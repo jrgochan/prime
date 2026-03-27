@@ -1,9 +1,20 @@
 from fastapi import FastAPI, BackgroundTasks
+from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from core_ml_model import BettiSurrogateEstimator
 from vector_db import TopologyMemoryDB
 from lean_exporter import Lean4Exporter
 
 app = FastAPI(title="Project HYPERZETA System Orchestrator")
+
+# Allow API cross-origin polling natively mapping the Next.js visualizer node
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # AI Core Module Instantiations
 vector_db = TopologyMemoryDB()
@@ -50,14 +61,56 @@ def check_vector_memory(state_vector: str = "0.0,0.0"):
     result = vector_db.query_nearest_successful_state(dummy_vector)
     return {"nearest_topology": result}
 
-@app.post("/agent/proofs/generate")
-async def generate_formal_proof(betti_score: float = 3.1415):
-    """
-    Commands the Orchestrator to snapshot the current Sedenion geometry 
-    and export it as a symbolic Lean 4 theorem to the /proofs vault.
-    """
-    # Simulates extracting the massive 16D tensor natively from the Rust PyO3 Core 
-    dummy_16d_tensor = [0.0] * 16 
+# Native SSE Generator Loop binding LLM logic errors across continuous HTML EventSource layers!
+def proof_stream_generator(proof_path: str):
+    yield f"data: [AI AGENT] Booting Local 'AlphaProof' REPL Loop...\n\n"
     
+    max_attempts = 15
+    previous_error = None
+    
+    for attempt in range(max_attempts):
+        yield f"data: [AI AGENT] Iteration {attempt + 1}/{max_attempts} - Prompting Native Ollama 'qwen2.5-coder' Model...\n\n"
+        
+        # 2. Extract structural tactics via Local Mathematical LLM (Native Blocking Call)
+        llm_status = lean_bridge.expand_proof(proof_path, previous_error)
+        
+        if "Ollama Server Not Running" in llm_status:
+            yield f"data: [AI AGENT] FATAL: Native Ollama daemon not active on port 11434. Halting pipeline.\n\n"
+            break
+            
+        yield f"data: [AI AGENT] Tactics Injected. Verifying securely against Apple OS Native Lean 4 Compiler...\n\n"
+        
+        # 3. Compile against formal Apple MacOS Lean 4 binary array Toolchain
+        compiler_output = lean_bridge.verify_proof(proof_path)
+        
+        if compiler_output["status"] == "VERIFIED":
+            yield f"data: ✅ [AI AGENT] MILLENNIUM PRIZE SECURED!!! Theorem Proved Formally at {proof_path}\n\n"
+            break
+        else:
+            previous_error = compiler_output.get("error", "Unknown validation extraction failure.")
+            # Escape literal newlines out of exact error response to preserve the strict SSE framing limits
+            safe_error_string = previous_error.replace('\\n', ' | ')
+            yield f"data: ❌ [AI AGENT] Compiler Rejected Syntax. Relaying Error Trace: {safe_error_string[:150]}...\n\n"
+            
+    yield f"data: [AI AGENT] Stream Terminated.\n\n"
+
+@app.post("/agent/proofs/generate")
+async def generate_formal_proof(betti_score: float = 3.1415, lambda_val: float = 0.0):
+    """
+    Commands the Orchestrator strictly to snapshot the unproven logic bounds dropping the sorry sequence!
+    """
+    dummy_16d_tensor = [lambda_val] * 16 
     proof_path = lean_bridge.generate_betti_theorem(betti_score, dummy_16d_tensor)
-    return {"status": "Formal Theorem Generated", "file_location": proof_path}
+    
+    return {
+        "status": "Discovery Trapped", 
+        "lambda_origin": lambda_val, 
+        "file_location": proof_path
+    }
+
+@app.get("/agent/proofs/synthesize/stream")
+async def api_synthesize_stream(proof_path: str):
+    """
+    Natively streams the Ollama mathematical AI loop live into the React Browser connection!
+    """
+    return StreamingResponse(proof_stream_generator(proof_path), media_type="text/event-stream")

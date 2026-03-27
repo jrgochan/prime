@@ -108,6 +108,27 @@ impl Sedenion {
     pub fn new(a: Octonion, b: Octonion) -> Self {
         Self { a, b }
     }
+    
+    pub fn zero() -> Self {
+        Sedenion::new(
+            Octonion::new(
+                Quaternion::new(0.0, 0.0, 0.0, 0.0), 
+                Quaternion::new(0.0, 0.0, 0.0, 0.0)
+            ),
+            Octonion::new(
+                Quaternion::new(0.0, 0.0, 0.0, 0.0), 
+                Quaternion::new(0.0, 0.0, 0.0, 0.0)
+            )
+        )
+    }
+
+    pub fn add(&self, other: &Self) -> Self {
+        Self::new(self.a.add(&other.a), self.b.add(&other.b))
+    }
+
+    pub fn sub(&self, other: &Self) -> Self {
+        Self::new(self.a.sub(&other.a), self.b.sub(&other.b))
+    }
 
     pub fn mul(&self, other: &Self) -> Self {
         let ac = self.a.mul(&other.a);
@@ -138,5 +159,36 @@ impl Sedenion {
         } else {
             self.scale(1.0 / n)
         }
+    }
+
+    /// Evaluates the Euler Hypercomplex Exponential e^S
+    /// e^S = e^r * (cos(|V|) + (V / |V|) * sin(|V|))
+    pub fn exp(&self) -> Self {
+        let r = self.a.a.r; // The real scalar boundary
+        
+        let mut v = *self;
+        v.a.a.r = 0.0; // Isolate the 15-Dimensional Imaginary Vector V
+
+        let v_norm = v.norm_sq().sqrt();
+        let exp_r = r.exp();
+
+        if v_norm == 0.0 {
+            // Strictly real bound return
+            let mut res = Sedenion::zero();
+            res.a.a.r = exp_r;
+            return res;
+        }
+
+        let cos_v = v_norm.cos();
+        let sin_v_over_v = v_norm.sin() / v_norm;
+
+        // V * (sin(|V|) / |V|)
+        let mut scaled_v = v.scale(sin_v_over_v);
+        
+        // Add cos(|V|) to the real axis position
+        scaled_v.a.a.r += cos_v;
+
+        // Multiply magnitude entirely by e^R exponential drift
+        scaled_v.scale(exp_r)
     }
 }

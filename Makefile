@@ -1,4 +1,4 @@
-.PHONY: setup build-wasm build-api dev-ui dev-api clean check-env run-all
+.PHONY: setup build-wasm build-api dev-ui dev-api clean check-env run-all setup-ai
 
 # Project HYPERZETA Local Environment Logic
 PYTHON_VENV = gateway-api/venv/bin/activate
@@ -45,3 +45,10 @@ clean:
 
 check-env:
 	@bash scripts/setup_env.sh
+
+setup-ai:
+	@echo "=> Booting Native Ollama AI Theorem Matrix (Mac OS Local)..."
+	@if ! command -v ollama >/dev/null 2>&1; then echo "Ollama not installed! Please run 'brew install ollama' or download from ollama.com."; exit 1; fi
+	@echo "=> Pulling Qwen-2.5-Coder:7b (7 Billion Parameters) into isolated Local Storage..."
+	@ollama pull qwen2.5-coder:7b
+	@echo "=> Theorem Prover Model ready for autonomous offline execution! Ensure 'ollama serve' is running in background."
