@@ -63,6 +63,15 @@ def check_vector_memory(state_vector: str = "0.0,0.0"):
 
 # Native SSE Generator Loop binding LLM logic errors across continuous HTML EventSource layers!
 def proof_stream_generator(proof_path: str):
+    import os
+    if not os.path.exists(proof_path):
+        yield "data: [AI AGENT] ERROR: Target file isolated sequence missing.\n\n"
+        return
+        
+    # Trap and isolate pristine geometric parameters mapped from Apple array memory before LLM mutation
+    with open(proof_path, "r") as initial_file:
+        pristine_template = initial_file.read()
+        
     yield f"data: [AI AGENT] Booting Local 'AlphaProof' REPL Loop...\n\n"
     
     max_attempts = 15
@@ -71,8 +80,8 @@ def proof_stream_generator(proof_path: str):
     for attempt in range(max_attempts):
         yield f"data: [AI AGENT] Iteration {attempt + 1}/{max_attempts} - Prompting Native Ollama 'qwen2.5-coder' Model...\n\n"
         
-        # 2. Extract structural tactics via Local Mathematical LLM (Native Blocking Call)
-        llm_status = lean_bridge.expand_proof(proof_path, previous_error)
+        # 2. Extract structural tactics cleanly dropping ONLY into the `sorry` mapping node
+        llm_status = lean_bridge.expand_proof(proof_path, pristine_template, previous_error)
         
         if "Ollama Server Not Running" in llm_status:
             yield f"data: [AI AGENT] FATAL: Native Ollama daemon not active on port 11434. Halting pipeline.\n\n"
@@ -87,10 +96,10 @@ def proof_stream_generator(proof_path: str):
             yield f"data: ✅ [AI AGENT] MILLENNIUM PRIZE SECURED!!! Theorem Proved Formally at {proof_path}\n\n"
             break
         else:
-            previous_error = compiler_output.get("error", "Unknown validation extraction failure.")
-            # Escape literal newlines out of exact error response to preserve the strict SSE framing limits
-            safe_error_string = previous_error.replace('\\n', ' | ')
-            yield f"data: ❌ [AI AGENT] Compiler Rejected Syntax. Relaying Error Trace: {safe_error_string[:150]}...\n\n"
+            previous_error = compiler_output.get("error", "Unknown validation extraction failure.").strip()
+            # Extinguish carriage returns and limit string slices preserving strict HTML5 SSE blocks natively!
+            safe_error_string = previous_error.replace('\n', ' ➔ ').replace('\r', '')
+            yield f"data: ❌ [AI AGENT] Compiler Rejected Syntax. Relaying Trace: {safe_error_string[:200]}...\n\n"
             
     yield f"data: [AI AGENT] Stream Terminated.\n\n"
 

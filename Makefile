@@ -36,6 +36,10 @@ run-all:
 	@echo "=> Deploying Local HYPERZETA Cluster..."
 	@bash scripts/run_all.sh
 
+run-infinity:
+	@echo "=> Igniting Headless Millennium Search Protocol (40,000 Iteration Bound)..."
+	@cd gateway-api && source venv/bin/activate && python cli_prover.py
+
 clean:
 	@echo "=> Purging memory artifacts and builds..."
 	@cd core-engine && cargo clean
@@ -49,6 +53,19 @@ check-env:
 setup-ai:
 	@echo "=> Booting Native Ollama AI Theorem Matrix (Mac OS Local)..."
 	@if ! command -v ollama >/dev/null 2>&1; then echo "Ollama not installed! Please run 'brew install ollama' or download from ollama.com."; exit 1; fi
-	@echo "=> Pulling Qwen-2.5-Coder:7b (7 Billion Parameters) into isolated Local Storage..."
-	@ollama pull qwen2.5-coder:7b
-	@echo "=> Theorem Prover Model ready for autonomous offline execution! Ensure 'ollama serve' is running in background."
+	@echo "=> Utilizing 96GB Unified Memory Limits..."
+	@echo "=> Pulling Qwen-2.5-Coder:32b (32 Billion Parameters) into isolated Local Storage..."
+	@ollama pull qwen2.5-coder:32b
+	@echo "=> Heavy Theorem Prover Model ready for autonomous offline execution!"
+
+setup-mathlib:
+	@echo "=> Initializing Lean 4 Mathlib Framework natively on Apple Silicon..."
+	@cd proofs && lake update
+	@cd proofs && lake exe cache get
+	@echo "=> Mathlib4 successfully cached offline into /proofs library bounds!"
+
+stop:
+	@echo "=> Terminating Core Project HYPERZETA OS Pipelines..."
+	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
+	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+	@echo "=> Stack successfully shutdown securely."

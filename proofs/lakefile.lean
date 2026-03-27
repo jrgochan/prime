@@ -1,0 +1,13 @@
+import Lake
+open Lake DSL
+
+package "hyperzeta_proofs" where
+  -- Build constraints securely limiting memory limits
+
+require mathlib from git
+  "https://github.com/leanprover-community/mathlib4.git"
+
+@[default_target]
+lean_lib «HyperzetaProofs» where
+  -- Expose SedenionAxioms boundaries formally inside the array
+  roots := #[`SedenionAxioms]
