@@ -1,4 +1,4 @@
-.PHONY: setup build-wasm build-api dev-ui dev-api clean clean-proofs check-env run-all run-infinity setup-ai setup-mathlib stop
+.PHONY: setup build-wasm build-api dev-ui dev-api clean clean-proofs check-env run-all run-infinity setup-ai setup-mathlib stop ensure-ollama
 
 # Project HYPERZETA Local Environment Logic
 PYTHON_VENV = gateway-api/venv/bin/activate
@@ -32,13 +32,30 @@ dev-api:
 build-all: build-wasm build-api
 	@echo "=> Native compilations successful for WebGPU and Python Gateway."
 
-run-all:
+run-all: ensure-ollama
 	@echo "=> Deploying Local HYPERZETA Cluster..."
 	@bash scripts/run_all.sh
 
-run-infinity:
-	@echo "=> Igniting Headless Millennium Search Protocol (40,000 Iteration Bound)..."
+run-infinity: ensure-ollama
+	@echo "=> Igniting Lemma Ladder: 10 Rungs to the Millennium Prize..."
 	@cd gateway-api && source venv/bin/activate && python cli_prover.py
+
+ensure-ollama:
+	@echo "=> Ensuring Ollama inference server is running..."
+	@if ! pgrep -x ollama > /dev/null 2>&1; then \
+		echo "  Starting Ollama..."; \
+		ollama serve > /dev/null 2>&1 & \
+		echo "  Waiting for Ollama to initialize..."; \
+		for i in $$(seq 1 15); do \
+			if curl -s http://127.0.0.1:11434/api/tags > /dev/null 2>&1; then \
+				echo "  Ollama ready!"; \
+				break; \
+			fi; \
+			sleep 1; \
+		done; \
+	else \
+		echo "  Ollama already running."; \
+	fi
 
 clean:
 	@echo "=> Purging memory artifacts and builds..."
@@ -68,10 +85,14 @@ stop:
 	@echo "=> Terminating Core Project HYPERZETA OS Pipelines..."
 	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+	@echo "=> Stopping Ollama inference server..."
+	@pkill -x ollama 2>/dev/null || true
 	@echo "=> Stack successfully shutdown securely."
 
 clean-proofs:
 	@echo "=> Purging auto-generated proof files..."
 	@rm -f proofs/StableTopology_*.lean
+	@rm -f proofs/Ladder_*.lean
 	@rm -f proofs/.hyperzeta_checkpoint.json
-	@echo "=> Proof directory cleaned. SedenionAxioms.lean preserved."
+	@rm -f proofs/hyperzeta_search.log
+	@echo "=> Proof directory cleaned. SedenionAxioms.lean and Proved_*.lean preserved."

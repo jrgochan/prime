@@ -39,8 +39,14 @@ proofs/**/*.c
 
 # 6. Auto-Generated Proof Files (rebuilt on every run)
 proofs/StableTopology_*.lean
+proofs/Ladder_*.lean
 proofs/.hyperzeta_checkpoint.json
+proofs/.conjecture_cache.json
+proofs/.operator_cache.json
+proofs/.boundary_cache.json
+proofs/.tower_cache.json
 proofs/hyperzeta_search.log
+# NOTE: proofs/Proved_*.lean are NOT ignored — those are successful proofs!
 
 # 6. Apple OS Exclusions
 .DS_Store
