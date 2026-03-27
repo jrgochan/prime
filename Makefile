@@ -1,4 +1,4 @@
-.PHONY: setup build-wasm build-api dev-ui dev-api clean check-env run-all setup-ai
+.PHONY: setup build-wasm build-api dev-ui dev-api clean clean-proofs check-env run-all run-infinity setup-ai setup-mathlib stop
 
 # Project HYPERZETA Local Environment Logic
 PYTHON_VENV = gateway-api/venv/bin/activate
@@ -69,3 +69,9 @@ stop:
 	@lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 	@lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 	@echo "=> Stack successfully shutdown securely."
+
+clean-proofs:
+	@echo "=> Purging auto-generated proof files..."
+	@rm -f proofs/StableTopology_*.lean
+	@rm -f proofs/.hyperzeta_checkpoint.json
+	@echo "=> Proof directory cleaned. SedenionAxioms.lean preserved."

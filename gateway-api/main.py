@@ -76,29 +76,35 @@ def proof_stream_generator(proof_path: str):
     
     max_attempts = 15
     previous_error = None
+    failed_history = []
     
     for attempt in range(max_attempts):
-        yield f"data: [AI AGENT] Iteration {attempt + 1}/{max_attempts} - Prompting Native Ollama 'qwen2.5-coder' Model...\n\n"
+        temp = lean_bridge._compute_temperature(attempt)
+        yield f"data: [AI AGENT] Iteration {attempt + 1}/{max_attempts} | T={temp:.2f} - Prompting '{lean_bridge.model}'...\n\n"
         
-        # 2. Extract structural tactics cleanly dropping ONLY into the `sorry` mapping node
-        llm_status = lean_bridge.expand_proof(proof_path, pristine_template, previous_error)
+        # Pass attempt count and failure history for full optimization benefits
+        llm_status = lean_bridge.expand_proof(
+            proof_path, pristine_template, previous_error,
+            attempt=attempt, failed_history=failed_history
+        )
         
         if "Ollama Server Not Running" in llm_status:
             yield f"data: [AI AGENT] FATAL: Native Ollama daemon not active on port 11434. Halting pipeline.\n\n"
             break
             
-        yield f"data: [AI AGENT] Tactics Injected. Verifying securely against Apple OS Native Lean 4 Compiler...\n\n"
+        yield f"data: [AI AGENT] Tactics Injected. Verifying against Lean 4 Compiler...\n\n"
         
-        # 3. Compile against formal Apple MacOS Lean 4 binary array Toolchain
         compiler_output = lean_bridge.verify_proof(proof_path)
         
         if compiler_output["status"] == "VERIFIED":
             yield f"data: ✅ [AI AGENT] MILLENNIUM PRIZE SECURED!!! Theorem Proved Formally at {proof_path}\n\n"
             break
+        elif compiler_output["status"] == "TIMEOUT":
+            yield f"data: ⏱️ [AI AGENT] Compilation timed out (120s). Retrying...\n\n"
         else:
             previous_error = compiler_output.get("error", "Unknown validation extraction failure.").strip()
-            # Extinguish carriage returns and limit string slices preserving strict HTML5 SSE blocks natively!
             safe_error_string = previous_error.replace('\n', ' ➔ ').replace('\r', '')
+            failed_history.append(safe_error_string[:200])
             yield f"data: ❌ [AI AGENT] Compiler Rejected Syntax. Relaying Trace: {safe_error_string[:200]}...\n\n"
             
     yield f"data: [AI AGENT] Stream Terminated.\n\n"

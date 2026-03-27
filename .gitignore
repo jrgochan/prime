@@ -32,10 +32,15 @@ ui-viewport/src/wasm/
 # 5. Lean 4 / Mathlib Ecosystem
 proofs/.lake/
 proofs/build/
-*.olean
-*.o
-*.c
-*.ilean
+proofs/**/*.olean
+proofs/**/*.ilean
+proofs/**/*.o
+proofs/**/*.c
+
+# 6. Auto-Generated Proof Files (rebuilt on every run)
+proofs/StableTopology_*.lean
+proofs/.hyperzeta_checkpoint.json
+proofs/hyperzeta_search.log
 
 # 6. Apple OS Exclusions
 .DS_Store
