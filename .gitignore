@@ -1,0 +1,16 @@
+# Python Environments
+venv/
+__pycache__/
+*.whl
+
+# Node/Next.js
+node_modules/
+.next/
+ui-viewport/public/wasm/
+
+# Rust Compilations
+target/
+Cargo.lock
+
+# macOS
+.DS_Store
