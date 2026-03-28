@@ -8,7 +8,7 @@ import subprocess
 from datetime import datetime
 from lean_exporter import Lean4Exporter
 from lemma_ladder import LEMMA_LADDER, get_rung, get_ladder_length, set_live_conjectures
-from conjecture_miner import ConjectureMiner
+from arithmetic_miner import ArithmeticMiner
 from operator_search import HilbertPolyaSearch
 from boundary_analyzer import BoundaryAnalyzer
 from tower_analyzer import TowerAnalyzer
@@ -157,22 +157,28 @@ def launch_ladder_prover():
                 proved_lemmas.append(lemma_name)
                 print(f"[*] Recovered proved lemma from disk: {lemma_name}")
     
+    # Auto-detect LiCriterion.lean — inject the full Li criterion chain
+    li_path = os.path.join(proofs_abs, "LiCriterion.lean")
+    if os.path.exists(li_path) and "li_criterion_chain" not in proved_lemmas:
+        proved_lemmas.append("li_criterion_chain")
+        print("[*] Detected LiCriterion.lean — Li's criterion chain injected!")
+    
     # Warm the Lean cache
     warm_lean_cache("../proofs")
     
     # ═══ Bridge 1: Conjecture Mining ═══
     print("\n" + "─" * 60)
-    print("  🔬 BRIDGE 1: Conjecture Mining (Sedenion Zeta Analysis)")
+    print("  🔬 BRIDGE 1: Conjecture Mining (Arithmetic Analysis)")
     print("─" * 60)
     try:
-        miner = ConjectureMiner(terms=30, num_zeros=5)
+        miner = ArithmeticMiner(target_n=47, max_prime=50)
         miner.mine()
         live_conjectures = miner.format_conjectures()
         set_live_conjectures(live_conjectures)
-        logger.info(f"Conjecture Miner: {len(miner.results.get('zeros', []))} zeros analyzed")
+        logger.info(f"Arithmetic Miner: injected explicit bounds for n={miner.target_n}")
     except Exception as e:
-        print(f"  [WARN] Conjecture mining failed: {e}. Using static conjectures.")
-        logger.warning(f"Conjecture mining failed: {e}")
+        print(f"  [WARN] Arithmetic mining failed: {e}. Using static conjectures.")
+        logger.warning(f"Arithmetic mining failed: {e}")
     
     # ═══ Bridge 3: Hilbert-Pólya Operator Search ═══
     print("\n" + "─" * 60)
@@ -247,7 +253,7 @@ def launch_ladder_prover():
         
         # Generate the lean file for this rung (or reuse from checkpoint)
         if rung_idx != start_rung or not proof_path or not os.path.exists(proof_path):
-            proof_path = bridge.generate_lemma_file(rung)
+            proof_path = bridge.generate_lemma_file(rung, proved_lemmas=proved_lemmas)
             with open(proof_path, "r") as f:
                 pristine_template = f.read()
             failed_history = []
@@ -260,7 +266,7 @@ def launch_ladder_prover():
         
         for attempt in range(attempt_start, rung["max_attempts"]):
             total_iterations += 1
-            current_temp = bridge._compute_temperature(attempt)
+            current_temp = bridge._compute_temperature(attempt, difficulty=rung.get("difficulty", "medium"))
             
             sys.stdout.write(f"\r  [{attempt + 1}/{rung['max_attempts']} | T={current_temp:.2f}] "
                            f"Query ➔ ")

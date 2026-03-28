@@ -224,6 +224,118 @@ fn tower_sweep(t_start: f64, t_end: f64, num_points: usize) -> PyResult<Vec<Vec<
     Ok(raw.into_iter().map(|row| row.to_vec()).collect())
 }
 
+/// Compute the sedenion zeta operator at s = σ + it.
+/// Returns a dict with:
+///   "matrix": flat list of 256 f64 (16x16 row-major left-multiplication matrix)
+///   "components": list of 16 f64 (ζ_𝕊(s) components)
+///   "norm": f64 (|ζ_𝕊(s)|)
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn zeta_operator(re: f64, im: f64, terms: usize) -> PyResult<(Vec<f64>, Vec<f64>, f64)> {
+    let (matrix, components, norm) = math::zeta_operator_at(re, im, terms);
+    Ok((matrix.to_vec(), components.to_vec(), norm))
+}
+
+/// Compute the sedenion zeta operator for a FULL 16D sedenion input.
+/// s_components: list of 16 floats [e₀, e₁, ..., e₁₅]
+/// Returns: (matrix_256, components_16, norm)
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn zeta_operator_full(s_components: Vec<f64>, terms: usize) -> PyResult<(Vec<f64>, Vec<f64>, f64)> {
+    if s_components.len() != 16 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "s_components must have exactly 16 elements"
+        ));
+    }
+    let mut arr = [0.0f64; 16];
+    arr.copy_from_slice(&s_components);
+    let (matrix, components, norm) = math::zeta_operator_full(&arr, terms);
+    Ok((matrix.to_vec(), components.to_vec(), norm))
+}
+
+/// Compute the sedenion ARITHMETIC zeta function.
+/// This uses the sedenion arithmetic logarithm (primes → basis directions)
+/// and non-commutative multiplication, creating genuinely non-complex values.
+///
+/// s_components: list of 16 floats [e₀, e₁, ..., e₁₅]
+/// Returns: (matrix_256, components_16, norm)
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn zeta_arithmetic(s_components: Vec<f64>, terms: usize) -> PyResult<(Vec<f64>, Vec<f64>, f64)> {
+    if s_components.len() != 16 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "s_components must have exactly 16 elements"
+        ));
+    }
+    let mut arr = [0.0f64; 16];
+    arr.copy_from_slice(&s_components);
+    let (matrix, components, norm) = math::zeta_arithmetic_sedenion(&arr, terms);
+    Ok((matrix.to_vec(), components.to_vec(), norm))
+}
+
+/// Compute the eta-regularized arithmetic zeta function.
+/// Converges for Re(s) > 0, enabling critical line computation.
+///
+/// s_components: list of 16 floats
+/// terms: number of terms in the series
+/// accelerate: use Euler acceleration for faster convergence
+/// Returns: (matrix_256, components_16, norm)
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn eta_arithmetic(s_components: Vec<f64>, terms: usize, accelerate: bool) -> PyResult<(Vec<f64>, Vec<f64>, f64)> {
+    if s_components.len() != 16 {
+        return Err(pyo3::exceptions::PyValueError::new_err(
+            "s_components must have exactly 16 elements"
+        ));
+    }
+    let mut arr = [0.0f64; 16];
+    arr.copy_from_slice(&s_components);
+    let (matrix, components, norm) = math::eta_arithmetic_sedenion(&arr, terms, accelerate);
+    Ok((matrix.to_vec(), components.to_vec(), norm))
+}
+
+/// Compute Li coefficients λ₁ through λ_N.
+/// t_max: search for zeros up to this height on the critical line
+/// n_max: compute λ₁ through λ_{n_max}
+/// Returns: (n_zeros_found, list of λ values, list of zero locations)
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn li_coeffs(n_max: usize, t_max: f64) -> PyResult<(usize, Vec<f64>, Vec<f64>)> {
+    let (n_zeros, lambdas, zeros) = math::li_coefficients(n_max, t_max);
+    Ok((n_zeros, lambdas, zeros))
+}
+
+/// Evaluate the Hardy Z-function at multiple points.
+/// Z(t) is real-valued, and Z(t) = 0 iff ζ(1/2+it) = 0.
+/// Returns: list of Z(t) values
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn hardy_z_vals(t_values: Vec<f64>) -> PyResult<Vec<f64>> {
+    Ok(t_values.iter().map(|&t| math::hardy_z(t)).collect())
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn quaternion_r4_sigma(n: usize) -> PyResult<(usize, usize)> {
+    let r4 = math::r4_jacobi(n);
+    let s1 = math::sigma1(n);
+    Ok((r4, s1))
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn ramanujan_tau_bound(max_n: usize) -> PyResult<Vec<i64>> {
+    let tau = math::compute_tau(max_n);
+    Ok(tau)
+}
+
+#[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn hecke_operator_trace(p: usize) -> PyResult<(f64, f64, f64)> {
+    let (t, l, norm) = math::hecke_spectral_contraction(p);
+    Ok((t, l, norm))
+}
+
 #[cfg(not(target_family = "wasm"))]
 #[pymodule]
 fn core_engine(_py: Python, m: &PyModule) -> PyResult<()> {
@@ -235,6 +347,14 @@ fn core_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(zeta_dirichlet_complex, m)?)?;
     m.add_function(wrap_pyfunction!(mertens_bound, m)?)?;
     m.add_function(wrap_pyfunction!(tower_sweep, m)?)?;
+    m.add_function(wrap_pyfunction!(zeta_operator, m)?)?;
+    m.add_function(wrap_pyfunction!(zeta_operator_full, m)?)?;
+    m.add_function(wrap_pyfunction!(zeta_arithmetic, m)?)?;
+    m.add_function(wrap_pyfunction!(eta_arithmetic, m)?)?;
+    m.add_function(wrap_pyfunction!(li_coeffs, m)?)?;
+    m.add_function(wrap_pyfunction!(hardy_z_vals, m)?)?;
+    m.add_function(wrap_pyfunction!(quaternion_r4_sigma, m)?)?;
+    m.add_function(wrap_pyfunction!(ramanujan_tau_bound, m)?)?;
+    m.add_function(wrap_pyfunction!(hecke_operator_trace, m)?)?;
     Ok(())
 }
-
