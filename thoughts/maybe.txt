@@ -1,0 +1,1 @@
+Another direction treats λ_n as an information divergence from the uniform distribution on the unit circle, though that thought seems to cut off mid-development.

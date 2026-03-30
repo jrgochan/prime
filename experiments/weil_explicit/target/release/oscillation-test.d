@@ -1,0 +1,1 @@
+/Users/jrgochan/code/github.com/jrgochan/prime/experiments/weil_explicit/target/release/oscillation-test: /Users/jrgochan/code/github.com/jrgochan/prime/experiments/weil_explicit/src/oscillation_test.rs

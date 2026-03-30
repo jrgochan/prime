@@ -1,0 +1,55 @@
+2026-03-29 10:11:56 | ============================================================
+2026-03-29 10:11:56 | SpectralRH Prover Started
+2026-03-29 10:11:56 | Initial sorrys: 14
+2026-03-29 10:11:56 | ============================================================
+2026-03-29 10:11:56 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 10:14:52 | ============================================================
+2026-03-29 10:14:52 | SpectralRH Prover Started
+2026-03-29 10:14:52 | Initial sorrys: 14
+2026-03-29 10:14:52 | ============================================================
+2026-03-29 10:14:52 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 10:15:19 | Attempt 1 REJECTED: error: build failed → 
+2026-03-29 10:15:31 | Attempt 2 REJECTED: error: build failed → 
+2026-03-29 10:15:43 | Attempt 3 REJECTED: error: build failed → 
+2026-03-29 10:15:55 | Attempt 4 REJECTED: error: build failed → 
+2026-03-29 10:16:07 | Attempt 5 REJECTED: error: build failed → 
+2026-03-29 16:17:19 | ============================================================
+2026-03-29 16:17:19 | SpectralRH Prover Started
+2026-03-29 16:17:19 | Initial sorrys: 14
+2026-03-29 16:17:19 | ============================================================
+2026-03-29 16:17:19 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 16:17:41 | Attempt 1 REJECTED: error: build failed → 
+2026-03-29 16:17:49 | Attempt 2 REJECTED: error: build failed → 
+2026-03-29 16:22:08 | ============================================================
+2026-03-29 16:22:08 | SpectralRH Prover Started
+2026-03-29 16:22:08 | Initial sorrys: 14
+2026-03-29 16:22:08 | ============================================================
+2026-03-29 16:22:08 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 16:22:18 | Attempt 1 REJECTED: unknown
+2026-03-29 16:22:25 | Attempt 2 REJECTED: unknown
+2026-03-29 16:22:31 | Attempt 3 REJECTED: unknown
+2026-03-29 16:23:21 | ============================================================
+2026-03-29 16:23:21 | SpectralRH Prover Started
+2026-03-29 16:23:21 | Initial sorrys: 14
+2026-03-29 16:23:21 | ============================================================
+2026-03-29 16:23:21 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 16:23:31 | Attempt 1 REJECTED: SpectralRH.lean:100:41: error: unexpected token 'by'; expected '{' or tactic
+2026-03-29 16:23:38 | Attempt 2 REJECTED: SpectralRH.lean:100:41: error: unexpected token 'by'; expected '{' or tactic
+2026-03-29 16:23:44 | Attempt 3 REJECTED: SpectralRH.lean:100:41: error: unexpected token 'by'; expected '{' or tactic
+2026-03-29 16:24:44 | ============================================================
+2026-03-29 16:24:44 | SpectralRH Prover Started
+2026-03-29 16:24:44 | Initial sorrys: 14
+2026-03-29 16:24:44 | ============================================================
+2026-03-29 16:24:44 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 16:24:55 | Attempt 1 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved
+2026-03-29 16:25:02 | Attempt 2 REJECTED: SpectralRH.lean:102:25: error: unexpected token '≤'; expected '↦', '=>'
+2026-03-29 16:25:09 | Attempt 3 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved
+2026-03-29 16:25:16 | Attempt 4 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved
+2026-03-29 16:26:55 | ============================================================
+2026-03-29 16:26:55 | SpectralRH Prover Started
+2026-03-29 16:26:55 | Initial sorrys: 14
+2026-03-29 16:26:55 | ============================================================
+2026-03-29 16:26:55 | Target 1: Cauchy Interlacing (λ_min non-increasing) (medium)
+2026-03-29 16:27:05 | Attempt 1 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved
+2026-03-29 16:27:12 | Attempt 2 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved
+2026-03-29 16:27:19 | Attempt 3 REJECTED: SpectralRH.lean:102:2: error: No goals to be solved

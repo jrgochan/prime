@@ -1,0 +1,8 @@
+[package]
+name = "spectral-fourier"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "spectral-fourier"
+path = "src/main.rs"

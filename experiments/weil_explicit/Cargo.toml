@@ -1,0 +1,72 @@
+[package]
+name = "weil-explicit"
+version = "0.3.0"
+edition = "2021"
+
+[dependencies]
+rayon = "1.10"
+
+[[bin]]
+name = "weil-explicit"
+path = "src/main.rs"
+
+[[bin]]
+name = "hankel-test"
+path = "src/hankel.rs"
+
+[[bin]]
+name = "nyman-beurling"
+path = "src/nyman_beurling.rs"
+
+[[bin]]
+name = "gram-spectral"
+path = "src/gram_spectral.rs"
+
+[[bin]]
+name = "gram-highN"
+path = "src/gram_highN.rs"
+
+[[bin]]
+name = "oscillation-test"
+path = "src/oscillation_test.rs"
+
+[[bin]]
+name = "ramanujan-test"
+path = "src/ramanujan_test.rs"
+
+[[bin]]
+name = "interval-cholesky"
+path = "src/interval_cholesky.rs"
+
+[[bin]]
+name = "exact-cholesky"
+path = "src/exact_cholesky.rs"
+
+[[bin]]
+name = "convergent-drops"
+path = "src/convergent_drops.rs"
+
+[[bin]]
+name = "drop-bound"
+path = "src/drop_bound.rs"
+
+[[bin]]
+name = "drop-mechanism"
+path = "src/drop_mechanism.rs"
+
+[[bin]]
+name = "ramanujan-coeffs"
+path = "src/ramanujan_coeffs.rs"
+
+[[bin]]
+name = "operator-theory"
+path = "src/operator_theory.rs"
+
+[[bin]]
+name = "normalization-decay"
+path = "src/normalization_decay.rs"
+
+[[bin]]
+name = "sign-structure"
+path = "src/sign_structure.rs"
+

@@ -1,0 +1,50 @@
+═══════════════════════════════════════════════════════════════
+  APPROACH 3b: EXACT Piecewise Integration + Interval Cholesky
+  Goal: Certify G_N positive definite for N up to 1000
+═══════════════════════════════════════════════════════════════
+
+[1/3] Verification: exact vs numerical integration
+
+     j    k exact midpoint interval width     status
+     2    2   0.2932450252        4.00e-3    wide ⚠️
+     2    3   0.2336897520        4.00e-3    wide ⚠️
+     3    5   0.2356493076        4.00e-3    wide ⚠️
+     5    7   0.2392284029        4.00e-3    wide ⚠️
+    10   10   0.3243970587        4.00e-3    wide ⚠️
+    20   15   0.2517390884        4.03e-3    wide ⚠️
+    50   50   0.3310022950        4.37e-3    wide ⚠️
+   100  100   0.3318338992        6.99e-3    wide ⚠️
+
+[2/3] Certified Interval Cholesky Decomposition
+
+      N    min L[i].lo²       max width      Gram width    status    time
+
+  Precomputing 499×499 exact Gram matrix...
+  Done in 107.9s
+
+  Max Gram entry interval width: 7.50e-1
+
+      N    min L[i].lo²     max L width    status
+      2    0.2912450132         3.69e-3  ✅ PD
+      3    0.1130502219         1.87e-2  ✅ PD
+      4    0.0611920379         3.98e-2  ✅ PD
+      5    0.0611920379         6.41e-2  ✅ PD
+      6    0.0272753562         1.27e-1  ✅ PD
+      7    0.0054448053         3.38e-1  ✅ PD
+      8               —               —  ❌ FAIL at i=6
+         diagonal interval = [-1.8249e0, 1.7233e0]
+
+[3/3] ═══ CERTIFICATION SUMMARY ═══
+
+  Method: Exact piecewise integration + Interval Cholesky
+  Gram entry: ∫₀¹ {j/x}·{k/x} dx computed as sum of
+    jk/x² - (jn+km)/x + mn pieces with exact ln bounds
+
+  ╔═══════════════════════════════════════════════════╗
+  ║                                                   ║
+  ║  G_N is RIGOROUSLY positive definite for N ≤    7 ║
+  ║                                                   ║
+  ╚═══════════════════════════════════════════════════╝
+
+  Total time: 107.9s
+═══════════════════════════════════════════════════════════════
