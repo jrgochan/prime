@@ -337,6 +337,13 @@ fn hecke_operator_trace(p: usize) -> PyResult<(f64, f64, f64)> {
 }
 
 #[cfg(not(target_family = "wasm"))]
+#[pyfunction]
+fn spectral_search(n_target: usize, t_max: f64) -> PyResult<(usize, Vec<f64>, Vec<f64>, Vec<(usize, f64, f64)>)> {
+    let (n, diag, offdiag, corr) = math::hilbert_polya_search(n_target, t_max);
+    Ok((n, diag, offdiag, corr))
+}
+
+#[cfg(not(target_family = "wasm"))]
 #[pymodule]
 fn core_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(rust_engine_status, m)?)?;
@@ -356,5 +363,6 @@ fn core_engine(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(quaternion_r4_sigma, m)?)?;
     m.add_function(wrap_pyfunction!(ramanujan_tau_bound, m)?)?;
     m.add_function(wrap_pyfunction!(hecke_operator_trace, m)?)?;
+    m.add_function(wrap_pyfunction!(spectral_search, m)?)?;
     Ok(())
 }

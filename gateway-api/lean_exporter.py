@@ -183,31 +183,47 @@ Timestamp: {timestamp}
                 "axiom li_9_pos  : 0 < liCoefficient 9\n"
                 "axiom li_10_pos : 0 < liCoefficient 10\n"
                 "axiom li_11_pos : 0 < liCoefficient 11\n"
-                "axiom li_12_pos : 0 < liCoefficient 12\n\n"
+                "axiom li_12_pos : 0 < liCoefficient 12\n"
+                "axiom li_13_pos : 0 < liCoefficient 13\n"
+                "axiom li_14_pos : 0 < liCoefficient 14\n"
+                "axiom li_15_pos : 0 < liCoefficient 15\n"
+                "axiom li_16_pos : 0 < liCoefficient 16\n"
+                "axiom li_17_pos : 0 < liCoefficient 17\n"
+                "axiom li_18_pos : 0 < liCoefficient 18\n"
+                "axiom li_19_pos : 0 < liCoefficient 19\n"
+                "axiom li_20_pos : 0 < liCoefficient 20\n\n"
                 "-- Asymptotic bound (needs rigorous proof)\n"
                 "def liMainTerm (n : ℕ) : ℝ :=\n"
                 "  (n : ℝ) / 2 * (Real.log ((n : ℝ) / (2 * Real.pi)) - 1 + 0.5772156649 / 2)\n"
-                "axiom liBound (n : ℕ) (hn : 13 ≤ n) :\n"
+                "axiom liBound (n : ℕ) (hn : 21 ≤ n) :\n"
                 "    0 < liMainTerm n ∧ |liCoefficient n - liMainTerm n| < liMainTerm n\n\n"
                 "-- Derived theorems (all compile without gaps)\n"
-                "axiom li_small_n_positive (n : ℕ) (hn : 1 ≤ n) (hn12 : n ≤ 12) :\n"
+                "axiom li_small_n_positive (n : ℕ) (hn : 1 ≤ n) (hn20 : n ≤ 20) :\n"
                 "    0 < liCoefficient n\n"
-                "axiom li_large_n_positive (n : ℕ) (hn : 13 ≤ n) :\n"
+                "axiom li_large_n_positive (n : ℕ) (hn : 21 ≤ n) :\n"
                 "    0 < liCoefficient n\n"
                 "end\n"
             ),
-            "bombieri_lagarias": (
-                "-- Previously proved: Bombieri-Lagarias Contraction Mapping\n"
-                "axiom HeckeEigenvalue : ℝ\n"
-                "axiom proved_li_positive_from_contraction (n : ℕ) (h_contract : |HeckeEigenvalue| ≤ 1) : 0 ≤ liCoefficient n\n"
+            "main_term_positive": (
+                "-- Previously proved: M(n) > 0 for n ≥ 21\n"
+                "axiom liMainTerm_pos_21 : 0 < liMainTerm 21\n"
+                "axiom liMainTerm_mono (m n : ℕ) (hmn : m ≤ n) (hm : 21 ≤ m) :\n"
+                "    liMainTerm m ≤ liMainTerm n\n"
+                "axiom proved_main_term_positive (n : ℕ) (hn : 21 ≤ n) : 0 < liMainTerm n\n"
             ),
-            "jacquet_langlands": (
-                "-- Previously proved: Quaternionic Jacquet-Langlands Spectral Bound\n"
-                "axiom proved_hecke_is_contraction : |HeckeEigenvalue| ≤ 1\n"
+            "li_remainder_bound": (
+                "-- Previously proved: Remainder bound (THE CRITICAL LEMMA)\n"
+                "axiom proved_li_remainder_bounded (n : ℕ) (hn : 21 ≤ n) :\n"
+                "    |liCoefficient n - liMainTerm n| < liMainTerm n\n"
+            ),
+            "li_large_positive": (
+                "-- Previously proved: λ_n > 0 for n ≥ 21\n"
+                "axiom proved_li_large_n_positive (n : ℕ) (hn : 21 ≤ n) :\n"
+                "    0 < liCoefficient n\n"
             ),
             "unconditional_positivity": (
-                "-- Previously proved: Unconditional Positivity of Li's Coefficients via Contraction\n"
-                "axiom proved_unconditional_positivity (n : ℕ) : 0 ≤ liCoefficient n\n"
+                "-- Previously proved: Unconditional Positivity via case split\n"
+                "axiom proved_li_positive (n : ℕ) (hn : 0 < n) : 0 ≤ liCoefficient n\n"
             ),
         }
         

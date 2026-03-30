@@ -935,3 +935,89 @@ pub fn hecke_spectral_contraction(p: usize) -> (f64, f64, f64) {
     
     (tau_p, lambda_p, unitary_norm)
 }
+
+// ═══════════════════════════════════════════════════════════
+// HILBERT-PÓLYA SPECTRAL OPERATOR SEARCH
+// ═══════════════════════════════════════════════════════════
+
+/// Given N eigenvalues (Riemann zeros), construct the unique N×N symmetric
+/// tridiagonal Jacobi matrix J with those eigenvalues via Stieltjes/Lanczos.
+pub fn inverse_eigenvalue_jacobi(eigenvalues: &[f64]) -> (Vec<f64>, Vec<f64>) {
+    let n = eigenvalues.len();
+    if n == 0 { return (vec![], vec![]); }
+    if n == 1 { return (vec![eigenvalues[0]], vec![]); }
+
+    let mut p_prev = vec![0.0; n];
+    let mut p_curr = vec![1.0; n];
+    let mut diagonal = Vec::with_capacity(n);
+    let mut off_diagonal = Vec::with_capacity(n - 1);
+
+    for j in 0..n {
+        let mut xpj_pj = 0.0;
+        let mut pj_pj = 0.0;
+        for k in 0..n {
+            let pk = p_curr[k];
+            pj_pj += pk * pk;
+            xpj_pj += eigenvalues[k] * pk * pk;
+        }
+        let a_j = xpj_pj / pj_pj;
+        diagonal.push(a_j);
+
+        if j < n - 1 {
+            let b_prev = if j > 0 { off_diagonal[j - 1] } else { 0.0 };
+            let mut p_next = vec![0.0; n];
+            for k in 0..n {
+                p_next[k] = (eigenvalues[k] - a_j) * p_curr[k] - b_prev * p_prev[k];
+            }
+            let mut pnext_pnext = 0.0;
+            for k in 0..n { pnext_pnext += p_next[k] * p_next[k]; }
+            let b_j = (pnext_pnext / pj_pj).sqrt();
+            off_diagonal.push(b_j);
+
+            if b_j > 1e-15 {
+                let scale = (pj_pj / pnext_pnext).sqrt();
+                for k in 0..n { p_next[k] *= scale; }
+            }
+            p_prev = p_curr;
+            p_curr = p_next;
+        }
+    }
+    (diagonal, off_diagonal)
+}
+
+/// Generate small primes using trial division.
+fn small_primes(count: usize) -> Vec<usize> {
+    let mut primes = Vec::with_capacity(count);
+    let mut n = 2usize;
+    while primes.len() < count {
+        if (2..=(n as f64).sqrt() as usize + 1).all(|d| n % d != 0) {
+            primes.push(n);
+        }
+        n += 1;
+    }
+    primes
+}
+
+/// Run the full Hilbert-Polya spectral search.
+/// Returns: (n_zeros, diagonal, off_diagonal, prime_correlations)
+/// Each prime_correlation is (prime, b_k, b_k / log(prime)).
+pub fn hilbert_polya_search(n_target: usize, t_max: f64)
+    -> (usize, Vec<f64>, Vec<f64>, Vec<(usize, f64, f64)>)
+{
+    let zeros = find_zeros(1.0, t_max, 0.05);
+    let n = zeros.len().min(n_target);
+    let zeros_slice = &zeros[..n];
+
+    let (diag, offdiag) = inverse_eigenvalue_jacobi(zeros_slice);
+
+    let primes = small_primes(offdiag.len() + 5);
+    let mut correlations = Vec::new();
+    for (k, &b_k) in offdiag.iter().enumerate() {
+        if k < primes.len() {
+            let log_p = (primes[k] as f64).ln();
+            correlations.push((primes[k], b_k, b_k / log_p));
+        }
+    }
+
+    (n, diag, offdiag, correlations)
+}

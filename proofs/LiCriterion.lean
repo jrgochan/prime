@@ -209,9 +209,17 @@ axiom li_9_pos  : 0 < liCoefficient 9
 axiom li_10_pos : 0 < liCoefficient 10
 axiom li_11_pos : 0 < liCoefficient 11
 axiom li_12_pos : 0 < liCoefficient 12
+axiom li_13_pos : 0 < liCoefficient 13
+axiom li_14_pos : 0 < liCoefficient 14
+axiom li_15_pos : 0 < liCoefficient 15
+axiom li_16_pos : 0 < liCoefficient 16
+axiom li_17_pos : 0 < liCoefficient 17
+axiom li_18_pos : 0 < liCoefficient 18
+axiom li_19_pos : 0 < liCoefficient 19
+axiom li_20_pos : 0 < liCoefficient 20
 
-/-- All Li coefficients for 1 ≤ n ≤ 12 are positive. -/
-theorem li_small_n_positive (n : ℕ) (hn : 1 ≤ n) (hn12 : n ≤ 12) :
+/-- All Li coefficients for 1 ≤ n ≤ 20 are positive. -/
+theorem li_small_n_positive (n : ℕ) (hn : 1 ≤ n) (hn20 : n ≤ 20) :
     0 < liCoefficient n := by
   interval_cases n <;> first
     | exact li_1_pos
@@ -226,9 +234,17 @@ theorem li_small_n_positive (n : ℕ) (hn : 1 ≤ n) (hn12 : n ≤ 12) :
     | exact li_10_pos
     | exact li_11_pos
     | exact li_12_pos
+    | exact li_13_pos
+    | exact li_14_pos
+    | exact li_15_pos
+    | exact li_16_pos
+    | exact li_17_pos
+    | exact li_18_pos
+    | exact li_19_pos
+    | exact li_20_pos
 
 -- ════════════════════════════════════════════════
--- SECTION 5: Asymptotic Bound (n ≥ 13)
+-- SECTION 5: Asymptotic Bound (n ≥ 21)
 -- ════════════════════════════════════════════════
 
 /-- The main asymptotic term of the Li coefficient.
@@ -248,11 +264,11 @@ def liMainTerm (n : ℕ) : ℝ :=
     
     A rigorous bound requires estimating Σ_k 1/γ_k²
     using known zero-density results. -/
-axiom liBound (n : ℕ) (hn : 13 ≤ n) :
+axiom liBound (n : ℕ) (hn : 21 ≤ n) :
     0 < liMainTerm n ∧ |liCoefficient n - liMainTerm n| < liMainTerm n
 
-/-- For n ≥ 13, the positivity follows from the main term dominating. -/
-theorem li_large_n_positive (n : ℕ) (hn : 13 ≤ n) :
+/-- For n ≥ 21, the positivity follows from the main term dominating. -/
+theorem li_large_n_positive (n : ℕ) (hn : 21 ≤ n) :
     0 < liCoefficient n := by
   have ⟨hA_pos, hB_bound⟩ := liBound n hn
   -- |B| < A means -A < B < A, i.e., -A < λₙ - A(n) < A
@@ -272,7 +288,7 @@ theorem li_large_n_positive (n : ℕ) (hn : 13 ≤ n) :
     combined with li_criterion, this gives RH. -/
 theorem li_all_positive (n : ℕ) (hn : 0 < n) :
     0 < liCoefficient n := by
-  by_cases h : n ≤ 12
+  by_cases h : n ≤ 20
   · exact li_small_n_positive n (by omega) h
   · push_neg at h
     exact li_large_n_positive n (by omega)
