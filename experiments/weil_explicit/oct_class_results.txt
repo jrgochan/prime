@@ -1,0 +1,171 @@
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/oct-class`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC CLASS RESTRICTION                                  ║
+║  Split integers into 8 classes by octonionic image             ║
+║  Compute spectral gap of G restricted to each class            ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══ N = 100 (dim = 99) ═══
+
+  Class sizes:
+    S_0 e0 (real)   :   11 integers, Liouville sum =   +9 (bias = 0.818)
+    S_1 e1 (→2)     :   11 integers, Liouville sum =   -3 (bias = -0.273)
+    S_2 e2 (→3)     :   14 integers, Liouville sum =   -2 (bias = -0.143)
+    S_3 e3 (→5)     :   14 integers, Liouville sum =   -2 (bias = -0.143)
+    S_4 e4 (→7)     :   11 integers, Liouville sum =   -1 (bias = -0.091)
+    S_5 e5 (→11)    :   12 integers, Liouville sum =   +0 (bias = 0.000)
+    S_6 e6 (→13)    :   15 integers, Liouville sum =   -3 (bias = -0.200)
+    S_7 e7 (→17)    :   11 integers, Liouville sum =   -1 (bias = -0.091)
+
+  Full matrix results:
+    λ_min(G):     0.0155600297
+    λ_min(G^𝕆):   0.0528708501
+
+       Class   size    λ_min(G|_S)     λ_min/λ(G)      L_sum       PSD?
+  ──────────────────────────────────────────────────────────────────────
+   e0 (real)     11   0.0557700682         3.5842          9          ✅
+     e1 (→2)     11   0.0528708501         3.3979         -3          ✅
+     e2 (→3)     14   0.0557851721         3.5852         -2          ✅
+     e3 (→5)     14   0.0548961142         3.5280         -2          ✅
+     e4 (→7)     11   0.0611198620         3.9280         -1          ✅
+    e5 (→11)     12   0.0614205125         3.9473          0          ✅
+    e6 (→13)     15   0.0619892753         3.9839         -3          ✅
+    e7 (→17)     11   0.0624393525         4.0128         -1          ✅
+
+  min over classes: λ_min(G|_S) =   0.0528708501
+  vs full:          λ_min(G)    =   0.0155600297
+  vs octonionic:    λ_min(G^𝕆)  =   0.0528708501
+  ⭐ EACH CLASS has LARGER spectral gap than the full matrix!
+     Ratio: 3.40× (worst class / full)
+
+  Liouville correlation in worst class (S_1 e1 (→2)):
+    Restricted:  0.012906
+    Full G:      ~0.70  (for comparison)
+    ✨ Decorrelated within class!
+
+  Time: 0.1s
+
+═══ N = 200 (dim = 199) ═══
+
+  Class sizes:
+    S_0 e0 (real)   :   21 integers, Liouville sum =  +13 (bias = 0.619)
+    S_1 e1 (→2)     :   18 integers, Liouville sum =   -4 (bias = -0.222)
+    S_2 e2 (→3)     :   27 integers, Liouville sum =   -5 (bias = -0.185)
+    S_3 e3 (→5)     :   26 integers, Liouville sum =   -6 (bias = -0.231)
+    S_4 e4 (→7)     :   27 integers, Liouville sum =   -5 (bias = -0.185)
+    S_5 e5 (→11)    :   25 integers, Liouville sum =   -5 (bias = -0.200)
+    S_6 e6 (→13)    :   26 integers, Liouville sum =   -4 (bias = -0.154)
+    S_7 e7 (→17)    :   29 integers, Liouville sum =   -1 (bias = -0.034)
+
+  Full matrix results:
+    λ_min(G):     0.0138859431
+    λ_min(G^𝕆):   0.0514771766
+
+       Class   size    λ_min(G|_S)     λ_min/λ(G)      L_sum       PSD?
+  ──────────────────────────────────────────────────────────────────────
+   e0 (real)     21   0.0518545049         3.7343         13          ✅
+     e1 (→2)     18   0.0514771766         3.7071         -4          ✅
+     e2 (→3)     27   0.0517785073         3.7288         -5          ✅
+     e3 (→5)     26   0.0528302113         3.8046         -6          ✅
+     e4 (→7)     27   0.0559300364         4.0278         -5          ✅
+    e5 (→11)     25   0.0559718039         4.0308         -5          ✅
+    e6 (→13)     26   0.0608428191         4.3816         -4          ✅
+    e7 (→17)     29   0.0606503027         4.3677         -1          ✅
+
+  min over classes: λ_min(G|_S) =   0.0514771766
+  vs full:          λ_min(G)    =   0.0138859431
+  vs octonionic:    λ_min(G^𝕆)  =   0.0514771766
+  ⭐ EACH CLASS has LARGER spectral gap than the full matrix!
+     Ratio: 3.71× (worst class / full)
+
+  Liouville correlation in worst class (S_1 e1 (→2)):
+    Restricted:  0.017053
+    Full G:      ~0.70  (for comparison)
+    ✨ Decorrelated within class!
+
+  Time: 0.4s
+
+═══ N = 500 (dim = 499) ═══
+
+  Class sizes:
+    S_0 e0 (real)   :   47 integers, Liouville sum =  +21 (bias = 0.447)
+    S_1 e1 (→2)     :   48 integers, Liouville sum =   -2 (bias = -0.042)
+    S_2 e2 (→3)     :   66 integers, Liouville sum =  -12 (bias = -0.182)
+    S_3 e3 (→5)     :   62 integers, Liouville sum =  -14 (bias = -0.226)
+    S_4 e4 (→7)     :   67 integers, Liouville sum =   -7 (bias = -0.104)
+    S_5 e5 (→11)    :   70 integers, Liouville sum =   +0 (bias = 0.000)
+    S_6 e6 (→13)    :   71 integers, Liouville sum =   -7 (bias = -0.099)
+    S_7 e7 (→17)    :   68 integers, Liouville sum =   +0 (bias = 0.000)
+
+  Full matrix results:
+    λ_min(G):     0.0123913325
+    λ_min(G^𝕆):   0.0489871697
+
+       Class   size    λ_min(G|_S)     λ_min/λ(G)      L_sum       PSD?
+  ──────────────────────────────────────────────────────────────────────
+   e0 (real)     47   0.0502768036         4.0574         21          ✅
+     e1 (→2)     48   0.0489871697         3.9533         -2          ✅
+     e2 (→3)     66   0.0490316354         3.9569        -12          ✅
+     e3 (→5)     62   0.0510476616         4.1196        -14          ✅
+     e4 (→7)     67   0.0518593405         4.1851         -7          ✅
+    e5 (→11)     70   0.0529443891         4.2727          0          ✅
+    e6 (→13)     71   0.0529596024         4.2739         -7          ✅
+    e7 (→17)     68   0.0557741100         4.5011          0          ✅
+
+  min over classes: λ_min(G|_S) =   0.0489871697
+  vs full:          λ_min(G)    =   0.0123913325
+  vs octonionic:    λ_min(G^𝕆)  =   0.0489871697
+  ⭐ EACH CLASS has LARGER spectral gap than the full matrix!
+     Ratio: 3.95× (worst class / full)
+
+  Liouville correlation in worst class (S_1 e1 (→2)):
+    Restricted:  -0.025242
+    Full G:      ~0.70  (for comparison)
+    ✨ Decorrelated within class!
+
+  Time: 2.8s
+
+═══ N = 1000 (dim = 999) ═══
+
+  Class sizes:
+    S_0 e0 (real)   :   98 integers, Liouville sum =  +40 (bias = 0.408)
+    S_1 e1 (→2)     :   93 integers, Liouville sum =   +9 (bias = 0.097)
+    S_2 e2 (→3)     :  124 integers, Liouville sum =  -16 (bias = -0.129)
+    S_3 e3 (→5)     :  123 integers, Liouville sum =  -19 (bias = -0.154)
+    S_4 e4 (→7)     :  146 integers, Liouville sum =  -14 (bias = -0.096)
+    S_5 e5 (→11)    :  135 integers, Liouville sum =   -5 (bias = -0.037)
+    S_6 e6 (→13)    :  142 integers, Liouville sum =   -8 (bias = -0.056)
+    S_7 e7 (→17)    :  138 integers, Liouville sum =   -2 (bias = -0.014)
+
+  Full matrix results:
+    λ_min(G):     0.0114766170
+    λ_min(G^𝕆):   0.0480447618
+
+       Class   size    λ_min(G|_S)     λ_min/λ(G)      L_sum       PSD?
+  ──────────────────────────────────────────────────────────────────────
+   e0 (real)     98   0.0480861796         4.1899         40          ✅
+     e1 (→2)     93   0.0480447618         4.1863          9          ✅
+     e2 (→3)    124   0.0481687534         4.1971        -16          ✅
+     e3 (→5)    123   0.0486141003         4.2359        -19          ✅
+     e4 (→7)    146   0.0515018495         4.4875        -14          ✅
+    e5 (→11)    135   0.0517022160         4.5050         -5          ✅
+    e6 (→13)    142   0.0518054129         4.5140         -8          ✅
+    e7 (→17)    138   0.0527601761         4.5972         -2          ✅
+
+  min over classes: λ_min(G|_S) =   0.0480447618
+  vs full:          λ_min(G)    =   0.0114766170
+  vs octonionic:    λ_min(G^𝕆)  =   0.0480447618
+  ⭐ EACH CLASS has LARGER spectral gap than the full matrix!
+     Ratio: 4.19× (worst class / full)
+
+  Liouville correlation in worst class (S_1 e1 (→2)):
+    Restricted:  -0.028311
+    Full G:      ~0.70  (for comparison)
+    ✨ Decorrelated within class!
+
+  Time: 11.3s
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Octonionic class restriction analysis complete.               ║
+╚══════════════════════════════════════════════════════════════════╝

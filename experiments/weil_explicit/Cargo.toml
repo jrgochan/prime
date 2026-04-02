@@ -120,3 +120,71 @@ path = "src/rotation_rate.rs"
 name = "certified-spectral"
 path = "src/certified_spectral.rs"
 
+[[bin]]
+name = "operator-spectral"
+path = "src/operator_spectral.rs"
+
+[[bin]]
+name = "gue-gram-test"
+path = "src/gue_gram_test.rs"
+
+[[bin]]
+name = "quaternion-gram"
+path = "src/quaternion_gram.rs"
+
+[[bin]]
+name = "octonion-decorr"
+path = "src/octonion_decorr.rs"
+
+[[bin]]
+name = "bridge-test"
+path = "src/bridge_test.rs"
+
+[[bin]]
+name = "susy-witten"
+path = "src/susy_witten.rs"
+
+[[bin]]
+name = "rg-flow"
+path = "src/rg_flow.rs"
+
+[[bin]]
+name = "oct-class"
+path = "src/oct_class.rs"
+
+[[bin]]
+name = "cross-class"
+path = "src/cross_class.rs"
+
+[[bin]]
+name = "proj-perturb"
+path = "src/proj_perturb.rs"
+
+[[bin]]
+name = "large-sieve"
+path = "src/large_sieve.rs"
+
+[[bin]]
+name = "rank1-extract"
+path = "src/rank1_extract.rs"
+
+[[bin]]
+name = "finite-opt"
+path = "src/finite_opt.rs"
+
+[[bin]]
+name = "residual-structure"
+path = "src/residual_structure.rs"
+
+[[bin]]
+name = "weyl-residual"
+path = "src/weyl_residual.rs"
+
+[[bin]]
+name = "gue-connection"
+path = "src/gue_connection.rs"
+
+[[bin]]
+name = "spectral-flow"
+path = "src/spectral_flow.rs"
+

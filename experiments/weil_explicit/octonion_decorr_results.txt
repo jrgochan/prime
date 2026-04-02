@@ -1,0 +1,136 @@
+warning: unnecessary parentheses around match arm expression
+   --> src/octonion_decorr.rs:122:14
+    |
+122 |         _ => ((p % 7) + 1), // Wrap around for larger primes
+    |              ^           ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+122 -         _ => ((p % 7) + 1), // Wrap around for larger primes
+122 +         _ => (p % 7) + 1 , // Wrap around for larger primes
+    |
+
+warning: associated function `new` is never used
+  --> src/octonion_decorr.rs:24:8
+   |
+23 | impl Oct {
+   | -------- associated function in this implementation
+24 |     fn new(c: [f64; 8]) -> Self { Self { c } }
+   |        ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `weil-explicit` (bin "octonion-decorr") generated 2 warnings (run `cargo fix --bin "octonion-decorr" -p weil-explicit` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/octonion-decorr`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC DECORRELATION — GRAM MATRIX SPECTRAL GAP           ║
+║  G^𝕆[j,k] = Re(φ̄(j)·φ(k)) · G[j,k]                        ║
+║  Does the octonionic weight block Liouville cancellation?       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══ Section 1: Octonionic map φ(k) ═══
+
+      k   Ω(k)     λ(k)     |φ(k)|    Re(φ)                                       φ(k)
+  ──────────────────────────────────────────────────────────────────────────────────
+      2      1       -1   1.000000   0.0000 [  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+      3      1       -1   1.000000   0.0000 [  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+      4      2        1   1.000000  -1.0000 [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+      5      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0]
+      6      2        1   1.000000   0.0000 [  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0]
+      7      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0]
+      8      3       -1   1.000000  -0.0000 [  0.0, -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+      9      2        1   1.000000  -1.0000 [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     10      2        1   1.000000   0.0000 [  0.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     11      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0]
+     12      3       -1   1.000000  -0.0000 [  0.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     13      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0]
+     14      2        1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0]
+     15      2        1   1.000000   0.0000 [  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     16      4        1   1.000000   1.0000 [  1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     17      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1.0]
+     18      3       -1   1.000000   0.0000 [  0.0, -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     19      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0]
+     20      3       -1   1.000000  -0.0000 [  0.0,  0.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0]
+     21      2        1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1.0,  0.0]
+     22      2        1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0, -1.0,  0.0,  0.0,  0.0]
+     23      1       -1   1.000000   0.0000 [  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0]
+     24      4        1   1.000000   0.0000 [  0.0,  0.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0]
+     25      2        1   1.000000  -1.0000 [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     26      2        1   1.000000   0.0000 [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0, -1.0]
+     27      3       -1   1.000000  -0.0000 [  0.0,  0.0, -1.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     28      3       -1   1.000000  -0.0000 [  0.0,  0.0,  0.0,  0.0, -1.0,  0.0,  0.0,  0.0]
+     29      1       -1   1.000000   0.0000 [  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+     30      3       -1   1.000000  -1.0000 [ -1.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0]
+
+═══ Section 2: Octonionic inner products Re(φ̄(j)·φ(k)) ═══
+
+  Testing decorrelation between even-Ω and odd-Ω numbers:
+
+  Average |Re(φ̄·φ)| for same Ω-parity:     0.125494 (9873 pairs)
+  Average |Re(φ̄·φ)| for different Ω-parity: 0.120269 (9828 pairs)
+  Decorrelation ratio (want << 1):           0.9584
+
+  Examples:
+      j     k  Ω_j  Ω_k     Re(φ̄·φ)  decorr?
+  ──────────────────────────────────────────
+      2     3    1    1     0.000000     same
+      2     6    1    2     0.000000   DIFF ✨
+      4     9    2    2     1.000000     same
+      6    10    2    2     0.000000     same
+      2     4    1    2     0.000000   DIFF ✨
+      3     5    1    1     0.000000     same
+      6    15    2    2     0.000000     same
+      4     6    2    2     0.000000     same
+     30    42    3    3     0.000000     same
+     12    18    3    3     0.000000     same
+      2    30    1    3     0.000000     same
+      3    70    1    3     0.000000     same
+
+═══ Section 3: Spectral gap — G vs G^𝕆 ═══
+
+       N       λ_min(G)     λ_min(G^𝕆)      ratio  improved?
+  ────────────────────────────────────────────────────────
+      20   0.0227652877   0.0613170113     2.6934     ✅ YES!  neg=0 (0.0s)
+      50   0.0179989002   0.0556685280     3.0929     ✅ YES!  neg=0 (0.1s)
+     100   0.0155613479   0.0528538378     3.3965     ✅ YES!  neg=0 (0.3s)
+     200   0.0138844159   0.0514756015     3.7074     ✅ YES!  neg=0 (1.0s)
+     300   0.0131440303   0.0490160673     3.7292     ✅ YES!  neg=0 (2.4s)
+     500   0.0123981679   0.0489532552     3.9484     ✅ YES!  neg=0 (6.6s)
+     800   0.0117628617   0.0480140274     4.0818     ✅ YES!  neg=0 (17.1s)
+
+  ─── Decay Rate Analysis ───
+    G   decay exponent:  α ≈ -0.1132  (λ_min ~ N^α)
+    G^𝕆 decay exponent:  α ≈ -0.0211  (λ_min ~ N^α)
+    Ratio exponent:      0.0921
+    ⭐ G^𝕆 gap appears to STABILIZE (α ≈ 0)!
+
+═══ Section 4: Liouville correlation of min eigenvector ═══
+
+       N        corr(G)      corr(G^𝕆)
+  ────────────────────────────────────
+      50       0.751821       0.362321  ← decorrelated ✨
+     100      -0.740870      -0.349258  ← decorrelated ✨
+     200      -0.705322       0.326298  ← decorrelated ✨
+     500      -0.687117      -0.284691  ← decorrelated ✨
+
+═══ Section 5: Weight matrix W properties (N=200) ═══
+
+  Weight matrix W[j,k] = Re(φ̄(j)·φ(k)):
+    Dimension:         199×199
+    Diagonal:          all 1.0 (W is a correlation matrix)
+    Zero off-diag:     17280/19701 (87.7%)
+    λ_min(W):          -0.000000
+    λ_max(W):          29.000000
+    W positive def?    ✅ YES
+    Neg eigenvalues:   0/199
+
+  ⭐ W is PSD! This is essential for the bridge theorem.
+    By Schur product theorem: G PSD ∧ W PSD → G^𝕆 = W∘G is PSD.
+    We need the REVERSE: G^𝕆 PSD + W properties → G PSD?
+
+  Total time: 35.7s
+╔══════════════════════════════════════════════════════════════════╗
+║  Octonionic decorrelation analysis complete.                    ║
+╚══════════════════════════════════════════════════════════════════╝

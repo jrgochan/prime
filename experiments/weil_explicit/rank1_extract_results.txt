@@ -1,0 +1,234 @@
+warning: variable does not need to be mutable
+   --> src/rank1_extract.rs:204:13
+    |
+204 |         let mut class_alpha = [0.0f64; 8]; // projection onto rank-1 direction
+    |             ----^^^^^^^^^^^
+    |             |
+    |             help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `class_alpha`
+   --> src/rank1_extract.rs:204:13
+    |
+204 |         let mut class_alpha = [0.0f64; 8]; // projection onto rank-1 direction
+    |             ^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_class_alpha`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `liouville` is never used
+  --> src/rank1_extract.rs:58:4
+   |
+58 | fn liouville(n: usize) -> i32 {
+   |    ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `weil-explicit` (bin "rank1-extract") generated 3 warnings (run `cargo fix --bin "rank1-extract" -p weil-explicit` to apply 2 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/rank1-extract`
+╔══════════════════════════════════════════════════════════════════╗
+║  RANK-1 STRUCTURE & LARGE-N STABILITY                          ║
+║  Extracting the 8×8 reduced interference problem               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══ N = 200 (dim = 199, n_pts = 200000) ═══
+
+  λ_min(G) = 0.0138859431    λ_min(G^block) = 0.0514771766
+  Diagonal = 0.1988462777    Interference = -0.1849603346
+  R = |interf|/diag = 0.930167    1-R = 0.069833
+
+  8×8 Reduced Interference Matrix (top singular values):
+     m0      m1      m2      m3      m4      m5      m6      m7
+  0    ---   0.2500  0.2491  0.2490  0.2485  0.2485  0.2484  0.2485 
+  1  0.2500    ---   0.2484  0.2487  0.2477  0.2478  0.2477  0.2478 
+  2  0.2491  0.2484    ---   0.2498  0.2484  0.2484  0.2485  0.2485 
+  3  0.2490  0.2487  0.2498    ---   0.2484  0.2485  0.2485  0.2486 
+  4  0.2485  0.2477  0.2484  0.2484    ---   0.2503  0.2497  0.2495 
+  5  0.2485  0.2478  0.2484  0.2485  0.2503    ---   0.2494  0.2497 
+  6  0.2484  0.2477  0.2485  0.2485  0.2497  0.2494    ---   0.2505 
+  7  0.2485  0.2478  0.2485  0.2486  0.2495  0.2497  0.2505    ---  
+  Min rank-1 accuracy: 99.8607%
+
+  Per-class energy:
+    S_0:  22.34%  (21 eigenvectors)
+    S_1:  21.83%  (18 eigenvectors)
+    S_2:  23.76%  (27 eigenvectors)
+    S_3:  23.61%  (26 eigenvectors)
+    S_4:   1.89%  (27 eigenvectors)
+    S_5:   1.92%  (25 eigenvectors)
+    S_6:   2.32%  (26 eigenvectors)
+    S_7:   2.32%  (29 eigenvectors)
+
+  WHY rank-1? Testing row proportionality for S_0 × S_1:
+    Reference: row for k=4 (norm=1.037762)
+    k=9: cos(angle to ref) = 0.99803381, ratio = 1.014842
+    k=16: cos(angle to ref) = 0.99907124, ratio = 1.030962
+    k=25: cos(angle to ref) = 0.99773748, ratio = 1.022026
+    k=30: cos(angle to ref) = 0.99732607, ratio = 1.034723
+
+  Time: 0.4s
+
+═══ N = 500 (dim = 499, n_pts = 200000) ═══
+
+  λ_min(G) = 0.0123913325    λ_min(G^block) = 0.0489871697
+  Diagonal = 0.1611678120    Interference = -0.1487765980
+  R = |interf|/diag = 0.923116    1-R = 0.076884
+
+  8×8 Reduced Interference Matrix (top singular values):
+     m0      m1      m2      m3      m4      m5      m6      m7
+  0    ---   0.2497  0.2494  0.2494  0.2492  0.2492  0.2492  0.2492 
+  1  0.2497    ---   0.2491  0.2492  0.2489  0.2490  0.2490  0.2490 
+  2  0.2494  0.2491    ---   0.2497  0.2492  0.2492  0.2493  0.2492 
+  3  0.2494  0.2492  0.2497    ---   0.2492  0.2492  0.2493  0.2493 
+  4  0.2492  0.2489  0.2492  0.2492    ---   0.2500  0.2497  0.2497 
+  5  0.2492  0.2490  0.2492  0.2492  0.2500    ---   0.2497  0.2498 
+  6  0.2492  0.2490  0.2493  0.2493  0.2497  0.2497    ---   0.2501 
+  7  0.2492  0.2490  0.2492  0.2493  0.2497  0.2498  0.2501    ---  
+  Min rank-1 accuracy: 99.9406%
+
+  Per-class energy:
+    S_0:  20.25%  (47 eigenvectors)
+    S_1:  19.66%  (48 eigenvectors)
+    S_2:  20.39%  (66 eigenvectors)
+    S_3:  20.55%  (62 eigenvectors)
+    S_4:   4.44%  (67 eigenvectors)
+    S_5:   4.46%  (70 eigenvectors)
+    S_6:   5.05%  (71 eigenvectors)
+    S_7:   5.20%  (68 eigenvectors)
+
+  WHY rank-1? Testing row proportionality for S_0 × S_1:
+    Reference: row for k=4 (norm=1.674170)
+    k=9: cos(angle to ref) = 0.99923816, ratio = 1.020342
+    k=16: cos(angle to ref) = 0.99963794, ratio = 1.031770
+    k=25: cos(angle to ref) = 0.99910691, ratio = 1.030579
+    k=30: cos(angle to ref) = 0.99895449, ratio = 1.037207
+
+  Time: 2.8s
+
+═══ N = 1000 (dim = 999, n_pts = 100000) ═══
+
+  λ_min(G) = 0.0114574611    λ_min(G^block) = 0.0479752304
+  Diagonal = 0.1525006337    Interference = -0.1410431728
+  R = |interf|/diag = 0.924869    1-R = 0.075131
+
+  8×8 Reduced Interference Matrix (top singular values):
+     m0      m1      m2      m3      m4      m5      m6      m7
+  0    ---   0.2497  0.2496  0.2495  0.2495  0.2495  0.2495  0.2495 
+  1  0.2497    ---   0.2495  0.2495  0.2494  0.2495  0.2494  0.2494 
+  2  0.2496  0.2495    ---   0.2498  0.2495  0.2495  0.2495  0.2495 
+  3  0.2495  0.2495  0.2498    ---   0.2495  0.2495  0.2495  0.2495 
+  4  0.2495  0.2494  0.2495  0.2495    ---   0.2500  0.2498  0.2498 
+  5  0.2495  0.2495  0.2495  0.2495  0.2500    ---   0.2498  0.2499 
+  6  0.2495  0.2494  0.2495  0.2495  0.2498  0.2498    ---   0.2500 
+  7  0.2495  0.2494  0.2495  0.2495  0.2498  0.2499  0.2500    ---  
+  Min rank-1 accuracy: 99.9710%
+
+  Per-class energy:
+    S_0:  18.48%  (98 eigenvectors)
+    S_1:  18.06%  (93 eigenvectors)
+    S_2:  18.52%  (124 eigenvectors)
+    S_3:  18.40%  (123 eigenvectors)
+    S_4:   6.36%  (146 eigenvectors)
+    S_5:   6.46%  (135 eigenvectors)
+    S_6:   6.78%  (142 eigenvectors)
+    S_7:   6.95%  (138 eigenvectors)
+
+  WHY rank-1? Testing row proportionality for S_0 × S_1:
+    Reference: row for k=4 (norm=2.321124)
+    k=9: cos(angle to ref) = 0.99960253, ratio = 1.022821
+    k=16: cos(angle to ref) = 0.99981100, ratio = 1.031972
+    k=25: cos(angle to ref) = 0.99953244, ratio = 1.033115
+    k=30: cos(angle to ref) = 0.99945384, ratio = 1.037676
+
+  Time: 6.2s
+
+═══ N = 1500 (dim = 1499, n_pts = 100000) ═══
+
+  λ_min(G) = 0.0109878781    λ_min(G^block) = 0.0467751033
+  Diagonal = 0.1428054563    Interference = -0.1318175782
+  R = |interf|/diag = 0.923057    1-R = 0.076943
+
+  8×8 Reduced Interference Matrix (top singular values):
+     m0      m1      m2      m3      m4      m5      m6      m7
+  0    ---   0.2498  0.2497  0.2497  0.2496  0.2497  0.2496  0.2496 
+  1  0.2498    ---   0.2496  0.2496  0.2496  0.2496  0.2496  0.2496 
+  2  0.2497  0.2496    ---   0.2498  0.2496  0.2497  0.2497  0.2497 
+  3  0.2497  0.2496  0.2498    ---   0.2497  0.2497  0.2497  0.2497 
+  4  0.2496  0.2496  0.2496  0.2497    ---   0.2500  0.2498  0.2498 
+  5  0.2497  0.2496  0.2497  0.2497  0.2500    ---   0.2499  0.2499 
+  6  0.2496  0.2496  0.2497  0.2497  0.2498  0.2499    ---   0.2500 
+  7  0.2496  0.2496  0.2497  0.2497  0.2498  0.2499  0.2500    ---  
+  Min rank-1 accuracy: 99.9800%
+
+  Per-class energy:
+    S_0:  17.26%  (145 eigenvectors)
+    S_1:  17.04%  (142 eigenvectors)
+    S_2:  17.29%  (180 eigenvectors)
+    S_3:  17.31%  (191 eigenvectors)
+    S_4:   7.70%  (213 eigenvectors)
+    S_5:   7.72%  (202 eigenvectors)
+    S_6:   7.86%  (214 eigenvectors)
+    S_7:   7.83%  (212 eigenvectors)
+
+  WHY rank-1? Testing row proportionality for S_0 × S_1:
+    Reference: row for k=4 (norm=2.863672)
+    k=9: cos(angle to ref) = 0.99973856, ratio = 1.023396
+    k=16: cos(angle to ref) = 0.99987558, ratio = 1.032041
+    k=25: cos(angle to ref) = 0.99969199, ratio = 1.034018
+    k=30: cos(angle to ref) = 0.99964089, ratio = 1.037565
+
+  Time: 15.3s
+
+═══ N = 2000 (dim = 1999, n_pts = 100000) ═══
+
+  λ_min(G) = 0.0106854613    λ_min(G^block) = 0.0465563359
+  Diagonal = 0.1408121249    Interference = -0.1301266636
+  R = |interf|/diag = 0.924115    1-R = 0.075885
+
+  8×8 Reduced Interference Matrix (top singular values):
+     m0      m1      m2      m3      m4      m5      m6      m7
+  0    ---   0.2498  0.2498  0.2497  0.2497  0.2498  0.2497  0.2497 
+  1  0.2498    ---   0.2497  0.2497  0.2497  0.2497  0.2497  0.2497 
+  2  0.2498  0.2497    ---   0.2498  0.2497  0.2497  0.2497  0.2497 
+  3  0.2497  0.2497  0.2498    ---   0.2497  0.2497  0.2497  0.2497 
+  4  0.2497  0.2497  0.2497  0.2497    ---   0.2500  0.2499  0.2499 
+  5  0.2498  0.2497  0.2497  0.2497  0.2500    ---   0.2499  0.2499 
+  6  0.2497  0.2497  0.2497  0.2497  0.2499  0.2499    ---   0.2500 
+  7  0.2497  0.2497  0.2497  0.2497  0.2499  0.2499  0.2500    ---  
+  Min rank-1 accuracy: 99.9855%
+
+  Per-class energy:
+    S_0:  16.65%  (198 eigenvectors)
+    S_1:  16.42%  (189 eigenvectors)
+    S_2:  16.65%  (243 eigenvectors)
+    S_3:  16.69%  (243 eigenvectors)
+    S_4:   8.34%  (276 eigenvectors)
+    S_5:   8.28%  (282 eigenvectors)
+    S_6:   8.53%  (285 eigenvectors)
+    S_7:   8.44%  (283 eigenvectors)
+
+  WHY rank-1? Testing row proportionality for S_0 × S_1:
+    Reference: row for k=4 (norm=3.301771)
+    k=9: cos(angle to ref) = 0.99980315, ratio = 1.023689
+    k=16: cos(angle to ref) = 0.99990629, ratio = 1.031985
+    k=25: cos(angle to ref) = 0.99976788, ratio = 1.034475
+    k=30: cos(angle to ref) = 0.99972968, ratio = 1.037472
+
+  Time: 29.7s
+
+╔══════════════════════════════════════════════════════════════════╗
+║  SUMMARY                                                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+       N     λ_min(G)   λ_min(blk)          R        1-R   rank1%     time
+  ───────────────────────────────────────────────────────────────────────────
+     200   0.01388594   0.05147718   0.930167   0.069833  99.8607      0.4
+     500   0.01239133   0.04898717   0.923116   0.076884  99.9406      2.8
+    1000   0.01145746   0.04797523   0.924869   0.075131  99.9710      6.2
+    1500   0.01098788   0.04677510   0.923057   0.076943  99.9800     15.3
+    2000   0.01068546   0.04655634   0.924115   0.075885  99.9855     29.7
+
+  Extrapolations:
+    dR/dN ≈ 2.12e-6 (R drift per unit N)
+    At this rate, R would reach 1.0 at N ≈ 37847

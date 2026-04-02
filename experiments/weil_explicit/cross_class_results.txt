@@ -1,0 +1,282 @@
+warning: method `inner` is never used
+  --> src/cross_class.rs:43:8
+   |
+25 | impl Oct {
+   | -------- method in this implementation
+...
+43 |     fn inner(&self, o: &Self) -> f64 { self.c.iter().zip(o.c.iter()).map(|(a,b)|a*b).sum() }
+   |        ^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `weil-explicit` (bin "cross-class") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/cross-class`
+╔══════════════════════════════════════════════════════════════════╗
+║  CROSS-CLASS DEEP DIVE                                         ║
+║  Analyzing G^{cross} structure — where RH lives               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══ N = 50 (dim = 49) ═══
+
+  Spectral decomposition:
+    λ_min(G):         0.0179967143
+    λ_min(G^block):   0.0556679469
+    λ_min(G^cross):  -2.1255230436
+    λ_max(G^cross):  10.5036726986
+    ||G^cross||_op:  10.5036726986
+
+  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = 188.684392
+     Weyl margin: λ_min(G^block) + λ_min(G^cross) = -2.0698550967
+     (Must be > 0 for RH, is ❌ NEGATIVE)
+     Ratio < 1 means Weyl bound is useful: ❌ NO (Weyl too loose)
+
+  Rank structure of G^cross:
+    Top 8 eigenvalues (absolute):
+      σ_1:  10.50367270  (47.0%)
+      σ_2:   2.12552304  (9.5%)
+      σ_3:   1.74267189  (7.8%)
+      σ_4:   1.72624452  (7.7%)
+      σ_5:   1.56176136  (7.0%)
+      σ_6:   1.30541896  (5.8%)
+      σ_7:   1.24610004  (5.6%)
+      σ_8:   0.80167234  (3.6%)
+    Effective rank (90% of spectral weight): 7/49
+    σ₁/σ₂ = 4.9417
+
+  Liouville correlation:
+    G full min-evec:   0.752020
+    G^cross min-evec:  0.139427
+
+  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):
+    S_2 × S_3: ||·||_F =   1.992518  (4.8%)
+    S_0 × S_2: ||·||_F =   1.974961  (4.8%)
+    S_2 × S_7: ||·||_F =   1.957011  (4.7%)
+    S_1 × S_2: ||·||_F =   1.810954  (4.4%)
+    S_0 × S_3: ||·||_F =   1.741344  (4.2%)
+    S_3 × S_7: ||·||_F =   1.726783  (4.2%)
+    S_0 × S_7: ||·||_F =   1.725820  (4.2%)
+    S_2 × S_6: ||·||_F =   1.651190  (4.0%)
+
+  GCD structure of cross-class pairs:
+    Coprime: 640/1039 (61.6%)
+
+  Scaling:
+    ||G^cross||_op / λ_min(G^block) = 188.684392
+    Weyl gap = -2.0698550967
+
+  Time: 0.0s
+
+═══ N = 100 (dim = 99) ═══
+
+  Spectral decomposition:
+    λ_min(G):         0.0155600297
+    λ_min(G^block):   0.0528708501
+    λ_min(G^cross):  -3.6521672454
+    λ_max(G^cross):  21.4598445896
+    ||G^cross||_op:  21.4598445896
+
+  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = 405.891802
+     Weyl margin: λ_min(G^block) + λ_min(G^cross) = -3.5992963953
+     (Must be > 0 for RH, is ❌ NEGATIVE)
+     Ratio < 1 means Weyl bound is useful: ❌ NO (Weyl too loose)
+
+  Rank structure of G^cross:
+    Top 8 eigenvalues (absolute):
+      σ_1:  21.45984459  (46.4%)
+      σ_2:   3.65216725  (7.9%)
+      σ_3:   3.50596210  (7.6%)
+      σ_4:   3.20141596  (6.9%)
+      σ_5:   2.92882762  (6.3%)
+      σ_6:   2.75696398  (6.0%)
+      σ_7:   2.73775529  (5.9%)
+      σ_8:   2.67980418  (5.8%)
+    Effective rank (90% of spectral weight): 8/99
+    σ₁/σ₂ = 5.8759
+
+  Liouville correlation:
+    G full min-evec:   0.740837
+    G^cross min-evec:  0.012699
+
+  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):
+    S_3 × S_6: ||·||_F =   3.589471  (4.2%)
+    S_2 × S_6: ||·||_F =   3.587667  (4.2%)
+    S_2 × S_3: ||·||_F =   3.509108  (4.1%)
+    S_5 × S_6: ||·||_F =   3.346924  (3.9%)
+    S_6 × S_7: ||·||_F =   3.231256  (3.8%)
+    S_3 × S_5: ||·||_F =   3.208836  (3.7%)
+    S_4 × S_6: ||·||_F =   3.206136  (3.7%)
+    S_2 × S_5: ||·||_F =   3.205633  (3.7%)
+
+  GCD structure of cross-class pairs:
+    Coprime: 2586/4278 (60.4%)
+
+  Scaling:
+    ||G^cross||_op / λ_min(G^block) = 405.891802
+    Weyl gap = -3.5992963953
+
+  Time: 0.1s
+
+═══ N = 200 (dim = 199) ═══
+
+  Spectral decomposition:
+    λ_min(G):         0.0138859431
+    λ_min(G^block):   0.0514771766
+    λ_min(G^cross):  -7.1280105566
+    λ_max(G^cross):  43.2298845307
+    ||G^cross||_op:  43.2298845307
+
+  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = 839.787404
+     Weyl margin: λ_min(G^block) + λ_min(G^cross) = -7.0765333800
+     (Must be > 0 for RH, is ❌ NEGATIVE)
+     Ratio < 1 means Weyl bound is useful: ❌ NO (Weyl too loose)
+
+  Rank structure of G^cross:
+    Top 8 eigenvalues (absolute):
+      σ_1:  43.22988453  (46.2%)
+      σ_2:   7.12801056  (7.6%)
+      σ_3:   6.71314321  (7.2%)
+      σ_4:   6.62869029  (7.1%)
+      σ_5:   6.45673682  (6.9%)
+      σ_6:   6.29086235  (6.7%)
+      σ_7:   5.38557595  (5.8%)
+      σ_8:   4.62868443  (4.9%)
+    Effective rank (90% of spectral weight): 8/199
+    σ₁/σ₂ = 6.0648
+
+  Liouville correlation:
+    G full min-evec:   0.705020
+    G^cross min-evec:  0.050862
+
+  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):
+    S_4 × S_7: ||·||_F =   6.983168  (4.1%)
+    S_2 × S_7: ||·||_F =   6.953902  (4.0%)
+    S_6 × S_7: ||·||_F =   6.880480  (4.0%)
+    S_3 × S_7: ||·||_F =   6.826730  (4.0%)
+    S_5 × S_7: ||·||_F =   6.724132  (3.9%)
+    S_2 × S_4: ||·||_F =   6.706536  (3.9%)
+    S_2 × S_3: ||·||_F =   6.621278  (3.8%)
+    S_4 × S_6: ||·||_F =   6.616020  (3.8%)
+
+  GCD structure of cross-class pairs:
+    Coprime: 10505/17280 (60.8%)
+
+  Scaling:
+    ||G^cross||_op / λ_min(G^block) = 839.787404
+    Weyl gap = -7.0765333800
+
+  Time: 0.4s
+
+═══ N = 500 (dim = 499) ═══
+
+  Spectral decomposition:
+    λ_min(G):         0.0123913325
+    λ_min(G^block):   0.0489871697
+    λ_min(G^cross): -17.6374537538
+    λ_max(G^cross): 108.6021691484
+    ||G^cross||_op: 108.6021691484
+
+  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = 2216.951290
+     Weyl margin: λ_min(G^block) + λ_min(G^cross) = -17.5884665840
+     (Must be > 0 for RH, is ❌ NEGATIVE)
+     Ratio < 1 means Weyl bound is useful: ❌ NO (Weyl too loose)
+
+  Rank structure of G^cross:
+    Top 8 eigenvalues (absolute):
+      σ_1: 108.60216915  (46.0%)
+      σ_2:  17.63745375  (7.5%)
+      σ_3:  17.29097953  (7.3%)
+      σ_4:  16.85364649  (7.1%)
+      σ_5:  16.52242587  (7.0%)
+      σ_6:  15.69551089  (6.7%)
+      σ_7:  12.75371824  (5.4%)
+      σ_8:  11.84920521  (5.0%)
+    Effective rank (90% of spectral weight): 8/499
+    σ₁/σ₂ = 6.1575
+
+  Liouville correlation:
+    G full min-evec:   0.686550
+    G^cross min-evec:  0.020626
+
+  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):
+    S_5 × S_6: ||·||_F =  17.606300  (4.1%)
+    S_6 × S_7: ||·||_F =  17.378221  (4.0%)
+    S_5 × S_7: ||·||_F =  17.235326  (4.0%)
+    S_4 × S_6: ||·||_F =  17.226070  (4.0%)
+    S_4 × S_5: ||·||_F =  17.127045  (4.0%)
+    S_2 × S_6: ||·||_F =  17.062349  (3.9%)
+    S_2 × S_5: ||·||_F =  16.939226  (3.9%)
+    S_4 × S_7: ||·||_F =  16.852466  (3.9%)
+
+  GCD structure of cross-class pairs:
+    Coprime: 65924/108617 (60.7%)
+
+  Scaling:
+    ||G^cross||_op / λ_min(G^block) = 2216.951290
+    Weyl gap = -17.5884665840
+
+  Time: 2.9s
+
+═══ N = 800 (dim = 799) ═══
+
+  Spectral decomposition:
+    λ_min(G):         0.0117574789
+    λ_min(G^block):   0.0480683636
+    λ_min(G^cross): -28.2518336839
+    λ_max(G^cross): 174.0522290223
+    ||G^cross||_op: 174.0522290223
+
+  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = 3620.931020
+     Weyl margin: λ_min(G^block) + λ_min(G^cross) = -28.2037653203
+     (Must be > 0 for RH, is ❌ NEGATIVE)
+     Ratio < 1 means Weyl bound is useful: ❌ NO (Weyl too loose)
+
+  Rank structure of G^cross:
+    Top 8 eigenvalues (absolute):
+      σ_1: 174.05222902  (46.0%)
+      σ_2:  28.25183368  (7.5%)
+      σ_3:  27.85073682  (7.4%)
+      σ_4:  27.49775280  (7.3%)
+      σ_5:  25.78845315  (6.8%)
+      σ_6:  24.39992501  (6.4%)
+      σ_7:  20.93704742  (5.5%)
+      σ_8:  19.32695733  (5.1%)
+    Effective rank (90% of spectral weight): 8/799
+    σ₁/σ₂ = 6.1607
+
+  Liouville correlation:
+    G full min-evec:   0.665800
+    G^cross min-evec:  0.025664
+
+  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):
+    S_6 × S_7: ||·||_F =  28.255303  (4.1%)
+    S_5 × S_7: ||·||_F =  27.853687  (4.0%)
+    S_4 × S_6: ||·||_F =  27.852876  (4.0%)
+    S_5 × S_6: ||·||_F =  27.847874  (4.0%)
+    S_4 × S_7: ||·||_F =  27.847468  (4.0%)
+    S_4 × S_5: ||·||_F =  27.501159  (4.0%)
+    S_2 × S_6: ||·||_F =  26.651119  (3.8%)
+    S_2 × S_7: ||·||_F =  26.650675  (3.8%)
+
+  GCD structure of cross-class pairs:
+    Coprime: 169219/278535 (60.8%)
+
+  Scaling:
+    ||G^cross||_op / λ_min(G^block) = 3620.931020
+    Weyl gap = -28.2037653203
+
+  Time: 7.4s
+
+═══ SUMMARY TABLE ═══
+
+       N     λ_min(G) λ_min(block) λ_min(cross)    WeylGap    ratio   rank90
+  ────────────────────────────────────────────────────────────────────────────────
+      50   0.01799671   0.05566795  -2.12552304 -2.06985510 188.6844        7
+     100   0.01556003   0.05287085  -3.65216725 -3.59929640 405.8918        8
+     200   0.01388594   0.05147718  -7.12801056 -7.07653338 839.7874        8
+     500   0.01239133   0.04898717 -17.63745375 -17.58846658 2216.9513        8
+     800   0.01175748   0.04806836 -28.25183368 -28.20376532 3620.9310        8
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Cross-class deep dive complete.                               ║
+╚══════════════════════════════════════════════════════════════════╝

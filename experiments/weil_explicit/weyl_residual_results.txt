@@ -1,0 +1,83 @@
+warning: unused import: `DVector`
+ --> src/weyl_residual.rs:2:25
+  |
+2 | use nalgebra::{DMatrix, DVector, SymmetricEigen};
+  |                         ^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `weil-explicit` (bin "weyl-residual") generated 1 warning (run `cargo fix --bin "weyl-residual" -p weil-explicit` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `target/release/weyl-residual`
+╔══════════════════════════════════════════════════════════════════╗
+║  WEYL BOUND ON RESIDUAL MATRIX                                ║
+║  G = (G^block + G^cross_rk) + G^cross_res                     ║
+║  λ_min(G) ≥ λ_min(modified) - ||residual||_op                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+═══ N = 200 (dim = 199) ═══
+
+  λ_min(G)       = 0.0138859431
+  λ_min(G^block) = 0.0514771766
+  ||G^cross||_op = 43.2298845307
+
+      k     λ_min(mod)     ||res||_op    gap=λ-||r||    proves?   actual
+      0   0.0514771766  43.2298845307 -43.1784073541      ❌  no 0.013886
+      1   0.0279339775   0.1654845344  -0.1375505569      ❌  no 0.013886
+      2   0.0169830089   0.1422498094  -0.1252668005      ❌  no 0.013886
+      3   0.0086122838   0.1100291584  -0.1014168746      ❌  no 0.013886
+      5   0.0152890545   0.0859278797  -0.0706388252      ❌  no 0.013886
+     10   0.0138847199   0.0567583617  -0.0428736418      ❌  no 0.013886
+     20   0.0138963128   0.0013140637   0.0125822490      ✅ YES 0.013886
+     50   0.0138859431   0.0000000000   0.0138859431      ✅ YES 0.013886
+
+  Binary search for minimum k where Weyl bound proves λ_min > 0:
+  Minimum k for Weyl proof: k = 19
+
+  Time: 0.6s
+
+═══ N = 500 (dim = 499) ═══
+
+  λ_min(G)       = 0.0123913325
+  λ_min(G^block) = 0.0489871697
+  ||G^cross||_op = 108.6021691484
+
+      k     λ_min(mod)     ||res||_op    gap=λ-||r||    proves?   actual
+      0   0.0489871697 108.6021691484 -108.5531819786      ❌  no 0.012391
+      1   0.0285745596   0.2246730054  -0.1960984459      ❌  no 0.012391
+      2   0.0196008297   0.1832055778  -0.1636047481      ❌  no 0.012391
+      3   0.0091810820   0.1595729104  -0.1503918284      ❌  no 0.012391
+      5   0.0127252323   0.1329088279  -0.1201835956      ❌  no 0.012391
+     10   0.0080215147   0.0957159699  -0.0876944552      ❌  no 0.012391
+     20   0.0114787102   0.0609399414  -0.0494612312      ❌  no 0.012391
+     50   0.0123940881   0.0018320244   0.0105620636      ✅ YES 0.012391
+
+  Binary search for minimum k where Weyl bound proves λ_min > 0:
+  Minimum k for Weyl proof: k = 45
+
+  Time: 5.1s
+
+═══ N = 1000 (dim = 999) ═══
+
+  λ_min(G)       = 0.0114574611
+  λ_min(G^block) = 0.0479752304
+  ||G^cross||_op = 217.5916289291
+
+      k     λ_min(mod)     ||res||_op    gap=λ-||r||    proves?   actual
+      0   0.0479752304 217.5916289291 -217.5436536987      ❌  no 0.011457
+      1   0.0288343970   0.2679253795  -0.2390909825      ❌  no 0.011457
+      2   0.0128662376   0.2120866765  -0.1992204389      ❌  no 0.011457
+      3   0.0003836484   0.1920338044  -0.1916501560      ❌  no 0.011457
+      5   0.0087237637   0.1608525586  -0.1521287949      ❌  no 0.011457
+     10   0.0133695975   0.1241313618  -0.1107617643      ❌  no 0.011457
+     20   0.0081889207   0.0983778129  -0.0901888922      ❌  no 0.011457
+     50   0.0103407930   0.0557921439  -0.0454513510      ❌  no 0.011457
+
+  Binary search for minimum k where Weyl bound proves λ_min > 0:
+  Minimum k for Weyl proof: k = 94
+
+  Time: 23.4s
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Weyl residual analysis complete.                              ║
+╚══════════════════════════════════════════════════════════════════╝
