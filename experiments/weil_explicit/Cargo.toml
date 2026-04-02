@@ -188,3 +188,6 @@ path = "src/gue_connection.rs"
 name = "spectral-flow"
 path = "src/spectral_flow.rs"
 
+[[bin]]
+name = "block-gap-analysis"
+path = "src/block_gap_analysis.rs"

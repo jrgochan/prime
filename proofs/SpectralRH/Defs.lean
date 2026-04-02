@@ -6,6 +6,7 @@ import Mathlib.NumberTheory.ArithmeticFunction.Defs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Data.Nat.Factorization.Basic
 import Mathlib.Analysis.Matrix.Spectrum
+import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 /-! # SpectralRH.Defs
