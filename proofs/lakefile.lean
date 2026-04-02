@@ -10,4 +10,4 @@ require mathlib from git
 @[default_target]
 lean_lib «HyperzetaProofs» where
   -- Expose SedenionAxioms boundaries formally inside the array
-  roots := #[`SedenionAxioms, `LiCriterion, `SpectralRH]
+  roots := #[`SedenionAxioms, `LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `HyperzetaRH]

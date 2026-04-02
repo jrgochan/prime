@@ -5,6 +5,8 @@ edition = "2021"
 
 [dependencies]
 rayon = "1.10"
+nalgebra = "0.33"
+num-complex = "0.4"
 
 [[bin]]
 name = "weil-explicit"
@@ -69,4 +71,52 @@ path = "src/normalization_decay.rs"
 [[bin]]
 name = "sign-structure"
 path = "src/sign_structure.rs"
+
+[[bin]]
+name = "gue-statistics"
+path = "src/gue_statistics.rs"
+
+[[bin]]
+name = "liouville-phase"
+path = "src/liouville_phase.rs"
+
+[[bin]]
+name = "enriched-verification"
+path = "src/enriched_verification.rs"
+
+[[bin]]
+name = "phase-boundary"
+path = "src/phase_boundary.rs"
+
+[[bin]]
+name = "proper-verification"
+path = "src/proper_verification.rs"
+
+[[bin]]
+name = "native-complex"
+path = "src/native_complex.rs"
+
+[[bin]]
+name = "spectral-gap-analysis"
+path = "src/spectral_gap_analysis.rs"
+
+[[bin]]
+name = "enriched-nb-criterion"
+path = "src/enriched_nb_criterion.rs"
+
+[[bin]]
+name = "pt-symmetry"
+path = "src/pt_symmetry.rs"
+
+[[bin]]
+name = "rank2-analysis"
+path = "src/rank2_analysis.rs"
+
+[[bin]]
+name = "rotation-rate"
+path = "src/rotation_rate.rs"
+
+[[bin]]
+name = "certified-spectral"
+path = "src/certified_spectral.rs"
 

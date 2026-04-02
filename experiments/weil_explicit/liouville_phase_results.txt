@@ -1,0 +1,102 @@
+warning: unused variable: `delta`
+   --> src/liouville_phase.rs:439:21
+    |
+439 |         let (class, delta) = classify_beta(r_val);
+    |                     ^^^^^ help: if this is intentional, prefix it with an underscore: `_delta`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `weil-explicit` (bin "liouville-phase") generated 1 warning (run `cargo fix --bin "liouville-phase" -p weil-explicit` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.01s
+     Running `target/release/liouville-phase`
+╔══════════════════════════════════════════════════════════════════╗
+║  LIOUVILLE PHASE ENRICHMENT: Breaking Time-Reversal Symmetry   ║
+║  Can we shift the Gram matrix from GOE → GUE?                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Liouville signs for k = 2..20:
+    λ(2)=-1  λ(3)=-1  λ(4)=+1  λ(5)=-1  λ(6)=+1  λ(7)=-1  λ(8)=-1  λ(9)=+1  λ(10)=+1  λ(11)=-1  λ(12)=-1  λ(13)=-1  λ(14)=+1  λ(15)=+1  λ(16)=+1  λ(17)=-1  λ(18)=-1  λ(19)=-1  λ(20)=-1  
+
+═══════════════════════════════════════════════════════════════
+  BASELINE: Real Gram Matrix G_N (N = 150)
+═══════════════════════════════════════════════════════════════
+
+  Computing 149×149 real Gram matrix... 0.2s
+  Computing eigenvalues (Jacobi)... 0.0s
+  ⟨r⟩ = 0.473885 → GOE (β=1) (Δ = 0.056815, β ≈ 0.61)
+
+═══════════════════════════════════════════════════════════════
+  SCHEME 1: Fourier Phase — G^ℂ[j,k] = ∫ {j/x}{k/x} e^{iα(j-k)/x} dx
+═══════════════════════════════════════════════════════════════
+
+         α        ⟨r⟩ Classification Δ from GOE   β estimate
+  ────────────────────────────────────────────────────────────
+  0 (real)   0.473885      GOE (β=1)   0.056815        0.607
+  Computing α = 0.01...      0.010   0.591476      GUE (β=2)   0.008124        1.882  (1.6s, 149 eigvals)
+  Computing α = 0.05...      0.050   0.642488      GSE (β=4)   0.031912        3.147  (1.6s, 149 eigvals)
+  Computing α = 0.10...      0.100   0.629369      GUE (β=2)   0.029769        2.432  (1.6s, 149 eigvals)
+  Computing α = 0.20...      0.200   0.604364      GUE (β=2)   0.004764        2.069  (1.7s, 149 eigvals)
+  Computing α = 0.50...      0.500   0.661829      GSE (β=4)   0.012571        3.664  (1.7s, 149 eigvals)
+  Computing α = 1.00...      1.000   0.644756      GSE (β=4)   0.029644        3.207  (1.7s, 149 eigvals)
+  Computing α = 2.00...      2.000   0.596229      GUE (β=2)   0.003371        1.951  (1.7s, 149 eigvals)
+  Computing α = 3.14...      3.142   0.583816      GUE (β=2)   0.015784        1.771  (1.7s, 149 eigvals)
+
+═══════════════════════════════════════════════════════════════
+  SCHEME 2: Log-Arithmetic Phase — e^{iα·ln(j/k)·x}
+  (Connected to Mellin transform & Dirichlet series)
+═══════════════════════════════════════════════════════════════
+
+         α        ⟨r⟩ Classification Δ from GUE   β estimate
+  ────────────────────────────────────────────────────────────
+  Computing α = 0.1...        0.1   0.486520      GOE (β=1)   0.113080        0.694  (1.4s)
+  Computing α = 0.5...        0.5   0.517243      GOE (β=1)   0.082357        0.907  (1.4s)
+  Computing α = 1.0...        1.0   0.556744      GOE (β=1)   0.042856        1.378  (1.4s)
+  Computing α = 2.0...        2.0   0.533922      GOE (β=1)   0.065678        1.022  (1.5s)
+  Computing α = 5.0...        5.0   0.585023      GUE (β=2)   0.014577        1.788  (1.5s)
+  Computing α = 10.0...       10.0   0.567166      GUE (β=2)   0.032434        1.529  (1.6s)
+
+═══════════════════════════════════════════════════════════════
+  SCHEME 3: Ω-Phase — e^{iα(Ω(j)-Ω(k))·{jk/x}}
+  (Liouville-connected: Ω encodes the sign structure)
+═══════════════════════════════════════════════════════════════
+
+         α        ⟨r⟩ Classification Δ from GUE   β estimate
+  ────────────────────────────────────────────────────────────
+  Computing α = 0.100...      0.100   0.486536      GOE (β=1)   0.113064        0.694  (1.3s)
+  Computing α = 0.500...      0.500   0.559005      GOE (β=1)   0.040595        1.411  (1.5s)
+  Computing α = 1.000...      1.000   0.557804      GOE (β=1)   0.041796        1.393  (1.6s)
+  Computing α = 1.571...      1.571   0.568179      GUE (β=2)   0.031421        1.544  (1.6s)
+  Computing α = 3.142...      3.142   0.615622      GUE (β=2)   0.016022        2.233  (1.7s)
+  Computing α = 6.283...      6.283   0.588955      GUE (β=2)   0.010645        1.846  (1.8s)
+
+═══════════════════════════════════════════════════════════════
+  SPECTRAL GAP ANALYSIS: λ_min under enrichment
+═══════════════════════════════════════════════════════════════
+
+  Does phase enrichment preserve the spectral gap?
+
+                Scheme        λ_min        λ_max    Gap ratio
+  ────────────────────────────────────────────────────────────
+       Real (baseline)   0.01453022      37.1201     0.000391
+         Fourier α=0.1   0.04986013       9.3578     0.005328
+         Fourier α=1.0   0.11272405       1.6290     0.069199
+             Log α=1.0   0.01575777      35.1385     0.000448
+
+╔══════════════════════════════════════════════════════════════════╗
+║              LIOUVILLE PHASE ENRICHMENT VERDICT                 ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                ║
+║  Baseline (real):  GOE (β≈1)   ← time-reversal symmetric      ║
+║                                                                ║
+║  Q: Does adding arithmetic phase shift the statistics?         ║
+║  Q: Is the spectral gap preserved under enrichment?            ║
+║  Q: Can we reach GUE (β≈2) — the universality class of ζ?     ║
+║                                                                ║
+║  If GUE is reached with spectral gap preserved:                ║
+║    → The enriched Gram matrix is a spectral realization        ║
+║    → HYPERZETA in the enriched space → RH                      ║
+║                                                                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+  Total computation time: 36.5s
+
