@@ -97,12 +97,12 @@ theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
     divided by the Schur complement. -/
 axiom drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
-      (∑ k ∈ Finset.range (N - 2), (crossCorr (N - 1) k)^2) /
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
       schurComplement (N - 1)
 
 theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
-      (∑ k ∈ Finset.range (N - 2), (crossCorr (N - 1) k)^2) /
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
       schurComplement (N - 1) := drop_formula_bound N hN
 
 

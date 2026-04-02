@@ -36,11 +36,11 @@ open Complex Real
 -- ════════════════════════════════════════════════
 
 /-- Minimum eigenvalue of the Gram matrix restricted to class m.
-    This is defined abstractly as a real number satisfying the
-    properties below. The construction mirrors gramRestricted
-    but avoids the Fin-indexing complexity. -/
-noncomputable def lambdaMinClass (m : Fin 8) (N : ℕ) : ℝ :=
-  Classical.choice ⟨(0 : ℝ)⟩
+    Declared opaque so it is safely abstract: its properties are
+    specified by the axioms below (positivity, class gap inequality).
+    The actual value is the minimum eigenvalue of the principal
+    submatrix of gramMatrix N indexed by integers in class m. -/
+opaque lambdaMinClass (m : Fin 8) (N : ℕ) : ℝ
 
 /-- **Axiom**: The restricted eigenvalue is positive (from linear independence
     restricted to each class). -/
@@ -148,6 +148,20 @@ theorem liouville_within_class_decorrelated :
 -- THE CROSS-CLASS BOUND (The RH Core)
 -- ════════════════════════════════════════════════
 
+/-- Minimum eigenvalue of the cross-class interaction matrix G^{cross}.
+    Declared opaque: its properties come from the axioms below. -/
+opaque lambdaMinCross (N : ℕ) : ℝ
+
+/-- **Weyl's inequality** for Hermitian matrix addition:
+    λ_min(A + B) ≥ λ_min(A) + λ_min(B).
+    Applied to G = G^{block} + G^{cross}, this gives:
+    λ_min(G) ≥ λ_min(G^{block}) + λ_min(G^{cross}).
+
+    This is a standard result from matrix perturbation theory
+    (Horn & Johnson, Theorem 4.3.1). -/
+axiom weyl_inequality (N : ℕ) :
+    lambdaMinBlock N + lambdaMinCross N ≤ lambdaMin N
+
 /-- **The Cross-Class Bound** (the irreducible content of RH):
     The cross-class interactions cannot reduce the block-diagonal
     spectral gap below zero.
@@ -156,13 +170,13 @@ theorem liouville_within_class_decorrelated :
     λ_min(G) ≥ λ_min(G^{block}) + λ_min(G^{cross})
 
     So RH follows from:
-    λ_min(G^{cross}) > -λ_min(G^{block})
+    λ_min(G^{block}) + λ_min(G^{cross}) > 0
 
     Computationally verified: λ_min(G^{cross}) ≈ -0.037 while
     λ_min(G^{block}) ≈ 0.048, so the bound holds (0.048 > 0.037).
 
-    ⚠️  This axiom, together with class_gap_strictly_larger,
-    provides an ALTERNATIVE proof path for RH:
+    ⚠️  This axiom, together with class_gap_strictly_larger and
+    weyl_inequality, provides an ALTERNATIVE proof path for RH:
     - Instead of bounding cos θ_N directly (liouville_cancellation),
     - Prove the cross-class interactions don't destroy the block gap.
 
@@ -171,9 +185,7 @@ theorem liouville_within_class_decorrelated :
     to large sieve / Bombieri-Vinogradov techniques. -/
 axiom cross_class_interaction_bounded :
     ∃ δ : ℝ, 0 < δ ∧ ∀ N : ℕ, 10 ≤ N →
-    -- The block gap exceeds the cross-class perturbation
-    δ ≤ lambdaMinBlock N  -- The block gap stays positive
-    -- (Combined with block_gap_larger, this gives lambdaMin N > 0)
+    δ ≤ lambdaMinBlock N + lambdaMinCross N
 
 -- ════════════════════════════════════════════════
 -- ALTERNATIVE PROOF OF RH
@@ -192,9 +204,15 @@ axiom cross_class_interaction_bounded :
     Both chains ultimately encode the same arithmetic content (RH),
     but the octonionic decomposition LOCALIZES the difficulty. -/
 theorem rh_from_octonionic_route
-    (h_cross : ∃ δ : ℝ, 0 < δ ∧ ∀ N : ℕ, 10 ≤ N → δ ≤ lambdaMinBlock N) :
-    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N :=
-  fun N hN => gram_positive_definite N hN
+    (h_cross : ∃ δ : ℝ, 0 < δ ∧ ∀ N : ℕ, 10 ≤ N → δ ≤ lambdaMinBlock N + lambdaMinCross N) :
+    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N := by
+  intro N hN
+  by_cases hN10 : 10 ≤ N
+  · obtain ⟨δ, hδ_pos, hδ_bound⟩ := h_cross
+    have h_weyl := weyl_inequality N
+    have h_cross_bound := hδ_bound N hN10
+    linarith
+  · exact gram_positive_definite N hN
 
 -- ════════════════════════════════════════════════
 -- RANK-1 INTERFERENCE STRUCTURE (Key Discovery)
@@ -246,8 +264,19 @@ theorem large_sieve_ratio_bounded :
 theorem rh_from_rank_one_interference
     (h_rank1 : ∀ (m₁ m₂ : Fin 8), m₁ ≠ m₂ → ∀ N : ℕ, 100 ≤ N → True)
     (h_ratio : ∃ R : ℝ, R < 1 ∧ ∀ N : ℕ, 100 ≤ N → True) :
-    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N :=
-  fun N hN => gram_positive_definite N hN
+    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N := by
+  -- This proof path requires:
+  -- 1. Formalize the rank-1 approximation of cross-class blocks
+  -- 2. Reduce the N×N interference to an 8×8 problem
+  -- 3. Derive λ_min > 0 from R < 1 via Weyl's inequality
+  -- Marking as sorry to honestly track the architectural boundary.
+  sorry
+
 
 
 end
+
+-- ════════════════════════════════════════════════
+-- AXIOM AUDIT: Show axioms used by alternative proof chain
+-- ════════════════════════════════════════════════
+#print axioms rh_from_octonionic_route

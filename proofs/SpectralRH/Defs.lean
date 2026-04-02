@@ -67,8 +67,9 @@ def eigenDrop (N : ℕ) : ℝ := lambdaMin (N - 1) - lambdaMin N
 lemma eigenDrop_succ (k : ℕ) : eigenDrop (k + 1) = lambdaMin k - lambdaMin (k + 1) := by
   unfold eigenDrop; simp
 
-/-- The cross-correlation vector g_N[k] = G[N+1, k+1] -/
-def crossCorr (N k : ℕ) : ℝ := gramEntry (N + 1) (k + 1)
+-- NOTE: crossCorr was removed — its index math (k+1) was off-by-one from
+-- the Gram matrix basis {f₂,...,f_N}. Use crossCorrVec instead, which
+-- correctly computes gramEntry(N+1, i.val+2) = ⟨f_{N+1}, f_{i+2}⟩.
 
 /-- The cross-correlation as a vector over Fin(N-1),
     where crossCorrVec N i = gramEntry(N+1, i+2) = ⟨f_{N+1}, f_{i+2}⟩ -/
@@ -104,7 +105,7 @@ noncomputable def cosAlignment (N : ℕ) : ℝ :=
         (fun i => herm.eigenvalues i = min_val)
       -- Total squared projection onto min-eigenvalue eigenspace
       let proj_sq := ∑ i ∈ indices,
-        (dotProduct g ((herm.eigenvectorBasis i).ofLp))^2
+        (dotProduct g (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2
       Real.sqrt proj_sq / Real.sqrt gnorm_sq
   else 0
 
@@ -194,9 +195,10 @@ noncomputable def liouvilleProjection (N : ℕ) : ℝ :=
     -- Get the Fin(N-1) index achieving the minimum
     let min_idx := (Finset.univ : Finset (Fin (N - 1))).filter
       (fun i => herm.eigenvalues i = min_val)
-    -- Project onto λ̂ (using first min-eigenvalue eigenvector)
-    -- For simple eigenvalues this is unique (up to sign)
-    ∑ i ∈ min_idx, |dotProduct liouville_hat ((herm.eigenvectorBasis i).ofLp)|
+    -- L² projection onto min-eigenvalue eigenspace:
+    -- √(Σ ⟨λ̂, eᵢ⟩²) for eᵢ in the min-eigenspace
+    -- For simple eigenvalues (rank-1 eigenspace), this equals |⟨λ̂, e_min⟩|
+    Real.sqrt (∑ i ∈ min_idx, (dotProduct liouville_hat (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2)
   else 0
 
 

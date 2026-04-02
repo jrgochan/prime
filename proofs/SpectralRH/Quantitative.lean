@@ -49,13 +49,13 @@ theorem schur_lower_bound (N : ℕ) (hN : 2 ≤ N) :
     are φ(N+1) ≈ N coprime values, giving ‖g‖² ≈ N/16. -/
 axiom cross_norm_bound (N : ℕ) (hN : 10 ≤ N) :
     ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ C₁ ≤ C₂ ∧
-    C₁ * N ≤ ∑ k ∈ Finset.range (N - 1), (crossCorr N k)^2 ∧
-    ∑ k ∈ Finset.range (N - 1), (crossCorr N k)^2 ≤ C₂ * N
+    C₁ * N ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
+    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * N
 
 theorem cross_norm_growth (N : ℕ) (hN : 10 ≤ N) :
     ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ C₁ ≤ C₂ ∧
-    C₁ * N ≤ ∑ k ∈ Finset.range (N - 1), (crossCorr N k)^2 ∧
-    ∑ k ∈ Finset.range (N - 1), (crossCorr N k)^2 ≤ C₂ * N :=
+    C₁ * N ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
+    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * N :=
   cross_norm_bound N hN
 
 -- ─────── LEMMA 4: EIGENVECTOR STRUCTURE ───────

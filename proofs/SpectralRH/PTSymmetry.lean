@@ -70,9 +70,29 @@ theorem gram_parity_decomposition (N : ℕ) :
     entries ±1, hence Pᵀ = P, and (PGP)ᵀ = PᵀGᵀPᵀ = PGP). -/
 lemma gramMatrixEven_hermitian (N : ℕ) :
     (gramMatrixEven N).IsHermitian := by
-  -- G_even = (1/2)(G + PGP); need to show (G_even)ᴴ = G_even
-  -- Over ℝ, ᴴ = ᵀ, so need entry symmetry
-  sorry -- Needs: G symmetric (have), P diagonal ⇒ PGP symmetric, sum symmetric
+  -- Strategy: G_even = (1/2) • (G + PGP)
+  -- Show each part is Hermitian, then the result follows.
+  unfold gramMatrixEven
+  -- G is Hermitian
+  have hG := gramMatrix_hermitian N
+  -- P is Hermitian (diagonal with real entries)
+  have hP : (parityOperator N).IsHermitian := by
+    unfold Matrix.IsHermitian parityOperator
+    ext i j
+    simp only [Matrix.conjTranspose_apply, Matrix.diagonal_apply, star_trivial]
+    by_cases h : j = i
+    · subst h; simp
+    · simp [h, Ne.symm h]
+  have hPGP : (parityOperator N * gramMatrix N * parityOperator N).IsHermitian := by
+    show (parityOperator N * gramMatrix N * parityOperator N).conjTranspose =
+         parityOperator N * gramMatrix N * parityOperator N
+    rw [Matrix.conjTranspose_mul, Matrix.conjTranspose_mul,
+        hP.eq, hG.eq, Matrix.mul_assoc]
+  have hSum := hG.add hPGP
+  show ((1/2 : ℝ) • (gramMatrix N + parityOperator N * gramMatrix N * parityOperator N)).IsHermitian
+  unfold Matrix.IsHermitian
+  simp only [Matrix.conjTranspose_smul, star_trivial]
+  rw [hSum.eq]
 
 /-!
 ### Rank-1 Perturbation Theory (2026-04-01)
