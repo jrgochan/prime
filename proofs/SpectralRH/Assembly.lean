@@ -18,7 +18,7 @@ open Complex Real
     Proof: δ ≤ cos²θ · ||g||² / S
       ≤ (C₁·M^{-β})² · C₂·M / (1/20) = 20·C₁²·C₂ · M^{1-2β} -/
 theorem drop_assembly_at (N : ℕ) (hN : 10 ≤ N)
-    (C₁ : ℝ) (hC₁ : 0 < C₁) (β : ℝ) (hβ : 1 < β)
+    (C₁ : ℝ) (hC₁ : 0 < C₁) (β : ℝ) (_hβ : 1 < β)
     (h_cos : cosAlignment (N - 1) ≤ C₁ * (N - 1 : ℝ) ^ (-β))
     (C₂ : ℝ) (hC₂ : 0 < C₂)
     (h_cross : dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) ≤ C₂ * (N - 1 : ℝ))

@@ -147,7 +147,7 @@ private lemma octonion_normSq_one : Octonion.normSq (1 : Octonion) = 1 := by
 
 /-- **Theorem** (was axiom): φ maps to unit octonions.
     |φ(k)| = 1 for all k ≥ 1. -/
-theorem intToOctonion_unit (k : ℕ) (hk : 1 ≤ k) :
+theorem intToOctonion_unit (k : ℕ) (_hk : 1 ≤ k) :
     Octonion.normSq (intToOctonion k) = 1 := by
   unfold intToOctonion
   by_cases h : k ≤ 1
@@ -299,7 +299,7 @@ axiom oct_gap_lower_bound :
     (the hard part of RH) is a CROSS-CLASS phenomenon. Within each
     octonionic class, the Gram matrix is well-behaved. -/
 theorem within_class_liouville_decorrelation :
-    ∀ m : Fin 8, ∃ C : ℝ, 0 < C ∧ C ≤ 0.05 ∧
+    ∀ _m : Fin 8, ∃ C : ℝ, 0 < C ∧ C ≤ 0.05 ∧
     ∀ N : ℕ, 100 ≤ N →
     -- The Liouville projection onto the minimum eigenvector
     -- of G restricted to class m is bounded by C

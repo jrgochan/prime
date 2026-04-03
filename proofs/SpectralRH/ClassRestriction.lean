@@ -175,7 +175,7 @@ noncomputable def gramCrossClass (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) 
     ENTIRELY a cross-class phenomenon. -/
 theorem liouville_within_class_decorrelated :
     ∀ N : ℕ, 100 ≤ N →
-    ∀ m : Fin 8,
+    ∀ _m : Fin 8,
     -- Within class m, the minimum eigenvector has Liouville
     -- correlation bounded by 0.05 (vs 0.70 for full G)
     True  -- Placeholder; precise eigenvector statement TBD
@@ -451,7 +451,7 @@ lemma classRestrict_norm_partition (N : ℕ) (v : Fin (N - 1) → ℝ) :
     if octonionClass (i.val + 2) = m then v i * v i else 0 := by
     intro m; by_cases h : octonionClass (i.val + 2) = m <;> simp [h]
   simp_rw [key]
-  simp [Finset.sum_ite_eq']
+  simp
 
 /-- The block-diagonal quadratic form decomposes over classes.
     vᵀ G^{block} v = Σ_m (v_m)ᵀ G (v_m)
@@ -470,8 +470,7 @@ lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
   -- LHS = Σ_i v(i) * (gramMatrixBlockDiag N *ᵥ v)(i)
   -- RHS = Σ_m Σ_i (classRestrict N m v)(i) * (gramMatrix N *ᵥ classRestrict N m v)(i)
   -- Expand mulVec
-  simp only [Matrix.mulVec, gramMatrixBlockDiag, gramMatrix, Matrix.of_apply, classRestrict,
-    Finset.sum_apply]
+  simp only [Matrix.mulVec, gramMatrixBlockDiag, gramMatrix, Matrix.of_apply, classRestrict]
   -- Now both sides are explicit finite sums over Fin (N-1)
   -- Swap Σ_m and Σ_i in RHS using Finset.sum_comm
   rw [Finset.sum_comm]
@@ -487,7 +486,7 @@ lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
   have h_rhs : ∀ (f : Fin 8 → ℝ),
     (∑ x : Fin 8, (if octonionClass (↑i + 2) = x then f x else 0)) =
     f (octonionClass (↑i + 2)) := by
-    intro f; simp [Finset.sum_ite_eq']
+    intro f; simp
   -- Collapse the m-sum: only m = class(i+2) contributes
   rw [show (∑ x : Fin 8,
       (if octonionClass (↑i + 2) = x then v i else 0) *
@@ -524,7 +523,7 @@ lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
     For v ≠ 0, proved by the positive definite Rayleigh characterization. -/
 lemma min_eigenvalue_le_quadForm_scaled
     {n : ℕ} {A : Matrix (Fin n) (Fin n) ℝ} (hA : A.IsHermitian)
-    (v : Fin n → ℝ) (hv : v ≠ 0) (hn : 0 < n) :
+    (v : Fin n → ℝ) (_hv : v ≠ 0) (hn : 0 < n) :
     (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
       (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
       hA.eigenvalues₀ * dotProduct v v

@@ -291,7 +291,7 @@ theorem proof_chain_summary
     lives on the BULK spectrum (eigenvalues ≈ 1/3), not the edge (≈ 0.048).
     This means the rank-1 interference channel costs proportionally more
     energy as N grows, making R → 0. -/
-noncomputable def lambdaEff (m : Fin 8) (N : ℕ) : ℝ :=
+noncomputable def lambdaEff (_m : Fin 8) (_N : ℕ) : ℝ :=
   Classical.choice ⟨(1 : ℝ)⟩  -- Abstract definition
 
 /-- **Effective Eigenvalue Axiom**: λ_eff(m) ≥ c · N for some c > 0.
@@ -312,7 +312,7 @@ axiom lambdaEff_linear_growth :
     α_m² = (Σ cⱼ uⱼ)² ≤ (Σ cⱼ² λⱼ)(Σ uⱼ²/λⱼ) = D_m / λ_eff(m). -/
 theorem alpha_bounded_by_eff :
     ∀ N : ℕ, 200 ≤ N →
-    ∀ m : Fin 8,
+    ∀ _m : Fin 8,
     -- α_m² ≤ D_m / λ_eff(m)   (Cauchy-Schwarz, provable)
     True  -- Type placeholder
   := fun _ _ _ => trivial
