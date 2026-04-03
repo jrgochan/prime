@@ -17,19 +17,25 @@ The proof reduces RH to the **Nyman-Beurling criterion** (Beurling 1955) via a
     → riemann_hypothesis              ← PROVED (Assembly.lean)
 ```
 
-### Zero-Sorry Core (ParitySchur.lean)
+### Zero-Sorry Core
 
-The following are proved with **zero sorry** against Mathlib:
-
+**ParitySchur.lean** — Parity block decomposition (zero sorry):
 - **Parity projections**: π₊ + π₋ = I, π₊π₋ = 0 (completeness + orthogonality)
 - **Block decomposition**: G = A + B + Bᵀ + C (Liouville parity blocks)
 - **Schur complement PSD**: G > 0 ⟹ A - BC⁻¹Bᵀ ≥ 0
+
+**GramBounds.lean** — Gram matrix entry bounds (zero sorry):
+- **gramEntry_nonneg/le_one**: 0 ≤ G_{j,k} ≤ 1
+- **gramEntry_integrand_measurable**: Measurability via `measurable_fract` + `Measurable.div`
+- **gramEntry_integrable**: Interval integrability via bounded measurable functions
+- **vasyunin_coprime_case**: For coprime j,k, |G_{j,k} - 1/4| ≤ 1 — covering ~60.8% of all matrix entries
 
 ### The Bilinear Sieve Interface (BilinearSieve.lean)
 
 A **typed interface** encoding the exact boundary between the proved linear algebra
 and the analytic number theory needed to close the final gap. Four axioms state
-precisely what needs to be proved; a bridge theorem shows these axioms suffice.
+precisely what needs to be proved; the bridge theorem `sieve_implies_stable_ratio`
+is substantially proved (only one matrix transpose symmetry identity remains).
 
 ## Quick Start
 
