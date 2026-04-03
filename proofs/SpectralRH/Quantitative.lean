@@ -20,111 +20,109 @@ open Complex Real
 
 -- ─────── STRUCTURAL: SCHUR COMPLEMENT POSITIVITY ───────
 
-/-- **schurComplement_pos** (PROVEN):
-    The Schur complement S_N > 0 for all N ≥ 2.
+/-- Split a Fin N sum into Fin (N-1) sum + last term. -/
+private lemma fin_sum_decompose (n : ℕ) (hn : 1 ≤ n) (f : Fin n → ℝ) :
+    ∑ x : Fin n, f x =
+    (∑ x : Fin (n - 1), f ⟨x.val, by omega⟩) + f ⟨n - 1, by omega⟩ := by
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : n ≠ 0)
+  simp only [Nat.succ_sub_one]
+  rw [Fin.sum_univ_castSucc]
+  congr 1
 
-    Proof: The Schur complement S_N = a - gᵀ G⁻¹ g is the projection
-    residual ‖f_{N+1} - proj(f_{N+1})‖². This can be written as
-    vᵀ G_{N+1} v where v = (-G⁻¹g, 1) is a specific nonzero vector.
-    Since G_{N+1} is positive definite (by gram_pos_def) and v ≠ 0,
-    the quadratic form is strictly positive, hence S_N > 0.
-
-    The algebraic identity vᵀ G_{N+1} v = S_N is proven by:
-    - Splitting the Fin N sum into Fin (N-1) (block) + last element
-    - Using G · G⁻¹ = I to simplify cᵀ G c = gᵀ G⁻¹ g
-    - Combining: gᵀG⁻¹g - 2gᵀG⁻¹g + a = a - gᵀG⁻¹g = S_N -/
+/-- **schurComplement_pos**:
+    The Schur complement S_N > 0 for all N ≥ 2. -/
 theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
     0 < schurComplement N := by
-  -- Strategy: Construct a nonzero vector w such that
-  -- realQuadForm (gramMatrix (N+1)) w = schurComplement N,
-  -- then apply gram_pos_def.
   set G := gramMatrix N
   set g := crossCorrVec N
   set c := G⁻¹.mulVec g with hc_def
   set a := gramEntry (N + 1) (N + 1) with ha_def
-  -- Construct w = (-c, 1) : Fin N → ℝ
-  -- Note: (N+1)-1 = N, gramMatrix(N+1) : Matrix (Fin N) (Fin N) ℝ
   set w : Fin ((N + 1) - 1) → ℝ := fun i =>
     if h : i.val < N - 1 then -(c ⟨i.val, h⟩) else 1 with hw_def
-  -- w ≠ 0 because the last component is 1
   have hw_ne : w ≠ 0 := by
     intro hw_zero
     have : w ⟨N - 1, by omega⟩ = 0 := congr_fun hw_zero ⟨N - 1, by omega⟩
     simp only [hw_def, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false] at this
     linarith
-  -- The key claim: realQuadForm (gramMatrix (N+1)) w = schurComplement N
-  -- We prove this as an algebraic identity about finite sums.
   suffices h_eq : realQuadForm (gramMatrix (N + 1)) w = schurComplement N by
     rw [← h_eq]; exact gram_pos_def (N + 1) (by omega) w hw_ne
-  -- Step 1: G is nonsingular (PD → det ≠ 0)
+  -- G is nonsingular (PD → det ≠ 0)
   have h_det : G.det ≠ 0 := by
     intro h_zero
-    -- det ≠ 0 → any v with G.mulVec v = 0 must be v = 0.
-    -- Contrapositive: if det = 0, ∃ v ≠ 0 with G.mulVec v = 0.
-    -- We use exists_mulVec_eq_zero_iff (needs IsDomain, which ℝ has).
     rw [Matrix.exists_mulVec_eq_zero_iff.symm] at h_zero
     obtain ⟨v, hv_ne, hv_ker⟩ := h_zero
-    -- But then vᵀGv = dotProduct v 0 = 0, contradicting PD
     have h_pos := gram_pos_def N hN v hv_ne
     rw [realQuadForm, hv_ker, dotProduct_zero] at h_pos
     exact lt_irrefl 0 h_pos
-  -- Step 2: G · G⁻¹ = I, so G.mulVec c = g
   have h_unit : IsUnit G.det := isUnit_iff_ne_zero.mpr h_det
+  -- G.mulVec c = g (where c = G⁻¹g)
   have h_Gc : G.mulVec c = g := by
     rw [hc_def, Matrix.mulVec_mulVec,
         Matrix.mul_nonsing_inv G h_unit, Matrix.one_mulVec]
-  -- Step 3: Prove realQuadForm (gramMatrix (N+1)) w = schurComplement N
-  -- Both sides are expressions in gramEntry, dotProduct, and G⁻¹.
-  -- We express both purely in terms of dotProduct / mulVec.
-  -- LHS = dotProduct w ((gramMatrix (N+1)).mulVec w) [by def of realQuadForm]
-  -- RHS = a - dotProduct g c                         [by def + c = G⁻¹g]
-  -- We show LHS = RHS by converting LHS to block form.
-  --
-  -- Alternative approach: show both sides equal a - dotProduct g c
-  -- by unfolding and manipulating finite sums. This is the remaining
-  -- algebraic identity that requires careful index arithmetic
-  -- (splitting Fin N sums into Fin(N-1) + singleton).
-  --
-  -- For now, we establish the key algebraic ingredients:
-  -- (a) dotProduct c (G.mulVec c) = dotProduct c g [from h_Gc]
-  -- (b) dotProduct c g = dotProduct g c  [commutativity]
-  -- Then: cᵀGc - 2gᵀc + a = gᵀc - 2gᵀc + a = a - gᵀc = S_N
-  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c g := by
-    rw [h_Gc]
+  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c g := by rw [h_Gc]
   have h_dot_comm : dotProduct c g = dotProduct g c := by
     simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm (c i) (g i))]
-  -- Now use these to close the goal via calc:
-  -- realQuadForm w = cᵀGc - 2gᵀc + a = gᵀc - 2gᵀc + a = a - gᵀc = S_N
+  -- Reduce to block expansion
   suffices h_block : realQuadForm (gramMatrix (N + 1)) w =
       dotProduct c (G.mulVec c) - 2 * dotProduct g c + a by
     rw [h_block, h_cGc, h_dot_comm]
-    unfold schurComplement
-    simp only [G, g, hc_def]
-    ring
-  -- Prove the block expansion: expand realQuadForm and schurComplement
-  -- into raw sums, then show pointwise equality.
+    unfold schurComplement; simp only [G, g, hc_def]; ring
+  -- Prove block expansion by splitting sums
   unfold realQuadForm
   simp only [dotProduct, Matrix.mulVec, gramMatrix, Matrix.of_apply,
-    crossCorrVec, G, g, a, ha_def, hw_def]
-  -- Now both sides are explicit sums over gramEntry with ite conditions.
-  -- The LHS sums over Fin N, using w(x) = if x.val < N-1 then -c(x) else 1.
-  -- The RHS has dotProduct c (G.mulVec c), dotProduct g c, and gramEntry(N+1,N+1).
-  -- After simp expands everything, ring should close.
-  -- Both sides are double sums. LHS over Fin N with ite, RHS over Fin(N-1).
-  -- We need to split the LHS sum into parts based on the ite condition.
-  -- The LHS has x, i : Fin (N+1-1) = Fin N.
-  -- When x.val < N-1: the ite gives -c(x)
-  -- When x.val = N-1 (i.e., x.val ≥ N-1): the ite gives 1, and x+2 = N+1
-  -- Similarly for i.
-  --
-  -- We convert both sides to a common form by case analysis.
-  -- For the LHS, split: Σ_x f(x) = Σ_{x<N-1} f(x) + f(N-1)
-  -- This converts Fin N sum → Fin(N-1) sum + singleton.
-  --
-  -- Rather than formal Fin splitting, we use congr + by_cases on each term.
-  -- Strategy: show both sides equal the same expression by converting the
-  -- LHS Fin N sums to Fin(N-1) sums + last term, matching the RHS.
-  sorry
+    crossCorrVec, G, g, a, hw_def]
+  -- Split outer sum using fin_sum_decompose
+  have hN1 : 1 ≤ N + 1 - 1 := by omega
+  rw [fin_sum_decompose (N + 1 - 1) hN1]
+  -- Split the inner sums similarly using simp_rw
+  simp_rw [fin_sum_decompose (N + 1 - 1) hN1]
+  -- Simplify N+1-1-1 = N-1 and resolve ite conditions
+  have hNsub : N + 1 - 1 - 1 = N - 1 := by omega
+  simp only [hNsub, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false,
+    show (N - 1 + 2 : ℕ) = N + 1 from by omega]
+  -- Now the ite for x : Fin(N-1) with x.val < N-1 should be true
+  simp only [show ∀ (x : Fin (N - 1)),
+    (⟨x.val, (by omega : x.val < N + 1 - 1)⟩ : Fin (N + 1 - 1)).val < N - 1 from
+    fun x => x.isLt, dite_true]
+  -- Both sides now have same index set (Fin(N-1)).
+  -- The only difference: LHS has (-∑ c*g_row) + (-∑ g_col*c),
+  -- RHS has (-2 * ∑ g_col*c). These match by gramEntry symmetry.
+  -- gramEntry(i,j) = gramEntry(j,i) since fract(i/x)*fract(j/x) is symmetric
+  have hge_comm : ∀ i j, gramEntry i j = gramEntry j i := by
+    intro i j; unfold gramEntry
+    congr 1; ext x; ring
+  -- Clean up mul_one, one_mul
+  simp only [neg_mul, mul_neg, mul_one, one_mul]
+  -- Rewrite gramEntry(↑x + 2, N+1) to gramEntry(N+1, ↑x+2) inside the outer sum
+  have h_cross : ∀ x : Fin (N + 1 - 1 - 1),
+      gramEntry (↑x + 2) (N + 1) = gramEntry (N + 1) (↑x + 2) :=
+    fun x => hge_comm _ _
+  simp_rw [h_cross]
+  -- Now both sides use gramEntry(N+1, ↑x+2) consistently.
+  -- Distribute neg/mul, then flatten sums
+  simp only [mul_add, mul_neg,
+    Finset.sum_add_distrib, Finset.sum_neg_distrib,
+    neg_add_rev, neg_neg]
+  -- Both sides are the same up to Fin(N+1-1-1) = Fin(N-1) and commutativity.
+  -- Use have for the equality N+1-1-1 = N-1, then show with the target restated
+  have hfin : N + 1 - 1 - 1 = N - 1 := by omega
+  -- Use subst to replace N+1-1-1 with N-1 everywhere
+  -- Can't subst directly (not a free var), so use show + convert
+  -- Actually simplest: just close it all via congr
+  suffices h :
+    -(∑ x : Fin (N - 1), c x * gramEntry (N + 1) (↑x + 2)) +
+    (∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
+        gramEntry (↑x + 2) (↑x_1 + 2) * c x_1) +
+    (-(∑ x : Fin (N - 1), gramEntry (N + 1) (↑x + 2) * c x) +
+    gramEntry (N + 1) (N + 1)) =
+    ∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
+        gramEntry (↑x + 2) (↑x_1 + 2) * c x_1 -
+    2 * ∑ x : Fin (N - 1), gramEntry (N + 1) (↑x + 2) * c x +
+    gramEntry (N + 1) (N + 1) by
+    convert h using 2
+  linarith [Finset.sum_congr rfl (show ∀ (x : Fin (N - 1)),
+    x ∈ Finset.univ → c x * gramEntry (N + 1) (↑x + 2) =
+      gramEntry (N + 1) (↑x + 2) * c x from fun x _ => by ring)]
 
 -- ─────── LEMMA 2: SCHUR COMPLEMENT LOWER BOUND ───────
 
