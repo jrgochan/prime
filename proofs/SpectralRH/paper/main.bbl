@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{baez-duarte2003}
 Luis B{\'a}ez-Duarte.
@@ -26,22 +26,39 @@ Arne Beurling.
 \newblock A closure problem related to the {R}iemann zeta-function.
 \newblock {\em Proc. Natl. Acad. Sci. USA}, 41:312--314, 1955.
 
+\bibitem{chen73}
+Jingrun Chen.
+\newblock On the representation of a larger even integer as the sum of a prime
+  and the product of at most two primes.
+\newblock {\em Scientia Sinica}, 16:157--176, 1973.
+
+\bibitem{heathbrown82}
+D.~R. Heath-Brown.
+\newblock Prime numbers in short intervals and a generalized {V}aughan
+  identity.
+\newblock {\em Canadian Journal of Mathematics}, 34:1365--1377, 1982.
+
 \bibitem{nyman1950}
 Bertil Nyman.
 \newblock On the one-dimensional translation group and semi-group in certain
   function spaces.
 \newblock {\em Thesis, Uppsala University}, 1950.
 
-\bibitem{sarnak11}
-Peter Sarnak.
-\newblock Three lectures on the {M}\"obius function, randomness and dynamics.
-\newblock {\em IAS Lecture Notes}, 2011.
-\newblock Available at \url{https://publications.ias.edu/sarnak/paper/546}.
+\bibitem{selberg1956}
+Atle Selberg.
+\newblock Harmonic analysis and discontinuous groups in weakly symmetric
+  {R}iemannian spaces with applications to {D}irichlet series.
+\newblock {\em Journal of the Indian Mathematical Society}, 20:47--87, 1956.
 
 \bibitem{lean4}
 {The Lean Community}.
 \newblock The {L}ean 4 theorem prover.
 \newblock \url{https://lean-lang.org}, 2024.
 \newblock Version 4.29.0.
+
+\bibitem{vaughan77}
+Robert~C. Vaughan.
+\newblock Sommes trigonom\'etriques sur les nombres premiers.
+\newblock {\em C. R. Acad. Sci. Paris S\'er. A-B}, 285:981--983, 1977.
 
 \end{thebibliography}

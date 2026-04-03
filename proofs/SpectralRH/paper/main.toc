@@ -36,3 +36,4 @@
 \contentsline {subsection}{\numberline {9.3}The Coprimality Curvature Bound (Open)}{12}{subsection.9.3}%
 \contentsline {subsection}{\numberline {9.4}The Three Gaps: Honest Assessment}{12}{subsection.9.4}%
 \contentsline {subsection}{\numberline {9.5}Formalization Roadmap}{13}{subsection.9.5}%
+\contentsline {subsection}{\numberline {9.6}Research Directions: Beyond the Parity Barrier}{14}{subsection.9.6}%

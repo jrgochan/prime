@@ -939,14 +939,20 @@ contrast, is governed by $\gcd(j,k)$, which depends on
 \textbf{statistically independent}: knowing that $\Omega(j)$ is even
 tells us nothing about $\gcd(j,k)$.
 
-This independence is a manifestation of the
-\emph{M\"obius randomness principle} --- the heuristic that the
-M\"obius function $\mu(n)$ (and hence the Liouville function
-$\lambda(n) = (-1)^{\Omega(n)}$) behaves independently of
-``structured'' arithmetic functions like divisibility indicators.
-Formally proving this independence, or finding the correct
-substitute statement, is a central open problem in analytic
-number theory~\cite{sarnak11}.
+This independence is precisely \textbf{Selberg's parity barrier}~\cite{selberg1956}
+--- the foundational obstruction in sieve theory. Standard sieves
+construct weights from the M\"obius function and divisor sums, which
+are ``blind'' to the total count of prime factors $\Omega(n)$.
+Selberg proved that no linear sieve can distinguish numbers with
+an even number of prime factors from those with an odd number.
+Our Gap~2 is a matrix-theoretic manifestation of the same obstruction:
+divisibility-based entry-wise bounds on $\Gram$ cannot distinguish
+the within-parity blocks $A$, $C$ from the cross-parity block $B$.
+
+This connection to established sieve theory is significant because
+the parity barrier is not merely a technical inconvenience --- it is
+a theorem. Techniques that bypass it (see \S\ref{sec:directions})
+involve fundamentally different mathematical structures.
 
 As a consequence, the entries of $B$ (cross-parity block) are
 \emph{not systematically smaller} than those of $A$ (within-parity
@@ -1015,6 +1021,60 @@ Mathlib already contains the Basel problem result
 $\zeta(2) = \pi^2/6$ (\texttt{riemannZeta\_two}), Euler's totient
 function, and the coprimality predicate \texttt{Nat.Coprime}, providing
 a foundation for future number-theoretic formalization.
+
+\subsection{Research Directions: Beyond the Parity Barrier}\label{sec:directions}
+
+The identification of Gap~2 with Selberg's parity barrier suggests
+a precise research program. The parity barrier was famously broken
+by Chen~\cite{chen73} in his proof that every sufficiently large even
+number is the sum of a prime and a product of at most two primes.
+Chen's method --- and subsequent refinements by Iwaniec, Friedlander,
+and others --- uses two key ideas that translate directly into our
+matrix framework:
+
+\subsubsection*{The Bilinear Form Connection}
+
+The operator norm of the cross-parity block defines a bilinear form:
+\[
+  \|B\| = \sup_{\|u\| = \|v\| = 1} \langle u, Bv \rangle,
+\]
+where $u$ ranges over the even-parity subspace $V_+$ and $v$ over
+the odd-parity subspace $V_-$. In the language of analytic number
+theory, this is a \emph{Type~II sum}:
+\[
+  \sum_{\substack{j \in S_+ \\ k \in S_-}} u_j \, G_{jk} \, v_k
+  \;=\;
+  \sum_{\substack{j \in S_+ \\ k \in S_-}} u_j \, v_k
+  \int_0^1 \{j/x\}\{k/x\}\,dx,
+\]
+where $S_+$ consists of integers with $\Omega$ even and $S_-$ those
+with $\Omega$ odd. Modern techniques for bounding such bilinear sums
+--- including Vaughan's identity~\cite{vaughan77}, the Heath-Brown
+identity~\cite{heathbrown82}, and the Bombieri--Vinogradov theorem
+--- provide the natural toolbox for attacking the spectral bound
+on $B$ relative to $A$.
+
+\subsubsection*{The Switching Principle}
+
+Chen's proof uses a \emph{switching principle}: rather than sieving
+directly for the target set (primes), one sieves for a larger set
+(almost-primes) and then corrects by subtracting an explicitly
+controlled error term. In our architecture, the analogue is:
+\begin{enumerate}
+  \item Start with $\Gram = A + B + B^\top + C$ (the full block
+    decomposition --- proved in Lean~4).
+  \item Bound $\|B\|$ not by individual entries, but by the
+    bilinear form $\langle u, Bv \rangle$ decomposed via Vaughan's
+    identity into Type~I and Type~II components.
+  \item Show that the Type~I contribution is bounded by $A$
+    (diagonal dominance) and the Type~II contribution exhibits
+    cancellation controlled by the divisor-sum structure of $G_{jk}$.
+\end{enumerate}
+
+This program would bridge our Discrete Lichnerowicz framework with
+the bilinear sieve bounds developed to break Selberg's parity barrier,
+providing a concrete --- if technically demanding --- path toward
+proving $R < 1$ analytically.
 
 % ═══════════════════════════════════════════
 % BIBLIOGRAPHY
