@@ -182,7 +182,7 @@ theorem cross_norm_growth :
     (b) Fixed-k entries decay as N^{-α(k)} with α ∈ [0.09, 0.31]
     (c) Energy center of mass ≈ N/10 (grows linearly)
     (d) Σ v_min[k] = O(N^{-0.3}) (near-orthogonal to constants) -/
-theorem eigvec_liouville_correlation (N : ℕ) (hN : 100 ≤ N) :
+theorem eigvec_liouville_correlation (N : ℕ) (_hN : 100 ≤ N) :
     -- The correlation between v_min and ln(k)·λ(k)/k exceeds 0.5
     -- (Formal statement would require defining correlation in Lean)
     True := by
@@ -190,7 +190,7 @@ theorem eigvec_liouville_correlation (N : ℕ) (hN : 100 ≤ N) :
 
 /-- Entry decay at fixed k: v_min[k] = O(N^{-0.3}) for small k.
     This is the normalization spreading effect. -/
-theorem eigvec_entry_decay (k : ℕ) (hk : 2 ≤ k) (hk' : k ≤ 20) :
+theorem eigvec_entry_decay (k : ℕ) (_hk : 2 ≤ k) (_hk' : k ≤ 20) :
     ∃ A : ℝ, 0 < A ∧ ∃ α : ℝ, 0 < α ∧ α ≤ 1 ∧
     ∀ N : ℕ, k ≤ N → True := by
   -- |v_min^{(N)}[k]| ≤ A · N^{-α}
