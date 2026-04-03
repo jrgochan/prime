@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  3 APR 2026 16:20
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  3 APR 2026 16:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -788,13 +788,13 @@ or specify an encoding such as \usepackage [latin1]{inputenc}
 in the document preamble.
 Alternatively, save the file in UTF-8 using your editor or another tool
 
-
+[3]
 Overfull \hbox (17.49626pt too wide) in paragraph at lines 246--252
 \T1/lmr/m/n/10.95 dis-tinct sin-gu-lar be-hav-iors at ra-tio-nal points). This 
 is for-mal-ized via an ax-iom \T1/lmtt/m/n/10.95 nb_basis_lin_indep
  []
 
-[3]
+
 Overfull \hbox (28.83257pt too wide) in paragraph at lines 306--308
 []\T1/lmr/m/n/10.95 This par-ti-tion is com-plete: ev-ery in-te-ger $\OML/lmm/m
 /it/10.95 n \OMS/lmsy/m/n/10.95 ^^U \OT1/lmr/m/n/10.95 2$ \T1/lmr/m/n/10.95 be-
@@ -1242,19 +1242,23 @@ en ax-ioms \T1/lmr/m/n/10.95 (\T1/lmtt/m/n/10.95 lambdaMinClass_pos\T1/lmr/m/n/
 10.95 , \T1/lmtt/m/n/10.95 block_min_eq_class_min\T1/lmr/m/n/10.95 ,
  []
 
-[10] [11] [12] [13] (./main.bbl [14]) [15] (./main.aux)
+[10] [11] [12] [13] [14] (./main.bbl) [15] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 1AD22B8C03605008B253ECC7FE21872C;7619.
+(rerunfilecheck)             Checksum: CF2DE9553A67BD68FE40CE87D1E64BA8;7889.
  ) 
 Here is how much of TeX's memory you used:
- 12951 strings out of 469006
- 191902 string characters out of 5454814
+ 12958 strings out of 469006
+ 191967 string characters out of 5454814
  690562 words of memory out of 5000000
- 41301 multiletter control sequences out of 15000+600000
+ 41302 multiletter control sequences out of 15000+600000
  740456 words of font info for 115 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
  75i,11n,79p,541b,1241s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1279,10 +1283,10 @@ basic/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/2026basic
 /texmf-dist/fonts/type1/public/lm/lmtt9.pfb></usr/local/texlive/2026basic/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/local/texlive/2026ba
 sic/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (15 pages, 471008 bytes).
+Output written on main.pdf (15 pages, 474938 bytes).
 PDF statistics:
- 565 PDF objects out of 1000 (max. 8388607)
- 493 compressed objects within 5 object streams
- 156 named destinations out of 1000 (max. 500000)
- 313 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 577 PDF objects out of 1000 (max. 8388607)
+ 504 compressed objects within 6 object streams
+ 162 named destinations out of 1000 (max. 500000)
+ 321 words of extra memory for PDF output out of 10000 (max. 10000000)
 

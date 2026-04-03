@@ -1,29 +1,29 @@
 \contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
-\contentsline {subsection}{\numberline {1.1}Contributions}{2}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.1}Contributions}{3}{subsection.1.1}%
 \contentsline {subsection}{\numberline {1.2}What This Paper Is Not}{3}{subsection.1.2}%
 \contentsline {section}{\numberline {2}The Gram Matrix Framework}{3}{section.2}%
 \contentsline {subsection}{\numberline {2.1}Definitions}{3}{subsection.2.1}%
-\contentsline {subsection}{\numberline {2.2}Positive Definiteness}{3}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.2}Positive Definiteness}{4}{subsection.2.2}%
 \contentsline {subsection}{\numberline {2.3}The Eigenvalue Drop Framework}{4}{subsection.2.3}%
 \contentsline {section}{\numberline {3}The Octonionic Fano Sieve}{4}{section.3}%
 \contentsline {subsection}{\numberline {3.1}The Eight-Class Partition}{4}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}The Weight Matrix and Block Decomposition}{4}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.2}The Weight Matrix and Block Decomposition}{5}{subsection.3.2}%
 \contentsline {section}{\numberline {4}PT-Symmetry of the Gram Matrix}{5}{section.4}%
 \contentsline {subsection}{\numberline {4.1}The Liouville Parity Operator}{5}{subsection.4.1}%
 \contentsline {subsection}{\numberline {4.2}Formally Verified Algebraic Properties}{5}{subsection.4.2}%
-\contentsline {subsection}{\numberline {4.3}Parity Decomposition}{5}{subsection.4.3}%
+\contentsline {subsection}{\numberline {4.3}Parity Decomposition}{6}{subsection.4.3}%
 \contentsline {section}{\numberline {5}The Great Pivot: Why the Gap Must Close}{6}{section.5}%
 \contentsline {subsection}{\numberline {5.1}The Original Strategy}{6}{subsection.5.1}%
 \contentsline {subsection}{\numberline {5.2}The 1/N Counterexample}{6}{subsection.5.2}%
 \contentsline {subsection}{\numberline {5.3}The Scaling Evidence}{6}{subsection.5.3}%
-\contentsline {subsection}{\numberline {5.4}The Key Insight}{6}{subsection.5.4}%
+\contentsline {subsection}{\numberline {5.4}The Key Insight}{7}{subsection.5.4}%
 \contentsline {subsection}{\numberline {5.5}The New Architecture}{7}{subsection.5.5}%
 \contentsline {section}{\numberline {6}The Axiom Audit}{7}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Critical-Path Axioms}{7}{subsection.6.1}%
 \contentsline {subsection}{\numberline {6.2}Supporting Axioms}{8}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}Summary Statistics}{8}{subsection.6.3}%
-\contentsline {section}{\numberline {7}Lessons for AI-Assisted Formal Verification}{8}{section.7}%
-\contentsline {subsection}{\numberline {7.1}The Collaborative Architecture}{8}{subsection.7.1}%
+\contentsline {section}{\numberline {7}Lessons for AI-Assisted Formal Verification}{9}{section.7}%
+\contentsline {subsection}{\numberline {7.1}The Collaborative Architecture}{9}{subsection.7.1}%
 \contentsline {subsection}{\numberline {7.2}The Compiler as Epistemic Firewall}{9}{subsection.7.2}%
 \contentsline {subsection}{\numberline {7.3}Axiom Honesty as Methodology}{9}{subsection.7.3}%
 \contentsline {subsection}{\numberline {7.4}Recommendations}{9}{subsection.7.4}%
@@ -37,3 +37,4 @@
 \contentsline {subsection}{\numberline {9.4}The Three Gaps: Honest Assessment}{12}{subsection.9.4}%
 \contentsline {subsection}{\numberline {9.5}Formalization Roadmap}{13}{subsection.9.5}%
 \contentsline {subsection}{\numberline {9.6}Research Directions: Beyond the Parity Barrier}{14}{subsection.9.6}%
+\contentsline {subsection}{\numberline {9.7}The Lean~4 Blueprint: BilinearSieve.lean}{14}{subsection.9.7}%

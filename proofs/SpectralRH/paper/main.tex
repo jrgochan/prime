@@ -1076,6 +1076,48 @@ the bilinear sieve bounds developed to break Selberg's parity barrier,
 providing a concrete --- if technically demanding --- path toward
 proving $R < 1$ analytically.
 
+\subsection{The Lean~4 Blueprint: BilinearSieve.lean}
+
+To make this research program machine-checkable, we have formalized
+its logical structure in a new Lean~4 file
+\texttt{SpectralRH/BilinearSieve.lean}. This file encodes the
+\emph{typed interface} between the proved linear algebra and the
+analytic number theory: four axioms state the exact analytical
+content that remains to be formalized, and a bridge theorem
+shows that these axioms suffice.
+
+\begin{enumerate}
+  \item \textbf{Vasyunin Expansion} (\lean{vasyunin\_expansion}, axiom):
+    The Gram entry $G_{jk} = 1/4 + \psi(j,k)$, where the correction
+    $|\psi| \leq 1/\gcd(j,k)$ is controlled by the divisor structure.
+
+  \item \textbf{Cross-Parity Bilinear Form}
+    (\lean{crossParityBilinear}, definition):
+    $S(u,v) = u^\top B v$, defined as a Lean function.
+    Pure linear algebra, no axioms.
+
+  \item \textbf{M\"obius Uncoupling} (\lean{moebius\_uncoupling}, axiom):
+    $S(u,v)$ decomposes over shared divisors into Type~I + Type~II
+    components via Vaughan's identity.
+
+  \item \textbf{Type~II Sieve Bound}
+    (\lean{type\_II\_sieve\_bound}, axiom):
+    $|S(u,v)|^2 \leq K^2 \cdot (u^\top A u)(v^\top C v)$
+    for some $K < 1$. This is the irreducible analytical content.
+
+  \item \textbf{Bridge Theorem}
+    (\lean{sieve\_implies\_stable\_ratio}, theorem):
+    The bilinear bound implies $R \leq K^2 < 1$. The proof uses
+    the variational characterization of the Schur complement:
+    $v^\top(BC^{-1}B^\top)v = \sup_w \{2v^\top Bw - w^\top Cw\}$,
+    optimized at $t^* = K\sqrt{v^\top Av}$, giving $R \leq K^2$.
+\end{enumerate}
+
+\noindent The bridge theorem is \textbf{pure linear algebra} and
+should be formalizable against Mathlib's matrix API. The four
+axioms represent precisely typed ``holes'' that the analytic number
+theory community can fill independently, with the Lean compiler
+guaranteeing that no hidden assumptions exist in the reduction.
 % ═══════════════════════════════════════════
 % BIBLIOGRAPHY
 % ═══════════════════════════════════════════
