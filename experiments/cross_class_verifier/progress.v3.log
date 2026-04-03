@@ -1,0 +1,21 @@
+═══════════════════════════════════════════════════════════
+  CROSS-CLASS VERIFIER v3 — Schur Bridge Analysis
+  Matrix: 60×60, Breakpoints: 500K
+═══════════════════════════════════════════════════════════
+
+[1] Computing Gram matrix...
+    Row 10/60
+    Row 20/60
+    Row 30/60
+    Row 40/60
+    Row 50/60
+    Row 60/60
+
+[2] Computing eigenvalues and bridge ratios...
+    N= 10: λ_min(G)=0.03197610 λ_min(G^𝕆)=0.03247205 ratio=0.9847
+    N= 20: λ_min(G)=0.02278025 λ_min(G^𝕆)=0.02450997 ratio=0.9294
+    N= 30: λ_min(G)=0.01990314 λ_min(G^𝕆)=0.02119925 ratio=0.9389
+    N= 40: λ_min(G)=0.01857612 λ_min(G^𝕆)=0.01994048 ratio=0.9316
+    N= 50: λ_min(G)=0.01801150 λ_min(G^𝕆)=0.01911894 ratio=0.9421
+    N= 60: λ_min(G)=0.01675456 λ_min(G^𝕆)=0.01804260 ratio=0.9286
+    N= 61: λ_min(G)=0.01675452 λ_min(G^𝕆)=0.01804260 ratio=0.9286

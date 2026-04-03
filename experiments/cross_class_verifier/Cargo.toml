@@ -1,0 +1,8 @@
+[package]
+name = "cross-class-verifier"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "cross-class-verifier"
+path = "src/main.rs"
