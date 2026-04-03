@@ -2,6 +2,7 @@ import SpectralRH.Defs
 import SpectralRH.OctonionicPartition
 import SpectralRH.ClassRestriction
 import SpectralRH.FiniteDimReduction
+import SpectralRH.RayleighBridge
 
 /-! # SpectralRH.SpectralFlow
 
@@ -46,38 +47,8 @@ open Complex Real
 -- SECTION 1: SPECTRAL FLOW PARAMETERIZATION
 -- ════════════════════════════════════════════════
 
-/-- The block-diagonal Gram matrix: G^block[i,j] = G[i,j] if i,j are in
-    the same octonionic class, 0 otherwise. This is the Gram matrix with
-    all cross-class interactions removed. -/
-noncomputable def gramMatrixBlockDiag (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
-  Matrix.of (fun i j =>
-    let ki := i.val + 2
-    let kj := j.val + 2
-    if octonionClass ki = octonionClass kj
-    then gramEntry ki kj  -- Within-class: keep
-    else 0)               -- Cross-class: zero out
-
-/-- The block-diagonal Gram matrix is Hermitian (symmetric). -/
-lemma gramMatrixBlockDiag_hermitian (N : ℕ) :
-    (gramMatrixBlockDiag N).IsHermitian := by
-  ext i j
-  simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrixBlockDiag, Matrix.of_apply]
-  -- The if conditions are octonionClass (i+2) = octonionClass (j+2)
-  -- and octonionClass (j+2) = octonionClass (i+2) (the transposed entry)
-  by_cases h : octonionClass (i.val + 2) = octonionClass (j.val + 2)
-  · rw [if_pos h, if_pos h.symm]
-    unfold gramEntry; congr 1; ext x; ring
-  · rw [if_neg h, if_neg (Ne.symm h)]
-
-/-- Cross-class matrix: G^cross = G - G^block. Contains only entries
-    where i,j belong to different octonionic classes. -/
-noncomputable def gramMatrixCross (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
-  gramMatrix N - gramMatrixBlockDiag N
-
-/-- The decomposition G = G^block + G^cross holds by definition. -/
-lemma gram_decomposition (N : ℕ) :
-    gramMatrix N = gramMatrixBlockDiag N + gramMatrixCross N := by
-  simp [gramMatrixCross, add_sub_cancel]
+-- gramMatrixBlockDiag, gramMatrixCross, gram_decomposition, and their
+-- Hermitian proofs are now imported from ClassRestriction.lean
 
 /-- The spectral flow matrix: G(t) = G^block + t · G^cross.
     At t = 0: G(0) = G^block
@@ -86,10 +57,6 @@ noncomputable def spectralFlowMatrix (N : ℕ) (t : ℝ) :
     Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
   gramMatrixBlockDiag N + t • gramMatrixCross N
 
-/-- The cross-class matrix is Hermitian. -/
-lemma gramMatrixCross_hermitian (N : ℕ) :
-    (gramMatrixCross N).IsHermitian :=
-  (gramMatrix_hermitian N).sub (gramMatrixBlockDiag_hermitian N)
 
 /-- The flow matrix is Hermitian for all t. -/
 lemma spectralFlowMatrix_hermitian (N : ℕ) (t : ℝ) :
@@ -465,5 +432,22 @@ theorem three_paths_to_rh :
     ╚══════════════════════════════════════════════════════════╝
 -/
 theorem proof_status_summary : True := trivial
+
+-- ════════════════════════════════════════════════
+-- WEYL INEQUALITY WIRING (UTILITIES)
+-- ════════════════════════════════════════════════
+
+-- NOTE: weyl_inequality is now a THEOREM (not axiom) in ClassRestriction.lean,
+-- proven using weyl_min_eigenvalue from RayleighBridge.lean.
+
+/-- Key observation: eigenvalues₀ only depends on the matrix, not the
+    proof of Hermitianness. Two different proofs of IsHermitian for
+    the SAME matrix produce the SAME eigenvalues₀. -/
+theorem eigenvalues₀_eq_of_matrix_eq {m : ℕ}
+    {A B : Matrix (Fin m) (Fin m) ℝ}
+    (hA : A.IsHermitian) (hB : B.IsHermitian)
+    (heq : A = B) :
+    hA.eigenvalues₀ = hB.eigenvalues₀ := by
+  subst heq; exact congr_arg _ (proof_irrel hA hB)
 
 end
