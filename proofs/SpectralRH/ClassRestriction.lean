@@ -2,6 +2,7 @@ import SpectralRH.Defs
 import SpectralRH.OctonionicPartition
 import SpectralRH.Structural
 import SpectralRH.RayleighBridge
+import SpectralRH.Assembly
 
 /-! # SpectralRH.ClassRestriction
 
@@ -399,3 +400,260 @@ end
 -- AXIOM AUDIT: Show axioms used by alternative proof chain
 -- ════════════════════════════════════════════════
 #print axioms rh_from_octonionic_global
+
+-- ════════════════════════════════════════════════
+-- PROVING oct_gap_lower_bound FROM THE MAIN CHAIN
+-- ════════════════════════════════════════════════
+
+/-- **oct_gap_lower_bound is provable** (PROVEN from main chain):
+    Derives the uniform octonionic gap bound from:
+    1. hyperzeta: ∃ c > 0, ∀ N ≥ 2, c ≤ λ_min(G_N)
+    2. oct_gap_dominates: λ_min(G_N) ≤ λ_min(G^𝕆_N)
+
+    This means oct_gap_lower_bound need not be an independent axiom —
+    it follows from the main proof chain.
+
+    Note: This creates a dependency on the main chain's axioms
+    (liouville_cancellation, etc.), but it DOES prove the statement.
+    An independent proof purely from octonionic structure would be
+    stronger (see within_class_spectral_gap for a roadmap). -/
+theorem oct_gap_lower_bound_from_main_chain :
+    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 2 ≤ N → c ≤ lambdaMinOct N := by
+  obtain ⟨c, hc_pos, hc_bound⟩ := hyperzeta
+  exact ⟨c, hc_pos, fun N hN => le_trans (hc_bound N hN) (oct_gap_dominates N hN)⟩
+
+#print axioms oct_gap_lower_bound_from_main_chain
+
+-- ════════════════════════════════════════════════
+-- PROVING oct_gap_dominates (Rayleigh Quotient)
+-- ════════════════════════════════════════════════
+
+/-- Class-restricted vector: zero out components outside class m. -/
+noncomputable def classRestrict (N : ℕ) (m : Fin 8) (v : Fin (N - 1) → ℝ) :
+    Fin (N - 1) → ℝ :=
+  fun i => if octonionClass (i.val + 2) = m then v i else 0
+
+/-- The class restrictions partition the squared norm:
+    Σ_m ‖v_m‖² = ‖v‖² where v_m is v restricted to class m. -/
+lemma classRestrict_norm_partition (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∑ m : Fin 8,
+      dotProduct (classRestrict N m v) (classRestrict N m v) =
+    dotProduct v v := by
+  simp only [dotProduct, classRestrict]
+  rw [Finset.sum_comm]
+  apply Finset.sum_congr rfl
+  intro i _
+  -- Need: Σ_m (if class(i+2)=m then v_i else 0)² = v_i²
+  -- Exactly one m equals class(i+2), contributing v_i²
+  have key : ∀ m : Fin 8,
+    (if octonionClass (i.val + 2) = m then v i else 0) *
+    (if octonionClass (i.val + 2) = m then v i else 0) =
+    if octonionClass (i.val + 2) = m then v i * v i else 0 := by
+    intro m; by_cases h : octonionClass (i.val + 2) = m <;> simp [h]
+  simp_rw [key]
+  simp [Finset.sum_ite_eq']
+
+/-- The block-diagonal quadratic form decomposes over classes.
+    vᵀ G^{block} v = Σ_m (v_m)ᵀ G (v_m)
+
+    This is a purely algebraic identity: both sides expand to
+    Σ_{i,j : class(i)=class(j)} v_i · G[i,j] · v_j.
+    The LHS gets this from the if-clause in gramMatrixBlockDiag,
+    the RHS gets this from the zero-masking in classRestrict.
+
+    The proof is by pointwise equality of the double sum. -/
+lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    realQuadForm (gramMatrixBlockDiag N) v =
+    ∑ m : Fin 8, realQuadForm (gramMatrix N) (classRestrict N m v) := by
+  -- Expand dotProduct and mulVec explicitly
+  simp only [realQuadForm, dotProduct]
+  -- LHS = Σ_i v(i) * (gramMatrixBlockDiag N *ᵥ v)(i)
+  -- RHS = Σ_m Σ_i (classRestrict N m v)(i) * (gramMatrix N *ᵥ classRestrict N m v)(i)
+  -- Expand mulVec
+  simp only [Matrix.mulVec, gramMatrixBlockDiag, gramMatrix, Matrix.of_apply, classRestrict,
+    Finset.sum_apply]
+  -- Now both sides are explicit finite sums over Fin (N-1)
+  -- Swap Σ_m and Σ_i in RHS using Finset.sum_comm
+  rw [Finset.sum_comm]
+  -- Now: LHS = Σ_i v(i) * Σ_j (if ci=cj then G[i,j] else 0)
+  --      RHS = Σ_i Σ_m (if ci=m then vi else 0) * Σ_j G[i,j] * (if cj=m then vj else 0)
+  apply Finset.sum_congr rfl; intro i _
+  -- Goal for each i:
+  -- v i * (fun j => if ci=cj then G[i,j] else 0) ⬝ᵥ v =
+  -- Σ_x (if ci=x then vi else 0) * (fun j => G[i,j]) ⬝ᵥ classRestrict N x v
+  --
+  -- RHS: collapse the x-sum to the unique x = class(i+2)
+  -- using Finset.sum_ite_eq'-like reasoning
+  have h_rhs : ∀ (f : Fin 8 → ℝ),
+    (∑ x : Fin 8, (if octonionClass (↑i + 2) = x then f x else 0)) =
+    f (octonionClass (↑i + 2)) := by
+    intro f; simp [Finset.sum_ite_eq']
+  -- Collapse the m-sum: only m = class(i+2) contributes
+  rw [show (∑ x : Fin 8,
+      (if octonionClass (↑i + 2) = x then v i else 0) *
+      (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ classRestrict N x v) =
+    v i * (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
+      classRestrict N (octonionClass (↑i + 2)) v from by
+    rw [show v i * (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
+        classRestrict N (octonionClass (↑i + 2)) v =
+      (if octonionClass (↑i + 2) = octonionClass (↑i + 2) then v i else 0) *
+        (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
+        classRestrict N (octonionClass (↑i + 2)) v from by simp]
+    rw [← h_rhs (fun x =>
+      (if octonionClass (↑i + 2) = x then v i else 0) *
+      (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ classRestrict N x v)]
+    apply Finset.sum_congr rfl; intro m _
+    by_cases hm : octonionClass (↑i + 2) = m <;> simp [hm]]
+  -- Now goal: v i * (if_row) ⬝ᵥ v = v i * G_row ⬝ᵥ classRestrict N (class i) v
+  -- Factor out v i and show dotProducts are equal
+  congr 1
+  -- Goal: (fun j => if ci=cj then G[i,j] else 0) ⬝ᵥ v =
+  --       (fun j => G[i,j]) ⬝ᵥ classRestrict N (class(i+2)) v
+  simp only [dotProduct, classRestrict]
+  -- Σ_j (if ci=cj then G[i,j] else 0) * v(j) = Σ_j G[i,j] * (if ci=cj then v(j) else 0)
+  apply Finset.sum_congr rfl; intro j _
+  by_cases h : octonionClass (↑i + 2) = octonionClass (↑j + 2)
+  · -- Same class: (if ci=cj then G else 0) * vj = G * (if cj=ci then vj else 0)
+    simp only [if_pos h, if_pos h.symm]
+  · -- Different class: 0 * vj = G * 0
+    simp only [if_neg h, if_neg (Ne.symm h), zero_mul, mul_zero]
+
+/-- Rayleigh quotient bound for arbitrary (non-unit) vectors:
+    λ_min(A) · ‖v‖² ≤ vᵀ A v for any v (including v = 0).
+    For v = 0, both sides are 0.
+    For v ≠ 0, proved by the positive definite Rayleigh characterization. -/
+lemma min_eigenvalue_le_quadForm_scaled
+    {n : ℕ} {A : Matrix (Fin n) (Fin n) ℝ} (hA : A.IsHermitian)
+    (v : Fin n → ℝ) (hv : v ≠ 0) (hn : 0 < n) :
+    (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀ * dotProduct v v
+    ≤ realQuadForm A v := by
+  -- Strategy: use the spectral decomposition directly.
+  -- vᵀ A v = Σ_k λ_k ⟨e_k, v⟩²  (spectral expansion)
+  -- ≥ λ_min · Σ_k ⟨e_k, v⟩²      (each λ_k ≥ λ_min)
+  -- = λ_min · ‖v‖²                (Parseval)
+  -- = λ_min · dotProduct v v
+  --
+  -- This mirrors the proof of min_eigenvalue_le_quadForm but for
+  -- non-unit vectors, keeping ‖v‖² explicit instead of using ‖v‖=1.
+  set b := hA.eigenvectorBasis with hb_def
+  set ev := hA.eigenvalues with hev_def
+  set lmin := (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+    (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+    hA.eigenvalues₀ with hlmin_def
+  -- Each eigenvalue ≥ lmin
+  have h_inf_le : ∀ i : Fin n, lmin ≤ ev i := by
+    intro i; show _ ≤ hA.eigenvalues i
+    simp only [Matrix.IsHermitian.eigenvalues]
+    exact Finset.inf'_le _ (Finset.mem_univ _)
+  -- The spectral expansion for non-unit vectors
+  set v' := WithLp.toLp (p := 2) v with hv'_def
+  -- xᵀ A x = Σ λᵢ ⟨eᵢ, x⟩² (same expansion as min_eigenvalue_le_quadForm)
+  have h_expand : realQuadForm A v =
+      ∑ i, ev i * (@inner ℝ _ _ (b i) v') ^ 2 := by
+    -- Step 1: realQuadForm A v = ⟪v', A·v'⟫
+    have hqf_inner : realQuadForm A v =
+        @inner ℝ (EuclideanSpace ℝ (Fin n)) _ v' (WithLp.toLp 2 (A.mulVec v)) := by
+      unfold realQuadForm; exact (inner_eq_dotProduct v (A.mulVec v)).symm
+    have hS := Matrix.isHermitian_iff_isSymmetric.mp hA
+    -- Step 2: ⟪eᵢ, A·v'⟫ = λᵢ · ⟪eᵢ, v'⟫
+    have h_eig_inner : ∀ i : Fin n,
+        @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v)) =
+        ev i * @inner ℝ _ _ (b i) v' := by
+      intro i
+      have h_eigvec : Matrix.toEuclideanLin A (b i) = ev i • (b i) := by
+        simp only [Matrix.toEuclideanLin, Matrix.toLpLin_apply, hev_def, hb_def]
+        rw [hA.mulVec_eigenvectorBasis i]; simp [WithLp.toLp_smul]
+      calc @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v))
+          = @inner ℝ _ _ (b i) (Matrix.toEuclideanLin A v') := rfl
+        _ = @inner ℝ _ _ (Matrix.toEuclideanLin A (b i)) v' := (hS (b i) v').symm
+        _ = @inner ℝ _ _ (ev i • (b i)) v' := by rw [h_eigvec]
+        _ = ev i * @inner ℝ _ _ (b i) v' := by rw [inner_smul_left]; simp
+    -- Step 3: Resolution of identity + combine
+    have h_res : @inner ℝ _ _ v' (WithLp.toLp 2 (A.mulVec v)) =
+        ∑ i, @inner ℝ _ _ v' (b i) * (ev i * @inner ℝ _ _ (b i) v') := by
+      conv_lhs => rw [show @inner ℝ _ _ v' (WithLp.toLp 2 (A.mulVec v)) =
+        ∑ i, @inner ℝ _ _ v' (b i) *
+          @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v))
+        from (b.sum_inner_mul_inner v' (WithLp.toLp 2 (A.mulVec v))).symm]
+      congr 1; ext i; rw [h_eig_inner i]
+    rw [hqf_inner, h_res]
+    -- Goal: Σ ⟪v', eᵢ⟫ * (λᵢ * ⟪eᵢ, v'⟫) = Σ λᵢ * ⟨eᵢ, v'⟩²
+    have h_comm : ∀ i : Fin n,
+        @inner ℝ _ _ v' (b i) = @inner ℝ _ _ (b i) v' := by
+      intro i; exact (real_inner_comm v' (b i)).symm
+    simp_rw [h_comm]
+    congr 1; ext i; ring
+  -- Parseval for non-unit vectors: Σ ⟨eᵢ, v⟩² = ‖v‖²
+  have h_parseval : ∑ i : Fin n, @inner ℝ _ _ (b i) v' ^ 2 =
+      dotProduct v v := by
+    have hp := b.sum_sq_inner_right v'
+    -- hp : Σ ⟨eᵢ, v'⟩² = ‖v'‖ ^ 2
+    -- Need to show ‖v'‖ ^ 2 = dotProduct v v
+    calc ∑ i : Fin n, @inner ℝ _ _ (b i) v' ^ 2
+        = ‖v'‖ ^ 2 := hp
+      _ = @inner ℝ (EuclideanSpace ℝ (Fin n)) _ v' v' := by
+            rw [real_inner_self_eq_norm_sq]
+      _ = dotProduct v v := inner_eq_dotProduct v v
+  rw [h_expand]
+  -- Goal: lmin * dotProduct v v ≤ Σ λᵢ ⟨eᵢ, v'⟩²
+  rw [← h_parseval]
+  -- Goal: lmin * Σ ⟨eᵢ,v'⟩² ≤ Σ λᵢ ⟨eᵢ,v'⟩²
+  rw [Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro i _
+  exact mul_le_mul_of_nonneg_right (h_inf_le i) (sq_nonneg _)
+
+/-- **oct_gap_dominates is provable** (via Rayleigh quotient):
+    λ_min(G) ≤ λ_min(G^{block}) because the block-diagonal form
+    restricts to within-class contributions, each bounded below
+    by the full Rayleigh quotient.
+
+    Proof: For any eigenvector eⱼ of G^{block} with eigenvalue λⱼ:
+      λⱼ = eⱼᵀ G^{block} eⱼ = Σ_m (eⱼ_m)ᵀ G (eⱼ_m)
+         ≥ Σ_m λ_min(G) · ‖eⱼ_m‖² = λ_min(G) · ‖eⱼ‖² = λ_min(G)
+
+    Therefore every eigenvalue of G^{block} ≥ λ_min(G),
+    so λ_min(G^{block}) ≥ λ_min(G). -/
+theorem oct_gap_dominates_proof (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin N ≤ lambdaMinBlock N := by
+  unfold lambdaMin lambdaMinBlock
+  simp only [show N ≥ 2 from hN, dite_true]
+  have h_pos : 0 < N - 1 := by omega
+  apply Finset.le_inf'
+  intro j _
+  have h_in_range : (gramMatrixBlockDiag_hermitian N).eigenvalues₀ j ∈
+      Set.range (gramMatrixBlockDiag_hermitian N).eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues; simp only [Set.mem_range]
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j, by simp [Equiv.symm_apply_apply]⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi, ← quadForm_eigenvector (gramMatrixBlockDiag_hermitian N) i]
+  set ei := ⇑((gramMatrixBlockDiag_hermitian N).eigenvectorBasis i) with hei_def
+  have h_unit : ‖(WithLp.toLp 2 ei : EuclideanSpace ℝ (Fin (N - 1)))‖ = 1 :=
+    (gramMatrixBlockDiag_hermitian N).eigenvectorBasis.orthonormal.1 i
+  have h_dot_one : dotProduct ei ei = 1 := by
+    rw [← inner_eq_dotProduct]; simp [inner_self_eq_norm_sq_to_K, h_unit]
+  rw [blockDiag_quadForm_decomp]
+  set lmin := (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).inf'
+    (by rw [Fintype.card_fin]; exact ⟨⟨0, h_pos⟩, Finset.mem_univ _⟩)
+    (gramMatrix_hermitian N).eigenvalues₀ with hlmin_def
+  calc lmin = lmin * 1 := (mul_one _).symm
+    _ = lmin * dotProduct ei ei := by rw [h_dot_one]
+    _ = lmin * ∑ m : Fin 8,
+        dotProduct (classRestrict N m ei) (classRestrict N m ei) := by
+        rw [classRestrict_norm_partition]
+    _ = ∑ m : Fin 8, lmin *
+        dotProduct (classRestrict N m ei) (classRestrict N m ei) :=
+        Finset.mul_sum _ _ _
+    _ ≤ ∑ m : Fin 8,
+        realQuadForm (gramMatrix N) (classRestrict N m ei) := by
+        apply Finset.sum_le_sum
+        intro m _
+        by_cases hvm : classRestrict N m ei = 0
+        · simp [hvm, realQuadForm, dotProduct, Matrix.mulVec]
+        · exact min_eigenvalue_le_quadForm_scaled (gramMatrix_hermitian N)
+            (classRestrict N m ei) hvm h_pos
+
+#print axioms oct_gap_dominates_proof
+

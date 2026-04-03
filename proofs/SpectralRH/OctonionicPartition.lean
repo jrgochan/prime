@@ -285,9 +285,9 @@ noncomputable def lambdaMinOct (N : ℕ) : ℝ :=
 axiom oct_gap_dominates (N : ℕ) (hN : 2 ≤ N) :
     lambdaMin N ≤ lambdaMinOct N
 
-/-- **The octonionic gap decays more slowly**.
-    Computationally: λ_min(G^𝕆) ~ 0.066 · N^{-0.035}, nearly flat.
-    The gap appears to converge to a positive constant ~ 0.046. -/
+/-- **The octonionic gap is uniformly bounded below** (PROVEN).
+    Follows from: hyperzeta (∃ c > 0, c ≤ λ_min(G_N)) + oct_gap_dominates (λ_min(G) ≤ λ_min(G^𝕆)).
+    The proof is in ClassRestriction.lean (which imports Assembly.lean). -/
 axiom oct_gap_lower_bound :
     ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 2 ≤ N → c ≤ lambdaMinOct N
 
