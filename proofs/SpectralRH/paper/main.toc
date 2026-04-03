@@ -28,3 +28,8 @@
 \contentsline {subsection}{\numberline {7.3}Axiom Honesty as Methodology}{9}{subsection.7.3}%
 \contentsline {subsection}{\numberline {7.4}Recommendations}{9}{subsection.7.4}%
 \contentsline {section}{\numberline {8}Conclusion}{9}{section.8}%
+\contentsline {section}{\numberline {9}Future Work: The Discrete Lichnerowicz Path}{10}{section.9}%
+\contentsline {subsection}{\numberline {9.1}The Parity Block Decomposition}{10}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}The Schur Complement as Discrete Lichnerowicz Formula}{10}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}The Coprimality Curvature Bound}{11}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Formalization Roadmap}{11}{subsection.9.4}%

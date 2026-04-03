@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  3 APR 2026 14:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex 2026.3.1)  3 APR 2026 14:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1229,19 +1229,19 @@ mm/m/it/10.95 N[];  \OMS/lmsy/m/n/10.95 8 \OML/lmm/m/it/10.95 N \OMS/lmsy/m/n/1
 [7] [8]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10.95> not available
 (Font)              Font shape `T1/lmtt/b/n' tried instead on input line 708.
- [9] (./main.bbl) [10] (./main.aux)
+ [9] [10] (./main.bbl) [11] (./main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 1A6972A0BD205E2561A59C113508C5D5;5360.
+(rerunfilecheck)             Checksum: AA8652C226498D074CED41E1166D8EB5;6580.
  ) 
 Here is how much of TeX's memory you used:
- 12887 strings out of 469006
- 191116 string characters out of 5454814
- 690140 words of memory out of 5000000
- 41278 multiletter control sequences out of 15000+600000
+ 12906 strings out of 469006
+ 191368 string characters out of 5454814
+ 690215 words of memory out of 5000000
+ 41286 multiletter control sequences out of 15000+600000
  734470 words of font info for 113 fonts, out of 8000000 for 9000
  319 hyphenation exceptions out of 8191
  75i,11n,79p,541b,1241s stack positions out of 10000i,1000n,20000p,200000b,200000s
@@ -1264,10 +1264,10 @@ exlive/2026basic/texmf-dist/fonts/type1/public/lm/lmtk10.pfb></usr/local/texliv
 e/2026basic/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></usr/local/texlive/202
 6basic/texmf-dist/fonts/type1/public/lm/lmtt9.pfb></usr/local/texlive/2026basic
 /texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on main.pdf (10 pages, 429546 bytes).
+Output written on main.pdf (11 pages, 440612 bytes).
 PDF statistics:
- 443 PDF objects out of 1000 (max. 8388607)
- 381 compressed objects within 4 object streams
- 117 named destinations out of 1000 (max. 500000)
- 241 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 482 PDF objects out of 1000 (max. 8388607)
+ 418 compressed objects within 5 object streams
+ 128 named destinations out of 1000 (max. 500000)
+ 281 words of extra memory for PDF output out of 10000 (max. 10000000)
 
