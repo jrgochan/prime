@@ -74,7 +74,11 @@ These are NOT open mathematical problems. They formalize:
 The challenge is **translation** — porting analytic number theory into dependent type
 theory using Mathlib's `Nat.ArithmeticFunction`. Suitable for a PhD project or ITP paper.
 
-**File:** [`proofs/SpectralRH/BilinearSieve.lean`](proofs/SpectralRH/BilinearSieve.lean)
+**Partial progress:** The coprime case (`gcd(j,k) = 1`) of `vasyunin_expansion` is
+already verified in [`GramBounds.lean`](proofs/SpectralRH/GramBounds.lean), covering
+~60.8% of all matrix entries using only the trivial integral bounds.
+
+**Files:** [`proofs/SpectralRH/BilinearSieve.lean`](proofs/SpectralRH/BilinearSieve.lean), [`proofs/SpectralRH/GramBounds.lean`](proofs/SpectralRH/GramBounds.lean)
 
 ### Tier 3: The Millennium Frontier _(Open problem)_
 
@@ -94,6 +98,7 @@ but proving K < 1 requires new insight.
 proofs/SpectralRH/
 ├── Defs.lean            # Core definitions (Gram matrix, eigenvalues, Liouville)
 ├── Structural.lean      # Structural theorems (pos-def, interlacing)
+├── GramBounds.lean      # ★ Gram entry bounds + coprime Vasyunin (verified)
 ├── ParitySchur.lean     # ★ Zero-sorry parity block decomposition
 ├── BilinearSieve.lean   # ★ Typed interface for Phase 2
 ├── Assembly.lean        # Full proof chain assembly

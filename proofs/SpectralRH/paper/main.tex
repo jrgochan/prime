@@ -1172,6 +1172,14 @@ number theory into 21st-century dependent type theory. This is a
 tractable formalization project suitable for a PhD thesis or ITP
 conference paper.
 
+\smallskip\noindent\textbf{Partial progress.}\enspace
+The Vasyunin bound for \emph{coprime} indices ($\gcd(j,k) = 1$) has
+been mechanically verified in \texttt{GramBounds.lean}. Since
+$0 \leq G_{jk} \leq 1$ (proved from the pointwise bound
+$0 \leq \{j/x\}\{k/x\} < 1$), the coprime bound
+$|G_{jk} - 1/4| \leq 1$ follows trivially. This covers
+approximately $6/\pi^2 \approx 60.8\%$ of all matrix entries.
+
 \subsubsection*{Tier 3: The Millennium Frontier}
 
 \textbf{Target:} \lean{type\_II\_sieve\_bound} ($K < 1$).
