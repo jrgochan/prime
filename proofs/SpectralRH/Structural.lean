@@ -190,26 +190,28 @@ theorem gram_l2_identity (N : ℕ) (_ : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
   rw [quadForm_as_double_sum, integral_sq_as_double_sum]
 
-/-- **Sub-axiom 1 (Floor behavior above)**: On (n/(n+1), 1) with m ≤ n ≥ 2,
+/-- **fract_eq_sub** (PROVEN): On (n/(n+1), 1) with m ≤ n ≥ 2,
     the fractional part {m/x} = m/x - m.
-    Proof: x ∈ (n/(n+1), 1) implies m ≤ m/x < m+1, so ⌊m/x⌋ = m. -/
-axiom fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 2 ≤ n)
+
+    Proof: m/(m+1) ≤ n/(n+1) < x < 1 implies m ≤ m/x < m+1, so ⌊m/x⌋ = m.
+    Cross-multiplication: m(n+1) ≤ n(m+1) ↔ mn+m ≤ nm+n ↔ m ≤ n. -/
+theorem fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 2 ≤ n)
     {x : ℝ} (hx_lo : (n : ℝ) / (↑n + 1) < x) (hx_hi : x < 1) :
-    Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ)
-
-/-- **Sub-axiom 2 (Floor unchanged below)**: On (n/(n+2), n/(n+1))
-    with m < n ≥ 2, the fractional part {m/x} = m/x - m (same as above).
-    Proof: m < n implies m/(m+1) < n/(n+2) < x, so m ≤ m/x < m+1. -/
-axiom fract_eq_sub_below {n m : ℕ} (hm : m < n) (hn : 2 ≤ n)
-    {x : ℝ} (hx_lo : (n : ℝ) / (↑n + 2) < x) (hx_hi : x < (n : ℝ) / (↑n + 1)) :
-    Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ)
-
-/-- **Sub-axiom 3 (Floor jumped below)**: On (n/(n+2), n/(n+1)),
-    the fractional part {n/x} = n/x - (n+1) — the floor has increased.
-    Proof: x < n/(n+1) implies n/x > n+1, and x > n/(n+2) implies n/x < n+2. -/
-axiom fract_eq_sub_shifted {n : ℕ} (hn : 2 ≤ n)
-    {x : ℝ} (hx_lo : (n : ℝ) / (↑n + 2) < x) (hx_hi : x < (n : ℝ) / (↑n + 1)) :
-    Int.fract ((n : ℝ) / x) = (n : ℝ) / x - ((n : ℝ) + 1)
+    Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ) := by
+  have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n / (↑n + 1) by positivity]
+  have h1 : (m : ℝ) * x ≤ ↑m := by nlinarith
+  have hn_ineq : (↑n : ℝ) < x * (↑n + 1) :=
+    (div_lt_iff₀ (by positivity : (0:ℝ) < ↑n + 1)).mp hx_lo
+  have hm_cross : (m : ℝ) * (↑n + 1) ≤ ↑n * (↑m + 1) := by
+    have : (m : ℝ) ≤ ↑n := by exact_mod_cast hm
+    nlinarith
+  have h2 : ↑m < (↑m + 1) * x := by nlinarith
+  have h_floor : ⌊(m : ℝ) / x⌋ = (m : ℤ) := by
+    rw [Int.floor_eq_iff]
+    constructor
+    · push_cast; rw [le_div_iff₀ hx_pos]; linarith
+    · push_cast; rw [div_lt_iff₀ hx_pos]; linarith
+  simp only [Int.fract, h_floor]; push_cast; ring
 
 /-- On (n'/(n'+1), 1), nbLinComb = A·(1/x - 1) where A = Σ wᵢ(i+2). -/
 private lemma nbLinComb_eq_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
@@ -223,45 +225,28 @@ private lemma nbLinComb_eq_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
   · rw [fract_eq_sub h hn' hx_lo hx_hi]; field_simp
   · push_neg at h; rw [hw_zero ⟨i, hi⟩ h]; simp
 
-/-- On (n'/(n'+2), n'/(n'+1)), nbLinComb = -w_{j₀} when A = 0. -/
-private lemma nbLinComb_eq_neg (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (N - 1))
-    (hw_above : ∀ i : Fin (N - 1), j₀ < i → w i = 0)
-    (hA : (∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)) = 0)
-    (x : ℝ) (hx_lo : (↑(j₀.val + 2) : ℝ) / (↑(j₀.val + 2) + 2) < x)
-    (hx_hi : x < (↑(j₀.val + 2) : ℝ) / (↑(j₀.val + 2) + 1)) :
-    nbLinComb N w x = -(w j₀) := by
-  set n' := j₀.val + 2; have hn' : 2 ≤ n' := by omega
-  have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 2) by positivity]
-  unfold nbLinComb
-  have h_term : ∀ i : Fin (N - 1),
-      w i * Int.fract ((↑(i.val + 2) : ℝ) / x) =
-      w i * ((↑(i.val + 2) : ℝ) / x - ↑(i.val + 2)) +
-      if i = j₀ then -(w j₀) else 0 := by
-    intro ⟨i, hi⟩
-    by_cases hij : (⟨i, hi⟩ : Fin (N-1)) = j₀
-    · simp only [hij, ite_true]
-      have hi_eq : i = j₀.val := Fin.val_eq_of_eq hij
-      rw [show (↑(i + 2) : ℝ) = ↑n' from by subst hi_eq; simp [n']]
-      rw [fract_eq_sub_shifted hn' hx_lo hx_hi]; ring
-    · simp only [hij, ite_false, add_zero]
-      have hi_ne : i ≠ j₀.val := Fin.val_ne_of_ne hij
-      by_cases h : i + 2 < n'
-      · rw [fract_eq_sub_below (by exact_mod_cast h : (i + 2 : ℕ) < n') hn' hx_lo hx_hi]
-      · push_neg at h; have : n' < i + 2 := by omega
-        rw [hw_above ⟨i, hi⟩ (by simp only [Fin.lt_def]; omega)]; simp
-  simp_rw [h_term, Finset.sum_add_distrib]
-  have h1 : ∑ i : Fin (N - 1), w i * ((↑(i.val + 2) : ℝ) / x - ↑(i.val + 2)) =
-    (∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)) * (1/x - 1) := by
-    rw [Finset.sum_mul]; congr 1; ext i; field_simp
-  rw [h1, hA, zero_mul, zero_add, Finset.sum_ite_eq' Finset.univ j₀]; simp
+/-- **Sub-axiom (NB floor jump)**: When A = Σ wᵢ(i+2) = 0 and j₀ is the
+    largest index with w_{j₀} ≠ 0, there is an open subinterval of (0,1)
+    where nbLinComb ≡ -w_{j₀}.
 
-/-- **nbLinComb_nonzero_somewhere** (PROVEN from floor sub-axioms):
+    Proof sketch: As x decreases through n'/(n'+1) (where n' = j₀+2),
+    ⌊n'/x⌋ jumps from n' to n'+1, contributing -w_{j₀} to the sum.
+    Since A = 0 makes the remaining terms cancel, nbLinComb = -w_{j₀}
+    on a small interval just below n'/(n'+1), between any two consecutive
+    discontinuities of the fractional parts {m/x}. -/
+axiom nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (N - 1))
+    (hw_above : ∀ i : Fin (N - 1), j₀ < i → w i = 0)
+    (hA : (∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)) = 0) :
+    ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+    ∀ x, x ∈ Set.Ioo c d → nbLinComb N w x = -(w j₀)
+
+/-- **nbLinComb_nonzero_somewhere** (PROVEN from sub-axioms):
     If w ≠ 0, nbLinComb is nonzero on some open subinterval of (0,1).
 
     Proof: Let j₀ = max index with w_{j₀} ≠ 0, n' = j₀+2, A = Σ wᵢ(i+2).
-    Case A ≠ 0: On (n'/(n'+1), 1), nbLinComb = A(1/x-1) ≠ 0.
-    Case A = 0: On (n'/(n'+2), n'/(n'+1)), nbLinComb = -w_{j₀} ≠ 0. -/
-theorem nbLinComb_nonzero_somewhere (N : ℕ) (hN : 2 ≤ N)
+    Case A ≠ 0: On (n'/(n'+1), 1), nbLinComb = A(1/x-1) ≠ 0 (via fract_eq_sub).
+    Case A = 0: Via nbLinComb_neg_interval, constant -w_{j₀} ≠ 0 on some interval. -/
+theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
     (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     (∀ x, x ∈ Set.Ioo c d → nbLinComb N w x ≠ 0) := by
@@ -279,7 +264,6 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (hN : 2 ≤ N)
       (not_le.mpr hi)
   set n' := j₀.val + 2
   have hn' : 2 ≤ n' := by omega
-  have hn'N : n' ≤ N := by have := j₀.isLt; omega
   have hn'_pos : (0 : ℝ) < ↑n' := by exact_mod_cast show 0 < n' by omega
   set A := ∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)
   by_cases hA : A ≠ 0
@@ -290,18 +274,14 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (hN : 2 ≤ N)
     rw [nbLinComb_eq_affine N w n' hn'
       (fun i hi => hw_above i (by
         show j₀ < i
-        exact Fin.lt_iff_val_lt_val.mpr (by omega))) x hx_lo hx_hi]
+        exact Fin.lt_def.mpr (by omega))) x hx_lo hx_hi]
     exact mul_ne_zero hA (by
       have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 1) by positivity]
       linarith [show 1 < 1/x from by rw [one_div]; exact one_lt_inv_iff₀.mpr ⟨hx_pos, hx_hi⟩])
-  · -- CASE A = 0: nbLinComb = -w_{j₀} (constant) on (n'/(n'+2), n'/(n'+1))
+  · -- CASE A = 0: nbLinComb = -w_{j₀} ≠ 0 on some interval
     push_neg at hA
-    refine ⟨↑n' / (↑n' + 2), ↑n' / (↑n' + 1), le_of_lt (by positivity),
-      div_lt_div_of_pos_left hn'_pos (by positivity) (by linarith),
-      by rw [div_le_one (by linarith)]; linarith, ?_⟩
-    intro x ⟨hx_lo, hx_hi⟩
-    rw [nbLinComb_eq_neg N w j₀ hw_above hA x hx_lo hx_hi]
-    exact neg_ne_zero.mpr hwj₀
+    obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA
+    exact ⟨c, d, hc, hcd, hd, fun x hx => by rw [heq x hx]; exact neg_ne_zero.mpr hwj₀⟩
 
 /-- nbLinComb² is integrable on subintervals of [0,1]. -/
 private lemma nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
