@@ -743,14 +743,128 @@ bound. The formalization process itself produced three notable outcomes:
 
 The remaining challenge --- proving the distance scaling bound
 $d_N^2 \leq C/\!\log N$ --- is a quantitative problem in analytic
-number theory. Understanding how the Gram matrix inverse expands
-to approximate the indicator function, at the rate controlled by
-the octonionic block structure and the PT-symmetry decomposition,
-represents a concrete and well-defined research direction.
+number theory. The next section outlines a concrete path toward
+this goal.
 
 The complete Lean~4 source code (3{,}970 lines, 96 theorems,
 zero \texttt{sorry}) is available at
 \url{https://github.com/jrgochan/prime}.
+
+% ═══════════════════════════════════════════
+% SECTION 8: FUTURE WORK
+% ═══════════════════════════════════════════
+\section{Future Work: The Discrete Lichnerowicz Path}\label{sec:future}
+
+The PT-symmetry algebra of Section~\ref{sec:ptsymmetry} opens a
+concrete path toward proving the remaining axiom
+\lean{nb\_distance\_scaling}. We outline this here as a research
+program that reduces the infinite-dimensional analytic problem
+to a finite-dimensional curvature bound.
+
+\subsection{The Parity Block Decomposition}
+
+Since $\Parity^2 = I$, the parity operator has eigenvalues $\pm 1$.
+The eigenspaces
+\[
+  V_+ = \{v : \Parity v = v\}, \qquad V_- = \{v : \Parity v = -v\}
+\]
+are spanned by integers with even and odd numbers of prime factors,
+respectively. The corresponding projections are
+$\pi_\pm = \tfrac{1}{2}(I \pm \Parity)$.
+
+Because $\Parity \Geven \Parity = \Geven$ (parity conservation) and
+$\Parity \Godd \Parity = -\Godd$ (parity reversal), the Gram matrix
+takes block form relative to $V_+ \oplus V_-$:
+\[
+  \Gram = \begin{pmatrix} A & B \\ B^\top & C \end{pmatrix},
+\]
+where $A = \pi_+ \Gram \pi_+$ (even-even interactions),
+$C = \pi_- \Gram \pi_-$ (odd-odd interactions), and
+$B = \pi_+ \Gram \pi_-$ (cross-parity coupling from $\Godd$).
+
+\subsection{The Schur Complement as Discrete Lichnerowicz Formula}
+
+On a compact Riemannian spin manifold, the Lichnerowicz formula
+$D^2 = \nabla^*\nabla + \operatorname{scal}/4$ decomposes the square
+of the Dirac operator into a connection Laplacian plus a curvature
+term. The key consequence: if the scalar curvature is positive,
+$D$ has no zero eigenvalues (the Lichnerowicz vanishing theorem).
+
+In our discrete setting, the analogous decomposition arises from
+the Schur complement. Since $C > 0$ (the odd-parity block inherits
+positive definiteness from $\Gram$), we define the
+\emph{effective Hamiltonian}:
+\[
+  H_{\mathrm{eff}} \;=\;
+  \underbrace{A}_{\text{``Laplacian''}}
+  \;-\;
+  \underbrace{B\, C^{-1}\, B^\top}_{\text{``curvature correction''}}.
+\]
+
+By the standard Schur complement lemma:
+\begin{quote}
+\emph{$\Gram > 0$ if and only if $C > 0$ and $H_{\mathrm{eff}} > 0$.}
+\end{quote}
+
+Since $\Gram > 0$ (our \lean{gram\_pos\_def} theorem), we obtain
+$H_{\mathrm{eff}} > 0$ for every finite $N$. The open question is
+how $\lmin(H_{\mathrm{eff}})$ scales with $N$, which determines
+$d_N^2$.
+
+\subsection{The Coprimality Curvature Bound}
+
+The cross-parity coupling $B$ is controlled by the number theory of
+the Gram entries $G_{jk}$ where $j$ has even $\Omega(j)$ and $k$ has
+odd $\Omega(k)$. These entries involve the integral
+$\int_0^1 \{j/x\}\{k/x\}\,dx$, whose Fourier expansion yields
+coefficients scaled by $1/\pi$:
+\[
+  \{y\} = \tfrac{1}{2} - \frac{1}{\pi}\sum_{m=1}^{\infty}
+  \frac{\sin(2\pi m y)}{m}.
+\]
+
+The macroscopic density of the cross-correlations is governed by
+the probability of coprimality:
+$\Pr(\gcd(j,k) = 1) = 6/\pi^2 \approx 0.608$.
+This acts as an \emph{endogenous positive scalar curvature}: the
+cross-parity coupling $B$ is suppressed relative to the diagonal
+blocks $A$ and $C$ by a factor controlled by $6/\pi^2$.
+
+If the interference ratio $R = \|BC^{-1}B^\top\|/\|A\|$ can be shown
+to satisfy $R < 1$ uniformly (our \lean{stable\_ratio} axiom,
+computationally verified at $R \approx 0.924$), this would
+give $H_{\mathrm{eff}} > 0$ with controlled eigenvalues, yielding
+the distance scaling bound.
+
+\subsection{Formalization Roadmap}
+
+The reduction from \lean{nb\_distance\_scaling} to the curvature
+bound decomposes into five steps:
+
+\begin{enumerate}
+  \item \textbf{Parity eigenspaces}: Define $V_+$, $V_-$, $\pi_\pm$
+    from $\Parity$. \emph{(Pure linear algebra.)}
+
+  \item \textbf{Block form}: Express $\Gram$ in block form $[A, B; B^\top, C]$
+    relative to the parity decomposition. \emph{(Pure linear algebra.)}
+
+  \item \textbf{Schur complement}: Define $H_{\mathrm{eff}} = A - BC^{-1}B^\top$.
+    \emph{(Pure linear algebra.)}
+
+  \item \textbf{Schur positivity lemma}: Prove that $\Gram > 0$
+    implies $H_{\mathrm{eff}} > 0$ (and vice versa, given $C > 0$).
+    \emph{(Standard textbook linear algebra.)}
+
+  \item \textbf{Curvature bound}: Show $R < 1$ using the coprimality
+    density $6/\pi^2$ and the octonionic block structure.
+    \emph{(Number theory enters here.)}
+\end{enumerate}
+
+Steps 1--4 are pure linear algebra and are immediate targets for
+Lean~4 formalization. Step~5 is the irreducible number-theoretic
+content, which we believe can be attacked using the Fano plane
+partition (Section~\ref{sec:octonion}) to decompose $B$ into eight
+independent block contributions.
 
 % ═══════════════════════════════════════════
 % BIBLIOGRAPHY
