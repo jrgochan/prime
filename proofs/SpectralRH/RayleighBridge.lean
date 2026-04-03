@@ -261,5 +261,52 @@ theorem weyl_min_eigenvalue
   exact add_le_add
     (min_eigenvalue_le_quadForm hA _ h_unit hn)
     (min_eigenvalue_le_quadForm hB _ h_unit hn)
+-- ════════════════════════════════════════════════
+-- PART VI: POSITIVE DEFINITENESS → λ_min > 0
+-- ════════════════════════════════════════════════
+
+/-- If xᵀAx > 0 for all nonzero x, then λ_min(A) > 0.
+
+    Proof: Each eigenvalue λᵢ = vᵢᵀ A vᵢ where vᵢ is the i-th
+    eigenvector (a unit vector from the orthonormal eigenbasis).
+    Since vᵢ ≠ 0, the positive definiteness gives λᵢ > 0.
+    All eigenvalues positive ⟹ the minimum is positive.
+
+    This converts the algebraic notion of positive definiteness
+    (quadratic form > 0) to the spectral notion (all eigenvalues > 0). -/
+theorem pos_def_implies_min_eigenvalue_pos
+    {A : Matrix (Fin n) (Fin n) ℝ} (hA : A.IsHermitian) (hn : 0 < n)
+    (hpd : ∀ v : Fin n → ℝ, v ≠ 0 → 0 < realQuadForm A v) :
+    0 < (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀ := by
+  -- Show each eigenvalue₀ j is positive, then inf' is positive
+  rw [Finset.lt_inf'_iff]
+  intro j _
+  -- eigenvalues₀ j is an actual eigenvalue λᵢ for some i
+  -- eigenvalues j = eigenvalues₀ (equiv.symm j), so eigenvalues₀ is a reindexing
+  -- We'll go through eigenvalues (indexed by Fin n)
+  have h_in_range : hA.eigenvalues₀ j ∈ Set.range hA.eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    simp only [Set.mem_range]
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j,
+           by simp [Equiv.symm_apply_apply]⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi, ← quadForm_eigenvector hA i]
+  -- Goal: 0 < realQuadForm A (eigenvectorBasis i)
+  -- The eigenvector is nonzero (it has norm 1)
+  apply hpd
+  -- Show eigenvectorBasis i ≠ 0 (as a Fin n → ℝ)
+  -- The coercion ⇑ gives .ofLp : EuclideanSpace → (Fin n → ℝ)
+  intro h_zero
+  -- h_zero : ⇑(eigenvectorBasis i) = 0  (as Fin n → ℝ)
+  -- hv : ‖eigenvectorBasis i‖ = 1 (in EuclideanSpace)
+  have hv := hA.eigenvectorBasis.orthonormal.1 i
+  -- If the coercion to (Fin n → ℝ) is zero, then the EuclideanSpace element
+  -- has norm 0, contradicting ‖·‖ = 1
+  have : ‖hA.eigenvectorBasis i‖ = 0 := by
+    rw [EuclideanSpace.norm_eq]
+    simp [show (hA.eigenvectorBasis i).1 = (0 : Fin n → ℝ) from h_zero]
+  linarith
 
 end
