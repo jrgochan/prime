@@ -89,14 +89,51 @@ lemma spectralFlowMatrix_at_zero (N : ℕ) :
     spectralFlowMatrix N 0 = gramMatrixBlockDiag N := by
   simp [spectralFlowMatrix, zero_smul, add_zero]
 
-/-- **The full Gram matrix is positive semi-definite**.
+/-- **The full Gram matrix is positive semi-definite** (was axiom, now theorem).
     This follows from the integral representation:
     xᵀ G x = ∑_{j,k} xⱼ xₖ ∫₀¹ {j/t}{k/t} dt
            = ∫₀¹ (∑ⱼ xⱼ {j/t})² dt ≥ 0.
-    The key insight: gramEntry is an inner product in L²(0,1),
-    so the Gram matrix is PSD by definition. -/
-axiom gramMatrix_posSemidef :
-    ∀ N : ℕ, 2 ≤ N → (gramMatrix N).PosSemidef
+
+    Proved using gram_pos_def (strict positivity for v ≠ 0)
+    and trivial vanishing for v = 0. -/
+theorem gramMatrix_posSemidef :
+    ∀ N : ℕ, 2 ≤ N → (gramMatrix N).PosSemidef := by
+  intro N hN
+  constructor
+  · exact gramMatrix_hermitian N
+  · intro x
+    -- Need: 0 ≤ Σ_{i ∈ x.support} Σ_{j ∈ x.support} x_i * G_{i,j} * x_j
+    -- For ℝ, star = id. This is the quadratic form xᵀGx.
+    -- If x = 0 (as Finsupp), both sides are 0.
+    -- If x ≠ 0, then ⇑x ≠ 0 and gram_pos_def gives strict positivity.
+    by_cases hx : x = 0
+    · subst hx; simp
+    · -- x ≠ 0 as Finsupp, so ⇑x ≠ 0 as a function
+      have hv : (⇑x : Fin (N-1) → ℝ) ≠ 0 := by
+        intro h; apply hx; ext i; exact congr_fun h i
+      have hpos := gram_pos_def N hN (⇑x) hv
+      unfold realQuadForm dotProduct at hpos
+      -- hpos : 0 < Σ_i x(i) * (Σ_j G_{i,j} * x(j))
+      -- Goal: 0 ≤ x.sum (fun i xi => x.sum (fun j xj => star xi * G i j * xj))
+      -- These are the same sum (star = id for ℝ, and Finsupp.sum over support
+      -- equals Finset.univ.sum when the function is zero outside support)
+      have : x.sum (fun i xi => x.sum (fun j xj => star xi * (gramMatrix N) i j * xj)) =
+             ∑ i, ∑ j, x i * (gramMatrix N) i j * x j := by
+        rw [Finsupp.sum_of_support_subset _ (Finset.subset_univ _) _ (by intros; simp)]
+        congr 1; ext i
+        rw [Finsupp.sum_of_support_subset _ (Finset.subset_univ _) _ (by intros; simp [mul_comm])]
+        simp [star_trivial]
+      rw [this]
+      -- Now goal: 0 ≤ ∑ i, x i * G i j * x j summed over i,j
+      -- hpos has: 0 < ∑ i, x i * (G.mulVec x) i
+      -- G.mulVec x i = ∑ j, G i j * x j, so these are the same
+      simp_rw [show ∀ i : Fin (N-1), ∀ j : Fin (N-1),
+        x i * gramMatrix N i j * x j = x i * (gramMatrix N i j * x j) from
+        fun i j => by ring]
+      simp_rw [← Finset.mul_sum]
+      -- Now goal matches hpos
+      simp only [Matrix.mulVec, dotProduct] at hpos
+      linarith
 
 /-- **Block-diagonal Gram matrix is positive definite**.
     Decomposition: G^block is PD because

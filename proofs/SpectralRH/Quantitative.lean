@@ -46,15 +46,9 @@ theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
     linarith
   suffices h_eq : realQuadForm (gramMatrix (N + 1)) w = schurComplement N by
     rw [← h_eq]; exact gram_pos_def (N + 1) (by omega) w hw_ne
-  -- G is nonsingular (PD → det ≠ 0)
-  have h_det : G.det ≠ 0 := by
-    intro h_zero
-    rw [Matrix.exists_mulVec_eq_zero_iff.symm] at h_zero
-    obtain ⟨v, hv_ne, hv_ker⟩ := h_zero
-    have h_pos := gram_pos_def N hN v hv_ne
-    rw [realQuadForm, hv_ker, dotProduct_zero] at h_pos
-    exact lt_irrefl 0 h_pos
-  have h_unit : IsUnit G.det := isUnit_iff_ne_zero.mpr h_det
+  -- G is nonsingular (now extracted as a global theorem)
+  have h_det : G.det ≠ 0 := gramMatrix_det_ne_zero N hN
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN
   -- G.mulVec c = g (where c = G⁻¹g)
   have h_Gc : G.mulVec c = g := by
     rw [hc_def, Matrix.mulVec_mulVec,

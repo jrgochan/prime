@@ -578,6 +578,26 @@ theorem gram_positive_definite (N : ℕ) (hN : 2 ≤ N) : 0 < lambdaMin N := by
 theorem lambdaMin_pos (N : ℕ) (hN : 2 ≤ N) : 0 < lambdaMin N :=
   gram_positive_definite N hN
 
+/-- The determinant of the Gram matrix is strictly positive, hence non-zero.
+    This mathematically justifies the matrix inverses used in the Schur complement
+    and the Nyman-Beurling distance formula.
+
+    Proof: Suppose det(G) = 0. Then ∃ v ≠ 0 with G·v = 0.
+    But gram_pos_def says vᵀGv > 0, while vᵀ(Gv) = vᵀ0 = 0. Contradiction. -/
+theorem gramMatrix_det_ne_zero (N : ℕ) (hN : 2 ≤ N) :
+    (gramMatrix N).det ≠ 0 := by
+  intro h_zero
+  rw [Matrix.exists_mulVec_eq_zero_iff.symm] at h_zero
+  obtain ⟨v, hv_ne, hv_ker⟩ := h_zero
+  have h_pos := gram_pos_def N hN v hv_ne
+  rw [realQuadForm, hv_ker, dotProduct_zero] at h_pos
+  exact lt_irrefl 0 h_pos
+
+/-- Global IsUnit seal for the Gram matrix determinant. -/
+lemma gramMatrix_isUnit_det (N : ℕ) (hN : 2 ≤ N) :
+    IsUnit (gramMatrix N).det :=
+  isUnit_iff_ne_zero.mpr (gramMatrix_det_ne_zero N hN)
+
 /-- Telescoping: λ_min(G_N) = λ_min(G_{N₀}) - Σ_{k=N₀}^{N-1} δ_{k+1}
     This is a purely algebraic identity following from the definition
     eigenDrop (k+1) = lambdaMin k - lambdaMin (k+1). -/
