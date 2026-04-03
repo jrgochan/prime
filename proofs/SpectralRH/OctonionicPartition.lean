@@ -261,10 +261,7 @@ lemma gramMatrixOct_hermitian (N : ℕ) :
   funext i j
   simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrixOct, Matrix.of_apply]
   unfold octonionWeight Octonion.inner gramEntry
-  ring_nf
-  congr 1
-  · congr 1; ext k; ring
-  · congr 1; ext x; ring
+  simp only [mul_comm]
 
 /-- Minimum eigenvalue of the octonionic Gram matrix -/
 noncomputable def lambdaMinOct (N : ℕ) : ℝ :=

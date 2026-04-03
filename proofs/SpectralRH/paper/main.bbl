@@ -1,0 +1,29 @@
+\begin{thebibliography}{1}
+
+\bibitem{baez-duarte2003}
+Luis B{\'a}ez-Duarte.
+\newblock A strengthening of the {N}yman--{B}eurling criterion for the
+  {R}iemann hypothesis.
+\newblock {\em Atti della Accademia Nazionale dei Lincei. Classe di Scienze
+  Fisiche, Matematiche e Naturali. Rendiconti Lincei. Matematica e
+  Applicazioni}, 14(1):5--11, 2003.
+
+\bibitem{beurling1955}
+Arne Beurling.
+\newblock A closure problem related to the {R}iemann zeta-function.
+\newblock {\em Proceedings of the National Academy of Sciences},
+  41(5):312--314, 1955.
+
+\bibitem{nyman1950}
+Bertil Nyman.
+\newblock On the one-dimensional translation group and semi-group in certain
+  function spaces.
+\newblock {\em Thesis, Uppsala University}, 1950.
+
+\bibitem{lean4}
+{The Lean Community}.
+\newblock The {L}ean 4 theorem prover.
+\newblock \url{https://lean-lang.org}, 2024.
+\newblock Version 4.29.0.
+
+\end{thebibliography}
