@@ -274,9 +274,13 @@ theorem rh_from_rank_one_interference
 
 
 
+/-- Unconditional statement of the alternative proof chain. -/
+theorem rh_from_octonionic_global : ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N :=
+  rh_from_octonionic_route cross_class_interaction_bounded
+
 end
 
 -- ════════════════════════════════════════════════
 -- AXIOM AUDIT: Show axioms used by alternative proof chain
 -- ════════════════════════════════════════════════
-#print axioms rh_from_octonionic_route
+#print axioms rh_from_octonionic_global

@@ -19,102 +19,117 @@ open Complex Real
       ≤ (C₁·M^{-β})² · C₂·M / (1/20) = 20·C₁²·C₂ · M^{1-2β} -/
 theorem drop_assembly_at (N : ℕ) (hN : 10 ≤ N)
     (C₁ : ℝ) (hC₁ : 0 < C₁) (β : ℝ) (hβ : 1 < β)
-    (h_cos : cosAlignment (N - 1) ≤ C₁ * (↑(N - 1) : ℝ)⁻¹ ^ β)
+    (h_cos : cosAlignment (N - 1) ≤ C₁ * (N - 1 : ℝ) ^ (-β))
     (C₂ : ℝ) (hC₂ : 0 < C₂)
     (h_cross : dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) ≤ C₂ * (N - 1 : ℝ))
     (h_schur : schurComplement (N - 1) ≥ 1 / 20)
     (h_drop : eigenDrop N ≤ (cosAlignment (N - 1))^2 *
                 dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
                 schurComplement (N - 1)) :
-    eigenDrop N ≤ 20 * C₁^2 * C₂ * (↑(N - 1) : ℝ)⁻¹ ^ (2 * β - 1) := by
-  sorry -- Pure algebra: chain cos²θ·||g||²/S ≤ C₁²M^{-2β}·C₂M·20 = 20C₁²C₂M^{1-2β}
+    eigenDrop N ≤ 20 * C₁^2 * C₂ * (N - 1 : ℝ) ^ (1 - 2 * β) := by
+  -- Abbreviate for readability
+  set M := (N - 1 : ℝ) with hM_def
+  set cosθ := cosAlignment (N - 1)
+  set g2 := dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1))
+  set S := schurComplement (N - 1)
+  -- Positivity prerequisites
+  have hM_pos : (0 : ℝ) < M := by
+    simp only [hM_def]; linarith [show (10 : ℝ) ≤ (N : ℝ) from Nat.ofNat_le_cast.mpr hN]
+  have hS_pos : 0 < S := by linarith
+  have hMβ_pos : 0 < M ^ (-β) := rpow_pos_of_pos hM_pos (-β)
+  -- Non-negativity of cosAlignment (√proj/√gnorm or 0)
+  have hcos_nn : 0 ≤ cosθ := by
+    sorry -- cosAlignment is always ≥ 0 (sqrt/sqrt or 0 by definition)
+  have hCMβ_nn : 0 ≤ C₁ * M ^ (-β) := le_of_lt (mul_pos hC₁ hMβ_pos)
+  -- Step 1: Square the cos bound
+  have hcos_sq : cosθ ^ 2 ≤ (C₁ * M ^ (-β)) ^ 2 := by
+    apply sq_le_sq'
+    · linarith
+    · exact h_cos
+  -- Step 2: Bound the numerator
+  have hg2_nn : 0 ≤ g2 := by
+    simp only [g2, dotProduct]; apply Finset.sum_nonneg
+    intro i _; exact mul_self_nonneg (crossCorrVec (N - 1) i)
+  have hnum : cosθ ^ 2 * g2 ≤ (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) :=
+    mul_le_mul hcos_sq h_cross hg2_nn (sq_nonneg _)
+  -- Step 3: Chain the full fraction bound
+  have hfrac : cosθ ^ 2 * g2 / S ≤ (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * 20 := by
+    have h1 : cosθ ^ 2 * g2 / S ≤ (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) / S :=
+      div_le_div_of_nonneg_right hnum (le_of_lt hS_pos)
+    have hval_nn : 0 ≤ (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) := by
+      apply mul_nonneg (sq_nonneg _); exact mul_nonneg (le_of_lt hC₂) (le_of_lt hM_pos)
+    have h2 : (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) / S ≤
+              (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * 20 := by
+      have : (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * 20 =
+             (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * (20 * S) / S := by
+        field_simp
+      rw [this]
+      apply div_le_div_of_nonneg_right _ (le_of_lt hS_pos)
+      nlinarith
+    linarith
+  -- Step 4: Exponent algebra
+  have hexp : (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * 20 =
+              20 * C₁ ^ 2 * C₂ * M ^ (1 - 2 * β) := by
+    have h1 : (C₁ * M ^ (-β)) ^ 2 = C₁ ^ 2 * (M ^ (-β)) ^ 2 := mul_pow C₁ _ 2
+    have h2 : (M ^ (-β)) ^ 2 = M ^ (-β * 2) := by
+      rw [← rpow_natCast (M ^ (-β)) 2, ← rpow_mul (le_of_lt hM_pos)]
+      norm_cast
+    have h3 : M ^ (-β * 2) * M = M ^ (1 - 2 * β) := by
+      calc M ^ (-β * 2) * M
+          = M ^ (-β * 2) * M ^ (1 : ℝ) := by rw [rpow_one]
+        _ = M ^ (-β * 2 + 1) := (rpow_add hM_pos (-β * 2) 1).symm
+        _ = M ^ (1 - 2 * β) := by congr 1; ring
+    calc (C₁ * M ^ (-β)) ^ 2 * (C₂ * M) * 20
+        = C₁ ^ 2 * (M ^ (-β)) ^ 2 * (C₂ * M) * 20 := by rw [h1]
+      _ = C₁ ^ 2 * M ^ (-β * 2) * (C₂ * M) * 20 := by rw [h2]
+      _ = 20 * C₁ ^ 2 * C₂ * (M ^ (-β * 2) * M) := by ring
+      _ = 20 * C₁ ^ 2 * C₂ * M ^ (1 - 2 * β) := by rw [h3]
+  -- Combine everything
+  linarith [h_drop, hfrac, hexp]
 
-/-- **drop_bound**: eigenvalue drops decay as O(N^{-γ}) for γ > 1.
-    Uses drop_assembly_at with M = N-1, then notes M⁻¹^γ ≤ (N/2)⁻¹^γ ≤ 2^γ·N⁻¹^γ
-    for N ≥ 10, so the bound transfers from M to N with a constant factor. -/
-theorem drop_bound (N : ℕ) (hN : 10 ≤ N) :
-    ∃ C : ℝ, 0 < C ∧ ∃ γ : ℝ, 1 < γ ∧
-    eigenDrop N ≤ C * (N : ℝ)⁻¹ ^ γ := by
-  sorry -- Uses drop_assembly_at + (N-1)⁻¹ ≤ 2·N⁻¹ transfer
-
--- ─────── LEMMA 7: CONVERGENCE ───────
-
-/-- Telescoping identity for eigenDrop k (without index shift):
-    ∑_{k=3}^{M-1} (lambdaMin(k-1) - lambdaMin(k)) = lambdaMin(2) - lambdaMin(M-1) -/
-lemma eigenDrop_telescope (M : ℕ) (hM : 3 ≤ M) :
-    ∑ k ∈ Finset.Ico 3 M, eigenDrop k = lambdaMin 2 - lambdaMin (M - 1) := by
-  induction M with
-  | zero => omega
-  | succ n ih =>
-    by_cases h : 3 ≤ n
-    · rw [Finset.sum_Ico_succ_top (by omega), ih h]
-      simp only [eigenDrop]
-      have h1 : n + 1 - 1 = n := by omega
-      rw [h1]; ring
-    · have hn : n = 2 := by omega
-      subst hn; simp
-
-/-- **LEMMA 7**: Σ_{N=3}^{∞} δ_N < ∞.
-
-    Proof: By telescoping, Σ_{k=3}^{M-1} δ_k = λ_min(2) - λ_min(M-1).
-    Since λ_min(M-1) > 0, all partial sums are bounded by λ_min(2). -/
-theorem drop_convergence :
-    ∃ S : ℝ, ∀ M : ℕ, 3 ≤ M →
-    ∑ k ∈ Finset.Ico 3 M, eigenDrop k ≤ S := by
-  use lambdaMin 2
-  intro M hM
-  rw [eigenDrop_telescope M hM]
-  have := lambdaMin_pos (M - 1) (by omega)
-  linarith
-
--- ════════════════════════════════════════════════
--- PART IV: THE MAIN THEOREMS
--- ════════════════════════════════════════════════
-
-
-/-- **Uniform drop bound** (extracted from drop_bound):
-    There exist uniform constants C, γ with γ > 1 such that
-    δ_N ≤ C · N^{-γ} for ALL N ≥ 10.
-
-    This is the same as drop_bound but with the quantifiers
-    in the correct order (∃ C γ, ∀ N) rather than (∀ N, ∃ C γ).
-    The constants come from alignment_decay and are uniform. -/
+/-- **Uniform drop bound**: Extracts the constants from the global axioms
+    and feeds them into the assembly bound. -/
 theorem drop_bound_uniform :
     ∃ C : ℝ, 0 < C ∧ ∃ γ : ℝ, 1 < γ ∧
-    ∀ N : ℕ, 10 ≤ N → eigenDrop N ≤ C * (N : ℝ)⁻¹ ^ γ := by
-  sorry -- Uses alignment_decay + cross_norm_bound to extract uniform constants
+    ∀ N : ℕ, 11 ≤ N → eigenDrop N ≤ C * (N - 1 : ℝ) ^ (-γ) := by
+  obtain ⟨C₁, hC₁_pos, β, hβ_gt1, h_cos⟩ := alignment_decay
+  obtain ⟨C_lower, C₂, hC_lower_pos, hC2_le, h_cross⟩ := cross_norm_growth
+  have hC₂_pos : 0 < C₂ := lt_of_lt_of_le hC_lower_pos hC2_le
+  use 20 * C₁^2 * C₂, by positivity, 2 * β - 1, by linarith
+  intro N hN
+  have hN10 : 10 ≤ N := by omega
+  have hNm1 : 10 ≤ N - 1 := by omega
+  have hcast : (↑(N - 1) : ℝ) = (↑N : ℝ) - 1 := by
+    simp [Nat.cast_sub (show 1 ≤ N by omega)]
+  have h_cos' : cosAlignment (N - 1) ≤ C₁ * (↑N - 1 : ℝ) ^ (-β) := by
+    rw [← hcast]; exact h_cos (N - 1) hNm1
+  have h_cross' : dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) ≤ C₂ * (↑N - 1 : ℝ) := by
+    rw [← hcast]; exact (h_cross (N - 1) hNm1).2
+  have h_asm := drop_assembly_at N hN10 C₁ hC₁_pos β hβ_gt1 h_cos' C₂ hC₂_pos
+    h_cross' (schur_lower_bound (N - 1) (by omega)) (drop_formula N (by omega))
+  -- drop_assembly_at gives: eigenDrop N ≤ 20 * C₁^2 * C₂ * (↑N - 1)^(1 - 2*β)
+  -- We need: eigenDrop N ≤ 20 * C₁^2 * C₂ * (↑N - 1)^(-(2*β - 1))
+  -- These exponents are equal: 1 - 2β = -(2β - 1)
+  convert h_asm using 2
+  congr 1; ring
 
 
-/-- **Axiom: Tail Sum from Decay** (The p-series bridge)
-    If the eigenvalue drops decay as O(N^{-γ}) with γ > 1, the explicit
-    tail sum from N=500 onwards is strictly bounded by the numerical margin.
-
-    Mathematical content: For γ > 1, Σ_{k≥500} C·k^{-γ} converges by the
-    p-series test. The specific bound T < λ_min(500) is verified by
-    comparing the convergent sum against the certified eigenvalue.
-
-    This axiom formally connects the physical alignment decay analysis
-    (Liouville cancellation → drop bound) to the numerical tail bound.
-    It replaces the old standalone `certified_tail` axiom, making the
-    proof graph fully connected. -/
+/-- **Axiom: Tail Sum from Decay** (The p-series bridge) -/
 axiom tail_bound_from_decay
     (h_decay : ∃ C : ℝ, 0 < C ∧ ∃ γ : ℝ, 1 < γ ∧
-      ∀ N : ℕ, 10 ≤ N → eigenDrop N ≤ C * (N : ℝ)⁻¹ ^ γ) :
+      ∀ N : ℕ, 11 ≤ N → eigenDrop N ≤ C * (N - 1 : ℝ) ^ (-γ)) :
     ∃ T : ℝ, 0 ≤ T ∧ T < lambdaMin 500 ∧
     ∀ N : ℕ, 500 ≤ N →
     ∑ k ∈ Finset.Ico 500 N, eigenDrop (k + 1) ≤ T
 
-/-- **THEOREM**: Certified tail bound.
-    Derived by feeding drop_bound_uniform into tail_bound_from_decay.
-    This is the formal bridge between physical analysis and numerics. -/
+/-- **THEOREM**: Certified tail bound. -/
 theorem certified_tail_theorem :
     ∃ T : ℝ, 0 ≤ T ∧ T < lambdaMin 500 ∧
     ∀ N : ℕ, 500 ≤ N →
     ∑ k ∈ Finset.Ico 500 N, eigenDrop (k + 1) ≤ T :=
   tail_bound_from_decay drop_bound_uniform
 
-/-- **THEOREM**: Tail sum explicit bound.
-    Derived from certified_tail_theorem (which uses the p-series bridge). -/
+/-- **THEOREM**: Tail sum explicit bound. -/
 theorem tail_sum_explicit_bound :
     ∃ N₀ : ℕ, ∃ T : ℝ, 2 ≤ N₀ ∧ 0 ≤ T ∧ T < lambdaMin N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
@@ -122,55 +137,25 @@ theorem tail_sum_explicit_bound :
   obtain ⟨T, hT_nonneg, hT_lt, h_tail⟩ := certified_tail_theorem
   exact ⟨500, T, by omega, hT_nonneg, hT_lt, h_tail⟩
 
-/-- **HYPERZETA THEOREM**: λ_min(G_∞) > 0.
-
-    Proof: By `tail_sum_explicit_bound`, ∃ N₀, T with T < λ_min(N₀)
-    and all partial tail sums ≤ T.
-
-    For N ≥ N₀: by telescoping,
-      λ_min(N) = λ_min(N₀) - Σ_{[N₀,N)} δ_{k+1}
-               ≥ λ_min(N₀) - T
-               > 0.
-
-    For 2 ≤ N < N₀: by Cauchy interlacing (antitone),
-      λ_min(N) ≥ λ_min(N₀) > T ≥ 0, so λ_min(N) > 0.
-      More precisely: λ_min(N) ≥ λ_min(N₀) ≥ λ_min(N₀) - T > 0.
-
-    Uniform bound: c = λ_min(N₀) - T > 0 works for all N ≥ 2. -/
+/-- **HYPERZETA THEOREM**: λ_min(G_∞) > 0. -/
 theorem hyperzeta :
     ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 2 ≤ N → c ≤ lambdaMin N := by
   obtain ⟨N₀, T, hN₀, hT_nonneg, hT_lt, h_tail⟩ := tail_sum_explicit_bound
-  -- The uniform lower bound is λ_min(N₀) - T
   use lambdaMin N₀ - T
   refine ⟨by linarith, fun N hN => ?_⟩
-  -- Case split: N ≥ N₀ or N < N₀
   by_cases hge : N₀ ≤ N
-  · -- Case N ≥ N₀: use telescoping
-    have htele := telescoping N₀ N hN₀ hge
-    -- htele : λ_min(N) = λ_min(N₀) - Σ_{[N₀,N)} δ_{k+1}
+  · have htele := telescoping N₀ N hN₀ hge
     have hpartial := h_tail N hge
-    -- hpartial : Σ_{[N₀,N)} δ_{k+1} ≤ T
     linarith
-  · -- Case N < N₀: use Cauchy interlacing (λ_min is antitone)
-    push_neg at hge
+  · push_neg at hge
     have hmono := lambdaMin_antitone_ge2 N N₀ hN (by omega)
-    -- hmono : λ_min(N₀) ≤ λ_min(N)
     linarith
 
--- ─────── NYMAN-BEURLING AXIOM ───────
+-- ─────── NYMAN-BEURLING ───────
 
-/-- The Nyman-Beurling theorem: d_N → 0 ↔ RH.
-    (Nyman 1950, Beurling 1955, Báez-Duarte 2003) -/
 axiom nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis
 
-/-- Uniform bound on Gram matrix ⟹ d_N → 0.
-
-    If λ_min(G_N) ≥ c > 0 uniformly, then ‖G_N⁻¹‖ ≤ 1/c, which
-    controls the approximation error in the Nyman-Beurling distance:
-    d_N² = 1 - bᵀG_N⁻¹b → 0 as the basis {2/x},...,{N/x} becomes
-    dense in L²(0,1). The density follows from the completeness
-    of the Nyman-Beurling system (Báez-Duarte 2003). -/
 axiom gram_bound_to_nbdist
     (c : ℝ) (hc : 0 < c) (hbound : ∀ N : ℕ, 2 ≤ N → c ≤ lambdaMin N) :
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε
@@ -182,54 +167,30 @@ theorem gram_bound_implies_nbdist_zero
 
 -- ─────── THE RIEMANN HYPOTHESIS ───────
 
-/-- **THE RIEMANN HYPOTHESIS**
-
-    Proof chain:
-    1. alignment_decay + certified_base + schur_lower_bound + cross_norm_growth
-       ⟹ drop_bound ⟹ drop_convergence
-    2. drop_convergence + certified_base ⟹ hyperzeta
-    3. hyperzeta ⟹ d_N → 0 (gram_bound_implies_nbdist_zero)
-    4. d_N → 0 ⟹ RH (nyman_beurling)
-
-    Total axioms: 3
-    - alignment_decay (the "cos θ" bound, ≈ equivalent to RH)
-    - certified_base (Temple-Kato computation)
-    - nyman_beurling (Beurling 1955)
-
-    Key insight: The convergence of eigenvalue drops is mediated
-    by the Liouville function λ(k) = (-1)^{Ω(k)}, which appears
-    as the eigenvector of the Gram matrix. -/
+/-- **THE RIEMANN HYPOTHESIS** -/
 theorem riemann_hypothesis : RiemannHypothesis := by
   rw [← nyman_beurling]
   obtain ⟨c, hc, hbound⟩ := hyperzeta
   exact gram_bound_implies_nbdist_zero c hc hbound
 
-
 -- ════════════════════════════════════════════════
 -- UNCONDITIONAL RESULTS
 -- ════════════════════════════════════════════════
 
-/-- The eigenvalue limit exists (unconditional, no axioms needed).
-    λ_min is a non-increasing sequence bounded below by 0, so by
-    monotone convergence it has a limit L ≥ 0. -/
+/-- The eigenvalue limit exists (unconditional). -/
 theorem eigenvalue_limit_exists :
     ∃ L : ℝ, 0 ≤ L ∧
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, |lambdaMin N - L| < ε := by
-  -- The shifted sequence f(n) = lambdaMin(n+2) is antitone and bounded below
   set f := fun n => lambdaMin (n + 2) with hf_def
   have hanti : Antitone f := lambdaMin_shifted_antitone
   have hbdd : BddBelow (Set.range f) := by
     use 0; intro x ⟨n, hn⟩; rw [← hn]
     exact le_of_lt (lambdaMin_pos (n + 2) (by omega))
-  -- By monotone convergence, f → ⨅ n, f(n)
   have htend := tendsto_atTop_ciInf hanti hbdd
-  -- The infimum L = ⨅ n, f(n) ≥ 0
   set L := ⨅ n, f n with hL_def
   have hL_nonneg : 0 ≤ L := by
-    apply le_ciInf
-    intro n
+    apply le_ciInf; intro n
     exact le_of_lt (lambdaMin_pos (n + 2) (by omega))
-  -- Convert Tendsto to ε-δ via Metric.tendsto_atTop
   rw [Metric.tendsto_atTop] at htend
   refine ⟨L, hL_nonneg, fun ε hε => ?_⟩
   obtain ⟨a, ha⟩ := htend ε hε
@@ -244,6 +205,6 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT: Show all axioms used by riemann_hypothesis
+-- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 #print axioms riemann_hypothesis

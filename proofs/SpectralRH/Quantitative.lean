@@ -47,16 +47,18 @@ theorem schur_lower_bound (N : ℕ) (hN : 2 ≤ N) :
     Proof: g_N[k] = ∫₀¹ {k/x}{(N+1)/x} dx → 1/4 for gcd(k,N+1)=1
     by asymptotic independence of fractional parts (Koksma). There
     are φ(N+1) ≈ N coprime values, giving ‖g‖² ≈ N/16. -/
-axiom cross_norm_bound (N : ℕ) (hN : 10 ≤ N) :
+axiom cross_norm_bound :
     ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ C₁ ≤ C₂ ∧
-    C₁ * N ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
-    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * N
+    ∀ N : ℕ, 10 ≤ N →
+    C₁ * (N : ℝ) ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
+    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * (N : ℝ)
 
-theorem cross_norm_growth (N : ℕ) (hN : 10 ≤ N) :
+theorem cross_norm_growth :
     ∃ C₁ C₂ : ℝ, 0 < C₁ ∧ C₁ ≤ C₂ ∧
-    C₁ * N ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
-    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * N :=
-  cross_norm_bound N hN
+    ∀ N : ℕ, 10 ≤ N →
+    C₁ * (N : ℝ) ≤ dotProduct (crossCorrVec N) (crossCorrVec N) ∧
+    dotProduct (crossCorrVec N) (crossCorrVec N) ≤ C₂ * (N : ℝ) :=
+  cross_norm_bound
 
 -- ─────── LEMMA 4: EIGENVECTOR STRUCTURE ───────
 

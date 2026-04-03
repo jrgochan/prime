@@ -27,7 +27,7 @@ open Complex Real
     ⚠️  This axiom IS the Riemann Hypothesis in spectral form. ⚠️ -/
 axiom liouville_cancellation :
     ∃ C₂ : ℝ, 0 < C₂ ∧ ∃ β₂ : ℝ, 1 < β₂ ∧
-    ∀ N : ℕ, 10 ≤ N → cosAlignment N ≤ C₂ * (N : ℝ)⁻¹ ^ β₂
+    ∀ N : ℕ, 10 ≤ N → cosAlignment N ≤ C₂ * (N : ℝ) ^ (-β₂)
   -- Computationally: C₂ ≈ 0.11, β₂ ≈ 1.40
   -- Note: This is stronger than alignment_decay (β₂ > β)
   -- but has the same form. The decomposition's value is
@@ -43,7 +43,7 @@ axiom liouville_cancellation :
     independently via perturbation theory. -/
 theorem alignment_decay :
     ∃ C : ℝ, 0 < C ∧ ∃ β : ℝ, 1 < β ∧
-    ∀ N : ℕ, 10 ≤ N → cosAlignment N ≤ C * (N : ℝ)⁻¹ ^ β := by
+    ∀ N : ℕ, 10 ≤ N → cosAlignment N ≤ C * (N : ℝ) ^ (-β) := by
   obtain ⟨C₂, hC₂, β₂, hβ₂, h⟩ := liouville_cancellation
   exact ⟨C₂, hC₂, β₂, hβ₂, h⟩
 
