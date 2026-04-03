@@ -20,16 +20,18 @@
 \contentsline {subsection}{\numberline {5.5}The New Architecture}{7}{subsection.5.5}%
 \contentsline {section}{\numberline {6}The Axiom Audit}{7}{section.6}%
 \contentsline {subsection}{\numberline {6.1}Critical-Path Axioms}{7}{subsection.6.1}%
-\contentsline {subsection}{\numberline {6.2}Supporting Axioms}{7}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.2}Supporting Axioms}{8}{subsection.6.2}%
 \contentsline {subsection}{\numberline {6.3}Summary Statistics}{8}{subsection.6.3}%
 \contentsline {section}{\numberline {7}Lessons for AI-Assisted Formal Verification}{8}{section.7}%
 \contentsline {subsection}{\numberline {7.1}The Collaborative Architecture}{8}{subsection.7.1}%
 \contentsline {subsection}{\numberline {7.2}The Compiler as Epistemic Firewall}{9}{subsection.7.2}%
 \contentsline {subsection}{\numberline {7.3}Axiom Honesty as Methodology}{9}{subsection.7.3}%
 \contentsline {subsection}{\numberline {7.4}Recommendations}{9}{subsection.7.4}%
-\contentsline {section}{\numberline {8}Conclusion}{9}{section.8}%
-\contentsline {section}{\numberline {9}Future Work: The Discrete Lichnerowicz Path}{10}{section.9}%
-\contentsline {subsection}{\numberline {9.1}The Parity Block Decomposition}{10}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}The Schur Complement as Discrete Lichnerowicz Formula}{10}{subsection.9.2}%
-\contentsline {subsection}{\numberline {9.3}The Coprimality Curvature Bound}{11}{subsection.9.3}%
-\contentsline {subsection}{\numberline {9.4}Formalization Roadmap}{11}{subsection.9.4}%
+\contentsline {section}{\numberline {8}Conclusion}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}The Triage of Proof Paths}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}The Reduction to a Single Bound}{10}{subsection.8.2}%
+\contentsline {section}{\numberline {9}The Discrete Lichnerowicz Path: Formalization Status}{11}{section.9}%
+\contentsline {subsection}{\numberline {9.1}The Parity Block Decomposition (Proved)}{11}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}The Schur Complement Positivity (Proved)}{11}{subsection.9.2}%
+\contentsline {subsection}{\numberline {9.3}The Coprimality Curvature Bound (Open)}{12}{subsection.9.3}%
+\contentsline {subsection}{\numberline {9.4}Formalization Roadmap}{12}{subsection.9.4}%
