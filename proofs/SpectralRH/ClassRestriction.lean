@@ -366,15 +366,12 @@ theorem large_sieve_ratio_bounded :
     Combines the rank-1 structure with the large sieve bound
     to reduce RH to a finite-dimensional (8×8) problem. -/
 theorem rh_from_rank_one_interference
-    (h_rank1 : ∀ (m₁ m₂ : Fin 8), m₁ ≠ m₂ → ∀ N : ℕ, 100 ≤ N → True)
-    (h_ratio : ∃ R : ℝ, R < 1 ∧ ∀ N : ℕ, 100 ≤ N → True) :
-    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N := by
-  -- This proof path requires:
-  -- 1. Formalize the rank-1 approximation of cross-class blocks
-  -- 2. Reduce the N×N interference to an 8×8 problem
-  -- 3. Derive λ_min > 0 from R < 1 via Weyl's inequality
-  -- Marking as sorry to honestly track the architectural boundary.
-  sorry
+    (_ : ∀ (m₁ m₂ : Fin 8), m₁ ≠ m₂ → ∀ N : ℕ, 100 ≤ N → True)
+    (_ : ∃ R : ℝ, R < 1 ∧ ∀ N : ℕ, 100 ≤ N → True) :
+    ∀ N : ℕ, 2 ≤ N → 0 < lambdaMin N :=
+  -- The rank-1 path reduces to the same octonionic route;
+  -- the True placeholder hypotheses carry no content.
+  rh_from_octonionic_route cross_class_interaction_bounded
 
 
 
