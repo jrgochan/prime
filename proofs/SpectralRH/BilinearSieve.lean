@@ -333,7 +333,7 @@ theorem sieve_implies_stable_ratio
   · -- CASE 2: C is singular ⟹ C⁻¹ = 0, so Q = 0
     have hC_inv_zero : C⁻¹ = 0 := Matrix.nonsing_inv_apply_not_isUnit C hdet
     have hQ_zero : Q = 0 := by
-      simp only [Q, B, C, hC_inv_zero, Matrix.zero_mul, Matrix.mul_zero,
+      simp only [Q, C, hC_inv_zero, Matrix.zero_mul, Matrix.mul_zero,
                  Matrix.zero_mulVec, dotProduct_zero]
     rw [hQ_zero]
     -- Goal: 0 ≤ K²·vᵀAv. Use parityBlockA_psd.
