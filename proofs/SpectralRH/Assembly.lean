@@ -39,7 +39,12 @@ theorem drop_assembly_at (N : ℕ) (hN : 10 ≤ N)
   have hMβ_pos : 0 < M ^ (-β) := rpow_pos_of_pos hM_pos (-β)
   -- Non-negativity of cosAlignment (√proj/√gnorm or 0)
   have hcos_nn : 0 ≤ cosθ := by
-    sorry -- cosAlignment is always ≥ 0 (sqrt/sqrt or 0 by definition)
+    dsimp only [cosθ]
+    unfold cosAlignment
+    split_ifs <;> first
+      | exact le_refl (0 : ℝ)
+      | exact div_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
+      | positivity
   have hCMβ_nn : 0 ≤ C₁ * M ^ (-β) := le_of_lt (mul_pos hC₁ hMβ_pos)
   -- Step 1: Square the cos bound
   have hcos_sq : cosθ ^ 2 ≤ (C₁ * M ^ (-β)) ^ 2 := by
