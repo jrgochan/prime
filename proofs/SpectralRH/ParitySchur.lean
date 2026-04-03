@@ -336,6 +336,68 @@ theorem schur_complement_pos_of_gram_pos (N : ℕ) (_hN : 2 ≤ N)
     exact (hGpsd.conjTranspose_mul_mul_same (parityProj_plus N)).dotProduct_mulVec_nonneg v
 
 -- ════════════════════════════════════════════════
+-- STEP 4b: PARITY BLOCK PSD (NO AXIOMS)
+-- ════════════════════════════════════════════════
+
+/-- Helper: The Gram matrix is positive semidefinite.
+    Bridges gram_pos_def (realQuadForm) to Mathlib's PosSemidef (Finsupp). -/
+theorem gramMatrix_posSemidef (N : ℕ) (hN : 2 ≤ N) :
+    (gramMatrix N).PosSemidef := by
+  apply Matrix.PosSemidef.of_dotProduct_mulVec_nonneg (gramMatrix_hermitian N)
+  intro x
+  simp only [star_trivial]
+  -- Need: 0 ≤ x ⬝ᵥ (gramMatrix N *ᵥ x) = realQuadForm (gramMatrix N) x
+  by_cases hx : x = 0
+  · simp [hx, Matrix.mulVec_zero, dotProduct_zero]
+  · exact le_of_lt (gram_pos_def N hN x hx)
+
+/-- **parityBlockA is PSD** (PROVEN): A = π₊Gπ₊ has nonneg quadratic form.
+
+    Proof: gramMatrix is PSD (from gram_pos_def). Then
+    π₊Gπ₊ = π₊ᴴGπ₊ (since π₊ is real symmetric), and
+    BᴴMB is PSD for PSD M by PosSemidef.conjTranspose_mul_mul_same. -/
+theorem parityBlockA_psd (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) :
+    0 ≤ dotProduct v ((parityBlockA N).mulVec v) := by
+  unfold parityBlockA
+  have hPpt : (parityProj_plus N)ᵀ = parityProj_plus N := by
+    unfold parityProj_plus parityOperator
+    ext i j
+    simp only [Matrix.transpose_apply, Matrix.smul_apply, smul_eq_mul,
+      Matrix.add_apply, Matrix.one_apply, Matrix.diagonal_apply]
+    split_ifs with h1 h2 h2 <;> simp_all
+  have hconj : (parityProj_plus N).conjTranspose = parityProj_plus N := by
+    ext i j
+    simp only [Matrix.conjTranspose_apply, star_trivial]
+    exact (congr_fun (congr_fun hPpt j) i).symm
+  rw [show parityProj_plus N * gramMatrix N * parityProj_plus N =
+      (parityProj_plus N).conjTranspose * gramMatrix N * parityProj_plus N from by
+    rw [hconj]]
+  exact ((gramMatrix_posSemidef N hN).conjTranspose_mul_mul_same
+    (parityProj_plus N)).dotProduct_mulVec_nonneg v
+
+/-- **parityBlockC is PSD** (PROVEN): C = π₋Gπ₋ has nonneg quadratic form.
+
+    Same proof as parityBlockA_psd but with π₋. -/
+theorem parityBlockC_psd (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) :
+    0 ≤ dotProduct v ((parityBlockC N).mulVec v) := by
+  unfold parityBlockC
+  have hPmt : (parityProj_minus N)ᵀ = parityProj_minus N := by
+    unfold parityProj_minus parityOperator
+    ext i j
+    simp only [Matrix.transpose_apply, Matrix.smul_apply, smul_eq_mul,
+      Matrix.sub_apply, Matrix.one_apply, Matrix.diagonal_apply]
+    split_ifs with h1 h2 h2 <;> simp_all
+  have hconj : (parityProj_minus N).conjTranspose = parityProj_minus N := by
+    ext i j
+    simp only [Matrix.conjTranspose_apply, star_trivial]
+    exact (congr_fun (congr_fun hPmt j) i).symm
+  rw [show parityProj_minus N * gramMatrix N * parityProj_minus N =
+      (parityProj_minus N).conjTranspose * gramMatrix N * parityProj_minus N from by
+    rw [hconj]]
+  exact ((gramMatrix_posSemidef N hN).conjTranspose_mul_mul_same
+    (parityProj_minus N)).dotProduct_mulVec_nonneg v
+
+-- ════════════════════════════════════════════════
 -- STEP 5: THE CURVATURE BOUND (NUMBER THEORY)
 -- ════════════════════════════════════════════════
 

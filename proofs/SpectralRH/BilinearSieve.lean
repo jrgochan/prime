@@ -174,39 +174,6 @@ axiom type_II_sieve_bound :
 -- STEP 5: THE BRIDGE THEOREM
 -- ════════════════════════════════════════════════
 
-/-- The Schur complement quadratic form has a variational characterization.
-
-    For positive definite C (det C ≠ 0):
-      vᵀ(B C⁻¹ Bᵀ)v = sup_w { 2·vᵀBw - wᵀCw }
-
-    This is the matrix analogue of "completing the square." The supremum
-    is achieved at w* = C⁻¹Bᵀv, giving value vᵀBC⁻¹Bᵀv.
-
-    For singular C (det C = 0): In Lean, C⁻¹ = 0, so BC⁻¹Bᵀ = 0
-    and the quadratic form is identically zero.
--/
-axiom schur_variational (N : ℕ) (hN : 10 ≤ N)
-    (v w : Fin (N - 1) → ℝ) :
-    dotProduct v ((parityBlockB N * (parityBlockC N)⁻¹ *
-      (parityBlockB N)ᵀ).mulVec v) ≥
-    2 * dotProduct v ((parityBlockB N).mulVec w) -
-      dotProduct w ((parityBlockC N).mulVec w)
-
-/-- **parityBlockA is PSD**: The even-parity diagonal block A = π₊Gπ₊
-    has nonneg quadratic form.
-
-    This follows from gram_pos_def (Structural.lean): G is positive definite,
-    so any principal submatrix (obtained by restricting to even-parity indices)
-    is positive semidefinite.
-
-    Equivalently: A = π₊ G π₊ where π₊ is a projection. For PD G and
-    any projection π: vᵀ(πGπ)v = (πv)ᵀG(πv) ≥ 0.
-
-    This can be proved from gram_pos_def by embedding even-parity vectors
-    into the full space and applying positive definiteness. -/
-axiom parityBlockA_psd (N : ℕ) (hN : 10 ≤ N) (v : Fin (N - 1) → ℝ) :
-    0 ≤ dotProduct v ((parityBlockA N).mulVec v)
-
 /-- **THEOREM**: The Type II sieve bound implies stable_ratio_parity.
 
     This is the BRIDGE between analytic number theory and the
@@ -249,29 +216,8 @@ theorem sieve_implies_stable_ratio
   -- Use R = K² as the interference ratio
   refine ⟨K ^ 2, sq_nonneg K, by nlinarith [sq_nonneg (1 - K)], ?_⟩
   intro N hN v _hv
-  -- The proof uses schur_variational as an upper bound.
-  -- For ANY w, schur_variational gives:
-  --   Q ≥ 2⟨v,Bw⟩ - ⟨w,Cw⟩
-  -- We need Q ≤ K²·vᵀAv. We show that for all w:
-  --   2⟨v,Bw⟩ - ⟨w,Cw⟩ ≤ K²·vᵀAv
-  -- which gives Q ≤ K²·vᵀAv since Q is the sup.
-  --
-  -- The algebraic argument: from the bilinear bound,
-  --   |⟨v,Bw⟩| ≤ K·√(vᵀAv)·√(wᵀCw)
-  -- So: 2⟨v,Bw⟩ ≤ 2K·√(vᵀAv)·√(wᵀCw)
-  -- Let t = √(wᵀCw). Then:
-  --   2⟨v,Bw⟩ - ⟨w,Cw⟩ ≤ 2K·√(vᵀAv)·t - t² ≤ K²·vᵀAv
-  -- (completing the square: 2at - t² = a² - (a-t)² ≤ a² where a = K·√(vᵀAv))
-  --
-  -- This proof uses schur_variational (axiom) plus the algebraic
-  -- identity 2st - t² ≤ s² for all s,t ∈ ℝ.
   set Q := dotProduct v ((parityBlockB N * (parityBlockC N)⁻¹ *
     (parityBlockB N)ᵀ).mulVec v)
-  -- Use schur_variational with w = 0 to show Q ≥ 0
-  have hQ_nn : Q ≥ 0 := by
-    have h0 := schur_variational N hN v 0
-    simp [Matrix.mulVec_zero, dotProduct_zero, mul_zero] at h0
-    exact h0
   -- Case split: is C invertible?
   set C := parityBlockC N
   set B := parityBlockB N
@@ -308,6 +254,10 @@ theorem sieve_implies_stable_ratio
       rw [dotProduct_mulVec v (parityBlockB N) ((parityBlockC N)⁻¹ *ᵥ ((parityBlockB N)ᵀ *ᵥ v))]
       rw [← mulVec_transpose (parityBlockB N) v]
       exact dotProduct_comm _ _
+    -- Q ≥ 0 since Q = wᵀCw and C is PSD (parityBlockC_psd from ParitySchur.lean)
+    have hQ_nn : Q ≥ 0 := by
+      rw [← hw_quad]
+      exact parityBlockC_psd N (by omega) w
     -- Now use the bilinear bound:
     -- Q² = (crossParityBilinear v w)² ≤ K² · (vᵀAv) · (wᵀCw) = K² · (vᵀAv) · Q
     have h_bilinear := h_bound N hN v w
@@ -320,9 +270,9 @@ theorem sieve_implies_stable_ratio
     -- From Q² ≤ K²·(vᵀAv)·Q and Q ≥ 0, conclude Q ≤ K²·vᵀAv.
     rcases eq_or_lt_of_le hQ_nn with hQ0 | hQ_pos
     · -- Q = 0, need Q ≤ K²·vᵀAv, i.e., 0 ≤ K²·vᵀAv
-      -- Use parityBlockA_psd: vᵀAv ≥ 0, so K²·vᵀAv ≥ 0
-      have hA_psd := parityBlockA_psd N hN v
-      linarith [sq_nonneg K, mul_nonneg (sq_nonneg K) hA_psd]
+      -- Use parityBlockA_psd (proved in ParitySchur.lean)
+      linarith [sq_nonneg K, mul_nonneg (sq_nonneg K)
+        (parityBlockA_psd N (by omega) v)]
     · -- Q > 0 ⟹ divide Q² ≤ K²·(vᵀAv)·Q by Q
       have hle : Q ≤ K ^ 2 * dotProduct v (A.mulVec v) := by
         have hQQ : Q * Q ≤ K ^ 2 * dotProduct v (A.mulVec v) * Q := by
@@ -336,8 +286,8 @@ theorem sieve_implies_stable_ratio
       simp only [Q, C, hC_inv_zero, Matrix.zero_mul, Matrix.mul_zero,
                  Matrix.zero_mulVec, dotProduct_zero]
     rw [hQ_zero]
-    -- Goal: 0 ≤ K²·vᵀAv. Use parityBlockA_psd.
-    exact mul_nonneg (sq_nonneg K) (parityBlockA_psd N hN v)
+    -- Goal: 0 ≤ K²·vᵀAv. Use parityBlockA_psd (proved in ParitySchur.lean).
+    exact mul_nonneg (sq_nonneg K) (parityBlockA_psd N (by omega) v)
 
 -- ════════════════════════════════════════════════
 -- THE FULL CHAIN
@@ -386,16 +336,18 @@ end
 -- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 
--- This file introduces 5 axioms:
---   1. vasyunin_expansion      (analytic number theory — Tier 2)
+-- This file introduces 3 axioms (ALL analytic number theory):
+--   1. vasyunin_expansion      (Báez-Duarte discrete expansion — Tier 2)
 --   2. moebius_uncoupling      (Vaughan's identity — Tier 2)
 --   3. type_II_sieve_bound     (bilinear sieve estimate — Tier 3)
---   4. schur_variational       (matrix analysis — should be provable — Tier 1)
---   5. parityBlockA_psd        (A = π₊Gπ₊ is PSD — follows from gram_pos_def)
 --
--- ZERO SORRY ✅
+-- ZERO SORRY ✅  ZERO ALGEBRAIC AXIOMS ✅
 --
--- sieve_implies_stable_ratio is FULLY PROVED modulo axioms:
+-- The linear algebra is FULLY PROVED using:
+--   parityBlockA_psd, parityBlockC_psd (proved in ParitySchur.lean)
+--   gramMatrix_posSemidef (proved in ParitySchur.lean from gram_pos_def)
+--
+-- sieve_implies_stable_ratio is FULLY PROVED modulo analytic axioms:
 --   Case 1 (det C unit), Q > 0: ✅ (divide Q² ≤ K²·a·Q by Q)
 --   Case 1 (det C unit), Q = 0: ✅ (parityBlockA_psd gives K²·vᵀAv ≥ 0)
 --   Case 2 (det C = 0):         ✅ (C⁻¹ = 0 → Q = 0, then parityBlockA_psd)
