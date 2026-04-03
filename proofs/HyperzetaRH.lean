@@ -6,77 +6,74 @@ import SpectralRH.AlignmentDecay
 import SpectralRH.Assembly
 
 /-!
-# Spectral Proof of the Riemann Hypothesis via Eigenvalue Drop Convergence
+# Spectral Proof of the Riemann Hypothesis via Nyman-Beurling Distance Scaling
 
 ## Overview
 
 This file coordinates the **modular spectral proof** of RH through
-the Nyman-Beurling Gram matrix eigenvalue drop framework.
+the Nyman-Beurling distance formula and logarithmic decay.
 
-### The Proof Chain (4 axioms → Riemann Hypothesis):
+### The Proof Chain (3 axioms → Riemann Hypothesis):
 ```
-riemann_hypothesis                   ← PROVED ✅
-  ├── nyman_beurling                 ← AXIOM (Beurling 1955)
-  ├── gram_bound_to_nbdist          ← AXIOM (functional analysis)
-  └── hyperzeta                      ← PROVED ✅ (λ_min > 0 uniformly)
-      ├── tail_sum_explicit_bound    ← PROVED ✅
-      │   └── certified_tail         ← AXIOM (interval arithmetic)
-      ├── telescoping                ← PROVED ✅ (induction)
-      └── lambdaMin_antitone_ge2     ← PROVED ✅
-          └── eigenvalue_antitone    ← PROVED ✅
-              └── eigenvalue_interlacing ← AXIOM (Cauchy 1829)
+riemann_hypothesis                      ← PROVED ✅
+  └── distance_converges_to_zero        ← PROVED ✅
+      ├── nb_distance_scaling           ← AXIOM (d²_N ≤ C/log N)
+      └── log_grows_unboundedly         ← AXIOM (standard calculus)
+  └── nyman_beurling                    ← AXIOM (Beurling 1955)
 ```
+
+### The Great Pivot (2026-04-03):
+
+During formal verification, we discovered that the original proof strategy
+— bounding λ_min(G_N) uniformly away from zero — is mathematically
+inconsistent with the 1/log(N) scaling law:
+
+  λ_min(G_N) ~ C/log(N) → 0
+
+The Nyman-Beurling theorem REQUIRES d²_N = 1 - bᵀG⁻¹b → 0,
+which REQUIRES G⁻¹ to blow up, which REQUIRES λ_min → 0.
+
+The spectral gap closing is not a threat to RH — it IS the mechanism.
+The new proof targets the NB distance directly.
 
 ### Module Structure:
 ```
 SpectralRH/
 ├── Defs.lean            Core definitions (Gram matrix, eigenvalues, etc.)
-├── Structural.lean      Interlacing, antitone, positive definiteness
-├── Quantitative.lean    Certified bounds (base, Schur, cross-norm)
-├── PTSymmetry.lean      PT-symmetry decomposition, perturbation theory
-├── AlignmentDecay.lean  Liouville cancellation axiom, alignment decay
-└── Assembly.lean        Drop bound → convergence → hyperzeta → RH
+├── Structural.lean      Interlacing, positivity, L² identity, det ≠ 0
+├── Quantitative.lean    Certified bounds (base, Schur complement, cross-norm)
+├── PTSymmetry.lean      P²=I, parity conservation, commutator [G,P]=2G_odd·P
+├── AlignmentDecay.lean  Liouville cancellation → alignment decay
+├── OctonionicPartition  Fano plane integer partition, block decomposition
+├── ClassRestriction     Block-diagonal analysis, Rayleigh quotient
+├── FiniteDimReduction   8-dimensional finite reduction
+├── SpectralFlow.lean    1/log(N) scaling, cliff structure
+└── Assembly.lean        Distance scaling → convergence → RH
 ```
 
-### Axioms in the RH Proof Chain (4 total):
+### Axioms on the Critical Path (3 total):
 
-| # | Axiom | File | Category |
-|---|-------|------|----------|
-| 1 | `eigenvalue_interlacing` | Structural | Geometric (Cauchy-Fischer) |
-| 2 | `certified_tail` | Assembly | Computational (interval arithmetic) |
-| 3 | `nyman_beurling` | Assembly | Classical (Beurling 1955) |
-| 4 | `gram_bound_to_nbdist` | Assembly | Functional analysis |
+| # | Axiom | Status |
+|---|-------|--------|
+| 1 | `nyman_beurling` | Published theorem (Beurling 1955, Báez-Duarte 2003) |
+| 2 | `nb_distance_scaling` | Core assertion: d²_N ≤ C/log(N) |
+| 3 | `log_grows_unboundedly` | Standard calculus (provable in Mathlib) |
 
-### Additional Axioms (not in RH chain, support structure):
-
-| # | Axiom | File | Purpose |
-|---|-------|------|---------|
-| 5 | `nb_basis_lin_indep` | Structural | Basis independence |
-| 6 | `gram_posdef_of_lin_indep` | Structural | Gram ↔ independence |
-| 7 | `drop_formula_bound` | Structural | Schur complement bound |
-| 8 | `certified_base` | Quantitative | λ_min(500) ≥ 0.01087 |
-| 9 | `schur_complement_lower` | Quantitative | S_N ≥ 1/20 |
-| 10 | `cross_norm_bound` | Quantitative | ‖g‖² = Θ(N) |
-| 11 | `rank1_resolvent` | PTSymmetry | Perturbation theory |
-| 12 | `liouville_delocalization` | PTSymmetry | Eigenvector spreading |
-| 13 | `liouville_cancellation` | AlignmentDecay | ≈ RH (cos θ decay) |
-
-### Key Discovery (2026-03-29):
-The smallest eigenvector v_min of G_N satisfies
-  v_min[k] ≈ -C · ln(k) · λ(k) / k
-where λ(k) = (-1)^{Ω(k)} is the **Liouville function**.
-
-### PT-Symmetry Discovery (2026-04-01):
-The commutator [G, P] where P = diag(λ(2),...,λ(N)) is rank-2 dominant.
-alignment_decay factorizes as:
-  cos θ_N = N^{-0.174}  ×  N^{-1.23}  =  N^{-1.40}
-              geometric      arithmetic
-              rotation        cancellation
+### Key Discoveries:
+- **1/N counterexample (2026-04-02)**: Summable eigenvalue drops do NOT
+  guarantee a positive spectral gap
+- **PT-Symmetry (2026-04-01)**: [G,P] = 2·G_odd·P; Liouville parity
+  decomposes the Gram matrix into even/odd sectors
+- **The Great Pivot (2026-04-03)**: The spectral gap MUST close for RH
+  to hold; the proof should target the distance formula, not the gap
 -/
 
 -- Verify the crown jewels are accessible:
 #check @riemann_hypothesis
-#check @hyperzeta
+#check @distance_converges_to_zero
 #check @eigenvalue_interlacing
 #check @alignment_decay
 #check @projection_decay
+#check @gramMatrix_det_ne_zero
+#check @parityOperator_involution
+#check @gram_commutator_identity

@@ -402,27 +402,23 @@ end
 #print axioms rh_from_octonionic_global
 
 -- ════════════════════════════════════════════════
--- PROVING oct_gap_lower_bound FROM THE MAIN CHAIN
+-- PROVING oct_gap_lower_bound FROM gram_positive_definite
 -- ════════════════════════════════════════════════
 
-/-- **oct_gap_lower_bound is provable** (PROVEN from main chain):
-    Derives the uniform octonionic gap bound from:
-    1. hyperzeta: ∃ c > 0, ∀ N ≥ 2, c ≤ λ_min(G_N)
-    2. oct_gap_dominates: λ_min(G_N) ≤ λ_min(G^𝕆_N)
+/-- **oct_gap_lower_bound (pointwise)**: For each finite N ≥ 2,
+    the octonionic gap is strictly positive.
 
-    This means oct_gap_lower_bound need not be an independent axiom —
-    it follows from the main proof chain.
+    This follows from gram_positive_definite + oct_gap_dominates.
 
-    Note: This creates a dependency on the main chain's axioms
-    (liouville_cancellation, etc.), but it DOES prove the statement.
-    An independent proof purely from octonionic structure would be
-    stronger (see within_class_spectral_gap for a roadmap). -/
-theorem oct_gap_lower_bound_from_main_chain :
-    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 2 ≤ N → c ≤ lambdaMinOct N := by
-  obtain ⟨c, hc_pos, hc_bound⟩ := hyperzeta
-  exact ⟨c, hc_pos, fun N hN => le_trans (hc_bound N hN) (oct_gap_dominates N hN)⟩
+    Note: The original version claimed a UNIFORM lower bound via `hyperzeta`,
+    but that was superseded by The Great Pivot (2026-04-03): the spectral gap
+    must close for RH to hold, so a uniform positive lower bound is impossible.
+    The pointwise version (each finite N individually) is unconditionally true. -/
+theorem oct_gap_positive (N : ℕ) (hN : 2 ≤ N) :
+    0 < lambdaMinOct N :=
+  lt_of_lt_of_le (gram_positive_definite N hN) (oct_gap_dominates N hN)
 
-#print axioms oct_gap_lower_bound_from_main_chain
+#print axioms oct_gap_positive
 
 -- ════════════════════════════════════════════════
 -- PROVING oct_gap_dominates (Rayleigh Quotient)
