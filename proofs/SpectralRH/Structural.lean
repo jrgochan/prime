@@ -1,5 +1,6 @@
 import SpectralRH.Defs
 import SpectralRH.RayleighBridge
+import Mathlib.MeasureTheory.Function.Floor
 
 /-! # SpectralRH.Structural
 Structural properties: interlacing, antitone, positive definiteness, telescoping.
@@ -59,16 +60,39 @@ theorem eigenDrop_nonneg (N : ℕ) (hN : 3 ≤ N) : 0 ≤ eigenDrop N := by
 def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
   ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)
 
-/-- **Axiom (Integrability)**: Products of fractional parts are
-    IntervalIntegrable on [0,1].
+/-- The function x ↦ Int.fract(j/x) * Int.fract(k/x) is measurable. -/
+private lemma fract_div_mul_measurable (j k : ℕ) :
+    Measurable (fun x : ℝ => Int.fract (↑j / x) * Int.fract (↑k / x)) :=
+  (measurable_const.div measurable_id).fract.mul
+    (measurable_const.div measurable_id).fract
 
-    This is a standard measure theory fact:
-    x ↦ Int.fract(n/x) is bounded ∈ [0,1) and measurable (piecewise smooth),
-    so the product is bounded measurable on a bounded interval, hence integrable. -/
-axiom fract_prod_intervalIntegrable (j k : ℕ) :
+/-- Products of fractional parts are bounded by 1. -/
+private lemma fract_prod_le_one (j k : ℕ) (x : ℝ) :
+    ‖Int.fract (↑j / x) * Int.fract (↑k / x)‖ ≤ ‖(1 : ℝ)‖ := by
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_one,
+      abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+  calc Int.fract (↑j / x) * Int.fract (↑k / x)
+      ≤ 1 * 1 := by
+        apply mul_le_mul
+        · exact le_of_lt (Int.fract_lt_one _)
+        · exact le_of_lt (Int.fract_lt_one _)
+        · exact Int.fract_nonneg _
+        · linarith
+    _ = 1 := mul_one 1
+
+/-- **fract_prod_intervalIntegrable** (PROVEN):
+    Products of fractional parts are IntervalIntegrable on [0,1].
+
+    Proof: Bounded by 1 + measurable + dominated by constant 1
+    on the finite measure interval [0,1]. -/
+theorem fract_prod_intervalIntegrable (j k : ℕ) :
     IntervalIntegrable
       (fun x : ℝ => Int.fract (↑j / x) * Int.fract (↑k / x))
-      MeasureTheory.volume 0 1
+      MeasureTheory.volume 0 1 :=
+  IntervalIntegrable.mono_fun
+    (intervalIntegrable_const (c := (1 : ℝ)))
+    ((fract_div_mul_measurable j k).aestronglyMeasurable.restrict)
+    (Filter.Eventually.of_forall (fract_prod_le_one j k))
 
 /-- Scaled products inherit integrability (const_mul). -/
 private lemma scaled_fract_intervalIntegrable (j k : ℕ) (a b : ℝ) :
@@ -166,19 +190,90 @@ theorem gram_l2_identity (N : ℕ) (_ : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
   rw [quadForm_as_double_sum, integral_sq_as_double_sum]
 
-/-- **Axiom (NB linear independence)**: The Nyman-Beurling functions
-    {2/x}, {3/x}, ..., {N/x} are linearly independent in L²(0,1).
+/-- **Axiom (NB pointwise non-vanishing)**: If w ≠ 0, then the NB linear
+    combination Σ wᵢ{(i+2)/x} is nonzero on some open subinterval of (0,1).
 
-    Equivalently: for w ≠ 0, the function Σᵢ wᵢ {(i+2)/x} has positive
-    L² norm: ∫₀¹ (Σᵢ wᵢ {(i+2)/x})² dx > 0.
+    This is the core number-theoretic content: the fractional part functions
+    {2/x}, {3/x}, ..., {N/x} are pointwise linearly independent.
 
-    This is a well-known result in analytic number theory:
-    - Vasyunin (1996): proved via Mellin transform analysis
-    - Báez-Duarte (2003): alternative proof via Müntz–Szász theorem
-    - Equivalent to: ker(Gram matrix) = {0} for all N ≥ 2 -/
-axiom nyman_beurling_lin_indep (N : ℕ) (hN : 2 ≤ N)
+    Proof sketch: On (N/(N+1), 1), {n/x} = n/x - n for all n = 2,...,N,
+    so the linear combination = A(1/x - 1) where A = Σ wᵢ(i+2).
+    If A ≠ 0, the function is nonzero on this interval.
+    If A = 0, use a finer interval decomposition where different floor
+    values create a triangular system of equations, forcing w = 0.
+
+    References: Vasyunin (1996), Báez-Duarte (2003). -/
+axiom nbLinComb_nonzero_somewhere (N : ℕ) (hN : 2 ≤ N)
     (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
-    0 < ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2
+    ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+    (∀ x, x ∈ Set.Ioo c d → nbLinComb N w x ≠ 0) ∧
+    ContinuousOn (nbLinComb N w) (Set.Icc c d)
+
+/-- nbLinComb² is integrable on subintervals of [0,1]. -/
+private lemma nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
+  have h_sq : (fun x => (nbLinComb N w x) ^ 2) =
+      (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+    ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
+  rw [h_sq]
+  have : (fun x : ℝ => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+      (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+    (∑ i : Fin (N - 1), ∑ j : Fin (N - 1), fun x =>
+      (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [this]
+  apply IntervalIntegrable.sum; intro i _
+  apply IntervalIntegrable.sum; intro j _
+  have : (fun x : ℝ => (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+    (fun x : ℝ => (w i * w j) * (Int.fract ((↑(i.val + 2) : ℝ) / x) *
+      Int.fract ((↑(j.val + 2) : ℝ) / x))) := by ext x; ring
+  rw [this]
+  exact (fract_prod_intervalIntegrable (i.val + 2) (j.val + 2)).const_mul _
+
+/-- **NB linear independence** (PROVEN from sub-axiom):
+    ∫₀¹ (Σ wᵢ{(i+2)/x})² dx > 0 for w ≠ 0.
+
+    Proof: The function is nonzero on some (c,d) ⊂ (0,1),
+    so (nbLinComb)² > 0 there. Since (nbLinComb)² ≥ 0 everywhere,
+    the full integral ∫₀¹ ≥ ∫_c^d > 0. -/
+theorem nyman_beurling_lin_indep (N : ℕ) (hN : 2 ≤ N)
+    (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    0 < ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
+  obtain ⟨c, d, hc0, hcd, hd1, hne, _⟩ := nbLinComb_nonzero_somewhere N hN w hw
+  have hpos_sub : ∀ x, x ∈ Set.Ioo c d → 0 < (nbLinComb N w x) ^ 2 :=
+    fun x hx => sq_pos_of_ne_zero (hne x hx)
+  have hisub : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume c d :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le (le_of_lt hcd), Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc hc0 hd1)
+  have hint_sub : 0 < ∫ x in c..d, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hisub hpos_sub hcd
+  have hi0c : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 c :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hc0, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc le_rfl (hcd.le.trans hd1))
+  have hid1 : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume d 1 :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hd1, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc (hc0.trans hcd.le) le_rfl)
+  have h_01 : (∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2) =
+    (∫ x in (0:ℝ)..c, (nbLinComb N w x) ^ 2) +
+    (∫ x in c..d, (nbLinComb N w x) ^ 2) +
+    (∫ x in d..1, (nbLinComb N w x) ^ 2) := by
+    have h1 := intervalIntegral.integral_add_adjacent_intervals hi0c hisub
+    have h2 := intervalIntegral.integral_add_adjacent_intervals (hi0c.trans hisub) hid1
+    linarith
+  rw [h_01]
+  have h1 : 0 ≤ ∫ x in (0:ℝ)..c, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hc0 (fun x _ => sq_nonneg _)
+  have h2 : 0 ≤ ∫ x in d..1, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hd1 (fun x _ => sq_nonneg _)
+  linarith
 
 /-- **gram_pos_def** (PROVEN): wᵀGw > 0 for w ≠ 0.
     Follows immediately from the L² identity + linear independence. -/
