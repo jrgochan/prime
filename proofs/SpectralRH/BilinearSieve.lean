@@ -257,19 +257,60 @@ theorem sieve_implies_stable_ratio
     have h0 := schur_variational N hN v 0
     simp [Matrix.mulVec_zero, dotProduct_zero, mul_zero] at h0
     exact h0
-  -- Now show the upper bound via the algebraic argument.
-  -- We use the fact that schur_variational gives Q ≥ 2⟨v,Bw⟩ - ⟨w,Cw⟩
-  -- for ALL w, so Q equals the sup. But we only need Q ≤ K²·vᵀAv.
-  --
-  -- Direct approach: since Q ≥ 0 and Q = vᵀ(BC⁻¹Bᵀ)v,
-  -- we bound Q using the bilinear form.
-  -- This requires matrix algebra: Q = ⟨v, B(C⁻¹(Bᵀv))⟩ = S(v, C⁻¹Bᵀv)
-  -- and ⟨C⁻¹Bᵀv, C(C⁻¹Bᵀv)⟩ = Q (when C is invertible).
-  -- Then Q² ≤ K²·(vᵀAv)·Q, so Q ≤ K²·vᵀAv.
-  sorry -- TIER 1: Pure linear algebra (Schur complement + completing the square)
-         -- See the detailed proof sketch above.
-         -- The formalization requires Mathlib's Matrix.mul_mulVec
-         -- and Matrix.mul_nonsing_inv for the matrix algebra steps.
+  -- Case split: is C invertible?
+  set C := parityBlockC N
+  set B := parityBlockB N
+  set A := parityBlockA N
+  by_cases hdet : IsUnit C.det
+  · -- CASE 1: C is invertible ⟹ use the Q² ≤ K²·(vᵀAv)·Q argument
+    -- Set w = C⁻¹ · Bᵀ · v
+    set w := C⁻¹.mulVec (Bᵀ.mulVec v)
+    -- Q = vᵀ · (B · C⁻¹ · Bᵀ) · v = vᵀ · B · w = crossParityBilinear(v, w)
+    have hQ_eq : Q = crossParityBilinear N v w := by
+      simp only [Q, crossParityBilinear, w, B, C]
+      congr 1
+      rw [← Matrix.mulVec_mulVec, ← Matrix.mulVec_mulVec]
+    -- wᵀ · C · w = vᵀ · Bᵀᵀ · (C⁻¹)ᵀ · C · C⁻¹ · Bᵀ · v = Q
+    -- Key step: C * C⁻¹ = I since det C is a unit
+    have hC_inv : C * C⁻¹ = 1 := Matrix.mul_nonsing_inv C hdet
+    have hw_quad : dotProduct w (C.mulVec w) = Q := by
+      simp only [w, Q, B, C]
+      rw [← Matrix.mulVec_mulVec C C⁻¹ (Bᵀ.mulVec v)]
+      rw [hC_inv, Matrix.one_mulVec]
+      -- Now: dotProduct (C⁻¹.mulVec (Bᵀ.mulVec v)) (Bᵀ.mulVec v)
+      -- = vᵀ · Bᵀᵀ · C⁻¹ᵀ · Bᵀ · v  (by dotProduct_mulVec)
+      -- = vᵀ · B · C⁻¹ · Bᵀ · v = Q (using Bᵀᵀ = B and C⁻¹ᵀ = C⁻¹ for symmetric C)
+      rw [dotProduct_mulVec]
+      -- After rw: (C⁻¹.mulVec (Bᵀ.mulVec v)) ᵥ* ??? = Q
+      sorry -- Matrix transpose/symmetry algebra: ⟨C⁻¹Bᵀv, Bᵀv⟩ = ⟨v, BC⁻¹Bᵀv⟩
+    -- Now use the bilinear bound:
+    -- Q² = (crossParityBilinear v w)² ≤ K² · (vᵀAv) · (wᵀCw) = K² · (vᵀAv) · Q
+    have h_bilinear := h_bound N hN v w
+    rw [hQ_eq] at hQ_nn ⊢
+    rw [← hQ_eq] at hw_quad
+    -- Q² ≤ K² · (vᵀAv) · Q
+    have hQ_sq : Q ^ 2 ≤ K ^ 2 * dotProduct v (A.mulVec v) * Q := by
+      calc Q ^ 2 = (crossParityBilinear N v w) ^ 2 := by rw [hQ_eq]
+        _ ≤ K ^ 2 * dotProduct v (A.mulVec v) *
+            dotProduct w (C.mulVec w) := h_bilinear
+        _ = K ^ 2 * dotProduct v (A.mulVec v) * Q := by rw [hw_quad]
+    -- From Q² ≤ K²·(vᵀAv)·Q with Q ≥ 0: Q ≤ K²·vᵀAv
+    rcases eq_or_lt_of_le hQ_nn with hQ0 | hQ_pos
+    · -- Q = 0, trivially Q ≤ K²·vᵀAv
+      rw [← hQ0, hQ_eq]; exact mul_nonneg (sq_nonneg K) (le_refl _) |>.symm ▸ by linarith
+    · -- Q > 0, divide: Q ≤ K²·vᵀAv
+      rw [hQ_eq]
+      have : Q ≤ K ^ 2 * dotProduct v (A.mulVec v) := by
+        have := div_le_of_le_mul₀ (le_of_lt hQ_pos) (by positivity) hQ_sq
+        rwa [sq, mul_div_cancel_of_imp' (by linarith : Q ≠ 0)] at this
+      linarith [this]
+  · -- CASE 2: C is singular ⟹ C⁻¹ = 0, so Q = 0
+    have hC_inv_zero : C⁻¹ = 0 := Matrix.nonsing_inv_apply_not_isUnit C hdet
+    have hQ_zero : Q = 0 := by
+      simp only [Q, B, C, hC_inv_zero, Matrix.zero_mul, Matrix.mul_zero,
+                 Matrix.zero_mulVec, dotProduct_zero]
+    rw [hQ_zero]
+    exact mul_nonneg (sq_nonneg K) (le_refl _) |>.symm ▸ by positivity
 
 -- ════════════════════════════════════════════════
 -- THE FULL CHAIN
@@ -324,13 +365,19 @@ end
 --   3. type_II_sieve_bound     (bilinear sieve estimate)
 --   4. schur_variational       (matrix analysis — should be provable)
 --
--- And 1 sorry:
---   sieve_implies_stable_ratio (needs schur_variational + optimization)
+-- And 1 sorry (reduced from the original full proof gap):
+--   sieve_implies_stable_ratio.hw_quad:
+--     The matrix transpose symmetry step:
+--       ⟨C⁻¹Bᵀv, Bᵀv⟩ = ⟨v, BC⁻¹Bᵀv⟩
+--     i.e., dotProduct (C⁻¹.mulVec (Bᵀ.mulVec v)) (Bᵀ.mulVec v)
+--         = dotProduct v ((B * C⁻¹ * Bᵀ).mulVec v)
+--     This follows from dotProduct_mulVec, transpose of inverse,
+--     and double transpose (Bᵀᵀ = B). Requires proving that
+--     the Gram block C is symmetric: Cᵀ = C.
 --
--- The sorry is a PURE LINEAR ALGEBRA gap: the variational
--- characterization of the Schur complement quadratic form.
--- This is standard textbook material but requires Mathlib's
--- matrix inverse API to formalize.
+-- The complete proof STRUCTURE is in place:
+--   Case 1 (det C unit): Q² ≤ K²·(vᵀAv)·Q → Q ≤ K²·vᵀAv
+--   Case 2 (det C = 0):  C⁻¹ = 0 → Q = 0 → trivial
 
 #check @type_II_sieve_bound
 #check @sieve_implies_stable_ratio
