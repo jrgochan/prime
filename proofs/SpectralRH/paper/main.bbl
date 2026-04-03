@@ -8,17 +8,35 @@ Luis B{\'a}ez-Duarte.
   Fisiche, Matematiche e Naturali. Rendiconti Lincei. Matematica e
   Applicazioni}, 14(1):5--11, 2003.
 
+\bibitem{baezduarte03}
+Luis B{\'a}ez-Duarte.
+\newblock A strengthening of the {N}yman--{B}eurling criterion for the
+  {R}iemann hypothesis.
+\newblock {\em Atti Accad. Naz. Lincei Rend. Lincei Mat. Appl.}, 14(1):5--11,
+  2003.
+
 \bibitem{beurling1955}
 Arne Beurling.
 \newblock A closure problem related to the {R}iemann zeta-function.
 \newblock {\em Proceedings of the National Academy of Sciences},
   41(5):312--314, 1955.
 
+\bibitem{beurling55}
+Arne Beurling.
+\newblock A closure problem related to the {R}iemann zeta-function.
+\newblock {\em Proc. Natl. Acad. Sci. USA}, 41:312--314, 1955.
+
 \bibitem{nyman1950}
 Bertil Nyman.
 \newblock On the one-dimensional translation group and semi-group in certain
   function spaces.
 \newblock {\em Thesis, Uppsala University}, 1950.
+
+\bibitem{sarnak11}
+Peter Sarnak.
+\newblock Three lectures on the {M}\"obius function, randomness and dynamics.
+\newblock {\em IAS Lecture Notes}, 2011.
+\newblock Available at \url{https://publications.ias.edu/sarnak/paper/546}.
 
 \bibitem{lean4}
 {The Lean Community}.

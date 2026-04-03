@@ -821,7 +821,8 @@ The formalization process itself produced three notable outcomes:
 The PT-symmetry algebra of Section~\ref{sec:ptsymmetry} provides a
 concrete path toward proving the remaining axiom
 \lean{nb\_distance\_scaling}. This section documents the formalization
-status, including the zero-sorry achievement in \texttt{ParitySchur.lean}.
+status --- including the zero-sorry achievement in
+\texttt{ParitySchur.lean} --- and the analytical gaps that remain.
 
 \subsection{The Parity Block Decomposition (Proved)}
 
@@ -884,9 +885,9 @@ is governed by the probability of coprimality:
 \[
   \Pr(\gcd(j,k) = 1) = \frac{6}{\pi^2} = \frac{1}{\zeta(2)} \approx 0.608.
 \]
-This acts as an \emph{endogenous positive scalar curvature}: the
-cross-parity coupling $B$ is suppressed relative to the diagonal
-blocks $A$ and $C$ by a factor controlled by $6/\pi^2$.
+The intuition is that $6/\pi^2$ acts as an \emph{endogenous positive
+scalar curvature}: coprime pairs produce asymptotically independent
+fractional-part products, suppressing the cross-parity coupling.
 
 \begin{axiombox}[Stable Interference Ratio]
   There exists $R$ with $0 \leq R < 1$ such that for all $N \geq 10$
@@ -900,6 +901,80 @@ blocks $A$ and $C$ by a factor controlled by $6/\pi^2$.
 \noindent If $R < 1$ uniformly, then $H_{\mathrm{eff}} \geq (1-R) \cdot A > 0$
 with eigenvalues bounded below by $(1-R) \cdot \lmin(A)$, which
 inherits logarithmic scaling from $\lmin(\Gram) \sim C/\log N$.
+
+\subsection{The Three Gaps: Honest Assessment}\label{sec:gaps}
+
+We document three mathematical gaps between the coprimality density
+$6/\pi^2$ and the spectral bound $R < 1$. The purpose of this
+subsection is to delineate precisely where the known mathematics
+ends and where new insight is required, ensuring reproducibility
+and intellectual transparency.
+
+\subsubsection*{Gap 1: The Matrix Theory Gap}
+
+The coprimality density is an \emph{entry-wise} statement:
+approximately $6/\pi^2$ of the pairs $(j,k)$ satisfy $\gcd(j,k) = 1$,
+and for these pairs the Gram entry
+$G_{jk} = \int_0^1 \{j/x\}\{k/x\}\,dx \approx 1/4$ (asymptotic
+independence of fractional parts by Koksma's theorem). However,
+the interference ratio $R$ is a \emph{spectral} quantity:
+\[
+  R = \sup_{v \neq 0} \frac{v^\top (BC^{-1}B^\top) v}{v^\top A v},
+\]
+the largest generalized eigenvalue of $(BC^{-1}B^\top, A)$.
+Entry-wise bounds on individual matrix elements do not directly
+yield spectral operator norm bounds. The Frobenius norm provides
+one bridge ($\|M\|_2 \leq \|M\|_F$), but this inequality goes
+in the wrong direction for our purposes: it upper-bounds the
+spectral norm, whereas we need a strict \emph{upper} bound $R < 1$,
+not a lower bound on $R$.
+
+\subsubsection*{Gap 2: The Number Theory Gap (M\"obius Randomness)}
+
+The parity blocks $A$, $B$, $C$ are defined by the \emph{Liouville
+parity} $(-1)^{\Omega(n)}$ --- whether $n$ has an even or odd number
+of prime factors (with multiplicity). The coprimality structure, by
+contrast, is governed by $\gcd(j,k)$, which depends on
+\emph{shared prime divisors}. These two classifications are
+\textbf{statistically independent}: knowing that $\Omega(j)$ is even
+tells us nothing about $\gcd(j,k)$.
+
+This independence is a manifestation of the
+\emph{M\"obius randomness principle} --- the heuristic that the
+M\"obius function $\mu(n)$ (and hence the Liouville function
+$\lambda(n) = (-1)^{\Omega(n)}$) behaves independently of
+``structured'' arithmetic functions like divisibility indicators.
+Formally proving this independence, or finding the correct
+substitute statement, is a central open problem in analytic
+number theory~\cite{sarnak11}.
+
+As a consequence, the entries of $B$ (cross-parity block) are
+\emph{not systematically smaller} than those of $A$ (within-parity
+block). Individual entries $G_{jk}$ have the same size distribution
+regardless of parity assignment. The suppression of $B$ relative
+to $A$ at the spectral level, if it occurs, must arise from
+\emph{global cancellation} in the quadratic form --- a more
+subtle phenomenon than entry-wise suppression.
+
+\subsubsection*{Gap 3: The Empirical Boundary}
+
+The computationally observed value $R \approx 0.924$ does not match
+any obvious function of $6/\pi^2 \approx 0.608$:
+\begin{center}
+\begin{tabular}{ll}
+$6/\pi^2$ & $\approx 0.608$ \\
+$1 - 6/\pi^2$ & $\approx 0.392$ \\
+$(6/\pi^2)^{1/2}$ & $\approx 0.780$ \\
+$R_{\mathrm{observed}}$ & $\approx 0.924$
+\end{tabular}
+\end{center}
+This suggests that the relationship between the coprimality density
+and the interference ratio, if it exists, involves additional
+structure beyond a simple closed-form expression. Identifying this
+structure --- perhaps through the eigenvalue distribution of the
+parity-restricted Gram matrices, or through the interaction of
+the Liouville oscillation with the divisor-sum decomposition of
+$G_{jk}$ --- remains the central analytical challenge.
 
 \subsection{Formalization Roadmap}
 
@@ -919,9 +994,8 @@ bound decomposes into five steps:
     $\Gram > 0$ implies $H_{\mathrm{eff}} \geq 0$.
     \hfill\textbf{\color{green!50!black}$\checkmark$ PROVED}
 
-  \item \textbf{Curvature bound} [Step 5]: Show $R < 1$ using
-    the coprimality density $6/\pi^2$.
-    \hfill\textbf{\color{red!70!black}OPEN}
+  \item \textbf{Curvature bound} [Step 5]: Show $R < 1$.
+    \hfill\textbf{\color{red!70!black}OPEN --- see~\S\ref{sec:gaps}}
 
   \item \textbf{Algebraic bridge}: Connect $H_{\mathrm{eff}}$
     eigenvalue bounds to the Nyman--Beurling distance $d_N^2$.
@@ -929,11 +1003,18 @@ bound decomposes into five steps:
 \end{enumerate}
 
 \noindent Steps 1--3 are \textbf{zero-sorry Lean~4 code} against Mathlib.
-Step~4 is the irreducible number-theoretic content: proving that
-$1/\zeta(2) = 6/\pi^2$ controls the parity interference ratio.
-We believe this can be attacked using Euler product identities and
-M\"obius inversion in Mathlib's \texttt{Nat.ArithmeticFunction}
-infrastructure, though this remains a substantial formalization effort.
+Step~4 is the irreducible analytical content. The three gaps documented in
+\S\ref{sec:gaps} show that a naive appeal to the coprimality density
+$6/\pi^2$ does \emph{not} suffice; a proof of $R < 1$ will require either
+(a)~a new spectral bound connecting entry-wise arithmetic structure to
+operator norms, or (b)~a fundamentally different argument that bypasses
+the entry-wise analysis entirely. We regard this as the natural next
+target for the formal verification program.
+
+Mathlib already contains the Basel problem result
+$\zeta(2) = \pi^2/6$ (\texttt{riemannZeta\_two}), Euler's totient
+function, and the coprimality predicate \texttt{Nat.Coprime}, providing
+a foundation for future number-theoretic formalization.
 
 % ═══════════════════════════════════════════
 % BIBLIOGRAPHY
