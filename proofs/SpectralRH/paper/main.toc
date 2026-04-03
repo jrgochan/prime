@@ -38,3 +38,4 @@
 \contentsline {subsection}{\numberline {9.5}Formalization Roadmap}{13}{subsection.9.5}%
 \contentsline {subsection}{\numberline {9.6}Research Directions: Beyond the Parity Barrier}{14}{subsection.9.6}%
 \contentsline {subsection}{\numberline {9.7}The Lean~4 Blueprint: BilinearSieve.lean}{14}{subsection.9.7}%
+\contentsline {subsection}{\numberline {9.8}Three-Tier Formalization Roadmap}{15}{subsection.9.8}%

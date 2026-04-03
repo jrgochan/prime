@@ -1118,6 +1118,79 @@ should be formalizable against Mathlib's matrix API. The four
 axioms represent precisely typed ``holes'' that the analytic number
 theory community can fill independently, with the Lean compiler
 guaranteeing that no hidden assumptions exist in the reduction.
+
+\subsection{Three-Tier Formalization Roadmap}\label{sec:tiers}
+
+We classify the remaining axioms into three tiers based on
+mathematical difficulty, inviting targeted community contribution.
+
+\subsubsection*{Tier 1: Pure Linear Algebra}
+
+\textbf{Targets:} \lean{schur\_variational} and the
+\texttt{sorry} in \lean{sieve\_implies\_stable\_ratio}.
+
+These reduce to finite-dimensional convex optimization. The key
+identity is the variational characterization of the Schur complement:
+\[
+  v^\top(BC^{-1}B^\top)v
+  = \sup_w \bigl\{ 2\,v^\top B w \;-\; w^\top C w \bigr\}.
+\]
+Combined with the Type~II sieve bound
+$|v^\top B w| \leq K \sqrt{v^\top\! Av}\,\sqrt{w^\top\! Cw}$,
+substituting $t = \sqrt{w^\top\! Cw}$ gives
+\[
+  v^\top(BC^{-1}B^\top)v
+  \;\leq\; \sup_{t \geq 0}\bigl\{2K\sqrt{v^\top\! Av}\cdot t - t^2\bigr\}
+  \;=\; K^2 \cdot v^\top\! Av.
+\]
+The supremum is attained at $t^* = K\sqrt{v^\top\! Av}$, yielding the
+macroscopic interference ratio $R = K^2$. Since $K < 1$, we obtain
+$R < 1$. This derivation --- that the macroscopic ratio $R$ is the
+\emph{square} of the microscopic Cauchy--Schwarz defect $K$ --- is the
+central bridge of the architecture.
+
+These are standard textbook results requiring no number theory,
+only Mathlib's \texttt{Matrix.nonsing\_inv} API. We explicitly
+leave these as open invitations to the Lean community.
+
+\subsubsection*{Tier 2: Formalizing the Literature}
+
+\textbf{Targets:} \lean{vasyunin\_expansion} and
+\lean{moebius\_uncoupling}.
+
+These are \emph{not} open mathematical problems:
+\begin{itemize}
+  \item The Vasyunin expansion is proved by B\'aez-Duarte et
+    al.~\cite{baez-duarte2005}. It expresses
+    $G_{jk} = 1/4 + \psi(j,k)$ with $|\psi| \leq 1/\gcd(j,k)$.
+  \item The M\"obius uncoupling follows from Vaughan's
+    identity~\cite{vaughan77}, decomposing arithmetic bilinear sums
+    into Type~I and Type~II components.
+\end{itemize}
+The challenge is \emph{translation}: porting 20th-century analytic
+number theory into 21st-century dependent type theory. This is a
+tractable formalization project suitable for a PhD thesis or ITP
+conference paper.
+
+\subsubsection*{Tier 3: The Millennium Frontier}
+
+\textbf{Target:} \lean{type\_II\_sieve\_bound} ($K < 1$).
+
+This is the irreducible analytical content. The Type~II sieve
+bound asserts that the cross-parity bilinear form satisfies a
+\emph{strict} Cauchy--Schwarz inequality:
+$|S(u,v)|^2 < (u^\top\! Au)(v^\top\! Cv)$.
+The obstruction is Selberg's parity
+barrier~\cite{selberg1956}: the Liouville parity $(-1)^{\Omega(n)}$
+is statistically independent of the divisibility structure
+$\gcd(j,k)$, so standard sieve weights cannot detect the
+parity difference between blocks $A$, $B$, and $C$.
+
+Breaking this barrier requires bilinear sieve techniques ---
+the same Type~I/Type~II decomposition that Chen~\cite{chen73}
+used to prove his theorem on primes and semiprimes.
+Proving $K < 1$ is the final step in the formal verification
+of the Riemann Hypothesis.
 % ═══════════════════════════════════════════
 % BIBLIOGRAPHY
 % ═══════════════════════════════════════════

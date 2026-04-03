@@ -234,14 +234,42 @@ theorem sieve_implies_stable_ratio
   -- Use R = K² as the interference ratio
   refine ⟨K ^ 2, sq_nonneg K, by nlinarith [sq_nonneg (1 - K)], ?_⟩
   intro N hN v _hv
-  -- The variational argument: for each w, the bilinear form is bounded
-  -- vᵀ(BC⁻¹Bᵀ)v = sup_w {2⟨v,Bw⟩ - ⟨w,Cw⟩} ≤ K²·⟨v,Av⟩
-  -- This requires the variational characterization of the Schur complement
-  -- and the optimization 2Kt - t² ≤ K² for t ≥ 0.
-  sorry -- Requires: schur_variational + optimization over t
-         -- The mathematical argument is given above;
-         -- formalizing it requires Mathlib's matrix inverse lemmas
-         -- for the variational characterization.
+  -- The proof uses schur_variational as an upper bound.
+  -- For ANY w, schur_variational gives:
+  --   Q ≥ 2⟨v,Bw⟩ - ⟨w,Cw⟩
+  -- We need Q ≤ K²·vᵀAv. We show that for all w:
+  --   2⟨v,Bw⟩ - ⟨w,Cw⟩ ≤ K²·vᵀAv
+  -- which gives Q ≤ K²·vᵀAv since Q is the sup.
+  --
+  -- The algebraic argument: from the bilinear bound,
+  --   |⟨v,Bw⟩| ≤ K·√(vᵀAv)·√(wᵀCw)
+  -- So: 2⟨v,Bw⟩ ≤ 2K·√(vᵀAv)·√(wᵀCw)
+  -- Let t = √(wᵀCw). Then:
+  --   2⟨v,Bw⟩ - ⟨w,Cw⟩ ≤ 2K·√(vᵀAv)·t - t² ≤ K²·vᵀAv
+  -- (completing the square: 2at - t² = a² - (a-t)² ≤ a² where a = K·√(vᵀAv))
+  --
+  -- This proof uses schur_variational (axiom) plus the algebraic
+  -- identity 2st - t² ≤ s² for all s,t ∈ ℝ.
+  set Q := dotProduct v ((parityBlockB N * (parityBlockC N)⁻¹ *
+    (parityBlockB N)ᵀ).mulVec v)
+  -- Use schur_variational with w = 0 to show Q ≥ 0
+  have hQ_nn : Q ≥ 0 := by
+    have h0 := schur_variational N hN v 0
+    simp [Matrix.mulVec_zero, dotProduct_zero, mul_zero] at h0
+    exact h0
+  -- Now show the upper bound via the algebraic argument.
+  -- We use the fact that schur_variational gives Q ≥ 2⟨v,Bw⟩ - ⟨w,Cw⟩
+  -- for ALL w, so Q equals the sup. But we only need Q ≤ K²·vᵀAv.
+  --
+  -- Direct approach: since Q ≥ 0 and Q = vᵀ(BC⁻¹Bᵀ)v,
+  -- we bound Q using the bilinear form.
+  -- This requires matrix algebra: Q = ⟨v, B(C⁻¹(Bᵀv))⟩ = S(v, C⁻¹Bᵀv)
+  -- and ⟨C⁻¹Bᵀv, C(C⁻¹Bᵀv)⟩ = Q (when C is invertible).
+  -- Then Q² ≤ K²·(vᵀAv)·Q, so Q ≤ K²·vᵀAv.
+  sorry -- TIER 1: Pure linear algebra (Schur complement + completing the square)
+         -- See the detailed proof sketch above.
+         -- The formalization requires Mathlib's Matrix.mul_mulVec
+         -- and Matrix.mul_nonsing_inv for the matrix algebra steps.
 
 -- ════════════════════════════════════════════════
 -- THE FULL CHAIN
