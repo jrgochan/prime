@@ -10,20 +10,49 @@ noncomputable section
 open Complex Real
 
 
-/-- **Cauchy Interlacing for the Gram matrix sequence** (Cauchy 1829):
-    G_N is a principal submatrix of G_{N+1}, so by the
-    Courant-Fischer min-max theorem, λ_min(G_{N+1}) ≤ λ_min(G_N).
+/-- **Cauchy Interlacing** (PROVEN): λ_min(G_{N+1}) ≤ λ_min(G_N).
 
-    Proof sketch: For any unit vector v ∈ ℝ^{N-1}, extend to
-    w = (v, 0) ∈ ℝ^N. Then wᵀG_{N+1}w = vᵀG_Nv and ‖w‖ = ‖v‖.
-    So inf_{‖w‖=1} wᵀG_{N+1}w ≤ inf_{‖v‖=1} vᵀG_Nv.
-
-    Note: The full Courant-Fischer theorem for Matrix.IsHermitian.eigenvalues₀
-    is not yet in Mathlib. This axiom directly states the consequence
-    for our specific Gram matrix sequence, avoiding Fin-cast issues
-    that arise when connecting the abstract principle to concrete matrices. -/
-axiom eigenvalue_interlacing (N : ℕ) (hN : 2 ≤ N) :
-    lambdaMin (N + 1) ≤ lambdaMin N
+    Proof: For any eigenvector v of G_N with eigenvalue λ, pad to w = (v, 0).
+    Then wᵀG_{N+1}w = vᵀG_Nv = λ and ‖w‖ = 1.
+    By the Rayleigh bound, λ_min(G_{N+1}) ≤ λ.
+    Taking λ = λ_min(G_N) gives the result. -/
+theorem eigenvalue_interlacing (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin (N + 1) ≤ lambdaMin N := by
+  obtain ⟨n, rfl⟩ : ∃ n, N = n + 1 := ⟨N - 1, by omega⟩
+  have hn : 0 < n := by omega
+  unfold lambdaMin
+  simp only [show n + 1 ≥ 2 from by omega, show n + 2 ≥ 2 from by omega, dite_true]
+  -- H_n = gramMatrix_hermitian (n+1) : the small matrix (Fin n × Fin n)
+  -- H_n1 = gramMatrix_hermitian (n+2) : the big matrix (Fin (n+1) × Fin (n+1))
+  set H_n := gramMatrix_hermitian (n + 1)
+  set H_n1 := gramMatrix_hermitian (n + 2)
+  -- Goal: inf'(eigenvalues₀ of H_n1) ≤ inf'(eigenvalues₀ of H_n)
+  -- Strategy: inf' ≤ every eigenvalue, so it suffices to show
+  --   inf'(H_n1) ≤ quadForm G_{n+2} w for some unit w
+  -- We pick w = padVector(eigenvector i of H_n) for any i.
+  -- Then use: inf'(H_n1) ≤ quadForm G_{n+2} w = quadForm G_{n+1} v = eigenvalue i
+  -- and:      eigenvalue i ≥ inf'(H_n) for the right i
+  -- Actually simpler: inf' is ≤ every element, and inf'(H_n1) ≤ any Rayleigh quotient.
+  -- So: inf'(H_n1) ≤ quadForm(padVector v) = quadForm v = λᵢ for all i
+  -- Taking inf over all i: inf'(H_n1) ≤ inf'(H_n).
+  apply Finset.le_inf'
+  intro j _
+  -- Show inf'(H_n1 eigenvalues₀) ≤ H_n.eigenvalues₀ j
+  -- eigenvalues₀ j ∈ range(eigenvalues), so ∃ i with eigenvalues i = eigenvalues₀ j
+  have h_in_range : H_n.eigenvalues₀ j ∈ Set.range H_n.eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j,
+           congr_arg _ (Equiv.symm_apply_apply _ j)⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi]
+  -- Goal: inf'(H_n1) ≤ H_n.eigenvalues i
+  -- = quadForm G_{n+1} (eigenvector i)    [by quadForm_eigenvector]
+  -- = quadForm G_{n+2} (padVector(eigenvector i))  [by quadForm_padVector]
+  rw [← quadForm_eigenvector H_n i, ← quadForm_padVector]
+  -- Goal: inf'(H_n1) ≤ quadForm G_{n+2} (padVector(eigenvector i))
+  exact min_eigenvalue_le_quadForm H_n1 _
+    (padVector_norm _ (H_n.eigenvectorBasis.orthonormal.1 i))
+    (by omega)
 
 theorem eigenvalue_antitone (N : ℕ) (hN : 2 ≤ N) :
     lambdaMin (N + 1) ≤ lambdaMin N := eigenvalue_interlacing N hN

@@ -310,3 +310,52 @@ theorem pos_def_implies_min_eigenvalue_pos
   linarith
 
 end
+
+-- ════════════════════════════════════════════════
+-- PART VII: VECTOR PADDING FOR INTERLACING
+-- ════════════════════════════════════════════════
+
+section PadVector
+open Matrix
+
+/-- Pad a vector with a zero at the end to embed ℝⁿ into ℝⁿ⁺¹. -/
+noncomputable def padVector {n : ℕ} (v : Fin n → ℝ) : Fin (n + 1) → ℝ :=
+  Fin.snoc v 0
+
+lemma padVector_dotProduct {n : ℕ} (v : Fin n → ℝ) :
+    dotProduct (padVector v) (padVector v) = dotProduct v v := by
+  unfold dotProduct padVector
+  rw [Fin.sum_univ_castSucc]
+  simp [Fin.snoc_castSucc, Fin.snoc_last]
+
+lemma padVector_norm {n : ℕ} (v : Fin n → ℝ)
+    (h : ‖(WithLp.toLp 2 v : EuclideanSpace ℝ (Fin n))‖ = 1) :
+    ‖(WithLp.toLp 2 (padVector v) : EuclideanSpace ℝ (Fin (n + 1)))‖ = 1 := by
+  have h_dot : dotProduct v v = 1 := by
+    have h1 : dotProduct v v =
+        @inner ℝ (EuclideanSpace ℝ (Fin n)) _
+          (WithLp.toLp 2 v) (WithLp.toLp 2 v) := (inner_eq_dotProduct v v).symm
+    rw [h1, real_inner_self_eq_norm_sq, h, one_pow]
+  have h_pad_sq : ‖(WithLp.toLp 2 (padVector v) : EuclideanSpace ℝ (Fin (n + 1)))‖ ^ 2 = 1 := by
+    have h1 : dotProduct (padVector v) (padVector v) =
+        @inner ℝ (EuclideanSpace ℝ (Fin (n + 1))) _
+          (WithLp.toLp 2 (padVector v)) (WithLp.toLp 2 (padVector v)) :=
+      (inner_eq_dotProduct (padVector v) (padVector v)).symm
+    rw [← real_inner_self_eq_norm_sq]; rw [← h1]; rw [padVector_dotProduct]; exact h_dot
+  nlinarith [norm_nonneg (WithLp.toLp 2 (padVector v) : EuclideanSpace ℝ (Fin (n + 1)))]
+
+/-- The quadratic form of a padded vector over G_{n+2} equals the
+    quadratic form of the original vector over G_{n+1}. -/
+private lemma quadForm_padVector_of {m : ℕ} (v : Fin m → ℝ) :
+    realQuadForm (of (fun (i j : Fin (m + 1)) => gramEntry (i.val + 2) (j.val + 2)))
+                 (padVector v) =
+    realQuadForm (of (fun (i j : Fin m) => gramEntry (i.val + 2) (j.val + 2))) v := by
+  simp only [realQuadForm, dotProduct, mulVec, of_apply, padVector,
+    Fin.sum_univ_castSucc, Fin.snoc_castSucc, Fin.snoc_last,
+    zero_mul, mul_zero, add_zero, Fin.val_castSucc]
+
+lemma quadForm_padVector {n : ℕ} (v : Fin n → ℝ) :
+    realQuadForm (gramMatrix (n + 2)) (padVector v) = realQuadForm (gramMatrix (n + 1)) v :=
+  quadForm_padVector_of v
+
+end PadVector
