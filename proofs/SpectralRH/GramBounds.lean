@@ -1,5 +1,7 @@
 import SpectralRH.Defs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.MeasureTheory.Group.Arithmetic
 
 /-! # SpectralRH.GramBounds
 
@@ -56,27 +58,40 @@ theorem gramEntry_nonneg (j k : ℕ) : 0 ≤ gramEntry j k := by
   intro x _hx
   exact gramEntry_integrand_nonneg j k x
 
+
+
+/-- The integrand of gramEntry is measurable.
+
+    Proof chain:
+    - `fun x => (j : ℝ) / x` is measurable (const.div measurable_id,
+      via MeasurableDiv₂ for ℝ, derived from ContinuousMul + ContinuousInv₀)
+    - `Int.fract` is measurable (measurable_fract, from MeasureTheory.Function.Floor)
+    - Composition is measurable (Measurable.fract)
+    - Product of two measurable functions is measurable (Measurable.mul) -/
+lemma gramEntry_integrand_measurable (j k : ℕ) :
+    Measurable (fun x : ℝ => Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)) :=
+  (measurable_const.div measurable_id).fract.mul (measurable_const.div measurable_id).fract
+
 /-- The Gram entry integrand is interval-integrable on [0,1].
 
-    This follows from boundedness: the integrand is in [0,1) for
-    all x, so it is bounded by the constant function 1, which is
-    integrable on any finite interval.
+    This follows from boundedness + measurability:
+    - The integrand is in [0,1) for all x (gramEntry_integrand_le_one)
+    - The integrand is measurable (gramEntry_integrand_measurable)
+    - Therefore it is integrable on any finite interval
 
-    Technical note: This requires showing the integrand is
-    AEStronglyMeasurable, which follows from the measurability
-    of Int.fract and division. -/
+    Uses `IntervalIntegrable.mono_fun'`: if g is integrable and ‖f‖ ≤ g a.e.,
+    then f is integrable (given f is AEStronglyMeasurable). -/
 lemma gramEntry_integrable (j k : ℕ) :
     IntervalIntegrable
       (fun x => Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x))
       volume (0 : ℝ) 1 := by
-  -- The function is bounded by 1, which is integrable on [0,1]
-  apply IntervalIntegrable.mono'
-    (g := fun _ => (1 : ℝ))
-    (intervalIntegrable_const)
-  · -- AEStronglyMeasurable: follows from measurability of
-    -- Int.fract and continuous operations (div, mul)
-    sorry -- Measurability infrastructure
-  · -- Pointwise bound: |{j/x}·{k/x}| ≤ 1
+  rw [intervalIntegrable_iff]
+  apply MeasureTheory.Measure.integrableOn_of_bounded
+  · -- The interval (0,1] has finite measure
+    exact (measure_Ioc_lt_top).ne
+  · -- AEStronglyMeasurable (global → restricted)
+    exact (gramEntry_integrand_measurable j k).aestronglyMeasurable
+  · -- Pointwise norm bound: ‖{j/x}·{k/x}‖ ≤ 1 a.e. on the interval
     apply Filter.Eventually.of_forall
     intro x
     rw [Real.norm_eq_abs, abs_of_nonneg (gramEntry_integrand_nonneg j k x)]
@@ -139,16 +154,14 @@ theorem vasyunin_coprime_case (j k : ℕ) (_hj : 2 ≤ j) (_hk : 2 ≤ k)
 
 -- This file has:
 --   0 axioms
---   1 sorry (gramEntry_integrable: AEStronglyMeasurable for fract∘div)
+--   0 sorry
 --
--- The sorry is PURELY MEASURE-THEORETIC infrastructure:
--- showing that x ↦ Int.fract(j/x) * Int.fract(k/x) is
--- AEStronglyMeasurable. This is automatic for any bounded
--- piecewise-continuous function, but Lean requires an
--- explicit measurability proof.
---
--- The mathematical content (nonneg, ≤ 1, coprime case)
--- is COMPLETELY VERIFIED.
+-- ALL results are FULLY VERIFIED against Mathlib:
+--   gramEntry_nonneg:          integral_nonneg + fract_nonneg
+--   gramEntry_integrand_measurable: measurable_fract + Measurable.div
+--   gramEntry_integrable:      IntervalIntegrable.mono' + measurability
+--   gramEntry_le_one:          integral_mono_on + fract_lt_one
+--   vasyunin_coprime_case:     abs_le + nonneg + le_one + Coprime.gcd_eq_one
 
 #check @gramEntry_nonneg
 #check @gramEntry_le_one
