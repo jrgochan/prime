@@ -189,10 +189,24 @@ axiom nb_distance_scaling :
 /-- **Axiom: Logarithmic divergence** (standard calculus).
 
     For any C > 0 and ε > 0, C/log(N) < ε eventually.
-    This is provable in Mathlib from `Real.tendsto_log_atTop`
-    but axiomatized to avoid topological yak-shaving at 3 AM. -/
-axiom log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
-    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → C / Real.log (N : ℝ) < ε
+    Proved using `Real.tendsto_log_atTop` from Mathlib. -/
+theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → C / Real.log (N : ℝ) < ε := by
+  -- Use log → ∞ to get log N > C/ε (strictly, via +1 bump)
+  have h := tendsto_log_atTop.eventually (Filter.eventually_ge_atTop (C / ε + 1))
+  rw [Filter.eventually_atTop] at h
+  obtain ⟨M, hM⟩ := h
+  use ⌈max M 2⌉₊
+  intro N hN
+  have hN_cast : (N : ℝ) ≥ max M 2 := le_trans (Nat.le_ceil _) (by exact_mod_cast hN)
+  have hN_ge_M : (N : ℝ) ≥ M := le_trans (le_max_left _ _) hN_cast
+  have hlog_pos : 0 < Real.log (N : ℝ) := Real.log_pos (by linarith [le_max_right M 2])
+  have hlog_gt : C / ε < Real.log (N : ℝ) := by linarith [hM N hN_ge_M]
+  rw [div_lt_iff₀ hlog_pos]
+  have : C < ε * Real.log (N : ℝ) := by
+    calc C = ε * (C / ε) := by field_simp
+      _ < ε * Real.log (N : ℝ) := by nlinarith
+  linarith
 
 -- ─────── NYMAN-BEURLING ───────
 
