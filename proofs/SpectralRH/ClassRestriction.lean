@@ -33,6 +33,30 @@ noncomputable section
 open Complex Real
 
 -- ════════════════════════════════════════════════
+-- GRAM MATRIX BLOCK-DIAGONAL DECOMPOSITION
+-- ════════════════════════════════════════════════
+
+/-- The block-diagonal Gram matrix: G^block[i,j] = G[i,j] if i,j are in
+    the same octonionic class, 0 otherwise. -/
+noncomputable def gramMatrixBlockDiag (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
+  Matrix.of (fun i j =>
+    let ki := i.val + 2
+    let kj := j.val + 2
+    if octonionClass ki = octonionClass kj
+    then gramEntry ki kj
+    else 0)
+
+/-- The block-diagonal Gram matrix is Hermitian (symmetric). -/
+lemma gramMatrixBlockDiag_hermitian (N : ℕ) :
+    (gramMatrixBlockDiag N).IsHermitian := by
+  ext i j
+  simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrixBlockDiag, Matrix.of_apply]
+  by_cases h : octonionClass (i.val + 2) = octonionClass (j.val + 2)
+  · rw [if_pos h, if_pos h.symm]
+    unfold gramEntry; congr 1; ext x; ring
+  · rw [if_neg h, if_neg (Ne.symm h)]
+
+-- ════════════════════════════════════════════════
 -- RESTRICTED GRAM MATRIX EIGENVALUES
 -- ════════════════════════════════════════════════
 
@@ -50,19 +74,30 @@ axiom lambdaMinClass_pos (m : Fin 8) (N : ℕ) (hN : 10 ≤ N)
     0 < lambdaMinClass m N
 
 -- ════════════════════════════════════════════════
--- THE BLOCK-DIAGONAL STRUCTURE
+-- THE BLOCK-DIAGONAL MINIMUM EIGENVALUE
 -- ════════════════════════════════════════════════
 
 /-- Minimum eigenvalue of the block-diagonal matrix G^{block} = ⊕ₘ G|_{Sₘ}.
-    Equals the minimum over all classes. -/
-noncomputable def lambdaMinBlock (N : ℕ) : ℝ :=
-  (Finset.univ : Finset (Fin 8)).inf' ⟨0, Finset.mem_univ _⟩
-    (fun m => lambdaMinClass m N)
+    Concretely defined as the minimum eigenvalue of gramMatrixBlockDiag N.
 
-/-- Block minimum equals the min over classes (by definition). -/
-theorem block_min_eq_class_min (N : ℕ) :
+    For a block-diagonal matrix, this equals min_m λ_min(G|_{Sₘ})
+    (see block_min_eq_class_min). -/
+noncomputable def lambdaMinBlock (N : ℕ) : ℝ :=
+  if h : N ≥ 2 then
+    (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩)
+      (gramMatrixBlockDiag_hermitian N).eigenvalues₀
+  else 0
+
+/-- **Axiom**: The block eigenvalue minimum equals the class-based minimum.
+    For a block-diagonal matrix G^{block} = ⊕ₘ G|_{Sₘ}, the eigenvalues
+    are the union of eigenvalues of the individual blocks.
+    Therefore λ_min(G^{block}) = min_m λ_min(G|_{Sₘ}).
+
+    This packages the block-diagonal eigenvalue structure theorem. -/
+axiom block_min_eq_class_min (N : ℕ) (hN : 10 ≤ N) :
     lambdaMinBlock N = (Finset.univ : Finset (Fin 8)).inf' ⟨0, Finset.mem_univ _⟩
-      (fun m => lambdaMinClass m N) := rfl
+      (fun m => lambdaMinClass m N)
 
 -- ════════════════════════════════════════════════
 -- THE CLASS RESTRICTION THEOREM
@@ -73,29 +108,27 @@ theorem block_min_eq_class_min (N : ℕ) :
     full Gram matrix.
 
     Experimental evidence:
-    | N    | λ_min(G)  | min_m λ_min(G|_{Sₘ}) | Ratio |
+    | N    | λ_min(G)  | min_m λ_min(G\|_{Sₘ}) | Ratio |
     |------|-----------|---------------------|-------|
     | 100  | 0.01556   | 0.05287             | 3.40  |
     | 200  | 0.01389   | 0.05148             | 3.71  |
     | 500  | 0.01239   | 0.04899             | 3.95  |
     | 1000 | 0.01148   | 0.04804             | 4.19  |
 
-    Moreover, min_m λ_min(G|_{Sₘ}) = λ_min(G^𝕆) exactly (to 10 digits). -/
+    Moreover, min_m λ_min(G\|_{Sₘ}) = λ_min(G^𝕆) exactly (to 10 digits). -/
 axiom class_gap_strictly_larger (m : Fin 8) (N : ℕ) (hN : 10 ≤ N) :
     lambdaMin N < lambdaMinClass m N
 
-/-- The block gap dominates the full gap (corollary). -/
+/-- The block gap dominates the full gap (corollary).
+    Uses block_min_eq_class_min to convert between eigenvalue-based
+    and class-based definitions. -/
 theorem block_gap_larger (N : ℕ) (hN : 10 ≤ N) :
     lambdaMin N < lambdaMinBlock N := by
-  -- The block gap is inf' over all 8 classes.
-  -- Since ℝ is a LinearOrder and the set is finite nonempty,
-  -- there exists m₀ achieving the infimum.
-  unfold lambdaMinBlock
-  -- inf' on a LinearOrder is achieved: ∃ m₀, inf' = f(m₀)
+  -- Rewrite lambdaMinBlock to the class-based form
+  rw [block_min_eq_class_min N hN]
+  -- Now the goal is: lambdaMin N < inf' (fun m => lambdaMinClass m N)
   obtain ⟨m₀, _, hm₀⟩ := Finset.exists_min_image Finset.univ
     (fun m => lambdaMinClass m N) Finset.univ_nonempty
-  -- hm₀ : ∀ m ∈ univ, lambdaMinClass m₀ N ≤ lambdaMinClass m N
-  -- So inf' = lambdaMinClass m₀ N
   have hinf : Finset.univ.inf' ⟨0, Finset.mem_univ _⟩ (fun m => lambdaMinClass m N)
       = lambdaMinClass m₀ N := by
     apply le_antisymm
@@ -105,7 +138,7 @@ theorem block_gap_larger (N : ℕ) (hN : 10 ≤ N) :
   exact class_gap_strictly_larger m₀ N hN
 
 /-- **G^𝕆 equals the block-diagonal** (computationally verified).
-    λ_min(G^𝕆) = min_m λ_min(G|_{Sₘ}).
+    λ_min(G^𝕆) = min_m λ_min(G\|_{Sₘ}).
     This is because the weight matrix W zeroes out all cross-class entries:
     W[j,k] ≈ 0 when j and k are in different octonionic classes. -/
 axiom oct_equals_block (N : ℕ) (hN : 10 ≤ N) :
@@ -133,7 +166,7 @@ noncomputable def gramCrossClass (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) 
 /-- **Liouville localization** (the key structural insight):
     The Liouville eigenvector correlation is:
     - ≈ 0.70 for G (strong alignment → small spectral gap)
-    - ≈ 0.02 for G|_{Sₘ} (decorrelated → large spectral gap)
+    - ≈ 0.02 for G\|_{Sₘ} (decorrelated → large spectral gap)
 
     This means the Liouville cancellation that makes RH hard is
     ENTIRELY a cross-class phenomenon. -/
@@ -144,30 +177,6 @@ theorem liouville_within_class_decorrelated :
     -- correlation bounded by 0.05 (vs 0.70 for full G)
     True  -- Placeholder; precise eigenvector statement TBD
   := fun _ _ _ => trivial
-
--- ════════════════════════════════════════════════
--- GRAM MATRIX DECOMPOSITION
--- ════════════════════════════════════════════════
-
-/-- The block-diagonal Gram matrix: G^block[i,j] = G[i,j] if i,j are in
-    the same octonionic class, 0 otherwise. -/
-noncomputable def gramMatrixBlockDiag (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
-  Matrix.of (fun i j =>
-    let ki := i.val + 2
-    let kj := j.val + 2
-    if octonionClass ki = octonionClass kj
-    then gramEntry ki kj
-    else 0)
-
-/-- The block-diagonal Gram matrix is Hermitian (symmetric). -/
-lemma gramMatrixBlockDiag_hermitian (N : ℕ) :
-    (gramMatrixBlockDiag N).IsHermitian := by
-  ext i j
-  simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrixBlockDiag, Matrix.of_apply]
-  by_cases h : octonionClass (i.val + 2) = octonionClass (j.val + 2)
-  · rw [if_pos h, if_pos h.symm]
-    unfold gramEntry; congr 1; ext x; ring
-  · rw [if_neg h, if_neg (Ne.symm h)]
 
 /-- Cross-class matrix: G^cross = G - G^block. -/
 noncomputable def gramMatrixCross (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
@@ -196,30 +205,17 @@ noncomputable def lambdaMinCross (N : ℕ) : ℝ :=
       (gramMatrixCross_hermitian N).eigenvalues₀
   else 0
 
-/-- **Axiom**: The abstract block minimum (min over octonionic classes)
-    is a lower bound for the minimum eigenvalue of the block-diagonal matrix.
-
-    For a block-diagonal matrix G^{block} = ⊕ₘ G|_{Sₘ}, the eigenvalues
-    are the union of eigenvalues of the blocks. Therefore:
-    λ_min(G^{block}) = min_m λ_min(G|_{Sₘ}) = lambdaMinBlock.
-
-    This packages the block-diagonal eigenvalue structure theorem. -/
-axiom block_eigenvalue_le (N : ℕ) (hN : N ≥ 2) :
-    lambdaMinBlock N ≤
-    (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).inf'
-      (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩)
-      (gramMatrixBlockDiag_hermitian N).eigenvalues₀
-
-/-- For N < 2, lambdaMinBlock ≤ 0 (degenerate: the Gram matrix has 0 rows). -/
-axiom lambdaMinBlock_le_zero_small (N : ℕ) (hN : N < 2) : lambdaMinBlock N ≤ 0
-
 /-- **Weyl's inequality** for Hermitian matrix addition (PROVEN):
     λ_min(A + B) ≥ λ_min(A) + λ_min(B).
     Applied to G = G^{block} + G^{cross}, this gives:
     λ_min(G) ≥ λ_min(G^{block}) + λ_min(G^{cross}).
 
     Uses weyl_min_eigenvalue from RayleighBridge.lean applied to
-    the decomposition gramMatrix = gramMatrixBlockDiag + gramMatrixCross. -/
+    the decomposition gramMatrix = gramMatrixBlockDiag + gramMatrixCross.
+
+    This is 100% proven — no custom axioms needed. lambdaMinBlock and
+    lambdaMinCross are both defined as inf'(eigenvalues₀(...)), so the
+    proof just unfolds definitions and applies the generic Weyl theorem. -/
 theorem weyl_inequality (N : ℕ) :
     lambdaMinBlock N + lambdaMinCross N ≤ lambdaMin N := by
   by_cases hN : N ≥ 2
@@ -227,34 +223,23 @@ theorem weyl_inequality (N : ℕ) :
     -- The core Weyl result from RayleighBridge
     have h_weyl := weyl_min_eigenvalue
       (gramMatrixBlockDiag_hermitian N) (gramMatrixCross_hermitian N) h_pos
-    -- h_weyl : inf'(...) ≥ inf'(block) + inf'(cross)
-    -- where ... = (hA.add hB).eigenvalues₀
+    -- h_weyl : inf'(block) + inf'(cross) ≤ inf'((block+cross)_hermitian)
 
     -- eigenvalues₀ of (block+cross) = eigenvalues₀ of gramMatrix
     -- because block + cross = gramMatrix definitionally (gram_decomposition)
-    -- and eigenvalues₀ depends only on the matrix, not the proof
     have h_ev_eq : ∀ j, ((gramMatrixBlockDiag_hermitian N).add
         (gramMatrixCross_hermitian N)).eigenvalues₀ j =
         (gramMatrix_hermitian N).eigenvalues₀ j := by
       intro j; congr 1; exact (gram_decomposition N).symm
 
-    -- Unfold lambdaMin and lambdaMinCross to their eigenvalues₀ definitions
-    unfold lambdaMin lambdaMinCross
+    -- Unfold all three definitions to their eigenvalues₀ forms
+    unfold lambdaMin lambdaMinCross lambdaMinBlock
     simp only [show N ≥ 2 from hN, dite_true]
 
-    -- Now the goal is:
-    -- lambdaMinBlock N + inf'(H, cross.ev₀) ≤ inf'(H', gramMatrix.ev₀)
-    -- But the nonemptiness witnesses H, H' may differ syntactically
-    -- Use block_eigenvalue_le and Weyl to chain
+    -- Goal: inf'(block.ev₀) + inf'(cross.ev₀) ≤ inf'(gram.ev₀)
+    -- h_weyl gives: inf'(block.ev₀) + inf'(cross.ev₀) ≤ inf'((block+cross).ev₀)
+    -- h_ev_eq gives: (block+cross).ev₀ = gram.ev₀ pointwise
 
-    -- lambdaMinBlock ≤ inf'(block.ev₀)
-    have h_block := block_eigenvalue_le N hN
-    -- h_block uses the SAME nonemptiness witness as our goal
-
-    -- The Weyl bound states:
-    -- inf'(block.ev₀) + inf'(cross.ev₀) ≤ inf'((block+cross).ev₀)
-    -- And (block+cross).ev₀ = gramMatrix.ev₀ pointwise (by h_ev_eq)
-    -- So inf'((block+cross).ev₀) = inf'(gramMatrix.ev₀) (by Finset.inf'_congr)
     have h_inf_eq : ∀ (H₁ H₂ : Finset.Nonempty
         (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1)))))),
         Finset.univ.inf' H₁
@@ -277,14 +262,9 @@ theorem weyl_inequality (N : ℕ) :
 
     linarith [h_inf_eq (by rw [Fintype.card_fin]; exact ⟨⟨0, h_pos⟩, Finset.mem_univ _⟩)
                        (by rw [Fintype.card_fin]; exact ⟨⟨0, h_pos⟩, Finset.mem_univ _⟩)]
-  · -- N < 2: degenerate case
-    -- The goal after unfold becomes lambdaMinBlock N + 0 ≤ 0
-    unfold lambdaMin lambdaMinCross
-    simp only [show ¬(N ≥ 2) from hN, dite_false, add_zero]
-    -- Need: lambdaMinBlock N ≤ 0
-    -- lambdaMinBlock is inf' over opaque values for the vacuous 0×0 case
-    -- This is only needed for soundness; weyl_inequality is used for N ≥ 10
-    exact lambdaMinBlock_le_zero_small N (by omega)
+  · -- N < 2: all three definitions return 0 via dite_false
+    unfold lambdaMin lambdaMinCross lambdaMinBlock
+    simp only [show ¬(N ≥ 2) from hN, dite_false, add_zero, le_refl]
 
 /-- **The Cross-Class Bound** (the irreducible content of RH):
     The cross-class interactions cannot reduce the block-diagonal
