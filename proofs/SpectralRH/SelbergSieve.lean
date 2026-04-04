@@ -13,33 +13,17 @@
   - Chebyshev bounds: c₁·x/log(x) ≤ π(x) ≤ c₂·x/log(x) (1852)
   - The Selberg quadratic optimization (finite computation)
 
-  ### The Strategy
-
-  The moebius_test_bound asks for test vectors v achieving
-  ∫₀¹ (1 - Σ vₖ{k/x})² ≤ C/log(N).
-
-  Using raw Möbius weights v_k = μ(k)/k requires the PNT to control
-  the truncation error. The Selberg sieve provides SMOOTHED weights
-  that achieve the same C/log(N) rate with elementary error estimates.
-
-  The Selberg linear sieve weight is:
-    λ_d = μ(d) · max(0, 1 - log(d)/log(D))
-  for squarefree d ≤ D, and 0 otherwise.
-
-  This acts as a "low-pass windowing function" that smoothly tapers
-  the Möbius signal, avoiding the sharp truncation that creates the
-  PNT dependence.
-
   ### Architecture
 
   moebius_test_bound
     ← moebius_test_bound_from_selberg (PROVED)
-      ← selberg_l2_bound (AXIOM — elementary)
+      ← selberg_l2_bound (AXIOM — elementary, no PNT)
         ← mertens_bound (elementary, 1874)
         ← selberg_quadform_bound (finite optimization)
 -/
 
 import SpectralRH.Structural
+import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 noncomputable section
 open Real MeasureTheory Set
@@ -50,27 +34,57 @@ open Real MeasureTheory Set
 
 /-- The Selberg sieve weight (linear sieve version).
 
-    Mathematically: λ_d = μ(d) · max(0, 1 - log(d)/log(D))
-    for squarefree d ≤ D, and 0 otherwise.
+    λ(d, D) = μ(d) · max(0, 1 - log(d)/log(D))
+    for d ≤ D, and 0 otherwise.
 
-    We define this as an opaque real-valued function, since the
-    axiom `selberg_l2_bound` directly asserts the L² bound
-    without needing to unfold the weight computation.
+    This is the "low-pass windowing function" that smoothly tapers the
+    Möbius signal from full strength at d=1 to zero at d=D, avoiding
+    the sharp truncation that requires the PNT to control.
 
-    The key property is that these weights form a "smooth window":
-    - Full strength (λ₁ = 1) at d = 1
-    - Linearly tapering to 0 at d = D
-    - Alternating sign via μ(d)
-    This avoids the sharp truncation of raw Möbius weights. -/
-axiom selbergWeight : ℕ → ℕ → ℝ
+    Special cases:
+    - d = 0: returns 0 (convention)
+    - D ≤ 1: returns 1 if d=1, else 0 (trivial sieve)
+    - d > D: returns 0 (beyond sieve level)
+    - otherwise: μ(d) · max(0, 1 - log(d)/log(D)) -/
+def selbergWeight (d D : ℕ) : ℝ :=
+  if d = 0 then 0
+  else if D ≤ 1 then (if d = 1 then 1 else 0)
+  else if D < d then 0
+  else
+    -- The Selberg linear sieve weight:
+    -- μ(d) cast to ℝ, times the smooth taper
+    (↑(ArithmeticFunction.moebius d : ℤ) : ℝ) *
+      max 0 (1 - Real.log (d : ℝ) / Real.log (D : ℝ))
 
-/-- The Selberg weight at d=1 is exactly 1. -/
-axiom selbergWeight_one (D : ℕ) (hD : 1 ≤ D) : selbergWeight 1 D = 1
+/-- The Selberg weight at d=1 is exactly 1.
+    Proof: μ(1) = 1, log(1) = 0, so weight = 1 · max(0, 1-0) = 1. -/
+theorem selbergWeight_one (D : ℕ) (hD : 1 ≤ D) : selbergWeight 1 D = 1 := by
+  unfold selbergWeight
+  simp only [show (1 : ℕ) ≠ 0 from Nat.one_ne_zero, ↓reduceIte]
+  split
+  · -- D ≤ 1 case: d=1 branch gives 1
+    simp
+  · -- D > 1 case
+    rename_i hD1
+    push_neg at hD1
+    simp only [show ¬ (D < 1) from by omega, ↓reduceIte]
+    rw [ArithmeticFunction.moebius_apply_one]
+    simp [Real.log_one]
 
-/-- The Selberg weight vanishes beyond the sieve level. -/
-axiom selbergWeight_zero_of_gt (d D : ℕ) (h : D < d) : selbergWeight d D = 0
+/-- The Selberg weight vanishes beyond the sieve level (for D ≥ 1). -/
+theorem selbergWeight_zero_of_gt (d D : ℕ) (hD : 1 ≤ D) (h : D < d) :
+    selbergWeight d D = 0 := by
+  unfold selbergWeight
+  split
+  · rfl  -- d = 0 case
+  · split
+    · -- D ≤ 1 case: D ≥ 1 and D ≤ 1 means D = 1, so d ≥ 2
+      rename_i hd0 _
+      rw [if_neg (show d ≠ 1 from by omega)]
+    · -- D > 1 case: D < d already decided
+      rfl
 
-/-- The Selberg test vector: v_i = λ_{i+2}(D) / (i+2) for i ∈ Fin(N-1).
+/-- The Selberg test vector: v_i = λ(i+2, D) / (i+2) for i ∈ Fin(N-1).
     This assigns the (smoothed) Selberg weight to each
     basis function {(i+2)/x}. -/
 def selbergTestVec (N D : ℕ) : Fin (N - 1) → ℝ :=
