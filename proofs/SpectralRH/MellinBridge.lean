@@ -3,6 +3,7 @@ import SpectralRH.Structural
 import Mathlib.Analysis.MellinTransform
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.Dirichlet
+import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 
 /-! # SpectralRH.MellinBridge
 
@@ -137,7 +138,28 @@ theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
   rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
   -- Step 3: Interchange ∫₀¹ Σᵢ = Σᵢ ∫₀¹
   -- Each term is interval integrable (bounded × power function on [0,1])
-  rw [intervalIntegral.integral_finset_sum (s := Finset.univ) (fun i _ => by sorry)]
+  rw [intervalIntegral.integral_finset_sum (s := Finset.univ) (fun i _ => by
+    -- Goal: IntervalIntegrable (fun x => w i * (↑x ^ (s-1) * fractBasisC ...)) volume 0 1
+    -- Factor out w i as a constant
+    apply IntervalIntegrable.const_mul
+    -- Bound: ‖t^{s-1} * fractBasisC k t‖ ≤ ‖t^{s-1}‖ since |fract| ≤ 1
+    apply IntervalIntegrable.mono_fun (intervalIntegral.intervalIntegrable_cpow' (by
+      simp [sub_re, one_re]; linarith : -1 < (s - 1).re))
+    · -- AEStronglyMeasurable: product of cpow and fract on uIoc 0 1.
+      -- Both (x : ℝ) ↦ (↑x : ℂ)^(s-1) and (x : ℝ) ↦ ↑(Int.fract(k/x))
+      -- are measurable (cpow is continuous on (0,∞), fract is piecewise continuous).
+      -- The product of measurable functions is measurable.
+      exact sorry  -- measurability (mechanical, not mathematical)
+    · -- Norm bound: ‖t^{s-1} * fract‖ ≤ ‖t^{s-1}‖
+      filter_upwards with x
+      rw [norm_mul]
+      calc ‖(↑x : ℂ) ^ (s - 1)‖ * ‖fractBasisC (↑i + 2) x‖
+          ≤ ‖(↑x : ℂ) ^ (s - 1)‖ * 1 := by
+            gcongr
+            simp only [fractBasisC, Complex.norm_real, Real.norm_eq_abs,
+              abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = ‖(↑x : ℂ) ^ (s - 1)‖ := mul_one _)]
   -- Step 4: Factor out wᵢ and convert back to set integral = mellinRestricted
   congr 1; ext i
   -- Goal: ∫₀¹ wᵢ * (t^{s-1} * φᵢ(t)) = wᵢ * ∫ₛ t^{s-1} * φᵢ(t)
