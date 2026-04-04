@@ -7,9 +7,14 @@
   of the Nyman-Beurling basis function with the constant function 1.
 
   ### Architecture:
-  fract_integral_as_sum (AXIOM — substitution u=k/x + sum decomposition)
-    ↓ [interval_sub_div_sq — THEOREM: ∫_n^{n+1} (x-n)/x² = log(1+1/n) - 1/(n+1)]
-  fract_integral_eq_tsum (THEOREM — derived from axiom + interval computation)
+  fract_integral_eq_tsum (THEOREM — proved via x-domain partition + assembly)
+    ↓ [floor_div_eq_on_Ioc — THEOREM: ⌊k/x⌋ = n on Ioc(k/(n+1), k/n)]
+    ↓ [fract_div_eq_on_Ioc — THEOREM: {k/x} = k/x - n]
+    ↓ [integral_div_sub_const_on_piece — THEOREM: per-interval FTC]
+    ↓ [fract_integral_piece — THEOREM: a.e. congr bridge]
+    ↓ [fract_integral_telescope — THEOREM: finite telescoping]
+    ↓ [fract_integral_tail_bound — THEOREM: tail → 0]
+    ↓ [fract_div_intervalIntegrable — THEOREM: floor measurable → fract measurable → bounded]
   summable_log_correction (THEOREM — was axiom, proved via comparison + sign flip)
       ↓ [hasSum_telescoping_inv — THEOREM (telescoping series)]
       ↓ [fract_integral_as_one_plus — THEOREM]
@@ -33,20 +38,9 @@ noncomputable section
 open Real MeasureTheory
 
 -- ════════════════════════════════════════════════
--- LAYER 0: IRREDUCIBLE AXIOMS
+-- LAYER 0: X-DOMAIN PARTITION PROOF
+-- (was: fract_integral_as_sum axiom — now eliminated)
 -- ════════════════════════════════════════════════
-
-/-- **Axiom (Substitution + Sum)**: ∫₀¹ {k/x}dx = k · Σ ∫_{m+k}^{m+k+1} (x-(m+k))/x² dx.
-
-    This is the irreducible analytic core: change of variables u = k/x
-    gives ∫₀¹ {k/x}dx = k·∫_k^∞ {u}/u² du, then partitioning into
-    intervals [n,n+1) where {u} = u-n. The per-interval integral
-    computation is proved as a theorem below. -/
-axiom fract_integral_as_sum (k : ℕ) (hk : 1 ≤ k) :
-    ∫ x in (0:ℝ)..1, Int.fract ((k : ℝ) / x) =
-    (k : ℝ) * ∑' (m : ℕ),
-      (∫ x in ((m + k : ℕ) : ℝ)..((m + k : ℕ) : ℝ) + 1,
-        (x - ((m + k : ℕ) : ℝ)) / x ^ 2)
 
 /-- **THEOREM**: ∫_n^{n+1} (x-n)/x² dx = log(1+1/n) - 1/(n+1).
     Proof: (x-n)/x² = 1/x - n/x². By FTC with antiderivative log(x) + n/x:
@@ -92,15 +86,209 @@ theorem interval_sub_div_sq (n : ℕ) (hn : 1 ≤ n) :
   have h4 : 1 / ((↑n : ℝ) + 1) = ((↑n : ℝ) + 1)⁻¹ := one_div _
   linarith
 
+/-- On Ioc(k/(n+1), k/n), ⌊k/x⌋ = n. -/
+private lemma floor_div_eq_on_Ioc (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n)
+    (x : ℝ) (hx_lo : (k : ℝ) / ((n : ℝ) + 1) < x) (hx_hi : x ≤ (k : ℝ) / (n : ℝ)) :
+    ⌊(k : ℝ) / x⌋ = (n : ℤ) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+  have hx_pos : (0 : ℝ) < x := by linarith [div_pos hk_pos hn1_pos]
+  rw [Int.floor_eq_iff]
+  constructor
+  · rw [Int.cast_natCast, le_div_iff₀ hx_pos]
+    nlinarith [mul_div_cancel₀ (k : ℝ) (ne_of_gt hn_pos)]
+  · rw [Int.cast_natCast, div_lt_iff₀ hx_pos]
+    nlinarith [mul_div_cancel₀ (k : ℝ) (ne_of_gt hn1_pos)]
+
+/-- On Ioc(k/(n+1), k/n), {k/x} = k/x - n. -/
+private lemma fract_div_eq_on_Ioc (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n)
+    (x : ℝ) (hx_lo : (k : ℝ) / ((n : ℝ) + 1) < x) (hx_hi : x ≤ (k : ℝ) / (n : ℝ)) :
+    Int.fract ((k : ℝ) / x) = (k : ℝ) / x - (n : ℝ) := by
+  unfold Int.fract
+  rw [floor_div_eq_on_Ioc k n hk hn x hx_lo hx_hi]; simp [Int.cast_natCast]
+
+/-- Pure calculus: ∫_{k/(n+1)}^{k/n} (k/x - n) dx = k·(log(1+1/n) - 1/(n+1)). -/
+private lemma integral_div_sub_const_on_piece (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n) :
+    ∫ x in ((k : ℝ) / ((n : ℝ) + 1))..((k : ℝ) / (n : ℝ)),
+      ((k : ℝ) / x - (n : ℝ)) =
+    (k : ℝ) * (Real.log (1 + 1 / (n : ℝ)) - 1 / ((n : ℝ) + 1)) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+  have hkn1_pos : (0 : ℝ) < (k : ℝ) / ((n : ℝ) + 1) := div_pos hk_pos hn1_pos
+  have hkn_pos : (0 : ℝ) < (k : ℝ) / (n : ℝ) := div_pos hk_pos hn_pos
+  have hle : (k : ℝ) / ((n : ℝ) + 1) ≤ (k : ℝ) / (n : ℝ) :=
+    div_le_div_of_nonneg_left (le_of_lt hk_pos) hn_pos (by linarith)
+  have hF : ∀ x ∈ Set.uIcc ((k : ℝ) / ((n : ℝ) + 1)) ((k : ℝ) / (n : ℝ)),
+      HasDerivAt (fun x => (k : ℝ) * Real.log x - (n : ℝ) * x)
+        ((k : ℝ) / x - (n : ℝ)) x := by
+    intro x hx; rw [Set.uIcc_of_le hle] at hx
+    have hx_pos : (0 : ℝ) < x := lt_of_lt_of_le hkn1_pos hx.1
+    convert (Real.hasDerivAt_log (ne_of_gt hx_pos)).const_mul (k : ℝ) |>.sub
+      ((hasDerivAt_id x).const_mul (n : ℝ)) using 1
+    simp [mul_comm (k : ℝ) x⁻¹, div_eq_mul_inv]
+  have hint : IntervalIntegrable (fun x => (k : ℝ) / x - (n : ℝ)) volume
+      ((k : ℝ) / ((n : ℝ) + 1)) ((k : ℝ) / (n : ℝ)) := by
+    apply ContinuousOn.intervalIntegrable
+    exact (continuousOn_const.div continuousOn_id (fun x hx => by
+      rw [Set.uIcc_of_le hle] at hx; exact ne_of_gt (lt_of_lt_of_le hkn1_pos hx.1))).sub
+      continuousOn_const
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
+  have h1 : Real.log ((k : ℝ) / (n : ℝ)) - Real.log ((k : ℝ) / ((n : ℝ) + 1)) =
+      Real.log (((n : ℝ) + 1) / (n : ℝ)) := by
+    rw [← Real.log_div (ne_of_gt hkn_pos) (ne_of_gt hkn1_pos)]; congr 1; field_simp
+  rw [show (k : ℝ) * Real.log ((k : ℝ) / (n : ℝ)) - (n : ℝ) * ((k : ℝ) / (n : ℝ)) -
+      ((k : ℝ) * Real.log ((k : ℝ) / ((n : ℝ) + 1)) - (n : ℝ) * ((k : ℝ) / ((n : ℝ) + 1))) =
+      (k : ℝ) * (Real.log ((k : ℝ) / (n : ℝ)) - Real.log ((k : ℝ) / ((n : ℝ) + 1))) -
+      (n : ℝ) * ((k : ℝ) / (n : ℝ) - (k : ℝ) / ((n : ℝ) + 1)) from by ring, h1]
+  have h2 : Real.log (((n : ℝ) + 1) / (n : ℝ)) = Real.log (1 + 1 / (n : ℝ)) := by
+    congr 1; field_simp
+  rw [h2]; have : (n : ℝ) * ((k : ℝ) / (n : ℝ) - (k : ℝ) / ((n : ℝ) + 1)) =
+      (k : ℝ) / ((n : ℝ) + 1) := by field_simp; ring
+  rw [this]; ring
+
+/-- The fract integral on a piece equals the closed form via a.e. congr. -/
+private lemma fract_integral_piece (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n) :
+    ∫ x in ((k : ℝ) / ((n : ℝ) + 1))..((k : ℝ) / (n : ℝ)),
+      Int.fract ((k : ℝ) / x) =
+    (k : ℝ) * (Real.log (1 + 1 / (n : ℝ)) - 1 / ((n : ℝ) + 1)) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hle : (k : ℝ) / ((n : ℝ) + 1) ≤ (k : ℝ) / (n : ℝ) :=
+    div_le_div_of_nonneg_left (le_of_lt hk_pos) hn_pos (by linarith)
+  rw [← integral_div_sub_const_on_piece k n hk hn,
+    intervalIntegral.integral_of_le hle, intervalIntegral.integral_of_le hle]
+  exact integral_congr_ae ((ae_restrict_mem measurableSet_Ioc).mono
+    (fun x hx => fract_div_eq_on_Ioc k n hk hn x hx.1 hx.2))
+
+/-- Floor is measurable: preimage of each {n} is Ico(n, n+1). -/
+private lemma measurable_floor_real : Measurable (Int.floor : ℝ → ℤ) := by
+  intro s hs
+  have key : Int.floor ⁻¹' s = ⋃ n ∈ s, Set.Ico (↑n : ℝ) ((↑n : ℝ) + 1) := by
+    ext x; simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_Ico, exists_prop]
+    constructor
+    · intro h; exact ⟨⌊x⌋, h, Int.floor_le x, Int.lt_floor_add_one x⟩
+    · rintro ⟨n, hn, h1, h2⟩
+      rwa [show ⌊x⌋ = n from Int.floor_eq_iff.mpr ⟨h1, h2⟩]
+  rw [key]
+  exact MeasurableSet.biUnion s.to_countable (fun n _ => measurableSet_Ico)
+
+/-- Fract is measurable: fract x = x - ↑⌊x⌋. -/
+private lemma measurable_fract_real : Measurable (Int.fract : ℝ → ℝ) :=
+  measurable_id.sub ((by fun_prop : Measurable (fun n : ℤ => (n : ℝ))).comp measurable_floor_real)
+
+/-- Fract(k/x) is measurable. -/
+private lemma measurable_fract_div (k : ℕ) :
+    Measurable (fun x : ℝ => Int.fract ((k : ℝ) / x)) :=
+  measurable_fract_real.comp (measurable_const.div measurable_id)
+
+/-- **THEOREM** (was axiom): {k/x} is integrable on any finite interval.
+    Proof: bounded by 1, measurable (floor→fract→composition), finite measure. -/
+theorem fract_div_intervalIntegrable (k : ℕ) (a b : ℝ) :
+    IntervalIntegrable (fun x => Int.fract ((k : ℝ) / x)) volume a b :=
+  (IntegrableOn.of_bound (by simp)
+    (measurable_fract_div k).aestronglyMeasurable.restrict 1
+    (ae_of_all _ (fun x => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+      exact le_of_lt (Int.fract_lt_one _)))).intervalIntegrable
+
+/-- Finite telescoping of fract integral pieces. -/
+private lemma fract_integral_telescope (k : ℕ) (hk : 1 ≤ k) (N : ℕ) :
+    ∑ j ∈ Finset.range (N + 1),
+      ∫ x in ((k : ℝ) / ((k : ℝ) + (j : ℝ) + 1))..((k : ℝ) / ((k : ℝ) + (j : ℝ))),
+        Int.fract ((k : ℝ) / x) =
+    ∫ x in ((k : ℝ) / ((k : ℝ) + (N : ℝ) + 1))..(1 : ℝ),
+      Int.fract ((k : ℝ) / x) := by
+  induction N with
+  | zero =>
+    rw [Finset.sum_range_one]; simp only [Nat.cast_zero, add_zero]
+    congr 1; exact div_self (ne_of_gt (show (0 : ℝ) < (k : ℝ) by positivity))
+  | succ N ih =>
+    rw [Finset.sum_range_succ, ih]
+    set a := (k : ℝ) / ((k : ℝ) + (N : ℝ) + 2) with ha_def
+    set b := (k : ℝ) / ((k : ℝ) + (N : ℝ) + 1) with hb_def
+    have key := intervalIntegral.integral_add_adjacent_intervals
+      (fract_div_intervalIntegrable k a b) (fract_div_intervalIntegrable k b 1)
+    rw [add_comm]; convert key using 2 <;> simp [ha_def, hb_def] <;> ring_nf
+
+/-- Tail bound: ‖∫₀^ε {k/x} dx‖ ≤ ε. -/
+private lemma fract_integral_tail_bound (k : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
+    ‖∫ x in (0 : ℝ)..ε, Int.fract ((k : ℝ) / x)‖ ≤ ε := by
+  have h1 : ∀ x ∈ Set.uIoc (0 : ℝ) ε, ‖Int.fract ((k : ℝ) / x)‖ ≤ 1 := by
+    intro x _; rw [Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+    exact le_of_lt (Int.fract_lt_one _)
+  calc ‖∫ x in (0 : ℝ)..ε, Int.fract ((k : ℝ) / x)‖
+      ≤ 1 * |ε - 0| := intervalIntegral.norm_integral_le_of_norm_le_const h1
+    _ = ε := by rw [sub_zero, abs_of_nonneg hε, one_mul]
+
+/-- Helper: k/(k+N+1) → 0. -/
+private lemma tendsto_k_div_k_add (k : ℕ) :
+    Filter.Tendsto (fun N : ℕ => (k : ℝ) / ((k : ℝ) + (N : ℝ) + 1))
+      Filter.atTop (nhds 0) := by
+  rw [show (0 : ℝ) = (k : ℝ) * 0 from (mul_zero _).symm]
+  apply Filter.Tendsto.const_mul
+  · apply Filter.Tendsto.comp tendsto_inv_atTop_zero
+    apply Filter.tendsto_atTop_atTop_of_monotone
+    · intro a b h; push_cast; linarith [show (a : ℝ) ≤ b from Nat.cast_le.mpr h]
+    · intro b; use ⌈b⌉₊; linarith [Nat.le_ceil b]
+
 /-- **THEOREM** (was axiom): ∫₀¹ {k/x}dx = k · Σ (log(1+1/(m+k)) - 1/(m+k+1)).
-    Derived from fract_integral_as_sum + interval_sub_div_sq. -/
+    Proved by x-domain partition: piece formula + telescoping + tail vanishing. -/
 theorem fract_integral_eq_tsum (k : ℕ) (hk : 1 ≤ k) :
     ∫ x in (0:ℝ)..1, Int.fract ((k : ℝ) / x) =
     (k : ℝ) * ∑' (m : ℕ),
       (Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / (((m + k : ℕ) : ℝ) + 1)) := by
-  rw [fract_integral_as_sum k hk]
-  congr 1
-  exact tsum_congr (fun m => interval_sub_div_sq (m + k) (by omega))
+  set I := ∫ x in (0:ℝ)..1, Int.fract ((k : ℝ) / x)
+  set g : ℕ → ℝ := fun m =>
+    Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / (((m + k : ℕ) : ℝ) + 1)
+  -- Each piece equals k * g(j)
+  have hpiece : ∀ j : ℕ,
+      ∫ x in ((k : ℝ) / ((k : ℝ) + (j : ℝ) + 1))..((k : ℝ) / ((k : ℝ) + (j : ℝ))),
+        Int.fract ((k : ℝ) / x) = (k : ℝ) * g j := by
+    intro j; convert fract_integral_piece k (j + k) hk (by omega) using 2 <;> push_cast <;> ring
+  -- Partial sums via telescope
+  have hpartial : ∀ N : ℕ,
+      ∑ j ∈ Finset.range (N + 1), (k : ℝ) * g j =
+      ∫ x in ((k : ℝ) / ((k : ℝ) + (N : ℝ) + 1))..(1 : ℝ), Int.fract ((k : ℝ) / x) := by
+    intro N; rw [← fract_integral_telescope k hk N]
+    exact Finset.sum_congr rfl (fun j _ => (hpiece j).symm)
+  -- Remainder = tail integral
+  have hremainder : ∀ N : ℕ,
+      I - ∑ j ∈ Finset.range (N + 1), (k : ℝ) * g j =
+      ∫ x in (0 : ℝ)..((k : ℝ) / ((k : ℝ) + (N : ℝ) + 1)), Int.fract ((k : ℝ) / x) := by
+    intro N; rw [hpartial, sub_eq_iff_eq_add]
+    exact (intervalIntegral.integral_add_adjacent_intervals
+      (fract_div_intervalIntegrable k _ _) (fract_div_intervalIntegrable k _ _)).symm
+  -- Nonneg pieces
+  have hnn : ∀ m, 0 ≤ (k : ℝ) * g m := by
+    intro m; rw [← hpiece m]
+    apply intervalIntegral.integral_nonneg
+    · exact div_le_div_of_nonneg_left
+        (le_of_lt (Nat.cast_pos.mpr (by omega : 0 < k)))
+        (show (0 : ℝ) < (k : ℝ) + (↑m : ℝ) by positivity)
+        (show (k : ℝ) + (↑m : ℝ) ≤ (k : ℝ) + (↑m : ℝ) + 1 by linarith)
+    · intro x _; exact Int.fract_nonneg _
+  -- HasSum via nonneg convergence
+  have hhas : HasSum (fun m => (k : ℝ) * g m) I := by
+    rw [hasSum_iff_tendsto_nat_of_nonneg hnn]
+    rw [Metric.tendsto_atTop]
+    intro ε hε
+    obtain ⟨N₀, hN₀⟩ := exists_nat_gt ((k : ℝ) / ε)
+    use N₀ + 1; intro N hN; rw [dist_eq_norm]
+    obtain ⟨M, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega : N ≠ 0)
+    rw [show ∑ j ∈ Finset.range (M + 1), ↑k * g j - I =
+      -(I - ∑ j ∈ Finset.range (M + 1), ↑k * g j) from by ring, norm_neg, hremainder]
+    calc ‖∫ x in (0 : ℝ)..↑k / (↑k + ↑M + 1), Int.fract (↑k / x)‖
+        ≤ (k : ℝ) / ((k : ℝ) + (M : ℝ) + 1) := fract_integral_tail_bound k _ (by positivity)
+      _ < ε := by
+          rw [div_lt_iff₀ (by positivity : (0 : ℝ) < ↑k + ↑M + 1)]
+          have hN₀' : (k : ℝ) < ε * N₀ := by rw [div_lt_iff₀ hε] at hN₀; linarith
+          have hNM : (N₀ : ℝ) ≤ (M : ℝ) + 1 := by exact_mod_cast (show N₀ ≤ M + 1 by omega)
+          nlinarith [show (0 : ℝ) ≤ (k : ℝ) from Nat.cast_nonneg k, hε]
+  -- Conclude
+  calc I = ∑' m, ((k : ℝ) * g m) := hhas.tsum_eq.symm
+    _ = (k : ℝ) * ∑' m, g m := tsum_mul_left
 
 -- summable_log_correction: proved below in Layer 2, after per_term_log_bound
 -- and summable_inv_sq_shift are available.
