@@ -8,7 +8,7 @@
 
   ### Architecture:
   fract_integral_eq_tsum (AXIOM — change of variables)
-  summable_log_correction (AXIOM — O(1/n²) summability)
+  summable_log_correction (THEOREM — was axiom, proved via comparison + sign flip)
       ↓ [hasSum_telescoping_inv — THEOREM (telescoping series)]
       ↓ [fract_integral_as_one_plus — THEOREM]
       ↓ [fract_integral_identity — THEOREM (sign flip)]
@@ -46,12 +46,8 @@ axiom fract_integral_eq_tsum (k : ℕ) (hk : 1 ≤ k) :
     (k : ℝ) * ∑' (m : ℕ),
       (Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / (((m + k : ℕ) : ℝ) + 1))
 
-/-- **Axiom (Summability)**: The log-harmonic correction is summable.
-    Each term |log(1+1/n) - 1/n| ≤ 1/(2n²) from log(1+x) ≥ x-x²/2,
-    and Σ 1/n² converges. -/
-axiom summable_log_correction (k : ℕ) (hk : 1 ≤ k) :
-    Summable (fun m : ℕ =>
-      Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / ((m + k : ℕ) : ℝ))
+-- summable_log_correction: proved below in Layer 2, after per_term_log_bound
+-- and summable_inv_sq_shift are available.
 
 -- ════════════════════════════════════════════════
 -- LAYER 1: TELESCOPING SERIES
@@ -150,6 +146,31 @@ private lemma summable_inv_sq_shift (k : ℕ) (hk : 1 ≤ k) :
   Summable.of_nonneg_of_le (fun m => by positivity)
     (fun m => inv_sq_le_double_tele (m + k) (by omega))
     ((hasSum_telescoping_inv k hk).summable.mul_left 2)
+
+/-- **THEOREM** (was axiom): The log-harmonic correction is summable.
+    Proof: |log(1+1/n) - 1/n| = 1/n - log(1+1/n) ≤ 1/(2n²),
+    and 1/(2n²) is summable, so by comparison + sign flip. -/
+theorem summable_log_correction (k : ℕ) (hk : 1 ≤ k) :
+    Summable (fun m : ℕ =>
+      Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / ((m + k : ℕ) : ℝ)) := by
+  -- The negated terms 1/n - log(1+1/n) are nonneg (log(1+x) ≤ x)
+  have hnn : ∀ m : ℕ, 0 ≤ 1 / ((m + k : ℕ) : ℝ) -
+      Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) := by
+    intro m
+    have : Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) ≤ 1 / ((m + k : ℕ) : ℝ) := by
+      rw [Real.log_le_iff_le_exp (by positivity)]
+      linarith [Real.add_one_le_exp (1 / ((m + k : ℕ) : ℝ))]
+    linarith
+  -- Negated terms bounded by 1/(2(m+k)²), which is summable
+  have hsumm_neg : Summable (fun m : ℕ =>
+      1 / ((m + k : ℕ) : ℝ) - Real.log (1 + 1 / ((m + k : ℕ) : ℝ))) :=
+    Summable.of_nonneg_of_le hnn
+      (fun m => per_term_log_bound (m + k) (by omega))
+      ((summable_inv_sq_shift k hk).mul_left (1/2) |>.congr (fun m => by
+        show 1 / 2 * (1 / ((m + k : ℕ) : ℝ) ^ 2) = 1 / (2 * ((m + k : ℕ) : ℝ) ^ 2)
+        ring))
+  -- Summable (-f) → Summable f
+  exact summable_neg_iff.mp (hsumm_neg.congr (fun m => by ring))
 
 /-- For n ≥ 2: 1/n² ≤ 1/(n-1) - 1/n = 1/((n-1)n) (tighter comparison). -/
 private lemma inv_sq_le_shifted_tele (m : ℕ) (k : ℕ) (hk : 1 ≤ k) :
