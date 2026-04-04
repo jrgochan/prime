@@ -4,6 +4,7 @@ import SpectralRH.Quantitative
 import SpectralRH.AlignmentDecay
 import SpectralRH.BilinearSieve
 import SpectralRH.ParityBridge
+import SpectralRH.MellinBridge
 
 /-! # SpectralRH.Assembly
 
@@ -451,19 +452,76 @@ theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
     _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := (l2_error_eq_quad_error N hN v).symm
     _ < ε := hv
 
-/-- **Axiom: The Nyman-Beurling Criterion** (Beurling 1955, Báez-Duarte 2003).
+/-- **THEOREM: The Nyman-Beurling Criterion** (was axiom, now derived).
 
     RH holds if and only if the Nyman-Beurling distance d²_N → 0.
 
-    **Decomposition** (see MellinBridge.lean):
-    This axiom is decomposed into three sub-axioms via the Mellin transform:
-      - `mellin_fractBasis`: ∫₀¹ {k/x}·x^{s-1} = k^s(ζ(s)/s - 1/(s-1))
-      - `nyman_beurling_converse`: d²→0 ⟹ RH
-      - `nyman_beurling_forward`: RH ⟹ d²→0
-    Together, `nyman_beurling_from_mellin` proves the ↔ in existential form.
-    The `existential_implies_infimum` theorem above converts to this form. -/
-axiom nyman_beurling :
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis
+    **Derived from MellinBridge.lean** via:
+      - `nyman_beurling_converse`: d²→0 ⟹ RH (axiom in MellinBridge)
+      - `nyman_beurling_forward`: RH ⟹ d²→0  (axiom in MellinBridge)
+      - `existential_implies_infimum`: ∃v form → infimum form (proved)
+      - The forward direction produces an optimal v = G⁻¹b. -/
+theorem nyman_beurling :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis := by
+  constructor
+  · -- (⟹) nbDistSq' < ε → RH
+    intro h
+    apply nyman_beurling_converse
+    intro ε hε
+    obtain ⟨N₀, hN₀⟩ := h ε hε
+    -- Need: ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫(1-f)² < ε
+    -- Use the same N₀, produce witness v = G⁻¹b for each N
+    use max N₀ 2
+    intro N hN
+    have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+    have hNn : N₀ ≤ N := le_trans (le_max_left _ _) hN
+    -- Produce optimal v = G⁻¹b
+    use (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+    -- Show ∫(1-f)² = nbDistSq' N via the quadform identity
+    have h_bridge := l2_error_eq_quad_error N hN2
+        ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
+    rw [h_bridge]
+    -- Goal: 1 - 2bᵀ(G⁻¹b) + (G⁻¹b)ᵀG(G⁻¹b) < ε
+    -- This equals nbDistSq' N (algebra: Gc=b ⟹ cᵀGc=cᵀb, so 1-2cᵀb+cᵀb=1-cᵀb)
+    have h_dist := hN₀ N hNn
+    -- Use notebook identity: at optimal v, quad form = nbDistSq'
+    have h_quad := nbDistSq_as_quadform N hN2
+    -- h_quad: let c := G⁻¹b; nbDistSq' N = 1 - realQuadForm G c
+    -- h_bridge: ∫(1-f)² = 1 - 2bᵀc + vᵀGv
+    -- Need: 1 - 2bᵀc + cᵀGc = nbDistSq' N where c = G⁻¹b
+    set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N) with hc_def
+    set b := basisInnerProd N
+    set G := gramMatrix N
+    have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN2
+    have h_Gc : G.mulVec c = b := by
+      simp [hc_def, G, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+    -- cᵀGc = cᵀb (since Gc = b)
+    have h_cGc : dotProduct c (G.mulVec c) = dotProduct c b := by rw [h_Gc]
+    -- quad form at optimal = nbDistSq'
+    have h_quad := nbDistSq_as_quadform N hN2
+    -- h_quad: nbDistSq' N = 1 - realQuadForm G c
+    -- h_bridge: ∫(1-f)² = 1 - 2 * dotProduct b c + realQuadForm G c
+    -- And: realQuadForm G c = dotProduct c (G.mulVec c) = dotProduct c b
+    -- Also: dotProduct b c = dotProduct c b (commutativity)
+    -- So: 1 - 2 * dotProduct b c + realQuadForm G c
+    --   = 1 - 2 * dotProduct c b + dotProduct c b
+    --   = 1 - dotProduct c b
+    --   = 1 - dotProduct b c
+    --   = nbDistSq' N
+    simp only [realQuadForm] at h_quad ⊢
+    have h_comm : dotProduct b c = dotProduct c b := dotProduct_comm b c
+    linarith [h_dist, h_cGc, h_comm]
+  · -- (⟸) RH → nbDistSq' < ε
+    intro h
+    have h_exist := nyman_beurling_forward h
+    intro ε hε
+    obtain ⟨N₀, hN₀⟩ := h_exist ε hε
+    use max N₀ 2
+    intro N hN
+    have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+    have hNn : N₀ ≤ N := le_trans (le_max_left _ _) hN
+    obtain ⟨v, hv⟩ := hN₀ N hNn
+    exact existential_implies_infimum N hN2 ε v hv
 
 -- ─────── THE RIEMANN HYPOTHESIS ───────
 
