@@ -148,6 +148,28 @@ private lemma ofReal_inv_cpow' (n : ℕ) (_hn : 1 ≤ n) (s : ℂ) :
     rw [arg_ofReal_of_nonneg (le_of_lt (Nat.cast_pos.mpr (by omega)))]
     exact ne_of_gt Real.pi_pos |>.symm)
 
+/-- (k/n)^s = k^s · n^{-s} for positive naturals, via exp/log decomposition. -/
+private lemma ofReal_div_cpow (k n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n) (s : ℂ) :
+    (↑((k:ℝ)/(n:ℝ)) : ℂ) ^ s = (↑(k:ℝ) : ℂ) ^ s * (↑(n:ℝ) : ℂ) ^ (-s) := by
+  have hk_pos : (0:ℝ) < k := by positivity
+  have hn_pos : (0:ℝ) < n := by positivity
+  have hkn_ne : (↑((k:ℝ)/(n:ℝ)) : ℂ) ≠ 0 :=
+    ofReal_ne_zero.mpr (ne_of_gt (div_pos hk_pos hn_pos))
+  have hk_ne : (↑(k:ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt hk_pos)
+  have hn_ne : (↑(n:ℝ) : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt hn_pos)
+  have hn_arg : (↑(n:ℝ) : ℂ).arg ≠ π := by
+    rw [arg_ofReal_of_nonneg (le_of_lt hn_pos)]
+    exact (ne_of_gt Real.pi_pos).symm
+  have hk_arg : (↑(k:ℝ) : ℂ).arg = 0 := arg_ofReal_of_nonneg (le_of_lt hk_pos)
+  have hninv_arg : ((↑(n:ℝ) : ℂ)⁻¹).arg = 0 := by
+    rw [← ofReal_inv, arg_ofReal_of_nonneg (le_of_lt (inv_pos.mpr hn_pos))]
+  rw [cpow_def_of_ne_zero hkn_ne, cpow_def_of_ne_zero hk_ne, cpow_def_of_ne_zero hn_ne]
+  rw [← Complex.exp_add]; congr 1
+  rw [ofReal_div, div_eq_mul_inv]
+  rw [Complex.log_mul hk_ne (fun h => hn_ne (inv_eq_zero.mp h)) (by
+    rw [hk_arg, hninv_arg]; constructor <;> linarith [Real.pi_pos])]
+  rw [Complex.log_inv _ hn_arg]; ring
+
 /-- Abel summation by induction: ∑ (n+1)(aₙ₊₁ - aₙ₊₂) = ∑ aₙ₊₁ - N·aₙ₊₁.
     Pure linear algebra — zero sorry, zero axioms. -/
 private lemma abel_sum' (a : ℕ → ℂ) : ∀ N : ℕ,
@@ -579,6 +601,51 @@ private lemma partial_sum_gen (s : ℂ) (k : ℕ) (M : ℕ) :
   rw [← Finset.sum_div]; congr 1
   convert hab using 2 <;> simp [Nat.cast_add, Nat.cast_one]
 
+/-- Convert the Abel summation numerator to the ζ-sum form.
+    ∑_{i<M+1} (k/(k+i+1))^s + k - (k+M+1)·(k/(k+M+1))^s
+    = k + k^s · ∑_{n ∈ Icc(k+1,k+M)} n^{-s} - (k+M)·(k/(k+M+1))^s
+
+    Proof sketch: Apply (k/n)^s = k^s·n^{-s}, reindex range→Icc,
+    split off last term, simplify (k+M+1-1) = k+M. -/
+private lemma abel_form_to_zeta_form (s : ℂ) (k : ℕ) (hk : 1 ≤ k) (M : ℕ) :
+    ∑ i ∈ Finset.range (M+1), (↑((k:ℝ)/(↑(k+i)+1)) : ℂ) ^ s +
+      (↑k : ℂ) -
+      (↑(k + (M+1)) : ℂ) * (↑((k:ℝ)/(↑(k+(M+1)):ℝ)) : ℂ) ^ s =
+    (↑k : ℂ) + (↑k : ℂ) ^ s *
+      (∑ n ∈ Finset.Icc (k+1) (k+M), ((↑(n : ℕ) : ℂ) ^ (-s))) -
+      (↑(k + M) : ℂ) * (↑((k:ℝ)/(↑(k+M)+1)) : ℂ) ^ s := by
+  -- Step 1: Normalize ↑(k+i)+1 to ↑(k+i+1) and ↑(k+(M+1)) to ↑(k+M+1)
+  simp_rw [show ∀ i : ℕ, (↑(k+i) : ℝ) + 1 = ↑(k+i+1) from fun i => by push_cast; ring]
+  rw [show k + (M + 1) = k + M + 1 from by omega]
+  -- Step 2: Apply (k/n)^s = k^s · n^{-s} via ofReal_div_cpow
+  -- First convert the sum
+  have h_sum : ∀ i ∈ Finset.range (M+1),
+      (↑((k:ℝ)/↑(k+i+1)) : ℂ) ^ s = (↑(k:ℝ) : ℂ) ^ s * (↑(k+i+1:ℕ) : ℂ) ^ (-s) :=
+    fun i _ => ofReal_div_cpow k (k+i+1) hk (by omega) s
+  rw [Finset.sum_congr rfl h_sum]
+  -- Also convert the tail term
+  rw [ofReal_div_cpow k (k+M+1) hk (by omega) s]
+  -- Step 3: Factor k^s from the sum
+  rw [← Finset.mul_sum]
+  -- Step 4: Reindex range(M+1) → Icc(k+1, k+M+1)
+  have h_reindex : ∑ i ∈ Finset.range (M+1), (↑(k+i+1 : ℕ) : ℂ) ^ (-s) =
+      ∑ n ∈ Finset.Icc (k+1) (k+M+1), (↑n : ℂ) ^ (-s) := by
+    apply Finset.sum_bij' (fun i _ => k + i + 1) (fun n _ => n - k - 1)
+      (fun i hi => by simp only [Finset.mem_range] at hi; simp only [Finset.mem_Icc]; omega)
+      (fun n hn => by simp only [Finset.mem_Icc] at hn; simp only [Finset.mem_range]; omega)
+      (fun i _ => by dsimp; omega)
+      (fun n hn => by dsimp; simp only [Finset.mem_Icc] at hn; omega)
+      (fun i _ => by congr 1)
+  rw [h_reindex]
+  -- Step 5: Split off last term: Icc(k+1, k+M+1) = Icc(k+1, k+M) ∪ {k+M+1}
+  rw [show Finset.Icc (k+1) (k+M+1) = Finset.Icc (k+1) (k+M) ∪ {k+M+1} from by
+    ext n; simp only [Finset.mem_union, Finset.mem_Icc, Finset.mem_singleton]; omega]
+  rw [Finset.sum_union (by simp [Finset.disjoint_singleton_right])]
+  simp only [Finset.sum_singleton]
+  -- Step 6: Normalize casts and ring
+  push_cast
+  ring
+
 /-- Inductive decomposition: ∫_{Ioc(k/(k+M+1), 1)} f = ∑_{i<M+1} piece(k, k+i).
     By induction on M, splitting Ioc at each step and applying piece_setIntegral_gen. -/
 private lemma integral_decomp_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
@@ -672,10 +739,11 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
       rw [integral_decomp_gen s hs k hk M]
       -- Apply partial Abel summation
       rw [partial_sum_gen s k M]
-      -- Goal now: (∑ a_{k+i+1} + k·a_k - (k+M+1)·a_{k+M+1}) / s = target / s
-      -- Both sides have /s, so congr 1 to compare numerators
-      -- Then: k/k = 1, (k/n)^s = k^s·n^{-s}, reindex sums
-      sorry  -- pure algebra: k/k=1, (k/n)^s = k^s·n^{-s}, Finset reindexing
+      -- Strip /s from both sides
+      congr 1
+      -- Simplify k/k = 1
+      rw [div_self (show (k:ℝ) ≠ 0 from by positivity), ofReal_one, one_cpow, mul_one]
+      exact abel_form_to_zeta_form s k hk M
     -- Step 2: ∑_{n=k+1}^{N} n^{-s} → ζ(s) - ∑_{n=1}^{k} n^{-s}
     have h_tail_zeta : Tendsto
         (fun N : ℕ => ∑ n ∈ Finset.Icc (k+1) N, ((↑(n:ℕ) : ℂ) ^ (-s)))
