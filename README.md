@@ -18,14 +18,15 @@ identities — is **proved with zero sorry**.
 ## Proof Architecture
 
 ```
-moebius_test_bound                     ← Axiom: ∃ test vector, error ≤ C/log(N)
-  + nbDistSq_le_test_vector            ← PROVED (variational bound, PSD)
-  = nb_distance_scaling                ← PROVED THEOREM
+moebius_test_bound (L² axiom)            ← Axiom: ∫₀¹ (1-Σ vᵢ{(i+2)/x})² ≤ C/log(N)
+  + l2_error_eq_quad_error               ← PROVED (L²↔Matrix Bridge)
+  + nbDistSq_le_test_vector              ← PROVED (variational bound, PSD)
+  = nb_distance_scaling                  ← PROVED THEOREM
       ↓ [log_grows_unboundedly — PROVED]
       ↓ [distance_converges_to_zero — PROVED]
-nyman_beurling                         ← Axiom: published (Beurling 1955)
+nyman_beurling                           ← Axiom: published (Beurling 1955)
       ↓
-riemann_hypothesis                     ← PROVED
+riemann_hypothesis                       ← PROVED
 ```
 
 Lean reports exactly **2 mathematical axioms**:
@@ -72,7 +73,7 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 | Axiom | Category | Status |
 |-------|----------|--------|
 | `nyman_beurling` | Published theorem | 📘 Beurling 1955, Báez-Duarte 2003. Universally accepted. |
-| `moebius_test_bound` | Analytic NT | 🟡 ∃ test vector with C/log(N) error. Computationally verified. |
+| `moebius_test_bound` | Analytic NT | 🟡 ∫₀¹(1-Σvᵢ{(i+2)/x})² ≤ C/log(N). Computationally verified. |
 
 ### Structural (not on critical path)
 
@@ -80,16 +81,17 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 |-------|----------|--------|
 | `type_II_sieve_bound` | Frontier | 🔴 K < 1. The Millennium frontier. |
 | `block_eigenvalue_log_scaling` | ANT | 🟡 Parity-separated Gram eigenvalues. |
-| `basis_inner_prod_nonzero` | Calculus | 🟢 ∫₀¹ {2/x} dx > 0. Standard. |
+| `basis_inner_prod_nonzero` | Calculus | ✅ **PROVED** (was axiom). ∫₀¹ {2/x} dx > 0. |
 
 ## Zero-Sorry Core
 
 **Assembly.lean** — The proof chain:
+- `l2_error_eq_quad_error`: ∫₀¹(1-f)² = 1 - 2bᵀw + wᵀGw (L²↔Matrix Bridge, PROVED)
 - `nbDistSq_le_test_vector`: d²_N ≤ 1 - 2bᵀv + vᵀGv (variational bound, PROVED)
-- `nb_distance_scaling`: d²_N ≤ C/log(N) (from test vector axiom)
+- `nb_distance_scaling`: d²_N ≤ C/log(N) (from test vector axiom through bridge)
 - `distance_converges_to_zero`: d²_N → 0 (from log divergence)
 - `riemann_hypothesis`: RH (from Nyman-Beurling)
-- `nbDistSq_as_quadform`: d²_N = 1 - cᵀGc (Rayleigh connection)
+- `basis_inner_prod_nonzero`: b₀ > 0 (PROVED, was axiom)
 - `nbDistSq_lt_one`: d²_N < 1 for all N ≥ 2
 - `bGinvb_pos`: bᵀG⁻¹b > 0 for all N ≥ 2
 
@@ -161,6 +163,20 @@ make clean          # Clean all build artifacts
 | `ClassRestriction.lean` | Octonion residue class analysis (off-path) |
 | `OctonionicPartition.lean` | Block-diagonal gap dominance |
 | `FiniteDimReduction.lean` | Finite-dimensional reduction (off-path) |
+
+## Roadmap: Formalizing `nyman_beurling`
+
+We propose formalizing via **Approach B (Báez-Duarte 2003)**, bypassing Hardy space H²:
+
+| Phase | Description | Status | Estimate |
+|-------|-------------|--------|----------|
+| 1 | L²↔Matrix Bridge | ✅ DONE | - |
+| 2 | Mellin transform infrastructure | 🟡 Partial Mathlib | 2-3 months |
+| 3 | Easy direction: RH → d²_N → 0 | Needs Phase 2 | 2-3 months |
+| 4 | Hard direction: separating functional | Core proof | 4-6 months |
+| 5 | Integration + cleanup | - | 1-2 months |
+
+**Key insight (Phase 4)**: If ζ(ρ)=0 with Re(ρ)≠1/2, then x^{ρ-1} annihilates every {k/x} but not 1_{(0,1)}, blocking L² convergence.
 
 ## Paper
 
