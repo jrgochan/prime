@@ -241,23 +241,73 @@ private lemma partial_zeta_tendsto' (s : ℂ) (hs : 1 < s.re) :
   simp only [Nat.cast_zero, h0, add_zero]
   congr 1; ext n; congr 1; push_cast; ring
 
+/-- The floor-weighted integrand is integrable on (0,1].
+    Proof: bound ‖t^{s-1}·⌊1/t⌋‖ ≤ ‖t^{s-2}‖ via ⌊x⌋ ≤ x,
+    and t^{s-2} is integrable for Re(s-2) > -1 (i.e., Re(s) > 1). -/
+private lemma floor_mellin_integrableOn (s : ℂ) (hs : 1 < s.re) :
+    IntegrableOn (fun x : ℝ => (↑x : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / x⌋) : ℂ))
+      (Ioc 0 1) volume := by
+  have hg : IntegrableOn (fun x : ℝ => (↑x : ℂ) ^ (s - 2)) (Ioc 0 1) volume := by
+    have h := @intervalIntegral.intervalIntegrable_cpow' 0 1 (s-2) (by simp [sub_re]; linarith)
+    rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith : (0:ℝ) ≤ 1)] at h
+  exact Integrable.mono hg
+    (by apply AEStronglyMeasurable.mul
+        · exact (ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const
+            (fun x hx => by left; simp [ofReal_re]; exact hx) |>.mono Ioc_subset_Ioi_self
+            ).aestronglyMeasurable measurableSet_Ioc
+        · exact ((Measurable.of_discrete (α := ℤ)).comp
+            ((measurable_const.div measurable_id).floor)).aestronglyMeasurable.restrict)
+    (by apply ae_restrict_of_ae_restrict_of_subset Ioc_subset_Ioi_self
+        apply (ae_restrict_mem measurableSet_Ioi).mono
+        intro t ht; rw [mem_Ioi] at ht
+        rw [norm_mul, norm_ofReal_cpow t ht, norm_ofReal_cpow t ht]
+        simp only [sub_re, one_re]
+        have h_nn : (0 : ℤ) ≤ ⌊(1:ℝ)/t⌋ := Int.floor_nonneg.mpr (div_nonneg one_pos.le ht.le)
+        rw [Complex.norm_intCast, abs_of_nonneg (by exact_mod_cast h_nn)]
+        calc t ^ (s.re - 1) * (⌊(1:ℝ)/t⌋ : ℝ)
+            ≤ t ^ (s.re - 1) * (1/t) := mul_le_mul_of_nonneg_left (Int.floor_le _) (rpow_nonneg ht.le _)
+          _ = t ^ (s.re - 2) := by
+              rw [mul_one_div, div_eq_mul_inv, ← rpow_neg_one t, ← rpow_add ht]; congr 1; ring)
+
+/-- ⋃_N Ioc(1/(N+1), 1) = Ioc(0, 1). -/
+private lemma iUnion_Ioc_inv :
+    ⋃ N : ℕ, Ioc (1 / ((N : ℝ) + 1)) 1 = Ioc (0 : ℝ) 1 := by
+  ext x; simp only [mem_iUnion, mem_Ioc]; constructor
+  · rintro ⟨N, hlo, hhi⟩; exact ⟨by linarith [show (0:ℝ) < 1/((N:ℝ)+1) from by positivity], hhi⟩
+  · rintro ⟨hx, hx1⟩; obtain ⟨N, hN⟩ := exists_nat_gt (1/x - 1); refine ⟨N, ?_, hx1⟩
+    have hN1 : (0:ℝ) < (N:ℝ)+1 := by linarith [Nat.cast_nonneg (α := ℝ) N]
+    rw [div_lt_iff₀ hN1]; linarith [(div_lt_iff₀ hx).mp (by linarith : 1/x < (N:ℝ)+1)]
+
+/-- The sequence Ioc(1/(N+1), 1) is monotone. -/
+private lemma mono_Ioc_inv : Monotone (fun N : ℕ => Ioc (1 / ((N : ℝ) + 1)) (1 : ℝ)) := by
+  intro m n hmn; apply Ioc_subset_Ioc_left
+  apply div_le_div_of_nonneg_left (by linarith)
+    (by have := Nat.cast_nonneg (α := ℝ) n; linarith)
+    (by show (m:ℝ)+1 ≤ (n:ℝ)+1; have : (m:ℝ) ≤ (n:ℝ) := Nat.cast_le.mpr hmn; linarith)
+
 /-- **THEOREM** (was axiom): The Mellin transform of the floor function on (0,1).
     ∫₀¹ ⌊1/x⌋ · x^{s-1} dx = ζ(s)/s  for Re(s) > 1.
 
-    **Proof**: Decompose (0,1] into pieces (1/(n+1), 1/n], evaluate the
-    per-piece integral via `integral_cpow`, apply Abel summation, and
-    take the limit using `summable_one_div_nat_cpow` and
-    `zeta_eq_tsum_one_div_nat_cpow`.
-
-    **STATUS**: All component lemmas fully verified (zero sorry).
-    One sorry remains in this theorem body for the integral decomposition
-    assembly (connecting the finite partial sums to the set integral). -/
+    **Proof strategy**: By `tendsto_setIntegral_of_monotone`,
+    ∫_{Ioc(1/(N+1),1)} f → ∫_{Ioc(0,1)} f. By `assembly_limit`,
+    the Abel partial sums converge to ζ(s)/s. The remaining sorry
+    connects partial integrals to Abel sums via `integral_finset_union`. -/
 theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
     ∫ t in Set.Ioc (0 : ℝ) 1,
       (t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ) = riemannZeta s / s := by
-  -- The limit of partial Abel sums gives ζ(s)/s (assembly_limit).
-  -- The partial sums equal the integral over (1/(N+1), 1) which
-  -- converges to the integral over (0,1) as N → ∞.
+  -- By monotone convergence: partial integrals → full integral
+  let f : ℝ → ℂ := fun x => (↑x : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / x⌋) : ℂ)
+  have h_tendsto_int : Tendsto
+      (fun N : ℕ => ∫ x in Ioc (1/((N:ℝ)+1)) 1, f x)
+      atTop (nhds (∫ x in Ioc 0 1, f x)) := by
+    rw [← iUnion_Ioc_inv]
+    exact tendsto_setIntegral_of_monotone (fun _ => measurableSet_Ioc) mono_Ioc_inv
+      (iUnion_Ioc_inv ▸ floor_mellin_integrableOn s hs)
+  show ∫ t in Set.Ioc 0 1, f t = riemannZeta s / s
+  -- Each partial integral equals the Abel sum (integral decomposition)
+  -- ∫_{Ioc(1/(N+1),1)} = ∑_{n=1}^{N} n · ∫_{piece_n} t^{s-1} = Abel_sum / s
+  -- This + assembly_limit give: partial integrals → ζ(s)/s
+  -- By uniqueness of limits: ∫_{Ioc(0,1)} f = ζ(s)/s
   sorry
 
 /-- The general mellin_fractBasis axiom for all k ≥ 1. -/
