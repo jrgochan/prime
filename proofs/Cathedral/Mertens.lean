@@ -15,9 +15,10 @@
   Numerically: 1 - B²/Q ≈ 2·log(N)/N = o(1/log N). ✓
 
   ### Architecture:
-  basis_sum_lower_bound (SUB-AXIOM A)
-  gram_sum_upper_bound  (SUB-AXIOM B)
-      ↓ [nb_distance_decay_axiom — THEOREM!]
+  FractIntegral.lean: basis_entry_lower (THEOREM from axioms)
+      ↓ [basis_sum_tight — THEOREM]
+  gram_sum_tight (AXIOM — Vasyunin expansion)
+      ↓ [nb_distance_decay_axiom' — THEOREM!]
       ↓ [SelbergSieve.lean: moebius_test_bound_from_selberg]
       ↓ [Assembly.lean: moebius_test_bound, nb_distance_scaling]
       ↓ riemann_hypothesis
@@ -26,6 +27,7 @@
 import Cathedral.Defs
 import Cathedral.Structural
 import Cathedral.GramBounds
+import Cathedral.FractIntegral
 
 noncomputable section
 open Real MeasureTheory Set Finset Matrix
@@ -34,130 +36,245 @@ open Real MeasureTheory Set Finset Matrix
 -- DEFINITIONS
 -- ════════════════════════════════════════════════
 
-/-- Sum of basis inner products: B(N) = Σ_{k=1}^{N-1} b_k = Σ ∫₀¹ {k/x} dx.
-
-    Each b_k → 1/2, so B(N) ≈ (N-1)/2 for large N.
-    More precisely, b_k = 1/2 - 1/(2k) + O(1/k²), so
-    B(N) = (N-1)/2 - H_{N-1}/2 + O(1) ≈ (N-1)/2 - log(N)/2. -/
+/-- Sum of basis inner products: B(N) = Σ_{k=1}^{N-1} b_k = Σ ∫₀¹ {k/x} dx. -/
 noncomputable def basisSum (N : ℕ) : ℝ :=
   ∑ i : Fin (N - 1), basisInnerProd N i
 
-/-- Total Gram mass: Q(N) = 𝟙ᵀG𝟙 = Σ_{j,k} G_{jk} = ∫₀¹ (Σ {k/x})² dx.
-
-    Since G_{jk} ≈ 1/4 + δ_{jk}/12, we have
-    Q(N) ≈ (N-1)²/4 + (N-1)/12. -/
+/-- Total Gram mass: Q(N) = 𝟙ᵀG𝟙 = Σ_{j,k} G_{jk}. -/
 noncomputable def gramSum (N : ℕ) : ℝ :=
   ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j
 
 -- ════════════════════════════════════════════════
--- SUB-AXIOM A: Lower bound on basis sum
+-- ALGEBRA HELPERS
 -- ════════════════════════════════════════════════
 
--- Sub-Axiom A (crude): B(N) ≥ (N-1)/4
--- Sub-Axiom B (crude): Q(N) ≤ (N-1)²/3
--- (Removed — see refined Sub-Axioms A' and B' below)
-
--- ════════════════════════════════════════════════
--- THEOREM: nb_distance_decay from A + B
--- ════════════════════════════════════════════════
-
-/-- The constant vector: w_k = c for all k. -/
 def constVec (N : ℕ) (c : ℝ) : Fin (N - 1) → ℝ := fun _ => c
 
-/-- **Key Lemma**: dotProduct b (constVec c) = c · basisSum.
-    Proof: bᵀ(c·𝟙) = c·Σbₖ = c·B by linearity. -/
 lemma dot_const (N : ℕ) (c : ℝ) :
     dotProduct (basisInnerProd N) (constVec N c) = c * basisSum N := by
   unfold dotProduct basisSum constVec
   simp [Finset.mul_sum]
   congr 1; ext i; ring
 
-/-- **Key Lemma**: realQuadForm G (constVec c) = c² · gramSum.
-    Proof: (c·𝟙)ᵀG(c·𝟙) = c²·𝟙ᵀG𝟙 = c²·ΣG_{jk} by bilinearity. -/
 lemma quad_const (N : ℕ) (c : ℝ) :
     realQuadForm (gramMatrix N) (constVec N c) = c ^ 2 * gramSum N := by
   simp only [realQuadForm, constVec, gramSum, dotProduct, Matrix.mulVec,
              Finset.mul_sum]
   ring_nf
 
-/-- **Helper**: 1 - 2(cB) + c²Q = 1 - B²/Q when c = B/Q and Q > 0. -/
-lemma const_witness_l2 (B Q : ℝ) (hQ : Q > 0) :
-    1 - 2 * (B / Q * B) + (B / Q) ^ 2 * Q = 1 - B ^ 2 / Q := by
-  field_simp
-  ring
-
 -- ════════════════════════════════════════════════
--- HELPER LEMMAS (pure ℝ — no ℕ casts!)
+-- PURE ℝ HELPER LEMMAS
 -- ════════════════════════════════════════════════
 
-/-- **Step 1 (Pure Algebra)**: Given bounds on B and Q, the constant
-    witness c = 2/M yields error ≤ K·L/M for appropriate K.
-
-    Inputs (all ℝ, no casts):
-      M = N-1 > 0,  L = logN > 0
-      B ≥ M/2 - A·L,  Q ≤ M²/4 + D·(M+1)
-    Conclusion:
-      1 - 2·(2/M)·B + (2/M)²·Q ≤ 4·A·L/M + 4·D·(M+1)/M² -/
 lemma quadratic_bound_of_bounds
-    (M L A D B Q : ℝ) (hM : M > 0) (hL : L > 0)
-    (hA : A > 0) (hD : D > 0)
+    (M L A D B Q : ℝ) (hM : M > 0) (_hL : L > 0)
+    (_hA : A > 0) (_hD : D > 0)
     (hB : B ≥ M / 2 - A * L)
     (hQ : Q ≤ M ^ 2 / 4 + D * (M + 1)) :
     1 - 2 * (2 / M * B) + (2 / M) ^ 2 * Q ≤
     4 * A * L / M + 4 * D * (M + 1) / M ^ 2 := by
-  -- Pure algebra: expand, clear denominators, collect terms.
-  -- After multiplying through by M² > 0, reduces to:
-  --   M² - 4B·M + 4Q ≤ 4A·L·M + 4D·(M+1)
-  -- which follows from hB and hQ by nlinarith.
-  sorry
+  have hM2 : M ^ 2 > 0 := by positivity
+  have hMne : M ≠ 0 := ne_of_gt hM
+  rw [div_add_div _ _ (ne_of_gt hM) (ne_of_gt hM2)]
+  rw [le_div_iff₀ (mul_pos hM hM2)]
+  have h1 : B * M ≥ M ^ 2 / 2 - A * L * M := by nlinarith
+  have h2 : Q * 4 ≤ M ^ 2 + 4 * D * (M + 1) := by nlinarith
+  have : (1 - 2 * (2 / M * B) + (2 / M) ^ 2 * Q) * (M * M ^ 2) =
+         M ^ 3 - 4 * B * M ^ 2 + 4 * Q * M := by
+    field_simp; ring
+  rw [this]
+  nlinarith [sq_nonneg M, sq_nonneg B]
 
-/-- **Step 2 (Pure Algebra)**: Simplify the bound from Step 1.
-    4·A·L/M + 4·D·(M+1)/M² ≤ (8·A + 8·D)·L/M
-    provided M ≥ 2 and L ≥ 1. -/
 lemma simplify_error_bound (M L A D : ℝ) (hM : M ≥ 2) (hL : L ≥ 1)
     (hA : A > 0) (hD : D > 0) :
     4 * A * L / M + 4 * D * (M + 1) / M ^ 2 ≤
     (8 * A + 8 * D) * L / M := by
   have hMpos : M > 0 := by linarith
   have hM2pos : M ^ 2 > 0 := by positivity
-  -- Pure algebra: (M+1)/M² ≤ 2/M for M≥2, and multiply by L≥1.
-  sorry
+  rw [div_add_div _ _ (ne_of_gt hMpos) (ne_of_gt hM2pos)]
+  rw [div_le_div_iff₀ (mul_pos hMpos hM2pos) hMpos]
+  have hM3 : M ^ 3 > 0 := by positivity
+  have lhs_expand : (4 * A * L * M ^ 2 + M * (4 * D * (M + 1))) * M =
+    4 * A * L * M ^ 3 + 4 * D * M ^ 2 * (M + 1) := by ring
+  have rhs_expand : (8 * A + 8 * D) * L * (M * M ^ 2) =
+    8 * A * L * M ^ 3 + 8 * D * L * M ^ 3 := by ring
+  rw [lhs_expand, rhs_expand]
+  have h1 : 4 * D * M ^ 2 * (M + 1) ≤ 8 * D * M ^ 3 := by
+    have : 4 * D * M ^ 2 * (M + 1) = 4 * D * M ^ 3 + 4 * D * M ^ 2 := by ring
+    have : 8 * D * M ^ 3 = 4 * D * M ^ 3 + 4 * D * M ^ 3 := by ring
+    have hD_M2_pos : 0 < D * M ^ 2 := by positivity
+    have hM_ge_1 : M - 1 ≥ 1 := by linarith
+    nlinarith [mul_pos hD_M2_pos (show 0 < M - 1 by linarith)]
+  have h2 : 8 * D * M ^ 3 ≤ 8 * D * L * M ^ 3 := by
+    have : 0 < 8 * D * M ^ 3 := by positivity
+    nlinarith
+  have h3 : 4 * A * L * M ^ 3 ≤ 8 * A * L * M ^ 3 := by
+    nlinarith [show 0 ≤ A * L * M ^ 3 from by positivity]
+  linarith
 
-/-- **Step 3 (Pure Algebra)**: K·L/M ≤ C/L when K·L² ≤ C·M.
-    Equivalently: if L² ≤ M and K ≤ C, then K·L/M ≤ C/L. -/
 lemma ratio_flip (K C L M : ℝ) (hL : L > 0) (hM : M > 0)
-    (hKC : K ≤ C) (hL2 : L ^ 2 ≤ M) :
+    (hK : K ≥ 0) (hKC : K ≤ C) (hL2 : L ^ 2 ≤ M) :
     K * L / M ≤ C / L := by
-  -- Pure algebra: K·L/M ≤ C/L iff K·L² ≤ C·M.
-  -- From hKC (K≤C) and hL2 (L²≤M): K·L² ≤ C·L² ≤ C·M.
-  sorry
+  rw [div_le_div_iff₀ hM hL]
+  calc K * L * L = K * L ^ 2 := by ring
+    _ ≤ K * M := by nlinarith
+    _ ≤ C * M := by nlinarith
 
-/-- **Step 4 (Calculus)**: log²(N) ≤ N-1 for N ≥ 8.
-    Standard fact: log(x) ≤ √x for x ≥ 1, so log²(x) ≤ x.
-    More precisely: log(x) ≤ (x-1) for x ≥ 1 (concavity of log),
-    so log²(x) ≤ (x-1)² ≤ x·(x-1) for x ≥ 2.
-    But we only need: log²(x) ≤ x, which holds for x ≥ e² ≈ 7.4.
-
-    This is the ONLY non-algebraic fact in the entire proof chain. -/
-axiom log_sq_le_self :
+theorem log_sq_le_self :
     ∃ N₀ : ℕ, 4 ≤ N₀ ∧ ∀ N : ℕ, N₀ ≤ N →
-    Real.log (N : ℝ) ^ 2 ≤ ((N : ℝ) - 1)
+    Real.log (N : ℝ) ^ 2 ≤ ((N : ℝ) - 1) := by
+  refine ⟨258, by omega, fun N hN => ?_⟩
+  have hNge : (258 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+  have hNnn : (0 : ℝ) ≤ (N : ℝ) := by linarith
+  have h1 := Real.log_le_rpow_div hNnn (show (0:ℝ) < 1/4 by norm_num)
+  set s := Real.sqrt (N : ℝ) with hs_def
+  have hSnn : 0 ≤ s := Real.sqrt_nonneg _
+  have hSsq : s * s = (N : ℝ) := Real.mul_self_sqrt hNnn
+  have hN14 : (N : ℝ) ^ ((1:ℝ)/4) = Real.sqrt s := by
+    rw [show (1:ℝ)/4 = (1/2) * (1/2) from by norm_num,
+        Real.rpow_mul hNnn]
+    conv_lhs => rw [show (N:ℝ) ^ ((1:ℝ)/2) = s from by rw [hs_def, Real.sqrt_eq_rpow]]
+    rw [Real.sqrt_eq_rpow]
+  rw [hN14] at h1
+  have h1' : Real.log (N : ℝ) ≤ 4 * Real.sqrt s := by linarith [show (0:ℝ) < 1/4 from by norm_num]
+  have hs16 : s ≥ 16 := by
+    rw [ge_iff_le, hs_def, ← Real.sqrt_sq (show (0:ℝ) ≤ 16 by norm_num)]
+    apply Real.sqrt_le_sqrt
+    nlinarith
+  have hSs_nn : 0 ≤ Real.sqrt s := Real.sqrt_nonneg _
+  have hSs4 : Real.sqrt s ≥ 4 := by
+    rw [ge_iff_le, ← Real.sqrt_sq (show (0:ℝ) ≤ 4 by norm_num)]
+    apply Real.sqrt_le_sqrt; nlinarith
+  have hSsSsq : Real.sqrt s * Real.sqrt s = s := Real.mul_self_sqrt hSnn
+  have hlog_nn : 0 ≤ Real.log (N : ℝ) := Real.log_nonneg (by linarith : (1:ℝ) ≤ (N:ℝ))
+  have h2 : Real.log (N : ℝ) ^ 2 ≤ 16 * s := by
+    have : Real.log (N:ℝ) ^ 2 ≤ (4 * Real.sqrt s) ^ 2 :=
+      sq_le_sq' (by linarith) h1'
+    calc Real.log (N:ℝ) ^ 2 ≤ (4 * Real.sqrt s) ^ 2 := this
+      _ = 16 * (Real.sqrt s * Real.sqrt s) := by ring
+      _ = 16 * s := by rw [hSsSsq]
+  have h3 : 16 * s ≤ (N : ℝ) - 1 := by
+    rw [← hSsq]
+    nlinarith [sq_nonneg (s - 16)]
+  linarith
 
 -- ════════════════════════════════════════════════
--- REFINED SUB-AXIOMS
+-- LAYER 2: HARMONIC NUMBER TOOLS
 -- ════════════════════════════════════════════════
 
-/-- **Sub-Axiom A' (Tight Basis Sum)**: B(N) ≥ (N-1)/2 - C·log(N).
-    Content: b_k ≈ 1/2 for each k (fractional part average).
-    Numerically verified: B(100) = 49.0 ≥ 49.5 - 2.3 - 1 = 46.2. ✓ -/
-axiom basis_sum_tight :
+noncomputable def harmonicFin (n : ℕ) : ℝ :=
+  ∑ i : Fin n, 1 / ((i.val : ℝ) + 1)
+
+private lemma inv_succ_le_log_div (k : ℕ) (hk : 1 ≤ k) :
+    1 / ((k : ℝ) + 1) ≤ Real.log ((k : ℝ) + 1) - Real.log (k : ℝ) := by
+  rw [← Real.log_div (by positivity) (by positivity)]
+  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
+  have hk1_pos : (k : ℝ) + 1 > 0 := by linarith
+  rw [show (1:ℝ) / ((k:ℝ) + 1) = Real.log (Real.exp (1 / ((k:ℝ) + 1))) from
+    (Real.log_exp _).symm]
+  apply Real.log_le_log (Real.exp_pos _)
+  have hx_small : 1 / ((k : ℝ) + 1) ≤ 1 := by
+    rw [div_le_one hk1_pos]; linarith
+  have hx_nonneg : 0 ≤ 1 / ((k : ℝ) + 1) := by positivity
+  calc Real.exp (1 / ((k:ℝ) + 1))
+      ≤ 1 + 1/((k:ℝ)+1) + 1/((k:ℝ)+1)^2 := by
+        have hbound := Real.exp_bound' (x := 1/((k:ℝ)+1)) (n := 2) hx_nonneg hx_small (by omega)
+        simp only [Finset.sum_range_succ, Finset.sum_range_zero, pow_zero, pow_succ,
+                   one_mul, Nat.factorial, Nat.succ_eq_add_one] at hbound
+        norm_num at hbound
+        rw [show (1:ℝ)/((k:ℝ)+1) = ((k:ℝ)+1)⁻¹ from one_div _,
+            show (1:ℝ)/((k:ℝ)+1)^2 = ((k:ℝ)+1)⁻¹ * ((k:ℝ)+1)⁻¹ from by
+              rw [one_div, sq, _root_.mul_inv_rev]]
+        nlinarith
+    _ ≤ ((k:ℝ) + 1) / (k:ℝ) := by
+        rw [show ((k:ℝ) + 1)/(k:ℝ) = 1 + 1/(k:ℝ) from by field_simp]
+        have h1 : 1/((k:ℝ)+1) + 1/((k:ℝ)+1)^2 ≤ 1/(k:ℝ) := by
+          rw [div_add_div _ _ (ne_of_gt hk1_pos) (ne_of_gt (pow_pos hk1_pos 2))]
+          rw [div_le_div_iff₀ (mul_pos hk1_pos (pow_pos hk1_pos 2)) hk_pos]
+          nlinarith [sq_nonneg (k : ℝ)]
+        linarith
+
+theorem harmonicFin_le (n : ℕ) (hn : 1 ≤ n) :
+    harmonicFin n ≤ 1 + Real.log (n : ℝ) := by
+  induction n with
+  | zero => omega
+  | succ m ih =>
+    cases m with
+    | zero =>
+      simp only [harmonicFin]
+      norm_num
+    | succ k =>
+      unfold harmonicFin
+      rw [show ∑ i : Fin (k + 2), 1 / ((i.val : ℝ) + 1)
+          = (∑ i : Fin (k + 1), 1 / ((i.val : ℝ) + 1)) + 1 / ((k : ℝ) + 1 + 1) from by
+        rw [Fin.sum_univ_castSucc]
+        simp [Fin.val_last]]
+      have ih' := ih (by omega)
+      unfold harmonicFin at ih'
+      have hstep := inv_succ_le_log_div (k + 1) (by omega)
+      push_cast at hstep ⊢
+      have h := add_le_add ih' (le_of_eq rfl |>.trans hstep)
+      norm_cast at *
+      linarith
+
+-- ════════════════════════════════════════════════
+-- LAYER 3: DERIVED SUM BOUNDS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: B(N) ≥ (N-1)/2 - C·log(N).
+    Uses basis_entry_lower (from FractIntegral.lean) + harmonicFin_le. -/
+theorem basis_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
-    basisSum N ≥ (N - 1 : ℝ) / 2 - C * Real.log (N : ℝ)
+    basisSum N ≥ (N - 1 : ℝ) / 2 - C * Real.log (N : ℝ) := by
+  refine ⟨1, one_pos, 3, by omega, fun N hN => ?_⟩
+  have h1 : basisSum N ≥
+      ∑ i : Fin (N - 1), ((1:ℝ)/2 - 1 / (2 * ((i.val : ℝ) + 1))) := by
+    unfold basisSum
+    apply Finset.sum_le_sum
+    intro i _
+    unfold basisInnerProd
+    have h := basis_entry_lower (i.val + 1) (by omega)
+    show _ ≥ _
+    simp only [] at *
+    have : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
+    rw [this]
+    convert h using 1 <;> push_cast <;> ring
+  have h2 : ∑ i : Fin (N - 1), ((1:ℝ)/2 - 1 / (2 * ((i.val : ℝ) + 1)))
+      = (↑(N - 1) : ℝ) / 2 - (1/2) * harmonicFin (N - 1) := by
+    unfold harmonicFin
+    simp only [Finset.sum_sub_distrib, Fin.sum_const, nsmul_eq_mul]
+    ring_nf
+    suffices hsuff : ∑ x : Fin (N - 1), (2 + (x.val : ℝ) * 2)⁻¹
+        = (1/2) * ∑ x : Fin (N - 1), (1 + (x.val : ℝ))⁻¹ by linarith
+    rw [Finset.mul_sum]
+    congr 1; ext x
+    rw [show (2 : ℝ) + (x.val : ℝ) * 2 = 2 * (1 + (x.val : ℝ)) from by ring]
+    rw [_root_.mul_inv_rev, mul_comm]
+    norm_num
+  have hN1 : 1 ≤ N - 1 := by omega
+  have h3 : harmonicFin (N - 1) ≤ 1 + Real.log (N : ℝ) := by
+    calc harmonicFin (N - 1) ≤ 1 + Real.log (↑(N - 1)) := harmonicFin_le _ hN1
+      _ ≤ 1 + Real.log (N : ℝ) := by
+          gcongr
+          exact_mod_cast Nat.sub_le N 1
+  have hlogN : 1 ≤ Real.log (N : ℝ) := by
+    rw [← Real.log_exp 1]
+    apply Real.log_le_log (Real.exp_pos 1)
+    calc Real.exp 1 ≤ 3 := by
+          have := Real.exp_bound' (n := 3) (by norm_num : (0:ℝ) ≤ 1)
+            (by norm_num : (1:ℝ) ≤ 1)
+          simp [Finset.sum_range_succ] at this; linarith
+      _ ≤ (N : ℝ) := by exact_mod_cast hN
+  have hNR : (N - 1 : ℝ) = (↑(N - 1) : ℝ) := by
+    push_cast [Nat.cast_sub (by omega : 1 ≤ N)]; ring
+  calc basisSum N
+      ≥ (↑(N - 1) : ℝ) / 2 - (1/2) * harmonicFin (N - 1) := by linarith [h1, h2]
+    _ ≥ (↑(N - 1) : ℝ) / 2 - (1/2) * (1 + Real.log (N : ℝ)) := by linarith [h3]
+    _ = (↑(N - 1) : ℝ) / 2 - 1/2 - Real.log (N : ℝ) / 2 := by ring
+    _ ≥ (N - 1 : ℝ) / 2 - 1 * Real.log (N : ℝ) := by rw [hNR]; linarith
 
-/-- **Sub-Axiom B' (Tight Gram Sum)**: Q(N) ≤ (N-1)²/4 + C·N.
-    Content: G_{jk} ≈ 1/4 for most j,k.
-    Numerically verified: Q(100) = 2434 ≤ 2450 + 100 = 2550. ✓ -/
+/-- **AXIOM**: Q(N) ≤ (N-1)²/4 + C·N (Vasyunin expansion). -/
 axiom gram_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
@@ -167,12 +284,6 @@ axiom gram_sum_tight :
 -- MAIN THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: nb_distance_decay from sub-axioms + helper lemmas.
-
-    Proof: Use constant witness c = 2/(N-1).
-    Step 1: ∫(1-f)² = 1-2cB+c²Q  [l2_error_eq_quad_error + dot_const + quad_const]
-    Step 2: ≤ (8A+8D)·logN/(N-1)  [quadratic_bound + simplify_error_bound]
-    Step 3: ≤ C/logN               [ratio_flip + log_sq_le_self] -/
 theorem nb_distance_decay_axiom' :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
@@ -180,7 +291,6 @@ theorem nb_distance_decay_axiom' :
   obtain ⟨C_A, hCA, N_A, hNA, hA⟩ := basis_sum_tight
   obtain ⟨C_B, hCB, N_B, hNB, hB⟩ := gram_sum_tight
   obtain ⟨N_L, hNL, hLogSq⟩ := log_sq_le_self
-  -- Choose C and N₀ large enough for all sub-results
   set K := 8 * (C_A + C_B + 1) with hK_def
   refine ⟨K, by linarith, max (max (max N_A N_B) N_L) 4, by omega,
     fun N hN => ?_⟩
@@ -189,7 +299,6 @@ theorem nb_distance_decay_axiom' :
   have hNA' : N_A ≤ N := by omega
   have hNB' : N_B ≤ N := by omega
   have hNL' : N_L ≤ N := by omega
-  -- Cast to ℝ: set M = N-1
   set M := ((N : ℝ) - 1) with hM_def
   set L := Real.log (N : ℝ) with hL_def
   have hMpos : M > 0 := by
@@ -201,34 +310,29 @@ theorem nb_distance_decay_axiom' :
   have hLpos : L > 0 := by
     apply Real.log_pos; linarith [show (4 : ℝ) ≤ (N : ℝ) from Nat.ofNat_le_cast.mpr hN4]
   have hLge1 : L ≥ 1 := by
-    -- log(N) ≥ log(4) > log(e) = 1 for N ≥ 4.
-    -- This requires: exp(1) < 4, which is e ≈ 2.718 < 4. ✓
-    sorry
-  -- Sub-axiom bounds (now in terms of M, L)
+    rw [ge_iff_le, hL_def]
+    rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+    apply Real.log_le_log (Real.exp_pos 1)
+    have hexp_le_3 : Real.exp 1 ≤ 3 := by
+      have := Real.exp_bound' (x := 1) (n := 3) (by norm_num) (by norm_num) (by omega)
+      simp [Finset.sum_range_succ, Nat.factorial] at this
+      linarith
+    linarith [show (4 : ℝ) ≤ (N : ℝ) from Nat.ofNat_le_cast.mpr hN4]
   have hBbound : basisSum N ≥ M / 2 - C_A * L := hA N hNA'
   have hQbound : gramSum N ≤ M ^ 2 / 4 + C_B * (N : ℝ) := hB N hNB'
-  -- Note: C_B * N = C_B * (M + 1)
   have hN_eq : (N : ℝ) = M + 1 := by linarith
   rw [hN_eq] at hQbound
-  -- Log² bound
   have hLogSqBound : L ^ 2 ≤ M := hLogSq N hNL'
-  -- Define the witness: v_k = 2/M for all k
   set c := 2 / M with hc_def
   refine ⟨constVec N c, ?_⟩
-  -- Step 1: Convert integral to algebraic form
   have h_l2 := l2_error_eq_quad_error N hN2 (constVec N c)
   rw [h_l2, dot_const N c, quad_const N c]
-  -- Goal: 1 - 2*(c * basisSum N) + c^2 * gramSum N ≤ K / L
-  -- Step 2: Apply quadratic_bound_of_bounds
   have h_step1 := quadratic_bound_of_bounds M L C_A C_B (basisSum N) (gramSum N)
     hMpos hLpos hCA hCB hBbound hQbound
-  -- Step 3: Apply simplify_error_bound
   have h_step2 := simplify_error_bound M L C_A C_B hMge2 hLge1 hCA hCB
-  -- Step 4: Apply ratio_flip with log² bound
   have h_step3 := ratio_flip (8 * C_A + 8 * C_B) K L M hLpos hMpos
-    (by linarith) hLogSqBound
-  -- Chain the inequalities
-  linarith
+    (by linarith) (by linarith) hLogSqBound
+  linarith [h_step3 ]
 
 -- Bridge: the old axiom is now a theorem
 theorem nb_distance_decay_axiom_bridge :
