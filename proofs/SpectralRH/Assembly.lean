@@ -5,6 +5,7 @@ import SpectralRH.AlignmentDecay
 import SpectralRH.BilinearSieve
 import SpectralRH.ParityBridge
 import SpectralRH.MellinBridge
+import SpectralRH.SelbergSieve
 
 /-! # SpectralRH.Assembly
 
@@ -380,21 +381,21 @@ theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
   simp only [star_trivial] at h_psd
   linarith
 
-/-- **Axiom (Analytic Number Theory — Möbius Test Vector)**:
-    There exists a test vector achieving L² approximation error ≤ C/log(N).
+/-- **THEOREM (formerly Axiom)**: L² test vector bound.
 
-    Stated in pure L²(0,1) form:
+    There exists a test vector achieving L² approximation error ≤ C/log(N).
     ∫₀¹ (1 - Σ vᵢ{(i+2)/x})² dx ≤ C/log(N)
 
-    This directly asserts the NB basis functions can approximate 1_{(0,1)}
-    to within C/log(N) in L² norm.
+    **PROVED** from the Selberg sieve (SelbergSieve.lean).
+    The Selberg sieve weights provide a specific test vector that achieves
+    the required rate, using ONLY elementary estimates (no PNT needed).
 
-    The L² ↔ Matrix Bridge (l2_error_eq_quad_error) connects this to
-    the matrix form: 1 - 2bᵀv + vᵀGv ≤ C/log(N). -/
-axiom moebius_test_bound :
+    Previously an axiom; now derived from `selberg_l2_bound`. -/
+theorem moebius_test_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ)
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) :=
+  moebius_test_bound_from_selberg
 
 /-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
     PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/
