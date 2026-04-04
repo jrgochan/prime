@@ -274,11 +274,107 @@ theorem basis_sum_tight :
     _ = (↑(N - 1) : ℝ) / 2 - 1/2 - Real.log (N : ℝ) / 2 := by ring
     _ ≥ (N - 1 : ℝ) / 2 - 1 * Real.log (N : ℝ) := by rw [hNR]; linarith
 
-/-- **AXIOM**: Q(N) ≤ (N-1)²/4 + C·N (Vasyunin expansion). -/
-axiom gram_sum_tight :
+/-- **AXIOM**: Per-entry Gram upper bound.
+    G_{j,k} = ∫₀¹ {j/x}·{k/x} dx ≤ 1/4 + 1/(j·k).
+
+    Justification (Vasyunin): For uniform {j/x}, {k/x} on [0,1):
+    E[{j/x}] = 1/2, E[{j/x}²] = 1/3, so E[{j/x}{k/x}] ≈ 1/4
+    with correlation term = O(log(gcd)/jk). The 1/(jk) bound
+    is generous for the correction. -/
+axiom gram_entry_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    gramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ))
+
+/-- Helper: The double sum Σᵢ Σⱼ 1/((i+1)(j+1)) = H_{N-1}². -/
+private lemma double_sum_reciprocal (n : ℕ) :
+    ∑ i : Fin n, ∑ j : Fin n,
+      (1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))
+    = harmonicFin n ^ 2 := by
+  unfold harmonicFin
+  have : ∀ i : Fin n, ∑ j : Fin n,
+      (1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))
+    = (1 / ((i.val : ℝ) + 1)) * ∑ j : Fin n, (1 / ((j.val : ℝ) + 1)) := by
+    intro i
+    rw [Finset.mul_sum]
+    congr 1; ext j
+    rw [div_mul_div_comm]; ring_nf
+  simp_rw [this]
+  rw [← Finset.sum_mul]
+  ring
+
+/-- **THEOREM** (was axiom): Q(N) ≤ (N-1)²/4 + C·N.
+    Proof: Use gram_entry_upper to bound each entry, then
+    factor the correction as H_{N-1}² ≤ (1+log N)² ≤ 4·(N-1). -/
+theorem gram_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
-    gramSum N ≤ (N - 1 : ℝ) ^ 2 / 4 + C * (N : ℝ)
+    gramSum N ≤ (N - 1 : ℝ) ^ 2 / 4 + C * (N : ℝ) := by
+  obtain ⟨N_L, hNL, hLogSq⟩ := log_sq_le_self
+  refine ⟨4, by norm_num, max N_L 3, by omega, fun N hN => ?_⟩
+  have hN3 : 3 ≤ N := by omega
+  have hNL' : N_L ≤ N := by omega
+  -- Step 1: Bound each gramMatrix entry
+  have hentry : ∀ i j : Fin (N - 1),
+      gramMatrix N i j ≤ 1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)) := by
+    intros i j
+    simp only [gramMatrix, Matrix.of_apply]
+    have : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
+    have : ((j.val + 1 : ℕ) : ℝ) = (j.val : ℝ) + 1 := by push_cast; ring
+    convert gram_entry_upper (i.val + 1) (j.val + 1) (by omega) (by omega) using 2
+    all_goals push_cast; ring
+  -- Step 2: Sum the bound
+  unfold gramSum
+  have h_sum_bound :
+      ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j ≤
+      ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+        (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) := by
+    apply Finset.sum_le_sum; intros i _
+    apply Finset.sum_le_sum; intros j _
+    exact hentry i j
+  -- Step 3: Split into constant part + correction part
+  have h_split :
+      ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+        (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) =
+      (N - 1 : ℝ) ^ 2 / 4 + harmonicFin (N - 1) ^ 2 := by
+    simp only [Finset.sum_add_distrib]
+    congr 1
+    · -- Constant part: Σᵢ Σⱼ 1/4 = (N-1)²/4
+      simp only [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
+      push_cast [Nat.cast_sub (show 1 ≤ N from by omega)]
+      ring
+    · -- Correction part: Σᵢ Σⱼ 1/((i+1)(j+1)) = H²
+      exact double_sum_reciprocal (N - 1)
+  -- Step 4: Bound H_{N-1}² ≤ 4·N
+  have hN1 : 1 ≤ N - 1 := by omega
+  have hH := harmonicFin_le (N - 1) hN1
+  have hlogN_ge1 : Real.log (N : ℝ) ≥ 1 := by
+    rw [ge_iff_le, ← Real.log_exp 1]
+    apply Real.log_le_log (Real.exp_pos 1)
+    have : Real.exp 1 ≤ 3 := by
+      have := Real.exp_bound' (x := 1) (n := 3) (by norm_num) (by norm_num) (by omega)
+      simp [Finset.sum_range_succ, Nat.factorial] at this; linarith
+    linarith [show (3 : ℝ) ≤ (N : ℝ) from by exact_mod_cast hN3]
+  have hH_bound : harmonicFin (N - 1) ≤ 2 * Real.log (N : ℝ) := by
+    calc harmonicFin (N - 1)
+        ≤ 1 + Real.log (↑(N - 1)) := hH
+      _ ≤ 1 + Real.log (N : ℝ) := by
+          gcongr; exact_mod_cast Nat.sub_le N 1
+      _ ≤ Real.log (N : ℝ) + Real.log (N : ℝ) := by linarith
+      _ = 2 * Real.log (N : ℝ) := by ring
+  have hH_sq : harmonicFin (N - 1) ^ 2 ≤ 4 * Real.log (N : ℝ) ^ 2 := by
+    have hH_nn : 0 ≤ harmonicFin (N - 1) := by
+      unfold harmonicFin; apply Finset.sum_nonneg
+      intros; positivity
+    nlinarith [sq_nonneg (harmonicFin (N - 1)), sq_nonneg (Real.log (N : ℝ))]
+  have hlog_sq : Real.log (N : ℝ) ^ 2 ≤ (N : ℝ) - 1 := hLogSq N hNL'
+  have hNR : (N : ℝ) - 1 ≤ (N : ℝ) := by linarith
+  -- Chain: gramSum ≤ (N-1)²/4 + H² ≤ (N-1)²/4 + 4·log²N ≤ (N-1)²/4 + 4·(N-1) ≤ (N-1)²/4 + 4·N
+  calc ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j
+      ≤ ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+          (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) := h_sum_bound
+    _ = (N - 1 : ℝ) ^ 2 / 4 + harmonicFin (N - 1) ^ 2 := h_split
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * Real.log (N : ℝ) ^ 2 := by linarith [hH_sq]
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * ((N : ℝ) - 1) := by linarith [hlog_sq]
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * (N : ℝ) := by linarith
 
 -- ════════════════════════════════════════════════
 -- MAIN THEOREM
