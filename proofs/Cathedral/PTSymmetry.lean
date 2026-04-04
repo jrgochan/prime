@@ -70,8 +70,8 @@ lemma parityOperator_involution (N : ℕ) :
   simp only [Matrix.diagonal_apply, Matrix.one_apply]
   split_ifs with h
   · subst h
-    -- Goal: ↑(liouvilleFunction (↑i + 2)) * ↑(liouvilleFunction (↑i + 2)) = 1
-    have := liouvilleFunction_sq (i.val + 2)
+    -- Goal: ↑(liouvilleFunction (↑i + 1)) * ↑(liouvilleFunction (↑i + 1)) = 1
+    have := liouvilleFunction_sq (i.val + 1)
     nlinarith [this]
   · rfl
 

@@ -397,9 +397,9 @@ lemma padVector_norm {n : ℕ} (v : Fin n → ℝ)
 /-- The quadratic form of a padded vector over G_{n+2} equals the
     quadratic form of the original vector over G_{n+1}. -/
 private lemma quadForm_padVector_of {m : ℕ} (v : Fin m → ℝ) :
-    realQuadForm (of (fun (i j : Fin (m + 1)) => gramEntry (i.val + 2) (j.val + 2)))
+    realQuadForm (of (fun (i j : Fin (m + 1)) => gramEntry (i.val + 1) (j.val + 1)))
                  (padVector v) =
-    realQuadForm (of (fun (i j : Fin m) => gramEntry (i.val + 2) (j.val + 2))) v := by
+    realQuadForm (of (fun (i j : Fin m) => gramEntry (i.val + 1) (j.val + 1))) v := by
   simp only [realQuadForm, dotProduct, mulVec, of_apply, padVector,
     Fin.sum_univ_castSucc, Fin.snoc_castSucc, Fin.snoc_last,
     zero_mul, mul_zero, add_zero, Fin.val_castSucc]

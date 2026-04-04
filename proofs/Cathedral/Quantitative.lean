@@ -36,7 +36,7 @@ theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
   set G := gramMatrix N
   set g := crossCorrVec N
   set c := G⁻¹.mulVec g with hc_def
-  set a := gramEntry (N + 1) (N + 1) with ha_def
+  set a := gramEntry N N with ha_def
   set w : Fin ((N + 1) - 1) → ℝ := fun i =>
     if h : i.val < N - 1 then -(c ⟨i.val, h⟩) else 1 with hw_def
   have hw_ne : w ≠ 0 := by
@@ -72,8 +72,7 @@ theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
   simp_rw [fin_sum_decompose (N + 1 - 1) hN1]
   -- Simplify N+1-1-1 = N-1 and resolve ite conditions
   have hNsub : N + 1 - 1 - 1 = N - 1 := by omega
-  simp only [hNsub, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false,
-    show (N - 1 + 2 : ℕ) = N + 1 from by omega]
+  simp only [hNsub, show ¬(N - 1 < N - 1) from lt_irrefl _, dite_false]
   -- Now the ite for x : Fin(N-1) with x.val < N-1 should be true
   simp only [show ∀ (x : Fin (N - 1)),
     (⟨x.val, (by omega : x.val < N + 1 - 1)⟩ : Fin (N + 1 - 1)).val < N - 1 from
@@ -87,9 +86,12 @@ theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
     congr 1; ext x; ring
   -- Clean up mul_one, one_mul
   simp only [neg_mul, mul_neg, mul_one, one_mul]
-  -- Rewrite gramEntry(↑x + 2, N+1) to gramEntry(N+1, ↑x+2) inside the outer sum
+  -- Normalize N-1+1 to N (needed since basis now uses +1 instead of +2)
+  have hN1 : N - 1 + 1 = N := by omega
+  simp only [hN1]
+  -- Rewrite gramEntry(↑x + 1, N) to gramEntry(N, ↑x+1) via symmetry
   have h_cross : ∀ x : Fin (N + 1 - 1 - 1),
-      gramEntry (↑x + 2) (N + 1) = gramEntry (N + 1) (↑x + 2) :=
+      gramEntry (↑x + 1) N = gramEntry N (↑x + 1) :=
     fun x => hge_comm _ _
   simp_rw [h_cross]
   -- Now both sides use gramEntry(N+1, ↑x+2) consistently.
@@ -104,19 +106,19 @@ theorem schurComplement_pos (N : ℕ) (hN : 2 ≤ N) :
   -- Can't subst directly (not a free var), so use show + convert
   -- Actually simplest: just close it all via congr
   suffices h :
-    -(∑ x : Fin (N - 1), c x * gramEntry (N + 1) (↑x + 2)) +
+    -(∑ x : Fin (N - 1), c x * gramEntry N (↑x + 1)) +
     (∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
-        gramEntry (↑x + 2) (↑x_1 + 2) * c x_1) +
-    (-(∑ x : Fin (N - 1), gramEntry (N + 1) (↑x + 2) * c x) +
-    gramEntry (N + 1) (N + 1)) =
+        gramEntry (↑x + 1) (↑x_1 + 1) * c x_1) +
+    (-(∑ x : Fin (N - 1), gramEntry N (↑x + 1) * c x) +
+    gramEntry N N) =
     ∑ x : Fin (N - 1), c x * ∑ x_1 : Fin (N - 1),
-        gramEntry (↑x + 2) (↑x_1 + 2) * c x_1 -
-    2 * ∑ x : Fin (N - 1), gramEntry (N + 1) (↑x + 2) * c x +
-    gramEntry (N + 1) (N + 1) by
+        gramEntry (↑x + 1) (↑x_1 + 1) * c x_1 -
+    2 * ∑ x : Fin (N - 1), gramEntry N (↑x + 1) * c x +
+    gramEntry N N by
     convert h using 2
   linarith [Finset.sum_congr rfl (show ∀ (x : Fin (N - 1)),
-    x ∈ Finset.univ → c x * gramEntry (N + 1) (↑x + 2) =
-      gramEntry (N + 1) (↑x + 2) * c x from fun x _ => by ring)]
+    x ∈ Finset.univ → c x * gramEntry N (↑x + 1) =
+      gramEntry N (↑x + 1) * c x from fun x _ => by ring)]
 
 -- ─────── LEMMA 2: SCHUR COMPLEMENT LOWER BOUND ───────
 

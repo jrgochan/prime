@@ -144,7 +144,7 @@ axiom mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
     M₀₁[Σ wᵢ{(i+2)/x}](s) = Σ wᵢ · M₀₁[{(i+2)/·}](s).
     This is just linearity of the Mellin transform. -/
 def mellinNBLinComb (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ) : ℂ :=
-  ∑ i : Fin (N - 1), w i * mellinRestricted (fractBasisC (i.val + 2)) s
+  ∑ i : Fin (N - 1), w i * mellinRestricted (fractBasisC (i.val + 1)) s
 
 /-- **Key Lemma (Phase 2C)**: Linearity of restricted Mellin.
     The Mellin transform of a finite linear combination equals
@@ -152,15 +152,15 @@ def mellinNBLinComb (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ) : ℂ :=
 theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
     (hs : 1 < s.re) :
     mellinRestricted (fun x => ∑ i : Fin (N - 1),
-      w i * fractBasisC (i.val + 2) x) s =
+      w i * fractBasisC (i.val + 1) x) s =
     mellinNBLinComb N w s := by
   unfold mellinRestricted mellinNBLinComb
   -- Key: ∫ t^{s-1} · Σᵢ(wᵢ·φᵢ(t)) = Σᵢ wᵢ · ∫ t^{s-1}·φᵢ(t)
   -- Step 1: Push t^{s-1} into the sum and rearrange
   have h_eq : (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * ∑ i : Fin (N - 1),
-      w i * fractBasisC (i.val + 2) t) =
+      w i * fractBasisC (i.val + 1) t) =
     (fun t : ℝ => ∑ i : Fin (N - 1),
-      w i * ((↑t : ℂ) ^ (s - 1) * fractBasisC (i.val + 2) t)) := by
+      w i * ((↑t : ℂ) ^ (s - 1) * fractBasisC (i.val + 1) t)) := by
     ext t; rw [Finset.mul_sum]; congr 1; ext i
     ring
   simp_rw [h_eq]
@@ -190,7 +190,7 @@ theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
     · -- Norm bound: ‖t^{s-1} * fract‖ ≤ ‖t^{s-1}‖
       filter_upwards with x
       rw [norm_mul]
-      calc ‖(↑x : ℂ) ^ (s - 1)‖ * ‖fractBasisC (↑i + 2) x‖
+      calc ‖(↑x : ℂ) ^ (s - 1)‖ * ‖fractBasisC (↑i + 1) x‖
           ≤ ‖(↑x : ℂ) ^ (s - 1)‖ * 1 := by
             gcongr
             simp only [fractBasisC, Complex.norm_real, Real.norm_eq_abs,

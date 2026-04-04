@@ -223,8 +223,8 @@ theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
   intro h_eq
   have h_zero : basisInnerProd N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
   simp only [basisInnerProd] at h_zero
-  -- f(x) = {2/x}, integrable on [0,1] via fract_prod_intervalIntegrable
-  set f := (fun x : ℝ => Int.fract (((0 + 2 : ℕ) : ℝ) / x)) with hf_def
+  -- f(x) = {1/x}, integrable on [0,1] via fract_prod_intervalIntegrable
+  set f := (fun x : ℝ => Int.fract (((0 + 1 : ℕ) : ℝ) / x)) with hf_def
   -- f is integrable on [0,1]: bounded by 1, measurable
   have hf_meas : Measurable f := (measurable_const.div measurable_id).fract
   have hf_bound : ∀ x : ℝ, ‖f x‖ ≤ ‖(1 : ℝ)‖ := fun x => by
@@ -235,19 +235,19 @@ theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
     IntervalIntegrable.mono_fun (intervalIntegrable_const (c := (1:ℝ)))
       hf_meas.aestronglyMeasurable.restrict
       (Filter.Eventually.of_forall hf_bound)
-  -- On (2/3, 1): {2/x} = 2/x - 2 > 0 by fract_eq_sub
-  set c : ℝ := 2/3
+  -- On (1/2, 1): {1/x} = 1/x - 1 > 0 by fract_eq_sub
+  set c : ℝ := 1/2
   have hc0 : (0:ℝ) ≤ c := by norm_num
   have hcd : c < 1 := by norm_num
   have hpos : ∀ x, x ∈ Set.Ioo c (1:ℝ) → 0 < f x := by
     intro x ⟨hx_lo, hx_hi⟩
     simp only [f]
-    have h23 : (2:ℝ) / (↑(2:ℕ) + 1) < x := by
-      have : (2:ℝ) / (↑(2:ℕ) + 1) = 2 / 3 := by norm_num
-      rw [this]; exact hx_lo
-    rw [fract_eq_sub (le_refl 2) (le_refl 2) h23 hx_hi]
-    simp only [Nat.cast_ofNat]
-    rw [sub_pos, lt_div_iff₀ (by linarith : (0:ℝ) < x)]; linarith
+    have h12 : (↑(1:ℕ) : ℝ) / (↑(1:ℕ) + 1) < x := by norm_num; exact hx_lo
+    rw [fract_eq_sub (le_refl 1) (le_refl 1) h12 hx_hi]
+    -- {1/x} = 1/x - 1 > 0 on (1/2, 1) since 1/x > 1
+    have hxp : 0 < x := by linarith
+    have : (1:ℝ) / x > 1 := by rw [gt_iff_lt, lt_div_iff₀ hxp]; linarith
+    linarith
   -- Subinterval integrability
   have hi_sub : IntervalIntegrable f MeasureTheory.volume c 1 :=
     hf_01.mono_set (by

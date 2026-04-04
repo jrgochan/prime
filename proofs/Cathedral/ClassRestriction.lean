@@ -25,8 +25,8 @@ open Complex Real
     the same octonionic class, 0 otherwise. -/
 noncomputable def gramMatrixBlockDiag (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
   Matrix.of (fun i j =>
-    let ki := i.val + 2
-    let kj := j.val + 2
+    let ki := i.val + 1
+    let kj := j.val + 1
     if octonionClass ki = octonionClass kj
     then gramEntry ki kj
     else 0)
@@ -36,7 +36,7 @@ lemma gramMatrixBlockDiag_hermitian (N : ℕ) :
     (gramMatrixBlockDiag N).IsHermitian := by
   ext i j
   simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrixBlockDiag, Matrix.of_apply]
-  by_cases h : octonionClass (i.val + 2) = octonionClass (j.val + 2)
+  by_cases h : octonionClass (i.val + 1) = octonionClass (j.val + 1)
   · rw [if_pos h, if_pos h.symm]
     unfold gramEntry; congr 1; ext x; ring
   · rw [if_neg h, if_neg (Ne.symm h)]
@@ -138,8 +138,8 @@ axiom oct_equals_block (N : ℕ) (hN : 10 ≤ N) :
     octonionic classes. -/
 noncomputable def gramCrossClass (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
   Matrix.of (fun i j =>
-    let ki := i.val + 2
-    let kj := j.val + 2
+    let ki := i.val + 1
+    let kj := j.val + 1
     if octonionClass ki = octonionClass kj
     then 0  -- Within-class: goes to G^{block}
     else gramEntry ki kj)  -- Cross-class: goes to G^{cross}
@@ -409,7 +409,7 @@ theorem oct_gap_positive (N : ℕ) (hN : 2 ≤ N) :
 /-- Class-restricted vector: zero out components outside class m. -/
 noncomputable def classRestrict (N : ℕ) (m : Fin 8) (v : Fin (N - 1) → ℝ) :
     Fin (N - 1) → ℝ :=
-  fun i => if octonionClass (i.val + 2) = m then v i else 0
+  fun i => if octonionClass (i.val + 1) = m then v i else 0
 
 /-- The class restrictions partition the squared norm:
     Σ_m ‖v_m‖² = ‖v‖² where v_m is v restricted to class m. -/
@@ -424,10 +424,10 @@ lemma classRestrict_norm_partition (N : ℕ) (v : Fin (N - 1) → ℝ) :
   -- Need: Σ_m (if class(i+2)=m then v_i else 0)² = v_i²
   -- Exactly one m equals class(i+2), contributing v_i²
   have key : ∀ m : Fin 8,
-    (if octonionClass (i.val + 2) = m then v i else 0) *
-    (if octonionClass (i.val + 2) = m then v i else 0) =
-    if octonionClass (i.val + 2) = m then v i * v i else 0 := by
-    intro m; by_cases h : octonionClass (i.val + 2) = m <;> simp [h]
+    (if octonionClass (i.val + 1) = m then v i else 0) *
+    (if octonionClass (i.val + 1) = m then v i else 0) =
+    if octonionClass (i.val + 1) = m then v i * v i else 0 := by
+    intro m; by_cases h : octonionClass (i.val + 1) = m <;> simp [h]
   simp_rw [key]
   simp
 
@@ -462,25 +462,25 @@ lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
   -- RHS: collapse the x-sum to the unique x = class(i+2)
   -- using Finset.sum_ite_eq'-like reasoning
   have h_rhs : ∀ (f : Fin 8 → ℝ),
-    (∑ x : Fin 8, (if octonionClass (↑i + 2) = x then f x else 0)) =
-    f (octonionClass (↑i + 2)) := by
+    (∑ x : Fin 8, (if octonionClass (↑i + 1) = x then f x else 0)) =
+    f (octonionClass (↑i + 1)) := by
     intro f; simp
   -- Collapse the m-sum: only m = class(i+2) contributes
   rw [show (∑ x : Fin 8,
-      (if octonionClass (↑i + 2) = x then v i else 0) *
-      (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ classRestrict N x v) =
-    v i * (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
-      classRestrict N (octonionClass (↑i + 2)) v from by
-    rw [show v i * (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
-        classRestrict N (octonionClass (↑i + 2)) v =
-      (if octonionClass (↑i + 2) = octonionClass (↑i + 2) then v i else 0) *
-        (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ
-        classRestrict N (octonionClass (↑i + 2)) v from by simp]
+      (if octonionClass (↑i + 1) = x then v i else 0) *
+      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ classRestrict N x v) =
+    v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+      classRestrict N (octonionClass (↑i + 1)) v from by
+    rw [show v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        classRestrict N (octonionClass (↑i + 1)) v =
+      (if octonionClass (↑i + 1) = octonionClass (↑i + 1) then v i else 0) *
+        (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        classRestrict N (octonionClass (↑i + 1)) v from by simp]
     rw [← h_rhs (fun x =>
-      (if octonionClass (↑i + 2) = x then v i else 0) *
-      (fun j => gramEntry (↑i + 2) (↑j + 2)) ⬝ᵥ classRestrict N x v)]
+      (if octonionClass (↑i + 1) = x then v i else 0) *
+      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ classRestrict N x v)]
     apply Finset.sum_congr rfl; intro m _
-    by_cases hm : octonionClass (↑i + 2) = m <;> simp [hm]]
+    by_cases hm : octonionClass (↑i + 1) = m <;> simp [hm]]
   -- Now goal: v i * (if_row) ⬝ᵥ v = v i * G_row ⬝ᵥ classRestrict N (class i) v
   -- Factor out v i and show dotProducts are equal
   congr 1
@@ -489,7 +489,7 @@ lemma blockDiag_quadForm_decomp (N : ℕ) (v : Fin (N - 1) → ℝ) :
   simp only [dotProduct, classRestrict]
   -- Σ_j (if ci=cj then G[i,j] else 0) * v(j) = Σ_j G[i,j] * (if ci=cj then v(j) else 0)
   apply Finset.sum_congr rfl; intro j _
-  by_cases h : octonionClass (↑i + 2) = octonionClass (↑j + 2)
+  by_cases h : octonionClass (↑i + 1) = octonionClass (↑j + 1)
   · -- Same class: (if ci=cj then G else 0) * vj = G * (if cj=ci then vj else 0)
     simp only [if_pos h, if_pos h.symm]
   · -- Different class: 0 * vj = G * 0

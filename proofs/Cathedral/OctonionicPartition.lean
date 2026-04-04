@@ -228,7 +228,7 @@ theorem weight_bounded (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     (Hadamard/Schur product of the weight matrix with the Gram matrix). -/
 noncomputable def gramMatrixOct (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
   Matrix.of (fun i j =>
-    octonionWeight (i.val + 2) (j.val + 2) * gramEntry (i.val + 2) (j.val + 2))
+    octonionWeight (i.val + 1) (j.val + 1) * gramEntry (i.val + 1) (j.val + 1))
 
 /-- G^𝕆 is symmetric (since both W and G are symmetric). -/
 lemma gramMatrixOct_hermitian (N : ℕ) :

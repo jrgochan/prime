@@ -35,7 +35,7 @@ noncomputable def gramEntry (j k : ℕ) : ℝ :=
 /-- The (N-1)×(N-1) Gram matrix with entries G[j,k] for j,k ∈ {2,...,N}.
     This is the Gram matrix of the Nyman-Beurling basis functions. -/
 noncomputable def gramMatrix (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
-  Matrix.of (fun i j => gramEntry (i.val + 2) (j.val + 2))
+  Matrix.of (fun i j => gramEntry (i.val + 1) (j.val + 1))
 
 /-- The Gram matrix is Hermitian (symmetric over ℝ), since
     G[j,k] = ∫ {j/x}{k/x} dx = ∫ {k/x}{j/x} dx = G[k,j] -/
@@ -72,15 +72,15 @@ lemma eigenDrop_succ (k : ℕ) : eigenDrop (k + 1) = lambdaMin k - lambdaMin (k 
 -- correctly computes gramEntry(N+1, i.val+2) = ⟨f_{N+1}, f_{i+2}⟩.
 
 /-- The cross-correlation as a vector over Fin(N-1),
-    where crossCorrVec N i = gramEntry(N+1, i+2) = ⟨f_{N+1}, f_{i+2}⟩ -/
+    where crossCorrVec N i = gramEntry(N, i+1) = ⟨f_N, f_{i+1}⟩ -/
 noncomputable def crossCorrVec (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => gramEntry (N + 1) (i.val + 2)
+  fun i => gramEntry N (i.val + 1)
 
-/-- The Schur complement S_N = G[N+1,N+1] - gᵀ G_N⁻¹ g.
-    This is the variance of f_{N+1} after projecting out the
-    span of f_2, ..., f_N. By positive definiteness, S_N > 0. -/
+/-- The Schur complement S_N = G[N,N] - gᵀ G_N⁻¹ g.
+    This is the variance of f_N after projecting out the
+    span of f_1, ..., f_{N-1}. By positive definiteness, S_N > 0. -/
 noncomputable def schurComplement (N : ℕ) : ℝ :=
-  gramEntry (N + 1) (N + 1) -
+  gramEntry N N -
   dotProduct (crossCorrVec N) ((gramMatrix N)⁻¹.mulVec (crossCorrVec N))
 
 /-- The cosine of the angle between the cross-correlation vector g_N
@@ -112,7 +112,7 @@ noncomputable def cosAlignment (N : ℕ) : ℝ :=
 /-- The inner product vector b_i = ⟨1_{(0,1)}, f_{i+2}⟩ = ∫₀¹ {(i+2)/x} dx.
     Used in the Nyman-Beurling distance formula. -/
 noncomputable def basisInnerProd (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => ∫ x in (0:ℝ)..1, Int.fract (((i.val + 2 : ℕ) : ℝ) / x)
+  fun i => ∫ x in (0:ℝ)..1, Int.fract (((i.val + 1 : ℕ) : ℝ) / x)
 
 /-- Nyman-Beurling distance squared: d_N² = 1 - bᵀ G_N⁻¹ b.
     This is the squared L²(0,1) distance from the indicator 1_{(0,1)}
@@ -140,7 +140,7 @@ def liouvilleFunction (n : ℕ) : ℤ :=
     singular direction IS the Liouville function itself (ρ > 0.99999).
     After removing this rank-2 component, ‖[G,P]_residual‖/‖G‖ → 0. -/
 noncomputable def parityOperator (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
-  Matrix.diagonal (fun i => (liouvilleFunction (i.val + 2) : ℝ))
+  Matrix.diagonal (fun i => (liouvilleFunction (i.val + 1) : ℝ))
 
 /-- The normalized Liouville vector λ̂ ∈ ℝ^{N-1} defined by
     λ̂[i] = λ(i+2) / ‖λ_vec‖, where λ_vec[i] = λ(i+2).
@@ -151,7 +151,7 @@ noncomputable def parityOperator (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) 
     Experimental verification: correlation with the actual singular
     vector of [G,P] exceeds 0.99999 for all N tested (30-500). -/
 noncomputable def liouvilleUnitVec (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => (liouvilleFunction (i.val + 2) : ℝ) / Real.sqrt (N - 1 : ℝ)
+  fun i => (liouvilleFunction (i.val + 1) : ℝ) / Real.sqrt (N - 1 : ℝ)
 
 /-- The parity-even part of the Gram matrix: G_even = (G + PGP) / 2.
     This preserves Liouville parity (maps even→even, odd→odd).

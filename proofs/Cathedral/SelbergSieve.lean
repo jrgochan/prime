@@ -93,7 +93,7 @@ theorem selbergWeight_zero_of_gt (d D : ℕ) (hD : 1 ≤ D) (h : D < d) :
     This assigns the (smoothed) Selberg weight to each
     basis function {(i+2)/x}. -/
 def selbergTestVec (N D : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => selbergWeight (i.val + 2) D / (i.val + 2 : ℝ)
+  fun i => selbergWeight (i.val + 1) D / (i.val + 1 : ℝ)
 
 -- ════════════════════════════════════════════════
 -- SECTION 2: THE SELBERG L² BOUND

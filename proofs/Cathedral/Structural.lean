@@ -87,7 +87,7 @@ theorem eigenDrop_nonneg (N : ℕ) (hN : 3 ≤ N) : 0 ≤ eigenDrop N := by
 /-- The NB linear combination: φ_w(x) = Σᵢ wᵢ · {(i+2)/x}.
     This is the L²(0,1) function whose squared norm equals wᵀGw. -/
 def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
-  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)
+  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
 
 /-- The function x ↦ Int.fract(j/x) * Int.fract(k/x) is measurable. -/
 private lemma fract_div_mul_measurable (j k : ℕ) :
@@ -138,7 +138,7 @@ private lemma scaled_fract_intervalIntegrable (j k : ℕ) (a b : ℝ) :
 private lemma quadForm_as_double_sum (N : ℕ) (w : Fin (N - 1) → ℝ) :
     realQuadForm (gramMatrix N) w =
     ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-      w i * w j * gramEntry (i.val + 2) (j.val + 2) := by
+      w i * w j * gramEntry (i.val + 1) (j.val + 1) := by
   unfold realQuadForm dotProduct
   congr 1; ext i
   simp only [Matrix.mulVec, dotProduct, gramMatrix, Matrix.of_apply]
@@ -160,52 +160,52 @@ private lemma integral_fract_prod_eq (j k : ℕ) (a b : ℝ) :
 private lemma integral_sq_as_double_sum (N : ℕ) (w : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 =
     ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-      w i * w j * gramEntry (i.val + 2) (j.val + 2) := by
+      w i * w j * gramEntry (i.val + 1) (j.val + 1) := by
   -- Expand (Σ aᵢ)² = Σᵢ Σⱼ aᵢ * aⱼ
   have h_sq : (fun x : ℝ => (nbLinComb N w x) ^ 2) =
       (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
     ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
   rw [h_sq]
   -- Convert unattached sums for integral_finset_sum
   rw [show (fun x : ℝ => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
       (fun x => ∑ i ∈ Finset.univ, ∑ j ∈ Finset.univ,
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) from by
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) from by
     ext x; simp]
   -- Pull outer Σᵢ through ∫
   rw [intervalIntegral.integral_finset_sum]
   -- For each i, pull inner Σⱼ through ∫
   congr 1; ext i
   rw [show (fun x : ℝ => ∑ j ∈ Finset.univ,
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
       (fun x => ∑ j ∈ Finset.univ,
-        (fun j x => (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) j x) from by
+        (fun j x => (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) j x) from by
     ext x; simp]
   rw [intervalIntegral.integral_finset_sum]
   -- Each integral = wᵢ wⱼ gramEntry(i+2, j+2)
   congr 1; ext j
-  exact integral_fract_prod_eq (i.val + 2) (j.val + 2) (w i) (w j)
+  exact integral_fract_prod_eq (i.val + 1) (j.val + 1) (w i) (w j)
   -- Inner integrability
   · intro j _
-    exact scaled_fract_intervalIntegrable (i.val + 2) (j.val + 2) (w i) (w j)
+    exact scaled_fract_intervalIntegrable (i.val + 1) (j.val + 1) (w i) (w j)
   -- Outer integrability
   · intro i _
     have : (fun x => ∑ j : Fin (N - 1),
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
       (∑ j : Fin (N - 1), fun x =>
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
       ext x; simp [Finset.sum_apply]
     rw [this]
     exact IntervalIntegrable.sum Finset.univ (fun j _ =>
-      scaled_fract_intervalIntegrable (i.val + 2) (j.val + 2) (w i) (w j))
+      scaled_fract_intervalIntegrable (i.val + 1) (j.val + 1) (w i) (w j))
 
 /-- **L² norm identity** (PROVEN): wᵀGw = ∫₀¹ (Σᵢ wᵢ fᵢ)² dx.
 
@@ -219,12 +219,12 @@ theorem gram_l2_identity (N : ℕ) (_ : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
   rw [quadForm_as_double_sum, integral_sq_as_double_sum]
 
-/-- **fract_eq_sub** (PROVEN): On (n/(n+1), 1) with m ≤ n ≥ 2,
+/-- **fract_eq_sub** (PROVEN): On (n/(n+1), 1) with m ≤ n ≥ 1,
     the fractional part {m/x} = m/x - m.
 
     Proof: m/(m+1) ≤ n/(n+1) < x < 1 implies m ≤ m/x < m+1, so ⌊m/x⌋ = m.
     Cross-multiplication: m(n+1) ≤ n(m+1) ↔ mn+m ≤ nm+n ↔ m ≤ n. -/
-theorem fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 2 ≤ n)
+theorem fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 1 ≤ n)
     {x : ℝ} (hx_lo : (n : ℝ) / (↑n + 1) < x) (hx_hi : x < 1) :
     Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ) := by
   have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n / (↑n + 1) by positivity]
@@ -242,15 +242,15 @@ theorem fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 2 ≤ n)
     · push_cast; rw [div_lt_iff₀ hx_pos]; linarith
   simp only [Int.fract, h_floor]; push_cast; ring
 
-/-- On (n'/(n'+1), 1), nbLinComb = A·(1/x - 1) where A = Σ wᵢ(i+2). -/
+/-- On (n'/(n'+1), 1), nbLinComb = A·(1/x - 1) where A = Σ wᵢ(i+1). -/
 private lemma nbLinComb_eq_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
-    (n' : ℕ) (hn' : 2 ≤ n')
-    (hw_zero : ∀ i : Fin (N - 1), n' < i.val + 2 → w i = 0)
+    (n' : ℕ) (hn' : 1 ≤ n')
+    (hw_zero : ∀ i : Fin (N - 1), n' < i.val + 1 → w i = 0)
     (x : ℝ) (hx_lo : (n' : ℝ) / (↑n' + 1) < x) (hx_hi : x < 1) :
-    nbLinComb N w x = (∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)) * (1/x - 1) := by
+    nbLinComb N w x = (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) * (1/x - 1) := by
   have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 1) by positivity]
   unfold nbLinComb; rw [Finset.sum_mul]; congr 1; ext ⟨i, hi⟩
-  by_cases h : i + 2 ≤ n'
+  by_cases h : i + 1 ≤ n'
   · rw [fract_eq_sub h hn' hx_lo hx_hi]; field_simp
   · push_neg at h; rw [hw_zero ⟨i, hi⟩ h]; simp
 
@@ -338,21 +338,41 @@ private theorem fract_eq_sub_jump {n : ℕ} (hn : 2 ≤ n)
     · push_cast; linarith
   simp only [Int.fract, h_floor]; push_cast; ring
 
-/-- **NB floor jump** (PROVEN): When A = Σ wᵢ(i+2) = 0 and j₀ is the
+/-- **NB floor jump** (PROVEN): When A = Σ wᵢ(i+1) = 0 and j₀ is the
     largest index with w_{j₀} ≠ 0, nbLinComb ≡ -w_{j₀} on an open
     subinterval of (0,1).
 
     On ((n'-1)/n', n'/(n'+1)) where n' = j₀+2:
-    • For i < j₀: ⌊(i+2)/x⌋ = i+2, so {(i+2)/x} = (i+2)/x - (i+2)
+    • For i < j₀: ⌊(i+1)/x⌋ = i+1, so {(i+1)/x} = (i+1)/x - (i+1)
     • For i = j₀: ⌊n'/x⌋ = n'+1 (floor jumps!), so {n'/x} = n'/x - (n'+1)
     • For i > j₀: wᵢ = 0
     Summing: nbLinComb = A/x - (A + w_{j₀}) = -w_{j₀} since A = 0. -/
 theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (N - 1))
     (hw_above : ∀ i : Fin (N - 1), j₀ < i → w i = 0)
-    (hA : (∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)) = 0) :
+    (hA : (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) = 0)
+    (hwj₀ : w j₀ ≠ 0) :
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     ∀ x, x ∈ Set.Ioo c d → nbLinComb N w x = -(w j₀) := by
-  set n' := j₀.val + 2
+  -- j₀ ≥ 1: if j₀ = 0, then A = w₀ * 1 ≠ 0, contradicting hA
+  have hj₀_pos : 1 ≤ j₀.val := by
+    by_contra h; push_neg at h
+    have hj₀_zero : j₀.val = 0 := by omega
+    have hw_rest : ∀ i : Fin (N - 1), i ≠ j₀ → w i = 0 := by
+      intro i hi
+      by_cases hlt : j₀ < i
+      · exact hw_above i hlt
+      · push_neg at hlt
+        -- i ≤ j₀ and i ≠ j₀. Since j₀.val = 0, i.val = 0 = j₀.val, contradiction
+        exfalso; apply hi; exact Fin.ext (by omega)
+    have : (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) = w j₀ * 1 := by
+      have h_terms : ∀ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ) =
+          if i = j₀ then w j₀ * 1 else 0 := by
+        intro i; by_cases heq : i = j₀
+        · subst heq; simp [hj₀_zero]
+        · rw [hw_rest i heq, zero_mul, if_neg heq]
+      simp_rw [h_terms]; simp
+    rw [this, mul_one] at hA; exact hwj₀ hA
+  set n' := j₀.val + 1
   have hn' : 2 ≤ n' := by omega
   have hn'_pos : (0 : ℝ) < ↑n' := by exact_mod_cast show 0 < n' by omega
   -- The interval: c = (n'-1)/n', d = n'/(n'+1)
@@ -377,10 +397,10 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
     -- For i > j₀: w i = 0, so the term vanishes
     -- Rewrite each term
     have h_term : ∀ i : Fin (N - 1),
-        w i * Int.fract ((↑(i.val + 2) : ℝ) / x) =
+        w i * Int.fract ((↑(i.val + 1) : ℝ) / x) =
         if j₀ < i then 0
         else if i = j₀ then w j₀ * ((↑n' : ℝ) / x - (↑n' + 1))
-        else w i * ((↑(i.val + 2) : ℝ) / x - ↑(i.val + 2)) := by
+        else w i * ((↑(i.val + 1) : ℝ) / x - ↑(i.val + 1)) := by
       intro i
       by_cases hi_above : j₀ < i
       · simp only [hi_above, ↓reduceIte, hw_above i hi_above, zero_mul]
@@ -393,25 +413,25 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
         · have hi_lt : i < j₀ := lt_of_le_of_ne hi_above hi_eq
           simp only [hi_eq, ↓reduceIte]
           congr 1
-          have hm : i.val + 2 + 1 ≤ n' := by omega
+          have hm : i.val + 1 + 1 ≤ n' := by omega
           exact fract_eq_sub_shifted hm hn' hx_lo hx_hi
     simp_rw [h_term]
     -- Rewrite conditional sum as div_sum/x - const_sum
     have h_split : ∀ i : Fin (N - 1),
         (if j₀ < i then (0 : ℝ)
          else if i = j₀ then w j₀ * ((↑n' : ℝ) / x - (↑n' + 1))
-         else w i * ((↑(i.val + 2) : ℝ) / x - ↑(i.val + 2))) =
-        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2)) / x -
+         else w i * ((↑(i.val + 1) : ℝ) / x - ↑(i.val + 1))) =
+        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x -
         (if j₀ < i then (0 : ℝ) else if i = j₀ then w j₀ * (↑n' + 1)
-         else w i * ↑(i.val + 2)) := by
+         else w i * ↑(i.val + 1)) := by
       intro i; split_ifs with h1 h2
       · simp
       · subst h2; field_simp; ring
       · field_simp
     simp_rw [h_split, Finset.sum_sub_distrib]
     -- Now goal: (Σ (if ... else w_i*(i+2))) / x - Σ (if ... else if ... then w_{j₀}(n'+1) else w_i(i+2)) = -w_{j₀}
-    have hA_ite : ∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2)) = 0 := by
-      trans ∑ i : Fin (N - 1), w i * ↑(i.val + 2)
+    have hA_ite : ∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) = 0 := by
+      trans ∑ i : Fin (N - 1), w i * ↑(i.val + 1)
       · congr 1; ext i; split_ifs with h
         · simp [hw_above i h]
         · rfl
@@ -420,16 +440,16 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
     -- After sum_sub_distrib: goal is (Σ (if j₀<i then 0 else w_i*(i+2))/x) - (Σ ...) = -w_{j₀}
     -- Need to pull the /x outside. Can't use Finset.sum_div directly.
     -- Instead use conv to rewrite the first sum using hA_ite.
-    have h_sum_div : (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2)) / x) = 0 := by
-      rw [show (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2)) / x) =
-        (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2))) / x from
+    have h_sum_div : (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x) = 0 := by
+      rw [show (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x) =
+        (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1))) / x from
         (Finset.sum_div Finset.univ _ x).symm]
       rw [hA_ite, zero_div]
     rw [h_sum_div, zero_sub, neg_eq_iff_eq_neg, neg_neg]
     have h_each : ∀ i : Fin (N - 1),
         (if j₀ < i then (0 : ℝ) else if i = j₀ then w j₀ * (↑n' + 1)
-         else w i * ↑(i.val + 2)) =
-        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 2)) +
+         else w i * ↑(i.val + 1)) =
+        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) +
         (if i = j₀ then w j₀ else 0) := by
       intro i; by_cases h1 : j₀ < i
       · simp only [h1, ite_true]
@@ -465,10 +485,10 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
     intro i hi; by_contra h
     exact absurd (Finset.le_max' S i (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩))
       (not_le.mpr hi)
-  set n' := j₀.val + 2
-  have hn' : 2 ≤ n' := by omega
+  set n' := j₀.val + 1
+  have hn' : 1 ≤ n' := by omega
   have hn'_pos : (0 : ℝ) < ↑n' := by exact_mod_cast show 0 < n' by omega
-  set A := ∑ i : Fin (N - 1), w i * (↑(i.val + 2) : ℝ)
+  set A := ∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)
   by_cases hA : A ≠ 0
   · -- CASE A ≠ 0: nbLinComb = A(1/x-1) ≠ 0 on (n'/(n'+1), 1)
     refine ⟨↑n' / (↑n' + 1), 1, le_of_lt (by positivity),
@@ -483,7 +503,7 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
       linarith [show 1 < 1/x from by rw [one_div]; exact one_lt_inv_iff₀.mpr ⟨hx_pos, hx_hi⟩])
   · -- CASE A = 0: nbLinComb = -w_{j₀} ≠ 0 on some interval
     push_neg at hA
-    obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA
+    obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA hwj₀
     exact ⟨c, d, hc, hcd, hd, fun x hx => by rw [heq x hx]; exact neg_ne_zero.mpr hwj₀⟩
 
 /-- nbLinComb² is integrable on [0,1]. -/
@@ -491,26 +511,26 @@ theorem nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
     IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
   have h_sq : (fun x => (nbLinComb N w x) ^ 2) =
       (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-        (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
     ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
   rw [h_sq]
   have : (fun x : ℝ => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-      (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
     (∑ i : Fin (N - 1), ∑ j : Fin (N - 1), fun x =>
-      (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) := by
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
     ext x; simp [Finset.sum_apply]
   rw [this]
   apply IntervalIntegrable.sum; intro i _
   apply IntervalIntegrable.sum; intro j _
-  have : (fun x : ℝ => (w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) *
-      (w j * Int.fract ((↑(j.val + 2) : ℝ) / x))) =
-    (fun x : ℝ => (w i * w j) * (Int.fract ((↑(i.val + 2) : ℝ) / x) *
-      Int.fract ((↑(j.val + 2) : ℝ) / x))) := by ext x; ring
+  have : (fun x : ℝ => (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+    (fun x : ℝ => (w i * w j) * (Int.fract ((↑(i.val + 1) : ℝ) / x) *
+      Int.fract ((↑(j.val + 1) : ℝ) / x))) := by ext x; ring
   rw [this]
-  exact (fract_prod_intervalIntegrable (i.val + 2) (j.val + 2)).const_mul _
+  exact (fract_prod_intervalIntegrable (i.val + 1) (j.val + 1)).const_mul _
 
 /-- **NB linear independence** (PROVEN from sub-axiom):
     ∫₀¹ (Σ wᵢ{(i+2)/x})² dx > 0 for w ≠ 0.
@@ -663,12 +683,12 @@ private lemma single_fract_integrable (k : ℕ) (c : ℝ) :
 theorem nbLinComb_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
     IntervalIntegrable (nbLinComb N w) MeasureTheory.volume 0 1 := by
   unfold nbLinComb
-  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) =
-    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) := by
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
+    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) := by
     ext x; simp [Finset.sum_apply]
   rw [h_sum]
   apply IntervalIntegrable.sum; intro i _
-  exact single_fract_integrable (i.val + 2) (w i)
+  exact single_fract_integrable (i.val + 1) (w i)
 
 /-- The integral of nbLinComb equals the dot product b^T w.
     ∫₀¹ Σ wᵢ{(i+2)/x} dx = Σ wᵢ · ∫₀¹ {(i+2)/x} dx = dotProduct b w. -/
@@ -679,14 +699,14 @@ theorem integral_nbLinComb_eq_dotProduct (N : ℕ) (w : Fin (N - 1) → ℝ) :
   -- ∫₀¹ Σ wᵢ{(i+2)/x} = Σ wᵢ · ∫₀¹ {(i+2)/x} = Σ (∫₀¹{(i+2)/x}) · wᵢ
   -- Use integral_finset_sum via the rewrite pattern from integral_sq_as_double_sum
   conv_lhs =>
-    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) =
-      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) i x) from by
+    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
+      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) i x) from by
       ext x; simp]
   rw [intervalIntegral.integral_finset_sum]
   · congr 1; ext i
     rw [intervalIntegral.integral_const_mul, mul_comm]
   · intro i _
-    exact single_fract_integrable (i.val + 2) (w i)
+    exact single_fract_integrable (i.val + 1) (w i)
 
 /-- **THE L² ↔ MATRIX BRIDGE** (PROVEN):
     ∫₀¹ (1 - Σ wᵢ{(i+2)/x})² dx = 1 - 2·bᵀw + wᵀGw.
