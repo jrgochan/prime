@@ -24,7 +24,8 @@ moebius_test_bound (L² axiom)            ← Axiom: ∫₀¹ (1-Σ vᵢ{(i+2)/x
   = nb_distance_scaling                  ← PROVED THEOREM
       ↓ [log_grows_unboundedly — PROVED]
       ↓ [distance_converges_to_zero — PROVED]
-nyman_beurling                           ← Axiom: published (Beurling 1955)
+nyman_beurling                           ← Axiom → decomposed in MellinBridge:
+  [mellin_fractBasis + nyman_beurling_{forward,converse}]
       ↓
 riemann_hypothesis                       ← PROVED
 ```
@@ -72,7 +73,7 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 
 | Axiom | Category | Status |
 |-------|----------|--------|
-| `nyman_beurling` | Published theorem | 📘 Beurling 1955, Báez-Duarte 2003. Universally accepted. |
+| `nyman_beurling` | Published theorem | 📘 Decomposed in MellinBridge.lean into 3 sub-axioms |
 | `moebius_test_bound` | Analytic NT | 🟡 ∫₀¹(1-Σvᵢ{(i+2)/x})² ≤ C/log(N). Computationally verified. |
 
 ### Structural (not on critical path)
@@ -122,7 +123,7 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 
 ```bash
 cd proofs
-lake build          # Build all Lean proofs (~3040 jobs)
+lake build          # Build all Lean proofs (~3066 jobs)
 ```
 
 Verify the axiom set:
@@ -151,6 +152,7 @@ make clean          # Clean all build artifacts
 | `ParitySchur.lean` | 0 | Parity decomposition, Schur PSD, bridge axioms |
 | `BilinearSieve.lean` | 0 | Sieve → stable ratio (0 algebraic axioms) |
 | `ParityBridge.lean` | 0 | Parity Bridge: sieve + block scaling → full scaling |
+| `MellinBridge.lean` | 0 | Mellin transform infrastructure, NB decomposition |
 | `Assembly.lean` | 0 | Final chain: axioms → RH |
 
 ### Exploratory / Supporting
@@ -171,10 +173,10 @@ We propose formalizing via **Approach B (Báez-Duarte 2003)**, bypassing Hardy s
 | Phase | Description | Status | Estimate |
 |-------|-------------|--------|----------|
 | 1 | L²↔Matrix Bridge | ✅ DONE | - |
-| 2 | Mellin transform infrastructure | 🟡 Partial Mathlib | 2-3 months |
-| 3 | Easy direction: RH → d²_N → 0 | Needs Phase 2 | 2-3 months |
-| 4 | Hard direction: separating functional | Core proof | 4-6 months |
-| 5 | Integration + cleanup | - | 1-2 months |
+| 2 | Mellin transform infrastructure | ✅ DONE | MellinBridge.lean (0 sorry) |
+| 3 | Easy direction: RH → d²_N → 0 | 🟡 Axiom | 2-3 months |
+| 4 | Hard direction: separating functional | 🟡 Axiom | 4-6 months |
+| 5 | Integration + cleanup | 🟡 Ready | existential_implies_infimum proved |
 
 **Key insight (Phase 4)**: If ζ(ρ)=0 with Re(ρ)≠1/2, then x^{ρ-1} annihilates every {k/x} but not 1_{(0,1)}, blocking L² convergence.
 
