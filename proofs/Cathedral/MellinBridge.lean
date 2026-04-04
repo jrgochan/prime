@@ -567,6 +567,18 @@ private lemma abel_sum_gen (a : ℕ → ℂ) (k : ℕ) : ∀ M : ℕ,
     rw [Finset.sum_range_succ, Finset.sum_range_succ, ih]
     push_cast; ring
 
+/-- The partial Abel sum connects to partial ζ sums for the generalized k-floor. -/
+private lemma partial_sum_gen (s : ℂ) (k : ℕ) (M : ℕ) :
+    ∑ i ∈ Finset.range (M+1),
+      (↑(k + i) : ℂ) * ((↑((k:ℝ)/(↑(k+i):ℝ)) : ℂ) ^ s -
+        (↑((k:ℝ)/(↑(k+i)+1)) : ℂ) ^ s) / s =
+    (∑ i ∈ Finset.range (M+1), (↑((k:ℝ)/(↑(k+i)+1)) : ℂ) ^ s +
+      (↑k : ℂ) * (↑((k:ℝ)/(↑k:ℝ)) : ℂ) ^ s -
+      (↑(k + (M+1)) : ℂ) * (↑((k:ℝ)/(↑(k+(M+1)):ℝ)) : ℂ) ^ s) / s := by
+  have hab := abel_sum_gen (fun n => (↑((k:ℝ)/(↑n:ℝ)) : ℂ) ^ s) k (M+1)
+  rw [← Finset.sum_div]; congr 1
+  convert hab using 2 <;> simp [Nat.cast_add, Nat.cast_one]
+
 /-- Inductive decomposition: ∫_{Ioc(k/(k+M+1), 1)} f = ∑_{i<M+1} piece(k, k+i).
     By induction on M, splitting Ioc at each step and applying piece_setIntegral_gen. -/
 private lemma integral_decomp_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
@@ -658,7 +670,12 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
       obtain ⟨M, rfl⟩ : ∃ M, N = k + M := ⟨N - k, by omega⟩
       -- Now N is replaced by k + M everywhere
       rw [integral_decomp_gen s hs k hk M]
-      sorry  -- Abel summation + algebra
+      -- Apply partial Abel summation
+      rw [partial_sum_gen s k M]
+      -- Goal now: (∑ a_{k+i+1} + k·a_k - (k+M+1)·a_{k+M+1}) / s = target / s
+      -- Both sides have /s, so congr 1 to compare numerators
+      -- Then: k/k = 1, (k/n)^s = k^s·n^{-s}, reindex sums
+      sorry  -- pure algebra: k/k=1, (k/n)^s = k^s·n^{-s}, Finset reindexing
     -- Step 2: ∑_{n=k+1}^{N} n^{-s} → ζ(s) - ∑_{n=1}^{k} n^{-s}
     have h_tail_zeta : Tendsto
         (fun N : ℕ => ∑ n ∈ Finset.Icc (k+1) N, ((↑(n:ℕ) : ℂ) ^ (-s)))
