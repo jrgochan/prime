@@ -498,7 +498,12 @@ theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
   -- Step 3: Apply mellin_div_integral and floor_div_mellin
   rw [mellin_div_integral s hs k hk, floor_div_mellin s hs k hk]
   -- Step 4: Algebra: k/(s-1) - [k/s + (k^s/s)·(ζ - ∑)] = k/(s(s-1)) + (k^s/s)·(∑ - ζ)
-  sorry
+  have hs_ne : s ≠ 0 := by
+    intro h; rw [h, zero_re] at hs; linarith
+  have hs1_ne : s - 1 ≠ 0 := by
+    intro h; have := congr_arg re h; simp [sub_re, one_re] at this; linarith
+  field_simp
+  ring
 
 -- ════════════════════════════════════════════════
 -- SECTION 3: THE SEPARATING FUNCTIONAL
