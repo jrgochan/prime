@@ -1,0 +1,16 @@
+Spectral Decomposition of NB Distance
+======================================
+N_MAX = 600, QUAD_PTS = 50000
+Started: Instant { tv_sec: 579161, tv_nsec: 771700750 }
+
+
+max d²·log(N) for N≥10: 0.1778782189
+Time elapsed: 25.4s
+
+Total time: 43.6s
+
+Key questions answered:
+  1. Does λ_min·logN converge? → check spectral_summary.csv
+  2. Which mode dominates bᵀG⁻¹b? → check dominant_modes.csv
+  3. How does λ_min scale? → check eigenvalue_scaling.csv
+  4. Is d² controlled by one mode or many? → check eigenvalue_spectrum.csv
