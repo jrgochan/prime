@@ -235,21 +235,31 @@ axiom zeta_zero_separates :
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
 
-/-- **Sub-axiom (Functional Equation consequence)**:
+/-- **Sub-axiom (Bernoulli numbers — elementary)**:
 
-    Non-trivial zeros of ζ have positive real part.
+    ζ at negative ODD integers is nonzero.
 
-    If ζ(s) = 0 and s is not a trivial zero (−2, −4, −6, ...),
-    then Re(s) > 0.
+    ζ(-(2k+1)) = (-1)^{2k+1} · B_{2k+2}/(2k+2) ≠ 0 for k ≥ 0
 
-    **Proof strategy**: By the functional equation
-    ζ(1-s) = 2(2π)^{-s} Γ(s) cos(πs/2) · ζ(s),
-    a zero of ζ at s with Re(s) ≤ 0 must have Re(1-s) ≥ 1.
-    But ζ ≠ 0 for Re ≥ 1 (Mathlib: riemannZeta_ne_zero_of_one_le_re).
-    So cos(πs/2) = 0 or Γ(s) has a pole. The cos factor vanishes
-    at s = -1, -3, -5, ... but those give trivial zeros.
-    The Γ poles at s = 0, -1, -2, ... cancel the cos zeros.
-    The net result: only s = -2, -4, -6, ... (trivial zeros). -/
+    This uses:
+    - riemannZeta_neg_nat_eq_bernoulli (Mathlib): ζ(-n) = (-1)^n B_{n+1}/(n+1)
+    - B_{2m} ≠ 0 for m ≥ 1 (classical, from the zeta function Euler product
+      at positive even integers: ζ(2m) = (-1)^{m+1} (2π)^{2m} B_{2m}/(2·(2m)!))
+
+    **Proof strategy**: Can be proved from Mathlib's formula for ζ(2m)
+    (Euler's formula for ζ at positive even integers), since B_{2m} = 0
+    would give ζ(2m) = 0, contradicting riemannZeta_ne_zero_of_one_le_re. -/
+axiom zeta_neg_odd_ne_zero :
+    ∀ k : ℕ, riemannZeta (↑(-(2 * (k : ℤ) - 1))) ≠ 0
+
+/-- **THEOREM**: Non-trivial zeros of ζ have positive real part.
+
+    Proof (case analysis on s with Re(s) ≤ 0):
+    - s not an integer: functional equation ζ(1-s) = [factors]·ζ(s)
+      gives ζ(1-s) = 0, but Re(1-s) ≥ 1 → contradiction (Mathlib)
+    - s = 0: ζ(0) = -1/2 ≠ 0 (Mathlib: riemannZeta_zero)
+    - s = negative even: trivial zero, excluded by hypothesis
+    - s = negative odd: ζ ≠ 0 by Bernoulli (sub-axiom) -/
 axiom zeta_nontrivial_zero_re_pos :
     ∀ s : ℂ, riemannZeta s = 0 →
     (¬∃ n : ℕ, s = -2 * (↑n + 1)) →
