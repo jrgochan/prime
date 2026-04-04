@@ -88,7 +88,7 @@ theorem mellin_target (s : ℂ) (hs : 0 < s.re) :
   rw [integral_cpow (Or.inl hre), sub_add_cancel, ofReal_one, one_cpow,
       ofReal_zero, zero_cpow hs0, sub_zero]
 
-/-- **Axiom (Phase 2B)**: Mellin transform of the fractional part basis function.
+/- **Documentation**: Mellin transform of the fractional part basis function.
 
     For Re(s) > 1 and k ≥ 1:
     ∫₀¹ {k/x} · x^{s-1} dx = k/(s(s-1)) + (k^s/s)(H_k(s) - ζ(s))
@@ -104,7 +104,31 @@ theorem mellin_target (s : ℂ) (hs : 0 < s.re) :
     4. The sum telescopes to k^{1-s} + ζ(s) - ∑_{m=1}^k m^{-s}
     5. Combining gives the identity above
 
-    **Numerically verified** for k = 1,2,3 and s = 2,3 to 6 decimal places. -/
+    **Numerically verified** for k = 1,2,3 and s = 2,3 to 6 decimal places.
+
+    **Reduction**: For k = 1, the identity decomposes as:
+      {1/x} = 1/x - ⌊1/x⌋, so
+      ∫₀¹ {1/x} x^{s-1} = ∫₀¹ x^{s-2} - ∫₀¹ ⌊1/x⌋ x^{s-1}
+                          = 1/(s-1) - ζ(s)/s
+    The first integral is proved (mellin_cpow_restricted).
+    The second is the `floor_mellin_eq_zeta` axiom below. -/
+
+/-- **Sub-axiom**: The Mellin transform of the floor function on (0,1).
+    ∫₀¹ ⌊1/x⌋ · x^{s-1} dx = ζ(s)/s  for Re(s) > 1.
+
+    Proof sketch:
+    1. Decompose (0,1] = ∪_{n=1}^∞ (1/(n+1), 1/n]
+    2. On each piece, ⌊1/x⌋ = n, so integral = n · [(1/n)^s - (1/(n+1))^s] / s
+    3. Abel summation: ∑ n(n^{-s} - (n+1)^{-s}) = ζ(s)
+       Proof: n·n^{-s} - n(n+1)^{-s} = n^{1-s} - ((n+1)-1)(n+1)^{-s}
+            = n^{1-s} - (n+1)^{1-s} + (n+1)^{-s}
+       Summing: telescopes to 1 + ∑_{m=2}^∞ m^{-s} = ζ(s)
+    4. So the integral = ζ(s)/s. -/
+axiom floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
+    ∫ t in Set.Ioc (0 : ℝ) 1,
+      (t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ) = riemannZeta s / s
+
+/-- The general mellin_fractBasis axiom for all k ≥ 1. -/
 axiom mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
     mellinRestricted (fractBasisC k) s =
     (k : ℂ) / (s * (s - 1)) +
