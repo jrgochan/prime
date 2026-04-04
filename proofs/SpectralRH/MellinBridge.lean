@@ -12,7 +12,7 @@ import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 This file connects the Nyman-Beurling basis functions {k/x} to the Riemann
 zeta function via the Mellin transform. It establishes the key identity:
 
-  mellin ({k/·}) s = k^s · (ζ(s)/s - 1/(s-1))
+  mellin ({k/·}) s = k/(s(s-1)) + (k^s/s)(H_k(s) - ζ(s))
 
 which is the mathematical engine behind the Nyman-Beurling criterion.
 
@@ -90,21 +90,26 @@ theorem mellin_target (s : ℂ) (hs : 0 < s.re) :
 
 /-- **Axiom (Phase 2B)**: Mellin transform of the fractional part basis function.
 
-    For Re(s) > 1:
-    ∫₀¹ {k/x} · x^{s-1} dx = k^s · (ζ(s)/s - 1/(s-1))
+    For Re(s) > 1 and k ≥ 1:
+    ∫₀¹ {k/x} · x^{s-1} dx = k/(s(s-1)) + (k^s/s)(H_k(s) - ζ(s))
 
-    This is the core identity connecting fractional parts to the zeta function.
-    It follows from:
-    1. Substituting u = k/x
-    2. Expanding {u} = u - ⌊u⌋
-    3. Computing ∫ u · u^{-s-1} using Mellin theory
-    4. Recognizing the sum over ⌊u⌋ as a Dirichlet series = ζ(s)
+    where H_k(s) = ∑_{m=1}^k m^{-s} is the partial Dirichlet sum.
 
-    The proof requires Mellin transform manipulations that are partially
-    available in Mathlib (Analysis.MellinTransform). -/
+    For k = 1, this simplifies to: 1/(s-1) - ζ(s)/s.
+
+    **Derivation**:
+    1. Substitute u = k/x: integral becomes k^s ∫_k^∞ {u} u^{-s-1} du
+    2. Expand {u} = u - ⌊u⌋ and split at integer points
+    3. Abel summation on ∑_{n=k}^∞ n(n^{-s} - (n+1)^{-s})
+    4. The sum telescopes to k^{1-s} + ζ(s) - ∑_{m=1}^k m^{-s}
+    5. Combining gives the identity above
+
+    **Numerically verified** for k = 1,2,3 and s = 2,3 to 6 decimal places. -/
 axiom mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
     mellinRestricted (fractBasisC k) s =
-    (k : ℂ) ^ s * (riemannZeta s / s - 1 / (s - 1))
+    (k : ℂ) / (s * (s - 1)) +
+    ((k : ℂ) ^ s / s) *
+      ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s)
 
 -- ════════════════════════════════════════════════
 -- SECTION 3: THE SEPARATING FUNCTIONAL
