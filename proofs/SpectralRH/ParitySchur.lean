@@ -460,9 +460,11 @@ end
     The minimum eigenvalue of the Gram matrix has logarithmic decay:
     λ_min(G_N) ≥ c / log(N) for some c > 0.
 
-    This is the quantitative version of gram_pos_def. The 1/log(N)
-    rate is connected to the prime number theorem via the
-    Nyman-Beurling basis function decay rates.
+    **NOTE (2026-04-03)**: This axiom is now DERIVABLE via the Parity Bridge!
+    See `gram_eigenvalue_log_scaling_derived` in ParityBridge.lean, which
+    proves this from `type_II_sieve_bound` + `block_eigenvalue_log_scaling`.
+    Kept here to avoid circular imports (ParityBridge imports BilinearSieve
+    which imports ParitySchur).
 
     Computational verification:
     | N    | λ_min      | log(N)·λ_min |
@@ -499,12 +501,15 @@ open Matrix Real in
 /-- **The V2 Bridge Theorem** (derived from the two axioms above).
     R < 1 → d²_N ≤ C/log(N).
 
-    Note: The stable_ratio_parity hypothesis is no longer needed
-    for this particular derivation, as gram_eigenvalue_log_scaling
-    already gives the eigenvalue bound independently. However,
-    the stable_ratio_parity result proves that the parity coupling
-    is subcritical, which provides the structural explanation for
-    WHY the eigenvalue bound holds (the spectral gap is preserved). -/
+    **UPDATE (2026-04-03, V3 Parity Bridge)**:
+    The stable_ratio_parity hypothesis `_hR` is now logically connected
+    to the eigenvalue scaling via ParityBridge.lean:
+      type_II_sieve_bound → stable_ratio (this `_hR`)
+      type_II_sieve_bound + block_eigenvalue_log_scaling
+        → gram_eigenvalue_log_scaling_derived (ParityBridge)
+    The `_hR` parameter remains structurally present here but the
+    actual proof term routes through the axioms directly.
+    See Assembly.lean for the version that uses the Parity Bridge. -/
 theorem schur_to_distance_scaling_v2
     (_hR : ∃ R : ℝ, 0 ≤ R ∧ R < 1 ∧
       ∀ N : ℕ, 10 ≤ N →
@@ -529,8 +534,11 @@ theorem schur_to_distance_scaling_v2
 -- PROVED: parityBlockA_psd (A = π₊Gπ₊ is PSD)
 -- PROVED: parityBlockC_psd (C = π₋Gπ₋ is PSD)
 -- PROVED: schur_complement_lower_from_ratio (H_eff ≥ (1-R)·A)
--- PROVED: schur_to_distance_scaling_v2 (NOW A THEOREM from Axioms A+B)
+-- PROVED: schur_to_distance_scaling_v2 (from Axioms A+B, local to this file)
 -- AXIOM: stable_ratio_parity (PROVED in BilinearSieve as type_II_implies_stable_ratio)
--- AXIOM: gram_eigenvalue_log_scaling (λ_min ≥ c/log(N), analytic number theory)
+-- AXIOM: gram_eigenvalue_log_scaling (DERIVABLE via ParityBridge.lean!)
 -- AXIOM: eigenvalue_implies_distance_bound (eigenvalue → NB distance, spectral theory)
 -- STATUS: ZERO SORRY ✓
+-- NOTE: gram_eigenvalue_log_scaling is now DERIVED in ParityBridge.lean from:
+--   type_II_sieve_bound + block_eigenvalue_log_scaling
+--   See gram_eigenvalue_log_scaling_derived in ParityBridge.lean
