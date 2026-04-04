@@ -9,7 +9,7 @@ supported by Rust-based numerical experiments.
 > *into two irreducible mathematical claims, and makes everything else*
 > *compiler-verified.*
 
-This project has **reduced the Riemann Hypothesis to two axioms** in a
+This project has **reduced the Riemann Hypothesis to three axioms** in a
 fully connected, compiler-verified Lean 4 chain. All algebraic
 infrastructure — variational bounds, Rayleigh quotients, Schur complements,
 bilinear sieve reductions, parity block decompositions, completing-the-square
@@ -30,11 +30,12 @@ nyman_beurling                           ← Axiom → decomposed in MellinBridg
 riemann_hypothesis                       ← PROVED
 ```
 
-Lean reports exactly **2 mathematical axioms**:
+Lean reports exactly **3 mathematical axioms**:
 ```
 'riemann_hypothesis' depends on axioms:
   [moebius_test_bound,
-   nyman_beurling,
+   nyman_beurling_converse,
+   nyman_beurling_forward,
    propext, Classical.choice, Quot.sound]
 ```
 
@@ -69,12 +70,16 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 
 ## Axiom Audit
 
-### Critical Path (2 axioms)
+### Critical Path (3 axioms)
 
 | Axiom | Category | Status |
 |-------|----------|--------|
-| `nyman_beurling` | Published theorem | 📘 Decomposed in MellinBridge.lean into 3 sub-axioms |
 | `moebius_test_bound` | Analytic NT | 🟡 ∫₀¹(1-Σvᵢ{(i+2)/x})² ≤ C/log(N). Computationally verified. |
+| `nyman_beurling_forward` | Analytic NT | 🟡 RH ⟹ d²→0 (easy direction, Perron's formula) |
+| `nyman_beurling_converse` | Complex Analysis | 🟡 d²→0 ⟹ RH (separating functional) |
+
+> **Note**: `nyman_beurling` (the monolithic Beurling 1955 axiom) is now a **PROVED THEOREM**,
+> derived from the three axioms above via MellinBridge.lean.
 
 ### Structural (not on critical path)
 
