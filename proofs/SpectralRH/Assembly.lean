@@ -546,10 +546,38 @@ theorem distance_converges_to_zero :
 /-- **THE RIEMANN HYPOTHESIS**
 
     Proved via the logarithmic decay of the Nyman-Beurling distance:
-    d²_N ≤ C/log(N) → 0, combined with the Nyman-Beurling criterion. -/
+    d²_N ≤ C/log(N) → 0, combined with the Nyman-Beurling converse.
+
+    Note: Only the CONVERSE direction (d²→0 ⟹ RH) is needed here.
+    The forward direction (RH ⟹ d²→0) is not used on the critical path. -/
 theorem riemann_hypothesis : RiemannHypothesis := by
-  rw [← nyman_beurling]
-  exact distance_converges_to_zero
+  apply nyman_beurling_converse
+  intro ε hε
+  obtain ⟨N₀, hN₀⟩ := distance_converges_to_zero ε hε
+  -- Need: ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫(1-f)² < ε
+  use max N₀ 2
+  intro N hN
+  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+  have hNN : N₀ ≤ N := le_trans (le_max_left _ _) hN
+  -- Produce optimal v = G⁻¹b
+  use (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+  -- The L² error at v* equals nbDistSq' N
+  have h_bridge := l2_error_eq_quad_error N hN2
+      ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
+  rw [h_bridge]
+  -- nbDistSq' N < ε from distance_converges_to_zero
+  have h_dist := hN₀ N hNN
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N) with hc_def
+  set b := basisInnerProd N
+  set G := gramMatrix N
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN2
+  have h_Gc : G.mulVec c = b := by
+    simp [hc_def, G, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c b := by rw [h_Gc]
+  have h_quad := nbDistSq_as_quadform N hN2
+  simp only [realQuadForm] at h_quad ⊢
+  have h_comm : dotProduct b c = dotProduct c b := dotProduct_comm b c
+  linarith [h_dist, h_cGc, h_comm]
 
 -- ════════════════════════════════════════════════
 -- UNCONDITIONAL RESULTS (no axioms needed)
