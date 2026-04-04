@@ -577,8 +577,52 @@ private lemma integral_decomp_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 �
         (↑(k + i) : ℂ) * ((↑((k:ℝ)/(↑(k+i):ℝ)) : ℂ) ^ s -
           (↑((k:ℝ)/(↑(k+i)+1)) : ℂ) ^ s) / s := by
   intro M; induction M with
-  | zero => sorry  -- base: k/(k+1)..k/k = k/(k+1)..1 + piece_setIntegral_gen
-  | succ m ih => sorry  -- inductive: split + ih + piece_setIntegral_gen
+  | zero =>
+    have hk0 : k + 0 = k := Nat.add_zero k
+    rw [show (0:ℕ) + 1 = 1 from rfl, hk0]
+    simp only [Finset.range_one, Finset.sum_singleton, Nat.add_zero]
+    have h1 : Set.Ioc ((k:ℝ)/((k:ℝ)+1)) (1:ℝ) = Set.Ioc ((k:ℝ)/((k:ℝ)+1)) ((k:ℝ)/(k:ℝ)) := by
+      rw [div_self (by positivity : (k:ℝ) ≠ 0)]
+    rw [h1]
+    exact piece_setIntegral_gen k k hk hk s hs
+  | succ m ih =>
+    -- Simplify k + (m+1) = k + m + 1 at Nat level
+    rw [show k + (m + 1) = k + m + 1 from by omega]
+    -- Set up interval splitting
+    have hk_m1 : (0:ℝ) < ↑(k+m)+1 := by positivity
+    have hk_m2 : (0:ℝ) < ↑(k+m+1)+1 := by positivity
+    have h_le : (k:ℝ)/(↑(k+m+1)+1) ≤ (k:ℝ)/(↑(k+m)+1) :=
+      div_le_div_of_nonneg_left (by positivity) hk_m1 (by push_cast; linarith)
+    have h_le1 : (k:ℝ)/(↑(k+m)+1) ≤ 1 := by
+      rw [div_le_one hk_m1]; push_cast; linarith [Nat.cast_nonneg (α := ℝ) m]
+    have h_union : Set.Ioc ((k:ℝ)/(↑(k+m+1)+1)) ((k:ℝ)/(↑(k+m)+1)) ∪
+        Set.Ioc ((k:ℝ)/(↑(k+m)+1)) 1 = Set.Ioc ((k:ℝ)/(↑(k+m+1)+1)) 1 :=
+      Set.Ioc_union_Ioc_eq_Ioc h_le h_le1
+    have h_disj : Disjoint (Set.Ioc ((k:ℝ)/(↑(k+m+1)+1)) ((k:ℝ)/(↑(k+m)+1)))
+        (Set.Ioc ((k:ℝ)/(↑(k+m)+1)) 1) := Set.Ioc_disjoint_Ioc_of_le le_rfl
+    have h_int_full := floor_div_integrableOn s hs k hk
+    have h_int_piece : IntegrableOn (fun (t : ℝ) => (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ))
+        (Set.Ioc ((k:ℝ)/(↑(k+m+1)+1)) ((k:ℝ)/(↑(k+m)+1))) volume :=
+      h_int_full.mono_set (fun x ⟨hlo, hhi⟩ =>
+        ⟨by linarith [div_pos (by positivity : (0:ℝ) < k) hk_m2], by linarith⟩)
+    have h_int_rest : IntegrableOn (fun (t : ℝ) => (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ))
+        (Set.Ioc ((k:ℝ)/(↑(k+m)+1)) 1) volume :=
+      h_int_full.mono_set (fun x ⟨hlo, hhi⟩ =>
+        ⟨by linarith [div_pos (by positivity : (0:ℝ) < k) hk_m1], hhi⟩)
+    -- Split the integral
+    rw [← h_union, setIntegral_union h_disj measurableSet_Ioc h_int_piece h_int_rest]
+    rw [ih]
+    -- Goal: ∫ piece + ∑ range(m+1) = ∑ range((m+1)+1)
+    conv_rhs => rw [Finset.sum_range_succ]
+    -- Goal: ∫ piece + ∑ range(m+1) = ∑ range(m+1) + last
+    rw [add_comm (∫ _ in _, _)]
+    congr 1
+    -- piece: ∫ Ioc(k/(↑(k+m+1)+1), k/(↑(k+m)+1)) = ↑(k+(m+1)) * ...
+    -- piece_setIntegral_gen: ∫ Ioc(k/(↑(k+m+1)+1), k/↑(k+m+1)) = ↑(k+m+1) * ...
+    -- These are the same since ↑(k+m)+1 = ↑(k+m+1)
+    have h_n_cast : (↑(k+m) : ℝ) + 1 = ↑(k+m+1) := by push_cast; ring
+    rw [h_n_cast]
+    exact piece_setIntegral_gen k (k + m + 1) hk (by omega) s hs
 
 /-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt = k/s + (k^s/s)·(ζ(s) - ∑_{m<k}(m+1)^{-s}). -/
 private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
