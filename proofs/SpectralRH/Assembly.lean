@@ -193,6 +193,80 @@ theorem nb_distance_scaling :
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) :=
   schur_to_distance_scaling_v2 stable_ratio_parity
 
+-- ─────── NB DISTANCE STRUCTURAL THEOREMS ───────
+
+/-- **THEOREM**: The NB distance as a Rayleigh quotient.
+    d²_N = 1 - cᵀGc where c = G⁻¹b.
+
+    This connects the Nyman-Beurling distance to our Rayleigh framework:
+    bᵀG⁻¹b = bᵀ(G⁻¹b) = (G·G⁻¹b)ᵀ(G⁻¹b) = cᵀGc
+    where the second step uses G·G⁻¹ = I (from gramMatrix_det_ne_zero).
+
+    Combined with quadform_lower_implies_eigenvalue_lower, this gives:
+    d²_N = 1 - cᵀGc ≤ 1 - λ_min(G)·‖c‖²
+    connecting the NB distance directly to λ_min. -/
+theorem nbDistSq_as_quadform (N : ℕ) (hN : 2 ≤ N) :
+    let c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+    nbDistSq' N = 1 - realQuadForm (gramMatrix N) c := by
+  -- Unfold definitions
+  simp only [nbDistSq', realQuadForm]
+  -- Goal: 1 - dotProduct b (G⁻¹.mulVec b) = 1 - dotProduct (G⁻¹.mulVec b) (G.mulVec (G⁻¹.mulVec b))
+  congr 1
+  -- Goal: dotProduct b (G⁻¹.mulVec b) = dotProduct c (G.mulVec c) where c = G⁻¹.mulVec b
+  -- Since G · c = G · (G⁻¹ · b) = b:
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+  have h_unit : IsUnit (gramMatrix N).det := gramMatrix_isUnit_det N hN
+  have h_Gc : (gramMatrix N).mulVec c = basisInnerProd N := by
+    rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  -- dotProduct b (c) = dotProduct c (G.mulVec c) = dotProduct c b
+  -- Both sides equal dotProduct b c = dotProduct c b (by commutativity)
+  -- LHS = dotProduct b c (since G⁻¹.mulVec b = c by definition)
+  -- RHS = dotProduct c (G.mulVec c) = dotProduct c b (since G.mulVec c = b)
+  rw [h_Gc]
+  -- Goal: dotProduct (basisInnerProd N) c = dotProduct c (basisInnerProd N)
+  simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm _ _)]
+
+/-- **Axiom**: The basis inner product vector b is nonzero.
+    b₀ = ∫₀¹ {2/x} dx = 1 - ln 2 ≈ 0.307 > 0.
+
+    This is a standard analysis fact: {2/x} > 0 on (1, 2) which
+    has positive measure, so the integral is strictly positive.
+    Proving it in Lean requires measure-theoretic integral positivity
+    which is available in Mathlib but heavy to wire up. -/
+axiom basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
+    basisInnerProd N ≠ 0
+
+/-- **THEOREM**: The NB distance is strictly less than 1.
+    d²_N < 1 for all N ≥ 2.
+
+    Proof: d²_N = 1 - cᵀGc where c = G⁻¹b.
+    Since G is positive definite (gram_pos_def) and c ≠ 0
+    (because b ≠ 0 and G is invertible), cᵀGc > 0.
+    Therefore d²_N = 1 - (positive) < 1. -/
+theorem nbDistSq_lt_one (N : ℕ) (hN : 2 ≤ N) :
+    nbDistSq' N < 1 := by
+  rw [nbDistSq_as_quadform N hN]
+  -- Goal: 1 - realQuadForm G c < 1, i.e., 0 < realQuadForm G c
+  linarith [gram_pos_def N hN ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
+    (by -- c = G⁻¹b ≠ 0 because b ≠ 0 and G is invertible
+     -- G.mulVec c = b, so if c = 0 then b = G.mulVec 0 = 0
+     intro hc
+     have h_unit : IsUnit (gramMatrix N).det := gramMatrix_isUnit_det N hN
+     have h_Gc : (gramMatrix N).mulVec ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) =
+            basisInnerProd N := by
+       rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+     rw [hc, Matrix.mulVec_zero] at h_Gc
+     -- h_Gc : 0 = basisInnerProd N
+     exact basis_inner_prod_nonzero N hN h_Gc.symm)]
+
+/-- **COROLLARY**: The NB quadratic form is positive.
+    bᵀG⁻¹b > 0 for all N ≥ 2. -/
+theorem bGinvb_pos (N : ℕ) (hN : 2 ≤ N) :
+    0 < dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) := by
+  have h := nbDistSq_lt_one N hN
+  unfold nbDistSq' at h
+  linarith
+
 /-- **Axiom: Logarithmic divergence** (standard calculus).
 
     For any C > 0 and ε > 0, C/log(N) < ε eventually.
