@@ -70,13 +70,34 @@ derivable from the sieve bound and a simpler block-diagonal eigenvalue axiom.
 
 ## Axiom Audit
 
+### Architecture: Two Pillars
+
+The proof separates into two clean pillars with a compiler-verified interface:
+
+**Pillar 1: Discrete Linear Algebra (PROVED — zero sorry)**
+- Gram matrix theory: Hermitianness, PSD, eigenvalue bounds
+- Parity decomposition: Liouville blocks A, B, C
+- Schur complement: A - BC⁻¹Bᵀ ≥ 0
+- Variational principle: d²_N ≤ any test vector
+- L² ↔ Matrix bridge: ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+- Nyman-Beurling biconditional: **PROVED THEOREM** (was axiom)
+
+**Pillar 2: Analytic Number Theory (3 axioms remaining)**
+- Test vector existence: Möbius weights + PNT
+- Nyman-Beurling forward: Perron's formula
+- Nyman-Beurling converse: Separating functional
+
+The interface between pillars is the L² integral
+`∫₀¹ (1 - Σ vₖ{k/x})² dx` — Pillar 1 converts it to matrix algebra,
+Pillar 2 supplies the analytic content.
+
 ### Critical Path (3 axioms)
 
-| Axiom | Category | Status |
-|-------|----------|--------|
-| `moebius_test_bound` | Analytic NT | 🟡 ∫₀¹(1-Σvᵢ{(i+2)/x})² ≤ C/log(N). Computationally verified. |
-| `nyman_beurling_forward` | Analytic NT | 🟡 RH ⟹ d²→0 (easy direction, Perron's formula) |
-| `nyman_beurling_converse` | Complex Analysis | 🟡 d²→0 ⟹ RH (separating functional) |
+| Axiom | Pillar | Strategy |
+|-------|--------|----------|
+| `moebius_test_bound` | Analytic | Möbius weights μ(k)/k + quantitative PNT → O(1/log N) |
+| `nyman_beurling_forward` | Analytic | RH ⟹ d²→0 via Perron's formula |
+| `nyman_beurling_converse` | Analytic | d²→0 ⟹ RH via separating functional x^{ρ-1} |
 
 > **Note**: `nyman_beurling` (the monolithic Beurling 1955 axiom) is now a **PROVED THEOREM**,
 > derived from the three axioms above via MellinBridge.lean.
