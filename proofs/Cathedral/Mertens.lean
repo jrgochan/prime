@@ -274,15 +274,40 @@ theorem basis_sum_tight :
     _ = (↑(N - 1) : ℝ) / 2 - 1/2 - Real.log (N : ℝ) / 2 := by ring
     _ ≥ (N - 1 : ℝ) / 2 - 1 * Real.log (N : ℝ) := by rw [hNR]; linarith
 
-/-- **AXIOM**: Per-entry Gram upper bound.
-    G_{j,k} = ∫₀¹ {j/x}·{k/x} dx ≤ 1/4 + 1/(j·k).
+/-- **AXIOM**: Per-entry Gram upper bound (diagonal case).
+    G_{j,j} = ∫₀¹ {j/x}² dx ≤ 1/3 + 1/j².
 
-    Justification (Vasyunin): For uniform {j/x}, {k/x} on [0,1):
-    E[{j/x}] = 1/2, E[{j/x}²] = 1/3, so E[{j/x}{k/x}] ≈ 1/4
-    with correlation term = O(log(gcd)/jk). The 1/(jk) bound
-    is generous for the correction. -/
-axiom gram_entry_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    The diagonal Gram entry is the second moment of {j/x} on (0,1).
+    By Weyl equidistribution, E[{j/x}²] → 1/3 as j → ∞.
+    The correction term 1/j² bounds the deviation from equidistribution.
+
+    NOTE: The diagonal value G(j,j) → 1/3 (NOT 1/4), since
+    E[X²] = 1/3 for X ~ Uniform(0,1). -/
+axiom gram_entry_diag_upper (j : ℕ) (hj : 1 ≤ j) :
+    gramEntry j j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2)
+
+/-- **AXIOM**: Per-entry Gram upper bound (off-diagonal case).
+    G_{j,k} = ∫₀¹ {j/x}·{k/x} dx ≤ 1/4 + 1/(j·k)  for j ≠ k.
+
+    For j ≠ k, the fractional parts {j/x} and {k/x} are approximately
+    independent (Weyl equidistribution), so their product integral
+    approaches E[{j/x}]·E[{k/x}] = (1/2)·(1/2) = 1/4.
+    The correction 1/(jk) bounds the correlation. -/
+axiom gram_entry_offdiag_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
     gramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ))
+
+/-- Unified bound for downstream usage: G_{j,k} ≤ 1/3 + 1/(j·k).
+    This follows from either gram_entry_diag_upper or gram_entry_offdiag_upper
+    since 1/4 < 1/3 and 1/j² ≤ 1/(j·k) when j = k. -/
+lemma gram_entry_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    gramEntry j k ≤ 1 / 3 + 1 / ((j : ℝ) * (k : ℝ)) := by
+  by_cases hjk : j = k
+  · subst hjk
+    have h := gram_entry_diag_upper j hj
+    rw [show (j : ℝ) ^ 2 = (j : ℝ) * (j : ℝ) from sq (j : ℝ)] at h
+    linarith
+  · have h := gram_entry_offdiag_upper j k hj hk hjk
+    linarith
 
 /-- Helper: The double sum Σᵢ Σⱼ 1/((i+1)(j+1)) = H_{N-1}². -/
 private lemma double_sum_reciprocal (n : ℕ) :
@@ -301,80 +326,131 @@ private lemma double_sum_reciprocal (n : ℕ) :
   rw [← Finset.sum_mul]
   ring
 
-/-- **THEOREM** (was axiom): Q(N) ≤ (N-1)²/4 + C·N.
-    Proof: Use gram_entry_upper to bound each entry, then
-    factor the correction as H_{N-1}² ≤ (1+log N)² ≤ 4·(N-1). -/
+/-- **THEOREM**: Q(N) ≤ (N-1)²/4 + C·N.
+    Off-diagonal: G(i,j) ≤ 1/4 + 1/((i+1)(j+1)), contributes (N-1)²/4 + H².
+    Diagonal excess: G(i,i) ≤ 1/3 + ... vs 1/4 + ..., adds (N-1)/12.
+    Total: (N-1)²/4 + H² + (N-1)/12 ≤ (N-1)²/4 + 5N. -/
 theorem gram_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
     gramSum N ≤ (N - 1 : ℝ) ^ 2 / 4 + C * (N : ℝ) := by
   obtain ⟨N_L, hNL, hLogSq⟩ := log_sq_le_self
-  refine ⟨4, by norm_num, max N_L 3, by omega, fun N hN => ?_⟩
+  refine ⟨5, by norm_num, max N_L 3, by omega, fun N hN => ?_⟩
   have hN3 : 3 ≤ N := by omega
   have hNL' : N_L ≤ N := by omega
-  -- Step 1: Bound each gramMatrix entry
-  have hentry : ∀ i j : Fin (N - 1),
+  have hN1 : 1 ≤ N - 1 := by omega
+  -- Off-diagonal bound
+  have hentry_offdiag : ∀ i j : Fin (N - 1), i ≠ j →
       gramMatrix N i j ≤ 1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)) := by
-    intros i j
+    intros i j hij
     simp only [gramMatrix, Matrix.of_apply]
-    have : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
-    have : ((j.val + 1 : ℕ) : ℝ) = (j.val : ℝ) + 1 := by push_cast; ring
-    convert gram_entry_upper (i.val + 1) (j.val + 1) (by omega) (by omega) using 2
+    have hi_ne_j : i.val + 1 ≠ j.val + 1 := by intro h; exact hij (Fin.ext (by omega))
+    convert gram_entry_offdiag_upper (i.val + 1) (j.val + 1) (by omega) (by omega) hi_ne_j using 2
     all_goals push_cast; ring
-  -- Step 2: Sum the bound
-  unfold gramSum
+  -- Diagonal bound
+  have hentry_diag : ∀ i : Fin (N - 1),
+      gramMatrix N i i ≤ 1 / 3 + 1 / (((i.val : ℝ) + 1) * ((i.val : ℝ) + 1)) := by
+    intro i
+    simp only [gramMatrix, Matrix.of_apply]
+    have h := gram_entry_diag_upper (i.val + 1) (by omega)
+    have hcast : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
+    rw [show ((i.val + 1 : ℕ) : ℝ) ^ 2 = ((i.val : ℝ) + 1) * ((i.val : ℝ) + 1) from by
+      rw [hcast]; ring] at h
+    linarith
+  -- Every entry satisfies 1/4 + corr, with extra 1/12 on diagonal
+  -- G(i,j) ≤ 1/4 + 1/((i+1)(j+1))  for all (i,j), with equality or better off-diag
+  -- G(i,i) ≤ 1/4 + 1/12 + 1/((i+1)²) = (1/4 + 1/((i+1)²)) + 1/12
+  -- So: Σ G(i,j) ≤ Σ (1/4 + 1/((i+1)(j+1))) + (N-1)·(1/12)
   have h_sum_bound :
       ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j ≤
       ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) := by
-    apply Finset.sum_le_sum; intros i _
-    apply Finset.sum_le_sum; intros j _
-    exact hentry i j
-  -- Step 3: Split into constant part + correction part
+        (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) +
+      (N - 1 : ℝ) / 12 := by
+    -- For each i, split inner sum at j = i vs j ≠ i
+    have h_row : ∀ i : Fin (N - 1),
+        ∑ j : Fin (N - 1), gramMatrix N i j ≤
+        ∑ j : Fin (N - 1), (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) + 1 / 12 := by
+      intro i
+      -- Split: Σ_j G(i,j) = G(i,i) + Σ_{j≠i} G(i,j)
+      -- ≤ (1/3 + corr_ii) + Σ_{j≠i} (1/4 + corr_ij)
+      -- = (1/4 + 1/12 + corr_ii) + Σ_{j≠i} (1/4 + corr_ij)
+      -- = Σ_j (1/4 + corr_ij) + 1/12   [since corr_ii appears in both]
+      calc ∑ j : Fin (N - 1), gramMatrix N i j
+          = gramMatrix N i i + ∑ j ∈ Finset.univ.erase i, gramMatrix N i j := by
+            rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
+        _ ≤ (1 / 3 + 1 / (((i.val : ℝ) + 1) * ((i.val : ℝ) + 1))) +
+            ∑ j ∈ Finset.univ.erase i,
+              (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) := by
+            apply add_le_add
+            · exact hentry_diag i
+            · exact Finset.sum_le_sum (fun j hj =>
+                hentry_offdiag i j (Ne.symm (Finset.ne_of_mem_erase hj)))
+        _ = (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((i.val : ℝ) + 1))) +
+            ∑ j ∈ Finset.univ.erase i,
+              (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) + 1 / 12 := by
+            linarith [show (1:ℝ)/3 = 1/4 + 1/12 from by norm_num]
+        _ = ∑ j : Fin (N - 1),
+              (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) + 1 / 12 := by
+            rw [← Finset.add_sum_erase _ _ (Finset.mem_univ i)]
+    -- Now sum over i
+    calc ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j
+        ≤ ∑ i : Fin (N - 1), (∑ j : Fin (N - 1),
+            (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) + 1 / 12) :=
+          Finset.sum_le_sum (fun i _ => h_row i)
+      _ = ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+            (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) +
+          ∑ _i : Fin (N - 1), (1 / 12 : ℝ) := by
+          simp only [← Finset.sum_add_distrib]
+      _ = ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+            (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) +
+          (N - 1 : ℝ) / 12 := by
+          congr 1
+          simp [Finset.sum_const, Finset.card_fin]
+          push_cast [Nat.cast_sub (show 1 ≤ N from by omega)]
+          ring
+  -- Now evaluate: Σ(1/4 + corr) = (N-1)²/4 + H²
   have h_split :
       ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
         (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) =
       (N - 1 : ℝ) ^ 2 / 4 + harmonicFin (N - 1) ^ 2 := by
     simp only [Finset.sum_add_distrib]
     congr 1
-    · -- Constant part: Σᵢ Σⱼ 1/4 = (N-1)²/4
-      simp only [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
+    · simp only [Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
       push_cast [Nat.cast_sub (show 1 ≤ N from by omega)]
       ring
-    · -- Correction part: Σᵢ Σⱼ 1/((i+1)(j+1)) = H²
-      exact double_sum_reciprocal (N - 1)
-  -- Step 4: Bound H_{N-1}² ≤ 4·N
-  have hN1 : 1 ≤ N - 1 := by omega
+    · exact double_sum_reciprocal (N - 1)
+  -- Bound H² ≤ 4·log²N ≤ 4·(N-1) ≤ 4·N
   have hH := harmonicFin_le (N - 1) hN1
-  have hlogN_ge1 : Real.log (N : ℝ) ≥ 1 := by
-    rw [ge_iff_le, ← Real.log_exp 1]
-    apply Real.log_le_log (Real.exp_pos 1)
-    have : Real.exp 1 ≤ 3 := by
-      have := Real.exp_bound' (x := 1) (n := 3) (by norm_num) (by norm_num) (by omega)
-      simp [Finset.sum_range_succ, Nat.factorial] at this; linarith
-    linarith [show (3 : ℝ) ≤ (N : ℝ) from by exact_mod_cast hN3]
   have hH_bound : harmonicFin (N - 1) ≤ 2 * Real.log (N : ℝ) := by
-    calc harmonicFin (N - 1)
-        ≤ 1 + Real.log (↑(N - 1)) := hH
-      _ ≤ 1 + Real.log (N : ℝ) := by
-          gcongr; exact_mod_cast Nat.sub_le N 1
-      _ ≤ Real.log (N : ℝ) + Real.log (N : ℝ) := by linarith
-      _ = 2 * Real.log (N : ℝ) := by ring
+    have hlogN_ge1 : Real.log (N : ℝ) ≥ 1 := by
+      rw [ge_iff_le, ← Real.log_exp 1]
+      apply Real.log_le_log (Real.exp_pos 1)
+      have : Real.exp 1 ≤ 3 := by
+        have := Real.exp_bound' (x := 1) (n := 3) (by norm_num) (by norm_num) (by omega)
+        simp [Finset.sum_range_succ, Nat.factorial] at this; linarith
+      linarith [show (3 : ℝ) ≤ (N : ℝ) from by exact_mod_cast hN3]
+    linarith [harmonicFin_le (N - 1) hN1,
+              show Real.log (↑(N - 1)) ≤ Real.log (N : ℝ) from by
+                gcongr; exact_mod_cast Nat.sub_le N 1]
   have hH_sq : harmonicFin (N - 1) ^ 2 ≤ 4 * Real.log (N : ℝ) ^ 2 := by
     have hH_nn : 0 ≤ harmonicFin (N - 1) := by
-      unfold harmonicFin; apply Finset.sum_nonneg
-      intros; positivity
+      unfold harmonicFin; apply Finset.sum_nonneg; intros; positivity
     nlinarith [sq_nonneg (harmonicFin (N - 1)), sq_nonneg (Real.log (N : ℝ))]
   have hlog_sq : Real.log (N : ℝ) ^ 2 ≤ (N : ℝ) - 1 := hLogSq N hNL'
-  have hNR : (N : ℝ) - 1 ≤ (N : ℝ) := by linarith
-  -- Chain: gramSum ≤ (N-1)²/4 + H² ≤ (N-1)²/4 + 4·log²N ≤ (N-1)²/4 + 4·(N-1) ≤ (N-1)²/4 + 4·N
+  -- Chain: gramSum ≤ (N-1)²/4 + H² + (N-1)/12
+  --                ≤ (N-1)²/4 + 4·(N-1) + N/12
+  --                ≤ (N-1)²/4 + 5·N
   calc ∑ i : Fin (N - 1), ∑ j : Fin (N - 1), gramMatrix N i j
-      ≤ ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-          (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) := h_sum_bound
-    _ = (N - 1 : ℝ) ^ 2 / 4 + harmonicFin (N - 1) ^ 2 := h_split
-    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * Real.log (N : ℝ) ^ 2 := by linarith [hH_sq]
-    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * ((N : ℝ) - 1) := by linarith [hlog_sq]
-    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * (N : ℝ) := by linarith
+      ≤ (∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+          (1 / 4 + 1 / (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))) +
+        (N - 1 : ℝ) / 12 := h_sum_bound
+    _ = ((N - 1 : ℝ) ^ 2 / 4 + harmonicFin (N - 1) ^ 2) + (N - 1 : ℝ) / 12 := by
+        rw [h_split]
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * Real.log (N : ℝ) ^ 2 + (N : ℝ) / 12 := by
+        linarith [hH_sq]
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 4 * ((N : ℝ) - 1) + (N : ℝ) / 12 := by
+        linarith [hlog_sq]
+    _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 5 * (N : ℝ) := by linarith
 
 -- ════════════════════════════════════════════════
 -- MAIN THEOREM
