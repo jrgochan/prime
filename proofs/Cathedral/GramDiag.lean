@@ -48,18 +48,72 @@ private lemma log2_le : Real.log 2 ≤ 3 / 4 := by
 -- PER-TERM LOG LOWER BOUND
 -- ════════════════════════════════════════════════
 
-/-- For n ≥ 2: 1/n - log(1+1/n) ≥ 1/(2n(n+1)).
-    This follows from the trapezoidal bound on ∫_n^{n+1} 1/t dt:
-    log((n+1)/n) ≤ (1/2)(1/n + 1/(n+1)) via convexity of 1/t.
-    The formal proof uses log(1+x) ≤ x - x²/2 + x³/3 (3-term alternating Taylor). -/
+/-- log(1+x) ≤ x - x²/2 + x³/3 for x ≥ 0.
+    Proof: h(x) = x - x²/2 + x³/3 - log(1+x) satisfies h(0)=0 and
+    h'(x) = x³/(1+x) ≥ 0, so h is monotone on [0,∞). -/
+private lemma log_upper_cubic (x : ℝ) (hx : 0 ≤ x) :
+    Real.log (1 + x) ≤ x - x^2/2 + x^3/3 := by
+  suffices h : 0 ≤ x - x^2/2 + x^3/3 - Real.log (1 + x) by linarith
+  set f : ℝ → ℝ := fun t => t - t^2/2 + t^3/3 - Real.log (1 + t) with hf_def
+  have hf0 : f 0 = 0 := by simp [hf_def, Real.log_one]
+  have hcont : ContinuousOn f (Ici 0) := by
+    simp only [hf_def]
+    apply ContinuousOn.sub
+    · apply ContinuousOn.add
+      · exact (continuousOn_id.sub ((continuous_pow 2).continuousOn.div_const 2))
+      · exact (continuous_pow 3).continuousOn.div_const 3
+    · exact ContinuousOn.log (continuousOn_const.add continuousOn_id) (fun t ht => by
+        simp only [mem_Ici] at ht; linarith)
+  have hdiff : DifferentiableOn ℝ f (interior (Ici (0:ℝ))) := by
+    simp only [interior_Ici, hf_def]
+    intro t ht
+    simp only [mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    apply DifferentiableAt.sub
+    · apply DifferentiableAt.add
+      · exact differentiableAt_id.sub ((differentiableAt_pow 2).div_const 2)
+      · exact (differentiableAt_pow 3).div_const 3
+    · exact (differentiableAt_id.const_add 1).log (ne_of_gt (by linarith : (0:ℝ) < 1 + t))
+  have hderiv : ∀ t ∈ interior (Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht
+    simp only [interior_Ici, mem_Ioi] at ht
+    have h1t : (0:ℝ) < 1 + t := by linarith
+    have h1t_ne : (1:ℝ) + t ≠ 0 := ne_of_gt h1t
+    -- h'(t) = 1 - t + t² - 1/(1+t) = t³/(1+t)
+    have hdf : HasDerivAt f (t^3 / (1+t)) t := by
+      simp only [hf_def]
+      have h1 := hasDerivAt_id t
+      have h2 := (hasDerivAt_pow 2 t).div_const 2
+      have h3 := (hasDerivAt_pow 3 t).div_const 3
+      have h4 := (hasDerivAt_id t).const_add 1 |>.log h1t_ne
+      refine (((h1.sub h2).add h3).sub h4).congr_deriv ?_
+      simp only [id]; field_simp; ring
+    rw [hdf.deriv]
+    exact div_nonneg (pow_nonneg (le_of_lt ht) 3) (le_of_lt h1t)
+  have hmono : MonotoneOn f (Ici 0) :=
+    monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (mem_Ici.mpr (le_refl 0)) (mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
 private lemma per_term_nge2 (n : ℕ) (hn : 2 ≤ n) :
     1 / ((n : ℕ) : ℝ) - Real.log (1 + 1 / ((n : ℕ) : ℝ))
     ≥ 1 / (2 * ((n : ℕ) : ℝ) * (((n : ℕ) : ℝ) + 1)) := by
-  -- For n ≥ 2 with x = 1/n ∈ (0, 1/2]:
-  -- log(1+x) ≤ x - x²/2 + x³/3 (alternating Taylor S₃ upper bound)
-  -- so 1/n - log ≥ 1/(2n²) - 1/(3n³)
-  -- and 1/(2n²) - 1/(3n³) ≥ 1/(2n(n+1)) ⟺ 3n ≥ 2(n+1) ⟺ n ≥ 2.
-  sorry
+  have hn_pos : (0 : ℝ) < (n : ℝ) := by positivity
+  have hge2 : (n : ℝ) ≥ 2 := by exact_mod_cast hn
+  -- log(1+1/n) ≤ 1/n - (1/n)²/2 + (1/n)³/3
+  have h := log_upper_cubic (1/(n:ℝ)) (by positivity)
+  -- 1/n - log ≥ 1/(2n²) - 1/(3n³) ≥ 1/(2n(n+1))
+  have step1 : 1/(n:ℝ) - Real.log (1 + 1/(n:ℝ)) ≥ 1/(2*(n:ℝ)^2) - 1/(3*(n:ℝ)^3) := by
+    have h1 : (1/(n:ℝ))^2 / 2 = 1 / (2 * (n:ℝ)^2) := by field_simp
+    have h2 : (1/(n:ℝ))^3 / 3 = 1 / (3 * (n:ℝ)^3) := by field_simp
+    linarith [h1, h2]
+  have step2 : 1/(2*(n:ℝ)^2) - 1/(3*(n:ℝ)^3) ≥ 1/(2*(n:ℝ)*((n:ℝ)+1)) := by
+    rw [ge_iff_le, sub_eq_add_neg, ← sub_eq_add_neg]
+    rw [div_sub_div _ _ (ne_of_gt (by positivity : (0:ℝ) < 2*(n:ℝ)^2))
+                        (ne_of_gt (by positivity : (0:ℝ) < 3*(n:ℝ)^3))]
+    rw [div_le_div_iff₀ (by positivity) (by positivity)]
+    nlinarith [sq_nonneg ((n:ℝ) - 2)]
+  linarith
 
 /-- For all n ≥ 1: 1/n - log(1+1/n) ≥ 1/(2n(n+1)). -/
 private lemma per_term_log_lower (n : ℕ) (hn : 1 ≤ n) :
