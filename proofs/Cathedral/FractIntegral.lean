@@ -7,7 +7,9 @@
   of the Nyman-Beurling basis function with the constant function 1.
 
   ### Architecture:
-  fract_integral_eq_tsum (AXIOM — change of variables)
+  fract_integral_as_sum (AXIOM — substitution u=k/x + sum decomposition)
+    ↓ [interval_sub_div_sq — THEOREM: ∫_n^{n+1} (x-n)/x² = log(1+1/n) - 1/(n+1)]
+  fract_integral_eq_tsum (THEOREM — derived from axiom + interval computation)
   summable_log_correction (THEOREM — was axiom, proved via comparison + sign flip)
       ↓ [hasSum_telescoping_inv — THEOREM (telescoping series)]
       ↓ [fract_integral_as_one_plus — THEOREM]
@@ -34,17 +36,71 @@ open Real MeasureTheory
 -- LAYER 0: IRREDUCIBLE AXIOMS
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Integral = tsum)**: The integral ∫₀¹ {k/x}dx equals
-    k times a tsum of log-reciprocal terms.
+/-- **Axiom (Substitution + Sum)**: ∫₀¹ {k/x}dx = k · Σ ∫_{m+k}^{m+k+1} (x-(m+k))/x² dx.
 
     This is the irreducible analytic core: change of variables u = k/x
     gives ∫₀¹ {k/x}dx = k·∫_k^∞ {u}/u² du, then partitioning into
-    intervals [n,n+1) where {u} = u-n and computing each piece:
-    ∫_n^{n+1} (u-n)/u² du = log((n+1)/n) - 1/(n+1). -/
-axiom fract_integral_eq_tsum (k : ℕ) (hk : 1 ≤ k) :
+    intervals [n,n+1) where {u} = u-n. The per-interval integral
+    computation is proved as a theorem below. -/
+axiom fract_integral_as_sum (k : ℕ) (hk : 1 ≤ k) :
     ∫ x in (0:ℝ)..1, Int.fract ((k : ℝ) / x) =
     (k : ℝ) * ∑' (m : ℕ),
-      (Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / (((m + k : ℕ) : ℝ) + 1))
+      (∫ x in ((m + k : ℕ) : ℝ)..((m + k : ℕ) : ℝ) + 1,
+        (x - ((m + k : ℕ) : ℝ)) / x ^ 2)
+
+/-- **THEOREM**: ∫_n^{n+1} (x-n)/x² dx = log(1+1/n) - 1/(n+1).
+    Proof: (x-n)/x² = 1/x - n/x². By FTC with antiderivative log(x) + n/x:
+    [log(x) + n/x]_n^{n+1} = log((n+1)/n) + n/(n+1) - 1 = log(1+1/n) - 1/(n+1). -/
+theorem interval_sub_div_sq (n : ℕ) (hn : 1 ≤ n) :
+    ∫ x in ((n : ℕ) : ℝ)..((n : ℕ) : ℝ) + 1, (x - ((n : ℕ) : ℝ)) / x ^ 2 =
+    Real.log (1 + 1 / ((n : ℕ) : ℝ)) - 1 / (((n : ℕ) : ℝ) + 1) := by
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  -- Antiderivative F(x) = log(x) + n/x, F'(x) = 1/x - n/x² = (x-n)/x²
+  have hF : ∀ x ∈ Set.uIcc ((n : ℕ) : ℝ) (((n : ℕ) : ℝ) + 1),
+      HasDerivAt (fun x => Real.log x + (↑n : ℝ) * x⁻¹)
+        ((x - (↑n : ℝ)) / x ^ 2) x := by
+    intro x hx
+    have hx_pos : (0 : ℝ) < x := by
+      simp at hx; linarith
+    have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+    have hlog := Real.hasDerivAt_log hx_ne
+    have hinv := hasDerivAt_inv hx_ne
+    -- log'(x) = x⁻¹, (x⁻¹)' = -(x²)⁻¹
+    -- (log x + n·x⁻¹)' = x⁻¹ + n·(-(x²)⁻¹) = x⁻¹ - n/x² = (x-n)/x²
+    convert hlog.add (hinv.const_mul (↑n : ℝ)) using 1
+    field_simp; ring
+  have hint : IntervalIntegrable
+      (fun x => (x - (↑n : ℝ)) / x ^ 2) MeasureTheory.volume
+      ((n : ℕ) : ℝ) (((n : ℕ) : ℝ) + 1) := by
+    apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.div
+    · exact continuousOn_id.sub continuousOn_const
+    · exact continuousOn_pow 2
+    · intro x hx; simp at hx
+      exact pow_ne_zero 2 (ne_of_gt (by linarith))
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
+  -- Goal: log(↑n+1) + ↑n*(↑n+1)⁻¹ - (log ↑n + ↑n*(↑n)⁻¹) = log(1+1/↑n) - 1/(↑n+1)
+  -- Auxiliary facts for algebra
+  have h1 : (↑n : ℝ) * (↑n : ℝ)⁻¹ = 1 := mul_inv_cancel₀ (ne_of_gt hn_pos)
+  have h2 : Real.log (1 + 1 / (↑n : ℝ)) = Real.log ((↑n : ℝ) + 1) - Real.log (↑n : ℝ) := by
+    conv_lhs => rw [show (1 : ℝ) + 1 / (↑n : ℝ) = ((↑n : ℝ) + 1) / (↑n : ℝ) from by field_simp]
+    exact Real.log_div (by linarith : (↑n : ℝ) + 1 ≠ 0) (ne_of_gt hn_pos)
+  have h3 : (↑n : ℝ) * ((↑n : ℝ) + 1)⁻¹ + ((↑n : ℝ) + 1)⁻¹ = 1 := by
+    rw [show (↑n : ℝ) * ((↑n : ℝ) + 1)⁻¹ + ((↑n : ℝ) + 1)⁻¹
+      = ((↑n : ℝ) + 1) * ((↑n : ℝ) + 1)⁻¹ from by ring]
+    exact mul_inv_cancel₀ (by linarith : (↑n : ℝ) + 1 ≠ 0)
+  have h4 : 1 / ((↑n : ℝ) + 1) = ((↑n : ℝ) + 1)⁻¹ := one_div _
+  linarith
+
+/-- **THEOREM** (was axiom): ∫₀¹ {k/x}dx = k · Σ (log(1+1/(m+k)) - 1/(m+k+1)).
+    Derived from fract_integral_as_sum + interval_sub_div_sq. -/
+theorem fract_integral_eq_tsum (k : ℕ) (hk : 1 ≤ k) :
+    ∫ x in (0:ℝ)..1, Int.fract ((k : ℝ) / x) =
+    (k : ℝ) * ∑' (m : ℕ),
+      (Real.log (1 + 1 / ((m + k : ℕ) : ℝ)) - 1 / (((m + k : ℕ) : ℝ) + 1)) := by
+  rw [fract_integral_as_sum k hk]
+  congr 1
+  exact tsum_congr (fun m => interval_sub_div_sq (m + k) (by omega))
 
 -- summable_log_correction: proved below in Layer 2, after per_term_log_bound
 -- and summable_inv_sq_shift are available.
