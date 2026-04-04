@@ -380,28 +380,39 @@ theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
   linarith
 
 /-- **Axiom (Analytic Number Theory — Möbius Test Vector)**:
-    There exists a test vector that achieves approximation error ≤ C/log(N).
+    There exists a test vector achieving L² approximation error ≤ C/log(N).
+
+    Stated in pure L²(0,1) form:
+    ∫₀¹ (1 - Σ vᵢ{(i+2)/x})² dx ≤ C/log(N)
 
     This directly asserts the NB basis functions can approximate 1_{(0,1)}
     to within C/log(N) in L² norm.
 
-    NOTE: This replaces eigenvalue_implies_distance_bound, which had
-    the Rayleigh bound going the wrong direction. -/
+    The L² ↔ Matrix Bridge (l2_error_eq_quad_error) connects this to
+    the matrix form: 1 - 2bᵀv + vᵀGv ≤ C/log(N). -/
 axiom moebius_test_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    1 - 2 * dotProduct (basisInnerProd N) v +
-      realQuadForm (gramMatrix N) v ≤ C / Real.log (N : ℝ)
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ)
 
 /-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
-    PROVED from moebius_test_bound + nbDistSq_le_test_vector. -/
+    PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/
 theorem nb_distance_scaling :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) := by
   obtain ⟨C, hC, N₀, hN₀, h_test⟩ := moebius_test_bound
   exact ⟨C, hC, N₀, hN₀, fun N hN => by
     obtain ⟨v, hv⟩ := h_test N hN
-    exact le_trans (nbDistSq_le_test_vector N (by omega) v) hv⟩
+    -- Wire: d²_N ≤ [variational] = [L² integral] ≤ C/log(N)
+    have h_bridge := l2_error_eq_quad_error N (by omega) v
+    have h_var := nbDistSq_le_test_vector N (by omega) v
+    -- variational bound gives d²_N ≤ 1 - 2bᵀv + vᵀGv
+    -- bridge gives ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+    -- So d²_N ≤ ∫(1-f)² ≤ C/log(N)
+    calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
+          realQuadForm (gramMatrix N) v := h_var
+      _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := h_bridge.symm
+      _ ≤ C / Real.log (N : ℝ) := hv⟩
 
 /-- **Axiom: Logarithmic divergence** (standard calculus).
 
