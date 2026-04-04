@@ -535,6 +535,22 @@ private lemma floor_div_integrableOn (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1
           _ ≤ ‖(↑k : ℝ) * t ^ (s.re - 2)‖ := le_norm_self _
           _ = _ := by simp)
 
+/-- N·(k/(N+1))^s → 0 as N → ∞ for Re(s) > 1. -/
+private lemma tail_vanishes_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (_hk : 1 ≤ k) :
+    Tendsto (fun N : ℕ => (↑N : ℂ) * (↑((k:ℝ)/((N:ℝ)+1)) : ℂ) ^ s) atTop (nhds 0) := by
+  have h_rewrite : ∀ N : ℕ,
+      (↑N : ℂ) * (↑((k:ℝ)/((N:ℝ)+1)) : ℂ) ^ s =
+      (↑k : ℂ) ^ s * ((↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s) := by
+    intro N
+    have hk_nn : (0:ℝ) ≤ (k:ℝ) := by positivity
+    have hN1_nn : (0:ℝ) ≤ 1/((N:ℝ)+1) := by positivity
+    rw [show (k:ℝ)/((N:ℝ)+1) = (k:ℝ) * (1/((N:ℝ)+1)) from by ring,
+        Complex.ofReal_mul (k:ℝ) (1/((N:ℝ)+1)),
+        mul_cpow_ofReal_nonneg hk_nn hN1_nn]
+    push_cast; rw [mul_comm (↑N : ℂ), mul_assoc]; congr 1; exact mul_comm _ _
+  rw [show (0:ℂ) = (↑k : ℂ) ^ s * 0 from by simp]
+  exact (tail_vanishes' s hs).const_mul _ |>.congr (fun N => (h_rewrite N).symm)
+
 /-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt = k/s + (k^s/s)·(ζ(s) - ∑_{m<k}(m+1)^{-s}). -/
 private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
     ∫ t in Set.Ioc (0:ℝ) 1,
@@ -557,7 +573,40 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
       (fun N : ℕ => ∫ t in Ioc ((k:ℝ)/((N:ℝ)+1)) 1, f t)
       atTop (nhds ((↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
         (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))))) := by
-    sorry
+    -- Step 1: Partial integrals = Abel sum formula (induction)
+    -- After inductive decomposition + Abel summation, each partial integral equals:
+    -- [(↑k) + (↑k)^s · ∑_{n=k+1}^{N} n^{-s} - N·(k/(N+1))^s] / s
+    have h_eq : ∀ᶠ N : ℕ in atTop, ∫ t in Ioc ((k:ℝ)/((N:ℝ)+1)) 1, f t =
+        ((↑k : ℂ) + (↑k : ℂ) ^ s *
+          (∑ n ∈ Finset.Icc (k+1) N, ((↑(n : ℕ) : ℂ) ^ (-s))) -
+          (↑N : ℂ) * (↑((k:ℝ)/((N:ℝ)+1)) : ℂ) ^ s) / s := by
+      sorry  -- integral_decomp_gen + Abel summation
+    -- Step 2: ∑_{n=k+1}^{N} n^{-s} → ζ(s) - ∑_{n=1}^{k} n^{-s}
+    have h_tail_zeta : Tendsto
+        (fun N : ℕ => ∑ n ∈ Finset.Icc (k+1) N, ((↑(n:ℕ) : ℂ) ^ (-s)))
+        atTop (nhds (riemannZeta s -
+          (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))))) := by
+      sorry  -- partial_zeta_tendsto' restricted to tail
+    -- Step 3: N·(k/(N+1))^s → 0
+    have h_tail := tail_vanishes_gen s hs k hk
+    -- Step 4: Combine convergences
+    have h_conv : Tendsto (fun N : ℕ =>
+        ((↑k : ℂ) + (↑k : ℂ) ^ s *
+          (∑ n ∈ Finset.Icc (k+1) N, ((↑(n : ℕ) : ℂ) ^ (-s))) -
+          (↑N : ℂ) * (↑((k:ℝ)/((N:ℝ)+1)) : ℂ) ^ s) / s)
+        atTop (nhds (((↑k : ℂ) + (↑k : ℂ) ^ s *
+          (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))) - 0) / s)) :=
+      Tendsto.div_const
+        (((h_tail_zeta.const_mul _).const_add _).sub h_tail) s
+    -- Step 5: Simplify 0 and rewrite target
+    simp only [sub_zero] at h_conv
+    have h_algebra : ((↑k : ℂ) + (↑k : ℂ) ^ s *
+        (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))))) / s =
+      (↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
+        (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))) := by
+      ring
+    rw [h_algebra] at h_conv
+    exact h_conv.congr' (h_eq.mono (fun N hN => hN.symm))
   -- By uniqueness of limits
   exact tendsto_nhds_unique h_tendsto_int h_tendsto_target
 
