@@ -414,12 +414,67 @@ theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
   -- By uniqueness of limits
   exact tendsto_nhds_unique h_tendsto_int h_tendsto_zeta
 
-/-- The general mellin_fractBasis axiom for all k ≥ 1. -/
-axiom mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
+/-- On Ioc(k/(n+1), k/n), ⌊k/t⌋ = n (generalized floor). -/
+private lemma floor_div_eq_on_Ioc_gen (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n)
+    (t : ℝ) (ht_lo : (k : ℝ)/((n : ℝ)+1) < t) (ht_hi : t ≤ (k : ℝ)/(n : ℝ)) :
+    ⌊(k : ℝ)/t⌋ = (n : ℤ) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+  have ht_pos : (0 : ℝ) < t := by linarith [div_pos hk_pos hn1_pos]
+  rw [Int.floor_eq_iff]
+  constructor
+  · rw [Int.cast_natCast, le_div_iff₀ ht_pos]
+    nlinarith [mul_div_cancel₀ (k : ℝ) (ne_of_gt hn_pos)]
+  · rw [Int.cast_natCast, div_lt_iff₀ ht_pos]
+    nlinarith [mul_div_cancel₀ (k : ℝ) (ne_of_gt hn1_pos)]
+
+/-- ∫₀¹ t^{s-1}·(k/t) dt = k/(s-1) for Re(s) > 1. -/
+private lemma mellin_div_integral (s : ℂ) (hs : 1 < s.re) (k : ℕ) (_hk : 1 ≤ k) :
+    ∫ t in Set.Ioc (0:ℝ) 1, (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ)) =
+    (↑k : ℂ) / (s - 1) := by
+  -- Step 1: Replace integrand with k · t^{s-2}
+  have h_eq : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ)))
+      (fun t : ℝ => (↑k : ℂ) * (↑t : ℂ) ^ (s - 2))
+      (Set.Ioc (0:ℝ) 1) := by
+    intro t ⟨ht_lo, _⟩
+    have ht' : (↑t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht_lo)
+    show (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ)) = (↑k : ℂ) * (↑t : ℂ) ^ (s - 2)
+    rw [show (s - 2 : ℂ) = (s - 1) + (-1) from by ring, cpow_add _ _ ht',
+        Complex.cpow_neg_one]
+    ring
+  rw [setIntegral_congr_fun measurableSet_Ioc h_eq]
+  -- Step 2: Pull out k
+  rw [show ∫ x in Set.Ioc (0:ℝ) 1, (↑k : ℂ) * (↑x : ℂ) ^ (s - 2) =
+      (↑k : ℂ) * ∫ x in Set.Ioc (0:ℝ) 1, (↑x : ℂ) ^ (s - 2) from integral_const_mul _ _]
+  -- Step 3: Evaluate ∫ t^{s-2} = 1/(s-1)
+  rw [← intervalIntegral.integral_of_le (le_of_lt (by linarith : (0:ℝ) < 1))]
+  rw [integral_cpow (Or.inl (show -1 < (s - 2).re from by simp [sub_re]; linarith))]
+  rw [show s - 2 + 1 = s - 1 from by ring]
+  rw [ofReal_one, one_cpow, ofReal_zero,
+      zero_cpow (show s - 1 ≠ 0 from by
+        intro h; have := congr_arg re h; simp [sub_re, one_re] at this; linarith)]
+  rw [sub_zero, mul_one_div]
+
+/-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt for Re(s) > 1 (generalized floor Mellin). -/
+private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
+    ∫ t in Set.Ioc (0:ℝ) 1,
+      (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ)/t⌋) : ℂ) =
+    (↑k : ℂ) / (s - 1) - (k : ℂ) / (s * (s - 1)) -
+    ((k : ℂ) ^ s / s) *
+      ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s) := by
+  sorry
+
+/-- The general mellin_fractBasis for all k ≥ 1. -/
+theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
     mellinRestricted (fractBasisC k) s =
     (k : ℂ) / (s * (s - 1)) +
     ((k : ℂ) ^ s / s) *
-      ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s)
+      ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s) := by
+  -- Split {k/t} = k/t - ⌊k/t⌋
+  unfold mellinRestricted fractBasisC
+  sorry
 
 -- ════════════════════════════════════════════════
 -- SECTION 3: THE SEPARATING FUNCTIONAL
