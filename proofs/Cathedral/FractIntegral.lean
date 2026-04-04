@@ -102,7 +102,7 @@ private lemma floor_div_eq_on_Ioc (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤
     nlinarith [mul_div_cancel₀ (k : ℝ) (ne_of_gt hn1_pos)]
 
 /-- On Ioc(k/(n+1), k/n), {k/x} = k/x - n. -/
-private lemma fract_div_eq_on_Ioc (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n)
+lemma fract_div_eq_on_Ioc (k : ℕ) (n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n)
     (x : ℝ) (hx_lo : (k : ℝ) / ((n : ℝ) + 1) < x) (hx_hi : x ≤ (k : ℝ) / (n : ℝ)) :
     Int.fract ((k : ℝ) / x) = (k : ℝ) / x - (n : ℝ) := by
   unfold Int.fract

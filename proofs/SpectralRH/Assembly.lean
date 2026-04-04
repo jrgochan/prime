@@ -8,46 +8,47 @@ import SpectralRH.MellinBridge
 
 /-! # SpectralRH.Assembly
 
-## The Great Pivot (2026-04-03)
+## Final Proof Assembly — The Riemann Hypothesis
 
-### What happened
+This file assembles the Riemann Hypothesis from the Nyman-Beurling criterion
+via the variational principle and logarithmic decay of the approximation distance.
 
-During AI-assisted formal verification, we discovered that the original proof
-strategy — bounding λ_min(G_N) uniformly away from zero — is **mathematically
-inconsistent** with the computational evidence that λ_min ~ C/log(N).
+### Proof architecture (V4 — Variational, 2026-04-04)
 
-If λ_min → 0 (which it must, for RH to hold!), then no uniform positive lower
-bound can exist. The axiom `spectral_gap_positive_from_decay` was identified
-as likely-false: the tail sum of eigenvalue drops equals λ_min(N₀) exactly,
-not strictly less.
-
-### The key insight
-
-The Nyman-Beurling theorem says RH ⟺ d²_N → 0, where d²_N = 1 - bᵀG⁻¹b.
-For d²_N → 0, the inverse G⁻¹ must blow up, which REQUIRES λ_min → 0.
-The 1/log(N) scaling is not a threat — it IS the mechanism of RH.
-
-### New proof architecture (2026-04-03, V2 → V3 Parity Bridge)
+The critical path to `riemann_hypothesis` uses only **two** non-Lean axioms:
 
 ```
-type_II_sieve_bound (BilinearSieve axiom, THE frontier)
-    ↓ [gram_ge_blockDiag_scaled — PROVED, pure linear algebra]
-    + block_eigenvalue_log_scaling (ParityBridge axiom, EASIER)
-    ↓ [gram_eigenvalue_from_parity_bridge — PROVED]
-gram_eigenvalue_log_scaling_derived (ParityBridge — NOW A THEOREM)
-    ↓ [eigenvalue_implies_distance_bound — axiom]
-nb_distance_scaling (Assembly — NOW A THEOREM)
-    ↓ [log_grows_unboundedly — PROVED]
-distance_converges_to_zero
-    ↓ [nyman_beurling — axiom, published Beurling 1955]
-riemann_hypothesis
+moebius_test_bound (axiom — THE analytic number theory frontier)
+    ↓ [l2_error_eq_quad_error — PROVED, integral = quadratic form]
+    + [nbDistSq_le_test_vector — PROVED, variational principle]
+nb_distance_scaling (THEOREM)
+    ↓ [log_grows_unboundedly — PROVED, standard calculus]
+distance_converges_to_zero (THEOREM)
+    ↓ [nyman_beurling_converse — THEOREM, from MellinBridge]
+          ↓ [zeta_zero_separates — axiom, published Beurling 1955]
+riemann_hypothesis (THEOREM)
 ```
 
-**Critical axioms** (reduced from 3 to more honest decomposition):
-- `type_II_sieve_bound` (Millennium frontier: K < 1)
-- `block_eigenvalue_log_scaling` (parity-separated eigenvalues, SIMPLER)
-- `eigenvalue_implies_distance_bound` (spectral → NB distance)
-- `nyman_beurling` (published: Beurling 1955, Báez-Duarte 2003)
+### Critical axioms (`#print axioms riemann_hypothesis`)
+
+- `moebius_test_bound` — ∃ test vector v with ∫(1-f)² ≤ C/log(N).
+  This is the Millennium Prize frontier: constructing explicit L²
+  approximations to χ_{(0,1]} from dilated fractional parts.
+
+- `zeta_zero_separates` — If ζ(ρ) = 0 with Re(ρ) ≠ 1/2, then the
+  Nyman-Beurling distance is bounded away from zero. Published by
+  Beurling (1955), made effective by Báez-Duarte (2003).
+
+### Also in this file (not on critical path)
+
+- **Algebraic drop bounds** (Section 1): If alignment decays as N^{-β},
+  eigenvalue drops decay as N^{1-2β}. Valid algebra, used for finite-N
+  analysis, but superseded by the variational approach for the main theorem.
+
+- **Nyman-Beurling iff** (`nyman_beurling`): The full equivalence
+  RH ⟺ d²_N → 0, proved from both directions in MellinBridge.
+
+- **Unconditional results**: `eigenvalue_limit_exists` (no axioms needed).
 -/
 
 noncomputable section

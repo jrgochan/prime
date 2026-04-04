@@ -214,6 +214,290 @@ private lemma gramEntry_le_basis (j : ℕ) :
   · intro x _; exact fract_mul_self_le _
 
 -- ════════════════════════════════════════════════
+-- PIECE INTEGRAL ANALYSIS FOR j ≥ 3
+-- ════════════════════════════════════════════════
+
+/-- log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4 for x ≥ 0.
+    Proof: h(x) = log(1+x) - (x - x²/2 + x³/3 - x⁴/4) has h(0) = 0 and
+    h'(x) = x⁴/(1+x) ≥ 0, so h is monotone. -/
+private lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
+    x - x^2/2 + x^3/3 - x^4/4 ≤ Real.log (1 + x) := by
+  suffices h : 0 ≤ Real.log (1 + x) - (x - x^2/2 + x^3/3 - x^4/4) by linarith
+  set f : ℝ → ℝ := fun t => Real.log (1 + t) - (t - t^2/2 + t^3/3 - t^4/4) with hf_def
+  have hf0 : f 0 = 0 := by simp [hf_def, Real.log_one]
+  have hcont : ContinuousOn f (Ici 0) := by
+    simp only [hf_def]
+    apply ContinuousOn.sub
+    · exact ContinuousOn.log (continuousOn_const.add continuousOn_id) (fun t ht => by
+        simp only [mem_Ici] at ht; linarith)
+    · fun_prop
+  have hdiff : DifferentiableOn ℝ f (interior (Ici (0:ℝ))) := by
+    simp only [interior_Ici, hf_def]
+    intro t ht; simp only [mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    apply DifferentiableAt.sub
+    · exact (differentiableAt_id.const_add 1).log (ne_of_gt (by linarith : (0:ℝ) < 1 + t))
+    · fun_prop
+  have hderiv : ∀ t ∈ interior (Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, mem_Ioi] at ht
+    have h1t : (0:ℝ) < 1 + t := by linarith
+    have hdf : HasDerivAt f (t^4 / (1+t)) t := by
+      simp only [hf_def]
+      have h1 := (hasDerivAt_id t).const_add 1 |>.log (ne_of_gt h1t)
+      have h2 := hasDerivAt_id t
+      have h3 := (hasDerivAt_pow 2 t).div_const 2
+      have h4 := (hasDerivAt_pow 3 t).div_const 3
+      have h5 := (hasDerivAt_pow 4 t).div_const 4
+      refine (h1.sub (((h2.sub h3).add h4).sub h5)).congr_deriv ?_
+      simp only [id]; field_simp; ring
+    rw [hdf.deriv]
+    exact div_nonneg (pow_nonneg (le_of_lt ht) 4) (le_of_lt h1t)
+  have hmono : MonotoneOn f (Ici 0) :=
+    monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (mem_Ici.mpr (le_refl 0)) (mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+/-- FTC: ∫_{j/(n+1)}^{j/n} (j/x - n)² dx = j·[(2n+1)/(n+1) - 2n·log(1+1/n)].
+    Antiderivative: F(x) = -j²·x⁻¹ - 2jn·log(x) + n²·x. -/
+private lemma integral_sq_div_sub_const (j n : ℕ) (hj : 1 ≤ j) (hn : 1 ≤ n) :
+    ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
+      ((j:ℝ)/x - (n:ℝ))^2 =
+    (j:ℝ) * ((2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ))) := by
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0:ℝ) < (n:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn1_pos : (0:ℝ) < (n:ℝ) + 1 := by linarith
+  have hlo_pos : (0:ℝ) < (j:ℝ)/((n:ℝ)+1) := div_pos hj_pos hn1_pos
+  have hhi_pos : (0:ℝ) < (j:ℝ)/(n:ℝ) := div_pos hj_pos hn_pos
+  have hle : (j:ℝ)/((n:ℝ)+1) ≤ (j:ℝ)/(n:ℝ) :=
+    div_le_div_of_nonneg_left (le_of_lt hj_pos) hn_pos (by linarith)
+  set g₁ : ℝ → ℝ := fun x => -(j:ℝ)^2 * x⁻¹
+  set g₂ : ℝ → ℝ := fun x => -2*(j:ℝ)*(n:ℝ) * Real.log x
+  set g₃ : ℝ → ℝ := fun x => (n:ℝ)^2 * x
+  have hF : ∀ x ∈ Set.uIcc ((j:ℝ)/((n:ℝ)+1)) ((j:ℝ)/(n:ℝ)),
+      HasDerivAt (fun x => g₁ x + g₂ x + g₃ x) (((j:ℝ)/x - (n:ℝ))^2) x := by
+    intro x hx
+    rw [Set.uIcc_of_le hle] at hx
+    have hx_pos : (0:ℝ) < x := lt_of_lt_of_le hlo_pos hx.1
+    have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+    have h1 : HasDerivAt g₁ ((j:ℝ)^2 * x⁻¹^2) x := by
+      simp only [g₁]; convert (hasDerivAt_inv hx_ne).const_mul (-(j:ℝ)^2) using 1; ring
+    have h2 : HasDerivAt g₂ (-2*(j:ℝ)*(n:ℝ) * x⁻¹) x := by
+      simp only [g₂]; exact (Real.hasDerivAt_log hx_ne).const_mul _
+    have h3 : HasDerivAt g₃ ((n:ℝ)^2) x := by
+      simp only [g₃]; convert (hasDerivAt_id x).const_mul ((n:ℝ)^2) using 1; ring
+    refine ((h1.add h2).add h3).congr_deriv ?_
+    field_simp; ring
+  have hint : IntervalIntegrable (fun x => ((j:ℝ)/x - (n:ℝ))^2) volume
+      ((j:ℝ)/((n:ℝ)+1)) ((j:ℝ)/(n:ℝ)) := by
+    apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.pow
+    exact (continuousOn_const.div continuousOn_id (fun x hx => by
+      rw [Set.uIcc_of_le hle] at hx; exact ne_of_gt (lt_of_lt_of_le hlo_pos hx.1))).sub
+      continuousOn_const
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
+  simp only [g₁, g₂, g₃]
+  have hlog : Real.log ((j:ℝ)/(n:ℝ)) - Real.log ((j:ℝ)/((n:ℝ)+1)) =
+      Real.log (1 + 1/(n:ℝ)) := by
+    rw [← Real.log_div (ne_of_gt hhi_pos) (ne_of_gt hlo_pos)]
+    congr 1; field_simp
+  have inv1 : ((j:ℝ)/(n:ℝ))⁻¹ = (n:ℝ)/(j:ℝ) := by field_simp
+  have inv2 : ((j:ℝ)/((n:ℝ)+1))⁻¹ = ((n:ℝ)+1)/(j:ℝ) := by field_simp
+  rw [inv1, inv2]
+  set L := Real.log (1 + 1/(n:ℝ))
+  have hlog2 : Real.log ((j:ℝ)/(n:ℝ)) = Real.log ((j:ℝ)/((n:ℝ)+1)) + L := by
+    linarith [hlog]
+  rw [hlog2]
+  have hn_ne : (n:ℝ) ≠ 0 := ne_of_gt hn_pos
+  have hn1_ne : (n:ℝ) + 1 ≠ 0 := ne_of_gt hn1_pos
+  have hj_ne : (j:ℝ) ≠ 0 := ne_of_gt hj_pos
+  field_simp; ring
+
+/-- Per-piece bound: the squared piece integral ≤ j/(3n(n+1)) for n ≥ 3.
+    Uses log_lower_quartic: log(1+1/n) ≥ 1/n - 1/(2n²) + 1/(3n³) - 1/(4n⁴). -/
+private lemma piece_sq_upper_bound (n : ℕ) (hn : 3 ≤ n) :
+    (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ))
+    ≤ 1 / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
+  have hn_pos : (0:ℝ) < (n:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hge3 : (n:ℝ) ≥ 3 := by exact_mod_cast hn
+  have hlog := log_lower_quartic (1/(n:ℝ)) (by positivity)
+  have hstep1 : (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ) * Real.log (1 + 1/(n:ℝ)) ≤
+      (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ) * (1/(n:ℝ) - (1/(n:ℝ))^2/2 + (1/(n:ℝ))^3/3 - (1/(n:ℝ))^4/4) := by
+    linarith [mul_le_mul_of_nonneg_left hlog (by positivity : (0:ℝ) ≤ 2*(n:ℝ))]
+  have hstep2 :
+      (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ) * (1/(n:ℝ) - (1/(n:ℝ))^2/2 + (1/(n:ℝ))^3/3 - (1/(n:ℝ))^4/4) =
+      1/((n:ℝ)*((n:ℝ)+1)) - 2/(3*(n:ℝ)^2) + 1/(2*(n:ℝ)^3) := by
+    field_simp; ring
+  have hstep3 : 1/((n:ℝ)*((n:ℝ)+1)) - 2/(3*(n:ℝ)^2) + 1/(2*(n:ℝ)^3) ≤
+      1/(3*(n:ℝ)*((n:ℝ)+1)) := by
+    suffices h : 1/((n:ℝ)*((n:ℝ)+1)) - 2/(3*(n:ℝ)^2) + 1/(2*(n:ℝ)^3) -
+        1/(3*(n:ℝ)*((n:ℝ)+1)) ≤ 0 by linarith
+    have heq : 1/((n:ℝ)*((n:ℝ)+1)) - 2/(3*(n:ℝ)^2) + 1/(2*(n:ℝ)^3) -
+        1/(3*(n:ℝ)*((n:ℝ)+1)) = -(((n:ℝ)-3)/(6*(n:ℝ)^3*((n:ℝ)+1))) := by
+      field_simp; ring
+    rw [heq]; exact neg_nonpos_of_nonneg (div_nonneg (by linarith) (by positivity))
+  linarith [hstep1, hstep2]
+
+-- Integrability of {j/x}²
+private lemma fract_sq_intervalIntegrable (j : ℕ) (a b : ℝ) :
+    IntervalIntegrable (fun x => Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) volume a b := by
+  apply IntervalIntegrable.mono_fun
+    (intervalIntegral.intervalIntegrable_const (c := (1:ℝ)))
+  · have hmeas : Measurable (fun x : ℝ => Int.fract ((j:ℝ) / x)) :=
+      measurable_fract_real.comp (measurable_const.div measurable_id)
+    exact (hmeas.mul hmeas).aestronglyMeasurable.restrict
+  · filter_upwards with x
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)),
+        Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1)]
+    nlinarith [Int.fract_nonneg ((j:ℝ)/x), Int.fract_lt_one ((j:ℝ)/x)]
+
+/-- Bound each squared piece integral by j/(3n(n+1)). -/
+private lemma fract_sq_piece_bound (j n : ℕ) (hj : 3 ≤ j) (hn : j ≤ n) :
+    ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
+      Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+    (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0:ℝ) < (n:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hle : (j:ℝ)/((n:ℝ)+1) ≤ (j:ℝ)/(n:ℝ) :=
+    div_le_div_of_nonneg_left (le_of_lt hj_pos) hn_pos (by linarith)
+  -- Replace fract with (j/x - n)² via a.e. congr
+  have hae : ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
+      Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) =
+      ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)), ((j:ℝ)/x - (n:ℝ))^2 := by
+    rw [intervalIntegral.integral_of_le hle, intervalIntegral.integral_of_le hle]
+    exact integral_congr_ae ((ae_restrict_mem measurableSet_Ioc).mono (fun x hx => by
+      show Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) = ((j:ℝ)/x - (n:ℝ))^2
+      rw [fract_div_eq_on_Ioc j n (by omega) (by omega) x hx.1 hx.2]; ring))
+  rw [hae, integral_sq_div_sub_const j n (by omega) (by omega)]
+  calc (j:ℝ) * ((2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ)))
+      ≤ (j:ℝ) * (1 / (3 * (n:ℝ) * ((n:ℝ)+1))) :=
+        mul_le_mul_of_nonneg_left (piece_sq_upper_bound n (by omega)) (by positivity)
+    _ = (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by ring
+
+/-- Finite telescoping of squared piece integrals. -/
+private lemma fract_sq_telescope (j : ℕ) (hj : 1 ≤ j) (N : ℕ) :
+    ∑ m ∈ Finset.range (N + 1),
+      ∫ x in ((j:ℝ)/((j:ℝ)+(m:ℝ)+1))..((j:ℝ)/((j:ℝ)+(m:ℝ))),
+        Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) =
+    ∫ x in ((j:ℝ)/((j:ℝ)+(N:ℝ)+1))..(1:ℝ),
+      Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) := by
+  induction N with
+  | zero =>
+    rw [Finset.sum_range_one]; simp only [Nat.cast_zero, add_zero]
+    congr 1; exact div_self (ne_of_gt (show (0:ℝ) < (j:ℝ) by positivity))
+  | succ N ih =>
+    rw [Finset.sum_range_succ, ih]
+    set a := (j:ℝ) / ((j:ℝ) + (N:ℝ) + 2)
+    set b := (j:ℝ) / ((j:ℝ) + (N:ℝ) + 1)
+    have key := intervalIntegral.integral_add_adjacent_intervals
+      (fract_sq_intervalIntegrable j a b) (fract_sq_intervalIntegrable j b 1)
+    rw [add_comm]; convert key using 2 <;> simp [a, b] <;> ring_nf
+
+/-- Tail bound: ‖∫₀^ε {j/x}² dx‖ ≤ ε. -/
+private lemma fract_sq_tail_bound (j : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
+    ‖∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖ ≤ ε := by
+  have h : ∀ x ∈ Set.uIoc (0:ℝ) ε,
+      ‖Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖ ≤ 1 := by
+    intro x _
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+    nlinarith [Int.fract_nonneg ((j:ℝ)/x), Int.fract_lt_one ((j:ℝ)/x)]
+  calc ‖∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖
+      ≤ 1 * |ε - 0| := intervalIntegral.norm_integral_le_of_norm_le_const h
+    _ = ε := by rw [sub_zero, abs_of_nonneg hε, one_mul]
+
+/-- **gramEntry j j ≤ 1/3 for j ≥ 3**.
+    Proof by piece integral decomposition + Taylor bound.
+    For each M: gramEntry ≤ 1/3 + 2j/(3(j+M+1)), and taking M → ∞ gives ≤ 1/3. -/
+private lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
+    gramEntry j j ≤ 1 / 3 := by
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  -- For each M, bound gramEntry by partial sum + tail
+  have hbound : ∀ M : ℕ, gramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by
+    intro M
+    set ε := (j:ℝ) / ((j:ℝ) + (M:ℝ) + 1)
+    have hε_pos : 0 < ε := by positivity
+    -- gramEntry = ∫₀^ε + ∫_ε^1
+    have hsplit : gramEntry j j =
+      (∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) +
+      (∫ x in ε..1, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) :=
+      (intervalIntegral.integral_add_adjacent_intervals
+        (fract_sq_intervalIntegrable j 0 ε) (fract_sq_intervalIntegrable j ε 1)).symm
+    rw [hsplit]
+    -- Tail bound
+    have htail : ∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤ ε := by
+      have hb := fract_sq_tail_bound j ε (le_of_lt hε_pos)
+      -- hb : ‖∫...‖ ≤ ε. Since ∫... ≤ |∫...| = ‖∫...‖ ≤ ε.
+      calc ∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)
+          ≤ |∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)| := le_abs_self _
+        _ = ‖∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖ := (Real.norm_eq_abs _).symm
+        _ ≤ ε := hb
+    -- Main part: telescope = Σ pieces, bounded by partial telescoping sum
+    have hmain : ∫ x in ε..1, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+        (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) := by
+      -- Rewrite as sum of pieces via telescope
+      have htel := (fract_sq_telescope j (by omega) M).symm
+      rw [htel]
+      -- Need to match the endpoints: the piece bounds use ↑(j+m) while
+      -- the telescope uses ↑j + ↑m. Bridge with convert.
+      -- First, bound each piece
+      have hpieces : ∀ m ∈ Finset.range (M + 1),
+          ∫ x in ((j:ℝ)/((j:ℝ)+(m:ℝ)+1))..((j:ℝ)/((j:ℝ)+(m:ℝ))),
+            Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+          (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)) := by
+        intro m _
+        -- The piece bound uses n = j+m (as ℕ)
+        have : (j:ℝ) + (m:ℝ) = ((j+m:ℕ):ℝ) := by push_cast; ring
+        rw [this]
+        exact fract_sq_piece_bound j (j+m) hj (by omega)
+      calc ∑ m ∈ Finset.range (M + 1),
+              ∫ x in ((j:ℝ)/((j:ℝ)+(m:ℝ)+1))..((j:ℝ)/((j:ℝ)+(m:ℝ))),
+                Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)
+          ≤ ∑ m ∈ Finset.range (M + 1),
+              (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)) :=
+            Finset.sum_le_sum hpieces
+        _ = (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) := by
+            -- Summand equality: j/(3·(j+m)·(j+m+1)) = j/3·(1/(j+m) - 1/(j+m+1))
+            have hrw : ∑ m ∈ Finset.range (M + 1),
+                (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)) =
+                (j:ℝ)/3 * ∑ m ∈ Finset.range (M + 1),
+                (1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1)) := by
+              rw [Finset.mul_sum]
+              congr 1; ext m
+              have : (0:ℝ) < (j:ℝ) + (m:ℝ) := by positivity
+              have : (0:ℝ) < (j:ℝ) + (m:ℝ) + 1 := by linarith
+              field_simp; ring
+            rw [hrw]
+            -- Telescoping: Σ (1/(j+m) - 1/(j+m+1)) = 1/j - 1/(j+M+1)
+            congr 1
+            have htele : ∀ M' : ℕ, ∑ m ∈ Finset.range (M' + 1),
+                (1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1)) =
+                1/(j:ℝ) - 1/((j:ℝ)+(M':ℝ)+1) := by
+              intro M'; induction M' with
+              | zero => simp
+              | succ M' ih =>
+                rw [Finset.sum_range_succ, ih]
+                have h1 : (j:ℝ) + (M':ℝ) + 1 ≠ 0 := by positivity
+                have h2 : (j:ℝ) + (M':ℝ) + 1 + 1 ≠ 0 := by positivity
+                have h3 : (j:ℝ) ≠ 0 := ne_of_gt hj_pos
+                push_cast; field_simp; ring
+            exact htele M
+    -- Combine: tail + main ≤ ε + j/3·(1/j - 1/(j+M+1)) = 1/3 + 2j/(3(j+M+1))
+    have hcomb : ε + (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) =
+        1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by
+      simp only [ε]; field_simp; ring
+    linarith
+  -- Now take the limit: for any ε > 0, choose M large enough.
+  by_contra h_neg; push_neg at h_neg
+  obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
+  have hM := hbound N₀
+  have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith
+  have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < gramEntry j j - 1/3 := by
+    rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*((j:ℝ)+(N₀:ℝ)+1))]
+    have h1 : 2*(j:ℝ) < 3*(gramEntry j j - 1/3)*N₀ := by
+      rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(gramEntry j j - 1/3))] at hN₀; linarith
+    nlinarith [show (0:ℝ) ≤ (j:ℝ) from by positivity]
+  linarith
+
+-- ════════════════════════════════════════════════
 -- MAIN THEOREM
 -- ════════════════════════════════════════════════
 
@@ -230,9 +514,7 @@ theorem gram_entry_diag_upper' (j : ℕ) (hj : 1 ≤ j) :
     interval_cases j <;> simp_all <;> norm_num <;> linarith
   · -- j ≥ 3: gramEntry j j ≤ 1/3 suffices since 1/j² ≥ 0
     push_neg at hle
-    -- gramEntry j j ≤ 1/3 from piece integral analysis
-    have : gramEntry j j ≤ 1 / 3 := by
-      sorry -- TODO: piece integral decomposition
+    have : gramEntry j j ≤ 1 / 3 := gramEntry_le_third j (by omega)
     linarith [show (0:ℝ) ≤ 1 / (j:ℝ)^2 from by positivity]
 
 end

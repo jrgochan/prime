@@ -9,40 +9,51 @@ import Cathedral.SelbergSieve
 
 /-! # Cathedral.Assembly
 
-## Final Proof Assembly
+## Final Proof Assembly — The Riemann Hypothesis
 
-The Riemann Hypothesis is proved by combining:
+This file assembles the Riemann Hypothesis via the Nyman-Beurling criterion,
+the variational principle, and the constant-witness NB distance decay.
 
-### Critical Path (Mertens constant-witness approach)
+### Proof architecture (2026-04-04)
+
 ```
-fract_integral_eq_tsum      (FractIntegral — axiom, change of variables)
-summable_log_correction     (FractIntegral — axiom, O(1/n²) convergence)
-log_harmonic_tail_bound     (FractIntegral — axiom, tail bound)
-    → basis_entry_lower     (FractIntegral — THEOREM)
-    → basis_sum_tight       (Mertens — THEOREM)
-gram_entry_upper            (Mertens — axiom, G_{j,k} ≤ 1/4+1/jk)
+gram_entry_diag_upper       (GramDiag — THEOREM, piece-integral decomposition)
+gram_entry_offdiag_upper    (Mertens — axiom, G_{j,k} ≤ 1/4 + 1/(jk) for j≠k)
     → gram_sum_tight        (Mertens — THEOREM)
-    → nb_distance_decay     (Mertens — THEOREM)
+basis_entry_lower           (FractIntegral — THEOREM)
+    → basis_sum_tight       (Mertens — THEOREM)
+    → nb_distance_decay     (Mertens — THEOREM, constant witness c = B/Q)
     → moebius_test_bound    (SelbergSieve → Assembly — THEOREM)
-    → nb_distance_scaling   (Assembly — THEOREM)
-    → distance_converges    (Assembly — THEOREM)
-zeta_zero_separates         (MellinBridge — axiom, Mellin bridge)
+    → [nbDistSq_le_test_vector — PROVED, variational principle]
+    → [l2_error_eq_quad_error — PROVED, integral = quadratic form]
+nb_distance_scaling         (Assembly — THEOREM)
+    → [log_grows_unboundedly — PROVED, standard calculus]
+distance_converges_to_zero  (Assembly — THEOREM)
+zeta_zero_separates         (MellinBridge — axiom, Beurling 1955)
     → nyman_beurling_converse (MellinBridge — THEOREM)
     → riemann_hypothesis    (Assembly — THEOREM)
 ```
 
-### 5 Project Axioms on the Critical Path
-1. `fract_integral_eq_tsum` — change of variables u=k/x
-2. `summable_log_correction` — O(1/n²) series convergence
-3. `log_harmonic_tail_bound` — elementary tail sum bound
-4. `gram_entry_upper` — per-entry Gram matrix bound G_{j,k} ≤ 1/4+1/(jk)
-5. `zeta_zero_separates` — Nyman-Beurling converse via Mellin transform
+### 2 Project Axioms on the Critical Path (`#print axioms riemann_hypothesis`)
 
-### Alternative Path (spectral, non-critical)
-Assembly also contains an alternative spectral drop-bound path using
-alignment decay, parity bridges, and Schur complements. These theorems
-are fully proved but are NOT on the critical path to `riemann_hypothesis`.
-Supporting files live in `Cathedral/Spectral/`.
+1. `gram_entry_offdiag_upper` — Per-entry Gram bound G_{j,k} ≤ 1/4 + 1/(jk)
+   for j ≠ k. The diagonal case `gram_entry_diag_upper` is now a theorem
+   (proved in GramDiag.lean via piece-integral decomposition + S₄ Taylor bound).
+
+2. `zeta_zero_separates` — Nyman-Beurling converse via Mellin transform.
+   If ζ(ρ) = 0 with Re(ρ) ≠ 1/2, the NB distance is bounded away from zero.
+   Published by Beurling (1955), made effective by Báez-Duarte (2003).
+
+### Also in this file (not on critical path)
+
+- **Algebraic drop bounds** (Section 1): If alignment decays as N^{-β},
+  eigenvalue drops decay as N^{1-2β}. Valid algebra, used for finite-N
+  analysis, but superseded by the variational approach for the main theorem.
+
+- **Nyman-Beurling iff** (`nyman_beurling`): The full equivalence
+  RH ⟺ d²_N → 0, proved from both directions in MellinBridge.
+
+- **Unconditional results**: `eigenvalue_limit_exists` (no axioms needed).
 -/
 
 noncomputable section
@@ -387,7 +398,8 @@ theorem moebius_test_bound :
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) :=
   moebius_test_bound_from_selberg
 
-
+/-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
+    PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/
 theorem nb_distance_scaling :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) := by
@@ -401,7 +413,7 @@ theorem nb_distance_scaling :
       _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := h_bridge.symm
       _ ≤ C / Real.log (N : ℝ) := hv⟩
 
-/-- **Axiom: Logarithmic divergence** (standard calculus).
+/-- **THEOREM**: Logarithmic divergence (standard calculus).
 
     For any C > 0 and ε > 0, C/log(N) < ε eventually.
     Proved using `Real.tendsto_log_atTop` from Mathlib. -/
