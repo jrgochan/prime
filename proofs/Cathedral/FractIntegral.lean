@@ -175,7 +175,7 @@ private lemma measurable_floor_real : Measurable (Int.floor : ℝ → ℤ) := by
   exact MeasurableSet.biUnion s.to_countable (fun n _ => measurableSet_Ico)
 
 /-- Fract is measurable: fract x = x - ↑⌊x⌋. -/
-private lemma measurable_fract_real : Measurable (Int.fract : ℝ → ℝ) :=
+lemma measurable_fract_real : Measurable (Int.fract : ℝ → ℝ) :=
   measurable_id.sub ((by fun_prop : Measurable (fun n : ℤ => (n : ℝ))).comp measurable_floor_real)
 
 /-- Fract(k/x) is measurable. -/

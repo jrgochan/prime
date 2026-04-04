@@ -28,6 +28,7 @@ import Cathedral.Defs
 import Cathedral.Structural
 import Cathedral.GramBounds
 import Cathedral.FractIntegral
+import Cathedral.GramDiag
 
 noncomputable section
 open Real MeasureTheory Set Finset Matrix
@@ -274,17 +275,11 @@ theorem basis_sum_tight :
     _ = (↑(N - 1) : ℝ) / 2 - 1/2 - Real.log (N : ℝ) / 2 := by ring
     _ ≥ (N - 1 : ℝ) / 2 - 1 * Real.log (N : ℝ) := by rw [hNR]; linarith
 
-/-- **AXIOM**: Per-entry Gram upper bound (diagonal case).
+/-- **THEOREM** (was axiom): Per-entry Gram upper bound (diagonal case).
     G_{j,j} = ∫₀¹ {j/x}² dx ≤ 1/3 + 1/j².
-
-    The diagonal Gram entry is the second moment of {j/x} on (0,1).
-    By Weyl equidistribution, E[{j/x}²] → 1/3 as j → ∞.
-    The correction term 1/j² bounds the deviation from equidistribution.
-
-    NOTE: The diagonal value G(j,j) → 1/3 (NOT 1/4), since
-    E[X²] = 1/3 for X ~ Uniform(0,1). -/
-axiom gram_entry_diag_upper (j : ℕ) (hj : 1 ≤ j) :
-    gramEntry j j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2)
+    See Cathedral.GramDiag for the proof architecture. -/
+theorem gram_entry_diag_upper (j : ℕ) (hj : 1 ≤ j) :
+    gramEntry j j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2) := gram_entry_diag_upper' j hj
 
 /-- **AXIOM**: Per-entry Gram upper bound (off-diagonal case).
     G_{j,k} = ∫₀¹ {j/x}·{k/x} dx ≤ 1/4 + 1/(j·k)  for j ≠ k.

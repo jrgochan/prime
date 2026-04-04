@@ -15,6 +15,7 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core (critical path)
     `Cathedral.Defs, `Cathedral.Structural, `Cathedral.GramBounds,
+    `Cathedral.GramDiag,
     `Cathedral.FractIntegral, `Cathedral.Mertens, `Cathedral.SelbergSieve,
     `Cathedral.MellinBridge, `Cathedral.Assembly,
     -- Spectral path (non-critical, parallel exploration)
