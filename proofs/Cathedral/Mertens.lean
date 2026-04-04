@@ -128,53 +128,48 @@ axiom gram_sum_tight :
 
 /-- **THEOREM**: nb_distance_decay_axiom from basis_sum_tight + gram_sum_tight.
 
-    Proof sketch:
-    1. Use constant witness w = (B/Q, ..., B/Q)
-    2. By l2_error_eq_quad_error: ∫(1-f)² = 1 - 2(B/Q)·B + (B/Q)²·Q = 1 - B²/Q
-    3. From A': B ≥ (N-1)/2 - C_A·logN
-    4. From B': Q ≤ (N-1)²/4 + C_B·N
-    5. Algebra: Q - B² ≤ C₃·N·logN
-    6. So 1 - B²/Q = (Q-B²)/Q ≤ C₃·N·logN / ((N-1)²/4) ≤ C₄·logN/N
-    7. logN/N ≤ 1/logN for N ≥ e^{logN·logN}... actually for any fixed C:
-       C·logN/N ≤ C'/logN iff C·log²N ≤ C'·N iff log²N/N ≤ C'/C.
-       Since log²N/N → 0, this holds for N ≥ N₀.  ∎ -/
+    The constant witness w_k = 2/(N-1) achieves L² ≤ C·logN/N ≤ C'/logN.
+    Proof: L² = 1 - 2cB + c²Q where c = 2/(N-1).
+    From A': 2cB ≥ 2 - 4·C_A·logN/(N-1)
+    From B': c²Q ≤ 1 + 4·C_B·N/(N-1)²
+    So L² ≤ 4C_A·logN/(N-1) + 4C_B·N/(N-1)² ≤ C·logN/N ≤ C'/logN. -/
 theorem nb_distance_decay_axiom' :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) := by
   obtain ⟨C_A, hCA, N_A, hNA, hA⟩ := basis_sum_tight
   obtain ⟨C_B, hCB, N_B, hNB, hB⟩ := gram_sum_tight
-  -- Choose C and N₀ large enough
-  refine ⟨8 * (C_A + C_B + 1), by linarith, max (max N_A N_B) 4, by omega,
+  -- Choose C and N₀
+  set C := 8 * (C_A + C_B + 1) ^ 2 with hC_def
+  refine ⟨C, by positivity, max (max N_A N_B) 4, by omega,
     fun N hN => ?_⟩
   have hN2 : 2 ≤ N := by omega
+  have hN4 : 4 ≤ N := by omega
   have hNA' : N_A ≤ N := by omega
   have hNB' : N_B ≤ N := by omega
-  -- The bounds from sub-axioms
+  have hNm1_pos : (0 : ℝ) < ((N : ℝ) - 1) := by
+    have : (4 : ℝ) ≤ (N : ℝ) := Nat.ofNat_le_cast.mpr hN4
+    linarith
+  -- Sub-axiom bounds
   have hBbound := hA N hNA'
   have hQbound := hB N hNB'
-  -- Exhibit the constant witness
-  set B := basisSum N with hB_def
-  set Q := gramSum N with hQ_def
-  -- We need Q > 0 to define B/Q.
-  -- Q = ∫₀¹ F(x)² dx where F = Σ{k/x}. Since F ≥ 0 and not identically 0 for N ≥ 3,
-  -- Q > 0. For now, we use: Q ≥ G_{1,1} > 0 since gramEntry 1 1 > 0.
-  have hQpos : Q > 0 := by
-    sorry -- Q = Σ G_{jk} with G_{1,1} = ∫{1/x}² > 0
-  -- Step 1: Exhibit witness v = constVec N (B / Q)
-  refine ⟨constVec N (B / Q), ?_⟩
-  -- Step 2: Convert integral to quadratic form
-  have h_l2 := l2_error_eq_quad_error N hN2 (constVec N (B / Q))
-  rw [h_l2, dot_const N (B / Q), quad_const N (B / Q)]
-  -- Goal: 1 - 2 * (B/Q * basisSum N) + (B/Q)^2 * gramSum N ≤ C / log N
-  -- Fold basisSum N → B and gramSum N → Q
-  -- Step 3: Simplify to 1 - B²/Q using const_witness_l2
-  rw [const_witness_l2 B Q hQpos]
-  -- Goal: 1 - B² / Q ≤ 8 * (C_A + C_B + 1) / log N
-  -- Step 4: Bound 1 - B²/Q using sub-axiom bounds
-  -- The key inequality: 1 - B²/Q = (Q - B²)/Q
-  -- From bounds: Q - B² ≤ C₃·N·logN and Q ≥ c·N²
-  -- So (Q-B²)/Q ≤ C₃·logN/(c·N) ≤ C'/logN for large N
+  -- Define the witness: v_k = 2/(N-1) for all k
+  set c := 2 / (N - 1 : ℝ) with hc_def
+  refine ⟨constVec N c, ?_⟩
+  -- Step 1: Convert integral to algebraic form
+  have h_l2 := l2_error_eq_quad_error N hN2 (constVec N c)
+  rw [h_l2, dot_const N c, quad_const N c]
+  -- Goal: 1 - 2*(c * B) + c^2 * Q ≤ C / log N
+  -- where B = basisSum N, Q = gramSum N
+  -- Step 2: Bound using sub-axioms
+  -- From hBbound: basisSum N ≥ (N-1)/2 - C_A·logN
+  --   so c·B = 2·B/(N-1) ≥ 1 - 2·C_A·logN/(N-1)
+  --   so 2·c·B ≥ 2 - 4·C_A·logN/(N-1)
+  -- From hQbound: gramSum N ≤ (N-1)²/4 + C_B·N
+  --   so c²·Q = 4·Q/(N-1)² ≤ 1 + 4·C_B·N/(N-1)²
+  -- So: 1 - 2cB + c²Q ≤ 4·C_A·logN/(N-1) + 4·C_B·N/(N-1)²
+  --    ≤ (4·C_A + 4·C_B)·logN/(N-1)  [since N/(N-1)² ≤ logN/(N-1) for large N]
+  --    ≤ C / logN  [since logN/(N-1) = O(logN/N) and log²N/N → 0]
   sorry
 
 -- Bridge: the old axiom is now a theorem
