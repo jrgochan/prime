@@ -2,37 +2,13 @@ import SpectralRH.Defs
 
 /-! # SpectralRH.OctonionicPartition
 
-Formalization of the octonionic partition of the integers.
+⚠️ NOT ON CRITICAL PATH — This file contains exploratory axioms
+and supporting material that is NOT part of the verified chain
+from type_II_sieve_bound → riemann_hypothesis.
 
-## Overview
-
-We define a multiplicative map φ : ℕ → S⁷ ⊂ 𝕆 that maps each positive
-integer to a unit octonion via its prime factorization. This map partitions
-{2,...,N} into 8 classes S₀,...,S₇ based on the dominant component of φ(k).
-
-## Key Results (Computational, verified to N = 1000)
-
-1. **Every class has a larger spectral gap than the full Gram matrix**:
-   λ_min(G|_{Sₘ}) ≥ 3.4 · λ_min(G) for all m.
-
-2. **Liouville decorrelation within classes**:
-   The Liouville eigenvector correlation drops from 0.70 (full G)
-   to ≈ 0.02 within each class.
-
-3. **Block-diagonal structure**:
-   The octonionic Gram matrix G^𝕆 = ⊕ₘ G|_{Sₘ} (approximately).
-
-## Mathematical Foundation
-
-The octonions 𝕆 are the largest normed division algebra (Hurwitz 1898).
-The key property exploited here is **norm multiplicativity**:
-|φ(m)·φ(n)| = |φ(m)|·|φ(n)| = 1 for unit octonions.
-
-This ensures the weight matrix W[j,k] = Re(φ(j)*·φ(k)) satisfies:
-- W[k,k] = 1 (diagonal entries)
-- |W[j,k]| ≤ 1 (bounded off-diagonal)
-- W is positive semi-definite (as a Gram matrix of unit vectors)
+See Assembly.lean and BilinearSieve.lean for the critical path.
 -/
+
 
 noncomputable section
 open Complex Real

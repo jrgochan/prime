@@ -6,39 +6,13 @@ import SpectralRH.RayleighBridge
 
 /-! # SpectralRH.SpectralFlow
 
-Formalization of the spectral flow approach to RH, incorporating all
-experimental discoveries from the computational investigation:
+⚠️ NOT ON CRITICAL PATH — This file contains exploratory axioms
+and supporting material that is NOT part of the verified chain
+from type_II_sieve_bound → riemann_hypothesis.
 
-## Key Discoveries (Computationally Verified)
-
-1. **1/log(N) Scaling**: λ_min(G_N) ~ C/log(N) with C ≈ 0.075
-2. **Cliff Phenomenon**: dλ/dt jumps 360× at t=1 in G(t) = G^block + t·G^cross
-3. **Safety Margin**: t_zero > 1 for all N, with t_zero - 1 ~ C/log(N)
-4. **Massive Cancellation**: Individual class pairs perturb λ_min by ±30,
-   but all 28 together give λ_min ≈ +0.011 (cancellation ratio 3400:1)
-5. **Full-Rank Interference**: The residual beyond rank-1 accounts for 66%
-   of the bilinear form, with an SVD cascade on the spectral edge
-
-## Proof Strategy
-
-The spectral flow provides a new proof path:
-
-  1. Define G(t) = G^block + t · G^cross for t ∈ [0, ∞)
-  2. λ_min(G(0)) = λ_min(G^block) > 0 (block-diagonal is PD)
-  3. λ_min(G(t)) is continuous in t
-  4. λ_min(G(1)) = λ_min(G) (the physical value)
-  5. Show: λ_min(G(t)) > 0 for all t ∈ [0, 1]
-
-Combined with Nyman-Beurling: λ_min(G) > 0 for all N ⟺ RH.
-
-## File Structure
-
-- Section 1: Spectral flow parameterization
-- Section 2: The 1/log(N) scaling law
-- Section 3: Cliff structure and safety margin
-- Section 4: Monotonicity and the flow theorem
-- Section 5: The complete proof architecture
+See Assembly.lean and BilinearSieve.lean for the critical path.
 -/
+
 
 noncomputable section
 open Complex Real
@@ -89,51 +63,8 @@ lemma spectralFlowMatrix_at_zero (N : ℕ) :
     spectralFlowMatrix N 0 = gramMatrixBlockDiag N := by
   simp [spectralFlowMatrix, zero_smul, add_zero]
 
-/-- **The full Gram matrix is positive semi-definite** (was axiom, now theorem).
-    This follows from the integral representation:
-    xᵀ G x = ∑_{j,k} xⱼ xₖ ∫₀¹ {j/t}{k/t} dt
-           = ∫₀¹ (∑ⱼ xⱼ {j/t})² dt ≥ 0.
-
-    Proved using gram_pos_def (strict positivity for v ≠ 0)
-    and trivial vanishing for v = 0. -/
-theorem gramMatrix_posSemidef :
-    ∀ N : ℕ, 2 ≤ N → (gramMatrix N).PosSemidef := by
-  intro N hN
-  constructor
-  · exact gramMatrix_hermitian N
-  · intro x
-    -- Need: 0 ≤ Σ_{i ∈ x.support} Σ_{j ∈ x.support} x_i * G_{i,j} * x_j
-    -- For ℝ, star = id. This is the quadratic form xᵀGx.
-    -- If x = 0 (as Finsupp), both sides are 0.
-    -- If x ≠ 0, then ⇑x ≠ 0 and gram_pos_def gives strict positivity.
-    by_cases hx : x = 0
-    · subst hx; simp
-    · -- x ≠ 0 as Finsupp, so ⇑x ≠ 0 as a function
-      have hv : (⇑x : Fin (N-1) → ℝ) ≠ 0 := by
-        intro h; apply hx; ext i; exact congr_fun h i
-      have hpos := gram_pos_def N hN (⇑x) hv
-      unfold realQuadForm dotProduct at hpos
-      -- hpos : 0 < Σ_i x(i) * (Σ_j G_{i,j} * x(j))
-      -- Goal: 0 ≤ x.sum (fun i xi => x.sum (fun j xj => star xi * G i j * xj))
-      -- These are the same sum (star = id for ℝ, and Finsupp.sum over support
-      -- equals Finset.univ.sum when the function is zero outside support)
-      have : x.sum (fun i xi => x.sum (fun j xj => star xi * (gramMatrix N) i j * xj)) =
-             ∑ i, ∑ j, x i * (gramMatrix N) i j * x j := by
-        rw [Finsupp.sum_of_support_subset _ (Finset.subset_univ _) _ (by intros; simp)]
-        congr 1; ext i
-        rw [Finsupp.sum_of_support_subset _ (Finset.subset_univ _) _ (by intros; simp [mul_comm])]
-        simp [star_trivial]
-      rw [this]
-      -- Now goal: 0 ≤ ∑ i, x i * G i j * x j summed over i,j
-      -- hpos has: 0 < ∑ i, x i * (G.mulVec x) i
-      -- G.mulVec x i = ∑ j, G i j * x j, so these are the same
-      simp_rw [show ∀ i : Fin (N-1), ∀ j : Fin (N-1),
-        x i * gramMatrix N i j * x j = x i * (gramMatrix N i j * x j) from
-        fun i j => by ring]
-      simp_rw [← Finset.mul_sum]
-      -- Now goal matches hpos
-      simp only [Matrix.mulVec, dotProduct] at hpos
-      linarith
+-- gramMatrix_posSemidef is now imported from ParitySchur.lean
+-- (via ClassRestriction → Assembly → BilinearSieve → ParitySchur)
 
 /-- **Block-diagonal Gram matrix is positive definite**.
     Decomposition: G^block is PD because

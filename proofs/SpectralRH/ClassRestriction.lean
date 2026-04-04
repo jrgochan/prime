@@ -6,31 +6,13 @@ import SpectralRH.Assembly
 
 /-! # SpectralRH.ClassRestriction
 
-The octonionic class restriction theorem: the spectral gap of the Gram
-matrix restricted to each octonionic class is larger than the full gap.
+⚠️ NOT ON CRITICAL PATH — This file contains exploratory axioms
+and supporting material that is NOT part of the verified chain
+from type_II_sieve_bound → riemann_hypothesis.
 
-## Main Results
-
-- `class_gap_strictly_larger`: λ_min(G|_{Sₘ}) > λ_min(G) for each m
-- `oct_equals_block`: λ_min(G^𝕆) = min_m λ_min(G|_{Sₘ})
-- `schur_bridge`: λ_min(G) ≥ C · λ_min(G^𝕆) for constant C > 0
-
-## Proof Strategy for RH (Schur Bridge)
-
-The octonionic Gram matrix G^𝕆 = W ∘ G (Hadamard product) satisfies
-λ_min(G^𝕆) ≈ 0.048 (nearly flat, 4× larger than λ_min(G)).
-
-The Schur bridge axiom establishes a multiplicative bound:
-  λ_min(G) ≥ C · λ_min(G^𝕆)   where C ≈ 0.91
-
-Combined with oct_gap_lower_bound (λ_min(G^𝕆) ≥ c > 0), this gives:
-  λ_min(G) ≥ C·c > 0  →  RH
-
-Note: The additive Weyl approach (λ_min(G^block) + λ_min(G^cross) > 0)
-FAILS because λ_min(G^cross) grows as -0.085·N (verified computationally).
-The multiplicative Schur bridge avoids this by using the weight matrix
-structure directly.
+See Assembly.lean and BilinearSieve.lean for the critical path.
 -/
+
 
 noncomputable section
 open Complex Real

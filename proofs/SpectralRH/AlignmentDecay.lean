@@ -2,9 +2,14 @@ import SpectralRH.Defs
 import SpectralRH.PTSymmetry
 
 /-! # SpectralRH.AlignmentDecay
-The alignment decay decomposition: liouville_cancellation axiom
-and alignment_decay theorem.
+
+⚠️ NOT ON CRITICAL PATH — This file contains exploratory axioms
+and supporting material that is NOT part of the verified chain
+from type_II_sieve_bound → riemann_hypothesis.
+
+See Assembly.lean and BilinearSieve.lean for the critical path.
 -/
+
 
 noncomputable section
 open Complex Real

@@ -4,39 +4,13 @@ import SpectralRH.ClassRestriction
 
 /-! # SpectralRH.FiniteDimReduction
 
-The crown jewel: reduction of RH to a finite-dimensional optimization problem.
+⚠️ NOT ON CRITICAL PATH — This file contains exploratory axioms
+and supporting material that is NOT part of the verified chain
+from type_II_sieve_bound → riemann_hypothesis.
 
-## The Discovery
-
-Through computational analysis (N ≤ 2000), we established:
-
-1. **Rank-1 interference**: The cross-class interference matrix M, represented
-   in the eigenbasis of G^block, has rank-1 structure on each class-pair block.
-   Accuracy: 99.86% at N=200, increasing to 99.99% at N=2000.
-
-2. **Universal coupling**: The normalized coupling constant σ_{m₁,m₂}/√(|S_{m₁}|·|S_{m₂}|)
-   converges to 1/4 for ALL class pairs. The 8×8 coupling matrix Σ → ¼(J - I₈).
-
-3. **Stable large sieve ratio**: The ratio R = |interference|/diagonal stabilizes
-   at R ≈ 0.924 ± 0.003 from N=500 to N=2000, with no drift toward 1.
-
-## The Reduction
-
-These three facts reduce RH to:
-
-  **RH ⟺ a specific bilinear form on ℝ⁸ with coupling ¼(J-I₈) satisfies R < 1.**
-
-This is a pure finite-dimensional optimization over 8 real variables,
-with no infinite-dimensional analysis and no number theory.
-
-## File Structure
-
-- Section 1: Energy decomposition (diagonal + interference)
-- Section 2: Rank-1 structure axioms
-- Section 3: Universal coupling ¼(J-I₈)
-- Section 4: The 8-dimensional reduction
-- Section 5: RH from the finite bound
+See Assembly.lean and BilinearSieve.lean for the critical path.
 -/
+
 
 noncomputable section
 open Complex Real
@@ -213,6 +187,10 @@ noncomputable def finiteR (fp : FiniteProblem) (lam_block : ℝ) : ℝ :=
 -- ════════════════════════════════════════════════
 
 /-- **The Stable Ratio Axiom** (computationally verified):
+
+    ⚠️ SUPERSEDED: The critical path now uses `stable_ratio_parity` in
+    ParitySchur.lean (proved from `type_II_sieve_bound` in BilinearSieve.lean).
+    This axiom remains as an alternative formulation via EnergyDecomposition.
 
     | N    | R      | 1-R    |
     |------|--------|--------|
