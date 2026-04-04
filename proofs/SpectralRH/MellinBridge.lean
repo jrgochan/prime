@@ -262,5 +262,4 @@ theorem mellin_cpow_restricted (a : ℂ) (s : ℂ) (hs : 0 < (s + a).re) :
 theorem zeta_ne_zero_of_re_gt_one (s : ℂ) (hs : 1 < s.re) :
     riemannZeta s ≠ 0 :=
   riemannZeta_ne_zero_of_one_lt_re hs
-
 end

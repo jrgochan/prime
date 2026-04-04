@@ -438,11 +438,30 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 
 -- ─────── NYMAN-BEURLING ───────
 
+/-- **THEOREM**: The existential L² form implies the infimum form.
+
+    If ∃ v with ∫(1-f)² < ε, then nbDistSq' N < ε.
+    Uses: nbDistSq' ≤ quad form (variational) = ∫(1-f)² (bridge) -/
+theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
+    (v : Fin (N - 1) → ℝ)
+    (hv : ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) :
+    nbDistSq' N < ε :=
+  calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
+        realQuadForm (gramMatrix N) v := nbDistSq_le_test_vector N hN v
+    _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := (l2_error_eq_quad_error N hN v).symm
+    _ < ε := hv
+
 /-- **Axiom: The Nyman-Beurling Criterion** (Beurling 1955, Báez-Duarte 2003).
 
     RH holds if and only if the Nyman-Beurling distance d²_N → 0.
-    Formalizing this published theorem would require multi-year effort
-    in complex analysis (the Beurling inner function theory). -/
+
+    **Decomposition** (see MellinBridge.lean):
+    This axiom is decomposed into three sub-axioms via the Mellin transform:
+      - `mellin_fractBasis`: ∫₀¹ {k/x}·x^{s-1} = k^s(ζ(s)/s - 1/(s-1))
+      - `nyman_beurling_converse`: d²→0 ⟹ RH
+      - `nyman_beurling_forward`: RH ⟹ d²→0
+    Together, `nyman_beurling_from_mellin` proves the ↔ in existential form.
+    The `existential_implies_infimum` theorem above converts to this form. -/
 axiom nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis
 
