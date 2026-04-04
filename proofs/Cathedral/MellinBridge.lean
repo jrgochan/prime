@@ -457,13 +457,12 @@ private lemma mellin_div_integral (s : ℂ) (hs : 1 < s.re) (k : ℕ) (_hk : 1 �
         intro h; have := congr_arg re h; simp [sub_re, one_re] at this; linarith)]
   rw [sub_zero, mul_one_div]
 
-/-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt for Re(s) > 1 (generalized floor Mellin). -/
+/-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt = k/s + (k^s/s)·(ζ(s) - ∑_{m<k}(m+1)^{-s}). -/
 private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
     ∫ t in Set.Ioc (0:ℝ) 1,
       (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ)/t⌋) : ℂ) =
-    (↑k : ℂ) / (s - 1) - (k : ℂ) / (s * (s - 1)) -
-    ((k : ℂ) ^ s / s) *
-      ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s) := by
+    (↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
+      (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))) := by
   sorry
 
 /-- The general mellin_fractBasis for all k ≥ 1. -/
@@ -474,6 +473,31 @@ theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
       ((Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) - riemannZeta s) := by
   -- Split {k/t} = k/t - ⌊k/t⌋
   unfold mellinRestricted fractBasisC
+  -- Step 1: Replace {k/t} with k/t - ⌊k/t⌋ pointwise
+  have h_fract_eq : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑(Int.fract ((k : ℝ) / t)) : ℂ))
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ)) -
+                     (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ) / t⌋) : ℂ))
+      (Set.Ioc (0:ℝ) 1) := by
+    intro t ⟨ht_lo, _⟩
+    show (↑t : ℂ) ^ (s - 1) * (↑(Int.fract ((k : ℝ) / t)) : ℂ) =
+         (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ)) -
+         (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ) / t⌋) : ℂ)
+    rw [← mul_sub]
+    congr 1
+    -- {x} = x - ⌊x⌋
+    rw [Int.fract]
+    push_cast; norm_cast
+  rw [setIntegral_congr_fun measurableSet_Ioc h_fract_eq]
+  -- Step 2: ∫(f - g) = ∫f - ∫g
+  rw [integral_sub
+    (by sorry : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * ((↑k:ℂ)/(↑t:ℂ)))
+      (Set.Ioc 0 1) volume)
+    (by sorry : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(k:ℝ)/t⌋):ℂ))
+      (Set.Ioc 0 1) volume)]
+  -- Step 3: Apply mellin_div_integral and floor_div_mellin
+  rw [mellin_div_integral s hs k hk, floor_div_mellin s hs k hk]
+  -- Step 4: Algebra: k/(s-1) - [k/s + (k^s/s)·(ζ - ∑)] = k/(s(s-1)) + (k^s/s)·(∑ - ζ)
   sorry
 
 -- ════════════════════════════════════════════════
