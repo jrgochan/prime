@@ -3,22 +3,21 @@
 
   ## Mertens' Theorem and the Selberg Sieve Estimates
 
-  ### Key insight (this file):
+  ### Key insight:
   The two-sided bound |bᵀv - 1/2| ≤ C/log N decomposes as:
   - UPPER: bᵀv ≤ 1/2 + C/log N — PROVED from PSD + quadratic bound
   - LOWER: bᵀv ≥ 1/2 - C/log N — requires Mertens (AXIOM)
 
-  So `mertens_linear_bound` is HALF-PROVED:
-  - The upper bound is a FREE consequence of positive semi-definiteness
-  - Only the lower bound requires analytic number theory
+  `mertens_linear_bound` is therefore HALF-PROVED:
+  only the lower bound requires analytic number theory.
 
   ### Architecture:
-  mertens_lower_bound (AXIOM — Mertens 1874, the hard direction)
+  mertens_lower_bound (AXIOM — Mertens 1874)
   mertens_quadratic_bound (AXIOM — Mertens + Vasyunin 1996)
-      ↓
-  bv_upper_bound (THEOREM — from PSD + quadratic)
-  mertens_linear_bound (THEOREM — from lower + upper)
-  mertens_selberg (THEOREM — from linear + quadratic)
+      ↓ [bv_upper_bound — PROVED from PSD + quadratic]
+      ↓ [mertens_linear_bound — PROVED from upper + lower]
+      ↓ [mertens_selberg — PROVED from linear + quadratic]
+  Consumed by SelbergSieve.lean
 -/
 
 import Cathedral.Defs
@@ -67,44 +66,41 @@ def selbergTestVec (N D : ℕ) : Fin (N - 1) → ℝ :=
   fun i => selbergWeight (i.val + 1) D / (i.val + 1 : ℝ)
 
 -- ════════════════════════════════════════════════
--- SECTION 2: THE TWO AXIOMS
+-- SECTION 2: THE TWO AXIOMS (irreducible analytic core)
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Mertens 1874 — Lower Bound on bᵀv)**:
+/-- **Axiom 1 (Mertens 1874 — Lower Bound on bᵀv)**:
 
-    The Selberg-weighted inner product satisfies bᵀv ≥ 1/2 - C/log N.
+    bᵀv ≥ 1/2 - C/log N
 
-    This is the ESSENTIAL Mertens content: the Selberg weights
-    "point in the right direction" — toward the target function 1.
+    The Selberg weights "point toward" the target function 1.
+    This is the essential one-sided Mertens content.
 
-    **Proof sketch**:
-    bᵀv = Σ bₖ vₖ = (1/2)Σvₖ + Σ(bₖ-1/2)vₖ.
-    Main: (1/2)·Σvₖ ≈ 1/(2 log N) by Mertens.
-    Correction: Σ(bₖ-1/2)·vₖ = 1/2 - 1/(2 log N) + O(1/log N).
+    **Proof sketch**: bᵀv = (1/2)Σvₖ + Σ(bₖ-1/2)vₖ.
+    By Mertens: Σvₖ ≈ 1/log N. The correction Σ(bₖ-1/2)vₖ
+    involves |bₖ-1/2| ≤ C/k and Möbius cancellation.
     Net: bᵀv = 1/2 + O(1/log N), so bᵀv ≥ 1/2 - C/log N.
 
-    **Note**: The UPPER bound bᵀv ≤ 1/2 + C/log N is proved FREE
-    from PSD (see bv_upper_bound below). Only this lower bound
+    **Note**: The UPPER bound bᵀv ≤ 1/2 + C/log N is proved
+    FREE from PSD (see bv_upper_bound). Only this lower bound
     requires Mertens.
 
-    **Reference**: F. Mertens (1874). Uses only Chebyshev bounds. -/
+    **Ref**: F. Mertens (1874). Elementary (Chebyshev bounds). -/
 axiom mertens_lower_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
     1/2 - C / Real.log (N : ℝ) ≤
       dotProduct (basisInnerProd N) (selbergTestVec N N)
 
-/-- **Axiom (Mertens + Vasyunin — Quadratic Bound)**:
+/-- **Axiom 2 (Mertens + Vasyunin — Quadratic Bound)**:
 
-    The Gram quadratic form with Selberg weights satisfies:
-    vᵀGv ≤ C/log(N)
+    vᵀGv ≤ C/log N
 
-    **Proof sketch**:
-    By the Vasyunin expansion: G_{jk} = 1/4 + correction(j,k).
-    Main: (1/4)(Σvₖ)² = O(1/log²N) by Mertens.
-    Correction: O(Σ gcd(j,k)/(j²k²)) = O(1/log N).
+    **Proof sketch**: By Vasyunin, G_{jk} ≈ 1/4 + O(gcd(j,k)/(jk)).
+    Main term: (1/4)(Σvₖ)² = O(1/log²N) by Mertens.
+    Correction: O(1/log N) by multiplicative structure.
 
-    **References**: Mertens (1874), Vasyunin (1996). -/
+    **Refs**: Mertens (1874), Vasyunin (1996). -/
 axiom mertens_quadratic_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
@@ -112,19 +108,18 @@ axiom mertens_quadratic_bound :
       C / Real.log (N : ℝ)
 
 -- ════════════════════════════════════════════════
--- SECTION 3: UPPER BOUND ON bᵀv (PROVED from PSD!)
+-- SECTION 3: UPPER BOUND ON bᵀv (PROVED from PSD)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED)**: bᵀv ≤ 1/2 + C/(2 log N).
+/-- **THEOREM (PROVED)**: bᵀv ≤ 1/2 + C/log N.
 
-    This is the UPPER half of mertens_linear_bound, proved WITHOUT
-    Mertens — purely from the positive semi-definiteness of the
-    L² square integral ∫₀¹(1-f)² ≥ 0.
+    The UPPER half of the linear bound, proved WITHOUT Mertens —
+    purely from ∫₀¹(1-f)² ≥ 0 and the quadratic bound.
 
     Proof:
-    1. ∫₀¹(1-f)² = 1 - 2bᵀv + vᵀGv ≥ 0   (L² nonneg)
-    2. So: bᵀv ≤ (1 + vᵀGv)/2
-    3. With vᵀGv ≤ C/log N: bᵀv ≤ 1/2 + C/(2 log N)  ∎ -/
+    ∫(1-f)² = 1 - 2bᵀv + vᵀGv ≥ 0   (L² nonneg)
+    So: 2bᵀv ≤ 1 + vᵀGv ≤ 1 + C/log N
+    Hence: bᵀv - 1/2 ≤ C/(2 log N) ≤ C/log N  ∎ -/
 theorem bv_upper_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
@@ -134,46 +129,29 @@ theorem bv_upper_bound :
   refine ⟨C, hC, max N₀ 2, by omega, fun N hN => ?_⟩
   have hN2 : 2 ≤ N := by omega
   have hN0 : N₀ ≤ N := by omega
-  -- Key: ∫₀¹(1-f)² = 1 - 2bᵀv + vᵀGv ≥ 0
   have h_l2 := l2_error_eq_quad_error N hN2 (selbergTestVec N N)
-  -- The integral is nonneg (it's ∫ of a square)
   have h_nonneg : 0 ≤ ∫ x in (0:ℝ)..1,
       (1 - nbLinComb N (selbergTestVec N N) x) ^ 2 := by
     apply intervalIntegral.integral_nonneg (by norm_num : (0:ℝ) ≤ 1)
-    intro x _hx
-    exact sq_nonneg _
-  -- Substituting: 0 ≤ 1 - 2bᵀv + vᵀGv
+    intro x _hx; exact sq_nonneg _
   rw [h_l2] at h_nonneg
-  -- So bᵀv ≤ (1 + vᵀGv)/2
   set bv := dotProduct (basisInnerProd N) (selbergTestVec N N)
   set qf := realQuadForm (gramMatrix N) (selbergTestVec N N)
-  -- h_nonneg: 0 ≤ 1 - 2*bv + qf
-  -- h_quad: qf ≤ C/log N
   have hqf := h_quad N hN0
-  -- From h_nonneg: 2*bv ≤ 1 + qf ≤ 1 + C/log N
-  -- So bv ≤ 1/2 + C/(2 log N)
-  -- And bv - 1/2 ≤ C/(2 log N) ≤ C/log N
   set L := C / Real.log (↑N)
   have hL : qf ≤ L := hqf
-  -- From h_nonneg: 0 ≤ 1 - 2*bv + qf
-  -- So: 2*bv ≤ 1 + qf ≤ 1 + L
-  -- bv ≤ (1+L)/2 = 1/2 + L/2
-  -- bv - 1/2 ≤ L/2 ≤ L
   have hL_pos : 0 ≤ L := by positivity
   nlinarith
 
 -- ════════════════════════════════════════════════
--- SECTION 4: mertens_linear_bound (PROVED!)
+-- SECTION 4: mertens_linear_bound (PROVED)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED)**: The full two-sided linear bound.
+/-- **THEOREM (PROVED)**: |bᵀv - 1/2| ≤ C/log N.
 
-    |bᵀv - 1/2| ≤ C/log N
-
-    Proof:
-    - Upper half (bᵀv - 1/2 ≤ C/log N): from bv_upper_bound (PSD)
-    - Lower half (1/2 - bᵀv ≤ C/log N): from mertens_lower_bound (axiom)
-    - Combined: |bᵀv - 1/2| ≤ max(C₁,C₂)/log N  ∎ -/
+    Combines:
+    - Lower (axiom): bᵀv ≥ 1/2 - C₁/log N
+    - Upper (proved): bᵀv ≤ 1/2 + C₂/log N   ∎ -/
 theorem mertens_linear_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
@@ -187,29 +165,20 @@ theorem mertens_linear_bound :
   rw [abs_le]
   set bv := dotProduct (basisInnerProd N) (selbergTestVec N N)
   constructor
-  · -- Lower: -(max C₁ C₂ / log N) ≤ bv - 1/2
-    have h1 := h_lower N hN1
-    -- h1: 1/2 - C₁/log N ≤ bv
-    -- Need: -(max C₁ C₂ / log N) ≤ bv - 1/2
-    -- i.e.: 1/2 - max(C₁,C₂)/log N ≤ bv
-    -- Since C₁ ≤ max C₁ C₂, we have C₁/log N ≤ max(C₁,C₂)/log N
-    -- So 1/2 - max(.)/log N ≤ 1/2 - C₁/log N ≤ bv
+  · have h1 := h_lower N hN1
     have hle : C₁ / Real.log (↑N) ≤ max C₁ C₂ / Real.log (↑N) := by
-      apply div_le_div_of_nonneg_right (le_max_left _ _)
-      positivity
+      apply div_le_div_of_nonneg_right (le_max_left _ _); positivity
     linarith
-  · -- Upper: bv - 1/2 ≤ max(C₁,C₂)/log N
-    have h2 := h_upper N hN2
+  · have h2 := h_upper N hN2
     have hle : C₂ / Real.log (↑N) ≤ max C₁ C₂ / Real.log (↑N) := by
-      apply div_le_div_of_nonneg_right (le_max_right _ _)
-      positivity
+      apply div_le_div_of_nonneg_right (le_max_right _ _); positivity
     linarith
 
 -- ════════════════════════════════════════════════
--- SECTION 5: mertens_selberg (PROVED from linear + quadratic)
+-- SECTION 5: mertens_selberg (PROVED)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED)**: The combined Mertens-Selberg estimate. -/
+/-- **THEOREM (PROVED)**: Combined Mertens-Selberg estimate. -/
 theorem mertens_selberg :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
