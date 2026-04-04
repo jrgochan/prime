@@ -311,18 +311,59 @@ theorem zeta_neg_odd_ne_zero (k : ℕ) :
     · -- ζ(2(n+1)) ≠ 0: Re = 2(n+1) ≥ 2 ≥ 1
       exact riemannZeta_ne_zero_of_one_le_re (by simp; linarith [Nat.zero_le n])
 
-/-- **THEOREM**: Non-trivial zeros of ζ have positive real part.
 
-    Proof (case analysis on s with Re(s) ≤ 0):
-    - s not an integer: functional equation ζ(1-s) = [factors]·ζ(s)
-      gives ζ(1-s) = 0, but Re(1-s) ≥ 1 → contradiction (Mathlib)
-    - s = 0: ζ(0) = -1/2 ≠ 0 (Mathlib: riemannZeta_zero)
-    - s = negative even: trivial zero, excluded by hypothesis
-    - s = negative odd: ζ ≠ 0 by Bernoulli (sub-axiom) -/
-axiom zeta_nontrivial_zero_re_pos :
+/-- **THEOREM (proved from Mathlib + zeta_neg_odd_ne_zero)**:
+    Non-trivial zeros of ζ have positive real part.
+
+    Proof by contrapositive: assume Re(s) ≤ 0 and derive contradiction.
+    Case analysis on whether s is a non-positive integer:
+
+    A) s not a non-positive integer:
+       Functional equation ζ(1-s) = [factors]·ζ(s).
+       Since ζ(s) = 0: ζ(1-s) = 0. But Re(1-s) ≥ 1, so ζ(1-s) ≠ 0
+       by Mathlib's riemannZeta_ne_zero_of_one_le_re. Contradiction.
+
+    B) s = -n for n : ℕ:
+       - n = 0: ζ(0) = -1/2 ≠ 0 (Mathlib: riemannZeta_zero)
+       - n+1 even (= 2j): trivial zero, excluded by hypothesis
+       - n+1 odd (= 2j+1): ζ ≠ 0 by zeta_neg_odd_ne_zero -/
+theorem zeta_nontrivial_zero_re_pos :
     ∀ s : ℂ, riemannZeta s = 0 →
     (¬∃ n : ℕ, s = -2 * (↑n + 1)) →
-    0 < s.re
+    0 < s.re := by
+  intro s h_zero h_not_triv
+  by_contra h_not_pos
+  push_neg at h_not_pos
+  by_cases h_int : ∃ n : ℕ, s = -(↑n : ℂ)
+  · -- Case B: s = -n for some n : ℕ
+    obtain ⟨n, rfl⟩ := h_int
+    rcases n with _ | m
+    · -- n = 0: ζ(0) = -1/2 ≠ 0
+      simp at h_zero; rw [riemannZeta_zero] at h_zero; norm_num at h_zero
+    · -- n = m+1: even or odd?
+      rcases Nat.even_or_odd (m + 1) with ⟨j, hj⟩ | ⟨j, hj⟩
+      · -- Even: m+1 = 2j → trivial zero, excluded by hypothesis
+        have hj_pos : 1 ≤ j := by omega
+        exfalso; apply h_not_triv; refine ⟨j - 1, ?_⟩
+        have : (↑(j - 1) : ℂ) + 1 = ↑j := by
+          rw [Nat.cast_sub hj_pos]; push_cast; ring
+        rw [this]; push_cast [hj]; ring
+      · -- Odd: m+1 = 2j+1 → zeta_neg_odd_ne_zero
+        have := zeta_neg_odd_ne_zero (j + 1)
+        apply this
+        have key : (-(2 * (↑(j + 1) : ℤ) - 1)) = -(↑(m + 1) : ℤ) := by omega
+        rw [show (↑(-(2 * (↑(j + 1) : ℤ) - 1)) : ℂ) = (↑(-(↑(m + 1) : ℤ)) : ℂ) from
+          congr_arg _ key]
+        simp only [Int.cast_neg, Int.cast_natCast]
+        exact h_zero
+  · -- Case A: s is NOT a non-positive integer → functional equation
+    push_neg at h_int
+    have hs1 : s ≠ 1 := by
+      intro heq; rw [heq] at h_not_pos; norm_num at h_not_pos
+    have h_func := riemannZeta_one_sub h_int hs1
+    have h_1s_zero : riemannZeta (1 - s) = 0 := by rw [h_func, h_zero, mul_zero]
+    have h_re : 1 ≤ (1 - s).re := by simp [Complex.sub_re]; linarith
+    exact absurd h_1s_zero (riemannZeta_ne_zero_of_one_le_re h_re)
 
 /-- **THEOREM**: ¬RH → ∃ zero in critical strip off critical line.
 
