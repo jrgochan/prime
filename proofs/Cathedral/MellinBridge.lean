@@ -541,8 +541,25 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
       (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ)/t⌋) : ℂ) =
     (↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
       (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))) := by
-  -- Same monotone convergence + inductive decomposition as floor_mellin_eq_zeta
-  sorry
+  -- Monotone convergence: partial integrals → full integral
+  let f : ℝ → ℂ := fun t => (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ)/t⌋) : ℂ)
+  have h_tendsto_int : Tendsto
+      (fun N : ℕ => ∫ t in Ioc ((k:ℝ)/((N:ℝ)+1)) 1, f t)
+      atTop (nhds (∫ t in Ioc 0 1, f t)) := by
+    rw [← iUnion_Ioc_gen k hk]
+    exact tendsto_setIntegral_of_monotone (fun _ => measurableSet_Ioc) (mono_Ioc_gen k hk)
+      (iUnion_Ioc_gen k hk ▸ floor_div_integrableOn s hs k hk)
+  show ∫ t in Set.Ioc 0 1, f t =
+    (↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
+      (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))))
+  -- The partial integrals also tend to the target (via Abel sums)
+  have h_tendsto_target : Tendsto
+      (fun N : ℕ => ∫ t in Ioc ((k:ℝ)/((N:ℝ)+1)) 1, f t)
+      atTop (nhds ((↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
+        (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))))) := by
+    sorry
+  -- By uniqueness of limits
+  exact tendsto_nhds_unique h_tendsto_int h_tendsto_target
 
 /-- The general mellin_fractBasis for all k ≥ 1. -/
 theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
