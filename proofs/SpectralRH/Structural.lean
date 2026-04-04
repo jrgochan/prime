@@ -486,8 +486,8 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
     obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA
     exact ⟨c, d, hc, hcd, hd, fun x hx => by rw [heq x hx]; exact neg_ne_zero.mpr hwj₀⟩
 
-/-- nbLinComb² is integrable on subintervals of [0,1]. -/
-private lemma nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
+/-- nbLinComb² is integrable on [0,1]. -/
+theorem nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
     IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
   have h_sq : (fun x => (nbLinComb N w x) ^ 2) =
       (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
@@ -635,5 +635,101 @@ theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
       schurComplement (N - 1) := drop_formula_bound N hN
 
+
+-- ════════════════════════════════════════════════════════════════
+-- THE L² ↔ MATRIX BRIDGE
+-- ════════════════════════════════════════════════════════════════
+
+/-- Each w_i * fract((i+2)/x) is integrable on [0,1]. -/
+private lemma single_fract_integrable (k : ℕ) (c : ℝ) :
+    IntervalIntegrable (fun x : ℝ => c * Int.fract (↑k / x))
+      MeasureTheory.volume 0 1 := by
+  have hm : Measurable (fun x : ℝ => c * Int.fract (↑k / x)) :=
+    (measurable_const.div measurable_id).fract.const_mul c
+  exact IntervalIntegrable.mono_fun (intervalIntegrable_const (c := |c|))
+    hm.aestronglyMeasurable.restrict
+    (Filter.Eventually.of_forall (fun x => by
+      simp only [Real.norm_eq_abs, abs_abs]
+      calc |c * Int.fract (↑k / x)|
+          = |c| * |Int.fract (↑k / x)| := abs_mul _ _
+        _ ≤ |c| * 1 := by
+            apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+            rw [abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = |c| := mul_one _))
+
+/-- nbLinComb is integrable on [0,1].
+    Proof: finite sum of individually integrable functions. -/
+theorem nbLinComb_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (nbLinComb N w) MeasureTheory.volume 0 1 := by
+  unfold nbLinComb
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) =
+    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_sum]
+  apply IntervalIntegrable.sum; intro i _
+  exact single_fract_integrable (i.val + 2) (w i)
+
+/-- The integral of nbLinComb equals the dot product b^T w.
+    ∫₀¹ Σ wᵢ{(i+2)/x} dx = Σ wᵢ · ∫₀¹ {(i+2)/x} dx = dotProduct b w. -/
+theorem integral_nbLinComb_eq_dotProduct (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, nbLinComb N w x =
+    dotProduct (basisInnerProd N) w := by
+  unfold nbLinComb dotProduct basisInnerProd
+  -- ∫₀¹ Σ wᵢ{(i+2)/x} = Σ wᵢ · ∫₀¹ {(i+2)/x} = Σ (∫₀¹{(i+2)/x}) · wᵢ
+  -- Use integral_finset_sum via the rewrite pattern from integral_sq_as_double_sum
+  conv_lhs =>
+    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) =
+      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract ((↑(i.val + 2) : ℝ) / x)) i x) from by
+      ext x; simp]
+  rw [intervalIntegral.integral_finset_sum]
+  · congr 1; ext i
+    rw [intervalIntegral.integral_const_mul, mul_comm]
+  · intro i _
+    exact single_fract_integrable (i.val + 2) (w i)
+
+/-- **THE L² ↔ MATRIX BRIDGE** (PROVEN):
+    ∫₀¹ (1 - Σ wᵢ{(i+2)/x})² dx = 1 - 2·bᵀw + wᵀGw.
+
+    This connects the continuous L²(0,1) approximation distance to the
+    discrete matrix quadratic form, bridging functional analysis and
+    linear algebra.
+
+    Proof: Expand (1-f)² = 1 - 2f + f². Integrate term-by-term:
+    ∫1 = 1, ∫f = bᵀw (integral_nbLinComb_eq_dotProduct),
+    ∫f² = wᵀGw (gram_l2_identity). -/
+theorem l2_error_eq_quad_error (N : ℕ) (hN : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N w x) ^ 2 =
+    1 - 2 * dotProduct (basisInnerProd N) w + realQuadForm (gramMatrix N) w := by
+  -- Expand (1-f)² = 1 - 2f + f²
+  have h_expand : (fun x : ℝ => (1 - nbLinComb N w x) ^ 2) =
+      (fun x : ℝ => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) := by
+    ext x; ring
+  rw [h_expand]
+  -- Integrate term by term: ∫(1 - 2f + f²) = ∫1 - 2·∫f + ∫f²
+  have hi_const : IntervalIntegrable (fun _ : ℝ => (1:ℝ)) MeasureTheory.volume 0 1 :=
+    intervalIntegrable_const
+  have hi_2f : IntervalIntegrable (fun x => 2 * nbLinComb N w x) MeasureTheory.volume 0 1 :=
+    (nbLinComb_integrable N w).const_mul 2
+  have hi_sq : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 :=
+    nbLinComb_sq_integrable N w
+  -- Split: ∫(a - b + c) = ∫a - ∫b + ∫c
+  have h_sub_add : ∫ x in (0:ℝ)..1, (1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) =
+      (∫ x in (0:ℝ)..1, (1:ℝ)) - (∫ x in (0:ℝ)..1, 2 * nbLinComb N w x) +
+      (∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2) := by
+    rw [show (fun x : ℝ => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) =
+        (fun x => (1 - 2 * nbLinComb N w x) + (nbLinComb N w x) ^ 2) from by ext x; ring]
+    rw [intervalIntegral.integral_add (hi_const.sub hi_2f) hi_sq]
+    rw [show (fun x : ℝ => 1 - 2 * nbLinComb N w x) =
+        (fun x => (1:ℝ) - 2 * nbLinComb N w x) from rfl]
+    rw [intervalIntegral.integral_sub hi_const hi_2f]
+  rw [h_sub_add]
+  -- ∫₀¹ 1 dx = 1
+  rw [intervalIntegral.integral_const, sub_zero, smul_eq_mul, mul_one]
+  -- ∫₀¹ 2f = 2·∫₀¹ f = 2·bᵀw
+  rw [show (fun x : ℝ => 2 * nbLinComb N w x) = (fun x => (2:ℝ) * nbLinComb N w x) from rfl,
+      intervalIntegral.integral_const_mul, integral_nbLinComb_eq_dotProduct]
+  -- ∫₀¹ f² = wᵀGw
+  rw [gram_l2_identity N hN w]
 
 end
