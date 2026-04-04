@@ -69,10 +69,22 @@ def targetFnC (x : ℝ) : ℂ :=
     The proof simply unfolds `mellinRestricted` and applies the Mathlib result. -/
 theorem mellin_target (s : ℂ) (hs : 0 < s.re) :
     mellinRestricted targetFnC s = 1 / s := by
-  -- Proof strategy: On Ioc 0 1, targetFnC = 1, so the integral equals
-  -- ∫ t in Ioc 0 1, t^{s-1} = 1/s (by hasMellin_one_Ioc from Mathlib).
-  -- The matching requires careful indicator/set manipulation.
-  sorry
+  unfold mellinRestricted
+  -- Step 1: On Ioc 0 1, targetFnC t = 1, so integrand becomes t^{s-1}
+  have h_simp : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * targetFnC t)
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1))
+      (Set.Ioc (0:ℝ) 1) := by
+    intro t ⟨h0, h1⟩
+    simp only [targetFnC, if_pos (And.intro h0 h1), mul_one]
+  rw [setIntegral_congr_fun measurableSet_Ioc h_simp]
+  -- Step 2: Convert set integral Ioc → interval integral
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- Step 3: Evaluate ∫₀¹ t^{s-1} dt = ((1^s - 0^s) / s) = 1/s
+  have hre : -1 < (s - 1).re := by simp [sub_re, one_re]; linarith
+  have hs0 : s ≠ 0 := by intro h; rw [h, zero_re] at hs; exact lt_irrefl _ hs
+  rw [integral_cpow (Or.inl hre), sub_add_cancel, ofReal_one, one_cpow,
+      ofReal_zero, zero_cpow hs0, sub_zero]
 
 /-- **Axiom (Phase 2B)**: Mellin transform of the fractional part basis function.
 
@@ -110,8 +122,28 @@ theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
     mellinRestricted (fun x => ∑ i : Fin (N - 1),
       w i * fractBasisC (i.val + 2) x) s =
     mellinNBLinComb N w s := by
-  -- Linearity: integral of sum = sum of integrals
-  sorry  -- TODO: interchange sum and integral
+  unfold mellinRestricted mellinNBLinComb
+  -- Key: ∫ t^{s-1} · Σᵢ(wᵢ·φᵢ(t)) = Σᵢ wᵢ · ∫ t^{s-1}·φᵢ(t)
+  -- Step 1: Push t^{s-1} into the sum and rearrange
+  have h_eq : (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * ∑ i : Fin (N - 1),
+      w i * fractBasisC (i.val + 2) t) =
+    (fun t : ℝ => ∑ i : Fin (N - 1),
+      w i * ((↑t : ℂ) ^ (s - 1) * fractBasisC (i.val + 2) t)) := by
+    ext t; rw [Finset.mul_sum]; congr 1; ext i
+    ring
+  simp_rw [h_eq]
+  -- Step 2: Convert set integral to interval integral
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- Step 3: Interchange ∫₀¹ Σᵢ = Σᵢ ∫₀¹
+  -- Each term is interval integrable (bounded × power function on [0,1])
+  rw [intervalIntegral.integral_finset_sum (s := Finset.univ) (fun i _ => by sorry)]
+  -- Step 4: Factor out wᵢ and convert back to set integral = mellinRestricted
+  congr 1; ext i
+  -- Goal: ∫₀¹ wᵢ * (t^{s-1} * φᵢ(t)) = wᵢ * ∫ₛ t^{s-1} * φᵢ(t)
+  -- i.e., ∫₀¹ wᵢ * f(t) = wᵢ * mellinRestricted(φᵢ)(s)
+  simp only [mellinRestricted]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact intervalIntegral.integral_const_mul (w i) _
 
 /-- **THE OBSTRUCTION THEOREM (Phase 4 target)**:
     If ζ(ρ) = 0 with Re(ρ) ≠ 1/2 (RH fails), then there exists a
