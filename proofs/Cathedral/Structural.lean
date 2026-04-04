@@ -1,5 +1,5 @@
 import Cathedral.Defs
-import Cathedral.RayleighBridge
+import Cathedral.Spectral.RayleighBridge
 import Mathlib.MeasureTheory.Function.Floor
 
 /-! # SpectralRH.Structural

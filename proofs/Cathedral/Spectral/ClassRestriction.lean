@@ -1,7 +1,7 @@
 import Cathedral.Defs
-import Cathedral.OctonionicPartition
+import Cathedral.Spectral.OctonionicPartition
 import Cathedral.Structural
-import Cathedral.RayleighBridge
+import Cathedral.Spectral.RayleighBridge
 import Cathedral.Assembly
 
 /-! # SpectralRH.ClassRestriction

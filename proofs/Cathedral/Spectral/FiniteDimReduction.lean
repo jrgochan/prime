@@ -1,6 +1,6 @@
 import Cathedral.Defs
-import Cathedral.OctonionicPartition
-import Cathedral.ClassRestriction
+import Cathedral.Spectral.OctonionicPartition
+import Cathedral.Spectral.ClassRestriction
 
 /-! # SpectralRH.FiniteDimReduction
 

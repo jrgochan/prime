@@ -1,6 +1,6 @@
 import Cathedral.Defs
 import Cathedral.Structural
-import Cathedral.PTSymmetry
+import Cathedral.Spectral.PTSymmetry
 
 /-! # SpectralRH.ParitySchur
 

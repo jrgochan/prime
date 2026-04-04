@@ -12,5 +12,17 @@ lean_lib «HyperzetaProofs» where
   roots := #[`LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.GramBounds, `SpectralRH.ParitySchur, `SpectralRH.BilinearSieve, `SpectralRH.ParityBridge, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `SpectralRH.OctonionicPartition, `SpectralRH.ClassRestriction, `SpectralRH.FiniteDimReduction, `SpectralRH.SpectralFlow, `SpectralRH.RayleighBridge, `SpectralRH.MellinBridge, `SpectralRH.SelbergSieve, `HyperzetaRH]
 
 lean_lib «Cathedral» where
-  roots := #[`Cathedral.Defs, `Cathedral.Structural, `Cathedral.GramBounds, `Cathedral.FractIntegral, `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge, `Cathedral.Quantitative, `Cathedral.PTSymmetry, `Cathedral.AlignmentDecay, `Cathedral.Assembly, `Cathedral.OctonionicPartition, `Cathedral.ClassRestriction, `Cathedral.FiniteDimReduction, `Cathedral.SpectralFlow, `Cathedral.RayleighBridge, `Cathedral.MellinBridge, `Cathedral.SelbergSieve, `Cathedral.Mertens]
+  roots := #[
+    -- Core (critical path)
+    `Cathedral.Defs, `Cathedral.Structural, `Cathedral.GramBounds,
+    `Cathedral.FractIntegral, `Cathedral.Mertens, `Cathedral.SelbergSieve,
+    `Cathedral.MellinBridge, `Cathedral.Assembly,
+    -- Spectral path (non-critical, parallel exploration)
+    `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,
+    `Cathedral.Spectral.OctonionicPartition, `Cathedral.Spectral.ClassRestriction,
+    `Cathedral.Spectral.FiniteDimReduction,
+    -- Bridge files (used by Assembly for alternative proofs)
+    `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
+    `Cathedral.Quantitative, `Cathedral.AlignmentDecay
+  ]
 
