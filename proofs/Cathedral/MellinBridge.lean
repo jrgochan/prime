@@ -457,12 +457,91 @@ private lemma mellin_div_integral (s : ℂ) (hs : 1 < s.re) (k : ℕ) (_hk : 1 �
         intro h; have := congr_arg re h; simp [sub_re, one_re] at this; linarith)]
   rw [sub_zero, mul_one_div]
 
+/-- ⋃_N Ioc(k/(N+1), 1) = Ioc(0, 1). -/
+private lemma iUnion_Ioc_gen (k : ℕ) (hk : 1 ≤ k) :
+    ⋃ N : ℕ, Ioc ((k:ℝ)/((N:ℝ)+1)) 1 = Ioc (0:ℝ) 1 := by
+  ext x; simp only [mem_iUnion, mem_Ioc]; constructor
+  · rintro ⟨N, hlo, hhi⟩
+    exact ⟨by linarith [show (0:ℝ) < (k:ℝ)/((N:ℝ)+1) from by positivity], hhi⟩
+  · rintro ⟨hx, hx1⟩
+    obtain ⟨N, hN⟩ := exists_nat_gt ((k:ℝ)/x - 1)
+    refine ⟨N, ?_, hx1⟩
+    have hN1 : (0:ℝ) < (N:ℝ)+1 := by linarith [Nat.cast_nonneg (α := ℝ) N]
+    rw [div_lt_iff₀ hN1]
+    linarith [(div_lt_iff₀ hx).mp (by linarith : (k:ℝ)/x < (N:ℝ)+1)]
+
+/-- The sequence Ioc(k/(N+1), 1) is monotone. -/
+private lemma mono_Ioc_gen (k : ℕ) (hk : 1 ≤ k) :
+    Monotone (fun N : ℕ => Ioc ((k:ℝ)/((N:ℝ)+1)) (1:ℝ)) := by
+  intro m n hmn; apply Ioc_subset_Ioc_left
+  apply div_le_div_of_nonneg_left
+    (show (0:ℝ) ≤ (k:ℝ) from by positivity)
+    (show (0:ℝ) < (m:ℝ)+1 from by positivity)
+    (show (m:ℝ)+1 ≤ (n:ℝ)+1 from by
+      have : (m:ℝ) ≤ (n:ℝ) := by exact_mod_cast hmn
+      linarith)
+
+/-- Per-piece integral: ∫ t^{s-1}·n on Ioc(k/(n+1), k/n). -/
+private lemma piece_setIntegral_gen (k n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n) (s : ℂ) (hs : 1 < s.re) :
+    ∫ t in Ioc ((k:ℝ)/((n:ℝ)+1)) ((k:ℝ)/(n:ℝ)),
+      (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ) =
+    (↑n : ℂ) * ((↑((k:ℝ)/(n:ℝ)) : ℂ) ^ s - (↑((k:ℝ)/((n:ℝ)+1)) : ℂ) ^ s) / s := by
+  -- Replace ⌊k/t⌋ with n on this piece
+  have h_eq : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ))
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑n : ℂ))
+      (Ioc ((k:ℝ)/((n:ℝ)+1)) ((k:ℝ)/(n:ℝ))) := by
+    intro t ⟨ht_lo, ht_hi⟩
+    have := floor_div_eq_on_Ioc_gen k n hk hn t ht_lo ht_hi
+    simp only [this]; push_cast; norm_cast
+  rw [setIntegral_congr_fun measurableSet_Ioc h_eq]
+  have hab : (k:ℝ)/((n:ℝ)+1) ≤ (k:ℝ)/(n:ℝ) :=
+    div_le_div_of_nonneg_left (show (0:ℝ) ≤ k from by positivity) (by positivity)
+      (by linarith [show (0:ℝ) < (n:ℝ) from by positivity])
+  rw [setIntegral_congr_fun measurableSet_Ioc (fun t _ => mul_comm _ _)]
+  rw [show ∫ t in Ioc ((k:ℝ)/((n:ℝ)+1)) ((k:ℝ)/(n:ℝ)), (↑n : ℂ) * (↑t : ℂ) ^ (s - 1) =
+      (↑n : ℂ) * ∫ t in Ioc ((k:ℝ)/((n:ℝ)+1)) ((k:ℝ)/(n:ℝ)), (↑t : ℂ) ^ (s - 1)
+    from integral_const_mul _ _]
+  rw [← intervalIntegral.integral_of_le hab]
+  rw [integral_cpow (Or.inl (by simp [sub_re]; linarith))]
+  rw [show s - 1 + 1 = s from by ring]; ring
+
+/-- Generalized integrability for floor_div on Ioc(0,1). -/
+private lemma floor_div_integrableOn (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
+    IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ))
+      (Ioc 0 1) volume := by
+  have hg : IntegrableOn (fun x : ℝ => (↑x : ℂ) ^ (s - 2)) (Ioc 0 1) volume := by
+    have h := @intervalIntegral.intervalIntegrable_cpow' 0 1 (s-2) (by simp [sub_re]; linarith)
+    rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith : (0:ℝ) ≤ 1)] at h
+  exact Integrable.mono (hg.norm.const_mul (↑k : ℝ))
+    (by apply AEStronglyMeasurable.mul
+        · exact (ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const
+            (fun x hx => by left; simp [ofReal_re]; exact hx) |>.mono Ioc_subset_Ioi_self
+            ).aestronglyMeasurable measurableSet_Ioc
+        · exact ((Measurable.of_discrete (α := ℤ)).comp
+            ((measurable_const.div measurable_id).floor)).aestronglyMeasurable.restrict)
+    (by apply ae_restrict_of_ae_restrict_of_subset Ioc_subset_Ioi_self
+        apply (ae_restrict_mem measurableSet_Ioi).mono
+        intro t ht; rw [mem_Ioi] at ht
+        rw [norm_mul, norm_ofReal_cpow t ht, norm_ofReal_cpow t ht]
+        simp only [sub_re, one_re]
+        have h_nn : (0 : ℤ) ≤ ⌊(k:ℝ)/t⌋ := Int.floor_nonneg.mpr (div_nonneg (by positivity) ht.le)
+        rw [Complex.norm_intCast, abs_of_nonneg (by exact_mod_cast h_nn)]
+        calc t ^ (s.re - 1) * (⌊(k:ℝ)/t⌋ : ℝ)
+            ≤ t ^ (s.re - 1) * ((k:ℝ)/t) := mul_le_mul_of_nonneg_left (Int.floor_le _) (rpow_nonneg ht.le _)
+          _ = (↑k : ℝ) * t ^ (s.re - 2) := by
+              rw [mul_comm, div_mul_eq_mul_div, mul_div_assoc, div_eq_mul_inv, ← rpow_neg_one t,
+                  ← rpow_add ht]; congr 1; ring
+          _ ≤ ‖(↑k : ℝ) * t ^ (s.re - 2)‖ := le_norm_self _
+          _ = _ := by simp)
+
 /-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt = k/s + (k^s/s)·(ζ(s) - ∑_{m<k}(m+1)^{-s}). -/
 private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
     ∫ t in Set.Ioc (0:ℝ) 1,
       (↑t : ℂ) ^ (s - 1) * (↑(⌊(k : ℝ)/t⌋) : ℂ) =
     (↑k : ℂ) / s + ((k : ℂ) ^ s / s) *
       (riemannZeta s - (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s)))) := by
+  -- Same monotone convergence + inductive decomposition as floor_mellin_eq_zeta
   sorry
 
 /-- The general mellin_fractBasis for all k ≥ 1. -/
