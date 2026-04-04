@@ -86,91 +86,149 @@ lemma const_witness_l2 (B Q : ℝ) (hQ : Q > 0) :
   field_simp
   ring
 
--- NOTE: The actual proof is in nb_distance_decay_axiom' below,
--- which extracts bounds directly from the sub-axioms.
-
 -- ════════════════════════════════════════════════
--- REFINED SUB-AXIOMS (tighter bounds needed)
+-- HELPER LEMMAS (pure ℝ — no ℕ casts!)
 -- ════════════════════════════════════════════════
 
-/-- **Sub-Axiom A' (Tight Basis Sum)**:
+/-- **Step 1 (Pure Algebra)**: Given bounds on B and Q, the constant
+    witness c = 2/M yields error ≤ K·L/M for appropriate K.
 
-    B(N) ≥ (N-1)/2 - C·log(N)
+    Inputs (all ℝ, no casts):
+      M = N-1 > 0,  L = logN > 0
+      B ≥ M/2 - A·L,  Q ≤ M²/4 + D·(M+1)
+    Conclusion:
+      1 - 2·(2/M)·B + (2/M)²·Q ≤ 4·A·L/M + 4·D·(M+1)/M² -/
+lemma quadratic_bound_of_bounds
+    (M L A D B Q : ℝ) (hM : M > 0) (hL : L > 0)
+    (hA : A > 0) (hD : D > 0)
+    (hB : B ≥ M / 2 - A * L)
+    (hQ : Q ≤ M ^ 2 / 4 + D * (M + 1)) :
+    1 - 2 * (2 / M * B) + (2 / M) ^ 2 * Q ≤
+    4 * A * L / M + 4 * D * (M + 1) / M ^ 2 := by
+  -- Pure algebra: expand, clear denominators, collect terms.
+  -- After multiplying through by M² > 0, reduces to:
+  --   M² - 4B·M + 4Q ≤ 4A·L·M + 4D·(M+1)
+  -- which follows from hB and hQ by nlinarith.
+  sorry
 
-    Since b_k = 1/2 - 1/(2k) + O(1/k²), we have
-    B = Σb_k = (N-1)/2 - H_{N-1}/2 + O(1) ≥ (N-1)/2 - log(N)/2 - 1.
+/-- **Step 2 (Pure Algebra)**: Simplify the bound from Step 1.
+    4·A·L/M + 4·D·(M+1)/M² ≤ (8·A + 8·D)·L/M
+    provided M ≥ 2 and L ≥ 1. -/
+lemma simplify_error_bound (M L A D : ℝ) (hM : M ≥ 2) (hL : L ≥ 1)
+    (hA : A > 0) (hD : D > 0) :
+    4 * A * L / M + 4 * D * (M + 1) / M ^ 2 ≤
+    (8 * A + 8 * D) * L / M := by
+  have hMpos : M > 0 := by linarith
+  have hM2pos : M ^ 2 > 0 := by positivity
+  -- Pure algebra: (M+1)/M² ≤ 2/M for M≥2, and multiply by L≥1.
+  sorry
 
-    **Content**: b_k ≈ 1/2 for each k (fractional part average).
-    **Numerically verified**: B(100) = 49.0 ≥ 49.5 - 2.3 - 1 = 46.2. ✓ -/
+/-- **Step 3 (Pure Algebra)**: K·L/M ≤ C/L when K·L² ≤ C·M.
+    Equivalently: if L² ≤ M and K ≤ C, then K·L/M ≤ C/L. -/
+lemma ratio_flip (K C L M : ℝ) (hL : L > 0) (hM : M > 0)
+    (hKC : K ≤ C) (hL2 : L ^ 2 ≤ M) :
+    K * L / M ≤ C / L := by
+  -- Pure algebra: K·L/M ≤ C/L iff K·L² ≤ C·M.
+  -- From hKC (K≤C) and hL2 (L²≤M): K·L² ≤ C·L² ≤ C·M.
+  sorry
+
+/-- **Step 4 (Calculus)**: log²(N) ≤ N-1 for N ≥ 8.
+    Standard fact: log(x) ≤ √x for x ≥ 1, so log²(x) ≤ x.
+    More precisely: log(x) ≤ (x-1) for x ≥ 1 (concavity of log),
+    so log²(x) ≤ (x-1)² ≤ x·(x-1) for x ≥ 2.
+    But we only need: log²(x) ≤ x, which holds for x ≥ e² ≈ 7.4.
+
+    This is the ONLY non-algebraic fact in the entire proof chain. -/
+axiom log_sq_le_self :
+    ∃ N₀ : ℕ, 4 ≤ N₀ ∧ ∀ N : ℕ, N₀ ≤ N →
+    Real.log (N : ℝ) ^ 2 ≤ ((N : ℝ) - 1)
+
+-- ════════════════════════════════════════════════
+-- REFINED SUB-AXIOMS
+-- ════════════════════════════════════════════════
+
+/-- **Sub-Axiom A' (Tight Basis Sum)**: B(N) ≥ (N-1)/2 - C·log(N).
+    Content: b_k ≈ 1/2 for each k (fractional part average).
+    Numerically verified: B(100) = 49.0 ≥ 49.5 - 2.3 - 1 = 46.2. ✓ -/
 axiom basis_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
     basisSum N ≥ (N - 1 : ℝ) / 2 - C * Real.log (N : ℝ)
 
-/-- **Sub-Axiom B' (Tight Gram Sum)**:
-
-    Q(N) ≤ (N-1)²/4 + C·N
-
-    Since G_{jk} ≈ 1/4 + O(gcd(j,k)/(jk)) and G_{jj} ≈ 1/3:
-    Σ_{j≠k} G_{jk} ≈ (N-1)(N-2)/4 and Σ_j G_{jj} ≈ (N-1)/3.
-    Total: ≈ (N-1)²/4 + (N-1)/12.
-
-    **Content**: G_{jk} ≈ 1/4 for most j,k.
-    **Numerically verified**: Q(100) = 2434 ≤ 2450 + 100 = 2550. ✓ -/
+/-- **Sub-Axiom B' (Tight Gram Sum)**: Q(N) ≤ (N-1)²/4 + C·N.
+    Content: G_{jk} ≈ 1/4 for most j,k.
+    Numerically verified: Q(100) = 2434 ≤ 2450 + 100 = 2550. ✓ -/
 axiom gram_sum_tight :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
     gramSum N ≤ (N - 1 : ℝ) ^ 2 / 4 + C * (N : ℝ)
 
 -- ════════════════════════════════════════════════
--- MAIN THEOREM: nb_distance_decay from A' + B'
+-- MAIN THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: nb_distance_decay_axiom from basis_sum_tight + gram_sum_tight.
+/-- **THEOREM**: nb_distance_decay from sub-axioms + helper lemmas.
 
-    The constant witness w_k = 2/(N-1) achieves L² ≤ C·logN/N ≤ C'/logN.
-    Proof: L² = 1 - 2cB + c²Q where c = 2/(N-1).
-    From A': 2cB ≥ 2 - 4·C_A·logN/(N-1)
-    From B': c²Q ≤ 1 + 4·C_B·N/(N-1)²
-    So L² ≤ 4C_A·logN/(N-1) + 4C_B·N/(N-1)² ≤ C·logN/N ≤ C'/logN. -/
+    Proof: Use constant witness c = 2/(N-1).
+    Step 1: ∫(1-f)² = 1-2cB+c²Q  [l2_error_eq_quad_error + dot_const + quad_const]
+    Step 2: ≤ (8A+8D)·logN/(N-1)  [quadratic_bound + simplify_error_bound]
+    Step 3: ≤ C/logN               [ratio_flip + log_sq_le_self] -/
 theorem nb_distance_decay_axiom' :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) := by
   obtain ⟨C_A, hCA, N_A, hNA, hA⟩ := basis_sum_tight
   obtain ⟨C_B, hCB, N_B, hNB, hB⟩ := gram_sum_tight
-  -- Choose C and N₀
-  set C := 8 * (C_A + C_B + 1) ^ 2 with hC_def
-  refine ⟨C, by positivity, max (max N_A N_B) 4, by omega,
+  obtain ⟨N_L, hNL, hLogSq⟩ := log_sq_le_self
+  -- Choose C and N₀ large enough for all sub-results
+  set K := 8 * (C_A + C_B + 1) with hK_def
+  refine ⟨K, by linarith, max (max (max N_A N_B) N_L) 4, by omega,
     fun N hN => ?_⟩
   have hN2 : 2 ≤ N := by omega
   have hN4 : 4 ≤ N := by omega
   have hNA' : N_A ≤ N := by omega
   have hNB' : N_B ≤ N := by omega
-  have hNm1_pos : (0 : ℝ) < ((N : ℝ) - 1) := by
+  have hNL' : N_L ≤ N := by omega
+  -- Cast to ℝ: set M = N-1
+  set M := ((N : ℝ) - 1) with hM_def
+  set L := Real.log (N : ℝ) with hL_def
+  have hMpos : M > 0 := by
     have : (4 : ℝ) ≤ (N : ℝ) := Nat.ofNat_le_cast.mpr hN4
     linarith
-  -- Sub-axiom bounds
-  have hBbound := hA N hNA'
-  have hQbound := hB N hNB'
-  -- Define the witness: v_k = 2/(N-1) for all k
-  set c := 2 / (N - 1 : ℝ) with hc_def
+  have hMge2 : M ≥ 2 := by
+    have : (4 : ℝ) ≤ (N : ℝ) := Nat.ofNat_le_cast.mpr hN4
+    linarith
+  have hLpos : L > 0 := by
+    apply Real.log_pos; linarith [show (4 : ℝ) ≤ (N : ℝ) from Nat.ofNat_le_cast.mpr hN4]
+  have hLge1 : L ≥ 1 := by
+    -- log(N) ≥ log(4) > log(e) = 1 for N ≥ 4.
+    -- This requires: exp(1) < 4, which is e ≈ 2.718 < 4. ✓
+    sorry
+  -- Sub-axiom bounds (now in terms of M, L)
+  have hBbound : basisSum N ≥ M / 2 - C_A * L := hA N hNA'
+  have hQbound : gramSum N ≤ M ^ 2 / 4 + C_B * (N : ℝ) := hB N hNB'
+  -- Note: C_B * N = C_B * (M + 1)
+  have hN_eq : (N : ℝ) = M + 1 := by linarith
+  rw [hN_eq] at hQbound
+  -- Log² bound
+  have hLogSqBound : L ^ 2 ≤ M := hLogSq N hNL'
+  -- Define the witness: v_k = 2/M for all k
+  set c := 2 / M with hc_def
   refine ⟨constVec N c, ?_⟩
   -- Step 1: Convert integral to algebraic form
   have h_l2 := l2_error_eq_quad_error N hN2 (constVec N c)
   rw [h_l2, dot_const N c, quad_const N c]
-  -- Goal: 1 - 2*(c * B) + c^2 * Q ≤ C / log N
-  -- where B = basisSum N, Q = gramSum N
-  -- Step 2: Bound using sub-axioms
-  -- From hBbound: basisSum N ≥ (N-1)/2 - C_A·logN
-  --   so c·B = 2·B/(N-1) ≥ 1 - 2·C_A·logN/(N-1)
-  --   so 2·c·B ≥ 2 - 4·C_A·logN/(N-1)
-  -- From hQbound: gramSum N ≤ (N-1)²/4 + C_B·N
-  --   so c²·Q = 4·Q/(N-1)² ≤ 1 + 4·C_B·N/(N-1)²
-  -- So: 1 - 2cB + c²Q ≤ 4·C_A·logN/(N-1) + 4·C_B·N/(N-1)²
-  --    ≤ (4·C_A + 4·C_B)·logN/(N-1)  [since N/(N-1)² ≤ logN/(N-1) for large N]
-  --    ≤ C / logN  [since logN/(N-1) = O(logN/N) and log²N/N → 0]
-  sorry
+  -- Goal: 1 - 2*(c * basisSum N) + c^2 * gramSum N ≤ K / L
+  -- Step 2: Apply quadratic_bound_of_bounds
+  have h_step1 := quadratic_bound_of_bounds M L C_A C_B (basisSum N) (gramSum N)
+    hMpos hLpos hCA hCB hBbound hQbound
+  -- Step 3: Apply simplify_error_bound
+  have h_step2 := simplify_error_bound M L C_A C_B hMge2 hLge1 hCA hCB
+  -- Step 4: Apply ratio_flip with log² bound
+  have h_step3 := ratio_flip (8 * C_A + 8 * C_B) K L M hLpos hMpos
+    (by linarith) hLogSqBound
+  -- Chain the inequalities
+  linarith
 
 -- Bridge: the old axiom is now a theorem
 theorem nb_distance_decay_axiom_bridge :
