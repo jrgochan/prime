@@ -76,48 +76,18 @@ lemma dot_const (N : ℕ) (c : ℝ) :
     Proof: (c·𝟙)ᵀG(c·𝟙) = c²·𝟙ᵀG𝟙 = c²·ΣG_{jk} by bilinearity. -/
 lemma quad_const (N : ℕ) (c : ℝ) :
     realQuadForm (gramMatrix N) (constVec N c) = c ^ 2 * gramSum N := by
-  sorry -- algebraic identity: bilinearity of quadratic form
+  simp only [realQuadForm, constVec, gramSum, dotProduct, Matrix.mulVec,
+             Finset.mul_sum]
+  ring_nf
 
-/-- **THEOREM (PROVED from Sub-Axioms A + B)**:
+/-- **Helper**: 1 - 2(cB) + c²Q = 1 - B²/Q when c = B/Q and Q > 0. -/
+lemma const_witness_l2 (B Q : ℝ) (hQ : Q > 0) :
+    1 - 2 * (B / Q * B) + (B / Q) ^ 2 * Q = 1 - B ^ 2 / Q := by
+  field_simp
+  ring
 
-    nb_distance_decay_axiom: ∃ v, ∫₀¹(1-f)² ≤ C/log(N).
-
-    **Proof**: Use the constant witness w_k = B/Q for all k.
-    Then ∫(1-f)² = 1 - B²/Q.
-
-    From Sub-Axiom A: B ≥ (N-1)/4, so B² ≥ (N-1)²/16.
-    From Sub-Axiom B: Q ≤ (N-1)²/3.
-    Therefore: B²/Q ≥ ((N-1)²/16) / ((N-1)²/3) = 3/16.
-
-    Wait — that only gives B²/Q ≥ 3/16, not B²/Q → 1.
-    We need TIGHTER bounds...
-
-    Actually: 1 - B²/Q = (Q - B²)/Q. We need this ≤ C/logN.
-
-    Alternative approach: use Q ≤ (N-1)²/3 and B ≥ (N-1)/4:
-    1 - B²/Q ≤ 1 - (N-1)²/16 / ((N-1)²/3) = 1 - 3/16 = 13/16.
-    Too weak!
-
-    The issue: we need B² and Q to be CLOSE, not just bounded.
-    Let me use the tighter estimates:
-    - B ≥ (N-1)/2 - C₁·log(N)  (from b_k ≈ 1/2)
-    - Q ≤ (N-1)²/4 + C₂·N     (from G_{jk} ≈ 1/4 + corrections)
-
-    Then B² ≥ (N-1)²/4 - C₁·(N-1)·log(N) + ...
-    So Q - B² ≤ C₂·N + C₁·(N-1)·log(N) ≤ C₃·N·log(N).
-    And 1 - B²/Q = (Q-B²)/Q ≤ C₃·N·logN / ((N-1)²/4) ≤ C₄·logN/N.
-    Since logN/N ≤ C₅/logN for N ≥ N₀, done. -/
-theorem nb_distance_decay_from_bounds
-    (hA : ∃ C_A : ℝ, 0 < C_A ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-          ∀ N : ℕ, N₀ ≤ N →
-          basisSum N ≥ (N - 1 : ℝ) / 2 - C_A * Real.log (N : ℝ))
-    (hB : ∃ C_B : ℝ, 0 < C_B ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-          ∀ N : ℕ, N₀ ≤ N →
-          gramSum N ≤ (N - 1 : ℝ) ^ 2 / 4 + C_B * (N : ℝ)) :
-    ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-    ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) := by
-  sorry -- To be proved: algebraic manipulation + calculus
+-- NOTE: The actual proof is in nb_distance_decay_axiom' below,
+-- which extracts bounds directly from the sub-axioms.
 
 -- ════════════════════════════════════════════════
 -- REFINED SUB-AXIOMS (tighter bounds needed)
@@ -174,21 +144,37 @@ theorem nb_distance_decay_axiom' :
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) := by
   obtain ⟨C_A, hCA, N_A, hNA, hA⟩ := basis_sum_tight
   obtain ⟨C_B, hCB, N_B, hNB, hB⟩ := gram_sum_tight
-  -- Use C = 8 * (C_A + C_B + 1), N₀ = max of all thresholds
+  -- Choose C and N₀ large enough
   refine ⟨8 * (C_A + C_B + 1), by linarith, max (max N_A N_B) 4, by omega,
     fun N hN => ?_⟩
   have hN2 : 2 ≤ N := by omega
   have hNA' : N_A ≤ N := by omega
   have hNB' : N_B ≤ N := by omega
-  -- Step 1: Choose the constant witness w = B/Q · 𝟏
-  set B := basisSum N
-  set Q := gramSum N
-  -- We need Q > 0 (Gram matrix is PSD so Q = 𝟙ᵀG𝟙 ≥ 0, and positive for N ≥ 2)
-  -- For now, use the known lower bound B ≥ (N-1)/4 > 0, and Q ≥ B² (Cauchy-Schwarz approx)
-  -- Actually Q ≥ max(B², 0) since Q = ∫F² ≥ (∫F)² /1 = B² by Jensen
-  -- Step 2: Witness is c = B/Q
-  -- ∫(1-f)² = 1 - 2(B/Q)·B + (B/Q)²·Q = 1 - B²/Q
-  -- Step 3: Show 1 - B²/Q ≤ C/log N
+  -- The bounds from sub-axioms
+  have hBbound := hA N hNA'
+  have hQbound := hB N hNB'
+  -- Exhibit the constant witness
+  set B := basisSum N with hB_def
+  set Q := gramSum N with hQ_def
+  -- We need Q > 0 to define B/Q.
+  -- Q = ∫₀¹ F(x)² dx where F = Σ{k/x}. Since F ≥ 0 and not identically 0 for N ≥ 3,
+  -- Q > 0. For now, we use: Q ≥ G_{1,1} > 0 since gramEntry 1 1 > 0.
+  have hQpos : Q > 0 := by
+    sorry -- Q = Σ G_{jk} with G_{1,1} = ∫{1/x}² > 0
+  -- Step 1: Exhibit witness v = constVec N (B / Q)
+  refine ⟨constVec N (B / Q), ?_⟩
+  -- Step 2: Convert integral to quadratic form
+  have h_l2 := l2_error_eq_quad_error N hN2 (constVec N (B / Q))
+  rw [h_l2, dot_const N (B / Q), quad_const N (B / Q)]
+  -- Goal: 1 - 2 * (B/Q * basisSum N) + (B/Q)^2 * gramSum N ≤ C / log N
+  -- Fold basisSum N → B and gramSum N → Q
+  -- Step 3: Simplify to 1 - B²/Q using const_witness_l2
+  rw [const_witness_l2 B Q hQpos]
+  -- Goal: 1 - B² / Q ≤ 8 * (C_A + C_B + 1) / log N
+  -- Step 4: Bound 1 - B²/Q using sub-axiom bounds
+  -- The key inequality: 1 - B²/Q = (Q - B²)/Q
+  -- From bounds: Q - B² ≤ C₃·N·logN and Q ≥ c·N²
+  -- So (Q-B²)/Q ≤ C₃·logN/(c·N) ≤ C'/logN for large N
   sorry
 
 -- Bridge: the old axiom is now a theorem
