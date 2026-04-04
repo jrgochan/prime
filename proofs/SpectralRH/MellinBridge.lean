@@ -235,15 +235,30 @@ axiom zeta_zero_separates :
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
 
-/-- **Sub-axiom (Trigonometry — elementary)**:
+/-- Helper: cos(π·(n+1)) = (-1)^(n+1).
+    Proved by induction using Complex.cos_pi and Complex.cos_add_pi. -/
+private lemma cos_pi_mul_succ (n : ℕ) :
+    Complex.cos (↑Real.pi * ↑(n + 1)) = (-1) ^ (n + 1) := by
+  induction n with
+  | zero => simp [Complex.cos_pi]
+  | succ k ih =>
+    have h1 : (↑Real.pi : ℂ) * (↑(k + 1 + 1) : ℂ) =
+              (↑Real.pi : ℂ) * (↑(k + 1) : ℂ) + ↑Real.pi := by
+      push_cast; ring
+    rw [h1, Complex.cos_add_pi, ih]
+    ring
 
-    cos(π·n) ≠ 0 for integer n. Since cos(πn) = (-1)^n.
+/-- **THEOREM (proved from Mathlib)**: cos(π·n) ≠ 0 for n ≥ 1.
 
-    This is a basic trigonometric identity. Mathlib has cos_int_mul_two_pi
-    (cos(2πn) = 1) but not cos_int_mul_pi directly. The identity
-    cos(πn) = (-1)^n follows from cos(π) = -1 and the addition formula. -/
-axiom cos_int_mul_pi_ne_zero :
-    ∀ n : ℕ, Complex.cos (↑Real.pi * ↑(n + 1)) ≠ 0
+    Since cos(πn) = (-1)^n and (-1)^n ≠ 0.
+
+    Proof: By induction using Complex.cos_pi (= -1) and
+    Complex.cos_add_pi (cos(x+π) = -cos(x)), we show
+    cos(π·(n+1)) = (-1)^{n+1}, which is nonzero. -/
+theorem cos_int_mul_pi_ne_zero (n : ℕ) :
+    Complex.cos (↑Real.pi * ↑(n + 1)) ≠ 0 := by
+  rw [cos_pi_mul_succ]
+  exact pow_ne_zero _ (by norm_num : (-1 : ℂ) ≠ 0)
 
 /-- **THEOREM**: ζ at negative odd integers (and s=1) is nonzero.
 
