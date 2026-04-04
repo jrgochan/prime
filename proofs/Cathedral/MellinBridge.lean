@@ -330,9 +330,39 @@ private lemma integral_decomp (s : ℂ) (hs : 1 < s.re) : ∀ N : ℕ,
   | zero =>
     simp only [Finset.range_zero, Finset.sum_empty]
     convert setIntegral_empty (f := fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(1:ℝ)/t⌋) : ℂ))
-    simp [Set.Ioc_eq_empty (show ¬((1:ℝ) < 1) from by linarith)]
+    simp
   | succ k ih =>
-    sorry -- induction step: Ioc_union + setIntegral_union + piece_setIntegral + ih
+    -- Ioc(1/(k+2), 1) = Ioc(1/(k+2), 1/(k+1)) ∪ Ioc(1/(k+1), 1)
+    let f : ℝ → ℂ := fun x => (↑x : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / x⌋) : ℂ)
+    have h_union : Set.Ioc (1/((k:ℝ)+2)) (1/((k:ℝ)+1)) ∪ Set.Ioc (1/((k:ℝ)+1)) 1
+        = Set.Ioc (1/((k:ℝ)+2)) 1 := by
+      apply Set.Ioc_union_Ioc_eq_Ioc
+      · apply div_le_div_of_nonneg_left (by linarith) (by positivity)
+        linarith [Nat.cast_nonneg (α := ℝ) k]
+      · rw [div_le_one (by positivity : (0:ℝ) < (k:ℝ)+1)]
+        linarith [Nat.cast_nonneg (α := ℝ) k]
+    have h_disj : Disjoint (Set.Ioc (1/((k:ℝ)+2)) (1/((k:ℝ)+1)))
+        (Set.Ioc (1/((k:ℝ)+1)) 1) := Set.Ioc_disjoint_Ioc_of_le le_rfl
+    have h_int_full := floor_mellin_integrableOn s hs
+    have h_int_piece : IntegrableOn f (Set.Ioc (1/((k:ℝ)+2)) (1/((k:ℝ)+1))) volume :=
+      h_int_full.mono_set (fun x ⟨hlo, hhi⟩ => ⟨by
+        linarith [div_pos (one_pos) (by positivity : (0:ℝ) < (k:ℝ)+2)], by
+        have : 1/((k:ℝ)+1) ≤ 1 := by
+          rw [div_le_one (by positivity : (0:ℝ) < (k:ℝ)+1)]
+          linarith [Nat.cast_nonneg (α := ℝ) k]
+        linarith⟩)
+    have h_int_rest : IntegrableOn f (Set.Ioc (1/((k:ℝ)+1)) 1) volume :=
+      h_int_full.mono_set (fun x ⟨hlo, hhi⟩ =>
+        ⟨by linarith [div_pos (one_pos) (by positivity : (0:ℝ) < (k:ℝ)+1)], hhi⟩)
+    -- Split integral over union
+    rw [show (↑(k + 1) : ℝ) + 1 = (k : ℝ) + 2 from by push_cast; ring]
+    rw [← h_union]
+    rw [setIntegral_union h_disj measurableSet_Ioc h_int_piece h_int_rest]
+    rw [Finset.sum_range_succ, ih]
+    rw [show (↑k : ℝ) + 1 = ((k:ℝ) + 1) from rfl]
+    rw [add_comm]
+    congr 1
+    exact piece_setIntegral s hs k
 
 theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
     ∫ t in Set.Ioc (0 : ℝ) 1,
@@ -351,8 +381,38 @@ theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
       ∑ n ∈ Finset.range N,
         (↑(n + 1) : ℂ) * (((↑(1/((n:ℝ)+1)) : ℂ) ^ s -
           (↑(1/((n:ℝ)+2)) : ℂ) ^ s) / s) := integral_decomp s hs
-  -- Rewrite to partial_sum_eq' form, then use partial_zeta_tendsto' + tail_vanishes'
-  sorry
+  -- Rewrite Abel sum using partial_sum_eq'
+  have h_eq2 : ∀ N : ℕ, ∫ x in Ioc (1/((N:ℝ)+1)) 1, f x =
+      (∑ n ∈ Finset.range N, (↑(1/((n:ℝ)+1)) : ℂ) ^ s -
+        (↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s) / s := by
+    intro N
+    rw [h_eq]
+    have h := partial_sum_eq' s N
+    convert h using 1
+    congr 1; ext n; simp [mul_div_assoc]
+  -- Build: partial integrals → ζ(s)/s
+  -- First: ∑ (1/(n+1))^s → ζ(s)
+  have h_zeta := partial_zeta_tendsto' s hs
+  have h_zeta' : Tendsto (fun N : ℕ => ∑ n ∈ Finset.range N,
+      (↑(1/((n:ℝ)+1)) : ℂ) ^ s) atTop (nhds (riemannZeta s)) := by
+    have := h_zeta.congr (fun N => (partial_zeta_eq' s hs N).symm)
+    exact this
+  -- Second: N·(1/(N+1))^s → 0
+  have h_tail := tail_vanishes' s hs
+  -- Combine: (∑ - tail) / s → (ζ(s) - 0) / s = ζ(s) / s
+  have h_tendsto_abel : Tendsto (fun N : ℕ =>
+      (∑ n ∈ Finset.range N, (↑(1/((n:ℝ)+1)) : ℂ) ^ s -
+        (↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s) / s)
+      atTop (nhds (riemannZeta s / s)) := by
+    have h_sub := h_zeta'.sub h_tail
+    simp only [sub_zero] at h_sub
+    exact Tendsto.div_const h_sub s
+  -- The partial integrals also tend to ζ(s)/s
+  have h_tendsto_zeta : Tendsto (fun N : ℕ =>
+      ∫ x in Ioc (1/((N:ℝ)+1)) 1, f x) atTop (nhds (riemannZeta s / s)) := by
+    exact h_tendsto_abel.congr (fun N => (h_eq2 N).symm)
+  -- By uniqueness of limits
+  exact tendsto_nhds_unique h_tendsto_int h_tendsto_zeta
 
 /-- The general mellin_fractBasis axiom for all k ≥ 1. -/
 axiom mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
