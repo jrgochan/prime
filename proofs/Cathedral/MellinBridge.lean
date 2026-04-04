@@ -551,6 +551,35 @@ private lemma tail_vanishes_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (_hk : 1 ≤
   rw [show (0:ℂ) = (↑k : ℂ) ^ s * 0 from by simp]
   exact (tail_vanishes' s hs).const_mul _ |>.congr (fun N => (h_rewrite N).symm)
 
+/-- Generalized Abel summation: ∑_{i<M} (k+i)·[a_{k+i} - a_{k+i+1}]
+    = k·a_k + ∑_{i<M} a_{k+i+1} - (k+M)·a_{k+M+1} - a_k.
+    Actually we want: = ∑_{i<M} a_{k+i+1} + k·a_k - (k+M)·a_{k+M+1}
+    Simplified: sums ∑_{i=0}^{M-1} (k+i)(a_{k+i} - a_{k+i+1})
+    = k·a_k + ∑_{i=1}^{M-1} a_{k+i} - (k+M-1)·a_{k+M}
+    We need to match: k + k^s·∑n^{-s} - N·tail form. -/
+private lemma abel_sum_gen (a : ℕ → ℂ) (k : ℕ) : ∀ M : ℕ,
+    ∑ i ∈ Finset.range M, (↑(k + i) : ℂ) * (a (k + i) - a (k + i + 1)) =
+    ∑ i ∈ Finset.range M, a (k + i + 1) + (↑k : ℂ) * a k -
+      (↑(k + M) : ℂ) * a (k + M) := by
+  intro M; induction M with
+  | zero => simp
+  | succ m ih =>
+    rw [Finset.sum_range_succ, Finset.sum_range_succ, ih]
+    push_cast; ring
+
+/-- Inductive decomposition: ∫_{Ioc(k/(k+M+1), 1)} f = ∑_{i<M+1} piece(k, k+i).
+    By induction on M, splitting Ioc at each step and applying piece_setIntegral_gen. -/
+private lemma integral_decomp_gen (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
+    ∀ M : ℕ,
+    ∫ t in Set.Ioc ((k:ℝ)/(↑(k+M)+1)) 1,
+      (↑t : ℂ) ^ (s - 1) * (↑(⌊(k:ℝ)/t⌋) : ℂ)
+    = ∑ i ∈ Finset.range (M+1),
+        (↑(k + i) : ℂ) * ((↑((k:ℝ)/(↑(k+i):ℝ)) : ℂ) ^ s -
+          (↑((k:ℝ)/(↑(k+i)+1)) : ℂ) ^ s) / s := by
+  intro M; induction M with
+  | zero => sorry  -- base: k/(k+1)..k/k = k/(k+1)..1 + piece_setIntegral_gen
+  | succ m ih => sorry  -- inductive: split + ih + piece_setIntegral_gen
+
 /-- ∫₀¹ t^{s-1}·⌊k/t⌋ dt = k/s + (k^s/s)·(ζ(s) - ∑_{m<k}(m+1)^{-s}). -/
 private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k) :
     ∫ t in Set.Ioc (0:ℝ) 1,
