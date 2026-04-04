@@ -260,16 +260,56 @@ theorem cos_int_mul_pi_ne_zero (n : ℕ) :
   rw [cos_pi_mul_succ]
   exact pow_ne_zero _ (by norm_num : (-1 : ℂ) ≠ 0)
 
-/-- **THEOREM**: ζ at negative odd integers (and s=1) is nonzero.
 
-    Uses the functional equation from Mathlib:
-    ζ(1-s) = 2(2π)^{-s} Γ(s) cos(πs/2) · ζ(s)
 
-    For k ≥ 1, set s = 2k: ζ(-(2k-1)) = [factors] · ζ(2k).
-    All factors nonzero → ζ(-(2k-1)) ≠ 0.
-    For k = 0: ζ(1) ≠ 0 by riemannZeta_ne_zero_of_one_le_re. -/
-axiom zeta_neg_odd_ne_zero :
-    ∀ k : ℕ, riemannZeta (↑(-(2 * (k : ℤ) - 1))) ≠ 0
+/-- **THEOREM (proved from Mathlib)**: ζ at negative odd integers (and s=1) is nonzero.
+
+    For k = 0: ζ(1) ≠ 0 by riemannZeta_ne_zero_of_one_le_re.
+    For k ≥ 1: Uses functional equation (riemannZeta_one_sub):
+      ζ(-(2k-1)) = ζ(1-2k) = 2·(2π)^{-2k}·Γ(2k)·cos(πk)·ζ(2k)
+    All five factors are nonzero:
+      - 2 ≠ 0 (trivial)
+      - (2π)^{-2k} ≠ 0 (2π ≠ 0, cpow_eq_zero_iff)
+      - Γ(2k) ≠ 0 (Complex.Gamma_ne_zero, 2k ≥ 2 not a non-positive int)
+      - cos(πk) ≠ 0 (cos_pi_mul_succ: cos(πk) = (-1)^k)
+      - ζ(2k) ≠ 0 (riemannZeta_ne_zero_of_one_le_re, Re(2k) ≥ 2) -/
+theorem zeta_neg_odd_ne_zero (k : ℕ) :
+    riemannZeta (↑(-(2 * (k : ℤ) - 1))) ≠ 0 := by
+  cases k with
+  | zero =>
+    norm_num
+    exact riemannZeta_ne_zero_of_one_le_re le_rfl
+  | succ n =>
+    have h_eq : (↑(-(2 * (↑(n + 1) : ℤ) - 1)) : ℂ) = 1 - ↑(2 * (n + 1) : ℕ) := by
+      push_cast; ring
+    rw [h_eq]
+    have hs : ∀ m : ℕ, (↑(2 * (n + 1) : ℕ) : ℂ) ≠ -↑m := by
+      intro m h; have := congr_arg Complex.re h; simp at this
+      linarith [Nat.cast_nonneg (α := ℝ) m]
+    have hs1 : (↑(2 * (n + 1) : ℕ) : ℂ) ≠ 1 := by
+      intro h; have := congr_arg Complex.re h; simp at this; linarith
+    rw [riemannZeta_one_sub hs hs1]
+    -- Product of 5 nonzero factors is nonzero
+    apply mul_ne_zero
+    apply mul_ne_zero
+    apply mul_ne_zero
+    apply mul_ne_zero
+    · -- 2 ≠ 0
+      exact two_ne_zero
+    · -- (2π)^(-s) ≠ 0: since 2π ≠ 0
+      rw [Ne, Complex.cpow_eq_zero_iff]; push_neg; intro h
+      exact absurd h (mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_ne_zero))
+    · -- Γ(2(n+1)) ≠ 0: positive integer, not a pole
+      apply Complex.Gamma_ne_zero
+      intro m h; have := congr_arg Complex.re h; simp at this
+      linarith [Nat.cast_nonneg (α := ℝ) m]
+    · -- cos(π(n+1)) ≠ 0: cos(πk) = (-1)^k
+      have hcos : (↑Real.pi : ℂ) * ↑(2 * (n + 1) : ℕ) / 2 = ↑Real.pi * ↑(n + 1) := by
+        push_cast; ring
+      rw [hcos, cos_pi_mul_succ]
+      exact pow_ne_zero _ (by norm_num : (-1 : ℂ) ≠ 0)
+    · -- ζ(2(n+1)) ≠ 0: Re = 2(n+1) ≥ 2 ≥ 1
+      exact riemannZeta_ne_zero_of_one_le_re (by simp; linarith [Nat.zero_le n])
 
 /-- **THEOREM**: Non-trivial zeros of ζ have positive real part.
 
