@@ -491,9 +491,44 @@ theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
   rw [setIntegral_congr_fun measurableSet_Ioc h_fract_eq]
   -- Step 2: ∫(f - g) = ∫f - ∫g
   rw [integral_sub
-    (by sorry : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * ((↑k:ℂ)/(↑t:ℂ)))
+    (by -- IntegrableOn t^{s-1}·(k/t) = k·t^{s-2}
+      have h_cpow : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s - 2)) (Ioc 0 1) volume := by
+        have h := @intervalIntegral.intervalIntegrable_cpow' 0 1 (s-2) (by simp [sub_re]; linarith)
+        rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith : (0:ℝ) ≤ 1)] at h
+      apply IntegrableOn.congr_fun (h_cpow.const_mul (↑k : ℂ)) _ measurableSet_Ioc
+      intro t ht
+      show (↑k : ℂ) * (↑t : ℂ) ^ (s - 2) = (↑t : ℂ) ^ (s - 1) * ((↑k : ℂ) / (↑t : ℂ))
+      have ht' : (↑t : ℂ) ≠ 0 := ofReal_ne_zero.mpr (ne_of_gt ht.1)
+      rw [show (s - 2 : ℂ) = (s - 1) + (-1) from by ring, cpow_add _ _ ht', Complex.cpow_neg_one]
+      ring : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * ((↑k:ℂ)/(↑t:ℂ)))
       (Set.Ioc 0 1) volume)
-    (by sorry : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(k:ℝ)/t⌋):ℂ))
+    (by -- IntegrableOn t^{s-1}·⌊k/t⌋: dominate by k·t^{Re(s)-2}
+      have hg : IntegrableOn (fun x : ℝ => (↑x : ℂ) ^ (s - 2)) (Ioc 0 1) volume := by
+        have h := @intervalIntegral.intervalIntegrable_cpow' 0 1 (s-2) (by simp [sub_re]; linarith)
+        rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le (by linarith : (0:ℝ) ≤ 1)] at h
+      exact Integrable.mono (hg.norm.const_mul (↑k : ℝ))
+        (by apply AEStronglyMeasurable.mul
+            · exact (ContinuousOn.cpow continuous_ofReal.continuousOn continuousOn_const
+                (fun x hx => by left; simp [ofReal_re]; exact hx) |>.mono Ioc_subset_Ioi_self
+                ).aestronglyMeasurable measurableSet_Ioc
+            · exact ((Measurable.of_discrete (α := ℤ)).comp
+                ((measurable_const.div measurable_id).floor)).aestronglyMeasurable.restrict)
+        (by apply ae_restrict_of_ae_restrict_of_subset Ioc_subset_Ioi_self
+            apply (ae_restrict_mem measurableSet_Ioi).mono
+            intro t ht; rw [mem_Ioi] at ht
+            rw [norm_mul, norm_ofReal_cpow t ht, norm_ofReal_cpow t ht]
+            simp only [sub_re, one_re]
+            have h_nn : (0 : ℤ) ≤ ⌊(k:ℝ)/t⌋ := Int.floor_nonneg.mpr (div_nonneg (by positivity) ht.le)
+            rw [Complex.norm_intCast, abs_of_nonneg (by exact_mod_cast h_nn)]
+            calc t ^ (s.re - 1) * (⌊(k:ℝ)/t⌋ : ℝ)
+                ≤ t ^ (s.re - 1) * ((k:ℝ)/t) := mul_le_mul_of_nonneg_left (Int.floor_le _) (rpow_nonneg ht.le _)
+              _ = (↑k : ℝ) * t ^ (s.re - 2) := by
+                  rw [mul_comm, div_mul_eq_mul_div, mul_div_assoc,
+                      div_eq_mul_inv, ← rpow_neg_one t,
+                      ← rpow_add ht]; congr 1; ring
+              _ ≤ ‖(↑k : ℝ) * t ^ (s.re - 2)‖ := le_norm_self _
+              _ = _ := by simp)
+      : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(k:ℝ)/t⌋):ℂ))
       (Set.Ioc 0 1) volume)]
   -- Step 3: Apply mellin_div_integral and floor_div_mellin
   rw [mellin_div_integral s hs k hk, floor_div_mellin s hs k hk]
