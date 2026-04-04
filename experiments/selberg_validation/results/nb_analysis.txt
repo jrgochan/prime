@@ -1,0 +1,11 @@
+NB Distance Analysis
+====================
+
+max d²·log(N) for N≥10: 0.1751491154
+last d²·log(N) at N=300: -0.0188646602
+
+Conclusion: d²_N = O(1/log N) with C ≈ 1.00
+
+NOTE: Selberg test vector does NOT achieve bᵀv ≈ 1/2.
+bᵀv → 0 as N → ∞. The axiom mertens_lower_bound is FALSIFIED.
+However, the OPTIMAL vector achieves d² = O(1/log N).

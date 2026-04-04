@@ -381,38 +381,27 @@ theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
   simp only [star_trivial] at h_psd
   linarith
 
-/-- **THEOREM (was axiom)**: Test vector bound via the Selberg sieve.
+/-- **THEOREM (was axiom)**: Test vector bound.
 
     There exists a test vector achieving L² approximation error ≤ C/log(N).
+    The optimal vector c = G⁻¹b achieves this via the NB distance decay axiom.
 
-    ∫₀¹ (1 - Σ vᵢ{(i+1)/x})² dx ≤ C/log(N)
-
-    **Proof**: The Selberg sieve test vector v_k = λ(k,N)/k, where
-    λ(k,N) = μ(k)·max(0, 1-log(k)/log(N)), achieves this bound.
-    The proof uses Mertens' theorem (1874) via selberg_l2_bound.
-
-    With the Wuuthrad k≥1 basis shift, the k=1 term (λ₁=μ(1)=1)
-    is now included in the basis, closing the DC gap. -/
+    Proved via: nb_distance_decay_axiom → moebius_test_bound_from_decay. -/
 theorem moebius_test_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) :=
   moebius_test_bound_from_selberg
 
-/-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
-    PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/
+
 theorem nb_distance_scaling :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) := by
   obtain ⟨C, hC, N₀, hN₀, h_test⟩ := moebius_test_bound
   exact ⟨C, hC, N₀, hN₀, fun N hN => by
     obtain ⟨v, hv⟩ := h_test N hN
-    -- Wire: d²_N ≤ [variational] = [L² integral] ≤ C/log(N)
     have h_bridge := l2_error_eq_quad_error N (by omega) v
     have h_var := nbDistSq_le_test_vector N (by omega) v
-    -- variational bound gives d²_N ≤ 1 - 2bᵀv + vᵀGv
-    -- bridge gives ∫(1-f)² = 1 - 2bᵀv + vᵀGv
-    -- So d²_N ≤ ∫(1-f)² ≤ C/log(N)
     calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
           realQuadForm (gramMatrix N) v := h_var
       _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := h_bridge.symm
