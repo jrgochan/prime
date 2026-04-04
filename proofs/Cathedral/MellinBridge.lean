@@ -285,13 +285,55 @@ private lemma mono_Ioc_inv : Monotone (fun N : ℕ => Ioc (1 / ((N : ℝ) + 1)) 
     (by have := Nat.cast_nonneg (α := ℝ) n; linarith)
     (by show (m:ℝ)+1 ≤ (n:ℝ)+1; have : (m:ℝ) ≤ (n:ℝ) := Nat.cast_le.mpr hmn; linarith)
 
-/-- **THEOREM** (was axiom): The Mellin transform of the floor function on (0,1).
-    ∫₀¹ ⌊1/x⌋ · x^{s-1} dx = ζ(s)/s  for Re(s) > 1.
+/-- On piece Ioc(1/(n+2), 1/(n+1)), ⌊1/t⌋ = n+1, so the integral
+    equals (n+1)·[(1/(n+1))^s - (1/(n+2))^s]/s, the n-th Abel sum term. -/
+private lemma piece_setIntegral (s : ℂ) (hs : 1 < s.re) (n : ℕ) :
+    ∫ t in Set.Ioc (1/((n:ℝ)+2)) (1/((n:ℝ)+1)),
+      (↑t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ)
+    = (↑(n + 1) : ℂ) * (((↑(1/((n:ℝ)+1)) : ℂ) ^ s -
+        (↑(1/((n:ℝ)+2)) : ℂ) ^ s) / s) := by
+  -- Step 1: On this piece, ⌊1/t⌋ = n+1, so f(t) = (n+1)·t^{s-1}
+  have h_eq_on : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ))
+      (fun t : ℝ => (↑(n + 1) : ℂ) * (↑t : ℂ) ^ (s - 1))
+      (Set.Ioc (1/((n:ℝ)+2)) (1/((n:ℝ)+1))) := by
+    intro t ⟨ht_lo, ht_hi⟩
+    have hfl : ⌊(1:ℝ)/t⌋ = ((n+1 : ℕ) : ℤ) := by
+      apply floor_inv_eq_on_Ioc (n+1) (by omega) t
+      · rwa [show 1/((↑(n+1:ℕ):ℝ)+1) = 1/((n:ℝ)+2) from by push_cast; ring]
+      · rwa [show 1/(↑(n+1:ℕ):ℝ) = 1/((n:ℝ)+1) from by push_cast; ring]
+    show (↑t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ) =
+         (↑(n + 1) : ℂ) * (↑t : ℂ) ^ (s - 1)
+    rw [hfl]; push_cast; ring
+  -- Step 2: Replace integrand and pull out constant
+  rw [setIntegral_congr_fun measurableSet_Ioc h_eq_on]
+  rw [show ∫ x in Set.Ioc (1/((n:ℝ)+2)) (1/((n:ℝ)+1)),
+        (↑(n+1) : ℂ) * (↑x : ℂ) ^ (s-1) =
+      (↑(n+1) : ℂ) * ∫ x in Set.Ioc (1/((n:ℝ)+2)) (1/((n:ℝ)+1)),
+        (↑x : ℂ) ^ (s-1) from integral_const_mul _ _]
+  congr 1
+  -- Step 3: The set integral = the cpow formula = [(1/(n+1))^s - (1/(n+2))^s]/s
+  have h := integral_cpow_piece' s hs (n+1) (by omega)
+  rw [intervalIntegral.integral_of_le (show 1/((↑(n+1:ℕ):ℝ)+1) ≤ 1/(↑(n+1:ℕ):ℝ) from by
+    apply div_le_div_of_nonneg_left (by linarith) (by positivity)
+    linarith [Nat.cast_nonneg (α := ℝ) n])] at h
+  convert h using 2 <;> push_cast <;> ring
 
-    **Proof strategy**: By `tendsto_setIntegral_of_monotone`,
-    ∫_{Ioc(1/(N+1),1)} f → ∫_{Ioc(0,1)} f. By `assembly_limit`,
-    the Abel partial sums converge to ζ(s)/s. The remaining sorry
-    connects partial integrals to Abel sums via `integral_finset_union`. -/
+/-- Inductive decomposition: ∫_{Ioc(1/(N+1), 1)} f = partial Abel sum / s. -/
+private lemma integral_decomp (s : ℂ) (hs : 1 < s.re) : ∀ N : ℕ,
+    ∫ t in Set.Ioc (1/((N:ℝ)+1)) 1,
+      (↑t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ)
+    = ∑ n ∈ Finset.range N,
+        (↑(n + 1) : ℂ) * (((↑(1/((n:ℝ)+1)) : ℂ) ^ s -
+          (↑(1/((n:ℝ)+2)) : ℂ) ^ s) / s) := by
+  intro N; induction N with
+  | zero =>
+    simp only [Finset.range_zero, Finset.sum_empty]
+    convert setIntegral_empty (f := fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(1:ℝ)/t⌋) : ℂ))
+    simp [Set.Ioc_eq_empty (show ¬((1:ℝ) < 1) from by linarith)]
+  | succ k ih =>
+    sorry -- induction step: Ioc_union + setIntegral_union + piece_setIntegral + ih
+
 theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
     ∫ t in Set.Ioc (0 : ℝ) 1,
       (t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ) = riemannZeta s / s := by
@@ -304,10 +346,12 @@ theorem floor_mellin_eq_zeta (s : ℂ) (hs : 1 < s.re) :
     exact tendsto_setIntegral_of_monotone (fun _ => measurableSet_Ioc) mono_Ioc_inv
       (iUnion_Ioc_inv ▸ floor_mellin_integrableOn s hs)
   show ∫ t in Set.Ioc 0 1, f t = riemannZeta s / s
-  -- Each partial integral equals the Abel sum (integral decomposition)
-  -- ∫_{Ioc(1/(N+1),1)} = ∑_{n=1}^{N} n · ∫_{piece_n} t^{s-1} = Abel_sum / s
-  -- This + assembly_limit give: partial integrals → ζ(s)/s
-  -- By uniqueness of limits: ∫_{Ioc(0,1)} f = ζ(s)/s
+  -- Rewrite partial integrals using integral_decomp
+  have h_eq : ∀ N : ℕ, ∫ x in Ioc (1/((N:ℝ)+1)) 1, f x =
+      ∑ n ∈ Finset.range N,
+        (↑(n + 1) : ℂ) * (((↑(1/((n:ℝ)+1)) : ℂ) ^ s -
+          (↑(1/((n:ℝ)+2)) : ℂ) ^ s) / s) := integral_decomp s hs
+  -- Rewrite to partial_sum_eq' form, then use partial_zeta_tendsto' + tail_vanishes'
   sorry
 
 /-- The general mellin_fractBasis axiom for all k ≥ 1. -/
