@@ -586,7 +586,33 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
         (fun N : ℕ => ∑ n ∈ Finset.Icc (k+1) N, ((↑(n:ℕ) : ℂ) ^ (-s)))
         atTop (nhds (riemannZeta s -
           (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))))) := by
-      sorry  -- partial_zeta_tendsto' restricted to tail
+      have hs0 : s ≠ 0 := ne_of_apply_ne re (by linarith : s.re ≠ 0)
+      -- Rewrite: eventually Icc = range - range
+      suffices h : Tendsto (fun N : ℕ =>
+          ∑ m ∈ Finset.range N, ((↑(m+1:ℕ) : ℂ) ^ (-s)) -
+          ∑ m ∈ Finset.range k, ((↑(m+1:ℕ) : ℂ) ^ (-s)))
+          atTop (nhds (riemannZeta s -
+            (Finset.range k).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))))) by
+        apply h.congr'
+        apply Filter.eventually_atTop.mpr
+        refine ⟨k + 1, fun N hN => ?_⟩
+        symm; dsimp only
+        rw [show Finset.Icc (k+1) N = Finset.Ico (k+1) (N+1) from by
+          ext n; simp only [Finset.mem_Icc, Finset.mem_Ico]; omega]
+        rw [Finset.sum_Ico_eq_add_neg _ (by omega : k+1 ≤ N+1)]
+        rw [Finset.sum_range_succ', Finset.sum_range_succ']
+        simp only [Nat.cast_zero, zero_cpow (neg_ne_zero.mpr hs0)]
+        push_cast; ring
+      -- Partial zeta convergence: ∑ range(N) g → ζ
+      have h_pzeta : Tendsto (fun N : ℕ =>
+          ∑ m ∈ Finset.range N, ((↑(m+1:ℕ) : ℂ) ^ (-s)))
+          atTop (nhds (riemannZeta s)) := by
+        have := partial_zeta_tendsto' s hs
+        apply this.congr (fun N => ?_)
+        congr 1; ext n
+        rw [one_div, inv_eq_one_div, cpow_neg, one_div]
+        congr 1; push_cast; ring
+      exact h_pzeta.sub tendsto_const_nhds
     -- Step 3: N·(k/(N+1))^s → 0
     have h_tail := tail_vanishes_gen s hs k hk
     -- Step 4: Combine convergences
