@@ -309,6 +309,56 @@ theorem pos_def_implies_min_eigenvalue_pos
     simp [show (hA.eigenvectorBasis i).1 = (0 : Fin n → ℝ) from h_zero]
   linarith
 
+-- ════════════════════════════════════════════════
+-- PART VI-B: REVERSE RAYLEIGH BOUND (λ_min ≥ c)
+-- ════════════════════════════════════════════════
+
+/-- **Reverse Rayleigh Bound**: If xᵀAx ≥ c · ‖x‖² for all x,
+    then λ_min(A) ≥ c.
+
+    This is the converse of `min_eigenvalue_le_quadForm`:
+    - Forward:  λ_min(A) ≤ xᵀAx for unit x
+    - Reverse:  (∀ x, xᵀAx ≥ c·‖x‖²) → λ_min(A) ≥ c
+
+    Proof: Each eigenvalue λᵢ = vᵢᵀAvᵢ ≥ c · ‖vᵢ‖² = c · 1 = c
+    (since eigenvectors are unit vectors). So inf(λᵢ) ≥ c.
+
+    Together with `min_eigenvalue_le_quadForm`, this gives the full
+    Rayleigh characterization: λ_min = inf_{‖x‖=1} xᵀAx. -/
+theorem quadform_lower_implies_eigenvalue_lower
+    {A : Matrix (Fin n) (Fin n) ℝ} (hA : A.IsHermitian) (hn : 0 < n)
+    (c : ℝ) (h : ∀ v : Fin n → ℝ,
+      realQuadForm A v ≥ c * dotProduct v v) :
+    (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀ ≥ c := by
+  -- Unfold ≥ to ≤ for Finset.le_inf'_iff
+  show c ≤ _
+  rw [Finset.le_inf'_iff]
+  intro j hj
+  -- eigenvalues₀ j = eigenvalues i for some i
+  have h_in_range : hA.eigenvalues₀ j ∈ Set.range hA.eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    simp only [Set.mem_range]
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j,
+           by simp [Equiv.symm_apply_apply]⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi, ← quadForm_eigenvector hA i]
+  -- Goal: c ≤ realQuadForm A (eigenvectorBasis i)
+  -- From hypothesis: realQuadForm A v ≥ c * dotProduct v v for all v
+  -- For eigenvector v = eigenvectorBasis i: dotProduct v v = ‖v‖² = 1
+  have h_bound := h (⇑(hA.eigenvectorBasis i))
+  -- dotProduct v v = 1 for unit eigenvector
+  have h_unit : dotProduct (⇑(hA.eigenvectorBasis i))
+                           (⇑(hA.eigenvectorBasis i)) = 1 := by
+    rw [← inner_eq_dotProduct]
+    simp [inner_self_eq_norm_sq_to_K, hA.eigenvectorBasis.orthonormal.1 i]
+  -- h_bound : realQuadForm A v ≥ c * (v ⬝ᵥ v)
+  -- h_unit : v ⬝ᵥ v = 1
+  -- So: realQuadForm A v ≥ c * 1 = c
+  rw [h_unit, mul_one] at h_bound
+  linarith
+
 end
 
 -- ════════════════════════════════════════════════
