@@ -3,6 +3,7 @@ import SpectralRH.Structural
 import Mathlib.Analysis.MellinTransform
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.Dirichlet
+import Mathlib.NumberTheory.LSeries.Nonvanishing
 import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 
 /-! # SpectralRH.MellinBridge
@@ -234,25 +235,51 @@ axiom zeta_zero_separates :
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
 
-/-- **Sub-axiom (Definition of RH — Logic)**:
+/-- **Sub-axiom (Functional Equation consequence)**:
 
-    ¬RH means: there exists a non-trivial zero of ζ off the critical line.
+    Non-trivial zeros of ζ have positive real part.
 
-    This is essentially the negation of the RH definition. We state it
-    as an axiom because the Lean proof requires careful handling of the
-    trivial zeros (−2, −4, ...) and the pole at s = 1.
+    If ζ(s) = 0 and s is not a trivial zero (−2, −4, −6, ...),
+    then Re(s) > 0.
 
-    **Proof strategy**: Direct negation of RiemannHypothesis:
-    ¬(∀ s, ζ(s)=0 → ... → s.re = 1/2)
-    ≡ ∃ s, ζ(s)=0 ∧ ... ∧ s.re ≠ 1/2
-    Then show s must have 0 < Re(s) < 1 (from the functional equation
-    and non-vanishing on Re(s) = 1).
+    **Proof strategy**: By the functional equation
+    ζ(1-s) = 2(2π)^{-s} Γ(s) cos(πs/2) · ζ(s),
+    a zero of ζ at s with Re(s) ≤ 0 must have Re(1-s) ≥ 1.
+    But ζ ≠ 0 for Re ≥ 1 (Mathlib: riemannZeta_ne_zero_of_one_le_re).
+    So cos(πs/2) = 0 or Γ(s) has a pole. The cos factor vanishes
+    at s = -1, -3, -5, ... but those give trivial zeros.
+    The Γ poles at s = 0, -1, -2, ... cancel the cos zeros.
+    The net result: only s = -2, -4, -6, ... (trivial zeros). -/
+axiom zeta_nontrivial_zero_re_pos :
+    ∀ s : ℂ, riemannZeta s = 0 →
+    (¬∃ n : ℕ, s = -2 * (↑n + 1)) →
+    0 < s.re
 
-    This is mostly logic + basic ζ properties (functional equation,
-    non-vanishing on Re = 1), all available in Mathlib. -/
-axiom rh_neg_gives_critical_strip_zero :
+/-- **THEOREM**: ¬RH → ∃ zero in critical strip off critical line.
+
+    Proof:
+    1. push_neg on ¬RH: ∃ s with ζ(s) = 0, not trivial, s ≠ 1, Re ≠ 1/2
+    2. Re(s) > 0: from zeta_nontrivial_zero_re_pos (functional equation)
+    3. Re(s) < 1: from Mathlib's riemannZeta_ne_zero_of_one_le_re
+       (if Re(s) ≥ 1 then ζ(s) ≠ 0, contradiction) -/
+theorem rh_neg_gives_critical_strip_zero :
     ¬ RiemannHypothesis →
-    ∃ ρ : ℂ, riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ ρ.re ≠ 1/2
+    ∃ ρ : ℂ, riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ ρ.re ≠ 1/2 := by
+  intro h
+  -- Push the negation: ∃ s, ζ(s) = 0 ∧ (∀ n, s ≠ ...) ∧ s ≠ 1 ∧ Re(s) ≠ 1/2
+  unfold RiemannHypothesis at h
+  push_neg at h
+  obtain ⟨s, h_zero, h_not_triv, h_ne_1, h_re_ne_half⟩ := h
+  -- Convert ∀ n, s ≠ -2*(n+1) back to ¬∃ n, s = -2*(n+1)
+  have h_not_triv' : ¬∃ n : ℕ, s = -2 * (↑n + 1) := by
+    push_neg; exact h_not_triv
+  refine ⟨s, h_zero, ?_, ?_, h_re_ne_half⟩
+  · -- 0 < Re(s): from functional equation (axiom)
+    exact zeta_nontrivial_zero_re_pos s h_zero h_not_triv'
+  · -- Re(s) < 1: from Mathlib (if Re ≥ 1 then ζ ≠ 0)
+    by_contra h_ge
+    push_neg at h_ge
+    exact absurd h_zero (riemannZeta_ne_zero_of_one_le_re h_ge)
 
 /-- **THEOREM**: nyman_beurling_converse from the separation axioms.
 
