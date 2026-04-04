@@ -5,7 +5,6 @@ import SpectralRH.AlignmentDecay
 import SpectralRH.BilinearSieve
 import SpectralRH.ParityBridge
 import SpectralRH.MellinBridge
-import SpectralRH.SelbergSieve
 
 /-! # SpectralRH.Assembly
 
@@ -381,21 +380,28 @@ theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
   simp only [star_trivial] at h_psd
   linarith
 
-/-- **THEOREM (formerly Axiom)**: L² test vector bound.
+/-- **Axiom (Analytic Number Theory — Test Vector Bound)**:
 
     There exists a test vector achieving L² approximation error ≤ C/log(N).
+
     ∫₀¹ (1 - Σ vᵢ{(i+2)/x})² dx ≤ C/log(N)
 
-    **PROVED** from the Selberg sieve (SelbergSieve.lean).
-    The Selberg sieve weights provide a specific test vector that achieves
-    the required rate, using ONLY elementary estimates (no PNT needed).
+    This is equivalent to the Nyman-Beurling distance estimate:
+    d²_N = inf_v ∫(1-f)² ≤ C/log(N)
 
-    Previously an axiom; now derived from `selberg_l2_bound`. -/
-theorem moebius_test_bound :
+    **Proof strategies** (for future work):
+    - Báez-Duarte (2003): Uses Dirichlet series coefficients of 1/ζ(s)
+    - Burnol-Vasyunin: Uses the Vasyunin sum and RH-equivalent estimates
+    - Optimal test vector: v* = G⁻¹b minimizes the quadratic form
+
+    Note: The Selberg sieve approach (SelbergSieve.lean) provides weights
+    that are elementary but require including the k=1 basis function {1/x}
+    which is outside our current basis {2/x},...,{N/x}. See SelbergSieve.lean
+    for the exploratory decomposition and potential fix strategies. -/
+axiom moebius_test_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) :=
-  moebius_test_bound_from_selberg
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ)
 
 /-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
     PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/

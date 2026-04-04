@@ -1,25 +1,30 @@
 /-
   SpectralRH/SelbergSieve.lean
 
-  ## The Selberg Sieve Approach to moebius_test_bound
+  ## EXPLORATORY: The Selberg Sieve Approach to moebius_test_bound
 
-  This file reduces the moebius_test_bound axiom to a simpler, more
-  elementary axiom based on the Selberg sieve. The key advantage:
+  **STATUS**: NOT on critical path. This file explores a Selberg sieve
+  decomposition but has a known mathematical gap.
 
-  **The Selberg sieve does NOT require the Prime Number Theorem.**
+  **THE GAP**: Our basis functions are {2/x},...,{N/x} (starting from k=2).
+  The Selberg weight λ₁ = μ(1) = 1 contributes via {1/x}, which is NOT
+  in our basis. Without the k=1 term, the Selberg-weighted sum has the
+  wrong sign/magnitude for L² approximation of the constant function.
 
-  Instead it uses only:
-  - Mertens' theorem: ∑_{p≤x} 1/p = log log x + M + o(1) (1874)
-  - Chebyshev bounds: c₁·x/log(x) ≤ π(x) ≤ c₂·x/log(x) (1852)
-  - The Selberg quadratic optimization (finite computation)
+  **FIX STRATEGIES** (for future work):
+  1. Extend the basis to include {1/x} (requires refactoring nbLinComb)
+  2. Use a modified test vector that compensates for the missing {1/x}
+  3. Use an entirely different test vector (e.g., optimal v* = G⁻¹b)
 
-  ### Architecture
+  The decomposition pattern below (axiom → sub-axioms → theorem chain)
+  remains a valuable template for future approaches.
+
+  ### Original Architecture (conditional on fixing the test vector)
 
   moebius_test_bound
-    ← moebius_test_bound_from_selberg (PROVED)
-      ← selberg_l2_bound (AXIOM — elementary, no PNT)
-        ← mertens_bound (elementary, 1874)
-        ← selberg_quadform_bound (finite optimization)
+    ← moebius_test_bound_from_selberg
+      ← selberg_l2_bound
+        ← selberg_linear_bound + selberg_quadratic_bound
 -/
 
 import SpectralRH.Structural
