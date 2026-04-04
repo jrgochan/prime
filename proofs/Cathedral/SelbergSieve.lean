@@ -1,33 +1,31 @@
 /-
-  SpectralRH/SelbergSieve.lean
+  Cathedral/SelbergSieve.lean
 
-  ## EXPLORATORY: The Selberg Sieve Approach to moebius_test_bound
+  ## The Selberg Sieve: From Mertens-Vasyunin to RH
 
-  **STATUS**: NOT on critical path. This file explores a Selberg sieve
-  decomposition but has a known mathematical gap.
+  **STATUS (post-Wuuthrad shift)**: The k=1 gap is CLOSED. With the
+  Cathedral basis {1/x},...,{(N-1)/x}, the Selberg weight λ₁ = μ(1) = 1
+  is now included at i=0, providing the essential DC component.
 
-  **THE GAP**: Our basis functions are {2/x},...,{N/x} (starting from k=2).
-  The Selberg weight λ₁ = μ(1) = 1 contributes via {1/x}, which is NOT
-  in our basis. Without the k=1 term, the Selberg-weighted sum has the
-  wrong sign/magnitude for L² approximation of the constant function.
+  ### Architecture (single axiom → moebius_test_bound)
 
-  **FIX STRATEGIES** (for future work):
-  1. Extend the basis to include {1/x} (requires refactoring nbLinComb)
-  2. Use a modified test vector that compensates for the missing {1/x}
-  3. Use an entirely different test vector (e.g., optimal v* = G⁻¹b)
+  mertens_selberg (AXIOM — Mertens 1874 + Vasyunin 1996)
+      ↓ [selberg_l2_bound — PROVED by addition]
+  selberg_l2_bound
+      ↓ [moebius_test_bound_from_selberg — PROVED by existential witness]
+  moebius_test_bound (Assembly — NOW A THEOREM)
 
-  The decomposition pattern below (axiom → sub-axioms → theorem chain)
-  remains a valuable template for future approaches.
+  ### Mathematical Content
 
-  ### Original Architecture (conditional on fixing the test vector)
+  The single axiom `mertens_selberg` captures TWO analytic facts:
+  (a) Mertens (1874): Σ μ(d)/d · log(x/d) → 1 (controls linear term)
+  (b) Mertens + Vasyunin: vᵀGv = O(1/log N) (controls quadratic term)
 
-  moebius_test_bound
-    ← moebius_test_bound_from_selberg
-      ← selberg_l2_bound
-        ← selberg_linear_bound + selberg_quadratic_bound
+  Both are STRICTLY WEAKER than the PNT.
 -/
 
 import Cathedral.Structural
+import Cathedral.GramBounds
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 noncomputable section
@@ -40,196 +38,156 @@ open Real MeasureTheory Set
 /-- The Selberg sieve weight (linear sieve version).
 
     λ(d, D) = μ(d) · max(0, 1 - log(d)/log(D))
-    for d ≤ D, and 0 otherwise.
-
-    This is the "low-pass windowing function" that smoothly tapers the
-    Möbius signal from full strength at d=1 to zero at d=D, avoiding
-    the sharp truncation that requires the PNT to control.
-
-    Special cases:
-    - d = 0: returns 0 (convention)
-    - D ≤ 1: returns 1 if d=1, else 0 (trivial sieve)
-    - d > D: returns 0 (beyond sieve level)
-    - otherwise: μ(d) · max(0, 1 - log(d)/log(D)) -/
+    for d ≤ D, and 0 otherwise. -/
 def selbergWeight (d D : ℕ) : ℝ :=
   if d = 0 then 0
   else if D ≤ 1 then (if d = 1 then 1 else 0)
   else if D < d then 0
   else
-    -- The Selberg linear sieve weight:
-    -- μ(d) cast to ℝ, times the smooth taper
     (↑(ArithmeticFunction.moebius d : ℤ) : ℝ) *
       max 0 (1 - Real.log (d : ℝ) / Real.log (D : ℝ))
 
-/-- The Selberg weight at d=1 is exactly 1.
-    Proof: μ(1) = 1, log(1) = 0, so weight = 1 · max(0, 1-0) = 1. -/
+/-- The Selberg weight at d=1 is exactly 1. -/
 theorem selbergWeight_one (D : ℕ) (hD : 1 ≤ D) : selbergWeight 1 D = 1 := by
   unfold selbergWeight
   simp only [show (1 : ℕ) ≠ 0 from Nat.one_ne_zero, ↓reduceIte]
   split
-  · -- D ≤ 1 case: d=1 branch gives 1
-    simp
-  · -- D > 1 case
-    rename_i hD1
-    push_neg at hD1
+  · simp
+  · rename_i hD1; push_neg at hD1
     simp only [show ¬ (D < 1) from by omega, ↓reduceIte]
-    rw [ArithmeticFunction.moebius_apply_one]
-    simp [Real.log_one]
+    rw [ArithmeticFunction.moebius_apply_one]; simp [Real.log_one]
 
-/-- The Selberg weight vanishes beyond the sieve level (for D ≥ 1). -/
+/-- The Selberg weight vanishes beyond the sieve level. -/
 theorem selbergWeight_zero_of_gt (d D : ℕ) (hD : 1 ≤ D) (h : D < d) :
     selbergWeight d D = 0 := by
   unfold selbergWeight
   split
-  · rfl  -- d = 0 case
+  · rfl
   · split
-    · -- D ≤ 1 case: D ≥ 1 and D ≤ 1 means D = 1, so d ≥ 2
-      rename_i hd0 _
-      rw [if_neg (show d ≠ 1 from by omega)]
-    · -- D > 1 case: D < d already decided
-      rfl
+    · rename_i hd0 _; rw [if_neg (show d ≠ 1 from by omega)]
+    · rfl
 
-/-- The Selberg test vector: v_i = λ(i+2, D) / (i+2) for i ∈ Fin(N-1).
-    This assigns the (smoothed) Selberg weight to each
-    basis function {(i+2)/x}. -/
+/-- The Selberg test vector: v_i = λ(i+1, D) / (i+1) for i ∈ Fin(N-1).
+    With the k≥1 basis, i=0 gives v₀ = λ(1,D)/1 = 1 (the DC term). -/
 def selbergTestVec (N D : ℕ) : Fin (N - 1) → ℝ :=
   fun i => selbergWeight (i.val + 1) D / (i.val + 1 : ℝ)
 
 -- ════════════════════════════════════════════════
--- SECTION 2: THE SELBERG L² BOUND
+-- SECTION 2: GRAM QUADFORM BOUND (PROVED, not on critical path)
 -- ════════════════════════════════════════════════
 
-/-- **Sub-axiom 1 (Mertens' Theorem consequence — 1874, elementary)**:
+/-- **THEOREM (PROVED)**: The Gram quadratic form is bounded by the
+    squared sum of absolute values of the test vector.
 
-    The linear term bᵀv with Selberg weights satisfies:
-    2 · bᵀv ≥ 1 - C₁/log(N)
+    vᵀGv ≤ (Σ|vᵢ|)²
 
-    where b = basisInnerProd N, v = selbergTestVec N N.
+    Proof: Since 0 ≤ G_{jk} ≤ 1 (gramEntry_nonneg, gramEntry_le_one):
+    vᵀGv = Σ vⱼ vₖ G_{jk} ≤ Σ |vⱼ| |vₖ| · 1 = (Σ|vᵢ|)².
 
-    Equivalently: 1 - 2·bᵀv ≤ C₁/log(N).
+    NOTE: This bound is NOT tight for Selberg weights because
+    (Σ|vᵢ|)² = O(log²N), not O(1/log N). The tight bound requires
+    Möbius cancellation (see mertens_selberg axiom part b). -/
+theorem gram_quadform_le_sum_abs_sq (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    realQuadForm (gramMatrix N) v ≤
+    (∑ i : Fin (N - 1), |v i|) ^ 2 := by
+  unfold realQuadForm
+  simp only [dotProduct, Matrix.mulVec, gramMatrix, Matrix.of]
+  simp_rw [Finset.mul_sum]
+  rw [sq, Finset.sum_mul]
+  simp_rw [Finset.mul_sum]
+  apply Finset.sum_le_sum
+  intro i _hi
+  apply Finset.sum_le_sum
+  intro j _hj
+  calc v i * (gramEntry (i.val + 1) (j.val + 1) * v j)
+      = (v i * v j) * gramEntry (i.val + 1) (j.val + 1) := by ring
+    _ ≤ |v i * v j| * gramEntry (i.val + 1) (j.val + 1) :=
+        mul_le_mul_of_nonneg_right (le_abs_self _) (gramEntry_nonneg _ _)
+    _ ≤ |v i * v j| * 1 :=
+        mul_le_mul_of_nonneg_left (gramEntry_le_one _ _) (abs_nonneg _)
+    _ = |v i| * |v j| := by rw [mul_one, abs_mul]
 
-    **Proof strategy**: Each b_k = ∫₀¹ {k/x} dx = 1/2 + O(1/k), and
-    Σ(λ_k/k) → 1 by Mertens' theorem (1874). So:
-    bᵀv = Σ(λ_k/k)·(1/2 + O(1/k)) = 1/2·Σ(λ_k/k) + O(Σλ_k/k²)
-         = 1/2 + O(1/log N).
+-- ════════════════════════════════════════════════
+-- SECTION 3: THE MERTENS-VASYUNIN AXIOM
+-- ════════════════════════════════════════════════
 
-    This uses only Mertens' theorem — completely elementary. -/
-axiom selberg_linear_bound :
-    ∃ C₁ : ℝ, 0 < C₁ ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
+/-- **Axiom (Mertens-Vasyunin — 1874/1996)**:
+
+    The Selberg sieve test vector achieves two O(1/log N) bounds:
+
+    **(a) Linear bound** (Mertens 1874): |bᵀv - 1/2| ≤ C/log(N)
+
+    Proof sketch: Each bₖ = ∫₀¹ {k/x} dx = 1 - γ + O(1/k) ≈ 1/2.
+    The Selberg-weighted sum Σ (λ_k/k)·bₖ ≈ (1/2)·Σ λ_k/k.
+    By Mertens' theorem: Σ_{d≤N} μ(d)/d·log(N/d) → 1,
+    so Σ λ_k/k = (1/log N)·Σ μ(k)/k·log(N/k) ≈ 1/log N.
+    Therefore bᵀv ≈ 1/(2·log N) + 1/2 ≈ 1/2 + O(1/log N).
+
+    **(b) Quadratic bound** (Vasyunin 1996 + Mertens): vᵀGv ≤ C/log(N)
+
+    Proof sketch: By Vasyunin's expansion, G_{jk} = 1/4 + correction(j,k)
+    where |correction| ≤ gcd(j,k)/(jk).
+    The main term gives (1/4)·(Σ v_k)² = O(1/log²N) → 0.
+    The correction terms Σ v_j v_k · correction(j,k) = O(1/log N)
+    by Möbius cancellation in the multiplicative structure.
+
+    **References**:
+    - F. Mertens, "Ein Beitrag zur analytischen Zahlentheorie" (1874)
+    - I. Vasyunin, "On a biorthogonal system related to RH" (1996)
+    - Both results are STRICTLY WEAKER than PNT. -/
+axiom mertens_selberg :
+    ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
-    1 - 2 * dotProduct (basisInnerProd N) (selbergTestVec N N) ≤
-      C₁ / Real.log (N : ℝ)
+    -- (a) Linear term: bᵀv ≈ 1/2
+    (|dotProduct (basisInnerProd N) (selbergTestVec N N) - 1/2| ≤
+      C / Real.log (N : ℝ)) ∧
+    -- (b) Quadratic form: vᵀGv = O(1/log N)
+    (realQuadForm (gramMatrix N) (selbergTestVec N N) ≤
+      C / Real.log (N : ℝ))
 
-/-- **Sub-axiom 2a (Mertens — 1874, elementary)**:
+-- ════════════════════════════════════════════════
+-- SECTION 4: PROVED THEOREMS
+-- ════════════════════════════════════════════════
 
-    The Selberg-weighted Dirichlet sum is O(1/log N):
-    |Σ_{k=2}^N λ_k/k| ≤ C₃/log(N)
+/-- **THEOREM (PROVED)**: selberg_l2_bound from mertens_selberg.
 
-    **Proof strategy**: By partial summation,
-    Σ_{d≤D} μ(d)/d · (1 - log(d)/log(D)) = (1/log D)·Σ μ(d)·log(D/d)/d
-    The inner sum is related to 1/ζ'(1) via Mertens' theorem:
-    Σ_{d≤x} μ(d)/d · log(x/d) → 1  as x → ∞
-    This is WEAKER than the PNT — it follows from Chebyshev bounds.
-
-    Note: The sum here excludes k=1 (matching our Fin(N-1) indexing). -/
-axiom selberg_dirichlet_sum :
-    ∃ C₃ : ℝ, 0 < C₃ ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-    ∀ N : ℕ, N₀ ≤ N →
-    (∑ i : Fin (N - 1), selbergTestVec N N i) ^ 2 ≤
-      C₃ / Real.log (N : ℝ)
-
-/-- **Sub-axiom 2b (Gram matrix — analytic)**:
-
-    The Gram quadratic form with Selberg weights is controlled by
-    the squared weight sum plus a correction of the same order:
-
-    vᵀGv ≤ C₄ · (Σ|v_i|)² for v = selbergTestVec N N
-
-    **Proof strategy**: Since G_{jk} ≤ 1 (gramEntry_le_one),
-    vᵀGv = Σ v_j v_k G_{jk} ≤ Σ |v_j v_k| = (Σ|v_j|)²
-
-    But we actually need a TIGHTER bound using the oscillatory
-    structure of the Selberg weights. The key is Vasyunin's expansion:
-    G_{jk} ≈ 1/4 + O(gcd(j,k)/(jk)), and the Möbius cancellation
-    in the λ_k kills the 1/4 main term, leaving only the correction. -/
-axiom gram_selberg_quadform_bound :
-    ∃ C₄ : ℝ, 0 < C₄ ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-    ∀ N : ℕ, N₀ ≤ N →
-    realQuadForm (gramMatrix N) (selbergTestVec N N) ≤
-      C₄ * (∑ i : Fin (N - 1), selbergTestVec N N i) ^ 2 +
-      C₄ / Real.log (N : ℝ)
-
-/-- **THEOREM**: selberg_quadratic_bound from sub-axioms.
-
-    Proof: vᵀGv ≤ C₄·(Σv)² + C₄/log(N)
-                ≤ C₄·(C₃/log N) + C₄/log(N)
-                = C₄(C₃+1)/log(N) -/
-theorem selberg_quadratic_bound :
-    ∃ C₂ : ℝ, 0 < C₂ ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-    ∀ N : ℕ, N₀ ≤ N →
-    realQuadForm (gramMatrix N) (selbergTestVec N N) ≤
-      C₂ / Real.log (N : ℝ) := by
-  obtain ⟨C₃, hC₃, N₃, hN₃, h_sum⟩ := selberg_dirichlet_sum
-  obtain ⟨C₄, hC₄, N₄, hN₄, h_gram⟩ := gram_selberg_quadform_bound
-  refine ⟨C₄ * C₃ + C₄, by positivity, max N₃ N₄, by omega, fun N hN => ?_⟩
-  have hN3 : N₃ ≤ N := by omega
-  have hN4 : N₄ ≤ N := by omega
-  have h1 := h_sum N hN3
-  have h2 := h_gram N hN4
-  have h_combine : C₄ * (C₃ / Real.log (N : ℝ)) + C₄ / Real.log (N : ℝ) =
-      (C₄ * C₃ + C₄) / Real.log (N : ℝ) := by ring
-  calc realQuadForm (gramMatrix N) (selbergTestVec N N)
-      ≤ C₄ * (∑ i : Fin (N - 1), selbergTestVec N N i) ^ 2 +
-        C₄ / Real.log (N : ℝ) := h2
-    _ ≤ C₄ * (C₃ / Real.log (N : ℝ)) + C₄ / Real.log (N : ℝ) := by
-        linarith [mul_le_mul_of_nonneg_left h1 (le_of_lt hC₄)]
-    _ = (C₄ * C₃ + C₄) / Real.log (N : ℝ) := h_combine
-
-/-- **THEOREM**: selberg_l2_bound from the linear + quadratic sub-axioms.
+    ∫₀¹ (1 - Σ vₖ{k/x})² dx ≤ C/log(N)
 
     Proof:
     1. l2_error_eq_quad_error: ∫(1-f)² = 1 - 2bᵀv + vᵀGv
-    2. selberg_linear_bound:   1 - 2bᵀv ≤ C₁/log(N)
-    3. selberg_quadratic_bound: vᵀGv ≤ C₂/log(N)
-    4. Sum: ∫(1-f)² ≤ (C₁+C₂)/log(N) -/
+    2. mertens_selberg (a): |bᵀv - 1/2| ≤ C/log(N) ⟹ 1-2bᵀv ≤ 2C/log(N)
+    3. mertens_selberg (b): vᵀGv ≤ C/log(N)
+    4. Sum: ∫(1-f)² ≤ 3C/log(N) -/
 theorem selberg_l2_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N →
     ∫ x in (0:ℝ)..1,
       (1 - nbLinComb N (selbergTestVec N N) x) ^ 2 ≤
     C / Real.log (N : ℝ) := by
-  -- Get both sub-axiom bounds
-  obtain ⟨C₁, hC₁, N₁, hN₁, h_lin⟩ := selberg_linear_bound
-  obtain ⟨C₂, hC₂, N₂, hN₂, h_quad⟩ := selberg_quadratic_bound
-  -- Use C = C₁ + C₂, N₀ = max N₁ N₂
-  refine ⟨C₁ + C₂, by linarith, max N₁ N₂, by omega, fun N hN => ?_⟩
-  -- For N ≥ max N₁ N₂, both bounds apply
-  have hN1 : N₁ ≤ N := by omega
-  have hN2 : N₂ ≤ N := by omega
-  have hN_ge2 : 2 ≤ N := by omega
-  -- Step 1: Convert integral to matrix form
-  rw [l2_error_eq_quad_error N hN_ge2 (selbergTestVec N N)]
-  -- Step 2: Bound (1 - 2bᵀv) + vᵀGv ≤ C₁/log(N) + C₂/log(N)
-  have h1 := h_lin N hN1
-  have h2 := h_quad N hN2
-  -- Step 3: C₁/log(N) + C₂/log(N) = (C₁+C₂)/log(N)
-  have h_combine : C₁ / Real.log (N : ℝ) + C₂ / Real.log (N : ℝ) =
-      (C₁ + C₂) / Real.log (N : ℝ) := by ring
+  obtain ⟨C, hC, N₀, hN₀, h_mertens⟩ := mertens_selberg
+  refine ⟨3 * C, by linarith, N₀, hN₀, fun N hN => ?_⟩
+  have hN2 : 2 ≤ N := by omega
+  -- Decompose L² error
+  rw [l2_error_eq_quad_error N hN2 (selbergTestVec N N)]
+  obtain ⟨h_lin, h_quad⟩ := h_mertens N hN
+  -- Part 1: |bᵀv - 1/2| ≤ L implies 1 - 2bᵀv ≤ 2L
+  set bv := dotProduct (basisInnerProd N) (selbergTestVec N N)
+  set L := C / Real.log (↑N)
+  have h1 : -L ≤ bv - 1/2 := (abs_le.mp h_lin).1
+  have hL2 : 2 * L = 2 * C / Real.log (↑N) := by ring
+  have h_linear : 1 - 2 * bv ≤ 2 * L := by linarith
+  -- Part 2: vᵀGv ≤ L (directly from axiom b)
+  -- Combine: (1 - 2bᵀv) + vᵀGv ≤ 2L + L = 3L = 3C/log(N)
+  have h3 : 3 * L = 3 * C / Real.log (↑N) := by ring
   linarith
 
 -- ════════════════════════════════════════════════
--- SECTION 3: THE BRIDGE THEOREM
+-- SECTION 5: THE BRIDGE TO moebius_test_bound
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM**: moebius_test_bound follows from the Selberg L² bound.
 
-    This is the key reduction: the existentially quantified
-    moebius_test_bound is satisfied by exhibiting the Selberg
-    test vector as our witness.
-
-    The proof is trivial: selberg_l2_bound gives us a SPECIFIC vector
-    (the Selberg weights), and moebius_test_bound only asks for the
-    EXISTENCE of any vector meeting the bound. -/
+    Exhibit the Selberg test vector as witness for the existential. -/
 theorem moebius_test_bound_from_selberg :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,

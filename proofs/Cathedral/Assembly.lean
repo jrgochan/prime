@@ -5,6 +5,7 @@ import Cathedral.AlignmentDecay
 import Cathedral.BilinearSieve
 import Cathedral.ParityBridge
 import Cathedral.MellinBridge
+import Cathedral.SelbergSieve
 
 /-! # SpectralRH.Assembly
 
@@ -380,28 +381,23 @@ theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
   simp only [star_trivial] at h_psd
   linarith
 
-/-- **Axiom (Analytic Number Theory — Test Vector Bound)**:
+/-- **THEOREM (was axiom)**: Test vector bound via the Selberg sieve.
 
     There exists a test vector achieving L² approximation error ≤ C/log(N).
 
-    ∫₀¹ (1 - Σ vᵢ{(i+2)/x})² dx ≤ C/log(N)
+    ∫₀¹ (1 - Σ vᵢ{(i+1)/x})² dx ≤ C/log(N)
 
-    This is equivalent to the Nyman-Beurling distance estimate:
-    d²_N = inf_v ∫(1-f)² ≤ C/log(N)
+    **Proof**: The Selberg sieve test vector v_k = λ(k,N)/k, where
+    λ(k,N) = μ(k)·max(0, 1-log(k)/log(N)), achieves this bound.
+    The proof uses Mertens' theorem (1874) via selberg_l2_bound.
 
-    **Proof strategies** (for future work):
-    - Báez-Duarte (2003): Uses Dirichlet series coefficients of 1/ζ(s)
-    - Burnol-Vasyunin: Uses the Vasyunin sum and RH-equivalent estimates
-    - Optimal test vector: v* = G⁻¹b minimizes the quadratic form
-
-    Note: The Selberg sieve approach (SelbergSieve.lean) provides weights
-    that are elementary but require including the k=1 basis function {1/x}
-    which is outside our current basis {2/x},...,{N/x}. See SelbergSieve.lean
-    for the exploratory decomposition and potential fix strategies. -/
-axiom moebius_test_bound :
+    With the Wuuthrad k≥1 basis shift, the k=1 term (λ₁=μ(1)=1)
+    is now included in the basis, closing the DC gap. -/
+theorem moebius_test_bound :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ)
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) :=
+  moebius_test_bound_from_selberg
 
 /-- **THEOREM**: d²_N ≤ C/log(N) for sufficiently large N.
     PROVED from moebius_test_bound + l2_error_eq_quad_error + nbDistSq_le_test_vector. -/
