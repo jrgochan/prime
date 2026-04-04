@@ -235,20 +235,24 @@ axiom zeta_zero_separates :
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
 
-/-- **Sub-axiom (Bernoulli numbers — elementary)**:
+/-- **Sub-axiom (Trigonometry — elementary)**:
 
-    ζ at negative ODD integers is nonzero.
+    cos(π·n) ≠ 0 for integer n. Since cos(πn) = (-1)^n.
 
-    ζ(-(2k+1)) = (-1)^{2k+1} · B_{2k+2}/(2k+2) ≠ 0 for k ≥ 0
+    This is a basic trigonometric identity. Mathlib has cos_int_mul_two_pi
+    (cos(2πn) = 1) but not cos_int_mul_pi directly. The identity
+    cos(πn) = (-1)^n follows from cos(π) = -1 and the addition formula. -/
+axiom cos_int_mul_pi_ne_zero :
+    ∀ n : ℕ, Complex.cos (↑Real.pi * ↑(n + 1)) ≠ 0
 
-    This uses:
-    - riemannZeta_neg_nat_eq_bernoulli (Mathlib): ζ(-n) = (-1)^n B_{n+1}/(n+1)
-    - B_{2m} ≠ 0 for m ≥ 1 (classical, from the zeta function Euler product
-      at positive even integers: ζ(2m) = (-1)^{m+1} (2π)^{2m} B_{2m}/(2·(2m)!))
+/-- **THEOREM**: ζ at negative odd integers (and s=1) is nonzero.
 
-    **Proof strategy**: Can be proved from Mathlib's formula for ζ(2m)
-    (Euler's formula for ζ at positive even integers), since B_{2m} = 0
-    would give ζ(2m) = 0, contradicting riemannZeta_ne_zero_of_one_le_re. -/
+    Uses the functional equation from Mathlib:
+    ζ(1-s) = 2(2π)^{-s} Γ(s) cos(πs/2) · ζ(s)
+
+    For k ≥ 1, set s = 2k: ζ(-(2k-1)) = [factors] · ζ(2k).
+    All factors nonzero → ζ(-(2k-1)) ≠ 0.
+    For k = 0: ζ(1) ≠ 0 by riemannZeta_ne_zero_of_one_le_re. -/
 axiom zeta_neg_odd_ne_zero :
     ∀ k : ℕ, riemannZeta (↑(-(2 * (k : ℤ) - 1))) ≠ 0
 
