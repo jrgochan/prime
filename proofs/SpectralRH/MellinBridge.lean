@@ -2,6 +2,7 @@ import SpectralRH.Defs
 import SpectralRH.Structural
 import Mathlib.Analysis.MellinTransform
 import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.NumberTheory.LSeries.Dirichlet
 
 /-! # SpectralRH.MellinBridge
 
@@ -208,15 +209,29 @@ theorem nyman_beurling_from_mellin :
     This is a direct consequence of Mathlib's hasMellin_cpow_Ioc. -/
 theorem mellin_cpow_restricted (a : ℂ) (s : ℂ) (hs : 0 < (s + a).re) :
     mellinRestricted (fun x => (x : ℂ) ^ a) s = 1 / (s + a) := by
-  -- Follow from hasMellin_cpow_Ioc
-  sorry  -- TODO: unfold mellinRestricted, match to hasMellin_cpow_Ioc
+  unfold mellinRestricted
+  -- t^{s-1} * t^a = t^{s+a-1} on Ioc 0 1
+  have h_simp : Set.EqOn
+      (fun t : ℝ => (↑t : ℂ) ^ (s - 1) * (↑t : ℂ) ^ a)
+      (fun t : ℝ => (↑t : ℂ) ^ (s + a - 1))
+      (Set.Ioc (0:ℝ) 1) := by
+    intro t ⟨h0, _⟩
+    simp only
+    rw [← cpow_add _ _ (ofReal_ne_zero.mpr (ne_of_gt h0))]
+    congr 1; ring
+  rw [setIntegral_congr_fun measurableSet_Ioc h_simp]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have hre : -1 < (s + a - 1).re := by
+    have := hs; rw [add_re] at this; simp [sub_re, one_re]; linarith
+  have hsa : s + a ≠ 0 := by
+    intro h; rw [h, zero_re] at hs; exact lt_irrefl _ hs
+  rw [integral_cpow (Or.inl hre)]
+  simp only [sub_add_cancel, ofReal_one, one_cpow, ofReal_zero, zero_cpow hsa, sub_zero]
 
 /-- The zeta function has no zeros at s=1 (pole) or at trivial zeros.
     This is already in Mathlib. -/
 theorem zeta_ne_zero_of_re_gt_one (s : ℂ) (hs : 1 < s.re) :
-    riemannZeta s ≠ 0 := by
-  -- For Re(s) > 1, ζ(s) = Σ 1/n^s which is a convergent series with all positive terms
-  -- This should follow from Mathlib's existing API
-  sorry  -- TODO: derive from zeta_eq_tsum_one_div_nat_cpow + positivity
+    riemannZeta s ≠ 0 :=
+  riemannZeta_ne_zero_of_one_lt_re hs
 
 end
