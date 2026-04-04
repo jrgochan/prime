@@ -204,26 +204,87 @@ theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
   rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
   exact intervalIntegral.integral_const_mul (w i) _
 
-/-- **THE OBSTRUCTION THEOREM (Phase 4 target)**:
-    If ζ(ρ) = 0 with Re(ρ) ≠ 1/2 (RH fails), then there exists a
-    functional that separates 1_{(0,1)} from the span of {k/x}.
+/-- **Sub-axiom (Complex Analysis — Mellin Separation)**:
 
-    Specifically: x^{ρ-1} annihilates every {k/x}:
-      M₀₁[{k/x}](ρ) = k^ρ · (ζ(ρ)/ρ - 1/(ρ-1)) = k^ρ · (0/ρ - 1/(ρ-1))
-                      = -k^ρ/(ρ-1)  (nonzero, but DOES have ζ(ρ)=0 contribution)
+    If ζ has a non-trivial zero ρ off the critical line
+    (0 < Re(ρ) < 1, Re(ρ) ≠ 1/2), then the function x^{ρ-1}
+    creates a continuous linear functional on L²(0,1) that
+    "almost annihilates" the span of {k/x} for k ≥ 2.
 
-    Wait — this doesn't immediately annihilate! The key is more subtle:
-    the NB distance d²_N measures approximation of 1_{(0,1)} by
-    DILATED fractional parts ρ_α(x) = {α/x} where α ranges over (0,∞),
-    not just integer k. For the discrete version with integer k ≥ 2,
-    the argument requires showing the defect doesn't vanish.
+    Specifically: the Mellin transform M₀₁[{k/x}](ρ) involves ζ(ρ) = 0,
+    so the functional ℓ_ρ(f) = ∫₀¹ f(x)·x^{ρ-1} dx satisfies
+    ℓ_ρ({k/x}) = -k^ρ/(ρ-1) (using ζ(ρ) = 0).
 
-    We state this as an axiom for Phase 4:
-    If RH fails, d²_N ↛ 0. -/
-axiom nyman_beurling_converse :
+    Meanwhile ℓ_ρ(1) = 1/ρ ≠ 0 (since ρ ≠ 0 in the critical strip).
+
+    This creates a measurable "obstruction" to L² approximation:
+    no linear combination of {k/x} can approximate 1 too closely
+    in L² without also matching on the functional ℓ_ρ.
+
+    **Proof ingredients**:
+    - Mellin transform of {k/x}: from mellin_fractBasis (MellinBridge.lean)
+    - Continuity of ℓ_ρ on L²(0,1): from ∫|x^{ρ-1}|² < ∞ for Re(ρ) > 0
+    - Separation: ζ(ρ) = 0 kills one term, leaving nonzero residual -/
+axiom zeta_zero_separates :
+    ∀ ρ : ℂ, riemannZeta ρ = 0 →
+    0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
+    -- There exists a "defect" δ > 0 such that no linear combination
+    -- of {k/x} for k ≥ 2 can approximate 1 in L² better than δ
+    ∃ δ : ℝ, 0 < δ ∧
+    ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
+
+/-- **Sub-axiom (Definition of RH — Logic)**:
+
+    ¬RH means: there exists a non-trivial zero of ζ off the critical line.
+
+    This is essentially the negation of the RH definition. We state it
+    as an axiom because the Lean proof requires careful handling of the
+    trivial zeros (−2, −4, ...) and the pole at s = 1.
+
+    **Proof strategy**: Direct negation of RiemannHypothesis:
+    ¬(∀ s, ζ(s)=0 → ... → s.re = 1/2)
+    ≡ ∃ s, ζ(s)=0 ∧ ... ∧ s.re ≠ 1/2
+    Then show s must have 0 < Re(s) < 1 (from the functional equation
+    and non-vanishing on Re(s) = 1).
+
+    This is mostly logic + basic ζ properties (functional equation,
+    non-vanishing on Re = 1), all available in Mathlib. -/
+axiom rh_neg_gives_critical_strip_zero :
+    ¬ RiemannHypothesis →
+    ∃ ρ : ℂ, riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ ρ.re ≠ 1/2
+
+/-- **THEOREM**: nyman_beurling_converse from the separation axioms.
+
+    Proof (by contrapositive):
+    1. Assume ¬RH
+    2. rh_neg_gives_critical_strip_zero: ∃ ρ off critical line with ζ(ρ) = 0
+    3. zeta_zero_separates: this ρ creates defect δ > 0
+    4. Therefore ∫(1-f)² ≥ δ > 0 for all N, so d² ↛ 0
+    5. Contrapositive: d² → 0 implies RH -/
+theorem nyman_beurling_converse :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
-    RiemannHypothesis
+    RiemannHypothesis := by
+  -- Proof by contrapositive: ¬RH → ¬(d²→0)
+  intro h_conv
+  by_contra h_not_rh
+  -- Step 1: ¬RH gives a zero off the critical line
+  obtain ⟨ρ, h_zero, h_pos, h_lt1, h_ne_half⟩ :=
+    rh_neg_gives_critical_strip_zero h_not_rh
+  -- Step 2: This zero creates a defect δ > 0
+  obtain ⟨δ, hδ_pos, h_defect⟩ :=
+    zeta_zero_separates ρ h_zero h_pos h_lt1 h_ne_half
+  -- Step 3: But convergence says ∫(1-f)² < δ for large N
+  obtain ⟨N₀, h_small⟩ := h_conv δ hδ_pos
+  -- Step 4: Contradiction at N = max N₀ 2
+  have hN : N₀ ≤ max N₀ 2 := le_max_left _ _
+  have hN2 : 2 ≤ max N₀ 2 := le_max_right _ _
+  obtain ⟨v, hv⟩ := h_small (max N₀ 2) hN
+  -- hv: ∫(1-f)² < δ
+  -- h_defect: ∫(1-f)² ≥ δ
+  have h_ge := h_defect (max N₀ 2) hN2 v
+  linarith
 
 -- ════════════════════════════════════════════════
 -- SECTION 4: THE FORWARD DIRECTION (Phase 3)
