@@ -210,15 +210,62 @@ theorem nbDistSq_as_quadform (N : ℕ) (hN : 2 ≤ N) :
   -- Goal: dotProduct (basisInnerProd N) c = dotProduct c (basisInnerProd N)
   simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm _ _)]
 
-/-- **Axiom**: The basis inner product vector b is nonzero.
-    b₀ = ∫₀¹ {2/x} dx = 1 - ln 2 ≈ 0.307 > 0.
+/-- **THEOREM** (was axiom): The basis inner product vector b is nonzero.
+    b₀ = ∫₀¹ {2/x} dx > 0.
 
-    This is a standard analysis fact: {2/x} > 0 on (1, 2) which
-    has positive measure, so the integral is strictly positive.
-    Proving it in Lean requires measure-theoretic integral positivity
-    which is available in Mathlib but heavy to wire up. -/
-axiom basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
-    basisInnerProd N ≠ 0
+    Proof: On (2/3, 1), fract_eq_sub gives {2/x} = 2/x - 2 > 0.
+    By intervalIntegral_pos_of_pos_on, the integral over (2/3, 1) is positive.
+    Since {2/x} ≥ 0 everywhere, the full integral ∫₀¹ ≥ ∫_{2/3}^1 > 0.
+    Therefore b₀ > 0, so b ≠ 0. -/
+theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
+    basisInnerProd N ≠ 0 := by
+  intro h_eq
+  have h_zero : basisInnerProd N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
+  simp only [basisInnerProd] at h_zero
+  -- f(x) = {2/x}, integrable on [0,1] via fract_prod_intervalIntegrable
+  set f := (fun x : ℝ => Int.fract (((0 + 2 : ℕ) : ℝ) / x)) with hf_def
+  -- f is integrable on [0,1]: bounded by 1, measurable
+  have hf_meas : Measurable f := (measurable_const.div measurable_id).fract
+  have hf_bound : ∀ x : ℝ, ‖f x‖ ≤ ‖(1 : ℝ)‖ := fun x => by
+    simp only [f, Real.norm_eq_abs, abs_one,
+      abs_of_nonneg (Int.fract_nonneg _)]
+    exact le_of_lt (Int.fract_lt_one _)
+  have hf_01 : IntervalIntegrable f MeasureTheory.volume 0 1 :=
+    IntervalIntegrable.mono_fun (intervalIntegrable_const (c := (1:ℝ)))
+      hf_meas.aestronglyMeasurable.restrict
+      (Filter.Eventually.of_forall hf_bound)
+  -- On (2/3, 1): {2/x} = 2/x - 2 > 0 by fract_eq_sub
+  set c : ℝ := 2/3
+  have hc0 : (0:ℝ) ≤ c := by norm_num
+  have hcd : c < 1 := by norm_num
+  have hpos : ∀ x, x ∈ Set.Ioo c (1:ℝ) → 0 < f x := by
+    intro x ⟨hx_lo, hx_hi⟩
+    simp only [f]
+    have h23 : (2:ℝ) / (↑(2:ℕ) + 1) < x := by
+      have : (2:ℝ) / (↑(2:ℕ) + 1) = 2 / 3 := by norm_num
+      rw [this]; exact hx_lo
+    rw [fract_eq_sub (le_refl 2) (le_refl 2) h23 hx_hi]
+    simp only [Nat.cast_ofNat]
+    rw [sub_pos, lt_div_iff₀ (by linarith : (0:ℝ) < x)]; linarith
+  -- Subinterval integrability
+  have hi_sub : IntervalIntegrable f MeasureTheory.volume c 1 :=
+    hf_01.mono_set (by
+      simp only [Set.uIcc_of_le (le_of_lt hcd), Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc hc0 le_rfl)
+  have hi_0c : IntervalIntegrable f MeasureTheory.volume 0 c :=
+    hf_01.mono_set (by
+      simp only [Set.uIcc_of_le hc0, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc le_rfl (le_of_lt hcd))
+  -- ∫_{2/3}^1 f > 0
+  have h_sub_pos : 0 < ∫ x in c..1, f x :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hi_sub hpos hcd
+  -- ∫_0^{2/3} f ≥ 0
+  have h_0c_nn : 0 ≤ ∫ x in (0:ℝ)..c, f x :=
+    intervalIntegral.integral_nonneg hc0 (fun x _ => Int.fract_nonneg _)
+  -- ∫₀¹ f = ∫₀^c f + ∫_c^1 f
+  have h_split : ∫ x in (0:ℝ)..1, f x = (∫ x in (0:ℝ)..c, f x) + (∫ x in c..1, f x) :=
+    (intervalIntegral.integral_add_adjacent_intervals hi_0c hi_sub).symm
+  linarith
 
 /-- **THEOREM**: The NB distance is strictly less than 1.
     d²_N < 1 for all N ≥ 2.
