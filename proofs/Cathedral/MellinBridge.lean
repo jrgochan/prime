@@ -653,7 +653,12 @@ private lemma floor_div_mellin (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1 ≤ k
         ((↑k : ℂ) + (↑k : ℂ) ^ s *
           (∑ n ∈ Finset.Icc (k+1) N, ((↑(n : ℕ) : ℂ) ^ (-s))) -
           (↑N : ℂ) * (↑((k:ℝ)/((N:ℝ)+1)) : ℂ) ^ s) / s := by
-      sorry  -- integral_decomp_gen + Abel summation
+      filter_upwards [Filter.Ici_mem_atTop k] with N hN
+      have hN' : k ≤ N := hN
+      obtain ⟨M, rfl⟩ : ∃ M, N = k + M := ⟨N - k, by omega⟩
+      -- Now N is replaced by k + M everywhere
+      rw [integral_decomp_gen s hs k hk M]
+      sorry  -- Abel summation + algebra
     -- Step 2: ∑_{n=k+1}^{N} n^{-s} → ζ(s) - ∑_{n=1}^{k} n^{-s}
     have h_tail_zeta : Tendsto
         (fun N : ℕ => ∑ n ∈ Finset.Icc (k+1) N, ((↑(n:ℕ) : ℂ) ^ (-s)))
