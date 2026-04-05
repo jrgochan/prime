@@ -263,4 +263,95 @@ lemma weight_telescope (M : ℕ) :
   | zero => simp
   | succ k ih => rw [Finset.sum_range_succ, ih]; push_cast; field_simp; ring
 
+-- ════════════════════════════════════════════════
+-- COVARIANCE DECOMPOSITION: G_{j,k} ≤ 1/4 + Cov
+-- ════════════════════════════════════════════════
+
+/-- Algebraic identity: {a}·{b} = ({a}-1/2)·({b}-1/2) + ({a}+{b})/2 - 1/4. -/
+private lemma fract_prod_expand (a b : ℝ) :
+    Int.fract a * Int.fract b =
+    (Int.fract a - 1/2) * (Int.fract b - 1/2) +
+    (Int.fract a + Int.fract b) / 2 - 1/4 := by ring
+
+/-- The centered product ({j/x}-1/2)·({k/x}-1/2) is integrable on [0,1]. -/
+private lemma centered_prod_integrable (j k : ℕ) :
+    IntervalIntegrable (fun x : ℝ =>
+      (Int.fract ((j:ℝ)/x) - 1/2) * (Int.fract ((k:ℝ)/x) - 1/2))
+    MeasureTheory.volume 0 1 := by
+  apply IntervalIntegrable.mono_fun
+    (intervalIntegral.intervalIntegrable_const (c := (1:ℝ)))
+  · have h1 : Measurable (fun x : ℝ => Int.fract ((j:ℝ)/x) - 1/2) :=
+      (measurable_fract_real.comp (measurable_const.div measurable_id)).sub measurable_const
+    have h2 : Measurable (fun x : ℝ => Int.fract ((k:ℝ)/x) - 1/2) :=
+      (measurable_fract_real.comp (measurable_const.div measurable_id)).sub measurable_const
+    exact (h1.mul h2).aestronglyMeasurable.restrict
+  · filter_upwards with x
+    simp only [Real.norm_eq_abs, abs_one]
+    have hfj := Int.fract_nonneg ((j:ℝ)/x)
+    have hfj' := Int.fract_lt_one ((j:ℝ)/x)
+    have hfk := Int.fract_nonneg ((k:ℝ)/x)
+    have hfk' := Int.fract_lt_one ((k:ℝ)/x)
+    rw [abs_le]; constructor <;> nlinarith
+
+/-- Integrability of the remainder term. -/
+private lemma fract_sum_integrable (j k : ℕ) :
+    IntervalIntegrable (fun x : ℝ =>
+      (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4)
+    MeasureTheory.volume 0 1 :=
+  ((fract_div_intervalIntegrable j 0 1).add (fract_div_intervalIntegrable k 0 1)).div_const 2
+    |>.sub (intervalIntegral.intervalIntegrable_const)
+
+/-- Integral split: G_{j,k} = ∫ centered_prod + ∫ (fract_sum - 1/4). -/
+private lemma gramEntry_integral_split (j k : ℕ) :
+    gramEntry j k =
+    (∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) - 1/2) * (Int.fract ((k:ℝ)/x) - 1/2)) +
+    (∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4) := by
+  unfold gramEntry
+  rw [← intervalIntegral.integral_add (centered_prod_integrable j k) (fract_sum_integrable j k)]
+  congr 1; ext x; rw [fract_prod_expand]; ring
+
+private lemma sum_term_le_quarter (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    ∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4 ≤ 1/4 := by
+  have hj_int := basis_integral_upper j hj
+  have hk_int := basis_integral_upper k hk
+  have hj_ii := fract_div_intervalIntegrable j 0 1
+  have hk_ii := fract_div_intervalIntegrable k 0 1
+  have h_split : ∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4 =
+      (∫ x in (0:ℝ)..1, Int.fract ((j:ℝ)/x))/2 +
+      (∫ x in (0:ℝ)..1, Int.fract ((k:ℝ)/x))/2 - 1/4 := by
+    calc ∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4
+        = ∫ x in (0:ℝ)..1, (fun x => Int.fract ((j:ℝ)/x)/2 + (Int.fract ((k:ℝ)/x)/2 - 1/4)) x := by
+          congr 1; ext x; ring
+      _ = (∫ x in (0:ℝ)..1, Int.fract ((j:ℝ)/x)/2) +
+          (∫ x in (0:ℝ)..1, (Int.fract ((k:ℝ)/x)/2 - 1/4)) :=
+          intervalIntegral.integral_add (hj_ii.div_const 2)
+            ((hk_ii.div_const 2).sub intervalIntegral.intervalIntegrable_const)
+      _ = (∫ x in (0:ℝ)..1, Int.fract ((j:ℝ)/x))/2 +
+          ((∫ x in (0:ℝ)..1, Int.fract ((k:ℝ)/x))/2 - (1:ℝ)*(1/4)) := by
+          rw [intervalIntegral.integral_div,
+              intervalIntegral.integral_sub (hk_ii.div_const 2)
+                intervalIntegral.intervalIntegrable_const,
+              intervalIntegral.integral_div, intervalIntegral.integral_const]
+          simp [smul_eq_mul]
+      _ = _ := by ring
+  linarith
+
+/-- **COVARIANCE DECOMPOSITION**: G_{j,k} ≤ 1/4 + Cov({j/x}, {k/x}).
+
+    The Gram entry decomposes as Cov + (I_j+I_k)/2 - 1/4 where
+    I_j = ∫{j/x} ≤ 1/2. The remainder is ≤ 1/4, giving:
+    G_{j,k} ≤ 1/4 + ∫₀¹ ({j/x}-1/2)({k/x}-1/2) dx + (extra ≤ 1/4)
+
+    But actually: G = Cov + rest, rest ≤ 1/4,
+    so G ≤ Cov + 1/4 = 1/4 + Cov. -/
+theorem gramEntry_le_quarter_plus_cov (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    gramEntry j k ≤ 1/4 +
+    ∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) - 1/2) * (Int.fract ((k:ℝ)/x) - 1/2) := by
+  -- G_{j,k} = Cov + sum_term where sum_term = (I_j+I_k)/2 - 1/4 ≤ 1/4
+  -- Wait, we need G ≤ 1/4 + Cov, i.e., sum_term ≤ 1/4
+  -- But actually: G = Cov + sum_term. We want G ≤ 1/4 + Cov.
+  -- This means sum_term ≤ 1/4. ✓ (from sum_term_le_quarter)
+  rw [gramEntry_integral_split j k]
+  linarith [sum_term_le_quarter j k hj hk]
+
 end
