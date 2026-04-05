@@ -127,7 +127,124 @@ private lemma piece_sq_upper_bound_n2 :
   linarith
 
 -- ════════════════════════════════════════════════
--- INFRASTRUCTURE: SUBSTITUTION IDENTITY
+-- GENERALIZED DIAGONAL BOUND: G_{j,j} ≤ 1/3 FOR ALL j ≥ 1
+-- ════════════════════════════════════════════════
+
+/-- Piece bound for ALL n ≥ 1: dispatches to n=1, n=2, or n≥3 cases. -/
+private lemma piece_sq_upper_bound_all (n : ℕ) (hn : 1 ≤ n) :
+    (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ))
+    ≤ 1 / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
+  by_cases h3 : 3 ≤ n
+  · exact piece_sq_upper_bound n h3
+  · interval_cases n
+    · push_cast; exact piece_sq_upper_bound_n1
+    · push_cast; exact piece_sq_upper_bound_n2
+
+/-- Piece integral bound for j ≥ 1, n ≥ 1 (extends fract_sq_piece_bound). -/
+private lemma fract_sq_piece_bound_all (j n : ℕ) (hj : 1 ≤ j) (hn : 1 ≤ n) :
+    ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
+      Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+    (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hn_pos : (0:ℝ) < (n:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hle : (j:ℝ)/((n:ℝ)+1) ≤ (j:ℝ)/(n:ℝ) :=
+    div_le_div_of_nonneg_left (le_of_lt hj_pos) hn_pos (by linarith)
+  have hae : ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
+      Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) =
+      ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)), ((j:ℝ)/x - (n:ℝ))^2 := by
+    rw [intervalIntegral.integral_of_le hle, intervalIntegral.integral_of_le hle]
+    exact integral_congr_ae ((ae_restrict_mem measurableSet_Ioc).mono (fun x hx => by
+      show Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) = ((j:ℝ)/x - (n:ℝ))^2
+      rw [fract_div_eq_on_Ioc j n hj hn x hx.1 hx.2]; ring))
+  rw [hae, integral_sq_div_sub_const j n hj hn]
+  calc (j:ℝ) * ((2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ)))
+      ≤ (j:ℝ) * (1 / (3 * (n:ℝ) * ((n:ℝ)+1))) :=
+        mul_le_mul_of_nonneg_left (piece_sq_upper_bound_all n hn) (by positivity)
+    _ = (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by ring
+
+private lemma tele_sum (j : ℕ) (hj : 1 ≤ j) (M : ℕ) :
+    (Finset.range (M+1)).sum (fun m =>
+      (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1))) =
+    (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) := by
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  -- Step 1: factor out j/3
+  have hrw : ∀ m : ℕ, (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)) =
+      (j:ℝ)/3 * (1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1)) := by
+    intro m; field_simp; ring
+  -- Step 2: telescope the inner sum
+  have htele : ∀ M' : ℕ, ∑ m ∈ Finset.range (M'+1),
+      (1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1)) =
+      1/(j:ℝ) - 1/((j:ℝ)+(M':ℝ)+1) := by
+    intro M'; induction M' with
+    | zero => simp
+    | succ k ih => rw [Finset.sum_range_succ, ih]; push_cast; field_simp; ring
+  -- Combine
+  calc (Finset.range (M+1)).sum (fun m =>
+        (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)))
+      = (Finset.range (M+1)).sum (fun m =>
+        (j:ℝ)/3 * (1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1))) := by
+          congr 1; ext m; exact hrw m
+    _ = (j:ℝ)/3 * (Finset.range (M+1)).sum (fun m =>
+        1/((j:ℝ)+(m:ℝ)) - 1/((j:ℝ)+(m:ℝ)+1)) := by rw [Finset.mul_sum]
+    _ = (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) := by rw [htele]
+
+/-- **THEOREM**: G_{j,j} ≤ 1/3 for ALL j ≥ 1. -/
+theorem gramEntry_le_third_all (j : ℕ) (hj : 1 ≤ j) :
+    gramEntry j j ≤ 1 / 3 := by
+  by_cases hj3 : 3 ≤ j
+  · exact gramEntry_le_third j hj3
+  have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
+  suffices hbound : ∀ M : ℕ, gramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) by
+    by_contra h_neg; push_neg at h_neg
+    obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
+    have hM := hbound N₀
+    have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith
+    have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < gramEntry j j - 1/3 := by
+      rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*((j:ℝ)+(N₀:ℝ)+1))]
+      have h1 : 2*(j:ℝ) < 3*(gramEntry j j - 1/3)*N₀ := by
+        rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(gramEntry j j - 1/3))] at hN₀; linarith
+      nlinarith [show (0:ℝ) ≤ (j:ℝ) from by positivity]
+    linarith
+  intro M
+  set ε := (j:ℝ) / ((j:ℝ) + (M:ℝ) + 1)
+  have hε_pos : 0 < ε := by positivity
+  unfold gramEntry
+  rw [(intervalIntegral.integral_add_adjacent_intervals
+    (fract_sq_intervalIntegrable j 0 ε) (fract_sq_intervalIntegrable j ε 1)).symm]
+  have htail : ∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤ ε := by
+    linarith [le_abs_self (∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)),
+              (Real.norm_eq_abs _).symm ▸ fract_sq_tail_bound j ε (le_of_lt hε_pos)]
+  have hmain : ∫ x in ε..1, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+      1/3 - (j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by
+    rw [← fract_sq_telescope j hj M]
+    have hpieces : ∀ m ∈ Finset.range (M + 1),
+        ∫ x in ((j:ℝ)/((j:ℝ)+(m:ℝ)+1))..((j:ℝ)/((j:ℝ)+(m:ℝ))),
+          Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
+        (j:ℝ) / (3 * ((j:ℝ)+(m:ℝ)) * ((j:ℝ)+(m:ℝ)+1)) := by
+      intro m _
+      rw [show (j:ℝ) + (m:ℝ) = ((j+m:ℕ):ℝ) from by push_cast; ring]
+      exact fract_sq_piece_bound_all j (j+m) hj (by omega)
+    have htele := tele_sum j hj M
+    have hsimp : (j:ℝ)/3 * (1/(j:ℝ) - 1/((j:ℝ)+(M:ℝ)+1)) =
+        1/3 - (j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by field_simp
+    linarith [Finset.sum_le_sum hpieces]
+  linarith [show (j:ℝ)/((j:ℝ)+(M:ℝ)+1) + (1/3 - (j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1))) =
+    1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) from by field_simp; ring]
+
+-- ════════════════════════════════════════════════
+-- MAIN THEOREM: ALL j,k ≥ 1 WITH jk ≤ 12
+-- ════════════════════════════════════════════════
+
+/-- **MAIN THEOREM**: G_{j,k} ≤ 1/4+1/(jk) for ALL j,k ≥ 1 with jk ≤ 12. -/
+theorem gram_entry_offdiag_upper_all (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k)
+    (hjk_le : j * k ≤ 12) :
+    gramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ)) := by
+  have h1 := gramEntry_le_third_all j hj
+  have h2 := gramEntry_le_third_all k hk
+  have h3 := gramEntry_le_avg_diag j k
+  exact le_trans (by linarith) (third_le_quarter_plus_inv j k hj hk hjk_le)
+
+
 -- ════════════════════════════════════════════════
 
 /-- Key periodicity lemma: {j(n+t)} = {jt} for j,n : ℕ, t : ℝ. -/
