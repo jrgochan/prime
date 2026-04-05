@@ -24,7 +24,9 @@ lean_lib «Cathedral» where
     `Cathedral.Mertens.Harmonic, `Cathedral.Mertens.GramEntry,
     `Cathedral.Mertens.GramSum, `Cathedral.Mertens.NbDecay,
     `Cathedral.SelbergSieve,
-    `Cathedral.MellinBridge, `Cathedral.Assembly,
+    `Cathedral.MellinBridge,
+    `Cathedral.Assembly.DropAssembly, `Cathedral.Assembly.QuadFormBridge,
+    `Cathedral.Assembly.MainChain, `Cathedral.Assembly,
     -- Spectral path (non-critical, parallel exploration)
     `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,
     `Cathedral.Spectral.OctonionicPartition, `Cathedral.Spectral.ClassRestriction,
