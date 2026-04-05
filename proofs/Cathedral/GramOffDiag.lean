@@ -3,12 +3,14 @@
 
   ## Off-diagonal Gram entry upper bound
 
-  ### Proven theorems (zero sorry):
-  - gramEntry_le_avg_diag: G_{j,k} ≤ (G_{j,j}+G_{k,k})/2
+  ### Proven theorems (zero sorry, zero axioms):
+  - gramEntry_le_avg_diag: G_{j,k} ≤ (G_{j,j}+G_{k,k})/2 (AM-GM)
   - gramEntry_le_third_offdiag: G_{j,k} ≤ 1/3 for j,k ≥ 3
   - gram_entry_offdiag_upper_amgm: G_{j,k} ≤ 1/4+1/(jk) for j,k ≥ 3, jk ≤ 12
   - log_two_lower: ln2 ≥ 2/3
   - piece_sq_upper_bound_n1/n2: piece bounds for n=1,2
+  - gramEntry_le_third_all: G_{j,j} ≤ 1/3 for ALL j ≥ 1
+  - gram_entry_offdiag_upper_all: G_{j,k} ≤ 1/4+1/(jk) for ALL j,k ≥ 1, jk ≤ 12
 -/
 
 import Cathedral.Defs
