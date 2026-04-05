@@ -16,7 +16,11 @@ lean_lib «Cathedral» where
     -- Core (critical path)
     `Cathedral.Defs, `Cathedral.Structural, `Cathedral.GramBounds,
     `Cathedral.GramDiag, `Cathedral.GramOffDiag,
-    `Cathedral.FractIntegral, `Cathedral.Mertens, `Cathedral.SelbergSieve,
+    `Cathedral.FractIntegral,
+    `Cathedral.Mertens.Defs, `Cathedral.Mertens.Algebraic,
+    `Cathedral.Mertens.Harmonic, `Cathedral.Mertens.GramEntry,
+    `Cathedral.Mertens.GramSum, `Cathedral.Mertens.NbDecay,
+    `Cathedral.SelbergSieve,
     `Cathedral.MellinBridge, `Cathedral.Assembly,
     -- Spectral path (non-critical, parallel exploration)
     `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,

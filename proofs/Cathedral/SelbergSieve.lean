@@ -7,7 +7,7 @@
 import Cathedral.Defs
 import Cathedral.Structural
 import Cathedral.GramBounds
-import Cathedral.Mertens
+import Cathedral.Mertens.NbDecay
 
 noncomputable section
 open Real MeasureTheory Set Finset
