@@ -125,16 +125,129 @@ lemma sum_inv_sq_le_two (n : ℕ) (hn : 1 ≤ n) :
   have : 0 ≤ 1 / (n : ℝ) := by positivity
   linarith
 
-/-- **AXIOM** (elementary number theory):
-    Σ_{i≠j, Fin n} gcd(i+1,j+1)/((i+1)(j+1)) ≤ 2n.
 
-    Proof sketch: gcd(a,b) ≤ min(a,b), so gcd/(ab) ≤ 1/max(a,b).
-    By symmetry, Σ_{i≠j} 1/max = 2·Σ_{i<j} 1/(j+1) = 2·Σ_j j/(j+1) ≤ 2n.
-    The exchange-of-summation-order formalization is technically complex. -/
-axiom gcd_offdiag_sum_le (n : ℕ) :
+-- ─── Per-term bounds ───
+
+private lemma gcd_le_inv_fst {n : ℕ} (i j : Fin n) :
+    (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+      (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)) ≤
+    1 / ((i.val : ℝ) + 1) := by
+  have hi : (0 : ℝ) < (i.val : ℝ) + 1 := by positivity
+  have hj : (0 : ℝ) < (j.val : ℝ) + 1 := by positivity
+  rw [div_le_div_iff₀ (mul_pos hi hj) hi, one_mul]
+  have : (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ≤ (j.val : ℝ) + 1 := by
+    exact_mod_cast Nat.gcd_le_right (i.val + 1) (by omega : 0 < j.val + 1)
+  nlinarith
+
+private lemma gcd_le_inv_snd {n : ℕ} (i j : Fin n) :
+    (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+      (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)) ≤
+    1 / ((j.val : ℝ) + 1) := by
+  have hi : (0 : ℝ) < (i.val : ℝ) + 1 := by positivity
+  have hj : (0 : ℝ) < (j.val : ℝ) + 1 := by positivity
+  rw [div_le_div_iff₀ (mul_pos hi hj) hj, one_mul]
+  have : (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ≤ (i.val : ℝ) + 1 := by
+    exact_mod_cast Nat.gcd_le_left (j.val + 1) (by omega : 0 < i.val + 1)
+  nlinarith
+
+-- ─── Ratio sum bound ───
+
+private lemma sum_ratio_le (n : ℕ) :
+    ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1)) ≤ (n : ℝ) := by
+  calc ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1))
+      ≤ ∑ _i : Fin n, (1 : ℝ) := by
+        apply Finset.sum_le_sum; intro i _
+        rw [div_le_one (by positivity : (0:ℝ) < (i.val : ℝ) + 1)]
+        linarith [Nat.cast_nonneg (α := ℝ) i.val]
+    _ = (n : ℝ) := by simp [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+
+-- ─── Card of {i : Fin n | i.val < j.val} = j.val ───
+
+private lemma card_lt_j {n : ℕ} (j : Fin n) :
+    ((Finset.univ : Finset (Fin n)).filter (fun i : Fin n => i.val < j.val)).card = j.val := by
+  -- The elements with val < j.val are exactly the image of Fin.castLE applied to Fin j.val
+  have h_eq : (Finset.univ : Finset (Fin n)).filter (fun i => i.val < j.val) =
+      (Finset.univ : Finset (Fin j.val)).image (fun k : Fin j.val => ⟨k.val, by omega⟩) := by
+    ext i; simp [Finset.mem_filter, Finset.mem_image, Fin.ext_iff]
+    constructor
+    · intro hi; exact ⟨⟨i.val, hi⟩, rfl⟩
+    · rintro ⟨k, hk⟩
+      have h1 : k.val < j.val := k.isLt
+      have h2 : k.val = i.val := by exact_mod_cast hk
+      exact Fin.mk_lt_mk.mpr (by omega)
+  rw [h_eq, Finset.card_image_of_injective _ (fun a b h => Fin.ext (by simpa [Fin.ext_iff] using h))]
+  simp [Finset.card_univ, Fintype.card_fin]
+
+-- ─── Main theorem ───
+
+set_option maxHeartbeats 800000 in
+theorem gcd_offdiag_sum_le (n : ℕ) :
     ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
       ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
-        (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) ≤ 2 * (n : ℝ)
+        (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) ≤ 2 * (n : ℝ) := by
+  -- Split erase i into {j < i} ∪ {j > i}
+  have h_split : ∀ i : Fin n, Finset.univ.erase i =
+      (Finset.univ.filter (fun j : Fin n => j.val < i.val)) ∪
+      (Finset.univ.filter (fun j : Fin n => i.val < j.val)) := by
+    intro i; ext j; constructor
+    · intro hj; simp [Finset.mem_erase] at hj; simp [Finset.mem_filter]; omega
+    · intro hj; simp [Finset.mem_filter] at hj; simp [Finset.mem_erase, Fin.ext_iff]; omega
+  have h_disj : ∀ i : Fin n, Disjoint
+      (Finset.univ.filter (fun j : Fin n => j.val < i.val))
+      (Finset.univ.filter (fun j : Fin n => i.val < j.val)) := by
+    intro i
+    rw [Finset.disjoint_filter]
+    intro j _ h1 h2; omega
+  -- The main calc chain (inline the term)
+  -- The main calc chain (inline the term, don't use set)
+  calc ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
+        ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+          (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))
+      = ∑ i : Fin n, (∑ j ∈ Finset.univ.filter (fun j : Fin n => j.val < i.val),
+            ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+              (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) +
+           ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+            ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+              (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))) := by
+        congr 1; ext i; rw [h_split i, Finset.sum_union (h_disj i)]
+    _ ≤ ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1) +
+              ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+                (1 / ((j.val : ℝ) + 1))) := by
+        apply Finset.sum_le_sum; intro i _
+        apply add_le_add
+        · -- j < i: each term ≤ 1/(i+1), count = i.val
+          calc ∑ j ∈ Finset.univ.filter (fun j : Fin n => j.val < i.val),
+                ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+                  (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))
+              ≤ ∑ _j ∈ Finset.univ.filter (fun j : Fin n => j.val < i.val),
+                  (1 / ((i.val : ℝ) + 1)) :=
+                Finset.sum_le_sum (fun j _ => gcd_le_inv_fst i j)
+            _ = (i.val : ℝ) / ((i.val : ℝ) + 1) := by
+                rw [Finset.sum_const, nsmul_eq_mul, card_lt_j i]; ring
+        · -- j > i: each term ≤ 1/(j+1)
+          exact Finset.sum_le_sum (fun j _ => gcd_le_inv_snd i j)
+    _ = ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1)) +
+        ∑ i : Fin n, ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+          (1 / ((j.val : ℝ) + 1)) := by
+        rw [← Finset.sum_add_distrib]
+    _ ≤ (n : ℝ) + (n : ℝ) := by
+        apply add_le_add (sum_ratio_le n)
+        -- Swap summation: Σ_i Σ_{j>i} 1/(j+1) = Σ_j (card{i<j})/(j+1) = Σ_j j/(j+1)
+        calc ∑ i : Fin n, ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+              (1 / ((j.val : ℝ) + 1))
+            = ∑ j : Fin n, ∑ i ∈ Finset.univ.filter (fun i : Fin n => i.val < j.val),
+                (1 / ((j.val : ℝ) + 1)) := by
+              -- Swap: Σ_i Σ_{j ∈ F(i)} g(j) = Σ_j Σ_{i ∈ F'(j)} g(j)
+              -- where F(i) = {j | i < j} and F'(j) = {i | i < j}
+              apply Finset.sum_comm'
+              intro i j; simp [Finset.mem_filter]
+          _ = ∑ j : Fin n, ((j.val : ℝ) / ((j.val : ℝ) + 1)) := by
+              congr 1; ext j
+              rw [Finset.sum_const, nsmul_eq_mul, card_lt_j j]; ring
+          _ ≤ (n : ℝ) := sum_ratio_le n
+    _ = 2 * (n : ℝ) := by ring
+
+
 
 -- ════════════════════════════════════════════════
 -- BASIS SUM TIGHT
