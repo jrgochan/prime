@@ -407,7 +407,7 @@ private lemma fract_sq_tail_bound (j : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
 /-- **gramEntry j j ≤ 1/3 for j ≥ 3**.
     Proof by piece integral decomposition + Taylor bound.
     For each M: gramEntry ≤ 1/3 + 2j/(3(j+M+1)), and taking M → ∞ gives ≤ 1/3. -/
-private lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
+lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
     gramEntry j j ≤ 1 / 3 := by
   have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
   -- For each M, bound gramEntry by partial sum + tail
