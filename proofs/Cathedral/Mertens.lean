@@ -485,11 +485,46 @@ theorem gram_sum_tight :
               (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1)))) :=
         Finset.sum_le_sum (fun i _ => h_row_axiom i)
     _ ≤ (N - 1 : ℝ) ^ 2 / 4 + (N - 1 : ℝ) / 12 + 2 + 2 * (N - 1 : ℝ) := by
-        -- Split: Σ_i [const + 1/(i+1)² + Σ gcd/(ij)]
-        -- = (N-1)·const + Σ 1/(i+1)² + Σ_total gcd/(ij)
+        -- Key inequality: split the sum
+        have h_sq_bound : ∑ i : Fin (N - 1),
+            (1 / (((i.val : ℝ) + 1) * ((i.val : ℝ) + 1))) ≤ 2 := by
+          -- Σ 1/(i+1)² ≤ Σ 1/(i(i+1)) = telescoping = 1 - 1/N < 1, plus i=0 term = 1.
+          -- So total ≤ 2. But formalizing telescoping is complex.
+          -- Simpler: Σ 1/(i+1)² ≤ Σ_{i=0}^{N-2} 1 = N-1 ... but N-1 > 2 for N > 3!
+          -- We need the bound for ALL N ≥ 3.
+          -- Use: 1/(i+1)² ≤ 1/(i·(i+1)) = 1/i - 1/(i+1) for i ≥ 1.
+          -- And 1/1² = 1 for i = 0.
+          -- Σ_{i=0}^{n-1} 1/(i+1)² = 1 + Σ_{i=1}^{n-1} 1/(i+1)²
+          -- ≤ 1 + Σ_{i=1}^{n-1} 1/(i(i+1)) = 1 + (1 - 1/n) < 2.
+          sorry -- telescoping sum bound
+        -- GCD sum bound: Σ_{i≠j} gcd(i+1,j+1)/((i+1)(j+1)) ≤ 2(N-1)
+        -- Proof sketch: gcd ≤ min, min*max = product, so gcd/(ij) ≤ 1/max(i,j) ≤ 1.
+        -- Writing Σ_{i≠j} = 2·Σ_{i<j}, and Σ_{i<j} 1/(j+1) = Σ_j j/(j+1) ≤ N-2.
+        have h_gcd_bound : ∑ i : Fin (N - 1), ∑ j ∈ Finset.univ.erase i,
+            ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) /
+              (((i.val : ℝ) + 1) * ((j.val : ℝ) + 1))) ≤ 2 * (N - 1 : ℝ) := by
+          -- Using gcd(a,b) ≤ min(a,b) and min(a,b)·max(a,b) = a·b:
+          -- gcd/(ij) ≤ min/(ij) = 1/max ≤ 1
+          -- But we need the tighter: gcd/(ij) ≤ 1/(i+1) (since gcd ≤ j+1 ≤ (j+1))
+          -- and gcd/(ij) ≤ 1/(j+1).
+          -- Using the WEAKER bound gcd/(ij) ≤ 1/(i+1):
+          -- Per row i: Σ_{j≠i} 1/(i+1) = (N-2)/(i+1)
+          -- Total: Σ_i (N-2)/(i+1) = (N-2)·H_{N-1}
+          -- This is O(N log N), too big. Need 1/max approach.
+          --
+          -- ALTERNATIVE: bound each term by min(1/(i+1), 1/(j+1)) ≤ 1.
+          -- Then the QUADRATIC Σ = (N-1)(N-2) is too big.
+          --
+          -- CORRECT APPROACH: Leave as axiom for now.
+          -- gcd sum ≤ 2(N-1) follows from:
+          -- Σ_{i≠j} gcd/(ij) ≤ Σ_{i≠j} 1/max(i+1,j+1) = 2·Σ_{i<j} 1/(j+1)
+          --   = 2·Σ_{j=1}^{N-2} j/(j+1) ≤ 2(N-2) ≤ 2(N-1)
+          -- The pairwise symmetry and telescoping in Lean is technically complex.
+          sorry
+        -- Combine the constant, squared, and gcd sums
         simp only [Finset.sum_add_distrib, Finset.sum_const, Finset.card_fin, nsmul_eq_mul]
-        -- Bound Σ 1/(i+1)² ≤ 2 and Σ gcd/(ij) ≤ 2(N-1)
-        sorry -- TODO: Split and bound the three sums
+        push_cast [Nat.cast_sub (show 1 ≤ N from by omega)]
+        linarith
     _ ≤ (N - 1 : ℝ) ^ 2 / 4 + 5 * (N : ℝ) := by
         nlinarith
 
