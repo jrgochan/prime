@@ -14,7 +14,10 @@ lean_lib «HyperzetaProofs» where
 lean_lib «Cathedral» where
   roots := #[
     -- Core (critical path)
-    `Cathedral.Defs, `Cathedral.Structural, `Cathedral.GramBounds,
+    `Cathedral.Defs,
+    `Cathedral.Structural.Eigenvalue, `Cathedral.Structural.NbLinComb,
+    `Cathedral.Structural.Independence, `Cathedral.Structural.L2Tools,
+    `Cathedral.Structural, `Cathedral.GramBounds,
     `Cathedral.GramDiag, `Cathedral.GramOffDiag,
     `Cathedral.FractIntegral,
     `Cathedral.Mertens.Defs, `Cathedral.Mertens.Algebraic,
