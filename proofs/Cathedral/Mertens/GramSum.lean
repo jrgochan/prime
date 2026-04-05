@@ -24,7 +24,7 @@ open Real MeasureTheory Set Finset Matrix
 -- ════════════════════════════════════════════════
 
 /-- Off-diagonal Gram matrix entries are at most 1/3. -/
-lemma gramMatrix_offdiag_le_third (N : ℕ) (hN3 : 3 ≤ N) :
+lemma gramMatrix_offdiag_le_third (N : ℕ) (_hN3 : 3 ≤ N) :
     ∀ i j : Fin (N - 1), i ≠ j → gramMatrix N i j ≤ 1 / 3 := by
   intros i j hij
   simp only [gramMatrix, Matrix.of_apply]
@@ -81,7 +81,8 @@ lemma gramMatrix_offdiag_gcd (N : ℕ) :
   simp only [gramMatrix, Matrix.of_apply]
   have hi_ne_j : i.val + 1 ≠ j.val + 1 := by intro h; exact hij (Fin.ext (by omega))
   have h := gram_entry_offdiag_upper (i.val + 1) (j.val + 1) (by omega) (by omega) hi_ne_j
-  convert h using 2 <;> push_cast <;> ring
+  convert h using 2
+  all_goals (push_cast; ring)
 
 /-- Row sum with gcd-based off-diagonal bound:
     Σ_j G(i,j) ≤ (N-1)/4 + 1/12 + 1/(i+1)² + Σ_{j≠i} gcd/(ij). -/

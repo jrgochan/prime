@@ -49,7 +49,7 @@ axiom gram_entry_offdiag_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : 
 
 /-- Off-diagonal entries are at most 1/3.
     Follows from gramEntry_le_avg_diag (AM-GM) + gramEntry_le_third_all. -/
-lemma gram_entry_offdiag_le_third (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
+lemma gram_entry_offdiag_le_third (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (_hjk : j ≠ k) :
     gramEntry j k ≤ 1 / 3 := by
   have h_avg := gramEntry_le_avg_diag j k
   have h1 := gramEntry_le_third_all j hj
