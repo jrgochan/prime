@@ -195,7 +195,7 @@ theorem basis_integral_upper (k : ℕ) (hk : 1 ≤ k) :
 -- ════════════════════════════════════════════════
 
 /-- gramEntry j j ≤ ∫₀¹ {j/x} dx via pointwise {u}² ≤ {u}. -/
-private lemma gramEntry_le_basis (j : ℕ) :
+lemma gramEntry_le_basis (j : ℕ) :
     gramEntry j j ≤ ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) := by
   unfold gramEntry
   apply intervalIntegral.integral_mono_on (by norm_num : (0:ℝ) ≤ 1)
@@ -220,7 +220,7 @@ private lemma gramEntry_le_basis (j : ℕ) :
 /-- log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4 for x ≥ 0.
     Proof: h(x) = log(1+x) - (x - x²/2 + x³/3 - x⁴/4) has h(0) = 0 and
     h'(x) = x⁴/(1+x) ≥ 0, so h is monotone. -/
-private lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
+lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
     x - x^2/2 + x^3/3 - x^4/4 ≤ Real.log (1 + x) := by
   suffices h : 0 ≤ Real.log (1 + x) - (x - x^2/2 + x^3/3 - x^4/4) by linarith
   set f : ℝ → ℝ := fun t => Real.log (1 + t) - (t - t^2/2 + t^3/3 - t^4/4) with hf_def
@@ -259,7 +259,7 @@ private lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
 
 /-- FTC: ∫_{j/(n+1)}^{j/n} (j/x - n)² dx = j·[(2n+1)/(n+1) - 2n·log(1+1/n)].
     Antiderivative: F(x) = -j²·x⁻¹ - 2jn·log(x) + n²·x. -/
-private lemma integral_sq_div_sub_const (j n : ℕ) (hj : 1 ≤ j) (hn : 1 ≤ n) :
+lemma integral_sq_div_sub_const (j n : ℕ) (hj : 1 ≤ j) (hn : 1 ≤ n) :
     ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
       ((j:ℝ)/x - (n:ℝ))^2 =
     (j:ℝ) * ((2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ))) := by
@@ -314,7 +314,7 @@ private lemma integral_sq_div_sub_const (j n : ℕ) (hj : 1 ≤ j) (hn : 1 ≤ n
 
 /-- Per-piece bound: the squared piece integral ≤ j/(3n(n+1)) for n ≥ 3.
     Uses log_lower_quartic: log(1+1/n) ≥ 1/n - 1/(2n²) + 1/(3n³) - 1/(4n⁴). -/
-private lemma piece_sq_upper_bound (n : ℕ) (hn : 3 ≤ n) :
+lemma piece_sq_upper_bound (n : ℕ) (hn : 3 ≤ n) :
     (2*(n:ℝ)+1)/((n:ℝ)+1) - 2*(n:ℝ)* Real.log (1 + 1/(n:ℝ))
     ≤ 1 / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
   have hn_pos : (0:ℝ) < (n:ℝ) := Nat.cast_pos.mpr (by omega)
@@ -338,7 +338,7 @@ private lemma piece_sq_upper_bound (n : ℕ) (hn : 3 ≤ n) :
   linarith [hstep1, hstep2]
 
 -- Integrability of {j/x}²
-private lemma fract_sq_intervalIntegrable (j : ℕ) (a b : ℝ) :
+lemma fract_sq_intervalIntegrable (j : ℕ) (a b : ℝ) :
     IntervalIntegrable (fun x => Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) volume a b := by
   apply IntervalIntegrable.mono_fun
     (intervalIntegral.intervalIntegrable_const (c := (1:ℝ)))
@@ -351,7 +351,7 @@ private lemma fract_sq_intervalIntegrable (j : ℕ) (a b : ℝ) :
     nlinarith [Int.fract_nonneg ((j:ℝ)/x), Int.fract_lt_one ((j:ℝ)/x)]
 
 /-- Bound each squared piece integral by j/(3n(n+1)). -/
-private lemma fract_sq_piece_bound (j n : ℕ) (hj : 3 ≤ j) (hn : j ≤ n) :
+lemma fract_sq_piece_bound (j n : ℕ) (hj : 3 ≤ j) (hn : j ≤ n) :
     ∫ x in ((j:ℝ)/((n:ℝ)+1))..((j:ℝ)/(n:ℝ)),
       Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤
     (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by
@@ -374,7 +374,7 @@ private lemma fract_sq_piece_bound (j n : ℕ) (hj : 3 ≤ j) (hn : j ≤ n) :
     _ = (j:ℝ) / (3 * (n:ℝ) * ((n:ℝ)+1)) := by ring
 
 /-- Finite telescoping of squared piece integrals. -/
-private lemma fract_sq_telescope (j : ℕ) (hj : 1 ≤ j) (N : ℕ) :
+lemma fract_sq_telescope (j : ℕ) (hj : 1 ≤ j) (N : ℕ) :
     ∑ m ∈ Finset.range (N + 1),
       ∫ x in ((j:ℝ)/((j:ℝ)+(m:ℝ)+1))..((j:ℝ)/((j:ℝ)+(m:ℝ))),
         Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) =
@@ -393,7 +393,7 @@ private lemma fract_sq_telescope (j : ℕ) (hj : 1 ≤ j) (N : ℕ) :
     rw [add_comm]; convert key using 2 <;> simp [a, b] <;> ring_nf
 
 /-- Tail bound: ‖∫₀^ε {j/x}² dx‖ ≤ ε. -/
-private lemma fract_sq_tail_bound (j : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
+lemma fract_sq_tail_bound (j : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
     ‖∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖ ≤ ε := by
   have h : ∀ x ∈ Set.uIoc (0:ℝ) ε,
       ‖Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)‖ ≤ 1 := by
