@@ -91,3 +91,5 @@ proofs/.tower_cache.json
 *.oops
 *.orig
 *.orig.*
+visualizer/node_modules/
+visualizer/.next/
