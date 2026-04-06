@@ -1,26 +1,32 @@
 # ══════════════════════════════════════════════════════════════
 # Project PRIME — Makefile
-# Three pillars: Lean 4 Proofs · Rust Experiments · Platform
+# Five pillars: Lean 4 Proofs · Rust Experiments · Visualizer · Paper · Platform
 # ══════════════════════════════════════════════════════════════
 
 .PHONY: help build clean \
         lean-build lean-clean lean-check lean-audit lean-setup \
-        experiments experiment-parity experiment-cross experiment-weil \
+        cathedral-archive cathedral-dump cathedral-audit cathedral-check \
+        experiments experiments-clean \
+        experiment-parity experiment-cross experiment-weil \
+        experiment-g2 experiment-gcd experiment-selberg \
+        experiment-fourier experiment-quaternion \
+        visualizer visualizer-dev visualizer-build visualizer-parse \
+        paper paper-technical paper-overview paper-clean \
         platform-setup platform-build platform-run platform-stop \
-        setup-ai ensure-ollama check-env \
-        cathedral-archive cathedral-audit cathedral-check \
-        paper paper-technical paper-overview paper-clean
+        setup-ai ensure-ollama check-env
 
 # ── Directories ──────────────────────────────────────────────
 PROOFS_DIR    = proofs
+CATHEDRAL_DIR = $(PROOFS_DIR)/Cathedral
 LEAN_BUILD    = $(PROOFS_DIR)/.lake/build
 EXPERIMENTS   = experiments
+VISUALIZER    = visualizer
 PYTHON_VENV   = gateway-api/venv/bin/activate
 WASM_OUT_DIR  = ../ui-viewport/src/wasm
 
 # ── Lean source files (for dependency tracking) ─────────────
-LEAN_SRCS = $(wildcard $(PROOFS_DIR)/SpectralRH/*.lean) \
-            $(wildcard $(PROOFS_DIR)/*.lean)
+LEAN_SRCS = $(wildcard $(CATHEDRAL_DIR)/**/*.lean) \
+            $(wildcard $(CATHEDRAL_DIR)/*.lean)
 
 # ══════════════════════════════════════════════════════════════
 # DEFAULT / HELP
@@ -28,39 +34,57 @@ LEAN_SRCS = $(wildcard $(PROOFS_DIR)/SpectralRH/*.lean) \
 
 help:
 	@echo ""
-	@echo "  ╔══════════════════════════════════════════════════╗"
-	@echo "  ║         Project PRIME — Build Targets            ║"
-	@echo "  ╠══════════════════════════════════════════════════╣"
-	@echo "  ║                                                  ║"
-	@echo "  ║  LEAN 4 PROOFS (SpectralRH)                      ║"
-	@echo "  ║    make lean-build    Build all Lean proofs       ║"
-	@echo "  ║    make lean-clean    Remove .lake/build cache    ║"
-	@echo "  ║    make lean-check    Quick typecheck (no build)  ║"
-	@echo "  ║    make lean-audit    Scan for sorry/axiom usage  ║"
-	@echo "  ║    make lean-setup    Fetch Mathlib cache         ║"
-	@echo "  ║                                                  ║"
-	@echo "  ║  CATHEDRAL (RH Proof Chain)                      ║"
-	@echo "  ║    make cathedral-archive  Archive .tar.gz        ║"
-	@echo "  ║    make cathedral-audit    Sorry & axiom scan     ║"
-	@echo "  ║    make cathedral-check    Typecheck all modules  ║"
-	@echo "  ║                                                  ║"
-	@echo "  ║  RUST EXPERIMENTS                                ║"
-	@echo "  ║    make experiments          Build & run all      ║"
-	@echo "  ║    make experiment-parity    Parity Schur only    ║"
-	@echo "  ║    make experiment-cross     Cross-class only     ║"
-	@echo "  ║    make experiment-weil      Weil explicit only   ║"
-	@echo "  ║                                                  ║"
-	@echo "  ║  COMBINED                                        ║"
-	@echo "  ║    make build         Build proofs + experiments  ║"
-	@echo "  ║    make clean         Clean all build artifacts   ║"
-	@echo "  ║                                                  ║"
-	@echo "  ║  PLATFORM (HYPERZETA)                            ║"
-	@echo "  ║    make platform-setup   Install all deps         ║"
-	@echo "  ║    make platform-build   Compile WASM + PyO3      ║"
-	@echo "  ║    make platform-run     Start full stack          ║"
-	@echo "  ║    make platform-stop    Shutdown all services     ║"
-	@echo "  ║                                                  ║"
-	@echo "  ╚══════════════════════════════════════════════════╝"
+	@echo "  ╔══════════════════════════════════════════════════════╗"
+	@echo "  ║           Project PRIME — Build Targets              ║"
+	@echo "  ╠══════════════════════════════════════════════════════╣"
+	@echo "  ║                                                      ║"
+	@echo "  ║  LEAN 4 PROOFS                                       ║"
+	@echo "  ║    make lean-build      Build all Lean proofs         ║"
+	@echo "  ║    make lean-clean      Remove .lake/build cache      ║"
+	@echo "  ║    make lean-check      Quick typecheck (Cathedral)   ║"
+	@echo "  ║    make lean-audit      Scan for sorry/axiom usage    ║"
+	@echo "  ║    make lean-setup      Fetch Mathlib cache           ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  CATHEDRAL (RH Proof Chain)                          ║"
+	@echo "  ║    make cathedral-dump     Dump .lean → text file     ║"
+	@echo "  ║    make cathedral-archive  Archive .tar.gz            ║"
+	@echo "  ║    make cathedral-audit    Sorry & axiom scan         ║"
+	@echo "  ║    make cathedral-check    Typecheck all modules      ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  RUST EXPERIMENTS                                    ║"
+	@echo "  ║    make experiments           Build & run all         ║"
+	@echo "  ║    make experiment-parity     Parity Schur analysis   ║"
+	@echo "  ║    make experiment-cross      Cross-class verifier    ║"
+	@echo "  ║    make experiment-weil       Weil explicit formula   ║"
+	@echo "  ║    make experiment-g2         G₂ spectral operator    ║"
+	@echo "  ║    make experiment-gcd        GCD sum audit           ║"
+	@echo "  ║    make experiment-selberg    Selberg validation      ║"
+	@echo "  ║    make experiment-fourier    Spectral Fourier        ║"
+	@echo "  ║    make experiment-quaternion Quaternion RH            ║"
+	@echo "  ║    make experiments-clean     Clean all Rust targets   ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  VISUALIZER (Cathedral Proof Explorer)               ║"
+	@echo "  ║    make visualizer-dev    Start dev server (port 3000)║"
+	@echo "  ║    make visualizer-build  Production build            ║"
+	@echo "  ║    make visualizer-parse  Re-parse Lean dep graph     ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  PAPER                                               ║"
+	@echo "  ║    make paper             Build all papers            ║"
+	@echo "  ║    make paper-technical   cathedral.tex → pdf         ║"
+	@echo "  ║    make paper-overview    overview.tex → pdf          ║"
+	@echo "  ║    make paper-clean       Remove LaTeX artifacts      ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  COMBINED                                            ║"
+	@echo "  ║    make build      Build proofs + experiments         ║"
+	@echo "  ║    make clean      Clean all build artifacts          ║"
+	@echo "  ║                                                      ║"
+	@echo "  ║  PLATFORM (HYPERZETA)                                ║"
+	@echo "  ║    make platform-setup   Install all deps             ║"
+	@echo "  ║    make platform-build   Compile WASM + PyO3          ║"
+	@echo "  ║    make platform-run     Start full stack              ║"
+	@echo "  ║    make platform-stop    Shutdown all services         ║"
+	@echo "  ║                                                      ║"
+	@echo "  ╚══════════════════════════════════════════════════════╝"
 	@echo ""
 
 # ══════════════════════════════════════════════════════════════
@@ -102,55 +126,53 @@ lean-clean:
 	@echo "  🧹 Lean build cache removed."
 	@echo "  💡 Tip: Restart your IDE / Lean server to clear stale diagnostics."
 
-## Quick typecheck of core SpectralRH files (no full build)
+## Quick typecheck of Cathedral proof chain
 lean-check:
-	@echo "═══ Lean 4: Typechecking SpectralRH modules ═══"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/Defs.lean 2>&1 \
-		&& echo "  ✓ Defs.lean" || echo "  ✗ Defs.lean"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/Structural.lean 2>&1 \
-		&& echo "  ✓ Structural.lean" || echo "  ✗ Structural.lean"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/ParitySchur.lean 2>&1 \
-		&& echo "  ✓ ParitySchur.lean" || echo "  ✗ ParitySchur.lean"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/Quantitative.lean 2>&1 \
-		&& echo "  ✓ Quantitative.lean" || echo "  ✗ Quantitative.lean"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/PTSymmetry.lean 2>&1 \
-		&& echo "  ✓ PTSymmetry.lean" || echo "  ✗ PTSymmetry.lean"
-	@cd $(PROOFS_DIR) && lake env lean SpectralRH/Assembly.lean 2>&1 \
-		&& echo "  ✓ Assembly.lean" || echo "  ✗ Assembly.lean"
+	@echo "═══ Lean 4: Typechecking Cathedral modules ═══"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Defs.lean 2>&1 \
+		&& echo "  ✓ Cathedral/Defs.lean" || echo "  ✗ Cathedral/Defs.lean"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Mertens/GramBounds.lean 2>&1 \
+		&& echo "  ✓ Mertens/GramBounds.lean" || echo "  ✗ Mertens/GramBounds.lean"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Mertens/GramSum.lean 2>&1 \
+		&& echo "  ✓ Mertens/GramSum.lean" || echo "  ✗ Mertens/GramSum.lean"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Structural/Structural.lean 2>&1 \
+		&& echo "  ✓ Structural/Structural.lean" || echo "  ✗ Structural/Structural.lean"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Structural/ParitySchur.lean 2>&1 \
+		&& echo "  ✓ Structural/ParitySchur.lean" || echo "  ✗ Structural/ParitySchur.lean"
+	@cd $(PROOFS_DIR) && lake env lean Cathedral/Assembly/MainChain.lean 2>&1 \
+		&& echo "  ✓ Assembly/MainChain.lean" || echo "  ✗ Assembly/MainChain.lean"
 	@echo "═══ Typecheck complete ═══"
 
 ## Audit: scan for sorry and axiom usage across all proof files
 lean-audit:
 	@echo "═══ Lean 4: Sorry & Axiom Audit ═══"
 	@echo "── sorry usage ──"
-	@grep -rn "\bsorry\b" $(PROOFS_DIR)/SpectralRH/*.lean 2>/dev/null \
+	@grep -rn "\bsorry\b" $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null \
 		| grep -v "^.*:.*--" || echo "  None found! 🎉"
 	@echo ""
 	@echo "── axiom declarations ──"
-	@grep -rn "^axiom " $(PROOFS_DIR)/SpectralRH/*.lean 2>/dev/null \
+	@grep -rn "^axiom " $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null \
 		|| echo "  None found."
 	@echo ""
 	@echo "── sorry count by file ──"
-	@for f in $(PROOFS_DIR)/SpectralRH/*.lean; do \
+	@for f in $$(find $(CATHEDRAL_DIR) -name '*.lean'); do \
 		count=$$(grep -c "\bsorry\b" "$$f" 2>/dev/null); \
-		name=$$(basename "$$f"); \
+		name=$$(echo "$$f" | sed 's|$(PROOFS_DIR)/||'); \
 		if [ "$$count" -gt 0 ] 2>/dev/null; then \
 			echo "  ⚠  $$name: $$count sorry"; \
 		fi; \
 	done
 	@echo ""
-	@echo "── total sorry in proofs (excluding comments) ──"
-	@grep -rn "\bsorry\b" $(PROOFS_DIR)/SpectralRH/*.lean 2>/dev/null \
-		| grep -v "\-\-" | grep -v "STATUS" | grep -v "PROVEN" \
-		| grep -v "no sorry" | grep -v "SORRY" \
-		|| echo "  ✅ Zero sorry in proof code!"
+	@echo "── axiom count ──"
+	@total=$$(grep -rc "^axiom " $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null | awk -F: '{s+=$$2} END{print s}'); \
+		echo "  Total axioms: $$total"
+	@echo ""
 	@echo "═══ Audit complete ═══"
 
 # ══════════════════════════════════════════════════════════════
 # CATHEDRAL (RH Proof Chain)
 # ══════════════════════════════════════════════════════════════
 
-CATHEDRAL_DIR = $(PROOFS_DIR)/Cathedral
 ARCHIVE_NAME = cathedral-archive-$(shell date +%Y%m%d-%H%M%S).tar.gz
 
 ## Create a .tar.gz archive of the entire Cathedral lean structure
@@ -163,8 +185,7 @@ cathedral-archive:
 		--exclude='*.trace' \
 		Cathedral/ \
 		lakefile.lean \
-		lean-toolchain \
-		GRAM_ENTRY_PLAN.md
+		lean-toolchain
 	@echo "  📦 Archive created: $(ARCHIVE_NAME)"
 	@echo "  📊 Size: $$(du -h $(ARCHIVE_NAME) | cut -f1)"
 	@echo "  📁 Contents:"
@@ -173,12 +194,22 @@ cathedral-archive:
 	@echo "  ✅ Cathedral archived."
 
 ## Dump all Cathedral .lean files into a single readable text file
-## Perfect for pasting into AI chat interfaces (Gemini, etc.)
+## Perfect for sharing with The Theorist / pasting into AI chat
 cathedral-dump:
 	@echo "═══ Cathedral: Creating text dump ═══"
 	@echo "# Cathedral Source Dump" > cathedral-dump.txt
 	@echo "# Generated: $$(date)" >> cathedral-dump.txt
 	@echo "# Project: prime/proofs/Cathedral" >> cathedral-dump.txt
+	@echo "# Proof: Spectral Riemann Hypothesis (2-axiom reduction)" >> cathedral-dump.txt
+	@echo "" >> cathedral-dump.txt
+	@echo "# Architecture:" >> cathedral-dump.txt
+	@echo "#   Cathedral/Defs.lean              - Core definitions" >> cathedral-dump.txt
+	@echo "#   Cathedral/Mertens/               - Physics pillar (Gram bounds)" >> cathedral-dump.txt
+	@echo "#   Cathedral/Structural/            - Proof structure (Schur, parity)" >> cathedral-dump.txt
+	@echo "#   Cathedral/MellinBridge/          - Spectral pillar (Mellin, separation)" >> cathedral-dump.txt
+	@echo "#   Cathedral/Quantitative/          - Quantitative estimates" >> cathedral-dump.txt
+	@echo "#   Cathedral/Assembly/              - Final RH assembly" >> cathedral-dump.txt
+	@echo "#   Cathedral/Spectral/              - Exploratory (off critical path)" >> cathedral-dump.txt
 	@echo "" >> cathedral-dump.txt
 	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
@@ -196,18 +227,11 @@ cathedral-dump:
 	@echo "════════════════════════════════════════════════" >> cathedral-dump.txt
 	@echo "" >> cathedral-dump.txt
 	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-dump.txt
-	@if [ -f $(PROOFS_DIR)/GRAM_ENTRY_PLAN.md ]; then \
-		echo "" >> cathedral-dump.txt; \
-		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
-		echo "FILE: GRAM_ENTRY_PLAN.md" >> cathedral-dump.txt; \
-		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
-		echo "" >> cathedral-dump.txt; \
-		cat $(PROOFS_DIR)/GRAM_ENTRY_PLAN.md >> cathedral-dump.txt; \
-	fi
 	@echo "  📄 Dump created: cathedral-dump.txt"
 	@echo "  📊 Size: $$(du -h cathedral-dump.txt | cut -f1)"
 	@echo "  📝 Files included: $$(grep -c '^FILE:' cathedral-dump.txt)"
-	@echo "  ✅ Ready to paste into chat!"
+	@echo "  📐 Lines: $$(wc -l < cathedral-dump.txt | tr -d ' ')"
+	@echo "  ✅ Ready to share with The Theorist!"
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:
@@ -217,26 +241,27 @@ cathedral-audit:
 	@grep -rn "\bsorry\b" $(CATHEDRAL_DIR)/Mertens/*.lean 2>/dev/null \
 		| grep -v "\-\-" || echo "  ✅ Zero sorry in Mertens/!"
 	@echo ""
-	@echo "── sorry usage (Scratch/ — active work) ──"
-	@grep -rn "\bsorry\b" $(CATHEDRAL_DIR)/Scratch/*.lean 2>/dev/null \
-		| grep -v "\-\-" || echo "  None found."
-	@echo ""
-	@echo "── axiom declarations ──"
-	@grep -rn "^axiom " $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null \
-		|| echo "  None found."
-	@echo ""
-	@echo "── sorry count by file ──"
-	@for f in $$(find $(CATHEDRAL_DIR) -name '*.lean'); do \
-		count=$$(grep -c "\bsorry\b" "$$f" 2>/dev/null); \
-		name=$$(echo "$$f" | sed 's|$(PROOFS_DIR)/||'); \
-		if [ "$$count" -gt 0 ] 2>/dev/null; then \
-			echo "  ⚠  $$name: $$count sorry"; \
+	@echo "── sorry usage (all modules) ──"
+	@for d in Mertens Structural MellinBridge Quantitative Assembly Spectral; do \
+		count=$$(grep -rc "\bsorry\b" $(CATHEDRAL_DIR)/$$d/*.lean 2>/dev/null | awk -F: '{s+=$$2} END{print s+0}'); \
+		if [ "$$count" -gt 0 ]; then \
+			echo "  ⚠  $$d/: $$count sorry"; \
+		else \
+			echo "  ✅ $$d/: 0 sorry"; \
 		fi; \
 	done
 	@echo ""
+	@echo "── axiom declarations (critical path) ──"
+	@grep -rn "^axiom " $(CATHEDRAL_DIR)/Mertens/*.lean $(CATHEDRAL_DIR)/MellinBridge/*.lean 2>/dev/null \
+		|| echo "  None outside critical path."
+	@echo ""
+	@echo "── axiom declarations (all files) ──"
+	@grep -rn "^axiom " $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null \
+		|| echo "  None found."
+	@echo ""
 	@echo "═══ Cathedral audit complete ═══"
 
-## Typecheck all Cathedral modules
+## Typecheck all Cathedral modules (builds the full proof chain)
 cathedral-check:
 	@echo "═══ Cathedral: Typechecking all modules ═══"
 	@cd $(PROOFS_DIR) && lake build Cathedral.Assembly.MainChain 2>&1 | tail -5
@@ -282,34 +307,90 @@ paper-clean:
 # RUST EXPERIMENTS
 # ══════════════════════════════════════════════════════════════
 
-experiments: experiment-parity experiment-cross experiment-weil
+## Build and run all Rust experiments
+experiments: experiment-parity experiment-g2 experiment-cross \
+             experiment-weil experiment-gcd experiment-selberg
 	@echo "  ✅ All experiments complete."
 
+## Clean all Rust experiment build artifacts
 experiments-clean:
 	@echo "═══ Experiments: Cleaning ═══"
-	@for d in $(EXPERIMENTS)/*/; do \
-		if [ -f "$$d/Cargo.toml" ]; then \
-			echo "  Cleaning $$(basename $$d)..."; \
-			cd "$$d" && cargo clean 2>/dev/null; \
-			cd - > /dev/null; \
-		fi; \
+	@find $(EXPERIMENTS) -name "Cargo.toml" -exec dirname {} \; | while read d; do \
+		echo "  Cleaning $$(basename $$d)..."; \
+		cd "$$d" && cargo clean 2>/dev/null; \
+		cd - > /dev/null; \
 	done
 	@echo "  🧹 Experiment build artifacts removed."
 
+# ── Spectral ─────────────────────────────────────────────────
+
 experiment-parity:
 	@echo "═══ Experiment: Parity Schur ═══"
-	@cd $(EXPERIMENTS)/parity_schur && cargo run --release 2>&1 | tail -5
+	@cd $(EXPERIMENTS)/spectral/parity-schur && cargo run --release 2>&1 | tail -10
 	@echo ""
+
+experiment-g2:
+	@echo "═══ Experiment: G₂ Spectral Operator ═══"
+	@cd $(EXPERIMENTS)/spectral/g2-spectral && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+experiment-fourier:
+	@echo "═══ Experiment: Spectral Fourier ═══"
+	@cd $(EXPERIMENTS)/spectral/spectral-fourier && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+# ── Algebraic ────────────────────────────────────────────────
 
 experiment-cross:
 	@echo "═══ Experiment: Cross-Class Verifier ═══"
-	@cd $(EXPERIMENTS)/cross_class_verifier && cargo run --release 2>&1 | tail -5
+	@cd $(EXPERIMENTS)/algebraic/cross-class-verifier && cargo run --release 2>&1 | tail -10
 	@echo ""
 
-experiment-weil:
-	@echo "═══ Experiment: Weil Explicit ═══"
-	@cd $(EXPERIMENTS)/weil_explicit && cargo run --release 2>&1 | tail -5
+experiment-quaternion:
+	@echo "═══ Experiment: Quaternion RH ═══"
+	@cd $(EXPERIMENTS)/algebraic/quaternion-rh && cargo run --release 2>&1 | tail -10
 	@echo ""
+
+# ── Gram Matrix ──────────────────────────────────────────────
+
+experiment-gcd:
+	@echo "═══ Experiment: GCD Sum Audit ═══"
+	@cd $(EXPERIMENTS)/gram-matrix/gcd-sum-audit && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+experiment-selberg:
+	@echo "═══ Experiment: Selberg Validation ═══"
+	@cd $(EXPERIMENTS)/gram-matrix/selberg-validation && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+# ── Numerical ────────────────────────────────────────────────
+
+experiment-weil:
+	@echo "═══ Experiment: Weil Explicit Formula ═══"
+	@cd $(EXPERIMENTS)/numerical/weil-explicit && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+# ══════════════════════════════════════════════════════════════
+# VISUALIZER (Cathedral Proof Explorer)
+# ══════════════════════════════════════════════════════════════
+
+## Start the visualizer dev server (Next.js on port 3000)
+visualizer-dev:
+	@echo "═══ Visualizer: Starting dev server ═══"
+	@echo "  → http://localhost:3000"
+	@cd $(VISUALIZER) && npm run dev
+
+## Build the visualizer for production
+visualizer-build:
+	@echo "═══ Visualizer: Production build ═══"
+	@cd $(VISUALIZER) && npm run build
+	@echo "  ✅ Visualizer built."
+
+## Re-parse Lean files to update the proof dependency graph
+visualizer-parse:
+	@echo "═══ Visualizer: Parsing Lean dependency graph ═══"
+	@cd $(VISUALIZER) && node scripts/parse-lean.mjs
+	@echo "  ✅ Dependency graph updated."
 
 # ══════════════════════════════════════════════════════════════
 # PLATFORM (HYPERZETA) — UI, API, Ollama
