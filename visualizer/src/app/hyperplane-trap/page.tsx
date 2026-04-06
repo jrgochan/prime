@@ -1,65 +1,53 @@
 "use client";
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, Suspense } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Text, Float } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import { motion } from "framer-motion";
 import * as THREE from "three";
 
 function Surface() {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  const { geometry, colorArray } = useMemo(() => {
+  const geometry = useMemo(() => {
     const size = 80;
     const geo = new THREE.PlaneGeometry(6, 6, size, size);
     const positions = geo.attributes.position;
     const colors = new Float32Array(positions.count * 3);
 
-    // The Mellin residual surface: |ℓ_ρ(1 - Σ v_k {k/x})|²
-    // over 2D weight space (v1, v2) for N=4
-    // For visualization, we use a simplified model showing the zero point
-    const rhoRe = 0.75; // rogue zero with Re > 1/2
-    const rhoIm = 14.134; // first zeta zero imaginary part
-
     for (let i = 0; i < positions.count; i++) {
       const px = positions.getX(i);
       const py = positions.getY(i);
 
-      // Map to weight space
       const v1 = px;
       const v2 = py;
 
-      // Simplified Mellin residual model
-      // Zero at spoofing weights, rising bowl elsewhere
+      // Spoofing weight location
       const spoofV1 = 0.8;
       const spoofV2 = -0.3;
       const dx = v1 - spoofV1;
       const dy = v2 - spoofV2;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
-      // L² norm explosion near spoofing weights
+      // L² norm
       const l2Norm = 0.1 + 2.0 * (v1 * v1 + v2 * v2) + 0.5 * Math.abs(v1 * v2);
 
-      // Mellin residual has a zero at (spoofV1, spoofV2)
+      // Mellin residual zeroes at spoofing weights
       const mellinResidual = dist * dist * 0.3;
 
-      // What Cauchy-Schwarz would give: residual / norm
-      const csBound = mellinResidual / (l2Norm + 0.01);
-
-      // The actual L² distance: stays bounded below by δ
+      // Height: L² distance stays bounded below by δ
       const height = 0.15 + mellinResidual + 0.1 * l2Norm * 0.05;
-
       positions.setZ(i, Math.min(height, 4));
 
-      // Color by height
+      // Color: blue (low) → red (high)
       const t = Math.min(height / 2, 1);
-      colors[i * 3] = 0.06 + t * 0.8; // R
-      colors[i * 3 + 1] = 0.2 * (1 - t) + 0.05; // G
-      colors[i * 3 + 2] = 0.8 * (1 - t) + 0.1; // B
+      colors[i * 3] = 0.06 + t * 0.8;
+      colors[i * 3 + 1] = 0.2 * (1 - t) + 0.05;
+      colors[i * 3 + 2] = 0.8 * (1 - t) + 0.1;
     }
 
     geo.computeVertexNormals();
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    return { geometry: geo, colorArray: colors };
+    return geo;
   }, []);
 
   useFrame((state) => {
@@ -70,7 +58,7 @@ function Surface() {
 
   return (
     <mesh ref={meshRef} geometry={geometry} rotation={[-Math.PI / 3, 0, 0]} position={[0, -0.5, 0]}>
-      <meshStandardMaterial vertexColors side={THREE.DoubleSide} wireframe={false}
+      <meshStandardMaterial vertexColors side={THREE.DoubleSide}
         transparent opacity={0.9} roughness={0.6} metalness={0.2} />
     </mesh>
   );
@@ -78,36 +66,54 @@ function Surface() {
 
 function ZeroPoint() {
   const ref = useRef<THREE.Mesh>(null);
+  const ringRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (ref.current) {
       ref.current.scale.setScalar(1 + Math.sin(state.clock.elapsedTime * 2) * 0.15);
     }
+    if (ringRef.current) {
+      ringRef.current.rotation.x = state.clock.elapsedTime * 0.5;
+      ringRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+    }
   });
 
   return (
-    <Float speed={2} floatIntensity={0.3}>
-      <mesh ref={ref} position={[0.8, 0.2, -0.3]}>
+    <group position={[0.8, 0.2, -0.3]}>
+      {/* Pulsing sphere */}
+      <mesh ref={ref}>
         <sphereGeometry args={[0.08, 16, 16]} />
         <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={2} />
       </mesh>
-      <Text position={[0.8, 0.5, -0.3]} fontSize={0.12} color="#ef4444"
-        anchorX="center" anchorY="bottom" font="/fonts/inter.woff">
-        Zero (spoofing weights)
-      </Text>
-    </Float>
+      {/* Orbiting ring */}
+      <mesh ref={ringRef}>
+        <torusGeometry args={[0.15, 0.01, 8, 32]} />
+        <meshStandardMaterial color="#ef4444" emissive="#ef4444" emissiveIntensity={1} transparent opacity={0.6} />
+      </mesh>
+      {/* HTML label (always works, no font dependency) */}
+      <Html position={[0, 0.3, 0]} center style={{ pointerEvents: "none" }}>
+        <div className="text-red-400 text-xs font-mono whitespace-nowrap bg-[#0a0b14]/80 px-2 py-1 rounded border border-red-500/30">
+          Zero (spoofing weights)
+        </div>
+      </Html>
+    </group>
   );
 }
 
-function WireframeGrid() {
+function AxisLabels() {
   return (
-    <gridHelper args={[6, 20, "#1e2148", "#1e2148"]} position={[0, -1.2, 0]} />
+    <group>
+      <Html position={[3.2, -0.5, 0]} center style={{ pointerEvents: "none" }}>
+        <span className="text-blue-400/60 text-xs font-mono">v₁ →</span>
+      </Html>
+      <Html position={[0, -0.5, 3.2]} center style={{ pointerEvents: "none" }}>
+        <span className="text-blue-400/60 text-xs font-mono">v₂ →</span>
+      </Html>
+    </group>
   );
 }
 
 export default function HyperplaneTrapPage() {
-  const [showWireframe, setShowWireframe] = useState(false);
-
   return (
     <div className="h-full flex flex-col">
       <div className="p-6 border-b border-[#1e2148]">
@@ -119,18 +125,29 @@ export default function HyperplaneTrapPage() {
 
       <div className="flex-1 flex">
         <div className="flex-1 relative">
-          <Canvas camera={{ position: [3, 3, 3], fov: 55 }} gl={{ antialias: true }}>
-            <ambientLight intensity={0.4} />
-            <directionalLight position={[5, 5, 5]} intensity={0.8} />
-            <pointLight position={[-3, 3, -3]} intensity={0.3} color="#3b82f6" />
-            <Surface />
-            <ZeroPoint />
-            <WireframeGrid />
-            <OrbitControls enableDamping dampingFactor={0.05} />
-          </Canvas>
+          <Suspense fallback={
+            <div className="w-full h-full flex items-center justify-center text-slate-500">
+              Loading 3D scene...
+            </div>
+          }>
+            <Canvas camera={{ position: [4, 3, 4], fov: 50 }}
+              gl={{ antialias: true, alpha: false }}
+              onCreated={({ gl }) => { gl.setClearColor("#0a0b14"); }}
+            >
+              <ambientLight intensity={0.4} />
+              <directionalLight position={[5, 5, 5]} intensity={0.8} />
+              <pointLight position={[-3, 3, -3]} intensity={0.3} color="#3b82f6" />
+              <pointLight position={[2, 1, 2]} intensity={0.2} color="#ef4444" />
+              <Surface />
+              <ZeroPoint />
+              <AxisLabels />
+              <gridHelper args={[6, 20, "#1e2148", "#1e2148"]} position={[0, -1.2, 0]} />
+              <OrbitControls enableDamping dampingFactor={0.05} autoRotate autoRotateSpeed={0.5} />
+            </Canvas>
+          </Suspense>
 
           <div className="absolute bottom-4 left-4 text-xs text-slate-500">
-            Drag to rotate · Scroll to zoom
+            Drag to rotate · Scroll to zoom · Auto-rotates
           </div>
         </div>
 
