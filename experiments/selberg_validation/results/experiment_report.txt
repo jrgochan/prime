@@ -1,0 +1,6 @@
+EXPERIMENT 2: Vasyunin Bound
+  Pairs: 3240, Violations: 2805, Max ratio: 15.047542
+
+EXPERIMENT 3: NB Distance Decay
+  max d²·log(N) for N≥10: 0.1783300332
+  Conclusion: d²_N = O(1/log N) with C ≈ 1.00

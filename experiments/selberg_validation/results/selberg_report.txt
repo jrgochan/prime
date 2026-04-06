@@ -1,0 +1,20 @@
+Selberg Sieve Validation Report
+================================
+N_MAX = 500
+Quadrature points = 100000
+
+
+AXIOM VALIDATION RESULTS
+========================
+
+1. mertens_lower_bound: bᵀv ≥ 1/2 - C/log(N)
+   max (1/2 - bᵀv)·log(N) for N≥10: 2.9159461257
+   Suggested C: 3.00
+
+2. mertens_quadratic_bound: vᵀGv ≤ C/log(N)
+   max vᵀGv·log(N) for N≥10: 0.3072881968
+   Suggested C: 1.00
+
+3. Vasyunin bound: |G_jk - 1/4| ≤ gcd(j,k)/(2jk)
+   Violations: 991
+   Max ratio: 8.270925
