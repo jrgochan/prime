@@ -1,5 +1,9 @@
 # Axiom Roadmap: Closing the Gaps in the Spectral RH Formalization
 
+> ⚠️ **OUTDATED**: This document describes an earlier 17-axiom architecture.
+> The current Cathedral (v1.0) has **2 mathematical axioms** in the RH proof chain.
+> See the [main README](../../README.md) for the current state.
+
 ## Current Status: 17 axioms, 35 proven (ZERO sorry)
 
 Started with 39+ axioms/sorry. Eliminated 22+ through:

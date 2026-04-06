@@ -1,5 +1,9 @@
 # SpectralRH Proof Architecture
 
+> ⚠️ **OUTDATED**: This document describes an earlier 3-axiom architecture.
+> The current Cathedral (v1.0) uses **2 axioms**: `offdiag_excess_sum_le` and
+> `zeta_zero_separates`. See the [main README](../../README.md) for the current state.
+
 ## Fully-Connected Critical Path (April 2026)
 
 The Riemann Hypothesis is reduced to **3 axioms** with **zero sorry**:
