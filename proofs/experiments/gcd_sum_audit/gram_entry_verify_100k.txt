@@ -1,0 +1,9 @@
+gram_entry_offdiag_upper verification
+Range: j,k <= 100000
+Adaptive quadrature: 20k/10k/5k/2k points
+Total pairs: 4999950000
+Hard pairs: 4999949996
+Violations: 1458613756
+Worst excess: 3.3187573831e-2 at (31258, 41226)
+Time: 1399.32s (12 threads)
+Result: FAIL
