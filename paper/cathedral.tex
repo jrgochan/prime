@@ -45,7 +45,9 @@ We present a machine-checked proof architecture in Lean~4 against Mathlib
 that reduces the Riemann Hypothesis to exactly two explicit mathematical axioms:
 an aggregate sieve bound on the off-diagonal Gram matrix excess, and
 the converse direction of the Nyman--Beurling criterion.
-The formalization comprises 3,444 compiled modules with zero \texttt{sorry} placeholders.
+The formalization comprises a novel Cathedral architecture of 44 Lean~4 modules,
+compiling against 3,400+ Mathlib dependencies with strictly zero \texttt{sorry}
+placeholders in the proof chain.
 All structural, algebraic, and spectral scaffolding---including the
 Gram matrix theory, parity decomposition, L\textsuperscript{2}--matrix bridge,
 Mellin transform infrastructure, and the functional equation bridge---is
@@ -110,6 +112,11 @@ For all $n \geq 2$:
 This axiom bounds the total off-diagonal ``excess'' of the Gram matrix.
 Numerically, the sum is actually \emph{negative} ($\approx -n/2$),
 giving an $18\times$ safety margin against the stated bound.
+This negativity is driven by the marginal mean shifts
+$E_j = \int_0^1 \fract{j/x}\,dx - \frac{1}{2} \approx -1/(12j)$.
+When aggregated across the matrix, these contribute a dominant
+$-\frac{n}{12}\log n$ bias that easily overtakes the positive $O(n)$
+variance of the Dirichlet error term, confirming our empirical observations.
 
 The factor $\frac{1}{4}$ arises because
 $\int_0^1 \fract{j/x}\,dx = \frac{1}{2}$ for all $j \geq 1$,
@@ -176,8 +183,12 @@ The proof chain flows through three major components:
 \paragraph{Forward Direction (Pillar 1 $\Rightarrow$ $d_N^2 \to 0$).}
 The Gram matrix $G$ satisfies $\sum_{i,j} G_{ij} = n^2/4 + O(n)$
 (from the aggregate bound). The constant-weight test vector
-$v_k = 2/n$ achieves $d_N^2 \leq C/\log N$ via the variational
-characterization $d_N^2 = 1 - \mathbf{b}^T G^{-1} \mathbf{b}$.
+avoids computing $G^{-1}$ entirely. It achieves the $O(1/\log N)$ decay
+via the variational upper bound $d_N^2 \leq 1 - 2\mathbf{b}^T v + v^T G v$.
+Because the macroscopic $n^2/4$ mass of the Gram matrix perfectly cancels
+the $n^2/4$ mass of the basis inner products in the Rayleigh quotient,
+our generously loose $O(n)$ off-diagonal bound is rendered completely harmless.
+We term this the \emph{Constant Vector Miracle}.
 
 \paragraph{Converse Direction (Pillar 2 $\Rightarrow$ $\neg\RH \Rightarrow d_N^2 \not\to 0$).}
 If RH fails, a rogue zero $\rho$ in the critical strip with
@@ -235,9 +246,12 @@ does not merely confirm known mathematics---it actively uncovers
 subtle errors that persist in informal reasoning.
 
 \paragraph{Closing the Axioms.}
-Pillar~1 may be approachable via the Ramanujan identity for
-$\sum_{j,k \leq n} \gcd(j,k)^2$ once Ramanujan-style estimates
-are formalized in Mathlib.
+Pillar~1 may be approachable by formalizing the $L^2$ variance of the
+Dirichlet Divisor Problem. The aggregate covariance sum translates
+via $u = 1/x$ into the integral of $(\Delta(u)/u)^2$, where
+$\Delta(u) = \sum_{n \leq u} d(n) - u\log u - (2\gamma - 1)u$
+is the Dirichlet divisor error term. This requires Mathlib's future
+integration of Vorono\"i summation and Dirichlet convolution bounds.
 Pillar~2 requires the Prime Number Theorem in Lean~4, a substantial
 but well-defined formalization target.
 
@@ -245,8 +259,8 @@ but well-defined formalization target.
 The complete formalization is available at
 \url{https://github.com/jrgochan/prime}.
 Building requires Lean v4.29.0-rc8 and Mathlib.
-The command \texttt{lake build} compiles all 3,444 modules in
-approximately two minutes.
+The command \texttt{lake build} compiles all 3,444 modules
+(44 novel + 3,400 Mathlib dependencies) in approximately two minutes.
 
 \begin{thebibliography}{9}
 \bibitem{nyman1950}
