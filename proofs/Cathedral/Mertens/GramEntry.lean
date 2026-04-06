@@ -51,8 +51,8 @@ theorem gram_entry_diag_upper (j : ℕ) (hj : 1 ≤ j) :
     Numerically verified for all j,k ≤ 150. -/
 axiom gram_entry_offdiag_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
     gramEntry j k ≤ 1 / 4 +
-      (Nat.gcd j k : ℝ) ^ 2 / (12 * (j : ℝ) * (k : ℝ)) +
-      1 / (4 * max (j : ℝ) (k : ℝ))
+      (((Nat.gcd j k : ℝ) ^ 2) / (12 * (j : ℝ) * (k : ℝ))) +
+      (1 / (4 * max (j : ℝ) (k : ℝ)))
 
 /-- Off-diagonal entries are at most 1/3.
     Follows from gramEntry_le_avg_diag (AM-GM) + gramEntry_le_third_all. -/
