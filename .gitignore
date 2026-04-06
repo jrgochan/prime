@@ -56,3 +56,6 @@ Icon
 ._*
 .Spotlight-V100
 .Trashes
+cathedral-archive-*.tar.gz
+cathedral-dump.txt
+dump_b64.txt
