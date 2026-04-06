@@ -20,7 +20,8 @@ The critical line Re(ρ) = 1/2 is the event horizon:
 ### Proof Architecture
 1. l2_norm_sq_power: ∫₀¹ x^{2σ-2} dx = 1/(2σ-1) [PROVED]
 2. mellin_fractBasis_at_zeta_zero: M₀₁[{k/x}](ρ) when ζ(ρ)=0 [PROVED]
-3. cauchy_schwarz_separation: ‖1-f‖² ≥ |ℓ_ρ(1-f)|²/‖ℓ_ρ‖² [TODO]
+3. cauchy_schwarz_separation → THE HYPERPLANE TRAP [DEAD END]
+   See historical note below. The Mellin residual CAN be driven to zero.
 -/
 
 noncomputable section
@@ -118,58 +119,44 @@ theorem mellin_target_eq (ρ : ℂ) (hρ : 0 < ρ.re) :
   mellin_target ρ hρ
 
 -- ════════════════════════════════════════════════
--- INTEGRAL CAUCHY-SCHWARZ (standard real analysis)
+-- THE HYPERPLANE TRAP (discovered 2026-04-06)
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Real Analysis — Integral Cauchy-Schwarz)**:
+/- **Historical Note: Why Cauchy-Schwarz Cannot Close the Gap**
 
-    For f : ℝ → ℝ and g : ℝ → ℂ with f², |g|² integrable on (0,1):
-      ‖∫₀¹ f(x)·g(x) dx‖² ≤ (∫₀¹ f(x)² dx) · (∫₀¹ ‖g(x)‖² dx)
+    The natural approach to proving `zeta_zero_separates` is:
+    1. Show ℓ_ρ(1) = 1/ρ ≠ 0                  [PROVED: mellin_target_nonzero]
+    2. Show ‖x^{ρ-1}‖²_{L²} = 1/(2σ-1) < ∞   [PROVED: l2_norm_sq_power]
+    3. Apply Cauchy-Schwarz: ‖1-f‖² ≥ |ℓ_ρ(1-f)|²·(2σ-1)
+    4. Show ∃ δ₀ > 0, |ℓ_ρ(1-f)| ≥ δ₀ uniformly  [DEAD END]
 
-    This is the integral form of the Cauchy-Schwarz inequality,
-    a standard textbook result in real analysis. We state it for
-    the specific case needed: real-valued f and complex-valued g,
-    integrated over (0,1).
+    **The Hyperplane Trap** (identified by The Theorist):
+    Step 4 is MATHEMATICALLY FALSE. For N ≥ 4, the system
 
-    **Status**: This follows from Mathlib's `norm_inner_le_norm`
-    applied to the L²(μ, ℂ) inner product space, but the bridge
-    between the abstract Hilbert space Cauchy-Schwarz and concrete
-    interval integrals requires measurability and integrability
-    scaffolding not yet fully connected in our import set.
+      Σ vₖ · M_ρ(k) = 1/ρ    (one complex equation = 2 real constraints)
+      with v₂, v₃, v₄ ∈ ℝ    (3 real unknowns)
 
-    **Character**: This is a PURE ANALYSIS axiom, completely
-    independent of number theory. It is verifiable from undergraduate
-    real analysis and will be fully provable once the L²-integral
-    bridge is formalized in Mathlib. -/
-axiom integral_cauchy_schwarz_01
-    (f : ℝ → ℝ) (g : ℝ → ℂ)
-    (hf : MeasureTheory.IntegrableOn (fun x => f x ^ 2) (Set.Ioc 0 1))
-    (hg : MeasureTheory.IntegrableOn (fun x => ‖g x‖ ^ 2) (Set.Ioc 0 1)) :
-    ‖∫ x in Set.Ioc (0:ℝ) 1, (f x : ℂ) * g x‖ ^ 2 ≤
-    (∫ x in Set.Ioc (0:ℝ) 1, f x ^ 2) *
-    (∫ x in Set.Ioc (0:ℝ) 1, ‖g x‖ ^ 2)
+    is solvable! There exist EXACT real weights that make the
+    Mellin residual ℓ_ρ(1-f) = 0. The Cauchy-Schwarz bound gives
+    ‖1-f‖² ≥ 0, which is trivially true but useless.
 
--- ════════════════════════════════════════════════
--- THE SEPARATION BOUND
--- ════════════════════════════════════════════════
+    **Why `zeta_zero_separates` is still true**: The "spoofing" weights
+    that make ℓ_ρ(1-f) = 0 cause ‖f_N‖_{L²} to explode to infinity.
+    So ‖1-f‖² grows even though the Mellin residual vanishes.
+    But Cauchy-Schwarz is "blind" to this norm explosion — it
+    separates the functional from the norm.
 
-/- **The Master Inequality (Sketch)**:
+    **The correct proof** requires either:
+    - Báez-Duarte's Möbius witness h_ρ (needs PNT for L² convergence)
+    - Full L² duality theory (needs analytic continuation)
+    Both are beyond current Lean/Mathlib formalization capability.
 
-    For any h ∈ L²(0,1) and ρ with Re(ρ) > 1/2:
+    **Conclusion**: `zeta_zero_separates` must remain as an axiom.
+    It perfectly encapsulates the deep complex-analytic content
+    of the Nyman-Beurling converse that formal methods cannot
+    yet reach.
 
-    ∫₀¹ (1-h)² dx ≥ ‖∫₀¹ (1-h)·x^{ρ-1} dx‖² · (2Re(ρ)-1)
-
-    Proof: By Cauchy-Schwarz and l2_norm_sq_power:
-    ‖∫ (1-h)·x^{ρ-1}‖² ≤ (∫ (1-h)²) · (∫ |x^{ρ-1}|²)
-                        = (∫ (1-h)²) · 1/(2σ-1)
-
-    Rearranging: ∫ (1-h)² ≥ ‖∫ (1-h)·x^{ρ-1}‖² · (2σ-1)
-
-    If the Mellin residual ‖∫ (1-h)·x^{ρ-1}‖ is bounded below by
-    some δ₀ > 0 uniformly in h, then:
-    ∫ (1-h)² ≥ δ₀² · (2σ-1) > 0
-
-    This shows that zeta_zero_separates reduces to:
-    "The Mellin residual at ρ cannot be driven to zero
-     by any choice of weights." -/
-
+    The L² scaffolding above (l2_norm_sq_power, mellin_target_nonzero,
+    mellin_fractBasis_at_zeta_zero) remains as a testament to what
+    CAN be formalized and documents the proof architecture for
+    future generations who may close this gap. -/
