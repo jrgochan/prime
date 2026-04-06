@@ -3,53 +3,58 @@ fn gcd(mut a: u64, mut b: u64) -> u64 {
     a
 }
 
+fn frac(x: f64) -> f64 { x - x.floor() }
+
+fn gram_entry(j: u64, k: u64, n: u64) -> f64 {
+    let mut s = 0.0;
+    for i in 1..=n {
+        let x = (i as f64 - 0.5) / n as f64;
+        s += frac(j as f64 / x) * frac(k as f64 / x) / n as f64;
+    }
+    s
+}
+
 fn main() {
-    println!("{:<8} {:>18} {:>18} {:>18} {:>12}",
-             "N", "Σ_g≤12 g/(ij)", "Σ_g>12 1/12", "total_excess", "2(N-1)");
-    println!("{}", "-".repeat(80));
+    let n_quad = 50000u64;
+    
+    println!("Testing: gramEntry(j,k) - 1/4 ≤ gcd/(jk) + 1/(4·max(j,k))");
+    println!("{:<6} {:<6} {:>12} {:>12} {:>12} {:>8}",
+             "j", "k", "GE-1/4", "gcd/(jk)", "+1/(4max)", "OK?");
+    println!("{}", "-".repeat(62));
 
-    for &n in &[10u64, 50, 100, 500, 1000, 5000, 10000, 20000] {
-        let mut sum_small_gcd: f64 = 0.0;
-        let mut sum_large_gcd: f64 = 0.0;
+    let mut max_excess: f64 = -999.0;
+    let mut worst = (0u64, 0u64);
+    let mut pass = true;
 
-        for i in 1..n {
-            for j in 1..n {
-                if i != j {
-                    let g = gcd(i, j);
-                    let fi = i as f64;
-                    let fj = j as f64;
-                    if g <= 12 {
-                        sum_small_gcd += g as f64 / (fi * fj);
-                    } else {
-                        sum_large_gcd += 1.0 / 12.0;
-                    }
-                }
+    for j in 1..=80u64 {
+        for k in (j+1)..=80 {
+            let ge = gram_entry(j, k, n_quad);
+            let excess = ge - 0.25;
+            let g = gcd(j, k) as f64;
+            let bound = g / (j as f64 * k as f64) + 1.0 / (4.0 * (j.max(k) as f64));
+            let diff = excess - bound;
+            
+            if diff > max_excess {
+                max_excess = diff;
+                worst = (j, k);
+            }
+            
+            if diff > 0.001 { // tolerance for numerical integration
+                println!("{:<6} {:<6} {:>12.8} {:>12.8} {:>12.8} FAIL  diff={:.6e}",
+                         j, k, excess, g/(j as f64 * k as f64), 
+                         1.0/(4.0 * j.max(k) as f64), diff);
+                pass = false;
             }
         }
-
-        let two_n1 = 2.0 * (n as f64 - 1.0);
-        let total = sum_small_gcd + sum_large_gcd;
-
-        println!("{:<8} {:>18.6} {:>18.6} {:>18.6} {:>12.1}",
-                 n, sum_small_gcd, sum_large_gcd, total, two_n1);
     }
 
-    // Also check: count pairs with gcd > 12
+    let (wj, wk) = worst;
+    let g = gcd(wj, wk) as f64;
     println!();
-    println!("{:<8} {:>15} {:>15} {:>15}",
-             "N", "pairs_g>12", "total_pairs", "fraction");
-    println!("{}", "-".repeat(55));
-    for &n in &[100u64, 500, 1000, 5000] {
-        let mut count_large: u64 = 0;
-        let total = (n - 1) * (n - 2);
-        for i in 1..n {
-            for j in 1..n {
-                if i != j && gcd(i, j) > 12 {
-                    count_large += 1;
-                }
-            }
-        }
-        println!("{:<8} {:>15} {:>15} {:>15.6}",
-                 n, count_large, total, count_large as f64 / total as f64);
-    }
+    println!("Worst case: j={}, k={}", wj, wk);
+    println!("  GE-1/4 = {:.8}", gram_entry(wj, wk, n_quad) - 0.25);
+    println!("  bound  = {:.8}", g/(wj as f64 * wk as f64) + 1.0/(4.0 * wj.max(wk) as f64));
+    println!("  excess = {:.8e}", max_excess);
+    println!();
+    println!("Overall: {}", if pass { "PASS ✓" } else { "FAIL ✗" });
 }
