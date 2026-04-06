@@ -6,7 +6,7 @@
 
 import Cathedral.GramOffDiag
 import Cathedral.GramBounds
-import Cathedral.Scratch.SubstProbe
+import Cathedral.Mertens.SubstProbe
 
 set_option maxHeartbeats 3200000
 noncomputable section

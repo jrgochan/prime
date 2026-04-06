@@ -1,6 +1,6 @@
 import Cathedral.GramOffDiag
 import Cathedral.GramBounds
-import Cathedral.Scratch.CoprimeCross
+import Cathedral.Mertens.CoprimeCross
 
 set_option maxHeartbeats 800000
 noncomputable section

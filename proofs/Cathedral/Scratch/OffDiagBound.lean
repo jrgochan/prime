@@ -20,7 +20,7 @@
 
 import Cathedral.GramOffDiag
 import Cathedral.GramBounds
-import Cathedral.Scratch.CovDecomp
+import Cathedral.Mertens.CovDecomp
 
 set_option maxHeartbeats 800000
 noncomputable section

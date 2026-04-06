@@ -16,7 +16,7 @@
   so Ψ(K/β) = K(α²-β²)/(12αβ²) - ... which is bounded by 1/(4β).
 -/
 
-import Cathedral.Scratch.CoprimeCross
+import Cathedral.Mertens.CoprimeCross
 import Cathedral.GramOffDiag
 
 set_option maxHeartbeats 4000000

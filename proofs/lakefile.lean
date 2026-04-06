@@ -34,8 +34,11 @@ lean_lib «Cathedral» where
     -- Bridge files (used by Assembly for alternative proofs)
     `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
     `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
-    -- Scratch/development files
-    `Cathedral.Scratch.CoprimeCross, `Cathedral.Scratch.BernoulliCross,
-    `Cathedral.Scratch.SubstProbe, `Cathedral.Scratch.CovDecomp
+    -- Mertens infrastructure (sorry-free, promoted from Scratch)
+    `Cathedral.Mertens.PeriodicFormula,
+    `Cathedral.Mertens.BernoulliCross, `Cathedral.Mertens.CoprimeCross,
+    `Cathedral.Mertens.SubstProbe, `Cathedral.Mertens.CovDecomp,
+    -- Scratch/development files (active work, has sorrys)
+    `Cathedral.Scratch.OffDiagBound, `Cathedral.Scratch.RunningAvg
   ]
 

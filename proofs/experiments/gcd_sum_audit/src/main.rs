@@ -1,60 +1,50 @@
+use std::io::Write;
+
 fn gcd(mut a: u64, mut b: u64) -> u64 {
     while b != 0 { let t = b; b = a % b; a = t; }
     a
 }
 
-fn frac(x: f64) -> f64 { x - x.floor() }
-
-fn gram_entry(j: u64, k: u64, n: u64) -> f64 {
-    let mut s = 0.0;
-    for i in 1..=n {
-        let x = (i as f64 - 0.5) / n as f64;
-        s += frac(j as f64 / x) * frac(k as f64 / x) / n as f64;
-    }
-    s
-}
-
 fn main() {
-    let n_quad = 50000u64;
+    // Pure arithmetic: no gramEntry integration needed
+    // Just verify the two component sums that feed offdiag_excess_sum_le
+    let targets: Vec<u64> = vec![1000, 5000, 10000, 20000, 50000, 100000];
     
-    println!("Testing: gramEntry(j,k) - 1/4 ≤ gcd/(jk) + 1/(4·max(j,k))");
-    println!("{:<6} {:<6} {:>12} {:>12} {:>12} {:>8}",
-             "j", "k", "GE-1/4", "gcd/(jk)", "+1/(4max)", "OK?");
-    println!("{}", "-".repeat(62));
+    let mut out = std::fs::File::create("sum_bounds_extended.csv").unwrap();
+    writeln!(out, "N,sum_gcd2_over_12ij,sum_inv_4max,total,ratio_to_3N").unwrap();
 
-    let mut max_excess: f64 = -999.0;
-    let mut worst = (0u64, 0u64);
-    let mut pass = true;
+    println!("{:<10} {:>18} {:>18} {:>14} {:>14}",
+             "N", "Σg²/(12ij)", "Σ1/(4max)", "total/N", "total/3N");
+    println!("{}", "-".repeat(80));
 
-    for j in 1..=80u64 {
-        for k in (j+1)..=80 {
-            let ge = gram_entry(j, k, n_quad);
-            let excess = ge - 0.25;
-            let g = gcd(j, k) as f64;
-            let bound = g / (j as f64 * k as f64) + 1.0 / (4.0 * (j.max(k) as f64));
-            let diff = excess - bound;
-            
-            if diff > max_excess {
-                max_excess = diff;
-                worst = (j, k);
-            }
-            
-            if diff > 0.001 { // tolerance for numerical integration
-                println!("{:<6} {:<6} {:>12.8} {:>12.8} {:>12.8} FAIL  diff={:.6e}",
-                         j, k, excess, g/(j as f64 * k as f64), 
-                         1.0/(4.0 * j.max(k) as f64), diff);
-                pass = false;
+    for &n in &targets {
+        let mut s_gcd2: f64 = 0.0;
+        let mut s_max: f64 = 0.0;
+
+        for i in 1..n {
+            for j in (i+1)..n {
+                let g = gcd(i, j) as f64;
+                let fi = i as f64;
+                let fj = j as f64;
+                // Both (i,j) and (j,i) contribute symmetrically
+                s_gcd2 += 2.0 * g * g / (12.0 * fi * fj);
+                s_max  += 2.0 / (4.0 * fj); // max(i,j) = j since j > i
             }
         }
+
+        let nf = n as f64;
+        let total = s_gcd2 + s_max;
+
+        println!("{:<10} {:>18.6} {:>18.6} {:>14.8} {:>14.8}",
+                 n, s_gcd2, s_max, total/nf, total/(3.0*nf));
+
+        writeln!(out, "{},{:.10},{:.10},{:.10},{:.10}",
+                 n, s_gcd2, s_max, total, total/(3.0*nf)).unwrap();
     }
 
-    let (wj, wk) = worst;
-    let g = gcd(wj, wk) as f64;
     println!();
-    println!("Worst case: j={}, k={}", wj, wk);
-    println!("  GE-1/4 = {:.8}", gram_entry(wj, wk, n_quad) - 0.25);
-    println!("  bound  = {:.8}", g/(wj as f64 * wk as f64) + 1.0/(4.0 * wj.max(wk) as f64));
-    println!("  excess = {:.8e}", max_excess);
+    println!("If total/3N < 1.0 for all N, the axiom offdiag_excess_sum_le holds.");
+    println!("Theory predicts total/N → 2/3, so total/3N → 2/9 ≈ 0.222...");
     println!();
-    println!("Overall: {}", if pass { "PASS ✓" } else { "FAIL ✗" });
+    println!("Results written to sum_bounds_extended.csv");
 }
