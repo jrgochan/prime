@@ -114,7 +114,7 @@ Numerically, the sum is actually \emph{negative} ($\approx -n/2$),
 giving an $18\times$ safety margin against the stated bound.
 This negativity is driven by the marginal mean shifts
 $E_j = \int_0^1 \fract{j/x}\,dx - \frac{1}{2} \approx -1/(12j)$.
-When aggregated across the matrix, these contribute a dominant
+Aggregated across the matrix, these contribute a dominant
 $-\frac{n}{12}\log n$ bias that easily overtakes the positive $O(n)$
 variance of the Dirichlet error term, confirming our empirical observations.
 
@@ -190,7 +190,7 @@ the $n^2/4$ mass of the basis inner products in the Rayleigh quotient,
 our generously loose $O(n)$ off-diagonal bound is rendered completely harmless.
 We term this the \emph{Constant Vector Miracle}.
 
-\paragraph{Converse Direction (Pillar 2 $\Rightarrow$ $\neg\RH \Rightarrow d_N^2 \not\to 0$).}
+\paragraph{Converse Direction (Pillar 2 $\Rightarrow$ $\neg\RH \Rightarrow d_N^2 \geq \delta > 0$).}
 If RH fails, a rogue zero $\rho$ in the critical strip with
 $\re(\rho) \neq 1/2$ creates a uniform lower bound $d_N^2 \geq \delta > 0$.
 
