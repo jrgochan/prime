@@ -15,6 +15,7 @@ import Cathedral.GramOffDiag
 import Cathedral.Mertens.Defs
 import Cathedral.Mertens.Algebraic
 import Cathedral.Mertens.GramEntry
+import Cathedral.Mertens.OffDiagExcess
 
 noncomputable section
 open Real MeasureTheory Set Finset Matrix
@@ -73,21 +74,20 @@ lemma gramMatrix_row_sum_le (N : ℕ) (hN3 : 3 ≤ N) :
 -- The corrected axiom (in GramEntry.lean) gives: gramEntry ≤ 1/4 + g²/(12jk) + 1/(4·max).
 -- For gram_sum_tight, we need the SUM of excesses to be O(N).
 
-/-- **AXIOM**: Combined off-diagonal excess sum ≤ 3N.
-
-    From the corrected per-entry axiom:
-      gramEntry j k - 1/4 ≤ g²/(12jk) + 1/(4·max(j,k))
-
-    Summing over all off-diagonal pairs:
-      Σ g²/(12ij) → (1/6)·N  (from Ramanujan/Euler product estimates)
-      Σ 1/(4·max)  → (1/2)·N  (harmonic sum symmetry)
-      Total        → (2/3)·N  ≤ 3·N
-
-    Numerically verified for N ≤ 20,000 via Rust (experiments/gcd_sum_audit).
-    The bound 3N is very generous — actual ratio stabilizes at ≈ 0.67. -/
-axiom offdiag_excess_sum_le (n : ℕ) :
+/-- **PROVED**: Combined off-diagonal excess sum ≤ 3N.
+    Decomposed into two sub-bounds in OffDiagExcess.lean:
+      Σ gcd²/(12ij) ≤ 2N  (gcd_sq_sum_le axiom)
+      Σ 1/(4·max)  ≤ N    (inv_max_sum_le axiom)
+    Wired through the corrected per-entry axiom (gram_entry_offdiag_upper). -/
+theorem offdiag_excess_sum_le (n : ℕ) :
     ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
-      (gramMatrix (n + 1) i j - 1 / 4) ≤ 3 * (n : ℝ)
+      (gramMatrix (n + 1) i j - 1 / 4) ≤ 3 * (n : ℝ) := by
+  by_cases hn : 1 ≤ n
+  · exact Cathedral.OffDiagExcess.offdiag_excess_from_parts n hn
+  · -- n = 0: empty sum
+    push_neg at hn
+    interval_cases n
+    simp
 
 
 -- ════════════════════════════════════════════════

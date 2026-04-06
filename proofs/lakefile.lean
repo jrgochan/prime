@@ -38,6 +38,7 @@ lean_lib «Cathedral» where
     `Cathedral.Mertens.PeriodicFormula,
     `Cathedral.Mertens.BernoulliCross, `Cathedral.Mertens.CoprimeCross,
     `Cathedral.Mertens.SubstProbe, `Cathedral.Mertens.CovDecomp,
+    `Cathedral.Mertens.OffDiagExcess,
     -- Scratch/development files (active work, has sorrys)
     `Cathedral.Scratch.OffDiagBound, `Cathedral.Scratch.RunningAvg
   ]
