@@ -9,7 +9,7 @@
         experiments experiments-clean \
         experiment-parity experiment-cross experiment-weil \
         experiment-g2 experiment-gcd experiment-selberg \
-        experiment-fourier experiment-quaternion \
+        experiment-fourier experiment-quaternion experiment-lambda-eff \
         visualizer visualizer-dev visualizer-build visualizer-parse \
         paper paper-technical paper-overview paper-clean \
         platform-setup platform-build platform-run platform-stop \
@@ -61,6 +61,7 @@ help:
 	@echo "  ║    make experiment-selberg    Selberg validation      ║"
 	@echo "  ║    make experiment-fourier    Spectral Fourier        ║"
 	@echo "  ║    make experiment-quaternion Quaternion RH            ║"
+	@echo "  ║    make experiment-lambda-eff λ_eff linear growth      ║"
 	@echo "  ║    make experiments-clean     Clean all Rust targets   ║"
 	@echo "  ║                                                      ║"
 	@echo "  ║  VISUALIZER (Cathedral Proof Explorer)               ║"
@@ -337,6 +338,12 @@ experiment-g2:
 experiment-fourier:
 	@echo "═══ Experiment: Spectral Fourier ═══"
 	@cd $(EXPERIMENTS)/spectral/spectral-fourier && cargo run --release 2>&1 | tail -10
+	@echo ""
+
+experiment-lambda-eff:
+	@echo "═══ Experiment: λ_eff Linear Growth ═══"
+	@echo "  Modes: validate | medium | high | ultra | <N>"
+	@cd $(EXPERIMENTS)/spectral/lambda-eff && cargo run --release -- $(or $(MODE),medium) 2>&1
 	@echo ""
 
 # ── Algebraic ────────────────────────────────────────────────

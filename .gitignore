@@ -93,3 +93,4 @@ proofs/.tower_cache.json
 *.orig.*
 visualizer/node_modules/
 visualizer/.next/
+experiments/spectral/lambda-eff/target/
