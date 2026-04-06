@@ -33,6 +33,9 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.FiniteDimReduction,
     -- Bridge files (used by Assembly for alternative proofs)
     `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
-    `Cathedral.Quantitative, `Cathedral.AlignmentDecay
+    `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
+    -- Scratch/development files
+    `Cathedral.Scratch.CoprimeCross, `Cathedral.Scratch.BernoulliCross,
+    `Cathedral.Scratch.SubstProbe, `Cathedral.Scratch.CovDecomp
   ]
 
