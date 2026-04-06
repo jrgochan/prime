@@ -3,6 +3,7 @@ import Cathedral.MellinBridge.FloorMellin
 import Cathedral.MellinBridge.FloorDivMellin
 import Cathedral.MellinBridge.Separation
 import Cathedral.MellinBridge.NymanBeurling
+import Cathedral.MellinBridge.HilbertSetup
 
 /-! # Cathedral.MellinBridge
 
