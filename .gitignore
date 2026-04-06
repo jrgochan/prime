@@ -59,3 +59,4 @@ Icon
 cathedral-archive-*.tar.gz
 cathedral-dump.txt
 dump_b64.txt
+proofs/experiments/*/target/
