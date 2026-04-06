@@ -76,3 +76,18 @@ dump_b64.txt
 *.fdb_latexmk
 *.fls
 *.synctex.gz
+
+# Rust build artifacts
+**/target/
+
+# Cache files
+proofs/.arithmetic_cache.json
+proofs/.boundary_cache.json
+proofs/.conjecture_cache.json
+proofs/.operator_cache.json
+proofs/.tower_cache.json
+
+# Junk files
+*.oops
+*.orig
+*.orig.*

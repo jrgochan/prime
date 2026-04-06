@@ -1,1 +1,0 @@
-/Users/jrgochan/code/github.com/jrgochan/prime/experiments/weil_explicit/target/release/convergent-drops: /Users/jrgochan/code/github.com/jrgochan/prime/experiments/weil_explicit/src/convergent_drops.rs
