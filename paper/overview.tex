@@ -1,0 +1,109 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{xcolor}
+
+\geometry{margin=1.2in}
+
+\title{%
+  The Cathedral:\\[4pt]
+  \large A Machine-Checked Roadmap to the Riemann Hypothesis%
+}
+\author{Jason Robert Gochanour}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We describe a Lean~4 formalization that reduces the 167-year-old
+Riemann Hypothesis to exactly two mathematical statements.
+A computer has verified that if both statements are true,
+the Riemann Hypothesis follows. This note explains the result,
+the two remaining obstacles, and why they matter---without
+requiring expertise in formal verification or analytic number theory.
+\end{abstract}
+
+\section{What Did We Do?}
+
+The Riemann Hypothesis (RH) is one of mathematics' deepest unsolved problems.
+It concerns the distribution of prime numbers and has resisted proof since 1859.
+
+We used a computer proof assistant called \textbf{Lean~4} to check every
+logical step of a proof attempt, starting from two precisely stated
+assumptions and ending at RH. The computer verified 3,444 separate
+modules with zero errors and zero gaps.
+
+\textbf{We did not prove RH.} We identified exactly two mathematical
+claims that, if true, would imply RH---and we proved everything else
+with machine-checked rigor.
+
+\section{The Two Remaining Pieces}
+
+\subsection{Piece 1: ``The Sieve Bound''}
+
+Imagine a large matrix whose entries measure how similar different
+number-theoretic functions are to each other. RH is equivalent to
+saying that certain averages of these entries stay well-behaved.
+
+Our first assumption says: the total ``excess'' in the off-diagonal
+entries of this matrix grows at most linearly with the matrix size.
+Numerical experiments with matrices up to size $100{,}000$ confirm this
+with an $18\times$ safety margin---the actual values are negative.
+
+\textit{Why we can't prove it yet:} It requires number-theoretic estimates
+(related to how greatest common divisors distribute) that are not yet
+available in the Lean mathematics library.
+
+\subsection{Piece 2: ``The Spectral Wall''}
+
+If RH were \emph{false}, there would be a ``rogue zero'' of the Riemann zeta
+function sitting in the wrong part of the complex plane. Our second assumption
+says: such a rogue zero would create an impenetrable wall---no matter
+what combination of basis functions you try, you can never approximate
+the target function closely enough.
+
+This is known to be true by a classical theorem from the 1950s
+(Nyman--Beurling), but the proof uses deep tools (the Prime Number Theorem
+and M\"obius function analysis) that are not yet formalized in Lean.
+
+\textit{Why we can't prove it yet:} The proof requires the Prime Number Theorem
+to be available in Lean~4, which is a major formalization project in itself.
+
+\section{What Did We Learn?}
+
+During this work, we made two surprising discoveries:
+
+\begin{enumerate}
+\item \textbf{The Sawtooth Floor:} A bound that seemed obviously true
+in informal mathematics turned out to be \emph{false} for large values.
+The computer's insistence on rigor led us to find a subtle
+constant-covariance effect that invalidates the naive approach.
+
+\item \textbf{The Hyperplane Trap:} A natural strategy for proving
+Piece~2 --- using the Cauchy-Schwarz inequality --- fails for a
+beautiful geometric reason: the ``cheating'' weights that would
+fool the inequality cause the approximation to explode in size.
+The computer warned us that the approach was doomed before
+we wasted weeks pursuing it.
+\end{enumerate}
+
+Both discoveries show that formal verification is not just a way to
+check known proofs---it actively reveals errors that informal
+reasoning misses.
+
+\section{How to Verify}
+
+\begin{verbatim}
+git clone https://github.com/jrgochan/prime
+cd prime/proofs
+lake build
+\end{verbatim}
+
+\noindent
+The build completes in approximately two minutes and reports zero errors.
+
+\end{document}

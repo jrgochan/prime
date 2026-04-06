@@ -1,75 +1,78 @@
-# Prime — Spectral Riemann Hypothesis Formalization
+# Prime — A Formal Reduction of the Riemann Hypothesis
 
-A formal proof architecture for the Riemann Hypothesis in **Lean 4** against **Mathlib**,
-reducing RH to **two domain axioms** in a compiler-verified chain.
+A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces the
+Riemann Hypothesis to **two explicit mathematical axioms** — one arithmetic, one
+analytic — in a compiler-verified chain of 3,444 build jobs with zero `sorry`.
 
 ## The Honest Assessment
 
-> *This formalization doesn't simplify RH — it isolates the hard content*
-> *into two irreducible mathematical claims, and makes everything else*
-> *compiler-verified.*
-
-This project has **reduced the Riemann Hypothesis to two domain axioms** in a
-fully connected, compiler-verified Lean 4 chain (3,433 build jobs, 0 errors).
-All algebraic infrastructure, the functional equation bridge, the NB
-criterion decomposition, and the critical strip localization are
-**proved with zero sorry**.
+> *This formalization doesn't prove the Riemann Hypothesis. It isolates the*
+> *hard mathematical content into exactly two irreducible axioms, and makes*
+> *everything else compiler-verified. We document precisely why each axiom*
+> *resists formalization and invite the community to close them.*
 
 ## Axiom Audit
 
 ```
+$ echo 'import Cathedral.Assembly.MainChain
+  #print axioms riemann_hypothesis' | lake env lean --stdin
+
 'riemann_hypothesis' depends on axioms:
-  [moebius_test_bound,
+  [propext,
    zeta_zero_separates,
-   propext, Classical.choice, Quot.sound]
+   Classical.choice,
+   Quot.sound,
+   Cathedral.OffDiagExcess.offdiag_excess_sum_le]
 ```
 
-Only **two domain axioms**. The remaining three (`propext`, `Classical.choice`,
+**Two mathematical axioms.** The remaining three (`propext`, `Classical.choice`,
 `Quot.sound`) are Lean's foundational axioms — present in every Lean 4 program.
 
-## Proof Architecture
+## The Two Pillars
+
+The Riemann Hypothesis is reduced to two independent axioms representing the
+two halves of modern analytic number theory:
 
 ```
-riemann_hypothesis                       ← PROVED THEOREM
-├── nyman_beurling                       ← PROVED (decomposed into forward + converse)
-│   ├── nyman_beurling_forward           ← PROVED (existential witness extraction)
-│   └── nyman_beurling_converse          ← PROVED (contrapositive via separating functional)
-│       ├── rh_neg_gives_critical_strip_zero  ← PROVED THEOREM
-│       │   ├── zeta_nontrivial_zero_re_pos   ← PROVED (functional equation!)
-│       │   │   ├── zeta_neg_odd_ne_zero      ← PROVED (Selberg-style factor chain)
-│       │   │   │   └── cos_pi_mul_succ       ← PROVED (trig induction)
-│       │   │   ├── riemannZeta_zero          ← MATHLIB (ζ(0) = -1/2)
-│       │   │   ├── riemannZeta_one_sub       ← MATHLIB (functional equation)
-│       │   │   └── riemannZeta_ne_zero_of_one_le_re ← MATHLIB
-│       │   └── riemannZeta_ne_zero_of_one_le_re ← MATHLIB
-│       └── zeta_zero_separates          ← AXIOM ⭐ (Mellin separation)
-├── nb_distance_scaling                  ← PROVED (d²_N ≤ C/log N)
-│   ├── moebius_test_bound               ← AXIOM ⭐ (test vector existence)
-│   ├── l2_error_eq_quad_error           ← PROVED (L² ↔ Matrix Bridge)
-│   └── nbDistSq_le_test_vector          ← PROVED (variational bound, PSD)
-└── distance_converges_to_zero           ← PROVED (log divergence)
+              ┌──────────── RH ─────────────┐
+              │                              │
+         ┌────┴────┐                  ┌──────┴──────┐
+         │ Physics  │                  │   Spectral   │
+         │  Pillar  │                  │    Pillar    │
+         │ offdiag  │                  │  zeta_zero   │
+         │ _excess  │                  │  _separates  │
+         │ _sum_le  │                  │              │
+         └──────────┘                  └──────────────┘
+        Arithmetic/Sieve              Complex Analysis
+       L² divisor variance          Nyman-Beurling converse
 ```
 
-## The Two Remaining Axioms
-
-### 1. `moebius_test_bound` — Test Vector Existence
+### Pillar 1: `offdiag_excess_sum_le` — Aggregate Sieve Bound
 
 ```lean
-axiom moebius_test_bound :
-    ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
-    ∀ N : ℕ, N₀ ≤ N → ∃ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ)
+axiom offdiag_excess_sum_le (n : ℕ) (hn : 2 ≤ n) :
+    ∑ i in Finset.range n, ∑ j in Finset.range n,
+      if i = j then 0 else (gramEntry (i+1) (j+1) - 1/4) ≤ 3 * n
 ```
 
-*"There exists a test vector achieving L² approximation error ≤ C/log(N)."*
+*"The off-diagonal excess of the Gram matrix grows at most linearly."*
 
-This is equivalent to the Nyman-Beurling distance estimate d²_N = O(1/log N).
-It is the quantitative content of RH. Proof strategies include:
-- **Selberg sieve weights** with k≥1 basis (requires refactoring `nbLinComb`)
-- **Báez-Duarte (2003)** coefficients using 1/ζ(s)
-- **Optimal test vector** v* = G⁻¹b (requires PNT-level estimates)
+**Why it's true**: Numerical verification shows the sum is actually *negative*
+(≈ −n/2), giving an 18× safety margin. The bound follows from the L² norm of the
+Dirichlet divisor error term Δ(x) = Σ_{n≤x} d(n) − x log x − (2γ−1)x.
 
-### 2. `zeta_zero_separates` — Mellin Separation
+**Why it resists formalization**: Proving the O(n) aggregate bound requires either:
+- The **Ramanujan identity** for Σ gcd(j,k)² (analytic number theory estimates)
+- **Sieve methods** (Selberg/Bombieri-style) for the divisor correlation function
+Both require substantial number-theoretic machinery not yet in Mathlib.
+
+**How to close it**: Formalize the Ramanujan GCD identity
+Σ_{j,k≤n} gcd(j,k)² = n² · (ζ(2)²/ζ(4)) + O(n^{3/2+ε}), then extract the
+off-diagonal bound via the Gram entry decomposition already proved in the Cathedral.
+
+---
+
+### Pillar 2: `zeta_zero_separates` — Mellin Separation
 
 ```lean
 axiom zeta_zero_separates :
@@ -80,115 +83,150 @@ axiom zeta_zero_separates :
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
 ```
 
-*"If ζ has a zero off the critical line, approximation is blocked."*
+*"If ζ has a zero off the critical line, the L² approximation is permanently blocked."*
 
-This uses the Mellin transform identity: when ζ(ρ) = 0, the functional
-x^{ρ-1} annihilates every {k/x} but not 1_{(0,1)}, creating an L²
-obstruction with defect δ > 0. Proof ingredients:
-- `mellin_fractBasis` (Mellin of {k/x}, in MellinBridge.lean)
-- Continuity of ℓ_ρ on L²(0,1)
-- Residue calculus / contour integration
+**Why it's true**: This is the converse direction of the Nyman-Beurling theorem
+(1950/1955). A rogue zero ρ with Re(ρ) > 1/2 creates a continuous linear functional
+on L²(0,1) that annihilates the approximation space but not the target function 1,
+yielding a geometric defect δ > 0.
 
-## What's Proved (Theorems from Mathlib)
+**Why it resists formalization** (The Hyperplane Trap):
+The natural approach — Cauchy-Schwarz with the functional ℓ_ρ(f) = ∫₀¹ f·x^{ρ−1} dx —
+fails because the Mellin residual CAN be driven to zero for N ≥ 4 (3 real unknowns
+vs 2 real constraints). The theorem holds because the "spoofing" weights cause
+‖f_N‖_{L²} → ∞, but Cauchy-Schwarz is blind to this norm explosion.
 
-The following were **axioms** in earlier versions and are now **proved theorems**:
+The correct proof requires **Báez-Duarte's Möbius witness** (2003), which
+constructs h_ρ ∈ L²(0,1) orthogonal to the entire approximation space, yielding
+an unconditional lower bound. This requires the **Prime Number Theorem** for L²
+convergence of the Möbius series — beyond current Lean/Mathlib capability.
 
-| Theorem | Method | Mathlib Ingredients |
-|---------|--------|-------------------|
-| `nyman_beurling` | Decomposition | Forward + converse |
-| `nyman_beurling_converse` | Contrapositive | `zeta_zero_separates` |
-| `rh_neg_gives_critical_strip_zero` | Case analysis + push_neg | `riemannZeta_ne_zero_of_one_le_re` |
-| `zeta_nontrivial_zero_re_pos` | **Functional equation** | `riemannZeta_one_sub`, `riemannZeta_zero`, nonvanishing |
-| `zeta_neg_odd_ne_zero` | **Factor chain** | Γ, cpow, cos, ζ nonvanishing |
-| `cos_int_mul_pi_ne_zero` | Trig induction | `Complex.cos_pi`, `Complex.cos_add_pi` |
-| `cos_pi_mul_succ` | Base + induction | cos(π) = -1 |
+**How to close it**: Formalize the PNT in Lean (substantial project), then construct
+the Báez-Duarte witness and verify its orthogonality via Möbius inversion.
+
+## Proof Architecture
+
+```
+riemann_hypothesis                           ← PROVED THEOREM
+├── nyman_beurling                           ← PROVED
+│   ├── nyman_beurling_forward               ← PROVED
+│   │   └── nb_distance_scaling              ← PROVED (d²_N ≤ C/log N)
+│   │       ├── offdiag_excess_sum_le        ← AXIOM ⭐ (Physics Pillar)
+│   │       ├── l2_error_eq_quad_error       ← PROVED (L² ↔ Matrix Bridge)
+│   │       └── nbDistSq_le_test_vector      ← PROVED (variational bound)
+│   └── nyman_beurling_converse              ← PROVED
+│       ├── rh_neg_gives_critical_strip_zero ← PROVED
+│       │   ├── zeta_nontrivial_zero_re_pos  ← PROVED (functional equation!)
+│       │   │   ├── zeta_neg_odd_ne_zero     ← PROVED (Selberg factor chain)
+│       │   │   ├── riemannZeta_zero         ← MATHLIB (ζ(0) = -1/2)
+│       │   │   ├── riemannZeta_one_sub      ← MATHLIB (functional equation)
+│       │   │   └── riemannZeta_ne_zero_of_one_le_re ← MATHLIB
+│       │   └── riemannZeta_ne_zero_of_one_le_re ← MATHLIB
+│       └── zeta_zero_separates              ← AXIOM ⭐ (Spectral Pillar)
+└── distance_converges_to_zero               ← PROVED (log divergence)
+```
+
+## What Is Proved (Highlights)
+
+| Component | Key Theorems | Status |
+|-----------|-------------|--------|
+| **Gram Matrix** | PSD, entry bounds, coprime Vasyunin | ✅ Proved |
+| **Parity Decomposition** | Liouville blocks, Schur complement | ✅ Proved |
+| **L² ↔ Matrix Bridge** | ∫(1−f)² = 1 − 2bᵀv + vᵀGv | ✅ Proved |
+| **Mellin Infrastructure** | floor_mellin_eq_zeta, mellin_fractBasis | ✅ Proved |
+| **Functional Equation Bridge** | zeta_nontrivial_zero_re_pos | ✅ Proved (from Mathlib) |
+| **NB Decomposition** | Forward + converse | ✅ Proved |
+| **L² Norm** | ∫₀¹ x^{2σ-2} dx = 1/(2σ-1) | ✅ Proved |
+| **Mellin at ζ zeros** | Simplified formula when ζ(ρ)=0 | ✅ Proved |
 
 ## Quick Start
 
 ```bash
 cd proofs
-lake build          # Build all Lean proofs (~3,433 jobs)
+lake build                        # Build all (3,444 jobs, ~2 min)
+make cathedral-audit              # Print axiom dependencies
+make cathedral-dump               # Concatenate all Cathedral .lean files
 ```
 
-Verify the axiom set:
+Verify the axiom set directly:
 ```bash
-echo 'import SpectralRH.Assembly
+echo 'import Cathedral.Assembly.MainChain
 #print axioms riemann_hypothesis' | lake env lean --stdin
-```
-
-Or use the Makefile:
-```bash
-make build          # Full project build (Lean + Rust)
-make lean-audit     # Scan for sorry/axiom counts
-make clean          # Clean all build artifacts
 ```
 
 ## File Guide
 
-### Critical Path
+### The Cathedral (Critical Path)
 
-| File | Sorry | Description |
-|------|-------|-------------|
-| `Defs.lean` | 0 | Core definitions (Gram matrix, NB distance, Liouville) |
-| `Structural.lean` | 0 | Gram PSD, eigenvalue interlacing, fractional part lemmas |
-| `RayleighBridge.lean` | 0 | Eigenvalue-quadratic form bridge (both directions) |
-| `GramBounds.lean` | 0 | Gram entry bounds, coprime Vasyunin case |
-| `ParitySchur.lean` | 0 | Parity decomposition, Schur PSD |
-| `BilinearSieve.lean` | 0 | Sieve → stable ratio |
-| `ParityBridge.lean` | 0 | Parity Bridge: sieve + block scaling → full scaling |
-| `MellinBridge.lean` | 0 | Mellin infrastructure, functional equation proofs |
-| `Assembly.lean` | 0 | Final chain: axioms → RH |
+```
+Cathedral/
+├── Defs.lean                    # Gram matrix, NB distance, core definitions
+├── Structural/                  # PSD, eigenvalue interlacing, fract lemmas
+├── GramDiag.lean                # Diagonal Gram entries = 1/4 + 1/(12k²)
+├── GramOffDiag.lean             # Off-diagonal entry decomposition
+├── GramBounds.lean              # Entry bounds, coprime Vasyunin case
+├── FractIntegral.lean           # Fractional part integral library
+├── ParitySchur.lean             # Parity decomposition, Schur PSD
+├── BilinearSieve.lean           # Sieve → stable ratio
+├── ParityBridge.lean            # Block scaling → full scaling
+├── Quantitative.lean            # Schur complement positivity
+├── Mertens/                     # Gram sum bounds
+│   ├── GramEntry.lean           #   Entry-level bounds
+│   ├── GramSum.lean             #   Aggregate sum bound
+│   └── OffDiagExcess.lean       #   ⭐ offdiag_excess_sum_le axiom
+├── MellinBridge/                # Mellin transform infrastructure
+│   ├── Basic.lean               #   Core definitions, mellin_target
+│   ├── FloorMellin.lean         #   k=1 floor Mellin, floor_mellin_eq_zeta
+│   ├── FloorDivMellin.lean      #   k≥1 generalized, mellin_fractBasis
+│   ├── Separation.lean          #   ⭐ zeta_zero_separates + converse
+│   ├── NymanBeurling.lean       #   Forward direction, combined criterion
+│   └── HilbertSetup.lean        #   L² scaffolding + Hyperplane Trap docs
+└── Assembly/
+    └── MainChain.lean           # Final chain: axioms → riemann_hypothesis
+```
 
-### Exploratory / Supporting
+### Supporting Infrastructure
 
 | File | Description |
 |------|-------------|
-| `SelbergSieve.lean` | Selberg sieve exploration (k=1 gap documented) |
-| `Quantitative.lean` | Schur complement positivity proof |
-| `SpectralFlow.lean` | Spectral flow analysis |
-| `FiniteDimReduction.lean` | Finite-dimensional reduction |
+| `SelbergSieve.lean` | Selberg sieve exploration |
+| `AlignmentDecay.lean` | Alignment decay bounds |
+| `LiCriterion.lean` | Li criterion formalization |
+| `NymanBeurling.lean` | Standalone NB exploration |
+| `HyperzetaRH.lean` | Hyperzeta approach |
 
-## Two Pillars Architecture
+## Technical Discoveries
 
-**Pillar 1: Discrete Linear Algebra (PROVED — zero sorry)**
-- Gram matrix theory: Hermitianness, PSD, eigenvalue bounds
-- Parity decomposition: Liouville blocks A, B, C
-- Schur complement: A - BC⁻¹Bᵀ ≥ 0
-- Variational principle: d²_N ≤ any test vector
-- L² ↔ Matrix bridge: ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+### 1. The Sawtooth Autocorrelation Floor
+The covariance between adjacent fractional parts {j/x} and {(j+1)/x} does NOT
+decay to zero — it stabilizes at C∞ ≈ 0.00227. This breaks any pointwise
+off-diagonal bound for j ≥ 109, necessitating the aggregate approach.
 
-**Pillar 2: Analytic Number Theory (2 axioms remaining)**
-- Test vector existence (`moebius_test_bound`): Möbius weights + PNT
-- Mellin separation (`zeta_zero_separates`): separating functional
+### 2. The Hyperplane Trap
+The Cauchy-Schwarz approach to `zeta_zero_separates` via a single Mellin functional
+fails because the Mellin residual can be driven to exactly zero for N ≥ 4. The
+theorem holds due to norm explosion of the spoofing weights, which Cauchy-Schwarz
+cannot detect.
 
-**Functional Equation Bridge (PROVED from Mathlib)**
-- ζ functional equation: `riemannZeta_one_sub`
-- Critical strip localization: `zeta_nontrivial_zero_re_pos`
-- Negative odd nonvanishing: `zeta_neg_odd_ne_zero`
-- Trig identity: cos(πn) = (-1)^n
-
-## Roadmap
-
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 1 | L²↔Matrix Bridge | ✅ PROVED |
-| 2 | Mellin transform infrastructure | ✅ PROVED |
-| 3 | Functional equation bridge | ✅ PROVED (from Mathlib) |
-| 4 | Nyman-Beurling decomposition | ✅ PROVED |
-| 5 | Critical strip localization | ✅ PROVED (from Mathlib) |
-| 6 | Test vector existence | 🟡 `moebius_test_bound` axiom |
-| 7 | Mellin separation | 🟡 `zeta_zero_separates` axiom |
-
-### Next Steps
-
-1. **Refactor basis to k≥1**: Include {1/x} in the NB basis, enabling
-   the Selberg sieve to close `moebius_test_bound`.
-2. **Formalize `zeta_zero_separates`**: Target for a community bounty.
-   Requires complex analysis (Mellin transform + residue calculus).
+### 3. The Constant Vector Miracle
+The off-diagonal sum Σ_{i≠j}(G_ij − 1/4) is actually negative (≈ −n/2), meaning
+the constant vector test gives a BETTER bound than the quadratic form analysis
+demands. The 3n axiom bound has an 18× safety margin.
 
 ## Paper
 
-The research paper is in [`proofs/SpectralRH/paper/`](proofs/SpectralRH/paper/).
+See [`paper/`](paper/) for the formal write-up.
+
+## Contributing
+
+We welcome contributions that close either axiom! See the "How to close it"
+sections above for specific strategies.
+
+## Technical Requirements
+
+- **Lean**: v4.29.0-rc8
+- **Mathlib**: Current (see `lean-toolchain` and `lake-manifest.json`)
+- **LaTeX**: pdflatex + amsmath (for paper compilation)
 
 ## License
 

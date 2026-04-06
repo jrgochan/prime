@@ -8,7 +8,8 @@
         experiments experiment-parity experiment-cross experiment-weil \
         platform-setup platform-build platform-run platform-stop \
         setup-ai ensure-ollama check-env \
-        cathedral-archive cathedral-audit cathedral-check
+        cathedral-archive cathedral-audit cathedral-check \
+        paper paper-technical paper-overview paper-clean
 
 # ── Directories ──────────────────────────────────────────────
 PROOFS_DIR    = proofs
@@ -245,6 +246,37 @@ cathedral-check:
 		| lake env lean --stdin 2>&1 | grep -A 10 "depends on axioms"
 	@echo ""
 	@echo "═══ Cathedral typecheck complete ═══"
+
+# ══════════════════════════════════════════════════════════════
+# PAPER
+# ══════════════════════════════════════════════════════════════
+
+PAPER_DIR = paper
+
+## Build all papers (technical + overview)
+paper: paper-technical paper-overview
+	@echo "═══ All papers built ═══"
+
+## Build the technical paper (cathedral.tex → cathedral.pdf)
+paper-technical:
+	@echo "═══ Building technical paper ═══"
+	cd $(PAPER_DIR) && pdflatex -interaction=nonstopmode cathedral.tex
+	cd $(PAPER_DIR) && pdflatex -interaction=nonstopmode cathedral.tex
+	@echo "  → $(PAPER_DIR)/cathedral.pdf"
+
+## Build the overview paper (overview.tex → overview.pdf)
+paper-overview:
+	@echo "═══ Building overview paper ═══"
+	cd $(PAPER_DIR) && pdflatex -interaction=nonstopmode overview.tex
+	cd $(PAPER_DIR) && pdflatex -interaction=nonstopmode overview.tex
+	@echo "  → $(PAPER_DIR)/overview.pdf"
+
+## Clean LaTeX build artifacts
+paper-clean:
+	@echo "Cleaning paper build artifacts..."
+	cd $(PAPER_DIR) && rm -f *.aux *.log *.out *.toc *.bbl *.blg \
+		*.fdb_latexmk *.fls *.synctex.gz
+	@echo "Done."
 
 # ══════════════════════════════════════════════════════════════
 # RUST EXPERIMENTS
