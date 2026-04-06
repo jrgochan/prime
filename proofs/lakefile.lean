@@ -31,6 +31,7 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,
     `Cathedral.Spectral.OctonionicPartition, `Cathedral.Spectral.ClassRestriction,
     `Cathedral.Spectral.FiniteDimReduction,
+    `Cathedral.Spectral.ConstantVectorBound,
     -- Bridge files (used by Assembly for alternative proofs)
     `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
     `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
