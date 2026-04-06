@@ -15,6 +15,10 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/proof-tree", label: "Proof Tree", icon: "🌳" },
   { href: "/gram-heatmap", label: "Gram Matrix", icon: "🔥" },
   { href: "/sawtooth", label: "Sawtooth Discovery", icon: "📐" },
+  { href: "/offdiag-margin", label: "18× Margin", icon: "📊" },
+  { href: "/fractional-waves", label: "Fractional Waves", icon: "🌊" },
+  { href: "/hyperplane-trap", label: "Hyperplane Trap", icon: "🕳️" },
+  { href: "/cathedral-3d", label: "Cathedral 3D", icon: "⛪" },
 ];
 
 export default function Shell({ children }: { children: ReactNode }) {
