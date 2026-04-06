@@ -503,18 +503,78 @@ theorem lambda_max_linear_growth :
     (univ : Finset (Fin (Fintype.card (Fin (N - 1))))).sup'
       (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, mem_univ _⟩)
       (gramMatrix_hermitian N).eigenvalues₀ := by
-  -- For each class m, finClassCard_density gives c_m > 0 with fCC ≥ c_m·N
-  -- constant_vector_quadform_lower gives v^T G v ≥ (fCC-1)²/16
-  -- constantClassVector_dotProduct gives ||v||² = fCC
-  -- rayleigh: λ_max ≥ (fCC-1)²/(16·fCC)
-  -- For fCC ≥ c_m·N ≥ 2 (large N): (fCC-1) ≥ fCC/2
-  -- So (fCC-1)²/(16·fCC) ≥ (fCC/2)²/(16·fCC) = fCC/64 ≥ c_m·N/64
-  -- Take c = min_m (c_m/64)
-  sorry  -- Assembly: all mathematical components are proved above.
-         -- This is purely connecting constant_vector_quadform_lower,
-         -- constantClassVector_dotProduct, rayleigh_lower_bound_max,
-         -- and finClassCard_density with algebra.
-         -- The bound λ_max ≥ c·N/64 follows from fCC ≥ c·N.
+  -- Step 1: Get density constants for each class
+  choose c_fn hc_data using finClassCard_density
+  -- hc_data m : 0 < c_fn m ∧ ∃ N₀, ∀ N ≥ N₀, c_fn m * N ≤ fCC(N,m)
+  -- Use c = min_m(c_fn m / 64), which absorbs the algebra
+  refine ⟨univ.inf' ⟨0, mem_univ _⟩ (fun m => c_fn m / 64), ?_, fun m => ?_⟩
+  · -- Positivity: inf' of positive functions is positive
+    -- inf' = f(m₀) for some m₀ in univ, and f(m₀) = c_fn m₀ / 64 > 0
+    obtain ⟨m₀, _, hm₀⟩ := Finset.exists_mem_eq_inf' ⟨0, mem_univ _⟩
+      (fun m => c_fn m / 64)
+    rw [hm₀]; exact div_pos (hc_data m₀).1 (by norm_num)
+  · -- For each class m: get its density constant and threshold
+    obtain ⟨hc_pos, N_m, hN_bound⟩ := hc_data m
+    -- N₀ must be large enough for (1) fCC ≥ c_m·N and (2) fCC ≥ 2
+    refine ⟨max (max N_m 2) (Nat.ceil (2 / c_fn m) + 1), fun N hN => ?_⟩
+    have hN_m : N_m ≤ N := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
+    have hN2 : 2 ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
+    have hN_large : (2 / c_fn m) < (N : ℝ) := by
+      have : Nat.ceil (2 / c_fn m) + 1 ≤ N := le_trans (le_max_right _ _) hN
+      have : (Nat.ceil (2 / c_fn m) : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : Nat.ceil (2 / c_fn m) < N)
+      exact lt_of_le_of_lt (Nat.le_ceil _) this
+    -- Key fact: fCC ≥ c_m · N ≥ 2
+    have h_fCC_bound := hN_bound N hN_m
+    have h_fCC_ge2 : 2 ≤ (finClassCard N m : ℝ) := by
+      have h_2_lt_cmN : 2 < c_fn m * (N : ℝ) := by
+        have := mul_lt_mul_of_pos_left hN_large hc_pos
+        rwa [mul_div_cancel₀ _ (ne_of_gt hc_pos)] at this
+      linarith
+    have h_fCC_pos : (0 : ℝ) < finClassCard N m := by linarith
+    -- Step 2: Apply Rayleigh with the constant vector
+    -- We need: c · dotProduct v v ≤ realQuadForm G v
+    -- From constant_vector_quadform_lower: (fCC-1)²/16 ≤ v^T G v
+    -- From constantClassVector_dotProduct: v^T v = fCC
+    -- So need: c * fCC ≤ (fCC-1)²/16
+    have h_quad := constant_vector_quadform_lower N hN2 m
+    have h_dot := constantClassVector_dotProduct N m
+    have h_nonzero : constantClassVector N m ≠ 0 :=
+      constantClassVector_ne_zero N m (by exact_mod_cast (show 0 < (finClassCard N m : ℝ) from h_fCC_pos))
+    -- Apply Rayleigh: any c with c · v^T v ≤ v^T G v gives c ≤ λ_max
+    have h_rayleigh := rayleigh_lower_bound_max
+      (gramMatrix_hermitian N) (by omega) ((↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)))
+      (constantClassVector N m) h_nonzero
+      (by -- Need: ((fCC-1)²/(16·fCC)) · fCC ≤ v^T G v
+          rw [h_dot]
+          -- Show: ((fCC-1)²/(16·fCC)) · fCC = (fCC-1)²/16
+          -- Work in ℝ with explicit casts
+          set a := (↑(finClassCard N m) : ℝ)
+          -- (a-1)² / (16*a) * a = (a-1)² * a / (16 * a) = (a-1)² / 16
+          have ha_ne : a ≠ 0 := ne_of_gt h_fCC_pos
+          have : (a - 1) ^ 2 / (16 * a) * a = (a - 1) ^ 2 / 16 := by
+            rw [div_mul_eq_mul_div, mul_div_mul_right _ _ ha_ne]
+          linarith)
+    -- h_rayleigh : (fCC-1)²/(16·fCC) ≤ λ_max
+    -- Step 3: Bound (fCC-1)²/(16·fCC) ≥ c_m·N/64
+    -- For fCC ≥ 2: fCC-1 ≥ fCC/2, so (fCC-1)² ≥ fCC²/4
+    -- Therefore (fCC-1)²/(16·fCC) ≥ fCC²/(4·16·fCC) = fCC/64 ≥ c_m·N/64
+    have h_half : (↑(finClassCard N m) : ℝ) / 2 ≤ ↑(finClassCard N m) - 1 := by linarith
+    have h_sq_bound : (↑(finClassCard N m) : ℝ) ^ 2 / 4 ≤ (↑(finClassCard N m) - 1) ^ 2 := by
+      nlinarith
+    have h_ratio_bound : (↑(finClassCard N m) : ℝ) / 64 ≤
+        (↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)) := by
+      rw [div_le_div_iff₀ (by norm_num : (0:ℝ) < 64) (by positivity)]
+      nlinarith
+    -- Final chain: c·N ≤ (c_m/64)·N ≤ fCC/64 ≤ (fCC-1)²/(16·fCC) ≤ λ_max
+    calc univ.inf' ⟨0, mem_univ _⟩ (fun m => c_fn m / 64) * ↑N
+        ≤ c_fn m / 64 * ↑N := by
+          apply mul_le_mul_of_nonneg_right (inf'_le _ (mem_univ m))
+            (Nat.cast_nonneg N)
+      _ ≤ (↑(finClassCard N m) : ℝ) / 64 := by
+          rw [div_mul_eq_mul_div]
+          exact div_le_div_of_nonneg_right h_fCC_bound (by norm_num)
+      _ ≤ (↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)) := h_ratio_bound
+      _ ≤ _ := h_rayleigh
 
 -- ════════════════════════════════════════════════
 -- PART VI: THE EFFECTIVE EIGENVALUE (RESOLVENT)
@@ -571,15 +631,13 @@ end
 --   ✅ constantClassVector_dotProduct (||v||² = fCC via sum_boole)
 --   ✅ lambdaEff_linear_growth_proved (main theorem from resolvent axiom)
 --
--- AXIOMS (3):
+-- AXIOMS (2):
 --   📐 finClassCard_density — class count ≥ c·N (Dirichlet)
 --   ⚡ lambdaEff_resolvent_bound — spectral alignment (Lightning Rod)
 --
--- SORRY (1, purely mechanical assembly):
---   🔧 lambda_max_linear_growth — connecting quadform + dotprod + Rayleigh + density
---      Every component is PROVED; this is gluing 4 lemmas together with algebra.
+-- SORRY: **ZERO** 🎉
 --
--- The HARD mathematical content (zero sorry):
+-- The HARD mathematical content (all PROVED):
 --   basis_entry_lower (PROVED) — ∫{k/x}dx ≥ 1/4 for k ≥ 2
 --   gram_l2_identity (PROVED) — v^T G v = ∫|nbLinComb|²
 --   integral_sq_ge_sq_integral (PROVED) — ∫f² ≥ (∫f)²
