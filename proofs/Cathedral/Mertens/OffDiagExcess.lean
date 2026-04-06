@@ -26,22 +26,116 @@ lemma max_of_lt {i j : ℕ} (hij : i < j) :
   rw [max_eq_right]
   linarith [show (i : ℝ) < (j : ℝ) from Nat.cast_lt.mpr hij]
 
-/-- **THEOREM**: Total 1/(4·max) sum over all off-diagonal pairs ≤ n.
+/-- For j.val < i.val: max(i+1,j+1) = i+1, so 1/(4·max) = 1/(4(i+1)). -/
+private lemma inv_max_of_lt_row {n : ℕ} (i j : Fin n) (hij : j.val < i.val) :
+    1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1)) = 1 / (4 * ((i.val : ℝ) + 1)) := by
+  have : (j.val : ℝ) + 1 ≤ (i.val : ℝ) + 1 := by
+    linarith [show (j.val : ℝ) < (i.val : ℝ) from Nat.cast_lt.mpr hij]
+  simp [max_eq_left this]
 
-    Proof sketch (using symmetry):
-    Σ_{i≠j} 1/(4·max(i+1,j+1))
-    = 2·Σ_{i<j} 1/(4(j+1))        [max symmetric, equals j+1 for i<j]
-    = (1/2)·Σ_{j=1}^{n-1} j/(j+1)  [for each j: j pairs (i,0..j-1)]
-    < (1/2)·(n-1)                   [j/(j+1) < 1]
-    ≤ n                             [trivial]
+/-- For i.val < j.val: max(i+1,j+1) = j+1, so 1/(4·max) = 1/(4(j+1)). -/
+private lemma inv_max_of_lt_col {n : ℕ} (i j : Fin n) (hij : i.val < j.val) :
+    1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1)) = 1 / (4 * ((j.val : ℝ) + 1)) := by
+  have : (i.val : ℝ) + 1 ≤ (j.val : ℝ) + 1 := by
+    linarith [show (i.val : ℝ) < (j.val : ℝ) from Nat.cast_lt.mpr hij]
+  simp [max_eq_right this]
 
-    The Lean proof avoids the symmetry decomposition by directly bounding
-    each inner sum and using the COMBINED bound. Since the direct Finset
-    approach for symmetry decomposition is complex, we use the verified
-    asymptotic (ratio → 1/2) as justification. -/
-axiom inv_max_sum_le (n : ℕ) (hn : 1 ≤ n) :
+/-- Card of {i : Fin n | i.val < j.val} = j.val (local copy of private GramEntry lemma). -/
+private lemma card_lt_j' {n : ℕ} (j : Fin n) :
+    ((Finset.univ : Finset (Fin n)).filter (fun i : Fin n => i.val < j.val)).card = j.val := by
+  have h_eq : (Finset.univ : Finset (Fin n)).filter (fun i => i.val < j.val) =
+      (Finset.univ : Finset (Fin j.val)).image (fun k : Fin j.val => ⟨k.val, by omega⟩) := by
+    ext i; simp [Finset.mem_filter, Finset.mem_image, Fin.ext_iff]
+    constructor
+    · intro hi; exact ⟨⟨i.val, hi⟩, rfl⟩
+    · rintro ⟨k, hk⟩
+      have h1 : k.val < j.val := k.isLt
+      have h2 : k.val = i.val := by exact_mod_cast hk
+      exact Fin.mk_lt_mk.mpr (by omega)
+  rw [h_eq, Finset.card_image_of_injective _ (fun a b h => Fin.ext (by simpa [Fin.ext_iff] using h))]
+  simp [Finset.card_univ, Fintype.card_fin]
+
+/-- Σ i/(i+1) ≤ n, since each i/(i+1) < 1 (local copy). -/
+private lemma sum_ratio_le' (n : ℕ) :
+    ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1)) ≤ (n : ℝ) := by
+  calc ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1))
+      ≤ ∑ _i : Fin n, (1 : ℝ) := by
+        apply Finset.sum_le_sum; intro i _
+        rw [div_le_one (by positivity : (0:ℝ) < (i.val : ℝ) + 1)]
+        linarith [Nat.cast_nonneg (α := ℝ) i.val]
+    _ = (n : ℝ) := by simp [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
+
+set_option maxHeartbeats 800000 in
+/-- **THEOREM**: Total 1/(4·max) sum over all off-diagonal pairs ≤ n. -/
+theorem inv_max_sum_le (n : ℕ) (_hn : 1 ≤ n) :
     ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
-      (1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1))) ≤ (n : ℝ)
+      (1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1))) ≤ (n : ℝ) := by
+  -- Step 0: Erase decomposition (same as gcd_offdiag_sum_le)
+  have h_split : ∀ i : Fin n, Finset.univ.erase i =
+      (Finset.univ.filter (fun j : Fin n => j.val < i.val)) ∪
+      (Finset.univ.filter (fun j : Fin n => i.val < j.val)) := by
+    intro i; ext j; constructor
+    · intro hj; simp [Finset.mem_erase] at hj; simp [Finset.mem_filter]; omega
+    · intro hj; simp [Finset.mem_filter] at hj; simp [Finset.mem_erase, Fin.ext_iff]; omega
+  have h_disj : ∀ i : Fin n, Disjoint
+      (Finset.univ.filter (fun j : Fin n => j.val < i.val))
+      (Finset.univ.filter (fun j : Fin n => i.val < j.val)) := by
+    intro i; rw [Finset.disjoint_filter]; intro j _ h1 h2; omega
+  -- Step 1: Split and bound each half
+  calc ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
+        (1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1)))
+      = ∑ i : Fin n, (∑ j ∈ Finset.univ.filter (fun j : Fin n => j.val < i.val),
+            (1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1))) +
+           ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+            (1 / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1)))) := by
+        congr 1; ext i; rw [h_split i, Finset.sum_union (h_disj i)]
+    _ ≤ ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1) / 4 +
+              ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+                (1 / (4 * ((j.val : ℝ) + 1)))) := by
+        apply Finset.sum_le_sum; intro i _
+        apply add_le_add
+        · -- j < i: each term = 1/(4(i+1)), there are i.val terms → sum = i/(i+1)/4
+          have h1 : ∀ j ∈ Finset.univ.filter (fun j : Fin n => j.val < i.val),
+              (1 : ℝ) / (4 * max ((i.val : ℝ) + 1) ((j.val : ℝ) + 1)) =
+              1 / (4 * ((i.val : ℝ) + 1)) :=
+            fun j hj => inv_max_of_lt_row i j (Finset.mem_filter.mp hj).2
+          rw [Finset.sum_congr rfl h1, Finset.sum_const, nsmul_eq_mul,
+              Nat.cast_inj.mpr (card_lt_j' i)]
+          -- now: ↑i * (1 / (4 * (↑i + 1))) ≤ ↑i / (↑i + 1) / 4
+          -- These are equal: a * (1/(4b)) = a/b/4
+          apply le_of_eq; field_simp
+        · -- j > i: each term = 1/(4(j+1))
+          exact Finset.sum_le_sum (fun j hj =>
+            le_of_eq (inv_max_of_lt_col i j (Finset.mem_filter.mp hj).2))
+    _ = ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1) / 4) +
+        ∑ i : Fin n, ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+          (1 / (4 * ((j.val : ℝ) + 1))) := by
+        rw [← Finset.sum_add_distrib]
+    _ ≤ (n : ℝ) / 4 + (n : ℝ) / 4 := by
+        apply add_le_add
+        · -- First half: Σ i/(i+1)/4 ≤ n/4
+          calc ∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1) / 4)
+              = (∑ i : Fin n, ((i.val : ℝ) / ((i.val : ℝ) + 1))) / 4 := by
+                rw [Finset.sum_div]
+            _ ≤ (n : ℝ) / 4 := by
+                apply div_le_div_of_nonneg_right (sum_ratio_le' n) (by positivity)
+        · -- Swap summation: Σ_i Σ_{j>i} 1/(4(j+1)) = Σ_j j/(j+1)/4
+          calc ∑ i : Fin n, ∑ j ∈ Finset.univ.filter (fun j : Fin n => i.val < j.val),
+                (1 / (4 * ((j.val : ℝ) + 1)))
+              = ∑ j : Fin n, ∑ _i ∈ Finset.univ.filter (fun i : Fin n => i.val < j.val),
+                  (1 / (4 * ((j.val : ℝ) + 1))) := by
+                apply Finset.sum_comm'
+                intro i j; simp [Finset.mem_filter]
+            _ = ∑ j : Fin n, ((j.val : ℝ) / ((j.val : ℝ) + 1) / 4) := by
+                congr 1; ext j
+                rw [Finset.sum_const, nsmul_eq_mul, Nat.cast_inj.mpr (card_lt_j' j)]
+                field_simp
+            _ = (∑ j : Fin n, ((j.val : ℝ) / ((j.val : ℝ) + 1))) / 4 := by
+                rw [Finset.sum_div]
+            _ ≤ (n : ℝ) / 4 := by
+                apply div_le_div_of_nonneg_right (sum_ratio_le' n) (by positivity)
+    _ = (n : ℝ) / 2 := by ring
+    _ ≤ (n : ℝ) := by linarith [Nat.cast_nonneg (α := ℝ) n]
 
 -- ════════════════════════════════════════════════
 -- PART 2: The gcd²/(12ij) sum bound
