@@ -60,3 +60,19 @@ cathedral-archive-*.tar.gz
 cathedral-dump.txt
 dump_b64.txt
 proofs/experiments/*/target/
+
+# Generated dumps & archives
+cathedral-dump.txt
+cathedral-archive-*.tar.gz
+dump_b64.txt
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.synctex.gz
