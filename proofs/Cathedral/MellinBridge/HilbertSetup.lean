@@ -117,3 +117,59 @@ theorem mellin_target_eq (ρ : ℂ) (hρ : 0 < ρ.re) :
     mellinRestricted targetFnC ρ = 1 / ρ :=
   mellin_target ρ hρ
 
+-- ════════════════════════════════════════════════
+-- INTEGRAL CAUCHY-SCHWARZ (standard real analysis)
+-- ════════════════════════════════════════════════
+
+/-- **Axiom (Real Analysis — Integral Cauchy-Schwarz)**:
+
+    For f : ℝ → ℝ and g : ℝ → ℂ with f², |g|² integrable on (0,1):
+      ‖∫₀¹ f(x)·g(x) dx‖² ≤ (∫₀¹ f(x)² dx) · (∫₀¹ ‖g(x)‖² dx)
+
+    This is the integral form of the Cauchy-Schwarz inequality,
+    a standard textbook result in real analysis. We state it for
+    the specific case needed: real-valued f and complex-valued g,
+    integrated over (0,1).
+
+    **Status**: This follows from Mathlib's `norm_inner_le_norm`
+    applied to the L²(μ, ℂ) inner product space, but the bridge
+    between the abstract Hilbert space Cauchy-Schwarz and concrete
+    interval integrals requires measurability and integrability
+    scaffolding not yet fully connected in our import set.
+
+    **Character**: This is a PURE ANALYSIS axiom, completely
+    independent of number theory. It is verifiable from undergraduate
+    real analysis and will be fully provable once the L²-integral
+    bridge is formalized in Mathlib. -/
+axiom integral_cauchy_schwarz_01
+    (f : ℝ → ℝ) (g : ℝ → ℂ)
+    (hf : MeasureTheory.IntegrableOn (fun x => f x ^ 2) (Set.Ioc 0 1))
+    (hg : MeasureTheory.IntegrableOn (fun x => ‖g x‖ ^ 2) (Set.Ioc 0 1)) :
+    ‖∫ x in Set.Ioc (0:ℝ) 1, (f x : ℂ) * g x‖ ^ 2 ≤
+    (∫ x in Set.Ioc (0:ℝ) 1, f x ^ 2) *
+    (∫ x in Set.Ioc (0:ℝ) 1, ‖g x‖ ^ 2)
+
+-- ════════════════════════════════════════════════
+-- THE SEPARATION BOUND
+-- ════════════════════════════════════════════════
+
+/- **The Master Inequality (Sketch)**:
+
+    For any h ∈ L²(0,1) and ρ with Re(ρ) > 1/2:
+
+    ∫₀¹ (1-h)² dx ≥ ‖∫₀¹ (1-h)·x^{ρ-1} dx‖² · (2Re(ρ)-1)
+
+    Proof: By Cauchy-Schwarz and l2_norm_sq_power:
+    ‖∫ (1-h)·x^{ρ-1}‖² ≤ (∫ (1-h)²) · (∫ |x^{ρ-1}|²)
+                        = (∫ (1-h)²) · 1/(2σ-1)
+
+    Rearranging: ∫ (1-h)² ≥ ‖∫ (1-h)·x^{ρ-1}‖² · (2σ-1)
+
+    If the Mellin residual ‖∫ (1-h)·x^{ρ-1}‖ is bounded below by
+    some δ₀ > 0 uniformly in h, then:
+    ∫ (1-h)² ≥ δ₀² · (2σ-1) > 0
+
+    This shows that zeta_zero_separates reduces to:
+    "The Mellin residual at ρ cannot be driven to zero
+     by any choice of weights." -/
+
