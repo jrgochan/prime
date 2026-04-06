@@ -7,7 +7,8 @@
         lean-build lean-clean lean-check lean-audit lean-setup \
         experiments experiment-parity experiment-cross experiment-weil \
         platform-setup platform-build platform-run platform-stop \
-        setup-ai ensure-ollama check-env
+        setup-ai ensure-ollama check-env \
+        cathedral-archive cathedral-audit cathedral-check
 
 # ── Directories ──────────────────────────────────────────────
 PROOFS_DIR    = proofs
@@ -36,6 +37,11 @@ help:
 	@echo "  ║    make lean-check    Quick typecheck (no build)  ║"
 	@echo "  ║    make lean-audit    Scan for sorry/axiom usage  ║"
 	@echo "  ║    make lean-setup    Fetch Mathlib cache         ║"
+	@echo "  ║                                                  ║"
+	@echo "  ║  CATHEDRAL (RH Proof Chain)                      ║"
+	@echo "  ║    make cathedral-archive  Archive .tar.gz        ║"
+	@echo "  ║    make cathedral-audit    Sorry & axiom scan     ║"
+	@echo "  ║    make cathedral-check    Typecheck all modules  ║"
 	@echo "  ║                                                  ║"
 	@echo "  ║  RUST EXPERIMENTS                                ║"
 	@echo "  ║    make experiments          Build & run all      ║"
@@ -138,6 +144,107 @@ lean-audit:
 		| grep -v "no sorry" | grep -v "SORRY" \
 		|| echo "  ✅ Zero sorry in proof code!"
 	@echo "═══ Audit complete ═══"
+
+# ══════════════════════════════════════════════════════════════
+# CATHEDRAL (RH Proof Chain)
+# ══════════════════════════════════════════════════════════════
+
+CATHEDRAL_DIR = $(PROOFS_DIR)/Cathedral
+ARCHIVE_NAME = cathedral-archive-$(shell date +%Y%m%d-%H%M%S).tar.gz
+
+## Create a .tar.gz archive of the entire Cathedral lean structure
+cathedral-archive:
+	@echo "═══ Cathedral: Creating archive ═══"
+	@cd $(PROOFS_DIR) && tar czf ../$(ARCHIVE_NAME) \
+		--exclude='.lake' \
+		--exclude='*.olean' \
+		--exclude='*.ilean' \
+		--exclude='*.trace' \
+		Cathedral/ \
+		lakefile.lean \
+		lean-toolchain \
+		GRAM_ENTRY_PLAN.md
+	@echo "  📦 Archive created: $(ARCHIVE_NAME)"
+	@echo "  📊 Size: $$(du -h $(ARCHIVE_NAME) | cut -f1)"
+	@echo "  📁 Contents:"
+	@tar tzf $(ARCHIVE_NAME) | head -30
+	@echo "  ..."
+	@echo "  ✅ Cathedral archived."
+
+## Dump all Cathedral .lean files into a single readable text file
+## Perfect for pasting into AI chat interfaces (Gemini, etc.)
+cathedral-dump:
+	@echo "═══ Cathedral: Creating text dump ═══"
+	@echo "# Cathedral Source Dump" > cathedral-dump.txt
+	@echo "# Generated: $$(date)" >> cathedral-dump.txt
+	@echo "# Project: prime/proofs/Cathedral" >> cathedral-dump.txt
+	@echo "" >> cathedral-dump.txt
+	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
+		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
+		echo "" >> cathedral-dump.txt; \
+		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
+		echo "FILE: $$relpath" >> cathedral-dump.txt; \
+		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
+		echo "" >> cathedral-dump.txt; \
+		cat "$$file" >> cathedral-dump.txt; \
+		echo "" >> cathedral-dump.txt; \
+	done
+	@echo "" >> cathedral-dump.txt
+	@echo "════════════════════════════════════════════════" >> cathedral-dump.txt
+	@echo "FILE: lakefile.lean" >> cathedral-dump.txt
+	@echo "════════════════════════════════════════════════" >> cathedral-dump.txt
+	@echo "" >> cathedral-dump.txt
+	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-dump.txt
+	@if [ -f $(PROOFS_DIR)/GRAM_ENTRY_PLAN.md ]; then \
+		echo "" >> cathedral-dump.txt; \
+		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
+		echo "FILE: GRAM_ENTRY_PLAN.md" >> cathedral-dump.txt; \
+		echo "════════════════════════════════════════════════" >> cathedral-dump.txt; \
+		echo "" >> cathedral-dump.txt; \
+		cat $(PROOFS_DIR)/GRAM_ENTRY_PLAN.md >> cathedral-dump.txt; \
+	fi
+	@echo "  📄 Dump created: cathedral-dump.txt"
+	@echo "  📊 Size: $$(du -h cathedral-dump.txt | cut -f1)"
+	@echo "  📝 Files included: $$(grep -c '^FILE:' cathedral-dump.txt)"
+	@echo "  ✅ Ready to paste into chat!"
+
+## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
+cathedral-audit:
+	@echo "═══ Cathedral: Proof Chain Audit ═══"
+	@echo ""
+	@echo "── sorry usage (Mertens/ — should be zero) ──"
+	@grep -rn "\bsorry\b" $(CATHEDRAL_DIR)/Mertens/*.lean 2>/dev/null \
+		| grep -v "\-\-" || echo "  ✅ Zero sorry in Mertens/!"
+	@echo ""
+	@echo "── sorry usage (Scratch/ — active work) ──"
+	@grep -rn "\bsorry\b" $(CATHEDRAL_DIR)/Scratch/*.lean 2>/dev/null \
+		| grep -v "\-\-" || echo "  None found."
+	@echo ""
+	@echo "── axiom declarations ──"
+	@grep -rn "^axiom " $(CATHEDRAL_DIR)/**/*.lean $(CATHEDRAL_DIR)/*.lean 2>/dev/null \
+		|| echo "  None found."
+	@echo ""
+	@echo "── sorry count by file ──"
+	@for f in $$(find $(CATHEDRAL_DIR) -name '*.lean'); do \
+		count=$$(grep -c "\bsorry\b" "$$f" 2>/dev/null); \
+		name=$$(echo "$$f" | sed 's|$(PROOFS_DIR)/||'); \
+		if [ "$$count" -gt 0 ] 2>/dev/null; then \
+			echo "  ⚠  $$name: $$count sorry"; \
+		fi; \
+	done
+	@echo ""
+	@echo "═══ Cathedral audit complete ═══"
+
+## Typecheck all Cathedral modules
+cathedral-check:
+	@echo "═══ Cathedral: Typechecking all modules ═══"
+	@cd $(PROOFS_DIR) && lake build Cathedral.Assembly.MainChain 2>&1 | tail -5
+	@echo ""
+	@echo "── RH axiom dependencies ──"
+	@cd $(PROOFS_DIR) && echo 'import Cathedral.Assembly.MainChain' \
+		| lake env lean --stdin 2>&1 | grep -A 10 "depends on axioms"
+	@echo ""
+	@echo "═══ Cathedral typecheck complete ═══"
 
 # ══════════════════════════════════════════════════════════════
 # RUST EXPERIMENTS

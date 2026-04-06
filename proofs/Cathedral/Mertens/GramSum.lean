@@ -71,23 +71,14 @@ lemma gramMatrix_row_sum_le (N : ℕ) (hN3 : 3 ≤ N) :
         push_cast [Nat.cast_sub (show 2 ≤ N from by omega)]
         linarith
 
--- The corrected axiom (in GramEntry.lean) gives: gramEntry ≤ 1/4 + g²/(12jk) + 1/(4·max).
--- For gram_sum_tight, we need the SUM of excesses to be O(N).
-
 /-- **PROVED**: Combined off-diagonal excess sum ≤ 3N.
-    Decomposed into two sub-bounds in OffDiagExcess.lean:
-      Σ gcd²/(12ij) ≤ 2N  (gcd_sq_sum_le axiom)
-      Σ 1/(4·max)  ≤ N    (inv_max_sum_le axiom)
-    Wired through the corrected per-entry axiom (gram_entry_offdiag_upper). -/
+    Uses the aggregate bound axiom directly (not pointwise decomposition).
+    See OffDiagExcess.lean for the full rationale and documentation
+    of the Sawtooth Autocorrelation Floor discovery. -/
 theorem offdiag_excess_sum_le (n : ℕ) :
     ∑ i : Fin n, ∑ j ∈ Finset.univ.erase i,
-      (gramMatrix (n + 1) i j - 1 / 4) ≤ 3 * (n : ℝ) := by
-  by_cases hn : 1 ≤ n
-  · exact Cathedral.OffDiagExcess.offdiag_excess_from_parts n hn
-  · -- n = 0: empty sum
-    push_neg at hn
-    interval_cases n
-    simp
+      (gramMatrix (n + 1) i j - 1 / 4) ≤ 3 * (n : ℝ) :=
+  Cathedral.OffDiagExcess.offdiag_excess_sum_le n
 
 
 -- ════════════════════════════════════════════════

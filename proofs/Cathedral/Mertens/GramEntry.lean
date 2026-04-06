@@ -5,7 +5,7 @@
 
   Contains:
   - gram_entry_diag_upper (theorem via GramDiag)
-  - gram_entry_offdiag_upper (axiom — corrected gcd-based)
+  - gram_entry_offdiag_upper (DELETED — proved false, see OffDiagExcess.lean)
   - gram_entry_offdiag_le_third (theorem via AM-GM)
   - gram_entry_upper (unified bound)
   - basis_sum_tight (theorem)
@@ -36,23 +36,14 @@ open Real MeasureTheory Set Finset Matrix
 theorem gram_entry_diag_upper (j : ℕ) (hj : 1 ≤ j) :
     gramEntry j j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2) := gram_entry_diag_upper' j hj
 
-/-- **Off-diagonal Gram entry upper bound** (CORRECTED 2026-04-06).
-    G_{j,k} = ∫₀¹ {j/x}·{k/x} dx ≤ 1/4 + g²/(12jk) + 1/(4·max(j,k)).
+/- **DELETED AXIOM (2026-04-06)**: gram_entry_offdiag_upper was PROVED FALSE.
+    The pointwise bound G_{j,k} ≤ 1/4 + gcd²/(12jk) + 1/(4·max(j,k))
+    fails for j ≥ 109, k = j+1 due to the Sawtooth Autocorrelation Floor:
+      C_∞ = ∫₀¹ B₂(t)/2 · ψ₁(t+1) dt ≈ 0.00227
+    exceeds 1/(4·110) ≈ 0.00227 for adjacent coprime pairs.
 
-    The bound decomposes as:
-    1. gramEntry ≤ 1/4 + Cov  (from gramEntry_le_quarter_plus_cov, PROVED)
-    2. Cov ≤ g²/(12jk) + 1/(4·max(j,k))  where:
-       - g²/(12jk) = exact mean of coprime cross product (CoprimeCross)
-       - 1/(4·max(j,k)) = IBP running average error bound
-
-    **Previous version** used gcd/(jk), which is FALSE for gcd ≥ 14
-    (e.g., j=14, k=28: gramEntry ≈ 0.2871 > 0.2857 = 1/4 + 14/392).
-
-    Numerically verified for all j,k ≤ 150. -/
-axiom gram_entry_offdiag_upper (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
-    gramEntry j k ≤ 1 / 4 +
-      (((Nat.gcd j k : ℝ) ^ 2) / (12 * (j : ℝ) * (k : ℝ))) +
-      (1 / (4 * max (j : ℝ) (k : ℝ)))
+    The RH proof now uses an AGGREGATE sum axiom (offdiag_excess_sum_le)
+    instead of pointwise per-entry bounds. See OffDiagExcess.lean. -/
 
 /-- Off-diagonal entries are at most 1/3.
     Follows from gramEntry_le_avg_diag (AM-GM) + gramEntry_le_third_all. -/
