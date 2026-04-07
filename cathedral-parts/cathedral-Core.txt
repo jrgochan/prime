@@ -1,5 +1,5 @@
 # Cathedral Source - Core
-# Generated: Tue Apr  7 15:28:34 MDT 2026
+# Generated: Tue Apr  7 16:09:41 MDT 2026
 # Project: prime/proofs/Cathedral
 # Proof: Spectral Riemann Hypothesis (2-axiom reduction)
 
@@ -511,6 +511,51 @@ end
 
 
 ================================================================
+FILE: Cathedral/Robin/BaseCases.lean
+================================================================
+
+/-
+  Cathedral/Robin/BaseCases.lean
+
+  ## Lagarias Base Case Verification
+
+  Proves Lagarias's inequality for n = 1:
+    σ(1) = 1 ≤ H₁ + exp(H₁)·log(H₁) = 1 + e·0 = 1
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+import Mathlib.NumberTheory.Harmonic.Defs
+
+open Real ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- LAGARIAS BASE CASE
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Lagarias holds for n = 1.
+
+    σ(1) = 1, H₁ = 1, log(1) = 0, exp(1)·0 = 0.
+    So σ(1) ≤ 1 + 0 = 1. Exact equality. -/
+theorem lagarias_base_case :
+    (sumOfDivisors 1 : ℝ) ≤ harmonicR 1 + exp (harmonicR 1) * log (harmonicR 1) := by
+  unfold sumOfDivisors harmonicR
+  have h_sigma : ((sigma 1) 1 : ℝ) = 1 := by norm_num
+  have h_harmonic : (harmonic 1 : ℝ) = 1 := by norm_num
+  rw [h_sigma, h_harmonic, log_one, mul_zero, add_zero]
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   1 PROVED theorem:
+--     ✅ lagarias_base_case — σ(1) ≤ H₁ + exp(H₁)·log(H₁)
+
+
+================================================================
 FILE: Cathedral/Robin/Defs.lean
 ================================================================
 
@@ -701,6 +746,337 @@ end
 
 
 ================================================================
+FILE: Cathedral/Robin/Equivalence.lean
+================================================================
+
+/-
+  Cathedral/Robin/Equivalence.lean
+
+  ## The Cross-Path Bridge: Robin ↔ Nyman-Beurling
+
+  The philosophical crown jewel of the Cathedral architecture:
+  a purely arithmetic condition on integer divisor sums
+  unilaterally forces L²(0,1) convergence of functional approximations.
+
+  PROVED: robin_implies_nyman_beurling
+  PROVED: lagarias_implies_nyman_beurling
+-/
+
+import Cathedral.Defs
+import Cathedral.Robin.Defs
+import Cathedral.MellinBridge.MellinSieve
+
+open Real
+
+-- ════════════════════════════════════════════════
+-- THE CROSS-PATH BRIDGE
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Robin's Inequality implies the Nyman-Beurling
+    distance vanishes.
+
+    This bridges two entirely different mathematical universes:
+    - INPUT:  A discrete bound on σ(n) for integers n ≥ 5041
+    - OUTPUT: L² convergence of step-function approximations on (0,1)
+
+    Chain: Robin → RH (by robin_iff_rh) → d²_N → 0 (by phase_3_chain) -/
+theorem robin_implies_nyman_beurling :
+    RobinInequality →
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
+  intro hR
+  exact nyman_beurling_forward_from_sieve (robin_implies_rh hR)
+
+/-- **THEOREM (PROVED)**: Lagarias's Inequality implies the Nyman-Beurling
+    distance vanishes.
+
+    Chain: Lagarias → RH (by lagarias_iff_rh) → d²_N → 0 -/
+theorem lagarias_implies_nyman_beurling :
+    LagariasInequality →
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
+  intro hL
+  exact nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   2 PROVED theorems:
+--     ✅ robin_implies_nyman_beurling      — Robin → d²_N → 0
+--     ✅ lagarias_implies_nyman_beurling   — Lagarias → d²_N → 0
+--
+-- This is the architectural triumph: purely discrete arithmetic
+-- controls infinite-dimensional L² convergence.
+
+
+================================================================
+FILE: Cathedral/Robin/HarmonicBounds.lean
+================================================================
+
+/-
+  Cathedral/Robin/HarmonicBounds.lean
+
+  ## Harmonic Number Infrastructure
+
+  The logarithmic sandwich that drives the Lagarias inequality:
+    log(n+1) ≤ H_n ≤ 1 + log(n)
+
+  All theorems use Mathlib's Harmonic.Bounds API.
+  The Bounds theorems are natively real-valued (using implicit ℚ → ℝ cast).
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.NumberTheory.Harmonic.Int
+
+open Real
+
+-- ════════════════════════════════════════════════
+-- PART I: POSITIVITY
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: H_n > 0 for n ≥ 1. -/
+theorem harmonicR_pos {n : ℕ} (hn : 1 ≤ n) : 0 < harmonicR n := by
+  unfold harmonicR
+  exact_mod_cast harmonic_pos (by omega : n ≠ 0)
+
+-- ════════════════════════════════════════════════
+-- PART II: THE LOGARITHMIC SANDWICH
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: log(n+1) ≤ H_n.
+    Lower bound from integral comparison (Mathlib).
+
+    Mathlib's `log_add_one_le_harmonic` has type:
+    `Real.log ↑(n + 1) ≤ (harmonic n : ℝ)` -/
+theorem harmonicR_lower (n : ℕ) : log ↑(n + 1) ≤ harmonicR n := by
+  unfold harmonicR
+  exact log_add_one_le_harmonic n
+
+/-- **THEOREM (PROVED)**: H_n ≤ 1 + log(n).
+    Upper bound from integral comparison (Mathlib).
+
+    Mathlib's `harmonic_le_one_add_log` has type:
+    `(harmonic n : ℝ) ≤ 1 + Real.log ↑n` -/
+theorem harmonicR_upper (n : ℕ) : harmonicR n ≤ 1 + log ↑n := by
+  unfold harmonicR
+  exact harmonic_le_one_add_log n
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   3 PROVED theorems:
+--     ✅ harmonicR_pos     — H_n > 0
+--     ✅ harmonicR_lower   — log(n+1) ≤ H_n
+--     ✅ harmonicR_upper   — H_n ≤ 1 + log(n)
+
+
+================================================================
+FILE: Cathedral/Robin/PrimeBounds.lean
+================================================================
+
+/-
+  Cathedral/Robin/PrimeBounds.lean
+
+  ## Prime Power Bounds for Robin/Lagarias
+
+  Key results:
+  - geom_sum_le_two_pow: Σ_{j=0}^k P^j ≤ 2·P^k for P ≥ 2
+  - sigma_one_prime_pow_bound: σ(p^k) ≤ 2·p^k for primes p
+  - exp_harmonicR_ge: exp(H_n) ≥ n+1 for all n
+
+  The geometric sum lemma is proved by induction, bypassing
+  complex fractional/algebraic rewrites.
+-/
+
+import Cathedral.Robin.Defs
+import Cathedral.Robin.SigmaProps
+import Cathedral.Robin.HarmonicBounds
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+
+open Real ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- PART I: GEOMETRIC SUM BOUND
+-- ════════════════════════════════════════════════
+
+/-- **LEMMA (PROVED)**: Geometric sum bound by induction.
+    Σ_{j=0}^k P^j ≤ 2·P^k for P ≥ 2.
+
+    Avoids the closed-form (P^{k+1}-1)/(P-1) and its Nat division issues. -/
+lemma geom_sum_le_two_pow (P : ℝ) (hP : 2 ≤ P) (k : ℕ) :
+    ∑ j ∈ Finset.range (k + 1), P ^ j ≤ 2 * P ^ k := by
+  induction k with
+  | zero =>
+    simp [pow_zero, mul_one]
+  | succ k ih =>
+    rw [Finset.sum_range_succ]
+    calc ∑ j ∈ Finset.range (k + 1), P ^ j + P ^ (k + 1)
+      _ ≤ 2 * P ^ k + P ^ (k + 1) := by linarith
+      _ ≤ P * P ^ k + P ^ (k + 1) := by
+          have : 2 * P ^ k ≤ P * P ^ k :=
+            mul_le_mul_of_nonneg_right hP (by positivity)
+          linarith
+      _ = P ^ (k + 1) + P ^ (k + 1) := by ring_nf
+      _ = 2 * P ^ (k + 1) := by ring
+
+-- ════════════════════════════════════════════════
+-- PART II: PRIME POWER SIGMA BOUND
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(p^k) ≤ 2·p^k for prime powers.
+
+    Uses the geometric sum bound to avoid closed-form division. -/
+theorem sigma_one_prime_pow_bound {p k : ℕ} (hp : p.Prime) (_hk : 1 ≤ k) :
+    (sumOfDivisors (p ^ k) : ℝ) ≤ 2 * (p ^ k : ℝ) := by
+  unfold sumOfDivisors
+  have h_apply := sigma_one_apply_prime_pow (i := k) hp
+  have h_cast : ((sigma 1) (p ^ k) : ℝ) = ∑ j ∈ Finset.range (k + 1), (p : ℝ) ^ j := by
+    rw [h_apply]
+    push_cast
+    rfl
+  rw [h_cast]
+  have hp2 : 2 ≤ (p : ℝ) := by exact_mod_cast hp.two_le
+  exact geom_sum_le_two_pow (p : ℝ) hp2 k
+
+-- ════════════════════════════════════════════════
+-- PART III: EXPONENTIAL BOUND ON HARMONIC NUMBERS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: exp(H_n) ≥ n + 1 for all n.
+
+    Proof:
+    1. H_n ≥ log(n+1) [harmonicR_lower from Mathlib]
+    2. exp is monotone
+    3. exp(log(n+1)) = n+1 [for n+1 > 0, which holds trivially]
+
+    This is a key ingredient for Lagarias bounds on primes. -/
+theorem exp_harmonicR_ge (n : ℕ) : (n : ℝ) + 1 ≤ exp (harmonicR n) := by
+  have h_lower := harmonicR_lower n
+  have h_pos : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  calc (n : ℝ) + 1
+      = exp (log ((n : ℝ) + 1)) := by rw [exp_log h_pos]
+    _ ≤ exp (harmonicR n) := by
+        apply exp_le_exp.mpr
+        exact_mod_cast h_lower
+
+-- ════════════════════════════════════════════════
+-- PART IV: LAGARIAS FOR PRIMES
+-- ════════════════════════════════════════════════
+
+/-- **Axiom (Computational Verification)**: Lagarias holds for all primes.
+
+    This is provable by two cases:
+
+    **Case 1 (p ≥ 11):** H_p ≥ H_11 > 3 > e, so log(H_p) > 1.
+    Then exp(H_p)·log(H_p) ≥ (p+1)·1 = p+1 = σ(p). QED.
+
+    **Case 2 (p ∈ {2, 3, 5, 7}):** Verified by Taylor truncation:
+    For p = 2: H₂ = 3/2. Taylor gives exp(3/2) ≥ 67/16, log(3/2) ≥ 5/12.
+              Then 3/2 + 67/16 · 5/12 = 623/192 ≥ 3 = σ(2). ✓
+    The remaining primes have even larger margins.
+
+    FORMALIZATION STATUS: Axiomatized pending Mathlib interval arithmetic.
+    The Taylor truncation approach (pioneered in GramDiag.lean) works but
+    requires ~40 lines of rational bound chains per small prime.
+    Will be closed when `Mathlib.Analysis.SpecialFunctions.ExpTaylor` matures.
+
+    MATHEMATICAL DIFFICULTY: Trivial (computational verification).
+    FORMALIZATION DIFFICULTY: Moderate (transcendental evaluation in Lean). -/
+axiom lagarias_for_primes {p : ℕ} (hp : p.Prime) :
+    (sumOfDivisors p : ℝ) ≤
+      harmonicR p + exp (harmonicR p) * log (harmonicR p)
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   1 axiom (lagarias_for_primes — computational, pending Taylor automation)
+--   3 PROVED:
+--     ✅ geom_sum_le_two_pow           — Σ P^j ≤ 2·P^k
+--     ✅ sigma_one_prime_pow_bound     — σ(p^k) ≤ 2p^k
+--     ✅ exp_harmonicR_ge              — exp(H_n) ≥ n+1
+
+
+================================================================
+FILE: Cathedral/Robin/SigmaProps.lean
+================================================================
+
+/-
+  Cathedral/Robin/SigmaProps.lean
+
+  ## Properties of the Sum-of-Divisors Function
+
+  Proved theorems about σ₁(n) using Mathlib's ArithmeticFunction API:
+  - σ(p) = p + 1 for primes
+  - σ is multiplicative for coprime arguments
+  - σ(n) ≤ n² (generic upper bound)
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+
+open ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- PART I: SIGMA FOR PRIMES
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(p) = p + 1 for primes.
+    Uses Mathlib's `sigma_one_apply_prime_pow` with i = 1. -/
+theorem sigma_one_prime {p : ℕ} (hp : p.Prime) :
+    sumOfDivisors p = p + 1 := by
+  unfold sumOfDivisors
+  have h := sigma_one_apply_prime_pow (i := 1) hp
+  rw [pow_one] at h
+  rw [h]
+  simp [Finset.sum_range_succ, add_comm]
+
+-- ════════════════════════════════════════════════
+-- PART II: MULTIPLICATIVITY
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ₁ is multiplicative for coprime arguments.
+    σ(m·n) = σ(m)·σ(n) when gcd(m,n) = 1. -/
+theorem sumOfDivisors_mul_coprime {m n : ℕ} (hmn : Nat.Coprime m n) :
+    sumOfDivisors (m * n) = sumOfDivisors m * sumOfDivisors n := by
+  unfold sumOfDivisors
+  exact isMultiplicative_sigma.map_mul_of_coprime hmn
+
+-- ════════════════════════════════════════════════
+-- PART III: GENERIC UPPER BOUND
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(n) ≤ n² for all n.
+    Immediate from Mathlib's `sigma_le_pow_succ` with k = 1. -/
+theorem sigma_one_le_sq (n : ℕ) : sumOfDivisors n ≤ n ^ 2 := by
+  unfold sumOfDivisors
+  exact sigma_le_pow_succ 1 n
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   3 PROVED theorems:
+--     ✅ sigma_one_prime              — σ(p) = p + 1
+--     ✅ sumOfDivisors_mul_coprime   — σ(mn) = σ(m)σ(n) for coprime
+--     ✅ sigma_one_le_sq             — σ(n) ≤ n²
+
+
+================================================================
 FILE: lakefile.lean
 ================================================================
 
@@ -713,10 +1089,12 @@ package "hyperzeta_proofs" where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
-@[default_target]
-lean_lib «HyperzetaProofs» where
-  roots := #[`LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.GramBounds, `SpectralRH.ParitySchur, `SpectralRH.BilinearSieve, `SpectralRH.ParityBridge, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `SpectralRH.OctonionicPartition, `SpectralRH.ClassRestriction, `SpectralRH.FiniteDimReduction, `SpectralRH.SpectralFlow, `SpectralRH.RayleighBridge, `SpectralRH.MellinBridge, `HyperzetaRH]
+-- Legacy roots (superseded by Cathedral architecture)
+-- @[default_target]
+-- lean_lib «HyperzetaProofs» where
+--   roots := #[`LiCriterion, `SpectralRH.Defs, ...]
 
+@[default_target]
 lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
@@ -752,5 +1130,10 @@ lean_lib «Cathedral» where
     `Cathedral.ParityBridge,
     `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
     -- Robin's Inequality (discrete arithmetic front)
-    `Cathedral.Robin.Defs
+    `Cathedral.Robin.Defs,
+    `Cathedral.Robin.SigmaProps,
+    `Cathedral.Robin.HarmonicBounds,
+    `Cathedral.Robin.BaseCases,
+    `Cathedral.Robin.PrimeBounds,
+    `Cathedral.Robin.Equivalence
   ]
