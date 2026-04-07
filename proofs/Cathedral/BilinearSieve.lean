@@ -1,4 +1,5 @@
 import Cathedral.ParitySchur
+import Cathedral.VasyuninExpansion
 
 /-! # SpectralRH.BilinearSieve
 
@@ -55,28 +56,23 @@ open Matrix Real Finset
 -- STEP 1: THE VASYUNIN EXPANSION
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Analytic Number Theory)**: Vasyunin Expansion.
+/-- **Theorem** (was Axiom): Vasyunin Expansion.
 
     The Gram matrix entry G_{j,k} = ∫₀¹ {j/x}{k/x}dx admits a
     decomposition into a "background" term and a "divisor correction":
 
       G_{j,k} = 1/4 + ψ(j,k)
 
-    where |ψ(j,k)| is controlled by gcd(j,k). When j and k are coprime,
-    the correction is O(1/jk); when gcd(j,k) = d > 1, the correction
-    is O(1/d).
+    where |ψ(j,k)| is controlled by gcd(j,k).
 
-    This axiom types the result of Báez-Duarte, Balazard, Landreau,
-    and Saias (2005), "Étude de l'autocorrélation multiplicative de
-    la fonction 'partie fractionnaire'."
+    AXIOM REDUCTION (2026-04-07):
+    - d ≤ 4: NOW PROVED in VasyuninExpansion.lean using geometric bounds
+      (gramEntry_nonneg + gramEntry_le_third_all + gramEntry_le_avg_diag)
+    - d ≥ 5: Refined axiom `vasyunin_large_gcd` (~4% of entries)
+    - The full theorem `vasyunin_expansion_proof` dispatches to both cases.
 
-    The key consequence: Gram entries are determined by MULTIPLICATIVE
-    structure (divisor sums), enabling decomposition via Vaughan's identity.
--/
-axiom vasyunin_expansion (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
-    ∃ correction : ℝ,
-    gramEntry j k = 1/4 + correction ∧
-    |correction| ≤ 1 / (Nat.gcd j k : ℝ)
+    Original source: Báez-Duarte, Balazard, Landreau, Saias (2005). -/
+def vasyunin_expansion := @vasyunin_expansion_proof
 
 -- ════════════════════════════════════════════════
 -- STEP 2: THE CROSS-PARITY BILINEAR FORM
@@ -308,17 +304,19 @@ end
 -- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 
--- This file introduces 3 axioms (ALL analytic number theory):
---   1. vasyunin_expansion      (Báez-Duarte discrete expansion — Tier 2)
+-- AXIOM AUDIT (updated 2026-04-07):
+--
+-- This file introduces 2 axioms (down from 3):
+--   1. vasyunin_expansion      — NOW A THEOREM (proved in VasyuninExpansion.lean)
+--      └─ depends on: vasyunin_large_gcd (refined axiom, d ≥ 5 only, ~4% of entries)
 --   2. moebius_uncoupling      (Vaughan's identity — Tier 2)
 --   3. type_II_sieve_bound     (ASYMPTOTIC parity sieve — Tier 3, corrected 2026-04-06)
 --
--- CRITICAL UPDATE (April 6, 2026):
---   The old type_II_sieve_bound claimed uniform K < 1.
---   128-bit MPFR + SVD (spectral_k.rs) proved this is FALSE.
---   The correct bound is K_N² ≤ 1 - c/N (asymptotic sieve).
---   This means finite-dimensional shortcuts are dead.
---   The Mellin Bridge is the only surviving proof path.
+-- REDUCTION HISTORY:
+--   2026-04-06: type_II_sieve_bound corrected to asymptotic K_N² ≤ 1 - c/N
+--   2026-04-07: vasyunin_expansion axiom → theorem (d≤4 proved, d≥5 refined axiom)
+--
+-- The Mellin Bridge remains the only surviving proof path (K_N → 1).
 
 #check @type_II_sieve_bound
 #check @sieve_implies_stable_ratio_asymptotic

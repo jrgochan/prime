@@ -26,6 +26,9 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.Separation, `Cathedral.MellinBridge.NymanBeurling,
     `Cathedral.MellinBridge.HilbertSetup,
     `Cathedral.MellinBridge.OrthogonalWitness,
+    `Cathedral.MellinBridge.MellinSieve,
+    `Cathedral.MellinBridge.AutocorrelationBypass,
+    `Cathedral.MellinBridge.MertensWeightBypass,
     `Cathedral.MellinBridge,
     -- Assembly (crown)
     `Cathedral.Assembly.QuadFormBridge,
@@ -36,6 +39,8 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.FiniteDimReduction,
     `Cathedral.Spectral.ConstantVectorBound,
     -- Sieve infrastructure (for forward direction)
-    `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
+    `Cathedral.ParitySchur, `Cathedral.VasyuninExpansion,
+    `Cathedral.BilinearSieve, `Cathedral.MoebiusUncoupling,
+    `Cathedral.ParityBridge,
     `Cathedral.Quantitative, `Cathedral.AlignmentDecay
   ]
