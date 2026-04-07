@@ -98,13 +98,8 @@ axiom baezDuarte_inner_one (ρ : ℂ)
     ∫ x in (0:ℝ)..1,
       starRingEnd ℂ (baezDuarteWitness ρ x) * 1 = 1 / ρ
 
-/-- **AXIOM 4: Norm Bound.**
-    The L² norm of h_ρ is bounded by some constant M_ρ > 0. -/
-axiom baezDuarte_norm_bound (ρ : ℂ)
-    (h_zero : riemannZeta ρ = 0)
-    (h_re : 1/2 < ρ.re) :
-    ∃ M_ρ : ℝ, 0 < M_ρ ∧
-    ∫ x in (0:ℝ)..1, ‖baezDuarteWitness ρ x‖^2 ≤ M_ρ
+-- **FORMERLY AXIOM 4**: Now proved as a theorem below (after baezDuarte_norm_pos).
+-- The witness is M_ρ = baezDuarteNormSq ρ, with positivity from Axioms 1+3.
 
 /-- **AXIOM 5: Inner Product with Residual.**
     The inner product ⟨h_ρ, 1 - f_w⟩ = 1/ρ for any weights w.
@@ -115,14 +110,8 @@ axiom baezDuarte_inner_residual (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
     ∫ x in (0:ℝ)..1, starRingEnd ℂ (baezDuarteWitness ρ x) *
       (1 - nbLinComb N w x) = 1 / ρ
 
-/-- **AXIOM 6: L¹ Product Integrability.**
-    The product ‖h_ρ(x)‖ · |1 - f_w(x)| is integrable on (0,1).
-    This is a consequence of Axioms 1 and the L² membership of
-    nbLinComb, via the Cauchy-Schwarz inequality for integrability. -/
-axiom baezDuarte_L1_product (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
-    (h_re : 1/2 < ρ.re) (N : ℕ) (w : Fin (N - 1) → ℝ) :
-    IntervalIntegrable (fun x => ‖baezDuarteWitness ρ x‖ *
-      |1 - nbLinComb N w x|) MeasureTheory.volume 0 1
+-- **FORMERLY AXIOM 6**: Now proved as a theorem below (after the integrability tools).
+-- Derived from Axiom 1 via AM-GM domination + √ measurability chain.
 
 -- ════════════════════════════════════════════════
 -- PROVED: CAUCHY-SCHWARZ FOR INTERVAL INTEGRALS
@@ -278,6 +267,63 @@ theorem baezDuarte_norm_pos (ρ : ℂ)
   have hρ_ne : ρ ≠ 0 := by intro h; rw [h, zero_re] at h_re; linarith
   exact (by rw [one_div]; exact inv_ne_zero hρ_ne : (1 : ℂ) / ρ ≠ 0) h_ax3.symm
 
+-- ════════════════════════════════════════════════
+-- FORMERLY AXIOM 6: NOW A THEOREM
+-- ════════════════════════════════════════════════
+
+/-- **PROVED (formerly Axiom 6): L¹ Product Integrability.**
+    The product ‖h_ρ(x)‖ · |1 - f_w(x)| is integrable on (0,1).
+
+    **Proof**: AM-GM domination + √ measurability chain.
+    From Axiom 1, we extract AEStronglyMeasurable for ‖h‖²,
+    compose with √ to get AEStronglyMeasurable for ‖h‖,
+    then dominate ‖h‖·|1-f_w| ≤ ½(‖h‖² + |1-f_w|²) via AM-GM. -/
+theorem baezDuarte_L1_product (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
+    (h_re : 1/2 < ρ.re) (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => ‖baezDuarteWitness ρ x‖ *
+      |1 - nbLinComb N w x|) MeasureTheory.volume 0 1 := by
+  -- Step 1: Build the dominator ½(‖h‖² + |1-f_w|²)
+  have hf2 := baezDuarte_is_L2 ρ h_zero h_re
+  have hg2_eq : (fun x => |1 - nbLinComb N w x| ^ 2) =
+      (fun x => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) := by
+    ext x; rw [sq_abs]; ring
+  have hg2 : IntervalIntegrable (fun x => |1 - nbLinComb N w x| ^ 2)
+      MeasureTheory.volume 0 1 := by
+    rw [hg2_eq]
+    exact ((intervalIntegrable_const : IntervalIntegrable (fun _ => (1:ℝ)) _ 0 1).sub
+      ((nbLinComb_integrable N w).const_mul 2)).add
+      (nbLinComb_sq_integrable N w)
+  have hdom : IntervalIntegrable (fun x => (1/2 : ℝ) *
+      (‖baezDuarteWitness ρ x‖ ^ 2 + |1 - nbLinComb N w x| ^ 2))
+      MeasureTheory.volume 0 1 :=
+    (hf2.add hg2).const_mul (1/2)
+  -- Step 2: Measurability of ‖h‖ via √ chain
+  -- From IntervalIntegrable ‖h‖², extract AEStronglyMeasurable ‖h‖²
+  have h_meas_sq := hf2.aestronglyMeasurable_restrict_uIoc
+  -- Compose with √ (continuous) and rewrite √(‖h‖²) = ‖h‖
+  have h_meas_norm : AEStronglyMeasurable (fun x => ‖baezDuarteWitness ρ x‖)
+      (MeasureTheory.volume.restrict (Set.uIoc 0 1)) :=
+    (continuous_sqrt.comp_aestronglyMeasurable h_meas_sq).congr
+      (Filter.Eventually.of_forall fun x => Real.sqrt_sq (norm_nonneg _))
+  -- Measurability of |1 - f_w| from nbLinComb_integrable
+  have h_meas_g : AEStronglyMeasurable (fun x => |1 - nbLinComb N w x|)
+      (MeasureTheory.volume.restrict (Set.uIoc 0 1)) :=
+    ((aestronglyMeasurable_const.sub
+      (nbLinComb_integrable N w).aestronglyMeasurable_restrict_uIoc).norm).congr
+      (Filter.Eventually.of_forall fun x => Real.norm_eq_abs _)
+  -- Product measurability
+  have h_meas_prod := h_meas_norm.mul h_meas_g
+  -- Step 3: Apply domination via mono_fun'
+  apply IntervalIntegrable.mono_fun' hdom h_meas_prod
+  -- Pointwise bound: ‖h‖·|1-f_w| ≤ ½(‖h‖² + |1-f_w|²) via AM-GM
+  apply Filter.Eventually.of_forall; intro x
+  -- Unfold the Pi.mul and simplify the norm of the product
+  show ‖(fun x => ‖baezDuarteWitness ρ x‖) x * (fun x => |1 - nbLinComb N w x|) x‖ ≤ _
+  simp only [Real.norm_eq_abs]
+  rw [abs_of_nonneg (mul_nonneg (norm_nonneg _) (abs_nonneg _))]
+  have h_amgm := two_mul_le_add_sq (‖baezDuarteWitness ρ x‖) (|1 - nbLinComb N w x|)
+  linarith
+
 /-- **PROVED**: For any off-critical-line zero ρ, the NB distance
     is bounded below by |1/ρ|² / ‖h_ρ‖².
 
@@ -356,6 +402,20 @@ theorem orthogonal_witness_lower_bound (ρ : ℂ)
   have h_norm_pos := baezDuarte_norm_pos ρ h_zero h_re
   rw [mul_comm] at h_chain
   exact (div_le_iff₀ h_norm_pos).mpr h_chain
+
+-- ════════════════════════════════════════════════
+-- FORMERLY AXIOM 4: NOW A THEOREM
+-- ════════════════════════════════════════════════
+
+/-- **PROVED (formerly Axiom 4): Norm Bound.**
+    The L² norm of h_ρ is bounded by some constant M_ρ > 0.
+    Witness: M_ρ = baezDuarteNormSq ρ. Positivity from Axioms 1+3. -/
+theorem baezDuarte_norm_bound (ρ : ℂ)
+    (h_zero : riemannZeta ρ = 0)
+    (h_re : 1/2 < ρ.re) :
+    ∃ M_ρ : ℝ, 0 < M_ρ ∧
+    ∫ x in (0:ℝ)..1, ‖baezDuarteWitness ρ x‖^2 ≤ M_ρ :=
+  ⟨baezDuarteNormSq ρ, baezDuarte_norm_pos ρ h_zero h_re, le_rfl⟩
 
 -- ════════════════════════════════════════════════
 -- THE HYPERPLANE TRAP BREAKER
