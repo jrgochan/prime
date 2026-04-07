@@ -46,5 +46,10 @@ lean_lib «Cathedral» where
     `Cathedral.ParityBridge,
     `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
     -- Robin's Inequality (discrete arithmetic front)
-    `Cathedral.Robin.Defs
+    `Cathedral.Robin.Defs,
+    `Cathedral.Robin.SigmaProps,
+    `Cathedral.Robin.HarmonicBounds,
+    `Cathedral.Robin.BaseCases,
+    `Cathedral.Robin.PrimeBounds,
+    `Cathedral.Robin.Equivalence
   ]
