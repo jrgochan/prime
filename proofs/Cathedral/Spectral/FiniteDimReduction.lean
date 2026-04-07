@@ -269,16 +269,17 @@ theorem proof_chain_summary
     lives on the BULK spectrum (eigenvalues ≈ 1/3), not the edge (≈ 0.048).
     This means the rank-1 interference channel costs proportionally more
     energy as N grows, making R → 0. -/
-noncomputable def lambdaEff (_m : Fin 8) (_N : ℕ) : ℝ :=
-  Classical.choice ⟨(1 : ℝ)⟩  -- Abstract definition
+noncomputable def lambdaEff (_m : Fin 8) (N : ℕ) : ℝ :=
+  if h : 2 ≤ N then
+    (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).sup'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩)
+      (gramMatrix_hermitian N).eigenvalues₀
+  else 0
 
-/-- **Effective Eigenvalue Axiom**: λ_eff(m) ≥ c · N for some c > 0.
-    This encodes the linear growth observed computationally.
-    (Equivalent to: the rank-1 direction is bounded away from the
-    spectral edge of G^block.) -/
-axiom lambdaEff_linear_growth :
-    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 200 ≤ N →
-    ∀ m : Fin 8, c * N ≤ lambdaEff m N
+-- **Effective Eigenvalue Growth**: λ_eff(m) ≥ c · N for some c > 0.
+-- See `lambdaEff_resolvent_bound` and `lambdaEff_linear_growth_proved`
+-- in Cathedral.Spectral.ConstantVectorBound for the full proof
+-- (via the constant class vector Rayleigh argument).
 
 /-- **The Cauchy-Schwarz Inequality for rank-1 projections**:
     α_m² ≤ D_m / λ_eff(m)

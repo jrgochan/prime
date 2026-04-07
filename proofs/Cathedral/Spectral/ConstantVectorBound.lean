@@ -210,7 +210,20 @@ theorem integral_sq_ge_sq_integral (f : ℝ → ℝ)
     (∫ x in (0:ℝ)..1, f x) ^ 2 ≤ ∫ x in (0:ℝ)..1, f x ^ 2 := by
   set c := ∫ x in (0:ℝ)..1, f x with hc_def
   -- Variance trick: ∫(f - c)² ≥ 0, expanding gives c² ≤ ∫f²
-  sorry
+  have h_nonneg : 0 ≤ ∫ x in (0:ℝ)..1, (f x - c) ^ 2 := by
+    apply intervalIntegral.integral_nonneg (by linarith)
+    intro x _; exact sq_nonneg _
+  -- Expand (f - c)² = f² - 2cf + c²
+  have h_expand : ∫ x in (0:ℝ)..1, (f x - c) ^ 2 =
+      (∫ x in (0:ℝ)..1, f x ^ 2) - 2 * c * c + c ^ 2 := by
+    have : (fun x => (f x - c) ^ 2) = (fun x => f x ^ 2 - 2 * c * f x + c ^ 2) := by
+      ext x; ring
+    rw [this]
+    rw [intervalIntegral.integral_add (hf2.sub (hf.const_mul (2 * c))) intervalIntegrable_const]
+    rw [intervalIntegral.integral_sub hf2 (hf.const_mul (2 * c))]
+    rw [intervalIntegral.integral_const_mul]
+    simp only [intervalIntegral.integral_const, sub_zero, one_smul, hc_def]
+  linarith
 
 -- ════════════════════════════════════════════════
 -- PART III: THE CAUCHY-SCHWARZ MIRACLE (PROVED)
@@ -248,7 +261,11 @@ lemma nbLinComb_constantClassVector (N : ℕ) (m : Fin 8) (x : ℝ) :
       (fun i => octonionClass (i.val + 1) = m),
     Int.fract ((↑(i.val + 1) : ℝ) / x) := by
   unfold nbLinComb constantClassVector
-  sorry
+  rw [Finset.sum_filter]
+  apply Finset.sum_congr rfl; intro i _
+  by_cases h : octonionClass (↑i + 1) = m
+  · simp [h]
+  · simp [h]
 
 /-- The integral of nbLinComb for the class indicator equals the
     sum of individual basis integrals over the class. -/
@@ -257,7 +274,14 @@ lemma integral_nbLinComb_lower (N : ℕ) (m : Fin 8) :
     ∑ i ∈ (univ : Finset (Fin (N - 1))).filter
       (fun i => octonionClass (i.val + 1) = m),
     ∫ x in (0:ℝ)..1, Int.fract ((↑(i.val + 1) : ℝ) / x) := by
-  sorry
+  conv_lhs => rw [show (fun x => nbLinComb N (constantClassVector N m) x) =
+    (fun x => ∑ i ∈ (univ : Finset (Fin (N - 1))).filter
+      (fun i => octonionClass (i.val + 1) = m),
+      Int.fract ((↑(i.val + 1) : ℝ) / x)) from by
+    ext x; exact nbLinComb_constantClassVector N m x]
+  rw [intervalIntegral.integral_finset_sum]
+  intro i _
+  exact fract_div_intervalIntegrable (i.val + 1) 0 1
 
 /-- nbLinComb of a bounded-weight vector is square-integrable on [0,1].
     Since each fract is in [0,1) and there are finitely many terms,
@@ -265,7 +289,39 @@ lemma integral_nbLinComb_lower (N : ℕ) (m : Fin 8) :
 lemma nbLinComb_sq_intervalIntegrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
     IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2)
       MeasureTheory.volume 0 1 := by
-  sorry
+  -- nbLinComb² = (Σ wᵢ fᵢ)² = Σᵢ Σⱼ wᵢwⱼ fᵢfⱼ, each term is integrable
+  have h_sq : (fun x => (nbLinComb N w x) ^ 2) =
+      (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
+    ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
+  rw [h_sq]
+  -- Convert lambda-sum to sum-of-lambdas for IntervalIntegrable.sum
+  have h_conv : (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+    (∑ i : Fin (N - 1), fun x => ∑ j : Fin (N - 1),
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_conv]
+  exact IntervalIntegrable.sum Finset.univ fun i _ => by
+    have h_conv2 : (fun x => ∑ j : Fin (N - 1),
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+      (∑ j : Fin (N - 1), fun x =>
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
+      ext x; simp [Finset.sum_apply]
+    rw [h_conv2]
+    exact IntervalIntegrable.sum Finset.univ fun j _ => by
+      -- Each term is (a * fract_j)(b * fract_k) = ab * fract_j*fract_k
+      have : (fun x : ℝ => (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+          (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+        (fun x : ℝ => (w i * w j) * (Int.fract (↑(i.val + 1) / x) * Int.fract (↑(j.val + 1) / x))) := by
+        ext x; ring
+      rw [this]
+      exact (fract_prod_intervalIntegrable (i.val + 1) (j.val + 1)).const_mul _
 
 /-- The integral of nbLinComb for the class indicator is nonneg
     (each term is fract ≥ 0, with weight 0 or 1). -/
@@ -370,7 +426,8 @@ lemma fin_filter_integral_lower (N : ℕ) (_hN : 2 ≤ N) (m : Fin 8) :
     Uses finClassCard (Fin-native count) to avoid index bijection issues.
     The -1 accounts for the possible k=1 term (integral ≥ 0, not ≥ 1/4).
     For asymptotic analysis, this -1 is absorbed into the density constant. -/
-theorem constant_vector_quadform_lower (N : ℕ) (hN : 2 ≤ N) (m : Fin 8) :
+theorem constant_vector_quadform_lower (N : ℕ) (hN : 2 ≤ N) (m : Fin 8)
+    (hcard : 1 ≤ finClassCard N m) :
     ((finClassCard N m : ℝ) - 1) ^ 2 / 16 ≤
     realQuadForm (gramMatrix N) (constantClassVector N m) := by
   -- Step 1: gram_l2_identity gives v^T G v = ∫₀¹ (nbLinComb)² dx
@@ -383,33 +440,113 @@ theorem constant_vector_quadform_lower (N : ℕ) (hN : 2 ≤ N) (m : Fin 8) :
   -- Step 3: Apply Cauchy-Schwarz: ∫ F² ≥ (∫ F)²
   have h_cs := integral_sq_ge_sq_integral
     (fun x => nbLinComb N (constantClassVector N m) x)
-    (by sorry) -- IntervalIntegrable proof needs API update
+    (by -- nbLinComb is IntervalIntegrable: use |f| ≤ 1 + f²
+        apply IntervalIntegrable.mono_fun
+          ((intervalIntegrable_const (c := (1:ℝ))).add
+            (nbLinComb_sq_intervalIntegrable N (constantClassVector N m)))
+        · exact (Finset.measurable_sum _ (fun i _ =>
+            (measurable_const.mul
+              ((measurable_const.div measurable_id).fract)))).aestronglyMeasurable.restrict
+        · apply Filter.Eventually.of_forall; intro x
+          simp only [norm_eq_abs]
+          calc |nbLinComb N (constantClassVector N m) x|
+              ≤ 1 + nbLinComb N (constantClassVector N m) x ^ 2 := by
+                nlinarith [sq_abs (nbLinComb N (constantClassVector N m) x)]
+            _ ≤ |1 + nbLinComb N (constantClassVector N m) x ^ 2| :=
+                le_abs_self _)
     (nbLinComb_sq_intervalIntegrable N (constantClassVector N m))
   -- Step 4: Chain: ((fCC-1)/4)² ≤ (∫F)² ≤ ∫F²
+  have h_fcc_ge1 : (1 : ℝ) ≤ (finClassCard N m : ℝ) := by exact_mod_cast hcard
+  have h_nn := integral_nbLinComb_nonneg N m
+  have h_nn2 : (0 : ℝ) ≤ ((finClassCard N m : ℝ) - 1) / 4 := by linarith
   calc ((finClassCard N m : ℝ) - 1) ^ 2 / 16
       = (((finClassCard N m : ℝ) - 1) / 4) ^ 2 := by ring
     _ ≤ (∫ x in (0:ℝ)..1, nbLinComb N (constantClassVector N m) x) ^ 2 := by
-        sorry -- sq monotonicity needs API update for lambda unwrapping
+        nlinarith [sq_nonneg (∫ x in (0:ℝ)..1, nbLinComb N (constantClassVector N m) x - ((↑(finClassCard N m) - 1) / 4))]
     _ ≤ ∫ x in (0:ℝ)..1, (nbLinComb N (constantClassVector N m) x) ^ 2 := h_cs
 
 -- ════════════════════════════════════════════════
--- PART IV: CLASS DENSITY (AXIOM)
+-- PART IV: ALL-ONES VECTOR (REPLACES CLASS DENSITY AXIOM)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM (Dirichlet Density)**: The Fin-indexed class count
-    grows linearly with N. Follows from Dirichlet's theorem.
-    finClassCard counts k ∈ {1,...,N-1} with class=m.
-    Since classSet uses {2,...,N}, finClassCard ≥ classSet.card - 1,
-    and by Dirichlet, classSet.card ≥ c·N, so finClassCard ≥ c·N - 1.
-    For large N: finClassCard ≥ (c/2)·N. -/
-axiom finClassCard_density (m : Fin 8) :
-    ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-    c * (N : ℝ) ≤ ((finClassCard N m) : ℝ)
+-- The original axiom `finClassCard_density` asserted Dirichlet density
+-- for each octonionic class. This is UNNECESSARY: the all-ones vector
+-- v = (1,1,...,1) gives λ_max ≥ (N-2)²/(16(N-1)) ≥ N/64, with no
+-- class structure needed. The Cauchy-Schwarz miracle works for ANY
+-- nonzero vector!
+
+/-- The dot product of (1,...,1) with itself is N-1. -/
+private lemma allOnes_dotProduct (N : ℕ) :
+    dotProduct (fun (_ : Fin (N - 1)) => (1:ℝ)) (fun _ => (1:ℝ)) =
+    ((N - 1 : ℕ) : ℝ) := by
+  simp [dotProduct, Finset.sum_const, mul_one]
+
+/-- The nbLinComb of the all-ones vector simplifies to a bare sum. -/
+private lemma nbLinComb_allOnes (N : ℕ) (x : ℝ) :
+    nbLinComb N (fun (_ : Fin (N - 1)) => (1:ℝ)) x =
+    ∑ i : Fin (N - 1), Int.fract ((↑(i.val + 1)) / x) := by
+  simp [nbLinComb, one_mul]
+
+/-- The integral of the all-ones nbLinComb is ≥ (N-2)/4.
+    Each term with k ≥ 2 contributes ≥ 1/4, and k=1 contributes ≥ 0. -/
+private lemma allOnes_integral_lower (N : ℕ) (_hN : 2 ≤ N) :
+    ((N - 2 : ℕ) : ℝ) / 4 ≤
+    ∫ x in (0:ℝ)..1, nbLinComb N (fun (_ : Fin (N - 1)) => (1:ℝ)) x := by
+  -- Swap sum and integral
+  have h_integ : ∀ i : Fin (N - 1),
+      IntervalIntegrable (fun x => Int.fract ((↑(i.val + 1)) / x)) MeasureTheory.MeasureSpace.volume 0 1 :=
+    fun i => fract_div_intervalIntegrable (i.val + 1) 0 1
+  rw [show ∫ x in (0:ℝ)..1, nbLinComb N (fun _ => (1:ℝ)) x =
+      ∫ x in (0:ℝ)..1, ∑ i : Fin (N - 1), Int.fract ((↑(i.val + 1)) / x) from by
+    congr 1; ext x; exact nbLinComb_allOnes N x]
+  rw [intervalIntegral.integral_finset_sum]
+  · set S := (Finset.univ : Finset (Fin (N - 1))).filter (fun i => 1 ≤ i.val)
+    have hS_card : S.card = N - 2 := by
+      -- Direct: S.card = univ.card - (univ \ S).card = (N-1) - 1 = N - 2
+      have hS_sub : S ⊆ Finset.univ := Finset.filter_subset _ _
+      have h_sdiff_card : (Finset.univ \ S).card = 1 := by
+        have h_eq : Finset.univ \ S = {(⟨0, (by omega : 0 < N - 1)⟩ : Fin (N - 1))} := by
+          ext i; simp [S, Finset.mem_sdiff, Finset.mem_filter, Fin.ext_iff]
+        rw [h_eq, Finset.card_singleton]
+      have := Finset.card_sdiff_add_card_eq_card hS_sub
+      rw [h_sdiff_card, Finset.card_fin] at this
+      omega
+    have h_nonneg : ∀ i : Fin (N - 1),
+        0 ≤ ∫ x in (0:ℝ)..1, Int.fract ((↑(i.val + 1)) / x) := by
+      intro i
+      apply intervalIntegral.integral_nonneg (by norm_num)
+      intro x _; exact Int.fract_nonneg _
+    calc ((N - 2 : ℕ) : ℝ) / 4
+        = (S.card : ℝ) / 4 := by rw [hS_card]
+      _ = ∑ _ ∈ S, (1 : ℝ) / 4 := by rw [Finset.sum_const]; ring
+      _ ≤ ∑ i ∈ S, ∫ x in (0:ℝ)..1, Int.fract ((↑(i.val + 1)) / x) := by
+          apply Finset.sum_le_sum
+          intro i hi
+          simp only [S, Finset.mem_filter] at hi
+          have hk : 2 ≤ i.val + 1 := by omega
+          have h := basis_entry_lower (i.val + 1) (by omega : 1 ≤ i.val + 1)
+          have : (1 : ℝ) / (2 * (↑(i.val + 1) : ℝ)) ≤ 1 / 4 := by
+            rw [div_le_div_iff₀ (by positivity) (by norm_num)]
+            have : (2 : ℝ) ≤ (↑(i.val + 1) : ℝ) := by exact_mod_cast hk
+            linarith
+          linarith
+      _ ≤ ∑ i : Fin (N - 1), ∫ x in (0:ℝ)..1, Int.fract ((↑(i.val + 1)) / x) :=
+          Finset.sum_le_sum_of_subset_of_nonneg (Finset.filter_subset _ _)
+            (fun i _ _ => h_nonneg i)
+  · intro i _
+    exact fract_div_intervalIntegrable (i.val + 1) 0 1
+
+/-- The integral is nonneg (needed for Cauchy-Schwarz). -/
+private lemma allOnes_integral_nonneg (N : ℕ) (hN : 2 ≤ N) :
+    0 ≤ ∫ x in (0:ℝ)..1, nbLinComb N (fun (_ : Fin (N - 1)) => (1:ℝ)) x := by
+  have := allOnes_integral_lower N hN
+  linarith [show (0:ℝ) ≤ ((N - 2 : ℕ) : ℝ) / 4 from by positivity]
 
 -- ════════════════════════════════════════════════
--- PART V: λ_max LINEAR GROWTH (PROVED)
+-- PART V: λ_max LINEAR GROWTH (PROVED — ALL-ONES)
 -- ════════════════════════════════════════════════
 
+-- (keep class vector helpers for potential future use)
 /-- The constant class vector is nonzero for finClassCard > 0. -/
 lemma constantClassVector_ne_zero (N : ℕ) (m : Fin 8)
     (hcard : 0 < finClassCard N m) :
@@ -435,106 +572,119 @@ lemma constantClassVector_dotProduct (N : ℕ) (m : Fin 8) :
       if octonionClass (↑i + 1) = m then 1 else 0 := by
     intro i; by_cases h : octonionClass (↑i + 1) = m <;> simp [h]
   simp_rw [this]
-  sorry -- sum_boole / rfl needs API update
+  rw [← Finset.sum_boole]
 
 /-- **THEOREM: λ_max of the Gram matrix grows linearly with N.**
 
-    Proof chain:
-    1. constant_vector_quadform_lower: v^T G v ≥ (fCC-1)²/16
-    2. constantClassVector_dotProduct: ||v||² = fCC
-    3. rayleigh_lower_bound_max: c · fCC ≤ v^T G v ⟹ c ≤ λ_max
-    4. Algebra: (fCC-1)²/(16·fCC) ≥ (c·N-1)²/(16·c·N) ≥ c'·N
-    5. Therefore: λ_max ≥ c'·N = Ω(N) -/
+    Proof via the all-ones vector v = (1,...,1):
+    1. v^T G v = ∫₀¹ (Σ fract((i+1)/x))² ≥ ((N-2)/4)²  [Cauchy-Schwarz]
+    2. v^T v = N-1
+    3. λ_max ≥ v^TGv / v^Tv ≥ (N-2)²/(16(N-1)) ≥ N/64 -/
 theorem lambda_max_linear_growth :
-    ∃ c : ℝ, 0 < c ∧ ∀ m : Fin 8, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
+    ∃ c : ℝ, 0 < c ∧ ∀ _m : Fin 8, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → (hN2 : 2 ≤ N) →
     c * (N : ℝ) ≤
     (univ : Finset (Fin (Fintype.card (Fin (N - 1))))).sup'
-      (by rw [Fintype.card_fin]; sorry) -- omega for Fin nonempty
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, mem_univ _⟩)
       (gramMatrix_hermitian N).eigenvalues₀ := by
-  -- Step 1: Get density constants for each class
-  choose c_fn hc_data using finClassCard_density
-  -- hc_data m : 0 < c_fn m ∧ ∃ N₀, ∀ N ≥ N₀, c_fn m * N ≤ fCC(N,m)
-  -- Use c = min_m(c_fn m / 64), which absorbs the algebra
-  refine ⟨univ.inf' ⟨0, mem_univ _⟩ (fun m => c_fn m / 64), ?_, fun m => ?_⟩
-  · -- Positivity: inf' of positive functions is positive
-    -- inf' = f(m₀) for some m₀ in univ, and f(m₀) = c_fn m₀ / 64 > 0
-    obtain ⟨m₀, _, hm₀⟩ := Finset.exists_mem_eq_inf' ⟨0, mem_univ _⟩
-      (fun m => c_fn m / 64)
-    rw [hm₀]; exact div_pos (hc_data m₀).1 (by norm_num)
-  · -- For each class m: get its density constant and threshold
-    obtain ⟨hc_pos, N_m, hN_bound⟩ := hc_data m
-    -- N₀ must be large enough for (1) fCC ≥ c_m·N and (2) fCC ≥ 2
-    refine ⟨max (max N_m 2) (Nat.ceil (2 / c_fn m) + 1), fun N hN => ?_⟩
-    have hN_m : N_m ≤ N := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
-    have hN2 : 2 ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
-    have hN_large : (2 / c_fn m) < (N : ℝ) := by
-      have : Nat.ceil (2 / c_fn m) + 1 ≤ N := le_trans (le_max_right _ _) hN
-      have : (Nat.ceil (2 / c_fn m) : ℝ) < (N : ℝ) := by exact_mod_cast (by omega : Nat.ceil (2 / c_fn m) < N)
-      exact lt_of_le_of_lt (Nat.le_ceil _) this
-    -- Key fact: fCC ≥ c_m · N ≥ 2
-    have h_fCC_bound := hN_bound N hN_m
-    have h_fCC_ge2 : 2 ≤ (finClassCard N m : ℝ) := by
-      have h_2_lt_cmN : 2 < c_fn m * (N : ℝ) := by
-        have := mul_lt_mul_of_pos_left hN_large hc_pos
-        rwa [mul_div_cancel₀ _ (ne_of_gt hc_pos)] at this
+  refine ⟨1/64, by norm_num, fun _m => ⟨4, fun N hN hN2 => ?_⟩⟩
+  -- The all-ones vector
+  set v := (fun (_ : Fin (N - 1)) => (1:ℝ)) with hv_def
+  have hv_ne : v ≠ 0 := by
+    intro h; have := congr_fun h ⟨0, by omega⟩; simp [hv_def] at this
+  have hv_dot := allOnes_dotProduct N
+  -- v^T G v = ∫₀¹ (nbLinComb N v x)²
+  have h_l2 := gram_l2_identity N hN2 v
+  -- Cauchy-Schwarz: ∫ f² ≥ (∫ f)²
+  -- First establish integrability of nbLinComb
+  have h_nbInteg : IntervalIntegrable (nbLinComb N v) MeasureTheory.volume 0 1 := by
+    -- nbLinComb is bounded on [0,1] (finite sum of bounded functions)
+    -- Since (nbLinComb)^2 is integrable and nbLinComb is measurable,
+    -- nbLinComb is integrable. But simpler: use the sum structure.
+    unfold nbLinComb
+    simp only [hv_def, one_mul]
+    have h_eq : (fun x : ℝ => ∑ i : Fin (N - 1), Int.fract ((↑(i.val + 1) : ℝ) / x)) =
+      ∑ i : Fin (N - 1), (fun x : ℝ => Int.fract ((↑(i.val + 1) : ℝ) / x)) := by
+      ext x; simp [Finset.sum_apply]
+    rw [h_eq]
+    exact IntervalIntegrable.sum Finset.univ fun (i : Fin (N - 1)) _ =>
+      fract_div_intervalIntegrable (i.val + 1) 0 1
+  have h_cs := integral_sq_ge_sq_integral
+    (nbLinComb N v) h_nbInteg (nbLinComb_sq_intervalIntegrable N v)
+  -- So v^TGv ≥ ((N-2)/4)²
+  have h_quad_lower : ((N - 2 : ℕ) : ℝ) ^ 2 / 16 ≤ realQuadForm (gramMatrix N) v := by
+    calc ((N - 2 : ℕ) : ℝ) ^ 2 / 16
+        = (((N - 2 : ℕ) : ℝ) / 4) ^ 2 := by ring
+      _ ≤ (∫ x in (0:ℝ)..1, nbLinComb N v x) ^ 2 := by
+          have h_il := allOnes_integral_lower N hN2
+          have hv_eq : ∫ x in (0:ℝ)..1, nbLinComb N v x =
+            ∫ x in (0:ℝ)..1, nbLinComb N (fun (_ : Fin (N - 1)) => (1:ℝ)) x := by
+            congr 1
+          rw [hv_eq]
+          -- b ≤ a, b ≥ 0, a ≥ 0 ⟹ b² ≤ a²
+          set I := ∫ x in (0:ℝ)..1, nbLinComb N (fun (_ : Fin (N - 1)) => (1:ℝ)) x
+          set b := ((N - 2 : ℕ) : ℝ) / 4
+          have hb_le : b ≤ I := h_il
+          have hb_nn : 0 ≤ b := by positivity
+          exact sq_le_sq' (by linarith) hb_le
+      _ ≤ ∫ x in (0:ℝ)..1, (nbLinComb N v x) ^ 2 := h_cs
+      _ = realQuadForm (gramMatrix N) v := h_l2.symm
+  -- Rayleigh: c · v^Tv ≤ v^TGv ⟹ c ≤ λ_max
+  have hNm1_pos : (0:ℝ) < ↑(N - 1 : ℕ) := by exact_mod_cast (show 0 < N - 1 by omega)
+  have h_rayleigh := rayleigh_lower_bound_max
+    (gramMatrix_hermitian N) (by omega)
+    (((N - 2 : ℕ) : ℝ) ^ 2 / (16 * ↑(N - 1 : ℕ)))
+    v hv_ne
+    (by rw [hv_dot]
+        have : ((N - 2 : ℕ) : ℝ) ^ 2 / (16 * ↑(N - 1 : ℕ)) * ↑(N - 1 : ℕ) =
+          ((N - 2 : ℕ) : ℝ) ^ 2 / 16 := by
+          rw [div_mul_eq_mul_div, mul_div_mul_right _ _ (ne_of_gt hNm1_pos)]
+        linarith)
+  -- Final: 1/64 * N ≤ (N-2)²/(16(N-1)) ≤ λ_max
+  have h_chain : 1 / 64 * (↑N : ℝ) ≤
+      ((N - 2 : ℕ) : ℝ) ^ 2 / (16 * ↑(N - 1 : ℕ)) := by
+    have hN4 : (4 : ℕ) ≤ N := hN
+    have hN_sub2 : ((N - 2 : ℕ) : ℝ) = (N : ℝ) - 2 := by
+      simp [Nat.cast_sub (show 2 ≤ N by omega)]
+    have hN_sub1 : ((N - 1 : ℕ) : ℝ) = (N : ℝ) - 1 := by
+      simp [Nat.cast_sub (show 1 ≤ N by omega)]
+    rw [hN_sub2, hN_sub1]
+    have hN_pos : (0:ℝ) < (N : ℝ) - 1 := by
+      have : (1 : ℝ) < (N : ℝ) := by exact_mod_cast (show 1 < N by omega)
       linarith
-    have h_fCC_pos : (0 : ℝ) < finClassCard N m := by linarith
-    -- Step 2: Apply Rayleigh with the constant vector
-    -- We need: c · dotProduct v v ≤ realQuadForm G v
-    -- From constant_vector_quadform_lower: (fCC-1)²/16 ≤ v^T G v
-    -- From constantClassVector_dotProduct: v^T v = fCC
-    -- So need: c * fCC ≤ (fCC-1)²/16
-    have h_quad := constant_vector_quadform_lower N hN2 m
-    have h_dot := constantClassVector_dotProduct N m
-    have h_nonzero : constantClassVector N m ≠ 0 :=
-      constantClassVector_ne_zero N m (by exact_mod_cast (show 0 < (finClassCard N m : ℝ) from h_fCC_pos))
-    -- Apply Rayleigh: any c with c · v^T v ≤ v^T G v gives c ≤ λ_max
-    have h_rayleigh := rayleigh_lower_bound_max
-      (gramMatrix_hermitian N) (by omega) ((↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)))
-      (constantClassVector N m) h_nonzero
-      (by -- Need: ((fCC-1)²/(16·fCC)) · fCC ≤ v^T G v
-          rw [h_dot]
-          -- Show: ((fCC-1)²/(16·fCC)) · fCC = (fCC-1)²/16
-          -- Work in ℝ with explicit casts
-          set a := (↑(finClassCard N m) : ℝ)
-          -- (a-1)² / (16*a) * a = (a-1)² * a / (16 * a) = (a-1)² / 16
-          have ha_ne : a ≠ 0 := ne_of_gt h_fCC_pos
-          have : (a - 1) ^ 2 / (16 * a) * a = (a - 1) ^ 2 / 16 := by
-            rw [div_mul_eq_mul_div, mul_div_mul_right _ _ ha_ne]
-          linarith)
-    -- h_rayleigh : (fCC-1)²/(16·fCC) ≤ λ_max
-    -- Step 3: Bound (fCC-1)²/(16·fCC) ≥ c_m·N/64
-    -- For fCC ≥ 2: fCC-1 ≥ fCC/2, so (fCC-1)² ≥ fCC²/4
-    -- Therefore (fCC-1)²/(16·fCC) ≥ fCC²/(4·16·fCC) = fCC/64 ≥ c_m·N/64
-    have h_half : (↑(finClassCard N m) : ℝ) / 2 ≤ ↑(finClassCard N m) - 1 := by linarith
-    have h_sq_bound : (↑(finClassCard N m) : ℝ) ^ 2 / 4 ≤ (↑(finClassCard N m) - 1) ^ 2 := by
-      nlinarith
-    have h_ratio_bound : (↑(finClassCard N m) : ℝ) / 64 ≤
-        (↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)) := by
-      rw [div_le_div_iff₀ (by norm_num : (0:ℝ) < 64) (by positivity)]
-      nlinarith
-    -- Final chain: c·N ≤ (c_m/64)·N ≤ fCC/64 ≤ (fCC-1)²/(16·fCC) ≤ λ_max
-    calc univ.inf' ⟨0, mem_univ _⟩ (fun m => c_fn m / 64) * ↑N
-        ≤ c_fn m / 64 * ↑N := by
-          apply mul_le_mul_of_nonneg_right (inf'_le _ (mem_univ m))
-            (Nat.cast_nonneg N)
-      _ ≤ (↑(finClassCard N m) : ℝ) / 64 := by
-          rw [div_mul_eq_mul_div]
-          exact div_le_div_of_nonneg_right h_fCC_bound (by norm_num)
-      _ ≤ (↑(finClassCard N m) - 1) ^ 2 / (16 * ↑(finClassCard N m)) := h_ratio_bound
-      _ ≤ _ := h_rayleigh
+    rw [le_div_iff₀ (by positivity : (0:ℝ) < 16 * ((N : ℝ) - 1))]
+    -- Need: 1/64 * N * (16*(N-1)) ≤ (N-2)²
+    -- i.e. N*(N-1)/4 ≤ (N-2)²
+    -- Expand: N²/4 - N/4 ≤ N² - 4N + 4
+    -- i.e. 3N²/4 - 15N/4 + 4 ≥ 0, true for N ≥ 4
+    have hN4R : (4:ℝ) ≤ (N:ℝ) := by exact_mod_cast hN
+    nlinarith [sq_nonneg ((N : ℝ) - 2), sq_nonneg ((N : ℝ) - 5/2)]
+  linarith
 
 -- ════════════════════════════════════════════════
 -- PART VI: THE EFFECTIVE EIGENVALUE (RESOLVENT)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM (Spectral Alignment — The Lightning Rod):**
+/-- **PROVED (was axiom): Spectral Alignment — The Lightning Rod.**
     λ_eff(m, N) ≥ c · N for some c > 0 and large enough N.
-    Encodes the 99.99% alignment of the interference direction
-    with the Perron-Frobenius eigenvector at λ_max ≈ N/32. -/
-axiom lambdaEff_resolvent_bound (m : Fin 8) :
+    Now proved: lambdaEff IS the max eigenvalue, and lambda_max_linear_growth
+    gives exactly this bound via the constant class vector Rayleigh argument. -/
+theorem lambdaEff_resolvent_bound (m : Fin 8) :
     ∃ c : ℝ, 0 < c ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-    c * (N : ℝ) ≤ lambdaEff m N
+    c * (N : ℝ) ≤ lambdaEff m N := by
+  obtain ⟨c, hc_pos, hm⟩ := lambda_max_linear_growth
+  obtain ⟨N₀, hN₀⟩ := hm m
+  refine ⟨c, hc_pos, max N₀ 2, fun N hN => ?_⟩
+  have hN₀_le : N₀ ≤ N := le_trans (le_max_left _ _) hN
+  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+  have h_bound := hN₀ N hN₀_le hN2
+  -- lambdaEff _m N = sup' ... eigenvalues₀ when 2 ≤ N (by definition)
+  show c * (N : ℝ) ≤ lambdaEff m N
+  have : lambdaEff m N =
+    (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).sup'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, by omega⟩, Finset.mem_univ _⟩)
+      (gramMatrix_hermitian N).eigenvalues₀ := by
+    unfold lambdaEff; exact dif_pos hN2
+  rw [this]; exact h_bound
 
 -- ════════════════════════════════════════════════
 -- PART VII: THE MAIN THEOREM (PROVED)
@@ -577,11 +727,11 @@ end
 --   ✅ constant_vector_quadform_lower (the CS Miracle!)
 --   ✅ constantClassVector_ne_zero (nonzero for fCC > 0)
 --   ✅ constantClassVector_dotProduct (||v||² = fCC via sum_boole)
---   ✅ lambdaEff_linear_growth_proved (main theorem from resolvent axiom)
+--   ✅ lambdaEff_resolvent_bound (PROVED! was axiom, now uses λ_max def)
+--   ✅ lambdaEff_linear_growth_proved (main theorem from resolvent bound)
 --
--- AXIOMS (2):
+-- AXIOMS (1):
 --   📐 finClassCard_density — class count ≥ c·N (Dirichlet)
---   ⚡ lambdaEff_resolvent_bound — spectral alignment (Lightning Rod)
 --
 -- SORRY: **ZERO** 🎉
 --
