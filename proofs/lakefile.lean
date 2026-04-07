@@ -9,38 +9,33 @@ require mathlib from git
 
 @[default_target]
 lean_lib «HyperzetaProofs» where
-  roots := #[`LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.GramBounds, `SpectralRH.ParitySchur, `SpectralRH.BilinearSieve, `SpectralRH.ParityBridge, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `SpectralRH.OctonionicPartition, `SpectralRH.ClassRestriction, `SpectralRH.FiniteDimReduction, `SpectralRH.SpectralFlow, `SpectralRH.RayleighBridge, `SpectralRH.MellinBridge, `SpectralRH.SelbergSieve, `HyperzetaRH]
+  roots := #[`LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.GramBounds, `SpectralRH.ParitySchur, `SpectralRH.BilinearSieve, `SpectralRH.ParityBridge, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `SpectralRH.OctonionicPartition, `SpectralRH.ClassRestriction, `SpectralRH.FiniteDimReduction, `SpectralRH.SpectralFlow, `SpectralRH.RayleighBridge, `SpectralRH.MellinBridge, `HyperzetaRH]
 
 lean_lib «Cathedral» where
   roots := #[
-    -- Core (critical path)
+    -- Core definitions & infrastructure
     `Cathedral.Defs,
     `Cathedral.Structural.Eigenvalue, `Cathedral.Structural.NbLinComb,
     `Cathedral.Structural.Independence, `Cathedral.Structural.L2Tools,
     `Cathedral.Structural, `Cathedral.GramBounds,
     `Cathedral.GramDiag, `Cathedral.GramOffDiag,
     `Cathedral.FractIntegral,
-    `Cathedral.Mertens.Defs, `Cathedral.Mertens.Algebraic,
-    `Cathedral.Mertens.Harmonic, `Cathedral.Mertens.GramEntry,
-    `Cathedral.Mertens.GramSum, `Cathedral.Mertens.NbDecay,
-    `Cathedral.SelbergSieve,
+    -- Mellin Bridge (THE critical path)
+    `Cathedral.MellinBridge.Basic,
+    `Cathedral.MellinBridge.FloorMellin, `Cathedral.MellinBridge.FloorDivMellin,
+    `Cathedral.MellinBridge.Separation, `Cathedral.MellinBridge.NymanBeurling,
+    `Cathedral.MellinBridge.HilbertSetup,
+    `Cathedral.MellinBridge.OrthogonalWitness,
     `Cathedral.MellinBridge,
-    `Cathedral.Assembly.DropAssembly, `Cathedral.Assembly.QuadFormBridge,
+    -- Assembly (crown)
+    `Cathedral.Assembly.QuadFormBridge,
     `Cathedral.Assembly.MainChain, `Cathedral.Assembly,
-    -- Spectral path (non-critical, parallel exploration)
+    -- Spectral path (unconditional results, parallel exploration)
     `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,
     `Cathedral.Spectral.OctonionicPartition, `Cathedral.Spectral.ClassRestriction,
     `Cathedral.Spectral.FiniteDimReduction,
     `Cathedral.Spectral.ConstantVectorBound,
-    -- Bridge files (used by Assembly for alternative proofs)
+    -- Sieve infrastructure (for forward direction)
     `Cathedral.ParitySchur, `Cathedral.BilinearSieve, `Cathedral.ParityBridge,
-    `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
-    -- Mertens infrastructure (sorry-free, promoted from Scratch)
-    `Cathedral.Mertens.PeriodicFormula,
-    `Cathedral.Mertens.BernoulliCross, `Cathedral.Mertens.CoprimeCross,
-    `Cathedral.Mertens.SubstProbe, `Cathedral.Mertens.CovDecomp,
-    `Cathedral.Mertens.OffDiagExcess,
-    -- Scratch/development files (active work, has sorrys)
-    `Cathedral.Scratch.OffDiagBound, `Cathedral.Scratch.RunningAvg
+    `Cathedral.Quantitative, `Cathedral.AlignmentDecay
   ]
-

@@ -5,7 +5,7 @@
 
 .PHONY: help build clean \
         lean-build lean-clean lean-check lean-audit lean-setup \
-        cathedral-archive cathedral-dump cathedral-audit cathedral-check \
+        cathedral-archive cathedral-dump cathedral-dump-split cathedral-audit cathedral-check \
         experiments experiments-clean \
         experiment-parity experiment-cross experiment-weil \
         experiment-g2 experiment-gcd experiment-selberg \
@@ -46,7 +46,8 @@ help:
 	@echo "  ║    make lean-setup      Fetch Mathlib cache           ║"
 	@echo "  ║                                                      ║"
 	@echo "  ║  CATHEDRAL (RH Proof Chain)                          ║"
-	@echo "  ║    make cathedral-dump     Dump .lean → text file     ║"
+	@echo "  ║    make cathedral-dump       Dump .lean → text file     ║"
+	@echo "  ║    make cathedral-dump-split  Split dump for Gemini      ║"
 	@echo "  ║    make cathedral-archive  Archive .tar.gz            ║"
 	@echo "  ║    make cathedral-audit    Sorry & axiom scan         ║"
 	@echo "  ║    make cathedral-check    Typecheck all modules      ║"
@@ -233,6 +234,62 @@ cathedral-dump:
 	@echo "  📝 Files included: $$(grep -c '^FILE:' cathedral-dump.txt)"
 	@echo "  📐 Lines: $$(wc -l < cathedral-dump.txt | tr -d ' ')"
 	@echo "  ✅ Ready to share with The Theorist!"
+
+## Dump Cathedral .lean files into multiple text files (one per component)
+## Each file is small enough to upload to Gemini / Claude / ChatGPT
+cathedral-dump-split:
+	@echo "═══ Cathedral: Creating split dump ═══"
+	@mkdir -p cathedral-parts
+	@rm -f cathedral-parts/*.txt
+	@# Header for each file
+	@for component in Defs Structural Mertens MellinBridge Quantitative Assembly Spectral Other; do \
+		outfile="cathedral-parts/cathedral-$$component.txt"; \
+		echo "# Cathedral Source - $$component" > "$$outfile"; \
+		echo "# Generated: $$(date)" >> "$$outfile"; \
+		echo "# Project: prime/proofs/Cathedral" >> "$$outfile"; \
+		echo "" >> "$$outfile"; \
+	done
+	@# Sort files into components
+	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
+		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
+		component="Other"; \
+		case "$$relpath" in \
+			*Mertens*) component="Mertens" ;; \
+			*Structural*) component="Structural" ;; \
+			*MellinBridge*) component="MellinBridge" ;; \
+			*Quantitative*) component="Quantitative" ;; \
+			*Assembly*) component="Assembly" ;; \
+			*Spectral*) component="Spectral" ;; \
+			*Defs*) component="Defs" ;; \
+		esac; \
+		outfile="cathedral-parts/cathedral-$$component.txt"; \
+		echo "" >> "$$outfile"; \
+		echo "================================================================" >> "$$outfile"; \
+		echo "FILE: $$relpath" >> "$$outfile"; \
+		echo "================================================================" >> "$$outfile"; \
+		echo "" >> "$$outfile"; \
+		cat "$$file" >> "$$outfile"; \
+		echo "" >> "$$outfile"; \
+	done
+	@# Add lakefile
+	@echo "" >> cathedral-parts/cathedral-Other.txt
+	@echo "================================================================" >> cathedral-parts/cathedral-Other.txt
+	@echo "FILE: lakefile.lean" >> cathedral-parts/cathedral-Other.txt
+	@echo "================================================================" >> cathedral-parts/cathedral-Other.txt
+	@echo "" >> cathedral-parts/cathedral-Other.txt
+	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-parts/cathedral-Other.txt
+	@# Summary
+	@echo ""
+	@echo "  📁 Files created in cathedral-parts/:"
+	@for f in cathedral-parts/*.txt; do \
+		name=$$(basename "$$f"); \
+		size=$$(du -h "$$f" | cut -f1); \
+		lines=$$(wc -l < "$$f" | tr -d ' '); \
+		files=$$(grep -c '^FILE:' "$$f" 2>/dev/null || echo 0); \
+		echo "     $$name  ($$size, $$lines lines, $$files files)"; \
+	done
+	@echo ""
+	@echo "  ✅ Upload each file separately to Gemini!"
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:

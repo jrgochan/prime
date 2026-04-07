@@ -4,6 +4,7 @@ import Cathedral.MellinBridge.FloorDivMellin
 import Cathedral.MellinBridge.Separation
 import Cathedral.MellinBridge.NymanBeurling
 import Cathedral.MellinBridge.HilbertSetup
+import Cathedral.MellinBridge.OrthogonalWitness
 
 /-! # Cathedral.MellinBridge
 
@@ -17,4 +18,7 @@ as a single import for downstream files (e.g. `Cathedral.Assembly`).
 - **FloorDivMellin**: k≥1 generalized, `floor_div_mellin`, `mellin_fractBasis`
 - **Separation**: Separating functional, zeta non-vanishing, `nyman_beurling_converse`
 - **NymanBeurling**: Forward direction, combined criterion, immediate results
+- **HilbertSetup**: L² Hilbert space infrastructure
+- **OrthogonalWitness**: Báez-Duarte witness, defeats the Hyperplane Trap
 -/
+
