@@ -212,6 +212,7 @@ cathedral-dump:
 	@echo "#   Cathedral/Quantitative/          - Quantitative estimates" >> cathedral-dump.txt
 	@echo "#   Cathedral/Assembly/              - Final RH assembly" >> cathedral-dump.txt
 	@echo "#   Cathedral/Spectral/              - Exploratory (off critical path)" >> cathedral-dump.txt
+	@echo "#   Cathedral/Robin/                 - Discrete front (Robin/Lagarias)" >> cathedral-dump.txt
 	@echo "" >> cathedral-dump.txt
 	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
@@ -242,7 +243,7 @@ cathedral-dump-split:
 	@mkdir -p cathedral-parts
 	@rm -f cathedral-parts/*.txt
 	@# Header for each file
-	@for component in Defs Structural Mertens MellinBridge Quantitative Assembly Spectral Other; do \
+	@for component in Defs Structural Mertens MellinBridge Quantitative Assembly Spectral Robin Other; do \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "# Cathedral Source - $$component" > "$$outfile"; \
 		echo "# Generated: $$(date)" >> "$$outfile"; \
@@ -260,6 +261,7 @@ cathedral-dump-split:
 			*Quantitative*) component="Quantitative" ;; \
 			*Assembly*) component="Assembly" ;; \
 			*Spectral*) component="Spectral" ;; \
+			*Robin*) component="Robin" ;; \
 			*Defs*) component="Defs" ;; \
 		esac; \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
@@ -300,7 +302,7 @@ cathedral-audit:
 		| grep -v "\-\-" || echo "  ✅ Zero sorry in Mertens/!"
 	@echo ""
 	@echo "── sorry usage (all modules) ──"
-	@for d in Mertens Structural MellinBridge Quantitative Assembly Spectral; do \
+	@for d in Mertens Structural MellinBridge Quantitative Assembly Spectral Robin; do \
 		count=$$(grep -rc "\bsorry\b" $(CATHEDRAL_DIR)/$$d/*.lean 2>/dev/null | awk -F: '{s+=$$2} END{print s+0}'); \
 		if [ "$$count" -gt 0 ]; then \
 			echo "  ⚠  $$d/: $$count sorry"; \
