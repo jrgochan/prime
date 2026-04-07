@@ -138,23 +138,20 @@ axiom baezDuarte_norm_bound (ρ : ℂ)
 
 /-- **Cauchy-Schwarz for interval integrals** (universal ℝ-valued).
 
-    For non-negative real-valued functions f, g on [0,1]:
+    For real-valued functions f, g on [0,1]:
       (∫₀¹ f·g)² ≤ (∫₀¹ f²)(∫₀¹ g²)
 
-    This is a standard inequality in measure theory (Mathlib's
-    `MeasureTheory.inner_mul_le_norm_mul_sq` in the L² space).
-    Quarantined here to avoid typeclass resolution issues with
-    mixed ℝ/ℂ interval integrals.
-
-    The RH-specific logic does NOT depend on the proof of this lemma.
-    It is a universally true mathematical fact. -/
+    **Proof**: For all t : ℝ, ∫₀¹ (t·f + g)² ≥ 0.
+    Expanding: t²·∫f² + 2t·∫fg + ∫g² ≥ 0.
+    This is a non-negative quadratic in t, so discriminant ≤ 0:
+    (2·∫fg)² - 4·(∫f²)·(∫g²) ≤ 0, i.e., (∫fg)² ≤ (∫f²)(∫g²). -/
 lemma real_cauchy_schwarz_interval (f g : ℝ → ℝ)
     (hf : IntervalIntegrable (fun x => f x ^ 2) MeasureTheory.volume 0 1)
     (hg : IntervalIntegrable (fun x => g x ^ 2) MeasureTheory.volume 0 1)
     (hfg : IntervalIntegrable (fun x => f x * g x) MeasureTheory.volume 0 1) :
     (∫ x in (0:ℝ)..1, f x * g x) ^ 2 ≤
     (∫ x in (0:ℝ)..1, f x ^ 2) * (∫ x in (0:ℝ)..1, g x ^ 2) := by
-  sorry -- Universal Cauchy-Schwarz (standard Mathlib, quarantined from typeclass issues)
+  sorry -- Universal Cauchy-Schwarz (discriminant of ∫(tf+g)² ≥ 0)
 
 -- ════════════════════════════════════════════════
 -- CONSEQUENCES
@@ -166,11 +163,15 @@ def baezDuarteNormSq (ρ : ℂ) : ℝ :=
 
 /-- **THEOREM**: The Báez-Duarte witness has strictly positive norm
     when ρ is a non-trivial zero of ζ off the critical line.
-    This follows from Axiom 3: if ‖h_ρ‖ = 0, then h_ρ = 0 a.e.,
-    so ⟨h_ρ, 1⟩ = 0, contradicting 1/ρ ≠ 0.
 
-    Proof uses: norm zero implies function zero a.e. for interval
-    integrable functions, then Axiom 3 contradiction. -/
+    **Proof (The Theorist's "No A.E." Bypass)**:
+    Assume ∫‖h_ρ‖² ≤ 0 for contradiction.
+    Since ‖h_ρ(x)‖² ≥ 0 pointwise, the integral must be exactly 0.
+    By Cauchy-Schwarz: (∫‖h_ρ‖·1)² ≤ (∫‖h_ρ‖²)(∫1²) = 0·1 = 0.
+    So ∫‖h_ρ‖ = 0.
+    By the Triangle Inequality for Integrals (norm_integral_le_integral_norm):
+      ‖∫ conj(h_ρ)·1‖ ≤ ∫‖h_ρ‖ = 0
+    But Axiom 3 says ∫ conj(h_ρ)·1 = 1/ρ ≠ 0. Contradiction! -/
 theorem baezDuarte_norm_pos (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (h_re : 1/2 < ρ.re) :
@@ -178,19 +179,43 @@ theorem baezDuarte_norm_pos (ρ : ℂ)
   unfold baezDuarteNormSq
   by_contra h_not
   push_neg at h_not
-  -- If ‖h_ρ‖² ≤ 0 and the integrand is non-negative, then ∫ = 0.
-  -- Since ‖·‖² ≥ 0 pointwise, this means ‖h_ρ(x)‖ = 0 a.e.,
-  -- i.e., h_ρ = 0 a.e.
-  -- Then ⟨h_ρ, 1⟩ = ∫ 0 · 1 = 0, contradicting Axiom 3 (= 1/ρ ≠ 0).
-  -- The a.e. vanishing argument is standard measure theory.
-  sorry -- Standard: ∫[0,1] ‖f‖² ≤ 0 with ‖f‖² ≥ 0 ⟹ f = 0 a.e.
+  -- h_not : ∫‖h_ρ‖² ≤ 0.  Since ‖h_ρ(x)‖² ≥ 0 pointwise, ∫ = 0.
+  have h_nn : 0 ≤ ∫ x in (0:ℝ)..1, ‖baezDuarteWitness ρ x‖ ^ 2 := by
+    apply intervalIntegral.integral_nonneg (by norm_num : (0:ℝ) ≤ 1)
+    intro x _; exact sq_nonneg _
+  have h_eq_zero : ∫ x in (0:ℝ)..1, ‖baezDuarteWitness ρ x‖ ^ 2 = 0 := by
+    linarith
+  -- Axiom 3: ∫ conj(h_ρ)·1 = 1/ρ
+  have h_ax3 := baezDuarte_inner_one ρ h_zero
+  -- ρ ≠ 0 since Re(ρ) > 1/2 > 0
+  have hρ_ne : ρ ≠ 0 := by
+    intro h; rw [h, zero_re] at h_re; linarith
+  -- 1/ρ ≠ 0
+  have h_inv_ne : (1 : ℂ) / ρ ≠ 0 := by
+    rw [one_div]; exact inv_ne_zero hρ_ne
+  -- ‖1/ρ‖ > 0
+  have h_norm_inv_pos : 0 < ‖(1 : ℂ) / ρ‖ := norm_pos_iff.mpr h_inv_ne
+  -- From ∫‖h‖² = 0 and triangle inequality, derive contradiction
+  -- ‖1/ρ‖ = ‖∫ conj(h)·1‖ ≤ ∫ ‖conj(h)·1‖ = ∫ ‖h‖
+  -- And (∫‖h‖)² ≤ (∫‖h‖²)(∫1) = 0 by C-S, so ∫‖h‖ = 0.
+  -- Therefore ‖1/ρ‖ ≤ 0, contradiction.
+  -- Note: We use the fact ‖conj(z)‖ = ‖z‖ and the triangle inequality.
+  -- The exact Lean proof requires threading through the axiom types.
+  -- Since baezDuarteWitness is opaque, we need interval norm bound.
+  sorry -- Triangle inequality chain: ‖1/ρ‖ ≤ ∫‖h‖ and ∫‖h‖ = 0
 
 /-- **THEOREM**: For any off-critical-line zero ρ, the NB distance
     is bounded below by |1/ρ|² / ‖h_ρ‖².
 
     This is the mathematical heart of the Nyman-Beurling converse:
     the existence of an orthogonal annihilator creates an
-    uncrossable gap in L². -/
+    uncrossable gap in L².
+
+    **Proof (Real-Norm Bypass)**:
+    Step 1: ⟨h_ρ, 1-f_w⟩ = 1/ρ by Axioms 2+3 (linearity & orthogonality)
+    Step 2: ‖1/ρ‖ ≤ ∫ ‖h_ρ(x)‖·|1-f_w(x)| dx (triangle inequality)
+    Step 3: Square and apply C-S: ≤ (∫‖h_ρ‖²)(∫(1-f_w)²)
+    Step 4: Divide by ∫‖h_ρ‖² (positive by baezDuarte_norm_pos) -/
 theorem orthogonal_witness_lower_bound (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (h_re : 1/2 < ρ.re) :
@@ -198,11 +223,13 @@ theorem orthogonal_witness_lower_bound (ρ : ℂ)
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2
       ≥ ‖(1 : ℂ) / ρ‖^2 / baezDuarteNormSq ρ := by
   intro N hN v
-  -- Apply Cauchy-Schwarz via the Real-Norm Bypass:
-  -- ‖1/ρ‖² ≤ (∫‖h_ρ‖²)(∫(1-f_w)²) implies ∫(1-f_w)² ≥ ‖1/ρ‖²/‖h_ρ‖²
-  -- The key: work with ‖h_ρ(x)‖ (real) and |1-f_w(x)| (real)
-  -- to avoid the ℂ inner product API entirely.
-  sorry -- Cauchy-Schwarz + Axioms 2 & 3 (see baezDuarte_separates for full proof)
+  -- The full proof requires:
+  -- 1. Linearity: ⟨h_ρ, 1-f_w⟩ = 1/ρ via Axioms 2+3
+  -- 2. Triangle: ‖1/ρ‖ ≤ ∫ ‖h(x)·(1-f_w(x))‖ dx
+  -- 3. C-S: (∫ ‖h‖·|1-f_w|)² ≤ (∫‖h‖²)(∫(1-f_w)²)
+  -- 4. Division by baezDuarteNormSq ρ > 0
+  -- Each step is standard but requires precise interval integral threading.
+  sorry -- C-S + triangle inequality chain (see baezDuarte_separates)
 
 -- ════════════════════════════════════════════════
 -- THE HYPERPLANE TRAP BREAKER
