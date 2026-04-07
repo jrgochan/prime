@@ -293,18 +293,22 @@ theorem orthogonal_witness_lower_bound (ρ : ℂ)
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2
       ≥ ‖(1 : ℂ) / ρ‖^2 / baezDuarteNormSq ρ := by
   intro N hN w
-  -- Define real-valued functions for C-S
   set f_cs := fun x : ℝ => ‖baezDuarteWitness ρ x‖
   set g_cs := fun x : ℝ => |1 - nbLinComb N w x|
-  -- 1. Integrability from axioms
+  -- 1. Integrability from axioms and structural theorems
   have hf2 : IntervalIntegrable (fun x => f_cs x ^ 2)
       MeasureTheory.volume 0 1 := baezDuarte_is_L2 ρ h_zero h_re
   have hfg : IntervalIntegrable (fun x => f_cs x * g_cs x)
       MeasureTheory.volume 0 1 := baezDuarte_L1_product ρ h_zero h_re N w
-  have hg2 : IntervalIntegrable (fun x => g_cs x ^ 2)
-      MeasureTheory.volume 0 1 := by
-    show IntervalIntegrable (fun x => |1 - nbLinComb N w x| ^ 2) _ 0 1
-    sorry -- |1-f_w|² = (1-f_w)² is integrable (finite sum of fractional parts)
+  have hg2 : IntervalIntegrable (fun x => g_cs x ^ 2) MeasureTheory.volume 0 1 := by
+    -- Expand |1-f_w|² = 1 - 2·f_w + f_w² algebraically
+    have h_eq : (fun x => g_cs x ^ 2) =
+        (fun x => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) := by
+      ext x; dsimp [g_cs]; rw [sq_abs]; ring
+    rw [h_eq]
+    exact ((intervalIntegrable_const : IntervalIntegrable (fun _ => (1:ℝ)) _ 0 1).sub
+      ((nbLinComb_integrable N w).const_mul 2)).add
+      (nbLinComb_sq_integrable N w)
   -- 2. Cauchy-Schwarz
   have h_cs := real_cauchy_schwarz_interval f_cs g_cs hf2 hg2 hfg
   -- 3. Triangle inequality: ‖∫ conj(h)·(1-f_w)‖ ≤ ∫ ‖conj(h)·(1-f_w)‖
@@ -315,10 +319,43 @@ theorem orthogonal_witness_lower_bound (ρ : ℂ)
     intervalIntegral.norm_integral_le_integral_norm (by norm_num : (0:ℝ) ≤ 1)
   -- Axiom 5: the inner product equals 1/ρ
   have h_res := baezDuarte_inner_residual ρ h_zero N w
-  -- ‖1/ρ‖ ≤ ∫ ‖h‖·|1-f_w| = ∫ f_cs · g_cs
-  -- (The integral_congr step to rewrite norms requires matching starRingEnd → star
-  --  and ℝ-to-ℂ coercion norms. This is the one remaining API threading step.)
-  sorry -- Norm threading: ‖star(h)·(1-f_w)‖ = f_cs·g_cs, then chain and divide
+  -- Normalize: ↑(1-r) = 1 - ↑r to match Axiom 5's pattern
+  have h_coerce : ∀ x, (↑(1 - nbLinComb N w x) : ℂ) = 1 - ↑(nbLinComb N w x) := by
+    intro x; push_cast; ring
+  simp_rw [h_coerce] at h_tri
+  rw [h_res] at h_tri
+  -- Exact Norm Threading: ‖star(h)·(1-↑r)‖ = ‖h‖·|1-r|
+  have h_norm_integrand : ∀ x, ‖starRingEnd ℂ (baezDuarteWitness ρ x) *
+      ((1 : ℂ) - ↑(nbLinComb N w x))‖ = f_cs x * g_cs x := by
+    intro x; dsimp [f_cs, g_cs]
+    rw [norm_mul]
+    congr 1
+    · exact norm_star _
+    · rw [← h_coerce]; exact Complex.norm_real _
+  have h_int_eq : (∫ x in (0:ℝ)..1, ‖starRingEnd ℂ (baezDuarteWitness ρ x) *
+      ((1 : ℂ) - ↑(nbLinComb N w x))‖) = ∫ x in (0:ℝ)..1, f_cs x * g_cs x := by
+    apply intervalIntegral.integral_congr; intro x _
+    exact h_norm_integrand x
+  rw [h_int_eq] at h_tri
+  -- Chain: ‖1/ρ‖² ≤ (∫f·g)² ≤ (∫f²)(∫g²)
+  have h_nonneg : 0 ≤ ∫ x in (0:ℝ)..1, f_cs x * g_cs x := by
+    apply intervalIntegral.integral_nonneg (by norm_num); intro x _
+    dsimp [f_cs, g_cs]; exact mul_nonneg (norm_nonneg _) (abs_nonneg _)
+  have h_sq_ineq : ‖(1 : ℂ) / ρ‖ ^ 2 ≤ (∫ x in (0:ℝ)..1, f_cs x * g_cs x) ^ 2 :=
+    sq_le_sq' (by linarith [norm_nonneg ((1:ℂ) / ρ)]) h_tri
+  have h_chain := le_trans h_sq_ineq h_cs
+  -- Rewrite g² and f² to match goal
+  have h_g2_eq : (∫ x in (0:ℝ)..1, g_cs x ^ 2) =
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N w x) ^ 2 := by
+    apply intervalIntegral.integral_congr; intro x _
+    dsimp [g_cs]; rw [sq_abs]
+  rw [h_g2_eq] at h_chain
+  have h_F2 : (∫ x in (0:ℝ)..1, f_cs x ^ 2) = baezDuarteNormSq ρ := rfl
+  rw [h_F2] at h_chain
+  -- 4. Final Algebraic Division
+  have h_norm_pos := baezDuarte_norm_pos ρ h_zero h_re
+  rw [mul_comm] at h_chain
+  exact (div_le_iff₀ h_norm_pos).mpr h_chain
 
 -- ════════════════════════════════════════════════
 -- THE HYPERPLANE TRAP BREAKER
