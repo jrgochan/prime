@@ -7,10 +7,12 @@ package "hyperzeta_proofs" where
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 
-@[default_target]
-lean_lib «HyperzetaProofs» where
-  roots := #[`LiCriterion, `SpectralRH.Defs, `SpectralRH.Structural, `SpectralRH.GramBounds, `SpectralRH.ParitySchur, `SpectralRH.BilinearSieve, `SpectralRH.ParityBridge, `SpectralRH.Quantitative, `SpectralRH.PTSymmetry, `SpectralRH.AlignmentDecay, `SpectralRH.Assembly, `SpectralRH.OctonionicPartition, `SpectralRH.ClassRestriction, `SpectralRH.FiniteDimReduction, `SpectralRH.SpectralFlow, `SpectralRH.RayleighBridge, `SpectralRH.MellinBridge, `HyperzetaRH]
+-- Legacy roots (superseded by Cathedral architecture)
+-- @[default_target]
+-- lean_lib «HyperzetaProofs» where
+--   roots := #[`LiCriterion, `SpectralRH.Defs, ...]
 
+@[default_target]
 lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
