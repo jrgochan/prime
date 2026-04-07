@@ -23,12 +23,14 @@ lean_lib «Cathedral» where
     -- Mellin Bridge (THE critical path)
     `Cathedral.MellinBridge.Basic,
     `Cathedral.MellinBridge.FloorMellin, `Cathedral.MellinBridge.FloorDivMellin,
-    `Cathedral.MellinBridge.Separation, `Cathedral.MellinBridge.NymanBeurling,
+    `Cathedral.MellinBridge.Separation,
     `Cathedral.MellinBridge.HilbertSetup,
     `Cathedral.MellinBridge.OrthogonalWitness,
     `Cathedral.MellinBridge.MellinSieve,
     `Cathedral.MellinBridge.AutocorrelationBypass,
     `Cathedral.MellinBridge.MertensWeightBypass,
+    `Cathedral.MellinBridge.AbelSummation,
+    `Cathedral.MellinBridge.MertensIntegral,
     `Cathedral.MellinBridge,
     -- Assembly (crown)
     `Cathedral.Assembly.QuadFormBridge,
@@ -42,5 +44,7 @@ lean_lib «Cathedral» where
     `Cathedral.ParitySchur, `Cathedral.VasyuninExpansion,
     `Cathedral.BilinearSieve, `Cathedral.MoebiusUncoupling,
     `Cathedral.ParityBridge,
-    `Cathedral.Quantitative, `Cathedral.AlignmentDecay
+    `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
+    -- Robin's Inequality (discrete arithmetic front)
+    `Cathedral.Robin.Defs
   ]
