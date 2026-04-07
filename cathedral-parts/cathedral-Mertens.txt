@@ -1,5 +1,5 @@
 # Cathedral Source - Mertens
-# Generated: Tue Apr  7 14:25:45 MDT 2026
+# Generated: Tue Apr  7 14:33:27 MDT 2026
 # Project: prime/proofs/Cathedral
 
 
@@ -106,7 +106,24 @@ theorem convergent_log_series_bound :
       (Real.log (k : ℝ)) ^ 2 / ((k : ℝ) ^ (3/2 : ℝ))) ≤ C := by
   use 500
   refine ⟨by norm_num, fun N hN => ?_⟩
-  sorry
+  -- Strategy: bound each summand by 64/k^{5/4}, then bound finite sum
+  -- Key: log(k) < 8·k^{1/8} because log(x) < x for x > 0
+  --       applied to x = k^{1/8}, giving (1/8)·log(k) < k^{1/8}
+  --       therefore log²(k) < 64·k^{1/4}
+  --       and log²(k)/k^{3/2} < 64·k^{1/4}/k^{3/2} = 64/k^{5/4}
+  -- The sum Σ 64/k^{5/4} converges by p-series (5/4 > 1).
+  -- We use C = 500 as a generous upper bound.
+  calc (Finset.Ico 2 N).sum (fun k =>
+        (Real.log (k : ℝ)) ^ 2 / ((k : ℝ) ^ (3/2 : ℝ)))
+    _ ≤ (Finset.Ico 2 N).sum (fun k =>
+        64 / ((k : ℝ) ^ (5/4 : ℝ))) := by
+          apply Finset.sum_le_sum; intro k hk
+          rw [Finset.mem_Ico] at hk
+          -- log²(k)/k^{3/2} ≤ 64·k^{1/4}/k^{3/2} = 64/k^{5/4}
+          sorry
+    _ ≤ 500 := by
+          -- The p-series Σ 64/k^{5/4} converges and ≤ 500
+          sorry
 
 -- ════════════════════════════════════════════════
 -- AUDIT

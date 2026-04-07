@@ -1,5 +1,5 @@
 # Cathedral Source - Defs
-# Generated: Tue Apr  7 14:25:45 MDT 2026
+# Generated: Tue Apr  7 14:33:27 MDT 2026
 # Project: prime/proofs/Cathedral
 
 
