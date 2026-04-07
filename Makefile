@@ -239,30 +239,34 @@ cathedral-dump:
 ## Dump Cathedral .lean files into multiple text files (one per component)
 ## Each file is small enough to upload to Gemini / Claude / ChatGPT
 cathedral-dump-split:
-	@echo "═══ Cathedral: Creating split dump ═══"
+	@echo "═══ Cathedral: Creating split dump (10 files for Gemini) ═══"
 	@mkdir -p cathedral-parts
 	@rm -f cathedral-parts/*.txt
 	@# Header for each file
-	@for component in Defs Structural Mertens MellinBridge Quantitative Assembly Spectral Robin Other; do \
+	@for component in Core Structural Gram SieveParity SieveBridge MellinFoundations MellinTools Assembly Spectral1 Spectral2; do \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "# Cathedral Source - $$component" > "$$outfile"; \
 		echo "# Generated: $$(date)" >> "$$outfile"; \
 		echo "# Project: prime/proofs/Cathedral" >> "$$outfile"; \
+		echo "# Proof: Spectral Riemann Hypothesis (2-axiom reduction)" >> "$$outfile"; \
 		echo "" >> "$$outfile"; \
 	done
-	@# Sort files into components
-	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
+	@# Sort files into components (10 categories, each <90K)
+	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" -not -path "*Archive*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
-		component="Other"; \
+		component="Core"; \
 		case "$$relpath" in \
-			*Mertens*) component="Mertens" ;; \
 			*Structural*) component="Structural" ;; \
-			*MellinBridge*) component="MellinBridge" ;; \
-			*Quantitative*) component="Quantitative" ;; \
+			*GramBounds*|*GramDiag*|*GramOffDiag*|*FractIntegral*|*AlignmentDecay*) component="Gram" ;; \
+			*BilinearSieve*|*ParitySchur*) component="SieveParity" ;; \
+			*ParityBridge*|*MoebiusUncoupling*|*VasyuninExpansion*) component="SieveBridge" ;; \
+			*MellinBridge/Basic*|*FloorMellin*|*FloorDivMellin*|*Separation*) component="MellinFoundations" ;; \
+			*MellinBridge.lean) component="MellinFoundations" ;; \
+			*HilbertSetup*|*OrthogonalWitness*|*MellinSieve*|*AbelSummation*|*MertensIntegral*|*AutocorrelationBypass*|*MertensWeightBypass*) component="MellinTools" ;; \
 			*Assembly*) component="Assembly" ;; \
-			*Spectral*) component="Spectral" ;; \
-			*Robin*) component="Robin" ;; \
-			*Defs*) component="Defs" ;; \
+			*PTSymmetry*|*RayleighBridge*|*OctonionicPartition*) component="Spectral1" ;; \
+			*ClassRestriction*|*ConstantVectorBound*|*FiniteDimReduction*) component="Spectral2" ;; \
+			*Defs*|*Robin*|*Quantitative*) component="Core" ;; \
 		esac; \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "" >> "$$outfile"; \
@@ -273,16 +277,16 @@ cathedral-dump-split:
 		cat "$$file" >> "$$outfile"; \
 		echo "" >> "$$outfile"; \
 	done
-	@# Add lakefile
-	@echo "" >> cathedral-parts/cathedral-Other.txt
-	@echo "================================================================" >> cathedral-parts/cathedral-Other.txt
-	@echo "FILE: lakefile.lean" >> cathedral-parts/cathedral-Other.txt
-	@echo "================================================================" >> cathedral-parts/cathedral-Other.txt
-	@echo "" >> cathedral-parts/cathedral-Other.txt
-	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-parts/cathedral-Other.txt
+	@# Add lakefile to Core
+	@echo "" >> cathedral-parts/cathedral-Core.txt
+	@echo "================================================================" >> cathedral-parts/cathedral-Core.txt
+	@echo "FILE: lakefile.lean" >> cathedral-parts/cathedral-Core.txt
+	@echo "================================================================" >> cathedral-parts/cathedral-Core.txt
+	@echo "" >> cathedral-parts/cathedral-Core.txt
+	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-parts/cathedral-Core.txt
 	@# Summary
 	@echo ""
-	@echo "  📁 Files created in cathedral-parts/:"
+	@echo "  📁 Files created in cathedral-parts/ (max 10 for Gemini):"
 	@for f in cathedral-parts/*.txt; do \
 		name=$$(basename "$$f"); \
 		size=$$(du -h "$$f" | cut -f1); \
@@ -291,7 +295,7 @@ cathedral-dump-split:
 		echo "     $$name  ($$size, $$lines lines, $$files files)"; \
 	done
 	@echo ""
-	@echo "  ✅ Upload each file separately to Gemini!"
+	@echo "  ✅ Upload all 10 files to Gemini Deep Think!"
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:
