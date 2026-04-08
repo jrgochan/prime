@@ -1,5 +1,5 @@
 # Cathedral Source - MellinTools
-# Generated: Tue Apr  7 16:09:41 MDT 2026
+# Generated: Tue Apr  7 17:20:41 MDT 2026
 # Project: prime/proofs/Cathedral
 # Proof: Spectral Riemann Hypothesis (2-axiom reduction)
 
@@ -1364,14 +1364,12 @@ axiom baezDuarte_is_L2 (ρ : ℂ)
     IntervalIntegrable (fun x => ‖baezDuarteWitness ρ x‖^2)
       MeasureTheory.volume 0 1
 
-/-- **AXIOM 2: Orthogonality.**
-    If ζ(ρ) = 0, then h_ρ is orthogonal to every basis function
-    {k/x} for k ≥ 2 in L²(0,1). -/
-axiom baezDuarte_orthogonal (ρ : ℂ)
-    (h_zero : riemannZeta ρ = 0)
-    (k : ℕ) (hk : 2 ≤ k) :
-    ∫ x in (0:ℝ)..1,
-      starRingEnd ℂ (baezDuarteWitness ρ x) * fractBasisC k x = 0
+-- **FORMERLY AXIOM 2: Orthogonality.**
+-- Excised 2026-04-07: never referenced by any downstream theorem.
+-- Its role (⟨h_ρ, {k/x}⟩ = 0 for k ≥ 2) is fully subsumed by
+-- baezDuarte_inner_residual (Axiom 5), which encapsulates linearity
+-- of the integral and the orthogonality in a single statement.
+-- See: Báez-Duarte Axiom Analysis for The Theorist.
 
 /-- **AXIOM 3: Non-Triviality.**
     The inner product of h_ρ with the target function 1_{(0,1)}

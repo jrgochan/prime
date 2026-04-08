@@ -153,7 +153,7 @@ theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
   · -- CASE 1: d ≤ 4 — PROVED
     exact vasyunin_expansion_d_le_4 j k hj hk hd
   · -- CASE 2: d ≥ 5 — refined axiom
-    push_neg at hd
+    push Not at hd
     exact vasyunin_large_gcd j k hj hk (by omega)
 
 end

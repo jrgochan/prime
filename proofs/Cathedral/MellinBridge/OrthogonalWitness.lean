@@ -81,14 +81,12 @@ axiom baezDuarte_is_L2 (ρ : ℂ)
     IntervalIntegrable (fun x => ‖baezDuarteWitness ρ x‖^2)
       MeasureTheory.volume 0 1
 
-/-- **AXIOM 2: Orthogonality.**
-    If ζ(ρ) = 0, then h_ρ is orthogonal to every basis function
-    {k/x} for k ≥ 2 in L²(0,1). -/
-axiom baezDuarte_orthogonal (ρ : ℂ)
-    (h_zero : riemannZeta ρ = 0)
-    (k : ℕ) (hk : 2 ≤ k) :
-    ∫ x in (0:ℝ)..1,
-      starRingEnd ℂ (baezDuarteWitness ρ x) * fractBasisC k x = 0
+-- **FORMERLY AXIOM 2: Orthogonality.**
+-- Excised 2026-04-07: never referenced by any downstream theorem.
+-- Its role (⟨h_ρ, {k/x}⟩ = 0 for k ≥ 2) is fully subsumed by
+-- baezDuarte_inner_residual (Axiom 5), which encapsulates linearity
+-- of the integral and the orthogonality in a single statement.
+-- See: Báez-Duarte Axiom Analysis for The Theorist.
 
 /-- **AXIOM 3: Non-Triviality.**
     The inner product of h_ρ with the target function 1_{(0,1)}
@@ -222,7 +220,7 @@ theorem baezDuarte_norm_pos (ρ : ℂ)
     0 < baezDuarteNormSq ρ := by
   unfold baezDuarteNormSq
   by_contra h_not
-  push_neg at h_not
+  push Not at h_not
   -- ∫‖h‖² ≤ 0 and ‖h‖² ≥ 0 pointwise, so ∫‖h‖² = 0
   have h_nn : 0 ≤ ∫ x in (0:ℝ)..1, ‖baezDuarteWitness ρ x‖ ^ 2 := by
     apply intervalIntegral.integral_nonneg (by norm_num : (0:ℝ) ≤ 1)

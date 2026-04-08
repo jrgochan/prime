@@ -37,7 +37,7 @@ theorem logWeight_self (N : ℕ) (hN : 2 ≤ N) : logWeight N N = 0 := by
   ring
 
 /-- **PROVED**: f(1) = 1 (the initial value). -/
-theorem logWeight_one (N : ℕ) (hN : 2 ≤ N) : logWeight N 1 = 1 := by
+theorem logWeight_one (N : ℕ) (_hN : 2 ≤ N) : logWeight N 1 = 1 := by
   unfold logWeight
   simp [Real.log_one]
 

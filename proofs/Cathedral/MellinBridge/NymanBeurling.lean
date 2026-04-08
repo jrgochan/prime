@@ -1,4 +1,5 @@
 import Cathedral.MellinBridge.Separation
+import Cathedral.MellinBridge.MellinSieve
 
 /-! # Cathedral.MellinBridge.NymanBeurling
 
@@ -21,19 +22,9 @@ open Complex Real MeasureTheory Set Filter
 -- SECTION 4: THE FORWARD DIRECTION (Phase 3)
 -- ════════════════════════════════════════════════
 
-/-- **Forward direction of Nyman-Beurling (Phase 3 target)**:
-    If RH holds, then d²_N → 0.
-
-    This is the "easy" direction. The proof sketch:
-    1. RH ⟹ ζ has no zeros with Re > 1/2 (except trivial)
-    2. This means 1/(ζ(s)·s) has an analytic continuation to Re > 1/2
-    3. Using Perron's formula, construct explicit coefficients that
-       make the NB approximation converge
-    4. The rate is d²_N = O(1/log N) from zero-free region bounds -/
-axiom nyman_beurling_forward :
-    RiemannHypothesis →
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε)
+-- **FORMERLY axiom nyman_beurling_forward**:
+-- Excised 2026-04-07. Now proved as `nyman_beurling_forward_from_sieve`
+-- in Cathedral.MellinBridge.MellinSieve via the weight construction chain.
 
 -- ════════════════════════════════════════════════
 -- SECTION 5: COMBINING INTO NYMAN-BEURLING
@@ -49,7 +40,7 @@ theorem nyman_beurling_from_mellin :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
-  ⟨nyman_beurling_converse, nyman_beurling_forward⟩
+  ⟨nyman_beurling_converse, nyman_beurling_forward_from_sieve⟩
 
 -- ════════════════════════════════════════════════
 -- SECTION 6: IMMEDIATE PROVABLE RESULTS

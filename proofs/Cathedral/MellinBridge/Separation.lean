@@ -180,7 +180,7 @@ theorem zeta_neg_odd_ne_zero (k : ℕ) :
     · -- 2 ≠ 0
       exact two_ne_zero
     · -- (2π)^(-s) ≠ 0: since 2π ≠ 0
-      rw [Ne, Complex.cpow_eq_zero_iff]; push_neg; intro h
+      rw [Ne, Complex.cpow_eq_zero_iff]; push Not; intro h
       exact absurd h (mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_ne_zero))
     · -- Γ(2(n+1)) ≠ 0: positive integer, not a pole
       apply Complex.Gamma_ne_zero
@@ -216,7 +216,7 @@ theorem zeta_nontrivial_zero_re_pos :
     0 < s.re := by
   intro s h_zero h_not_triv
   by_contra h_not_pos
-  push_neg at h_not_pos
+  push Not at h_not_pos
   by_cases h_int : ∃ n : ℕ, s = -(↑n : ℂ)
   · -- Case B: s = -n for some n : ℕ
     obtain ⟨n, rfl⟩ := h_int
@@ -240,7 +240,7 @@ theorem zeta_nontrivial_zero_re_pos :
         simp only [Int.cast_neg, Int.cast_natCast]
         exact h_zero
   · -- Case A: s is NOT a non-positive integer → functional equation
-    push_neg at h_int
+    push Not at h_int
     have hs1 : s ≠ 1 := by
       intro heq; rw [heq] at h_not_pos; norm_num at h_not_pos
     have h_func := riemannZeta_one_sub h_int hs1
@@ -251,7 +251,7 @@ theorem zeta_nontrivial_zero_re_pos :
 /-- **THEOREM**: ¬RH → ∃ zero in critical strip off critical line.
 
     Proof:
-    1. push_neg on ¬RH: ∃ s with ζ(s) = 0, not trivial, s ≠ 1, Re ≠ 1/2
+    1. push Not on ¬RH: ∃ s with ζ(s) = 0, not trivial, s ≠ 1, Re ≠ 1/2
     2. Re(s) > 0: from zeta_nontrivial_zero_re_pos (functional equation)
     3. Re(s) < 1: from Mathlib's riemannZeta_ne_zero_of_one_le_re
        (if Re(s) ≥ 1 then ζ(s) ≠ 0, contradiction) -/
@@ -261,17 +261,17 @@ theorem rh_neg_gives_critical_strip_zero :
   intro h
   -- Push the negation: ∃ s, ζ(s) = 0 ∧ (∀ n, s ≠ ...) ∧ s ≠ 1 ∧ Re(s) ≠ 1/2
   unfold RiemannHypothesis at h
-  push_neg at h
+  push Not at h
   obtain ⟨s, h_zero, h_not_triv, h_ne_1, h_re_ne_half⟩ := h
   -- Convert ∀ n, s ≠ -2*(n+1) back to ¬∃ n, s = -2*(n+1)
   have h_not_triv' : ¬∃ n : ℕ, s = -2 * (↑n + 1) := by
-    push_neg; exact h_not_triv
+    push Not; exact h_not_triv
   refine ⟨s, h_zero, ?_, ?_, h_re_ne_half⟩
   · -- 0 < Re(s): from functional equation (axiom)
     exact zeta_nontrivial_zero_re_pos s h_zero h_not_triv'
   · -- Re(s) < 1: from Mathlib (if Re ≥ 1 then ζ ≠ 0)
     by_contra h_ge
-    push_neg at h_ge
+    push Not at h_ge
     exact absurd h_zero (riemannZeta_ne_zero_of_one_le_re h_ge)
 
 /-- **THEOREM**: nyman_beurling_converse from the separation axioms.

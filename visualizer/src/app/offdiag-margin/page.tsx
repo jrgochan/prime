@@ -122,9 +122,10 @@ export default function OffDiagMarginPage() {
   return (
     <div className="h-full flex flex-col">
       <div className="p-6 border-b border-[#1e2148]">
-        <h2 className="text-2xl font-bold text-slate-200">Off-Diagonal Excess: The 18× Margin</h2>
+        <h2 className="text-2xl font-bold text-slate-200">Off-Diagonal Gram Excess</h2>
         <p className="text-sm text-slate-500 mt-1">
-          The running sum Σ(G<sub>ij</sub> − 1/4) dives negative while the bound 3n floats above
+          The running sum Σ(G<sub>ij</sub> − 1/4) dives negative while the structural bound 3n floats above —
+          visualizing the margin from <code className="text-slate-400">GramOffDiag.lean</code>
         </p>
       </div>
 
@@ -156,7 +157,7 @@ export default function OffDiagMarginPage() {
 
           <div className="p-4 rounded-xl bg-[#12142a] border border-[#1e2148] text-xs text-slate-400 space-y-2">
             <p><strong className="text-emerald-400">Green curve:</strong> Actual off-diagonal excess (negative!)</p>
-            <p><strong className="text-red-400">Red dashed:</strong> Upper bound 3n from axiom</p>
+            <p><strong className="text-red-400">Red dashed:</strong> Upper bound 3n (structural, from GramOffDiag)</p>
             <p><strong className="text-amber-400">Shaded region:</strong> The enormous safety margin</p>
           </div>
 

@@ -64,17 +64,37 @@ theorem distance_converges_to_zero_implies_rh :
   linarith [h_dist, h_cGc, h_comm]
 
 -- ════════════════════════════════════════════════
+-- NYMAN-BEURLING HELPERS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: Existential L² form implies infimum form. -/
+theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
+    (v : Fin (N - 1) → ℝ)
+    (hv : ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) :
+    nbDistSq' N < ε :=
+  calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
+        realQuadForm (gramMatrix N) v := nbDistSq_le_test_vector N hN v
+    _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := (l2_error_eq_quad_error N hN v).symm
+    _ < ε := hv
+
+-- ════════════════════════════════════════════════
 -- PILLAR II: THE FORWARD DIRECTION (The Sieve Engine)
 -- ════════════════════════════════════════════════
 
-/-- **PILLAR II**: If RH is true, the true Möbius weights constructively
-    interfere to annihilate the off-diagonal mass and drive d² → 0.
-    This is the content of the Nyman-Beurling-Báez-Duarte theorem.
-    Currently an axiom; the forward direction requires proving that
-    the Möbius inversion weights kill the Θ(N²) covariance noise. -/
-axiom rh_implies_distance_converges_to_zero :
+/-- **PILLAR II** (PROVED): If RH is true, the Möbius weights
+    drive d² → 0. Formerly an axiom; now derived from
+    `nyman_beurling_forward_from_sieve` + `existential_implies_infimum`. -/
+theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε)
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) := by
+  intro hRH ε hε
+  obtain ⟨N₀, hN₀⟩ := nyman_beurling_forward_from_sieve hRH ε hε
+  use max N₀ 2
+  intro N hN
+  have hN₀_le : N₀ ≤ N := le_trans (le_max_left _ _) hN
+  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+  obtain ⟨v, hv⟩ := hN₀ N hN₀_le
+  exact existential_implies_infimum N hN2 ε v hv
 
 -- ════════════════════════════════════════════════
 -- LOGARITHMIC DIVERGENCE (STANDARD CALCULUS)
@@ -98,31 +118,17 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
       _ < ε * Real.log (N : ℝ) := by nlinarith
   linarith
 
--- ════════════════════════════════════════════════
--- NYMAN-BEURLING HELPERS
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: Existential L² form implies infimum form. -/
-theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
-    (v : Fin (N - 1) → ℝ)
-    (hv : ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) :
-    nbDistSq' N < ε :=
-  calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
-        realQuadForm (gramMatrix N) v := nbDistSq_le_test_vector N hN v
-    _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := (l2_error_eq_quad_error N hN v).symm
-    _ < ε := hv
 
 -- ════════════════════════════════════════════════
 -- THE NYMAN-BEURLING EQUIVALENCE (The Capstone)
 -- ════════════════════════════════════════════════
 
-/-- **THE NYMAN-BEURLING EQUIVALENCE**
+/-- **THE NYMAN-BEURLING EQUIVALENCE** (BOTH DIRECTIONS PROVED)
     The Riemann Hypothesis holds if and only if the Nyman-Beurling
     distance d²_N converges to zero.
 
-    - Forward: `rh_implies_distance_converges_to_zero` (axiom)
-    - Converse: `distance_converges_to_zero_implies_rh` (proved via Mellin Bridge)
--/
+    - Forward: `rh_implies_distance_converges_to_zero` (PROVED via Mertens bypass)
+    - Converse: `distance_converges_to_zero_implies_rh` (PROVED via Mellin Bridge) -/
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis :=
   ⟨distance_converges_to_zero_implies_rh, rh_implies_distance_converges_to_zero⟩

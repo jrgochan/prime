@@ -13,9 +13,10 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: "🏛️" },
   { href: "/proof-tree", label: "Proof Tree", icon: "🌳" },
+  { href: "/robin-lagarias", label: "Robin–Lagarias", icon: "🏆" },
   { href: "/gram-heatmap", label: "Gram Matrix", icon: "🔥" },
   { href: "/sawtooth", label: "Sawtooth Discovery", icon: "📐" },
-  { href: "/offdiag-margin", label: "18× Margin", icon: "📊" },
+  { href: "/offdiag-margin", label: "Off-Diagonal", icon: "📊" },
   { href: "/fractional-waves", label: "Fractional Waves", icon: "🌊" },
   { href: "/hyperplane-trap", label: "Hyperplane Trap", icon: "🕳️" },
   { href: "/cathedral-3d", label: "Cathedral 3D", icon: "⛪" },
@@ -31,10 +32,10 @@ export default function Shell({ children }: { children: ReactNode }) {
           <h1 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
             Cathedral
           </h1>
-          <p className="text-xs text-slate-500 mt-1">Proof Visualizer v1.0</p>
+          <p className="text-xs text-slate-500 mt-1">Proof Visualizer v2.0</p>
         </div>
 
-        <div className="flex-1 py-4 px-3 space-y-1">
+        <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
             return (
@@ -60,10 +61,19 @@ export default function Shell({ children }: { children: ReactNode }) {
           })}
         </div>
 
-        <div className="p-4 border-t border-[#1e2148]">
+        <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>2 axioms · 0 sorry</span>
+            <span>36 axioms · 0 sorry</span>
+          </div>
+          <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-emerald-500/60 rounded-full"
+              style={{ width: "60%" }}
+            />
+          </div>
+          <div className="text-[10px] text-slate-600">
+            60% proved (30/50 critical nodes)
           </div>
         </div>
       </nav>

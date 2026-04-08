@@ -295,7 +295,7 @@ theorem gram_eigenvalue_from_parity_bridge
   by_cases hN2 : N < 2
   · -- N < 2 contradicts 10 ≤ N
     omega
-  · push_neg at hN2
+  · push Not at hN2
     -- Step 1: ∀ v, v^T G v ≥ (1-K) · v^T G_block v (from gram_ge_blockDiag_scaled)
     -- Step 2: ∀ v, v^T G_block v ≥ c₀/logN · ‖v‖² (from block axiom)
     -- Step 3: ∀ v, v^T G v ≥ (1-K) · c₀/logN · ‖v‖² (chain)
@@ -390,7 +390,7 @@ theorem asymptotic_parity_bridge
   have hK_sq_lt_1 : K ^ 2 < 1 := by linarith
   have hK_le_1 : K ≤ 1 := by
     by_contra h_gt
-    push_neg at h_gt
+    push Not at h_gt
     have : K ^ 2 > 1 := by nlinarith
     linarith
   -- Step 2: Difference of squares trick
@@ -443,7 +443,7 @@ theorem asymptotic_parity_bridge
   -- Convert to eigenvalue bound
   by_cases hN2 : N < 2
   · omega
-  · push_neg at hN2
+  · push Not at hN2
     unfold lambdaMin
     simp only [show N ≥ 2 from hN2, dite_true]
     exact quadform_lower_implies_eigenvalue_lower

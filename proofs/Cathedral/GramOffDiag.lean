@@ -197,7 +197,7 @@ theorem gramEntry_le_third_all (j : ℕ) (hj : 1 ≤ j) :
   · exact gramEntry_le_third j hj3
   have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
   suffices hbound : ∀ M : ℕ, gramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) by
-    by_contra h_neg; push_neg at h_neg
+    by_contra h_neg; push Not at h_neg
     obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
     have hM := hbound N₀
     have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith

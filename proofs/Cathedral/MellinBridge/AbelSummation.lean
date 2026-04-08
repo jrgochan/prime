@@ -47,7 +47,7 @@ theorem abel_summation (a f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N) :
   obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hMN
   induction d with
   | zero =>
-    simp [Finset.Icc_self, Finset.Ico_self]
+    simp [Finset.Icc_self]
   | succ n ih =>
     have hle : M ≤ M + n := Nat.le_add_right M n
     -- Normalize: Lean sees M + (n + 1), we need M + n + 1

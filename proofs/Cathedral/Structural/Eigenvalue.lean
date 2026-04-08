@@ -79,7 +79,7 @@ theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
     · rw [Finset.sum_Ico_succ_top h]
       have := ih h
       linarith
-    · push_neg at h
+    · push Not at h
       have : N₀ = n + 1 := by omega
       subst this
       simp

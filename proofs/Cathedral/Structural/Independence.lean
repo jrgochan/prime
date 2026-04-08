@@ -56,7 +56,7 @@ private lemma nbLinComb_eq_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
   unfold nbLinComb; rw [Finset.sum_mul]; congr 1; ext ⟨i, hi⟩
   by_cases h : i + 1 ≤ n'
   · rw [fract_eq_sub h hn' hx_lo hx_hi]; field_simp
-  · push_neg at h; rw [hw_zero ⟨i, hi⟩ h]; simp
+  · push Not at h; rw [hw_zero ⟨i, hi⟩ h]; simp
 
 /-- Floor on shifted interval: On ((n-1)/n, n/(n+1)) with m+1 ≤ n, {m/x} = m/x - m. -/
 private theorem fract_eq_sub_shifted {n m : ℕ} (hm : m + 1 ≤ n) (hn : 2 ≤ n)
@@ -106,7 +106,7 @@ private theorem fract_eq_sub_jump {n : ℕ} (hn : 2 ≤ n)
       have := (div_lt_iff₀ hn_pos).mp hx_lo; linarith
     have h_prod : (↑n + 2) * (↑n - 1) < (↑n + 2) * (x * ↑n) :=
       mul_lt_mul_of_pos_left hxn (by linarith)
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     have h_mul_n : (↑n + 2) * x * ↑n ≤ ↑n * ↑n :=
       mul_le_mul_of_nonneg_right h (le_of_lt hn_pos)
     have h_assoc : (↑n + 2) * (x * ↑n) = (↑n + 2) * x * ↑n := by ring
@@ -131,13 +131,13 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     ∀ x, x ∈ Set.Ioo c d → nbLinComb N w x = -(w j₀) := by
   have hj₀_pos : 1 ≤ j₀.val := by
-    by_contra h; push_neg at h
+    by_contra h; push Not at h
     have hj₀_zero : j₀.val = 0 := by omega
     have hw_rest : ∀ i : Fin (N - 1), i ≠ j₀ → w i = 0 := by
       intro i hi
       by_cases hlt : j₀ < i
       · exact hw_above i hlt
-      · push_neg at hlt
+      · push Not at hlt
         exfalso; apply hi; exact Fin.ext (by omega)
     have : (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) = w j₀ * 1 := by
       have h_terms : ∀ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ) =
@@ -172,7 +172,7 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
       intro i
       by_cases hi_above : j₀ < i
       · simp only [hi_above, ↓reduceIte, hw_above i hi_above, zero_mul]
-      · push_neg at hi_above
+      · push Not at hi_above
         simp only [show ¬(j₀ < i) from not_lt.mpr hi_above, ↓reduceIte]
         by_cases hi_eq : i = j₀
         · subst hi_eq; simp only [↓reduceIte]
@@ -217,7 +217,7 @@ theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (
       · simp only [h1, ite_true]
         have : i ≠ j₀ := ne_of_gt h1
         simp [this]
-      · push_neg at h1
+      · push Not at h1
         simp only [show ¬(j₀ < i) from not_lt.mpr h1, ite_false]
         by_cases h2 : i = j₀
         · subst h2; simp only [ite_true, n']; ring
@@ -231,7 +231,7 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     (∀ x, x ∈ Set.Ioo c d → nbLinComb N w x ≠ 0) := by
   have hw_exists : ∃ i : Fin (N - 1), w i ≠ 0 := by
-    by_contra h; push_neg at h; exact hw (funext h)
+    by_contra h; push Not at h; exact hw (funext h)
   let S := Finset.filter (fun i : Fin (N - 1) => w i ≠ 0) Finset.univ
   have hS : S.Nonempty := by
     obtain ⟨i, hi⟩ := hw_exists
@@ -257,7 +257,7 @@ theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
     exact mul_ne_zero hA (by
       have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 1) by positivity]
       linarith [show 1 < 1/x from by rw [one_div]; exact one_lt_inv_iff₀.mpr ⟨hx_pos, hx_hi⟩])
-  · push_neg at hA
+  · push Not at hA
     obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA hwj₀
     exact ⟨c, d, hc, hcd, hd, fun x hx => by rw [heq x hx]; exact neg_ne_zero.mpr hwj₀⟩
 

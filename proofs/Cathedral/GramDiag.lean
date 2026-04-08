@@ -486,7 +486,7 @@ lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
       simp only [ε]; field_simp; ring
     linarith
   -- Now take the limit: for any ε > 0, choose M large enough.
-  by_contra h_neg; push_neg at h_neg
+  by_contra h_neg; push Not at h_neg
   obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
   have hM := hbound N₀
   have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith
@@ -513,7 +513,7 @@ theorem gram_entry_diag_upper' (j : ℕ) (hj : 1 ≤ j) :
       _ ≤ 1 / 2 := basis_integral_upper j hj
     interval_cases j <;> simp_all <;> norm_num <;> linarith
   · -- j ≥ 3: gramEntry j j ≤ 1/3 suffices since 1/j² ≥ 0
-    push_neg at hle
+    push Not at hle
     have : gramEntry j j ≤ 1 / 3 := gramEntry_le_third j (by omega)
     linarith [show (0:ℝ) ≤ 1 / (j:ℝ)^2 from by positivity]
 

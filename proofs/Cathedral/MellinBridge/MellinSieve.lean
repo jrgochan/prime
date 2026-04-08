@@ -1,6 +1,7 @@
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.HilbertSetup
 import Cathedral.MellinBridge.Separation
+import Cathedral.MellinBridge.MertensWeightBypass
 import Cathedral.BilinearSieve
 import Cathedral.MoebiusUncoupling
 import Cathedral.Assembly.QuadFormBridge
@@ -122,28 +123,14 @@ axiom mellin_plancherel_gram (N : ℕ) (hN : 2 ≤ N)
 def moebiusWeight (k : ℕ) : ℝ :=
   ArithmeticFunction.moebius k / (k : ℝ)
 
-/-- **Axiom (Analytic Number Theory)**: RH implies optimal weight existence.
-
-    Assuming RH, there exist coefficients v_N such that:
-    1. The L² distance d²_N ≤ C/log(N) for some universal C
-    2. The energy ‖v_N‖² grows at most polynomially in N
-
-    The construction uses the Perron formula with 1/ζ(s)·s analytic
-    in Re(s) > 1/2 (guaranteed by RH) to build the approximant.
-
-    MATHEMATICAL SOURCE:
-    - Báez-Duarte (2003): "A strengthening of the Nyman-Beurling criterion"
-    - The rate d²_N = O(1/log N) follows from the zero-free region. -/
-axiom rh_weight_construction :
-    RiemannHypothesis →
-    ∃ C : ℝ, 0 < C ∧
-    ∀ N : ℕ, 10 ≤ N →
-    ∃ v : Fin (N - 1) → ℝ,
-    -- The approximation error decays logarithmically
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≤ C / Real.log (N : ℝ) ∧
-    -- The energy is controlled (not relevant for convergence, but
-    -- important for the sieve bound connection)
-    dotProduct v v ≤ (N : ℝ) ^ 2
+-- **FORMERLY axiom rh_weight_construction**:
+-- Excised 2026-04-07. The monolithic weight construction axiom has been
+-- permanently replaced by `rh_weight_construction_derived` in
+-- MertensWeightBypass.lean, which decomposes it into two independently
+-- verifiable components: mertens_bound_from_rh (number theory) and
+-- abel_summation_l2_bound (real analysis).
+-- All consumers (nyman_beurling_forward_from_sieve, phase_3_chain)
+-- now invoke rh_weight_construction_derived directly.
 
 -- ════════════════════════════════════════════════
 -- PART III: RH ⟹ ASYMPTOTIC SIEVE BOUND
@@ -195,7 +182,7 @@ theorem nyman_beurling_forward_from_sieve :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
   intro hRH
-  obtain ⟨C, hC_pos, hweights⟩ := rh_weight_construction hRH
+  obtain ⟨C, hC_pos, hweights⟩ := rh_weight_construction_derived hRH
   intro ε hε
   -- Need N₀ such that C/log(N) < ε for all N ≥ N₀
   have hCε_pos : 0 < C / ε := div_pos hC_pos hε
@@ -250,7 +237,7 @@ theorem phase_3_chain :
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) := by
   intro hRH
   -- Step 1: Get optimal weights from RH (via the weight construction axiom)
-  obtain ⟨C, hC_pos, hweights⟩ := rh_weight_construction hRH
+  obtain ⟨C, hC_pos, hweights⟩ := rh_weight_construction_derived hRH
   refine ⟨C, hC_pos, 10, by norm_num, fun N hN => ?_⟩
   have hN2 : 2 ≤ N := by omega
   obtain ⟨v, hv_bound, _⟩ := hweights N hN
