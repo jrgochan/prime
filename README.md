@@ -130,9 +130,7 @@ Build PDFs: `cd paper && pdflatex cathedral.tex && pdflatex overview.tex`
 ## Methodology
 
 This project was built through a tripartite human-AI collaboration:
-a human mathematician providing architectural vision and numerical experiments,
-a mathematical theorist providing deep analytic intuition,
-and a code-level engineer providing Lean 4 compilation and structural optimization.
+a human computer scientist providing architectural vision and architectural design, Gemini Deep Think, acting as a mathematical theorist providing deep analytic intuition, and Claude Opus 4.6 (Thinking) acting as a code-level engineer providing Lean 4 compilation and structural optimization.
 
 ## License
 
