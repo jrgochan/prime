@@ -66,5 +66,3 @@ I built this map for the mathematical community. To the formalization experts: t
 ---
 
 *— Jason Robert Gochanour*
-
-*Los Alamos, NM*
