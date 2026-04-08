@@ -94,3 +94,6 @@ proofs/.tower_cache.json
 visualizer/node_modules/
 visualizer/.next/
 experiments/spectral/lambda-eff/target/
+
+# Cathedral dump splits (context-passing artifacts)
+cathedral-parts/
