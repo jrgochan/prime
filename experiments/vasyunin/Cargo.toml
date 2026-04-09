@@ -1,0 +1,9 @@
+[package]
+name = "vasyunin"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rug = { version = "1", features = ["float"] }
+nalgebra = "0.33"
+rayon = "1"
