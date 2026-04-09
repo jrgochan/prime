@@ -17,6 +17,8 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
     `Cathedral.Defs,
+    -- Linear algebra (basis-independent)
+    `Cathedral.LinearAlgebra.ShermanMorrison,
     `Cathedral.Structural.Eigenvalue, `Cathedral.Structural.NbLinComb,
     `Cathedral.Structural.Independence, `Cathedral.Structural.L2Tools,
     `Cathedral.Structural, `Cathedral.GramBounds,
@@ -34,6 +36,10 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.AbelSummation,
     `Cathedral.MellinBridge.MertensIntegral,
     `Cathedral.MellinBridge,
+    -- Báez-Duarte (true basis, θ ≤ 1)
+    `Cathedral.MellinBridge.BaezDuarte,
+    -- Vasyunin (discrete formula, no integrals)
+    `Cathedral.MellinBridge.Vasyunin,
     -- Assembly (crown)
     `Cathedral.Assembly.QuadFormBridge,
     `Cathedral.Assembly.MainChain, `Cathedral.Assembly,
