@@ -17,12 +17,11 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
     `Cathedral.Defs,
-    `Cathedral.Quantitative,
-    -- Linear algebra (basis-independent, zero sorry)
+    -- Linear algebra (abstract, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
-    -- Mellin Bridge: Báez-Duarte + Vasyunin (the true Cathedral)
+    `Cathedral.LinearAlgebra.Variational,
+    -- Mellin Bridge: Nyman-Beurling + Vasyunin (the active proof chain)
     `Cathedral.MellinBridge.NymanBeurling,
-    `Cathedral.MellinBridge.BaezDuarte,
     `Cathedral.MellinBridge.Vasyunin,
     -- Robin's Inequality (discrete arithmetic front)
     `Cathedral.Robin.Defs,

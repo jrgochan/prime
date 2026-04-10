@@ -29,6 +29,7 @@ import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Cathedral.LinearAlgebra.ShermanMorrison
+import Cathedral.LinearAlgebra.Variational
 
 noncomputable section
 open Real Matrix Finset
@@ -260,22 +261,66 @@ noncomputable def vasyuninQuadForm (N : ℕ) : ℝ :=
     ((vasyuninCovMatrix N)⁻¹.mulVec (vasyuninMeanVec N))
 
 -- ════════════════════════════════════════════════
--- PART X: THE VARIATIONAL PRINCIPLE
+-- PART X: THE VARIATIONAL PRINCIPLE (NOW A THEOREM)
 -- ════════════════════════════════════════════════
 
-/-- **The Dual Variational Principle.**
-    For any test vector v with vᵀCv > 0:
-      (bᵀv)² / (vᵀCv) ≤ bᵀ C⁻¹ b
+/-- The covariance matrix is symmetric (Hermitian over ℝ).
+    Follows from vasyuninGramMatrix_symmetric and bbᵀ being symmetric. -/
+theorem vasyuninCovMatrix_hermitian (N : ℕ) :
+    (vasyuninCovMatrix N).IsHermitian := by
+  unfold vasyuninCovMatrix Matrix.IsHermitian
+  rw [Matrix.conjTranspose_sub]
+  congr 1
+  · exact vasyuninGramMatrix_symmetric N
+  · -- bbᵀ is symmetric: (vecMulVec b b)ᵀ = vecMulVec b b
+    funext i j
+    simp [Matrix.conjTranspose_apply, star_trivial, vecMulVec, mul_comm]
 
-    This is a consequence of the Cauchy-Schwarz inequality
-    in the inner product ⟨u, w⟩_C = uᵀCw.
-    Equality holds when v = C⁻¹b.
+/-- **The covariance matrix is positive definite for N ≥ 3.**
+    This is the KEY STRUCTURAL AXIOM.
 
-    This is the keystone of the Cathedral:
-    it lets us lower-bound X_N without inverting C. -/
-axiom variational_lower_bound (N : ℕ) (v : Fin N → ℝ)
+    C = G - bbᵀ is positive definite because:
+    - G is the Gram matrix of {f_1,...,f_N} in L²(0,1), hence PSD
+    - The extended (N+1)×(N+1) Gram matrix M of {1, f_1,...,f_N}
+      is also PSD (Gram matrices are always PSD)
+    - By the Schur complement theorem:
+      C = G - b·1⁻¹·bᵀ = G - bbᵀ is the Schur complement of M
+    - Since M is PSD and the 1×1 block is positive, C is PSD
+    - Since the basis functions are linearly independent, G is
+      positive DEFINITE, and the strict inequality carries through -/
+axiom vasyuninCovMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
+    (vasyuninCovMatrix N).PosDef
+
+/-- The covariance matrix is positive semidefinite (derived from PosDef). -/
+theorem vasyuninCovMatrix_posSemidef (N : ℕ) (hN : N ≥ 3) :
+    (vasyuninCovMatrix N).PosSemidef :=
+  (vasyuninCovMatrix_posDef N hN).posSemidef
+
+/-- The covariance matrix has invertible determinant (derived from PosDef). -/
+theorem vasyuninCovMatrix_isUnit_det (N : ℕ) (hN : N ≥ 3) :
+    IsUnit (vasyuninCovMatrix N).det :=
+  (vasyuninCovMatrix N).isUnit_iff_isUnit_det.mp (vasyuninCovMatrix_posDef N hN).isUnit
+
+/-- **The Dual Variational Principle — NOW A THEOREM.**
+    Derived from abstract Cauchy-Schwarz (Variational.lean). -/
+theorem variational_lower_bound (N : ℕ) (hN : N ≥ 3)
+    (v : Fin N → ℝ)
     (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) :
-    rayleighQuotient N v ≤ vasyuninQuadForm N
+    rayleighQuotient N v ≤ vasyuninQuadForm N := by
+  unfold rayleighQuotient vasyuninQuadForm
+  have h_rq : Cathedral.Variational.realQuadForm (vasyuninCovMatrix N) v =
+      dotProduct v ((vasyuninCovMatrix N).mulVec v) := rfl
+  have h_cs := Cathedral.Variational.cauchy_schwarz_quadform
+    (vasyuninCovMatrix N) (vasyuninMeanVec N) v
+    (vasyuninCovMatrix_hermitian N) (vasyuninCovMatrix_posSemidef N hN)
+    (vasyuninCovMatrix_isUnit_det N hN) (h_rq ▸ hv)
+  rw [h_rq] at h_cs
+  have h_comm := mul_comm (dotProduct v ((vasyuninCovMatrix N).mulVec v))
+    (dotProduct (vasyuninMeanVec N) ((vasyuninCovMatrix N)⁻¹.mulVec (vasyuninMeanVec N)))
+  rw [h_comm] at h_cs
+  exact div_le_of_le_mul₀ (le_of_lt hv)
+    (by nlinarith [h_cs, sq_nonneg (dotProduct (vasyuninMeanVec N) v)])
+    h_cs
 
 -- ════════════════════════════════════════════════
 -- PART XI: THE FINAL AXIOM (CONSTRUCTIVE)
@@ -308,14 +353,29 @@ axiom log_cutoff_witness_bound :
     ∃ c : ℝ, c > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       c * Real.log (N : ℝ) ≤ rayleighQuotient N (logCutoffWitness N)
 
+/-- The log cutoff witness is nonzero for N ≥ 3.
+    The first component is v₁ = -μ(1)·(1 - ln(1)/ln(N)) = -1·1 = -1 ≠ 0. -/
+theorem logCutoffWitness_ne_zero (N : ℕ) (hN : N ≥ 3) :
+    logCutoffWitness N ≠ 0 := by
+  intro h_eq
+  have h0 : logCutoffWitness N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
+  simp only [logCutoffWitness, moebiusFn] at h0
+  -- h0 : -(↑(moebius 1) : ℝ) * (1 - log 1 / log ↑N) = 0
+  rw [ArithmeticFunction.moebius_apply_one] at h0
+  simp [Real.log_one] at h0
+
 /-- The log cutoff witness has strictly positive covariance vᵀCv > 0.
-    This follows from the covariance matrix being positive definite on
-    the subspace orthogonal to b, and the logCutoffWitness having
-    nontrivial projection onto that subspace (since μ is not identically zero).
-    Equivalently: the witness bound axiom gives Q ≥ c·ln(N) > 0,
-    and Q = (bᵀv)²/(vᵀCv), so vᵀCv > 0. -/
-axiom log_cutoff_witness_pos (N : ℕ) (hN : N ≥ 3) :
-    dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) > 0
+    NOW A THEOREM: C is PSD with invertible det and v ≠ 0 → vᵀCv > 0.
+    Uses the abstract posSemidef_pos_of_ne_zero from Variational.lean. -/
+theorem log_cutoff_witness_pos (N : ℕ) (hN : N ≥ 3) :
+    dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) > 0 :=
+  Cathedral.Variational.posSemidef_pos_of_ne_zero
+    (vasyuninCovMatrix N)
+    (vasyuninCovMatrix_hermitian N)
+    (vasyuninCovMatrix_posSemidef N hN)
+    (vasyuninCovMatrix_isUnit_det N hN)
+    (logCutoffWitness N)
+    (logCutoffWitness_ne_zero N hN)
 
 -- ════════════════════════════════════════════════
 -- PART XII: THE CHAIN TO RH
@@ -336,7 +396,7 @@ theorem quadForm_diverges :
   -- Step 2: Positivity gives vᵀCv > 0
   have hpos := log_cutoff_witness_pos N hN3
   -- Step 3: The variational principle gives Q(v) ≤ X_N
-  have hvar := variational_lower_bound N (logCutoffWitness N) hpos
+  have hvar := variational_lower_bound N hN3 (logCutoffWitness N) hpos
   -- Step 4: Chain: c·ln(N) ≤ Q(v) ≤ X_N
   exact le_trans hQ hvar
 
