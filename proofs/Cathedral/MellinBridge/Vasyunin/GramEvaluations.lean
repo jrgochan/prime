@@ -306,4 +306,47 @@ theorem vasyuninGramEntry_two_three :
   rw [show (3 : ℝ) / (2 : ℝ) = 3 / 2 by norm_num]
   ring
 
+-- ════════════════════════════════════════════════
+-- OFF-DIAGONAL POSITIVITY
+-- ════════════════════════════════════════════════
+
+/-- √3 < 2: since 3 < 4 = 2². -/
+theorem sqrt_three_lt_two : Real.sqrt 3 < 2 := by
+  have : Real.sqrt 3 < Real.sqrt 4 := Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+  rwa [show Real.sqrt 4 = 2 from by
+    rw [show (4:ℝ) = 2^2 by norm_num, Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 2)]] at this
+
+/-- **G(1,3) > 0**: The off-diagonal entry is strictly positive.
+    Uses π > 3, √3 < 2 to bound π/(18√3) > 1/12, then
+    combines with ln(π) > 11·ln(2)/7 from our 3⁷ ≥ 2¹¹ bound. -/
+theorem vasyuninGramEntry_one_three_pos : vasyuninGramEntry 1 3 > 0 := by
+  rw [vasyuninGramEntry_one_three]
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
+    Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
+  rw [h_log2pi]
+  set l := Real.log 2
+  set p := Real.log Real.pi
+  set g := Real.eulerMascheroniConstant
+  set s := Real.sqrt 3
+  -- Bounds
+  have hl : (0.6931471803 : ℝ) < l := Real.log_two_gt_d9
+  have hg_hi : g < 2/3 := Real.eulerMascheroniConstant_lt_two_thirds
+  have h_logpi : p > 11 * l / 7 := by
+    calc p > Real.log 3 :=
+              Real.log_lt_log (by norm_num : (0:ℝ) < 3) pi_gt_three
+         _ ≥ 11 * l / 7 := log_three_ge_11_log_two_div_7
+  -- ln(3) < 2·ln(2) (since 3 < 4 = 2²)
+  have h_log3 : Real.log 3 < 2 * l := by
+    rw [show 2 * l = Real.log (2 ^ 2) from by rw [Real.log_pow]; ring]
+    exact Real.log_lt_log (by norm_num : (0:ℝ) < 3) (by norm_num)
+  -- π/(18√3) > 1/12 (since π > 3, √3 < 2)
+  have hs_pos : (0 : ℝ) < s := Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)
+  have hs_lt : s < 2 := sqrt_three_lt_two
+  have h_pi_term : Real.pi / (18 * s) > 1 / 12 := by
+    have h18s_pos : (0:ℝ) < 18 * s := by positivity
+    rw [gt_iff_lt, div_lt_div_iff₀ (by norm_num : (0:ℝ) < 12) h18s_pos]
+    nlinarith [pi_gt_three]
+  -- Now close: the positive terms overcome the negative ones
+  nlinarith [h_log3, h_logpi, h_pi_term]
+
 end Cathedral.Vasyunin
