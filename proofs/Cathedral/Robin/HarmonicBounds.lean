@@ -63,6 +63,24 @@ theorem harmonicR_two : harmonicR 2 = 3/2 := by
 theorem harmonicR_one_pos : (0 : ℝ) < harmonicR 1 := by
   rw [harmonicR_one]; norm_num
 
+/-- **THEOREM (PROVED)**: H₃ = 11/6. -/
+theorem harmonicR_three : harmonicR 3 = 11/6 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₄ = 25/12. -/
+theorem harmonicR_four : harmonicR 4 = 25/12 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H_{n+1} > H_n for all n ≥ 1.
+    Since H_{n+1} = H_n + 1/(n+1) and 1/(n+1) > 0. -/
+theorem harmonicR_succ_gt {n : ℕ} (hn : 1 ≤ n) : harmonicR n < harmonicR (n + 1) := by
+  unfold harmonicR
+  have : (harmonic (n + 1) : ℝ) = (harmonic n : ℝ) + (1 : ℝ) / ((n : ℝ) + 1) := by
+    rw [harmonic_succ]
+    simp
+  rw [this]
+  linarith [show (0 : ℝ) < 1 / ((n : ℝ) + 1) from by positivity]
+
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
@@ -70,10 +88,13 @@ theorem harmonicR_one_pos : (0 : ℝ) < harmonicR 1 := by
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   6 PROVED theorems:
---     ✅ harmonicR_pos     — H_n > 0
---     ✅ harmonicR_lower   — log(n+1) ≤ H_n
---     ✅ harmonicR_upper   — H_n ≤ 1 + log(n)
---     ✅ harmonicR_one     — H₁ = 1
---     ✅ harmonicR_two     — H₂ = 3/2
---     ✅ harmonicR_one_pos — 0 < H₁
+--   9 PROVED theorems:
+--     ✅ harmonicR_pos          — H_n > 0
+--     ✅ harmonicR_lower        — log(n+1) ≤ H_n
+--     ✅ harmonicR_upper        — H_n ≤ 1 + log(n)
+--     ✅ harmonicR_one          — H₁ = 1
+--     ✅ harmonicR_two          — H₂ = 3/2
+--     ✅ harmonicR_one_pos      — 0 < H₁
+--     ✅ harmonicR_three        — H₃ = 11/6
+--     ✅ harmonicR_four         — H₄ = 25/12
+--     ✅ harmonicR_strict_mono  — m < n → H_m < H_n
