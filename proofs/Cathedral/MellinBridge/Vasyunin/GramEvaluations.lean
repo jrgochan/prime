@@ -236,4 +236,40 @@ theorem vasyuninSum_three_two_val :
   rw [fract_two_thirds, fract_four_thirds, cot_pi_div_three, cot_two_pi_div_three]
   ring
 
+-- ════════════════════════════════════════════════
+-- G(1,3) EXACT FORM
+-- ════════════════════════════════════════════════
+
+/-- **G(1,3) exact form**: Since gcd(1,3)=1, j'=1, k'=3, and
+    V(1,3) = 0, V(3,1) = -1/(3√3), we get:
+    G(1,3) = 2A/3 - ln(3)/3 + π/(18√3) - 1/3
+    where A = ln(2π) - γ. -/
+theorem vasyuninGramEntry_one_three :
+    vasyuninGramEntry 1 3 =
+    2 * (Real.log (2 * Real.pi) - γ) / 3 -
+    Real.log 3 / 3 +
+    Real.pi / (18 * Real.sqrt 3) - 1 / 3 := by
+  unfold vasyuninGramEntry
+  simp only [show 1 ≠ 3 from by omega, ↓reduceIte]
+  simp only [show Nat.gcd 1 3 = 1 from by norm_num,
+             show 1 / 1 = 1 from by norm_num,
+             show 3 / 1 = 3 from by norm_num]
+  rw [vasyuninSum_one, vasyuninSum_three_one_val]
+  push_cast
+  rw [show (3 : ℝ) / (1 : ℝ) = 3 by norm_num]
+  rw [show Real.log (3 : ℝ) = Real.log 3 from rfl]
+  ring
+
+/-- **G(3,3) exact form**: The third diagonal entry.
+    G(3,3) = (ln(2π) - γ)/3 - 1/9. -/
+theorem vasyuninGramEntry_three_three :
+    vasyuninGramEntry 3 3 =
+    (Real.log (2 * Real.pi) - γ) / 3 - 1 / 9 := by
+  rw [vasyuninGramEntry_diag]; push_cast; ring
+
+/-- **Third mean entry**: b₃ = (ln(3) + 1 - γ)/3. -/
+theorem vasyuninMeanEntry_three :
+    vasyuninMeanEntry 3 = (Real.log 3 + 1 - γ) / 3 := by
+  unfold vasyuninMeanEntry; norm_num
+
 end Cathedral.Vasyunin
