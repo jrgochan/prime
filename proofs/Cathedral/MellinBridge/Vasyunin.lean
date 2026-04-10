@@ -442,6 +442,25 @@ theorem vasyuninCovMatrix_isUnit_det (N : ℕ) (hN : N ≥ 3) :
     IsUnit (vasyuninCovMatrix N).det :=
   (vasyuninCovMatrix N).isUnit_iff_isUnit_det.mp (vasyuninCovMatrix_posDef N hN).isUnit
 
+/-- **AXIOM DECOMPOSITION**: The PosDef axiom follows from two simpler conditions.
+
+    If the Gram matrix G is positive definite (true for Gram matrices of
+    linearly independent L² functions) AND bᵀG⁻¹b < 1 (equivalent to
+    d²_N > 0 via Sherman-Morrison), then C = G - bbᵀ is PosDef.
+
+    This shows the path to eliminating vasyuninCovMatrix_posDef:
+    1. Prove G is PD (Gram matrix of linearly independent functions)
+    2. Prove bᵀG⁻¹b < 1 (NB distance is positive, weaker than RH)
+    Together these imply C is PD without the axiom. -/
+theorem vasyuninCovMatrix_posDef_from_gram (N : ℕ)
+    (hG : (vasyuninGramMatrix N).PosDef)
+    (h_schur : dotProduct (vasyuninMeanVec N)
+      ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)) < 1) :
+    (vasyuninCovMatrix N).PosDef := by
+  unfold vasyuninCovMatrix
+  exact Cathedral.Variational.schur_complement_posDef
+    (vasyuninGramMatrix N) (vasyuninMeanVec N) hG h_schur
+
 /-- **The Dual Variational Principle — NOW A THEOREM.**
     Derived from abstract Cauchy-Schwarz (Variational.lean). -/
 theorem variational_lower_bound (N : ℕ) (hN : N ≥ 3)
