@@ -23,6 +23,9 @@
 import Mathlib.Data.Real.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.Analysis.Complex.ExponentialBounds
+import Mathlib.Analysis.Real.Pi.Bounds
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 import Mathlib.LinearAlgebra.Matrix.DotProduct
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
@@ -184,6 +187,66 @@ theorem vasyuninGram_eq_cov_plus_mean (N : ℕ) :
     vasyuninCovMatrix N + vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N) := by
   unfold vasyuninCovMatrix
   simp [sub_add_cancel]
+
+-- ════════════════════════════════════════════════
+-- PART VI-B: GRAM DIAGONAL POSITIVITY
+-- ════════════════════════════════════════════════
+
+/-- Key constant bound: ln(2π) - γ > 1.
+    Proof chain: ln(2π) = ln(2) + ln(π) > 0.693 + 1 = 1.693,
+    and γ < 2/3 = 0.667, so ln(2π) - γ > 1.026 > 1.
+
+    Uses Mathlib facts:
+    - log_two_gt_d9 : 0.6931471803 < log 2
+    - exp_one_lt_three : exp 1 < 3  (gives log 3 > 1)
+    - pi_gt_three : 3 < π  (gives log π > log 3 > 1)
+    - eulerMascheroniConstant_lt_two_thirds : γ < 2/3 -/
+theorem log_two_pi_sub_euler_gt_one :
+    Real.log (2 * Real.pi) - Real.eulerMascheroniConstant > 1 := by
+  have h_log2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have h_e_lt_3 : Real.exp 1 < 3 := Real.exp_one_lt_three
+  have h_pi_gt : (3 : ℝ) < Real.pi := pi_gt_three
+  have h_gamma : Real.eulerMascheroniConstant < 2 / 3 :=
+    Real.eulerMascheroniConstant_lt_two_thirds
+  -- log 3 > 1 (from exp 1 < 3)
+  have h_log3 : 1 < Real.log 3 := by
+    rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+    exact Real.log_lt_log (Real.exp_pos 1) h_e_lt_3
+  -- log π > 1 (from π > 3 and log 3 > 1)
+  have h_logpi : 1 < Real.log Real.pi := by
+    calc 1 < Real.log 3 := h_log3
+         _ < Real.log Real.pi := by
+           exact Real.log_lt_log (by norm_num : (0 : ℝ) < 3) h_pi_gt
+  -- log(2π) = log 2 + log π > 0.693 + 1 = 1.693
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi := by
+    rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (ne_of_gt Real.pi_pos)]
+  rw [h_log2pi]
+  -- 0.693 + 1 - 2/3 > 1
+  linarith
+
+/-- **Gram Diagonal Positivity**: G(k,k) > 0 for all k ≥ 1.
+    Direct from the formula G(k,k) = (ln(2π) - γ)/k - 1/k²
+    and the fact that ln(2π) - γ > 1 > 1/k for k ≥ 1. -/
+theorem vasyuninGramEntry_diag_pos (k : ℕ) (hk : k ≥ 1) :
+    vasyuninGramEntry k k > 0 := by
+  unfold vasyuninGramEntry
+  simp only [ite_true]
+  -- Goal: (log(2π) - γ) / k - 1 / k² > 0
+  -- i.e., (log(2π) - γ) * k - 1 > 0 (after multiplying by k²)
+  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
+  have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
+  have hk_sq_pos : (k : ℝ) ^ 2 > 0 := pow_pos hk_pos 2
+  have h_const := log_two_pi_sub_euler_gt_one
+  -- G(k,k) = (ln2π - γ)/k - 1/k²  = ((ln2π - γ)*k - 1) / k²
+  rw [show (log (2 * Real.pi) - γ) / (k : ℝ) -
+      1 / (k : ℝ) ^ 2 =
+      ((log (2 * Real.pi) - γ) * k - 1) /
+      (k : ℝ) ^ 2 by field_simp]
+  apply div_pos _ hk_sq_pos
+  -- Need: (ln2π - γ) * k - 1 > 0, i.e., (ln2π - γ) * k > 1
+  -- Since ln2π - γ > 1 and k ≥ 1: (ln2π - γ) * k ≥ ln2π - γ > 1
+  have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+  nlinarith [mul_le_mul_of_nonneg_left hk1 (by linarith : (0 : ℝ) ≤ log (2 * Real.pi) - γ)]
 
 -- ════════════════════════════════════════════════
 -- PART VII: THE MÖBIUS FUNCTION
