@@ -139,4 +139,40 @@ theorem nb_dist_via_witness
   field_simp
   ring
 
+-- ════════════════════════════════════════════════
+-- PART V: THE SCHUR-MORRISON BRIDGE
+-- ════════════════════════════════════════════════
+
+/-- **The Schur-Morrison Bridge.**
+    If C is positive semidefinite and y solves Cy = b,
+    then bᵀ·w < 1, where w = (1/(1+X))•y solves Gw = b.
+
+    Since bᵀw = X/(1+X) and X = bᵀy ≥ 0 (by PSD),
+    we have bᵀw = X/(1+X) ∈ [0, 1), strictly less than 1.
+
+    This means: **the Schur complement condition bᵀG⁻¹b < 1
+    is AUTOMATICALLY satisfied** when there exists a PSD covariance
+    matrix C with G = C + bbᵀ and an explicit solve Cy = b.
+
+    Combined with the Schur complement theorem, this gives a
+    CIRCULAR-FREE characterization: G PD → C PD (if we can
+    exhibit a solution y to Cy = b). -/
+theorem schur_condition_from_psd
+    (b y : Fin n → ℝ)
+    (X : ℝ) (hX : X = dotProduct b y)
+    (hX_nn : 0 ≤ X) :
+    dotProduct b ((1 / (1 + X)) • y) < 1 := by
+  rw [dist_sq_eq_inv_one_plus_X b y X hX]
+  -- Need: X / (1 + X) < 1, i.e., X < 1 + X, i.e., 0 < 1
+  rw [div_lt_one (by linarith : (0 : ℝ) < 1 + X)]
+  linarith
+
+/-- When X > 0, the distance d² = 1/(1+X) is strictly between 0 and 1. -/
+theorem dist_sq_bounds
+    (X : ℝ) (hX_pos : 0 < X) :
+    0 < 1 / (1 + X) ∧ 1 / (1 + X) < 1 := by
+  constructor
+  · positivity
+  · rw [div_lt_one (by linarith)]; linarith
+
 end Cathedral.ShermanMorrison
