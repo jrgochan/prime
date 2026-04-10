@@ -17,42 +17,13 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
     `Cathedral.Defs,
-    -- Linear algebra (basis-independent)
+    `Cathedral.Quantitative,
+    -- Linear algebra (basis-independent, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
-    `Cathedral.Structural.Eigenvalue, `Cathedral.Structural.NbLinComb,
-    `Cathedral.Structural.Independence, `Cathedral.Structural.L2Tools,
-    `Cathedral.Structural, `Cathedral.GramBounds,
-    `Cathedral.GramDiag, `Cathedral.GramOffDiag,
-    `Cathedral.FractIntegral,
-    -- Mellin Bridge (THE critical path)
-    `Cathedral.MellinBridge.Basic,
-    `Cathedral.MellinBridge.FloorMellin, `Cathedral.MellinBridge.FloorDivMellin,
-    `Cathedral.MellinBridge.Separation,
-    `Cathedral.MellinBridge.HilbertSetup,
-    `Cathedral.MellinBridge.OrthogonalWitness,
-    `Cathedral.MellinBridge.MellinSieve,
-    `Cathedral.MellinBridge.AutocorrelationBypass,
-    `Cathedral.MellinBridge.MertensWeightBypass,
-    `Cathedral.MellinBridge.AbelSummation,
-    `Cathedral.MellinBridge.MertensIntegral,
-    `Cathedral.MellinBridge,
-    -- Báez-Duarte (true basis, θ ≤ 1)
+    -- Mellin Bridge: Báez-Duarte + Vasyunin (the true Cathedral)
+    `Cathedral.MellinBridge.NymanBeurling,
     `Cathedral.MellinBridge.BaezDuarte,
-    -- Vasyunin (discrete formula, no integrals)
     `Cathedral.MellinBridge.Vasyunin,
-    -- Assembly (crown)
-    `Cathedral.Assembly.QuadFormBridge,
-    `Cathedral.Assembly.MainChain, `Cathedral.Assembly,
-    -- Spectral path (unconditional results, parallel exploration)
-    `Cathedral.Spectral.PTSymmetry, `Cathedral.Spectral.RayleighBridge,
-    `Cathedral.Spectral.OctonionicPartition, `Cathedral.Spectral.ClassRestriction,
-    `Cathedral.Spectral.FiniteDimReduction,
-    `Cathedral.Spectral.ConstantVectorBound,
-    -- Sieve infrastructure (for forward direction)
-    `Cathedral.ParitySchur, `Cathedral.VasyuninExpansion,
-    `Cathedral.BilinearSieve, `Cathedral.MoebiusUncoupling,
-    `Cathedral.ParityBridge,
-    `Cathedral.Quantitative, `Cathedral.AlignmentDecay,
     -- Robin's Inequality (discrete arithmetic front)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,

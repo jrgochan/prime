@@ -237,7 +237,7 @@ fn main() {
     println!("  Three vectors: Raw Möbius, Linear cutoff, Log cutoff");
     println!("{}", "═".repeat(78));
 
-    let sizes = vec![50, 100, 200, 500, 1000, 2000, 5000, 10000];
+    let sizes = vec![1000, 2000, 5000, 10000, 20000, 50000];
     let max_n = *sizes.last().unwrap();
     let mu = mobius_sieve(max_n);
     let cache: VCache = Mutex::new(HashMap::new());
