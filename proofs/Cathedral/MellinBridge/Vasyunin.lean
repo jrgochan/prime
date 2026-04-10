@@ -702,5 +702,28 @@ theorem vasyuninGramMatrix_trace (N : ℕ) :
   ext i
   exact vasyuninGramMatrix_diag N i
 
+/-- **G(1,2) exact form**: Since gcd(1,2)=1, j'=1, k'=2, and
+    V(1,2) = V(2,1) = 0 (both vanish), we get:
+    G(1,2) = 3A/4 - ln(2)/4 - 1/2
+    where A = ln(2π) - γ. -/
+theorem vasyuninGramEntry_one_two :
+    vasyuninGramEntry 1 2 =
+    3 * (Real.log (2 * Real.pi) - γ) / 4 -
+    Real.log 2 / 4 - 1 / 2 := by
+  unfold vasyuninGramEntry
+  simp only [show 1 ≠ 2 from by omega, ↓reduceIte]
+  -- gcd(1,2) = 1, 1/1 = 1, 2/1 = 2
+  simp only [show Nat.gcd 1 2 = 1 from by norm_num,
+             show 1 / 1 = 1 from by norm_num,
+             show 2 / 1 = 2 from by norm_num]
+  -- V(1,2) = 0, V(2,1) = 0
+  rw [vasyuninSum_one, vasyuninSum_two_one]
+  -- Normalize Nat casts and simplify
+  push_cast
+  rw [show (2 : ℝ) / (1 : ℝ) = 2 by norm_num]
+  rw [show Real.log (2 : ℝ) = Real.log 2 from rfl]
+  ring
+
 end Cathedral.Vasyunin
+
 
