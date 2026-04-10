@@ -751,7 +751,9 @@ theorem vasyuninGramEntry_one_two_pos : vasyuninGramEntry 1 2 > 0 := by
     Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
   rw [h_log2pi]
   linarith
+-- NOTE: det(G₂) > 0 requires tighter numerical bounds on ln(2), ln(π), γ.
+-- The margin is only approx 0.025, needing 4+ decimal precision.
+-- This will be proved in a dedicated SmallCases.lean after refactoring.
 
 end Cathedral.Vasyunin
-
 
