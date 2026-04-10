@@ -272,4 +272,38 @@ theorem vasyuninMeanEntry_three :
     vasyuninMeanEntry 3 = (Real.log 3 + 1 - γ) / 3 := by
   unfold vasyuninMeanEntry; norm_num
 
+/-- **V(2,b) = 0 for all b**: The sum has one term {b/2}·cot(π/2).
+    Since cot(π/2) = cos(π/2)/sin(π/2) = 0/1 = 0, the term vanishes.
+    This generalizes V(2,1) = 0. -/
+theorem vasyuninSum_two (b : ℕ) : vasyuninSum 2 b = 0 := by
+  unfold vasyuninSum
+  simp only [show ¬(2 ≤ 1) from by omega, ↓reduceIte]
+  have h_ico : Ico 1 2 = ({1} : Finset ℕ) := by ext x; simp
+  rw [h_ico, Finset.sum_singleton]
+  unfold cot
+  have h_cos : Real.cos (Real.pi * (1 : ℕ) / (2 : ℕ)) = 0 := by
+    rw [show (Real.pi * (1 : ℕ) / (2 : ℕ) : ℝ) = Real.pi / 2 by push_cast; ring]
+    exact Real.cos_pi_div_two
+  rw [h_cos]; simp
+
+/-- **G(2,3) exact form**: Since gcd(2,3)=1, j'=2, k'=3,
+    V(2,3) = 0, V(3,2) = 1/(3√3), we get:
+    G(2,3) = 5A/12 - ln(3/2)/12 - π/(36√3) - 1/6
+    where A = ln(2π) - γ. -/
+theorem vasyuninGramEntry_two_three :
+    vasyuninGramEntry 2 3 =
+    5 * (Real.log (2 * Real.pi) - γ) / 12 -
+    Real.log (3 / 2) / 12 -
+    Real.pi / (36 * Real.sqrt 3) -
+    1 / 6 := by
+  unfold vasyuninGramEntry
+  simp only [show 2 ≠ 3 from by omega, ↓reduceIte]
+  simp only [show Nat.gcd 2 3 = 1 from by norm_num,
+             show 2 / 1 = 2 from by norm_num,
+             show 3 / 1 = 3 from by norm_num]
+  rw [vasyuninSum_two 3, vasyuninSum_three_two_val]
+  push_cast
+  rw [show (3 : ℝ) / (2 : ℝ) = 3 / 2 by norm_num]
+  ring
+
 end Cathedral.Vasyunin
