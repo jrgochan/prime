@@ -377,6 +377,26 @@ noncomputable def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
 theorem moebiusFn_one : moebiusFn 1 = 1 := by
   unfold moebiusFn; exact ArithmeticFunction.moebius_apply_one
 
+/-- μ(2) = -1 (2 is prime). -/
+theorem moebiusFn_two : moebiusFn 2 = -1 := by
+  unfold moebiusFn; native_decide
+
+/-- μ(3) = -1 (3 is prime). -/
+theorem moebiusFn_three : moebiusFn 3 = -1 := by
+  unfold moebiusFn; native_decide
+
+/-- μ(4) = 0 (4 = 2², has squared factor). -/
+theorem moebiusFn_four : moebiusFn 4 = 0 := by
+  unfold moebiusFn; native_decide
+
+/-- μ(6) = 1 (6 = 2·3, squarefree with 2 prime factors). -/
+theorem moebiusFn_six : moebiusFn 6 = 1 := by
+  unfold moebiusFn; native_decide
+
+/-- μ(30) = -1 (30 = 2·3·5, squarefree with 3 prime factors). -/
+theorem moebiusFn_thirty : moebiusFn 30 = -1 := by
+  unfold moebiusFn; native_decide
+
 /-- The first component of the witness: v₀ = -1 for N ≥ 2.
     v₀ = -μ(1) · (1 - ln(1)/ln(N)) = -(1) · (1 - 0) = -1. -/
 theorem logCutoffWitness_first (N : ℕ) (hN : N ≥ 2) :

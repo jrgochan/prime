@@ -50,13 +50,36 @@ theorem sigma_one_le_sq (n : ℕ) : sumOfDivisors n ≤ n ^ 2 := by
   exact sigma_le_pow_succ 1 n
 
 -- ════════════════════════════════════════════════
+-- PART IV: SIGMA LOWER BOUND
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(n) ≥ n + 1 for n ≥ 2.
+    Every n ≥ 2 has at least 1 and n as distinct divisors. -/
+theorem sigma_one_ge_succ (n : ℕ) (hn : 2 ≤ n) :
+    n + 1 ≤ sumOfDivisors n := by
+  unfold sumOfDivisors
+  have h_le : ({1, n} : Finset ℕ).sum _root_.id ≤ (sigma 1) n := by
+    rw [sigma_one_apply]
+    apply Finset.sum_le_sum_of_subset
+    intro x hx
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | rfl
+    · simp; omega
+    · simp; omega
+  have h_sum : ({1, n} : Finset ℕ).sum _root_.id = 1 + n := by
+    rw [Finset.sum_pair (by omega : (1:ℕ) ≠ n)]
+    rfl
+  omega
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   3 PROVED theorems:
+--   4 PROVED theorems:
 --     ✅ sigma_one_prime              — σ(p) = p + 1
 --     ✅ sumOfDivisors_mul_coprime   — σ(mn) = σ(m)σ(n) for coprime
 --     ✅ sigma_one_le_sq             — σ(n) ≤ n²
+--     ✅ sigma_one_ge_succ           — σ(n) ≥ n + 1
