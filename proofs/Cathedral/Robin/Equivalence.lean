@@ -48,15 +48,39 @@ theorem lagarias_implies_nyman_beurling :
   exact nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
 
 -- ════════════════════════════════════════════════
+-- THE CONVERSE: NB → ROBIN / LAGARIAS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Nyman-Beurling convergence implies Robin's Inequality.
+    Chain: d²_N → 0 → RH (by nyman_beurling_converse) → Robin (by robin_iff_rh) -/
+theorem nyman_beurling_implies_robin :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+    RobinInequality := by
+  intro hNB
+  exact rh_implies_robin (nyman_beurling_converse hNB)
+
+/-- **THEOREM (PROVED)**: Nyman-Beurling convergence implies Lagarias' Inequality.
+    Chain: d²_N → 0 → RH → Lagarias -/
+theorem nyman_beurling_implies_lagarias :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+    LagariasInequality := by
+  intro hNB
+  exact rh_implies_lagarias (nyman_beurling_converse hNB)
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   2 PROVED theorems:
+--   4 PROVED theorems:
 --     ✅ robin_implies_nyman_beurling      — Robin → d²_N → 0
 --     ✅ lagarias_implies_nyman_beurling   — Lagarias → d²_N → 0
+--     ✅ nyman_beurling_implies_robin      — d²_N → 0 → Robin
+--     ✅ nyman_beurling_implies_lagarias   — d²_N → 0 → Lagarias
 --
--- This is the architectural triumph: purely discrete arithmetic
--- controls infinite-dimensional L² convergence.
+-- The full equivalence: Robin ↔ d²→0 ↔ Lagarias ↔ RH
+-- All arrows are machine-verified.

@@ -369,4 +369,23 @@ theorem schur_complement_posDef
       exact h_cs
     nlinarith
 
+-- ════════════════════════════════════════════════
+-- SECTION 6: FUTURE WORK – G PD
+-- ════════════════════════════════════════════════
+
+-- ROADMAP: The final axiom elimination requires proving
+-- that the Vasyunin Gram matrix G_N is positive definite.
+--
+-- PATH A (Diagonal Dominance):
+--   If G(i,i) > Σ_{j≠i} |G(i,j)| for all i, then G is PD.
+--   This would require bounding off-diagonal Gram entries.
+--
+-- PATH B (Inner Product Space):
+--   G is a Gram matrix of L² functions. If the functions
+--   h_1,...,h_N are linearly independent in L²(0,1), then
+--   G is automatically PD. This reduces to showing
+--   {1/(kx)} are linearly independent — a number theory fact.
+--
+-- Either path would eliminate the vasyuninCovMatrix_posDef axiom.
+
 end Cathedral.Variational
