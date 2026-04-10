@@ -138,6 +138,20 @@ theorem vasyuninGramEntry_diag (k : ℕ) :
 noncomputable def vasyuninMeanEntry (k : ℕ) : ℝ :=
   (Real.log (k : ℝ) + 1 - γ) / (k : ℝ)
 
+/-- The first mean entry: b₁ = 1 - γ ≈ 0.4228.
+    b₁ = (ln(1) + 1 - γ) / 1 = (0 + 1 - γ) / 1 = 1 - γ. -/
+theorem vasyuninMeanEntry_one :
+    vasyuninMeanEntry 1 = 1 - γ := by
+  unfold vasyuninMeanEntry
+  simp [Real.log_one]
+
+/-- The first diagonal Gram entry: G(1,1) = ln(2π) - γ - 1 ≈ 0.261.
+    From the diagonal formula with k = 1. -/
+theorem vasyuninGramEntry_one_one :
+    vasyuninGramEntry 1 1 = Real.log (2 * Real.pi) - γ - 1 := by
+  rw [vasyuninGramEntry_diag]
+  simp
+
 -- ════════════════════════════════════════════════
 -- PART V: THE MATRICES
 -- ════════════════════════════════════════════════
@@ -342,6 +356,18 @@ noncomputable def moebiusFn : ℕ → ℤ := fun n => ArithmeticFunction.moebius
     The log cutoff is the Goldilocks zone. -/
 noncomputable def logCutoffWitness (N : ℕ) (i : Fin N) : ℝ :=
   -(↑(moebiusFn (i.val + 1)) : ℝ) * (1 - Real.log ↑(i.val + 1) / Real.log ↑N)
+
+/-- μ(1) = 1 (from Mathlib). -/
+theorem moebiusFn_one : moebiusFn 1 = 1 := by
+  unfold moebiusFn; exact ArithmeticFunction.moebius_apply_one
+
+/-- The first component of the witness: v₀ = -1 for N ≥ 2.
+    v₀ = -μ(1) · (1 - ln(1)/ln(N)) = -(1) · (1 - 0) = -1. -/
+theorem logCutoffWitness_first (N : ℕ) (hN : N ≥ 2) :
+    logCutoffWitness N ⟨0, by omega⟩ = -1 := by
+  unfold logCutoffWitness moebiusFn
+  rw [ArithmeticFunction.moebius_apply_one]
+  simp [Real.log_one]
 
 -- ════════════════════════════════════════════════
 -- PART IX: THE RAYLEIGH QUOTIENT
