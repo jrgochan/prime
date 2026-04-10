@@ -71,6 +71,15 @@ noncomputable def vasyuninSum (a b : ℕ) : ℝ :=
   else ∑ m ∈ Ico 1 a,
     Int.fract ((m * b : ℕ) / (a : ℝ)) * cot (Real.pi * m / a)
 
+/-- V(1, b) = 0: the cotangent sum over an empty range. -/
+theorem vasyuninSum_one (b : ℕ) : vasyuninSum 1 b = 0 := by
+  unfold vasyuninSum; simp
+
+/-- V(0, b) = 0 by convention. -/
+theorem vasyuninSum_zero (b : ℕ) : vasyuninSum 0 b = 0 := by
+  unfold vasyuninSum; simp
+
+
 -- ════════════════════════════════════════════════
 -- PART III: THE EXACT DISCRETE GRAM ENTRY
 -- ════════════════════════════════════════════════
@@ -107,6 +116,13 @@ noncomputable def vasyuninGramEntry (j k : ℕ) : ℝ :=
                  (vasyuninSum jp kp + vasyuninSum kp jp)
     let term4 := 1 / (jf * kf)
     term1 + term2 - term3 - term4
+
+/-- The diagonal Gram entry has a simplified form.
+    G(k,k) = (ln(2π) - γ)/k - 1/k² -/
+theorem vasyuninGramEntry_diag (k : ℕ) :
+    vasyuninGramEntry k k =
+    (Real.log (2 * Real.pi) - γ) / (k : ℝ) - 1 / (k : ℝ) ^ 2 := by
+  unfold vasyuninGramEntry; simp
 
 -- ════════════════════════════════════════════════
 -- PART IV: THE EXACT MEAN VECTOR
@@ -189,7 +205,32 @@ theorem vasyuninGram_eq_cov_plus_mean (N : ℕ) :
   simp [sub_add_cancel]
 
 -- ════════════════════════════════════════════════
--- PART VI-B: GRAM DIAGONAL POSITIVITY
+-- PART VI-B: MEAN VECTOR POSITIVITY
+-- ════════════════════════════════════════════════
+
+/-- The mean entry b_k is strictly positive for all k ≥ 1.
+    b_k = (ln(k) + 1 - γ) / k > 0 since:
+    - ln(k) ≥ 0 for k ≥ 1
+    - 1 - γ > 1 - 2/3 = 1/3 > 0
+    - k > 0 -/
+theorem vasyuninMeanEntry_pos (k : ℕ) (hk : k ≥ 1) :
+    vasyuninMeanEntry k > 0 := by
+  unfold vasyuninMeanEntry
+  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
+  apply div_pos _ hk_pos
+  have h_gamma : Real.eulerMascheroniConstant < 2 / 3 :=
+    Real.eulerMascheroniConstant_lt_two_thirds
+  have h_log_nn : Real.log (k : ℝ) ≥ 0 := Real.log_nonneg (by exact_mod_cast hk)
+  linarith
+
+/-- All entries of the mean vector are positive for N ≥ 1. -/
+theorem vasyuninMeanVec_pos (N : ℕ) (_hN : N ≥ 1) (i : Fin N) :
+    vasyuninMeanVec N i > 0 := by
+  unfold vasyuninMeanVec
+  exact vasyuninMeanEntry_pos (i.val + 1) (by omega)
+
+-- ════════════════════════════════════════════════
+-- PART VI-C: GRAM DIAGONAL POSITIVITY
 -- ════════════════════════════════════════════════
 
 /-- Key constant bound: ln(2π) - γ > 1.
