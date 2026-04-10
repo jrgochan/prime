@@ -46,8 +46,8 @@ that reduces the Riemann Hypothesis to the logarithmic growth of a single
 explicit Rayleigh quotient built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 11 active Lean files with \textbf{103 theorems}
-compiling in 3,063 build jobs with \textbf{zero \texttt{sorry} placeholders}.
+The formalization comprises 17 active Lean files with \textbf{112 theorems}
+compiling in 3,069 build jobs with \textbf{zero \texttt{sorry} placeholders}.
 In the active proof chain, only two axioms remain: one encoding positive
 definiteness of the Vasyunin covariance matrix (provably reducible to $G_N$ PD),
 and the other encoding the logarithmic growth of the explicit log cutoff
@@ -66,8 +66,9 @@ implies $v^T C v > 0$.
 
 As standalone results, we prove unconditionally that
 $\sigma(p) \leq H_p + e^{H_p}\ln H_p$ for all primes~$p$, that
-the Gram matrix $G(j,k)$ is symmetric, that $G(k,k) > 0$ for all $k \geq 1$
-(using Mathlib bounds on $\pi$, $e$, and~$\gamma$), and that the
+the Gram matrix $G(j,k)$ is symmetric, that $G(k,k) > 0$ for all $k \geq 1$,
+that the $2 \times 2$ Gram matrix~$G_2$ is \emph{positive definite}
+(via the number-theoretic bound $3^7 \geq 2^{11}$), and that the
 covariance matrix is Hermitian, PSD, and invertible.
 \end{abstract}
 
@@ -155,6 +156,23 @@ $\ln(2\pi) - \gamma > 1$ using four Mathlib facts:
 \texttt{pi\_gt\_three} ($\pi > 3 \Rightarrow \ln\pi > 1$), and
 \texttt{eulerMascheroniConstant\_lt\_two\_thirds} ($\gamma < 2/3$).
 Then $(\ln(2\pi)-\gamma) k \geq \ln(2\pi)-\gamma > 1 \geq 1/k$.
+\end{theorem}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry]
+\texttt{vasyuninGram2x2\_det\_pos}: $\det(G_2) > 0$, i.e.
+$G(1,1) \cdot G(2,2) - G(1,2)^2 > 0$.
+
+Proof: We first prove $G(1,2) = \tfrac{3}{4}(\ln(2\pi) - \gamma) - \tfrac{1}{4}\ln 2 - \tfrac{1}{2}$
+using the fact that $V(1,2) = V(2,1) = 0$ (the latter because $\cot(\pi/2) = 0$).
+The determinant reduces to a polynomial inequality in $\ell = \ln 2$,
+$p = \ln \pi$, $g = \gamma$ with margin $\approx 0.025$.
+The key trick: $3^7 = 2187 > 2048 = 2^{11}$ implies
+$\ln 3 \geq \tfrac{11}{7} \ln 2 \approx 1.089$.
+Combined with $p > \ln 3$, $p \leq 2\ell$, $\tfrac{1}{2} < g < \tfrac{2}{3}$,
+\texttt{nlinarith} closes automatically.
+
+By Sylvester's criterion (with $G(1,1) > 0$), the $2 \times 2$ Gram matrix
+is \emph{positive definite}.
 \end{theorem}
 
 % ================================================================
@@ -457,11 +475,11 @@ or the explicit variational quotient (new architecture).
 \midrule
 \texttt{ShermanMorrison.lean} & $d^2 = 1/(1+X)$ & 0 & 0 & \textbf{Complete} \\
 \texttt{Variational.lean}     & Cauchy--Schwarz + PosDef bridge & 0 & 0 & \textbf{Complete} \\
-\texttt{Vasyunin.lean}        & Gram + witness + chain & 0 & 2 & \textbf{Complete} \\
+\texttt{Vasyunin/*.lean} (6)  & Gram + witness + chain & 0 & 2 & \textbf{Complete} \\
 \texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 2 & \textbf{Complete} \\
 \texttt{Defs.lean}            & Core defs       & 0 & 0 & Foundation \\
 \midrule
-\textbf{Total (11 files)}     & \textbf{103 theorems} & \textbf{0} & \textbf{4} & \\
+\textbf{Total (17 files)}     & \textbf{112 theorems} & \textbf{0} & \textbf{4} & \\
 \bottomrule
 \end{tabular}
 \end{table}
