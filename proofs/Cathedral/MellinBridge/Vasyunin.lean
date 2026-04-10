@@ -169,6 +169,15 @@ noncomputable def vasyuninMeanVec (N : ℕ) : Fin N → ℝ :=
 noncomputable def vasyuninCovMatrix (N : ℕ) : Matrix (Fin N) (Fin N) ℝ :=
   vasyuninGramMatrix N - vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)
 
+/-- The diagonal of the Gram matrix satisfies the diagonal formula. -/
+theorem vasyuninGramMatrix_diag (N : ℕ) (i : Fin N) :
+    vasyuninGramMatrix N i i =
+    (Real.log (2 * Real.pi) - γ) / (i.val + 1 : ℝ) -
+      1 / (i.val + 1 : ℝ) ^ 2 := by
+  unfold vasyuninGramMatrix
+  simp [of_apply, vasyuninGramEntry_diag]
+
+
 -- ════════════════════════════════════════════════
 -- PART VI: STRUCTURAL PROPERTIES
 -- ════════════════════════════════════════════════
@@ -313,6 +322,13 @@ theorem vasyuninGramEntry_diag_pos (k : ℕ) (hk : k ≥ 1) :
   -- Since ln2π - γ > 1 and k ≥ 1: (ln2π - γ) * k ≥ ln2π - γ > 1
   have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
   nlinarith [mul_le_mul_of_nonneg_left hk1 (by linarith : (0 : ℝ) ≤ log (2 * Real.pi) - γ)]
+
+/-- Every diagonal entry of the Gram matrix is strictly positive. -/
+theorem vasyuninGramMatrix_diag_pos (N : ℕ) (i : Fin N) :
+    vasyuninGramMatrix N i i > 0 := by
+  unfold vasyuninGramMatrix
+  simp only [of_apply]
+  exact vasyuninGramEntry_diag_pos (i.val + 1) (by omega)
 
 -- ════════════════════════════════════════════════
 -- PART VII: THE MÖBIUS FUNCTION
