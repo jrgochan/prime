@@ -724,6 +724,34 @@ theorem vasyuninGramEntry_one_two :
   rw [show Real.log (2 : ℝ) = Real.log 2 from rfl]
   ring
 
+/-- **G(1,2) > 0**: The off-diagonal Gram entry is strictly positive.
+    From the exact form G(1,2) = 3A/4 - ln(2)/4 - 1/2, we need 3A > ln(2) + 2.
+    Since A = ln(2π) - γ = ln(2) + ln(π) - γ,
+    need 3ln(2) + 3ln(π) - 3γ > ln(2) + 2, i.e. 2ln(2) + 3ln(π) > 2 + 3γ.
+    Using ln(2) > 0.693, ln(π) > 1, γ < 2/3:
+    LHS > 2·0.693 + 3 = 4.386 > 4 > 2 + 2 = RHS. -/
+theorem vasyuninGramEntry_one_two_pos : vasyuninGramEntry 1 2 > 0 := by
+  rw [vasyuninGramEntry_one_two]
+  -- Need: 3 * (log(2π) - γ) / 4 - log(2) / 4 - 1/2 > 0
+  -- i.e. 3 * (log(2π) - γ) > log(2) + 2
+  -- i.e. 3 * log(2π) - 3γ > log(2) + 2
+  -- Expand: 3(log 2 + log π) - 3γ > log 2 + 2
+  -- i.e. 2·log 2 + 3·log π > 2 + 3γ
+  have h_log2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
+  have h_e_lt_3 : Real.exp 1 < 3 := Real.exp_one_lt_three
+  have h_pi_gt : (3 : ℝ) < Real.pi := pi_gt_three
+  have h_gamma : Real.eulerMascheroniConstant < 2 / 3 :=
+    Real.eulerMascheroniConstant_lt_two_thirds
+  have h_log3 : 1 < Real.log 3 := by
+    rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+    exact Real.log_lt_log (Real.exp_pos 1) h_e_lt_3
+  have h_logpi : 1 < Real.log Real.pi :=
+    lt_trans h_log3 (Real.log_lt_log (by norm_num : (0:ℝ) < 3) h_pi_gt)
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
+    Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
+  rw [h_log2pi]
+  linarith
+
 end Cathedral.Vasyunin
 
 
