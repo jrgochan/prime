@@ -28,6 +28,9 @@ theorem lagarias_base_case :
   have h_harmonic : (harmonic 1 : ℝ) = 1 := by norm_num
   rw [h_sigma, h_harmonic, log_one, mul_zero, add_zero]
 
+-- NOTE: Lagarias for n = 2,3,5,7 is proved in PrimeBounds.lean
+-- via lagarias_for_primes, since these are all prime.
+
 /-- σ(1) = 1 (unit has only itself as divisor). -/
 theorem sumOfDivisors_one : sumOfDivisors 1 = 1 := by
   unfold sumOfDivisors; norm_num

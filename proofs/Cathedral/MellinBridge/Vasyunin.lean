@@ -669,4 +669,38 @@ theorem nbDistSq_decays :
     _ < ε * (1 + vasyuninQuadForm N) := by
         apply mul_lt_mul_of_pos_left h_X_big hε
 
+-- ════════════════════════════════════════════════
+-- PART XII: GRAM MATRIX TRACE AND SMALL CASES
+-- ════════════════════════════════════════════════
+
+/-- **V(2,1) = 0**: The only term has cot(π/2) = cos(π/2)/sin(π/2) = 0.
+    Sum: {1·1/2}·cot(π·1/2) = (1/2)·0 = 0. -/
+theorem vasyuninSum_two_one : vasyuninSum 2 1 = 0 := by
+  unfold vasyuninSum
+  simp only [show ¬(2 ≤ 1) from by omega, ↓reduceIte]
+  -- The sum is over Ico 1 2 = {1}
+  have h_ico : Ico 1 2 = ({1} : Finset ℕ) := by
+    ext x; simp
+  rw [h_ico, Finset.sum_singleton]
+  -- Evaluate: {1·1/2}·cot(π·1/2)
+  -- cot(π·1/2) has cos(π·1/2) in numerator
+  unfold cot
+  -- cos(π * 1 / 2) = cos(π/2) = 0
+  have h_cos : Real.cos (Real.pi * (1 : ℕ) / (2 : ℕ)) = 0 := by
+    rw [show (Real.pi * (1 : ℕ) / (2 : ℕ) : ℝ) = Real.pi / 2 by push_cast; ring]
+    exact Real.cos_pi_div_two
+  rw [h_cos]
+  simp
+
+/-- The trace of the N×N Gram matrix equals the sum of diagonal entries. -/
+theorem vasyuninGramMatrix_trace (N : ℕ) :
+    (vasyuninGramMatrix N).trace =
+    ∑ i : Fin N, ((Real.log (2 * Real.pi) - γ) / (↑i.val + 1) -
+                   1 / (↑i.val + 1) ^ 2) := by
+  unfold Matrix.trace
+  congr 1
+  ext i
+  exact vasyuninGramMatrix_diag N i
+
 end Cathedral.Vasyunin
+
