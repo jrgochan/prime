@@ -349,4 +349,46 @@ theorem vasyuninGramEntry_one_three_pos : vasyuninGramEntry 1 3 > 0 := by
   -- Now close: the positive terms overcome the negative ones
   nlinarith [h_log3, h_logpi, h_pi_term]
 
+/-- √3 > 1: since 3 > 1. -/
+theorem one_lt_sqrt_three : (1 : ℝ) < Real.sqrt 3 := by
+  rw [show (1 : ℝ) = Real.sqrt 1 from by simp]
+  exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+
+/-- **G(2,3) > 0**: The off-diagonal entry is strictly positive.
+    Uses ln(3/2) < ln(2), π/(36√3) < 1/9, and ln(π) > 11·ln(2)/7. -/
+theorem vasyuninGramEntry_two_three_pos : vasyuninGramEntry 2 3 > 0 := by
+  rw [vasyuninGramEntry_two_three]
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
+    Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
+  rw [h_log2pi]
+  set l := Real.log 2
+  set p := Real.log Real.pi
+  set g := Real.eulerMascheroniConstant
+  set s := Real.sqrt 3
+  -- Bounds
+  have hl : (0.6931471803 : ℝ) < l := Real.log_two_gt_d9
+  have hg_hi : g < 2/3 := Real.eulerMascheroniConstant_lt_two_thirds
+  have h_logpi : p > 11 * l / 7 := by
+    calc p > Real.log 3 :=
+              Real.log_lt_log (by norm_num : (0:ℝ) < 3) pi_gt_three
+         _ ≥ 11 * l / 7 := log_three_ge_11_log_two_div_7
+  -- ln(3/2) < ln(2) (since 3/2 < 2)
+  have h_log32 : Real.log (3 / 2) < l := by
+    exact Real.log_lt_log (by norm_num : (0:ℝ) < 3/2) (by norm_num)
+  -- ln(3/2) > 0
+  have h_log32_pos : Real.log (3 / 2) > 0 :=
+    Real.log_pos (by norm_num : (1:ℝ) < 3/2)
+  -- π/(36√3) < 1/9 (since π < 4, √3 > 1)
+  have hs_pos : (0 : ℝ) < s := Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)
+  have hs_gt : (1 : ℝ) < s := one_lt_sqrt_three
+  have h_pi_upper : Real.pi / (36 * s) < 1 / 9 := by
+    have h36s_pos : (0:ℝ) < 36 * s := by positivity
+    rw [div_lt_div_iff₀ h36s_pos (by norm_num : (0:ℝ) < 9)]
+    -- Need: 9 * π < 36 * s, i.e. π < 4s
+    -- π ≤ 4 and s > 1, so π < 4 ≤ 4s
+    nlinarith [pi_le_four]
+  have h_pi_pos : Real.pi / (36 * s) > 0 := by positivity
+  -- nlinarith closes
+  nlinarith [h_log32, h_logpi, h_pi_upper, h_pi_pos]
+
 end Cathedral.Vasyunin
