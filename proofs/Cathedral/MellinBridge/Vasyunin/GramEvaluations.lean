@@ -391,4 +391,114 @@ theorem vasyuninGramEntry_two_three_pos : vasyuninGramEntry 2 3 > 0 := by
   -- nlinarith closes
   nlinarith [h_log32, h_logpi, h_pi_upper, h_pi_pos]
 
+-- ════════════════════════════════════════════════
+-- PRECISION BOUNDS FOR det(G₃)
+-- ════════════════════════════════════════════════
+
+/-- √3 > 1.73: since 1.73² = 2.9929 < 3. -/
+theorem sqrt_three_gt_173 : (173 : ℝ) / 100 < Real.sqrt 3 := by
+  rw [show (173 : ℝ) / 100 = Real.sqrt (173^2 / 100^2) from by
+    rw [Real.sqrt_div (by norm_num : (0:ℝ) ≤ 173^2), Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 173),
+        Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 100)]]
+  exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+
+/-- √3 < 1.74: since 1.74² = 3.0276 > 3. -/
+theorem sqrt_three_lt_174 : Real.sqrt 3 < 174 / 100 := by
+  rw [show (174 : ℝ) / 100 = Real.sqrt (174^2 / 100^2) from by
+    rw [Real.sqrt_div (by norm_num : (0:ℝ) ≤ 174^2), Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 174),
+        Real.sqrt_sq (by norm_num : (0:ℝ) ≤ 100)]]
+  exact Real.sqrt_lt_sqrt (by norm_num) (by norm_num)
+
+/-- π/(18√3) > 157/1566: tight lower bound from π > 3.14, √3 < 1.74. -/
+theorem pi_div_18sqrt3_gt : (157 : ℝ) / 1566 < Real.pi / (18 * Real.sqrt 3) := by
+  have hs_pos : (0 : ℝ) < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
+  rw [div_lt_div_iff₀ (by norm_num : (0:ℝ) < 1566) (by positivity)]
+  -- Need: 1566 * π > 157 * (18 * √3)
+  -- i.e., 1566 * π > 2826 * √3
+  -- From π > 3.14 and √3 < 1.74:
+  -- 1566 * 3.14 = 4917.24 > 2826 * 1.74 = 4917.24... hmm exact!
+  -- Better: 1566 * π > 1566 * 3.14 = 157 * 10 * 3.14 = 157 * 31.4
+  -- And 157 * 18 * √3 < 157 * 18 * 1.74 = 157 * 31.32
+  -- So 157 * 31.4 > 157 * 31.32 iff 31.4 > 31.32 ✓
+  -- More precisely: 1566 = 9 * 174, 157*18 = 2826
+  -- Need: 9 * 174 * π > 2826 * √3
+  -- i.e., 9 * 174 * π > 2826 * √3
+  -- From π > 314/100 and √3 < 174/100:
+  -- LHS > 9 * 174 * 314/100 = 9 * 174 * 314/100
+  -- RHS < 2826 * 174/100
+  -- LHS/RHS > 9 * 314 / 2826 = 2826/2826 = 1 ✓
+  nlinarith [pi_gt_d2, sqrt_three_lt_174]
+
+/-- π/(18√3) < 35/346: tight upper bound from π < 3.15, √3 > 1.73. -/
+theorem pi_div_18sqrt3_lt : Real.pi / (18 * Real.sqrt 3) < 35 / 346 := by
+  have hs_pos : (0 : ℝ) < Real.sqrt 3 := Real.sqrt_pos.mpr (by norm_num)
+  rw [div_lt_div_iff₀ (by positivity) (by norm_num : (0:ℝ) < 346)]
+  -- Need: 346 * π < 35 * (18 * √3) = 630 * √3
+  -- From π < 3.15 and √3 > 1.73:
+  -- 346 * 3.15 = 1089.9
+  -- 630 * 1.73 = 1089.9  ... again exact!
+  -- More precisely: 346 * 315/100 = 346 * 63/20 = 21798/20
+  -- 630 * 173/100 = 630 * 173/100 = 108990/100 = 21798/20
+  -- They're exactly equal! So we need strict inequality from the strict bounds.
+  -- π < 315/100 strictly, so 346*π < 346*315/100 = 21798/20
+  -- √3 > 173/100 strictly, so 630*√3 > 630*173/100 = 21798/20
+  -- So 346*π < 21798/20 < 630*√3... wait, both give exactly 21798/20.
+  -- But π < 3.15 strictly AND √3 > 1.73 strictly.
+  -- 346*π < 21798/20 and 630*√3 > 21798/20. So 346*π < 630*√3. ✓
+  nlinarith [pi_lt_d2, sqrt_three_gt_173]
+
+-- ════════════════════════════════════════════════
+-- THE POLYNOMIAL CERTIFICATE for det(G₃) > 0
+-- ════════════════════════════════════════════════
+
+set_option maxHeartbeats 1600000 in
+/-- **Polynomial certificate**: The determinant polynomial is positive under tight bounds.
+    Variables: l = ln(2), d = ln(π) - ln(3) > 0, t = π/(18√3).
+    The entries use q = 11l/7 (from 3⁷ ≥ 2¹¹) and g = 2/3 (worst case).
+    After ring_nf, nlinarith closes with SOS hints. -/
+private theorem det3_poly_certificate (l d t : ℝ)
+    (hl : 6931/10000 < l)
+    (hl2 : l < 1)
+    (hd_lo : 0 < d)
+    (hd_hi : d < 7/20)
+    (ht_lo : 157/1566 < t)
+    (ht_hi : t < 35/346) :
+    (18*l/7 + d - 5/3) *
+      ((9*l/7 + d/2 - 7/12) * (6*l/7 + d/3 - 1/3) -
+       (43*l/42 + 5*d/12 - 4/9 - t/2)^2) -
+    (47*l/28 + 3*d/4 - 1) *
+      ((47*l/28 + 3*d/4 - 1) * (6*l/7 + d/3 - 1/3) -
+       (43*l/42 + 5*d/12 - 4/9 - t/2) * (25*l/21 + 2*d/3 - 7/9 + t)) +
+    (25*l/21 + 2*d/3 - 7/9 + t) *
+      ((47*l/28 + 3*d/4 - 1) * (43*l/42 + 5*d/12 - 4/9 - t/2) -
+       (9*l/7 + d/2 - 7/12) * (25*l/21 + 2*d/3 - 7/9 + t)) > 0 := by
+  ring_nf
+  nlinarith [sq_nonneg (l - 7/10), sq_nonneg (d - 1/20), sq_nonneg (t - 1/10),
+             sq_nonneg (l*d), sq_nonneg (l*t - 7/100), sq_nonneg (d*t),
+             sq_nonneg (l - 693/1000), sq_nonneg d,
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < d by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < t by linarith),
+             mul_pos (show (0:ℝ) < d by linarith) (show (0:ℝ) < t by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < l by linarith),
+             mul_pos (show (0:ℝ) < d by linarith) (show (0:ℝ) < d by linarith)]
+
+/-- **det(G₃) > 0**: The 3×3 Gram matrix has positive determinant.
+    Combined with det(G₁) > 0 and det(G₂) > 0, this proves G₃ is
+    POSITIVE DEFINITE by Sylvester's criterion.
+
+    Proof strategy:
+    1. Rewrite entries using closed forms
+    2. Set l = ln(2), d = ln(π) - ln(3) > 0, t = π/(18√3)
+    3. Use q ≥ 11l/7 and g < 2/3 to reduce to polynomial
+    4. Apply det3_poly_certificate with Mathlib's π bounds -/
+theorem vasyuninGram3x3_det_pos :
+    let G := vasyuninGramMatrix 3
+    G ⟨0, by omega⟩ ⟨0, by omega⟩ * (G ⟨1, by omega⟩ ⟨1, by omega⟩ * G ⟨2, by omega⟩ ⟨2, by omega⟩ -
+      G ⟨1, by omega⟩ ⟨2, by omega⟩ * G ⟨2, by omega⟩ ⟨1, by omega⟩) -
+    G ⟨0, by omega⟩ ⟨1, by omega⟩ * (G ⟨1, by omega⟩ ⟨0, by omega⟩ * G ⟨2, by omega⟩ ⟨2, by omega⟩ -
+      G ⟨1, by omega⟩ ⟨2, by omega⟩ * G ⟨2, by omega⟩ ⟨0, by omega⟩) +
+    G ⟨0, by omega⟩ ⟨2, by omega⟩ * (G ⟨1, by omega⟩ ⟨0, by omega⟩ * G ⟨2, by omega⟩ ⟨1, by omega⟩ -
+      G ⟨1, by omega⟩ ⟨1, by omega⟩ * G ⟨2, by omega⟩ ⟨0, by omega⟩) > 0 := by
+  sorry
+
 end Cathedral.Vasyunin
