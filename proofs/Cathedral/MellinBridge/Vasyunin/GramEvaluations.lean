@@ -84,8 +84,57 @@ theorem vasyuninGramEntry_one_two_pos : vasyuninGramEntry 1 2 > 0 := by
   rw [h_log2pi]
   linarith
 
--- NOTE: det(G₂) > 0 requires tighter numerical bounds on ln(2), ln(π), γ.
--- The margin is only approx 0.025, needing 4+ decimal precision.
--- This will be proved here once we have tighter Mathlib bounds.
+/-- **3⁷ ≥ 2¹¹** (2187 ≥ 2048), hence ln(3) ≥ 11·ln(2)/7 ≈ 1.089.
+    This is the crucial number-theoretic bound that unlocks det(G₂) > 0. -/
+theorem log_three_ge_11_log_two_div_7 :
+    Real.log 3 ≥ 11 * Real.log 2 / 7 := by
+  rw [ge_iff_le, div_le_iff₀ (by norm_num : (0:ℝ) < 7)]
+  rw [show 11 * Real.log 2 = Real.log (2 ^ 11) by rw [Real.log_pow]; ring]
+  rw [show Real.log 3 * 7 = Real.log (3 ^ 7) by rw [Real.log_pow]; ring]
+  exact Real.log_le_log (by norm_num : (0:ℝ) < 2 ^ 11) (by norm_num)
+
+/-- **det(G₂) > 0**: The 2×2 leading minor of the Gram matrix has positive
+    determinant. Combined with G(1,1) > 0, this proves the 2×2 Gram matrix
+    is positive definite (Sylvester's criterion).
+
+    det(G₂) = G(1,1)·G(2,2) - G(1,2)²
+    where G(1,1) = A - 1, G(2,2) = A/2 - 1/4, G(1,2) = 3A/4 - L/4 - 1/2
+    and A = ln(2π) - γ, L = ln(2).
+
+    Numerically: det ≈ 0.025 > 0.
+
+    The proof uses the key bound 3⁷ ≥ 2¹¹ to establish
+    ln(π) > 11·ln(2)/7 ≈ 1.089, which provides enough arithmetic
+    precision for nlinarith to close the polynomial inequality. -/
+theorem vasyuninGram2x2_det_pos :
+    vasyuninGramEntry 1 1 * vasyuninGramEntry 2 2 -
+    vasyuninGramEntry 1 2 * vasyuninGramEntry 1 2 > 0 := by
+  rw [vasyuninGramEntry_diag 1, vasyuninGramEntry_diag 2, vasyuninGramEntry_one_two]
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
+    Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
+  rw [h_log2pi]
+  set l := Real.log 2
+  set p := Real.log Real.pi
+  set g := Real.eulerMascheroniConstant
+  -- Bounds
+  have hl : (0.6931471803 : ℝ) < l := Real.log_two_gt_d9
+  have hg_lo : (1:ℝ)/2 < g := Real.one_half_lt_eulerMascheroniConstant
+  have hg_hi : g < 2/3 := Real.eulerMascheroniConstant_lt_two_thirds
+  -- The crucial bound: ln(π) > 11·ln(2)/7 (from 3^7 > 2^11 and π > 3)
+  have h_logpi : p > 11 * l / 7 := by
+    calc p > Real.log 3 :=
+              Real.log_lt_log (by norm_num : (0:ℝ) < 3) pi_gt_three
+         _ ≥ 11 * l / 7 := log_three_ge_11_log_two_div_7
+  -- Upper bound: ln(π) ≤ 2·ln(2) (from π ≤ 4)
+  have h_p_le : p ≤ 2 * l := by
+    rw [show 2 * l = Real.log (2 ^ 2) from by rw [Real.log_pow]; ring]
+    exact Real.log_le_log Real.pi_pos (by norm_num; exact pi_le_four)
+  -- Normalize Nat casts
+  push_cast
+  -- nlinarith closes with the tight bound on p
+  nlinarith [sq_nonneg (p - 11*l/7), sq_nonneg (g - 1/2), sq_nonneg (l - 0.7),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < p by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < l - g by linarith)]
 
 end Cathedral.Vasyunin
+
