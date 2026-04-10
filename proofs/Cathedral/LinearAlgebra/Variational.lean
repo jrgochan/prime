@@ -310,4 +310,63 @@ theorem vecMulVec_self_posSemidef (b : Fin n → ℝ) :
   rw [h_eq]
   exact sq_nonneg _
 
+-- ════════════════════════════════════════════════
+-- SECTION 5: SCHUR COMPLEMENT (1×1 BLOCK)
+-- ════════════════════════════════════════════════
+
+/-- **The Schur Complement Theorem (1×1 top-left block).**
+
+    If G is positive definite and bᵀG⁻¹b < 1, then
+    C = G - bbᵀ is positive definite.
+
+    This provides a reduction path for the PosDef axiom:
+    - If G is PD (Gram matrix of L² basis functions)
+    - And bᵀG⁻¹b < 1 (i.e., d²_N > 0 via Sherman-Morrison)
+    - Then C = G - bbᵀ is PD. ∎
+
+    The proof uses our Cauchy-Schwarz result to show that
+    (bᵀx)² ≤ (bᵀG⁻¹b)(xᵀGx), so
+    xᵀCx = xᵀGx - (bᵀx)² ≥ (1 - bᵀG⁻¹b)·xᵀGx > 0. -/
+theorem schur_complement_posDef
+    (G : Matrix (Fin n) (Fin n) ℝ)
+    (b : Fin n → ℝ)
+    (hG : G.PosDef)
+    (h_schur : dotProduct b (G⁻¹.mulVec b) < 1) :
+    (G - vecMulVec b b).PosDef := by
+  -- Step 1: Hermitian
+  have h_herm : (G - vecMulVec b b).IsHermitian :=
+    hG.isHermitian.sub (vecMulVec_self_hermitian b)
+  -- Step 2: Use of_dotProduct_mulVec_pos
+  exact Matrix.PosDef.of_dotProduct_mulVec_pos h_herm fun {x} hx => by
+    simp only [star_trivial]
+    -- We need: 0 < x ⬝ᵥ (G - bbᵀ) *ᵥ x
+    rw [Matrix.sub_mulVec, dotProduct_sub]
+    -- x ⬝ᵥ G *ᵥ x > 0 (from G PosDef)
+    have h_Gx_pos : 0 < dotProduct x (G.mulVec x) := by
+      have := hG.dotProduct_mulVec_pos hx
+      simpa [star_trivial] using this
+    -- x ⬝ᵥ (bbᵀ) *ᵥ x = (b ⬝ᵥ x)²
+    have h_bb_eq : dotProduct x ((vecMulVec b b).mulVec x) =
+        (dotProduct b x) ^ 2 := by
+      have h_mul : (vecMulVec b b).mulVec x = (dotProduct b x) • b := by
+        ext i; simp only [mulVec, vecMulVec, dotProduct, Finset.sum_mul,
+          Matrix.of_apply, Pi.smul_apply, smul_eq_mul]
+        congr 1; ext j; ring
+      rw [h_mul, dotProduct_smul, smul_eq_mul]
+      rw [show dotProduct x b = dotProduct b x from by
+        simp [dotProduct]; congr 1; ext; exact mul_comm _ _]
+      ring
+    rw [h_bb_eq]
+    -- Cauchy-Schwarz: (b ⬝ᵥ x)² / (x ⬝ᵥ Gx) ≤ b ⬝ᵥ G⁻¹b
+    have h_unit : IsUnit G.det :=
+      G.isUnit_iff_isUnit_det.mp hG.isUnit
+    have h_cs := cauchy_schwarz_quadform G b x
+      hG.isHermitian hG.posSemidef h_unit h_Gx_pos
+    have h_cs_bound : (dotProduct b x) ^ 2 ≤
+        dotProduct b (G⁻¹.mulVec b) * dotProduct x (G.mulVec x) := by
+      rw [show dotProduct b (G⁻¹.mulVec b) * dotProduct x (G.mulVec x) =
+          realQuadForm G x * dotProduct b (G⁻¹.mulVec b) from mul_comm _ _]
+      exact h_cs
+    nlinarith
+
 end Cathedral.Variational
