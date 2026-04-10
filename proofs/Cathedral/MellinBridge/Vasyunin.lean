@@ -560,6 +560,47 @@ theorem quadForm_diverges :
   -- Step 4: Chain: c·ln(N) ≤ Q(v) ≤ X_N
   exact le_trans hQ hvar
 
+/-- **The NB distance squared decays to zero.**
+    From X_N ≥ c·ln(N) → ∞ and d²_N = 1/(1+X_N):
+    d²_N ≤ 1/(1 + c·ln(N)) → 0.
+
+    This is the FINAL ANALYTIC STEP before the Nyman-Beurling criterion. -/
+theorem nbDistSq_decays :
+    ∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+      1 / (1 + vasyuninQuadForm N) < ε := by
+  intro ε hε
+  obtain ⟨c, hc, N₀, hN_bound⟩ := quadForm_diverges
+  -- Need N₁ with c·ln(N₁) > 1/ε - 1, equivalently ln(N₁) > (1/ε - 1)/c
+  have h_arch : ∃ N₁ : ℕ, (1/ε - 1) / c < Real.log (N₁ : ℝ) := by
+    have h_tend := Real.tendsto_log_atTop
+    rw [Filter.tendsto_atTop_atTop] at h_tend
+    obtain ⟨M, hM⟩ := h_tend ((1/ε - 1) / c + 1)
+    refine ⟨⌈max M 1⌉₊, ?_⟩
+    have hM_bound := hM (max M 1) (le_max_left _ _)
+    have h1 : (1:ℝ) ≤ max M 1 := le_max_right _ _
+    have h2 : (max M 1 : ℝ) ≤ (⌈max M 1⌉₊ : ℝ) := Nat.le_ceil _
+    have := Real.log_le_log (by linarith) h2
+    linarith
+  obtain ⟨N₁, hN₁⟩ := h_arch
+  refine ⟨max N₀ (max N₁ 1), fun N hN => ?_⟩
+  have hN₀' : N ≥ N₀ := by omega
+  have hN₁' : N ≥ N₁ := by omega
+  have hN1 : N ≥ 1 := by omega
+  have h_XN := hN_bound N hN₀'
+  have h_log_mono : Real.log (N₁ : ℝ) ≤ Real.log (N : ℝ) := by
+    rcases Nat.eq_zero_or_pos N₁ with rfl | hN₁_pos
+    · simp; exact Real.log_nonneg (by exact_mod_cast hN1)
+    · exact Real.log_le_log (Nat.cast_pos.mpr hN₁_pos) (by exact_mod_cast hN₁')
+  have h_clog : 1/ε - 1 < c * Real.log (N : ℝ) := by
+    have h1 : (1/ε - 1) / c < Real.log (N : ℝ) := lt_of_lt_of_le hN₁ h_log_mono
+    rw [div_lt_iff₀ hc] at h1; linarith [mul_comm (Real.log (N : ℝ)) c]
+  have h_X_big : 1/ε < 1 + vasyuninQuadForm N := by linarith
+  have h_denom_pos : (0:ℝ) < 1 + vasyuninQuadForm N := by
+    have : (0:ℝ) < 1/ε := div_pos one_pos hε
+    linarith
+  rw [div_lt_iff₀ h_denom_pos]
+  calc 1 = ε * (1/ε) := by rw [mul_one_div_cancel (ne_of_gt hε)]
+    _ < ε * (1 + vasyuninQuadForm N) := by
+        apply mul_lt_mul_of_pos_left h_X_big hε
+
 end Cathedral.Vasyunin
-
-

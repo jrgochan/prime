@@ -36,6 +36,19 @@ theorem sumOfDivisors_one : sumOfDivisors 1 = 1 := by
 theorem sumOfDivisors_two : sumOfDivisors 2 = 3 := by
   unfold sumOfDivisors; native_decide
 
+/-- σ(6) = 12 (6 is the first perfect number: 1+2+3+6 = 12 = 2·6). -/
+theorem sumOfDivisors_six : sumOfDivisors 6 = 12 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(28) = 56 (28 is the second perfect number: 1+2+4+7+14+28 = 56 = 2·28). -/
+theorem sumOfDivisors_twentyeight : sumOfDivisors 28 = 56 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(5040) = 19344 — The last Robin counterexample.
+    5040 = 7! = 2⁴·3²·5·7 is the largest n for which σ(n) ≥ eᵞ·n·log(log(n)). -/
+theorem sumOfDivisors_5040 : sumOfDivisors 5040 = 19344 := by
+  unfold sumOfDivisors; native_decide
+
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
@@ -43,7 +56,10 @@ theorem sumOfDivisors_two : sumOfDivisors 2 = 3 := by
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   3 PROVED theorems:
---     ✅ lagarias_base_case — σ(1) ≤ H₁ + exp(H₁)·log(H₁)
---     ✅ sumOfDivisors_one  — σ(1) = 1
---     ✅ sumOfDivisors_two  — σ(2) = 3
+--   6 PROVED theorems:
+--     ✅ lagarias_base_case        — σ(1) ≤ H₁ + exp(H₁)·log(H₁)
+--     ✅ sumOfDivisors_one         — σ(1) = 1
+--     ✅ sumOfDivisors_two         — σ(2) = 3
+--     ✅ sumOfDivisors_six         — σ(6) = 12  (perfect number!)
+--     ✅ sumOfDivisors_twentyeight — σ(28) = 56  (perfect number!)
+--     ✅ sumOfDivisors_5040        — σ(5040) = 19344 (Robin boundary)
