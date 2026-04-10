@@ -171,4 +171,69 @@ theorem vasyuninSum_three_two :
   push_cast
   norm_num
 
+-- ════════════════════════════════════════════════
+-- FRACTIONAL PARTS
+-- ════════════════════════════════════════════════
+
+/-- {1/3} = 1/3: the fractional part of 1/3 is 1/3. -/
+theorem fract_one_third : Int.fract (1 / (3 : ℝ)) = 1 / 3 := by
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+/-- {2/3} = 2/3: the fractional part of 2/3 is 2/3. -/
+theorem fract_two_thirds : Int.fract (2 / (3 : ℝ)) = 2 / 3 := by
+  rw [Int.fract_eq_self.mpr ⟨by norm_num, by norm_num⟩]
+
+/-- {4/3} = 1/3: since 4/3 = 1 + 1/3, the fractional part is 1/3. -/
+theorem fract_four_thirds : Int.fract (4 / (3 : ℝ)) = 1 / 3 := by
+  rw [show (4 : ℝ) / 3 = 1 / 3 + 1 from by ring]
+  rw [Int.fract_add_one]
+  exact fract_one_third
+
+-- ════════════════════════════════════════════════
+-- COTANGENT EVALUATIONS
+-- ════════════════════════════════════════════════
+
+/-- cot(π/3) = cos(π/3) / sin(π/3) = (1/2) / (√3/2) = 1/√3. -/
+theorem cot_pi_div_three :
+    cot (Real.pi / 3) = 1 / Real.sqrt 3 := by
+  unfold cot
+  rw [cos_pi_div_three, sin_pi_div_three]
+  have h2 : (2:ℝ) ≠ 0 := by norm_num
+  field_simp
+
+/-- cot(2π/3) = -1/√3.
+    Proof: 2π/3 = π - π/3, so cos(2π/3) = -cos(π/3) = -1/2
+    and sin(2π/3) = sin(π/3) = √3/2. -/
+theorem cot_two_pi_div_three :
+    cot (2 * Real.pi / 3) = -(1 / Real.sqrt 3) := by
+  unfold cot
+  rw [show 2 * Real.pi / 3 = Real.pi - Real.pi / 3 by ring]
+  rw [Real.cos_pi_sub, Real.sin_pi_sub, cos_pi_div_three, sin_pi_div_three]
+  have h2 : (2:ℝ) ≠ 0 := by norm_num
+  field_simp
+
+-- ════════════════════════════════════════════════
+-- CLOSED FORM V(3,k)
+-- ════════════════════════════════════════════════
+
+/-- **V(3,1) = -1/(3√3)**: The Vasyunin sum evaluates to an exact irrational.
+    = (1/3)·(1/√3) + (2/3)·(-1/√3) = (1-2)/(3√3) = -1/(3√3). -/
+theorem vasyuninSum_three_one_val :
+    vasyuninSum 3 1 = -(1 / (3 * Real.sqrt 3)) := by
+  rw [vasyuninSum_three_one]
+  rw [show Real.pi * 1 / 3 = Real.pi / 3 by ring]
+  rw [show Real.pi * 2 / 3 = 2 * Real.pi / 3 by ring]
+  rw [fract_one_third, fract_two_thirds, cot_pi_div_three, cot_two_pi_div_three]
+  ring
+
+/-- **V(3,2) = 1/(3√3)**: By similar calculation.
+    = (2/3)·(1/√3) + (1/3)·(-1/√3) = (2-1)/(3√3) = 1/(3√3). -/
+theorem vasyuninSum_three_two_val :
+    vasyuninSum 3 2 = 1 / (3 * Real.sqrt 3) := by
+  rw [vasyuninSum_three_two]
+  rw [show Real.pi * 1 / 3 = Real.pi / 3 by ring]
+  rw [show Real.pi * 2 / 3 = 2 * Real.pi / 3 by ring]
+  rw [fract_two_thirds, fract_four_thirds, cot_pi_div_three, cot_two_pi_div_three]
+  ring
+
 end Cathedral.Vasyunin
