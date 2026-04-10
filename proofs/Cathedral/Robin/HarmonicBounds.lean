@@ -48,13 +48,32 @@ theorem harmonicR_upper (n : ℕ) : harmonicR n ≤ 1 + log ↑n := by
   exact harmonic_le_one_add_log n
 
 -- ════════════════════════════════════════════════
+-- PART III: EXACT VALUES
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: H₁ = 1. -/
+theorem harmonicR_one : harmonicR 1 = 1 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₂ = 3/2. -/
+theorem harmonicR_two : harmonicR 2 = 3/2 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₁ is positive (special case). -/
+theorem harmonicR_one_pos : (0 : ℝ) < harmonicR 1 := by
+  rw [harmonicR_one]; norm_num
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   3 PROVED theorems:
+--   6 PROVED theorems:
 --     ✅ harmonicR_pos     — H_n > 0
 --     ✅ harmonicR_lower   — log(n+1) ≤ H_n
 --     ✅ harmonicR_upper   — H_n ≤ 1 + log(n)
+--     ✅ harmonicR_one     — H₁ = 1
+--     ✅ harmonicR_two     — H₂ = 3/2
+--     ✅ harmonicR_one_pos — 0 < H₁
