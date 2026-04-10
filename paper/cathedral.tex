@@ -46,8 +46,8 @@ that reduces the Riemann Hypothesis to the logarithmic growth of a single
 explicit Rayleigh quotient built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 17 active Lean files with \textbf{112 theorems}
-compiling in 3,069 build jobs with \textbf{zero \texttt{sorry} placeholders}.
+The formalization comprises 17 active Lean files with \textbf{145 theorems}
+compiling in 2,379 build jobs with \textbf{zero \texttt{sorry} placeholders}.
 In the active proof chain, only two axioms remain: one encoding positive
 definiteness of the Vasyunin covariance matrix (provably reducible to $G_N$ PD),
 and the other encoding the logarithmic growth of the explicit log cutoff
@@ -62,13 +62,16 @@ bypasses matrix inversion entirely; (3)~the Sherman--Morrison identity
 $d_N^2 = 1/(1+X_N)$ proved with zero axioms; (4)~the independent
 emergence of the Selberg sieve from the $L^2$ variational principle;
 (5)~a first-principles polarization proof that PSD$\,+\,$invertible$\,+\,v \neq 0$
-implies $v^T C v > 0$.
+implies $v^T C v > 0$;
+(6)~the quadratic interpolation method for certifying multi-variable
+polynomial positivity via boundary evaluation and concavity.
 
 As standalone results, we prove unconditionally that
 $\sigma(p) \leq H_p + e^{H_p}\ln H_p$ for all primes~$p$, that
 the Gram matrix $G(j,k)$ is symmetric, that $G(k,k) > 0$ for all $k \geq 1$,
-that the $2 \times 2$ Gram matrix~$G_2$ is \emph{positive definite}
-(via the number-theoretic bound $3^7 \geq 2^{11}$), and that the
+that the $3 \times 3$ Gram matrix~$G_3$ is \emph{positive definite}
+(via a novel quadratic interpolation of two polynomial certificates
+with tight bounds from Mathlib's $3.14 < \pi < 3.15$), and that the
 covariance matrix is Hermitian, PSD, and invertible.
 \end{abstract}
 
@@ -172,6 +175,47 @@ Combined with $p > \ln 3$, $p \leq 2\ell$, $\tfrac{1}{2} < g < \tfrac{2}{3}$,
 \texttt{nlinarith} closes automatically.
 
 By Sylvester's criterion (with $G(1,1) > 0$), the $2 \times 2$ Gram matrix
+is \emph{positive definite}.
+\end{theorem}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry, April 10, 2026]
+\texttt{vasyuninGram3x3\_det\_pos\_closedForm}: $\det(G_3) > 0$.
+
+Proof employs a novel \emph{quadratic interpolation method}.
+All 9~entries of $G_3$ are evaluated in closed form using
+$V(1,b) = V(2,b) = 0$ (empty/vanishing sums),
+$V(3,1) = -1/(3\sqrt{3})$, and $V(3,2) = 1/(3\sqrt{3})$.
+The determinant, expanded in Lean as a degree-3 polynomial in 4~variables
+$(A, \ell, q, t)$ with $A = \ln(2\pi)-\gamma$, $\ell = \ln 2$,
+$q = \ln 3$, $t = \pi/(18\sqrt{3})$, is observed to be
+\emph{degree~2 in} $A$, with leading coefficient $-t/8 < 0$.
+
+This makes $\det(G_3)$ a \emph{downward parabola} in $A$.
+The key algebraic identity
+\[
+D \cdot P(A) = (h-A)\,P(\ell_0) + (A-\ell_0)\,P(h) + \frac{t}{8}\,(A-\ell_0)(h-A)\,D
+\]
+where $D = h - \ell_0$, $\ell_0 = \ell + q - \tfrac{2}{3}$,
+$h = 3\ell - \tfrac{1}{2}$, shows that if $P(\ell_0) > 0$ and $P(h) > 0$,
+then $P(A) > 0$ for all $A \in [\ell_0, h]$.
+This identity is verified by \texttt{ring} in Lean.
+
+Two polynomial certificates are proved by \texttt{ring\_nf} + \texttt{nlinarith}
+with SOS hints in 3~variables $(\ell, q, t)$:
+\begin{enumerate}
+\item $P(\ell_0) > 0$ at $A = \ell + q - 2/3$ (worst case: $\gamma = 2/3$, $\ln\pi = \ln 3$);
+\item $P(h) > 0$ at $A = 3\ell - 1/2$ (worst case: $\ln\pi = 2\ln 2$, $\gamma = 1/2$).
+\end{enumerate}
+
+Critical precision bounds from Mathlib:
+$3.14 < \pi < 3.15$ (\texttt{pi\_gt\_d2}/\texttt{pi\_lt\_d2}),
+$1.73 < \sqrt{3} < 1.74$, yielding $t \in (157/1566, \, 35/346)$.
+The tight range $[0.1003, 0.1012]$ gives determinant margin $\approx 0.001$;
+the crude range $[1/12, 2/9]$ from $\pi \in (3,4)$ fails (determinant
+goes negative at the boundary).
+
+By Sylvester's criterion (with $G(1,1) > 0$, $\det(G_2) > 0$,
+and $\det(G_3) > 0$), the $3 \times 3$ Gram matrix
 is \emph{positive definite}.
 \end{theorem}
 
@@ -350,6 +394,15 @@ it is positive definite by construction. Formalizing this final step
 (linear independence of the B\'{a}ez-Duarte basis) would eliminate the axiom entirely.
 \end{remark}
 
+\begin{remark}[Status: $G_3$ is Positive Definite]
+As of April 10, 2026, the $3 \times 3$ Gram matrix $G_3$ has been proved
+positive definite via Sylvester's criterion (all three leading minors
+have positive determinant). This is the first concrete instance of
+$G_N\,\text{PD}$ verified in the Cathedral. Extending to general $N$ remains
+open, requiring either induction on principal submatrices or a proof
+of linear independence of the B\'aez-Duarte basis $\{\{1/(kx)\}\}_{k=1}^N$.
+\end{remark}
+
 \begin{axiombox}[\texttt{log\_cutoff\_witness\_bound}]
 $\exists\,c > 0,\;\exists\,N_0,\;\forall\,N \geq N_0$:
 $c \cdot \ln N \leq Q_N(v_{\text{log}})$.
@@ -479,7 +532,7 @@ or the explicit variational quotient (new architecture).
 \texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 2 & \textbf{Complete} \\
 \texttt{Defs.lean}            & Core defs       & 0 & 0 & Foundation \\
 \midrule
-\textbf{Total (17 files)}     & \textbf{112 theorems} & \textbf{0} & \textbf{4} & \\
+\textbf{Total (17 files)}     & \textbf{145 theorems} & \textbf{0} & \textbf{4} & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -526,7 +579,7 @@ and the Riemann Hypothesis through four machine-verified cross-path theorems.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # 3,063 jobs, zero errors, zero sorry
+lake build    # 2,379 jobs, zero errors, zero sorry
 \end{verbatim}
 
 \begin{thebibliography}{9}
