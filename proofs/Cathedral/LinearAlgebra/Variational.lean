@@ -370,22 +370,87 @@ theorem schur_complement_posDef
     nlinarith
 
 -- ════════════════════════════════════════════════
--- SECTION 6: FUTURE WORK – G PD
+-- SECTION 6: 3×3 SYLVESTER CRITERION
 -- ════════════════════════════════════════════════
 
--- ROADMAP: The final axiom elimination requires proving
--- that the Vasyunin Gram matrix G_N is positive definite.
---
--- PATH A (Diagonal Dominance):
---   If G(i,i) > Σ_{j≠i} |G(i,j)| for all i, then G is PD.
---   This would require bounding off-diagonal Gram entries.
---
--- PATH B (Inner Product Space):
---   G is a Gram matrix of L² functions. If the functions
---   h_1,...,h_N are linearly independent in L²(0,1), then
---   G is automatically PD. This reduces to showing
---   {1/(kx)} are linearly independent — a number theory fact.
---
--- Either path would eliminate the vasyuninCovMatrix_posDef axiom.
+/-- **3×3 Sylvester criterion via completing the square.**
+    For a Hermitian 3×3 matrix M with positive leading minors, M is positive definite.
+
+    Proof: The CTS algebraic identity (verified by `ring`):
+      a·det₂·(xᵀMx) = det₂·(a·x₀+b·x₁+c·x₂)²
+                      + (det₂·x₁+(ae-bc)·x₂)²
+                      + a·det(M)·x₂²
+
+    where a = M(0,0), det₂ = a·M(1,1) - M(0,1)².
+    Since a > 0 and det₂ > 0, the LHS shares sign with xᵀMx.
+    The RHS is a sum of non-negative terms, each with a positive coefficient.
+    If x ≠ 0: x₂ ≠ 0 → third term > 0; or x₂ = 0, x₁ ≠ 0 → second term > 0;
+    or x₁ = x₂ = 0, x₀ ≠ 0 → first term > 0. In all cases xᵀMx > 0. -/
+theorem sylvester_3x3
+    (M : Matrix (Fin 3) (Fin 3) ℝ)
+    (hH : M.IsHermitian)
+    (h1 : M 0 0 > 0)
+    (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0)
+    (h3 : M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) -
+          M 0 1 * (M 0 1 * M 2 2 - M 1 2 * M 0 2) +
+          M 0 2 * (M 0 1 * M 1 2 - M 1 1 * M 0 2) > 0) :
+    M.PosDef := by
+  have hM10 : M 1 0 = M 0 1 := by
+    have := congr_fun (congr_fun hH 1) 0; simp [conjTranspose_apply, star_trivial] at this; exact this.symm
+  have hM20 : M 2 0 = M 0 2 := by
+    have := congr_fun (congr_fun hH 2) 0; simp [conjTranspose_apply, star_trivial] at this; exact this.symm
+  have hM21 : M 2 1 = M 1 2 := by
+    have := congr_fun (congr_fun hH 2) 1; simp [conjTranspose_apply, star_trivial] at this; exact this.symm
+  exact PosDef.of_dotProduct_mulVec_pos hH fun {x} hx => by
+    simp only [star_trivial]
+    have h_expand : dotProduct x (M.mulVec x) =
+        M 0 0 * x 0 ^ 2 + M 1 1 * x 1 ^ 2 + M 2 2 * x 2 ^ 2 +
+        2 * M 0 1 * x 0 * x 1 + 2 * M 0 2 * x 0 * x 2 + 2 * M 1 2 * x 1 * x 2 := by
+      simp only [dotProduct, mulVec, Fin.sum_univ_three, Fin.isValue]
+      rw [hM10, hM20, hM21]; ring
+    rw [h_expand]
+    have h_cts :
+        M 0 0 * (M 0 0 * M 1 1 - M 0 1 ^ 2) *
+          (M 0 0 * x 0 ^ 2 + M 1 1 * x 1 ^ 2 + M 2 2 * x 2 ^ 2 +
+          2 * M 0 1 * x 0 * x 1 + 2 * M 0 2 * x 0 * x 2 + 2 * M 1 2 * x 1 * x 2) =
+        (M 0 0 * M 1 1 - M 0 1 ^ 2) * (M 0 0 * x 0 + M 0 1 * x 1 + M 0 2 * x 2) ^ 2 +
+        ((M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 + (M 0 0 * M 1 2 - M 0 1 * M 0 2) * x 2) ^ 2 +
+        M 0 0 * (M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) -
+          M 0 1 * (M 0 1 * M 2 2 - M 1 2 * M 0 2) +
+          M 0 2 * (M 0 1 * M 1 2 - M 1 1 * M 0 2)) * x 2 ^ 2 := by ring
+    have had : (0 : ℝ) < M 0 0 * (M 0 0 * M 1 1 - M 0 1 ^ 2) := mul_pos h1 h2
+    by_contra h_neg
+    push Not at h_neg
+    have h_scaled := mul_nonpos_of_nonneg_of_nonpos (le_of_lt had) h_neg
+    have h_rhs_le : (M 0 0 * M 1 1 - M 0 1 ^ 2) * (M 0 0 * x 0 + M 0 1 * x 1 + M 0 2 * x 2) ^ 2 +
+        ((M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 + (M 0 0 * M 1 2 - M 0 1 * M 0 2) * x 2) ^ 2 +
+        M 0 0 * (M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) -
+          M 0 1 * (M 0 1 * M 2 2 - M 1 2 * M 0 2) +
+          M 0 2 * (M 0 1 * M 1 2 - M 1 1 * M 0 2)) * x 2 ^ 2 ≤ 0 := by linarith
+    have ht1 : (0 : ℝ) ≤ (M 0 0 * M 1 1 - M 0 1 ^ 2) * (M 0 0 * x 0 + M 0 1 * x 1 + M 0 2 * x 2) ^ 2 :=
+      mul_nonneg (le_of_lt h2) (sq_nonneg _)
+    have ht2 : (0 : ℝ) ≤ ((M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 + (M 0 0 * M 1 2 - M 0 1 * M 0 2) * x 2) ^ 2 :=
+      sq_nonneg _
+    have ht3 : (0 : ℝ) ≤ M 0 0 * (M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) -
+        M 0 1 * (M 0 1 * M 2 2 - M 1 2 * M 0 2) +
+        M 0 2 * (M 0 1 * M 1 2 - M 1 1 * M 0 2)) * x 2 ^ 2 :=
+      mul_nonneg (mul_nonneg (le_of_lt h1) (le_of_lt h3)) (sq_nonneg _)
+    have heq1 : (M 0 0 * M 1 1 - M 0 1 ^ 2) * (M 0 0 * x 0 + M 0 1 * x 1 + M 0 2 * x 2) ^ 2 = 0 := by linarith
+    have heq2 : ((M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 + (M 0 0 * M 1 2 - M 0 1 * M 0 2) * x 2) ^ 2 = 0 := by linarith
+    have heq3 : M 0 0 * (M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) -
+        M 0 1 * (M 0 1 * M 2 2 - M 1 2 * M 0 2) +
+        M 0 2 * (M 0 1 * M 1 2 - M 1 1 * M 0 2)) * x 2 ^ 2 = 0 := by linarith
+    have hx2 : x 2 = 0 := by
+      by_contra h; exact absurd heq3 (ne_of_gt (mul_pos (mul_pos h1 h3) (sq_pos_of_ne_zero h)))
+    have hx1 : x 1 = 0 := by
+      rw [hx2, mul_zero, add_zero] at heq2
+      have h_sq : (M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 = 0 := sq_eq_zero_iff.mp heq2
+      exact (mul_eq_zero.mp h_sq).resolve_left (ne_of_gt h2)
+    have hx0 : x 0 = 0 := by
+      rw [hx1, hx2, mul_zero, add_zero, mul_zero, add_zero] at heq1
+      have h_sq := (mul_eq_zero.mp heq1).resolve_left (ne_of_gt h2)
+      have h_prod : M 0 0 * x 0 = 0 := sq_eq_zero_iff.mp h_sq
+      exact (mul_eq_zero.mp h_prod).resolve_left (ne_of_gt h1)
+    apply hx; ext i; fin_cases i <;> simp_all
 
 end Cathedral.Variational
