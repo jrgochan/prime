@@ -128,8 +128,7 @@ theorem dist_sq_eq_inv_one_plus_X
 /-- The NB distance is exactly 1/(1+X) when computed via the
     Sherman-Morrison witness vector. -/
 theorem nb_dist_via_witness
-    (C G : Matrix (Fin n) (Fin n) ℝ) (b y : Fin n → ℝ)
-    (hG : G = C + vecMulVec b b)
+    (C : Matrix (Fin n) (Fin n) ℝ) (b y : Fin n → ℝ)
     (hCy : C.mulVec y = b)
     (hC_psd : C.PosSemidef)
     (X : ℝ) (hX : X = dotProduct b y) :
