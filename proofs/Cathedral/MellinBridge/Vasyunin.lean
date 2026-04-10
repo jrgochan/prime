@@ -369,6 +369,20 @@ theorem logCutoffWitness_first (N : ℕ) (hN : N ≥ 2) :
   rw [ArithmeticFunction.moebius_apply_one]
   simp [Real.log_one]
 
+/-- The last component of the witness: v_{N-1} = 0 for N ≥ 2.
+    v_{N-1} = -μ(N) · (1 - ln(N)/ln(N)) = -μ(N) · 0 = 0.
+    This is the "acoustic dampener" — the logarithmic envelope
+    kills the boundary, preventing oscillation. -/
+theorem logCutoffWitness_last (N : ℕ) (hN : N ≥ 2) :
+    logCutoffWitness N ⟨N - 1, by omega⟩ = 0 := by
+  unfold logCutoffWitness
+  simp only []
+  have hN_eq : N - 1 + 1 = N := by omega
+  rw [hN_eq]
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  rw [div_self (Real.log_ne_zero_of_pos_of_ne_one hN_pos (by exact_mod_cast (by omega : N ≠ 1)))]
+  simp
+
 -- ════════════════════════════════════════════════
 -- PART IX: THE RAYLEIGH QUOTIENT
 -- ════════════════════════════════════════════════
