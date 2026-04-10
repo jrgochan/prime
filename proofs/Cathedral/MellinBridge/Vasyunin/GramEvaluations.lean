@@ -136,5 +136,39 @@ theorem vasyuninGram2x2_det_pos :
              mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < p by linarith),
              mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < l - g by linarith)]
 
-end Cathedral.Vasyunin
+/-- **G(2,1) = G(1,2)**: Symmetry of the off-diagonal entry. -/
+theorem vasyuninGramEntry_two_one :
+    vasyuninGramEntry 2 1 = vasyuninGramEntry 1 2 :=
+  vasyuninGramEntry_comm 2 1
 
+/-- **V(3,1)**: For a = 3, b = 1, the sum has two terms:
+    {1/3}·cot(π/3) + {2/3}·cot(2π/3). -/
+theorem vasyuninSum_three_one :
+    vasyuninSum 3 1 =
+    Int.fract (1 / (3 : ℝ)) * cot (Real.pi * 1 / 3) +
+    Int.fract (2 / (3 : ℝ)) * cot (Real.pi * 2 / 3) := by
+  unfold vasyuninSum
+  simp only [show ¬(3 ≤ 1) from by omega, ↓reduceIte]
+  have h_ico : Ico 1 3 = ({1, 2} : Finset ℕ) := by
+    ext x; simp; omega
+  rw [h_ico]
+  simp only [Finset.sum_pair (by norm_num : (1:ℕ) ≠ 2)]
+  push_cast
+  norm_num
+
+/-- **V(3,2)**: For a = 3, b = 2, the sum has two terms:
+    {2/3}·cot(π/3) + {4/3}·cot(2π/3). -/
+theorem vasyuninSum_three_two :
+    vasyuninSum 3 2 =
+    Int.fract (2 / (3 : ℝ)) * cot (Real.pi * 1 / 3) +
+    Int.fract (4 / (3 : ℝ)) * cot (Real.pi * 2 / 3) := by
+  unfold vasyuninSum
+  simp only [show ¬(3 ≤ 1) from by omega, ↓reduceIte]
+  have h_ico : Ico 1 3 = ({1, 2} : Finset ℕ) := by
+    ext x; simp; omega
+  rw [h_ico]
+  simp only [Finset.sum_pair (by norm_num : (1:ℕ) ≠ 2)]
+  push_cast
+  norm_num
+
+end Cathedral.Vasyunin
