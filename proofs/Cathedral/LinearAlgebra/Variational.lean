@@ -277,4 +277,37 @@ theorem posSemidef_pos_of_ne_zero {n : ℕ} (G : Matrix (Fin n) (Fin n) ℝ)
         linarith
       exact h_Gx_ne (by nlinarith [sq_nonneg c])
 
+-- ════════════════════════════════════════════════
+-- SECTION 4: RANK-1 MATRIX PROPERTIES
+-- ════════════════════════════════════════════════
+
+/-- The rank-1 matrix bbᵀ = vecMulVec b b is Hermitian (symmetric over ℝ). -/
+theorem vecMulVec_self_hermitian (b : Fin n → ℝ) :
+    (vecMulVec b b).IsHermitian := by
+  ext i j
+  simp [vecMulVec, conjTranspose_apply, star_trivial, mul_comm]
+
+/-- The rank-1 matrix bbᵀ is positive semidefinite.
+    Proof: xᵀ(bbᵀ)x = (bᵀx)² ≥ 0. -/
+theorem vecMulVec_self_posSemidef (b : Fin n → ℝ) :
+    (vecMulVec b b).PosSemidef := by
+  refine ⟨vecMulVec_self_hermitian b, fun x => ?_⟩
+  simp only [star_trivial, vecMulVec, Matrix.of_apply]
+  -- Goal involves Finsupp.sum over (i,j): xᵢ * (bᵢ * bⱼ) * xⱼ
+  -- This equals (Σᵢ xᵢ * bᵢ)² ≥ 0
+  -- Use dotProduct_mulVec_nonneg-like approach
+  -- Actually, let's just compute from mulVec and dotProduct
+  have h_eq : x.sum (fun i xi => x.sum (fun j xj =>
+      xi * (b i * b j) * xj)) =
+      (x.sum (fun i xi => xi * b i)) ^ 2 := by
+    simp only [sq, Finsupp.sum_mul, mul_assoc]
+    congr 1
+    ext i
+    simp only [← mul_assoc, Finsupp.mul_sum]
+    congr 1
+    ext j
+    ring
+  rw [h_eq]
+  exact sq_nonneg _
+
 end Cathedral.Variational

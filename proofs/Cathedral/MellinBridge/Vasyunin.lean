@@ -204,6 +204,17 @@ theorem vasyuninGram_eq_cov_plus_mean (N : ℕ) :
   unfold vasyuninCovMatrix
   simp [sub_add_cancel]
 
+/-- The mean outer product bbᵀ is positive semidefinite (rank-1 PSD).
+    Direct application of vecMulVec_self_posSemidef. -/
+theorem vasyuninMeanOuterProduct_posSemidef (N : ℕ) :
+    (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).PosSemidef :=
+  Cathedral.Variational.vecMulVec_self_posSemidef _
+
+/-- The mean outer product bbᵀ is Hermitian (symmetric). -/
+theorem vasyuninMeanOuterProduct_hermitian (N : ℕ) :
+    (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).IsHermitian :=
+  Cathedral.Variational.vecMulVec_self_hermitian _
+
 -- ════════════════════════════════════════════════
 -- PART VI-B: MEAN VECTOR POSITIVITY
 -- ════════════════════════════════════════════════
