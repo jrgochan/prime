@@ -188,7 +188,6 @@ theorem vasyuninGramMatrix_diag (N : ℕ) (i : Fin N) :
   unfold vasyuninGramMatrix
   simp [of_apply, vasyuninGramEntry_diag]
 
-
 -- ════════════════════════════════════════════════
 -- PART VI: STRUCTURAL PROPERTIES
 -- ════════════════════════════════════════════════
@@ -340,6 +339,12 @@ theorem vasyuninGramMatrix_diag_pos (N : ℕ) (i : Fin N) :
   unfold vasyuninGramMatrix
   simp only [of_apply]
   exact vasyuninGramEntry_diag_pos (i.val + 1) (by omega)
+
+-- NOTE: The Gram diagonal G(k,k) = A/k - 1/k² is NOT monotone for all k.
+-- In fact G(1,1) = A - 1 ≈ 0.026 < G(2,2) = A/2 - 1/4 ≈ 0.263.
+-- The function f(x) = A/x - 1/x² has f'(x) = (-Ax+2)/x³, so it
+-- INCREASES for x < 2/A ≈ 1.95 and decreases for x > 2/A.
+-- Maximum is at x = 2/A, between k=1 and k=2.
 
 -- ════════════════════════════════════════════════
 -- PART VII: THE MÖBIUS FUNCTION
