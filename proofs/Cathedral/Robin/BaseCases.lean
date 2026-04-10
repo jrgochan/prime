@@ -28,6 +28,14 @@ theorem lagarias_base_case :
   have h_harmonic : (harmonic 1 : ℝ) = 1 := by norm_num
   rw [h_sigma, h_harmonic, log_one, mul_zero, add_zero]
 
+/-- σ(1) = 1 (unit has only itself as divisor). -/
+theorem sumOfDivisors_one : sumOfDivisors 1 = 1 := by
+  unfold sumOfDivisors; norm_num
+
+/-- σ(2) = 3 (divisors: 1, 2). -/
+theorem sumOfDivisors_two : sumOfDivisors 2 = 3 := by
+  unfold sumOfDivisors; native_decide
+
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
@@ -35,5 +43,7 @@ theorem lagarias_base_case :
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   1 PROVED theorem:
+--   3 PROVED theorems:
 --     ✅ lagarias_base_case — σ(1) ≤ H₁ + exp(H₁)·log(H₁)
+--     ✅ sumOfDivisors_one  — σ(1) = 1
+--     ✅ sumOfDivisors_two  — σ(2) = 3
