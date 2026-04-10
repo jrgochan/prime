@@ -129,6 +129,32 @@ noncomputable def nbDistSq' (N : ℕ) : ℝ :=
 def liouvilleFunction (n : ℕ) : ℤ :=
   (-1) ^ (n.factorization.sum (fun _ e => e))
 
+/-- λ(1) = 1  (Ω(1) = 0, even parity). -/
+theorem liouville_one : liouvilleFunction 1 = 1 := by native_decide
+
+/-- λ(2) = -1  (Ω(2) = 1, odd parity). -/
+theorem liouville_two : liouvilleFunction 2 = -1 := by native_decide
+
+/-- λ(4) = 1  (Ω(4) = 2, even parity). -/
+theorem liouville_four : liouvilleFunction 4 = 1 := by native_decide
+
+/-- λ(6) = 1  (Ω(6) = 2, even parity: 6 = 2·3). -/
+theorem liouville_six : liouvilleFunction 6 = 1 := by native_decide
+
+/-- λ(30) = -1  (Ω(30) = 3, odd parity: 30 = 2·3·5). -/
+theorem liouville_thirty : liouvilleFunction 30 = -1 := by native_decide
+
+/-- The Liouville function squares to 1: λ(n)² = 1 for all n ≥ 1.
+    Since λ(n) = ±1, this is immediate. -/
+theorem liouville_sq (n : ℕ) (_hn : 1 ≤ n) :
+    liouvilleFunction n ^ 2 = 1 := by
+  unfold liouvilleFunction
+  have h : ∀ k : ℕ, ((-1 : ℤ) ^ k) ^ 2 = 1 := by
+    intro k
+    rw [← pow_mul]
+    simp [show k * 2 = 2 * k from by ring, pow_mul]
+  exact h _
+
 -- ── LIOUVILLE PARITY DECOMPOSITION (PT-Symmetry, discovered 2026-04-01) ──
 
 /-- The Liouville parity operator P = diag(λ(2), λ(3), ..., λ(N)).

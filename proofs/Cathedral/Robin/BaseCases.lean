@@ -49,6 +49,30 @@ theorem sumOfDivisors_twentyeight : sumOfDivisors 28 = 56 := by
 theorem sumOfDivisors_5040 : sumOfDivisors 5040 = 19344 := by
   unfold sumOfDivisors; native_decide
 
+/-- σ(3) = 4 (divisors: 1, 3). -/
+theorem sumOfDivisors_three : sumOfDivisors 3 = 4 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(12) = 28 (divisors: 1, 2, 3, 4, 6, 12). -/
+theorem sumOfDivisors_twelve : sumOfDivisors 12 = 28 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(496) = 992 (496 is the third perfect number: σ(n) = 2n). -/
+theorem sumOfDivisors_496 : sumOfDivisors 496 = 992 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 6 is perfect: σ(6) = 2·6. -/
+theorem perfect_six : sumOfDivisors 6 = 2 * 6 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 28 is perfect: σ(28) = 2·28. -/
+theorem perfect_twentyeight : sumOfDivisors 28 = 2 * 28 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 496 is perfect: σ(496) = 2·496. -/
+theorem perfect_496 : sumOfDivisors 496 = 2 * 496 := by
+  unfold sumOfDivisors; native_decide
+
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════

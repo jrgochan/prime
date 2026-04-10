@@ -152,6 +152,17 @@ theorem vasyuninGramEntry_one_one :
   rw [vasyuninGramEntry_diag]
   simp
 
+/-- The second mean entry: b₂ = (ln(2) + 1 - γ) / 2 ≈ 0.5600. -/
+theorem vasyuninMeanEntry_two :
+    vasyuninMeanEntry 2 = (Real.log 2 + 1 - γ) / 2 := by
+  unfold vasyuninMeanEntry; norm_num
+
+/-- The second diagonal Gram entry: G(2,2) = (ln(2π) - γ)/2 - 1/4. -/
+theorem vasyuninGramEntry_two_two :
+    vasyuninGramEntry 2 2 =
+    (Real.log (2 * Real.pi) - γ) / 2 - 1 / 4 := by
+  rw [vasyuninGramEntry_diag]; norm_num
+
 -- ════════════════════════════════════════════════
 -- PART V: THE MATRICES
 -- ════════════════════════════════════════════════
