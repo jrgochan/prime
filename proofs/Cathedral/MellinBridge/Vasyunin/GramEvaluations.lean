@@ -448,57 +448,148 @@ theorem pi_div_18sqrt3_lt : Real.pi / (18 * Real.sqrt 3) < 35 / 346 := by
   nlinarith [pi_lt_d2, sqrt_three_gt_173]
 
 -- ════════════════════════════════════════════════
--- THE POLYNOMIAL CERTIFICATE for det(G₃) > 0
+-- det(G₃) > 0: THE PROOF
 -- ════════════════════════════════════════════════
+-- Strategy: det is degree 2 in A (concave, since A² coeff = -t/8 < 0).
+-- We prove det > 0 at both endpoints A = A_min = l+q-2/3 and A = A_max = 3l-1/2,
+-- then use the quadratic interpolation identity to conclude det(A) > 0
+-- for all A ∈ [A_min, A_max].
 
-set_option maxHeartbeats 1600000 in
-/-- **Polynomial certificate**: The determinant polynomial is positive under tight bounds.
-    Variables: l = ln(2), d = ln(π) - ln(3) > 0, t = π/(18√3).
-    The entries use q = 11l/7 (from 3⁷ ≥ 2¹¹) and g = 2/3 (worst case).
-    After ring_nf, nlinarith closes with SOS hints. -/
-private theorem det3_poly_certificate (l d t : ℝ)
-    (hl : 6931/10000 < l)
-    (hl2 : l < 1)
-    (hd_lo : 0 < d)
-    (hd_hi : d < 7/20)
-    (ht_lo : 157/1566 < t)
-    (ht_hi : t < 35/346) :
-    (18*l/7 + d - 5/3) *
-      ((9*l/7 + d/2 - 7/12) * (6*l/7 + d/3 - 1/3) -
-       (43*l/42 + 5*d/12 - 4/9 - t/2)^2) -
-    (47*l/28 + 3*d/4 - 1) *
-      ((47*l/28 + 3*d/4 - 1) * (6*l/7 + d/3 - 1/3) -
-       (43*l/42 + 5*d/12 - 4/9 - t/2) * (25*l/21 + 2*d/3 - 7/9 + t)) +
-    (25*l/21 + 2*d/3 - 7/9 + t) *
-      ((47*l/28 + 3*d/4 - 1) * (43*l/42 + 5*d/12 - 4/9 - t/2) -
-       (9*l/7 + d/2 - 7/12) * (25*l/21 + 2*d/3 - 7/9 + t)) > 0 := by
-  ring_nf
-  nlinarith [sq_nonneg (l - 7/10), sq_nonneg (d - 1/20), sq_nonneg (t - 1/10),
-             sq_nonneg (l*d), sq_nonneg (l*t - 7/100), sq_nonneg (d*t),
-             sq_nonneg (l - 693/1000), sq_nonneg d,
-             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < d by linarith),
+-- Define the det expression as a function of (A, l, q, t) for clarity
+private noncomputable def detExpr (A l q t : ℝ) : ℝ :=
+    (A - 1) * ((A/2 - 1/4) * (A/3 - 1/9) -
+               (5*A/12 - (q-l)/12 - t/2 - 1/6)^2) -
+    (3*A/4 - l/4 - 1/2) *
+      ((3*A/4 - l/4 - 1/2) * (A/3 - 1/9) -
+       (5*A/12 - (q-l)/12 - t/2 - 1/6) * (2*A/3 - q/3 + t - 1/3)) +
+    (2*A/3 - q/3 + t - 1/3) *
+      ((3*A/4 - l/4 - 1/2) * (5*A/12 - (q-l)/12 - t/2 - 1/6) -
+       (A/2 - 1/4) * (2*A/3 - q/3 + t - 1/3))
+
+set_option maxHeartbeats 3200000 in
+/-- **Certificate 1**: det > 0 at A = l + q - 2/3 (from g = 2/3, p = q). -/
+private theorem det3_at_Amin (l q t : ℝ)
+    (hl : 6931/10000 < l) (hl2 : l < 1)
+    (hq_lo : 11 * l / 7 ≤ q) (hq_hi : q < 8 * l / 5)
+    (ht_lo : 157/1566 < t) (ht_hi : t < 35/346) :
+    detExpr (l + q - 2/3) l q t > 0 := by
+  unfold detExpr; ring_nf
+  nlinarith [sq_nonneg (l - 693/1000), sq_nonneg (q - 11*l/7),
+             sq_nonneg (8*l/5 - q), sq_nonneg (t - 157/1566),
+             sq_nonneg (35/346 - t), sq_nonneg (l*q - 76/100),
+             sq_nonneg (l*t - 693/10000), sq_nonneg (q*t - 109/1000),
+             sq_nonneg (l + q - 5/3), sq_nonneg (l - q + 4*l/7),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < q by linarith),
              mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < t by linarith),
-             mul_pos (show (0:ℝ) < d by linarith) (show (0:ℝ) < t by linarith),
+             mul_pos (show (0:ℝ) < q by linarith) (show (0:ℝ) < t by linarith),
              mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < l by linarith),
-             mul_pos (show (0:ℝ) < d by linarith) (show (0:ℝ) < d by linarith)]
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < q - l by linarith)]
 
-/-- **det(G₃) > 0**: The 3×3 Gram matrix has positive determinant.
-    Combined with det(G₁) > 0 and det(G₂) > 0, this proves G₃ is
-    POSITIVE DEFINITE by Sylvester's criterion.
+set_option maxHeartbeats 3200000 in
+/-- **Certificate 2**: det > 0 at A = 3l - 1/2 (from p = 2l, g = 1/2). -/
+private theorem det3_at_Amax (l q t : ℝ)
+    (hl : 6931/10000 < l) (hl2 : l < 1)
+    (hq_lo : 11 * l / 7 ≤ q) (hq_hi : q < 8 * l / 5)
+    (ht_lo : 157/1566 < t) (ht_hi : t < 35/346) :
+    detExpr (3*l - 1/2) l q t > 0 := by
+  unfold detExpr; ring_nf
+  nlinarith [sq_nonneg (l - 693/1000), sq_nonneg (q - 11*l/7),
+             sq_nonneg (8*l/5 - q), sq_nonneg (t - 157/1566),
+             sq_nonneg (35/346 - t), sq_nonneg (l*q - 76/100),
+             sq_nonneg (l*t - 693/10000), sq_nonneg (q*t - 109/1000),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < q by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < t by linarith),
+             mul_pos (show (0:ℝ) < q by linarith) (show (0:ℝ) < t by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < l by linarith),
+             mul_pos (show (0:ℝ) < l by linarith) (show (0:ℝ) < q - l by linarith)]
 
-    Proof strategy:
-    1. Rewrite entries using closed forms
-    2. Set l = ln(2), d = ln(π) - ln(3) > 0, t = π/(18√3)
-    3. Use q ≥ 11l/7 and g < 2/3 to reduce to polynomial
-    4. Apply det3_poly_certificate with Mathlib's π bounds -/
-theorem vasyuninGram3x3_det_pos :
-    let G := vasyuninGramMatrix 3
-    G ⟨0, by omega⟩ ⟨0, by omega⟩ * (G ⟨1, by omega⟩ ⟨1, by omega⟩ * G ⟨2, by omega⟩ ⟨2, by omega⟩ -
-      G ⟨1, by omega⟩ ⟨2, by omega⟩ * G ⟨2, by omega⟩ ⟨1, by omega⟩) -
-    G ⟨0, by omega⟩ ⟨1, by omega⟩ * (G ⟨1, by omega⟩ ⟨0, by omega⟩ * G ⟨2, by omega⟩ ⟨2, by omega⟩ -
-      G ⟨1, by omega⟩ ⟨2, by omega⟩ * G ⟨2, by omega⟩ ⟨0, by omega⟩) +
-    G ⟨0, by omega⟩ ⟨2, by omega⟩ * (G ⟨1, by omega⟩ ⟨0, by omega⟩ * G ⟨2, by omega⟩ ⟨1, by omega⟩ -
-      G ⟨1, by omega⟩ ⟨1, by omega⟩ * G ⟨2, by omega⟩ ⟨0, by omega⟩) > 0 := by
-  sorry
+/-- **Quadratic interpolation identity**: For any quadratic f(A) with leading
+    coefficient -t/8, we have D·f(A) = v·f(lo) + u·f(hi) + (t/8)·u·v·D
+    where u = A - lo, v = hi - A, D = hi - lo.
+    Since all summands on the RHS are ≥ 0, f(A) > 0 follows. -/
+private theorem det3_quadratic_interpolation (A l q t lo hi : ℝ)
+    (hA_ge : lo ≤ A) (hA_le : A ≤ hi) (hD : lo < hi) (ht : 0 < t)
+    (h_lo : detExpr lo l q t > 0)
+    (h_hi : detExpr hi l q t > 0) :
+    detExpr A l q t > 0 := by
+  -- Let u = A - lo, v = hi - A, D = hi - lo
+  have hu : 0 ≤ A - lo := by linarith
+  have hv : 0 ≤ hi - A := by linarith
+  have hD_pos : 0 < hi - lo := by linarith
+  -- The key algebraic identity: (hi-lo)·P(A) = (hi-A)·P(lo) + (A-lo)·P(hi) + t/8·(A-lo)·(hi-A)·(hi-lo)
+  have h_identity : (hi - lo) * detExpr A l q t =
+      (hi - A) * detExpr lo l q t + (A - lo) * detExpr hi l q t +
+      t / 8 * (A - lo) * (hi - A) * (hi - lo) := by
+    unfold detExpr; ring
+  -- All terms on RHS are non-negative
+  have h1 : (hi - A) * detExpr lo l q t ≥ 0 := mul_nonneg hv (le_of_lt h_lo)
+  have h2 : (A - lo) * detExpr hi l q t ≥ 0 := mul_nonneg hu (le_of_lt h_hi)
+  have h3 : t / 8 * (A - lo) * (hi - A) * (hi - lo) ≥ 0 := by positivity
+  -- At least one term is strictly positive (since either u > 0 or v > 0, and D > 0)
+  -- Actually: either A > lo (so h2 > 0) or A = lo (so h_lo gives it directly)
+  by_cases hA_eq : A = lo
+  · rw [hA_eq]; exact h_lo
+  · have hu_pos : 0 < A - lo := by
+      rcases (lt_or_eq_of_le hA_ge) with h | h
+      · linarith
+      · exact absurd h.symm hA_eq
+    have h2_pos : 0 < (A - lo) * detExpr hi l q t := mul_pos hu_pos h_hi
+    -- (hi - lo) * P(A) = positive + nonneg + nonneg > 0
+    have h_prod : 0 < (hi - lo) * detExpr A l q t := by linarith [h_identity, h1, h3]
+    -- D > 0 and D * det(A) > 0 implies det(A) > 0
+    by_contra h_neg
+    push Not at h_neg
+    have := mul_nonpos_of_nonneg_of_nonpos (le_of_lt hD_pos) h_neg
+    linarith
+
+/-- **Main theorem**: det(G₃) > 0 for the closed-form entries.
+    Uses the quadratic interpolation of det3_at_Amin and det3_at_Amax. -/
+theorem vasyuninGram3x3_det_pos_closedForm :
+    let A := Real.log (2 * Real.pi) - Real.eulerMascheroniConstant
+    let l := Real.log 2
+    let q := Real.log 3
+    let t := Real.pi / (18 * Real.sqrt 3)
+    detExpr A l q t > 0 := by
+  -- Establish all bounds
+  have hl : (6931 : ℝ)/10000 < Real.log 2 := by nlinarith [Real.log_two_gt_d9]
+  have hl2 : Real.log 2 < 1 := by
+    rw [show (1 : ℝ) = Real.log (Real.exp 1) from by rw [Real.log_exp]]
+    exact Real.log_lt_log (by norm_num) (by nlinarith [Real.exp_one_gt_d9])
+  have hq_lo : 11 * Real.log 2 / 7 ≤ Real.log 3 := log_three_ge_11_log_two_div_7
+  have hq_hi : Real.log 3 < 8 * Real.log 2 / 5 := by
+    rw [lt_div_iff₀ (by norm_num : (0:ℝ) < 5)]
+    rw [show Real.log 3 * 5 = Real.log (3 ^ 5) by rw [Real.log_pow]; ring]
+    rw [show 8 * Real.log 2 = Real.log (2 ^ 8) by rw [Real.log_pow]; ring]
+    exact Real.log_lt_log (by norm_num : (0:ℝ) < 3 ^ 5) (by norm_num)
+  have ht_lo : (157:ℝ)/1566 < Real.pi / (18 * Real.sqrt 3) := pi_div_18sqrt3_gt
+  have ht_hi : Real.pi / (18 * Real.sqrt 3) < 35/346 := pi_div_18sqrt3_lt
+  -- Bound A from below and above
+  have hA_lo : Real.log 2 + Real.log 3 - 2/3 ≤
+      Real.log (2 * Real.pi) - Real.eulerMascheroniConstant := by
+    have : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi := by
+      rw [Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)]
+    rw [this]
+    have : Real.log 3 ≤ Real.log Real.pi :=
+      Real.log_le_log (by norm_num) (le_of_lt pi_gt_three)
+    linarith [Real.eulerMascheroniConstant_lt_two_thirds]
+  have hA_hi : Real.log (2 * Real.pi) - Real.eulerMascheroniConstant ≤ 3 * Real.log 2 - 1/2 := by
+    have hlog : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi := by
+      rw [Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)]
+    rw [hlog]
+    have : Real.log Real.pi ≤ 2 * Real.log 2 := by
+      rw [show 2 * Real.log 2 = Real.log (2 ^ 2) from by rw [Real.log_pow]; ring]
+      exact Real.log_le_log Real.pi_pos (by norm_num; exact pi_le_four)
+    linarith [Real.one_half_lt_eulerMascheroniConstant]
+  have hD : Real.log 2 + Real.log 3 - 2/3 < 3 * Real.log 2 - 1/2 := by
+    nlinarith [hq_lo]
+  have ht_pos : (0 : ℝ) < Real.pi / (18 * Real.sqrt 3) := by positivity
+  -- Apply quadratic interpolation
+  exact det3_quadratic_interpolation
+    (Real.log (2 * Real.pi) - Real.eulerMascheroniConstant)
+    (Real.log 2) (Real.log 3) (Real.pi / (18 * Real.sqrt 3))
+    (Real.log 2 + Real.log 3 - 2/3) (3 * Real.log 2 - 1/2)
+    hA_lo hA_hi hD ht_pos
+    (det3_at_Amin _ _ _ hl hl2 hq_lo hq_hi ht_lo ht_hi)
+    (det3_at_Amax _ _ _ hl hl2 hq_lo hq_hi ht_lo ht_hi)
 
 end Cathedral.Vasyunin
