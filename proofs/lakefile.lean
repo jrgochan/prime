@@ -20,6 +20,8 @@ lean_lib «Cathedral» where
     -- Linear algebra (abstract, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
     `Cathedral.LinearAlgebra.Variational,
+    `Cathedral.LinearAlgebra.SchurComplement,
+    `Cathedral.LinearAlgebra.Sylvester,
     -- Mellin Bridge: Nyman-Beurling + Vasyunin (the active proof chain)
     `Cathedral.MellinBridge.NymanBeurling,
     `Cathedral.MellinBridge.Vasyunin,

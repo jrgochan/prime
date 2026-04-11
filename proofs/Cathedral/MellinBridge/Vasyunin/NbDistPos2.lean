@@ -9,6 +9,7 @@
 -/
 
 import Cathedral.MellinBridge.Vasyunin.CovDet2
+import Cathedral.LinearAlgebra.Sylvester
 
 noncomputable section
 open Real Matrix Finset

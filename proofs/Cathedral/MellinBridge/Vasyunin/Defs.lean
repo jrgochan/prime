@@ -32,7 +32,7 @@ import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 import Mathlib.Data.Matrix.Basic
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Cathedral.LinearAlgebra.ShermanMorrison
-import Cathedral.LinearAlgebra.Variational
+import Cathedral.LinearAlgebra.SchurComplement
 
 noncomputable section
 open Real Matrix Finset

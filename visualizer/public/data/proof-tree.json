@@ -811,6 +811,33 @@
       "signature": "theorem vasyuninGram3x3_det_pos_closedForm : let A"
     },
     {
+      "id": "gramMatrix_entry_independent",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
+      "line": 67,
+      "signature": "theorem gramMatrix_entry_independent (N\u2081 N\u2082 : \u2115) (i : Fin N\u2081) (j : Fin N\u2081) (hi : i.val < N\u2082) (hj : j.val < N\u2082) : (vasyuninGramMatrix N\u2081) i j = (vasyuninGramMatrix N\u2082) \u27e8i.val, hi\u27e9 \u27e8j.val, hj\u27e9"
+    },
+    {
+      "id": "gramSchurComplement_pos",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
+      "line": 124,
+      "signature": "axiom gramSchurComplement_pos (N : \u2115) (hN : N \u2265 1) : vasyuninGramEntry (N+1) (N+1) - dotProduct (fun i : Fin N => vasyuninGramEntry (i.val+1) (N+1)) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (fun i : Fin N \u2026"
+    },
+    {
+      "id": "gramMatrix_diag_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
+      "line": 136,
+      "signature": "theorem gramMatrix_diag_pos (N : \u2115) (i : Fin N) : (vasyuninGramMatrix N) i i > 0"
+    },
+    {
       "id": "vasyunin_eq_integral",
       "type": "axiom",
       "category": "axiom",
@@ -870,7 +897,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
-      "line": 51,
+      "line": 52,
       "signature": "theorem gramMatrix2_posDef : (vasyuninGramMatrix 2).PosDef"
     },
     {
@@ -879,7 +906,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
-      "line": 94,
+      "line": 95,
       "signature": "theorem covMatrix2_posDef : (vasyuninCovMatrix 2).PosDef"
     },
     {
@@ -888,7 +915,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
-      "line": 112,
+      "line": 113,
       "signature": "theorem nbDistSq_pos_two : dotProduct (vasyuninMeanVec 2) ((vasyuninGramMatrix 2)\u207b\u00b9.mulVec (vasyuninMeanVec 2)) < 1"
     },
     {
@@ -897,7 +924,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
-      "line": 55,
+      "line": 56,
       "signature": "theorem covMatrix3_posDef : (vasyuninCovMatrix 3).PosDef"
     },
     {
@@ -906,7 +933,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
-      "line": 144,
+      "line": 145,
       "signature": "theorem gramMatrix3_posDef : (vasyuninGramMatrix 3).PosDef"
     },
     {
@@ -915,7 +942,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
-      "line": 165,
+      "line": 166,
       "signature": "theorem nbDistSq_pos_three : dotProduct (vasyuninMeanVec 3) ((vasyuninGramMatrix 3)\u207b\u00b9.mulVec (vasyuninMeanVec 3)) < 1"
     },
     {
@@ -1171,6 +1198,42 @@
       "signature": "theorem logCutoffWitness_last (N : \u2115) (hN : N \u2265 2) : logCutoffWitness N \u27e8N - 1, by omega\u27e9 = 0"
     },
     {
+      "id": "vecMulVec_self_hermitian",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/SchurComplement.lean",
+      "line": 30,
+      "signature": "theorem vecMulVec_self_hermitian (b : Fin n \u2192 \u211d) : (vecMulVec b b).IsHermitian"
+    },
+    {
+      "id": "vecMulVec_self_posSemidef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/SchurComplement.lean",
+      "line": 37,
+      "signature": "theorem vecMulVec_self_posSemidef (b : Fin n \u2192 \u211d) : (vecMulVec b b).PosSemidef"
+    },
+    {
+      "id": "schur_complement_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/SchurComplement.lean",
+      "line": 71,
+      "signature": "theorem schur_complement_posDef (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (h_schur : dotProduct b (G\u207b\u00b9.mulVec b) < 1) : (G - vecMulVec b b).PosDef"
+    },
+    {
+      "id": "schur_complement_converse",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/SchurComplement.lean",
+      "line": 121,
+      "signature": "theorem schur_complement_converse (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (hC : (G - vecMulVec b b).PosDef) : dotProduct b (G\u207b\u00b9.mulVec b) < 1"
+    },
+    {
       "id": "vecMulVec_mulVec_eq",
       "type": "lemma",
       "category": "proved",
@@ -1252,12 +1315,39 @@
       "signature": "theorem dist_sq_bounds (X : \u211d) (hX_pos : 0 < X) : 0 < 1 / (1 + X) \u2227 1 / (1 + X) < 1"
     },
     {
+      "id": "sylvester_2x2",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Sylvester.lean",
+      "line": 36,
+      "signature": "theorem sylvester_2x2 (M : Matrix (Fin 2) (Fin 2) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) : M.PosDef"
+    },
+    {
+      "id": "sylvester_3x3",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Sylvester.lean",
+      "line": 88,
+      "signature": "theorem sylvester_3x3 (M : Matrix (Fin 3) (Fin 3) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) (h3 : M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) - M 0 1 * (M 0 1 * M 2 2 - \u2026"
+    },
+    {
+      "id": "bordered_matrix_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Sylvester.lean",
+      "line": 177,
+      "signature": "theorem bordered_matrix_posDef {n : \u2115} (M : Matrix (Fin (n+1)) (Fin (n+1)) \u211d) (hH : M.IsHermitian) (A : Matrix (Fin n) (Fin n) \u211d) (hA_eq : \u2200 i j : Fin n, M \u27e8i.val, Nat.lt_succ_of_lt i.isLt\u27e9 \u27e8j.val,\u2026"
+    },
+    {
       "id": "realQuadForm",
       "type": "def",
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 35,
+      "line": 42,
       "signature": "def realQuadForm (A : Matrix (Fin n) (Fin n) \u211d) (x : Fin n \u2192 \u211d) : \u211d"
     },
     {
@@ -1266,7 +1356,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 52,
+      "line": 59,
       "signature": "theorem variational_bound (G : Matrix (Fin n) (Fin n) \u211d) (b v : Fin n \u2192 \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) : realQuadForm G v - 2 * dotProduct b v + dotProduct b \u2026"
     },
     {
@@ -1275,7 +1365,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 103,
+      "line": 110,
       "signature": "theorem cauchy_schwarz_quadform (G : Matrix (Fin n) (Fin n) \u211d) (b v : Fin n \u2192 \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) (hv_pos : realQuadForm G v > 0) : (dotProduct b v\u2026"
     },
     {
@@ -1284,62 +1374,8 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 180,
+      "line": 157,
       "signature": "theorem posSemidef_pos_of_ne_zero {n : \u2115} (G : Matrix (Fin n) (Fin n) \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) (x : Fin n \u2192 \u211d) (hx : x \u2260 0) : dotProduct x (G.mulVec x) > 0"
-    },
-    {
-      "id": "vecMulVec_self_hermitian",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 285,
-      "signature": "theorem vecMulVec_self_hermitian (b : Fin n \u2192 \u211d) : (vecMulVec b b).IsHermitian"
-    },
-    {
-      "id": "vecMulVec_self_posSemidef",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 292,
-      "signature": "theorem vecMulVec_self_posSemidef (b : Fin n \u2192 \u211d) : (vecMulVec b b).PosSemidef"
-    },
-    {
-      "id": "schur_complement_posDef",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 330,
-      "signature": "theorem schur_complement_posDef (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (h_schur : dotProduct b (G\u207b\u00b9.mulVec b) < 1) : (G - vecMulVec b b).PosDef"
-    },
-    {
-      "id": "schur_complement_converse",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 380,
-      "signature": "theorem schur_complement_converse (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (hC : (G - vecMulVec b b).PosDef) : dotProduct b (G\u207b\u00b9.mulVec b) < 1"
-    },
-    {
-      "id": "sylvester_2x2",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 437,
-      "signature": "theorem sylvester_2x2 (M : Matrix (Fin 2) (Fin 2) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) : M.PosDef"
-    },
-    {
-      "id": "sylvester_3x3",
-      "type": "theorem",
-      "category": "proved",
-      "route": "infrastructure",
-      "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 485,
-      "signature": "theorem sylvester_3x3 (M : Matrix (Fin 3) (Fin 3) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) (h3 : M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) - M 0 1 * (M 0 1 * M 2 2 - \u2026"
     },
     {
       "id": "lagarias_base_case",
@@ -3565,6 +3601,78 @@
     },
     {
       "source": "vasyuninGramEntry",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "gramMatrix2_posDef",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "gramMatrix2_posDef",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "gramMatrix2_posDef",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "gramMatrix3_posDef",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "gramMatrix3_posDef",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "gramMatrix3_posDef",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_posDef",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "vasyuninGramMatrix_posDef",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_posDef",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "gramMatrix_entry_independent"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "gramSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "gramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
       "target": "vasyunin_eq_integral"
     },
     {
@@ -4204,6 +4312,34 @@
       "target": "variational_lower_bound"
     },
     {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninGramMatrix_posDef"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyunin_nbDistSq_pos"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "variational_lower_bound"
+    },
+    {
       "source": "realQuadForm",
       "target": "vasyuninCovMatrix_hermitian"
     },
@@ -4260,34 +4396,6 @@
       "target": "variational_lower_bound"
     },
     {
-      "source": "schur_complement_posDef",
-      "target": "vasyuninCovMatrix_hermitian"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "vasyuninGramMatrix_posDef"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "vasyunin_nbDistSq_pos"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "vasyuninCovMatrix_posDef"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "vasyuninCovMatrix_posSemidef"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "vasyuninCovMatrix_isUnit_det"
-    },
-    {
-      "source": "schur_complement_posDef",
-      "target": "variational_lower_bound"
-    },
-    {
       "source": "vasyuninGramEntry",
       "target": "vasyuninGramEntry_comm"
     },
@@ -4558,6 +4666,38 @@
     {
       "source": "vecMulVec_self_posSemidef",
       "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vecMulVec_self_hermitian"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vecMulVec_self_posSemidef"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "schur_complement_posDef"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "schur_complement_converse"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vecMulVec_self_hermitian"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vecMulVec_self_posSemidef"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "schur_complement_posDef"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "schur_complement_converse"
     },
     {
       "source": "sumOfDivisors",
@@ -5013,14 +5153,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 197,
-    "totalEdges": 809,
-    "axiomCount": 6,
-    "theoremCount": 156,
+    "totalNodes": 201,
+    "totalEdges": 835,
+    "axiomCount": 7,
+    "theoremCount": 159,
     "definitionCount": 35,
-    "provedTheorems": 156,
-    "fileCount": 22,
-    "description": "Cathedral proof architecture: 6 axioms, 156 theorems, 35 definitions across 22 files",
-    "generatedAt": "2026-04-11T04:30:49.921989"
+    "provedTheorems": 159,
+    "fileCount": 25,
+    "description": "Cathedral proof architecture: 7 axioms, 159 theorems, 35 definitions across 25 files",
+    "generatedAt": "2026-04-11T05:03:58.331808"
   }
 }
