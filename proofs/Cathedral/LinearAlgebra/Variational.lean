@@ -548,5 +548,52 @@ theorem sylvester_3x3
       have h_prod : M 0 0 * x 0 = 0 := sq_eq_zero_iff.mp h_sq
       exact (mul_eq_zero.mp h_prod).resolve_left (ne_of_gt h1)
     apply hx; ext i; fin_cases i <;> simp_all
+-- ════════════════════════════════════════════════
+-- SECTION 8: BORDERED MATRIX PD (Inductive Step)
+-- ════════════════════════════════════════════════
+
+/-- **Bordered matrix positive definiteness.**
+
+    If a Hermitian (n+1)×(n+1) matrix M has:
+    - Leading n×n submatrix A that is PD
+    - Schur complement s = M(n,n) - gᵀA⁻¹g > 0
+
+    then M is PD.
+
+    This is the key theorem for inductive proofs of Gram matrix PD.
+
+    The proof uses completing the square:
+    xᵀMx = (x_top + A⁻¹g · x_n)ᵀ A (x_top + A⁻¹g · x_n) + s · x_n²
+
+    where x_top ∈ ℝⁿ, x_n ∈ ℝ is the last component,
+    g = border vector, s = Schur complement.
+
+    Both terms are non-negative, and for x ≠ 0, at least one is positive.
+-/
+theorem bordered_matrix_posDef {n : ℕ}
+    (M : Matrix (Fin (n+1)) (Fin (n+1)) ℝ)
+    (hH : M.IsHermitian)
+    -- The leading n×n submatrix
+    (A : Matrix (Fin n) (Fin n) ℝ)
+    (hA_eq : ∀ i j : Fin n, M ⟨i.val, Nat.lt_succ_of_lt i.isLt⟩ ⟨j.val, Nat.lt_succ_of_lt j.isLt⟩ = A i j)
+    (hA_pd : A.PosDef)
+    -- The border vector
+    (g : Fin n → ℝ)
+    (hg_eq : ∀ i : Fin n, M ⟨i.val, Nat.lt_succ_of_lt i.isLt⟩ ⟨n, Nat.lt_succ_iff.mpr le_rfl⟩ = g i)
+    -- The Schur complement is positive
+    (hs : M ⟨n, Nat.lt_succ_iff.mpr le_rfl⟩ ⟨n, Nat.lt_succ_iff.mpr le_rfl⟩ -
+          dotProduct g (A⁻¹.mulVec g) > 0) :
+    M.PosDef := by
+  -- Use the submatrix PD criterion: the leading n×n block is PD
+  -- and the Schur complement s > 0. Together: M is PD.
+  --
+  -- Bridge Fin (n+1) ≃ Fin n ⊕ Fin 1 via fromBlocks + submatrix.
+  -- This avoids explicit Fin decomposition by using Mathlib's
+  -- existing block matrix infrastructure.
+  --
+  -- For now, we leave this as a documented sorry.
+  -- The mathematically equivalent fromBlocks₁₁ is in Mathlib
+  -- (gives PSD; we upgrade to PD via the strict Schur condition).
+  sorry
 
 end Cathedral.Variational
