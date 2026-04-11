@@ -46,10 +46,59 @@ theorem vasyuninCovMatrix_hermitian (N : ℕ) :
   · funext i j
     simp [Matrix.conjTranspose_apply, star_trivial, vecMulVec, mul_comm]
 
+-- ════════════════════════════════════════════════
+-- PART X-A: THE GEOMETRY HEIST — AXIOM DECOMPOSITION
+--
+-- The old opaque axiom `vasyuninCovMatrix_posDef` hid two
+-- profound geometric facts. We now expose them separately:
+--
+-- Axiom 1: "The fractional sawtooth waves {k/x} are linearly
+--           independent in L²(0,1)."  → Gram matrix is PD
+--
+-- Axiom 2: "The constant function 1 cannot be perfectly
+--           reconstructed from finitely many sawtooth waves."
+--           → Nyman-Beurling distance d²_N > 0
+--
+-- Together, Schur complement gives C = G - bbᵀ PD. ∎
+-- ════════════════════════════════════════════════
+
+/-- **GEOMETRIC AXIOM 1: The Gram matrix is positive definite.**
+
+    The discrete Vasyunin Gram matrix G_N(j,k) = ∫₀¹ {j/x}{k/x}dx
+    is positive definite for N ≥ 3.
+
+    Geometric meaning: The fractional-part basis functions
+    {1/x}, {2/x}, ..., {N/x} are linearly independent in L²(0,1).
+    This is a well-known fact of functional analysis — the sawtooth
+    waves have distinct discontinuity structures at x = k/m and
+    cannot cancel each other. -/
+axiom vasyuninGramMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
+    (vasyuninGramMatrix N).PosDef
+
+/-- **GEOMETRIC AXIOM 2: The NB distance is strictly positive.**
+
+    For any finite truncation N, the constant function 1 is NOT
+    in the closed span of {1/x}, ..., {N/x}, i.e., d²_N > 0.
+
+    Equivalently: bᵀG⁻¹b < 1, where b is the mean vector.
+
+    This is unconditionally true for all finite N — the NB
+    equivalence says d²_N → 0 iff RH, but d²_N > 0 always.
+    In the Gram matrix picture: the projection of 1 onto the
+    finite sawtooth subspace always falls short. -/
+axiom vasyunin_nbDistSq_pos (N : ℕ) (hN : N ≥ 3) :
+    dotProduct (vasyuninMeanVec N)
+      ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)) < 1
+
 /-- **The covariance matrix is positive definite for N ≥ 3.**
-    This is the KEY STRUCTURAL AXIOM. -/
-axiom vasyuninCovMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
-    (vasyuninCovMatrix N).PosDef
+    NOW A THEOREM: derived from the two geometric axioms via
+    Schur complement (Variational.lean). -/
+theorem vasyuninCovMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
+    (vasyuninCovMatrix N).PosDef := by
+  unfold vasyuninCovMatrix
+  exact Cathedral.Variational.schur_complement_posDef
+    (vasyuninGramMatrix N) (vasyuninMeanVec N)
+    (vasyuninGramMatrix_posDef N hN) (vasyunin_nbDistSq_pos N hN)
 
 /-- The covariance matrix is positive semidefinite (derived from PosDef). -/
 theorem vasyuninCovMatrix_posSemidef (N : ℕ) (hN : N ≥ 3) :
@@ -60,16 +109,6 @@ theorem vasyuninCovMatrix_posSemidef (N : ℕ) (hN : N ≥ 3) :
 theorem vasyuninCovMatrix_isUnit_det (N : ℕ) (hN : N ≥ 3) :
     IsUnit (vasyuninCovMatrix N).det :=
   (vasyuninCovMatrix N).isUnit_iff_isUnit_det.mp (vasyuninCovMatrix_posDef N hN).isUnit
-
-/-- **AXIOM DECOMPOSITION**: The PosDef axiom follows from two simpler conditions. -/
-theorem vasyuninCovMatrix_posDef_from_gram (N : ℕ)
-    (hG : (vasyuninGramMatrix N).PosDef)
-    (h_schur : dotProduct (vasyuninMeanVec N)
-      ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)) < 1) :
-    (vasyuninCovMatrix N).PosDef := by
-  unfold vasyuninCovMatrix
-  exact Cathedral.Variational.schur_complement_posDef
-    (vasyuninGramMatrix N) (vasyuninMeanVec N) hG h_schur
 
 /-- **The Dual Variational Principle — NOW A THEOREM.**
     Derived from abstract Cauchy-Schwarz (Variational.lean). -/
