@@ -7,6 +7,7 @@
 
 import Cathedral.MellinBridge.Vasyunin.Structural
 import Cathedral.MellinBridge.Vasyunin.Witness
+import Cathedral.MellinBridge.Vasyunin.GramInduction
 
 noncomputable section
 open Real Matrix Finset
@@ -62,18 +63,20 @@ theorem vasyuninCovMatrix_hermitian (N : ℕ) :
 -- Together, Schur complement gives C = G - bbᵀ PD. ∎
 -- ════════════════════════════════════════════════
 
-/-- **GEOMETRIC AXIOM 1: The Gram matrix is positive definite.**
+/-- **GEOMETRIC FACT 1: The Gram matrix is positive definite.**
 
     The discrete Vasyunin Gram matrix G_N(j,k) = ∫₀¹ {j/x}{k/x}dx
     is positive definite for N ≥ 3.
 
     Geometric meaning: The fractional-part basis functions
     {1/x}, {2/x}, ..., {N/x} are linearly independent in L²(0,1).
-    This is a well-known fact of functional analysis — the sawtooth
-    waves have distinct discontinuity structures at x = k/m and
-    cannot cancel each other. -/
-axiom vasyuninGramMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
-    (vasyuninGramMatrix N).PosDef
+
+    FORMERLY AN AXIOM — now proved by induction using:
+    - Base case: G₂ PD (Sylvester 2×2 criterion)
+    - Inductive step: bordered_matrix_posDef + gramSchurComplement_pos -/
+theorem vasyuninGramMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
+    (vasyuninGramMatrix N).PosDef :=
+  vasyuninGramMatrix_posDef_inductive N (by omega)
 
 /-- **GEOMETRIC AXIOM 2: The NB distance is strictly positive.**
 

@@ -140,35 +140,65 @@ theorem gramMatrix_diag_pos (N : ℕ) (i : Fin N) :
   exact vasyuninGramEntry_diag_pos (i.val + 1) (by omega)
 
 -- ════════════════════════════════════════════════
--- §5. THE INDUCTIVE PROOF (SKETCH)
+-- §5. THE INDUCTIVE PROOF
 -- ════════════════════════════════════════════════
 
-/-
-  **THE FULL INDUCTIVE PROOF (not yet formalized):**
+/-- **The Gram matrix G_{N+1} is a bordered extension of G_N.**
+    This connects the Gram matrix definition to the bordered matrix framework. -/
+theorem gramMatrix_bordered_eq (N : ℕ) (i j : Fin N) :
+    (vasyuninGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) =
+    (vasyuninGramMatrix N) i j := by
+  simp [vasyuninGramMatrix, of_apply, Fin.castSucc]
 
-  Theorem: G_N is PD for all N ≥ 1.
+/-- The border vector of G_{N+1} is the cross-correlation with f_{N+1}. -/
+theorem gramMatrix_border_eq (N : ℕ) (i : Fin N) :
+    (vasyuninGramMatrix (N+1)) (Fin.castSucc i) (Fin.last N) =
+    vasyuninGramEntry (i.val + 1) (N + 1) := by
+  simp [vasyuninGramMatrix, of_apply, Fin.castSucc, Fin.last]
 
-  Proof by strong induction on N:
-  - Base: N = 1: G₁ = [[G(1,1)]] = [[A - 1]]. Since A ≈ 1.26 > 1,
-    this 1×1 matrix is PD. ✓
-  - Base: N = 2: G₂ PD — proved in NbDistPos2.lean (gramMatrix2_posDef). ✓
-  - Base: N = 3: G₃ PD — proved in NbDistPos3.lean (gramMatrix3_posDef). ✓
-  - Step: Assume G_N PD for some N ≥ 1.
-    G_{N+1} is the bordered matrix [G_N, g; gᵀ, α].
-    The Schur complement α - gᵀG_N⁻¹g > 0 (by gramSchurComplement_pos).
-    Therefore G_{N+1} is PD. ∎
+/-- The corner entry of G_{N+1} is G(N+1, N+1). -/
+theorem gramMatrix_corner_eq (N : ℕ) :
+    (vasyuninGramMatrix (N+1)) (Fin.last N) (Fin.last N) =
+    vasyuninGramEntry (N + 1) (N + 1) := by
+  simp [vasyuninGramMatrix, of_apply, Fin.last]
 
-  To formalize the Step, we need:
-  1. A "bordered matrix PD" theorem in Variational.lean
-  2. Connection between vasyuninGramMatrix (N+1) and the bordered form
-  3. The gramSchurComplement_pos axiom (or its proof)
+/-- **THE INDUCTIVE STEP: G_N PD implies G_{N+1} PD.**
+    Uses bordered_matrix_posDef + gramSchurComplement_pos. -/
+theorem gramMatrix_posDef_step (N : ℕ) (hN : N ≥ 1)
+    (hGN : (vasyuninGramMatrix N).PosDef) :
+    (vasyuninGramMatrix (N + 1)).PosDef := by
+  apply Cathedral.Variational.bordered_matrix_posDef
+    (vasyuninGramMatrix (N+1))
+    (vasyuninGramMatrix_symmetric (N+1))
+    (vasyuninGramMatrix N)
+    (gramMatrix_bordered_eq N)
+    hGN
+    (fun i => vasyuninGramEntry (i.val + 1) (N + 1))
+    (gramMatrix_border_eq N)
+  -- Schur complement: α - gᵀG_N⁻¹g > 0
+  simp only [vasyuninGramMatrix, of_apply]
+  exact gramSchurComplement_pos N hN
 
-  The bordered matrix theorem is standard linear algebra.
-  The connection is definitional.
-  The Schur complement positivity is the deep content (discontinuity argument).
+/-- **THEOREM: G_N is positive definite for all N ≥ 2.**
 
-  With this framework, axiom 2 (vasyuninGramMatrix_posDef) would be
-  REDUCED TO gramSchurComplement_pos, which has clearer geometric content.
--/
+    Proved by induction:
+    - Base: G₂ PD (NbDistPos2.lean: gramMatrix2_posDef)
+    - Step: G_N PD → G_{N+1} PD (bordered_matrix_posDef + gramSchurComplement_pos)
+
+    This theorem REPLACES the axiom `vasyuninGramMatrix_posDef` in Rayleigh.lean.
+    The only remaining axiom is `gramSchurComplement_pos`. -/
+theorem vasyuninGramMatrix_posDef_inductive (N : ℕ) (hN : N ≥ 2) :
+    (vasyuninGramMatrix N).PosDef := by
+  -- Induction on N starting from base case N = 2
+  induction N with
+  | zero => omega
+  | succ n ih =>
+    by_cases hn2 : n = 1
+    · -- Base case: N = 2
+      subst hn2; exact gramMatrix2_posDef
+    · -- Inductive step: n + 1, with n ≥ 2
+      have hn_ge_2 : n ≥ 2 := by omega
+      have hn_ge_1 : n ≥ 1 := by omega
+      exact gramMatrix_posDef_step n hn_ge_1 (ih hn_ge_2)
 
 end Cathedral.Vasyunin
