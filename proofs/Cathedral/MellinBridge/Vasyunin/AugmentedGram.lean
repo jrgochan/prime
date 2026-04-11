@@ -8,10 +8,9 @@
 
   where b is the mean vector and G_N is the Gram matrix.
 
-  Key properties:
-  - H_N PD implies G_N PD (leading principal submatrix)
-  - H_N PD implies C_N = G_N - bbᵀ PD (Schur complement w.r.t. 1×1 block)
-  - H_N PD implies bᵀG⁻¹b < 1 (Schur complement w.r.t. G_N block)
+  Key properties (all proven, zero sorry):
+  - H_N PD implies G_N PD (trailing principal submatrix, §6b)
+  - H_N PD implies bᵀG⁻¹b < 1 (witness vector w=(1,-G⁻¹b), §7)
 
   This file unifies gramSchurComplement_pos and vasyunin_nbDistSq_pos
   into a single axiom: augmentedSchurComplement_pos.
@@ -22,8 +21,8 @@
   Created April 11, 2026.
 -/
 
-import Cathedral.MellinBridge.Vasyunin.NbDistPos3
-import Cathedral.MellinBridge.Vasyunin.NbDistPos2
+import Cathedral.MellinBridge.Vasyunin.CovDet3
+import Cathedral.LinearAlgebra.Sylvester
 
 noncomputable section
 open Real Matrix Finset

@@ -258,7 +258,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 47,
+      "line": 46,
       "signature": "noncomputable def augmentedGramMatrix (N : \u2115) : Matrix (Fin (N+1)) (Fin (N+1)) \u211d"
     },
     {
@@ -267,7 +267,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 63,
+      "line": 62,
       "signature": "theorem augmentedGramMatrix_symmetric (N : \u2115) : (augmentedGramMatrix N).IsHermitian"
     },
     {
@@ -276,7 +276,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 70,
+      "line": 69,
       "signature": "theorem augmented_corner_eq (N : \u2115) : augmentedGramMatrix N \u27e80, Nat.zero_lt_succ N\u27e9 \u27e80, Nat.zero_lt_succ N\u27e9 = 1"
     },
     {
@@ -285,7 +285,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 75,
+      "line": 74,
       "signature": "theorem augmented_bordered_eq (N : \u2115) (i j : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) = (augmentedGramMatrix N) i j"
     },
     {
@@ -294,7 +294,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 81,
+      "line": 80,
       "signature": "theorem augmented_border_eq (N : \u2115) (i : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.last (N+1)) = if i.val = 0 then vasyuninMeanEntry (N+1) else vasyuninGramEntry i.val (N+1)"
     },
     {
@@ -303,7 +303,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 89,
+      "line": 88,
       "signature": "theorem augmented_last_eq (N : \u2115) : (augmentedGramMatrix (N+1)) (Fin.last (N+1)) (Fin.last (N+1)) = vasyuninGramEntry (N+1) (N+1)"
     },
     {
@@ -312,7 +312,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 122,
+      "line": 121,
       "signature": "axiom augmentedSchurComplement_pos (N : \u2115) (hN : N \u2265 1) : let H"
     },
     {
@@ -321,7 +321,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 134,
+      "line": 133,
       "signature": "theorem augmented_posDef_step (N : \u2115) (hN : N \u2265 1) (hHN : (augmentedGramMatrix N).PosDef) : (augmentedGramMatrix (N + 1)).PosDef"
     },
     {
@@ -330,7 +330,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 162,
+      "line": 161,
       "signature": "theorem augmented1_posDef : (augmentedGramMatrix 1).PosDef"
     },
     {
@@ -339,7 +339,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 198,
+      "line": 197,
       "signature": "theorem augmentedGramMatrix_posDef (N : \u2115) (hN : N \u2265 1) : (augmentedGramMatrix N).PosDef"
     },
     {
@@ -348,7 +348,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 258,
+      "line": 257,
       "signature": "theorem gramMatrix_posDef_from_augmented (N : \u2115) (hN : N \u2265 1) : (vasyuninGramMatrix N).PosDef"
     },
     {
@@ -357,7 +357,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 358,
+      "line": 357,
       "signature": "theorem nbDistSq_pos_from_augmented (N : \u2115) (hN : N \u2265 1) (hG : (vasyuninGramMatrix N).PosDef) : dotProduct (vasyuninMeanVec N) (nbGinvb N) < 1"
     },
     {
@@ -5870,6 +5870,6 @@
     "provedTheorems": 169,
     "fileCount": 25,
     "description": "Cathedral proof architecture: 5 axioms, 169 theorems, 36 definitions across 25 files",
-    "generatedAt": "2026-04-11T06:12:18.903173"
+    "generatedAt": "2026-04-11T06:25:15.905692"
   }
 }
