@@ -8,6 +8,7 @@
 import Cathedral.MellinBridge.Vasyunin.Defs
 import Cathedral.MellinBridge.Vasyunin.Structural
 import Cathedral.MellinBridge.Vasyunin.GramEvaluations
+import Cathedral.MellinBridge.Vasyunin.CovDet3
 import Cathedral.MellinBridge.Vasyunin.Witness
 import Cathedral.MellinBridge.Vasyunin.Rayleigh
 import Cathedral.MellinBridge.Vasyunin.Chain
