@@ -343,12 +343,21 @@
       "signature": "theorem augmentedGramMatrix_posDef (N : \u2115) (hN : N \u2265 1) : (augmentedGramMatrix N).PosDef"
     },
     {
+      "id": "gramMatrix_posDef_from_augmented",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 258,
+      "signature": "theorem gramMatrix_posDef_from_augmented (N : \u2115) (hN : N \u2265 1) : (vasyuninGramMatrix N).PosDef"
+    },
+    {
       "id": "nbDistSq_pos_from_augmented",
       "type": "theorem",
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 298,
+      "line": 358,
       "signature": "theorem nbDistSq_pos_from_augmented (N : \u2115) (hN : N \u2265 1) (hG : (vasyuninGramMatrix N).PosDef) : dotProduct (vasyuninMeanVec N) (nbGinvb N) < 1"
     },
     {
@@ -910,78 +919,6 @@
       "signature": "theorem vasyuninGram3x3_det_pos_closedForm : let A"
     },
     {
-      "id": "gramMatrix_entry_independent",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 67,
-      "signature": "theorem gramMatrix_entry_independent (N\u2081 N\u2082 : \u2115) (i : Fin N\u2081) (j : Fin N\u2081) (hi : i.val < N\u2082) (hj : j.val < N\u2082) : (vasyuninGramMatrix N\u2081) i j = (vasyuninGramMatrix N\u2082) \u27e8i.val, hi\u27e9 \u27e8j.val, hj\u27e9"
-    },
-    {
-      "id": "gramSchurComplement_pos",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 124,
-      "signature": "axiom gramSchurComplement_pos (N : \u2115) (hN : N \u2265 1) : vasyuninGramEntry (N+1) (N+1) - dotProduct (fun i : Fin N => vasyuninGramEntry (i.val+1) (N+1)) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (fun i : Fin N \u2026"
-    },
-    {
-      "id": "gramMatrix_diag_pos",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 136,
-      "signature": "theorem gramMatrix_diag_pos (N : \u2115) (i : Fin N) : (vasyuninGramMatrix N) i i > 0"
-    },
-    {
-      "id": "gramMatrix_bordered_eq",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 148,
-      "signature": "theorem gramMatrix_bordered_eq (N : \u2115) (i j : Fin N) : (vasyuninGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) = (vasyuninGramMatrix N) i j"
-    },
-    {
-      "id": "gramMatrix_border_eq",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 154,
-      "signature": "theorem gramMatrix_border_eq (N : \u2115) (i : Fin N) : (vasyuninGramMatrix (N+1)) (Fin.castSucc i) (Fin.last N) = vasyuninGramEntry (i.val + 1) (N + 1)"
-    },
-    {
-      "id": "gramMatrix_corner_eq",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 160,
-      "signature": "theorem gramMatrix_corner_eq (N : \u2115) : (vasyuninGramMatrix (N+1)) (Fin.last N) (Fin.last N) = vasyuninGramEntry (N + 1) (N + 1)"
-    },
-    {
-      "id": "gramMatrix_posDef_step",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 167,
-      "signature": "theorem gramMatrix_posDef_step (N : \u2115) (hN : N \u2265 1) (hGN : (vasyuninGramMatrix N).PosDef) : (vasyuninGramMatrix (N + 1)).PosDef"
-    },
-    {
-      "id": "vasyuninGramMatrix_posDef_inductive",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramInduction.lean",
-      "line": 190,
-      "signature": "theorem vasyuninGramMatrix_posDef_inductive (N : \u2115) (hN : N \u2265 2) : (vasyuninGramMatrix N).PosDef"
-    },
-    {
       "id": "vasyunin_eq_integral",
       "type": "axiom",
       "category": "axiom",
@@ -1095,7 +1032,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 24,
+      "line": 23,
       "signature": "noncomputable def rayleighQuotient (N : \u2115) (v : Fin N \u2192 \u211d) : \u211d"
     },
     {
@@ -1104,7 +1041,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 33,
+      "line": 32,
       "signature": "noncomputable def vasyuninQuadForm (N : \u2115) : \u211d"
     },
     {
@@ -1113,7 +1050,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 42,
+      "line": 41,
       "signature": "theorem vasyuninCovMatrix_hermitian (N : \u2115) : (vasyuninCovMatrix N).IsHermitian"
     },
     {
@@ -1122,7 +1059,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 78,
+      "line": 76,
       "signature": "theorem vasyuninGramMatrix_posDef (N : \u2115) (hN : N \u2265 3) : (vasyuninGramMatrix N).PosDef"
     },
     {
@@ -1131,7 +1068,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 92,
+      "line": 90,
       "signature": "theorem vasyunin_nbDistSq_pos (N : \u2115) (hN : N \u2265 3) : dotProduct (vasyuninMeanVec N) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (vasyuninMeanVec N)) < 1"
     },
     {
@@ -1140,7 +1077,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 100,
+      "line": 98,
       "signature": "theorem vasyuninCovMatrix_posDef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosDef"
     },
     {
@@ -1149,7 +1086,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 108,
+      "line": 106,
       "signature": "theorem vasyuninCovMatrix_posSemidef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosSemidef"
     },
     {
@@ -1158,7 +1095,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 113,
+      "line": 111,
       "signature": "theorem vasyuninCovMatrix_isUnit_det (N : \u2115) (hN : N \u2265 3) : IsUnit (vasyuninCovMatrix N).det"
     },
     {
@@ -1167,7 +1104,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 119,
+      "line": 117,
       "signature": "theorem variational_lower_bound (N : \u2115) (hN : N \u2265 3) (v : Fin N \u2192 \u211d) (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) : rayleighQuotient N v \u2264 vasyuninQuadForm N"
     },
     {
@@ -1993,6 +1930,10 @@
     },
     {
       "source": "covEntry_00",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "covEntry_00",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2030,6 +1971,10 @@
     {
       "source": "covEntry_00_pos",
       "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "gramMatrix_posDef_from_augmented"
     },
     {
       "source": "covEntry_00_pos",
@@ -2073,6 +2018,10 @@
     },
     {
       "source": "vasyuninGramEntry",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2113,6 +2062,10 @@
     },
     {
       "source": "vasyuninMeanEntry",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanEntry",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2153,6 +2106,10 @@
     },
     {
       "source": "vasyuninMeanEntry_one",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2193,6 +2150,10 @@
     },
     {
       "source": "vasyuninGramEntry_one_one",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2233,6 +2194,10 @@
     },
     {
       "source": "vasyuninGramMatrix",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninGramMatrix",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2273,6 +2238,10 @@
     },
     {
       "source": "vasyuninMeanVec",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanVec",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2313,46 +2282,10 @@
     },
     {
       "source": "vasyuninCovMatrix",
-      "target": "nbDistSq_pos_from_augmented"
+      "target": "gramMatrix_posDef_from_augmented"
     },
     {
-      "source": "gramSchurComplement_pos",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "gramSchurComplement_pos",
+      "source": "vasyuninCovMatrix",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2390,6 +2323,10 @@
     {
       "source": "vasyunin_nbDistSq_pos",
       "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "gramMatrix_posDef_from_augmented"
     },
     {
       "source": "vasyunin_nbDistSq_pos",
@@ -2433,6 +2370,54 @@
     },
     {
       "source": "vasyuninGramEntry_comm",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2470,6 +2455,10 @@
     {
       "source": "sylvester_2x2",
       "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "gramMatrix_posDef_from_augmented"
     },
     {
       "source": "sylvester_2x2",
@@ -2510,6 +2499,10 @@
     {
       "source": "bordered_matrix_posDef",
       "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "gramMatrix_posDef_from_augmented"
     },
     {
       "source": "bordered_matrix_posDef",
@@ -4302,230 +4295,6 @@
     {
       "source": "vasyuninGramEntry_comm",
       "target": "vasyuninGram3x3_det_pos_closedForm"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "gramMatrix2_posDef",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
-      "target": "vasyuninGramMatrix_posDef_inductive"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_entry_independent"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramSchurComplement_pos"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_diag_pos"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_bordered_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_border_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_corner_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_posDef_step"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninGramMatrix_posDef_inductive"
     },
     {
       "source": "vasyuninGramEntry",
@@ -5084,6 +4853,34 @@
       "target": "variational_lower_bound"
     },
     {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyuninGramMatrix_posDef"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyunin_nbDistSq_pos"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "gramMatrix_posDef_from_augmented",
+      "target": "variational_lower_bound"
+    },
+    {
       "source": "nbDistSq_pos_from_augmented",
       "target": "vasyuninCovMatrix_hermitian"
     },
@@ -5196,62 +4993,6 @@
       "target": "variational_lower_bound"
     },
     {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyuninCovMatrix_hermitian"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyuninGramMatrix_posDef"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyunin_nbDistSq_pos"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyuninCovMatrix_posDef"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyuninCovMatrix_posSemidef"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "vasyuninCovMatrix_isUnit_det"
-    },
-    {
-      "source": "gramSchurComplement_pos",
-      "target": "variational_lower_bound"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyuninCovMatrix_hermitian"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyuninGramMatrix_posDef"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyunin_nbDistSq_pos"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyuninCovMatrix_posDef"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyuninCovMatrix_posSemidef"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "vasyuninCovMatrix_isUnit_det"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef_inductive",
-      "target": "variational_lower_bound"
-    },
-    {
       "source": "vasyuninGramMatrix_symmetric",
       "target": "vasyuninCovMatrix_hermitian"
     },
@@ -5305,34 +5046,6 @@
     },
     {
       "source": "schur_complement_posDef",
-      "target": "variational_lower_bound"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninCovMatrix_hermitian"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninGramMatrix_posDef"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyunin_nbDistSq_pos"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninCovMatrix_posDef"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninCovMatrix_posSemidef"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "vasyuninCovMatrix_isUnit_det"
-    },
-    {
-      "source": "bordered_matrix_posDef",
       "target": "variational_lower_bound"
     },
     {
@@ -6149,14 +5862,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 217,
-    "totalEdges": 1048,
-    "axiomCount": 6,
-    "theoremCount": 175,
+    "totalNodes": 210,
+    "totalEdges": 992,
+    "axiomCount": 5,
+    "theoremCount": 169,
     "definitionCount": 36,
-    "provedTheorems": 175,
-    "fileCount": 26,
-    "description": "Cathedral proof architecture: 6 axioms, 175 theorems, 36 definitions across 26 files",
-    "generatedAt": "2026-04-11T06:05:57.326550"
+    "provedTheorems": 169,
+    "fileCount": 25,
+    "description": "Cathedral proof architecture: 5 axioms, 169 theorems, 36 definitions across 25 files",
+    "generatedAt": "2026-04-11T06:12:18.903173"
   }
 }
