@@ -253,6 +253,105 @@
       "signature": "theorem zeta_ne_zero_of_re_gt_one (s : \u2102) (hs : 1 < s.re) : riemannZeta s \u2260 0"
     },
     {
+      "id": "augmentedGramMatrix",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 47,
+      "signature": "noncomputable def augmentedGramMatrix (N : \u2115) : Matrix (Fin (N+1)) (Fin (N+1)) \u211d"
+    },
+    {
+      "id": "augmentedGramMatrix_symmetric",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 63,
+      "signature": "theorem augmentedGramMatrix_symmetric (N : \u2115) : (augmentedGramMatrix N).IsHermitian"
+    },
+    {
+      "id": "augmented_corner_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 70,
+      "signature": "theorem augmented_corner_eq (N : \u2115) : augmentedGramMatrix N \u27e80, Nat.zero_lt_succ N\u27e9 \u27e80, Nat.zero_lt_succ N\u27e9 = 1"
+    },
+    {
+      "id": "augmented_bordered_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 75,
+      "signature": "theorem augmented_bordered_eq (N : \u2115) (i j : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) = (augmentedGramMatrix N) i j"
+    },
+    {
+      "id": "augmented_border_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 81,
+      "signature": "theorem augmented_border_eq (N : \u2115) (i : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.last (N+1)) = if i.val = 0 then vasyuninMeanEntry (N+1) else vasyuninGramEntry i.val (N+1)"
+    },
+    {
+      "id": "augmented_last_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 89,
+      "signature": "theorem augmented_last_eq (N : \u2115) : (augmentedGramMatrix (N+1)) (Fin.last (N+1)) (Fin.last (N+1)) = vasyuninGramEntry (N+1) (N+1)"
+    },
+    {
+      "id": "augmentedSchurComplement_pos",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 122,
+      "signature": "axiom augmentedSchurComplement_pos (N : \u2115) (hN : N \u2265 1) : let H"
+    },
+    {
+      "id": "augmented_posDef_step",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 134,
+      "signature": "theorem augmented_posDef_step (N : \u2115) (hN : N \u2265 1) (hHN : (augmentedGramMatrix N).PosDef) : (augmentedGramMatrix (N + 1)).PosDef"
+    },
+    {
+      "id": "augmented1_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 162,
+      "signature": "theorem augmented1_posDef : (augmentedGramMatrix 1).PosDef"
+    },
+    {
+      "id": "augmentedGramMatrix_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 198,
+      "signature": "theorem augmentedGramMatrix_posDef (N : \u2115) (hN : N \u2265 1) : (augmentedGramMatrix N).PosDef"
+    },
+    {
+      "id": "nbDistSq_pos_from_augmented",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 298,
+      "signature": "theorem nbDistSq_pos_from_augmented (N : \u2115) (hN : N \u2265 1) (hG : (vasyuninGramMatrix N).PosDef) : dotProduct (vasyuninMeanVec N) (nbGinvb N) < 1"
+    },
+    {
       "id": "log_cutoff_witness_bound",
       "type": "axiom",
       "category": "axiom",
@@ -996,7 +1095,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 23,
+      "line": 24,
       "signature": "noncomputable def rayleighQuotient (N : \u2115) (v : Fin N \u2192 \u211d) : \u211d"
     },
     {
@@ -1005,7 +1104,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 32,
+      "line": 33,
       "signature": "noncomputable def vasyuninQuadForm (N : \u2115) : \u211d"
     },
     {
@@ -1014,7 +1113,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 41,
+      "line": 42,
       "signature": "theorem vasyuninCovMatrix_hermitian (N : \u2115) : (vasyuninCovMatrix N).IsHermitian"
     },
     {
@@ -1023,17 +1122,17 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 77,
+      "line": 78,
       "signature": "theorem vasyuninGramMatrix_posDef (N : \u2115) (hN : N \u2265 3) : (vasyuninGramMatrix N).PosDef"
     },
     {
       "id": "vasyunin_nbDistSq_pos",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
       "line": 92,
-      "signature": "axiom vasyunin_nbDistSq_pos (N : \u2115) (hN : N \u2265 3) : dotProduct (vasyuninMeanVec N) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (vasyuninMeanVec N)) < 1  /-- **The covariance matrix is positive definite for N \u2265\u2026"
+      "signature": "theorem vasyunin_nbDistSq_pos (N : \u2115) (hN : N \u2265 3) : dotProduct (vasyuninMeanVec N) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (vasyuninMeanVec N)) < 1"
     },
     {
       "id": "vasyuninCovMatrix_posDef",
@@ -1041,7 +1140,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 99,
+      "line": 100,
       "signature": "theorem vasyuninCovMatrix_posDef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosDef"
     },
     {
@@ -1050,7 +1149,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 107,
+      "line": 108,
       "signature": "theorem vasyuninCovMatrix_posSemidef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosSemidef"
     },
     {
@@ -1059,7 +1158,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 112,
+      "line": 113,
       "signature": "theorem vasyuninCovMatrix_isUnit_det (N : \u2115) (hN : N \u2265 3) : IsUnit (vasyuninCovMatrix N).det"
     },
     {
@@ -1068,7 +1167,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
-      "line": 118,
+      "line": 119,
       "signature": "theorem variational_lower_bound (N : \u2115) (hN : N \u2265 3) (v : Fin N \u2192 \u211d) (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) : rayleighQuotient N v \u2264 vasyuninQuadForm N"
     },
     {
@@ -1857,6 +1956,566 @@
   ],
   "edges": [
     {
+      "source": "covEntry_00",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "gramSchurComplement_pos",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyunin_nbDistSq_pos",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmentedSchurComplement_pos"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented_posDef_step"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmented1_posDef"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "bordered_matrix_posDef",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
       "source": "cot",
       "target": "log_cutoff_witness_bound"
     },
@@ -4395,6 +5054,62 @@
     {
       "source": "sylvester_3x3",
       "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyuninGramMatrix_posDef"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyunin_nbDistSq_pos"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "augmentedGramMatrix_posDef",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyuninGramMatrix_posDef"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyunin_nbDistSq_pos"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "nbDistSq_pos_from_augmented",
+      "target": "variational_lower_bound"
     },
     {
       "source": "vasyuninGramMatrix",
@@ -5434,14 +6149,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 206,
-    "totalEdges": 894,
+    "totalNodes": 217,
+    "totalEdges": 1048,
     "axiomCount": 6,
-    "theoremCount": 165,
-    "definitionCount": 35,
-    "provedTheorems": 165,
-    "fileCount": 25,
-    "description": "Cathedral proof architecture: 6 axioms, 165 theorems, 35 definitions across 25 files",
-    "generatedAt": "2026-04-11T05:34:11.278053"
+    "theoremCount": 175,
+    "definitionCount": 36,
+    "provedTheorems": 175,
+    "fileCount": 26,
+    "description": "Cathedral proof architecture: 6 axioms, 175 theorems, 36 definitions across 26 files",
+    "generatedAt": "2026-04-11T06:05:57.326550"
   }
 }

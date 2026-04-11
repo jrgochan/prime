@@ -7,7 +7,7 @@
 
 import Cathedral.MellinBridge.Vasyunin.Structural
 import Cathedral.MellinBridge.Vasyunin.Witness
-import Cathedral.MellinBridge.Vasyunin.GramInduction
+import Cathedral.MellinBridge.Vasyunin.AugmentedGram
 
 noncomputable section
 open Real Matrix Finset
@@ -71,27 +71,26 @@ theorem vasyuninCovMatrix_hermitian (N : ℕ) :
     Geometric meaning: The fractional-part basis functions
     {1/x}, {2/x}, ..., {N/x} are linearly independent in L²(0,1).
 
-    FORMERLY AN AXIOM — now proved by induction using:
-    - Base case: G₂ PD (Sylvester 2×2 criterion)
-    - Inductive step: bordered_matrix_posDef + gramSchurComplement_pos -/
+    FORMERLY AN AXIOM — now derived from augmentedGramMatrix_posDef.
+    G_N is the trailing submatrix of H_N, so xᵀG_Nx = (0,x)ᵀH_N(0,x) > 0. -/
 theorem vasyuninGramMatrix_posDef (N : ℕ) (hN : N ≥ 3) :
     (vasyuninGramMatrix N).PosDef :=
-  vasyuninGramMatrix_posDef_inductive N (by omega)
+  gramMatrix_posDef_from_augmented N (by omega)
 
-/-- **GEOMETRIC AXIOM 2: The NB distance is strictly positive.**
+/-- **GEOMETRIC AXIOM 2 → NOW A THEOREM.**
 
     For any finite truncation N, the constant function 1 is NOT
     in the closed span of {1/x}, ..., {N/x}, i.e., d²_N > 0.
 
     Equivalently: bᵀG⁻¹b < 1, where b is the mean vector.
 
-    This is unconditionally true for all finite N — the NB
-    equivalence says d²_N → 0 iff RH, but d²_N > 0 always.
-    In the Gram matrix picture: the projection of 1 onto the
-    finite sawtooth subspace always falls short. -/
-axiom vasyunin_nbDistSq_pos (N : ℕ) (hN : N ≥ 3) :
+    PREVIOUSLY AN AXIOM. Now derived from augmentedGramMatrix_posDef
+    via the witness vector w = (1, -G⁻¹b).
+    Key identity: wᵀH_Nw = 1 - bᵀG⁻¹b > 0 (since H_N PD). -/
+theorem vasyunin_nbDistSq_pos (N : ℕ) (hN : N ≥ 3) :
     dotProduct (vasyuninMeanVec N)
-      ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)) < 1
+      ((vasyuninGramMatrix N)⁻¹.mulVec (vasyuninMeanVec N)) < 1 :=
+  nbDistSq_pos_from_augmented N (by omega) (vasyuninGramMatrix_posDef N hN)
 
 /-- **The covariance matrix is positive definite for N ≥ 3.**
     NOW A THEOREM: derived from the two geometric axioms via
