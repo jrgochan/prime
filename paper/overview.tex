@@ -27,22 +27,20 @@ quadratic form built from M\"obius values and Vasyunin cotangent sums.
 
 No integrals. No complex plane. No analytic continuation. No measure theory.
 
-The formalization compiles in 3,073 build steps across 21 active Lean files
+The formalization compiles in 3,076 build steps across 25 active Lean files
 with \textbf{zero errors and zero \texttt{sorry} placeholders}.
-In the active proof chain, only \textbf{two axioms} remain:
-(1)~positive definiteness of the Vasyunin covariance matrix, and
+In the active proof chain, only \textbf{five axioms} remain:
+(1)~a geometric axiom (augmented Gram matrix Schur complement positivity),
 (2)~the logarithmic growth of the explicit log cutoff Rayleigh quotient---which
-IS the Riemann Hypothesis.
-Five former axioms (Cauchy--Schwarz, witness positivity, Hermitian,
-PSD, invertibility) are now compiler-verified theorems.
+IS the Riemann Hypothesis,
+(3)~a definitional bridge (Vasyunin integral identity),
+and (4--5)~two classical literature equivalences (Lagarias/Robin).
 
-As standalone results, we prove the Sherman--Morrison identity
-$d_N^2 = 1/(1+X_N)$ with zero axioms, Gram diagonal positivity
-$G(k,k) > 0$ using Mathlib bounds on $\pi$, $e$, $\gamma$,
-and derive the full proof chain
-$\text{Witness} \to X_N \to \infty \to d_N^2 \to 0 \to \text{RH}$
-as a machine-verified theorem. For $N=3$, both $G_3$ and $C_3$ are proved
-positive definite via polynomial positivity certificates.
+The \emph{augmented Gram matrix} $H_N = \begin{psmallmatrix} 1 & b^T \\ b & G_N \end{psmallmatrix}$
+unifies the entire geometric foundation: from a single axiom about its Schur
+complement, we derive $G_N$ positive definite (trailing submatrix), $b^T G_N^{-1} b < 1$
+(witness vector), and the covariance matrix $C_N = G_N - bb^T$ positive definite
+(Schur complement)---all as compiler-verified theorems.
 \end{abstract}
 
 \section{What Did We Do?}
@@ -52,7 +50,7 @@ We used a computer proof assistant called \textbf{Lean~4} to reduce the
 about weighted M\"obius sums over cotangent values.
 
 \textbf{We did not prove RH.} We built a \emph{machine-verified framework}
-that identifies exactly which mathematical fact remains to be established,
+that identifies exactly which mathematical facts remain to be established,
 proves everything else with compiler-checked rigor, and reduces the entire
 problem to a finite, computable quantity.
 
@@ -74,6 +72,25 @@ $V(a,b) = \sum_{m=1}^{a-1} \{mb/a\} \cot(\pi m/a)$.
 This formula involves only: $\gcd$, $\log$, $\cot$, and fractional parts.
 \textbf{No integrals appear anywhere.}
 
+\subsection{The Augmented Gram Matrix}
+
+The key architectural insight is the \emph{augmented Gram matrix}:
+\[
+H_N = \begin{pmatrix} 1 & b^T \\ b & G_N \end{pmatrix}
+\]
+This is the Gram matrix of $\{1, f_1, \ldots, f_N\}$ in $L^2(0,1)$,
+where $f_k(x) = \{k/x\}$ are the fractional-part sawtooth functions.
+
+From the single axiom that the Schur complement of $H_N$ is positive
+(i.e., $f_{N+1}$ cannot be perfectly reconstructed from
+$\{1, f_1, \ldots, f_N\}$), we prove by induction that $H_N$ is
+positive definite for all $N \geq 1$. This yields:
+\begin{itemize}
+\item $G_N$ PD (trailing submatrix embedding $w = (0, x)$)
+\item $b^T G_N^{-1} b < 1$ (witness vector $w = (1, -G_N^{-1}b)$)
+\item $C_N = G_N - bb^T$ PD (Schur complement)
+\end{itemize}
+
 \subsection{The Log Cutoff Witness}
 
 The explicit witness vector
@@ -82,7 +99,7 @@ v_k = -\mu(k)\left(1 - \frac{\ln k}{\ln N}\right)
 \]
 defines a Rayleigh quotient $Q_N = (b^T v)^2 / (v^T C_N v)$ that provides
 a \emph{constructive lower bound} on $X_N = b^T C_N^{-1} b$ via the
-variational principle. Experimentally (Attack~8, to $N=50{,}000$):
+variational principle. Experimentally (Attack~9, to $N=20{,}000$):
 
 \begin{center}
 \begin{tabular}{rrrr}
@@ -94,7 +111,6 @@ $N$ & $\ln N$ & $Q_N/\ln N$ & $\Delta$ \\
 5000 & 8.52 & 12.45 & +0.88 \\
 10000 & 9.21 & 12.96 & +0.51 \\
 20000 & 9.90 & 13.44 & +0.48 \\
-50000 & 10.82 & 14.01 & +0.57 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -118,54 +134,57 @@ the $L^2$ variational principle.
   &\text{RH}
 \end{align*}
 
-Every arrow is a \textbf{machine-verified Lean~4 theorem}. Only one axiom
-(the witness bound) encodes the Riemann Hypothesis itself; one structural
-axiom (positive definiteness) completes the chain.
+Every arrow is a \textbf{machine-verified Lean~4 theorem}.
 
-\section{The Two Core Axioms}
+\section{The Five Axioms}
 
 \begin{enumerate}
-\item \textbf{Covariance Positive Definiteness} (\texttt{vasyuninCovMatrix\_posDef}):
-  The covariance matrix $C_N$ is positive definite for $N \geq 3$.
-  \emph{Status: Structural axiom. From this, Hermitian symmetry, PSD,
-  invertibility, witness positivity, and Cauchy--Schwarz are all derived
-  as theorems. The $N=3$ case is formally verified: $\det(C_3) > 0$
-  (\texttt{covMatrix3\_det3\_pos}) via polynomial certificates in
-  5 transcendentals.}
+\item \textbf{Augmented Schur Complement Positivity}
+  (\texttt{augmentedSchurComplement\_pos}):
+  The $(N+1)$th sawtooth function $f_{N+1}$ has positive distance from
+  $\mathrm{span}\{1, f_1, \ldots, f_N\}$.
+  \emph{Status: Geometric fact. The jump discontinuity of $f_{N+1}$ at
+  $x = (N+1)/(N+2)$ cannot be reproduced by lower-frequency sawteeth.}
 
 \item \textbf{Log Cutoff Witness Bound} (\texttt{log\_cutoff\_witness\_bound}):
   $\exists\,c > 0,\;\exists\,N_0,\;\forall\,N \geq N_0$:
   $c \cdot \ln N \leq Q_N(v_{\text{log}})$.
   \emph{Status: This IS the Riemann Hypothesis, expressed as a finite
   double sum of cotangents.}
-\end{enumerate}
 
-\noindent Two literature axioms (\texttt{lagarias\_iff\_rh},
-\texttt{robin\_iff\_rh}) live on the independent Robin/Lagarias front.
+\item \textbf{Vasyunin Integral Bridge} (\texttt{vasyunin\_eq\_integral}):
+  The Vasyunin cotangent formula equals
+  $\int_0^1 \{j/x\}\{k/x\}\,dx$.
+  \emph{Status: Definitional axiom. Published by Vasyunin (1995) and
+  B\'aez-Duarte et al.\ (2005).}
+
+\item \textbf{Lagarias Equivalence} (\texttt{lagarias\_iff\_rh}):
+  RH $\iff \sigma(n) \leq H_n + e^{H_n}\ln H_n$ for all $n \geq 1$.
+  \emph{Status: Classical literature (Lagarias, 2002).}
+
+\item \textbf{Robin Equivalence} (\texttt{robin\_iff\_rh}):
+  RH $\iff \sigma(n) < e^\gamma n\ln\ln n$ for all $n \geq 5041$.
+  \emph{Status: Classical literature (Robin, 1984).}
+\end{enumerate}
 
 \section{What We Proved (Zero Sorry)}
 
 \begin{itemize}
-\item \texttt{vasyuninGramEntry\_comm}: $G(j,k) = G(k,j)$.
-\item \texttt{vasyuninGramEntry\_diag\_pos}: $G(k,k) > 0$ for all $k \geq 1$
-  (from Mathlib bounds on $\pi$, $e$, $\gamma$).
-\item \texttt{vasyuninCovMatrix\_hermitian}: $C = C^T$ (derived from PosDef).
-\item \texttt{variational\_lower\_bound}: Cauchy--Schwarz in the $C$-inner product
-  (formerly an axiom, now a theorem).
-\item \texttt{log\_cutoff\_witness\_pos}: $v^T C v > 0$
-  (formerly an axiom, now proved via polarization argument).
-\item \texttt{posSemidef\_pos\_of\_ne\_zero}: PSD + invertible + $v \neq 0$
-  $\implies v^T G v > 0$ (first-principles discriminant proof).
-\item \texttt{logCutoffWitness\_ne\_zero}: $v \neq 0$ since $v_1 = -\mu(1) = -1$.
+\item \texttt{augmentedGramMatrix\_posDef}: $H_N$ PD for all $N \geq 1$
+  (induction via bordered matrix theorem, 1 axiom).
+\item \texttt{gramMatrix\_posDef\_from\_augmented}: $G_N$ PD
+  (trailing submatrix embedding).
+\item \texttt{nbDistSq\_pos\_from\_augmented}: $b^T G^{-1} b < 1$
+  (witness vector $w = (1, -G^{-1}b)$).
+\item \texttt{vasyuninCovMatrix\_posDef}: $C_N$ PD (Schur complement).
+\item \texttt{variational\_lower\_bound}: Cauchy--Schwarz in the $C$-inner product.
+\item \texttt{log\_cutoff\_witness\_pos}: $v^T C v > 0$.
 \item \texttt{quadForm\_diverges}: $X_N \geq c \cdot \ln N$.
 \item \texttt{nb\_dist\_via\_witness}: $d^2 = 1/(1+X)$. Zero axioms.
-\item \texttt{one\_plus\_cov\_ne\_zero}: $1 + X \neq 0$. Zero axioms.
 \item \texttt{lagarias\_for\_primes}: $\sigma(p) \leq H_p + e^{H_p}\ln H_p$
   for all primes. Zero axioms.
-\item \texttt{covMatrix3\_det3\_pos}: $\det(C_3) > 0$ (covariance matrix).
-  Zero axioms. Degree-6 polynomial in 5 transcendentals.
-\item \texttt{covMatrix3\_det2\_pos}: $\det(C_2) > 0$.
-  Double quadratic interpolation.
+\item \texttt{covMatrix3\_det3\_pos}: $\det(C_3) > 0$ (polynomial certificates
+  in 5 transcendentals). Zero axioms.
 \end{itemize}
 
 \section{Architecture}
@@ -175,25 +194,27 @@ axiom (positive definiteness) completes the chain.
 \small
 \begin{tabular}{llrr}
 \toprule
-\textbf{File} & \textbf{Role} & \textbf{Sorry} & \textbf{Axioms} \\
+\textbf{Component} & \textbf{Role} & \textbf{Sorry} & \textbf{Axioms} \\
 \midrule
-\texttt{ShermanMorrison.lean} & $d^2 = 1/(1+X)$ & 0 & 0 \\
-\texttt{Variational.lean}     & Cauchy--Schwarz + PosDef bridge & 0 & 0 \\
-\texttt{Vasyunin/*.lean}        & Gram + covariance + witness + chain (10 files) & 0 & 2 \\
-\texttt{Robin/*.lean}         & Discrete arithmetic (6 files) & 0 & 2 \\
-\texttt{Defs.lean + NB.lean}  & Core definitions & 0 & 0 \\
+\texttt{LinearAlgebra/} & Sherman--Morrison, Variational, Sylvester & 0 & 0 \\
+\texttt{AugmentedGram.lean} & $H_N$ PD, $G_N$ PD, $b^TG^{-1}b < 1$ & 0 & 1 \\
+\texttt{Vasyunin/*.lean}     & Gram entries, covariance, witness, chain & 0 & 2 \\
+\texttt{Robin/*.lean}       & Discrete arithmetic (6 files) & 0 & 2 \\
+\texttt{Defs.lean + NB.lean} & Core definitions & 0 & 0 \\
 \midrule
-\textbf{Total (21 files)}     &                        & \textbf{0} & \textbf{4} \\
+\textbf{Total (25 files)}   &                        & \textbf{0} & \textbf{5} \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\noindent Proof tree: 210 nodes (5 axioms, 169 theorems, 36 definitions), 992 edges.
 
 \section{How to Verify}
 
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # 3,073 jobs, zero errors, zero sorry
+lake build    # 3,076 jobs, zero errors, zero sorry
 \end{verbatim}
 
 \end{document}

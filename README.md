@@ -3,23 +3,24 @@
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the logarithmic growth of a single explicit
 Rayleigh quotient built from the Möbius function and the Vasyunin cotangent
-sum. Compiles in **3,073 build jobs** with **zero `sorry`**, **zero warnings**,
-and **4 axioms** on the active proof chain.
+sum. Compiles in **3,076 build jobs** with **zero `sorry`**, **zero warnings**,
+and **5 axioms** on the active proof chain.
 
 ## The Honest Assessment
 
 > *This formalization does not prove the Riemann Hypothesis. It reduces*
 > *its entire mathematical content to a single finite statement about*
 > *Möbius-weighted cotangent sums—which IS the RH, expressed as a*
-> *computable quantity—plus one structural axiom (covariance matrix*
-> *positive definiteness, itself provably reducible to Gram matrix PD).*
+> *computable quantity—plus one geometric axiom (the augmented Gram*
+> *matrix Schur complement), one definitional bridge (the Vasyunin*
+> *integral identity), and two classical equivalences (Lagarias/Robin).*
 > *Everything else is compiler-verified.*
 
 ## Quick Start
 
 ```bash
 cd proofs
-lake build          # 3,073 jobs, ~2 min, zero errors
+lake build          # 3,076 jobs, ~2 min, zero errors
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -37,7 +38,18 @@ and b_k = (ln k + 1 - γ)/k.
 **No continuous integrals. No complex plane. No analytic continuation. No measure theory.**
 Only: Möbius function, gcd, logarithm, cotangent, and fractional parts.
 
-## Architecture: The Vasyunin Variational Path
+## Architecture: The Augmented Gram Matrix
+
+### The Ultimate Matrix
+
+The augmented Gram matrix H_N = [1, bᵀ; b, G_N] is the Gram matrix of
+{1, f_1, ..., f_N} in L²(0,1). From a single axiom (its Schur complement
+is positive), all geometric properties are derived:
+
+- **H_N PD** for all N ≥ 1 (by induction via bordered matrix theorem)
+- **G_N PD** (trailing submatrix: xᵀG_Nx = (0,x)ᵀH_N(0,x) > 0)
+- **bᵀG⁻¹b < 1** (witness vector: wᵀH_Nw = 1 - bᵀG⁻¹b > 0)
+- **C_N = G_N - bbᵀ PD** (Schur complement of G_N)
 
 ### The Proof Chain
 
@@ -54,14 +66,24 @@ Discrete arithmetic equivalences connecting RH to divisor-sum inequalities.
 **Unconditional result** (zero axioms):
 - `lagarias_for_primes` — σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p ✓
 
-## The 4 Axioms
+## The 5 Axioms
 
-| Axiom | File | Nature |
-|---|---|---|
-| `log_cutoff_witness_bound` | Chain.lean | **THE RH itself** — verified numerically to N=50,000 |
-| `vasyuninCovMatrix_posDef` | Rayleigh.lean | Structural — reducible to G_N PD |
-| `lagarias_iff_rh` | Robin/Defs.lean | Literature (Lagarias 2002) |
-| `robin_iff_rh` | Robin/Defs.lean | Literature (Robin 1984) |
+| # | Axiom | File | Nature |
+|---|---|---|---|
+| 1 | `augmentedSchurComplement_pos` | AugmentedGram.lean | **Geometric** — sawtooth discontinuity |
+| 2 | `log_cutoff_witness_bound` | Chain.lean | **THE RH itself** — Selberg sieve bound |
+| 3 | `vasyunin_eq_integral` | GramPSD.lean | **Definitional** — L² integral bridge |
+| 4 | `lagarias_iff_rh` | Robin/Defs.lean | Literature (Lagarias 2002) |
+| 5 | `robin_iff_rh` | Robin/Defs.lean | Literature (Robin 1984) |
+
+### What Was Eliminated
+
+| Former Axiom | How It Was Proved |
+|---|---|
+| `vasyuninGramMatrix_posDef` | Induction via bordered matrix theorem |
+| `gramSchurComplement_pos` | Subsumed by augmented Schur complement |
+| `vasyunin_nbDistSq_pos` | Witness vector w = (1, -G⁻¹b) |
+| `vasyuninCovMatrix_posDef` | Schur complement of G_N PD + bᵀG⁻¹b < 1 |
 
 All other structural properties—Hermitian symmetry, positive semidefiniteness,
 determinant invertibility, witness positivity, and the variational principle—are
@@ -71,11 +93,11 @@ determinant invertibility, witness positivity, and the variational principle—a
 
 | Result | Status |
 |---|---|
-| `covMatrix3_det3_pos` — det(C₃) > 0 | **Proved** (zero sorry, polynomial certificates) |
-| `covMatrix3_det2_pos` — det(C₂) > 0 | **Proved** (double interpolation) |
-| `covEntry_00_pos` — C₀₀ > 0 | **Proved** |
+| `augmentedGramMatrix_posDef` — H_N PD for all N ≥ 1 | **Proved** (induction, 1 axiom) |
+| `gramMatrix_posDef_from_augmented` — G_N PD for all N ≥ 1 | **Proved** (trailing submatrix) |
+| `nbDistSq_pos_from_augmented` — bᵀG⁻¹b < 1 | **Proved** (witness vector) |
+| `covMatrix3_det3_pos` — det(C₃) > 0 | **Proved** (polynomial certificates) |
 | `vasyuninGram3x3_det_pos_closedForm` — det(G₃) > 0 | **Proved** (quadratic interpolation) |
-| `vasyuninGram2x2_det_pos` — det(G₂) > 0 | **Proved** |
 | `nbDistSq_decays` — d²_N → 0 | **Proved** (from axioms) |
 | `quadForm_diverges` — X_N ≥ c·ln(N) | **Proved** (from axioms) |
 | `lagarias_for_primes` — σ(p) ≤ Lagarias bound | **Proved** (0 axioms) |
@@ -84,17 +106,27 @@ determinant invertibility, witness positivity, and the variational principle—a
 ## Repository Structure
 
 ```
-proofs/              — Lean 4 formalization (21 active files, 4 axioms, 0 sorry)
+proofs/              — Lean 4 formalization (25 active files, 5 axioms, 0 sorry)
   Cathedral/         — The proof architecture
     Defs.lean        — Core definitions
-    LinearAlgebra/   — Sherman-Morrison, Variational principle
+    LinearAlgebra/   — Sherman-Morrison, Variational principle, Sylvester
     MellinBridge/    — Nyman-Beurling bridge + Vasyunin framework
-      Vasyunin/      — The heart: Gram entries, covariance proofs, witness chain
+      Vasyunin/      — The heart: AugmentedGram, Gram entries, covariance, chain
     Robin/           — Robin/Lagarias discrete arithmetic front
-    Archive/         — Historical explorations (38 files, off critical path)
+    Archive/         — Historical explorations
 paper/               — LaTeX paper and overview
 experiments/         — Numerical experiments (Rust/MPFR, Python)
+visualizer/          — Next.js proof tree visualizer
 docs/                — Collaboration logs and analysis
+```
+
+## Proof Tree
+
+```
+Nodes: 210 (5 axioms, 169 theorems, 36 definitions)
+Edges: 992
+Files: 25
+Routes: infrastructure (45), mellin (3), variational (114), robin (48)
 ```
 
 ## Papers
@@ -115,11 +147,10 @@ Build PDFs: `cd paper && pdflatex cathedral.tex && pdflatex overview.tex`
    with no knowledge of primes, independently discovered μ(k) — Selberg's parity
    barrier, emergent from pure linear algebra.
 
-3. **The Covariance Positivity Certificate**: The 3×3 covariance matrix
-   determinant, a degree-6 polynomial in 5 transcendentals (ln 2, γ, ln 3,
-   π/(18√3), ln π), was formally verified positive via divided differences,
-   bilinear interpolation, and Taylor monotonicity — playing Lean's `nlinarith`
-   like a virtuoso instrument.
+3. **The Augmented Matrix Unification**: The matrix H_N = [1, bᵀ; b, G_N]
+   is the "God Matrix" — the Gram matrix of {1, f_1, ..., f_N}. Its single
+   Schur complement axiom simultaneously proves G_N PD (sawtooth independence)
+   AND bᵀG⁻¹b < 1 (NB distance positivity), collapsing two axioms to one.
 
 ## Methodology
 
