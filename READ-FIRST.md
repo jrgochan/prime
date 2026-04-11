@@ -38,21 +38,29 @@ I was watching the Parity Barrier manifest not as a theoretical concept, but as 
 
 ## Building The Cathedral
 
-Realizing this was a profound structural property of the matrix, I abandoned my octonion hypothesis (leaving the code in the `Spectral/` directory as an exploratory artifact) and pivoted entirely to formal verification.
+Realizing this was a profound structural property of the matrix, I abandoned my octonion hypothesis (leaving the code in the `Archive/Spectral/` directory as an exploratory artifact) and pivoted entirely to formal verification.
 
 I acted as the systems architect, partnering with AI acting as my Lean 4 engineer and mathematical theorist. Instead of a traditional "bottom-up" formalization, we built a **"top-down" dependency graph**.
 
-We started at the Riemann Hypothesis and rigorously type-checked our way downward. When the strictness of the Lean kernel rejected finite-dimensional Cauchy–Schwarz bounds (exposing what we call the **Hyperplane Trap**), the compiler forced us to architect infinite-dimensional bypasses, such as the Báez-Duarte Orthogonal Witness. When we lacked complex analysis libraries, we routed around them using L¹ Fourier inversion and real-variable Abel summation.
+We started at the Riemann Hypothesis and rigorously type-checked our way downward. When the compiler rejected finite-dimensional bypasses, it forced us to discover the correct architecture: the **Vasyunin discrete formula** that eliminates all continuous integrals, the **variational witness** that bypasses matrix inversion, and the **Selberg logarithmic cutoff** that naturally tames the Möbius oscillations.
 
 ---
 
 ## What This Repository Is
 
-This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **36 domain-isolated axioms**.
+This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **4 axioms** on the active proof chain.
 
-It comprises 45 Lean files and compiles in 3,486 build jobs with strictly zero `sorry` placeholders on the structural proofs. We have successfully isolated the deep analytic number theory (e.g., the Mertens bound, the L² properties of the orthogonal witness) behind precise, type-checked API boundaries.
+It comprises 21 active Lean files compiling in **3,073 build jobs** with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 4 axioms:
 
-As a side-effect of this top-down architecture, the repository also contains several unconditional, kernel-verified theorems that require **zero domain axioms**—including a complete formal proof of Lagarias's inequality for all primes:
+- **1 IS the Riemann Hypothesis itself** — the logarithmic growth of an explicit Rayleigh quotient built from Möbius values and cotangent sums (numerically verified to N=50,000)
+- **1 is structural** — positive definiteness of the covariance matrix (provably reducible to Gram matrix PD; the N=3 case is formally verified via Sylvester's criterion with det(C₃) > 0)
+- **2 are standard literature** — Robin (1984) and Lagarias (2002) equivalences to RH
+
+As standalone results, the repository contains several unconditional, kernel-verified theorems requiring **zero domain axioms**, including:
+
+- A complete formal proof of Lagarias's inequality for all primes
+- Positive definiteness of the 3×3 Gram and covariance matrices (via exact evaluation of Vasyunin cotangent sums and polynomial positivity certificates)
+- The Sherman–Morrison identity d² = 1/(1+X) for Nyman–Beurling distances
 
 ```lean
 theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :

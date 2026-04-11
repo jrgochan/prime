@@ -27,7 +27,7 @@ quadratic form built from M\"obius values and Vasyunin cotangent sums.
 
 No integrals. No complex plane. No analytic continuation. No measure theory.
 
-The formalization compiles in 3,063 build steps across 10 active Lean files
+The formalization compiles in 3,073 build steps across 21 active Lean files
 with \textbf{zero errors and zero \texttt{sorry} placeholders}.
 In the active proof chain, only \textbf{two axioms} remain:
 (1)~positive definiteness of the Vasyunin covariance matrix, and
@@ -41,7 +41,8 @@ $d_N^2 = 1/(1+X_N)$ with zero axioms, Gram diagonal positivity
 $G(k,k) > 0$ using Mathlib bounds on $\pi$, $e$, $\gamma$,
 and derive the full proof chain
 $\text{Witness} \to X_N \to \infty \to d_N^2 \to 0 \to \text{RH}$
-as a machine-verified theorem.
+as a machine-verified theorem. For $N=3$, both $G_3$ and $C_3$ are proved
+positive definite via polynomial positivity certificates.
 \end{abstract}
 
 \section{What Did We Do?}
@@ -81,7 +82,7 @@ v_k = -\mu(k)\left(1 - \frac{\ln k}{\ln N}\right)
 \]
 defines a Rayleigh quotient $Q_N = (b^T v)^2 / (v^T C_N v)$ that provides
 a \emph{constructive lower bound} on $X_N = b^T C_N^{-1} b$ via the
-variational principle. Experimentally (Attack~8, to $N=20{,}000$):
+variational principle. Experimentally (Attack~8, to $N=50{,}000$):
 
 \begin{center}
 \begin{tabular}{rrrr}
@@ -93,6 +94,7 @@ $N$ & $\ln N$ & $Q_N/\ln N$ & $\Delta$ \\
 5000 & 8.52 & 12.45 & +0.88 \\
 10000 & 9.21 & 12.96 & +0.51 \\
 20000 & 9.90 & 13.44 & +0.48 \\
+50000 & 10.82 & 14.01 & +0.57 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -127,7 +129,9 @@ axiom (positive definiteness) completes the chain.
   The covariance matrix $C_N$ is positive definite for $N \geq 3$.
   \emph{Status: Structural axiom. From this, Hermitian symmetry, PSD,
   invertibility, witness positivity, and Cauchy--Schwarz are all derived
-  as theorems.}
+  as theorems. The $N=3$ case is formally verified: $\det(C_3) > 0$
+  (\texttt{covMatrix3\_det3\_pos}) via polynomial certificates in
+  5 transcendentals.}
 
 \item \textbf{Log Cutoff Witness Bound} (\texttt{log\_cutoff\_witness\_bound}):
   $\exists\,c > 0,\;\exists\,N_0,\;\forall\,N \geq N_0$:
@@ -158,6 +162,10 @@ axiom (positive definiteness) completes the chain.
 \item \texttt{one\_plus\_cov\_ne\_zero}: $1 + X \neq 0$. Zero axioms.
 \item \texttt{lagarias\_for\_primes}: $\sigma(p) \leq H_p + e^{H_p}\ln H_p$
   for all primes. Zero axioms.
+\item \texttt{covMatrix3\_det3\_pos}: $\det(C_3) > 0$ (covariance matrix).
+  Zero axioms. Degree-6 polynomial in 5 transcendentals.
+\item \texttt{covMatrix3\_det2\_pos}: $\det(C_2) > 0$.
+  Double quadratic interpolation.
 \end{itemize}
 
 \section{Architecture}
@@ -171,10 +179,11 @@ axiom (positive definiteness) completes the chain.
 \midrule
 \texttt{ShermanMorrison.lean} & $d^2 = 1/(1+X)$ & 0 & 0 \\
 \texttt{Variational.lean}     & Cauchy--Schwarz + PosDef bridge & 0 & 0 \\
-\texttt{Vasyunin.lean}        & Gram + witness + chain & 0 & 2 \\
+\texttt{Vasyunin/*.lean}        & Gram + covariance + witness + chain (10 files) & 0 & 2 \\
 \texttt{Robin/*.lean}         & Discrete arithmetic (6 files) & 0 & 2 \\
+\texttt{Defs.lean + NB.lean}  & Core definitions & 0 & 0 \\
 \midrule
-\textbf{Total (10 files)}     &                        & \textbf{0} & \textbf{4} \\
+\textbf{Total (21 files)}     &                        & \textbf{0} & \textbf{4} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -184,7 +193,7 @@ axiom (positive definiteness) completes the chain.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # 3,063 jobs, zero errors, zero sorry
+lake build    # 3,073 jobs, zero errors, zero sorry
 \end{verbatim}
 
 \end{document}
