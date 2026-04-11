@@ -1,288 +1,1345 @@
 {
   "nodes": [
     {
-      "id": "riemann_hypothesis",
-      "type": "definition",
+      "id": "fracPart",
+      "type": "def",
       "category": "definition",
-      "route": "crown",
+      "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 19,
-      "signature": "RiemannHypothesis: ∀ s, ζ(s) = 0 → (trivial zero) ∨ s = 1 ∨ s.re = 1/2"
+      "line": 24,
+      "signature": "def fracPart' (x : \u211d) : \u211d"
     },
-
     {
-      "id": "nyman_beurling_equivalence",
-      "type": "theorem",
+      "id": "nbBasis",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 27,
+      "signature": "def nbBasis' (k : \u2115) (x : \u211d) : \u211d"
+    },
+    {
+      "id": "gramEntry",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 32,
+      "signature": "noncomputable def gramEntry (j k : \u2115) : \u211d"
+    },
+    {
+      "id": "gramMatrix",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 37,
+      "signature": "noncomputable def gramMatrix (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
+    },
+    {
+      "id": "gramMatrix_hermitian",
+      "type": "lemma",
       "category": "proved",
-      "route": "crown",
-      "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 126,
-      "signature": "(∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, d²_N < ε) ↔ RH  [Nyman-Beurling iff]"
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 42,
+      "signature": "lemma gramMatrix_hermitian (N : \u2115) : (gramMatrix N).IsHermitian"
     },
     {
-      "id": "distance_converges_to_zero_implies_rh",
-      "type": "theorem",
+      "id": "lambdaMin",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 55,
+      "signature": "noncomputable def lambdaMin (N : \u2115) : \u211d"
+    },
+    {
+      "id": "eigenDrop",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 64,
+      "signature": "def eigenDrop (N : \u2115) : \u211d"
+    },
+    {
+      "id": "eigenDrop_succ",
+      "type": "lemma",
       "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 38,
-      "signature": "(∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, d²_N < ε) → RH  [PILLAR I]"
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 67,
+      "signature": "lemma eigenDrop_succ (k : \u2115) : eigenDrop (k + 1) = lambdaMin k - lambdaMin (k + 1)"
     },
     {
-      "id": "rh_implies_distance_converges_to_zero",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 75,
-      "signature": "axiom: RH → (∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, d²_N < ε)  [PILLAR II — redundant]"
+      "id": "crossCorrVec",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 76,
+      "signature": "noncomputable def crossCorrVec (N : \u2115) : Fin (N - 1) \u2192 \u211d"
     },
     {
-      "id": "eigenvalue_limit_exists",
-      "type": "theorem",
-      "category": "proved",
-      "route": "crown",
-      "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 135,
-      "signature": "∃ L ≥ 0, λ_min(N) → L  [unconditional]"
-    },
-
-    {
-      "id": "nyman_beurling_converse",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/Separation.lean",
-      "line": 285,
-      "signature": "(∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫(1-φ_v)² < ε) → RH  [PROVED by contrapositive]"
+      "id": "schurComplement",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 82,
+      "signature": "noncomputable def schurComplement (N : \u2115) : \u211d"
     },
     {
-      "id": "rh_neg_gives_critical_strip_zero",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/Separation.lean",
-      "line": 258,
-      "signature": "¬RH → ∃ ρ, ζ(ρ)=0 ∧ 0 < Re(ρ) < 1 ∧ Re(ρ) ≠ 1/2  [PROVED]"
+      "id": "cosAlignment",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 93,
+      "signature": "noncomputable def cosAlignment (N : \u2115) : \u211d"
     },
     {
-      "id": "zeta_nontrivial_zero_re_pos",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/Separation.lean",
-      "line": 179,
-      "signature": "ζ(s)=0 ∧ ¬trivial → 0 < Re(s)  [PROVED via functional equation]"
+      "id": "basisInnerProd",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 114,
+      "signature": "noncomputable def basisInnerProd (N : \u2115) : Fin (N - 1) \u2192 \u211d"
     },
     {
-      "id": "zeta_zero_separates",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/Separation.lean",
-      "line": 112,
-      "signature": "axiom: off-line zero creates L² defect δ > 0  [SUBSUMED by OrthogonalWitness]"
-    },
-
-    {
-      "id": "baezDuarte_separates",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 428,
-      "signature": "∃ δ > 0, ∀ N ≥ 2, ∀ w, ∫(1-f_w)² ≥ δ  [PROVED — Trap Breaker]"
+      "id": "nbDistSq",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 121,
+      "signature": "noncomputable def nbDistSq' (N : \u2115) : \u211d"
     },
     {
-      "id": "orthogonal_witness_lower_bound",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 335,
-      "signature": "∫(1-f_w)² ≥ |1/ρ|²/‖h_ρ‖²  [PROVED via Cauchy-Schwarz]"
-    },
-    {
-      "id": "real_cauchy_schwarz_interval",
-      "type": "theorem",
-      "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
+      "id": "liouvilleFunction",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
       "line": 129,
-      "signature": "(∫fg)² ≤ (∫f²)(∫g²)  [PROVED — discriminant argument]"
+      "signature": "def liouvilleFunction (n : \u2115) : \u2124"
     },
     {
-      "id": "baezDuarte_norm_pos",
+      "id": "liouville_one",
       "type": "theorem",
       "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 219,
-      "signature": "0 < ‖h_ρ‖²  [PROVED from L²+inner_one]"
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 133,
+      "signature": "theorem liouville_one : liouvilleFunction 1 = 1"
     },
     {
-      "id": "baezDuarte_L1_product",
+      "id": "liouville_two",
       "type": "theorem",
       "category": "proved",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 281,
-      "signature": "IntervalIntegrable (‖h‖·|1-f_w|) vol 0 1  [PROVED — AM-GM]"
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 136,
+      "signature": "theorem liouville_two : liouvilleFunction 2 = -1"
     },
     {
-      "id": "baezDuarte_is_L2",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 78,
-      "signature": "axiom: h_ρ ∈ L²(0,1) when Re(ρ) > 1/2"
+      "id": "liouville_four",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 139,
+      "signature": "theorem liouville_four : liouvilleFunction 4 = 1"
     },
     {
-      "id": "baezDuarte_inner_one",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 96,
-      "signature": "axiom: ⟨h_ρ, 1⟩ = 1/ρ  [Mellin computation]"
+      "id": "liouville_six",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 142,
+      "signature": "theorem liouville_six : liouvilleFunction 6 = 1"
     },
     {
-      "id": "baezDuarte_inner_residual",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "converse",
-      "file": "Cathedral/MellinBridge/OrthogonalWitness.lean",
-      "line": 108,
-      "signature": "axiom: ⟨h_ρ, 1-f_w⟩ = 1/ρ for any weights w"
+      "id": "liouville_thirty",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 145,
+      "signature": "theorem liouville_thirty : liouvilleFunction 30 = -1"
     },
-
     {
-      "id": "nyman_beurling_forward",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/NymanBeurling.lean",
-      "line": 33,
-      "signature": "axiom: RH → d²→0  [SUBSUMED by nyman_beurling_forward_from_sieve]"
+      "id": "liouville_sq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 149,
+      "signature": "theorem liouville_sq (n : \u2115) (_hn : 1 \u2264 n) : liouvilleFunction n ^ 2 = 1"
+    },
+    {
+      "id": "parityOperator",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 168,
+      "signature": "noncomputable def parityOperator (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
+    },
+    {
+      "id": "liouvilleUnitVec",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 179,
+      "signature": "noncomputable def liouvilleUnitVec (N : \u2115) : Fin (N - 1) \u2192 \u211d"
+    },
+    {
+      "id": "gramMatrixEven",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 188,
+      "signature": "noncomputable def gramMatrixEven (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
+    },
+    {
+      "id": "gramMatrixOdd",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 199,
+      "signature": "noncomputable def gramMatrixOdd (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
+    },
+    {
+      "id": "liouvilleProjection",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/Defs.lean",
+      "line": 214,
+      "signature": "noncomputable def liouvilleProjection (N : \u2115) : \u211d"
     },
     {
       "id": "nyman_beurling_from_mellin",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
+      "route": "mellin",
       "file": "Cathedral/MellinBridge/NymanBeurling.lean",
-      "line": 48,
-      "signature": "d²→0 ↔ RH  [PROVED from forward + converse]"
+      "line": 39,
+      "signature": "theorem nyman_beurling_from_mellin : (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - nbLinComb N v x) ^ 2 < \u03b5) \u2194 RiemannHypothesis"
     },
     {
-      "id": "nyman_beurling_forward_from_sieve",
+      "id": "mellin_cpow_restricted",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 193,
-      "signature": "RH → ∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫(1-φ_v)² < ε  [PROVED from rh_weight_construction]"
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/NymanBeurling.lean",
+      "line": 51,
+      "signature": "theorem mellin_cpow_restricted (a : \u2102) (s : \u2102) (hs : 0 < (s + a).re) : mellinRestricted (fun x => (x : \u2102) ^ a) s = 1 / (s + a)"
     },
     {
-      "id": "phase_3_chain",
+      "id": "zeta_ne_zero_of_re_gt_one",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 247,
-      "signature": "RH → ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, d²_N ≤ C/log(N)  [PROVED]"
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/NymanBeurling.lean",
+      "line": 74,
+      "signature": "theorem zeta_ne_zero_of_re_gt_one (s : \u2102) (hs : 1 < s.re) : riemannZeta s \u2260 0"
     },
     {
-      "id": "rh_weight_construction",
+      "id": "log_cutoff_witness_bound",
       "type": "axiom",
       "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 137,
-      "signature": "axiom: RH → ∃ weights with ∫(1-f)² ≤ C/log(N)  [monolithic — replaced by derived]"
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Chain.lean",
+      "line": 31,
+      "signature": "axiom log_cutoff_witness_bound : \u2203 c : \u211d, c > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 c * Real.log (N : \u211d) \u2264 rayleighQuotient N (logCutoffWitness N)  /-- The log cutoff witness is nonzero for N \u2265 3. -/ the\u2026"
     },
     {
-      "id": "rh_weight_construction_derived",
+      "id": "logCutoffWitness_ne_zero",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MertensWeightBypass.lean",
-      "line": 208,
-      "signature": "RH → ∃ weights with d² ≤ C/log(N)  [PROVED from mertens + abel]"
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Chain.lean",
+      "line": 36,
+      "signature": "theorem logCutoffWitness_ne_zero (N : \u2115) (hN : N \u2265 3) : logCutoffWitness N \u2260 0"
     },
     {
-      "id": "mertens_bound_from_rh",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MertensWeightBypass.lean",
-      "line": 114,
-      "signature": "axiom: RH → |M(x)| ≤ C√x log²x  [THE CRITICAL AXIOM — needs Perron's formula]"
-    },
-    {
-      "id": "abel_summation_l2_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MertensWeightBypass.lean",
-      "line": 183,
-      "signature": "axiom: Mertens bound → ∃ weights with d² ≤ C/log(N)  [Abel summation]"
-    },
-    {
-      "id": "corrected_weights_pole_free",
+      "id": "log_cutoff_witness_pos",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MertensWeightBypass.lean",
-      "line": 131,
-      "signature": "Σ k·correctedWeight(N,k) = 0  [PROVED — pole neutralization]"
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Chain.lean",
+      "line": 46,
+      "signature": "theorem log_cutoff_witness_pos (N : \u2115) (hN : N \u2265 3) : dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) > 0"
     },
     {
-      "id": "mellin_plancherel_gram",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 104,
-      "signature": "axiom: v·Gv = (1/2π) ∫|M[f_N](1/2+it)|² dt  [Plancherel]"
-    },
-    {
-      "id": "log_grows_unboundedly",
+      "id": "quadForm_diverges",
       "type": "theorem",
       "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 84,
-      "signature": "C/log(N) < ε eventually  [PROVED — standard calculus]"
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Chain.lean",
+      "line": 61,
+      "signature": "theorem quadForm_diverges : \u2203 c : \u211d, c > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 c * Real.log (N : \u211d) \u2264 vasyuninQuadForm N"
     },
-
     {
-      "id": "robin_implies_nyman_beurling",
+      "id": "nbDistSq_decays",
       "type": "theorem",
       "category": "proved",
-      "route": "robin",
-      "file": "Cathedral/Robin/Equivalence.lean",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Chain.lean",
+      "line": 76,
+      "signature": "theorem nbDistSq_decays : \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 1 / (1 + vasyuninQuadForm N) < \u03b5"
+    },
+    {
+      "id": "log_two_lt_seven_tenths",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet2.lean",
+      "line": 23,
+      "signature": "theorem log_two_lt_seven_tenths : Real.log 2 < 7 / 10"
+    },
+    {
+      "id": "covMatrix3_det2_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet2.lean",
+      "line": 130,
+      "signature": "theorem covMatrix3_det2_pos : (vasyuninCovMatrix 3) 0 0 * (vasyuninCovMatrix 3) 1 1 - (vasyuninCovMatrix 3) 0 1 ^ 2 > 0"
+    },
+    {
+      "id": "log_three_gt_549_500",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet3.lean",
+      "line": 36,
+      "signature": "theorem log_three_gt_549_500 : (549 : \u211d) / 500 < Real.log 3"
+    },
+    {
+      "id": "covDet3Expr_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet3.lean",
+      "line": 196,
+      "signature": "theorem covDet3Expr_pos (l g q t : \u211d) (hl : 6931/10000 < l) (hl2 : l < 7/10) (hg_lo : 1/2 \u2264 g) (hg_hi : g \u2264 2/3) (hq_lo : 549/500 < q) (hq_hi : q < 8*l/5) (ht_lo : 157/1566 < t) (ht_hi : t < 35/346\u2026"
+    },
+    {
+      "id": "covDet3Full",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet3.lean",
+      "line": 227,
+      "signature": "def covDet3Full (A l g q t : \u211d) : \u211d"
+    },
+    {
+      "id": "covDet3Full_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet3.lean",
+      "line": 360,
+      "signature": "theorem covDet3Full_pos (A l g q t : \u211d) (hl : 6931/10000 < l) (hl2 : l < 7/10) (hg_lo : 1/2 \u2264 g) (hg_hi : g \u2264 2/3) (hq_lo : 549/500 < q) (hq_hi : q < 8*l/5) (ht_lo : 157/1566 < t) (ht_hi : t < 35/3\u2026"
+    },
+    {
+      "id": "covMatrix3_det3_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovDet3.lean",
+      "line": 417,
+      "signature": "theorem covMatrix3_det3_pos : (vasyuninCovMatrix 3) 0 0 * ((vasyuninCovMatrix 3) 1 1 * (vasyuninCovMatrix 3) 2 2 - (vasyuninCovMatrix 3) 1 2 ^ 2) - (vasyuninCovMatrix 3) 0 1 * ((vasyuninCovMatrix 3\u2026"
+    },
+    {
+      "id": "covEntry_00",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovEntries.lean",
+      "line": 23,
+      "signature": "theorem covEntry_00 : (vasyuninCovMatrix 3) 0 0 = Real.log (2 * Real.pi) - \u03b3 - 1 - (1 - \u03b3) ^ 2"
+    },
+    {
+      "id": "covEntry_00_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovEntries.lean",
       "line": 32,
-      "signature": "Robin → d²_N → 0  [PROVED — cross-bridge]"
+      "signature": "theorem covEntry_00_pos : (vasyuninCovMatrix 3) 0 0 > 0"
     },
     {
-      "id": "lagarias_implies_nyman_beurling",
+      "id": "covEntry_01",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovEntries.lean",
+      "line": 47,
+      "signature": "theorem covEntry_01 : (vasyuninCovMatrix 3) 0 1 = 3 / 4 * (Real.log (2 * Real.pi) - \u03b3) - Real.log 2 / 4 - 1 / 2 - (1 - \u03b3) * ((Real.log 2 + 1 - \u03b3) / 2)"
+    },
+    {
+      "id": "covEntry_11",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CovEntries.lean",
+      "line": 60,
+      "signature": "theorem covEntry_11 : (vasyuninCovMatrix 3) 1 1 = (Real.log (2 * Real.pi) - \u03b3) / 2 - 1 / 4 - ((Real.log 2 + 1 - \u03b3) / 2) ^ 2"
+    },
+    {
+      "id": "cot",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 50,
+      "signature": "def cot (x : \u211d) : \u211d"
+    },
+    {
+      "id": "vasyuninSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 69,
+      "signature": "noncomputable def vasyuninSum (a b : \u2115) : \u211d"
+    },
+    {
+      "id": "vasyuninSum_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 75,
+      "signature": "theorem vasyuninSum_one (b : \u2115) : vasyuninSum 1 b = 0"
+    },
+    {
+      "id": "vasyuninSum_zero",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 79,
+      "signature": "theorem vasyuninSum_zero (b : \u2115) : vasyuninSum 0 b = 0"
+    },
+    {
+      "id": "vasyuninGramEntry",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 104,
+      "signature": "noncomputable def vasyuninGramEntry (j k : \u2115) : \u211d"
+    },
+    {
+      "id": "vasyuninGramEntry_diag",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 122,
+      "signature": "theorem vasyuninGramEntry_diag (k : \u2115) : vasyuninGramEntry k k = (Real.log (2 * Real.pi) - \u03b3) / (k : \u211d) - 1 / (k : \u211d) ^ 2"
+    },
+    {
+      "id": "vasyuninMeanEntry",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 138,
+      "signature": "noncomputable def vasyuninMeanEntry (k : \u2115) : \u211d"
+    },
+    {
+      "id": "vasyuninMeanEntry_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 143,
+      "signature": "theorem vasyuninMeanEntry_one : vasyuninMeanEntry 1 = 1 - \u03b3"
+    },
+    {
+      "id": "vasyuninGramEntry_one_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 150,
+      "signature": "theorem vasyuninGramEntry_one_one : vasyuninGramEntry 1 1 = Real.log (2 * Real.pi) - \u03b3 - 1"
+    },
+    {
+      "id": "vasyuninMeanEntry_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 156,
+      "signature": "theorem vasyuninMeanEntry_two : vasyuninMeanEntry 2 = (Real.log 2 + 1 - \u03b3) / 2"
+    },
+    {
+      "id": "vasyuninGramEntry_two_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 161,
+      "signature": "theorem vasyuninGramEntry_two_two : vasyuninGramEntry 2 2 = (Real.log (2 * Real.pi) - \u03b3) / 2 - 1 / 4"
+    },
+    {
+      "id": "vasyuninGramMatrix",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 171,
+      "signature": "noncomputable def vasyuninGramMatrix (N : \u2115) : Matrix (Fin N) (Fin N) \u211d"
+    },
+    {
+      "id": "vasyuninMeanVec",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 175,
+      "signature": "noncomputable def vasyuninMeanVec (N : \u2115) : Fin N \u2192 \u211d"
+    },
+    {
+      "id": "vasyuninCovMatrix",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 180,
+      "signature": "noncomputable def vasyuninCovMatrix (N : \u2115) : Matrix (Fin N) (Fin N) \u211d"
+    },
+    {
+      "id": "vasyuninGramMatrix_diag",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
+      "line": 184,
+      "signature": "theorem vasyuninGramMatrix_diag (N : \u2115) (i : Fin N) : vasyuninGramMatrix N i i = (Real.log (2 * Real.pi) - \u03b3) / (i.val + 1 : \u211d) - 1 / (i.val + 1 : \u211d) ^ 2"
+    },
+    {
+      "id": "vasyuninSum_two_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 25,
+      "signature": "theorem vasyuninSum_two_one : vasyuninSum 2 1 = 0"
+    },
+    {
+      "id": "vasyuninGramMatrix_trace",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 39,
+      "signature": "theorem vasyuninGramMatrix_trace (N : \u2115) : (vasyuninGramMatrix N).trace = \u2211 i : Fin N, ((Real.log (2 * Real.pi) - \u03b3) / (\u2191i.val + 1) - 1 / (\u2191i.val + 1) ^ 2)"
+    },
+    {
+      "id": "vasyuninGramEntry_one_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 52,
+      "signature": "theorem vasyuninGramEntry_one_two : vasyuninGramEntry 1 2 = 3 * (Real.log (2 * Real.pi) - \u03b3) / 4 - Real.log 2 / 4 - 1 / 2"
+    },
+    {
+      "id": "vasyuninGramEntry_one_two_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 71,
+      "signature": "theorem vasyuninGramEntry_one_two_pos : vasyuninGramEntry 1 2 > 0"
+    },
+    {
+      "id": "log_three_ge_11_log_two_div_7",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 90,
+      "signature": "theorem log_three_ge_11_log_two_div_7 : Real.log 3 \u2265 11 * Real.log 2 / 7"
+    },
+    {
+      "id": "vasyuninGram2x2_det_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 110,
+      "signature": "theorem vasyuninGram2x2_det_pos : vasyuninGramEntry 1 1 * vasyuninGramEntry 2 2 - vasyuninGramEntry 1 2 * vasyuninGramEntry 1 2 > 0"
+    },
+    {
+      "id": "vasyuninGramEntry_two_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 141,
+      "signature": "theorem vasyuninGramEntry_two_one : vasyuninGramEntry 2 1 = vasyuninGramEntry 1 2"
+    },
+    {
+      "id": "vasyuninSum_three_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 147,
+      "signature": "theorem vasyuninSum_three_one : vasyuninSum 3 1 = Int.fract (1 / (3 : \u211d)) * cot (Real.pi * 1 / 3) + Int.fract (2 / (3 : \u211d)) * cot (Real.pi * 2 / 3)"
+    },
+    {
+      "id": "vasyuninSum_three_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 162,
+      "signature": "theorem vasyuninSum_three_two : vasyuninSum 3 2 = Int.fract (2 / (3 : \u211d)) * cot (Real.pi * 1 / 3) + Int.fract (4 / (3 : \u211d)) * cot (Real.pi * 2 / 3)"
+    },
+    {
+      "id": "fract_one_third",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 180,
+      "signature": "theorem fract_one_third : Int.fract (1 / (3 : \u211d)) = 1 / 3"
+    },
+    {
+      "id": "fract_two_thirds",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 184,
+      "signature": "theorem fract_two_thirds : Int.fract (2 / (3 : \u211d)) = 2 / 3"
+    },
+    {
+      "id": "fract_four_thirds",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 188,
+      "signature": "theorem fract_four_thirds : Int.fract (4 / (3 : \u211d)) = 1 / 3"
+    },
+    {
+      "id": "cot_pi_div_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 198,
+      "signature": "theorem cot_pi_div_three : cot (Real.pi / 3) = 1 / Real.sqrt 3"
+    },
+    {
+      "id": "cot_two_pi_div_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 208,
+      "signature": "theorem cot_two_pi_div_three : cot (2 * Real.pi / 3) = -(1 / Real.sqrt 3)"
+    },
+    {
+      "id": "vasyuninSum_three_one_val",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 222,
+      "signature": "theorem vasyuninSum_three_one_val : vasyuninSum 3 1 = -(1 / (3 * Real.sqrt 3))"
+    },
+    {
+      "id": "vasyuninSum_three_two_val",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 232,
+      "signature": "theorem vasyuninSum_three_two_val : vasyuninSum 3 2 = 1 / (3 * Real.sqrt 3)"
+    },
+    {
+      "id": "vasyuninGramEntry_one_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 248,
+      "signature": "theorem vasyuninGramEntry_one_three : vasyuninGramEntry 1 3 = 2 * (Real.log (2 * Real.pi) - \u03b3) / 3 - Real.log 3 / 3 + Real.pi / (18 * Real.sqrt 3) - 1 / 3"
+    },
+    {
+      "id": "vasyuninGramEntry_three_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 266,
+      "signature": "theorem vasyuninGramEntry_three_three : vasyuninGramEntry 3 3 = (Real.log (2 * Real.pi) - \u03b3) / 3 - 1 / 9"
+    },
+    {
+      "id": "vasyuninMeanEntry_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 272,
+      "signature": "theorem vasyuninMeanEntry_three : vasyuninMeanEntry 3 = (Real.log 3 + 1 - \u03b3) / 3"
+    },
+    {
+      "id": "vasyuninSum_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 279,
+      "signature": "theorem vasyuninSum_two (b : \u2115) : vasyuninSum 2 b = 0"
+    },
+    {
+      "id": "vasyuninGramEntry_two_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 294,
+      "signature": "theorem vasyuninGramEntry_two_three : vasyuninGramEntry 2 3 = 5 * (Real.log (2 * Real.pi) - \u03b3) / 12 - Real.log (3 / 2) / 12 - Real.pi / (36 * Real.sqrt 3) - 1 / 6"
+    },
+    {
+      "id": "sqrt_three_lt_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 315,
+      "signature": "theorem sqrt_three_lt_two : Real.sqrt 3 < 2"
+    },
+    {
+      "id": "vasyuninGramEntry_one_three_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 323,
+      "signature": "theorem vasyuninGramEntry_one_three_pos : vasyuninGramEntry 1 3 > 0"
+    },
+    {
+      "id": "one_lt_sqrt_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 354,
+      "signature": "theorem one_lt_sqrt_three : (1 : \u211d) < Real.sqrt 3"
+    },
+    {
+      "id": "vasyuninGramEntry_two_three_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 360,
+      "signature": "theorem vasyuninGramEntry_two_three_pos : vasyuninGramEntry 2 3 > 0"
+    },
+    {
+      "id": "sqrt_three_gt_173",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 400,
+      "signature": "theorem sqrt_three_gt_173 : (173 : \u211d) / 100 < Real.sqrt 3"
+    },
+    {
+      "id": "sqrt_three_lt_174",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 407,
+      "signature": "theorem sqrt_three_lt_174 : Real.sqrt 3 < 174 / 100"
+    },
+    {
+      "id": "pi_div_18sqrt3_gt",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 414,
+      "signature": "theorem pi_div_18sqrt3_gt : (157 : \u211d) / 1566 < Real.pi / (18 * Real.sqrt 3)"
+    },
+    {
+      "id": "pi_div_18sqrt3_lt",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 434,
+      "signature": "theorem pi_div_18sqrt3_lt : Real.pi / (18 * Real.sqrt 3) < 35 / 346"
+    },
+    {
+      "id": "vasyuninGram3x3_det_pos_closedForm",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 548,
+      "signature": "theorem vasyuninGram3x3_det_pos_closedForm : let A"
+    },
+    {
+      "id": "rayleighQuotient",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 22,
+      "signature": "noncomputable def rayleighQuotient (N : \u2115) (v : Fin N \u2192 \u211d) : \u211d"
+    },
+    {
+      "id": "vasyuninQuadForm",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 31,
+      "signature": "noncomputable def vasyuninQuadForm (N : \u2115) : \u211d"
+    },
+    {
+      "id": "vasyuninCovMatrix_hermitian",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 40,
+      "signature": "theorem vasyuninCovMatrix_hermitian (N : \u2115) : (vasyuninCovMatrix N).IsHermitian"
+    },
+    {
+      "id": "vasyuninCovMatrix_posDef",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 51,
+      "signature": "axiom vasyuninCovMatrix_posDef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosDef  /-- The covariance matrix is positive semidefinite (derived from PosDef). -/ theorem vasyuninCovMatrix_posSemidef\u2026"
+    },
+    {
+      "id": "vasyuninCovMatrix_posSemidef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 55,
+      "signature": "theorem vasyuninCovMatrix_posSemidef (N : \u2115) (hN : N \u2265 3) : (vasyuninCovMatrix N).PosSemidef"
+    },
+    {
+      "id": "vasyuninCovMatrix_isUnit_det",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 60,
+      "signature": "theorem vasyuninCovMatrix_isUnit_det (N : \u2115) (hN : N \u2265 3) : IsUnit (vasyuninCovMatrix N).det"
+    },
+    {
+      "id": "vasyuninCovMatrix_posDef_from_gram",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 65,
+      "signature": "theorem vasyuninCovMatrix_posDef_from_gram (N : \u2115) (hG : (vasyuninGramMatrix N).PosDef) (h_schur : dotProduct (vasyuninMeanVec N) ((vasyuninGramMatrix N)\u207b\u00b9.mulVec (vasyuninMeanVec N)) < 1) : (vasyu\u2026"
+    },
+    {
+      "id": "variational_lower_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
+      "line": 76,
+      "signature": "theorem variational_lower_bound (N : \u2115) (hN : N \u2265 3) (v : Fin N \u2192 \u211d) (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) : rayleighQuotient N v \u2264 vasyuninQuadForm N"
+    },
+    {
+      "id": "vasyuninGramEntry_comm",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 30,
+      "signature": "theorem vasyuninGramEntry_comm (j k : \u2115) : vasyuninGramEntry j k = vasyuninGramEntry k j"
+    },
+    {
+      "id": "vasyuninGramMatrix_symmetric",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 48,
+      "signature": "theorem vasyuninGramMatrix_symmetric (N : \u2115) : (vasyuninGramMatrix N).IsHermitian"
+    },
+    {
+      "id": "vasyuninGram_eq_cov_plus_mean",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 56,
+      "signature": "theorem vasyuninGram_eq_cov_plus_mean (N : \u2115) : vasyuninGramMatrix N = vasyuninCovMatrix N + vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)"
+    },
+    {
+      "id": "vasyuninMeanOuterProduct_posSemidef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 64,
+      "signature": "theorem vasyuninMeanOuterProduct_posSemidef (N : \u2115) : (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).PosSemidef"
+    },
+    {
+      "id": "vasyuninMeanOuterProduct_hermitian",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 69,
+      "signature": "theorem vasyuninMeanOuterProduct_hermitian (N : \u2115) : (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).IsHermitian"
+    },
+    {
+      "id": "vasyuninMeanEntry_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 82,
+      "signature": "theorem vasyuninMeanEntry_pos (k : \u2115) (hk : k \u2265 1) : vasyuninMeanEntry k > 0"
+    },
+    {
+      "id": "vasyuninMeanVec_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 93,
+      "signature": "theorem vasyuninMeanVec_pos (N : \u2115) (_hN : N \u2265 1) (i : Fin N) : vasyuninMeanVec N i > 0"
+    },
+    {
+      "id": "log_two_pi_sub_euler_gt_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 105,
+      "signature": "theorem log_two_pi_sub_euler_gt_one : Real.log (2 * Real.pi) - Real.eulerMascheroniConstant > 1"
+    },
+    {
+      "id": "vasyuninGramEntry_diag_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 125,
+      "signature": "theorem vasyuninGramEntry_diag_pos (k : \u2115) (hk : k \u2265 1) : vasyuninGramEntry k k > 0"
+    },
+    {
+      "id": "vasyuninGramMatrix_diag_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Structural.lean",
+      "line": 142,
+      "signature": "theorem vasyuninGramMatrix_diag_pos (N : \u2115) (i : Fin N) : vasyuninGramMatrix N i i > 0"
+    },
+    {
+      "id": "moebiusFn",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 22,
+      "signature": "noncomputable def moebiusFn : \u2115 \u2192 \u2124"
+    },
+    {
+      "id": "logCutoffWitness",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 34,
+      "signature": "noncomputable def logCutoffWitness (N : \u2115) (i : Fin N) : \u211d"
+    },
+    {
+      "id": "moebiusFn_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 38,
+      "signature": "theorem moebiusFn_one : moebiusFn 1 = 1"
+    },
+    {
+      "id": "moebiusFn_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 42,
+      "signature": "theorem moebiusFn_two : moebiusFn 2 = -1"
+    },
+    {
+      "id": "moebiusFn_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 46,
+      "signature": "theorem moebiusFn_three : moebiusFn 3 = -1"
+    },
+    {
+      "id": "moebiusFn_four",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 50,
+      "signature": "theorem moebiusFn_four : moebiusFn 4 = 0"
+    },
+    {
+      "id": "moebiusFn_six",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 54,
+      "signature": "theorem moebiusFn_six : moebiusFn 6 = 1"
+    },
+    {
+      "id": "moebiusFn_thirty",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 58,
+      "signature": "theorem moebiusFn_thirty : moebiusFn 30 = -1"
+    },
+    {
+      "id": "logCutoffWitness_first",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 63,
+      "signature": "theorem logCutoffWitness_first (N : \u2115) (hN : N \u2265 2) : logCutoffWitness N \u27e80, by omega\u27e9 = -1"
+    },
+    {
+      "id": "logCutoffWitness_last",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/Witness.lean",
+      "line": 73,
+      "signature": "theorem logCutoffWitness_last (N : \u2115) (hN : N \u2265 2) : logCutoffWitness N \u27e8N - 1, by omega\u27e9 = 0"
+    },
+    {
+      "id": "vecMulVec_mulVec_eq",
+      "type": "lemma",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 36,
+      "signature": "lemma vecMulVec_mulVec_eq (b y : Fin n \u2192 \u211d) : (vecMulVec b b).mulVec y = (dotProduct b y) \u2022 b"
+    },
+    {
+      "id": "sherman_morrison_solve",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 55,
+      "signature": "theorem sherman_morrison_solve (C G : Matrix (Fin n) (Fin n) \u211d) (b y : Fin n \u2192 \u211d) (hG : G = C + vecMulVec b b) (hCy : C.mulVec y = b) (X : \u211d) (hX : X = dotProduct b y) (h_denom : 1 + X \u2260 0) : G.mul\u2026"
+    },
+    {
+      "id": "cov_quadform_nonneg",
+      "type": "lemma",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 80,
+      "signature": "lemma cov_quadform_nonneg (C : Matrix (Fin n) (Fin n) \u211d) (b y : Fin n \u2192 \u211d) (hC_psd : C.PosSemidef) (hCy : C.mulVec y = b) : 0 \u2264 dotProduct b y"
+    },
+    {
+      "id": "one_plus_cov_pos",
+      "type": "lemma",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 92,
+      "signature": "lemma one_plus_cov_pos (C : Matrix (Fin n) (Fin n) \u211d) (b y : Fin n \u2192 \u211d) (hC_psd : C.PosSemidef) (hCy : C.mulVec y = b) : 0 < 1 + dotProduct b y"
+    },
+    {
+      "id": "one_plus_cov_ne_zero",
+      "type": "lemma",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 99,
+      "signature": "lemma one_plus_cov_ne_zero (C : Matrix (Fin n) (Fin n) \u211d) (b y : Fin n \u2192 \u211d) (hC_psd : C.PosSemidef) (hCy : C.mulVec y = b) : 1 + dotProduct b y \u2260 0"
+    },
+    {
+      "id": "dist_sq_eq_inv_one_plus_X",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 121,
+      "signature": "theorem dist_sq_eq_inv_one_plus_X (b y : Fin n \u2192 \u211d) (X : \u211d) (hX : X = dotProduct b y) : dotProduct b ((1 / (1 + X)) \u2022 y) = X / (1 + X)"
+    },
+    {
+      "id": "nb_dist_via_witness",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 130,
+      "signature": "theorem nb_dist_via_witness (C : Matrix (Fin n) (Fin n) \u211d) (b y : Fin n \u2192 \u211d) (hCy : C.mulVec y = b) (hC_psd : C.PosSemidef) (X : \u211d) (hX : X = dotProduct b y) : 1 - dotProduct b ((1 / (1 + X)) \u2022 y) \u2026"
+    },
+    {
+      "id": "schur_condition_from_psd",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 160,
+      "signature": "theorem schur_condition_from_psd (b y : Fin n \u2192 \u211d) (X : \u211d) (hX : X = dotProduct b y) (hX_nn : 0 \u2264 X) : dotProduct b ((1 / (1 + X)) \u2022 y) < 1"
+    },
+    {
+      "id": "dist_sq_bounds",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/ShermanMorrison.lean",
+      "line": 171,
+      "signature": "theorem dist_sq_bounds (X : \u211d) (hX_pos : 0 < X) : 0 < 1 / (1 + X) \u2227 1 / (1 + X) < 1"
+    },
+    {
+      "id": "realQuadForm",
+      "type": "def",
+      "category": "definition",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 35,
+      "signature": "def realQuadForm (A : Matrix (Fin n) (Fin n) \u211d) (x : Fin n \u2192 \u211d) : \u211d"
+    },
+    {
+      "id": "variational_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 52,
+      "signature": "theorem variational_bound (G : Matrix (Fin n) (Fin n) \u211d) (b v : Fin n \u2192 \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) : realQuadForm G v - 2 * dotProduct b v + dotProduct b \u2026"
+    },
+    {
+      "id": "cauchy_schwarz_quadform",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 103,
+      "signature": "theorem cauchy_schwarz_quadform (G : Matrix (Fin n) (Fin n) \u211d) (b v : Fin n \u2192 \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) (hv_pos : realQuadForm G v > 0) : (dotProduct b v\u2026"
+    },
+    {
+      "id": "posSemidef_pos_of_ne_zero",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 180,
+      "signature": "theorem posSemidef_pos_of_ne_zero {n : \u2115} (G : Matrix (Fin n) (Fin n) \u211d) (hH : G.IsHermitian) (hPSD : G.PosSemidef) (h_unit : IsUnit G.det) (x : Fin n \u2192 \u211d) (hx : x \u2260 0) : dotProduct x (G.mulVec x) > 0"
+    },
+    {
+      "id": "vecMulVec_self_hermitian",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 285,
+      "signature": "theorem vecMulVec_self_hermitian (b : Fin n \u2192 \u211d) : (vecMulVec b b).IsHermitian"
+    },
+    {
+      "id": "vecMulVec_self_posSemidef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 292,
+      "signature": "theorem vecMulVec_self_posSemidef (b : Fin n \u2192 \u211d) : (vecMulVec b b).PosSemidef"
+    },
+    {
+      "id": "schur_complement_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 330,
+      "signature": "theorem schur_complement_posDef (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (h_schur : dotProduct b (G\u207b\u00b9.mulVec b) < 1) : (G - vecMulVec b b).PosDef"
+    },
+    {
+      "id": "sylvester_3x3",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 389,
+      "signature": "theorem sylvester_3x3 (M : Matrix (Fin 3) (Fin 3) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) (h3 : M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) - M 0 1 * (M 0 1 * M 2 2 - \u2026"
+    },
+    {
+      "id": "lagarias_base_case",
       "type": "theorem",
       "category": "proved",
       "route": "robin",
-      "file": "Cathedral/Robin/Equivalence.lean",
-      "line": 43,
-      "signature": "Lagarias → d²_N → 0  [PROVED — cross-bridge]"
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 24,
+      "signature": "theorem lagarias_base_case : (sumOfDivisors 1 : \u211d) \u2264 harmonicR 1 + exp (harmonicR 1) * log (harmonicR 1)"
     },
     {
-      "id": "robin_iff_rh",
-      "type": "axiom",
-      "category": "axiom",
+      "id": "sumOfDivisors_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 35,
+      "signature": "theorem sumOfDivisors_one : sumOfDivisors 1 = 1"
+    },
+    {
+      "id": "sumOfDivisors_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 39,
+      "signature": "theorem sumOfDivisors_two : sumOfDivisors 2 = 3"
+    },
+    {
+      "id": "sumOfDivisors_six",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 43,
+      "signature": "theorem sumOfDivisors_six : sumOfDivisors 6 = 12"
+    },
+    {
+      "id": "sumOfDivisors_twentyeight",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 47,
+      "signature": "theorem sumOfDivisors_twentyeight : sumOfDivisors 28 = 56"
+    },
+    {
+      "id": "sumOfDivisors_5040",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 52,
+      "signature": "theorem sumOfDivisors_5040 : sumOfDivisors 5040 = 19344"
+    },
+    {
+      "id": "sumOfDivisors_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 56,
+      "signature": "theorem sumOfDivisors_three : sumOfDivisors 3 = 4"
+    },
+    {
+      "id": "sumOfDivisors_twelve",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 60,
+      "signature": "theorem sumOfDivisors_twelve : sumOfDivisors 12 = 28"
+    },
+    {
+      "id": "sumOfDivisors_496",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 64,
+      "signature": "theorem sumOfDivisors_496 : sumOfDivisors 496 = 992"
+    },
+    {
+      "id": "perfect_six",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 68,
+      "signature": "theorem perfect_six : sumOfDivisors 6 = 2 * 6"
+    },
+    {
+      "id": "perfect_twentyeight",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 72,
+      "signature": "theorem perfect_twentyeight : sumOfDivisors 28 = 2 * 28"
+    },
+    {
+      "id": "perfect_496",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/BaseCases.lean",
+      "line": 76,
+      "signature": "theorem perfect_496 : sumOfDivisors 496 = 2 * 496"
+    },
+    {
+      "id": "sumOfDivisors",
+      "type": "def",
+      "category": "definition",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 127,
-      "signature": "axiom: σ(n) < eᵞ n ln(ln n) ∀ n ≥ 5041 ↔ RH  [Gronwall + Mertens 3rd]"
+      "line": 56,
+      "signature": "def sumOfDivisors (n : \u2115) : \u2115"
+    },
+    {
+      "id": "harmonicR",
+      "type": "def",
+      "category": "definition",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 62,
+      "signature": "noncomputable def harmonicR (n : \u2115) : \u211d"
+    },
+    {
+      "id": "LagariasInequality",
+      "type": "def",
+      "category": "definition",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 78,
+      "signature": "def LagariasInequality : Prop"
     },
     {
       "id": "lagarias_iff_rh",
@@ -291,34 +1348,196 @@
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
       "line": 96,
-      "signature": "axiom: σ(n) ≤ H_n + exp(H_n)·ln(H_n) ∀ n ≥ 1 ↔ RH"
+      "signature": "axiom lagarias_iff_rh : LagariasInequality \u2194 RiemannHypothesis  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- PART III: ROBIN'S INEQUALITY -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
     },
     {
-      "id": "lagarias_for_primes",
+      "id": "RobinInequality",
+      "type": "def",
+      "category": "definition",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 111,
+      "signature": "def RobinInequality : Prop"
+    },
+    {
+      "id": "robin_iff_rh",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 127,
+      "signature": "axiom robin_iff_rh : RobinInequality \u2194 RiemannHypothesis  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- PART IV: IMMEDIATE CONSEQUENCES -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 \u2026"
+    },
+    {
+      "id": "lagarias_iff_robin",
       "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 134,
+      "signature": "theorem lagarias_iff_robin : LagariasInequality \u2194 RobinInequality"
+    },
+    {
+      "id": "rh_implies_lagarias",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 140,
+      "signature": "theorem rh_implies_lagarias : RiemannHypothesis \u2192 LagariasInequality"
+    },
+    {
+      "id": "rh_implies_robin",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 144,
+      "signature": "theorem rh_implies_robin : RiemannHypothesis \u2192 RobinInequality"
+    },
+    {
+      "id": "lagarias_implies_rh",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 148,
+      "signature": "theorem lagarias_implies_rh : LagariasInequality \u2192 RiemannHypothesis"
+    },
+    {
+      "id": "robin_implies_rh",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 152,
+      "signature": "theorem robin_implies_rh : RobinInequality \u2192 RiemannHypothesis"
+    },
+    {
+      "id": "robin_implies_nyman_beurling",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Equivalence.lean",
+      "line": 32,
+      "signature": "theorem robin_implies_nyman_beurling : RobinInequality \u2192 (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - nbLinComb N v x) ^ 2 < \u03b5)"
+    },
+    {
+      "id": "lagarias_implies_nyman_beurling",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Equivalence.lean",
+      "line": 43,
+      "signature": "theorem lagarias_implies_nyman_beurling : LagariasInequality \u2192 (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - nbLinComb N v x) ^ 2 < \u03b5)"
+    },
+    {
+      "id": "nyman_beurling_implies_robin",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Equivalence.lean",
+      "line": 56,
+      "signature": "theorem nyman_beurling_implies_robin : (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - nbLinComb N v x) ^ 2 < \u03b5) \u2192 RobinInequality"
+    },
+    {
+      "id": "nyman_beurling_implies_lagarias",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Equivalence.lean",
+      "line": 65,
+      "signature": "theorem nyman_beurling_implies_lagarias : (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - nbLinComb N v x) ^ 2 < \u03b5) \u2192 LagariasInequality"
+    },
+    {
+      "id": "harmonicR_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 24,
+      "signature": "theorem harmonicR_pos {n : \u2115} (hn : 1 \u2264 n) : 0 < harmonicR n"
+    },
+    {
+      "id": "harmonicR_lower",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 37,
+      "signature": "theorem harmonicR_lower (n : \u2115) : log \u2191(n + 1) \u2264 harmonicR n"
+    },
+    {
+      "id": "harmonicR_upper",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 46,
+      "signature": "theorem harmonicR_upper (n : \u2115) : harmonicR n \u2264 1 + log \u2191n"
+    },
+    {
+      "id": "harmonicR_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 55,
+      "signature": "theorem harmonicR_one : harmonicR 1 = 1"
+    },
+    {
+      "id": "harmonicR_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 59,
+      "signature": "theorem harmonicR_two : harmonicR 2 = 3/2"
+    },
+    {
+      "id": "harmonicR_one_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 63,
+      "signature": "theorem harmonicR_one_pos : (0 : \u211d) < harmonicR 1"
+    },
+    {
+      "id": "harmonicR_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 67,
+      "signature": "theorem harmonicR_three : harmonicR 3 = 11/6"
+    },
+    {
+      "id": "harmonicR_four",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 71,
+      "signature": "theorem harmonicR_four : harmonicR 4 = 25/12"
+    },
+    {
+      "id": "harmonicR_succ_gt",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/HarmonicBounds.lean",
+      "line": 76,
+      "signature": "theorem harmonicR_succ_gt {n : \u2115} (hn : 1 \u2264 n) : harmonicR n < harmonicR (n + 1)"
+    },
+    {
+      "id": "geom_sum_le_two_pow",
+      "type": "lemma",
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 280,
-      "signature": "σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p  [PROVED! — milestone]"
-    },
-    {
-      "id": "lagarias_base_case",
-      "type": "theorem",
-      "category": "proved",
-      "route": "robin",
-      "file": "Cathedral/Robin/BaseCases.lean",
-      "line": 1,
-      "signature": "σ(1) ≤ H_1 + exp(H_1)·ln(H_1)  [PROVED — n=1]"
-    },
-    {
-      "id": "sigma_one_prime",
-      "type": "theorem",
-      "category": "proved",
-      "route": "robin",
-      "file": "Cathedral/Robin/SigmaProps.lean",
-      "line": 1,
-      "signature": "σ(p) = p + 1 for prime p  [PROVED]"
+      "line": 21,
+      "signature": "lemma geom_sum_le_two_pow (P : \u211d) (hP : 2 \u2264 P) (k : \u2115) : \u2211 j \u2208 Finset.range (k + 1), P ^ j \u2264 2 * P ^ k"
     },
     {
       "id": "sigma_one_prime_pow_bound",
@@ -326,17 +1545,44 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 44,
-      "signature": "σ(p^k) ≤ 2·p^k  [PROVED — geometric sum]"
+      "line": 40,
+      "signature": "theorem sigma_one_prime_pow_bound {p k : \u2115} (hp : p.Prime) (_hk : 1 \u2264 k) : (sumOfDivisors (p ^ k) : \u211d) \u2264 2 * (p ^ k : \u211d)"
     },
     {
-      "id": "lagarias_ge_11",
-      "type": "theorem",
+      "id": "exp_lower_quadratic",
+      "type": "lemma",
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 236,
-      "signature": "p+1 ≤ H_p + exp(H_p)·ln(H_p) for p ≥ 11  [PROVED — algebraic bypass]"
+      "line": 57,
+      "signature": "lemma exp_lower_quadratic (x : \u211d) (hx : 0 \u2264 x) : 1 + x + x^2/2 \u2264 Real.exp x"
+    },
+    {
+      "id": "exp_lower_cubic",
+      "type": "lemma",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/PrimeBounds.lean",
+      "line": 87,
+      "signature": "lemma exp_lower_cubic (x : \u211d) (hx : 0 \u2264 x) : 1 + x + x^2/2 + x^3/6 \u2264 Real.exp x"
+    },
+    {
+      "id": "exp_lower_quartic",
+      "type": "lemma",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/PrimeBounds.lean",
+      "line": 120,
+      "signature": "lemma exp_lower_quartic (x : \u211d) (hx : 0 \u2264 x) : 1 + x + x^2/2 + x^3/6 + x^4/24 \u2264 Real.exp x"
+    },
+    {
+      "id": "log_inv_le",
+      "type": "lemma",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/PrimeBounds.lean",
+      "line": 157,
+      "signature": "lemma log_inv_le (x : \u211d) (hx : 0 < x) : 1 - x\u207b\u00b9 \u2264 Real.log x"
     },
     {
       "id": "exp_harmonicR_ge",
@@ -345,300 +1591,2753 @@
       "route": "robin",
       "file": "Cathedral/Robin/PrimeBounds.lean",
       "line": 260,
-      "signature": "exp(H_n) ≥ n+1  [PROVED — from log(n+1) ≤ H_n]"
+      "signature": "theorem exp_harmonicR_ge (n : \u2115) : (n : \u211d) + 1 \u2264 Real.exp (harmonicR n)"
     },
     {
-      "id": "harmonicR_mono",
+      "id": "lagarias_for_primes",
       "type": "theorem",
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 243,
-      "signature": "m ≤ n → H_m ≤ H_n  [PROVED — monotonicity]"
+      "line": 293,
+      "signature": "theorem lagarias_for_primes {p : \u2115} (hp : p.Prime) : (sumOfDivisors p : \u211d) \u2264 harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p)"
     },
     {
-      "id": "exp_lower_quartic",
+      "id": "sigma_one_prime",
       "type": "theorem",
       "category": "proved",
       "route": "robin",
-      "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 118,
-      "signature": "1+x+x²/2+x³/6+x⁴/24 ≤ exp(x) for x ≥ 0  [PROVED — Taylor truncation]"
+      "file": "Cathedral/Robin/SigmaProps.lean",
+      "line": 23,
+      "signature": "theorem sigma_one_prime {p : \u2115} (hp : p.Prime) : sumOfDivisors p = p + 1"
     },
     {
-      "id": "log_three_ge_one",
+      "id": "sumOfDivisors_mul_coprime",
       "type": "theorem",
       "category": "proved",
       "route": "robin",
-      "file": "Cathedral/Robin/PrimeBounds.lean",
-      "line": 226,
-      "signature": "1 ≤ log(3)  [PROVED — from log_lower_quartic]"
-    },
-
-    {
-      "id": "l2_error_eq_quad_error",
-      "type": "theorem",
-      "category": "proved",
-      "route": "crown",
-      "file": "Cathedral/Assembly/QuadFormBridge.lean",
-      "line": 21,
-      "signature": "∫(1-φ_v)² = 1 - 2b·v + v^TGv  [PROVED — L²↔quadform bridge]"
-    },
-    {
-      "id": "nbDistSq_le_test_vector",
-      "type": "theorem",
-      "category": "proved",
-      "route": "crown",
-      "file": "Cathedral/Assembly/QuadFormBridge.lean",
-      "line": 103,
-      "signature": "d²_N ≤ 1 - 2bᵀv + vᵀGv  [PROVED — variational principle]"
-    },
-    {
-      "id": "nbDistSq_lt_one",
-      "type": "theorem",
-      "category": "proved",
-      "route": "crown",
-      "file": "Cathedral/Assembly/QuadFormBridge.lean",
-      "line": 77,
-      "signature": "d²_N < 1  [PROVED — unconditional]"
-    },
-
-    {
-      "id": "floor_mellin_eq_zeta",
-      "type": "theorem",
-      "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/FloorMellin.lean",
-      "line": 294,
-      "signature": "M[⌊1/x⌋](s) = ζ(s)/s for Re(s) > 1  [PROVED]"
-    },
-    {
-      "id": "mellin_cpow_restricted",
-      "type": "theorem",
-      "category": "proved",
-      "route": "forward",
-      "file": "Cathedral/MellinBridge/NymanBeurling.lean",
-      "line": 60,
-      "signature": "M[x^a](s) = 1/(s+a) for Re(s+a) > 0  [PROVED]"
-    },
-
-    {
-      "id": "gramMatrix",
-      "type": "definition",
-      "category": "definition",
-      "route": "crown",
-      "file": "Cathedral/Defs.lean",
+      "file": "Cathedral/Robin/SigmaProps.lean",
       "line": 37,
-      "signature": "def: G_N = (∫₀¹ {j/x}·{k/x} dx)_{j,k}"
+      "signature": "theorem sumOfDivisors_mul_coprime {m n : \u2115} (hmn : Nat.Coprime m n) : sumOfDivisors (m * n) = sumOfDivisors m * sumOfDivisors n"
     },
     {
-      "id": "nbDistSq",
-      "type": "definition",
-      "category": "definition",
-      "route": "crown",
-      "file": "Cathedral/Defs.lean",
-      "line": 55,
-      "signature": "def: d²_N = inf_w (1 - 2bᵀw + wᵀGw)"
+      "id": "sigma_one_le_sq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/SigmaProps.lean",
+      "line": 48,
+      "signature": "theorem sigma_one_le_sq (n : \u2115) : sumOfDivisors n \u2264 n ^ 2"
     },
     {
-      "id": "lambdaMin",
-      "type": "definition",
-      "category": "definition",
-      "route": "crown",
-      "file": "Cathedral/Defs.lean",
-      "line": 68,
-      "signature": "def: λ_min(N) = smallest eigenvalue of G_N"
-    },
-
-    {
-      "id": "type_II_sieve_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/BilinearSieve.lean",
-      "line": 172,
-      "signature": "axiom: ∃ c > 0, K² ≤ 1 - c/N  [numerically verified c ≈ 0.46]"
-    },
-    {
-      "id": "moebius_uncoupling",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/BilinearSieve.lean",
-      "line": 126,
-      "signature": "axiom: Möbius uncoupling bound"
-    },
-    {
-      "id": "vaughan_decomposition",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/MoebiusUncoupling.lean",
-      "line": 229,
-      "signature": "axiom: Vaughan identity for μ(n)"
-    },
-    {
-      "id": "type_I_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/MoebiusUncoupling.lean",
-      "line": 267,
-      "signature": "axiom: PNT-based bound on Type I sums"
-    },
-    {
-      "id": "vaughan_implies_uncoupling",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/MoebiusUncoupling.lean",
-      "line": 322,
-      "signature": "axiom: Vaughan → Möbius uncoupling"
-    },
-
-    {
-      "id": "gram_eigenvalue_log_scaling",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/ParitySchur.lean",
-      "line": 476,
-      "signature": "axiom: λ_min(G_N) ≥ c/log(N)"
-    },
-    {
-      "id": "eigenvalue_implies_distance_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/ParitySchur.lean",
-      "line": 494,
-      "signature": "axiom: λ_min bound → d² ≤ C/log(N)"
-    },
-    {
-      "id": "stable_ratio_parity",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/ParitySchur.lean",
-      "line": 413,
-      "signature": "axiom: parity block ratio stabilizes"
-    },
-    {
-      "id": "schur_bridge",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 282,
-      "signature": "axiom: Schur complement → eigenvalue bound"
-    },
-    {
-      "id": "oct_gap_lower_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/Spectral/OctonionicPartition.lean",
-      "line": 264,
-      "signature": "axiom: octonionic gap C/(N log N)"
-    },
-    {
-      "id": "drop_formula_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/Structural/Eigenvalue.lean",
-      "line": 88,
-      "signature": "axiom: λ_{N+1} drop formula"
-    },
-    {
-      "id": "vasyunin_large_gcd",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "spectral",
-      "file": "Cathedral/VasyuninExpansion.lean",
-      "line": 124,
-      "signature": "axiom: Vasyunin off-diagonal for gcd(j,k) > 1"
+      "id": "sigma_one_ge_succ",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/SigmaProps.lean",
+      "line": 58,
+      "signature": "theorem sigma_one_ge_succ (n : \u2115) (hn : 2 \u2264 n) : n + 1 \u2264 sumOfDivisors n"
     }
   ],
   "edges": [
-    {"source": "nyman_beurling_equivalence", "target": "riemann_hypothesis"},
-    {"source": "distance_converges_to_zero_implies_rh", "target": "nyman_beurling_equivalence"},
-    {"source": "rh_implies_distance_converges_to_zero", "target": "nyman_beurling_equivalence"},
-
-    {"source": "nyman_beurling_converse", "target": "distance_converges_to_zero_implies_rh"},
-    {"source": "l2_error_eq_quad_error", "target": "distance_converges_to_zero_implies_rh"},
-    {"source": "nbDistSq_le_test_vector", "target": "distance_converges_to_zero_implies_rh"},
-
-    {"source": "rh_neg_gives_critical_strip_zero", "target": "nyman_beurling_converse"},
-    {"source": "zeta_zero_separates", "target": "nyman_beurling_converse"},
-    {"source": "baezDuarte_separates", "target": "nyman_beurling_converse"},
-
-    {"source": "zeta_nontrivial_zero_re_pos", "target": "rh_neg_gives_critical_strip_zero"},
-
-    {"source": "orthogonal_witness_lower_bound", "target": "baezDuarte_separates"},
-    {"source": "baezDuarte_norm_pos", "target": "baezDuarte_separates"},
-
-    {"source": "real_cauchy_schwarz_interval", "target": "orthogonal_witness_lower_bound"},
-    {"source": "baezDuarte_inner_residual", "target": "orthogonal_witness_lower_bound"},
-    {"source": "baezDuarte_L1_product", "target": "orthogonal_witness_lower_bound"},
-
-    {"source": "baezDuarte_is_L2", "target": "baezDuarte_norm_pos"},
-    {"source": "baezDuarte_inner_one", "target": "baezDuarte_norm_pos"},
-    {"source": "baezDuarte_is_L2", "target": "baezDuarte_L1_product"},
-
-
-    {"source": "rh_weight_construction", "target": "nyman_beurling_forward_from_sieve"},
-    {"source": "rh_weight_construction", "target": "phase_3_chain"},
-    {"source": "log_grows_unboundedly", "target": "nyman_beurling_forward_from_sieve"},
-    {"source": "l2_error_eq_quad_error", "target": "phase_3_chain"},
-    {"source": "nbDistSq_le_test_vector", "target": "phase_3_chain"},
-
-    {"source": "mertens_bound_from_rh", "target": "rh_weight_construction_derived"},
-    {"source": "abel_summation_l2_bound", "target": "rh_weight_construction_derived"},
-    {"source": "corrected_weights_pole_free", "target": "rh_weight_construction_derived"},
-
-    {"source": "nyman_beurling_forward", "target": "nyman_beurling_from_mellin"},
-    {"source": "nyman_beurling_converse", "target": "nyman_beurling_from_mellin"},
-
-    {"source": "robin_iff_rh", "target": "robin_implies_nyman_beurling"},
-    {"source": "nyman_beurling_forward_from_sieve", "target": "robin_implies_nyman_beurling"},
-
-    {"source": "lagarias_iff_rh", "target": "lagarias_implies_nyman_beurling"},
-    {"source": "nyman_beurling_forward_from_sieve", "target": "lagarias_implies_nyman_beurling"},
-
-    {"source": "sigma_one_prime", "target": "lagarias_for_primes"},
-    {"source": "lagarias_ge_11", "target": "lagarias_for_primes"},
-    {"source": "exp_lower_quartic", "target": "lagarias_for_primes"},
-
-    {"source": "harmonicR_mono", "target": "lagarias_ge_11"},
-    {"source": "exp_harmonicR_ge", "target": "lagarias_ge_11"},
-    {"source": "log_three_ge_one", "target": "lagarias_ge_11"},
-
-    {"source": "sigma_one_prime", "target": "sigma_one_prime_pow_bound"},
-
-    {"source": "gramMatrix", "target": "l2_error_eq_quad_error"},
-    {"source": "nbDistSq", "target": "nbDistSq_le_test_vector"},
-    {"source": "nbDistSq", "target": "nbDistSq_lt_one"},
-    {"source": "lambdaMin", "target": "eigenvalue_limit_exists"},
-
-    {"source": "type_II_sieve_bound", "target": "moebius_uncoupling"},
-    {"source": "vaughan_decomposition", "target": "vaughan_implies_uncoupling"},
-    {"source": "type_I_bound", "target": "vaughan_implies_uncoupling"},
-    {"source": "vaughan_implies_uncoupling", "target": "moebius_uncoupling"},
-
-    {"source": "gram_eigenvalue_log_scaling", "target": "eigenvalue_implies_distance_bound"},
-    {"source": "stable_ratio_parity", "target": "gram_eigenvalue_log_scaling"},
-    {"source": "schur_bridge", "target": "gram_eigenvalue_log_scaling"},
-    {"source": "oct_gap_lower_bound", "target": "schur_bridge"}
+    {
+      "source": "cot",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "cot",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "cot",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "cot",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "cot",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "rayleighQuotient",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "rayleighQuotient",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "rayleighQuotient",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "rayleighQuotient",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "rayleighQuotient",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "vasyuninQuadForm",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "vasyuninQuadForm",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "vasyuninQuadForm",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "vasyuninQuadForm",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "vasyuninQuadForm",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "vasyuninCovMatrix_hermitian",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "vasyuninCovMatrix_hermitian",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "vasyuninCovMatrix_hermitian",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix_hermitian",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "vasyuninCovMatrix_hermitian",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "vasyuninCovMatrix_posSemidef",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "vasyuninCovMatrix_posSemidef",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "vasyuninCovMatrix_posSemidef",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix_posSemidef",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "vasyuninCovMatrix_posSemidef",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "vasyuninCovMatrix_isUnit_det",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "vasyuninCovMatrix_isUnit_det",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "vasyuninCovMatrix_isUnit_det",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix_isUnit_det",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "vasyuninCovMatrix_isUnit_det",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "variational_lower_bound",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "variational_lower_bound",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "variational_lower_bound",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "variational_lower_bound",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "variational_lower_bound",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "moebiusFn",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "logCutoffWitness",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "posSemidef_pos_of_ne_zero",
+      "target": "log_cutoff_witness_bound"
+    },
+    {
+      "source": "posSemidef_pos_of_ne_zero",
+      "target": "logCutoffWitness_ne_zero"
+    },
+    {
+      "source": "posSemidef_pos_of_ne_zero",
+      "target": "log_cutoff_witness_pos"
+    },
+    {
+      "source": "posSemidef_pos_of_ne_zero",
+      "target": "quadForm_diverges"
+    },
+    {
+      "source": "posSemidef_pos_of_ne_zero",
+      "target": "nbDistSq_decays"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "log_two_lt_seven_tenths"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "covMatrix3_det2_pos"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "log_two_lt_seven_tenths"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "covMatrix3_det2_pos"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "log_two_lt_seven_tenths"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "covMatrix3_det2_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "log_two_lt_seven_tenths"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covMatrix3_det2_pos"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "log_two_lt_seven_tenths"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "covMatrix3_det2_pos"
+    },
+    {
+      "source": "log_two_lt_seven_tenths",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "log_two_lt_seven_tenths",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "log_two_lt_seven_tenths",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "log_two_lt_seven_tenths",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "covEntry_00",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "covEntry_01",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "covEntry_11",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_three",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninMeanEntry_three",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_three",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_three",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_gt",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "pi_div_18sqrt3_gt",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_gt",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_gt",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_lt",
+      "target": "log_three_gt_549_500"
+    },
+    {
+      "source": "pi_div_18sqrt3_lt",
+      "target": "covDet3Expr_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_lt",
+      "target": "covDet3Full_pos"
+    },
+    {
+      "source": "pi_div_18sqrt3_lt",
+      "target": "covMatrix3_det3_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninMeanEntry_one",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninGramEntry_one_one",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninMeanEntry_two",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninGramEntry_two_two",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninGramEntry_two_two",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_two_two",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninGramEntry_two_two",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "covEntry_00"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "covEntry_00_pos"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "covEntry_01"
+    },
+    {
+      "source": "log_three_ge_11_log_two_div_7",
+      "target": "covEntry_11"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "cot",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "cot",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "cot",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "cot",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "cot",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "cot",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "cot",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "cot",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "cot",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "cot",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "cot",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "cot",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninSum",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninSum_one",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninGramMatrix_diag",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramMatrix_trace"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_one_two"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_one_two_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "log_three_ge_11_log_two_div_7"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGram2x2_det_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_two_one"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_three_one"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_three_two"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "fract_one_third"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "fract_two_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "fract_four_thirds"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "cot_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "cot_two_pi_div_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_three_one_val"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_three_two_val"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_one_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_three_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninMeanEntry_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninSum_two"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_two_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "sqrt_three_lt_two"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_one_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "one_lt_sqrt_three"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGramEntry_two_three_pos"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "sqrt_three_gt_173"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "sqrt_three_lt_174"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "pi_div_18sqrt3_gt"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "pi_div_18sqrt3_lt"
+    },
+    {
+      "source": "vasyuninGramEntry_comm",
+      "target": "vasyuninGram3x3_det_pos_closedForm"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "cauchy_schwarz_quadform",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_hermitian"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_posDef"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_posSemidef"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_isUnit_det"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "vasyuninCovMatrix_posDef_from_gram"
+    },
+    {
+      "source": "schur_complement_posDef",
+      "target": "variational_lower_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vecMulVec_self_hermitian",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninGramEntry_comm"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninGramMatrix_symmetric"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninGram_eq_cov_plus_mean"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninMeanOuterProduct_posSemidef"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninMeanOuterProduct_hermitian"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninMeanEntry_pos"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninMeanVec_pos"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "log_two_pi_sub_euler_gt_one"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninGramEntry_diag_pos"
+    },
+    {
+      "source": "vecMulVec_self_posSemidef",
+      "target": "vasyuninGramMatrix_diag_pos"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "lagarias_base_case"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_one"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_two"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_six"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_twentyeight"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_5040"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_three"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_twelve"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_496"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "perfect_six"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "perfect_twentyeight"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "perfect_496"
+    },
+    {
+      "source": "harmonicR",
+      "target": "lagarias_base_case"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_one"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_two"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_six"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_twentyeight"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_5040"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_three"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_twelve"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sumOfDivisors_496"
+    },
+    {
+      "source": "harmonicR",
+      "target": "perfect_six"
+    },
+    {
+      "source": "harmonicR",
+      "target": "perfect_twentyeight"
+    },
+    {
+      "source": "harmonicR",
+      "target": "perfect_496"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "lagarias_base_case"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_one"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_two"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_six"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_twentyeight"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_5040"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_three"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_twelve"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "sumOfDivisors_496"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "perfect_six"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "perfect_twentyeight"
+    },
+    {
+      "source": "lagarias_for_primes",
+      "target": "perfect_496"
+    },
+    {
+      "source": "LagariasInequality",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "LagariasInequality",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "LagariasInequality",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "LagariasInequality",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "lagarias_iff_rh",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "lagarias_iff_rh",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "lagarias_iff_rh",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "lagarias_iff_rh",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "RobinInequality",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "RobinInequality",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "RobinInequality",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "RobinInequality",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "robin_iff_rh",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "robin_iff_rh",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "robin_iff_rh",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "robin_iff_rh",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "rh_implies_lagarias",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "rh_implies_lagarias",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "rh_implies_lagarias",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "rh_implies_lagarias",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "rh_implies_robin",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "rh_implies_robin",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "rh_implies_robin",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "rh_implies_robin",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "lagarias_implies_rh",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "lagarias_implies_rh",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "lagarias_implies_rh",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "lagarias_implies_rh",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "robin_implies_rh",
+      "target": "robin_implies_nyman_beurling"
+    },
+    {
+      "source": "robin_implies_rh",
+      "target": "lagarias_implies_nyman_beurling"
+    },
+    {
+      "source": "robin_implies_rh",
+      "target": "nyman_beurling_implies_robin"
+    },
+    {
+      "source": "robin_implies_rh",
+      "target": "nyman_beurling_implies_lagarias"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_pos"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_lower"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_upper"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_one"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_two"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_one_pos"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_three"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_four"
+    },
+    {
+      "source": "harmonicR",
+      "target": "harmonicR_succ_gt"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "geom_sum_le_two_pow"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sigma_one_prime_pow_bound"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "exp_lower_quadratic"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "exp_lower_cubic"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "exp_lower_quartic"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "log_inv_le"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "exp_harmonicR_ge"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "lagarias_for_primes"
+    },
+    {
+      "source": "harmonicR",
+      "target": "geom_sum_le_two_pow"
+    },
+    {
+      "source": "harmonicR",
+      "target": "sigma_one_prime_pow_bound"
+    },
+    {
+      "source": "harmonicR",
+      "target": "exp_lower_quadratic"
+    },
+    {
+      "source": "harmonicR",
+      "target": "exp_lower_cubic"
+    },
+    {
+      "source": "harmonicR",
+      "target": "exp_lower_quartic"
+    },
+    {
+      "source": "harmonicR",
+      "target": "log_inv_le"
+    },
+    {
+      "source": "harmonicR",
+      "target": "exp_harmonicR_ge"
+    },
+    {
+      "source": "harmonicR",
+      "target": "lagarias_for_primes"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "geom_sum_le_two_pow"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "sigma_one_prime_pow_bound"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "exp_lower_quadratic"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "exp_lower_cubic"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "exp_lower_quartic"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "log_inv_le"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "exp_harmonicR_ge"
+    },
+    {
+      "source": "harmonicR_lower",
+      "target": "lagarias_for_primes"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "geom_sum_le_two_pow"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "sigma_one_prime_pow_bound"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "exp_lower_quadratic"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "exp_lower_cubic"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "exp_lower_quartic"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "log_inv_le"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "exp_harmonicR_ge"
+    },
+    {
+      "source": "sigma_one_prime",
+      "target": "lagarias_for_primes"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sigma_one_prime"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sumOfDivisors_mul_coprime"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sigma_one_le_sq"
+    },
+    {
+      "source": "sumOfDivisors",
+      "target": "sigma_one_ge_succ"
+    }
   ],
   "meta": {
-    "totalFiles": 22,
-    "totalNodes": 56,
-    "totalEdges": 50,
-    "axiomCount": 19,
-    "theoremCount": 30,
-    "provedTheorems": 30,
-    "generatedAt": "2026-04-07T22:34:00Z",
-    "description": "Cathedral proof architecture — Three routes to RH: Converse (Báez-Duarte), Forward (Mertens), Robin/Lagarias (verified Lean 4.30, zero sorry)"
+    "totalNodes": 182,
+    "totalEdges": 672,
+    "axiomCount": 4,
+    "theoremCount": 144,
+    "definitionCount": 34,
+    "provedTheorems": 144,
+    "fileCount": 19,
+    "description": "Cathedral proof architecture: 4 axioms, 144 theorems, 34 definitions across 19 files",
+    "generatedAt": "2026-04-11T00:13:39.943914"
   }
 }

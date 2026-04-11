@@ -388,8 +388,8 @@ export default function Cathedral3DPage() {
           The Cathedral — 3D Architecture
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          Three pillars hold the roof of RH: Converse (Báez-Duarte), Forward
-          (Mertens), and Robin (Discrete).
+          Three pillars hold the roof of RH: Variational (Vasyunin), Robin
+          (Discrete), and the Mellin Bridge.
         </p>
       </div>
 
@@ -422,30 +422,26 @@ export default function Cathedral3DPage() {
             <Foundation />
             <Pillar
               position={[-1.5, 0, 0]}
-              label="Converse"
+              label="Variational"
               color="#8b5cf6"
               axioms={[
-                "baezDuarte_is_L2",
-                "baezDuarte_orthogonal",
-                "baezDuarte_inner_one",
-                "baezDuarte_inner_residual",
+                "log_cutoff_witness_bound",
+                "vasyuninCovMatrix_posDef",
               ]}
             />
             <Pillar
               position={[0, 0, 0.4]}
-              label="Forward"
+              label="Mellin"
               color="#3b82f6"
               axioms={[
-                "mertens_bound_from_rh",
-                "abel_summation_l2_bound",
-                "rh_weight_construction",
+                "nyman_beurling_from_mellin",
               ]}
             />
             <Pillar
               position={[1.5, 0, 0]}
               label="Robin"
               color="#f59e0b"
-              axioms={["robin_iff_rh", "lagarias_iff_rh"]}
+              axioms={["lagarias_iff_rh", "robin_iff_rh"]}
             />
             <CathedralStructure onSelectBrick={setSelected} />
             <Roof />
@@ -471,7 +467,7 @@ export default function Cathedral3DPage() {
               STRUCTURE
             </div>
             <p className="text-sm text-slate-300">
-              45 Lean modules form the bricks. Three pillars carry 9 critical
+              21 Lean files form the bricks. Three pillars carry 4 foundational
               axioms. RH is the roof.
             </p>
           </div>
@@ -497,9 +493,9 @@ export default function Cathedral3DPage() {
               { color: "#f59e0b", label: "Roof: riemann_hypothesis" },
               {
                 color: "#8b5cf6",
-                label: "Pillar 1: Converse (Báez-Duarte)",
+                label: "Pillar 1: Variational (Vasyunin)",
               },
-              { color: "#3b82f6", label: "Pillar 2: Forward (Mertens)" },
+              { color: "#3b82f6", label: "Pillar 2: Mellin Bridge" },
               { color: "#f59e0b", label: "Pillar 3: Robin (Discrete)" },
               { color: "#4a8b3e", label: "Bricks: Proved theorems" },
               { color: "#1e3a5f", label: "Foundation: Mathlib" },

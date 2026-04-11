@@ -15,7 +15,7 @@ export default function GramHeatmapPage() {
     const matrix = new Float64Array(size * size);
     for (let j = 0; j < size; j++) {
       for (let k = j; k < size; k++) {
-        const val = gramEntry(j + 1, k + 1, 500);
+        const val = gramEntry(j + 1, k + 1);
         matrix[j * size + k] = val;
         matrix[k * size + j] = val;
       }

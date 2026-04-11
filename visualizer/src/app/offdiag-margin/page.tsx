@@ -27,7 +27,7 @@ export default function OffDiagMarginPage() {
       for (let n = 2; n <= maxN; n++) {
         cache[n] = [];
         for (let k = 1; k < n; k++) {
-          const g = gramEntry(n, k, 300);
+          const g = gramEntry(n, k);
           cache[n][k] = g;
           runningSum += 2 * (g - 0.25);
         }

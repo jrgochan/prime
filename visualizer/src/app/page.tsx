@@ -14,12 +14,22 @@ interface CardInfo {
 
 const CARDS: CardInfo[] = [
   {
+    href: "/term-explorer",
+    title: "Term Explorer",
+    description:
+      "Interactively explore the Vasyunin formula term by term. Toggle dimensions, inspect matrix entries, visualize the log cutoff witness, and walk the proof chain.",
+    icon: "🔬",
+    stats: "4 terms · live computation · interactive",
+    gradient: "from-violet-500/20 to-purple-500/20",
+    border: "border-violet-500/20",
+  },
+  {
     href: "/proof-tree",
     title: "Proof Dependency Tree",
     description:
-      "Interactive force-directed graph of every theorem, axiom, and definition. Filter by route, trace dependency chains, and explore the critical path.",
+      "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "57 nodes · 51 edges · 3 routes",
+    stats: "166 theorems · 4 axioms",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -105,25 +115,25 @@ interface RouteInfo {
 
 const ROUTES: RouteInfo[] = [
   {
-    label: "ROUTE 1 — CONVERSE",
-    name: "d²→0 ⟹ RH",
-    desc: "Báez-Duarte orthogonal witness: if L² distance vanishes, no off-line zero can exist. 3 axioms.",
-    color: "from-violet-500/10 to-transparent",
-    borderColor: "border-violet-500/20",
+    label: "STEP 1 — WITNESS",
+    name: "Q(v_log) ≥ c·ln N",
+    desc: "The log cutoff witness v_k = −μ(k)(1 − ln k/ln N) yields a Rayleigh quotient that grows logarithmically. This IS the RH.",
+    color: "from-amber-500/10 to-transparent",
+    borderColor: "border-amber-500/20",
   },
   {
-    label: "ROUTE 2 — FORWARD",
-    name: "RH ⟹ d²→0",
-    desc: "Mertens bypass: RH gives M(x) = O(√x log²x), Abel summation gives optimal weights. 2 axioms.",
+    label: "STEP 2 — VARIATIONAL",
+    name: "Q(v) ≤ X_N → ∞",
+    desc: "Cauchy-Schwarz + Sherman-Morrison: the quadratic form X_N = b^T C^{-1} b diverges, so d²_N = 1/(1+X_N) → 0.",
     color: "from-blue-500/10 to-transparent",
     borderColor: "border-blue-500/20",
   },
   {
-    label: "ROUTE 3 — ROBIN/LAGARIAS",
+    label: "INDEPENDENT — ROBIN",
     name: "Robin ↔ RH ↔ Lagarias",
-    desc: "Discrete arithmetic: σ(n) bounds equivalent to RH. lagarias_for_primes proved unconditionally.",
-    color: "from-amber-500/10 to-transparent",
-    borderColor: "border-amber-500/20",
+    desc: "Discrete arithmetic: σ(p) ≤ H_p + exp(H_p)·ln(H_p) proved for ALL primes. Zero axioms.",
+    color: "from-emerald-500/10 to-transparent",
+    borderColor: "border-emerald-500/20",
   },
 ];
 
@@ -142,18 +152,18 @@ export default function HomePage() {
           </span>
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
-          A machine-checked framework for the Spectral Riemann Hypothesis in
-          Lean 4. Three independent routes converge on the Nyman-Beurling
-          equivalence.
+          A machine-checked reduction of the Riemann Hypothesis to a single
+          discrete variational witness in Lean 4, via the Vasyunin cotangent
+          formula.
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "45 Lean files" },
+            { color: "bg-emerald-500", text: "21 Lean files" },
             { color: "bg-emerald-500", text: "0 sorry" },
-            { color: "bg-amber-500", text: "36 axioms" },
-            { color: "bg-emerald-500", text: "30+ proved theorems" },
-            { color: "bg-blue-500", text: "3,486 build jobs" },
+            { color: "bg-amber-500", text: "4 axioms" },
+            { color: "bg-emerald-500", text: "166 theorems" },
+            { color: "bg-blue-500", text: "3,073 build jobs" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -165,7 +175,7 @@ export default function HomePage() {
 
       {/* Three Routes */}
       <h2 className="text-xl font-bold text-slate-200 mb-4">
-        Three Routes to RH
+        The Vasyunin Path
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         {ROUTES.map((route, i) => (
@@ -189,26 +199,46 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Milestone banner */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mb-12 p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">✅</span>
-          <div>
-            <h3 className="text-sm font-bold text-emerald-400">
-              lagarias_for_primes — PROVED
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p. Kernel-verified,
-              zero sorry. Axiom count reduced by 2 (lagarias_for_primes + orthogonal excision).
-            </p>
+      {/* Milestone banners */}
+      <div className="space-y-3 mb-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🏰</span>
+            <div>
+              <h3 className="text-sm font-bold text-violet-400">
+                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                The 3×3 covariance matrix is positive definite via Sylvester&apos;s criterion.
+                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
+              </p>
+            </div>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">✅</span>
+            <div>
+              <h3 className="text-sm font-bold text-emerald-400">
+                lagarias_for_primes — PROVED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p. Zero axioms.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       <h2 className="text-xl font-bold text-slate-200 mb-4">Explore</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

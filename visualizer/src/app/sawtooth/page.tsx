@@ -21,7 +21,7 @@ export default function SawtoothPage() {
   useEffect(() => {
     const points: DataPoint[] = [];
     for (let j = 1; j <= maxJ; j++) {
-      const g = gramEntry(j, j + 1, 2000);
+      const g = gramEntry(j, j + 1);
       points.push({ j, covariance: g - 0.25, naiveBound: 1 / (4 * j) });
     }
     setData(points);
