@@ -426,8 +426,48 @@ theorem schur_complement_converse
     nlinarith [sq_nonneg X]
 
 -- ════════════════════════════════════════════════
--- SECTION 6: 3×3 SYLVESTER CRITERION
+-- SECTION 6: SYLVESTER CRITERIA
 -- ════════════════════════════════════════════════
+
+/-- **2×2 Sylvester criterion via completing the square.**
+    For a Hermitian 2×2 matrix M with M(0,0) > 0 and det > 0, M is positive definite.
+
+    Proof: The CTS identity: a·(xᵀMx) = (a·x₀+b·x₁)² + det(M)·x₁²
+    where a = M(0,0), b = M(0,1). -/
+theorem sylvester_2x2
+    (M : Matrix (Fin 2) (Fin 2) ℝ)
+    (hH : M.IsHermitian)
+    (h1 : M 0 0 > 0)
+    (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) :
+    M.PosDef := by
+  have hM10 : M 1 0 = M 0 1 := by
+    have := congr_fun (congr_fun hH 1) 0; simp [conjTranspose_apply, star_trivial] at this; exact this.symm
+  exact PosDef.of_dotProduct_mulVec_pos hH fun {x} hx => by
+    simp only [star_trivial]
+    have h_expand : dotProduct x (M.mulVec x) =
+        M 0 0 * x 0 ^ 2 + M 1 1 * x 1 ^ 2 + 2 * M 0 1 * x 0 * x 1 := by
+      simp only [dotProduct, mulVec, Fin.sum_univ_two, Fin.isValue]
+      rw [hM10]; ring
+    rw [h_expand]
+    have h_cts : M 0 0 * (M 0 0 * x 0 ^ 2 + M 1 1 * x 1 ^ 2 + 2 * M 0 1 * x 0 * x 1) =
+        (M 0 0 * x 0 + M 0 1 * x 1) ^ 2 +
+        (M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 ^ 2 := by ring
+    by_contra h_neg
+    push Not at h_neg
+    have h_scaled := mul_nonpos_of_nonneg_of_nonpos (le_of_lt h1) h_neg
+    rw [h_cts] at h_scaled
+    have ht1 : (0 : ℝ) ≤ (M 0 0 * x 0 + M 0 1 * x 1) ^ 2 := sq_nonneg _
+    have ht2 : (0 : ℝ) ≤ (M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 ^ 2 :=
+      mul_nonneg (le_of_lt h2) (sq_nonneg _)
+    have heq1 : (M 0 0 * x 0 + M 0 1 * x 1) ^ 2 = 0 := by linarith
+    have heq2 : (M 0 0 * M 1 1 - M 0 1 ^ 2) * x 1 ^ 2 = 0 := by linarith
+    have hx1 : x 1 = 0 := by
+      by_contra h; exact absurd heq2 (ne_of_gt (mul_pos h2 (sq_pos_of_ne_zero h)))
+    have hx0 : x 0 = 0 := by
+      rw [hx1, mul_zero, add_zero] at heq1
+      have h_sq : M 0 0 * x 0 = 0 := sq_eq_zero_iff.mp heq1
+      exact (mul_eq_zero.mp h_sq).resolve_left (ne_of_gt h1)
+    apply hx; ext i; fin_cases i <;> simp_all
 
 /-- **3×3 Sylvester criterion via completing the square.**
     For a Hermitian 3×3 matrix M with positive leading minors, M is positive definite.

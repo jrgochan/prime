@@ -793,6 +793,15 @@
       "signature": "theorem pi_div_18sqrt3_lt : Real.pi / (18 * Real.sqrt 3) < 35 / 346"
     },
     {
+      "id": "detExpr",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/GramEntries.lean",
+      "line": 460,
+      "signature": "noncomputable def detExpr (A l q t : \u211d) : \u211d"
+    },
+    {
       "id": "vasyuninGram3x3_det_pos_closedForm",
       "type": "theorem",
       "category": "proved",
@@ -854,6 +863,60 @@
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
       "line": 141,
       "signature": "theorem vasyuninGramMatrix_diag_nonneg (N : \u2115) (i : Fin N) : 0 \u2264 vasyuninGramMatrix N i i"
+    },
+    {
+      "id": "gramMatrix2_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
+      "line": 51,
+      "signature": "theorem gramMatrix2_posDef : (vasyuninGramMatrix 2).PosDef"
+    },
+    {
+      "id": "covMatrix2_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
+      "line": 94,
+      "signature": "theorem covMatrix2_posDef : (vasyuninCovMatrix 2).PosDef"
+    },
+    {
+      "id": "nbDistSq_pos_two",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean",
+      "line": 112,
+      "signature": "theorem nbDistSq_pos_two : dotProduct (vasyuninMeanVec 2) ((vasyuninGramMatrix 2)\u207b\u00b9.mulVec (vasyuninMeanVec 2)) < 1"
+    },
+    {
+      "id": "covMatrix3_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
+      "line": 55,
+      "signature": "theorem covMatrix3_posDef : (vasyuninCovMatrix 3).PosDef"
+    },
+    {
+      "id": "gramMatrix3_posDef",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
+      "line": 144,
+      "signature": "theorem gramMatrix3_posDef : (vasyuninGramMatrix 3).PosDef"
+    },
+    {
+      "id": "nbDistSq_pos_three",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
+      "line": 165,
+      "signature": "theorem nbDistSq_pos_three : dotProduct (vasyuninMeanVec 3) ((vasyuninGramMatrix 3)\u207b\u00b9.mulVec (vasyuninMeanVec 3)) < 1"
     },
     {
       "id": "rayleighQuotient",
@@ -1252,12 +1315,30 @@
       "signature": "theorem schur_complement_posDef (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (h_schur : dotProduct b (G\u207b\u00b9.mulVec b) < 1) : (G - vecMulVec b b).PosDef"
     },
     {
+      "id": "schur_complement_converse",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 380,
+      "signature": "theorem schur_complement_converse (G : Matrix (Fin n) (Fin n) \u211d) (b : Fin n \u2192 \u211d) (hG : G.PosDef) (hC : (G - vecMulVec b b).PosDef) : dotProduct b (G\u207b\u00b9.mulVec b) < 1"
+    },
+    {
+      "id": "sylvester_2x2",
+      "type": "theorem",
+      "category": "proved",
+      "route": "infrastructure",
+      "file": "Cathedral/LinearAlgebra/Variational.lean",
+      "line": 437,
+      "signature": "theorem sylvester_2x2 (M : Matrix (Fin 2) (Fin 2) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) : M.PosDef"
+    },
+    {
       "id": "sylvester_3x3",
       "type": "theorem",
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/LinearAlgebra/Variational.lean",
-      "line": 389,
+      "line": 485,
       "signature": "theorem sylvester_3x3 (M : Matrix (Fin 3) (Fin 3) \u211d) (hH : M.IsHermitian) (h1 : M 0 0 > 0) (h2 : M 0 0 * M 1 1 - M 0 1 ^ 2 > 0) (h3 : M 0 0 * (M 1 1 * M 2 2 - M 1 2 ^ 2) - M 0 1 * (M 0 1 * M 2 2 - \u2026"
     },
     {
@@ -3651,6 +3732,366 @@
       "target": "vasyuninGramMatrix_diag_nonneg"
     },
     {
+      "source": "covMatrix3_det2_pos",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "covMatrix3_det2_pos",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "covMatrix3_det2_pos",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "gramMatrix2_posDef"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "covMatrix2_posDef"
+    },
+    {
+      "source": "sylvester_2x2",
+      "target": "nbDistSq_pos_two"
+    },
+    {
+      "source": "covMatrix3_det2_pos",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "covMatrix3_det2_pos",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "covMatrix3_det2_pos",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "covMatrix3_det3_pos",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "covMatrix3_det3_pos",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "covMatrix3_det3_pos",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "covEntry_00_pos",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninMeanVec",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninCovMatrix",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_two",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGram2x2_det_pos",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_one_three",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_three_three",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_two_three",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "detExpr",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "detExpr",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "detExpr",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGram3x3_det_pos_closedForm",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGram3x3_det_pos_closedForm",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGram3x3_det_pos_closedForm",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramMatrix_symmetric",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "vasyuninGramEntry_diag_pos",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "schur_complement_converse",
+      "target": "nbDistSq_pos_three"
+    },
+    {
+      "source": "sylvester_3x3",
+      "target": "covMatrix3_posDef"
+    },
+    {
+      "source": "sylvester_3x3",
+      "target": "gramMatrix3_posDef"
+    },
+    {
+      "source": "sylvester_3x3",
+      "target": "nbDistSq_pos_three"
+    },
+    {
       "source": "vasyuninGramMatrix",
       "target": "vasyuninCovMatrix_hermitian"
     },
@@ -4572,14 +5013,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 188,
-    "totalEdges": 719,
+    "totalNodes": 197,
+    "totalEdges": 809,
     "axiomCount": 6,
-    "theoremCount": 148,
-    "definitionCount": 34,
-    "provedTheorems": 148,
-    "fileCount": 20,
-    "description": "Cathedral proof architecture: 6 axioms, 148 theorems, 34 definitions across 20 files",
-    "generatedAt": "2026-04-11T03:28:55.474307"
+    "theoremCount": 156,
+    "definitionCount": 35,
+    "provedTheorems": 156,
+    "fileCount": 22,
+    "description": "Cathedral proof architecture: 6 axioms, 156 theorems, 35 definitions across 22 files",
+    "generatedAt": "2026-04-11T04:30:49.921989"
   }
 }

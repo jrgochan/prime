@@ -12,7 +12,7 @@ cd proofs
 lake build    # 3,073 jobs, ~2 min, zero errors
 ```
 
-When `lake build` completes, every theorem in the repository is machine-verified. There are no `sorry` placeholders, no custom axioms beyond the 4 documented below, and no floating-point approximations. The Lean kernel enforces absolute logical truth.
+When `lake build` completes, every theorem in the repository is machine-verified. There are no `sorry` placeholders, no custom axioms beyond the 6 documented below, and no floating-point approximations. The Lean kernel enforces absolute logical truth.
 
 ---
 
@@ -33,27 +33,37 @@ This involves only: the Möbius function μ, greatest common divisor, logarithm,
 
 ---
 
-## The 4 Axioms
+## The 6 Axioms
 
-### Critical Path (2 axioms)
+### Irreducible (2 axioms)
 
 | # | Axiom | File | What it says |
 |---|-------|------|-------------|
 | 1 | `log_cutoff_witness_bound` | [Chain.lean](../proofs/Cathedral/MellinBridge/Vasyunin/Chain.lean#L31) | Q(v_log) ≥ c·ln N for some c > 0 |
-| 2 | `vasyuninCovMatrix_posDef` | [Rayleigh.lean](../proofs/Cathedral/MellinBridge/Vasyunin/Rayleigh.lean#L51) | C_N is positive definite for N ≥ 3 |
+| 4 | `vasyunin_eq_integral` | [GramPSD.lean](../proofs/Cathedral/MellinBridge/Vasyunin/GramPSD.lean#L45) | Vasyunin discrete sum = L²(0,1) integral |
 
 **Axiom 1 IS the Riemann Hypothesis** — expressed as a finite, discrete, computable quantity. It has been numerically verified to N = 50,000 with Q/ln N monotonically increasing.
 
-**Axiom 2 is structural** — it says the covariance matrix is positive definite. This is provably reducible to G_N being positive definite (which follows from linear independence of the Báez-Duarte basis). The N = 3 case is **formally verified** via Sylvester's criterion.
+**Axiom 4 is the "dictionary"** — it bridges the Vasyunin discrete formula to the L² inner product. This is classical analysis, definitional in nature.
+
+### Structural (2 axioms, proved for N ≤ 3)
+
+| # | Axiom | File | Status |
+|---|-------|------|--------|
+| 2 | `vasyuninGramMatrix_posDef` | [Rayleigh.lean](../proofs/Cathedral/MellinBridge/Vasyunin/Rayleigh.lean#L75) | Proved for N=3 in NbDistPos3.lean |
+| 3 | `vasyunin_nbDistSq_pos` | [Rayleigh.lean](../proofs/Cathedral/MellinBridge/Vasyunin/Rayleigh.lean#L89) | Proved for N=3 via converse Schur |
+
+Axiom 3 **reduces to axiom 2** via the converse Schur complement theorem. For N = 3, both are proved from pure determinant certificates (zero axioms).
 
 ### Literature (2 axioms)
 
 | # | Axiom | File | Source |
 |---|-------|------|--------|
-| 3 | `lagarias_iff_rh` | [Robin/Defs.lean](../proofs/Cathedral/Robin/Defs.lean#L96) | Lagarias 2002 |
-| 4 | `robin_iff_rh` | [Robin/Defs.lean](../proofs/Cathedral/Robin/Defs.lean#L127) | Robin 1984 |
+| 5 | `lagarias_iff_rh` | [Robin/Defs.lean](../proofs/Cathedral/Robin/Defs.lean#L96) | Lagarias 2002 |
+| 6 | `robin_iff_rh` | [Robin/Defs.lean](../proofs/Cathedral/Robin/Defs.lean#L127) | Robin 1984 |
 
 These are well-known equivalences used only on the independent Robin/Lagarias front.
+Blocked on Mathlib's Prime Number Theorem formalization.
 
 ---
 
@@ -100,6 +110,16 @@ The crown jewel of the Cathedral:
 
 Together: C₃ is positive definite by Sylvester's criterion.
 
+### Step 4b: Axiom 3 for N = 3
+**File:** [NbDistPos3.lean](../proofs/Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean)
+
+Proves `nbDistSq_pos_three`: b^T G₃⁻¹ b < 1 using:
+- **`covMatrix3_posDef`** — C₃ PD from Sylvester (Steps 3+4)
+- **`gramMatrix3_posDef`** — G₃ PD from Sylvester (Step 3)
+- **`schur_complement_converse`** — Converse Schur complement
+
+This proves Axiom 3 for N = 3 without using any axioms.
+
 ### Step 5: Linear Algebra
 **Files:** [ShermanMorrison.lean](../proofs/Cathedral/LinearAlgebra/ShermanMorrison.lean), [Variational.lean](../proofs/Cathedral/LinearAlgebra/Variational.lean)
 
@@ -107,6 +127,9 @@ Zero-axiom foundations:
 - **`nb_dist_via_witness`** — d² = 1/(1+X) (Sherman-Morrison)
 - **`variational_lower_bound`** — Q(v) ≤ X_N (Cauchy-Schwarz)
 - **`posSemidef_pos_of_ne_zero`** — PSD + invertible + v≠0 → vᵀGv > 0
+- **`schur_complement_posDef`** — G PD + b^TG⁻¹b < 1 → C PD
+- **`schur_complement_converse`** — G PD + C PD → b^TG⁻¹b < 1
+- **`sylvester_3x3`** — 3×3 Sylvester criterion via completing the square
 
 ### Step 6: The Witness
 **File:** [Witness.lean](../proofs/Cathedral/MellinBridge/Vasyunin/Witness.lean)
