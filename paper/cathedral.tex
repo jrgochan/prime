@@ -46,38 +46,31 @@ that reduces the Riemann Hypothesis to the logarithmic growth of a single
 explicit Rayleigh quotient built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 21 active Lean files with \textbf{166 theorems}
-compiling in 3,073 build jobs with \textbf{zero \texttt{sorry} placeholders}.
-In the active proof chain, only two axioms remain: one encoding positive
-definiteness of the Vasyunin covariance matrix (provably reducible to $G_N$ PD;
-the $N=3$ case is now formally verified via Sylvester's criterion with
-$\det(C_3) > 0$),
-and the other encoding the logarithmic growth of the explicit log cutoff
-witness---which \textbf{IS the Riemann Hypothesis} expressed as a finite,
-computable quantity. Two additional literature axioms (Robin, Lagarias)
-stand independently on the discrete arithmetic front.
+The formalization comprises 25 active Lean files with \textbf{169 theorems}
+compiling in 3,076 build jobs with \textbf{zero \texttt{sorry} placeholders}.
+In the active proof chain, only \textbf{five axioms} remain:
+(1)~a geometric axiom (augmented Gram matrix Schur complement positivity),
+(2)~the logarithmic growth of the explicit log cutoff witness---which
+\textbf{IS the Riemann Hypothesis} expressed as a finite, computable quantity,
+(3)~a definitional bridge (Vasyunin integral identity),
+and (4--5)~two classical literature equivalences (Lagarias/Robin).
 
-Central innovations include: (1)~the elimination of continuous integrals
+The key architectural innovation is the \emph{augmented Gram matrix}
+$H_N = \begin{psmallmatrix} 1 & b^T \\ b & G_N \end{psmallmatrix}$,
+which unifies the entire geometric foundation: from a single axiom about
+its Schur complement, we derive $G_N$ positive definite (trailing submatrix
+embedding), $b^T G_N^{-1} b < 1$ (witness vector), and the covariance
+matrix $C_N = G_N - bb^T$ positive definite (Schur complement)---all as
+compiler-verified theorems with zero \texttt{sorry}.
+
+Additional innovations include: (1)~the elimination of continuous integrals
 via the exact Vasyunin discrete formula for Gram matrix entries;
 (2)~the constructive Selberg-type logarithmic cutoff witness that
 bypasses matrix inversion entirely; (3)~the Sherman--Morrison identity
 $d_N^2 = 1/(1+X_N)$ proved with zero axioms; (4)~the independent
 emergence of the Selberg sieve from the $L^2$ variational principle;
-(5)~a first-principles polarization proof that PSD$\,+\,$invertible$\,+\,v \neq 0$
-implies $v^T C v > 0$;
-(6)~the quadratic interpolation method for certifying multi-variable
-polynomial positivity via boundary evaluation and concavity.
-
-As standalone results, we prove unconditionally that
-$\sigma(p) \leq H_p + e^{H_p}\ln H_p$ for all primes~$p$, that
-the Gram matrix $G(j,k)$ is symmetric, that $G(k,k) > 0$ for all $k \geq 1$,
-that the $3 \times 3$ Gram matrix~$G_3$ is \emph{positive definite}
-(via a novel quadratic interpolation of two polynomial certificates
-with tight bounds from Mathlib's $3.14 < \pi < 3.15$), that the
-$3 \times 3$ covariance matrix~$C_3$ is \emph{positive definite}
-(via a degree-6 polynomial in 5 transcendentals with divided differences,
-bilinear interpolation, and Taylor monotonicity), and that the
-covariance matrix is Hermitian, PSD, and invertible.
+(5)~three Fin-embedding proofs connecting the augmented matrix to its
+substructures.
 \end{abstract}
 
 % ================================================================
@@ -347,72 +340,81 @@ The full chain to RH:
 \end{enumerate}
 
 % ================================================================
+\section{The Augmented Gram Matrix}
+% ================================================================
+
+The key architectural insight (April 11, 2026) is the \emph{augmented Gram matrix}:
+\[
+H_N = \begin{pmatrix} 1 & b^T \\ b & G_N \end{pmatrix}
+\]
+This is the Gram matrix of $\{1, f_1, \ldots, f_N\}$ in $L^2(0,1)$,
+where $f_k(x) = \{k/x\}$ are the fractional-part sawtooth functions.
+
+From a single axiom about the Schur complement of $H_N$, the entire
+geometric foundation is derived as theorems.
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry]
+\texttt{augmentedGramMatrix\_posDef}: $H_N$ is positive definite for all $N \geq 1$.
+
+Proof by induction via the bordered matrix theorem:
+\begin{itemize}
+\item Base: $H_1$ PD from $\texttt{covEntry\_00\_pos}$ and direct $2 \times 2$ Sylvester.
+\item Step: $H_N$ PD $+$ augmented Schur complement $> 0$ $\implies$ $H_{N+1}$ PD.
+\end{itemize}
+\end{theorem}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry]
+\texttt{gramMatrix\_posDef\_from\_augmented}: $G_N$ is positive definite for all $N \geq 1$.
+
+Proof: $G_N$ is the trailing $N \times N$ submatrix of $H_N$.
+For any $x \neq 0$, set $w = (0, x) \in \RR^{N+1}$. Then
+$w^T H_N w = x^T G_N x > 0$ since $H_N$ PD and $w \neq 0$.
+\end{theorem}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry]
+\texttt{nbDistSq\_pos\_from\_augmented}: $b^T G_N^{-1} b < 1$ for all $N \geq 1$.
+
+Proof: Set $w = (1, -G_N^{-1}b) \in \RR^{N+1}$. The quadratic form identity
+$w^T H_N w = 1 - b^T G_N^{-1} b$ is proved by expanding the double sum
+and using $G \cdot G^{-1} b = b$ to annihilate the tail.
+Since $H_N$ PD and $w \neq 0$, we get $1 - b^T G_N^{-1} b > 0$.
+\end{theorem}
+
+\begin{remark}
+The covariance matrix $C_N = G_N - bb^T$ is positive definite by
+the Schur complement theorem: $G_N$ PD $+$ $b^T G_N^{-1} b < 1$
+$\implies$ $C_N$ PD. This was formerly an axiom; it is now a theorem.
+\end{remark}
+
+% ================================================================
 \section{The Axiom Taxonomy}
 % ================================================================
 
-The active proof chain rests on exactly \textbf{two} axioms.
-All other structural properties---Hermitian symmetry, positive
-semidefiniteness, determinant invertibility, witness positivity,
-and the variational principle---are now \textbf{proved theorems}.
+The active proof chain rests on exactly \textbf{five} axioms.
+All structural properties---Gram matrix PD, covariance matrix PD,
+Hermitian symmetry, positive semidefiniteness, determinant invertibility,
+witness positivity, Nyman--Beurling distance bound, and the variational
+principle---are now \textbf{proved theorems}.
 
-\subsection{Core Axioms (Active Proof Chain)}
+\subsection{Geometric Axiom}
 
-\begin{axiombox}[\texttt{vasyuninCovMatrix\_posDef}]
-The covariance matrix $C_N = G_N - b b^T$ is positive definite for $N \geq 3$.
+\begin{axiombox}[\texttt{augmentedSchurComplement\_pos}]
+The Schur complement of $H_N$ is positive: the sawtooth function
+$f_{N+1}$ has positive $L^2$ distance from $\mathrm{span}\{1, f_1, \ldots, f_N\}$.
 
-\emph{Structural axiom.} Encapsulates the fact that the $L^2$ inner product
-is non-degenerate after mean deflation. From this single axiom, the following
-are derived as theorems:
+\emph{Geometric fact.} The fractional-part function $f_{N+1}(x) = \{(N+1)/x\}$
+has a jump discontinuity at $x = (N+1)/(N+2)$ that no linear combination
+of $1, f_1, \ldots, f_N$ can reproduce. From this single axiom:
 \begin{itemize}
-\item $C$ is Hermitian (\texttt{vasyuninCovMatrix\_hermitian})
-\item $C$ is PSD (\texttt{vasyuninCovMatrix\_posSemidef})
-\item $\det C$ is invertible (\texttt{vasyuninCovMatrix\_isUnit\_det})
-\item $v^T C v > 0$ for $v \neq 0$ (\texttt{log\_cutoff\_witness\_pos})
-\item $(b^T v)^2/(v^T C v) \leq b^T C^{-1} b$ (\texttt{variational\_lower\_bound})
+\item $H_N$ PD for all $N \geq 1$ (induction)
+\item $G_N$ PD (trailing submatrix)
+\item $b^T G^{-1} b < 1$ (witness vector)
+\item $C_N$ PD (Schur complement)
+\item All downstream properties (Hermitian, PSD, invertible, witness positive, variational bound)
 \end{itemize}
 \end{axiombox}
 
-\begin{remark}[Axiom Decomposition via Schur Complement]
-As of April 10, 2026, this axiom is \textbf{provably reducible} to a
-single primitive condition: \emph{$G_N$ is positive definite.}
-
-The reduction proceeds in two steps, both machine-verified:
-\begin{enumerate}
-\item \textbf{Schur Complement Theorem}
-(\texttt{schur\_complement\_posDef}):
-If $G$ is positive definite and $b^T G^{-1} b < 1$, then
-$C = G - b b^T$ is positive definite.
-
-\emph{Proof:} By Cauchy--Schwarz in the $G$-inner product,
-$(b^T x)^2 \leq (b^T G^{-1} b)(x^T G x)$, so
-$x^T C x \geq (1 - b^T G^{-1} b) \cdot x^T G x > 0$. \qed
-
-\item \textbf{Schur--Morrison Bridge}
-(\texttt{schur\_condition\_from\_psd}):
-The condition $b^T G^{-1} b < 1$ is \emph{automatic.}
-By Sherman--Morrison, $b^T G^{-1} b = X/(1+X)$ where $X = b^T C^{-1} b \geq 0$.
-Since $X/(1+X) < 1$ for all $X \geq 0$, the Schur condition holds unconditionally.
-\end{enumerate}
-
-Therefore: $G_N\ \text{PD} \implies C_N\ \text{PD}$, with no additional hypotheses.
-Since $G_N$ is the Gram matrix of linearly independent $L^2$ functions,
-it is positive definite by construction. Formalizing this final step
-(linear independence of the B\'{a}ez-Duarte basis) would eliminate the axiom entirely.
-\end{remark}
-
-\begin{remark}[Status: $G_3$ and $C_3$ are Positive Definite]
-As of April 10, 2026, both the $3 \times 3$ Gram matrix $G_3$ and the
-$3 \times 3$ covariance matrix $C_3 = G_3 - bb^T$ have been proved
-positive definite via Sylvester's criterion:
-\begin{itemize}
-\item $G_3$: \texttt{vasyuninGram3x3\_det\_pos\_closedForm} (quadratic interpolation)
-\item $C_3$: \texttt{covMatrix3\_det3\_pos} (divided differences + Taylor monotonicity)
-\end{itemize}
-The $C_3$ proof is a degree-6 polynomial in 5 transcendentals
-($\ln 2, \gamma, \ln 3, \pi/(18\sqrt{3}), \ln\pi$)
-certified via bilinear interpolation at grid corners.
-Extending to general $N$ remains open.
-\end{remark}
+\subsection{The Hypothesis}
 
 \begin{axiombox}[\texttt{log\_cutoff\_witness\_bound}]
 $\exists\,c > 0,\;\exists\,N_0,\;\forall\,N \geq N_0$:
@@ -420,11 +422,21 @@ $c \cdot \ln N \leq Q_N(v_{\text{log}})$.
 
 \textbf{This IS the Riemann Hypothesis.} It is a purely
 discrete, finite statement about M\"obius-weighted Vasyunin
-cotangent sums. Experimentally verified to $N = 50{,}000$
+cotangent sums. Experimentally verified to $N = 20{,}000$
 with $Q/\ln N$ monotonically increasing.
 \end{axiombox}
 
-\subsection{Literature Axioms (Discrete Arithmetic Front)}
+\subsection{Definitional Bridge}
+
+\begin{axiombox}[\texttt{vasyunin\_eq\_integral}]
+The Vasyunin cotangent formula equals the $L^2$ integral:
+$G(j,k) = \int_0^1 \{j/x\}\{k/x\}\,dx$.
+
+\emph{Definitional axiom.} Published by Vasyunin (1995) and
+B\'aez-Duarte et al.\ (2005). Verified computationally to 15 digits.
+\end{axiombox}
+
+\subsection{Literature Axioms}
 
 \begin{axiombox}[\texttt{lagarias\_iff\_rh} / \texttt{robin\_iff\_rh}]
 The Lagarias and Robin equivalences to RH.
@@ -437,17 +449,13 @@ Used only in the Robin inequality module, not in the main Vasyunin chain.
 
 The following were previously axioms and are now fully proved:
 \begin{itemize}
+\item \texttt{vasyuninGramMatrix\_posDef} --- from $H_N$ PD (trailing submatrix)
+\item \texttt{vasyunin\_nbDistSq\_pos} --- from $H_N$ PD (witness vector)
+\item \texttt{gramSchurComplement\_pos} --- subsumed by augmented axiom
+\item \texttt{vasyuninCovMatrix\_posDef} --- from $G_N$ PD + $b^T G^{-1} b < 1$
 \item \texttt{variational\_lower\_bound} --- from abstract Cauchy--Schwarz
-  (proved in \texttt{Variational.lean}).
 \item \texttt{log\_cutoff\_witness\_pos} --- from PosDef + $v \neq 0$
-  (via \texttt{posSemidef\_pos\_of\_ne\_zero}, a first-principles
-  polarization argument).
-\item \texttt{vasyuninCovMatrix\_hermitian} --- from Gram symmetry
-  + $bb^T$ symmetry.
-\item \texttt{vasyuninCovMatrix\_posSemidef} --- from
-  \texttt{Matrix.PosDef.posSemidef}.
-\item \texttt{vasyuninCovMatrix\_isUnit\_det} --- from
-  \texttt{Matrix.PosDef.isUnit}.
+\item \texttt{vasyuninCovMatrix\_hermitian} --- from Gram symmetry + $bb^T$ symmetry
 \end{itemize}
 
 % ================================================================
@@ -535,26 +543,22 @@ or the explicit variational quotient (new architecture).
 \small
 \begin{tabular}{llrrl}
 \toprule
-\textbf{File} & \textbf{Role} & \textbf{Sorry} & \textbf{Axioms} & \textbf{Status} \\
+\textbf{Component} & \textbf{Role} & \textbf{Sorry} & \textbf{Axioms} & \textbf{Status} \\
 \midrule
-\texttt{ShermanMorrison.lean} & $d^2 = 1/(1+X)$ & 0 & 0 & \textbf{Complete} \\
-\texttt{Variational.lean}     & Cauchy--Schwarz + PosDef bridge & 0 & 0 & \textbf{Complete} \\
-\texttt{Vasyunin/*.lean} (10) & Gram + covariance + witness + chain & 0 & 2 & \textbf{Complete} \\
+\texttt{LinearAlgebra/} (4)   & Sherman--Morrison, Variational, Sylvester & 0 & 0 & \textbf{Complete} \\
+\texttt{AugmentedGram.lean}   & $H_N$ PD, $G_N$ PD, $b^TG^{-1}b < 1$ & 0 & 1 & \textbf{Complete} \\
+\texttt{Vasyunin/*.lean} (12) & Gram + covariance + witness + chain & 0 & 2 & \textbf{Complete} \\
 \texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 2 & \textbf{Complete} \\
-\texttt{Defs.lean}            & Core defs       & 0 & 0 & Foundation \\
-\texttt{NymanBeurling.lean}   & NB bridge       & 0 & 0 & Foundation \\
+\texttt{Defs.lean + NB.lean}  & Core defs       & 0 & 0 & Foundation \\
 \midrule
-\textbf{Total (21 files)}     & \textbf{166 theorems} & \textbf{0} & \textbf{4} & \\
+\textbf{Total (25 files)}     & \textbf{169 theorems} & \textbf{0} & \textbf{5} & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent
-Legacy modules (\texttt{BaezDuarte.lean}, \texttt{Quantitative.lean})
-have been archived to \texttt{Cathedral/Archive/IntegralBasis/}.
-40~files from the original ``high-frequency'' architecture are archived
-in \texttt{Cathedral/Archive/HighFrequencyTrap/} and
-\texttt{Cathedral/Archive/IntegralBasis/}.
+Proof tree: 210 nodes (5 axioms, 169 theorems, 36 definitions), 992 edges.
+Legacy modules archived to \texttt{Cathedral/Archive/}.
 
 % ================================================================
 \section{Methodology}
@@ -577,12 +581,19 @@ built from M\"obius values and Vasyunin cotangent sums. The entire
 reduction is machine-verified in Lean~4 with zero \texttt{sorry}
 placeholders.
 
-\paragraph{The Irreducible Frontier.}
-In the main proof chain, only one structural axiom remains (positive
-definiteness of the covariance matrix---itself provably reducible to
-$G_N$ PD---alongside the Riemann Hypothesis itself. Five former
-axioms---Cauchy--Schwarz, witness positivity, Hermitian symmetry,
-PSD, and determinant invertibility---are now compiler-verified theorems.
+\paragraph{The 5-Axiom Cathedral.}
+The active proof chain rests on exactly five axioms: one geometric fact
+(augmented Schur complement positivity), one encoding the RH itself
+(log cutoff witness bound), one definitional bridge (Vasyunin integral
+identity), and two classical equivalences (Lagarias/Robin). Seven former
+axioms---including Gram PD, covariance PD, NB distance positivity,
+Cauchy--Schwarz, witness positivity, Hermitian symmetry, and
+determinant invertibility---are now compiler-verified theorems.
+
+The key architectural innovation is the augmented Gram matrix $H_N$,
+which unifies the geometric foundation into a single inductive structure.
+From one axiom about its Schur complement, all positive definiteness
+properties cascade as theorems.
 
 As a standalone result, the \emph{Equivalence Diamond} connects
 Robin's inequality, Lagarias's inequality, Nyman--Beurling convergence,
@@ -592,7 +603,7 @@ and the Riemann Hypothesis through four machine-verified cross-path theorems.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # 3,073 jobs, zero errors, zero sorry
+lake build    # 3,076 jobs, zero errors, zero sorry
 \end{verbatim}
 
 \begin{thebibliography}{9}
