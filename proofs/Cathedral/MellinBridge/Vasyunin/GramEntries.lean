@@ -457,7 +457,7 @@ theorem pi_div_18sqrt3_lt : Real.pi / (18 * Real.sqrt 3) < 35 / 346 := by
 -- for all A ∈ [A_min, A_max].
 
 -- Define the det expression as a function of (A, l, q, t) for clarity
-private noncomputable def detExpr (A l q t : ℝ) : ℝ :=
+noncomputable def detExpr (A l q t : ℝ) : ℝ :=
     (A - 1) * ((A/2 - 1/4) * (A/3 - 1/9) -
                (5*A/12 - (q-l)/12 - t/2 - 1/6)^2) -
     (3*A/4 - l/4 - 1/2) *
