@@ -29,7 +29,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "166 theorems · 4 axioms",
+    stats: "169 theorems · 5 axioms · 210 nodes",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -159,11 +159,12 @@ export default function HomePage() {
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "21 Lean files" },
+            { color: "bg-emerald-500", text: "25 Lean files" },
             { color: "bg-emerald-500", text: "0 sorry" },
-            { color: "bg-amber-500", text: "4 axioms" },
-            { color: "bg-emerald-500", text: "166 theorems" },
-            { color: "bg-blue-500", text: "3,073 build jobs" },
+            { color: "bg-amber-500", text: "5 axioms" },
+            { color: "bg-emerald-500", text: "169 theorems" },
+            { color: "bg-blue-500", text: "3,076 build jobs" },
+            { color: "bg-purple-500", text: "992 edges" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -205,17 +206,18 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20"
+          className="p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20"
         >
           <div className="flex items-center gap-3">
             <span className="text-2xl">🏰</span>
             <div>
-              <h3 className="text-sm font-bold text-violet-400">
-                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+              <h3 className="text-sm font-bold text-amber-400">
+                The 5-Axiom Cathedral — Augmented Matrix Unification
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                The 3×3 covariance matrix is positive definite via Sylvester&apos;s criterion.
-                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
+                H_N = [1, bᵀ; b, G_N] unifies the geometric foundation. From one axiom:
+                G_N PD (trailing submatrix), bᵀG⁻¹b &lt; 1 (witness vector), C_N PD (Schur complement).
+                7 → 5 axioms. Zero sorry.
               </p>
             </div>
           </div>
@@ -224,6 +226,24 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.6 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">💎</span>
+            <div>
+              <h3 className="text-sm font-bold text-violet-400">
+                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.7 }}
           className="p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
         >
           <div className="flex items-center gap-3">
