@@ -259,7 +259,7 @@ cathedral-dump-split:
 		case "$$relpath" in \
 			*LinearAlgebra*) component="LinearAlgebra" ;; \
 			*Vasyunin/Defs*|*Vasyunin/Structural*) component="VasyuninDefs" ;; \
-			*Vasyunin/GramEntries*|*Vasyunin/GramEvaluations*|*Vasyunin/GramPSD*) component="VasyuninGram" ;; \
+			*Vasyunin/GramEntries*|*Vasyunin/GramEvaluations*|*Vasyunin/GramPSD*|*Vasyunin/GramInduction*|*Vasyunin/NbDistPos*) component="VasyuninGram" ;; \
 			*Vasyunin/CovEntries*|*Vasyunin/CovDet2*|*Vasyunin/CovDet3*) component="VasyuninCov" ;; \
 			*Vasyunin/Witness*|*Vasyunin/Rayleigh*|*Vasyunin/Chain*|*MellinBridge/Vasyunin.lean) component="VasyuninBridge" ;; \
 			*MellinBridge*) component="Core" ;; \
