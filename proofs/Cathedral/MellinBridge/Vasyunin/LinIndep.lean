@@ -101,13 +101,83 @@ def nbLinCombNew (N : ℕ) (w : Fin N → ℝ) (x : ℝ) : ℝ :=
     When A = 0: nbLinCombNew = -w(k₀) (constant, nonzero). -/
 theorem nbLinCombNew_eq_neg_on_critical_interval (N : ℕ) (w : Fin N → ℝ)
     (k₀ : Fin N) (hw_below : ∀ i : Fin N, i < k₀ → w i = 0)
-    (hk₀_pos : 1 ≤ k₀.val)
     (hA : (∑ i : Fin N, w i / ((i.val + 1 : ℕ) : ℝ)) = 0)
     (x : ℝ)
     (hx_lo : 1 / ((k₀.val : ℝ) + 2) < x)
     (hx_hi : x < 1 / ((k₀.val : ℝ) + 1)) :
     nbLinCombNew N w x = -(w k₀) := by
-  sorry
+  have hk₀_pos_r : (0 : ℝ) < (k₀.val : ℝ) + 1 := by positivity
+  have hx_pos : (0 : ℝ) < x := by linarith [show (0:ℝ) < 1 / ((k₀.val : ℝ) + 2) from by positivity]
+  -- Helper cast lemma
+  set k₀v := k₀.val with hk₀v_def
+  -- The floor lemmas use k : ℕ with k = k₀v + 1, interval (1/(k+1), 1/k):
+  --   fract_inv_mul_eq_sub_one (k₀v + 1) ... needs (1/((k₀v+1:ℝ)+1), 1/(k₀v+1:ℝ))
+  --   = (1/(k₀v+2), 1/(k₀v+1)) which is exactly our (hx_lo, hx_hi)
+  -- Nat cast helper: ↑(k₀v + 1) = ↑k₀v + 1
+  have hcast_k : ((k₀v + 1 : ℕ) : ℝ) = (k₀v : ℝ) + 1 := by push_cast; ring
+  -- Step 1: Rewrite each term using floor lemmas
+  have h_term : ∀ i : Fin N,
+      w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) =
+      if i < k₀ then 0
+      else w i / (((i.val + 1 : ℕ) : ℝ) * x) -
+           (if i = k₀ then w k₀ else 0) := by
+    intro i
+    have hicast : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
+    by_cases hi_below : i < k₀
+    · simp only [hi_below, ↓reduceIte, hw_below i hi_below, zero_mul]
+    · push_neg at hi_below
+      simp only [show ¬(i < k₀) from not_lt.mpr hi_below, ↓reduceIte]
+      by_cases hi_eq : i = k₀
+      · -- i = k₀
+        subst hi_eq; simp only [↓reduceIte]
+        have hk_ge : 1 ≤ k₀v + 1 := by omega
+        have h1 : 1 / ((↑(k₀v + 1) : ℝ) + 1) < x := by
+          have : ((↑(k₀v + 1) : ℝ) + 1) = (↑k₀v + 2) := by rw [hcast_k]; ring
+          rw [this]; exact hx_lo
+        have h2 : x < 1 / (↑(k₀v + 1) : ℝ) := by rw [hcast_k]; exact hx_hi
+        -- The goal has ↑(↑i + 1) which after subst equals ↑(k₀v + 1)
+        -- Both are ((Fin.val i + 1 : ℕ) : ℝ), which Lean prints as ↑(↑i + 1)
+        -- With k₀v = ↑i, these are definitionally equal
+        conv_lhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(k₀v + 1) : ℝ) from by norm_cast]
+        conv_rhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(k₀v + 1) : ℝ) from by norm_cast]
+        rw [fract_inv_mul_eq_sub_one (k₀v + 1) hk_ge x h1 h2]; ring
+      · -- i > k₀
+        have hi_above : k₀ < i := lt_of_le_of_ne hi_below (Ne.symm hi_eq)
+        simp only [hi_eq, ↓reduceIte, sub_zero]
+        have hk_ge : 1 ≤ k₀v + 1 := by omega
+        have hij : k₀v + 1 < i.val + 1 := by omega
+        have h1 : 1 / ((↑(k₀v + 1) : ℝ) + 1) < x := by
+          have : ((↑(k₀v + 1) : ℝ) + 1) = (↑k₀v + 2) := by rw [hcast_k]; ring
+          rw [this]; exact hx_lo
+        have h2 : x < 1 / (↑(k₀v + 1) : ℝ) := by rw [hcast_k]; exact hx_hi
+        conv_lhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(i.val + 1) : ℝ) from by norm_cast]
+        rw [fract_inv_mul_eq_self (k₀v + 1) (i.val + 1) hk_ge hij x h1 h2]
+        rw [show (↑(i.val + 1) : ℝ) = ((↑i + 1 : ℕ) : ℝ) from by norm_cast]
+        field_simp
+  -- Step 2: Apply the rewrite
+  unfold nbLinCombNew; simp_rw [h_term]
+  -- Step 3: Eliminate the if-else by using w(i)=0 for i < k₀
+  have h_ite_sum : ∀ i : Fin N,
+      (if i < k₀ then (0 : ℝ)
+       else w i / (((i.val + 1 : ℕ) : ℝ) * x) - (if i = k₀ then w k₀ else 0)) =
+      w i / (((i.val + 1 : ℕ) : ℝ) * x) - (if i = k₀ then w k₀ else 0) := by
+    intro i; split_ifs with h1 h2
+    · rw [hw_below i h1]; simp; exact absurd (Eq.symm h2) (ne_of_lt h1 |>.symm)
+    · rw [hw_below i h1]; simp
+    · rfl
+    · rfl
+  simp_rw [h_ite_sum, Finset.sum_sub_distrib]
+  -- Sum₂: Σ (if i = k₀ then w k₀ else 0) = w k₀
+  have h_sum2 : ∑ i : Fin N, (if i = k₀ then w k₀ else (0 : ℝ)) = w k₀ := by
+    rw [Finset.sum_ite_eq' Finset.univ k₀ (fun _ => w k₀)]
+    simp [Finset.mem_univ]
+  rw [h_sum2]
+  have h_factor : ∑ i : Fin N, w i / (((i.val + 1 : ℕ) : ℝ) * x) =
+      (1 / x) * ∑ i : Fin N, w i / ((i.val + 1 : ℕ) : ℝ) := by
+    rw [Finset.mul_sum]; congr 1; ext i
+    have : (0 : ℝ) < ((i.val + 1 : ℕ) : ℝ) := by positivity
+    field_simp
+  rw [h_factor, hA, mul_zero, zero_sub]
 
 /-- If w ≠ 0, then nbLinCombNew is nonzero on some subinterval of (0,1). -/
 theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
@@ -141,9 +211,18 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
   have hb_le_1 : b ≤ 1 := by simp only [b]; rw [div_le_one hk_pos]; exact_mod_cast hk_ge
   -- Handle two cases: k₀.val = 0 and k₀.val ≥ 1
   by_cases hk₀_zero : k₀.val = 0
-  · -- k₀ = 0: all functions are used. Use the interval directly.
-    -- On (1/2, 1): h_1 has floor jump, all others floor 0
-    sorry
+  · -- k₀ = 0: same evaluation lemma applies since hk₀_pos was removed
+    by_cases hA_zero : A = 0
+    · refine ⟨a, b, ha_nn, hab, hb_le_1, ?_⟩
+      intro x ⟨hx_lo, hx_hi⟩
+      have ha_eq : a = 1 / ((k₀.val : ℝ) + 2) := by
+        simp only [a]; congr 1; simp only [hk_def]; push_cast; ring
+      have hb_eq : b = 1 / ((k₀.val : ℝ) + 1) := by
+        simp only [b]; congr 1; simp only [hk_def]; push_cast; ring
+      rw [nbLinCombNew_eq_neg_on_critical_interval N w k₀ hw_below hA_zero x
+          (by linarith) (by linarith)]
+      exact neg_ne_zero.mpr hwk₀
+    · sorry -- k₀=0, A≠0 case
   · -- k₀.val ≥ 1: the standard case
     have hk₀_pos : 1 ≤ k₀.val := by omega
     by_cases hA_zero : A = 0
@@ -155,12 +234,10 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
         simp only [a]; congr 1; simp only [hk_def]; push_cast; ring
       have hb_eq : b = 1 / ((k₀.val : ℝ) + 1) := by
         simp only [b]; congr 1; simp only [hk_def]; push_cast; ring
-      rw [nbLinCombNew_eq_neg_on_critical_interval N w k₀ hw_below hk₀_pos hA_zero x
+      rw [nbLinCombNew_eq_neg_on_critical_interval N w k₀ hw_below hA_zero x
           (by linarith) (by linarith)]
       exact neg_ne_zero.mpr hwk₀
     · -- Case A ≠ 0: f = A/x - w(k₀) is nonconstant, has at most one zero
-      -- For a nonconstant continuous function on an interval,
-      -- it has at most one zero, so it's nonzero on a subinterval
       sorry
 
 -- ════════════════════════════════════════════════
