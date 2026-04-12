@@ -230,6 +230,80 @@ theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
   · apply Finset.sum_congr rfl; intro i _
     apply Finset.sum_congr rfl; intro j _; ring
 
+-- ════════════════════════════════════════════════
+-- §3b. THE FACTORIAL NUKE — evaluation on (1/(N!+1), 1/N!)
+--      On this interval, (i+1) | N! for all i < N, so ALL floors
+--      are exact integers and g(x) = A/x - N!·A.
+-- ════════════════════════════════════════════════
+
+private lemma floor_on_factorial (N : ℕ) (i : Fin N) (x : ℝ)
+    (hx_lo : 1 / ((Nat.factorial N : ℝ) + 1) < x)
+    (hx_hi : x < 1 / (Nat.factorial N : ℝ)) :
+    ⌊1 / (((i.val + 1 : ℕ) : ℝ) * x)⌋ = (Nat.factorial N / (i.val + 1) : ℕ) := by
+  set M := Nat.factorial N
+  set d := i.val + 1
+  have hd_pos : (0 : ℝ) < (d : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (Nat.factorial_pos N)
+  have hx_pos : (0 : ℝ) < x := lt_trans (by positivity) hx_lo
+  have hdx_pos : (0 : ℝ) < (d : ℝ) * x := mul_pos hd_pos hx_pos
+  have hdvd : d ∣ M := Nat.dvd_factorial (by omega) (by have := i.isLt; omega)
+  set q := M / d
+  have hqd : q * d = M := Nat.div_mul_cancel hdvd
+  rw [show ((M / d : ℕ) : ℤ) = (q : ℤ) from by norm_cast]
+  rw [Int.floor_eq_iff]
+  constructor
+  · rw [Int.cast_natCast, le_div_iff₀ hdx_pos]
+    have : (q : ℝ) * ((d : ℝ) * x) < 1 := by
+      calc (q : ℝ) * ((d : ℝ) * x) = ((q * d : ℕ) : ℝ) * x := by push_cast; ring
+        _ = (M : ℝ) * x := by rw [hqd]
+        _ < (M : ℝ) * (1 / (M : ℝ)) := mul_lt_mul_of_pos_left hx_hi hM_pos
+        _ = 1 := by field_simp
+    linarith
+  · rw [show ((q : ℤ) : ℝ) + 1 = ((q : ℝ) + 1 : ℝ) from by push_cast; ring]
+    rw [div_lt_iff₀ hdx_pos]
+    calc (1 : ℝ) = ((M : ℝ) + 1) * (1 / ((M : ℝ) + 1)) := by field_simp
+      _ < ((M : ℝ) + 1) * x := mul_lt_mul_of_pos_left hx_lo (by linarith)
+      _ ≤ ((q : ℝ) + 1) * ((d : ℝ) * x) := by
+          have hle : (M : ℝ) + 1 ≤ ((q : ℝ) + 1) * (d : ℝ) := by
+            have hnat : M + 1 ≤ (q + 1) * d := by
+              calc M + 1 ≤ M + d := by omega
+                _ = q * d + d := by rw [hqd]
+                _ = (q + 1) * d := by ring
+            exact_mod_cast hnat
+          nlinarith
+
+private lemma fract_on_factorial (N : ℕ) (i : Fin N) (x : ℝ)
+    (hx_lo : 1 / ((Nat.factorial N : ℝ) + 1) < x)
+    (hx_hi : x < 1 / (Nat.factorial N : ℝ)) :
+    Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) =
+    1 / (((i.val + 1 : ℕ) : ℝ) * x) - (Nat.factorial N / (i.val + 1) : ℕ) := by
+  rw [Int.fract, floor_on_factorial N i x hx_lo hx_hi]
+  norm_cast
+
+private lemma nbLinCombNew_eq_on_factorial
+    (N : ℕ) (v : Fin N → ℝ) (x : ℝ)
+    (hx_lo : 1 / ((Nat.factorial N : ℝ) + 1) < x)
+    (hx_hi : x < 1 / (Nat.factorial N : ℝ)) :
+    nbLinCombNew N v x =
+    (∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ)) / x -
+    (Nat.factorial N : ℝ) * (∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ)) := by
+  simp only [nbLinCombNew]
+  simp_rw [fract_on_factorial N _ x hx_lo hx_hi]
+  set M := Nat.factorial N
+  simp_rw [mul_sub, Finset.sum_sub_distrib]
+  congr 1
+  · rw [Finset.sum_div]
+    congr 1; ext i
+    have hx_pos : (0 : ℝ) < x := lt_trans (by positivity) hx_lo
+    have hi_pos : ((i.val + 1 : ℕ) : ℝ) ≠ 0 := by positivity
+    field_simp
+  · rw [Finset.mul_sum]
+    congr 1; ext i
+    have hdvd : (i.val + 1) ∣ M := Nat.dvd_factorial (by omega) (by have := i.isLt; omega)
+    rw [show ((M / (i.val + 1) : ℕ) : ℝ) = (M : ℝ) / ((i.val + 1 : ℕ) : ℝ) from by
+      rw [Nat.cast_div hdvd (by positivity)]]
+    ring
+
 /-- f ≠ 0 somewhere when w ≠ 0 (extends nbLinCombNew_nonzero_somewhere).
 
     Case w₀ = 0: f = nbLinCombNew v ≠ 0 by LinIndep
@@ -354,13 +428,24 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
             conv_lhs => rw [show (∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ)) = Av from rfl]
             rw [hAv_zero, zero_div, add_zero]
             exact hw₀
-          · -- k₀ = 0: degenerate edge case (right interval escapes (0,1))
-            -- N=1 is IMPOSSIBLE (A = v(0)/1 = v(0) ≠ 0, contradicts A=0).
-            -- So N ≥ 2. On (1/2,1): f = w₀ + (-w₀) = 0 (dead).
-            -- On (1/3,1/2): f = -(v(0)+v(1)). Use this interval if v(0)+v(1) ≠ 0.
-            -- If v(0)+v(1) = 0: need deeper piecewise evaluation.
-            -- Requires: generalized evaluation lemma not restricted to min-index.
-            sorry
+          · -- k₀ = 0: THE FACTORIAL NUKE
+            -- On (1/(N!+1), 1/N!), ALL floor functions are exact (d|N! for d≤N),
+            -- so g(x) = A/x - N!·A = 0 (since A=0). Thus f = w₀ ≠ 0.
+            set M := Nat.factorial N with hM_def
+            have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (Nat.factorial_pos N)
+            have hMp1_pos : (0 : ℝ) < ((M : ℝ) + 1) := by linarith
+            have hM_ge_1 : (1 : ℝ) ≤ (M : ℝ) := by
+              exact_mod_cast Nat.factorial_pos N
+            refine ⟨1 / ((M : ℝ) + 1), 1 / (M : ℝ),
+              by positivity,
+              by rw [div_lt_div_iff₀ hMp1_pos hM_pos]; nlinarith,
+              by rw [div_le_one hM_pos]; exact hM_ge_1,
+              fun x ⟨hx_lo, hx_hi⟩ => ?_⟩
+            show w₀ + nbLinCombNew N v x ≠ 0
+            rw [nbLinCombNew_eq_on_factorial N v x hx_lo hx_hi,
+                show ∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ) = Av from rfl,
+                hAv_zero, zero_div, mul_zero, sub_self, add_zero]
+            exact hw₀
         · -- w₀ ≠ v(k₀): f = w₀ - v(k₀) ≠ 0 everywhere on (a, b)
           refine ⟨a, b, ha_nn, hab, hb_le_1, fun x ⟨hx_lo, hx_hi⟩ => ?_⟩
           show w₀ + nbLinCombNew N v x ≠ 0
