@@ -95,6 +95,19 @@ theorem augmented_last_eq (N : ℕ) :
 -- §3. THE L² IDENTITY (replaces the old axiom)
 -- ════════════════════════════════════════════════
 
+/-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
+private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
+    IntervalIntegrable (fun x => nbLinCombNew N v x) MeasureTheory.volume 0 1 := by
+  unfold nbLinCombNew
+  show IntervalIntegrable (fun x => ∑ i : Fin N,
+    v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) MeasureTheory.volume 0 1
+  have h_swap : (fun x => ∑ i : Fin N, v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) =
+      ∑ i ∈ Finset.univ, (fun x => v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_swap]
+  exact IntervalIntegrable.sum Finset.univ (fun i _ =>
+    (fract_inv_intervalIntegrable (i.val + 1)).const_mul (v i))
+
 /-- The augmented linear combination:
     f(x) = w₀ + Σᵢ wᵢ · {1/((i+1)x)}. -/
 noncomputable def nbAugLinComb (N : ℕ) (w : Fin (N+1) → ℝ) (x : ℝ) : ℝ :=
@@ -115,8 +128,14 @@ theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
       (w ⟨0, Nat.zero_lt_succ N⟩) ^ 2 +
       2 * (w ⟨0, Nat.zero_lt_succ N⟩) * ∑ i : Fin N, w (Fin.succ i) * vasyuninMeanEntry (i.val + 1) +
       ∑ i : Fin N, ∑ j : Fin N, w (Fin.succ i) * w (Fin.succ j) * vasyuninGramEntry (i.val + 1) (j.val + 1) by
-    rw [hLHS]
-    sorry -- RHS: ∫₀¹ f² = normal form (integral linearity + axioms)
+    -- We also need: ∫₀¹ f² = same normal form
+    suffices hRHS : ∫ x in (0:ℝ)..1, (nbAugLinComb N w x) ^ 2 =
+        (w ⟨0, Nat.zero_lt_succ N⟩) ^ 2 +
+        2 * (w ⟨0, Nat.zero_lt_succ N⟩) * ∑ i : Fin N, w (Fin.succ i) * vasyuninMeanEntry (i.val + 1) +
+        ∑ i : Fin N, ∑ j : Fin N, w (Fin.succ i) * w (Fin.succ j) * vasyuninGramEntry (i.val + 1) (j.val + 1) by
+      rw [hLHS, hRHS]
+    -- Prove hRHS
+    sorry
   -- Prove hLHS: expand dot product
   simp only [dotProduct, mulVec, augmentedGramMatrix, of_apply]
   rw [Fin.sum_univ_succ]; simp_rw [Fin.sum_univ_succ]
@@ -288,21 +307,6 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
         -- goal : w₀ + (Av / x - v k₀) ≠ 0
         intro h_eq; apply this; linarith
 
-/-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
-private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
-    IntervalIntegrable (fun x => nbLinCombNew N v x) MeasureTheory.volume 0 1 := by
-  -- nbLinCombNew = Σ v(i) * fract(1/((i+1)x))
-  -- Pull the sum outside: ∑ (fun x => v(i) * fract(...))
-  -- Each term is v(i) * (IntervalIntegrable fract)
-  unfold nbLinCombNew
-  show IntervalIntegrable (fun x => ∑ i : Fin N,
-    v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) MeasureTheory.volume 0 1
-  have h_swap : (fun x => ∑ i : Fin N, v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) =
-      ∑ i ∈ Finset.univ, (fun x => v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) := by
-    ext x; simp [Finset.sum_apply]
-  rw [h_swap]
-  exact IntervalIntegrable.sum Finset.univ (fun i _ =>
-    (fract_inv_intervalIntegrable (i.val + 1)).const_mul (v i))
 
 /-- nbAugLinComb² is integrable on [0,1].
     f = w₀ + g where g = nbLinCombNew. Then f² = w₀² + 2w₀g + g².
