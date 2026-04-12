@@ -456,6 +456,22 @@ theorem fract_inv_prod_intervalIntegrable (j k : ℕ) :
     ((fract_inv_mul_measurable j k).aestronglyMeasurable.restrict)
     (Filter.Eventually.of_forall (fract_inv_prod_le_one j k))
 
+/-- Single fractional part {1/(kx)} is IntervalIntegrable on [0,1]. -/
+theorem fract_inv_intervalIntegrable (k : ℕ) :
+    IntervalIntegrable
+      (fun x : ℝ => Int.fract (1 / (↑k * x)))
+      MeasureTheory.volume 0 1 :=
+  IntervalIntegrable.mono_fun
+    (intervalIntegrable_const (c := (1 : ℝ)))
+    ((measurable_const.div (measurable_const.mul measurable_id)).fract
+      |>.aestronglyMeasurable.restrict)
+    (Filter.Eventually.of_forall fun x => by
+      simp only [Real.norm_eq_abs, norm_one]
+      exact le_of_lt (by
+        calc |Int.fract (1 / (↑k * x))| = Int.fract (1 / (↑k * x)) :=
+          abs_of_nonneg (Int.fract_nonneg _)
+        _ < 1 := Int.fract_lt_one _))
+
 /-- nbLinCombNew² is integrable on [0,1]. -/
 theorem nbLinCombNew_sq_integrable (N : ℕ) (w : Fin N → ℝ) :
     IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume 0 1 := by

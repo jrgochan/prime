@@ -141,7 +141,7 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
       exact ⟨0, 1, le_refl 0, one_pos, le_refl 1, fun x _ => by
         show w₀ + nbLinCombNew N v x ≠ 0
         rw [show nbLinCombNew N v x = 0 from by
-          simp [nbLinCombNew, hv, Pi.zero_apply, zero_mul, Finset.sum_const_zero]]
+          simp [nbLinCombNew, hv, zero_mul, Finset.sum_const_zero]]
         simp [hw₀]⟩
     · -- Subcase 2b: v ≠ 0. Use the integral positivity argument.
       -- ∫₀¹ f² > 0 since f is not identically zero (w₀ ≠ 0),
@@ -151,10 +151,18 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
 /-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
 private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
     IntervalIntegrable (fun x => nbLinCombNew N v x) MeasureTheory.volume 0 1 := by
-  -- nbLinCombNew is a finite sum of w_i * fract(1/(kx))
-  -- Each term is bounded by |w_i|, and bounded+measurable → integrable
-  -- The sum of finitely many IntervalIntegrable functions is IntervalIntegrable
-  sorry
+  -- nbLinCombNew = Σ v(i) * fract(1/((i+1)x))
+  -- Pull the sum outside: ∑ (fun x => v(i) * fract(...))
+  -- Each term is v(i) * (IntervalIntegrable fract)
+  unfold nbLinCombNew
+  show IntervalIntegrable (fun x => ∑ i : Fin N,
+    v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) MeasureTheory.volume 0 1
+  have h_swap : (fun x => ∑ i : Fin N, v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) =
+      ∑ i ∈ Finset.univ, (fun x => v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_swap]
+  exact IntervalIntegrable.sum Finset.univ (fun i _ =>
+    (fract_inv_intervalIntegrable (i.val + 1)).const_mul (v i))
 
 /-- nbAugLinComb² is integrable on [0,1].
     f = w₀ + g where g = nbLinCombNew. Then f² = w₀² + 2w₀g + g².
