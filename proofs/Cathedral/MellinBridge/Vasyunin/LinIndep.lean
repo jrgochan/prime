@@ -42,22 +42,21 @@ theorem floor_inv_mul_eq_one (k : ℕ) (hk : 1 ≤ k)
     ⌊1 / ((k : ℝ) * x)⌋ = 1 := by
   have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
   have hk1_pos : (0 : ℝ) < (k : ℝ) + 1 := by linarith
-  have hx_pos : (0 : ℝ) < x := by
-    calc (0 : ℝ) < 1 / ((k : ℝ) + 1) := by positivity
-    _ < x := hx_lo
+  have hx_pos : (0 : ℝ) < x := by linarith [show (0:ℝ) < 1 / ((k:ℝ) + 1) from by positivity]
   have hkx_pos : (0 : ℝ) < (k : ℝ) * x := mul_pos hk_pos hx_pos
-  -- Lower bound: 1/(kx) > 1
-  have h_lower : 1 ≤ 1 / ((k : ℝ) * x) := by
-    rw [le_div_iff₀ hkx_pos]
-    nlinarith [mul_div_cancel₀ (1 : ℝ) (ne_of_gt hk_pos)]
-  -- Upper bound: 1/(kx) < 2
-  have h_upper : 1 / ((k : ℝ) * x) < 2 := by
-    rw [div_lt_iff₀ hkx_pos]
-    nlinarith [mul_div_cancel₀ (1 : ℝ) (ne_of_gt hk1_pos)]
-  rw [Int.floor_eq_iff (by positivity)]
+  rw [Int.floor_eq_iff]
   constructor
-  · exact_mod_cast h_lower
-  · push_cast; linarith
+  · -- 1 ≤ 1/(kx): from x < 1/k ⟹ kx < 1
+    rw [Int.cast_one, le_div_iff₀ hkx_pos]
+    nlinarith [div_mul_cancel₀ (1 : ℝ) (ne_of_gt hk_pos)]
+  · -- 1/(kx) < 2: from x > 1/(k+1) ⟹ (k+1)x > 1 ⟹ 2kx ≥ (k+1)x > 1
+    rw [Int.cast_one]
+    show 1 / ((k : ℝ) * x) < 1 + 1
+    rw [div_lt_iff₀ hkx_pos]
+    have hkx_bound : ((k : ℝ) + 1) * x > 1 := by
+      calc ((k : ℝ) + 1) * x > ((k : ℝ) + 1) * (1 / ((k : ℝ) + 1)) := by nlinarith
+      _ = 1 := by field_simp
+    nlinarith [show (1:ℝ) ≤ (k:ℝ) from Nat.one_le_cast.mpr hk]
 
 /-- Fractional part: on (1/(k+1), 1/k), {1/(kx)} = 1/(kx) - 1. -/
 theorem fract_inv_mul_eq_sub_one (k : ℕ) (hk : 1 ≤ k)
@@ -77,17 +76,17 @@ theorem floor_inv_mul_eq_zero (k j : ℕ) (hk : 1 ≤ k) (hj : k < j)
   have hx_pos : (0 : ℝ) < x := by linarith [show (0:ℝ) < 1 / ((k:ℝ) + 1) from by positivity]
   have hj_pos : (0 : ℝ) < (j : ℝ) := Nat.cast_pos.mpr (by omega)
   have hjx_pos : (0 : ℝ) < (j : ℝ) * x := mul_pos hj_pos hx_pos
-  -- 1/(jx) ≥ 0 (trivially)
-  have h_nonneg : 0 ≤ 1 / ((j : ℝ) * x) := by positivity
+  have hval_pos : (0 : ℝ) < 1 / ((j : ℝ) * x) := by positivity
   -- 1/(jx) < 1: since j ≥ k+1 and x > 1/(k+1), jx > j/(k+1) ≥ 1
   have h_lt_one : 1 / ((j : ℝ) * x) < 1 := by
     rw [div_lt_one hjx_pos]
     have hj_ge : (k : ℝ) + 1 ≤ (j : ℝ) := by exact_mod_cast hj
-    nlinarith [mul_div_cancel₀ (1 : ℝ) (ne_of_gt hk1_pos)]
-  rw [Int.floor_eq_iff (by positivity)]
-  constructor
-  · exact_mod_cast h_nonneg
-  · push_cast; linarith
+    have : 1 / ((k : ℝ) + 1) * ((k : ℝ) + 1) = 1 := by field_simp
+    nlinarith
+  have h_nonneg : (0 : ℝ) ≤ 1 / ((j : ℝ) * x) := by positivity
+  have : ⌊1 / ((j : ℝ) * x)⌋ = 0 := by
+    rw [Int.floor_eq_zero_iff]; exact ⟨h_nonneg, h_lt_one⟩
+  exact this
 
 /-- Fractional part: on (1/(k+1), 1/k) with j > k, {1/(jx)} = 1/(jx). -/
 theorem fract_inv_mul_eq_self (k j : ℕ) (hk : 1 ≤ k) (hj : k < j)
@@ -138,8 +137,36 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
   -- The interval (1/(k₀.val+2), 1/(k₀.val+1)) is where we witness nonzero
   -- On this interval, h_{k₀+1} has floor 1, all higher h_j have floor 0
   -- The linear combination equals (1/x)·A - w(k₀) for some A
-  -- If A ≠ 0, then the function c·(1/x) + d is nonzero near the boundary
-  -- If A = 0, then the function = -w(k₀) ≠ 0 everywhere on the interval
+  -- Key insight: on this interval, for each i:
+  --   i < k₀ ⟹ w(i) = 0 (by minimum-index)
+  --   i = k₀ ⟹ {1/((k₀+1)x)} = 1/((k₀+1)x) - 1
+  --   i > k₀ ⟹ {1/((i+1)x)} = 1/((i+1)x)
+  -- So nbLinCombNew = w(k₀)·(1/((k₀+1)x) - 1) + Σ_{i>k₀} w(i)·1/((i+1)x)
+  --                 = (1/x)·(Σ_{i≥k₀} w(i)/(i+1)) - w(k₀)
+  -- Let A = Σ_{i≥k₀} w(i)/(i+1). Since w(i)=0 for i<k₀, this = Σ_i w(i)/(i+1).
+  set k := k₀.val + 1
+  have hk : 1 ≤ k := by omega
+  -- The interval
+  set a := 1 / ((k : ℝ) + 1)
+  set b := 1 / (k : ℝ)
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by positivity
+  have hk1_pos : (0 : ℝ) < (k : ℝ) + 1 := by linarith
+  have hab : a < b := by
+    simp only [a, b]; rw [div_lt_div_iff₀ hk1_pos hk_pos]; nlinarith
+  have ha_nn : 0 ≤ a := by positivity
+  have hb_le_1 : b ≤ 1 := by simp only [b]; rw [div_le_one hk_pos]; exact_mod_cast hk
+  -- On Ioo a b, nbLinCombNew = A/x - w(k₀) for some A
+  -- If A ≠ 0: f(x) = A/x - w(k₀) is strictly monotone, hence ≠ 0 on a subinterval
+  -- If A = 0: f(x) = -w(k₀) ≠ 0 everywhere
+  -- In both cases, we can find a subinterval where f ≠ 0
+  -- For now, since f = -w(k₀) when A = 0, that's the constant case;
+  -- and when A ≠ 0, f is nonzero near x = b (where f → A·k - w(k₀))
+  -- We take the simple approach: -w(k₀) ≠ 0 on some subinterval regardless
+  refine ⟨a, b, ha_nn, hab, hb_le_1, ?_⟩
+  intro x ⟨hx_lo, hx_hi⟩
+  -- Need to show nbLinCombNew N w x ≠ 0
+  -- This requires showing the linear combination is nonzero at x
+  -- The full proof needs Finset manipulation to split the sum
   sorry
 
 /-- nbLinCombNew² is integrable on [0,1]. -/
