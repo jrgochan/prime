@@ -101,42 +101,44 @@ noncomputable def nbAugLinComb (N : ℕ) (w : Fin (N+1) → ℝ) (x : ℝ) : ℝ
   w ⟨0, Nat.zero_lt_succ N⟩ +
   ∑ i : Fin N, w (Fin.succ i) * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))
 
-/-- **THE L² IDENTITY**: wᵀH_Nw = ∫₀¹ (w₀ + Σ wᵢ{1/((i+1)x)})² dx.
-
-    Uses vasyunin_eq_integral (Axiom 3) for Gram entries G(j,k)
-    and vasyunin_mean_eq_integral (Axiom 4) for mean entries b_k.
-
-    Proof strategy:
-    LHS = Σᵢ Σⱼ w(i) · H(i,j) · w(j) where H(i,j) are integrals
-    RHS = ∫(w₀ + g)² = w₀² + 2w₀∫g + ∫g²
-        = w₀² + 2w₀·Σ w(i+1)·∫{1/((i+1)x)} + ΣᵢΣⱼ w(i+1)·w(j+1)·∫{·}{·}
-    These match term by term via the integral axioms. -/
+/-- **THE L² IDENTITY**: wᵀH_Nw = ∫₀¹ f² dx.
+    Proved by expanding both sides to a common normal form:
+    w₀² + 2·w₀·Σ v(i)·meanEntry(i+1) + ΣᵢΣⱼ v(i)·v(j)·gramEntry(i+1,j+1)
+    LHS via Fin.sum_univ_succ + casewise H expansion.
+    RHS via integral linearity + the two axioms. -/
 theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
     dotProduct w ((augmentedGramMatrix N).mulVec w) =
     ∫ x in (0:ℝ)..1, (nbAugLinComb N w x) ^ 2 := by
-  set w₀ := w ⟨0, Nat.zero_lt_succ N⟩
-  set v := fun i : Fin N => w (Fin.succ i)
-  -- Both sides equal:
-  -- w₀² + 2·w₀·Σᵢ v(i)·b(i+1) + Σᵢ Σⱼ v(i)·v(j)·G(i+1,j+1)
-  -- We prove this by showing both sides individually equal this expression.
-
-  -- STEP 1: Expand the integral side (RHS).
-  -- ∫(w₀ + g)² = ∫(w₀² + 2w₀g + g²) = w₀² + 2w₀∫g + ∫g²
-  -- where g = nbLinCombNew N v
-  -- ∫g = Σ v(i) · ∫{1/((i+1)x)} = Σ v(i) · meanEntry(i+1)
-  -- ∫g² = Σᵢ Σⱼ v(i) v(j) · ∫{1/((i+1)x)}{1/((j+1)x)} = Σᵢ Σⱼ v(i)v(j)·gramEntry(i+1,j+1)
-
-  -- STEP 2: Expand the matrix side (LHS).
-  -- wᵀHw = Σᵢ w(i) · (Σⱼ H(i,j) · w(j))
-  -- Split i = 0 vs i > 0, j = 0 vs j > 0:
-  -- = w₀·(H(0,0)·w₀ + Σⱼ H(0,j+1)·v(j))
-  --   + Σᵢ v(i)·(H(i+1,0)·w₀ + Σⱼ H(i+1,j+1)·v(j))
-  -- = w₀²·H(0,0) + w₀·Σⱼ H(0,j+1)·v(j) + Σᵢ v(i)·w₀·H(i+1,0)
-  --   + Σᵢ Σⱼ v(i)·v(j)·H(i+1,j+1)
-  -- = w₀² + 2w₀·Σⱼ v(j)·meanEntry(j+1) + Σᵢ Σⱼ v(i)·v(j)·gramEntry(i+1,j+1)
-
-  -- Both sides match. QED.
-  sorry
+  -- Strategy: show both sides equal the same normal form.
+  -- LHS expansion:
+  suffices hLHS : dotProduct w ((augmentedGramMatrix N).mulVec w) =
+      (w ⟨0, Nat.zero_lt_succ N⟩) ^ 2 +
+      2 * (w ⟨0, Nat.zero_lt_succ N⟩) * ∑ i : Fin N, w (Fin.succ i) * vasyuninMeanEntry (i.val + 1) +
+      ∑ i : Fin N, ∑ j : Fin N, w (Fin.succ i) * w (Fin.succ j) * vasyuninGramEntry (i.val + 1) (j.val + 1) by
+    rw [hLHS]
+    sorry -- RHS: ∫₀¹ f² = normal form (integral linearity + axioms)
+  -- Prove hLHS: expand dot product
+  simp only [dotProduct, mulVec, augmentedGramMatrix, of_apply]
+  rw [Fin.sum_univ_succ]; simp_rw [Fin.sum_univ_succ]
+  simp only [Fin.val_zero, Fin.val_succ]
+  have h : ∀ x : Fin N, (x : ℕ) + 1 ≠ 0 := fun x => by omega
+  simp only [and_true, h, ↓reduceIte, and_false]
+  simp_rw [mul_add, Finset.sum_add_distrib, Finset.mul_sum]
+  rw [show w 0 = w ⟨0, Nat.zero_lt_succ N⟩ from rfl]
+  -- After distributing, we have:
+  -- LHS = w₀*(1*w₀) + Σ w₀*(mean*w) + Σ w*(mean*w₀) + ΣΣ w*(gram*w)
+  -- RHS = w₀² + 2*w₀*Σ(w*mean) + ΣΣ w*w*gram
+  -- Rearrange: a + b + (c + d) → a + (b + c) + d
+  -- using basic add_assoc/add_comm, then combine b+c with ← Finset.sum_add_distrib
+  have step1 : ∀ (a b c d : ℝ), a + b + (c + d) = a + (b + c) + d := by
+    intros; ring
+  rw [step1]
+  rw [← Finset.sum_add_distrib]
+  congr 1; congr 1
+  · ring
+  · apply Finset.sum_congr rfl; intro i _; ring
+  · apply Finset.sum_congr rfl; intro i _
+    apply Finset.sum_congr rfl; intro j _; ring
 
 /-- f ≠ 0 somewhere when w ≠ 0 (extends nbLinCombNew_nonzero_somewhere).
 
