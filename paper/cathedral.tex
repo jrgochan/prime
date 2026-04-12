@@ -1,6 +1,6 @@
 \documentclass[11pt,a4paper]{article}
 
-\usepackage{amsmath,amssymb,amsthm}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage[utf8]{inputenc}
 \usepackage{hyperref}
 \usepackage{geometry}
@@ -46,7 +46,8 @@ that reduces the Riemann Hypothesis to the logarithmic growth of a single
 explicit Rayleigh quotient built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 30 active Lean files with \textbf{175+ theorems}
+The formalization comprises 30 active Lean files with
+\textbf{189 proved statements} (177 theorems, 12 lemmas)
 compiling in 3,081 build jobs with \textbf{zero \texttt{sorry} placeholders}.
 In the active proof chain, only \textbf{four axioms} remain:
 (1)~the logarithmic growth of the explicit log cutoff witness---which
@@ -239,8 +240,10 @@ semidefinite and $Cy = b$.
 \end{theorem}
 
 \begin{remark}
-The Sherman--Morrison module is the \emph{only} file in the Cathedral
-that requires zero axioms. It is purely basis-independent linear algebra.
+The Sherman--Morrison module requires zero axioms---it is purely
+basis-independent linear algebra. In fact, the majority of modules
+now require zero axioms; the four active axioms are concentrated
+in \texttt{Chain.lean}, \texttt{IntegralBridge.lean}, and \texttt{Robin/Defs.lean}.
 \end{remark}
 
 % ================================================================
@@ -311,7 +314,7 @@ $1.29$ to $1.56$, with an implied lower bound $c \approx 1.29$.
 \item \textbf{Linear cutoff} ($v_k = -\mu(k)(1-k/N)$): $Q/\ln$
   monotonically \emph{decreasing} (14.78$\to$6.52). Kills signal.
 \item \textbf{Log cutoff} ($v_k = -\mu(k)(1-\ln k/\ln N)$):
-  $Q/\ln$ monotonically \emph{increasing} (5.79$\to$13.44).
+  $Q/\ln$ monotonically \emph{increasing} (5.79$\to$14.01).
   \textbf{The witness.}
 \end{itemize}
 
@@ -351,11 +354,11 @@ The key architectural insight (April 11, 2026) is the \emph{augmented Gram matri
 \[
 H_N = \begin{pmatrix} 1 & b^T \\ b & G_N \end{pmatrix}
 \]
-This is the Gram matrix of $\{1, f_1, \ldots, f_N\}$ in $L^2(0,1)$,
-where $f_k(x) = \{k/x\}$ are the fractional-part sawtooth functions.
+This is the Gram matrix of $\{1, h_1, \ldots, h_N\}$ in $L^2(0,1)$,
+where $h_k(x) = \{1/(kx)\}$ are the B\'aez-Duarte basis functions.
 
-From a single axiom about the Schur complement of $H_N$, the entire
-geometric foundation is derived as theorems.
+Schur complement positivity---the key inductive step---is now a
+\emph{proved theorem} (the ``Factorial Nuke'', described below).
 
 \begin{theorem}[Proved in Lean~4 --- Zero Sorry]
 \texttt{augmentedGramMatrix\_posDef}: $H_N$ is positive definite for all $N \geq 1$.
@@ -388,6 +391,68 @@ Since $H_N$ PD and $w \neq 0$, we get $1 - b^T G_N^{-1} b > 0$.
 The covariance matrix $C_N = G_N - bb^T$ is positive definite by
 the Schur complement theorem: $G_N$ PD $+$ $b^T G_N^{-1} b < 1$
 $\implies$ $C_N$ PD. This was formerly an axiom; it is now a theorem.
+\end{remark}
+
+% ================================================================
+\section{The Final Two Proofs (April 12, 2026)}
+% ================================================================
+
+The following two theorems eliminated the last remaining \texttt{sorry}
+placeholders and the fifth axiom, completing the Cathedral.
+
+\subsection{The Factorial Nuke}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry, April 12, 2026]
+\texttt{nbAugLinComb\_nonzero\_somewhere}: No nontrivial augmented linear
+combination $f(x) = w_0 + \sum_{i=0}^{N-1} v_i \cdot \{1/((i+1)x)\}$
+vanishes identically on $(0,1)$.
+
+The critical edge case: when $k_0 = 0$ (no floor transition), the
+linear combination $g(x) = \sum v_i \cdot \{1/((i+1)x)\}$ might still
+vanish. The ``Factorial Nuke'' resolves this:
+
+\emph{Strategy.} Evaluate on the interval $(1/(N!+1),\; 1/N!)$. For all
+$i < N$, the divisibility $(i+1) \mid N!$ forces
+$\lfloor 1/((i+1)x) \rfloor = N!/(i+1)$ exactly (no rounding).
+Therefore:
+\[
+g(x) = \frac{A}{x} - N! \cdot A, \qquad A = \sum_{i=0}^{N-1} \frac{v_i}{i+1}
+\]
+When $A = 0$: $g \equiv 0$ but $f = w_0 \neq 0$. When $A \neq 0$:
+$g(x) = A/x - N! A$ is a nonconstant hyperbola, hence nonzero somewhere.
+
+Key Lean infrastructure: \texttt{Nat.dvd\_factorial}, \texttt{Int.floor\_eq\_iff},
+three helper lemmas (\texttt{floor\_on\_factorial}, \texttt{fract\_on\_factorial},
+\texttt{nbLinCombNew\_eq\_on\_factorial}).
+\end{theorem}
+
+\subsection{The Euler-Mascheroni Integral}
+
+\begin{theorem}[Proved in Lean~4 --- Zero Sorry, April 12, 2026]
+\texttt{mean\_entry\_eq\_integral}:
+\[
+\frac{\ln k + 1 - \gamma}{k} = \int_0^1 \left\{\frac{1}{kx}\right\} dx
+\]
+
+\emph{Strategy.} By substitution $u = kx$:
+$\int_0^{1/k} \{1/(kx)\}\,dx = (1/k) \int_0^1 \{1/u\}\,du$,
+reducing all $k$ to the universal integral $\int_0^1 \{1/u\}\,du = 1 - \gamma$.
+
+The identity $\int_0^1 \{1/u\}\,du = 1 - \gamma$ is proved via the series:
+\[
+\sum_{m=0}^{\infty} \left(\frac{1}{m+1} - \log\!\left(1+\frac{1}{m+1}\right)\right) = \gamma
+\]
+whose partial sums equal $H_N - \log(N+1) \to \gamma$ by Mathlib's
+\texttt{tendsto\_harmonic\_sub\_log}. The key lemma
+\texttt{hasSum\_inv\_sub\_log\_euler} bridges the \texttt{HasSum}
+API to the Euler-Mascheroni limit.
+\end{theorem}
+
+\begin{remark}
+This theorem immediately eliminates the former axiom
+\texttt{vasyunin\_mean\_eq\_integral}: the one-line proof
+\texttt{unfold vasyuninMeanEntry; exact mean\_entry\_eq\_integral k hk}
+reduces the axiom to the theorem, taking the Cathedral from 5 to 4 axioms.
 \end{remark}
 
 % ================================================================
@@ -546,7 +611,7 @@ or the explicit variational quotient (new architecture).
 \texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 2 & \textbf{Complete} \\
 \texttt{Defs.lean + NB.lean}  & Core defs       & 0 & 0 & Foundation \\
 \midrule
-\textbf{Total (30 files)}     & \textbf{175+ theorems} & \textbf{0} & \textbf{4} & \\
+\textbf{Total (30 files)}     & \textbf{189 proved} & \textbf{0} & \textbf{4} & \\
 \bottomrule
 \end{tabular}
 \end{table}
