@@ -355,6 +355,13 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
             rw [hAv_zero, zero_div, add_zero]
             exact hw₀
           · -- k₀ = 0: degenerate edge case (right interval escapes (0,1))
+            -- Analysis: k₀=0 forces N ≥ 2 (since A=0 and v(0)≠0 requires cancellation).
+            -- On (1/2,1): f = v(0) + (-v(0)) = 0 (the standard critical interval is dead).
+            -- On (1/3,1/2): f = -(v(0) + v(1)), nonzero iff v(0) ≠ -v(1).
+            -- On (1/(m+2),1/(m+1)): f = -(Σ_{i≤m} binomial-like combo of v), nonzero
+            --   for SOME m by linear independence of fract basis.
+            -- Strategy: use nbLinCombNew = piecewise-constant (since A=0) and show
+            --   g can't equal the constant -w₀ on every interval simultaneously.
             sorry
         · -- w₀ ≠ v(k₀): f = w₀ - v(k₀) ≠ 0 everywhere on (a, b)
           refine ⟨a, b, ha_nn, hab, hb_le_1, fun x ⟨hx_lo, hx_hi⟩ => ?_⟩
