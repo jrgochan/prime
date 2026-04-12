@@ -11,9 +11,9 @@
   Adapted from Cathedral/Archive/Independence.lean (364 lines, zero sorry).
 -/
 
-import Cathedral.MellinBridge.Vasyunin.GramPSD
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.Data.Fin.Basic
 
 noncomputable section
 open Real MeasureTheory
