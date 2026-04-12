@@ -31,11 +31,11 @@ namespace Cathedral.Vasyunin
 /-- **THE INTEGRAL BRIDGE.**
 
     The Vasyunin discrete formula computes the same value as the
-    Lebesgue integral of the product of fractional-part functions.
+    Lebesgue integral of the product of Báez-Duarte basis functions.
 
-    This is a definitional axiom — it asserts the equivalence between
-    the discrete cotangent-sum formula (which we USE for computation)
-    and the integral definition (which gives us L² geometric properties).
+    CRITICAL: The basis is h_k(x) = {1/(kx)}, NOT {k/x}.
+    The Vasyunin cotangent formula is the Gram matrix of {1/(kx)}.
+    (See RED ALERT memo — verified numerically April 11, 2026.)
 
     We open the door to the continuous world exactly once, steal the
     positivity, and close it.
@@ -45,7 +45,7 @@ namespace Cathedral.Vasyunin
 axiom vasyunin_eq_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) :
     vasyuninGramEntry j k =
     ∫ x in (0:ℝ)..1,
-      Int.fract ((j:ℝ) / x) * Int.fract ((k:ℝ) / x)
+      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
 
 -- ════════════════════════════════════════════════
 -- §2. GRAM PSD: THEOREM (not axiom!)
