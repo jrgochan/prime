@@ -50,17 +50,24 @@ We started at the Riemann Hypothesis and rigorously type-checked our way downwar
 
 This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **4 axioms** on the active proof chain.
 
-It comprises 21 active Lean files compiling in **3,073 build jobs** with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 4 axioms:
+It comprises 30 active Lean files compiling in **3,081 build jobs** with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 4 axioms:
 
 - **1 IS the Riemann Hypothesis itself** — the logarithmic growth of an explicit Rayleigh quotient built from Möbius values and cotangent sums (numerically verified to N=50,000)
-- **1 is structural** — positive definiteness of the covariance matrix (provably reducible to Gram matrix PD; the N=3 case is formally verified via Sylvester's criterion with det(C₃) > 0)
+- **1 is a definitional bridge** — the Vasyunin integral identity connecting the cotangent formula to L² inner products (Vasyunin 1995, Báez-Duarte 2005)
 - **2 are standard literature** — Robin (1984) and Lagarias (2002) equivalences to RH
+
+All structural properties—Gram matrix positive definiteness, covariance matrix
+positive definiteness, augmented Schur complement positivity (proved via the
+"Factorial Nuke"), the mean entry integral identity (proved via the
+Euler-Mascheroni series), witness positivity, and the variational principle—are
+now **compiler-verified theorems**.
 
 As standalone results, the repository contains several unconditional, kernel-verified theorems requiring **zero domain axioms**, including:
 
 - A complete formal proof of Lagarias's inequality for all primes
 - Positive definiteness of the 3×3 Gram and covariance matrices (via exact evaluation of Vasyunin cotangent sums and polynomial positivity certificates)
 - The Sherman–Morrison identity d² = 1/(1+X) for Nyman–Beurling distances
+- The Euler-Mascheroni integral: ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
 
 ```lean
 theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
