@@ -29,7 +29,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "169 theorems · 5 axioms · 210 nodes",
+    stats: "175+ theorems · 4 axioms · 0 sorry",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -152,19 +152,19 @@ export default function HomePage() {
           </span>
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
-          A machine-checked reduction of the Riemann Hypothesis to a single
-          discrete variational witness in Lean 4, via the Vasyunin cotangent
-          formula.
+          A machine-checked reduction of the Riemann Hypothesis to four
+          explicit axioms in Lean 4, via the Vasyunin cotangent formula.
+          Zero <code className="text-emerald-400">sorry</code>. Every theorem compiler-verified.
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "25 Lean files" },
+            { color: "bg-emerald-500", text: "30 Lean files" },
             { color: "bg-emerald-500", text: "0 sorry" },
-            { color: "bg-amber-500", text: "5 axioms" },
-            { color: "bg-emerald-500", text: "169 theorems" },
-            { color: "bg-blue-500", text: "3,076 build jobs" },
-            { color: "bg-purple-500", text: "992 edges" },
+            { color: "bg-amber-500", text: "4 axioms" },
+            { color: "bg-emerald-500", text: "175+ theorems" },
+            { color: "bg-blue-500", text: "3,081 build jobs" },
+            { color: "bg-purple-500", text: "Zero sorry" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -212,12 +212,31 @@ export default function HomePage() {
             <span className="text-2xl">🏰</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                The 5-Axiom Cathedral — Augmented Matrix Unification
+                The 4-Axiom Cathedral — ZERO SORRY
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                H_N = [1, bᵀ; b, G_N] unifies the geometric foundation. From one axiom:
-                G_N PD (trailing submatrix), bᵀG⁻¹b &lt; 1 (witness vector), C_N PD (Schur complement).
-                7 → 5 axioms. Zero sorry.
+                Every theorem compiler-verified. 4 axioms remain: RH itself (log_cutoff_witness_bound),
+                Vasyunin 1995 (vasyunin_eq_integral), and two literature equivalences (lagarias_iff_rh, robin_iff_rh).
+                April 12, 2026.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.55 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-red-500/10 via-red-500/5 to-transparent border border-red-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">💣</span>
+            <div>
+              <h3 className="text-sm font-bold text-red-400">
+                The Factorial Nuke — k₀=0 Edge Case DESTROYED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                On (1/(N!+1), 1/N!), divisibility (i+1)|N! forces all floor functions to be exact integers.
+                When A=0: g(x)=0, f(x)=w₀≠0. The degenerate case is annihilated.
               </p>
             </div>
           </div>
@@ -229,13 +248,14 @@ export default function HomePage() {
           className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">💎</span>
+            <span className="text-2xl">🔬</span>
             <div>
               <h3 className="text-sm font-bold text-violet-400">
-                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+                Euler-Mascheroni Integral — ∫₀¹ {'{'}1/x{'}'} dx = 1 − γ PROVED
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
+                Substitution u=kx + series identity Σ(1/(m+1) − log(1+1/(m+1))) = γ via tendsto_harmonic_sub_log.
+                Axiom vasyunin_mean_eq_integral eliminated → 5 → 4 axioms.
               </p>
             </div>
           </div>
@@ -243,7 +263,7 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.65 }}
           className="p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
         >
           <div className="flex items-center gap-3">
@@ -254,6 +274,24 @@ export default function HomePage() {
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p. Zero axioms.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.7 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-cyan-500/10 via-cyan-500/5 to-transparent border border-cyan-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">💎</span>
+            <div>
+              <h3 className="text-sm font-bold text-cyan-400">
+                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
               </p>
             </div>
           </div>
