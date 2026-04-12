@@ -6,11 +6,15 @@
   Connects the Vasyunin discrete formulas to Lebesgue integrals.
   Extracted from GramPSD.lean to avoid import cycles.
 
-  These are the ONLY two axioms connecting discrete combinatorics
-  to continuous analysis in the entire Cathedral.
+  The mean entry axiom has been ELIMINATED (April 12, 2026) — it is now
+  a theorem proved in MeanIntegral.lean via piecewise integration +
+  the Euler-Mascheroni limit.
+
+  ONE axiom remains: the Gram entry identity (Vasyunin 1995).
 -/
 
 import Cathedral.MellinBridge.Vasyunin.Defs
+import Cathedral.MellinBridge.Vasyunin.MeanIntegral
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section
@@ -37,18 +41,20 @@ axiom vasyunin_eq_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) :
     ∫ x in (0:ℝ)..1,
       Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
 
-/-- **THE MEAN ENTRY INTEGRAL BRIDGE.**
+/-- **THE MEAN ENTRY INTEGRAL IDENTITY** (was axiom — now THEOREM).
 
-    The mean vector entry b_k = (ln k + 1 - γ)/k equals the integral
-    of the Báez-Duarte basis function h_k(x) = {1/(kx)} over (0,1).
+    vasyuninMeanEntry k = ∫₀¹ {1/(kx)} dx
 
-    This is a standard calculus computation:
-    ∫₀¹ {1/(kx)} dx = ∫_{1/k}^1 1/(kx) dx + Σ_{n≥1} ∫ (1/(kx) - n) dx
-                    = ln(k)/k + (1-γ)/k = (ln k + 1 - γ)/k
+    Proof: unfold the definition and apply `mean_entry_eq_integral`,
+    which proves (ln k + 1 - γ)/k = ∫₀¹ {1/(kx)} dx via
+    piecewise integration + the Euler-Mascheroni limit.
 
-    Source: Direct computation, verified numerically to 15+ digits. -/
-axiom vasyunin_mean_eq_integral (k : ℕ) (hk : k ≥ 1) :
+    ELIMINATED as axiom: April 12, 2026, 12:26 AM MDT. -/
+theorem vasyunin_mean_eq_integral (k : ℕ) (hk : k ≥ 1) :
     vasyuninMeanEntry k =
-    ∫ x in (0:ℝ)..1, Int.fract (1 / ((k:ℝ) * x))
+    ∫ x in (0:ℝ)..1, Int.fract (1 / ((k:ℝ) * x)) := by
+  unfold vasyuninMeanEntry
+  exact mean_entry_eq_integral k hk
 
 end Cathedral.Vasyunin
+
