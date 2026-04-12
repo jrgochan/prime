@@ -23,6 +23,7 @@
 
 import Cathedral.MellinBridge.Vasyunin.CovDet3
 import Cathedral.MellinBridge.Vasyunin.LinIndep
+import Cathedral.MellinBridge.Vasyunin.IntegralBridge
 import Cathedral.LinearAlgebra.Sylvester
 
 noncomputable section
@@ -95,6 +96,25 @@ theorem augmented_last_eq (N : ℕ) :
 -- §3. THE L² IDENTITY (replaces the old axiom)
 -- ════════════════════════════════════════════════
 
+/-- Each fract product {1/(jx)}·{1/(kx)} is integrable on [0,1]. -/
+private theorem fract_prod_integrable (j k : ℕ) :
+    IntervalIntegrable (fun x =>
+      Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)))
+      MeasureTheory.volume 0 1 := by
+  apply IntervalIntegrable.mono_fun (f := fun _ => (1 : ℝ)) (hf := intervalIntegrable_const)
+  · exact ((measurable_fract.comp (measurable_const.div (measurable_const.mul measurable_id))).mul
+      (measurable_fract.comp (measurable_const.div (measurable_const.mul measurable_id)))).aestronglyMeasurable.restrict
+  · filter_upwards with x
+    simp only [Real.norm_eq_abs, norm_one, abs_mul, abs_of_nonneg (Int.fract_nonneg _)]
+    exact mul_le_one₀ (le_of_lt (Int.fract_lt_one _)) (Int.fract_nonneg _) (le_of_lt (Int.fract_lt_one _))
+
+/-- Pointwise-to-Pi conversion for interval integrability of finite sums. -/
+private theorem intervalIntegrable_sum_pointwise {N : ℕ} {g : Fin N → ℝ → ℝ}
+    (hg : ∀ i, IntervalIntegrable (g i) MeasureTheory.volume 0 1) :
+    IntervalIntegrable (fun x => ∑ i : Fin N, g i x) MeasureTheory.volume 0 1 := by
+  have h := IntervalIntegrable.sum (s := Finset.univ) (fun i _ => hg i)
+  convert h using 1; ext x; simp [Finset.sum_apply]
+
 /-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
 private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
     IntervalIntegrable (fun x => nbLinCombNew N v x) MeasureTheory.volume 0 1 := by
@@ -134,8 +154,59 @@ theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
         2 * (w ⟨0, Nat.zero_lt_succ N⟩) * ∑ i : Fin N, w (Fin.succ i) * vasyuninMeanEntry (i.val + 1) +
         ∑ i : Fin N, ∑ j : Fin N, w (Fin.succ i) * w (Fin.succ j) * vasyuninGramEntry (i.val + 1) (j.val + 1) by
       rw [hLHS, hRHS]
-    -- Prove hRHS
-    sorry
+    -- Prove hRHS: ∫₀¹ f² = normal form
+    set w₀ := w ⟨0, Nat.zero_lt_succ N⟩
+    set v : Fin N → ℝ := fun i => w (Fin.succ i)
+    -- Rewrite f as w₀ + g
+    have hf_eq : ∀ x, nbAugLinComb N w x = w₀ + nbLinCombNew N v x := by
+      intro x; simp only [nbAugLinComb, nbLinCombNew, v, w₀]
+    simp_rw [hf_eq]
+    -- Expand (w₀ + g)²
+    simp_rw [show ∀ x, (w₀ + nbLinCombNew N v x) ^ 2 =
+      w₀ ^ 2 + 2 * w₀ * nbLinCombNew N v x + (nbLinCombNew N v x) ^ 2 from fun x => by ring]
+    -- Split integral
+    have hg_int := nbLinCombNew_integrable N v
+    have hg_sq_int := nbLinCombNew_sq_integrable N v
+    rw [intervalIntegral.integral_add
+        (IntervalIntegrable.add intervalIntegrable_const (hg_int.const_mul (2 * w₀)))
+        hg_sq_int,
+      intervalIntegral.integral_add intervalIntegrable_const
+        (hg_int.const_mul (2 * w₀))]
+    -- Piece 1: ∫ w₀² = w₀²
+    rw [intervalIntegral.integral_const, sub_zero, one_smul]
+    congr 1; congr 1
+    · -- Piece 2: ∫(2w₀·g) = 2w₀·Σ vᵢ·meanEntry
+      rw [intervalIntegral.integral_const_mul]
+      congr 1
+      have hfn : (fun x => nbLinCombNew N v x) =
+          (fun x => ∑ i : Fin N, v i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) := rfl
+      rw [hfn]
+      rw [intervalIntegral.integral_finset_sum (fun i _ =>
+        (fract_inv_intervalIntegrable (i.val + 1)).const_mul (v i))]
+      apply Finset.sum_congr rfl; intro i _
+      rw [intervalIntegral.integral_const_mul]
+      congr 1
+      exact (vasyunin_mean_eq_integral (i.val + 1) (by omega)).symm
+    · -- Piece 3: ∫g² = ΣΣ vᵢvⱼ·gramEntry
+      set f : Fin N → ℝ → ℝ := fun i x => ∑ j : Fin N, v i * v j *
+        (Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))
+      have hfn2 : ∀ x, (nbLinCombNew N v x) ^ 2 = ∑ i : Fin N, f i x := by
+        intro x; simp only [nbLinCombNew, f, Finset.sum_mul, Finset.mul_sum, sq]; congr 1
+        ext i; congr 1; ext j; ring
+      simp_rw [hfn2]
+      rw [intervalIntegral.integral_finset_sum (fun i _ =>
+        intervalIntegrable_sum_pointwise (fun j =>
+          (fract_prod_integrable (i.val + 1) (j.val + 1)).const_mul (v i * v j)))]
+      apply Finset.sum_congr rfl; intro i _
+      show ∫ x in (0:ℝ)..1, ∑ j : Fin N, v i * v j *
+        (Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x))) =
+        ∑ j : Fin N, v i * v j * vasyuninGramEntry (i.val + 1) (j.val + 1)
+      rw [intervalIntegral.integral_finset_sum (fun j _ =>
+          (fract_prod_integrable (i.val + 1) (j.val + 1)).const_mul (v i * v j))]
+      apply Finset.sum_congr rfl; intro j _
+      rw [intervalIntegral.integral_const_mul]
+      congr 1
+      exact (vasyunin_eq_integral (i.val + 1) (j.val + 1) (by omega) (by omega)).symm
   -- Prove hLHS: expand dot product
   simp only [dotProduct, mulVec, augmentedGramMatrix, of_apply]
   rw [Fin.sum_univ_succ]; simp_rw [Fin.sum_univ_succ]
