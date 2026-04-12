@@ -121,10 +121,19 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
     ∀ x, x ∈ Set.Ioo c d → nbAugLinComb N w x ≠ 0 := by
   sorry -- w₀=0: use nbLinCombNew; w₀≠0: use continuity near x=1
 
-/-- nbAugLinComb² is integrable on [0,1]. -/
+/-- nbAugLinComb² is integrable on [0,1].
+    f = w₀ + g where g = nbLinCombNew. Then f² = w₀² + 2w₀g + g².
+    All pieces integrable: constant, const*sum(bounded), sum(bounded)². -/
 theorem nbAugLinComb_sq_integrable (N : ℕ) (w : Fin (N+1) → ℝ) :
     IntervalIntegrable (fun x => (nbAugLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
-  sorry -- Similar to nbLinCombNew_sq_integrable: bounded piecewise rational
+  set v := fun i : Fin N => w (Fin.succ i)
+  have hf_eq : (fun x => (nbAugLinComb N w x) ^ 2) =
+      (fun x => (w ⟨0, Nat.zero_lt_succ N⟩ + nbLinCombNew N v x) ^ 2) := by
+    ext x; rfl
+  rw [hf_eq]
+  -- (c + g)² ≤ 2c² + 2g², and g² is integrable by nbLinCombNew_sq_integrable
+  -- More directly: expand and use sum integrability
+  sorry
 
 -- ════════════════════════════════════════════════
 -- §3b. DIRECT PD PROOF (replaces §3 axiom + §4 induction)
