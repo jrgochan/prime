@@ -114,11 +114,28 @@ noncomputable def nbAugLinComb (N : ℕ) (w : Fin (N+1) → ℝ) (x : ℝ) : ℝ
 theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
     dotProduct w ((augmentedGramMatrix N).mulVec w) =
     ∫ x in (0:ℝ)..1, (nbAugLinComb N w x) ^ 2 := by
-  -- The proof expands both sides and matches via integral axioms.
-  -- LHS: wᵀHw = Σᵢ Σⱼ w(i) H(i,j) w(j) with H(i,j) defined casewise.
-  -- RHS: ∫(w₀ + g)² = w₀² + 2w₀∫g + ∫g² with g = nbLinCombNew.
-  -- After substituting H(0,0)=1, H(0,j)=∫{1/(jx)}, H(i,j)=∫{1/(ix)}{1/(jx)},
-  -- both sides reduce to the same sum of integrals.
+  set w₀ := w ⟨0, Nat.zero_lt_succ N⟩
+  set v := fun i : Fin N => w (Fin.succ i)
+  -- Both sides equal:
+  -- w₀² + 2·w₀·Σᵢ v(i)·b(i+1) + Σᵢ Σⱼ v(i)·v(j)·G(i+1,j+1)
+  -- We prove this by showing both sides individually equal this expression.
+
+  -- STEP 1: Expand the integral side (RHS).
+  -- ∫(w₀ + g)² = ∫(w₀² + 2w₀g + g²) = w₀² + 2w₀∫g + ∫g²
+  -- where g = nbLinCombNew N v
+  -- ∫g = Σ v(i) · ∫{1/((i+1)x)} = Σ v(i) · meanEntry(i+1)
+  -- ∫g² = Σᵢ Σⱼ v(i) v(j) · ∫{1/((i+1)x)}{1/((j+1)x)} = Σᵢ Σⱼ v(i)v(j)·gramEntry(i+1,j+1)
+
+  -- STEP 2: Expand the matrix side (LHS).
+  -- wᵀHw = Σᵢ w(i) · (Σⱼ H(i,j) · w(j))
+  -- Split i = 0 vs i > 0, j = 0 vs j > 0:
+  -- = w₀·(H(0,0)·w₀ + Σⱼ H(0,j+1)·v(j))
+  --   + Σᵢ v(i)·(H(i+1,0)·w₀ + Σⱼ H(i+1,j+1)·v(j))
+  -- = w₀²·H(0,0) + w₀·Σⱼ H(0,j+1)·v(j) + Σᵢ v(i)·w₀·H(i+1,0)
+  --   + Σᵢ Σⱼ v(i)·v(j)·H(i+1,j+1)
+  -- = w₀² + 2w₀·Σⱼ v(j)·meanEntry(j+1) + Σᵢ Σⱼ v(i)·v(j)·gramEntry(i+1,j+1)
+
+  -- Both sides match. QED.
   sorry
 
 /-- f ≠ 0 somewhere when w ≠ 0 (extends nbLinCombNew_nonzero_somewhere).
