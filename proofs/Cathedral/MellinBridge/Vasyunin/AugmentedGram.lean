@@ -217,39 +217,55 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
       by_cases hAv_zero : Av = 0
       · -- A = 0: g = -v(k₀) on (a,b), so f = w₀ - v(k₀)
         by_cases hw_vk : w₀ = v k₀
-        · -- w₀ = v(k₀): f = 0 on this interval.
-          -- But g = -v(k₀) = -w₀ ≠ 0, so g has a definite CONSTANT nonzero value.
-          -- We need a different interval. Use (0, a) where g has a jump.
-          -- On (0, 1/(k₀+2)), g involves higher indices... complex.
-          -- For now, use a simpler argument:
-          -- Since v ≠ 0 has minimum index k₀, and w₀ ≠ 0,
-          -- the augmented function f cannot be identically zero on (0,1)
-          -- because ∫₀¹ f² > 0 iff f ≠ 0 a.e.
-          -- Actually, try: pick a LARGER interval. On (0, a) the function
-          -- g has a different form and f = w₀ + g can't be zero everywhere.
-          -- For simplicity: use (b, 1) where g = 0 (all fract terms have floor ≥ 1)
-          -- and f = w₀ ≠ 0.
-          -- On x ∈ (b, 1) = (1/k, 1), check if 1/(i+1) < 1/k ⟹ floor(1/((i+1)x)) ≥ 1
-          -- This is complex. Simplest: On x ∈ (1, ∞), g is zero, but we need (0,1).
-          -- Actually: for x close to 1, 1/((i+1)x) < 1, so fract(1/((i+1)x)) = 1/((i+1)x).
-          -- So g(x) = Σ v(i)/((i+1)x) = Av/x = 0 (since Av = 0).
-          -- So f(x) = w₀ on x close to 1. Since w₀ ≠ 0, done!
-          -- More precisely: for x ∈ (1/2, 1), 1/((i+1)x) < 1 for i ≥ 1.
-          -- For i = 0: 1/(1·x) = 1/x ∈ (1, 2), so fract = 1/x - 1.
-          -- So g(x) = v(0)·(1/x - 1) + Σ_{i≥1} v(i)/((i+1)x)
-          -- When Av = 0 and k₀ = 0, this is: v(0)(1/x-1) + Av'/x for Av'=Σ_{i≥1}...
-          -- This gets complicated. Use a simpler approach:
-          -- Take x very close to 1: 1/((i+1)x) ∈ (0,1) for all i, so fract = 1/((i+1)x)
-          -- when x > 1/(i+1), i.e. x > 1/2 for i=1, x > 1/3 for i=2, etc.
-          -- For i=0: x > 1 needed for fract = id, but x < 1. So for x ∈ (1/2, 1):
-          -- fract(1/x) = 1/x - ⌊1/x⌋ = 1/x - 1 (since 1 < 1/x < 2)
-          -- So g(x) = v(0)(1/x - 1) + Σ_{i≥1} v(i)/((i+1)x)
-          --         = Σ v(i)/((i+1)x) - v(0) = Av/x - v(0) = -v(0) (since Av=0)
-          -- But v(0) = v k₀ when k₀ = 0. And hw_vk says w₀ = v(k₀) = v(0).
-          -- So f = w₀ - v(0) = 0. Same problem!
-          -- When k₀ > 0: for x ∈ (1/2, 1), g behaves differently.
-          -- This is getting too complicated. Just sorry this sub-sub-case.
-          sorry
+        · -- w₀ = v(k₀): f = 0 on the LEFT critical interval.
+          -- THE THEORIST'S REVELATION: On the RIGHT interval (b, 1/k₀),
+          -- ALL floors of 1/((i+1)x) are 0 (since (i+1)x > 1 for i ≥ k₀),
+          -- so g(x) = Σ v_i/((i+1)x) = A/x = 0 (since A = 0).
+          -- Therefore f(x) = w₀ ≠ 0 everywhere on the right interval.
+          -- This works for k₀ ≥ 1. For k₀ = 0, the right interval escapes (0,1).
+          by_cases hk₀_pos : k₀.val ≥ 1
+          · -- k₀ ≥ 1: use the right interval (1/(k₀+1), 1/k₀)
+            -- g = A/x - v(k₀-1) = 0/x - 0 = 0, so f = w₀ ≠ 0 on this interval.
+            have hk₀v := hk₀_pos  -- k₀.val ≥ 1
+            -- Interval bounds
+            have hk₀_cast_pos : (0 : ℝ) < (k₀.val : ℝ) :=
+              Nat.cast_pos.mpr (by omega)
+            refine ⟨1 / ((k₀.val : ℝ) + 1), 1 / (k₀.val : ℝ),
+              by positivity,
+              by rw [div_lt_div_iff₀ (by linarith) hk₀_cast_pos]; nlinarith,
+              by rw [div_le_one hk₀_cast_pos]; exact_mod_cast hk₀v,
+              fun x hx => ?_⟩
+            show w₀ + nbLinCombNew N v x ≠ 0
+            -- The interval (1/(k₀+1), 1/k₀) = (1/(k₀'+2), 1/(k₀'+1)) where k₀' = k₀-1
+            have hk₀'_bound : k₀.val - 1 < N := by omega
+            have hv_below' : ∀ i : Fin N, i < ⟨k₀.val - 1, hk₀'_bound⟩ → v i = 0 := by
+              intro i hi; apply hv_below
+              exact lt_of_lt_of_le hi (by simp [Fin.le_def])
+            have hx_lo : 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 2 : ℝ) < x := by
+              change 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 2 : ℝ) < x
+              simp only [Fin.val_mk]
+              norm_cast
+              rw [show k₀.val - 1 + 2 = k₀.val + 1 from by omega]
+              exact_mod_cast hx.1
+            have hx_hi : x < 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 1 : ℝ) := by
+              change x < 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 1 : ℝ)
+              simp only [Fin.val_mk]
+              norm_cast
+              rw [show k₀.val - 1 + 1 = k₀.val from by omega]
+              exact_mod_cast hx.2
+            rw [nbLinCombNew_eq_affine_on_critical_interval N v ⟨k₀.val - 1, hk₀'_bound⟩
+                hv_below' x hx_lo hx_hi]
+            -- Now: w₀ + (A/x - v(k₀-1)) ≠ 0
+            -- v(k₀-1) = 0 since k₀-1 < k₀, and A = 0
+            have hvk₀' : v ⟨k₀.val - 1, hk₀'_bound⟩ = 0 :=
+              hv_below _ (by simp [Fin.lt_def]; omega)
+            rw [hvk₀', sub_zero]
+            -- Now: w₀ + A/x ≠ 0, where A = Av = 0
+            conv_lhs => rw [show (∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ)) = Av from rfl]
+            rw [hAv_zero, zero_div, add_zero]
+            exact hw₀
+          · -- k₀ = 0: degenerate edge case (right interval escapes (0,1))
+            sorry
         · -- w₀ ≠ v(k₀): f = w₀ - v(k₀) ≠ 0 everywhere on (a, b)
           refine ⟨a, b, ha_nn, hab, hb_le_1, fun x ⟨hx_lo, hx_hi⟩ => ?_⟩
           show w₀ + nbLinCombNew N v x ≠ 0

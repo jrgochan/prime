@@ -114,7 +114,13 @@ theorem lower_integral_eq (k : ℕ) (hk : 1 ≤ k) :
 /-- {1/(kx)} is integrable on any interval. -/
 theorem fract_inv_mul_intervalIntegrable (k : ℕ) (a b : ℝ) :
     IntervalIntegrable (fun x => Int.fract (1 / ((k : ℝ) * x))) MeasureTheory.volume a b := by
-  sorry -- Bounded by 1, measurable (fract ∘ rational), finite interval
+  apply IntervalIntegrable.mono_fun (f := fun _ => (1 : ℝ))
+      (hf := intervalIntegrable_const)
+  · exact (measurable_fract.comp
+      (measurable_const.div (measurable_const.mul measurable_id))).aestronglyMeasurable.restrict
+  · filter_upwards with x
+    rw [Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _), norm_one]
+    exact le_of_lt (Int.fract_lt_one _)
 
 /-- **THE MEAN ENTRY INTEGRAL IDENTITY** (proves the axiom).
 
