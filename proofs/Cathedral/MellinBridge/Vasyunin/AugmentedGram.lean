@@ -104,11 +104,22 @@ noncomputable def nbAugLinComb (N : ℕ) (w : Fin (N+1) → ℝ) (x : ℝ) : ℝ
 /-- **THE L² IDENTITY**: wᵀH_Nw = ∫₀¹ (w₀ + Σ wᵢ{1/((i+1)x)})² dx.
 
     Uses vasyunin_eq_integral (Axiom 3) for Gram entries G(j,k)
-    and vasyunin_mean_eq_integral (Axiom 4) for mean entries b_k. -/
+    and vasyunin_mean_eq_integral (Axiom 4) for mean entries b_k.
+
+    Proof strategy:
+    LHS = Σᵢ Σⱼ w(i) · H(i,j) · w(j) where H(i,j) are integrals
+    RHS = ∫(w₀ + g)² = w₀² + 2w₀∫g + ∫g²
+        = w₀² + 2w₀·Σ w(i+1)·∫{1/((i+1)x)} + ΣᵢΣⱼ w(i+1)·w(j+1)·∫{·}{·}
+    These match term by term via the integral axioms. -/
 theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
     dotProduct w ((augmentedGramMatrix N).mulVec w) =
     ∫ x in (0:ℝ)..1, (nbAugLinComb N w x) ^ 2 := by
-  sorry -- L² identity: expand both sides, match using integral axioms
+  -- The proof expands both sides and matches via integral axioms.
+  -- LHS: wᵀHw = Σᵢ Σⱼ w(i) H(i,j) w(j) with H(i,j) defined casewise.
+  -- RHS: ∫(w₀ + g)² = w₀² + 2w₀∫g + ∫g² with g = nbLinCombNew.
+  -- After substituting H(0,0)=1, H(0,j)=∫{1/(jx)}, H(i,j)=∫{1/(ix)}{1/(jx)},
+  -- both sides reduce to the same sum of integrals.
+  sorry
 
 /-- f ≠ 0 somewhere when w ≠ 0 (extends nbLinCombNew_nonzero_somewhere).
 
