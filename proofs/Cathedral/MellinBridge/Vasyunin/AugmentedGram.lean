@@ -154,9 +154,17 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
         rw [show nbLinCombNew N v x = 0 from by
           simp [nbLinCombNew, hv, zero_mul, Finset.sum_const_zero]]
         simp [hw₀]⟩
-    · -- Subcase 2b: v ≠ 0. Use the integral positivity argument.
-      -- ∫₀¹ f² > 0 since f is not identically zero (w₀ ≠ 0),
-      -- which means f ≠ 0 on some subinterval.
+    · -- Subcase 2b: v ≠ 0. Get an interval where g ≠ 0, then f ≠ 0 there too.
+      -- g is nonzero on (c,d). f = w₀ + g. If f were zero on all of (c,d),
+      -- then g = -w₀ (constant) on (c,d), contradicting our theorem that
+      -- g is a non-constant piecewise function there.
+      obtain ⟨c, d, hc, hcd, hd, hne⟩ := nbLinCombNew_nonzero_somewhere N hN v hv
+      -- g ≠ 0 at some point x₀ ∈ (c,d).
+      -- If w₀ + g(x₀) ≠ 0, we're done (f ≠ 0 at x₀, so on a subinterval).
+      -- If w₀ + g(x₀) = 0, then g(x₀) = -w₀.
+      -- Pick another point x₁ ∈ (c,d) close to x₀.
+      -- Since g ≠ 0 on (c,d) and g is not the constant -w₀,
+      -- ∃ x₁ where g(x₁) ≠ -w₀, hence f(x₁) = w₀ + g(x₁) ≠ 0.
       sorry
 
 /-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
