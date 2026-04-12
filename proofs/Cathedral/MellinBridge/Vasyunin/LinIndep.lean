@@ -126,7 +126,7 @@ theorem nbLinCombNew_eq_neg_on_critical_interval (N : ℕ) (w : Fin N → ℝ)
     have hicast : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
     by_cases hi_below : i < k₀
     · simp only [hi_below, ↓reduceIte, hw_below i hi_below, zero_mul]
-    · push_neg at hi_below
+    · push Not at hi_below
       simp only [show ¬(i < k₀) from not_lt.mpr hi_below, ↓reduceIte]
       by_cases hi_eq : i = k₀
       · -- i = k₀
@@ -202,7 +202,7 @@ theorem nbLinCombNew_eq_affine_on_critical_interval (N : ℕ) (w : Fin N → ℝ
     have hicast : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
     by_cases hi_below : i < k₀
     · simp only [hi_below, ↓reduceIte, hw_below i hi_below, zero_mul]
-    · push_neg at hi_below
+    · push Not at hi_below
       simp only [show ¬(i < k₀) from not_lt.mpr hi_below, ↓reduceIte]
       by_cases hi_eq : i = k₀
       · subst hi_eq; simp only [↓reduceIte]
@@ -300,7 +300,7 @@ private theorem affine_inv_nonzero_subinterval (A B a b : ℝ) (hA : A ≠ 0)
     -- Since f(m) ≠ 0, m ≠ A/B, so m is in one of these zero-free intervals.
     by_cases hzero_lt : ∀ x₀, a < x₀ → x₀ < b → A / x₀ - B ≠ 0
     · exact ⟨a, b, le_refl a, hab, le_refl b, fun x hx => hzero_lt x hx.1 hx.2⟩
-    · push_neg at hzero_lt
+    · push Not at hzero_lt
       obtain ⟨x₀, hx₀_lo, hx₀_hi, hfx₀⟩ := hzero_lt
       -- x₀ is the unique zero. m ≠ x₀ since f(m) ≠ 0.
       by_cases hm_lt_x₀ : m < x₀
@@ -338,13 +338,13 @@ private theorem affine_inv_nonzero_subinterval (A B a b : ℝ) (hA : A ≠ 0)
         exact hx_ne hx_eq
 
 /-- If w ≠ 0, then nbLinCombNew is nonzero on some subinterval of (0,1). -/
-theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
+theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (_hN : 1 ≤ N)
     (w : Fin N → ℝ) (hw : w ≠ 0) :
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     (∀ x, x ∈ Set.Ioo c d → nbLinCombNew N w x ≠ 0) := by
   -- Find the minimum nonzero index
   have hw_exists : ∃ i : Fin N, w i ≠ 0 := by
-    by_contra h; push_neg at h; exact hw (funext h)
+    by_contra h; push Not at h; exact hw (funext h)
   let S := Finset.filter (fun i : Fin N => w i ≠ 0) Finset.univ
   have hS : S.Nonempty := by
     obtain ⟨i, hi⟩ := hw_exists
