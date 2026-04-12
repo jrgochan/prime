@@ -139,7 +139,7 @@ noncomputable def nbAugLinComb (N : ℕ) (w : Fin (N+1) → ℝ) (x : ℝ) : ℝ
     w₀² + 2·w₀·Σ v(i)·meanEntry(i+1) + ΣᵢΣⱼ v(i)·v(j)·gramEntry(i+1,j+1)
     LHS via Fin.sum_univ_succ + casewise H expansion.
     RHS via integral linearity + the two axioms. -/
-theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
+theorem augmented_l2_identity (N : ℕ) (_hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
     dotProduct w ((augmentedGramMatrix N).mulVec w) =
     ∫ x in (0:ℝ)..1, (nbAugLinComb N w x) ^ 2 := by
   -- Strategy: show both sides equal the same normal form.
@@ -346,7 +346,7 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
       -- doesn't actually arise because g would then be zero (v=0 case).
       -- Find minimum nonzero index k₀ for v
       have hv_exists : ∃ i : Fin N, v i ≠ 0 := by
-        by_contra h; push_neg at h; exact hv (funext h)
+        by_contra h; push Not at h; exact hv (funext h)
       let S := Finset.filter (fun i : Fin N => v i ≠ 0) Finset.univ
       have hS : S.Nonempty := by
         obtain ⟨i, hi⟩ := hv_exists
@@ -407,13 +407,13 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
               exact lt_of_lt_of_le hi (by simp [Fin.le_def])
             have hx_lo : 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 2 : ℝ) < x := by
               change 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 2 : ℝ) < x
-              simp only [Fin.val_mk]
+              simp only []
               norm_cast
               rw [show k₀.val - 1 + 2 = k₀.val + 1 from by omega]
               exact_mod_cast hx.1
             have hx_hi : x < 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 1 : ℝ) := by
               change x < 1 / ((⟨k₀.val - 1, hk₀'_bound⟩ : Fin N).val + 1 : ℝ)
-              simp only [Fin.val_mk]
+              simp only []
               norm_cast
               rw [show k₀.val - 1 + 1 = k₀.val from by omega]
               exact_mod_cast hx.2

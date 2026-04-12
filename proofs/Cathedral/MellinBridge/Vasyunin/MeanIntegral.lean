@@ -35,7 +35,7 @@ open Real MeasureTheory
 
 /-- On (1/k, 1], 1/(kx) ∈ (0,1), so {1/(kx)} = 1/(kx). -/
 lemma fract_inv_mul_eq_self_on_upper (k : ℕ) (hk : 1 ≤ k) (x : ℝ)
-    (hx_lo : 1 / (k : ℝ) < x) (hx_hi : x ≤ 1) :
+    (hx_lo : 1 / (k : ℝ) < x) (_hx_hi : x ≤ 1) :
     Int.fract (1 / ((k : ℝ) * x)) = 1 / ((k : ℝ) * x) := by
   have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
   have hx_pos : (0 : ℝ) < x := lt_of_lt_of_le (div_pos one_pos hk_pos) (le_of_lt hx_lo)
@@ -83,8 +83,8 @@ theorem upper_integral_eq_log (k : ℕ) (hk : 1 ≤ k) :
     intro x hx; rw [Set.uIcc_of_le hle] at hx
     exact ne_of_gt (mul_pos hk_pos (lt_of_lt_of_le (div_pos one_pos hk_pos) hx.1))
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
-  simp only [Real.log_one, mul_zero, Real.log_div one_ne_zero (ne_of_gt hk_pos), Real.log_one,
-    zero_sub, neg_neg]
+  simp only [Real.log_one, mul_zero, Real.log_div one_ne_zero (ne_of_gt hk_pos),
+    zero_sub]
   ring
 
 -- ════════════════════════════════════════════════
