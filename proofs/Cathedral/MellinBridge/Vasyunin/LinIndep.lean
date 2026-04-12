@@ -13,6 +13,7 @@
 
 import Cathedral.MellinBridge.Vasyunin.GramPSD
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section
 open Real MeasureTheory
@@ -424,10 +425,62 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
 -- §4. INTEGRABILITY AND MAIN THEOREM
 -- ════════════════════════════════════════════════
 
+/-- Products of fractional parts of 1/(j*x) and 1/(k*x) are measurable. -/
+private lemma fract_inv_mul_measurable (j k : ℕ) :
+    Measurable (fun x : ℝ => Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))) := by
+  apply Measurable.mul
+  · exact (measurable_const.div (measurable_const.mul measurable_id)).fract
+  · exact (measurable_const.div (measurable_const.mul measurable_id)).fract
+
+/-- Products of fractional parts are bounded by 1. -/
+private lemma fract_inv_prod_le_one (j k : ℕ) (x : ℝ) :
+    ‖Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))‖ ≤ ‖(1 : ℝ)‖ := by
+  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_one,
+      abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+  calc Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))
+      ≤ 1 * 1 := by
+        apply mul_le_mul
+        · exact le_of_lt (Int.fract_lt_one _)
+        · exact le_of_lt (Int.fract_lt_one _)
+        · exact Int.fract_nonneg _
+        · linarith
+    _ = 1 := mul_one 1
+
+/-- Products of fractional parts of 1/(j*x) are IntervalIntegrable on [0,1]. -/
+private theorem fract_inv_prod_intervalIntegrable (j k : ℕ) :
+    IntervalIntegrable
+      (fun x : ℝ => Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x)))
+      MeasureTheory.volume 0 1 :=
+  IntervalIntegrable.mono_fun
+    (intervalIntegrable_const (c := (1 : ℝ)))
+    ((fract_inv_mul_measurable j k).aestronglyMeasurable.restrict)
+    (Filter.Eventually.of_forall (fract_inv_prod_le_one j k))
+
 /-- nbLinCombNew² is integrable on [0,1]. -/
 theorem nbLinCombNew_sq_integrable (N : ℕ) (w : Fin N → ℝ) :
     IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume 0 1 := by
-  sorry
+  have h_sq : (fun x => (nbLinCombNew N w x) ^ 2) =
+      (fun x => ∑ i : Fin N, ∑ j : Fin N,
+        (w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) *
+        (w j * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))) := by
+    ext x; unfold nbLinCombNew; rw [sq, Finset.sum_mul_sum]
+  rw [h_sq]
+  have : (fun x : ℝ => ∑ i : Fin N, ∑ j : Fin N,
+      (w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) *
+      (w j * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))) =
+    (∑ i : Fin N, ∑ j : Fin N, fun x =>
+      (w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) *
+      (w j * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [this]
+  apply IntervalIntegrable.sum; intro i _
+  apply IntervalIntegrable.sum; intro j _
+  have : (fun x : ℝ => (w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))) *
+      (w j * Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))) =
+    (fun x : ℝ => (w i * w j) * (Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) *
+      Int.fract (1 / (((j.val + 1 : ℕ) : ℝ) * x)))) := by ext x; ring
+  rw [this]
+  exact (fract_inv_prod_intervalIntegrable (i.val + 1) (j.val + 1)).const_mul _
 
 /-- **THE NUKE**: ∫₀¹ (Σ wᵢ{1/((i+1)x)})² dx > 0 for w ≠ 0.
 
