@@ -112,28 +112,65 @@ theorem augmented_l2_identity (N : ℕ) (hN : N ≥ 1) (w : Fin (N+1) → ℝ) :
 
 /-- f ≠ 0 somewhere when w ≠ 0 (extends nbLinCombNew_nonzero_somewhere).
 
-    Two cases:
-    - w₀ = 0: reduces to nbLinCombNew_nonzero_somewhere (already proved)
-    - w₀ ≠ 0: constant + bounded fract terms → nonzero near x = 1 -/
+    Case w₀ = 0: f = nbLinCombNew v ≠ 0 by LinIndep
+    Case w₀ ≠ 0, v = 0: f = w₀ (constant, nonzero everywhere)
+    Case w₀ ≠ 0, v ≠ 0: use nbLinCombNew_nonzero_somewhere -/
 theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
     (w : Fin (N+1) → ℝ) (hw : w ≠ 0) :
     ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
     ∀ x, x ∈ Set.Ioo c d → nbAugLinComb N w x ≠ 0 := by
-  sorry -- w₀=0: use nbLinCombNew; w₀≠0: use continuity near x=1
+  set w₀ := w ⟨0, Nat.zero_lt_succ N⟩ with hw₀_def
+  set v := fun i : Fin N => w (Fin.succ i) with hv_def
+  by_cases hw₀ : w₀ = 0
+  · -- Case 1: w₀ = 0. Then f(x) = nbLinCombNew N v x.
+    have hv_ne : v ≠ 0 := by
+      intro hv_zero; apply hw; funext ⟨j, hj⟩
+      rcases Nat.eq_zero_or_pos j with rfl | hj_pos
+      · exact hw₀
+      · have := congr_fun hv_zero ⟨j - 1, by omega⟩
+        simp only [hv_def, Fin.succ, Pi.zero_apply] at this
+        convert this using 2
+        ext; simp; omega
+    obtain ⟨c, d, hc, hcd, hd, hne⟩ := nbLinCombNew_nonzero_somewhere N hN v hv_ne
+    exact ⟨c, d, hc, hcd, hd, fun x hx => by
+      show w₀ + nbLinCombNew N v x ≠ 0
+      rw [hw₀, zero_add]; exact hne x hx⟩
+  · -- Case 2: w₀ ≠ 0.
+    by_cases hv : v = 0
+    · -- Subcase 2a: v = 0. Then f(x) = w₀ (constant).
+      exact ⟨0, 1, le_refl 0, one_pos, le_refl 1, fun x _ => by
+        show w₀ + nbLinCombNew N v x ≠ 0
+        rw [show nbLinCombNew N v x = 0 from by
+          simp [nbLinCombNew, hv, Pi.zero_apply, zero_mul, Finset.sum_const_zero]]
+        simp [hw₀]⟩
+    · -- Subcase 2b: v ≠ 0. Use the integral positivity argument.
+      -- ∫₀¹ f² > 0 since f is not identically zero (w₀ ≠ 0),
+      -- which means f ≠ 0 on some subinterval.
+      sorry
+
+/-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
+private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
+    IntervalIntegrable (fun x => nbLinCombNew N v x) MeasureTheory.volume 0 1 := by
+  -- nbLinCombNew is a finite sum of w_i * fract(1/(kx))
+  -- Each term is bounded by |w_i|, and bounded+measurable → integrable
+  -- The sum of finitely many IntervalIntegrable functions is IntervalIntegrable
+  sorry
 
 /-- nbAugLinComb² is integrable on [0,1].
     f = w₀ + g where g = nbLinCombNew. Then f² = w₀² + 2w₀g + g².
     All pieces integrable: constant, const*sum(bounded), sum(bounded)². -/
 theorem nbAugLinComb_sq_integrable (N : ℕ) (w : Fin (N+1) → ℝ) :
     IntervalIntegrable (fun x => (nbAugLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
+  set w₀ := w ⟨0, Nat.zero_lt_succ N⟩
   set v := fun i : Fin N => w (Fin.succ i)
+  -- f(x) = w₀ + g(x), so f² = w₀² + 2w₀g + g²
   have hf_eq : (fun x => (nbAugLinComb N w x) ^ 2) =
-      (fun x => (w ⟨0, Nat.zero_lt_succ N⟩ + nbLinCombNew N v x) ^ 2) := by
-    ext x; rfl
+      (fun x => w₀ ^ 2 + 2 * w₀ * nbLinCombNew N v x + (nbLinCombNew N v x) ^ 2) := by
+    ext x; show (w₀ + nbLinCombNew N v x) ^ 2 = _; ring
   rw [hf_eq]
-  -- (c + g)² ≤ 2c² + 2g², and g² is integrable by nbLinCombNew_sq_integrable
-  -- More directly: expand and use sum integrability
-  sorry
+  exact (((intervalIntegrable_const).add
+    ((nbLinCombNew_integrable N v).const_mul (2 * w₀))).add
+    (nbLinCombNew_sq_integrable N v))
 
 -- ════════════════════════════════════════════════
 -- §3b. DIRECT PD PROOF (replaces §3 axiom + §4 induction)

@@ -447,7 +447,7 @@ private lemma fract_inv_prod_le_one (j k : ℕ) (x : ℝ) :
     _ = 1 := mul_one 1
 
 /-- Products of fractional parts of 1/(j*x) are IntervalIntegrable on [0,1]. -/
-private theorem fract_inv_prod_intervalIntegrable (j k : ℕ) :
+theorem fract_inv_prod_intervalIntegrable (j k : ℕ) :
     IntervalIntegrable
       (fun x : ℝ => Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x)))
       MeasureTheory.volume 0 1 :=
