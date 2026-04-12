@@ -438,6 +438,32 @@ theorem nyman_beurling_lin_indep_new (N : ℕ) (hN : 1 ≤ N)
   obtain ⟨c, d, hc0, hcd, hd1, hne⟩ := nbLinCombNew_nonzero_somewhere N hN w hw
   have hpos_sub : ∀ x, x ∈ Set.Ioo c d → 0 < (nbLinCombNew N w x) ^ 2 :=
     fun x hx => sq_pos_of_ne_zero (hne x hx)
-  sorry
+  have hisub : IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume c d :=
+    (nbLinCombNew_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le (le_of_lt hcd), Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc hc0 hd1)
+  have hint_sub : 0 < ∫ x in c..d, (nbLinCombNew N w x) ^ 2 :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hisub hpos_sub hcd
+  have hi0c : IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume 0 c :=
+    (nbLinCombNew_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hc0, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc le_rfl (hcd.le.trans hd1))
+  have hid1 : IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume d 1 :=
+    (nbLinCombNew_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hd1, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc (hc0.trans hcd.le) le_rfl)
+  have h_01 : (∫ x in (0:ℝ)..1, (nbLinCombNew N w x) ^ 2) =
+    (∫ x in (0:ℝ)..c, (nbLinCombNew N w x) ^ 2) +
+    (∫ x in c..d, (nbLinCombNew N w x) ^ 2) +
+    (∫ x in d..1, (nbLinCombNew N w x) ^ 2) := by
+    have h1 := intervalIntegral.integral_add_adjacent_intervals hi0c hisub
+    have h2 := intervalIntegral.integral_add_adjacent_intervals (hi0c.trans hisub) hid1
+    linarith
+  rw [h_01]
+  have h1 : 0 ≤ ∫ x in (0:ℝ)..c, (nbLinCombNew N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hc0 (fun x _ => sq_nonneg _)
+  have h2 : 0 ≤ ∫ x in d..1, (nbLinCombNew N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hd1 (fun x _ => sq_nonneg _)
+  linarith
 
 end Cathedral.Vasyunin
