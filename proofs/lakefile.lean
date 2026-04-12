@@ -31,5 +31,7 @@ lean_lib «Cathedral» where
     `Cathedral.Robin.HarmonicBounds,
     `Cathedral.Robin.BaseCases,
     `Cathedral.Robin.PrimeBounds,
-    `Cathedral.Robin.Equivalence
+    `Cathedral.Robin.Equivalence,
+    -- Archive (reference proofs for the active chain)
+    `Cathedral.Archive.HighFrequencyTrap.FractIntegral
   ]

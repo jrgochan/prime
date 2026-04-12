@@ -24,6 +24,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+import Cathedral.Archive.HighFrequencyTrap.FractIntegral
 
 noncomputable section
 open Real MeasureTheory
@@ -100,12 +101,86 @@ theorem upper_integral_eq_log (k : ℕ) (hk : 1 ≤ k) :
 -- = (1/k) (-γ + 1)  [first sum = Euler-Mascheroni by sign flip, second telescopes to 1]
 -- = (1-γ)/k
 
+/-- **Euler-Mascheroni series identity**: Σ(1/(m+1) - log(1+1/(m+1))) = γ.
+    Proof: partial sums = H_N - log(N+1) → γ via tendsto_harmonic_sub_log. -/
+private lemma hasSum_inv_sub_log_euler :
+    HasSum (fun m : ℕ => 1 / ((m + 1 : ℕ) : ℝ) - Real.log (1 + 1 / ((m + 1 : ℕ) : ℝ)))
+      Real.eulerMascheroniConstant := by
+  rw [hasSum_iff_tendsto_nat_of_nonneg]
+  · -- partial sum = H_N - log(N+1)
+    have hpart : ∀ N, ∑ m ∈ Finset.range N,
+        (1 / ((m + 1 : ℕ) : ℝ) - Real.log (1 + 1 / ((m + 1 : ℕ) : ℝ))) =
+        (harmonic N : ℝ) - Real.log ((N : ℝ) + 1) := by
+      intro N
+      rw [Finset.sum_sub_distrib]
+      congr 1
+      -- Harmonic part: Σ 1/(m+1) = H_N
+      · simp only [harmonic, Rat.cast_sum, Rat.cast_inv, Rat.cast_natCast]
+        congr 1; ext i; rw [one_div]
+      -- Log telescope: Σ log(1+1/(m+1)) = log(N+1)
+      · induction N with
+        | zero => simp
+        | succ n ih =>
+          rw [Finset.sum_range_succ, ih]
+          have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+          have hn2 : (0 : ℝ) < (n : ℝ) + 2 := by linarith
+          rw [show 1 + 1 / ((n + 1 : ℕ) : ℝ) = ((n : ℝ) + 2) / ((n : ℝ) + 1) from by
+            push_cast; field_simp; ring]
+          rw [Real.log_div (ne_of_gt hn2) (ne_of_gt hn1)]
+          push_cast; ring
+    simp_rw [hpart]
+    -- H_N - log(N+1) → γ
+    have h1 := Real.tendsto_harmonic_sub_log
+    have h2 : Filter.Tendsto (fun N : ℕ => Real.log ((N : ℝ) + 1) - Real.log (N : ℝ))
+        Filter.atTop (nhds 0) := by
+      have : Filter.Tendsto (fun N : ℕ => Real.log (1 + 1 / (N : ℝ)))
+          Filter.atTop (nhds (Real.log (1 + 0))) := by
+        have hlog_cont : ContinuousAt (fun x : ℝ => Real.log (1 + x)) 0 :=
+          (continuousAt_const.add continuousAt_id).log (by norm_num)
+        have h1N : Filter.Tendsto (fun N : ℕ => (1 : ℝ) / (N : ℝ))
+            Filter.atTop (nhds 0) := by
+          simp_rw [one_div]; exact tendsto_inv_atTop_nhds_zero_nat (𝕜 := ℝ)
+        exact hlog_cont.tendsto.comp h1N
+      simp only [add_zero, Real.log_one] at this
+      refine this.congr' ?_
+      filter_upwards [Filter.eventually_gt_atTop 0] with n hn
+      rw [show 1 + 1 / (n : ℝ) = ((n : ℝ) + 1) / (n : ℝ) from by field_simp]
+      rw [Real.log_div (by positivity) (by positivity)]
+    have h3 := h1.sub h2
+    simp only [sub_zero] at h3
+    convert h3 using 1; ext N; ring
+  · intro m
+    have : Real.log (1 + 1 / ((m + 1 : ℕ) : ℝ)) ≤ 1 / ((m + 1 : ℕ) : ℝ) := by
+      rw [Real.log_le_iff_le_exp (by positivity)]
+      linarith [Real.add_one_le_exp (1 / ((m + 1 : ℕ) : ℝ))]
+    linarith
+
+/-- ∫₀¹ {1/x} dx = 1 - γ -/
+private lemma fract_inv_integral_eq :
+    ∫ x in (0:ℝ)..1, Int.fract (1 / x) = 1 - Real.eulerMascheroniConstant := by
+  have h := fract_integral_identity 1 (by omega)
+  simp only [Nat.cast_one, one_mul] at h
+  rw [h, hasSum_inv_sub_log_euler.tsum_eq]
+
 /-- ∫₀^{1/k} {1/(kx)} dx = (1-γ)/k.
-    This is the hard integral, requiring the Euler-Mascheroni limit. -/
+    This is the hard integral, requiring the Euler-Mascheroni limit.
+    Proof: substitute u = kx to get (1/k)∫₀¹{1/u}du = (1/k)(1-γ). -/
 theorem lower_integral_eq (k : ℕ) (hk : 1 ≤ k) :
     ∫ x in (0 : ℝ)..(1 / (k : ℝ)), Int.fract (1 / ((k : ℝ) * x)) =
     (1 - Real.eulerMascheroniConstant) / (k : ℝ) := by
-  sorry -- piecewise decomposition + Euler-Mascheroni limit
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
+  have hsub : ∫ x in (0 : ℝ)..(1 / (k : ℝ)), Int.fract (1 / ((k : ℝ) * x)) =
+      (k : ℝ)⁻¹ * ∫ x in (0 : ℝ)..1, Int.fract (1 / x) := by
+    have hcomm : (fun x => Int.fract (1 / ((k : ℝ) * x))) =
+        (fun x => Int.fract (1 / (x * (k : ℝ)))) := by ext x; rw [mul_comm]
+    rw [hcomm]
+    have h := intervalIntegral.integral_comp_mul_right (a := (0 : ℝ)) (b := 1 / (k : ℝ))
+      (fun u => Int.fract (1 / u)) hk_ne
+    simp only [zero_mul, smul_eq_mul] at h
+    rw [show 1 / (k : ℝ) * (k : ℝ) = 1 from by field_simp] at h
+    exact h
+  rw [hsub, fract_inv_integral_eq, inv_mul_eq_div]
 
 -- ════════════════════════════════════════════════
 -- §3. ASSEMBLY: mean entry = integral
