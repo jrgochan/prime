@@ -251,7 +251,7 @@ theorem nbLinCombNew_eq_affine_on_critical_interval (N : ℕ) (w : Fin N → ℝ
   field_simp
 
 /-- **A/x - B is nonzero on a subinterval** when A ≠ 0 and 0 < a < b. -/
-private theorem affine_inv_nonzero_subinterval (A B a b : ℝ) (hA : A ≠ 0)
+theorem affine_inv_nonzero_subinterval (A B a b : ℝ) (hA : A ≠ 0)
     (ha : 0 < a) (hab : a < b) :
     ∃ c d : ℝ, a ≤ c ∧ c < d ∧ d ≤ b ∧
     ∀ x, x ∈ Set.Ioo c d → A / x - B ≠ 0 := by

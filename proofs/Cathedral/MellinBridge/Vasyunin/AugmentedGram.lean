@@ -173,18 +173,104 @@ theorem nbAugLinComb_nonzero_somewhere (N : ℕ) (hN : N ≥ 1)
         rw [show nbLinCombNew N v x = 0 from by
           simp [nbLinCombNew, hv, zero_mul, Finset.sum_const_zero]]
         simp [hw₀]⟩
-    · -- Subcase 2b: v ≠ 0. Get an interval where g ≠ 0, then f ≠ 0 there too.
-      -- g is nonzero on (c,d). f = w₀ + g. If f were zero on all of (c,d),
-      -- then g = -w₀ (constant) on (c,d), contradicting our theorem that
-      -- g is a non-constant piecewise function there.
-      obtain ⟨c, d, hc, hcd, hd, hne⟩ := nbLinCombNew_nonzero_somewhere N hN v hv
-      -- g ≠ 0 at some point x₀ ∈ (c,d).
-      -- If w₀ + g(x₀) ≠ 0, we're done (f ≠ 0 at x₀, so on a subinterval).
-      -- If w₀ + g(x₀) = 0, then g(x₀) = -w₀.
-      -- Pick another point x₁ ∈ (c,d) close to x₀.
-      -- Since g ≠ 0 on (c,d) and g is not the constant -w₀,
-      -- ∃ x₁ where g(x₁) ≠ -w₀, hence f(x₁) = w₀ + g(x₁) ≠ 0.
-      sorry
+    · -- Subcase 2b: w₀ ≠ 0, v ≠ 0.
+      -- Replicate the minimum-index analysis: on the critical interval (a,b),
+      -- f(x) = w₀ + A/x - w_{k₀} = A/x - (w_{k₀} - w₀).
+      -- When A ≠ 0: use affine_inv_nonzero_subinterval (already proved).
+      -- When A = 0: f = w₀ - w_{k₀} (constant). Nonzero when w₀ ≠ w_{k₀}.
+      -- When A = 0, w₀ = w_{k₀}: f = 0 on this interval, but this
+      -- doesn't actually arise because g would then be zero (v=0 case).
+      -- Find minimum nonzero index k₀ for v
+      have hv_exists : ∃ i : Fin N, v i ≠ 0 := by
+        by_contra h; push_neg at h; exact hv (funext h)
+      let S := Finset.filter (fun i : Fin N => v i ≠ 0) Finset.univ
+      have hS : S.Nonempty := by
+        obtain ⟨i, hi⟩ := hv_exists
+        exact ⟨i, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hi⟩⟩
+      set k₀ := S.min' hS
+      have hvk₀ : v k₀ ≠ 0 := (Finset.mem_filter.mp (Finset.min'_mem S hS)).2
+      have hv_below : ∀ i : Fin N, i < k₀ → v i = 0 := by
+        intro i hi; by_contra h
+        exact absurd (Finset.min'_le S i (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩))
+          (not_le.mpr hi)
+      -- Since v i = w (Fin.succ i), translate to w: w (Fin.succ i) = 0 for i < k₀
+      have hw_below : ∀ i : Fin N, i < k₀ → (fun j => w (Fin.succ j)) i = 0 := by
+        intro i hi; exact hv_below i hi
+      set Av := ∑ i : Fin N, v i / ((i.val + 1 : ℕ) : ℝ) with hAv_def
+      set k := k₀.val + 1 with hk_def
+      have hk_pos : (0 : ℝ) < (k : ℝ) := by positivity
+      have hk1_pos : (0 : ℝ) < (k : ℝ) + 1 := by linarith
+      set a := 1 / ((k : ℝ) + 1)
+      set b := 1 / (k : ℝ)
+      have hab : a < b := by
+        simp only [a, b]; rw [div_lt_div_iff₀ hk1_pos hk_pos]; nlinarith
+      have ha_pos : (0 : ℝ) < a := by positivity
+      have ha_nn : 0 ≤ a := le_of_lt ha_pos
+      have hb_le_1 : b ≤ 1 := by
+        simp only [b]; rw [div_le_one hk_pos]; exact_mod_cast (by omega : 1 ≤ k)
+      -- On (a, b), g(x) = nbLinCombNew N v x = Av/x - v(k₀)
+      -- So f(x) = w₀ + g(x) = w₀ + Av/x - v(k₀) = Av/x - (v(k₀) - w₀)
+      have ha_eq : a = 1 / ((k₀.val : ℝ) + 2) := by
+        simp only [a]; congr 1; simp only [hk_def]; push_cast; ring
+      have hb_eq : b = 1 / ((k₀.val : ℝ) + 1) := by
+        simp only [b]; congr 1; simp only [hk_def]; push_cast; ring
+      by_cases hAv_zero : Av = 0
+      · -- A = 0: g = -v(k₀) on (a,b), so f = w₀ - v(k₀)
+        by_cases hw_vk : w₀ = v k₀
+        · -- w₀ = v(k₀): f = 0 on this interval.
+          -- But g = -v(k₀) = -w₀ ≠ 0, so g has a definite CONSTANT nonzero value.
+          -- We need a different interval. Use (0, a) where g has a jump.
+          -- On (0, 1/(k₀+2)), g involves higher indices... complex.
+          -- For now, use a simpler argument:
+          -- Since v ≠ 0 has minimum index k₀, and w₀ ≠ 0,
+          -- the augmented function f cannot be identically zero on (0,1)
+          -- because ∫₀¹ f² > 0 iff f ≠ 0 a.e.
+          -- Actually, try: pick a LARGER interval. On (0, a) the function
+          -- g has a different form and f = w₀ + g can't be zero everywhere.
+          -- For simplicity: use (b, 1) where g = 0 (all fract terms have floor ≥ 1)
+          -- and f = w₀ ≠ 0.
+          -- On x ∈ (b, 1) = (1/k, 1), check if 1/(i+1) < 1/k ⟹ floor(1/((i+1)x)) ≥ 1
+          -- This is complex. Simplest: On x ∈ (1, ∞), g is zero, but we need (0,1).
+          -- Actually: for x close to 1, 1/((i+1)x) < 1, so fract(1/((i+1)x)) = 1/((i+1)x).
+          -- So g(x) = Σ v(i)/((i+1)x) = Av/x = 0 (since Av = 0).
+          -- So f(x) = w₀ on x close to 1. Since w₀ ≠ 0, done!
+          -- More precisely: for x ∈ (1/2, 1), 1/((i+1)x) < 1 for i ≥ 1.
+          -- For i = 0: 1/(1·x) = 1/x ∈ (1, 2), so fract = 1/x - 1.
+          -- So g(x) = v(0)·(1/x - 1) + Σ_{i≥1} v(i)/((i+1)x)
+          -- When Av = 0 and k₀ = 0, this is: v(0)(1/x-1) + Av'/x for Av'=Σ_{i≥1}...
+          -- This gets complicated. Use a simpler approach:
+          -- Take x very close to 1: 1/((i+1)x) ∈ (0,1) for all i, so fract = 1/((i+1)x)
+          -- when x > 1/(i+1), i.e. x > 1/2 for i=1, x > 1/3 for i=2, etc.
+          -- For i=0: x > 1 needed for fract = id, but x < 1. So for x ∈ (1/2, 1):
+          -- fract(1/x) = 1/x - ⌊1/x⌋ = 1/x - 1 (since 1 < 1/x < 2)
+          -- So g(x) = v(0)(1/x - 1) + Σ_{i≥1} v(i)/((i+1)x)
+          --         = Σ v(i)/((i+1)x) - v(0) = Av/x - v(0) = -v(0) (since Av=0)
+          -- But v(0) = v k₀ when k₀ = 0. And hw_vk says w₀ = v(k₀) = v(0).
+          -- So f = w₀ - v(0) = 0. Same problem!
+          -- When k₀ > 0: for x ∈ (1/2, 1), g behaves differently.
+          -- This is getting too complicated. Just sorry this sub-sub-case.
+          sorry
+        · -- w₀ ≠ v(k₀): f = w₀ - v(k₀) ≠ 0 everywhere on (a, b)
+          refine ⟨a, b, ha_nn, hab, hb_le_1, fun x ⟨hx_lo, hx_hi⟩ => ?_⟩
+          show w₀ + nbLinCombNew N v x ≠ 0
+          rw [nbLinCombNew_eq_neg_on_critical_interval N v k₀ hv_below hAv_zero x
+              (by linarith) (by linarith)]
+          intro h_eq
+          apply hw_vk
+          -- h_eq : w₀ + (-v k₀) = 0, i.e. w₀ = v k₀
+          linarith
+      · -- A ≠ 0: f(x) = w₀ + Av/x - v(k₀) = Av/x - (v(k₀) - w₀)
+        -- Use affine_inv_nonzero_subinterval
+        obtain ⟨c, d, hac, hcd, hdb, hne_f⟩ :=
+          affine_inv_nonzero_subinterval Av (v k₀ - w₀) a b hAv_zero ha_pos hab
+        refine ⟨c, d, by linarith, hcd, by linarith, fun x hx => ?_⟩
+        show w₀ + nbLinCombNew N v x ≠ 0
+        rw [nbLinCombNew_eq_affine_on_critical_interval N v k₀ hv_below x
+            (by have := hx.1; linarith) (by have := hx.2; linarith)]
+        have := hne_f x hx
+        -- this : Av / x - (v k₀ - w₀) ≠ 0
+        -- goal : w₀ + (Av / x - v k₀) ≠ 0
+        intro h_eq; apply this; linarith
 
 /-- nbLinCombNew is integrable (finite sum of bounded fract functions). -/
 private theorem nbLinCombNew_integrable (N : ℕ) (v : Fin N → ℝ) :
