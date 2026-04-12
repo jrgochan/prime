@@ -179,6 +179,163 @@ theorem nbLinCombNew_eq_neg_on_critical_interval (N : ℕ) (w : Fin N → ℝ)
     field_simp
   rw [h_factor, hA, mul_zero, zero_sub]
 
+/-- **General evaluation** (without A = 0 assumption):
+    nbLinCombNew = A/x - w(k₀) on (1/(k₀+2), 1/(k₀+1)). -/
+theorem nbLinCombNew_eq_affine_on_critical_interval (N : ℕ) (w : Fin N → ℝ)
+    (k₀ : Fin N) (hw_below : ∀ i : Fin N, i < k₀ → w i = 0)
+    (x : ℝ)
+    (hx_lo : 1 / ((k₀.val : ℝ) + 2) < x)
+    (hx_hi : x < 1 / ((k₀.val : ℝ) + 1)) :
+    nbLinCombNew N w x =
+    (∑ i : Fin N, w i / ((i.val + 1 : ℕ) : ℝ)) / x - w k₀ := by
+  -- Same proof as nbLinCombNew_eq_neg_on_critical_interval, but keep A
+  have hx_pos : (0 : ℝ) < x := by linarith [show (0:ℝ) < 1 / ((k₀.val : ℝ) + 2) from by positivity]
+  set k₀v := k₀.val with hk₀v_def
+  have hcast_k : ((k₀v + 1 : ℕ) : ℝ) = (k₀v : ℝ) + 1 := by push_cast; ring
+  have h_term : ∀ i : Fin N,
+      w i * Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x)) =
+      if i < k₀ then 0
+      else w i / (((i.val + 1 : ℕ) : ℝ) * x) -
+           (if i = k₀ then w k₀ else 0) := by
+    intro i
+    have hicast : ((i.val + 1 : ℕ) : ℝ) = (i.val : ℝ) + 1 := by push_cast; ring
+    by_cases hi_below : i < k₀
+    · simp only [hi_below, ↓reduceIte, hw_below i hi_below, zero_mul]
+    · push_neg at hi_below
+      simp only [show ¬(i < k₀) from not_lt.mpr hi_below, ↓reduceIte]
+      by_cases hi_eq : i = k₀
+      · subst hi_eq; simp only [↓reduceIte]
+        have hk_ge : 1 ≤ k₀v + 1 := by omega
+        have h1 : 1 / ((↑(k₀v + 1) : ℝ) + 1) < x := by
+          have : ((↑(k₀v + 1) : ℝ) + 1) = (↑k₀v + 2) := by rw [hcast_k]; ring
+          rw [this]; exact hx_lo
+        have h2 : x < 1 / (↑(k₀v + 1) : ℝ) := by rw [hcast_k]; exact hx_hi
+        conv_lhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(k₀v + 1) : ℝ) from by norm_cast]
+        conv_rhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(k₀v + 1) : ℝ) from by norm_cast]
+        rw [fract_inv_mul_eq_sub_one (k₀v + 1) hk_ge x h1 h2]; ring
+      · have hi_above : k₀ < i := lt_of_le_of_ne hi_below (Ne.symm hi_eq)
+        simp only [hi_eq, ↓reduceIte, sub_zero]
+        have hk_ge : 1 ≤ k₀v + 1 := by omega
+        have hij : k₀v + 1 < i.val + 1 := by omega
+        have h1 : 1 / ((↑(k₀v + 1) : ℝ) + 1) < x := by
+          have : ((↑(k₀v + 1) : ℝ) + 1) = (↑k₀v + 2) := by rw [hcast_k]; ring
+          rw [this]; exact hx_lo
+        have h2 : x < 1 / (↑(k₀v + 1) : ℝ) := by rw [hcast_k]; exact hx_hi
+        conv_lhs => rw [show ((↑i + 1 : ℕ) : ℝ) = (↑(i.val + 1) : ℝ) from by norm_cast]
+        rw [fract_inv_mul_eq_self (k₀v + 1) (i.val + 1) hk_ge hij x h1 h2]
+        rw [show (↑(i.val + 1) : ℝ) = ((↑i + 1 : ℕ) : ℝ) from by norm_cast]
+        field_simp
+  unfold nbLinCombNew; simp_rw [h_term]
+  have h_ite_sum : ∀ i : Fin N,
+      (if i < k₀ then (0 : ℝ)
+       else w i / (((i.val + 1 : ℕ) : ℝ) * x) - (if i = k₀ then w k₀ else 0)) =
+      w i / (((i.val + 1 : ℕ) : ℝ) * x) - (if i = k₀ then w k₀ else 0) := by
+    intro i; split_ifs with h1 h2
+    · rw [hw_below i h1]; simp; exact absurd (Eq.symm h2) (ne_of_lt h1 |>.symm)
+    · rw [hw_below i h1]; simp
+    · rfl
+    · rfl
+  simp_rw [h_ite_sum, Finset.sum_sub_distrib]
+  have h_sum2 : ∑ i : Fin N, (if i = k₀ then w k₀ else (0 : ℝ)) = w k₀ := by
+    rw [Finset.sum_ite_eq' Finset.univ k₀ (fun _ => w k₀)]
+    simp [Finset.mem_univ]
+  rw [h_sum2]
+  have h_factor : ∑ i : Fin N, w i / (((i.val + 1 : ℕ) : ℝ) * x) =
+      (1 / x) * ∑ i : Fin N, w i / ((i.val + 1 : ℕ) : ℝ) := by
+    rw [Finset.mul_sum]; congr 1; ext i
+    have : (0 : ℝ) < ((i.val + 1 : ℕ) : ℝ) := by positivity
+    field_simp
+  rw [h_factor]
+  have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+  field_simp
+
+/-- **A/x - B is nonzero on a subinterval** when A ≠ 0 and 0 < a < b. -/
+private theorem affine_inv_nonzero_subinterval (A B a b : ℝ) (hA : A ≠ 0)
+    (ha : 0 < a) (hab : a < b) :
+    ∃ c d : ℝ, a ≤ c ∧ c < d ∧ d ≤ b ∧
+    ∀ x, x ∈ Set.Ioo c d → A / x - B ≠ 0 := by
+  -- A/x - B = 0 ⟺ x = A/B. So f is nonzero except at one point.
+  -- For x ∈ (a, (a+b)/2) or ((a+b)/2, b), f ≠ 0 on whichever avoids x₀.
+  -- The function A/x is strictly monotone, so A/x₁ ≠ A/x₂ for x₁ ≠ x₂.
+  -- Therefore A/x - B ≠ 0 for all x ≠ A/B.
+  set m := (a + b) / 2 with hm_def
+  have hm_pos : 0 < m := by linarith
+  have ham : a < m := by linarith
+  have hmb : m < b := by linarith
+  -- f is nonzero on (a, m) because:
+  -- for x ∈ (a, m), if A/x = B, then x = A/B.
+  -- But 1/x is injective, so at most one x in (a, m) has A/x = B.
+  -- If there's no such x: use (a, m).
+  -- If there is: use (m, b) instead (since the zero can be in at most one half).
+  by_cases hfm : A / m - B = 0
+  · -- f(m) = 0, so A/m = B. For x ≠ m, A/x ≠ A/m, so f(x) ≠ 0.
+    -- Use either (a, m) or (m, b). Take (a, m).
+    refine ⟨a, m, le_refl a, ham, le_of_lt hmb, ?_⟩
+    intro x ⟨hx_lo, hx_hi⟩
+    have hx_ne_m : x ≠ m := ne_of_lt hx_hi
+    have hx_pos : 0 < x := by linarith
+    intro h_eq
+    -- h_eq : A/x - B = 0, and hfm : A/m - B = 0
+    -- So A/x = B = A/m, hence 1/x = 1/m (since A ≠ 0)
+    have : A / x = A / m := by linarith
+    have : 1 / x = 1 / m := by
+      field_simp at this ⊢; linarith
+    have : x = m := by
+      have hx_pos' : x ≠ 0 := ne_of_gt hx_pos
+      have hm_pos' : m ≠ 0 := ne_of_gt hm_pos
+      field_simp at this; linarith
+    exact hx_ne_m this
+  · -- f(m) ≠ 0. Use an interval containing m.
+    -- Since A/x - B is continuous and nonzero at m, it's nonzero on a neighborhood.
+    -- We can use (a, b) restricted to avoiding any zero.
+    -- Simpler: pick any x ∈ (a, m): if A/x = B = A/m + something ≠ ...
+    -- Actually, just use (a, m) and argue each x satisfies x ≠ A/B:
+    -- If no x ∈ (a, m) has f(x) = 0, done.
+    -- If some x₀ ∈ (a, m) has f(x₀) = 0, then x₀ = A/B and m ≠ A/B.
+    -- Use (x₀, m) or (a, x₀).
+    -- But this gets recursive. Simpler: use (m, b) as our subinterval.
+    -- We know f(m) ≠ 0. For any x ∈ (a, b) with f(x) = 0, x = A/B.
+    -- So at most one zero in (a, b). The intervals (a, A/B) and (A/B, b) are zero-free.
+    -- Since f(m) ≠ 0, m ≠ A/B, so m is in one of these zero-free intervals.
+    by_cases hzero_lt : ∀ x₀, a < x₀ → x₀ < b → A / x₀ - B ≠ 0
+    · exact ⟨a, b, le_refl a, hab, le_refl b, fun x hx => hzero_lt x hx.1 hx.2⟩
+    · push_neg at hzero_lt
+      obtain ⟨x₀, hx₀_lo, hx₀_hi, hfx₀⟩ := hzero_lt
+      -- x₀ is the unique zero. m ≠ x₀ since f(m) ≠ 0.
+      by_cases hm_lt_x₀ : m < x₀
+      · -- m < x₀. Use (a, x₀): for x ∈ (a, x₀), x ≠ x₀ so A/x ≠ A/x₀ = B.
+        refine ⟨a, x₀, le_refl a, by linarith, le_of_lt hx₀_hi, ?_⟩
+        intro x ⟨hx_lo, hx_hi⟩
+        have hx_ne : x ≠ x₀ := ne_of_lt hx_hi
+        have hx_pos : 0 < x := by linarith
+        have hx₀_pos : 0 < x₀ := by linarith
+        intro h_eq
+        have : A / x = A / x₀ := by linarith
+        have hx_eq : x = x₀ := by
+          have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+          have hx₀_ne : x₀ ≠ 0 := ne_of_gt hx₀_pos
+          field_simp at this
+          nlinarith
+        exact hx_ne hx_eq
+      · -- x₀ ≤ m. Since m ≠ x₀, x₀ < m. Use (x₀, b).
+        have hx₀_lt_m : x₀ < m := by
+          rcases lt_or_eq_of_le (not_lt.mp hm_lt_x₀) with h | h
+          · exact h
+          · exfalso; apply hfm; rw [← h]; linarith
+        refine ⟨x₀, b, le_of_lt hx₀_lo, by linarith, le_refl b, ?_⟩
+        intro x ⟨hx_lo, hx_hi⟩
+        have hx_ne : x ≠ x₀ := ne_of_gt hx_lo
+        have hx_pos : 0 < x := by linarith
+        have hx₀_pos : 0 < x₀ := by linarith
+        intro h_eq
+        have : A / x = A / x₀ := by linarith
+        have hx_eq : x = x₀ := by
+          have hx_ne : x ≠ 0 := ne_of_gt hx_pos
+          have hx₀_ne : x₀ ≠ 0 := ne_of_gt hx₀_pos
+          field_simp at this
+          nlinarith
+        exact hx_ne hx_eq
+
 /-- If w ≠ 0, then nbLinCombNew is nonzero on some subinterval of (0,1). -/
 theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
     (w : Fin N → ℝ) (hw : w ≠ 0) :
@@ -222,7 +379,19 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
       rw [nbLinCombNew_eq_neg_on_critical_interval N w k₀ hw_below hA_zero x
           (by linarith) (by linarith)]
       exact neg_ne_zero.mpr hwk₀
-    · sorry -- k₀=0, A≠0 case
+    · -- k₀=0, A≠ 0: use affine_inv_nonzero_subinterval
+      have ha_eq : a = 1 / ((k₀.val : ℝ) + 2) := by
+        simp only [a]; congr 1; simp only [hk_def]; push_cast; ring
+      have hb_eq : b = 1 / ((k₀.val : ℝ) + 1) := by
+        simp only [b]; congr 1; simp only [hk_def]; push_cast; ring
+      have ha_pos : (0 : ℝ) < a := by positivity
+      obtain ⟨c, d, hac, hcd, hdb, hne⟩ :=
+        affine_inv_nonzero_subinterval A (w k₀) a b hA_zero ha_pos hab
+      refine ⟨c, d, by linarith, hcd, by linarith, ?_⟩
+      intro x ⟨hx_lo, hx_hi⟩
+      rw [nbLinCombNew_eq_affine_on_critical_interval N w k₀ hw_below x
+          (by linarith) (by linarith)]
+      exact hne x ⟨hx_lo, hx_hi⟩
   · -- k₀.val ≥ 1: the standard case
     have hk₀_pos : 1 ≤ k₀.val := by omega
     by_cases hA_zero : A = 0
@@ -237,8 +406,19 @@ theorem nbLinCombNew_nonzero_somewhere (N : ℕ) (hN : 1 ≤ N)
       rw [nbLinCombNew_eq_neg_on_critical_interval N w k₀ hw_below hA_zero x
           (by linarith) (by linarith)]
       exact neg_ne_zero.mpr hwk₀
-    · -- Case A ≠ 0: f = A/x - w(k₀) is nonconstant, has at most one zero
-      sorry
+    · -- Case A ≠ 0: use affine_inv_nonzero_subinterval
+      have ha_eq : a = 1 / ((k₀.val : ℝ) + 2) := by
+        simp only [a]; congr 1; simp only [hk_def]; push_cast; ring
+      have hb_eq : b = 1 / ((k₀.val : ℝ) + 1) := by
+        simp only [b]; congr 1; simp only [hk_def]; push_cast; ring
+      have ha_pos : (0 : ℝ) < a := by positivity
+      obtain ⟨c, d, hac, hcd, hdb, hne⟩ :=
+        affine_inv_nonzero_subinterval A (w k₀) a b hA_zero ha_pos hab
+      refine ⟨c, d, by linarith, hcd, by linarith, ?_⟩
+      intro x ⟨hx_lo, hx_hi⟩
+      rw [nbLinCombNew_eq_affine_on_critical_interval N w k₀ hw_below x
+          (by linarith) (by linarith)]
+      exact hne x ⟨hx_lo, hx_hi⟩
 
 -- ════════════════════════════════════════════════
 -- §4. INTEGRABILITY AND MAIN THEOREM
