@@ -6,7 +6,7 @@ reduction of the Riemann Hypothesis to a discrete variational witness.
 ## Build
 
 ```bash
-lake build    # 3,081 jobs, zero errors, zero sorry, zero warnings
+lake build    # zero errors, zero sorry, zero warnings
 ```
 
 ## Architecture
@@ -35,6 +35,11 @@ Cathedral/
 │       ├── IntegralBridge.lean       — Vasyunin integral axiom + mean entry bridge
 │       ├── LinIndep.lean             — Augmented linear independence
 │       ├── MeanIntegral.lean         — ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
+│       ├── CrossTermFTC.lean         — Off-diagonal piecewise FTC + Beatty bound
+│       ├── PiecewiseFTC.lean         — Diagonal case FTC template
+│       ├── DiagonalBridge.lean       — Diagonal Vasyunin bridge
+│       ├── StirlingBridge.lean       — Stirling approximation infrastructure
+│       ├── SqueezeElimination.lean   — Squeeze theorem for axiom elimination
 │       ├── NbDistPos2.lean           — NB distance positivity (N=2)
 │       ├── NbDistPos3.lean           — NB distance positivity (N=3)
 │       ├── Rayleigh.lean             — Rayleigh quotient theorems
@@ -42,7 +47,7 @@ Cathedral/
 │       └── Witness.lean              — Log cutoff witness construction
 └── Robin/
     ├── BaseCases.lean                — σ(p) ≤ bound for p ∈ {2,3,5,7}
-    ├── Defs.lean                     — Robin/Lagarias definitions + 2 axioms
+    ├── Defs.lean                     — Robin/Lagarias definitions + 1 axiom
     ├── Equivalence.lean              — 4 cross-path equivalence theorems
     ├── HarmonicBounds.lean           — Harmonic number properties
     ├── PrimeBounds.lean              — lagarias_for_primes (0 axioms)
@@ -53,18 +58,15 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | 30 |
-| Theorems | 177 |
-| Lemmas | 12 |
-| Definitions | 38 |
-| Axioms | 4 |
+| Active Lean files | 36 |
+| Theorems + Lemmas | 217 |
+| Definitions | 42 |
+| Axioms | 3 |
 | `sorry` | **0** |
 | Warnings | **0** |
-| Build jobs | 3,081 |
 
-## The 4 Axioms
+## The 3 Axioms
 
 1. **`log_cutoff_witness_bound`** (Chain.lean) — The RH itself: Q(v) ≥ c·ln(N)
-2. **`vasyunin_eq_integral`** (IntegralBridge.lean) — Vasyunin formula = L² integral
-3. **`lagarias_iff_rh`** (Robin/Defs.lean) — Lagarias equivalence (2002)
-4. **`robin_iff_rh`** (Robin/Defs.lean) — Robin equivalence (1984)
+2. **`vasyunin_eq_integral`** (IntegralBridge.lean) — Vasyunin formula = L² integral (CrossTermFTC attacks this)
+3. **`arithmetic_rh_equivalences`** (Robin/Defs.lean) — Lagarias (2002) + Robin (1984) equivalences

@@ -48,13 +48,13 @@ We started at the Riemann Hypothesis and rigorously type-checked our way downwar
 
 ## What This Repository Is
 
-This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **4 axioms** on the active proof chain.
+This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **3 axioms** on the active proof chain.
 
-It comprises 30 active Lean files compiling in **3,081 build jobs** with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 4 axioms:
+It comprises 36 active Lean files with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 3 axioms:
 
 - **1 IS the Riemann Hypothesis itself** — the logarithmic growth of an explicit Rayleigh quotient built from Möbius values and cotangent sums (numerically verified to N=50,000)
-- **1 is a definitional bridge** — the Vasyunin integral identity connecting the cotangent formula to L² inner products (Vasyunin 1995, Báez-Duarte 2005)
-- **2 are standard literature** — Robin (1984) and Lagarias (2002) equivalences to RH
+- **1 is a definitional bridge** — the Vasyunin integral identity connecting the cotangent formula to L² inner products (Vasyunin 1995, Báez-Duarte 2005). Active formalization via piecewise FTC on Beatty-sequence tiles (`CrossTermFTC.lean`).
+- **1 combines standard literature** — Robin (1984) and Lagarias (2002) equivalences to RH
 
 All structural properties—Gram matrix positive definiteness, covariance matrix
 positive definiteness, augmented Schur complement positivity (proved via the

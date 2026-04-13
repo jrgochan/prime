@@ -3,8 +3,8 @@
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the logarithmic growth of a single explicit
 Rayleigh quotient built from the Möbius function and the Vasyunin cotangent
-sum. Compiles in **3,081 build jobs** with **zero `sorry`**, **zero warnings**,
-and **4 axioms** on the active proof chain.
+sum. **Zero `sorry`**, **zero warnings**, and **3 axioms** on the active
+proof chain.
 
 ## The Honest Assessment
 
@@ -12,7 +12,7 @@ and **4 axioms** on the active proof chain.
 > *its entire mathematical content to a single finite statement about*
 > *Möbius-weighted cotangent sums—which IS the RH, expressed as a*
 > *computable quantity—plus one definitional bridge (the Vasyunin*
-> *integral identity), and two classical equivalences (Lagarias/Robin).*
+> *integral identity), and combined classical equivalences (Lagarias/Robin).*
 > *Everything else—including augmented Gram matrix positivity, covariance*
 > *positivity, the mean entry integral identity, and the variational*
 > *principle—is compiler-verified.*
@@ -68,14 +68,13 @@ Discrete arithmetic equivalences connecting RH to divisor-sum inequalities.
 **Unconditional result** (zero axioms):
 - `lagarias_for_primes` — σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p ✓
 
-## The 4 Axioms
+## The 3 Axioms
 
 | # | Axiom | File | Nature |
 |---|---|---|---|
 | 1 | `log_cutoff_witness_bound` | Chain.lean | **THE RH itself** — Selberg sieve bound |
-| 2 | `vasyunin_eq_integral` | IntegralBridge.lean | **Definitional** — L² integral bridge |
-| 3 | `lagarias_iff_rh` | Robin/Defs.lean | Literature (Lagarias 2002) |
-| 4 | `robin_iff_rh` | Robin/Defs.lean | Literature (Robin 1984) |
+| 2 | `vasyunin_eq_integral` | IntegralBridge.lean | **Definitional** — L² integral bridge (CrossTermFTC attacks this) |
+| 3 | `arithmetic_rh_equivalences` | Robin/Defs.lean | Literature (Lagarias 2002, Robin 1984) |
 
 ### What Was Eliminated (Now Theorems)
 
@@ -105,17 +104,20 @@ Discrete arithmetic equivalences connecting RH to divisor-sum inequalities.
 | `quadForm_diverges` — X_N ≥ c·ln(N) | **Proved** (from axioms) |
 | `lagarias_for_primes` — σ(p) ≤ Lagarias bound | **Proved** (0 axioms) |
 | `nb_dist_via_witness` — d² = 1/(1+X) | **Proved** (0 axioms, Sherman–Morrison) |
+| `cross_piece_integral_ftc` — piecewise FTC for ∫(1/(jx)−m)(1/(kx)−n)dx | **Proved** (0 axioms) |
+| `tile_n_values_bounded` — Beatty: ≤2 tiles/row when j≤k | **Proved** (0 axioms) |
 
 ## Repository Structure
 
 ```
-proofs/              — Lean 4 formalization (30 active files, 4 axioms, 0 sorry, 0 warnings)
+proofs/              — Lean 4 formalization (36 active files, 3 axioms, 0 sorry, 0 warnings)
   Cathedral/         — The proof architecture
     Defs.lean        — Core definitions
     LinearAlgebra/   — Sherman-Morrison, Variational principle, Sylvester, SchurComplement
     MellinBridge/    — Nyman-Beurling bridge + Vasyunin framework
       Vasyunin/      — The heart: AugmentedGram, MeanIntegral, LinIndep, Gram entries,
-                       covariance, witness, chain, IntegralBridge
+                       covariance, witness, chain, IntegralBridge,
+                       CrossTermFTC, PiecewiseFTC, DiagonalBridge
     Robin/           — Robin/Lagarias discrete arithmetic front
     Archive/         — Historical explorations
 paper/               — LaTeX paper and overview
@@ -127,14 +129,12 @@ docs/                — Collaboration logs and analysis
 ## Build Stats
 
 ```
-Files:      30 active Lean files
-Theorems:   177 theorems + 12 lemmas = 189 proved statements
-Definitions: 38
-Axioms:     4
+Files:      36 active Lean files
+Theorems:   217 proved statements
+Definitions: 42
+Axioms:     3
 Sorry:      0
 Warnings:   0
-Build jobs:  3,081
-Build time: ~2 min
 ```
 
 ## Papers
