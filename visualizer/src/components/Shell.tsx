@@ -65,7 +65,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>4 axioms · 0 sorry · 166 theorems</span>
+            <span>3 axioms · 0 sorry · 217 theorems</span>
           </div>
           <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
             <div

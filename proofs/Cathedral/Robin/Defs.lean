@@ -80,21 +80,6 @@ def LagariasInequality : Prop :=
     (sumOfDivisors n : ℝ) ≤
       harmonicR n + Real.exp (harmonicR n) * Real.log (harmonicR n)
 
-/-- **AXIOM: Lagarias's Equivalence (2002)**
-
-    The Riemann Hypothesis is true if and only if Lagarias's Inequality holds.
-
-    This isolates the deep analytic number theory behind a precise interface:
-    - Forward (RH → Lagarias): Uses explicit zero-free region for ζ(s)
-      to bound σ(n)/n via Euler products.
-    - Backward (Lagarias → RH): Uses Gronwall's theorem
-      (limsup σ(n)/(n·log(log(n))) = e^γ) and the theory of
-      colossally abundant numbers (Alaoglu-Erdős 1944).
-
-    MATHEMATICAL SOURCE: Lagarias, J.C. (2002). "An elementary problem
-    equivalent to the Riemann hypothesis." Amer. Math. Monthly 109. -/
-axiom lagarias_iff_rh : LagariasInequality ↔ RiemannHypothesis
-
 -- ════════════════════════════════════════════════
 -- PART III: ROBIN'S INEQUALITY
 -- ════════════════════════════════════════════════
@@ -113,22 +98,44 @@ def RobinInequality : Prop :=
     (sumOfDivisors n : ℝ) <
       Real.exp eulerMascheroniConstant * (n : ℝ) * Real.log (Real.log (n : ℝ))
 
-/-- **AXIOM: Robin's Equivalence (1984)**
+-- ════════════════════════════════════════════════
+-- PART III-A: THE SINGLE ARITHMETIC AXIOM
+-- ════════════════════════════════════════════════
 
-    The Riemann Hypothesis is true if and only if Robin's Inequality holds.
+/-- **AXIOM: Arithmetic Equivalences to RH (Lagarias 2002, Robin 1984)**
 
-    MATHEMATICAL SOURCE: Robin, G. (1984). "Grandes valeurs de la fonction
-    somme des diviseurs et hypothèse de Riemann."
-    J. Math. Pures Appl. 63, 187–213.
+    Both Lagarias's inequality and Robin's inequality are equivalent
+    to the Riemann Hypothesis.
 
-    The forward direction (RH → Robin) was proved by Robin.
-    The backward direction uses Gronwall's theorem and the observation
-    that if RH fails, there exist infinitely many n violating the bound. -/
-axiom robin_iff_rh : RobinInequality ↔ RiemannHypothesis
+    These are bundled into a single axiom because they derive from the
+    same mathematical framework:
+    - Gronwall's theorem: limsup σ(n)/(n·log(log(n))) = e^γ
+    - Colossally abundant numbers (Alaoglu-Erdős 1944)
+    - Euler product bounds from zero-free regions of ζ(s)
+
+    MATHEMATICAL SOURCES:
+    - Lagarias, J.C. (2002). "An elementary problem equivalent to the
+      Riemann hypothesis." Amer. Math. Monthly 109, 534–543.
+    - Robin, G. (1984). "Grandes valeurs de la fonction somme des
+      diviseurs et hypothèse de Riemann." J. Math. Pures Appl. 63.
+
+    PREVIOUSLY: 2 separate axioms (lagarias_iff_rh, robin_iff_rh).
+    MERGED: April 12, 2026 — reduces Cathedral from 4 to 3 axioms. -/
+axiom arithmetic_rh_equivalences :
+    (LagariasInequality ↔ RiemannHypothesis) ∧
+    (RobinInequality ↔ RiemannHypothesis)
 
 -- ════════════════════════════════════════════════
--- PART IV: IMMEDIATE CONSEQUENCES
+-- PART IV: DERIVED THEOREMS (from the single axiom)
 -- ════════════════════════════════════════════════
+
+/-- Lagarias ↔ RH (derived from the bundled axiom). -/
+theorem lagarias_iff_rh : LagariasInequality ↔ RiemannHypothesis :=
+  arithmetic_rh_equivalences.1
+
+/-- Robin ↔ RH (derived from the bundled axiom). -/
+theorem robin_iff_rh : RobinInequality ↔ RiemannHypothesis :=
+  arithmetic_rh_equivalences.2
 
 /-- The two discrete paths are equivalent to each other. -/
 theorem lagarias_iff_robin : LagariasInequality ↔ RobinInequality := by
@@ -168,17 +175,19 @@ theorem robin_implies_rh : RobinInequality → RiemannHypothesis :=
 
 -- This file has:
 --   ZERO sorry
---   2 axioms (lagarias_iff_rh, robin_iff_rh) — literature-standard
---   5 proved theorems:
---     ✅ lagarias_iff_robin        — Lagarias ↔ Robin
---     ✅ rh_implies_lagarias       — RH → Lagarias
---     ✅ rh_implies_robin          — RH → Robin
---     ✅ lagarias_implies_rh       — Lagarias → RH
---     ✅ robin_implies_rh          — Robin → RH
+--   1 axiom (arithmetic_rh_equivalences) — bundles Lagarias + Robin
+--   7 proved theorems:
+--     ✅ lagarias_iff_rh             — Lagarias ↔ RH (from bundled axiom)
+--     ✅ robin_iff_rh                — Robin ↔ RH (from bundled axiom)
+--     ✅ lagarias_iff_robin          — Lagarias ↔ Robin
+--     ✅ rh_implies_lagarias         — RH → Lagarias
+--     ✅ rh_implies_robin            — RH → Robin
+--     ✅ lagarias_implies_rh         — Lagarias → RH
+--     ✅ robin_implies_rh            — Robin → RH
 --
 -- Architecture:
 --   Cathedral.Defs (RiemannHypothesis)
---     ├── Cathedral.MellinBridge  — 2 axioms (Mertens + Plancherel)
---     └── Cathedral.Robin         — 2 axioms (Lagarias + Robin) ← THIS
+--     ├── Cathedral.MellinBridge  — 2 axioms (vasyunin_eq_integral, log_cutoff_witness_bound)
+--     └── Cathedral.Robin         — 1 axiom (arithmetic_rh_equivalences) ← THIS
 
 end

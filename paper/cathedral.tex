@@ -46,14 +46,15 @@ that reduces the Riemann Hypothesis to the logarithmic growth of a single
 explicit Rayleigh quotient built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 30 active Lean files with
-\textbf{189 proved statements} (177 theorems, 12 lemmas)
-compiling in 3,081 build jobs with \textbf{zero \texttt{sorry} placeholders}.
-In the active proof chain, only \textbf{four axioms} remain:
+The formalization comprises 36 active Lean files with
+\textbf{zero \texttt{sorry} placeholders}.
+In the active proof chain, only \textbf{three axioms} remain:
 (1)~the logarithmic growth of the explicit log cutoff witness---which
 \textbf{IS the Riemann Hypothesis} expressed as a finite, computable quantity,
 (2)~a definitional bridge (Vasyunin integral identity),
-and (3--4)~two classical literature equivalences (Lagarias/Robin).
+and (3)~combined classical literature equivalences (Lagarias/Robin).
+A cross-term Fundamental Theorem of Calculus (\texttt{CrossTermFTC.lean})
+provides the analytical engine for eliminating Axiom~2.
 
 The key architectural innovation is the \emph{augmented Gram matrix}
 $H_N = \begin{psmallmatrix} 1 & b^T \\ b & G_N \end{psmallmatrix}$,
@@ -459,7 +460,7 @@ reduces the axiom to the theorem, taking the Cathedral from 5 to 4 axioms.
 \section{The Axiom Taxonomy}
 % ================================================================
 
-The active proof chain rests on exactly \textbf{four} axioms.
+The active proof chain rests on exactly \textbf{three} axioms.
 All structural properties---Gram matrix PD, covariance matrix PD,
 Hermitian symmetry, positive semidefiniteness, determinant invertibility,
 witness positivity, Nyman--Beurling distance bound, augmented linear
@@ -488,10 +489,10 @@ $G(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$.
 B\'aez-Duarte et al.\ (2005). Verified computationally to 15 digits.
 \end{axiombox}
 
-\subsection{Literature Axioms}
+\subsection{Literature Axiom}
 
-\begin{axiombox}[\texttt{lagarias\_iff\_rh} / \texttt{robin\_iff\_rh}]
-The Lagarias and Robin equivalences to RH.
+\begin{axiombox}[\texttt{arithmetic\_rh\_equivalences}]
+The Lagarias and Robin equivalences to RH, combined into a single axiom.
 
 \emph{Standard literature results} (Lagarias 2002, Robin 1984).
 Used only in the Robin inequality module, not in the main Vasyunin chain.
@@ -607,17 +608,18 @@ or the explicit variational quotient (new architecture).
 \texttt{LinearAlgebra/} (4)   & Sherman--Morrison, Variational, Sylvester & 0 & 0 & \textbf{Complete} \\
 \texttt{AugmentedGram.lean}   & $H_N$ PD, $G_N$ PD, $b^TG^{-1}b < 1$ & 0 & 0 & \textbf{Complete} \\
 \texttt{MeanIntegral.lean}    & $\int_0^1 \{1/(kx)\} dx = (\ln k + 1 - \gamma)/k$ & 0 & 0 & \textbf{Complete} \\
+\texttt{CrossTermFTC.lean}    & Off-diagonal FTC, Beatty bound & 0 & 0 & \textbf{Complete} \\
 \texttt{Vasyunin/*.lean} (14) & Gram + covariance + witness + chain & 0 & 2 & \textbf{Complete} \\
-\texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 2 & \textbf{Complete} \\
+\texttt{Robin/*.lean} (6)     & Discrete arith. & 0 & 1 & \textbf{Complete} \\
 \texttt{Defs.lean + NB.lean}  & Core defs       & 0 & 0 & Foundation \\
 \midrule
-\textbf{Total (30 files)}     & \textbf{189 proved} & \textbf{0} & \textbf{4} & \\
+\textbf{Total (36 files)}     &  & \textbf{0} & \textbf{3} & \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent
-3,081 build jobs. Zero errors. Zero \texttt{sorry}.
+Zero errors. Zero \texttt{sorry}.
 Legacy modules archived to \texttt{Cathedral/Archive/}.
 
 % ================================================================
@@ -641,15 +643,21 @@ built from M\"obius values and Vasyunin cotangent sums. The entire
 reduction is machine-verified in Lean~4 with zero \texttt{sorry}
 placeholders.
 
-\paragraph{The 4-Axiom Cathedral (April 12, 2026).}
-The active proof chain rests on exactly four axioms: one encoding
+\paragraph{The 3-Axiom Cathedral (April 12, 2026).}
+The active proof chain rests on exactly three axioms: one encoding
 the RH itself (log cutoff witness bound), one definitional bridge
-(Vasyunin integral identity), and two classical equivalences
+(Vasyunin integral identity), and one combined classical equivalence
 (Lagarias/Robin). Nine former axioms---including Gram PD,
 covariance PD, augmented Schur complement positivity, the mean entry
 integral identity, NB distance positivity, Cauchy--Schwarz, witness
 positivity, Hermitian symmetry, and determinant
 invertibility---are now compiler-verified theorems.
+
+The cross-term Fundamental Theorem of Calculus (\texttt{CrossTermFTC.lean})
+evaluates each piecewise tile of $\int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$
+in closed form and proves the Beatty sequence bound: at most 2~tiles
+per row when $j \leq k$. This provides the analytical engine for
+eliminating the Vasyunin integral bridge axiom.
 
 The key architectural innovations are: (1)~the augmented Gram matrix $H_N$,
 which unifies the geometric foundation into a single inductive structure

@@ -12,3 +12,7 @@ import Cathedral.MellinBridge.Vasyunin.CovDet3
 import Cathedral.MellinBridge.Vasyunin.Witness
 import Cathedral.MellinBridge.Vasyunin.Rayleigh
 import Cathedral.MellinBridge.Vasyunin.Chain
+import Cathedral.MellinBridge.Vasyunin.StirlingBridge
+import Cathedral.MellinBridge.Vasyunin.DiagonalBridge
+import Cathedral.MellinBridge.Vasyunin.PiecewiseFTC
+import Cathedral.MellinBridge.Vasyunin.SqueezeElimination

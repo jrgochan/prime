@@ -11,6 +11,10 @@ path = "src/main.rs"
 name = "attack9"
 path = "src/attack9.rs"
 
+[[bin]]
+name = "attack10"
+path = "src/attack10.rs"
+
 [dependencies]
 rug = { version = "1", features = ["float"] }
 nalgebra = "0.33"

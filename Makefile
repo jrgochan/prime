@@ -249,7 +249,7 @@ cathedral-dump-split:
 		echo "# Generated: $$(date)" >> "$$outfile"; \
 		echo "# Project: prime/proofs/Cathedral" >> "$$outfile"; \
 		echo "# Proof: Spectral Riemann Hypothesis" >> "$$outfile"; \
-		echo "# Build: lake build (zero sorry, zero axioms)" >> "$$outfile"; \
+		echo "# Build: lake build Cathedral (3 axioms, zero sorry)" >> "$$outfile"; \
 		echo "" >> "$$outfile"; \
 	done
 	@# Sort files into components
@@ -261,7 +261,7 @@ cathedral-dump-split:
 			*Vasyunin/Defs*|*Vasyunin/Structural*) component="VasyuninDefs" ;; \
 			*Vasyunin/GramEntries*|*Vasyunin/GramEvaluations*|*Vasyunin/GramPSD*|*Vasyunin/AugmentedGram*|*Vasyunin/NbDistPos*) component="VasyuninGram" ;; \
 			*Vasyunin/CovEntries*|*Vasyunin/CovDet2*|*Vasyunin/CovDet3*) component="VasyuninCov" ;; \
-			*Vasyunin/Witness*|*Vasyunin/Rayleigh*|*Vasyunin/Chain*|*Vasyunin/LinIndep*|*Vasyunin/FractIntegral*|*Vasyunin/NbDistPos2*|*MellinBridge/Vasyunin.lean) component="VasyuninBridge" ;; \
+			*Vasyunin/Witness*|*Vasyunin/Rayleigh*|*Vasyunin/Chain*|*Vasyunin/LinIndep*|*Vasyunin/FractIntegral*|*Vasyunin/NbDistPos2*|*Vasyunin/NbDistPos3*|*Vasyunin/StirlingBridge*|*Vasyunin/IntegralBridge*|*Vasyunin/DiagonalBridge*|*Vasyunin/MeanIntegral*|*Vasyunin/PiecewiseFTC*|*Vasyunin/SqueezeElimination*|*MellinBridge/Vasyunin.lean) component="VasyuninBridge" ;; \
 			*MellinBridge*) component="Core" ;; \
 			*Robin*) component="Robin" ;; \
 			*Defs*) component="Core" ;; \

@@ -15,7 +15,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 27,
+      "line": 31,
       "signature": "def nbBasis' (k : \u2115) (x : \u211d) : \u211d"
     },
     {
@@ -24,7 +24,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 32,
+      "line": 36,
       "signature": "noncomputable def gramEntry (j k : \u2115) : \u211d"
     },
     {
@@ -33,7 +33,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 37,
+      "line": 41,
       "signature": "noncomputable def gramMatrix (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -42,7 +42,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 42,
+      "line": 46,
       "signature": "lemma gramMatrix_hermitian (N : \u2115) : (gramMatrix N).IsHermitian"
     },
     {
@@ -51,7 +51,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 55,
+      "line": 59,
       "signature": "noncomputable def lambdaMin (N : \u2115) : \u211d"
     },
     {
@@ -60,7 +60,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 64,
+      "line": 68,
       "signature": "def eigenDrop (N : \u2115) : \u211d"
     },
     {
@@ -69,7 +69,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 67,
+      "line": 71,
       "signature": "lemma eigenDrop_succ (k : \u2115) : eigenDrop (k + 1) = lambdaMin k - lambdaMin (k + 1)"
     },
     {
@@ -78,7 +78,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 76,
+      "line": 80,
       "signature": "noncomputable def crossCorrVec (N : \u2115) : Fin (N - 1) \u2192 \u211d"
     },
     {
@@ -87,7 +87,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 82,
+      "line": 86,
       "signature": "noncomputable def schurComplement (N : \u2115) : \u211d"
     },
     {
@@ -96,7 +96,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 93,
+      "line": 97,
       "signature": "noncomputable def cosAlignment (N : \u2115) : \u211d"
     },
     {
@@ -105,7 +105,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 114,
+      "line": 118,
       "signature": "noncomputable def basisInnerProd (N : \u2115) : Fin (N - 1) \u2192 \u211d"
     },
     {
@@ -114,7 +114,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 121,
+      "line": 125,
       "signature": "noncomputable def nbDistSq' (N : \u2115) : \u211d"
     },
     {
@@ -123,7 +123,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 129,
+      "line": 133,
       "signature": "def liouvilleFunction (n : \u2115) : \u2124"
     },
     {
@@ -132,7 +132,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 133,
+      "line": 137,
       "signature": "theorem liouville_one : liouvilleFunction 1 = 1"
     },
     {
@@ -141,7 +141,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 136,
+      "line": 140,
       "signature": "theorem liouville_two : liouvilleFunction 2 = -1"
     },
     {
@@ -150,7 +150,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 139,
+      "line": 143,
       "signature": "theorem liouville_four : liouvilleFunction 4 = 1"
     },
     {
@@ -159,7 +159,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 142,
+      "line": 146,
       "signature": "theorem liouville_six : liouvilleFunction 6 = 1"
     },
     {
@@ -168,7 +168,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 145,
+      "line": 149,
       "signature": "theorem liouville_thirty : liouvilleFunction 30 = -1"
     },
     {
@@ -177,7 +177,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 149,
+      "line": 153,
       "signature": "theorem liouville_sq (n : \u2115) (_hn : 1 \u2264 n) : liouvilleFunction n ^ 2 = 1"
     },
     {
@@ -186,7 +186,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 168,
+      "line": 172,
       "signature": "noncomputable def parityOperator (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -195,7 +195,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 179,
+      "line": 183,
       "signature": "noncomputable def liouvilleUnitVec (N : \u2115) : Fin (N - 1) \u2192 \u211d"
     },
     {
@@ -204,7 +204,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 188,
+      "line": 192,
       "signature": "noncomputable def gramMatrixEven (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -213,7 +213,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 199,
+      "line": 203,
       "signature": "noncomputable def gramMatrixOdd (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -222,7 +222,7 @@
       "category": "definition",
       "route": "infrastructure",
       "file": "Cathedral/Defs.lean",
-      "line": 214,
+      "line": 218,
       "signature": "noncomputable def liouvilleProjection (N : \u2115) : \u211d"
     },
     {
@@ -258,7 +258,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 46,
+      "line": 48,
       "signature": "noncomputable def augmentedGramMatrix (N : \u2115) : Matrix (Fin (N+1)) (Fin (N+1)) \u211d"
     },
     {
@@ -267,7 +267,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 62,
+      "line": 64,
       "signature": "theorem augmentedGramMatrix_symmetric (N : \u2115) : (augmentedGramMatrix N).IsHermitian"
     },
     {
@@ -276,7 +276,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 69,
+      "line": 71,
       "signature": "theorem augmented_corner_eq (N : \u2115) : augmentedGramMatrix N \u27e80, Nat.zero_lt_succ N\u27e9 \u27e80, Nat.zero_lt_succ N\u27e9 = 1"
     },
     {
@@ -285,7 +285,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 74,
+      "line": 76,
       "signature": "theorem augmented_bordered_eq (N : \u2115) (i j : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) = (augmentedGramMatrix N) i j"
     },
     {
@@ -294,7 +294,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 80,
+      "line": 82,
       "signature": "theorem augmented_border_eq (N : \u2115) (i : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.last (N+1)) = if i.val = 0 then vasyuninMeanEntry (N+1) else vasyuninGramEntry i.val (N+1)"
     },
     {
@@ -303,35 +303,44 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 88,
+      "line": 90,
       "signature": "theorem augmented_last_eq (N : \u2115) : (augmentedGramMatrix (N+1)) (Fin.last (N+1)) (Fin.last (N+1)) = vasyuninGramEntry (N+1) (N+1)"
     },
     {
-      "id": "augmentedSchurComplement_pos",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 121,
-      "signature": "axiom augmentedSchurComplement_pos (N : \u2115) (hN : N \u2265 1) : let H"
-    },
-    {
-      "id": "augmented_posDef_step",
-      "type": "theorem",
-      "category": "proved",
+      "id": "nbAugLinComb",
+      "type": "def",
+      "category": "definition",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
       "line": 133,
-      "signature": "theorem augmented_posDef_step (N : \u2115) (hN : N \u2265 1) (hHN : (augmentedGramMatrix N).PosDef) : (augmentedGramMatrix (N + 1)).PosDef"
+      "signature": "noncomputable def nbAugLinComb (N : \u2115) (w : Fin (N+1) \u2192 \u211d) (x : \u211d) : \u211d"
     },
     {
-      "id": "augmented1_posDef",
+      "id": "augmented_l2_identity",
       "type": "theorem",
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 161,
-      "signature": "theorem augmented1_posDef : (augmentedGramMatrix 1).PosDef"
+      "line": 142,
+      "signature": "theorem augmented_l2_identity (N : \u2115) (_hN : N \u2265 1) (w : Fin (N+1) \u2192 \u211d) : dotProduct w ((augmentedGramMatrix N).mulVec w) = \u222b x in (0:\u211d)..1, (nbAugLinComb N w x) ^ 2"
+    },
+    {
+      "id": "nbAugLinComb_nonzero_somewhere",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 312,
+      "signature": "theorem nbAugLinComb_nonzero_somewhere (N : \u2115) (hN : N \u2265 1)"
+    },
+    {
+      "id": "nbAugLinComb_sq_integrable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
+      "line": 475,
+      "signature": "theorem nbAugLinComb_sq_integrable (N : \u2115) (w : Fin (N+1) \u2192 \u211d) : IntervalIntegrable (fun x => (nbAugLinComb N w x) ^ 2) MeasureTheory.volume 0 1"
     },
     {
       "id": "augmentedGramMatrix_posDef",
@@ -339,7 +348,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 197,
+      "line": 499,
       "signature": "theorem augmentedGramMatrix_posDef (N : \u2115) (hN : N \u2265 1) : (augmentedGramMatrix N).PosDef"
     },
     {
@@ -348,7 +357,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 257,
+      "line": 589,
       "signature": "theorem gramMatrix_posDef_from_augmented (N : \u2115) (hN : N \u2265 1) : (vasyuninGramMatrix N).PosDef"
     },
     {
@@ -357,7 +366,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean",
-      "line": 357,
+      "line": 689,
       "signature": "theorem nbDistSq_pos_from_augmented (N : \u2115) (hN : N \u2265 1) (hG : (vasyuninGramMatrix N).PosDef) : dotProduct (vasyuninMeanVec N) (nbGinvb N) < 1"
     },
     {
@@ -505,6 +514,78 @@
       "signature": "theorem covEntry_11 : (vasyuninCovMatrix 3) 1 1 = (Real.log (2 * Real.pi) - \u03b3) / 2 - 1 / 4 - ((Real.log 2 + 1 - \u03b3) / 2) ^ 2"
     },
     {
+      "id": "fract_eq_on_piece_general",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 45,
+      "signature": "lemma fract_eq_on_piece_general (j m : \u2115) (hj : 1 \u2264 j) (hm : 1 \u2264 m) (x : \u211d) (hlo : 1 / ((j:\u211d) * ((m:\u211d) + 1)) < x) (hhi : x \u2264 1 / ((j:\u211d) * (m:\u211d))) : Int.fract (1 / ((j:\u211d) * x)) = 1 / ((j:\u211d) * x) - (\u2026"
+    },
+    {
+      "id": "fract_eq_on_piece_zero",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 72,
+      "signature": "lemma fract_eq_on_piece_zero (j : \u2115) (hj : 1 \u2264 j) (x : \u211d) (hlo : 1 / (j:\u211d) < x) (_hhi : x \u2264 1) : Int.fract (1 / ((j:\u211d) * x)) = 1 / ((j:\u211d) * x)"
+    },
+    {
+      "id": "cross_piece_integral_ftc",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 101,
+      "signature": "theorem cross_piece_integral_ftc (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (lo hi : \u211d) (hlo_pos : 0 < lo) (hle : lo \u2264 hi) : \u222b x in lo..hi, (1 / ((j:\u211d) * x) - (m:\u211d)) * (1 / ((k:\u211d) * x) - (n:\u211d)) = let jf"
+    },
+    {
+      "id": "tileLo",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 174,
+      "signature": "def tileLo (j k m n : \u2115) : \u211d"
+    },
+    {
+      "id": "tileHi",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 177,
+      "signature": "def tileHi (j k m n : \u2115) : \u211d"
+    },
+    {
+      "id": "tileLo_m0",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 181,
+      "signature": "def tileLo_m0 (j k n : \u2115) : \u211d"
+    },
+    {
+      "id": "tile_nonempty_iff",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 186,
+      "signature": "lemma tile_nonempty_iff (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) : tileLo j k m n < tileHi j k m n \u2194 (j * m < k * (n + 1) \u2227 k * n < j * (m + 1))"
+    },
+    {
+      "id": "tile_n_values_bounded",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/CrossTermFTC.lean",
+      "line": 265,
+      "signature": "lemma tile_n_values_bounded (j k m : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hjk : j \u2264 k) : \u2200 n\u2081 n\u2082 n\u2083 : \u2115, 1 \u2264 n\u2081 \u2192 1 \u2264 n\u2082 \u2192 1 \u2264 n\u2083 \u2192 n\u2081 < n\u2082 \u2192 n\u2082 < n\u2083 \u2192 tileLo j k m n\u2081 < tileHi j k m n\u2081 \u2192 til\u2026"
+    },
+    {
       "id": "cot",
       "type": "def",
       "category": "definition",
@@ -638,6 +719,78 @@
       "file": "Cathedral/MellinBridge/Vasyunin/Defs.lean",
       "line": 184,
       "signature": "theorem vasyuninGramMatrix_diag (N : \u2115) (i : Fin N) : vasyuninGramMatrix N i i = (Real.log (2 * Real.pi) - \u03b3) / (i.val + 1 : \u211d) - 1 / (i.val + 1 : \u211d) ^ 2"
+    },
+    {
+      "id": "fract_inv_of_gt_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 41,
+      "signature": "theorem fract_inv_of_gt_one {u : \u211d} (hu : 1 < u) : Int.fract (1 / u) = 1 / u"
+    },
+    {
+      "id": "fract_inv_of_ge_one_ae",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 49,
+      "signature": "theorem fract_inv_of_ge_one_ae {u : \u211d} (hu : 1 \u2264 u) (hu_ne : u \u2260 1) : Int.fract (1 / u) = 1 / u"
+    },
+    {
+      "id": "fract_sq_inv_of_gt_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 54,
+      "signature": "theorem fract_sq_inv_of_gt_one {u : \u211d} (hu : 1 < u) : Int.fract (1 / u) * Int.fract (1 / u) = (1 / u) ^ 2"
+    },
+    {
+      "id": "integral_inv_sq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 64,
+      "signature": "theorem integral_inv_sq (k : \u2115) (hk : 1 \u2264 k) : \u222b u in (1:\u211d)..(k:\u211d), (1 / u ^ 2 : \u211d) = 1 - 1 / (k : \u211d)"
+    },
+    {
+      "id": "integral_comp_mul_nat",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 92,
+      "signature": "theorem integral_comp_mul_nat (f : \u211d \u2192 \u211d) (k : \u2115) (hk : 1 \u2264 k) : \u222b x in (0:\u211d)..(1:\u211d), f ((k:\u211d) * x) = (1 / (k:\u211d)) * \u222b u in (0:\u211d)..(k:\u211d), f u"
+    },
+    {
+      "id": "integral_split_at_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 107,
+      "signature": "theorem integral_split_at_one (f : \u211d \u2192 \u211d) (k : \u2115) (_hk : 1 \u2264 k) (hf_int_01 : IntervalIntegrable f MeasureTheory.volume 0 1) (hf_int_1k : IntervalIntegrable f MeasureTheory.volume 1 (k:\u211d)) : \u222b u in \u2026"
+    },
+    {
+      "id": "diagonal_algebra",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 116,
+      "signature": "theorem diagonal_algebra (k : \u2115) (hk : 1 \u2264 k) : (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : \u211d) - 1 / (k : \u211d) ^ 2 = 1 / (k : \u211d) * ((Real.log (2 * Real.pi) - eulerMascheroniConstant - 1\u2026"
+    },
+    {
+      "id": "vasyunin_eq_integral_diag",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean",
+      "line": 149,
+      "signature": "theorem vasyunin_eq_integral_diag (k : \u2115) (hk : k \u2265 1) : vasyuninGramEntry k k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((k:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))"
     },
     {
       "id": "vasyuninSum_two_one",
@@ -919,21 +1072,12 @@
       "signature": "theorem vasyuninGram3x3_det_pos_closedForm : let A"
     },
     {
-      "id": "vasyunin_eq_integral",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 45,
-      "signature": "axiom vasyunin_eq_integral (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract ((j:\u211d) / x) * Int.fract ((k:\u211d) / x)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
-    },
-    {
       "id": "gramDet2_pos",
       "type": "theorem",
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 78,
+      "line": 61,
       "signature": "theorem gramDet2_pos : vasyuninGramEntry 1 1 * vasyuninGramEntry 2 2 - vasyuninGramEntry 1 2 ^ 2 > 0"
     },
     {
@@ -942,7 +1086,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 109,
+      "line": 92,
       "signature": "theorem gramQuadForm_nonneg (N : \u2115) (v : Fin N \u2192 \u211d) : 0 \u2264 dotProduct v ((vasyuninGramMatrix N).mulVec v)"
     },
     {
@@ -951,7 +1095,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 128,
+      "line": 111,
       "signature": "theorem vasyuninGramMatrix_posSemidef (N : \u2115) : (vasyuninGramMatrix N).PosSemidef"
     },
     {
@@ -960,7 +1104,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 136,
+      "line": 119,
       "signature": "theorem vasyuninGramMatrix_diag_pos' (N : \u2115) (i : Fin N) : 0 < vasyuninGramMatrix N i i"
     },
     {
@@ -969,8 +1113,188 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/MellinBridge/Vasyunin/GramPSD.lean",
-      "line": 141,
+      "line": 124,
       "signature": "theorem vasyuninGramMatrix_diag_nonneg (N : \u2115) (i : Fin N) : 0 \u2264 vasyuninGramMatrix N i i"
+    },
+    {
+      "id": "vasyunin_eq_integral",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/IntegralBridge.lean",
+      "line": 39,
+      "signature": "axiom vasyunin_eq_integral (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))  /-- **THE MEAN ENTRY INTEGRAL ID\u2026"
+    },
+    {
+      "id": "vasyunin_mean_eq_integral",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/IntegralBridge.lean",
+      "line": 53,
+      "signature": "theorem vasyunin_mean_eq_integral (k : \u2115) (hk : k \u2265 1) : vasyuninMeanEntry k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((k:\u211d) * x))"
+    },
+    {
+      "id": "floor_inv_mul_eq_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 28,
+      "signature": "theorem floor_inv_mul_eq_one (k : \u2115) (hk : 1 \u2264 k) (x : \u211d) (hx_lo : 1 / ((k : \u211d) + 1) < x) (hx_hi : x < 1 / (k : \u211d)) : \u230a1 / ((k : \u211d) * x)\u230b = 1"
+    },
+    {
+      "id": "fract_inv_mul_eq_sub_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 48,
+      "signature": "theorem fract_inv_mul_eq_sub_one (k : \u2115) (hk : 1 \u2264 k) (x : \u211d) (hx_lo : 1 / ((k : \u211d) + 1) < x) (hx_hi : x < 1 / (k : \u211d)) : Int.fract (1 / ((k : \u211d) * x)) = 1 / ((k : \u211d) * x) - 1"
+    },
+    {
+      "id": "floor_inv_mul_eq_zero",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 56,
+      "signature": "theorem floor_inv_mul_eq_zero (k j : \u2115) (hk : 1 \u2264 k) (hj : k < j) (x : \u211d) (hx_lo : 1 / ((k : \u211d) + 1) < x) (_ : x < 1 / (k : \u211d)) : \u230a1 / ((j : \u211d) * x)\u230b = 0"
+    },
+    {
+      "id": "fract_inv_mul_eq_self",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 73,
+      "signature": "theorem fract_inv_mul_eq_self (k j : \u2115) (hk : 1 \u2264 k) (hj : k < j) (x : \u211d) (hx_lo : 1 / ((k : \u211d) + 1) < x) (hx_hi : x < 1 / (k : \u211d)) : Int.fract (1 / ((j : \u211d) * x)) = 1 / ((j : \u211d) * x)"
+    },
+    {
+      "id": "nbLinCombNew",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 85,
+      "signature": "def nbLinCombNew (N : \u2115) (w : Fin N \u2192 \u211d) (x : \u211d) : \u211d"
+    },
+    {
+      "id": "nbLinCombNew_eq_neg_on_critical_interval",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 103,
+      "signature": "theorem nbLinCombNew_eq_neg_on_critical_interval (N : \u2115) (w : Fin N \u2192 \u211d) (k\u2080 : Fin N) (hw_below : \u2200 i : Fin N, i < k\u2080 \u2192 w i = 0) (hA : (\u2211 i : Fin N, w i / ((i.val + 1 : \u2115) : \u211d)) = 0) (x : \u211d) (hx_lo\u2026"
+    },
+    {
+      "id": "nbLinCombNew_eq_affine_on_critical_interval",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 185,
+      "signature": "theorem nbLinCombNew_eq_affine_on_critical_interval (N : \u2115) (w : Fin N \u2192 \u211d) (k\u2080 : Fin N) (hw_below : \u2200 i : Fin N, i < k\u2080 \u2192 w i = 0) (x : \u211d) (hx_lo : 1 / ((k\u2080.val : \u211d) + 2) < x) (hx_hi : x < 1 / ((k\u2026"
+    },
+    {
+      "id": "affine_inv_nonzero_subinterval",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 254,
+      "signature": "theorem affine_inv_nonzero_subinterval (A B a b : \u211d) (hA : A \u2260 0) (ha : 0 < a) (hab : a < b) : \u2203 c d : \u211d, a \u2264 c \u2227 c < d \u2227 d \u2264 b \u2227 \u2200 x, x \u2208 Set.Ioo c d \u2192 A / x - B \u2260 0"
+    },
+    {
+      "id": "nbLinCombNew_nonzero_somewhere",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 341,
+      "signature": "theorem nbLinCombNew_nonzero_somewhere (N : \u2115) (_hN : 1 \u2264 N)"
+    },
+    {
+      "id": "fract_inv_prod_intervalIntegrable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 450,
+      "signature": "theorem fract_inv_prod_intervalIntegrable (j k : \u2115) : IntervalIntegrable (fun x : \u211d => Int.fract (1 / (\u2191j * x)) * Int.fract (1 / (\u2191k * x))) MeasureTheory.volume 0 1"
+    },
+    {
+      "id": "fract_inv_intervalIntegrable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 460,
+      "signature": "theorem fract_inv_intervalIntegrable (k : \u2115) : IntervalIntegrable (fun x : \u211d => Int.fract (1 / (\u2191k * x))) MeasureTheory.volume 0 1"
+    },
+    {
+      "id": "nbLinCombNew_sq_integrable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 476,
+      "signature": "theorem nbLinCombNew_sq_integrable (N : \u2115) (w : Fin N \u2192 \u211d) : IntervalIntegrable (fun x => (nbLinCombNew N w x) ^ 2) MeasureTheory.volume 0 1"
+    },
+    {
+      "id": "nyman_beurling_lin_indep_new",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/LinIndep.lean",
+      "line": 504,
+      "signature": "theorem nyman_beurling_lin_indep_new (N : \u2115) (hN : 1 \u2264 N) (w : Fin N \u2192 \u211d) (hw : w \u2260 0) : 0 < \u222b x in (0:\u211d)..1, (nbLinCombNew N w x) ^ 2"
+    },
+    {
+      "id": "fract_inv_mul_eq_self_on_upper",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean",
+      "line": 37,
+      "signature": "lemma fract_inv_mul_eq_self_on_upper (k : \u2115) (hk : 1 \u2264 k) (x : \u211d) (hx_lo : 1 / (k : \u211d) < x) (_hx_hi : x \u2264 1) : Int.fract (1 / ((k : \u211d) * x)) = 1 / ((k : \u211d) * x)"
+    },
+    {
+      "id": "upper_integral_eq_log",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean",
+      "line": 57,
+      "signature": "theorem upper_integral_eq_log (k : \u2115) (hk : 1 \u2264 k) : \u222b x in (1 / (k : \u211d))..(1 : \u211d), Int.fract (1 / ((k : \u211d) * x)) = Real.log (k : \u211d) / (k : \u211d)"
+    },
+    {
+      "id": "lower_integral_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean",
+      "line": 168,
+      "signature": "theorem lower_integral_eq (k : \u2115) (hk : 1 \u2264 k) : \u222b x in (0 : \u211d)..(1 / (k : \u211d)), Int.fract (1 / ((k : \u211d) * x)) = (1 - Real.eulerMascheroniConstant) / (k : \u211d)"
+    },
+    {
+      "id": "fract_inv_mul_intervalIntegrable",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean",
+      "line": 190,
+      "signature": "theorem fract_inv_mul_intervalIntegrable (k : \u2115) (a b : \u211d) : IntervalIntegrable (fun x => Int.fract (1 / ((k : \u211d) * x))) MeasureTheory.volume a b"
+    },
+    {
+      "id": "mean_entry_eq_integral",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean",
+      "line": 206,
+      "signature": "theorem mean_entry_eq_integral (k : \u2115) (hk : 1 \u2264 k) : (Real.log (k : \u211d) + 1 - Real.eulerMascheroniConstant) / (k : \u211d) = \u222b x in (0:\u211d)..1, Int.fract (1 / ((k : \u211d) * x))"
     },
     {
       "id": "gramMatrix2_posDef",
@@ -1025,6 +1349,78 @@
       "file": "Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean",
       "line": 166,
       "signature": "theorem nbDistSq_pos_three : dotProduct (vasyuninMeanVec 3) ((vasyuninGramMatrix 3)\u207b\u00b9.mulVec (vasyuninMeanVec 3)) < 1"
+    },
+    {
+      "id": "fract_eq_on_piece",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 37,
+      "signature": "lemma fract_eq_on_piece (n : \u2115) (hn : 1 \u2264 n) (x : \u211d) (hlo : 1 / ((n:\u211d) + 1) < x) (hhi : x \u2264 1 / (n:\u211d)) : Int.fract (1 / x) = 1 / x - (n:\u211d)"
+    },
+    {
+      "id": "piece_integral_ftc",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 68,
+      "signature": "lemma piece_integral_ftc (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), (1 / x - (n:\u211d)) ^ 2 = (2 * (n:\u211d) + 1) / ((n:\u211d) + 1) - 2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d))"
+    },
+    {
+      "id": "ftc_eq_stirling_term",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 125,
+      "signature": "lemma ftc_eq_stirling_term (n : \u2115) (hn : 1 \u2264 n) : (2 * (n:\u211d) + 1) / ((n:\u211d) + 1) - 2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) = -2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) + 2 - 1 / ((n:\u211d) + 1)"
+    },
+    {
+      "id": "fract_sq_intervalIntegrable",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 136,
+      "signature": "lemma fract_sq_intervalIntegrable (a b : \u211d) : IntervalIntegrable (fun x => Int.fract (1 / x) * Int.fract (1 / x)) volume a b"
+    },
+    {
+      "id": "fract_sq_ae_eq_piece",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 151,
+      "signature": "lemma fract_sq_ae_eq_piece (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), Int.fract (1 / x) * Int.fract (1 / x) = \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), (1 / x - (n:\u211d)) ^ 2"
+    },
+    {
+      "id": "piece_eq_stirling_summand",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 167,
+      "signature": "theorem piece_eq_stirling_summand (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), Int.fract (1 / x) * Int.fract (1 / x) = -2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) + 2 - 1 / ((n:\u211d) + 1)"
+    },
+    {
+      "id": "telescope",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 174,
+      "signature": "theorem telescope (K : \u2115) (hK : 2 \u2264 K) : \u2211 m \u2208 Finset.range (K - 1), \u222b x in (1 / ((m:\u211d) + 2))..(1 / ((m:\u211d) + 1)), Int.fract (1 / x) * Int.fract (1 / x) = \u222b x in (1 / (K:\u211d))..(1:\u211d), Int.fract (1 / x\u2026"
+    },
+    {
+      "id": "integral_eq_partialSum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean",
+      "line": 208,
+      "signature": "theorem integral_eq_partialSum (K : \u2115) (hK : K \u2265 2) : \u222b x in (1 / (K:\u211d))..(1:\u211d), Int.fract (1 / x) * Int.fract (1 / x) = StirlingBridge.partialSum K"
     },
     {
       "id": "rayleighQuotient",
@@ -1106,6 +1502,69 @@
       "file": "Cathedral/MellinBridge/Vasyunin/Rayleigh.lean",
       "line": 117,
       "signature": "theorem variational_lower_bound (N : \u2115) (hN : N \u2265 3) (v : Fin N \u2192 \u211d) (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) : rayleighQuotient N v \u2264 vasyuninQuadForm N"
+    },
+    {
+      "id": "fract_sq_tail_bound",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/SqueezeElimination.lean",
+      "line": 41,
+      "signature": "lemma fract_sq_tail_bound (\u03b5 : \u211d) (h\u03b5 : 0 \u2264 \u03b5) : \u2016\u222b x in (0:\u211d)..\u03b5, Int.fract (1 / x) * Int.fract (1 / x)\u2016 \u2264 \u03b5"
+    },
+    {
+      "id": "fract_sq_tail_nonneg",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/SqueezeElimination.lean",
+      "line": 53,
+      "signature": "lemma fract_sq_tail_nonneg (\u03b5 : \u211d) (h\u03b5 : 0 \u2264 \u03b5) : 0 \u2264 \u222b x in (0:\u211d)..\u03b5, Int.fract (1 / x) * Int.fract (1 / x)"
+    },
+    {
+      "id": "integral_split",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/SqueezeElimination.lean",
+      "line": 79,
+      "signature": "lemma integral_split (K : \u2115) (_hK : 1 \u2264 K) : \u222b x in (0:\u211d)..(1:\u211d), Int.fract (1 / x) * Int.fract (1 / x) = (\u222b x in (0:\u211d)..(1 / (K:\u211d)), Int.fract (1 / x) * Int.fract (1 / x)) + (\u222b x in (1 / (K:\u211d))..(\u2026"
+    },
+    {
+      "id": "fract_sq_integral_value",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/SqueezeElimination.lean",
+      "line": 122,
+      "signature": "theorem fract_sq_integral_value : \u222b u in (0:\u211d)..(1:\u211d), (Int.fract (1 / u) * Int.fract (1 / u) : \u211d) = Real.log (2 * Real.pi) - eulerMascheroniConstant - 1"
+    },
+    {
+      "id": "partialSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/StirlingBridge.lean",
+      "line": 37,
+      "signature": "def partialSum (K : \u2115) : \u211d"
+    },
+    {
+      "id": "tendsto_partialSum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/StirlingBridge.lean",
+      "line": 42,
+      "signature": "theorem tendsto_partialSum : Tendsto partialSum atTop (nhds (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1))"
+    },
+    {
+      "id": "partialSum_eq_series_sum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/MellinBridge/Vasyunin/StirlingBridge.lean",
+      "line": 148,
+      "signature": "theorem partialSum_eq_series_sum' (M : \u2115) : partialSum (M + 2) = \u2211 n \u2208 Finset.range (M + 1), (-2 * ((n : \u211d) + 1) * Real.log (1 + 1 / ((n : \u211d) + 1)) + 2 - 1 / ((n : \u211d) + 2))"
     },
     {
       "id": "vasyuninGramEntry_comm",
@@ -1594,31 +2053,40 @@
       "signature": "def LagariasInequality : Prop"
     },
     {
-      "id": "lagarias_iff_rh",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "robin",
-      "file": "Cathedral/Robin/Defs.lean",
-      "line": 96,
-      "signature": "axiom lagarias_iff_rh : LagariasInequality \u2194 RiemannHypothesis  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- PART III: ROBIN'S INEQUALITY -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
-    },
-    {
       "id": "RobinInequality",
       "type": "def",
       "category": "definition",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 111,
+      "line": 96,
       "signature": "def RobinInequality : Prop"
     },
     {
-      "id": "robin_iff_rh",
+      "id": "arithmetic_rh_equivalences",
       "type": "axiom",
       "category": "axiom",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 127,
-      "signature": "axiom robin_iff_rh : RobinInequality \u2194 RiemannHypothesis  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- PART IV: IMMEDIATE CONSEQUENCES -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 \u2026"
+      "line": 124,
+      "signature": "axiom arithmetic_rh_equivalences : (LagariasInequality \u2194 RiemannHypothesis) \u2227 (RobinInequality \u2194 RiemannHypothesis)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- PART IV: DERIVED THEOREMS\u2026"
+    },
+    {
+      "id": "lagarias_iff_rh",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 133,
+      "signature": "theorem lagarias_iff_rh : LagariasInequality \u2194 RiemannHypothesis"
+    },
+    {
+      "id": "robin_iff_rh",
+      "type": "theorem",
+      "category": "proved",
+      "route": "robin",
+      "file": "Cathedral/Robin/Defs.lean",
+      "line": 137,
+      "signature": "theorem robin_iff_rh : RobinInequality \u2194 RiemannHypothesis"
     },
     {
       "id": "lagarias_iff_robin",
@@ -1626,7 +2094,7 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 134,
+      "line": 141,
       "signature": "theorem lagarias_iff_robin : LagariasInequality \u2194 RobinInequality"
     },
     {
@@ -1635,7 +2103,7 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 140,
+      "line": 147,
       "signature": "theorem rh_implies_lagarias : RiemannHypothesis \u2192 LagariasInequality"
     },
     {
@@ -1644,7 +2112,7 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 144,
+      "line": 151,
       "signature": "theorem rh_implies_robin : RiemannHypothesis \u2192 RobinInequality"
     },
     {
@@ -1653,7 +2121,7 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 148,
+      "line": 155,
       "signature": "theorem lagarias_implies_rh : LagariasInequality \u2192 RiemannHypothesis"
     },
     {
@@ -1662,7 +2130,7 @@
       "category": "proved",
       "route": "robin",
       "file": "Cathedral/Robin/Defs.lean",
-      "line": 152,
+      "line": 159,
       "signature": "theorem robin_implies_rh : RobinInequality \u2192 RiemannHypothesis"
     },
     {
@@ -1893,91 +2361,47 @@
   ],
   "edges": [
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmentedGramMatrix_symmetric"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmented_corner_eq"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmented_bordered_eq"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmented_border_eq"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmented_last_eq"
     },
     {
-      "source": "covEntry_00",
-      "target": "augmentedSchurComplement_pos"
+      "source": "gramEntry",
+      "target": "augmented_l2_identity"
     },
     {
-      "source": "covEntry_00",
-      "target": "augmented_posDef_step"
+      "source": "gramEntry",
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
-      "source": "covEntry_00",
-      "target": "augmented1_posDef"
+      "source": "gramEntry",
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "augmentedGramMatrix_posDef"
     },
     {
-      "source": "covEntry_00",
+      "source": "gramEntry",
       "target": "gramMatrix_posDef_from_augmented"
     },
     {
-      "source": "covEntry_00",
-      "target": "nbDistSq_pos_from_augmented"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "covEntry_00_pos",
-      "target": "gramMatrix_posDef_from_augmented"
-    },
-    {
-      "source": "covEntry_00_pos",
+      "source": "gramEntry",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2002,15 +2426,15 @@
     },
     {
       "source": "vasyuninGramEntry",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninGramEntry",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninGramEntry",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninGramEntry",
@@ -2046,15 +2470,15 @@
     },
     {
       "source": "vasyuninMeanEntry",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninMeanEntry",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninMeanEntry",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninMeanEntry",
@@ -2069,94 +2493,6 @@
       "target": "nbDistSq_pos_from_augmented"
     },
     {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "gramMatrix_posDef_from_augmented"
-    },
-    {
-      "source": "vasyuninMeanEntry_one",
-      "target": "nbDistSq_pos_from_augmented"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "gramMatrix_posDef_from_augmented"
-    },
-    {
-      "source": "vasyuninGramEntry_one_one",
-      "target": "nbDistSq_pos_from_augmented"
-    },
-    {
       "source": "vasyuninGramMatrix",
       "target": "augmentedGramMatrix_symmetric"
     },
@@ -2178,15 +2514,15 @@
     },
     {
       "source": "vasyuninGramMatrix",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninGramMatrix",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninGramMatrix",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninGramMatrix",
@@ -2222,15 +2558,15 @@
     },
     {
       "source": "vasyuninMeanVec",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninMeanVec",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninMeanVec",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninMeanVec",
@@ -2245,47 +2581,443 @@
       "target": "nbDistSq_pos_from_augmented"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmentedGramMatrix_symmetric"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmented_corner_eq"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmented_bordered_eq"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmented_border_eq"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmented_last_eq"
     },
     {
-      "source": "vasyuninCovMatrix",
-      "target": "augmentedSchurComplement_pos"
+      "source": "vasyunin_eq_integral",
+      "target": "augmented_l2_identity"
     },
     {
-      "source": "vasyuninCovMatrix",
-      "target": "augmented_posDef_step"
+      "source": "vasyunin_eq_integral",
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
-      "source": "vasyuninCovMatrix",
-      "target": "augmented1_posDef"
+      "source": "vasyunin_eq_integral",
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "augmentedGramMatrix_posDef"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
       "target": "gramMatrix_posDef_from_augmented"
     },
     {
-      "source": "vasyuninCovMatrix",
+      "source": "vasyunin_eq_integral",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_eq_neg_on_critical_interval",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_eq_affine_on_critical_interval",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "affine_inv_nonzero_subinterval",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_nonzero_somewhere",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "fract_inv_intervalIntegrable",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nbLinCombNew_sq_integrable",
+      "target": "nbDistSq_pos_from_augmented"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmentedGramMatrix_symmetric"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmented_corner_eq"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmented_bordered_eq"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmented_border_eq"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmented_last_eq"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmented_l2_identity"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "nbAugLinComb_nonzero_somewhere"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "nbAugLinComb_sq_integrable"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "augmentedGramMatrix_posDef"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
+      "target": "gramMatrix_posDef_from_augmented"
+    },
+    {
+      "source": "nyman_beurling_lin_indep_new",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -2310,15 +3042,15 @@
     },
     {
       "source": "vasyunin_nbDistSq_pos",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyunin_nbDistSq_pos",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyunin_nbDistSq_pos",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyunin_nbDistSq_pos",
@@ -2354,15 +3086,15 @@
     },
     {
       "source": "vasyuninGramEntry_comm",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninGramEntry_comm",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninGramEntry_comm",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninGramEntry_comm",
@@ -2398,15 +3130,15 @@
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
-      "target": "augmentedSchurComplement_pos"
+      "target": "augmented_l2_identity"
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
-      "target": "augmented_posDef_step"
+      "target": "nbAugLinComb_nonzero_somewhere"
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
-      "target": "augmented1_posDef"
+      "target": "nbAugLinComb_sq_integrable"
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
@@ -2418,94 +3150,6 @@
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
-      "target": "nbDistSq_pos_from_augmented"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "gramMatrix_posDef_from_augmented"
-    },
-    {
-      "source": "sylvester_2x2",
-      "target": "nbDistSq_pos_from_augmented"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmentedGramMatrix_symmetric"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented_corner_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented_bordered_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented_border_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented_last_eq"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmentedSchurComplement_pos"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented_posDef_step"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmented1_posDef"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "augmentedGramMatrix_posDef"
-    },
-    {
-      "source": "bordered_matrix_posDef",
-      "target": "gramMatrix_posDef_from_augmented"
-    },
-    {
-      "source": "bordered_matrix_posDef",
       "target": "nbDistSq_pos_from_augmented"
     },
     {
@@ -3217,6 +3861,194 @@
       "target": "covEntry_11"
     },
     {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_inv_of_gt_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_inv_of_ge_one_ae"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_sq_inv_of_gt_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "integral_inv_sq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "integral_comp_mul_nat"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "integral_split_at_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "diagonal_algebra"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_eq_integral_diag"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_inv_of_gt_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_inv_of_ge_one_ae"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_sq_inv_of_gt_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "integral_inv_sq"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "integral_comp_mul_nat"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "integral_split_at_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "diagonal_algebra"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyunin_eq_integral_diag"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_inv_of_gt_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_inv_of_ge_one_ae"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_sq_inv_of_gt_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "integral_inv_sq"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "integral_comp_mul_nat"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "integral_split_at_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "diagonal_algebra"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyunin_eq_integral_diag"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_inv_of_gt_one"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_inv_of_ge_one_ae"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_sq_inv_of_gt_one"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "integral_inv_sq"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "integral_comp_mul_nat"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "integral_split_at_one"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "diagonal_algebra"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "vasyunin_eq_integral_diag"
+    },
+    {
       "source": "cot",
       "target": "vasyuninSum_two_one"
     },
@@ -4295,10 +5127,6 @@
     {
       "source": "vasyuninGramEntry_comm",
       "target": "vasyuninGram3x3_det_pos_closedForm"
-    },
-    {
-      "source": "vasyuninGramEntry",
-      "target": "vasyunin_eq_integral"
     },
     {
       "source": "vasyuninGramEntry",
@@ -4319,10 +5147,6 @@
     {
       "source": "vasyuninGramEntry",
       "target": "vasyuninGramMatrix_diag_nonneg"
-    },
-    {
-      "source": "vasyuninGramMatrix",
-      "target": "vasyunin_eq_integral"
     },
     {
       "source": "vasyuninGramMatrix",
@@ -4346,10 +5170,6 @@
     },
     {
       "source": "vasyuninGram2x2_det_pos",
-      "target": "vasyunin_eq_integral"
-    },
-    {
-      "source": "vasyuninGram2x2_det_pos",
       "target": "gramDet2_pos"
     },
     {
@@ -4367,10 +5187,6 @@
     {
       "source": "vasyuninGram2x2_det_pos",
       "target": "vasyuninGramMatrix_diag_nonneg"
-    },
-    {
-      "source": "vasyuninGramMatrix_posDef",
-      "target": "vasyunin_eq_integral"
     },
     {
       "source": "vasyuninGramMatrix_posDef",
@@ -4394,10 +5210,6 @@
     },
     {
       "source": "vasyuninGramEntry_comm",
-      "target": "vasyunin_eq_integral"
-    },
-    {
-      "source": "vasyuninGramEntry_comm",
       "target": "gramDet2_pos"
     },
     {
@@ -4415,10 +5227,6 @@
     {
       "source": "vasyuninGramEntry_comm",
       "target": "vasyuninGramMatrix_diag_nonneg"
-    },
-    {
-      "source": "vasyuninGramMatrix_symmetric",
-      "target": "vasyunin_eq_integral"
     },
     {
       "source": "vasyuninGramMatrix_symmetric",
@@ -4442,10 +5250,6 @@
     },
     {
       "source": "vasyuninGramEntry_diag_pos",
-      "target": "vasyunin_eq_integral"
-    },
-    {
-      "source": "vasyuninGramEntry_diag_pos",
       "target": "gramDet2_pos"
     },
     {
@@ -4463,6 +5267,90 @@
     {
       "source": "vasyuninGramEntry_diag_pos",
       "target": "vasyuninGramMatrix_diag_nonneg"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_eq_integral"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_mean_eq_integral"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyunin_eq_integral"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "vasyunin_mean_eq_integral"
+    },
+    {
+      "source": "mean_entry_eq_integral",
+      "target": "vasyunin_eq_integral"
+    },
+    {
+      "source": "mean_entry_eq_integral",
+      "target": "vasyunin_mean_eq_integral"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "fract_inv_mul_eq_self_on_upper"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "upper_integral_eq_log"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "lower_integral_eq"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "fract_inv_mul_intervalIntegrable"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "mean_entry_eq_integral"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "fract_inv_mul_eq_self_on_upper"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "upper_integral_eq_log"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "lower_integral_eq"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "fract_inv_mul_intervalIntegrable"
+    },
+    {
+      "source": "vasyunin_mean_eq_integral",
+      "target": "mean_entry_eq_integral"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_inv_mul_eq_self_on_upper"
+    },
+    {
+      "source": "telescope",
+      "target": "upper_integral_eq_log"
+    },
+    {
+      "source": "telescope",
+      "target": "lower_integral_eq"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_inv_mul_intervalIntegrable"
+    },
+    {
+      "source": "telescope",
+      "target": "mean_entry_eq_integral"
     },
     {
       "source": "covMatrix3_det2_pos",
@@ -4825,6 +5713,70 @@
       "target": "nbDistSq_pos_three"
     },
     {
+      "source": "partialSum",
+      "target": "fract_eq_on_piece"
+    },
+    {
+      "source": "partialSum",
+      "target": "piece_integral_ftc"
+    },
+    {
+      "source": "partialSum",
+      "target": "ftc_eq_stirling_term"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_ae_eq_piece"
+    },
+    {
+      "source": "partialSum",
+      "target": "piece_eq_stirling_summand"
+    },
+    {
+      "source": "partialSum",
+      "target": "telescope"
+    },
+    {
+      "source": "partialSum",
+      "target": "integral_eq_partialSum"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_eq_on_piece"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "piece_integral_ftc"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "ftc_eq_stirling_term"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_sq_ae_eq_piece"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "piece_eq_stirling_summand"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "telescope"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "integral_eq_partialSum"
+    },
+    {
       "source": "augmentedGramMatrix_posDef",
       "target": "vasyuninCovMatrix_hermitian"
     },
@@ -5103,6 +6055,70 @@
     {
       "source": "cauchy_schwarz_quadform",
       "target": "variational_lower_bound"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tendsto_partialSum"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "partialSum_eq_series_sum"
     },
     {
       "source": "vasyuninGramEntry",
@@ -5553,6 +6569,70 @@
       "target": "perfect_496"
     },
     {
+      "source": "log_cutoff_witness_bound",
+      "target": "arithmetic_rh_equivalences"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "lagarias_iff_rh"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "robin_iff_rh"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "lagarias_iff_robin"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "rh_implies_lagarias"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "rh_implies_robin"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "lagarias_implies_rh"
+    },
+    {
+      "source": "log_cutoff_witness_bound",
+      "target": "robin_implies_rh"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "arithmetic_rh_equivalences"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "lagarias_iff_rh"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "robin_iff_rh"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "lagarias_iff_robin"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "rh_implies_lagarias"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "rh_implies_robin"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "lagarias_implies_rh"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "robin_implies_rh"
+    },
+    {
       "source": "LagariasInequality",
       "target": "robin_implies_nyman_beurling"
     },
@@ -5569,35 +6649,35 @@
       "target": "nyman_beurling_implies_lagarias"
     },
     {
-      "source": "lagarias_iff_rh",
+      "source": "RobinInequality",
       "target": "robin_implies_nyman_beurling"
     },
     {
-      "source": "lagarias_iff_rh",
+      "source": "RobinInequality",
       "target": "lagarias_implies_nyman_beurling"
     },
     {
-      "source": "lagarias_iff_rh",
+      "source": "RobinInequality",
       "target": "nyman_beurling_implies_robin"
     },
     {
-      "source": "lagarias_iff_rh",
+      "source": "RobinInequality",
       "target": "nyman_beurling_implies_lagarias"
     },
     {
-      "source": "RobinInequality",
+      "source": "lagarias_iff_rh",
       "target": "robin_implies_nyman_beurling"
     },
     {
-      "source": "RobinInequality",
+      "source": "lagarias_iff_rh",
       "target": "lagarias_implies_nyman_beurling"
     },
     {
-      "source": "RobinInequality",
+      "source": "lagarias_iff_rh",
       "target": "nyman_beurling_implies_robin"
     },
     {
-      "source": "RobinInequality",
+      "source": "lagarias_iff_rh",
       "target": "nyman_beurling_implies_lagarias"
     },
     {
@@ -5862,14 +6942,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 210,
-    "totalEdges": 992,
-    "axiomCount": 5,
-    "theoremCount": 169,
-    "definitionCount": 36,
-    "provedTheorems": 169,
-    "fileCount": 25,
-    "description": "Cathedral proof architecture: 5 axioms, 169 theorems, 36 definitions across 25 files",
-    "generatedAt": "2026-04-11T06:25:15.905692"
+    "totalNodes": 262,
+    "totalEdges": 1145,
+    "axiomCount": 3,
+    "theoremCount": 217,
+    "definitionCount": 42,
+    "provedTheorems": 217,
+    "fileCount": 33,
+    "description": "Cathedral proof architecture: 3 axioms, 217 theorems, 42 definitions across 33 files",
+    "generatedAt": "2026-04-12T21:42:18.251801"
   }
 }

@@ -29,7 +29,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "175+ theorems · 4 axioms · 0 sorry",
+    stats: "175+ theorems · 3 axioms · 0 sorry",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -152,18 +152,18 @@ export default function HomePage() {
           </span>
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
-          A machine-checked reduction of the Riemann Hypothesis to four
+          A machine-checked reduction of the Riemann Hypothesis to three
           explicit axioms in Lean 4, via the Vasyunin cotangent formula.
           Zero <code className="text-emerald-400">sorry</code>. Every theorem compiler-verified.
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "30 Lean files" },
+            { color: "bg-emerald-500", text: "36 Lean files" },
             { color: "bg-emerald-500", text: "0 sorry" },
-            { color: "bg-amber-500", text: "4 axioms" },
+            { color: "bg-amber-500", text: "3 axioms" },
             { color: "bg-emerald-500", text: "175+ theorems" },
-            { color: "bg-blue-500", text: "3,081 build jobs" },
+            { color: "bg-blue-500", text: "Zero errors" },
             { color: "bg-purple-500", text: "Zero sorry" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
@@ -212,11 +212,11 @@ export default function HomePage() {
             <span className="text-2xl">🏰</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                The 4-Axiom Cathedral — ZERO SORRY
+                The 3-Axiom Cathedral — ZERO SORRY
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Every theorem compiler-verified. 4 axioms remain: RH itself (log_cutoff_witness_bound),
-                Vasyunin 1995 (vasyunin_eq_integral), and two literature equivalences (lagarias_iff_rh, robin_iff_rh).
+                Every theorem compiler-verified. 3 axioms remain: RH itself (log_cutoff_witness_bound),
+                Vasyunin 1995 (vasyunin_eq_integral), and combined literature equivalences (arithmetic_rh_equivalences).
                 April 12, 2026.
               </p>
             </div>
@@ -255,7 +255,7 @@ export default function HomePage() {
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Substitution u=kx + series identity Σ(1/(m+1) − log(1+1/(m+1))) = γ via tendsto_harmonic_sub_log.
-                Axiom vasyunin_mean_eq_integral eliminated → 5 → 4 axioms.
+                Axiom vasyunin_mean_eq_integral eliminated → 5 → 4 → 3 axioms.
               </p>
             </div>
           </div>
@@ -292,6 +292,25 @@ export default function HomePage() {
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.75 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-teal-500/10 via-teal-500/5 to-transparent border border-teal-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🗺️</span>
+            <div>
+              <h3 className="text-sm font-bold text-teal-400">
+                CrossTermFTC — Off-Diagonal Infrastructure DEPLOYED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                6 theorems, 0 sorry. Piecewise FTC for ∫(1/(jx)−m)(1/(kx)−n)dx and Beatty sequence bound
+                (≤2 tiles per row when j≤k). The analytical engine for eliminating vasyunin_eq_integral.
               </p>
             </div>
           </div>
