@@ -3,8 +3,8 @@
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the logarithmic growth of a single explicit
 Rayleigh quotient built from the Möbius function and the Vasyunin cotangent
-sum. **Zero `sorry`**, **zero warnings**, and **3 axioms** on the active
-proof chain.
+sum. **Zero `sorry`**, **zero warnings**, and **5 axioms** on the crown
+theorem's critical path (verified by `#print axioms`).
 
 ## The Honest Assessment
 
@@ -21,7 +21,7 @@ proof chain.
 
 ```bash
 cd proofs
-lake build          # 3,081 jobs, ~2 min, zero errors, zero warnings
+lake build          # 3,530 jobs, ~2 min, zero errors, zero warnings
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -55,11 +55,15 @@ basis functions. Schur complement positivity is now a **proved theorem**
 
 ### The Proof Chain
 
-1. `log_cutoff_witness_bound` — Q(v_log) ≥ c·ln(N) (**Axiom — the RH itself**)
-2. `variational_lower_bound` — Q(v) ≤ X_N (**Theorem** — Cauchy–Schwarz)
-3. `log_cutoff_witness_pos` — vᵀCv > 0 (**Theorem** — PosDef + v ≠ 0)
-4. `quadForm_diverges` — X_N ≥ c·ln(N) (**Theorem**)
-5. `nbDistSq_decays` — d²_N → 0 (**Theorem**)
+1. `witness_covariance_decay` — vᵀCv ≤ C/ln(N) (**Axiom — THE RH itself**)
+2. `witness_numerator_convergence` — bᵀv → 1 (**Axiom — PNT level**)
+3. `vasyunin_eq_integral` — Gram entry = L² integral (**Axiom — Vasyunin 1995**)
+4. `algebraic_nb_bridge` — Quadform → integral criterion (**Axiom — structural**)
+5. `zeta_zero_separates` — Off-line zero → L² obstruction (**Axiom — converse**)
+6. `variational_lower_bound` — Q(v) ≤ X_N (**Theorem** — Cauchy–Schwarz)
+7. `log_cutoff_witness_bound` — Q(v_log) ≥ c·ln(N) (**Theorem** — from axioms 1+2)
+8. `quadForm_diverges` — X_N ≥ c·ln(N) (**Theorem**)
+9. `nbDistSq_decays` — d²_N → 0 (**Theorem**)
 
 ### The Robin/Lagarias Front (Independent)
 
@@ -68,13 +72,22 @@ Discrete arithmetic equivalences connecting RH to divisor-sum inequalities.
 **Unconditional result** (zero axioms):
 - `lagarias_for_primes` — σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p ✓
 
-## The 3 Axioms
+## The 5 Critical-Path Axioms
+
+Verified by `#print axioms nyman_beurling_iff_rh`:
 
 | # | Axiom | File | Nature |
 |---|---|---|---|
-| 1 | `log_cutoff_witness_bound` | Chain.lean | **THE RH itself** — Selberg sieve bound |
-| 2 | `vasyunin_eq_integral` | IntegralBridge.lean | **Definitional** — L² integral bridge (CrossTermFTC attacks this) |
-| 3 | `arithmetic_rh_equivalences` | Robin/Defs.lean | Literature (Lagarias 2002, Robin 1984) |
+| 1 | `witness_covariance_decay` | WitnessAsymptotics.lean | **THE RH itself** — vᵀCv ≤ C/ln(N) |
+| 2 | `witness_numerator_convergence` | WitnessAsymptotics.lean | **PNT level** — bᵀv → 1 |
+| 3 | `vasyunin_eq_integral` | IntegralBridge.lean | **Vasyunin 1995** — L² integral bridge |
+| 4 | `algebraic_nb_bridge` | Chain.lean | **Structural** — quadform → integral criterion |
+| 5 | `zeta_zero_separates` | Axioms.lean | **Converse** — off-line zero → L² obstruction |
+
+An alternative forward direction (`phase_3_chain`) uses only 2 axioms:
+`mertens_bound_from_rh` + `abel_summation_l2_bound`.
+
+48 total axioms support parallel proof paths (sieve engine, spectral theory, Mellin bridge).
 
 ### What Was Eliminated (Now Theorems)
 
@@ -110,15 +123,25 @@ Discrete arithmetic equivalences connecting RH to divisor-sum inequalities.
 ## Repository Structure
 
 ```
-proofs/              — Lean 4 formalization (36 active files, 3 axioms, 0 sorry, 0 warnings)
+proofs/              — Lean 4 formalization (83 active files, 48 axioms, 0 sorry)
   Cathedral/         — The proof architecture
-    Defs.lean        — Core definitions
-    LinearAlgebra/   — Sherman-Morrison, Variational principle, Sylvester, SchurComplement
-    MellinBridge/    — Nyman-Beurling bridge + Vasyunin framework
-      Vasyunin/      — The heart: AugmentedGram, MeanIntegral, LinIndep, Gram entries,
-                       covariance, witness, chain, IntegralBridge,
-                       CrossTermFTC, PiecewiseFTC, DiagonalBridge
+    Defs.lean        — Core definitions (gramEntry, nbLinComb, nbDistSq)
+    Axioms.lean      — Axiom registry (zeta_zero_separates)
+    LinearAlgebra/   — Sherman-Morrison, Variational, Sylvester, SchurComplement
+    Gram/            — L²Bridge, FractIntegral, off-diagonal bounds
+    Vasyunin/        — The heart: AugmentedGram, cotangent chain, witness
+      Augmented/     — AugmentedGram.lean, IntegralBridge, MeanIntegral, Rayleigh
+      Cotangent/     — DigammaReflection, LogDigammaBridge, TelescopeSum
+      Matrix/        — CovDet2, CovDet3, Structural
+      Proof/         — Chain, WitnessAsymptotics, BartlettWindow
+    NymanBeurling/   — Crown theorem (nyman_beurling_iff_rh)
+    Assembly/        — QuadFormBridge, MainChain
     Robin/           — Robin/Lagarias discrete arithmetic front
+    Structural/      — Eigenvalue interlacing, telescoping
+    Spectral/        — Class restriction, constant vector bound
+    Sieve/           — Bilinear sieve, parity bridge, Möbius uncoupling
+    MellinBridge/    — Mellin-Plancherel, weight construction, Mertens bypass
+    IntegralBasis/   — Báez-Duarte, quantitative bounds
     Archive/         — Historical explorations
 paper/               — LaTeX paper and overview
 experiments/         — Numerical experiments (Rust/MPFR, Python)
@@ -129,18 +152,17 @@ docs/                — Collaboration logs and analysis
 ## Build Stats
 
 ```
-Files:      36 active Lean files
-Theorems:   217 proved statements
-Definitions: 42
-Axioms:     3
+Files:      83 active Lean files
+Axioms:     48 total (5 on critical path, verified by #print axioms)
 Sorry:      0
 Warnings:   0
+Compiled:   3,530 modules
 ```
 
 ## Papers
 
-- `paper/cathedral.tex` — Technical paper (10 pages)
-- `paper/overview.tex` — Accessible overview (4 pages)
+- `paper/cathedral.tex` — Technical paper (12 pages)
+- `paper/overview.tex` — Accessible overview (6 pages)
 
 Build PDFs: `cd paper && pdflatex cathedral.tex && pdflatex overview.tex`
 

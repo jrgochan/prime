@@ -27,7 +27,7 @@ built from M\"obius values and Vasyunin cotangent sums.
 
 No integrals. No complex plane. No analytic continuation. No measure theory.
 
-The fomalization compiles with \textbf{zero errors} and \textbf{zero sorry}.
+The formalization compiles with \textbf{zero errors} and \textbf{zero sorry}.
 The single axiom encoding RH is $v^T C_N v \leq C / \ln N$,
 where $v$ is the Selberg-weighted M\"obius witness and $C_N$ is the
 Vasyunin covariance matrix. This axiom is \textbf{machine-verified to be
@@ -155,27 +155,42 @@ The converse (RH $\Rightarrow$ covariance decay) is also proved
   From Mertens: $\sum \mu(k) \ln(k)/k \to -1$.
 \end{enumerate}
 
-\subsection{Tier 3: Classical Number Theory (6 axioms)}
+\subsection{Tier 3: Classical Number Theory (off critical path)}
+
+The following axioms support the Vasyunin formula derivation and Robin
+equivalences but are \emph{not} required by the crown theorem:
 
 \begin{enumerate}\setcounter{enumi}{2}
 \item \textbf{Gauss Digamma Formula} (1813)
 \item \textbf{Dedekind Reciprocity} (1892)
 \item \textbf{Telescope Limit} (Vasyunin)
 \item \textbf{Vasyunin Integral Formula} (1995)
-\item \textbf{Vasyunin Integral Bridge} (1995)
 \item \textbf{Arithmetic RH Equivalences} (Robin 1984, Lagarias 2002)
 \end{enumerate}
 
-\subsection{Tier 4: Structural (3 axioms)}
+\subsection{Tier 4: Structural (on critical path)}
 
-\begin{enumerate}\setcounter{enumi}{8}
-\item \textbf{Mertens Bound} (\texttt{rh\_implies\_mertens\_bound}):
-  RH $\Rightarrow$ $|M(x)| \leq Cx^{1/2}(\log x)^2$. (Titchmarsh 14.25)
+\begin{enumerate}\setcounter{enumi}{7}
+\item \textbf{Vasyunin Integral Bridge} (\texttt{vasyunin\_eq\_integral}):
+  Cotangent formula = $L^2$ integral. (Vasyunin 1995)
+\item \textbf{Algebraic-Integral Bridge} (\texttt{algebraic\_nb\_bridge}):
+  Quadratic form divergence implies integral criterion.
+\item \textbf{Zeta Separation} (\texttt{zeta\_zero\_separates}):
+  Off-critical-line zero creates $L^2$ obstruction. (Converse direction.)
+\end{enumerate}
+
+\subsection{Alternative Forward (2 axioms, off crown theorem)}
+
+\begin{enumerate}\setcounter{enumi}{10}
+\item \textbf{Mertens Bound} (\texttt{mertens\_bound\_from\_rh}):
+  RH $\Rightarrow$ $|M(x)| \leq Cx^{1/2}(\log x)^2$.
 \item \textbf{Abel Summation} (\texttt{abel\_summation\_l2\_bound}):
   Mertens bound $\Rightarrow$ L$^2$ decay.
-\item \textbf{Algebraic-Integral Bridge} (\texttt{algebraic\_nb\_bridge}):
-  Gram matrix entries = integrals.
 \end{enumerate}
+
+\noindent The crown theorem \texttt{nyman\_beurling\_iff\_rh} depends on
+exactly 5 Cathedral axioms (items 1--2, 8--10), verified by
+\texttt{\#print axioms}.
 
 \noindent\textbf{Formerly axioms, now theorems:}
 \texttt{log\_cutoff\_witness\_bound} (was the RH axiom; now proved from
@@ -235,23 +250,28 @@ covariance decay + numerator convergence, April~15, 2026).
 \toprule
 \textbf{Component} & \textbf{Role} & \textbf{Sorry} & \textbf{Axioms} \\
 \midrule
-\texttt{LinearAlgebra/} & Sherman--Morrison, Variational, Sylvester & 0 & 0 \\
-\texttt{AugmentedGram.lean} & $H_N$ PD, $G_N$ PD, $b^TG^{-1}b < 1$ & 0 & 0 \\
-\texttt{MeanIntegral.lean} & $\int_0^1 \{1/(kx)\} dx = b_k$ (proved) & 0 & 0 \\
-\texttt{CrossTermFTC.lean} & Off-diagonal piecewise FTC, Beatty bound & 0 & 0 \\
-\texttt{Telescope chain} (6) & Digamma refl., TelescopeSum, LogDigammaBridge & 0 & 5 \\
-\texttt{Vasyunin/*.lean} (18) & Gram entries, covariance, witness, chain & 0 & 1 \\
-\texttt{Robin/*.lean} (6) & Discrete arithmetic & 0 & 1 \\
-\texttt{Defs.lean + NB.lean} & Core definitions & 0 & 0 \\
+\texttt{Defs + Axioms + NB}  & Core defs, axiom registry & 0 & 1 \\
+\texttt{LinearAlgebra/} (4)   & Sherman--Morrison, Variational, Sylvester & 0 & 0 \\
+\texttt{Gram/} (4)            & Integral L$^2$ bridge, off-diagonal bounds & 0 & 0 \\
+\texttt{Vasyunin/} (18)       & Cotangent, augmented Gram, witness, chain & 0 & 10 \\
+\texttt{NymanBeurling/} (2)   & Forward + converse biconditional & 0 & 0 \\
+\texttt{Assembly/} (3)        & QuadFormBridge, MainChain & 0 & 0 \\
+\texttt{Robin/} (6)           & Discrete arithmetic & 0 & 1 \\
+\texttt{Structural/} (3)      & Eigenvalue interlacing & 0 & 1 \\
+\texttt{Spectral/} (5)        & Class restriction, constant vector & 0 & 9 \\
+\texttt{Sieve/} (8)           & Bilinear sieve, parity bridge & 0 & 11 \\
+\texttt{MellinBridge/} (8)    & Mellin--Plancherel, weight construction & 0 & 10 \\
+\texttt{IntegralBasis/} (3)   & B\'aez-Duarte, quantitative bounds & 0 & 5 \\
 \midrule
-\textbf{Total (40 files)}   &                        & \textbf{0} & \textbf{7} \\
+\textbf{Total (83 files)}     &  & \textbf{0} & \textbf{48} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent 8{,}710 lines. 3087 compiled modules. Zero errors. Zero sorry.
-All seven axioms are classical results (Gauss 1813, Dedekind 1892,
-Vasyunin 1995, Lagarias 2002, Robin 1984).
+\noindent 3530 compiled modules. Zero errors. Zero sorry.
+The crown theorem depends on 5 of the 48 axioms;
+the remainder support parallel proof paths (sieve engine,
+spectral theory, Mellin bridge).
 
 \section{How to Verify}
 

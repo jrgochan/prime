@@ -7,7 +7,32 @@ import Cathedral.Defs
 
   Central hub for shared axioms and the axiom documentation index.
 
-  ### Axiom Inventory — 48 unique axioms across 83 active files
+  ### COMPILER-VERIFIED Critical Path (April 15, 2026)
+
+  `#print axioms nyman_beurling_iff_rh` depends on exactly **5 Cathedral axioms**:
+
+  | # | Axiom | Role | Tier |
+  |---|-------|------|------|
+  | 1 | `zeta_zero_separates` | Converse (d²→0 ⟹ RH) | 3 (complex analysis) |
+  | 2 | `algebraic_nb_bridge` | Quadform → integral criterion | 4 (structural) |
+  | 3 | `vasyunin_eq_integral` | Vasyunin formula = L² integral | 3 (Vasyunin 1995) |
+  | 4 | `witness_numerator_convergence` | bᵀv → 1 | 2 (PNT-level) |
+  | 5 | `witness_covariance_decay` | vᵀCv ≤ C/ln(N) — **THIS IS RH** | 1 (RH content) |
+
+  `#print axioms phase_3_chain` (alternative forward, 2 axioms):
+  | `mertens_bound_from_rh` | RH → Mertens bound | 3 |
+  | `abel_summation_l2_bound` | Mertens → L² decay | 4 |
+
+  `#print axioms gram_eigenvalue_asymptotic_derived` (spectral engine, 2 axioms):
+  | `type_II_sieve_bound` | Asymptotic parity sieve | 4 |
+  | `block_eigenvalue_log_scaling` | Block-diagonal eigenvalue scaling | 4 |
+
+  Zero-axiom theorems (pure Mathlib):
+  `gramMatrix_posSemidef`, `gram_pos_def`, `gramMatrix_isUnit_det`,
+  `nbDistSq_lt_one`, `l2_error_eq_quad_error`, `nbDistSq_le_test_vector`,
+  `eigenvalue_interlacing`, `lambdaEff_linear_growth_proved`.
+
+  ### Full Inventory — 48 unique axioms across 83 active files
 
   #### Core Chain (Vasyunin proof — 8 axioms)
   | Axiom | Location | Tier |
@@ -21,16 +46,16 @@ import Cathedral.Defs
   | `vasyunin_eq_integral` | Vasyunin/Augmented/IntegralBridge | 3 |
   | `zeta_zero_separates` | **this file** | 3 |
 
-  #### Cotangent Formula (3 axioms)
+  #### Cotangent Formula (4 axioms — NOT on critical path)
   | `gauss_digamma_formula` | Vasyunin/Cotangent/DigammaReflection | 3 |
   | `harmonicTileSum_reciprocity` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
   | `telescope_limit_eq_vasyunin` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
   | `vasyunin_integral_eq_formula` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
 
-  #### Robin front (1 axiom)
+  #### Robin front (1 axiom — NOT on critical path)
   | `arithmetic_rh_equivalences` | Robin/Defs | 3 |
 
-  #### MellinBridge (8 axioms)
+  #### MellinBridge (8 axioms — 2 on phase_3_chain path)
   | `mertens_bound_from_rh` | MellinBridge/MertensWeightBypass | 3 |
   | `abel_summation_l2_bound` | MellinBridge/MertensWeightBypass | 4 |
   | `baezDuarte_is_L2` | MellinBridge/OrthogonalWitness | 3 |
@@ -42,7 +67,7 @@ import Cathedral.Defs
   | `flattened_basis_integrable` | MellinBridge/AutocorrelationBypass | 4 |
   | `mellin_plancherel_gram` | MellinBridge/MellinSieve | 4 |
 
-  #### Spectral theory (9 axioms)
+  #### Spectral theory (9 axioms — NOT on critical path)
   | `lambdaMinClass_pos` | Spectral/ClassRestriction | 4 |
   | `block_min_eq_class_min` | Spectral/ClassRestriction | 4 |
   | `class_gap_strictly_larger` | Spectral/ClassRestriction | 4 |
@@ -53,7 +78,7 @@ import Cathedral.Defs
   | `stable_ratio` | Spectral/FiniteDimReduction | 4 |
   | `liouville_delocalization` | Spectral/PTSymmetry | 4 |
 
-  #### Sieve engine (9 axioms)
+  #### Sieve engine (11 axioms — 2 on spectral engine path)
   | `vasyunin_large_gcd` | Sieve/VasyuninExpansion | 3 |
   | `stable_ratio_parity` | Sieve/ParitySchur | 4 |
   | `gram_eigenvalue_log_scaling` | Sieve/ParitySchur | 4 |
@@ -66,17 +91,17 @@ import Cathedral.Defs
   | `vaughan_implies_uncoupling` | Sieve/MoebiusUncoupling | 4 |
   | `liouville_cancellation` | Sieve/AlignmentDecay | 4 |
 
-  #### Structural & integration (3 axioms)
+  #### Structural & integration (3 axioms — NOT on critical path)
   | `drop_formula_bound` | Structural/Eigenvalue | 4 |
   | `schur_complement_lower` | IntegralBasis/Quantitative | 4 |
   | `cross_norm_bound` | IntegralBasis/Quantitative | 4 |
 
-  #### Integral basis (2 axioms)
+  #### Integral basis (2 axioms — NOT on critical path)
   | `nyman_beurling_equivalence` | IntegralBasis/BaezDuarte | 3 |
   | `baez_duarte_covariance_divergence` | IntegralBasis/BaezDuarte | 1 (RH content) |
 
   ### Total: 48 unique axioms
-  ### Tiers: 2 RH-equivalent · 1 PNT-level · 15 classical · 30 structural
+  ### Critical path: 5 axioms · Alternative forward: 2 · Spectral engine: 2 · Non-critical: 41
 -/
 
 noncomputable section
