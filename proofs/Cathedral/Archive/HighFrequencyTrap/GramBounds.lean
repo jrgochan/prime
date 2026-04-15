@@ -54,8 +54,8 @@ lemma gramEntry_integrand_le_one (j k : ℕ) (x : ℝ) :
     functions, and 0 ≥ 0. -/
 theorem gramEntry_nonneg (j k : ℕ) : 0 ≤ gramEntry j k := by
   unfold gramEntry
-  apply intervalIntegral.integral_nonneg (by norm_num : (0:ℝ) ≤ 1)
-  intro x _hx
+  apply intervalIntegral.integral_nonneg_of_forall (by norm_num : (0:ℝ) ≤ 1)
+  intro x
   exact gramEntry_integrand_nonneg j k x
 
 
