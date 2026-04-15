@@ -1,4 +1,5 @@
 import Cathedral.MellinBridge.Basic
+import Cathedral.Axioms
 
 /-! # Cathedral.MellinBridge.Separation
 
@@ -88,35 +89,7 @@ theorem mellin_nbLinComb_eq_sum (N : ℕ) (w : Fin (N - 1) → ℂ) (s : ℂ)
   rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
   exact intervalIntegral.integral_const_mul (w i) _
 
-/-- **Sub-axiom (Complex Analysis — Mellin Separation)**:
-
-    If ζ has a non-trivial zero ρ off the critical line
-    (0 < Re(ρ) < 1, Re(ρ) ≠ 1/2), then the function x^{ρ-1}
-    creates a continuous linear functional on L²(0,1) that
-    "almost annihilates" the span of {k/x} for k ≥ 2.
-
-    Specifically: the Mellin transform M₀₁[{k/x}](ρ) involves ζ(ρ) = 0,
-    so the functional ℓ_ρ(f) = ∫₀¹ f(x)·x^{ρ-1} dx satisfies
-    ℓ_ρ({k/x}) = -k^ρ/(ρ-1) (using ζ(ρ) = 0).
-
-    Meanwhile ℓ_ρ(1) = 1/ρ ≠ 0 (since ρ ≠ 0 in the critical strip).
-
-    This creates a measurable "obstruction" to L² approximation:
-    no linear combination of {k/x} can approximate 1 too closely
-    in L² without also matching on the functional ℓ_ρ.
-
-    **Proof ingredients**:
-    - Mellin transform of {k/x}: from mellin_fractBasis (MellinBridge.lean)
-    - Continuity of ℓ_ρ on L²(0,1): from ∫|x^{ρ-1}|² < ∞ for Re(ρ) > 0
-    - Separation: ζ(ρ) = 0 kills one term, leaving nonzero residual -/
-axiom zeta_zero_separates :
-    ∀ ρ : ℂ, riemannZeta ρ = 0 →
-    0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
-    -- There exists a "defect" δ > 0 such that no linear combination
-    -- of {k/x} for k ≥ 2 can approximate 1 in L² better than δ
-    ∃ δ : ℝ, 0 < δ ∧
-    ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
+-- Note: zeta_zero_separates is imported from Cathedral.Axioms
 
 /-- Helper: cos(π·(n+1)) = (-1)^(n+1).
     Proved by induction using Complex.cos_pi and Complex.cos_add_pi. -/
