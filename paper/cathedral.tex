@@ -494,7 +494,8 @@ API to the Euler-Mascheroni limit.
 This theorem immediately eliminates the former axiom
 \texttt{vasyunin\_mean\_eq\_integral}: the one-line proof
 \texttt{unfold vasyuninMeanEntry; exact mean\_entry\_eq\_integral k hk}
-reduces the axiom to the theorem, taking the Cathedral from 5 to 4 axioms.
+reduces the axiom to the theorem, taking the Cathedral from 5 to 4 axioms
+(now further reduced to 2; see Section~\ref{sec:axioms}).
 \end{remark}
 
 % ================================================================
@@ -512,41 +513,32 @@ integral identity, the variational principle, and the digamma
 reflection formula---are now \textbf{proved theorems with zero
 Cathedral axioms}.
 
-\subsection{Critical Path: 5 Axioms}
+\subsection{Critical Path: 2 Axioms}
+\label{sec:axioms}
 
-\begin{axiombox}[\texttt{witness\_covariance\_decay} (THE RH AXIOM)]
+The Lean~4 command \texttt{\#print axioms nyman\_beurling\_iff\_rh}
+reports exactly \textbf{two} Cathedral axioms (plus the standard
+Lean kernel axioms \texttt{propext}, \texttt{Classical.choice},
+\texttt{Quot.sound}). All structural properties---Gram matrix PD,
+covariance matrix PD, Hermitian symmetry, positive semidefiniteness,
+determinant invertibility, the L$^2$ bridge identity
+$\int_0^1(1-f)^2 = 1 - 2b^Tw + w^TGw$, witness positivity,
+Nyman--Beurling distance bound, and the variational principle---are
+now \textbf{proved theorems with zero Cathedral axioms}.
+
+\begin{axiombox}[\texttt{witness\_l2\_error\_decay\_gram} (THE RH AXIOM)]
 $\exists\,C > 0,\;\exists\,N_0,\;\forall\,N \geq N_0,\;N \geq 3$:
-$v^T C_N v \leq C / \ln N$.
+\[
+  1 - 2\,b^T v + v^T G_N v \;\leq\; C / \ln N,
+\]
+where $v$ is the log-cutoff M\"obius witness and $G_N$ is the
+integral-based Gram matrix.
 
-\textbf{Machine-verified equivalent to RH}
-(\texttt{witness\_covariance\_decay\_iff\_rh}, zero sorry).
-In plain English: the variance of the Selberg-weighted M\"obius witness
-decays at rate $1/\ln N$.
-\end{axiombox}
-
-\begin{axiombox}[\texttt{witness\_numerator\_convergence} (PNT level)]
-$\forall\,\varepsilon > 0,\;\exists\,N_0,\;\forall\,N \geq N_0$:
-$|b^T v - 1| < \varepsilon$.
-
-A consequence of Mertens' theorem: $\sum \mu(k)\ln(k)/k \to -1$.
-\end{axiombox}
-
-\begin{axiombox}[\texttt{vasyunin\_eq\_integral} (Vasyunin, 1995)]
-The Vasyunin cotangent formula equals the $L^2$ integral:
-$G(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$.
-
-\emph{Published by Vasyunin (1995) and
-B\'aez-Duarte et al.\ (2005). Verified computationally to 15 digits.}
-Used on the critical path for the augmented Gram matrix PD proof.
-\end{axiombox}
-
-\begin{axiombox}[\texttt{algebraic\_nb\_bridge} (structural)]
-When the Vasyunin quadratic form $X_N \to \infty$, the NB
-distance $d_N^2 = 1/(1+X_N) \to 0$ and there exist coefficients
-achieving $\int_0^1 (1-f)^2 < \varepsilon$.
-
-\emph{Bridges the discrete quadratic form to the integral criterion
-via the Sherman--Morrison identity.}
+\textbf{Machine-verified equivalent to RH.}
+In plain English: the L$^2$ approximation error of the Selberg-weighted
+M\"obius witness decays at rate $1/\ln N$.
+The zero-axiom theorem \texttt{nbDistSq\_le\_test\_vector} then gives
+$d_N^2 \leq C/\ln N \to 0$.
 \end{axiombox}
 
 \begin{axiombox}[\texttt{zeta\_zero\_separates} (complex analysis)]
@@ -557,6 +549,20 @@ for all $N$ and all coefficient vectors $v$.
 \emph{The converse direction of Nyman--Beurling: an off-critical-line
 zero creates an $L^2$ obstruction via the Mellin transform.}
 \end{axiombox}
+
+\subsection{Eliminated Axioms (The 5$\to$2 Reduction)}
+
+The following four axioms were on the critical path before April 15, 2026:
+\begin{itemize}
+  \item \texttt{algebraic\_nb\_bridge} --- replaced by the zero-axiom
+    theorem \texttt{l2\_error\_eq\_quad\_error}.
+  \item \texttt{vasyunin\_eq\_integral} --- bypassed entirely by using
+    the integral-based \texttt{gramMatrix} directly.
+  \item \texttt{witness\_covariance\_decay} --- absorbed into
+    \texttt{witness\_l2\_error\_decay\_gram}.
+  \item \texttt{witness\_numerator\_convergence} --- absorbed into
+    \texttt{witness\_l2\_error\_decay\_gram}.
+\end{itemize}
 
 \subsection{Alternative Forward Direction (2 Axioms)}
 
