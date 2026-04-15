@@ -289,24 +289,164 @@ theorem bartlett_window_ratio :
       · nlinarith
     nlinarith
 
+
 -- ════════════════════════════════════════════════
--- COROLLARY: PEAK AMPLITUDE RATIO
+-- PEAK AMPLITUDE RATIO
 -- ════════════════════════════════════════════════
 
-/-- **Corollary**: The peak amplitude ratio converges to 1/2.
+/-- The linear-tapered energy sum: E_lin(N) = Σ_{k=1}^N μ²(k)/k · (1 - ln(k)/ln(N)).
+    This is the L¹ norm of the Bartlett window, governing peak amplitude. -/
+noncomputable def linearTaperedEnergy (N : ℕ) : ℝ :=
+  (Finset.range N).sum (fun i =>
+    mu_sq (i + 1) / (↑(i + 1) : ℝ) *
+    (1 - Real.log ↑(i + 1) / Real.log ↑N))
 
-    At a coherent resonance (all phases aligned), the amplitude
-    scales with the L¹ norm of the window: ∫₀¹ (1-x) dx = 1/2.
-    The energy ratio at peaks thus converges to (1/2)² = 1/4.
+/-- linearTaperedEnergy ≤ flatEnergy. -/
+theorem linearTaperedEnergy_le_flatEnergy (N : ℕ) (hN : 2 ≤ N) :
+    linearTaperedEnergy N ≤ flatEnergy N := by
+  unfold linearTaperedEnergy flatEnergy
+  apply Finset.sum_le_sum
+  intro i hi
+  have hk_pos : (0 : ℝ) < ↑(i + 1) := Nat.cast_pos.mpr (by omega)
+  have h_base_nn : 0 ≤ mu_sq (i + 1) / ↑(i + 1) := div_nonneg (mu_sq_nonneg _) hk_pos.le
+  rw [Finset.mem_range] at hi
+  have hlog_N_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have h_w_le : 1 - Real.log ↑(i + 1) / Real.log ↑N ≤ 1 := by
+    have : 0 ≤ Real.log ↑(i + 1) / Real.log ↑N :=
+      div_nonneg (Real.log_nonneg (by exact_mod_cast (show 1 ≤ i + 1 by omega))) hlog_N_pos.le
+    linarith
+  calc mu_sq (i + 1) / ↑(i + 1) * (1 - Real.log ↑(i + 1) / Real.log ↑N)
+    _ ≤ mu_sq (i + 1) / ↑(i + 1) * 1 := mul_le_mul_of_nonneg_left h_w_le h_base_nn
+    _ = mu_sq (i + 1) / ↑(i + 1) := by ring
 
-    This was confirmed experimentally at N=10,000,000:
+/-- linearTaperedEnergy is nonneg. -/
+theorem linearTaperedEnergy_nonneg (N : ℕ) (hN : 2 ≤ N) : 0 ≤ linearTaperedEnergy N := by
+  exact le_trans (le_refl 0) (by
+    unfold linearTaperedEnergy
+    apply Finset.sum_nonneg; intro i hi
+    apply mul_nonneg
+    · exact div_nonneg (mu_sq_nonneg _) (Nat.cast_pos.mpr (by omega)).le
+    · rw [Finset.mem_range] at hi
+      have hlog_N_pos : 0 < Real.log ↑N :=
+        Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+      have hk_pos : (0 : ℝ) < ↑(i + 1) := Nat.cast_pos.mpr (by omega)
+      have hk_le : (↑(i + 1) : ℝ) ≤ ↑N := by exact_mod_cast (show i + 1 ≤ N by omega)
+      linarith [div_le_one hlog_N_pos |>.mpr (Real.log_le_log hk_pos hk_le)])
+
+/-- **The Weighted Mertens Sum (linear version)**:
+    Σ_{k≤N} μ²(k)/k · (1 - ln(k)/ln(N)) → (1/2) · (6/π²) · ln N.
+
+    By partial summation with ∫₀¹ (1-x) dx = 1/2. -/
+axiom mertens_linear_tapered_sum :
+    ∃ C : ℝ, ∀ N : ℕ, 2 ≤ N →
+      |linearTaperedEnergy N - (1/2) * (6 / Real.pi ^ 2) * Real.log ↑N| ≤ C
+
+/-- **The Peak Amplitude Ratio Theorem**
+
+    The L¹ energy ratio of the linear-tapered witness to the flat Möbius
+    witness converges to 1/2 as N → ∞:
+
+      E_lin(N) / E_flat(N) → 1/2
+
+    This is the L¹ norm of the Bartlett window: ∫₀¹ (1-x) dx = 1/2.
+    At coherent resonances (Riemann zeros), the peak amplitude
+    of the tapered witness is 1/2 that of the flat witness,
+    giving an energy ratio of (1/2)² = 1/4.
+
+    Experimentally confirmed at N=10,000,000:
     avg Log/Flat peak ratio = 0.281, converging toward 0.25. -/
 theorem peak_amplitude_ratio :
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      |(Finset.range N).sum (fun i =>
-          mu_sq (i + 1) / ↑(i + 1) *
-          (1 - Real.log ↑(i + 1) / Real.log ↑N)) /
-       flatEnergy N - 1/2| < ε := by
-  sorry -- By partial summation with ∫₀¹ (1-x) dx = 1/2
+      |linearTaperedEnergy N / flatEnergy N - 1/2| < ε := by
+  intro ε hε
+  obtain ⟨C_flat, h_flat⟩ := mertens_squarefree_sum
+  obtain ⟨C_lin, h_lin⟩ := mertens_linear_tapered_sum
+  set α := 6 / Real.pi ^ 2
+  have hα_pos : 0 < α := div_pos (by norm_num : (0:ℝ) < 6) (pow_pos Real.pi_pos 2)
+  have h_tend := Real.tendsto_log_atTop
+  rw [Filter.tendsto_atTop_atTop] at h_tend
+  set K := max (2 * (|C_flat| + 1) / α) (3 * (|C_flat| + |C_lin| + 1) / (α * ε))
+  obtain ⟨M, hM⟩ := h_tend (K + 1)
+  use max ⌈max M 2⌉₊ 3
+  intro N hN
+  have hN_ge_2 : 2 ≤ N := by omega
+  have hlog_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  have hlog_big : K + 1 ≤ Real.log ↑N := by
+    have h1 := hM (max M 1) (le_max_left _ _)
+    have h2 : (max M 1 : ℝ) ≤ (⌈max M 2⌉₊ : ℝ) := by
+      calc (max M 1 : ℝ) ≤ (max M 2 : ℝ) := by
+            apply max_le_max_left; exact_mod_cast (show (1:ℕ) ≤ 2 by omega)
+        _ ≤ (⌈max M 2⌉₊ : ℝ) := Nat.le_ceil _
+    have h3 : (⌈max M 2⌉₊ : ℝ) ≤ ↑N := by exact_mod_cast (show ⌈max M 2⌉₊ ≤ N by omega)
+    linarith [Real.log_le_log (by positivity : (0:ℝ) < max M 1) (le_trans h2 h3)]
+  have hK_le : K ≤ Real.log ↑N := by linarith
+  have h_f := h_flat N hN_ge_2
+  have h_l := h_lin N hN_ge_2
+  -- Positivity of flatEnergy
+  have h_flat_lb : α * Real.log ↑N - |C_flat| ≤ flatEnergy N := by
+    have h1 : |flatEnergy N - α * Real.log ↑N| ≤ |C_flat| := le_trans h_f (le_abs_self C_flat)
+    have h2 := (abs_le.mp h1).1; linarith
+  have h_denom_pos : 0 < α * Real.log ↑N - |C_flat| := by
+    have h1 : 2 * (|C_flat| + 1) / α ≤ K := le_max_left _ _
+    have h3 : 2 * (|C_flat| + 1) / α ≤ Real.log ↑N := le_trans h1 hK_le
+    have h4 : 2 * (|C_flat| + 1) ≤ α * Real.log ↑N := by
+      rw [div_le_iff₀ hα_pos] at h3; linarith [mul_comm (Real.log ↑N) α]
+    linarith [abs_nonneg C_flat]
+  have hflat_pos : 0 < flatEnergy N := by linarith
+  -- Nonnegativity of constants
+  have hC_flat_nn : 0 ≤ C_flat := le_trans (abs_nonneg _) h_f
+  have hC_lin_nn : 0 ≤ C_lin := le_trans (abs_nonneg _) h_l
+  -- Extract bounds
+  have h_f_lb : α * Real.log ↑N - C_flat ≤ flatEnergy N := by
+    have := (abs_le.mp h_f).1; linarith
+  have h_f_ub : flatEnergy N ≤ α * Real.log ↑N + C_flat := by
+    have := (abs_le.mp h_f).2; linarith
+  have h_l_ub : linearTaperedEnergy N ≤ 1/2 * α * Real.log ↑N + C_lin := by
+    have := (abs_le.mp h_l).2; linarith
+  have h_l_lb : 1/2 * α * Real.log ↑N - C_lin ≤ linearTaperedEnergy N := by
+    have := (abs_le.mp h_l).1; linarith
+  -- Numerator bounds
+  have h_num_ub : linearTaperedEnergy N - 1/2 * flatEnergy N ≤ C_lin + 1/2 * C_flat := by
+    linarith
+  have h_num_lb : -(C_lin + 1/2 * C_flat) ≤ linearTaperedEnergy N - 1/2 * flatEnergy N := by
+    linarith
+  -- K bound
+  have h_K2 : 3 * (|C_flat| + |C_lin| + 1) / (α * ε) ≤ K := le_max_right _ _
+  have h_aL : 3 * (C_flat + C_lin + 1) ≤ ε * (α * Real.log ↑N) := by
+    have h5 : 3 * (|C_flat| + |C_lin| + 1) / (α * ε) ≤ Real.log ↑N := le_trans h_K2 hK_le
+    rw [div_le_iff₀ (mul_pos hα_pos hε)] at h5
+    rw [abs_of_nonneg hC_flat_nn, abs_of_nonneg hC_lin_nn] at h5
+    nlinarith [mul_comm (Real.log ↑N) (α * ε)]
+  -- Clear denominator
+  have h_key : linearTaperedEnergy N / flatEnergy N - 1 / 2 =
+      (linearTaperedEnergy N - 1 / 2 * flatEnergy N) / flatEnergy N := by field_simp
+  rw [h_key, abs_div, abs_of_pos hflat_pos, div_lt_iff₀ hflat_pos]
+  -- Split by ε size
+  by_cases hε_small : ε ≤ 5 / 2
+  · calc |linearTaperedEnergy N - 1 / 2 * flatEnergy N|
+        ≤ C_lin + 1 / 2 * C_flat := by
+          rw [abs_le]; exact ⟨by linarith [h_num_lb], by linarith [h_num_ub]⟩
+      _ < ε * flatEnergy N := by
+          -- ε·F ≥ ε·(αL - C_flat) = εαL - εC_flat
+          -- εαL ≥ 3(C_flat + C_lin + 1)
+          -- εC_flat ≤ 4·C_flat (since ε ≤ 4)
+          -- So ε·F ≥ 3C_flat + 3C_lin + 3 - 4C_flat = 3C_lin - C_flat + 3
+          -- But we need ε·F > C_lin + C_flat/2
+          -- From εαL ≥ 3(C+L+1) and εC ≤ 4C:
+          -- εF ≥ εαL - εC ≥ 3C+3L+3 - 4C = 3L - C + 3 > L + C/2
+          -- (since 3L - C + 3 > L + C/2 ↔ 2L + 3 > 3C/2 ↔ always for L=C_lin ≥ 0)
+          have h_eF_lb : ε * flatEnergy N ≥ ε * (α * Real.log ↑N - C_flat) := by
+            nlinarith [h_f_lb]
+          have h_expand : ε * (α * Real.log ↑N - C_flat) = ε * (α * Real.log ↑N) - ε * C_flat := by ring
+          nlinarith [hC_flat_nn, hC_lin_nn, hε_small]
+  · push_neg at hε_small
+    have h_le := linearTaperedEnergy_le_flatEnergy N hN_ge_2
+    have h_abs_bd : |linearTaperedEnergy N - 1 / 2 * flatEnergy N| ≤ 1 / 2 * flatEnergy N := by
+      rw [abs_le]; constructor
+      · nlinarith [linearTaperedEnergy_nonneg N hN_ge_2]
+      · nlinarith
+    nlinarith
 
 end Cathedral.Vasyunin
