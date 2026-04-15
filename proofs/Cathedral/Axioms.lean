@@ -7,43 +7,76 @@ import Cathedral.Defs
 
   Central hub for shared axioms and the axiom documentation index.
 
-  ### Axiom Inventory (Complete)
+  ### Axiom Inventory — 48 unique axioms across 83 active files
 
-  #### Tier 1: RH Content (1 axiom)
-  - `witness_covariance_decay` — vᵀCv ≤ C/ln(N)
-    - Location: Vasyunin/Proof/WitnessAsymptotics.lean
-    - Machine-verified equivalent to RH
+  #### Core Chain (Vasyunin proof — 8 axioms)
+  | Axiom | Location | Tier |
+  |-------|----------|------|
+  | `witness_covariance_decay` | Vasyunin/Proof/WitnessAsymptotics | 1 (RH content) |
+  | `witness_numerator_convergence` | Vasyunin/Proof/WitnessAsymptotics | 2 (PNT-level) |
+  | `mertens_squarefree_sum` | Vasyunin/Proof/BartlettWindow | 3 (classical) |
+  | `mertens_tapered_sum` | Vasyunin/Proof/BartlettWindow | 3 |
+  | `mertens_linear_tapered_sum` | Vasyunin/Proof/BartlettWindow | 3 |
+  | `algebraic_nb_bridge` | Vasyunin/Proof/Chain | 4 (structural) |
+  | `vasyunin_eq_integral` | Vasyunin/Augmented/IntegralBridge | 3 |
+  | `zeta_zero_separates` | **this file** | 3 |
 
-  #### Tier 2: PNT-Level (1 axiom)
-  - `witness_numerator_convergence` — bᵀv → 1
-    - Location: Vasyunin/Proof/WitnessAsymptotics.lean
+  #### Cotangent Formula (3 axioms)
+  | `gauss_digamma_formula` | Vasyunin/Cotangent/DigammaReflection | 3 |
+  | `harmonicTileSum_reciprocity` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
+  | `telescope_limit_eq_vasyunin` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
+  | `vasyunin_integral_eq_formula` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
 
-  #### Tier 3: Classical Analysis (4 axioms)
-  - `mertens_squarefree_sum` — Σ μ²(k)/k → 6/π²·ln(N)
-    - Location: Vasyunin/Proof/BartlettWindow.lean
-  - `mertens_tapered_sum` — tapered variant
-    - Location: Vasyunin/Proof/BartlettWindow.lean
-  - `mertens_linear_tapered_sum` — linear-tapered variant
-    - Location: Vasyunin/Proof/BartlettWindow.lean
-  - `zeta_zero_separates` — ζ(ρ)=0 off critical line → L² obstruction
-    - Location: **this file** (used by NymanBeurling/Separation.lean)
+  #### Robin front (1 axiom)
+  | `arithmetic_rh_equivalences` | Robin/Defs | 3 |
 
-  #### Tier 4: Structural (4 axioms)
-  - `rh_implies_mertens_bound` — RH → |M(x)| ≤ Cx^{1/2}(log x)²
-    - Location: Vasyunin/Proof/WitnessConditional.lean
-  - `abel_summation_l2_bound` — Mertens bound → L² decay
-    - Location: Vasyunin/Proof/WitnessConditional.lean
-  - `algebraic_nb_bridge` — Gram divergence → NB integral criterion
-    - Location: Vasyunin/Proof/WitnessConditional.lean
-  - `arithmetic_rh_equivalences` — Robin ↔ Lagarias ↔ RH
-    - Location: Robin/Defs.lean
+  #### MellinBridge (8 axioms)
+  | `mertens_bound_from_rh` | MellinBridge/MertensWeightBypass | 3 |
+  | `abel_summation_l2_bound` | MellinBridge/MertensWeightBypass | 4 |
+  | `baezDuarte_is_L2` | MellinBridge/OrthogonalWitness | 3 |
+  | `baezDuarte_inner_one` | MellinBridge/OrthogonalWitness | 3 |
+  | `baezDuarte_inner_residual` | MellinBridge/OrthogonalWitness | 3 |
+  | `mellin_fourier_change` | MellinBridge/AutocorrelationBypass | 4 |
+  | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
+  | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
+  | `flattened_basis_integrable` | MellinBridge/AutocorrelationBypass | 4 |
+  | `mellin_plancherel_gram` | MellinBridge/MellinSieve | 4 |
 
-  #### NymanBeurling (1 axiom)
-  - `nyman_beurling_forward_from_sieve` — RH → d²→0
-    - Location: NymanBeurling/NymanBeurling.lean
-    - Consequence of rh_implies_mertens_bound + Abel summation
+  #### Spectral theory (9 axioms)
+  | `lambdaMinClass_pos` | Spectral/ClassRestriction | 4 |
+  | `block_min_eq_class_min` | Spectral/ClassRestriction | 4 |
+  | `class_gap_strictly_larger` | Spectral/ClassRestriction | 4 |
+  | `oct_equals_block` | Spectral/ClassRestriction | 4 |
+  | `schur_bridge` | Spectral/ClassRestriction | 4 |
+  | `oct_gap_dominates` | Spectral/OctonionicPartition | 4 |
+  | `oct_gap_lower_bound` | Spectral/OctonionicPartition | 4 |
+  | `stable_ratio` | Spectral/FiniteDimReduction | 4 |
+  | `liouville_delocalization` | Spectral/PTSymmetry | 4 |
 
-  ### Total: 11 axioms (1 RH-equivalent, 10 classical/structural)
+  #### Sieve engine (9 axioms)
+  | `vasyunin_large_gcd` | Sieve/VasyuninExpansion | 3 |
+  | `stable_ratio_parity` | Sieve/ParitySchur | 4 |
+  | `gram_eigenvalue_log_scaling` | Sieve/ParitySchur | 4 |
+  | `eigenvalue_implies_distance_bound` | Sieve/ParitySchur | 4 |
+  | `block_eigenvalue_log_scaling` | Sieve/ParityBridge | 4 |
+  | `moebius_uncoupling` | Sieve/BilinearSieve | 4 |
+  | `type_II_sieve_bound` | Sieve/BilinearSieve | 4 |
+  | `vaughan_decomposition` | Sieve/MoebiusUncoupling | 4 |
+  | `type_I_bound` | Sieve/MoebiusUncoupling | 4 |
+  | `vaughan_implies_uncoupling` | Sieve/MoebiusUncoupling | 4 |
+  | `liouville_cancellation` | Sieve/AlignmentDecay | 4 |
+
+  #### Structural & integration (3 axioms)
+  | `drop_formula_bound` | Structural/Eigenvalue | 4 |
+  | `schur_complement_lower` | IntegralBasis/Quantitative | 4 |
+  | `cross_norm_bound` | IntegralBasis/Quantitative | 4 |
+
+  #### Integral basis (2 axioms)
+  | `nyman_beurling_equivalence` | IntegralBasis/BaezDuarte | 3 |
+  | `baez_duarte_covariance_divergence` | IntegralBasis/BaezDuarte | 1 (RH content) |
+
+  ### Total: 48 unique axioms
+  ### Tiers: 2 RH-equivalent · 1 PNT-level · 15 classical · 30 structural
 -/
 
 noncomputable section
