@@ -23,14 +23,18 @@ open Complex Real
 /-- The fractional part {x} = x - ⌊x⌋, using Mathlib's Int.fract -/
 def fracPart' (x : ℝ) : ℝ := Int.fract x
 
-/-- Nyman-Beurling basis: f_k(x) = {k/x} for x ∈ (0,1] -/
-def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract ((k : ℝ) / x)
+/-- Báez-Duarte basis: h_k(x) = {1/(kx)} for x ∈ (0,1].
+    NOTE: This is the SHIFTED Báez-Duarte basis, NOT {k/x}.
+    The Vasyunin discrete formula computes the Gram matrix of {1/(kx)},
+    not {k/x}. Verified numerically: G(2,2) ≈ 0.3803 matches ∫{1/(2x)}²,
+    not ∫{2/x}² ≈ 0.2937. See RED ALERT memo (April 11, 2026). -/
+def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract (1 / ((k : ℝ) * x))
 
-/-- Gram matrix entry G[j,k] = ∫₀¹ {j/x}{k/x} dx
-    This is the inner product of Nyman-Beurling basis functions f_j, f_k
-    in L²(0,1). -/
+/-- Gram matrix entry G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx
+    This is the inner product of Báez-Duarte basis functions h_j, h_k
+    in L²(0,1). The Vasyunin cotangent formula computes this exactly. -/
 noncomputable def gramEntry (j k : ℕ) : ℝ :=
-  ∫ x in (0:ℝ)..1, Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)
+  ∫ x in (0:ℝ)..1, Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))
 
 /-- The (N-1)×(N-1) Gram matrix with entries G[j,k] for j,k ∈ {2,...,N}.
     This is the Gram matrix of the Nyman-Beurling basis functions. -/
@@ -109,10 +113,10 @@ noncomputable def cosAlignment (N : ℕ) : ℝ :=
       Real.sqrt proj_sq / Real.sqrt gnorm_sq
   else 0
 
-/-- The inner product vector b_i = ⟨1_{(0,1)}, f_{i+2}⟩ = ∫₀¹ {(i+2)/x} dx.
+/-- The inner product vector b_i = ⟨1_{(0,1)}, h_{i+1}⟩ = ∫₀¹ {1/((i+1)x)} dx.
     Used in the Nyman-Beurling distance formula. -/
 noncomputable def basisInnerProd (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => ∫ x in (0:ℝ)..1, Int.fract (((i.val + 1 : ℕ) : ℝ) / x)
+  fun i => ∫ x in (0:ℝ)..1, Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))
 
 /-- Nyman-Beurling distance squared: d_N² = 1 - bᵀ G_N⁻¹ b.
     This is the squared L²(0,1) distance from the indicator 1_{(0,1)}
@@ -128,6 +132,32 @@ noncomputable def nbDistSq' (N : ℕ) : ℝ :=
     Examples: λ(1)=1, λ(2)=-1, λ(4)=1, λ(6)=1, λ(12)=-1, λ(30)=-1 -/
 def liouvilleFunction (n : ℕ) : ℤ :=
   (-1) ^ (n.factorization.sum (fun _ e => e))
+
+/-- λ(1) = 1  (Ω(1) = 0, even parity). -/
+theorem liouville_one : liouvilleFunction 1 = 1 := by native_decide
+
+/-- λ(2) = -1  (Ω(2) = 1, odd parity). -/
+theorem liouville_two : liouvilleFunction 2 = -1 := by native_decide
+
+/-- λ(4) = 1  (Ω(4) = 2, even parity). -/
+theorem liouville_four : liouvilleFunction 4 = 1 := by native_decide
+
+/-- λ(6) = 1  (Ω(6) = 2, even parity: 6 = 2·3). -/
+theorem liouville_six : liouvilleFunction 6 = 1 := by native_decide
+
+/-- λ(30) = -1  (Ω(30) = 3, odd parity: 30 = 2·3·5). -/
+theorem liouville_thirty : liouvilleFunction 30 = -1 := by native_decide
+
+/-- The Liouville function squares to 1: λ(n)² = 1 for all n ≥ 1.
+    Since λ(n) = ±1, this is immediate. -/
+theorem liouville_sq (n : ℕ) (_hn : 1 ≤ n) :
+    liouvilleFunction n ^ 2 = 1 := by
+  unfold liouvilleFunction
+  have h : ∀ k : ℕ, ((-1 : ℤ) ^ k) ^ 2 = 1 := by
+    intro k
+    rw [← pow_mul]
+    simp [show k * 2 = 2 * k from by ring, pow_mul]
+  exact h _
 
 -- ── LIOUVILLE PARITY DECOMPOSITION (PT-Symmetry, discovered 2026-04-01) ──
 

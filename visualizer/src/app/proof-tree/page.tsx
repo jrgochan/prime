@@ -37,19 +37,17 @@ interface ProofData {
 }
 
 const ROUTE_COLORS: Record<string, string> = {
-  converse: "#8b5cf6",
-  forward: "#3b82f6",
+  variational: "#8b5cf6",
   robin: "#f59e0b",
-  crown: "#10b981",
-  spectral: "#64748b",
+  infrastructure: "#3b82f6",
+  mellin: "#10b981",
 };
 
 const ROUTE_LABELS: Record<string, string> = {
-  converse: "Route 1: Converse (d²→0 ⟹ RH)",
-  forward: "Route 2: Forward (RH ⟹ d²→0)",
-  robin: "Route 3: Robin/Lagarias",
-  crown: "Crown: Assembly",
-  spectral: "Spectral Infrastructure",
+  variational: "Vasyunin Variational Path",
+  robin: "Robin–Lagarias (Discrete)",
+  infrastructure: "Infrastructure & Definitions",
+  mellin: "Mellin Bridge",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {

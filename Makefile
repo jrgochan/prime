@@ -239,34 +239,33 @@ cathedral-dump:
 ## Dump Cathedral .lean files into multiple text files (one per component)
 ## Each file is small enough to upload to Gemini / Claude / ChatGPT
 cathedral-dump-split:
-	@echo "═══ Cathedral: Creating split dump (10 files for Gemini) ═══"
+	@echo "═══ Cathedral: Creating split dump ═══"
 	@mkdir -p cathedral-parts
 	@rm -f cathedral-parts/*.txt
 	@# Header for each file
-	@for component in Core Structural Gram SieveParity SieveBridge MellinFoundations MellinTools Assembly Spectral1 Spectral2; do \
+	@for component in Core LinearAlgebra VasyuninDefs VasyuninGram VasyuninCov VasyuninTelescope VasyuninBridge Robin; do \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "# Cathedral Source - $$component" > "$$outfile"; \
 		echo "# Generated: $$(date)" >> "$$outfile"; \
 		echo "# Project: prime/proofs/Cathedral" >> "$$outfile"; \
-		echo "# Proof: Spectral Riemann Hypothesis (2-axiom reduction)" >> "$$outfile"; \
+		echo "# Proof: Spectral Riemann Hypothesis" >> "$$outfile"; \
+		echo "# Build: lake build Cathedral (6 axioms, 1 sorry)" >> "$$outfile"; \
 		echo "" >> "$$outfile"; \
 	done
-	@# Sort files into components (10 categories, each <90K)
+	@# Sort files into components
 	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" -not -path "*Archive*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
 		component="Core"; \
 		case "$$relpath" in \
-			*Structural*) component="Structural" ;; \
-			*GramBounds*|*GramDiag*|*GramOffDiag*|*FractIntegral*|*AlignmentDecay*) component="Gram" ;; \
-			*BilinearSieve*|*ParitySchur*) component="SieveParity" ;; \
-			*ParityBridge*|*MoebiusUncoupling*|*VasyuninExpansion*) component="SieveBridge" ;; \
-			*MellinBridge/Basic*|*FloorMellin*|*FloorDivMellin*|*Separation*) component="MellinFoundations" ;; \
-			*MellinBridge.lean) component="MellinFoundations" ;; \
-			*HilbertSetup*|*OrthogonalWitness*|*MellinSieve*|*AbelSummation*|*MertensIntegral*|*AutocorrelationBypass*|*MertensWeightBypass*) component="MellinTools" ;; \
-			*Assembly*) component="Assembly" ;; \
-			*PTSymmetry*|*RayleighBridge*|*OctonionicPartition*) component="Spectral1" ;; \
-			*ClassRestriction*|*ConstantVectorBound*|*FiniteDimReduction*) component="Spectral2" ;; \
-			*Defs*|*Robin*|*Quantitative*) component="Core" ;; \
+			*LinearAlgebra*) component="LinearAlgebra" ;; \
+			*Vasyunin/Defs*|*Vasyunin/Structural*) component="VasyuninDefs" ;; \
+			*Vasyunin/GramEntries*|*Vasyunin/GramEvaluations*|*Vasyunin/GramPSD*|*Vasyunin/AugmentedGram*|*Vasyunin/NbDistPos*|*Vasyunin/GramInduction*) component="VasyuninGram" ;; \
+			*Vasyunin/CovEntries*|*Vasyunin/CovDet2*|*Vasyunin/CovDet3*) component="VasyuninCov" ;; \
+			*Vasyunin/DigammaReflection*|*Vasyunin/TelescopeSum*|*Vasyunin/LogDigammaBridge*|*Vasyunin/OffDiagPartition*|*Vasyunin/CrossTermFTC*|*Vasyunin/VasyuninAssembly*) component="VasyuninTelescope" ;; \
+			*Vasyunin/Witness*|*Vasyunin/Rayleigh*|*Vasyunin/Chain*|*Vasyunin/LinIndep*|*Vasyunin/FractIntegral*|*Vasyunin/NbDistPos2*|*Vasyunin/NbDistPos3*|*Vasyunin/StirlingBridge*|*Vasyunin/IntegralBridge*|*Vasyunin/DiagonalBridge*|*Vasyunin/MeanIntegral*|*Vasyunin/PiecewiseFTC*|*Vasyunin/SqueezeElimination*|*MellinBridge/Vasyunin.lean) component="VasyuninBridge" ;; \
+			*MellinBridge*) component="Core" ;; \
+			*Robin*) component="Robin" ;; \
+			*Defs*) component="Core" ;; \
 		esac; \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "" >> "$$outfile"; \
@@ -286,7 +285,7 @@ cathedral-dump-split:
 	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-parts/cathedral-Core.txt
 	@# Summary
 	@echo ""
-	@echo "  📁 Files created in cathedral-parts/ (max 10 for Gemini):"
+	@echo "  📁 Files created in cathedral-parts/:"
 	@for f in cathedral-parts/*.txt; do \
 		name=$$(basename "$$f"); \
 		size=$$(du -h "$$f" | cut -f1); \
@@ -295,7 +294,7 @@ cathedral-dump-split:
 		echo "     $$name  ($$size, $$lines lines, $$files files)"; \
 	done
 	@echo ""
-	@echo "  ✅ Upload all 10 files to Gemini Deep Think!"
+	@echo "  ✅ Upload all files to Gemini Deep Think!"
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:

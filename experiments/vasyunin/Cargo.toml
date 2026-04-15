@@ -1,0 +1,22 @@
+[package]
+name = "vasyunin"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "attack8"
+path = "src/main.rs"
+
+[[bin]]
+name = "attack9"
+path = "src/attack9.rs"
+
+[[bin]]
+name = "attack10"
+path = "src/attack10.rs"
+
+[dependencies]
+rug = { version = "1", features = ["float"] }
+nalgebra = "0.33"
+rayon = "1"
+serde_json = "1"
