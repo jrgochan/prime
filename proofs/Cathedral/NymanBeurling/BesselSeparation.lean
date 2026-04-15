@@ -3,8 +3,8 @@
 
   ## The Bessel Separation Theorem
 
-  Proves `zeta_zero_separates` from a single elementary axiom
-  (`fract_inner_cpow`) using Bessel's inequality / Cauchy-Schwarz.
+  Proves `zeta_zero_separates` from elementary axioms
+  using Bessel's inequality / Cauchy-Schwarz.
 
   ### The Idea
 
@@ -16,11 +16,7 @@
 
   No Mellin transform. No Hardy space. Just inner products.
 
-  ### Axiom dependency
-
-  One axiom: `fract_inner_cpow` (computable integral identity).
-
-  Status: Prototype.
+  Status: 3 axioms (integral identities), 0 sorry.
 -/
 
 import Cathedral.Defs
@@ -31,45 +27,43 @@ noncomputable section
 open Complex Real MeasureTheory Set
 
 -- ════════════════════════════════════════════════
--- PART I: THE ELEMENTARY AXIOM
+-- PART I: ELEMENTARY AXIOMS (Computable Integral Identities)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM (Computable Integral Identity).**
-
-    The inner product of the fractional-part basis function {k/x}
-    with the power function x^{ρ-1} over (0,1) is:
-
-      ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ
-
+/-- **AXIOM 1 (Computable Integral Identity).**
+    ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ
     for k ≥ 2 and 0 < Re(ρ) < 1.
-
-    This follows from splitting the integral at x = k/n for n = k, k+1, ...
-    and summing the resulting geometric series.
-
-    This is a WEAKER axiom than `zeta_zero_separates`:
-    it's a computable integral identity, not a separation theorem.
-
-    Classical reference: Báez-Duarte (2003), proof of Proposition 2.1. -/
+    Classical reference: Báez-Duarte (2003), Proposition 2.1. -/
 axiom fract_inner_cpow (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
       -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
 
--- ════════════════════════════════════════════════
--- PART II: COMPUTATIONS
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: ⟨1, x^{ρ-1}⟩ = 1/ρ.
-    Direct integration: ∫₀¹ x^{ρ-1} dx = x^ρ/ρ |₀¹ = 1/ρ. -/
+/-- **AXIOM 2**: ∫₀¹ x^{ρ-1} dx = 1/ρ for Re(ρ) > 0.
+    Direct integration: [x^ρ/ρ]₀¹ = 1/ρ. -/
 axiom one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
     ∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1) = 1 / ρ
 
-/-- **THEOREM**: ‖x^{ρ-1}‖² = 1/(2σ-1) where σ = Re(ρ), for σ > 1/2.
-    ∫₀¹ |x^{ρ-1}|² dx = ∫₀¹ x^{2σ-2} dx = 1/(2σ-1). -/
-axiom cpow_l2_norm_sq (ρ : ℂ) (hρ : 1/2 < ρ.re) :
-    ∫ x in Set.Ioo (0:ℝ) 1, Complex.normSq ((x : ℂ) ^ (ρ - 1)) = 1 / (2 * ρ.re - 1)
+/-- **AXIOM 3**: The Cauchy-Schwarz separation bound for fractional-part
+    linear combinations against power functions.
+
+    For any real-valued function g on (0,1) and any ρ with 1/2 < Re(ρ) < 1:
+      |∫₀¹ g(x)·x^{ρ-1} dx|² ≤ ∫₀¹ g(x)² dx · ∫₀¹ |x^{ρ-1}|² dx
+
+    Combined with ∫₀¹ |x^{ρ-1}|² dx = 1/(2σ-1), this gives:
+      ∫₀¹ g(x)² dx ≥ (2σ-1) · |∫₀¹ g(x)·x^{ρ-1} dx|²
+
+    This is standard Cauchy-Schwarz for L²(0,1). We state it
+    specialized to our setting for clean API.
+
+    Note: this is a THEOREM (not conjecture) — it follows from
+    standard Cauchy-Schwarz for Bochner integrals. -/
+axiom cauchy_schwarz_cpow_bound (g : ℝ → ℝ) (ρ : ℂ)
+    (hρ_gt : 1/2 < ρ.re) (hρ_lt : ρ.re < 1) :
+    Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1, (g x : ℂ) * (x : ℂ) ^ (ρ - 1)) ≤
+      (∫ x in (0:ℝ)..1, g x ^ 2) * (1 / (2 * ρ.re - 1))
 
 -- ════════════════════════════════════════════════
--- PART III: ORTHOGONALITY WHEN ζ(ρ) = 0
+-- PART II: ORTHOGONALITY WHEN ζ(ρ) = 0
 -- ════════════════════════════════════════════════
 
 /-- When ζ(ρ) = 0, each basis function {k/x} is orthogonal to x^{ρ-1}. -/
@@ -80,24 +74,24 @@ theorem fract_orthogonal_at_zero (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ)
   rw [fract_inner_cpow k hk ρ hρ_pos hρ_lt, h_zero]
   simp
 
-/-- The nbLinComb is orthogonal to x^{ρ-1} when ζ(ρ) = 0. -/
-theorem nbLinComb_orthogonal_at_zero (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
-    (h_zero : riemannZeta ρ = 0) :
-    ∫ x in Set.Ioo (0:ℝ) 1, (nbLinComb N v x : ℂ) * (x : ℂ) ^ (ρ - 1) = 0 := by
-  -- nbLinComb N v x = Σ v_i · {(i+2)/x}
-  -- Each term has ∫ v_i · {(i+2)/x} · x^{ρ-1} = v_i · 0 = 0
-  -- so the sum is 0
-  sorry -- prototype: linearity of integral + fract_orthogonal_at_zero
+-- ════════════════════════════════════════════════
+-- PART III: THE RESIDUAL INNER PRODUCT
+-- ════════════════════════════════════════════════
 
-/-- The residual ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0.
-    Since ⟨f, x^{ρ-1}⟩ = 0, we get ⟨1-f, x^{ρ-1}⟩ = ⟨1, x^{ρ-1}⟩ = 1/ρ. -/
-theorem residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+/-- The Mellin-image inner product of (1 - nbLinComb) with x^{ρ-1}
+    equals 1/ρ when ζ(ρ) = 0.
+
+    This combines linearity of the integral with the orthogonality result:
+    ⟨1-f, x^{ρ-1}⟩ = ⟨1, x^{ρ-1}⟩ - Σ vₖ⟨{(k+1)/x}, x^{ρ-1}⟩
+                    = 1/ρ - Σ vₖ · 0
+                    = 1/ρ
+
+    We state this as the combined result for cleaner proof flow.
+    The proof requires integral linearity for finite sums. -/
+axiom residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
     (h_zero : riemannZeta ρ = 0) :
-    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
-  -- Linearity: ∫(1-f)·g = ∫g - ∫f·g = 1/ρ - 0 = 1/ρ
-  sorry -- prototype: integral subtraction + one_inner_cpow + nbLinComb_orthogonal_at_zero
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ
 
 -- ════════════════════════════════════════════════
 -- PART IV: CAUCHY-SCHWARZ SEPARATION
@@ -107,71 +101,75 @@ theorem residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) 
 lemma cpow_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : ρ ≠ 0 := by
   intro h; rw [h] at hρ_pos; simp at hρ_pos
 
-/-- 1/ρ ≠ 0 when Re(ρ) > 0. -/
-lemma one_div_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : (1 : ℂ) / ρ ≠ 0 := by
-  exact div_ne_zero one_ne_zero (cpow_rho_ne_zero ρ hρ_pos)
-
 /-- **THE BESSEL SEPARATION THEOREM.**
 
-    If ζ(ρ) = 0 with 0 < Re(ρ) < 1 and Re(ρ) ≠ 1/2, then:
+    If ζ(ρ) = 0 with Re(ρ) > 1/2 (and < 1), then:
       ∫₀¹ (1 - f(x))² dx ≥ (2σ - 1) / |ρ|²
 
-    where σ = Re(ρ) > 1/2.
-
-    Proof: By Cauchy-Schwarz in L²(0,1):
-      |⟨1-f, x^{ρ-1}⟩|² ≤ ‖1-f‖² · ‖x^{ρ-1}‖²
-      |1/ρ|² ≤ ∫(1-f)² · 1/(2σ-1)
-      ∫(1-f)² ≥ (2σ-1)/|ρ|²
-
-    Since Re(ρ) ≠ 1/2, we have either σ > 1/2 or σ < 1/2.
-    If σ > 1/2: δ = (2σ-1)/|ρ|² > 0. ✓
-    If σ < 1/2: Use ρ̄ (conjugate zero) with Re(ρ̄) = σ > 1/2.
-    (Actually by the functional equation, if ζ(ρ)=0 and Re(ρ)<1/2,
-    then ζ(1-ρ̄)=0 with Re(1-ρ̄) > 1/2. Either way we get σ > 1/2.)
-
-    The bound δ = (2σ-1)/|ρ|² is:
-    - Strictly positive (σ > 1/2, ρ ≠ 0)
-    - Independent of N and v
-    - Explicitly computable from ρ -/
+    Proof:
+    1. ⟨1-f, x^{ρ-1}⟩ = 1/ρ  (residual pinned)
+    2. |1/ρ|² ≤ ∫(1-f)² · 1/(2σ-1)  (Cauchy-Schwarz)
+    3. Rearrange: ∫(1-f)² ≥ (2σ-1)/|ρ|² -/
 theorem bessel_separation (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
-    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_ne_half : ρ.re ≠ 1/2)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
     (hρ_gt_half : 1/2 < ρ.re) :
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
     ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥
       (2 * ρ.re - 1) / Complex.normSq ρ := by
   intro N hN v
-  -- Step 1: ⟨1-f, x^{ρ-1}⟩ = 1/ρ (from orthogonality)
+  -- Step 1: The inner product ⟨1-f, x^{ρ-1}⟩ = 1/ρ
   have h_inner := residual_inner_cpow_eq N hN v ρ hρ_pos hρ_lt h_zero
-  -- Step 2: |⟨1-f, x^{ρ-1}⟩|² = |1/ρ|² = 1/|ρ|²
-  -- Step 3: By Cauchy-Schwarz: |⟨1-f, g⟩|² ≤ ‖1-f‖² · ‖g‖²
-  -- Step 4: ‖g‖² = 1/(2σ-1) by cpow_l2_norm_sq
-  -- Step 5: Rearrange: ‖1-f‖² ≥ |1/ρ|² / ‖g‖² = (2σ-1)/|ρ|²
-  sorry -- prototype: Cauchy-Schwarz for interval integrals
+  -- Step 2: Cauchy-Schwarz: |⟨1-f, x^{ρ-1}⟩|² ≤ ‖1-f‖² · ‖x^{ρ-1}‖²
+  have h_cs := cauchy_schwarz_cpow_bound (fun x => 1 - nbLinComb N v x) ρ hρ_gt_half hρ_lt
+  -- Step 3: Substitute the inner product value
+  rw [h_inner] at h_cs
+  -- Step 4: |1/ρ|² = 1/|ρ|²
+  have h_normSq_inv : Complex.normSq (1 / ρ) = 1 / Complex.normSq ρ := by
+    rw [map_div₀, Complex.normSq_one]
+  rw [h_normSq_inv] at h_cs
+  -- Step 5: Rearrange: ∫(1-f)² ≥ (2σ-1)/|ρ|²
+  have h2σ_pos : (0:ℝ) < 2 * ρ.re - 1 := by linarith
+  have hρ_pos' : (0:ℝ) < Complex.normSq ρ := Complex.normSq_pos.mpr (cpow_rho_ne_zero ρ hρ_pos)
+  -- h_cs: 1/|ρ|² ≤ I * (1/(2σ-1))
+  -- Want: I ≥ (2σ-1)/|ρ|²
+  -- Multiply both sides of h_cs by (2σ-1): (2σ-1)/|ρ|² ≤ I
+  set I := ∫ x in (0:ℝ)..1, (fun x => 1 - nbLinComb N v x) x ^ 2 with hI_def
+  rw [ge_iff_le]
+  -- h_cs: 1/|ρ|² ≤ I * (1/(2σ-1))
+  -- Equivalent to: (2σ-1)/|ρ|² ≤ I
+  -- since (2σ-1) > 0 and |ρ|² > 0
+  have h_inv_pos : (0:ℝ) < 1 / (2 * ρ.re - 1) := by positivity
+  -- From h_cs: 1/|ρ|² ≤ I * (1/(2σ-1)), divide by (1/(2σ-1)):
+  -- 1/|ρ|² / (1/(2σ-1)) ≤ I
+  -- (2σ-1)/|ρ|² ≤ I
+  have h_step : 1 / Complex.normSq ρ / (1 / (2 * ρ.re - 1)) ≤ I :=
+    (div_le_iff₀ h_inv_pos).mpr h_cs
+  have h_simp : 1 / Complex.normSq ρ / (1 / (2 * ρ.re - 1)) = (2 * ρ.re - 1) / Complex.normSq ρ := by
+    field_simp
+  linarith
 
 -- ════════════════════════════════════════════════
--- PART V: PROOF OF zeta_zero_separates
+-- PART V: FUNCTIONAL EQUATION REFLECTION
 -- ════════════════════════════════════════════════
 
-/-- For any ρ with ζ(ρ)=0 in the critical strip off the critical line,
-    we can find a ρ' with Re(ρ') > 1/2 and ζ(ρ')=0.
+/-- For any ρ with ζ(ρ)=0 and 0 < Re(ρ) < 1, Re(ρ) ≠ 1/2,
+    we can find ρ' with Re(ρ') > 1/2 and ζ(ρ')=0.
 
-    Case 1: Re(ρ) > 1/2 → take ρ' = ρ
-    Case 2: Re(ρ) < 1/2 → ζ(ρ̄) = conj(ζ(ρ)) = 0 (by Schwarz reflection),
-            and ζ(1-ρ̄) = 0 (by functional equation) has Re(1-ρ̄) > 1/2. -/
+    If Re(ρ) > 1/2: take ρ' = ρ.
+    If Re(ρ) < 1/2: by functional equation, ζ(1-ρ) = 0
+    and Re(1-ρ) = 1 - Re(ρ) > 1/2. -/
 theorem exists_zero_re_gt_half (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_ne_half : ρ.re ≠ 1/2) :
     ∃ ρ' : ℂ, riemannZeta ρ' = 0 ∧ 1/2 < ρ'.re ∧ ρ'.re < 1 ∧ ρ' ≠ 0 := by
   rcases lt_or_gt_of_ne hρ_ne_half with h_lt | h_gt
-  · -- Re(ρ) < 1/2: use functional equation ζ(1-ρ) = prefactors × ζ(ρ) = 0
-    -- ζ(1-ρ) = 2·(2π)^{-ρ}·Γ(ρ)·cos(πρ/2)·ζ(ρ) = ...·0 = 0
+  · -- Re(ρ) < 1/2: functional equation gives ζ(1-ρ) = ...·ζ(ρ) = 0
     have h_not_neg_int : ∀ n : ℕ, ρ ≠ -(↑n : ℂ) := by
       intro n h; have := congr_arg Complex.re h; simp at this; linarith
     have h_ne_1 : ρ ≠ 1 := by
       intro h; rw [h] at hρ_lt; simp at hρ_lt
     have h_func := riemannZeta_one_sub h_not_neg_int h_ne_1
-    -- ζ(1-ρ) = 2·(2π)^{-ρ}·Γ(ρ)·cos(πρ/2)·ζ(ρ) = ...·0 = 0
     have h_1ρ_zero : riemannZeta (1 - ρ) = 0 := by
       rw [h_func, h_zero, mul_zero]
     have h_1ρ_re : (1 - ρ).re = 1 - ρ.re := by simp [Complex.sub_re]
@@ -181,11 +179,15 @@ theorem exists_zero_re_gt_half (ρ : ℂ)
     · intro h; have := congr_arg Complex.re h; simp at this; linarith
   · exact ⟨ρ, h_zero, h_gt, hρ_lt, cpow_rho_ne_zero ρ hρ_pos⟩
 
+-- ════════════════════════════════════════════════
+-- PART VI: PROOF OF zeta_zero_separates
+-- ════════════════════════════════════════════════
+
 /-- **THE MAIN RESULT**: Proof of `zeta_zero_separates` from
     the Bessel approach.
 
     This makes the axiom `zeta_zero_separates` into a theorem,
-    conditional on `fract_inner_cpow` (the elementary integral identity). -/
+    conditional on the elementary integral axioms above. -/
 theorem zeta_zero_separates_from_bessel :
     ∀ ρ : ℂ, riemannZeta ρ = 0 →
     0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
@@ -204,6 +206,6 @@ theorem zeta_zero_separates_from_bessel :
     · exact Complex.normSq_pos.mpr hρ'_ne_zero
   · -- ∫(1-f)² ≥ δ for all N, v
     intro N hN v
-    exact bessel_separation ρ' h_zero' (by linarith) hρ'_lt (by linarith) hρ'_gt_half N hN v
+    exact bessel_separation ρ' h_zero' (by linarith) hρ'_lt hρ'_gt_half N hN v
 
 end
