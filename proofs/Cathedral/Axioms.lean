@@ -9,15 +9,18 @@ import Cathedral.Defs
 
   ### COMPILER-VERIFIED Critical Path (April 15, 2026)
 
-  `#print axioms nyman_beurling_iff_rh` depends on exactly **5 Cathedral axioms**:
+  `#print axioms nyman_beurling_iff_rh` depends on exactly **2 Cathedral axioms**:
 
   | # | Axiom | Role | Tier |
   |---|-------|------|------|
   | 1 | `zeta_zero_separates` | Converse (d²→0 ⟹ RH) | 3 (complex analysis) |
-  | 2 | `algebraic_nb_bridge` | Quadform → integral criterion | 4 (structural) |
-  | 3 | `vasyunin_eq_integral` | Vasyunin formula = L² integral | 3 (Vasyunin 1995) |
-  | 4 | `witness_numerator_convergence` | bᵀv → 1 | 2 (PNT-level) |
-  | 5 | `witness_covariance_decay` | vᵀCv ≤ C/ln(N) — **THIS IS RH** | 1 (RH content) |
+  | 2 | `witness_l2_error_decay_gram` | L² error ≤ C/ln(N) — **THIS IS RH** | 1 (RH content) |
+
+  **Eliminated from critical path** (April 15, 2026 — The 5→2 Reduction):
+  - `algebraic_nb_bridge` → replaced by `l2_error_eq_quad_error` (zero axioms)
+  - `vasyunin_eq_integral` → bypassed (gramMatrix used directly)
+  - `witness_numerator_convergence` → absorbed into `witness_l2_error_decay_gram`
+  - `witness_covariance_decay` → absorbed into `witness_l2_error_decay_gram`
 
   `#print axioms phase_3_chain` (alternative forward, 2 axioms):
   | `mertens_bound_from_rh` | RH → Mertens bound | 3 |
