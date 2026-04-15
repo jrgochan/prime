@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/DiagonalBridge.lean
+  Cathedral/Vasyunin/Cotangent/DiagonalBridge.lean
 
   ## The Diagonal Integral Bridge
 

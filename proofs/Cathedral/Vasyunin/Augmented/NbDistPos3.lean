@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/NbDistPos3.lean
+  Cathedral/Vasyunin/Augmented/NbDistPos3.lean
 
   **PROOF: Axiom 3 holds for N = 3.**
 

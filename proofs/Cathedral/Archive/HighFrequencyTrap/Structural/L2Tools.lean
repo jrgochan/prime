@@ -9,8 +9,8 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Structural.NbLinComb
-import Cathedral.Structural.Independence
+import Cathedral.Archive.HighFrequencyTrap.Structural.NbLinComb
+import Cathedral.Archive.HighFrequencyTrap.Structural.Independence
 
 noncomputable section
 open Complex Real

@@ -1,14 +1,14 @@
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.FloorMellin
-import Cathedral.MellinBridge.FloorDivMellin
-import Cathedral.MellinBridge.Separation
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.MellinBridge.OrthogonalWitness
-import Cathedral.MellinBridge.MellinSieve
-import Cathedral.MellinBridge.AbelSummation
-import Cathedral.MellinBridge.MertensIntegral
-import Cathedral.MellinBridge.MertensWeightBypass
-import Cathedral.MellinBridge.AutocorrelationBypass
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.FloorMellin
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.FloorDivMellin
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Separation
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.HilbertSetup
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.OrthogonalWitness
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.MellinSieve
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.AbelSummation
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.MertensIntegral
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.MertensWeightBypass
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.AutocorrelationBypass
 
 /-! # Cathedral.MellinBridge
 

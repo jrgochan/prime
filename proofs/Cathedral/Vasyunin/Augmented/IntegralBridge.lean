@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/IntegralBridge.lean
+  Cathedral/Vasyunin/Augmented/IntegralBridge.lean
 
   **THE INTEGRAL BRIDGE AXIOMS**
 

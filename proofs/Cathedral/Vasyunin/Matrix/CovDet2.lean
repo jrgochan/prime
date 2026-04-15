@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/CovDet2.lean
+  Cathedral/Vasyunin/Matrix/CovDet2.lean
 
   det(C₂) > 0 for the 2×2 leading minor of the covariance matrix,
   via double quadratic interpolation on (ln π, γ).

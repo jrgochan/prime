@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/NbDistPos2.lean
+  Cathedral/Vasyunin/Augmented/NbDistPos2.lean
 
   **PROOF: Axioms 2 and 3 hold for N = 2.**
 

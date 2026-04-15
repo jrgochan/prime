@@ -14,9 +14,9 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Structural
-import Cathedral.FractIntegral
-import Cathedral.GramDiag
+import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
+import Cathedral.Archive.HighFrequencyTrap.FractIntegral
+import Cathedral.Archive.HighFrequencyTrap.GramDiag
 
 noncomputable section
 open Real MeasureTheory Set

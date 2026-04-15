@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/Structural.lean
+  Cathedral/Vasyunin/Matrix/Structural.lean
 
   Structural properties of the Vasyunin Gram matrix:
   symmetry, decomposition, diagonal positivity, mean vector positivity.

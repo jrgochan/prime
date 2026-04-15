@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/AugmentedGram.lean
+  Cathedral/Vasyunin/Augmented/AugmentedGram.lean
 
   **THE AUGMENTED GRAM MATRIX — THE ULTIMATE MATRIX**
 

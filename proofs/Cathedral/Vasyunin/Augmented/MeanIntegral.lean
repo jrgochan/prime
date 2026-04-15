@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/MeanIntegral.lean
+  Cathedral/Vasyunin/Augmented/MeanIntegral.lean
 
   **THE MEAN ENTRY INTEGRAL — PROVING THE FRESHMAN CALCULUS AXIOM**
 

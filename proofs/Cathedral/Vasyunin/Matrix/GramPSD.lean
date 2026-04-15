@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/GramPSD.lean
+  Cathedral/Vasyunin/Matrix/GramPSD.lean
 
   **THE GEOMETRY HEIST — PHASE B**
 

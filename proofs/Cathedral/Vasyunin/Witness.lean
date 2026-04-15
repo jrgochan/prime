@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/Witness.lean
+  Cathedral/Vasyunin/Witness.lean
 
   The Möbius function and the logarithmic cutoff witness vector.
 -/

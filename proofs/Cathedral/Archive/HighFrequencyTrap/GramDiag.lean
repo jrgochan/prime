@@ -1,5 +1,5 @@
 import Cathedral.Defs
-import Cathedral.FractIntegral
+import Cathedral.Archive.HighFrequencyTrap.FractIntegral
 
 /-! # Cathedral.GramDiag
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/TelescopeSum.lean
+  Cathedral/Vasyunin/Cotangent/TelescopeSum.lean
 
   ## THE TELESCOPE SUM — Phase 1b: FTC Boundary Cancellation
 

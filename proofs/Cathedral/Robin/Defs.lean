@@ -17,7 +17,7 @@
 
   ```
   Cathedral.Defs (RiemannHypothesis)
-    ├── Cathedral.MellinBridge (Continuous / L² / Spectral Path)
+    ├── Cathedral.Vasyunin (Continuous / L² / Spectral Path)
     └── Cathedral.Robin        (Discrete / Arithmetic Path)  ← THIS FILE
   ```
 
@@ -187,7 +187,7 @@ theorem robin_implies_rh : RobinInequality → RiemannHypothesis :=
 --
 -- Architecture:
 --   Cathedral.Defs (RiemannHypothesis)
---     ├── Cathedral.MellinBridge  — 2 axioms (vasyunin_eq_integral, log_cutoff_witness_bound)
+--     ├── Cathedral.Vasyunin  — axioms (vasyunin_eq_integral, log_cutoff_witness_bound)
 --     └── Cathedral.Robin         — 1 axiom (arithmetic_rh_equivalences) ← THIS
 
 end

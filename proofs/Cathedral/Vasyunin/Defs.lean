@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin.lean
+  Cathedral/Vasyunin/Defs.lean
 
   ## The Vasyunin Discrete Formula
 

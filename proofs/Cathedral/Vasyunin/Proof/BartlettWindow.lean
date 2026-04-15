@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/BartlettWindow.lean
+  Cathedral/Vasyunin/Proof/BartlettWindow.lean
 
   ## The Bartlett Window Theorem
 

@@ -1,4 +1,4 @@
-import Cathedral.BilinearSieve
+import Cathedral.Archive.HighFrequencyTrap.BilinearSieve
 
 /-! # SpectralRH.ParityBridge
 

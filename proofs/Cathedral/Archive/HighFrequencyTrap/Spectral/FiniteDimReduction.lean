@@ -1,6 +1,6 @@
 import Cathedral.Defs
-import Cathedral.Spectral.OctonionicPartition
-import Cathedral.Spectral.ClassRestriction
+import Cathedral.Archive.HighFrequencyTrap.Spectral.OctonionicPartition
+import Cathedral.Archive.HighFrequencyTrap.Spectral.ClassRestriction
 
 /-! # SpectralRH.FiniteDimReduction
 
@@ -278,7 +278,7 @@ noncomputable def lambdaEff (_m : Fin 8) (N : ℕ) : ℝ :=
 
 -- **Effective Eigenvalue Growth**: λ_eff(m) ≥ c · N for some c > 0.
 -- See `lambdaEff_resolvent_bound` and `lambdaEff_linear_growth_proved`
--- in Cathedral.Spectral.ConstantVectorBound for the full proof
+-- in Cathedral.Archive.HighFrequencyTrap.Spectral.ConstantVectorBound for the full proof
 -- (via the constant class vector Rayleigh argument).
 
 /-- **The Cauchy-Schwarz Inequality for rank-1 projections**:

@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/Chain.lean
+  Cathedral/Vasyunin/Proof/Chain.lean
 
   The final proof chain: witness bound → divergence → NB distance decay.
 -/

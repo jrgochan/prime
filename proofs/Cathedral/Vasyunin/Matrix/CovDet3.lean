@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/CovDet3.lean
+  Cathedral/Vasyunin/Matrix/CovDet3.lean
 
   **det(C₃) > 0**: The 3×3 covariance matrix has positive determinant.
   

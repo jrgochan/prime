@@ -1,8 +1,8 @@
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.HilbertSetup
 import Cathedral.Defs
 
-/-! # Cathedral.MellinBridge.MertensWeightBypass
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.MertensWeightBypass
 
     ## The Mertens/Tauberian Bypass: RH Weights Without Complex Contours
 

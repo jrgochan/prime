@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/VasyuninAssembly.lean
+  Cathedral/Vasyunin/Cotangent/VasyuninAssembly.lean
 
   ## PHASE 2b: THE FINAL ASSEMBLY
 

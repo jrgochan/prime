@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/DigammaReflection.lean
+  Cathedral/Vasyunin/Cotangent/DigammaReflection.lean
 
   ## PHASE 2: THE DIGAMMA ASSEMBLY
 

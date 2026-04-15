@@ -11,8 +11,8 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Structural
-import Cathedral.ParitySchur
+import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
+import Cathedral.Archive.HighFrequencyTrap.ParitySchur
 
 noncomputable section
 open Complex Real

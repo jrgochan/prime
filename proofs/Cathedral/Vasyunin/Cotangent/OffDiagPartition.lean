@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/OffDiagPartition.lean
+  Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean
 
   ## THE OFF-DIAGONAL PARTITION — Phase 1 of the Digamma Connection
 

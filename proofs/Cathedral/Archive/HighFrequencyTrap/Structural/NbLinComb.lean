@@ -8,7 +8,7 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Spectral.RayleighBridge
+import Cathedral.Archive.HighFrequencyTrap.Spectral.RayleighBridge
 import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section

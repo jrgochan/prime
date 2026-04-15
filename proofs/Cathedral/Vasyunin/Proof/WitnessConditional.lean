@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/WitnessConditional.lean
+  Cathedral/Vasyunin/Proof/WitnessConditional.lean
 
   The conditional direction: RH → witness_covariance_decay.
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/PiecewiseFTC.lean
+  Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean
 
   ## PIECEWISE FTC FOR THE BODY INTEGRAL
 

@@ -1,9 +1,9 @@
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.MellinBridge.MellinSieve
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.HilbertSetup
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.MellinSieve
 import Cathedral.Defs
 
-/-! # Cathedral.MellinBridge.AutocorrelationBypass
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.AutocorrelationBypass
 
     ## The Autocorrelation Bypass: Plancherel without L² Isometry
 

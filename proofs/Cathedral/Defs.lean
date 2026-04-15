@@ -9,8 +9,17 @@ import Mathlib.Analysis.Matrix.Spectrum
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
-/-! # SpectralRH.Defs
-Core definitions for the spectral proof of RH.
+/-!
+  Cathedral/Defs.lean
+
+  Core definitions for the Cathedral proof architecture:
+  - Fractional parts and the Báez-Duarte basis h_k(x) = {1/(kx)}
+  - Gram matrix G(j,k) = ⟨h_j, h_k⟩ in L²(0,1)
+  - Nyman-Beurling distance d²_N = 1 - bᵀG⁻¹b
+  - Liouville function and parity operator
+  - Spectral definitions: λ_min, eigenDrop, cosAlignment
+
+  Zero sorry. Zero axioms.
 -/
 
 noncomputable section
@@ -231,5 +240,10 @@ noncomputable def liouvilleProjection (N : ℕ) : ℝ :=
     Real.sqrt (∑ i ∈ min_idx, (dotProduct liouville_hat (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2)
   else 0
 
+/-- The Nyman-Beurling linear combination: φ_w(x) = Σᵢ wᵢ · {(i+2)/x}.
+    This is the general linear combination of NB basis functions.
+    The NB theorem states: inf_w ‖1 - φ_w‖² → 0 iff RH. -/
+noncomputable def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
+  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
 
 end

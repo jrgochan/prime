@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/Rayleigh.lean
+  Cathedral/Vasyunin/Augmented/Rayleigh.lean
 
   The Rayleigh quotient, quadratic form, covariance PD axiom,
   and the Dual Variational Principle.

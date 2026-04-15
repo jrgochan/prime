@@ -1,5 +1,5 @@
-import Cathedral.ParitySchur
-import Cathedral.VasyuninExpansion
+import Cathedral.Archive.HighFrequencyTrap.ParitySchur
+import Cathedral.Archive.HighFrequencyTrap.VasyuninExpansion
 
 /-! # SpectralRH.BilinearSieve
 

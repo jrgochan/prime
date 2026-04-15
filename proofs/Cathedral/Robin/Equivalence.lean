@@ -13,7 +13,7 @@
 
 import Cathedral.Defs
 import Cathedral.Robin.Defs
-import Cathedral.MellinBridge.MellinSieve
+import Cathedral.NymanBeurling.NymanBeurling
 
 open Real
 

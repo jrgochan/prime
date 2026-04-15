@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/StirlingBridge.lean
+  Cathedral/Vasyunin/Cotangent/StirlingBridge.lean
 
   **THE STIRLING BRIDGE** (The Dawn Strike, April 12, 2026)
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/GramEntries.lean
+  Cathedral/Vasyunin/Matrix/GramEntries.lean
 
   Exact evaluations of Gram matrix entries, mean entries, and
   determinant positivity for the 2×2 and 3×3 leading minors.

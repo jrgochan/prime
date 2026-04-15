@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/LogDigammaBridge.lean
+  Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean
 
   ## PHASE 3: THE LOG-DIGAMMA BRIDGE
 

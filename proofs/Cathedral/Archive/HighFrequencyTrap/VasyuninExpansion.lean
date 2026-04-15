@@ -1,5 +1,5 @@
-import Cathedral.GramBounds
-import Cathedral.GramOffDiag
+import Cathedral.Archive.HighFrequencyTrap.GramBounds
+import Cathedral.Archive.HighFrequencyTrap.GramOffDiag
 
 /-! # Cathedral.VasyuninExpansion
 

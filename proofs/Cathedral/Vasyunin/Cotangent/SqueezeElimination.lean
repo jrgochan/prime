@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/SqueezeElimination.lean
+  Cathedral/Vasyunin/Cotangent/SqueezeElimination.lean
 
   ## THE SQUEEZE THEOREM ELIMINATION OF AXIOM 4
 

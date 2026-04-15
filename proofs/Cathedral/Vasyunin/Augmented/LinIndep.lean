@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/LinIndep.lean
+  Cathedral/Vasyunin/Augmented/LinIndep.lean
 
   **THE MINIMUM-INDEX NUKE — Linear Independence of {1/(kx)}**
 

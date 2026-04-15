@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/WitnessAsymptotics.lean
+  Cathedral/Vasyunin/Proof/WitnessAsymptotics.lean
 
   Decomposition of the log_cutoff_witness_bound axiom into:
   1. witness_numerator_convergence: bᵀv → 1 (from PNT)

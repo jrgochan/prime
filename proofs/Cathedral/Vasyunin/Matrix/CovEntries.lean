@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/Vasyunin/CovEntries.lean
+  Cathedral/Vasyunin/Matrix/CovEntries.lean
 
   Closed-form evaluations of covariance matrix entries C(0,0), C(0,1), C(1,1)
   and positivity of C(0,0).

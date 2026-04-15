@@ -47,7 +47,7 @@
     when ζ(ρ) = 0 creates a pole in 1/ζ at ρ.
 -/
 
-import Cathedral.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter

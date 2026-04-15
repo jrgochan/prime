@@ -20,9 +20,9 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Structural
-import Cathedral.MellinBridge
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.Assembly.QuadFormBridge
 
 noncomputable section
 open Complex Real
