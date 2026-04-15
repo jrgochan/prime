@@ -4,7 +4,7 @@
   The final proof chain: witness bound → divergence → NB distance decay.
 -/
 
-import Cathedral.MellinBridge.Vasyunin.Rayleigh
+import Cathedral.MellinBridge.Vasyunin.WitnessAsymptotics
 
 noncomputable section
 open Real Matrix Finset
@@ -12,25 +12,14 @@ open Real Matrix Finset
 namespace Cathedral.Vasyunin
 
 -- ════════════════════════════════════════════════
--- PART XI: THE FINAL AXIOM (CONSTRUCTIVE)
+-- PART XI: THE WITNESS BOUND (FORMERLY AN AXIOM)
 -- ════════════════════════════════════════════════
 
-/-- **THE FINAL AXIOM — The Log Cutoff Witness.**
-
-    The Riemann Hypothesis is equivalent to the statement that the
-    log cutoff Möbius witness vector yields a Rayleigh quotient that
-    grows at least logarithmically in N.
-
-    This is a CONSTRUCTIVE statement:
-    - The witness vector v_k = -μ(k)(1 - ln(k)/ln(N)) is explicit
-    - The quotient Q = (bᵀv)²/(vᵀCv) is a finite sum of cotangents
-    - No matrix inversion. No C⁻¹. No condition numbers.
-    - No continuous integrals. No complex plane. No measure theory.
-
-    Only: Möbius function, gcd, log, cot, fractional parts. -/
-axiom log_cutoff_witness_bound :
-    ∃ c : ℝ, c > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      c * Real.log (N : ℝ) ≤ rayleighQuotient N (logCutoffWitness N)
+-- **FORMERLY `axiom log_cutoff_witness_bound`.**
+-- Now proved in WitnessAsymptotics.lean from:
+--   1. witness_numerator_convergence (PNT: bᵀv → 1)
+--   2. witness_covariance_decay (RH: vᵀCv ≤ C/ln N)
+-- See WitnessAsymptotics.lean for the full decomposition.
 
 /-- The log cutoff witness is nonzero for N ≥ 3. -/
 theorem logCutoffWitness_ne_zero (N : ℕ) (hN : N ≥ 3) :
