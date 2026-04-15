@@ -154,13 +154,13 @@ export default function HomePage() {
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis to seven
           classical axioms in Lean 4, via the Vasyunin cotangent formula.
-          19,605 lines. Zero <code className="text-emerald-400">sorry</code>. Every theorem compiler-verified.
+          8,710 lines. Zero <code className="text-emerald-400">sorry</code>. Every theorem compiler-verified.
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
             { color: "bg-emerald-500", text: "40 Lean files" },
-            { color: "bg-emerald-500", text: "19,605 lines" },
+            { color: "bg-emerald-500", text: "8,710 lines" },
             { color: "bg-amber-500", text: "7 axioms" },
             { color: "bg-emerald-500", text: "260 theorems" },
             { color: "bg-blue-500", text: "0 sorry" },
