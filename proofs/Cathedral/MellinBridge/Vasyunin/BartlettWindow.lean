@@ -230,9 +230,13 @@ theorem bartlett_window_ratio :
   have h_t := h_tap N hN_ge_2   -- |taperedEnergy N - (1/3)α·ln N| ≤ C_tap
   -- flatEnergy N > 0: from |flatEnergy - α·ln N| ≤ C_flat and α·ln N >> C_flat
   have h_flat_lb : α * Real.log ↑N - |C_flat| ≤ flatEnergy N := by
-    -- |flatEnergy N - α·ln N| ≤ C_flat implies flatEnergy N ≥ α·ln N - C_flat ≥ α·ln N - |C_flat|
-    have h_abs := abs_le.mp (le_trans h_f (le_abs_self C_flat))
-    sorry -- TECHNICAL: extract from abs bound
+    -- |flatEnergy N - α·ln N| ≤ C_flat ≤ |C_flat|
+    -- implies -(|C_flat|) ≤ flatEnergy N - α·ln N
+    -- implies α·ln N - |C_flat| ≤ flatEnergy N
+    have h1 : |flatEnergy N - α * Real.log ↑N| ≤ |C_flat| :=
+      le_trans h_f (le_abs_self C_flat)
+    have h2 := (abs_le.mp h1).1
+    linarith
   have h_denom_pos : 0 < α * Real.log ↑N - |C_flat| := by
     have h1 : 2 * (|C_flat| + 1) / α ≤ K := le_max_left _ _
     have h2 : K ≤ Real.log ↑N := hK_le
@@ -240,13 +244,50 @@ theorem bartlett_window_ratio :
     have h4 : 2 * (|C_flat| + 1) ≤ α * Real.log ↑N := by
       rw [div_le_iff₀ hα_pos] at h3; linarith [mul_comm (Real.log ↑N) α]
     linarith [abs_nonneg C_flat]
-  have hflat_pos : 0 < flatEnergy N := by
-    sorry -- From h_flat_lb and h_denom_pos
-  -- The main asymptotic argument:
-  -- taperedEnergy / flatEnergy - 1/3
-  --   = (taperedEnergy - (1/3)·flatEnergy) / flatEnergy
-  -- The numerator is O(1), the denominator is Θ(ln N), so the ratio → 0.
-  sorry
+  have hflat_pos : 0 < flatEnergy N := by linarith
+  -- C_flat ≥ 0 (since |something| ≤ C_flat forces C_flat ≥ 0)
+  have hC_flat_nn : 0 ≤ C_flat := le_trans (abs_nonneg _) h_f
+  have hC_tap_nn : 0 ≤ C_tap := le_trans (abs_nonneg _) h_t
+  -- Extract 4-way bounds from the abs inequalities
+  have h_f_lb : α * Real.log ↑N - C_flat ≤ flatEnergy N := by
+    have := (abs_le.mp h_f).1; linarith
+  have h_f_ub : flatEnergy N ≤ α * Real.log ↑N + C_flat := by
+    have := (abs_le.mp h_f).2; linarith
+  have h_t_lb : 1/3 * α * Real.log ↑N - C_tap ≤ taperedEnergy N := by
+    have := (abs_le.mp h_t).1; linarith
+  have h_t_ub : taperedEnergy N ≤ 1/3 * α * Real.log ↑N + C_tap := by
+    have := (abs_le.mp h_t).2; linarith
+  -- Numerator bounds: T - F/3 = (T - αL/3) - (F - αL)/3
+  have h_num_ub : taperedEnergy N - 1/3 * flatEnergy N ≤ C_tap + 1/3 * C_flat := by
+    linarith
+  have h_num_lb : -(C_tap + 1/3 * C_flat) ≤ taperedEnergy N - 1/3 * flatEnergy N := by
+    linarith
+  -- From K ≥ 3(C_flat+C_tap+1)/(α·ε), get ε·α·ln N ≥ 3(C_flat+C_tap+1)
+  have h_K2 : 3 * (|C_flat| + |C_tap| + 1) / (α * ε) ≤ K := le_max_right _ _
+  have h_aL : 3 * (C_flat + C_tap + 1) ≤ ε * (α * Real.log ↑N) := by
+    have h5 : 3 * (|C_flat| + |C_tap| + 1) / (α * ε) ≤ Real.log ↑N := le_trans h_K2 hK_le
+    rw [div_le_iff₀ (mul_pos hα_pos hε)] at h5
+    rw [abs_of_nonneg hC_flat_nn, abs_of_nonneg hC_tap_nn] at h5
+    nlinarith [mul_comm (Real.log ↑N) (α * ε)]
+  -- Goal: |taperedEnergy N / flatEnergy N - 1/3| < ε
+  have h_key : taperedEnergy N / flatEnergy N - 1 / 3 =
+      (taperedEnergy N - 1 / 3 * flatEnergy N) / flatEnergy N := by field_simp
+  rw [h_key, abs_div, abs_of_pos hflat_pos, div_lt_iff₀ hflat_pos]
+  -- Goal: |taperedEnergy N - 1/3 * flatEnergy N| < ε * flatEnergy N
+  by_cases hε_small : ε ≤ 8 / 3
+  · -- Small ε: bound via C_tap + C_flat/3 < ε * flatEnergy N
+    calc |taperedEnergy N - 1 / 3 * flatEnergy N|
+        ≤ C_tap + 1 / 3 * C_flat := by
+          rw [abs_le]; exact ⟨by linarith [h_num_lb], by linarith [h_num_ub]⟩
+      _ < ε * flatEnergy N := by nlinarith [hC_flat_nn, hC_tap_nn, h_f_lb, h_aL, hε_small]
+  · -- Large ε (> 8/3 > 2/3): use |T - F/3| ≤ 2F/3 < εF directly
+    push_neg at hε_small
+    have h_le := taperedEnergy_le_flatEnergy N hN_ge_2
+    have h_abs_bd : |taperedEnergy N - 1 / 3 * flatEnergy N| ≤ 2 / 3 * flatEnergy N := by
+      rw [abs_le]; constructor
+      · nlinarith [taperedEnergy_nonneg N]
+      · nlinarith
+    nlinarith
 
 -- ════════════════════════════════════════════════
 -- COROLLARY: PEAK AMPLITUDE RATIO
