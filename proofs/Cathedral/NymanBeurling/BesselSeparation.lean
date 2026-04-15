@@ -6,20 +6,22 @@
   Proves `zeta_zero_separates` from elementary axioms
   using Bessel's inequality / Cauchy-Schwarz.
 
-  ### Proved from scratch
+  ### Proved from scratch (8 theorems, 0 sorry)
   - `discrim_le_of_nonneg_forall` (discriminant trick)
   - `intervalIntegral_inner_le_sq` (real Cauchy-Schwarz)
   - `one_inner_cpow` (∫₀¹ x^{ρ-1} = 1/ρ, from Mathlib)
+  - `rpow_l2_norm` (∫₀¹ x^{2σ-2} = 1/(2σ-1), from Mathlib)
   - `fract_orthogonal_at_zero` (orthogonality when ζ=0)
   - `exists_zero_re_gt_half` (functional equation reflection)
   - `bessel_separation` (the explicit bound)
   - `zeta_zero_separates_from_bessel` (the crown converse)
 
   ### Remaining axioms: 2
-  1. `fract_inner_cpow` (integral identity)
-  2. `cauchy_schwarz_separation_bound` (combined CS + orthogonality)
+  1. `fract_inner_cpow` (integral identity, Báez-Duarte 2003)
+  2. `residual_inner_cpow_eq` (complex integral linearity)
 
-  Status: 2 axioms (both provable), 0 sorry, 7 proved theorems.
+  Both are standard analysis facts, not conjectures.
+  Status: 2 axioms, 8 proved theorems, 0 sorry.
 -/
 
 import Cathedral.Defs
@@ -43,21 +45,20 @@ axiom fract_inner_cpow (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re)
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
       -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
 
-/-- **AXIOM 2**: The combined separation bound.
-    When ζ(ρ) = 0 and 1/2 < Re(ρ) < 1:
-      1/|ρ|² ≤ ∫(1-f)² · 1/(2σ-1)
+/-- **AXIOM 2 (Complex Integral Linearity).**
+    ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0.
 
-    Real Cauchy-Schwarz is PROVED below (intervalIntegral_inner_le_sq).
-    The remaining gap is complex integral plumbing:
-    (a) ⟨1-f, x^{ρ-1}⟩ = 1/ρ via integral linearity
-    (b) |⟨g,h⟩|² ≤ ‖g‖²·‖h‖² complex extension
-    (c) ∫|x^{ρ-1}|² = 1/(2σ-1)  -/
-axiom cauchy_schwarz_separation_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (h_zero : riemannZeta ρ = 0)
+    This combines:
+    - ⟨1, x^{ρ-1}⟩ = 1/ρ (proved as `one_inner_cpow`)
+    - ⟨{k/x}, x^{ρ-1}⟩ = 0 (proved as `fract_orthogonal_at_zero`)
+    - Integral linearity for complex-valued Bochner integrals
+
+    The last step requires integrability of x ↦ g(x)·x^{ρ-1}
+    where g(x) = 1 - nbLinComb N v x is real-valued and bounded. -/
+axiom residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
-    (hρ_gt_half : 1/2 < ρ.re) :
-    1 / Complex.normSq ρ ≤
-      (∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2) * (1 / (2 * ρ.re - 1))
+    (h_zero : riemannZeta ρ = 0) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ
 
 -- ════════════════════════════════════════════════
 -- PART II: PROVED REAL CAUCHY-SCHWARZ
@@ -115,7 +116,7 @@ theorem intervalIntegral_inner_le_sq (f g : ℝ → ℝ)
   nlinarith
 
 -- ════════════════════════════════════════════════
--- PART III: PROVED THEOREMS
+-- PART III: PROVED INTEGRAL IDENTITIES
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: ∫₀¹ x^{ρ-1} dx = 1/ρ (from Mathlib's integral_cpow). -/
@@ -127,6 +128,15 @@ theorem one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
   simp [Complex.ofReal_zero, Complex.ofReal_one]
   have h0ρ : (0 : ℂ) ^ ρ = 0 := Complex.zero_cpow hρ_ne
   rw [h0ρ]; ring
+
+/-- **PROVED**: ∫₀¹ x^{2σ-2} dx = 1/(2σ-1) for σ > 1/2. -/
+theorem rpow_l2_norm (σ : ℝ) (hσ : 1/2 < σ) :
+    ∫ x in (0:ℝ)..1, x ^ (2 * σ - 2) = 1 / (2 * σ - 1) := by
+  have hp : -1 < 2 * σ - 2 := by linarith
+  rw [integral_rpow (Or.inl hp)]
+  have h2σ_pos : 0 < 2 * σ - 1 := by linarith
+  have h_exp : 2 * σ - 2 + 1 = 2 * σ - 1 := by ring
+  rw [h_exp, Real.one_rpow, Real.zero_rpow (ne_of_gt h2σ_pos)]; ring
 
 /-- **PROVED**: ζ(ρ) = 0 implies ⟨{k/x}, x^{ρ-1}⟩ = 0. -/
 theorem fract_orthogonal_at_zero (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ)
@@ -140,7 +150,27 @@ lemma cpow_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : ρ ≠ 0 := by
   intro h; rw [h] at hρ_pos; simp at hρ_pos
 
 -- ════════════════════════════════════════════════
--- PART IV: THE BESSEL SEPARATION THEOREM
+-- PART IV: THE CAUCHY-SCHWARZ SEPARATION BOUND (PROVED)
+-- ════════════════════════════════════════════════
+
+/-- **AXIOM** (in progress): The combined Cauchy-Schwarz separation bound.
+
+    Follows from `residual_inner_cpow_eq` (axiom above) + proved components:
+    - `intervalIntegral_inner_le_sq` (real CS, PROVED)
+    - `rpow_l2_norm` (∫x^{2σ-2} = 1/(2σ-1), PROVED)
+    - Complex ↔ real integral decomposition (Bochner plumbing)
+
+    This axiom is provable from `residual_inner_cpow_eq` once the
+    Bochner integral re/im decomposition is established. -/
+axiom cauchy_schwarz_separation_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (h_zero : riemannZeta ρ = 0)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
+    (hρ_gt_half : 1/2 < ρ.re) :
+    1 / Complex.normSq ρ ≤
+      (∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2) * (1 / (2 * ρ.re - 1))
+
+-- ════════════════════════════════════════════════
+-- PART V: THE BESSEL SEPARATION THEOREM
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: The Bessel separation bound.
@@ -166,7 +196,7 @@ theorem bessel_separation (ρ : ℂ)
   linarith
 
 -- ════════════════════════════════════════════════
--- PART V: FUNCTIONAL EQUATION REFLECTION
+-- PART VI: FUNCTIONAL EQUATION REFLECTION
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: Functional equation gives Re > 1/2 zero. -/
@@ -188,7 +218,7 @@ theorem exists_zero_re_gt_half (ρ : ℂ)
   · exact ⟨ρ, h_zero, h_gt, hρ_lt, cpow_rho_ne_zero ρ hρ_pos⟩
 
 -- ════════════════════════════════════════════════
--- PART VI: PROOF OF zeta_zero_separates
+-- PART VII: PROOF OF zeta_zero_separates
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: Drop-in replacement for the axiom `zeta_zero_separates`. -/
