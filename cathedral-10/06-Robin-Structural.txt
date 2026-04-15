@@ -1,0 +1,1480 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Cathedral Source — 06-Robin-Structural
+# Generated: Wed Apr 15 04:19:29 MDT 2026
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
+# Build: lake build — 3530 jobs, zero errors, zero sorry
+# Crown: nyman_beurling_iff_rh depends on 5 axioms (#print axioms verified)
+# Total: 83 active files, 48 axioms across 12 modules
+#
+# Critical path axioms:
+#   1. witness_covariance_decay     — THE RH (vᵀCv ≤ C/ln N)
+#   2. witness_numerator_convergence — PNT level (bᵀv → 1)
+#   3. vasyunin_eq_integral          — Vasyunin 1995
+#   4. algebraic_nb_bridge           — structural bridge
+#   5. zeta_zero_separates           — NB converse
+#
+# This is file 06-Robin-Structural of 10. Upload all 10 to Gemini.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+================================================================
+FILE: Cathedral/Robin/BaseCases.lean
+================================================================
+
+/-
+  Cathedral/Robin/BaseCases.lean
+
+  ## Lagarias Base Case Verification
+
+  Proves Lagarias's inequality for n = 1:
+    σ(1) = 1 ≤ H₁ + exp(H₁)·log(H₁) = 1 + e·0 = 1
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+import Mathlib.NumberTheory.Harmonic.Defs
+
+open Real ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- LAGARIAS BASE CASE
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Lagarias holds for n = 1.
+
+    σ(1) = 1, H₁ = 1, log(1) = 0, exp(1)·0 = 0.
+    So σ(1) ≤ 1 + 0 = 1. Exact equality. -/
+theorem lagarias_base_case :
+    (sumOfDivisors 1 : ℝ) ≤ harmonicR 1 + exp (harmonicR 1) * log (harmonicR 1) := by
+  unfold sumOfDivisors harmonicR
+  have h_sigma : ((sigma 1) 1 : ℝ) = 1 := by norm_num
+  have h_harmonic : (harmonic 1 : ℝ) = 1 := by norm_num
+  rw [h_sigma, h_harmonic, log_one, mul_zero, add_zero]
+
+-- NOTE: Lagarias for n = 2,3,5,7 is proved in PrimeBounds.lean
+-- via lagarias_for_primes, since these are all prime.
+
+/-- σ(1) = 1 (unit has only itself as divisor). -/
+theorem sumOfDivisors_one : sumOfDivisors 1 = 1 := by
+  unfold sumOfDivisors; norm_num
+
+/-- σ(2) = 3 (divisors: 1, 2). -/
+theorem sumOfDivisors_two : sumOfDivisors 2 = 3 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(6) = 12 (6 is the first perfect number: 1+2+3+6 = 12 = 2·6). -/
+theorem sumOfDivisors_six : sumOfDivisors 6 = 12 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(28) = 56 (28 is the second perfect number: 1+2+4+7+14+28 = 56 = 2·28). -/
+theorem sumOfDivisors_twentyeight : sumOfDivisors 28 = 56 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(5040) = 19344 — The last Robin counterexample.
+    5040 = 7! = 2⁴·3²·5·7 is the largest n for which σ(n) ≥ eᵞ·n·log(log(n)). -/
+theorem sumOfDivisors_5040 : sumOfDivisors 5040 = 19344 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(3) = 4 (divisors: 1, 3). -/
+theorem sumOfDivisors_three : sumOfDivisors 3 = 4 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(12) = 28 (divisors: 1, 2, 3, 4, 6, 12). -/
+theorem sumOfDivisors_twelve : sumOfDivisors 12 = 28 := by
+  unfold sumOfDivisors; native_decide
+
+/-- σ(496) = 992 (496 is the third perfect number: σ(n) = 2n). -/
+theorem sumOfDivisors_496 : sumOfDivisors 496 = 992 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 6 is perfect: σ(6) = 2·6. -/
+theorem perfect_six : sumOfDivisors 6 = 2 * 6 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 28 is perfect: σ(28) = 2·28. -/
+theorem perfect_twentyeight : sumOfDivisors 28 = 2 * 28 := by
+  unfold sumOfDivisors; native_decide
+
+/-- 496 is perfect: σ(496) = 2·496. -/
+theorem perfect_496 : sumOfDivisors 496 = 2 * 496 := by
+  unfold sumOfDivisors; native_decide
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   6 PROVED theorems:
+--     ✅ lagarias_base_case        — σ(1) ≤ H₁ + exp(H₁)·log(H₁)
+--     ✅ sumOfDivisors_one         — σ(1) = 1
+--     ✅ sumOfDivisors_two         — σ(2) = 3
+--     ✅ sumOfDivisors_six         — σ(6) = 12  (perfect number!)
+--     ✅ sumOfDivisors_twentyeight — σ(28) = 56  (perfect number!)
+--     ✅ sumOfDivisors_5040        — σ(5040) = 19344 (Robin boundary)
+
+
+================================================================
+FILE: Cathedral/Robin/Defs.lean
+================================================================
+
+/-
+  Cathedral/Robin/Defs.lean
+
+  ## The Discrete Front: Robin's and Lagarias's Inequalities
+
+  This file establishes the purely arithmetic path to the Riemann Hypothesis
+  via two classical equivalences:
+
+  - **Lagarias (2002)**: σ(n) ≤ Hₙ + exp(Hₙ) · log(Hₙ) for all n ≥ 1
+  - **Robin (1984)**: σ(n) < e^γ · n · log(log(n)) for all n ≥ 5041
+
+  Both are equivalent to RH. Unlike the Nyman-Beurling path (which requires
+  L² functional analysis and Mellin transforms), these formulations are
+  purely arithmetic: they involve only divisors, exponentials, and logarithms.
+
+  ### Architecture
+
+  ```
+  Cathedral.Defs (RiemannHypothesis)
+    ├── Cathedral.Vasyunin (Continuous / L² / Spectral Path)
+    └── Cathedral.Robin        (Discrete / Arithmetic Path)  ← THIS FILE
+  ```
+
+  ### Axiom Philosophy
+
+  The equivalences `lagarias_iff_rh` and `robin_iff_rh` are axiomatized
+  as literature-standard results. The deep analytic content (Gronwall's
+  theorem, colossally abundant numbers, Mertens' product formula) is
+  isolated behind these interfaces, exactly as `mertens_bound_from_rh`
+  isolates the Perron formula on the Nyman-Beurling path.
+
+  ### References
+
+  - Robin, G. (1984). "Grandes valeurs de la fonction somme des diviseurs
+    et hypothèse de Riemann." J. Math. Pures Appl. 63, 187–213.
+  - Lagarias, J.C. (2002). "An elementary problem equivalent to the
+    Riemann hypothesis." Amer. Math. Monthly 109, 534–543.
+-/
+
+import Cathedral.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+import Mathlib.NumberTheory.Harmonic.Defs
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+
+noncomputable section
+open ArithmeticFunction Real
+
+-- ════════════════════════════════════════════════
+-- PART I: DEFINITIONS
+-- ════════════════════════════════════════════════
+
+/-- The sum-of-divisors function σ₁(n) = Σ_{d | n} d.
+    Uses Mathlib's `ArithmeticFunction.sigma` with k = 1. -/
+def sumOfDivisors (n : ℕ) : ℕ :=
+  (sigma 1) n
+
+/-- The n-th harmonic number cast to ℝ.
+    Hₙ = Σ_{k=1}^n 1/k.
+    Uses Mathlib's `harmonic : ℕ → ℚ` with a cast to ℝ. -/
+noncomputable def harmonicR (n : ℕ) : ℝ :=
+  (harmonic n : ℝ)
+
+-- ════════════════════════════════════════════════
+-- PART II: LAGARIAS'S INEQUALITY (Primary Spearhead)
+-- ════════════════════════════════════════════════
+
+/-- **Lagarias's Inequality (2002)**:
+    σ(n) ≤ Hₙ + exp(Hₙ) · log(Hₙ) for all n ≥ 1.
+
+    This is the formalizer's preferred formulation because:
+    1. It holds for ALL n ≥ 1 (no boundary at n = 5041)
+    2. It uses harmonic numbers (well-supported in Mathlib)
+    3. It avoids log(log(n)) domain issues for small n
+
+    For n = 1: H₁ = 1, so σ(1) = 1 ≤ 1 + e¹·log(1) = 1 + 0 = 1. ✓ -/
+def LagariasInequality : Prop :=
+  ∀ n : ℕ, 1 ≤ n →
+    (sumOfDivisors n : ℝ) ≤
+      harmonicR n + Real.exp (harmonicR n) * Real.log (harmonicR n)
+
+-- ════════════════════════════════════════════════
+-- PART III: ROBIN'S INEQUALITY
+-- ════════════════════════════════════════════════
+
+/-- **Robin's Inequality (1984)**:
+    σ(n) < e^γ · n · log(log(n)) for all n ≥ 5041.
+
+    The last counterexample is n = 5040 = 2⁴ · 3² · 5 · 7
+    (a highly composite number, σ(5040) = 19344).
+
+    NOTE: For n ≥ 5041, log(log(n)) > 0 since log(5041) > e.
+    The strict inequality makes this slightly harder to formalize
+    than Lagarias, but it is the classical formulation. -/
+def RobinInequality : Prop :=
+  ∀ n : ℕ, 5041 ≤ n →
+    (sumOfDivisors n : ℝ) <
+      Real.exp eulerMascheroniConstant * (n : ℝ) * Real.log (Real.log (n : ℝ))
+
+-- ════════════════════════════════════════════════
+-- PART III-A: THE SINGLE ARITHMETIC AXIOM
+-- ════════════════════════════════════════════════
+
+/-- **AXIOM: Arithmetic Equivalences to RH (Lagarias 2002, Robin 1984)**
+
+    Both Lagarias's inequality and Robin's inequality are equivalent
+    to the Riemann Hypothesis.
+
+    These are bundled into a single axiom because they derive from the
+    same mathematical framework:
+    - Gronwall's theorem: limsup σ(n)/(n·log(log(n))) = e^γ
+    - Colossally abundant numbers (Alaoglu-Erdős 1944)
+    - Euler product bounds from zero-free regions of ζ(s)
+
+    MATHEMATICAL SOURCES:
+    - Lagarias, J.C. (2002). "An elementary problem equivalent to the
+      Riemann hypothesis." Amer. Math. Monthly 109, 534–543.
+    - Robin, G. (1984). "Grandes valeurs de la fonction somme des
+      diviseurs et hypothèse de Riemann." J. Math. Pures Appl. 63.
+
+    PREVIOUSLY: 2 separate axioms (lagarias_iff_rh, robin_iff_rh).
+    MERGED: April 12, 2026 — reduces Cathedral from 4 to 3 axioms. -/
+axiom arithmetic_rh_equivalences :
+    (LagariasInequality ↔ RiemannHypothesis) ∧
+    (RobinInequality ↔ RiemannHypothesis)
+
+-- ════════════════════════════════════════════════
+-- PART IV: DERIVED THEOREMS (from the single axiom)
+-- ════════════════════════════════════════════════
+
+/-- Lagarias ↔ RH (derived from the bundled axiom). -/
+theorem lagarias_iff_rh : LagariasInequality ↔ RiemannHypothesis :=
+  arithmetic_rh_equivalences.1
+
+/-- Robin ↔ RH (derived from the bundled axiom). -/
+theorem robin_iff_rh : RobinInequality ↔ RiemannHypothesis :=
+  arithmetic_rh_equivalences.2
+
+/-- The two discrete paths are equivalent to each other. -/
+theorem lagarias_iff_robin : LagariasInequality ↔ RobinInequality := by
+  constructor
+  · intro hL; exact robin_iff_rh.mpr (lagarias_iff_rh.mp hL)
+  · intro hR; exact lagarias_iff_rh.mpr (robin_iff_rh.mp hR)
+
+/-- RH implies Lagarias's Inequality. -/
+theorem rh_implies_lagarias : RiemannHypothesis → LagariasInequality :=
+  lagarias_iff_rh.mpr
+
+/-- RH implies Robin's Inequality. -/
+theorem rh_implies_robin : RiemannHypothesis → RobinInequality :=
+  robin_iff_rh.mpr
+
+/-- Lagarias's Inequality implies RH. -/
+theorem lagarias_implies_rh : LagariasInequality → RiemannHypothesis :=
+  lagarias_iff_rh.mp
+
+/-- Robin's Inequality implies RH. -/
+theorem robin_implies_rh : RobinInequality → RiemannHypothesis :=
+  robin_iff_rh.mp
+
+-- ════════════════════════════════════════════════
+-- PART V: COMPUTATIONAL DEMONSTRATION
+-- ════════════════════════════════════════════════
+
+-- Lean can natively compute the sum of divisors:
+#eval (sigma 1) 5040   -- 19344 (Highly composite, fails Robin)
+#eval (sigma 1) 5041   -- 5113  (= 71², σ = 1 + 71 + 5041)
+#eval (sigma 1) 12     -- 28    (perfect number: σ(12) = 28)
+#eval (sigma 1) 6      -- 12    (perfect number: σ(6) = 12)
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   1 axiom (arithmetic_rh_equivalences) — bundles Lagarias + Robin
+--   7 proved theorems:
+--     ✅ lagarias_iff_rh             — Lagarias ↔ RH (from bundled axiom)
+--     ✅ robin_iff_rh                — Robin ↔ RH (from bundled axiom)
+--     ✅ lagarias_iff_robin          — Lagarias ↔ Robin
+--     ✅ rh_implies_lagarias         — RH → Lagarias
+--     ✅ rh_implies_robin            — RH → Robin
+--     ✅ lagarias_implies_rh         — Lagarias → RH
+--     ✅ robin_implies_rh            — Robin → RH
+--
+-- Architecture:
+--   Cathedral.Defs (RiemannHypothesis)
+--     ├── Cathedral.Vasyunin  — axioms (vasyunin_eq_integral, log_cutoff_witness_bound)
+--     └── Cathedral.Robin         — 1 axiom (arithmetic_rh_equivalences) ← THIS
+
+end
+
+
+================================================================
+FILE: Cathedral/Robin/Equivalence.lean
+================================================================
+
+/-
+  Cathedral/Robin/Equivalence.lean
+
+  ## The Cross-Path Bridge: Robin ↔ Nyman-Beurling
+
+  The philosophical crown jewel of the Cathedral architecture:
+  a purely arithmetic condition on integer divisor sums
+  unilaterally forces L²(0,1) convergence of functional approximations.
+
+  PROVED: robin_implies_nyman_beurling
+  PROVED: lagarias_implies_nyman_beurling
+-/
+
+import Cathedral.Defs
+import Cathedral.Robin.Defs
+import Cathedral.NymanBeurling.NymanBeurling
+
+open Real
+
+-- ════════════════════════════════════════════════
+-- THE CROSS-PATH BRIDGE
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Robin's Inequality implies the Nyman-Beurling
+    distance vanishes.
+
+    This bridges two entirely different mathematical universes:
+    - INPUT:  A discrete bound on σ(n) for integers n ≥ 5041
+    - OUTPUT: L² convergence of step-function approximations on (0,1)
+
+    Chain: Robin → RH (by robin_iff_rh) → d²_N → 0 (by phase_3_chain) -/
+theorem robin_implies_nyman_beurling :
+    RobinInequality →
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
+  intro hR
+  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (robin_implies_rh hR)
+
+/-- **THEOREM (PROVED)**: Lagarias's Inequality implies the Nyman-Beurling
+    distance vanishes.
+
+    Chain: Lagarias → RH (by lagarias_iff_rh) → d²_N → 0 -/
+theorem lagarias_implies_nyman_beurling :
+    LagariasInequality →
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
+  intro hL
+  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
+
+-- ════════════════════════════════════════════════
+-- THE CONVERSE: NB → ROBIN / LAGARIAS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: Nyman-Beurling convergence implies Robin's Inequality.
+    Chain: d²_N → 0 → RH (by nyman_beurling_converse) → Robin (by robin_iff_rh) -/
+theorem nyman_beurling_implies_robin :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+    RobinInequality := by
+  intro hNB
+  exact rh_implies_robin (nyman_beurling_converse hNB)
+
+/-- **THEOREM (PROVED)**: Nyman-Beurling convergence implies Lagarias' Inequality.
+    Chain: d²_N → 0 → RH → Lagarias -/
+theorem nyman_beurling_implies_lagarias :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+    LagariasInequality := by
+  intro hNB
+  exact rh_implies_lagarias (nyman_beurling_converse hNB)
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   4 PROVED theorems:
+--     ✅ robin_implies_nyman_beurling      — Robin → d²_N → 0
+--     ✅ lagarias_implies_nyman_beurling   — Lagarias → d²_N → 0
+--     ✅ nyman_beurling_implies_robin      — d²_N → 0 → Robin
+--     ✅ nyman_beurling_implies_lagarias   — d²_N → 0 → Lagarias
+--
+-- The full equivalence: Robin ↔ d²→0 ↔ Lagarias ↔ RH
+-- All arrows are machine-verified.
+
+
+================================================================
+FILE: Cathedral/Robin/HarmonicBounds.lean
+================================================================
+
+/-
+  Cathedral/Robin/HarmonicBounds.lean
+
+  ## Harmonic Number Infrastructure
+
+  The logarithmic sandwich that drives the Lagarias inequality:
+    log(n+1) ≤ H_n ≤ 1 + log(n)
+
+  All theorems use Mathlib's Harmonic.Bounds API.
+  The Bounds theorems are natively real-valued (using implicit ℚ → ℝ cast).
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.Harmonic.Bounds
+import Mathlib.NumberTheory.Harmonic.Int
+
+open Real
+
+-- ════════════════════════════════════════════════
+-- PART I: POSITIVITY
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: H_n > 0 for n ≥ 1. -/
+theorem harmonicR_pos {n : ℕ} (hn : 1 ≤ n) : 0 < harmonicR n := by
+  unfold harmonicR
+  exact_mod_cast harmonic_pos (by omega : n ≠ 0)
+
+-- ════════════════════════════════════════════════
+-- PART II: THE LOGARITHMIC SANDWICH
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: log(n+1) ≤ H_n.
+    Lower bound from integral comparison (Mathlib).
+
+    Mathlib's `log_add_one_le_harmonic` has type:
+    `Real.log ↑(n + 1) ≤ (harmonic n : ℝ)` -/
+theorem harmonicR_lower (n : ℕ) : log ↑(n + 1) ≤ harmonicR n := by
+  unfold harmonicR
+  exact log_add_one_le_harmonic n
+
+/-- **THEOREM (PROVED)**: H_n ≤ 1 + log(n).
+    Upper bound from integral comparison (Mathlib).
+
+    Mathlib's `harmonic_le_one_add_log` has type:
+    `(harmonic n : ℝ) ≤ 1 + Real.log ↑n` -/
+theorem harmonicR_upper (n : ℕ) : harmonicR n ≤ 1 + log ↑n := by
+  unfold harmonicR
+  exact harmonic_le_one_add_log n
+
+-- ════════════════════════════════════════════════
+-- PART III: EXACT VALUES
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: H₁ = 1. -/
+theorem harmonicR_one : harmonicR 1 = 1 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₂ = 3/2. -/
+theorem harmonicR_two : harmonicR 2 = 3/2 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₁ is positive (special case). -/
+theorem harmonicR_one_pos : (0 : ℝ) < harmonicR 1 := by
+  rw [harmonicR_one]; norm_num
+
+/-- **THEOREM (PROVED)**: H₃ = 11/6. -/
+theorem harmonicR_three : harmonicR 3 = 11/6 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H₄ = 25/12. -/
+theorem harmonicR_four : harmonicR 4 = 25/12 := by
+  unfold harmonicR; norm_num
+
+/-- **THEOREM (PROVED)**: H_{n+1} > H_n for all n ≥ 1.
+    Since H_{n+1} = H_n + 1/(n+1) and 1/(n+1) > 0. -/
+theorem harmonicR_succ_gt {n : ℕ} (hn : 1 ≤ n) : harmonicR n < harmonicR (n + 1) := by
+  unfold harmonicR
+  have : (harmonic (n + 1) : ℝ) = (harmonic n : ℝ) + (1 : ℝ) / ((n : ℝ) + 1) := by
+    rw [harmonic_succ]
+    simp
+  rw [this]
+  linarith [show (0 : ℝ) < 1 / ((n : ℝ) + 1) from by positivity]
+
+-- ════════════════════════════════════════════════
+-- PART IV: LOGARITHMIC TAYLOR BOUNDS
+-- ════════════════════════════════════════════════
+
+/-- log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4 for x ≥ 0.
+    Proof: h(x) = log(1+x) - (x - x²/2 + x³/3 - x⁴/4) has h(0) = 0 and
+    h'(x) = x⁴/(1+x) ≥ 0, so h is monotone.
+    (Formerly in archived GramDiag.lean, moved here April 2026.) -/
+lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
+    x - x^2/2 + x^3/3 - x^4/4 ≤ Real.log (1 + x) := by
+  suffices h : 0 ≤ Real.log (1 + x) - (x - x^2/2 + x^3/3 - x^4/4) by linarith
+  set f : ℝ → ℝ := fun t => Real.log (1 + t) - (t - t^2/2 + t^3/3 - t^4/4) with hf_def
+  have hf0 : f 0 = 0 := by simp [hf_def, Real.log_one]
+  have hcont : ContinuousOn f (Set.Ici 0) := by
+    simp only [hf_def]
+    apply ContinuousOn.sub
+    · exact ContinuousOn.log (continuousOn_const.add continuousOn_id) (fun t ht => by
+        simp only [Set.mem_Ici] at ht; linarith)
+    · fun_prop
+  have hdiff : DifferentiableOn ℝ f (interior (Set.Ici (0:ℝ))) := by
+    simp only [interior_Ici, hf_def]
+    intro t ht; simp only [Set.mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    apply DifferentiableAt.sub
+    · exact (differentiableAt_id.const_add 1).log (ne_of_gt (by linarith : (0:ℝ) < 1 + t))
+    · fun_prop
+  have hderiv : ∀ t ∈ interior (Set.Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, Set.mem_Ioi] at ht
+    have h1t : (0:ℝ) < 1 + t := by linarith
+    have hdf : HasDerivAt f (t^4 / (1+t)) t := by
+      simp only [hf_def]
+      have h1 := (hasDerivAt_id t).const_add 1 |>.log (ne_of_gt h1t)
+      have h2 := hasDerivAt_id t
+      have h3 := (hasDerivAt_pow 2 t).div_const 2
+      have h4 := (hasDerivAt_pow 3 t).div_const 3
+      have h5 := (hasDerivAt_pow 4 t).div_const 4
+      refine (h1.sub (((h2.sub h3).add h4).sub h5)).congr_deriv ?_
+      simp only [id]; field_simp; ring
+    rw [hdf.deriv]
+    exact div_nonneg (pow_nonneg (le_of_lt ht) 4) (le_of_lt h1t)
+  have hmono : MonotoneOn f (Set.Ici 0) :=
+    monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (Set.mem_Ici.mpr (le_refl 0)) (Set.mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   10 PROVED theorems:
+--     ✅ harmonicR_pos          — H_n > 0
+--     ✅ harmonicR_lower        — log(n+1) ≤ H_n
+--     ✅ harmonicR_upper        — H_n ≤ 1 + log(n)
+--     ✅ harmonicR_one          — H₁ = 1
+--     ✅ harmonicR_two          — H₂ = 3/2
+--     ✅ harmonicR_one_pos      — 0 < H₁
+--     ✅ harmonicR_three        — H₃ = 11/6
+--     ✅ harmonicR_four         — H₄ = 25/12
+--     ✅ harmonicR_succ_gt      — H_{n+1} > H_n
+--     ✅ log_lower_quartic      — log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4
+
+
+
+================================================================
+FILE: Cathedral/Robin/PrimeBounds.lean
+================================================================
+
+/-
+  Cathedral/Robin/PrimeBounds.lean
+
+  ## Prime Power Bounds & Lagarias for All Primes (PROVED!)
+-/
+
+import Cathedral.Robin.Defs
+import Cathedral.Robin.SigmaProps
+import Cathedral.Robin.HarmonicBounds
+import Mathlib.Analysis.SpecialFunctions.ExpDeriv
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.Data.Nat.Prime.Basic
+
+open Real ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- PART I: GEOMETRIC SUM BOUND
+-- ════════════════════════════════════════════════
+
+lemma geom_sum_le_two_pow (P : ℝ) (hP : 2 ≤ P) (k : ℕ) :
+    ∑ j ∈ Finset.range (k + 1), P ^ j ≤ 2 * P ^ k := by
+  induction k with
+  | zero => simp [pow_zero, mul_one]
+  | succ k ih =>
+    rw [Finset.sum_range_succ]
+    calc ∑ j ∈ Finset.range (k + 1), P ^ j + P ^ (k + 1)
+      _ ≤ 2 * P ^ k + P ^ (k + 1) := by linarith
+      _ ≤ P * P ^ k + P ^ (k + 1) := by
+          have : 2 * P ^ k ≤ P * P ^ k :=
+            mul_le_mul_of_nonneg_right hP (by positivity)
+          linarith
+      _ = P ^ (k + 1) + P ^ (k + 1) := by ring_nf
+      _ = 2 * P ^ (k + 1) := by ring
+
+-- ════════════════════════════════════════════════
+-- PART II: PRIME POWER SIGMA BOUND
+-- ════════════════════════════════════════════════
+
+theorem sigma_one_prime_pow_bound {p k : ℕ} (hp : p.Prime) (_hk : 1 ≤ k) :
+    (sumOfDivisors (p ^ k) : ℝ) ≤ 2 * (p ^ k : ℝ) := by
+  unfold sumOfDivisors
+  have h_apply := sigma_one_apply_prime_pow (i := k) hp
+  have h_cast : ((sigma 1) (p ^ k) : ℝ) = ∑ j ∈ Finset.range (k + 1), (p : ℝ) ^ j := by
+    rw [h_apply]; push_cast; rfl
+  rw [h_cast]
+  exact geom_sum_le_two_pow (p : ℝ) (by exact_mod_cast hp.two_le) k
+
+-- ════════════════════════════════════════════════
+-- PART III: TAYLOR TRUNCATION BOUNDS
+-- ════════════════════════════════════════════════
+
+-- NOTE: We use the GramDiag.lean pattern for HasDerivAt proofs.
+-- Key: `dsimp only [_root_.id]` (not `simp`) to resolve the
+-- ArithmeticFunction.id vs _root_.id ambiguity.
+
+lemma exp_lower_quadratic (x : ℝ) (hx : 0 ≤ x) : 1 + x + x^2/2 ≤ Real.exp x := by
+  suffices h : 0 ≤ Real.exp x - (1 + x + x^2/2) by linarith
+  set f : ℝ → ℝ := fun t => Real.exp t - (1 + t + t^2/2)
+  have hf0 : f 0 = 0 := by
+    show Real.exp 0 - (1 + 0 + 0 ^ 2 / 2) = 0; simp [Real.exp_zero]
+  have hcont : ContinuousOn f (Set.Ici 0) := by
+    show ContinuousOn (fun t => Real.exp t - (1 + t + t ^ 2 / 2)) (Set.Ici 0)
+    exact ContinuousOn.sub continuous_exp.continuousOn
+      (ContinuousOn.add (continuousOn_const.add continuousOn_id)
+        ((continuous_pow 2).continuousOn.div_const 2))
+  have hdiff : DifferentiableOn ℝ f (interior (Set.Ici (0:ℝ))) := by
+    simp only [interior_Ici]
+    show DifferentiableOn ℝ (fun t => Real.exp t - (1 + t + t ^ 2 / 2)) (Set.Ioi 0)
+    intro t ht; simp only [Set.mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    exact differentiableAt_exp.sub
+      ((differentiableAt_id.const_add 1).add ((differentiableAt_pow 2).div_const 2))
+  have hderiv : ∀ t ∈ interior (Set.Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, Set.mem_Ioi] at ht
+    have hdf : HasDerivAt f (Real.exp t - (1 + t)) t := by
+      have hd1 := hasDerivAt_exp t
+      have hd2 := (hasDerivAt_id t).const_add 1
+      have hd3 := (hasDerivAt_pow 2 t).div_const 2
+      refine (hd1.sub (hd2.add hd3)).congr_deriv ?_
+      dsimp only [_root_.id]; ring
+    rw [hdf.deriv]; linarith [Real.add_one_le_exp t]
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+lemma exp_lower_cubic (x : ℝ) (hx : 0 ≤ x) : 1 + x + x^2/2 + x^3/6 ≤ Real.exp x := by
+  suffices h : 0 ≤ Real.exp x - (1 + x + x^2/2 + x^3/6) by linarith
+  set f : ℝ → ℝ := fun t => Real.exp t - (1 + t + t^2/2 + t^3/6)
+  have hf0 : f 0 = 0 := by
+    show Real.exp 0 - (1 + 0 + 0 ^ 2 / 2 + 0 ^ 3 / 6) = 0; simp [Real.exp_zero]
+  have hcont : ContinuousOn f (Set.Ici 0) := by
+    show ContinuousOn (fun t => Real.exp t - (1 + t + t ^ 2 / 2 + t ^ 3 / 6)) (Set.Ici 0)
+    exact ContinuousOn.sub continuous_exp.continuousOn
+      (ContinuousOn.add (ContinuousOn.add (continuousOn_const.add continuousOn_id)
+        ((continuous_pow 2).continuousOn.div_const 2))
+        ((continuous_pow 3).continuousOn.div_const 6))
+  have hdiff : DifferentiableOn ℝ f (interior (Set.Ici (0:ℝ))) := by
+    simp only [interior_Ici]
+    show DifferentiableOn ℝ (fun t => Real.exp t - (1 + t + t ^ 2 / 2 + t ^ 3 / 6)) (Set.Ioi 0)
+    intro t ht; simp only [Set.mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    exact differentiableAt_exp.sub
+      (((differentiableAt_id.const_add 1).add ((differentiableAt_pow 2).div_const 2)).add
+        ((differentiableAt_pow 3).div_const 6))
+  have hderiv : ∀ t ∈ interior (Set.Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, Set.mem_Ioi] at ht
+    have hdf : HasDerivAt f (Real.exp t - (1 + t + t^2/2)) t := by
+      have hd1 := hasDerivAt_exp t
+      have hd2 := (hasDerivAt_id t).const_add 1
+      have hd3 := (hasDerivAt_pow 2 t).div_const 2
+      have hd4 := (hasDerivAt_pow 3 t).div_const 6
+      refine (hd1.sub ((hd2.add hd3).add hd4)).congr_deriv ?_
+      dsimp only [_root_.id]; ring
+    rw [hdf.deriv]; linarith [exp_lower_quadratic t (le_of_lt ht)]
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+lemma exp_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
+    1 + x + x^2/2 + x^3/6 + x^4/24 ≤ Real.exp x := by
+  suffices h : 0 ≤ Real.exp x - (1 + x + x^2/2 + x^3/6 + x^4/24) by linarith
+  set f : ℝ → ℝ := fun t => Real.exp t - (1 + t + t^2/2 + t^3/6 + t^4/24)
+  have hf0 : f 0 = 0 := by
+    show Real.exp 0 - (1 + 0 + 0 ^ 2 / 2 + 0 ^ 3 / 6 + 0 ^ 4 / 24) = 0; simp [Real.exp_zero]
+  have hcont : ContinuousOn f (Set.Ici 0) := by
+    show ContinuousOn (fun t => Real.exp t - (1 + t + t ^ 2 / 2 + t ^ 3 / 6 + t ^ 4 / 24)) (Set.Ici 0)
+    exact ContinuousOn.sub continuous_exp.continuousOn
+      (ContinuousOn.add (ContinuousOn.add (ContinuousOn.add (continuousOn_const.add continuousOn_id)
+        ((continuous_pow 2).continuousOn.div_const 2))
+        ((continuous_pow 3).continuousOn.div_const 6))
+        ((continuous_pow 4).continuousOn.div_const 24))
+  have hdiff : DifferentiableOn ℝ f (interior (Set.Ici (0:ℝ))) := by
+    simp only [interior_Ici]
+    show DifferentiableOn ℝ (fun t => Real.exp t - (1 + t + t ^ 2 / 2 + t ^ 3 / 6 + t ^ 4 / 24)) (Set.Ioi 0)
+    intro t ht; simp only [Set.mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    exact differentiableAt_exp.sub
+      ((((differentiableAt_id.const_add 1).add ((differentiableAt_pow 2).div_const 2)).add
+        ((differentiableAt_pow 3).div_const 6)).add
+        ((differentiableAt_pow 4).div_const 24))
+  have hderiv : ∀ t ∈ interior (Set.Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, Set.mem_Ioi] at ht
+    have hdf : HasDerivAt f (Real.exp t - (1 + t + t^2/2 + t^3/6)) t := by
+      have hd1 := hasDerivAt_exp t
+      have hd2 := (hasDerivAt_id t).const_add 1
+      have hd3 := (hasDerivAt_pow 2 t).div_const 2
+      have hd4 := (hasDerivAt_pow 3 t).div_const 6
+      have hd5 := (hasDerivAt_pow 4 t).div_const 24
+      refine (hd1.sub (((hd2.add hd3).add hd4).add hd5)).congr_deriv ?_
+      dsimp only [_root_.id]; ring
+    rw [hdf.deriv]; linarith [exp_lower_cubic t (le_of_lt ht)]
+  have hmono := monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (Set.mem_Ici.mpr le_rfl) (Set.mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+lemma log_inv_le (x : ℝ) (hx : 0 < x) : 1 - x⁻¹ ≤ Real.log x := by
+  have h1 : Real.log x⁻¹ ≤ x⁻¹ - 1 := Real.log_le_sub_one_of_pos (inv_pos.mpr hx)
+  rw [Real.log_inv] at h1; linarith
+
+-- ════════════════════════════════════════════════
+-- PART IV: SMALL PRIME VERIFICATION
+-- The lemmas are stated in terms of (↑p + 1) to match the master theorem
+-- ════════════════════════════════════════════════
+
+private lemma lagarias_p2 :
+    (2 : ℝ) + 1 ≤ harmonicR 2 + Real.exp (harmonicR 2) * Real.log (harmonicR 2) := by
+  unfold harmonicR
+  have h_h : (harmonic 2 : ℝ) = 3/2 := by norm_num
+  rw [h_h]
+  have he : 67/16 ≤ Real.exp (3/2 : ℝ) := by
+    have h1 := exp_lower_cubic (3/2 : ℝ) (by norm_num)
+    linarith
+  have hl : 77/192 ≤ Real.log (3/2 : ℝ) := by
+    have h1 := log_lower_quartic (1/2 : ℝ) (by norm_num)
+    have h3 : (1:ℝ) + 1/2 = 3/2 := by norm_num
+    rw [h3] at h1; linarith
+  nlinarith
+
+private lemma lagarias_p3 :
+    (3 : ℝ) + 1 ≤ harmonicR 3 + Real.exp (harmonicR 3) * Real.log (harmonicR 3) := by
+  unfold harmonicR
+  have h_h : (harmonic 3 : ℝ) = 11/6 := by norm_num
+  rw [h_h]
+  have he : 7181/1296 ≤ Real.exp (11/6 : ℝ) := by
+    have h1 := exp_lower_cubic (11/6 : ℝ) (by norm_num)
+    linarith
+  have hl : 2895/5184 ≤ Real.log (11/6 : ℝ) := by
+    have h1 := log_lower_quartic (5/6 : ℝ) (by norm_num)
+    have h3 : (1:ℝ) + 5/6 = 11/6 := by norm_num
+    rw [h3] at h1; linarith
+  nlinarith
+
+private lemma lagarias_p5 :
+    (5 : ℝ) + 1 ≤ harmonicR 5 + Real.exp (harmonicR 5) * Real.log (harmonicR 5) := by
+  unfold harmonicR
+  have h_h : (harmonic 5 : ℝ) = 137/60 := by norm_num
+  rw [h_h]
+  have he : 9 ≤ Real.exp (137/60 : ℝ) := by
+    have h1 := exp_lower_quartic (137/60 : ℝ) (by norm_num)
+    linarith
+  have hl : 77/137 ≤ Real.log (137/60 : ℝ) := by
+    have h1 := log_inv_le (137/60 : ℝ) (by norm_num)
+    have h2 : (1 : ℝ) - (137/60 : ℝ)⁻¹ = 77/137 := by norm_num
+    linarith
+  nlinarith
+
+private lemma lagarias_p7 :
+    (7 : ℝ) + 1 ≤ harmonicR 7 + Real.exp (harmonicR 7) * Real.log (harmonicR 7) := by
+  unfold harmonicR
+  have h_h : (harmonic 7 : ℝ) = 363/140 := by norm_num
+  rw [h_h]
+  have he : 117/10 ≤ Real.exp (363/140 : ℝ) := by
+    have h1 := exp_lower_quartic (363/140 : ℝ) (by norm_num)
+    linarith
+  have hl : 223/363 ≤ Real.log (363/140 : ℝ) := by
+    have h1 := log_inv_le (363/140 : ℝ) (by norm_num)
+    have h2 : (1 : ℝ) - (363/140 : ℝ)⁻¹ = 223/363 := by norm_num
+    linarith
+  nlinarith
+
+-- ════════════════════════════════════════════════
+-- PART V: STRATEGIC BYPASS FOR p ≥ 11
+-- ════════════════════════════════════════════════
+
+private lemma log_two_ge : (2:ℝ) / 3 ≤ Real.log 2 := by
+  have h43 := log_lower_quartic (1/3 : ℝ) (by norm_num)
+  have h32 := log_lower_quartic (1/2 : ℝ) (by norm_num)
+  have : (1:ℝ) + 1/3 = 4/3 := by norm_num
+  rw [this] at h43
+  have : (1:ℝ) + 1/2 = 3/2 := by norm_num
+  rw [this] at h32
+  have h1 : Real.log 2 = Real.log (4/3) + Real.log (3/2) := by
+    rw [← Real.log_mul (by norm_num : (4:ℝ)/3 ≠ 0) (by norm_num : (3:ℝ)/2 ≠ 0)]
+    norm_num
+  linarith
+
+private lemma log_three_ge_one : 1 ≤ Real.log 3 := by
+  have h32 := log_lower_quartic (1/2 : ℝ) (by norm_num)
+  have : (1:ℝ) + 1/2 = 3/2 := by norm_num
+  rw [this] at h32
+  have h1 : Real.log 3 = Real.log (3/2) + Real.log 2 := by
+    rw [← Real.log_mul (by norm_num : (3:ℝ)/2 ≠ 0) (by norm_num : (2:ℝ) ≠ 0)]
+    norm_num
+  linarith [log_two_ge]
+
+private lemma harmonicR_mono {m n : ℕ} (h : m ≤ n) : harmonicR m ≤ harmonicR n := by
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le h
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have ihm : harmonicR m ≤ harmonicR (m + k) := ih (by omega)
+    calc harmonicR m ≤ harmonicR (m + k) := ihm
+      _ ≤ harmonicR (m + k + 1) := by
+        unfold harmonicR
+        simp only [Rat.cast_le]
+        rw [harmonic_succ]
+        exact le_add_of_nonneg_right (by positivity)
+
+theorem exp_harmonicR_ge (n : ℕ) : (n : ℝ) + 1 ≤ Real.exp (harmonicR n) := by
+  have h_lower := harmonicR_lower n
+  have h_pos : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  calc (n : ℝ) + 1
+      = Real.exp (Real.log ((n : ℝ) + 1)) := by rw [Real.exp_log h_pos]
+    _ ≤ Real.exp (harmonicR n) := by
+        apply Real.exp_le_exp.mpr
+        exact_mod_cast h_lower
+
+private lemma harmonicR_11_ge_3 : 3 ≤ harmonicR 11 := by
+  unfold harmonicR
+  have h : (harmonic 11 : ℝ) = 83711 / 27720 := by norm_num
+  rw [h]; norm_num
+
+private lemma lagarias_ge_11 {p : ℕ} (hp : 11 ≤ p) :
+    (p : ℝ) + 1 ≤ harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p) := by
+  have h_Hp_ge_3 : 3 ≤ harmonicR p := le_trans harmonicR_11_ge_3 (harmonicR_mono hp)
+  have h_log_ge_1 : 1 ≤ Real.log (harmonicR p) :=
+    le_trans log_three_ge_one (Real.log_le_log (by norm_num : (0:ℝ) < 3) h_Hp_ge_3)
+  have h_exp_ge := exp_harmonicR_ge p
+  calc (p : ℝ) + 1
+      ≤ Real.exp (harmonicR p) := h_exp_ge
+    _ = Real.exp (harmonicR p) * 1 := (mul_one _).symm
+    _ ≤ Real.exp (harmonicR p) * Real.log (harmonicR p) :=
+        mul_le_mul_of_nonneg_left h_log_ge_1 (le_of_lt (Real.exp_pos _))
+    _ ≤ harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p) := by
+        linarith [show 0 ≤ harmonicR p from by linarith]
+
+-- ════════════════════════════════════════════════
+-- PART VI: THE MASTER THEOREM
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED!)**: Lagarias holds for ALL primes. -/
+theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
+    (sumOfDivisors p : ℝ) ≤
+      harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p) := by
+  -- σ(p) = p + 1
+  rw [sigma_one_prime hp]; push_cast
+  -- Now goal: (↑p + 1 : ℝ) ≤ ...
+  by_cases h11 : 11 ≤ p
+  · exact lagarias_ge_11 h11
+  · have h11' : p < 11 := not_le.mp h11
+    have hp2 := hp.two_le
+    interval_cases p
+    -- p = 2
+    · exact lagarias_p2
+    -- p = 3
+    · exact lagarias_p3
+    -- p = 4 (not prime)
+    · revert hp; decide
+    -- p = 5
+    · exact lagarias_p5
+    -- p = 6 (not prime)
+    · revert hp; decide
+    -- p = 7
+    · exact lagarias_p7
+    -- p = 8, 9, 10 (not prime)
+    · revert hp; decide
+    · revert hp; decide
+    · revert hp; decide
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   ALL PROVED:
+--     ✅ geom_sum_le_two_pow           — Σ P^j ≤ 2·P^k
+--     ✅ sigma_one_prime_pow_bound     — σ(p^k) ≤ 2p^k
+--     ✅ exp_lower_{quadratic,cubic,quartic} — Taylor bounds
+--     ✅ log_inv_le                    — log(x) ≥ 1 - 1/x
+--     ✅ lagarias_p2, p3, p5, p7       — Small prime verification
+--     ✅ log_two_ge, log_three_ge_one  — Logarithmic constants
+--     ✅ harmonicR_mono                — H_m ≤ H_n for m ≤ n
+--     ✅ exp_harmonicR_ge              — exp(H_n) ≥ n+1
+--     ✅ harmonicR_11_ge_3             — H_11 ≥ 3
+--     ✅ lagarias_ge_11                — Lagarias for p ≥ 11
+--     ✅ lagarias_for_primes           — Lagarias for ALL primes!
+
+
+================================================================
+FILE: Cathedral/Robin/SigmaProps.lean
+================================================================
+
+/-
+  Cathedral/Robin/SigmaProps.lean
+
+  ## Properties of the Sum-of-Divisors Function
+
+  Proved theorems about σ₁(n) using Mathlib's ArithmeticFunction API:
+  - σ(p) = p + 1 for primes
+  - σ is multiplicative for coprime arguments
+  - σ(n) ≤ n² (generic upper bound)
+-/
+
+import Cathedral.Robin.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
+
+open ArithmeticFunction
+
+-- ════════════════════════════════════════════════
+-- PART I: SIGMA FOR PRIMES
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(p) = p + 1 for primes.
+    Uses Mathlib's `sigma_one_apply_prime_pow` with i = 1. -/
+theorem sigma_one_prime {p : ℕ} (hp : p.Prime) :
+    sumOfDivisors p = p + 1 := by
+  unfold sumOfDivisors
+  have h := sigma_one_apply_prime_pow (i := 1) hp
+  rw [pow_one] at h
+  rw [h]
+  simp [Finset.sum_range_succ, add_comm]
+
+-- ════════════════════════════════════════════════
+-- PART II: MULTIPLICATIVITY
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ₁ is multiplicative for coprime arguments.
+    σ(m·n) = σ(m)·σ(n) when gcd(m,n) = 1. -/
+theorem sumOfDivisors_mul_coprime {m n : ℕ} (hmn : Nat.Coprime m n) :
+    sumOfDivisors (m * n) = sumOfDivisors m * sumOfDivisors n := by
+  unfold sumOfDivisors
+  exact isMultiplicative_sigma.map_mul_of_coprime hmn
+
+-- ════════════════════════════════════════════════
+-- PART III: GENERIC UPPER BOUND
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(n) ≤ n² for all n.
+    Immediate from Mathlib's `sigma_le_pow_succ` with k = 1. -/
+theorem sigma_one_le_sq (n : ℕ) : sumOfDivisors n ≤ n ^ 2 := by
+  unfold sumOfDivisors
+  exact sigma_le_pow_succ 1 n
+
+-- ════════════════════════════════════════════════
+-- PART IV: SIGMA LOWER BOUND
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED)**: σ(n) ≥ n + 1 for n ≥ 2.
+    Every n ≥ 2 has at least 1 and n as distinct divisors. -/
+theorem sigma_one_ge_succ (n : ℕ) (hn : 2 ≤ n) :
+    n + 1 ≤ sumOfDivisors n := by
+  unfold sumOfDivisors
+  have h_le : ({1, n} : Finset ℕ).sum _root_.id ≤ (sigma 1) n := by
+    rw [sigma_one_apply]
+    apply Finset.sum_le_sum_of_subset
+    intro x hx
+    simp only [Finset.mem_insert, Finset.mem_singleton] at hx
+    rcases hx with rfl | rfl
+    · simp; omega
+    · simp; omega
+  have h_sum : ({1, n} : Finset ℕ).sum _root_.id = 1 + n := by
+    rw [Finset.sum_pair (by omega : (1:ℕ) ≠ n)]
+    rfl
+  omega
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ZERO sorry
+--   ZERO axioms
+--   4 PROVED theorems:
+--     ✅ sigma_one_prime              — σ(p) = p + 1
+--     ✅ sumOfDivisors_mul_coprime   — σ(mn) = σ(m)σ(n) for coprime
+--     ✅ sigma_one_le_sq             — σ(n) ≤ n²
+--     ✅ sigma_one_ge_succ           — σ(n) ≥ n + 1
+
+
+================================================================
+FILE: Cathedral/Structural/Eigenvalue.lean
+================================================================
+
+/-
+  Cathedral/Structural/Eigenvalue.lean
+
+  ## Eigenvalue monotonicity and interlacing.
+
+  Core results:
+  - eigenvalue_interlacing (Cauchy interlacing)
+  - lambdaMin_shifted_antitone
+  - eigenDrop_nonneg
+  - telescoping identity
+  - drop_formula_bound (axiom)
+-/
+
+import Cathedral.Defs
+import Cathedral.Spectral.RayleighBridge
+
+noncomputable section
+open Complex Real
+
+/-- **Cauchy Interlacing** (PROVEN): λ_min(G_{N+1}) ≤ λ_min(G_N). -/
+theorem eigenvalue_interlacing (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin (N + 1) ≤ lambdaMin N := by
+  obtain ⟨n, rfl⟩ : ∃ n, N = n + 1 := ⟨N - 1, by omega⟩
+  have hn : 0 < n := by omega
+  unfold lambdaMin
+  simp only [show n + 1 ≥ 2 from by omega, show n + 2 ≥ 2 from by omega, dite_true]
+  set H_n := gramMatrix_hermitian (n + 1)
+  set H_n1 := gramMatrix_hermitian (n + 2)
+  apply Finset.le_inf'
+  intro j _
+  have h_in_range : H_n.eigenvalues₀ j ∈ Set.range H_n.eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j,
+           congr_arg _ (Equiv.symm_apply_apply _ j)⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi]
+  rw [← quadForm_eigenvector H_n i, ← quadForm_padVector]
+  exact min_eigenvalue_le_quadForm H_n1 _
+    (padVector_norm _ (H_n.eigenvectorBasis.orthonormal.1 i))
+    (by omega)
+
+theorem eigenvalue_antitone (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin (N + 1) ≤ lambdaMin N := eigenvalue_interlacing N hN
+
+/-- lambdaMin shifted to start at 0 is antitone on all of ℕ. -/
+lemma lambdaMin_shifted_antitone : Antitone (fun n => lambdaMin (n + 2)) := by
+  intro a b hab
+  induction hab with
+  | refl => exact le_refl _
+  | step h ih => exact le_trans (eigenvalue_antitone _ (by omega)) ih
+
+/-- lambdaMin is antitone for indices ≥ 2. -/
+lemma lambdaMin_antitone_ge2 (M N : ℕ) (hM : 2 ≤ M) (hN : M ≤ N) :
+    lambdaMin N ≤ lambdaMin M := by
+  have := lambdaMin_shifted_antitone (show M - 2 ≤ N - 2 by omega)
+  simp only at this
+  have hM2 : M - 2 + 2 = M := by omega
+  have hN2 : N - 2 + 2 = N := by omega
+  rwa [hM2, hN2] at this
+
+/-- The eigenvalue drop is non-negative (from Cauchy interlacing) -/
+theorem eigenDrop_nonneg (N : ℕ) (hN : 3 ≤ N) : 0 ≤ eigenDrop N := by
+  unfold eigenDrop
+  have h2 : 2 ≤ N - 1 := by omega
+  have := eigenvalue_antitone (N - 1) h2
+  have hsimp : N - 1 + 1 = N := by omega
+  rw [hsimp] at this
+  linarith
+
+/-- Telescoping: λ_min(G_N) = λ_min(G_{N₀}) - Σ_{k=N₀}^{N-1} δ_{k+1}. -/
+theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
+    lambdaMin N = lambdaMin N₀ -
+    ∑ k ∈ Finset.Ico N₀ N, eigenDrop (k + 1) := by
+  simp_rw [eigenDrop_succ]
+  induction N with
+  | zero => simp [Nat.le_zero.mp hN]
+  | succ n ih =>
+    by_cases h : N₀ ≤ n
+    · rw [Finset.sum_Ico_succ_top h]
+      have := ih h
+      linarith
+    · push Not at h
+      have : N₀ = n + 1 := by omega
+      subst this
+      simp
+
+/-- **Drop formula** (Schur complement perturbation) — AXIOM. -/
+axiom drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
+    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
+      schurComplement (N - 1)
+
+theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
+    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
+      schurComplement (N - 1) := drop_formula_bound N hN
+
+end
+
+
+================================================================
+FILE: Cathedral/Structural/Independence.lean
+================================================================
+
+/-
+  Cathedral/Structural/Independence.lean
+
+  ## NB linear independence and positive definiteness.
+
+  Proves that the fractional-part functions {k/x} are linearly independent
+  in L²(0,1), which implies the Gram matrix is positive definite.
+
+  Core results:
+  - fract_eq_sub (floor computation on intervals)
+  - nbLinComb_neg_interval (floor jump witness)
+  - nbLinComb_nonzero_somewhere (NB is nonzero for w ≠ 0)
+  - nyman_beurling_lin_indep (∫ f² > 0)
+  - gram_pos_def (wᵀGw > 0)
+  - gram_positive_definite (λ_min > 0)
+  - gramMatrix_det_ne_zero
+-/
+
+import Cathedral.Defs
+import Cathedral.Spectral.RayleighBridge
+import Cathedral.Gram.NbLinComb
+
+noncomputable section
+open Complex Real
+
+-- ════════════════════════════════════════════════
+-- FLOOR COMPUTATIONS ON INTERVALS
+-- ════════════════════════════════════════════════
+
+/-- On (n/(n+1), 1) with m ≤ n ≥ 1, {m/x} = m/x - m. -/
+theorem fract_eq_sub {n m : ℕ} (hm : m ≤ n) (hn : 1 ≤ n)
+    {x : ℝ} (hx_lo : (n : ℝ) / (↑n + 1) < x) (hx_hi : x < 1) :
+    Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ) := by
+  have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n / (↑n + 1) by positivity]
+  have h1 : (m : ℝ) * x ≤ ↑m := by nlinarith
+  have hn_ineq : (↑n : ℝ) < x * (↑n + 1) :=
+    (div_lt_iff₀ (by positivity : (0:ℝ) < ↑n + 1)).mp hx_lo
+  have hm_cross : (m : ℝ) * (↑n + 1) ≤ ↑n * (↑m + 1) := by
+    have : (m : ℝ) ≤ ↑n := by exact_mod_cast hm
+    nlinarith
+  have h2 : ↑m < (↑m + 1) * x := by nlinarith
+  have h_floor : ⌊(m : ℝ) / x⌋ = (m : ℤ) := by
+    rw [Int.floor_eq_iff]
+    constructor
+    · push_cast; rw [le_div_iff₀ hx_pos]; linarith
+    · push_cast; rw [div_lt_iff₀ hx_pos]; linarith
+  simp only [Int.fract, h_floor]; push_cast; ring
+
+/-- On (n'/(n'+1), 1), nbLinComb = A·(1/x - 1) where A = Σ wᵢ(i+1). -/
+private lemma nbLinComb_eq_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
+    (n' : ℕ) (hn' : 1 ≤ n')
+    (hw_zero : ∀ i : Fin (N - 1), n' < i.val + 1 → w i = 0)
+    (x : ℝ) (hx_lo : (n' : ℝ) / (↑n' + 1) < x) (hx_hi : x < 1) :
+    nbLinComb N w x = (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) * (1/x - 1) := by
+  have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 1) by positivity]
+  unfold nbLinComb; rw [Finset.sum_mul]; congr 1; ext ⟨i, hi⟩
+  by_cases h : i + 1 ≤ n'
+  · rw [fract_eq_sub h hn' hx_lo hx_hi]; field_simp
+  · push Not at h; rw [hw_zero ⟨i, hi⟩ h]; simp
+
+/-- Floor on shifted interval: On ((n-1)/n, n/(n+1)) with m+1 ≤ n, {m/x} = m/x - m. -/
+private theorem fract_eq_sub_shifted {n m : ℕ} (hm : m + 1 ≤ n) (hn : 2 ≤ n)
+    {x : ℝ} (hx_lo : ((n : ℝ) - 1) / ↑n < x) (hx_hi : x < ↑n / (↑n + 1)) :
+    Int.fract ((m : ℝ) / x) = (m : ℝ) / x - (m : ℝ) := by
+  have hn_pos : (0 : ℝ) < ↑n := by exact_mod_cast show 0 < n by omega
+  have hx_pos : 0 < x := by
+    have h1 : (1 : ℝ) ≤ ↑n := by exact_mod_cast show 1 ≤ n by omega
+    have : (0 : ℝ) ≤ (↑n - 1) / ↑n := div_nonneg (by linarith) (by linarith)
+    linarith
+  have hx_lt_one : x < 1 := by
+    calc x < ↑n / (↑n + 1) := hx_hi
+    _ < 1 := by rw [div_lt_one (by linarith)]; linarith
+  have h_lower : (m : ℝ) ≤ ↑m / x := by
+    rw [le_div_iff₀ hx_pos]; nlinarith
+  have h_upper : (m : ℝ) / x < ↑m + 1 := by
+    rw [div_lt_iff₀ hx_pos]
+    have hmn : (m : ℝ) ≤ ↑n - 1 := by
+      have : (m : ℝ) + 1 ≤ ↑n := by exact_mod_cast hm
+      linarith
+    nlinarith [(div_lt_iff₀ hn_pos).mp hx_lo]
+  have h_floor : ⌊(m : ℝ) / x⌋ = (m : ℤ) := by
+    rw [Int.floor_eq_iff]
+    constructor
+    · push_cast; linarith
+    · push_cast; linarith
+  simp only [Int.fract, h_floor]; push_cast; ring
+
+/-- Floor jump: On ((n-1)/n, n/(n+1)) with n ≥ 2, {n/x} = n/x - (n+1). -/
+private theorem fract_eq_sub_jump {n : ℕ} (hn : 2 ≤ n)
+    {x : ℝ} (hx_lo : ((n : ℝ) - 1) / ↑n < x) (hx_hi : x < ↑n / (↑n + 1)) :
+    Int.fract ((n : ℝ) / x) = (n : ℝ) / x - (↑n + 1) := by
+  have hn_pos : (0 : ℝ) < ↑n := by exact_mod_cast show 0 < n by omega
+  have hx_pos : 0 < x := by
+    have h1 : (1 : ℝ) ≤ ↑n := by exact_mod_cast show 1 ≤ n by omega
+    have : (0 : ℝ) ≤ (↑n - 1) / ↑n := div_nonneg (by linarith) (by linarith)
+    linarith
+  have h_lower : (n : ℝ) + 1 ≤ ↑n / x := by
+    rw [le_div_iff₀ hx_pos]
+    have hn1 : (0 : ℝ) < ↑n + 1 := by linarith
+    have : x * (↑n + 1) < ↑n := by
+      rwa [lt_div_iff₀ hn1] at hx_hi
+    linarith
+  have h_upper : (n : ℝ) / x < ↑n + 2 := by
+    rw [div_lt_iff₀ hx_pos]
+    have hxn : (↑n - 1) < x * ↑n := by
+      have := (div_lt_iff₀ hn_pos).mp hx_lo; linarith
+    have h_prod : (↑n + 2) * (↑n - 1) < (↑n + 2) * (x * ↑n) :=
+      mul_lt_mul_of_pos_left hxn (by linarith)
+    by_contra h; push Not at h
+    have h_mul_n : (↑n + 2) * x * ↑n ≤ ↑n * ↑n :=
+      mul_le_mul_of_nonneg_right h (le_of_lt hn_pos)
+    have h_assoc : (↑n + 2) * (x * ↑n) = (↑n + 2) * x * ↑n := by ring
+    have hn_ge : (2 : ℝ) ≤ ↑n := by exact_mod_cast hn
+    nlinarith [h_assoc]
+  have h_floor : ⌊(n : ℝ) / x⌋ = (↑n + 1 : ℤ) := by
+    rw [Int.floor_eq_iff]
+    constructor
+    · push_cast; linarith
+    · push_cast; linarith
+  simp only [Int.fract, h_floor]; push_cast; ring
+
+-- ════════════════════════════════════════════════
+-- NB FLOOR JUMP AND LINEAR INDEPENDENCE
+-- ════════════════════════════════════════════════
+
+/-- When A = Σ wᵢ(i+1) = 0, nbLinComb ≡ -w_{j₀} on an open subinterval. -/
+theorem nbLinComb_neg_interval (N : ℕ) (w : Fin (N - 1) → ℝ) (j₀ : Fin (N - 1))
+    (hw_above : ∀ i : Fin (N - 1), j₀ < i → w i = 0)
+    (hA : (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) = 0)
+    (hwj₀ : w j₀ ≠ 0) :
+    ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+    ∀ x, x ∈ Set.Ioo c d → nbLinComb N w x = -(w j₀) := by
+  have hj₀_pos : 1 ≤ j₀.val := by
+    by_contra h; push Not at h
+    have hj₀_zero : j₀.val = 0 := by omega
+    have hw_rest : ∀ i : Fin (N - 1), i ≠ j₀ → w i = 0 := by
+      intro i hi
+      by_cases hlt : j₀ < i
+      · exact hw_above i hlt
+      · push Not at hlt
+        exfalso; apply hi; exact Fin.ext (by omega)
+    have : (∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)) = w j₀ * 1 := by
+      have h_terms : ∀ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ) =
+          if i = j₀ then w j₀ * 1 else 0 := by
+        intro i; by_cases heq : i = j₀
+        · subst heq; simp [hj₀_zero]
+        · rw [hw_rest i heq, zero_mul, if_neg heq]
+      simp_rw [h_terms]; simp
+    rw [this, mul_one] at hA; exact hwj₀ hA
+  set n' := j₀.val + 1
+  have hn' : 2 ≤ n' := by omega
+  have hn'_pos : (0 : ℝ) < ↑n' := by exact_mod_cast show 0 < n' by omega
+  refine ⟨(↑n' - 1) / ↑n', ↑n' / (↑n' + 1),
+    div_nonneg (by linarith [show (1:ℝ) ≤ ↑n' from by exact_mod_cast show 1 ≤ n' by omega]) (le_of_lt hn'_pos),
+    ?_, ?_, ?_⟩
+  · rw [div_lt_div_iff₀ hn'_pos (show (0:ℝ) < ↑n' + 1 by linarith)]
+    nlinarith
+  · rw [div_le_one (by linarith : (0:ℝ) < ↑n' + 1)]
+    linarith
+  · intro x ⟨hx_lo, hx_hi⟩
+    have hx_pos : 0 < x := by
+      have : (0 : ℝ) ≤ (↑n' - 1) / ↑n' := div_nonneg
+        (by linarith [show (1:ℝ) ≤ ↑n' from by exact_mod_cast show 1 ≤ n' by omega])
+        (le_of_lt hn'_pos)
+      linarith
+    unfold nbLinComb
+    have h_term : ∀ i : Fin (N - 1),
+        w i * Int.fract ((↑(i.val + 1) : ℝ) / x) =
+        if j₀ < i then 0
+        else if i = j₀ then w j₀ * ((↑n' : ℝ) / x - (↑n' + 1))
+        else w i * ((↑(i.val + 1) : ℝ) / x - ↑(i.val + 1)) := by
+      intro i
+      by_cases hi_above : j₀ < i
+      · simp only [hi_above, ↓reduceIte, hw_above i hi_above, zero_mul]
+      · push Not at hi_above
+        simp only [show ¬(j₀ < i) from not_lt.mpr hi_above, ↓reduceIte]
+        by_cases hi_eq : i = j₀
+        · subst hi_eq; simp only [↓reduceIte]
+          congr 1
+          exact fract_eq_sub_jump hn' hx_lo hx_hi
+        · have hi_lt : i < j₀ := lt_of_le_of_ne hi_above hi_eq
+          simp only [hi_eq, ↓reduceIte]
+          congr 1
+          have hm : i.val + 1 + 1 ≤ n' := by omega
+          exact fract_eq_sub_shifted hm hn' hx_lo hx_hi
+    simp_rw [h_term]
+    have h_split : ∀ i : Fin (N - 1),
+        (if j₀ < i then (0 : ℝ)
+         else if i = j₀ then w j₀ * ((↑n' : ℝ) / x - (↑n' + 1))
+         else w i * ((↑(i.val + 1) : ℝ) / x - ↑(i.val + 1))) =
+        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x -
+        (if j₀ < i then (0 : ℝ) else if i = j₀ then w j₀ * (↑n' + 1)
+         else w i * ↑(i.val + 1)) := by
+      intro i; split_ifs with h1 h2
+      · simp
+      · subst h2; field_simp; ring
+      · field_simp
+    simp_rw [h_split, Finset.sum_sub_distrib]
+    have hA_ite : ∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) = 0 := by
+      trans ∑ i : Fin (N - 1), w i * ↑(i.val + 1)
+      · congr 1; ext i; split_ifs with h
+        · simp [hw_above i h]
+        · rfl
+      · exact hA
+    have h_sum_div : (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x) = 0 := by
+      rw [show (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) / x) =
+        (∑ i : Fin (N - 1), (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1))) / x from
+        (Finset.sum_div Finset.univ _ x).symm]
+      rw [hA_ite, zero_div]
+    rw [h_sum_div, zero_sub, neg_eq_iff_eq_neg, neg_neg]
+    have h_each : ∀ i : Fin (N - 1),
+        (if j₀ < i then (0 : ℝ) else if i = j₀ then w j₀ * (↑n' + 1)
+         else w i * ↑(i.val + 1)) =
+        (if j₀ < i then (0 : ℝ) else w i * ↑(i.val + 1)) +
+        (if i = j₀ then w j₀ else 0) := by
+      intro i; by_cases h1 : j₀ < i
+      · simp only [h1, ite_true]
+        have : i ≠ j₀ := ne_of_gt h1
+        simp [this]
+      · push Not at h1
+        simp only [show ¬(j₀ < i) from not_lt.mpr h1, ite_false]
+        by_cases h2 : i = j₀
+        · subst h2; simp only [ite_true, n']; ring
+        · simp [h2]
+    simp_rw [h_each, Finset.sum_add_distrib, hA_ite, zero_add,
+      Finset.sum_ite_eq', Finset.mem_univ, ite_true]
+
+/-- If w ≠ 0, nbLinComb is nonzero on some open subinterval of (0,1). -/
+theorem nbLinComb_nonzero_somewhere (N : ℕ) (_ : 2 ≤ N)
+    (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+    (∀ x, x ∈ Set.Ioo c d → nbLinComb N w x ≠ 0) := by
+  have hw_exists : ∃ i : Fin (N - 1), w i ≠ 0 := by
+    by_contra h; push Not at h; exact hw (funext h)
+  let S := Finset.filter (fun i : Fin (N - 1) => w i ≠ 0) Finset.univ
+  have hS : S.Nonempty := by
+    obtain ⟨i, hi⟩ := hw_exists
+    exact ⟨i, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hi⟩⟩
+  set j₀ := S.max' hS
+  have hwj₀ : w j₀ ≠ 0 := (Finset.mem_filter.mp (Finset.max'_mem S hS)).2
+  have hw_above : ∀ i : Fin (N - 1), j₀ < i → w i = 0 := by
+    intro i hi; by_contra h
+    exact absurd (Finset.le_max' S i (Finset.mem_filter.mpr ⟨Finset.mem_univ _, h⟩))
+      (not_le.mpr hi)
+  set n' := j₀.val + 1
+  have hn' : 1 ≤ n' := by omega
+  have hn'_pos : (0 : ℝ) < ↑n' := by exact_mod_cast show 0 < n' by omega
+  set A := ∑ i : Fin (N - 1), w i * (↑(i.val + 1) : ℝ)
+  by_cases hA : A ≠ 0
+  · refine ⟨↑n' / (↑n' + 1), 1, le_of_lt (by positivity),
+      by rw [div_lt_one (by linarith)]; linarith, le_refl 1, ?_⟩
+    intro x ⟨hx_lo, hx_hi⟩
+    rw [nbLinComb_eq_affine N w n' hn'
+      (fun i hi => hw_above i (by
+        show j₀ < i
+        exact Fin.lt_def.mpr (by omega))) x hx_lo hx_hi]
+    exact mul_ne_zero hA (by
+      have hx_pos : 0 < x := by linarith [show (0:ℝ) < ↑n' / (↑n' + 1) by positivity]
+      linarith [show 1 < 1/x from by rw [one_div]; exact one_lt_inv_iff₀.mpr ⟨hx_pos, hx_hi⟩])
+  · push Not at hA
+    obtain ⟨c, d, hc, hcd, hd, heq⟩ := nbLinComb_neg_interval N w j₀ hw_above hA hwj₀
+    exact ⟨c, d, hc, hcd, hd, fun x hx => by rw [heq x hx]; exact neg_ne_zero.mpr hwj₀⟩
+
+-- ════════════════════════════════════════════════
+-- INTEGRABILITY AND POSITIVE DEFINITENESS
+-- ════════════════════════════════════════════════
+
+/-- nbLinComb² is integrable on [0,1]. -/
+theorem nbLinComb_sq_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 := by
+  have h_sq : (fun x => (nbLinComb N w x) ^ 2) =
+      (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+        (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+        (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
+    ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
+  rw [h_sq]
+  have : (fun x : ℝ => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+    (∑ i : Fin (N - 1), ∑ j : Fin (N - 1), fun x =>
+      (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [this]
+  apply IntervalIntegrable.sum; intro i _
+  apply IntervalIntegrable.sum; intro j _
+  have : (fun x : ℝ => (w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) *
+      (w j * Int.fract ((↑(j.val + 1) : ℝ) / x))) =
+    (fun x : ℝ => (w i * w j) * (Int.fract ((↑(i.val + 1) : ℝ) / x) *
+      Int.fract ((↑(j.val + 1) : ℝ) / x))) := by ext x; ring
+  rw [this]
+  exact (fract_prod_intervalIntegrable (i.val + 1) (j.val + 1)).const_mul _
+
+/-- **NB linear independence**: ∫₀¹ (Σ wᵢ{(i+1)/x})² dx > 0 for w ≠ 0. -/
+theorem nyman_beurling_lin_indep (N : ℕ) (hN : 2 ≤ N)
+    (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    0 < ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
+  obtain ⟨c, d, hc0, hcd, hd1, hne⟩ := nbLinComb_nonzero_somewhere N hN w hw
+  have hpos_sub : ∀ x, x ∈ Set.Ioo c d → 0 < (nbLinComb N w x) ^ 2 :=
+    fun x hx => sq_pos_of_ne_zero (hne x hx)
+  have hisub : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume c d :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le (le_of_lt hcd), Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc hc0 hd1)
+  have hint_sub : 0 < ∫ x in c..d, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hisub hpos_sub hcd
+  have hi0c : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 c :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hc0, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc le_rfl (hcd.le.trans hd1))
+  have hid1 : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume d 1 :=
+    (nbLinComb_sq_integrable N w).mono_set (by
+      simp only [Set.uIcc_of_le hd1, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc (hc0.trans hcd.le) le_rfl)
+  have h_01 : (∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2) =
+    (∫ x in (0:ℝ)..c, (nbLinComb N w x) ^ 2) +
+    (∫ x in c..d, (nbLinComb N w x) ^ 2) +
+    (∫ x in d..1, (nbLinComb N w x) ^ 2) := by
+    have h1 := intervalIntegral.integral_add_adjacent_intervals hi0c hisub
+    have h2 := intervalIntegral.integral_add_adjacent_intervals (hi0c.trans hisub) hid1
+    linarith
+  rw [h_01]
+  have h1 : 0 ≤ ∫ x in (0:ℝ)..c, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hc0 (fun x _ => sq_nonneg _)
+  have h2 : 0 ≤ ∫ x in d..1, (nbLinComb N w x) ^ 2 :=
+    intervalIntegral.integral_nonneg hd1 (fun x _ => sq_nonneg _)
+  linarith
+
+/-- **gram_pos_def**: wᵀGw > 0 for w ≠ 0. -/
+theorem gram_pos_def (N : ℕ) (hN : 2 ≤ N)
+    (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    0 < realQuadForm (gramMatrix N) w := by
+  rw [gram_l2_identity N hN w]
+  exact nyman_beurling_lin_indep N hN w hw
+
+/-- **The Gram matrix is positive definite** for N ≥ 2: λ_min > 0. -/
+theorem gram_positive_definite (N : ℕ) (hN : 2 ≤ N) : 0 < lambdaMin N := by
+  unfold lambdaMin
+  simp only [show N ≥ 2 from hN, dite_true]
+  exact pos_def_implies_min_eigenvalue_pos
+    (gramMatrix_hermitian N)
+    (by omega)
+    (fun v hv => gram_pos_def N hN v hv)
+
+theorem lambdaMin_pos (N : ℕ) (hN : 2 ≤ N) : 0 < lambdaMin N :=
+  gram_positive_definite N hN
+
+/-- det(G) ≠ 0 for N ≥ 2. -/
+theorem gramMatrix_det_ne_zero (N : ℕ) (hN : 2 ≤ N) :
+    (gramMatrix N).det ≠ 0 := by
+  intro h_zero
+  rw [Matrix.exists_mulVec_eq_zero_iff.symm] at h_zero
+  obtain ⟨v, hv_ne, hv_ker⟩ := h_zero
+  have h_pos := gram_pos_def N hN v hv_ne
+  rw [realQuadForm, hv_ker, dotProduct_zero] at h_pos
+  exact lt_irrefl 0 h_pos
+
+/-- Global IsUnit seal for the Gram matrix determinant. -/
+lemma gramMatrix_isUnit_det (N : ℕ) (hN : 2 ≤ N) :
+    IsUnit (gramMatrix N).det :=
+  isUnit_iff_ne_zero.mpr (gramMatrix_det_ne_zero N hN)
+
+end
+
+
+================================================================
+FILE: Cathedral/Structural/Structural.lean
+================================================================
+
+import Cathedral.Structural.Eigenvalue
+import Cathedral.Gram.NbLinComb
+import Cathedral.Structural.Independence
+import Cathedral.Gram.L2Bridge
+
