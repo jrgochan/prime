@@ -38,10 +38,18 @@ axiom fract_inner_cpow (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re)
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
       -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
 
-/-- **AXIOM 2**: ∫₀¹ x^{ρ-1} dx = 1/ρ for Re(ρ) > 0.
-    Direct integration: [x^ρ/ρ]₀¹ = 1/ρ. -/
-axiom one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
-    ∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1) = 1 / ρ
+/-- **THEOREM**: ∫₀¹ x^{ρ-1} dx = 1/ρ for Re(ρ) > 0.
+    Direct integration via Mathlib's integral_cpow:
+    ∫₀¹ x^r dx = (1^{r+1} - 0^{r+1})/(r+1)
+    With r = ρ-1: = (1 - 0)/ρ = 1/ρ. -/
+theorem one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
+    ∫ x in (0:ℝ)..1, (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
+  have hr : -1 < (ρ - 1).re := by simp [Complex.sub_re]; linarith
+  have hρ_ne : ρ ≠ 0 := by intro h; rw [h] at hρ_pos; simp at hρ_pos
+  rw [integral_cpow (Or.inl hr)]
+  simp [Complex.ofReal_zero, Complex.ofReal_one]
+  have h0ρ : (0 : ℂ) ^ ρ = 0 := Complex.zero_cpow hρ_ne
+  rw [h0ρ]; ring
 
 /-- **AXIOM 3**: The Cauchy-Schwarz separation bound for fractional-part
     linear combinations against power functions.
