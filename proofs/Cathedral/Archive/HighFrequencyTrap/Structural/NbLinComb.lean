@@ -8,15 +8,13 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Spectral.RayleighBridge
+import Cathedral.Archive.HighFrequencyTrap.Spectral.RayleighBridge
 import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section
 open Complex Real
 
-/-- The NB linear combination: φ_w(x) = Σᵢ wᵢ · {(i+1)/x}. -/
-def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
-  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
+-- Note: nbLinComb is defined in Cathedral/Defs.lean
 
 /-- The function x ↦ Int.fract(j/x) * Int.fract(k/x) is measurable. -/
 private lemma fract_div_mul_measurable (j k : ℕ) :

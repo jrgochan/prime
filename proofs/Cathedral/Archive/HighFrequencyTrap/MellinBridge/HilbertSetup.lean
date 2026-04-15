@@ -1,7 +1,7 @@
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.FloorDivMellin
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.FloorDivMellin
 
-/-! # Cathedral.MellinBridge.HilbertSetup
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.HilbertSetup
 
 ## Hilbert space scaffolding for the separating functional
 

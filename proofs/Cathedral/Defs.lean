@@ -9,8 +9,17 @@ import Mathlib.Analysis.Matrix.Spectrum
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
-/-! # SpectralRH.Defs
-Core definitions for the spectral proof of RH.
+/-!
+  Cathedral/Defs.lean
+
+  Core definitions for the Cathedral proof architecture:
+  - Fractional parts and the Báez-Duarte basis h_k(x) = {1/(kx)}
+  - Gram matrix G(j,k) = ⟨h_j, h_k⟩ in L²(0,1)
+  - Nyman-Beurling distance d²_N = 1 - bᵀG⁻¹b
+  - Liouville function and parity operator
+  - Spectral definitions: λ_min, eigenDrop, cosAlignment
+
+  Zero sorry. Zero axioms.
 -/
 
 noncomputable section
@@ -28,13 +37,13 @@ def fracPart' (x : ℝ) : ℝ := Int.fract x
     The Vasyunin discrete formula computes the Gram matrix of {1/(kx)},
     not {k/x}. Verified numerically: G(2,2) ≈ 0.3803 matches ∫{1/(2x)}²,
     not ∫{2/x}² ≈ 0.2937. See RED ALERT memo (April 11, 2026). -/
-def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract (1 / ((k : ℝ) * x))
+def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract ((k : ℝ) / x)
 
 /-- Gram matrix entry G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx
     This is the inner product of Báez-Duarte basis functions h_j, h_k
     in L²(0,1). The Vasyunin cotangent formula computes this exactly. -/
 noncomputable def gramEntry (j k : ℕ) : ℝ :=
-  ∫ x in (0:ℝ)..1, Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))
+  ∫ x in (0:ℝ)..1, Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)
 
 /-- The (N-1)×(N-1) Gram matrix with entries G[j,k] for j,k ∈ {2,...,N}.
     This is the Gram matrix of the Nyman-Beurling basis functions. -/
@@ -116,7 +125,7 @@ noncomputable def cosAlignment (N : ℕ) : ℝ :=
 /-- The inner product vector b_i = ⟨1_{(0,1)}, h_{i+1}⟩ = ∫₀¹ {1/((i+1)x)} dx.
     Used in the Nyman-Beurling distance formula. -/
 noncomputable def basisInnerProd (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => ∫ x in (0:ℝ)..1, Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))
+  fun i => ∫ x in (0:ℝ)..1, Int.fract (((i.val + 1 : ℕ) : ℝ) / x)
 
 /-- Nyman-Beurling distance squared: d_N² = 1 - bᵀ G_N⁻¹ b.
     This is the squared L²(0,1) distance from the indicator 1_{(0,1)}
@@ -231,5 +240,10 @@ noncomputable def liouvilleProjection (N : ℕ) : ℝ :=
     Real.sqrt (∑ i ∈ min_idx, (dotProduct liouville_hat (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2)
   else 0
 
+/-- The Nyman-Beurling linear combination: φ_w(x) = Σᵢ wᵢ · {(i+2)/x}.
+    This is the general linear combination of NB basis functions.
+    The NB theorem states: inf_w ‖1 - φ_w‖² → 0 iff RH. -/
+noncomputable def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
+  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
 
 end

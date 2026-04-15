@@ -13,7 +13,7 @@
 
 import Cathedral.Defs
 import Cathedral.Robin.Defs
-import Cathedral.MellinBridge.MellinSieve
+import Cathedral.NymanBeurling.NymanBeurling
 
 open Real
 
@@ -34,7 +34,7 @@ theorem robin_implies_nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
   intro hR
-  exact nyman_beurling_forward_from_sieve (robin_implies_rh hR)
+  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (robin_implies_rh hR)
 
 /-- **THEOREM (PROVED)**: Lagarias's Inequality implies the Nyman-Beurling
     distance vanishes.
@@ -45,7 +45,7 @@ theorem lagarias_implies_nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
   intro hL
-  exact nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
+  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
 
 -- ════════════════════════════════════════════════
 -- THE CONVERSE: NB → ROBIN / LAGARIAS

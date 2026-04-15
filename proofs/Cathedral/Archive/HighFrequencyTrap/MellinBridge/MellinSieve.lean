@@ -1,13 +1,13 @@
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.MellinBridge.Separation
-import Cathedral.MellinBridge.MertensWeightBypass
-import Cathedral.BilinearSieve
-import Cathedral.MoebiusUncoupling
-import Cathedral.Assembly.QuadFormBridge
-import Cathedral.Structural.L2Tools
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.HilbertSetup
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Separation
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.MertensWeightBypass
+import Cathedral.Archive.HighFrequencyTrap.BilinearSieve
+import Cathedral.Archive.HighFrequencyTrap.MoebiusUncoupling
+import Cathedral.Archive.HighFrequencyTrap.Assembly.QuadFormBridge
+import Cathedral.Archive.HighFrequencyTrap.Structural.L2Tools
 
-/-! # Cathedral.MellinBridge.MellinSieve
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.MellinSieve
 
     ## The Final Assault: RH ⟹ Asymptotic Sieve Bound
 

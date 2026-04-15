@@ -1,12 +1,12 @@
 import Cathedral.Defs
-import Cathedral.FractIntegral
-import Cathedral.Spectral.OctonionicPartition
-import Cathedral.Spectral.ClassRestriction
-import Cathedral.Spectral.RayleighBridge
-import Cathedral.Spectral.FiniteDimReduction
-import Cathedral.Structural.NbLinComb
+import Cathedral.Archive.HighFrequencyTrap.FractIntegral
+import Cathedral.Archive.HighFrequencyTrap.Spectral.OctonionicPartition
+import Cathedral.Archive.HighFrequencyTrap.Spectral.ClassRestriction
+import Cathedral.Archive.HighFrequencyTrap.Spectral.RayleighBridge
+import Cathedral.Archive.HighFrequencyTrap.Spectral.FiniteDimReduction
+import Cathedral.Archive.HighFrequencyTrap.Structural.NbLinComb
 
-/-! # Cathedral.Spectral.ConstantVectorBound
+/-! # Cathedral.Archive.HighFrequencyTrap.Spectral.ConstantVectorBound
 
 ## The Constant Vector Miracle — Proving `lambdaEff_linear_growth`
 

@@ -7,7 +7,6 @@
 import Cathedral.Robin.Defs
 import Cathedral.Robin.SigmaProps
 import Cathedral.Robin.HarmonicBounds
-import Cathedral.GramDiag
 import Mathlib.Analysis.SpecialFunctions.ExpDeriv
 import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.Data.Nat.Prime.Basic

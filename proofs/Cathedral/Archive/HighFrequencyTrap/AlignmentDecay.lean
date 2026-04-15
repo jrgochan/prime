@@ -1,5 +1,5 @@
 import Cathedral.Defs
-import Cathedral.Spectral.PTSymmetry
+import Cathedral.Archive.HighFrequencyTrap.Spectral.PTSymmetry
 
 /-! # SpectralRH.AlignmentDecay
 

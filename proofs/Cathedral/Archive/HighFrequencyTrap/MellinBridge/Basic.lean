@@ -1,12 +1,12 @@
 import Cathedral.Defs
-import Cathedral.Structural
+import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
 import Mathlib.Analysis.MellinTransform
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.Dirichlet
 import Mathlib.NumberTheory.LSeries.Nonvanishing
 import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 
-/-! # Cathedral.MellinBridge.Basic
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
 
 ## Definitions and core Mellin transform infrastructure
 

@@ -82,13 +82,58 @@ theorem harmonicR_succ_gt {n : ℕ} (hn : 1 ≤ n) : harmonicR n < harmonicR (n 
   linarith [show (0 : ℝ) < 1 / ((n : ℝ) + 1) from by positivity]
 
 -- ════════════════════════════════════════════════
+-- PART IV: LOGARITHMIC TAYLOR BOUNDS
+-- ════════════════════════════════════════════════
+
+/-- log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4 for x ≥ 0.
+    Proof: h(x) = log(1+x) - (x - x²/2 + x³/3 - x⁴/4) has h(0) = 0 and
+    h'(x) = x⁴/(1+x) ≥ 0, so h is monotone.
+    (Formerly in archived GramDiag.lean, moved here April 2026.) -/
+lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
+    x - x^2/2 + x^3/3 - x^4/4 ≤ Real.log (1 + x) := by
+  suffices h : 0 ≤ Real.log (1 + x) - (x - x^2/2 + x^3/3 - x^4/4) by linarith
+  set f : ℝ → ℝ := fun t => Real.log (1 + t) - (t - t^2/2 + t^3/3 - t^4/4) with hf_def
+  have hf0 : f 0 = 0 := by simp [hf_def, Real.log_one]
+  have hcont : ContinuousOn f (Set.Ici 0) := by
+    simp only [hf_def]
+    apply ContinuousOn.sub
+    · exact ContinuousOn.log (continuousOn_const.add continuousOn_id) (fun t ht => by
+        simp only [Set.mem_Ici] at ht; linarith)
+    · fun_prop
+  have hdiff : DifferentiableOn ℝ f (interior (Set.Ici (0:ℝ))) := by
+    simp only [interior_Ici, hf_def]
+    intro t ht; simp only [Set.mem_Ioi] at ht
+    apply DifferentiableAt.differentiableWithinAt
+    apply DifferentiableAt.sub
+    · exact (differentiableAt_id.const_add 1).log (ne_of_gt (by linarith : (0:ℝ) < 1 + t))
+    · fun_prop
+  have hderiv : ∀ t ∈ interior (Set.Ici (0:ℝ)), 0 ≤ deriv f t := by
+    intro t ht; simp only [interior_Ici, Set.mem_Ioi] at ht
+    have h1t : (0:ℝ) < 1 + t := by linarith
+    have hdf : HasDerivAt f (t^4 / (1+t)) t := by
+      simp only [hf_def]
+      have h1 := (hasDerivAt_id t).const_add 1 |>.log (ne_of_gt h1t)
+      have h2 := hasDerivAt_id t
+      have h3 := (hasDerivAt_pow 2 t).div_const 2
+      have h4 := (hasDerivAt_pow 3 t).div_const 3
+      have h5 := (hasDerivAt_pow 4 t).div_const 4
+      refine (h1.sub (((h2.sub h3).add h4).sub h5)).congr_deriv ?_
+      simp only [id]; field_simp; ring
+    rw [hdf.deriv]
+    exact div_nonneg (pow_nonneg (le_of_lt ht) 4) (le_of_lt h1t)
+  have hmono : MonotoneOn f (Set.Ici 0) :=
+    monotoneOn_of_deriv_nonneg (convex_Ici 0) hcont hdiff hderiv
+  have hfx : f 0 ≤ f x := hmono (Set.mem_Ici.mpr (le_refl 0)) (Set.mem_Ici.mpr hx) hx
+  rw [hf0] at hfx; exact hfx
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 -- This file has:
 --   ZERO sorry
 --   ZERO axioms
---   9 PROVED theorems:
+--   10 PROVED theorems:
 --     ✅ harmonicR_pos          — H_n > 0
 --     ✅ harmonicR_lower        — log(n+1) ≤ H_n
 --     ✅ harmonicR_upper        — H_n ≤ 1 + log(n)
@@ -97,4 +142,6 @@ theorem harmonicR_succ_gt {n : ℕ} (hn : 1 ≤ n) : harmonicR n < harmonicR (n 
 --     ✅ harmonicR_one_pos      — 0 < H₁
 --     ✅ harmonicR_three        — H₃ = 11/6
 --     ✅ harmonicR_four         — H₄ = 25/12
---     ✅ harmonicR_strict_mono  — m < n → H_m < H_n
+--     ✅ harmonicR_succ_gt      — H_{n+1} > H_n
+--     ✅ log_lower_quartic      — log(1+x) ≥ x - x²/2 + x³/3 - x⁴/4
+

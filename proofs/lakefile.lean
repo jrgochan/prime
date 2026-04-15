@@ -17,14 +17,18 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
     `Cathedral.Defs,
+    -- Axiom registry
+    `Cathedral.Axioms,
     -- Linear algebra (abstract, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
     `Cathedral.LinearAlgebra.Variational,
     `Cathedral.LinearAlgebra.SchurComplement,
     `Cathedral.LinearAlgebra.Sylvester,
-    -- Mellin Bridge: Nyman-Beurling + Vasyunin (the active proof chain)
-    `Cathedral.MellinBridge.NymanBeurling,
-    `Cathedral.MellinBridge.Vasyunin,
+    -- Nyman-Beurling criterion
+    `Cathedral.NymanBeurling.Separation,
+    `Cathedral.NymanBeurling.NymanBeurling,
+    -- Vasyunin (the active proof chain)
+    `Cathedral.Vasyunin,
     -- Robin's Inequality (discrete arithmetic front)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
@@ -32,6 +36,49 @@ lean_lib «Cathedral» where
     `Cathedral.Robin.BaseCases,
     `Cathedral.Robin.PrimeBounds,
     `Cathedral.Robin.Equivalence,
-    -- Archive (reference proofs for the active chain)
-    `Cathedral.Archive.HighFrequencyTrap.FractIntegral
+    -- Gram integral analysis
+    `Cathedral.Gram.FractIntegral,
+    `Cathedral.Gram.Bounds,
+    `Cathedral.Gram.Diagonal,
+    `Cathedral.Gram.OffDiagonal,
+    `Cathedral.Gram.NbLinComb,
+    `Cathedral.Gram.L2Bridge,
+    -- Spectral theory
+    `Cathedral.Spectral.RayleighBridge,
+    `Cathedral.Spectral.PTSymmetry,
+    `Cathedral.Spectral.OctonionicPartition,
+    `Cathedral.Spectral.ClassRestriction,
+    `Cathedral.Spectral.FiniteDimReduction,
+    `Cathedral.Spectral.ConstantVectorBound,
+    -- Structural layer
+    `Cathedral.Structural.Independence,
+    `Cathedral.Structural.Eigenvalue,
+    `Cathedral.Structural.Structural,
+    -- Mellin bridge
+    `Cathedral.MellinBridge.Basic,
+    `Cathedral.MellinBridge.FloorMellin,
+    `Cathedral.MellinBridge.FloorDivMellin,
+    `Cathedral.MellinBridge.HilbertSetup,
+    `Cathedral.MellinBridge.Separation,
+    `Cathedral.MellinBridge.OrthogonalWitness,
+    `Cathedral.MellinBridge.AbelSummation,
+    `Cathedral.MellinBridge.MertensIntegral,
+    `Cathedral.MellinBridge.MertensWeightBypass,
+    `Cathedral.MellinBridge.AutocorrelationBypass,
+    `Cathedral.MellinBridge.MellinSieve,
+    `Cathedral.MellinBridge.MellinBridge,
+    -- Sieve engine
+    `Cathedral.Sieve.VasyuninExpansion,
+    `Cathedral.Sieve.ParitySchur,
+    `Cathedral.Sieve.ParityBridge,
+    `Cathedral.Sieve.BilinearSieve,
+    `Cathedral.Sieve.MoebiusUncoupling,
+    `Cathedral.Sieve.AlignmentDecay,
+    -- Assembly
+    `Cathedral.Assembly.QuadFormBridge,
+    `Cathedral.Assembly.MainChain,
+    `Cathedral.Assembly.Assembly,
+    -- Integral basis
+    `Cathedral.IntegralBasis.BaezDuarte,
+    `Cathedral.IntegralBasis.Quantitative
   ]

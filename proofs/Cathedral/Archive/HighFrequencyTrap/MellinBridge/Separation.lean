@@ -1,6 +1,6 @@
-import Cathedral.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
 
-/-! # Cathedral.MellinBridge.Separation
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.Separation
 
 ## The separating functional and zeta non-vanishing
 

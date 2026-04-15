@@ -12,7 +12,7 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Spectral.RayleighBridge
+import Cathedral.Archive.HighFrequencyTrap.Spectral.RayleighBridge
 
 noncomputable section
 open Complex Real

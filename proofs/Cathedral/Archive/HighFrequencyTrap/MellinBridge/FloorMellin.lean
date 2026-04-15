@@ -1,6 +1,6 @@
-import Cathedral.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
 
-/-! # Cathedral.MellinBridge.FloorMellin
+/-! # Cathedral.Archive.HighFrequencyTrap.MellinBridge.FloorMellin
 
 ## Floor-division Mellin transform (k = 1 case)
 

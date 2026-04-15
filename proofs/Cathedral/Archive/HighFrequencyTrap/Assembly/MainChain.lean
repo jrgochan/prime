@@ -20,9 +20,10 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Structural
-import Cathedral.MellinBridge
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
+import Cathedral.Archive.HighFrequencyTrap.MellinBridge.Basic
+import Cathedral.Archive.HighFrequencyTrap.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.NymanBeurling
 
 noncomputable section
 open Complex Real
@@ -88,7 +89,7 @@ theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) := by
   intro hRH ε hε
-  obtain ⟨N₀, hN₀⟩ := nyman_beurling_forward_from_sieve hRH ε hε
+  obtain ⟨N₀, hN₀⟩ := Cathedral.Vasyunin.nyman_beurling_forward_from_sieve hRH ε hε
   use max N₀ 2
   intro N hN
   have hN₀_le : N₀ ≤ N := le_trans (le_max_left _ _) hN

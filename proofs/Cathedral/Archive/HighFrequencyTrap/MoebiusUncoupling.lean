@@ -1,5 +1,5 @@
-import Cathedral.VasyuninExpansion
-import Cathedral.BilinearSieve
+import Cathedral.Archive.HighFrequencyTrap.VasyuninExpansion
+import Cathedral.Archive.HighFrequencyTrap.BilinearSieve
 import Mathlib.NumberTheory.ArithmeticFunction.Defs
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 

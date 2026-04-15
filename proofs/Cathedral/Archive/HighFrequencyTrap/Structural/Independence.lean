@@ -17,8 +17,8 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Spectral.RayleighBridge
-import Cathedral.Structural.NbLinComb
+import Cathedral.Archive.HighFrequencyTrap.Spectral.RayleighBridge
+import Cathedral.Archive.HighFrequencyTrap.Structural.NbLinComb
 
 noncomputable section
 open Complex Real
