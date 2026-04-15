@@ -83,13 +83,15 @@ theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
 -- ════════════════════════════════════════════════
 
 /-- **PILLAR II** (PROVED): If RH is true, the Möbius weights
-    drive d² → 0. Formerly an axiom; now derived from
-    `nyman_beurling_forward_from_sieve` + `existential_implies_infimum`. -/
+    drive d² → 0. Now derived from `nyman_beurling_forward_direct`
+    (GramWitness.lean) + `existential_implies_infimum`.
+
+    Uses only `witness_l2_error_decay_gram` (1 axiom). -/
 theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) := by
   intro hRH ε hε
-  obtain ⟨N₀, hN₀⟩ := Cathedral.Vasyunin.nyman_beurling_forward_from_sieve hRH ε hε
+  obtain ⟨N₀, hN₀⟩ := nyman_beurling_forward_direct hRH ε hε
   use max N₀ 2
   intro N hN
   have hN₀_le : N₀ ≤ N := le_trans (le_max_left _ _) hN
