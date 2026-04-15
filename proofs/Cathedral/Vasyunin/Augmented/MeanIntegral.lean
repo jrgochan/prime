@@ -24,7 +24,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
-import Cathedral.Archive.HighFrequencyTrap.FractIntegral
+import Cathedral.Gram.FractIntegral
 
 noncomputable section
 open Real MeasureTheory
