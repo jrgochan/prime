@@ -22,6 +22,13 @@ import Cathedral.Defs
   - `witness_numerator_convergence` → absorbed into `witness_l2_error_decay_gram`
   - `witness_covariance_decay` → absorbed into `witness_l2_error_decay_gram`
 
+  **Bessel Decomposition** (April 15, 2026):
+  `zeta_zero_separates` is proved in `BesselSeparation.lean` from 3 axioms:
+  - `fract_inner_cpow` — ∫{k/x}·x^{ρ-1} = -ζ(ρ)·k^ρ/ρ (Báez-Duarte 2003)
+  - `cauchy_schwarz_cpow_bound` — standard L² Cauchy-Schwarz
+  - `residual_inner_cpow_eq` — integral linearity for finite sums
+  All 3 are known theorems in analysis, not conjectures.
+
   `#print axioms phase_3_chain` (alternative forward, 2 axioms):
   | `mertens_bound_from_rh` | RH → Mertens bound | 3 |
   | `abel_summation_l2_bound` | Mertens → L² decay | 4 |
