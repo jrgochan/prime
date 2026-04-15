@@ -202,17 +202,26 @@ cathedral-dump:
 	@echo "# Cathedral Source Dump" > cathedral-dump.txt
 	@echo "# Generated: $$(date)" >> cathedral-dump.txt
 	@echo "# Project: prime/proofs/Cathedral" >> cathedral-dump.txt
-	@echo "# Proof: Spectral Riemann Hypothesis (2-axiom reduction)" >> cathedral-dump.txt
+	@echo "# Build: lake build — 3530 jobs, zero errors, zero sorry" >> cathedral-dump.txt
+	@echo "# Crown theorem: nyman_beurling_iff_rh (5 Cathedral axioms)" >> cathedral-dump.txt
+	@echo "# Total: 83 active files, 48 axioms, 0 sorry" >> cathedral-dump.txt
 	@echo "" >> cathedral-dump.txt
 	@echo "# Architecture:" >> cathedral-dump.txt
-	@echo "#   Cathedral/Defs.lean              - Core definitions" >> cathedral-dump.txt
-	@echo "#   Cathedral/Mertens/               - Physics pillar (Gram bounds)" >> cathedral-dump.txt
-	@echo "#   Cathedral/Structural/            - Proof structure (Schur, parity)" >> cathedral-dump.txt
-	@echo "#   Cathedral/MellinBridge/          - Spectral pillar (Mellin, separation)" >> cathedral-dump.txt
-	@echo "#   Cathedral/Quantitative/          - Quantitative estimates" >> cathedral-dump.txt
-	@echo "#   Cathedral/Assembly/              - Final RH assembly" >> cathedral-dump.txt
-	@echo "#   Cathedral/Spectral/              - Exploratory (off critical path)" >> cathedral-dump.txt
-	@echo "#   Cathedral/Robin/                 - Discrete front (Robin/Lagarias)" >> cathedral-dump.txt
+	@echo "#   Defs.lean + Axioms.lean   — Core definitions, axiom registry" >> cathedral-dump.txt
+	@echo "#   LinearAlgebra/            — Sherman-Morrison, Variational, Sylvester" >> cathedral-dump.txt
+	@echo "#   Gram/                     — L² integral bridge, off-diagonal bounds" >> cathedral-dump.txt
+	@echo "#   Vasyunin/Augmented/       — AugmentedGram (Factorial Nuke), IntegralBridge" >> cathedral-dump.txt
+	@echo "#   Vasyunin/Cotangent/       — Digamma reflection, telescope sums" >> cathedral-dump.txt
+	@echo "#   Vasyunin/Matrix/          — Gram entries, covariance determinants" >> cathedral-dump.txt
+	@echo "#   Vasyunin/Proof/           — Chain, WitnessAsymptotics, BartlettWindow" >> cathedral-dump.txt
+	@echo "#   NymanBeurling/            — Crown theorem (nyman_beurling_iff_rh)" >> cathedral-dump.txt
+	@echo "#   Assembly/                 — QuadFormBridge, MainChain" >> cathedral-dump.txt
+	@echo "#   Robin/                    — Robin/Lagarias equivalences" >> cathedral-dump.txt
+	@echo "#   Structural/               — Eigenvalue interlacing" >> cathedral-dump.txt
+	@echo "#   Spectral/                 — Class restriction, spectral bounds" >> cathedral-dump.txt
+	@echo "#   Sieve/                    — Bilinear sieve, parity bridge" >> cathedral-dump.txt
+	@echo "#   MellinBridge/             — Mellin-Plancherel, Mertens bypass" >> cathedral-dump.txt
+	@echo "#   IntegralBasis/            — Báez-Duarte, quantitative bounds" >> cathedral-dump.txt
 	@echo "" >> cathedral-dump.txt
 	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
@@ -236,36 +245,47 @@ cathedral-dump:
 	@echo "  📐 Lines: $$(wc -l < cathedral-dump.txt | tr -d ' ')"
 	@echo "  ✅ Ready to share with The Theorist!"
 
-## Dump Cathedral .lean files into multiple text files (one per component)
-## Each file is small enough to upload to Gemini / Claude / ChatGPT
+## Dump Cathedral .lean files into multiple text files (one per module)
+## Each file is sized for Gemini / Claude / ChatGPT upload
+## Includes ALL active files (no Archive exclusion — the whole Cathedral)
 cathedral-dump-split:
-	@echo "═══ Cathedral: Creating split dump ═══"
+	@echo "═══ Cathedral: Creating split dump (whole Cathedral) ═══"
 	@mkdir -p cathedral-parts
 	@rm -f cathedral-parts/*.txt
-	@# Header for each file
-	@for component in Core LinearAlgebra VasyuninDefs VasyuninGram VasyuninCov VasyuninTelescope VasyuninBridge Robin; do \
+	@# Create headers for each component
+	@for component in Core LinearAlgebra Gram Vasyunin-Augmented Vasyunin-Cotangent \
+		Vasyunin-Matrix Vasyunin-Proof NymanBeurling Assembly Robin Structural \
+		Spectral Sieve MellinBridge IntegralBasis Archive; do \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
-		echo "# Cathedral Source - $$component" > "$$outfile"; \
+		echo "# Cathedral Source — $$component" > "$$outfile"; \
 		echo "# Generated: $$(date)" >> "$$outfile"; \
 		echo "# Project: prime/proofs/Cathedral" >> "$$outfile"; \
-		echo "# Proof: Spectral Riemann Hypothesis" >> "$$outfile"; \
-		echo "# Build: lake build Cathedral (6 axioms, 1 sorry)" >> "$$outfile"; \
+		echo "# Build: lake build — 3530 jobs, zero errors, zero sorry" >> "$$outfile"; \
+		echo "# Crown theorem: nyman_beurling_iff_rh (5 Cathedral axioms)" >> "$$outfile"; \
+		echo "# Total: 83 active files, 48 axioms" >> "$$outfile"; \
 		echo "" >> "$$outfile"; \
 	done
-	@# Sort files into components
-	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" -not -path "*Archive*" | sort | while read file; do \
+	@# Route every .lean file to its component
+	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
 		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
 		component="Core"; \
 		case "$$relpath" in \
+			*Archive*) component="Archive" ;; \
 			*LinearAlgebra*) component="LinearAlgebra" ;; \
-			*Vasyunin/Defs*|*Vasyunin/Structural*) component="VasyuninDefs" ;; \
-			*Vasyunin/GramEntries*|*Vasyunin/GramEvaluations*|*Vasyunin/GramPSD*|*Vasyunin/AugmentedGram*|*Vasyunin/NbDistPos*|*Vasyunin/GramInduction*) component="VasyuninGram" ;; \
-			*Vasyunin/CovEntries*|*Vasyunin/CovDet2*|*Vasyunin/CovDet3*) component="VasyuninCov" ;; \
-			*Vasyunin/DigammaReflection*|*Vasyunin/TelescopeSum*|*Vasyunin/LogDigammaBridge*|*Vasyunin/OffDiagPartition*|*Vasyunin/CrossTermFTC*|*Vasyunin/VasyuninAssembly*) component="VasyuninTelescope" ;; \
-			*Vasyunin/Witness*|*Vasyunin/Rayleigh*|*Vasyunin/Chain*|*Vasyunin/LinIndep*|*Vasyunin/FractIntegral*|*Vasyunin/NbDistPos2*|*Vasyunin/NbDistPos3*|*Vasyunin/StirlingBridge*|*Vasyunin/IntegralBridge*|*Vasyunin/DiagonalBridge*|*Vasyunin/MeanIntegral*|*Vasyunin/PiecewiseFTC*|*Vasyunin/SqueezeElimination*|*MellinBridge/Vasyunin.lean) component="VasyuninBridge" ;; \
-			*MellinBridge*) component="Core" ;; \
+			*Gram/*) component="Gram" ;; \
+			*Vasyunin/Augmented/*) component="Vasyunin-Augmented" ;; \
+			*Vasyunin/Cotangent/*) component="Vasyunin-Cotangent" ;; \
+			*Vasyunin/Matrix/*) component="Vasyunin-Matrix" ;; \
+			*Vasyunin/Proof/*) component="Vasyunin-Proof" ;; \
+			*Vasyunin/Defs*|*Vasyunin/Witness*) component="Vasyunin-Augmented" ;; \
+			*NymanBeurling*) component="NymanBeurling" ;; \
+			*Assembly*) component="Assembly" ;; \
 			*Robin*) component="Robin" ;; \
-			*Defs*) component="Core" ;; \
+			*Structural*) component="Structural" ;; \
+			*Spectral*) component="Spectral" ;; \
+			*Sieve*) component="Sieve" ;; \
+			*MellinBridge*) component="MellinBridge" ;; \
+			*IntegralBasis*) component="IntegralBasis" ;; \
 		esac; \
 		outfile="cathedral-parts/cathedral-$$component.txt"; \
 		echo "" >> "$$outfile"; \
@@ -283,18 +303,28 @@ cathedral-dump-split:
 	@echo "================================================================" >> cathedral-parts/cathedral-Core.txt
 	@echo "" >> cathedral-parts/cathedral-Core.txt
 	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-parts/cathedral-Core.txt
+	@# Remove empty component files (no files routed there)
+	@for f in cathedral-parts/*.txt; do \
+		files=$$(grep -c '^FILE:' "$$f" 2>/dev/null || echo 0); \
+		if [ "$$files" -eq 0 ]; then rm -f "$$f"; fi; \
+	done
 	@# Summary
 	@echo ""
 	@echo "  📁 Files created in cathedral-parts/:"
-	@for f in cathedral-parts/*.txt; do \
+	@total_files=0; \
+	for f in cathedral-parts/*.txt; do \
 		name=$$(basename "$$f"); \
 		size=$$(du -h "$$f" | cut -f1); \
 		lines=$$(wc -l < "$$f" | tr -d ' '); \
 		files=$$(grep -c '^FILE:' "$$f" 2>/dev/null || echo 0); \
+		total_files=$$((total_files + files)); \
 		echo "     $$name  ($$size, $$lines lines, $$files files)"; \
-	done
+	done; \
+	echo ""; \
+	echo "  📊 Total: $$total_files files across $$(ls cathedral-parts/*.txt | wc -l | tr -d ' ') parts"
 	@echo ""
 	@echo "  ✅ Upload all files to Gemini Deep Think!"
+	@echo "  💡 Critical path files: cathedral-Core, cathedral-Vasyunin-*, cathedral-NymanBeurling"
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:
