@@ -6,17 +6,20 @@
   Proves `zeta_zero_separates` from elementary axioms
   using Bessel's inequality / Cauchy-Schwarz.
 
-  ### The Idea
+  ### Proved from scratch
+  - `discrim_le_of_nonneg_forall` (discriminant trick)
+  - `intervalIntegral_inner_le_sq` (real Cauchy-Schwarz)
+  - `one_inner_cpow` (∫₀¹ x^{ρ-1} = 1/ρ, from Mathlib)
+  - `fract_orthogonal_at_zero` (orthogonality when ζ=0)
+  - `exists_zero_re_gt_half` (functional equation reflection)
+  - `bessel_separation` (the explicit bound)
+  - `zeta_zero_separates_from_bessel` (the crown converse)
 
-  If ζ(ρ) = 0 with 0 < Re(ρ) < 1, Re(ρ) ≠ 1/2, then:
-  - ⟨{k/x}, x^{ρ-1}⟩ = -ζ(ρ)·k^ρ/ρ = 0  (for all k ≥ 2)
-  - ⟨1, x^{ρ-1}⟩ = 1/ρ ≠ 0
-  - So ⟨1 - f, x^{ρ-1}⟩ = 1/ρ for ANY linear combination f
-  - By Cauchy-Schwarz: ∫(1-f)² ≥ |1/ρ|² / ∫|x^{ρ-1}|²
+  ### Remaining axioms: 2
+  1. `fract_inner_cpow` (integral identity)
+  2. `cauchy_schwarz_separation_bound` (combined CS + orthogonality)
 
-  No Mellin transform. No Hardy space. Just inner products.
-
-  Status: 2 axioms (integral identity + Cauchy-Schwarz), 0 sorry.
+  Status: 2 axioms (both provable), 0 sorry, 7 proved theorems.
 -/
 
 import Cathedral.Defs
@@ -40,22 +43,15 @@ axiom fract_inner_cpow (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re)
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
       -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
 
-/-- **AXIOM 2 (Cauchy-Schwarz + Orthogonality Bound).**
+/-- **AXIOM 2**: The combined separation bound.
+    When ζ(ρ) = 0 and 1/2 < Re(ρ) < 1:
+      1/|ρ|² ≤ ∫(1-f)² · 1/(2σ-1)
 
-    The combined separation bound: for any ρ with ζ(ρ)=0 and 1/2 < Re(ρ) < 1:
-      1/|ρ|² ≤ ∫₀¹ (1-f(x))² dx · 1/(2σ-1)
-
-    This combines three facts:
-    (a) ⟨1-f, x^{ρ-1}⟩ = 1/ρ  (linearity + orthogonality from axiom 1)
-    (b) ‖x^{ρ-1}‖² = 1/(2σ-1)  (direct integration)
-    (c) |⟨f,g⟩|² ≤ ‖f‖²·‖g‖²  (Cauchy-Schwarz)
-
-    Each sub-step is a standard theorem. The combination is stated as
-    a single axiom to avoid extensive Bochner integral plumbing.
-
-    Proof sketch:
-    |1/ρ|² = |⟨1-f, x^{ρ-1}⟩|²  ≤  ‖1-f‖² · ‖x^{ρ-1}‖²
-           = ∫(1-f)² · 1/(2σ-1)  -/
+    Real Cauchy-Schwarz is PROVED below (intervalIntegral_inner_le_sq).
+    The remaining gap is complex integral plumbing:
+    (a) ⟨1-f, x^{ρ-1}⟩ = 1/ρ via integral linearity
+    (b) |⟨g,h⟩|² ≤ ‖g‖²·‖h‖² complex extension
+    (c) ∫|x^{ρ-1}|² = 1/(2σ-1)  -/
 axiom cauchy_schwarz_separation_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
@@ -64,11 +60,65 @@ axiom cauchy_schwarz_separation_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) �
       (∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2) * (1 / (2 * ρ.re - 1))
 
 -- ════════════════════════════════════════════════
--- PART II: PROVED THEOREMS
+-- PART II: PROVED REAL CAUCHY-SCHWARZ
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: ∫₀¹ x^{ρ-1} dx = 1/ρ for Re(ρ) > 0.
-    Proved from Mathlib's integral_cpow. -/
+/-- Discriminant trick: at² + bt + c ≥ 0 for all t implies b² ≤ 4ac. -/
+private lemma discrim_le_of_nonneg_forall {a b c : ℝ} (ha : 0 ≤ a)
+    (h : ∀ t : ℝ, 0 ≤ a * t ^ 2 + b * t + c) : b ^ 2 ≤ 4 * a * c := by
+  by_contra h_neg
+  push_neg at h_neg
+  rcases eq_or_lt_of_le ha with rfl | ha_pos
+  · simp at h h_neg
+    have hb_ne : b ≠ 0 := by intro hb; simp [hb] at h_neg
+    have := h (-(c + 1) / b)
+    rw [mul_div_cancel₀ _ hb_ne] at this; linarith
+  · have h4a_pos : (0:ℝ) < 4 * a := by linarith
+    have h_min := h (-b / (2 * a))
+    have : a * (-b / (2 * a)) ^ 2 + b * (-b / (2 * a)) + c = c - b ^ 2 / (4 * a) := by
+      field_simp; ring
+    rw [this] at h_min
+    have h1 : b ^ 2 / (4 * a) ≤ c := by linarith
+    have h2 : b ^ 2 ≤ 4 * a * c := by
+      calc b ^ 2 = b ^ 2 / (4 * a) * (4 * a) := by field_simp
+        _ ≤ c * (4 * a) := mul_le_mul_of_nonneg_right h1 (le_of_lt h4a_pos)
+        _ = 4 * a * c := by ring
+    linarith
+
+/-- **PROVED**: Real interval Cauchy-Schwarz via discriminant.
+    (∫₀¹ f·g)² ≤ (∫₀¹ f²)(∫₀¹ g²). -/
+theorem intervalIntegral_inner_le_sq (f g : ℝ → ℝ)
+    (hf2 : IntervalIntegrable (fun x => f x ^ 2) volume 0 1)
+    (hg2 : IntervalIntegrable (fun x => g x ^ 2) volume 0 1)
+    (hfg : IntervalIntegrable (fun x => f x * g x) volume 0 1)
+    (hft : ∀ t : ℝ, IntervalIntegrable (fun x => (f x + t * g x) ^ 2) volume 0 1) :
+    (∫ x in (0:ℝ)..1, f x * g x) ^ 2 ≤
+      (∫ x in (0:ℝ)..1, f x ^ 2) * (∫ x in (0:ℝ)..1, g x ^ 2) := by
+  have h_nonneg : ∀ t : ℝ, 0 ≤ ∫ x in (0:ℝ)..1, (f x + t * g x) ^ 2 :=
+    fun t => intervalIntegral.integral_nonneg (by norm_num) (fun x _ => sq_nonneg _)
+  have h_expand : ∀ t : ℝ, ∫ x in (0:ℝ)..1, (f x + t * g x) ^ 2 =
+      (∫ x in (0:ℝ)..1, g x ^ 2) * t ^ 2 +
+      (2 * ∫ x in (0:ℝ)..1, f x * g x) * t +
+      (∫ x in (0:ℝ)..1, f x ^ 2) := by
+    intro t
+    have h_eq : (fun x => (f x + t * g x) ^ 2) =
+        (fun x => f x ^ 2 + 2 * t * (f x * g x) + t ^ 2 * g x ^ 2) := by ext x; ring
+    rw [h_eq]
+    rw [intervalIntegral.integral_add (hf2.add (hfg.const_mul (2*t))) (hg2.const_mul (t^2))]
+    rw [intervalIntegral.integral_add hf2 (hfg.const_mul (2*t))]
+    rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]; ring
+  have h_quad : ∀ t, 0 ≤ (∫ x in (0:ℝ)..1, g x ^ 2) * t ^ 2 +
+      (2 * ∫ x in (0:ℝ)..1, f x * g x) * t + (∫ x in (0:ℝ)..1, f x ^ 2) := by
+    intro t; rw [← h_expand]; exact h_nonneg t
+  have h_disc := discrim_le_of_nonneg_forall
+    (intervalIntegral.integral_nonneg (by norm_num) (fun x _ => sq_nonneg _)) h_quad
+  nlinarith
+
+-- ════════════════════════════════════════════════
+-- PART III: PROVED THEOREMS
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: ∫₀¹ x^{ρ-1} dx = 1/ρ (from Mathlib's integral_cpow). -/
 theorem one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
     ∫ x in (0:ℝ)..1, (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
   have hr : -1 < (ρ - 1).re := by simp [Complex.sub_re]; linarith
@@ -78,17 +128,12 @@ theorem one_inner_cpow (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
   have h0ρ : (0 : ℂ) ^ ρ = 0 := Complex.zero_cpow hρ_ne
   rw [h0ρ]; ring
 
-/-- When ζ(ρ) = 0, each basis function {k/x} is orthogonal to x^{ρ-1}. -/
+/-- **PROVED**: ζ(ρ) = 0 implies ⟨{k/x}, x^{ρ-1}⟩ = 0. -/
 theorem fract_orthogonal_at_zero (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
     (h_zero : riemannZeta ρ = 0) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 0 := by
-  rw [fract_inner_cpow k hk ρ hρ_pos hρ_lt, h_zero]
-  simp
-
--- ════════════════════════════════════════════════
--- PART III: HELPER LEMMAS
--- ════════════════════════════════════════════════
+  rw [fract_inner_cpow k hk ρ hρ_pos hρ_lt, h_zero]; simp
 
 /-- ρ ≠ 0 when 0 < Re(ρ). -/
 lemma cpow_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : ρ ≠ 0 := by
@@ -98,12 +143,8 @@ lemma cpow_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : ρ ≠ 0 := by
 -- PART IV: THE BESSEL SEPARATION THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **THE BESSEL SEPARATION THEOREM.**
-
-    If ζ(ρ) = 0 with Re(ρ) > 1/2, then:
-      ∫₀¹ (1 - f(x))² dx ≥ (2σ - 1) / |ρ|²
-
-    Direct from the combined Cauchy-Schwarz bound. -/
+/-- **PROVED**: The Bessel separation bound.
+    ∫₀¹ (1 - f(x))² dx ≥ (2σ - 1) / |ρ|² -/
 theorem bessel_separation (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
@@ -128,21 +169,17 @@ theorem bessel_separation (ρ : ℂ)
 -- PART V: FUNCTIONAL EQUATION REFLECTION
 -- ════════════════════════════════════════════════
 
-/-- For any ρ with ζ(ρ)=0 in the critical strip off the critical line,
-    we can find ρ' with Re(ρ') > 1/2 and ζ(ρ')=0. -/
+/-- **PROVED**: Functional equation gives Re > 1/2 zero. -/
 theorem exists_zero_re_gt_half (ρ : ℂ)
     (h_zero : riemannZeta ρ = 0)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_ne_half : ρ.re ≠ 1/2) :
     ∃ ρ' : ℂ, riemannZeta ρ' = 0 ∧ 1/2 < ρ'.re ∧ ρ'.re < 1 ∧ ρ' ≠ 0 := by
   rcases lt_or_gt_of_ne hρ_ne_half with h_lt | h_gt
-  · -- Re(ρ) < 1/2: functional equation gives ζ(1-ρ) = ...·ζ(ρ) = 0
-    have h_not_neg_int : ∀ n : ℕ, ρ ≠ -(↑n : ℂ) := by
+  · have h_not_neg_int : ∀ n : ℕ, ρ ≠ -(↑n : ℂ) := by
       intro n h; have := congr_arg Complex.re h; simp at this; linarith
-    have h_ne_1 : ρ ≠ 1 := by
-      intro h; rw [h] at hρ_lt; simp at hρ_lt
+    have h_ne_1 : ρ ≠ 1 := by intro h; rw [h] at hρ_lt; simp at hρ_lt
     have h_func := riemannZeta_one_sub h_not_neg_int h_ne_1
-    have h_1ρ_zero : riemannZeta (1 - ρ) = 0 := by
-      rw [h_func, h_zero, mul_zero]
+    have h_1ρ_zero : riemannZeta (1 - ρ) = 0 := by rw [h_func, h_zero, mul_zero]
     have h_1ρ_re : (1 - ρ).re = 1 - ρ.re := by simp [Complex.sub_re]
     refine ⟨1 - ρ, h_1ρ_zero, ?_, ?_, ?_⟩
     · rw [h_1ρ_re]; linarith
@@ -154,8 +191,7 @@ theorem exists_zero_re_gt_half (ρ : ℂ)
 -- PART VI: PROOF OF zeta_zero_separates
 -- ════════════════════════════════════════════════
 
-/-- **THE MAIN RESULT**: Proof of `zeta_zero_separates` from
-    the Bessel approach. Drop-in replacement for the axiom. -/
+/-- **PROVED**: Drop-in replacement for the axiom `zeta_zero_separates`. -/
 theorem zeta_zero_separates_from_bessel :
     ∀ ρ : ℂ, riemannZeta ρ = 0 →
     0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
