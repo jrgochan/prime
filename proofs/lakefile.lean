@@ -17,12 +17,15 @@ lean_lib «Cathedral» where
   roots := #[
     -- Core definitions & infrastructure
     `Cathedral.Defs,
+    -- Axiom registry
+    `Cathedral.Axioms,
     -- Linear algebra (abstract, zero sorry)
     `Cathedral.LinearAlgebra.ShermanMorrison,
     `Cathedral.LinearAlgebra.Variational,
     `Cathedral.LinearAlgebra.SchurComplement,
     `Cathedral.LinearAlgebra.Sylvester,
     -- Nyman-Beurling criterion
+    `Cathedral.NymanBeurling.Separation,
     `Cathedral.NymanBeurling.NymanBeurling,
     -- Vasyunin (the active proof chain)
     `Cathedral.Vasyunin,

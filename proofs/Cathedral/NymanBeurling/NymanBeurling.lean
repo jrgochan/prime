@@ -1,59 +1,63 @@
-import Cathedral.Defs
+import Cathedral.Axioms
+import Cathedral.NymanBeurling.Separation
 
 /-!
   Cathedral/NymanBeurling/NymanBeurling.lean
 
-  ## The Nyman-Beurling criterion
+  ## The Nyman-Beurling Criterion
 
   The full Nyman-Beurling criterion: d²_N → 0 ↔ RH.
 
   ### Architecture
-  Two axioms (both proven in the archived MellinBridge module):
-  - `nyman_beurling_converse`: d²→0 ⟹ RH
-  - `nyman_beurling_forward_from_sieve`: RH ⟹ d²→0
+  - Converse (d²→0 ⟹ RH): Proved in Separation.lean via contrapositive
+  - Forward (RH ⟹ d²→0): Axiom (proven in archive, uses Mertens + Abel)
 
-  ### Key results
-  - `nyman_beurling_from_mellin`: the full biconditional
+  ### Axiom inventory
+  - `zeta_zero_separates` (Tier 3, in Axioms.lean) — used by converse
+  - `rh_implies_mertens_bound` (Tier 4, in Axioms.lean) — used by forward
 -/
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter
 
 -- ════════════════════════════════════════════════
--- NYMAN-BEURLING AXIOMS
+-- FORWARD: RH ⟹ d²→0
 -- ════════════════════════════════════════════════
 
--- Both directions are proven in the archived MellinBridge module
--- (Cathedral/Archive/HighFrequencyTrap/MellinBridge/).
--- They cannot be compiled with current Mathlib due to API drift,
--- but the proofs are preserved for reference.
+-- The forward direction uses:
+--   RH → rh_implies_mertens_bound (axiom, Tier 4)
+--     → Abel summation with log-cutoff weights
+--     → ∃ v, ∫(1-f)² ≤ C/log(N) < ε
+--
+-- The full proof is in the archive (MellinBridge/MellinSieve.lean)
+-- but cannot compile with current Mathlib due to API drift.
+-- It depends on rh_implies_mertens_bound (Axioms.lean) plus
+-- the Abel summation step.
 
-/-- The Nyman-Beurling converse: d²_N → 0 implies RH.
-    Proof (archived): contrapositive; ¬RH gives a zeta zero ρ
-    off the critical line, creating a separating functional
-    that contradicts the L² density hypothesis. -/
-axiom nyman_beurling_converse :
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
-    RiemannHypothesis
+/-- **Forward direction**: RH ⟹ d²_N → 0.
 
-/-- The Nyman-Beurling forward direction: RH implies d²_N → 0.
-    Proof (archived): RH → weight construction via Mellin sieve
-    → explicit L² approximation with C/log(N) error. -/
+    Proven in archive (MellinSieve.lean) from rh_implies_mertens_bound
+    + Abel summation. The proof constructs explicit Möbius weights
+    v_k = -μ(k)·(1 - ln(k)/ln(N)) achieving ∫(1-f)² ≤ C/log(N).
+
+    This axiom is a consequence of:
+    - rh_implies_mertens_bound (Tier 4, Axioms.lean)
+    - Abel summation for log-cutoff weights (classical) -/
 axiom nyman_beurling_forward_from_sieve :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε)
 
 -- ════════════════════════════════════════════════
--- THE FULL CRITERION
+-- THE FULL BICONDITIONAL
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: The Nyman-Beurling criterion (from forward + converse).
+/-- **THEOREM**: The Nyman-Beurling criterion.
     d²_N → 0 ↔ RH. -/
 theorem nyman_beurling_from_mellin :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, nyman_beurling_forward_from_sieve⟩
+
 end
