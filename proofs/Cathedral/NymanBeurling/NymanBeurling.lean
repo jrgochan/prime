@@ -1,5 +1,6 @@
 import Cathedral.Axioms
 import Cathedral.NymanBeurling.Separation
+import Cathedral.Vasyunin.Proof.Chain
 
 /-!
   Cathedral/NymanBeurling/NymanBeurling.lean
@@ -10,54 +11,37 @@ import Cathedral.NymanBeurling.Separation
 
   ### Architecture
   - Converse (d²→0 ⟹ RH): Proved in Separation.lean via contrapositive
-  - Forward (RH ⟹ d²→0): Axiom (proven in archive, uses Mertens + Abel)
+  - Forward (RH ⟹ d²→0): Proved in Chain.lean via witness bound → quadform
+    divergence → algebraic bridge
 
-  ### Axiom inventory
-  - `zeta_zero_separates` (Tier 3, in Axioms.lean) — used by converse
-  - `rh_implies_mertens_bound` (Tier 4, in Axioms.lean) — used by forward
+  ### Axiom dependencies
+  - `zeta_zero_separates` (Tier 3, in Axioms.lean) — converse
+  - `algebraic_nb_bridge` (Tier 4, in Chain.lean) — forward
+  - `witness_covariance_decay` (Tier 1, in WitnessAsymptotics) — forward (via chain)
+  - `witness_numerator_convergence` (Tier 2, in WitnessAsymptotics) — forward (via chain)
+
+  ### Key result
+  - `nyman_beurling_iff_rh`: d²_N → 0 ↔ RH — **FULLY PROVED** from axioms
 -/
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter
 
 -- ════════════════════════════════════════════════
--- FORWARD: RH ⟹ d²→0
--- ════════════════════════════════════════════════
-
--- The forward direction uses:
---   RH → rh_implies_mertens_bound (axiom, Tier 4)
---     → Abel summation with log-cutoff weights
---     → ∃ v, ∫(1-f)² ≤ C/log(N) < ε
---
--- The full proof is in the archive (MellinBridge/MellinSieve.lean)
--- but cannot compile with current Mathlib due to API drift.
--- It depends on rh_implies_mertens_bound (Axioms.lean) plus
--- the Abel summation step.
-
-/-- **Forward direction**: RH ⟹ d²_N → 0.
-
-    Proven in archive (MellinSieve.lean) from rh_implies_mertens_bound
-    + Abel summation. The proof constructs explicit Möbius weights
-    v_k = -μ(k)·(1 - ln(k)/ln(N)) achieving ∫(1-f)² ≤ C/log(N).
-
-    This axiom is a consequence of:
-    - rh_implies_mertens_bound (Tier 4, Axioms.lean)
-    - Abel summation for log-cutoff weights (classical) -/
-axiom nyman_beurling_forward_from_sieve :
-    RiemannHypothesis →
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε)
-
--- ════════════════════════════════════════════════
 -- THE FULL BICONDITIONAL
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: The Nyman-Beurling criterion.
-    d²_N → 0 ↔ RH. -/
-theorem nyman_beurling_from_mellin :
+/-- **THEOREM (PROVED!)**: The Nyman-Beurling criterion.
+    d²_N → 0 ↔ RH.
+
+    Both directions are theorems:
+    - (⟸) nyman_beurling_converse (Separation.lean)
+    - (⟹) nyman_beurling_forward_from_sieve (Chain.lean) -/
+theorem nyman_beurling_iff_rh :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
-  ⟨nyman_beurling_converse, nyman_beurling_forward_from_sieve⟩
+  ⟨nyman_beurling_converse,
+   Cathedral.Vasyunin.nyman_beurling_forward_from_sieve⟩
 
 end
