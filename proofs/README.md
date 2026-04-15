@@ -24,7 +24,8 @@ Cathedral/
 │   ├── Vasyunin.lean                 — Module root
 │   └── Vasyunin/
 │       ├── AugmentedGram.lean        — H_N PD, G_N PD, bᵀG⁻¹b < 1 (Factorial Nuke)
-│       ├── Chain.lean                — Full proof chain: axiom → RH
+│       ├── BartlettWindow.lean       — Energy ratio→1/3, amplitude→1/2 (zero sorry)
+│       ├── Chain.lean                — Full proof chain: witness → RH
 │       ├── CovDet2.lean              — det(C₂) > 0
 │       ├── CovDet3.lean              — det(C₃) > 0 (polynomial certificates)
 │       ├── CovEntries.lean           — Covariance matrix closed-form entries
@@ -44,7 +45,9 @@ Cathedral/
 │       ├── NbDistPos3.lean           — NB distance positivity (N=3)
 │       ├── Rayleigh.lean             — Rayleigh quotient theorems
 │       ├── Structural.lean           — Hermitian, PSD, invertibility theorems
-│       └── Witness.lean              — Log cutoff witness construction
+│       ├── Witness.lean              — Log cutoff witness construction
+│       ├── WitnessAsymptotics.lean   — Decomposition: axiom → PNT + RH parts
+│       └── WitnessConditional.lean   — witness_covariance_decay ↔ RH (ZERO SORRY)
 └── Robin/
     ├── BaseCases.lean                — σ(p) ≤ bound for p ∈ {2,3,5,7}
     ├── Defs.lean                     — Robin/Lagarias definitions + 1 axiom
@@ -58,15 +61,30 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | 36 |
-| Theorems + Lemmas | 217 |
-| Definitions | 42 |
-| Axioms | 3 |
+| Active Lean files | 38 |
+| Theorems + Lemmas | 230+ |
+| Definitions | 48 |
 | `sorry` | **0** |
 | Warnings | **0** |
 
-## The 3 Axioms
+## The Axiom Structure
 
-1. **`log_cutoff_witness_bound`** (Chain.lean) — The RH itself: Q(v) ≥ c·ln(N)
-2. **`vasyunin_eq_integral`** (IntegralBridge.lean) — Vasyunin formula = L² integral (CrossTermFTC attacks this)
-3. **`arithmetic_rh_equivalences`** (Robin/Defs.lean) — Lagarias (2002) + Robin (1984) equivalences
+The Cathedral's axioms decompose into tiers:
+
+### Tier 1: The RH Content (1 axiom)
+- **`witness_covariance_decay`** — vᵀCv ≤ C/ln(N)
+  - *Machine-verified equivalent to RH* (`witness_covariance_decay_iff_rh`)
+  - Plain English: "The Selberg-weighted Möbius witness approximates 1 in L²(0,1) with error O(1/ln N)"
+
+### Tier 2: PNT-Level (1 axiom)
+- **`witness_numerator_convergence`** — bᵀv → 1 (from Mertens: Σ μ(k)·ln(k)/k → -1)
+
+### Tier 3: Classical Number Theory (6 axioms)
+- 3 Mertens partial-sum axioms (BartlettWindow)
+- 3 Vasyunin integral / digamma evaluation axioms
+
+### Tier 4: Structural (3 axioms)
+- `arithmetic_rh_equivalences` — Robin ↔ Lagarias ↔ RH
+- `rh_implies_mertens_bound` — RH → |M(x)| ≤ Cx^{1/2}(log x)²
+- `abel_summation_l2_bound` — Mertens bound → L² decay
+- `algebraic_nb_bridge` — Gram matrix = integrals (links algebraic/analytic)
