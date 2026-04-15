@@ -22,9 +22,10 @@ lean_lib «Cathedral» where
     `Cathedral.LinearAlgebra.Variational,
     `Cathedral.LinearAlgebra.SchurComplement,
     `Cathedral.LinearAlgebra.Sylvester,
-    -- Mellin Bridge: Nyman-Beurling + Vasyunin (the active proof chain)
-    `Cathedral.MellinBridge.NymanBeurling,
-    `Cathedral.MellinBridge.Vasyunin,
+    -- Nyman-Beurling criterion
+    `Cathedral.NymanBeurling.NymanBeurling,
+    -- Vasyunin (the active proof chain)
+    `Cathedral.Vasyunin,
     -- Robin's Inequality (discrete arithmetic front)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,

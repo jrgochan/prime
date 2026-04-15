@@ -28,7 +28,7 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
-import Cathedral.MellinBridge.Vasyunin.MeanIntegral
+import Cathedral.Vasyunin.Augmented.MeanIntegral
 
 noncomputable section
 open Real MeasureTheory
