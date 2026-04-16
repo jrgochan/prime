@@ -65,10 +65,10 @@ axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
 axiom mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
-    ∫ u in Set.Ioo (0:ℝ) 1,
-      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) +
-    ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
-      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+    (∫ u in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
+    (∫ u in Set.Ioo (1:ℝ) (k:ℝ),
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1))
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral becomes ∫₁ᵏ u^{s-2} du. -/
 axiom mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
@@ -117,34 +117,34 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < 
         ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
           ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) :=
         mellin_substitution_ioo k hk2 s hs
-      -- Step 2: Split ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ
-    _ = (k : ℂ) ^ (-s) *
-        (∫ u in Set.Ioo (0:ℝ) 1,
-          ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) +
-         ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
-          ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) := by
-        rw [mellin_integral_split k hk2 s hs]
-      -- Step 3: {1/u} → 1/u on (1,k)
-    _ = (k : ℂ) ^ (-s) *
-        (∫ u in Set.Ioo (0:ℝ) 1,
-          ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) +
-         ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
-          ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) := by
-        rw [mellin_tail_fract_simplify k hk2 s hs]
-      -- Step 4: Evaluate ∫₁ᵏ u^{s-2} du
-    _ = (k : ℂ) ^ (-s) *
-        (∫ u in Set.Ioo (0:ℝ) 1,
-          ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) +
-         ((k : ℂ) ^ (s - 1) - 1) / (s - 1)) := by
-        rw [mellin_tail_evaluate k hk2 s hs]
-      -- Step 5: Distribute and simplify algebra
+      -- Steps 2-5: Split, simplify fract, evaluate tail, algebra
     _ = (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
         (k : ℂ) ^ (-s) *
           ∫ x in Set.Ioo (0:ℝ) 1,
             ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
-        -- Algebra: k⁻ˢ·(A + B) = B' + k⁻ˢ·A where B = (kˢ⁻¹-1)/(s-1)
-        -- and B' = (k⁻¹ - k⁻ˢ)/(s-1) with k⁻ˢ·(kˢ⁻¹-1) = k⁻¹ - k⁻ˢ
-        sorry -- pure complex algebra, no measure theory
+        have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast (show (k:ℝ) ≠ 0 by positivity)
+        have hsplit := mellin_integral_split k hk2 s hs
+        have hfract := mellin_tail_fract_simplify k hk2 s hs
+        have htail := mellin_tail_evaluate k hk2 s hs
+        -- Build: k⁻ˢ · ∫₀ᵏ = k⁻ˢ·∫₀¹ + (1/k - k⁻ˢ)/(s-1)
+        have hfull : (k : ℂ) ^ (-s) *
+            ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
+              ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
+          (k : ℂ) ^ (-s) *
+            (∫ u in Set.Ioo (0:ℝ) 1,
+              ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
+          (1 / k - (k : ℂ) ^ (-s)) / (s - 1) := by
+          rw [hsplit, mul_add]
+          congr 1
+          rw [hfract, htail]
+          -- Goal: k⁻ˢ * ((kˢ⁻¹-1)/(s-1)) = (1/k - k⁻ˢ)/(s-1)
+          rw [mul_div_assoc']
+          congr 1
+          -- k⁻ˢ * (kˢ⁻¹ - 1) = 1/k - k⁻ˢ
+          rw [mul_sub, mul_one, ← cpow_add (-s) (s - 1) hk_ne,
+              show (-s + (s - 1) : ℂ) = -1 from by ring, cpow_neg_one]
+          simp [one_div]
+        rw [hfull, add_comm]
 
 end Cathedral.MellinReduction
 
