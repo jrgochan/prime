@@ -131,7 +131,7 @@ private lemma bd_residual_sq_iint (N : ℕ) (v : Fin (N - 1) → ℝ) :
     By substitution u = kx, the integral splits into:
     - The tail integral ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1}-1)/(s-1)
     - A k^{-s} multiple of the k=1 base case -/
-axiom bd_mellin_reduction (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+axiom bd_mellin_reduction (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
     (k : ℂ) ^ (-s) * ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)
@@ -153,7 +153,7 @@ theorem bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
       (x : ℂ) ^ (ρ - 1) = 1 / ((k : ℂ) * (ρ - 1)) := by
   have hρ1 : ρ ≠ 1 := by intro h; rw [h] at hρ_lt; norm_num at hρ_lt
   -- Apply the Basis Collapse
-  rw [bd_mellin_reduction k hk ρ hρ_pos]
+  rw [bd_mellin_reduction k hk ρ hρ_pos hρ1]
   -- Apply the Base Case
   rw [bd_mellin_base_case ρ hρ_pos hρ1]
   -- Apply ζ(ρ) = 0
