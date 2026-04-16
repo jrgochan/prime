@@ -202,33 +202,60 @@ theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ
 -- PROVED: The Rank-1 lower bound on |residual|²
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM (Rank-1 Lower Bound)**: For all W ∈ ℝ,
-    |1/ρ - W/(ρ-1)|² ≥ t²(2σ-1)² / (|ρ|⁴·|ρ-1|²).
+/-- The key quadratic identity: D·((σu-1)² + (tu)²) = (Du-σ)² + t²
+    where D = σ² + t² = |ρ|². This is the perfect-square decomposition
+    that makes the Rank-1 lower bound trivial. -/
+private lemma quadratic_sq_identity (σ t u : ℝ) :
+    (σ^2 + t^2) * ((σ * u - 1)^2 + (t * u)^2) =
+    ((σ^2 + t^2) * u - σ)^2 + t^2 := by ring
+
+/-- normSq of the numerator (1-W)ρ-1 in terms of real components. -/
+private lemma normSq_linear_sub (σ t u : ℝ) :
+    (σ * u - 1)^2 + (t * u)^2 = (σ^2 + t^2) * u^2 - 2 * σ * u + 1 := by ring
+
+/-- **PROVED (Rank-1 Lower Bound)**: For all W ∈ ℝ,
+    |1/ρ - W/(ρ-1)|² ≥ t² / (|ρ|⁴·|ρ-1|²).
 
     This is the geometric heart of the Rank-1 Mellin Miracle.
-    As W ranges over ℝ, {1/ρ - W/(ρ-1)} traces a line in ℂ.
-    The squared distance from 0 to this line is the minimum of
-    f(W) = |1/ρ - W/(ρ-1)|², which is a quadratic in W.
-
-    **Proof sketch** (quadratic discriminant):
-    Let α = 1/ρ, β = 1/(ρ-1). Then:
-    f(W) = |α - Wβ|² = |β|²W² - 2W·Re(α·conj(β)) + |α|²
-    min_W f(W) = (|α|²|β|² - Re(α·conj(β))²) / |β|²
-              = Im(α·conj(β))² / |β|²
-
-    Computing: α·conj(β) = conj(ρ-1)/(ρ·|ρ-1|²)
-    Im(conj(ρ-1)/ρ) = -t(2σ-1)/|ρ|²    (direct calculation)
-    So Im(α·conj(β)) = -t(2σ-1)/(|ρ|²·|ρ-1|²)
-    And |β|² = 1/|ρ-1|²
-
-    Therefore min = t²(2σ-1)²/(|ρ|⁴·|ρ-1|²).
-
-    This bound is positive when t ≠ 0 and σ ≠ 1/2. -/
-axiom rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
-    (him : ρ.im ≠ 0) (hσ : ρ.re ≠ 1/2) (W : ℝ) :
-    ρ.im ^ 2 * (2 * ρ.re - 1) ^ 2 /
-      (Complex.normSq ρ ^ 2 * Complex.normSq (ρ - 1)) ≤
-    Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1))
+    The key identity: setting u = 1-W,
+      |ρ|² · normSq((u·ρ - 1)) = (|ρ|²·u - σ)² + t²
+    which is ≥ t² (perfect square ≥ 0).
+    Therefore normSq(1/ρ - W/(ρ-1)) ≥ t²/(|ρ|⁴·|ρ-1|²). -/
+theorem rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
+    (_him : ρ.im ≠ 0) (W : ℝ) :
+    ρ.im ^ 2 / (Complex.normSq ρ ^ 2 * Complex.normSq (ρ - 1)) ≤
+    Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1)) := by
+  set σ := ρ.re; set t := ρ.im
+  have hD_pos : 0 < Complex.normSq ρ := Complex.normSq_pos.mpr hρ_ne
+  have hD2_pos : 0 < Complex.normSq (ρ - 1) := Complex.normSq_pos.mpr hρ1_ne
+  -- Step 1: Express as quotient
+  have heq : 1 / ρ - (↑W : ℂ) / (ρ - 1) = ((1 - ↑W) * ρ - 1) / (ρ * (ρ - 1)) := by
+    field_simp; ring
+  rw [heq, map_div₀, map_mul]
+  -- Step 2: Compute re/im of numerator
+  set z := (1 - (↑W : ℂ)) * ρ - 1
+  have hz_re : z.re = σ * (1 - W) - 1 := by
+    simp [z, Complex.mul_re, Complex.sub_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.one_re]; ring
+  have hz_im : z.im = t * (1 - W) := by
+    simp [z, Complex.mul_im, Complex.sub_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.one_im]; ring
+  -- Step 3: normSq z = z.re² + z.im²
+  have hnum_ns : Complex.normSq z = (σ * (1 - W) - 1)^2 + (t * (1 - W))^2 := by
+    rw [Complex.normSq_apply, hz_re, hz_im]; ring
+  have hD_eq : Complex.normSq ρ = σ^2 + t^2 := by
+    rw [Complex.normSq_apply]; ring
+  rw [hnum_ns]
+  -- Step 4: Reduce to the core real inequality
+  -- Goal: t²/(D²·D2) ≤ ((σ(1-W)-1)²+(t(1-W))²)/(D·D2)
+  -- Suffices: t² ≤ ((σ(1-W)-1)²+(t(1-W))²) · D
+  suffices h : t^2 ≤ ((σ * (1 - W) - 1)^2 + (t * (1 - W))^2) * Complex.normSq ρ by
+    rw [div_le_div_iff₀ (mul_pos (pow_pos hD_pos 2) hD2_pos) (mul_pos hD_pos hD2_pos)]
+    nlinarith [mul_pos hD_pos hD2_pos]
+  -- Step 5: The quadratic identity closes it
+  rw [hD_eq]
+  nlinarith [quadratic_sq_identity σ t (1 - W),
+    sq_nonneg ((σ^2 + t^2) * (1 - W) - σ)]
 
 -- ════════════════════════════════════════════════
 -- PROVED: Functional equation reflection
@@ -294,18 +321,17 @@ theorem zeta_zero_separates_bd :
   have hρ'_pos : 0 < ρ'.re := by linarith
   have hρ'_ne : ρ' ≠ 0 := rho_ne_zero ρ' hρ'_pos
   have hρ'1_ne : ρ' - 1 ≠ 0 := rho_sub_one_ne_zero ρ' hlt'
-  -- Step 2: Define δ
+  -- Step 2: Define δ using the sharp Rank-1 bound (no phantom factor)
   set σ' := ρ'.re
   set t' := ρ'.im
-  -- The minimum of |1/ρ' - W/(ρ'-1)|² over W ∈ ℝ is
-  -- t'²(2σ'-1)² / (|ρ'|⁴·|ρ'-1|²)
-  -- Our separation bound is (2σ'-1) times the min of the CS quotient:
-  set δ₀ := t' ^ 2 * (2 * σ' - 1) ^ 2 /
+  -- The minimum of |1/ρ' - W/(ρ'-1)|² over W ∈ ℝ is t'²/(|ρ'|⁴·|ρ'-1|²)
+  -- Our separation bound is (2σ'-1) times this minimum:
+  set δ₀ := t' ^ 2 /
     (Complex.normSq ρ' ^ 2 * Complex.normSq (ρ' - 1))
   set δ := (2 * σ' - 1) * δ₀
   have hδ₀_pos : 0 < δ₀ := by
     apply div_pos
-    · exact mul_pos (sq_pos_of_ne_zero him') (sq_pos_of_ne_zero (ne_of_gt (by linarith : (0:ℝ) < 2 * σ' - 1)))
+    · exact sq_pos_of_ne_zero him'
     · exact mul_pos (sq_pos_of_ne_zero (ne_of_gt (Complex.normSq_pos.mpr hρ'_ne)))
         (Complex.normSq_pos.mpr hρ'1_ne)
   have hδ_pos : 0 < δ := mul_pos (by linarith) hδ₀_pos
@@ -323,20 +349,15 @@ theorem zeta_zero_separates_bd :
   -- The residual is 1/ρ' - (Σ (vᵢ:ℂ)/(i+1)) * (1/(ρ'-1))
   -- = 1/ρ' - (↑W' : ℂ) * (1/(ρ'-1)) where W' = Σ vᵢ/(i+1) ∈ ℝ
   -- = 1/ρ' - (↑W' : ℂ) / (ρ'-1)
-  have h_σ'_ne : σ' ≠ 1 / 2 := ne_of_gt hgt'
   -- Rewrite the normSq of the integral using h_resid
-  -- The integral = 1/ρ' - (Σ (vᵢ:ℂ)/(i+1)) * (1/(ρ'-1))
-  -- We need: normSq of this ≥ δ₀
-  -- We have: Σ (vᵢ:ℂ)/(i+1) = ↑(Σ vᵢ/(i+1)) = ↑W
   have h_W_cast : (∑ i : Fin (N-1), (v i : ℂ) / (↑(i.val + 1) : ℂ)) = (↑W : ℂ) := by
     simp only [W, Complex.ofReal_sum, Complex.ofReal_div, Complex.ofReal_natCast]
-  -- So the integral = 1/ρ' - ↑W/(ρ'-1)
   have h_resid' : ∫ x in Set.Ioo (0:ℝ) 1,
       ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1) =
       1 / ρ' - (↑W : ℂ) / (ρ' - 1) := by
     rw [h_resid, h_W_cast]; ring
-  -- Apply rank1_lower_bound: normSq(1/ρ' - ↑W/(ρ'-1)) ≥ δ₀
-  have h_rank1 := rank1_lower_bound ρ' hρ'_ne hρ'1_ne him' h_σ'_ne W
+  -- Apply rank1_lower_bound (PROVED): normSq(1/ρ' - ↑W/(ρ'-1)) ≥ δ₀
+  have h_rank1 := rank1_lower_bound ρ' hρ'_ne hρ'1_ne him' W
   -- Combine: normSq(integral) ≥ δ₀
   have h_ns_ge : δ₀ ≤ Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1,
       ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1)) := by
