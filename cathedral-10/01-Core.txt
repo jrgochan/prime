@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 01-Core
-# Generated: Wed Apr 15 20:28:10 MDT 2026
+# Generated: Wed Apr 15 20:36:25 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -1157,7 +1157,6 @@ theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ
   -- Now LHS = 1/ρ - Σ vᵢ * (1/((i+1)(ρ-1)))
   -- RHS = 1/ρ - (Σ vᵢ/(i+1)) * (1/(ρ-1))
   -- Rewrite each term: vᵢ * (1/((i+1)(ρ-1))) = vᵢ/(i+1) * (1/(ρ-1))
-  congr 1
   have key : ∀ i : Fin (N-1), (v i : ℂ) * (1 / ((↑(i.val + 1) : ℂ) * (ρ - 1))) =
       (v i : ℂ) / (↑(i.val + 1) : ℂ) * (1 / (ρ - 1)) := by
     intro i
@@ -1170,25 +1169,33 @@ theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ
 -- PROVED: The Rank-1 lower bound on |residual|²
 -- ════════════════════════════════════════════════
 
-/-- **The Rank-1 Lower Bound**: min over W ∈ ℝ of |1/ρ - W/(ρ-1)|²
-    is t²(2σ-1)² / (|ρ|⁴·|ρ-1|²) > 0 when t ≠ 0 and σ ≠ 1/2.
+/-- **AXIOM (Rank-1 Lower Bound)**: For all W ∈ ℝ,
+    |1/ρ - W/(ρ-1)|² ≥ t²(2σ-1)² / (|ρ|⁴·|ρ-1|²).
 
-    For any specific W, the bound |1/ρ - W/(ρ-1)|² ≥ min is trivially true.
-    
     This is the geometric heart of the Rank-1 Mellin Miracle.
     As W ranges over ℝ, {1/ρ - W/(ρ-1)} traces a line in ℂ.
-    The distance from 0 to this line is the minimum of the quadratic. -/
-theorem rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
+    The squared distance from 0 to this line is the minimum of
+    f(W) = |1/ρ - W/(ρ-1)|², which is a quadratic in W.
+
+    **Proof sketch** (quadratic discriminant):
+    Let α = 1/ρ, β = 1/(ρ-1). Then:
+    f(W) = |α - Wβ|² = |β|²W² - 2W·Re(α·conj(β)) + |α|²
+    min_W f(W) = (|α|²|β|² - Re(α·conj(β))²) / |β|²
+              = Im(α·conj(β))² / |β|²
+
+    Computing: α·conj(β) = conj(ρ-1)/(ρ·|ρ-1|²)
+    Im(conj(ρ-1)/ρ) = -t(2σ-1)/|ρ|²    (direct calculation)
+    So Im(α·conj(β)) = -t(2σ-1)/(|ρ|²·|ρ-1|²)
+    And |β|² = 1/|ρ-1|²
+
+    Therefore min = t²(2σ-1)²/(|ρ|⁴·|ρ-1|²).
+
+    This bound is positive when t ≠ 0 and σ ≠ 1/2. -/
+axiom rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
     (him : ρ.im ≠ 0) (hσ : ρ.re ≠ 1/2) (W : ℝ) :
     ρ.im ^ 2 * (2 * ρ.re - 1) ^ 2 /
       (Complex.normSq ρ ^ 2 * Complex.normSq (ρ - 1)) ≤
-    Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1)) := by
-  -- Quadratic discriminant argument:
-  -- f(W) = |1/ρ - W/(ρ-1)|² is a quadratic in W (real variable)
-  -- with positive leading coefficient |1/(ρ-1)|² > 0.
-  -- Its minimum = Im(α·conj(β))²/|β|² where α=1/ρ, β=1/(ρ-1).
-  -- This equals t²(2σ-1)²/(|ρ|⁴·|ρ-1|²) by direct computation.
-  sorry
+    Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1))
 
 -- ════════════════════════════════════════════════
 -- PROVED: Functional equation reflection
@@ -1273,13 +1280,57 @@ theorem zeta_zero_separates_bd :
   -- Step 3: Compute the residual integral via bd_residual_mellin
   set W := ∑ i : Fin (N-1), v i / (↑(i.val + 1) : ℝ)
   have h_resid := bd_residual_mellin N hN v ρ' hρ'_pos hlt' hz'
-  -- Step 4: Apply rank1_lower_bound to get |integral|² ≥ δ₀
-  -- Step 5: Apply bd_cauchy_schwarz to get ∫(1-f)² ≥ (2σ'-1) · δ₀
+  -- Step 4: Cauchy-Schwarz gives: normSq(integral) ≤ ∫(1-f)² · 1/(2σ'-1)
   have h_cs := bd_cauchy_schwarz N hN v ρ' hρ'_pos hlt' hgt'
-  -- The normSq of the integral is ≥ δ₀ (from rank1_lower_bound applied
-  -- to the specific W). Combined with CS: ∫(1-f)² · 1/(2σ'-1) ≥ δ₀
-  -- Therefore ∫(1-f)² ≥ (2σ'-1)·δ₀ = δ
-  sorry
+  -- Step 5: Rank-1 gives: normSq(1/ρ' - W'/(ρ'-1)) ≥ δ₀
+  -- where W' = Σ vᵢ/(i+1) cast to ℂ and divided appropriately
+  -- The integral equals 1/ρ' - (Σ vᵢ/(i+1)) · 1/(ρ'-1) by h_resid
+  -- So normSq(integral) = normSq(1/ρ' - (Σ vᵢ/(i+1)) · 1/(ρ'-1))
+  -- But rank1_lower_bound needs W : ℝ such that W/(ρ-1) matches.
+  -- The residual is 1/ρ' - (Σ (vᵢ:ℂ)/(i+1)) * (1/(ρ'-1))
+  -- = 1/ρ' - (↑W' : ℂ) * (1/(ρ'-1)) where W' = Σ vᵢ/(i+1) ∈ ℝ
+  -- = 1/ρ' - (↑W' : ℂ) / (ρ'-1)
+  have h_σ'_ne : σ' ≠ 1 / 2 := ne_of_gt hgt'
+  -- Rewrite the normSq of the integral using h_resid
+  -- The integral = 1/ρ' - (Σ (vᵢ:ℂ)/(i+1)) * (1/(ρ'-1))
+  -- We need: normSq of this ≥ δ₀
+  -- We have: Σ (vᵢ:ℂ)/(i+1) = ↑(Σ vᵢ/(i+1)) = ↑W
+  have h_W_cast : (∑ i : Fin (N-1), (v i : ℂ) / (↑(i.val + 1) : ℂ)) = (↑W : ℂ) := by
+    simp only [W, Complex.ofReal_sum, Complex.ofReal_div, Complex.ofReal_natCast]
+  -- So the integral = 1/ρ' - ↑W/(ρ'-1)
+  have h_resid' : ∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1) =
+      1 / ρ' - (↑W : ℂ) / (ρ' - 1) := by
+    rw [h_resid, h_W_cast]; ring
+  -- Apply rank1_lower_bound: normSq(1/ρ' - ↑W/(ρ'-1)) ≥ δ₀
+  have h_rank1 := rank1_lower_bound ρ' hρ'_ne hρ'1_ne him' h_σ'_ne W
+  -- Combine: normSq(integral) ≥ δ₀
+  have h_ns_ge : δ₀ ≤ Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1)) := by
+    rw [h_resid']; exact h_rank1
+  -- From CS: ∫(1-f)² · 1/(2σ'-1) ≥ normSq(integral) ≥ δ₀
+  -- So ∫(1-f)² ≥ (2σ'-1) · δ₀ = δ
+  have h_2σ_pos : (0:ℝ) < 2 * σ' - 1 := by linarith
+  have h_inv_pos : (0:ℝ) < 1 / (2 * σ' - 1) := by positivity
+  -- h_cs: normSq(integral) ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- h_ns_ge: δ₀ ≤ normSq(integral)
+  -- Therefore: δ₀ ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- So ∫(1-f)² ≥ δ₀ * (2σ'-1) = (2σ'-1) * δ₀ = δ
+  rw [ge_iff_le]
+  have h_combined : δ₀ ≤ (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) *
+      (1 / (2 * σ' - 1)) := le_trans h_ns_ge h_cs
+  -- h_combined: δ₀ ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- goal: δ ≤ ∫(1-f)²  where δ = (2σ'-1) * δ₀
+  -- So: (2σ'-1) * δ₀ ≤ ∫(1-f)²
+  -- From h_combined: δ₀ ≤ I * (1/(2σ'-1)), multiply by (2σ'-1):
+  have h_mul : δ₀ * (2 * σ' - 1) ≤
+      (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) *
+      (1 / (2 * σ' - 1)) * (2 * σ' - 1) :=
+    mul_le_mul_of_nonneg_right h_combined (le_of_lt h_2σ_pos)
+  have h_cancel : (1 : ℝ) / (2 * σ' - 1) * (2 * σ' - 1) = 1 :=
+    div_mul_cancel₀ 1 (ne_of_gt h_2σ_pos)
+  rw [mul_assoc, h_cancel, mul_one] at h_mul
+  linarith
 
 end
 

@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 04-Vasyunin-Matrix-Proof
-# Generated: Wed Apr 15 20:28:10 MDT 2026
+# Generated: Wed Apr 15 20:36:25 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
