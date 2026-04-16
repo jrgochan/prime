@@ -138,8 +138,15 @@ private theorem completedRiemannZeta_neg_on_unit_interval
       (completedRiemannZeta₀ (s : ℂ)).re +
       (-1 / s + -1 / (1 - s)) := by
     conv_lhs => rw [h_eq]
-    simp only [Complex.sub_re, Complex.div_re]
-    sorry -- real-part extraction for 1/(s:ℂ) and 1/((1-s):ℂ) at real s
+    -- For real s: 1/(s:ℂ) = (1/s : ℝ) and 1/((1-s):ℂ) = (1/(1-s) : ℝ)
+    have hs_ne : (s : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hs_pos
+    have hs1_ne : (1 : ℂ) - (s : ℂ) ≠ 0 := by
+      rw [← Complex.ofReal_one, ← Complex.ofReal_sub]
+      exact_mod_cast ne_of_gt (by linarith : (0:ℝ) < 1 - s)
+    rw [show (1 : ℂ) / (s : ℂ) = ((1 / s : ℝ) : ℂ) from by push_cast; rfl]
+    rw [show (1 : ℂ) / ((1 : ℂ) - (s : ℂ)) = (((1 / (1 - s)) : ℝ) : ℂ) from by push_cast; rfl]
+    simp only [Complex.sub_re, Complex.ofReal_re]
+    ring
   rw [h_re]; linarith
 
 /-- **THEOREM** (Replaces Axiom 3): ζ(s) ≠ 0 for real s ∈ (0,1).
