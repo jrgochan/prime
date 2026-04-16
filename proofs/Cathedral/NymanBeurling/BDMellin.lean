@@ -163,9 +163,16 @@ private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0
       ← intervalIntegral.integral_of_le h_le2]
   let f : ℝ → ℂ := fun u => ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
   have h_int_1 : IntervalIntegrable f volume 0 1 := by
-    sorry -- integrability via intervalIntegrable_cpow' + bounded fract
+    -- Strategy: |{1/u}| ≤ 1, so ‖f(u)‖ ≤ ‖u^{s-1}‖ = u^{Re(s)-1}
+    -- u^{Re(s)-1} is integrable on (0,1) when Re(s)-1 > -1, i.e. Re(s) > 0 ✓
+    -- Uses: intervalIntegrable_rpow' + Integrable.mono
+    sorry
   have h_int_2 : IntervalIntegrable f volume 1 k := by
-    sorry -- continuity on [1,k] since {1/u} = 1/u there
+    -- Strategy: On [1,k], {1/u} = 1/u, which is continuous.
+    -- u^{s-1} is continuous on [1,k] since u > 0.
+    -- Product of continuous functions is continuous, hence integrable on compact.
+    -- Uses: ContinuousOn.intervalIntegrable
+    sorry
   exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/
