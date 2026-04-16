@@ -35,6 +35,7 @@
 -/
 
 import Cathedral.Defs
+import Cathedral.Gram.FractIntegral
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 
@@ -50,6 +51,32 @@ open Complex Real MeasureTheory Set
     By the Nyman-Beurling theorem: inf_w ‖1 - φ_w‖²_{L²(0,1)} → 0 iff RH. -/
 def bdLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
   ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))
+
+/-- A single scaled BD basis function is integrable on [0,1]. -/
+private lemma bd_single_fract_integrable (k : ℕ) (c : ℝ) :
+    IntervalIntegrable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x)))
+      MeasureTheory.volume 0 1 := by
+  have h_meas : Measurable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x))) :=
+    (measurable_fract_real.comp (measurable_const.div
+      (measurable_const.mul measurable_id))).const_mul c
+  have h_bound : ∀ x : ℝ, ‖c * Int.fract (1 / ((k : ℝ) * x))‖ ≤ |c| := by
+    intro x; rw [Real.norm_eq_abs, abs_mul]
+    exact mul_le_of_le_one_right (abs_nonneg _)
+      ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le)
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact ⟨h_meas.aestronglyMeasurable, .of_bounded
+    (Filter.Eventually.of_forall (fun x => h_bound x))⟩
+
+/-- The BD linear combination is integrable on [0,1]. -/
+theorem bdLinComb_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (bdLinComb N v) MeasureTheory.volume 0 1 := by
+  unfold bdLinComb
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+    (∑ i : Fin (N - 1), fun x : ℝ => v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_sum]
+  apply IntervalIntegrable.sum; intro i _
+  exact bd_single_fract_integrable (i.val + 1) (v i)
 
 -- ════════════════════════════════════════════════
 -- AXIOM 1: BD Mellin transform at ζ zeros
