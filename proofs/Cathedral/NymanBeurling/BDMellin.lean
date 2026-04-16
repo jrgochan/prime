@@ -94,6 +94,23 @@ axiom bd_cauchy_schwarz (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) (ρ :
     (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) * (1 / (2 * ρ.re - 1))
 
 -- ════════════════════════════════════════════════
+-- AXIOM 3: ζ has no real zeros in the critical strip
+-- ════════════════════════════════════════════════
+
+/-- **AXIOM**: The Riemann zeta function has no zeros on the real line
+    in the interval (0, 1).
+
+    Mathematical justification:
+    - ζ(s) has a pole at s = 1 and ζ(0) = -1/2
+    - For real s ∈ (0, 1): ζ(s) < 0 (by the integral representation
+      or the functional equation combined with Γ positivity)
+    - In particular, ζ(s) ≠ 0 for real s ∈ (0, 1)
+
+    This is a standard result in analytic number theory. -/
+axiom zeta_no_real_zeros_in_strip (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    riemannZeta (s : ℂ) ≠ 0
+
+-- ════════════════════════════════════════════════
 -- PROVED: Helper lemmas
 -- ════════════════════════════════════════════════
 
@@ -117,6 +134,32 @@ private lemma one_inner_cpow' (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
   ring
 
 -- ════════════════════════════════════════════════
+-- AXIOM 4: Integral linearity for BD residual
+-- ════════════════════════════════════════════════
+
+/-- **AXIOM**: Integral linearity for the BD residual Mellin transform.
+
+    ∫_{Ioo} (1 - Σ vᵢ{1/((i+1)x)}) · x^{ρ-1} dx
+    = ∫_{Ioo} x^{ρ-1} dx - Σᵢ vᵢ · ∫_{Ioo} {1/((i+1)x)} · x^{ρ-1} dx
+
+    This is the integral linearity/sum-interchange identity:
+    ∫(a - Σ bᵢ) = ∫a - Σ ∫bᵢ, valid when all integrands are integrable.
+
+    The integrability is proved in BesselSeparation.lean for the {k/x} basis
+    (residual_cpow_integrableOn) and is identical for {1/(kx)} since both
+    are bounded by [0,1) times the integrable x^{σ-1}.
+
+    This axiom can be eliminated by porting the integrability infrastructure
+    from BesselSeparation to the BD basis. -/
+axiom bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+    (∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1)) -
+    ∑ i : Fin (N-1), (v i : ℂ) *
+      ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1)
+
+-- ════════════════════════════════════════════════
 -- PROVED: The BD residual Mellin transform
 -- ════════════════════════════════════════════════
 
@@ -130,12 +173,31 @@ theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (h_zero : riemannZeta ρ = 0) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
     1 / ρ - (∑ i : Fin (N-1), (v i : ℂ) / (↑(i.val + 1) : ℂ)) * (1 / (ρ - 1)) := by
-  -- Step 1: The integral of (1 - bdLinComb)·cpow splits as
-  -- ∫ 1·cpow - ∫ bdLinComb·cpow = ∫ cpow - Σ vᵢ ∫ {1/((i+1)x)}·cpow
-  -- We express directly by applying bd_mellin_at_zero to each basis function
-  -- and using one_inner_cpow' for the constant 1.
-  -- For now, bridge via integral linearity axiom approach:
-  sorry
+  -- Step 1: Apply integral linearity to split the integral
+  rw [bd_integral_linearity N v ρ hρ_pos hρ_lt]
+  -- Step 2: The first integral is 1/ρ
+  rw [one_inner_cpow' ρ hρ_pos]
+  -- Step 3: Each basis integral is 1/((i+1)(ρ-1)) by bd_mellin_at_zero
+  -- After linearity: 1/ρ - Σᵢ vᵢ · ∫{1/((i+1)x)}·cpow
+  -- Each integral = 1/((i+1)(ρ-1))
+  congr 1
+  have h_terms : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) = 1 / ((↑(i.val + 1) : ℂ) * (ρ - 1)) := by
+    intro i
+    exact bd_mellin_at_zero (i.val + 1) (by omega) ρ hρ_pos hρ_lt h_zero
+  simp_rw [h_terms]
+  -- Now LHS = 1/ρ - Σ vᵢ * (1/((i+1)(ρ-1)))
+  -- RHS = 1/ρ - (Σ vᵢ/(i+1)) * (1/(ρ-1))
+  -- Rewrite each term: vᵢ * (1/((i+1)(ρ-1))) = vᵢ/(i+1) * (1/(ρ-1))
+  congr 1
+  have key : ∀ i : Fin (N-1), (v i : ℂ) * (1 / ((↑(i.val + 1) : ℂ) * (ρ - 1))) =
+      (v i : ℂ) / (↑(i.val + 1) : ℂ) * (1 / (ρ - 1)) := by
+    intro i
+    have hi : (↑(i.val + 1) : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero i.val
+    have hρ1 : ρ - 1 ≠ 0 := rho_sub_one_ne_zero ρ hρ_lt
+    field_simp
+  simp_rw [key, ← Finset.sum_mul]
 
 -- ════════════════════════════════════════════════
 -- PROVED: The Rank-1 lower bound on |residual|²
@@ -170,6 +232,14 @@ theorem rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0
 theorem bd_exists_zero_re_gt_half (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_ne : ρ.re ≠ 1/2) :
     ∃ ρ' : ℂ, riemannZeta ρ' = 0 ∧ 1/2 < ρ'.re ∧ ρ'.re < 1 ∧ ρ'.im ≠ 0 := by
+  -- Helper: ρ with Im=0 can't be a zero in (0,1)
+  have no_real_zero : ∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.im ≠ 0 := by
+    intro s hs hs_pos hs_lt him
+    -- If Im(s) = 0 then s = (s.re : ℂ)
+    have hreal : s = (s.re : ℂ) := by
+      apply Complex.ext <;> simp [him]
+    rw [hreal] at hs
+    exact absurd hs (zeta_no_real_zeros_in_strip s.re hs_pos hs_lt)
   -- Step 1: Get a zero with Re > 1/2 (by functional equation reflection if needed)
   rcases lt_or_gt_of_ne hρ_ne with h_lt | h_gt
   · -- Case Re(ρ) < 1/2: reflect to 1-ρ which has Re > 1/2
@@ -180,16 +250,11 @@ theorem bd_exists_zero_re_gt_half (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
     have h_1ρ_zero : riemannZeta (1 - ρ) = 0 := by rw [h_func, h_zero, mul_zero]
     refine ⟨1 - ρ, h_1ρ_zero, by simp [Complex.sub_re]; linarith,
       by simp [Complex.sub_re]; linarith, ?_⟩
-    simp [Complex.sub_im]; exact fun h => absurd h (by
-      -- If Im(ρ) = 0 and Re(ρ) in (0,1), ρ is real.
-      -- ζ has no real zeros in (0,1): ζ(x) < 0 for x ∈ (0,1) by known results.
-      -- This is a deep fact; for now we use sorry.
-      sorry)
+    -- Im(1-ρ) = -Im(ρ), so Im(1-ρ) ≠ 0 ↔ Im(ρ) ≠ 0
+    simp [Complex.sub_im]
+    exact no_real_zero ρ h_zero hρ_pos hρ_lt
   · -- Case Re(ρ) > 1/2: use ρ directly
-    refine ⟨ρ, h_zero, h_gt, hρ_lt, ?_⟩
-    intro him
-    -- Same argument: if Im(ρ)=0, ρ is real in (1/2, 1), contradiction
-    sorry
+    exact ⟨ρ, h_zero, h_gt, hρ_lt, no_real_zero ρ h_zero hρ_pos hρ_lt⟩
 
 -- ════════════════════════════════════════════════
 -- THE CROWN: ζ zero separation for BD basis
