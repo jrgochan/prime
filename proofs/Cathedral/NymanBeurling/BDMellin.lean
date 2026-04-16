@@ -168,7 +168,24 @@ private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0
       rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
       exact intervalIntegral.intervalIntegrable_rpow' (show -1 < s.re - 1 by linarith)
     refine Integrable.mono h_dom ?_ ?_
-    · sorry -- AEStronglyMeasurable for fract∘(1/·) * cpow on Ioc
+    · -- AEStronglyMeasurable for fract∘(1/·) * cpow on Ioc
+      apply AEStronglyMeasurable.mul
+      · -- Measurability of ↑(Int.fract(1/u))
+        have hmfloor : Measurable (Int.floor : ℝ → ℤ) := by
+          intro s hs
+          have : Int.floor ⁻¹' s = ⋃ n ∈ s, Set.Ico (↑n : ℝ) ((↑n : ℝ) + 1) := by
+            ext x; simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_Ico, exists_prop]
+            exact ⟨fun h => ⟨⌊x⌋, h, Int.floor_le x, Int.lt_floor_add_one x⟩,
+                   fun ⟨n, hn, h1, h2⟩ => by rwa [show ⌊x⌋ = n from Int.floor_eq_iff.mpr ⟨h1, h2⟩]⟩
+          rw [this]; exact MeasurableSet.biUnion s.to_countable (fun _ _ => measurableSet_Ico)
+        have hmfract : Measurable (Int.fract : ℝ → ℝ) :=
+          measurable_id.sub ((by fun_prop : Measurable (fun n : ℤ => (n : ℝ))).comp hmfloor)
+        exact (Complex.continuous_ofReal.measurable.comp
+          (hmfract.comp (measurable_const.div measurable_id))).aestronglyMeasurable.restrict
+      · -- AEStronglyMeasurable for u^{s-1} on Ioc
+        exact (ContinuousOn.cpow Complex.continuous_ofReal.continuousOn continuousOn_const
+          (fun x hx => Or.inl (by exact_mod_cast show 0 < x from hx.1))).aestronglyMeasurable
+            measurableSet_Ioc
     · filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with u hu
       simp only [f, norm_mul, Complex.norm_real]
       have h_norm_eq : ‖(u : ℂ) ^ (s - 1)‖ = u ^ (s.re - 1) := by
