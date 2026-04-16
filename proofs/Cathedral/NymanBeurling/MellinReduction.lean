@@ -62,13 +62,14 @@ axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
         ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
 
 /-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand. -/
-axiom mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
     (∫ u in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
     (∫ u in Set.Ioo (1:ℝ) (k:ℝ),
-      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1))
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) := by
+  sorry -- measure theory: ae-split at u=1, integrability
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral becomes ∫₁ᵏ u^{s-2} du. -/
 theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
