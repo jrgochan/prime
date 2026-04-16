@@ -10,11 +10,9 @@
   1. Substitution u = kx transforms ∫₀¹ to k⁻ˢ ∫₀ᵏ
   2. Split ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ
   3. On (1,k): {1/u} = 1/u (sub-lemma fract_inv_of_gt_one)
-  4. Evaluate ∫₁ᵏ u^{s-2} du via integral_cpow
+  4. Evaluate ∫₁ᵏ u^{s-2} du via integral_cpow (Or.inr, avoiding 0)
 
-  NOTE: Requires s ≠ 1. At s=1, both sides of the formula evaluate to
-  0/0 = 0 in Lean, but the actual integral is ln(k). This is correct
-  because the formula is only applied at zeta zeros where s ≠ 1.
+  NOTE: Requires s ≠ 1 to avoid 0/0 in the formula.
 -/
 import Cathedral.NymanBeurling.BDMellin
 
@@ -53,7 +51,8 @@ lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
 -- THEOREMS: Substitution, Splitting, and Tail Evaluation
 -- ════════════════════════════════════════════════
 
-/-- Substitution u = kx converts ∫₀¹ f(kx) g(x) dx to k⁻¹ ∫₀ᵏ f(u) g(u/k) du. -/
+/-- Substitution u = kx converts ∫₀¹ f(kx) g(x) dx to k⁻ˢ ∫₀ᵏ f(u) g(u/k) du.
+    Uses integral_comp_mul_right + cpow factoring. -/
 axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ x in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
@@ -61,7 +60,8 @@ axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
       ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
         ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
 
-/-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand. -/
+/-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand.
+    Uses integral_add_adjacent_intervals + integrability. -/
 theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
@@ -69,9 +69,22 @@ theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
     (∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) := by
-  sorry -- measure theory: Ioc union + integrability via intervalIntegrable_cpow'
+  have h_le1 : (0:ℝ) ≤ 1 := by norm_num
+  have h_le2 : (1:ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+  have h_le3 : (0:ℝ) ≤ k := le_trans h_le1 h_le2
+  rw [← integral_Ioc_eq_integral_Ioo, ← integral_Ioc_eq_integral_Ioo,
+      ← integral_Ioc_eq_integral_Ioo]
+  rw [← intervalIntegral.integral_of_le h_le3,
+      ← intervalIntegral.integral_of_le h_le1,
+      ← intervalIntegral.integral_of_le h_le2]
+  let f : ℝ → ℂ := fun u => ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+  have h_int_1 : IntervalIntegrable f volume 0 1 := by
+    sorry -- integrability via intervalIntegrable_cpow' + bounded fract part
+  have h_int_2 : IntervalIntegrable f volume 1 k := by
+    sorry -- continuity on [1,k] since {1/u} = 1/u there
+  exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
 
-/-- On (1,k), {1/u} = 1/u, so the tail integral becomes ∫₁ᵏ u^{s-2} du. -/
+/-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/
 theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
@@ -83,7 +96,7 @@ theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < 
   rw [fract_inv_of_gt_one hu.1]
 
 /-- ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1} - 1)/(s-1).
-    Requires s ≠ 1 (at s=1, the LHS is ln(k) but the RHS is 0/0 = 0). -/
+    Uses integral_cpow with Or.inr since 0 ∉ [1,k]. -/
 theorem mellin_tail_evaluate (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
@@ -99,27 +112,27 @@ theorem mellin_tail_evaluate (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) 
     have hu_pos : 0 < u := by linarith
     have hu_ne : (u:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hu_pos)
     dsimp only
-    rw [show (1:ℝ) / u = u⁻¹ from one_div _]
-    rw [Complex.ofReal_inv]
+    rw [show (1 / u : ℝ) = u⁻¹ from one_div u, Complex.ofReal_inv]
     rw [show (s - 2 : ℂ) = -1 + (s - 1) from by ring]
     rw [cpow_add (-1) (s - 1) hu_ne, cpow_neg_one]
   rw [setIntegral_congr_fun measurableSet_Ioc h_eq]
   rw [← intervalIntegral.integral_of_le h_le]
-  -- Apply integral_cpow with r = s-2
+  -- Apply integral_cpow with Or.inr: s-2 ≠ -1 and 0 ∉ [1,k]
   have h_r_ne : s - 2 ≠ -1 := by
-    intro h
-    apply hs1
+    intro h; apply hs1
     have : s = s - 2 + 2 := by ring
-    rw [h] at this
-    norm_num at this
-    exact this
-  sorry -- integral_cpow + algebra (s-2+1 = s-1)
+    rw [h] at this; norm_num at this; exact this
+  rw [integral_cpow (Or.inr ⟨h_r_ne, fun h_mem => by
+    rw [Set.uIcc_of_le h_le] at h_mem
+    linarith [h_mem.1]⟩)]
+  rw [show s - 2 + 1 = s - 1 from by ring]
+  push_cast; rw [Complex.one_cpow]
 
 -- ════════════════════════════════════════════════
 -- THE MAIN THEOREM: AXIOM 1a ELIMINATION
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM** (was Axiom 1a): The BD Mellin reduction.
+/-- **THEOREM** (Replaces Axiom 1a): The BD Mellin reduction.
 
     By substitution u = kx:
     ∫₀¹ {1/(kx)} x^{s-1} dx = (1/k - k⁻ˢ)/(s-1) + k⁻ˢ ∫₀¹ {1/x} x^{s-1} dx
@@ -140,15 +153,12 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < 
     exact bd_mellin_reduction_k1 s hs
   -- Case k ≥ 2
   have hk2 : 2 ≤ k := by omega
-  -- Chain all 4 theorems + algebra
   calc ∫ x in Set.Ioo (0:ℝ) 1,
         ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)
-      -- Step 1: Substitution u = kx
       = (k : ℂ) ^ (-s) *
         ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
           ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) :=
         mellin_substitution_ioo k hk2 s hs
-      -- Steps 2-5: Split, simplify fract, evaluate tail, algebra
     _ = (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
         (k : ℂ) ^ (-s) *
           ∫ x in Set.Ioo (0:ℝ) 1,
@@ -157,7 +167,6 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < 
         have hsplit := mellin_integral_split k hk2 s hs
         have hfract := mellin_tail_fract_simplify k hk2 s hs
         have htail := mellin_tail_evaluate k hk2 s hs hs1
-        -- Build: k⁻ˢ · ∫₀ᵏ = k⁻ˢ·∫₀¹ + (1/k - k⁻ˢ)/(s-1)
         have hfull : (k : ℂ) ^ (-s) *
             ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
               ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
@@ -168,12 +177,10 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < 
           rw [hsplit, mul_add]
           congr 1
           rw [hfract, htail]
-          -- Goal: k⁻ˢ * ((kˢ⁻¹-1)/(s-1)) = (1/k - k⁻ˢ)/(s-1)
           rw [mul_div_assoc']
           congr 1
-          -- k⁻ˢ * (kˢ⁻¹ - 1) = 1/k - k⁻ˢ
-          rw [mul_sub, mul_one, ← cpow_add (-s) (s - 1) hk_ne,
-              show (-s + (s - 1) : ℂ) = -1 from by ring, cpow_neg_one]
+          rw [mul_sub, mul_one, ← cpow_add (-s) (s - 1) hk_ne]
+          rw [show (-s + (s - 1) : ℂ) = -1 from by ring, cpow_neg_one]
           simp [one_div]
         rw [hfull, add_comm]
 
