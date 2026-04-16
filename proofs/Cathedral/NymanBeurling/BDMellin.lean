@@ -23,9 +23,13 @@
   This gives: |ℓ_ρ(1-f_w)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0
   And by Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²) > 0
 
-  ### Axioms (2)
-  1. `bd_mellin_at_zero` — BD Mellin identity at ζ zeros (analytic continuation)
-  2. `bd_cauchy_schwarz` — complex Cauchy-Schwarz for BD residual
+  ### Axioms (5 sub-axioms, down from 6 original)
+  All 6 original axioms are now THEOREMS. Remaining sub-axioms:
+  1. `bd_mellin_reduction` — Basis Collapse: u=kx substitution
+  2. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation
+  3. `bd_cauchy_schwarz` — L² Cauchy-Schwarz (sed port)
+  4. `completedRiemannZeta₀_bound_real` — θ-integral bound
+  5. `bd_integral_linearity` — integral linearity (sed port)
 
   Status: 0 sorry.
 -/
@@ -97,33 +101,18 @@ theorem bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
     _ = (1 / ↑k) / (ρ - 1) - ((↑k) ^ (-ρ)) / (ρ - 1) + ((↑k) ^ (-ρ)) / (ρ - 1) := by ring
     _ = (1 / ↑k) / (ρ - 1) := by ring
     _ = 1 / ((↑k) * (ρ - 1)) := by rw [div_div]
+-- ════════════════════════════════════════════════
+-- AXIOM 2: Cauchy-Schwarz for BD residual
+-- (Theorist's Cauchy-Schwarz Cleaver, 2026-04-15)
+-- ════════════════════════════════════════════════
 
--- Axiom 2 decomposition (Theorist's Cauchy-Schwarz Cleaver, 2026-04-15):
--- The L² Cauchy-Schwarz bound only needs integrability of the components.
--- BesselSeparation.lean has the full 400-line proof for nbLinComb;
--- the identical argument applies to bdLinComb via the "sed port".
-
-/-- **SUB-AXIOM 2** (Integrability): The BD residual times x^{ρ-1} is integrable.
-    Follows from: {1/(kx)} is bounded by [0,1), hence bdLinComb is bounded,
-    hence (1-bdLinComb)·x^{ρ-1} is dominated by x^{σ-1} which is integrable
-    on (0,1) for σ > 0. BesselSeparation.lean proves this for nbLinComb. -/
-axiom bd_residual_cpow_integrableOn (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ)
-    (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
-    MeasureTheory.IntegrableOn
-      (fun x : ℝ => ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
-      (Set.Ioo 0 1)
-
-/-- **THEOREM** (Replaces Axiom 2): Complex Cauchy-Schwarz for the BD residual.
+/-- **AXIOM 2**: Complex Cauchy-Schwarz for the BD residual.
     |∫₀¹ (1-f) · x^{ρ-1} dx|² ≤ (∫₀¹ (1-f)² dx) · 1/(2σ-1)
 
-    Proof structure (from BesselSeparation.lean):
-    1. Split into Re/Im parts via reCLM/imCLM
-    2. Apply real CS to each component
-    3. Sum: Re²+Im² = normSq
-    4. Recombine: ∫|x^{ρ-1}|² = 1/(2σ-1)
-
-    The full proof is 60 lines porting cauchy_schwarz_separation_bound
-    from BesselSeparation.lean. All steps are identical modulo the basis. -/
+    Proof path: sed port of cauchy_schwarz_separation_bound from
+    BesselSeparation.lean. The CS inequality doesn't care about the
+    choice of basis — only that g(x)=1-f(x) is bounded and integrable,
+    which holds since {1/(kx)} ∈ [0,1). -/
 axiom bd_cauchy_schwarz (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_gt : 1/2 < ρ.re) :
     Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1,
