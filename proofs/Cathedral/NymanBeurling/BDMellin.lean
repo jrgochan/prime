@@ -123,11 +123,7 @@ axiom completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s <
 axiom completedRiemannZeta₀_real (s : ℝ) :
     (completedRiemannZeta₀ (s : ℂ)).im = 0
 
-/-- **SUB-AXIOM 3c**: Gammaℝ(s) > 0 for real s > 0.
-    Since Gammaℝ s = π^{-s/2} · Γ(s/2), and both factors are positive
-    for s > 0. Mathlib has `Gamma_pos_of_pos` for the real Γ function. -/
-axiom gammaR_pos_of_pos (s : ℝ) (hs : 0 < s) :
-    0 < (Gammaℝ (s : ℂ)).re
+-- PROVED: Gammaℝ(s) ≠ 0 for real s > 0.  (Mathlib: Gammaℝ_ne_zero_of_re_pos)
 
 /-- The completed zeta function is negative for real s ∈ (0,1).
     By the Jacobi Theta Bypass: Λ(s) = Λ₀(s) - 1/s - 1/(1-s),
@@ -149,16 +145,16 @@ private theorem completedRiemannZeta_neg_on_unit_interval
 /-- **THEOREM** (Replaces Axiom 3): ζ(s) ≠ 0 for real s ∈ (0,1).
     Proof via the Jacobi Theta Bypass:
     riemannZeta s = completedRiemannZeta s / Gammaℝ s,
-    where the numerator < 0 and the denominator > 0. -/
+    where the numerator < 0 and the denominator ≠ 0. -/
 theorem zeta_no_real_zeros_in_strip (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
     riemannZeta (s : ℂ) ≠ 0 := by
   have hs_ne : (s : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hs_pos
   rw [riemannZeta_def_of_ne_zero hs_ne]
   have h_neg := completedRiemannZeta_neg_on_unit_interval s hs_pos hs_lt
-  have h_gamma := gammaR_pos_of_pos s hs_pos
+  have h_gamma := Gammaℝ_ne_zero_of_re_pos (by simp [hs_pos] : 0 < (s : ℂ).re)
   apply div_ne_zero
   · intro h; rw [h] at h_neg; simp at h_neg
-  · intro h; rw [h] at h_gamma; simp at h_gamma
+  · exact h_gamma
 
 -- ════════════════════════════════════════════════
 -- PROVED: Helper lemmas
