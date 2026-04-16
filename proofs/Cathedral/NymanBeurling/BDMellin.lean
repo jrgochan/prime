@@ -238,30 +238,91 @@ private lemma one_inner_cpow' (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
   ring
 
 -- ════════════════════════════════════════════════
--- AXIOM 4: Integral linearity for BD residual
+-- PROVED: Integral linearity for BD residual
+-- (Port of residual_inner_cpow_eq from BesselSeparation)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM**: Integral linearity for the BD residual Mellin transform.
+/-- x^{ρ-1} is L¹ on Ioc(0,1) as ℂ-valued. -/
+private lemma bd_cpow_integrableOn_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+  have h_dom : IntegrableOn (fun x : ℝ => x ^ (ρ.re - 1)) (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact intervalIntegral.intervalIntegrable_rpow' (show -1 < ρ.re - 1 by linarith)
+  exact Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) (by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (ρ - 1),
+        show (ρ - 1).re = ρ.re - 1 from by simp [Complex.sub_re],
+        Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)])
 
-    ∫_{Ioo} (1 - Σ vᵢ{1/((i+1)x)}) · x^{ρ-1} dx
-    = ∫_{Ioo} x^{ρ-1} dx - Σᵢ vᵢ · ∫_{Ioo} {1/((i+1)x)} · x^{ρ-1} dx
+/-- {1/(kx)}·x^{ρ-1} is L¹ on Ioc(0,1) (bounded × integrable). -/
+private lemma bd_fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
+      (Set.Ioc 0 1) :=
+  Integrable.bdd_mul' (bd_cpow_integrableOn_Ioc ρ hρ)
+    ((Complex.continuous_ofReal.measurable.comp
+      (measurable_fract_real.comp (measurable_const.div
+        (measurable_const.mul measurable_id)))).aestronglyMeasurable)
+    (Filter.Eventually.of_forall (fun x => by
+      rw [Complex.norm_real]
+      exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le))
 
-    This is the integral linearity/sum-interchange identity:
-    ∫(a - Σ bᵢ) = ∫a - Σ ∫bᵢ, valid when all integrands are integrable.
+/-- **THEOREM** (Replaces Axiom 4): Integral linearity for the BD residual.
+    ∫(1-f)·h = ∫h - Σ vᵢ·∫(fᵢ·h)
 
-    The integrability is proved in BesselSeparation.lean for the {k/x} basis
-    (residual_cpow_integrableOn) and is identical for {1/(kx)} since both
-    are bounded by [0,1) times the integrable x^{σ-1}.
-
-    This axiom can be eliminated by porting the integrability infrastructure
-    from BesselSeparation to the BD basis. -/
-axiom bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    Proved by porting residual_inner_cpow_eq from BesselSeparation.lean. -/
+theorem bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
     (∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1)) -
     ∑ i : Fin (N-1), (v i : ℂ) *
       ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
-        (x : ℂ) ^ (ρ - 1)
+        (x : ℂ) ^ (ρ - 1) := by
+  rw [← integral_Ioc_eq_integral_Ioo]
+  -- Expand: (1-f)·h = h - Σ vᵢ·({1/((i+1)x)}·h)
+  have h_eq : ∀ x : ℝ, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+      (x : ℂ) ^ (ρ - 1) - ∑ i : Fin (N-1),
+        ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) := by
+    intro x; rw [Complex.ofReal_sub, Complex.ofReal_one, sub_mul, one_mul]; congr 1
+    rw [show (bdLinComb N v x : ℂ) = ∑ i : Fin (N-1),
+      ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) from by
+      simp [bdLinComb, Complex.ofReal_sum, Complex.ofReal_mul]]
+    rw [Finset.sum_mul]
+  have h_sum_int : ∀ i : Fin (N-1), i ∈ Finset.univ →
+      IntegrableOn (fun x => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+    intro i _
+    apply Integrable.bdd_mul' (bd_cpow_integrableOn_Ioc ρ hρ_pos)
+    · exact (Complex.continuous_ofReal.measurable.comp
+        ((measurable_const.mul (measurable_fract_real.comp
+          (measurable_const.div (measurable_const.mul measurable_id)))))).aestronglyMeasurable
+    · exact Filter.Eventually.of_forall (fun x => by
+        rw [Complex.norm_real]
+        calc |v i * Int.fract (1 / (↑(i.val + 1) * x))|
+            = |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := abs_mul _ _
+          _ ≤ |v i| * 1 := mul_le_mul_of_nonneg_left
+              ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le) (abs_nonneg _)
+          _ = |v i| := mul_one _)
+  simp_rw [h_eq]
+  rw [integral_sub (bd_cpow_integrableOn_Ioc ρ hρ_pos) (integrable_finset_sum _ h_sum_int),
+      integral_finset_sum _ h_sum_int]
+  -- Factor out vᵢ from each integral
+  have h_terms : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioc (0:ℝ) 1, ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) =
+      (v i : ℂ) * ∫ x in Set.Ioc (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) := by
+    intro i
+    rw [show (fun x : ℝ => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+      (x : ℂ) ^ (ρ - 1)) = (fun x => (v i : ℂ) *
+      (((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))) from by
+      ext x; push_cast; ring]
+    exact integral_const_mul _ _
+  simp_rw [h_terms]
+  -- Convert Ioc back to Ioo
+  congr 1
+  · exact integral_Ioc_eq_integral_Ioo
+  · congr 1; ext i
+    congr 1; exact integral_Ioc_eq_integral_Ioo
 
 -- ════════════════════════════════════════════════
 -- PROVED: The BD residual Mellin transform
