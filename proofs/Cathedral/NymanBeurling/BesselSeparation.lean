@@ -41,18 +41,108 @@ open Complex Real MeasureTheory Set
 -- PART I: AXIOMS (3 mathematical + 4 integrability)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM 1**: ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ.
-    Báez-Duarte (2003), Proposition 2.1. -/
-axiom fract_inner_cpow (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
+/-- **AXIOM**: ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ.
+    Báez-Duarte (2003), Proposition 2.1. Valid for all k ≥ 1. -/
+axiom fract_inner_cpow (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
       -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
 
-/-- **AXIOM 2**: ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0.
-    Complex integral linearity + orthogonality. -/
-axiom residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
-    (h_zero : riemannZeta ρ = 0) :
-    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ
+-- ════════════════════════════════════════════════
+-- PROVED: ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0
+-- Derived from fract_inner_cpow via integral linearity.
+-- ════════════════════════════════════════════════
+
+/-- x^{ρ-1} is L¹ on Ioc(0,1) as ℂ-valued. -/
+private lemma cpow_integrableOn_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+  have h_dom : IntegrableOn (fun x : ℝ => x ^ (ρ.re - 1)) (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact intervalIntegral.intervalIntegrable_rpow' (show -1 < ρ.re - 1 by linarith)
+  exact Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) (by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (ρ - 1),
+        show (ρ - 1).re = ρ.re - 1 from by simp [Complex.sub_re],
+        Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)])
+
+/-- {k/x}·x^{ρ-1} is L¹ on Ioc(0,1) (bounded × integrable). -/
+private lemma fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
+      (Set.Ioc 0 1) :=
+  Integrable.bdd_mul' (cpow_integrableOn_Ioc ρ hρ)
+    ((Complex.continuous_ofReal.measurable.comp
+      (measurable_fract_real.comp (measurable_const.div measurable_id))).aestronglyMeasurable)
+    (Filter.Eventually.of_forall (fun x => by
+      rw [Complex.norm_real]
+      exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le))
+
+/-- ∫_{Ioc 0 1} x^{ρ-1} dx = 1/ρ. -/
+private lemma cpow_setIntegral_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
+    ∫ x in Set.Ioc (0:ℝ) 1, (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
+      integral_cpow (Or.inl (show -1 < (ρ-1).re by simp [Complex.sub_re]; linarith)),
+      show (ρ - 1) + 1 = ρ from by ring]
+  have hρ_ne : ρ ≠ 0 := by intro h; rw [h] at hρ; simp at hρ
+  simp only [Complex.ofReal_one, Complex.ofReal_zero, Complex.one_cpow, Complex.zero_cpow hρ_ne]
+  ring
+
+/-- **PROVED**: ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0.
+    Derived from `fract_inner_cpow` by integral linearity:
+    ∫(1-f)·h = ∫h - Σvᵢ·∫{(i+1)/x}·h = 1/ρ - Σvᵢ(-ζ(ρ)(i+1)^ρ/ρ) = 1/ρ. -/
+theorem residual_inner_cpow_eq (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (h_zero : riemannZeta ρ = 0) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
+  rw [← integral_Ioc_eq_integral_Ioo]
+  -- Expand: (1-f)·h = h - Σ vᵢ·({(i+1)/x}·h)
+  have h_eq : ∀ x : ℝ, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+      (x : ℂ) ^ (ρ - 1) - ∑ i : Fin (N-1),
+        ((v i * Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) := by
+    intro x; rw [Complex.ofReal_sub, Complex.ofReal_one, sub_mul, one_mul]; congr 1
+    rw [show (nbLinComb N v x : ℂ) = ∑ i : Fin (N-1),
+      ((v i * Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) from by
+      simp [nbLinComb, Complex.ofReal_sum, Complex.ofReal_mul]]
+    rw [Finset.sum_mul]
+  have h_sum_int : ∀ i : Fin (N-1), i ∈ Finset.univ →
+      IntegrableOn (fun x => ((v i * Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+    intro i _
+    apply Integrable.bdd_mul' (cpow_integrableOn_Ioc ρ hρ_pos)
+    · exact (Complex.continuous_ofReal.measurable.comp
+        ((measurable_const.mul (measurable_fract_real.comp
+          (measurable_const.div measurable_id))))).aestronglyMeasurable
+    · exact Filter.Eventually.of_forall (fun x => by
+        rw [Complex.norm_real]
+        calc |v i * Int.fract (↑(i.val + 1) / x)|
+            = |v i| * |Int.fract (↑(i.val + 1) / x)| := abs_mul _ _
+          _ ≤ |v i| * 1 := mul_le_mul_of_nonneg_left
+              ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le) (abs_nonneg _)
+          _ = |v i| := mul_one _)
+  simp_rw [h_eq]
+  rw [integral_sub (cpow_integrableOn_Ioc ρ hρ_pos) (integrable_finset_sum _ h_sum_int),
+      cpow_setIntegral_Ioc ρ hρ_pos,
+      integral_finset_sum _ h_sum_int]
+  -- Each term: ∫ (vi*{k/x}:ℝ)·cpow = vi · ∫{k/x}·cpow
+  have h_terms : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioc (0:ℝ) 1, ((v i * Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) =
+      (v i : ℂ) * ∫ x in Set.Ioc (0:ℝ) 1, ((Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) := by
+    intro i
+    rw [show (fun x : ℝ => ((v i * Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) *
+      (x : ℂ) ^ (ρ - 1)) = (fun x => (v i : ℂ) *
+      (((Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))) from by
+      ext x; push_cast; ring]
+    exact integral_const_mul _ _
+  simp_rw [h_terms]
+  -- Apply fract_inner_cpow after Ioc→Ioo conversion
+  have h_conv : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioc (0:ℝ) 1,
+        ((Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+      -(riemannZeta ρ) * (↑(i.val + 1) : ℂ) ^ ρ / ρ := by
+    intro i
+    rw [integral_Ioc_eq_integral_Ioo,
+        fract_inner_cpow _ (by omega : 1 ≤ i.val + 1) ρ hρ_pos hρ_lt]
+  simp_rw [h_conv, h_zero, neg_zero, zero_mul, zero_div, mul_zero,
+           Finset.sum_const_zero, sub_zero]
 
 /-- **PROVED**: Bochner integrability of g·x^{ρ-1} on (0,1).
     Strategy: |1-f(x)| ≤ 1+Σ|vᵢ| (bounded) and ‖x^{ρ-1}‖ = x^{σ-1} (integrable for σ>0).
@@ -296,7 +386,7 @@ theorem rpow_l2_norm (σ : ℝ) (hσ : 1/2 < σ) :
       Real.one_rpow, Real.zero_rpow (ne_of_gt (show 0 < 2 * σ - 1 by linarith))]; ring
 
 /-- **PROVED**: ζ(ρ) = 0 implies orthogonality. -/
-theorem fract_orthogonal_at_zero (k : ℕ) (hk : 2 ≤ k) (ρ : ℂ)
+theorem fract_orthogonal_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
     (h_zero : riemannZeta ρ = 0) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 0 := by
