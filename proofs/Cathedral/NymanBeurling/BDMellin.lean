@@ -51,25 +51,52 @@ def bdLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
 -- AXIOM 1: BD Mellin transform at ζ zeros
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM**: The Mellin transform of the BD basis at ζ zeros.
-    For h_k(x) = {1/(kx)} and ζ(ρ) = 0 with 0 < Re(ρ) < 1:
+-- The Mellin transform of the BD basis at ζ zeros:
+-- ∫₀¹ {1/(kx)} · x^{ρ-1} dx = 1/(k(ρ-1))
+--
+-- Proof via the Basis Collapse (Theorist, 2026-04-15):
+-- 1. bd_mellin_reduction: factors out k via u=kx substitution
+-- 2. bd_mellin_base_case: k=1 case via identity theorem
+-- 3. Algebraic cancellation: k^{-ρ} terms annihilate at zeros
 
-      ∫₀¹ {1/(kx)} · x^{ρ-1} dx = 1/(k(ρ-1))
+/-- **SUB-AXIOM 1a** (Basis Collapse): Factors out k for any s with Re(s) > 0.
+    By substitution u = kx, the integral splits into:
+    - The tail integral ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1}-1)/(s-1)
+    - A k^{-s} multiple of the k=1 base case -/
+axiom bd_mellin_reduction (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
+    (k : ℂ) ^ (-s) * ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)
 
-    Mathematical justification:
-    - For Re(s) > 1: proved via change of variables u = kx, yielding
-      k^{-s} · [1/(s-1) - ζ(s)/s + (k^{s-1}-1)/(s-1)]
-      = 1/(k(s-1)) - ζ(s)/(sk^s)
-    - The k=1 case (∫₀¹ {1/x}·x^{s-1} = 1/(s-1) - ζ(s)/s) is proved
-      in FloorMellin.lean (344 lines, zero sorry)
-    - Both sides are holomorphic on Re(s) > 0; by the identity theorem
-      the formula extends from Re(s) > 1 to all Re(s) > 0
-    - At ζ(ρ) = 0: the ζ term vanishes, leaving 1/(k(ρ-1)) -/
-axiom bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
+/-- **SUB-AXIOM 1b** (Identity Theorem): Base case k=1 analytically continued.
+    F(s) = ∫₀¹ {1/x}·x^{s-1} dx equals G(s) = 1/(s-1) - ζ(s)/s.
+    FloorMellin.lean proves F = G for Re(s) > 1; the identity theorem
+    extends this to all Re(s) > 0, s ≠ 1. -/
+axiom bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    1 / (s - 1) - riemannZeta s / s
+
+/-- **THEOREM** (Replaces Axiom 1): BD Mellin transform at a zeta zero.
+    Chains the Basis Collapse + Identity Theorem + ζ(ρ)=0 cancellation. -/
+theorem bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
     (h_zero : riemannZeta ρ = 0) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) *
-      (x : ℂ) ^ (ρ - 1) = 1 / ((k : ℂ) * (ρ - 1))
+      (x : ℂ) ^ (ρ - 1) = 1 / ((k : ℂ) * (ρ - 1)) := by
+  have hρ1 : ρ ≠ 1 := by intro h; rw [h] at hρ_lt; norm_num at hρ_lt
+  -- Apply the Basis Collapse
+  rw [bd_mellin_reduction k hk ρ hρ_pos]
+  -- Apply the Base Case
+  rw [bd_mellin_base_case ρ hρ_pos hρ1]
+  -- Apply ζ(ρ) = 0
+  rw [h_zero, zero_div, sub_zero]
+  -- Algebra: the k^{-ρ} terms perfectly cancel
+  have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt (by omega : 0 < k)
+  have hp_ne : ρ - 1 ≠ 0 := sub_ne_zero.mpr hρ1
+  calc (1 / ↑k - (↑k) ^ (-ρ)) / (ρ - 1) + (↑k) ^ (-ρ) * (1 / (ρ - 1))
+    _ = (1 / ↑k) / (ρ - 1) - ((↑k) ^ (-ρ)) / (ρ - 1) + ((↑k) ^ (-ρ)) / (ρ - 1) := by ring
+    _ = (1 / ↑k) / (ρ - 1) := by ring
+    _ = 1 / ((↑k) * (ρ - 1)) := by rw [div_div]
 
 -- ════════════════════════════════════════════════
 -- AXIOM 2: Cauchy-Schwarz for BD residual
