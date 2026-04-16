@@ -78,6 +78,43 @@ theorem bdLinComb_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
   apply IntervalIntegrable.sum; intro i _
   exact bd_single_fract_integrable (i.val + 1) (v i)
 
+/-- bdLinComb is square-integrable on [0,1]. -/
+private lemma bdLinComb_sq_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (bdLinComb N v x) ^ 2) MeasureTheory.volume 0 1 := by
+  have h_meas : Measurable (fun x : ℝ => bdLinComb N v x) := by
+    unfold bdLinComb
+    exact Finset.measurable_sum _ (fun i _ =>
+      (measurable_fract_real.comp (measurable_const.div
+        (measurable_const.mul measurable_id))).const_mul (v i))
+  set C := ∑ i : Fin (N-1), |v i|
+  have h_bound : ∀ x, ‖(bdLinComb N v x) ^ 2‖ ≤ C ^ 2 := by
+    intro x; rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    have h_abs : |bdLinComb N v x| ≤ C := by
+      unfold bdLinComb
+      calc |∑ i, v i * Int.fract (1 / (↑(i.val + 1) * x))|
+          ≤ ∑ i, |v i * Int.fract (1 / (↑(i.val + 1) * x))| := Finset.abs_sum_le_sum_abs _ _
+        _ = ∑ i, |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := by congr 1; ext i; exact abs_mul _ _
+        _ ≤ ∑ i, |v i| * 1 := by
+          apply Finset.sum_le_sum; intro i _
+          exact mul_le_mul_of_nonneg_left ((abs_of_nonneg (Int.fract_nonneg _)).le.trans
+            (Int.fract_lt_one _).le) (abs_nonneg _)
+        _ = C := by simp [C]
+    have hC_nn : 0 ≤ C := by positivity
+    have h1 : bdLinComb N v x ≤ C := (le_abs_self _).trans h_abs
+    have h2 : -(C) ≤ bdLinComb N v x := le_trans (neg_le_neg h_abs) (neg_abs_le _)
+    exact sq_le_sq' h2 h1
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact ⟨(h_meas.pow_const 2).aestronglyMeasurable, .of_bounded
+    (Filter.Eventually.of_forall (fun x => h_bound x))⟩
+
+/-- The residual squared is integrable on [0,1]. -/
+private lemma bd_residual_sq_iint (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (1 - bdLinComb N v x) ^ 2) MeasureTheory.volume 0 1 := by
+  rw [show (fun x => (1 - bdLinComb N v x) ^ 2) =
+      (fun x => 1 - 2 * bdLinComb N v x + (bdLinComb N v x) ^ 2) from by ext x; ring]
+  exact ((intervalIntegrable_const (c := (1:ℝ))).sub
+    ((bdLinComb_integrable N v).const_mul 2)).add (bdLinComb_sq_integrable N v)
+
 -- ════════════════════════════════════════════════
 -- AXIOM 1: BD Mellin transform at ζ zeros
 -- ════════════════════════════════════════════════
