@@ -11,12 +11,15 @@
   - `residual_inner_cpow_eq`: axiom — complex integral linearity
   - `residual_cpow_integrableOn`: axiom — Bochner integrability
   - `cauchy_schwarz_separation_bound`: PROVED from the above
-  - Plus 8 integrability axioms (standard measure-theory plumbing)
+  - Plus 4 integrability axioms (product/square integrability)
 
   ### Key proved results
   - Real Cauchy-Schwarz via discriminant trick
   - Complex → real bridge via ContinuousLinearMap.integral_comp_comm
   - rpow L² norm computation
+  - normSq pointwise identity via norm_cpow_eq_rpow_re_of_pos
+  - Ioo/interval integral equivalence
+  - Shifted-square integrability from components
   - Functional equation reflection
   - The crown converse `zeta_zero_separates_from_bessel`
 
@@ -34,7 +37,7 @@ noncomputable section
 open Complex Real MeasureTheory Set
 
 -- ════════════════════════════════════════════════
--- PART I: AXIOMS
+-- PART I: AXIOMS (3 mathematical + 4 integrability)
 -- ════════════════════════════════════════════════
 
 /-- **AXIOM 1**: ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ.
@@ -56,9 +59,7 @@ axiom residual_cpow_integrableOn (N : ℕ) (hN : 2 ≤ N)
     IntegrableOn (fun x : ℝ => ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
       (Set.Ioo (0:ℝ) 1)
 
--- Measure-theory plumbing axioms
-axiom ioo_eq_interval (f : ℝ → ℝ) (hf : IntervalIntegrable f volume 0 1) :
-    ∫ x in Set.Ioo (0:ℝ) 1, f x = ∫ x in (0:ℝ)..1, f x
+-- Integrability axioms (4 — product/square integrability on (0,1))
 axiom g_re_h_iint (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
     IntervalIntegrable (fun x => (1 - nbLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re) volume 0 1
@@ -69,15 +70,35 @@ axiom re_h_sq_iint (ρ : ℂ) (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
     IntervalIntegrable (fun x => ((x : ℂ) ^ (ρ - 1)).re ^ 2) volume 0 1
 axiom im_h_sq_iint (ρ : ℂ) (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
     IntervalIntegrable (fun x => ((x : ℂ) ^ (ρ - 1)).im ^ 2) volume 0 1
-axiom cs_shift_re (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
-    IntervalIntegrable (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).re) ^ 2) volume 0 1
-axiom cs_shift_im (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
-    IntervalIntegrable (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).im) ^ 2) volume 0 1
-axiom norm_sq_cpow_integral (ρ : ℂ) (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
+
+-- ════════════════════════════════════════════════
+-- PART I-B: PROVED PLUMBING (formerly axioms)
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: ∫ on Ioo = interval integral (Ioc and Ioo differ by measure zero). -/
+theorem ioo_eq_interval (f : ℝ → ℝ) (_hf : IntervalIntegrable f volume 0 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, f x = ∫ x in (0:ℝ)..1, f x := by
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact integral_Ioc_eq_integral_Ioo.symm
+
+/-- **PROVED**: ∫(re²+im²) = ∫x^{2σ-2} (pointwise normSq identity). -/
+theorem norm_sq_cpow_integral (ρ : ℂ) (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
     ∫ x in (0:ℝ)..1, (((x : ℂ) ^ (ρ - 1)).re ^ 2 + ((x : ℂ) ^ (ρ - 1)).im ^ 2) =
-    ∫ x in (0:ℝ)..1, x ^ (2 * ρ.re - 2)
+    ∫ x in (0:ℝ)..1, x ^ (2 * ρ.re - 2) := by
+  apply intervalIntegral.integral_congr
+  intro x hx
+  simp only [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1), Set.mem_Icc] at hx
+  show ((x : ℂ) ^ (ρ - 1)).re ^ 2 + ((x : ℂ) ^ (ρ - 1)).im ^ 2 = x ^ (2 * ρ.re - 2)
+  rcases eq_or_lt_of_le hx.1 with rfl | hx_pos
+  · have h_ne : ρ - 1 ≠ 0 := by
+      intro h; have := congr_arg Complex.re h; simp at this; linarith
+    simp only [Complex.ofReal_zero, zero_cpow h_ne, Complex.zero_re, Complex.zero_im]
+    simp [Real.zero_rpow (show 2 * ρ.re - 2 ≠ 0 by linarith)]
+  · have h1 : ((x : ℂ) ^ (ρ-1)).re ^ 2 + ((x : ℂ) ^ (ρ-1)).im ^ 2 =
+        Complex.normSq ((x : ℂ) ^ (ρ-1)) := by rw [Complex.normSq_apply]; ring
+    rw [h1, Complex.normSq_eq_norm_sq, Complex.norm_cpow_eq_rpow_re_of_pos hx_pos,
+        sq, ← Real.rpow_add hx_pos]
+    congr 1; simp [Complex.sub_re]; ring
 
 -- ════════════════════════════════════════════════
 -- PART II: PROVED HELPERS
@@ -169,6 +190,26 @@ private lemma residual_sq_iint (N : ℕ) (v : Fin (N-1) → ℝ) :
       (fun x => 1 - 2 * nbLinComb N v x + (nbLinComb N v x) ^ 2) from by ext x; ring]
   exact ((intervalIntegrable_const (c := (1:ℝ))).sub
     ((nbLinComb_integrable N v).const_mul 2)).add (nbLinComb_sq_integrable N v)
+
+/-- **PROVED**: (g + t·re(h))² is interval-integrable. From (a+tb)² = a²+2tab+t²b². -/
+theorem cs_shift_re (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
+    IntervalIntegrable (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).re) ^ 2) volume 0 1 := by
+  rw [show (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).re) ^ 2) =
+      (fun x => (1 - nbLinComb N v x) ^ 2 + 2 * t * ((1 - nbLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re) +
+        t ^ 2 * ((x : ℂ) ^ (ρ - 1)).re ^ 2) from by ext x; ring]
+  exact ((residual_sq_iint N v).add ((g_re_h_iint N hN v ρ hρ hρ').const_mul (2*t))).add
+    ((re_h_sq_iint ρ hρ hρ').const_mul (t^2))
+
+/-- **PROVED**: (g + t·im(h))² is interval-integrable. -/
+theorem cs_shift_im (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
+    IntervalIntegrable (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).im) ^ 2) volume 0 1 := by
+  rw [show (fun x => ((1 - nbLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).im) ^ 2) =
+      (fun x => (1 - nbLinComb N v x) ^ 2 + 2 * t * ((1 - nbLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im) +
+        t ^ 2 * ((x : ℂ) ^ (ρ - 1)).im ^ 2) from by ext x; ring]
+  exact ((residual_sq_iint N v).add ((g_im_h_iint N hN v ρ hρ hρ').const_mul (2*t))).add
+    ((im_h_sq_iint ρ hρ hρ').const_mul (t^2))
 
 -- ════════════════════════════════════════════════
 -- PART V: CAUCHY-SCHWARZ SEPARATION BOUND (PROVED!)
