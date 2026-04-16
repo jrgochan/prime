@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 01-Core
-# Generated: Thu Apr 16 01:17:10 MDT 2026
+# Generated: Thu Apr 16 01:38:56 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -594,7 +594,7 @@ import Cathedral.MellinBridge.Basic
 import Cathedral.Assembly.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
 import Cathedral.NymanBeurling.Separation
-import Cathedral.Assembly.BDBridge
+import Cathedral.Assembly.BDBypass
 
 noncomputable section
 open Complex Real
@@ -689,15 +689,29 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 /-- **THEOREM** (was AXIOM 6): RH → d²_BD → 0.
 
     ELIMINATED as axiom: 2026-04-16.
-    Now a theorem via the BD L² Bridge (BDBridge.lean):
-    1. bd_witness_l2_error_decay (axiom): ∃v, 1-2bᵀv+vᵀGv ≤ C/ln N
-    2. bd_l2_error_eq_quad_error (theorem): ∫(1-bdLinComb)² = 1-2bᵀv+vᵀGv
-    3. C/ln N → 0 (standard calculus) -/
+    THE GRAND SEVERANCE (Theorist, 2026-04-16):
+    Now routed through BDBypass.lean (Mertens → Abel summation),
+    completely bypassing the Vasyunin Gram matrix.
+    1. rh_implies_mertens_bound: RH → |M(x)| = O(√x log²x)
+    2. abel_summation_bd_l2_bound: Mertens → ∃v, ∫(1-f_v)² ≤ C/ln N
+    3. C/ln N → 0 (standard calculus: log_grows_unboundedly) -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_proved
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) := by
+  intro hRH ε hε
+  -- Step 1: Get the witness decay from BDBypass
+  obtain ⟨C_err, hC_pos, N₀, hN₀⟩ := rh_implies_bd_witness_decay hRH
+  -- Step 2: Find N₁ where C_err / log(N) < ε
+  obtain ⟨N₁, hN₁⟩ := log_grows_unboundedly C_err hC_pos ε hε
+  -- Step 3: Take max of both thresholds
+  use max (max N₀ N₁) 3
+  intro N hN
+  have hN₀' : N ≥ N₀ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
+  have hN₁' : N₁ ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
+  have hN3 : N ≥ 3 := le_trans (le_max_right _ _) hN
+  obtain ⟨v, hv⟩ := hN₀ N hN₀' hN3
+  exact ⟨v, lt_of_le_of_lt hv (hN₁ N hN₁')⟩
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
