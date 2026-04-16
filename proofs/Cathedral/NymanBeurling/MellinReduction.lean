@@ -71,11 +71,15 @@ axiom mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1))
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral becomes ∫₁ᵏ u^{s-2} du. -/
-axiom mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
-      ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+      ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) := by
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
+  intro u hu
+  simp only
+  rw [fract_inv_of_gt_one hu.1]
 
 /-- ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1} - 1)/(s-1). -/
 axiom mellin_tail_evaluate (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
