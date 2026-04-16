@@ -53,7 +53,7 @@ def bdLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
   ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))
 
 /-- A single scaled BD basis function is integrable on [0,1]. -/
-private lemma bd_single_fract_integrable (k : ℕ) (c : ℝ) :
+lemma bd_single_fract_integrable (k : ℕ) (c : ℝ) :
     IntervalIntegrable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x)))
       MeasureTheory.volume 0 1 := by
   have h_meas : Measurable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x))) :=
@@ -79,7 +79,7 @@ theorem bdLinComb_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
   exact bd_single_fract_integrable (i.val + 1) (v i)
 
 /-- bdLinComb is square-integrable on [0,1]. -/
-private lemma bdLinComb_sq_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+lemma bdLinComb_sq_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
     IntervalIntegrable (fun x => (bdLinComb N v x) ^ 2) MeasureTheory.volume 0 1 := by
   have h_meas : Measurable (fun x : ℝ => bdLinComb N v x) := by
     unfold bdLinComb
