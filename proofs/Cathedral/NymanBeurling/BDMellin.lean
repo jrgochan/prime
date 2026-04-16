@@ -118,10 +118,8 @@ private lemma pole_terms_le_neg_four (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) 
 axiom completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
     (completedRiemannZeta₀ (s : ℂ)).re < 4
 
-/-- **SUB-AXIOM 3b**: Λ₀(s) is real-valued for real s.
-    Follows from the Mellin transform of the real-valued Jacobi theta kernel. -/
-axiom completedRiemannZeta₀_real (s : ℝ) :
-    (completedRiemannZeta₀ (s : ℂ)).im = 0
+-- NOTE: completedRiemannZeta₀_real (sub-axiom 3b) was originally here but is unused.
+-- The real-part extraction is handled directly by push_cast + ring.
 
 -- PROVED: Gammaℝ(s) ≠ 0 for real s > 0.  (Mathlib: Gammaℝ_ne_zero_of_re_pos)
 
