@@ -7,8 +7,8 @@
   using Bessel's inequality / Cauchy-Schwarz.
 
   ### Architecture
-  - `fract_inner_cpow`: axiom — Báez-Duarte integral identity
-  - `residual_inner_cpow_eq`: axiom — complex integral linearity
+  - `fract_orthogonal_at_zero`: axiom — orthogonality at ζ zeros
+  - `residual_inner_cpow_eq`: PROVED — complex integral linearity
   - `residual_cpow_integrableOn`: axiom — Bochner integrability
   - `cauchy_schwarz_separation_bound`: PROVED from the above
   - Plus 4 integrability axioms (product/square integrability)
@@ -38,18 +38,25 @@ noncomputable section
 open Complex Real MeasureTheory Set
 
 -- ════════════════════════════════════════════════
--- PART I: AXIOMS (3 mathematical + 4 integrability)
+-- PART I: AXIOM (orthogonality at zeta zeros)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM**: ∫₀¹ {k/x} · x^{ρ-1} dx = -ζ(ρ) · k^ρ / ρ.
-    Báez-Duarte (2003), Proposition 2.1. Valid for all k ≥ 1. -/
-axiom fract_inner_cpow (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
-    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
-      -(riemannZeta ρ) * (k : ℂ) ^ ρ / ρ
+/-- **AXIOM**: ζ(ρ) = 0 ⟹ {k/x} is orthogonal to x^{ρ-1} on (0,1).
+    From Báez-Duarte (2003), Prop. 2.1: ∫₀¹ {k/x}·x^{s-1}dx = -ζ(s)k^s/s.
+    At a zeta zero, the RHS vanishes.
+
+    Mathematical justification:
+    - For Re(s) > 1: proved in mellin_fractBasis (FloorDivMellin.lean)
+    - Extended to 0 < Re(s) < 1 by analytic continuation
+    - At ζ zeros (which satisfy 0 < Re(ρ) < 1): the identity gives 0 -/
+axiom fract_orthogonal_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
+    (h_zero : riemannZeta ρ = 0) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 0
 
 -- ════════════════════════════════════════════════
 -- PROVED: ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0
--- Derived from fract_inner_cpow via integral linearity.
+-- Derived from fract_orthogonal_at_zero via integral linearity.
 -- ════════════════════════════════════════════════
 
 /-- x^{ρ-1} is L¹ on Ioc(0,1) as ℂ-valued. -/
@@ -86,7 +93,7 @@ private lemma cpow_setIntegral_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
   ring
 
 /-- **PROVED**: ⟨1-f, x^{ρ-1}⟩ = 1/ρ when ζ(ρ) = 0.
-    Derived from `fract_inner_cpow` by integral linearity:
+    Derived from `fract_orthogonal_at_zero` by integral linearity:
     ∫(1-f)·h = ∫h - Σvᵢ·∫{(i+1)/x}·h = 1/ρ - Σvᵢ(-ζ(ρ)(i+1)^ρ/ρ) = 1/ρ. -/
 theorem residual_inner_cpow_eq (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (h_zero : riemannZeta ρ = 0) :
@@ -133,16 +140,14 @@ theorem residual_inner_cpow_eq (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ)
       ext x; push_cast; ring]
     exact integral_const_mul _ _
   simp_rw [h_terms]
-  -- Apply fract_inner_cpow after Ioc→Ioo conversion
+  -- Apply fract_orthogonal_at_zero after Ioc→Ioo conversion
   have h_conv : ∀ i : Fin (N-1),
       ∫ x in Set.Ioc (0:ℝ) 1,
-        ((Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
-      -(riemannZeta ρ) * (↑(i.val + 1) : ℂ) ^ ρ / ρ := by
+        ((Int.fract ((↑(i.val + 1) : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 0 := by
     intro i
-    rw [integral_Ioc_eq_integral_Ioo,
-        fract_inner_cpow _ (by omega : 1 ≤ i.val + 1) ρ hρ_pos hρ_lt]
-  simp_rw [h_conv, h_zero, neg_zero, zero_mul, zero_div, mul_zero,
-           Finset.sum_const_zero, sub_zero]
+    rw [integral_Ioc_eq_integral_Ioo]
+    exact fract_orthogonal_at_zero _ (by omega : 1 ≤ i.val + 1) ρ hρ_pos hρ_lt h_zero
+  simp_rw [h_conv, mul_zero, Finset.sum_const_zero, sub_zero]
 
 /-- **PROVED**: Bochner integrability of g·x^{ρ-1} on (0,1).
     Strategy: |1-f(x)| ≤ 1+Σ|vᵢ| (bounded) and ‖x^{ρ-1}‖ = x^{σ-1} (integrable for σ>0).
@@ -385,12 +390,7 @@ theorem rpow_l2_norm (σ : ℝ) (hσ : 1/2 < σ) :
       show 2 * σ - 2 + 1 = 2 * σ - 1 from by ring,
       Real.one_rpow, Real.zero_rpow (ne_of_gt (show 0 < 2 * σ - 1 by linarith))]; ring
 
-/-- **PROVED**: ζ(ρ) = 0 implies orthogonality. -/
-theorem fract_orthogonal_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
-    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
-    (h_zero : riemannZeta ρ = 0) :
-    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract ((k : ℝ) / x) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 0 := by
-  rw [fract_inner_cpow k hk ρ hρ_pos hρ_lt, h_zero]; simp
+-- fract_orthogonal_at_zero is now the axiom (declared in PART I above)
 
 lemma cpow_rho_ne_zero (ρ : ℂ) (hρ_pos : 0 < ρ.re) : ρ ≠ 0 := by
   intro h; rw [h] at hρ_pos; simp at hρ_pos
