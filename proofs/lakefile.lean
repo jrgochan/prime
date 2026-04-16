@@ -79,6 +79,7 @@ lean_lib «Cathedral» where
     -- Assembly
     `Cathedral.Assembly.QuadFormBridge,
     `Cathedral.Assembly.GramWitness,
+    `Cathedral.Assembly.BDBridge,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
     -- Integral basis

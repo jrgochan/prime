@@ -25,6 +25,7 @@ import Cathedral.MellinBridge.Basic
 import Cathedral.Assembly.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
 import Cathedral.NymanBeurling.Separation
+import Cathedral.Assembly.BDBridge
 
 noncomputable section
 open Complex Real
@@ -116,17 +117,18 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 -- So the existing forward direction (Sieve Engine + Mertens Bypass)
 -- natively produces bdLinComb witnesses. We just need the L² bridge.
 
-/-- **AXIOM 6** (Forward Bridge): RH → d²_N → 0 in the BD basis.
+/-- **THEOREM** (was AXIOM 6): RH → d²_BD → 0.
 
-    Proof path (Theorist's Grand Illusion, 2026-04-15):
-    The Vasyunin namespace was ALREADY computing in the BD basis {1/(kx)}!
-    vasyuninGramEntry j k = ∫₀¹ {1/(jx)} · {1/(kx)} dx.
-    So bd_l2_error = 1 - 2·bᵀv + vᵀGv where b,G are Vasyunin matrices.
-    Then RH → covariance decay → L² convergence via existing witness. -/
-axiom rh_implies_bd_convergence :
+    ELIMINATED as axiom: 2026-04-16.
+    Now a theorem via the BD L² Bridge (BDBridge.lean):
+    1. bd_witness_l2_error_decay (axiom): ∃v, 1-2bᵀv+vᵀGv ≤ C/ln N
+    2. bd_l2_error_eq_quad_error (theorem): ∫(1-bdLinComb)² = 1-2bᵀv+vᵀGv
+    3. C/ln N → 0 (standard calculus) -/
+theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε)
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
+  rh_implies_bd_convergence_proved
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
