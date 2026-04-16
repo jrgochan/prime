@@ -1,4 +1,5 @@
 import Cathedral.Axioms
+import Cathedral.NymanBeurling.BDMellin
 import Mathlib.NumberTheory.LSeries.Nonvanishing
 
 /-!
@@ -8,6 +9,8 @@ import Mathlib.NumberTheory.LSeries.Nonvanishing
 
   Proves `nyman_beurling_converse` using the contrapositive:
     ¬RH → ∃ ρ off critical line → zeta_zero_separates → d² ≥ δ > 0
+
+  Uses the CORRECT Báez-Duarte basis h_k(x) = {1/(kx)} via `bdLinComb`.
 
   All intermediate theorems are proven from Mathlib.
   The only axiom used is `zeta_zero_separates` (Tier 3).
@@ -173,7 +176,7 @@ theorem rh_neg_gives_critical_strip_zero :
     4. Contrapositive: convergence → RH -/
 theorem nyman_beurling_converse :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) →
     RiemannHypothesis := by
   intro h_conv
   by_contra h_not_rh

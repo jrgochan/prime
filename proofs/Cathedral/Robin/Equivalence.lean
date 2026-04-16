@@ -14,6 +14,7 @@
 import Cathedral.Defs
 import Cathedral.Robin.Defs
 import Cathedral.NymanBeurling.NymanBeurling
+import Cathedral.NymanBeurling.BDMellin
 
 open Real
 
@@ -55,7 +56,7 @@ theorem lagarias_implies_nyman_beurling :
     Chain: d²_N → 0 → RH (by nyman_beurling_converse) → Robin (by robin_iff_rh) -/
 theorem nyman_beurling_implies_robin :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) →
     RobinInequality := by
   intro hNB
   exact rh_implies_robin (nyman_beurling_converse hNB)
@@ -64,7 +65,7 @@ theorem nyman_beurling_implies_robin :
     Chain: d²_N → 0 → RH → Lagarias -/
 theorem nyman_beurling_implies_lagarias :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) →
     LagariasInequality := by
   intro hNB
   exact rh_implies_lagarias (nyman_beurling_converse hNB)

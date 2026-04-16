@@ -26,6 +26,7 @@ lean_lib «Cathedral» where
     `Cathedral.LinearAlgebra.Sylvester,
     -- Nyman-Beurling criterion
     `Cathedral.NymanBeurling.Separation,
+    `Cathedral.NymanBeurling.BDMellin,
     `Cathedral.NymanBeurling.BesselSeparation,
     `Cathedral.NymanBeurling.NymanBeurling,
     -- Vasyunin (the active proof chain)

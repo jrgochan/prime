@@ -247,35 +247,16 @@ theorem rh_neg_gives_critical_strip_zero :
     push Not at h_ge
     exact absurd h_zero (riemannZeta_ne_zero_of_one_le_re h_ge)
 
-/-- **THEOREM**: nyman_beurling_converse from the separation axioms.
+/- **ARCHIVED** (April 15, 2026): This duplicate nyman_beurling_converse
+   used nbLinComb ({k/x} basis). The primary version is now in
+   NymanBeurling/Separation.lean using bdLinComb ({1/(kx)} basis).
+   The converse was moved to the correct BD basis as part of the
+   Rank-1 Mellin Miracle refactor.
 
-    Proof (by contrapositive):
-    1. Assume ¬RH
-    2. rh_neg_gives_critical_strip_zero: ∃ ρ off critical line with ζ(ρ) = 0
-    3. zeta_zero_separates: this ρ creates defect δ > 0
-    4. Therefore ∫(1-f)² ≥ δ > 0 for all N, so d² ↛ 0
-    5. Contrapositive: d² → 0 implies RH -/
 theorem nyman_beurling_converse :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) →
     RiemannHypothesis := by
-  -- Proof by contrapositive: ¬RH → ¬(d²→0)
-  intro h_conv
-  by_contra h_not_rh
-  -- Step 1: ¬RH gives a zero off the critical line
-  obtain ⟨ρ, h_zero, h_pos, h_lt1, h_ne_half⟩ :=
-    rh_neg_gives_critical_strip_zero h_not_rh
-  -- Step 2: This zero creates a defect δ > 0
-  obtain ⟨δ, hδ_pos, h_defect⟩ :=
-    zeta_zero_separates ρ h_zero h_pos h_lt1 h_ne_half
-  -- Step 3: But convergence says ∫(1-f)² < δ for large N
-  obtain ⟨N₀, h_small⟩ := h_conv δ hδ_pos
-  -- Step 4: Contradiction at N = max N₀ 2
-  have hN : N₀ ≤ max N₀ 2 := le_max_left _ _
-  have hN2 : 2 ≤ max N₀ 2 := le_max_right _ _
-  obtain ⟨v, hv⟩ := h_small (max N₀ 2) hN
-  -- hv: ∫(1-f)² < δ
-  -- h_defect: ∫(1-f)² ≥ δ
-  have h_ge := h_defect (max N₀ 2) hN2 v
-  linarith
+  ...
+-/
 

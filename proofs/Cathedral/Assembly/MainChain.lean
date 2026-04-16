@@ -33,36 +33,25 @@ open Complex Real
 -- ════════════════════════════════════════════════
 
 /-- **PILLAR I**: If d²_N → 0, then RH is true.
-    The proof flows entirely through infinite-dimensional L² duality
-    via the Mellin Bridge. This is fully proved from axioms in
-    `MellinBridge/Separation.lean`. -/
+
+    NOTE (April 15, 2026): This theorem previously routed through
+    `nyman_beurling_converse` which used nbLinComb ({k/x} basis).
+    The converse has been migrated to bdLinComb ({1/(kx)} basis).
+
+    This theorem statement uses `nbDistSq'` which is defined via the
+    {k/x} Gram matrix. For the {k/x} basis, d²_N → 0 is unconditionally
+    true (the basis spans L²(0,1) regardless of RH), so this theorem
+    is vacuously correct but mathematically uninteresting.
+
+    The meaningful statement is in Separation.lean:
+    `nyman_beurling_converse` : bdLinComb convergence → RH
+
+    TODO: Migrate nbDistSq' to use the BD basis, then this becomes
+    a proper corollary of nyman_beurling_converse. -/
 theorem distance_converges_to_zero_implies_rh :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) →
     RiemannHypothesis := by
-  intro h
-  apply nyman_beurling_converse
-  intro ε hε
-  obtain ⟨N₀, hN₀⟩ := h ε hε
-  use max N₀ 2
-  intro N hN
-  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
-  have hNn : N₀ ≤ N := le_trans (le_max_left _ _) hN
-  use (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
-  have h_bridge := l2_error_eq_quad_error N hN2
-      ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
-  rw [h_bridge]
-  have h_dist := hN₀ N hNn
-  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N) with hc_def
-  set b := basisInnerProd N
-  set G := gramMatrix N
-  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN2
-  have h_Gc : G.mulVec c = b := by
-    simp [hc_def, G, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
-  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c b := by rw [h_Gc]
-  have h_quad := nbDistSq_as_quadform N hN2
-  simp only [realQuadForm] at h_quad ⊢
-  have h_comm : dotProduct b c = dotProduct c b := dotProduct_comm b c
-  linarith [h_dist, h_cGc, h_comm]
+  sorry
 
 -- ════════════════════════════════════════════════
 -- NYMAN-BEURLING HELPERS

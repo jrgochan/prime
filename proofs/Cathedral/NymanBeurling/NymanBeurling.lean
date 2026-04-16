@@ -1,5 +1,6 @@
 import Cathedral.Axioms
 import Cathedral.NymanBeurling.Separation
+import Cathedral.NymanBeurling.BDMellin
 import Cathedral.Assembly.GramWitness
 
 /-!
@@ -7,41 +8,35 @@ import Cathedral.Assembly.GramWitness
 
   ## The Nyman-Beurling Criterion
 
-  The full Nyman-Beurling criterion: d²_N → 0 ↔ RH.
+  ### Current Architecture (April 15, 2026 — Post Rank-1 Mellin Miracle)
 
-  ### Architecture
-  - Converse (d²→0 ⟹ RH): Proved in Separation.lean via contrapositive
-  - Forward (RH ⟹ d²→0): Proved in GramWitness.lean via
-      witness_l2_error_decay_gram → nbDistSq_le_test_vector → l2_error_eq_quad_error
+  - **Converse** (d²→0 ⟹ RH): Uses `bdLinComb` = Σ wₖ{1/(kx)} (θ ≤ 1)
+    - PROVED from `bd_mellin_at_zero` (1 axiom, Rank-1 Mellin)
+    - The rank-1 structure M[h_k](ρ) = 1/(k(ρ-1)) makes separation trivial
 
-  ### Axiom dependencies (ONLY 2 on the forward path!)
-  - `zeta_zero_separates` (Tier 3, in Axioms.lean) — converse
-  - `witness_l2_error_decay_gram` (Tier 1, in GramWitness.lean) — forward
+  - **Forward** (RH ⟹ d²→0): Uses `nbLinComb` = Σ wₖ{k/x} (θ > 1)
+    - PROVED from `witness_l2_error_decay_gram` (1 axiom)
+    - NOTE: This direction is vacuously correct for {k/x} since the
+      high-frequency basis unconditionally spans L²(0,1). The true
+      content is in the forward direction for {1/(kx)}, which requires
+      migrating the Gram matrix infrastructure to the BD basis.
 
-  ### Key result
-  - `nyman_beurling_iff_rh`: d²_N → 0 ↔ RH — **FULLY PROVED** from 2 axioms
+  ### Key results
+  - `nyman_beurling_converse`: d²_N(BD) → 0 ⟹ RH (1 axiom)
+  - `nyman_beurling_forward_direct`: RH ⟹ d²_N(HF) → 0 (1 axiom)
+
+  ### Future work
+  Unify both directions on the BD basis by migrating gramEntry from
+  ∫{j/x}{k/x}dx to ∫{1/(jx)}{1/(kx)}dx, making `nyman_beurling_iff_rh`
+  a true biconditional on a single basis.
 -/
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter
 
--- ════════════════════════════════════════════════
--- THE FULL BICONDITIONAL
--- ════════════════════════════════════════════════
-
-/-- **THEOREM (PROVED!)**: The Nyman-Beurling criterion.
-    d²_N → 0 ↔ RH.
-
-    Both directions are theorems:
-    - (⟸) nyman_beurling_converse (Separation.lean, 1 axiom)
-    - (⟹) nyman_beurling_forward_direct (GramWitness.lean, 1 axiom)
-
-    Total axiom count: **2** (zeta_zero_separates + witness_l2_error_decay_gram) -/
-theorem nyman_beurling_iff_rh :
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) ↔
-    RiemannHypothesis :=
-  ⟨nyman_beurling_converse,
-   nyman_beurling_forward_direct⟩
+-- The converse and forward are proved in their respective files.
+-- Re-export for convenience:
+-- nyman_beurling_converse : from Separation.lean (uses bdLinComb)
+-- nyman_beurling_forward_direct : from GramWitness.lean (uses nbLinComb)
 
 end

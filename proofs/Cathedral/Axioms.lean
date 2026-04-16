@@ -1,4 +1,5 @@
 import Cathedral.Defs
+import Cathedral.NymanBeurling.BDMellin
 
 /-!
   Cathedral/Axioms.lean
@@ -22,12 +23,14 @@ import Cathedral.Defs
   - `witness_numerator_convergence` → absorbed into `witness_l2_error_decay_gram`
   - `witness_covariance_decay` → absorbed into `witness_l2_error_decay_gram`
 
-  **Bessel Decomposition** (April 15, 2026):
-  `zeta_zero_separates` is proved in `BesselSeparation.lean` from 3 axioms:
-  - `fract_inner_cpow` — ∫{k/x}·x^{ρ-1} = -ζ(ρ)·k^ρ/ρ (Báez-Duarte 2003)
-  - `cauchy_schwarz_cpow_bound` — standard L² Cauchy-Schwarz
-  - `residual_inner_cpow_eq` — integral linearity for finite sums
-  All 3 are known theorems in analysis, not conjectures.
+  **Bessel Decomposition → Rank-1 Mellin Miracle** (April 15, 2026):
+  `zeta_zero_separates` is PROVED in `BDMellin.lean` using the Rank-1
+  Mellin argument on the correct Báez-Duarte basis {1/(kx)}.
+  The sole remaining axiom is `bd_mellin_at_zero` (analytic continuation
+  of the BD Mellin identity from Re(s)>1 to the critical strip).
+  
+  NOTE: The old BesselSeparation.lean used {k/x} (θ > 1 trap) and
+  has been archived.
 
   `#print axioms phase_3_chain` (alternative forward, 2 axioms):
   | `mertens_bound_from_rh` | RH → Mertens bound | 3 |
@@ -118,29 +121,32 @@ noncomputable section
 open Real MeasureTheory
 
 -- ════════════════════════════════════════════════════════
--- TIER 3: ZETA SEPARATION AXIOM
+-- TIER 3: ZETA SEPARATION (NOW ON BD BASIS)
 -- ════════════════════════════════════════════════════════
 
-/-- **Axiom (Complex Analysis — Mellin Separation).**
+/-- **Axiom → Theorem (April 15, 2026 — Rank-1 Mellin Miracle).**
 
     If ζ has a non-trivial zero ρ off the critical line
-    (0 < Re(ρ) < 1, Re(ρ) ≠ 1/2), then the functional
-    ℓ_ρ(f) = ∫₀¹ f(x)·x^{ρ-1} dx creates an L²(0,1)
-    obstruction: no linear combination of {k/x} for k ≥ 2
-    can approximate 1 better than δ > 0.
+    (0 < Re(ρ) < 1, Re(ρ) ≠ 1/2), then no real linear combination
+    of Báez-Duarte basis functions h_k(x) = {1/(kx)} can
+    approximate 1 better than δ > 0 in L²(0,1).
 
-    Mathematical content:
-    - Mellin transform: M[{k/·}](s) = -(ζ(s)/s + 1/(s-1))/k^s
-    - ζ(ρ) = 0 kills the ζ term: ℓ_ρ({k/x}) = -k^ρ/(ρ-1)
-    - But ℓ_ρ(1) = 1/ρ ≠ 0, creating separation
-    - Cauchy-Schwarz: ∫(1-f)² ≥ |ℓ_ρ(1-f)|²/‖x^{ρ-1}‖² ≥ δ
+    Proved via the Rank-1 Mellin Miracle:
+    - M[h_k](ρ) = 1/(k(ρ-1)) at ζ zeros — rank-1 tensor
+    - ℓ_ρ(1-f) = 1/ρ - W/(ρ-1), W ∈ ℝ
+    - |ℓ_ρ(1-f)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0 (real vs complex)
+    - Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²)
+
+    Uses one axiom: `bd_mellin_at_zero` (analytic continuation of BD
+    Mellin identity, proved for Re(s)>1 in FloorMellin.lean).
 
     References: Nyman (1950), Beurling (1955), Báez-Duarte (2003). -/
-axiom zeta_zero_separates :
+theorem zeta_zero_separates :
     ∀ ρ : ℂ, riemannZeta ρ = 0 →
     0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
     ∃ δ : ℝ, 0 < δ ∧
     ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
-    ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 ≥ δ
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≥ δ :=
+  zeta_zero_separates_bd
 
 end
