@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 04-Vasyunin-Matrix-Proof
-# Generated: Wed Apr 15 04:19:29 MDT 2026
+# Generated: Wed Apr 15 19:41:50 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -2443,6 +2443,7 @@ FILE: Cathedral/Vasyunin/Proof/WitnessConditional.lean
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
+import Cathedral.Vasyunin.Proof.Chain
 import Cathedral.NymanBeurling.NymanBeurling
 
 noncomputable section
@@ -2503,7 +2504,7 @@ axiom rh_implies_mertens_bound :
 
     This is the bridge from classical analytic number theory
     to the Cathedral's linear algebra framework. -/
-axiom abel_summation_l2_bound :
+axiom abel_summation_covariance_bound :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |(mertensFunction x : ℝ)| ≤ C * x ^ ((1:ℝ)/2) * (Real.log x) ^ 2) →
     ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
@@ -2528,7 +2529,7 @@ theorem rh_implies_covariance_decay :
       dotProduct (logCutoffWitness N)
         ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤ C_cov / Real.log ↑N := by
   intro hRH
-  exact abel_summation_l2_bound (rh_implies_mertens_bound hRH)
+  exact abel_summation_covariance_bound (rh_implies_mertens_bound hRH)
 
 -- ════════════════════════════════════════════════
 -- THE FULL EQUIVALENCE
@@ -2580,24 +2581,7 @@ theorem rh_implies_witness_bound :
     _ = 1 / 4 := by field_simp
     _ ≤ (dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 := h_num_sq
 
--- ════════════════════════════════════════════════
--- THE ALGEBRAIC → INTEGRAL BRIDGE
--- ════════════════════════════════════════════════
-
-/-- **Bridge: quadratic form divergence → NB integral criterion.**
-
-    When the Vasyunin quadratic form X_N → ∞, the NB distance
-    d²_N = 1/(1+X_N) → 0. The optimal coefficient vector v = G⁻¹b
-    achieves this minimum, giving ∃ v, ∫₀¹ (1-f)² < ε.
-
-    Mathematical content: the Vasyunin Gram matrix entries
-    G(j,k) = ∫₀¹ {j/x}{k/x}dx, and the Sherman-Morrison identity
-    gives d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b). -/
-axiom algebraic_nb_bridge :
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      1 / (1 + vasyuninQuadForm N) < ε) →
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε)
+-- algebraic_nb_bridge is imported from Cathedral.Vasyunin.Proof.Chain
 
 /-- **THE CROWN JEWEL: Witness covariance decay ↔ RH.**
 

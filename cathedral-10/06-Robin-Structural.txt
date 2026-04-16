@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 06-Robin-Structural
-# Generated: Wed Apr 15 04:19:29 MDT 2026
+# Generated: Wed Apr 15 19:41:50 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -356,7 +356,7 @@ theorem robin_implies_nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
   intro hR
-  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (robin_implies_rh hR)
+  exact nyman_beurling_forward_direct (robin_implies_rh hR)
 
 /-- **THEOREM (PROVED)**: Lagarias's Inequality implies the Nyman-Beurling
     distance vanishes.
@@ -367,7 +367,7 @@ theorem lagarias_implies_nyman_beurling :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
   intro hL
-  exact Cathedral.Vasyunin.nyman_beurling_forward_from_sieve (lagarias_implies_rh hL)
+  exact nyman_beurling_forward_direct (lagarias_implies_rh hL)
 
 -- ════════════════════════════════════════════════
 -- THE CONVERSE: NB → ROBIN / LAGARIAS
