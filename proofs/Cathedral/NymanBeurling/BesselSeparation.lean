@@ -29,6 +29,7 @@
 import Cathedral.Defs
 import Cathedral.Axioms
 import Cathedral.Gram.L2Bridge
+import Cathedral.Gram.FractIntegral
 import Cathedral.Structural.Independence
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
@@ -53,11 +54,49 @@ axiom residual_inner_cpow_eq (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (�
     (h_zero : riemannZeta ρ = 0) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) = 1 / ρ
 
-/-- **AXIOM 3**: Bochner integrability of g·x^{ρ-1} on (0,1). -/
-axiom residual_cpow_integrableOn (N : ℕ) (hN : 2 ≤ N)
-    (v : Fin (N-1) → ℝ) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
+/-- **PROVED**: Bochner integrability of g·x^{ρ-1} on (0,1).
+    Strategy: |1-f(x)| ≤ 1+Σ|vᵢ| (bounded) and ‖x^{ρ-1}‖ = x^{σ-1} (integrable for σ>0).
+    Product dominated by C·x^{σ-1} via Integrable.mono. -/
+theorem residual_cpow_integrableOn (N : ℕ) (_hN : 2 ≤ N)
+    (v : Fin (N-1) → ℝ) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (_hρ_lt : ρ.re < 1) :
     IntegrableOn (fun x : ℝ => ((1 - nbLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
-      (Set.Ioo (0:ℝ) 1)
+      (Set.Ioo (0:ℝ) 1) := by
+  set C := 1 + ∑ i : Fin (N-1), |v i| with hC_def
+  have hC_nn : 0 ≤ C := by
+    simp [hC_def]; linarith [Finset.sum_nonneg (fun i (_ : i ∈ Finset.univ) => abs_nonneg (v i))]
+  -- Dominator: C · x^(σ-1) is IntegrableOn Ioo
+  have h_dom : IntegrableOn (fun x : ℝ => C * x ^ (ρ.re - 1)) (Set.Ioo 0 1) :=
+    IntegrableOn.mono_set
+      (by rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+          exact (intervalIntegral.intervalIntegrable_rpow'
+            (show -1 < ρ.re - 1 by linarith)).const_mul C)
+      Set.Ioo_subset_Ioc_self
+  -- Bound: |1 - f(x)| ≤ C
+  have h_f_bound : ∀ x : ℝ, |1 - nbLinComb N v x| ≤ C := by
+    intro x
+    have hf : |nbLinComb N v x| ≤ ∑ i : Fin (N-1), |v i| := by
+      unfold nbLinComb
+      calc |∑ i, v i * Int.fract (↑(i.val + 1) / x)|
+          ≤ ∑ i, |v i * Int.fract (↑(i.val + 1) / x)| := Finset.abs_sum_le_sum_abs _ _
+        _ = ∑ i, |v i| * |Int.fract (↑(i.val + 1) / x)| := by congr 1; ext i; exact abs_mul _ _
+        _ ≤ ∑ i, |v i| * 1 := Finset.sum_le_sum (fun i _ =>
+            mul_le_mul_of_nonneg_left ((abs_of_nonneg (Int.fract_nonneg _)).le.trans
+              (Int.fract_lt_one _).le) (abs_nonneg _))
+        _ = ∑ i, |v i| := by simp
+    calc |1 - nbLinComb N v x| ≤ |1| + |nbLinComb N v x| := abs_sub _ _
+      _ = 1 + |nbLinComb N v x| := by simp
+      _ ≤ C := by linarith
+  apply Integrable.mono h_dom
+  · -- AEStronglyMeasurable
+    exact (Complex.continuous_ofReal.comp_aestronglyMeasurable
+      (((intervalIntegrable_const (c := (1:ℝ))).sub (nbLinComb_integrable N v)).aestronglyMeasurable.mono_set
+        (Set.Ioo_subset_Ioc_self.trans (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])))
+      ).mul (Measurable.aestronglyMeasurable (by fun_prop))
+  · -- Norm bound: ‖(1-f)·cpow‖ ≤ C · x^(σ-1)
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioo] with x hx
+    rw [norm_mul, Complex.norm_real, Complex.norm_cpow_eq_rpow_re_of_pos hx.1 _,
+        Real.norm_of_nonneg (mul_nonneg hC_nn (Real.rpow_nonneg (le_of_lt hx.1) _))]
+    apply mul_le_mul_of_nonneg_right (h_f_bound x) (Real.rpow_nonneg (le_of_lt hx.1) _)
 
 -- Helper: g² integrability (needed by product integrability proofs)
 private lemma residual_sq_iint (N : ℕ) (v : Fin (N-1) → ℝ) :
