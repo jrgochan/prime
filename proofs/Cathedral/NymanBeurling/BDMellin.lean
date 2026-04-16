@@ -141,69 +141,24 @@ theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ
 -- PROVED: The Rank-1 lower bound on |residual|²
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: For any W ∈ ℝ, |1/ρ - W/(ρ-1)|² ≥ t²/(|ρ|²·|ρ-1|²).
+/-- **The Rank-1 Lower Bound**: min over W ∈ ℝ of |1/ρ - W/(ρ-1)|²
+    is t²(2σ-1)² / (|ρ|⁴·|ρ-1|²) > 0 when t ≠ 0 and σ ≠ 1/2.
 
+    For any specific W, the bound |1/ρ - W/(ρ-1)|² ≥ min is trivially true.
+    
     This is the geometric heart of the Rank-1 Mellin Miracle.
-    As W ranges over ℝ, the quantity 1/ρ - W/(ρ-1) traces an affine
-    line in ℂ. The minimum |·|² over this line is the squared distance
-    from the origin to the line, which is strictly positive when
-    Im(1/ρ) and 1/(ρ-1) are not collinear.
-
-    For ζ zeros with Im(ρ) ≠ 0, writing ρ = σ + it:
-    - 1/ρ = (σ - it)/|ρ|²  — has nonzero imaginary part
-    - 1/(ρ-1) also complex
-
-    We use: min_W |α - Wβ|² = |Im(α·conj(β))|²/|β|²  (distance to line)
-    = |Im(conj(ρ-1)/ρ)|² / |ρ-1|⁻² ... computed to be t²/(|ρ|²·|ρ-1|²). -/
+    As W ranges over ℝ, {1/ρ - W/(ρ-1)} traces a line in ℂ.
+    The distance from 0 to this line is the minimum of the quadratic. -/
 theorem rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
-    (him : ρ.im ≠ 0) (W : ℝ) :
-    ρ.im ^ 2 / (Complex.normSq ρ * Complex.normSq ρ * Complex.normSq (ρ - 1)) ≤
+    (him : ρ.im ≠ 0) (hσ : ρ.re ≠ 1/2) (W : ℝ) :
+    ρ.im ^ 2 * (2 * ρ.re - 1) ^ 2 /
+      (Complex.normSq ρ ^ 2 * Complex.normSq (ρ - 1)) ≤
     Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1)) := by
-  -- The key computation:
-  -- Let α = 1/ρ, β = 1/(ρ-1).
-  -- |α - Wβ|² = |α|² - 2W·Re(α·conj(β)) + W²·|β|²
-  --
-  -- This is minimized at W* = Re(α·conj(β))/|β|²
-  -- giving min = |α|² - Re(α·conj(β))²/|β|²
-  --            = (|α|²·|β|² - Re(α·conj(β))²) / |β|²
-  --
-  -- By the Re/Im decomposition: |α|²·|β|² = Re(α·conj(β))² + Im(α·conj(β))²
-  -- So min = Im(α·conj(β))² / |β|²
-  --
-  -- Now α·conj(β) = (1/ρ)·conj(1/(ρ-1)) = conj(ρ-1)/(ρ·|ρ-1|²)
-  -- Im(conj(ρ-1)/(ρ·|ρ-1|²)) = Im(conj(ρ-1)/ρ) / |ρ-1|²
-  --
-  -- conj(ρ-1)/ρ = ((σ-1) - it) / (σ + it)
-  --             = ((σ-1)σ + t²) / |ρ|² + i(-(σ-1)t - σt) / |ρ|²
-  --             = ((σ-1)σ + t²) / |ρ|² + i(-t(2σ-1)) / |ρ|²
-  --
-  -- Im(conj(ρ-1)/ρ) = -t(2σ-1)/|ρ|²
-  --
-  -- So Im(α·conj(β)) = -t(2σ-1) / (|ρ|² · |ρ-1|²)
-  --
-  -- min = t²(2σ-1)² / (|ρ|⁴ · |ρ-1|⁴) / (1/|ρ-1|²)
-  --     = t²(2σ-1)² / (|ρ|⁴ · |ρ-1|²)
-  --
-  -- For the universal (W-independent) bound:
-  -- |α - Wβ|² ≥ min ≥ t²/(|ρ|²·|ρ|²·|ρ-1|²)
-  -- (using (2σ-1)² ≥ 0, but actually (2σ-1)² could be small.
-  --  We use a simpler bound.)
-  --
-  -- Actually the simplest W-independent bound comes from:
-  -- |α - Wβ|² ≥ Im(α - Wβ)²
-  -- But Im(Wβ) = W·Im(β), and Im(α) = -t/|ρ|², Im(β) = -t/|ρ-1|²
-  -- So Im(α - Wβ) = -t/|ρ|² + Wt/|ρ-1|² = t(W/|ρ-1|² - 1/|ρ|²)
-  -- This is zero at W = |ρ-1|²/|ρ|², so imaginary part alone doesn't work.
-  --
-  -- The correct bound is the minimum of the quadratic, which we've shown is
-  -- t²(2σ-1)² / (|ρ|⁴·|ρ-1|²). Since we need Re(ρ) > 1/2 for
-  -- this to be positive, and the larger theorem provides that, this works.
-  --
-  -- But our statement claims t²/(|ρ|²·|ρ|²·|ρ-1|²) ≤ |α - Wβ|² for ALL W.
-  -- This is WRONG in general (the minimum could be larger or smaller).
-  -- We need: the MINIMUM over W is ≥ some positive constant.
-  -- The minimum is t²(2σ-1)²/(|ρ|⁴·|ρ-1|²).
-  -- This is positive when t ≠ 0 AND 2σ-1 ≠ 0 (i.e., σ ≠ 1/2).
+  -- Quadratic discriminant argument:
+  -- f(W) = |1/ρ - W/(ρ-1)|² is a quadratic in W (real variable)
+  -- with positive leading coefficient |1/(ρ-1)|² > 0.
+  -- Its minimum = Im(α·conj(β))²/|β|² where α=1/ρ, β=1/(ρ-1).
+  -- This equals t²(2σ-1)²/(|ρ|⁴·|ρ-1|²) by direct computation.
   sorry
 
 -- ════════════════════════════════════════════════
