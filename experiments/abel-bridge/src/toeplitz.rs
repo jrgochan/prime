@@ -40,21 +40,35 @@ fn integrate_01<F: Fn(f64) -> f64>(f: F) -> f64 {
     total * h / 3.0
 }
 
-/// Gram entry G(j,k) = ∫₀¹ {j/x}{k/x} dx
-fn gram_entry(j: usize, k: usize) -> f64 {
+/// Gram entry G(j,k) = ∫₀¹ {j/x}{k/x} dx  [HIGH-FREQUENCY BASIS]
+fn gram_entry_hf(j: usize, k: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
     integrate_01(|x| (jf / x).fract() * (kf / x).fract())
 }
 
-/// Normalized Gram: M(j,k) = G(j,k) / √(jk)
-fn normalized_gram(j: usize, k: usize) -> f64 {
-    gram_entry(j, k) / ((j as f64) * (k as f64)).sqrt()
+/// Gram entry G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx  [BÁEZ-DUARTE BASIS]
+fn gram_entry_bd(j: usize, k: usize) -> f64 {
+    let jf = j as f64;
+    let kf = k as f64;
+    integrate_01(|x| (1.0 / (jf * x)).fract() * (1.0 / (kf * x)).fract())
+}
+
+/// Normalized Gram (HF): M(j,k) = G_HF(j,k) / √(jk)
+fn normalized_gram_hf(j: usize, k: usize) -> f64 {
+    gram_entry_hf(j, k) / ((j as f64) * (k as f64)).sqrt()
+}
+
+/// Normalized Gram (BD): M(j,k) = G_BD(j,k) / √(jk)
+fn normalized_gram_bd(j: usize, k: usize) -> f64 {
+    gram_entry_bd(j, k) / ((j as f64) * (k as f64)).sqrt()
 }
 
 /// Compute the "autocorrelation function" by averaging M(j,k) over all
 /// pairs (j,k) with approximately the same log-distance τ = |ln j - ln k|
-fn compute_toeplitz_kernel(max_k: usize, n_bins: usize) -> Vec<(f64, f64, f64, usize)> {
+fn compute_toeplitz_kernel<F: Fn(usize, usize) -> f64 + Sync>(
+    max_k: usize, n_bins: usize, norm_gram: F
+) -> Vec<(f64, f64, f64, usize)> {
     let max_tau = (max_k as f64).ln();
     let bin_width = max_tau / n_bins as f64;
 
@@ -63,12 +77,11 @@ fn compute_toeplitz_kernel(max_k: usize, n_bins: usize) -> Vec<(f64, f64, f64, u
         .flat_map(|j| (j..=max_k).map(move |k| (j, k)))
         .collect();
 
-    // Compute M(j,k) in parallel
     let m_values: Vec<(f64, f64)> = pairs
         .par_iter()
         .map(|&(j, k)| {
             let tau = ((k as f64).ln() - (j as f64).ln()).abs();
-            let m = normalized_gram(j, k);
+            let m = norm_gram(j, k);
             (tau, m)
         })
         .collect();
@@ -110,53 +123,62 @@ fn main() {
     fs::create_dir_all("results").unwrap();
 
     // ═══ Phase 1: Direct Toeplitz check for small indices ═══
-    println!("═══ Phase 1: Direct Toeplitz Check ═══");
-    println!("  Computing M(j,k) = G(j,k)/√(jk) for pairs with same log-ratio");
+    println!("═══ Phase 1a: High-Frequency Basis {{j/x}} ═══");
+    println!("  Computing M(j,k) = G_HF(j,k)/√(jk) for pairs with same log-ratio");
     println!();
-
-    // If Toeplitz: M(j,k) depends only on |ln j - ln k|
-    // So M(1,2) should ≈ M(2,4) should ≈ M(3,6) (all have ln ratio = ln 2)
-    // And M(1,3) should ≈ M(2,6) should ≈ M(3,9) (all have ln ratio = ln 3)
 
     println!("  Log-ratio = ln(2) ≈ 0.693:");
     let pairs_ln2: Vec<(usize, usize)> = vec![(1,2), (2,4), (3,6), (4,8), (5,10)];
     for &(j, k) in &pairs_ln2 {
-        let m = normalized_gram(j, k);
-        let tau = ((k as f64) / (j as f64)).ln();
-        println!("    M({},{}) = {:.8}  (τ = {:.4})", j, k, m, tau);
+        let m = normalized_gram_hf(j, k);
+        println!("    M_HF({},{}) = {:.8}", j, k, m);
     }
 
     println!("\n  Log-ratio = ln(3) ≈ 1.099:");
     let pairs_ln3: Vec<(usize, usize)> = vec![(1,3), (2,6), (3,9), (4,12), (5,15)];
     for &(j, k) in &pairs_ln3 {
-        let m = normalized_gram(j, k);
-        let tau = ((k as f64) / (j as f64)).ln();
-        println!("    M({},{}) = {:.8}  (τ = {:.4})", j, k, m, tau);
+        let m = normalized_gram_hf(j, k);
+        println!("    M_HF({},{}) = {:.8}", j, k, m);
+    }
+
+    println!("\n═══ Phase 1b: Báez-Duarte Basis {{1/(jx)}} ═══");
+    println!("  Computing M(j,k) = G_BD(j,k)/√(jk) for pairs with same log-ratio");
+    println!();
+
+    println!("  Log-ratio = ln(2) ≈ 0.693:");
+    for &(j, k) in &pairs_ln2 {
+        let m = normalized_gram_bd(j, k);
+        println!("    M_BD({},{}) = {:.8}", j, k, m);
+    }
+
+    println!("\n  Log-ratio = ln(3) ≈ 1.099:");
+    for &(j, k) in &pairs_ln3 {
+        let m = normalized_gram_bd(j, k);
+        println!("    M_BD({},{}) = {:.8}", j, k, m);
     }
 
     println!("\n  Log-ratio = ln(4) ≈ 1.386:");
     let pairs_ln4: Vec<(usize, usize)> = vec![(1,4), (2,8), (3,12), (5,20)];
     for &(j, k) in &pairs_ln4 {
-        let m = normalized_gram(j, k);
-        let tau = ((k as f64) / (j as f64)).ln();
-        println!("    M({},{}) = {:.8}  (τ = {:.4})", j, k, m, tau);
+        let m = normalized_gram_bd(j, k);
+        println!("    M_BD({},{}) = {:.8}", j, k, m);
     }
 
-    println!("\n  Diagonal (τ = 0):");
+    println!("\n  BD Diagonal (τ = 0):");
     for j in 1..=10 {
-        let m = normalized_gram(j, j);
-        println!("    M({},{}) = {:.8}", j, j, m);
+        let m = normalized_gram_bd(j, j);
+        println!("    M_BD({},{}) = {:.8}", j, j, m);
     }
 
     // ═══ Phase 2: Full kernel extraction ═══
-    println!("\n═══ Phase 2: Toeplitz Kernel r(τ) Extraction ═══");
+    println!("\n═══ Phase 2: BD Toeplitz Kernel r(τ) Extraction ═══");
     let max_k = 50;
     let n_bins = 30;
 
-    println!("  Computing all M(j,k) for j,k ∈ [1,{}] ({} pairs)...",
+    println!("  Computing all M_BD(j,k) for j,k ∈ [1,{}] ({} pairs)...",
         max_k, max_k * (max_k + 1) / 2);
 
-    let kernel = compute_toeplitz_kernel(max_k, n_bins);
+    let kernel = compute_toeplitz_kernel(max_k, n_bins, |j, k| normalized_gram_bd(j, k));
 
     println!("  Done in {:.1}s\n", t0.elapsed().as_secs_f64());
 
@@ -186,10 +208,10 @@ fn main() {
     }
 
     // ═══ Phase 3: Scatter plot data for visual inspection ═══
-    println!("\n═══ Phase 3: Full scatter data ═══");
+    println!("\n═══ Phase 3: BD scatter data ═══");
     {
-        let mut f = fs::File::create("results/toeplitz_scatter.tsv").unwrap();
-        writeln!(f, "j\tk\ttau\tM_jk\tG_jk").unwrap();
+        let mut f = fs::File::create("results/toeplitz_scatter_bd.tsv").unwrap();
+        writeln!(f, "j\tk\ttau\tM_bd\tG_bd\tM_hf\tG_hf").unwrap();
 
         let pairs: Vec<(usize, usize)> = (1..=max_k)
             .flat_map(|j| (j..=max_k).map(move |k| (j, k)))
@@ -199,9 +221,11 @@ fn main() {
             .par_iter()
             .map(|&(j, k)| {
                 let tau = ((k as f64).ln() - (j as f64).ln()).abs();
-                let g = gram_entry(j, k);
-                let m = g / ((j as f64) * (k as f64)).sqrt();
-                format!("{}\t{}\t{:.8}\t{:.10}\t{:.10}", j, k, tau, m, g)
+                let g_bd = gram_entry_bd(j, k);
+                let m_bd = g_bd / ((j as f64) * (k as f64)).sqrt();
+                let g_hf = gram_entry_hf(j, k);
+                let m_hf = g_hf / ((j as f64) * (k as f64)).sqrt();
+                format!("{}\t{}\t{:.8}\t{:.10}\t{:.10}\t{:.10}\t{:.10}", j, k, tau, m_bd, g_bd, m_hf, g_hf)
             })
             .collect();
 
@@ -209,7 +233,7 @@ fn main() {
             writeln!(f, "{}", row).unwrap();
         }
     }
-    println!("  📄 results/toeplitz_scatter.tsv ({} pairs)", max_k * (max_k + 1) / 2);
+    println!("  📄 results/toeplitz_scatter_bd.tsv");
 
     // ═══ Verdict ═══
     let total = t0.elapsed().as_secs_f64();
