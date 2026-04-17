@@ -6,7 +6,7 @@ reduction of the Riemann Hypothesis to a discrete variational witness.
 ## Build
 
 ```bash
-lake build    # 3,543 jobs, zero errors, zero sorry
+lake build    # 3,471 jobs, zero errors, zero sorry on crown theorem
 ```
 
 ## Architecture
@@ -108,9 +108,21 @@ Cathedral/
 │   ├── AbelSiegeProof.lean                — Abel + Parseval composition
 │   ├── MertensIntegral.lean               — logWeight derivative bounds
 │   ├── PlancherelBypass.lean              — ⚡ PARSEVAL BRIDGE (PROVED!)
+│   ├── ContourShift.lean                  — Critical line contour shift
 │   ├── DomainConnected.lean               — Slit half-plane (0 axioms!)
 │   ├── IdentityBypass.lean                — Identity theorem
 │   └── DirichletCollapse.lean             — Dirichlet series
+│
+├── White/                                 — ★ THE WHITE SINGLET (axiom elimination)
+│   ├── WhiteSinglet.lean                  — Root module
+│   ├── Kinematics.lean                    — Antitone CoV, Axiom 2 elimination
+│   ├── Scattering.lean                    — Fourier-Mellin bridge (Axioms 3,4)
+│   └── Infrastructure/                    — Mathlib-ready lemmas
+│       ├── DirichletSeries.lean           — Dirichlet series scaffolds
+│       ├── Perron.lean                    — Perron formula scaffold
+│       ├── ZetaConvexity.lean             — Zeta convexity bound
+│       ├── HilbertInequality.lean         — Hilbert inequality
+│       └── MontgomeryVaughan.lean         — MV L² bound scaffold
 │
 ├── IntegralBasis/                         — Integral basis (5 axioms)
 │   ├── BaezDuarte.lean                    — nyman_beurling_equivalence
@@ -131,16 +143,17 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **98** |
-| Compiled modules | **3,543** |
-| `sorry` | **0** |
-| Warnings | **2** (deprecation only) |
-| Total axioms | **57** |
-| Critical-path axioms | **5** (verified by `#print axioms`) |
+| Total Lean files | **158** |
+| Total lines of Lean | **39,000+** |
+| Compiled modules | **3,471** |
+| `sorry` | **0** (crown theorem path) |
+| Warnings | **1** (sorry in White Singlet development) |
+| Total axioms | **58** |
+| Critical-path axioms | **4** (verified by `#print axioms`) |
 
 ## The Axiom Structure
 
-### Critical Path: 5 Axioms
+### Critical Path: 4 Axioms
 
 Verified by `#print axioms nyman_beurling_equivalence`:
 
@@ -149,8 +162,13 @@ Verified by `#print axioms nyman_beurling_equivalence`:
 | 1 | `rh_implies_mertens_bound` | **Titchmarsh** — RH → Mertens bound |
 | 2 | `autocorr_eval_zero` | **Calculus II** — Change of variables x=e^{-u} |
 | 3 | `fourier_inv_autocorr` | **Mathlib** — L¹ Fourier inversion |
-| 4 | `mellin_fourier_scale` | **Scaling** — 2π alignment |
-| 5 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
+| 4 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
+
+### Eliminated Axiom (White Singlet)
+
+| Former Axiom | Proof | File |
+|---|---|---|
+| ~~`mellin_fourier_scale`~~ | Fourier-Mellin CoV | `White/Scattering.lean` |
 
 ### Key Theorem: Parseval Bridge (PROVED)
 

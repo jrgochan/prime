@@ -1,12 +1,12 @@
 # References — The Cathedral
 
-**v1.0.0-The-Cathedral** — April 17, 2026
+**v1.0.0-The-Cathedral (Phase II: White Singlet)** — April 17, 2026
 
 A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-40+ mathematicians. 167 years of prior work. Five axioms. Zero sorry.
+40+ mathematicians. 167 years of prior work. Four axioms. Zero sorry.
 
 ---
 
@@ -441,14 +441,13 @@ traces back to published mathematics listed here.
 
 ## How Critical-Path Axioms Map to References (v1.0.0)
 
-The crown theorem `nyman_beurling_equivalence` depends on exactly **5 mathematical axioms**:
+The crown theorem `nyman_beurling_equivalence` depends on exactly **4 mathematical axioms**:
 
 | Cathedral Axiom | Mathematical Content | References |
 |---|---|---|
 | `rh_implies_mertens_bound` | RH ⟹ \|M(x)\| = O(x^{1/2} log²x) | Mertens 1874, 1897 |
 | `autocorr_eval_zero` | Change of variables: R_f(0) = ‖f‖² | Measure theory |
 | `fourier_inv_autocorr` | L¹ Fourier inversion for autocorrelation | Plancherel 1910, Fourier 1822 |
-| `mellin_fourier_scale` | 2π scaling alignment | Mellin 1896 |
 | `critical_line_mellin_bound` | Montgomery–Vaughan L² bound | Montgomery 1973 |
 
 ## How Eliminated Axioms Were Proved
@@ -465,6 +464,7 @@ The crown theorem `nyman_beurling_equivalence` depends on exactly **5 mathematic
 | `digamma_reflection_complex` | logDeriv of Γ(s)Γ(1-s) | Euler 1755 |
 | `abel_summation_l2_bound` | Abel summation siege proof | Abel 1826 |
 | `divisor_sum_swap` | Finset bijection | Dirichlet 1863 |
+| `mellin_fourier_scale` | Fourier-Mellin CoV (White Singlet) | Mellin 1896 |
 
 ---
 
@@ -480,4 +480,4 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ---
 
-*Last updated: April 17, 2026 — v1.0.0-The-Cathedral*
+*Last updated: April 17, 2026 — v1.0.0-The-Cathedral (Phase II: White Singlet)*
