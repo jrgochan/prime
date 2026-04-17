@@ -159,7 +159,7 @@ export default function HomePage() {
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "88 Lean files" },
+            { color: "bg-emerald-500", text: "98 Lean files" },
             { color: "bg-red-500", text: "Parseval Bridge PROVED" },
             { color: "bg-amber-500", text: "5 axioms" },
             { color: "bg-blue-500", text: "0 sorry" },

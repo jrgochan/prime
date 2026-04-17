@@ -131,11 +131,11 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **88** |
+| Active Lean files | **98** |
 | Compiled modules | **3,543** |
 | `sorry` | **0** |
 | Warnings | **2** (deprecation only) |
-| Total axioms | **46** |
+| Total axioms | **57** |
 | Critical-path axioms | **5** (verified by `#print axioms`) |
 
 ## The Axiom Structure

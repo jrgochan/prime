@@ -236,24 +236,24 @@ covariance decay + numerator convergence, April~15, 2026).
 \midrule
 \texttt{Defs + Axioms + NB}  & Core defs, axiom registry & 0 & 1 \\
 \texttt{LinearAlgebra/} (4)   & Sherman--Morrison, Variational, Sylvester & 0 & 0 \\
-\texttt{Gram/} (4)            & Integral L$^2$ bridge, off-diagonal bounds & 0 & 0 \\
-\texttt{Vasyunin/} (18)       & Cotangent, augmented Gram, witness, chain & 0 & 10 \\
-\texttt{NymanBeurling/} (2)   & Forward + converse biconditional & 0 & 0 \\
-\texttt{Assembly/} (3)        & QuadFormBridge, MainChain & 0 & 0 \\
+\texttt{Gram/} (6)            & Integral L$^2$ bridge, off-diagonal bounds & 0 & 0 \\
+\texttt{Vasyunin/} (30)       & Cotangent, augmented Gram, witness, chain & 0 & 13 \\
+\texttt{NymanBeurling/} (7)   & Forward + converse biconditional & 0 & 1 \\
+\texttt{Assembly/} (6)        & QuadFormBridge, MainChain, BDBypass & 0 & 2 \\
 \texttt{Robin/} (6)           & Discrete arithmetic & 0 & 1 \\
 \texttt{Structural/} (3)      & Eigenvalue interlacing & 0 & 1 \\
-\texttt{Spectral/} (5)        & Class restriction, constant vector & 0 & 9 \\
-\texttt{Sieve/} (8)           & Bilinear sieve, parity bridge & 0 & 11 \\
-\texttt{MellinBridge/} (13)   & Mellin--Plancherel, Parseval Bridge, Abel & 0 & 8 \\
-\texttt{IntegralBasis/} (3)   & B\'aez-Duarte, quantitative bounds & 0 & 5 \\
+\texttt{Spectral/} (6)        & Class restriction, constant vector & 0 & 9 \\
+\texttt{Sieve/} (6)           & Bilinear sieve, parity bridge & 0 & 11 \\
+\texttt{MellinBridge/} (19)   & Mellin--Plancherel, Parseval Bridge, Abel & 0 & 15 \\
+\texttt{IntegralBasis/} (2)   & B\'aez-Duarte, quantitative bounds & 0 & 4 \\
 \midrule
-\textbf{Total (88 files)}     &  & \textbf{0} & \textbf{46} \\
+\textbf{Total (98 files)}     &  & \textbf{0} & \textbf{57} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent 3543 compiled modules. Zero errors. Zero sorry.
-The crown theorem depends on \textbf{5} of the 46 axioms;
+The crown theorem depends on \textbf{5} of the 57 axioms;
 the remainder support parallel proof paths (sieve engine,
 spectral theory, Vasyunin cotangent chain).
 

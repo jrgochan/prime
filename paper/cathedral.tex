@@ -45,7 +45,7 @@ that reduces the Riemann Hypothesis to a single concrete statement about
 the decay rate of a quadratic form built from the M\"obius function and the
 Vasyunin cotangent sum.
 
-The formalization comprises 83 active Lean files
+The formalization comprises 98 active Lean files
 with \textbf{zero errors} and \textbf{zero sorry}.
 The single axiom encoding the Riemann Hypothesis is
 $v^T C_N v \leq C / \ln N$,
@@ -239,7 +239,7 @@ semidefinite and $Cy = b$.
 \begin{remark}
 The Sherman--Morrison module requires zero axioms---it is purely
 basis-independent linear algebra. In fact, the majority of modules
-now require zero axioms; the seven active axioms are concentrated
+now require zero axioms; the 57 active axioms are concentrated
 in \texttt{Chain.lean}, \texttt{IntegralBridge.lean},
 \texttt{LogDigammaBridge.lean}, \texttt{DigammaReflection.lean},
 and \texttt{Robin/Defs.lean}.
@@ -758,18 +758,18 @@ or the explicit variational quotient (new architecture).
 \midrule
 \texttt{Defs.lean + Axioms.lean} & Core defs, axiom registry & 0 & 1 & Foundation \\
 \texttt{LinearAlgebra/} (4) & Sherman--Morrison, Variational, Sylvester & 0 & 0 & \textbf{Complete} \\
-\texttt{Gram/} (4)         & Integral L$^2$ bridge, off-diagonal bounds & 0 & 0 & \textbf{Complete} \\
-\texttt{Vasyunin/} (18)    & Cotangent, augmented Gram, witness chain & 0 & 10 & \textbf{Complete} \\
-\texttt{NymanBeurling/} (2)& Forward + converse biconditional & 0 & 0 & \textbf{Complete} \\
-\texttt{Assembly/} (3)     & QuadFormBridge, MainChain, MatrixConnection & 0 & 0 & \textbf{Complete} \\
+\texttt{Gram/} (6)         & Integral L$^2$ bridge, off-diagonal bounds & 0 & 0 & \textbf{Complete} \\
+\texttt{Vasyunin/} (30)    & Cotangent, augmented Gram, witness chain & 0 & 13 & \textbf{Complete} \\
+\texttt{NymanBeurling/} (7)& Forward + converse biconditional & 0 & 1 & \textbf{Complete} \\
+\texttt{Assembly/} (6)     & QuadFormBridge, MainChain, BDBypass & 0 & 2 & \textbf{Complete} \\
 \texttt{Robin/} (6)        & Discrete arithmetic, Lagarias/Robin & 0 & 1 & \textbf{Complete} \\
 \texttt{Structural/} (3)   & Eigenvalue interlacing, telescoping & 0 & 1 & \textbf{Complete} \\
-\texttt{Spectral/} (5)     & Class restriction, constant vector bound & 0 & 9 & \textbf{Complete} \\
-\texttt{Sieve/} (8)        & Bilinear sieve, parity bridge, Schur & 0 & 11 & \textbf{Complete} \\
-\texttt{MellinBridge/} (13) & Mellin--Plancherel, Parseval Bridge, Abel & 0 & 8 & \textbf{Complete} \\
-\texttt{IntegralBasis/} (3)& B\'aez-Duarte, quantitative bounds & 0 & 5 & \textbf{Complete} \\
+\texttt{Spectral/} (6)     & Class restriction, constant vector bound & 0 & 9 & \textbf{Complete} \\
+\texttt{Sieve/} (6)        & Bilinear sieve, parity bridge, Schur & 0 & 11 & \textbf{Complete} \\
+\texttt{MellinBridge/} (19) & Mellin--Plancherel, Parseval Bridge, Abel & 0 & 15 & \textbf{Complete} \\
+\texttt{IntegralBasis/} (2)& B\'aez-Duarte, quantitative bounds & 0 & 4 & \textbf{Complete} \\
 \midrule
-\textbf{Total (88 files)}  &  & \textbf{0} & \textbf{46} & \\
+\textbf{Total (98 files)}  &  & \textbf{0} & \textbf{57} & \\
 \bottomrule
 \end{tabular}
 \caption{Module architecture. The crown theorem
