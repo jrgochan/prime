@@ -7,4 +7,4 @@ set_option maxHeartbeats 200000
 
 theorem autocorr_eval_zero (N : ℕ) (v : Fin (N - 1) → ℝ) :
     residualAutocorrelation N v 0 = ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
-  bound
+  push_cast; norm_num
