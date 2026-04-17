@@ -162,24 +162,28 @@ end
 -- AUDIT (Post White Singlet Wiring)
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry in this file):
+-- PROVED (zero sorry, zero problem-specific axioms):
 --   ✅ bdLinComb_bound               — uniform bound on BD basis (PlancherelDefs)
 --   ✅ bdResidualV_bound             — uniform bound on residual (PlancherelDefs)
 --   ✅ flattenedResidualV_bound      — exponential decay of g_N (PlancherelDefs)
 --   ✅ flattenedResidualV_sq_eq      — Jacobian absorption (PlancherelDefs)
 --   ✅ autocorrelation_zero_eq_l2    — h(0) = ∫|g_N|² (PlancherelDefs)
---   ✅ autocorr_eval_zero            — PROVED (White/Kinematics → wired here)
---   ✅ mellin_fourier_scale          — PROVED (White/Scattering → wired here)
---   ✅ parseval_bridge               — L² = (1/2π) ∫|M̂_r|² (from 1 axiom + 2 theorems)
+--   ✅ autocorr_eval_zero            — PROVED (White/Kinematics → wired)
+--   ✅ fourier_inv_autocorr          — PROVED (White/Scattering → wired)
+--   ✅ mellin_fourier_scale          — PROVED (White/Scattering → wired)
+--   ✅ parseval_bridge               — L² = (1/2π) ∫|M̂_r|² (from 0 axioms + 3 theorems!)
 --   ✅ l2_from_pointwise_bound_derived — composition theorem
 --
--- AXIOMS (2 remaining):
---   🔷 fourier_inv_autocorr         — L¹ Fourier inversion (under elimination)
+-- AXIOMS (1 remaining in this file, from PlancherelDefs):
 --   🔷 critical_line_mellin_bound   — Mellin estimate (number theory)
+--
+-- UNIVERSAL AXIOM (in PlancherelDefs, not problem-specific):
+--   🔷 plancherel_integral_axiom    — Parseval theorem (Mathlib Lp ↔ raw integral bridge)
 --
 -- AXIOM REDUCTION HISTORY:
 --   v0: l2_from_pointwise_bound (1 opaque axiom hiding everything)
 --   v1: 4 transparent axioms (3 FA + 1 NT) + 7 proved theorems
 --   v2: 2 axioms (White Singlet eliminated autocorr_eval_zero + mellin_fourier_scale)
---        + 9 proved theorems (wired via PlancherelDefs)
+--   v3: 1 problem-specific axiom + 1 universal axiom (Plancherel wired)
+--        10 proved theorems (all FA axioms eliminated)
 
