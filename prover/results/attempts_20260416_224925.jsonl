@@ -204,3 +204,4 @@
 {"axiom_name": "drop_formula_bound", "strategy": "llm_gemma4:31b", "tactic": "exact drop_formula_bound N hN", "success": false, "elapsed": 7.879071950912476, "error_type": null, "error_message": null, "timestamp": "2026-04-17T00:34:29.076177"}
 {"axiom_name": "drop_formula_bound", "strategy": "llm_gemma4:31b", "tactic": "exact drop_formula_bound N hN", "success": false, "elapsed": 6.919010162353516, "error_type": null, "error_message": null, "timestamp": "2026-04-17T00:37:43.800478"}
 {"axiom_name": "drop_formula_bound", "strategy": "llm_gemma4:31b", "tactic": "exact drop_formula_bound N hN", "success": false, "elapsed": 7.65696120262146, "error_type": null, "error_message": null, "timestamp": "2026-04-17T00:42:35.678615"}
+{"axiom_name": "drop_formula_bound", "strategy": "llm_gemma4:31b", "tactic": "exact drop_formula_bound N hN", "success": false, "elapsed": 7.317742109298706, "error_type": null, "error_message": null, "timestamp": "2026-04-17T00:45:15.385474"}
