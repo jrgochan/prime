@@ -175,46 +175,39 @@ theorem term1_exact :
     the cross-term integral picks up the residue at s = 1
     (the pole of ζ(s)), giving:
 
-    (1/2π) ∫ Re(ζ(s)W_N(s))/|s|² dt|_{Re(s)=1/2}
-    = W_N(1) + (bounded integral on Re(s) = σ)
+    (1/2π) ∫ Re(ζ(s)W_N(s))/|s|² dt = 1 + O(ln ln N / ln N)
 
-    W_N(1) = Σ v_k/k → log(log N)/log N → 0,
-    giving the exact evaluation of the cross-term. -/
-theorem cross_term_contour_shift (N : ℕ) (hN : 10 ≤ N)
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2) :
-    ∃ C : ℝ, 0 < C ∧
+    The residue at s=1 contributes W_N(1) ~ 1, and the
+    shifted-line integral is O(1/ln N). The ln(ln N) correction
+    comes from the double pole of ζ(s)W_N(s)/s(1-s). -/
+theorem cross_term_contour_shift (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C : ℝ, C > 0 ∧
     |(1 / (2 * Real.pi)) *
      ∫ t : ℝ, (riemannZeta ((1/2 : ℂ) + t * I) *
        dirichletPolyBD N ((1/2 : ℂ) + t * I)).re /
        ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2 -
-     2| ≤ C / Real.log ↑N := by
-  sorry -- Campaign Delta: The Heart
+     1| ≤ C * Real.log (Real.log ↑N) / Real.log ↑N := by
+  sorry -- Campaign Delta: Contour shift + residue at s=1
 
 -- ════════════════════════════════════════════════
 -- §6. TERM 3: THE POLYNOMIAL MOMENT
 -- ════════════════════════════════════════════════
 
-/-- **TARGET LEMMA**: The polynomial moment via contour shift.
+/-- **TARGET LEMMA**: The polynomial moment bound.
 
-    (1/2π) ∫ |ζ(s)W_N(s)|²/|s|² dt|_{Re(s)=1/2}
-    = 2 + O(1/log N)
+    (1/2π) ∫ |ζ(s)W_N(s)|²/|s|² dt  ≤  1 + O(ln ln N / ln N)
 
-    This also requires a contour shift, but the double product
-    |ζW|² = (ζW)(ζ̄W̄) involves the conjugate, requiring
-    the functional equation ζ(s̄) = ζ̄(s). -/
-theorem term3_polynomial_moment (N : ℕ) (hN : 10 ≤ N)
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2) :
-    ∃ C : ℝ, 0 < C ∧
-    |(1 / (2 * Real.pi)) *
+    By Montgomery-Vaughan mean value theorem for Dirichlet series,
+    the polynomial moment is bounded. The ln(ln N) correction
+    mirrors the cross-term via the double pole at s=1. -/
+theorem term3_polynomial_moment (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C : ℝ, C > 0 ∧
+    (1 / (2 * Real.pi)) *
      ∫ t : ℝ, ‖riemannZeta ((1/2 : ℂ) + t * I) *
        dirichletPolyBD N ((1/2 : ℂ) + t * I)‖ ^ 2 /
-       ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2 -
-     2| ≤ C / Real.log ↑N := by
-  sorry -- Campaign Delta: Step 3
+       ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2
+     ≤ 1 + C * Real.log (Real.log ↑N) / Real.log ↑N := by
+  sorry -- Campaign Delta: Montgomery-Vaughan mean value
 
 -- ════════════════════════════════════════════════
 -- §7. THE ASSEMBLY (Exact Cancellation)
@@ -224,13 +217,17 @@ theorem term3_polynomial_moment (N : ℕ) (hN : 10 ≤ N)
 
     Combining the three terms:
     Total = Term1 - 2·CrossTerm + Term3
-          = 2 - 2·(2 + O(1/log N)) + (2 + O(1/log N))
-          = 2 - 4 - O(1/log N) + 2 + O(1/log N)
-          = O(1/log N)
+          = 1 - 2·(1 + O(δ)) + (1 + O(δ))
+          = 1 - 2 - 2·O(δ) + 1 + O(δ)
+          = O(δ)  where δ = ln(ln N)/ln(N)
 
-    The key is that Term1 = 2 EXACTLY, and the O(1/log N)
-    errors in Terms 2 and 3 don't destroy each other because
-    they come from the SAME contour shift. -/
+    The key is that Term1 = 1 EXACTLY (proved!), and the
+    cross-term and polynomial moment have matching structure
+    from the SAME contour shift.
+
+    STATUS: This theorem requires connecting the three-term
+    decomposition to the mellinBDResidual, plus the contour
+    bounds from cross_term and term3. -/
 theorem critical_line_mellin_bound_proved
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -238,8 +235,13 @@ theorem critical_line_mellin_bound_proved
     (N : ℕ) (hN : 10 ≤ N) :
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 / Real.log ↑N := by
-  sorry -- Campaign Delta: The Assembly
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
+  -- The three-term decomposition: Total = Term1 - 2·CrossTerm + Term3
+  -- Term1 = 1 (proved in term1_exact)
+  -- CrossTerm = 1 + O(ln ln N / ln N) (cross_term_contour_shift)
+  -- Term3 ≤ 1 + O(ln ln N / ln N) (term3_polynomial_moment)
+  -- Assembly: 1 - 2(1 + δ) + (1 + δ) = -δ, so |Total| ≤ Cδ
+  sorry -- Campaign Delta: Connect mellinBDResidual to contourIntegrand + assembly
 
 end
 
@@ -249,13 +251,16 @@ end
 
 -- PROVED (zero sorry):
 --   ✅ integrand_three_terms  — |1-z|²/|s|² = 1/|s|² - 2Re(z)/|s|² + |z|²/|s|²
---                               Uses norm_sub_sq_real + inner product ⟪1,z⟫_ℝ = Re(z)
+--                               Uses Complex.normSq_apply + ring (Theorist's tactical strike)
+--   ✅ term1_exact            — (1/2π)∫ 1/|s|² dt = 1
+--                               Uses integral_comp_mul_left + integral_univ_inv_one_add_sq
 --
--- TARGET LEMMAS (sorry → to be proved):
---   🎯 term1_exact                        — (1/2π)∫ 1/|s|² dt = 1 (calculus)
---   🎯 cross_term_contour_shift           — THE HEART (contour shift + residue)
---   🎯 term3_polynomial_moment            — |ζW|² moment (contour shift)
---   🎯 critical_line_mellin_bound_proved  — ASSEMBLY (exact cancellation)
+-- TARGET LEMMAS (sorry → Vanguard Targets):
+--   🎯 cross_term_contour_shift           — Contour shift + residue at s=1
+--   🎯 term3_polynomial_moment            — Montgomery-Vaughan mean value
+--   🎯 critical_line_mellin_bound_proved  — Assembly + mellinBDResidual bridge
+--
+-- BOUND: (C_m + 1)² · ln(ln N) / ln N  (corrected from 1/ln N)
 --
 -- DEFINITIONS:
 --   ✅ dirichletPolyBD         — W_N(s) = Σ v_i (i+1)^{-s}
@@ -263,7 +268,7 @@ end
 --   ✅ ContourRect             — rectangle parameters [½±iT, σ±iT]
 --
 -- NUMERICAL VERIFICATION (Rust Oracle):
---   ✅ Decomposition exact to machine precision
---   ✅ d²_N · ln(N) → growing constant (Báez-Duarte effect)
---   ✅ Term 1 = 1 (analytically confirmed)
+--   ✅ Decomposition exact to machine precision (< 1e-14)
+--   ✅ d²_N · ln(N) grows like ln(ln N) (Báez-Duarte/Balazard-Saias)
+--   ✅ Term 1 = 1 (analytically confirmed + formally proved)
 
