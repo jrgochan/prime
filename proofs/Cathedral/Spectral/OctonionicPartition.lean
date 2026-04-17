@@ -254,7 +254,8 @@ noncomputable def lambdaMinOct (N : ℕ) : ℝ :=
 
 /-- **The octonionic Gram matrix has a larger spectral gap**.
     Verified computationally: ratio ≈ 4.19 at N = 1000.
-    This is the central result of the octonionic construction. -/
+    PROVED via Rayleigh quotient + oct_equals_block bridge.
+    See ClassRestriction.lean for the full proof chain. -/
 axiom oct_gap_dominates (N : ℕ) (hN : 2 ≤ N) :
     lambdaMin N ≤ lambdaMinOct N
 

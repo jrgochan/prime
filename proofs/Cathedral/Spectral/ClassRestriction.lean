@@ -383,10 +383,6 @@ end
 -- ════════════════════════════════════════════════
 #print axioms rh_from_octonionic_global
 
--- ════════════════════════════════════════════════
--- PROVING oct_gap_lower_bound FROM gram_positive_definite
--- ════════════════════════════════════════════════
-
 /-- **oct_gap_lower_bound (pointwise)**: For each finite N ≥ 2,
     the octonionic gap is strictly positive.
 
@@ -633,4 +629,20 @@ theorem oct_gap_dominates_proof (N : ℕ) (hN : 2 ≤ N) :
             (classRestrict N m ei) hvm h_pos
 
 #print axioms oct_gap_dominates_proof
+
+/-- **oct_gap_dominates is PROVED** for N ≥ 10 (via Rayleigh quotient):
+    Chains oct_gap_dominates_proof (λ_min(G) ≤ λ_min(G^block)) with
+    oct_equals_block (λ_min(G^𝕆) = λ_min(G^block)) to obtain
+    λ_min(G) ≤ λ_min(G^𝕆).
+
+    For 2 ≤ N < 10, the axiom oct_gap_dominates covers the small cases.
+
+    This demonstrates that oct_gap_dominates is REDUNDANT for N ≥ 10:
+    the Rayleigh quotient argument + the block identity proves it. -/
+theorem oct_gap_dominates_derived (N : ℕ) (hN : 10 ≤ N) :
+    lambdaMin N ≤ lambdaMinOct N := by
+  rw [oct_equals_block N hN]
+  exact oct_gap_dominates_proof N (le_trans (by norm_num) hN)
+
+#print axioms oct_gap_dominates_derived
 
