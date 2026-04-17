@@ -188,16 +188,16 @@ theorem autocorr_eval_zero_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
   exact flattened_l2_eq_residual_l2 N v
 
 -- ════════════════════════════════════════════════
--- AUDIT: AXIOM 2 STATUS
+-- AUDIT: AXIOM 2 STATUS — **COMPLETE**
 -- ════════════════════════════════════════════════
 -- autocorr_eval_zero_proved depends on:
 --   ✅ autocorrelation_zero_eq_l2 (PROVED in PlancherelBypass.lean)
 --   ✅ flattenedResidualV_sq_eq (PROVED in PlancherelBypass.lean)
---   🔨 full_integral_eq_halfline (sorry — needs integral splitting)
---   🔨 flattened_l2_eq_residual_l2 (sorry — needs integral_comp_mul_deriv_Ioi)
+--   ✅ full_integral_eq_halfline (PROVED — integral splitting via Ici/Ioi)
+--   ✅ flattened_l2_eq_residual_l2 (PROVED — antitone CoV via JacobianOneDim)
 --
--- Total sorry count: 2
--- Both are pure measure-theory routing through Mathlib.
--- No number theory, no sorry in the proof logic.
+-- Total sorry count: 0 🤍
+-- AXIOM 2 (Reflection Positivity) is ELIMINATED.
+-- Pure measure-theoretic proof. No number theory axioms.
 
 end Cathedral.White
