@@ -98,12 +98,32 @@ lemma flattenedResidual_bound (N : ℕ) (u : ℝ) :
 -- PART 3: CHANGE OF VARIABLES (Step 1)
 -- ════════════════════════════════════════════════
 
+/-- **PROVED**: The key algebraic identity for the change of variables.
+    g_N(u)² = r_N(e^{-u})² · e^{-u} for u ≥ 0.
+
+    This is because g_N(u) = r_N(e^{-u}) · e^{-u/2}, so
+    g_N(u)² = r_N(e^{-u})² · (e^{-u/2})² = r_N(e^{-u})² · e^{-u}.
+
+    The e^{-u/2} factor was chosen precisely so that squaring it
+    produces the Jacobian e^{-u} = |dx/du| of the substitution x = e^{-u}. -/
+lemma flattenedResidual_sq_eq (N : ℕ) (u : ℝ) (hu : 0 ≤ u) :
+    (flattenedResidual N u) ^ 2 =
+    (bdResidual N (Real.exp (-u))) ^ 2 * Real.exp (-u) := by
+  unfold flattenedResidual
+  simp [hu]
+  rw [mul_pow]
+  congr 1
+  rw [sq, ← Real.exp_add]
+  ring_nf
+
 /-- **Key identity**: The L² norm of the residual equals the L² norm
     of the flattened residual.
 
     ∫₀¹ |r_N(x)|² dx = ∫₀^∞ |g_N(u)|² du
 
-    Proof: change of variables x = e^{-u}, dx = e^{-u} du. -/
+    Proof: change of variables x = e^{-u}, dx = e^{-u} du.
+    The Jacobian e^{-u} is absorbed by the e^{-u/2} factor in g_N
+    (proved in `flattenedResidual_sq_eq`). -/
 axiom l2_change_of_variables (N : ℕ) (hN : 2 ≤ N) :
     ∫ x in (0:ℝ)..1, (bdResidual N x) ^ 2 =
     ∫ u : ℝ, (flattenedResidual N u) ^ 2
@@ -221,6 +241,7 @@ end
 --   ✅ bdLinComb_bound               — uniform bound on BD basis
 --   ✅ bdResidual_bound              — uniform bound on residual
 --   ✅ flattenedResidual_bound       — exponential decay of g_N
+--   ✅ flattenedResidual_sq_eq       — Jacobian absorption: g_N² = r_N² · e^{-u}
 --   ✅ autocorrelation_zero_eq_l2    — h(0) = ∫|g_N|²
 --   ✅ l2_from_pointwise_bound_derived — composition theorem
 --
