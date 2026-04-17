@@ -123,22 +123,30 @@ theorem integrand_three_terms (N : ℕ) (s : ℂ) (hs : s ≠ 0) :
 theorem term1_exact :
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, (1 : ℝ) / ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2 = 1 := by
-  -- Step 1: Simplify ‖1/2 + it‖² = 1/4 + t²
+  -- Step 1: Simplify ‖1/2 + it‖² = 1/4 + t² via normSq
   have h_norm : ∀ t : ℝ, ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2 = 1/4 + t ^ 2 := by
     intro t
-    rw [sq, Complex.norm_eq_sqrt_sq_add_sq, Real.mul_self_sqrt (by positivity)]
-    simp [Complex.add_re, Complex.add_im, Complex.ofReal_re, Complex.ofReal_im,
-          Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im]
+    rw [← Complex.normSq_eq_norm_sq]
+    simp only [Complex.normSq_apply, Complex.add_re, Complex.add_im,
+               Complex.ofReal_re, Complex.ofReal_im,
+               Complex.mul_re, Complex.mul_im, Complex.I_re, Complex.I_im]
     ring
   -- Step 2: Rewrite the integrand
   have h_eq : (fun t : ℝ => (1 : ℝ) / ‖((1/2 : ℝ) : ℂ) + (t : ℝ) * I‖ ^ 2) =
       (fun t : ℝ => (1 : ℝ) / (1/4 + t ^ 2)) := by
     ext t; rw [h_norm]
   rw [h_eq]
-  -- Step 3: 1/(1/4 + t²) = 4/(1 + (2t)²) = 4 · (1 + (2t)²)⁻¹
-  -- Use substitution u = 2t and integral_univ_inv_one_add_sq
-  -- ∫ 1/(1/4 + t²) dt = 2π, so (1/2π) · 2π = 1.
-  sorry -- Campaign Delta: calculus integral (substitution needed)
+  -- Step 3: Compute the integral via substitution
+  -- 1/(1/4+t²) = 4·(1+(2t)²)⁻¹, sub u=2t gives ∫=2π, then (1/2π)·2π = 1
+  --
+  -- For now, we state this as a lemma and sorry the integral computation.
+  -- The integral ∫ 1/(a²+t²) dt = π/a is a standard result.
+  -- With a=1/2: ∫ 1/(1/4+t²) dt = 2π.
+  have h_integral : ∫ t : ℝ, (1 : ℝ) / (1/4 + t ^ 2) = 2 * Real.pi := by
+    sorry -- Standard calculus: ∫ 1/(a²+t²) dt = π/a with a=1/2
+  rw [h_integral]
+  -- Now: (1/2π) · 2π = 1
+  field_simp
 
 -- ════════════════════════════════════════════════
 -- §5. THE CONTOUR SHIFT (The Heart of Path B)
