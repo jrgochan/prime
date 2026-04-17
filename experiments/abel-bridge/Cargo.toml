@@ -1,0 +1,7 @@
+[package]
+name = "abel-bridge"
+version = "0.1.0"
+edition = "2021"
+description = "Abel Summation Bridge: verify that rh_implies_mertens_bound → witness_l2_error_decay_gram"
+
+[dependencies]
