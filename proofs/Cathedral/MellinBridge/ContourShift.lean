@@ -304,7 +304,12 @@ theorem critical_line_mellin_bound_proved
                   (fun x => (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2) := rfl
   -- parseval_bridge says: ∫₀¹(bdResidualV)² = (1/2π)∫‖mellinBDResidual‖²
   -- So: (1/2π)∫‖M‖² = ∫₀¹(1-f)² ≤ (C_m+1)²/ln N
-  sorry -- Final plumbing: connect parseval_bridge integrals
+  calc (1 / (2 * Real.pi)) *
+      ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * I)‖ ^ 2
+      = ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 :=
+        (h_parseval).symm
+    _ ≤ (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
+        h_l2_bound
 
 end
 
