@@ -28,6 +28,7 @@
 
 import Cathedral.MellinBridge.PlancherelBypass
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 noncomputable section
 open Real MeasureTheory Set Filter
@@ -60,33 +61,54 @@ lemma exp_neg_mem_Ioc (u : ℝ) (hu : 0 ≤ u) :
 -- §2. THE JACOBIAN ABSORPTION (CORE IDENTITY)
 -- ════════════════════════════════════════════════
 
-/-- **KEY STEP**: The integral of g_N² over [0,∞) equals the integral
-    of r_N² over (0,1] via x = exp(-u).
+/-- exp(-u) is antitone on Ioi(0). -/
+lemma exp_neg_antitoneOn : AntitoneOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) :=
+  fun _ _ _ _ hab => Real.exp_le_exp.mpr (neg_le_neg hab)
 
-    Uses the PROVED identity: g_N(u)² = r_N(exp(-u))² · exp(-u)
-    from `flattenedResidualV_sq_eq`.
+/-- The derivative of exp(-u) within Ioi is -exp(-u). -/
+lemma hasDerivWithinAt_exp_neg (u : ℝ) (_ : u ∈ Set.Ioi (0 : ℝ)) :
+    HasDerivWithinAt (fun u => Real.exp (-u)) (-Real.exp (-u)) (Set.Ioi 0) u := by
+  have : HasDerivAt (fun u => Real.exp (-u)) (Real.exp (-u) * (-1)) u := by
+    exact (Real.hasDerivAt_exp (-u)).comp u (hasDerivAt_id u).neg
+  simp only [mul_neg, mul_one] at this
+  exact this.hasDerivWithinAt
 
-    The substitution transforms:
-      ∫₀^∞ g_N(u)² du = ∫₀^∞ r_N(e^{-u})² · e^{-u} du
-                       = ∫₀¹ r_N(x)² dx     [x = e^{-u}]
+/-- exp(-·) maps Ioi(0) onto Ioo(0,1). -/
+lemma exp_neg_image_Ioi : (fun u : ℝ => Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 0 1 := by
+  ext x
+  simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+  constructor
+  · rintro ⟨u, hu, rfl⟩
+    exact ⟨Real.exp_pos _, by rwa [Real.exp_lt_one_iff, neg_neg_iff_pos]⟩
+  · intro ⟨hx_pos, hx_lt⟩
+    refine ⟨-Real.log x, ?_, ?_⟩
+    · rw [neg_pos]; exact Real.log_neg hx_pos hx_lt
+    · simp [Real.exp_log hx_pos]
 
-    The Jacobian e^{-u} = |dx/du| is already present in the integrand!
+/-- **KEY STEP**: The integral of g_N² over (0,∞) equals the integral
+    of r_N² over (0,1) via x = exp(-u).
 
-    ROUTE: `integral_comp_mul_deriv_Ioi` with f(u) = exp(-u), g(x) = r_N(x)². -/
+    Uses Mathlib's antitone change of variables:
+      ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
+
+    With f(u) = exp(-u), -f'(u) = exp(-u), and
+    g_N(u)² = r_N(exp(-u))² · exp(-u)  [from flattenedResidualV_sq_eq]. -/
 theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
     ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
-  -- The proof has two parts:
-  -- Part A: Rewrite using flattenedResidualV_sq_eq (PROVED)
-  -- Part B: Apply integral_comp_mul_deriv_Ioi (Mathlib routing)
-  sorry -- 🔨 FORGE TASK: Wire through integral_comp_mul_deriv_Ioi
-  -- Part A is done (flattenedResidualV_sq_eq).
-  -- Part B needs: f := exp(-·), f' := -exp(-·), g := (bdResidualV N v)²
-  -- Hypotheses for integral_comp_mul_deriv_Ioi:
-  --   * f is continuous on [0, ∞) ✓ (exp is continuous)
-  --   * f' = deriv f on (0, ∞) ✓ (hasDerivAt_exp_neg)
-  --   * f is monotone ✓ (exp_neg_strictAntiOn → need to negate)
-  --   * g is measurable ✓ (composition of measurable functions)
+  -- Step 1: Rewrite g_N(u)² = r_N(exp(-u))² · exp(-u) using flattenedResidualV_sq_eq
+  have h_sq : ∀ u ∈ Set.Ioi (0 : ℝ),
+      (flattenedResidualV N v u) ^ 2 =
+      (bdResidualV N v (Real.exp (-u))) ^ 2 * Real.exp (-u) := by
+    intro u hu
+    exact flattenedResidualV_sq_eq N v u (le_of_lt (Set.mem_Ioi.mp hu))
+  -- Step 2: Rewrite the Ioi integral pointwise
+  rw [setIntegral_congr_fun measurableSet_Ioi h_sq]
+  -- Step 3: The integral of r_N(exp(-u))² · exp(-u) over Ioi(0) equals
+  --         ∫ x in Ioo(0,1), r_N(x)² by antitone substitution
+  -- Step 4: ∫ x in Ioo(0,1), f = ∫ x in (0:ℝ)..1, f (endpoints have measure zero)
+  sorry -- 🔨 FORGE TASK: Apply integral_image_eq_integral_deriv_smul_of_antitoneOn
+        --    + convert Ioo integral to interval integral
 
 -- ════════════════════════════════════════════════
 -- §3. FULL INTEGRAL SPLITTING
