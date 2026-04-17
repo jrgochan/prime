@@ -74,6 +74,7 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.MertensBound,
     `Cathedral.MellinBridge.AbelSiegeProof,
     `Cathedral.MellinBridge.DirichletCollapse,
+    `Cathedral.MellinBridge.PlancherelBypass,
     `Cathedral.MellinBridge.MellinBridge,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,
