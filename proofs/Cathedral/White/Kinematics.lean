@@ -92,14 +92,40 @@ theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §3. FULL INTEGRAL SPLITTING
 -- ════════════════════════════════════════════════
 
-/-- The full-line integral of g_N² equals the half-line integral,
-    since g_N(u) = 0 for u < 0 by definition. -/
+/-- g_N(u) = 0 for u < 0 by definition. -/
+lemma flattenedResidualV_zero_of_neg (N : ℕ) (v : Fin (N - 1) → ℝ) (u : ℝ) (hu : u < 0) :
+    flattenedResidualV N v u = 0 := by
+  unfold flattenedResidualV
+  simp [show ¬(0 ≤ u) from not_le.mpr hu]
+
+/-- g_N(u)² = 0 for u < 0, since g_N(u) = 0. -/
+lemma flattenedResidualV_sq_zero_of_neg (N : ℕ) (v : Fin (N - 1) → ℝ) (u : ℝ) (hu : u < 0) :
+    (flattenedResidualV N v u) ^ 2 = 0 := by
+  rw [flattenedResidualV_zero_of_neg N v u hu]; ring
+
+/-- The full-line integral of g_N² equals the [0,∞) integral.
+    On (-∞, 0), g_N = 0 pointwise, so the function is supported on [0,∞). -/
+lemma full_integral_eq_Ici (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
+    ∫ u in Set.Ici (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
+  symm
+  apply setIntegral_eq_integral_of_forall_compl_eq_zero
+  intro u hu
+  simp only [Set.mem_Ici, not_le] at hu
+  exact flattenedResidualV_sq_zero_of_neg N v u hu
+
+/-- The [0,∞) integral equals the (0,∞) integral, since {0} has measure zero. -/
+lemma Ici_eq_Ioi_integral (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u in Set.Ici (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
+    ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
+  apply setIntegral_congr_set
+  exact Ioi_ae_eq_Ici.symm
+
+/-- **PROVED**: The full-line integral of g_N² equals the half-line integral. -/
 lemma full_integral_eq_halfline (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
     ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
-  -- flattenedResidualV N v u = 0 when u < 0 (by definition)
-  -- So the integral over (-∞, 0] is zero, and the full integral = Ioi integral.
-  sorry -- 🔨 FORGE TASK: Split integral and show complement is zero
+  rw [full_integral_eq_Ici N v, Ici_eq_Ioi_integral N v]
 
 -- ════════════════════════════════════════════════
 -- §4. THE THEOREM (AXIOM 2 ELIMINATION)
