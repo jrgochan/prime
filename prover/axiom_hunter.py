@@ -30,6 +30,12 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from lean_runner import compile_lean_string, CompileResult
 from strategies.tactic_bomb import generate_tactics, count_tactics
+from strategies.llm_prover import (
+    generate_proof_attempt as llm_generate_proof,
+    get_file_context,
+    is_ollama_available,
+    DEFAULT_MODEL,
+)
 
 PROOFS_DIR = Path(__file__).resolve().parent.parent / "proofs"
 CATHEDRAL_DIR = PROOFS_DIR / "Cathedral"
@@ -215,16 +221,113 @@ def attack_axiom(
     return False, attempts
 
 
+def attack_axiom_llm(
+    axiom: AxiomInfo,
+    model: str = DEFAULT_MODEL,
+    max_iterations: int = 10,
+    timeout: int = 60,
+    log_file=None,
+) -> tuple[bool, list[Attempt]]:
+    """
+    Attack an axiom using the local LLM with iterative error feedback.
+    The scoped rifle.
+    """
+    attempts = []
+    print(f"\n{'='*60}")
+    print(f"🧠 LLM Targeting: {axiom.name}")
+    print(f"   File: {axiom.file}:{axiom.line}")
+    print(f"   Model: {model}")
+    print(f"{'='*60}")
+
+    # Get file context for the LLM
+    file_path = PROOFS_DIR / axiom.file
+    context = get_file_context(file_path, axiom.line)
+
+    previous_error = None
+
+    for iteration in range(1, max_iterations + 1):
+        # Ask LLM for a proof
+        print(f"   🧠 [{iteration:2d}] Querying {model}...", end=" ", flush=True)
+
+        tactic = llm_generate_proof(
+            axiom_name=axiom.name,
+            axiom_signature=axiom.signature,
+            file_context=context,
+            previous_error=previous_error,
+            attempt_num=iteration,
+            model=model,
+        )
+
+        if tactic is None:
+            print("⚠️  No response")
+            continue
+
+        # Show what the LLM generated
+        tactic_preview = tactic.replace("\n", " ")[:60]
+        print(f"→ {tactic_preview}...")
+
+        # Build and compile
+        lean_code = generate_proof_attempt(axiom, tactic)
+        result = compile_lean_string(
+            lean_code,
+            timeout_seconds=timeout,
+            filename=f"LLM_{axiom.name}.lean",
+        )
+
+        attempt = Attempt(
+            axiom_name=axiom.name,
+            strategy=f"llm_{model}",
+            tactic=tactic[:500],
+            success=result.success,
+            elapsed=result.elapsed_seconds,
+            error_type=result.error_type,
+            error_message=result.error_message[:200] if result.error_message else None,
+            timestamp=datetime.now().isoformat(),
+        )
+        attempts.append(attempt)
+
+        if log_file:
+            log_file.write(json.dumps(asdict(attempt)) + "\n")
+            log_file.flush()
+
+        if result.success:
+            print(f"\n   🎉🎉🎉 AXIOM PROVED BY LLM: {axiom.name} 🎉🎉🎉")
+            print(f"   Winning proof:\n   by {tactic}")
+            return True, attempts
+
+        # Feed error back for next iteration
+        status = f"❌ [{result.error_type}]" if result.error_type else "❌"
+        print(f"   {status} ({result.elapsed_seconds:.1f}s)")
+        previous_error = result.stderr[:1500] if result.stderr else None
+
+    print(f"   ⏸️  LLM budget exhausted ({max_iterations} iterations)")
+    return False, attempts
+
+
 def run_hunt(
     target_axiom: Optional[str] = None,
     max_hours: float = 8.0,
     max_attempts_per_axiom: int = 100,
     timeout_per_attempt: int = 30,
     priority: str = "non-critical",
+    model: str = DEFAULT_MODEL,
+    max_llm_iterations: int = 10,
+    no_llm: bool = False,
 ):
     """Run the full axiom hunt."""
     start_time = time.time()
     deadline = start_time + max_hours * 3600
+
+    # Check LLM availability
+    use_llm = False
+    if not no_llm:
+        print(f"🧠 Checking Ollama ({model})...")
+        if is_ollama_available(model):
+            use_llm = True
+            print(f"   ✅ LLM available! Will use {model} as primary strategy.")
+        else:
+            print(f"   ⚠️  Ollama not available. Falling back to tactic bombardment.")
+            print(f"   To enable: ollama serve && ollama pull {model}")
 
     # Scan axioms
     print("🔍 Scanning Cathedral for axioms...")
@@ -263,9 +366,13 @@ def run_hunt(
     all_attempts = []
 
     total_tactics = count_tactics(8)
+    strategy_desc = f"LLM ({model}) + tactic_bomb" if use_llm else "tactic_bomb only"
     print(f"\n🚀 AXIOM HUNTER — Campaign Beta Automated Search")
+    print(f"   Strategy: {strategy_desc}")
     print(f"   Axioms to attack: {len(axioms)}")
-    print(f"   Tactics per axiom: up to {min(max_attempts_per_axiom, total_tactics)}")
+    if use_llm:
+        print(f"   LLM iterations per axiom: {max_llm_iterations}")
+    print(f"   Tactic attempts per axiom: up to {min(max_attempts_per_axiom, total_tactics)}")
     print(f"   Timeout per attempt: {timeout_per_attempt}s")
     print(f"   Max runtime: {max_hours} hours")
     print(f"   Results: {attempts_file}")
@@ -282,15 +389,38 @@ def run_hunt(
             elapsed_hours = (time.time() - start_time) / 3600
             print(f"\n[{i+1}/{len(axioms)}] ({elapsed_hours:.1f}h elapsed)")
 
+            # Strategy 1: LLM (if available)
+            if use_llm:
+                success, attempts = attack_axiom_llm(
+                    axiom,
+                    model=model,
+                    max_iterations=max_llm_iterations,
+                    timeout=timeout_per_attempt,
+                    log_file=log_file,
+                )
+                all_attempts.extend(attempts)
+                if success:
+                    winning = [a for a in attempts if a.success][0]
+                    successes.append(
+                        {
+                            "axiom": axiom.name,
+                            "file": axiom.file,
+                            "line": axiom.line,
+                            "tactic": winning.tactic,
+                            "elapsed": winning.elapsed,
+                            "strategy": "llm",
+                        }
+                    )
+                    continue  # Move to next axiom
+
+            # Strategy 2: Tactic bombardment
             success, attempts = attack_axiom(
                 axiom,
                 max_attempts=max_attempts_per_axiom,
                 timeout=timeout_per_attempt,
                 log_file=log_file,
             )
-
             all_attempts.extend(attempts)
-
             if success:
                 winning = [a for a in attempts if a.success][0]
                 successes.append(
@@ -300,6 +430,7 @@ def run_hunt(
                         "line": axiom.line,
                         "tactic": winning.tactic,
                         "elapsed": winning.elapsed,
+                        "strategy": "tactic_bomb",
                     }
                 )
 
@@ -448,11 +579,24 @@ if __name__ == "__main__":
     parser.add_argument(
         "--quick", action="store_true", help="Quick test mode (10 min, 3 axioms)"
     )
+    parser.add_argument(
+        "--model", type=str, default=DEFAULT_MODEL,
+        help=f"Ollama model to use (default: {DEFAULT_MODEL})"
+    )
+    parser.add_argument(
+        "--llm-iterations", type=int, default=10,
+        help="Max LLM iterations per axiom (default: 10)"
+    )
+    parser.add_argument(
+        "--no-llm", action="store_true",
+        help="Disable LLM strategy, use tactic bombardment only"
+    )
     args = parser.parse_args()
 
     if args.quick:
         args.max_hours = 0.17  # 10 minutes
         args.max_attempts = 20
+        args.llm_iterations = 3
 
     run_hunt(
         target_axiom=args.axiom,
@@ -460,4 +604,7 @@ if __name__ == "__main__":
         max_attempts_per_axiom=args.max_attempts,
         timeout_per_attempt=args.timeout,
         priority=args.priority,
+        model=args.model,
+        max_llm_iterations=args.llm_iterations,
+        no_llm=args.no_llm,
     )

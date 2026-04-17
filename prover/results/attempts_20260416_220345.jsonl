@@ -1,0 +1,6 @@
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "exact?", "success": false, "elapsed": 4.9570558071136475, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:03:50.828561"}
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "apply?", "success": false, "elapsed": 4.997239112854004, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:03:55.826548"}
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "simp", "success": false, "elapsed": 5.082863807678223, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:04:00.910102"}
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "norm_num", "success": false, "elapsed": 5.018679141998291, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:04:05.929500"}
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "omega", "success": false, "elapsed": 4.938078880310059, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:04:10.868249"}
+{"axiom_name": "fract_orthogonal_at_zero", "strategy": "tactic_bomb", "tactic": "ring", "success": false, "elapsed": 4.836093902587891, "error_type": null, "error_message": null, "timestamp": "2026-04-16T22:04:15.705071"}
