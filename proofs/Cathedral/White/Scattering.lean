@@ -26,6 +26,8 @@ import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.White.Kinematics
 import Mathlib.Analysis.Fourier.Inversion
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.MeasureTheory.Integral.ExpDecay
+import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section
 open Real MeasureTheory Set Complex Fourier
@@ -159,6 +161,49 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
     Physics: This is the spectral decomposition. The vacuum energy
     (position-space L² norm) equals the sum over all momentum modes
     (frequency-space |F̂|² integral). -/
+
+-- ──── PROVED: Measurability & Integrability ────
+
+private theorem flatResV_measurable' (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    Measurable (flattenedResidualV N v) := by
+  unfold flattenedResidualV bdResidualV bdLinComb
+  apply Measurable.ite measurableSet_Ici
+  · apply Measurable.mul
+    · apply Measurable.sub measurable_const
+      apply Finset.measurable_sum; intro i _
+      apply Measurable.const_mul; apply Measurable.fract
+      apply Measurable.div measurable_const
+      exact (measurable_const.mul measurable_neg.exp)
+    · exact (measurable_neg.div_const _).exp
+  · exact measurable_const
+
+private theorem flatResC_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    Integrable (flattenedResidualC N v) volume := by
+  unfold flattenedResidualC
+  have hV : Integrable (flattenedResidualV N v) volume := by
+    set C := 1 + ∑ i : Fin (N - 1), |v i|
+    rw [← integrableOn_univ]
+    rw [show (Set.univ : Set ℝ) = Set.Ioi 0 ∪ {(0:ℝ)} ∪ Set.Iio 0 from by
+      ext x; simp only [Set.mem_univ, Set.mem_union, Set.mem_Ioi, Set.mem_singleton_iff,
+        Set.mem_Iio, true_iff]; rcases lt_trichotomy x 0 with h | h | h
+      · exact Or.inr h
+      · exact Or.inl (Or.inr h)
+      · exact Or.inl (Or.inl h)]
+    apply IntegrableOn.union
+    · apply IntegrableOn.union
+      · exact ((exp_neg_integrableOn_Ioi 0 (show (0:ℝ) < 1/2 by positivity)).const_mul C).mono'
+          ((flatResV_measurable' N v).aestronglyMeasurable.restrict)
+          (ae_of_all _ fun u => by
+            simp only [norm_eq_abs]
+            calc |flattenedResidualV N v u|
+                ≤ C * rexp (-u / 2) := flattenedResidualV_bound N v u
+              _ = C * rexp (-(1/2) * u) := by ring_nf)
+      · exact integrableOn_singleton (hx := by simp)
+    · exact integrableOn_zero.congr_fun (fun u hu => by
+        simp only [Set.mem_Iio] at hu
+        unfold flattenedResidualV; simp [show ¬(0 ≤ u) from not_le.mpr hu]) measurableSet_Iio
+  exact hV.ofReal
+
 theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
     residualAutocorrelation N v 0 =
     ∫ ξ : ℝ, ‖∫ u : ℝ, flattenedResidualC N v u *
@@ -172,10 +217,9 @@ theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
     simp [Complex.norm_real, sq_abs]
   rw [h_conv]
   -- Step 3: Apply Plancherel's theorem (∫ ‖f‖² = ∫ ‖𝓕f‖²)
-  -- The hypotheses (L¹ and L²) follow from exponential decay:
-  --   |flattenedResidualC N v u| ≤ C * exp(-u/2) ∈ L¹ ∩ L²
-  have hf1 : Integrable (flattenedResidualC N v) volume := by
-    sorry -- follows from flattenedResidualV_bound + exp(-u/2) ∈ L¹
+  -- Proved integrability from exponential decay:
+  have hf1 : Integrable (flattenedResidualC N v) volume :=
+    flatResC_integrable N v
   have hf2 : MemLp (flattenedResidualC N v) 2 volume := by
     sorry -- follows from flattenedResidualV_bound + exp(-u) ∈ L¹
   exact plancherel_integral_axiom (flattenedResidualC N v) hf1 hf2
