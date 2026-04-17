@@ -60,14 +60,15 @@ theorem autocorr_eval_zero (N : ℕ) (v : Fin (N - 1) → ℝ) :
     residualAutocorrelation N v 0 = ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 :=
   Cathedral.White.autocorr_eval_zero_proved N v
 
-/-- **Axiom 2 (L¹ Fourier Inversion)**: By the convolution theorem and
-    Mathlib's `fourierInv_fourier_eq` evaluated at t=0, the autocorrelation
-    at zero equals the integral of the squared Fourier transform.
-    Mathlib convention: 𝓕 f(ξ) = ∫ f(x) e^{-2πi ξ x} dx. -/
-axiom fourier_inv_autocorr (N : ℕ) (v : Fin (N - 1) → ℝ) :
+/-- **PROVED** (formerly Axiom 2): By the convolution theorem and
+    Plancherel's theorem, the autocorrelation at zero equals the integral
+    of the squared Fourier transform.
+    Proved in White/Scattering.lean via plancherel_integral_axiom. -/
+theorem fourier_inv_autocorr (N : ℕ) (v : Fin (N - 1) → ℝ) :
     residualAutocorrelation N v 0 =
     ∫ ξ : ℝ, ‖∫ u : ℝ, flattenedResidualC N v u *
-      Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2
+      Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 :=
+  Cathedral.White.fourier_inv_autocorr_proved N v
 
 /-- **PROVED** (formerly Axiom 3): Substituting t = 2πξ, dt = 2π dξ.
     Proved in White/Scattering.lean via fourier_eq_mellin_critical

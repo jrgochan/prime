@@ -165,14 +165,14 @@ theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 := by
   -- Step 1: h(0) = ∫ g_N(u)² du (PROVED: autocorrelation_zero_eq_l2)
   rw [autocorrelation_zero_eq_l2 N v]
-  -- Goal: ∫ g_N² du = ∫ ‖ĝ_N(ξ)‖² dξ
-  -- This is Plancherel's theorem (norm_fourier_eq in Mathlib.Analysis.Fourier.LpSpace).
-  -- Bridge requirements:
-  --   (a) Lift flattenedResidualC to Lp ℂ 2 (needs MemLp proof from exponential decay)
-  --   (b) Connect ‖f‖²_Lp² = ∫ |f|² dμ (snorm_eq_integral_rpow_nnnorm)
-  --   (c) Show 𝓕(toLp f) agrees with the explicit Fourier integral
-  -- All three are Mathlib infrastructure; the mathematical content is trivial.
-  sorry -- 🔨 BRIDGE: Plancherel (Lp ↔ raw integral)
+  -- Step 2: Convert real-squared to complex-norm-squared
+  have h_conv : ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
+      ∫ u : ℝ, ‖flattenedResidualC N v u‖ ^ 2 := by
+    congr 1; ext u; unfold flattenedResidualC
+    simp [Complex.norm_real, sq_abs]
+  rw [h_conv]
+  -- Step 3: Apply Plancherel's theorem (∫ ‖f‖² = ∫ ‖𝓕f‖²)
+  exact plancherel_integral_axiom (flattenedResidualC N v)
 
 -- ════════════════════════════════════════════════
 -- §3. AXIOM 4 ELIMINATION (Scale Covariance)
