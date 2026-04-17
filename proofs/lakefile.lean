@@ -29,6 +29,8 @@ lean_lib «Cathedral» where
     `Cathedral.NymanBeurling.ThetaBound,
     `Cathedral.NymanBeurling.BDMellin,
     `Cathedral.NymanBeurling.BesselSeparation,
+    `Cathedral.NymanBeurling.ThetaBoundMellin,
+    `Cathedral.NymanBeurling.MellinReduction,
     `Cathedral.NymanBeurling.NymanBeurling,
     -- Vasyunin (the active proof chain)
     `Cathedral.Vasyunin,
@@ -76,6 +78,7 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.AbelSiegeProof,
     `Cathedral.MellinBridge.DirichletCollapse,
     `Cathedral.MellinBridge.PlancherelBypass,
+    `Cathedral.MellinBridge.ContourShift,
     `Cathedral.MellinBridge.MellinBridge,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,
@@ -96,5 +99,12 @@ lean_lib «Cathedral» where
     `Cathedral.IntegralBasis.Quantitative,
     -- White Singlet (Phase I: Axiom elimination)
     `Cathedral.White.Kinematics,
-    `Cathedral.White.Scattering
+    `Cathedral.White.Scattering,
+    `Cathedral.White.WhiteSinglet,
+    -- White Singlet Infrastructure (Mathlib-ready scaffolds)
+    `Cathedral.White.Infrastructure.DirichletSeries,
+    `Cathedral.White.Infrastructure.Perron,
+    `Cathedral.White.Infrastructure.ZetaConvexity,
+    `Cathedral.White.Infrastructure.HilbertInequality,
+    `Cathedral.White.Infrastructure.MontgomeryVaughan
   ]
