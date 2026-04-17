@@ -80,6 +80,50 @@ def ContourRect.vertices (c : ContourRect) : Fin 4 → ℂ
   | 3 => (c.σ_right : ℝ) - c.T * I   -- bottom-right
 
 -- ════════════════════════════════════════════════
+-- §2½. THE MELLIN-CONTOUR BRIDGE
+-- ════════════════════════════════════════════════
+
+/-- The Mellin transform of a single BD basis {1/(kx)} on (0,1).
+    By combining bd_mellin_reduction_proved + bd_mellin_base_case:
+      ∫₀¹ {1/(kx)} · x^{s-1} dx = 1/(k(s-1)) - ζ(s)·k^{-s}/s
+
+    This is the key identity connecting the L² world (Mellin of residual)
+    to the ζ world (Dirichlet polynomial on the critical line). -/
+theorem mellin_basis_element (k : ℕ) (hk : 1 ≤ k) (s : ℂ)
+    (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    1 / ((k : ℂ) * (s - 1)) - riemannZeta s * (k : ℂ) ^ (-s) / s := by
+  rw [bd_mellin_reduction_proved k hk s hs hs1, bd_mellin_base_case s hs hs1]
+  have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt (by omega : 0 < k)
+  have hs1_ne : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
+  field_simp
+  ring
+
+/-- The Mellin transform of the BD residual on (0,1) decomposes as:
+    ∫₀¹ (1-f_N) · x^{s-1} dx = (1 - ζ(s)·W_N(s))/s - W_sum/(s-1)
+
+    where W_sum = Σ v_i/(i+1) captures the constant-function projection
+    (independent of s).
+
+    This bridge connects `mellinBDResidual` to `contourIntegrand`.
+
+    Proof sketch: Apply bd_integral_linearity to split the integral,
+    then use mellin_basis_element on each summand, and collect terms. -/
+theorem mellin_residual_on_unit_interval (N : ℕ) (hN : 2 ≤ N) (s : ℂ)
+    (hs : 0 < s.re) (hs1 : s ≠ 1) (hs_lt : s.re < 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N (bdMoebiusWeight N) x : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    1 / s - riemannZeta s * dirichletPolyBD N s / s -
+    (∑ i : Fin (N - 1), (bdMoebiusWeight N i : ℂ) / ((i.val + 1 : ℕ) : ℂ)) / (s - 1) := by
+  -- Proof sketch:
+  -- 1. bd_integral_linearity splits ∫(1-f)·h = ∫h - Σ vᵢ·∫(fᵢ·h)
+  -- 2. ∫₀¹ x^{s-1} dx = 1/s  (integral_cpow)
+  -- 3. mellin_basis_element gives each ∫{1/(kx)}·x^{s-1} = 1/(k(s-1)) - ζk^{-s}/s
+  -- 4. Collecting terms: the ζ pieces form ζ·W_N(s)/s, the 1/k pieces form W_sum/(s-1)
+  sorry
+
+-- ════════════════════════════════════════════════
 -- §3. THE KEY DECOMPOSITION (Algebraic)
 -- ════════════════════════════════════════════════
 
