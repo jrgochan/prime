@@ -608,3 +608,4 @@
 {"axiom_name": "harmonicTileSum_reciprocity", "strategy": "tactic_bomb", "tactic": "constructor; omega", "success": false, "elapsed": 4.182750940322876, "error_type": null, "error_message": null, "timestamp": "2026-04-17T04:00:28.802626"}
 {"axiom_name": "harmonicTileSum_reciprocity", "strategy": "tactic_bomb", "tactic": "constructor; positivity", "success": false, "elapsed": 4.455849885940552, "error_type": null, "error_message": null, "timestamp": "2026-04-17T04:00:33.259212"}
 {"axiom_name": "harmonicTileSum_reciprocity", "strategy": "tactic_bomb", "tactic": "constructor; exact?", "success": false, "elapsed": 4.247919797897339, "error_type": null, "error_message": null, "timestamp": "2026-04-17T04:00:37.507843"}
+{"axiom_name": "lambdaMinClass_pos", "strategy": "llm_gemma4:31b", "tactic": "sorry", "success": false, "elapsed": 5.2434728145599365, "error_type": null, "error_message": null, "timestamp": "2026-04-17T04:05:39.938821"}
