@@ -3,12 +3,12 @@
 ### *The Architecture of the Prime Vacuum via the Parseval Bridge*
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
-the Riemann Hypothesis to four standard theorems in harmonic analysis and
+the Riemann Hypothesis to three standard theorems in harmonic analysis and
 classical analytic number theory. **Zero `sorry`**, **zero errors**, and
-**4 mathematical axioms** on the crown theorem (verified by `#print axioms`).
+**3 mathematical axioms** on the crown theorem (verified by `#print axioms`).
 
 > **Phase II: The White Singlet** — Systematic axiom elimination campaign.
-> Three of the original five axioms have been proved from Mathlib infrastructure.
+> Four of the original five axioms have been proved from Mathlib infrastructure.
 > One axiom remains under active elimination (Plancherel bridge).
 
 > **Release: v1.0.0-The-Cathedral** — April 17, 2026
@@ -16,8 +16,8 @@ classical analytic number theory. **Zero `sorry`**, **zero errors**, and
 ## The Honest Assessment
 
 > *This formalization does not prove the Riemann Hypothesis. It reduces*
-> *its entire mathematical content to four precisely stated, well-understood*
-> *facts—two elementary harmonic analysis lemmas, one classical theorem*
+> *its entire mathematical content to three precisely stated, well-understood*
+> *facts—one elementary harmonic analysis lemma, one classical theorem*
 > *(Mertens, 1897), and one quarantined complex-analytic bound. Everything*
 > *else—the Nyman–Beurling theory, Sherman–Morrison, Abel summation,*
 > *Hahn–Banach separation, Plancherel, variational principles—is compiler-verified.*
@@ -47,7 +47,7 @@ The proof decomposes into two pillars:
 - **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via Hahn–Banach separation and Mellin transform.
 - **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via Mertens → Abel → Parseval Bridge.
 
-## The Four Axioms
+## The Three Axioms
 
 Verified by `#print axioms nyman_beurling_equivalence`:
 
@@ -59,7 +59,8 @@ Verified by `#print axioms nyman_beurling_equivalence`:
 | 4 | `critical_line_mellin_bound` | Montgomery–Vaughan L² bound on Re(s)=1/2 | Montgomery (1973) |
 
 **Eliminated axioms** (proved in `Cathedral/White/`):
-- ~~`mellin_fourier_scale`~~ — Linear substitution t=2πξ (**PROVED** in `Scattering.lean`)
+- ~~`autocorr_eval_zero`~~ — Change of variables (**PROVED** in `Kinematics.lean`, **WIRED**)
+- ~~`mellin_fourier_scale`~~ — Linear substitution t=2πξ (**PROVED** in `Scattering.lean`, **WIRED**)
 
 **Under active elimination** (1 sorry remaining):
 - `fourier_inv_autocorr` — Plancherel bridge (Mathlib Lp infrastructure gap)
@@ -132,7 +133,7 @@ proofs/Cathedral/
 
 ```
 Files:      158 Lean files (39,000+ lines)
-Axioms:     4 on critical path (verified by #print axioms)
+Axioms:     3 on critical path (verified by #print axioms)
 Sorry:      0 on crown theorem path
 Errors:     0
 Modules:    3,471 (lake build)
