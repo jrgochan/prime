@@ -16,3 +16,7 @@ path = "src/main.rs"
 [[bin]]
 name = "toeplitz"
 path = "src/toeplitz.rs"
+
+[[bin]]
+name = "vasyunin-exact"
+path = "src/vasyunin_exact.rs"
