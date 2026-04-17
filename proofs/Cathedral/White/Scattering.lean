@@ -95,7 +95,49 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
   -- Factor out bdResidualV; need: rexp(-u/2) * cexp(-2πξuI) = rexp(-u) * rexp(-u)^(s-1)
   -- i.e., rexp(-u) * rexp(-u)^(s-1) = rexp(-u)^s = cexp(-su) = rexp(-u/2) * cexp(-2πξuI)
   -- This is a complex exponential identity requiring cpow manipulation.
-  sorry -- 🔨 WIRING: Complex cpow identity for exp(-u)^s where s = 1/2 + 2πξi
+  -- Goal: ↑(bdResidualV * rexp(-u/2)) * cexp(-2πξuI) = rexp(-u) • (↑(bdResidualV) * ↑(rexp(-u))^(s-1))
+  -- Key identity: for x = rexp(-u) > 0 and s = 1/2 + 2πξI:
+  --   x • (↑r * ↑x^(s-1)) = ↑r * (↑(x^(1/2)) * cexp(-2πξu·I))
+  have hx_pos : (0 : ℝ) < rexp (-u) := exp_pos _
+  have hx_ne : (rexp (-u) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hx_pos)
+  -- Prove the exponential identity as a helper:
+  -- ↑(rexp(-u/2)) * cexp(-2πξuI) = ↑(rexp(-u))^s
+  have h_exp_id : (rexp (-u / 2) : ℂ) * Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+      (rexp (-u) : ℂ) ^ s := by
+    -- (↑x)^s = cexp(s * log(↑x))
+    rw [Complex.cpow_def_of_ne_zero hx_ne]
+    -- log(↑(rexp(-u))) = ↑(-u)
+    have h_log : Complex.log (↑(rexp (-u))) = ↑(-u) := by
+      rw [← Complex.ofReal_log (le_of_lt hx_pos), Real.log_exp]
+    rw [h_log]
+    -- s * (-u) = -u/2 + (-2πξu)I
+    have h_prod : ↑(-u) * s = ↑(-u / 2) + (-2 * ↑Real.pi * ↑ξ * ↑u) * Complex.I := by
+      simp only [hs_def]; push_cast; ring
+    rw [h_prod, Complex.exp_add, Complex.ofReal_exp]
+  -- Now use h_exp_id to close the goal
+  -- LHS = ↑(bdResidualV * rexp(-u/2)) * cexp(...)
+  --      = ↑bdResidualV * (↑(rexp(-u/2)) * cexp(...))
+  --      = ↑bdResidualV * ↑(rexp(-u))^s
+  -- RHS = rexp(-u) • (↑bdResidualV * ↑(rexp(-u))^(s-1))
+  --      = ↑bdResidualV * (↑(rexp(-u)) * ↑(rexp(-u))^(s-1))
+  --      = ↑bdResidualV * ↑(rexp(-u))^s
+  rw [Complex.ofReal_mul, mul_assoc, h_exp_id]
+  change _ = (rexp (-u) : ℂ) * (↑(bdResidualV N v (rexp (-u))) * ↑(rexp (-u)) ^ (s - 1))
+  rw [mul_left_comm]
+  congr 1
+  -- Goal: ↑(rexp(-u))^s = ↑(rexp(-u)) * ↑(rexp(-u))^(s-1)
+  -- Use cpow_def for both sides, exploit log properties
+  rw [Complex.cpow_def_of_ne_zero hx_ne, Complex.cpow_def_of_ne_zero hx_ne]
+  have h_log : Complex.log (↑(rexp (-u))) = ↑(-u) := by
+    rw [← Complex.ofReal_log (le_of_lt hx_pos), Real.log_exp]
+  rw [h_log]
+  -- LHS: cexp(↑(-u) * s)
+  -- RHS: ↑(rexp(-u)) * cexp(↑(-u) * (s-1))
+  -- cexp(↑(-u) * s) = cexp(↑(-u) * (s-1) + ↑(-u))
+  --                  = cexp(↑(-u) * (s-1)) * cexp(↑(-u))
+  --                  = cexp(↑(-u) * (s-1)) * ↑(rexp(-u))
+  rw [show ↑(-u) * s = ↑(-u) * (s - 1) + ↑(-u) from by ring]
+  rw [Complex.exp_add, mul_comm, Complex.ofReal_exp]
 
 -- ════════════════════════════════════════════════
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)
