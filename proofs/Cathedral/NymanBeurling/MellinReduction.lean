@@ -15,6 +15,7 @@
   NOTE: Requires s ≠ 1 to avoid 0/0 in the formula.
 -/
 import Cathedral.NymanBeurling.BDMellin
+import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section
 open Complex Real MeasureTheory Set
@@ -51,14 +52,9 @@ lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
 -- THEOREMS: Substitution, Splitting, and Tail Evaluation
 -- ════════════════════════════════════════════════
 
-/-- Substitution u = kx converts ∫₀¹ f(kx) g(x) dx to k⁻ˢ ∫₀ᵏ f(u) g(u/k) du.
-    Uses integral_comp_mul_right + cpow factoring. -/
-axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
-    ∫ x in Set.Ioo (0:ℝ) 1,
-      ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    (k : ℂ) ^ (-s) *
-      ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
-        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+-- Axiom `mellin_substitution_ioo` eliminated:
+-- Now proved as theorem `mellin_substitution_ioo` in BDMellin.lean
+-- (via integral_comp_mul_right + cpow factoring)
 
 /-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand.
     Uses integral_add_adjacent_intervals + integrability. -/
@@ -79,9 +75,51 @@ theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
       ← intervalIntegral.integral_of_le h_le2]
   let f : ℝ → ℂ := fun u => ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
   have h_int_1 : IntervalIntegrable f volume 0 1 := by
-    sorry -- integrability via intervalIntegrable_cpow' + bounded fract part
+    apply IntervalIntegrable.mono_fun (intervalIntegral.intervalIntegrable_cpow' (by
+      simp [sub_re, one_re]; linarith : -1 < (s - 1).re))
+    · apply AEStronglyMeasurable.mul
+      · exact (Measurable.aestronglyMeasurable
+          (Complex.measurable_ofReal.comp
+            (Measurable.fract (measurable_const.div measurable_id)))).restrict
+      · apply ContinuousOn.aestronglyMeasurable
+        · exact ContinuousOn.cpow_const (Complex.continuous_ofReal.continuousOn)
+            (fun x hx => Or.inl (by
+              simp [Complex.ofReal_re]
+              exact (Set.mem_Ioc.mp (Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1) ▸ hx)).1))
+        · exact measurableSet_uIoc
+    · filter_upwards with x
+      rw [norm_mul]
+      calc ‖((Int.fract (1 / x) : ℝ) : ℂ)‖ * ‖(↑x : ℂ) ^ (s - 1)‖
+          ≤ 1 * ‖(↑x : ℂ) ^ (s - 1)‖ := by
+            gcongr
+            simp [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = ‖(↑x : ℂ) ^ (s - 1)‖ := one_mul _
   have h_int_2 : IntervalIntegrable f volume 1 k := by
-    sorry -- continuity on [1,k] since {1/u} = 1/u there
+    -- On [1,k], {1/u} = 1/u, so f(u) = (1/u) * u^{s-1} = u^{s-2}
+    -- which is continuous (hence integrable) on [1,k] since u > 0
+    have h1k : (1:ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+    apply IntervalIntegrable.mono_fun (intervalIntegral.intervalIntegrable_cpow
+      (Or.inr (fun h => by
+        rw [Set.uIcc_of_le h1k] at h; exact not_le.mpr (by linarith [h.1]) (le_refl 0))))
+    · apply AEStronglyMeasurable.mul
+      · exact (Measurable.aestronglyMeasurable
+          (Complex.measurable_ofReal.comp
+            (Measurable.fract (measurable_const.div measurable_id)))).restrict
+      · apply ContinuousOn.aestronglyMeasurable
+        · exact ContinuousOn.cpow_const (Complex.continuous_ofReal.continuousOn)
+            (fun x hx => Or.inl (by
+              rw [Set.uIoc_of_le h1k] at hx
+              simp [Complex.ofReal_re]; linarith [(Set.mem_Ioc.mp hx).1]))
+        · exact measurableSet_uIoc
+    · filter_upwards with x
+      rw [norm_mul]
+      calc ‖((Int.fract (1 / x) : ℝ) : ℂ)‖ * ‖(↑x : ℂ) ^ (s - 1)‖
+          ≤ 1 * ‖(↑x : ℂ) ^ (s - 1)‖ := by
+            gcongr
+            simp [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = ‖(↑x : ℂ) ^ (s - 1)‖ := one_mul _
   exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/

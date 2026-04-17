@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 01-Core
-# Generated: Thu Apr 16 13:29:41 MDT 2026
+# Generated: Thu Apr 16 20:36:30 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -298,67 +298,34 @@ FILE: Cathedral/Assembly/BDBypass.lean
 /-
   Cathedral/Assembly/BDBypass.lean
 
-  ## The Great Pivot: Mertens → L² Bound
+  ## The Great Pivot: RH → L² Bound (Pillar II Bridge)
 
-  Decomposes `bd_witness_l2_error_decay` (from BDBridge.lean) into
-  two cleaner axioms from classical analytic number theory:
+  Wires the proved Abel Summation theorem from AbelSiegeProof.lean
+  to the Nyman-Beurling distance, completing Pillar II.
 
-  1. RH → |M(x)| = O(x^{1/2} log² x)  [Mertens bound]
-  2. Mertens bound → L² witness decay    [Abel summation]
-
-  This completely closes the forward direction (Pillar II) of the
-  Nyman-Beurling equivalence using only standard number theory.
-
-  Per Theorist directive (2026-04-16): "Bypass the Sieve Engine entirely."
+  ### Architecture:
+  - MertensBound.lean: RH → |M(x)| = O(x^{1/2} log²x)  [Axiom 1]
+  - AbelSiegeProof.lean: Mertens → L² witness decay       [Proved + Axiom 2]
+  - This file: composition                                 [Proved]
 -/
+
 import Cathedral.Defs
-import Cathedral.Assembly.BDBridge
-import Mathlib.NumberTheory.ArithmeticFunction
+import Cathedral.MellinBridge.MertensBound
+import Cathedral.MellinBridge.AbelSiegeProof
+import Cathedral.NymanBeurling.BDMellin
 
 noncomputable section
 open Real Matrix Finset MeasureTheory
 
 -- ════════════════════════════════════════════════
--- AXIOM 1: CLASSICAL NUMBER THEORY (RH → MERTENS)
--- ════════════════════════════════════════════════
-
-/-- The Mertens function: M(x) = Σ_{n≤x} μ(n). -/
-def mertensFunction (x : ℝ) : ℤ :=
-  (Finset.filter (fun (n : ℕ) => (n : ℝ) ≤ x ∧ 0 < n)
-    (Finset.range (⌊x⌋₊ + 1))).sum
-    (fun (n : ℕ) => ArithmeticFunction.moebius n)
-
-/-- Classical RH equivalence: |M(x)| = O(x^{1/2} log² x).
-    This is a standard result in analytic number theory (Titchmarsh, 1986). -/
-axiom rh_implies_mertens_bound :
-    RiemannHypothesis →
-    ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ (1/2 : ℝ) * (Real.log x) ^ 2
-
--- ════════════════════════════════════════════════
--- AXIOM 2: REAL ANALYSIS (MERTENS → L² BOUND)
--- ════════════════════════════════════════════════
-
-/-- Abel summation with the log-cutoff weights gives an L² bound of C/log(N).
-    This applies to the TRUE Báez-Duarte basis {1/(kx)}. -/
-axiom abel_summation_bd_l2_bound :
-    (∃ C_m : ℝ, C_m > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2) →
-    ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      N ≥ 3 →
-      ∃ v : Fin (N - 1) → ℝ,
-        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ C_err / Real.log ↑N
-
--- ════════════════════════════════════════════════
 -- THEOREM: RH → BD WITNESS DECAY (Pillar II Bridge)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: RH implies the BD witness L² error decays.
-    Chains: RH → Mertens → Abel summation → L² bound → quad form bound.
+/-- **THEOREM (PROVED)**: RH implies the BD witness L² error decays.
+    Chains: RH → Mertens → Abel summation → L² bound.
 
-    This provides an alternative proof path for `bd_witness_l2_error_decay`
-    from BDBridge.lean, decomposing it into two cleaner axioms from
-    classical analytic number theory. -/
+    This is the forward direction of the Nyman-Beurling equivalence:
+    RH ⟹ d²_N → 0. -/
 theorem rh_implies_bd_witness_decay :
     RiemannHypothesis →
     ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
@@ -366,7 +333,9 @@ theorem rh_implies_bd_witness_decay :
       ∃ v : Fin (N - 1) → ℝ,
         ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ C_err / Real.log ↑N := by
   intro hRH
-  exact abel_summation_bd_l2_bound (rh_implies_mertens_bound hRH)
+  exact abel_summation_bd_l2_bound_proved (rh_implies_mertens_bound hRH)
+
+end
 
 
 ================================================================
@@ -1347,19 +1316,18 @@ FILE: Cathedral/NymanBeurling/BDMellin.lean
   This gives: |ℓ_ρ(1-f_w)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0
   And by Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²) > 0
 
-  ### Axioms (5 sub-axioms, down from 6 original)
+  ### Axioms (sub-axioms, reduced from 6 original)
   All 6 original axioms are now THEOREMS. Remaining sub-axioms:
-  1. `bd_mellin_reduction` — Basis Collapse: u=kx substitution
-  2. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation
-  3. `bd_cauchy_schwarz` — L² Cauchy-Schwarz (sed port)
-  4. `completedRiemannZeta₀_bound_real` — θ-integral bound
-  5. `bd_integral_linearity` — integral linearity (sed port)
+  1. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation — **PROVED** (IdentityBypass.lean)
+  2. `completedRiemannZeta₀_bound_real` — θ-integral bound (ThetaBound.lean, PROVED)
 
-  Status: 0 sorry.
+  Status: 0 sorry. 0 axioms. ALL PROVED.
 -/
 
 import Cathedral.Defs
 import Cathedral.Gram.FractIntegral
+import Cathedral.NymanBeurling.ThetaBound
+import Cathedral.MellinBridge.IdentityBypass
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 
@@ -1461,13 +1429,81 @@ private lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
   simp only [one_mul, one_cpow, div_one, one_div]
   ring_nf
 
-/-- Substitution u = kx: change of variables for the BD Mellin integral. -/
-private axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+/-- Helper: (u/k)^s = u^s * k^{-s} for positive reals u, k. -/
+private lemma ofReal_div_cpow_real {u k : ℝ} (hu : 0 < u) (hk : 0 < k) (s : ℂ) :
+    ((u / k : ℝ) : ℂ) ^ s = (u : ℂ) ^ s * (k : ℂ) ^ (-s) := by
+  have hk_ne : (k : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hk)
+  rw [Complex.ofReal_div, div_eq_mul_inv, ← Complex.ofReal_inv]
+  rw [mul_cpow_ofReal_nonneg hu.le (inv_nonneg.mpr hk.le)]
+  rw [cpow_neg]
+  congr 1
+  rw [Complex.ofReal_inv]
+  exact inv_cpow _ _ (by rw [Complex.arg_ofReal_of_nonneg hk.le]; exact ne_of_gt Real.pi_pos |>.symm)
+
+/-- Substitution u = kx: change of variables for the BD Mellin integral.
+    PROVED via integral_comp_mul_right + cpow factoring. -/
+theorem mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ x in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     (k : ℂ) ^ (-s) *
       ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
-        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) := by
+  have hk_pos : (0:ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hk_ne : (k:ℝ) ≠ 0 := ne_of_gt hk_pos
+  have hk_c_ne : (k:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hk_ne
+  let g : ℝ → ℂ := fun u =>
+    ((Int.fract (1 / u) : ℝ) : ℂ) * ((u / (k:ℝ) : ℝ) : ℂ) ^ (s - 1)
+  have h_eq_lhs : ∀ x ∈ Set.uIcc (0:ℝ) 1,
+      g (x * (k:ℝ)) = ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+    intro x hx
+    dsimp [g]
+    congr 1
+    · rw [mul_comm x (k:ℝ)]
+    · congr 1; push_cast; exact_mod_cast mul_div_cancel_right₀ x hk_ne
+  have h_expand : ∀ u ∈ Set.uIcc (0:ℝ) (k:ℝ),
+      g u = ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) := by
+    intro u hu
+    dsimp [g]
+    have hu_pos : 0 < u ∨ u = 0 := by
+      rw [Set.uIcc_of_le (le_of_lt hk_pos)] at hu; exact (lt_or_eq_of_le hu.1).imp_right Eq.symm
+    rcases hu_pos with h | rfl
+    · rw [ofReal_div_cpow_real h hk_pos (s - 1)]; push_cast; ring
+    · simp [div_zero, Int.fract_zero, zero_div, zero_mul]
+  -- Convert from Ioo to interval integrals
+  rw [← integral_Ioc_eq_integral_Ioo, ← integral_Ioc_eq_integral_Ioo]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  rw [← intervalIntegral.integral_of_le (show (0:ℝ) ≤ k from le_of_lt hk_pos)]
+  -- LHS rewrite
+  have h_lhs_eq : ∫ x in (0:ℝ)..1, ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+      ∫ x in (0:ℝ)..1, g (x * (k:ℝ)) :=
+    (intervalIntegral.integral_congr h_eq_lhs).symm
+  -- Expand g inside RHS
+  have h_g_expand : ∫ u in (0:ℝ)..(k:ℝ), g u =
+      (∫ u in (0:ℝ)..(k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+        (k : ℂ) ^ (-(s - 1)) := by
+    calc ∫ u in (0:ℝ)..(k:ℝ), g u
+        = ∫ u in (0:ℝ)..(k:ℝ),
+            ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) :=
+          intervalIntegral.integral_congr h_expand
+      _ = _ := intervalIntegral.integral_mul_const _ _
+  rw [h_lhs_eq]
+  rw [intervalIntegral.integral_comp_mul_right (f := g) hk_ne]
+  simp only [zero_mul, one_mul]
+  -- Name the integral to avoid elaboration issues
+  set I := ∫ u in (0:ℝ)..(↑k:ℝ), g u with hI_def
+  -- I = (∫ f u) * k^{-(s-1)}
+  rw [show I = (∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+    (↑k : ℂ) ^ (-(s - 1)) from h_g_expand]
+  -- smul→mul
+  set J := ∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+  show ((↑k : ℝ)⁻¹ : ℝ) • (J * (↑k : ℂ) ^ (-(s - 1))) = (↑k : ℂ) ^ (-s) * J
+  rw [Complex.real_smul]
+  push_cast
+  rw [← cpow_neg_one (↑k : ℂ)]
+  rw [← mul_assoc, mul_right_comm]
+  congr 1
+  rw [← cpow_add _ _ hk_c_ne]
+  congr 1; ring
 
 /-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand. -/
 private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
@@ -1617,13 +1653,14 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ)
           simp [one_div]
         rw [hfull, add_comm]
 
-/-- **SUB-AXIOM 1b** (Identity Theorem): Base case k=1 analytically continued.
+/-- **THEOREM** (was SUB-AXIOM 1b, now PROVED via Identity Theorem):
     F(s) = ∫₀¹ {1/x}·x^{s-1} dx equals G(s) = 1/(s-1) - ζ(s)/s.
     FloorMellin.lean proves F = G for Re(s) > 1; the identity theorem
-    extends this to all Re(s) > 0, s ≠ 1. -/
-axiom bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    (IdentityBypass.lean) extends this to all Re(s) > 0, s ≠ 1. -/
+theorem bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    1 / (s - 1) - riemannZeta s / s
+    1 / (s - 1) - riemannZeta s / s :=
+  bd_mellin_base_case_proved s hs hs1
 
 /-- **THEOREM** (Replaces Axiom 1): BD Mellin transform at a zeta zero.
     Chains the Basis Collapse + Identity Theorem + ζ(ρ)=0 cancellation. -/
@@ -1928,16 +1965,15 @@ private lemma pole_terms_le_neg_four (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) 
   rw [div_le_iff₀ (mul_pos hs_pos hs1)]
   nlinarith [sq_nonneg (s - 1/2)]
 
-/-- **SUB-AXIOM 3a** (θ-integral bound): The entire function Λ₀(s) satisfies
+/-- **THEOREM (was SUB-AXIOM 3a)** (θ-integral bound): The entire function Λ₀(s) satisfies
     Re(Λ₀(s)) < 4 for real s ∈ (0,1).
 
-    Proof path: Λ₀(s) = ∫₁^∞ (x^{s/2-1} + x^{(1-s)/2-1}) ω(x) dx / 2
-    where ω(x) = Σ_{n≥1} e^{-πn²x}. For s ∈ (0,1) and x ≥ 1,
-    x^{negative} ≤ 1, so the integrand ≤ 2ω(x).
-    The integral ∫₁^∞ ω(x) dx ≤ e^{-π}/(π(1-e^{-π})) ≈ 0.015,
-    giving Λ₀(s) ≤ 0.030 ≪ 4. -/
-axiom completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
-    (completedRiemannZeta₀ (s : ℂ)).re < 4
+    Proved in Cathedral/NymanBeurling/ThetaBound.lean via the Mellin transform
+    representation and exponential decay of the Jacobi theta kernel.
+    Zero sorry, zero axioms — pure Mathlib. -/
+private lemma completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    (completedRiemannZeta₀ (s : ℂ)).re < 4 :=
+  completedRiemannZeta₀_bound_real_proved s hs_pos hs_lt
 
 -- NOTE: completedRiemannZeta₀_real (sub-axiom 3b) was originally here but is unused.
 -- The real-part extraction is handled directly by push_cast + ring.
@@ -2884,6 +2920,7 @@ FILE: Cathedral/NymanBeurling/MellinReduction.lean
   NOTE: Requires s ≠ 1 to avoid 0/0 in the formula.
 -/
 import Cathedral.NymanBeurling.BDMellin
+import Mathlib.MeasureTheory.Function.Floor
 
 noncomputable section
 open Complex Real MeasureTheory Set
@@ -2920,14 +2957,9 @@ lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
 -- THEOREMS: Substitution, Splitting, and Tail Evaluation
 -- ════════════════════════════════════════════════
 
-/-- Substitution u = kx converts ∫₀¹ f(kx) g(x) dx to k⁻ˢ ∫₀ᵏ f(u) g(u/k) du.
-    Uses integral_comp_mul_right + cpow factoring. -/
-axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
-    ∫ x in Set.Ioo (0:ℝ) 1,
-      ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    (k : ℂ) ^ (-s) *
-      ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
-        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+-- Axiom `mellin_substitution_ioo` eliminated:
+-- Now proved as theorem `mellin_substitution_ioo` in BDMellin.lean
+-- (via integral_comp_mul_right + cpow factoring)
 
 /-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand.
     Uses integral_add_adjacent_intervals + integrability. -/
@@ -2948,9 +2980,51 @@ theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re)
       ← intervalIntegral.integral_of_le h_le2]
   let f : ℝ → ℂ := fun u => ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
   have h_int_1 : IntervalIntegrable f volume 0 1 := by
-    sorry -- integrability via intervalIntegrable_cpow' + bounded fract part
+    apply IntervalIntegrable.mono_fun (intervalIntegral.intervalIntegrable_cpow' (by
+      simp [sub_re, one_re]; linarith : -1 < (s - 1).re))
+    · apply AEStronglyMeasurable.mul
+      · exact (Measurable.aestronglyMeasurable
+          (Complex.measurable_ofReal.comp
+            (Measurable.fract (measurable_const.div measurable_id)))).restrict
+      · apply ContinuousOn.aestronglyMeasurable
+        · exact ContinuousOn.cpow_const (Complex.continuous_ofReal.continuousOn)
+            (fun x hx => Or.inl (by
+              simp [Complex.ofReal_re]
+              exact (Set.mem_Ioc.mp (Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1) ▸ hx)).1))
+        · exact measurableSet_uIoc
+    · filter_upwards with x
+      rw [norm_mul]
+      calc ‖((Int.fract (1 / x) : ℝ) : ℂ)‖ * ‖(↑x : ℂ) ^ (s - 1)‖
+          ≤ 1 * ‖(↑x : ℂ) ^ (s - 1)‖ := by
+            gcongr
+            simp [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = ‖(↑x : ℂ) ^ (s - 1)‖ := one_mul _
   have h_int_2 : IntervalIntegrable f volume 1 k := by
-    sorry -- continuity on [1,k] since {1/u} = 1/u there
+    -- On [1,k], {1/u} = 1/u, so f(u) = (1/u) * u^{s-1} = u^{s-2}
+    -- which is continuous (hence integrable) on [1,k] since u > 0
+    have h1k : (1:ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+    apply IntervalIntegrable.mono_fun (intervalIntegral.intervalIntegrable_cpow
+      (Or.inr (fun h => by
+        rw [Set.uIcc_of_le h1k] at h; exact not_le.mpr (by linarith [h.1]) (le_refl 0))))
+    · apply AEStronglyMeasurable.mul
+      · exact (Measurable.aestronglyMeasurable
+          (Complex.measurable_ofReal.comp
+            (Measurable.fract (measurable_const.div measurable_id)))).restrict
+      · apply ContinuousOn.aestronglyMeasurable
+        · exact ContinuousOn.cpow_const (Complex.continuous_ofReal.continuousOn)
+            (fun x hx => Or.inl (by
+              rw [Set.uIoc_of_le h1k] at hx
+              simp [Complex.ofReal_re]; linarith [(Set.mem_Ioc.mp hx).1]))
+        · exact measurableSet_uIoc
+    · filter_upwards with x
+      rw [norm_mul]
+      calc ‖((Int.fract (1 / x) : ℝ) : ℂ)‖ * ‖(↑x : ℂ) ^ (s - 1)‖
+          ≤ 1 * ‖(↑x : ℂ) ^ (s - 1)‖ := by
+            gcongr
+            simp [Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = ‖(↑x : ℂ) ^ (s - 1)‖ := one_mul _
   exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/
@@ -3305,6 +3379,479 @@ end
 
 
 ================================================================
+FILE: Cathedral/NymanBeurling/ThetaBound.lean
+================================================================
+
+/-
+  Cathedral/NymanBeurling/ThetaBound.lean
+
+  ## Proof: completedRiemannZeta₀_bound_real
+
+  THEOREM: For real s ∈ (0,1), Re(Λ₀(s)) < 4.
+
+  Status: **ZERO sorry. ZERO axioms. Pure Mathlib.**
+
+  Proof chain:
+  1. evenKernel_zero_sub_one_le: |θ(0,t)-1| ≤ 4e^{-πt} for t ≥ 1 (JacobiTheta.Bounds)
+  2. f_modif_norm_le: ‖f_modif(t)‖ ≤ 4e^{-πt} for t > 1
+  3. f_modif_norm_le_Ioo: ‖f_modif(t)‖ ≤ t^{-1/2}·4e^{-π/t} for t ∈ (0,1) (FE)
+  4. u_pow_exp_bound: u^{3/2}·e^{-πu} ≤ e^{-π} for u ≥ 1 (Algebraic Squeeze)
+  5. integrand_pointwise_bound: ‖t^{s-1}·f_modif(t)‖ ≤ 4e^{-πt} for all t > 0
+  6. mellin_integral_bound: ∫‖integrand‖ ≤ 4/π < 8
+  7. norm_Lambda0_lt_eight → completedRiemannZeta₀_norm_bound → main theorem
+-/
+import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.NumberTheory.LSeries.HurwitzZetaEven
+import Mathlib.NumberTheory.ModularForms.JacobiTheta.Bounds
+import Mathlib.Analysis.Real.Pi.Bounds
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+
+noncomputable section
+open Complex Real MeasureTheory Set HurwitzZeta Filter HurwitzKernelBounds
+
+-- ════════════════════════════════════════════════════
+-- Section 1: Numeric helpers
+-- ════════════════════════════════════════════════════
+
+private lemma exp_neg_pi_lt_half : rexp (-π) < 1 / 2 := by
+  rw [Real.exp_neg]; exact inv_lt_of_inv_lt₀ (by positivity) (by linarith [pi_gt_three, add_one_le_exp π])
+
+private lemma crude_geom_bound (t : ℝ) (ht : 1 ≤ t) :
+    rexp (-π * t) / (1 - rexp (-π * t)) ≤ 2 * rexp (-π * t) := by
+  have h_exp : rexp (-π * t) < 1 / 2 :=
+    lt_of_le_of_lt (exp_le_exp.mpr (by nlinarith [pi_pos])) exp_neg_pi_lt_half
+  rw [div_le_iff₀ (by linarith)]; nlinarith [exp_pos (-π * t)]
+
+/-- The Algebraic Squeeze: u^{3/2}·exp(-πu) ≤ exp(-π) for u ≥ 1.
+    From ln u ≤ u - 1 and 3/2 ≤ π, so u^{3/2} ≤ e^{π(u-1)}. -/
+private lemma u_pow_exp_bound (u : ℝ) (hu : 1 ≤ u) :
+    u ^ (3 / 2 : ℝ) * rexp (-π * u) ≤ rexp (-π) := by
+  have hu_pos : 0 < u := by linarith
+  have h_log : Real.log u ≤ u - 1 := Real.log_le_sub_one_of_pos hu_pos
+  have h_pi_bound : (3 / 2 : ℝ) ≤ π := by linarith [Real.pi_gt_three]
+  have h_mul_log : (3 / 2 : ℝ) * Real.log u ≤ π * (u - 1) :=
+    calc (3 / 2 : ℝ) * Real.log u
+      _ ≤ (3 / 2 : ℝ) * (u - 1) := mul_le_mul_of_nonneg_left h_log (by norm_num)
+      _ ≤ π * (u - 1) := mul_le_mul_of_nonneg_right h_pi_bound (by linarith)
+  have h_u_pow : u ^ (3 / 2 : ℝ) = rexp ((3 / 2 : ℝ) * Real.log u) := by
+    rw [Real.rpow_def_of_pos hu_pos]; ring_nf
+  rw [h_u_pow]
+  calc rexp ((3 / 2 : ℝ) * Real.log u) * rexp (-π * u)
+    _ ≤ rexp (π * (u - 1)) * rexp (-π * u) :=
+        mul_le_mul_of_nonneg_right (Real.exp_le_exp.mpr h_mul_log) (exp_pos _).le
+    _ = rexp (π * u - π - π * u) := by rw [← Real.exp_add]; congr 1; ring
+    _ = rexp (-π) := by congr 1; ring
+
+-- ════════════════════════════════════════════════════
+-- Section 2: Pointwise theta kernel bound
+-- ════════════════════════════════════════════════════
+
+private lemma evenKernel_eq_F_int {t : ℝ} (ht : 0 < t) :
+    evenKernel (0 : UnitAddCircle) t = F_int 0 ((0 : ℝ) : UnitAddCircle) t := by
+  have h1 := (hasSum_int_evenKernel (0 : ℝ) ht).tsum_eq
+  simp only [add_zero] at h1; rw [QuotientAddGroup.mk_zero] at h1
+  suffices F_int 0 ((0 : ℝ) : UnitAddCircle) t = ∑' (b : ℤ), rexp (-π * ↑b ^ 2 * t) by linarith
+  simp only [F_int, Function.Periodic.lift_coe, f_int, add_zero, pow_zero, one_mul]
+
+private lemma evenKernel_zero_sub_one_le {t : ℝ} (ht : 1 ≤ t) :
+    ‖evenKernel (0 : UnitAddCircle) t - 1‖ ≤ 4 * rexp (-π * t) := by
+  have ht_pos := lt_of_lt_of_le one_pos ht
+  have hFint := F_int_eq_of_mem_Icc 0 ⟨le_refl _, zero_le_one⟩ ht_pos
+  simp only [sub_zero] at hFint
+  rw [evenKernel_eq_F_int ht_pos, hFint,
+    show F_nat 0 0 t + F_nat 0 1 t - 1 = (F_nat 0 0 t - 1) + F_nat 0 1 t from by ring]
+  calc ‖(F_nat 0 0 t - 1) + F_nat 0 1 t‖
+      ≤ ‖F_nat 0 0 t - 1‖ + ‖F_nat 0 1 t‖ := norm_add_le _ _
+    _ ≤ rexp (-π * t) / (1 - rexp (-π * t)) +
+        rexp (-π * t) / (1 - rexp (-π * t)) := by
+        gcongr
+        · exact F_nat_zero_zero_sub_le ht_pos
+        · have := F_nat_zero_le (show (0 : ℝ) ≤ 1 from zero_le_one) ht_pos
+          simp only [one_pow, mul_one] at this; exact this
+    _ = 2 * (rexp (-π * t) / (1 - rexp (-π * t))) := by ring
+    _ ≤ 2 * (2 * rexp (-π * t)) := by gcongr; exact crude_geom_bound t ht
+    _ = 4 * rexp (-π * t) := by ring
+
+-- ════════════════════════════════════════════════════
+-- Section 3: Symmetry key + f_modif bounds
+-- ════════════════════════════════════════════════════
+
+private abbrev P₀ := (hurwitzEvenFEPair (0 : UnitAddCircle))
+
+/-- The Symmetry Key: evenKernel(0,·) = cosKernel(0,·), from symmetry of the FE pair. -/
+private lemma evenKernel_eq_cosKernel (t : ℝ) :
+    evenKernel (0 : UnitAddCircle) t = cosKernel (0 : UnitAddCircle) t := by
+  have h_fg : P₀.f = P₀.g :=
+    calc P₀.f = P₀.symm.g := rfl
+      _ = P₀.g := congr_arg WeakFEPair.g hurwitzEvenFEPair_zero_symm
+  exact Complex.ofReal_inj.mp (congr_fun h_fg t)
+
+/-- f_modif norm bound on Ioi(1): ‖f_modif(t)‖ ≤ 4·exp(-πt). -/
+private lemma f_modif_norm_le {t : ℝ} (ht : 1 < t) :
+    ‖P₀.f_modif t‖ ≤ 4 * rexp (-π * t) := by
+  show ‖(Ioi 1).indicator (fun x ↦ P₀.f x - P₀.f₀) t +
+       (Ioo 0 1).indicator (fun x ↦ P₀.f x - (P₀.ε * ↑(x ^ (-P₀.k))) • P₀.g₀) t‖ ≤ _
+  rw [indicator_of_mem (show t ∈ Ioi (1:ℝ) from ht),
+      indicator_of_notMem (show t ∉ Ioo (0:ℝ) 1 from fun h ↦ not_lt.mpr (le_of_lt ht) h.2),
+      add_zero]
+  have hf0 : P₀.f₀ = (1 : ℂ) := by simp [hurwitzEvenFEPair]
+  rw [hf0]
+  show ‖(↑(evenKernel (0 : UnitAddCircle) t) : ℂ) - 1‖ ≤ 4 * rexp (-π * t)
+  rw [show (↑(evenKernel (0 : UnitAddCircle) t) : ℂ) - (1 : ℂ) =
+    (↑(evenKernel (0 : UnitAddCircle) t - 1) : ℂ) from by push_cast; ring]
+  rw [Complex.norm_real]
+  exact evenKernel_zero_sub_one_le (le_of_lt ht)
+
+/-- f_modif norm bound on Ioo(0,1): ‖f_modif(t)‖ ≤ t^{-1/2}·4·exp(-π/t).
+    Uses the functional equation and evenKernel = cosKernel. -/
+private lemma f_modif_norm_le_Ioo {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
+    ‖P₀.f_modif t‖ ≤ t ^ (-(1:ℝ)/2) * (4 * rexp (-π * (1/t))) := by
+  show ‖(Ioi 1).indicator (fun x ↦ P₀.f x - P₀.f₀) t +
+       (Ioo 0 1).indicator (fun x ↦ P₀.f x - (P₀.ε * ↑(x ^ (-P₀.k))) • P₀.g₀) t‖ ≤ _
+  rw [indicator_of_notMem (show t ∉ Ioi (1:ℝ) from not_lt.mpr (le_of_lt ht1)),
+      indicator_of_mem (show t ∈ Ioo (0:ℝ) 1 from ⟨ht0, ht1⟩), zero_add]
+  show ‖(↑(evenKernel (0 : UnitAddCircle) t) : ℂ) -
+       ((1 : ℂ) * ↑(t ^ (-(1 / 2 : ℝ)))) • (1 : ℂ)‖ ≤ _
+  simp only [one_mul, smul_eq_mul, mul_one]
+  rw [show (↑(evenKernel (0 : UnitAddCircle) t) : ℂ) - ↑(t ^ (-(1/2 : ℝ))) =
+    (↑(evenKernel (0 : UnitAddCircle) t - t ^ (-(1/2 : ℝ))) : ℂ) from by push_cast; ring]
+  rw [Complex.norm_real]
+  have h_fe := evenKernel_functional_equation (0 : UnitAddCircle) t
+  rw [← evenKernel_eq_cosKernel (1/t)] at h_fe
+  have h_rpow : (1 : ℝ) / t ^ (1/2 : ℝ) = t ^ (-(1/2 : ℝ)) := by
+    rw [Real.rpow_neg ht0.le, one_div]
+  rw [h_rpow] at h_fe
+  have h_diff : evenKernel (0 : UnitAddCircle) t - t ^ (-(1/2 : ℝ)) =
+      t ^ (-(1/2 : ℝ)) * (evenKernel (0 : UnitAddCircle) (1/t) - 1) := by
+    rw [h_fe]; ring
+  rw [h_diff, norm_mul, Real.norm_rpow_of_nonneg ht0.le, Real.norm_of_nonneg ht0.le]
+  have h_exp_eq : (-(1 / 2 : ℝ)) = (-1 / 2 : ℝ) := by ring
+  rw [h_exp_eq]
+  gcongr
+  exact evenKernel_zero_sub_one_le (le_div_iff₀ ht0 |>.mpr (by linarith))
+
+-- ════════════════════════════════════════════════════
+-- Section 4: Mellin infrastructure
+-- ════════════════════════════════════════════════════
+
+private lemma norm_mellin_le (f : ℝ → ℂ) (s : ℂ) :
+    ‖mellin f s‖ ≤ ∫ t in Ioi (0 : ℝ), ‖(t : ℂ) ^ (s - 1) • f t‖ :=
+  norm_integral_le_integral_norm _
+
+private lemma zeta0_eq (s : ℂ) :
+    completedRiemannZeta₀ s = P₀.Λ₀ (s / 2) / 2 := by
+  simp only [completedRiemannZeta₀, completedHurwitzZetaEven₀]
+
+-- ════════════════════════════════════════════════════
+-- Section 5: Core integral bound
+-- ════════════════════════════════════════════════════
+
+/-- Pointwise integrand bound on Ioi 0: the integrand is ≤ 4·exp(-πt) ae.
+    Uses f_modif_norm_le (Ioi 1), f_modif_norm_le_Ioo + u_pow_exp_bound (Ioo(0,1)),
+    and the observation that 4·exp(-π) ≤ 4·exp(-πt) for t ≤ 1. -/
+private lemma integrand_pointwise_bound {s : ℝ} (hs_pos : 0 < s) (hs_lt : s < 1)
+    {t : ℝ} (ht : 0 < t) :
+    t ^ (s / 2 - 1) * ‖P₀.f_modif t‖ ≤ 4 * rexp (-π * t) := by
+  rcases lt_or_ge t 1 with ht1 | ht1
+  · -- Case t ∈ (0, 1): the Theorist's Gambit
+    have hfm := f_modif_norm_le_Ioo ht ht1
+    -- Bound: ‖f_modif(t)‖ ≤ t^{-1/2} · 4 · exp(-π/t)
+    -- Key fact: (1/t)^{3/2} · exp(-π·(1/t)) ≤ exp(-π) [u_pow_exp_bound at 1/t]
+    have h_inv_ge : 1 ≤ 1 / t := le_div_iff₀ ht |>.mpr (by linarith)
+    have h_squeeze := u_pow_exp_bound (1/t) h_inv_ge
+    -- t^{σ/2} ≤ 1 for 0 < t < 1, σ > 0
+    have h_rpow_le : t ^ (s / 2) ≤ 1 := rpow_le_one ht.le ht1.le (by positivity)
+    -- We need: t^{σ-1} · ‖f_modif(t)‖ ≤ 4·exp(-πt)
+    -- Apply bound on f_modif:
+    -- t^{σ-1} · ‖f_modif‖ ≤ t^{σ-1} · t^{-1/2} · 4·exp(-π/t)
+    --   = 4 · t^{σ-3/2} · exp(-π/t)
+    --   = 4 · t^{σ/2} · t^{-3/2} · exp(-π/t) 
+    --   ≤ 4 · 1 · (1/t)^{3/2} · exp(-π·(1/t))
+    --   ≤ 4 · exp(-π)
+    --   ≤ 4 · exp(-πt)
+    -- Strategy: bound everything by 4·exp(-π), then by 4·exp(-πt).
+    -- First show t^{σ-1} · t^{-1/2} · (1/t)^{-3/2} ≤ 1
+    -- Actually, let's just bound t^{σ-1} ≤ t^{-1/2} for this range,
+    -- since σ/2 - 1 ≤ -1/2 (as σ < 1 ⟹ σ/2 < 1/2 ⟹ σ/2 - 1 < -1/2).
+    -- No wait, σ/2 - 1 < -1/2 is NOT right in general (σ could be close to 1).
+    -- Actually σ ∈ (0,1), so σ/2 ∈ (0, 1/2), so σ/2 - 1 ∈ (-1, -1/2).
+    -- So t^{σ/2-1} ≤ t^{-1} (since -1 < σ/2-1 and t < 1).
+    -- Wait, for t < 1, larger negative exponent gives LARGER value.
+    -- t^{-1} ≥ t^{σ/2-1} iff -1 ≤ σ/2-1 iff 0 ≤ σ/2, which is true.
+    -- And t^{σ/2-1} * t^{-1/2} = t^{σ/2-3/2}.
+    -- We want: t^{σ/2-3/2} * 4 * exp(-π/t) ≤ 4 * exp(-πt).
+    -- Or: t^{σ/2-3/2} * exp(-π/t) ≤ exp(-πt).
+    -- Since t^{σ/2-3/2} = t^{σ/2} * t^{-3/2} ≤ 1 * (1/t)^{3/2},
+    -- we get: t^{σ/2-3/2} * exp(-π/t) ≤ (1/t)^{3/2} * exp(-π/t) ≤ exp(-π) ≤ exp(-πt).
+    -- Let me just prove the nonneg bound from scratch:
+    suffices h : t ^ (s / 2 - 1) * (t ^ (-(1:ℝ)/2) * (4 * rexp (-π * (1/t)))) ≤
+        4 * rexp (-π * t) by
+      exact le_trans (mul_le_mul_of_nonneg_left hfm (rpow_nonneg ht.le _)) h
+    -- LHS = 4 * (t ^ (s/2-1) * t^{-1/2}) * exp(-π/t)
+    -- Show this ≤ 4 * exp(-π) ≤ 4 * exp(-πt)
+    suffices h : t ^ (s / 2 - 1) * t ^ (-(1:ℝ)/2) * (4 * rexp (-π * (1/t))) ≤
+        4 * rexp (-π * t) by
+      linarith [mul_assoc (t ^ (s / 2 - 1)) (t ^ (-(1:ℝ)/2)) (4 * rexp (-π * (1/t)))]
+    -- Reorganize: = 4 * ((t^{σ/2-1} * t^{-1/2}) * exp(-π/t))
+    -- = 4 * (t^{σ/2-3/2} * exp(-π/t))  [rpow_add]
+    have := mul_assoc (t ^ (s / 2 - 1)) (t ^ (-(1:ℝ)/2)) (4 * rexp (-π * (1/t)))
+    -- Just bound the whole product directly
+    -- t^{s/2-1} * t^{-1/2} = t^{s/2-3/2}
+    -- = t^{s/2} * t^{-3/2}
+    -- ≤ 1 * (1/t)^{3/2}
+    -- so LHS ≤ 4 * (1/t)^{3/2} * exp(-π/t) ≤ 4 * exp(-π) ≤ 4 * exp(-πt)
+    calc t ^ (s / 2 - 1) * t ^ (-(1:ℝ)/2) * (4 * rexp (-π * (1/t)))
+      _ ≤ (1/t) ^ (3/2 : ℝ) * (4 * rexp (-π * (1/t))) := by
+            gcongr
+            rw [← rpow_add ht]
+            rw [one_div, inv_rpow ht.le, ← rpow_neg ht.le]
+            apply rpow_le_rpow_of_exponent_ge ht ht1.le
+            linarith
+      _ = 4 * ((1/t) ^ (3/2 : ℝ) * rexp (-π * (1/t))) := by ring
+      _ ≤ 4 * rexp (-π) :=
+            mul_le_mul_of_nonneg_left h_squeeze (by norm_num)
+      _ ≤ 4 * rexp (-π * t) := by
+            have h_exp : -π ≤ -π * t := by nlinarith [pi_pos]
+            exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr h_exp) (by norm_num)
+  · rcases eq_or_lt_of_le ht1 with rfl | ht1'
+    · -- t = 1: f_modif(1) = 0
+      have : P₀.f_modif 1 = 0 := by
+        have h1 : (1 : ℝ) ∉ Ioi (1 : ℝ) := by simp
+        have h2 : (1 : ℝ) ∉ Ioo (0 : ℝ) 1 := fun h => (lt_irrefl 1 h.2)
+        show (Ioi (1:ℝ)).indicator (fun x ↦ P₀.f x - P₀.f₀) 1 +
+             (Ioo (0:ℝ) 1).indicator (fun x ↦ P₀.f x - (P₀.ε * ↑(x ^ (-P₀.k))) • P₀.g₀) 1 = 0
+        rw [indicator_of_notMem h1, indicator_of_notMem h2, add_zero]
+      simp [this]; positivity
+    · -- t > 1: standard bound via f_modif_norm_le
+      calc t ^ (s / 2 - 1) * ‖P₀.f_modif t‖
+          ≤ 1 * ‖P₀.f_modif t‖ :=
+              mul_le_mul_of_nonneg_right
+                (rpow_le_one_of_one_le_of_nonpos (le_of_lt ht1') (by linarith))
+                (norm_nonneg _)
+        _ = ‖P₀.f_modif t‖ := one_mul _
+        _ ≤ 4 * rexp (-π * t) := f_modif_norm_le ht1'
+
+/-- The Mellin integral of the modified theta kernel is < 8 for real σ ∈ (0, 1/2).
+
+    Uses the pointwise bound ‖integrand‖ ≤ 4·exp(-πt) and the explicit integral
+    ∫₀^∞ 4·exp(-πt) dt = 4/π < 2. -/
+private lemma mellin_integral_bound (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    ∫ t in Ioi (0 : ℝ),
+      ‖(t : ℂ) ^ ((↑s / 2 : ℂ) - 1) • P₀.toStrongFEPair.f t‖ < 8 := by
+  -- The integral comparison: ∫ ‖integrand‖ ≤ ∫ 4·exp(-πt) = 4/π < 8
+  have h_bound : IntegrableOn (fun t ↦ 4 * rexp (-π * t)) (Ioi (0 : ℝ)) :=
+    (integrableOn_exp_mul_Ioi (show (-π : ℝ) < 0 from neg_lt_zero.mpr pi_pos) 0).const_mul 4
+  have h_le : ∀ᵐ (t : ℝ) ∂(volume.restrict (Ioi (0 : ℝ))),
+      ‖((t : ℝ) : ℂ) ^ ((↑s / 2 : ℂ) - 1) • P₀.f_modif t‖ ≤ 4 * rexp ((-π) * t) := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioi] with t ht
+    rw [norm_smul, Complex.norm_cpow_eq_rpow_re_of_pos (mem_Ioi.mp ht)]
+    simp only [sub_re, ofReal_re, div_ofNat, one_re]
+    exact integrand_pointwise_bound hs_pos hs_lt (mem_Ioi.mp ht)
+  calc ∫ t in Ioi (0 : ℝ),
+        ‖(t : ℂ) ^ ((↑s / 2 : ℂ) - 1) • P₀.toStrongFEPair.f t‖
+      ≤ ∫ t in Ioi (0 : ℝ), 4 * rexp (-π * t) :=
+          integral_mono_of_nonneg
+            (Eventually.of_forall (fun _ ↦ norm_nonneg _))
+            h_bound h_le
+    _ = 4 * (∫ t in Ioi (0 : ℝ), rexp (-π * t)) := by rw [integral_const_mul]
+    _ = 4 * (-rexp (-π * 0) / (-π)) := by
+          rw [integral_exp_mul_Ioi (show (-π : ℝ) < 0 from neg_lt_zero.mpr pi_pos) 0]
+    _ = 4 / π := by rw [mul_zero, Real.exp_zero]; ring
+    _ < 8 := by rw [div_lt_iff₀ pi_pos]; linarith [pi_gt_three]
+
+-- ════════════════════════════════════════════════════
+-- Section 6: Main theorem chain
+-- ════════════════════════════════════════════════════
+
+private lemma norm_Lambda0_lt_eight (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    ‖P₀.Λ₀ ((↑s : ℂ) / 2)‖ < 8 := by
+  show ‖mellin P₀.toStrongFEPair.f ((↑s : ℂ) / 2)‖ < 8
+  exact (norm_mellin_le _ _).trans_lt (mellin_integral_bound s hs_pos hs_lt)
+
+private lemma completedRiemannZeta₀_norm_bound (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    ‖completedRiemannZeta₀ (s : ℂ)‖ < 4 := by
+  rw [zeta0_eq, norm_div, Complex.norm_ofNat]
+  linarith [norm_Lambda0_lt_eight s hs_pos hs_lt]
+
+theorem completedRiemannZeta₀_bound_real_proved
+    (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    (completedRiemannZeta₀ (s : ℂ)).re < 4 :=
+  (Complex.re_le_norm _).trans_lt (completedRiemannZeta₀_norm_bound s hs_pos hs_lt)
+
+end
+
+
+================================================================
+FILE: Cathedral/NymanBeurling/ThetaBoundMellin.lean
+================================================================
+
+/-
+  ThetaBoundMellin.lean — The Final Cleaving
+  Executing the Theorist's Directive: Annihilation of the Last Sorry
+-/
+import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.NumberTheory.LSeries.HurwitzZetaEven
+import Mathlib.NumberTheory.ModularForms.JacobiTheta.Bounds
+import Mathlib.Analysis.Real.Pi.Bounds
+
+noncomputable section
+open Complex Real MeasureTheory Set HurwitzZeta Filter HurwitzKernelBounds
+
+private abbrev P₀ := (hurwitzEvenFEPair (0 : UnitAddCircle))
+
+-- ════════════════════════════════════════════════════
+-- NUMERIC HELPERS
+-- ════════════════════════════════════════════════════
+
+private lemma exp_neg_pi_lt_half : rexp (-π) < 1 / 2 := by
+  rw [Real.exp_neg]; exact inv_lt_of_inv_lt₀ (by positivity) (by linarith [pi_gt_three, add_one_le_exp π])
+
+private lemma crude_geom (t : ℝ) (ht : 1 ≤ t) :
+    rexp (-π * t) / (1 - rexp (-π * t)) ≤ 2 * rexp (-π * t) := by
+  have h_exp : rexp (-π * t) < 1 / 2 :=
+    lt_of_le_of_lt (exp_le_exp.mpr (by nlinarith [pi_pos])) exp_neg_pi_lt_half
+  rw [div_le_iff₀ (by linarith)]; nlinarith [exp_pos (-π * t)]
+
+-- ════════════════════════════════════════════════════
+-- EVENKERNEL BOUND (from previous session)
+-- ════════════════════════════════════════════════════
+
+private lemma evenKernel_eq_F_int {t : ℝ} (ht : 0 < t) :
+    evenKernel (0 : UnitAddCircle) t = F_int 0 ((0 : ℝ) : UnitAddCircle) t := by
+  have h1 := (hasSum_int_evenKernel (0 : ℝ) ht).tsum_eq
+  simp only [add_zero] at h1; rw [QuotientAddGroup.mk_zero] at h1
+  suffices F_int 0 ((0 : ℝ) : UnitAddCircle) t = ∑' (b : ℤ), rexp (-π * ↑b ^ 2 * t) by linarith
+  simp only [F_int, Function.Periodic.lift_coe, f_int, add_zero, pow_zero, one_mul]
+
+private lemma evenKernel_zero_sub_one_le {t : ℝ} (ht : 1 ≤ t) :
+    ‖evenKernel (0 : UnitAddCircle) t - 1‖ ≤ 4 * rexp (-π * t) := by
+  have ht_pos := lt_of_lt_of_le one_pos ht
+  have hFint := F_int_eq_of_mem_Icc 0 ⟨le_refl _, zero_le_one⟩ ht_pos
+  simp only [sub_zero] at hFint
+  rw [evenKernel_eq_F_int ht_pos, hFint,
+    show F_nat 0 0 t + F_nat 0 1 t - 1 = (F_nat 0 0 t - 1) + F_nat 0 1 t from by ring]
+  calc ‖(F_nat 0 0 t - 1) + F_nat 0 1 t‖
+      ≤ ‖F_nat 0 0 t - 1‖ + ‖F_nat 0 1 t‖ := norm_add_le _ _
+    _ ≤ rexp (-π * t) / (1 - rexp (-π * t)) +
+        rexp (-π * t) / (1 - rexp (-π * t)) := by
+        gcongr
+        · exact F_nat_zero_zero_sub_le ht_pos
+        · have := F_nat_zero_le (show (0 : ℝ) ≤ 1 from zero_le_one) ht_pos
+          simp only [one_pow, mul_one] at this; exact this
+    _ = 2 * (rexp (-π * t) / (1 - rexp (-π * t))) := by ring
+    _ ≤ 2 * (2 * rexp (-π * t)) := by gcongr; exact crude_geom t ht
+    _ = 4 * rexp (-π * t) := by ring
+
+-- ════════════════════════════════════════════════════
+-- PHASE 1: The Algebraic Squeeze (Theorist's Gambit)
+-- u^{3/2} * exp(-πu) ≤ exp(-π) for u ≥ 1
+-- ════════════════════════════════════════════════════
+
+private lemma u_pow_exp_bound (u : ℝ) (hu : 1 ≤ u) :
+    u ^ (3 / 2 : ℝ) * rexp (-π * u) ≤ rexp (-π) := by
+  have hu_pos : 0 < u := by linarith
+  have h_log : Real.log u ≤ u - 1 := Real.log_le_sub_one_of_pos hu_pos
+  have h_pi_bound : (3 / 2 : ℝ) ≤ π := by linarith [Real.pi_gt_three]
+  have h_mul_log : (3 / 2 : ℝ) * Real.log u ≤ π * (u - 1) := by
+    calc (3 / 2 : ℝ) * Real.log u
+      _ ≤ (3 / 2 : ℝ) * (u - 1) := mul_le_mul_of_nonneg_left h_log (by norm_num)
+      _ ≤ π * (u - 1) := mul_le_mul_of_nonneg_right h_pi_bound (by linarith)
+  have h_exp : rexp ((3 / 2 : ℝ) * Real.log u) ≤ rexp (π * (u - 1)) :=
+    Real.exp_le_exp.mpr h_mul_log
+  have h_u_pow : u ^ (3 / 2 : ℝ) = rexp ((3 / 2 : ℝ) * Real.log u) := by
+    rw [Real.rpow_def_of_pos hu_pos]; ring_nf
+  rw [h_u_pow]
+  calc rexp ((3 / 2 : ℝ) * Real.log u) * rexp (-π * u)
+    _ ≤ rexp (π * (u - 1)) * rexp (-π * u) := mul_le_mul_of_nonneg_right h_exp (exp_pos _).le
+    _ = rexp (π * u - π - π * u) := by rw [← Real.exp_add]; congr 1; ring
+    _ = rexp (-π) := by congr 1; ring
+
+-- ════════════════════════════════════════════════════
+-- PHASE 2: The Symmetry Key
+-- evenKernel(0, t) = cosKernel(0, t)
+-- ════════════════════════════════════════════════════
+
+private lemma evenKernel_eq_cosKernel (t : ℝ) :
+    evenKernel (0 : UnitAddCircle) t = cosKernel (0 : UnitAddCircle) t := by
+  have h_symm := hurwitzEvenFEPair_zero_symm
+  have h_fg : P₀.f = P₀.g := by
+    calc P₀.f = P₀.symm.g := rfl
+      _ = P₀.g := congr_arg WeakFEPair.g h_symm
+  have h_eval := congr_fun h_fg t
+  exact Complex.ofReal_inj.mp h_eval
+
+-- ════════════════════════════════════════════════════
+-- PHASE 2.5: f_modif_norm on Ioo(0,1) — the inner sorry
+-- ════════════════════════════════════════════════════
+
+-- The key fact:
+-- evenKernel_functional_equation: evenKernel a x = 1/x^{1/2} * cosKernel a (1/x)
+-- Combined with evenKernel_eq_cosKernel:
+-- evenKernel 0 x = x^{-1/2} * evenKernel 0 (1/x)
+
+-- f_modif on Ioo(0,1):
+-- = P₀.f t - (P₀.ε * ↑(t^{-P₀.k})) • P₀.g₀
+-- = ofReal(ek(t)) - (1 * ↑(t^{-1/2})) • 1
+-- = ofReal(ek(t)) - ofReal(t^{-1/2})  [since 1•1 = 1 and casting t^{-1/2}]
+
+-- Hmm wait, ↑(t^{-1/2}) • 1 is (t^{-1/2} : ℂ) • (1 : ℂ) = (t^{-1/2} : ℂ)
+-- Actually P₀.ε = (1 : ℂ). And t^{-P₀.k} = t^{-1/2} as a real.
+-- And ε * ↑(t^{-k}) is (1 : ℂ) * ofReal(t^{-1/2}) = ofReal(t^{-1/2}) in ℂ.
+-- And smearing by g₀ = (1 : ℂ): ofReal(t^{-1/2}) • 1 = ofReal(t^{-1/2}).
+
+-- So f_modif(t) on Ioo(0,1) = ofReal(ek(t)) - ofReal(t^{-1/2})
+-- = ofReal(ek(t) - t^{-1/2})
+
+-- By FE: ek(t) = (1/t)^{1/2} * cosKernel(0, 1/t) = t^{-1/2} * ek(1/t) [using cosKernel=evenKernel]
+-- So: ek(t) - t^{-1/2} = t^{-1/2} * (ek(1/t) - 1)
+
+-- ‖f_modif(t)‖ = |ek(t) - t^{-1/2}| = t^{-1/2} * |ek(1/t) - 1|
+-- ≤ t^{-1/2} * 4*exp(-π/t)  [by evenKernel_zero_sub_one_le at 1/t, since 1/t ≥ 1]
+
+private lemma f_modif_norm_le_Ioo {t : ℝ} (ht0 : 0 < t) (ht1 : t < 1) :
+    ‖P₀.f_modif t‖ ≤ t ^ (-(1:ℝ)/2) * (4 * rexp (-π * (1/t))) := by
+  have h1 : t ∉ Ioi (1 : ℝ) := not_lt.mpr (le_of_lt ht1)
+  have h2 : t ∈ Ioo (0 : ℝ) 1 := ⟨ht0, ht1⟩
+  show ‖(Ioi 1).indicator (fun x ↦ P₀.f x - P₀.f₀) t +
+       (Ioo 0 1).indicator (fun x ↦ P₀.f x - (P₀.ε * ↑(x ^ (-P₀.k))) • P₀.g₀) t‖ ≤ _
+  rw [indicator_of_notMem h1, indicator_of_mem h2, zero_add]
+  -- Goal: ‖P₀.f t - (P₀.ε * ↑(t^{-P₀.k})) • P₀.g₀‖ ≤ t^{-1/2} * (4 * exp(-π/t))
+  -- Unfold: P₀.f t = ofReal(ek(t)), P₀.ε = 1, P₀.k = 1/2, P₀.g₀ = 1
+  -- So: ‖ofReal(ek(t)) - ofReal(t^{-1/2})‖
+  show ‖(↑(evenKernel (0 : UnitAddCircle) t) : ℂ) -
+       ((1 : ℂ) * ↑(t ^ (-(1 / 2 : ℝ)))) • (1 : ℂ)‖ ≤ _
+  simp only [one_mul, smul_eq_mul, mul_one]
+  -- Goal: ‖↑(ek(t)) - ↑(t^{-1/2})‖ ≤ t^{-1/2} * (4 * exp(-π/t))
+  rw [show (↑(evenKernel (0 : UnitAddCircle) t) : ℂ) - ↑(t ^ (-(1/2 : ℝ))) =
+    (↑(evenKernel (0 : UnitAddCircle) t - t ^ (-(1/2 : ℝ))) : ℂ) from by push_cast; ring]
+  rw [Complex.norm_real]
+  -- Goal: ‖ek(t) - t^{-1/2}‖ ≤ t^{-1/2} * (4 * exp(-π/t))
+  -- Use the functional equation: ek(t) = t^{-1/2} * cosKernel(0, 1/t)
+  have h_fe := evenKernel_functional_equation (0 : UnitAddCircle) t
+  -- h_fe: ek(t) = 1/t^{1/2} * cosKernel(0, 1/t)
+  -- And cosKernel(0, ·) = evenKernel(0, ·):
+  rw [← evenKernel_eq_cosKernel (1/t)] at h_fe
+  -- h_fe: ek(t) = 1/t^{1/2} * ek(1/t)
+  -- 1/t^{1/2} = t^{-1/2}:
+  have h_rpow : (1 : ℝ) / t ^ (1/2 : ℝ) = t ^ (-(1/2 : ℝ)) := by
+    rw [Real.rpow_neg ht0.le, one_div]
+  rw [h_rpow] at h_fe
+  -- h_fe: ek(t) = t^{-1/2} * ek(1/t)
+  -- So: ek(t) - t^{-1/2} = t^{-1/2} * (ek(1/t) - 1)
+  have h_diff : evenKernel (0 : UnitAddCircle) t - t ^ (-(1/2 : ℝ)) =
+      t ^ (-(1/2 : ℝ)) * (evenKernel (0 : UnitAddCircle) (1/t) - 1) := by
+    rw [h_fe]; ring
+  rw [h_diff, norm_mul, Real.norm_rpow_of_nonneg ht0.le, Real.norm_of_nonneg ht0.le]
+  -- Unify the exponent mismatch -(1/2) vs -1/2 via congr
+  have h_exp_eq : (-(1 / 2 : ℝ)) = (-1 / 2 : ℝ) := by ring
+  rw [h_exp_eq]
+  gcongr
+  exact evenKernel_zero_sub_one_le (le_div_iff₀ ht0 |>.mpr (by linarith))
+
+end
+
+
+================================================================
 FILE: Cathedral/Vasyunin.lean
 ================================================================
 
@@ -3360,6 +3907,7 @@ lean_lib «Cathedral» where
     `Cathedral.LinearAlgebra.Sylvester,
     -- Nyman-Beurling criterion
     `Cathedral.NymanBeurling.Separation,
+    `Cathedral.NymanBeurling.ThetaBound,
     `Cathedral.NymanBeurling.BDMellin,
     `Cathedral.NymanBeurling.BesselSeparation,
     `Cathedral.NymanBeurling.NymanBeurling,
@@ -3402,6 +3950,11 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.MertensWeightBypass,
     `Cathedral.MellinBridge.AutocorrelationBypass,
     `Cathedral.MellinBridge.MellinSieve,
+    `Cathedral.MellinBridge.DomainConnected,
+    `Cathedral.MellinBridge.IdentityBypass,
+    `Cathedral.MellinBridge.MertensBound,
+    `Cathedral.MellinBridge.AbelSiegeProof,
+    `Cathedral.MellinBridge.DirichletCollapse,
     `Cathedral.MellinBridge.MellinBridge,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,

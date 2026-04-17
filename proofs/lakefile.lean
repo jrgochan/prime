@@ -26,6 +26,7 @@ lean_lib «Cathedral» where
     `Cathedral.LinearAlgebra.Sylvester,
     -- Nyman-Beurling criterion
     `Cathedral.NymanBeurling.Separation,
+    `Cathedral.NymanBeurling.ThetaBound,
     `Cathedral.NymanBeurling.BDMellin,
     `Cathedral.NymanBeurling.BesselSeparation,
     `Cathedral.NymanBeurling.NymanBeurling,
@@ -68,6 +69,11 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.MertensWeightBypass,
     `Cathedral.MellinBridge.AutocorrelationBypass,
     `Cathedral.MellinBridge.MellinSieve,
+    `Cathedral.MellinBridge.DomainConnected,
+    `Cathedral.MellinBridge.IdentityBypass,
+    `Cathedral.MellinBridge.MertensBound,
+    `Cathedral.MellinBridge.AbelSiegeProof,
+    `Cathedral.MellinBridge.DirichletCollapse,
     `Cathedral.MellinBridge.MellinBridge,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,

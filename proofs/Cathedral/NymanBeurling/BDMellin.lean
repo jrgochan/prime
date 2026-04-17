@@ -23,19 +23,18 @@
   This gives: |ℓ_ρ(1-f_w)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0
   And by Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²) > 0
 
-  ### Axioms (5 sub-axioms, down from 6 original)
+  ### Axioms (sub-axioms, reduced from 6 original)
   All 6 original axioms are now THEOREMS. Remaining sub-axioms:
-  1. `bd_mellin_reduction` — Basis Collapse: u=kx substitution
-  2. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation
-  3. `bd_cauchy_schwarz` — L² Cauchy-Schwarz (sed port)
-  4. `completedRiemannZeta₀_bound_real` — θ-integral bound
-  5. `bd_integral_linearity` — integral linearity (sed port)
+  1. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation — **PROVED** (IdentityBypass.lean)
+  2. `completedRiemannZeta₀_bound_real` — θ-integral bound (ThetaBound.lean, PROVED)
 
-  Status: 0 sorry.
+  Status: 0 sorry. 0 axioms. ALL PROVED.
 -/
 
 import Cathedral.Defs
 import Cathedral.Gram.FractIntegral
+import Cathedral.NymanBeurling.ThetaBound
+import Cathedral.MellinBridge.IdentityBypass
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 
@@ -137,13 +136,81 @@ private lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
   simp only [one_mul, one_cpow, div_one, one_div]
   ring_nf
 
-/-- Substitution u = kx: change of variables for the BD Mellin integral. -/
-private axiom mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+/-- Helper: (u/k)^s = u^s * k^{-s} for positive reals u, k. -/
+private lemma ofReal_div_cpow_real {u k : ℝ} (hu : 0 < u) (hk : 0 < k) (s : ℂ) :
+    ((u / k : ℝ) : ℂ) ^ s = (u : ℂ) ^ s * (k : ℂ) ^ (-s) := by
+  have hk_ne : (k : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hk)
+  rw [Complex.ofReal_div, div_eq_mul_inv, ← Complex.ofReal_inv]
+  rw [mul_cpow_ofReal_nonneg hu.le (inv_nonneg.mpr hk.le)]
+  rw [cpow_neg]
+  congr 1
+  rw [Complex.ofReal_inv]
+  exact inv_cpow _ _ (by rw [Complex.arg_ofReal_of_nonneg hk.le]; exact ne_of_gt Real.pi_pos |>.symm)
+
+/-- Substitution u = kx: change of variables for the BD Mellin integral.
+    PROVED via integral_comp_mul_right + cpow factoring. -/
+theorem mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
     ∫ x in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     (k : ℂ) ^ (-s) *
       ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
-        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) := by
+  have hk_pos : (0:ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hk_ne : (k:ℝ) ≠ 0 := ne_of_gt hk_pos
+  have hk_c_ne : (k:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hk_ne
+  let g : ℝ → ℂ := fun u =>
+    ((Int.fract (1 / u) : ℝ) : ℂ) * ((u / (k:ℝ) : ℝ) : ℂ) ^ (s - 1)
+  have h_eq_lhs : ∀ x ∈ Set.uIcc (0:ℝ) 1,
+      g (x * (k:ℝ)) = ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+    intro x hx
+    dsimp [g]
+    congr 1
+    · rw [mul_comm x (k:ℝ)]
+    · congr 1; push_cast; exact_mod_cast mul_div_cancel_right₀ x hk_ne
+  have h_expand : ∀ u ∈ Set.uIcc (0:ℝ) (k:ℝ),
+      g u = ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) := by
+    intro u hu
+    dsimp [g]
+    have hu_pos : 0 < u ∨ u = 0 := by
+      rw [Set.uIcc_of_le (le_of_lt hk_pos)] at hu; exact (lt_or_eq_of_le hu.1).imp_right Eq.symm
+    rcases hu_pos with h | rfl
+    · rw [ofReal_div_cpow_real h hk_pos (s - 1)]; push_cast; ring
+    · simp [div_zero, Int.fract_zero, zero_div, zero_mul]
+  -- Convert from Ioo to interval integrals
+  rw [← integral_Ioc_eq_integral_Ioo, ← integral_Ioc_eq_integral_Ioo]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  rw [← intervalIntegral.integral_of_le (show (0:ℝ) ≤ k from le_of_lt hk_pos)]
+  -- LHS rewrite
+  have h_lhs_eq : ∫ x in (0:ℝ)..1, ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+      ∫ x in (0:ℝ)..1, g (x * (k:ℝ)) :=
+    (intervalIntegral.integral_congr h_eq_lhs).symm
+  -- Expand g inside RHS
+  have h_g_expand : ∫ u in (0:ℝ)..(k:ℝ), g u =
+      (∫ u in (0:ℝ)..(k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+        (k : ℂ) ^ (-(s - 1)) := by
+    calc ∫ u in (0:ℝ)..(k:ℝ), g u
+        = ∫ u in (0:ℝ)..(k:ℝ),
+            ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) :=
+          intervalIntegral.integral_congr h_expand
+      _ = _ := intervalIntegral.integral_mul_const _ _
+  rw [h_lhs_eq]
+  rw [intervalIntegral.integral_comp_mul_right (f := g) hk_ne]
+  simp only [zero_mul, one_mul]
+  -- Name the integral to avoid elaboration issues
+  set I := ∫ u in (0:ℝ)..(↑k:ℝ), g u with hI_def
+  -- I = (∫ f u) * k^{-(s-1)}
+  rw [show I = (∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+    (↑k : ℂ) ^ (-(s - 1)) from h_g_expand]
+  -- smul→mul
+  set J := ∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+  show ((↑k : ℝ)⁻¹ : ℝ) • (J * (↑k : ℂ) ^ (-(s - 1))) = (↑k : ℂ) ^ (-s) * J
+  rw [Complex.real_smul]
+  push_cast
+  rw [← cpow_neg_one (↑k : ℂ)]
+  rw [← mul_assoc, mul_right_comm]
+  congr 1
+  rw [← cpow_add _ _ hk_c_ne]
+  congr 1; ring
 
 /-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand. -/
 private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
@@ -293,13 +360,14 @@ theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ)
           simp [one_div]
         rw [hfull, add_comm]
 
-/-- **SUB-AXIOM 1b** (Identity Theorem): Base case k=1 analytically continued.
+/-- **THEOREM** (was SUB-AXIOM 1b, now PROVED via Identity Theorem):
     F(s) = ∫₀¹ {1/x}·x^{s-1} dx equals G(s) = 1/(s-1) - ζ(s)/s.
     FloorMellin.lean proves F = G for Re(s) > 1; the identity theorem
-    extends this to all Re(s) > 0, s ≠ 1. -/
-axiom bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    (IdentityBypass.lean) extends this to all Re(s) > 0, s ≠ 1. -/
+theorem bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    1 / (s - 1) - riemannZeta s / s
+    1 / (s - 1) - riemannZeta s / s :=
+  bd_mellin_base_case_proved s hs hs1
 
 /-- **THEOREM** (Replaces Axiom 1): BD Mellin transform at a zeta zero.
     Chains the Basis Collapse + Identity Theorem + ζ(ρ)=0 cancellation. -/
@@ -604,16 +672,15 @@ private lemma pole_terms_le_neg_four (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) 
   rw [div_le_iff₀ (mul_pos hs_pos hs1)]
   nlinarith [sq_nonneg (s - 1/2)]
 
-/-- **SUB-AXIOM 3a** (θ-integral bound): The entire function Λ₀(s) satisfies
+/-- **THEOREM (was SUB-AXIOM 3a)** (θ-integral bound): The entire function Λ₀(s) satisfies
     Re(Λ₀(s)) < 4 for real s ∈ (0,1).
 
-    Proof path: Λ₀(s) = ∫₁^∞ (x^{s/2-1} + x^{(1-s)/2-1}) ω(x) dx / 2
-    where ω(x) = Σ_{n≥1} e^{-πn²x}. For s ∈ (0,1) and x ≥ 1,
-    x^{negative} ≤ 1, so the integrand ≤ 2ω(x).
-    The integral ∫₁^∞ ω(x) dx ≤ e^{-π}/(π(1-e^{-π})) ≈ 0.015,
-    giving Λ₀(s) ≤ 0.030 ≪ 4. -/
-axiom completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
-    (completedRiemannZeta₀ (s : ℂ)).re < 4
+    Proved in Cathedral/NymanBeurling/ThetaBound.lean via the Mellin transform
+    representation and exponential decay of the Jacobi theta kernel.
+    Zero sorry, zero axioms — pure Mathlib. -/
+private lemma completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    (completedRiemannZeta₀ (s : ℂ)).re < 4 :=
+  completedRiemannZeta₀_bound_real_proved s hs_pos hs_lt
 
 -- NOTE: completedRiemannZeta₀_real (sub-axiom 3b) was originally here but is unused.
 -- The real-part extraction is handled directly by push_cast + ring.
