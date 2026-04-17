@@ -143,7 +143,24 @@ theorem term1_exact :
   -- The integral ∫ 1/(a²+t²) dt = π/a is a standard result.
   -- With a=1/2: ∫ 1/(1/4+t²) dt = 2π.
   have h_integral : ∫ t : ℝ, (1 : ℝ) / (1/4 + t ^ 2) = 2 * Real.pi := by
-    sorry -- Standard calculus: ∫ 1/(a²+t²) dt = π/a with a=1/2
+    -- Rewrite: 1/(1/4+t²) = (fun u => 4*(1+u²)⁻¹)(2t)
+    have h1 : (fun t : ℝ => (1 : ℝ) / (1/4 + t ^ 2)) =
+        (fun t : ℝ => (fun u : ℝ => (4 : ℝ) * (1 + u ^ 2)⁻¹) (2 * t)) := by
+      ext t; field_simp; ring
+    rw [h1]
+    -- Goal: ∫ t, (fun u => 4*(1+u²)⁻¹)(2*t) = 2π
+    -- This IS the pattern for integral_comp_mul_left with g = fun u => 4*(1+u²)⁻¹, a = 2
+    rw [MeasureTheory.Measure.integral_comp_mul_left (fun u => 4 * (1 + u ^ 2)⁻¹) 2]
+    -- Goal: |2⁻¹| • ∫ u, 4*(1+u²)⁻¹ = 2π
+    -- Compute inner integral via smul + standard result
+    have h_inner : ∫ u : ℝ, (4 : ℝ) * (1 + u ^ 2)⁻¹ = 4 * Real.pi := by
+      rw [show (fun u : ℝ => (4 : ℝ) * (1 + u ^ 2)⁻¹) =
+              (fun u : ℝ => (4 : ℝ) • ((1 + u ^ 2)⁻¹ : ℝ)) from by
+        ext; simp [smul_eq_mul]]
+      rw [MeasureTheory.integral_smul, integral_univ_inv_one_add_sq, smul_eq_mul]
+    rw [h_inner]
+    simp [abs_of_pos (show (0:ℝ) < 2⁻¹ by positivity), smul_eq_mul]
+    ring
   rw [h_integral]
   -- Now: (1/2π) · 2π = 1
   field_simp
