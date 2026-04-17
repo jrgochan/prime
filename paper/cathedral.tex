@@ -38,7 +38,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 17, 2026 --- cathedral-dump-13}
+\date{April 17, 2026 --- cathedral-crown}
 
 \begin{document}
 
@@ -63,12 +63,15 @@ theorem (Mertens), and one quarantines the entire complex-analytic content of th
 Riemann zeta function via the Montgomery--Vaughan mean value theorem.
 
 The forward direction is proved via a novel \emph{Parseval Bridge} that bypasses
-the discrete Vasyunin cotangent sums entirely. The calculus limit
+the discrete Vasyunin cotangent sums entirely, reducing the $L^2(0,1)$ norm to a
+frequency-domain integral on the critical line. The calculus limit
 $\ln(\ln N)/\ln N \to 0$ is established using the algebraic bound
 $\ln x \le 2\sqrt{x}$, avoiding topological filter arguments.
 
 Companion Rust experiments (the \emph{Gram Oracle} and \emph{Contour Oracle})
-validate the spectral correspondence to 15 digits of precision.
+validate the spectral correspondence to 15 digits of precision, confirming
+the B\'aez-Duarte constant $C = 1/(2 + \gamma - \ln 4\pi) \approx 21.65$
+and the three-term interference pattern on the critical line.
 \end{abstract}
 
 % ================================================================
@@ -135,9 +138,13 @@ machine-checked.
 \lean{critical\_line\_mellin\_bound} & $\|\hat{w}\|_{L^2(\re s = 1/2)}^2$ bound & Montgomery--Vaughan \\
 \bottomrule
 \end{tabular}
-\caption{The five mathematical axioms of the Cathedral. Together with
+\caption{The five mathematical axioms of the Cathedral, verified by
+\lean{\#print axioms nyman\_beurling\_equivalence}. Together with
 Lean's three kernel axioms (\lean{propext}, \lean{Classical.choice},
-\lean{Quot.sound}), these are the complete axiomatic foundation.}
+\lean{Quot.sound}), these form the complete axiomatic foundation.
+Axioms~2--4 are elementary measure theory / Fourier analysis;
+Axiom~5 quarantines the deep content of the Montgomery--Vaughan
+mean value theorem \cite{montgomery1973}.}
 \label{tab:axioms}
 \end{table}
 
@@ -470,24 +477,28 @@ $\|v\|^2 = \Theta(N)$, which diverges despite $E(N) \to 0$.
 \section{The Archived Paths}
 % ================================================================
 
-The Cathedral repository contains two archived paths, preserved as
-monuments to the formalization process:
+The Cathedral repository contains several archived paths, preserved as
+monuments to the formalization process and as resources for future work:
 
 \begin{itemize}
   \item \textbf{HighFrequencyTrap/}: The original \lean{GramWitness.lean}
-    using the $\{k/x\}$ basis. Computationally correct but mathematically
-    insufficient for the RH equivalence.
+    using the $\{k/x\}$ basis (Discovery~\ref{rem:hf-trap}).
   \item \textbf{DiscreteMirage/}: The complete piecewise-FTC decomposition
     of the Gram matrix integral, including 14 fully proved telescope
     theorems and the digamma reflection formula
     $\psi(1-s) - \psi(s) = \pi\cot(\pi s)$ (proved from Mathlib's
     $\Gamma(s)\Gamma(1-s) = \pi/\sin(\pi s)$ via logarithmic differentiation).
-    Contains a false reciprocity axiom but is otherwise rigorous mathematics.
-  \item \textbf{ContourShift.lean}: Campaign Delta scaffold for the
-    contour-shift approach to Axiom~5. Contains two fully proved theorems
+    Contains a numerically-falsified reciprocity axiom but is otherwise
+    rigorous mathematics.
+  \item \textbf{ContourShift.lean}: Scaffold for the contour-shift
+    approach to Axiom~5. Contains two fully proved theorems
     (\lean{integrand\_three\_terms}, \lean{term1\_exact}) and three
-    Vanguard Target lemmas (sorry) awaiting formalization of the
+    lemmas awaiting formalization of the
     Phragm\'en--Lindel\"of bound and double-pole residue calculus.
+  \item \textbf{FinalDragon.lean} (burned): An attempted direct proof
+    of Axiom~5 via the triangle inequality, which was discovered to contain
+    mathematically false lemma statements (Discovery~\ref{disc:triangle}).
+    Deleted upon identification of the error.
 \end{itemize}
 
 % ================================================================

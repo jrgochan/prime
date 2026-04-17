@@ -15,7 +15,7 @@
   \large via the Parseval Bridge in Lean~4%
 }
 \author{Jason Robert Gochanour}
-\date{April 17, 2026 — cathedral-dump-13}
+\date{April 17, 2026 \textemdash\ cathedral-crown}
 
 \begin{document}
 \maketitle
@@ -46,9 +46,10 @@ to five precisely stated, well-understood mathematical facts. Everything
 else---the Nyman--Beurling theory, Sherman--Morrison, Abel summation,
 Hahn--Banach separation---is compiler-verified.
 
-\textbf{We did not prove RH.} We built a machine-verified framework
-that identifies exactly which mathematical facts remain, proves everything
-else, and reduces the entire problem to a modular API.
+\textbf{We did not prove RH.} We built a machine-verified containment
+vessel that identifies exactly which mathematical facts remain unformalized,
+proves everything else, and reduces the entire century-old problem to
+a modular API with two axiom sockets.
 
 \section{The Crown Theorem}
 
@@ -159,7 +160,16 @@ the trace of the resolvent of the Riemann Hamiltonian.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # zero errors, zero sorry
+lake build    # Build completed successfully (3543 jobs).
+\end{verbatim}
+
+\noindent To inspect the axiom foundation:
+\begin{verbatim}
+#print axioms nyman_beurling_equivalence
+-- autocorr_eval_zero, critical_line_mellin_bound,
+-- fourier_inv_autocorr, mellin_fourier_scale,
+-- rh_implies_mertens_bound
+-- (plus propext, Classical.choice, Quot.sound)
 \end{verbatim}
 
 \section*{Acknowledgments}
