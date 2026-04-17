@@ -134,7 +134,7 @@ theorem l2_from_pointwise_bound
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 / Real.log ↑N :=
+      (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
   l2_from_pointwise_bound_derived C_m hC hMertens N hN
 
 -- ════════════════════════════════════════════════
@@ -151,7 +151,8 @@ theorem abel_summation_bd_l2_bound_proved :
     ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       ∃ v : Fin (N - 1) → ℝ,
-        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ C_err / Real.log ↑N := by
+        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
+          C_err * Real.log (Real.log ↑N) / Real.log ↑N := by
   intro ⟨C_m, hC_pos, hMertens⟩
   use (C_m + 1) ^ 2, by positivity
   use 10

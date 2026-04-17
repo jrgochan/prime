@@ -269,7 +269,7 @@ axiom bd_gram_form_bound (C_m : ℝ) (hC : 0 < C_m)
     (N : ℕ) (hN : 10 ≤ N) :
     1 - 2 * dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N) +
     realQuadForm (Matrix.of fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N)
-    ≤ (C_m + 1) ^ 2 / Real.log ↑N
+    ≤ (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
 
 /-- **THEOREM**: Axiom 5 proved via the Parseval Bypass.
 
@@ -289,13 +289,13 @@ theorem critical_line_mellin_bound_proved
     (N : ℕ) (hN : 10 ≤ N) :
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 / Real.log ↑N := by
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
   -- Step 1: The Parseval bridge converts Mellin → L²(0,1)
   have h_parseval := parseval_bridge N (bdMoebiusWeight N)
   -- Step 2: The L² integral equals the Gram quadratic form
   have h_l2_bound : ∫ x in (0:ℝ)..1,
       (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 / Real.log ↑N := by
+      (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
     rw [bd_l2_error_eq_quad_error N (by omega) (bdMoebiusWeight N)]
     exact bd_gram_form_bound C_m hC hMertens N hN
   -- Step 3: Chain through Parseval

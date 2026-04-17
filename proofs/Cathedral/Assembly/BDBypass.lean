@@ -34,7 +34,8 @@ theorem rh_implies_bd_witness_decay :
     ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       ∃ v : Fin (N - 1) → ℝ,
-        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ C_err / Real.log ↑N := by
+        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
+          C_err * Real.log (Real.log ↑N) / Real.log ↑N := by
   intro hRH
   exact abel_summation_bd_l2_bound_proved (rh_implies_mertens_bound hRH)
 

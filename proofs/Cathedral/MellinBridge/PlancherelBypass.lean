@@ -230,7 +230,7 @@ axiom critical_line_mellin_bound
     (N : ℕ) (hN : 10 ≤ N) :
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * Complex.I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 / Real.log ↑N
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
 
 -- ════════════════════════════════════════════════
 -- §6. THE COMPOSITION THEOREM (PROVED!)
@@ -244,7 +244,7 @@ theorem l2_from_pointwise_bound_derived
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 / Real.log ↑N := by
+      (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
   -- bdResidualV is definitionally equal to (1 - bdLinComb)
   have h_rewrite : ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 =
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := rfl
