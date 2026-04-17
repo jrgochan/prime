@@ -97,10 +97,13 @@ theorem integrand_three_terms (N : ℕ) (s : ℂ) (hs : s ≠ 0) :
   -- |1 - z|² = 1 - 2·Re(z) + |z|² (pure algebra)
   set z := riemannZeta s * dirichletPolyBD N s
   have h1 : ‖(1 : ℂ) - z‖ ^ 2 = 1 - 2 * z.re + ‖z‖ ^ 2 := by
-    -- This is the identity |1-z|² = 1 - 2Re(z) + |z|²
-    -- It follows from expanding (1-z)(1-z̄) = 1 - z - z̄ + |z|²
-    -- and using z + z̄ = 2·Re(z), ‖w‖² = w·w̄.
-    sorry -- Trivial algebra, Lean API hunt deferred
+    rw [@norm_sub_sq_real ℂ]
+    simp only [norm_one, one_pow]
+    -- Need: ⟪(1 : ℂ), z⟫_ℝ = z.re
+    -- The real inner product on ℂ is Re(conj(a) * b)
+    have : @inner ℝ ℂ _ (1 : ℂ) z = z.re := by
+      simp [inner, Complex.inner]
+    rw [this]
   rw [show ‖(1 : ℂ) - z‖ ^ 2 / ‖s‖ ^ 2 =
     1 / ‖s‖ ^ 2 - 2 * z.re / ‖s‖ ^ 2 + ‖z‖ ^ 2 / ‖s‖ ^ 2 from by rw [h1]; ring]
 
