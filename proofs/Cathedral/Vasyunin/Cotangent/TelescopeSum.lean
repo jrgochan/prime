@@ -351,8 +351,11 @@ theorem row_ftc_combined (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
 --   ✅ row_ftc_combined          — Combined: 1/k + log term + linear term
 --
 -- WITH SORRY (provable, Phase 2 dependencies):
---   ⚠  log_sum_split             — factor extraction from Finset.sum
---   ⚠  m_log_partial_sum_formula — Abel summation for m·log terms
+--   (none — all theorems in this file are fully proved!)
+--
+-- NOTE (April 17, 2026): log_sum_split and m_log_partial_sum_formula
+-- were previously marked as sorry but have been fully proved.
+-- The entire algebraic telescoping structure is verified.
 
 end Cathedral.Vasyunin.TelescopeSum
 
