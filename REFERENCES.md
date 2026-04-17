@@ -1,10 +1,12 @@
 # References — The Cathedral
 
+**v1.0.0-The-Cathedral** — April 17, 2026
+
 A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-40 mathematicians. 167 years of prior work. Zero sorry.
+40+ mathematicians. 167 years of prior work. Five axioms. Zero sorry.
 
 ---
 
@@ -16,9 +18,9 @@ traces back to published mathematics listed here.
   gegebenen Grösse," *Monatsberichte der Berliner Akademie*, November 1859.
 
   > The original conjecture: all non-trivial zeros of ζ(s) have real part ½.
-  > In the Cathedral, this is encoded via `witness_covariance_decay`:
-  > vᵀCv ≤ C/ln(N), which is machine-verified equivalent to RH
-  > (`witness_covariance_decay_iff_rh`, both directions, zero sorry).
+  > In the Cathedral, RH is encoded via the Nyman–Beurling equivalence:
+  > d²_N → 0, machine-verified equivalent to RH via
+  > `nyman_beurling_equivalence` (both directions, zero sorry, 5 axioms).
 
 ### The Nyman–Beurling Criterion
 
@@ -437,15 +439,17 @@ traces back to published mathematics listed here.
 
 ---
 
-## How Critical-Path Axioms Map to References
+## How Critical-Path Axioms Map to References (v1.0.0)
+
+The crown theorem `nyman_beurling_equivalence` depends on exactly **5 mathematical axioms**:
 
 | Cathedral Axiom | Mathematical Content | References |
 |---|---|---|
-| `witness_covariance_decay` | **THE RH**: vᵀCv ≤ C/ln(N) | Riemann 1859, Selberg 1949, Möbius 1832 |
-| `witness_numerator_convergence` | bᵀv → 1 (PNT-level) | Mertens 1874, Hardy–Littlewood 1918 |
-| `vasyunin_eq_integral` | Cotangent formula = L² integral | Vasyunin 1996, Báez-Duarte et al. 2005 |
-| `algebraic_nb_bridge` | Quadform → integral criterion | Sherman–Morrison 1950, Schur 1917 |
-| `zeta_zero_separates` | Off-line zero → L² obstruction | Nyman 1950, Beurling 1955, Mellin 1896 |
+| `rh_implies_mertens_bound` | RH ⟹ \|M(x)\| = O(x^{1/2} log²x) | Mertens 1874, 1897 |
+| `autocorr_eval_zero` | Change of variables: R_f(0) = ‖f‖² | Measure theory |
+| `fourier_inv_autocorr` | L¹ Fourier inversion for autocorrelation | Plancherel 1910, Fourier 1822 |
+| `mellin_fourier_scale` | 2π scaling alignment | Mellin 1896 |
+| `critical_line_mellin_bound` | Montgomery–Vaughan L² bound | Montgomery 1973 |
 
 ## How Eliminated Axioms Were Proved
 
@@ -458,7 +462,22 @@ traces back to published mathematics listed here.
 | `nb_dist_via_witness` | Sherman–Morrison | Sherman & Morrison 1950 |
 | `floor_sum_reciprocity` | Eisenstein maneuver | Eisenstein 1844, Hermite 1875 |
 | `log_cutoff_witness_bound` | Decomposed into axioms 1+2 | Selberg 1949, Mertens 1874 |
+| `digamma_reflection_complex` | logDeriv of Γ(s)Γ(1-s) | Euler 1755 |
+| `abel_summation_l2_bound` | Abel summation siege proof | Abel 1826 |
+| `divisor_sum_swap` | Finset bijection | Dirichlet 1863 |
 
 ---
 
-*Last updated: April 15, 2026*
+## Archived Paths
+
+Two archived paths are preserved as monuments to the formalization process:
+
+- **`Cathedral/Archive/HighFrequencyTrap/`**: The {k/x} basis — computationally
+  correct but mathematically insufficient for the RH equivalence.
+- **`Cathedral/Archive/DiscreteMirage/`**: The complete Vasyunin cotangent
+  decomposition — 14 fully proved telescope theorems, digamma reflection,
+  but containing a false `harmonicTileSum_reciprocity` axiom.
+
+---
+
+*Last updated: April 17, 2026 — v1.0.0-The-Cathedral*
