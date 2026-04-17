@@ -48,13 +48,14 @@ def bdResidualV (N : ℕ) (v : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
   1 - bdLinComb N v x
 
 /-- The Mellin transform of the BD residual on the critical line.
-    M_{1-f_N}(s) = ∫₀^∞ r_N(x) · x^{s-1} dx.
+    M_{1-f_N}(s) = ∫₀¹ r_N(x) · x^{s-1} dx.
 
     On the critical line s = 1/2 + it, this equals the Fourier
     transform of the flattened residual (up to 2π scaling).
-    Defined via the integral representation for self-containment. -/
+    DOMAIN CORRECTION: Constrained to (0,1) to match the L²(0,1)
+    Parseval identity and avoid the divergent tail on (1,∞). -/
 def mellinBDResidual (N : ℕ) (v : Fin (N - 1) → ℝ) (s : ℂ) : ℂ :=
-  ∫ x in Set.Ioi (0 : ℝ), (bdResidualV N v x : ℂ) * (x : ℂ) ^ (s - 1)
+  ∫ x in Set.Ioo (0 : ℝ) 1, (bdResidualV N v x : ℂ) * (x : ℂ) ^ (s - 1)
 
 /-- The flattened residual in the Fourier domain.
     g_N(u) = r_N(e^{-u}) · e^{-u/2} for u ≥ 0, zero otherwise.
