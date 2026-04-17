@@ -52,11 +52,11 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
     (∫ u : ℝ, flattenedResidualC N v u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)) =
     mellinBDResidual N v ((1/2 : ℂ) + (2 * Real.pi * ξ) * Complex.I) := by
-  -- The Fourier kernel e^{-2πiξu} composed with the flattening x = e^{-u}
-  -- gives x^{2πiξ}, and the e^{-u/2} flattening gives x^{-1/2}.
-  -- Together: x^{-1/2 + 2πiξ} = x^{(1/2 + 2πiξ) - 1} = x^{s-1}
-  -- where s = 1/2 + 2πiξ·i on the critical line.
-  sorry -- 🔨 FORGE TASK: Substitution u = -log x in Fourier integral
+  -- Step 1: The LHS integral over ℝ equals the integral over Ioi(0)
+  -- because flattenedResidualC = 0 for u < 0
+  -- Step 2: Unfold flattenedResidualC and apply the exp(-u) substitution
+  -- Step 3: The result is exactly the Mellin integral on Ioo(0,1)
+  sorry -- 🔨 FORGE TASK: Complex-valued exp(-u) substitution via antitone CoV
 
 -- ════════════════════════════════════════════════
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)

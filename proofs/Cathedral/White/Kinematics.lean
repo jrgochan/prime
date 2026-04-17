@@ -104,11 +104,25 @@ theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
     exact flattenedResidualV_sq_eq N v u (le_of_lt (Set.mem_Ioi.mp hu))
   -- Step 2: Rewrite the Ioi integral pointwise
   rw [setIntegral_congr_fun measurableSet_Ioi h_sq]
-  -- Step 3: The integral of r_N(exp(-u))² · exp(-u) over Ioi(0) equals
-  --         ∫ x in Ioo(0,1), r_N(x)² by antitone substitution
-  -- Step 4: ∫ x in Ioo(0,1), f = ∫ x in (0:ℝ)..1, f (endpoints have measure zero)
-  sorry -- 🔨 FORGE TASK: Apply integral_image_eq_integral_deriv_smul_of_antitoneOn
-        --    + convert Ioo integral to interval integral
+  -- Step 3: Apply antitone change of variables (JacobianOneDim)
+  -- For antitone f, ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
+  -- We reverse: ∫ u in s, (-f'(u)) • g(f(u)) = ∫ x in f '' s, g x
+  -- With f(u) = exp(-u), -f'(u) = exp(-u), f '' Ioi(0) = Ioo(0,1)
+  have h_antitone := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
+    measurableSet_Ioi
+    (fun u hu => hasDerivWithinAt_exp_neg u hu)
+    exp_neg_antitoneOn
+    (fun x : ℝ => (bdResidualV N v x : ℝ) ^ 2)
+  rw [exp_neg_image_Ioi] at h_antitone
+  -- h_antitone: ∫ x ∈ Ioo(0,1), g(x) = ∫ u ∈ Ioi(0), (-(-exp(-u))) • g(exp(-u))
+  simp only [neg_neg, smul_eq_mul] at h_antitone
+  -- h_antitone: ∫ x ∈ Ioo 0 1, .. = ∫ u ∈ Ioi 0, exp(-u) * (bdResidualV ..)²
+  -- Goal: ∫ u ∈ Ioi 0, (bdResidualV ..)² * exp(-u) = ∫ x in 0..1, (bdResidualV ..)²
+  -- First commute the multiplication in the goal to match h_antitone
+  rw [show (fun u => bdResidualV N v (Real.exp (-u)) ^ 2 * Real.exp (-u)) =
+      (fun u => Real.exp (-u) * bdResidualV N v (Real.exp (-u)) ^ 2) from by ext u; ring]
+  rw [← h_antitone, ← integral_Ioc_eq_integral_Ioo,
+      intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
 
 -- ════════════════════════════════════════════════
 -- §3. FULL INTEGRAL SPLITTING
