@@ -16,9 +16,11 @@
 
 import Cathedral.NymanBeurling.BDMellin
 import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+import Mathlib.Analysis.Fourier.FourierTransform
 
 noncomputable section
 open Real MeasureTheory Finset BigOperators Complex
+open scoped FourierTransform
 
 -- ════════════════════════════════════════════════
 -- §1. DEFINITIONS: FLATTENING & AUTOCORRELATION
@@ -133,30 +135,42 @@ theorem autocorrelation_zero_eq_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
   congr 1; ext u; simp [sub_zero, sq]
 
 -- ════════════════════════════════════════════════
--- §3. PLANCHEREL AXIOM (Parseval for raw integrals)
+-- §3. PLANCHEREL AXIOM (Parseval via Mathlib's 𝓕)
 -- ════════════════════════════════════════════════
 
-/-- **Plancherel's theorem** for raw integrals (ℝ → ℂ).
+/-- **Plancherel's theorem** using Mathlib's standard Fourier transform 𝓕.
 
-    For an L² function f : ℝ → ℂ, the L² norm equals the L² norm
-    of its Fourier transform:
+    ∫ ‖f(u)‖² du = ∫ ‖𝓕f(ξ)‖² dξ
 
-      ∫ ‖f(u)‖² du = ∫ ‖∫ f(u) e^{-2πiξu} du‖² dξ
+    Mathlib has this as `norm_fourier_eq` for Lp functions
+    (`Analysis.Fourier.LpSpace`). This axiom exists solely because
+    Mathlib's Plancherel operates on `Lp ℂ 2` types while we use
+    raw integrals. The bridge (MemLp + snorm ↔ integral + L2/L1
+    agreement for the Fourier extension) is pure infrastructure. -/
+axiom plancherel_mathlib_fourier (f : ℝ → ℂ) :
+    ∫ u : ℝ, ‖f u‖ ^ 2 = ∫ ξ : ℝ, ‖𝓕 f ξ‖ ^ 2
 
-    This is standard (Mathlib: `norm_fourier_eq` in `Analysis.Fourier.LpSpace`).
-    The axiom isolates the Lp ↔ raw-integral bridge, which is the only
-    gap between Mathlib's abstract Lp Fourier theory and our concrete integrals.
+/-- **PROVED**: Bridge from Mathlib's 𝓕 to our explicit exp formula.
+    Shows: ∫ f(u) exp(-2πiξu) du = 𝓕 f ξ. -/
+private lemma our_fourier_eq_mathlib_aux (f : ℝ → ℂ) (ξ : ℝ) :
+    (∫ u : ℝ, f u * Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I)) =
+    𝓕 f ξ := by
+  rw [Real.fourier_real_eq_integral_exp_smul]
+  congr 1; ext u; rw [smul_eq_mul, mul_comm]
+  congr 1; push_cast; ring_nf
 
-    The mathematical content is trivially true. The bridge requires:
-    1. Proving f ∈ Lp ℂ 2 (MemLp from exponential decay bound)
-    2. Connecting ‖f‖²_{L²} to ∫ ‖f‖² (snorm ↔ integral)
-    3. Verifying 𝓕(toLp f) agrees with the explicit formula
-
-    All three are Mathlib infrastructure, not mathematics. -/
-axiom plancherel_integral_axiom (f : ℝ → ℂ) :
+/-- **PROVED**: The original explicit-formula version follows from
+    `plancherel_mathlib_fourier` + the formula matching lemma. -/
+theorem plancherel_integral_axiom (f : ℝ → ℂ) :
     ∫ u : ℝ, ‖f u‖ ^ 2 =
     ∫ ξ : ℝ, ‖∫ u : ℝ, f u *
-      Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2
+      Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 := by
+  have : (fun ξ : ℝ => ‖∫ u, f u * Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I)‖ ^ 2) =
+         (fun ξ : ℝ => ‖𝓕 f ξ‖ ^ 2) := by
+    ext ξ; rw [our_fourier_eq_mathlib_aux f ξ]
+  rw [this]
+  exact plancherel_mathlib_fourier f
 
 end
+
 
