@@ -20,7 +20,7 @@
 
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.Analysis.Complex.PhragmenLindelof
-import Mathlib.Analysis.Asymptotics.Asymptotics
+import Mathlib.Analysis.Normed.Operator.Asymptotics
 
 noncomputable section
 open Complex Real Filter Asymptotics

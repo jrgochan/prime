@@ -21,7 +21,7 @@ import Mathlib.NumberTheory.LSeries.Basic
 import Mathlib.Analysis.MellinInversion
 
 noncomputable section
-open Real Complex MeasureTheory Set Filter
+open Real MeasureTheory Filter
 
 namespace Cathedral.White.Infrastructure
 
@@ -37,10 +37,10 @@ theorem perron_formula_quantitative
     (hx_not_int : Int.fract x ≠ 0) :
     ∃ (Error : ℝ),
     ‖ (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, a n) -
-      (1 / (2 * Real.pi * I)) *
-      ∫ t in (-T)..T, (∑' n, a n * (n : ℂ) ^ (-(c + t * I))) *
-        (x : ℂ) ^ (c + t * I) / (c + t * I) ‖
-    ≤ Error ∧ Error = O[atTop] (fun T => x^c / T) := by
+      (1 / (2 * Real.pi * Complex.I)) *
+      ∫ t in (-T)..T, (∑' n, a n * (n : ℂ) ^ (-(c + t * Complex.I))) *
+        (x : ℂ) ^ (c + t * Complex.I) / (c + t * Complex.I) ‖
+    ≤ Error ∧ Error ≤ x^c / T := by
   -- 🔨 MATHLIB TASK:
   -- 1. Apply Cauchy's theorem to the rectangle [c-iT, c+iT, -R-iT, -R+iT].
   -- 2. Bound the horizontal and left-vertical segments as R → ∞.

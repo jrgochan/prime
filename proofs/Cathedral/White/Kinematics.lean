@@ -26,7 +26,7 @@
   - Mathlib.MeasureTheory.Integral.IntegralEqImproper
 -/
 
-import Cathedral.MellinBridge.PlancherelBypass
+import Cathedral.MellinBridge.PlancherelDefs
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 import Mathlib.MeasureTheory.Function.JacobianOneDim
 

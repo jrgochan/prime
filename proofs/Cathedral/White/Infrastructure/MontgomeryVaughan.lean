@@ -16,9 +16,12 @@
 
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
+import Cathedral.MellinBridge.PlancherelDefs
+import Cathedral.MellinBridge.MertensBound
+import Cathedral.MellinBridge.BDWeights
 
 noncomputable section
-open Complex Real MeasureTheory Finset
+open Complex Real MeasureTheory Finset Cathedral
 
 namespace Cathedral.White.Infrastructure
 
@@ -29,7 +32,7 @@ namespace Cathedral.White.Infrastructure
     Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973). -/
 theorem dirichlet_polynomial_mean_value
     (N : ℕ) (a : ℕ → ℂ) (T : ℝ) (hT : 0 < T) :
-    ∫ t in (-T)..T, ‖ ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I)) ‖ ^ 2
+    ∫ t in (-T)..T, ‖ ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ) ‖ ^ 2
     ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 * (2 * T + 2 * Real.pi * n) := by
   -- 🔨 MATHLIB TASK:
   -- 1. Expand |Σ a_n n^{-it}|² = Σ_m Σ_n a_m conj(a_n) (m/n)^{-it}.
@@ -46,10 +49,10 @@ theorem dirichlet_polynomial_mean_value
 theorem critical_line_mellin_bound_under_rh
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
-      |(Cathedral.mertensFunction x : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
     (N : ℕ) (hN : 10 ≤ N) :
     (1 / (2 * Real.pi)) *
-    ∫ t : ℝ, ‖Cathedral.mellinBDResidual N (Cathedral.bdMoebiusWeight N)
+    ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
       ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
     (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
   -- 🔨 MATHLIB TASK:

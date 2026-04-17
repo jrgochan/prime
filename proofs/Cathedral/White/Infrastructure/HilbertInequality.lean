@@ -18,7 +18,7 @@
 -/
 
 import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 
 noncomputable section
 open Complex Real Finset
@@ -27,8 +27,8 @@ namespace Cathedral.White.Infrastructure
 
 /-- A finite sequence of reals is δ-separated if the distance between
     any two distinct elements is at least δ. -/
-def IsDeltaSeparated {N : ℕ} (λ : Fin N → ℝ) (δ : ℝ) : Prop :=
-  ∀ i j : Fin N, i ≠ j → δ ≤ |λ i - λ j|
+def IsDeltaSeparated {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ) : Prop :=
+  ∀ i j : Fin N, i ≠ j → δ ≤ |lam i - lam j|
 
 /-- **TARGET MATHLIB PR**: Schur's Test for discrete operators.
     If a matrix K_{ij} satisfies bounded row/column sums,
@@ -40,7 +40,7 @@ lemma schur_test_discrete {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ)
     (h_row : ∀ i, ∑ j, ‖K i j‖ ≤ C)
     (h_col : ∀ j, ∑ i, ‖K i j‖ ≤ C)
     (x y : Fin N → ℂ) :
-    ‖∑ i, ∑ j, K i j * x i * conj (y j)‖ ≤
+    ‖∑ i, ∑ j, K i j * x i * starRingEnd ℂ (y j)‖ ≤
     C * Real.sqrt (∑ i, ‖x i‖^2) * Real.sqrt (∑ j, ‖y j‖^2) := by
   -- 🔨 MATHLIB TASK: Standard operator theory via Cauchy-Schwarz.
   sorry
@@ -51,11 +51,11 @@ lemma schur_test_discrete {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ)
 
     Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973). -/
 theorem montgomery_vaughan_inequality
-    (N : ℕ) (x : Fin N → ℂ) (λ : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
-    (h_sep : IsDeltaSeparated λ δ) :
+    (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated lam δ) :
     ‖ ∑ i : Fin N, ∑ j : Fin N,
         if i = j then (0 : ℂ)
-        else (x i * conj (x j)) / ((λ i - λ j : ℝ) : ℂ) ‖
+        else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ) ‖
     ≤ (Real.pi / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
   -- 🔨 MATHLIB TASK:
   -- 1. Apply schur_test_discrete with K_ij = 1/(λ_i - λ_j).

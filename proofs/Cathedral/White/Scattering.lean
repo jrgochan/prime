@@ -22,7 +22,7 @@
   - mellinBDResidual (PlancherelBypass.lean)
 -/
 
-import Cathedral.MellinBridge.PlancherelBypass
+import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.White.Kinematics
 import Mathlib.Analysis.Fourier.Inversion
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
@@ -237,7 +237,7 @@ theorem parseval_bridge_white (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ t : ℝ, ‖mellinBDResidual N v ((1/2 : ℂ) + t * Complex.I)‖ ^ 2 := by
   calc ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2
       = residualAutocorrelation N v 0 :=
-        (autocorr_eval_zero N v).symm
+        (autocorr_eval_zero_proved N v).symm
     _ = ∫ ξ : ℝ, ‖∫ u : ℝ, flattenedResidualC N v u *
           Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 :=
         fourier_inv_autocorr_proved N v
