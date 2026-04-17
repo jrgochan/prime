@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 04-Vasyunin-Matrix-Proof
-# Generated: Thu Apr 16 23:09:33 MDT 2026
+# Generated: Fri Apr 17 03:48:55 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -2111,6 +2111,7 @@ FILE: Cathedral/Vasyunin/Proof/Chain.lean
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
+import Cathedral.NymanBeurling.BDMellin
 
 noncomputable section
 open Real Matrix Finset
@@ -2216,13 +2217,19 @@ theorem nbDistSq_decays :
     achieves this minimum, giving ∃ v, ∫₀¹ (1-f)² < ε.
 
     Mathematical content: the Vasyunin Gram matrix entries
-    G(j,k) = ∫₀¹ {j/x}{k/x}dx, and the Sherman-Morrison identity
-    gives d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b). -/
+    G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)}dx (TRUE Báez-Duarte basis),
+    and the Sherman-Morrison identity gives
+    d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b).
+
+    NOTE (April 17, 2026): Changed from nbLinComb ({k/x} HF basis)
+    to bdLinComb ({1/(kx)} BD basis). The Vasyunin discrete formula
+    computes the Gram matrix of the BD basis, NOT the HF basis.
+    See 'The Identity Crisis Resolved' memo. -/
 axiom algebraic_nb_bridge :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       1 / (1 + vasyuninQuadForm N) < ε) →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε)
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε)
 
 -- ════════════════════════════════════════════════
 -- PART XIV: THE FORWARD DIRECTION (PROVED!)
@@ -2240,12 +2247,12 @@ axiom algebraic_nb_bridge :
     4. algebraic_nb_bridge: quadform decay → NB integral decay    [Axiom, Tier 4]
     Result: RH ⟹ ∀ ε > 0, ∃ N₀, ∃ v, ∫(1-f)² < ε             [PROVED!]
 
-    This replaces the former axiom `nyman_beurling_forward_from_sieve`
-    in NymanBeurling.lean. -/
+    NOTE (April 17, 2026): Uses bdLinComb (true BD basis {1/(kx)})
+    not nbLinComb (HF basis {k/x}). -/
 theorem nyman_beurling_forward_from_sieve :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) := by
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) := by
   intro _
   exact algebraic_nb_bridge nbDistSq_decays
 
