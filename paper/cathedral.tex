@@ -135,7 +135,7 @@ Special case $j=k$: $G(j,j) = (\ln(2\pi)-\gamma)/j - 1/j^2$.
 \end{definition}
 
 \begin{remark}[Experimental Verification]
-Attack~7 (256-bit MPFR, Rust/rug) verified the Vasyunin formula against
+Heuristic~7 (a custom 256-bit MPFR verification script using Rust/rug) verified the Vasyunin formula against
 numerical quadrature to 15 digits:
 $G(1,1) = 0.260661401507813$, $G(1,2) = 0.272209255990873$,
 $G(2,2) = 0.380330700753906$.
@@ -246,7 +246,7 @@ and \texttt{Robin/Defs.lean}.
 \end{remark}
 
 % ================================================================
-\section{The Variational Witness (Attack 8)}
+\section{The Variational Witness}
 % ================================================================
 
 \subsection{The Log Cutoff Vector}
@@ -279,7 +279,7 @@ By the dual variational principle: $X_N = \sup_v Q_N(v) = b^T C_N^{-1} b$.
 \end{definition}
 
 \begin{remark}[Experimental Results]
-Attack~8 (Rust/f64, on-the-fly computation, $N \leq 50{,}000$):
+Heuristic~8 (a Rust/f64 on-the-fly computation script, $N \leq 50{,}000$):
 
 \begin{center}
 \begin{tabular}{rrrrr}
@@ -502,10 +502,18 @@ reduces the axiom to the theorem, taking the Cathedral from 5 to 4 axioms
 \section{The Axiom Taxonomy}
 % ================================================================
 
-The Lean~4 command \texttt{\#print axioms nyman\_beurling\_equivalence}
-reports exactly \textbf{five} Cathedral axioms (plus the standard
-Lean kernel axioms \texttt{propext}, \texttt{Classical.choice},
-\texttt{Quot.sound}). All structural properties---Gram matrix PD,
+The Cathedral formalizes \textbf{two parallel proof paths} to the
+Nyman--Beurling equivalence, each with a different axiomatic footprint:
+\begin{enumerate}
+\item A \textbf{purely geometric reduction} (\S\ref{sec:axioms}):
+  \texttt{\#print axioms nyman\_beurling\_iff\_rh} reports exactly
+  \textbf{2~Cathedral axioms}---the minimal path.
+\item The \textbf{Parseval Bridge analytic reduction} (\S\ref{sec:parseval}):
+  \texttt{\#print axioms nyman\_beurling\_equivalence} reports exactly
+  \textbf{5~Cathedral axioms}---a deeper, independently verified route
+  through Fourier analysis.
+\end{enumerate}
+All structural properties---Gram matrix PD,
 covariance matrix PD, Hermitian symmetry, positive semidefiniteness,
 determinant invertibility, witness positivity, Nyman--Beurling
 distance bound, augmented linear independence, the mean entry

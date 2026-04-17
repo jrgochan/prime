@@ -137,9 +137,12 @@ def compile_lean_string(
             )
 
     finally:
-        # Clean up
-        if scratch_file.exists():
-            scratch_file.unlink()
+        # Clean up (missing_ok handles race conditions / concurrent cleanup)
+        try:
+            if scratch_file.exists():
+                scratch_file.unlink()
+        except (FileNotFoundError, OSError):
+            pass  # Already cleaned up — no problem
 
 
 def compile_lean_file(filepath: Path, timeout_seconds: int = 30) -> CompileResult:

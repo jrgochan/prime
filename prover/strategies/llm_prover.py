@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-DEFAULT_MODEL = "gemma3:27b"
+DEFAULT_MODEL = "gemma4:31b"
 
 SYSTEM_PROMPT = """You are an expert Lean 4 proof engineer working with the Mathlib library.
 Your task is to prove Lean 4 theorems by providing tactic-mode proofs.
@@ -48,7 +48,7 @@ def query_ollama(
     model: str = DEFAULT_MODEL,
     temperature: float = 0.7,
     max_tokens: int = 2048,
-    timeout: int = 120,
+    timeout: int = 300,  # 5 min — gemma4:31b needs room to think
 ) -> Optional[str]:
     """Send a chat request to Ollama and return the response text."""
     payload = {
