@@ -42,6 +42,44 @@ CATHEDRAL_DIR = PROOFS_DIR / "Cathedral"
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 SKIP_DIRS = {"Archive", "Scratch"}
 
+# ════════════════════════════════════════════════
+# THEORIST'S TARGETING PARAMETERS (April 17, 2026)
+# ════════════════════════════════════════════════
+
+# NEVER target these — complex analysis beyond LLM capability.
+# The LLM will hallucinate bogus contour integration theorems.
+EVEREST_AXIOMS = {
+    "critical_line_mellin_bound",   # Montgomery-Vaughan mean value theory
+    "rh_implies_mertens_bound",     # Titchmarsh-level prime number theory
+    "mertens_bound_from_rh",        # Same as above (variant name)
+}
+
+# HIGH PRIORITY — tractable targets for LLM proof search.
+# These are pure algebra, finite sums, or combinatorial identities.
+HIGH_PRIORITY_AXIOMS = {
+    # Linear algebra stubs (Sylvester criteria, polynomial identities)
+    "gauss_digamma_formula",
+    "harmonicTileSum_reciprocity",
+    "drop_formula_bound",
+    # Finite sum manipulations
+    "vaughan_implies_uncoupling",
+    "vaughan_decomposition",
+    "mertens_tapered_sum",
+    "mertens_linear_tapered_sum",
+    "mertens_squarefree_sum",
+    # Block-diagonal / spectral (definitions + basic inequalities)
+    "oct_equals_block",
+    "block_min_eq_class_min",
+    "lambdaMinClass_pos",
+    # Already proved redundant — small-N cases
+    "oct_gap_dominates",
+    # Integral identities
+    "autocorr_eval_zero",
+    "fourier_inv_autocorr",
+    "mellin_fourier_scale",
+    "mellin_fourier_change",
+}
+
 # Axiom declaration pattern
 AXIOM_RE = re.compile(
     r"^(axiom)\s+(\w+)\s*(.*?)(?=\n(?:theorem|axiom|def|lemma|noncomputable|instance|abbrev|#|section|namespace|end|open|variable|import|--|/-)|$)",
@@ -313,6 +351,7 @@ def run_hunt(
     model: str = DEFAULT_MODEL,
     max_llm_iterations: int = 10,
     no_llm: bool = False,
+    smart: bool = False,
 ):
     """Run the full axiom hunt."""
     start_time = time.time()
@@ -352,7 +391,26 @@ def run_hunt(
         "mellin_fourier_scale",
         "critical_line_mellin_bound",
     }
-    if priority == "critical":
+
+    # Apply smart targeting if enabled
+    if smart:
+        # Exclude Everest axioms (will burn cycles with zero yield)
+        pre_count = len(axioms)
+        axioms = [a for a in axioms if a.name not in EVEREST_AXIOMS]
+        excluded = pre_count - len(axioms)
+        if excluded:
+            print(f"   🎯 Smart targeting: excluded {excluded} Everest axioms")
+
+        # Sort: high-priority first, then non-critical, then critical
+        def smart_sort_key(a):
+            if a.name in HIGH_PRIORITY_AXIOMS:
+                return (0, a.name)  # Attack first
+            elif a.name in CRITICAL_PATH:
+                return (2, a.name)  # Attack last
+            else:
+                return (1, a.name)  # Middle priority
+        axioms.sort(key=smart_sort_key)
+    elif priority == "critical":
         axioms.sort(key=lambda a: (0 if a.name in CRITICAL_PATH else 1, a.name))
     else:
         # Non-critical first (more likely to succeed)
@@ -591,6 +649,10 @@ if __name__ == "__main__":
         "--no-llm", action="store_true",
         help="Disable LLM strategy, use tactic bombardment only"
     )
+    parser.add_argument(
+        "--smart", action="store_true",
+        help="Smart targeting: exclude Everest axioms, prioritize tractable targets"
+    )
     args = parser.parse_args()
 
     if args.quick:
@@ -607,4 +669,5 @@ if __name__ == "__main__":
         model=args.model,
         max_llm_iterations=args.llm_iterations,
         no_llm=args.no_llm,
+        smart=args.smart,
     )
