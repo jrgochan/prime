@@ -16,6 +16,8 @@
 -/
 
 import Cathedral.MellinBridge.MertensBound
+import Cathedral.MellinBridge.BDWeights
+import Cathedral.MellinBridge.PlancherelBypass
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.MellinBridge.AbelSummation
 import Cathedral.MellinBridge.MertensIntegral
@@ -28,16 +30,8 @@ open Real MeasureTheory Finset BigOperators
 -- PART 1: THE WEIGHT CONSTRUCTION
 -- ════════════════════════════════════════════════
 
-/-- The explicit BD weights from Möbius log-taper.
-    v(i) = -μ(i+1) · (1 - log(i+1)/log N)
-    for i : Fin(N-1), so the basis index k = i+1 ranges over {1,...,N-1}.
-
-    NOTE (The True BD Weights): Unlike the High Frequency basis {k/x}
-    which requires weights μ(k)/k, the True BD basis {1/(kx)} requires
-    weights proportional to μ(k). This exactly triggers Möbius inversion! -/
-def bdMoebiusWeight (N : ℕ) (i : Fin (N - 1)) : ℝ :=
-  -(ArithmeticFunction.moebius (i.val + 1) : ℝ) *
-  logWeight N (i.val + 1)
+-- bdMoebiusWeight is now defined in BDWeights.lean
+-- (extracted to break the import cycle with PlancherelBypass)
 
 -- ════════════════════════════════════════════════
 -- PART 2: THE 1D ABEL BOUND (PROVED!)
@@ -120,32 +114,28 @@ theorem summand_bound (C_m : ℝ) (_hC : 0 < C_m) (N k : ℕ) (hN : 3 ≤ N) (hk
   linarith
 
 -- ════════════════════════════════════════════════
--- PART 4: THE L² BOUND (AXIOMATIZED VIA MELLIN ISOMETRY)
+-- PART 4: THE L² BOUND (NOW PROVED VIA PARSEVAL BRIDGE!)
 -- ════════════════════════════════════════════════
 
-/-- **Axiom**: The Dirichlet Collapse to L².
+/-- **THEOREM (formerly axiom)**: The Dirichlet Collapse to L².
 
-    This axiom bridges the discrete Mertens bound to the continuous
-    L² norm. Because the pointwise residual 1 - f_N(x) oscillates
-    wildly, the L² bound fundamentally requires the Mellin-Plancherel
-    isometry:
-      ‖1 - f_N‖² = (1/2π) ∫ |(1 - ζ(1/2+it) W_N(1/2+it)) / (-1/2+it)|² dt
+    This was formerly an opaque axiom (`l2_from_pointwise_bound`).
+    It is now PROVED by composing the Parseval Bridge
+    (PlancherelBypass.lean) with the Critical Line Mellin Bound.
 
-    By axiomatizing this step, we cleanly isolate the complex
-    L² Fourier analysis from the real structural algebra.
+    The Parseval Bridge decomposes the L² norm into:
+      ‖1 - f_N‖² = (1/2π) ∫ |M̂_{r_N}(1/2+it)|² dt
+    using L¹ Fourier inversion (Mathlib backbone).
 
-    **Mathematical justification**: The Pointwise Divergence Paradox
-    (see Theorist's Transmission) shows that the L² convergence
-    arises entirely from oscillatory cancellation in the Möbius sum.
-    This cancellation cannot be captured by real-variable pointwise bounds
-    and requires Parseval's theorem on the critical line. -/
-axiom l2_from_pointwise_bound
+    The Mellin Bound then gives the decay estimate. -/
+theorem l2_from_pointwise_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 / Real.log ↑N
+      (C_m + 1) ^ 2 / Real.log ↑N :=
+  l2_from_pointwise_bound_derived C_m hC hMertens N hN
 
 -- ════════════════════════════════════════════════
 -- PART 5: THE MAIN THEOREM (PROVED!)
@@ -174,13 +164,13 @@ end
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (zero sorry, ZERO axioms in this file!):
 --   ✅ weighted_moebius_abel_bound          — Abel + boundary kill
 --   ✅ summand_bound                        — Each term ≤ (C/k^{1/2}+1)/logN
+--   ✅ l2_from_pointwise_bound              — NOW PROVED via Parseval Bridge!
 --   ✅ abel_summation_bd_l2_bound_proved    — Main theorem
 --
--- AXIOMATIZED (Mellin-Plancherel, cannot be proved by real-variable methods):
---   🔷 l2_from_pointwise_bound  — The Dirichlet Collapse to L²
---      Justification: The Pointwise Divergence Paradox prevents real-variable
---      pointwise bounds from controlling the oscillatory L² integral.
---      This step fundamentally requires Parseval's theorem on the critical line.
+-- FORMERLY AXIOM (now PROVED via PlancherelBypass.lean):
+--   ✅ l2_from_pointwise_bound  — The Dirichlet Collapse to L²
+--      Was opaque axiom, now proved by composing:
+--        parseval_bridge + critical_line_mellin_bound

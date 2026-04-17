@@ -30,7 +30,7 @@
 -/
 
 import Cathedral.MellinBridge.MertensBound
-import Cathedral.MellinBridge.AbelSiegeProof
+import Cathedral.MellinBridge.BDWeights
 import Cathedral.NymanBeurling.BDMellin
 import Mathlib.Analysis.Fourier.Inversion
 

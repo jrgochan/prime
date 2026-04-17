@@ -72,6 +72,7 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.DomainConnected,
     `Cathedral.MellinBridge.IdentityBypass,
     `Cathedral.MellinBridge.MertensBound,
+    `Cathedral.MellinBridge.BDWeights,
     `Cathedral.MellinBridge.AbelSiegeProof,
     `Cathedral.MellinBridge.DirichletCollapse,
     `Cathedral.MellinBridge.PlancherelBypass,
