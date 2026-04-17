@@ -3364,7 +3364,7 @@
       "route": "mellin",
       "file": "Cathedral/Assembly/BDBypass.lean",
       "line": 32,
-      "signature": "theorem rh_implies_bd_witness_decay : RiemannHypothesis \u2192 \u2203 C_err : \u211d, C_err > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2264 C_err / Re\u2026"
+      "signature": "theorem rh_implies_bd_witness_decay : RiemannHypothesis \u2192 \u2203 C_err : \u211d, C_err > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2264 C_err * Re\u2026"
     },
     {
       "id": "gramLogCutoffWitness",
@@ -3453,7 +3453,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 147,
+      "line": 211,
       "signature": "theorem nyman_beurling_equivalence : (\u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 < \u03b5) \u2194 RiemannHypothesis"
     },
     {
@@ -3462,7 +3462,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/Assembly/MainChain.lean",
-      "line": 158,
+      "line": 222,
       "signature": "theorem eigenvalue_limit_exists : \u2203 L : \u211d, 0 \u2264 L \u2227 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, |lambdaMin N - L| < \u03b5"
     },
     {
@@ -5257,6 +5257,105 @@
       "signature": "theorem mellin_target (s : \u2102) (hs : 0 < s.re) : mellinRestricted targetFnC s = 1 / s"
     },
     {
+      "id": "dirichletPolyBD",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 50,
+      "signature": "def dirichletPolyBD (N : \u2115) (s : \u2102) : \u2102"
+    },
+    {
+      "id": "contourIntegrand",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 63,
+      "signature": "def contourIntegrand (N : \u2115) (s : \u2102) : \u211d"
+    },
+    {
+      "id": "ContourRect",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 81,
+      "signature": "def ContourRect.vertices (c : ContourRect) : Fin 4 \u2192 \u2102 | 0 => (1/2 : \u211d) - c.T * I   -- bottom-left | 1 => (1/2 : \u211d) + c.T * I   -- top-left (critical line) | 2 => (c.\u03c3_right : \u211d) + c.T * I   -- top\u2026"
+    },
+    {
+      "id": "mellin_basis_element",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 107,
+      "signature": "theorem mellin_basis_element (k : \u2115) (hk : 1 \u2264 k) (s : \u2102) (hs : 0 < s.re) (hs1 : s \u2260 1) : \u222b x in Set.Ioo (0:\u211d) 1, ((Int.fract (1 / ((k:\u211d)*x)) : \u211d) : \u2102) * (x : \u2102) ^ (s - 1) = 1 / ((k : \u2102) * (s - 1))\u2026"
+    },
+    {
+      "id": "mellin_residual_on_unit_interval",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 123,
+      "signature": "theorem mellin_residual_on_unit_interval (N : \u2115) (hN : 2 \u2264 N) (s : \u2102) (hs : 0 < s.re) (hs1 : s \u2260 1) (hs_lt : s.re < 1) : \u222b x in Set.Ioo (0:\u211d) 1, ((1 - bdLinComb N (bdMoebiusWeight N) x : \u211d) : \u2102) * \u2026"
+    },
+    {
+      "id": "integrand_three_terms",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 151,
+      "signature": "theorem integrand_three_terms (N : \u2115) (s : \u2102) (hs : s \u2260 0) : contourIntegrand N s = 1 / \u2016s\u2016 ^ 2 + 2 * (riemannZeta s * dirichletPolyBD N s).re / \u2016s\u2016 ^ 2 + \u2016riemannZeta s * dirichletPolyBD N s\u2016 ^ 2 \u2026"
+    },
+    {
+      "id": "term1_exact",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 172,
+      "signature": "theorem term1_exact : (1 / (2 * Real.pi)) * \u222b t : \u211d, (1 : \u211d) / \u2016((1/2 : \u211d) : \u2102) + (t : \u211d) * I\u2016 ^ 2 = 1"
+    },
+    {
+      "id": "cross_term_contour_shift",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 218,
+      "signature": "theorem cross_term_contour_shift (N : \u2115) (hN : 10 \u2264 N) : \u2203 C : \u211d, C > 0 \u2227 |(1 / (2 * Real.pi)) * \u222b t : \u211d, 2 * (riemannZeta ((1/2 : \u2102) + t * I) * dirichletPolyBD N ((1/2 : \u2102) + t * I)).re / \u2016((1/2 :\u2026"
+    },
+    {
+      "id": "term3_polynomial_moment",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 233,
+      "signature": "theorem term3_polynomial_moment (N : \u2115) (hN : 10 \u2264 N) : \u2203 C : \u211d, C > 0 \u2227 (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016riemannZeta ((1/2 : \u2102) + t * I) * dirichletPolyBD N ((1/2 : \u2102) + t * I)\u2016 ^ 2 / \u2016((1/2 : \u211d) :\u2026"
+    },
+    {
+      "id": "bd_gram_form_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 266,
+      "signature": "axiom bd_gram_form_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ (1/2 : \u211d) * (Real.log x) ^ 2) (N : \u2115) (hN : 10 \u2264 N) : 1 - 2 * dotProduct (\u2026"
+    },
+    {
+      "id": "critical_line_mellin_bound_proved",
+      "type": "theorem",
+      "category": "proved",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/ContourShift.lean",
+      "line": 285,
+      "signature": "theorem critical_line_mellin_bound_proved (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ (1/2 : \u211d) * (Real.log x) ^ 2) (N : \u2115) (hN : 10 \u2264 N) : (1 \u2026"
+    },
+    {
       "id": "sum_moebius_eq_indicator",
       "type": "theorem",
       "category": "proved",
@@ -5694,7 +5793,7 @@
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 56,
+      "line": 57,
       "signature": "def mellinBDResidual (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (s : \u2102) : \u2102"
     },
     {
@@ -5703,7 +5802,7 @@
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 66,
+      "line": 67,
       "signature": "def flattenedResidualV (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (u : \u211d) : \u211d"
     },
     {
@@ -5712,7 +5811,7 @@
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 73,
+      "line": 74,
       "signature": "def flattenedResidualC (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (u : \u211d) : \u2102"
     },
     {
@@ -5721,7 +5820,7 @@
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 82,
+      "line": 83,
       "signature": "def residualAutocorrelation (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (t : \u211d) : \u211d"
     },
     {
@@ -5730,7 +5829,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 92,
+      "line": 93,
       "signature": "lemma bdLinComb_bound (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (x : \u211d) : |bdLinComb N v x| \u2264 \u2211 i : Fin (N - 1), |v i|"
     },
     {
@@ -5739,7 +5838,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 106,
+      "line": 107,
       "signature": "lemma bdResidualV_bound (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (x : \u211d) : |bdResidualV N v x| \u2264 1 + \u2211 i : Fin (N - 1), |v i|"
     },
     {
@@ -5748,7 +5847,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 118,
+      "line": 119,
       "signature": "lemma flattenedResidualV_bound (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (u : \u211d) : |flattenedResidualV N v u| \u2264 (1 + \u2211 i : Fin (N - 1), |v i|) * Real.exp (-u / 2)"
     },
     {
@@ -5757,7 +5856,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 135,
+      "line": 136,
       "signature": "lemma flattenedResidualV_sq_eq (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (u : \u211d) (hu : 0 \u2264 u) : (flattenedResidualV N v u) ^ 2 = (bdResidualV N v (Real.exp (-u))) ^ 2 * Real.exp (-u)"
     },
     {
@@ -5766,7 +5865,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 146,
+      "line": 147,
       "signature": "theorem autocorrelation_zero_eq_l2 (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : residualAutocorrelation N v 0 = \u222b u : \u211d, (flattenedResidualV N v u) ^ 2"
     },
     {
@@ -5775,7 +5874,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 159,
+      "line": 160,
       "signature": "axiom autocorr_eval_zero (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : residualAutocorrelation N v 0 = \u222b x in (0:\u211d)..1, (bdResidualV N v x) ^ 2  /-- **Axiom 2 (L\u00b9 Fourier Inversion)**: By the convolution theorem\u2026"
     },
     {
@@ -5784,7 +5883,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 166,
+      "line": 167,
       "signature": "axiom fourier_inv_autocorr (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : residualAutocorrelation N v 0 = \u222b \u03be : \u211d, \u2016\u222b u : \u211d, flattenedResidualC N v u * Complex.exp (-2 * Real.pi * \u03be * u * Complex.I)\u2016 ^ 2  /-- **A\u2026"
     },
     {
@@ -5793,7 +5892,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 174,
+      "line": 175,
       "signature": "axiom mellin_fourier_scale (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u222b \u03be : \u211d, \u2016\u222b u : \u211d, flattenedResidualC N v u * Complex.exp (-2 * Real.pi * \u03be * u * Complex.I)\u2016 ^ 2 = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellin\u2026"
     },
     {
@@ -5802,7 +5901,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 194,
+      "line": 195,
       "signature": "theorem parseval_bridge (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u222b x in (0:\u211d)..1, (bdResidualV N v x) ^ 2 = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellinBDResidual N v ((1/2 : \u2102) + t * Complex.I)\u2016 ^ 2"
     },
     {
@@ -5811,7 +5910,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 225,
+      "line": 226,
       "signature": "axiom critical_line_mellin_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ (1/2 : \u211d) * (Real.log x) ^ 2) (N : \u2115) (hN : 10 \u2264 N) : (1 / (2 * Re\u2026"
     },
     {
@@ -5820,7 +5919,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/PlancherelBypass.lean",
-      "line": 240,
+      "line": 241,
       "signature": "theorem l2_from_pointwise_bound_derived (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ (1/2 : \u211d) * (Real.log x) ^ 2) (N : \u2115) (hN : 10 \u2264 N) : \u222b x i\u2026"
     },
     {
@@ -21078,6 +21177,454 @@
       "target": "mellin_target"
     },
     {
+      "source": "vasyuninGramEntry",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "term1_exact"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "term1_exact"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "vasyuninMeanEntry",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "term1_exact"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bdLinComb",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bd_mellin_reduction_proved",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bd_mellin_base_case",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bd_integral_linearity",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "term1_exact"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "one_inner_cpow",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bd_l2_error_eq_quad_error",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "term1_exact"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "realQuadForm",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bdMoebiusWeight",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "term1_exact"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "bdResidualV",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "term1_exact"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "mellinBDResidual",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "mellin_basis_element"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "mellin_residual_on_unit_interval"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "integrand_three_terms"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "term1_exact"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "cross_term_contour_shift"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "term3_polynomial_moment"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "bd_gram_form_bound"
+    },
+    {
+      "source": "parseval_bridge",
+      "target": "critical_line_mellin_bound_proved"
+    },
+    {
       "source": "mellinRestricted",
       "target": "mellin_fractBasis"
     },
@@ -23411,14 +23958,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 735,
-    "totalEdges": 4198,
-    "axiomCount": 55,
-    "theoremCount": 547,
-    "definitionCount": 133,
-    "provedTheorems": 547,
-    "fileCount": 90,
-    "description": "Cathedral proof architecture: 55 axioms, 547 theorems, 133 definitions across 90 files",
-    "generatedAt": "2026-04-17T01:28:14.663597"
+    "totalNodes": 746,
+    "totalEdges": 4310,
+    "axiomCount": 56,
+    "theoremCount": 554,
+    "definitionCount": 136,
+    "provedTheorems": 554,
+    "fileCount": 91,
+    "description": "Cathedral proof architecture: 56 axioms, 554 theorems, 136 definitions across 91 files",
+    "generatedAt": "2026-04-17T05:40:23.236951"
   }
 }
