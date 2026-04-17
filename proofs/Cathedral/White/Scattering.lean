@@ -86,7 +86,7 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
   intro u hu
   simp only [Set.mem_Ioi] at hu
   -- Simplify the double-negation: - -rexp(-u) = rexp(-u)
-  simp only [neg_neg, gM, smul_eq_mul]
+  simp only [neg_neg, gM]
   -- Unfold flattenedResidualC for u > 0:
   have hu_nn : (0 : ℝ) ≤ u := le_of_lt hu
   simp only [flattenedResidualC, flattenedResidualV, if_pos hu_nn]
