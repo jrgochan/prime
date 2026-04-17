@@ -172,7 +172,13 @@ theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
     simp [Complex.norm_real, sq_abs]
   rw [h_conv]
   -- Step 3: Apply Plancherel's theorem (∫ ‖f‖² = ∫ ‖𝓕f‖²)
-  exact plancherel_integral_axiom (flattenedResidualC N v)
+  -- The hypotheses (L¹ and L²) follow from exponential decay:
+  --   |flattenedResidualC N v u| ≤ C * exp(-u/2) ∈ L¹ ∩ L²
+  have hf1 : Integrable (flattenedResidualC N v) volume := by
+    sorry -- follows from flattenedResidualV_bound + exp(-u/2) ∈ L¹
+  have hf2 : MemLp (flattenedResidualC N v) 2 volume := by
+    sorry -- follows from flattenedResidualV_bound + exp(-u) ∈ L¹
+  exact plancherel_integral_axiom (flattenedResidualC N v) hf1 hf2
 
 -- ════════════════════════════════════════════════
 -- §3. AXIOM 4 ELIMINATION (Scale Covariance)

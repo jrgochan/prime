@@ -17,6 +17,8 @@
 import Cathedral.NymanBeurling.BDMellin
 import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.Fourier.LpSpace
+import Mathlib.MeasureTheory.Function.L2Space
 
 noncomputable section
 open Real MeasureTheory Finset BigOperators Complex
@@ -135,23 +137,67 @@ theorem autocorrelation_zero_eq_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
   congr 1; ext u; simp [sub_zero, sq]
 
 -- ════════════════════════════════════════════════
--- §3. PLANCHEREL AXIOM (Parseval via Mathlib's 𝓕)
+-- §3. PLANCHEREL (Parseval via Mathlib's 𝓕)
 -- ════════════════════════════════════════════════
 
-/-- **Plancherel's theorem** using Mathlib's standard Fourier transform 𝓕.
+-- ──── PROVED: Lp norm² = ∫ pointwise norm² ────
 
-    ∫ ‖f(u)‖² du = ∫ ‖𝓕f(ξ)‖² dξ
+/-- For f : Lp ℂ 2, ‖f‖² = ∫ ‖f(a)‖². -/
+private lemma lp2_norm_sq_eq_integral (f : ℝ →₂[volume] ℂ) :
+    ‖f‖ ^ 2 = ∫ a : ℝ, ‖f a‖ ^ 2 := by
+  rw [sq, ← @inner_self_eq_norm_mul_norm ℂ, L2.inner_def]
+  simp only [inner_self_eq_norm_sq_to_K]
+  norm_cast
 
-    Mathlib has this as `norm_fourier_eq` for Lp functions
-    (`Analysis.Fourier.LpSpace`). This axiom exists solely because
-    Mathlib's Plancherel operates on `Lp ℂ 2` types while we use
-    raw integrals. The bridge (MemLp + snorm ↔ integral + L2/L1
-    agreement for the Fourier extension) is pure infrastructure. -/
-axiom plancherel_mathlib_fourier (f : ℝ → ℂ) :
-    ∫ u : ℝ, ‖f u‖ ^ 2 = ∫ ξ : ℝ, ‖𝓕 f ξ‖ ^ 2
+/-- For f with MemLp, ∫ ‖f‖² = ‖toLp f‖². -/
+private lemma raw_integral_eq_lp_norm_sq (f : ℝ → ℂ) (hf : MemLp f 2 volume) :
+    ∫ u : ℝ, ‖f u‖ ^ 2 = ‖hf.toLp f‖ ^ 2 := by
+  rw [lp2_norm_sq_eq_integral]
+  apply integral_congr_ae
+  filter_upwards [hf.coeFn_toLp] with u hu
+  show ‖f u‖ ^ 2 = ‖(hf.toLp f : ℝ →₂[volume] ℂ) u‖ ^ 2
+  rw [hu]
 
-/-- **PROVED**: Bridge from Mathlib's 𝓕 to our explicit exp formula.
-    Shows: ∫ f(u) exp(-2πiξu) du = 𝓕 f ξ. -/
+-- ──── PROVED: Plancherel for Lp elements ────
+
+/-- norm_fourier_eq squared: ‖f_lp‖² = ‖𝓕 f_lp‖². -/
+private lemma plancherel_lp_norm_sq (f_lp : ℝ →₂[volume] ℂ) :
+    ‖f_lp‖ ^ 2 = ‖(𝓕 f_lp : ℝ →₂[volume] ℂ)‖ ^ 2 := by
+  rw [MeasureTheory.Lp.norm_fourier_eq]
+
+-- ──── AXIOM: L₂ Fourier =ᵐ L₁ Fourier ────
+
+/-- **MINIMAL AXIOM**: For f ∈ L¹ ∩ L², the L² extension of the
+    Fourier transform agrees a.e. with the L¹ integral formula.
+
+    This follows from density of Schwartz functions in L¹ ∩ L²:
+    - For Schwartz f: `SchwartzMap.toLp_fourier_eq` gives equality
+    - For general L¹ ∩ L²: approximate by Schwartz fₙ → f in both norms
+    - 𝓕₂(fₙ.toLp) → 𝓕₂(f.toLp) in L² (isometry)
+    - 𝓕₁(fₙ) → 𝓕₁(f) uniformly (bounded on L¹)
+    - Both limits agree with 𝓕₂(f.toLp) and 𝓕₁(f) respectively -/
+axiom l2_fourier_eq_l1_fourier_ae (f : ℝ → ℂ)
+    (hf1 : Integrable f volume) (hf2 : MemLp f 2 volume) :
+    (𝓕 (hf2.toLp f) : ℝ →₂[volume] ℂ) =ᵐ[volume] (𝓕 f : ℝ → ℂ)
+
+-- ──── PROVED: Plancherel for raw integrals ────
+
+/-- **PROVED**: ∫ ‖f‖² = ∫ ‖𝓕 f‖² for f ∈ L¹ ∩ L².
+    Uses norm_fourier_eq + the Lp bridge. -/
+theorem plancherel_mathlib_fourier (f : ℝ → ℂ)
+    (hf1 : Integrable f volume) (hf2 : MemLp f 2 volume) :
+    ∫ u : ℝ, ‖f u‖ ^ 2 = ∫ ξ : ℝ, ‖𝓕 f ξ‖ ^ 2 := by
+  rw [raw_integral_eq_lp_norm_sq f hf2]
+  rw [plancherel_lp_norm_sq (hf2.toLp f)]
+  rw [lp2_norm_sq_eq_integral]
+  apply integral_congr_ae
+  filter_upwards [l2_fourier_eq_l1_fourier_ae f hf1 hf2] with ξ hξ
+  show ‖(𝓕 (hf2.toLp f) : ℝ →₂[volume] ℂ) ξ‖ ^ 2 = ‖𝓕 f ξ‖ ^ 2
+  rw [hξ]
+
+-- ──── PROVED: Explicit formula version ────
+
+/-- **PROVED**: Bridge from Mathlib's 𝓕 to our explicit exp formula. -/
 private lemma our_fourier_eq_mathlib_aux (f : ℝ → ℂ) (ξ : ℝ) :
     (∫ u : ℝ, f u * Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I)) =
     𝓕 f ξ := by
@@ -159,9 +205,9 @@ private lemma our_fourier_eq_mathlib_aux (f : ℝ → ℂ) (ξ : ℝ) :
   congr 1; ext u; rw [smul_eq_mul, mul_comm]
   congr 1; push_cast; ring_nf
 
-/-- **PROVED**: The original explicit-formula version follows from
-    `plancherel_mathlib_fourier` + the formula matching lemma. -/
-theorem plancherel_integral_axiom (f : ℝ → ℂ) :
+/-- **PROVED**: The explicit-formula version. -/
+theorem plancherel_integral_axiom (f : ℝ → ℂ)
+    (hf1 : Integrable f volume) (hf2 : MemLp f 2 volume) :
     ∫ u : ℝ, ‖f u‖ ^ 2 =
     ∫ ξ : ℝ, ‖∫ u : ℝ, f u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 := by
@@ -169,8 +215,9 @@ theorem plancherel_integral_axiom (f : ℝ → ℂ) :
          (fun ξ : ℝ => ‖𝓕 f ξ‖ ^ 2) := by
     ext ξ; rw [our_fourier_eq_mathlib_aux f ξ]
   rw [this]
-  exact plancherel_mathlib_fourier f
+  exact plancherel_mathlib_fourier f hf1 hf2
 
 end
+
 
 
