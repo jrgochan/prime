@@ -1,6 +1,6 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — 01-Core
-# Generated: Thu Apr 16 20:36:30 MDT 2026
+# Generated: Thu Apr 16 23:09:33 MDT 2026
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
@@ -3852,6 +3852,22 @@ end
 
 
 ================================================================
+FILE: Cathedral/Scratch/Hunt_autocorr_eval_zero.lean
+================================================================
+
+import Cathedral.MellinBridge.MertensBound
+import Cathedral.MellinBridge.BDWeights
+import Cathedral.NymanBeurling.BDMellin
+import Mathlib.Analysis.Fourier.Inversion
+
+set_option maxHeartbeats 200000
+
+theorem autocorr_eval_zero (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    residualAutocorrelation N v 0 = ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
+  norm_cast; ring
+
+
+================================================================
 FILE: Cathedral/Vasyunin.lean
 ================================================================
 
@@ -3953,8 +3969,10 @@ lean_lib «Cathedral» where
     `Cathedral.MellinBridge.DomainConnected,
     `Cathedral.MellinBridge.IdentityBypass,
     `Cathedral.MellinBridge.MertensBound,
+    `Cathedral.MellinBridge.BDWeights,
     `Cathedral.MellinBridge.AbelSiegeProof,
     `Cathedral.MellinBridge.DirichletCollapse,
+    `Cathedral.MellinBridge.PlancherelBypass,
     `Cathedral.MellinBridge.MellinBridge,
     -- Sieve engine
     `Cathedral.Sieve.VasyuninExpansion,

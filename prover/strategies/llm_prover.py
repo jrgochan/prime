@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Optional
 
 OLLAMA_URL = "http://localhost:11434/api/chat"
-DEFAULT_MODEL = "gemma4:31b"
+DEFAULT_MODEL = "gemma4:e4b"
 
 SYSTEM_PROMPT = """You are an expert Lean 4 proof engineer working with the Mathlib library.
 Your task is to prove Lean 4 theorems by providing tactic-mode proofs.
