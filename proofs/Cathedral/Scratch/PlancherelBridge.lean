@@ -1,21 +1,16 @@
 /-
-  PlancherelBridge: Measurability + Integrability of flattenedResidualC.
+  Testing MemLp proof — simplest approach.
 -/
 
 import Cathedral.MellinBridge.PlancherelDefs
 import Mathlib.MeasureTheory.Integral.ExpDecay
 import Mathlib.MeasureTheory.Function.Floor
-import Mathlib.Analysis.Fourier.LpSpace
+import Mathlib.MeasureTheory.Function.L2Space
 
 noncomputable section
 open Real MeasureTheory Finset BigOperators Set
-open scoped FourierTransform
 
--- ═══════════════════════════════════════════
--- PROVED: Measurability
--- ═══════════════════════════════════════════
-
-theorem flatResV_measurable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+private theorem flatResV_meas (N : ℕ) (v : Fin (N - 1) → ℝ) :
     Measurable (flattenedResidualV N v) := by
   unfold flattenedResidualV bdResidualV bdLinComb
   apply Measurable.ite measurableSet_Ici
@@ -28,47 +23,64 @@ theorem flatResV_measurable (N : ℕ) (v : Fin (N - 1) → ℝ) :
     · exact (measurable_neg.div_const _).exp
   · exact measurable_const
 
-theorem flatResC_aesm (N : ℕ) (v : Fin (N - 1) → ℝ) :
-    AEStronglyMeasurable (flattenedResidualC N v) volume := by
-  unfold flattenedResidualC
-  exact (Complex.ofRealCLM.continuous.measurable.comp
-    (flatResV_measurable N v)).aestronglyMeasurable
+-- MemLp 2: Use memLp_two_iff_integrable_sq_norm
+-- then prove Integrable (‖f·‖²) by the same Ioi/Iio decomposition
 
--- ═══════════════════════════════════════════
--- PROVED: Integrable
--- ═══════════════════════════════════════════
+theorem flatResC_memLp2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    MemLp (flattenedResidualC N v) 2 volume := by
+  have haesm : AEStronglyMeasurable (flattenedResidualC N v) volume := by
+    unfold flattenedResidualC
+    exact (Complex.ofRealCLM.continuous.measurable.comp (flatResV_meas N v)).aestronglyMeasurable
+  refine (memLp_two_iff_integrable_sq_norm haesm).mpr ?_
+  -- Goal: Integrable (fun x => ‖flattenedResidualC N v x‖ ^ 2) volume
+  -- ‖flattenedResidualC N v u‖ = |flattenedResidualV N v u|
+  -- So ‖f u‖² = |flattenedResidualV N v u|²
+  -- |flattenedResidualV N v u|² ≤ (C * exp(-u/2))² = C² * exp(-u) on Ioi 0
+  -- And |flattenedResidualV N v u|² = 0 on Iio 0
 
-theorem flatResV_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
-    Integrable (flattenedResidualV N v) volume := by
+  -- The squared function has the same support as f:
+  have hsq_zero : ∀ u : ℝ, u < 0 →
+      (fun x => ‖flattenedResidualC N v x‖ ^ 2) u = 0 := by
+    intro u hu
+    unfold flattenedResidualC flattenedResidualV
+    simp [show ¬(0 ≤ u) from not_le.mpr hu]
+
   set C := 1 + ∑ i : Fin (N - 1), |v i|
-  rw [← integrableOn_univ]
-  -- Split: univ = Ici 0 ∪ Iio 0
-  have huniv : (Set.univ : Set ℝ) = Set.Ici 0 ∪ Set.Iio 0 := by
-    ext x; simp only [Set.mem_univ, Set.mem_union, Set.mem_Ici, Set.mem_Iio, true_iff]
-    exact le_or_gt 0 x
-  rw [huniv, integrableOn_union]
-  refine ⟨?_, ?_⟩
-  · -- IntegrableOn [0, ∞): bounded by exp decay on (0, ∞), single point doesn't matter
-    have hIoi : IntegrableOn (flattenedResidualV N v) (Set.Ioi 0) volume :=
-      ((exp_neg_integrableOn_Ioi 0
-        (show (0:ℝ) < 1/2 by positivity)).const_mul C).mono'
-        ((flatResV_measurable N v).aestronglyMeasurable.restrict)
-        (ae_of_all _ fun u => by
-          simp only [norm_eq_abs]
-          calc |flattenedResidualV N v u|
-              ≤ C * rexp (-u / 2) := flattenedResidualV_bound N v u
-            _ = C * rexp (-(1/2) * u) := by ring_nf)
-    -- Ici 0 = Ioi 0 ∪ {0}, and IntegrableOn {0} is trivial
-    rw [show Set.Ici (0:ℝ) = Set.Ioi 0 ∪ {0} from by ext; simp [le_iff_lt_or_eq, eq_comm]]
-    exact hIoi.union (integrableOn_singleton (hx := by simp))
-  · -- IntegrableOn (-∞, 0): f = 0 there
-    apply integrableOn_zero.congr_fun _ measurableSet_Iio
-    intro u hu; simp only [Set.mem_Iio] at hu
-    unfold flattenedResidualV; simp [show ¬(0 ≤ u) from not_le.mpr hu]
 
-theorem flatResC_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
-    Integrable (flattenedResidualC N v) volume := by
-  unfold flattenedResidualC
-  exact (flatResV_integrable N v).ofReal
+  rw [← integrableOn_univ]
+  rw [show (Set.univ : Set ℝ) = Set.Ioi 0 ∪ {(0:ℝ)} ∪ Set.Iio 0 from by
+    ext x; simp only [Set.mem_univ, Set.mem_union, Set.mem_Ioi, Set.mem_singleton_iff,
+      Set.mem_Iio, true_iff]; rcases lt_trichotomy x 0 with h | h | h
+    · exact Or.inr h
+    · exact Or.inl (Or.inr h)
+    · exact Or.inl (Or.inl h)]
+  apply IntegrableOn.union
+  · apply IntegrableOn.union
+    · -- On Ioi 0: ‖f u‖² ≤ C² * exp(-u)
+      have hbnd : IntegrableOn (fun u => C ^ 2 * rexp (-(1:ℝ) * u)) (Set.Ioi 0) volume :=
+        (exp_neg_integrableOn_Ioi 0 (show (0:ℝ) < 1 by positivity)).const_mul (C ^ 2)
+      apply hbnd.mono'
+      · -- AEStronglyMeasurable of ‖f·‖²
+        apply AEStronglyMeasurable.restrict
+        exact (haesm.norm.mul haesm.norm).congr
+          (ae_of_all _ fun u => by simp [sq])
+      · -- Pointwise bound
+        filter_upwards with u
+        simp only [norm_eq_abs, Function.comp]
+        unfold flattenedResidualC
+        simp only [Complex.norm_real, abs_abs]
+        -- Goal: |flattenedResidualV N v u| ^ 2 ≤ |C ^ 2 * rexp (-(1:ℝ) * u)|
+        rw [abs_of_nonneg (by positivity)]
+        have hb := flattenedResidualV_bound N v u
+        calc |flattenedResidualV N v u| ^ 2
+            ≤ (C * rexp (-u / 2)) ^ 2 := by
+              apply sq_le_sq' <;> linarith [abs_nonneg (flattenedResidualV N v u)]
+          _ = C ^ 2 * rexp (-(1:ℝ) * u) := by
+              rw [mul_pow, sq (rexp _), ← Real.exp_add]
+              ring_nf
+    · exact integrableOn_singleton (hx := by simp)
+  · -- On Iio 0: f = 0 so ‖f‖² = 0
+    exact integrableOn_zero.congr_fun (fun u hu => by
+      exact (hsq_zero u (Set.mem_Iio.mp hu)).symm) measurableSet_Iio
 
 end
