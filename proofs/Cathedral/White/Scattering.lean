@@ -52,11 +52,29 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
     (∫ u : ℝ, flattenedResidualC N v u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)) =
     mellinBDResidual N v ((1/2 : ℂ) + (2 * Real.pi * ξ) * Complex.I) := by
-  -- Step 1: The LHS integral over ℝ equals the integral over Ioi(0)
-  -- because flattenedResidualC = 0 for u < 0
-  -- Step 2: Unfold flattenedResidualC and apply the exp(-u) substitution
-  -- Step 3: The result is exactly the Mellin integral on Ioo(0,1)
-  sorry -- 🔨 FORGE TASK: Complex-valued exp(-u) substitution via antitone CoV
+  -- The proof mirrors Kinematics but for ℂ-valued functions.
+  -- Step 1: Restrict LHS to Ioi(0) since flattenedResidualC = 0 for u < 0
+  have h_restrict : ∫ u : ℝ, flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+    ∫ u in Set.Ici (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) := by
+    symm; apply setIntegral_eq_integral_of_forall_compl_eq_zero
+    intro u hu; simp only [Set.mem_Ici, not_le] at hu
+    simp [flattenedResidualC, flattenedResidualV, show ¬(0 ≤ u) from not_le.mpr hu]
+  have h_ici_ioi : ∫ u in Set.Ici (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+    ∫ u in Set.Ioi (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) := by
+    apply setIntegral_congr_set Ioi_ae_eq_Ici.symm
+  rw [h_restrict, h_ici_ioi]
+  -- The remaining steps require the complex-valued antitone substitution
+  -- x = exp(-u), which converts the half-line integral to Ioo(0,1).
+  -- The pointwise identity:
+  --   exp(-u) • ((bdResidualV(exp(-u)) : ℂ) • exp(-u)^(s-1))
+  --   = (bdResidualV(exp(-u)) * exp(-u/2) : ℂ) * cexp(-2πξuI)
+  -- follows from: exp(-u) * exp(-u)^(s-1) = exp(-u)^s = exp(-su)
+  --   = exp(-u(1/2 + 2πξi)) = exp(-u/2) * cexp(-2πξuI)
+  sorry -- 🔨 Complex cpow identity: exp(-u)^s = exp(-su) for s = 1/2 + 2πξi
 
 -- ════════════════════════════════════════════════
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)
