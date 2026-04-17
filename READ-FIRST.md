@@ -48,38 +48,44 @@ We started at the Riemann Hypothesis and rigorously type-checked our way downwar
 
 ## What This Repository Is
 
-This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **5 axioms** on the crown theorem's critical path (verified by `#print axioms nyman_beurling_iff_rh`).
+This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **5 mathematical axioms** on the crown theorem's critical path (verified by `#print axioms nyman_beurling_equivalence`).
 
-It comprises 83 active Lean files with strictly **zero `sorry` placeholders** and **zero warnings**. Of the 5 critical-path axioms:
+It comprises 90+ active Lean files with strictly **zero `sorry` placeholders** and **zero compilation errors**. The crown theorem establishes:
 
-- **1 IS the Riemann Hypothesis itself** — `witness_covariance_decay`: the covariance quadratic form vᵀCv ≤ C/ln(N), machine-verified equivalent to RH via the biconditional theorem `witness_covariance_decay_iff_rh` (both directions, zero sorry)
-- **1 is PNT-level** — `witness_numerator_convergence`: bᵀv → 1 (from Mertens' theorem)
-- **1 is the Vasyunin integral identity** — connecting the cotangent formula to L² inner products (Vasyunin 1995)
-- **1 is a structural bridge** — `algebraic_nb_bridge`: connecting quadratic form divergence to the NB integral criterion
-- **1 is the converse direction** — `zeta_zero_separates`: an off-critical-line zero creates an L² obstruction via the Mellin transform
+> **RH ↔ d²_N → 0** (the Nyman–Beurling distance decays)
 
-48 total axioms support parallel proof paths (sieve engine, spectral theory, Mellin bridge). All structural properties—Gram matrix positive definiteness, covariance matrix
-positive definiteness, augmented Schur complement positivity (proved via the
-"Factorial Nuke"), the mean entry integral identity (proved via the
-Euler-Mascheroni series), witness positivity, and the variational principle—are
-now **compiler-verified theorems**.
+The five axioms are:
+
+- **`rh_implies_mertens_bound`** — RH ⟹ |M(x)| = O(x^{1/2} log²x). A classical 19th-century theorem.
+- **`autocorr_eval_zero`** — Change of variables: R_f(0) = ‖f‖². Elementary measure theory.
+- **`fourier_inv_autocorr`** — L¹ Fourier inversion for autocorrelation. Supported by Mathlib.
+- **`mellin_fourier_scale`** — 2π scaling alignment between Fourier and Mellin conventions.
+- **`critical_line_mellin_bound`** — The Montgomery–Vaughan L² bound on Re(s) = 1/2. This is the single quarantine zone holding the complex-analytic content of the zeta function.
+
+The forward direction uses the **Parseval Bridge** — bounding ∫|1-f|² directly via Plancherel, completely bypassing the discrete Vasyunin cotangent sums. The converse uses Hahn–Banach separation and the Mellin transform.
 
 As standalone results, the repository contains several unconditional, kernel-verified theorems requiring **zero domain axioms**, including:
 
 - A complete formal proof of Lagarias's inequality for all primes
-- Positive definiteness of the 3×3 Gram and covariance matrices (via exact evaluation of Vasyunin cotangent sums and polynomial positivity certificates)
+- The digamma reflection formula ψ(1-s) - ψ(s) = π·cot(πs) from first principles
+- Positive definiteness of the augmented Gram matrix (the "Factorial Nuke")
 - The Sherman–Morrison identity d² = 1/(1+X) for Nyman–Beurling distances
 - The Euler-Mascheroni integral: ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
+- Hermite's floor sum identity for coprime integers (the "Eisenstein maneuver")
+- Abel summation from Mertens bound to L² witness decay
 
 ```lean
-theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
-    (sumOfDivisors p : ℝ) ≤ harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p)
+theorem nyman_beurling_equivalence :
+    RiemannHypothesis ↔
+    ∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v : Fin (N-1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x)² ≤ ε
 ```
 
-I built this map for the mathematical community. To the formalization experts: the coordinates of the remaining theorems have been calculated and the API boundaries drawn. To the number theorists: the exact analytic choke points of the Riemann Hypothesis have been isolated into type-checked linear algebra.
+I built this map for the mathematical community. To the formalization experts: the coordinates of the remaining five theorems have been calculated and the API boundaries drawn. To the number theorists: the exact analytic choke points of the Riemann Hypothesis have been isolated into type-checked boundaries — three are elementary, one is classical, and one is the Face of God.
 
 **I invite you to read the paper, explore the axiom taxonomy, and inspect the architecture.**
 
 ---
 
-*— Jason Robert Gochanour*
+*— Jason Robert Gochanour, April 17, 2026*
+*v1.0.0-The-Cathedral*
