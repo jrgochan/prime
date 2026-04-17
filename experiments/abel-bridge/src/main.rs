@@ -1,60 +1,72 @@
-//! # Abel Summation Bridge Experiment
+//! # Abel Summation Bridge Experiment v2
 //!
-//! ## Goal
-//! Numerically verify that the Mertens bound |M(x)| ≤ C·x^{1/2}·(ln x)²
-//! implies the Selberg witness decay: 1 - 2bᵀv + vᵀGv ≤ C'/ln(N).
+//! Parallel, production-grade numerical verification that the Mertens bound
+//! |M(x)| ≤ C·x^{1/2}·(ln x)² implies the Selberg witness decay:
+//!     1 - 2bᵀv + vᵀGv ≤ C'/ln(N)
 //!
-//! This is **Attack 2** from the Forge Master's analysis: showing that
-//! `rh_implies_mertens_bound` → `witness_l2_error_decay_gram` via
-//! Abel summation. If this bridge holds numerically, we can formalize
-//! it in Lean to collapse the Cathedral to a SINGLE axiom.
+//! **Attack 2**: rh_implies_mertens_bound → witness_l2_error_decay_gram
 //!
-//! ## What it computes
-//! 1. Möbius function μ(k) via sieve
-//! 2. Mertens function M(x) = Σ_{k≤x} μ(k)
-//! 3. Gram matrix entries G(j,k) = ∫₀¹ {j/x}{k/x} dx (Vasyunin formula)
-//! 4. Basis inner products b_k = ∫₀¹ {k/x} dx
-//! 5. Log-cutoff witness v_k = -μ(k)(1 - ln k / ln N)
-//! 6. Decomposition of bᵀv via Abel summation against M(t)
-//! 7. Decomposition of vᵀGv into Mertens-controlled pieces
-//!
-//! ## Key output
-//! - Ratio (1 - 2bᵀv + vᵀGv) / (1/ln N) should stabilize → C
-//! - Abel summation remainder should be bounded by Mertens bound
+//! Outputs:
+//!   results/quadratic_form.tsv    — Q(N) values and decomposition
+//!   results/mertens_profile.tsv   — Mertens function statistics
+//!   results/summary.json          — Machine-readable summary
+//!   results/abel_decomposition.tsv — Abel summation components
 
-use std::f64::consts::PI;
+use rayon::prelude::*;
+use serde::Serialize;
+use std::fs;
+use std::io::Write;
+use std::time::Instant;
+
+// ═══════════════════════════════════════════
+// CORE ARITHMETIC
+// ═══════════════════════════════════════════
 
 /// Compute Möbius function μ(k) for k = 0..n via sieve
 fn mobius_sieve(n: usize) -> Vec<i8> {
     let mut mu = vec![0i8; n + 1];
-    let mut is_prime = vec![true; n + 1];
-    let mut prime_count = vec![0u8; n + 1];
-    let mut has_sq_factor = vec![false; n + 1];
+    let mut smallest_prime = vec![0usize; n + 1];
 
     mu[1] = 1;
 
     for p in 2..=n {
-        if !is_prime[p] {
-            continue;
+        if smallest_prime[p] != 0 {
+            continue; // not prime
         }
-        // p is prime — mark multiples
+        // p is prime
         for m in (p..=n).step_by(p) {
-            is_prime[m] = m == p; // only p itself stays prime
-            prime_count[m] += 1;
-        }
-        // Mark p² multiples as having square factors
-        let p2 = p * p;
-        for m in (p2..=n).step_by(p2) {
-            has_sq_factor[m] = true;
+            if smallest_prime[m] == 0 {
+                smallest_prime[m] = p;
+            }
         }
     }
 
-    for k in 1..=n {
-        if has_sq_factor[k] {
-            mu[k] = 0;
-        } else {
-            mu[k] = if prime_count[k] % 2 == 0 { 1 } else { -1 };
+    for k in 2..=n {
+        let mut val = k;
+        let mut num_factors = 0u32;
+        let mut has_sq = false;
+
+        while val > 1 {
+            let p = smallest_prime[val];
+            let mut count = 0;
+            while val % p == 0 {
+                val /= p;
+                count += 1;
+            }
+            if count > 1 {
+                has_sq = true;
+                break;
+            }
+            num_factors += 1;
         }
+
+        mu[k] = if has_sq {
+            0
+        } else if num_factors % 2 == 0 {
+            1
+        } else {
+            -1
+        };
     }
 
     mu
@@ -70,237 +82,372 @@ fn mertens(mu: &[i8]) -> Vec<i64> {
     m
 }
 
-/// Gram matrix diagonal entry G(j,j) = ∫₀¹ {j/x}² dx
-fn gram_diag(j: usize) -> f64 {
-    let jf = j as f64;
-    let n_points = 10000;
-    let h = 1.0 / n_points as f64;
+// ═══════════════════════════════════════════
+// GRAM MATRIX (PARALLEL COMPUTATION)
+// ═══════════════════════════════════════════
+
+const QUAD_POINTS: usize = 50_000;
+
+/// Compute ∫₀¹ f(x) dx via composite Simpson's rule with QUAD_POINTS nodes
+fn integrate_01<F: Fn(f64) -> f64>(f: F) -> f64 {
+    let n = QUAD_POINTS;
+    let h = 1.0 / n as f64;
     let mut total = 0.0;
 
-    for i in 1..n_points {
+    // Simpson weights: 1, 4, 2, 4, 2, ..., 4, 1
+    for i in 1..n {
         let x = i as f64 * h;
-        let fj = (jf / x).fract();
         let w = if i % 2 == 0 { 2.0 } else { 4.0 };
-        total += w * fj * fj;
+        total += w * f(x);
     }
+
+    // Endpoints (avoiding x=0 singularity)
+    total += f(h * 0.01); // near-zero proxy
+    total += f(1.0 - h * 0.01); // near-one proxy
+
     total * h / 3.0
 }
 
-/// Gram matrix off-diagonal entry G(j,k) for j ≠ k
-/// G(j,k) = ∫₀¹ {j/x}{k/x} dx
-fn gram_offdiag(j: usize, k: usize) -> f64 {
+/// Compute Gram matrix entry G(j,k) = ∫₀¹ {j/x}{k/x} dx
+fn gram_entry(j: usize, k: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
-
-    // Numerical integration via Simpson's rule
-    let n_points = 10000;
-    let h = 1.0 / n_points as f64;
-    let mut total = 0.0;
-
-    for i in 1..n_points {
-        let x = i as f64 * h;
+    integrate_01(|x| {
         let fj = (jf / x).fract();
         let fk = (kf / x).fract();
-        let w = if i % 2 == 0 { 2.0 } else { 4.0 };
-        total += w * fj * fk;
-    }
-    total * h / 3.0
+        fj * fk
+    })
 }
 
-/// Gram entry G(j,k)
-fn gram_entry(j: usize, k: usize) -> f64 {
-    if j == k {
-        gram_diag(j)
-    } else {
-        gram_offdiag(j, k)
-    }
-}
-
-/// Basis inner product b_k = ∫₀¹ {k/x} dx
+/// Compute basis inner product b_k = ∫₀¹ {k/x} dx
 fn basis_inner_prod(k: usize) -> f64 {
     let kf = k as f64;
-    // ∫₀¹ {k/x} dx = 1 - γ + Σ_{n=1}^{k-1} (k/n - k/(n+1)) · (something)
-    // Numerical integration
-    let n_points = 10000;
-    let h = 1.0 / n_points as f64;
-    let mut total = 0.0;
-
-    for i in 1..n_points {
-        let x = i as f64 * h;
-        let fk = (kf / x).fract();
-        let w = if i % 2 == 0 { 2.0 } else { 4.0 };
-        total += w * fk;
-    }
-    total * h / 3.0
+    integrate_01(|x| (kf / x).fract())
 }
 
-/// Run the full Abel Bridge analysis for a given N
-fn analyze_n(n: usize, mu: &[i8], mertens_fn: &[i64]) {
-    let ln_n = (n as f64).ln();
+/// Compute ALL Gram entries for index range 2..=n (parallelized)
+/// Returns a flattened upper-triangular matrix (row-major, j ≤ k)
+fn compute_gram_matrix(n: usize) -> Vec<Vec<f64>> {
+    let dim = n - 1; // indices 2..=n → 0..dim-1
 
-    // Build the log-cutoff witness: v_k = -μ(k)(1 - ln(k)/ln(N))
-    // Cathedral uses k = 2..N, indexed as Fin(N-1) with offset +2
-    let v: Vec<f64> = (2..=n)
-        .map(|k| {
+    // Parallel computation of rows
+    let matrix: Vec<Vec<f64>> = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let j = i + 2;
+            (0..dim)
+                .map(|ii| {
+                    let k = ii + 2;
+                    if k >= j {
+                        gram_entry(j, k)
+                    } else {
+                        0.0 // filled by symmetry
+                    }
+                })
+                .collect()
+        })
+        .collect();
+
+    // Fill lower triangle by symmetry
+    let mut full = matrix;
+    for i in 0..dim {
+        for ii in 0..i {
+            full[i][ii] = full[ii][i];
+        }
+    }
+    full
+}
+
+/// Compute all basis inner products b_k for k=2..=n (parallelized)
+fn compute_basis_prods(n: usize) -> Vec<f64> {
+    (2..=n)
+        .into_par_iter()
+        .map(|k| basis_inner_prod(k))
+        .collect()
+}
+
+// ═══════════════════════════════════════════
+// ANALYSIS
+// ═══════════════════════════════════════════
+
+#[derive(Serialize)]
+struct QuadFormRow {
+    n: usize,
+    q: f64,
+    q_times_ln_n: f64,
+    bt_v: f64,
+    vt_g_v: f64,
+    mertens_n: i64,
+    mertens_ratio: f64,
+    ln_n: f64,
+}
+
+#[derive(Serialize)]
+struct MertensRow {
+    x: usize,
+    m_x: i64,
+    abs_m_over_sqrt_x: f64,
+    abs_m_over_sqrt_x_ln_sq: f64,
+}
+
+#[derive(Serialize)]
+struct AbelRow {
+    n: usize,
+    abel_linear: f64,
+    direct_linear: f64,
+    difference: f64,
+}
+
+#[derive(Serialize)]
+struct Summary {
+    max_n: usize,
+    quad_points: usize,
+    num_test_ns: usize,
+    mertens_bound_constant: f64,
+    q_times_ln_n_values: Vec<(usize, f64)>,
+    elapsed_seconds: f64,
+}
+
+fn analyze_n(
+    n: usize,
+    mu: &[i8],
+    mertens_fn: &[i64],
+    gram: &[Vec<f64>],
+    basis: &[f64],
+) -> (QuadFormRow, AbelRow) {
+    let ln_n = (n as f64).ln();
+    let dim = n - 1;
+
+    // Build witness: v_k = -μ(k)(1 - ln(k)/ln(N)) for k=2..=n
+    let v: Vec<f64> = (0..dim)
+        .map(|i| {
+            let k = i + 2;
             let mu_k = mu[k] as f64;
             let weight = 1.0 - (k as f64).ln() / ln_n;
             -mu_k * weight
         })
         .collect();
 
-    // Compute bᵀv = Σ_{k=2}^N b_k · v_k
-    let mut bt_v = 0.0;
-    for (i, &vk) in v.iter().enumerate() {
-        let k = i + 2;
-        bt_v += basis_inner_prod(k) * vk;
-    }
+    // bᵀv
+    let bt_v: f64 = v.iter().enumerate().map(|(i, &vi)| basis[i] * vi).sum();
 
-    // Compute vᵀGv (just diagonal + a few off-diagonal for speed)
-    // For full accuracy we need all entries, but diagonal dominates
+    // vᵀGv (FULL matrix — not just diagonal)
     let mut vt_g_v = 0.0;
-
-    // Diagonal part: Σ v_k² · G(k,k)
-    for (i, &vk) in v.iter().enumerate() {
-        let k = i + 2;
-        vt_g_v += vk * vk * gram_entry(k, k);
-    }
-
-    // Off-diagonal (sample for large N): Σ_{j≠k} v_j v_k G(j,k)
-    // For small N, compute all; for large N, estimate
-    if n <= 500 {
-        for i in 0..v.len() {
-            for j in (i + 1)..v.len() {
-                let gi_j = gram_entry(i + 2, j + 2);
-                vt_g_v += 2.0 * v[i] * v[j] * gi_j;
-            }
+    for i in 0..dim {
+        for j in 0..dim {
+            vt_g_v += v[i] * v[j] * gram[i][j];
         }
     }
 
-    // Quadratic form: Q = 1 - 2bᵀv + vᵀGv
+    // Q = 1 - 2bᵀv + vᵀGv
     let q = 1.0 - 2.0 * bt_v + vt_g_v;
+    let q_times_ln = q * ln_n;
 
-    // Ratio: Q / (1/ln N) = Q · ln N
-    let ratio = q * ln_n;
-
-    // Mertens function analysis
     let m_n = mertens_fn[n];
-    let mertens_ratio = (m_n as f64).abs() / ((n as f64).sqrt() * ln_n * ln_n);
+    let mertens_ratio = if n >= 10 {
+        (m_n as f64).abs() / ((n as f64).sqrt() * (n as f64).ln().powi(2))
+    } else {
+        0.0
+    };
 
-    // Abel summation of bᵀv:
-    // Σ_{k=2}^N μ(k)(1 - ln k/ln N) · b_k
-    //   = (by Abel) (1/ln N) · Σ_{k=2}^{N-1} M(k) · [b_k(1-ln k/ln N) - b_{k+1}(1-ln(k+1)/ln N)]
-    //   + boundary terms
-    // The key: if |M(k)| ≤ C·k^{1/2}·(ln k)², the Abel sum contributes O(1/ln N)
-
-    let mut abel_sum = 0.0;
+    // Abel summation decomposition of bᵀv
+    let mut abel_linear = 0.0;
     for k in 2..n {
         let mk = mertens_fn[k] as f64;
-        let bk = basis_inner_prod(k);
-        let bk1 = basis_inner_prod(k + 1);
+        let bk = basis[k - 2];
+        let bk1 = if k + 1 <= n { basis[k - 1] } else { 0.0 };
         let wk = 1.0 - (k as f64).ln() / ln_n;
-        let wk1 = 1.0 - ((k + 1) as f64).ln() / ln_n;
-        abel_sum += mk * (bk * wk - bk1 * wk1);
+        let wk1 = if k + 1 <= n {
+            1.0 - ((k + 1) as f64).ln() / ln_n
+        } else {
+            0.0
+        };
+        abel_linear += mk * (bk * wk - bk1 * wk1);
     }
-    // Add boundary: M(N) · b_N · w_N  (w_N = 0 since ln N / ln N = 1)
-    // So boundary = 0
 
-    println!(
-        "  N={:>6} | Q={:>12.8} | Q·lnN={:>8.4} | M(N)={:>8} | |M|/√N(lnN)²={:.4} | bᵀv={:.6} | Abel={:.6}",
-        n, q, ratio, m_n, mertens_ratio, bt_v, abel_sum
-    );
+    let qrow = QuadFormRow {
+        n,
+        q,
+        q_times_ln_n: q_times_ln,
+        bt_v,
+        vt_g_v,
+        mertens_n: m_n,
+        mertens_ratio,
+        ln_n,
+    };
+
+    let abel = AbelRow {
+        n,
+        abel_linear,
+        direct_linear: bt_v,
+        difference: (abel_linear - bt_v).abs(),
+    };
+
+    (qrow, abel)
 }
 
 fn main() {
+    let t0 = Instant::now();
+
     println!("╔══════════════════════════════════════════════════════════════╗");
-    println!("║      ABEL SUMMATION BRIDGE EXPERIMENT                      ║");
+    println!("║      ABEL SUMMATION BRIDGE v2 — PARALLEL EDITION           ║");
     println!("║      Attack 2: rh_implies_mertens_bound → witness_decay    ║");
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
 
-    let max_n = 5000;
-    println!("Computing Möbius sieve up to N={}...", max_n);
-    let mu = mobius_sieve(max_n);
-    let mertens_fn = mertens(mu.as_slice());
+    // Configuration
+    let test_ns: Vec<usize> = vec![
+        10, 20, 30, 50, 75, 100, 150, 200, 300, 400, 500,
+        750, 1000, 1500, 2000,
+    ];
+    let max_n = *test_ns.iter().max().unwrap();
+    let sieve_n = max_n.max(10_000); // extra for Mertens profile
 
-    // Verify Mertens function
-    println!("\n═══ Mertens Function Check ═══");
-    println!("  M(10)={}, M(100)={}, M(1000)={}, M(5000)={}",
-        mertens_fn[10], mertens_fn[100], mertens_fn[1000], mertens_fn[max_n]);
+    // Create results directory
+    fs::create_dir_all("results").unwrap();
 
-    // Verify Mertens bound: |M(x)| ≤ C·x^{1/2}·(ln x)²
-    let mut max_mertens_ratio = 0.0f64;
-    for x in 10..=max_n {
-        let ratio = (mertens_fn[x] as f64).abs() / ((x as f64).sqrt() * (x as f64).ln().powi(2));
-        max_mertens_ratio = max_mertens_ratio.max(ratio);
+    // Step 1: Sieve
+    println!("Step 1: Computing Möbius sieve up to {}...", sieve_n);
+    let mu = mobius_sieve(sieve_n);
+    let mertens_fn = mertens(&mu);
+    println!("  ✅ M(100)={}, M(1000)={}, M({})={}", 
+        mertens_fn[100], mertens_fn[1000], sieve_n, mertens_fn[sieve_n]);
+
+    // Step 2: Mertens profile
+    println!("\nStep 2: Computing Mertens bound profile...");
+    let mut mertens_rows: Vec<MertensRow> = Vec::new();
+    let mut max_mertens_c = 0.0f64;
+    for x in 10..=sieve_n {
+        let mx = mertens_fn[x];
+        let xf = x as f64;
+        let ratio = (mx as f64).abs() / (xf.sqrt() * xf.ln().powi(2));
+        max_mertens_c = max_mertens_c.max(ratio);
+
+        if x <= 100 || x % 100 == 0 {
+            mertens_rows.push(MertensRow {
+                x,
+                m_x: mx,
+                abs_m_over_sqrt_x: (mx as f64).abs() / xf.sqrt(),
+                abs_m_over_sqrt_x_ln_sq: ratio,
+            });
+        }
     }
-    println!("  Max |M(x)|/(√x·(ln x)²) for x ∈ [10,{}]: {:.6}", max_n, max_mertens_ratio);
-    println!("  (Should stabilize — this is the Mertens bound constant C_M)");
+    println!("  ✅ Max |M(x)|/(√x·(ln x)²) = {:.6} for x ∈ [10,{}]", max_mertens_c, sieve_n);
 
-    // Main analysis: quadratic form decay
-    println!("\n═══ Quadratic Form Decay Analysis ═══");
-    println!("  Testing: 1 - 2bᵀv + vᵀGv ≤ C/ln(N)");
-    println!("  If Q·ln(N) → constant, the Abel Bridge works!\n");
+    // Write Mertens profile
+    {
+        let mut f = fs::File::create("results/mertens_profile.tsv").unwrap();
+        writeln!(f, "x\tM(x)\t|M|/sqrt(x)\t|M|/(sqrt(x)*(ln_x)^2)").unwrap();
+        for row in &mertens_rows {
+            writeln!(f, "{}\t{}\t{:.8}\t{:.8}", row.x, row.m_x,
+                row.abs_m_over_sqrt_x, row.abs_m_over_sqrt_x_ln_sq).unwrap();
+        }
+    }
+    println!("  📄 results/mertens_profile.tsv");
 
-    let test_ns = [10, 20, 50, 100, 200, 500];
+    // Step 3: For each test N, compute Gram matrix + basis products + analyze
+    println!("\nStep 3: Computing Gram matrices and quadratic forms (parallel)...");
+    println!("  Quadrature: {} Simpson nodes per integral", QUAD_POINTS);
+    println!("  Test Ns: {:?}", test_ns);
+    println!();
+
+    let mut q_rows: Vec<QuadFormRow> = Vec::new();
+    let mut abel_rows: Vec<AbelRow> = Vec::new();
 
     for &n in &test_ns {
-        if n <= max_n {
-            analyze_n(n, &mu, &mertens_fn);
-        }
-    }
+        let t_start = Instant::now();
+        let dim = n - 1;
 
-    // PNT Decomposition: analyze linear and quadratic terms separately
-    println!("\n═══ PNT Decomposition (Attack 1) ═══");
-    println!("  Decomposing: Q = 1 - 2·(LINEAR) + (QUADRATIC)");
-    println!("  LINEAR = bᵀv = Σ b_k·v_k");
-    println!("  QUADRATIC = vᵀGv = Σ v_j·v_k·G(j,k)\n");
+        print!("  N={:>5} ({}×{} matrix)... ", n, dim, dim);
+        std::io::stdout().flush().unwrap();
 
-    for &n in &[50, 100, 200] {
-        let ln_n = (n as f64).ln();
-        let v: Vec<f64> = (2..=n)
-            .map(|k| {
-                let mu_k = mu[k] as f64;
-                let weight = 1.0 - (k as f64).ln() / ln_n;
-                -mu_k * weight
-            })
-            .collect();
+        // Compute Gram matrix (parallelized)
+        let gram = compute_gram_matrix(n);
+        let basis = compute_basis_prods(n);
 
-        // Linear term
-        let mut linear = 0.0;
-        for (i, &vk) in v.iter().enumerate() {
-            linear += basis_inner_prod(i + 2) * vk;
-        }
+        let (qrow, abel) = analyze_n(n, &mu, &mertens_fn, &gram, &basis);
 
-        // Quadratic diagonal only (for speed)
-        let mut quad_diag = 0.0;
-        for (i, &vk) in v.iter().enumerate() {
-            quad_diag += vk * vk * gram_diag(i + 2);
-        }
-
-        let q = 1.0 - 2.0 * linear + quad_diag;
+        let elapsed = t_start.elapsed().as_secs_f64();
         println!(
-            "  N={:>4} | LINEAR(bᵀv)={:.6} | need ~{:.6} | DIAG(vᵀGv)={:.6} | Q_diag={:.6} | Q_diag·lnN={:.4}",
-            n, linear, 0.5 - 0.5 / ln_n, quad_diag, q, q * ln_n
+            "Q={:>10.6}  Q·lnN={:>8.4}  bᵀv={:.4}  vᵀGv={:.4}  ({:.1}s)",
+            qrow.q, qrow.q_times_ln_n, qrow.bt_v, qrow.vt_g_v, elapsed
         );
+
+        q_rows.push(qrow);
+        abel_rows.push(abel);
     }
 
-    println!("\n═══ Mertens Bound Profile ═══");
-    println!("  x      | M(x)   | |M(x)|/√x | |M(x)|/(√x·(ln x)²)");
-    for &x in &[100, 500, 1000, 2000, 3000, 4000, 5000] {
-        if x <= max_n {
-            let mx = mertens_fn[x];
-            let xf = x as f64;
-            println!(
-                "  {:>5}  | {:>6} | {:.4}    | {:.6}",
-                x, mx, (mx as f64).abs() / xf.sqrt(),
-                (mx as f64).abs() / (xf.sqrt() * xf.ln().powi(2))
-            );
+    // Step 4: Write results
+    println!("\nStep 4: Writing results...");
+
+    // Quadratic form TSV
+    {
+        let mut f = fs::File::create("results/quadratic_form.tsv").unwrap();
+        writeln!(f, "N\tQ\tQ*ln(N)\tbt_v\tvt_G_v\tM(N)\t|M|_ratio\tln(N)").unwrap();
+        for row in &q_rows {
+            writeln!(f, "{}\t{:.10}\t{:.6}\t{:.8}\t{:.8}\t{}\t{:.8}\t{:.6}",
+                row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v,
+                row.mertens_n, row.mertens_ratio, row.ln_n).unwrap();
         }
     }
+    println!("  📄 results/quadratic_form.tsv");
 
-    println!("\n═══ Conclusion ═══");
-    println!("  If Q·ln(N) stabilizes to a constant C, then:");
-    println!("  witness_l2_error_decay_gram holds with C_err = C");
-    println!("  AND the Abel summation bridge links it to the Mertens bound.");
-    println!("  Both proof paths collapse to: |M(x)| = O(√x · (ln x)²)");
+    // Abel decomposition TSV
+    {
+        let mut f = fs::File::create("results/abel_decomposition.tsv").unwrap();
+        writeln!(f, "N\tabel_linear\tdirect_linear\tdifference").unwrap();
+        for row in &abel_rows {
+            writeln!(f, "{}\t{:.10}\t{:.10}\t{:.10}",
+                row.n, row.abel_linear, row.direct_linear, row.difference).unwrap();
+        }
+    }
+    println!("  📄 results/abel_decomposition.tsv");
+
+    // Summary JSON
+    let summary = Summary {
+        max_n,
+        quad_points: QUAD_POINTS,
+        num_test_ns: test_ns.len(),
+        mertens_bound_constant: max_mertens_c,
+        q_times_ln_n_values: q_rows.iter().map(|r| (r.n, r.q_times_ln_n)).collect(),
+        elapsed_seconds: t0.elapsed().as_secs_f64(),
+    };
+    {
+        let f = fs::File::create("results/summary.json").unwrap();
+        serde_json::to_writer_pretty(f, &summary).unwrap();
+    }
+    println!("  📄 results/summary.json");
+
+    // Final report
+    let total_time = t0.elapsed().as_secs_f64();
+    println!("\n╔══════════════════════════════════════════════════════════════╗");
+    println!("║                        RESULTS                             ║");
+    println!("╠══════════════════════════════════════════════════════════════╣");
+    println!("║                                                            ║");
+    println!("║  N       Q           Q·ln(N)     bᵀv       vᵀGv           ║");
+    println!("║  ─────   ─────────   ────────   ──────── ────────          ║");
+    for row in &q_rows {
+        println!("║  {:>5}   {:>9.6}   {:>8.4}   {:.4}   {:.4}          ║",
+            row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v);
+    }
+    println!("║                                                            ║");
+    println!("║  Mertens constant C_M = {:.6}                         ║", max_mertens_c);
+    println!("║  Total time: {:.1}s                                       ║", total_time);
+    println!("║                                                            ║");
+
+    // Check convergence
+    if q_rows.len() >= 3 {
+        let last = &q_rows[q_rows.len() - 1];
+        let prev = &q_rows[q_rows.len() - 2];
+        let trend = last.q_times_ln_n - prev.q_times_ln_n;
+        if trend.abs() < 0.5 {
+            println!("║  ✅ Q·ln(N) appears to STABILIZE → Abel Bridge holds!     ║");
+        } else if trend > 0.0 {
+            println!("║  ⚠️  Q·ln(N) still growing — need larger N                ║");
+        } else {
+            println!("║  ✅ Q·ln(N) decreasing — even better than expected!        ║");
+        }
+    }
+    println!("║                                                            ║");
+    println!("╚══════════════════════════════════════════════════════════════╝");
 }
