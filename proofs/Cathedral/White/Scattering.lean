@@ -119,8 +119,18 @@ theorem mellin_fourier_scale_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
   simp_rw [h_eq]
   -- Step 2: Substitute t = 2πξ in the integral
   -- ∫ f(2πξ) dξ = (1/2π) ∫ f(t) dt
-  -- Using Mathlib: Measure.integral_comp_mul_left
-  sorry -- 🔨 FORGE TASK: Apply Measure.integral_comp_mul_left with c = 2π
+  -- Pattern from ContourShift.lean:191 (PROVED)
+  -- First, align the coercions: 2 * ↑π * ↑ξ = ↑(2 * π * ξ) in ℂ
+  have h_coerce : ∀ ξ : ℝ,
+      (1/2 : ℂ) + 2 * ↑π * ↑ξ * I = (1/2 : ℂ) + ↑(2 * π * ξ) * I := by
+    intro ξ; push_cast; ring
+  simp_rw [h_coerce]
+  rw [MeasureTheory.Measure.integral_comp_mul_left
+    (fun t : ℝ => ‖mellinBDResidual N v ((1/2 : ℂ) + ↑t * I)‖ ^ 2) (2 * Real.pi)]
+  simp only [smul_eq_mul]
+  have h_pos : (0 : ℝ) < 2 * Real.pi := by positivity
+  rw [show |(2 * Real.pi)⁻¹| = (2 * Real.pi)⁻¹ from abs_of_pos (inv_pos.mpr h_pos)]
+  rw [show (1 : ℝ) / (2 * Real.pi) = (2 * Real.pi)⁻¹ from one_div _]
 
 -- ════════════════════════════════════════════════
 -- §4. THE WHITE PARSEVAL BRIDGE (All Three Combined)
