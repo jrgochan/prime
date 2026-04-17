@@ -93,5 +93,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.Assembly,
     -- Integral basis
     `Cathedral.IntegralBasis.BaezDuarte,
-    `Cathedral.IntegralBasis.Quantitative
+    `Cathedral.IntegralBasis.Quantitative,
+    -- White Singlet (Phase I: Axiom elimination)
+    `Cathedral.White.Kinematics,
+    `Cathedral.White.Scattering
   ]

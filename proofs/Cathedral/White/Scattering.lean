@@ -23,6 +23,7 @@
 -/
 
 import Cathedral.MellinBridge.PlancherelBypass
+import Cathedral.White.Kinematics
 import Mathlib.Analysis.Fourier.Inversion
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 
@@ -67,14 +68,34 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
       Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) := by
     apply setIntegral_congr_set Ioi_ae_eq_Ici.symm
   rw [h_restrict, h_ici_ioi]
-  -- The remaining steps require the complex-valued antitone substitution
-  -- x = exp(-u), which converts the half-line integral to Ioo(0,1).
-  -- The pointwise identity:
-  --   exp(-u) • ((bdResidualV(exp(-u)) : ℂ) • exp(-u)^(s-1))
-  --   = (bdResidualV(exp(-u)) * exp(-u/2) : ℂ) * cexp(-2πξuI)
-  -- follows from: exp(-u) * exp(-u)^(s-1) = exp(-u)^s = exp(-su)
-  --   = exp(-u(1/2 + 2πξi)) = exp(-u/2) * cexp(-2πξuI)
-  sorry -- 🔨 Complex cpow identity: exp(-u)^s = exp(-su) for s = 1/2 + 2πξi
+  -- Step 2: Unfold mellinBDResidual and apply CoV
+  unfold mellinBDResidual
+  set s : ℂ := 1 / 2 + 2 * ↑Real.pi * ↑ξ * Complex.I with hs_def
+  set gM : ℝ → ℂ := fun x => (bdResidualV N v x : ℂ) * (x : ℂ) ^ (s - 1)
+  -- Step 3: Apply the antitone CoV: ∫_{Ioo(0,1)} gM = ∫_{Ioi(0)} exp(-u) • gM(exp(-u))
+  have h_cov := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
+    measurableSet_Ioi
+    (fun u hu => hasDerivWithinAt_exp_neg u hu)
+    exp_neg_antitoneOn gM
+  rw [exp_neg_image_Ioi] at h_cov
+  -- h_cov : ∫_{Ioo(0,1)} gM = ∫_{Ioi(0)} -(-exp(-u)) • gM(exp(-u))
+  -- i.e.:   ∫_{Ioo(0,1)} gM = ∫_{Ioi(0)} exp(-u) • gM(exp(-u))
+  rw [h_cov]
+  -- Both sides are ∫_{Ioi 0}. Show integrands agree pointwise.
+  apply setIntegral_congr_fun measurableSet_Ioi
+  intro u hu
+  simp only [Set.mem_Ioi] at hu
+  -- Simplify the double-negation: - -rexp(-u) = rexp(-u)
+  simp only [neg_neg, gM, smul_eq_mul]
+  -- Unfold flattenedResidualC for u > 0:
+  have hu_nn : (0 : ℝ) ≤ u := le_of_lt hu
+  simp only [flattenedResidualC, flattenedResidualV, if_pos hu_nn]
+  -- Goal reduces to: ↑(bdResidualV * rexp(-u/2)) * cexp(-2πξuI)
+  --               = rexp(-u) * (↑(bdResidualV) * ↑(rexp(-u))^(s-1))
+  -- Factor out bdResidualV; need: rexp(-u/2) * cexp(-2πξuI) = rexp(-u) * rexp(-u)^(s-1)
+  -- i.e., rexp(-u) * rexp(-u)^(s-1) = rexp(-u)^s = cexp(-su) = rexp(-u/2) * cexp(-2πξuI)
+  -- This is a complex exponential identity requiring cpow manipulation.
+  sorry -- 🔨 WIRING: Complex cpow identity for exp(-u)^s where s = 1/2 + 2πξi
 
 -- ════════════════════════════════════════════════
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)
