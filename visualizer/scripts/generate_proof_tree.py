@@ -19,7 +19,7 @@ CATHEDRAL_DIR = PROOFS_DIR / "Cathedral"
 OUTPUT = PROJECT_ROOT / "visualizer" / "public" / "data" / "proof-tree.json"
 
 # Skip archive
-SKIP_DIRS = {"Archive"}
+SKIP_DIRS = {"Archive", "Scratch"}
 
 # Lean declaration patterns
 DECL_RE = re.compile(
@@ -37,11 +37,25 @@ def classify_route(filepath: str) -> str:
         return "robin"
     if rel.startswith("LinearAlgebra/"):
         return "infrastructure"
-    if rel.startswith("MellinBridge/Vasyunin/"):
+    if rel.startswith("Gram/"):
+        return "infrastructure"
+    if rel.startswith("Vasyunin/"):
         return "variational"
     if rel.startswith("MellinBridge/"):
         return "mellin"
-    if rel == "Defs.lean":
+    if rel.startswith("NymanBeurling/"):
+        return "mellin"
+    if rel.startswith("Assembly/"):
+        return "mellin"
+    if rel.startswith("Sieve/"):
+        return "variational"
+    if rel.startswith("Spectral/"):
+        return "variational"
+    if rel.startswith("Structural/"):
+        return "infrastructure"
+    if rel.startswith("IntegralBasis/"):
+        return "mellin"
+    if rel == "Defs.lean" or rel == "Axioms.lean":
         return "infrastructure"
     return "infrastructure"
 
