@@ -6,7 +6,7 @@ reduction of the Riemann Hypothesis to a discrete variational witness.
 ## Build
 
 ```bash
-lake build    # 3,530 jobs, zero errors, zero sorry, zero warnings
+lake build    # 3,543 jobs, zero errors, zero sorry
 ```
 
 ## Architecture
@@ -97,12 +97,20 @@ Cathedral/
 │   ├── AlignmentDecay.lean                — Liouville cancellation
 │   └── MoebiusUncoupling.lean             — Vaughan decomposition
 │
-├── MellinBridge/                          — Mellin route (10 axioms)
-│   ├── MellinSieve.lean                   — phase_3_chain (2 axioms!)
+├── MellinBridge/                          — Mellin route (8 axioms)
+│   ├── MellinSieve.lean                   — phase_3_chain (2 axioms)
 │   ├── MertensWeightBypass.lean           — mertens_bound_from_rh
 │   ├── AutocorrelationBypass.lean         — Fourier inversion
 │   ├── OrthogonalWitness.lean             — Báez-Duarte inner products
-│   └── ...
+│   ├── MertensBound.lean                  — mertensFunction + rh_implies_mertens
+│   ├── BDWeights.lean                     — bdMoebiusWeight extraction
+│   ├── AbelSummation.lean                 — Abel's lemma (0 axioms!)
+│   ├── AbelSiegeProof.lean                — Abel + Parseval composition
+│   ├── MertensIntegral.lean               — logWeight derivative bounds
+│   ├── PlancherelBypass.lean              — ⚡ PARSEVAL BRIDGE (PROVED!)
+│   ├── DomainConnected.lean               — Slit half-plane (0 axioms!)
+│   ├── IdentityBypass.lean                — Identity theorem
+│   └── DirichletCollapse.lean             — Dirichlet series
 │
 ├── IntegralBasis/                         — Integral basis (5 axioms)
 │   ├── BaezDuarte.lean                    — nyman_beurling_equivalence
@@ -123,32 +131,34 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **83** |
-| Compiled modules | **3,530** |
+| Active Lean files | **88** |
+| Compiled modules | **3,543** |
 | `sorry` | **0** |
-| Warnings | **0** |
-| Total axioms | **48** |
+| Warnings | **2** (deprecation only) |
+| Total axioms | **46** |
 | Critical-path axioms | **5** (verified by `#print axioms`) |
 
 ## The Axiom Structure
 
 ### Critical Path: 5 Axioms
 
-Verified by `#print axioms nyman_beurling_iff_rh`:
+Verified by `#print axioms nyman_beurling_equivalence`:
 
 | # | Axiom | Role |
 |---|-------|------|
-| 1 | `witness_covariance_decay` | **THE RH** — vᵀCv ≤ C/ln(N) |
-| 2 | `witness_numerator_convergence` | **PNT level** — bᵀv → 1 |
-| 3 | `vasyunin_eq_integral` | **Vasyunin 1995** — Gram = L² integral |
-| 4 | `algebraic_nb_bridge` | **Structural** — quadform → integral criterion |
-| 5 | `zeta_zero_separates` | **Converse** — off-line zero → L² obstruction |
+| 1 | `rh_implies_mertens_bound` | **Titchmarsh** — RH → Mertens bound |
+| 2 | `autocorr_eval_zero` | **Calculus II** — Change of variables x=e^{-u} |
+| 3 | `fourier_inv_autocorr` | **Mathlib** — L¹ Fourier inversion |
+| 4 | `mellin_fourier_scale` | **Scaling** — 2π alignment |
+| 5 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
 
-### Alternative Forward: 2 Axioms
+### Key Theorem: Parseval Bridge (PROVED)
 
-`#print axioms phase_3_chain`:
-- `mertens_bound_from_rh` — RH → |M(x)| ≤ Cx^{1/2}(log x)²
-- `abel_summation_l2_bound` — Mertens bound → L² decay
+`parseval_bridge` chains axioms 2–4 to prove:
+```
+∫₀¹ |r_N(x)|² dx = (1/2π) ∫ |M̂_{r_N}(1/2+it)|² dt
+```
+This replaces the old opaque `l2_from_pointwise_bound` axiom.
 
 ### Spectral Engine: 2 Axioms
 

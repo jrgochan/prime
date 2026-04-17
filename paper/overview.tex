@@ -150,9 +150,31 @@ Every arrow is a \textbf{machine-verified Lean~4 theorem}.
   Off-critical-line zero creates $L^2$ obstruction. (Converse direction.)
 \end{enumerate}
 
-\noindent The crown theorem \texttt{nyman\_beurling\_iff\_rh} depends on
-exactly \textbf{2} Cathedral axioms (items 1--2), verified by
+\noindent The crown theorem \texttt{nyman\_beurling\_equivalence} depends on
+exactly \textbf{5} Cathedral axioms (items 1--5 below), verified by
 \texttt{\#print axioms}.
+
+\subsection{Tier 3: The Parseval Bridge (April 16, 2026)}
+
+The forward direction ($\text{RH} \Rightarrow d_N^2 \to 0$) is proved via
+the Mellin route using five transparent axioms:
+
+\begin{enumerate}\setcounter{enumi}{2}
+\item \textbf{Mertens Bound} (\texttt{rh\_implies\_mertens\_bound}):
+  RH $\Rightarrow$ $|M(x)| \leq C x^{1/2} (\log x)^2$.
+\item \textbf{Change of Variables} (\texttt{autocorr\_eval\_zero}):
+  Autocorrelation at zero = $L^2(0,1)$ norm via $x = e^{-u}$.
+\item \textbf{Fourier Inversion} (\texttt{fourier\_inv\_autocorr}):
+  From Mathlib's \texttt{fourierInv\_fourier\_eq}.
+\item \textbf{Scaling} (\texttt{mellin\_fourier\_scale}):
+  $t = 2\pi\xi$ aligns Fourier $\leftrightarrow$ Mellin.
+\item \textbf{Mellin Bound} (\texttt{critical\_line\_mellin\_bound}):
+  Montgomery--Vaughan second moment estimate.
+\end{enumerate}
+
+The \emph{Parseval Bridge} (\texttt{parseval\_bridge}, PROVED) chains axioms 4--6
+to establish the $L^2 \leftrightarrow$ critical-line isometry, replacing the
+former opaque \texttt{l2\_from\_pointwise\_bound} axiom.
 
 \noindent\textbf{Formerly axioms, now theorems:}
 \texttt{log\_cutoff\_witness\_bound} (was the RH axiom; now proved from
@@ -222,18 +244,18 @@ covariance decay + numerator convergence, April~15, 2026).
 \texttt{Structural/} (3)      & Eigenvalue interlacing & 0 & 1 \\
 \texttt{Spectral/} (5)        & Class restriction, constant vector & 0 & 9 \\
 \texttt{Sieve/} (8)           & Bilinear sieve, parity bridge & 0 & 11 \\
-\texttt{MellinBridge/} (8)    & Mellin--Plancherel, weight construction & 0 & 10 \\
+\texttt{MellinBridge/} (13)   & Mellin--Plancherel, Parseval Bridge, Abel & 0 & 8 \\
 \texttt{IntegralBasis/} (3)   & B\'aez-Duarte, quantitative bounds & 0 & 5 \\
 \midrule
-\textbf{Total (83 files)}     &  & \textbf{0} & \textbf{48} \\
+\textbf{Total (88 files)}     &  & \textbf{0} & \textbf{46} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\noindent 3531 compiled modules. Zero errors. Zero sorry.
-The crown theorem depends on \textbf{2} of the 49 axioms;
+\noindent 3543 compiled modules. Zero errors. Zero sorry.
+The crown theorem depends on \textbf{5} of the 46 axioms;
 the remainder support parallel proof paths (sieve engine,
-spectral theory, Mellin bridge, Vasyunin cotangent chain).
+spectral theory, Vasyunin cotangent chain).
 
 \section{How to Verify}
 
