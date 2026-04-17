@@ -136,8 +136,68 @@ theorem rh_implies_bd_convergence :
   -- Step 2: C_err * ln(ln N) / ln N → 0 as N → ∞ (standard calculus)
   have h_decay : ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N →
       C_err * Real.log (Real.log ↑N) / Real.log ↑N < ε := by
-    -- ln(ln N)/ln N → 0 since ln grows slower than any power
-    sorry -- Standard calculus: proved in principle by log_grows_unboundedly variants
+    -- We use log(log N) = 2·log(√(log N)) < 2·√(log N)
+    -- So C_err·log(log N)/log N < 2·C_err/√(log N) → 0
+    set K := (2 * C_err / ε) ^ 2
+    have h_tend := Real.tendsto_log_atTop
+    rw [Filter.tendsto_atTop_atTop] at h_tend
+    obtain ⟨M, hM⟩ := h_tend (K + 1)
+    use max ⌈max M 3⌉₊ 3
+    intro N hN
+    have hN3 : 3 ≤ N := le_trans (le_max_right _ _) hN
+    have hN_M : max M 3 ≤ ↑N := by
+      calc max M 3 ≤ (⌈max M 3⌉₊ : ℝ) := Nat.le_ceil _
+        _ ≤ ↑(max ⌈max M 3⌉₊ 3) := by exact_mod_cast le_max_left _ _
+        _ ≤ ↑N := by exact_mod_cast hN
+    have h_log_M : K + 1 ≤ Real.log (max M 3) := hM _ (le_max_left _ _)
+    have h_log_N : K + 1 ≤ Real.log ↑N := le_trans h_log_M (Real.log_le_log (by positivity) hN_M)
+    have h_K_lt : K < Real.log ↑N := by linarith
+    have h_log_pos : 0 < Real.log ↑N := by linarith [show 0 ≤ K from sq_nonneg _]
+    have h_log_log_pos : 0 < Real.log (Real.log ↑N) := by
+      apply Real.log_pos
+      have h3 : (3 : ℝ) ≤ ↑N := by exact_mod_cast hN3
+      calc (1:ℝ) = Real.log (Real.exp 1) := by rw [Real.log_exp]
+         _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) (by linarith [Real.exp_one_lt_three])
+         _ ≤ Real.log ↑N := Real.log_le_log (by norm_num) h3
+    -- log(log N) = 2 * log(sqrt(log N))
+    have h_sqrt_pos : 0 < Real.sqrt (Real.log ↑N) := Real.sqrt_pos.mpr h_log_pos
+    have h_log_eq : Real.log (Real.log ↑N) = 2 * Real.log (Real.sqrt (Real.log ↑N)) := by
+      rw [Real.log_sqrt (le_of_lt h_log_pos)]
+      ring
+    -- log(sqrt(log N)) < sqrt(log N)
+    have h_log_lt : Real.log (Real.sqrt (Real.log ↑N)) < Real.sqrt (Real.log ↑N) := by
+      calc Real.log (Real.sqrt (Real.log ↑N)) ≤ Real.sqrt (Real.log ↑N) - 1 :=
+             Real.log_le_sub_one_of_pos h_sqrt_pos
+        _ < Real.sqrt (Real.log ↑N) := by linarith
+    have h_log_log_lt : Real.log (Real.log ↑N) < 2 * Real.sqrt (Real.log ↑N) := by
+      calc Real.log (Real.log ↑N) = 2 * Real.log (Real.sqrt (Real.log ↑N)) := h_log_eq
+        _ < 2 * Real.sqrt (Real.log ↑N) := mul_lt_mul_of_pos_left h_log_lt (by norm_num)
+    -- Direct bound: C_err * log(log N)/log N < C_err * 2√(log N)/log N = 2C_err/√(log N) < ε
+    have h_sqrt_log_pos : 0 < Real.sqrt (Real.log ↑N) := Real.sqrt_pos.mpr h_log_pos
+    -- Step A: log(log N)/log N < 2/√(log N)
+    have h_ratio : Real.log (Real.log ↑N) / Real.log ↑N < 2 / Real.sqrt (Real.log ↑N) := by
+      rw [div_lt_div_iff₀ h_log_pos h_sqrt_log_pos]
+      calc Real.log (Real.log ↑N) * Real.sqrt (Real.log ↑N)
+          < 2 * Real.sqrt (Real.log ↑N) * Real.sqrt (Real.log ↑N) :=
+            mul_lt_mul_of_pos_right h_log_log_lt h_sqrt_log_pos
+        _ = 2 * Real.log ↑N := by
+            rw [mul_assoc, Real.mul_self_sqrt (le_of_lt h_log_pos)]
+    -- Step B: C_err * (log(log N)/log N) < C_err * 2/√(log N) = 2C_err/√(log N)
+    have h_bound : C_err * Real.log (Real.log ↑N) / Real.log ↑N <
+        2 * C_err / Real.sqrt (Real.log ↑N) := by
+      rw [mul_div_assoc]
+      have := mul_lt_mul_of_pos_left h_ratio hC_pos
+      have : C_err * (2 / Real.sqrt (Real.log ↑N)) = 2 * C_err / Real.sqrt (Real.log ↑N) := by ring
+      linarith
+    -- Step C: 2C_err/√(log N) < ε because √(log N) > 2C_err/ε
+    have h_sqrt_big : 2 * C_err / ε < Real.sqrt (Real.log ↑N) := by
+      rw [← Real.sqrt_sq (le_of_lt (div_pos (mul_pos (by norm_num : (0:ℝ) < 2) hC_pos) hε))]
+      exact Real.sqrt_lt_sqrt (sq_nonneg _) h_K_lt
+    have h_small : 2 * C_err / Real.sqrt (Real.log ↑N) < ε := by
+      rw [div_lt_iff₀ h_sqrt_log_pos]
+      calc 2 * C_err = ε * (2 * C_err / ε) := by rw [mul_div_cancel₀ _ (ne_of_gt hε)]
+        _ < ε * Real.sqrt (Real.log ↑N) := mul_lt_mul_of_pos_left h_sqrt_big hε
+    exact lt_trans h_bound h_small
   obtain ⟨N₁, hN₁⟩ := h_decay
   -- Step 3: Take max of both thresholds
   use max (max N₀ N₁) 3
