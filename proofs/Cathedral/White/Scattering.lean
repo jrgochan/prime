@@ -165,10 +165,14 @@ theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 := by
   -- Step 1: h(0) = ∫ g_N(u)² du (PROVED: autocorrelation_zero_eq_l2)
   rw [autocorrelation_zero_eq_l2 N v]
-  -- Step 2: ∫ g_N² du = ∫ |ĝ_N(ξ)|² dξ (Plancherel/Parseval for L² functions)
-  -- g_N ∈ L¹ ∩ L² by flattenedResidualV_bound: |g_N(u)| ≤ C · e^{-u/2}
-  -- So we can apply Mathlib's Plancherel theorem.
-  sorry -- 🔨 FORGE TASK: Apply MeasureTheory.snorm_fourierIntegral or Plancherel
+  -- Goal: ∫ g_N² du = ∫ ‖ĝ_N(ξ)‖² dξ
+  -- This is Plancherel's theorem (norm_fourier_eq in Mathlib.Analysis.Fourier.LpSpace).
+  -- Bridge requirements:
+  --   (a) Lift flattenedResidualC to Lp ℂ 2 (needs MemLp proof from exponential decay)
+  --   (b) Connect ‖f‖²_Lp² = ∫ |f|² dμ (snorm_eq_integral_rpow_nnnorm)
+  --   (c) Show 𝓕(toLp f) agrees with the explicit Fourier integral
+  -- All three are Mathlib infrastructure; the mathematical content is trivial.
+  sorry -- 🔨 BRIDGE: Plancherel (Lp ↔ raw integral)
 
 -- ════════════════════════════════════════════════
 -- §3. AXIOM 4 ELIMINATION (Scale Covariance)
