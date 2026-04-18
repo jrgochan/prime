@@ -100,6 +100,33 @@ theorem l2_crude_upper_bound (N : ℕ) (v : Fin (N - 1) → ℝ) :
         rw [intervalIntegral.integral_const]; simp
     _ = _ := by ring
 
+/-- **THEOREM (PROVED!)**: The L² error decomposes as
+    ∫₀¹ (1-f)² = 1 - 2·∫₀¹ f + ∫₀¹ f².
+
+    This uses integral linearity (sub, const_mul, add)
+    and the fact that ∫₀¹ 1 = 1. -/
+theorem l2_expansion (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 =
+      1 - 2 * (∫ x in (0:ℝ)..1, bdLinComb N v x) +
+      (∫ x in (0:ℝ)..1, (bdLinComb N v x) ^ 2) := by
+  -- (1-f)² = 1 - 2f + f²
+  have h_eq : (fun x => (1 - bdLinComb N v x) ^ 2) =
+      (fun x => 1 - 2 * bdLinComb N v x + (bdLinComb N v x) ^ 2) := by
+    ext x; ring
+  rw [h_eq]
+  have h1 := intervalIntegrable_const (c := (1:ℝ)) (μ := MeasureTheory.volume)
+    (a := (0:ℝ)) (b := (1:ℝ))
+  have h2 := (bdLinComb_integrable N v).const_mul 2
+  have h3 := bdLinComb_sq_integrable N v
+  rw [intervalIntegral.integral_add (h1.sub h2) h3,
+      intervalIntegral.integral_sub h1 h2]
+  have h_int_1 : ∫ x in (0:ℝ)..1, (1:ℝ) = 1 := by
+    rw [intervalIntegral.integral_const]; simp
+  have h_int_cm : ∫ x in (0:ℝ)..1, 2 * bdLinComb N v x =
+      2 * ∫ x in (0:ℝ)..1, bdLinComb N v x := by
+    exact intervalIntegral.integral_const_mul 2 _
+  rw [h_int_1, h_int_cm]
+
 -- ════════════════════════════════════════════════
 -- §2. ABEL SUMMATION WITH O(x^{3/4})
 -- ════════════════════════════════════════════════
