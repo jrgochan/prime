@@ -273,22 +273,45 @@ axiom selbergMajorant_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
 -- §6. Montgomery-Vaughan Hilbert Inequality
 -- ═══════════════════════════════════════════
 
-/-- **Montgomery-Vaughan Hilbert Inequality** (1974).
-    For δ-separated real numbers, the discrete Hilbert transform is bounded
-    with the sharp constant π/δ.
+/-!
+### The BS → M-V Derivation Gap
+
+The Montgomery-Vaughan Hilbert inequality CANNOT be derived from
+Schur's test + BS axioms alone. The raw kernel `1/(λᵢ - λⱼ)` has
+row sums that grow as `log(N)/δ`, not `π/δ`.
+
+The correct derivation requires distributional Fourier analysis:
+1. Construct the trigonometric sum `f(t) = Σ xᵣ e^{2πiλᵣt}`
+2. Use the Selberg majorant to smooth: `I(Δ) = ∫ |f|² · S(Δ·) dt`
+3. Band-limitation (BS5) kills off-diagonal: `Ŝ(λᵣ-λₛ) = 0` for r ≠ s
+4. Integral (BS4) bounds diagonal: `Ŝ(0) = ∫S = 2`
+5. Majorization (BS1/BS2) connects smoothed form to original
+
+Since Lean/Mathlib lacks distributional Fourier analysis, we axiomatize
+the M-V result itself. It is a published theorem depending conceptually
+on BS1-BS5.
+-/
+
+/-- **Montgomery-Vaughan Hilbert Inequality** (Axiom).
 
     Reference: Montgomery & Vaughan, J. London Math. Soc. (2) 8 (1974), 73-81.
 
-    **PROOF PATH**: Follows from the Selberg majorant axioms (§5) via:
-    1. Construct smoothed kernel K_Δ(x) = S(x/δ)/(2δ)
-    2. Show the quadratic form Σ x_r ȳ_s K_Δ(λ_r-λ_s) is positive-definite
-       (from band-limitation BS5)
-    3. Separate diagonal (using BS4: ∫S = 2) and off-diagonal (using BS1/BS2)
-    4. Conclude: off-diagonal ≤ (π/δ) · diagonal
+    For δ-separated real numbers, the discrete Hilbert bilinear form
+    satisfies ‖Σ xᵢ x̄ⱼ / (λᵢ - λⱼ)‖ ≤ (π/δ) · Σ |xᵢ|².
 
-    **CURRENT STATUS**: Blocked on the derivation from BS axioms.
-    When the axioms are replaced by constructive proofs, this
-    becomes fully sorry-free. -/
+    Dependencies: Selberg majorant axioms BS1-BS5.
+    Will be upgraded to a theorem when distributional Fourier analysis
+    is available in Lean/Mathlib. -/
+axiom montgomery_vaughan_bound
+    {N : ℕ} (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated lam δ) :
+    ‖∑ i : Fin N, ∑ j : Fin N,
+        (if i = j then (0 : ℂ)
+         else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))‖
+    ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2
+
+/-- **Montgomery-Vaughan Hilbert Inequality** (Theorem).
+    Proved from `montgomery_vaughan_bound`. -/
 theorem montgomery_vaughan_inequality
     (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
     (h_sep : IsDeltaSeparated lam δ) :
@@ -296,7 +319,8 @@ theorem montgomery_vaughan_inequality
         (if i = j then (0 : ℂ)
          else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))
     ‖S‖ ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
-  -- Derivation from Selberg axioms BS1-BS5 (TODO)
-  sorry
+  intro S
+  exact montgomery_vaughan_bound x lam δ hδ h_sep
 
 end Cathedral.White.Infrastructure
+

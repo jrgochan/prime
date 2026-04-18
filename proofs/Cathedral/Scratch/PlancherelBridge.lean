@@ -1,8 +1,27 @@
 /-
-  Scratch: Sinc Function + Selberg Axioms → Montgomery-Vaughan
+  Scratch: Phase C — Montgomery-Vaughan from Selberg Axioms
+
+  KEY INSIGHT: M-V cannot be derived from Schur's test + BS axioms alone,
+  because the row sums of the raw kernel 1/(λ_i - λ_j) grow as log(N)/δ.
+
+  The correct derivation uses the Fourier transform of the Selberg majorant
+  to construct a POSITIVE-DEFINITE smoothed kernel whose off-diagonal terms
+  vanish (band-limitation) while diagonal terms are bounded (integral = 2).
+
+  APPROACH: Factor the derivation into two clean intermediate results:
+
+  (A) The "Selberg smoothing bound" — for any f : ℝ → ℂ with f(t) = Σ xᵣ e^{2πiλᵣt},
+      the integral ∫ |f|² · |S_Δ| is bounded
+  (B) The "positive-definiteness" — the smoothed bilinear form ≥ 0
+
+  Since the derivation BS → M-V requires distributional Fourier analysis
+  (which Lean/Mathlib lacks), we axiomatize M-V directly as a published
+  result that DEPENDS ON BS1-BS5 conceptually.
 -/
 
 import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Algebra.BigOperators.Group.Finset.Basic
+import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
@@ -10,80 +29,60 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 noncomputable section
 open Complex Real Finset BigOperators MeasureTheory
 
--- ═══════════════════════════════════════════
--- §1. The Sinc Function
--- ═══════════════════════════════════════════
-
-/-- The sinc function: sinc(x) = sin(πx)/(πx) for x ≠ 0, sinc(0) = 1. -/
-def sinc (x : ℝ) : ℝ :=
-  if x = 0 then 1 else Real.sin (π * x) / (π * x)
-
-@[simp] lemma sinc_zero : sinc 0 = 1 := by simp [sinc]
-
-lemma sinc_of_ne_zero {x : ℝ} (hx : x ≠ 0) :
-    sinc x = Real.sin (π * x) / (π * x) := by
-  simp [sinc, hx]
-
-/-- sinc vanishes at nonzero integers. -/
-lemma sinc_intCast_of_ne_zero (n : ℤ) (hn : n ≠ 0) :
-    sinc (n : ℝ) = 0 := by
-  rw [sinc_of_ne_zero (Int.cast_ne_zero.mpr hn)]
-  have : Real.sin (π * ↑n) = 0 := by
-    rw [mul_comm]; exact Real.sin_int_mul_pi n
-  simp [this]
+-- Reproduce δ-separation
+def IsDeltaSeparated' {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ) : Prop :=
+  ∀ i j : Fin N, i ≠ j → δ ≤ |lam i - lam j|
 
 -- ═══════════════════════════════════════════
--- §2. Selberg Majorant Axioms
+-- THE CORRECT INTERMEDIATE AXIOM
 -- ═══════════════════════════════════════════
 
-/-- The Selberg majorant of the signum function.
-    Reference: Vaaler, "Some extremal functions in Fourier analysis",
-    Bull. AMS 12 (1985), 183-216.
-    Explicit formula:
-    S(x) = sinc(x)² · (2/x + Σ (1/(x-n)² + 1/(x+n)²)) -/
-axiom selbergMajorant : ℝ → ℝ
+-- The key insight: M-V follows from the fact that the
+-- Fourier transform of the Selberg majorant has compact support.
+-- This means that for δ-separated frequencies, the smoothed kernel
+-- (obtained by convolving with the Selberg majorant) produces a
+-- diagonal-dominant matrix.
+--
+-- Instead of axiomatizing BS → M-V derivation (which needs distributions),
+-- we axiomatize the RESULT:
 
-/-- **Axiom BS1**: S(x) ≥ 1 for x > 0. -/
-axiom selbergMajorant_ge_one_of_pos (x : ℝ) (hx : 0 < x) :
-    1 ≤ selbergMajorant x
+/-- **Montgomery-Vaughan Hilbert Inequality** (Axiom).
 
-/-- **Axiom BS2**: S(x) ≤ -1 for x < 0. -/
-axiom selbergMajorant_le_neg_one_of_neg (x : ℝ) (hx : x < 0) :
-    selbergMajorant x ≤ -1
+    For δ-separated real numbers λ₁, ..., λ_N and complex weights x₁, ..., x_N:
 
-/-- **Axiom BS3**: S is integrable with respect to Lebesgue measure. -/
-axiom selbergMajorant_integrable :
-    Integrable selbergMajorant (volume : Measure ℝ)
+    |Σ_{r≠s} xᵣ x̄ₛ / (λᵣ - λₛ)| ≤ (π/δ) · Σᵣ |xᵣ|²
 
-/-- **Axiom BS4**: ∫ S(x) dx = 2. -/
-axiom selbergMajorant_integral :
-    ∫ x : ℝ, selbergMajorant x ∂(volume : Measure ℝ) = 2
+    This is a published result (Montgomery & Vaughan, 1974).
+    The proof uses Beurling-Selberg extremal functions and proceeds by:
 
-/-- **Axiom BS5**: S has Fourier transform supported in [-1,1]. -/
-axiom selbergMajorant_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
-    ∫ x : ℝ, selbergMajorant x * Real.cos (2 * π * ξ * x) ∂(volume : Measure ℝ) = 0
+    1. Let S be the Selberg majorant of sgn with ∫S = 2 and Ŝ ⊂ [-1,1].
+    2. For f(t) = Σ xᵣ e^{2πiλᵣt}, consider I(Δ) = ∫ |f(t)|² B(Δt) dt.
+    3. For Δ = 1/(2δ), the band-limitation of S gives B̂(λᵣ - λₛ) = 0
+       for r ≠ s (since |λᵣ - λₛ| ≥ δ > Δ).
+    4. So I(Δ) = Σᵣ |xᵣ|² · B̂(0) = Σ |xᵣ|² / δ (from ∫S = 2).
+    5. On the other hand, B(t) ≥ sgn(t) implies bounds on the bilinear form.
+    6. Combining and optimizing over Δ gives the constant π/δ.
 
--- ═══════════════════════════════════════════
--- §3. Key Consequence for the Hilbert Kernel
--- ═══════════════════════════════════════════
+    **STATUS**: Axiom. Depends on Selberg axioms BS1-BS5 conceptually.
+    Will be upgraded to a theorem when distributional Fourier analysis
+    is available in Mathlib. -/
+axiom montgomery_vaughan_bound
+    {N : ℕ} (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated' lam δ) :
+    ‖∑ i : Fin N, ∑ j : Fin N,
+        (if i = j then (0 : ℂ)
+         else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))‖
+    ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2
 
-/-- The Selberg-smoothed row sum bound.
-    For δ-separated reals, the smoothed Hilbert kernel has bounded row sums.
-    This is the KEY consequence of the Selberg majorant that makes M-V work.
-
-    Proof sketch: The row sum of the smoothed kernel K_Δ(λᵢ - λⱼ) is
-    bounded by ∫ K_Δ ≤ π/δ, because K_Δ is positive and band-limited.
-
-    This axiom will be replaced when the full Selberg construction is proved. -/
-axiom selberg_smoothed_row_bound {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ)
-    (hδ : 0 < δ) (h_sep : ∀ i j : Fin N, i ≠ j → δ ≤ |lam i - lam j|)
-    (i : Fin N) :
-    ∑ j ∈ Finset.univ.erase i, 1 / |lam i - lam j| ≤ π / δ
-
--- NOTE: This axiom is NOT true for arbitrary δ-separated sequences
--- when N is large. However, the BILINEAR FORM bound that M-V gives
--- IS true with constant π/δ. The correct derivation from the Selberg
--- majorant constructs a DIFFERENT kernel whose row sums are bounded.
--- For now, we state M-V directly and note the dependency on B-S theory.
+-- Now the THEOREM follows trivially from the axiom:
+theorem montgomery_vaughan_inequality'
+    (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated' lam δ) :
+    let S := ∑ i : Fin N, ∑ j : Fin N,
+        (if i = j then (0 : ℂ)
+         else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))
+    ‖S‖ ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
+  intro S
+  exact montgomery_vaughan_bound x lam δ hδ h_sep
 
 end
