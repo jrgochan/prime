@@ -26,6 +26,7 @@
 -/
 
 import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -219,6 +220,36 @@ lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
 -- ═══════════════════════════════════════════
 -- §6. The Perron Kernel for y > 1 (Residue = 1)
 -- ═══════════════════════════════════════════
+
+/-- The "flattened" Perron integrand with the pole removed:
+    g(s) = (y^s - 1)/s for s ≠ 0, and g(0) = log(y).
+    This is entire by the removable singularity theorem. -/
+noncomputable def perronFlattened (y : ℝ) : ℂ → ℂ :=
+  dslope (fun z => (y : ℂ) ^ z) 0
+
+/-- The key decomposition: y^s/s = g(s) + 1/s for s ≠ 0.
+    This follows from dslope definition: g(s) = (y^s - f(0))/(s - 0) = (y^s - 1)/s. -/
+lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (hy : 0 < y) (s : ℂ) (hs : s ≠ 0) :
+    perronIntegrand y s = perronFlattened y s + 1 / s := by
+  simp only [perronIntegrand, perronFlattened, dslope_of_ne _ hs, slope, vsub_eq_sub, sub_zero,
+             smul_eq_mul]
+  have : (y : ℂ) ^ (0 : ℂ) = 1 := by simp [cpow_zero]
+  rw [this]
+  field_simp
+  ring
+
+/-- The rectangle integral of 1/s around [-R, c] × [-T, T] equals 2πi.
+    This is the winding number computation.
+    Proof: By explicit FTC evaluation of Complex.log on each segment. -/
+lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R) (hT : 0 < T) :
+    (∫ x in (-R)..c, ((↑x + -↑T * I)⁻¹ : ℂ)) -
+    (∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ)) +
+    I * (∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ)) -
+    I * (∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ)) = 2 * Real.pi * I := by
+  -- This requires explicit evaluation of ∫ 1/s on each segment using Complex.log FTC.
+  -- The log values at the 4 corners cancel except for the imaginary part
+  -- which sums to 2π (from the winding number argument).
+  sorry
 
 /-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T·log y)).
 
