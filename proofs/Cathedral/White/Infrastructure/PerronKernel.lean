@@ -160,16 +160,30 @@ lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (hR : 0 ≤ R) :
 
 /-- The rectangle integral of y^s/s vanishes when s=0 is outside.
     For the rectangle [c, R] × [-T, T] with c > 0, y^s/s is holomorphic inside.
-    Uses Mathlib's integral_boundary_rect_eq_zero_of_differentiable_on_off_countable. -/
+    Uses Mathlib's `integral_boundary_rect_eq_zero_of_differentiableOn` (Cauchy-Goursat). -/
 lemma rectangle_integral_perron_vanishes {y c R T : ℝ} (hy : 0 < y)
     (hc : 0 < c) (hR : c < R) (hT : 0 < T) :
     (∫ x in c..R, perronIntegrand y (x + (-T) * I)) -
     (∫ x in c..R, perronIntegrand y (x + T * I)) +
     I * (∫ t in (-T)..T, perronIntegrand y (R + t * I)) -
     I * (∫ t in (-T)..T, perronIntegrand y (c + t * I)) = 0 := by
-  sorry -- The proof uses integral_boundary_rect_eq_zero with z = ⟨c,-T⟩, w = ⟨R,T⟩
-        -- ContinuousOn: perronIntegrand is continuous on [c,R]×[-T,T] (c > 0 so s ≠ 0)
-        -- DifferentiableAt: perronIntegrand_differentiableAt at all interior points
+  -- Key fact: 0 is not in the rectangle [c,R]×[-T,T] since c > 0
+  have rect_ne_zero : ∀ s ∈ Set.uIcc c R ×ℂ Set.uIcc (-T) T, s ≠ (0 : ℂ) := by
+    intro s hs h0
+    have hre : s.re ∈ Set.uIcc c R := (Complex.mem_reProdIm.mp hs).1
+    rw [h0] at hre
+    simp [Set.mem_uIcc, Complex.zero_re] at hre
+    -- hre : c ≤ 0 ∧ 0 ≤ R ∨ R ≤ 0 ∧ 0 ≤ c
+    rcases hre with ⟨h1, _⟩ | ⟨_, h2⟩ <;> linarith
+  -- f is differentiable on the closed rectangle
+  have hDiff : DifferentiableOn ℂ (perronIntegrand y) (Set.uIcc c R ×ℂ Set.uIcc (-T) T) :=
+    fun s hs => (perronIntegrand_differentiableAt hy (rect_ne_zero s hs)).differentiableWithinAt
+  -- Apply Cauchy-Goursat (z = ⟨c,-T⟩, w = ⟨R,T⟩)
+  have key := Complex.integral_boundary_rect_eq_zero_of_differentiableOn
+    (perronIntegrand y) ⟨c, -T⟩ ⟨R, T⟩ hDiff
+  simp only [smul_eq_mul] at key
+  -- ↑(-T) = -(↑T) in ℂ
+  rwa [Complex.ofReal_neg] at key
 
 /-- The right vertical segment is bounded by 2T·y^R/R for y < 1.
     For each t, ‖y^{R+tI}/(R+tI)‖ = y^R/‖R+tI‖ ≤ y^R/R since ‖R+tI‖ ≥ R. -/
