@@ -26,6 +26,7 @@ import Cathedral.Assembly.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
 import Cathedral.NymanBeurling.Separation
 import Cathedral.Assembly.BDBypass
+import Cathedral.Assembly.VasyuninBypass
 
 noncomputable section
 open Complex Real
@@ -119,94 +120,21 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 
 /-- **THEOREM** (was AXIOM 6): RH → d²_BD → 0.
 
-    ELIMINATED as axiom: 2026-04-16.
-    THE GRAND SEVERANCE (Theorist, 2026-04-16):
-    Now routed through BDBypass.lean (Mertens → Abel summation),
-    completely bypassing the Vasyunin Gram matrix.
+    v1 (2026-04-16): Routed through BDBypass (Mertens → Abel summation)
+    v2 (2026-04-18): Rerouted through VasyuninBypass (covariance decomposition)
+
+    The proof now uses the Vasyunin tower directly:
     1. rh_implies_mertens_bound: RH → |M(x)| = O(√x log²x)
-    2. abel_summation_bd_l2_bound: Mertens → ∃v, ∫(1-f_v)² ≤ C/ln N
-    3. C/ln N → 0 (standard calculus: log_grows_unboundedly) -/
+    2. abel_summation_covariance_bound: Mertens → vᵀCv ≤ C/log(N)
+    3. witness_numerator_convergence: bᵀv → 1 (PNT)
+    4. Combined: (1-bᵀv)² + vᵀCv → 0
+
+    This eliminates bd_gram_form_decay from the crown. -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) := by
-  intro hRH ε hε
-  -- Step 1: Get the witness decay from BDBypass
-  obtain ⟨C_err, hC_pos, N₀, hN₀⟩ := rh_implies_bd_witness_decay hRH
-  -- Step 2: C_err * ln(ln N) / ln N → 0 as N → ∞ (standard calculus)
-  have h_decay : ∃ N₁ : ℕ, ∀ N : ℕ, N₁ ≤ N →
-      C_err * Real.log (Real.log ↑N) / Real.log ↑N < ε := by
-    -- We use log(log N) = 2·log(√(log N)) < 2·√(log N)
-    -- So C_err·log(log N)/log N < 2·C_err/√(log N) → 0
-    set K := (2 * C_err / ε) ^ 2
-    have h_tend := Real.tendsto_log_atTop
-    rw [Filter.tendsto_atTop_atTop] at h_tend
-    obtain ⟨M, hM⟩ := h_tend (K + 1)
-    use max ⌈max M 3⌉₊ 3
-    intro N hN
-    have hN3 : 3 ≤ N := le_trans (le_max_right _ _) hN
-    have hN_M : max M 3 ≤ ↑N := by
-      calc max M 3 ≤ (⌈max M 3⌉₊ : ℝ) := Nat.le_ceil _
-        _ ≤ ↑(max ⌈max M 3⌉₊ 3) := by exact_mod_cast le_max_left _ _
-        _ ≤ ↑N := by exact_mod_cast hN
-    have h_log_M : K + 1 ≤ Real.log (max M 3) := hM _ (le_max_left _ _)
-    have h_log_N : K + 1 ≤ Real.log ↑N := le_trans h_log_M (Real.log_le_log (by positivity) hN_M)
-    have h_K_lt : K < Real.log ↑N := by linarith
-    have h_log_pos : 0 < Real.log ↑N := by linarith [show 0 ≤ K from sq_nonneg _]
-    have h_log_log_pos : 0 < Real.log (Real.log ↑N) := by
-      apply Real.log_pos
-      have h3 : (3 : ℝ) ≤ ↑N := by exact_mod_cast hN3
-      calc (1:ℝ) = Real.log (Real.exp 1) := by rw [Real.log_exp]
-         _ < Real.log 3 := Real.log_lt_log (Real.exp_pos 1) (by linarith [Real.exp_one_lt_three])
-         _ ≤ Real.log ↑N := Real.log_le_log (by norm_num) h3
-    -- log(log N) = 2 * log(sqrt(log N))
-    have h_sqrt_pos : 0 < Real.sqrt (Real.log ↑N) := Real.sqrt_pos.mpr h_log_pos
-    have h_log_eq : Real.log (Real.log ↑N) = 2 * Real.log (Real.sqrt (Real.log ↑N)) := by
-      rw [Real.log_sqrt (le_of_lt h_log_pos)]
-      ring
-    -- log(sqrt(log N)) < sqrt(log N)
-    have h_log_lt : Real.log (Real.sqrt (Real.log ↑N)) < Real.sqrt (Real.log ↑N) := by
-      calc Real.log (Real.sqrt (Real.log ↑N)) ≤ Real.sqrt (Real.log ↑N) - 1 :=
-             Real.log_le_sub_one_of_pos h_sqrt_pos
-        _ < Real.sqrt (Real.log ↑N) := by linarith
-    have h_log_log_lt : Real.log (Real.log ↑N) < 2 * Real.sqrt (Real.log ↑N) := by
-      calc Real.log (Real.log ↑N) = 2 * Real.log (Real.sqrt (Real.log ↑N)) := h_log_eq
-        _ < 2 * Real.sqrt (Real.log ↑N) := mul_lt_mul_of_pos_left h_log_lt (by norm_num)
-    -- Direct bound: C_err * log(log N)/log N < C_err * 2√(log N)/log N = 2C_err/√(log N) < ε
-    have h_sqrt_log_pos : 0 < Real.sqrt (Real.log ↑N) := Real.sqrt_pos.mpr h_log_pos
-    -- Step A: log(log N)/log N < 2/√(log N)
-    have h_ratio : Real.log (Real.log ↑N) / Real.log ↑N < 2 / Real.sqrt (Real.log ↑N) := by
-      rw [div_lt_div_iff₀ h_log_pos h_sqrt_log_pos]
-      calc Real.log (Real.log ↑N) * Real.sqrt (Real.log ↑N)
-          < 2 * Real.sqrt (Real.log ↑N) * Real.sqrt (Real.log ↑N) :=
-            mul_lt_mul_of_pos_right h_log_log_lt h_sqrt_log_pos
-        _ = 2 * Real.log ↑N := by
-            rw [mul_assoc, Real.mul_self_sqrt (le_of_lt h_log_pos)]
-    -- Step B: C_err * (log(log N)/log N) < C_err * 2/√(log N) = 2C_err/√(log N)
-    have h_bound : C_err * Real.log (Real.log ↑N) / Real.log ↑N <
-        2 * C_err / Real.sqrt (Real.log ↑N) := by
-      rw [mul_div_assoc]
-      have := mul_lt_mul_of_pos_left h_ratio hC_pos
-      have : C_err * (2 / Real.sqrt (Real.log ↑N)) = 2 * C_err / Real.sqrt (Real.log ↑N) := by ring
-      linarith
-    -- Step C: 2C_err/√(log N) < ε because √(log N) > 2C_err/ε
-    have h_sqrt_big : 2 * C_err / ε < Real.sqrt (Real.log ↑N) := by
-      rw [← Real.sqrt_sq (le_of_lt (div_pos (mul_pos (by norm_num : (0:ℝ) < 2) hC_pos) hε))]
-      exact Real.sqrt_lt_sqrt (sq_nonneg _) h_K_lt
-    have h_small : 2 * C_err / Real.sqrt (Real.log ↑N) < ε := by
-      rw [div_lt_iff₀ h_sqrt_log_pos]
-      calc 2 * C_err = ε * (2 * C_err / ε) := by rw [mul_div_cancel₀ _ (ne_of_gt hε)]
-        _ < ε * Real.sqrt (Real.log ↑N) := mul_lt_mul_of_pos_left h_sqrt_big hε
-    exact lt_trans h_bound h_small
-  obtain ⟨N₁, hN₁⟩ := h_decay
-  -- Step 3: Take max of both thresholds
-  use max (max N₀ N₁) 3
-  intro N hN
-  have hN₀' : N ≥ N₀ := le_trans (le_trans (le_max_left _ _) (le_max_left _ _)) hN
-  have hN₁' : N₁ ≤ N := le_trans (le_trans (le_max_right _ _) (le_max_left _ _)) hN
-  have hN3 : N ≥ 3 := le_trans (le_max_right _ _) hN
-  obtain ⟨v, hv⟩ := hN₀ N hN₀' hN3
-  exact ⟨v, lt_of_le_of_lt hv (hN₁ N hN₁')⟩
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
+  rh_implies_bd_convergence_vasyunin
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,

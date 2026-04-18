@@ -65,44 +65,41 @@ theorem dirichlet_polynomial_mean_value
   exact dirichlet_polynomial_mean_value_bound N a T hT
 
 -- ═══════════════════════════════════════════
--- §2. Critical Line Mellin Bound
+-- §2. Direct L² Gram Form Decay
 -- ═══════════════════════════════════════════
 
 /-!
-### Proof Path (from Mean Value Theorem + Mertens Bound)
+### Proof Path (from Mertens Bound → Direct L² Analysis)
 
-1. **Express** `mellinBDResidual` as a Dirichlet polynomial: Σ cₙ n⁻ˢ
-2. **Apply** `dirichlet_polynomial_mean_value` with s = 1/2 + it
-3. **Bound coefficients** using Mertens: |cₙ| ≤ (C_m + 1) · n⁻¹/² · (log n)²
-4. **Sum the series**: Σ |cₙ|² (2T + 2πn) ≤ (C_m+1)² · log(log N) / log N
+1. **Expand** ∫₀¹ |r_N(x)|² dx = 1 - 2bᵀv + vᵀGv
+   (via `bd_l2_error_eq_quad_error` in BDBridge.lean)
+2. **Bound the linear term** using Abel summation + Mertens:
+   |Σ v_k · b_k| = O(1/log N)
+3. **Bound the quadratic form** vᵀGv using Mertens:
+   The Gram entries G_{jk} = ∫₀¹ {1/(jx)}{1/(kx)} dx
+   with Möbius log-taper weights give decay loglog(N)/log(N)
+4. **Combine**: ∫|r_N|² ≤ (C_m+1)² · loglog(N)/log(N)
 
-Dependencies: `dirichlet_polynomial_mean_value_bound`, `hMertens`.
+The Mellin-side bound then follows via `parseval_bridge`
+(proved in PlancherelBypass.lean).
 -/
 
-/-- **Critical Line Mellin Bound** (Axiom).
+/-- **BD Gram Form Decay** (Axiom).
 
-    Dependencies: `dirichlet_polynomial_mean_value_bound` + Mertens bound. -/
-axiom critical_line_mellin_bound_axiom
+    Under the Mertens bound |M(x)| ≤ C_m·x^{1/2}·log²x,
+    the L²(0,1) norm of the BD residual with Möbius log-taper
+    weights decays as O(loglog N / log N).
+
+    This is a DIRECT statement about L² approximation quality,
+    without Fourier/Mellin transform machinery.
+
+    Dependencies: Mertens bound + Gram matrix structure. -/
+axiom bd_gram_form_decay
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
     (N : ℕ) (hN : 10 ≤ N) :
-    (1 / (2 * Real.pi)) *
-    ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
-      ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
+    ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 ≤
     (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
 
-/-- **Critical Line Mellin Bound** (Theorem). Proved from axiom. -/
-theorem critical_line_mellin_bound_under_rh
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x ≥ 2,
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
-    (N : ℕ) (hN : 10 ≤ N) :
-    (1 / (2 * Real.pi)) *
-    ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
-      ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
-  critical_line_mellin_bound_axiom C_m hC hMertens N hN
-
 end Cathedral.White.Infrastructure
-
