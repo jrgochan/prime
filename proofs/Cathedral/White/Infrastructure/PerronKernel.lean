@@ -32,7 +32,7 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section
-open Complex Real MeasureTheory Set BigOperators
+open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
 namespace Cathedral.White.Infrastructure
 
@@ -292,35 +292,134 @@ lemma horiz_log_antideriv {a : ℝ} (ha : a ≠ 0) (x : ℝ) :
   simp [div_eq_mul_inv] at hlog
   exact hlog
 
+/-- The four-corner logarithm identity: pure winding number algebra.
+    Uses conjugation symmetry (log(z̄) = conj(log z)) plus
+    arg(-R+TI) + arg(R+TI) = π (from arg_neg_eq_arg_add_pi_of_im_neg). -/
+lemma four_corner_log_sum {R T : ℝ} (hR : 0 < R) (hT : 0 < T) :
+    -Complex.log (-↑R - ↑T * I) + Complex.log (-↑R + ↑T * I)
+    - Complex.log (↑R - ↑T * I) + Complex.log (↑R + ↑T * I) = 2 * ↑Real.pi * I := by
+  have hconj_RT : conj (↑R + ↑T * I) = ↑R - ↑T * I := by
+    simp [map_add, map_mul, conj_ofReal, conj_I, mul_neg]; ring
+  have harg_ne_pi : (↑R + ↑T * I : ℂ).arg ≠ π := by
+    intro h
+    have hre : (0 : ℝ) < (↑R + ↑T * I : ℂ).re := by
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im, hR]
+    linarith [Complex.arg_lt_pi_iff.mpr (Or.inl hre.le), Complex.arg_le_pi (↑R + ↑T * I)]
+  have harg_sum : (↑R + ↑T * I : ℂ).arg + (-↑R + ↑T * I : ℂ).arg = π := by
+    have : (-↑R + ↑T * I : ℂ) = -(↑R - ↑T * I) := by ring
+    rw [this, Complex.arg_neg_eq_arg_add_pi_of_im_neg
+      (by simp [Complex.sub_im, Complex.ofReal_im, Complex.mul_im,
+                Complex.I_re, Complex.I_im, hT] : (↑R - ↑T * I : ℂ).im < 0)]
+    rw [show (↑R - ↑T * I : ℂ) = conj (↑R + ↑T * I) from hconj_RT.symm,
+        Complex.arg_conj, if_neg harg_ne_pi]; ring
+  have harg_ne_pi2 : (-↑R + ↑T * I : ℂ).arg ≠ π := by
+    exact ne_of_lt (Complex.arg_lt_pi_iff.mpr (Or.inr
+      (by simp [Complex.add_im, Complex.neg_im, Complex.ofReal_im,
+                Complex.mul_im, Complex.I_re, Complex.I_im]; linarith : (-↑R + ↑T * I : ℂ).im ≠ 0)))
+  have hlog_conj1 : Complex.log (↑R - ↑T * I) = conj (Complex.log (↑R + ↑T * I)) := by
+    rw [← hconj_RT, Complex.log_conj _ harg_ne_pi]
+  have hconj_mRT : conj (-↑R + ↑T * I) = -↑R - ↑T * I := by
+    simp [map_add, map_neg, map_mul, conj_ofReal, conj_I, mul_neg]; ring
+  have hlog_conj2 : Complex.log (-↑R - ↑T * I) = conj (Complex.log (-↑R + ↑T * I)) := by
+    rw [← hconj_mRT, Complex.log_conj _ harg_ne_pi2]
+  have key (z : ℂ) : z - conj z = 2 * I * ↑z.im := by
+    apply Complex.ext <;> simp [Complex.mul_re, Complex.I_re, Complex.I_im,
+                  Complex.mul_im, Complex.conj_re, Complex.conj_im] <;> ring
+  calc -Complex.log (-↑R - ↑T * I) + Complex.log (-↑R + ↑T * I)
+      - Complex.log (↑R - ↑T * I) + Complex.log (↑R + ↑T * I)
+      = (Complex.log (-↑R + ↑T * I) - conj (Complex.log (-↑R + ↑T * I)))
+        + (Complex.log (↑R + ↑T * I) - conj (Complex.log (↑R + ↑T * I))) := by
+          rw [hlog_conj1, hlog_conj2]; ring
+    _ = 2 * I * ↑(Complex.log (-↑R + ↑T * I)).im
+        + 2 * I * ↑(Complex.log (↑R + ↑T * I)).im := by rw [key, key]
+    _ = 2 * I * ↑((-↑R + ↑T * I : ℂ).arg)
+        + 2 * I * ↑((↑R + ↑T * I : ℂ).arg) := by simp [Complex.log_im]
+    _ = 2 * I * ↑((↑R + ↑T * I : ℂ).arg + (-↑R + ↑T * I : ℂ).arg) := by push_cast; ring
+    _ = 2 * I * ↑(Real.pi) := by rw [harg_sum]
+    _ = 2 * ↑Real.pi * I := by ring
+
 /-- The rectangle integral of 1/s around [-R, c] × [-T, T] equals 2πi.
-    This is the winding number computation.
-
-    Proof sketch (FTC on each segment):
-    • Bottom (x + (-T)I, x: -R → c): antiderivative = log(x - TI)
-    • Top    (x + TI, x: -R → c):    antiderivative = log(x + TI)
-    • Right  (c + tI, t: -T → T):    antiderivative = -I·log(c + tI)
-    • Left   (-R + tI, t: -T → T):   antiderivative = -I·log(R - tI) [Theorist's trick]
-      (R - tI has Re = R > 0, so stays in slitPlane, dodging the branch cut!)
-
-    Evaluating at corners and summing: the real parts (log|·|) cancel in pairs,
-    leaving only imaginary parts (args) that sum to exactly 2π. -/
+    FTC on each segment reduces to the four-corner log identity. -/
 lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R) (hT : 0 < T) :
     (∫ x in (-R)..c, ((↑x + -↑T * I)⁻¹ : ℂ)) -
     (∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ)) +
     I * (∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ)) -
     I * (∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ)) = 2 * Real.pi * I := by
-  -- Step 1: Apply FTC to each segment using the antiderivative lemmas above:
-  --   Bottom: ∫ = log(c - TI) - log(-R - TI)     [horiz_log_antideriv, a = -T]
-  --   Top:    ∫ = log(c + TI) - log(-R + TI)     [horiz_log_antideriv, a = T]
-  --   Right:  ∫ = -I·log(c+TI) - (-I·log(c-TI))  [right_vert_log_antideriv]
-  --   Left:   ∫ = -I·log(R-TI) - (-I·log(R+TI))  [left_vert_log_antideriv]
-  -- Step 2: Substitute and cancel:
-  --   The log(c±TI) terms from Bottom/Top cancel with Right.
-  --   Remaining: I·[log(R+TI) - log(R-TI)] + [log(-R-TI) - log(-R+TI)]
-  -- Step 3: Expand log = ln|z| + I·arg(z):
-  --   Real parts (ln|z|) cancel since |R+TI| = |R-TI| and |-R+TI| = |-R-TI|.
-  --   Imaginary parts sum to I · 2π.
-  sorry
+  -- Step 1: FTC on each segment.
+  -- Integrability follows from HasDerivAt (the derivative is the integrand, which is continuous).
+  have hT_ne : (T : ℝ) ≠ 0 := ne_of_gt hT
+  have hmT_ne : (-T : ℝ) ≠ 0 := neg_ne_zero.mpr hT_ne
+  -- Bottom: ∫_{-R}^c 1/(x - TI) dx = log(c - TI) - log(-R - TI)
+  have hbot : ∫ x in (-R)..c, ((↑x + -↑T * I)⁻¹ : ℂ) =
+      Complex.log (↑c + -↑T * I) - Complex.log (-↑R + -↑T * I) := by
+    rw [show (-↑R : ℂ) = ↑(-R) from by push_cast; ring,
+        show ((-↑T : ℂ) * I) = (↑(-T) * I) from by push_cast; ring]
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun x _ => horiz_log_antideriv hmT_ne x)
+      (ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun x _ h => by
+        have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this)))
+  -- Top: ∫_{-R}^c 1/(x + TI) dx = log(c + TI) - log(-R + TI)
+  have htop : ∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ) =
+      Complex.log (↑c + ↑T * I) - Complex.log (-↑R + ↑T * I) := by
+    rw [show (-↑R : ℂ) = ↑(-R) from by push_cast; ring]
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun x _ => horiz_log_antideriv hT_ne x)
+      (ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun x _ h => by
+        have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this)))
+  -- Right: ∫_{-T}^T 1/(c + tI) dt = -I·log(c+TI) - (-I·log(c-TI))
+  have hright : ∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ) =
+      -I * Complex.log (↑c + ↑T * I) - (-I * Complex.log (↑c + (-↑T) * I)) := by
+    rw [show ((-↑T : ℂ) * I) = (↑(-T) * I) from by push_cast; ring]
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun t _ => right_vert_log_antideriv hc t)
+      (ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun t _ h => by
+        have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+        linarith)))
+  -- Left: ∫_{-T}^T 1/(-R + tI) dt = -I·log(R-TI) - (-I·log(R+TI))
+  have hleft : ∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ) =
+      -I * Complex.log (↑R - ↑T * I) - (-I * Complex.log (↑R - (-↑T) * I)) := by
+    rw [show ((-↑T : ℂ) * I) = (↑(-T) * I) from by push_cast; ring]
+    exact intervalIntegral.integral_eq_sub_of_hasDerivAt
+      (fun t _ => left_vert_log_antideriv hR t)
+      (ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun t _ h => by
+        have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.ofReal_re, Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+        linarith)))
+  -- Step 2: Substitute the four FTC results and simplify
+  rw [hbot, htop, hright, hleft]
+  -- The goal now has I * (-I * ... - -I * ...) terms. Simplify using I*(-I) = 1.
+  have hII : (I : ℂ) * -I = 1 := by
+    simp [Complex.ext_iff, Complex.I_re, Complex.I_im]
+  -- Normalize sign patterns
+  have hs1 : (-↑R + -↑T * I : ℂ) = -↑R - ↑T * I := by ring
+  have hs2 : (↑R - -↑T * I : ℂ) = ↑R + ↑T * I := by ring
+  have hs3 : (↑c + -↑T * I : ℂ) = ↑c - ↑T * I := by ring
+  rw [hs1, hs2, hs3]
+  -- Now simplify I * (-I * A - -I * B) terms
+  -- I * (-I * A - -I * B) = I*(-I)*A - I*(-I)*B ... no, -(-I) = I
+  -- -I * A - -I * B means: (-I)*A - (-I)*B = (-I)*(A - B)
+  -- I * ((-I)*(A - B)) = (I*(-I))*(A-B) = 1*(A-B) = A - B
+  -- But Lean represents this differently. Let's compute directly.
+  have key1 : I * (-I * Complex.log (↑c + ↑T * I) - -I * Complex.log (↑c - ↑T * I))
+      = Complex.log (↑c + ↑T * I) - Complex.log (↑c - ↑T * I) := by
+    have : -I * Complex.log (↑c + ↑T * I) - -I * Complex.log (↑c - ↑T * I)
+         = -I * (Complex.log (↑c + ↑T * I) - Complex.log (↑c - ↑T * I)) := by ring
+    rw [this, ← mul_assoc, hII, one_mul]
+  have key2 : I * (-I * Complex.log (↑R - ↑T * I) - -I * Complex.log (↑R + ↑T * I))
+      = Complex.log (↑R - ↑T * I) - Complex.log (↑R + ↑T * I) := by
+    have : -I * Complex.log (↑R - ↑T * I) - -I * Complex.log (↑R + ↑T * I)
+         = -I * (Complex.log (↑R - ↑T * I) - Complex.log (↑R + ↑T * I)) := by ring
+    rw [this, ← mul_assoc, hII, one_mul]
+  rw [key1, key2]
+  -- Goal: (log(c-TI) - log(-R-TI)) - (log(c+TI) - log(-R+TI))
+  --       + (log(c+TI) - log(c-TI)) - (log(R-TI) - log(R+TI)) = 2πI
+  -- The log(c±TI) cancel, leaving: -log(-R-TI) + log(-R+TI) - log(R-TI) + log(R+TI) = 2πI
+  linear_combination four_corner_log_sum hR hT
 
 /-- Left vertical segment bound for y > 1: ‖∫ f(−R + t·I) dt‖ ≤ 2T·y^(−R)/R.
     The exponential decay y^(-R) → 0 as R → ∞ when y > 1. -/
