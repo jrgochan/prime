@@ -510,11 +510,119 @@ lemma left_rectangle_perron_winding {y c R T : ℝ}
     I * (∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I)) -
     I * (∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I)) =
     2 * ↑Real.pi * I := by
-  -- Decompose: on each segment, y^s/s = g(s) + 1/s (perronIntegrand_eq_flattened_add_inv)
-  -- Cauchy-Goursat for g (entire): ∫_∂B g = 0
-  -- Winding number (rectangle_integral_inv_eq_two_pi_I): ∫_∂B 1/s = 2πi
-  -- Sum: ∫_∂B f = ∫_∂B g + ∫_∂B 1/s = 0 + 2πi = 2πi
-  sorry
+  -- Step 1: dslope of y^z is differentiable everywhere (removable singularity)
+  set f_cpow : ℂ → ℂ := fun z => (y : ℂ) ^ z with hf_def
+  have hDiffAt : ∀ z : ℂ, DifferentiableAt ℂ (dslope f_cpow 0) z := by
+    intro z
+    rcases eq_or_ne z 0 with rfl | hz
+    · -- At z = 0: use differentiableOn_dslope (removable singularity theorem)
+      have hDiff : DifferentiableOn ℂ f_cpow (Set.univ : Set ℂ) :=
+        fun z _ => (differentiableAt_cpow_const hy z).differentiableWithinAt
+      have h_nhds : (Set.univ : Set ℂ) ∈ nhds (0 : ℂ) := Filter.univ_mem
+      have key := ((differentiableOn_dslope h_nhds (f := f_cpow)).mpr hDiff) 0 (Set.mem_univ _)
+      exact key.differentiableAt (Filter.univ_mem)
+    · -- At z ≠ 0: straightforward
+      exact (differentiableAt_dslope_of_ne hz).mpr (differentiableAt_cpow_const hy z)
+  -- Step 2: Cauchy-Goursat for g = dslope on the rectangle [-R, c] × [-T, T]
+  set g := dslope f_cpow 0 with hg_def
+  have rect_g : (∫ x in (-R)..c, g (↑x + -↑T * I)) -
+      (∫ x in (-R)..c, g (↑x + ↑T * I)) +
+      I * (∫ t in (-T)..T, g (↑c + ↑t * I)) -
+      I * (∫ t in (-T)..T, g (-↑R + ↑t * I)) = 0 := by
+    have hDiffOn : DifferentiableOn ℂ g (Set.uIcc (-R) c ×ℂ Set.uIcc (-T) T) :=
+      fun z _ => (hDiffAt z).differentiableWithinAt
+    have key := Complex.integral_boundary_rect_eq_zero_of_differentiableOn
+      g ⟨-R, -T⟩ ⟨c, T⟩ hDiffOn
+    simp only [smul_eq_mul] at key
+    convert key using 2 <;> push_cast <;> ring
+  -- Step 3: Winding number for 1/s
+  have rect_inv := rectangle_integral_inv_eq_two_pi_I hc hR hT
+  -- Step 4: On each segment, split ∫ f = ∫ g + ∫ (1/s) using perronIntegrand_eq_flattened_add_inv.
+  -- We use: perronIntegrand y s = g s + 1/s for s ≠ 0, and integral_add for measurability.
+  -- Key fact: on all boundary segments, s ≠ 0 (either re ≠ 0 or im ≠ 0).
+  -- Therefore the integrand identity holds pointwise, and the integrals split.
+  -- Instead of splitting each segment individually, we note that the result follows
+  -- from rect_g + rect_inv by showing the perron integrals equal the sum.
+  -- Since f(s) = g(s) + 1/s pointwise on the boundary, ∫ f = ∫ g + ∫ (1/s) by integral_add.
+  -- So ∫_∂B f = ∫_∂B g + ∫_∂B 1/s = 0 + 2πi.
+  -- The pointwise identity gives us: on each segment, the perronIntegrand integral
+  -- equals the g integral + the 1/s integral.
+  -- For the bottom segment ∫_{-R}^c f(x - TI) dx:
+  have hT_ne : T ≠ 0 := ne_of_gt hT
+  have hmT_ne : -T ≠ 0 := neg_ne_zero.mpr hT_ne
+  -- g is continuous (differentiable everywhere → continuous)
+  have hg_cont : Continuous g := by
+    rw [continuous_iff_continuousAt]
+    intro z; exact (hDiffAt z).continuousAt
+  -- Helper: g ∘ φ is integrable for any continuous φ : ℝ → ℂ
+  -- Bridge: g = perronFlattened y (both are dslope of the same function)
+  have hg_eq : g = perronFlattened y := rfl
+  -- Split each segment using integral_add
+  have split_bot : ∫ x in (-R)..c, perronIntegrand y (↑x + -↑T * I) =
+      (∫ x in (-R)..c, g (↑x + -↑T * I)) + ∫ x in (-R)..c, ((↑x + -↑T * I)⁻¹ : ℂ) := by
+    rw [← intervalIntegral.integral_add]
+    · congr 1; ext x
+      have hne : (↑x + -↑T * I : ℂ) ≠ 0 := by
+        intro h; have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this
+      rw [perronIntegrand_eq_flattened_add_inv y hy _ hne, one_div, hg_eq]
+    · exact (hg_cont.comp (by fun_prop : Continuous fun x : ℝ => (↑x + -↑T * I : ℂ))).intervalIntegrable _ _
+    · exact ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun x _ h => by
+        have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this))
+  have split_top : ∫ x in (-R)..c, perronIntegrand y (↑x + ↑T * I) =
+      (∫ x in (-R)..c, g (↑x + ↑T * I)) + ∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ) := by
+    rw [← intervalIntegral.integral_add]
+    · congr 1; ext x
+      have hne : (↑x + ↑T * I : ℂ) ≠ 0 := by
+        intro h; have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this
+      rw [perronIntegrand_eq_flattened_add_inv y hy _ hne, one_div, hg_eq]
+    · exact (hg_cont.comp (by fun_prop : Continuous fun x : ℝ => (↑x + ↑T * I : ℂ))).intervalIntegrable _ _
+    · exact ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun x _ h => by
+        have := congr_arg Complex.im h
+        simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.I_re, Complex.I_im] at this
+        exact hT_ne this))
+  have split_right : ∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I) =
+      (∫ t in (-T)..T, g (↑c + ↑t * I)) + ∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ) := by
+    rw [← intervalIntegral.integral_add]
+    · congr 1; ext t
+      have hne : (↑c + ↑t * I : ℂ) ≠ 0 := by
+        intro h; have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+        linarith
+      rw [perronIntegrand_eq_flattened_add_inv y hy _ hne, one_div, hg_eq]
+    · exact (hg_cont.comp (by fun_prop : Continuous fun t : ℝ => (↑c + ↑t * I : ℂ))).intervalIntegrable _ _
+    · exact ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun t _ h => by
+        have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+        linarith))
+  have split_left : ∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I) =
+      (∫ t in (-T)..T, g (-↑R + ↑t * I)) + ∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ) := by
+    rw [← intervalIntegral.integral_add]
+    · congr 1; ext t
+      have hne : (-↑R + ↑t * I : ℂ) ≠ 0 := by
+        intro h; have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.neg_re, Complex.ofReal_re, Complex.mul_re,
+              Complex.I_re, Complex.I_im] at this
+        linarith
+      rw [perronIntegrand_eq_flattened_add_inv y hy _ hne, one_div, hg_eq]
+    · exact (hg_cont.comp (by fun_prop : Continuous fun t : ℝ => (-↑R + ↑t * I : ℂ))).intervalIntegrable _ _
+    · exact ContinuousOn.intervalIntegrable (ContinuousOn.inv₀ (by fun_prop) (fun t _ h => by
+        have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.neg_re, Complex.ofReal_re, Complex.mul_re,
+              Complex.I_re, Complex.I_im] at this
+        linarith))
+  -- Step 5: Substitute and combine
+  rw [split_bot, split_top, split_right, split_left]
+  -- After substitution, the expression is:
+  -- (g_bot + inv_bot) - (g_top + inv_top) + I*(g_right + inv_right) - I*(g_left + inv_left)
+  -- = [g_bot - g_top + I*g_right - I*g_left] + [inv_bot - inv_top + I*inv_right - I*inv_left]
+  -- = 0 + 2πi = 2πi
+  linear_combination rect_g + rect_inv
 
 /-- Finite-R Perron bound for y > 1:
     ‖perronIntegral - 1‖ ≤ y^c/(π·T·|log y|) + T·y^(-R)/(π·R). -/
