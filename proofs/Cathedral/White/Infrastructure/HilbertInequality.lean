@@ -21,6 +21,9 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 noncomputable section
 open Complex Real Finset BigOperators
@@ -198,18 +201,94 @@ lemma row_sum_le_card_div_delta {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ)
         simp [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
 
 -- ═══════════════════════════════════════════
--- §4. Montgomery-Vaughan Hilbert Inequality
+-- §4. The Sinc Function (PROVED ✅)
 -- ═══════════════════════════════════════════
 
-/-- **TARGET**: Montgomery-Vaughan Hilbert Inequality (1973).
+/-- The sinc function: sinc(x) = sin(πx)/(πx) for x ≠ 0, sinc(0) = 1.
+    Mathlib equivalent: `euler_sineTerm_tprod` proves sin(πx)/(πx) = ∏(1-x²/n²). -/
+def sinc (x : ℝ) : ℝ :=
+  if x = 0 then 1 else Real.sin (π * x) / (π * x)
+
+@[simp] lemma sinc_zero : sinc 0 = 1 := by simp [sinc]
+
+lemma sinc_of_ne_zero {x : ℝ} (hx : x ≠ 0) :
+    sinc x = Real.sin (π * x) / (π * x) := by simp [sinc, hx]
+
+/-- sinc vanishes at nonzero integers. -/
+lemma sinc_intCast_of_ne_zero (n : ℤ) (hn : n ≠ 0) :
+    sinc (n : ℝ) = 0 := by
+  rw [sinc_of_ne_zero (Int.cast_ne_zero.mpr hn)]
+  have : Real.sin (π * ↑n) = 0 := by
+    rw [mul_comm]; exact Real.sin_int_mul_pi n
+  simp [this]
+
+-- ═══════════════════════════════════════════
+-- §5. Selberg Majorant Axioms
+-- ═══════════════════════════════════════════
+
+/-!
+### The Beurling-Selberg Extremal Function
+
+The Selberg majorant S : ℝ → ℝ is the optimal band-limited
+majorant of the signum function. Its explicit formula uses
+`sinc²` and the cotangent partial fraction expansion
+(`Mathlib.Analysis.SpecialFunctions.Trigonometric.Cotangent:cot_series_rep`).
+
+Reference: Vaaler, "Some extremal functions in Fourier analysis",
+Bull. AMS 12 (1985), 183-216.
+
+**PROOF PATH**: The axioms below will be replaced by constructive
+proofs using:
+- `sinc` (§4 above)
+- `cot_series_rep` from Mathlib (π·cot(πx) = 1/x + Σ(1/(x-n)+1/(x+n)))
+- `euler_sineTerm_tprod` from Mathlib (Euler sine product)
+- `digamma_reflection_complex` from Cathedral/Vasyunin/Cotangent/
+-/
+
+/-- The Selberg majorant of sgn(x). -/
+axiom selbergMajorant : ℝ → ℝ
+
+/-- **BS1**: S(x) ≥ 1 for x > 0 (majorizes sgn). -/
+axiom selbergMajorant_ge_one_of_pos (x : ℝ) (hx : 0 < x) :
+    1 ≤ selbergMajorant x
+
+/-- **BS2**: S(x) ≤ -1 for x < 0 (majorizes sgn). -/
+axiom selbergMajorant_le_neg_one_of_neg (x : ℝ) (hx : x < 0) :
+    selbergMajorant x ≤ -1
+
+/-- **BS3**: S is Lebesgue integrable. -/
+axiom selbergMajorant_integrable :
+    MeasureTheory.Integrable selbergMajorant (MeasureTheory.volume : MeasureTheory.Measure ℝ)
+
+/-- **BS4**: ∫ S(x) dx = 2 (optimal for band-limited sgn majorant). -/
+axiom selbergMajorant_integral :
+    ∫ x : ℝ, selbergMajorant x ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 2
+
+/-- **BS5**: Fourier transform of S vanishes outside [-1,1]. -/
+axiom selbergMajorant_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
+    ∫ x : ℝ, selbergMajorant x * Real.cos (2 * π * ξ * x)
+      ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 0
+
+-- ═══════════════════════════════════════════
+-- §6. Montgomery-Vaughan Hilbert Inequality
+-- ═══════════════════════════════════════════
+
+/-- **Montgomery-Vaughan Hilbert Inequality** (1974).
     For δ-separated real numbers, the discrete Hilbert transform is bounded
     with the sharp constant π/δ.
 
-    Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973).
+    Reference: Montgomery & Vaughan, J. London Math. Soc. (2) 8 (1974), 73-81.
 
-    CURRENT STATUS: The infrastructure (Schur's test + row sum bounds) is proved.
-    The sharp constant π/δ requires Beurling-Selberg extremal functions.
-    The weak version with N/δ follows from schur_test_discrete + row_sum_le_card_div_delta. -/
+    **PROOF PATH**: Follows from the Selberg majorant axioms (§5) via:
+    1. Construct smoothed kernel K_Δ(x) = S(x/δ)/(2δ)
+    2. Show the quadratic form Σ x_r ȳ_s K_Δ(λ_r-λ_s) is positive-definite
+       (from band-limitation BS5)
+    3. Separate diagonal (using BS4: ∫S = 2) and off-diagonal (using BS1/BS2)
+    4. Conclude: off-diagonal ≤ (π/δ) · diagonal
+
+    **CURRENT STATUS**: Blocked on the derivation from BS axioms.
+    When the axioms are replaced by constructive proofs, this
+    becomes fully sorry-free. -/
 theorem montgomery_vaughan_inequality
     (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
     (h_sep : IsDeltaSeparated lam δ) :
@@ -217,9 +296,7 @@ theorem montgomery_vaughan_inequality
         (if i = j then (0 : ℂ)
          else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))
     ‖S‖ ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
-  -- 🔨 REQUIRES: Beurling-Selberg extremal functions for the sharp π/δ.
-  -- The weak version (N/δ) follows from schur_test + row_sum_le_card_div_delta.
+  -- Derivation from Selberg axioms BS1-BS5 (TODO)
   sorry
 
 end Cathedral.White.Infrastructure
-
