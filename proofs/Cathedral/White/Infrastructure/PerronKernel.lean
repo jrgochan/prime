@@ -240,15 +240,29 @@ lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (hy : 0 < y) (s : ℂ) (hs 
 
 /-- The rectangle integral of 1/s around [-R, c] × [-T, T] equals 2πi.
     This is the winding number computation.
-    Proof: By explicit FTC evaluation of Complex.log on each segment. -/
+
+    Proof sketch (FTC on each segment):
+    • Bottom (x + (-T)I, x: -R → c): antiderivative = log(x - TI)
+    • Top    (x + TI, x: -R → c):    antiderivative = log(x + TI)
+    • Right  (c + tI, t: -T → T):    antiderivative = -I·log(c + tI)
+    • Left   (-R + tI, t: -T → T):   antiderivative = I·log(R - tI) [Theorist's trick]
+      (R - tI has Re = R > 0, so stays in slitPlane, dodging the branch cut!)
+
+    Evaluating at corners and summing: the real parts (log|·|) cancel in pairs,
+    leaving only imaginary parts (args) that sum to exactly 2π. -/
 lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R) (hT : 0 < T) :
     (∫ x in (-R)..c, ((↑x + -↑T * I)⁻¹ : ℂ)) -
     (∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ)) +
     I * (∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ)) -
     I * (∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ)) = 2 * Real.pi * I := by
-  -- This requires explicit evaluation of ∫ 1/s on each segment using Complex.log FTC.
-  -- The log values at the 4 corners cancel except for the imaginary part
-  -- which sums to 2π (from the winding number argument).
+  -- Each segment is evaluated using FTC with Complex.log as antiderivative.
+  -- The key tool is HasDerivAt.clog_real for the chain rule.
+  -- For the left vertical segment: use I·log(R - tI) to avoid the branch cut
+  -- since Re(R - tI) = R > 0 ensures we stay in slitPlane.
+  --
+  -- After FTC evaluation, the 8 corner values (4 corners × 2 appearances each)
+  -- collapse: the real parts (norms) cancel, and the imaginary parts (arguments)
+  -- sum to 2π (from the winding of arg around the origin).
   sorry
 
 /-- Left vertical segment bound for y > 1: ‖∫ f(−R + t·I) dt‖ ≤ 2T·y^(−R)/R.
