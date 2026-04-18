@@ -87,16 +87,72 @@ lemma perronIntegrand_bound_on_horizontal {y σ : ℝ} (hy : 0 < y) {T : ℝ} (h
 -- §4. Exponential Decay Integral
 -- ═══════════════════════════════════════════
 
-/-- For 0 < y < 1, the integral of y^σ over [c,R] is at most y^c/|log y|. -/
+/-- For 0 < y < 1, the integral of y^σ over [c,R] is at most y^c/|log y|.
+    Uses FTC: ∫_c^R y^σ dσ = (y^R - y^c)/log(y) ≤ y^c/|log y|. -/
 lemma integral_rpow_le_of_lt_one {y c R : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
     (hc : 0 ≤ c) (hR : c ≤ R) :
     ∫ σ in c..R, y ^ σ ≤ y ^ c / |Real.log y| := by
-  sorry
+  -- Key fact: log y < 0 for 0 < y < 1
+  have hlog_neg : Real.log y < 0 := Real.log_neg hy_pos hy_lt
+  have hlog_ne : Real.log y ≠ 0 := ne_of_lt hlog_neg
+  -- The antiderivative of y^σ is y^σ / log(y)
+  -- By FTC: ∫_c^R (log y · y^σ) dσ = y^R - y^c
+  have ftc : ∫ σ in c..R, Real.log y * y ^ σ = y ^ R - y ^ c := by
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    · intro x _
+      have h := (Real.hasStrictDerivAt_const_rpow hy_pos x).hasDerivAt
+      rwa [mul_comm] at h
+    · exact (continuous_const.mul (Continuous.rpow continuous_const continuous_id
+        (fun _ => Or.inl (ne_of_gt hy_pos)))).intervalIntegrable c R
+  -- Therefore: log y · ∫_c^R y^σ dσ = y^R - y^c
+  have key : Real.log y * ∫ σ in c..R, y ^ σ = y ^ R - y ^ c := by
+    rw [← intervalIntegral.integral_const_mul]
+    exact ftc
+  -- So: ∫_c^R y^σ dσ = (y^R - y^c) / log y
+  have integral_eq : ∫ σ in c..R, y ^ σ = (y ^ R - y ^ c) / Real.log y := by
+    field_simp at key ⊢
+    linarith
+  -- Now bound: (y^R - y^c) / log y ≤ y^c / |log y|
+  -- Since log y < 0: |log y| = -log y
+  -- And: (y^R - y^c) / log y = -(y^R - y^c) / (-log y) = (y^c - y^R) / |log y|
+  -- Since y^R ≥ 0: y^c - y^R ≤ y^c
+  rw [integral_eq, abs_of_neg hlog_neg]
+  have hyR_nonneg : 0 ≤ y ^ R := rpow_nonneg hy_pos.le R
+  have hyc_nonneg : 0 ≤ y ^ c := rpow_nonneg hy_pos.le c
+  -- Goal: (y^R - y^c) / log y ≤ y^c / (-log y)
+  -- Note: y^c / (-log y) = -(y^c / log y) = (-y^c) / log y
+  -- So goal is: (y^R - y^c) / log y ≤ (-y^c) / log y
+  -- Since log y < 0, dividing preserves order when numerator is larger
+  -- (y^R - y^c) / log y ≤ (-y^c) / log y ← div_le_div_of_nonpos_right
+  -- ↔ -y^c ≤ y^R - y^c (since log y < 0, division reverses)
+  -- Wait, log y < 0 means we need le_div_iff etc with reversal
+  -- Let's just compute directly
+  have h1 : y ^ c / (-Real.log y) = -(y ^ c) / Real.log y := by ring
+  rw [h1, div_le_div_right_of_neg hlog_neg]
+  linarith
 
-/-- For y > 1, the integral of y^σ over [-R,c] is at most y^c/log y. -/
+/-- For y > 1, the integral of y^σ over [-R,c] is at most y^c/log y.
+    Uses FTC: ∫_{-R}^c y^σ dσ = (y^c - y^{-R})/log(y) ≤ y^c/log y. -/
 lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (hR : 0 ≤ R) :
     ∫ σ in (-R)..c, y ^ σ ≤ y ^ c / Real.log y := by
-  sorry
+  have hy_pos : 0 < y := lt_trans one_pos hy
+  have hlog_pos : 0 < Real.log y := Real.log_pos hy
+  have hlog_ne : Real.log y ≠ 0 := ne_of_gt hlog_pos
+  -- FTC: ∫_{-R}^c (log y · y^σ) dσ = y^c - y^{-R}
+  have ftc : ∫ σ in (-R)..c, Real.log y * y ^ σ = y ^ c - y ^ (-R) := by
+    apply intervalIntegral.integral_eq_sub_of_hasDerivAt
+    · intro x _
+      have h := (Real.hasStrictDerivAt_const_rpow hy_pos x).hasDerivAt
+      rwa [mul_comm] at h
+    · exact (continuous_const.mul (Continuous.rpow continuous_const continuous_id
+        (fun _ => Or.inl (ne_of_gt hy_pos)))).intervalIntegrable (-R) c
+  have key : Real.log y * ∫ σ in (-R)..c, y ^ σ = y ^ c - y ^ (-R) := by
+    rw [← intervalIntegral.integral_const_mul]; exact ftc
+  have integral_eq : ∫ σ in (-R)..c, y ^ σ = (y ^ c - y ^ (-R)) / Real.log y := by
+    field_simp at key ⊢; linarith
+  rw [integral_eq]
+  have : 0 ≤ y ^ (-R) := rpow_nonneg hy_pos.le (-R)
+  exact div_le_div_of_nonneg_right (by linarith) hlog_pos.le
 
 -- ═══════════════════════════════════════════
 -- §5. Rectangle Sub-lemmas
