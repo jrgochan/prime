@@ -34,6 +34,8 @@ lean_lib «Cathedral» where
     `Cathedral.NymanBeurling.NymanBeurling,
     -- Vasyunin (the active proof chain)
     `Cathedral.Vasyunin,
+    `Cathedral.Vasyunin.Augmented.MeanIntegral,
+    `Cathedral.Vasyunin.Augmented.IntegralBridge,
     -- Robin's Inequality (discrete arithmetic front)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
@@ -95,6 +97,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.BDBypass,
     `Cathedral.Assembly.VasyuninBypass,
     `Cathedral.Assembly.DirectL2Crown,
+    `Cathedral.Assembly.AbelL2Bridge,
     `Cathedral.Assembly.FinalDragon,
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
