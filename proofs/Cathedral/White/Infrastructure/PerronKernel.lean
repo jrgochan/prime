@@ -255,8 +255,34 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
     The exponential decay y^(-R) → 0 as R → ∞ when y > 1. -/
 lemma left_vertical_bound {y R T : ℝ} (hy : 1 < y) (hR : 0 < R) (hT : 0 < T) :
     ‖∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I)‖ ≤ 2 * T * y ^ (-R) / R := by
-  -- Analogous to right_vertical_bound but for the left edge at σ = -R
-  sorry
+  have hy_pos : 0 < y := lt_trans zero_lt_one hy
+  -- Each integrand has norm ≤ y^(-R)/R
+  have pointwise_bound : ∀ t ∈ Set.uIoc (-T) T,
+      ‖perronIntegrand y (-↑R + ↑t * I)‖ ≤ y ^ (-R) / R := by
+    intro t _
+    have hR_ne : (-↑R : ℂ) + ↑t * I ≠ 0 := by
+      intro h
+      have : (-↑R : ℂ).re + (↑t * I).re = 0 := by rw [← Complex.add_re]; simp [h]
+      simp [Complex.ofReal_re, Complex.neg_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+      linarith
+    rw [perronIntegrand_norm hy_pos hR_ne]
+    have hre : (-↑R + ↑t * I).re = -R := by
+      simp [Complex.add_re, Complex.neg_re, Complex.ofReal_re,
+            Complex.mul_re, Complex.I_re, Complex.I_im]
+    rw [hre]
+    gcongr
+    -- Need: R ≤ ‖-R + tI‖
+    calc (R : ℝ) = |(-↑R + ↑t * I).re| := by
+          simp [hre, abs_of_pos hR]  -- |-R| = R since R > 0
+      _ ≤ ‖(-↑R : ℂ) + ↑t * I‖ := Complex.abs_re_le_norm _
+  -- Apply constant bound: ‖∫‖ ≤ C * |T - (-T)| = C * 2T
+  calc ‖∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I)‖
+      ≤ (y ^ (-R) / R) * |T - (-T)| :=
+        intervalIntegral.norm_integral_le_of_norm_le_const_ae
+          (Filter.Eventually.of_forall pointwise_bound)
+    _ = 2 * T * y ^ (-R) / R := by
+        rw [sub_neg_eq_add, ← two_mul, abs_of_pos (by linarith : 0 < 2 * T)]
+        ring
 
 /-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T·log y)).
 
