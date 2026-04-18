@@ -454,6 +454,135 @@ lemma left_vertical_bound {y R T : ℝ} (hy : 1 < y) (hR : 0 < R) (hT : 0 < T) :
         rw [sub_neg_eq_add, ← two_mul, abs_of_pos (by linarith : 0 < 2 * T)]
         ring
 
+/-- Horizontal segment bound for y > 1 on [-R, c]:
+    ‖∫_{-R}^c f(σ ± TI) dσ‖ ≤ y^c/(T·|log y|).
+    Uses integral_rpow_le_of_gt_one for the exponential decay. -/
+lemma horizontal_segment_bound_gt_one {y c R T : ℝ} (hy : 1 < y)
+    (hc : 0 < c) (hR : 0 ≤ R) (hT : 0 < T) (sign : ℝ) (hsign : |sign| = 1) :
+    ‖∫ σ in (-R)..c, perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤
+      y ^ c / (T * |Real.log y|) := by
+  have hy_pos : 0 < y := lt_trans one_pos hy
+  -- Pointwise bound: ‖f(σ + sign·T·I)‖ ≤ y^σ/T
+  have hle : ∀ σ, σ ∈ Set.Ioc (-R) c →
+      ‖perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤ y ^ σ / T := by
+    intro σ _
+    have hre : (↑σ + ↑(sign * T) * I : ℂ).re = σ := by
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+    have hs_ne : (↑σ : ℂ) + ↑(sign * T) * I ≠ 0 := by
+      intro h
+      have him := congr_arg Complex.im h
+      simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re,
+                  Complex.I_re, Complex.I_im, Complex.zero_im, mul_one, mul_zero, add_zero] at him
+      have : sign * T = 0 := by linarith
+      have : |sign * T| = 0 := abs_eq_zero.mpr this
+      rw [abs_mul, hsign, one_mul, abs_of_pos hT] at this
+      linarith
+    have him : |(↑σ + ↑(sign * T) * I : ℂ).im| = T := by
+      simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re,
+                  Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      ring_nf
+      rw [abs_mul, hsign, one_mul, abs_of_pos hT]
+    exact perronIntegrand_bound_on_horizontal hy_pos hT hre him hs_ne
+  have hmR_le_c : -R ≤ c := by linarith [hc]
+  have hint : IntervalIntegrable (fun σ => y ^ σ / T) MeasureTheory.volume (-R) c :=
+    ((Continuous.rpow continuous_const continuous_id
+      (fun _ => Or.inl (ne_of_gt hy_pos))).div_const T).intervalIntegrable (-R) c
+  calc ‖∫ σ in (-R)..c, perronIntegrand y (↑σ + ↑(sign * T) * I)‖
+      ≤ ∫ σ in (-R)..c, y ^ σ / T :=
+        intervalIntegral.norm_integral_le_of_norm_le hmR_le_c
+          (Filter.Eventually.of_forall fun σ hσ => hle σ hσ)
+          hint
+    _ = (∫ σ in (-R)..c, y ^ σ) / T := by
+        rw [intervalIntegral.integral_div]
+    _ ≤ (y ^ c / Real.log y) / T :=
+        div_le_div_of_nonneg_right (integral_rpow_le_of_gt_one hy hR) hT.le
+    _ = y ^ c / (T * |Real.log y|) := by
+        rw [abs_of_pos (Real.log_pos hy)]; ring
+
+/-- Rectangle identity for y^s/s on [-R, c] × [-T, T]:
+    The boundary integral equals 2πi (the winding number).
+    Uses dslope decomposition: y^s/s = g(s) + 1/s where g is entire.
+    Cauchy-Goursat kills ∫_∂B g = 0, and ∫_∂B 1/s = 2πi. -/
+lemma left_rectangle_perron_winding {y c R T : ℝ}
+    (hy : 0 < y) (hc : 0 < c) (hR : 0 < R) (hT : 0 < T) :
+    (∫ x in (-R)..c, perronIntegrand y (↑x + -↑T * I)) -
+    (∫ x in (-R)..c, perronIntegrand y (↑x + ↑T * I)) +
+    I * (∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I)) -
+    I * (∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I)) =
+    2 * ↑Real.pi * I := by
+  -- Decompose: on each segment, y^s/s = g(s) + 1/s (perronIntegrand_eq_flattened_add_inv)
+  -- Cauchy-Goursat for g (entire): ∫_∂B g = 0
+  -- Winding number (rectangle_integral_inv_eq_two_pi_I): ∫_∂B 1/s = 2πi
+  -- Sum: ∫_∂B f = ∫_∂B g + ∫_∂B 1/s = 0 + 2πi = 2πi
+  sorry
+
+/-- Finite-R Perron bound for y > 1:
+    ‖perronIntegral - 1‖ ≤ y^c/(π·T·|log y|) + T·y^(-R)/(π·R). -/
+lemma perron_integral_bound_with_R_gt_one {y c R T : ℝ} (hy : 1 < y)
+    (hc : 0 < c) (hR : 0 < R) (hT : 0 < T) :
+    ‖perronIntegral y c T - 1‖ ≤
+      y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ (-R) / (Real.pi * R) := by
+  have hy_pos : 0 < y := lt_trans one_pos hy
+  -- Abbreviate the four integrals
+  set bot := ∫ x in (-R)..c, perronIntegrand y (↑x + -↑T * I) with hbot_def
+  set top := ∫ x in (-R)..c, perronIntegrand y (↑x + ↑T * I) with htop_def
+  set rv := ∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I) with hrv_def
+  set lv := ∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I) with hlv_def
+  -- Step 1: Rectangle identity gives bot - top + I*rv - I*lv = 2πi
+  have rect := left_rectangle_perron_winding hy_pos hc hR hT
+  -- Extract: I*rv = 2πi + top - bot + I*lv
+  have hrv_eq : I * rv = 2 * ↑Real.pi * I - (bot - top) + I * lv := by
+    linear_combination rect
+  -- rv = 2π + (-I)(top - bot) + lv
+  have hrv_eq2 : rv = 2 * ↑Real.pi + (-I) * (top - bot) + lv := by
+    have hI_ne : (I : ℂ) ≠ 0 := Complex.I_ne_zero
+    have key : rv = I⁻¹ * (I * rv) := by rw [inv_mul_cancel_left₀ hI_ne]
+    rw [key, hrv_eq, Complex.inv_I]
+    have hII : (-I : ℂ) * I = 1 := by
+      simp [Complex.ext_iff, Complex.I_re, Complex.I_im]
+    ring_nf
+    simp [Complex.I_mul_I]
+  -- Step 2: perronIntegral - 1 = (1/(2π))(-I(top - bot) + lv)
+  have hP_sub : perronIntegral y c T - 1 =
+      (1 / (2 * ↑Real.pi)) * ((-I) * (top - bot) + lv) := by
+    show (1 / (2 * ↑Real.pi)) * rv - 1 =
+        (1 / (2 * ↑Real.pi)) * ((-I) * (top - bot) + lv)
+    rw [hrv_eq2]
+    have hpi_ne : (2 * ↑Real.pi : ℂ) ≠ 0 := by
+      apply mul_ne_zero (by norm_num : (2:ℂ) ≠ 0)
+      exact Complex.ofReal_ne_zero.mpr (ne_of_gt Real.pi_pos)
+    field_simp; ring
+  -- Step 3: Bound the three segments
+  have hbot_bound := horizontal_segment_bound_gt_one hy hc hR.le hT (-1) (by norm_num)
+  have htop_bound := horizontal_segment_bound_gt_one hy hc hR.le hT 1 (by norm_num)
+  simp only [neg_one_mul, one_mul, Complex.ofReal_neg] at hbot_bound htop_bound
+  have hlv_bound := left_vertical_bound hy hR hT
+  -- Step 4: Triangle inequality
+  have herr_bound : ‖(-I) * (top - bot) + lv‖ ≤ ‖top‖ + ‖bot‖ + ‖lv‖ := by
+    calc ‖(-I) * (top - bot) + lv‖
+        ≤ ‖(-I) * (top - bot)‖ + ‖lv‖ := norm_add_le _ _
+      _ = ‖top - bot‖ + ‖lv‖ := by
+          rw [norm_mul, norm_neg, Complex.norm_I, one_mul]
+      _ ≤ (‖top‖ + ‖bot‖) + ‖lv‖ := by
+          gcongr; exact norm_sub_le _ _
+  -- Step 5: Unfold perronIntegral and compute norm
+  rw [hP_sub, norm_mul]
+  have hpi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
+  have h2pi_norm : ‖(1 : ℂ) / (2 * ↑Real.pi)‖ = 1 / (2 * Real.pi) := by
+    rw [norm_div, norm_one, norm_mul, Complex.norm_ofNat, Complex.norm_real]
+    simp [abs_of_pos hpi_pos]
+  rw [h2pi_norm]
+  have h2pi_pos : 0 < 2 * Real.pi := by positivity
+  -- Final calc
+  calc 1 / (2 * Real.pi) * ‖(-I) * (top - bot) + lv‖
+      ≤ 1 / (2 * Real.pi) * (‖top‖ + ‖bot‖ + ‖lv‖) := by
+        gcongr
+    _ ≤ 1 / (2 * Real.pi) *
+        (y ^ c / (T * |Real.log y|) + y ^ c / (T * |Real.log y|) + 2 * T * y ^ (-R) / R) := by
+        gcongr
+    _ = y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ (-R) / (Real.pi * R) := by
+        field_simp; ring
+
 /-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T·log y)).
 
     Strategy (The Phantom Pole Bypass via dslope):
@@ -465,17 +594,42 @@ lemma left_vertical_bound {y R T : ℝ} (hy : 1 < y) (hR : 0 < R) (hT : 0 < T) :
     5. Residue = 1 extracted from the 2πi winding number -/
 theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T - 1‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  -- Proof outline:
-  -- 1. For any R > 0, on rectangle [-R, c] × [-T, T]:
-  --    ∫_∂B y^s/s = ∫_∂B 1/s = 2πi (by dslope + Cauchy-Goursat + winding)
-  -- 2. perronIntegral = (right edge)/(2π)
-  --    = [2πi + (top - bot) + I·left] / (2πi)  ... wait, divided by 2π not 2πi
-  -- 3. perronIntegral - 1 = [(top - bot) + I·left]/(2π) ... with 2πi from residue
-  -- Actually, we need to be more careful with the sign conventions.
-  --
-  -- The full assembly requires rectangle_integral_inv_eq_two_pi_I.
-  -- We sorry this pending completion of the winding number calculation.
-  sorry
+  -- By contradiction: assume the bound fails, then choose R so large
+  -- that the left vertical contribution is negligible.
+  by_contra hlt
+  push_neg at hlt
+  set δ := ‖perronIntegral y c T - 1‖ - y ^ c / (Real.pi * T * |Real.log y|) with hδ_def
+  have hδ : 0 < δ := by linarith
+  -- Choose R large enough that T/(πR) < δ
+  set R := max 1 (T / (Real.pi * δ) + 1) with hR_def
+  have hR_pos : 0 < R := by
+    calc (0:ℝ) < 1 := one_pos
+      _ ≤ R := le_max_left _ _
+  -- Apply the finite-R bound
+  have hbound := perron_integral_bound_with_R_gt_one hy hc hR_pos hT
+  -- Bound y^(-R) ≤ 1 since y > 1 and R > 0
+  -- y^(-R) = 1/y^R and y^R ≥ 1 since y ≥ 1
+  have hyR_le : y ^ (-R) ≤ 1 := by
+    have : 1 ≤ y ^ R := one_le_rpow hy.le hR_pos.le
+    rw [rpow_neg (le_of_lt (lt_trans one_pos hy))]
+    exact inv_le_one_of_one_le₀ this
+  -- So: T * y^(-R) / (πR) ≤ T / (πR)
+  have herr_le : T * y ^ (-R) / (Real.pi * R) ≤ T / (Real.pi * R) := by
+    apply div_le_div_of_nonneg_right _ (mul_pos Real.pi_pos hR_pos).le
+    calc T * y ^ (-R) ≤ T * 1 := by gcongr
+      _ = T := mul_one T
+  -- And R > T/(πδ), so T/(πR) < δ
+  have hR_big : T / (Real.pi * δ) < R := by
+    calc T / (Real.pi * δ) < T / (Real.pi * δ) + 1 := by linarith
+      _ ≤ R := le_max_right _ _
+  have herr_lt : T / (Real.pi * R) < δ := by
+    rw [div_lt_iff₀ (mul_pos Real.pi_pos hR_pos)]
+    have hπδ_pos := mul_pos Real.pi_pos hδ
+    have := (div_lt_iff₀ hπδ_pos).mp hR_big
+    linarith
+  -- Combine: ‖P - 1‖ ≤ target + T·y^(-R)/(πR) ≤ target + T/(πR) < target + δ
+  -- But δ = ‖P - 1‖ - target, contradiction
+  linarith
 
 -- ═══════════════════════════════════════════
 -- §7. The Perron Kernel for y < 1 (Residue = 0)
