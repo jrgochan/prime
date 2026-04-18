@@ -144,6 +144,47 @@ theorem abel_bound_34
   exact h_abel
 
 -- ════════════════════════════════════════════════
+-- §2b. SUMMAND BOUND: k^{3/4} · |Δw(k)| = k^{-1/4}/log N
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED!)**: Each Abel summand with O(x^{3/4}) bound is O(k^{-1/4}/log N).
+
+    C_m · k^{3/4} · |Δ logWeight(k)|
+    ≤ C_m · k^{3/4} · 1/(k · log N)     [by log_weight_derivative_bound]
+    = C_m · k^{-1/4} / log N             [algebra: k^{3/4}/k = k^{-1/4}]
+
+    THIS is the "bulldozer" — the x^{0.25} buffer means the exponent
+    is -1/4, which gives a convergent sum after telescoping. -/
+theorem summand_bound_34 (C_m : ℝ) (_hC : 0 < C_m) (N k : ℕ)
+    (hk : 2 ≤ k) (hkN : k < N) :
+    C_m * (k : ℝ) ^ ((3:ℝ)/4) * |logWeight N (k + 1) - logWeight N k| ≤
+        C_m / ((k : ℝ) ^ ((1:ℝ)/4) * Real.log (N : ℝ)) := by
+  have h_deriv := log_weight_derivative_bound k N hk hkN
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (show 0 < k by omega)
+  have hlog_N : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hk14_pos : (0 : ℝ) < (k : ℝ) ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos hk_pos _
+  have hk34_pos : (0 : ℝ) < (k : ℝ) ^ ((3:ℝ)/4) := Real.rpow_pos_of_pos hk_pos _
+  -- k^{3/4} * (k * log N)⁻¹ = (k^{1/4} * log N)⁻¹
+  -- k^{3/4} * k⁻¹ = k^{-1/4} = (k^{1/4})⁻¹
+  -- This is purely rpow algebra: 3/4 + (-1) = -1/4, and x^{-a} = (x^a)⁻¹
+  have h_rpow : (k : ℝ) ^ ((3:ℝ)/4) * (k : ℝ)⁻¹ = ((k : ℝ) ^ ((1:ℝ)/4))⁻¹ := by
+    have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
+    rw [show (k : ℝ)⁻¹ = (k : ℝ) ^ ((-(1:ℝ)) : ℝ) from
+      (Real.rpow_neg_one (k : ℝ)).symm ▸ by rfl]
+    rw [← Real.rpow_add hk_pos, show (3:ℝ)/4 + (-(1:ℝ)) = -(1:ℝ)/4 from by ring,
+        show -(1:ℝ)/4 = -((1:ℝ)/4) from by ring,
+        Real.rpow_neg (le_of_lt hk_pos)]
+  calc C_m * (k : ℝ) ^ ((3:ℝ)/4) * |logWeight N (k + 1) - logWeight N k|
+      ≤ C_m * (k : ℝ) ^ ((3:ℝ)/4) * (1 / ((k : ℝ) * Real.log (N : ℝ))) := by
+        apply mul_le_mul_of_nonneg_left h_deriv (by positivity)
+    _ = C_m * ((↑k) ^ ((3:ℝ)/4) * (↑k)⁻¹) / Real.log (↑N) := by
+        field_simp
+    _ = C_m * ((k : ℝ) ^ ((1:ℝ)/4))⁻¹ / Real.log (N : ℝ) := by
+        rw [h_rpow]
+    _ = C_m / ((↑k) ^ ((1:ℝ)/4) * Real.log (↑N)) := by
+        field_simp
+
+-- ════════════════════════════════════════════════
 -- §3. THE KEY LEMMA: Sum of k^{-1/4} bound
 -- ════════════════════════════════════════════════
 
@@ -156,13 +197,18 @@ theorem abel_bound_34
 theorem sum_rpow_neg_quarter_bound (N : ℕ) (hN : 1 ≤ N) :
     (Finset.Icc 1 N).sum (fun k => (k : ℝ) ^ (-(1:ℝ)/4)) ≤
       (4:ℝ)/3 * (N : ℝ) ^ ((3:ℝ)/4) := by
-  -- We use the integral comparison: for decreasing f,
-  -- f(k) ≤ ∫_{k-1}^k f(x) dx, so Σ f(k) ≤ ∫_0^N f(x) dx.
-  -- Here f(x) = x^{-1/4} and ∫_0^N x^{-1/4} dx = (4/3)N^{3/4}.
+  -- Strategy: 1^{-1/4} = 1 ≤ 4/3. For k ≥ 2, use integral comparison.
+  -- Total: Σ k^{-1/4} ≤ 1 + ∫_1^N x^{-1/4} dx = 1 + (4/3)(N^{3/4} - 1)
+  --       = (4/3)N^{3/4} - 1/3 ≤ (4/3)N^{3/4}
   --
-  -- For now we use a weaker but sufficient induction bound.
-  -- Σ_{k=1}^N k^{-1/4} ≤ 1 + ∫_1^N x^{-1/4} dx = 1 + (4/3)(N^{3/4} - 1)
-  -- = (4/3)N^{3/4} - 1/3 ≤ (4/3)N^{3/4}. ✓
+  -- For the integral comparison, we need:
+  --   k^{-1/4} ≤ ∫_{k-1}^k x^{-1/4} dx for k ≥ 2
+  -- This holds because x^{-1/4} is decreasing on (0,∞), so
+  --   min_{x∈[k-1,k]} x^{-1/4} = k^{-1/4}
+  --   and k^{-1/4} · 1 ≤ ∫_{k-1}^k x^{-1/4} dx
+  --
+  -- Full formalization requires rpow monotonicity + integral bounds.
+  -- Deferred to a focused session on Lean measure theory infrastructure.
   sorry
 
 -- ════════════════════════════════════════════════
