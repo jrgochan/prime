@@ -16,7 +16,8 @@
 -/
 
 import Cathedral.Assembly.BDBridge
-import Cathedral.Vasyunin.Proof.Chain
+import Cathedral.Vasyunin.Augmented.Rayleigh
+import Cathedral.LinearAlgebra.Variational
 
 noncomputable section
 open Real Matrix Finset MeasureTheory
@@ -174,7 +175,33 @@ theorem bd_mean_eq_vasyunin (N : ℕ) :
   simp [Cathedral.Vasyunin.vasyuninMeanVec]
 
 -- ════════════════════════════════════════════════
--- §5. KILLING algebraic_nb_bridge
+-- §5. WITNESS PROPERTIES
+-- ════════════════════════════════════════════════
+
+open Cathedral.Vasyunin in
+/-- The log cutoff witness is nonzero for N ≥ 3. -/
+theorem Cathedral.Vasyunin.logCutoffWitness_ne_zero' (N : ℕ) (hN : N ≥ 3) :
+    logCutoffWitness N ≠ 0 := by
+  intro h_eq
+  have h0 : logCutoffWitness N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
+  simp only [logCutoffWitness, moebiusFn] at h0
+  rw [ArithmeticFunction.moebius_apply_one] at h0
+  simp [Real.log_one] at h0
+
+open Cathedral.Vasyunin in
+/-- The log cutoff witness has strictly positive covariance vᵀCv > 0. -/
+theorem Cathedral.Vasyunin.log_cutoff_witness_pos' (N : ℕ) (hN : N ≥ 3) :
+    dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) > 0 :=
+  Cathedral.Variational.posSemidef_pos_of_ne_zero
+    (vasyuninCovMatrix N)
+    (vasyuninCovMatrix_hermitian N)
+    (vasyuninCovMatrix_posSemidef N hN)
+    (vasyuninCovMatrix_isUnit_det N hN)
+    (logCutoffWitness N)
+    (Cathedral.Vasyunin.logCutoffWitness_ne_zero' N hN)
+
+-- ════════════════════════════════════════════════
+-- §6. KILLING algebraic_nb_bridge
 -- ════════════════════════════════════════════════
 
 /-- P > 0 for the BD Gram matrix applied to logCutoffWitness. -/
@@ -188,7 +215,7 @@ private theorem bd_gram_pos (N : ℕ) (hN3 : N - 1 ≥ 3) :
     Cathedral.Vasyunin.vasyuninGramMatrix (N - 1) from bd_gram_eq_vasyunin N]
   -- PosDef implies xᵀGx > 0 for x ≠ 0
   have hPD := Cathedral.Vasyunin.vasyuninGramMatrix_posDef (N - 1) hN3
-  have hne := Cathedral.Vasyunin.logCutoffWitness_ne_zero (N - 1) hN3
+  have hne := Cathedral.Vasyunin.logCutoffWitness_ne_zero' (N - 1) hN3
   unfold realQuadForm
   exact Cathedral.Variational.posSemidef_pos_of_ne_zero
     (Cathedral.Vasyunin.vasyuninGramMatrix (N - 1))
@@ -202,7 +229,7 @@ private theorem bd_cov_pos (N : ℕ) (hN3 : N - 1 ≥ 3) :
       (Cathedral.Vasyunin.vasyuninCovMatrix (N - 1))
       (Cathedral.Vasyunin.logCutoffWitness (N - 1)) := by
   unfold realQuadForm
-  exact Cathedral.Vasyunin.log_cutoff_witness_pos (N - 1) hN3
+  exact Cathedral.Vasyunin.log_cutoff_witness_pos' (N - 1) hN3
 
 /-- The Gram decomposition for the BD/Vasyunin matrices. -/
 private theorem bd_gram_decomp (N : ℕ) :
