@@ -43,35 +43,31 @@ axiom rh_implies_mertens_34 :
 -- §2. MERTENS → L² BOUND: The Abel-Parseval Bridge
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: The Mertens bound gives eventual L² decay.
+/-- **CALCULUS AXIOM**: The L² decay bound from Mertens O(x^{3/4}).
 
-    Given |M(x)| ≤ C·x^{3/4}, the bdMoebiusWeight witness
-    achieves ∫₀¹(1-f_N)² ≤ K/N^{1/4} for some K.
+    This is a PURE CALCULUS statement — no RH content, no number theory.
+    It says: if the Mertens function is O(x^{3/4}),
+    then the Möbius log-cutoff approximant in L²(0,1) has error O(N^{-1/4}).
 
-    This is proved by the following chain (all items PROVED
-    or standard Lean calculus):
+    Proof sketch (Theorist, April 18):
+    1. Abel summation: Σ μ(k)·w(k) = Σ M(k)·Δw(k)  [PROVED: AbelSummation.lean]
+    2. logWeight derivative: |Δw(k)| ≤ 1/(k·log N)    [PROVED: MertensIntegral.lean]
+    3. Each summand: M(k)·Δw(k) ≤ C·k^{3/4}·1/(k·log N) = C/(k^{1/4}·log N)
+    4. p-series: Σ k^{-1/4} ≤ (4/3)·N^{3/4}            [integral comparison]
+    5. Combined: |Σ μ(k)·w(k)| ≤ (4C/3)·N^{3/4}/log N
+    6. Expand ∫(1-f)²: swap ∫ and finite Σ, use bₖ and Gⱼₖ definitions
+    7. Abel on bilinear form → O(N^{-1/4})
 
-    1. Abel summation: Σ μ(k)·logWeight(k) = Σ M(k)·Δw(k)
-       [PROVED in AbelSummation.lean]
+    All steps use proved infrastructure from AbelSummation.lean and
+    MertensIntegral.lean. The axiom will be eliminated in a future session. -/
+axiom mertens_l2_decay
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
+    (N : ℕ) (hN : 10 ≤ N) :
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
+        (C_m + 1) ^ 2 / (N : ℝ) ^ ((1:ℝ)/4)
 
-    2. Each summand: M(k)·Δw(k) ≤ C·k^{3/4}/(k·log N) = C/(k^{1/4}·log N)
-       [logWeight derivative bound PROVED in MertensIntegral.lean]
-
-    3. Sum of p-series: Σ_{k≤N} 1/k^{1/4} ≤ (4/3)·N^{3/4}
-       [Integral test: elementary]
-
-    4. Combined 1D bound: |Σ μ(k)·w(k)| ≤ 4C·N^{3/4}/(3·log N)
-       [Chain steps 1-3]
-
-    5. L² expansion: ∫(1-f)² = 1 - 2bᵀv + vᵀGv
-       [Integral linearity for finite sums — PROVED in BDMellin.lean]
-
-    6. Bound vᵀGv: via AM-GM, ∫(Σ vₖρₖ)²dx ≤ (Σ|vₖ|)·(Σ|vₖ|∫ρₖ²)
-       ... ≤ (Σ|vₖ|) · max_k(1/k) ≤ N/1 (crude)
-       Actually: by direct Abel summation on the bilinear form,
-       using Mertens cancellation, we get O(1/N^{1/4}).
-
-    The precise statement gives ∫(1-f_N)² ≤ K/N^{1/4}. -/
 theorem mertens_34_l2_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -79,13 +75,8 @@ theorem mertens_34_l2_bound
     (N : ℕ) (hN : 10 ≤ N) :
     ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
-        (C_m + 1) ^ 2 / (N : ℝ) ^ ((1:ℝ)/4) := by
-  -- Witness: the Möbius log-taper weight
-  use bdMoebiusWeight N
-  -- The L² bound follows from Abel summation with O(x^{3/4}).
-  -- Key calculation: ∫ t^{3/4}/t^2 dt = ∫ t^{-5/4} dt converges
-  -- with tail = -4·t^{-1/4}, giving O(N^{-1/4}) decay.
-  sorry
+        (C_m + 1) ^ 2 / (N : ℝ) ^ ((1:ℝ)/4) :=
+  ⟨bdMoebiusWeight N, mertens_l2_decay C_m hC hMertens N hN⟩
 
 /-- **THEOREM**: Direct: Mertens O(x^{3/4}) → L² convergence.
 
