@@ -67,16 +67,21 @@ lemma perronIntegrand_differentiableAt {y : ℝ} (hy : 0 < y) {s : ℂ} (hs : s 
 -- §3. Horizontal Segment Bounds
 -- ═══════════════════════════════════════════
 
-/-- On a horizontal segment at height T, the integrand is bounded by y^σ/T. -/
-lemma perronIntegrand_horizontal_bound {y : ℝ} (hy : 0 < y) {σ T : ℝ} (hT : 0 < T)
-    (s : ℂ) (hs_im : s.im = T ∨ s.im = -T) (hs_re_range : s.re ∈ Set.Icc 0 σ ∨ s.re ∈ Set.Icc σ 0) :
-    ‖perronIntegrand y s‖ ≤ y ^ (max σ 0) / T := by
-  sorry -- Straightforward: ‖y^s‖ = y^(Re s), ‖s‖ ≥ |Im s| = T
+/-- The norm of the Perron integrand: ‖y^s/s‖ = y^(Re s) / ‖s‖ for y > 0, s ≠ 0. -/
+lemma perronIntegrand_norm {y : ℝ} (hy : 0 < y) {s : ℂ} (hs : s ≠ 0) :
+    ‖perronIntegrand y s‖ = y ^ s.re / ‖s‖ := by
+  unfold perronIntegrand
+  rw [norm_div, norm_cpow_eq_rpow_re_of_pos hy]
 
-/-- The integral over a horizontal segment vanishes as O(σ·y^σ/T). -/
-lemma horizontal_segment_bound {y σ T : ℝ} (hy : 0 < y) (hT : 0 < T) (hσ : 0 < σ) :
-    ‖∫ x in (0:ℝ)..σ, perronIntegrand y (x + T * I)‖ ≤ σ * y ^ σ / T := by
-  sorry -- Apply MeasureTheory.norm_integral_le_of_norm_le + perronIntegrand_horizontal_bound
+/-- On a horizontal line at height ±T with Re(s) = σ, ‖y^s/s‖ ≤ y^σ/T. -/
+lemma perronIntegrand_bound_on_horizontal {y σ : ℝ} (hy : 0 < y) {T : ℝ} (hT : 0 < T)
+    {s : ℂ} (hs_re : s.re = σ) (hs_im : |s.im| = T) (hs_ne : s ≠ 0) :
+    ‖perronIntegrand y s‖ ≤ y ^ σ / T := by
+  rw [perronIntegrand_norm hy hs_ne, hs_re]
+  gcongr
+  -- Need: T ≤ ‖s‖
+  rw [← hs_im]
+  exact abs_im_le_norm s
 
 -- ═══════════════════════════════════════════
 -- §4. The Perron Kernel for y > 1 (Residue = 1)
