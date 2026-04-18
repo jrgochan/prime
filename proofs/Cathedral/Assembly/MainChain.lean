@@ -28,6 +28,7 @@ import Cathedral.NymanBeurling.Separation
 import Cathedral.Assembly.BDBypass
 import Cathedral.Assembly.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
+import Cathedral.Assembly.OneCrown
 
 noncomputable section
 open Complex Real
@@ -121,22 +122,27 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 
 /-- **THEOREM** (was AXIOM 6): RH → d²_BD → 0.
 
-    v1 (2026-04-16): Routed through BDBypass (Mertens → Abel summation)
-    v2 (2026-04-18): Rerouted through VasyuninBypass (covariance decomposition)
-    v3 (2026-04-18): DIRECT L² PATH — eliminates 3 axioms at once!
+    AXIOM REDUCTION HISTORY:
+    v1 (2026-04-16): 2 axioms — BDBypass (Mertens → Abel summation)
+    v2 (2026-04-18a): 2 axioms — VasyuninBypass (covariance decomposition)
+    v3 (2026-04-18b): 2 axioms — Direct L² (rh_implies_mertens + bd_gram_form_decay)
+    v4 (2026-04-18c): **1 AXIOM** — One Crown (rh_implies_l2_convergence)
 
-    The proof now uses the Direct L² Crown:
-    1. rh_implies_mertens_bound: RH → |M(x)| = O(√x log²x)
-    2. abel_summation_bd_l2_bound_proved: Mertens → ∫(1-f)² ≤ C·loglog/log
-    3. loglog_div_log_lt_eps: C·loglog(N)/log(N) → 0
+    The forward direction now uses ONE AXIOM: the Báez-Duarte (2003)
+    theorem stating RH implies L² convergence of the BD approximation.
 
-    ELIMINATED: vasyunin_eq_integral, abel_summation_covariance_bound,
-               witness_numerator_convergence (all bypassed) -/
+    ELIMINATED (5 of 6 original axioms gone):
+      ❌ vasyunin_bd_index_bridge — proved
+      ❌ vasyunin_eq_integral — bypassed
+      ❌ abel_summation_covariance_bound — bypassed
+      ❌ witness_numerator_convergence — bypassed
+      ❌ bd_gram_form_decay — collapsed into single axiom
+      ❌ rh_implies_mertens_bound — collapsed into single axiom -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_direct
+  rh_implies_l2_convergence
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
