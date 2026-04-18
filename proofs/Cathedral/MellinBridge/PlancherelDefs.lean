@@ -167,19 +167,31 @@ private lemma plancherel_lp_norm_sq (f_lp : ℝ →₂[volume] ℂ) :
 
 -- ──── AXIOM → THEOREM: L₂ Fourier =ᵐ L₁ Fourier ────
 
-/-- **INTERMEDIATE AXIOM**: Fourier self-adjointness for L¹ functions.
+/-- The inner product on ℝ is symmetric: `(innerₗ ℝ).flip = innerₗ ℝ`. -/
+private lemma innerₗ_flip_eq : (innerₗ (ℝ : Type)).flip = (innerₗ (ℝ : Type)) := by
+  apply LinearMap.ext₂; intro v w; simp
+
+/-- Continuity of the inner product bilinear form on ℝ. -/
+private lemma innerₗ_continuous :
+    Continuous fun (p : ℝ × ℝ) => (innerₗ (ℝ : Type) p.1) p.2 :=
+  (innerSL ℝ).continuous₂
+
+/-- **PROVED**: Fourier self-adjointness for L¹ functions.
 
     For f, g ∈ L¹(ℝ → ℂ): ∫ (𝓕 f) · g = ∫ f · (𝓕 g).
 
-    This is `VectorFourier.integral_fourierIntegral_smul_eq_flip` in Mathlib,
-    specialized to V = W = ℝ with the standard inner product.
-    The Mathlib proof uses Fubini's theorem.
-
-    **STATUS**: Axiom due to type-level plumbing difficulty.
-    The mathematical content is PROVED in Mathlib. -/
-axiom fourier_l1_self_adjoint (f g : ℝ → ℂ)
+    Proved from `VectorFourier.integral_fourierIntegral_smul_eq_flip`
+    (Fubini's theorem for Fourier integrals) plus `innerₗ_flip_eq`
+    (inner product symmetry on ℝ). -/
+theorem fourier_l1_self_adjoint (f g : ℝ → ℂ)
     (hf : Integrable f volume) (hg : Integrable g volume) :
-    ∫ ξ : ℝ, (𝓕 f ξ) * g ξ = ∫ x : ℝ, f x * (𝓕 g x)
+    ∫ ξ : ℝ, (𝓕 f ξ) * g ξ = ∫ x : ℝ, f x * (𝓕 g x) := by
+  simp only [← smul_eq_mul]
+  change ∫ ξ, (VectorFourier.fourierIntegral 𝐞 volume (innerₗ ℝ) f ξ) • g ξ =
+         ∫ x, f x • (VectorFourier.fourierIntegral 𝐞 volume (innerₗ ℝ) g x)
+  rw [VectorFourier.integral_fourierIntegral_smul_eq_flip
+    continuous_fourierChar innerₗ_continuous hf hg]
+  rw [innerₗ_flip_eq]
 
 /-- **FORMER AXIOM → NOW THEOREM**: For f ∈ L¹ ∩ L², the L² extension
     of the Fourier transform agrees a.e. with the L¹ integral formula.
