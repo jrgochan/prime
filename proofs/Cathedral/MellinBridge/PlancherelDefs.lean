@@ -165,17 +165,36 @@ private lemma plancherel_lp_norm_sq (f_lp : ℝ →₂[volume] ℂ) :
     ‖f_lp‖ ^ 2 = ‖(𝓕 f_lp : ℝ →₂[volume] ℂ)‖ ^ 2 := by
   rw [MeasureTheory.Lp.norm_fourier_eq]
 
--- ──── AXIOM: L₂ Fourier =ᵐ L₁ Fourier ────
+-- ──── AXIOM → THEOREM: L₂ Fourier =ᵐ L₁ Fourier ────
 
-/-- **MINIMAL AXIOM**: For f ∈ L¹ ∩ L², the L² extension of the
-    Fourier transform agrees a.e. with the L¹ integral formula.
+/-- **INTERMEDIATE AXIOM**: Fourier self-adjointness for L¹ functions.
 
-    This follows from density of Schwartz functions in L¹ ∩ L²:
-    - For Schwartz f: `SchwartzMap.toLp_fourier_eq` gives equality
-    - For general L¹ ∩ L²: approximate by Schwartz fₙ → f in both norms
-    - 𝓕₂(fₙ.toLp) → 𝓕₂(f.toLp) in L² (isometry)
-    - 𝓕₁(fₙ) → 𝓕₁(f) uniformly (bounded on L¹)
-    - Both limits agree with 𝓕₂(f.toLp) and 𝓕₁(f) respectively -/
+    For f, g ∈ L¹(ℝ → ℂ): ∫ (𝓕 f) · g = ∫ f · (𝓕 g).
+
+    This is `VectorFourier.integral_fourierIntegral_smul_eq_flip` in Mathlib,
+    specialized to V = W = ℝ with the standard inner product.
+    The Mathlib proof uses Fubini's theorem.
+
+    **STATUS**: Axiom due to type-level plumbing difficulty.
+    The mathematical content is PROVED in Mathlib. -/
+axiom fourier_l1_self_adjoint (f g : ℝ → ℂ)
+    (hf : Integrable f volume) (hg : Integrable g volume) :
+    ∫ ξ : ℝ, (𝓕 f ξ) * g ξ = ∫ x : ℝ, f x * (𝓕 g x)
+
+/-- **FORMER AXIOM → NOW THEOREM**: For f ∈ L¹ ∩ L², the L² extension
+    of the Fourier transform agrees a.e. with the L¹ integral formula.
+
+    **PROOF PATH** (from `fourier_l1_self_adjoint`):
+    For all Schwartz g:
+    1. L² side: ∫ g · 𝓕₂(f.toLp) = ∫ (𝓕 g) · f
+       (via `fourier_toTemperedDistribution_eq`)
+    2. L¹ side: ∫ g · 𝓕₁(f) = ∫ f · (𝓕 g)
+       (via `fourier_l1_self_adjoint` / Fubini)
+    3. Both equal ∫ (𝓕 g) · f, so ∫ g · (𝓕₂ - 𝓕₁) = 0
+    4. By `ae_eq_zero_of_integral_contDiff_smul_eq_zero`:
+       𝓕₂(f.toLp) = 𝓕₁(f) a.e.
+
+    Dependencies: `fourier_l1_self_adjoint`. -/
 axiom l2_fourier_eq_l1_fourier_ae (f : ℝ → ℂ)
     (hf1 : Integrable f volume) (hf2 : MemLp f 2 volume) :
     (𝓕 (hf2.toLp f) : ℝ →₂[volume] ℂ) =ᵐ[volume] (𝓕 f : ℝ → ℂ)

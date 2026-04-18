@@ -1,70 +1,51 @@
 /-
-  Scratch: Phase 3 — Dirichlet Polynomial Mean Value Theorem
-
-  Goal: ∫_{-T}^T |Σ aₙ n^{-it}|² dt ≤ Σ |aₙ|² (2T + 2πn)
-
-  Proof outline:
-  1. Expand |Σ aₙ n^{-it}|² = Σ_m Σ_n aₘ āₙ (m/n)^{-it}
-  2. Integrate term by term:
-     ∫_{-T}^T (m/n)^{-it} dt = ∫_{-T}^T e^{-it log(m/n)} dt
-     = 2T                         if m = n
-     = 2 sin(T log(m/n))/log(m/n)  if m ≠ n
-  3. Diagonal: 2T · Σ |aₙ|²
-  4. Off-diagonal: bounded by Σ |aₘ| |aₙ| · 2/|log(m/n)|
-  5. Apply M-V with λₙ = log n to bound the off-diagonal
-
-  SIMPLER APPROACH (without M-V):
-  The off-diagonal integral is bounded by |sin(θ)/θ| ≤ 1,
-  so |∫ (m/n)^{-it} dt| ≤ min(2T, 2/|log(m/n)|).
-  Then use the Hilbert inequality or direct estimates.
-
-  For the Cathedral, the CLEANEST approach may be to axiomatize
-  the mean value theorem directly (it's also a published result).
+  Scratch: Full proof of l2_fourier_test_schwartz
 -/
 
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Cathedral.MellinBridge.PlancherelDefs
+import Mathlib.Analysis.Fourier.LpSpace
+import Mathlib.Analysis.Distribution.TemperedDistribution
 
 noncomputable section
-open Complex Real MeasureTheory Finset BigOperators
+open MeasureTheory FourierTransform Real Complex
+open scoped BigOperators SchwartzMap
 
--- The diagonal integral: ∫_{-T}^T |n^{-it}|² dt = 2T
--- This is because |n^{-it}| = |e^{-it log n}| = 1.
+-- The key distributional identity:
+-- For f ∈ L² and g Schwartz,
+-- ∫ g(ξ) • (𝓕₂ f)(ξ) dξ = ∫ (𝓕 g)(x) • f(x) dx
 
--- The off-diagonal integral:
--- ∫_{-T}^T (m/n)^{-it} dt = ∫_{-T}^T e^{-it log(m/n)} dt
---                          = 2 sin(T log(m/n)) / log(m/n)
+-- Note: For Schwartz g, 𝓕 g is also Schwartz (𝓢 → 𝓢).
+-- The coercion 𝓢(ℝ, ℂ) → (ℝ → ℂ) is via SchwartzMap.FunLike.
 
--- For the mean value theorem, note that:
--- Since |sin(x)/x| ≤ 1, the off-diagonal integral ≤ 2T
--- And since |sin(x)| ≤ 1, the off-diagonal integral ≤ 2/|log(m/n)|
--- For m, n integers with m ≠ n:
--- |log(m/n)| = |log m - log n| ≥ 1/max(m,n) (for consecutive integers)
+lemma l2_fourier_test_schwartz (f_lp : ℝ →₂[volume] ℂ) (g : 𝓢(ℝ, ℂ)) :
+    Lp.toTemperedDistribution (𝓕 f_lp) g =
+    Lp.toTemperedDistribution f_lp (𝓕 g) := by
+  -- fourier_toTemperedDistribution_eq says:
+  -- 𝓕 (Lp.toTemperedDistribution f_lp) = Lp.toTemperedDistribution (𝓕 f_lp)
+  have h := Lp.fourier_toTemperedDistribution_eq f_lp
+  -- So: Lp.toTemperedDistribution (𝓕 f_lp) g
+  --   = (𝓕 (Lp.toTemperedDistribution f_lp)) g    [by h]
+  --   = Lp.toTemperedDistribution f_lp (𝓕 g)       [by defn of distributional 𝓕]
+  rw [← h]
+  -- Goal: (𝓕 (Lp.toTemperedDistribution f_lp)) g = Lp.toTemperedDistribution f_lp (𝓕 g)
+  rfl
 
--- The mean value theorem says:
--- ∫ |Σ aₙ n^{-it}|² dt ≤ Σ |aₙ|² (2T + O(n))
--- The O(n) comes from the off-diagonal contribution via M-V:
--- Σ_{m≠n, m≤N} 1/|log m - log n| · |aₘ| |aₙ|
--- ≤ (by M-V with δₙ = log(1+1/n) ≈ 1/n)
--- ≤ πn · |aₙ|²  for each n
+-- This tells us:
+-- ∫ g(ξ) • (𝓕₂ f_lp)(ξ) dξ = ∫ (𝓕 g)(x) • f_lp(x) dx
+-- by Lp.toTemperedDistribution_apply on both sides.
 
--- This gives: total ≤ Σ |aₙ|² (2T + π·n)
--- The 2πn in the statement is a slightly less sharp constant.
+-- Now expanding via toTemperedDistribution_apply:
+-- LHS = ∫ g(ξ) • (𝓕₂ f_lp : ℝ →₂[volume] ℂ)(ξ) dξ
+-- RHS = ∫ (𝓕 g : 𝓢(ℝ, ℂ))(x) • (f_lp : ℝ →₂[volume] ℂ)(x) dx
 
--- ═══════════════════════════════════════════
--- APPROACH: Axiomatize the mean value theorem
--- ═══════════════════════════════════════════
+-- For the Fubini side: we need
+-- ∫ g(ξ) • (𝓕₁ f)(ξ) dξ = ∫ (𝓕 g)(x) • f(x) dx
+-- which is fourier_l1_self_adjoint f g (with smul = * for ℂ).
 
--- The full proof requires:
--- 1. Interchanging sum and integral (needs integrability)
--- 2. Computing ∫ e^{-it log(m/n)} dt (basic calculus)
--- 3. Applying M-V to bound the off-diagonal sum
---
--- Steps 1 and 2 are doable in Lean but tedious.
--- Step 3 requires the M-V axiom we just set up.
---
--- For now, let's axiomatize the mean value theorem and
--- use it to drive toward critical_line_mellin_bound.
+-- The conclusion: ∫ g • 𝓕₂(f.toLp) = ∫ g • 𝓕₁(f) for all Schwartz g.
+
+-- Let me check what toTemperedDistribution_apply produces
+#check @Lp.toTemperedDistribution_apply ℝ ℂ
+-- toTemperedDistribution_apply f g = ∫ x, g x • ↑↑f x
 
 end
