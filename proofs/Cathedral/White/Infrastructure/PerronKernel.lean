@@ -43,9 +43,10 @@ namespace Cathedral.White.Infrastructure
 def perronIntegrand (y : ℝ) (s : ℂ) : ℂ :=
   (y : ℂ) ^ s / s
 
-/-- The vertical line integral over [c-iT, c+iT] of y^s/s. -/
+/-- The vertical line integral over [c-iT, c+iT] of y^s/s.
+    With s = c + it, ds = i·dt, so (1/2πi)·∫f·ds = (1/2π)·∫f·dt. -/
 def perronIntegral (y c T : ℝ) : ℂ :=
-  (1 / (2 * Real.pi * I)) *
+  (1 / (2 * ↑Real.pi)) *
     ∫ t in (-T)..T, perronIntegrand y (c + t * I)
 
 -- ═══════════════════════════════════════════
@@ -304,9 +305,9 @@ lemma perron_integral_bound_with_R {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y <
   -- Step 3: Unfold perronIntegral and compute norm
   unfold perronIntegral
   have hpi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
-  have h2pi_norm : ‖(1 : ℂ) / (2 * ↑Real.pi * I)‖ = 1 / (2 * Real.pi) := by
-    rw [norm_div, norm_one, norm_mul, norm_mul]
-    simp [Complex.norm_I, Complex.norm_ofNat, Complex.norm_real, abs_of_pos hpi_pos]
+  have h2pi_norm : ‖(1 : ℂ) / (2 * ↑Real.pi)‖ = 1 / (2 * Real.pi) := by
+    rw [norm_div, norm_one, norm_mul, Complex.norm_ofNat, Complex.norm_real]
+    simp [abs_of_pos hpi_pos]
   rw [norm_mul, h2pi_norm]
   -- Final bound
   have h2pi_pos : 0 < 2 * Real.pi := by positivity
@@ -404,7 +405,7 @@ theorem perron_formula_from_kernel
     (a : ℕ → ℂ) (x c T : ℝ) (hx : 0 < x) (hc : 1 < c) (hT : 0 < T)
     (hx_frac : Int.fract x ≠ 0) :
     ‖(∑ n ∈ Finset.Icc 1 ⌊x⌋₊, a n) -
-      (1 / (2 * Real.pi * I)) *
+      (1 / (2 * ↑Real.pi)) *
       ∫ t in (-T)..T, (∑ n ∈ Finset.Icc 1 ⌊x⌋₊, a n * (n : ℂ) ^ (-(↑c + ↑t * I))) *
         (x : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)‖ ≤
     x ^ c / T := by
