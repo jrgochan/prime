@@ -128,6 +128,45 @@ theorem l2_expansion (N : ℕ) (v : Fin (N - 1) → ℝ) :
   rw [h_int_1, h_int_cm]
 
 -- ════════════════════════════════════════════════
+-- §1b. INTEGRAL-SUM SWAP: ∫ Σ vₖ·ρₖ = Σ vₖ · ∫ ρₖ
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (PROVED!)**: The integral of the BD linear combination
+    equals the sum of weighted basis integrals.
+
+    ∫₀¹ Σ vₖ·{1/(kx)} dx = Σ vₖ · ∫₀¹ {1/(kx)} dx
+
+    This is just integral_finset_sum applied to a finite sum of
+    integrable functions (each proved in bd_single_fract_integrable). -/
+theorem integral_bdLinComb_eq_sum (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, bdLinComb N v x =
+    ∑ i : Fin (N - 1), v i * (∫ x in (0:ℝ)..1,
+      Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) := by
+  unfold bdLinComb
+  -- Commute pointwise sum out of integral
+  have h_eq : (fun x : ℝ => ∑ i : Fin (N - 1),
+        v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+      ∑ i : Fin (N - 1), (fun x : ℝ =>
+        v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_eq]
+  -- The goal is now ∫₀¹ (Σ f_i)(x) = Σ (v_i * ∫₀¹ {1/(k_i·x)})
+  -- Step 1: ∫ Σ f_i = Σ ∫ f_i (integral_finset_sum)
+  conv_lhs => rw [show
+    (∑ i : Fin (N - 1), fun x : ℝ =>
+      v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+    (fun x => ∑ i : Fin (N - 1),
+      (fun (j : Fin (N - 1)) (x : ℝ) =>
+        v j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x))) i x) from by
+      ext x; simp [Finset.sum_apply]]
+  rw [intervalIntegral.integral_finset_sum
+    (fun i (_ : i ∈ Finset.univ) =>
+      bd_single_fract_integrable (i.val + 1) (v i))]
+  -- Step 2: Each ∫ c·f = c · ∫ f
+  congr 1; ext i
+  exact intervalIntegral.integral_const_mul (v i) _
+
+-- ════════════════════════════════════════════════
 -- §2. ABEL SUMMATION WITH O(x^{3/4})
 -- ════════════════════════════════════════════════
 
