@@ -272,18 +272,53 @@ lemma perron_integral_bound_with_R {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y <
     (hc : 0 < c) (hR : c < R) (hT : 0 < T) :
     ‖perronIntegral y c T‖ ≤
       y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ R / (Real.pi * R) := by
-  -- Step 1: From the rectangle identity, extract the left integral
+  -- Abbreviate the four integrals
+  set bot := ∫ x in c..R, perronIntegrand y (↑x + -↑T * I) with hbot_def
+  set top := ∫ x in c..R, perronIntegrand y (↑x + ↑T * I) with htop_def
+  set rv := ∫ t in (-T)..T, perronIntegrand y (↑R + ↑t * I) with hrv_def
+  set lv := ∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I) with hlv_def
+  -- Step 1: From rect, extract lv
   have rect := rectangle_integral_perron_vanishes hy_pos hc hR hT
-  -- rect: bottom - top + I*right - I*left = 0
-  -- So: I*left = bottom - top + I*right
-  -- perronIntegral = (1/(2πi)) * left
-  -- ‖perronIntegral‖ ≤ (‖bottom‖ + ‖top‖ + ‖right‖)/(2π)
+  have hlv_eq : I * lv = bot - top + I * rv := by linear_combination -rect
+  -- lv = -I * (bot - top) + rv
+  have hlv_eq2 : lv = -I * (bot - top) + rv := by
+    have hI_ne : (I : ℂ) ≠ 0 := Complex.I_ne_zero
+    have : lv = I⁻¹ * (I * lv) := by rw [inv_mul_cancel_left₀ hI_ne]
+    rw [this, hlv_eq, Complex.inv_I, mul_add, ← mul_assoc (-I) I rv]
+    simp [Complex.I_mul_I]
   -- Step 2: Bound each segment
-  have hbot := horizontal_segment_bound hy_pos hy_lt hc hR.le hT (-1) (by norm_num)
-  have htop := horizontal_segment_bound hy_pos hy_lt hc hR.le hT 1 (by norm_num)
-  have hright := right_vertical_bound hy_pos hy_lt (lt_trans hc hR) hT
-  -- Step 3: Algebraic composition (the hardest part — manipulating complex norms)
-  sorry
+  have hbot_bound := horizontal_segment_bound hy_pos hy_lt hc hR.le hT (-1) (by norm_num)
+  have htop_bound := horizontal_segment_bound hy_pos hy_lt hc hR.le hT 1 (by norm_num)
+  have hrv_bound := right_vertical_bound hy_pos hy_lt (lt_trans hc hR) hT
+  -- Match sign: (-1)*T = -T and 1*T = T, and ↑(-T) = -↑T
+  simp only [neg_one_mul, one_mul, Complex.ofReal_neg] at hbot_bound htop_bound
+  -- ‖lv‖ ≤ ‖bot‖ + ‖top‖ + ‖rv‖
+  have hlv_bound : ‖lv‖ ≤ ‖bot‖ + ‖top‖ + ‖rv‖ := by
+    rw [hlv_eq2]
+    calc ‖-I * (bot - top) + rv‖
+        ≤ ‖-I * (bot - top)‖ + ‖rv‖ := norm_add_le _ _
+      _ = ‖bot - top‖ + ‖rv‖ := by
+          rw [norm_mul, norm_neg, Complex.norm_I, one_mul]
+      _ ≤ (‖bot‖ + ‖top‖) + ‖rv‖ := by
+          gcongr; exact norm_sub_le _ _
+  -- Step 3: Unfold perronIntegral and compute norm
+  unfold perronIntegral
+  have hpi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
+  have h2pi_norm : ‖(1 : ℂ) / (2 * ↑Real.pi * I)‖ = 1 / (2 * Real.pi) := by
+    rw [norm_div, norm_one, norm_mul, norm_mul]
+    simp [Complex.norm_I, Complex.norm_ofNat, Complex.norm_real, abs_of_pos hpi_pos]
+  rw [norm_mul, h2pi_norm]
+  -- Final bound
+  have h2pi_pos : 0 < 2 * Real.pi := by positivity
+  calc 1 / (2 * Real.pi) * ‖lv‖
+      ≤ 1 / (2 * Real.pi) * (‖bot‖ + ‖top‖ + ‖rv‖) := by
+        gcongr
+    _ ≤ 1 / (2 * Real.pi) *
+        (y ^ c / (T * |Real.log y|) + y ^ c / (T * |Real.log y|) + 2 * T * y ^ R / R) := by
+        gcongr
+    _ = y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ R / (Real.pi * R) := by
+        field_simp
+        ring
 
 /-- **KEY LEMMA**: For 0 < y < 1, Perron integral = 0 + O(y^c/(T|log y|)).
 
