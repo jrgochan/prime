@@ -126,19 +126,51 @@ theorem mellin_residual_on_unit_interval (N : ℕ) (hN : 2 ≤ N) (s : ℂ)
       ((1 - bdLinComb N (bdMoebiusWeight N) x : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     1 / s + riemannZeta s * dirichletPolyBD N s / s -
     (∑ i : Fin (N - 1), (bdMoebiusWeight N i : ℂ) / ((i.val + 1 : ℕ) : ℂ)) / (s - 1) := by
-  -- Proof uses exclusively proved ingredients:
-  -- 1. bd_integral_linearity (BDMellin.lean, PROVED)
-  -- 2. one_inner_cpow' (above, PROVED)
-  -- 3. mellin_basis_element (above, PROVED)
-  -- 4. Sum algebra: distribute, split, collect (Finset.sum_sub_distrib + field_simp)
-  --
-  -- Sign analysis: bd_integral_linearity gives ∫1·h - Σ vᵢ·∫(fᵢ·h)
-  -- The MINUS from "1 - f_N" absorbs into the vᵢ terms.
-  -- mellin_basis_element gives 1/(k(s-1)) - ζk^{-s}/s for each basis.
-  -- So: -Σ vᵢ·(1/(kᵢ(s-1)) - ζkᵢ^{-s}/s)
-  --   = -W_sum/(s-1) + ζ·W_N(s)/s   (sign flip!)
-  -- Result: 1/s + ζ·W_N(s)/s - W_sum/(s-1)
-  sorry
+  -- Step 1: Split the integral using linearity (PROVED in BDMellin.lean)
+  rw [bd_integral_linearity N (bdMoebiusWeight N) s hs hs_lt]
+  -- Now we have: ∫ x^{s-1} - Σ vᵢ · ∫ {1/((i+1)x)} · x^{s-1}
+  -- Step 2: First integral = 1/s
+  rw [one_inner_cpow' s hs]
+  -- Step 3: Each basis integral via mellin_basis_element
+  have h_terms : ∀ i : Fin (N - 1),
+      ∫ x in Set.Ioo (0:ℝ) 1,
+        ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+      1 / ((↑(i.val + 1) : ℂ) * (s - 1)) - riemannZeta s * (↑(i.val + 1) : ℂ) ^ (-s) / s := by
+    intro i
+    exact mellin_basis_element (i.val + 1) (by omega) s hs hs1
+  simp_rw [h_terms]
+  -- Step 4: Algebra — distribute and collect
+  -- LHS: 1/s - Σ vᵢ · (1/((i+1)(s-1)) - ζ(s)·(i+1)^{-s}/s)
+  -- = 1/s - Σ vᵢ/(i+1)(s-1) + Σ vᵢ·ζ(s)·(i+1)^{-s}/s
+  -- = 1/s - (Σ vᵢ/(i+1))/(s-1) + ζ(s)·(Σ vᵢ·(i+1)^{-s})/s
+  -- = 1/s + ζ(s)·W_N(s)/s - W_sum/(s-1)
+  -- Step 4: Algebra — collect the two sums
+  -- LHS = 1/s - (Σ vᵢ·1/((i+1)(s-1)) - Σ vᵢ·ζ·(i+1)^{-s}/s)
+  -- RHS = 1/s + ζ·W_N/s - W_sum/(s-1)
+  -- We need: - Σ vᵢ/((i+1)(s-1)) = -W_sum/(s-1)  [factor out 1/(s-1)]
+  --       and: Σ vᵢ·ζ·(i+1)^{-s}/s = ζ·W_N/s       [factor out ζ/s]
+  -- Factor each sum
+  have h_sum_A : ∑ i : Fin (N - 1), (bdMoebiusWeight N i : ℂ) *
+      (1 / ((↑(i.val + 1) : ℂ) * (s - 1))) =
+      (∑ i : Fin (N - 1), (bdMoebiusWeight N i : ℂ) / ((↑(i.val + 1) : ℂ))) / (s - 1) := by
+    rw [Finset.sum_div]; congr 1; ext i
+    have hi : (↑(i.val + 1) : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero i.val
+    field_simp
+  have h_sum_B : ∑ i : Fin (N - 1), (bdMoebiusWeight N i : ℂ) *
+      (riemannZeta s * (↑(i.val + 1) : ℂ) ^ (-s) / s) =
+      riemannZeta s * dirichletPolyBD N s / s := by
+    unfold dirichletPolyBD
+    rw [Finset.mul_sum]
+    simp_rw [mul_div_assoc']
+    rw [← Finset.sum_div]
+    congr 1
+    congr 1; ext i; ring
+  rw [show (fun i : Fin (N - 1) => (bdMoebiusWeight N i : ℂ) *
+      (1 / ((↑(i.val + 1) : ℂ) * (s - 1)) - riemannZeta s * (↑(i.val + 1) : ℂ) ^ (-s) / s)) =
+      (fun i => (bdMoebiusWeight N i : ℂ) * (1 / ((↑(i.val + 1) : ℂ) * (s - 1))) -
+        (bdMoebiusWeight N i : ℂ) * (riemannZeta s * (↑(i.val + 1) : ℂ) ^ (-s) / s))
+      from by ext i; ring]
+  rw [Finset.sum_sub_distrib, h_sum_A, h_sum_B]; ring
 
 -- ════════════════════════════════════════════════
 -- §3. THE KEY DECOMPOSITION (Algebraic)
