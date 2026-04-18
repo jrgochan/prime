@@ -61,7 +61,7 @@ private lemma weighted_sum_bound_col {N : ℕ} (K : Fin N → Fin N → ℂ)
 
 /-- The squared version of Schur's test, proved via
     Cauchy-Schwarz on the product type `Fin N × Fin N`. -/
-private lemma schur_sq_bound {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ) (hC : 0 ≤ C)
+private lemma schur_sq_bound {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ) (_hC : 0 ≤ C)
     (h_row : ∀ i, ∑ j, ‖K i j‖ ≤ C)
     (h_col : ∀ j, ∑ i, ‖K i j‖ ≤ C)
     (x y : Fin N → ℂ) :
@@ -153,7 +153,7 @@ theorem schur_test_discrete {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ) (h
             Real.sq_sqrt (Finset.sum_nonneg (fun j _ => sq_nonneg _))]))
 
 -- ═══════════════════════════════════════════
--- §3. δ-Separation and Montgomery-Vaughan
+-- §3. δ-Separation Infrastructure (PROVED ✅)
 -- ═══════════════════════════════════════════
 
 /-- A finite sequence of reals is δ-separated if the distance between
@@ -161,13 +161,55 @@ theorem schur_test_discrete {N : ℕ} (K : Fin N → Fin N → ℂ) (C : ℝ) (h
 def IsDeltaSeparated {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ) : Prop :=
   ∀ i j : Fin N, i ≠ j → δ ≤ |lam i - lam j|
 
+/-- δ-separation implies distinct values. -/
+lemma delta_sep_ne_of_ne {N : ℕ} {lam : Fin N → ℝ} {δ : ℝ} (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated lam δ) {i j : Fin N} (hij : i ≠ j) :
+    lam i ≠ lam j := by
+  intro h; have := h_sep i j hij; rw [h, sub_self, abs_zero] at this; linarith
+
+/-- 1/|λᵢ - λⱼ| ≤ 1/δ for δ-separated sequences. -/
+lemma norm_inv_sub_le {N : ℕ} {lam : Fin N → ℝ} {δ : ℝ} (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated lam δ) {i j : Fin N} (hij : i ≠ j) :
+    1 / |lam i - lam j| ≤ 1 / δ := by
+  have hab := h_sep i j hij
+  exact div_le_div_of_nonneg_left (by positivity) hδ hab
+
+/-- The kernel ‖1/(λᵢ - λⱼ)‖ ≤ 1/δ. -/
+lemma kernel_norm_le {N : ℕ} {lam : Fin N → ℝ} {δ : ℝ} (hδ : 0 < δ)
+    (h_sep : IsDeltaSeparated lam δ) {i j : Fin N} (hij : i ≠ j) :
+    ‖(1 : ℂ) / ((lam i - lam j : ℝ) : ℂ)‖ ≤ 1 / δ := by
+  rw [norm_div, norm_one, Complex.norm_real]
+  exact norm_inv_sub_le hδ h_sep hij
+
+/-- Row sum bound: each row of the Hilbert kernel has norm sum ≤ N/δ.
+    This is WEAKER than π/δ but follows from δ-separation alone. -/
+lemma row_sum_le_card_div_delta {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ)
+    (hδ : 0 < δ) (h_sep : IsDeltaSeparated lam δ) (i : Fin N) :
+    ∑ j : Fin N, ‖(if i = j then (0 : ℂ) else
+      (1 : ℂ) / ((lam i - lam j : ℝ) : ℂ))‖ ≤ ↑(Fintype.card (Fin N)) / δ := by
+  calc ∑ j : Fin N, ‖(if i = j then (0 : ℂ) else
+        (1 : ℂ) / ((lam i - lam j : ℝ) : ℂ))‖
+      ≤ ∑ j : Fin N, (1 / δ) := by
+        apply Finset.sum_le_sum; intro j _
+        split_ifs with h
+        · simp; positivity
+        · exact kernel_norm_le hδ h_sep h
+    _ = ↑(Fintype.card (Fin N)) / δ := by
+        simp [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]; ring
+
+-- ═══════════════════════════════════════════
+-- §4. Montgomery-Vaughan Hilbert Inequality
+-- ═══════════════════════════════════════════
+
 /-- **TARGET**: Montgomery-Vaughan Hilbert Inequality (1973).
     For δ-separated real numbers, the discrete Hilbert transform is bounded
     with the sharp constant π/δ.
 
     Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973).
-    ROUTE: Apply schur_test_discrete with K_ij = 1/(λ_i - λ_j),
-    then bound row sums using cotangent estimates. -/
+
+    CURRENT STATUS: The infrastructure (Schur's test + row sum bounds) is proved.
+    The sharp constant π/δ requires Beurling-Selberg extremal functions.
+    The weak version with N/δ follows from schur_test_discrete + row_sum_le_card_div_delta. -/
 theorem montgomery_vaughan_inequality
     (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
     (h_sep : IsDeltaSeparated lam δ) :
@@ -175,10 +217,9 @@ theorem montgomery_vaughan_inequality
         (if i = j then (0 : ℂ)
          else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))
     ‖S‖ ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
-  -- 🔨 PHASE 2 TARGET:
-  -- 1. Apply schur_test_discrete with K_ij = 1/(λ_i - λ_j).
-  -- 2. Construct Montgomery-Vaughan test weights.
-  -- 3. Bound the row sums: Σ_{j≠i} 1/|λ_i - λ_j| ≤ π/δ.
+  -- 🔨 REQUIRES: Beurling-Selberg extremal functions for the sharp π/δ.
+  -- The weak version (N/δ) follows from schur_test + row_sum_le_card_div_delta.
   sorry
 
 end Cathedral.White.Infrastructure
+
