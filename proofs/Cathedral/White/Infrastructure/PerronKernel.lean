@@ -330,14 +330,43 @@ lemma perron_integral_bound_with_R {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y <
 theorem perron_kernel_lt_one (y c T : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1)
     (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  -- Strategy: for all R > c, the rectangle identity +  bounds give
-  --   ‖perronIntegral‖ ≤ y^c/(πT|log y|) + Ty^R/(πR)
-  -- Taking R → ∞ kills the second term since 0 < y < 1.
-  -- We formalize "≤ a + f(R) for all R, f(R) → 0 ⟹ ≤ a" via le_of_forall_pos_lt_add.
-  --
-  -- For now, we sorry the limit step and prove the finite-R composition.
-  -- This composes ALL the building-block lemmas.
-  sorry
+  -- It suffices to show: for any ε > 0, ‖·‖ ≤ target + ε
+  -- This implies ‖·‖ ≤ target by contradiction.
+  by_contra hlt
+  push_neg at hlt
+  set δ := ‖perronIntegral y c T‖ - y ^ c / (Real.pi * T * |Real.log y|) with hδ_def
+  have hδ : 0 < δ := by linarith
+  -- Choose R large enough that T/(πR) < δ
+  set R := max (c + 1) (T / (Real.pi * δ) + 1) with hR_def
+  have hR_gt_c : c < R := by
+    calc c < c + 1 := by linarith
+      _ ≤ R := le_max_left _ _
+  have hR_pos : 0 < R := lt_trans hc hR_gt_c
+  -- Apply our proved composition bound
+  have hbound := perron_integral_bound_with_R hy_pos hy_lt hc hR_gt_c hT
+  -- Bound y^R ≤ 1 since 0 < y < 1
+  have hyR_le : y ^ R ≤ 1 := rpow_le_one hy_pos.le hy_lt.le hR_pos.le
+  -- So: T * y^R / (πR) ≤ T * 1 / (πR) = T/(πR)
+  have herr_le : T * y ^ R / (Real.pi * R) ≤ T / (Real.pi * R) := by
+    apply div_le_div_of_nonneg_right _ (mul_pos Real.pi_pos hR_pos).le
+    calc T * y ^ R ≤ T * 1 := by gcongr
+      _ = T := mul_one T
+  -- And R > T/(πδ), so T/(πR) < δ
+  have hR_big : T / (Real.pi * δ) < R := by
+    calc T / (Real.pi * δ) < T / (Real.pi * δ) + 1 := by linarith
+      _ ≤ R := le_max_right _ _
+  have herr_lt : T / (Real.pi * R) < δ := by
+    rw [div_lt_iff₀ (mul_pos Real.pi_pos hR_pos)]
+    -- Need: T < δ * (π * R) = π * δ * R
+    -- From hR_big: T / (π * δ) < R, so T < (π * δ) * R
+    have hπδ_pos := mul_pos Real.pi_pos hδ
+    have := (div_lt_iff₀ hπδ_pos).mp hR_big
+    -- this : T < R * (π * δ)
+    linarith
+  -- Combine: ‖perronIntegral‖ ≤ target + Ty^R/(πR) ≤ target + T/(πR) < target + δ
+  -- But δ = ‖perronIntegral‖ - target
+  -- So target + δ = ‖perronIntegral‖, giving ‖perronIntegral‖ < ‖perronIntegral‖. Contradiction!
+  linarith
 
 -- ═══════════════════════════════════════════
 -- §8. The Unified Perron Kernel Bound
