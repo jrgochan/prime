@@ -238,6 +238,60 @@ lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (hy : 0 < y) (s : ℂ) (hs 
   field_simp
   ring
 
+/-- Antiderivative for right vertical: d/dt[-I·log(c + tI)] = 1/(c + tI).
+    Used for ∫ 1/(c + tI) dt in the winding number computation. -/
+lemma right_vert_log_antideriv {c : ℝ} (hc : 0 < c) (t : ℝ) :
+    HasDerivAt (fun u : ℝ => -I * Complex.log (↑c + ↑u * I))
+      ((↑c + ↑t * I)⁻¹ : ℂ) t := by
+  have hslitPlane : (↑c + ↑t * I) ∈ slitPlane := by
+    left; simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+                Complex.I_re, Complex.I_im, hc]
+  have hf : HasDerivAt (fun u : ℝ => (↑c : ℂ) + ↑u * I) (I : ℂ) t := by
+    simpa using (Complex.ofRealCLM.hasDerivAt (x := t)).mul_const I |>.const_add (↑c : ℂ)
+  have hlog := HasDerivAt.clog_real hf hslitPlane
+  have hmul := hlog.const_mul (-I)
+  have : -I * (I / (↑c + ↑t * I)) = (↑c + ↑t * I)⁻¹ := by
+    rw [div_eq_mul_inv, ← mul_assoc,
+        show -I * I = (1 : ℂ) from by simp [Complex.I_mul_I], one_mul]
+  rwa [this] at hmul
+
+/-- Antiderivative for left vertical (Theorist's trick):
+    d/dt[-I·log(R - tI)] = 1/(-R + tI).
+    Key insight: R - tI has Re = R > 0, staying in slitPlane. -/
+lemma left_vert_log_antideriv {R : ℝ} (hR : 0 < R) (t : ℝ) :
+    HasDerivAt (fun u : ℝ => -I * Complex.log (↑R - ↑u * I))
+      ((-↑R + ↑t * I)⁻¹ : ℂ) t := by
+  have hslitPlane : (↑R - ↑t * I) ∈ slitPlane := by
+    left; simp [Complex.sub_re, Complex.ofReal_re, Complex.mul_re,
+                Complex.I_re, Complex.I_im, hR]
+  have hf : HasDerivAt (fun u : ℝ => (↑R : ℂ) - ↑u * I) (-I : ℂ) t := by
+    simpa using ((Complex.ofRealCLM.hasDerivAt (x := t)).mul_const I).const_sub (↑R : ℂ)
+  have hlog := HasDerivAt.clog_real hf hslitPlane
+  have hmul := hlog.const_mul (-I)
+  -- -I * (-I / (R - tI)) = -I²/(R - tI) = 1/(R - tI) = -1/(-R + tI) ... wait
+  -- Actually: -I * (-I / (R - tI)) = I²/(R - tI) = -1/(R - tI) = 1/(-R + tI)? No.
+  -- Let's compute: -I * (-I) = I² = -1, so -I * (-I/(R-tI)) = -1/(R-tI) = 1/(-(R-tI)) = 1/(-R+tI)
+  have : -I * (-I / (↑R - ↑t * I)) = (-↑R + ↑t * I)⁻¹ := by
+    rw [div_eq_mul_inv, ← mul_assoc,
+        show -I * -I = (-1 : ℂ) from by simp [Complex.I_mul_I]]
+    simp only [neg_mul, one_mul, neg_inv, neg_neg]
+    congr 1; ring
+  rwa [this] at hmul
+
+/-- Antiderivative for horizontal segments: d/dx[log(x + aI)] = 1/(x + aI)
+    when a ≠ 0 (so x + aI stays in slitPlane via nonzero imaginary part). -/
+lemma horiz_log_antideriv {a : ℝ} (ha : a ≠ 0) (x : ℝ) :
+    HasDerivAt (fun u : ℝ => Complex.log (↑u + ↑a * I))
+      ((↑x + ↑a * I)⁻¹ : ℂ) x := by
+  have hslitPlane : (↑x + ↑a * I) ∈ slitPlane := by
+    right; simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                 Complex.I_re, Complex.I_im, ha]
+  have hf : HasDerivAt (fun u : ℝ => (↑u : ℂ) + ↑a * I) (1 : ℂ) x := by
+    simpa using (Complex.ofRealCLM.hasDerivAt (x := x)).add_const (↑a * I)
+  have hlog := HasDerivAt.clog_real hf hslitPlane
+  simp [div_eq_mul_inv] at hlog
+  exact hlog
+
 /-- The rectangle integral of 1/s around [-R, c] × [-T, T] equals 2πi.
     This is the winding number computation.
 
@@ -245,7 +299,7 @@ lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (hy : 0 < y) (s : ℂ) (hs 
     • Bottom (x + (-T)I, x: -R → c): antiderivative = log(x - TI)
     • Top    (x + TI, x: -R → c):    antiderivative = log(x + TI)
     • Right  (c + tI, t: -T → T):    antiderivative = -I·log(c + tI)
-    • Left   (-R + tI, t: -T → T):   antiderivative = I·log(R - tI) [Theorist's trick]
+    • Left   (-R + tI, t: -T → T):   antiderivative = -I·log(R - tI) [Theorist's trick]
       (R - tI has Re = R > 0, so stays in slitPlane, dodging the branch cut!)
 
     Evaluating at corners and summing: the real parts (log|·|) cancel in pairs,
@@ -255,14 +309,17 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
     (∫ x in (-R)..c, ((↑x + ↑T * I)⁻¹ : ℂ)) +
     I * (∫ t in (-T)..T, ((↑c + ↑t * I)⁻¹ : ℂ)) -
     I * (∫ t in (-T)..T, ((-↑R + ↑t * I)⁻¹ : ℂ)) = 2 * Real.pi * I := by
-  -- Each segment is evaluated using FTC with Complex.log as antiderivative.
-  -- The key tool is HasDerivAt.clog_real for the chain rule.
-  -- For the left vertical segment: use I·log(R - tI) to avoid the branch cut
-  -- since Re(R - tI) = R > 0 ensures we stay in slitPlane.
-  --
-  -- After FTC evaluation, the 8 corner values (4 corners × 2 appearances each)
-  -- collapse: the real parts (norms) cancel, and the imaginary parts (arguments)
-  -- sum to 2π (from the winding of arg around the origin).
+  -- Step 1: Apply FTC to each segment using the antiderivative lemmas above:
+  --   Bottom: ∫ = log(c - TI) - log(-R - TI)     [horiz_log_antideriv, a = -T]
+  --   Top:    ∫ = log(c + TI) - log(-R + TI)     [horiz_log_antideriv, a = T]
+  --   Right:  ∫ = -I·log(c+TI) - (-I·log(c-TI))  [right_vert_log_antideriv]
+  --   Left:   ∫ = -I·log(R-TI) - (-I·log(R+TI))  [left_vert_log_antideriv]
+  -- Step 2: Substitute and cancel:
+  --   The log(c±TI) terms from Bottom/Top cancel with Right.
+  --   Remaining: I·[log(R+TI) - log(R-TI)] + [log(-R-TI) - log(-R+TI)]
+  -- Step 3: Expand log = ln|z| + I·arg(z):
+  --   Real parts (ln|z|) cancel since |R+TI| = |R-TI| and |-R+TI| = |-R-TI|.
+  --   Imaginary parts sum to I · 2π.
   sorry
 
 /-- Left vertical segment bound for y > 1: ‖∫ f(−R + t·I) dt‖ ≤ 2T·y^(−R)/R.
