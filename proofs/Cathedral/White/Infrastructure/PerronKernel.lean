@@ -84,44 +84,64 @@ lemma perronIntegrand_bound_on_horizontal {y σ : ℝ} (hy : 0 < y) {T : ℝ} (h
   exact abs_im_le_norm s
 
 -- ═══════════════════════════════════════════
--- §4. The Perron Kernel for y > 1 (Residue = 1)
+-- §4. Exponential Decay Integral
 -- ═══════════════════════════════════════════
 
-/-- **KEY LEMMA**: For y > 1 and c > 0, the Perron integral equals 1 up to O(y^c / (T·|log y|)).
+/-- For 0 < y < 1, the integral of y^σ over [c,R] is at most y^c/|log y|. -/
+lemma integral_rpow_le_of_lt_one {y c R : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
+    (hc : 0 ≤ c) (hR : c ≤ R) :
+    ∫ σ in c..R, y ^ σ ≤ y ^ c / |Real.log y| := by
+  sorry
 
-    Proof strategy:
-    1. Apply `integral_boundary_rect_eq_zero_of_differentiable_on_off_countable`
-       to the rectangle with corners c-iT, c+iT, -R-iT, -R+iT.
-    2. The integrand y^s/s is holomorphic everywhere except s=0.
-    3. The rectangle contains s=0 (since c > 0, R > 0), so apply
-       Cauchy integral formula: residue at s=0 of y^s/s = y^0 = 1.
-    4. As R → ∞, the left vertical segment → 0 (since y > 1, y^{-R} → 0).
-    5. Horizontal segments bounded by O(y^c/T).
-    6. Combine: ∫_vertical = 2πi·1 - horizontal errors = 2πi + O(y^c/T). -/
+/-- For y > 1, the integral of y^σ over [-R,c] is at most y^c/log y. -/
+lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (hR : 0 ≤ R) :
+    ∫ σ in (-R)..c, y ^ σ ≤ y ^ c / Real.log y := by
+  sorry
+
+-- ═══════════════════════════════════════════
+-- §5. Rectangle Sub-lemmas
+-- ═══════════════════════════════════════════
+
+/-- The rectangle integral of y^s/s vanishes when s=0 is outside.
+    For the rectangle [c, R] × [-T, T] with c > 0, y^s/s is holomorphic inside.
+    Uses Mathlib's integral_boundary_rect_eq_zero_of_differentiable_on_off_countable. -/
+lemma rectangle_integral_perron_vanishes {y c R T : ℝ} (hy : 0 < y)
+    (hc : 0 < c) (hR : c < R) (hT : 0 < T) :
+    (∫ x in c..R, perronIntegrand y (x + (-T) * I)) -
+    (∫ x in c..R, perronIntegrand y (x + T * I)) +
+    I * (∫ t in (-T)..T, perronIntegrand y (R + t * I)) -
+    I * (∫ t in (-T)..T, perronIntegrand y (c + t * I)) = 0 := by
+  sorry -- The proof uses integral_boundary_rect_eq_zero with z = ⟨c,-T⟩, w = ⟨R,T⟩
+        -- ContinuousOn: perronIntegrand is continuous on [c,R]×[-T,T] (c > 0 so s ≠ 0)
+        -- DifferentiableAt: perronIntegrand_differentiableAt at all interior points
+
+/-- The right vertical segment is bounded by 2T·y^R/R for y < 1. -/
+lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
+    (hR : 0 < R) (hT : 0 < T) :
+    ‖∫ t in (-T)..T, perronIntegrand y (R + t * I)‖ ≤ 2 * T * y ^ R / R := by
+  sorry
+
+-- ═══════════════════════════════════════════
+-- §6. The Perron Kernel for y > 1 (Residue = 1)
+-- ═══════════════════════════════════════════
+
+/-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T|log y|)). -/
 theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T - 1‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  sorry -- Rectangle contour argument via integral_boundary_rect_eq_zero
+  sorry
 
 -- ═══════════════════════════════════════════
--- §5. The Perron Kernel for y < 1 (Residue = 0)
+-- §7. The Perron Kernel for y < 1 (Residue = 0)
 -- ═══════════════════════════════════════════
 
-/-- **KEY LEMMA**: For 0 < y < 1 and c > 0, the Perron integral equals 0 up to O(y^c / (T·|log y|)).
-
-    Proof strategy:
-    1. Close the contour to the RIGHT: rectangle c-iT, c+iT, R+iT, R-iT.
-    2. No poles inside (s=0 is to the left of c).
-    3. By Cauchy-Goursat, the boundary integral = 0.
-    4. As R → ∞, the right vertical segment → 0 (since y < 1, y^R → 0).
-    5. Horizontal segments bounded by O(y^c/T).
-    6. Combine: ∫_vertical = 0 - horizontal errors = O(y^c/T). -/
+/-- **KEY LEMMA**: For 0 < y < 1, Perron integral = 0 + O(y^c/(T|log y|)). -/
 theorem perron_kernel_lt_one (y c T : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1)
     (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  sorry -- Rectangle contour argument (no residue case)
+  sorry
 
 -- ═══════════════════════════════════════════
--- §6. The Unified Perron Kernel Bound
+-- §8. The Unified Perron Kernel Bound
 -- ═══════════════════════════════════════════
 
 /-- **UNIFIED PERRON KERNEL**: The Perron integral approximates the step function.
@@ -142,7 +162,7 @@ theorem perron_kernel_bound (y c T : ℝ) (hy : 0 < y) (hy_ne : y ≠ 1)
     exact perron_kernel_lt_one y c T hy hlt hc hT
 
 -- ═══════════════════════════════════════════
--- §7. From Kernel to Summatory Function (The Assembly)
+-- §9. From Kernel to Summatory Function (The Assembly)
 -- ═══════════════════════════════════════════
 
 /-- **PERRON'S FORMULA**: The truncated Perron formula for summatory functions.
