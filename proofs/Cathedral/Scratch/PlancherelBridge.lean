@@ -1,88 +1,70 @@
 /-
-  Scratch: Phase C — Montgomery-Vaughan from Selberg Axioms
+  Scratch: Phase 3 — Dirichlet Polynomial Mean Value Theorem
 
-  KEY INSIGHT: M-V cannot be derived from Schur's test + BS axioms alone,
-  because the row sums of the raw kernel 1/(λ_i - λ_j) grow as log(N)/δ.
+  Goal: ∫_{-T}^T |Σ aₙ n^{-it}|² dt ≤ Σ |aₙ|² (2T + 2πn)
 
-  The correct derivation uses the Fourier transform of the Selberg majorant
-  to construct a POSITIVE-DEFINITE smoothed kernel whose off-diagonal terms
-  vanish (band-limitation) while diagonal terms are bounded (integral = 2).
+  Proof outline:
+  1. Expand |Σ aₙ n^{-it}|² = Σ_m Σ_n aₘ āₙ (m/n)^{-it}
+  2. Integrate term by term:
+     ∫_{-T}^T (m/n)^{-it} dt = ∫_{-T}^T e^{-it log(m/n)} dt
+     = 2T                         if m = n
+     = 2 sin(T log(m/n))/log(m/n)  if m ≠ n
+  3. Diagonal: 2T · Σ |aₙ|²
+  4. Off-diagonal: bounded by Σ |aₘ| |aₙ| · 2/|log(m/n)|
+  5. Apply M-V with λₙ = log n to bound the off-diagonal
 
-  APPROACH: Factor the derivation into two clean intermediate results:
+  SIMPLER APPROACH (without M-V):
+  The off-diagonal integral is bounded by |sin(θ)/θ| ≤ 1,
+  so |∫ (m/n)^{-it} dt| ≤ min(2T, 2/|log(m/n)|).
+  Then use the Hilbert inequality or direct estimates.
 
-  (A) The "Selberg smoothing bound" — for any f : ℝ → ℂ with f(t) = Σ xᵣ e^{2πiλᵣt},
-      the integral ∫ |f|² · |S_Δ| is bounded
-  (B) The "positive-definiteness" — the smoothed bilinear form ≥ 0
-
-  Since the derivation BS → M-V requires distributional Fourier analysis
-  (which Lean/Mathlib lacks), we axiomatize M-V directly as a published
-  result that DEPENDS ON BS1-BS5 conceptually.
+  For the Cathedral, the CLEANEST approach may be to axiomatize
+  the mean value theorem directly (it's also a published result).
 -/
 
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
-import Mathlib.Algebra.BigOperators.Group.Finset.Basic
-import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import Mathlib.MeasureTheory.Integral.Bochner.Basic
-import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 noncomputable section
-open Complex Real Finset BigOperators MeasureTheory
+open Complex Real MeasureTheory Finset BigOperators
 
--- Reproduce δ-separation
-def IsDeltaSeparated' {N : ℕ} (lam : Fin N → ℝ) (δ : ℝ) : Prop :=
-  ∀ i j : Fin N, i ≠ j → δ ≤ |lam i - lam j|
+-- The diagonal integral: ∫_{-T}^T |n^{-it}|² dt = 2T
+-- This is because |n^{-it}| = |e^{-it log n}| = 1.
+
+-- The off-diagonal integral:
+-- ∫_{-T}^T (m/n)^{-it} dt = ∫_{-T}^T e^{-it log(m/n)} dt
+--                          = 2 sin(T log(m/n)) / log(m/n)
+
+-- For the mean value theorem, note that:
+-- Since |sin(x)/x| ≤ 1, the off-diagonal integral ≤ 2T
+-- And since |sin(x)| ≤ 1, the off-diagonal integral ≤ 2/|log(m/n)|
+-- For m, n integers with m ≠ n:
+-- |log(m/n)| = |log m - log n| ≥ 1/max(m,n) (for consecutive integers)
+
+-- The mean value theorem says:
+-- ∫ |Σ aₙ n^{-it}|² dt ≤ Σ |aₙ|² (2T + O(n))
+-- The O(n) comes from the off-diagonal contribution via M-V:
+-- Σ_{m≠n, m≤N} 1/|log m - log n| · |aₘ| |aₙ|
+-- ≤ (by M-V with δₙ = log(1+1/n) ≈ 1/n)
+-- ≤ πn · |aₙ|²  for each n
+
+-- This gives: total ≤ Σ |aₙ|² (2T + π·n)
+-- The 2πn in the statement is a slightly less sharp constant.
 
 -- ═══════════════════════════════════════════
--- THE CORRECT INTERMEDIATE AXIOM
+-- APPROACH: Axiomatize the mean value theorem
 -- ═══════════════════════════════════════════
 
--- The key insight: M-V follows from the fact that the
--- Fourier transform of the Selberg majorant has compact support.
--- This means that for δ-separated frequencies, the smoothed kernel
--- (obtained by convolving with the Selberg majorant) produces a
--- diagonal-dominant matrix.
+-- The full proof requires:
+-- 1. Interchanging sum and integral (needs integrability)
+-- 2. Computing ∫ e^{-it log(m/n)} dt (basic calculus)
+-- 3. Applying M-V to bound the off-diagonal sum
 --
--- Instead of axiomatizing BS → M-V derivation (which needs distributions),
--- we axiomatize the RESULT:
-
-/-- **Montgomery-Vaughan Hilbert Inequality** (Axiom).
-
-    For δ-separated real numbers λ₁, ..., λ_N and complex weights x₁, ..., x_N:
-
-    |Σ_{r≠s} xᵣ x̄ₛ / (λᵣ - λₛ)| ≤ (π/δ) · Σᵣ |xᵣ|²
-
-    This is a published result (Montgomery & Vaughan, 1974).
-    The proof uses Beurling-Selberg extremal functions and proceeds by:
-
-    1. Let S be the Selberg majorant of sgn with ∫S = 2 and Ŝ ⊂ [-1,1].
-    2. For f(t) = Σ xᵣ e^{2πiλᵣt}, consider I(Δ) = ∫ |f(t)|² B(Δt) dt.
-    3. For Δ = 1/(2δ), the band-limitation of S gives B̂(λᵣ - λₛ) = 0
-       for r ≠ s (since |λᵣ - λₛ| ≥ δ > Δ).
-    4. So I(Δ) = Σᵣ |xᵣ|² · B̂(0) = Σ |xᵣ|² / δ (from ∫S = 2).
-    5. On the other hand, B(t) ≥ sgn(t) implies bounds on the bilinear form.
-    6. Combining and optimizing over Δ gives the constant π/δ.
-
-    **STATUS**: Axiom. Depends on Selberg axioms BS1-BS5 conceptually.
-    Will be upgraded to a theorem when distributional Fourier analysis
-    is available in Mathlib. -/
-axiom montgomery_vaughan_bound
-    {N : ℕ} (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
-    (h_sep : IsDeltaSeparated' lam δ) :
-    ‖∑ i : Fin N, ∑ j : Fin N,
-        (if i = j then (0 : ℂ)
-         else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))‖
-    ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2
-
--- Now the THEOREM follows trivially from the axiom:
-theorem montgomery_vaughan_inequality'
-    (N : ℕ) (x : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
-    (h_sep : IsDeltaSeparated' lam δ) :
-    let S := ∑ i : Fin N, ∑ j : Fin N,
-        (if i = j then (0 : ℂ)
-         else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))
-    ‖S‖ ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
-  intro S
-  exact montgomery_vaughan_bound x lam δ hδ h_sep
+-- Steps 1 and 2 are doable in Lean but tedious.
+-- Step 3 requires the M-V axiom we just set up.
+--
+-- For now, let's axiomatize the mean value theorem and
+-- use it to drive toward critical_line_mellin_bound.
 
 end

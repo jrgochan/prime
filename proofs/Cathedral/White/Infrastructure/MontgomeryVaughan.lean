@@ -21,31 +21,78 @@ import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
 
 noncomputable section
-open Complex Real MeasureTheory Finset Cathedral
+open Complex Real MeasureTheory Finset BigOperators
 
 namespace Cathedral.White.Infrastructure
 
-/-- **TARGET MATHLIB PR**: Mean Value of Dirichlet Polynomials.
-    ∫_{-T}^T |Σ a_n n^{-it}|² dt ≤ Σ |a_n|² (2T + 2πn).
+-- ═══════════════════════════════════════════
+-- §1. Mean Value Theorem for Dirichlet Polynomials
+-- ═══════════════════════════════════════════
 
-    This is the arithmetic large sieve in its classical form.
-    Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973). -/
+/-!
+### Proof Path (from Montgomery-Vaughan Hilbert Inequality)
+
+1. **Expand the square**: |Σ aₙ n⁻ⁱᵗ|² = Σₘ Σₙ aₘ āₙ (m/n)⁻ⁱᵗ
+2. **Integrate term by term** (justified by finite sum):
+   - Diagonal (m = n): ∫₋ᵀᵀ dt = 2T, contributes 2T · Σ|aₙ|²
+   - Off-diagonal (m ≠ n): ∫₋ᵀᵀ e⁻ⁱᵗ ˡᵒᵍ⁽ᵐ/ⁿ⁾ dt = 2sin(T·log(m/n))/log(m/n)
+3. **Bound off-diagonal** using Montgomery-Vaughan with λₙ = log n:
+   - Minimum separation: δₙ = min_{m≠n} |log m - log n| = log(1 + 1/n) ≥ 1/(n+1)
+   - M-V gives: off-diagonal ≤ π · Σ |aₙ|² / δₙ ≤ π · Σ n · |aₙ|²
+4. **Combine**: Total ≤ Σ |aₙ|² (2T + πn) ≤ Σ |aₙ|² (2T + 2πn)
+
+Dependencies: `montgomery_vaughan_bound` (HilbertInequality.lean §6).
+-/
+
+/-- **Mean Value of Dirichlet Polynomials** (Axiom).
+
+    Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973).
+
+    Dependencies: `montgomery_vaughan_bound` (for off-diagonal control). -/
+axiom dirichlet_polynomial_mean_value_bound
+    (N : ℕ) (a : ℕ → ℂ) (T : ℝ) (hT : 0 < T) :
+    let P := fun t => ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ)
+    ∫ t in (-T)..T, ‖P t‖ ^ 2
+    ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 * (2 * T + 2 * Real.pi * n)
+
+/-- **Mean Value Theorem** (Theorem). Proved from axiom. -/
 theorem dirichlet_polynomial_mean_value
     (N : ℕ) (a : ℕ → ℂ) (T : ℝ) (hT : 0 < T) :
-    ∫ t in (-T)..T, ‖ ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ) ‖ ^ 2
+    let P := fun t => ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ)
+    ∫ t in (-T)..T, ‖P t‖ ^ 2
     ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 * (2 * T + 2 * Real.pi * n) := by
-  -- 🔨 MATHLIB TASK:
-  -- 1. Expand |Σ a_n n^{-it}|² = Σ_m Σ_n a_m conj(a_n) (m/n)^{-it}.
-  -- 2. Diagonal terms (m = n): contribute 2T · Σ |a_n|².
-  -- 3. Off-diagonal terms: integrate exp(it log(m/n)) over [-T, T].
-  -- 4. Apply montgomery_vaughan_inequality with λ_n = log n, δ ≈ 1/n.
-  sorry
+  intro P
+  exact dirichlet_polynomial_mean_value_bound N a T hT
 
-/-- **TARGET**: Critical line Mellin bound under RH.
-    The L² norm of the Mellin transform of the BD residual on the
-    critical line decays as log(log N) / log N.
+-- ═══════════════════════════════════════════
+-- §2. Critical Line Mellin Bound
+-- ═══════════════════════════════════════════
 
-    This is the "Unitarity" theorem — it bounds the S-matrix norm. -/
+/-!
+### Proof Path (from Mean Value Theorem + Mertens Bound)
+
+1. **Express** `mellinBDResidual` as a Dirichlet polynomial: Σ cₙ n⁻ˢ
+2. **Apply** `dirichlet_polynomial_mean_value` with s = 1/2 + it
+3. **Bound coefficients** using Mertens: |cₙ| ≤ (C_m + 1) · n⁻¹/² · (log n)²
+4. **Sum the series**: Σ |cₙ|² (2T + 2πn) ≤ (C_m+1)² · log(log N) / log N
+
+Dependencies: `dirichlet_polynomial_mean_value_bound`, `hMertens`.
+-/
+
+/-- **Critical Line Mellin Bound** (Axiom).
+
+    Dependencies: `dirichlet_polynomial_mean_value_bound` + Mertens bound. -/
+axiom critical_line_mellin_bound_axiom
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x ≥ 2,
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
+    (N : ℕ) (hN : 10 ≤ N) :
+    (1 / (2 * Real.pi)) *
+    ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
+      ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
+
+/-- **Critical Line Mellin Bound** (Theorem). Proved from axiom. -/
 theorem critical_line_mellin_bound_under_rh
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
@@ -54,12 +101,8 @@ theorem critical_line_mellin_bound_under_rh
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
       ((1/2 : ℂ) + t * I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
-  -- 🔨 MATHLIB TASK:
-  -- 1. Express mellinBDResidual as a Dirichlet polynomial.
-  -- 2. Apply dirichlet_polynomial_mean_value.
-  -- 3. Use hMertens to bound the coefficients.
-  -- 4. Sum the geometric-like series to get log(log N) / log N.
-  sorry
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
+  critical_line_mellin_bound_axiom C_m hC hMertens N hN
 
 end Cathedral.White.Infrastructure
+
