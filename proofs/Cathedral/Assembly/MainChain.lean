@@ -27,6 +27,7 @@ import Cathedral.NymanBeurling.NymanBeurling
 import Cathedral.NymanBeurling.Separation
 import Cathedral.Assembly.BDBypass
 import Cathedral.Assembly.VasyuninBypass
+import Cathedral.Assembly.DirectL2Crown
 
 noncomputable section
 open Complex Real
@@ -122,19 +123,20 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 
     v1 (2026-04-16): Routed through BDBypass (Mertens → Abel summation)
     v2 (2026-04-18): Rerouted through VasyuninBypass (covariance decomposition)
+    v3 (2026-04-18): DIRECT L² PATH — eliminates 3 axioms at once!
 
-    The proof now uses the Vasyunin tower directly:
+    The proof now uses the Direct L² Crown:
     1. rh_implies_mertens_bound: RH → |M(x)| = O(√x log²x)
-    2. abel_summation_covariance_bound: Mertens → vᵀCv ≤ C/log(N)
-    3. witness_numerator_convergence: bᵀv → 1 (PNT)
-    4. Combined: (1-bᵀv)² + vᵀCv → 0
+    2. abel_summation_bd_l2_bound_proved: Mertens → ∫(1-f)² ≤ C·loglog/log
+    3. loglog_div_log_lt_eps: C·loglog(N)/log(N) → 0
 
-    This eliminates bd_gram_form_decay from the crown. -/
+    ELIMINATED: vasyunin_eq_integral, abel_summation_covariance_bound,
+               witness_numerator_convergence (all bypassed) -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_vasyunin
+  rh_implies_bd_convergence_direct
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
