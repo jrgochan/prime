@@ -80,146 +80,107 @@ axiom pnt_mu_log_sq_div_k :
 
 /-- **NUMBER THEORY AXIOM**: The Möbius-weighted mean is close to 1.
 
-    This is the PURE NUMBER THEORY content extracted from linear_mean_bound.
     After the calculus chain (∫ → Σ → closed form) is proved, this is
     what remains: a finite sum bound involving Möbius weights.
 
-    Mathematical content:
-    Σ (-μ(k)) · w(k) · (log k + 1 - γ)/k ≈ 1 - (1+γ)/log N
-
-    Proof sketch (uses PNT axioms + Abel summation):
-    1. Expand: (1-γ)·Σ(-μ/k) + Σ(-μ·log/k) - taper/logN
-    2. PNT: Σ μ/k → 0, Σ μ·log/k → -1, Σ μ·log²/k → -2γ
-    3. Main term = 0 + 1 = 1
-    4. Taper = -(1+γ)/logN
-    5. Tails: O(N^{-1/4}) from Abel summation with M = O(x^{3/4})
-    6. Total: ≤ (C_m + 2)/logN since 1+γ ≈ 1.577 < 2 < C_m + 2 -/
+    Uses existential K (per Theorist directive) to avoid constant-chasing.
+    The Abel Engine will instantiate K from the PNT tail bounds:
+    |S₁| ≤ 5·C_m/N^{1/4}, |S₂+1| ≤ C_m·N^{-1/4}·(5lnN+16), etc.
+    All constants absorb into K via triangle inequality. -/
 axiom moebius_mean_finite_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K : ℝ, K > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     |∑ i : Fin (N - 1), bdMoebiusWeight N i *
       ((Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) /
         ↑(i.val + 1)) - 1| ≤
-      (C_m + 2) / Real.log (N : ℝ)
+      K / Real.log (N : ℝ)
 
-/-- **THEOREM** (was CALCULUS AXIOM 2a — now PROVED from PNT axioms!):
-    The linear mean of the BD approximant is close to 1.
+/-- **THEOREM** (was CALCULUS AXIOM 2a — now PROVED!):
+    ∃ K > 0, ∀ N ≥ 10, |(∫₀¹ f_N dx) - 1| ≤ K / log(N)
 
-    |∫₀¹ f_N(x) dx - 1| ≤ (C_m + 2) / log(N)
-
-    THE LOGARITHMIC TRAP (Theorist, April 18):
-    The log-taper w_k = 1 - ln(k)/ln(N) creates cross-terms in Σ v_k·b_k.
-    The PNT limits (Σμ/k→0, Σμ·ln/k→-1, Σμ·ln²/k→-2γ) give:
-    ∫f ≈ 1 - (1+γ)/ln(N), so the error is O(1/ln N).
-
-    Proof chain (all links proved):
-    1. ∫f = Σ vₖ·∫{1/(kx)} [✅ integral_bdLinComb_eq_sum]
-    2. ∫{1/(kx)} = (ln k + 1 - γ)/k [✅ mean_entry_eq_integral]
-    3. Expand product and use PNT axioms [✅ pnt_mu_*]
-    4. Abel summation for tail bounds [✅ abel_summation_abs_bound] -/
+    Proof chain: ∫ → Σ → closed form → number theory axiom. -/
 theorem linear_mean_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K : ℝ, K > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     |(∫ x in (0:ℝ)..1, bdLinComb N (bdMoebiusWeight N) x) - 1| ≤
-      (C_m + 2) / Real.log (N : ℝ) := by
-  -- ====== STEP 1: Integral = weighted sum of basis integrals ======
-  -- ∫ f_N = Σ v_i · ∫₀¹ {1/((i+1)x)} dx
+      K / Real.log (N : ℝ) := by
+  -- Get the existential K from the number theory axiom
+  obtain ⟨K, hK_pos, hK_bound⟩ := moebius_mean_finite_bound C_m hC hMertens
+  refine ⟨K, hK_pos, fun N hN => ?_⟩
+  -- Steps 1-3: Reduce integral to finite sum (all proved)
   have h_sum := integral_bdLinComb_eq_sum N (bdMoebiusWeight N)
-  -- ====== STEP 2: Each basis integral = closed form ======
-  -- ∫₀¹ {1/(kx)} dx = (log k + 1 - γ) / k
   have h_entry : ∀ i : Fin (N - 1),
     ∫ x in (0:ℝ)..1, Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) =
       (Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) / ↑(i.val + 1) := by
     intro i
     exact (mean_entry_eq_integral (i.val + 1) (by omega)).symm
-  -- ====== STEP 3: Substitute to get algebraic sum ======
-  -- ∫f = Σ v_i · (log(i+1) + 1 - γ)/(i+1)
-  rw [h_sum]
-  simp_rw [h_entry]
-  -- ====== STEP 4: Apply the number theory bound ======
-  -- After Steps 1-3, the integral is fully reduced to:
-  --   |Σ bdMoebiusWeight · (log k + 1 - γ)/k - 1| ≤ (C_m+2)/log N
-  -- This is pure number theory: Möbius sums + PNT + Abel.
-  -- See moebius_mean_finite_bound below.
-  exact moebius_mean_finite_bound C_m hC hMertens N hN
+  rw [h_sum]; simp_rw [h_entry]
+  -- Step 4: Apply number theory bound
+  exact hK_bound N hN
 
 /-- **NUMBER THEORY AXIOM**: The Vasyunin bilinear form is close to 1.
 
-    This is the PURE NUMBER THEORY content for the quadratic form.
-    After the calculus chain (∫f² → v^T G v) is proved via
-    bd_gram_l2_identity, what remains is bounding the bilinear form.
-
-    Mathematical content:
-    v^T G v = ΣΣ v_i·v_j·G_{ij} where v = Möbius log-taper weights
-    and G_{ij} = vasyuninGramEntry(i,j) = ∫₀¹ {1/(ix)}·{1/(jx)} dx.
-
-    The bound 1 + K²/log N follows from:
-    - Gram entry bounds: G_{jk} ≤ 1/max(j,k)
-    - Bilinear Abel summation with M(x) = O(x^{3/4})
-    - The log-taper penalty (same mechanism as linear mean) -/
+    Uses existential K (per Theorist directive).
+    Can attack via Parseval Bypass (v^T G v = ∫|W_N|²/(1/4+t²) dt)
+    or Variance Split (G = C + bb^T, reuse linear mean). -/
 axiom moebius_quadratic_finite_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K : ℝ, K > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     realQuadForm (Matrix.of fun i j =>
       vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) ≤
-      1 + (C_m + 2) ^ 2 / Real.log (N : ℝ)
+      1 + K / Real.log (N : ℝ)
 
 /-- **THEOREM** (was CALCULUS AXIOM 2b — now PROVED!):
-    The L² norm of the BD approximant is close to 1.
+    ∃ K > 0, ∀ N ≥ 10, ∫₀¹ f_N(x)² dx ≤ 1 + K/log(N)
 
-    ∫₀¹ f_N(x)² dx ≤ 1 + (C_m + 2)²/log(N)
-
-    Proof chain (all links proved):
-    1. ∫f² = v^T G v  [✅ bd_gram_l2_identity]
-    2. v^T G v ≤ 1 + K²/log N  [moebius_quadratic_finite_bound] -/
+    Proof: ∫f² = v^T G v [bd_gram_l2_identity] + axiom bound. -/
 theorem quadratic_form_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K : ℝ, K > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     ∫ x in (0:ℝ)..1, (bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      1 + (C_m + 2) ^ 2 / Real.log (N : ℝ) := by
-  -- STEP 1: Reduce integral to bilinear form via bd_gram_l2_identity
+      1 + K / Real.log (N : ℝ) := by
+  obtain ⟨K, hK_pos, hK_bound⟩ := moebius_quadratic_finite_bound C_m hC hMertens
+  refine ⟨K, hK_pos, fun N hN => ?_⟩
   rw [bd_gram_l2_identity N (by omega : 2 ≤ N) (bdMoebiusWeight N)]
-  -- STEP 2: Apply the number theory bound on the bilinear form
-  exact moebius_quadratic_finite_bound C_m hC hMertens N hN
+  exact hK_bound N hN
 
 /-- **THEOREM (PROVED!)**: Assembly — the two sub-bounds imply the L² decay.
 
+    ∃ K > 0, ∀ N ≥ 10, ∫(1-f)² ≤ K/log(N)
+
     By l2_expansion: ∫(1-f)² = 1 - 2∫f + ∫f²
-    With |∫f - 1| ≤ K/log(N) (linear bound, K = C_m+2):
-      ∫f ≥ 1 - K/log(N), so -2∫f ≤ -2 + 2K/log(N)
-    With ∫f² ≤ 1 + K²/log(N) (quadratic bound):
-      ∫(1-f)² ≤ 1 + (-2 + 2K/log(N)) + (1 + K²/log(N))
-             = (2K + K²)/log(N)
-             ≤ (K+1)²/log(N) = (C_m+3)²/log(N)  ✓ -/
+    With |∫f - 1| ≤ K₁/log(N) and ∫f² ≤ 1 + K₂/log(N):
+      ∫(1-f)² ≤ (2K₁ + K₂)/log(N)
+    Set K = 2K₁ + K₂. -/
 theorem mertens_l2_decay
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K : ℝ, K > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-        (C_m + 3) ^ 2 / Real.log (N : ℝ) := by
-  -- Get the linear and quadratic bounds
-  set K := C_m + 2 with hK_def
-  have hK_pos : 0 < K := by linarith
-  have h_lin := linear_mean_bound C_m hC hMertens N hN
-  have h_quad := quadratic_form_bound C_m hC hMertens N hN
-  have hN_pos : (0:ℝ) < (N:ℝ) := by exact_mod_cast (show 0 < N by omega)
+        K / Real.log (N : ℝ) := by
+  -- Get existential constants from both bounds
+  obtain ⟨K₁, hK₁_pos, h_lin⟩ := linear_mean_bound C_m hC hMertens
+  obtain ⟨K₂, hK₂_pos, h_quad⟩ := quadratic_form_bound C_m hC hMertens
+  -- Set K = 2K₁ + K₂ (absorbs all constants)
+  refine ⟨2 * K₁ + K₂, by linarith, fun N hN => ?_⟩
   have hlogN_pos : (0:ℝ) < Real.log (N:ℝ) := by
     apply Real.log_pos; exact_mod_cast (show 1 < N by omega)
-  -- Let I_f = ∫f
-  set I_f := ∫ x in (0:ℝ)..1, bdLinComb N (bdMoebiusWeight N) x with hI_f_def
-  -- Extract lower bound from |I_f - 1| ≤ K/log(N)
-  have h_lin_lo : 1 - K / Real.log (N:ℝ) ≤ I_f := by
+  -- Get concrete bounds for this N
+  have h_lin_N := h_lin N hN
+  have h_quad_N := h_quad N hN
+  set I_f := ∫ x in (0:ℝ)..1, bdLinComb N (bdMoebiusWeight N) x
+  have h_lin_lo : 1 - K₁ / Real.log (N:ℝ) ≤ I_f := by
     linarith [neg_abs_le (I_f - 1)]
-  -- Step: Expand ∫(1-f)² = 1 - 2·I_f + ∫f² using integral linearity
+  -- Expand ∫(1-f)² = 1 - 2∫f + ∫f²
   have h_expand : ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 =
       1 - 2 * I_f + ∫ x in (0:ℝ)..1, (bdLinComb N (bdMoebiusWeight N) x) ^ 2 := by
     have h_eq : (fun x => (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2) =
@@ -231,48 +192,23 @@ theorem mertens_l2_decay
     have h3 := bdLinComb_sq_integrable N (bdMoebiusWeight N)
     rw [intervalIntegral.integral_add (h1.sub h2) h3,
         intervalIntegral.integral_sub h1 h2]
-    have h_int_1 : ∫ x in (0:ℝ)..1, (1:ℝ) = 1 := by
-      rw [intervalIntegral.integral_const]; simp
-    have h_int_cm : ∫ x in (0:ℝ)..1, 2 * bdLinComb N (bdMoebiusWeight N) x =
-        2 * I_f := intervalIntegral.integral_const_mul 2 _
-    rw [h_int_1, h_int_cm]
-  -- Now combine: ∫(1-f)² = 1 - 2I_f + I_f2
+    rw [intervalIntegral.integral_const, sub_zero, one_smul,
+        intervalIntegral.integral_const_mul]
   rw [h_expand]
-  -- set I_f2 so linarith can work with it
   set I_f2 := ∫ x in (0:ℝ)..1, (bdLinComb N (bdMoebiusWeight N) x) ^ 2
-  -- 1 - 2*I_f + I_f2 ≤ 1 - 2*(1-K/log N) + (1+K²/log N) = (2K+K²)/log N
-  have h_ub : 1 - 2 * I_f + I_f2 ≤ (2 * K + K ^ 2) / Real.log (N:ℝ) := by
-    have h1 : -2 * I_f ≤ -2 * (1 - K / Real.log (N:ℝ)) := by linarith
-    have h2 : I_f2 ≤ 1 + K ^ 2 / Real.log (N:ℝ) := h_quad
-    have h3 : 1 - 2 * (1 - K / Real.log (N:ℝ)) +
-        (1 + K ^ 2 / Real.log (N:ℝ)) =
-        (2 * K + K ^ 2) / Real.log (N:ℝ) := by field_simp; ring
+  -- Combine: 1 - 2I_f + I_f2 ≤ 1 - 2(1 - K₁/logN) + (1 + K₂/logN) = (2K₁+K₂)/logN
+  have h_ub : 1 - 2 * I_f + I_f2 ≤ (2 * K₁ + K₂) / Real.log (N:ℝ) := by
+    have h1 : -2 * I_f ≤ -2 * (1 - K₁ / Real.log (N:ℝ)) := by linarith
+    have h3 : 1 - 2 * (1 - K₁ / Real.log (N:ℝ)) +
+        (1 + K₂ / Real.log (N:ℝ)) =
+        (2 * K₁ + K₂) / Real.log (N:ℝ) := by field_simp; ring
     linarith
-  -- (2K+K²)/log N ≤ (K+1)²/log N = (C_m+3)²/log N
-  have h_sum : (2 * K + K ^ 2) / Real.log (N:ℝ) ≤
-      (C_m + 3) ^ 2 / Real.log (N:ℝ) := by
-    apply div_le_div_of_nonneg_right _ (le_of_lt hlogN_pos)
-    have : (2 * K + K ^ 2) = (K + 1) ^ 2 - 1 := by ring
-    have : (K + 1) ^ 2 - 1 ≤ (K + 1) ^ 2 := by linarith
-    have : K + 1 = C_m + 3 := by rw [hK_def]; ring
-    nlinarith
   linarith
 
-theorem mertens_34_l2_bound
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
-    ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
-        (C_m + 3) ^ 2 / Real.log (N : ℝ) :=
-  ⟨bdMoebiusWeight N, mertens_l2_decay C_m hC hMertens N hN⟩
+/-- **THEOREM**: Mertens O(x^{3/4}) → L² convergence.
 
-/-- **THEOREM**: Direct: Mertens O(x^{3/4}) → L² convergence.
-
-    The convergence argument: given ∫(1-f)² ≤ K/log(N),
-    for any ε > 0, choose N > e^{K/ε} so K/log(N) < ε.
-    (Log grows without bound, so this always works.) -/
+    Given ∃ K, ∫(1-f)² ≤ K/log(N), for any ε > 0,
+    choose N > e^{K/ε} so K/log(N) < ε. -/
 theorem mertens_34_implies_convergence :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ ((3:ℝ)/4)) →
@@ -280,33 +216,26 @@ theorem mertens_34_implies_convergence :
       ∃ v : Fin (N - 1) → ℝ,
         ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε := by
   intro ⟨C_m, hC, hMertens⟩ ε hε
-  set K := (C_m + 3) ^ 2 with hK_def
-  have hK_pos : 0 < K := by positivity
-  -- Choose N₀ large enough that K/log(N) < ε, i.e., log(N) > K/ε
-  -- Take N₀ = max 10 (⌈exp(K/ε)⌉₊ + 1)
+  -- Get the existential K from mertens_l2_decay
+  obtain ⟨K, hK_pos, hK_bound⟩ := mertens_l2_decay C_m hC hMertens
+  -- Choose N₀ large enough that K/log(N₀) < ε
   set N₀ := max 10 (⌈Real.exp (K / ε)⌉₊ + 1)
   refine ⟨N₀, fun N hN => ?_⟩
   have hN10 : 10 ≤ N := by omega
-  obtain ⟨v, hv⟩ := mertens_34_l2_bound C_m hC hMertens N hN10
-  refine ⟨v, lt_of_le_of_lt hv ?_⟩
-  -- K/log(N) < ε because N > exp(K/ε), so log(N) > K/ε
-  have hN_pos : (0:ℝ) < (N:ℝ) := by exact_mod_cast (show 0 < N by omega)
+  have hK_N := hK_bound N hN10
+  refine ⟨bdMoebiusWeight N, lt_of_le_of_lt hK_N ?_⟩
   have hlogN_pos : (0:ℝ) < Real.log (N:ℝ) := by
     apply Real.log_pos; exact_mod_cast (show 1 < N by omega)
   rw [div_lt_iff₀ hlogN_pos]
-  -- N > exp(K/ε), so log(N) > K/ε, so K < ε * log(N)
   have hN_large : Real.exp (K / ε) < (N:ℝ) := by
     calc Real.exp (K / ε) ≤ ↑⌈Real.exp (K / ε)⌉₊ := Nat.le_ceil _
       _ < (N:ℝ) := by exact_mod_cast (show ⌈Real.exp (K / ε)⌉₊ < N by omega)
   have h_log : K / ε < Real.log (N:ℝ) := by
     rw [← Real.log_exp (K / ε)]
     exact Real.log_lt_log (Real.exp_pos _) hN_large
-  -- K / ε < log N  ⟹  K < ε * log N
-  have h_final : K < ε * Real.log (N:ℝ) := by
-    calc K = K / ε * ε := (div_mul_cancel₀ K (ne_of_gt hε)).symm
-      _ < Real.log (N:ℝ) * ε := mul_lt_mul_of_pos_right h_log hε
-      _ = ε * Real.log (N:ℝ) := mul_comm _ _
-  linarith
+  calc K = K / ε * ε := (div_mul_cancel₀ K (ne_of_gt hε)).symm
+    _ < Real.log (N:ℝ) * ε := mul_lt_mul_of_pos_right h_log hε
+    _ = ε * Real.log (N:ℝ) := mul_comm _ _
 
 -- ════════════════════════════════════════════════
 -- §4. THE CROWN: rh_implies_l2_convergence (PROVED!)
