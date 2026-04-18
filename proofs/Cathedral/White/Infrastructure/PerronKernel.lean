@@ -251,6 +251,13 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
   -- which sums to 2π (from the winding number argument).
   sorry
 
+/-- Left vertical segment bound for y > 1: ‖∫ f(−R + t·I) dt‖ ≤ 2T·y^(−R)/R.
+    The exponential decay y^(-R) → 0 as R → ∞ when y > 1. -/
+lemma left_vertical_bound {y R T : ℝ} (hy : 1 < y) (hR : 0 < R) (hT : 0 < T) :
+    ‖∫ t in (-T)..T, perronIntegrand y (-↑R + ↑t * I)‖ ≤ 2 * T * y ^ (-R) / R := by
+  -- Analogous to right_vertical_bound but for the left edge at σ = -R
+  sorry
+
 /-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T·log y)).
 
     Strategy (The Phantom Pole Bypass via dslope):
@@ -262,13 +269,16 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
     5. Residue = 1 extracted from the 2πi winding number -/
 theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T - 1‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  -- The proof mirrors perron_kernel_lt_one but with:
-  --   (a) Left-shift rectangle [-R, c] × [-T, T]
-  --   (b) Residue contribution: ∫_∂B 1/s = 2πi (via dslope decomposition)
-  --   (c) Left vertical bound: y^(-R)/R → 0 as R → ∞ (since y > 1)
-  -- The dslope bypass: g(s) = (y^s - 1)/s is entire, so ∫_∂B g = 0,
-  -- giving ∫_∂B y^s/s = ∫_∂B 1/s = 2πi (winding number × 2πi).
-  -- After the 1/(2π) normalization, this contributes exactly 1.
+  -- Proof outline:
+  -- 1. For any R > 0, on rectangle [-R, c] × [-T, T]:
+  --    ∫_∂B y^s/s = ∫_∂B 1/s = 2πi (by dslope + Cauchy-Goursat + winding)
+  -- 2. perronIntegral = (right edge)/(2π)
+  --    = [2πi + (top - bot) + I·left] / (2πi)  ... wait, divided by 2π not 2πi
+  -- 3. perronIntegral - 1 = [(top - bot) + I·left]/(2π) ... with 2πi from residue
+  -- Actually, we need to be more careful with the sign conventions.
+  --
+  -- The full assembly requires rectangle_integral_inv_eq_two_pi_I.
+  -- We sorry this pending completion of the winding number calculation.
   sorry
 
 -- ═══════════════════════════════════════════
