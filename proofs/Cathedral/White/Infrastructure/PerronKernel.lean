@@ -220,9 +220,24 @@ lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
 -- §6. The Perron Kernel for y > 1 (Residue = 1)
 -- ═══════════════════════════════════════════
 
-/-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T|log y|)). -/
+/-- **KEY LEMMA**: For y > 1, Perron integral = 1 + O(y^c/(T·log y)).
+
+    Strategy (The Phantom Pole Bypass via dslope):
+    1. Split: y^s/s = g(s) + 1/s where g(s) = dslope(y^s, 0)(s) = (y^s - 1)/s
+    2. g is entire (Mathlib: differentiableOn_dslope)
+    3. On the LEFT rectangle [-R, c] × [-T, T] enclosing s=0:
+       ∫_∂B g = 0 (Cauchy-Goursat), so ∫_∂B y^s/s = ∫_∂B 1/s = 2πi
+    4. Same composition as lt_one but contour shifted LEFT
+    5. Residue = 1 extracted from the 2πi winding number -/
 theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T) :
     ‖perronIntegral y c T - 1‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
+  -- The proof mirrors perron_kernel_lt_one but with:
+  --   (a) Left-shift rectangle [-R, c] × [-T, T]
+  --   (b) Residue contribution: ∫_∂B 1/s = 2πi (via dslope decomposition)
+  --   (c) Left vertical bound: y^(-R)/R → 0 as R → ∞ (since y > 1)
+  -- The dslope bypass: g(s) = (y^s - 1)/s is entire, so ∫_∂B g = 0,
+  -- giving ∫_∂B y^s/s = ∫_∂B 1/s = 2πi (winding number × 2πi).
+  -- After the 1/(2π) normalization, this contributes exactly 1.
   sorry
 
 -- ═══════════════════════════════════════════
