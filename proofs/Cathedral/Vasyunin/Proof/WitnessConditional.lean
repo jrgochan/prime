@@ -215,60 +215,11 @@ theorem witness_covariance_decay_iff_rh :
               · exact hlog_pos.le
         _ = 1 / 4 := by field_simp
         _ ≤ (dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 := h_num_sq
-    -- Step 2: From witness bound, derive quadForm_diverges
+    -- Step 2: Bridge directly to RH via the λ-trick
+    -- (Steps 2-4 of the old chain are now bypassed by the λ-trick)
     obtain ⟨c, hc, N₃, hN_bound⟩ := h_witness
-    have h_quad : ∃ c : ℝ, c > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-        c * Real.log (N : ℝ) ≤ vasyuninQuadForm N := by
-      refine ⟨c, hc, max N₃ 3, fun N hN₀ => ?_⟩
-      have hN₃' : N ≥ N₃ := le_of_max_le_left hN₀
-      have hN3 : N ≥ 3 := le_of_max_le_right hN₀
-      have hQ := hN_bound N hN₃'
-      have hpos : dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) > 0 :=
-        Cathedral.Variational.posSemidef_pos_of_ne_zero
-          (vasyuninCovMatrix N) (vasyuninCovMatrix_hermitian N)
-          (vasyuninCovMatrix_posSemidef N hN3) (vasyuninCovMatrix_isUnit_det N hN3)
-          (logCutoffWitness N) (by
-            intro h_eq
-            have h0 : logCutoffWitness N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
-            simp only [logCutoffWitness, moebiusFn] at h0
-            rw [ArithmeticFunction.moebius_apply_one] at h0
-            simp [Real.log_one] at h0)
-      exact le_trans hQ (variational_lower_bound N hN3 (logCutoffWitness N) hpos)
-    -- Step 3: From quadForm_diverges, derive nbDistSq_decays
-    have h_nb_decay : ∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-        1 / (1 + vasyuninQuadForm N) < ε := by
-      intro ε hε
-      obtain ⟨c', hc', N₄, hN₄⟩ := h_quad
-      have h_arch : ∃ N₅ : ℕ, (1/ε - 1) / c' < Real.log (N₅ : ℝ) := by
-        have h_tend := Real.tendsto_log_atTop
-        rw [Filter.tendsto_atTop_atTop] at h_tend
-        obtain ⟨M, hM⟩ := h_tend ((1/ε - 1) / c' + 1)
-        refine ⟨⌈max M 1⌉₊, ?_⟩
-        have hM_bound := hM (max M 1) (le_max_left _ _)
-        have h1 : (1:ℝ) ≤ max M 1 := le_max_right _ _
-        have h2 : (max M 1 : ℝ) ≤ (⌈max M 1⌉₊ : ℝ) := Nat.le_ceil _
-        linarith [Real.log_le_log (by linarith) h2]
-      obtain ⟨N₅, hN₅⟩ := h_arch
-      refine ⟨max N₄ (max N₅ 1), fun N hN => ?_⟩
-      have hN₄' : N ≥ N₄ := by omega
-      have hN₅' : N ≥ N₅ := by omega
-      have hN1 : N ≥ 1 := by omega
-      have h_XN := hN₄ N hN₄'
-      have h_log_mono : Real.log (N₅ : ℝ) ≤ Real.log (N : ℝ) := by
-        rcases Nat.eq_zero_or_pos N₅ with rfl | hN₅_pos
-        · simp; exact Real.log_nonneg (by exact_mod_cast hN1)
-        · exact Real.log_le_log (Nat.cast_pos.mpr hN₅_pos) (by exact_mod_cast hN₅')
-      have h_clog : 1/ε - 1 < c' * Real.log (N : ℝ) := by
-        have h1 : (1/ε - 1) / c' < Real.log (N : ℝ) := lt_of_lt_of_le hN₅ h_log_mono
-        rw [div_lt_iff₀ hc'] at h1; linarith [mul_comm (Real.log (N : ℝ)) c']
-      have h_X_big : 1/ε < 1 + vasyuninQuadForm N := by linarith
-      have h_denom_pos : (0:ℝ) < 1 + vasyuninQuadForm N := by
-        have : (0:ℝ) < 1/ε := div_pos one_pos hε; linarith
-      rw [div_lt_iff₀ h_denom_pos]
-      calc 1 = ε * (1/ε) := by rw [mul_one_div_cancel (ne_of_gt hε)]
-        _ < ε * (1 + vasyuninQuadForm N) := mul_lt_mul_of_pos_left h_X_big hε
-    -- Step 4: Bridge to integral formulation → RH
-    exact nyman_beurling_converse (algebraic_nb_bridge h_nb_decay)
+    exact nyman_beurling_converse
+      (forward_bridge_from_lambda_trick c hc ⟨N₃, hN_bound⟩)
   · -- Converse: RH → covariance decay
     exact rh_implies_covariance_decay
 
