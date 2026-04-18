@@ -166,6 +166,15 @@ theorem integral_bdLinComb_eq_sum (N : ℕ) (v : Fin (N - 1) → ℝ) :
   congr 1; ext i
   exact intervalIntegral.integral_const_mul (v i) _
 
+/-- **THEOREM** (PROVED!): For u > 1, {1/u} = 1/u.
+    Since 0 < 1/u < 1, the floor is 0. -/
+theorem fract_inv_eq_inv_of_gt_one (u : ℝ) (hu : 1 < u) :
+    Int.fract (1 / u) = 1 / u := by
+  rw [Int.fract_eq_self]
+  constructor
+  · exact div_nonneg one_pos.le (le_of_lt (lt_trans one_pos hu))
+  · rwa [div_lt_one (lt_trans one_pos hu)]
+
 -- ════════════════════════════════════════════════
 -- §2. ABEL SUMMATION WITH O(x^{3/4})
 -- ════════════════════════════════════════════════
