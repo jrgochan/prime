@@ -171,11 +171,35 @@ lemma rectangle_integral_perron_vanishes {y c R T : ℝ} (hy : 0 < y)
         -- ContinuousOn: perronIntegrand is continuous on [c,R]×[-T,T] (c > 0 so s ≠ 0)
         -- DifferentiableAt: perronIntegrand_differentiableAt at all interior points
 
-/-- The right vertical segment is bounded by 2T·y^R/R for y < 1. -/
+/-- The right vertical segment is bounded by 2T·y^R/R for y < 1.
+    For each t, ‖y^{R+tI}/(R+tI)‖ = y^R/‖R+tI‖ ≤ y^R/R since ‖R+tI‖ ≥ R. -/
 lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
     (hR : 0 < R) (hT : 0 < T) :
     ‖∫ t in (-T)..T, perronIntegrand y (R + t * I)‖ ≤ 2 * T * y ^ R / R := by
-  sorry
+  -- Each integrand has norm ≤ y^R/R
+  have pointwise_bound : ∀ t ∈ Set.uIoc (-T) T, ‖perronIntegrand y (↑R + ↑t * I)‖ ≤ y ^ R / R := by
+    intro t _
+    have hR_ne : (↑R : ℂ) + ↑t * I ≠ 0 := by
+      intro h
+      have : (↑R : ℂ).re + (↑t * I).re = 0 := by rw [← Complex.add_re]; simp [h]
+      simp [Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+      linarith
+    rw [perronIntegrand_norm hy_pos hR_ne]
+    have hre : (↑R + ↑t * I).re = R := by
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+    rw [hre]
+    gcongr
+    -- Need: R ≤ ‖R + tI‖
+    calc (R : ℝ) = |(↑R + ↑t * I).re| := by simp [hre, abs_of_pos hR]
+      _ ≤ ‖(↑R : ℂ) + ↑t * I‖ := Complex.abs_re_le_norm _
+  -- Apply constant bound: ‖∫‖ ≤ C * |T - (-T)| = C * 2T
+  calc ‖∫ t in (-T)..T, perronIntegrand y (↑R + ↑t * I)‖
+      ≤ (y ^ R / R) * |T - (-T)| :=
+        intervalIntegral.norm_integral_le_of_norm_le_const_ae
+          (Filter.Eventually.of_forall pointwise_bound)
+    _ = 2 * T * y ^ R / R := by
+        rw [sub_neg_eq_add, ← two_mul, abs_of_pos (by linarith : 0 < 2 * T)]
+        ring
 
 -- ═══════════════════════════════════════════
 -- §6. The Perron Kernel for y > 1 (Residue = 1)
