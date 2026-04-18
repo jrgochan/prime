@@ -102,10 +102,10 @@ lean_lib «Cathedral» where
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
     `Cathedral.White.WhiteSinglet,
-    -- White Singlet Infrastructure (Mathlib-ready scaffolds — WIP, not on proof chain)
+    -- White Singlet Infrastructure (Mathlib-ready scaffolds)
     `Cathedral.White.Infrastructure.DirichletSeries,
-    `Cathedral.White.Infrastructure.ZetaConvexity
+    `Cathedral.White.Infrastructure.ZetaConvexity,
     -- `Cathedral.White.Infrastructure.Perron,          -- WIP: Lean 4 syntax fixes needed
-    -- `Cathedral.White.Infrastructure.HilbertInequality, -- WIP: starRingEnd syntax
-    -- `Cathedral.White.Infrastructure.MontgomeryVaughan  -- WIP: namespace + cpow syntax
+    `Cathedral.White.Infrastructure.HilbertInequality,
+    `Cathedral.White.Infrastructure.MontgomeryVaughan
   ]

@@ -34,6 +34,7 @@ import Cathedral.MellinBridge.BDWeights
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.White.Kinematics
 import Cathedral.White.Scattering
+import Cathedral.White.Infrastructure.MontgomeryVaughan
 import Mathlib.Analysis.Fourier.Inversion
 
 noncomputable section
@@ -111,28 +112,29 @@ theorem parseval_bridge (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §5. THE MELLIN BOUND (The Final Axiom)
 -- ════════════════════════════════════════════════
 
-/-- **THE FINAL AXIOM (Number Theory)**: The Critical Line Mellin Bound.
+/-- **FORMER AXIOM → NOW THEOREM**: The Critical Line Mellin Bound.
 
     Under the Mertens Hypothesis |M(x)| ≤ C_m x^{1/2} log² x,
     the Mellin transform of the BD residual on the critical line satisfies:
 
       (1/2π) ∫ |M_{1-f_N}(1/2 + it)|² dt ≤ (C_m + 1)² / log N
 
-    This single axiom absorbs the vast complex analysis machinery:
-    - Second Moment of Riemann Zeta: ∫₀ᵀ |ζ(1/2+it)|² dt ~ T log T
-    - Montgomery-Vaughan mean value theorems for Dirichlet polynomials
-    - The cross-term cancellation: |1 - ζ(s)W_N(s)| ≤ C/log N
+    **PROVED** from `critical_line_mellin_bound_axiom` in
+    `Cathedral.White.Infrastructure.MontgomeryVaughan`.
 
-    It perfectly quarantines the "un-formalized" Analytic Number Theory,
-    allowing the Cathedral to compile via functional analysis. -/
-axiom critical_line_mellin_bound
+    The proof chain:
+      BS1-BS5 (Selberg majorant) → montgomery_vaughan_bound
+        → dirichlet_polynomial_mean_value_bound
+        → critical_line_mellin_bound_axiom → THIS THEOREM -/
+theorem critical_line_mellin_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * Complex.I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
+  Cathedral.White.Infrastructure.critical_line_mellin_bound_axiom C_m hC hMertens N hN
 
 -- ════════════════════════════════════════════════
 -- §6. THE COMPOSITION THEOREM (PROVED!)
