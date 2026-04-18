@@ -214,6 +214,43 @@ theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T
 -- §7. The Perron Kernel for y < 1 (Residue = 0)
 -- ═══════════════════════════════════════════
 
+/-- Horizontal segment bound: ‖∫_c^R f(σ ± TI) dσ‖ ≤ y^c / (T · |log y|) for 0 < y < 1.
+    Composes perronIntegrand_bound_on_horizontal with integral_rpow_le_of_lt_one. -/
+lemma horizontal_segment_bound {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
+    (hc : 0 < c) (hR : c ≤ R) (hT : 0 < T) (sign : ℝ) (hsign : |sign| = 1) :
+    ‖∫ σ in c..R, perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤
+      y ^ c / (T * |Real.log y|) := by
+  -- Pointwise bound: ‖f(σ + sign·T·I)‖ ≤ y^σ/T
+  have hle : ∀ σ, σ ∈ Set.Ioc c R → ‖perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤ y ^ σ / T := by
+    intro σ hσ_mem
+    have hσ_pos : 0 < σ := lt_trans hc hσ_mem.1
+    have hre : (↑σ + ↑(sign * T) * I : ℂ).re = σ := by
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+    have hs_ne : (↑σ : ℂ) + ↑(sign * T) * I ≠ 0 := by
+      intro h
+      have : (↑σ + ↑(sign * T) * I : ℂ).re = (0 : ℂ).re := congr_arg Complex.re h
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+      linarith
+    have him : |(↑σ + ↑(sign * T) * I : ℂ).im| = T := by
+      simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re,
+                  Complex.ofReal_im, Complex.I_re, Complex.I_im]
+      ring_nf
+      rw [abs_mul, hsign, one_mul, abs_of_pos hT]
+    exact perronIntegrand_bound_on_horizontal hy_pos hT hre him hs_ne
+  have hint : IntervalIntegrable (fun σ => y ^ σ / T) MeasureTheory.volume c R :=
+    ((Continuous.rpow continuous_const continuous_id
+      (fun _ => Or.inl (ne_of_gt hy_pos))).div_const T).intervalIntegrable c R
+  calc ‖∫ σ in c..R, perronIntegrand y (↑σ + ↑(sign * T) * I)‖
+      ≤ ∫ σ in c..R, y ^ σ / T :=
+        intervalIntegral.norm_integral_le_of_norm_le hR
+          (Filter.Eventually.of_forall fun σ hσ => hle σ hσ)
+          hint
+    _ = (∫ σ in c..R, y ^ σ) / T := by
+        rw [intervalIntegral.integral_div]
+    _ ≤ (y ^ c / |Real.log y|) / T :=
+        div_le_div_of_nonneg_right (integral_rpow_le_of_lt_one hy_pos hy_lt hc.le hR) hT.le
+    _ = y ^ c / (T * |Real.log y|) := by ring
+
 /-- **KEY LEMMA**: For 0 < y < 1, Perron integral = 0 + O(y^c/(T|log y|)). -/
 theorem perron_kernel_lt_one (y c T : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1)
     (hc : 0 < c) (hT : 0 < T) :
