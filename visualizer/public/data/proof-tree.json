@@ -6,7 +6,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Axioms.lean",
-      "line": 144,
+      "line": 140,
       "signature": "theorem zeta_zero_separates : \u2200 \u03c1 : \u2102, riemannZeta \u03c1 = 0 \u2192 0 < \u03c1.re \u2192 \u03c1.re < 1 \u2192 \u03c1.re \u2260 1/2 \u2192 \u2203 \u03b4 : \u211d, 0 < \u03b4 \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 \u2200 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2265 \u03b4"
     },
     {
@@ -4114,21 +4114,12 @@
       "signature": "def mellinDistance (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u211d"
     },
     {
-      "id": "mellin_plancherel_gram",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "mellin",
-      "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 105,
-      "signature": "axiom mellin_plancherel_gram (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : dotProduct v ((gramMatrix N).mulVec v) = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellinNBLinCombR N v ((1/2 : \u2102) + t * Complex.I)\u2016 \u2026"
-    },
-    {
       "id": "moebiusWeight",
       "type": "def",
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 123,
+      "line": 106,
       "signature": "def moebiusWeight (k : \u2115) : \u211d"
     },
     {
@@ -4137,7 +4128,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 153,
+      "line": 136,
       "signature": "theorem rh_implies_type_II_sieve_bound : RiemannHypothesis \u2192 \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264\u2026"
     },
     {
@@ -4146,7 +4137,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/MellinSieve.lean",
-      "line": 234,
+      "line": 217,
       "signature": "theorem phase_3_chain : RiemannHypothesis \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2203 N\u2080 : \u2115, 2 \u2264 N\u2080 \u2227 \u2200 N : \u2115, N\u2080 \u2264 N \u2192 nbDistSq' N \u2264 C / Real.log (N : \u211d)"
     },
     {
@@ -5101,10 +5092,6 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "nyman_beurling_equivalence",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "nbDistSq_lt_one",
       "target": "zeta_zero_separates"
     },
@@ -5205,10 +5192,6 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "mellin_plancherel_gram",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "phase_3_chain",
       "target": "zeta_zero_separates"
     },
@@ -5246,6 +5229,14 @@
     },
     {
       "source": "gramMatrix_isUnit_det",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "dirichlet_polynomial_mean_value_bound",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "bd_gram_form_decay",
       "target": "zeta_zero_separates"
     },
     {
@@ -18657,30 +18648,6 @@
       "target": "mellin_plancherel_gram_derived"
     },
     {
-      "source": "mellin_plancherel_gram",
-      "target": "mellin_fourier_change"
-    },
-    {
-      "source": "mellin_plancherel_gram",
-      "target": "flattened_basis_integrable"
-    },
-    {
-      "source": "mellin_plancherel_gram",
-      "target": "fourier_inversion_autocorrelation"
-    },
-    {
-      "source": "mellin_plancherel_gram",
-      "target": "autocorrelation_zero_eq_l2_norm"
-    },
-    {
-      "source": "mellin_plancherel_gram",
-      "target": "gram_form_eq_l2_norm"
-    },
-    {
-      "source": "mellin_plancherel_gram",
-      "target": "mellin_plancherel_gram_derived"
-    },
-    {
       "source": "Cathedral",
       "target": "mellin_target"
     },
@@ -18918,10 +18885,6 @@
     },
     {
       "source": "gramMatrix",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "gramMatrix",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -18934,10 +18897,6 @@
     },
     {
       "source": "basisInnerProd",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "basisInnerProd",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -18947,10 +18906,6 @@
     {
       "source": "basisInnerProd",
       "target": "phase_3_chain"
-    },
-    {
-      "source": "nbDistSq",
-      "target": "mellin_plancherel_gram"
     },
     {
       "source": "nbDistSq",
@@ -18966,10 +18921,6 @@
     },
     {
       "source": "nbLinComb",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "nbLinComb",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -18979,10 +18930,6 @@
     {
       "source": "nbLinComb",
       "target": "phase_3_chain"
-    },
-    {
-      "source": "l2_error_eq_quad_error",
-      "target": "mellin_plancherel_gram"
     },
     {
       "source": "l2_error_eq_quad_error",
@@ -18998,10 +18945,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "Cathedral",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19010,10 +18953,6 @@
     },
     {
       "source": "nbDistSq_le_test_vector",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "nbDistSq_le_test_vector",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19026,10 +18965,6 @@
     },
     {
       "source": "realQuadForm",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "realQuadForm",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19042,10 +18977,6 @@
     },
     {
       "source": "crossParityBilinear",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "crossParityBilinear",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19058,10 +18989,6 @@
     },
     {
       "source": "type_II_sieve_bound",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "type_II_sieve_bound",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19074,10 +19001,6 @@
     },
     {
       "source": "parityBlockA",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "parityBlockA",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19090,10 +19013,6 @@
     },
     {
       "source": "parityBlockC",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "parityBlockC",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19105,8 +19024,16 @@
       "target": "phase_3_chain"
     },
     {
-      "source": "mellinRestricted",
-      "target": "mellin_plancherel_gram"
+      "source": "mellin_plancherel_gram_derived",
+      "target": "rh_implies_type_II_sieve_bound"
+    },
+    {
+      "source": "mellin_plancherel_gram_derived",
+      "target": "nyman_beurling_forward_from_sieve"
+    },
+    {
+      "source": "mellin_plancherel_gram_derived",
+      "target": "phase_3_chain"
     },
     {
       "source": "mellinRestricted",
@@ -19122,10 +19049,6 @@
     },
     {
       "source": "fractBasisC",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "fractBasisC",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19138,10 +19061,6 @@
     },
     {
       "source": "mertens_bound_from_rh",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "mertens_bound_from_rh",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19151,10 +19070,6 @@
     {
       "source": "mertens_bound_from_rh",
       "target": "phase_3_chain"
-    },
-    {
-      "source": "abel_summation_l2_bound",
-      "target": "mellin_plancherel_gram"
     },
     {
       "source": "abel_summation_l2_bound",
@@ -19170,10 +19085,6 @@
     },
     {
       "source": "rh_weight_construction_derived",
-      "target": "mellin_plancherel_gram"
-    },
-    {
-      "source": "rh_weight_construction_derived",
       "target": "rh_implies_type_II_sieve_bound"
     },
     {
@@ -19183,10 +19094,6 @@
     {
       "source": "rh_weight_construction_derived",
       "target": "phase_3_chain"
-    },
-    {
-      "source": "mellinNBLinComb",
-      "target": "mellin_plancherel_gram"
     },
     {
       "source": "mellinNBLinComb",
@@ -21866,14 +21773,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 562,
-    "totalEdges": 4201,
-    "axiomCount": 44,
+    "totalNodes": 561,
+    "totalEdges": 4180,
+    "axiomCount": 43,
     "theoremCount": 419,
     "definitionCount": 99,
     "provedTheorems": 419,
     "fileCount": 73,
-    "description": "Cathedral proof architecture: 44 axioms, 419 theorems, 99 definitions across 73 files",
-    "generatedAt": "2026-04-18T23:21:57.063366"
+    "description": "Cathedral proof architecture: 43 axioms, 419 theorems, 99 definitions across 73 files",
+    "generatedAt": "2026-04-18T23:30:01.692515"
   }
 }
