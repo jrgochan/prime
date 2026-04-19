@@ -204,11 +204,10 @@ export default function ProofTreePage() {
           .forceX<any>()
           .x((d: ProofNode) => {
             const positions: Record<string, number> = {
-              converse: width * 0.25,
-              forward: width * 0.5,
-              robin: width * 0.75,
-              crown: width * 0.5,
-              spectral: width * 0.85,
+              infrastructure: width * 0.2,
+              variational: width * 0.4,
+              mellin: width * 0.6,
+              crown: width * 0.8,
             };
             return positions[d.route] || width / 2;
           })
