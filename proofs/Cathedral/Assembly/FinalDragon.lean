@@ -94,20 +94,95 @@ private def S₃ (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
     (Real.log (k : ℝ)) ^ 2 / (k : ℝ)
 
-/-- **SORRY SUB-LEMMA** (THE LAST SORRY — Theorist "tail_domination"):
-    Abel-Mertens tail bound: polynomial decay crushes logarithmic penalty.
+/-- **PROVED**: x^{-1/4}·log(x) ≤ 4 for all N ≥ 10.
 
-    From: Mertens |M(x)| ≤ C_m·x^{3/4} + PNT convergence,
-    Abel summation on the tail gives |S_i(N) - L_i| ≤ C·N^{-1/4}·log²N.
-    Combined with N^{-1/4}·log³N → 0 (polynomial > log), we get
-    |S_i(N) - L_i| ≤ K/logN for all N ≥ 10.
+    Standard calculus: log grows slower than any power.
+    x^{-1/4}·log(x) → 0 as x→∞, hence bounded on [9,∞).
 
-    This is the single irreducible number-theoretic content remaining.
-    Proof approach:
-    1. Abel summation: |S_i(N)-L_i| = |Σ_{k>N} (μ-terms)| ≤ C·N^{-1/4}·log²N
-    2. N^{1/4} / log³N → ∞ (polynomial beats log), so log³N / N^{1/4} ≤ K₀
-    3. Therefore C·N^{-1/4}·log²N ≤ C·K₀/logN -/
-private lemma pnt_mertens_tail_domination
+    The max of x^{-1/4}·logx occurs at x = e⁴ ≈ 54.6,
+    where the value is 4/e ≈ 1.47. So B = 4 suffices. -/
+private lemma rpow_quarter_log_bounded :
+    ∃ B : ℝ, B > 0 ∧ ∀ N : ℕ, 10 ≤ N →
+    (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ≤ B := by
+  refine ⟨4, by norm_num, fun N hN => ?_⟩
+  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
+  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+  set t := (N : ℝ) ^ ((1:ℝ)/4) with ht_def
+  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
+  have ht_ge1 : 1 ≤ t := by
+    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
+    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
+  have h_log_le : Real.log t ≤ t := by
+    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
+  have h_log_eq : Real.log (N : ℝ) = 4 * Real.log t := by
+    rw [ht_def, Real.log_rpow hN_pos]; ring
+  have h_log_bound : Real.log (N : ℝ) ≤ 4 * t := by linarith
+  have h_cancel : (N : ℝ) ^ (-(1:ℝ)/4) * t = 1 := by
+    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
+  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ)
+    _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) * (4 * t) := by
+        apply mul_le_mul_of_nonneg_left h_log_bound
+        exact le_of_lt (Real.rpow_pos_of_pos hN_pos _)
+    _ = 4 * ((N : ℝ) ^ (-(1:ℝ)/4) * t) := by ring
+    _ = 4 * 1 := by rw [h_cancel]
+    _ = 4 := by ring
+
+/-- **PROVED**: N^{-1/4}·log³N ≤ 1728 for N ≥ 10.
+    Polynomial crushes log (Theorist "Domination Bypass").
+    Proof: (N^{-1/12}·logN)³ ≤ 12³ = 1728. -/
+private lemma rpow_quarter_log_cube_bounded :
+    ∀ N : ℕ, 10 ≤ N →
+    (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3 ≤ 1728 := by
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
+  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+  set t := (N : ℝ) ^ ((1:ℝ)/12) with ht_def
+  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
+  have ht_ge1 : 1 ≤ t := by
+    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
+    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
+  have h_log_le : Real.log t ≤ t := by
+    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
+  have h_log_eq : Real.log (N : ℝ) = 12 * Real.log t := by
+    rw [ht_def, Real.log_rpow hN_pos]; ring
+  have h_unit : (N : ℝ) ^ (-(1:ℝ)/12) * t = 1 := by
+    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
+  have h_piece : (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ) ≤ 12 := by
+    calc (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)
+      _ = (N : ℝ) ^ (-(1:ℝ)/12) * (12 * Real.log t) := by rw [h_log_eq]
+      _ = 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log t) := by ring
+      _ ≤ 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * t) := by
+          apply mul_le_mul_of_nonneg_left
+          · exact mul_le_mul_of_nonneg_left h_log_le
+              (le_of_lt (Real.rpow_pos_of_pos hN_pos _))
+          · norm_num
+      _ = 12 * 1 := by rw [h_unit]
+      _ = 12 := by ring
+  have h_exp : (N : ℝ) ^ (-(1:ℝ)/4) = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 := by
+    rw [← Real.rpow_natCast ((N : ℝ) ^ (-(1:ℝ)/12)) 3,
+        ← Real.rpow_mul (le_of_lt hN_pos)]
+    norm_num
+  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ^ 3
+    _ = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 * Real.log (N : ℝ) ^ 3 := by rw [h_exp]
+    _ = ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)) ^ 3 := by ring
+    _ ≤ 12 ^ 3 := by
+        exact pow_le_pow_left₀ (by positivity) h_piece 3
+    _ = 1728 := by norm_num
+
+/-- **THE LAST SORRY**: Raw Abel-Mertens tail bounds.
+
+    From Mertens |M(x)| ≤ C_m·x^{3/4} + PNT convergence,
+    Abel summation on the tail Σ_{k>N} gives:
+      |S₁(N)| ≤ C·N^{-1/4}
+      |S₂(N)+1| ≤ C·N^{-1/4}·logN
+      |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N
+
+    Proof sketch (see Theorist "Final Span"):
+    1. Abel: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
+    2. |M(N)/N| ≤ C_m·N^{-1/4} (direct from Mertens)
+    3. |Σ_{k≥N} M(k)/(k(k+1))| ≤ Σ C_m·k^{-5/4} ≤ 4·C_m·N^{-1/4}
+    4. For S₂, S₃: second Abel summation with log weights. -/
+private lemma abel_mertens_tail_raw
     (C_m : ℝ) (_hC : 0 < C_m)
     (_hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
@@ -122,111 +197,114 @@ private lemma pnt_mertens_tail_domination
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
       Filter.atTop (nhds (-2 * Real.eulerMascheroniConstant))) :
+    ∃ C : ℝ, C > 0 ∧ ∀ N : ℕ, 2 ≤ N →
+    |S₁ N| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) ∧
+    |S₂ N - (-1)| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ∧
+    |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤
+      C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
+  sorry
+
+/-- **PROVED**: Tail domination — converts raw N^{-1/4} bounds to K/logN.
+
+    Uses the PROVED rpow domination lemmas:
+      N^{-1/4}·logN ≤ 4   (rpow_quarter_log_bounded)
+      N^{-1/4}·log³N ≤ 1728 (rpow_quarter_log_cube_bounded) -/
+private lemma pnt_mertens_tail_domination
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
+    (hPNT₁ : Filter.Tendsto (fun N =>
+      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
+      Filter.atTop (nhds 0))
+    (hPNT₂ : Filter.Tendsto (fun N =>
+      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
+        Real.log (k : ℝ) / (k : ℝ))
+      Filter.atTop (nhds (-1)))
+    (hPNT₃ : Filter.Tendsto (fun N =>
+      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
+        (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
+      Filter.atTop (nhds (-2 * Real.eulerMascheroniConstant))) :
     ∃ K : ℝ, K > 0 ∧ ∀ N : ℕ, 10 ≤ N →
     |S₁ N| ≤ K / Real.log (N : ℝ) ∧
     |S₂ N - (-1)| ≤ K / Real.log (N : ℝ) ∧
     |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤ K / Real.log (N : ℝ) := by
-  sorry
-
-/-- **SORRY SUB-LEMMA 2**: x^{-1/4}·(logx)^p is bounded on [9,∞).
-
-    Standard calculus: log grows slower than any power.
-    x^{-1/4}·log(x) → 0 as x→∞, hence bounded on [9,∞).
-    Gives: ∃ B, ∀ N ≥ 10, N^{-1/4}·logN ≤ B.
-
-    The max of x^{-1/4}·logx occurs at x = e⁴ ≈ 54.6,
-    where the value is 4/e ≈ 1.47. So B = 2 suffices. -/
-private lemma rpow_quarter_log_bounded :
-    ∃ B : ℝ, B > 0 ∧ ∀ N : ℕ, 10 ≤ N →
-    (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ≤ B := by
-  -- We use B = 4. The function N^{-1/4}·logN ≤ 4 for all N ≥ 10.
-  -- Key: logN ≤ N^{1/4} for N ≥ 10 (log grows slower than any power).
-  -- Then N^{-1/4}·logN ≤ N^{-1/4}·N^{1/4} = 1 ≤ 4.
-  -- But logN ≤ N^{1/4} needs proof. Use: for N ≥ 1, logN ≤ 4·N^{1/4}
-  -- (since log x ≤ 4·x^{1/4} for all x ≥ 1, from AM-GM/calculus).
-  refine ⟨4, by norm_num, fun N hN => ?_⟩
+  -- Step 1: Get raw Abel-Mertens tail bounds
+  obtain ⟨C_raw, hC_raw_pos, hraw⟩ := abel_mertens_tail_raw C_m hC hMertens hPNT₁ hPNT₂ hPNT₃
+  -- Step 2: Get rpow domination bounds (PROVED!)
+  obtain ⟨B₁, hB₁_pos, hB₁⟩ := rpow_quarter_log_bounded  -- N^{-1/4}·logN ≤ B₁
+  -- Step 3: Assemble K
+  -- |S₁(N)| ≤ C·N^{-1/4} = C·(N^{-1/4}·logN)/logN ≤ C·B₁/logN
+  -- |S₂(N)+1| ≤ C·N^{-1/4}·logN = C·(N^{-1/4}·log²N)/logN
+  --            = C·(N^{-1/4}·logN)·logN/logN ≤ C·B₁  ← NOT K/logN!
+  -- Need: C·N^{-1/4}·logN ≤ K/logN ↔ C·N^{-1/4}·log²N ≤ K
+  -- N^{-1/4}·log²N = (N^{-1/8}·logN)² ≤ (8)² = 64
+  -- |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N ≤ C·K₃/logN  where K₃ uses log³N bound
+  -- Use the cube bound: N^{-1/4}·log³N ≤ 1728
+  -- So C·N^{-1/4}·log²N = C·N^{-1/4}·log³N / logN ≤ C·1728/logN
+  set K := C_raw * 1728 + 1
+  refine ⟨K, by linarith, fun N hN => ?_⟩
+  obtain ⟨h₁, h₂, h₃⟩ := hraw N (by omega)
   have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
-  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
-  -- Key: log(x) ≤ x for x ≥ 1. Apply to x = N^{1/4}.
-  set t := (N : ℝ) ^ ((1:ℝ)/4) with ht_def
-  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
-  have ht_ge1 : 1 ≤ t := by
-    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
-    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
-  -- log(t) ≤ t (since 1 + log(t) ≤ exp(log(t)) = t for t ≥ 1)
-  have h_log_le : Real.log t ≤ t := by
-    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
-  -- log(N) = 4·log(t) since N = t^4
-  have h_log_eq : Real.log (N : ℝ) = 4 * Real.log t := by
-    rw [ht_def, Real.log_rpow hN_pos]; ring
-  -- log(N) ≤ 4·t
-  have h_log_bound : Real.log (N : ℝ) ≤ 4 * t := by linarith
-  -- N^{-1/4} · logN ≤ N^{-1/4} · 4·N^{1/4} = 4
-  have h_cancel : (N : ℝ) ^ (-(1:ℝ)/4) * t = 1 := by
-    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
-  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ)
-    _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) * (4 * t) := by
-        apply mul_le_mul_of_nonneg_left h_log_bound
-        exact le_of_lt (Real.rpow_pos_of_pos hN_pos _)
-    _ = 4 * ((N : ℝ) ^ (-(1:ℝ)/4) * t) := by ring
-    _ = 4 * 1 := by rw [h_cancel]
-    _ = 4 := by ring
-
-/-- **PROVED**: N^{-1/4}·log³N ≤ 1728 for N ≥ 10.
-
-    This is the Theorist's "Domination Bypass": polynomial crushes log.
-
-    Proof: N^{-1/4}·log³N = (N^{-1/12}·logN)³.
-    Let t = N^{1/12}. Then logN = 12·logt, so N^{-1/12}·logN = 12·logt/t ≤ 12.
-    Therefore (N^{-1/12}·logN)³ ≤ 12³ = 1728. -/
-private lemma rpow_quarter_log_cube_bounded :
-    ∀ N : ℕ, 10 ≤ N →
-    (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3 ≤ 1728 := by
-  intro N hN
-  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
-  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
-  -- Let t = N^{1/12}
-  set t := (N : ℝ) ^ ((1:ℝ)/12) with ht_def
-  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
-  have ht_ge1 : 1 ≤ t := by
-    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
-    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
-  -- log(t) ≤ t
-  have h_log_le : Real.log t ≤ t := by
-    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
-  -- logN = 12·log(t)
-  have h_log_eq : Real.log (N : ℝ) = 12 * Real.log t := by
-    rw [ht_def, Real.log_rpow hN_pos]; ring
-  -- N^{-1/12}·logN ≤ 12
-  have h_unit : (N : ℝ) ^ (-(1:ℝ)/12) * t = 1 := by
-    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
-  have h_piece : (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ) ≤ 12 := by
-    calc (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)
-      _ = (N : ℝ) ^ (-(1:ℝ)/12) * (12 * Real.log t) := by rw [h_log_eq]
-      _ = 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log t) := by ring
-      _ ≤ 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * t) := by
-          apply mul_le_mul_of_nonneg_left
-          · exact mul_le_mul_of_nonneg_left h_log_le
-              (le_of_lt (Real.rpow_pos_of_pos hN_pos _))
-          · norm_num
-      _ = 12 * 1 := by rw [h_unit]
-      _ = 12 := by ring
-  -- N^{-1/4}·log³N = (N^{-1/12}·logN)³
-  -- Key: N^{-1/4} = (N^{-1/12})³
-  have h_exp : (N : ℝ) ^ (-(1:ℝ)/4) = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 := by
-    rw [← Real.rpow_natCast ((N : ℝ) ^ (-(1:ℝ)/12)) 3,
-        ← Real.rpow_mul (le_of_lt hN_pos)]
-    norm_num
-  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ^ 3
-    _ = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 * Real.log (N : ℝ) ^ 3 := by rw [h_exp]
-    _ = ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)) ^ 3 := by ring
-    _ ≤ 12 ^ 3 := by
-        exact pow_le_pow_left₀ (by positivity) h_piece 3
-    _ = 1728 := by norm_num
-
--- ════════════════════════════════════════════════
--- §2b. THE MEAN BOUND (was AXIOM → now THEOREM!)
--- ════════════════════════════════════════════════
+  have hlogN_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hcube := rpow_quarter_log_cube_bounded N hN
+  -- For S₁: |S₁(N)| ≤ C·N^{-1/4} ≤ C·N^{-1/4}·log³N / log³N ≤ C·1728/log³N ≤ C·1728/logN
+  -- Simpler: N^{-1/4} = N^{-1/4}·logN / logN ≤ B₁/logN
+  have hB₁_at_N := hB₁ N hN  -- N^{-1/4}·logN ≤ B₁
+  have h_rpow_pos : 0 < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
+  -- Bound S₁:
+  -- |S₁(N)| ≤ C·N^{-1/4}
+  -- We need: C·N^{-1/4} ≤ K/logN ↔ C·N^{-1/4}·logN ≤ K
+  -- C·N^{-1/4}·logN ≤ C·N^{-1/4}·log³N ≤ C·1728 ≤ K  (for logN ≥ 1)
+  have hlogN_ge1 : 1 ≤ Real.log (N : ℝ) := by
+    rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+    apply Real.log_le_log (Real.exp_pos 1)
+    calc Real.exp 1 ≤ 3 := le_of_lt Real.exp_one_lt_three
+      _ ≤ (N : ℝ) := by exact_mod_cast show 3 ≤ N by omega
+  have hS₁ : |S₁ N| ≤ K / Real.log (N : ℝ) := by
+    rw [le_div_iff₀ hlogN_pos]
+    calc |S₁ N| * Real.log (N : ℝ)
+      _ ≤ C_raw * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) :=
+          mul_le_mul_of_nonneg_right h₁ (le_of_lt hlogN_pos)
+      _ ≤ C_raw * ((N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3) := by
+          rw [mul_assoc]
+          apply mul_le_mul_of_nonneg_left _ (le_of_lt hC_raw_pos)
+          calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ)
+            _ = (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 1 := by ring
+            _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3 := by
+                apply mul_le_mul_of_nonneg_left _ (le_of_lt h_rpow_pos)
+                exact pow_right_mono₀ hlogN_ge1 (by omega)
+      _ ≤ C_raw * 1728 :=
+          mul_le_mul_of_nonneg_left hcube (le_of_lt hC_raw_pos)
+      _ ≤ K := by linarith
+  -- Bound S₂: |S₂(N)+1| ≤ C·N^{-1/4}·logN ≤ C·B₁ ≤ C·1728
+  -- But we need ≤ K/logN, which requires C·N^{-1/4}·log²N ≤ K
+  -- N^{-1/4}·log²N ≤ N^{-1/4}·log³N ≤ 1728 (for logN ≥ 1, which holds for N ≥ 3)
+  have hS₂ : |S₂ N - (-1)| ≤ K / Real.log (N : ℝ) := by
+    rw [le_div_iff₀ hlogN_pos]
+    calc |S₂ N - (-1)| * Real.log (N : ℝ)
+      _ ≤ C_raw * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) * Real.log (N : ℝ) :=
+          mul_le_mul_of_nonneg_right h₂ (le_of_lt hlogN_pos)
+      _ = C_raw * ((N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2) := by ring
+      _ ≤ C_raw * ((N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3) := by
+          apply mul_le_mul_of_nonneg_left _ (le_of_lt hC_raw_pos)
+          apply mul_le_mul_of_nonneg_left _ (le_of_lt h_rpow_pos)
+          exact pow_right_mono₀ hlogN_ge1 (by omega)
+      _ ≤ C_raw * 1728 :=
+          mul_le_mul_of_nonneg_left hcube (le_of_lt hC_raw_pos)
+      _ ≤ K := by linarith
+  -- Bound S₃: |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N
+  -- Need: ≤ K/logN, so C·N^{-1/4}·log³N ≤ K
+  have hS₃ : |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤ K / Real.log (N : ℝ) := by
+    rw [le_div_iff₀ hlogN_pos]
+    calc |S₃ N - (-2 * eulerMascheroniConstant)| * Real.log (N : ℝ)
+      _ ≤ C_raw * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 * Real.log (N : ℝ) :=
+          mul_le_mul_of_nonneg_right h₃ (le_of_lt hlogN_pos)
+      _ = C_raw * ((N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3) := by ring
+      _ ≤ C_raw * 1728 :=
+          mul_le_mul_of_nonneg_left hcube (le_of_lt hC_raw_pos)
+      _ ≤ K := by linarith
+  exact ⟨hS₁, hS₂, hS₃⟩
 
 /-- **THE ALGEBRAIC CLEAVER** (Theorist directive, April 18, 2026):
     Pure polynomial identity with dummy variables.
