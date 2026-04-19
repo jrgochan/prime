@@ -199,7 +199,6 @@ end
 -- This file has:
 --   3 axioms (elementary, independently verifiable):
 --     📐 mellin_fourier_change             (change of variables — Calculus II)
---     📐 flattened_basis_integrable         (exponential decay → L¹∩L²)
 --     📐 fourier_inversion_autocorrelation  (L¹ Fourier inversion at a point)
 --     📐 gram_form_eq_l2_norm              (Gram matrix = L² norm of f_N)
 --   0 sorry:

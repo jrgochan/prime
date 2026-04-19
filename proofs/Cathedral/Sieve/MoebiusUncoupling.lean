@@ -305,7 +305,7 @@ def sieveDimension : ℝ := 1
 -- **FORMERLY axiom vaughan_implies_uncoupling**:
 -- Excised 2026-04-19 (The Great Audit). This axiom was dead code — zero
 -- proof-term references in the entire active codebase. The critical path
--- uses rh_weight_construction directly, bypassing Vaughan decomposition.
+-- bypasses Vaughan decomposition entirely.
 
 -- ════════════════════════════════════════════════
 -- PART VIII: DOCUMENTATION
@@ -363,8 +363,8 @@ end
 -- CONNECTION TO BILINEAR SIEVE:
 --   vaughan_decomposition + type_I_bound ⟹ moebius_uncoupling
 --   (The moebius_uncoupling axiom in BilinearSieve.lean can be
---    DERIVED from the two axioms here, once bilinear_decomposition
---    and vaughan_implies_uncoupling are proved.)
+--    DERIVED from the two axioms here via bilinear_decomposition.
+--    vaughan_implies_uncoupling was excised as dead code, April 2026.)
 
 #check @vaughan_decomposition
 #check @correctionBilinear

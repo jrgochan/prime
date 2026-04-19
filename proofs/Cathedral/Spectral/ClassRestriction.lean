@@ -397,7 +397,8 @@ theorem oct_gap_positive (N : ℕ) (hN : 10 ≤ N) :
 #print axioms oct_gap_positive
 
 -- ════════════════════════════════════════════════
--- PROVING oct_gap_dominates (Rayleigh Quotient)
+-- PROVED: oct_gap_dominates (Rayleigh Quotient)
+-- (The axiom was excised April 2026 — proved here as oct_gap_dominates_derived)
 -- ════════════════════════════════════════════════
 
 /-- Class-restricted vector: zero out components outside class m. -/
@@ -576,7 +577,7 @@ lemma min_eigenvalue_le_quadForm_scaled
   intro i _
   exact mul_le_mul_of_nonneg_right (h_inf_le i) (sq_nonneg _)
 
-/-- **oct_gap_dominates is provable** (via Rayleigh quotient):
+/-- **oct_gap_dominates PROVED** (via Rayleigh quotient):
     λ_min(G) ≤ λ_min(G^{block}) because the block-diagonal form
     restricts to within-class contributions, each bounded below
     by the full Rayleigh quotient.
@@ -628,15 +629,14 @@ theorem oct_gap_dominates_proof (N : ℕ) (hN : 2 ≤ N) :
 
 #print axioms oct_gap_dominates_proof
 
-/-- **oct_gap_dominates is PROVED** for N ≥ 10 (via Rayleigh quotient):
+/-- **oct_gap_dominates PROVED** for N ≥ 10 (via Rayleigh quotient):
     Chains oct_gap_dominates_proof (λ_min(G) ≤ λ_min(G^block)) with
     oct_equals_block (λ_min(G^𝕆) = λ_min(G^block)) to obtain
     λ_min(G) ≤ λ_min(G^𝕆).
 
-    For 2 ≤ N < 10, the axiom oct_gap_dominates covers the small cases.
-
-    This demonstrates that oct_gap_dominates is REDUNDANT for N ≥ 10:
-    the Rayleigh quotient argument + the block identity proves it. -/
+    The axiom oct_gap_dominates was EXCISED (April 2026, The Great Audit)
+    since this theorem replaces it for N ≥ 10, and its only consumer
+    (oct_gap_positive) was dead code. -/
 theorem oct_gap_dominates_derived (N : ℕ) (hN : 10 ≤ N) :
     lambdaMin N ≤ lambdaMinOct N := by
   rw [oct_equals_block N hN]
