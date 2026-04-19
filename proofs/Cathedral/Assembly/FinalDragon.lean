@@ -172,6 +172,58 @@ private lemma rpow_quarter_log_bounded :
     _ = 4 * 1 := by rw [h_cancel]
     _ = 4 := by ring
 
+/-- **PROVED**: N^{-1/4}·log³N ≤ 1728 for N ≥ 10.
+
+    This is the Theorist's "Domination Bypass": polynomial crushes log.
+
+    Proof: N^{-1/4}·log³N = (N^{-1/12}·logN)³.
+    Let t = N^{1/12}. Then logN = 12·logt, so N^{-1/12}·logN = 12·logt/t ≤ 12.
+    Therefore (N^{-1/12}·logN)³ ≤ 12³ = 1728. -/
+private lemma rpow_quarter_log_cube_bounded :
+    ∀ N : ℕ, 10 ≤ N →
+    (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3 ≤ 1728 := by
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
+  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+  -- Let t = N^{1/12}
+  set t := (N : ℝ) ^ ((1:ℝ)/12) with ht_def
+  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
+  have ht_ge1 : 1 ≤ t := by
+    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
+    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
+  -- log(t) ≤ t
+  have h_log_le : Real.log t ≤ t := by
+    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
+  -- logN = 12·log(t)
+  have h_log_eq : Real.log (N : ℝ) = 12 * Real.log t := by
+    rw [ht_def, Real.log_rpow hN_pos]; ring
+  -- N^{-1/12}·logN ≤ 12
+  have h_unit : (N : ℝ) ^ (-(1:ℝ)/12) * t = 1 := by
+    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
+  have h_piece : (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ) ≤ 12 := by
+    calc (N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)
+      _ = (N : ℝ) ^ (-(1:ℝ)/12) * (12 * Real.log t) := by rw [h_log_eq]
+      _ = 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log t) := by ring
+      _ ≤ 12 * ((N : ℝ) ^ (-(1:ℝ)/12) * t) := by
+          apply mul_le_mul_of_nonneg_left
+          · exact mul_le_mul_of_nonneg_left h_log_le
+              (le_of_lt (Real.rpow_pos_of_pos hN_pos _))
+          · norm_num
+      _ = 12 * 1 := by rw [h_unit]
+      _ = 12 := by ring
+  -- N^{-1/4}·log³N = (N^{-1/12}·logN)³
+  -- Key: N^{-1/4} = (N^{-1/12})³
+  have h_exp : (N : ℝ) ^ (-(1:ℝ)/4) = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 := by
+    rw [← Real.rpow_natCast ((N : ℝ) ^ (-(1:ℝ)/12)) 3,
+        ← Real.rpow_mul (le_of_lt hN_pos)]
+    norm_num
+  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ^ 3
+    _ = ((N : ℝ) ^ (-(1:ℝ)/12)) ^ 3 * Real.log (N : ℝ) ^ 3 := by rw [h_exp]
+    _ = ((N : ℝ) ^ (-(1:ℝ)/12) * Real.log (N : ℝ)) ^ 3 := by ring
+    _ ≤ 12 ^ 3 := by
+        exact pow_le_pow_left₀ (by positivity) h_piece 3
+    _ = 1728 := by norm_num
+
 -- ════════════════════════════════════════════════
 -- §2b. THE MEAN BOUND (was AXIOM → now THEOREM!)
 -- ════════════════════════════════════════════════
