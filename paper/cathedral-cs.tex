@@ -31,6 +31,11 @@
   numberstyle=\tiny\color{gray},
   numbersep=5pt,
   xleftmargin=15pt,
+  inputencoding=utf8,
+  extendedchars=true,
+  literate=
+    {<<}{\guillemotleft}1
+    {>>}{\guillemotright}1,
 }
 
 \newcommand{\lean}[1]{\texttt{#1}}
@@ -198,7 +203,7 @@ of a single library target:
 
 \begin{lstlisting}[language=ML,caption={Lakefile structure (abbreviated)}]
 @[default_target]
-lean_lib «Cathedral» where
+lean_lib Cathedral where
   roots := #[
     `Cathedral.Defs,
     `Cathedral.Axioms,
