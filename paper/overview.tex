@@ -15,7 +15,7 @@
   \large via the Parseval Bridge in Lean~4%
 }
 \author{Jason Robert Gochanour}
-\date{April 17, 2026 \textemdash\ cathedral-crown}
+\date{April 19, 2026 \textemdash\ cathedral-audit}
 
 \begin{document}
 \maketitle
@@ -26,13 +26,13 @@ the Riemann Hypothesis to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 \texttt{nyman\_beurling\_equivalence}.
 
-The formalization compiles 3,543 jobs with \textbf{zero errors} and
-\textbf{zero sorry}. The crown theorem depends on exactly \textbf{five
-mathematical axioms}: three elementary harmonic analysis lemmas, one
-classical theorem (Mertens, 1897), and one quarantined complex-analytic
-bound (Montgomery--Vaughan mean value theorem). The forward direction
-uses the Parseval--Plancherel bridge, completely bypassing the discrete
-Vasyunin cotangent sums.
+The formalization---the \emph{Cathedral}---comprises 79 active Lean files
+(with 96 archived) across 11 modules. The crown theorem depends
+on exactly \textbf{five mathematical axioms}: three elementary harmonic
+analysis lemmas, one classical theorem (Mertens, 1897), and one
+quarantined complex-analytic bound (Montgomery--Vaughan mean value
+theorem). The forward direction uses the Parseval--Plancherel bridge,
+completely bypassing the discrete Vasyunin cotangent sums.
 
 Companion Rust experiments validate the spectral correspondence to
 15 digits of precision, confirming $Q_N \sim C \ln N$ where
@@ -49,7 +49,8 @@ Hahn--Banach separation---is compiler-verified.
 \textbf{We did not prove RH.} We built a machine-verified containment
 vessel that identifies exactly which mathematical facts remain unformalized,
 proves everything else, and reduces the entire century-old problem to
-a modular API with two axiom sockets.
+a clean modular architecture with five axiom sockets on the crown
+theorem's critical path (45 axioms total in the active codebase).
 
 \section{The Crown Theorem}
 
@@ -160,8 +161,13 @@ the trace of the resolvent of the Riemann Hamiltonian.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # Build completed successfully (3543 jobs).
+lake build    # 79 active files, 96 archived
 \end{verbatim}
+
+\noindent The active codebase was reduced from 178 to 79 files ($-56\%$)
+via a deep audit (April 18, 2026) that identified 31 duplicate declarations,
+9 ghost axioms, and 26 orphan files. All archived files are preserved
+in \texttt{Archive/}.
 
 \noindent To inspect the axiom foundation:
 \begin{verbatim}
@@ -182,8 +188,9 @@ and Anthropic's Claude (Antigravity) for Lean~4 proof engineering,
 Abel summation formalization, and the Parseval Bridge implementation.
 All proofs are compiler-verified.
 
-The axiom reduction from 56 to 5 was accomplished through four campaigns
-(Alpha--Delta) of systematic formalization over three weeks.
+The axiom reduction---from 56 to 45 active (5 on the crown critical path)---was
+accomplished through four campaigns (Alpha--Delta) of systematic formalization
+and a deep codebase audit over three weeks.
 The calculus limit $\ln(\ln N)/\ln N \to 0$ was proved purely algebraically
 via $\ln x \le 2\sqrt{x}$, avoiding topological filter arguments.
 

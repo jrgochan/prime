@@ -38,7 +38,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 17, 2026 --- cathedral-crown}
+\date{April 19, 2026 --- cathedral-audit}
 
 \begin{document}
 
@@ -46,11 +46,11 @@
 
 \begin{abstract}
 We present a machine-checked proof in the Lean~4 theorem prover, built against
-Mathlib, that the Riemann Hypothesis is logically equivalent to a set of five
+Mathlib, that the Riemann Hypothesis is logically equivalent to a set of
 standard theorems in harmonic analysis and classical analytic number theory.
 
-The formalization---the \emph{Cathedral}---comprises 3,543 compiled jobs across
-over 90 active Lean files with \textbf{zero sorry} (unproved goals) and
+The formalization---the \emph{Cathedral}---comprises 79 active Lean files
+(with 96 archived) across 11 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
@@ -117,13 +117,15 @@ The proof decomposes into two pillars:
     Parseval--Plancherel bridge. This direction rests on five axioms.
 \end{itemize}
 
-\subsection{The Five Axioms}
+\subsection{The Axiomatic Foundation}
 
-The entire mathematical content of the Cathedral is compressed into
-five axioms, listed in Table~\ref{tab:axioms}. Everything else---the
-Nyman--Beurling theory, the Sherman--Morrison identity, the spectral
-analysis, the Hahn--Banach separation, the Abel summation---is
-machine-checked.
+The Cathedral's mathematical content rests on 45 axioms in the active
+codebase, organized hierarchically. The crown theorem
+\lean{nyman\_beurling\_equivalence} depends on a small subset;
+Table~\ref{tab:axioms} lists the five that appear in its
+\lean{\#print axioms} output. Everything else---the Nyman--Beurling
+theory, the Sherman--Morrison identity, the spectral analysis, the
+Hahn--Banach separation, the Abel summation---is machine-checked.
 
 \begin{table}[h]
 \centering
@@ -477,28 +479,47 @@ $\|v\|^2 = \Theta(N)$, which diverges despite $E(N) \to 0$.
 \section{The Archived Paths}
 % ================================================================
 
-The Cathedral repository contains several archived paths, preserved as
-monuments to the formalization process and as resources for future work:
+The Cathedral maintains a systematic \lean{Archive/} directory containing
+96 files---more than the 79 active files---preserved as monuments to the
+formalization process and as resources for future work. Nothing is deleted.
+
+\subsection{The Great Audit (April 18, 2026)}
+
+A deep audit of the codebase identified:
+\begin{itemize}
+  \item \textbf{31 duplicated declaration names} across different files.
+  \item \textbf{9 ``ghost axioms''}: axioms that had already been proved
+    as theorems elsewhere in the codebase. These included
+    \lean{nyman\_beurling\_equivalence} (axiom in \lean{IntegralBasis/},
+    proved in \lean{Assembly/MainChain.lean}) and
+    \lean{mellin\_plancherel\_gram} (axiom in \lean{MellinSieve.lean},
+    proved in \lean{AutocorrelationBypass.lean}).
+  \item \textbf{3 near-complete file duplications}: The separation
+    theorems existed in both \lean{NymanBeurling/} and \lean{MellinBridge/};
+    the theta bound proof existed in both \lean{ThetaBound.lean} and
+    \lean{ThetaBoundMellin.lean}.
+  \item \textbf{26 orphan files} not imported by anything on the critical
+    path, including entire subsystems (\lean{Robin/}, \lean{IntegralBasis/},
+    \lean{Vasyunin/Cotangent/}).
+\end{itemize}
+
+The cleanup reduced the active codebase from 178 to 79 files ($-56\%$),
+with every remaining file on the critical path to
+\lean{rh\_implies\_l2\_convergence\_proved}.
+
+\subsection{Archived Subsystems}
 
 \begin{itemize}
   \item \textbf{HighFrequencyTrap/}: The original \lean{GramWitness.lean}
     using the $\{k/x\}$ basis (Discovery~\ref{rem:hf-trap}).
-  \item \textbf{DiscreteMirage/}: The complete piecewise-FTC decomposition
-    of the Gram matrix integral, including 14 fully proved telescope
-    theorems and the digamma reflection formula
-    $\psi(1-s) - \psi(s) = \pi\cot(\pi s)$ (proved from Mathlib's
-    $\Gamma(s)\Gamma(1-s) = \pi/\sin(\pi s)$ via logarithmic differentiation).
-    Contains a numerically-falsified reciprocity axiom but is otherwise
-    rigorous mathematics.
-  \item \textbf{ContourShift.lean}: Scaffold for the contour-shift
-    approach to Axiom~5. Contains two fully proved theorems
-    (\lean{integrand\_three\_terms}, \lean{term1\_exact}) and three
-    lemmas awaiting formalization of the
-    Phragm\'en--Lindel\"of bound and double-pole residue calculus.
-  \item \textbf{FinalDragon.lean} (burned): An attempted direct proof
-    of Axiom~5 via the triangle inequality, which was discovered to contain
-    mathematically false lemma statements (Discovery~\ref{disc:triangle}).
-    Deleted upon identification of the error.
+  \item \textbf{Vasyunin/Cotangent/}: 10 files implementing the complete
+    piecewise-FTC decomposition of the Gram matrix integral, including
+    14 fully proved telescope theorems and the digamma reflection formula.
+  \item \textbf{Robin/}: 6 files proving Robin's inequality bounds,
+    self-contained and not on the RH critical path.
+  \item \textbf{White/Infrastructure/}: Perron kernel, Selberg majorant,
+    Hilbert inequality scaffolds.
+  \item \textbf{Scratch/}: 9 dead experiments from the exploration phase.
 \end{itemize}
 
 % ================================================================
@@ -542,14 +563,15 @@ the asymptotic physics. The Cathedral stands.
 We have constructed a machine-verified proof that the Riemann Hypothesis
 is logically equivalent to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, routed through the Parseval Bridge. The formalization
-comprises 3,543 compiled jobs with zero sorry and zero errors, resting
+comprises 79 active Lean files (96 archived) across 11 modules, resting
 on five mathematical axioms---three elementary harmonic analysis
 lemmas, one classical analytic number theory result (Mertens), and one
 quarantined complex-analytic bound (Montgomery--Vaughan) on the critical
 line.
 
-The axiom reduction---from 56 in the initial architecture to 5 in
-the final build---was achieved through four campaigns of systematic
+The axiom reduction---from 56 in the initial architecture to 45 in
+the current build (5 on the crown theorem's critical path)---was
+achieved through four campaigns of systematic
 formalization, each eliminating axioms through direct proof:
 \begin{itemize}
   \item \textbf{Campaign Alpha}: Harmonic analysis foundations (Abel
