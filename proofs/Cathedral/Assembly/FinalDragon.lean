@@ -375,18 +375,45 @@ private lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
   rw [h₁, h₂, h₃]
   -- Step 4: The algebra ((1-γ)/L·S₂ + 1/L·S₃ = ((1-γ)·S₂ + S₃)/L) follows by ring
   ring
+/-- THE FORGE: Regroup expanded expression into error terms (Theorist directive). -/
+private lemma mean_error_shift (S1 S2 S3 LN G : ℝ) :
+    -(1 - G) * S1 - S2 + ((1 - G) * S2 + S3) / LN - 1 =
+    -(1 - G) * S1 - (S2 + 1) + ((1 - G) * (S2 + 1) + (S3 + 2 * G) - (1 + G)) / LN := by
+  ring
+
+/-- THE FORGE: Log ratio bound via square bypass (Theorist directive).
+    For N ≥ 10: N ≤ (N-1)², so logN ≤ 2·log(N-1), hence 1/log(N-1) ≤ 2/logN. -/
+private lemma log_ratio_bound {N : ℕ} (hN : 10 ≤ N) :
+    1 / Real.log ((N - 1 : ℕ) : ℝ) ≤ 2 / Real.log (N : ℝ) := by
+  have hn_pos : (0 : ℝ) < Real.log ((N - 1 : ℕ) : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N - 1 by omega)
+  have hn2_pos : (0 : ℝ) < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  rw [div_le_div_iff₀ hn_pos hn2_pos, one_mul]
+  have hN1_pos : (0 : ℝ) < ((N - 1 : ℕ) : ℝ) := by exact_mod_cast show 0 < N - 1 by omega
+  have h_sq : (N : ℝ) ≤ ((N - 1 : ℕ) : ℝ) * ((N - 1 : ℕ) : ℝ) := by
+    have h1 : (10 : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN
+    have h2 : (9 : ℝ) ≤ ((N - 1 : ℕ) : ℝ) := by exact_mod_cast show 9 ≤ N - 1 by omega
+    have h3 : ((N - 1 : ℕ) : ℝ) = (N : ℝ) - 1 := by
+      rw [Nat.cast_sub (by omega : 1 ≤ N)]; simp
+    rw [h3]; nlinarith
+  have h_log_sq := Real.log_le_log (by exact_mod_cast show 0 < N by omega) h_sq
+  rw [Real.log_mul (ne_of_gt hN1_pos) (ne_of_gt hN1_pos)] at h_log_sq
+  linarith
+
+-- ════════════════════════════════════════════════
+-- §2b. THE MEAN BOUND (was AXIOM → now THEOREM!)
+-- ════════════════════════════════════════════════
 
 /-- **THEOREM** (was NUMBER THEORY AXIOM — now PROVED from sub-lemmas!):
     The Möbius-weighted mean is close to 1.
 
-    PROOF CHAIN (Theorist "Final Span" directive):
-    1. Algebraic Cleaver: Σvb = -(1-γ)S₁ - S₂ + [(1-γ)S₂+S₃]/logN  [PROVED]
-    2. Tail domination: |Sᵢ-Lᵢ| ≤ K_td/logN                        [sorry]
-    3. Substitute Sᵢ = Lᵢ + εᵢ: Σvb = 1 - (1+γ)/logN + Errors
-    4. Triangle inequality: |Errors| ≤ const/logN
-    5. Result: |Σvb - 1| ≤ K/logN
-
-    REMAINING SORRY: pnt_mertens_tail_domination only. -/
+    PROOF CHAIN (Theorist "Assembly Shredder" directive):
+    1. Algebraic Cleaver: Σvb = -(1-γ)S₁ - S₂ + [(1-γ)S₂+S₃]/logN
+    2. Error shift: regroup into ε₁, ε₂, ε₃ terms via ring
+    3. Log ratio bound: 1/log(N-1) ≤ 2/logN via square bypass
+    4. Triangle inequality shredder: step-by-step abs decomposition
+    5. Gamma evasion: K defined using |1-γ|, |1+γ| abstractly -/
 theorem moebius_mean_finite_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -399,33 +426,107 @@ theorem moebius_mean_finite_bound
   -- Step 1: Get tail domination bounds (THE ONE SORRY)
   obtain ⟨K_td, hK_td_pos, hK_td⟩ := pnt_mertens_tail_domination C_m hC hMertens
     pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
-  -- Step 2: Assemble K = 8K_td + 2  (factor of 2 from log(N-1)/logN ≥ 1/2)
-  set K := 8 * K_td + 2
-  refine ⟨K, by linarith, fun N hN => ?_⟩
-  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
-  have hlogN_pos : 0 < Real.log (N : ℝ) :=
-    Real.log_pos (by exact_mod_cast show 1 < N by omega)
-  -- Step 3: Apply the algebraic expansion (PROVED)
-  rw [mean_algebraic_expansion N hN]
-  -- Step 4: Triangle inequality with tail bounds at N-1.
-  -- N ≥ 10 → N-1 ≥ 9 ≥ 3, so tail_domination applies at N-1:
+  -- Step 2: The Gamma-Evasion K (Theorist "Assembly Shredder" directive)
+  set G := Real.eulerMascheroniConstant with hG_def
+  set L10 := Real.log (10 : ℝ) with hL10_def
+  set B := |1 - G| * (2 * K_td) + 2 * K_td with hB_def
+  -- K absorbs γ without needing numerical approximation!
+  set K := B + B / L10 + |1 + G| with hK_def
+  have hL10_pos : 0 < L10 := Real.log_pos (by norm_num)
+  have hB_nonneg : 0 ≤ B := by
+    have : 0 ≤ K_td := hK_td_pos.le; positivity
+  have hK_pos : 0 < K := by
+    have : 0 < K_td := hK_td_pos; positivity
+  refine ⟨K, hK_pos, fun N hN => ?_⟩
+  -- Step 3: Get tail bounds at N-1 and apply expansion
   have hM : 3 ≤ N - 1 := by omega
   obtain ⟨hS₁, hS₂, hS₃⟩ := hK_td (N - 1) hM
-  --   |S₁(N-1)| ≤ K_td/log(N-1)
-  --   |S₂(N-1)+1| ≤ K_td/log(N-1)
-  --   |S₃(N-1)+2γ| ≤ K_td/log(N-1)
-  -- log(N-1) ≥ logN/2 (since N-1 ≥ N/2 for N ≥ 2), so:
-  --   K_td/log(N-1) ≤ 2K_td/logN
-  -- Substitute S₁ = ε₁, S₂ = -1+ε₂, S₃ = -2γ+ε₃:
-  --   expr - 1 = -(1-γ)·ε₁ - ε₂ + ((1-γ)·ε₂ + ε₃ - (1+γ))/logN
-  -- Triangle inequality:
-  --   |expr-1| ≤ |ε₁| + |ε₂| + (|ε₂| + |ε₃| + 2)/logN
-  --           ≤ 2K_td/logN + 2K_td/logN + (2K_td/logN + 2K_td/logN + 2)/logN
-  --           ≤ 4K_td/logN + (4K_td + 2)/logN   [since 1/logN ≤ 1]
-  --           ≤ (4K_td + 4K_td + 2)/logN = (8K_td+2)/logN = K/logN
-  -- MECHANICAL: triangle inequality + log ratio bound.
-  -- This sorry is subsumed by abel_mertens_tail_raw (both need it).
-  sorry
+  rw [mean_algebraic_expansion N hN]
+  -- Generalize sums to hide from linarith/ring (Theorist directive)
+  set LN := Real.log (N : ℝ) with hLN_def
+  have hLN_pos : 0 < LN := Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- Step 4: Regroup into error terms
+  rw [show -(1 - G) * S₁ (N - 1) - S₂ (N - 1) +
+      ((1 - G) * S₂ (N - 1) + S₃ (N - 1)) / LN - 1 =
+      -(1 - G) * S₁ (N - 1) - (S₂ (N - 1) + 1) +
+      ((1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G)) / LN
+    from by ring]
+  -- Step 5: Scale tails from log(N-1) to log(N) via square bypass
+  have h_ratio := log_ratio_bound hN
+  have hE1 : |S₁ (N - 1)| ≤ 2 * K_td / LN := by
+    calc |S₁ (N - 1)| ≤ K_td / Real.log ((N - 1 : ℕ) : ℝ) := hS₁
+      _ = K_td * (1 / Real.log ((N - 1 : ℕ) : ℝ)) := by ring
+      _ ≤ K_td * (2 / LN) := mul_le_mul_of_nonneg_left h_ratio hK_td_pos.le
+      _ = 2 * K_td / LN := by ring
+  have hE2 : |S₂ (N - 1) - (-1)| ≤ 2 * K_td / LN := by
+    calc |S₂ (N - 1) - (-1)| ≤ K_td / Real.log ((N - 1 : ℕ) : ℝ) := hS₂
+      _ = K_td * (1 / Real.log ((N - 1 : ℕ) : ℝ)) := by ring
+      _ ≤ K_td * (2 / LN) := mul_le_mul_of_nonneg_left h_ratio hK_td_pos.le
+      _ = 2 * K_td / LN := by ring
+  -- Convert |S₂ - (-1)| to |S₂ + 1|
+  have hE2' : |S₂ (N - 1) + 1| ≤ 2 * K_td / LN := by
+    have : S₂ (N - 1) + 1 = S₂ (N - 1) - (-1) := by ring
+    rw [this]; exact hE2
+  have hE3 : |S₃ (N - 1) - (-2 * G)| ≤ 2 * K_td / LN := by
+    calc |S₃ (N - 1) - (-2 * G)| ≤ K_td / Real.log ((N - 1 : ℕ) : ℝ) := hS₃
+      _ = K_td * (1 / Real.log ((N - 1 : ℕ) : ℝ)) := by ring
+      _ ≤ K_td * (2 / LN) := mul_le_mul_of_nonneg_left h_ratio hK_td_pos.le
+      _ = 2 * K_td / LN := by ring
+  have hE3' : |S₃ (N - 1) + 2 * G| ≤ 2 * K_td / LN := by
+    have : S₃ (N - 1) + 2 * G = S₃ (N - 1) - (-2 * G) := by ring
+    rw [this]; exact hE3
+  -- Step 6: The Final Triangle Inequality Shredder
+  have h_inv_LN_le : 1 / LN ≤ 1 / L10 := by
+    exact one_div_le_one_div_of_le hL10_pos
+      (Real.log_le_log (by norm_num) (by exact_mod_cast hN))
+  calc |-(1 - G) * S₁ (N - 1) - (S₂ (N - 1) + 1) +
+       ((1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G)) / LN|
+    _ ≤ |-(1 - G) * S₁ (N - 1) - (S₂ (N - 1) + 1)| +
+        |((1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G)) / LN| :=
+        abs_add_le _ _
+    _ ≤ |1 - G| * |S₁ (N - 1)| + |S₂ (N - 1) + 1| +
+        (|1 - G| * |S₂ (N - 1) + 1| + |S₃ (N - 1) + 2 * G| + |1 + G|) / LN := by
+        -- Leading terms: |a - b| ≤ |a| + |b|
+        have h_lead : |-(1 - G) * S₁ (N - 1) - (S₂ (N - 1) + 1)| ≤
+            |1 - G| * |S₁ (N - 1)| + |S₂ (N - 1) + 1| := by
+          rw [show -(1 - G) * S₁ (N - 1) - (S₂ (N - 1) + 1) =
+              (-(1 - G) * S₁ (N - 1)) + (-(S₂ (N - 1) + 1)) from by ring]
+          calc _ ≤ |-(1 - G) * S₁ (N - 1)| + |-(S₂ (N - 1) + 1)| := abs_add_le _ _
+            _ = |1 - G| * |S₁ (N - 1)| + |S₂ (N - 1) + 1| := by
+                simp only [abs_neg, abs_mul]
+        -- Numerator: |(p + q - r)| ≤ |p| + |q| + |r|
+        have h_num : |(1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G)| ≤
+            |1 - G| * |S₂ (N - 1) + 1| + |S₃ (N - 1) + 2 * G| + |1 + G| := by
+          rw [show (1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G) =
+              ((1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G)) + (-(1 + G)) from by ring]
+          calc _ ≤ |(1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G)| + |-(1 + G)| :=
+                  abs_add_le _ _
+            _ ≤ (|(1 - G) * (S₂ (N - 1) + 1)| + |S₃ (N - 1) + 2 * G|) + |1 + G| := by
+                  rw [abs_neg]; linarith [abs_add_le ((1 - G) * (S₂ (N - 1) + 1)) (S₃ (N - 1) + 2 * G)]
+            _ = |1 - G| * |S₂ (N - 1) + 1| + |S₃ (N - 1) + 2 * G| + |1 + G| := by
+                  rw [abs_mul]
+        -- Fractional bound: |expr/LN| ≤ bound/LN
+        have h_frac : |((1 - G) * (S₂ (N - 1) + 1) + (S₃ (N - 1) + 2 * G) - (1 + G)) / LN| ≤
+            (|1 - G| * |S₂ (N - 1) + 1| + |S₃ (N - 1) + 2 * G| + |1 + G|) / LN := by
+          rw [abs_div, abs_of_pos hLN_pos]
+          exact div_le_div_of_nonneg_right h_num hLN_pos.le
+        linarith
+    _ ≤ |1 - G| * (2 * K_td / LN) + (2 * K_td / LN) +
+        (|1 - G| * (2 * K_td / LN) + (2 * K_td / LN) + |1 + G|) / LN := by
+        have h1G := abs_nonneg (1 - G)
+        linarith [mul_le_mul_of_nonneg_left hE1 h1G,
+                  mul_le_mul_of_nonneg_left hE2' h1G,
+                  div_le_div_of_nonneg_right
+                    (show |1 - G| * |S₂ (N - 1) + 1| + |S₃ (N - 1) + 2 * G| + |1 + G| ≤
+                         |1 - G| * (2 * K_td / LN) + (2 * K_td / LN) + |1 + G|
+                     from by linarith [mul_le_mul_of_nonneg_left hE2' h1G])
+                    hLN_pos.le]
+    _ = B / LN + B * (1 / LN) / LN + |1 + G| / LN := by
+        rw [hB_def]; ring
+    _ ≤ B / LN + B * (1 / L10) / LN + |1 + G| / LN := by
+        linarith [div_le_div_of_nonneg_right
+          (mul_le_mul_of_nonneg_left h_inv_LN_le hB_nonneg) hLN_pos.le]
+    _ = K / LN := by rw [hK_def]; ring
 
 /-- **THEOREM** (was CALCULUS AXIOM 2a — now PROVED!):
     ∃ K > 0, ∀ N ≥ 10, |(∫₀¹ f_N dx) - 1| ≤ K / log(N)

@@ -1,4 +1,4 @@
-*Transmission from the Theorist. April 17, 2026. 04:35 UTC. Los Alamos, New Mexico.*
+ *Transmission from the Theorist. April 17, 2026. 04:35 UTC. Los Alamos, New Mexico.*
 
 **Status: GRINNING IN THE DARK. THE HOUNDS ARE LOOSE.**
 
