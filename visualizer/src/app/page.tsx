@@ -29,7 +29,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "554 theorems · 5 axioms · 91 files · Parseval Bridge",
+    stats: "419 theorems · 45 axioms · 79 files · post-audit",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -97,7 +97,7 @@ const CARDS: CardInfo[] = [
     href: "/cathedral-3d",
     title: "Cathedral 3D",
     description:
-      "The proof architecture as a literal cathedral — three pillars (Converse, Forward, Robin) holding the golden roof of RH.",
+      "The proof architecture as a literal cathedral — two pillars (Converse, Forward) holding the golden roof of RH.",
     icon: "⛪",
     stats: "3D · auto-rotates",
     gradient: "from-purple-500/20 to-indigo-500/20",
@@ -117,7 +117,7 @@ const ROUTES: RouteInfo[] = [
   {
     label: "STEP 1 — PARSEVAL BRIDGE",
     name: "L²(0,1) ↔ ∫|M̂(½+it)|² dt",
-    desc: "The Parseval Bridge (PROVED) decomposes the L² norm into a Mellin integral on the critical line via 3 calculus axioms. Combined with the Mellin bound, this replaces the former opaque l2_from_pointwise_bound axiom.",
+    desc: "The Parseval Bridge (PROVED) decomposes the L² norm into a Mellin integral on the critical line via calculus axioms. Combined with the Mellin bound, this replaces the former opaque l2_from_pointwise_bound axiom.",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
@@ -129,9 +129,9 @@ const ROUTES: RouteInfo[] = [
     borderColor: "border-blue-500/20",
   },
   {
-    label: "INDEPENDENT — ROBIN",
-    name: "Robin ↔ RH ↔ Lagarias",
-    desc: "Discrete arithmetic: σ(p) ≤ H_p + exp(H_p)·ln(H_p) proved for ALL primes. Zero axioms. Four cross-path equivalences.",
+    label: "STEP 3 — ASSEMBLY",
+    name: "Crown: RH ↔ d²_N → 0",
+    desc: "Assembly layer chains both directions. The crown theorem nyman_beurling_equivalence lives here. 12 files, all on the critical path.",
     color: "from-emerald-500/10 to-transparent",
     borderColor: "border-emerald-500/20",
   },
@@ -153,19 +153,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          Five transparent axioms remain — two perfectly machined sockets for Montgomery–Vaughan
-          and L² duality. Zero <code className="text-emerald-400">sorry</code>.
+          79 active files. 45 axioms — five on the crown theorem&apos;s critical path.
           The Parseval Bridge is <span className="text-emerald-400 font-bold">PROVED</span>.
-          <span className="text-amber-400 text-sm ml-1">cathedral-crown</span>
+          <span className="text-amber-400 text-sm ml-1">cathedral-audit</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "91 Lean files" },
-            { color: "bg-red-500", text: "554 theorems" },
-            { color: "bg-amber-500", text: "5 axioms" },
-            { color: "bg-blue-500", text: "0 sorry" },
-            { color: "bg-purple-500", text: "3,543 compiled jobs" },
+            { color: "bg-emerald-500", text: "79 active files" },
+            { color: "bg-red-500", text: "419 theorems" },
+            { color: "bg-amber-500", text: "45 axioms (5 on crown)" },
+            { color: "bg-blue-500", text: "96 archived" },
+            { color: "bg-purple-500", text: "cathedral-audit" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -203,6 +202,26 @@ export default function HomePage() {
 
       {/* Milestone banners */}
       <div className="space-y-3 mb-12">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.48 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/30"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🏛️</span>
+            <div>
+              <h3 className="text-sm font-bold text-violet-400">
+                THE GREAT AUDIT — 178 → 79 files (−56%)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Deep audit identified 31 duplicate declarations, 9 ghost axioms (axioms already proved as theorems),
+                and 26 orphan files. 96 files archived. Every remaining file is on the critical path.
+                Active axioms: 55 → 45. Active sorries: 50 → 38. April 18–19, 2026.
+              </p>
+            </div>
+          </div>
+        </motion.div>
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}

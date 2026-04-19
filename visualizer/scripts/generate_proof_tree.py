@@ -33,27 +33,25 @@ IMPORT_RE = re.compile(r"^import\s+([\w.]+)", re.MULTILINE)
 # Route classification by directory
 def classify_route(filepath: str) -> str:
     rel = filepath.replace(str(CATHEDRAL_DIR) + "/", "")
-    if rel.startswith("Robin/"):
-        return "robin"
     if rel.startswith("LinearAlgebra/"):
         return "infrastructure"
     if rel.startswith("Gram/"):
         return "infrastructure"
+    if rel.startswith("Structural/"):
+        return "infrastructure"
     if rel.startswith("Vasyunin/"):
+        return "variational"
+    if rel.startswith("Sieve/"):
+        return "variational"
+    if rel.startswith("Spectral/"):
         return "variational"
     if rel.startswith("MellinBridge/"):
         return "mellin"
     if rel.startswith("NymanBeurling/"):
         return "mellin"
     if rel.startswith("Assembly/"):
-        return "mellin"
-    if rel.startswith("Sieve/"):
-        return "variational"
-    if rel.startswith("Spectral/"):
-        return "variational"
-    if rel.startswith("Structural/"):
-        return "infrastructure"
-    if rel.startswith("IntegralBasis/"):
+        return "crown"
+    if rel.startswith("White/"):
         return "mellin"
     if rel == "Defs.lean" or rel == "Axioms.lean":
         return "infrastructure"

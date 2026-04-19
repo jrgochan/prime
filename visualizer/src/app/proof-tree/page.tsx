@@ -38,16 +38,16 @@ interface ProofData {
 
 const ROUTE_COLORS: Record<string, string> = {
   variational: "#8b5cf6",
-  robin: "#f59e0b",
+  crown: "#f59e0b",
   infrastructure: "#3b82f6",
   mellin: "#10b981",
 };
 
 const ROUTE_LABELS: Record<string, string> = {
-  variational: "Vasyunin Variational Path",
-  robin: "Robin–Lagarias (Discrete)",
-  infrastructure: "Infrastructure & Definitions",
-  mellin: "Mellin Bridge",
+  variational: "Vasyunin · Spectral · Sieve",
+  crown: "Assembly (Crown Theorems)",
+  infrastructure: "Infrastructure · Definitions",
+  mellin: "Mellin · NB · White",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
