@@ -98,6 +98,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.VasyuninBypass,
     `Cathedral.Assembly.DirectL2Crown,
     `Cathedral.Assembly.AbelL2Bridge,
+    `Cathedral.Assembly.AbelEngine,
     `Cathedral.Assembly.FinalDragon,
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
