@@ -192,7 +192,7 @@ theorem fract_inv_eq_inv_of_gt_one (u : ℝ) (hu : 1 < u) :
     This is the 1D Abel bound. For the L² bound, we need the
     bilinear version, but the structure is identical. -/
 theorem abel_bound_34
-    (C_m : ℝ) (hC : 0 < C_m)
+    (C_m : ℝ) (_hC : 0 < C_m)
     (hMertens : ∀ k : ℕ, 1 ≤ k →
       |partialSum (fun j => (ArithmeticFunction.moebius j : ℝ)) 1 k| ≤
         C_m * (k : ℝ) ^ ((3:ℝ)/4))

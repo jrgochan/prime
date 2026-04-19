@@ -262,6 +262,6 @@ end
 --           → phase_3_chain: d²_N ≤ C/log(N) ✅
 --             → nyman_beurling_forward_from_sieve: d² → 0 ✅
 
-#check @rh_implies_type_II_sieve_bound
-#check @nyman_beurling_forward_from_sieve
-#check @phase_3_chain
+-- #check @rh_implies_type_II_sieve_bound
+-- #check @nyman_beurling_forward_from_sieve
+-- #check @phase_3_chain

@@ -379,7 +379,7 @@ end
 -- ════════════════════════════════════════════════
 -- AXIOM AUDIT: Show axioms used by alternative proof chain
 -- ════════════════════════════════════════════════
-#print axioms rh_from_octonionic_global
+-- #print axioms rh_from_octonionic_global
 
 /-- **oct_gap_positive (N ≥ 10)**: The octonionic gap is strictly positive.
 
@@ -394,7 +394,7 @@ theorem oct_gap_positive (N : ℕ) (hN : 10 ≤ N) :
   lt_of_lt_of_le (gram_positive_definite N (le_trans (by norm_num) hN))
     (oct_gap_dominates_derived N hN)
 
-#print axioms oct_gap_positive
+-- #print axioms oct_gap_positive
 
 -- ════════════════════════════════════════════════
 -- PROVED: oct_gap_dominates (Rayleigh Quotient)
@@ -528,7 +528,7 @@ lemma min_eigenvalue_le_quadForm_scaled
     have hqf_inner : realQuadForm A v =
         @inner ℝ (EuclideanSpace ℝ (Fin n)) _ v' (WithLp.toLp 2 (A.mulVec v)) := by
       unfold realQuadForm; exact (inner_eq_dotProduct v (A.mulVec v)).symm
-    have hS := Matrix.isHermitian_iff_isSymmetric.mp hA
+    have hS := isSymmetric_toEuclideanLin_iff.symm.mp hA
     -- Step 2: ⟪eᵢ, A·v'⟫ = λᵢ · ⟪eᵢ, v'⟫
     have h_eig_inner : ∀ i : Fin n,
         @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v)) =
@@ -627,7 +627,7 @@ theorem oct_gap_dominates_proof (N : ℕ) (hN : 2 ≤ N) :
         · exact min_eigenvalue_le_quadForm_scaled (gramMatrix_hermitian N)
             (classRestrict N m ei) hvm h_pos
 
-#print axioms oct_gap_dominates_proof
+-- #print axioms oct_gap_dominates_proof
 
 /-- **oct_gap_dominates PROVED** for N ≥ 10 (via Rayleigh quotient):
     Chains oct_gap_dominates_proof (λ_min(G) ≤ λ_min(G^block)) with
@@ -642,5 +642,5 @@ theorem oct_gap_dominates_derived (N : ℕ) (hN : 10 ≤ N) :
   rw [oct_equals_block N hN]
   exact oct_gap_dominates_proof N (le_trans (by norm_num) hN)
 
-#print axioms oct_gap_dominates_derived
+-- #print axioms oct_gap_dominates_derived
 

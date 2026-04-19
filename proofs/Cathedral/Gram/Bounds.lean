@@ -163,8 +163,8 @@ theorem vasyunin_coprime_case (j k : ℕ) (_hj : 2 ≤ j) (_hk : 2 ≤ k)
 --   gramEntry_le_one:          integral_mono_on + fract_lt_one
 --   vasyunin_coprime_case:     abs_le + nonneg + le_one + Coprime.gcd_eq_one
 
-#check @gramEntry_nonneg
-#check @gramEntry_le_one
-#check @vasyunin_coprime_case
+-- #check @gramEntry_nonneg
+-- #check @gramEntry_le_one
+-- #check @vasyunin_coprime_case
 
 end

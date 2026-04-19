@@ -182,5 +182,5 @@ end
 --   BEFORE: axiom vasyunin_expansion (ALL d ≥ 1, ~100% of entries)
 --   AFTER:  axiom vasyunin_large_gcd (only d ≥ 5, ~4% of entries)
 
-#check @vasyunin_expansion_proof
-#check @vasyunin_small_gcd
+-- #check @vasyunin_expansion_proof
+-- #check @vasyunin_small_gcd

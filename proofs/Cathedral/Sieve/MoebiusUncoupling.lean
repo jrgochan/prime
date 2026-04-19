@@ -366,5 +366,5 @@ end
 --    DERIVED from the two axioms here via bilinear_decomposition.
 --    vaughan_implies_uncoupling was excised as dead code, April 2026.)
 
-#check @vaughan_decomposition
-#check @correctionBilinear
+-- #check @vaughan_decomposition
+-- #check @correctionBilinear

@@ -318,6 +318,6 @@ end
 --
 -- The Mellin Bridge remains the only surviving proof path (K_N → 1).
 
-#check @type_II_sieve_bound
-#check @sieve_implies_stable_ratio_asymptotic
+-- #check @type_II_sieve_bound
+-- #check @sieve_implies_stable_ratio_asymptotic
 

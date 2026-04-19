@@ -50,7 +50,7 @@ private theorem dotProduct_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
     logCutoffWitness_last (m + 1) (by omega)
   simp only [h_last, mul_zero, add_zero]
   simp only [vasyuninMeanVec, Fin.castSucc, logCutoffWitness, bdMoebiusWeight, logWeight, moebiusFn]
-  apply Finset.sum_congr rfl; intro i _; congr 2 <;> simp [Fin.castAdd]
+  apply Finset.sum_congr rfl; intro i _; congr 2
 
 /-- Helper: quad form bridge, parameterized as N = m+1.
     vᵀGv over Fin(m+1) = vᵀGv over Fin m when last weight is 0. -/

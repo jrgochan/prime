@@ -183,4 +183,4 @@ end
 -- ════════════════════════════════════════════════
 -- AXIOM AUDIT
 -- ════════════════════════════════════════════════
-#print axioms nyman_beurling_equivalence
+-- #print axioms nyman_beurling_equivalence

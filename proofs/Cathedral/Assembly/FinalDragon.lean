@@ -804,6 +804,6 @@ theorem rh_implies_l2_convergence_proved :
 -- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 
-#print axioms rh_implies_l2_convergence_proved
+-- #print axioms rh_implies_l2_convergence_proved
 
 end

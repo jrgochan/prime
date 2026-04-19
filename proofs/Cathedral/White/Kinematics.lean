@@ -42,7 +42,7 @@ namespace Cathedral.White
 /-- The map u ↦ exp(-u) is strictly decreasing on [0,∞) with range (0,1]. -/
 lemma exp_neg_strictAntiOn : StrictAntiOn (fun u => Real.exp (-u)) (Set.Ici 0) := by
   intro a _ b _ hab
-  exact Real.exp_lt_exp_of_lt (neg_lt_neg hab)
+  exact Real.exp_strictMono (neg_lt_neg hab)
 
 /-- The derivative of u ↦ exp(-u) is -exp(-u). -/
 lemma hasDerivAt_exp_neg (u : ℝ) :

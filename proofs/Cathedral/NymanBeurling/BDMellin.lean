@@ -127,7 +127,7 @@ private lemma fract_inv_of_gt_one {u : ℝ} (hu : 1 < u) : Int.fract (1 / u) = 1
     exact hu
 
 /-- The Mellin reduction for k=1 is an identity. -/
-private lemma bd_mellin_reduction_k1 (s : ℂ) (hs : 0 < s.re) :
+private lemma bd_mellin_reduction_k1 (s : ℂ) (_hs : 0 < s.re) :
     ∫ x in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / ((1:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     (1 / (1:ℂ) - (1 : ℂ) ^ (-s)) / (s - 1) +
@@ -149,7 +149,7 @@ private lemma ofReal_div_cpow_real {u k : ℝ} (hu : 0 < u) (hk : 0 < k) (s : �
 
 /-- Substitution u = kx: change of variables for the BD Mellin integral.
     PROVED via integral_comp_mul_right + cpow factoring. -/
-theorem mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+theorem mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (_hs : 0 < s.re) :
     ∫ x in Set.Ioo (0:ℝ) 1,
       ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
     (k : ℂ) ^ (-s) *
@@ -281,7 +281,7 @@ private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0
   exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
 
 /-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/
-private theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+private theorem mellin_tail_fract_simplify (k : ℕ) (_hk : 2 ≤ k) (s : ℂ) (_hs : 0 < s.re) :
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
@@ -291,7 +291,7 @@ private theorem mellin_tail_fract_simplify (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (h
 
 /-- ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1} - 1)/(s-1). Uses integral_cpow Or.inr. -/
 private theorem mellin_tail_evaluate (k : ℕ) (hk : 2 ≤ k) (s : ℂ)
-    (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    (_hs : 0 < s.re) (hs1 : s ≠ 1) :
     ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
       ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
     ((k : ℂ) ^ (s - 1) - 1) / (s - 1) := by
@@ -436,7 +436,7 @@ private lemma bd_ioo_eq_interval (f : ℝ → ℝ) (_hf : IntervalIntegrable f v
   exact integral_Ioc_eq_integral_Ioo.symm
 
 /-- ∫(re²+im²) = ∫x^{2σ-2} (pointwise normSq identity). -/
-private lemma bd_norm_sq_cpow_integral (ρ : ℂ) (hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
+private lemma bd_norm_sq_cpow_integral (ρ : ℂ) (_hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
     ∫ x in (0:ℝ)..1, (((x : ℂ) ^ (ρ - 1)).re ^ 2 + ((x : ℂ) ^ (ρ - 1)).im ^ 2) =
     ∫ x in (0:ℝ)..1, x ^ (2 * ρ.re - 2) := by
   apply intervalIntegral.integral_congr
@@ -475,7 +475,7 @@ private lemma bd_cs_inner_le_sq (f g : ℝ → ℝ)
     (hf2 : IntervalIntegrable (fun x => f x ^ 2) volume 0 1)
     (hg2 : IntervalIntegrable (fun x => g x ^ 2) volume 0 1)
     (hfg : IntervalIntegrable (fun x => f x * g x) volume 0 1)
-    (hft : ∀ t, IntervalIntegrable (fun x => (f x + t * g x) ^ 2) volume 0 1) :
+    (_hft : ∀ t, IntervalIntegrable (fun x => (f x + t * g x) ^ 2) volume 0 1) :
     (∫ x in (0:ℝ)..1, f x * g x) ^ 2 ≤
       (∫ x in (0:ℝ)..1, f x ^ 2) * (∫ x in (0:ℝ)..1, g x ^ 2) := by
   have h_expand : ∀ t, ∫ x in (0:ℝ)..1, (f x + t * g x) ^ 2 =
@@ -529,7 +529,7 @@ private lemma bd_residual_cpow_integrableOn (N : ℕ) (_hN : 2 ≤ N)
   apply Integrable.mono h_dom
   · exact (Complex.continuous_ofReal.comp_aestronglyMeasurable
       (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
-        (Set.Ioo_subset_Ioc_self.trans (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])))
+        (Set.Ioo_subset_Ioc_self.trans (by simp [Set.uIoc_of_le (show (0:ℝ) ≤ 1 by norm_num)])))
       ).mul (Measurable.aestronglyMeasurable (by fun_prop))
   · filter_upwards [self_mem_ae_restrict measurableSet_Ioo] with x hx
     rw [norm_mul, Complex.norm_real, Complex.norm_cpow_eq_rpow_re_of_pos hx.1 _,
@@ -769,7 +769,7 @@ private lemma bd_cpow_integrableOn_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
 private lemma bd_fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.re) :
     IntegrableOn (fun x : ℝ => ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
       (Set.Ioc 0 1) :=
-  Integrable.bdd_mul' (bd_cpow_integrableOn_Ioc ρ hρ)
+  Integrable.bdd_mul (bd_cpow_integrableOn_Ioc ρ hρ)
     ((Complex.continuous_ofReal.measurable.comp
       (measurable_fract_real.comp (measurable_const.div
         (measurable_const.mul measurable_id)))).aestronglyMeasurable)
@@ -782,7 +782,7 @@ private lemma bd_fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.
 
     Proved by porting residual_inner_cpow_eq from BesselSeparation.lean (archived). -/
 theorem bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
-    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
+    (hρ_pos : 0 < ρ.re) (_hρ_lt : ρ.re < 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
     (∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1)) -
     ∑ i : Fin (N-1), (v i : ℂ) *
@@ -802,7 +802,7 @@ theorem bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
       IntegrableOn (fun x => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
         (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
     intro i _
-    apply Integrable.bdd_mul' (bd_cpow_integrableOn_Ioc ρ hρ_pos)
+    apply Integrable.bdd_mul (bd_cpow_integrableOn_Ioc ρ hρ_pos)
     · exact (Complex.continuous_ofReal.measurable.comp
         ((measurable_const.mul (measurable_fract_real.comp
           (measurable_const.div (measurable_const.mul measurable_id)))))).aestronglyMeasurable
