@@ -518,18 +518,98 @@ private lemma s1_decay
     _ ≤ (1 + 7 * C_m) * (N : ℝ) ^ (-(1:ℝ)/4) := by nlinarith [h_eps]
 
 -- ════════════════════════════════════════════════
--- §6. S₂ AND S₃ BOUNDS (Same pattern with log weights)
+-- §6. THE DISCRETE PRODUCT RULE (Theorist directive)
+-- S₂ and S₃ bounds via algebraic splitting
 -- ════════════════════════════════════════════════
 
--- S₂ and S₃ follow the SAME structure as S₁:
--- |S₂(N)+1| = |S₂(N)-S₂(∞)| ≤ C·N^{-1/4}·logN
--- |S₃(N)+2γ| = |S₃(N)-S₃(∞)| ≤ C·N^{-1/4}·log²N
---
--- The extra log factors come from Abel summation with f(k) = log(k)/k
--- where |Δf| involves log(k)/k² (not just 1/k²).
--- The log domination (MertensIntegral.lean:116): log(k) ≤ 8·k^{1/8}
--- converts these to k^{-9/8} type bounds that converge.
---
--- For now, S₂ and S₃ follow the same template as s1_decay.
+-- S₂ definition (matching FinalDragon.lean)
+private def S₂' (M : ℕ) : ℝ :=
+  ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
+    Real.log (k : ℝ) / (k : ℝ)
+
+/-- THE FORGE: log(1 + 1/k) ≤ 1/k for k ≥ 1.
+    From Mathlib: log(x) ≤ x - 1 for x > 0, applied to x = 1+1/k. -/
+private lemma log_one_plus_inv_le (k : ℕ) (hk : 1 ≤ k) :
+    Real.log (1 + 1/(k : ℝ)) ≤ 1/(k : ℝ) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h1k : (0 : ℝ) < 1 + 1/(k : ℝ) := by positivity
+  -- log(x) ≤ x - 1 for x > 0
+  have := Real.log_le_sub_one_of_pos h1k
+  linarith
+
+/-- THE FORGE: log(k+1) - log(k) ≤ 1/k for k ≥ 1.
+    Consequence of log(1+1/k) ≤ 1/k. -/
+private lemma log_diff_le_inv (k : ℕ) (hk : 1 ≤ k) :
+    Real.log ((k : ℝ) + 1) - Real.log (k : ℝ) ≤ 1/(k : ℝ) := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hk1_ne : ((k : ℝ) + 1) ≠ 0 := by linarith
+  have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
+  calc Real.log ((k : ℝ) + 1) - Real.log (k : ℝ)
+      = Real.log (((k : ℝ) + 1) / (k : ℝ)) := (Real.log_div hk1_ne hk_ne).symm
+    _ = Real.log (1 + 1/(k : ℝ)) := by congr 1; field_simp
+    _ ≤ 1/(k : ℝ) := log_one_plus_inv_le k hk
+
+/-- THE FORGE: Discrete Product Rule for f₂(k) = log(k)/k.
+    |log(k)/k - log(k+1)/(k+1)| ≤ (log(k) + 1)/k² -/
+private lemma s2_discrete_diff_bound (k : ℕ) (hk : 2 ≤ k) :
+    |Real.log (k : ℝ) / (k : ℝ) - Real.log ((k : ℝ) + 1) / ((k : ℝ) + 1)| ≤
+    (Real.log (k : ℝ) + 1) / (k : ℝ) ^ 2 := by
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hk1_pos : (0 : ℝ) < (k : ℝ) + 1 := by linarith
+  -- Discrete Product Rule: A_k·B_k - A_{k+1}·B_{k+1}
+  -- = A_k·(B_k - B_{k+1}) + B_{k+1}·(A_k - A_{k+1})
+  -- where A_k = log(k), B_k = 1/k
+  have h_split : Real.log (k : ℝ) / (k : ℝ) - Real.log ((k : ℝ) + 1) / ((k : ℝ) + 1) =
+      Real.log (k : ℝ) * (1/(k : ℝ) - 1/((k : ℝ) + 1)) +
+      1/((k : ℝ) + 1) * (Real.log (k : ℝ) - Real.log ((k : ℝ) + 1)) := by
+    field_simp; ring
+  rw [h_split]
+  -- Triangle inequality
+  calc |Real.log (k : ℝ) * (1/(k : ℝ) - 1/((k : ℝ) + 1)) +
+       1/((k : ℝ) + 1) * (Real.log (k : ℝ) - Real.log ((k : ℝ) + 1))|
+      ≤ |Real.log (k : ℝ) * (1/(k : ℝ) - 1/((k : ℝ) + 1))| +
+        |1/((k : ℝ) + 1) * (Real.log (k : ℝ) - Real.log ((k : ℝ) + 1))| :=
+          abs_add_le _ _
+    _ = Real.log (k : ℝ) * |1/(k : ℝ) - 1/((k : ℝ) + 1)| +
+        1/((k : ℝ) + 1) * |Real.log (k : ℝ) - Real.log ((k : ℝ) + 1)| := by
+          have hlog_nn : (0:ℝ) ≤ Real.log (k : ℝ) :=
+            Real.log_nonneg (by exact_mod_cast show 1 ≤ k by omega)
+          have hinv_nn : (0:ℝ) ≤ 1/((k : ℝ) + 1) := by positivity
+          rw [abs_mul, abs_of_nonneg hlog_nn, abs_mul, abs_of_nonneg hinv_nn]
+    _ ≤ Real.log (k : ℝ) * (1/((k : ℝ) * ((k : ℝ) + 1))) +
+        1/((k : ℝ) + 1) * (1/(k : ℝ)) := by
+          apply add_le_add
+          · apply mul_le_mul_of_nonneg_left _ (Real.log_nonneg (by exact_mod_cast show 1 ≤ k by omega))
+            -- |1/k - 1/(k+1)| = 1/(k(k+1))
+            rw [show 1/(k : ℝ) - 1/((k : ℝ) + 1) = 1/((k : ℝ) * ((k : ℝ) + 1)) from by
+              field_simp; ring]
+            rw [abs_of_nonneg (by positivity)]
+          · apply mul_le_mul_of_nonneg_left _ (by positivity)
+            -- |log(k) - log(k+1)| = log(k+1) - log(k) ≤ 1/k
+            have h_log_nn : 0 ≤ Real.log ((k : ℝ) + 1) - Real.log (k : ℝ) :=
+              sub_nonneg.mpr (Real.log_le_log hk_pos (by linarith))
+            rw [show Real.log (k : ℝ) - Real.log ((k : ℝ) + 1) =
+                -(Real.log ((k : ℝ) + 1) - Real.log (k : ℝ)) from by ring,
+                abs_neg, abs_of_nonneg h_log_nn]
+            exact log_diff_le_inv k (by omega)
+    _ ≤ (Real.log (k : ℝ) + 1) / (k : ℝ) ^ 2 := by
+          -- LHS = log(k)/(k(k+1)) + 1/(k(k+1))
+          -- RHS = (log(k)+1)/k²
+          -- Need: (log(k)+1)/(k(k+1)) ≤ (log(k)+1)/k²
+          -- i.e. k² ≤ k(k+1), which is nlinarith
+          have ha : (0 : ℝ) ≤ Real.log (k : ℝ) + 1 := by
+            have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast show 1 ≤ k by omega
+            linarith [Real.log_nonneg this]
+          have hkk1_pos : (0 : ℝ) < (k : ℝ) * ((k : ℝ) + 1) := by positivity
+          have hk2_pos : (0 : ℝ) < (k : ℝ) ^ 2 := by positivity
+          have hkk1 : (k : ℝ) ^ 2 ≤ (k : ℝ) * ((k : ℝ) + 1) := by nlinarith
+          -- LHS simplifies
+          have h_lhs : Real.log (k : ℝ) * (1 / ((k : ℝ) * ((k : ℝ) + 1))) +
+              1 / ((k : ℝ) + 1) * (1 / (k : ℝ)) =
+              (Real.log (k : ℝ) + 1) / ((k : ℝ) * ((k : ℝ) + 1)) := by
+            field_simp
+          rw [h_lhs]
+          -- Now: (log+1)/(k(k+1)) ≤ (log+1)/k²
+          exact div_le_div_of_nonneg_left ha hk2_pos hkk1
 
 end
