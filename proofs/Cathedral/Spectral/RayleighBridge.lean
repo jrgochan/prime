@@ -130,7 +130,7 @@ theorem min_eigenvalue_le_quadForm
   -- Step 2: Self-adjointness gives us
   -- hS : ∀ v w, ⟪toEuclideanLin A v, w⟫ = ⟪v, toEuclideanLin A w⟫
   -- toEuclideanLin = toLpLin 2 2
-  have hS := isSymmetric_toEuclideanLin_iff.symm.mp hA
+  have hS := Matrix.isHermitian_iff_isSymmetric.mp hA
 
   -- toLpLin 2 2 A x' = toLp (A *ᵥ x), and toLpLin 2 2 = toEuclideanLin
   have h_toLpLin : toEuclideanLin A x' = WithLp.toLp 2 (A.mulVec x) := rfl

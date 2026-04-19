@@ -381,20 +381,6 @@ end
 -- ════════════════════════════════════════════════
 -- #print axioms rh_from_octonionic_global
 
-/-- **oct_gap_positive (N ≥ 10)**: The octonionic gap is strictly positive.
-
-    PROVED via gram_positive_definite + oct_gap_dominates_derived.
-    Note: This requires N ≥ 10 because oct_equals_block (used in the
-    derivation) needs N ≥ 10. For N = 2..9 the result is true but
-    would require finite case verification.
-
-    STATUS: Dead code — no consumer in the active codebase. -/
-theorem oct_gap_positive (N : ℕ) (hN : 10 ≤ N) :
-    0 < lambdaMinOct N :=
-  lt_of_lt_of_le (gram_positive_definite N (le_trans (by norm_num) hN))
-    (oct_gap_dominates_derived N hN)
-
--- #print axioms oct_gap_positive
 
 -- ════════════════════════════════════════════════
 -- PROVED: oct_gap_dominates (Rayleigh Quotient)
@@ -528,7 +514,7 @@ lemma min_eigenvalue_le_quadForm_scaled
     have hqf_inner : realQuadForm A v =
         @inner ℝ (EuclideanSpace ℝ (Fin n)) _ v' (WithLp.toLp 2 (A.mulVec v)) := by
       unfold realQuadForm; exact (inner_eq_dotProduct v (A.mulVec v)).symm
-    have hS := isSymmetric_toEuclideanLin_iff.symm.mp hA
+    have hS := Matrix.isHermitian_iff_isSymmetric.mp hA
     -- Step 2: ⟪eᵢ, A·v'⟫ = λᵢ · ⟪eᵢ, v'⟫
     have h_eig_inner : ∀ i : Fin n,
         @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v)) =
@@ -644,3 +630,17 @@ theorem oct_gap_dominates_derived (N : ℕ) (hN : 10 ≤ N) :
 
 -- #print axioms oct_gap_dominates_derived
 
+/-- **oct_gap_positive (N ≥ 10)**: The octonionic gap is strictly positive.
+
+    PROVED via gram_positive_definite + oct_gap_dominates_derived.
+    Note: This requires N ≥ 10 because oct_equals_block (used in the
+    derivation) needs N ≥ 10. For N = 2..9 the result is true but
+    would require finite case verification.
+
+    STATUS: Dead code — no consumer in the active codebase. -/
+theorem oct_gap_positive (N : ℕ) (hN : 10 ≤ N) :
+    0 < lambdaMinOct N :=
+  lt_of_lt_of_le (gram_positive_definite N (le_trans (by norm_num) hN))
+    (oct_gap_dominates_derived N hN)
+
+-- #print axioms oct_gap_positive
