@@ -6,154 +6,150 @@ reduction of the Riemann Hypothesis to a discrete variational witness.
 ## Build
 
 ```bash
-lake build    # 3,471 jobs, zero errors, zero sorry on crown theorem
+lake build    # 79 active files, 96 archived
 ```
 
-## Architecture
+## Architecture (Post-Audit — April 19, 2026)
+
+Following the Great Audit, the active codebase was reduced from 178 to
+**79 files** (−56%). Every remaining file is on the critical path to the
+crown theorem `nyman_beurling_equivalence`.
 
 ```
 Cathedral/
-├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, nbDistSq)
-├── Axioms.lean                            — Axiom registry (zeta_zero_separates)
+├── Axioms.lean                            — Axiom registry
+├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, bdLinComb)
 │
-├── LinearAlgebra/                         — LAYER 0: Pure algebra (0 axioms)
+├── Assembly/              (12 files)      — CROWN: Main proof chain
+│   ├── MainChain.lean                     — nyman_beurling_equivalence (THE CROWN)
+│   ├── FinalDragon.lean                   — Abel-Parseval bridge (active development)
+│   ├── OneCrown.lean                      — Single-axiom forward direction
+│   ├── BDBypass.lean                      — RH → BD witness decay
+│   ├── BDBridge.lean                      — Integral bridge connector
+│   ├── DirectL2Crown.lean                 — Direct L² convergence
+│   ├── GramWitness.lean                   — Gram matrix witness construction
+│   ├── QuadFormBridge.lean                — l2_error_eq_quad_error, variational
+│   ├── VasyuninBypass.lean                — Vasyunin covariance bypass
+│   ├── AbelEngine.lean                    — Abel summation engine
+│   ├── AbelL2Bridge.lean                  — Abel → L² bridge
+│   └── Assembly.lean                      — Assembly hub
+│
+├── MellinBridge/          (18 files)      — Mellin transform infrastructure
+│   ├── PlancherelBypass.lean              — ⚡ THE PARSEVAL BRIDGE (core)
+│   ├── AbelSiegeProof.lean                — Abel + Parseval composition
+│   ├── AbelSummation.lean                 — Abel's lemma (0 axioms!)
+│   ├── MertensBound.lean                  — mertensFunction + rh_implies_mertens
+│   ├── MertensIntegral.lean               — logWeight derivative bounds
+│   ├── MertensWeightBypass.lean           — mertens_bound_from_rh
+│   ├── AutocorrelationBypass.lean         — Fourier inversion
+│   ├── BDWeights.lean                     — bdMoebiusWeight extraction
+│   ├── Basic.lean                         — Basic Mellin definitions
+│   ├── DomainConnected.lean               — Slit half-plane (0 axioms!)
+│   ├── FloorDivMellin.lean                — Floor division Mellin
+│   ├── FloorMellin.lean                   — Floor function Mellin
+│   ├── HilbertSetup.lean                  — Hilbert space setup
+│   ├── IdentityBypass.lean                — Identity theorem
+│   ├── MellinSieve.lean                   — Phase 3 chain
+│   ├── OrthogonalWitness.lean             — Báez-Duarte inner products
+│   ├── PlancherelDefs.lean                — Plancherel definitions
+│   └── Separation.lean                    — MellinBridge separation
+│
+├── NymanBeurling/         (4 files)       — Nyman-Beurling criterion
+│   ├── BDMellin.lean                      — BD basis + Mellin connection
+│   ├── NymanBeurling.lean                 — Re-export hub
+│   ├── Separation.lean                    — Converse: d²→0 ⟹ RH (Pillar I)
+│   └── ThetaBound.lean                    — Completed zeta bound
+│
+├── Vasyunin/              (18 files)      — Matrix + witness proofs
+│   ├── Defs.lean                          — Gram, covariance, mean definitions
+│   ├── Witness.lean                       — Log cutoff witness construction
+│   ├── Matrix/                            — Gram matrix properties
+│   │   ├── Structural.lean                — Hermitian, PSD, invertibility
+│   │   ├── GramEntries.lean               — Gram entry formulas
+│   │   ├── GramEvaluations.lean           — G(1,1), G(1,2), G(2,2), G(3,3)
+│   │   ├── CovEntries.lean                — Covariance closed-form entries
+│   │   ├── CovDet2.lean                   — det(C₂) > 0
+│   │   └── CovDet3.lean                   — det(C₃) > 0
+│   ├── Augmented/                         — Factorial Nuke + Rayleigh
+│   │   ├── AugmentedGram.lean             — H_N PD (Factorial Nuke)
+│   │   ├── IntegralBridge.lean            — vasyunin_eq_integral axiom
+│   │   ├── LinIndep.lean                  — Augmented linear independence
+│   │   ├── MeanIntegral.lean              — ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
+│   │   └── Rayleigh.lean                  — Rayleigh quotient theorems
+│   └── Proof/                             — Witness decay chain
+│       ├── Chain.lean                     — witness → d² → 0 → RH
+│       ├── LambdaTrick.lean               — Lambda trick
+│       ├── WitnessAsymptotics.lean        — Axiom decomposition (PNT + RH)
+│       └── WitnessConditional.lean        — decay ↔ RH
+│
+├── White/                 (3 files)       — Axiom elimination
+│   ├── Kinematics.lean                    — Antitone CoV, L² isometry
+│   ├── Scattering.lean                    — Fourier-Mellin bridge
+│   └── Infrastructure/
+│       └── MontgomeryVaughan.lean         — MV L² bound scaffold
+│
+├── Gram/                  (6 files)       — L² integral bridge
+│   ├── L2Bridge.lean                      — l2_error_eq_quad_error
+│   ├── FractIntegral.lean                 — Fractional-part integrability
+│   ├── Bounds.lean                        — Gram entry bounds
+│   ├── Diagonal.lean                      — Diagonal entries
+│   ├── NbLinComb.lean                     — NB linear combination
+│   └── OffDiagonal.lean                   — Off-diagonal bound
+│
+├── Spectral/              (5 files)       — Eigenvalue analysis
+│   ├── ClassRestriction.lean              — Arithmetic class restriction
+│   ├── OctonionicPartition.lean           — 8-way octonionic partition
+│   ├── FiniteDimReduction.lean            — Finite-dim spectral bounds
+│   ├── PTSymmetry.lean                    — Liouville delocalization
+│   └── RayleighBridge.lean                — Rayleigh bridge
+│
+├── Sieve/                 (4 files)       — Bilinear sieve + Möbius weights
+│   ├── BilinearSieve.lean                 — type_II_sieve_bound axiom
+│   ├── ParitySchur.lean                   — Parity Schur complement
+│   ├── VasyuninExpansion.lean             — Large-GCD expansion
+│   └── MoebiusUncoupling.lean             — Vaughan decomposition
+│
+├── LinearAlgebra/         (4 files)       — Pure algebra (0 axioms)
 │   ├── SchurComplement.lean               — Schur complement + bordered matrix
 │   ├── ShermanMorrison.lean               — d² = 1/(1+X)
 │   ├── Sylvester.lean                     — Sylvester's criterion for PD matrices
 │   └── Variational.lean                   — Rayleigh quotient lower bound
 │
-├── Gram/                                  — LAYER 1: L² integral bridge (0 axioms)
-│   ├── L2Bridge.lean                      — l2_error_eq_quad_error
-│   ├── FractIntegral.lean                 — Fractional-part integrability
-│   ├── OffDiagBound.lean                  — Off-diagonal Gram bounds
-│   └── GramConvention.lean                — gramEntry symmetry, positivity
-│
-├── Vasyunin/                              — LAYERS 2–5: The main proof
-│   ├── Defs.lean                          — Gram, covariance, mean definitions
-│   ├── Witness.lean                       — Log cutoff witness construction
-│   │
-│   ├── Matrix/                            — LAYER 2: Matrix properties
-│   │   ├── Structural.lean                — Hermitian, PSD, invertibility
-│   │   ├── GramEntries.lean               — Gram entry formulas
-│   │   ├── GramEvaluations.lean           — G(1,1), G(1,2), G(2,2), G(3,3)
-│   │   ├── GramPSD.lean                   — det(G₂) > 0, det(G₃) > 0
-│   │   ├── CovEntries.lean                — Covariance closed-form entries
-│   │   ├── CovDet2.lean                   — det(C₂) > 0
-│   │   └── CovDet3.lean                   — det(C₃) > 0 (quadratic interpolation)
-│   │
-│   ├── Augmented/                         — LAYER 3: Factorial Nuke + Rayleigh
-│   │   ├── LinIndep.lean                  — Augmented linear independence
-│   │   ├── AugmentedGram.lean             — H_N PD (Factorial Nuke)
-│   │   ├── IntegralBridge.lean            — vasyunin_eq_integral axiom
-│   │   ├── MeanIntegral.lean              — ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
-│   │   ├── NbDistPos2.lean                — NB distance positivity (N=2)
-│   │   ├── NbDistPos3.lean                — NB distance positivity (N=3)
-│   │   └── Rayleigh.lean                  — Rayleigh quotient theorems
-│   │
-│   ├── Cotangent/                         — LAYER 4: Vasyunin formula evaluation
-│   │   ├── DigammaReflection.lean         — ψ(1-s)-ψ(s) = πcot(πs) (PROVED)
-│   │   ├── TelescopeSum.lean              — Cotangent telescope sums
-│   │   ├── VasyuninAssembly.lean          — Assembly of telescope chain
-│   │   ├── LogDigammaBridge.lean          — Digamma → Vasyunin link
-│   │   ├── CrossTermFTC.lean              — Off-diagonal piecewise FTC
-│   │   ├── OffDiagPartition.lean          — Tile partition + Beatty bound
-│   │   ├── DiagonalBridge.lean            — Diagonal Vasyunin bridge
-│   │   ├── PiecewiseFTC.lean              — Diagonal case FTC
-│   │   ├── StirlingBridge.lean            — Stirling infrastructure
-│   │   └── SqueezeElimination.lean        — Squeeze theorem
-│   │
-│   └── Proof/                             — LAYER 5: The proof chain
-│       ├── BartlettWindow.lean            — Selberg sieve = Bartlett window
-│       ├── WitnessAsymptotics.lean        — Axiom decomposition (PNT + RH)
-│       ├── Chain.lean                     — witness → d² → 0 → RH
-│       └── WitnessConditional.lean        — decay ↔ RH (THE CROWN JEWEL)
-│
-├── NymanBeurling/                         — LAYER 6: NB biconditional
-│   ├── NymanBeurling.lean                 — nyman_beurling_iff_rh (5 axioms)
-│   └── Separation.lean                    — NB converse direction
-│
-├── Assembly/                              — Bridge layer
-│   ├── QuadFormBridge.lean                — l2_error_eq_quad_error, variational
-│   ├── MainChain.lean                     — Assembly hub
-│   └── MatrixConnection.lean              — gramMatrix ↔ vasyuninGramMatrix
-│
-├── Structural/                            — Eigenvalue theory
+├── Structural/            (3 files)       — Eigenvalue theory
 │   ├── Eigenvalue.lean                    — Interlacing, drop formula
-│   ├── TelescopingSum.lean                — Determinant telescoping
-│   └── DeterminantBounds.lean             — Determinant lower bounds
+│   ├── Independence.lean                  — Linear independence
+│   └── Structural.lean                    — Structural re-export
 │
-├── Spectral/                              — Spectral class theory (9 axioms)
-│   ├── ClassRestriction.lean              — Arithmetic class restriction
-│   ├── OctonionicPartition.lean           — 8-way octonionic partition
-│   ├── FiniteDimReduction.lean            — Finite-dim spectral bounds
-│   ├── PTSymmetry.lean                    — Liouville delocalization
-│   └── ConstantVectorBound.lean           — λ_eff linear growth (PROVED)
+├── Scratch/               (1 file)        — Active development
+│   └── AbelTailProof.lean                 — Abel tail bound (S₂/S₃ decay)
 │
-├── Sieve/                                 — Sieve engine (11 axioms)
-│   ├── BilinearSieve.lean                 — type_II_sieve_bound axiom
-│   ├── ParityBridge.lean                  — gram_eigenvalue_asymptotic_derived
-│   ├── ParitySchur.lean                   — Parity Schur complement
-│   ├── VasyuninExpansion.lean             — Large-GCD expansion
-│   ├── AlignmentDecay.lean                — Liouville cancellation
-│   └── MoebiusUncoupling.lean             — Vaughan decomposition
-│
-├── MellinBridge/                          — Mellin route (8 axioms)
-│   ├── MellinSieve.lean                   — phase_3_chain (2 axioms)
-│   ├── MertensWeightBypass.lean           — mertens_bound_from_rh
-│   ├── AutocorrelationBypass.lean         — Fourier inversion
-│   ├── OrthogonalWitness.lean             — Báez-Duarte inner products
-│   ├── MertensBound.lean                  — mertensFunction + rh_implies_mertens
-│   ├── BDWeights.lean                     — bdMoebiusWeight extraction
-│   ├── AbelSummation.lean                 — Abel's lemma (0 axioms!)
-│   ├── AbelSiegeProof.lean                — Abel + Parseval composition
-│   ├── MertensIntegral.lean               — logWeight derivative bounds
-│   ├── PlancherelBypass.lean              — ⚡ PARSEVAL BRIDGE (PROVED!)
-│   ├── ContourShift.lean                  — Critical line contour shift
-│   ├── DomainConnected.lean               — Slit half-plane (0 axioms!)
-│   ├── IdentityBypass.lean                — Identity theorem
-│   └── DirichletCollapse.lean             — Dirichlet series
-│
-├── White/                                 — ★ THE WHITE SINGLET (axiom elimination)
-│   ├── WhiteSinglet.lean                  — Root module
-│   ├── Kinematics.lean                    — Antitone CoV, Axiom 2 elimination
-│   ├── Scattering.lean                    — Fourier-Mellin bridge (Axioms 3,4)
-│   └── Infrastructure/                    — Mathlib-ready lemmas
-│       ├── DirichletSeries.lean           — Dirichlet series scaffolds
-│       ├── Perron.lean                    — Perron formula scaffold
-│       ├── ZetaConvexity.lean             — Zeta convexity bound
-│       ├── HilbertInequality.lean         — Hilbert inequality
-│       └── MontgomeryVaughan.lean         — MV L² bound scaffold
-│
-├── IntegralBasis/                         — Integral basis (5 axioms)
-│   ├── BaezDuarte.lean                    — nyman_beurling_equivalence
-│   └── Quantitative.lean                  — Schur complement bounds
-│
-├── Robin/                                 — LAYER 7: Arithmetic equivalences
-│   ├── Defs.lean                          — Robin/Lagarias definitions (1 axiom)
-│   ├── BaseCases.lean                     — σ(p) ≤ bound for p ∈ {2,3,5,7}
-│   ├── Equivalence.lean                   — 4 cross-path equivalence theorems
-│   ├── HarmonicBounds.lean                — Harmonic number properties
-│   ├── PrimeBounds.lean                   — lagarias_for_primes (0 axioms)
-│   └── SigmaProps.lean                    — Divisor sum properties
-│
-└── Archive/                               — Historical explorations
+└── Archive/               (96 files)      — Preserved explorations
+    ├── Scratch/                           — 9 dead experiments
+    ├── NymanBeurling/                     — ThetaBoundMellin, MellinReduction
+    ├── IntegralBasis/                     — BaezDuarte, Quantitative
+    ├── Robin/                             — Robin's inequality (6 files)
+    ├── Vasyunin/Cotangent/                — Piecewise FTC (10 files)
+    ├── White/Infrastructure/              — Perron, Hilbert, Selberg (6 files)
+    ├── Spectral/                          — ConstantVectorBound
+    ├── Sieve/                             — AlignmentDecay, ParityBridge
+    ├── MellinBridge/                      — ContourShift, DirichletCollapse
+    └── Assembly/                          — IntervalCalc
 ```
 
 ## Stats
 
 | Metric | Count |
 |---|---|
-| Total Lean files | **158** |
-| Total lines of Lean | **39,000+** |
-| Compiled modules | **3,471** |
-| `sorry` | **0** (crown theorem path) |
-| Warnings | **1** (sorry in White Singlet development) |
-| Total axioms | **58** |
-| Critical-path axioms | **4** (verified by `#print axioms`) |
+| Active Lean files | **79** |
+| Archived Lean files | **96** |
+| Active modules | **11** |
+| Active axioms | **45** |
+| Crown critical-path axioms | **5** (verified by `#print axioms`) |
+| Active sorries | **38** (0 on crown path) |
 
 ## The Axiom Structure
 
-### Critical Path: 4 Axioms
+### Crown Critical Path: 5 Axioms
 
 Verified by `#print axioms nyman_beurling_equivalence`:
 
@@ -162,13 +158,8 @@ Verified by `#print axioms nyman_beurling_equivalence`:
 | 1 | `rh_implies_mertens_bound` | **Titchmarsh** — RH → Mertens bound |
 | 2 | `autocorr_eval_zero` | **Calculus II** — Change of variables x=e^{-u} |
 | 3 | `fourier_inv_autocorr` | **Mathlib** — L¹ Fourier inversion |
-| 4 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
-
-### Eliminated Axiom (White Singlet)
-
-| Former Axiom | Proof | File |
-|---|---|---|
-| ~~`mellin_fourier_scale`~~ | Fourier-Mellin CoV | `White/Scattering.lean` |
+| 4 | `mellin_fourier_scale` | **Convention** — 2π scaling alignment |
+| 5 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
 
 ### Key Theorem: Parseval Bridge (PROVED)
 
@@ -177,12 +168,6 @@ Verified by `#print axioms nyman_beurling_equivalence`:
 ∫₀¹ |r_N(x)|² dx = (1/2π) ∫ |M̂_{r_N}(1/2+it)|² dt
 ```
 This replaces the old opaque `l2_from_pointwise_bound` axiom.
-
-### Spectral Engine: 2 Axioms
-
-`#print axioms gram_eigenvalue_asymptotic_derived`:
-- `type_II_sieve_bound` — Asymptotic parity sieve (MPFR-verified)
-- `block_eigenvalue_log_scaling` — Block-diagonal eigenvalue scaling
 
 ### Zero-Axiom Theorems (Pure Mathlib)
 
@@ -194,3 +179,15 @@ This replaces the old opaque `l2_from_pointwise_bound` axiom.
 - `nbDistSq_le_test_vector` — d² ≤ 1-2bᵀv+vᵀGv
 - `eigenvalue_interlacing` — λ_min(G_{N+1}) ≤ λ_min(G_N)
 - `lambdaEff_linear_growth_proved` — λ_eff grows linearly
+
+## The Great Audit (April 18, 2026)
+
+A deep audit of the codebase identified:
+- **31 duplicated declaration names** across different files
+- **9 ghost axioms** — axioms proved as theorems elsewhere
+- **3 near-complete file duplications**
+- **26 orphan files** not imported by anything on the critical path
+
+The cleanup reduced the active codebase from 178 to 79 files (−56%),
+with every remaining file on the critical path. Nothing was deleted —
+all files are preserved in `Archive/`.

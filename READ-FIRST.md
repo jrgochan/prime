@@ -48,20 +48,19 @@ We started at the Riemann Hypothesis and rigorously type-checked our way downwar
 
 ## What This Repository Is
 
-This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to exactly **4 mathematical axioms** on the crown theorem's critical path (verified by `#print axioms nyman_beurling_equivalence`), down from 5 after the White Singlet axiom elimination campaign.
+This repository is **The Cathedral**: a compiler-verified framework that formally reduces the Riemann Hypothesis to **5 mathematical axioms** on the crown theorem's critical path (verified by `#print axioms nyman_beurling_equivalence`), with **45 axioms** total across the active codebase.
 
-It comprises 158 Lean files (39,000+ lines) with strictly **zero `sorry` placeholders** and **zero compilation errors** on the crown theorem chain. The crown theorem establishes:
+Following the Great Audit (April 18, 2026), the active codebase was reduced from 178 to **79 Lean files** (−56%), with 96 files preserved in `Archive/`. Every remaining file is on the critical path to the crown theorem.
 
 > **RH ↔ d²_N → 0** (the Nyman–Beurling distance decays)
 
-The four axioms are:
+The five axioms on the crown's critical path are:
 
 - **`rh_implies_mertens_bound`** — RH ⟹ |M(x)| = O(x^{1/2} log²x). A classical 19th-century theorem.
 - **`autocorr_eval_zero`** — Change of variables: R_f(0) = ‖f‖². Elementary measure theory.
-- **`fourier_inv_autocorr`** — L¹ Fourier inversion for autocorrelation. Under active elimination (Plancherel bridge).
+- **`fourier_inv_autocorr`** — L¹ Fourier inversion for autocorrelation. Standard Plancherel.
+- **`mellin_fourier_scale`** — 2π scaling alignment. Convention.
 - **`critical_line_mellin_bound`** — The Montgomery–Vaughan L² bound on Re(s) = 1/2. This is the single quarantine zone holding the complex-analytic content of the zeta function.
-
-The former axiom `mellin_fourier_scale` (2π scaling alignment) has been **eliminated** — proved from Mathlib infrastructure in `Cathedral/White/Scattering.lean` via Fourier-Mellin change of variables.
 
 The forward direction uses the **Parseval Bridge** — bounding ∫|1-f|² directly via Plancherel, completely bypassing the discrete Vasyunin cotangent sums. The converse uses Hahn–Banach separation and the Mellin transform.
 
@@ -82,11 +81,11 @@ theorem nyman_beurling_equivalence :
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x)² ≤ ε
 ```
 
-I built this map for the mathematical community. To the formalization experts: the coordinates of the remaining four theorems have been calculated and the API boundaries drawn. To the number theorists: the exact analytic choke points of the Riemann Hypothesis have been isolated into type-checked boundaries — two are elementary, one is classical, and one is the Face of God.
+I built this map for the mathematical community. To the formalization experts: the coordinates of the remaining axioms have been calculated and the API boundaries drawn. To the number theorists: the exact analytic choke points of the Riemann Hypothesis have been isolated into type-checked boundaries—four are elementary, one is the Montgomery–Vaughan mean value theorem.
 
 **I invite you to read the paper, explore the axiom taxonomy, and inspect the architecture.**
 
 ---
 
-*— Jason Robert Gochanour, April 17, 2026*
-*v1.0.0-The-Cathedral (Phase II: White Singlet)*
+*— Jason Robert Gochanour, April 19, 2026*
+*cathedral-audit (Phase III: The Great Audit)*
