@@ -152,27 +152,69 @@ private lemma finite_rpow_54_tail_bound (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 
         rw [← Finset.mul_sum]
     _ ≤ 4 * (N : ℝ) ^ (-(1:ℝ)/4) := by
         -- The sum telescopes: Σ_{k=N+1}^M (f(k-1) - f(k)) = f(N) - f(M)
-        -- where f(k) = k^{-1/4}
-        -- So it equals N^{-1/4} - M^{-1/4} ≤ N^{-1/4}
-        sorry
+        apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 4)
+        -- Need: Σ(f(k-1) - f(k)) ≤ N^{-1/4}
+        -- The sum telescopes to N^{-1/4} - M^{-1/4} ≤ N^{-1/4}
+        -- Prove by induction on the Icc range
+        suffices htel : (Icc (N+1) M).sum (fun k =>
+            ((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4)) =
+            (N : ℝ) ^ (-(1:ℝ)/4) - (M : ℝ) ^ (-(1:ℝ)/4) by
+          rw [htel]
+          have : 0 ≤ (M : ℝ) ^ (-(1:ℝ)/4) := by positivity
+          linarith
+        -- Prove the telescoping identity by induction
+        have hle : N + 1 ≤ M := hNM
+        -- Induction on the difference M - (N+1)
+        obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hle
+        induction d with
+        | zero =>
+          simp [Finset.Icc_self]
+        | succ n ih =>
+          rw [show N + 1 + (n + 1) = N + 1 + n + 1 from by omega]
+          rw [Finset.sum_Icc_succ_top (by omega : N + 1 ≤ N + 1 + n + 1)]
+          have ih' := ih (by omega) (fun k hk1 hk2 => hbridge k hk1 (by omega)) (by omega)
+          rw [ih']
+          push_cast; ring
 
 -- ════════════════════════════════════════════════
 -- §3. THE 1/(k(k+1)) TELESCOPING (Already in Cathedral!)
 -- Reuses hasSum_telescoping_inv from FractIntegral.lean
 -- ════════════════════════════════════════════════
 
-/-- Finite telescoping: Σ_{k=N+1}^{M-1} 1/(k(k+1)) = 1/(N+1) - 1/M.
-    This is pure algebra on finite sums. -/
-private lemma finite_inv_kk1_telescope (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 < M) :
-    (Ico (N+1) M).sum (fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))) =
-    1 / ((N : ℝ) + 1) - 1 / (M : ℝ) := by
-  -- 1/(k(k+1)) = 1/k - 1/(k+1), then telescope
-  have htele : ∀ k : ℕ, 1 ≤ k →
-      1 / ((k : ℝ) * ((k : ℝ) + 1)) = 1 / (k : ℝ) - 1 / ((k:ℝ) + 1) := by
-    intro k hk
-    have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+
+private lemma finset_sum_tele (a d : ℕ) :
+    (Icc a (a + d)).sum (fun k => 1 / (k : ℝ) - 1 / ((k : ℝ) + 1)) =
+    1 / (a : ℝ) - 1 / (((a + d : ℕ) : ℝ) + 1) := by
+  induction d with
+  | zero => simp [Finset.Icc_self]
+  | succ n ih =>
+    rw [show a + (n + 1) = a + n + 1 from by omega,
+        Finset.sum_Icc_succ_top (by omega : a ≤ a + n + 1), ih]
+    push_cast; ring
+
+/-- Finite telescoping bound: Σ_{k=N+1}^{M} 1/(k(k+1)) ≤ 1/(N+1).
+    Uses partial fractions + finite telescoping. -/
+private lemma finite_inv_kk1_bound (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 ≤ M) :
+    (Icc (N+1) M).sum (fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))) ≤
+    1 / ((N : ℝ) + 1) := by
+  -- 1/(k(k+1)) = 1/k - 1/(k+1)
+  have hrw : (Icc (N+1) M).sum (fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))) =
+      (Icc (N+1) M).sum (fun k => 1 / (k : ℝ) - 1 / ((k : ℝ) + 1)) := by
+    apply Finset.sum_congr rfl
+    intro k hk; rw [Finset.mem_Icc] at hk
+    have : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
     field_simp; ring
-  sorry -- Finite telescoping identity — should be straightforward induction
+  rw [hrw]
+  -- Apply telescoping identity
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hNM
+  rw [finset_sum_tele]
+  -- Goal: 1/(↑(N+1)) - 1/(↑(N+1+d)+1) ≤ 1/(↑N + 1)
+  -- Cast normalization: ↑(N+1) = ↑N + 1
+  have h_cast : (1 : ℝ) / ((N + 1 : ℕ) : ℝ) = 1 / ((N : ℝ) + 1) := by push_cast; ring
+  rw [h_cast]
+  have h_nn : (0 : ℝ) ≤ 1 / (((N + 1 + d : ℕ) : ℝ) + 1) :=
+    div_nonneg one_pos.le (by positivity)
+  linarith
 
 -- ════════════════════════════════════════════════
 -- §4. THE FINITE ABEL BOUND
