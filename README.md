@@ -1,33 +1,28 @@
 # The Cathedral — A Machine-Verified Reduction of the Riemann Hypothesis
 
-### *The Architecture of the Prime Vacuum via the Parseval Bridge*
+### *Via the Nyman–Beurling Criterion and the Parseval Bridge in Lean 4*
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
-the Riemann Hypothesis to standard theorems in harmonic analysis and
-classical analytic number theory. **79 active Lean files** across 11 modules,
-with **5 mathematical axioms** on the crown theorem's critical path
-(verified by `#print axioms`), and **45 axioms** total in the active codebase.
+the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
+**78 active Lean files** across 11 modules, with **2 mathematical axioms** on
+the crown theorem's critical path (verified by `#print axioms`), and
+**40 axioms** total in the active codebase.
 
-> **Phase III: The Great Audit** — Deep codebase cleanup.
-> 178 → 79 active files (−56%). 96 archived. 9 ghost axioms identified.
-> Every remaining file is on the critical path.
+> **This formalization does not prove the Riemann Hypothesis.** It reduces
+> its entire mathematical content to two precisely stated, well-understood
+> facts—one for analytic continuation of the Báez-Duarte Mellin identity,
+> and one quarantining the forward direction (RH ⟹ d²_N → 0) as a single
+> axiom. Everything else—the Nyman–Beurling theory, Sherman–Morrison,
+> Abel summation, Rank-1 Mellin separation, Plancherel, variational
+> principles—is compiler-verified.
 
 > **Release: cathedral-audit** — April 19, 2026
-
-## The Honest Assessment
-
-> *This formalization does not prove the Riemann Hypothesis. It reduces*
-> *its entire mathematical content to precisely stated, well-understood*
-> *facts—one elementary harmonic analysis lemma, one classical theorem*
-> *(Mertens, 1897), and one quarantined complex-analytic bound. Everything*
-> *else—the Nyman–Beurling theory, Sherman–Morrison, Abel summation,*
-> *Hahn–Banach separation, Plancherel, variational principles—is compiler-verified.*
 
 ## Quick Start
 
 ```bash
 cd proofs
-lake build          # 79 active files, 96 archived
+lake build          # 78 active files, 96 archived
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -45,22 +40,19 @@ theorem nyman_beurling_equivalence :
 
 The proof decomposes into two pillars:
 
-- **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via Hahn–Banach separation and Mellin transform.
-- **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via Mertens → Abel → Parseval Bridge.
+- **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument.
+- **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via the Báez-Duarte theorem (quarantined as a single axiom).
 
-## The Axioms
+## The Two Crown Axioms
 
-The crown theorem `nyman_beurling_equivalence` depends on **5 axioms**
+The crown theorem `nyman_beurling_equivalence` depends on **2 mathematical axioms**
 (verified by `#print axioms`). The full active codebase contains
-**45 axioms** across its proof infrastructure.
+**40 axioms** across its proof infrastructure.
 
-| # | Axiom | Content | Source |
-|---|-------|---------|--------|
-| 1 | `rh_implies_mertens_bound` | RH ⟹ \|M(x)\| = O(x^{1/2} log²x) | Mertens (1897) |
-| 2 | `autocorr_eval_zero` | Change of variables: R_f(0) = ‖f‖² | Measure theory |
-| 3 | `fourier_inv_autocorr` | L¹ Fourier inversion for autocorrelation | Plancherel (1910) |
-| 4 | `mellin_fourier_scale` | 2π scaling alignment | Convention |
-| 5 | `critical_line_mellin_bound` | Montgomery–Vaughan L² bound on Re(s)=1/2 | Montgomery (1973) |
+| # | Axiom | Content | Role |
+|---|-------|---------|------|
+| 1 | `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 | Converse direction |
+| 2 | `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte, 2003) | Forward direction |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
@@ -81,58 +73,52 @@ discrete formula remains essential for numerical computation (see `experiments/`
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry
+├── Axioms.lean              ← Axiom registry (40 axioms, tiered)
 ├── Defs.lean                ← Core definitions
 ├── Assembly/        (12)    ← Crown theorems + proof chain
-│   ├── FinalDragon.lean     ← Abel-Parseval bridge (active dev)
-│   ├── MainChain.lean       ← nyman_beurling_equivalence
+│   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
+│   ├── OneCrown.lean        ← Single-axiom forward direction
 │   ├── BDBypass.lean        ← RH → BD witness decay
-│   └── OneCrown.lean        ← Single-axiom forward direction
-├── MellinBridge/    (18)    ← Mellin transform infrastructure
-│   ├── PlancherelBypass.lean← The Parseval Bridge core
-│   ├── AbelSiegeProof.lean  ← Abel summation (PROVED)
-│   └── MertensBound.lean    ← RH → Mertens (Axiom 1)
+│   └── AbelL2Bridge.lean    ← Abel → L² bridge (2 sorry, alt path)
+├── MellinBridge/    (16)    ← Mellin transform infrastructure
+│   ├── PlancherelBypass.lean← ⚡ THE PARSEVAL BRIDGE (core)
+│   ├── AbelSummation.lean   ← Abel's lemma (0 axioms!)
+│   └── MertensBound.lean    ← RH → Mertens bound
 ├── NymanBeurling/   (4)     ← Nyman-Beurling criterion
-│   ├── BDMellin.lean        ← BD basis + Mellin connection
-│   └── Separation.lean      ← Converse: d²→0 ⟹ RH
-├── Vasyunin/        (18)    ← Matrix + witness proofs
-│   ├── Matrix/              ← Gram matrix entries + evaluations
-│   ├── Augmented/           ← Augmented Gram PD proofs
-│   └── Proof/               ← Witness decay chain
-├── White/           (3)     ← Axiom elimination (Kinematics, Scattering)
+│   ├── BDMellin.lean        ← BD basis + Rank-1 Mellin Miracle
+│   ├── Separation.lean      ← Converse: d²→0 ⟹ RH (Pillar I)
+│   └── ThetaBound.lean      ← ζ(s) ≠ 0 on (0,1) (0 axioms!)
+├── Vasyunin/        (15)    ← Matrix + witness proofs
+├── White/           (4)     ← Axiom elimination proofs
 ├── Gram/            (6)     ← Gram matrix L² bounds
 ├── Spectral/        (5)     ← Eigenvalue analysis
 ├── Sieve/           (4)     ← Bilinear sieve + Möbius weights
-├── LinearAlgebra/   (4)     ← Sherman-Morrison, Variational, Sylvester
+├── LinearAlgebra/   (4)     ← Sherman-Morrison, Sylvester (0 axioms)
 ├── Structural/      (3)     ← Eigenvalue monotonicity
-├── Scratch/         (1)     ← AbelTailProof (active development)
 └── Archive/         (96)    ← Preserved exploratory paths
+```
+
+## Build Stats
+
+```
+Active files:   78 Lean files across 11 modules
+Archived:       96 Lean files in Archive/
+Axioms:         2 on crown critical path, 40 total active
+Sorry:          2 in active codebase (0 on crown path)
+Errors:         0
+Tag:            cathedral-audit
 ```
 
 ## Key Results (All Machine-Verified)
 
 | Result | Status |
 |--------|--------|
-| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (5 axioms) |
+| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (2 axioms) |
 | `rh_implies_bd_witness_decay` — RH ⟹ L² decay | **Proved** (from axioms) |
 | `abel_summation_bd_l2_bound_proved` — Mertens → L² bound | **Proved** |
 | `augmentedGramMatrix_posDef` — H_N PD for all N ≥ 1 | **Proved** (0 axioms) |
 | `digamma_reflection_complex` — ψ(1-s) - ψ(s) = π·cot(πs) | **Proved** (0 axioms) |
-| `floor_sum_single` — Hermite identity for coprime sums | **Proved** (0 axioms) |
-| `lagarias_for_primes` — Lagarias inequality for all primes | **Proved** (0 axioms) |
-| `nb_dist_via_witness` — d² = 1/(1+X) | **Proved** (0 axioms) |
-| `divisor_sum_swap` — Dirichlet hyperbola swap | **Proved** (0 axioms) |
-
-## Build Stats
-
-```
-Active files:   79 Lean files across 11 modules
-Archived:       96 Lean files in Archive/
-Axioms:         5 on crown critical path, 45 total active
-Sorry:          38 in active codebase (0 on crown path)
-Errors:         0
-Tag:            cathedral-audit
-```
+| `completedRiemannZeta₀_bound_real` — ζ ≠ 0 on (0,1) | **Proved** (0 axioms) |
 
 ## Numerical Validation (Rust)
 
@@ -148,7 +134,7 @@ Exact discrete Vasyunin computation confirms the spectral correspondence:
 Q_N / ln N → C ≈ 21.65, where C = 1/(2 + γ - ln 4π) is the quantum
 stiffness of the prime number vacuum.
 
-## Four Discoveries
+## Five Discoveries
 
 1. **The High-Frequency Trap**: The basis {k/x} spans L² unconditionally,
    making d²_N = 0 trivially. The true Báez-Duarte basis {1/(kx)} is essential.
@@ -162,15 +148,35 @@ stiffness of the prime number vacuum.
    Either constant suffices.
 
 4. **The Selberg Emergence**: The L² variational principle independently
-   rediscovers the Selberg sieve weights — μ(k)(1 - ln k / ln N) —
-   from pure linear algebra.
+   rediscovers the Selberg sieve weights.
 
-## Papers
+5. **The Triangle Inequality Trap**: ‖1 − f‖₂ ≤ 1 + ‖f‖₂ yields d²_N ≤ 4
+   for a quantity → 0. Real-variable bounds destroy the interference pattern.
+   The Parseval Bridge is mathematically *necessary*.
 
-- `paper/cathedral.tex` — Full technical paper
-- `paper/overview.tex` — Accessible overview
+## Documentation Suite
 
-Build PDFs: `cd paper && pdflatex cathedral.tex && pdflatex overview.tex`
+12 companion papers for 12 audiences:
+
+| Paper | Audience | Pages |
+|-------|----------|-------|
+| `cathedral.tex` | Technical overview | 9 |
+| `overview.tex` | Quick reference | 4 |
+| `cathedral-math.tex` | Research mathematicians | 12 |
+| `cathedral-physics.tex` | Physicists | 10 |
+| `cathedral-public.tex` | General public | 7 |
+| `cathedral-cs.tex` | Proof engineers / CS | 12 |
+| `cathedral-security.tex` | Security researchers | 9 |
+| `cathedral-philosophy.tex` | Philosophers of mathematics | 10 |
+| `cathedral-ai.tex` | AI/ML researchers | 7 |
+| `cathedral-lean.tex` | Lean/ITP community | 9 |
+| `cathedral-foundations.tex` | Logicians / foundations | 9 |
+| `cathedral-letter.tex` | A letter from the builder | 5 |
+
+Build all PDFs:
+```bash
+cd paper && ./build.sh
+```
 
 ## Methodology
 
@@ -189,8 +195,8 @@ Apache 2.0
 
 ```bibtex
 @misc{gochanour2026cathedral,
-  title={The Architecture of the Prime Vacuum: A Machine-Verified
-         Reduction of the Riemann Hypothesis via the Parseval Bridge},
+  title={The Cathedral: A Machine-Verified Reduction of the Riemann
+         Hypothesis via the Nyman--Beurling Criterion},
   author={Gochanour, Jason Robert},
   year={2026},
   url={https://github.com/jrgochan/prime}

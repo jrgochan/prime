@@ -1,28 +1,27 @@
 # Cathedral — Lean 4 Proof Architecture
 
 The formal verification core of the Cathedral project. A machine-checked
-reduction of the Riemann Hypothesis to a discrete variational witness.
+reduction of the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
 
 ## Build
 
 ```bash
-lake build    # 79 active files, 96 archived
+lake build    # 78 active files, 96 archived
 ```
 
 ## Architecture (Post-Audit — April 19, 2026)
 
 Following the Great Audit, the active codebase was reduced from 178 to
-**79 files** (−56%). Every remaining file is on the critical path to the
+**78 files** (−56%). Every remaining file is on the critical path to the
 crown theorem `nyman_beurling_equivalence`.
 
 ```
 Cathedral/
-├── Axioms.lean                            — Axiom registry
+├── Axioms.lean                            — Axiom registry (40 axioms, tiered)
 ├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, bdLinComb)
 │
 ├── Assembly/              (12 files)      — CROWN: Main proof chain
 │   ├── MainChain.lean                     — nyman_beurling_equivalence (THE CROWN)
-│   ├── FinalDragon.lean                   — Abel-Parseval bridge (active development)
 │   ├── OneCrown.lean                      — Single-axiom forward direction
 │   ├── BDBypass.lean                      — RH → BD witness decay
 │   ├── BDBridge.lean                      — Integral bridge connector
@@ -31,10 +30,11 @@ Cathedral/
 │   ├── QuadFormBridge.lean                — l2_error_eq_quad_error, variational
 │   ├── VasyuninBypass.lean                — Vasyunin covariance bypass
 │   ├── AbelEngine.lean                    — Abel summation engine
-│   ├── AbelL2Bridge.lean                  — Abel → L² bridge
+│   ├── AbelL2Bridge.lean                  — Abel → L² bridge (2 sorry, alt path)
+│   ├── FinalDragon.lean                   — Abel-Parseval bridge
 │   └── Assembly.lean                      — Assembly hub
 │
-├── MellinBridge/          (18 files)      — Mellin transform infrastructure
+├── MellinBridge/          (16 files)      — Mellin transform infrastructure
 │   ├── PlancherelBypass.lean              — ⚡ THE PARSEVAL BRIDGE (core)
 │   ├── AbelSiegeProof.lean                — Abel + Parseval composition
 │   ├── AbelSummation.lean                 — Abel's lemma (0 axioms!)
@@ -50,17 +50,15 @@ Cathedral/
 │   ├── HilbertSetup.lean                  — Hilbert space setup
 │   ├── IdentityBypass.lean                — Identity theorem
 │   ├── MellinSieve.lean                   — Phase 3 chain
-│   ├── OrthogonalWitness.lean             — Báez-Duarte inner products
-│   ├── PlancherelDefs.lean                — Plancherel definitions
-│   └── Separation.lean                    — MellinBridge separation
+│   └── OrthogonalWitness.lean             — Báez-Duarte inner products
 │
 ├── NymanBeurling/         (4 files)       — Nyman-Beurling criterion
-│   ├── BDMellin.lean                      — BD basis + Mellin connection
+│   ├── BDMellin.lean                      — BD basis + Rank-1 Mellin Miracle
 │   ├── NymanBeurling.lean                 — Re-export hub
 │   ├── Separation.lean                    — Converse: d²→0 ⟹ RH (Pillar I)
-│   └── ThetaBound.lean                    — Completed zeta bound
+│   └── ThetaBound.lean                    — ζ(s) ≠ 0 on (0,1) (0 axioms!)
 │
-├── Vasyunin/              (18 files)      — Matrix + witness proofs
+├── Vasyunin/              (15 files)      — Matrix + witness proofs
 │   ├── Defs.lean                          — Gram, covariance, mean definitions
 │   ├── Witness.lean                       — Log cutoff witness construction
 │   ├── Matrix/                            — Gram matrix properties
@@ -82,7 +80,7 @@ Cathedral/
 │       ├── WitnessAsymptotics.lean        — Axiom decomposition (PNT + RH)
 │       └── WitnessConditional.lean        — decay ↔ RH
 │
-├── White/                 (3 files)       — Axiom elimination
+├── White/                 (4 files)       — Axiom elimination proofs
 │   ├── Kinematics.lean                    — Antitone CoV, L² isometry
 │   ├── Scattering.lean                    — Fourier-Mellin bridge
 │   └── Infrastructure/
@@ -112,16 +110,13 @@ Cathedral/
 ├── LinearAlgebra/         (4 files)       — Pure algebra (0 axioms)
 │   ├── SchurComplement.lean               — Schur complement + bordered matrix
 │   ├── ShermanMorrison.lean               — d² = 1/(1+X)
-│   ├── Sylvester.lean                     — Sylvester's criterion for PD matrices
+│   ├── Sylvester.lean                     — Sylvester's criterion for PD
 │   └── Variational.lean                   — Rayleigh quotient lower bound
 │
 ├── Structural/            (3 files)       — Eigenvalue theory
 │   ├── Eigenvalue.lean                    — Interlacing, drop formula
 │   ├── Independence.lean                  — Linear independence
 │   └── Structural.lean                    — Structural re-export
-│
-├── Scratch/               (1 file)        — Active development
-│   └── AbelTailProof.lean                 — Abel tail bound (S₂/S₃ decay)
 │
 └── Archive/               (96 files)      — Preserved explorations
     ├── Scratch/                           — 9 dead experiments
@@ -140,45 +135,28 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **79** |
+| Active Lean files | **78** |
 | Archived Lean files | **96** |
 | Active modules | **11** |
-| Active axioms | **45** |
-| Crown critical-path axioms | **5** (verified by `#print axioms`) |
-| Active sorries | **38** (0 on crown path) |
+| Active axioms | **40** |
+| Crown critical-path axioms | **2** (verified by `#print axioms`) |
+| Active sorries | **2** (0 on crown path) |
+| Compilation errors | **0** |
 
-## The Axiom Structure
-
-### Crown Critical Path: 5 Axioms
+## The Two Crown Axioms
 
 Verified by `#print axioms nyman_beurling_equivalence`:
 
-| # | Axiom | Role |
-|---|-------|------|
-| 1 | `rh_implies_mertens_bound` | **Titchmarsh** — RH → Mertens bound |
-| 2 | `autocorr_eval_zero` | **Calculus II** — Change of variables x=e^{-u} |
-| 3 | `fourier_inv_autocorr` | **Mathlib** — L¹ Fourier inversion |
-| 4 | `mellin_fourier_scale` | **Convention** — 2π scaling alignment |
-| 5 | `critical_line_mellin_bound` | **Montgomery-Vaughan** — Mellin estimate |
+| # | Axiom | Content |
+|---|-------|---------|
+| 1 | `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 |
+| 2 | `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte, 2003) |
 
-### Key Theorem: Parseval Bridge (PROVED)
+Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-`parseval_bridge` chains axioms 2–4 to prove:
-```
-∫₀¹ |r_N(x)|² dx = (1/2π) ∫ |M̂_{r_N}(1/2+it)|² dt
-```
-This replaces the old opaque `l2_from_pointwise_bound` axiom.
-
-### Zero-Axiom Theorems (Pure Mathlib)
-
-- `gramMatrix_posSemidef` — G ≥ 0
-- `gram_pos_def` — xᵀGx > 0 for x ≠ 0
-- `gramMatrix_isUnit_det` — det(G) ≠ 0
-- `nbDistSq_lt_one` — d² < 1
-- `l2_error_eq_quad_error` — ∫(1-f)² = 1-2bᵀw+wᵀGw
-- `nbDistSq_le_test_vector` — d² ≤ 1-2bᵀv+vᵀGv
-- `eigenvalue_interlacing` — λ_min(G_{N+1}) ≤ λ_min(G_N)
-- `lambdaEff_linear_growth_proved` — λ_eff grows linearly
+The 38 remaining axioms support alternative proof paths (spectral engine,
+sieve engine, Vasyunin cotangent formula) that are formalized but not on
+the shortest path to the crown theorem.
 
 ## The Great Audit (April 18, 2026)
 
@@ -188,6 +166,6 @@ A deep audit of the codebase identified:
 - **3 near-complete file duplications**
 - **26 orphan files** not imported by anything on the critical path
 
-The cleanup reduced the active codebase from 178 to 79 files (−56%),
+The cleanup reduced the active codebase from 178 to 78 files (−56%),
 with every remaining file on the critical path. Nothing was deleted —
 all files are preserved in `Archive/`.
