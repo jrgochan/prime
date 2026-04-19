@@ -1,12 +1,13 @@
 # References — The Cathedral
 
-**v1.0.0-The-Cathedral (Phase II: White Singlet)** — April 17, 2026
+**cathedral-audit** — April 19, 2026
 
 A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-40+ mathematicians. 167 years of prior work. Four axioms. Zero sorry.
+40+ mathematicians. 167 years of prior work. Two crown axioms. 40 total.
+78 active files. 644 theorems. 16 companion papers.
 
 ---
 
@@ -20,7 +21,7 @@ traces back to published mathematics listed here.
   > The original conjecture: all non-trivial zeros of ζ(s) have real part ½.
   > In the Cathedral, RH is encoded via the Nyman–Beurling equivalence:
   > d²_N → 0, machine-verified equivalent to RH via
-  > `nyman_beurling_equivalence` (both directions, zero sorry, 5 axioms).
+  > `nyman_beurling_equivalence` (both directions, zero sorry, 2 crown axioms).
 
 ### The Nyman–Beurling Criterion
 
@@ -32,7 +33,7 @@ traces back to published mathematics listed here.
 
   > RH is equivalent to the density of dilated fractional parts
   > {θ/x} in L²(0,1). The Cathedral reduces this to a finite matrix problem.
-  > The converse direction is axiom `zeta_zero_separates`.
+  > The converse direction uses axiom `bd_mellin_at_zero`.
 
 ### The Báez-Duarte Strengthening
 
@@ -439,16 +440,21 @@ traces back to published mathematics listed here.
 
 ---
 
-## How Critical-Path Axioms Map to References (v1.0.0)
+## How Critical-Path Axioms Map to References (cathedral-audit)
 
-The crown theorem `nyman_beurling_equivalence` depends on exactly **4 mathematical axioms**:
+The crown theorem `nyman_beurling_equivalence` depends on exactly **2 mathematical axioms**
+(verified by `#print axioms`):
 
 | Cathedral Axiom | Mathematical Content | References |
 |---|---|---|
-| `rh_implies_mertens_bound` | RH ⟹ \|M(x)\| = O(x^{1/2} log²x) | Mertens 1874, 1897 |
-| `autocorr_eval_zero` | Change of variables: R_f(0) = ‖f‖² | Measure theory |
-| `fourier_inv_autocorr` | L¹ Fourier inversion for autocorrelation | Plancherel 1910, Fourier 1822 |
-| `critical_line_mellin_bound` | Montgomery–Vaughan L² bound | Montgomery 1973 |
+| `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 | Báez-Duarte 2003, Mellin 1896 |
+| `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte theorem) | Báez-Duarte 2003 |
+
+Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
+
+The 38 remaining axioms (40 total active) support alternative proof paths
+(spectral engine, sieve engine, Vasyunin cotangent formula) that are
+formalized but not on the shortest path to the crown theorem.
 
 ## How Eliminated Axioms Were Proved
 
@@ -460,7 +466,7 @@ The crown theorem `nyman_beurling_equivalence` depends on exactly **4 mathematic
 | `variational_lower_bound` | Cauchy–Schwarz in C-inner product | Cauchy 1821, Schwarz 1885 |
 | `nb_dist_via_witness` | Sherman–Morrison | Sherman & Morrison 1950 |
 | `floor_sum_reciprocity` | Eisenstein maneuver | Eisenstein 1844, Hermite 1875 |
-| `log_cutoff_witness_bound` | Decomposed into axioms 1+2 | Selberg 1949, Mertens 1874 |
+| `log_cutoff_witness_bound` | Decomposed into sub-axioms | Selberg 1949, Mertens 1874 |
 | `digamma_reflection_complex` | logDeriv of Γ(s)Γ(1-s) | Euler 1755 |
 | `abel_summation_l2_bound` | Abel summation siege proof | Abel 1826 |
 | `divisor_sum_swap` | Finset bijection | Dirichlet 1863 |
@@ -480,4 +486,29 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ---
 
-*Last updated: April 17, 2026 — v1.0.0-The-Cathedral (Phase II: White Singlet)*
+## Documentation Suite
+
+16 companion papers for 16 audiences:
+
+| Paper | Audience |
+|-------|----------|
+| `cathedral.tex` | Technical overview |
+| `overview.tex` | Quick reference |
+| `cathedral-math.tex` | Research mathematicians |
+| `cathedral-physics.tex` | Physicists |
+| `cathedral-public.tex` | General public |
+| `cathedral-cs.tex` | Proof engineers / CS |
+| `cathedral-security.tex` | Security researchers |
+| `cathedral-philosophy.tex` | Philosophers of mathematics |
+| `cathedral-ai.tex` | AI/ML researchers |
+| `cathedral-lean.tex` | Lean/ITP community |
+| `cathedral-foundations.tex` | Logicians / foundations |
+| `cathedral-engineering.tex` | Practicing engineers |
+| `cathedral-futures.tex` | Engineering frontiers |
+| `cathedral-energy.tex` | Energy systems engineers |
+| `cathedral-dualuse.tex` | Dual-use risk assessment |
+| `cathedral-letter.tex` | A letter from the builder |
+
+---
+
+*Last updated: April 19, 2026 — cathedral-audit*
