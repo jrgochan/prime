@@ -25,6 +25,7 @@ import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.MertensIntegral
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.MeanIntegral
+import Cathedral.Vasyunin.Proof.LambdaTrick
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 noncomputable section
@@ -621,9 +622,47 @@ theorem moebius_quadratic_finite_bound
   have hL10_pos : 0 < L10 := Real.log_pos (by norm_num)
   set K := K_cov + 2 * K₁ + K₁^2 / L10
   refine ⟨K, by positivity, fun N hN => ?_⟩
-  -- Step 4: Variance Split: vᵀGv = vᵀCv + (vᵀb)²
-  -- Use the gram_cov_decomposition: G = C + bbᵀ
-  sorry
+  -- Step 4: Variance Split via gram_cov_decomposition (Theorist: "IS the contour shift")
+  -- G = C + bbᵀ (definition of vasyuninCovMatrix)
+  set n := N - 1 with hn_def
+  set G := Matrix.of (fun (i j : Fin n) => vasyuninGramEntry (i.val + 1) (j.val + 1))
+  set b := Cathedral.Vasyunin.vasyuninMeanVec n
+  set C := Cathedral.Vasyunin.vasyuninCovMatrix n
+  set v := bdMoebiusWeight N
+  -- G = vasyuninGramMatrix n (by definition)
+  have hG_eq : G = Cathedral.Vasyunin.vasyuninGramMatrix n := by
+    ext i j; simp [G, Cathedral.Vasyunin.vasyuninGramMatrix, Matrix.of_apply]
+  -- vasyuninCovMatrix = G - bbᵀ ↔ G = C + bbᵀ
+  have hG_decomp : G = C + Matrix.vecMulVec b b := by
+    rw [hG_eq]
+    show Cathedral.Vasyunin.vasyuninGramMatrix n =
+      Cathedral.Vasyunin.vasyuninCovMatrix n + Matrix.vecMulVec b b
+    unfold Cathedral.Vasyunin.vasyuninCovMatrix
+    abel
+  -- Apply the decomposition: vᵀGv = vᵀCv + (bᵀv)²
+  have h_split := gram_cov_decomposition b C G v hG_decomp
+  -- Get the covariance bound
+  have h_cov_N := h_cov N hN
+  -- Get the linear mean bound and convert to dotProduct form
+  have h_mean_N := h_mean N hN
+  -- The sum in h_mean IS dotProduct b v
+  have h_dot_eq : ∑ i : Fin n, bdMoebiusWeight N i *
+      ((Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) / ↑(i.val + 1)) =
+      dotProduct b v := by
+    simp only [dotProduct, b, v, Cathedral.Vasyunin.vasyuninMeanVec,
+      Cathedral.Vasyunin.vasyuninMeanEntry]
+    congr 1; ext i; ring
+  rw [h_dot_eq] at h_mean_N
+  -- Now apply quadratic_from_mean_and_cov
+  set S := dotProduct b v
+  set LN := Real.log (N : ℝ)
+  have hLN_pos : 0 < LN := Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hLN_ge : L10 ≤ LN :=
+    Real.log_le_log (by norm_num) (by exact_mod_cast hN)
+  -- Apply the Quadratic Shredder
+  rw [h_split]
+  exact quadratic_from_mean_and_cov S (realQuadForm C v) K₁ K_cov LN L10
+    h_mean_N h_cov_N hLN_ge hL10_pos
 
 /-- **THEOREM** (was CALCULUS AXIOM 2b — now PROVED!):
     ∃ K > 0, ∀ N ≥ 10, ∫₀¹ f_N(x)² dx ≤ 1 + K/log(N)
