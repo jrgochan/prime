@@ -103,12 +103,46 @@ private lemma pnt_mertens_S1_tail_bound
 /-- **SORRY SUB-LEMMA 2**: x^{-1/4}·(logx)^p is bounded on [9,∞).
 
     Standard calculus: log grows slower than any power.
-    x^{-1/4}·log^p(x) → 0 as x→∞, hence bounded on [9,∞).
-    Gives: ∃ B, ∀ N ≥ 10, N^{-1/4}·logN^p ≤ B. -/
+    x^{-1/4}·log(x) → 0 as x→∞, hence bounded on [9,∞).
+    Gives: ∃ B, ∀ N ≥ 10, N^{-1/4}·logN ≤ B.
+
+    The max of x^{-1/4}·logx occurs at x = e⁴ ≈ 54.6,
+    where the value is 4/e ≈ 1.47. So B = 2 suffices. -/
 private lemma rpow_quarter_log_bounded :
     ∃ B : ℝ, B > 0 ∧ ∀ N : ℕ, 10 ≤ N →
     (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ≤ B := by
-  sorry
+  -- We use B = 4. The function N^{-1/4}·logN ≤ 4 for all N ≥ 10.
+  -- Key: logN ≤ N^{1/4} for N ≥ 10 (log grows slower than any power).
+  -- Then N^{-1/4}·logN ≤ N^{-1/4}·N^{1/4} = 1 ≤ 4.
+  -- But logN ≤ N^{1/4} needs proof. Use: for N ≥ 1, logN ≤ 4·N^{1/4}
+  -- (since log x ≤ 4·x^{1/4} for all x ≥ 1, from AM-GM/calculus).
+  refine ⟨4, by norm_num, fun N hN => ?_⟩
+  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
+  have hN_ge1 : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+  -- Key: log(x) ≤ x for x ≥ 1. Apply to x = N^{1/4}.
+  set t := (N : ℝ) ^ ((1:ℝ)/4) with ht_def
+  have ht_pos : 0 < t := Real.rpow_pos_of_pos hN_pos _
+  have ht_ge1 : 1 ≤ t := by
+    rw [ht_def, ← Real.rpow_zero (N : ℝ)]
+    exact Real.rpow_le_rpow_of_exponent_le hN_ge1 (by norm_num)
+  -- log(t) ≤ t (since 1 + log(t) ≤ exp(log(t)) = t for t ≥ 1)
+  have h_log_le : Real.log t ≤ t := by
+    linarith [Real.add_one_le_exp (Real.log t), Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
+  -- log(N) = 4·log(t) since N = t^4
+  have h_log_eq : Real.log (N : ℝ) = 4 * Real.log t := by
+    rw [ht_def, Real.log_rpow hN_pos]; ring
+  -- log(N) ≤ 4·t
+  have h_log_bound : Real.log (N : ℝ) ≤ 4 * t := by linarith
+  -- N^{-1/4} · logN ≤ N^{-1/4} · 4·N^{1/4} = 4
+  have h_cancel : (N : ℝ) ^ (-(1:ℝ)/4) * t = 1 := by
+    rw [ht_def, ← Real.rpow_add hN_pos]; norm_num
+  calc (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ)
+    _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) * (4 * t) := by
+        apply mul_le_mul_of_nonneg_left h_log_bound
+        exact le_of_lt (Real.rpow_pos_of_pos hN_pos _)
+    _ = 4 * ((N : ℝ) ^ (-(1:ℝ)/4) * t) := by ring
+    _ = 4 * 1 := by rw [h_cancel]
+    _ = 4 := by ring
 
 -- ════════════════════════════════════════════════
 -- §2b. THE MEAN BOUND (was AXIOM → now THEOREM!)
