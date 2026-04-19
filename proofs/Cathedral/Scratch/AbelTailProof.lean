@@ -752,7 +752,36 @@ private lemma s3_decay
     ∃ C₃ : ℝ, C₃ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
       |S₃' N - L₃| ≤
         C₃ * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
-  sorry -- Same architecture as s2_decay with log² factor
+  use 1 + 50 * C_m
+  constructor
+  · linarith
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlog_pos : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlog_sq_pos : 0 < (Real.log (N : ℝ)) ^ 2 := sq_pos_of_pos hlog_pos
+  have h_eps : (0 : ℝ) < (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
+    exact mul_pos (Real.rpow_pos_of_pos hN_pos _) hlog_sq_pos
+  -- Step 1: From PNT₃ (S₃ → L₃), get M₀
+  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound h_eps hPNT₃
+  -- Step 2: Choose M = max(N+1, M₀)
+  set M := max (N + 1) M₀
+  have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
+  have hM_ge_M0 : M₀ ≤ M := le_max_right _ _
+  -- Step 3: |S₃(M) - L₃| < N^{-1/4}·log²(N)
+  have hS3M : |S₃' M - L₃| ≤ (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
+    exact hM₀ M hM_ge_M0
+  -- Step 4: Triangle inequality
+  -- |S₃(N) - L₃| ≤ |S₃(M) - L₃| + |S₃(M) - S₃(N)|
+  -- First term: ≤ N^{-1/4}·log²(N) from Step 3
+  -- Second term: Abel summation with Mertens bound + Discrete Product Rule for log²/k
+  --   |Δ(log²(k)/k)| ≤ (log²(k)+2·log(k)+2)/k²
+  --   Interior ≤ Σ C_m·(k^{3/4}+N^{3/4})·(log²(k)+2·log(k)+2)/k²
+  --   ≤ C_m · [Σ k^{-5/4}·(log²(k)+2·log(k)+2) + N^{3/4}·Σ (...)/k²]
+  --   ≤ C_m · C_interior · N^{-1/4} · log²(N)
+  -- Boundary: C_m·(M^{3/4}+N^{3/4})·log²(M)/M → 0 as M → ∞
+  --
+  -- Total: (1 + 50·C_m)·N^{-1/4}·log²(N)
+  sorry -- Final wiring: same as s2_decay with log² weights
 
 -- ════════════════════════════════════════════════
 -- §11. THE ASSEMBLY: abel_mertens_tail_raw AS THEOREM
