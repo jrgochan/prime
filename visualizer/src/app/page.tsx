@@ -29,7 +29,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "419 theorems · 45 axioms · 79 files · post-audit",
+    stats: "419 theorems · 40 axioms · 79 files · post-audit",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -153,7 +153,7 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          79 active files. 45 axioms — five on the crown theorem&apos;s critical path.
+          79 active files. 40 axioms — five on the crown theorem&apos;s critical path.
           The Parseval Bridge is <span className="text-emerald-400 font-bold">PROVED</span>.
           <span className="text-amber-400 text-sm ml-1">cathedral-audit</span>
         </p>
@@ -162,7 +162,7 @@ export default function HomePage() {
           {[
             { color: "bg-emerald-500", text: "79 active files" },
             { color: "bg-red-500", text: "419 theorems" },
-            { color: "bg-amber-500", text: "45 axioms (5 on crown)" },
+            { color: "bg-amber-500", text: "40 axioms (5 on crown)" },
             { color: "bg-blue-500", text: "96 archived" },
             { color: "bg-purple-500", text: "cathedral-audit" },
           ].map((item) => (
