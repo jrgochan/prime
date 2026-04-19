@@ -85,28 +85,11 @@ def mellinDistance (N : ℕ) (v : Fin (N - 1) → ℝ) : ℝ :=
   ∫ t : ℝ, ‖(1 / ((1/2 : ℂ) + t * Complex.I) -
             mellinNBLinCombR N v ((1/2 : ℂ) + t * Complex.I))‖ ^ 2
 
-/-- **Axiom (Functional Analysis)**: Mellin-Plancherel for the Gram form.
-
-    The Gram quadratic form equals the Plancherel integral of the
-    Mellin transforms:
-
-      v ⬝ᵥ G_N v = (1/2π) ∫ |M[f_N](1/2 + it)|² dt
-
-    This connects the finite-dimensional Gram matrix (defined via
-    real integrals ∫₀¹ {j/x}{k/x} dx) to the frequency-domain
-    representation via the Mellin transform.
-
-    MATHEMATICAL SOURCE: This is a consequence of the Plancherel
-    theorem for the Mellin transform (Titchmarsh, Ch. 2).
-    The key identity is:
-      ∫₀¹ f(x)g(x) dx = (1/2πi) ∫_{σ-i∞}^{σ+i∞} M[f](s) M[g](1-s̄) ds
-
-    Applied with f = g = f_N and σ = 1/2, this gives the Gram form. -/
-axiom mellin_plancherel_gram (N : ℕ) (hN : 2 ≤ N)
-    (v : Fin (N - 1) → ℝ) :
-    dotProduct v ((gramMatrix N).mulVec v) =
-    (1 / (2 * Real.pi)) *
-    ∫ t : ℝ, ‖mellinNBLinCombR N v ((1/2 : ℂ) + t * Complex.I)‖ ^ 2
+-- **FORMERLY axiom mellin_plancherel_gram**:
+-- Excised 2026-04-19 (The Great Audit). This axiom was a ghost — it was
+-- already proved as `mellin_plancherel_gram_derived` in
+-- AutocorrelationBypass.lean (line 193). No proof term in the codebase
+-- ever referenced this axiom. All consumers use the derived version.
 
 -- ════════════════════════════════════════════════
 -- PART II: WEIGHT CONSTRUCTION FROM RH

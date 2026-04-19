@@ -45,7 +45,7 @@ import Cathedral.NymanBeurling.BDMellin
   `nbDistSq_lt_one`, `l2_error_eq_quad_error`, `nbDistSq_le_test_vector`,
   `eigenvalue_interlacing`, `lambdaEff_linear_growth_proved`.
 
-  ### Full Inventory — 48 unique axioms across 83 active files
+  ### Full Inventory — 44 unique axioms across 79 active files (post-audit)
 
   #### Core Chain (Vasyunin proof — 8 axioms)
   | Axiom | Location | Tier |
@@ -78,7 +78,6 @@ import Cathedral.NymanBeurling.BDMellin
   | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
   | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
   | `flattened_basis_integrable` | MellinBridge/AutocorrelationBypass | 4 |
-  | `mellin_plancherel_gram` | MellinBridge/MellinSieve | 4 |
 
   #### Spectral theory (9 axioms — NOT on critical path)
   | `lambdaMinClass_pos` | Spectral/ClassRestriction | 4 |
@@ -91,30 +90,27 @@ import Cathedral.NymanBeurling.BDMellin
   | `stable_ratio` | Spectral/FiniteDimReduction | 4 |
   | `liouville_delocalization` | Spectral/PTSymmetry | 4 |
 
-  #### Sieve engine (11 axioms — 2 on spectral engine path)
+  #### Sieve engine (7 axioms)
   | `vasyunin_large_gcd` | Sieve/VasyuninExpansion | 3 |
   | `stable_ratio_parity` | Sieve/ParitySchur | 4 |
   | `gram_eigenvalue_log_scaling` | Sieve/ParitySchur | 4 |
   | `eigenvalue_implies_distance_bound` | Sieve/ParitySchur | 4 |
-  | `block_eigenvalue_log_scaling` | Sieve/ParityBridge | 4 |
   | `moebius_uncoupling` | Sieve/BilinearSieve | 4 |
   | `type_II_sieve_bound` | Sieve/BilinearSieve | 4 |
   | `vaughan_decomposition` | Sieve/MoebiusUncoupling | 4 |
   | `type_I_bound` | Sieve/MoebiusUncoupling | 4 |
   | `vaughan_implies_uncoupling` | Sieve/MoebiusUncoupling | 4 |
-  | `liouville_cancellation` | Sieve/AlignmentDecay | 4 |
 
-  #### Structural & integration (3 axioms — NOT on critical path)
+  #### Structural (1 axiom)
   | `drop_formula_bound` | Structural/Eigenvalue | 4 |
-  | `schur_complement_lower` | IntegralBasis/Quantitative | 4 |
-  | `cross_norm_bound` | IntegralBasis/Quantitative | 4 |
 
-  #### Integral basis (2 axioms — NOT on critical path)
-  | `nyman_beurling_equivalence` | IntegralBasis/BaezDuarte | 3 |
-  | `baez_duarte_covariance_divergence` | IntegralBasis/BaezDuarte | 1 (RH content) |
+  #### White/Infrastructure (2 axioms)
+  | `dirichlet_polynomial_mean_value_bound` | White/Infrastructure/MontgomeryVaughan | 4 |
+  | `bd_gram_form_decay` | White/Infrastructure/MontgomeryVaughan | 4 |
 
-  ### Total: 48 unique axioms
-  ### Critical path: 5 axioms · Alternative forward: 2 · Spectral engine: 2 · Non-critical: 41
+  ### Total: 44 active axioms
+  ### Crown critical path: 5 · Spectral engine: 2 · Non-critical: 37
+  ### Ghost axioms eliminated: mellin_plancherel_gram (April 19, 2026)
 -/
 
 noncomputable section
