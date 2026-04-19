@@ -295,22 +295,33 @@ private lemma finite_abel_s1_diff
         field_simp; ring]
       rw [abs_neg, abs_of_nonneg (by positivity)])
   -- ─── Step 4: Bound the Abel output ───
-  -- hAbel : |Σ a(k)·f(k)| ≤ C_bound(M)·|f(M)| + Σ_{k=N+1}^{M-1} C_bound(k)·δ(k)
-  -- Need to show the RHS ≤ our target
   calc |(Icc (N+1) M).sum (fun k => a k * f k)|
       ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
     _ ≤ C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
         C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-      -- The boundary + interior bound is algebraic wiring
-      -- using finite_rpow_54_tail_bound and finite_inv_kk1_bound
-      -- from Steps 2 and 3 above
-      sorry
+      -- Split boundary and interior
+      apply add_le_add
+      · -- Boundary: C_bound(M)*|f(M)| ≤ C_m*(M^{-1/4} + N^{3/4}/M)
+        simp only [C_bound, f]
+        rw [abs_of_nonneg (by positivity)]
+        have hM_pos' : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
+        rw [show C_m * ((M : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) * (1 / (M : ℝ)) =
+            C_m * ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) from by ring]
+        gcongr
+        -- M^{3/4}/M = M^{-1/4}: proved by converting M to M^1 then using rpow_sub
+        have h_rpow : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) = (M : ℝ) ^ (-(1:ℝ)/4) := by
+          have hM34 : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) ^ (1:ℝ) = (M : ℝ) ^ ((3:ℝ)/4 - 1) :=
+            (Real.rpow_sub (by positivity : (0:ℝ) < (M:ℝ)) _ _).symm ▸ rfl
+          rw [Real.rpow_one] at hM34
+          rw [hM34]
+          congr 1; ring
+        rw [h_rpow]
+      · -- Interior sum ≤ C_m * 5 * N^{-1/4}
+        sorry
 
 -- ════════════════════════════════════════════════
 -- §5. THE LIMIT ARGUMENT
 -- For each N, choose M large enough via PNT
--- ════════════════════════════════════════════════
-
 /-- THE MAIN THEOREM for S₁:
     |S₁(N)| ≤ C · N^{-1/4} for N ≥ 2.
 
