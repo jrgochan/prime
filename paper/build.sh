@@ -21,6 +21,7 @@ PAPERS=(
   cathedral-lean
   cathedral-foundations
   cathedral-engineering
+  cathedral-futures
   cathedral-letter
 )
 
