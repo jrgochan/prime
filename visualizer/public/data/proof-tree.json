@@ -6,7 +6,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Axioms.lean",
-      "line": 140,
+      "line": 138,
       "signature": "theorem zeta_zero_separates : \u2200 \u03c1 : \u2102, riemannZeta \u03c1 = 0 \u2192 0 < \u03c1.re \u2192 \u03c1.re < 1 \u2192 \u03c1.re \u2260 1/2 \u2192 \u2203 \u03b4 : \u211d, 0 < \u03b4 \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 \u2200 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2265 \u03b4"
     },
     {
@@ -2629,21 +2629,12 @@
       "signature": "lemma gramMatrixBlockDiag_hermitian (N : \u2115) : (gramMatrixBlockDiag N).IsHermitian"
     },
     {
-      "id": "lambdaMinClass_pos",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 57,
-      "signature": "axiom lambdaMinClass_pos (m : Fin 8) (N : \u2115) (hN : 10 \u2264 N) (hcard : 2 \u2264 (classSet m N).card) : 0 < lambdaMinClass m N  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- THE BLOCK-DIAGONAL MINI\u2026"
-    },
-    {
       "id": "lambdaMinBlock",
       "type": "def",
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 70,
+      "line": 68,
       "signature": "noncomputable def lambdaMinBlock (N : \u2115) : \u211d"
     },
     {
@@ -2652,7 +2643,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 83,
+      "line": 81,
       "signature": "axiom block_min_eq_class_min (N : \u2115) (hN : 10 \u2264 N) : lambdaMinBlock N = (Finset.univ : Finset (Fin 8)).inf' \u27e80, Finset.mem_univ _\u27e9 (fun m => lambdaMinClass m N)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
     },
     {
@@ -2661,7 +2652,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 104,
+      "line": 102,
       "signature": "axiom class_gap_strictly_larger (m : Fin 8) (N : \u2115) (hN : 10 \u2264 N) : lambdaMin N < lambdaMinClass m N  /-- The block gap dominates the full gap (corollary). Uses block_min_eq_class_min to convert be\u2026"
     },
     {
@@ -2670,7 +2661,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 110,
+      "line": 108,
       "signature": "theorem block_gap_larger (N : \u2115) (hN : 10 \u2264 N) : lambdaMin N < lambdaMinBlock N"
     },
     {
@@ -2679,7 +2670,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 129,
+      "line": 127,
       "signature": "axiom oct_equals_block (N : \u2115) (hN : 10 \u2264 N) : lambdaMinOct N = lambdaMinBlock N  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- THE GRAM DECOMPOSITION -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
     },
     {
@@ -2688,7 +2679,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 139,
+      "line": 137,
       "signature": "noncomputable def gramCrossClass (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -2697,7 +2688,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 158,
+      "line": 156,
       "signature": "theorem liouville_within_class_decorrelated : \u2200 N : \u2115, 100 \u2264 N \u2192 \u2200 _m : Fin 8, -- Within class m, the minimum eigenvector has Liouville -- correlation bounded by 0.05 (vs 0.70 for full G)"
     },
     {
@@ -2706,7 +2697,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 167,
+      "line": 165,
       "signature": "noncomputable def gramMatrixCross (N : \u2115) : Matrix (Fin (N - 1)) (Fin (N - 1)) \u211d"
     },
     {
@@ -2715,7 +2706,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 171,
+      "line": 169,
       "signature": "lemma gram_decomposition (N : \u2115) : gramMatrix N = gramMatrixBlockDiag N + gramMatrixCross N"
     },
     {
@@ -2724,7 +2715,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 176,
+      "line": 174,
       "signature": "lemma gramMatrixCross_hermitian (N : \u2115) : (gramMatrixCross N).IsHermitian"
     },
     {
@@ -2733,7 +2724,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 186,
+      "line": 184,
       "signature": "noncomputable def lambdaMinCross (N : \u2115) : \u211d"
     },
     {
@@ -2742,7 +2733,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 204,
+      "line": 202,
       "signature": "theorem weyl_inequality (N : \u2115) : lambdaMinBlock N + lambdaMinCross N \u2264 lambdaMin N"
     },
     {
@@ -2751,7 +2742,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 282,
+      "line": 280,
       "signature": "axiom schur_bridge : \u2203 C : \u211d, 0 < C \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 C * lambdaMinOct N \u2264 lambdaMin N  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- RH VIA SCHUR BRIDGE -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
     },
     {
@@ -2760,7 +2751,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 304,
+      "line": 302,
       "signature": "theorem rh_from_schur_bridge (h_bridge : \u2203 C : \u211d, 0 < C \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 C * lambdaMinOct N \u2264 lambdaMin N) (h_oct_gap : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 c \u2264 lambdaMinOct N) : \u2200 N : \u2115, 2 \u2264 N \u2192 0\u2026"
     },
     {
@@ -2769,7 +2760,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 340,
+      "line": 338,
       "signature": "theorem interference_rank_one : \u2200 (m\u2081 m\u2082 : Fin 8), m\u2081 \u2260 m\u2082 \u2192 \u2200 N : \u2115, 100 \u2264 N \u2192 -- The cross-class block is dominated by its top singular value"
     },
     {
@@ -2778,7 +2769,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 358,
+      "line": 356,
       "signature": "theorem large_sieve_ratio_bounded : \u2203 R : \u211d, R < 1 \u2227 \u2200 N : \u2115, 100 \u2264 N \u2192 -- |interference(v_min)| / diagonal(v_min) \u2264 R True  -- Placeholder; the bound encodes RH"
     },
     {
@@ -2787,7 +2778,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 367,
+      "line": 365,
       "signature": "theorem rh_from_rank_one_interference (_ : \u2200 (m\u2081 m\u2082 : Fin 8), m\u2081 \u2260 m\u2082 \u2192 \u2200 N : \u2115, 100 \u2264 N \u2192 True) (_ : \u2203 R : \u211d, R < 1 \u2227 \u2200 N : \u2115, 100 \u2264 N \u2192 True) : \u2200 N : \u2115, 2 \u2264 N \u2192 0 < lambdaMin N"
     },
     {
@@ -2796,7 +2787,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 376,
+      "line": 374,
       "signature": "theorem rh_from_octonionic_global : \u2200 N : \u2115, 2 \u2264 N \u2192 0 < lambdaMin N"
     },
     {
@@ -2805,7 +2796,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 395,
+      "line": 393,
       "signature": "theorem oct_gap_positive (N : \u2115) (hN : 2 \u2264 N) : 0 < lambdaMinOct N"
     },
     {
@@ -2814,7 +2805,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 406,
+      "line": 404,
       "signature": "noncomputable def classRestrict (N : \u2115) (m : Fin 8) (v : Fin (N - 1) \u2192 \u211d) : Fin (N - 1) \u2192 \u211d"
     },
     {
@@ -2823,7 +2814,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 412,
+      "line": 410,
       "signature": "lemma classRestrict_norm_partition (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u2211 m : Fin 8, dotProduct (classRestrict N m v) (classRestrict N m v) = dotProduct v v"
     },
     {
@@ -2832,7 +2823,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 439,
+      "line": 437,
       "signature": "lemma blockDiag_quadForm_decomp (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : realQuadForm (gramMatrixBlockDiag N) v = \u2211 m : Fin 8, realQuadForm (gramMatrix N) (classRestrict N m v)"
     },
     {
@@ -2841,7 +2832,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 498,
+      "line": 496,
       "signature": "lemma min_eigenvalue_le_quadForm_scaled {n : \u2115} {A : Matrix (Fin n) (Fin n) \u211d} (hA : A.IsHermitian) (v : Fin n \u2192 \u211d) (_hv : v \u2260 0) (hn : 0 < n) : (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).\u2026"
     },
     {
@@ -2850,7 +2841,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 592,
+      "line": 590,
       "signature": "theorem oct_gap_dominates_proof (N : \u2115) (hN : 2 \u2264 N) : lambdaMin N \u2264 lambdaMinBlock N"
     },
     {
@@ -2859,7 +2850,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 642,
+      "line": 640,
       "signature": "theorem oct_gap_dominates_derived (N : \u2115) (hN : 10 \u2264 N) : lambdaMin N \u2264 lambdaMinOct N"
     },
     {
@@ -3565,15 +3556,6 @@
       "signature": "def sieveDimension : \u211d"
     },
     {
-      "id": "vaughan_implies_uncoupling",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/Sieve/MoebiusUncoupling.lean",
-      "line": 322,
-      "signature": "axiom vaughan_implies_uncoupling (N : \u2115) (hN : 10 \u2264 N) (u v : Fin (N - 1) \u2192 \u211d) : \u2203 main_term error : \u211d, crossParityBilinear N u v = main_term + error \u2227 |error| \u2264 (1 / Real.sqrt (N : \u211d)) * Real.sqrt\u2026"
-    },
-    {
       "id": "parityProj_plus",
       "type": "def",
       "category": "definition",
@@ -3853,21 +3835,12 @@
       "signature": "axiom mellin_fourier_change (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) (t : \u211d) : mellinNBLinCombR N v ((1/2 : \u2102) + t * Complex.I) = \u222b u : \u211d, (flattenedBasis N v u : \u2102) * Complex.exp (-(t * u) * Com\u2026"
     },
     {
-      "id": "flattened_basis_integrable",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "mellin",
-      "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 103,
-      "signature": "axiom flattened_basis_integrable (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : Integrable (fun u => flattenedBasis N v u) \u2227 Integrable (fun u => (flattenedBasis N v u) ^ 2)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
-    },
-    {
       "id": "autocorrelation",
       "type": "def",
       "category": "definition",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 119,
+      "line": 107,
       "signature": "def autocorrelation (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) (t : \u211d) : \u211d"
     },
     {
@@ -3876,7 +3849,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 136,
+      "line": 124,
       "signature": "axiom fourier_inversion_autocorrelation (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : autocorrelation N v 0 = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellinNBLinCombR N v ((1/2 : \u2102) + t * Complex.I)\u2016 ^ 2  -\u2026"
     },
     {
@@ -3885,7 +3858,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 153,
+      "line": 141,
       "signature": "theorem autocorrelation_zero_eq_l2_norm (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : autocorrelation N v 0 = \u222b u : \u211d, (flattenedBasis N v u) ^ 2"
     },
     {
@@ -3894,7 +3867,7 @@
       "category": "axiom",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 172,
+      "line": 160,
       "signature": "axiom gram_form_eq_l2_norm (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : dotProduct v ((gramMatrix N).mulVec v) = \u222b u : \u211d, (flattenedBasis N v u) ^ 2  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
     },
     {
@@ -3903,7 +3876,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/MellinBridge/AutocorrelationBypass.lean",
-      "line": 193,
+      "line": 181,
       "signature": "theorem mellin_plancherel_gram_derived (N : \u2115) (hN : 2 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : dotProduct v ((gramMatrix N).mulVec v) = (1 / (2 * Real.pi)) * \u222b t : \u211d, \u2016mellinNBLinCombR N v ((1/2 : \u2102) + t * Co\u2026"
     },
     {
@@ -5100,10 +5073,6 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "lambdaMinClass_pos",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "block_min_eq_class_min",
       "target": "zeta_zero_separates"
     },
@@ -5152,10 +5121,6 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "vaughan_implies_uncoupling",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "gramMatrix_posSemidef",
       "target": "zeta_zero_separates"
     },
@@ -5177,10 +5142,6 @@
     },
     {
       "source": "mellin_fourier_change",
-      "target": "zeta_zero_separates"
-    },
-    {
-      "source": "flattened_basis_integrable",
       "target": "zeta_zero_separates"
     },
     {
@@ -14937,10 +14898,6 @@
     },
     {
       "source": "gramEntry",
-      "target": "lambdaMinClass_pos"
-    },
-    {
-      "source": "gramEntry",
       "target": "block_min_eq_class_min"
     },
     {
@@ -15022,10 +14979,6 @@
     {
       "source": "gramMatrix",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "gramMatrix",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "gramMatrix",
@@ -15113,10 +15066,6 @@
     },
     {
       "source": "gramMatrix_hermitian",
-      "target": "lambdaMinClass_pos"
-    },
-    {
-      "source": "gramMatrix_hermitian",
       "target": "block_min_eq_class_min"
     },
     {
@@ -15198,10 +15147,6 @@
     {
       "source": "lambdaMin",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "lambdaMin",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "lambdaMin",
@@ -15289,10 +15234,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "lambdaMinClass_pos"
-    },
-    {
-      "source": "Cathedral",
       "target": "block_min_eq_class_min"
     },
     {
@@ -15377,10 +15318,6 @@
     },
     {
       "source": "octonionClass",
-      "target": "lambdaMinClass_pos"
-    },
-    {
-      "source": "octonionClass",
       "target": "block_min_eq_class_min"
     },
     {
@@ -15457,103 +15394,11 @@
     },
     {
       "source": "octonionClass",
-      "target": "oct_gap_dominates_derived"
-    },
-    {
-      "source": "classSet",
-      "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "classSet",
-      "target": "lambdaMinClass_pos"
-    },
-    {
-      "source": "classSet",
-      "target": "block_min_eq_class_min"
-    },
-    {
-      "source": "classSet",
-      "target": "class_gap_strictly_larger"
-    },
-    {
-      "source": "classSet",
-      "target": "block_gap_larger"
-    },
-    {
-      "source": "classSet",
-      "target": "oct_equals_block"
-    },
-    {
-      "source": "classSet",
-      "target": "liouville_within_class_decorrelated"
-    },
-    {
-      "source": "classSet",
-      "target": "gram_decomposition"
-    },
-    {
-      "source": "classSet",
-      "target": "gramMatrixCross_hermitian"
-    },
-    {
-      "source": "classSet",
-      "target": "weyl_inequality"
-    },
-    {
-      "source": "classSet",
-      "target": "schur_bridge"
-    },
-    {
-      "source": "classSet",
-      "target": "rh_from_schur_bridge"
-    },
-    {
-      "source": "classSet",
-      "target": "interference_rank_one"
-    },
-    {
-      "source": "classSet",
-      "target": "large_sieve_ratio_bounded"
-    },
-    {
-      "source": "classSet",
-      "target": "rh_from_rank_one_interference"
-    },
-    {
-      "source": "classSet",
-      "target": "rh_from_octonionic_global"
-    },
-    {
-      "source": "classSet",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "classSet",
-      "target": "classRestrict_norm_partition"
-    },
-    {
-      "source": "classSet",
-      "target": "blockDiag_quadForm_decomp"
-    },
-    {
-      "source": "classSet",
-      "target": "min_eigenvalue_le_quadForm_scaled"
-    },
-    {
-      "source": "classSet",
-      "target": "oct_gap_dominates_proof"
-    },
-    {
-      "source": "classSet",
       "target": "oct_gap_dominates_derived"
     },
     {
       "source": "lambdaMinOct",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "lambdaMinOct",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "lambdaMinOct",
@@ -15638,10 +15483,6 @@
     {
       "source": "oct_gap_dominates",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "oct_gap_dominates",
@@ -15726,10 +15567,6 @@
     {
       "source": "oct_gap_lower_bound",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "oct_gap_lower_bound",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "oct_gap_lower_bound",
@@ -15814,10 +15651,6 @@
     {
       "source": "realQuadForm",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "realQuadForm",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "realQuadForm",
@@ -15902,10 +15735,6 @@
     {
       "source": "inner_eq_dotProduct",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "inner_eq_dotProduct",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "inner_eq_dotProduct",
@@ -15990,10 +15819,6 @@
     {
       "source": "quadForm_eigenvector",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "quadForm_eigenvector",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "quadForm_eigenvector",
@@ -16078,10 +15903,6 @@
     {
       "source": "min_eigenvalue_le_quadForm",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "min_eigenvalue_le_quadForm",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "min_eigenvalue_le_quadForm",
@@ -16166,10 +15987,6 @@
     {
       "source": "weyl_min_eigenvalue",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "weyl_min_eigenvalue",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "weyl_min_eigenvalue",
@@ -16254,10 +16071,6 @@
     {
       "source": "type_II_sieve_bound",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "type_II_sieve_bound",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "type_II_sieve_bound",
@@ -16342,10 +16155,6 @@
     {
       "source": "gram_positive_definite",
       "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "gram_positive_definite",
-      "target": "lambdaMinClass_pos"
     },
     {
       "source": "gram_positive_definite",
@@ -17572,10 +17381,6 @@
       "target": "type_I_bound"
     },
     {
-      "source": "gramEntry",
-      "target": "vaughan_implies_uncoupling"
-    },
-    {
       "source": "gramMatrix",
       "target": "gramBilinear_decomposition"
     },
@@ -17586,10 +17391,6 @@
     {
       "source": "gramMatrix",
       "target": "type_I_bound"
-    },
-    {
-      "source": "gramMatrix",
-      "target": "vaughan_implies_uncoupling"
     },
     {
       "source": "Cathedral",
@@ -17604,26 +17405,6 @@
       "target": "type_I_bound"
     },
     {
-      "source": "Cathedral",
-      "target": "vaughan_implies_uncoupling"
-    },
-    {
-      "source": "crossParityBilinear",
-      "target": "gramBilinear_decomposition"
-    },
-    {
-      "source": "crossParityBilinear",
-      "target": "vaughan_decomposition"
-    },
-    {
-      "source": "crossParityBilinear",
-      "target": "type_I_bound"
-    },
-    {
-      "source": "crossParityBilinear",
-      "target": "vaughan_implies_uncoupling"
-    },
-    {
       "source": "moebius_uncoupling",
       "target": "gramBilinear_decomposition"
     },
@@ -17636,10 +17417,6 @@
       "target": "type_I_bound"
     },
     {
-      "source": "moebius_uncoupling",
-      "target": "vaughan_implies_uncoupling"
-    },
-    {
       "source": "type_II_sieve_bound",
       "target": "gramBilinear_decomposition"
     },
@@ -17650,10 +17427,6 @@
     {
       "source": "type_II_sieve_bound",
       "target": "type_I_bound"
-    },
-    {
-      "source": "type_II_sieve_bound",
-      "target": "vaughan_implies_uncoupling"
     },
     {
       "source": "gramMatrix",
@@ -18557,10 +18330,6 @@
     },
     {
       "source": "gramMatrix",
-      "target": "flattened_basis_integrable"
-    },
-    {
-      "source": "gramMatrix",
       "target": "fourier_inversion_autocorrelation"
     },
     {
@@ -18581,10 +18350,6 @@
     },
     {
       "source": "nbLinComb",
-      "target": "flattened_basis_integrable"
-    },
-    {
-      "source": "nbLinComb",
       "target": "fourier_inversion_autocorrelation"
     },
     {
@@ -18602,10 +18367,6 @@
     {
       "source": "Cathedral",
       "target": "mellin_fourier_change"
-    },
-    {
-      "source": "Cathedral",
-      "target": "flattened_basis_integrable"
     },
     {
       "source": "Cathedral",
@@ -18626,10 +18387,6 @@
     {
       "source": "mellinNBLinCombR",
       "target": "mellin_fourier_change"
-    },
-    {
-      "source": "mellinNBLinCombR",
-      "target": "flattened_basis_integrable"
     },
     {
       "source": "mellinNBLinCombR",
@@ -21773,14 +21530,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 561,
-    "totalEdges": 4180,
-    "axiomCount": 43,
+    "totalNodes": 558,
+    "totalEdges": 4126,
+    "axiomCount": 40,
     "theoremCount": 419,
     "definitionCount": 99,
     "provedTheorems": 419,
     "fileCount": 73,
-    "description": "Cathedral proof architecture: 43 axioms, 419 theorems, 99 definitions across 73 files",
-    "generatedAt": "2026-04-18T23:30:01.692515"
+    "description": "Cathedral proof architecture: 40 axioms, 419 theorems, 99 definitions across 73 files",
+    "generatedAt": "2026-04-18T23:34:32.255088"
   }
 }

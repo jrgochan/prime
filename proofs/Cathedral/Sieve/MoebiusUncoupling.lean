@@ -302,29 +302,10 @@ def sieveDimension : ℝ := 1
 -- PART VII: BRIDGE TO BILINEAR SIEVE
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Algebraic Number Theory + Sieve Theory)**: The Vasyunin expansion
-    + Vaughan decomposition together imply the Möbius uncoupling.
-
-    Chain:
-    1. S(u,v) = S_bg(u,v) + S_corr(u,v)       [bilinear_decomposition]
-    2. S_corr = S_I + S_II + error              [vaughan_decomposition]
-    3. |S_I| ≤ small · ‖u‖ · ‖v‖              [type_I_bound]
-    4. |error| ≤ small · ‖u‖ · ‖v‖            [vaughan_decomposition]
-    5. |S(u,v) - S_bg - S_II| ≤ ε_N · ‖u‖·‖v‖
-
-    The formal link between `crossParityBilinear` and `correctionBilinear`
-    requires the bilinear_decomposition identity (S = S_bg + S_corr),
-    which is Part II of this file. Combined with `vaughan_decomposition`
-    and `type_I_bound`, the conclusion follows.
-
-    STATUS: Off critical path. The critical path uses `rh_weight_construction`
-    directly, bypassing the Vaughan decomposition entirely. -/
-axiom vaughan_implies_uncoupling (N : ℕ) (hN : 10 ≤ N)
-    (u v : Fin (N - 1) → ℝ) :
-    ∃ main_term error : ℝ,
-    crossParityBilinear N u v = main_term + error ∧
-    |error| ≤ (1 / Real.sqrt (N : ℝ)) * Real.sqrt (dotProduct u u) *
-              Real.sqrt (dotProduct v v)
+-- **FORMERLY axiom vaughan_implies_uncoupling**:
+-- Excised 2026-04-19 (The Great Audit). This axiom was dead code — zero
+-- proof-term references in the entire active codebase. The critical path
+-- uses rh_weight_construction directly, bypassing Vaughan decomposition.
 
 -- ════════════════════════════════════════════════
 -- PART VIII: DOCUMENTATION
@@ -371,8 +352,7 @@ end
 --   2 axioms:
 --     📐 vaughan_decomposition  (Vaughan's identity — Tier 2)
 --     📐 type_I_bound           (PNT/B-V for Type I sums — Tier 2)
---   1 sorry:
---     ⚠️  vaughan_implies_uncoupling (composition of algebraic + analytic)
+--   0 sorry
 --
 -- PROVED (zero sorry):
 --   ✅ gramBilinear_decomposition  (uᵀGv = bg + corr — PROVED!)
@@ -388,4 +368,3 @@ end
 
 #check @vaughan_decomposition
 #check @correctionBilinear
-#check @vaughan_implies_uncoupling

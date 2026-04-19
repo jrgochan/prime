@@ -88,22 +88,10 @@ axiom mellin_fourier_change (N : ℕ) (hN : 2 ≤ N)
 -- STEP 2: INTEGRABILITY OF THE FLATTENED BASIS
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Decay Bound)**: The flattened basis is in L¹ ∩ L².
-
-    Because f_N is a finite sum of bounded fractional parts on (0,1):
-    |f_N(x)| ≤ Σ |v_k| for all x ∈ (0,1)
-
-    After substitution:
-    |g_N(u)| = |f_N(e^{-u})| · e^{-u/2} ≤ (Σ|v_k|) · e^{-u/2}
-
-    So g_N decays exponentially and is in L^p for all p ≥ 1.
-
-    MATHEMATICAL DIFFICULTY: Elementary (bounded × exponential decay).
-    FORMALIZATION DIFFICULTY: Low (Mathlib has integrability of rpow). -/
-axiom flattened_basis_integrable (N : ℕ) (hN : 2 ≤ N)
-    (v : Fin (N - 1) → ℝ) :
-    Integrable (fun u => flattenedBasis N v u) ∧
-    Integrable (fun u => (flattenedBasis N v u) ^ 2)
+-- **FORMERLY axiom flattened_basis_integrable**:
+-- Excised 2026-04-19 (The Great Audit). This axiom was dead code — zero
+-- proof-term references in the entire active codebase. The integrability
+-- is used implicitly by the other axioms in this file.
 
 -- ════════════════════════════════════════════════
 -- STEP 3: THE AUTOCORRELATION

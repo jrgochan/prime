@@ -52,11 +52,9 @@ lemma gramMatrixBlockDiag_hermitian (N : ℕ) :
     submatrix of gramMatrix N indexed by integers in class m. -/
 opaque lambdaMinClass (m : Fin 8) (N : ℕ) : ℝ
 
-/-- **Axiom**: The restricted eigenvalue is positive (from linear independence
-    restricted to each class). -/
-axiom lambdaMinClass_pos (m : Fin 8) (N : ℕ) (hN : 10 ≤ N)
-    (hcard : 2 ≤ (classSet m N).card) :
-    0 < lambdaMinClass m N
+-- **FORMERLY axiom lambdaMinClass_pos**:
+-- Excised 2026-04-19 (The Great Audit). This axiom was dead code — zero
+-- proof-term references in the entire active codebase.
 
 -- ════════════════════════════════════════════════
 -- THE BLOCK-DIAGONAL MINIMUM EIGENVALUE
