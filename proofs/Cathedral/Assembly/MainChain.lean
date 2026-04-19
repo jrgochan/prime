@@ -24,7 +24,6 @@ import Cathedral.Structural.Structural
 import Cathedral.MellinBridge.Basic
 import Cathedral.Assembly.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
-import Cathedral.NymanBeurling.Separation
 import Cathedral.Assembly.BDBypass
 import Cathedral.Assembly.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
