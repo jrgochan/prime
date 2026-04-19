@@ -91,41 +91,31 @@ pub fn build_bd_weight(n: usize, mu: &[i32]) -> DVector<f64> {
     })
 }
 
-/// Full probe at dimension N.
+/// Full probe at dimension N (with eigenvalue analysis).
+/// Use for N ≤ 3000. For larger N, use probe_fast.
 pub fn probe(n: usize, mu: &[i32]) -> ProbeResult {
     assert!(n >= 3, "N must be at least 3");
     let ln_n = (n as f64).ln();
     let inv_log_n = 1.0 / ln_n;
 
-    // Build matrices (dimension N-1)
     let g = build_gram_matrix(n);
     let b = build_mean_vector(n);
     let c = build_covariance(&g, &b);
-
-    // Build weight vector
     let w = build_bd_weight(n, mu);
 
-    // Quadratic forms
-    // d²_N = 1 - 2⟨b,w⟩ + w^T G w
     let gw = &g * &w;
     let gram_quad = w.dot(&gw);
     let mean_projection = w.dot(&b);
     let d_squared = 1.0 - 2.0 * mean_projection + gram_quad;
 
-    // Covariance part: w^T C w = d²_N - (1 - w^T b)²
     let cw = &c * &w;
     let cov_quad = w.dot(&cw);
     let mean_residual_sq = (1.0 - mean_projection).powi(2);
 
-    // Eigenvalue analysis
     let eig = c.clone().symmetric_eigen();
     let eigenvalues = eig.eigenvalues;
-
     let lambda_min = eigenvalues.iter().copied().fold(f64::INFINITY, f64::min);
-    let lambda_max = eigenvalues
-        .iter()
-        .copied()
-        .fold(f64::NEG_INFINITY, f64::max);
+    let lambda_max = eigenvalues.iter().copied().fold(f64::NEG_INFINITY, f64::max);
     let condition = if lambda_min.abs() > 1e-15 {
         (lambda_max / lambda_min).abs()
     } else {
@@ -134,23 +124,65 @@ pub fn probe(n: usize, mu: &[i32]) -> ProbeResult {
 
     let frob_norm = c.iter().map(|x| x * x).sum::<f64>().sqrt();
     let trace_c = (0..c.nrows()).map(|i| c[(i, i)]).sum();
-
     let ratio = d_squared * ln_n;
 
     ProbeResult {
-        n,
-        d_squared,
-        cov_quad,
-        mean_residual_sq,
-        gram_quad,
-        mean_projection,
-        inv_log_n,
-        ratio,
-        lambda_min,
-        lambda_max,
-        condition,
-        frob_norm,
-        trace_c,
+        n, d_squared, cov_quad, mean_residual_sq, gram_quad, mean_projection,
+        inv_log_n, ratio, lambda_min, lambda_max, condition, frob_norm, trace_c,
+    }
+}
+
+/// Fast probe: computes d²_N WITHOUT building the full matrix.
+///
+/// Streams Gram entries row-by-row in parallel.
+/// Memory: O(N) instead of O(N²). No eigenvalue decomposition.
+/// Use for N > 3000.
+pub fn probe_fast(n: usize, mu: &[i32]) -> ProbeResult {
+    assert!(n >= 3, "N must be at least 3");
+    let dim = n - 1;
+    let ln_n = (n as f64).ln();
+    let inv_log_n = 1.0 / ln_n;
+
+    // Build weight and mean vectors (O(N))
+    let w: Vec<f64> = (0..dim)
+        .map(|i| {
+            let k = i + 1;
+            let kf = k as f64;
+            -(mu[k] as f64) * (1.0 - kf.ln() / ln_n)
+        })
+        .collect();
+
+    let b: Vec<f64> = (0..dim).map(|i| mean_entry(i + 1)).collect();
+    let mean_projection: f64 = w.iter().zip(b.iter()).map(|(wi, bi)| wi * bi).sum();
+
+    // Compute w^T G w by streaming rows in parallel
+    // Skip rows/cols where w_i = 0 (μ(k) = 0)
+    let gram_quad: f64 = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let wi = w[i];
+            if wi.abs() < 1e-30 { return 0.0; }
+            let row_dot: f64 = (0..dim)
+                .map(|j| {
+                    let wj = w[j];
+                    if wj.abs() < 1e-30 { return 0.0; }
+                    gram_entry(i + 1, j + 1) * wj
+                })
+                .sum();
+            wi * row_dot
+        })
+        .sum();
+
+    let d_squared = 1.0 - 2.0 * mean_projection + gram_quad;
+    let mean_residual_sq = (1.0 - mean_projection).powi(2);
+    let cov_quad = d_squared - mean_residual_sq;
+    let ratio = d_squared * ln_n;
+
+    ProbeResult {
+        n, d_squared, cov_quad, mean_residual_sq, gram_quad, mean_projection,
+        inv_log_n, ratio,
+        lambda_min: f64::NAN, lambda_max: f64::NAN, condition: f64::NAN,
+        frob_norm: f64::NAN, trace_c: f64::NAN,
     }
 }
 

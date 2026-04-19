@@ -114,7 +114,11 @@ fn main() {
 
     for &n in &probe_ns {
         let t = Instant::now();
-        let result = covariance::probe(n, &mu);
+        let result = if n > 500 {
+            covariance::probe_fast(n, &mu)
+        } else {
+            covariance::probe(n, &mu)
+        };
         let elapsed = t.elapsed();
 
         println!(
