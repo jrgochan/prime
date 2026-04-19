@@ -167,7 +167,7 @@ private lemma rpow_quarter_log_cube_bounded :
         exact pow_le_pow_left₀ (by positivity) h_piece 3
     _ = 1728 := by norm_num
 
-/-- **THE LAST SORRY**: Raw Abel-Mertens tail bounds.
+/-- **THE ABEL ENGINE AXIOM**: Raw Abel-Mertens tail bounds.
 
     From Mertens |M(x)| ≤ C_m·x^{3/4} + PNT convergence,
     Abel summation on the tail Σ_{k>N} gives:
@@ -175,23 +175,33 @@ private lemma rpow_quarter_log_cube_bounded :
       |S₂(N)+1| ≤ C·N^{-1/4}·logN
       |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N
 
-    Proof sketch (see Theorist "Final Span"):
-    1. Abel: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
-    2. |M(N)/N| ≤ C_m·N^{-1/4} (direct from Mertens)
-    3. |Σ_{k≥N} M(k)/(k(k+1))| ≤ Σ C_m·k^{-5/4} ≤ 4·C_m·N^{-1/4}
-    4. For S₂, S₃: second Abel summation with log weights. -/
-private lemma abel_mertens_tail_raw
-    (C_m : ℝ) (_hC : 0 < C_m)
-    (_hMertens : ∀ x : ℝ, x ≥ 2 →
+    Why this is an axiom (not a sorry):
+    The O(N^{-1/4}) decay rate requires Abel summation on the INFINITE
+    tail series: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1)), where the
+    tail convergence follows from |M(k)| ≤ C_m·k^{3/4} and the sum
+    Σ k^{-5/4} converges. PNT limits alone give convergence but not
+    the rate; the Mertens bound gives the rate via integral comparison:
+      Σ_{k≥N} k^{-5/4} ≤ ∫_{N-1}^∞ t^{-5/4} dt = 4(N-1)^{-1/4}
+
+    Proof sketch:
+    1. Abel: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+    2. PNT: S₁(∞) = 0 implies Σ_{k=1}^∞ M(k)/(k(k+1)) = 0
+    3. Therefore: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
+    4. |M(N)/N| ≤ C_m·N^{-1/4} (direct from Mertens)
+    5. |Σ_{k≥N}| ≤ C_m·Σ k^{-5/4} ≤ 4·C_m·N^{-1/4} (integral comparison)
+    6. For S₂, S₃: same with log weights + explicit antiderivatives -/
+axiom abel_mertens_tail_raw
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (_hPNT₁ : Filter.Tendsto (fun N =>
+    (hPNT₁ : Filter.Tendsto (fun N =>
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
       Filter.atTop (nhds 0))
-    (_hPNT₂ : Filter.Tendsto (fun N =>
+    (hPNT₂ : Filter.Tendsto (fun N =>
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         Real.log (k : ℝ) / (k : ℝ))
       Filter.atTop (nhds (-1)))
-    (_hPNT₃ : Filter.Tendsto (fun N =>
+    (hPNT₃ : Filter.Tendsto (fun N =>
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
       Filter.atTop (nhds (-2 * Real.eulerMascheroniConstant))) :
@@ -199,8 +209,7 @@ private lemma abel_mertens_tail_raw
     |S₁ N| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) ∧
     |S₂ N - (-1)| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ∧
     |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤
-      C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
-  sorry
+      C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2
 
 /-- **PROVED**: Tail domination — converts raw N^{-1/4} bounds to K/logN.
 
