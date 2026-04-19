@@ -629,7 +629,25 @@ private lemma s2_discrete_diff_bound (k : ℕ) (hk : 2 ≤ k) :
 private lemma finite_rpow_54_log_tail_bound (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) :
     ∑ k ∈ Finset.Ico N M, (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ) ≤
     (4 * Real.log (N : ℝ) + 16) * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  sorry -- THE TAIL: requires sum swap or antiderivative hack
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlog_N_nn : 0 ≤ Real.log (N : ℝ) :=
+    Real.log_nonneg (by exact_mod_cast show 1 ≤ N by omega)
+  -- Split: log(k) = log(N) + (log(k) - log(N)) for k ≥ N
+  have h_split : ∀ k ∈ Finset.Ico N M,
+      (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ) ≤
+      (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (N : ℝ) +
+      (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ) - Real.log (N : ℝ)) := by
+    intro k hk
+    have : (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (N : ℝ) +
+           (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ) - Real.log (N : ℝ)) =
+           (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ) := by
+      rw [← mul_add]; congr 1; ring
+    linarith
+  -- Use monotonicity: log(k) ≥ log(N) for k ≥ N, so log(k)-log(N) ≥ 0
+  -- Bound the (log(k)-log(N)) part
+  -- For now, use Σ k^{-5/4}·log(k) ≤ log(M)·Σ k^{-5/4} with M-independent bound
+  -- This is a placeholder — full proof uses sum swap
+  sorry -- THE TAIL: sum swap or integral comparison needed
 
 /-- THE FORGE: Bound on Σ (log(k)+1)/k² for the N^{3/4} term in S₂.
     Σ_{k=N}^{M-1} (log(k)+1)/k² ≤ 6·log(N)/N for N ≥ 2. -/
