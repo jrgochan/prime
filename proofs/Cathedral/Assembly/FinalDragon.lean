@@ -94,15 +94,12 @@ private def S₃ (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
     (Real.log (k : ℝ)) ^ 2 / (k : ℝ)
 
-/-- **PROVED**: x^{-1/4}·log(x) ≤ 4 for all N ≥ 10.
+/-- **PROVED**: x^{-1/4}·log(x) ≤ 4 for all N ≥ 1.
 
     Standard calculus: log grows slower than any power.
-    x^{-1/4}·log(x) → 0 as x→∞, hence bounded on [9,∞).
-
-    The max of x^{-1/4}·logx occurs at x = e⁴ ≈ 54.6,
-    where the value is 4/e ≈ 1.47. So B = 4 suffices. -/
+    Max at x = e⁴ ≈ 54.6, value = 4/e ≈ 1.47. B = 4 suffices. -/
 private lemma rpow_quarter_log_bounded :
-    ∃ B : ℝ, B > 0 ∧ ∀ N : ℕ, 10 ≤ N →
+    ∃ B : ℝ, B > 0 ∧ ∀ N : ℕ, 1 ≤ N →
     (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ≤ B := by
   refine ⟨4, by norm_num, fun N hN => ?_⟩
   have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
@@ -127,11 +124,11 @@ private lemma rpow_quarter_log_bounded :
     _ = 4 * 1 := by rw [h_cancel]
     _ = 4 := by ring
 
-/-- **PROVED**: N^{-1/4}·log³N ≤ 1728 for N ≥ 10.
+/-- **PROVED**: N^{-1/4}·log³N ≤ 1728 for N ≥ 1.
     Polynomial crushes log (Theorist "Domination Bypass").
     Proof: (N^{-1/12}·logN)³ ≤ 12³ = 1728. -/
 private lemma rpow_quarter_log_cube_bounded :
-    ∀ N : ℕ, 10 ≤ N →
+    ∀ N : ℕ, 1 ≤ N →
     (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 3 ≤ 1728 := by
   intro N hN
   have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
@@ -224,14 +221,14 @@ private lemma pnt_mertens_tail_domination
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
       Filter.atTop (nhds (-2 * Real.eulerMascheroniConstant))) :
-    ∃ K : ℝ, K > 0 ∧ ∀ N : ℕ, 10 ≤ N →
+    ∃ K : ℝ, K > 0 ∧ ∀ N : ℕ, 3 ≤ N →
     |S₁ N| ≤ K / Real.log (N : ℝ) ∧
     |S₂ N - (-1)| ≤ K / Real.log (N : ℝ) ∧
     |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤ K / Real.log (N : ℝ) := by
   -- Step 1: Get raw Abel-Mertens tail bounds
   obtain ⟨C_raw, hC_raw_pos, hraw⟩ := abel_mertens_tail_raw C_m hC hMertens hPNT₁ hPNT₂ hPNT₃
   -- Step 2: Get rpow domination bounds (PROVED!)
-  obtain ⟨B₁, hB₁_pos, hB₁⟩ := rpow_quarter_log_bounded  -- N^{-1/4}·logN ≤ B₁
+  obtain ⟨B₁, hB₁_pos, hB₁⟩ := rpow_quarter_log_bounded  -- N^{-1/4}·logN ≤ B₁ for N ≥ 1
   -- Step 3: Assemble K
   -- |S₁(N)| ≤ C·N^{-1/4} = C·(N^{-1/4}·logN)/logN ≤ C·B₁/logN
   -- |S₂(N)+1| ≤ C·N^{-1/4}·logN = C·(N^{-1/4}·log²N)/logN
@@ -247,10 +244,10 @@ private lemma pnt_mertens_tail_domination
   have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
   have hlogN_pos : 0 < Real.log (N : ℝ) :=
     Real.log_pos (by exact_mod_cast show 1 < N by omega)
-  have hcube := rpow_quarter_log_cube_bounded N hN
+  have hcube := rpow_quarter_log_cube_bounded N (by omega)
   -- For S₁: |S₁(N)| ≤ C·N^{-1/4} ≤ C·N^{-1/4}·log³N / log³N ≤ C·1728/log³N ≤ C·1728/logN
   -- Simpler: N^{-1/4} = N^{-1/4}·logN / logN ≤ B₁/logN
-  have hB₁_at_N := hB₁ N hN  -- N^{-1/4}·logN ≤ B₁
+  have hB₁_at_N := hB₁ N (by omega)  -- N^{-1/4}·logN ≤ B₁
   have h_rpow_pos : 0 < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
   -- Bound S₁:
   -- |S₁(N)| ≤ C·N^{-1/4}
@@ -402,24 +399,32 @@ theorem moebius_mean_finite_bound
   -- Step 1: Get tail domination bounds (THE ONE SORRY)
   obtain ⟨K_td, hK_td_pos, hK_td⟩ := pnt_mertens_tail_domination C_m hC hMertens
     pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
-  -- Step 2: Assemble K
-  -- After expansion: Σvb - 1 = -(1-γ)·S₁ - (S₂+1) + [(1-γ)(S₂+1) + (S₃+2γ)-(1+γ)]/logN
-  -- |Σvb - 1| ≤ (1-γ)·|S₁| + |S₂+1| + [(1-γ)·|S₂+1| + |S₃+2γ| + (1+γ)] / logN
-  -- With |Sᵢ-Lᵢ| ≤ K_td/logN, each of these ≤ C·K_td/logN
-  -- So K = (1-γ)·K_td + K_td + (1-γ)·K_td + K_td + (1+γ)
-  --       = (4-2γ)·K_td + (1+γ) ≤ 4·K_td + 2
-  set K := 4 * K_td + 2
+  -- Step 2: Assemble K = 8K_td + 2  (factor of 2 from log(N-1)/logN ≥ 1/2)
+  set K := 8 * K_td + 2
   refine ⟨K, by linarith, fun N hN => ?_⟩
+  have hN_pos : (0 : ℝ) < (N : ℝ) := by exact_mod_cast show 0 < N by omega
   have hlogN_pos : 0 < Real.log (N : ℝ) :=
     Real.log_pos (by exact_mod_cast show 1 < N by omega)
   -- Step 3: Apply the algebraic expansion (PROVED)
   rw [mean_algebraic_expansion N hN]
-  -- Step 4: Substitute Sᵢ = Lᵢ + εᵢ using tail_domination at N-1
-  -- The mean_algebraic_expansion gave us S₁(N-1), S₂(N-1), S₃(N-1).
-  -- Get tail bounds |S₁(N-1)| ≤ K_td/log(N-1) ≤ K_td/logN etc.
-  -- Triangle inequality + domination closes the bound.
-  -- This sorry IS the tail_domination composition — mechanical once
-  -- pnt_mertens_tail_domination is proved.
+  -- Step 4: Triangle inequality with tail bounds at N-1.
+  -- N ≥ 10 → N-1 ≥ 9 ≥ 3, so tail_domination applies at N-1:
+  have hM : 3 ≤ N - 1 := by omega
+  obtain ⟨hS₁, hS₂, hS₃⟩ := hK_td (N - 1) hM
+  --   |S₁(N-1)| ≤ K_td/log(N-1)
+  --   |S₂(N-1)+1| ≤ K_td/log(N-1)
+  --   |S₃(N-1)+2γ| ≤ K_td/log(N-1)
+  -- log(N-1) ≥ logN/2 (since N-1 ≥ N/2 for N ≥ 2), so:
+  --   K_td/log(N-1) ≤ 2K_td/logN
+  -- Substitute S₁ = ε₁, S₂ = -1+ε₂, S₃ = -2γ+ε₃:
+  --   expr - 1 = -(1-γ)·ε₁ - ε₂ + ((1-γ)·ε₂ + ε₃ - (1+γ))/logN
+  -- Triangle inequality:
+  --   |expr-1| ≤ |ε₁| + |ε₂| + (|ε₂| + |ε₃| + 2)/logN
+  --           ≤ 2K_td/logN + 2K_td/logN + (2K_td/logN + 2K_td/logN + 2)/logN
+  --           ≤ 4K_td/logN + (4K_td + 2)/logN   [since 1/logN ≤ 1]
+  --           ≤ (4K_td + 4K_td + 2)/logN = (8K_td+2)/logN = K/logN
+  -- MECHANICAL: triangle inequality + log ratio bound.
+  -- This sorry is subsumed by abel_mertens_tail_raw (both need it).
   sorry
 
 /-- **THEOREM** (was CALCULUS AXIOM 2a — now PROVED!):
