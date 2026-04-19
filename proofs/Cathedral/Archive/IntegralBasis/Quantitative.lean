@@ -1,5 +1,5 @@
 import Cathedral.Defs
-import Cathedral.Archive.HighFrequencyTrap.Structural.Structural
+import Cathedral.Structural.Structural
 
 /-! # SpectralRH.Quantitative
 Numerically-verified bounds: certified base, Schur complement, cross-norm.
