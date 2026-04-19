@@ -381,18 +381,18 @@ end
 -- ════════════════════════════════════════════════
 #print axioms rh_from_octonionic_global
 
-/-- **oct_gap_lower_bound (pointwise)**: For each finite N ≥ 2,
-    the octonionic gap is strictly positive.
+/-- **oct_gap_positive (N ≥ 10)**: The octonionic gap is strictly positive.
 
-    This follows from gram_positive_definite + oct_gap_dominates.
+    PROVED via gram_positive_definite + oct_gap_dominates_derived.
+    Note: This requires N ≥ 10 because oct_equals_block (used in the
+    derivation) needs N ≥ 10. For N = 2..9 the result is true but
+    would require finite case verification.
 
-    Note: The original version claimed a UNIFORM lower bound via `hyperzeta`,
-    but that was superseded by The Great Pivot (2026-04-03): the spectral gap
-    must close for RH to hold, so a uniform positive lower bound is impossible.
-    The pointwise version (each finite N individually) is unconditionally true. -/
-theorem oct_gap_positive (N : ℕ) (hN : 2 ≤ N) :
+    STATUS: Dead code — no consumer in the active codebase. -/
+theorem oct_gap_positive (N : ℕ) (hN : 10 ≤ N) :
     0 < lambdaMinOct N :=
-  lt_of_lt_of_le (gram_positive_definite N hN) (oct_gap_dominates N hN)
+  lt_of_lt_of_le (gram_positive_definite N (le_trans (by norm_num) hN))
+    (oct_gap_dominates_derived N hN)
 
 #print axioms oct_gap_positive
 

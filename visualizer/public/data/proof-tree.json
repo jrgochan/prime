@@ -2796,8 +2796,8 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 393,
-      "signature": "theorem oct_gap_positive (N : \u2115) (hN : 2 \u2264 N) : 0 < lambdaMinOct N"
+      "line": 392,
+      "signature": "theorem oct_gap_positive (N : \u2115) (hN : 10 \u2264 N) : 0 < lambdaMinOct N"
     },
     {
       "id": "classRestrict",
@@ -3133,21 +3133,12 @@
       "signature": "noncomputable def lambdaMinOct (N : \u2115) : \u211d"
     },
     {
-      "id": "oct_gap_dominates",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/Spectral/OctonionicPartition.lean",
-      "line": 259,
-      "signature": "axiom oct_gap_dominates (N : \u2115) (hN : 2 \u2264 N) : lambdaMin N \u2264 lambdaMinOct N  /-- **The octonionic gap is uniformly bounded below** (PROVEN). Follows from: hyperzeta (\u2203 c > 0, c \u2264 \u03bb_min(G_N)) + oct_\u2026"
-    },
-    {
       "id": "oct_gap_lower_bound",
       "type": "axiom",
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Spectral/OctonionicPartition.lean",
-      "line": 265,
+      "line": 266,
       "signature": "axiom oct_gap_lower_bound : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 c \u2264 lambdaMinOct N  /-- **Liouville decorrelation within each class**. The Liouville eigenvector correlation drops from \u2248 0.70 in the f\u2026"
     },
     {
@@ -3156,7 +3147,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/OctonionicPartition.lean",
-      "line": 275,
+      "line": 276,
       "signature": "theorem within_class_liouville_decorrelation : \u2200 _m : Fin 8, \u2203 C : \u211d, 0 < C \u2227 C \u2264 0.05 \u2227 \u2200 N : \u2115, 100 \u2264 N \u2192 -- The Liouville projection onto the minimum eigenvector -- of G restricted to class m is\u2026"
     },
     {
@@ -5090,10 +5081,6 @@
     },
     {
       "source": "stable_ratio",
-      "target": "zeta_zero_separates"
-    },
-    {
-      "source": "oct_gap_dominates",
       "target": "zeta_zero_separates"
     },
     {
@@ -15481,90 +15468,6 @@
       "target": "oct_gap_dominates_derived"
     },
     {
-      "source": "oct_gap_dominates",
-      "target": "gramMatrixBlockDiag_hermitian"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "block_min_eq_class_min"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "class_gap_strictly_larger"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "block_gap_larger"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "oct_equals_block"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "liouville_within_class_decorrelated"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "gram_decomposition"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "gramMatrixCross_hermitian"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "weyl_inequality"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "schur_bridge"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "rh_from_schur_bridge"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "interference_rank_one"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "large_sieve_ratio_bounded"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "rh_from_rank_one_interference"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "rh_from_octonionic_global"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "classRestrict_norm_partition"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "blockDiag_quadForm_decomp"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "min_eigenvalue_le_quadForm_scaled"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "oct_gap_dominates_proof"
-    },
-    {
-      "source": "oct_gap_dominates",
-      "target": "oct_gap_dominates_derived"
-    },
-    {
       "source": "oct_gap_lower_bound",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -16479,10 +16382,6 @@
     {
       "source": "gramEntry",
       "target": "gramMatrixOct_hermitian"
-    },
-    {
-      "source": "gramEntry",
-      "target": "oct_gap_dominates"
     },
     {
       "source": "gramEntry",
@@ -16518,10 +16417,6 @@
     },
     {
       "source": "lambdaMin",
-      "target": "oct_gap_dominates"
-    },
-    {
-      "source": "lambdaMin",
       "target": "oct_gap_lower_bound"
     },
     {
@@ -16554,14 +16449,42 @@
     },
     {
       "source": "Cathedral",
-      "target": "oct_gap_dominates"
-    },
-    {
-      "source": "Cathedral",
       "target": "oct_gap_lower_bound"
     },
     {
       "source": "Cathedral",
+      "target": "within_class_liouville_decorrelation"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "intToOctonion_unit"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "partition_complete"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "classes_disjoint"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "weight_diagonal"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "weight_bounded"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "gramMatrixOct_hermitian"
+    },
+    {
+      "source": "lambdaMinBlock",
+      "target": "oct_gap_lower_bound"
+    },
+    {
+      "source": "lambdaMinBlock",
       "target": "within_class_liouville_decorrelation"
     },
     {
@@ -16590,14 +16513,106 @@
     },
     {
       "source": "oct_equals_block",
-      "target": "oct_gap_dominates"
-    },
-    {
-      "source": "oct_equals_block",
       "target": "oct_gap_lower_bound"
     },
     {
       "source": "oct_equals_block",
+      "target": "within_class_liouville_decorrelation"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "intToOctonion_unit"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "partition_complete"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "classes_disjoint"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "weight_diagonal"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "weight_bounded"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "gramMatrixOct_hermitian"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "oct_gap_lower_bound"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "within_class_liouville_decorrelation"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "intToOctonion_unit"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "partition_complete"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "classes_disjoint"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "weight_diagonal"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "weight_bounded"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "gramMatrixOct_hermitian"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "oct_gap_lower_bound"
+    },
+    {
+      "source": "oct_gap_dominates_proof",
+      "target": "within_class_liouville_decorrelation"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "intToOctonion_unit"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "partition_complete"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "classes_disjoint"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "weight_diagonal"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "weight_bounded"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "gramMatrixOct_hermitian"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
+      "target": "oct_gap_lower_bound"
+    },
+    {
+      "source": "oct_gap_dominates_derived",
       "target": "within_class_liouville_decorrelation"
     },
     {
@@ -16623,10 +16638,6 @@
     {
       "source": "type_II_sieve_bound",
       "target": "gramMatrixOct_hermitian"
-    },
-    {
-      "source": "type_II_sieve_bound",
-      "target": "oct_gap_dominates"
     },
     {
       "source": "type_II_sieve_bound",
@@ -21530,14 +21541,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 558,
-    "totalEdges": 4126,
-    "axiomCount": 40,
+    "totalNodes": 557,
+    "totalEdges": 4131,
+    "axiomCount": 39,
     "theoremCount": 419,
     "definitionCount": 99,
     "provedTheorems": 419,
     "fileCount": 73,
-    "description": "Cathedral proof architecture: 40 axioms, 419 theorems, 99 definitions across 73 files",
-    "generatedAt": "2026-04-18T23:34:32.255088"
+    "description": "Cathedral proof architecture: 39 axioms, 419 theorems, 99 definitions across 73 files",
+    "generatedAt": "2026-04-18T23:38:40.331636"
   }
 }

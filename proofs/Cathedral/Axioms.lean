@@ -45,7 +45,7 @@ import Cathedral.NymanBeurling.BDMellin
   `nbDistSq_lt_one`, `l2_error_eq_quad_error`, `nbDistSq_le_test_vector`,
   `eigenvalue_interlacing`, `lambdaEff_linear_growth_proved`.
 
-  ### Full Inventory — 41 unique axioms across 79 active files (post-audit)
+  ### Full Inventory — 40 unique axioms across 79 active files (post-audit)
 
   #### Core Chain (Vasyunin proof — 8 axioms)
   | Axiom | Location | Tier |
@@ -78,12 +78,11 @@ import Cathedral.NymanBeurling.BDMellin
   | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
   | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
 
-  #### Spectral theory (8 axioms — NOT on critical path)
+  #### Spectral theory (7 axioms — NOT on critical path)
   | `block_min_eq_class_min` | Spectral/ClassRestriction | 4 |
   | `class_gap_strictly_larger` | Spectral/ClassRestriction | 4 |
   | `oct_equals_block` | Spectral/ClassRestriction | 4 |
   | `schur_bridge` | Spectral/ClassRestriction | 4 |
-  | `oct_gap_dominates` | Spectral/OctonionicPartition | 4 |
   | `oct_gap_lower_bound` | Spectral/OctonionicPartition | 4 |
   | `stable_ratio` | Spectral/FiniteDimReduction | 4 |
   | `liouville_delocalization` | Spectral/PTSymmetry | 4 |
@@ -105,10 +104,11 @@ import Cathedral.NymanBeurling.BDMellin
   | `dirichlet_polynomial_mean_value_bound` | White/Infrastructure/MontgomeryVaughan | 4 |
   | `bd_gram_form_decay` | White/Infrastructure/MontgomeryVaughan | 4 |
 
-  ### Total: 41 active axioms
-  ### Crown critical path: 5 · Spectral engine: 2 · Non-critical: 34
+  ### Total: 40 active axioms
+  ### Crown critical path: 5 · Spectral engine: 2 · Non-critical: 33
   ### Dead axioms eliminated: lambdaMinClass_pos, flattened_basis_integrable,
-  ###   vaughan_implies_uncoupling, mellin_plancherel_gram (April 19, 2026)
+  ###   vaughan_implies_uncoupling, mellin_plancherel_gram,
+  ###   oct_gap_dominates (April 19, 2026)
 -/
 
 noncomputable section

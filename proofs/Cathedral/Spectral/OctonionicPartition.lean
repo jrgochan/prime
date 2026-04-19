@@ -252,12 +252,13 @@ noncomputable def lambdaMinOct (N : ℕ) : ℝ :=
 -- PART 6: KEY PROPERTIES (Computationally verified)
 -- ════════════════════════════════════════════════
 
-/-- **The octonionic Gram matrix has a larger spectral gap**.
-    Verified computationally: ratio ≈ 4.19 at N = 1000.
-    PROVED via Rayleigh quotient + oct_equals_block bridge.
-    See ClassRestriction.lean for the full proof chain. -/
-axiom oct_gap_dominates (N : ℕ) (hN : 2 ≤ N) :
-    lambdaMin N ≤ lambdaMinOct N
+-- **FORMERLY axiom oct_gap_dominates**:
+-- Excised 2026-04-19 (The Great Audit). This axiom's only consumer
+-- (oct_gap_positive) was dead code with zero proof-term references.
+-- The theorem is PROVED for N ≥ 10 as `oct_gap_dominates_derived` in
+-- ClassRestriction.lean (via Rayleigh quotient + oct_equals_block).
+-- For N ≥ 2, the weaker version `oct_gap_dominates_proof` proves
+-- lambdaMin N ≤ lambdaMinBlock N (different RHS type).
 
 /-- **The octonionic gap is uniformly bounded below** (PROVEN).
     Follows from: hyperzeta (∃ c > 0, c ≤ λ_min(G_N)) + oct_gap_dominates (λ_min(G) ≤ λ_min(G^𝕆)).
