@@ -20,6 +20,7 @@ PAPERS=(
   cathedral-ai
   cathedral-lean
   cathedral-foundations
+  cathedral-engineering
   cathedral-letter
 )
 
