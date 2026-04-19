@@ -519,19 +519,29 @@ mathematician (the ``architect'') and an AI coding assistant (the
 \toprule
 \textbf{Task} & \textbf{Human} & \textbf{AI} \\
 \midrule
-Mathematical strategy & Primary & Advisory \\
-Proof sketch & Primary & Implements \\
+Mathematical strategy & Primary & Collaborative \\
+Proof sketch & Collaborative & Proposes/implements \\
 Lean syntax & Guided & Primary \\
 Mathlib API discovery & Collaborative & Primary \\
 Debugging type errors & Collaborative & Primary \\
-Architecture decisions & Primary & Proposes \\
-Axiom classification & Primary & Tracks \\
+Architecture decisions & Primary & Proposes alternatives \\
+Axiom classification & Primary & Tracks/proposes eliminations \\
+Axiom elimination proofs & Collaborative & Primary \\
 Codebase audit & Initiates & Executes \\
 Documentation & Reviews & Writes \\
 Numerical experiments & Designs & Implements (Rust) \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+A nuance deserves emphasis: the ``Collaborative'' entries are not
+courtesy attributions. The AI actively proposed proof strategies---the
+Parseval Bridge implementation path, the Abel summation architecture,
+the Rank-1 Mellin approach to the converse direction, and the axiom
+elimination campaigns that reduced the crown path from 56 to 2 axioms.
+While the human made final strategic decisions, the AI's proposals
+were substantive mathematical contributions, not mere implementation
+suggestions.
 
 \subsection{Session Structure}
 
@@ -747,11 +757,16 @@ not the crown path), and 4 cosmetic Lean linter messages.
     (spectral engine, sieve engine, Mellin bridge) without merge
     conflicts. The assembly layer at the top integrates all paths.
 
-  \item \textbf{The AI is the fast typist, not the strategist.}
-    In our workflow, mathematical strategy was always human-driven.
-    The AI's primary value was in Lean syntax, Mathlib API discovery,
-    codebase navigation, and automated refactoring---tasks that are
-    high-volume but low-creativity.
+  \item \textbf{The AI is a collaborative builder, not just a typist.}
+    The characterization of AI as ``merely implementing'' human ideas
+    understates its contribution. In our workflow, the AI proposed
+    proof strategies, identified algebraic shortcuts (such as avoiding
+    topological filter arguments for limits), designed axiom elimination
+    campaigns, and recognized when an approach was failing before the
+    human did. Mathematical strategy remained human-\emph{directed},
+    but the AI was an active creative participant, not a passive tool.
+    The appropriate metaphor is not ``typist'' but ``collaborator with
+    complementary strengths.''
 \end{enumerate}
 
 % ================================================================
