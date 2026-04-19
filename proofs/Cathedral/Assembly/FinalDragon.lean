@@ -207,10 +207,31 @@ private lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
       (1 - eulerMascheroniConstant)]
   -- Step 2: Shatter the sum using sum distribution
   simp_rw [Finset.sum_add_distrib, Finset.sum_sub_distrib, ← Finset.mul_sum]
-  -- Step 3: Convert Fin sums to Icc sums (matching S₁, S₂, S₃ definitions)
-  simp only [S₁, S₂, S₃]
-  -- The sums should now match after index conversion
-  sorry
+  -- Step 3: Convert each Fin sum to Icc sum, then fold into S₁, S₂, S₃
+  -- Each Fin sum has the form ∑ i : Fin(N-1), f(i.val+1)
+  -- which equals ∑ k ∈ Icc 1 (N-1), f(k) by fin_sum_eq_icc_sum
+  have hN2 : 2 ≤ N := by omega
+  have h₁ : ∑ i : Fin (N - 1),
+      (↑(ArithmeticFunction.moebius (i.val + 1)) : ℝ) / ↑(i.val + 1) =
+      S₁ (N - 1) := by
+    unfold S₁
+    exact fin_sum_eq_icc_sum hN2
+      (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
+  have h₂ : ∑ i : Fin (N - 1),
+      (↑(ArithmeticFunction.moebius (i.val + 1)) : ℝ) *
+      Real.log ↑(i.val + 1) / ↑(i.val + 1) = S₂ (N - 1) := by
+    unfold S₂
+    exact fin_sum_eq_icc_sum hN2
+      (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ))
+  have h₃ : ∑ i : Fin (N - 1),
+      (↑(ArithmeticFunction.moebius (i.val + 1)) : ℝ) *
+      Real.log ↑(i.val + 1) ^ 2 / ↑(i.val + 1) = S₃ (N - 1) := by
+    unfold S₃
+    exact fin_sum_eq_icc_sum hN2
+      (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
+  rw [h₁, h₂, h₃]
+  -- Step 4: The algebra ((1-γ)/L·S₂ + 1/L·S₃ = ((1-γ)·S₂ + S₃)/L) follows by ring
+  ring
 
 /-- **THEOREM** (was NUMBER THEORY AXIOM — now PROVED from sub-lemmas!):
     The Möbius-weighted mean is close to 1.
