@@ -272,14 +272,45 @@ private lemma s1_decay
       Filter.atTop (nhds 0)) :
     ∃ C₁ : ℝ, C₁ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
       |S₁' N| ≤ C₁ * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  -- PROOF SKETCH (all components exist):
-  -- 1. tendsto_extract_bound gives M₀ with |S₁(M)| < N^{-1/4} for M ≥ M₀
-  -- 2. Choose M = max(N+1, M₀)
-  -- 3. finite_abel_s1_diff gives |S₁(M)-S₁(N)| ≤ 7·C_m·N^{-1/4}
-  -- 4. rpow_le_rpow_of_nonpos gives M^{-1/4} ≤ N^{-1/4}
-  -- 5. rpow_add gives N^{3/4} = N^{-1/4}·N^1 so N^{3/4}/M ≤ N^{-1/4}
-  -- 6. Triangle: |S₁(N)| ≤ (1+7C_m)·N^{-1/4}
-  sorry
+  use 1 + 7 * C_m
+  constructor
+  · linarith
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h_eps : (0 : ℝ) < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
+  -- Step 1: From PNT, get M₀ with |S₁(M)| < N^{-1/4} for M ≥ M₀
+  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound h_eps hPNT₁
+  -- Step 2: Choose M = max(N+1, M₀)
+  set M := max (N + 1) M₀
+  have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
+  have hM_ge_M0 : M₀ ≤ M := le_max_right _ _
+  -- Step 3: |S₁(M)| < N^{-1/4}
+  have hS1M : |S₁' M| ≤ (N : ℝ) ^ (-(1:ℝ)/4) := by
+    have := hM₀ M hM_ge_M0; simp at this; exact this
+  -- Step 4: Abel bound
+  have hAbel := finite_abel_s1_diff C_m hC hMertens N M hN hM_ge_N1
+  -- Step 5: M^{-1/4} ≤ N^{-1/4} and N^{3/4}/M ≤ N^{-1/4}
+  have hM_ge_N : (N : ℝ) ≤ (M : ℝ) := by exact_mod_cast (show N ≤ M by omega)
+  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h1 : (M : ℝ) ^ (-(1:ℝ)/4) ≤ (N : ℝ) ^ (-(1:ℝ)/4) :=
+    Real.rpow_le_rpow_of_nonpos hN_pos hM_ge_N (show -(1:ℝ)/4 ≤ 0 by norm_num)
+  have h2 : (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) ≤ (N : ℝ) ^ (-(1:ℝ)/4) := by
+    rw [div_le_iff₀ hM_pos]
+    have h34 : (N : ℝ) ^ ((3:ℝ)/4) = (N : ℝ) ^ (-(1:ℝ)/4) * (N : ℝ) ^ (1:ℝ) := by
+      rw [← Real.rpow_add hN_pos]; congr 1; norm_num
+    rw [h34, Real.rpow_one]
+    exact mul_le_mul_of_nonneg_left hM_ge_N (Real.rpow_nonneg hN_pos.le _)
+  -- Step 6: Triangle + combine
+  -- |S₁(N)| = |S₁(M) - (S₁(M) - S₁(N))| ≤ |S₁(M)| + |S₁(M) - S₁(N)|
+  have h_tri : |S₁' N| ≤ |S₁' M| + |S₁' M - S₁' N| := by
+    calc |S₁' N| = |S₁' M + (S₁' N - S₁' M)| := by ring_nf
+      _ ≤ |S₁' M| + |S₁' N - S₁' M| := abs_add_le _ _
+      _ = |S₁' M| + |S₁' M - S₁' N| := by rw [abs_sub_comm]
+  calc |S₁' N| ≤ |S₁' M| + |S₁' M - S₁' N| := h_tri
+    _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) +
+        (C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
+         C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4)) := by linarith
+    _ ≤ (1 + 7 * C_m) * (N : ℝ) ^ (-(1:ℝ)/4) := by nlinarith [h_eps]
 
 -- ════════════════════════════════════════════════
 -- §6. S₂ AND S₃ BOUNDS (Same pattern with log weights)
