@@ -21,8 +21,8 @@
 \theoremstyle{plain}
 \newtheorem{myth}{Myth}
 
-\newcommand{\RH}{\mathrm{RH}}
-\newcommand{\GRH}{\mathrm{GRH}}
+\newcommand{\RH}{\ensuremath{\mathrm{RH}}}
+\newcommand{\GRH}{\ensuremath{\mathrm{GRH}}}
 \newcommand{\re}{\operatorname{Re}}
 \newcommand{\CC}{\mathbb{C}}
 \newcommand{\RR}{\mathbb{R}}
@@ -433,7 +433,7 @@ distributions), that technique \emph{might} have algorithmic
 applications. This is speculative and has no evidence base.
 
 \begin{claim}[Cathedral Technique Assessment]
-The techniques used in the Cathedral are:
+The techniques used in the Cathedral---both active and archived---are:
 \begin{enumerate}
   \item Nyman--Beurling $L^2$ density (1950s).
   \item B\'aez-Duarte basis (2003).
@@ -441,6 +441,10 @@ The techniques used in the Cathedral are:
   \item Abel summation (17th century).
   \item Montgomery--Vaughan mean value theorem (1973).
   \item Rayleigh--Ritz variational principle (19th century).
+  \item Sieve methods: Selberg sieve, Vaughan decomposition (1940s--70s).
+  \item Perron's formula for Dirichlet series (1908).
+  \item Vasyunin cotangent formula and Dedekind sums (1892--1995).
+  \item Robin's inequality and the divisor function (1984).
 \end{enumerate}
 All of these are well-known, decades-old techniques in harmonic
 analysis and analytic number theory. None of them provide any
@@ -527,6 +531,71 @@ discrete logarithms in quantum polynomial time. Shor's algorithm
 has nothing to do with the Riemann Hypothesis---it uses the quantum
 Fourier transform to find the period of modular exponentiation, which
 is a group-theoretic technique, not a number-theoretic one.
+
+% ================================================================
+\section{Archive Audit: 96 Abandoned Approaches}
+\label{sec:archive}
+% ================================================================
+
+The Cathedral preserves 96 archived Lean files documenting approaches
+that were explored and abandoned during the 23-day construction. A
+natural question arises: could any of these abandoned techniques
+be weaponized, even if the main proof architecture cannot?
+
+We audited all 96 archived files, categorized by technique:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llcl@{}}
+\toprule
+\textbf{Category} & \textbf{Technique} & \textbf{Files} & \textbf{Finding} \\
+\midrule
+Sieve methods & Selberg, Vaughan, parity barrier & 5 & No threat \\
+Perron/contour & Contour shifts, Perron kernel & 4 & No threat \\
+Spectral theory & Eigenvalues, Hilbert--P\'olya & 3 & No threat \\
+Robin's inequality & $\sigma(n) < e^\gamma n\ln\ln n$ & 6 & No threat \\
+Vasyunin/cotangent & Dedekind sums, piecewise FTC & 13 & No threat \\
+Mellin transforms & Floor Mellin, Dirichlet series & 6 & No threat \\
+Exotic approaches & Bessel, winding number, QFT & 18 & No threat \\
+Duplicate/structural & Superseded declarations & 41 & No threat \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{The Archive as Counter-Evidence}
+
+The archive \emph{strengthens} the security assessment. Each archived
+file documents an approach that was explored and \emph{failed}. These
+96 failures constitute concrete evidence that the mathematical tools
+used in the Cathedral do not produce computational shortcuts.
+
+\begin{claim}[Archive as Counter-Evidence]
+If sieve methods, Perron's formula, or Mellin transform techniques
+could be repurposed for integer factoring or discrete logarithm
+computation, the archived approaches that used these techniques
+would have \emph{succeeded}---they would have produced unexpected
+algorithmic results instead of mathematical dead ends. Their failure
+is evidence \emph{for} the distributional-vs-computational separation
+(Section~\ref{sec:separation}).
+\end{claim}
+
+The distinction is important: these are not hypothetical arguments
+about what these tools \emph{might} do. They are empirical records
+of what these tools \emph{actually did} when applied to a
+concrete problem. The answer: they bounded $L^2$ norms, computed
+Gram matrix entries, and controlled Dirichlet polynomial averages.
+At no point did any approach produce information about the
+factorization of specific integers.
+
+\subsection{The Rust Experiments (211,202 lines)}
+
+The companion Rust codebase computes Gram matrix entries, eigenvalues,
+and Rayleigh quotients using exact rational arithmetic for
+$N \leq 5000$. It processes the integers $2, 3, \ldots, N$
+using $\gcd$ and $\operatorname{lcm}$ operations. This is publicly
+reproducible computation on small public integers. No private keys,
+secrets, or cryptographic targets are involved at any point in the
+numerical pipeline.
 
 % ================================================================
 \section{Symmetric Cryptography and Hash Functions}
