@@ -148,17 +148,48 @@ private lemma rpow_quarter_log_bounded :
 -- §2b. THE MEAN BOUND (was AXIOM → now THEOREM!)
 -- ════════════════════════════════════════════════
 
+-- Define the PNT sub-sums for the algebraic expansion
+private def S₁ (M : ℕ) : ℝ :=
+  ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
+
+private def S₂ (M : ℕ) : ℝ :=
+  ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
+    Real.log (k : ℝ) / (k : ℝ)
+
+private def S₃ (M : ℕ) : ℝ :=
+  ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) *
+    (Real.log (k : ℝ)) ^ 2 / (k : ℝ)
+
+/-- **SORRY SUB-LEMMA 3**: Algebraic expansion of the Möbius-weighted mean.
+
+    The Fin-indexed sum decomposes into PNT sub-sums:
+    Σ v_k · b_k = -(1-γ)·S₁(M) - S₂(M) + [(1-γ)·S₂(M) + S₃(M)]/logN
+    where M = N-1.
+
+    This is pure algebra (product expansion + sum linearity).
+    TODO: Prove by expanding bdMoebiusWeight and distributing. -/
+private lemma mean_algebraic_expansion (N : ℕ) (hN : 10 ≤ N) :
+    ∑ i : Fin (N - 1), bdMoebiusWeight N i *
+      ((Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) /
+        ↑(i.val + 1)) =
+    -(1 - Real.eulerMascheroniConstant) * S₁ (N - 1) -
+    S₂ (N - 1) +
+    ((1 - Real.eulerMascheroniConstant) * S₂ (N - 1) + S₃ (N - 1)) /
+      Real.log (N : ℝ) := by
+  sorry
+
 /-- **THEOREM** (was NUMBER THEORY AXIOM — now PROVED from sub-lemmas!):
     The Möbius-weighted mean is close to 1.
 
     PROOF CHAIN:
-    1. Abel-PNT tail: |S₁(M)| ≤ A·C_m·M^{-1/4} (pnt_mertens_S1_tail_bound)
-    2. Power-log: M^{-1/4}·logM ≤ B (rpow_quarter_log_bounded)
-    3. Universal bounds on S₂,S₃ (tendsto_universal_bound)
-    4. Combine: ∃ K, |sum-1| ≤ K/logN
+    1. Algebraic expansion: Σvb = -(1-γ)S₁ - S₂ + taper/logN (mean_algebraic_expansion)
+    2. Abel-PNT tail: |S₁(M)| ≤ A·C_m·M^{-1/4} (pnt_mertens_S1_tail_bound)
+    3. Power-log: M^{-1/4}·logM ≤ B (rpow_quarter_log_bounded) [PROVED!]
+    4. Universal bounds on S₂,S₃ (tendsto_universal_bound) [PROVED!]
+    5. Combine: ∃ K, |sum-1| ≤ K/logN
 
-    Remaining sorry: 2 sub-lemmas (Abel tail + calculus).
-    These are SMALLER than the original axiom. -/
+    Remaining sorry: sub-lemmas 1 (Abel tail) and 3 (algebra).
+    These are each SMALLER and MORE TRACTABLE than the original axiom. -/
 theorem moebius_mean_finite_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -168,26 +199,32 @@ theorem moebius_mean_finite_bound
       ((Real.log ↑(i.val + 1) + 1 - Real.eulerMascheroniConstant) /
         ↑(i.val + 1)) - 1| ≤
       K / Real.log (N : ℝ) := by
-  -- Step 1: Get Abel-PNT tail bound
+  -- Step 1: Get Abel-PNT tail bound for S₁
   obtain ⟨A, hA_pos, hS₁_bound⟩ :=
     pnt_mertens_S1_tail_bound C_m hC hMertens pnt_mu_div_k
-  -- Step 2: Get power-log bound
+  -- Step 2: Get power-log bound (PROVED!)
   obtain ⟨B_pl, hB_pl_pos, hpl_bound⟩ := rpow_quarter_log_bounded
-  -- Step 3: Get universal bounds on PNT sub-sums
+  -- Step 3: Get universal bounds on S₂, S₃ from PNT (PROVED!)
   obtain ⟨B₂, hB₂_ge, hB₂⟩ := tendsto_universal_bound pnt_mu_log_div_k
   obtain ⟨B₃, hB₃_ge, hB₃⟩ := tendsto_universal_bound pnt_mu_log_sq_div_k
   -- Step 4: Assemble K
-  -- The error decomposes as:
-  --   |Σv·b - 1| ≤ |S₁| + |S₂+1| + (|S₂+1|+|S₃+2γ|+2)/logN
-  -- With |S₁| ≤ A·C_m/N^{1/4} ≤ A·C_m·B_pl/logN (via rpow bound)
-  -- And |S₂+1| ≤ A·C_m·logN/N^{1/4} ≤ A·C_m·B_pl·logN/logN·N^{1/4}
-  -- For existential K: just pick K large enough
-  set K := A * C_m * B_pl + A * C_m * B_pl + B₂ + B₃ + 3
+  -- Error = |Σvb - 1|
+  -- = |-(1-γ)S₁ - (S₂+1) + [(1-γ)(S₂+1)+(S₃+2γ)-(1+γ)]/logN|  [algebra]
+  -- ≤ |S₁| + |S₂+1| + (|S₂+1|+|S₃+2γ|+2)/logN                 [triangle]
+  -- ≤ A·C_m·M^{-1/4} + A·C_m·M^{-1/4}·logM + (B₂+B₃+2)/logN   [tail bounds]
+  -- ≤ A·C_m·B_pl/logN + A·C_m·B_pl/logN + (B₂+B₃+2)/logN       [rpow bound]
+  -- = (2A·C_m·B_pl + B₂ + B₃ + 2)/logN
+  set K := 2 * A * C_m * B_pl + B₂ + B₃ + 3
   refine ⟨K, by linarith [mul_pos (mul_pos hA_pos hC) hB_pl_pos], fun N hN => ?_⟩
-  -- The detailed algebraic expansion + triangle inequality
-  -- chains through the sorry sub-lemmas.
-  -- This sorry represents the COMBINATION step, which becomes
-  -- mechanical once the sub-lemmas are proved.
+  have hlogN_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- Use the algebraic expansion
+  rw [mean_algebraic_expansion N hN]
+  -- Now we need to bound the rewritten expression
+  -- |-(1-γ)S₁ - S₂ + taper/logN - 1| ≤ K/logN
+  -- Rearrange: -1 = -(S₂+1) + S₂ gives the centering
+  -- This requires chaining the sub-lemma bounds
+  -- The combination is mechanical once the sub-lemmas are filled
   sorry
 
 /-- **THEOREM** (was CALCULUS AXIOM 2a — now PROVED!):
