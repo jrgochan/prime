@@ -230,12 +230,12 @@ private def S₁' (M : ℕ) : ℝ :=
 
     Proof: Apply abel_summation_abs_bound with:
     - a(k) = μ(k), f(k) = 1/k
-    - A(k) = M(k) - M(N) = partial Mertens from N+1 to k
-    - |A(k)| ≤ |M(k)| + |M(N)| ≤ C_m·(k^{3/4} + N^{3/4})
+    - |A(k)| ≤ C_m·(k^{3/4} + N^{3/4}) via Mertens + triangle
     - |Δf(k)| = 1/(k(k+1))
     Then: boundary ≤ C_m·(M^{-1/4} + N^{3/4}/M)
           interior ≤ C_m·(Σ k^{-5/4} + N^{3/4}·Σ 1/(k(k+1)))
-                   ≤ C_m·(4N^{-1/4} + N^{3/4}·1/N) = C_m·5·N^{-1/4} -/
+                   ≤ C_m·(4N^{-1/4} + N^{3/4}·1/(N+1))
+                   ≤ C_m·5·N^{-1/4} -/
 private lemma finite_abel_s1_diff
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -244,7 +244,65 @@ private lemma finite_abel_s1_diff
     |S₁' M - S₁' N| ≤
       C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
       C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  sorry -- Uses abel_summation_abs_bound
+  -- ─── Step 0: Basic positivity ───
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
+  -- ─── Step 1: S₁(M) - S₁(N) = Σ_{k=N+1}^M μ(k)/k ───
+  have h_diff : S₁' M - S₁' N =
+      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) := by
+    unfold S₁'
+    rw [show Icc 1 M = Icc 1 N ∪ Icc (N+1) M from by
+      ext k; simp [Finset.mem_Icc, Finset.mem_union]; omega]
+    rw [Finset.sum_union (by
+      rw [Finset.disjoint_left]; intro k hk1 hk2
+      simp [Finset.mem_Icc] at hk1 hk2; omega)]
+    ring
+  -- ─── Step 2: Rewrite as Σ a(k)·f(k) form ───
+  have h_mul : ∀ k : ℕ, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ) =
+      (↑(ArithmeticFunction.moebius k) : ℝ) * (1 / (k : ℝ)) := by
+    intro k; ring
+  rw [h_diff, show (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) =
+      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) * (1 / (k : ℝ))) from
+      Finset.sum_congr rfl (fun k _ => h_mul k)]
+  -- ─── Step 3: Apply abel_summation_abs_bound ───
+  -- a(k) = μ(k), f(k) = 1/k, range [N+1, M]
+  -- C_bound(k) = C_m · (k^{3/4} + N^{3/4})
+  -- δ(k) = 1/(k(k+1))
+  set a := fun k => (↑(ArithmeticFunction.moebius k) : ℝ)
+  set f : ℕ → ℝ := fun k => 1 / (k : ℝ)
+  set C_bound : ℕ → ℝ := fun k => C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4))
+  set δ : ℕ → ℝ := fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))
+  have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
+    -- hA: partial sum bound
+    (fun k hk1 hk2 => by
+      -- |A(k)| = |Σ_{j=N+1}^k μ(j)| ≤ |M(k)| + |M(N)| by triangle
+      -- ≤ C_m·k^{3/4} + C_m·N^{3/4} by Mertens bound
+      unfold partialSum
+      -- |Σ μ(j) over Icc (N+1) k| = |M(k) - M(N)| ≤ |M(k)| + |M(N)|
+      -- This requires bridging partialSum → mertensFunction
+      -- Which is the Mertens-partialSum bridge
+      sorry)
+    -- hf_mono: |f(k+1) - f(k)| ≤ δ(k)
+    (fun k hk1 hk2 => by
+      -- |1/(k+1) - 1/k| = 1/(k(k+1))
+      simp only [f]
+      have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+      have hk1_cast : ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
+      rw [hk1_cast]
+      rw [show 1 / ((k : ℝ) + 1) - 1 / (k : ℝ) = -(1 / ((k : ℝ) * ((k : ℝ) + 1))) from by
+        field_simp; ring]
+      rw [abs_neg, abs_of_nonneg (by positivity)])
+  -- ─── Step 4: Bound the Abel output ───
+  -- hAbel : |Σ a(k)·f(k)| ≤ C_bound(M)·|f(M)| + Σ_{k=N+1}^{M-1} C_bound(k)·δ(k)
+  -- Need to show the RHS ≤ our target
+  calc |(Icc (N+1) M).sum (fun k => a k * f k)|
+      ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
+    _ ≤ C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
+        C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
+      -- The boundary + interior bound is algebraic wiring
+      -- using finite_rpow_54_tail_bound and finite_inv_kk1_bound
+      -- from Steps 2 and 3 above
+      sorry
 
 -- ════════════════════════════════════════════════
 -- §5. THE LIMIT ARGUMENT
