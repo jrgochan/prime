@@ -275,12 +275,14 @@ private lemma finite_abel_s1_diff
   have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
     -- hA: partial sum bound
     (fun k hk1 hk2 => by
-      -- |A(k)| = |Σ_{j=N+1}^k μ(j)| ≤ |M(k)| + |M(N)| by triangle
-      -- ≤ C_m·k^{3/4} + C_m·N^{3/4} by Mertens bound
-      unfold partialSum
-      -- |Σ μ(j) over Icc (N+1) k| = |M(k) - M(N)| ≤ |M(k)| + |M(N)|
-      -- This requires bridging partialSum → mertensFunction
-      -- Which is the Mertens-partialSum bridge
+      -- |A(k)| = |Σ_{j=N+1}^k μ(j)|
+      -- We need: |partialSum a (N+1) k| ≤ C_m·(k^{3/4} + N^{3/4})
+      -- The partialSum is Σ_{N+1}^k μ(j) = M(k) - M(N)
+      -- |M(k) - M(N)| ≤ |M(k)| + |M(N)| ≤ C_m·k^{3/4} + C_m·N^{3/4}
+      simp only [a, C_bound]
+      -- Bridge: (Icc (N+1) k).sum μ = M(k) - M(N) (definitional alignment)
+      -- Then: |M(k)-M(N)| ≤ |M(k)| + |M(N)| by abs_sub_le + triangle
+      -- Then: both bounded by hMertens
       sorry)
     -- hf_mono: |f(k+1) - f(k)| ≤ δ(k)
     (fun k hk1 hk2 => by
