@@ -225,6 +225,35 @@ private lemma finite_inv_kk1_bound (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 ≤ M
 private def S₁' (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
 
+/-- Bridge: mertensFunction at a nat equals the Icc sum of μ.
+    M(k) = Σ_{n=1}^k μ(n) for k ≥ 1. -/
+private lemma mertens_eq_icc_sum (k : ℕ) (hk : 1 ≤ k) :
+    ((mertensFunction (k : ℝ) : ℤ) : ℝ) =
+    (Icc 1 k).sum (fun n => (↑(ArithmeticFunction.moebius n) : ℝ)) := by
+  unfold mertensFunction
+  push_cast
+  congr 1
+  ext n
+  simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Icc]
+  rw [Nat.floor_natCast]
+  constructor
+  · rintro ⟨h1, h2, h3⟩
+    exact ⟨h3, by exact_mod_cast h2⟩
+  · rintro ⟨h1, h2⟩
+    exact ⟨by omega, by exact_mod_cast h2, h1⟩
+
+/-- The partial sum over [N+1, k] equals M(k) - M(N). -/
+private lemma partial_sum_eq_mertens_diff (N k : ℕ) (hN : 1 ≤ N) (hk : N + 1 ≤ k) :
+    (Icc (N+1) k).sum (fun n => (↑(ArithmeticFunction.moebius n) : ℝ)) =
+    ((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ) := by
+  rw [mertens_eq_icc_sum k (by omega), mertens_eq_icc_sum N hN]
+  rw [show Icc 1 k = Icc 1 N ∪ Icc (N+1) k from by
+    ext x; simp [Finset.mem_Icc, Finset.mem_union]; omega]
+  rw [Finset.sum_union (by
+    rw [Finset.disjoint_left]; intro x hx1 hx2
+    simp [Finset.mem_Icc] at hx1 hx2; omega)]
+  ring
+
 /-- For any M ≥ N+1 ≥ 3, Abel summation on [N+1, M] gives:
     |S₁(M) - S₁(N)| ≤ C_m·(M^{-1/4} + N^{3/4}/M) + C_m·5·N^{-1/4}
 
@@ -280,10 +309,19 @@ private lemma finite_abel_s1_diff
       -- The partialSum is Σ_{N+1}^k μ(j) = M(k) - M(N)
       -- |M(k) - M(N)| ≤ |M(k)| + |M(N)| ≤ C_m·k^{3/4} + C_m·N^{3/4}
       simp only [a, C_bound]
-      -- Bridge: (Icc (N+1) k).sum μ = M(k) - M(N) (definitional alignment)
-      -- Then: |M(k)-M(N)| ≤ |M(k)| + |M(N)| by abs_sub_le + triangle
-      -- Then: both bounded by hMertens
-      sorry)
+      -- partialSum (fun k => μ(k)) (N+1) k = (Icc (N+1) k).sum μ
+      unfold partialSum
+      -- Use the bridge: (Icc (N+1) k).sum μ = M(k) - M(N)
+      rw [partial_sum_eq_mertens_diff N k (by omega) (by omega)]
+      -- |M(k) - M(N)| ≤ |M(k)| + |M(N)|
+      have hMk := hMertens (k : ℝ) (by exact_mod_cast show 2 ≤ k by omega)
+      have hMN := hMertens (N : ℝ) (by exact_mod_cast hN)
+      calc |((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ)|
+          ≤ |((mertensFunction (k:ℝ) : ℤ) : ℝ)| + |((mertensFunction (N:ℝ) : ℤ) : ℝ)| :=
+            abs_sub _ _
+        _ ≤ C_m * (k : ℝ) ^ ((3:ℝ)/4) + C_m * (N : ℝ) ^ ((3:ℝ)/4) :=
+            add_le_add hMk hMN
+        _ = C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) := by ring)
     -- hf_mono: |f(k+1) - f(k)| ≤ δ(k)
     (fun k hk1 hk2 => by
       -- |1/(k+1) - 1/k| = 1/(k(k+1))
