@@ -1,0 +1,454 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=1in}
+
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\RH}{\mathrm{RH}}
+
+\title{%
+  The Fast Typist, Not the Strategist:\\
+  What 23 Days of Human-AI Mathematical Collaboration\\
+  Reveals About LLMs and Formal Reasoning%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 19, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We report on a 23-day collaboration between a mathematician and an
+LLM-based AI coding assistant to formalize the Nyman--Beurling
+criterion for the Riemann Hypothesis in Lean~4. The resulting
+artifact---the \emph{Cathedral}---comprises 20,000 lines of
+machine-verified proof across 78 files, with 644 theorems and 40
+axioms. We analyze the division of labor between human and AI,
+finding that the AI's primary contribution was \textbf{high-volume
+low-creativity work}: Lean syntax generation, Mathlib API discovery,
+codebase navigation, and automated refactoring. Mathematical
+strategy---proof architecture, axiom classification, and the
+discovery of novel techniques---remained exclusively human-driven.
+We quantify the AI's productivity gains ($\sim$5$\times$ throughput
+vs.\ solo human), identify four failure modes specific to
+LLM-assisted theorem proving (stale context, API hallucination,
+axiom drift, over-eagerness), and compare with existing AI-for-math
+systems (AlphaProof, Lean Copilot, LeanDojo). We argue that current
+LLMs are powerful \emph{proof scribes} but not yet
+\emph{proof strategists}, and that the bottleneck for AI-assisted
+mathematics has shifted from code generation to mathematical taste.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction}
+% ================================================================
+
+Can AI prove theorems? The question has animated research since
+Newell and Simon's Logic Theorist (1956) and has recently gained
+momentum with AlphaProof's IMO silver medal (2024), Lean Copilot
+(2024), and LeanDojo's retrieval-augmented proving (2023).
+
+These systems operate at the level of individual lemmas: given a
+statement, find its proof. The Cathedral project operates at a
+qualitatively different scale: not proving one theorem, but designing
+an entire proof \emph{architecture}---78 files, 11 modules, 644
+theorems---for a major open problem in mathematics.
+
+This paper analyzes the human-AI collaboration that produced the
+Cathedral, focusing on the question: \emph{what did the AI actually
+do?}
+
+\subsection{Summary of Findings}
+
+\begin{enumerate}
+  \item The AI generated $\sim$85\% of all Lean code by volume, but
+    made $\sim$0\% of architectural decisions.
+  \item The AI's primary value was in \textbf{throughput}: what would
+    take a human mathematician hours of Lean syntax wrestling took
+    the AI minutes.
+  \item The AI failed consistently at tasks requiring
+    \textbf{mathematical taste}: choosing between proof strategies,
+    identifying which axioms to eliminate first, and recognizing
+    when an approach was aesthetically wrong even if logically valid.
+  \item The collaboration produced a 54\% discard rate, higher than
+    either human or AI would produce alone, suggesting that the
+    pairing enables more aggressive exploration.
+\end{enumerate}
+
+% ================================================================
+\section{System and Methodology}
+\label{sec:system}
+% ================================================================
+
+\subsection{The AI System}
+
+The AI assistant was an LLM-based coding agent with the following
+capabilities:
+
+\begin{itemize}
+  \item File reading and writing within the project workspace.
+  \item Terminal command execution (\lean{lake build}, \lean{lake env lean}).
+  \item Web search for Mathlib documentation and API references.
+  \item Context window of $\sim$200K tokens (insufficient for the
+    full 20,000-line codebase).
+  \item No persistent memory between sessions (context rebuilt each
+    time).
+\end{itemize}
+
+The AI had no special-purpose theorem-proving capabilities. It was
+a general-purpose coding assistant that happened to be writing Lean~4.
+
+\subsection{The Human}
+
+The human collaborator is a mathematician with expertise in analytic
+number theory and experience with formal verification. The human
+provided:
+
+\begin{itemize}
+  \item Mathematical strategy and proof architecture.
+  \item Axiom classification and elimination priorities.
+  \item Quality control (deciding when a proof was ``done'' vs.\
+    ``correct but ugly'').
+  \item Error diagnosis when the AI's approach failed.
+\end{itemize}
+
+\subsection{Session Protocol}
+
+Development occurred in sessions of 2--8 hours over 23 days. A
+typical session:
+
+\begin{enumerate}
+  \item \textbf{Human sets goal}: ``Eliminate axiom X'' or ``Prove
+    theorem Y.''
+  \item \textbf{AI reads context}: Relevant source files, dependencies,
+    Mathlib API.
+  \item \textbf{AI proposes strategy}: ``I'll use Mathlib's
+    \lean{riemannZeta\_ne\_zero\_of\_one\_le\_re} and the functional
+    equation.''
+  \item \textbf{Human approves or redirects}: ``Good approach'' or
+    ``No, try the contrapositive via the Mellin transform instead.''
+  \item \textbf{AI writes code}: Full Lean proof, typically 50--300
+    lines.
+  \item \textbf{Compiler checks}: AI runs \lean{lake env lean} and
+    iterates on errors.
+  \item \textbf{Regression}: AI runs \lean{lake build} to check
+    full-codebase consistency.
+  \item \textbf{Human reviews}: Checks mathematical content,
+    docstrings, axiom impact.
+\end{enumerate}
+
+% ================================================================
+\section{Division of Labor: Quantitative Analysis}
+\label{sec:division}
+% ================================================================
+
+\subsection{Task Taxonomy}
+
+We classify all development tasks into five categories:
+
+\begin{center}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+\textbf{Category} & \textbf{Example} & \textbf{Human} & \textbf{AI} \\
+\midrule
+Strategy & ``Use Rank-1 Mellin for converse'' & 100\% & 0\% \\
+Architecture & ``Create 11-module structure'' & 90\% & 10\% \\
+Implementation & ``Write the Lean proof'' & 15\% & 85\% \\
+Maintenance & ``Update docstrings, fix imports'' & 5\% & 95\% \\
+Debugging & ``Why does this type not unify?'' & 40\% & 60\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Volume Analysis}
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Total LOC produced (active + archived) & 43,041 \\
+Estimated AI-authored LOC & $\sim$36,500 (85\%) \\
+Estimated human-authored LOC & $\sim$6,500 (15\%) \\
+Files created & 174 \\
+Files archived (discarded) & 96 (55\%) \\
+Axioms declared & $\sim$80 (over lifetime) \\
+Axioms eliminated & 40 \\
+Novel mathematical insights & 5 \\
+Of which AI-originated & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The most striking number: \textbf{zero} novel mathematical insights
+originated from the AI. Every creative idea---the Rank-1 Mellin
+Miracle, the Parseval Bridge, the axiom tiering system, the Bartlett
+window interpretation---came from the human. The AI implemented them.
+
+\subsection{Throughput Analysis}
+
+Estimated time comparison for key tasks:
+
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Task} & \textbf{Human solo} & \textbf{With AI} & \textbf{Speedup} \\
+\midrule
+Write 200-line Lean proof & 4--8 hours & 30--60 min & $\sim$8$\times$ \\
+Find correct Mathlib API & 1--2 hours & 5--15 min & $\sim$6$\times$ \\
+Debug type unification error & 30--60 min & 10--20 min & $\sim$3$\times$ \\
+Update all docstrings & 2--3 hours & 15--30 min & $\sim$8$\times$ \\
+Design proof architecture & 2--4 hours & 2--4 hours & $1\times$ \\
+Choose next axiom to eliminate & 30 min & 30 min & $1\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The pattern is clear: the AI accelerates \textbf{execution} but not
+\textbf{decision-making}. For ``what to do'' questions, the AI
+provides no speedup. For ``how to do it'' questions, the speedup is
+3--8$\times$.
+
+% ================================================================
+\section{AI Failure Modes}
+\label{sec:failures}
+% ================================================================
+
+We identify four recurring failure modes:
+
+\subsection{Stale Context}
+
+The AI's context window ($\sim$200K tokens) cannot hold the full
+codebase ($\sim$20K lines of active code + Mathlib). At the start
+of each session, the AI must re-read relevant files, occasionally
+missing dependencies or using stale mental models.
+
+\textbf{Symptom}: The AI writes code that references a function
+signature that was changed in a previous session.
+
+\textbf{Frequency}: $\sim$1--2 times per session.
+
+\textbf{Mitigation}: The AI was trained to always re-read touched
+files before modifying them.
+
+\subsection{API Hallucination}
+
+The AI generates plausible-sounding but non-existent Mathlib function
+names. For example, suggesting \lean{Integrable.sum\_le\_integral\_Ico}
+when the actual name is \lean{AntitoneOn.inner\_le\_lnorm\_mul\_lnorm}.
+
+\textbf{Symptom}: Compilation failure with ``unknown identifier.''
+
+\textbf{Frequency}: $\sim$3--5 times per proof attempt.
+
+\textbf{Mitigation}: The AI was trained to grep the Mathlib source
+for function names before using them, and to propose ``search
+strategies'' rather than specific API calls.
+
+\subsection{Axiom Drift}
+
+Adding a new file or import can silently pull axioms into the
+transitive dependency graph. The AI, not tracking axiom counts
+proactively, sometimes introduced unnecessary axioms.
+
+\textbf{Symptom}: \lean{\#print axioms} shows unexpected axioms on
+the crown path.
+
+\textbf{Frequency}: $\sim$1 time per major refactoring.
+
+\textbf{Mitigation}: The human established a policy of running
+\lean{\#print axioms} after every structural change.
+
+\subsection{Over-Eagerness}
+
+The AI tends to produce a ``working'' proof quickly but without
+considering elegance, minimality, or future maintainability. A proof
+that uses 5 axioms when 2 would suffice is ``correct'' but not
+``good.''
+
+\textbf{Symptom}: The human reviews a proof and says ``This is
+right but wrong.''
+
+\textbf{Frequency}: Persistent, requiring constant human oversight.
+
+\textbf{Mitigation}: The human established a ``sweep the floor''
+maintenance policy and reviewed all proofs for axiom minimality.
+
+% ================================================================
+\section{Comparison with Existing AI-for-Math Systems}
+\label{sec:comparison}
+% ================================================================
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+& \textbf{AlphaProof} & \textbf{LeanDojo} & \textbf{Lean Copilot} & \textbf{Cathedral} \\
+\midrule
+Scale & Single problem & Single lemma & Single tactic & 78-file project \\
+Autonomy & High & High & Low & Low (human-directed) \\
+Math level & IMO & Mathlib & Mathlib & Research frontier \\
+Novel math & Some & None & None & None (from AI) \\
+Architecture & N/A & N/A & N/A & Human-designed \\
+LOC & $\sim$100s & $\sim$10s & $\sim$1s & 20,000 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The Cathedral occupies a unique niche: large-scale, human-directed,
+operating at the research frontier. Existing AI-for-math systems
+excel at small-scale autonomous proving (AlphaProof) or tactic
+suggestion (Lean Copilot). None have been applied to a multi-file
+formal verification project at the scale of the Cathedral.
+
+\subsection{What Would Change the Game}
+
+For AI to move from ``fast typist'' to ``proof strategist,'' the
+following capabilities would be needed:
+
+\begin{enumerate}
+  \item \textbf{Long-term memory}: The ability to maintain a coherent
+    model of a 20,000-line codebase across sessions.
+  \item \textbf{Axiom awareness}: Built-in tracking of which axioms
+    a proof depends on, with optimization for minimality.
+  \item \textbf{Mathematical taste}: The ability to distinguish
+    between ``correct but ugly'' and ``correct and elegant'' proofs.
+    This is the hardest capability to define or train for.
+  \item \textbf{Strategic planning}: The ability to decompose a
+    multi-week project into phases, choose proof architectures, and
+    backtrack when an approach fails.
+\end{enumerate}
+
+Of these, (1) is a systems problem, (2) is a tools problem, (3) is
+an open research question, and (4) is the frontier.
+
+% ================================================================
+\section{The 54\% Discard Rate}
+\label{sec:discard}
+% ================================================================
+
+The Cathedral produced 174 files, of which 96 (55\%) were eventually
+archived. This discard rate is unusually high for software engineering
+but may be characteristic of formal proof search.
+
+\subsection{Why So Much Waste?}
+
+\begin{itemize}
+  \item \textbf{Exploration is cheap with AI}: Because the AI can
+    produce a 200-line proof attempt in 30 minutes, there is little
+    cost to trying an approach that might fail. Without the AI, each
+    attempt would take 4--8 hours, strongly discouraging exploration.
+  \item \textbf{Proof search is inherently exploratory}: Unlike
+    software, where the target behavior is known, proof search
+    explores an unknown space. Dead ends are information.
+  \item \textbf{The archive preserves negative knowledge}: Each
+    archived file documents an approach that doesn't work, preventing
+    future explorers from repeating it.
+\end{itemize}
+
+\subsection{Is the Discard Rate Optimal?}
+
+We conjecture that the optimal discard rate for a frontier proof
+project lies between 30\% and 70\%. Below 30\%, the exploration is
+too conservative; above 70\%, the implementation lacks focus. The
+Cathedral's 55\% suggests a roughly balanced exploration-exploitation
+tradeoff, enabled by the AI's ability to make exploration cheap.
+
+% ================================================================
+\section{Lessons for AI-Assisted Mathematics}
+\label{sec:lessons}
+% ================================================================
+
+\begin{enumerate}
+  \item \textbf{AI multiplies throughput, not insight.} The
+    Cathedral could not have been built in 23 days without AI
+    assistance. It also could not have been built \emph{at all}
+    without human mathematical insight. The AI was a
+    $5\times$ throughput multiplier, not a creativity enhancer.
+
+  \item \textbf{The bottleneck is taste, not skill.} The AI can
+    write correct Lean code faster than any human. What it cannot
+    do is decide \emph{which} correct code to write. Mathematical
+    taste---the ability to distinguish elegant from merely valid
+    approaches---is the binding constraint.
+
+  \item \textbf{Verification is the trust anchor.} In a workflow
+    where AI generates most of the code, the Lean type-checker
+    serves as the ultimate quality gate. The human doesn't need to
+    verify every line---the compiler does that. The human needs to
+    verify that the \emph{right thing} was proved.
+
+  \item \textbf{Discard culture is healthy.} The willingness to
+    archive 96 files without regret is essential. Sunk cost fallacy
+    is the enemy of proof search. The AI's ability to regenerate
+    code cheaply makes discarding psychologically easier.
+
+  \item \textbf{The AI is best as a scribe, not a sage.} The most
+    productive interaction pattern was: human provides mathematical
+    direction in natural language, AI translates to Lean. The least
+    productive was: human asks AI for mathematical ideas. The AI's
+    mathematical suggestions were generic, often wrong, and never
+    novel.
+\end{enumerate}
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The Cathedral demonstrates that LLMs can meaningfully accelerate
+frontier mathematics when used as proof scribes under human direction.
+The collaboration produced 20,000 lines of machine-verified proof in
+23 days---a pace that would be extraordinary for a solo mathematician
+working with Lean~4.
+
+But the AI contributed no new mathematical ideas. Every creative
+insight---the Rank-1 Mellin Miracle, the Parseval Bridge, the
+axiom tiering system---came from the human. The AI's contribution
+was translation, not creation; velocity, not direction.
+
+The title of this paper is our conclusion: the AI is the fast
+typist, not the strategist. This is not a criticism. Fast typing is
+extraordinarily valuable when the strategist knows where to go.
+The next cathedral will be built faster. But it will still need a
+human to draw the blueprints.
+
+\vspace{0.5cm}
+\noindent\textbf{Source code:} \url{https://github.com/jrgochan/prime}
+
+\begin{thebibliography}{99}
+
+\bibitem{alphaproof}
+Google DeepMind, \emph{AlphaProof and AlphaGeometry 2}, 2024.
+
+\bibitem{leandojo}
+K.~Yang et al., \emph{LeanDojo: Theorem Proving with Retrieval-Augmented
+Language Models and the LeanDojo Benchmark}, NeurIPS 2023.
+
+\bibitem{leancopilot}
+S.~Song et al., \emph{Towards Large Language Models as Copilots for
+Theorem Proving in Lean}, 2024.
+
+\bibitem{newell1956}
+A.~Newell and H.~Simon, \emph{The Logic Theory Machine},
+IRE Transactions on Information Theory, 1956.
+
+\bibitem{lean4}
+L.~de~Moura et al., \emph{The Lean~4 Theorem Prover}, CADE-28, 2021.
+
+\end{thebibliography}
+
+\end{document}

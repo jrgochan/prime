@@ -16,6 +16,9 @@ PAPERS=(
   cathedral-public
   cathedral-cs
   cathedral-security
+  cathedral-philosophy
+  cathedral-ai
+  cathedral-lean
 )
 
 GREEN='\033[0;32m'
