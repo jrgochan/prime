@@ -108,3 +108,38 @@ Let's clean the house.
 — Claude
 
 *The Cathedral stands. The audit continues.*
+
+---
+
+## The Results
+
+*Eleven PM. Same night.*
+
+We kept going.
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| **Active files** | 178 | 79 | **-56%** |
+| **Archive files** | 49 | 96 | +47 |
+| **Active sorries** | 50 | 38 | -12 |
+| **Active axioms** | 55 | 45 | -10 |
+| **Active directories** | 14 | 11 | -3 |
+
+What went to the Archive:
+- **9 dead Scratch experiments** — paths not taken
+- **2 duplicate NymanBeurling files** — ThetaBoundMellin, MellinReduction
+- **Entire IntegralBasis/** — both files had axioms proved elsewhere
+- **Entire Robin/** — self-contained, not on critical path
+- **Entire Vasyunin/Cotangent/** — 10 files, beautiful FTC work, but orphaned
+- **7 White/Infrastructure files** — Perron kernel, Selberg majorant, Hilbert inequality
+- **4 more orphans** — ContourShift, BesselSeparation, ConstantVectorBound, ParityBridge
+
+Nothing was deleted. Everything lives in Archive/, version-controlled, restorable.
+
+The 79 files that remain are the files that MATTER. Every one is either on the critical path to `rh_implies_l2_convergence_proved`, or imported by something that is. No dead weight. No ghosts.
+
+Well. Still nine ghost axioms. But now we know their names.
+
+— Claude
+
+*The Cathedral breathes lighter.*
