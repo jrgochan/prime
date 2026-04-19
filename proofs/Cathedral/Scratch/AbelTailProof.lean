@@ -355,7 +355,103 @@ private lemma finite_abel_s1_diff
           congr 1; ring
         rw [h_rpow]
       · -- Interior sum ≤ C_m * 5 * N^{-1/4}
-        sorry
+        simp only [C_bound, δ]
+        -- Step 1: Ico ≤ Icc for nonneg sums
+        have h_ico_icc : (Ico (N+1) M).sum (fun k =>
+            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
+            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) ≤
+          (Icc (N+1) M).sum (fun k =>
+            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
+            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) := by
+          apply Finset.sum_le_sum_of_subset_of_nonneg Finset.Ico_subset_Icc_self
+          intro k _ _
+          apply mul_nonneg (mul_nonneg (by linarith) (add_nonneg (by positivity) (by positivity)))
+          positivity
+        -- Step 2: Factor the Icc sum into two parts
+        have h_split : (Icc (N+1) M).sum (fun k =>
+            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
+            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) ≤
+          C_m * (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4)) +
+          C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) := by
+          -- Split sum: Σ C_m*(k^{3/4}+N^{3/4})/(k(k+1))
+          -- = Σ C_m*k^{3/4}/(k(k+1)) + Σ C_m*N^{3/4}/(k(k+1))
+          have h_eq : (Icc (N+1) M).sum (fun k =>
+              C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
+              (1 / ((k : ℝ) * ((k : ℝ) + 1)))) =
+            (Icc (N+1) M).sum (fun k =>
+              C_m * (k : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) +
+            (Icc (N+1) M).sum (fun k =>
+              C_m * (N : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) := by
+            rw [← Finset.sum_add_distrib]
+            apply Finset.sum_congr rfl; intro k _; ring
+          rw [h_eq]
+          apply add_le_add
+          · -- Part 1: Σ C_m*k^{3/4}/(k(k+1)) ≤ C_m * Σ k^{-5/4}
+            rw [Finset.mul_sum]
+            apply Finset.sum_le_sum
+            intro k hk
+            rw [Finset.mem_Icc] at hk
+            have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+            -- C_m * k^{3/4}/(k(k+1)) ≤ C_m * k^{-5/4}
+            -- Use: k^{3/4}/(k(k+1)) ≤ k^{3/4}/k^2 = k^{-5/4}
+            -- since k*(k+1) ≥ k^2 (i.e. k+1 ≥ k)
+            have hkk1_ge_k2 : (k : ℝ) ^ 2 ≤ (k : ℝ) * ((k : ℝ) + 1) := by nlinarith
+            have hk34_div : C_m * (k : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1)) ≤
+                C_m * (k : ℝ) ^ ((3:ℝ)/4) / (k : ℝ) ^ 2 := by
+              apply div_le_div_of_nonneg_left (by positivity) (by positivity) hkk1_ge_k2
+            have hk_rpow : C_m * (k : ℝ) ^ ((3:ℝ)/4) / (k : ℝ) ^ 2 =
+                C_m * (k : ℝ) ^ (-(5:ℝ)/4) := by
+              -- k^{3/4} / k^2 = k^{3/4} * k^{-2} = k^{3/4-2} = k^{-5/4}
+              have h_k2 : (k : ℝ) ^ (2 : ℕ) = (k : ℝ) ^ (2 : ℝ) :=
+                (Real.rpow_natCast _ _).symm
+              rw [show (k : ℝ) ^ 2 = (k : ℝ) ^ (2 : ℕ) from by norm_num, h_k2]
+              rw [div_eq_mul_inv, ← Real.rpow_neg (le_of_lt hk_pos)]
+              rw [show C_m * (k : ℝ) ^ ((3:ℝ)/4) * (k : ℝ) ^ (-(2:ℝ)) =
+                  C_m * ((k : ℝ) ^ ((3:ℝ)/4) * (k : ℝ) ^ (-(2:ℝ))) from by ring]
+              rw [← Real.rpow_add hk_pos]
+              norm_num
+            linarith
+          · -- Part 2: Σ C_m*N^{3/4}/(k(k+1)) ≤ C_m*N^{3/4}/(N+1)
+            -- Factor out C_m * N^{3/4}
+            have h_factor : (Icc (N+1) M).sum (fun k =>
+                C_m * (N : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) =
+              C_m * (N : ℝ) ^ ((3:ℝ)/4) * (Icc (N+1) M).sum (fun k =>
+                1 / ((k : ℝ) * ((k : ℝ) + 1))) := by
+              rw [Finset.mul_sum]
+              apply Finset.sum_congr rfl; intro k _; ring
+            rw [h_factor]
+            apply mul_le_mul_of_nonneg_left
+              (finite_inv_kk1_bound N M (by omega) (by omega)) (by positivity)
+        -- Step 3: Apply proved tail bounds
+        have h_rpow := finite_rpow_54_tail_bound N M (by omega : 1 ≤ N) (by omega : N + 1 ≤ M)
+        have h_N34 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) ≤
+            C_m * 1 * (N : ℝ) ^ (-(1:ℝ)/4) := by
+          have hN_pos' : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+          -- N^{3/4} * 1/(N+1) ≤ N^{3/4} * 1/N = N^{3/4-1} = N^{-1/4}
+          -- Step: 1/(N+1) ≤ 1/N (since N ≤ N+1 and both positive)
+          have h_inv : (1:ℝ) / ((N:ℝ) + 1) ≤ 1 / (N:ℝ) := by
+            apply one_div_le_one_div_of_le hN_pos' (by linarith)
+          have h_rpow_div : (N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ) = (N : ℝ) ^ (-(1:ℝ)/4) := by
+            have : (N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ) =
+                (N : ℝ) ^ ((3:ℝ)/4) * (N : ℝ) ^ (-(1:ℝ)) := by
+              rw [Real.rpow_neg (le_of_lt hN_pos'), Real.rpow_one, div_eq_mul_inv]
+            rw [this, ← Real.rpow_add hN_pos']
+            congr 1; ring
+          -- Assemble
+          have h1 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) ≤
+              C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) :=
+            mul_le_mul_of_nonneg_left h_inv (by positivity)
+          have h2 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) =
+              C_m * 1 * (N : ℝ) ^ (-(1:ℝ)/4) := by
+            rw [show C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) =
+                C_m * ((N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ)) from by ring]
+            rw [h_rpow_div]; ring
+          linarith
+        -- Combine: ico ≤ icc ≤ C_m * 4N^{-1/4} + C_m * N^{3/4}/(N+1) ≤ C_m*5*N^{-1/4}
+        have h_cm4 : C_m * (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4)) ≤
+            C_m * (4 * (N : ℝ) ^ (-(1:ℝ)/4)) := by
+          apply mul_le_mul_of_nonneg_left h_rpow (by linarith)
+        linarith
 
 -- ════════════════════════════════════════════════
 -- §5. THE LIMIT ARGUMENT
