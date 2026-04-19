@@ -1,0 +1,692 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\geometry{margin=1in}
+
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{plain}
+\newtheorem{myth}{Myth}
+
+\newcommand{\RH}{\mathrm{RH}}
+\newcommand{\GRH}{\mathrm{GRH}}
+\newcommand{\re}{\operatorname{Re}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\lean}[1]{\texttt{#1}}
+\newcommand{\fract}[1]{\{#1\}}
+
+\title{%
+  The Riemann Hypothesis and Cryptographic Security:\\
+  What the Cathedral Proves, What It Doesn't,\\
+  and What the Headlines Will Get Wrong%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 19, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We analyze the cryptographic security implications of the Cathedral, a
+machine-verified Lean~4 formalization establishing that the Riemann
+Hypothesis is equivalent to the decay of the Nyman--Beurling distance.
+We rigorously demonstrate that this result---and indeed any resolution
+of the Riemann Hypothesis, whether proved or disproved---has
+\textbf{no direct impact} on the security of RSA, elliptic curve
+cryptography, AES, SHA-256, or any deployed cryptographic system.
+We identify and debunk seven common misconceptions that security
+researchers and journalists may propagate, provide precise
+separations between distributional knowledge (which RH provides) and
+computational hardness (which cryptography requires), and analyze
+the one scenario in which RH-adjacent mathematics \emph{could}
+theoretically affect cryptography: the discovery of a new structural
+property of primes during the proof process. We conclude that the
+Cathedral is cryptographically neutral, and that proving the Riemann
+Hypothesis would, if anything, \emph{strengthen} the theoretical
+foundations of existing cryptographic systems by converting
+conditional results to unconditional ones.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction: Why This Paper Is Necessary}
+% ================================================================
+
+When media outlets report on progress toward the Riemann Hypothesis,
+the following headline pattern is nearly inevitable:
+
+\begin{quote}
+\emph{``Scientists Crack 167-Year-Old Math Problem --- Is Your
+Encryption at Risk?''}
+\end{quote}
+
+The answer is no. But the reasons are subtle enough that they deserve
+a rigorous treatment, particularly because the Cathedral involves
+primes, zeta functions, and $L^2$ approximation theory --- all of
+which sound superficially connected to cryptography.
+
+This paper serves three audiences:
+
+\begin{enumerate}
+  \item \textbf{Security researchers} who need to assess whether the
+    Cathedral warrants a threat advisory.
+  \item \textbf{Journalists} who need accurate language for public
+    reporting.
+  \item \textbf{Cryptographers} who want precise statements about
+    what distributional results (like RH) do and do not imply about
+    computational hardness.
+\end{enumerate}
+
+\subsection{Summary of Findings}
+
+\begin{center}
+\fbox{\parbox{0.85\textwidth}{
+\textbf{Bottom line:} The Cathedral (and any resolution of RH)
+has zero impact on the security of:
+\begin{itemize}[noitemsep]
+  \item RSA (factoring-based)
+  \item ECDSA / EdDSA (elliptic curve-based)
+  \item AES-128/256 (symmetric encryption)
+  \item SHA-2 / SHA-3 (hash functions)
+  \item CRYSTALS-Kyber / Dilithium (lattice-based, post-quantum)
+  \item Signal Protocol, TLS 1.3, or any deployed system
+\end{itemize}
+}}
+\end{center}
+
+% ================================================================
+\section{What the Cathedral Actually Proves}
+\label{sec:what}
+% ================================================================
+
+The crown theorem of the Cathedral states:
+\begin{theorem}[Nyman--Beurling Equivalence, Machine-Verified]
+\[
+  \RH \;\iff\;
+  \forall\,\varepsilon > 0,\;\exists\,N_0,\;\forall\,N \geq N_0,\;
+  \exists\,v \in \RR^{N-1} :\quad
+  \int_0^1 \biggl(1 - \sum_{k=2}^{N} v_k\,\fract{1/(kx)}\biggr)^2\,dx < \varepsilon.
+\]
+\end{theorem}
+
+This is a statement about the density of a function space. It says
+nothing about:
+\begin{itemize}
+  \item Factoring integers.
+  \item Computing discrete logarithms.
+  \item Finding collisions in hash functions.
+  \item Solving lattice problems.
+  \item Any algorithmic task used in cryptography.
+\end{itemize}
+
+The Cathedral is a \emph{structural equivalence}, not an algorithm.
+It reduces one mathematical statement (RH) to another equivalent
+mathematical statement ($d_N^2 \to 0$). Neither statement provides
+a computational shortcut for any known hard problem.
+
+% ================================================================
+\section{Seven Myths Debunked}
+\label{sec:myths}
+% ================================================================
+
+\begin{myth}[``Proving RH breaks RSA.'']
+\label{myth:rsa}
+\textbf{False.}
+\end{myth}
+
+RSA security relies on the computational hardness of factoring
+$n = pq$ where $p$ and $q$ are large primes. Specifically:
+
+\begin{definition}[Factoring Assumption]
+There is no classical algorithm that, given a uniformly random
+$n$-bit semiprime $N = PQ$, outputs $P$ (or $Q$) in time
+polynomial in $n$, with non-negligible probability.
+\end{definition}
+
+The Riemann Hypothesis is a statement about the \emph{distribution}
+of primes: it constrains the error term in the Prime Number Theorem
+to $O(\sqrt{x}\log^2 x)$ rather than the unconditional
+$O(x\exp(-c\sqrt{\log x}))$.
+
+\begin{claim}[Distribution $\neq$ Factoring]
+\label{claim:separation}
+Knowing the exact distribution of primes does not help factor a
+specific semiprime. The analogy: knowing that 50\% of the population
+is female does not help you determine the gender of a specific
+individual.
+\end{claim}
+
+More precisely: the prime-counting function $\pi(x)$ tells you
+\emph{how many} primes exist below $x$. Factoring requires knowing
+\emph{which} integers near $\sqrt{N}$ are prime and divide $N$.
+These are fundamentally different computational problems. The first
+is solved by RH (with optimal error bounds); the second is
+conjectured to be hard regardless of RH.
+
+\begin{remark}
+Cryptographers already routinely \emph{assume} RH is true. Many
+theoretical results in cryptography are proved ``conditional on GRH''
+(the Generalized Riemann Hypothesis). If RH were secretly useful for
+breaking RSA, someone would have already exploited the assumption.
+\end{remark}
+
+\begin{myth}[``Proving RH reveals a pattern in the primes that
+could be exploited.'']
+\label{myth:pattern}
+\textbf{False.}
+\end{myth}
+
+RH constrains the \emph{global statistical distribution} of primes.
+It tells you that primes of size $\sim x$ occur with density
+$\sim 1/\ln x$, with fluctuations of size $\sim \sqrt{x}$. This is
+already assumed in every cryptographic security analysis.
+
+The ``pattern'' that RH reveals is:
+\begin{quote}
+\emph{Primes are distributed as regularly as possible, subject to
+their arithmetic constraints.}
+\end{quote}
+
+This is the \emph{opposite} of a vulnerability. Irregularity in
+prime distribution would be more concerning for cryptography than
+regularity. If primes clustered unexpectedly, it might create
+exploitable structure in cryptographic keys. RH asserts they
+\emph{don't} cluster---they're as well-distributed as possible.
+
+\begin{myth}[``The Möbius function in the proof could be used
+to factor numbers.'']
+\label{myth:mobius}
+\textbf{False.}
+\end{myth}
+
+The Cathedral uses the Mertens function $M(x) = \sum_{n \leq x} \mu(n)$,
+where $\mu(n)$ is the M\"obius function. Security researchers may note
+that $\mu(n)$ encodes the factorization of $n$:
+\[
+  \mu(n) = \begin{cases}
+    (-1)^k & \text{if } n \text{ is a product of } k \text{ distinct primes} \\
+    0 & \text{if } n \text{ has a squared prime factor}
+  \end{cases}
+\]
+
+The circularity is immediate: \textbf{computing $\mu(n)$ requires
+knowing the factorization of $n$.} You cannot use $\mu(n)$ to factor
+$n$---you need the factorization to compute $\mu(n)$ in the first
+place.
+
+The Mertens function $M(x)$ is a \emph{sum} over all $n \leq x$,
+which encodes statistical information about the distribution of
+prime factors across all integers, not about any specific integer.
+It is computable in $O(x^{2/3})$ time without factoring anything
+(via the Meissel--Mertens method), but this computation provides no
+information useful for factoring a specific $N$.
+
+\begin{myth}[``The Gram matrix eigenvalues could reveal prime
+factors.'']
+\label{myth:gram}
+\textbf{False.}
+\end{myth}
+
+The Gram matrix $G_N$ has entries
+$G(j,k) = \int_0^1 \fract{1/(jx)} \fract{1/(kx)}\,dx$, and its
+eigenvalues depend on the arithmetic interaction between integers
+$2 \leq j, k \leq N$. Security researchers might wonder: could the
+eigenvalue structure of $G_N$ (for $N$ near a target semiprime)
+reveal factoring information?
+
+No. The Gram matrix depends on $\gcd(j,k)$ through the Vasyunin
+formula, but this is the GCD of the \emph{row/column indices}, not
+of the target number. The matrix $G_N$ is a fixed mathematical
+object that depends only on $N$, not on any secret key or private
+value. It is publicly computable. There is nothing to ``reveal.''
+
+\begin{myth}[``The zeta zeros are like private keys---knowing them
+breaks the system.'']
+\label{myth:zeros}
+\textbf{False.}
+\end{myth}
+
+The nontrivial zeros of $\zeta(s)$ are public mathematical constants.
+The first $10^{13}$ zeros have been computed and published. Databases
+of zeta zeros are freely available online (LMFDB, Odlyzko's tables).
+Knowing billions of zeta zeros has not helped anyone factor any
+specific integer.
+
+The zeros encode the \emph{Fourier spectrum} of the prime counts,
+not the location of individual primes. They are the frequency
+content of the signal $\pi(x) - \text{Li}(x)$, which tells you
+about the global oscillation of the prime-counting function, not
+about specific values.
+
+\begin{myth}[``Disproving RH would be worse for cryptography.'']
+\label{myth:disproof}
+\textbf{Also false} (with a nuance).
+\end{myth}
+
+If RH were \emph{disproved}---if a zero were found off the critical
+line at $\rho = \sigma + it$ with $\sigma \neq 1/2$---the
+consequences would be:
+
+\begin{enumerate}
+  \item The prime-counting function $\pi(x)$ would have larger
+    fluctuations than currently assumed: $O(x^\sigma)$ instead
+    of $O(x^{1/2})$.
+  \item Certain conditional results in complexity theory (proved
+    assuming GRH) would lose their theoretical backing.
+  \item The Mertens bound $|M(x)| = O(x^{1/2+\varepsilon})$ would
+    fail, replaced by $|M(x)| = O(x^{\sigma + \varepsilon})$ for
+    $\sigma > 1/2$.
+\end{enumerate}
+
+None of these affect factoring hardness. The security of RSA does
+not depend on the size of $\pi(x) - \text{Li}(x)$; it depends on
+the hardness of factoring specific integers.
+
+The nuance: a disproof would mean that primes can cluster or gap
+more than expected. In principle, this could affect the output
+distribution of prime-generation algorithms (e.g., the probability
+that a random odd number in $[2^{1023}, 2^{1024}]$ is prime). But
+in practice, the error term is already negligible: for 1024-bit
+primes, the density is $\sim 1/710$ regardless of RH, and the
+fluctuation term is of order $2^{512}/710^2 \approx 10^{-6}$---far
+too small to exploit.
+
+\begin{myth}[``The proof technique itself (Parseval Bridge, Mellin
+transform) could be weaponized.'']
+\label{myth:technique}
+\textbf{False.}
+\end{myth}
+
+The Parseval Bridge converts an $L^2$ norm on $(0,1)$ to an $L^2$
+norm on the critical line. The Mellin transform connects time-domain
+and frequency-domain representations. These are standard tools in
+harmonic analysis and signal processing. They are already used in
+cryptanalysis (e.g., the Number Field Sieve uses lattice reduction,
+which involves Fourier analysis). The Cathedral does not introduce
+any new algorithmic technique---it provides a new \emph{structural
+understanding} of a known equivalence.
+
+Structural understanding is valuable for mathematics but not
+directly useful for algorithm design. Knowing \emph{why} $d_N^2 \to 0$
+is equivalent to RH does not tell you \emph{how} to factor integers.
+
+% ================================================================
+\section{The Precise Separation: Distribution vs. Computation}
+\label{sec:separation}
+% ================================================================
+
+The fundamental reason that RH does not affect cryptography is a
+gap between two types of mathematical knowledge:
+
+\begin{definition}[Distributional Knowledge]
+A statement about the \emph{statistical properties} of a class of
+numbers. Example: ``There are $\sim x/\ln x$ primes below $x$.''
+\end{definition}
+
+\begin{definition}[Computational Knowledge]
+A statement about the \emph{algorithmic difficulty} of a specific
+task on a given input. Example: ``Factoring $N = PQ$ requires
+$\exp(\Omega(n^{1/3}))$ time for $n$-bit $N$.''
+\end{definition}
+
+The Riemann Hypothesis is purely distributional:
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{What RH tells you} & \textbf{What RH does NOT tell you} \\
+\midrule
+How many primes $\leq x$ & Which integers are prime \\
+Error in prime counting & How to factor $N = PQ$ \\
+$|M(x)| \leq C\sqrt{x}\log^2 x$ & $\mu(N)$ for specific $N$ \\
+$\zeta(s) \neq 0$ for $\re s > 1/2$ & Discrete log of $g^x \bmod p$ \\
+Primes are well-distributed & Private key from public key \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cryptographic hardness assumptions (factoring, discrete log, LWE)
+are \emph{computational} statements. They assert that certain functions
+are hard to invert, not that certain statistical distributions have
+particular shapes. RH constrains the shape; cryptography needs the
+hardness. These are orthogonal.
+
+\subsection{A Formal Argument}
+
+\begin{theorem}[RH Does Not Imply Factoring]
+\label{thm:separation}
+There is no known reduction from the Integer Factoring Problem to
+any decision problem that is resolved by the Riemann Hypothesis.
+That is: no algorithm is known that, given oracle access to an
+RH oracle (a function that returns ``true'' for $\RH$), can factor
+integers in polynomial time.
+\end{theorem}
+
+\begin{proof}[Argument]
+An ``RH oracle'' is a single-bit oracle: it returns 1 (if RH is
+true) or 0 (if RH is false). A single bit of information cannot
+provide a polynomial-time speedup for factoring, since the factoring
+problem requires $\Omega(n)$ bits of output (the factor itself has
+$n/2$ bits).
+
+More generally: RH is a single mathematical statement. Its truth
+value is a fixed constant (either $\top$ or $\bot$). Any algorithm
+can be modified to hardcode this constant with at most a constant
+factor overhead. If ``assuming RH'' gave a factoring algorithm, then
+the unconditional algorithm (which simply tries both branches)
+would also be polynomial-time.
+\end{proof}
+
+\begin{remark}
+This argument generalizes: \emph{no fixed mathematical theorem can
+break a cryptosystem}, because the theorem's content can be
+hardcoded. Only \emph{algorithmic techniques} can break
+cryptosystems, and a theorem statement (however deep) is not an
+algorithm.
+\end{remark}
+
+% ================================================================
+\section{What \emph{Could} (Theoretically) Matter}
+\label{sec:could}
+% ================================================================
+
+While the Cathedral itself is cryptographically neutral, intellectual
+honesty requires addressing the one scenario that \emph{could}
+theoretically affect cryptography:
+
+\subsection{The Technique Spillover Hypothesis}
+
+The process of \emph{proving} a deep theorem sometimes produces new
+mathematical techniques that have unexpected applications. For example:
+
+\begin{itemize}
+  \item Wiles' proof of Fermat's Last Theorem developed the theory of
+    Galois representations, which later influenced elliptic curve
+    cryptography (both positively and as an analytical tool).
+  \item Shor's algorithm for quantum factoring uses the Quantum Fourier
+    Transform, which is a general-purpose tool with many applications.
+\end{itemize}
+
+If a future proof of RH required developing a fundamentally new
+technique for understanding prime factorizations (not just
+distributions), that technique \emph{might} have algorithmic
+applications. This is speculative and has no evidence base.
+
+\begin{claim}[Cathedral Technique Assessment]
+The techniques used in the Cathedral are:
+\begin{enumerate}
+  \item Nyman--Beurling $L^2$ density (1950s).
+  \item B\'aez-Duarte basis (2003).
+  \item Mellin transform and Plancherel theorem (19th century).
+  \item Abel summation (17th century).
+  \item Montgomery--Vaughan mean value theorem (1973).
+  \item Rayleigh--Ritz variational principle (19th century).
+\end{enumerate}
+All of these are well-known, decades-old techniques in harmonic
+analysis and analytic number theory. None of them provide any
+avenue for algorithmic improvement in factoring, discrete log,
+or lattice problems. The Cathedral does not introduce new
+mathematical techniques---it assembles existing ones in a new
+architecture that is machine-verified.
+\end{claim}
+
+\subsection{The GRH-Conditional Theorems}
+
+Several results in theoretical computer science are proved
+assuming the Generalized Riemann Hypothesis (GRH), which is
+stronger than RH:
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{GRH-Conditional Result} & \textbf{Impact if GRH Proved} \\
+\midrule
+Miller's deterministic primality test & Unconditional $O(\log^4 n)$ \\
+Polynomial-time class group computation & Unconditional \\
+Smallest quadratic non-residue $\leq O(\log^2 p)$ & Unconditional \\
+Bach's bounds for generating primes & Tighter constants \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+If GRH were proved, these conditional results would become
+unconditional. None of them break any cryptosystem:
+
+\begin{itemize}
+  \item \textbf{Miller's test}: Primality testing is already
+    polynomial-time unconditionally (AKS, 2002). The GRH-conditional
+    Miller test is faster but solves the same problem. Making
+    primality testing slightly faster does not help factoring.
+  \item \textbf{Class group computation}: Used in computational
+    algebraic number theory, not in attacks on deployed systems.
+  \item \textbf{Quadratic non-residues}: The smallest quadratic
+    non-residue modulo $p$ is already known to be $O(\sqrt{p}\log p)$
+    unconditionally (P\'olya--Vinogradov). The GRH improvement to
+    $O(\log^2 p)$ does not provide an attack vector.
+\end{itemize}
+
+\begin{remark}[GRH Actually Helps Security Proofs]
+Several cryptographic security proofs \emph{assume} GRH. If GRH
+were proved, these proofs would become unconditional, making the
+security guarantees \emph{stronger}, not weaker. Examples include
+certain proofs about the Goldwasser--Micali encryption scheme and
+the Blum--Blum--Shub pseudorandom generator.
+\end{remark}
+
+% ================================================================
+\section{Post-Quantum Considerations}
+\label{sec:postquantum}
+% ================================================================
+
+Modern cryptography is transitioning to post-quantum algorithms
+(NIST PQC standards: CRYSTALS-Kyber, CRYSTALS-Dilithium, SPHINCS+).
+These are based on:
+
+\begin{itemize}
+  \item Lattice problems (Learning with Errors, LWE).
+  \item Hash-based signatures.
+  \item Code-based cryptography.
+\end{itemize}
+
+None of these have any mathematical connection to the Riemann zeta
+function, prime distribution, or the Nyman--Beurling criterion. The
+hardness of LWE is related to worst-case lattice problems
+(Shortest Vector Problem), which live in a completely different
+branch of mathematics (geometry of numbers, rather than analytic
+number theory).
+
+\begin{claim}[Post-Quantum Immunity]
+The Cathedral's result is irrelevant to post-quantum cryptographic
+security. The NIST PQC standards are not affected by any resolution
+of the Riemann Hypothesis.
+\end{claim}
+
+The actual threat to pre-quantum cryptography (RSA, ECC) is
+\textbf{Shor's algorithm}, which factors integers and computes
+discrete logarithms in quantum polynomial time. Shor's algorithm
+has nothing to do with the Riemann Hypothesis---it uses the quantum
+Fourier transform to find the period of modular exponentiation, which
+is a group-theoretic technique, not a number-theoretic one.
+
+% ================================================================
+\section{Symmetric Cryptography and Hash Functions}
+\label{sec:symmetric}
+% ================================================================
+
+For completeness: symmetric cryptography (AES, ChaCha20) and hash
+functions (SHA-2, SHA-3, BLAKE3) have no connection to prime numbers
+or number theory whatsoever. Their security is based on:
+
+\begin{itemize}
+  \item Confusion and diffusion (Shannon, 1949).
+  \item Resistance to linear and differential cryptanalysis.
+  \item The random oracle model (for hash functions).
+\end{itemize}
+
+The Riemann Hypothesis could be proved, disproved, or shown to be
+independent of ZFC, and AES-256 would remain equally secure (or
+insecure) as it is today.
+
+% ================================================================
+\section{What a Responsible Disclosure Looks Like}
+\label{sec:disclosure}
+% ================================================================
+
+Since the Cathedral is cryptographically neutral, no security
+advisory is warranted. However, for the benefit of responsible
+disclosure processes, we state explicitly:
+
+\begin{enumerate}
+  \item \textbf{No CVE is needed.} The Cathedral does not disclose
+    a vulnerability in any system.
+  \item \textbf{No key material is compromised.} The proof involves
+    no private keys, secrets, or confidential data.
+  \item \textbf{No algorithm is accelerated.} The proof does not
+    provide a faster factoring, discrete log, or lattice algorithm.
+  \item \textbf{No system requires patching.} No software update
+    is needed in response to this work.
+  \item \textbf{No embargo is appropriate.} The work is pure
+    mathematics and should be published openly.
+\end{enumerate}
+
+% ================================================================
+\section{A Note for Journalists}
+\label{sec:journalists}
+% ================================================================
+
+If you are writing about the Cathedral for a general audience,
+here are accurate and inaccurate framings:
+
+\begin{center}
+\begin{tabular}{@{}p{0.45\textwidth}p{0.45\textwidth}@{}}
+\toprule
+\textbf{\color{green!50!black}Accurate} &
+\textbf{\color{red!70!black}Inaccurate} \\
+\midrule
+``Researchers built a computer-verified proof about the oldest
+unsolved problem in math.'' &
+``Researchers cracked the code behind internet encryption.'' \\[0.5em]
+``The result translates the Riemann Hypothesis into an equivalent
+form, but does not solve it.'' &
+``The Riemann Hypothesis has been solved / nearly solved.'' \\[0.5em]
+``This work has no impact on cryptographic security.'' &
+``Your passwords / bank accounts may be at risk.'' \\[0.5em]
+``The proof is about the statistical distribution of prime numbers.'' &
+``The proof reveals a pattern in primes that hackers could exploit.'' \\[0.5em]
+``If anything, proving RH would strengthen crypto security proofs.'' &
+``Proving RH would break the internet.'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ================================================================
+
+The Cathedral is a machine-verified proof that the Riemann Hypothesis
+is equivalent to the decay of the Nyman--Beurling distance. It is a
+contribution to pure mathematics and proof engineering, with no
+direct, indirect, or foreseeable implications for cryptographic
+security.
+
+The disconnect between RH and cryptography is not accidental---it
+reflects a deep structural separation between \emph{distributional}
+properties of primes (which RH constrains) and \emph{computational}
+hardness assumptions (which cryptography requires). These are
+different mathematical universes. Progress in one does not translate
+to the other.
+
+If the Riemann Hypothesis is eventually proved:
+\begin{itemize}
+  \item Mathematicians will celebrate.
+  \item Cryptographers will note that several conditional security
+    proofs are now unconditional (a mild strengthening).
+  \item Security practitioners will change nothing.
+  \item Your bank account will be fine.
+\end{itemize}
+
+If the Riemann Hypothesis is eventually disproved:
+\begin{itemize}
+  \item Mathematicians will be astonished.
+  \item Cryptographers will note that some error bounds in prime
+    generation are slightly looser than assumed (negligible in
+    practice).
+  \item Security practitioners will \emph{still} change nothing.
+  \item Your bank account will \emph{still} be fine.
+\end{itemize}
+
+The primes are not the lock. The primes are the landscape.
+Knowing the landscape perfectly does not give you the key.
+
+\vspace{0.5cm}
+\begin{flushright}
+\emph{Sleep well. Your encryption is safe.}
+\end{flushright}
+
+\vspace{1cm}
+\noindent\textbf{Source code:} \url{https://github.com/jrgochan/prime}
+
+% ================================================================
+% BIBLIOGRAPHY
+% ================================================================
+\begin{thebibliography}{99}
+
+\bibitem{rsa}
+R.~Rivest, A.~Shamir, and L.~Adleman, \emph{A method for obtaining
+digital signatures and public-key cryptosystems}, Comm. ACM
+\textbf{21} (1978), 120--126.
+
+\bibitem{aks}
+M.~Agrawal, N.~Kayal, and N.~Saxena, \emph{PRIMES is in P},
+Annals of Mathematics \textbf{160} (2004), 781--793.
+
+\bibitem{miller}
+G.L.~Miller, \emph{Riemann's hypothesis and tests for primality},
+J. Comput. System Sci. \textbf{13} (1976), 300--317.
+
+\bibitem{shor}
+P.~Shor, \emph{Polynomial-time algorithms for prime factorization
+and discrete logarithms on a quantum computer}, SIAM J. Comput.
+\textbf{26} (1997), 1484--1509.
+
+\bibitem{nist-pqc}
+NIST, \emph{Post-Quantum Cryptography Standardization},
+\url{https://csrc.nist.gov/projects/post-quantum-cryptography}, 2024.
+
+\bibitem{montgomery1973}
+H.L.~Montgomery, \emph{The pair correlation of zeros of the zeta
+function}, Proc. Symp. Pure Math. \textbf{24} (1973), 181--193.
+
+\bibitem{baezduarte2003}
+L.~B\'aez-Duarte, \emph{A strengthening of the Nyman--Beurling
+criterion}, Atti Accad. Naz. Lincei Rend. Mat. Appl. \textbf{14}
+(2003), 5--11.
+
+\bibitem{lwe}
+O.~Regev, \emph{On lattices, learning with errors, random linear
+codes, and cryptography}, J. ACM \textbf{56} (2009), 1--40.
+
+\end{thebibliography}
+
+\end{document}
