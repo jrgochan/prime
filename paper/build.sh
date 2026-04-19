@@ -20,6 +20,7 @@ PAPERS=(
   cathedral-ai
   cathedral-lean
   cathedral-foundations
+  cathedral-letter
 )
 
 GREEN='\033[0;32m'
