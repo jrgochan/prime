@@ -392,7 +392,7 @@ theorem bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
     _ = 1 / ((↑k) * (ρ - 1)) := by rw [div_div]
 
 -- ════════════════════════════════════════════════
--- SHARED HELPERS (basis-independent, from BesselSeparation)
+-- SHARED HELPERS (basis-independent, ported from BesselSeparation — now archived)
 -- ════════════════════════════════════════════════
 
 /-- re(x^(ρ-1))² is integrable on [0,1]. Dominated by x^{2σ-2}. -/
@@ -496,7 +496,7 @@ private lemma bd_cs_inner_le_sq (f g : ℝ → ℝ)
 
 -- ════════════════════════════════════════════════
 -- PROVED: Cauchy-Schwarz for BD residual
--- (Port of cauchy_schwarz_separation_bound from BesselSeparation)
+-- (Ported from cauchy_schwarz_separation_bound in BesselSeparation — now archived)
 -- ════════════════════════════════════════════════
 
 /-- BD residual is Bochner-integrable on Ioo(0,1). -/
@@ -750,7 +750,7 @@ private lemma one_inner_cpow' (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
 
 -- ════════════════════════════════════════════════
 -- PROVED: Integral linearity for BD residual
--- (Port of residual_inner_cpow_eq from BesselSeparation)
+-- (Ported from residual_inner_cpow_eq in BesselSeparation — now archived)
 -- ════════════════════════════════════════════════
 
 /-- x^{ρ-1} is L¹ on Ioc(0,1) as ℂ-valued. -/
@@ -780,7 +780,7 @@ private lemma bd_fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.
 /-- **THEOREM** (Replaces Axiom 4): Integral linearity for the BD residual.
     ∫(1-f)·h = ∫h - Σ vᵢ·∫(fᵢ·h)
 
-    Proved by porting residual_inner_cpow_eq from BesselSeparation.lean. -/
+    Proved by porting residual_inner_cpow_eq from BesselSeparation.lean (archived). -/
 theorem bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
     (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) :
     ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =

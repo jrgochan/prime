@@ -38,8 +38,8 @@ import Cathedral.Defs
     ### Axiom Decomposition
     The single `rh_weight_construction` axiom is replaced by:
     1. `mertens_bound_from_rh` — RH ⟹ M(x) = O(x^{1/2+ε})
-    2. `smoothed_weights_pole_free` — the c_N construction works
-    3. `abel_summation_l2_bound` — Abel summation gives the L² bound
+    2. `abel_summation_l2_bound` — Abel summation gives the L² bound
+    (The pole neutralization `corrected_weights_pole_free` is PROVED.)
 -/
 
 noncomputable section
@@ -240,5 +240,6 @@ end
 --
 -- AXIOM REDUCTION:
 --   BEFORE: rh_weight_construction (1 axiom, requires Perron + analytic continuation)
---   AFTER:  3 elementary axioms (Mertens bound, pole-free, Abel summation)
+--   AFTER:  2 elementary axioms (Mertens bound, Abel summation)
+--           + 1 proved theorem (pole neutralization)
 --           The complex plane is COMPLETELY AVOIDED

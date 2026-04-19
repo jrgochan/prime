@@ -51,10 +51,10 @@ import Cathedral.Gram.L2Bridge
     PART IV:  Nyman-Beurling forward (RH → d²_N → 0)
 
     ### Axiom Inventory
-    This file introduces 2 axioms:
-    1. `mellin_plancherel_gram` — Plancherel identity for Gram entries
-    2. `rh_weight_construction` — optimal weight existence from RH
-    These refine and replace `nyman_beurling_forward` in NymanBeurling.lean.
+    This file originally introduced 2 axioms (both now excised):
+    1. `mellin_plancherel_gram` — EXCISED (ghost → AutocorrelationBypass.lean)
+    2. `rh_weight_construction` — EXCISED (→ MertensWeightBypass.lean)
+    No axioms remain. All theorems proved via imported axioms.
 -/
 
 noncomputable section
@@ -241,12 +241,11 @@ end
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   2 axioms (both deep analytic content, BOTH BYPASSED):
---     📐 mellin_plancherel_gram    (BYPASSED → AutocorrelationBypass.lean)
---     📐 rh_weight_construction    (BYPASSED → MertensWeightBypass.lean)
---   1 sorry (OFF critical path):
---     ⚠️  rh_implies_type_II_sieve_bound  (physical consequence, not needed)
---   2 PROVED (were sorry):
+--   0 axioms (both original axioms excised — April 2026):
+--     📐 mellin_plancherel_gram    (EXCISED → ghost, proved in AutocorrelationBypass)
+--     📐 rh_weight_construction    (EXCISED → decomposed in MertensWeightBypass)
+--   0 sorry
+--   2 PROVED:
 --     ✅ nyman_beurling_forward_from_sieve (RH → d² → 0 — PROVED!)
 --     ✅ phase_3_chain                     (RH → d²≤C/logN — PROVED!)
 --
@@ -257,16 +256,11 @@ end
 --
 -- CRITICAL PATH (all PROVED):
 --   RiemannHypothesis
---     → rh_weight_construction (axiom)
+--     → rh_weight_construction_derived (MertensWeightBypass)
 --       → Variational Principle (nbDistSq_le_test_vector, PROVED)
 --         → L² Bridge (l2_error_eq_quad_error, PROVED)
 --           → phase_3_chain: d²_N ≤ C/log(N) ✅
 --             → nyman_beurling_forward_from_sieve: d² → 0 ✅
---
--- AXIOM REDUCTION:
---   BEFORE: nyman_beurling_forward (monolithic, all of Phase 3)
---   AFTER:  mellin_plancherel_gram + rh_weight_construction
---           (two precise, independently verifiable axioms)
 
 #check @rh_implies_type_II_sieve_bound
 #check @nyman_beurling_forward_from_sieve

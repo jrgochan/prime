@@ -208,5 +208,6 @@ end
 --
 -- AXIOM REDUCTION:
 --   BEFORE: mellin_plancherel_gram (1 monolithic axiom, requires L² Plancherel)
---   AFTER:  4 elementary axioms (change of vars, integrability, L¹ inversion, Gram=L²)
+--   AFTER:  3 elementary axioms (change of vars, L¹ inversion, Gram=L²)
+--           (flattened_basis_integrable excised as dead code, April 2026)
 --           Each is independently verifiable and closer to Mathlib's frontier

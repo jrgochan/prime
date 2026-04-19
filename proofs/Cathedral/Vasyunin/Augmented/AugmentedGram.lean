@@ -12,11 +12,10 @@
   - H_N PD implies G_N PD (trailing principal submatrix, §6b)
   - H_N PD implies bᵀG⁻¹b < 1 (witness vector w=(1,-G⁻¹b), §7)
 
-  This file unifies gramSchurComplement_pos and vasyunin_nbDistSq_pos
-  into a single axiom: augmentedSchurComplement_pos.
+  This file directly proves augmentedGramMatrix_posDef from the L² identity,
+  eliminating both gramSchurComplement_pos and vasyunin_nbDistSq_pos.
 
-  Status: 1 axiom (augmentedSchurComplement_pos), replaces 2 axioms.
-  All other content: zero sorry, zero axioms.
+  Status: Zero axioms, zero sorry. All content fully proved.
 
   Created April 11, 2026.
 -/
