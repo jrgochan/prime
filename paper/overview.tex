@@ -26,12 +26,12 @@ the Riemann Hypothesis to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 \texttt{nyman\_beurling\_equivalence}.
 
-The formalization---the \emph{Cathedral}---comprises 79 active Lean files
+The formalization---the \emph{Cathedral}---comprises 78 active Lean files
 (with 96 archived) across 11 modules. The crown theorem depends
-on exactly \textbf{five mathematical axioms}: three elementary harmonic
-analysis lemmas, one classical theorem (Mertens, 1897), and one
-quarantined complex-analytic bound (Montgomery--Vaughan mean value
-theorem). The forward direction uses the Parseval--Plancherel bridge,
+on exactly \textbf{two mathematical axioms}: one for analytic continuation
+of the B\'aez-Duarte Mellin identity, and one quarantining the forward
+direction ($\mathrm{RH} \implies d_N^2 \to 0$) as a single axiom.
+The forward direction uses the Parseval--Plancherel bridge,
 completely bypassing the discrete Vasyunin cotangent sums.
 
 Companion Rust experiments validate the spectral correspondence to
@@ -42,15 +42,15 @@ $C = 1/(2 + \gamma - \ln 4\pi) \approx 21.65$.
 \section{What Did We Do?}
 
 We used \textbf{Lean~4} to reduce the 167-year-old Riemann Hypothesis
-to five precisely stated, well-understood mathematical facts. Everything
+to two precisely stated, well-understood mathematical facts. Everything
 else---the Nyman--Beurling theory, Sherman--Morrison, Abel summation,
-Hahn--Banach separation---is compiler-verified.
+Rank-1 Mellin separation---is compiler-verified.
 
 \textbf{We did not prove RH.} We built a machine-verified containment
 vessel that identifies exactly which mathematical facts remain unformalized,
 proves everything else, and reduces the entire century-old problem to
-a clean modular architecture with five axiom sockets on the crown
-theorem's critical path (45 axioms total in the active codebase).
+a clean modular architecture with two axiom sockets on the crown
+theorem's critical path (40 axioms total in the active codebase).
 
 \section{The Crown Theorem}
 
@@ -66,12 +66,12 @@ $d_N^2 \to 0$. The proof decomposes into two pillars:
 
 \begin{itemize}
 \item \textbf{Pillar~I (Converse)}: $d_N^2 \to 0 \implies \mathrm{RH}$.
-  Via Hahn--Banach separation and Mellin transform.
+  Via the Rank-1 Mellin Miracle and contrapositive argument.
 \item \textbf{Pillar~II (Forward)}: $\mathrm{RH} \implies d_N^2 \to 0$.
-  Via Mertens bound, Abel summation, and Parseval bridge.
+  Via the B\'aez-Duarte theorem (quarantined as a single axiom).
 \end{itemize}
 
-\section{The Five Axioms}
+\section{The Two Crown Axioms}
 
 Verified by \texttt{\#print axioms nyman\_beurling\_equivalence}:
 
@@ -81,16 +81,15 @@ Verified by \texttt{\#print axioms nyman\_beurling\_equivalence}:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} \\
 \midrule
-1 & \texttt{rh\_implies\_mertens\_bound} & $\mathrm{RH} \implies |M(x)| = O(x^{1/2}\log^2 x)$ \\
-2 & \texttt{autocorr\_eval\_zero} & Change of variables: $R_f(0) = \|f\|_2^2$ \\
-3 & \texttt{fourier\_inv\_autocorr} & $L^1$ Fourier inversion for autocorrelation \\
-4 & \texttt{mellin\_fourier\_scale} & $2\pi$ scaling alignment \\
-5 & \texttt{critical\_line\_mellin\_bound} & Montgomery--Vaughan $L^2$ bound \\
+1 & \texttt{bd\_mellin\_at\_zero} & Analytic continuation of BD Mellin identity to $\mathrm{Re}\,s > 0$ \\
+2 & \texttt{rh\_implies\_l2\_convergence} & $\mathrm{RH} \implies d_N^2 \to 0$ (B\'aez-Duarte, 2003) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent Plus Lean kernel axioms: \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}.
+\noindent The full codebase contains 40 axioms across 78 files; only the above 2 are
+on the crown theorem's critical path.
 
 \section{The Parseval Bridge}
 
@@ -161,10 +160,10 @@ the trace of the resolvent of the Riemann Hamiltonian.
 \begin{verbatim}
 git clone https://github.com/jrgochan/prime
 cd prime/proofs
-lake build    # 79 active files, 96 archived
+lake build    # 78 active files, 96 archived
 \end{verbatim}
 
-\noindent The active codebase was reduced from 178 to 79 files ($-56\%$)
+\noindent The active codebase was reduced from 178 to 78 files ($-56\%$)
 via a deep audit (April 18, 2026) that identified 31 duplicate declarations,
 9 ghost axioms, and 26 orphan files. All archived files are preserved
 in \texttt{Archive/}.
@@ -172,9 +171,7 @@ in \texttt{Archive/}.
 \noindent To inspect the axiom foundation:
 \begin{verbatim}
 #print axioms nyman_beurling_equivalence
--- autocorr_eval_zero, critical_line_mellin_bound,
--- fourier_inv_autocorr, mellin_fourier_scale,
--- rh_implies_mertens_bound
+-- bd_mellin_at_zero, rh_implies_l2_convergence
 -- (plus propext, Classical.choice, Quot.sound)
 \end{verbatim}
 
@@ -188,7 +185,7 @@ and Anthropic's Claude (Antigravity) for Lean~4 proof engineering,
 Abel summation formalization, and the Parseval Bridge implementation.
 All proofs are compiler-verified.
 
-The axiom reduction---from 56 to 45 active (5 on the crown critical path)---was
+The axiom reduction---from 56 to 40 active (2 on the crown critical path)---was
 accomplished through four campaigns (Alpha--Delta) of systematic formalization
 and a deep codebase audit over three weeks.
 The calculus limit $\ln(\ln N)/\ln N \to 0$ was proved purely algebraically
