@@ -39,7 +39,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "644 theorems · 39 axioms · 78 files · post-audit",
+    stats: "641 theorems · 43 axioms · 84 files · night-assault",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -268,7 +268,7 @@ export default function HomePage() {
               <p className="text-xs text-slate-500 mt-0.5">
                 <code>#print axioms nyman_beurling_equivalence</code> — rh_implies_mertens_34,
                 pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k, abel_mertens_tail_raw,
-                millennium_covariance_cancellation, vasyunin_eq_integral.
+                millennium_covariance_cancellation, vasyunin_offdiag_integral.
                 Converse: zero custom axioms (pure Mathlib).
               </p>
             </div>
@@ -441,7 +441,28 @@ export default function HomePage() {
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 6 theorems, 0 sorry. Piecewise FTC for ∫(1/(jx)−m)(1/(kx)−n)dx and Beatty sequence bound
-                (≤2 tiles per row when j≤k). The analytical engine for eliminating vasyunin_eq_integral.
+                (≤2 tiles per row when j≤k). Diagonal vasyunin_eq_integral axiom ELIMINATED using this engine.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.77 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-yellow-500/10 via-yellow-500/5 to-transparent border border-yellow-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🌙</span>
+            <div>
+              <h3 className="text-sm font-bold text-yellow-400">
+                THE NIGHT ASSAULT — 2 Crown Axioms ANNIHILATED
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                vasyunin_eq_integral → THEOREM (diagonal G(k,k) proved via Stirling + piecewise FTC).
+                fract_sq_integral → THEOREM (Stirling + Squeeze). Cotangent tower (1,838 lines)
+                promoted from Archive. 256-bit MPFR experiment confirms 6–7 digit match.
+                Crown narrowed: vasyunin_offdiag_integral (off-diagonal only). April 20, 2026.
               </p>
             </div>
           </div>

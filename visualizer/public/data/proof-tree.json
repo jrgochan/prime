@@ -6,7 +6,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Axioms.lean",
-      "line": 140,
+      "line": 145,
       "signature": "theorem zeta_zero_separates : \u2200 \u03c1 : \u2102, riemannZeta \u03c1 = 0 \u2192 0 < \u03c1.re \u2192 \u03c1.re < 1 \u2192 \u03c1.re \u2260 1/2 \u2192 \u2203 \u03b4 : \u211d, 0 < \u03b4 \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 \u2200 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2265 \u03b4"
     },
     {
@@ -1081,6 +1081,717 @@
       "signature": "theorem witness_covariance_decay_iff_rh : (\u2203 C_cov : \u211d, C_cov > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) \u2264 C_cov /\u2026"
     },
     {
+      "id": "fract_eq_on_piece_general",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 45,
+      "signature": "lemma fract_eq_on_piece_general (j m : \u2115) (hj : 1 \u2264 j) (hm : 1 \u2264 m) (x : \u211d) (hlo : 1 / ((j:\u211d) * ((m:\u211d) + 1)) < x) (hhi : x \u2264 1 / ((j:\u211d) * (m:\u211d))) : Int.fract (1 / ((j:\u211d) * x)) = 1 / ((j:\u211d) * x) - (\u2026"
+    },
+    {
+      "id": "fract_eq_on_piece_zero",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 72,
+      "signature": "lemma fract_eq_on_piece_zero (j : \u2115) (hj : 1 \u2264 j) (x : \u211d) (hlo : 1 / (j:\u211d) < x) (_hhi : x \u2264 1) : Int.fract (1 / ((j:\u211d) * x)) = 1 / ((j:\u211d) * x)"
+    },
+    {
+      "id": "cross_piece_integral_ftc",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 101,
+      "signature": "theorem cross_piece_integral_ftc (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (lo hi : \u211d) (hlo_pos : 0 < lo) (hle : lo \u2264 hi) : \u222b x in lo..hi, (1 / ((j:\u211d) * x) - (m:\u211d)) * (1 / ((k:\u211d) * x) - (n:\u211d)) = let jf"
+    },
+    {
+      "id": "tileLo",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 174,
+      "signature": "def tileLo (j k m n : \u2115) : \u211d"
+    },
+    {
+      "id": "tileHi",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 177,
+      "signature": "def tileHi (j k m n : \u2115) : \u211d"
+    },
+    {
+      "id": "tileLo_m0",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 181,
+      "signature": "def tileLo_m0 (j k n : \u2115) : \u211d"
+    },
+    {
+      "id": "tile_nonempty_iff",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 186,
+      "signature": "lemma tile_nonempty_iff (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) : tileLo j k m n < tileHi j k m n \u2194 (j * m < k * (n + 1) \u2227 k * n < j * (m + 1))"
+    },
+    {
+      "id": "tile_n_values_bounded",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean",
+      "line": 265,
+      "signature": "lemma tile_n_values_bounded (j k m : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hjk : j \u2264 k) : \u2200 n\u2081 n\u2082 n\u2083 : \u2115, 1 \u2264 n\u2081 \u2192 1 \u2264 n\u2082 \u2192 1 \u2264 n\u2083 \u2192 n\u2081 < n\u2082 \u2192 n\u2082 < n\u2083 \u2192 tileLo j k m n\u2081 < tileHi j k m n\u2081 \u2192 til\u2026"
+    },
+    {
+      "id": "digamma_reflection_complex",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 67,
+      "signature": "theorem digamma_reflection_complex (s : \u2102) (hs : \u2200 n : \u2124, s \u2260 n) : Complex.digamma (1 - s) - Complex.digamma s = \u2191Real.pi * Complex.cos (\u2191Real.pi * s) / Complex.sin (\u2191Real.pi * s)"
+    },
+    {
+      "id": "digamma_add_nat",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 156,
+      "signature": "theorem digamma_add_nat (s : \u2102) (hs : \u2200 m : \u2115, s \u2260 -(m:\u2102)) (n : \u2115) : Complex.digamma (s + n) = Complex.digamma s + \u2211 k \u2208 Finset.range n, (s + k)\u207b\u00b9"
+    },
+    {
+      "id": "vasyuninCotSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 188,
+      "signature": "def vasyuninCotSum (a b : \u2115) : \u211d"
+    },
+    {
+      "id": "vasyuninCotSum_of_le_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 192,
+      "signature": "theorem vasyuninCotSum_of_le_one {a : \u2115} (b : \u2115) (ha : a \u2264 1) : vasyuninCotSum a b = 0"
+    },
+    {
+      "id": "gauss_digamma_formula",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 213,
+      "signature": "axiom gauss_digamma_formula (p q : \u2115) (hp : 1 \u2264 p) (hpq : p < q) (hcop : Nat.Coprime p q) : Complex.digamma ((p:\u2102) / (q:\u2102)) = -(\u2191(Real.eulerMascheroniConstant : \u211d)) - Complex.log (2 * (q:\u2102)) - (\u2191Re\u2026"
+    },
+    {
+      "id": "vasyuninGramFormula",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/DigammaReflection.lean",
+      "line": 237,
+      "signature": "def vasyuninGramFormula (j k : \u2115) : \u211d"
+    },
+    {
+      "id": "tileIndex",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 60,
+      "signature": "def tileIndex (j k m : \u2115) : \u2115"
+    },
+    {
+      "id": "tileIndex_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 63,
+      "signature": "theorem tileIndex_pos (j k m : \u2115) (_hj : 1 \u2264 j) (hk : 1 \u2264 k) (hjm : k \u2264 j * m) : 1 \u2264 tileIndex j k m"
+    },
+    {
+      "id": "partialDigammaSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 79,
+      "signature": "def partialDigammaSum (z : \u211d) (N : \u2115) : \u211d"
+    },
+    {
+      "id": "partialDigammaSum_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 87,
+      "signature": "theorem partialDigammaSum_one (N : \u2115) : partialDigammaSum 1 N = 0"
+    },
+    {
+      "id": "harmonicTileSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 102,
+      "signature": "def harmonicTileSum (a b : \u2115) : \u211d"
+    },
+    {
+      "id": "harmonicTileSum_reciprocity",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 119,
+      "signature": "axiom harmonicTileSum_reciprocity (a b : \u2115) (ha : 2 \u2264 a) (hb : 2 \u2264 b) (hcop : Nat.Coprime a b) : harmonicTileSum a b + harmonicTileSum b a = ((a:\u211d) - 1) * ((b:\u211d) - 1) / 2 - (1 : \u211d) / 2 + ((a:\u211d) + (\u2026"
+    },
+    {
+      "id": "floor_sum_single",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 199,
+      "signature": "theorem floor_sum_single (a b : \u2115) (ha : 2 \u2264 a) (hb : 2 \u2264 b) (hcop : Nat.Coprime a b) : \u2211 m \u2208 Finset.Icc 1 (a - 1), (m * b / a) = (a - 1) * (b - 1) / 2"
+    },
+    {
+      "id": "floor_sum_reciprocity",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 248,
+      "signature": "theorem floor_sum_reciprocity (a b : \u2115) (ha : 2 \u2264 a) (hb : 2 \u2264 b) (hcop : Nat.Coprime a b) : \u2211 m \u2208 Finset.Icc 1 (a - 1), (m * b / a) + \u2211 n \u2208 Finset.Icc 1 (b - 1), (n * a / b) = (a - 1) * (b - 1)"
+    },
+    {
+      "id": "telescope_limit_eq_vasyunin",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 305,
+      "signature": "axiom telescope_limit_eq_vasyunin (a b : \u2115) (ha : 1 \u2264 a) (hb : 1 \u2264 b) (hab : a < b) (hcop : Nat.Coprime a b) : -- The improper integral equals the formula value. -- This encapsulates: integral = li\u2026"
+    },
+    {
+      "id": "integral_eq_vasyunin_coprime",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 315,
+      "signature": "theorem integral_eq_vasyunin_coprime (a b : \u2115) (ha : 1 \u2264 a) (hb : 1 \u2264 b) (hab : a < b) (hcop : Nat.Coprime a b) : Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b"
+    },
+    {
+      "id": "coprime_after_gcd",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 326,
+      "signature": "theorem coprime_after_gcd (j k : \u2115) (hj : 1 \u2264 j) (_hk : 1 \u2264 k) : Nat.Coprime (j / Nat.gcd j k) (k / Nat.gcd j k)"
+    },
+    {
+      "id": "gcd_div_eq_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 331,
+      "signature": "theorem gcd_div_eq_one (j k : \u2115) (hj : 1 \u2264 j) (_hk : 1 \u2264 k) : Nat.gcd (j / Nat.gcd j k) (k / Nat.gcd j k) = 1"
+    },
+    {
+      "id": "vasyunin_integral_eq_formula",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean",
+      "line": 364,
+      "signature": "axiom vasyunin_integral_eq_formula (j k : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hjk : j \u2260 k) : Assembly.gramIntegral j k = DigammaReflection.vasyuninGramFormula j k  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
+    },
+    {
+      "id": "rowLo",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 44,
+      "signature": "def rowLo (j m : \u2115) : \u211d"
+    },
+    {
+      "id": "rowHi",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 45,
+      "signature": "def rowHi (j m : \u2115) : \u211d"
+    },
+    {
+      "id": "row_nonempty",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 48,
+      "signature": "lemma row_nonempty (j m : \u2115) (hj : 1 \u2264 j) (hm : 1 \u2264 m) : rowLo j m < rowHi j m"
+    },
+    {
+      "id": "rowLo_pos",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 57,
+      "signature": "lemma rowLo_pos (j m : \u2115) (hj : 1 \u2264 j) (_hm : 1 \u2264 m) : 0 < rowLo j m"
+    },
+    {
+      "id": "fract_eq_self_of_gt_inv",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 69,
+      "signature": "lemma fract_eq_self_of_gt_inv (j : \u2115) (hj : 1 \u2264 j) (x : \u211d) (hx : 1 / (j:\u211d) < x) (hx_le : x \u2264 1) : Int.fract (1 / ((j:\u211d) * x)) = 1 / ((j:\u211d) * x)"
+    },
+    {
+      "id": "row0_integrand_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 76,
+      "signature": "theorem row0_integrand_eq (j k : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hjk : j \u2264 k) (x : \u211d) (hx_lo : 1 / (j:\u211d) < x) (hx_hi : x \u2264 1) : Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x)) = 1 / ((j:\u211d) \u2026"
+    },
+    {
+      "id": "row0_integral_ftc",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 89,
+      "signature": "theorem row0_integral_ftc (j k : \u2115) (hj : 1 \u2264 j) (_hk : 1 \u2264 k) : \u222b x in (1 / (j:\u211d))..(1:\u211d), (1 / ((j:\u211d) * x)) * (1 / ((k:\u211d) * x)) = \u222b x in (1 / (j:\u211d))..(1:\u211d), (1 / ((j:\u211d) * x) - (0:\u2115)) * (1 / ((k:\u211d\u2026"
+    },
+    {
+      "id": "row_boundary_shared",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 102,
+      "signature": "theorem row_boundary_shared (j m : \u2115) : rowLo j m = rowHi j (m + 1)"
+    },
+    {
+      "id": "integral_split_rows",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 111,
+      "signature": "theorem integral_split_rows (f : \u211d \u2192 \u211d) (j m M : \u2115) (_hj : 1 \u2264 j) (_hm : 1 \u2264 m) (_hmM : m \u2264 M) (hf1 : IntervalIntegrable f MeasureTheory.volume (rowLo j M) (rowHi j M)) (hf2 : IntervalIntegrable f \u2026"
+    },
+    {
+      "id": "fract_prod_eq_on_tile",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 126,
+      "signature": "theorem fract_prod_eq_on_tile (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) (x : \u211d) (hj_lo : 1 / ((j:\u211d) * ((m:\u211d) + 1)) < x) (hj_hi : x \u2264 1 / ((j:\u211d) * (m:\u211d))) (hk_lo : 1 / ((k:\u211d)\u2026"
+    },
+    {
+      "id": "fract_prod_eq_on_tile_interval",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 145,
+      "signature": "theorem fract_prod_eq_on_tile_interval (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) (x : \u211d) (hx_lo : CrossTermFTC.tileLo j k m n < x) (hx_hi : x \u2264 CrossTermFTC.tileHi j k m n) \u2026"
+    },
+    {
+      "id": "tile_integral_eq_ftc",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 172,
+      "signature": "theorem tile_integral_eq_ftc (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) (h_nonempty : CrossTermFTC.tileLo j k m n < CrossTermFTC.tileHi j k m n) : \u222b x in (CrossTermFTC.tileLo\u2026"
+    },
+    {
+      "id": "fract_prod_eq_on_row",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 210,
+      "signature": "theorem fract_prod_eq_on_row (j k m : \u2115) (hj : 1 \u2264 j) (_hk : 1 \u2264 k) (hm : 1 \u2264 m) (x : \u211d) (hx_lo : rowLo j m < x) (hx_hi : x \u2264 rowHi j m) : Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x)) \u2026"
+    },
+    {
+      "id": "integral_eq_sum_rows",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 249,
+      "signature": "theorem integral_eq_sum_rows (j k : \u2115) (hj : 1 \u2264 j) (_hk : 1 \u2264 k) (m M : \u2115) (hm : 1 \u2264 m) (hmM : m \u2264 M) : \u222b x in (rowLo j M)..(rowHi j m), Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x)) =\u2026"
+    },
+    {
+      "id": "at_most_one_crossing",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 306,
+      "signature": "lemma at_most_one_crossing (j k m : \u2115) (hjk : j \u2264 k) : \u2200 n\u2081 n\u2082 : \u2115, j * m < k * n\u2081 \u2192 k * n\u2081 < j * (m + 1) \u2192 j * m < k * n\u2082 \u2192 k * n\u2082 < j * (m + 1) \u2192 n\u2081 = n\u2082"
+    },
+    {
+      "id": "row_integral_single_tile",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 327,
+      "signature": "theorem row_integral_single_tile (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn : 1 \u2264 n) (h_kn_le_jm : k * n \u2264 j * m) (h_jm1_le_kn1 : j * (m + 1) \u2264 k * (n + 1)) : \u222b x in (rowLo j m)..(row\u2026"
+    },
+    {
+      "id": "row_integral_split_at_crossing",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/OffDiagPartition.lean",
+      "line": 368,
+      "signature": "theorem row_integral_split_at_crossing (j k m n\u2080 : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) (hn\u2080 : 1 \u2264 n\u2080) (_h_cross_lo : j * m < k * n\u2080) (_h_cross_hi : k * n\u2080 < j * (m + 1)) : \u222b x in (rowLo j m).\u2026"
+    },
+    {
+      "id": "fract_eq_on_piece",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 37,
+      "signature": "lemma fract_eq_on_piece (n : \u2115) (hn : 1 \u2264 n) (x : \u211d) (hlo : 1 / ((n:\u211d) + 1) < x) (hhi : x \u2264 1 / (n:\u211d)) : Int.fract (1 / x) = 1 / x - (n:\u211d)"
+    },
+    {
+      "id": "piece_integral_ftc",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 68,
+      "signature": "lemma piece_integral_ftc (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), (1 / x - (n:\u211d)) ^ 2 = (2 * (n:\u211d) + 1) / ((n:\u211d) + 1) - 2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d))"
+    },
+    {
+      "id": "ftc_eq_stirling_term",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 125,
+      "signature": "lemma ftc_eq_stirling_term (n : \u2115) (hn : 1 \u2264 n) : (2 * (n:\u211d) + 1) / ((n:\u211d) + 1) - 2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) = -2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) + 2 - 1 / ((n:\u211d) + 1)"
+    },
+    {
+      "id": "fract_sq_ae_eq_piece",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 151,
+      "signature": "lemma fract_sq_ae_eq_piece (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), Int.fract (1 / x) * Int.fract (1 / x) = \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), (1 / x - (n:\u211d)) ^ 2"
+    },
+    {
+      "id": "piece_eq_stirling_summand",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 167,
+      "signature": "theorem piece_eq_stirling_summand (n : \u2115) (hn : 1 \u2264 n) : \u222b x in (1 / ((n:\u211d) + 1))..(1 / (n:\u211d)), Int.fract (1 / x) * Int.fract (1 / x) = -2 * (n:\u211d) * Real.log (1 + 1 / (n:\u211d)) + 2 - 1 / ((n:\u211d) + 1)"
+    },
+    {
+      "id": "telescope",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 174,
+      "signature": "theorem telescope (K : \u2115) (hK : 2 \u2264 K) : \u2211 m \u2208 Finset.range (K - 1), \u222b x in (1 / ((m:\u211d) + 2))..(1 / ((m:\u211d) + 1)), Int.fract (1 / x) * Int.fract (1 / x) = \u222b x in (1 / (K:\u211d))..(1:\u211d), Int.fract (1 / x\u2026"
+    },
+    {
+      "id": "integral_eq_partialSum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/PiecewiseFTC.lean",
+      "line": 208,
+      "signature": "theorem integral_eq_partialSum (K : \u2115) (hK : K \u2265 2) : \u222b x in (1 / (K:\u211d))..(1:\u211d), Int.fract (1 / x) * Int.fract (1 / x) = StirlingBridge.partialSum K"
+    },
+    {
+      "id": "fract_sq_tail_nonneg",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/SqueezeElimination.lean",
+      "line": 53,
+      "signature": "lemma fract_sq_tail_nonneg (\u03b5 : \u211d) (h\u03b5 : 0 \u2264 \u03b5) : 0 \u2264 \u222b x in (0:\u211d)..\u03b5, Int.fract (1 / x) * Int.fract (1 / x)"
+    },
+    {
+      "id": "integral_split",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/SqueezeElimination.lean",
+      "line": 79,
+      "signature": "lemma integral_split (K : \u2115) (_hK : 1 \u2264 K) : \u222b x in (0:\u211d)..(1:\u211d), Int.fract (1 / x) * Int.fract (1 / x) = (\u222b x in (0:\u211d)..(1 / (K:\u211d)), Int.fract (1 / x) * Int.fract (1 / x)) + (\u222b x in (1 / (K:\u211d))..(\u2026"
+    },
+    {
+      "id": "fract_sq_integral_value",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/SqueezeElimination.lean",
+      "line": 122,
+      "signature": "theorem fract_sq_integral_value : \u222b u in (0:\u211d)..(1:\u211d), (Int.fract (1 / u) * Int.fract (1 / u) : \u211d) = Real.log (2 * Real.pi) - eulerMascheroniConstant - 1"
+    },
+    {
+      "id": "partialSum",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/StirlingBridge.lean",
+      "line": 37,
+      "signature": "def partialSum (K : \u2115) : \u211d"
+    },
+    {
+      "id": "tendsto_partialSum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/StirlingBridge.lean",
+      "line": 42,
+      "signature": "theorem tendsto_partialSum : Tendsto partialSum atTop (nhds (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1))"
+    },
+    {
+      "id": "partialSum_eq_series_sum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/StirlingBridge.lean",
+      "line": 148,
+      "signature": "theorem partialSum_eq_series_sum' (M : \u2115) : partialSum (M + 2) = \u2211 n \u2208 Finset.range (M + 1), (-2 * ((n : \u211d) + 1) * Real.log (1 + 1 / ((n : \u211d) + 1)) + 2 - 1 / ((n : \u211d) + 2))"
+    },
+    {
+      "id": "F_rational",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 42,
+      "signature": "def F_rational (j k : \u2115) (x : \u211d) : \u211d"
+    },
+    {
+      "id": "F_log",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 46,
+      "signature": "def F_log (j k m n : \u2115) (x : \u211d) : \u211d"
+    },
+    {
+      "id": "F_linear",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 51,
+      "signature": "def F_linear (m n : \u2115) (x : \u211d) : \u211d"
+    },
+    {
+      "id": "F_eq_components",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 54,
+      "signature": "theorem F_eq_components (j k m n : \u2115) (x : \u211d) : (-1 / ((j:\u211d) * (k:\u211d) * x) - ((n:\u211d)/(j:\u211d) + (m:\u211d)/(k:\u211d)) * Real.log x + (m:\u211d) * (n:\u211d) * x) = F_rational j k x + F_log j k m n x + F_linear m n x"
+    },
+    {
+      "id": "rational_telescope",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 71,
+      "signature": "theorem rational_telescope (j k : \u2115) (x\u2080 : \u211d) : F_rational j k x\u2080 - F_rational j k x\u2080 = 0"
+    },
+    {
+      "id": "rational_sum_eq_endpoints",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 79,
+      "signature": "theorem rational_sum_eq_endpoints (j k : \u2115) (x_start x_end : \u211d) : F_rational j k x_end - F_rational j k x_start = -1 / ((j:\u211d) * (k:\u211d) * x_end) - (-1 / ((j:\u211d) * (k:\u211d) * x_start))"
+    },
+    {
+      "id": "log_coeff_jump_k_crossing",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 96,
+      "signature": "theorem log_coeff_jump_k_crossing (j k m n\u2080 : \u2115) (hn\u2080 : 1 \u2264 n\u2080) : ((n\u2080:\u211d)/(j:\u211d) + (m:\u211d)/(k:\u211d)) - (((n\u2080:\u211d) - 1)/(j:\u211d) + (m:\u211d)/(k:\u211d)) = 1 / (j:\u211d)"
+    },
+    {
+      "id": "log_coeff_jump_j_boundary",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 110,
+      "signature": "theorem log_coeff_jump_j_boundary (j k m n n' : \u2115) : ((n':\u211d)/(j:\u211d) + ((m:\u211d)+1)/(k:\u211d)) - ((n:\u211d)/(j:\u211d) + (m:\u211d)/(k:\u211d)) = ((n':\u211d) - (n:\u211d))/(j:\u211d) + 1/(k:\u211d)"
+    },
+    {
+      "id": "single_tile_ftc_decomposition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 122,
+      "signature": "theorem single_tile_ftc_decomposition (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) : let lo"
+    },
+    {
+      "id": "rational_row_diff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 143,
+      "signature": "theorem rational_row_diff (j k m : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) : F_rational j k (OffDiagPartition.rowHi j m) - F_rational j k (OffDiagPartition.rowLo j m) = 1 / (k:\u211d)"
+    },
+    {
+      "id": "log_row_diff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 160,
+      "signature": "theorem log_row_diff (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) : F_log j k m n (OffDiagPartition.rowHi j m) - F_log j k m n (OffDiagPartition.rowLo j m) = -((n:\u211d)/(j:\u211d) + (m:\u211d)/(k:\u211d)) * \u2026"
+    },
+    {
+      "id": "log_ratio_simplify",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 168,
+      "signature": "theorem log_ratio_simplify (j m : \u2115) (hj : 1 \u2264 j) (hm : 1 \u2264 m) : Real.log (1 / ((j:\u211d) * (m:\u211d))) - Real.log (1 / ((j:\u211d) * ((m:\u211d) + 1))) = Real.log (((m:\u211d) + 1) / (m:\u211d))"
+    },
+    {
+      "id": "linear_row_diff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 180,
+      "signature": "theorem linear_row_diff (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) : F_linear m n (OffDiagPartition.rowHi j m) - F_linear m n (OffDiagPartition.rowLo j m) = (m:\u211d) * (n:\u211d) * (1/((j:\u211d) * (m\u2026"
+    },
+    {
+      "id": "linear_diff_simplify",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 187,
+      "signature": "theorem linear_diff_simplify (j m n : \u2115) (hj : 1 \u2264 j) (hm : 1 \u2264 m) : (m:\u211d) * (n:\u211d) * (1/((j:\u211d) * (m:\u211d)) - 1/((j:\u211d) * ((m:\u211d)+1))) = (n:\u211d) / ((j:\u211d) * ((m:\u211d)+1))"
+    },
+    {
+      "id": "rational_telescope_sum",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 205,
+      "signature": "theorem rational_telescope_sum (j k M : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (_hM : 1 \u2264 M) : \u2211 m \u2208 Finset.Icc 1 M, (F_rational j k (OffDiagPartition.rowHi j m) - F_rational j k (OffDiagPartition.rowLo j m)\u2026"
+    },
+    {
+      "id": "log_sum_split",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 239,
+      "signature": "theorem log_sum_split (j k : \u2115) (n : \u2115 \u2192 \u2115) (M : \u2115) : \u2211 m \u2208 Finset.Icc 1 M, ((n m:\u211d)/(j:\u211d) + (m:\u211d)/(k:\u211d)) * Real.log (((m:\u211d) + 1) / (m:\u211d)) = (1/(j:\u211d)) * \u2211 m \u2208 Finset.Icc 1 M, (n m:\u211d) * Real.log (((\u2026"
+    },
+    {
+      "id": "m_log_partial_sum_formula",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 270,
+      "signature": "theorem m_log_partial_sum_formula (M : \u2115) (hM : 1 \u2264 M) : \u2211 m \u2208 Finset.Icc 1 M, (m:\u211d) * Real.log (((m:\u211d) + 1) / (m:\u211d)) = (M:\u211d) * Real.log ((M:\u211d) + 1) - \u2211 m \u2208 Finset.Icc 1 M, Real.log (m:\u211d)"
+    },
+    {
+      "id": "row_ftc_combined",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/TelescopeSum.lean",
+      "line": 308,
+      "signature": "theorem row_ftc_combined (j k m n : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) (hm : 1 \u2264 m) : let jf"
+    },
+    {
+      "id": "gramIntegral",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/VasyuninAssembly.lean",
+      "line": 39,
+      "signature": "def gramIntegral (j k : \u2115) : \u211d"
+    },
+    {
+      "id": "gram_diagonal_excluded",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/VasyuninAssembly.lean",
+      "line": 57,
+      "signature": "theorem gram_diagonal_excluded (j : \u2115) (hj : 1 \u2264 j) : gramIntegral j j = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((j:\u211d) * x))"
+    },
+    {
+      "id": "gramIntegral_comm",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/VasyuninAssembly.lean",
+      "line": 68,
+      "signature": "theorem gramIntegral_comm (j k : \u2115) : gramIntegral j k = gramIntegral k j"
+    },
+    {
+      "id": "vasyuninGramFormula_comm",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Cotangent/VasyuninAssembly.lean",
+      "line": 79,
+      "signature": "theorem vasyuninGramFormula_comm (j k : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) : DigammaReflection.vasyuninGramFormula j k = DigammaReflection.vasyuninGramFormula k j"
+    },
+    {
       "id": "augmentedGramMatrix",
       "type": "def",
       "category": "definition",
@@ -1199,12 +1910,12 @@
     },
     {
       "id": "vasyunin_eq_integral",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/IntegralBridge.lean",
-      "line": 39,
-      "signature": "axiom vasyunin_eq_integral (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))  /-- **THE MEAN ENTRY INTEGRAL ID\u2026"
+      "line": 43,
+      "signature": "theorem vasyunin_eq_integral (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))"
     },
     {
       "id": "vasyunin_mean_eq_integral",
@@ -1212,7 +1923,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/IntegralBridge.lean",
-      "line": 53,
+      "line": 58,
       "signature": "theorem vasyunin_mean_eq_integral (k : \u2115) (hk : k \u2265 1) : vasyuninMeanEntry k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((k:\u211d) * x))"
     },
     {
@@ -1457,6 +2168,60 @@
       "file": "Cathedral/Vasyunin/Augmented/Rayleigh.lean",
       "line": 117,
       "signature": "theorem variational_lower_bound (N : \u2115) (hN : N \u2265 3) (v : Fin N \u2192 \u211d) (hv : dotProduct v ((vasyuninCovMatrix N).mulVec v) > 0) : rayleighQuotient N v \u2264 vasyuninQuadForm N"
+    },
+    {
+      "id": "measurable_fract_prod",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 38,
+      "signature": "theorem measurable_fract_prod (j k : \u2115) : Measurable (fun x : \u211d => Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x)))"
+    },
+    {
+      "id": "fract_prod_le_one",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 47,
+      "signature": "theorem fract_prod_le_one (j k : \u2115) (x : \u211d) : \u2016Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))\u2016 \u2264 1"
+    },
+    {
+      "id": "fract_sq_integral",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 114,
+      "signature": "theorem fract_sq_integral : \u222b u in (0:\u211d)..(1:\u211d), (Int.fract (1 / u) * Int.fract (1 / u) : \u211d) = Real.log (2 * Real.pi) - eulerMascheroniConstant - 1"
+    },
+    {
+      "id": "vasyunin_integral_diag",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 122,
+      "signature": "theorem vasyunin_integral_diag (k : \u2115) (hk : k \u2265 1) : vasyuninGramEntry k k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((k:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))"
+    },
+    {
+      "id": "vasyunin_offdiag_integral",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 226,
+      "signature": "axiom vasyunin_offdiag_integral (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) (hjk : j \u2260 k) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))  /-- **THE THE\u2026"
+    },
+    {
+      "id": "vasyunin_eq_integral_proved",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean",
+      "line": 236,
+      "signature": "theorem vasyunin_eq_integral_proved (j k : \u2115) (hj : j \u2265 1) (hk : k \u2265 1) : vasyuninGramEntry j k = \u222b x in (0:\u211d)..1, Int.fract (1 / ((j:\u211d) * x)) * Int.fract (1 / ((k:\u211d) * x))"
     },
     {
       "id": "log_two_lt_seven_tenths",
@@ -3763,15 +4528,6 @@
       "signature": "theorem abel_summation_bd_l2_bound_proved : (\u2203 C_m : \u211d, C_m > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ (1/2 : \u211d) * (Real.log x) ^ 2) \u2192 \u2203 C_err : \u211d, C_err > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N\u2026"
     },
     {
-      "id": "partialSum",
-      "type": "def",
-      "category": "definition",
-      "route": "mellin",
-      "file": "Cathedral/MellinBridge/AbelSummation.lean",
-      "line": 30,
-      "signature": "def partialSum (a : \u2115 \u2192 \u211d) (M k : \u2115) : \u211d"
-    },
-    {
       "id": "abel_summation",
       "type": "theorem",
       "category": "proved",
@@ -5036,6 +5792,14 @@
       "target": "zeta_zero_separates"
     },
     {
+      "source": "fract_sq_integral",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "vasyunin_offdiag_integral",
+      "target": "zeta_zero_separates"
+    },
+    {
       "source": "bdLinComb",
       "target": "zeta_zero_separates"
     },
@@ -5668,6 +6432,54 @@
       "target": "gram_entry_diag_upper"
     },
     {
+      "source": "telescope",
+      "target": "fract_mul_self_le"
+    },
+    {
+      "source": "telescope",
+      "target": "basis_integral_upper"
+    },
+    {
+      "source": "telescope",
+      "target": "gramEntry_le_basis"
+    },
+    {
+      "source": "telescope",
+      "target": "log_lower_quartic"
+    },
+    {
+      "source": "telescope",
+      "target": "integral_sq_div_sub_const"
+    },
+    {
+      "source": "telescope",
+      "target": "piece_sq_upper_bound"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_sq_piece_bound"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_sq_telescope"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "telescope",
+      "target": "gramEntry_le_third"
+    },
+    {
+      "source": "telescope",
+      "target": "gram_entry_diag_upper"
+    },
+    {
       "source": "telescoping",
       "target": "fract_mul_self_le"
     },
@@ -5760,6 +6572,50 @@
       "target": "basis_entry_lower"
     },
     {
+      "source": "telescope",
+      "target": "interval_sub_div_sq"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_div_eq_on_Ioc"
+    },
+    {
+      "source": "telescope",
+      "target": "measurable_fract_real"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_div_intervalIntegrable"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_integral_eq_tsum"
+    },
+    {
+      "source": "telescope",
+      "target": "hasSum_telescoping_inv"
+    },
+    {
+      "source": "telescope",
+      "target": "summable_log_correction"
+    },
+    {
+      "source": "telescope",
+      "target": "log_harmonic_tail_bound"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_integral_as_one_plus"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_integral_identity"
+    },
+    {
+      "source": "telescope",
+      "target": "basis_entry_lower"
+    },
+    {
       "source": "telescoping",
       "target": "interval_sub_div_sq"
     },
@@ -5920,6 +6776,14 @@
       "target": "gram_l2_identity"
     },
     {
+      "source": "fract_prod_le_one",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "fract_prod_le_one",
+      "target": "gram_l2_identity"
+    },
+    {
       "source": "realQuadForm",
       "target": "fract_prod_intervalIntegrable"
     },
@@ -6465,6 +7329,42 @@
     },
     {
       "source": "Cathedral",
+      "target": "gramEntry_le_quarter_plus_cov"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_le_avg_sq"
+    },
+    {
+      "source": "telescope",
+      "target": "gramEntry_le_avg_diag"
+    },
+    {
+      "source": "telescope",
+      "target": "gramEntry_le_third_offdiag"
+    },
+    {
+      "source": "telescope",
+      "target": "gram_entry_offdiag_upper_amgm"
+    },
+    {
+      "source": "telescope",
+      "target": "gramEntry_le_third_all"
+    },
+    {
+      "source": "telescope",
+      "target": "gram_entry_offdiag_upper_all"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_mul_add_nat"
+    },
+    {
+      "source": "telescope",
+      "target": "weight_telescope"
+    },
+    {
+      "source": "telescope",
       "target": "gramEntry_le_quarter_plus_cov"
     },
     {
@@ -8064,6 +8964,1530 @@
       "target": "witness_covariance_decay_iff_rh"
     },
     {
+      "source": "Cathedral",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "Cathedral",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "Cathedral",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "Cathedral",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "fract_eq_on_piece",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "piece_integral_ftc",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_eq_on_piece_general"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_eq_on_piece_zero"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "cross_piece_integral_ftc"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tile_nonempty_iff"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tile_n_values_bounded"
+    },
+    {
+      "source": "cot",
+      "target": "digamma_reflection_complex"
+    },
+    {
+      "source": "cot",
+      "target": "digamma_add_nat"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninCotSum_of_le_one"
+    },
+    {
+      "source": "cot",
+      "target": "gauss_digamma_formula"
+    },
+    {
+      "source": "Cathedral",
+      "target": "digamma_reflection_complex"
+    },
+    {
+      "source": "Cathedral",
+      "target": "digamma_add_nat"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyuninCotSum_of_le_one"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gauss_digamma_formula"
+    },
+    {
+      "source": "Cathedral",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "Cathedral",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "Cathedral",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "Cathedral",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "Cathedral",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "Cathedral",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "Cathedral",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "Cathedral",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "telescope",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "telescope",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "telescope",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "telescope",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "telescope",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "telescope",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "telescope",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "telescope",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "telescope",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "telescope",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "row_ftc_combined",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "gramIntegral",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "harmonicTileSum_reciprocity"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "gcd_div_eq_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyunin_integral_eq_formula"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "Cathedral",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "Cathedral",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "Cathedral",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "Cathedral",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "Cathedral",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "fract_eq_on_piece_general",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "fract_eq_on_piece_zero",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "tileLo",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "tileLo",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "tileLo",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "tileLo",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "tileLo",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "tileLo",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "tileLo",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "tileLo",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "tileLo",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "tileLo",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "tileLo",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "tileLo",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "tileLo",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "tileLo",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "tileLo",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "tileHi",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "tileHi",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "tileHi",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "tileHi",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "tileHi",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "tileHi",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "tileHi",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "tileHi",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "tileHi",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "tileHi",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "tileHi",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "tileHi",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "tileHi",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "tileHi",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "tileHi",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "tile_n_values_bounded",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "telescope",
+      "target": "row_nonempty"
+    },
+    {
+      "source": "telescope",
+      "target": "rowLo_pos"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_eq_self_of_gt_inv"
+    },
+    {
+      "source": "telescope",
+      "target": "row0_integrand_eq"
+    },
+    {
+      "source": "telescope",
+      "target": "row0_integral_ftc"
+    },
+    {
+      "source": "telescope",
+      "target": "row_boundary_shared"
+    },
+    {
+      "source": "telescope",
+      "target": "integral_split_rows"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_eq_on_tile"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_eq_on_tile_interval"
+    },
+    {
+      "source": "telescope",
+      "target": "tile_integral_eq_ftc"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_eq_on_row"
+    },
+    {
+      "source": "telescope",
+      "target": "integral_eq_sum_rows"
+    },
+    {
+      "source": "telescope",
+      "target": "at_most_one_crossing"
+    },
+    {
+      "source": "telescope",
+      "target": "row_integral_single_tile"
+    },
+    {
+      "source": "telescope",
+      "target": "row_integral_split_at_crossing"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_eq_on_piece"
+    },
+    {
+      "source": "Cathedral",
+      "target": "piece_integral_ftc"
+    },
+    {
+      "source": "Cathedral",
+      "target": "ftc_eq_stirling_term"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_sq_ae_eq_piece"
+    },
+    {
+      "source": "Cathedral",
+      "target": "piece_eq_stirling_summand"
+    },
+    {
+      "source": "Cathedral",
+      "target": "telescope"
+    },
+    {
+      "source": "Cathedral",
+      "target": "integral_eq_partialSum"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_eq_on_piece"
+    },
+    {
+      "source": "partialSum",
+      "target": "piece_integral_ftc"
+    },
+    {
+      "source": "partialSum",
+      "target": "ftc_eq_stirling_term"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_ae_eq_piece"
+    },
+    {
+      "source": "partialSum",
+      "target": "piece_eq_stirling_summand"
+    },
+    {
+      "source": "partialSum",
+      "target": "telescope"
+    },
+    {
+      "source": "partialSum",
+      "target": "integral_eq_partialSum"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_eq_on_piece"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "piece_integral_ftc"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "ftc_eq_stirling_term"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "fract_sq_ae_eq_piece"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "piece_eq_stirling_summand"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "telescope"
+    },
+    {
+      "source": "partialSum_eq_series_sum",
+      "target": "integral_eq_partialSum"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "Cathedral",
+      "target": "integral_split"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "integral_eq_partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_tail_bound"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_tail_nonneg"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_intervalIntegrable"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "integral_split"
+    },
+    {
+      "source": "tendsto_partialSum",
+      "target": "fract_sq_integral_value"
+    },
+    {
+      "source": "Cathedral",
+      "target": "tendsto_partialSum"
+    },
+    {
+      "source": "Cathedral",
+      "target": "partialSum_eq_series_sum"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "tendsto_partialSum"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "partialSum_eq_series_sum"
+    },
+    {
+      "source": "telescoping",
+      "target": "tendsto_partialSum"
+    },
+    {
+      "source": "telescoping",
+      "target": "partialSum_eq_series_sum"
+    },
+    {
+      "source": "Cathedral",
+      "target": "F_eq_components"
+    },
+    {
+      "source": "Cathedral",
+      "target": "rational_telescope"
+    },
+    {
+      "source": "Cathedral",
+      "target": "rational_sum_eq_endpoints"
+    },
+    {
+      "source": "Cathedral",
+      "target": "log_coeff_jump_k_crossing"
+    },
+    {
+      "source": "Cathedral",
+      "target": "log_coeff_jump_j_boundary"
+    },
+    {
+      "source": "Cathedral",
+      "target": "single_tile_ftc_decomposition"
+    },
+    {
+      "source": "Cathedral",
+      "target": "rational_row_diff"
+    },
+    {
+      "source": "Cathedral",
+      "target": "log_row_diff"
+    },
+    {
+      "source": "Cathedral",
+      "target": "log_ratio_simplify"
+    },
+    {
+      "source": "Cathedral",
+      "target": "linear_row_diff"
+    },
+    {
+      "source": "Cathedral",
+      "target": "linear_diff_simplify"
+    },
+    {
+      "source": "Cathedral",
+      "target": "rational_telescope_sum"
+    },
+    {
+      "source": "Cathedral",
+      "target": "log_sum_split"
+    },
+    {
+      "source": "Cathedral",
+      "target": "m_log_partial_sum_formula"
+    },
+    {
+      "source": "Cathedral",
+      "target": "row_ftc_combined"
+    },
+    {
+      "source": "rowLo",
+      "target": "F_eq_components"
+    },
+    {
+      "source": "rowLo",
+      "target": "rational_telescope"
+    },
+    {
+      "source": "rowLo",
+      "target": "rational_sum_eq_endpoints"
+    },
+    {
+      "source": "rowLo",
+      "target": "log_coeff_jump_k_crossing"
+    },
+    {
+      "source": "rowLo",
+      "target": "log_coeff_jump_j_boundary"
+    },
+    {
+      "source": "rowLo",
+      "target": "single_tile_ftc_decomposition"
+    },
+    {
+      "source": "rowLo",
+      "target": "rational_row_diff"
+    },
+    {
+      "source": "rowLo",
+      "target": "log_row_diff"
+    },
+    {
+      "source": "rowLo",
+      "target": "log_ratio_simplify"
+    },
+    {
+      "source": "rowLo",
+      "target": "linear_row_diff"
+    },
+    {
+      "source": "rowLo",
+      "target": "linear_diff_simplify"
+    },
+    {
+      "source": "rowLo",
+      "target": "rational_telescope_sum"
+    },
+    {
+      "source": "rowLo",
+      "target": "log_sum_split"
+    },
+    {
+      "source": "rowLo",
+      "target": "m_log_partial_sum_formula"
+    },
+    {
+      "source": "rowLo",
+      "target": "row_ftc_combined"
+    },
+    {
+      "source": "rowHi",
+      "target": "F_eq_components"
+    },
+    {
+      "source": "rowHi",
+      "target": "rational_telescope"
+    },
+    {
+      "source": "rowHi",
+      "target": "rational_sum_eq_endpoints"
+    },
+    {
+      "source": "rowHi",
+      "target": "log_coeff_jump_k_crossing"
+    },
+    {
+      "source": "rowHi",
+      "target": "log_coeff_jump_j_boundary"
+    },
+    {
+      "source": "rowHi",
+      "target": "single_tile_ftc_decomposition"
+    },
+    {
+      "source": "rowHi",
+      "target": "rational_row_diff"
+    },
+    {
+      "source": "rowHi",
+      "target": "log_row_diff"
+    },
+    {
+      "source": "rowHi",
+      "target": "log_ratio_simplify"
+    },
+    {
+      "source": "rowHi",
+      "target": "linear_row_diff"
+    },
+    {
+      "source": "rowHi",
+      "target": "linear_diff_simplify"
+    },
+    {
+      "source": "rowHi",
+      "target": "rational_telescope_sum"
+    },
+    {
+      "source": "rowHi",
+      "target": "log_sum_split"
+    },
+    {
+      "source": "rowHi",
+      "target": "m_log_partial_sum_formula"
+    },
+    {
+      "source": "rowHi",
+      "target": "row_ftc_combined"
+    },
+    {
+      "source": "telescope",
+      "target": "F_eq_components"
+    },
+    {
+      "source": "telescope",
+      "target": "rational_telescope"
+    },
+    {
+      "source": "telescope",
+      "target": "rational_sum_eq_endpoints"
+    },
+    {
+      "source": "telescope",
+      "target": "log_coeff_jump_k_crossing"
+    },
+    {
+      "source": "telescope",
+      "target": "log_coeff_jump_j_boundary"
+    },
+    {
+      "source": "telescope",
+      "target": "single_tile_ftc_decomposition"
+    },
+    {
+      "source": "telescope",
+      "target": "rational_row_diff"
+    },
+    {
+      "source": "telescope",
+      "target": "log_row_diff"
+    },
+    {
+      "source": "telescope",
+      "target": "log_ratio_simplify"
+    },
+    {
+      "source": "telescope",
+      "target": "linear_row_diff"
+    },
+    {
+      "source": "telescope",
+      "target": "linear_diff_simplify"
+    },
+    {
+      "source": "telescope",
+      "target": "rational_telescope_sum"
+    },
+    {
+      "source": "telescope",
+      "target": "log_sum_split"
+    },
+    {
+      "source": "telescope",
+      "target": "m_log_partial_sum_formula"
+    },
+    {
+      "source": "telescope",
+      "target": "row_ftc_combined"
+    },
+    {
+      "source": "telescoping",
+      "target": "F_eq_components"
+    },
+    {
+      "source": "telescoping",
+      "target": "rational_telescope"
+    },
+    {
+      "source": "telescoping",
+      "target": "rational_sum_eq_endpoints"
+    },
+    {
+      "source": "telescoping",
+      "target": "log_coeff_jump_k_crossing"
+    },
+    {
+      "source": "telescoping",
+      "target": "log_coeff_jump_j_boundary"
+    },
+    {
+      "source": "telescoping",
+      "target": "single_tile_ftc_decomposition"
+    },
+    {
+      "source": "telescoping",
+      "target": "rational_row_diff"
+    },
+    {
+      "source": "telescoping",
+      "target": "log_row_diff"
+    },
+    {
+      "source": "telescoping",
+      "target": "log_ratio_simplify"
+    },
+    {
+      "source": "telescoping",
+      "target": "linear_row_diff"
+    },
+    {
+      "source": "telescoping",
+      "target": "linear_diff_simplify"
+    },
+    {
+      "source": "telescoping",
+      "target": "rational_telescope_sum"
+    },
+    {
+      "source": "telescoping",
+      "target": "log_sum_split"
+    },
+    {
+      "source": "telescoping",
+      "target": "m_log_partial_sum_formula"
+    },
+    {
+      "source": "telescoping",
+      "target": "row_ftc_combined"
+    },
+    {
+      "source": "cot",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "cot",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "cot",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "cross_piece_integral_ftc",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "digamma_reflection_complex",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "digamma_reflection_complex",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "digamma_reflection_complex",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "vasyuninCotSum",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "vasyuninCotSum",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "vasyuninCotSum",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "gauss_digamma_formula",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "gauss_digamma_formula",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "gauss_digamma_formula",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "vasyuninGramFormula",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "vasyunin_integral_eq_formula",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "vasyunin_integral_eq_formula",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "vasyunin_integral_eq_formula",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "tile_integral_eq_ftc",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "tile_integral_eq_ftc",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "tile_integral_eq_ftc",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "integral_eq_sum_rows",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "telescope",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "telescope",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "telescope",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "F_eq_components",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "F_eq_components",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "F_eq_components",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "rational_telescope_sum",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "rational_telescope_sum",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "rational_telescope_sum",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "gram_diagonal_excluded"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "gramIntegral_comm"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyuninGramFormula_comm"
+    },
+    {
       "source": "gramEntry",
       "target": "augmentedGramMatrix_symmetric"
     },
@@ -8929,6 +11353,22 @@
     },
     {
       "source": "mean_entry_eq_integral",
+      "target": "vasyunin_mean_eq_integral"
+    },
+    {
+      "source": "vasyunin_offdiag_integral",
+      "target": "vasyunin_eq_integral"
+    },
+    {
+      "source": "vasyunin_offdiag_integral",
+      "target": "vasyunin_mean_eq_integral"
+    },
+    {
+      "source": "vasyunin_eq_integral_proved",
+      "target": "vasyunin_eq_integral"
+    },
+    {
+      "source": "vasyunin_eq_integral_proved",
       "target": "vasyunin_mean_eq_integral"
     },
     {
@@ -9040,6 +11480,26 @@
       "target": "mean_entry_eq_integral"
     },
     {
+      "source": "telescope",
+      "target": "fract_inv_mul_eq_self_on_upper"
+    },
+    {
+      "source": "telescope",
+      "target": "upper_integral_eq_log"
+    },
+    {
+      "source": "telescope",
+      "target": "lower_integral_eq"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_inv_mul_intervalIntegrable"
+    },
+    {
+      "source": "telescope",
+      "target": "mean_entry_eq_integral"
+    },
+    {
       "source": "vasyunin_mean_eq_integral",
       "target": "fract_inv_mul_eq_self_on_upper"
     },
@@ -9386,6 +11846,170 @@
     {
       "source": "cauchy_schwarz_quadform",
       "target": "variational_lower_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "vasyunin_eq_integral_proved"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "vasyuninGramEntry_diag",
+      "target": "vasyunin_eq_integral_proved"
+    },
+    {
+      "source": "Cathedral",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "Cathedral",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "Cathedral",
+      "target": "vasyunin_eq_integral_proved"
+    },
+    {
+      "source": "telescope",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "telescope",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "telescope",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "telescope",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "telescope",
+      "target": "vasyunin_eq_integral_proved"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "fract_sq_integral_value",
+      "target": "vasyunin_eq_integral_proved"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "measurable_fract_prod"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_prod_le_one"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_prod_intervalIntegrable"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "fract_sq_integral"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyunin_integral_diag"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyunin_offdiag_integral"
+    },
+    {
+      "source": "vasyunin_eq_integral",
+      "target": "vasyunin_eq_integral_proved"
     },
     {
       "source": "vasyuninCovMatrix",
@@ -11776,6 +14400,38 @@
       "target": "mertens_34_l2_bound"
     },
     {
+      "source": "partialSum",
+      "target": "l2_crude_upper_bound"
+    },
+    {
+      "source": "partialSum",
+      "target": "l2_expansion"
+    },
+    {
+      "source": "partialSum",
+      "target": "integral_bdLinComb_eq_sum"
+    },
+    {
+      "source": "partialSum",
+      "target": "fract_inv_eq_inv_of_gt_one"
+    },
+    {
+      "source": "partialSum",
+      "target": "abel_bound_34"
+    },
+    {
+      "source": "partialSum",
+      "target": "summand_bound_34"
+    },
+    {
+      "source": "partialSum",
+      "target": "sum_rpow_neg_quarter_bound"
+    },
+    {
+      "source": "partialSum",
+      "target": "mertens_34_l2_bound"
+    },
+    {
       "source": "bdLinComb",
       "target": "l2_crude_upper_bound"
     },
@@ -11933,38 +14589,6 @@
     },
     {
       "source": "weighted_moebius_abel_bound",
-      "target": "mertens_34_l2_bound"
-    },
-    {
-      "source": "partialSum",
-      "target": "l2_crude_upper_bound"
-    },
-    {
-      "source": "partialSum",
-      "target": "l2_expansion"
-    },
-    {
-      "source": "partialSum",
-      "target": "integral_bdLinComb_eq_sum"
-    },
-    {
-      "source": "partialSum",
-      "target": "fract_inv_eq_inv_of_gt_one"
-    },
-    {
-      "source": "partialSum",
-      "target": "abel_bound_34"
-    },
-    {
-      "source": "partialSum",
-      "target": "summand_bound_34"
-    },
-    {
-      "source": "partialSum",
-      "target": "sum_rpow_neg_quarter_bound"
-    },
-    {
-      "source": "partialSum",
       "target": "mertens_34_l2_bound"
     },
     {
@@ -18092,35 +20716,35 @@
       "target": "abel_summation_bd_l2_bound_proved"
     },
     {
-      "source": "bdLinComb",
+      "source": "partialSum",
       "target": "weighted_moebius_abel_bound"
     },
     {
-      "source": "bdLinComb",
+      "source": "partialSum",
       "target": "summand_bound"
     },
     {
-      "source": "bdLinComb",
+      "source": "partialSum",
       "target": "l2_from_pointwise_bound"
     },
     {
-      "source": "bdLinComb",
+      "source": "partialSum",
       "target": "abel_summation_bd_l2_bound_proved"
     },
     {
-      "source": "partialSum",
+      "source": "bdLinComb",
       "target": "weighted_moebius_abel_bound"
     },
     {
-      "source": "partialSum",
+      "source": "bdLinComb",
       "target": "summand_bound"
     },
     {
-      "source": "partialSum",
+      "source": "bdLinComb",
       "target": "l2_from_pointwise_bound"
     },
     {
-      "source": "partialSum",
+      "source": "bdLinComb",
       "target": "abel_summation_bd_l2_bound_proved"
     },
     {
@@ -21525,14 +24149,14 @@
     }
   ],
   "meta": {
-    "totalNodes": 557,
-    "totalEdges": 4127,
-    "axiomCount": 39,
-    "theoremCount": 419,
-    "definitionCount": 99,
-    "provedTheorems": 419,
-    "fileCount": 74,
-    "description": "Cathedral proof architecture: 39 axioms, 419 theorems, 99 definitions across 74 files",
-    "generatedAt": "2026-04-20T00:19:14.504657"
+    "totalNodes": 641,
+    "totalEdges": 4594,
+    "axiomCount": 43,
+    "theoremCount": 485,
+    "definitionCount": 113,
+    "provedTheorems": 485,
+    "fileCount": 84,
+    "description": "Cathedral proof architecture: 43 axioms, 485 theorems, 113 definitions across 84 files",
+    "generatedAt": "2026-04-20T02:14:16.017591"
   }
 }

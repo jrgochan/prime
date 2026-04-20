@@ -64,9 +64,9 @@ const CROWN_AXIOMS: Axiom[] = [
     onCrown: true,
   },
   {
-    name: "vasyunin_eq_integral",
-    math: "G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx",
-    desc: "The Gram matrix entry equals the L² inner product integral. Connects the algebraic matrix framework to the analytic L² setting. From Vasyunin's 1995 representation.",
+    name: "vasyunin_offdiag_integral",
+    math: "G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx  (j≠k)",
+    desc: "The off-diagonal Gram matrix entry equals the L² inner product integral. The diagonal case G(k,k) has been PROVED as a theorem (via Stirling + piecewise FTC, zero axioms). The off-diagonal identity for j≠k is numerically verified to 6–7 digits but requires the Gauss digamma formula for formalization.",
     ref: "Vasyunin 1996, Báez-Duarte 2005",
     tier: 3,
     onCrown: true,
@@ -116,6 +116,17 @@ const NON_CROWN_GROUPS = [
       "baezDuarte_inner_residual",
     ],
     desc: "Mellin/Fourier transform infrastructure and orthogonal witnesses.",
+  },
+  {
+    name: "Cotangent Tower",
+    count: 4,
+    axioms: [
+      "gauss_digamma_formula",
+      "harmonicTileSum_reciprocity",
+      "telescope_limit_eq_vasyunin",
+      "vasyunin_integral_eq_formula",
+    ],
+    desc: "Sub-axioms of the off-diagonal Vasyunin identity — Gauss digamma, Dedekind reciprocity, telescope limit.",
   },
   {
     name: "Other",
@@ -269,7 +280,7 @@ function NonCrownSection() {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-        32 Supporting Axioms (not on crown path)
+        36 Supporting Axioms (not on crown path)
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {NON_CROWN_GROUPS.map((group) => (
@@ -442,7 +453,7 @@ export default function AxiomMapPage() {
         className="text-center text-xs text-slate-600 pt-4 border-t border-slate-800"
       >
         <code>#print axioms nyman_beurling_equivalence</code> — compiler
-        verified, April 19, 2026
+        verified, April 20, 2026
       </motion.div>
     </div>
   );
