@@ -20,6 +20,7 @@
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
 import Cathedral.Vasyunin.Proof.Chain
 import Cathedral.NymanBeurling.NymanBeurling
+import Cathedral.MellinBridge.MertensBound
 
 noncomputable section
 open Real Matrix Finset
@@ -30,32 +31,9 @@ namespace Cathedral.Vasyunin
 -- THE MERTENS BOUND UNDER RH
 -- ════════════════════════════════════════════════
 
-/-- **The Mertens function**: M(x) = Σ_{n≤x} μ(n).
-
-    Its growth rate controls the distribution of primes.
-    Under PNT: M(x) = o(x).
-    Under RH:  M(x) = O(x^{1/2+ε}). -/
-noncomputable def mertensFunction (x : ℝ) : ℤ :=
-  (Finset.filter (fun (n : ℕ) => (n : ℝ) ≤ x ∧ 0 < n)
-    (Finset.range (⌊x⌋₊ + 1))).sum
-    (fun (n : ℕ) => ArithmeticFunction.moebius n)
-
-/-- **RH implies the Mertens bound.**
-
-    Under the Riemann Hypothesis:
-      |M(x)| ≤ C · x^{1/2} · (log x)²
-
-    This is a classical consequence of the zero-free region
-    extending to Re(s) > 1/2. The log² factor can be improved
-    but is sufficient for our purposes.
-
-    References:
-    - Titchmarsh (1986), Theorem 14.25
-    - Iwaniec & Kowalski (2004), Corollary 13.7 -/
-axiom rh_implies_mertens_bound :
-    RiemannHypothesis →
-    ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |(mertensFunction x : ℝ)| ≤ C * x ^ ((1:ℝ)/2) * (Real.log x) ^ 2
+-- `mertensFunction` and `rh_implies_mertens_bound` are imported from
+-- Cathedral.MellinBridge.MertensBound (the single canonical source).
+-- Previously duplicated here; eliminated April 19, 2026 (Great Audit).
 
 -- ════════════════════════════════════════════════
 -- THE ABEL SUMMATION STEP
@@ -81,7 +59,7 @@ axiom rh_implies_mertens_bound :
     to the Cathedral's linear algebra framework. -/
 axiom abel_summation_covariance_bound :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |(mertensFunction x : ℝ)| ≤ C * x ^ ((1:ℝ)/2) * (Real.log x) ^ 2) →
+      |((_root_.mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ ((1:ℝ)/2) * (Real.log x) ^ 2) →
     ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       dotProduct (logCutoffWitness N)
@@ -104,7 +82,7 @@ theorem rh_implies_covariance_decay :
       dotProduct (logCutoffWitness N)
         ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤ C_cov / Real.log ↑N := by
   intro hRH
-  exact abel_summation_covariance_bound (rh_implies_mertens_bound hRH)
+  exact abel_summation_covariance_bound (_root_.rh_implies_mertens_bound hRH)
 
 -- ════════════════════════════════════════════════
 -- THE FULL EQUIVALENCE
