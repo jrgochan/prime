@@ -29,6 +29,7 @@ PAPERS=(
   cathedral-history
   cathedral-invitation
   cathedral-press
+  cathedral-legal
   cathedral-letter
 )
 
