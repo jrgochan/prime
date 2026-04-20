@@ -3062,12 +3062,12 @@
     },
     {
       "id": "rh_implies_mertens_34",
-      "type": "axiom",
-      "category": "axiom",
+      "type": "theorem",
+      "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 41,
-      "signature": "axiom rh_implies_mertens_34 : RiemannHypothesis \u2192 \u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C * x ^ ((3:\u211d)/4)  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 -- \u00a71b. \u2026"
+      "line": 47,
+      "signature": "theorem rh_implies_mertens_34 : RiemannHypothesis \u2192 \u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C * x ^ ((3:\u211d)/4)"
     },
     {
       "id": "pnt_mu_div_k",
@@ -3075,7 +3075,7 @@
       "category": "axiom",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 55,
+      "line": 111,
       "signature": "axiom pnt_mu_div_k : Filter.Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) / (k : \u211d)) Filter.atTop (nhds 0)  /-- **PNT AXIOM 2**: The weighted sum \u03a3 \u03bc(k)\u00b7ln(k)/k conv\u2026"
     },
     {
@@ -3084,7 +3084,7 @@
       "category": "axiom",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 63,
+      "line": 119,
       "signature": "axiom pnt_mu_log_div_k : Filter.Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) * Real.log (k : \u211d) / (k : \u211d)) Filter.atTop (nhds (-1))  /-- **PNT AXIOM 3**: The weight\u2026"
     },
     {
@@ -3093,7 +3093,7 @@
       "category": "axiom",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 72,
+      "line": 128,
       "signature": "axiom pnt_mu_log_sq_div_k : Filter.Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) * (Real.log (k : \u211d)) ^ 2 / (k : \u211d)) Filter.atTop (nhds (-2 * Real.eulerMascheroniCon\u2026"
     },
     {
@@ -3102,7 +3102,7 @@
       "category": "axiom",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 193,
+      "line": 249,
       "signature": "axiom abel_mertens_tail_raw (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) (hPNT\u2081 : Filter.Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(A\u2026"
     },
     {
@@ -3111,7 +3111,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 427,
+      "line": 483,
       "signature": "theorem moebius_mean_finite_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 |\u2211 i : Fin (N -\u2026"
     },
     {
@@ -3120,7 +3120,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 545,
+      "line": 601,
       "signature": "theorem linear_mean_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 |(\u222b x in (0:\u211d)..1, bdLi\u2026"
     },
     {
@@ -3129,7 +3129,7 @@
       "category": "axiom",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 583,
+      "line": 639,
       "signature": "axiom millennium_covariance_cancellation (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K_cov : \u211d, K_cov > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 \u2026"
     },
     {
@@ -3138,7 +3138,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 627,
+      "line": 683,
       "signature": "theorem moebius_quadratic_finite_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 realQuadFo\u2026"
     },
     {
@@ -3147,7 +3147,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 690,
+      "line": 746,
       "signature": "theorem quadratic_form_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 \u222b x in (0:\u211d)..1, (bd\u2026"
     },
     {
@@ -3156,7 +3156,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 710,
+      "line": 766,
       "signature": "theorem mertens_l2_decay (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 (N : \u2115), 10 \u2264 N \u2192 \u222b x in (0:\u211d)..1, (1 - bd\u2026"
     },
     {
@@ -3165,7 +3165,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 759,
+      "line": 815,
       "signature": "theorem mertens_34_implies_convergence : (\u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C * x ^ ((3:\u211d)/4)) \u2192 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..\u2026"
     },
     {
@@ -3174,7 +3174,7 @@
       "category": "proved",
       "route": "crown",
       "file": "Cathedral/Assembly/FinalDragon.lean",
-      "line": 795,
+      "line": 851,
       "signature": "theorem rh_implies_l2_convergence_proved : RiemannHypothesis \u2192 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 < \u03b5"
     },
     {
@@ -16200,6 +16200,58 @@
       "target": "rh_implies_l2_convergence_proved"
     },
     {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_mertens_34"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "pnt_mu_div_k"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "pnt_mu_log_div_k"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "pnt_mu_log_sq_div_k"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "abel_mertens_tail_raw"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "moebius_mean_finite_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "linear_mean_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "millennium_covariance_cancellation"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "moebius_quadratic_finite_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "quadratic_form_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "mertens_l2_decay"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "mertens_34_implies_convergence"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_l2_convergence_proved"
+    },
+    {
       "source": "logWeight",
       "target": "rh_implies_mertens_34"
     },
@@ -24150,13 +24202,13 @@
   ],
   "meta": {
     "totalNodes": 641,
-    "totalEdges": 4594,
-    "axiomCount": 43,
-    "theoremCount": 485,
+    "totalEdges": 4607,
+    "axiomCount": 42,
+    "theoremCount": 486,
     "definitionCount": 113,
-    "provedTheorems": 485,
+    "provedTheorems": 486,
     "fileCount": 84,
-    "description": "Cathedral proof architecture: 43 axioms, 485 theorems, 113 definitions across 84 files",
-    "generatedAt": "2026-04-20T02:14:16.017591"
+    "description": "Cathedral proof architecture: 42 axioms, 486 theorems, 113 definitions across 84 files",
+    "generatedAt": "2026-04-20T02:43:49.260565"
   }
 }
