@@ -16,9 +16,9 @@ interface Axiom {
 
 const CROWN_AXIOMS: Axiom[] = [
   {
-    name: "rh_implies_mertens_34",
-    math: "RH → |M(x)| = O(x^{3/4})",
-    desc: "The sole RH-content axiom. If the Riemann Hypothesis holds, the Mertens function M(x) = Σμ(n) grows no faster than x^{3/4}. This is the mathematical heart of the forward direction.",
+    name: "rh_implies_mertens_bound",
+    math: "RH → |M(x)| = O(x^{1/2} log²x)",
+    desc: "The sole RH-content axiom. If the Riemann Hypothesis holds, the Mertens function M(x) = Σμ(n) grows no faster than x^{1/2}·(log x)². The weaker O(x^{3/4}) bound is now a proved theorem. This is the mathematical heart of the forward direction.",
     ref: "Titchmarsh 1986, Theorem 14.25",
     tier: 1,
     onCrown: true,
@@ -280,7 +280,7 @@ function NonCrownSection() {
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-        36 Supporting Axioms (not on crown path)
+        35 Supporting Axioms (not on crown path)
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {NON_CROWN_GROUPS.map((group) => (

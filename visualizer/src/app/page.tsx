@@ -19,7 +19,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive map of the 7 crown axioms organized by tier: 1 RH-content, 3 PNT, 3 classical analysis. Click to explore each axiom's role, mathematical statement, and references.",
     icon: "🏛️",
-    stats: "7 crown · 39 total · 0 on converse",
+    stats: "7 crown · 42 total · 0 on converse",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
   },
@@ -39,7 +39,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "🌳",
-    stats: "641 theorems · 43 axioms · 84 files · night-assault",
+    stats: "641 theorems · 42 axioms · 84 files · night-assault",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -163,7 +163,7 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          78 active files. 39 axioms — seven on the crown theorem&apos;s critical path.
+          84 active files. 42 axioms — seven on the crown theorem&apos;s critical path.
           Zero custom axioms on the converse.
           <span className="text-amber-400 text-sm ml-1">cathedral-audit</span>
         </p>
@@ -172,7 +172,7 @@ export default function HomePage() {
           {[
             { color: "bg-emerald-500", text: "78 active files" },
             { color: "bg-red-500", text: "644 theorems" },
-            { color: "bg-amber-500", text: "39 axioms (7 on crown)" },
+            { color: "bg-amber-500", text: "42 axioms (7 on crown)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
             { color: "bg-purple-500", text: "cathedral-audit" },
           ].map((item) => (
@@ -266,7 +266,7 @@ export default function HomePage() {
                 Crown Theorem — 7 COMPILER-VERIFIED AXIOMS
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                <code>#print axioms nyman_beurling_equivalence</code> — rh_implies_mertens_34,
+                <code>#print axioms nyman_beurling_equivalence</code> — rh_implies_mertens_bound,
                 pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k, abel_mertens_tail_raw,
                 millennium_covariance_cancellation, vasyunin_offdiag_integral.
                 Converse: zero custom axioms (pure Mathlib).
