@@ -6,7 +6,7 @@ A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
 **78 active Lean files** across 11 modules, with **2 mathematical axioms** on
 the crown theorem's critical path (verified by `#print axioms`), and
-**40 axioms** total in the active codebase.
+**39 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
 > its entire mathematical content to two precisely stated, well-understood
@@ -47,7 +47,7 @@ The proof decomposes into two pillars:
 
 The crown theorem `nyman_beurling_equivalence` depends on **2 mathematical axioms**
 (verified by `#print axioms`). The full active codebase contains
-**40 axioms** across its proof infrastructure.
+**39 axioms** across its proof infrastructure.
 
 | # | Axiom | Content | Role |
 |---|-------|---------|------|
@@ -73,7 +73,7 @@ discrete formula remains essential for numerical computation (see `experiments/`
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (40 axioms, tiered)
+├── Axioms.lean              ← Axiom registry (39 axioms, tiered)
 ├── Defs.lean                ← Core definitions
 ├── Assembly/        (12)    ← Crown theorems + proof chain
 │   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
@@ -103,7 +103,7 @@ proofs/Cathedral/
 ```
 Active files:   78 Lean files across 11 modules
 Archived:       96 Lean files in Archive/
-Axioms:         2 on crown critical path, 40 total active
+Axioms:         7 on crown critical path, 39 total active
 Sorry:          2 in active codebase (0 on crown path)
 Errors:         0
 Tag:            cathedral-audit

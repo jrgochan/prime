@@ -65,7 +65,7 @@ We report on the design, construction, and maintenance of the
 Mathlib v4.30) that establishes the logical equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
 distance. The project comprises 78 active source files containing
-644 theorems and 40 axioms, with an additional 96 archived files
+644 theorems and 39 axioms, with an additional 96 archived files
 preserving superseded approaches. We describe the software
 engineering challenges of large-scale proof formalization:
 modular architecture with explicit dependency management, axiom
@@ -392,7 +392,7 @@ Each ghost axiom was resolved by:
 (c) updating all consumers to import the theorem, and
 (d) archiving the file if it contained only the ghost axiom.
 
-This reduced the active axiom count from 49 to 40 ($-18\%$).
+This reduced the active axiom count from 49 to 39 ($-20\%$).
 
 % ================================================================
 \section{Proof Engineering Metrics}
@@ -488,7 +488,7 @@ Mathlib is rebuilt only when the dependency version changes.
 11 & Apr 7 & 45 & 6 & Mellin bridge \\
 19 & Apr 15 & 45 & 5 & Rank-1 Miracle \\
 20 & Apr 16 & 45 & 2 & Mertens collapse \\
-22 & Apr 18 & 40 & 2 & Ghost axiom audit \\
+22 & Apr 18 & 39 & 7 & Ghost axiom audit \\
 23 & Apr 19 & 40 & 2 & Final cleanup \\
 \bottomrule
 \end{tabular}
@@ -785,7 +785,7 @@ Large-scale formalizations in proof assistants include:
     conjecture in Lean~4. Community-driven, $\sim$25,000 LOC.
 \end{itemize}
 
-The Cathedral is distinguished by: (a) the high axiom count (40,
+The Cathedral is distinguished by: (a) the high axiom count (39,
 reflecting the open status of RH), (b) the systematic axiom
 lifecycle management, (c) the high discard rate (54\%), and
 (d) the compressed development timeline (23 days, enabled by

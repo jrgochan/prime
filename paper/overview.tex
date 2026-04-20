@@ -28,11 +28,12 @@ $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 
 The formalization---the \emph{Cathedral}---comprises 78 active Lean files
 (with 96 archived) across 11 modules. The crown theorem depends
-on exactly \textbf{two mathematical axioms}: one for analytic continuation
-of the B\'aez-Duarte Mellin identity, and one quarantining the forward
-direction ($\mathrm{RH} \implies d_N^2 \to 0$) as a single axiom.
-The forward direction uses the Parseval--Plancherel bridge,
-completely bypassing the discrete Vasyunin cotangent sums.
+on exactly \textbf{seven mathematical axioms}: one encoding the Riemann
+Hypothesis via the Mertens bound, three Prime Number Theorem limits,
+and three classical analysis results (Abel summation, covariance
+cancellation, and the Vasyunin integral identity).
+The converse direction ($d_N^2 \to 0 \implies \mathrm{RH}$) uses
+\textbf{zero custom axioms}---it is pure Lean/Mathlib.
 
 Companion Rust experiments validate the spectral correspondence to
 15 digits of precision, confirming $Q_N \sim C \ln N$ where
@@ -42,15 +43,15 @@ $C = 1/(2 + \gamma - \ln 4\pi) \approx 21.65$.
 \section{What Did We Do?}
 
 We used \textbf{Lean~4} to reduce the 167-year-old Riemann Hypothesis
-to two precisely stated, well-understood mathematical facts. Everything
-else---the Nyman--Beurling theory, Sherman--Morrison, Abel summation,
+to seven precisely stated, well-understood mathematical facts. Everything
+else---the Nyman--Beurling theory, Sherman--Morrison,
 Rank-1 Mellin separation---is compiler-verified.
 
 \textbf{We did not prove RH.} We built a machine-verified containment
 vessel that identifies exactly which mathematical facts remain unformalized,
 proves everything else, and reduces the entire century-old problem to
 a clean modular architecture with seven axiom sockets on the crown
-theorem's critical path (40 axioms total in the active codebase).
+theorem's critical path (39 axioms total in the active codebase).
 
 \section{The Crown Theorem}
 
@@ -68,28 +69,34 @@ $d_N^2 \to 0$. The proof decomposes into two pillars:
 \item \textbf{Pillar~I (Converse)}: $d_N^2 \to 0 \implies \mathrm{RH}$.
   Via the Rank-1 Mellin Miracle and contrapositive argument.
 \item \textbf{Pillar~II (Forward)}: $\mathrm{RH} \implies d_N^2 \to 0$.
-  Via the B\'aez-Duarte theorem (quarantined as a single axiom).
+  Via the Mertens bound, PNT limits, Abel summation, and the
+  Vasyunin integral identity (decomposed into seven axioms).
 \end{itemize}
 
-\section{The Two Crown Axioms}
+\section{The Seven Crown Axioms}
 
 Verified by \texttt{\#print axioms nyman\_beurling\_equivalence}:
 
 \begin{table}[h]
 \centering
-\begin{tabular}{@{}llp{5cm}@{}}
+\begin{tabular}{@{}llp{5.5cm}@{}}
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} \\
 \midrule
-1 & \texttt{bd\_mellin\_at\_zero} & Analytic continuation of BD Mellin identity to $\mathrm{Re}\,s > 0$ \\
-2 & \texttt{rh\_implies\_l2\_convergence} & $\mathrm{RH} \implies d_N^2 \to 0$ (B\'aez-Duarte, 2003) \\
+1 & \texttt{rh\_implies\_mertens\_34} & RH $\implies |M(x)| = O(x^{3/4})$ \\
+2 & \texttt{pnt\_mu\_div\_k} & $\sum \mu(k)/k \to 0$ (PNT) \\
+3 & \texttt{pnt\_mu\_log\_div\_k} & $\sum \mu(k)\log k/k \to -1$ (PNT) \\
+4 & \texttt{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(k)\log^2 k/k \to -2\gamma$ (PNT) \\
+5 & \texttt{abel\_mertens\_tail\_raw} & Abel summation tail bounds \\
+6 & \texttt{millennium\_covariance\_cancellation} & 2D covariance bound \\
+7 & \texttt{vasyunin\_eq\_integral} & Gram entry = integral (Vasyunin 1995) \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \noindent Plus Lean kernel axioms: \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}.
-\noindent The full codebase contains 40 axioms across 78 files; only the above 2 are
-on the crown theorem's critical path.
+\noindent The full codebase contains 39 axioms across 78 files; only the above 7 are
+on the crown theorem's critical path. The converse direction uses zero custom axioms.
 
 \section{The Parseval Bridge}
 
@@ -170,7 +177,11 @@ in \texttt{Archive/}.
 \noindent To inspect the axiom foundation:
 \begin{verbatim}
 #print axioms nyman_beurling_equivalence
--- bd_mellin_at_zero, rh_implies_l2_convergence
+-- rh_implies_mertens_34, pnt_mu_div_k,
+-- pnt_mu_log_div_k, pnt_mu_log_sq_div_k,
+-- abel_mertens_tail_raw,
+-- millennium_covariance_cancellation,
+-- vasyunin_eq_integral
 -- (plus propext, Classical.choice, Quot.sound)
 \end{verbatim}
 
@@ -184,7 +195,7 @@ and Anthropic's Claude (Antigravity) for Lean~4 proof engineering,
 Abel summation formalization, and the Parseval Bridge implementation.
 All proofs are compiler-verified.
 
-The axiom reduction---from 56 to 40 active (2 on the crown critical path)---was
+The axiom reduction---from 56 to 39 active (7 on the crown critical path)---was
 accomplished through four campaigns (Alpha--Delta) of systematic formalization
 and a deep codebase audit over three weeks.
 The calculus limit $\ln(\ln N)/\ln N \to 0$ was proved purely algebraically

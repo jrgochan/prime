@@ -59,7 +59,7 @@ equivalence
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^N v_k \fract{1/(kx)})^2\,dx$
 is the Nyman--Beurling distance in the B\'aez-Duarte basis. The
 formalization comprises 78 active Lean files with zero compilation errors,
-resting on 40 mathematical axioms. Of these, only 2 appear on the critical
+resting on 39 mathematical axioms. Of these, only 7 appear on the critical
 path of the crown theorem \lean{nyman\_beurling\_equivalence}: one
 encoding the analytic continuation of the B\'aez-Duarte Mellin identity,
 and one encoding the $L^2$ convergence of the B\'aez-Duarte approximation
@@ -437,7 +437,7 @@ mean value theorem, contour shifting).
 
 \subsection{The Full Axiom Registry}
 
-The complete codebase contains 40 axioms across 78 active files,
+The complete codebase contains 39 axioms across 78 active files,
 organized by tier:
 
 \begin{center}
@@ -651,7 +651,7 @@ but remained as axioms due to the modular file structure. For example,
 \lean{nyman\_beurling\_equivalence} existed simultaneously as an axiom in
 \lean{IntegralBasis/BaezDuarte.lean} and as a theorem in
 \lean{Assembly/MainChain.lean}. The audit identified and archived all
-such duplicates, reducing the axiom count from 49 to 40.
+such duplicates, reducing the axiom count from 49 to 39.
 
 % ================================================================
 \section{Formalization Methodology}

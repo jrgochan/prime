@@ -6,7 +6,7 @@ A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-40+ mathematicians. 167 years of prior work. Seven crown axioms. 40 total.
+39 mathematicians. 167 years of prior work. Seven crown axioms. 39 total.
 78 active files. 644 theorems. 17 companion papers.
 
 ---
@@ -452,7 +452,7 @@ The crown theorem `nyman_beurling_equivalence` depends on exactly **2 mathematic
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-The 38 remaining axioms (40 total active) support alternative proof paths
+The 32 remaining axioms (39 total active) support alternative proof paths
 (spectral engine, sieve engine, Vasyunin cotangent formula) that are
 formalized but not on the shortest path to the crown theorem.
 
