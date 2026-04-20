@@ -46,6 +46,13 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.StirlingBridge,
     `Cathedral.Vasyunin.Cotangent.PiecewiseFTC,
     `Cathedral.Vasyunin.Cotangent.SqueezeElimination,
+    -- Cotangent tower (off-diagonal infrastructure)
+    `Cathedral.Vasyunin.Cotangent.CrossTermFTC,
+    `Cathedral.Vasyunin.Cotangent.OffDiagPartition,
+    `Cathedral.Vasyunin.Cotangent.TelescopeSum,
+    `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
+    `Cathedral.Vasyunin.Cotangent.DigammaReflection,
+    `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,
     `Cathedral.Vasyunin.Augmented.IntegralBridge,
     `Cathedral.Vasyunin.Proof.LambdaTrick,
