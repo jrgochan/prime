@@ -6,7 +6,7 @@ A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-40+ mathematicians. 167 years of prior work. Two crown axioms. 40 total.
+40+ mathematicians. 167 years of prior work. Seven crown axioms. 40 total.
 78 active files. 644 theorems. 17 companion papers.
 
 ---
@@ -21,7 +21,7 @@ traces back to published mathematics listed here.
   > The original conjecture: all non-trivial zeros of ζ(s) have real part ½.
   > In the Cathedral, RH is encoded via the Nyman–Beurling equivalence:
   > d²_N → 0, machine-verified equivalent to RH via
-  > `nyman_beurling_equivalence` (both directions, zero sorry, 2 crown axioms).
+  > `nyman_beurling_equivalence` (both directions, zero sorry, 7 crown axioms).
 
 ### The Nyman–Beurling Criterion
 

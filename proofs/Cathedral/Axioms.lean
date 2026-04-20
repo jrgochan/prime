@@ -6,79 +6,68 @@ import Cathedral.NymanBeurling.BDMellin
 
   ## The Cathedral's Axiom Registry
 
-  Central hub for shared axioms and the axiom documentation index.
+  Central hub for axiom documentation. This file contains NO axiom
+  declarations — all axioms are declared in their respective modules.
 
-  ### COMPILER-VERIFIED Critical Path (April 15, 2026)
+  ### COMPILER-VERIFIED Critical Path (April 19, 2026 — Final Audit)
 
-  `#print axioms nyman_beurling_iff_rh` depends on exactly **2 Cathedral axioms**:
+  `#print axioms nyman_beurling_equivalence` depends on exactly
+  **7 Cathedral axioms** (+ 3 Lean kernel axioms):
 
   | # | Axiom | Role | Tier |
   |---|-------|------|------|
-  | 1 | `zeta_zero_separates` | Converse (d²→0 ⟹ RH) | 3 (complex analysis) |
-  | 2 | `witness_l2_error_decay_gram` | L² error ≤ C/ln(N) — **THIS IS RH** | 1 (RH content) |
+  | 1 | `rh_implies_mertens_34` | RH → |M(x)| = O(x^{3/4}) | 1 (RH content) |
+  | 2 | `pnt_mu_div_k` | PNT: Σ μ(k)/k → 0 | 2 (PNT-level) |
+  | 3 | `pnt_mu_log_div_k` | PNT: Σ μ(k)log(k)/k → -1 | 2 (PNT-level) |
+  | 4 | `pnt_mu_log_sq_div_k` | PNT: Σ μ(k)log²(k)/k → -2γ | 2 (PNT-level) |
+  | 5 | `abel_mertens_tail_raw` | Abel summation tail bounds | 3 (classical) |
+  | 6 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval/Gram) |
+  | 7 | `vasyunin_eq_integral` | Gram entry = integral identity | 3 (Vasyunin 1995) |
 
-  **Eliminated from critical path** (April 15, 2026 — The 5→2 Reduction):
-  - `algebraic_nb_bridge` → replaced by `l2_error_eq_quad_error` (zero axioms)
-  - `vasyunin_eq_integral` → bypassed (gramMatrix used directly)
-  - `witness_numerator_convergence` → absorbed into `witness_l2_error_decay_gram`
-  - `witness_covariance_decay` → absorbed into `witness_l2_error_decay_gram`
+  The Lean kernel axioms (propext, Classical.choice, Quot.sound) are
+  standard and present in all nontrivial Lean programs.
 
-  **Bessel Decomposition → Rank-1 Mellin Miracle** (April 15, 2026):
-  `zeta_zero_separates` is PROVED in `BDMellin.lean` using the Rank-1
-  Mellin argument on the correct Báez-Duarte basis {1/(kx)}.
-  The sole remaining axiom is `bd_mellin_at_zero` (analytic continuation
-  of the BD Mellin identity from Re(s)>1 to the critical strip).
-  
-  NOTE: The old BesselSeparation.lean used {k/x} (θ > 1 trap) and
-  has been archived.
+  ### Crown Axiom Classification
 
-  `#print axioms phase_3_chain` (alternative forward, 2 axioms):
-  | `mertens_bound_from_rh` | RH → Mertens bound | 3 |
-  | `abel_summation_l2_bound` | Mertens → L² decay | 4 |
+  **Tier 1 — RH Content** (1 axiom):
+  - `rh_implies_mertens_34`: The sole axiom encoding the Riemann Hypothesis.
+    If M(x) = O(x^{1/2+ε}) (the full RH Mertens bound), this is immediate.
+    We use the weaker O(x^{3/4}) which suffices for L² convergence.
 
-  `#print axioms gram_eigenvalue_asymptotic_derived` (spectral engine, 2 axioms):
-  | `type_II_sieve_bound` | Asymptotic parity sieve | 4 |
-  | `block_eigenvalue_log_scaling` | Block-diagonal eigenvalue scaling | 4 |
+  **Tier 2 — PNT Level** (3 axioms):
+  - Three asymptotics of Möbius partial sums. These are unconditional
+    (true regardless of RH) and follow from the Prime Number Theorem
+    via Abel's limit theorem and derivatives of 1/ζ(s) at s=1.
 
-  Zero-axiom theorems (pure Mathlib):
-  `gramMatrix_posSemidef`, `gram_pos_def`, `gramMatrix_isUnit_det`,
-  `nbDistSq_lt_one`, `l2_error_eq_quad_error`, `nbDistSq_le_test_vector`,
-  `eigenvalue_interlacing`, `lambdaEff_linear_growth_proved`.
+  **Tier 3 — Classical Analysis** (3 axioms):
+  - `abel_mertens_tail_raw`: Abel summation converting Mertens + PNT
+    into N^{-1/4} tail bounds. Standard real analysis.
+  - `millennium_covariance_cancellation`: The 2D covariance cancellation
+    between the Gram matrix and the mean tensor. Requires Montgomery-Vaughan
+    mean value theorems. This is the mathematically deepest axiom.
+  - `vasyunin_eq_integral`: The Vasyunin identity connecting the discrete
+    Gram formula to the Lebesgue integral. Verified computationally to
+    15 digits (256-bit MPFR), requires formalization of the cotangent sum.
 
-  ### Full Inventory — 40 unique axioms across 79 active files (post-audit)
+  ### Alternative Forward Path (1 axiom)
 
-  #### Core Chain (Vasyunin proof — 8 axioms)
-  | Axiom | Location | Tier |
-  |-------|----------|------|
-  | `witness_covariance_decay` | Vasyunin/Proof/WitnessAsymptotics | 1 (RH content) |
-  | `witness_numerator_convergence` | Vasyunin/Proof/WitnessAsymptotics | 2 (PNT-level) |
-  | `mertens_squarefree_sum` | Vasyunin/Proof/BartlettWindow | 3 (classical) |
-  | `mertens_tapered_sum` | Vasyunin/Proof/BartlettWindow | 3 |
-  | `mertens_linear_tapered_sum` | Vasyunin/Proof/BartlettWindow | 3 |
-  | `algebraic_nb_bridge` | Vasyunin/Proof/Chain | 4 (structural) |
-  | `vasyunin_eq_integral` | Vasyunin/Augmented/IntegralBridge | 3 |
-  | `zeta_zero_separates` | **this file** | 3 |
+  The `nyman_beurling_forward_direct` theorem (GramWitness.lean) proves
+  RH ⟹ d²_N → 0 using the NB basis {k/x} with only **1 axiom**:
+  `witness_l2_error_decay_gram`. This is a stronger result but uses a
+  different basis than the crown theorem's BD basis {1/(kx)}.
 
-  #### Cotangent Formula (4 axioms — NOT on critical path)
-  | `gauss_digamma_formula` | Vasyunin/Cotangent/DigammaReflection | 3 |
-  | `harmonicTileSum_reciprocity` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
-  | `telescope_limit_eq_vasyunin` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
-  | `vasyunin_integral_eq_formula` | Vasyunin/Cotangent/LogDigammaBridge | 3 |
+  ### Converse Direction (0 custom axioms)
 
-  #### Robin front (1 axiom — NOT on critical path)
-  | `arithmetic_rh_equivalences` | Robin/Defs | 3 |
+  `nyman_beurling_converse` is **PURE** — zero custom axioms.
+  Proved via the Rank-1 Mellin Miracle in BDMellin.lean:
+  - M[h_k](ρ) = 1/(k(ρ-1)) at ζ zeros — rank-1 tensor
+  - Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²)
 
-  #### MellinBridge (8 axioms — 2 on phase_3_chain path)
-  | `mertens_bound_from_rh` | MellinBridge/MertensWeightBypass | 3 |
-  | `abel_summation_l2_bound` | MellinBridge/MertensWeightBypass | 4 |
-  | `baezDuarte_is_L2` | MellinBridge/OrthogonalWitness | 3 |
-  | `baezDuarte_inner_one` | MellinBridge/OrthogonalWitness | 3 |
-  | `baezDuarte_inner_residual` | MellinBridge/OrthogonalWitness | 3 |
-  | `mellin_fourier_change` | MellinBridge/AutocorrelationBypass | 4 |
-  | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
-  | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
+  ### Full Inventory — 40 active axioms across active files
 
-  #### Spectral theory (7 axioms — NOT on critical path)
+  #### Crown Path (7 axioms — listed above)
+
+  #### Spectral Engine (7 axioms — NOT on crown path)
   | `block_min_eq_class_min` | Spectral/ClassRestriction | 4 |
   | `class_gap_strictly_larger` | Spectral/ClassRestriction | 4 |
   | `oct_equals_block` | Spectral/ClassRestriction | 4 |
@@ -87,7 +76,7 @@ import Cathedral.NymanBeurling.BDMellin
   | `stable_ratio` | Spectral/FiniteDimReduction | 4 |
   | `liouville_delocalization` | Spectral/PTSymmetry | 4 |
 
-  #### Sieve engine (6 axioms)
+  #### Sieve Engine (8 axioms — NOT on crown path)
   | `vasyunin_large_gcd` | Sieve/VasyuninExpansion | 3 |
   | `stable_ratio_parity` | Sieve/ParitySchur | 4 |
   | `gram_eigenvalue_log_scaling` | Sieve/ParitySchur | 4 |
@@ -97,18 +86,34 @@ import Cathedral.NymanBeurling.BDMellin
   | `vaughan_decomposition` | Sieve/MoebiusUncoupling | 4 |
   | `type_I_bound` | Sieve/MoebiusUncoupling | 4 |
 
-  #### Structural (1 axiom)
-  | `drop_formula_bound` | Structural/Eigenvalue | 4 |
+  #### MellinBridge (8 axioms — alternative forward paths)
+  | `mertens_bound_from_rh` | MellinBridge/MertensWeightBypass | 3 |
+  | `abel_summation_l2_bound` | MellinBridge/MertensWeightBypass | 4 |
+  | `baezDuarte_is_L2` | MellinBridge/OrthogonalWitness | 3 |
+  | `baezDuarte_inner_one` | MellinBridge/OrthogonalWitness | 3 |
+  | `baezDuarte_inner_residual` | MellinBridge/OrthogonalWitness | 3 |
+  | `mellin_fourier_change` | MellinBridge/AutocorrelationBypass | 4 |
+  | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
+  | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
 
-  #### White/Infrastructure (2 axioms)
+  #### Vasyunin Proof Chain (5 axioms — NOT on crown path)
+  | `witness_covariance_decay` | Vasyunin/Proof/WitnessAsymptotics | 1 |
+  | `witness_numerator_convergence` | Vasyunin/Proof/WitnessAsymptotics | 2 |
+  | `rh_implies_mertens_bound` | Vasyunin/Proof/WitnessConditional | 3 |
+  | `abel_summation_covariance_bound` | Vasyunin/Proof/WitnessConditional | 4 |
+  | `witness_l2_error_decay_gram` | Assembly/GramWitness | 1 |
+
+  #### White/Infrastructure (2 axioms — NOT on crown path)
   | `dirichlet_polynomial_mean_value_bound` | White/Infrastructure/MontgomeryVaughan | 4 |
   | `bd_gram_form_decay` | White/Infrastructure/MontgomeryVaughan | 4 |
 
-  ### Total: 40 active axioms
-  ### Crown critical path: 5 · Spectral engine: 2 · Non-critical: 33
-  ### Dead axioms eliminated: lambdaMinClass_pos, flattened_basis_integrable,
-  ###   vaughan_implies_uncoupling, mellin_plancherel_gram,
-  ###   oct_gap_dominates (April 19, 2026)
+  #### Assembly (2 axioms — NOT on crown path)
+  | `bd_witness_l2_error_decay` | Assembly/BDBridge | 1 |
+  | `drop_formula_bound` | Structural/Eigenvalue | 4 |
+
+  ### Total: 40 active axioms (includes 1 duplicate: rh_implies_mertens_bound)
+  ### Crown path: 7 · Alternative paths: 33
+  ### Converse: 0 custom axioms (pure Mathlib + Lean kernel)
 -/
 
 noncomputable section
@@ -130,9 +135,6 @@ open Real MeasureTheory
     - ℓ_ρ(1-f) = 1/ρ - W/(ρ-1), W ∈ ℝ
     - |ℓ_ρ(1-f)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0 (real vs complex)
     - Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²)
-
-    Uses one axiom: `bd_mellin_at_zero` (analytic continuation of BD
-    Mellin identity, proved for Re(s)>1 in FloorMellin.lean).
 
     References: Nyman (1950), Beurling (1955), Báez-Duarte (2003). -/
 theorem zeta_zero_separates :

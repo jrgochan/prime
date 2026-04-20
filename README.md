@@ -113,7 +113,7 @@ Tag:            cathedral-audit
 
 | Result | Status |
 |--------|--------|
-| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (2 axioms) |
+| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (7 axioms) |
 | `rh_implies_bd_witness_decay` — RH ⟹ L² decay | **Proved** (from axioms) |
 | `abel_summation_bd_l2_bound_proved` — Mertens → L² bound | **Proved** |
 | `augmentedGramMatrix_posDef` — H_N PD for all N ≥ 1 | **Proved** (0 axioms) |
