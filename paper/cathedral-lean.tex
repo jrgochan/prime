@@ -264,7 +264,8 @@ Mertens function & Formalization of $M(x) = \sum_{n \leq x} \mu(n)$
   with asymptotics & Medium \\
 Montgomery--Vaughan & $L^2$ mean value theorems for Dirichlet
   polynomials on the critical line & Hard \\
-Dedekind sums & Vasyunin cotangent formula via reciprocity & Medium \\
+Dedekind sums \& Vasyunin cotangent formula via reciprocity
+  (diagonal case proved; off-diagonal requires Gauss digamma) & Medium \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -372,7 +373,7 @@ axiom, even if axioms are declared in their respective modules:
 /-!
 # Cathedral Axiom Registry
 Total: 39 axioms (7 on crown path)
-Last audit: April 19, 2026
+Last audit: April 20, 2026
 
 ## Crown Path Axioms (compiler-verified)
 1. rh_implies_mertens_34            -- RH content
@@ -381,7 +382,11 @@ Last audit: April 19, 2026
 4. pnt_mu_log_sq_div_k              -- PNT limit
 5. abel_mertens_tail_raw            -- Abel summation
 6. millennium_covariance_cancellation -- Covariance
-7. vasyunin_eq_integral             -- Gram = integral
+7. vasyunin_offdiag_integral        -- Off-diag Gram
+
+## Eliminated Axioms (April 20, 2026)
+-- vasyunin_eq_integral  -> THEOREM (diagonal proved)
+-- fract_sq_integral     -> THEOREM (Stirling+Squeeze)
 ...
 -/
 \end{lstlisting}
