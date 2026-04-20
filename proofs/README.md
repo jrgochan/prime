@@ -18,7 +18,7 @@ crown theorem `nyman_beurling_equivalence`.
 
 ```
 Cathedral/
-├── Axioms.lean                            — Axiom registry (43 axioms, tiered)
+├── Axioms.lean                            — Axiom registry (42 axioms, tiered)
 ├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, bdLinComb)
 │
 ├── Assembly/              (12 files)      — CROWN: Main proof chain

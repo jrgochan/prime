@@ -449,7 +449,7 @@ The crown theorem `nyman_beurling_equivalence` depends on exactly **7 mathematic
 
 | Cathedral Axiom | Mathematical Content | References |
 |---|---|---|
-| `rh_implies_mertens_34` | RH → \|M(x)\| = O(x^{3/4}) | Titchmarsh 1986, Mertens 1874 |
+| `rh_implies_mertens_bound` | RH → \|M(x)\| = O(x^{3/4}) | Titchmarsh 1986, Mertens 1874 |
 | `pnt_mu_div_k` | Σ μ(k)/k → 0 (PNT) | Selberg 1949, de la Vallée-Poussin 1896 |
 | `pnt_mu_log_div_k` | Σ μ(k)log(k)/k → -1 (PNT) | Selberg 1949 |
 | `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ (PNT) | Selberg 1949, Euler 1740 |

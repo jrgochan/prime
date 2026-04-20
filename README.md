@@ -6,7 +6,7 @@ A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
 **84 active Lean files** across 11 modules, with **7 mathematical axioms** on
 the crown theorem's critical path (verified by `#print axioms`), and
-**43 axioms** total in the active codebase.
+**42 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
 > its entire mathematical content to seven precisely stated, well-understood
@@ -48,11 +48,11 @@ The proof decomposes into two pillars:
 
 The crown theorem `nyman_beurling_equivalence` depends on **7 mathematical axioms**
 (verified by `#print axioms`). The full active codebase contains
-**43 axioms** across its proof infrastructure.
+**42 axioms** across its proof infrastructure.
 
 | # | Axiom | Content | Tier |
 |---|-------|---------|------|
-| 1 | `rh_implies_mertens_34` | RH → \|M(x)\| = O(x^{3/4}) | 1 (RH content) |
+| 1 | `rh_implies_mertens_bound` | RH → \|M(x)\| = O(x^{1/2} log²x) | 1 (RH content) |
 | 2 | `pnt_mu_div_k` | Σ μ(k)/k → 0 | 2 (PNT) |
 | 3 | `pnt_mu_log_div_k` | Σ μ(k)log(k)/k → -1 | 2 (PNT) |
 | 4 | `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ | 2 (PNT) |
@@ -79,7 +79,7 @@ discrete formula remains essential for numerical computation (see `experiments/`
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (43 axioms, tiered)
+├── Axioms.lean              ← Axiom registry (42 axioms, tiered)
 ├── Defs.lean                ← Core definitions
 ├── Assembly/        (12)    ← Crown theorems + proof chain
 │   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
@@ -109,7 +109,7 @@ proofs/Cathedral/
 ```
 Active files:   84 Lean files across 11 modules
 Archived:       96 Lean files in Archive/
-Axioms:         7 on crown critical path, 43 total active
+Axioms:         7 on crown critical path, 42 total active
 Sorry:          2 in active codebase (0 on crown path)
 Errors:         0
 Tag:            night-assault
