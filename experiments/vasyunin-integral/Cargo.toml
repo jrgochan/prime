@@ -1,0 +1,9 @@
+[package]
+name = "vasyunin-integral-verifier"
+version = "0.1.0"
+edition = "2021"
+description = "High-precision verification: G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx"
+
+[dependencies]
+rug = { version = "1", features = ["float"] }
+rayon = "1"
