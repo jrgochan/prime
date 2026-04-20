@@ -1,7 +1,7 @@
 /-
   Cathedral/Vasyunin/Augmented/IntegralBridge.lean
 
-  **THE INTEGRAL BRIDGE AXIOMS**
+  **THE INTEGRAL BRIDGE**
 
   Connects the Vasyunin discrete formulas to Lebesgue integrals.
   Extracted from GramPSD.lean to avoid import cycles.
@@ -10,11 +10,15 @@
   a theorem proved in MeanIntegral.lean via piecewise integration +
   the Euler-Mascheroni limit.
 
-  ONE axiom remains: the Gram entry identity (Vasyunin 1995).
+  The Gram entry axiom has been REPLACED (April 20, 2026) with a theorem
+  delegating to VasyuninIntegralProof:
+    - Diagonal case: PROVED via substitution + FTC
+    - Off-diagonal case: axiomatized as vasyunin_offdiag_integral
 -/
 
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Augmented.MeanIntegral
+import Cathedral.Vasyunin.Augmented.VasyuninIntegralProof
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section
@@ -22,7 +26,7 @@ open Real
 
 namespace Cathedral.Vasyunin
 
-/-- **THE INTEGRAL BRIDGE.**
+/-- **THE INTEGRAL BRIDGE** (was axiom — now THEOREM).
 
     The Vasyunin discrete formula computes the same value as the
     Lebesgue integral of the product of Báez-Duarte basis functions.
@@ -31,15 +35,16 @@ namespace Cathedral.Vasyunin
     The Vasyunin cotangent formula is the Gram matrix of {1/(kx)}.
     (See RED ALERT memo — verified numerically April 11, 2026.)
 
-    We open the door to the continuous world exactly once, steal the
-    positivity, and close it.
+    Diagonal case: PROVED (April 20, 2026) via substitution u=kx + FTC.
+    Off-diagonal case: via vasyunin_offdiag_integral axiom.
 
     Source: Vasyunin (1995), Báez-Duarte et al. (2005 Acta Arithmetica).
-    Verified computationally in Attack 7 (256-bit MPFR, 15-digit match). -/
-axiom vasyunin_eq_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) :
+    Verified computationally: 256-bit MPFR, 6-7 digit match (April 20, 2026). -/
+theorem vasyunin_eq_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) :
     vasyuninGramEntry j k =
     ∫ x in (0:ℝ)..1,
-      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
+      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x)) :=
+  IntegralProof.vasyunin_eq_integral_proved j k hj hk
 
 /-- **THE MEAN ENTRY INTEGRAL IDENTITY** (was axiom — now THEOREM).
 
