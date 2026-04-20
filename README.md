@@ -4,9 +4,9 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**78 active Lean files** across 11 modules, with **7 mathematical axioms** on
+**84 active Lean files** across 11 modules, with **7 mathematical axioms** on
 the crown theorem's critical path (verified by `#print axioms`), and
-**39 axioms** total in the active codebase.
+**43 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
 > its entire mathematical content to seven precisely stated, well-understood
@@ -17,7 +17,7 @@ the crown theorem's critical path (verified by `#print axioms`), and
 > Nyman–Beurling theory, Sherman–Morrison, Rank-1 Mellin separation,
 > Plancherel, variational principles—is compiler-verified.
 
-> **Release: cathedral-audit** — April 19, 2026
+> **Release: night-assault** — April 20, 2026
 
 ## Quick Start
 
@@ -48,7 +48,7 @@ The proof decomposes into two pillars:
 
 The crown theorem `nyman_beurling_equivalence` depends on **7 mathematical axioms**
 (verified by `#print axioms`). The full active codebase contains
-**39 axioms** across its proof infrastructure.
+**43 axioms** across its proof infrastructure.
 
 | # | Axiom | Content | Tier |
 |---|-------|---------|------|
@@ -58,7 +58,7 @@ The crown theorem `nyman_beurling_equivalence` depends on **7 mathematical axiom
 | 4 | `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ | 2 (PNT) |
 | 5 | `abel_mertens_tail_raw` | Abel summation tail bounds | 3 (classical) |
 | 6 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval) |
-| 7 | `vasyunin_eq_integral` | Gram entry = integral (Vasyunin 1995) | 3 (classical) |
+| 7 | `vasyunin_offdiag_integral` | Off-diagonal Gram = integral (diagonal PROVED) | 3 (classical) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
@@ -79,7 +79,7 @@ discrete formula remains essential for numerical computation (see `experiments/`
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (39 axioms, tiered)
+├── Axioms.lean              ← Axiom registry (43 axioms, tiered)
 ├── Defs.lean                ← Core definitions
 ├── Assembly/        (12)    ← Crown theorems + proof chain
 │   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
@@ -94,7 +94,7 @@ proofs/Cathedral/
 │   ├── BDMellin.lean        ← BD basis + Rank-1 Mellin Miracle
 │   ├── Separation.lean      ← Converse: d²→0 ⟹ RH (Pillar I)
 │   └── ThetaBound.lean      ← ζ(s) ≠ 0 on (0,1) (0 axioms!)
-├── Vasyunin/        (15)    ← Matrix + witness proofs
+├── Vasyunin/        (21)    ← Matrix + witness + Cotangent tower
 ├── White/           (4)     ← Axiom elimination proofs
 ├── Gram/            (6)     ← Gram matrix L² bounds
 ├── Spectral/        (5)     ← Eigenvalue analysis
@@ -107,12 +107,12 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   78 Lean files across 11 modules
+Active files:   84 Lean files across 11 modules
 Archived:       96 Lean files in Archive/
-Axioms:         7 on crown critical path, 39 total active
+Axioms:         7 on crown critical path, 43 total active
 Sorry:          2 in active codebase (0 on crown path)
 Errors:         0
-Tag:            cathedral-audit
+Tag:            night-assault
 ```
 
 ## Key Results (All Machine-Verified)

@@ -1,13 +1,13 @@
 # References — The Cathedral
 
-**cathedral-audit** — April 19, 2026
+**night-assault** — April 20, 2026
 
 A complete bibliography of the mathematical results used in the formal
 verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
-39 mathematicians. 167 years of prior work. Seven crown axioms. 39 total.
-78 active files. 644 theorems. 22 companion papers.
+39 mathematicians. 167 years of prior work. Seven crown axioms. 43 total.
+84 active files. 641 theorems. 22 companion papers.
 
 ---
 
@@ -57,7 +57,8 @@ traces back to published mathematics listed here.
 
   > The Vasyunin cotangent sum formula gives G(j,k) as a finite, closed-form
   > expression involving gcd, log, and cotangent — eliminating all integrals.
-  > This is axiom `vasyunin_eq_integral` in the Cathedral.
+  > The diagonal case G(k,k) has been **proved as a theorem** (Stirling + FTC).
+  > The off-diagonal case remains as axiom `vasyunin_offdiag_integral`.
 
 ---
 
@@ -392,7 +393,8 @@ traces back to published mathematics listed here.
   > The Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} {mb/a} cot(πm/a)
   > is related to classical Dedekind sums. The reciprocity law for
   > Dedekind sums may provide the skeleton key for eliminating
-  > `vasyunin_eq_integral`.
+  > `vasyunin_offdiag_integral` (the off-diagonal case; the diagonal
+  > was proved via Stirling + piecewise FTC on April 20, 2026).
 
 ---
 
@@ -453,14 +455,14 @@ The crown theorem `nyman_beurling_equivalence` depends on exactly **7 mathematic
 | `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ (PNT) | Selberg 1949, Euler 1740 |
 | `abel_mertens_tail_raw` | Abel summation tail bounds | Abel 1826 |
 | `millennium_covariance_cancellation` | 2D covariance bound (Parseval) | Plancherel 1910 |
-| `vasyunin_eq_integral` | Gram entry = integral (Vasyunin 1995) | Vasyunin 1996, Báez-Duarte 2005 |
+| `vasyunin_offdiag_integral` | Off-diagonal Gram = integral (diagonal PROVED) | Vasyunin 1996, Báez-Duarte 2005 |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 The converse direction uses **zero custom axioms** (pure Lean/Mathlib).
 
-The 32 remaining axioms (39 total active) support alternative proof paths
-(spectral engine, sieve engine, Vasyunin cotangent formula) that are
-formalized but not on the shortest path to the crown theorem.
+The 36 remaining axioms (43 total active) support alternative proof paths
+(spectral engine, sieve engine, Vasyunin cotangent formula, Cotangent tower)
+that are formalized but not on the shortest path to the crown theorem.
 
 ## How Eliminated Axioms Were Proved
 
@@ -477,6 +479,8 @@ formalized but not on the shortest path to the crown theorem.
 | `abel_summation_l2_bound` | Abel summation siege proof | Abel 1826 |
 | `divisor_sum_swap` | Finset bijection | Dirichlet 1863 |
 | `mellin_fourier_scale` | Fourier-Mellin CoV (White Singlet) | Mellin 1896 |
+| `vasyunin_eq_integral` (diagonal) | Stirling + piecewise FTC | Stirling 1730, Euler 1740 |
+| `fract_sq_integral` | Stirling + squeeze elimination | Stirling 1730 |
 
 ---
 
@@ -523,4 +527,4 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ---
 
-*Last updated: April 19, 2026 — cathedral-audit*
+*Last updated: April 20, 2026 — night-assault*

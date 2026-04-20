@@ -6,18 +6,19 @@ reduction of the Riemann Hypothesis to the decay of the Nyman–Beurling distanc
 ## Build
 
 ```bash
-lake build    # 78 active files, 96 archived
+lake build    # 84 active files, 96 archived
 ```
 
-## Architecture (Post-Audit — April 19, 2026)
+## Architecture (Night Assault — April 20, 2026)
 
-Following the Great Audit, the active codebase was reduced from 178 to
-**78 files** (−56%). Every remaining file is on the critical path to the
+Following the Great Audit and the Night Assault (Vasyunin diagonal elimination),
+the active codebase was expanded to **84 files** with the Cotangent tower
+promotion. Every remaining file is on the critical path to the
 crown theorem `nyman_beurling_equivalence`.
 
 ```
 Cathedral/
-├── Axioms.lean                            — Axiom registry (40 axioms, tiered)
+├── Axioms.lean                            — Axiom registry (43 axioms, tiered)
 ├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, bdLinComb)
 │
 ├── Assembly/              (12 files)      — CROWN: Main proof chain
@@ -58,7 +59,7 @@ Cathedral/
 │   ├── Separation.lean                    — Converse: d²→0 ⟹ RH (Pillar I)
 │   └── ThetaBound.lean                    — ζ(s) ≠ 0 on (0,1) (0 axioms!)
 │
-├── Vasyunin/              (15 files)      — Matrix + witness proofs
+├── Vasyunin/              (21 files)      — Matrix + witness + Cotangent tower
 │   ├── Defs.lean                          — Gram, covariance, mean definitions
 │   ├── Witness.lean                       — Log cutoff witness construction
 │   ├── Matrix/                            — Gram matrix properties
@@ -70,10 +71,21 @@ Cathedral/
 │   │   └── CovDet3.lean                   — det(C₃) > 0
 │   ├── Augmented/                         — Factorial Nuke + Rayleigh
 │   │   ├── AugmentedGram.lean             — H_N PD (Factorial Nuke)
-│   │   ├── IntegralBridge.lean            — vasyunin_eq_integral axiom
+│   │   ├── IntegralBridge.lean            — vasyunin_offdiag_integral axiom
+│   │   ├── VasyuninIntegralProof.lean     — Diagonal PROVED (Stirling + FTC)
 │   │   ├── LinIndep.lean                  — Augmented linear independence
 │   │   ├── MeanIntegral.lean              — ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
 │   │   └── Rayleigh.lean                  — Rayleigh quotient theorems
+│   ├── Cotangent/                         — Piecewise FTC (promoted from Archive)
+│   │   ├── StirlingBridge.lean            — Stirling floor bounds (0 axioms)
+│   │   ├── PiecewiseFTC.lean              — Per-tile FTC engine (0 axioms)
+│   │   ├── SqueezeElimination.lean        — Diagonal squeeze (0 axioms)
+│   │   ├── CrossTermFTC.lean              — Off-diagonal FTC
+│   │   ├── OffDiagPartition.lean          — Off-diagonal partition
+│   │   ├── TelescopeSum.lean              — Telescope summation
+│   │   ├── VasyuninAssembly.lean          — Assembly hub
+│   │   ├── DigammaReflection.lean         — Gauss digamma (1 axiom)
+│   │   └── LogDigammaBridge.lean          — Telescope-to-Vasyunin (3 axioms)
 │   └── Proof/                             — Witness decay chain
 │       ├── Chain.lean                     — witness → d² → 0 → RH
 │       ├── LambdaTrick.lean               — Lambda trick
@@ -123,7 +135,7 @@ Cathedral/
     ├── NymanBeurling/                     — ThetaBoundMellin, MellinReduction
     ├── IntegralBasis/                     — BaezDuarte, Quantitative
     ├── Robin/                             — Robin's inequality (6 files)
-    ├── Vasyunin/Cotangent/                — Piecewise FTC (10 files)
+    ├── Vasyunin/Cotangent/                — Foundational FTC (10 files, diagonal chain promoted)
     ├── White/Infrastructure/              — Perron, Hilbert, Selberg (6 files)
     ├── Spectral/                          — ConstantVectorBound
     ├── Sieve/                             — AlignmentDecay, ParityBridge
@@ -135,11 +147,11 @@ Cathedral/
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **78** |
+| Active Lean files | **84** |
 | Archived Lean files | **96** |
 | Active modules | **11** |
-| Active axioms | **40** |
-| Crown critical-path axioms | **2** (verified by `#print axioms`) |
+| Active axioms | **43** |
+| Crown critical-path axioms | **7** (verified by `#print axioms`) |
 | Active sorries | **2** (0 on crown path) |
 | Compilation errors | **0** |
 
@@ -169,3 +181,13 @@ A deep audit of the codebase identified:
 The cleanup reduced the active codebase from 178 to 78 files (−56%),
 with every remaining file on the critical path. Nothing was deleted —
 all files are preserved in `Archive/`.
+
+## The Night Assault (April 20, 2026)
+
+The Vasyunin diagonal identity `vasyunin_eq_integral` was proved as a
+theorem via Stirling's formula and piecewise FTC, eliminating it as a
+crown axiom. The companion axiom `fract_sq_integral` was also eliminated.
+The Cotangent tower (10 files, 1,838 lines) was promoted from Archive to
+active codebase. A 256-bit MPFR experiment confirmed 6–7 digit agreement
+for the off-diagonal case. The crown axiom was narrowed to
+`vasyunin_offdiag_integral` (off-diagonal only).
