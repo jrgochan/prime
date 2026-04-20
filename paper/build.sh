@@ -24,6 +24,7 @@ PAPERS=(
   cathedral-futures
   cathedral-energy
   cathedral-dualuse
+  cathedral-politics
   cathedral-letter
 )
 
