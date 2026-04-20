@@ -448,16 +448,19 @@ organized by tier:
 1 & RH-content (forward direction) & 2 & 1 \\
 2 & PNT-level results & 1 & 0 \\
 3 & Classical analytic number theory & 14 & 1 \\
-4 & Structural / spectral results & 23 & 0 \\
+4 & Structural / spectral results & 22 & 0 \\
 \midrule
-& \textbf{Total} & \textbf{40} & \textbf{2} \\
+& \textbf{Total} & \textbf{39} & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The 38 non-critical axioms support alternative proof paths
+The 37 non-critical axioms support alternative proof paths
 (spectral engine, sieve engine, Vasyunin cotangent formula) that
 are formalized but not on the shortest path to the crown theorem.
+Note: the Vasyunin diagonal identity $G(k,k) = \int_0^1 \fract{1/(kx)}^2\,dx$
+has been proved as a theorem (via Stirling's formula and piecewise FTC),
+while the off-diagonal identity remains axiomatized.
 
 \subsection{Axiom Reduction History}
 
@@ -708,7 +711,7 @@ We developed a systematic protocol for axiom management:
 
 \subsection{Build Verification}
 
-The codebase compiles with \lean{lake build} (3,537 jobs) with zero
+The codebase compiles with \lean{lake build} (3,557 jobs) with zero
 errors. Remaining warnings are limited to:
 \begin{itemize}
   \item 2 intentional \lean{sorry} markers in \lean{AbelL2Bridge.lean}

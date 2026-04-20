@@ -182,8 +182,13 @@ The Gram matrix $G \in \RR^{(N-1) \times (N-1)}$ has entries
   G(j,k) = \int_0^1 \fract{1/(jx)}\,\fract{1/(kx)}\,dx, \quad j,k \geq 2.
 \]
 The Vasyunin formula \cite{vasyunin1995} provides a closed-form expression
-for $G(j,k)$ involving cotangent sums. While this formula is essential
-for numerical computation (Section~\ref{sec:rust}), the formal proof
+for $G(j,k)$ involving cotangent sums. The \emph{diagonal} identity
+$G(k,k) = \int_0^1 \fract{1/(kx)}^2\,dx$ has been proved as a theorem
+(via Stirling's formula and piecewise FTC, zero axioms).
+The \emph{off-diagonal} identity has been verified numerically to
+6--7 digits using 256-bit MPFR arithmetic for all $j, k \leq 10$.
+While the cotangent formula is essential for numerical computation
+(Section~\ref{sec:rust}), the formal proof of the crown theorem
 bypasses it entirely via the Parseval--Plancherel approach.
 
 % ================================================================
@@ -512,6 +517,11 @@ with every remaining file on the critical path to
   \item \textbf{Vasyunin/Cotangent/}: 10 files implementing the complete
     piecewise-FTC decomposition of the Gram matrix integral, including
     14 fully proved telescope theorems and the digamma reflection formula.
+    The diagonal chain (\lean{StirlingBridge}, \lean{PiecewiseFTC},
+    \lean{SqueezeElimination}) has been promoted to the active codebase
+    and the off-diagonal infrastructure (\lean{CrossTermFTC},
+    \lean{OffDiagPartition}, \lean{TelescopeSum}, \lean{DigammaReflection},
+    \lean{LogDigammaBridge}) is active and building.
   \item \textbf{Robin/}: 6 files proving Robin's inequality bounds,
     self-contained and not on the RH critical path.
   \item \textbf{White/Infrastructure/}: Perron kernel, Selberg majorant,
@@ -566,7 +576,8 @@ Mellin identity, and one quarantining the forward direction
 (Mertens bound, Abel summation, Montgomery--Vaughan) as a single axiom.
 
 The axiom reduction---from 56 in the initial architecture to 39 in
-the current build (7 on the crown theorem's critical path)---was
+the current build (7 on the crown theorem's critical path, narrowed
+from 8 by proving the Vasyunin diagonal identity)---was
 achieved through four campaigns of systematic
 formalization, each eliminating axioms through direct proof:
 \begin{itemize}
