@@ -97,3 +97,6 @@ experiments/spectral/lambda-eff/target/
 
 # Cathedral dump splits (context-passing artifacts)
 cathedral-parts/
+cathedral-10/
+cathedral-rh/
+cathedral-parts/

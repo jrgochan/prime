@@ -5,7 +5,7 @@
 
 .PHONY: help build clean \
         lean-build lean-clean lean-check lean-audit lean-setup \
-        cathedral-archive cathedral-dump cathedral-dump-split cathedral-dump-10 cathedral-audit cathedral-check \
+        cathedral-archive cathedral-dump cathedral-dump-split cathedral-dump-10 cathedral-dump-rh cathedral-audit cathedral-check \
         experiments experiments-clean \
         experiment-parity experiment-cross experiment-weil \
         experiment-g2 experiment-gcd experiment-selberg \
@@ -47,8 +47,8 @@ help:
 	@echo "  ║                                                      ║"
 	@echo "  ║  CATHEDRAL (RH Proof Chain)                          ║"
 	@echo "  ║    make cathedral-dump       Dump .lean → text file     ║"
-	@echo "  ║    make cathedral-dump-split  Split dump (16 parts)       ║"
-	@echo "  ║    make cathedral-dump-10     Split dump (10 for Gemini)  ║"
+	@echo "  ║    make cathedral-dump-10     Balanced split (10 files)       ║"
+	@echo "  ║    make cathedral-dump-rh     RH critical path (10 files)    ║"
 	@echo "  ║    make cathedral-archive  Archive .tar.gz            ║"
 	@echo "  ║    make cathedral-audit    Sorry & axiom scan         ║"
 	@echo "  ║    make cathedral-check    Typecheck all modules      ║"
@@ -327,91 +327,15 @@ cathedral-dump-split:
 	@echo "  ✅ Upload all files to Gemini Deep Think!"
 	@echo "  💡 Critical path files: cathedral-Core, cathedral-Vasyunin-*, cathedral-NymanBeurling"
 
-## Dump Cathedral into exactly 10 files for Gemini's 10-file upload limit
-## Merges smaller modules into logical groups, numbered for upload order
+## Dump Cathedral into exactly 10 size-balanced files (greedy bin-packing)
+## Excludes Archive/ and Scratch/ — active codebase only
 cathedral-dump-10:
-	@echo "═══ Cathedral: Creating 10-file Gemini dump ═══"
-	@mkdir -p cathedral-10
-	@rm -f cathedral-10/*.txt
-	@# Create headers
-	@for part in \
-		"01-Core" "02-LinearAlgebra-Gram" "03-Vasyunin-Augmented" \
-		"04-Vasyunin-Matrix-Proof" "05-Vasyunin-Cotangent" \
-		"06-Robin-Structural" "07-MellinBridge" \
-		"08-Sieve" "09-Spectral-IntegralBasis" "10-Archive"; do \
-		outfile="cathedral-10/$$part.txt"; \
-		echo "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" > "$$outfile"; \
-		echo "# Cathedral Source — $$part" >> "$$outfile"; \
-		echo "# Generated: $$(date)" >> "$$outfile"; \
-		echo "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$$outfile"; \
-		echo "#" >> "$$outfile"; \
-		echo "# THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis" >> "$$outfile"; \
-		echo "# Build: lake build — 3530 jobs, zero errors, zero sorry" >> "$$outfile"; \
-		echo "# Crown: nyman_beurling_iff_rh depends on 5 axioms (#print axioms verified)" >> "$$outfile"; \
-		echo "# Total: 83 active files, 48 axioms across 12 modules" >> "$$outfile"; \
-		echo "#" >> "$$outfile"; \
-		echo "# Critical path axioms:" >> "$$outfile"; \
-		echo "#   1. witness_covariance_decay     — THE RH (vᵀCv ≤ C/ln N)" >> "$$outfile"; \
-		echo "#   2. witness_numerator_convergence — PNT level (bᵀv → 1)" >> "$$outfile"; \
-		echo "#   3. vasyunin_eq_integral          — Vasyunin 1995" >> "$$outfile"; \
-		echo "#   4. algebraic_nb_bridge           — structural bridge" >> "$$outfile"; \
-		echo "#   5. zeta_zero_separates           — NB converse" >> "$$outfile"; \
-		echo "#" >> "$$outfile"; \
-		echo "# This is file $$part of 10. Upload all 10 to Gemini." >> "$$outfile"; \
-		echo "# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" >> "$$outfile"; \
-		echo "" >> "$$outfile"; \
-	done
-	@# Route files to 10 buckets
-	@find $(CATHEDRAL_DIR) -name "*.lean" -not -path "*/.lake/*" | sort | while read file; do \
-		relpath=$$(echo "$$file" | sed 's|$(PROOFS_DIR)/||'); \
-		part="01-Core"; \
-		case "$$relpath" in \
-			*Archive*) part="10-Archive" ;; \
-			*LinearAlgebra*) part="02-LinearAlgebra-Gram" ;; \
-			*Gram/*) part="02-LinearAlgebra-Gram" ;; \
-			*Vasyunin/Augmented/*|*Vasyunin/Defs*|*Vasyunin/Witness*) part="03-Vasyunin-Augmented" ;; \
-			*Vasyunin/Matrix/*|*Vasyunin/Proof/*) part="04-Vasyunin-Matrix-Proof" ;; \
-			*Vasyunin/Cotangent/*) part="05-Vasyunin-Cotangent" ;; \
-			*NymanBeurling*|*Assembly*) part="01-Core" ;; \
-			*Robin*|*Structural*) part="06-Robin-Structural" ;; \
-			*MellinBridge*) part="07-MellinBridge" ;; \
-			*Sieve*) part="08-Sieve" ;; \
-			*Spectral*|*IntegralBasis*) part="09-Spectral-IntegralBasis" ;; \
-		esac; \
-		outfile="cathedral-10/$$part.txt"; \
-		echo "" >> "$$outfile"; \
-		echo "================================================================" >> "$$outfile"; \
-		echo "FILE: $$relpath" >> "$$outfile"; \
-		echo "================================================================" >> "$$outfile"; \
-		echo "" >> "$$outfile"; \
-		cat "$$file" >> "$$outfile"; \
-		echo "" >> "$$outfile"; \
-	done
-	@# Add lakefile to Core
-	@echo "" >> cathedral-10/01-Core.txt
-	@echo "================================================================" >> cathedral-10/01-Core.txt
-	@echo "FILE: lakefile.lean" >> cathedral-10/01-Core.txt
-	@echo "================================================================" >> cathedral-10/01-Core.txt
-	@echo "" >> cathedral-10/01-Core.txt
-	@cat $(PROOFS_DIR)/lakefile.lean >> cathedral-10/01-Core.txt
-	@# Summary
-	@echo ""
-	@echo "  📁 10 files in cathedral-10/ (upload ALL to Gemini):"
-	@echo ""
-	@total_files=0; \
-	for f in cathedral-10/*.txt; do \
-		name=$$(basename "$$f" .txt); \
-		size=$$(du -h "$$f" | cut -f1); \
-		lines=$$(wc -l < "$$f" | tr -d ' '); \
-		files=$$(grep -c '^FILE:' "$$f" 2>/dev/null || echo 0); \
-		total_files=$$((total_files + files)); \
-		printf "     %-35s %5s  %5d lines  %3d files\n" "$$name" "$$size" "$$lines" "$$files"; \
-	done; \
-	echo ""; \
-	echo "  📊 Total: $$total_files files in 10 uploads"
-	@echo ""
-	@echo "  ✅ Upload all 10 files to Gemini Deep Think!"
-	@echo "  📋 Upload order: 01 through 10 (numbered for convenience)"
+	@python3 scripts/cathedral_dump.py --mode all --parts 10 --outdir cathedral-10
+
+## Dump only RH critical-path files into 10 size-balanced files
+## Only files on the dependency chain of nyman_beurling_equivalence
+cathedral-dump-rh:
+	@python3 scripts/cathedral_dump.py --mode rh --parts 10 --outdir cathedral-rh
 
 ## Audit Cathedral proof chain: sorry count, axiom scan, RH dependencies
 cathedral-audit:
