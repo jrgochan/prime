@@ -165,16 +165,16 @@ export default function HomePage() {
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
           84 active files. 42 axioms — seven on the crown theorem&apos;s critical path.
           Zero custom axioms on the converse.
-          <span className="text-amber-400 text-sm ml-1">cathedral-audit</span>
+          <span className="text-amber-400 text-sm ml-1">night-assault</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "78 active files" },
-            { color: "bg-red-500", text: "644 theorems" },
+            { color: "bg-emerald-500", text: "84 active files" },
+            { color: "bg-red-500", text: "641 theorems" },
             { color: "bg-amber-500", text: "42 axioms (7 on crown)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "cathedral-audit" },
+            { color: "bg-purple-500", text: "night-assault" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -456,13 +456,14 @@ export default function HomePage() {
             <span className="text-2xl">🌙</span>
             <div>
               <h3 className="text-sm font-bold text-yellow-400">
-                THE NIGHT ASSAULT — 2 Crown Axioms ANNIHILATED
+                THE NIGHT ASSAULT — 3 Axioms ANNIHILATED → 42 Total
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 vasyunin_eq_integral → THEOREM (diagonal G(k,k) proved via Stirling + piecewise FTC).
-                fract_sq_integral → THEOREM (Stirling + Squeeze). Cotangent tower (1,838 lines)
-                promoted from Archive. 256-bit MPFR experiment confirms 6–7 digit match.
-                Crown narrowed: vasyunin_offdiag_integral (off-diagonal only). April 20, 2026.
+                fract_sq_integral → THEOREM (Stirling + Squeeze). rh_implies_mertens_34 → THEOREM
+                (absorbed by rh_implies_mertens_bound via (log x)² ≤ 64·x^{'{'}1/4{'}'}).
+                Crown narrowed: vasyunin_offdiag_integral (off-diagonal only).
+                42 axioms — the Answer. April 20, 2026.
               </p>
             </div>
           </div>
