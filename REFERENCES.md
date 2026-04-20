@@ -7,7 +7,7 @@ verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
 40+ mathematicians. 167 years of prior work. Two crown axioms. 40 total.
-78 active files. 644 theorems. 16 companion papers.
+78 active files. 644 theorems. 17 companion papers.
 
 ---
 
@@ -488,7 +488,7 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ## Documentation Suite
 
-16 companion papers for 16 audiences:
+17 companion papers for 17 audiences:
 
 | Paper | Audience |
 |-------|----------|
@@ -507,6 +507,7 @@ Two archived paths are preserved as monuments to the formalization process:
 | `cathedral-futures.tex` | Engineering frontiers |
 | `cathedral-energy.tex` | Energy systems engineers |
 | `cathedral-dualuse.tex` | Dual-use risk assessment |
+| `cathedral-politics.tex` | Policy / governance |
 | `cathedral-letter.tex` | A letter from the builder |
 
 ---

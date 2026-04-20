@@ -203,7 +203,6 @@ Apache 2.0
   title={The Cathedral: A Machine-Verified Reduction of the Riemann
          Hypothesis via the Nyman--Beurling Criterion},
   author={Gochanour, Jason Robert},
-  year={2026},
-  url={https://github.com/jrgochan/prime}
+  year={2026}
 }
 ```
