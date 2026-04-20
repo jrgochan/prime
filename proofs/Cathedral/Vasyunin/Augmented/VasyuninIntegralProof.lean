@@ -17,6 +17,7 @@
 
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Augmented.MeanIntegral
+import Cathedral.Vasyunin.Cotangent.SqueezeElimination
 import Cathedral.Gram.FractIntegral
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
@@ -108,12 +109,13 @@ private theorem integral_comp_mul_nat (f : ℝ → ℝ) (k : ℕ) (hk : 1 ≤ k)
   congr 1 <;> ring
 
 -- ∫₀¹ {1/u}² du = ln(2π) - γ - 1
--- This is the deepest fact: proved via Stirling + Squeeze in the archive.
--- We axiomatize it here as a LEMMA-LEVEL axiom (provable by known math).
-axiom fract_sq_integral :
+-- PROVED via the Stirling-Euler squeeze theorem (SqueezeElimination).
+-- Was axiom — now THEOREM (April 20, 2026).
+theorem fract_sq_integral :
     ∫ u in (0:ℝ)..(1:ℝ),
       (Int.fract (1 / u) * Int.fract (1 / u) : ℝ) =
-    Real.log (2 * Real.pi) - eulerMascheroniConstant - 1
+    Real.log (2 * Real.pi) - eulerMascheroniConstant - 1 :=
+  Cathedral.Vasyunin.SqueezeElimination.fract_sq_integral_value
 
 /-- **DIAGONAL BRIDGE**: G(k,k) = ∫₀¹ {1/(kx)}² dx.
     Proved via substitution u = kx + split at u=1 + FTC. -/

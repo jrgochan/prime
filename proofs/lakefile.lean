@@ -42,6 +42,10 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Augmented.LinIndep,
     `Cathedral.Vasyunin.Augmented.Rayleigh,
     `Cathedral.Vasyunin.Augmented.MeanIntegral,
+    -- Cotangent tower (diagonal proof chain, sorry-free)
+    `Cathedral.Vasyunin.Cotangent.StirlingBridge,
+    `Cathedral.Vasyunin.Cotangent.PiecewiseFTC,
+    `Cathedral.Vasyunin.Cotangent.SqueezeElimination,
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,
     `Cathedral.Vasyunin.Augmented.IntegralBridge,
     `Cathedral.Vasyunin.Proof.LambdaTrick,
