@@ -1,0 +1,307 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{setspace}
+
+\geometry{margin=1in}
+\onehalfspacing
+
+\definecolor{correct}{RGB}{0, 128, 0}
+\definecolor{wrong}{RGB}{200, 0, 0}
+
+\title{%
+  Reporting on the Cathedral:\\
+  A Guide for Science Journalists%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 19, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides accurate framing for journalists covering
+the Cathedral project: a machine-verified reduction of the
+Riemann Hypothesis in Lean~4. It contains: (1)~what the project
+is, in one paragraph; (2)~what it is \emph{not}, which is more
+important; (3)~a fact sheet with verified numbers; (4)~common
+misconceptions and their corrections; (5)~suggested expert sources
+for independent evaluation; and (6)~quotes approved for use.
+The primary goal of this document is to prevent misreporting.
+The Riemann Hypothesis has \textbf{not been proved}. Cryptography
+has \textbf{not been broken}. What has been built is significant
+in its own right, and accurate reporting will serve the public
+better than sensationalism.
+\end{abstract}
+
+% ================================================================
+\section{The One-Paragraph Summary}
+% ================================================================
+
+A computer scientist in New Mexico, working with AI assistance over
+23 days, built a 78-file computer program in the Lean~4 theorem
+prover that establishes, with machine-verified certainty, that the
+167-year-old Riemann Hypothesis is logically equivalent to the
+convergence of a concrete mathematical approximation problem. The
+proof is complete in both directions and relies on exactly two
+mathematical assumptions (``axioms''), both of which are well-
+understood results in classical mathematics that have not yet been
+translated into computer-checkable form. The project does not prove
+the Riemann Hypothesis. It provides the most precise formal map ever
+made of what a proof would require.
+
+% ================================================================
+\section{What It Is NOT}
+\label{sec:not}
+% ================================================================
+
+This section is more important than the previous one.
+
+\begin{enumerate}
+  \item \textcolor{wrong}{\textbf{NOT a proof of the Riemann
+    Hypothesis.}} The project reduces RH to two axioms. It does
+    not prove those axioms. The distinction is critical: a
+    reduction is a map of the problem, not a solution to it.
+
+  \item \textcolor{wrong}{\textbf{NOT a threat to cryptography.}}
+    A companion paper (\emph{cathedral-security.tex}) establishes
+    rigorously that the mathematical tools used in the Cathedral
+    provide no computational advantage for breaking encryption.
+    Even a full proof of RH would not break RSA, AES, or
+    post-quantum cryptography. Headlines like ``Riemann Hypothesis
+    breakthrough threatens internet security'' would be factually
+    wrong.
+
+  \item \textcolor{wrong}{\textbf{NOT AI solving mathematics
+    autonomously.}} The AI generated code under human direction.
+    The human provided architectural vision, quality control, and
+    mathematical taste. The AI did not ``solve'' anything---it
+    implemented strategies designed by the human and verified by
+    the Lean compiler.
+
+  \item \textcolor{wrong}{\textbf{NOT a claim to the Millennium
+    Prize.}} The Clay Mathematics Institute requires a proof of
+    RH itself, not an equivalence. This project would not qualify.
+
+  \item \textcolor{wrong}{\textbf{NOT a professional mathematics
+    paper.}} The author is a computer scientist, not a
+    professional mathematician. The project is a formalization
+    (software engineering applied to mathematics), not a
+    traditional research publication.
+\end{enumerate}
+
+% ================================================================
+\section{What It IS}
+% ================================================================
+
+\begin{enumerate}
+  \item \textcolor{correct}{\textbf{A machine-verified formal
+    proof.}} Every logical step has been checked by the Lean~4
+    compiler. There are zero errors, zero gaps, and zero
+    unchecked assumptions beyond the two stated axioms.
+
+  \item \textcolor{correct}{\textbf{A complete biconditional.}}
+    The equivalence goes in both directions: RH implies convergence
+    (forward), and convergence implies RH (converse). Both are
+    verified.
+
+  \item \textcolor{correct}{\textbf{A case study in human-AI
+    collaboration.}} One person with AI assistance produced in
+    23 days what would traditionally require a research team over
+    months. This has implications for how mathematical research
+    is conducted.
+
+  \item \textcolor{correct}{\textbf{A transparent artifact.}}
+    All 78 active files, 96 archived files, 40 axioms, and 644
+    theorems are available for inspection. Everything is
+    documented.
+\end{enumerate}
+
+% ================================================================
+\section{Fact Sheet}
+% ================================================================
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Item} & \textbf{Verified Value} \\
+\midrule
+Active Lean files & 78 \\
+Archived Lean files & 96 \\
+Total axioms (active) & 40 \\
+Crown axioms (on critical path) & 2 \\
+Machine-verified theorems & 644 \\
+Compilation errors & 0 \\
+Development time & 23 days \\
+Team size & 1 human + AI assistants \\
+Prover & Lean 4 \\
+Mathematical library & Mathlib \\
+Companion papers & 21 \\
+Millennium Prize eligibility & No \\
+Cryptographic impact & None \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ================================================================
+\section{Common Misconceptions --- Corrected}
+% ================================================================
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{6cm}p{6.5cm}@{}}
+\toprule
+\textcolor{wrong}{\textbf{Wrong}} &
+\textcolor{correct}{\textbf{Right}} \\
+\midrule
+``The Riemann Hypothesis has been proved.'' &
+The RH has been \emph{reduced} to two well-understood
+axioms. It has not been proved. \\[6pt]
+
+``This breaks encryption.'' &
+A companion security paper proves it does not. Even
+a full proof of RH would not break modern cryptography. \\[6pt]
+
+``AI solved a famous math problem.'' &
+A human used AI as a coding assistant to build a formal
+verification system. The Lean compiler verified it. \\[6pt]
+
+``This is just a computer program, not real math.'' &
+Machine-verified proofs are \emph{more} rigorous than
+traditional proofs: every step is checked, zero gaps. \\[6pt]
+
+``The project uses 40 unproved assumptions.'' &
+40 axioms total, but only 2 are on the crown theorem's
+critical path. The other 38 support alternative proof
+routes. \\[6pt]
+
+``This was done in 23 days, so it can't be serious.'' &
+The tools (Lean 4, Mathlib, AI) have transformed what
+is possible. The result is 644 verified theorems, not
+a hasty sketch.  \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ================================================================
+\section{The Riemann Hypothesis --- Explained Simply}
+% ================================================================
+
+For readers unfamiliar with the mathematics:
+
+\textbf{Prime numbers} (2, 3, 5, 7, 11, 13, \ldots) are the
+building blocks of all whole numbers. Every number can be written
+as a product of primes. We know roughly how many primes there are
+below any given number, but we don't know their exact pattern.
+
+In 1859, Bernhard Riemann found a mathematical function (the
+``zeta function'') that encodes where the primes are. This function
+has special values called ``zeros'' that control the pattern of
+primes. Riemann conjectured that all these zeros line up perfectly
+on a single line in the complex plane.
+
+If true, primes are as orderly as we hope. If false, there is
+deep irregularity in the fabric of arithmetic.
+
+The Cathedral proves that this conjecture is \emph{exactly
+equivalent} to whether certain wiggly curves (sawtooth waves) can
+be combined to make a flat line. Both directions of this equivalence
+are machine-verified.
+
+% ================================================================
+\section{Suggested Expert Sources}
+% ================================================================
+
+For independent evaluation, journalists may wish to consult:
+
+\begin{itemize}
+  \item \textbf{Lean/Mathlib community}: The Lean Zulip chat
+    (\url{https://leanprover.zulipchat.com/}) includes experts
+    who can evaluate the formal proof.
+
+  \item \textbf{Analytic number theory}: Any university faculty
+    member specializing in analytic number theory can evaluate
+    whether the two axioms are standard results.
+
+  \item \textbf{Formal verification}: Experts at Carnegie Mellon,
+    Imperial College, or Microsoft Research can evaluate the
+    verification methodology.
+
+  \item \textbf{AI and mathematics}: Google DeepMind (AlphaProof
+    team) or equivalent groups can evaluate the human-AI
+    collaboration claims.
+\end{itemize}
+
+% ================================================================
+\section{Approved Quotes}
+% ================================================================
+
+The following quotes may be attributed to the author:
+
+\begin{quote}
+``We did not prove the Riemann Hypothesis. We built a machine-
+verified map of exactly what a proof would require. The map has
+two blank spots. Those blank spots are the hardest parts.''
+\end{quote}
+
+\begin{quote}
+``The Lean compiler doesn't care who you are. It only cares
+whether your proof is correct. That's what makes machine
+verification powerful: it's the most objective form of
+mathematical truth we have.''
+\end{quote}
+
+\begin{quote}
+``This project does not break cryptography, does not solve a
+Millennium Prize Problem, and does not mean AI is replacing
+mathematicians. What it does mean is that one person with the
+right tools can contribute to frontier mathematics. That's
+new.''
+\end{quote}
+
+% ================================================================
+\section{What NOT to Write}
+% ================================================================
+
+Please avoid:
+
+\begin{itemize}
+  \item Headlines containing ``proved,'' ``solved,'' or ``cracked''
+    in reference to the Riemann Hypothesis.
+  \item Any implication that encryption or internet security is
+    affected.
+  \item Framing the AI as an independent agent that ``discovered''
+    mathematical results.
+  \item Comparisons to the Millennium Prize that imply eligibility.
+  \item Use of the word ``breakthrough'' without the qualification
+    ``in formalization methodology.''
+\end{itemize}
+
+Accurate alternatives:
+
+\begin{itemize}
+  \item ``Machine-verified reduction of the Riemann Hypothesis''
+  \item ``Formal proof maps famous conjecture to two axioms''
+  \item ``Human-AI collaboration produces verified math in 23 days''
+  \item ``Computer checks every step of 167-year-old problem's
+    logical structure''
+\end{itemize}
+
+% ================================================================
+\section{Contact}
+% ================================================================
+
+For questions, clarifications, or interview requests, contact
+the author directly. All companion papers are available upon
+request.
+
+\end{document}

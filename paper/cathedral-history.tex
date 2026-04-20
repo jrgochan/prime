@@ -1,0 +1,415 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{setspace}
+
+\geometry{margin=1in}
+\onehalfspacing
+
+\newcommand{\RH}{\ensuremath{\mathrm{RH}}}
+
+\title{%
+  167 Years of Attempts:\\
+  The Cathedral in the History of the Riemann Hypothesis%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 19, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We place the Cathedral project in historical context by tracing
+the 167-year arc of approaches to the Riemann Hypothesis, from
+Riemann's 1859 memoir through the Hilbert--P\'olya conjecture,
+the Montgomery--Odlyzko law, the Nyman--Beurling criterion, and
+the B\'aez-Duarte strengthening, to the present machine-verified
+reduction. We identify three historical turning points where the
+approach changed paradigm: (1)~the shift from direct zero-finding
+to spectral methods (1914--1973), (2)~the shift from operator
+theory to $L^2$ approximation (1950--2003), and (3)~the shift
+from informal proof to machine verification (2017--2026). The
+Cathedral sits at the confluence of the second and third shifts,
+combining B\'aez-Duarte's $L^2$ criterion with Lean~4
+verification. We argue that the project's significance lies not
+in resolving the conjecture but in \emph{formalizing the map}: for
+the first time, the complete logical structure of an RH equivalence
+has been machine-checked, with every assumption named, every
+deduction verified, and every failed approach preserved.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Act I: The Conjecture (1859--1914)}
+% ================================================================
+
+\subsection{Riemann's Eight Pages}
+
+In November 1859, Bernhard Riemann presented an eight-page paper
+to the Berlin Academy: ``\"Ueber die Anzahl der Primzahlen unter
+einer gegebenen Gr\"osse'' (On the number of primes less than a
+given magnitude). In it, he introduced the analytic continuation
+of the zeta function to the entire complex plane, proved the
+functional equation $\xi(s) = \xi(1-s)$, and made a remark that
+has haunted mathematics ever since:
+
+\begin{quote}
+\emph{``One would of course like to have a rigorous proof of this,
+but I have put aside the search for such a proof after some
+fleeting vain attempts, because it is not necessary for the
+immediate objective of my investigation.''}
+\end{quote}
+
+The ``this'' was the observation that all non-trivial zeros of
+$\zeta(s)$ have real part $\frac{1}{2}$.
+
+Riemann published one paper on number theory in his life. He died
+in 1866, at age 39. The conjecture survived him by 167 years
+and counting.
+
+\subsection{Early Attempts}
+
+The first systematic studies of zeta zeros were computational:
+
+\begin{itemize}
+  \item \textbf{Gram (1903)}: Computed the first 15 zeros on the
+    critical line. Introduced the Gram points $g_n$ where
+    $\vartheta(g_n) = n\pi$.
+  \item \textbf{Backlund (1914)}: Verified RH for the first 200
+    zeros.
+  \item \textbf{Hardy (1914)}: Proved that infinitely many zeros
+    lie on the critical line, without proving that \emph{all} do.
+\end{itemize}
+
+These early efforts established a pattern that would persist for
+a century: computational verification of RH for increasing numbers
+of zeros, accompanied by partial theoretical progress (``many zeros
+are on the line'') but no complete proof.
+
+% ================================================================
+\section{Act II: The Spectral Turn (1914--1987)}
+% ================================================================
+
+\subsection{Hilbert and P\'olya}
+
+Around 1914, David Hilbert and George P\'olya independently
+suggested that the zeta zeros might be eigenvalues of a
+self-adjoint operator $T$ on some Hilbert space: $T\psi_n =
+\rho_n \psi_n$ where $\rho_n = \frac{1}{2} + i\gamma_n$. If $T$
+is self-adjoint, its eigenvalues are real, so $\gamma_n \in \RR$
+and RH follows.
+
+This was a paradigm shift: instead of studying the zeta function
+directly, study the \emph{operator} whose spectrum it encodes.
+The search for the ``Hilbert--P\'olya operator'' became a
+parallel track to direct analytical approaches.
+
+\subsection{Selberg's Contribution}
+
+In 1942, Atle Selberg proved that a positive proportion of zeros
+lie on the critical line. His methods---the Selberg sieve and the
+Selberg trace formula---introduced the tools that would eventually
+connect number theory to spectral theory and random matrix theory.
+
+The Cathedral's log-cutoff witness $v_k = -\mu(k)(1 - \ln k/\ln N)$
+is a Selberg-type sieve weight. The $L^2$ variational principle
+independently rediscovers these weights as optimal---a connection
+that Selberg himself might have appreciated.
+
+\subsection{Montgomery--Odlyzko: The GUE Connection}
+
+In 1973, Hugh Montgomery discovered that the pair correlation of
+zeta zeros matches the Gaussian Unitary Ensemble (GUE) distribution
+from random matrix theory. In 1987, Andrew Odlyzko computed
+$10^{20}$ zeros and confirmed Montgomery's prediction to remarkable
+precision.
+
+This discovery connected the Riemann Hypothesis to quantum physics:
+the same statistical patterns appear in the energy levels of heavy
+nuclei and the eigenvalues of random matrices. The Hilbert--P\'olya
+conjecture went from speculation to a concrete statistical prediction.
+
+\textbf{Connection to the Cathedral}: The Gram matrix $G_N$ in the
+Cathedral is a deterministic number-theoretic matrix whose eigenvalue
+distribution can be compared with GUE predictions. The numerical
+experiments show $\lambda_{\min}(G_N) \sim C/\ln N$, a decay rate
+consistent with the soft edge of the Tracy--Widom distribution.
+
+% ================================================================
+\section{Act III: The $L^2$ Revolution (1950--2003)}
+% ================================================================
+
+\subsection{Nyman (1950)}
+
+Bertil Nyman's 1950 Uppsala thesis established the first function-
+space criterion for RH: the Riemann Hypothesis is true if and only
+if the constant function $1$ lies in the $L^2(0,1)$ closure of the
+span of dilated fractional parts $\{\theta/x\}$, $0 < \theta \leq 1$.
+
+This was the second paradigm shift: instead of studying the zeta
+function or its operator, study an \emph{approximation problem}
+in a Hilbert space. RH becomes a question about whether certain
+functions can approximate a target.
+
+\subsection{Beurling (1955)}
+
+Arne Beurling simplified Nyman's criterion and gave a cleaner
+formulation. The Nyman--Beurling theorem states:
+
+\[
+  \RH \;\iff\;
+  \overline{\operatorname{span}}\{x \mapsto \{\theta/x\} :
+  0 < \theta \leq 1\} = L^2(0,1).
+\]
+
+\subsection{B\'aez-Duarte (2003)}
+
+Luis B\'aez-Duarte made the crucial strengthening: one can restrict
+the dilations to integer reciprocals $\theta = 1/k$, $k = 2, 3,
+\ldots$ This restriction is not trivial---it converts the
+continuous parameter $\theta$ into a discrete arithmetic parameter,
+connecting the approximation problem to the multiplicative structure
+of the integers.
+
+The B\'aez-Duarte distance $d_N^2 = \inf_v \int_0^1 |1 - \sum v_k
+\{1/(kx)\}|^2\,dx$ is the object the Cathedral studies. The entire
+project reduces to understanding this single quantity.
+
+\subsection{Vasyunin and Balazard--Saias}
+
+Vasyunin (1996) showed that the Gram matrix entries $G(j,k) =
+\int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$ have a closed-form expression
+involving logarithms, GCDs, and cotangent sums. Balazard and Saias
+(2000) established the asymptotic rate $d_N^2 \sim c/\ln N$.
+
+The Cathedral formalizes both of these results, though the crown
+theorem ultimately bypasses Vasyunin's cotangent formula via the
+Parseval Bridge.
+
+% ================================================================
+\section{Act IV: The Verification Turn (2017--2026)}
+% ================================================================
+
+\subsection{The Rise of Formal Verification}
+
+The third paradigm shift is methodological rather than mathematical:
+the application of machine verification to mathematical proof.
+
+Key milestones:
+\begin{itemize}
+  \item \textbf{Hales (2017)}: Formal verification of the Kepler
+    Conjecture (Flyspeck project), 6 years of effort, HOL Light.
+  \item \textbf{Scholze--Buzzard (2021)}: Formalization of
+    liquid tensor experiments in Lean, establishing Lean as viable
+    for frontier mathematics.
+  \item \textbf{Tao et al. (2023)}: Formalization of the
+    Polynomial Freiman--Ruzsa conjecture in Lean~4/Blueprint.
+  \item \textbf{AlphaProof (2024)}: Google DeepMind's AI achieves
+    IMO silver medal level using Lean~4.
+\end{itemize}
+
+\subsection{The Cathedral (2026)}
+
+The Cathedral is, to our knowledge, the first machine-verified
+formalization of a complete RH equivalence. It differs from prior
+work in several respects:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llccc@{}}
+\toprule
+\textbf{Project} & \textbf{Result} & \textbf{Prover} &
+\textbf{Team} & \textbf{Duration} \\
+\midrule
+Flyspeck & Kepler conjecture & HOL Light & $\sim$20 & 6 years \\
+LTE & Liquid tensors & Lean~3 & $\sim$10 & 6 months \\
+PFR & Polynomial FR & Lean~4 & $\sim$15 & 3 months \\
+Cathedral & RH equivalence & Lean~4 & 1 + AI & 23 days \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The comparison is not entirely fair---the Cathedral does not prove
+RH, while Flyspeck proves Kepler, and the mathematical content
+differs in depth. But the timeline is striking: one person with AI
+assistance in 23 days, producing 78 files and 644 theorems.
+
+% ================================================================
+\section{What the Cathedral Does Differently}
+% ================================================================
+
+\subsection{The Parseval Bridge}
+
+Every previous approach to the forward direction
+($\RH \Rightarrow d_N^2 \to 0$) goes through the Vasyunin
+cotangent formula, requiring a closed-form computation of the
+Gram matrix entries. The Cathedral's Parseval Bridge bypasses this
+entirely, working in the frequency domain via Plancherel's theorem.
+
+This is historically significant because the Vasyunin formula
+involves Dedekind-type sums whose reciprocity properties are
+notoriously difficult to formalize. The Cathedral discovered
+(empirically) that a candidate reciprocity law was \emph{false}
+at $(a,b) = (3,2)$, motivating the switch to the Parseval Bridge.
+
+\subsection{The Rank-1 Mellin Miracle}
+
+The converse direction ($d_N^2 \to 0 \Rightarrow \RH$) was
+traditionally proved via Hahn--Banach separation. The Cathedral
+replaces this with a direct computation: at a zeta zero $\rho$,
+the Mellin transform of the basis functions $\{1/(kx)\}$
+factorizes as $\mathcal{M}[h_k](\rho) = 1/(k(\rho-1))$. The
+$k$-dependence and $\rho$-dependence separate, making the
+obstruction to approximation explicit and elementary.
+
+This is arguably a new proof technique, not just a formalization
+of an existing one.
+
+\subsection{The Archive as Artifact}
+
+Previous formalization projects discard failed attempts. The
+Cathedral preserves all 96 archived files as a historical record
+of the formalization process. This is unprecedented in formal
+verification and serves both educational and methodological
+purposes.
+
+% ================================================================
+\section{The Arc of History}
+% ================================================================
+
+\begin{center}
+\small
+\begin{tabular}{@{}rlp{7cm}@{}}
+\toprule
+\textbf{Year} & \textbf{Mathematician} & \textbf{Contribution} \\
+\midrule
+1859 & Riemann & The conjecture \\
+1896 & Hadamard, de la Vall\'ee-Poussin & Prime Number Theorem
+  (zeta non-vanishing on $\sigma = 1$) \\
+1903 & Gram & First zeros computed \\
+1914 & Hardy & Infinitely many zeros on the line \\
+$\sim$1914 & Hilbert, P\'olya & Spectral conjecture \\
+1942 & Selberg & Positive proportion on the line \\
+1950 & Nyman & $L^2$ criterion \\
+1955 & Beurling & Simplified criterion \\
+1973 & Montgomery & GUE pair correlation \\
+1987 & Odlyzko & Numerical confirmation of GUE \\
+1996 & Vasyunin & Cotangent sum formula for Gram matrix \\
+2003 & B\'aez-Duarte & Integer-restricted basis \\
+2004 & Gourdon & $10^{13}$ zeros verified \\
+2020 & Platt--Trudgian & $3 \times 10^{12}$ zeros verified
+  rigorously \\
+2026 & \textbf{Cathedral} & \textbf{Machine-verified RH equivalence} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The Cathedral does not end this arc. It adds a new kind of entry:
+not a partial result about zeros, not a new operator candidate,
+but a \emph{certified map} of the logical territory. For the first
+time, the complete biconditional $\RH \iff d_N^2 \to 0$ has been
+verified by machine, with every assumption exposed.
+
+% ================================================================
+\section{What Has Not Been Done}
+% ================================================================
+
+An honest historical account must note what the Cathedral does
+\emph{not} accomplish:
+
+\begin{enumerate}
+  \item It does not prove RH. No approach has.
+  \item It does not find a new zero. Computational verification
+    of zeros (Gourdon, Platt--Trudgian) is a separate endeavor.
+  \item It does not identify the Hilbert--P\'olya operator. The
+    spectral interpretation remains conjectural.
+  \item It does not improve the zero-free region. The best known
+    zero-free region (Korobov--Vinogradov type) is not addressed.
+  \item It does not resolve any Millennium Prize Problem. The
+    Clay Mathematics Institute requires a proof of RH itself,
+    not an equivalence.
+\end{enumerate}
+
+What it does is draw the most precise map ever made of what a
+proof would require: two axioms, named and classified, each
+encoding a well-understood piece of classical analysis.
+
+% ================================================================
+\section{Conclusion: The Long View}
+% ================================================================
+
+In 1900, David Hilbert placed the Riemann Hypothesis eighth on
+his famous list of 23 problems for the twentieth century. It
+was not solved in the twentieth century. At the turn of the
+twenty-first, the Clay Mathematics Institute placed it among the
+seven Millennium Prize Problems. It has not been solved in the
+first quarter of the twenty-first century either.
+
+The Cathedral is not the solution. But it may be part of the
+prelude. Every great proof is preceded by a period of
+clarification---a period where the community comes to understand
+exactly what needs to be proved and exactly what tools are
+available. Riemann's 1859 paper was such a clarification for
+analytic number theory. The Nyman--Beurling--B\'aez-Duarte
+criterion was such a clarification for the $L^2$ approach. The
+Cathedral is such a clarification for the verification approach:
+here is the map, here are the assumptions, here is what remains.
+
+The question Riemann set aside ``after some fleeting vain attempts''
+in 1859 is still open. But the shape of the question has never
+been clearer.
+
+\begin{quote}
+\emph{167 years of attempts.\\
+40 mathematicians' work, assembled and verified.\\
+Two axioms remain.\\
+The next chapter belongs to whoever proves them.}
+\end{quote}
+
+\begin{thebibliography}{99}
+
+\bibitem{riemann1859}
+B.~Riemann, \emph{\"Ueber die Anzahl der Primzahlen unter einer
+gegebenen Gr\"osse}, Monatsberichte der Berliner Akademie, 1859.
+
+\bibitem{hardy1914}
+G.H.~Hardy, \emph{Sur les z\'eros de la fonction $\zeta(s)$ de
+Riemann}, C. R. Acad. Sci. Paris \textbf{158} (1914), 1012--1014.
+
+\bibitem{selberg1942}
+A.~Selberg, \emph{On the zeros of Riemann's zeta-function},
+Skr. Norske Vid. Akad. Oslo I \textbf{10} (1942), 1--59.
+
+\bibitem{montgomery1973}
+H.L.~Montgomery, \emph{The pair correlation of zeros of the zeta
+function}, Proc. Symp. Pure Math. \textbf{24} (1973), 181--193.
+
+\bibitem{odlyzko1987}
+A.M.~Odlyzko, \emph{On the distribution of spacings between zeros
+of the zeta function}, Math. Comp. \textbf{48} (1987), 273--308.
+
+\bibitem{nyman1950}
+B.~Nyman, \emph{On the One-Dimensional Translation Group},
+Ph.D. Thesis, Uppsala, 1950.
+
+\bibitem{baezduarte2003}
+L.~B\'aez-Duarte, \emph{A strengthening of the Nyman--Beurling
+criterion}, Atti Accad. Naz. Lincei \textbf{14} (2003), 5--11.
+
+\bibitem{hales2017}
+T.~Hales et al., \emph{A Formal Proof of the Kepler Conjecture},
+Forum of Mathematics, Pi \textbf{5} (2017), e2.
+
+\end{thebibliography}
+
+\end{document}

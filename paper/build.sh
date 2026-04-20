@@ -25,6 +25,10 @@ PAPERS=(
   cathedral-energy
   cathedral-dualuse
   cathedral-politics
+  cathedral-education
+  cathedral-history
+  cathedral-invitation
+  cathedral-press
   cathedral-letter
 )
 
