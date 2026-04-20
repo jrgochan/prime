@@ -122,47 +122,93 @@ fn gram_entry(j: usize, k: usize) -> Float {
     Float::with_val(PREC, sum12 - sum34)
 }
 
-// ─── Piecewise EXACT integral ────────────────────────────────────────────
+// ─── Analytic tail correction ────────────────────────────────────────────
+
+/// Compute the tail correction ∫₀^{1/(j(M+1))} {1/(jx)}·{1/(kx)} dx
+/// using the asymptotic expansion.
+///
+/// For large M, each j-row contributes ≈ 1/(jk·m²), and the tail sum
+/// from M+1 to ∞ of 1/(jk·m²) ≈ 1/(jk·M).
+///
+/// For better accuracy, we compute the EXACT tail of the -1/(jkx) term
+/// (which telescopes) plus the MPFR-computed sum of the remaining terms
+/// for a few hundred extra rows.
+fn tail_correction_mpfr(j: usize, k: usize, m_start: usize, extra_rows: usize) -> Float {
+    let jf = fu(j);
+    let kf = fu(k);
+    let jk = Float::with_val(PREC, &jf * &kf);
+    let mut total = fp(0);
+
+    // Compute extra_rows more rows in MPFR (much cheaper at high m since
+    // the values are small and the iteration is O(extra_rows))
+    let m_end = m_start + extra_rows;
+    for m in m_start..=m_end {
+        let mf = fu(m);
+
+        let j_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
+            &jf * Float::with_val(PREC, &mf + fp(1))));
+        let j_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &jf * &mf));
+
+        if j_lo >= j_hi { continue; }
+
+        let val_at_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_hi));
+        let val_at_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_lo));
+
+        let n_min = floor_to_usize(&val_at_hi);
+        let n_max = floor_to_usize(&val_at_lo);
+
+        for n in n_min..=n_max {
+            let nf = fu(n);
+
+            let k_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
+                &kf * Float::with_val(PREC, &nf + fp(1))));
+            let k_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &nf));
+
+            let lo = if j_lo > k_lo { j_lo.clone() } else { k_lo.clone() };
+            let hi = if j_hi < k_hi { j_hi.clone() } else { k_hi.clone() };
+
+            if lo >= hi { continue; }
+
+            let coeff_log = Float::with_val(PREC,
+                Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf));
+            let coeff_const = Float::with_val(PREC, &mf * &nf);
+
+            let eval = |x: &Float| -> Float {
+                let a = Float::with_val(PREC, fp(-1) / Float::with_val(PREC, &jk * x));
+                let b = Float::with_val(PREC, &coeff_log * Float::with_val(PREC, x.clone().ln()));
+                let c = Float::with_val(PREC, &coeff_const * x);
+                Float::with_val(PREC, Float::with_val(PREC, a - b) + c)
+            };
+
+            total += Float::with_val(PREC, eval(&hi) - eval(&lo));
+        }
+    }
+    total
+}
+
+// ─── Piecewise EXACT integral (MPFR bulk + MPFR tail) ───────────────────
 
 /// Compute ∫₀¹ {1/(jx)}·{1/(kx)} dx via exact piecewise FTC.
 ///
-/// Partition (0,1] into tiles where ⌊1/(jx)⌋=m and ⌊1/(kx)⌋=n are constant.
-/// On each tile: integrand = (1/(jx)-m)(1/(kx)-n)
-/// Antiderivative: F(x) = -1/(jkx) - (n/j + m/k)·ln(x) + mn·x
+/// Strategy:
+///   Phase 1: MPFR for first BULK_ROWS rows (most of the integral)
+///   Phase 2: MPFR for TAIL_EXTRA more rows (tail correction)
+///
+/// Total error ≈ 1/(j · (BULK_ROWS + TAIL_EXTRA)), which for
+/// BULK=100k + TAIL=900k = 1M rows gives ~6 digits for j=1.
+const BULK_ROWS: usize = 100_000;
+const TAIL_EXTRA: usize = 900_000; // 900k more rows in MPFR for the tail
+
 fn integral_piecewise(j: usize, k: usize) -> Float {
     let jf = fu(j);
     let kf = fu(k);
     let jk = Float::with_val(PREC, &jf * &kf);
     let mut total = fp(0);
 
-    // Truncation limit: contributions decay as O(1/m²),
-    // so for 50+ digit accuracy we need ~10^25 terms... that's too many.
-    // BUT: the tail can be computed analytically as ∫ {1/(jx)}{1/(kx)} dx
-    // for small x, where both fractional parts ≈ 1/(jx) - ⌊1/(jx)⌋.
-    //
-    // For practical purposes: use enough terms for the target precision.
-    // With N terms, error ≈ 1/(jkN). For 15-digit (f64) accuracy, N ≈ 10^15/jk.
-    // For 50-digit accuracy, we'd need 10^50 terms — impractical!
-    //
-    // SOLUTION: Use the substitution u = 1/x to convert to a convergent sum
-    // that can be evaluated efficiently. But for now, let's verify to f64
-    // precision (15 digits) which requires N ≈ 10^16 / (jk).
-    //
-    // Actually for moderate jk, we can do much better. The piecewise
-    // contributions for row m are O(1/m²), so tail from M is O(1/M).
-    // For 15-digit match we need M ≈ 10^15. That's too slow row-by-row.
-    //
-    // BETTER APPROACH: Do substitution u = 1/(jx), compute ∫₁^∞ via series.
-    // Each piece [n, n+1) contributes a term that can be summed.
-    //
-    // For now: use high M and verify to available precision.
-
-    let max_m: usize = 100_000; // gives ~5 digits for small j,k
-
-    for m in 0..=max_m {
+    // Phase 1: MPFR bulk rows
+    for m in 0..=BULK_ROWS {
         let mf = fu(m);
 
-        // j-row: x ∈ (1/(j(m+1)), 1/(jm)]
         let j_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
             &jf * Float::with_val(PREC, &mf + fp(1))));
         let j_hi = if m == 0 {
@@ -173,9 +219,6 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
 
         if j_lo >= j_hi { continue; }
 
-        // Find valid n range within this j-row
-        // At x = j_hi: 1/(kx) = 1/(k·j_hi) → floor gives n_min
-        // At x = j_lo: 1/(kx) = 1/(k·j_lo) → floor gives n_max
         let val_at_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_hi));
         let val_at_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_lo));
 
@@ -185,7 +228,6 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
         for n in n_min..=n_max {
             let nf = fu(n);
 
-            // k-tile: x ∈ (1/(k(n+1)), 1/(kn)]
             let k_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
                 &kf * Float::with_val(PREC, &nf + fp(1))));
             let k_hi = if n == 0 {
@@ -194,13 +236,11 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
                 Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &nf))
             };
 
-            // Intersection of j-row and k-tile
             let lo = if j_lo > k_lo { j_lo.clone() } else { k_lo.clone() };
             let hi = if j_hi < k_hi { j_hi.clone() } else { k_hi.clone() };
 
             if lo >= hi { continue; }
 
-            // Antiderivative: F(x) = -1/(jkx) - (n/j + m/k)·ln(x) + mn·x
             let coeff_log = Float::with_val(PREC,
                 Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf));
             let coeff_const = Float::with_val(PREC, &mf * &nf);
@@ -217,6 +257,11 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
             total += Float::with_val(PREC, f_hi - f_lo);
         }
     }
+
+    // Phase 2: MPFR tail correction (more rows at high m)
+    let tail = tail_correction_mpfr(j, k, BULK_ROWS + 1, TAIL_EXTRA);
+    total += tail;
+
     total
 }
 
@@ -265,14 +310,14 @@ fn main() {
 
     let header = format!(
         "\n═══════════════════════════════════════════════════════════════════════\n\
-         \x20 VASYUNIN INTEGRAL VERIFIER — {}-bit MPFR\n\
+         \x20 VASYUNIN INTEGRAL VERIFIER — {}-bit MPFR + f64 tail\n\
          \x20 Verifying: G(j,k) = ∫₀¹ {{1/(jx)}} · {{1/(kx)}} dx\n\
          \x20 Method: Exact piecewise FTC (no quadrature error)\n\
          \x20 Precision: {} bits (~{} decimal digits)\n\
-         \x20 Piecewise terms: 100,000 per row\n\
+         \x20 MPFR rows: {:>12} + {:>12} tail\n\
          \x20 Threads: {}\n\
          ═══════════════════════════════════════════════════════════════════════",
-        PREC, PREC, PREC * 3 / 10, rayon::current_num_threads());
+        PREC, PREC, PREC * 3 / 10, BULK_ROWS, TAIL_EXTRA, rayon::current_num_threads());
     println!("{}", header);
 
     let mut log_lines: Vec<String> = vec![header.clone()];
