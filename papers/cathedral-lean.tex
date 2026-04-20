@@ -48,7 +48,7 @@
 \begin{abstract}
 We describe the practical techniques for formalizing analytic number
 theory in Lean~4 with Mathlib, distilled from the Cathedral project:
-a 20,000-line formalization of the Nyman--Beurling criterion for the
+a 22,670-line formalization of the Nyman--Beurling criterion for the
 Riemann Hypothesis. We cover Mathlib API patterns that worked well
 (interval integrals, spectral theory), patterns that required
 workarounds (infinite sums, measure theory), and patterns that are
@@ -84,7 +84,7 @@ is using them \emph{together}, in a single proof, with consistent
 type coercions and compatible assumptions.
 
 The Cathedral project encountered this challenge over 23 days,
-producing 78 active Lean files. This paper distills the lessons
+producing 84 active Lean files. This paper distills the lessons
 into actionable advice for future formalizers.
 
 \subsection{Scope}
@@ -387,6 +387,7 @@ Last audit: April 20, 2026
 ## Eliminated Axioms (April 20, 2026)
 -- vasyunin_eq_integral  -> THEOREM (diagonal proved)
 -- fract_sq_integral     -> THEOREM (Stirling+Squeeze)
+-- rh_implies_mertens_34 -> THEOREM (absorbed by _bound)
 ...
 -/
 \end{lstlisting}
@@ -539,7 +540,7 @@ The practical advice in this paper---which APIs to use, how to
 structure projects, how to manage axioms---should help future
 formalizers avoid the 96 dead-end files we had to archive.
 
-The Cathedral took 23 days and produced 20,000 lines of active code.
+The Cathedral took 23 days and produced 22,670 lines of active code.
 The next analytic number theory formalization, building on these
 lessons, should be faster. The tools are ready. The patterns are
 documented. Build your cathedral.

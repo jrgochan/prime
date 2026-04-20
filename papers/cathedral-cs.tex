@@ -64,7 +64,7 @@ We report on the design, construction, and maintenance of the
 \emph{Cathedral}, a 20,000-line Lean~4 formalization (built on
 Mathlib v4.30) that establishes the logical equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
-distance. The project comprises 78 active source files containing
+distance. The project comprises 84 active source files containing
 641 theorems and 42 axioms, with an additional 96 archived files
 preserving superseded approaches. We describe the software
 engineering challenges of large-scale proof formalization:
@@ -104,7 +104,7 @@ Hypothesis in Lean~4, producing a system that is:
     plus 23,115 lines of archived code across 96 files.
   \item \textbf{Modular}: 11 modules with explicit dependency DAGs.
   \item \textbf{Evolving}: The axiom count on the critical path was
-    reduced from 56 to 2 through four systematic elimination campaigns.
+    reduced from 56 to 7 through four systematic elimination campaigns.
   \item \textbf{Auditable}: Every axiom is registered, tiered, and tracked
     to its consumers.
 \end{itemize}
@@ -141,7 +141,7 @@ Lean version & 4.30.0-rc1 \\
 Mathlib dependency & v4.30 (leanprover-community/mathlib4) \\
 Active source files & 78 \\
 Archived source files & 96 \\
-Active lines of code & 19,926 \\
+Active lines of code & 22,670 \\
 Archived lines of code & 23,115 \\
 Theorems \& lemmas (active) & 644 \\
 Axioms (active) & 40 \\
@@ -407,7 +407,7 @@ This reduced the active axiom count from 49 to 39 ($-20\%$).
 \toprule
 \textbf{Category} & \textbf{Files} & \textbf{LOC} & \textbf{\% of Total} \\
 \midrule
-Active code & 78 & 19,926 & 46\% \\
+Active code & 78 & 22,670 & 46\% \\
 Archived code & 96 & 23,115 & 54\% \\
 \midrule
 Total produced & 174 & 43,041 & 100\% \\
@@ -493,7 +493,7 @@ Mathlib is rebuilt only when the dependency version changes.
 \bottomrule
 \end{tabular}
 \caption{Axiom count evolution. Crown path axioms were reduced
-from 56 to 2 in 20 days.}
+from 56 to 7 in 20 days.}
 \label{tab:axiom-history}
 \end{table}
 

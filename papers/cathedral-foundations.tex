@@ -48,8 +48,8 @@ We analyze the logical foundations of the Cathedral, a Lean~4
 formalization establishing $\RH \iff d_N^2 \to 0$.
 The proof inhabits the Calculus of Inductive Constructions (CIC)
 extended with three kernel axioms (\lean{propext}, \lean{Classical.choice},
-\lean{Quot.sound}) and two mathematical axioms
-(\lean{bd\_mellin\_at\_zero}, \lean{rh\_implies\_l2\_convergence}).
+\lean{Quot.sound}) and seven mathematical axioms
+(including \lean{rh\_implies\_mertens\_bound} and \lean{vasyunin\_offdiag\_integral}).
 We establish the precise logical strength of the formalization:
 it is provable in $\ZFC$ plus the consistency of the kernel axioms
 (which is equiconsistent with $\ZFC$). We analyze the trust chain
@@ -76,7 +76,7 @@ Every machine-verified proof rests on a stack of trust:
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (2 in the Cathedral) \\
+5 & Mathematical axioms (7 on crown path, 42 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -159,30 +159,37 @@ the interpretation of $\ZFC$ in CIC with large cardinals
 (which are not needed here).
 
 % ================================================================
-\section{The Five Axioms of the Cathedral}
+\section{The Ten Axioms of the Cathedral}
 \label{sec:axioms}
 % ================================================================
 
 The crown theorem \lean{nyman\_beurling\_equivalence} reports exactly
-5 axioms via \lean{\#print axioms}:
+10 axioms via \lean{\#print axioms} (3 kernel + 7 mathematical):
 
 \begin{center}
-\begin{tabular}{@{}clc@{}}
+\begin{tabular}{@{}clcc@{}}
 \toprule
-\textbf{\#} & \textbf{Axiom} & \textbf{Origin} \\
+\textbf{\#} & \textbf{Axiom} & \textbf{Origin} & \textbf{Tier} \\
 \midrule
-1 & \lean{propext} & Lean kernel \\
-2 & \lean{Classical.choice} & Lean kernel \\
-3 & \lean{Quot.sound} & Lean kernel \\
-4 & \lean{bd\_mellin\_at\_zero} & Cathedral \\
-5 & \lean{rh\_implies\_l2\_convergence} & Cathedral \\
+1 & \lean{propext} & Lean kernel & --- \\
+2 & \lean{Classical.choice} & Lean kernel & --- \\
+3 & \lean{Quot.sound} & Lean kernel & --- \\
+4 & \lean{rh\_implies\_mertens\_bound} & Cathedral & 1 (RH content) \\
+5 & \lean{pnt\_mu\_div\_k} & Cathedral & 2 (PNT) \\
+6 & \lean{pnt\_mu\_log\_div\_k} & Cathedral & 2 (PNT) \\
+7 & \lean{pnt\_mu\_log\_sq\_div\_k} & Cathedral & 2 (PNT) \\
+8 & \lean{abel\_mertens\_tail\_raw} & Cathedral & 3 (Analysis) \\
+9 & \lean{millennium\_covariance\_cancellation} & Cathedral & 3 (Analysis) \\
+10 & \lean{vasyunin\_offdiag\_integral} & Cathedral & 3 (Analysis) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 Axioms 1--3 are shared by every Lean~4 proof that uses Mathlib.
 They are part of the logical infrastructure, not the mathematical
-content. The foundationally interesting axioms are 4 and 5.
+content. The foundationally interesting axioms are 4--10: one encodes
+the Riemann Hypothesis itself (Tier~1), three encode the Prime Number
+Theorem (Tier~2), and three encode classical analysis facts (Tier~3).
 
 \subsection{Axiom 4: \lean{bd\_mellin\_at\_zero}}
 
@@ -245,7 +252,7 @@ perspective.
 \label{thm:zfc}
 The crown theorem $\RH \iff d_N^2 \to 0$, as stated in the
 Cathedral, is provable in $\ZFC$ (indeed in much weaker systems).
-The 2 mathematical axioms are formalization gaps, not foundational
+The 7 mathematical axioms are formalization gaps, not foundational
 gaps. The 3 kernel axioms are equiconsistent with $\ZFC$.
 \end{theorem}
 
@@ -344,7 +351,7 @@ verify the same proofs, providing redundancy.
 Lean kernel (type-checker) & $\sim$5{,}000 \\
 Lean elaborator + tactics & $\sim$100{,}000 \\
 Mathlib library & $\sim$1{,}400{,}000 \\
-Cathedral & $\sim$20{,}000 \\
+Cathedral & $\sim$22{,}670 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -492,13 +499,13 @@ a finer gradation:
   \item \textbf{Kernel axioms}: Trusted by design; part of the logic.
     (3 in the Cathedral.)
   \item \textbf{Active mathematical axioms}: Believed true, not yet
-    formalized. On the critical path. (2 in the Cathedral.)
+    formalized. On the critical path. (7 in the Cathedral.)
   \item \textbf{Off-path axioms}: Formalization gaps that do not
-    affect the crown theorem. (38 in the Cathedral.)
+    affect the crown theorem. (35 in the Cathedral.)
   \item \textbf{Theorems}: Machine-verified from axioms and Mathlib.
-    (644 in the Cathedral.)
+    (641 in the Cathedral.)
   \item \textbf{Archived axioms}: Previously active, now proved and
-    excised. (16 eliminated during the project.)
+    excised. (19 eliminated during the project.)
 \end{enumerate}
 
 This gradient makes the \emph{progress} of formalization visible.
@@ -511,7 +518,7 @@ management} concept layered on top of the foundations.
 The axiom-theorem gradient is analogous to the debt-equity spectrum
 in finance: axioms are ``debt'' (promises to prove later) and theorems
 are ``equity'' (fully owned mathematical knowledge). The Cathedral's
-reduction from 56 axioms to 39 (with 7 on the critical path) is a
+reduction from 56 axioms to 42 (with 7 on the critical path) is a
 deleveraging of the proof's balance sheet.
 \end{remark}
 
