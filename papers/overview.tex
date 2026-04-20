@@ -15,7 +15,7 @@
   \large via the Parseval Bridge in Lean~4%
 }
 \author{Jason Robert Gochanour}
-\date{April 19, 2026 \textemdash\ cathedral-audit}
+\date{April 20, 2026 \textemdash\ night-assault}
 
 \begin{document}
 \maketitle
@@ -51,7 +51,7 @@ Rank-1 Mellin separation---is compiler-verified.
 vessel that identifies exactly which mathematical facts remain unformalized,
 proves everything else, and reduces the entire century-old problem to
 a clean modular architecture with seven axiom sockets on the crown
-theorem's critical path (39 axioms total in the active codebase).
+theorem's critical path (42 axioms total in the active codebase).
 
 \section{The Crown Theorem}
 
@@ -95,7 +95,7 @@ Verified by \texttt{\#print axioms nyman\_beurling\_equivalence}:
 \end{table}
 
 \noindent Plus Lean kernel axioms: \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound}.
-\noindent The full codebase contains 39 axioms across 78 files; only the above 7 are
+\noindent The full codebase contains 42 axioms across 84 files; only the above 7 are
 on the crown theorem's critical path. The converse direction uses zero custom axioms.
 
 \section{The Parseval Bridge}
@@ -166,10 +166,10 @@ the trace of the resolvent of the Riemann Hamiltonian.
 
 \begin{verbatim}
 cd proofs
-lake build    # 78 active files, 96 archived
+lake build    # 84 active files, 96 archived
 \end{verbatim}
 
-\noindent The active codebase was reduced from 178 to 78 files ($-56\%$)
+\noindent The active codebase was reduced from 178 to 84 files ($-56\%$)
 via a deep audit (April 18, 2026) that identified 31 duplicate declarations,
 9 ghost axioms, and 26 orphan files. All archived files are preserved
 in \texttt{Archive/}.
@@ -177,7 +177,7 @@ in \texttt{Archive/}.
 \noindent To inspect the axiom foundation:
 \begin{verbatim}
 #print axioms nyman_beurling_equivalence
--- rh_implies_mertens_34, pnt_mu_div_k,
+-- rh_implies_mertens_bound, pnt_mu_div_k,
 -- pnt_mu_log_div_k, pnt_mu_log_sq_div_k,
 -- abel_mertens_tail_raw,
 -- millennium_covariance_cancellation,
