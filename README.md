@@ -156,7 +156,7 @@ stiffness of the prime number vacuum.
 
 ## Documentation Suite
 
-15 companion papers for 15 audiences:
+17 companion papers for 17 audiences:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
@@ -172,8 +172,10 @@ stiffness of the prime number vacuum.
 | `cathedral-lean.tex` | Lean/ITP community | 9 |
 | `cathedral-foundations.tex` | Logicians / foundations | 9 |
 | `cathedral-engineering.tex` | Practicing engineers | 8 |
-| `cathedral-futures.tex` | Engineering frontiers | 10 |
+| `cathedral-futures.tex` | Engineering frontiers | 12 |
 | `cathedral-energy.tex` | Energy systems engineers | 10 |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 10 |
+| `cathedral-politics.tex` | Policy / governance | 9 |
 | `cathedral-letter.tex` | A letter from the builder | 5 |
 
 Build all PDFs:
