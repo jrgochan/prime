@@ -9,7 +9,7 @@ import Cathedral.NymanBeurling.BDMellin
   Central hub for axiom documentation. This file contains NO axiom
   declarations — all axioms are declared in their respective modules.
 
-  ### COMPILER-VERIFIED Critical Path (April 19, 2026 — Final Audit)
+  ### COMPILER-VERIFIED Critical Path (April 20, 2026 — Night Assault)
 
   `#print axioms nyman_beurling_equivalence` depends on exactly
   **7 Cathedral axioms** (+ 3 Lean kernel axioms):
@@ -22,10 +22,14 @@ import Cathedral.NymanBeurling.BDMellin
   | 4 | `pnt_mu_log_sq_div_k` | PNT: Σ μ(k)log²(k)/k → -2γ | 2 (PNT-level) |
   | 5 | `abel_mertens_tail_raw` | Abel summation tail bounds | 3 (classical) |
   | 6 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval/Gram) |
-  | 7 | `vasyunin_eq_integral` | Gram entry = integral identity | 3 (Vasyunin 1995) |
+  | 7 | `vasyunin_offdiag_integral` | Off-diagonal Gram = integral | 3 (Vasyunin 1995) |
 
   The Lean kernel axioms (propext, Classical.choice, Quot.sound) are
   standard and present in all nontrivial Lean programs.
+
+  ### ELIMINATED AXIOMS (April 20, 2026 — The Night Assault)
+  - `vasyunin_eq_integral` → THEOREM (diagonal proved via FTC, off-diagonal narrowed)
+  - `fract_sq_integral` → THEOREM (proved via Stirling + Squeeze from Mathlib)
 
   ### Crown Axiom Classification
 
@@ -45,9 +49,9 @@ import Cathedral.NymanBeurling.BDMellin
   - `millennium_covariance_cancellation`: The 2D covariance cancellation
     between the Gram matrix and the mean tensor. Requires Montgomery-Vaughan
     mean value theorems. This is the mathematically deepest axiom.
-  - `vasyunin_eq_integral`: The Vasyunin identity connecting the discrete
-    Gram formula to the Lebesgue integral. Verified computationally to
-    15 digits (256-bit MPFR), requires formalization of the cotangent sum.
+  - `vasyunin_offdiag_integral`: The off-diagonal Vasyunin identity for j≠k.
+    The diagonal case G(k,k) is PROVED. Verified computationally to
+    6-7 digits (256-bit MPFR, 1M rows). Requires Gauss digamma formula.
 
   ### Alternative Forward Path (1 axiom)
 
@@ -111,8 +115,9 @@ import Cathedral.NymanBeurling.BDMellin
   | `bd_witness_l2_error_decay` | Assembly/BDBridge | 1 |
   | `drop_formula_bound` | Structural/Eigenvalue | 4 |
 
-  ### Total: 40 active axioms (includes 1 duplicate: rh_implies_mertens_bound)
-  ### Crown path: 7 · Alternative paths: 33
+  ### Total: 39 active axioms (includes 1 duplicate: rh_implies_mertens_bound)
+  ### Crown path: 7 (narrowed: vasyunin_eq_integral → vasyunin_offdiag_integral)
+  ### Alternative paths: 32
   ### Converse: 0 custom axioms (pure Mathlib + Lean kernel)
 -/
 
