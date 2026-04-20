@@ -4,17 +4,18 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**78 active Lean files** across 11 modules, with **2 mathematical axioms** on
+**78 active Lean files** across 11 modules, with **7 mathematical axioms** on
 the crown theorem's critical path (verified by `#print axioms`), and
 **39 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
-> its entire mathematical content to two precisely stated, well-understood
-> facts—one for analytic continuation of the Báez-Duarte Mellin identity,
-> and one quarantining the forward direction (RH ⟹ d²_N → 0) as a single
-> axiom. Everything else—the Nyman–Beurling theory, Sherman–Morrison,
-> Abel summation, Rank-1 Mellin separation, Plancherel, variational
-> principles—is compiler-verified.
+> its entire mathematical content to seven precisely stated, well-understood
+> facts—one encoding RH via the Mertens bound, three Prime Number Theorem
+> limits, and three classical analysis results (Abel summation, covariance
+> cancellation, Vasyunin integral identity). The converse direction uses
+> **zero custom axioms**—it is pure Lean/Mathlib. Everything else—the
+> Nyman–Beurling theory, Sherman–Morrison, Rank-1 Mellin separation,
+> Plancherel, variational principles—is compiler-verified.
 
 > **Release: cathedral-audit** — April 19, 2026
 
@@ -40,19 +41,24 @@ theorem nyman_beurling_equivalence :
 
 The proof decomposes into two pillars:
 
-- **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument.
-- **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via the Báez-Duarte theorem (quarantined as a single axiom).
+- **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument. **Zero custom axioms.**
+- **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via Mertens bound, PNT limits, Abel summation, and the Vasyunin integral identity (7 axioms).
 
-## The Two Crown Axioms
+## The Seven Crown Axioms
 
-The crown theorem `nyman_beurling_equivalence` depends on **2 mathematical axioms**
+The crown theorem `nyman_beurling_equivalence` depends on **7 mathematical axioms**
 (verified by `#print axioms`). The full active codebase contains
 **39 axioms** across its proof infrastructure.
 
-| # | Axiom | Content | Role |
+| # | Axiom | Content | Tier |
 |---|-------|---------|------|
-| 1 | `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 | Converse direction |
-| 2 | `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte, 2003) | Forward direction |
+| 1 | `rh_implies_mertens_34` | RH → \|M(x)\| = O(x^{3/4}) | 1 (RH content) |
+| 2 | `pnt_mu_div_k` | Σ μ(k)/k → 0 | 2 (PNT) |
+| 3 | `pnt_mu_log_div_k` | Σ μ(k)log(k)/k → -1 | 2 (PNT) |
+| 4 | `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ | 2 (PNT) |
+| 5 | `abel_mertens_tail_raw` | Abel summation tail bounds | 3 (classical) |
+| 6 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval) |
+| 7 | `vasyunin_eq_integral` | Gram entry = integral (Vasyunin 1995) | 3 (classical) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
@@ -156,7 +162,7 @@ stiffness of the prime number vacuum.
 
 ## Documentation Suite
 
-17 companion papers for 17 audiences:
+22 companion papers for 22 audiences:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
@@ -176,6 +182,11 @@ stiffness of the prime number vacuum.
 | `cathedral-energy.tex` | Energy systems engineers | 10 |
 | `cathedral-dualuse.tex` | Dual-use risk assessment | 10 |
 | `cathedral-politics.tex` | Policy / governance | 9 |
+| `cathedral-education.tex` | Educators | 6 |
+| `cathedral-history.tex` | Historians of mathematics | 7 |
+| `cathedral-invitation.tex` | Mathematicians (open challenge) | 5 |
+| `cathedral-press.tex` | Press / media | 5 |
+| `cathedral-legal.tex` | Legal / IP professionals | 8 |
 | `cathedral-letter.tex` | A letter from the builder | 5 |
 
 Build all PDFs:

@@ -7,7 +7,7 @@ verification. Every theorem, identity, and technique in the Cathedral
 traces back to published mathematics listed here.
 
 39 mathematicians. 167 years of prior work. Seven crown axioms. 39 total.
-78 active files. 644 theorems. 17 companion papers.
+78 active files. 644 theorems. 22 companion papers.
 
 ---
 
@@ -33,7 +33,7 @@ traces back to published mathematics listed here.
 
   > RH is equivalent to the density of dilated fractional parts
   > {θ/x} in L²(0,1). The Cathedral reduces this to a finite matrix problem.
-  > The converse direction uses axiom `bd_mellin_at_zero`.
+  > The converse direction uses zero custom axioms (pure Mathlib).
 
 ### The Báez-Duarte Strengthening
 
@@ -442,15 +442,21 @@ traces back to published mathematics listed here.
 
 ## How Critical-Path Axioms Map to References (cathedral-audit)
 
-The crown theorem `nyman_beurling_equivalence` depends on exactly **2 mathematical axioms**
+The crown theorem `nyman_beurling_equivalence` depends on exactly **7 mathematical axioms**
 (verified by `#print axioms`):
 
 | Cathedral Axiom | Mathematical Content | References |
 |---|---|---|
-| `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 | Báez-Duarte 2003, Mellin 1896 |
-| `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte theorem) | Báez-Duarte 2003 |
+| `rh_implies_mertens_34` | RH → \|M(x)\| = O(x^{3/4}) | Titchmarsh 1986, Mertens 1874 |
+| `pnt_mu_div_k` | Σ μ(k)/k → 0 (PNT) | Selberg 1949, de la Vallée-Poussin 1896 |
+| `pnt_mu_log_div_k` | Σ μ(k)log(k)/k → -1 (PNT) | Selberg 1949 |
+| `pnt_mu_log_sq_div_k` | Σ μ(k)log²(k)/k → -2γ (PNT) | Selberg 1949, Euler 1740 |
+| `abel_mertens_tail_raw` | Abel summation tail bounds | Abel 1826 |
+| `millennium_covariance_cancellation` | 2D covariance bound (Parseval) | Plancherel 1910 |
+| `vasyunin_eq_integral` | Gram entry = integral (Vasyunin 1995) | Vasyunin 1996, Báez-Duarte 2005 |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
+The converse direction uses **zero custom axioms** (pure Lean/Mathlib).
 
 The 32 remaining axioms (39 total active) support alternative proof paths
 (spectral engine, sieve engine, Vasyunin cotangent formula) that are
@@ -488,7 +494,7 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ## Documentation Suite
 
-17 companion papers for 17 audiences:
+22 companion papers for 22 audiences:
 
 | Paper | Audience |
 |-------|----------|
@@ -508,6 +514,11 @@ Two archived paths are preserved as monuments to the formalization process:
 | `cathedral-energy.tex` | Energy systems engineers |
 | `cathedral-dualuse.tex` | Dual-use risk assessment |
 | `cathedral-politics.tex` | Policy / governance |
+| `cathedral-education.tex` | Educators |
+| `cathedral-history.tex` | Historians of mathematics |
+| `cathedral-invitation.tex` | Mathematicians (open challenge) |
+| `cathedral-press.tex` | Press / media |
+| `cathedral-legal.tex` | Legal / IP professionals |
 | `cathedral-letter.tex` | A letter from the builder |
 
 ---
