@@ -6,7 +6,7 @@
       "category": "proved",
       "route": "infrastructure",
       "file": "Cathedral/Axioms.lean",
-      "line": 138,
+      "line": 140,
       "signature": "theorem zeta_zero_separates : \u2200 \u03c1 : \u2102, riemannZeta \u03c1 = 0 \u2192 0 < \u03c1.re \u2192 \u03c1.re < 1 \u2192 \u03c1.re \u2260 1/2 \u2192 \u2203 \u03b4 : \u211d, 0 < \u03b4 \u2227 \u2200 N : \u2115, 2 \u2264 N \u2192 \u2200 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 \u2265 \u03b4"
     },
     {
@@ -1045,31 +1045,13 @@
       "signature": "theorem log_cutoff_witness_bound : \u2203 c : \u211d, c > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 c * Real.log (N : \u211d) \u2264 rayleighQuotient N (logCutoffWitness N)"
     },
     {
-      "id": "mertensFunction",
-      "type": "def",
-      "category": "definition",
-      "route": "variational",
-      "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 38,
-      "signature": "noncomputable def mertensFunction (x : \u211d) : \u2124"
-    },
-    {
-      "id": "rh_implies_mertens_bound",
-      "type": "axiom",
-      "category": "axiom",
-      "route": "variational",
-      "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 55,
-      "signature": "axiom rh_implies_mertens_bound : RiemannHypothesis \u2192 \u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |(mertensFunction x : \u211d)| \u2264 C * x ^ ((1:\u211d)/2) * (Real.log x) ^ 2  -- \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2026"
-    },
-    {
       "id": "abel_summation_covariance_bound",
       "type": "axiom",
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 82,
-      "signature": "axiom abel_summation_covariance_bound : (\u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |(mertensFunction x : \u211d)| \u2264 C * x ^ ((1:\u211d)/2) * (Real.log x) ^ 2) \u2192 \u2203 C_cov : \u211d, C_cov > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N\u2026"
+      "line": 60,
+      "signature": "axiom abel_summation_covariance_bound : (\u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((_root_.mertensFunction x : \u2124) : \u211d)| \u2264 C * x ^ ((1:\u211d)/2) * (Real.log x) ^ 2) \u2192 \u2203 C_cov : \u211d, C_cov > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2026"
     },
     {
       "id": "rh_implies_covariance_decay",
@@ -1077,7 +1059,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 100,
+      "line": 78,
       "signature": "theorem rh_implies_covariance_decay : RiemannHypothesis \u2192 \u2203 C_cov : \u211d, C_cov > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitnes\u2026"
     },
     {
@@ -1086,7 +1068,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 116,
+      "line": 94,
       "signature": "theorem rh_implies_witness_bound : RiemannHypothesis \u2192 \u2203 c : \u211d, c > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 c * Real.log (N : \u211d) \u2264 rayleighQuotient N (logCutoffWitness N)"
     },
     {
@@ -1095,7 +1077,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Proof/WitnessConditional.lean",
-      "line": 172,
+      "line": 150,
       "signature": "theorem witness_covariance_decay_iff_rh : (\u2203 C_cov : \u211d, C_cov > 0 \u2227 \u2203 N\u2080 : \u2115, \u2200 N : \u2115, N \u2265 N\u2080 \u2192 N \u2265 3 \u2192 dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) \u2264 C_cov /\u2026"
     },
     {
@@ -1104,7 +1086,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 48,
+      "line": 47,
       "signature": "noncomputable def augmentedGramMatrix (N : \u2115) : Matrix (Fin (N+1)) (Fin (N+1)) \u211d"
     },
     {
@@ -1113,7 +1095,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 64,
+      "line": 63,
       "signature": "theorem augmentedGramMatrix_symmetric (N : \u2115) : (augmentedGramMatrix N).IsHermitian"
     },
     {
@@ -1122,7 +1104,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 71,
+      "line": 70,
       "signature": "theorem augmented_corner_eq (N : \u2115) : augmentedGramMatrix N \u27e80, Nat.zero_lt_succ N\u27e9 \u27e80, Nat.zero_lt_succ N\u27e9 = 1"
     },
     {
@@ -1131,7 +1113,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 76,
+      "line": 75,
       "signature": "theorem augmented_bordered_eq (N : \u2115) (i j : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.castSucc j) = (augmentedGramMatrix N) i j"
     },
     {
@@ -1140,7 +1122,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 82,
+      "line": 81,
       "signature": "theorem augmented_border_eq (N : \u2115) (i : Fin (N+1)) : (augmentedGramMatrix (N+1)) (Fin.castSucc i) (Fin.last (N+1)) = if i.val = 0 then vasyuninMeanEntry (N+1) else vasyuninGramEntry i.val (N+1)"
     },
     {
@@ -1149,7 +1131,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 90,
+      "line": 89,
       "signature": "theorem augmented_last_eq (N : \u2115) : (augmentedGramMatrix (N+1)) (Fin.last (N+1)) (Fin.last (N+1)) = vasyuninGramEntry (N+1) (N+1)"
     },
     {
@@ -1158,7 +1140,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 133,
+      "line": 132,
       "signature": "noncomputable def nbAugLinComb (N : \u2115) (w : Fin (N+1) \u2192 \u211d) (x : \u211d) : \u211d"
     },
     {
@@ -1167,7 +1149,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 142,
+      "line": 141,
       "signature": "theorem augmented_l2_identity (N : \u2115) (_hN : N \u2265 1) (w : Fin (N+1) \u2192 \u211d) : dotProduct w ((augmentedGramMatrix N).mulVec w) = \u222b x in (0:\u211d)..1, (nbAugLinComb N w x) ^ 2"
     },
     {
@@ -1176,7 +1158,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 312,
+      "line": 311,
       "signature": "theorem nbAugLinComb_nonzero_somewhere (N : \u2115) (hN : N \u2265 1)"
     },
     {
@@ -1185,7 +1167,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 475,
+      "line": 474,
       "signature": "theorem nbAugLinComb_sq_integrable (N : \u2115) (w : Fin (N+1) \u2192 \u211d) : IntervalIntegrable (fun x => (nbAugLinComb N w x) ^ 2) MeasureTheory.volume 0 1"
     },
     {
@@ -1194,7 +1176,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 499,
+      "line": 498,
       "signature": "theorem augmentedGramMatrix_posDef (N : \u2115) (hN : N \u2265 1) : (augmentedGramMatrix N).PosDef"
     },
     {
@@ -1203,7 +1185,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 589,
+      "line": 588,
       "signature": "theorem gramMatrix_posDef_from_augmented (N : \u2115) (hN : N \u2265 1) : (vasyuninGramMatrix N).PosDef"
     },
     {
@@ -1212,7 +1194,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Vasyunin/Augmented/AugmentedGram.lean",
-      "line": 689,
+      "line": 688,
       "signature": "theorem nbDistSq_pos_from_augmented (N : \u2115) (hN : N \u2265 1) (hG : (vasyuninGramMatrix N).PosDef) : dotProduct (vasyuninMeanVec N) (nbGinvb N) < 1"
     },
     {
@@ -1987,7 +1969,7 @@
       "route": "mellin",
       "file": "Cathedral/NymanBeurling/BDMellin.lean",
       "line": 152,
-      "signature": "theorem mellin_substitution_ioo (k : \u2115) (hk : 2 \u2264 k) (s : \u2102) (hs : 0 < s.re) : \u222b x in Set.Ioo (0:\u211d) 1, ((Int.fract (1 / ((k:\u211d)*x)) : \u211d) : \u2102) * (x : \u2102) ^ (s - 1) = (k : \u2102) ^ (-s) * \u222b u in Set.Ioo (0\u2026"
+      "signature": "theorem mellin_substitution_ioo (k : \u2115) (hk : 2 \u2264 k) (s : \u2102) (_hs : 0 < s.re) : \u222b x in Set.Ioo (0:\u211d) 1, ((Int.fract (1 / ((k:\u211d)*x)) : \u211d) : \u2102) * (x : \u2102) ^ (s - 1) = (k : \u2102) ^ (-s) * \u222b u in Set.Ioo (\u2026"
     },
     {
       "id": "bd_mellin_reduction_proved",
@@ -2041,7 +2023,7 @@
       "route": "mellin",
       "file": "Cathedral/NymanBeurling/BDMellin.lean",
       "line": 784,
-      "signature": "theorem bd_integral_linearity (N : \u2115) (v : Fin (N-1) \u2192 \u211d) (\u03c1 : \u2102) (h\u03c1_pos : 0 < \u03c1.re) (h\u03c1_lt : \u03c1.re < 1) : \u222b x in Set.Ioo (0:\u211d) 1, ((1 - bdLinComb N v x : \u211d) : \u2102) * (x : \u2102) ^ (\u03c1 - 1) = (\u222b x in Set.\u2026"
+      "signature": "theorem bd_integral_linearity (N : \u2115) (v : Fin (N-1) \u2192 \u211d) (\u03c1 : \u2102) (h\u03c1_pos : 0 < \u03c1.re) (_h\u03c1_lt : \u03c1.re < 1) : \u222b x in Set.Ioo (0:\u211d) 1, ((1 - bdLinComb N v x : \u211d) : \u2102) * (x : \u2102) ^ (\u03c1 - 1) = (\u222b x in Set\u2026"
     },
     {
       "id": "bd_residual_mellin",
@@ -2221,7 +2203,7 @@
       "route": "crown",
       "file": "Cathedral/Assembly/AbelL2Bridge.lean",
       "line": 194,
-      "signature": "theorem abel_bound_34 (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 k : \u2115, 1 \u2264 k \u2192 |partialSum (fun j => (ArithmeticFunction.moebius j : \u211d)) 1 k| \u2264 C_m * (k : \u211d) ^ ((3:\u211d)/4)) (N : \u2115) (hN : 10 \u2264 N) : |(Fin\u2026"
+      "signature": "theorem abel_bound_34 (C_m : \u211d) (_hC : 0 < C_m) (hMertens : \u2200 k : \u2115, 1 \u2264 k \u2192 |partialSum (fun j => (ArithmeticFunction.moebius j : \u211d)) 1 k| \u2264 C_m * (k : \u211d) ^ ((3:\u211d)/4)) (N : \u2115) (hN : 10 \u2264 N) : |(Fi\u2026"
     },
     {
       "id": "summand_bound_34",
@@ -2791,21 +2773,12 @@
       "signature": "theorem rh_from_octonionic_global : \u2200 N : \u2115, 2 \u2264 N \u2192 0 < lambdaMin N"
     },
     {
-      "id": "oct_gap_positive",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 392,
-      "signature": "theorem oct_gap_positive (N : \u2115) (hN : 10 \u2264 N) : 0 < lambdaMinOct N"
-    },
-    {
       "id": "classRestrict",
       "type": "def",
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 404,
+      "line": 391,
       "signature": "noncomputable def classRestrict (N : \u2115) (m : Fin 8) (v : Fin (N - 1) \u2192 \u211d) : Fin (N - 1) \u2192 \u211d"
     },
     {
@@ -2814,7 +2787,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 410,
+      "line": 397,
       "signature": "lemma classRestrict_norm_partition (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : \u2211 m : Fin 8, dotProduct (classRestrict N m v) (classRestrict N m v) = dotProduct v v"
     },
     {
@@ -2823,7 +2796,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 437,
+      "line": 424,
       "signature": "lemma blockDiag_quadForm_decomp (N : \u2115) (v : Fin (N - 1) \u2192 \u211d) : realQuadForm (gramMatrixBlockDiag N) v = \u2211 m : Fin 8, realQuadForm (gramMatrix N) (classRestrict N m v)"
     },
     {
@@ -2832,7 +2805,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 496,
+      "line": 483,
       "signature": "lemma min_eigenvalue_le_quadForm_scaled {n : \u2115} {A : Matrix (Fin n) (Fin n) \u211d} (hA : A.IsHermitian) (v : Fin n \u2192 \u211d) (_hv : v \u2260 0) (hn : 0 < n) : (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).\u2026"
     },
     {
@@ -2841,7 +2814,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 590,
+      "line": 577,
       "signature": "theorem oct_gap_dominates_proof (N : \u2115) (hN : 2 \u2264 N) : lambdaMin N \u2264 lambdaMinBlock N"
     },
     {
@@ -2850,8 +2823,17 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Spectral/ClassRestriction.lean",
-      "line": 640,
+      "line": 626,
       "signature": "theorem oct_gap_dominates_derived (N : \u2115) (hN : 10 \u2264 N) : lambdaMin N \u2264 lambdaMinOct N"
+    },
+    {
+      "id": "oct_gap_positive",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Spectral/ClassRestriction.lean",
+      "line": 641,
+      "signature": "theorem oct_gap_positive (N : \u2115) (hN : 10 \u2264 N) : 0 < lambdaMinOct N"
     },
     {
       "id": "largeSieveR",
@@ -3687,7 +3669,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/ParitySchur.lean",
-      "line": 476,
+      "line": 473,
       "signature": "axiom gram_eigenvalue_log_scaling : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 lambdaMin N \u2265 c / Real.log (N : \u211d)  /-- **Axiom B (Spectral Theory)**: If the Gram matrix eigenvalues decay as c/log(N), then \u2026"
     },
     {
@@ -3696,7 +3678,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/ParitySchur.lean",
-      "line": 494,
+      "line": 491,
       "signature": "axiom eigenvalue_implies_distance_bound : (\u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 lambdaMin N \u2265 c / Real.log (N : \u211d)) \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2203 N\u2080 : \u2115, 2 \u2264 N\u2080 \u2227 \u2200 N : \u2115, N\u2080 \u2264 N \u2192 nbDistSq' N \u2264 C / Real.log \u2026"
     },
     {
@@ -3705,7 +3687,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/ParitySchur.lean",
-      "line": 513,
+      "line": 507,
       "signature": "theorem schur_to_distance_scaling_v2 (_hR : \u2203 R : \u211d, 0 \u2264 R \u2227 R < 1 \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2200 v : Fin (N - 1) \u2192 \u211d, v \u2260 0 \u2192 dotProduct v ((parityBlockB N * (parityBlockC N)\u207b\u00b9 * (parityBlockB N)\u1d40).mulVec \u2026"
     },
     {
@@ -4103,6 +4085,24 @@
       "file": "Cathedral/MellinBridge/MellinSieve.lean",
       "line": 217,
       "signature": "theorem phase_3_chain : RiemannHypothesis \u2192 \u2203 C : \u211d, 0 < C \u2227 \u2203 N\u2080 : \u2115, 2 \u2264 N\u2080 \u2227 \u2200 N : \u2115, N\u2080 \u2264 N \u2192 nbDistSq' N \u2264 C / Real.log (N : \u211d)"
+    },
+    {
+      "id": "mertensFunction",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/MertensBound.lean",
+      "line": 25,
+      "signature": "def mertensFunction (x : \u211d) : \u2124"
+    },
+    {
+      "id": "rh_implies_mertens_bound",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/MellinBridge/MertensBound.lean",
+      "line": 37,
+      "signature": "axiom rh_implies_mertens_bound : RiemannHypothesis \u2192 \u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C * x ^ (1/2 : \u211d) * (Real.log x) ^ 2  end "
     },
     {
       "id": "logWeight",
@@ -5016,14 +5016,6 @@
   ],
   "edges": [
     {
-      "source": "gramMatrix",
-      "target": "zeta_zero_separates"
-    },
-    {
-      "source": "l2_error_eq_quad_error",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "Cathedral",
       "target": "zeta_zero_separates"
     },
@@ -5036,6 +5028,10 @@
       "target": "zeta_zero_separates"
     },
     {
+      "source": "abel_summation_covariance_bound",
+      "target": "zeta_zero_separates"
+    },
+    {
       "source": "vasyunin_eq_integral",
       "target": "zeta_zero_separates"
     },
@@ -5044,11 +5040,39 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "bd_mellin_at_zero",
+      "source": "zeta_zero_separates_bd",
       "target": "zeta_zero_separates"
     },
     {
-      "source": "zeta_zero_separates_bd",
+      "source": "nyman_beurling_converse",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "bd_witness_l2_error_decay",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "rh_implies_mertens_34",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "pnt_mu_div_k",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "pnt_mu_log_div_k",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "pnt_mu_log_sq_div_k",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "abel_mertens_tail_raw",
+      "target": "zeta_zero_separates"
+    },
+    {
+      "source": "millennium_covariance_cancellation",
       "target": "zeta_zero_separates"
     },
     {
@@ -5056,11 +5080,11 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "nbDistSq_lt_one",
+      "source": "nyman_beurling_forward_direct",
       "target": "zeta_zero_separates"
     },
     {
-      "source": "nbDistSq_le_test_vector",
+      "source": "nyman_beurling_equivalence",
       "target": "zeta_zero_separates"
     },
     {
@@ -5108,10 +5132,6 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "gramMatrix_posSemidef",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "stable_ratio_parity",
       "target": "zeta_zero_separates"
     },
@@ -5140,7 +5160,7 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "phase_3_chain",
+      "source": "rh_implies_mertens_bound",
       "target": "zeta_zero_separates"
     },
     {
@@ -5164,19 +5184,7 @@
       "target": "zeta_zero_separates"
     },
     {
-      "source": "eigenvalue_interlacing",
-      "target": "zeta_zero_separates"
-    },
-    {
       "source": "drop_formula_bound",
-      "target": "zeta_zero_separates"
-    },
-    {
-      "source": "gram_pos_def",
-      "target": "zeta_zero_separates"
-    },
-    {
-      "source": "gramMatrix_isUnit_det",
       "target": "zeta_zero_separates"
     },
     {
@@ -7785,10 +7793,6 @@
     },
     {
       "source": "vasyuninMeanVec",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "vasyuninMeanVec",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7805,10 +7809,6 @@
     },
     {
       "source": "vasyuninCovMatrix",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "vasyuninCovMatrix",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7825,10 +7825,6 @@
     },
     {
       "source": "moebiusFn",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "moebiusFn",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7845,10 +7841,6 @@
     },
     {
       "source": "logCutoffWitness",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "logCutoffWitness",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7865,10 +7857,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "Cathedral",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7885,10 +7873,6 @@
     },
     {
       "source": "forward_bridge_from_lambda_trick",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "forward_bridge_from_lambda_trick",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7905,10 +7889,6 @@
     },
     {
       "source": "witness_covariance_decay",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "witness_covariance_decay",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7925,10 +7905,6 @@
     },
     {
       "source": "witness_numerator_sq_lower_bound",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "witness_numerator_sq_lower_bound",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7945,10 +7921,6 @@
     },
     {
       "source": "log_cutoff_witness_bound",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "log_cutoff_witness_bound",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7965,10 +7937,6 @@
     },
     {
       "source": "rayleighQuotient",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "rayleighQuotient",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -7985,10 +7953,6 @@
     },
     {
       "source": "vasyuninCovMatrix_hermitian",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "vasyuninCovMatrix_hermitian",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -8002,10 +7966,6 @@
     {
       "source": "vasyuninCovMatrix_hermitian",
       "target": "witness_covariance_decay_iff_rh"
-    },
-    {
-      "source": "vasyuninCovMatrix_posSemidef",
-      "target": "rh_implies_mertens_bound"
     },
     {
       "source": "vasyuninCovMatrix_posSemidef",
@@ -8025,10 +7985,6 @@
     },
     {
       "source": "vasyuninCovMatrix_isUnit_det",
-      "target": "rh_implies_mertens_bound"
-    },
-    {
-      "source": "vasyuninCovMatrix_isUnit_det",
       "target": "abel_summation_covariance_bound"
     },
     {
@@ -8042,10 +7998,6 @@
     {
       "source": "vasyuninCovMatrix_isUnit_det",
       "target": "witness_covariance_decay_iff_rh"
-    },
-    {
-      "source": "nyman_beurling_converse",
-      "target": "rh_implies_mertens_bound"
     },
     {
       "source": "nyman_beurling_converse",
@@ -8064,8 +8016,36 @@
       "target": "witness_covariance_decay_iff_rh"
     },
     {
-      "source": "posSemidef_pos_of_ne_zero",
-      "target": "rh_implies_mertens_bound"
+      "source": "mertensFunction",
+      "target": "abel_summation_covariance_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "rh_implies_covariance_decay"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "rh_implies_witness_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "witness_covariance_decay_iff_rh"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "abel_summation_covariance_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_covariance_decay"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_witness_bound"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "witness_covariance_decay_iff_rh"
     },
     {
       "source": "posSemidef_pos_of_ne_zero",
@@ -11796,38 +11776,6 @@
       "target": "mertens_34_l2_bound"
     },
     {
-      "source": "mertensFunction",
-      "target": "l2_crude_upper_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "l2_expansion"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "integral_bdLinComb_eq_sum"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "fract_inv_eq_inv_of_gt_one"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "abel_bound_34"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "summand_bound_34"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "sum_rpow_neg_quarter_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "mertens_34_l2_bound"
-    },
-    {
       "source": "bdLinComb",
       "target": "l2_crude_upper_bound"
     },
@@ -12081,6 +12029,38 @@
     },
     {
       "source": "bdMoebiusWeight",
+      "target": "mertens_34_l2_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "l2_crude_upper_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "l2_expansion"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "integral_bdLinComb_eq_sum"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "fract_inv_eq_inv_of_gt_one"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "abel_bound_34"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "summand_bound_34"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "sum_rpow_neg_quarter_bound"
+    },
+    {
+      "source": "mertensFunction",
       "target": "mertens_34_l2_bound"
     },
     {
@@ -12513,10 +12493,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "rh_implies_bd_witness_decay"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
       "target": "rh_implies_bd_witness_decay"
     },
     {
@@ -12528,15 +12504,15 @@
       "target": "rh_implies_bd_witness_decay"
     },
     {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_bd_witness_decay"
+    },
+    {
       "source": "Cathedral",
       "target": "rh_implies_bd_convergence_direct"
     },
     {
       "source": "witness_numerator_convergence",
-      "target": "rh_implies_bd_convergence_direct"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
       "target": "rh_implies_bd_convergence_direct"
     },
     {
@@ -12556,6 +12532,10 @@
       "target": "rh_implies_bd_convergence_direct"
     },
     {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_bd_convergence_direct"
+    },
+    {
       "source": "vasyuninGramEntry",
       "target": "rh_implies_mertens_34"
     },
@@ -12917,58 +12897,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "rh_implies_l2_convergence_proved"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "rh_implies_mertens_34"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "pnt_mu_div_k"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "pnt_mu_log_div_k"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "pnt_mu_log_sq_div_k"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "abel_mertens_tail_raw"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "moebius_mean_finite_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "linear_mean_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "millennium_covariance_cancellation"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "moebius_quadratic_finite_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "quadratic_form_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "mertens_l2_decay"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "mertens_34_implies_convergence"
-    },
-    {
-      "source": "mertensFunction",
       "target": "rh_implies_l2_convergence_proved"
     },
     {
@@ -13593,6 +13521,58 @@
     },
     {
       "source": "bdMoebiusWeight",
+      "target": "rh_implies_l2_convergence_proved"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "rh_implies_mertens_34"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "pnt_mu_div_k"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "pnt_mu_log_div_k"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "pnt_mu_log_sq_div_k"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "abel_mertens_tail_raw"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "moebius_mean_finite_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "linear_mean_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "millennium_covariance_cancellation"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "moebius_quadratic_finite_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "quadratic_form_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "mertens_l2_decay"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "mertens_34_implies_convergence"
+    },
+    {
+      "source": "mertensFunction",
       "target": "rh_implies_l2_convergence_proved"
     },
     {
@@ -14044,34 +14024,6 @@
       "target": "eigenvalue_limit_exists"
     },
     {
-      "source": "rh_implies_mertens_bound",
-      "target": "distance_converges_to_zero_implies_rh"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "existential_implies_infimum"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "rh_implies_distance_converges_to_zero"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "log_grows_unboundedly"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "rh_implies_bd_convergence"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "nyman_beurling_equivalence"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "eigenvalue_limit_exists"
-    },
-    {
       "source": "abel_summation_covariance_bound",
       "target": "distance_converges_to_zero_implies_rh"
     },
@@ -14349,6 +14301,34 @@
     },
     {
       "source": "realQuadForm",
+      "target": "eigenvalue_limit_exists"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "distance_converges_to_zero_implies_rh"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "existential_implies_infimum"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_distance_converges_to_zero"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "log_grows_unboundedly"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_bd_convergence"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "nyman_beurling_equivalence"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
       "target": "eigenvalue_limit_exists"
     },
     {
@@ -14444,10 +14424,6 @@
       "target": "rh_implies_l2_convergence"
     },
     {
-      "source": "rh_implies_mertens_bound",
-      "target": "rh_implies_l2_convergence"
-    },
-    {
       "source": "bdLinComb",
       "target": "rh_implies_l2_convergence"
     },
@@ -14460,6 +14436,10 @@
       "target": "rh_implies_l2_convergence"
     },
     {
+      "source": "rh_implies_mertens_bound",
+      "target": "rh_implies_l2_convergence"
+    },
+    {
       "source": "bd_gram_form_decay",
       "target": "rh_implies_l2_convergence"
     },
@@ -14784,18 +14764,6 @@
       "target": "rh_implies_bd_convergence_vasyunin"
     },
     {
-      "source": "rh_implies_mertens_bound",
-      "target": "bdWitness_eq_bdMoebiusWeight"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "vasyunin_bd_index_bridge"
-    },
-    {
-      "source": "rh_implies_mertens_bound",
-      "target": "rh_implies_bd_convergence_vasyunin"
-    },
-    {
       "source": "abel_summation_covariance_bound",
       "target": "bdWitness_eq_bdMoebiusWeight"
     },
@@ -14853,6 +14821,18 @@
     },
     {
       "source": "bdMoebiusWeight",
+      "target": "rh_implies_bd_convergence_vasyunin"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "bdWitness_eq_bdMoebiusWeight"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
+      "target": "vasyunin_bd_index_bridge"
+    },
+    {
+      "source": "rh_implies_mertens_bound",
       "target": "rh_implies_bd_convergence_vasyunin"
     },
     {
@@ -14941,10 +14921,6 @@
     },
     {
       "source": "gramEntry",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "gramEntry",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -14964,6 +14940,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "gramEntry",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "gramMatrix",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15025,10 +15005,6 @@
     },
     {
       "source": "gramMatrix",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "gramMatrix",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15048,6 +15024,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "gramMatrix",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "gramMatrix_hermitian",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15109,10 +15089,6 @@
     },
     {
       "source": "gramMatrix_hermitian",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "gramMatrix_hermitian",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15132,6 +15108,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "gramMatrix_hermitian",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "lambdaMin",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15193,10 +15173,6 @@
     },
     {
       "source": "lambdaMin",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "lambdaMin",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15216,6 +15192,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "lambdaMin",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "Cathedral",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15277,10 +15257,6 @@
     },
     {
       "source": "Cathedral",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "Cathedral",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15300,6 +15276,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "Cathedral",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "octonionClass",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15361,10 +15341,6 @@
     },
     {
       "source": "octonionClass",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "octonionClass",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15384,6 +15360,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "octonionClass",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "lambdaMinOct",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15445,10 +15425,6 @@
     },
     {
       "source": "lambdaMinOct",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "lambdaMinOct",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15468,6 +15444,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "lambdaMinOct",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "oct_gap_lower_bound",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15529,10 +15509,6 @@
     },
     {
       "source": "oct_gap_lower_bound",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "oct_gap_lower_bound",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15552,6 +15528,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "oct_gap_lower_bound",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "realQuadForm",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15613,10 +15593,6 @@
     },
     {
       "source": "realQuadForm",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "realQuadForm",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15636,6 +15612,10 @@
       "target": "oct_gap_dominates_derived"
     },
     {
+      "source": "realQuadForm",
+      "target": "oct_gap_positive"
+    },
+    {
       "source": "inner_eq_dotProduct",
       "target": "gramMatrixBlockDiag_hermitian"
     },
@@ -15697,10 +15677,6 @@
     },
     {
       "source": "inner_eq_dotProduct",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "inner_eq_dotProduct",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15718,6 +15694,10 @@
     {
       "source": "inner_eq_dotProduct",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "inner_eq_dotProduct",
+      "target": "oct_gap_positive"
     },
     {
       "source": "quadForm_eigenvector",
@@ -15781,10 +15761,6 @@
     },
     {
       "source": "quadForm_eigenvector",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "quadForm_eigenvector",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15802,6 +15778,10 @@
     {
       "source": "quadForm_eigenvector",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "quadForm_eigenvector",
+      "target": "oct_gap_positive"
     },
     {
       "source": "min_eigenvalue_le_quadForm",
@@ -15865,10 +15845,6 @@
     },
     {
       "source": "min_eigenvalue_le_quadForm",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "min_eigenvalue_le_quadForm",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15886,6 +15862,10 @@
     {
       "source": "min_eigenvalue_le_quadForm",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "min_eigenvalue_le_quadForm",
+      "target": "oct_gap_positive"
     },
     {
       "source": "weyl_min_eigenvalue",
@@ -15949,10 +15929,6 @@
     },
     {
       "source": "weyl_min_eigenvalue",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "weyl_min_eigenvalue",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -15970,6 +15946,10 @@
     {
       "source": "weyl_min_eigenvalue",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "weyl_min_eigenvalue",
+      "target": "oct_gap_positive"
     },
     {
       "source": "type_II_sieve_bound",
@@ -16033,10 +16013,6 @@
     },
     {
       "source": "type_II_sieve_bound",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "type_II_sieve_bound",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -16054,6 +16030,10 @@
     {
       "source": "type_II_sieve_bound",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "type_II_sieve_bound",
+      "target": "oct_gap_positive"
     },
     {
       "source": "gram_positive_definite",
@@ -16117,10 +16097,6 @@
     },
     {
       "source": "gram_positive_definite",
-      "target": "oct_gap_positive"
-    },
-    {
-      "source": "gram_positive_definite",
       "target": "classRestrict_norm_partition"
     },
     {
@@ -16138,6 +16114,10 @@
     {
       "source": "gram_positive_definite",
       "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "gram_positive_definite",
+      "target": "oct_gap_positive"
     },
     {
       "source": "gramMatrix_hermitian",
@@ -16520,38 +16500,6 @@
       "target": "within_class_liouville_decorrelation"
     },
     {
-      "source": "oct_gap_positive",
-      "target": "intToOctonion_unit"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "partition_complete"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "classes_disjoint"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "weight_diagonal"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "weight_bounded"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "gramMatrixOct_hermitian"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "oct_gap_lower_bound"
-    },
-    {
-      "source": "oct_gap_positive",
-      "target": "within_class_liouville_decorrelation"
-    },
-    {
       "source": "oct_gap_dominates_proof",
       "target": "intToOctonion_unit"
     },
@@ -16613,6 +16561,38 @@
     },
     {
       "source": "oct_gap_dominates_derived",
+      "target": "within_class_liouville_decorrelation"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "intToOctonion_unit"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "partition_complete"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "classes_disjoint"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "weight_diagonal"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "weight_bounded"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "gramMatrixOct_hermitian"
+    },
+    {
+      "source": "oct_gap_positive",
+      "target": "oct_gap_lower_bound"
+    },
+    {
+      "source": "oct_gap_positive",
       "target": "within_class_liouville_decorrelation"
     },
     {
@@ -18112,22 +18092,6 @@
       "target": "abel_summation_bd_l2_bound_proved"
     },
     {
-      "source": "mertensFunction",
-      "target": "weighted_moebius_abel_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "summand_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "l2_from_pointwise_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "abel_summation_bd_l2_bound_proved"
-    },
-    {
       "source": "bdLinComb",
       "target": "weighted_moebius_abel_bound"
     },
@@ -18205,6 +18169,22 @@
     },
     {
       "source": "bdMoebiusWeight",
+      "target": "abel_summation_bd_l2_bound_proved"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "weighted_moebius_abel_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "summand_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "l2_from_pointwise_bound"
+    },
+    {
+      "source": "mertensFunction",
       "target": "abel_summation_bd_l2_bound_proved"
     },
     {
@@ -18877,6 +18857,10 @@
     },
     {
       "source": "Cathedral",
+      "target": "rh_implies_mertens_bound"
+    },
+    {
+      "source": "Cathedral",
       "target": "logWeight_self"
     },
     {
@@ -19144,30 +19128,6 @@
       "target": "l2_from_pointwise_bound_derived"
     },
     {
-      "source": "mertensFunction",
-      "target": "autocorr_eval_zero"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "fourier_inv_autocorr"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "mellin_fourier_scale"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "parseval_bridge"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "critical_line_mellin_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "l2_from_pointwise_bound_derived"
-    },
-    {
       "source": "bdLinComb",
       "target": "autocorr_eval_zero"
     },
@@ -19285,6 +19245,30 @@
     },
     {
       "source": "mellinNBLinCombR",
+      "target": "l2_from_pointwise_bound_derived"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "autocorr_eval_zero"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "fourier_inv_autocorr"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "mellin_fourier_scale"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "parseval_bridge"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "critical_line_mellin_bound"
+    },
+    {
+      "source": "mertensFunction",
       "target": "l2_from_pointwise_bound_derived"
     },
     {
@@ -21480,18 +21464,6 @@
       "target": "bd_gram_form_decay"
     },
     {
-      "source": "mertensFunction",
-      "target": "dirichlet_polynomial_mean_value_bound"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "dirichlet_polynomial_mean_value"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "bd_gram_form_decay"
-    },
-    {
       "source": "bd_l2_error_eq_quad_error",
       "target": "dirichlet_polynomial_mean_value_bound"
     },
@@ -21513,6 +21485,18 @@
     },
     {
       "source": "bdMoebiusWeight",
+      "target": "bd_gram_form_decay"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "dirichlet_polynomial_mean_value_bound"
+    },
+    {
+      "source": "mertensFunction",
+      "target": "dirichlet_polynomial_mean_value"
+    },
+    {
+      "source": "mertensFunction",
       "target": "bd_gram_form_decay"
     },
     {
@@ -21542,13 +21526,13 @@
   ],
   "meta": {
     "totalNodes": 557,
-    "totalEdges": 4131,
+    "totalEdges": 4127,
     "axiomCount": 39,
     "theoremCount": 419,
     "definitionCount": 99,
     "provedTheorems": 419,
-    "fileCount": 73,
-    "description": "Cathedral proof architecture: 39 axioms, 419 theorems, 99 definitions across 73 files",
-    "generatedAt": "2026-04-18T23:38:40.331636"
+    "fileCount": 74,
+    "description": "Cathedral proof architecture: 39 axioms, 419 theorems, 99 definitions across 74 files",
+    "generatedAt": "2026-04-20T00:19:14.504657"
   }
 }
