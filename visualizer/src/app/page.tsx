@@ -222,7 +222,7 @@ export default function HomePage() {
             <span className="text-2xl">🏛️</span>
             <div>
               <h3 className="text-sm font-bold text-violet-400">
-                THE GREAT AUDIT — 178 → 79 files (−56%)
+                THE GREAT AUDIT — 178 → 78 files (−56%)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
                 Deep audit identified 31 duplicate declarations, 9 ghost axioms (axioms already proved as theorems),

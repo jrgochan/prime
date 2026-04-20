@@ -12,6 +12,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview", icon: "🏛️" },
+  { href: "/axiom-map", label: "Axiom Map", icon: "🗺️" },
   { href: "/term-explorer", label: "Term Explorer", icon: "🔬" },
   { href: "/proof-tree", label: "Proof Tree", icon: "🌳" },
   { href: "/robin-lagarias", label: "Robin–Lagarias", icon: "🏆" },
@@ -65,7 +66,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-600">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>3 axioms · 0 sorry · 217 theorems</span>
+            <span>7 crown axioms · 0 sorry · 644 theorems</span>
           </div>
           <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
             <div
@@ -74,7 +75,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             />
           </div>
           <div className="text-[10px] text-slate-600">
-            3,073 build jobs · zero errors
+            3,507 build jobs · zero errors
           </div>
         </div>
       </nav>
