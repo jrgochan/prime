@@ -40,14 +40,17 @@ export function ModeBar() {
   const handleTermsSlider = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const t = parseFloat(e.target.value);
-      // Log-scale: 4 → 200
       const n = Math.round(4 * Math.pow(50, t));
       setZetaTerms(n);
     },
     [setZetaTerms]
   );
 
-  // Reverse: count → slider value (0-1)
+  const cycleSpeed = useCallback(() => {
+    const i = SPEEDS.indexOf(speed as (typeof SPEEDS)[number]);
+    setSpeed(SPEEDS[(i + 1) % SPEEDS.length]);
+  }, [speed, setSpeed]);
+
   const sliderValue = Math.log(particleCount / 1000) / Math.log(500);
   const termsSliderValue = Math.log(zetaTerms / 4) / Math.log(50);
 
@@ -70,49 +73,52 @@ export function ModeBar() {
   return (
     <div className="mode-bar">
       <div className="mode-bar-left">
-        <button
-          className={`mode-bar-btn pause-btn ${paused ? "active" : ""}`}
-          onClick={togglePaused}
-          title={paused ? "Resume (Space)" : "Pause (Space)"}
-        >
-          {paused ? "▶" : "⏸"}
-        </button>
-        <div className="mode-bar-speed">
-          {SPEEDS.map((s) => (
-            <button
-              key={s}
-              className={`mode-bar-speed-btn ${speed === s ? "active" : ""}`}
-              onClick={() => setSpeed(s)}
-              title={`${s}× speed`}
-            >
-              {s}×
-            </button>
-          ))}
+        {/* Playback controls */}
+        <div className="dock-group">
+          <button
+            className={`dock-btn ${paused ? "dock-btn--amber" : ""}`}
+            onClick={togglePaused}
+            title={paused ? "Resume (Space)" : "Pause (Space)"}
+          >
+            {paused ? "▶" : "⏸"}
+          </button>
+          <button
+            className="dock-btn dock-btn--speed"
+            onClick={cycleSpeed}
+            title="Click to cycle speed"
+          >
+            {speed}×
+          </button>
         </div>
-        <div className="mode-bar-particles" title="Particle count">
+
+        {/* Particle slider */}
+        <div className="dock-slider-group">
+          <span className="dock-slider-label">Particles</span>
           <input
             type="range"
             min="0"
             max="1"
-            step="0.01"
+            step="0.005"
             value={sliderValue}
             onChange={handleParticleSlider}
-            className="particle-slider"
+            className="dock-slider dock-slider--green"
           />
-          <span className="particle-label">{formatCount(particleCount)}</span>
+          <span className="dock-slider-value">{formatCount(particleCount)}</span>
         </div>
-        <div className="mode-bar-particles" title="Zeta terms (N)">
-          <span className="particle-label" style={{ color: "var(--hz-cyan, #00ccff)" }}>N</span>
+
+        {/* Zeta terms slider */}
+        <div className="dock-slider-group">
+          <span className="dock-slider-label dock-slider-label--cyan">N</span>
           <input
             type="range"
             min="0"
             max="1"
-            step="0.01"
+            step="0.005"
             value={termsSliderValue}
             onChange={handleTermsSlider}
-            className="particle-slider terms-slider"
+            className="dock-slider dock-slider--cyan"
           />
-          <span className="particle-label">{zetaTerms}</span>
+          <span className="dock-slider-value">{zetaTerms}</span>
         </div>
       </div>
 

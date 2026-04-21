@@ -726,94 +726,138 @@ body {
   color: var(--hz-amber);
 }
 
-.mode-bar-speed {
+/* ── Dock Groups ── */
+.dock-group {
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
-.mode-bar-speed-btn {
-  padding: 4px 8px;
+.dock-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   border: 1px solid var(--hz-border);
-  background: transparent;
+  background: var(--hz-surface);
+  backdrop-filter: blur(var(--hz-blur));
   color: var(--hz-text-dim);
-  font-size: 10px;
+  font-size: 14px;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.15s;
-}
-
-.mode-bar-speed-btn:first-child { border-radius: 6px 0 0 6px; }
-.mode-bar-speed-btn:last-child { border-radius: 0 6px 6px 0; }
-
-.mode-bar-speed-btn:hover {
-  border-color: var(--hz-green);
-  color: var(--hz-green);
-}
-
-.mode-bar-speed-btn.active {
-  background: var(--hz-green-dim);
-  border-color: var(--hz-green);
-  color: var(--hz-green);
-  font-weight: 700;
-}
-
-.mode-bar-particles {
+  transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 6px;
+  justify-content: center;
 }
 
-.particle-slider {
+.dock-btn:hover {
+  border-color: var(--hz-green);
+  color: var(--hz-green);
+  background: var(--hz-green-dim);
+}
+
+.dock-btn--amber {
+  border-color: var(--hz-amber);
+  color: var(--hz-amber);
+  background: rgba(255, 170, 0, 0.08);
+}
+
+.dock-btn--speed {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  width: 40px;
+}
+
+/* ── Dock Sliders ── */
+.dock-slider-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.dock-slider-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hz-text-dim);
+  min-width: 16px;
+  text-align: right;
+  opacity: 0.6;
+}
+
+.dock-slider-label--cyan {
+  color: var(--hz-cyan, #00ccff);
+  opacity: 0.8;
+}
+
+.dock-slider {
   -webkit-appearance: none;
   appearance: none;
-  width: 60px;
-  height: 3px;
-  background: var(--hz-border);
-  border-radius: 2px;
+  width: 120px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
   outline: none;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
-.particle-slider::-webkit-slider-thumb {
+.dock-slider:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dock-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--hz-green);
-  border: none;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3);
 }
 
-.particle-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.3);
+.dock-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
 }
 
-.particle-slider::-moz-range-thumb {
-  width: 10px;
-  height: 10px;
+.dock-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: var(--hz-green);
-  border: none;
+  border: 2px solid rgba(0, 0, 0, 0.3);
   cursor: pointer;
+  box-shadow: 0 0 6px rgba(0, 255, 136, 0.3);
 }
 
-.particle-label {
-  font-size: 9px;
-  color: var(--hz-text-dim);
+/* Cyan variant for N slider */
+.dock-slider--cyan::-webkit-slider-thumb {
+  background: var(--hz-cyan, #00ccff);
+  box-shadow: 0 0 6px rgba(0, 204, 255, 0.3);
+}
+
+.dock-slider--cyan::-webkit-slider-thumb:hover {
+  box-shadow: 0 0 12px rgba(0, 204, 255, 0.5);
+}
+
+.dock-slider--cyan::-moz-range-thumb {
+  background: var(--hz-cyan, #00ccff);
+  box-shadow: 0 0 6px rgba(0, 204, 255, 0.3);
+}
+
+.dock-slider-value {
+  font-size: 11px;
+  color: var(--hz-text);
   font-weight: 600;
-  letter-spacing: 0.03em;
-  min-width: 28px;
-}
-
-.terms-slider::-webkit-slider-thumb {
-  background: var(--hz-cyan, #00ccff);
-}
-
-.terms-slider::-moz-range-thumb {
-  background: var(--hz-cyan, #00ccff);
+  font-variant-numeric: tabular-nums;
+  min-width: 32px;
+  text-align: left;
 }
 
 .mode-bar-center {
