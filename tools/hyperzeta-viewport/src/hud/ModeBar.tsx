@@ -106,9 +106,9 @@ export function ModeBar() {
           <span className="dock-slider-value">{formatCount(particleCount)}</span>
         </div>
 
-        {/* Zeta terms slider */}
+        {/* Zeta terms slider — tooltip shows what N means for this mode */}
         <div className="dock-slider-group">
-          <span className="dock-slider-label dock-slider-label--cyan">N</span>
+          <span className="dock-slider-label dock-slider-label--cyan" title={viz.nSliderLabel || "N terms"}>N</span>
           <input
             type="range"
             min="0"
