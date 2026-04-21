@@ -3,13 +3,15 @@
 import { useViewportStore } from "../stores/viewport";
 
 const SHORTCUTS = [
-  { keys: ["1", "–", "6"], action: "Switch visualization mode" },
-  { keys: ["←", "→"], action: "Previous / Next mode" },
-  { keys: ["Tab"], action: "Open command palette" },
+  { keys: ["1", "–", "9"], action: "Modes 1–9" },
+  { keys: ["0"], action: "Mertens Turbulence" },
+  { keys: ["-"], action: "Spectral Gap" },
+  { keys: ["="], action: "Prime Harmonics" },
+  { keys: ["←", "→"], action: "Cycle modes" },
+  { keys: ["Tab"], action: "Command palette" },
   { keys: ["Space"], action: "Pause / Resume" },
-  { keys: ["+", "−"], action: "Speed up / Slow down" },
-  { keys: ["H"], action: "Toggle zen mode (hide HUD)" },
-  { keys: ["I"], action: "Toggle info sidebar" },
+  { keys: ["H"], action: "Zen mode (hide HUD)" },
+  { keys: ["I"], action: "Info sidebar" },
   { keys: ["?"], action: "This help screen" },
   { keys: ["Esc"], action: "Close overlays" },
 ];

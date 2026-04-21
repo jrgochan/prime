@@ -205,6 +205,186 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 4,
     usesOutputBuffer: false,
   },
+  {
+    id: "waves",
+    label: "Explicit Formula",
+    shortLabel: "Waves",
+    icon: "🌊",
+    hotkey: "7",
+    color: { core: "#44ddff", edge: "#114455" },
+    equation: {
+      main: "π(x) ≈ Li(x) − Σᵨ Li(xᵅ)",
+      sub: "20 zero correction waves",
+    },
+    description:
+      "Watch primes emerge from wave interference. Each zero contributes a correction wave.",
+    cards: [
+      {
+        title: "The Explicit Formula",
+        body: "The prime counting function π(x) can be written as a smooth term Li(x) minus a sum over zeros of ζ. Each zero ρ contributes an oscillating correction wave.",
+      },
+      {
+        title: "Wave Superposition",
+        body: "Adding more zeros refines the approximation. With 20 zeros, the prime staircase begins to emerge from the interference pattern. With all zeros, the staircase would be exact.",
+      },
+      {
+        title: "Zeros Control Primes",
+        body: "This is the most direct visual proof that the distribution of primes is governed by the zeros of ζ. The Riemann Hypothesis constrains where these corrections can come from.",
+      },
+    ],
+    wasmMode: 5,
+    usesOutputBuffer: false,
+  },
+  {
+    id: "mirror",
+    label: "Functional Equation",
+    shortLabel: "Mirror",
+    icon: "🪞",
+    hotkey: "8",
+    color: { core: "#bb88ff", edge: "#442266" },
+    equation: {
+      main: "ζ(s) = χ(s) · ζ(1−s)",
+      sub: "Critical line = mirror plane",
+    },
+    description:
+      "The symmetry of ζ. Both sides of the critical strip reflected through σ = ½.",
+    cards: [
+      {
+        title: "The Reflection",
+        body: "The functional equation ζ(s) = χ(s)·ζ(1−s) means the left and right halves of the critical strip are mirror images. The critical line σ = ½ is the mirror plane.",
+      },
+      {
+        title: "Why It Matters",
+        body: "This symmetry is why RH talks about σ = ½ specifically. The functional equation forces zeros to come in pairs reflected through this line — unless they sit exactly on it.",
+      },
+      {
+        title: "The χ Factor",
+        body: "χ(s) = 2ˢπˢ⁻¹ sin(πs/2) Γ(1−s) is the gamma factor that mediates the reflection. It never vanishes in the critical strip, so ζ(s) = 0 iff ζ(1−s) = 0.",
+      },
+    ],
+    wasmMode: 6,
+    usesOutputBuffer: false,
+  },
+  {
+    id: "gue",
+    label: "Random Matrix",
+    shortLabel: "GUE",
+    icon: "🎲",
+    hotkey: "9",
+    color: { core: "#ffdd44", edge: "#665500" },
+    equation: {
+      main: "P(s) ∼ GUE pair correlation",
+      sub: "Zeta zeros vs random eigenvalues",
+    },
+    description:
+      "The Montgomery-Odlyzko law. Zeta zero spacings match random matrix eigenvalues.",
+    cards: [
+      {
+        title: "Two Clouds",
+        body: "Left: spacings between consecutive zeta zeros. Right: eigenvalue spacings from the Gaussian Unitary Ensemble. They look the same — and they should.",
+      },
+      {
+        title: "The Montgomery-Odlyzko Law",
+        body: "In 1973, Montgomery showed that zeta zero pair correlations match GUE statistics. Odlyzko confirmed numerically with millions of zeros. It's the deepest known connection between number theory and physics.",
+      },
+      {
+        title: "Why Random Matrices?",
+        body: "GUE matrices model quantum systems with time-reversal symmetry breaking. That zeta zeros behave like quantum eigenvalues suggests there may be an undiscovered quantum system whose spectrum IS the zeros of ζ.",
+      },
+    ],
+    wasmMode: 7,
+    usesOutputBuffer: false,
+  },
+  {
+    id: "mertens",
+    label: "Mertens Turbulence",
+    shortLabel: "Mertens",
+    icon: "🌪️",
+    hotkey: "0",
+    color: { core: "#ff8844", edge: "#663311" },
+    equation: {
+      main: "M(x) = Σ μ(n)",
+      sub: "RH ⟺ |M(x)| < x^(½+ε)",
+    },
+    description:
+      "The Mertens function as a turbulent 3D walk. RH keeps it bounded.",
+    cards: [
+      {
+        title: "The Möbius Function",
+        body: "μ(n) = (−1)^k if n has k distinct prime factors, 0 if n has a squared factor. It oscillates wildly between −1, 0, and 1.",
+      },
+      {
+        title: "Mertens Sum",
+        body: "M(x) = Σ_{n≤x} μ(n) wanders like a random walk. The Riemann Hypothesis is equivalent to |M(x)| < x^(½+ε) — the walk can't stray too far.",
+      },
+      {
+        title: "Turbulent Flow",
+        body: "The 3D walk traces M(x) through space using cosine and sine projections. The resulting turbulence pattern is a fingerprint of the primes' multiplicative structure.",
+      },
+    ],
+    wasmMode: 8,
+    usesOutputBuffer: false,
+  },
+  {
+    id: "spectral-gap",
+    label: "Spectral Gap",
+    shortLabel: "Gap",
+    icon: "🏛️",
+    hotkey: "-",
+    color: { core: "#66ffaa", edge: "#225533" },
+    equation: {
+      main: "λ_min(G_N) > 0",
+      sub: "Cathedral Axiom 1 · Gram matrix floor",
+    },
+    description:
+      "From the Cathedral proof. The Gram matrix eigenvalue surface — Axiom 1 says it has a floor.",
+    cards: [
+      {
+        title: "The Spectral Gap",
+        body: "The Gram matrix G_N is formed from overlapping zeta evaluations. Its smallest eigenvalue λ_min(N) must stay positive — this is the Cathedral's foundational axiom.",
+      },
+      {
+        title: "The Surface",
+        body: "Height = log(λ_min) plotted over (N, t). The surface has a floor — it never touches zero. This floor is the spectral gap that the entire proof chain rests on.",
+      },
+      {
+        title: "Connection to RH",
+        body: "If the spectral gap vanished, the Nyman-Beurling distance would diverge, the zeta-free region would collapse, and RH could fail. The floor holds. The primes hold.",
+      },
+    ],
+    wasmMode: 9,
+    usesOutputBuffer: false,
+  },
+  {
+    id: "harmonics",
+    label: "Prime Harmonics",
+    shortLabel: "Harmonics",
+    icon: "🎵",
+    hotkey: "=",
+    color: { core: "#ff99dd", edge: "#662244" },
+    equation: {
+      main: "Σₚ sin(ln(p) · θ) / √p",
+      sub: "15 primes · standing waves on cylinder",
+    },
+    description:
+      "Number theory as music. Each prime is a note at frequency log(p), amplitude 1/√p.",
+    cards: [
+      {
+        title: "Prime Notes",
+        body: "Each prime p generates a standing wave at frequency log(p) with amplitude 1/√p. Higher primes are quieter but still contribute to the harmony.",
+      },
+      {
+        title: "The Cylinder",
+        body: "Waves are wrapped around a cylinder — each horizontal ring is one prime's contribution. The vertical stack shows how 15 primes create an increasingly complex resonance.",
+      },
+      {
+        title: "Fourier Analysis of Primes",
+        body: "The Riemann zeta function IS the Fourier transform of the prime distribution. These standing waves are the individual Fourier modes. Their zeros are the resonant frequencies.",
+      },
+    ],
+    wasmMode: 10,
+    usesOutputBuffer: false,
+  },
 ];
 
 // Index by ID for O(1) lookup

@@ -2,11 +2,17 @@
 
 import { useEffect } from "react";
 import { useViewportStore } from "../stores/viewport";
-import { VIZ_ORDER, VIZ_MAP } from "../content/visualizations";
+import { VISUALIZATIONS, VIZ_ORDER } from "../content/visualizations";
+
+// Build hotkey → mode map from registry
+const HOTKEY_MAP = new Map(
+  VISUALIZATIONS.map((v) => [v.hotkey, v.id])
+);
 
 /**
  * Global keyboard shortcuts for the viewport.
- * No dependencies — reads directly from Zustand store.
+ * Hotkeys are read from the Visualization Registry — adding a mode
+ * with a hotkey automatically registers it here.
  */
 export function useKeyboard() {
   useEffect(() => {
@@ -20,21 +26,14 @@ export function useKeyboard() {
 
       const store = useViewportStore.getState();
 
-      switch (e.key) {
-        // ── Mode Selection (1-6) ──
-        case "1":
-        case "2":
-        case "3":
-        case "4":
-        case "5":
-        case "6": {
-          const idx = parseInt(e.key) - 1;
-          if (idx < VIZ_ORDER.length) {
-            store.setViewMode(VIZ_ORDER[idx]);
-          }
-          break;
-        }
+      // ── Registry Hotkeys (1-9, 0, -, =) ──
+      const hotkeyMode = HOTKEY_MAP.get(e.key);
+      if (hotkeyMode) {
+        store.setViewMode(hotkeyMode);
+        return;
+      }
 
+      switch (e.key) {
         // ── Prev/Next Mode ──
         case "ArrowLeft": {
           if (store.paletteOpen) return;
@@ -49,22 +48,6 @@ export function useKeyboard() {
           const curIdx2 = VIZ_ORDER.indexOf(store.viewMode);
           const next = VIZ_ORDER[(curIdx2 + 1) % VIZ_ORDER.length];
           store.setViewMode(next);
-          break;
-        }
-
-        // ── Speed ──
-        case "=":
-        case "+": {
-          const speeds = [1, 2, 4, 8];
-          const si = speeds.indexOf(store.speed);
-          if (si < speeds.length - 1) store.setSpeed(speeds[si + 1]);
-          break;
-        }
-        case "-":
-        case "_": {
-          const speeds2 = [1, 2, 4, 8];
-          const si2 = speeds2.indexOf(store.speed);
-          if (si2 > 0) store.setSpeed(speeds2[si2 - 1]);
           break;
         }
 

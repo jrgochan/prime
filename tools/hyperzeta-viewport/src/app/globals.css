@@ -861,7 +861,7 @@ body {
 
 .palette-container {
   width: 90%;
-  max-width: 720px;
+  max-width: 900px;
   background: rgba(10, 14, 20, 0.95);
   border: 1px solid var(--hz-border);
   border-radius: 16px;
@@ -908,7 +908,7 @@ body {
 
 .palette-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 

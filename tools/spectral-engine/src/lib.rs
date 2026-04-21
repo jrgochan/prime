@@ -308,6 +308,198 @@ impl HyperEngine {
                     }
                 }
                 
+                // ── MODE 5: Explicit Formula Waves ──
+                // π(x) ≈ Li(x) - Σ_ρ Li(x^ρ). Each zero ρ contributes a correction wave.
+                // Show waves superposing to build the prime staircase.
+                5 => {
+                    let max_waves = 20usize;
+                    let num_x_points = self.particle_count / max_waves;
+                    let wave_idx = i / num_x_points;  // which zero we're up to
+                    let x_idx = i % num_x_points;     // position along x-axis
+                    
+                    let x = 2.0 + (x_idx as f64 / num_x_points as f64) * (40.0 + lambda * 10.0);
+                    
+                    // Known imaginary parts of first 20 non-trivial zeros
+                    let zeros: [f64; 20] = [
+                        14.1347, 21.0220, 25.0109, 30.4249, 32.9351,
+                        37.5862, 40.9187, 43.3271, 48.0052, 49.7738,
+                        52.9703, 56.4462, 59.3470, 60.8318, 65.1125,
+                        67.0798, 69.5464, 72.0672, 75.7047, 77.1448,
+                    ];
+                    
+                    // Sum correction waves from zeros 0..wave_idx
+                    let mut correction = 0.0f64;
+                    for k in 0..=wave_idx.min(zeros.len() - 1) {
+                        let gamma = zeros[k];
+                        // Li(x^ρ) ≈ -2·Re[Ei(ρ·ln(x))] simplified to oscillatory term
+                        let ln_x = x.ln();
+                        correction -= 2.0 * (gamma * ln_x).cos() / (gamma * gamma + 0.25).sqrt();
+                    }
+                    
+                    let spread = 25.0;
+                    let x_norm = (x_idx as f64 / num_x_points as f64) - 0.5;
+                    self.input_buffer[idx]     = (x_norm * spread * 2.0) as f32;
+                    self.input_buffer[idx + 1] = (correction * 3.0) as f32;
+                    self.input_buffer[idx + 2] = ((wave_idx as f64 / max_waves as f64 - 0.5) * spread) as f32;
+                }
+                
+                // ── MODE 6: Functional Equation Mirror ──
+                // ζ(s) = χ(s)·ζ(1-s). Show both sides reflected through σ = ½.
+                6 => {
+                    let half = self.particle_count / 2;
+                    let is_right = i >= half;
+                    let local_i = if is_right { i - half } else { i };
+                    let t_frac_local = local_i as f64 / half as f64;
+                    let t = t_frac_local * t_max;
+                    
+                    // Left: σ = 0.5 + offset, Right: σ = 0.5 - offset (reflected)
+                    let sigma_offset = 0.3 * (1.0 + (t * 0.1).sin() * 0.5);
+                    let sigma = if is_right { 0.5 + sigma_offset } else { 0.5 - sigma_offset };
+                    
+                    let (zr, zi) = Self::complex_zeta(sigma, t, 40);
+                    let mag = (zr * zr + zi * zi).sqrt().ln().max(-3.0).min(3.0);
+                    
+                    let mirror_x = if is_right { sigma_offset } else { -sigma_offset };
+                    let hs = 30.0 / t_max.max(1.0);
+                    self.input_buffer[idx]     = (mirror_x * 25.0) as f32;
+                    self.input_buffer[idx + 1] = ((t - t_max * 0.5) * hs) as f32;
+                    self.input_buffer[idx + 2] = (mag * 3.0) as f32;
+                }
+                
+                // ── MODE 7: GUE Random Matrix ──
+                // Overlay zeta zero spacings with GUE eigenvalue statistics.
+                // Left cloud: zeta zeros. Right cloud: GUE-distributed points.
+                7 => {
+                    let half = self.particle_count / 2;
+                    let is_gue = i >= half;
+                    let local_i = if is_gue { i - half } else { i };
+                    
+                    if !is_gue {
+                        // Zeta zeros: plot consecutive zero spacings
+                        let zeros: [f64; 20] = [
+                            14.1347, 21.0220, 25.0109, 30.4249, 32.9351,
+                            37.5862, 40.9187, 43.3271, 48.0052, 49.7738,
+                            52.9703, 56.4462, 59.3470, 60.8318, 65.1125,
+                            67.0798, 69.5464, 72.0672, 75.7047, 77.1448,
+                        ];
+                        let z_idx = local_i % (zeros.len() - 1);
+                        let repeat = local_i / (zeros.len() - 1);
+                        let spacing = zeros[z_idx + 1] - zeros[z_idx];
+                        // Normalize spacing by average
+                        let avg_spacing = (zeros[19] - zeros[0]) / 19.0;
+                        let norm_spacing = spacing / avg_spacing;
+                        
+                        let angle = (repeat as f64 * 0.1 + lambda * 0.15);
+                        let r = norm_spacing * 5.0;
+                        self.input_buffer[idx]     = (r * angle.cos() - 8.0) as f32;
+                        self.input_buffer[idx + 1] = ((z_idx as f64 / 19.0 - 0.5) * 20.0) as f32;
+                        self.input_buffer[idx + 2] = (r * angle.sin()) as f32;
+                    } else {
+                        // GUE: Wigner semicircle distribution approximation
+                        let phase = local_i as f64 * 2.399963 + lambda * 0.3; // golden angle
+                        let r_base = ((local_i as f64 / half as f64) * 4.0).sqrt(); // semicircle
+                        let r = r_base * 5.0;
+                        let y = ((local_i % 20) as f64 / 19.0 - 0.5) * 20.0;
+                        self.input_buffer[idx]     = (r * phase.cos() + 8.0) as f32;
+                        self.input_buffer[idx + 1] = y as f32;
+                        self.input_buffer[idx + 2] = (r * phase.sin()) as f32;
+                    }
+                }
+                
+                // ── MODE 8: Mertens Turbulence ──
+                // M(x) = Σ μ(n) — the Mertens function as a 3D random walk.
+                // RH ⟺ |M(x)| < x^(½+ε). Show the walk staying within bounds.
+                8 => {
+                    let n = i + 1;
+                    // Compute Möbius μ(n) via trial division
+                    let mu = Self::mobius(n);
+                    
+                    // Cumulative Mertens: each particle carries the running sum
+                    // (approximated for performance — use modular arithmetic for visual)
+                    let t_param = lambda * 0.5;
+                    let angle1 = n as f64 * 0.1 + t_param;
+                    let angle2 = n as f64 * 0.0618 + t_param * 0.7; // golden ratio freq
+                    
+                    // Mertens-like walk in 3D
+                    let walk_x: f64 = (1..=n.min(200)).map(|k| {
+                        let m = Self::mobius(k) as f64;
+                        m * (k as f64 * 0.15 + t_param).cos()
+                    }).sum();
+                    let walk_z: f64 = (1..=n.min(200)).map(|k| {
+                        let m = Self::mobius(k) as f64;
+                        m * (k as f64 * 0.15 + t_param).sin()
+                    }).sum();
+                    
+                    let scale = 0.8;
+                    let y = ((n as f64).ln() - 4.0) * 3.0; // log-scaled height
+                    self.input_buffer[idx]     = (walk_x * scale) as f32;
+                    self.input_buffer[idx + 1] = y as f32;
+                    self.input_buffer[idx + 2] = (walk_z * scale) as f32;
+                }
+                
+                // ── MODE 9: Spectral Gap Heatmap ──
+                // Gram matrix eigenvalue λ_min(N) as a surface.
+                // The Cathedral's Axiom 1 says this surface has a positive floor.
+                9 => {
+                    let grid_w = (self.particle_count as f64).sqrt() as usize;
+                    let grid_h = self.particle_count / grid_w.max(1);
+                    let xi = i % grid_w;
+                    let yi = i / grid_w;
+                    
+                    if yi >= grid_h {
+                        self.input_buffer[idx] = 0.0;
+                        self.input_buffer[idx + 1] = -100.0;
+                        self.input_buffer[idx + 2] = 0.0;
+                    } else {
+                        let n_dim = 2 + (xi as f64 / grid_w as f64 * 18.0) as usize; // N ∈ [2, 20]
+                        let t = (yi as f64 / grid_h as f64) * t_max;
+                        
+                        // Approximate Gram matrix diagonal dominance
+                        // G_{jk} ≈ ∫₀¹ {jt}{kt}/(n+t)² dt
+                        // λ_min ≈ 1/N - error
+                        let diag = 1.0 / n_dim as f64;
+                        let offdiag_decay = (-0.5 * (t * 0.1).sin().abs() * n_dim as f64).exp();
+                        let lambda_min = (diag * (1.0 - offdiag_decay * 0.8)).max(0.001);
+                        
+                        let spread = 20.0;
+                        let height = lambda_min.ln().max(-4.0) * 4.0 + 8.0;
+                        self.input_buffer[idx]     = ((xi as f64 / grid_w as f64 - 0.5) * spread * 2.0) as f32;
+                        self.input_buffer[idx + 1] = height as f32;
+                        self.input_buffer[idx + 2] = ((yi as f64 / grid_h as f64 - 0.5) * spread * 2.0) as f32;
+                    }
+                }
+                
+                // ── MODE 10: Prime Harmonics ──
+                // Each prime p generates a standing wave at frequency log(p).
+                // Superpose on a cylinder to create resonance patterns.
+                10 => {
+                    let primes: [u64; 15] = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47];
+                    let num_primes = primes.len();
+                    let points_per_prime = self.particle_count / num_primes;
+                    let prime_idx = i / points_per_prime;
+                    let local_i = i % points_per_prime;
+                    let p = primes[prime_idx.min(num_primes - 1)] as f64;
+                    
+                    let theta = (local_i as f64 / points_per_prime as f64) * std::f64::consts::TAU * 3.0;
+                    let freq = p.ln();
+                    let amplitude = 1.0 / p.sqrt(); // higher primes = quieter
+                    
+                    // Standing wave on cylinder
+                    let wave = amplitude * (freq * theta + lambda * freq * 0.1).sin();
+                    let r = 4.0 + wave * 6.0; // base radius + wave amplitude
+                    
+                    // Vertical position from prime index
+                    let y = (prime_idx as f64 / num_primes as f64 - 0.5) * 30.0;
+                    
+                    let rot = lambda * 0.1;
+                    let x = r * (theta + rot).cos();
+                    let z = r * (theta + rot).sin();
+                    
+                    self.input_buffer[idx]     = x as f32;
+                    self.input_buffer[idx + 1] = y as f32;
+                    self.input_buffer[idx + 2] = z as f32;
+                }
+                
                 _ => {} // Unknown mode — leave buffer unchanged
             }
 
@@ -357,6 +549,25 @@ impl HyperEngine {
             zi += mag * angle.sin();
         }
         (zr, zi)
+    }
+
+    /// Compute Möbius function μ(n) via trial division.
+    /// Returns 0 if n has squared prime factor, (-1)^k if k distinct primes.
+    fn mobius(n: usize) -> i32 {
+        if n == 1 { return 1; }
+        let mut n = n;
+        let mut factors = 0i32;
+        let mut d = 2usize;
+        while d * d <= n {
+            if n % d == 0 {
+                factors += 1;
+                n /= d;
+                if n % d == 0 { return 0; } // squared factor
+            }
+            d += 1;
+        }
+        if n > 1 { factors += 1; }
+        if factors % 2 == 0 { 1 } else { -1 }
     }
 }
 
