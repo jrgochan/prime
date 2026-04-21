@@ -20,7 +20,13 @@ interface ViewportState {
   speed: number;
   viewMode: ViewMode;
   cameraPreset: CameraPreset;
+  paused: boolean;
+
+  // ── UI Panels ──
   showInfo: boolean;
+  hudVisible: boolean;
+  paletteOpen: boolean;
+  showHelp: boolean;
 
   // ── Toast ──
   toastMessage: string;
@@ -34,7 +40,11 @@ interface ViewportState {
   setSpeed: (speed: number) => void;
   setViewMode: (mode: ViewMode) => void;
   setCameraPreset: (preset: CameraPreset) => void;
+  togglePaused: () => void;
   toggleInfo: () => void;
+  toggleHud: () => void;
+  togglePalette: () => void;
+  toggleHelp: () => void;
   showToast: (message: string) => void;
   hideToast: () => void;
 }
@@ -51,7 +61,12 @@ export const useViewportStore = create<ViewportState>()(
     speed: 1,
     viewMode: "output",
     cameraPreset: "orbital",
+    paused: false,
+
     showInfo: false,
+    hudVisible: true,
+    paletteOpen: false,
+    showHelp: false,
 
     toastMessage: "",
     toastVisible: false,
@@ -71,16 +86,22 @@ export const useViewportStore = create<ViewportState>()(
       })),
 
     setSpeed: (speed) => set({ speed }),
+
     setViewMode: (viewMode) => {
       // Tell the WASM engine which visualization to compute
       const system = useViewportStore.getState().hyperSystem;
       if (system?.engine && viewMode !== "output") {
         system.engine.set_view_mode(VIEW_MODE_WASM[viewMode]);
       }
-      set({ viewMode });
+      set({ viewMode, paletteOpen: false });
     },
+
     setCameraPreset: (cameraPreset) => set({ cameraPreset }),
-    toggleInfo: () => set((state) => ({ showInfo: !state.showInfo })),
+    togglePaused: () => set((s) => ({ paused: !s.paused })),
+    toggleInfo: () => set((s) => ({ showInfo: !s.showInfo })),
+    toggleHud: () => set((s) => ({ hudVisible: !s.hudVisible })),
+    togglePalette: () => set((s) => ({ paletteOpen: !s.paletteOpen })),
+    toggleHelp: () => set((s) => ({ showHelp: !s.showHelp })),
 
     showToast: (toastMessage) => set({ toastMessage, toastVisible: true }),
     hideToast: () => set({ toastVisible: false }),

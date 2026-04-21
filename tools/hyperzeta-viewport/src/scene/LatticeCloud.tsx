@@ -5,45 +5,26 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useViewportStore } from "../stores/viewport";
 import { PARTICLE_COUNT } from "../engine/types";
-import type { ViewMode } from "../engine/types";
+import { VIZ_MAP } from "../content/visualizations";
 
 import { vertexShader, fragmentShader } from "./shaders/lattice";
 
-// Color palettes per view mode
-const COLORS: Record<ViewMode, { core: THREE.Color; edge: THREE.Color }> = {
-  output: {
-    core: new THREE.Color("#00ff88"),
-    edge: new THREE.Color("#006644"),
-  },
-  spiral: {
-    core: new THREE.Color("#00ccff"),
-    edge: new THREE.Color("#004466"),
-  },
-  "partial-sums": {
-    core: new THREE.Color("#ff6bff"),
-    edge: new THREE.Color("#660066"),
-  },
-  landscape: {
-    core: new THREE.Color("#ffaa00"),
-    edge: new THREE.Color("#663300"),
-  },
-  "euler-rose": {
-    core: new THREE.Color("#ff6b9d"),
-    edge: new THREE.Color("#660033"),
-  },
-  tower: {
-    core: new THREE.Color("#88ffcc"),
-    edge: new THREE.Color("#336644"),
-  },
-};
+// Pre-build Three.js color objects from registry
+const colorCache = new Map<string, { core: THREE.Color; edge: THREE.Color }>();
+function getColors(modeId: string) {
+  if (!colorCache.has(modeId)) {
+    const viz = VIZ_MAP[modeId as keyof typeof VIZ_MAP];
+    colorCache.set(modeId, {
+      core: new THREE.Color(viz.color.core),
+      edge: new THREE.Color(viz.color.edge),
+    });
+  }
+  return colorCache.get(modeId)!;
+}
 
 /**
  * GPU-accelerated particle cloud using THREE.Points + custom GLSL shaders.
- *
- * - Single-vertex points (vs mesh geometry)
- * - Position data read directly from WASM shared memory
- * - Fragment shader renders circular particles with glow + gradient
- * - All state read from Zustand (no stale closures)
+ * All rendering state is read from the Visualization Registry.
  */
 export function LatticeCloud() {
   const pointsRef = useRef<THREE.Points>(null);
@@ -60,15 +41,17 @@ export function LatticeCloud() {
   }
 
   useFrame(() => {
-    // Read directly from Zustand store — never stale
-    const { hyperSystem, viewMode, speed } = useViewportStore.getState();
+    const { hyperSystem, viewMode, speed, paused } =
+      useViewportStore.getState();
     if (!hyperSystem) return;
 
     const { engine, outputBuffer, inputBuffer } = hyperSystem;
 
-    // Tick physics at configured speed
-    for (let s = 0; s < speed; s++) {
-      engine.tick_physics();
+    // Tick physics (skip when paused)
+    if (!paused) {
+      for (let s = 0; s < speed; s++) {
+        engine.tick_physics();
+      }
     }
     frameCount.current += 1;
 
@@ -79,20 +62,20 @@ export function LatticeCloud() {
       useViewportStore.getState().updateMetrics(c, l);
     }
 
-    // Select active buffer: "output" uses geometry_buffer, all others use input_buffer
-    const activeBuffer = viewMode === "output" ? outputBuffer : inputBuffer;
+    // Select buffer from registry
+    const viz = VIZ_MAP[viewMode];
+    const activeBuffer = viz.usesOutputBuffer ? outputBuffer : inputBuffer;
 
     // Copy WASM buffer into geometry attribute
     const posAttr = geometryRef.current!.getAttribute(
       "position"
     ) as THREE.BufferAttribute;
-    const posArray = posAttr.array as Float32Array;
-    posArray.set(activeBuffer);
+    (posAttr.array as Float32Array).set(activeBuffer);
     posAttr.needsUpdate = true;
 
-    // Update shader uniforms
+    // Update shader uniforms from registry colors
     if (materialRef.current) {
-      const palette = COLORS[viewMode];
+      const palette = getColors(viewMode);
       materialRef.current.uniforms.uCoreColor.value.copy(palette.core);
       materialRef.current.uniforms.uEdgeColor.value.copy(palette.edge);
       materialRef.current.uniforms.uCollapse.value =
@@ -112,8 +95,8 @@ export function LatticeCloud() {
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         uniforms={{
-          uCoreColor: { value: COLORS.output.core.clone() },
-          uEdgeColor: { value: COLORS.output.edge.clone() },
+          uCoreColor: { value: new THREE.Color("#00ff88") },
+          uEdgeColor: { value: new THREE.Color("#006644") },
           uCollapse: { value: 1.0 },
           uTime: { value: 0.0 },
         }}

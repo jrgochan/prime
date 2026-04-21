@@ -18,9 +18,15 @@ const STATUS_COLOR = {
 
 export function Header() {
   const engineState = useViewportStore((s) => s.engineState);
-  const showInfo = useViewportStore((s) => s.showInfo);
+  const paused = useViewportStore((s) => s.paused);
+  const hudVisible = useViewportStore((s) => s.hudVisible);
   const toggleInfo = useViewportStore((s) => s.toggleInfo);
-  const color = STATUS_COLOR[engineState];
+  const showInfo = useViewportStore((s) => s.showInfo);
+
+  if (!hudVisible) return null;
+
+  const color = paused ? "#ffaa00" : STATUS_COLOR[engineState];
+  const text = paused ? "⏸ Paused" : STATUS_TEXT[engineState];
 
   return (
     <header className="viewport-header">
@@ -28,14 +34,14 @@ export function Header() {
         <h1 className="title">PROJECT HYPERZETA</h1>
         <div className="status-badge" style={{ borderColor: color }}>
           <span className="status-dot" style={{ backgroundColor: color }} />
-          <span style={{ color }}>{STATUS_TEXT[engineState]}</span>
+          <span style={{ color }}>{text}</span>
         </div>
       </div>
       <div className="header-right">
         <button
           className="info-toggle"
           onClick={toggleInfo}
-          title="Toggle educational info"
+          title="Toggle educational info (I)"
         >
           {showInfo ? "✕" : "ℹ"}
         </button>

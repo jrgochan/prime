@@ -1,17 +1,24 @@
 "use client";
 
 import { useViewportStore } from "../stores/viewport";
-import { EDUCATIONAL_CARDS } from "../content/cards";
+import { VIZ_MAP } from "../content/visualizations";
 import { InfoCard } from "./InfoCard";
 
 export function InfoSidebar() {
   const showInfo = useViewportStore((s) => s.showInfo);
+  const viewMode = useViewportStore((s) => s.viewMode);
+
   if (!showInfo) return null;
+
+  const viz = VIZ_MAP[viewMode];
 
   return (
     <aside className="info-sidebar">
-      <h2 className="info-sidebar-title">About This Visualization</h2>
-      {EDUCATIONAL_CARDS.map((card, i) => (
+      <h2 className="info-sidebar-title">
+        {viz.icon} {viz.label}
+      </h2>
+      <p className="info-sidebar-desc">{viz.description}</p>
+      {viz.cards.map((card, i) => (
         <InfoCard key={card.title} title={card.title} body={card.body} index={i} />
       ))}
       <div className="info-footer">

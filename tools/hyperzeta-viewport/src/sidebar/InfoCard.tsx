@@ -1,14 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 export function InfoCard({
   title,
   body,
   index,
 }: {
   title: string;
-  body: ReactNode;
+  body: string;
   index: number;
 }) {
   return (
