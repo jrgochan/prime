@@ -136,7 +136,7 @@ private lemma floor_div_integrableOn (s : ℂ) (hs : 1 < s.re) (k : ℕ) (hk : 1
             ≤ t ^ (s.re - 1) * ((k:ℝ)/t) := mul_le_mul_of_nonneg_left (Int.floor_le _) (rpow_nonneg ht.le _)
           _ = (↑k : ℝ) * t ^ (s.re - 2) := by
               rw [mul_comm, div_mul_eq_mul_div, mul_div_assoc, div_eq_mul_inv, ← rpow_neg_one t,
-                  ← rpow_add ht]; congr 1; ring
+                  ← rpow_add ht]; congr 1; ring_nf
           _ ≤ ‖(↑k : ℝ) * t ^ (s.re - 2)‖ := le_norm_self _
           _ = _ := by simp)
 
@@ -170,7 +170,7 @@ private lemma abel_sum_gen (a : ℕ → ℂ) (k : ℕ) : ∀ M : ℕ,
   | zero => simp
   | succ m ih =>
     rw [Finset.sum_range_succ, Finset.sum_range_succ, ih]
-    push_cast; ring
+    push_cast; ring_nf
 
 /-- The partial Abel sum connects to partial ζ sums for the generalized k-floor. -/
 private lemma partial_sum_gen (s : ℂ) (k : ℕ) (M : ℕ) :
@@ -442,7 +442,7 @@ theorem mellin_fractBasis (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
               _ = (↑k : ℝ) * t ^ (s.re - 2) := by
                   rw [mul_comm, div_mul_eq_mul_div, mul_div_assoc,
                       div_eq_mul_inv, ← rpow_neg_one t,
-                      ← rpow_add ht]; congr 1; ring
+                      ← rpow_add ht]; congr 1; ring_nf
               _ ≤ ‖(↑k : ℝ) * t ^ (s.re - 2)‖ := le_norm_self _
               _ = _ := by simp)
       : IntegrableOn (fun t : ℝ => (↑t : ℂ) ^ (s-1) * (↑(⌊(k:ℝ)/t⌋):ℂ))
