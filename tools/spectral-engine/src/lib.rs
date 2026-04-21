@@ -105,13 +105,33 @@ impl HyperEngine {
             // Force the Real dimension of every coordinate mathematically exactly to 1/2
             s_coord.a.a.r = 0.5; 
 
-            // INPUT SPACE: Write the 16D→3D projected input positions (the spiral)
+            // INPUT SPACE: Helical spiral projection
+            // Map each particle's 16D sedenion orientation to a position on a helix.
+            // - Phase angle: derived from the particle's quaternion components (unique per particle)
+            // - Height: spreads particles vertically, modulated by lambda
+            // - Radius: based on the imaginary magnitude of the first quaternion
             let idx = i * 3;
-            let input_quat = s_coord.a.a;
-            let input_scale = 2.0; // Scale for visual clarity
-            self.input_buffer[idx]   = (input_quat.i * input_scale) as f32;
-            self.input_buffer[idx+1] = (input_quat.j * input_scale) as f32;
-            self.input_buffer[idx+2] = (input_quat.k * input_scale) as f32;
+            let q = s_coord.a.a; // First quaternion of the sedenion
+            
+            // Unique phase per particle: atan2 of two imaginary components
+            // This creates an angular distribution based on the particle's 16D orientation
+            let phase = q.i.atan2(q.j);
+            
+            // Radius: imaginary magnitude of the first octonion × modulation
+            let r = (q.i * q.i + q.j * q.j + q.k * q.k).sqrt();
+            let radius = 3.0 + r * 0.8;
+            
+            // Height: each particle gets a unique vertical position based on
+            // another pair of sedenion components, creating the helix layering
+            let q2 = s_coord.a.b; // Second quaternion of the first octonion
+            let height = (q2.r + q2.i) * 2.0;
+            
+            // The helix: x,z circle with y height.
+            // Lambda rotation makes the whole spiral turn over time.
+            let angle = phase + lambda * 0.3;
+            self.input_buffer[idx]     = (radius * angle.cos()) as f32;
+            self.input_buffer[idx + 1] = height as f32;
+            self.input_buffer[idx + 2] = (radius * angle.sin()) as f32;
 
             // STEP 2: Calculate Riemann Zeta Dirichlet Series in 16-Dimensions:
             // zeta(S) = sum_{n=1}^{N} n^{-S} = sum e^(-S * ln(n))
