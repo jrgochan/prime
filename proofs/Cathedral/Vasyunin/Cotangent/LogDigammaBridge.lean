@@ -87,7 +87,7 @@ def partialDigammaSum (z : ℝ) (N : ℕ) : ℝ :=
 theorem partialDigammaSum_one (N : ℕ) :
     partialDigammaSum 1 N = 0 := by
   unfold partialDigammaSum
-  simp [show (1:ℝ) - 1 = 0 from by ring]
+  simp
 
 -- ════════════════════════════════════════════════
 -- §3. THE HARMONIC TILE SUM

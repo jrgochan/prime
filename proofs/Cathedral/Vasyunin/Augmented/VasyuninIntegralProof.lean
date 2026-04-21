@@ -106,7 +106,7 @@ private theorem integral_comp_mul_nat (f : ℝ → ℝ) (k : ℕ) (hk : 1 ≤ k)
   simp_rw [show ∀ x : ℝ, (k:ℝ) * x = x * (k:ℝ) from fun x => mul_comm _ _]
   have h := intervalIntegral.integral_comp_mul_right (f := f) hk_ne (a := (0:ℝ)) (b := (1:ℝ))
   rw [h]; simp only [smul_eq_mul, inv_eq_one_div]
-  congr 1 <;> ring
+  (congr 1; ring)
 
 -- ∫₀¹ {1/u}² du = ln(2π) - γ - 1
 -- PROVED via the Stirling-Euler squeeze theorem (SqueezeElimination).

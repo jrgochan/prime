@@ -456,7 +456,7 @@ private lemma bd_norm_sq_cpow_integral (ρ : ℂ) (_hρ : 0 < ρ.re) (hρ' : ρ.
 
 private lemma bd_discrim_le {a b c : ℝ} (ha : 0 ≤ a)
     (h : ∀ t, 0 ≤ a * t ^ 2 + b * t + c) : b ^ 2 ≤ 4 * a * c := by
-  by_contra h_neg; push_neg at h_neg
+  by_contra h_neg; push Not at h_neg
   rcases eq_or_lt_of_le ha with rfl | ha_pos
   · simp at h h_neg
     have hb : b ≠ 0 := by intro hb; simp [hb] at h_neg
@@ -529,7 +529,7 @@ private lemma bd_residual_cpow_integrableOn (N : ℕ) (_hN : 2 ≤ N)
   apply Integrable.mono h_dom
   · exact (Complex.continuous_ofReal.comp_aestronglyMeasurable
       (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
-        (Set.Ioo_subset_Ioc_self.trans (by simp [Set.uIoc_of_le (show (0:ℝ) ≤ 1 by norm_num)])))
+        (Set.Ioo_subset_Ioc_self.trans (by simp)))
       ).mul (Measurable.aestronglyMeasurable (by fun_prop))
   · filter_upwards [self_mem_ae_restrict measurableSet_Ioo] with x hx
     rw [norm_mul, Complex.norm_real, Complex.norm_cpow_eq_rpow_re_of_pos hx.1 _,
@@ -549,7 +549,7 @@ private lemma bd_g_re_h_iint (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (
   have h_meas : AEStronglyMeasurable (fun x : ℝ => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re)
       (volume.restrict (Set.Ioc 0 1)) :=
     (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
-      (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])).mul
+      (by simp)).mul
       (Measurable.aestronglyMeasurable (by fun_prop)).restrict
   refine Integrable.mono h_sum h_meas ?_
   filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x _
@@ -571,7 +571,7 @@ private lemma bd_g_im_h_iint (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (
   have h_meas : AEStronglyMeasurable (fun x : ℝ => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im)
       (volume.restrict (Set.Ioc 0 1)) :=
     (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
-      (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])).mul
+      (by simp)).mul
       (Measurable.aestronglyMeasurable (by fun_prop)).restrict
   refine Integrable.mono h_sum h_meas ?_
   filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x _

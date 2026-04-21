@@ -86,7 +86,7 @@ theorem row0_integrand_eq (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k)
 
 /-- The row-0 integral ∫_{1/j}^{1} 1/(jkx²) dx = 1/(jk) · (1 - 1/j)
     when j ≤ k. Uses cross_piece_integral_ftc with m = 0, n = 0. -/
-theorem row0_integral_ftc (j k : ℕ) (hj : 1 ≤ j) (_hk : 1 ≤ k) :
+theorem row0_integral_ftc (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
     ∫ x in (1 / (j:ℝ))..(1:ℝ),
       (1 / ((j:ℝ) * x)) * (1 / ((k:ℝ) * x)) =
     ∫ x in (1 / (j:ℝ))..(1:ℝ),
