@@ -322,34 +322,38 @@ impl HyperEngine {
                 
                 // ── MODE 5: Explicit Formula Waves ──
                 // π(x) ≈ Li(x) - Σ_ρ Li(x^ρ). Each zero ρ contributes a correction wave.
-                // Show waves superposing to build the prime staircase.
+                // N slider controls how many zeros contribute — watch the staircase sharpen.
                 5 => {
-                    let max_waves = 20usize;
-                    let num_x_points = self.particle_count / max_waves;
-                    let wave_idx = i / num_x_points;  // which zero we're up to
-                    let x_idx = i % num_x_points;     // position along x-axis
-                    
-                    let x = 2.0 + (x_idx as f64 / num_x_points as f64) * (40.0 + lambda * 10.0);
-                    
-                    // Known imaginary parts of first 20 non-trivial zeros
-                    let zeros: [f64; 20] = [
+                    // First 50 non-trivial zeros of ζ(s)
+                    let zeros: [f64; 50] = [
                         14.1347, 21.0220, 25.0109, 30.4249, 32.9351,
                         37.5862, 40.9187, 43.3271, 48.0052, 49.7738,
                         52.9703, 56.4462, 59.3470, 60.8318, 65.1125,
                         67.0798, 69.5464, 72.0672, 75.7047, 77.1448,
+                        79.3374, 82.9104, 84.7355, 87.4253, 88.8091,
+                        92.4919, 94.6514, 95.8706, 98.8312, 101.318,
+                        103.726, 105.447, 107.169, 111.030, 111.875,
+                        114.320, 116.227, 118.791, 121.370, 122.947,
+                        124.257, 127.517, 129.579, 131.088, 133.498,
+                        134.757, 138.116, 139.736, 141.124, 143.112,
                     ];
+                    let max_waves = self.zeta_terms.min(zeros.len());
+                    let num_x_points = self.particle_count / max_waves.max(1);
+                    let wave_idx = i / num_x_points.max(1);
+                    let x_idx = i % num_x_points.max(1);
+                    
+                    let x = 2.0 + (x_idx as f64 / num_x_points.max(1) as f64) * (40.0 + lambda * 10.0);
                     
                     // Sum correction waves from zeros 0..wave_idx
                     let mut correction = 0.0f64;
-                    for k in 0..=wave_idx.min(zeros.len() - 1) {
-                        let gamma = zeros[k];
-                        // Li(x^ρ) ≈ -2·Re[Ei(ρ·ln(x))] simplified to oscillatory term
+                    for k in 0..=wave_idx.min(max_waves - 1) {
+                        let gamma = zeros[k.min(zeros.len() - 1)];
                         let ln_x = x.ln();
                         correction -= 2.0 * (gamma * ln_x).cos() / (gamma * gamma + 0.25).sqrt();
                     }
                     
                     let spread = 25.0;
-                    let x_norm = (x_idx as f64 / num_x_points as f64) - 0.5;
+                    let x_norm = (x_idx as f64 / num_x_points.max(1) as f64) - 0.5;
                     self.input_buffer[idx]     = (x_norm * spread * 2.0) as f32;
                     self.input_buffer[idx + 1] = (correction * 3.0) as f32;
                     self.input_buffer[idx + 2] = ((wave_idx as f64 / max_waves as f64 - 0.5) * spread) as f32;
