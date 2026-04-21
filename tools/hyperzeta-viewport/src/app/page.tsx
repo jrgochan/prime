@@ -30,7 +30,9 @@ function LatticePointCloud({
   onMetrics: (collapse: number, lambda: number) => void;
   speed: number;
 }) {
-  const memoryArray = viewMode === "input" ? inputArray : outputArray;
+  const activeArray = useRef(outputArray);
+  activeArray.current = viewMode === "input" ? inputArray : outputArray;
+
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matrix = useMemo(() => new THREE.Matrix4(), []);
   const position = useMemo(() => new THREE.Vector3(), []);
@@ -53,13 +55,10 @@ function LatticePointCloud({
       onMetrics(collapseMetric, lambdaFrame);
     }
 
+    const mem = activeArray.current;
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const idx = i * 3;
-      position.set(
-        memoryArray[idx],
-        memoryArray[idx + 1],
-        memoryArray[idx + 2]
-      );
+      position.set(mem[idx], mem[idx + 1], mem[idx + 2]);
       matrix.setPosition(position);
       meshRef.current.setMatrixAt(i, matrix);
     }
@@ -87,7 +86,7 @@ function LatticePointCloud({
 function AxisLabels() {
   const labelStyle = {
     fontSize: 0.8,
-    color: "rgba(255,255,255,0.35)",
+    color: "#595959",
     anchorX: "center" as const,
     anchorY: "middle" as const,
   };
@@ -104,7 +103,7 @@ function AxisLabels() {
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="rgba(0,255,136,0.12)" />
+        <lineBasicMaterial color="#1a3322" />
       </line>
       <line>
         <bufferGeometry>
@@ -115,7 +114,7 @@ function AxisLabels() {
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="rgba(0,204,255,0.12)" />
+        <lineBasicMaterial color="#1a2833" />
       </line>
       <line>
         <bufferGeometry>
@@ -126,7 +125,7 @@ function AxisLabels() {
             itemSize={3}
           />
         </bufferGeometry>
-        <lineBasicMaterial color="rgba(255,107,157,0.12)" />
+        <lineBasicMaterial color="#331a28" />
       </line>
 
       {/* Labels */}
