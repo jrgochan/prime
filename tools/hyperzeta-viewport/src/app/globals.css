@@ -808,6 +808,14 @@ body {
   min-width: 28px;
 }
 
+.terms-slider::-webkit-slider-thumb {
+  background: var(--hz-cyan, #00ccff);
+}
+
+.terms-slider::-moz-range-thumb {
+  background: var(--hz-cyan, #00ccff);
+}
+
 .mode-bar-center {
   display: flex;
   align-items: center;

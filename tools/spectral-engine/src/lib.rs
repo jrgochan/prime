@@ -23,6 +23,7 @@ pub struct HyperEngine {
     frame: f32, // The Lambda Deformation Parameter (Time Flow)
     collapse_metric: f64, // The live topological convergence tracker
     view_mode: u8, // 0=spiral, 1=partial-sums, 2=landscape, 3=euler-rose, 4=tower
+    zeta_terms: usize, // Number of Dirichlet series terms (user-configurable)
 }
 
 #[wasm_bindgen]
@@ -57,6 +58,7 @@ impl HyperEngine {
             frame: 0.0,
             collapse_metric: 10.0, // High origin bound
             view_mode: 0,
+            zeta_terms: 50,
         }
     }
 
@@ -85,6 +87,16 @@ impl HyperEngine {
     #[wasm_bindgen]
     pub fn set_view_mode(&mut self, mode: u8) {
         self.view_mode = mode;
+    }
+
+    #[wasm_bindgen]
+    pub fn set_zeta_terms(&mut self, n: usize) {
+        self.zeta_terms = n.max(4).min(500);
+    }
+
+    #[wasm_bindgen]
+    pub fn get_zeta_terms(&self) -> usize {
+        self.zeta_terms
     }
 
     #[wasm_bindgen]
@@ -124,7 +136,7 @@ impl HyperEngine {
                 // ζ(½+it) plotted as (Re, t, Im). Rings contract at zeros.
                 0 => {
                     let t = t_frac * t_max;
-                    let (zr, zi) = Self::complex_zeta(0.5, t, 50);
+                    let (zr, zi) = Self::complex_zeta(0.5, t, self.zeta_terms);
                     let rot = lambda * 0.15;
                     let rx = zr * rot.cos() - zi * rot.sin();
                     let rz = zr * rot.sin() + zi * rot.cos();
@@ -138,7 +150,7 @@ impl HyperEngine {
                 // For each t, trace the partial sum S_N = Σ_{n=1}^{N} n^{-s}.
                 // Each particle is one point on one spiral curve.
                 1 => {
-                    let max_terms = 60usize;
+                    let max_terms = self.zeta_terms;
                     let num_curves = self.particle_count / max_terms;
                     let curve_idx = i / max_terms;
                     let term_idx = i % max_terms;
@@ -182,7 +194,7 @@ impl HyperEngine {
                     } else {
                         let sigma = 0.05 + (xi as f64 / grid_w as f64) * 0.9; // σ ∈ [0.05, 0.95]
                         let t = (yi as f64 / grid_h as f64) * t_max;
-                        let (zr, zi) = Self::complex_zeta(sigma, t, 40);
+                        let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
                         let mag = (zr * zr + zi * zi).sqrt();
                         let height = mag.ln().max(-3.0).min(3.0); // clamp log|ζ|
                         
@@ -256,7 +268,7 @@ impl HyperEngine {
                     let sigma = 0.5;
                     
                     // Compute complex ζ for all layers
-                    let (zr, zi) = Self::complex_zeta(sigma, t, 50);
+                    let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
                     
                     // Layer offsets spread vertically
                     let layer_spread = 8.0;
@@ -356,7 +368,7 @@ impl HyperEngine {
                     let sigma_offset = 0.3 * (1.0 + (t * 0.1).sin() * 0.5);
                     let sigma = if is_right { 0.5 + sigma_offset } else { 0.5 - sigma_offset };
                     
-                    let (zr, zi) = Self::complex_zeta(sigma, t, 40);
+                    let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
                     let mag = (zr * zr + zi * zi).sqrt().ln().max(-3.0).min(3.0);
                     
                     let mirror_x = if is_right { sigma_offset } else { -sigma_offset };

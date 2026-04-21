@@ -16,6 +16,7 @@ interface ViewportState {
   lambda: number;
   singularityCount: number;
   particleCount: number;
+  zetaTerms: number;
 
   // ── Controls ──
   speed: number;
@@ -42,6 +43,7 @@ interface ViewportState {
   setViewMode: (mode: ViewMode) => void;
   setCameraPreset: (preset: CameraPreset) => void;
   setParticleCount: (count: number) => void;
+  setZetaTerms: (n: number) => void;
   togglePaused: () => void;
   toggleInfo: () => void;
   toggleHud: () => void;
@@ -60,6 +62,7 @@ export const useViewportStore = create<ViewportState>()(
     lambda: 0.0,
     singularityCount: 0,
     particleCount: DEFAULT_PARTICLE_COUNT,
+    zetaTerms: 50,
 
     speed: 1,
     viewMode: "output",
@@ -105,6 +108,16 @@ export const useViewportStore = create<ViewportState>()(
       // Clamp to reasonable range
       const clamped = Math.max(1_000, Math.min(500_000, particleCount));
       set({ particleCount: clamped });
+    },
+
+    setZetaTerms: (zetaTerms) => {
+      const clamped = Math.max(4, Math.min(500, zetaTerms));
+      // Live update — no reboot needed
+      const system = useViewportStore.getState().hyperSystem;
+      if (system?.engine) {
+        system.engine.set_zeta_terms(clamped);
+      }
+      set({ zetaTerms: clamped });
     },
 
     togglePaused: () => set((s) => ({ paused: !s.paused })),

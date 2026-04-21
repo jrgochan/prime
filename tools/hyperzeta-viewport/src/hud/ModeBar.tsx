@@ -25,10 +25,11 @@ export function ModeBar() {
   const hudVisible = useViewportStore((s) => s.hudVisible);
   const particleCount = useViewportStore((s) => s.particleCount);
   const setParticleCount = useViewportStore((s) => s.setParticleCount);
+  const zetaTerms = useViewportStore((s) => s.zetaTerms);
+  const setZetaTerms = useViewportStore((s) => s.setZetaTerms);
 
-  const handleSlider = useCallback(
+  const handleParticleSlider = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      // Exponential slider: maps 0-1 → 1K-500K
       const t = parseFloat(e.target.value);
       const count = Math.round(1000 * Math.pow(500, t));
       setParticleCount(count);
@@ -36,8 +37,19 @@ export function ModeBar() {
     [setParticleCount]
   );
 
+  const handleTermsSlider = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const t = parseFloat(e.target.value);
+      // Log-scale: 4 → 200
+      const n = Math.round(4 * Math.pow(50, t));
+      setZetaTerms(n);
+    },
+    [setZetaTerms]
+  );
+
   // Reverse: count → slider value (0-1)
   const sliderValue = Math.log(particleCount / 1000) / Math.log(500);
+  const termsSliderValue = Math.log(zetaTerms / 4) / Math.log(50);
 
   if (!hudVisible) return null;
 
@@ -84,10 +96,23 @@ export function ModeBar() {
             max="1"
             step="0.01"
             value={sliderValue}
-            onChange={handleSlider}
+            onChange={handleParticleSlider}
             className="particle-slider"
           />
           <span className="particle-label">{formatCount(particleCount)}</span>
+        </div>
+        <div className="mode-bar-particles" title="Zeta terms (N)">
+          <span className="particle-label" style={{ color: "var(--hz-cyan, #00ccff)" }}>N</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={termsSliderValue}
+            onChange={handleTermsSlider}
+            className="particle-slider terms-slider"
+          />
+          <span className="particle-label">{zetaTerms}</span>
         </div>
       </div>
 
