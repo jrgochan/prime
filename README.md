@@ -18,12 +18,15 @@ the crown theorem's critical path (verified by `#print axioms`), and
 > Plancherel, variational principles—is compiler-verified.
 
 > **Release: night-assault** — April 20, 2026
+>
+> 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
+> spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
 
 ## Quick Start
 
 ```bash
 cd proofs
-lake build          # 78 active files, 96 archived
+lake build          # 84 active files, 96 archived
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -162,7 +165,7 @@ stiffness of the prime number vacuum.
 
 ## Documentation Suite
 
-22 companion papers for 22 audiences:
+23 companion papers for 23 audiences:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
@@ -177,6 +180,7 @@ stiffness of the prime number vacuum.
 | `cathedral-ai.tex` | AI/ML researchers | 7 |
 | `cathedral-lean.tex` | Lean/ITP community | 9 |
 | `cathedral-foundations.tex` | Logicians / foundations | 9 |
+| `cathedral-fun.tex` | Primes, physics & numerology | 8 |
 | `cathedral-engineering.tex` | Practicing engineers | 8 |
 | `cathedral-futures.tex` | Engineering frontiers | 12 |
 | `cathedral-energy.tex` | Energy systems engineers | 10 |
@@ -187,11 +191,11 @@ stiffness of the prime number vacuum.
 | `cathedral-invitation.tex` | Mathematicians (open challenge) | 5 |
 | `cathedral-press.tex` | Press / media | 5 |
 | `cathedral-legal.tex` | Legal / IP professionals | 8 |
-| `cathedral-letter.tex` | A letter from the builder | 5 |
+| `cathedral-letter.tex` | A letter from the builder | 6 |
 
 Build all PDFs:
 ```bash
-cd paper && ./build.sh
+cd papers && ./build.sh
 ```
 
 ## Methodology
@@ -202,6 +206,25 @@ Google DeepMind's Gemini Deep Think acting as mathematical theorist providing
 deep analytic intuition, and Anthropic's Claude (Antigravity) acting as
 code-level engineer providing Lean 4 compilation and sorry elimination.
 All proofs are compiler-verified.
+
+## Repository Structure
+
+```
+prime/
+├── proofs/          🏛️  THE CATHEDRAL — 84 active Lean files, 96 archived
+├── papers/          📄  23 companion papers (LaTeX + PDF)
+├── experiments/     🔬  Rust numerical validation (256-bit MPFR)
+├── visualizer/      📊  Cathedral Dashboard (Next.js)
+├── scripts/         🔧  Build & export tools
+├── tools/           🏗️  Historical exploration tools
+│   ├── sedenion-explorer/   The night the machine fought back
+│   ├── spectral-engine/     G₂ spectral analysis (Rust)
+│   ├── axiom-hunter/        LLM-powered sorry elimination
+│   └── hyperzeta-viewport/  Original HYPERZETA visualization
+├── docs/            📚  Documentation, AI correspondence, exports
+├── ORIGIN-STORY.md  📖  How it all started
+└── REFERENCES.md    📚  Bibliography
+```
 
 ## License
 
