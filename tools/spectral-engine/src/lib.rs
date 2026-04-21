@@ -137,7 +137,7 @@ impl HyperEngine {
                 // ζ(½+it) plotted as (Re, t, Im). Rings contract at zeros.
                 0 => {
                     let t = t_frac * t_max;
-                    let (zr, zi) = Self::complex_zeta(0.5, t, self.zeta_terms);
+                    let (zr, zi) = zeta::dirichlet::complex_zeta(0.5, t, self.zeta_terms);
                     let rot = lambda * 0.15;
                     let rx = zr * rot.cos() - zi * rot.sin();
                     let rz = zr * rot.sin() + zi * rot.cos();
@@ -195,7 +195,7 @@ impl HyperEngine {
                     } else {
                         let sigma = 0.05 + (xi as f64 / grid_w as f64) * 0.9; // σ ∈ [0.05, 0.95]
                         let t = (yi as f64 / grid_h as f64) * t_max;
-                        let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
+                        let (zr, zi) = zeta::dirichlet::complex_zeta(sigma, t, self.zeta_terms);
                         let mag = (zr * zr + zi * zi).sqrt();
                         let height = mag.ln().max(-3.0).min(3.0); // clamp log|ζ|
                         
@@ -269,7 +269,7 @@ impl HyperEngine {
                     let sigma = 0.5;
                     
                     // Compute complex ζ for all layers
-                    let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
+                    let (zr, zi) = zeta::dirichlet::complex_zeta(sigma, t, self.zeta_terms);
                     
                     // Layer offsets spread vertically
                     let layer_spread = 8.0;
@@ -361,7 +361,7 @@ impl HyperEngine {
                     let sigma_offset = 0.3 * (1.0 + (t * 0.1).sin() * 0.5);
                     let sigma = if is_right { 0.5 + sigma_offset } else { 0.5 - sigma_offset };
                     
-                    let (zr, zi) = Self::complex_zeta(sigma, t, self.zeta_terms);
+                    let (zr, zi) = zeta::dirichlet::complex_zeta(sigma, t, self.zeta_terms);
                     let mag = (zr * zr + zi * zi).sqrt().ln().max(-3.0).min(3.0);
                     
                     let mirror_x = if is_right { sigma_offset } else { -sigma_offset };
@@ -417,7 +417,7 @@ impl HyperEngine {
                 8 => {
                     let n = i + 1;
                     // Compute Möbius μ(n) via trial division
-                    let mu = Self::mobius(n);
+                    let mu = zeta::arithmetic::mobius(n);
                     
                     // Cumulative Mertens: each particle carries the running sum
                     // (approximated for performance — use modular arithmetic for visual)
@@ -427,11 +427,11 @@ impl HyperEngine {
                     
                     // Mertens-like walk in 3D
                     let walk_x: f64 = (1..=n.min(200)).map(|k| {
-                        let m = Self::mobius(k) as f64;
+                        let m = zeta::arithmetic::mobius(k) as f64;
                         m * (k as f64 * 0.15 + t_param).cos()
                     }).sum();
                     let walk_z: f64 = (1..=n.min(200)).map(|k| {
-                        let m = Self::mobius(k) as f64;
+                        let m = zeta::arithmetic::mobius(k) as f64;
                         m * (k as f64 * 0.15 + t_param).sin()
                     }).sum();
                     
@@ -541,39 +541,7 @@ impl HyperEngine {
         self.collapse_metric = total_magnitude / (self.particle_count as f64);
     }
 
-    /// Compute classical complex ζ(σ + it) via truncated Dirichlet series.
-    /// Returns (Re(ζ), Im(ζ)).
-    fn complex_zeta(sigma: f64, t: f64, terms: usize) -> (f64, f64) {
-        let mut zr = 0.0f64;
-        let mut zi = 0.0f64;
-        for n in 1..=terms {
-            let log_n = (n as f64).ln();
-            let mag = (-sigma * log_n).exp(); // n^(-σ)
-            let angle = -t * log_n;           // rotation
-            zr += mag * angle.cos();
-            zi += mag * angle.sin();
-        }
-        (zr, zi)
-    }
-
-    /// Compute Möbius function μ(n) via trial division.
-    /// Returns 0 if n has squared prime factor, (-1)^k if k distinct primes.
-    fn mobius(n: usize) -> i32 {
-        if n == 1 { return 1; }
-        let mut n = n;
-        let mut factors = 0i32;
-        let mut d = 2usize;
-        while d * d <= n {
-            if n % d == 0 {
-                factors += 1;
-                n /= d;
-                if n % d == 0 { return 0; } // squared factor
-            }
-            d += 1;
-        }
-        if n > 1 { factors += 1; }
-        if factors % 2 == 0 { 1 } else { -1 }
-    }
+    // complex_zeta and mobius now live in zeta::dirichlet and zeta::arithmetic
 }
 
 // =========================================================
@@ -621,15 +589,7 @@ fn zeta_sedenion(re: f64, im: f64, terms: usize) -> PyResult<f64> {
 #[cfg(not(target_family = "wasm"))]
 #[pyfunction]
 fn zeta_dirichlet_complex(re: f64, im: f64, terms: usize) -> PyResult<(f64, f64, f64)> {
-    let mut sum_re = 0.0f64;
-    let mut sum_im = 0.0f64;
-    for n in 1..=terms {
-        let log_n = (n as f64).ln();
-        let mag = (-re * log_n).exp();
-        let angle = -im * log_n;
-        sum_re += mag * angle.cos();
-        sum_im += mag * angle.sin();
-    }
+    let (sum_re, sum_im) = zeta::dirichlet::complex_zeta(re, im, terms);
     let norm = (sum_re * sum_re + sum_im * sum_im).sqrt();
     Ok((sum_re, sum_im, norm))
 }
@@ -640,15 +600,7 @@ fn zeta_dirichlet_complex(re: f64, im: f64, terms: usize) -> PyResult<(f64, f64,
 #[pyfunction]
 fn mertens_bound(sigma: f64, t: f64, terms: usize) -> PyResult<(f64, f64, f64, f64)> {
     let compute_norm = |re: f64, im: f64| -> f64 {
-        let mut sr = 0.0f64;
-        let mut si = 0.0f64;
-        for n in 1..=terms {
-            let log_n = (n as f64).ln();
-            let mag = (-re * log_n).exp();
-            let angle = -im * log_n;
-            sr += mag * angle.cos();
-            si += mag * angle.sin();
-        }
+        let (sr, si) = zeta::dirichlet::complex_zeta(re, im, terms);
         (sr * sr + si * si).sqrt()
     };
 
