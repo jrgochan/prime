@@ -49,7 +49,7 @@ body {
 }
 
 /* ════════════════════════════════
-   HEADER
+   HEADER (slim bar)
    ════════════════════════════════ */
 .viewport-header {
   position: absolute;
@@ -58,52 +58,38 @@ body {
   right: 0;
   z-index: 20;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 12px 20px;
   pointer-events: none;
-  background: linear-gradient(to bottom, rgba(5, 5, 8, 0.8) 0%, transparent 100%);
+  background: linear-gradient(to bottom, rgba(5, 5, 8, 0.7) 0%, transparent 100%);
 }
 
-.header-left {
+.header-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.header-right {
-  pointer-events: auto;
-}
-
-.title {
-  font-size: 24px;
-  font-weight: 900;
-  letter-spacing: 0.2em;
-  color: var(--hz-green);
-  text-shadow: 0 0 30px var(--hz-green-glow);
-  margin: 0;
-}
-
-.status-badge {
-  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 4px 14px;
-  border: 1px solid;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  backdrop-filter: blur(var(--hz-blur));
-  background: var(--hz-surface);
-  width: fit-content;
+  pointer-events: none;
 }
 
-.status-dot {
-  width: 7px;
-  height: 7px;
+.header-mark {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  color: var(--hz-text-dim);
+}
+
+.header-sep {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.12);
+}
+
+.header-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   animation: pulse-dot 2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
 @keyframes pulse-dot {
@@ -111,26 +97,39 @@ body {
   50% { opacity: 0.3; }
 }
 
+.header-status {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.header-mode {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
 .info-toggle {
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 1px solid var(--hz-border);
   background: var(--hz-surface);
   backdrop-filter: blur(var(--hz-blur));
-  color: var(--hz-green);
-  font-size: 16px;
+  color: var(--hz-text-dim);
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
 }
 
 .info-toggle:hover {
   background: var(--hz-green-dim);
   border-color: var(--hz-green);
-  transform: scale(1.1);
+  color: var(--hz-green);
 }
 
 /* ════════════════════════════════

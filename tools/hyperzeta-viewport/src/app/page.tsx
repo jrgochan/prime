@@ -6,7 +6,6 @@ import { Viewport3D } from "../scene/Viewport3D";
 import { Header } from "../hud/Header";
 import { ModeBar } from "../hud/ModeBar";
 import { MetricsPanel } from "../hud/MetricsPanel";
-import { PhaseTimeline } from "../hud/PhaseTimeline";
 import { EquationOverlay } from "../hud/EquationOverlay";
 import { CriticalStripMap } from "../hud/CriticalStripMap";
 import { CommandPalette } from "../hud/CommandPalette";
@@ -33,7 +32,6 @@ export default function Home() {
 
       {/* ── Zen-mode aware ── */}
       <Header />
-      {hudVisible && <PhaseTimeline />}
       {hudVisible && <MetricsPanel />}
       <EquationOverlay />
       {hudVisible && <CriticalStripMap />}

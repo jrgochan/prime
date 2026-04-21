@@ -1,13 +1,7 @@
 "use client";
 
 import { useViewportStore } from "../stores/viewport";
-
-const STATUS_TEXT = {
-  booting: "Compiling Rust WASM Module…",
-  allocating: "Allocating 16D Lattice RAM…",
-  running: "Lattice Evolving — Live",
-  collapsed: "✦ Spectral Singularity Detected",
-} as const;
+import { VIZ_MAP } from "../content/visualizations";
 
 const STATUS_COLOR = {
   booting: "#ffaa00",
@@ -22,30 +16,34 @@ export function Header() {
   const hudVisible = useViewportStore((s) => s.hudVisible);
   const toggleInfo = useViewportStore((s) => s.toggleInfo);
   const showInfo = useViewportStore((s) => s.showInfo);
+  const viewMode = useViewportStore((s) => s.viewMode);
 
   if (!hudVisible) return null;
 
   const color = paused ? "#ffaa00" : STATUS_COLOR[engineState];
-  const text = paused ? "⏸ Paused" : STATUS_TEXT[engineState];
+  const viz = VIZ_MAP[viewMode];
 
   return (
     <header className="viewport-header">
-      <div className="header-left">
-        <h1 className="title">PROJECT HYPERZETA</h1>
-        <div className="status-badge" style={{ borderColor: color }}>
-          <span className="status-dot" style={{ backgroundColor: color }} />
-          <span style={{ color }}>{text}</span>
-        </div>
+      <div className="header-row">
+        <span className="header-mark">HYPERZETA</span>
+        <span className="header-sep">·</span>
+        <span className="header-dot" style={{ backgroundColor: color }} />
+        <span className="header-status" style={{ color }}>
+          {paused ? "Paused" : engineState === "running" ? "Live" : "Booting…"}
+        </span>
+        <span className="header-sep">·</span>
+        <span className="header-mode" style={{ color: viz.color.core }}>
+          {viz.icon} {viz.shortLabel}
+        </span>
       </div>
-      <div className="header-right">
-        <button
-          className="info-toggle"
-          onClick={toggleInfo}
-          title="Toggle educational info (I)"
-        >
-          {showInfo ? "✕" : "ℹ"}
-        </button>
-      </div>
+      <button
+        className="info-toggle"
+        onClick={toggleInfo}
+        title="Toggle info sidebar (I)"
+      >
+        {showInfo ? "✕" : "ℹ"}
+      </button>
     </header>
   );
 }
