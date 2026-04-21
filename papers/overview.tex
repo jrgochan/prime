@@ -83,7 +83,7 @@ Verified by \texttt{\#print axioms nyman\_beurling\_equivalence}:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} \\
 \midrule
-1 & \texttt{rh\_implies\_mertens\_34} & RH $\implies |M(x)| = O(x^{3/4})$ \\
+1 & \texttt{rh\_implies\_mertens\_bound} & RH $\implies |M(x)| = O(x^{1/2}\log^2 x)$ \\
 2 & \texttt{pnt\_mu\_div\_k} & $\sum \mu(k)/k \to 0$ (PNT) \\
 3 & \texttt{pnt\_mu\_log\_div\_k} & $\sum \mu(k)\log k/k \to -1$ (PNT) \\
 4 & \texttt{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(k)\log^2 k/k \to -2\gamma$ (PNT) \\
@@ -195,9 +195,10 @@ and Anthropic's Claude (Antigravity) for Lean~4 proof engineering,
 Abel summation formalization, and the Parseval Bridge implementation.
 All proofs are compiler-verified.
 
-The axiom reduction---from 56 to 39 active (7 on the crown critical path)---was
-accomplished through four campaigns (Alpha--Delta) of systematic formalization
-and a deep codebase audit over three weeks.
+The axiom reduction---from 56 to 42 active (7 on the crown critical path)---was
+accomplished through four campaigns (Alpha--Delta) of systematic formalization,
+a deep codebase audit, and the Night Assault (April 20, 2026) that eliminated
+three axioms including the diagonal Vasyunin integral and the Mertens merge.
 The calculus limit $\ln(\ln N)/\ln N \to 0$ was proved purely algebraically
 via $\ln x \le 2\sqrt{x}$, avoiding topological filter arguments.
 
