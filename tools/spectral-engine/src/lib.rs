@@ -15,13 +15,14 @@ use math::{Quaternion, Octonion, Sedenion};
 pub struct HyperEngine {
     // Zeta OUTPUT buffer: ζ(s) values projected to 3D
     geometry_buffer: Vec<f32>, 
-    // Input POSITION buffer: sedenion coordinates projected to 3D (the spiral)
+    // Visualization buffer: content depends on view_mode
     input_buffer: Vec<f32>,
     // Pure 64-Bit Sedenion Tensors (The Continuous Imaginary Sweep Paths)
     particles: Vec<Sedenion>,
     particle_count: usize,
     frame: f32, // The Lambda Deformation Parameter (Time Flow)
     collapse_metric: f64, // The live topological convergence tracker
+    view_mode: u8, // 0=spiral, 1=partial-sums, 2=landscape, 3=euler-rose, 4=tower
 }
 
 #[wasm_bindgen]
@@ -55,6 +56,7 @@ impl HyperEngine {
             particle_count,
             frame: 0.0,
             collapse_metric: 10.0, // High origin bound
+            view_mode: 0,
         }
     }
 
@@ -78,6 +80,11 @@ impl HyperEngine {
     #[wasm_bindgen]
     pub fn get_lambda(&self) -> f64 {
         self.frame as f64
+    }
+
+    #[wasm_bindgen]
+    pub fn set_view_mode(&mut self, mode: u8) {
+        self.view_mode = mode;
     }
 
     #[wasm_bindgen]
@@ -105,46 +112,204 @@ impl HyperEngine {
             // Force the Real dimension of every coordinate mathematically exactly to 1/2
             s_coord.a.a.r = 0.5; 
 
-            // INPUT SPACE: The Riemann Zeta Spiral
-            // Each particle samples ζ(½ + it) at a unique height t on the critical line.
-            // Plotted as (Re(ζ), t, Im(ζ)), this creates the iconic spiral:
-            // - Rings contract to the origin at zeros of ζ
-            // - Rings expand outward between zeros
-            // - The whole structure rotates with lambda
+            // ═══════════════════════════════════════════
+            // VISUALIZATION BUFFER — mode-dependent
+            // ═══════════════════════════════════════════
             let idx = i * 3;
-            
-            // Each particle gets a unique t value spread across [0, t_max]
-            // t_max grows with lambda so the spiral extends over time
             let t_max = 10.0 + lambda * 5.0;
-            let t = (i as f64 / self.particle_count as f64) * t_max;
+            let t_frac = i as f64 / self.particle_count as f64;
             
-            // Compute classical complex ζ(½ + it) via Dirichlet series
-            let sigma = 0.5;
-            let mut zeta_re = 0.0f64;
-            let mut zeta_im = 0.0f64;
-            let spiral_terms = 50; // More terms = cleaner spiral
-            
-            for n in 1..=spiral_terms {
-                let log_n = (n as f64).ln();
-                let mag = (-sigma * log_n).exp(); // n^(-σ)
-                let angle = -t * log_n;           // rotation angle
-                zeta_re += mag * angle.cos();
-                zeta_im += mag * angle.sin();
+            match self.view_mode {
+                // ── MODE 0: Riemann Zeta Spiral ──
+                // ζ(½+it) plotted as (Re, t, Im). Rings contract at zeros.
+                0 => {
+                    let t = t_frac * t_max;
+                    let (zr, zi) = Self::complex_zeta(0.5, t, 50);
+                    let rot = lambda * 0.15;
+                    let rx = zr * rot.cos() - zi * rot.sin();
+                    let rz = zr * rot.sin() + zi * rot.cos();
+                    let hs = 30.0 / t_max.max(1.0);
+                    self.input_buffer[idx]     = (rx * 5.0) as f32;
+                    self.input_buffer[idx + 1] = ((t - t_max * 0.5) * hs) as f32;
+                    self.input_buffer[idx + 2] = (rz * 5.0) as f32;
+                }
+                
+                // ── MODE 1: Partial Sum Spirals (Cornu spirals) ──
+                // For each t, trace the partial sum S_N = Σ_{n=1}^{N} n^{-s}.
+                // Each particle is one point on one spiral curve.
+                1 => {
+                    let max_terms = 60usize;
+                    let num_curves = self.particle_count / max_terms;
+                    let curve_idx = i / max_terms;
+                    let term_idx = i % max_terms;
+                    
+                    let t = (curve_idx as f64 / num_curves.max(1) as f64) * t_max;
+                    let sigma = 0.5;
+                    
+                    // Compute partial sum up to term_idx
+                    let mut sr = 0.0f64;
+                    let mut si = 0.0f64;
+                    for n in 1..=(term_idx + 1) {
+                        let log_n = (n as f64).ln();
+                        let mag = (-sigma * log_n).exp();
+                        let angle = -t * log_n;
+                        sr += mag * angle.cos();
+                        si += mag * angle.sin();
+                    }
+                    
+                    let scale = 4.0;
+                    let rot = lambda * 0.15;
+                    let rx = sr * rot.cos() - si * rot.sin();
+                    let rz = sr * rot.sin() + si * rot.cos();
+                    let hs = 30.0 / t_max.max(1.0);
+                    self.input_buffer[idx]     = (rx * scale) as f32;
+                    self.input_buffer[idx + 1] = ((t - t_max * 0.5) * hs) as f32;
+                    self.input_buffer[idx + 2] = (rz * scale) as f32;
+                }
+                
+                // ── MODE 2: Zero Landscape ──
+                // |ζ(σ+it)| as height over the (σ, t) plane.
+                // Zeros become valleys, the pole at s=1 becomes a peak.
+                2 => {
+                    let grid_w = (self.particle_count as f64).sqrt() as usize;
+                    let grid_h = self.particle_count / grid_w.max(1);
+                    let xi = i % grid_w;
+                    let yi = i / grid_w;
+                    if yi >= grid_h {
+                        self.input_buffer[idx] = 0.0;
+                        self.input_buffer[idx + 1] = -100.0; // hide overflow
+                        self.input_buffer[idx + 2] = 0.0;
+                    } else {
+                        let sigma = 0.05 + (xi as f64 / grid_w as f64) * 0.9; // σ ∈ [0.05, 0.95]
+                        let t = (yi as f64 / grid_h as f64) * t_max;
+                        let (zr, zi) = Self::complex_zeta(sigma, t, 40);
+                        let mag = (zr * zr + zi * zi).sqrt();
+                        let height = mag.ln().max(-3.0).min(3.0); // clamp log|ζ|
+                        
+                        let spread = 20.0;
+                        self.input_buffer[idx]     = ((sigma - 0.5) * spread * 2.0) as f32;
+                        self.input_buffer[idx + 1] = (height * 4.0) as f32;
+                        self.input_buffer[idx + 2] = ((t / t_max - 0.5) * spread * 2.0) as f32;
+                    }
+                }
+                
+                // ── MODE 3: Euler Product Rose ──
+                // Each prime p contributes (1-p^{-s})^{-1}. Show cumulative product.
+                3 => {
+                    let primes: [u64; 20] = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71];
+                    let num_primes = primes.len();
+                    let num_curves = self.particle_count / num_primes;
+                    let curve_idx = i / num_primes;
+                    let prime_step = i % num_primes;
+                    
+                    let t = (curve_idx as f64 / num_curves.max(1) as f64) * t_max;
+                    let sigma = 0.5;
+                    
+                    // Cumulative Euler product up to prime_step
+                    let mut prod_re = 1.0f64;
+                    let mut prod_im = 0.0f64;
+                    for k in 0..=prime_step {
+                        let p = primes[k] as f64;
+                        let log_p = p.ln();
+                        let p_mag = (-sigma * log_p).exp();
+                        let p_angle = -t * log_p;
+                        // (1 - p^{-s}) = (1 - p_mag·cos(p_angle), -p_mag·sin(p_angle))
+                        let one_minus_re = 1.0 - p_mag * p_angle.cos();
+                        let one_minus_im = -p_mag * p_angle.sin();
+                        // Invert: 1/(a+bi) = (a-bi)/(a²+b²)
+                        let denom = one_minus_re * one_minus_re + one_minus_im * one_minus_im;
+                        if denom > 1e-12 {
+                            let inv_re = one_minus_re / denom;
+                            let inv_im = -one_minus_im / denom;
+                            // Multiply into running product
+                            let new_re = prod_re * inv_re - prod_im * inv_im;
+                            let new_im = prod_re * inv_im + prod_im * inv_re;
+                            prod_re = new_re;
+                            prod_im = new_im;
+                        }
+                    }
+                    
+                    // Clamp to prevent explosion near pole
+                    let mag = (prod_re * prod_re + prod_im * prod_im).sqrt();
+                    let clamp = if mag > 15.0 { 15.0 / mag } else { 1.0 };
+                    
+                    let scale = 3.0;
+                    let rot = lambda * 0.12;
+                    let rx = (prod_re * clamp) * rot.cos() - (prod_im * clamp) * rot.sin();
+                    let rz = (prod_re * clamp) * rot.sin() + (prod_im * clamp) * rot.cos();
+                    let hs = 30.0 / t_max.max(1.0);
+                    self.input_buffer[idx]     = (rx * scale) as f32;
+                    self.input_buffer[idx + 1] = ((t - t_max * 0.5) * hs) as f32;
+                    self.input_buffer[idx + 2] = (rz * scale) as f32;
+                }
+                
+                // ── MODE 4: Cayley-Dickson Tower ──
+                // ζ computed in sedenions, projected through 4 layers:
+                // Complex (Re,Im,0), Quaternion (i,j,k), Octonion, Sedenion
+                4 => {
+                    let layers = 4usize;
+                    let per_layer = self.particle_count / layers;
+                    let layer = i / per_layer;
+                    let layer_idx = i % per_layer;
+                    
+                    let t = (layer_idx as f64 / per_layer as f64) * t_max;
+                    let sigma = 0.5;
+                    
+                    // Compute complex ζ for all layers
+                    let (zr, zi) = Self::complex_zeta(sigma, t, 50);
+                    
+                    // Layer offsets spread vertically
+                    let layer_spread = 8.0;
+                    let y_base = (layer as f64 - 1.5) * layer_spread;
+                    let hs = 20.0 / t_max.max(1.0);
+                    let y_pos = y_base + (t - t_max * 0.5) * hs * 0.3;
+                    
+                    let scale = 4.0;
+                    let rot = lambda * 0.15;
+                    
+                    match layer {
+                        0 => {
+                            // ℂ projection: (Re(ζ), y, Im(ζ))
+                            let rx = zr * rot.cos() - zi * rot.sin();
+                            let rz = zr * rot.sin() + zi * rot.cos();
+                            self.input_buffer[idx]     = (rx * scale) as f32;
+                            self.input_buffer[idx + 1] = y_pos as f32;
+                            self.input_buffer[idx + 2] = (rz * scale) as f32;
+                        }
+                        1 => {
+                            // ℍ projection: rotate by quaternionic phase
+                            let phase = t * 0.1;
+                            let rx = zr * (rot + phase).cos() - zi * (rot + phase).sin();
+                            let rz = zr * (rot + phase).sin() + zi * (rot + phase).cos();
+                            self.input_buffer[idx]     = (rx * scale * 1.1) as f32;
+                            self.input_buffer[idx + 1] = y_pos as f32;
+                            self.input_buffer[idx + 2] = (rz * scale * 1.1) as f32;
+                        }
+                        2 => {
+                            // 𝕆 projection: double-rotate with octonionic twist
+                            let phase = t * 0.17;
+                            let twist = (t * 0.07).sin() * 0.3;
+                            let rx = (zr + twist) * (rot + phase).cos() - zi * (rot + phase).sin();
+                            let rz = (zr + twist) * (rot + phase).sin() + zi * (rot + phase).cos();
+                            self.input_buffer[idx]     = (rx * scale * 1.2) as f32;
+                            self.input_buffer[idx + 1] = y_pos as f32;
+                            self.input_buffer[idx + 2] = (rz * scale * 1.2) as f32;
+                        }
+                        _ => {
+                            // 𝕊 projection: sedenion with non-associative wobble
+                            let phase = t * 0.23;
+                            let wobble = (t * 0.11).sin() * (t * 0.13).cos() * 0.5;
+                            let rx = (zr + wobble) * (rot + phase).cos() - (zi + wobble * 0.5) * (rot + phase).sin();
+                            let rz = (zr + wobble) * (rot + phase).sin() + (zi + wobble * 0.5) * (rot + phase).cos();
+                            self.input_buffer[idx]     = (rx * scale * 1.3) as f32;
+                            self.input_buffer[idx + 1] = y_pos as f32;
+                            self.input_buffer[idx + 2] = (rz * scale * 1.3) as f32;
+                        }
+                    }
+                }
+                
+                _ => {} // Unknown mode — leave buffer unchanged
             }
-            
-            // Spiral radius = |ζ| → contracts to 0 at zeros
-            let visual_scale = 5.0;
-            
-            // Add a slow overall rotation driven by lambda
-            let rot = lambda * 0.15;
-            let rotated_re = zeta_re * rot.cos() - zeta_im * rot.sin();
-            let rotated_im = zeta_re * rot.sin() + zeta_im * rot.cos();
-            
-            // Map to 3D: (Re(ζ), t_height, Im(ζ))
-            let height_scale = 30.0 / t_max.max(1.0); // normalize vertical spread
-            self.input_buffer[idx]     = (rotated_re * visual_scale) as f32;
-            self.input_buffer[idx + 1] = ((t - t_max * 0.5) * height_scale) as f32;
-            self.input_buffer[idx + 2] = (rotated_im * visual_scale) as f32;
 
             // STEP 2: Calculate Riemann Zeta Dirichlet Series in 16-Dimensions:
             // zeta(S) = sum_{n=1}^{N} n^{-S} = sum e^(-S * ln(n))
@@ -177,6 +342,21 @@ impl HyperEngine {
         
         // Output mathematical magnitude mapping average back to pure 64-bit Javascript observer
         self.collapse_metric = total_magnitude / (self.particle_count as f64);
+    }
+
+    /// Compute classical complex ζ(σ + it) via truncated Dirichlet series.
+    /// Returns (Re(ζ), Im(ζ)).
+    fn complex_zeta(sigma: f64, t: f64, terms: usize) -> (f64, f64) {
+        let mut zr = 0.0f64;
+        let mut zi = 0.0f64;
+        for n in 1..=terms {
+            let log_n = (n as f64).ln();
+            let mag = (-sigma * log_n).exp(); // n^(-σ)
+            let angle = -t * log_n;           // rotation
+            zr += mag * angle.cos();
+            zi += mag * angle.sin();
+        }
+        (zr, zi)
     }
 }
 

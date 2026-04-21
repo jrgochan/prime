@@ -5,25 +5,42 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useViewportStore } from "../stores/viewport";
 import { PARTICLE_COUNT } from "../engine/types";
+import type { ViewMode } from "../engine/types";
 
 import { vertexShader, fragmentShader } from "./shaders/lattice";
 
 // Color palettes per view mode
-const COLORS = {
+const COLORS: Record<ViewMode, { core: THREE.Color; edge: THREE.Color }> = {
   output: {
     core: new THREE.Color("#00ff88"),
     edge: new THREE.Color("#006644"),
   },
-  input: {
+  spiral: {
     core: new THREE.Color("#00ccff"),
     edge: new THREE.Color("#004466"),
+  },
+  "partial-sums": {
+    core: new THREE.Color("#ff6bff"),
+    edge: new THREE.Color("#660066"),
+  },
+  landscape: {
+    core: new THREE.Color("#ffaa00"),
+    edge: new THREE.Color("#663300"),
+  },
+  "euler-rose": {
+    core: new THREE.Color("#ff6b9d"),
+    edge: new THREE.Color("#660033"),
+  },
+  tower: {
+    core: new THREE.Color("#88ffcc"),
+    edge: new THREE.Color("#336644"),
   },
 };
 
 /**
  * GPU-accelerated particle cloud using THREE.Points + custom GLSL shaders.
  *
- * - 150K single-vertex points (vs 4.8M vertices with InstancedMesh)
+ * - Single-vertex points (vs mesh geometry)
  * - Position data read directly from WASM shared memory
  * - Fragment shader renders circular particles with glow + gradient
  * - All state read from Zustand (no stale closures)
@@ -44,8 +61,7 @@ export function LatticeCloud() {
 
   useFrame(() => {
     // Read directly from Zustand store — never stale
-    const { hyperSystem, viewMode, speed, collapse, lambda } =
-      useViewportStore.getState();
+    const { hyperSystem, viewMode, speed } = useViewportStore.getState();
     if (!hyperSystem) return;
 
     const { engine, outputBuffer, inputBuffer } = hyperSystem;
@@ -63,10 +79,10 @@ export function LatticeCloud() {
       useViewportStore.getState().updateMetrics(c, l);
     }
 
-    // Select active buffer based on view mode
-    const activeBuffer = viewMode === "input" ? inputBuffer : outputBuffer;
+    // Select active buffer: "output" uses geometry_buffer, all others use input_buffer
+    const activeBuffer = viewMode === "output" ? outputBuffer : inputBuffer;
 
-    // Copy WASM buffer into geometry attribute (zero-copy read, single write)
+    // Copy WASM buffer into geometry attribute
     const posAttr = geometryRef.current!.getAttribute(
       "position"
     ) as THREE.BufferAttribute;

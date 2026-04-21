@@ -13,7 +13,11 @@ const CAMERA_PRESETS: { key: CameraPreset; icon: string; title: string }[] = [
 
 const VIEW_MODES: { key: ViewMode; label: string; title: string }[] = [
   { key: "output", label: "ζ(s)", title: "ζ(s) output — shows collapse near zeros" },
-  { key: "input", label: "Spiral", title: "Input coordinates — 16D spiral structure" },
+  { key: "spiral", label: "Spiral", title: "Riemann zeta spiral — rings contract at zeros" },
+  { key: "partial-sums", label: "Cornu", title: "Partial sum spirals — Dirichlet series building up" },
+  { key: "landscape", label: "Landscape", title: "Zero landscape — |ζ(σ+it)| height field" },
+  { key: "euler-rose", label: "Euler", title: "Euler product — prime factor accumulation" },
+  { key: "tower", label: "Tower", title: "Cayley-Dickson tower — ℂ → ℍ → 𝕆 → 𝕊" },
 ];
 
 export function ControlsPanel() {
@@ -45,7 +49,7 @@ export function ControlsPanel() {
 
       <div className="control-group">
         <label className="control-label">View</label>
-        <div className="view-buttons">
+        <div className="view-buttons view-grid">
           {VIEW_MODES.map((m) => (
             <button
               key={m.key}

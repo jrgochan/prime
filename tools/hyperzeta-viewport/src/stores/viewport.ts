@@ -6,6 +6,7 @@ import type {
   EngineState,
   HyperSystem,
 } from "../engine/types";
+import { VIEW_MODE_WASM } from "../engine/types";
 
 interface ViewportState {
   // ── Engine ──
@@ -70,7 +71,14 @@ export const useViewportStore = create<ViewportState>()(
       })),
 
     setSpeed: (speed) => set({ speed }),
-    setViewMode: (viewMode) => set({ viewMode }),
+    setViewMode: (viewMode) => {
+      // Tell the WASM engine which visualization to compute
+      const system = useViewportStore.getState().hyperSystem;
+      if (system?.engine && viewMode !== "output") {
+        system.engine.set_view_mode(VIEW_MODE_WASM[viewMode]);
+      }
+      set({ viewMode });
+    },
     setCameraPreset: (cameraPreset) => set({ cameraPreset }),
     toggleInfo: () => set((state) => ({ showInfo: !state.showInfo })),
 
