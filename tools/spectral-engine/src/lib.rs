@@ -394,7 +394,7 @@ impl HyperEngine {
                         let avg_spacing = (zeros[19] - zeros[0]) / 19.0;
                         let norm_spacing = spacing / avg_spacing;
                         
-                        let angle = (repeat as f64 * 0.1 + lambda * 0.15);
+                        let angle = repeat as f64 * 0.1 + lambda * 0.15;
                         let r = norm_spacing * 5.0;
                         self.input_buffer[idx]     = (r * angle.cos() - 8.0) as f32;
                         self.input_buffer[idx + 1] = ((z_idx as f64 / 19.0 - 0.5) * 20.0) as f32;
@@ -417,13 +417,13 @@ impl HyperEngine {
                 8 => {
                     let n = i + 1;
                     // Compute Möbius μ(n) via trial division
-                    let mu = zeta::arithmetic::mobius(n);
+                    let _mu = zeta::arithmetic::mobius(n);
                     
                     // Cumulative Mertens: each particle carries the running sum
                     // (approximated for performance — use modular arithmetic for visual)
                     let t_param = lambda * 0.5;
-                    let angle1 = n as f64 * 0.1 + t_param;
-                    let angle2 = n as f64 * 0.0618 + t_param * 0.7; // golden ratio freq
+                    let _angle1 = n as f64 * 0.1 + t_param;
+                    let _angle2 = n as f64 * 0.0618 + t_param * 0.7; // golden ratio freq
                     
                     // Mertens-like walk in 3D
                     let walk_x: f64 = (1..=n.min(200)).map(|k| {

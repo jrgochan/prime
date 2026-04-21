@@ -553,6 +553,7 @@ pub fn zeta_operator_full(s_components: &[f64; 16], terms: usize) -> ([f64; 256]
 // This creates genuine mixing between all 16 components.
 
 /// The first 15 primes, used to map primes to sedenion basis directions.
+#[allow(dead_code)]
 const PRIMES_15: [usize; 15] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
 
 /// Compute the sedenion arithmetic logarithm of n.

@@ -367,9 +367,9 @@ fn main() {
     for k in 0..7 {
         let lk = left_mult_matrix(k);
         let lk2 = mat_mul(&lk, &lk);
-        let tr = mat_trace(&lk2);
+        let _tr = mat_trace(&lk2);
         // For division algebra: Lₖ² should have trace related to -dim
-        let expected = -2.0; // each eₖ has exactly 2 Fano triples through it
+        let _expected = -2.0; // each eₖ has exactly 2 Fano triples through it
         // Actually Lₖ·Lₖᵀ should be related to identity
         let lkt = mat_transpose(&lk);
         let prod = mat_mul(&lk, &lkt);
@@ -459,8 +459,8 @@ fn main() {
         let idx_d = ((gamma - t_start) / (t_end - t_start) * steps as f64) as usize;
         let idx_d = idx_d.min(flow_dirichlet.len() - 1);
         
-        let (t_d, ref eigs_d, sig_d) = flow_dirichlet[idx_d];
-        let (t_t, ref eigs_t, sig_t) = flow_trace[idx_d.min(flow_trace.len() - 1)];
+        let (_t_d, ref eigs_d, sig_d) = flow_dirichlet[idx_d];
+        let (_t_t, ref eigs_t, sig_t) = flow_trace[idx_d.min(flow_trace.len() - 1)];
         
         let min_eig_d = eigs_d.iter().cloned().fold(f64::INFINITY, f64::min).abs();
         let min_eig_t = eigs_t.iter().cloned().fold(f64::INFINITY, f64::min).abs();

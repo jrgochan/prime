@@ -11,8 +11,7 @@
 //!
 //! The converse (d²_N → 0 ⟹ RH) is proved PURE via the Rank-1 Mellin Miracle.
 
-use super::dirichlet::complex_zeta;
-use std::f64::consts::PI;
+
 
 // ════════════════════════════════════════════════════════════
 // BASIS FUNCTIONS

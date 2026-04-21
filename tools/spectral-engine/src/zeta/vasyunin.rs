@@ -81,7 +81,7 @@ pub fn gram_offdiag(j: usize, k: usize, num_points: usize) -> f64 {
 pub fn gram_diagonal(k: usize, _num_points: usize) -> f64 {
     let kf = k as f64;
     // Harmonic number H_{k-1}
-    let h = harmonic(k - 1);
+    let _h = harmonic(k - 1); // exact formula: (1 - γ + H_{k-1}) / k
     // G(k,k) = (1 - γ + ln(k) + ...) / k ≈ this formula
     // More precisely: ∫₀¹ {1/(kx)}² dx
     // Use the exact formula when available, numerical otherwise
