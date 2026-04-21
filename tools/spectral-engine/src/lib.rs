@@ -105,33 +105,46 @@ impl HyperEngine {
             // Force the Real dimension of every coordinate mathematically exactly to 1/2
             s_coord.a.a.r = 0.5; 
 
-            // INPUT SPACE: Helical spiral projection
-            // Map each particle's 16D sedenion orientation to a position on a helix.
-            // - Phase angle: derived from the particle's quaternion components (unique per particle)
-            // - Height: spreads particles vertically, modulated by lambda
-            // - Radius: based on the imaginary magnitude of the first quaternion
+            // INPUT SPACE: The Riemann Zeta Spiral
+            // Each particle samples ζ(½ + it) at a unique height t on the critical line.
+            // Plotted as (Re(ζ), t, Im(ζ)), this creates the iconic spiral:
+            // - Rings contract to the origin at zeros of ζ
+            // - Rings expand outward between zeros
+            // - The whole structure rotates with lambda
             let idx = i * 3;
-            let q = s_coord.a.a; // First quaternion of the sedenion
             
-            // Unique phase per particle: atan2 of two imaginary components
-            // This creates an angular distribution based on the particle's 16D orientation
-            let phase = q.i.atan2(q.j);
+            // Each particle gets a unique t value spread across [0, t_max]
+            // t_max grows with lambda so the spiral extends over time
+            let t_max = 10.0 + lambda * 5.0;
+            let t = (i as f64 / self.particle_count as f64) * t_max;
             
-            // Radius: imaginary magnitude of the first octonion × modulation
-            let r = (q.i * q.i + q.j * q.j + q.k * q.k).sqrt();
-            let radius = 3.0 + r * 0.8;
+            // Compute classical complex ζ(½ + it) via Dirichlet series
+            let sigma = 0.5;
+            let mut zeta_re = 0.0f64;
+            let mut zeta_im = 0.0f64;
+            let spiral_terms = 50; // More terms = cleaner spiral
             
-            // Height: each particle gets a unique vertical position based on
-            // another pair of sedenion components, creating the helix layering
-            let q2 = s_coord.a.b; // Second quaternion of the first octonion
-            let height = (q2.r + q2.i) * 2.0;
+            for n in 1..=spiral_terms {
+                let log_n = (n as f64).ln();
+                let mag = (-sigma * log_n).exp(); // n^(-σ)
+                let angle = -t * log_n;           // rotation angle
+                zeta_re += mag * angle.cos();
+                zeta_im += mag * angle.sin();
+            }
             
-            // The helix: x,z circle with y height.
-            // Lambda rotation makes the whole spiral turn over time.
-            let angle = phase + lambda * 0.3;
-            self.input_buffer[idx]     = (radius * angle.cos()) as f32;
-            self.input_buffer[idx + 1] = height as f32;
-            self.input_buffer[idx + 2] = (radius * angle.sin()) as f32;
+            // Spiral radius = |ζ| → contracts to 0 at zeros
+            let visual_scale = 5.0;
+            
+            // Add a slow overall rotation driven by lambda
+            let rot = lambda * 0.15;
+            let rotated_re = zeta_re * rot.cos() - zeta_im * rot.sin();
+            let rotated_im = zeta_re * rot.sin() + zeta_im * rot.cos();
+            
+            // Map to 3D: (Re(ζ), t_height, Im(ζ))
+            let height_scale = 30.0 / t_max.max(1.0); // normalize vertical spread
+            self.input_buffer[idx]     = (rotated_re * visual_scale) as f32;
+            self.input_buffer[idx + 1] = ((t - t_max * 0.5) * height_scale) as f32;
+            self.input_buffer[idx + 2] = (rotated_im * visual_scale) as f32;
 
             // STEP 2: Calculate Riemann Zeta Dirichlet Series in 16-Dimensions:
             // zeta(S) = sum_{n=1}^{N} n^{-S} = sum e^(-S * ln(n))
