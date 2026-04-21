@@ -1,102 +1,47 @@
-# ==================================
-# Project HYPERZETA Git Constraints 
-# ==================================
+# ============================================
+# The Cathedral — .gitignore
+# ============================================
 
-# 1. Python AI Router
-gateway-api/venv/
-gateway-api/__pycache__/
-gateway-api/*.whl
-gateway-api/.env
-*.pyc
-*.pyo
-
-# 2. Next.js / WebGPU Viewport
-ui-viewport/node_modules/
-ui-viewport/.next/
-ui-viewport/out/
-ui-viewport/build/
-ui-viewport/.turbo/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnp.*
-
-# 3. Rust Sedenion Math Engine
-core-engine/target/
-core-engine/Cargo.lock
-
-# 4. WASM Array Transport Boundaries
-ui-viewport/public/wasm/
-ui-viewport/src/wasm/
-
-# 5. Lean 4 / Mathlib Ecosystem
+# Lean 4 / Lake build artifacts
 proofs/.lake/
-proofs/build/
-proofs/**/*.olean
-proofs/**/*.ilean
-proofs/**/*.o
-proofs/**/*.c
+proofs/lake-packages/
+*.olean
 
-# 6. Auto-Generated Proof Files (rebuilt on every run)
-proofs/StableTopology_*.lean
-proofs/Ladder_*.lean
-proofs/.hyperzeta_checkpoint.json
-proofs/.conjecture_cache.json
-proofs/.operator_cache.json
-proofs/.boundary_cache.json
-proofs/.tower_cache.json
-proofs/hyperzeta_search.log
-# NOTE: proofs/Proved_*.lean are NOT ignored — those are successful proofs!
-
-# 6. Apple OS Exclusions
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.Spotlight-V100
-.Trashes
-cathedral-archive-*.tar.gz
-cathedral-dump.txt
-dump_b64.txt
-proofs/experiments/*/target/
-
-# Generated dumps & archives
-cathedral-dump.txt
-cathedral-archive-*.tar.gz
-dump_b64.txt
-
-# LaTeX build artifacts
-*.aux
-*.log
-*.out
-*.toc
-*.bbl
-*.blg
-*.fdb_latexmk
-*.fls
-*.synctex.gz
-
-# Rust build artifacts
+# Rust build artifacts (experiments + tools)
 **/target/
 
-# Cache files
-proofs/.arithmetic_cache.json
-proofs/.boundary_cache.json
-proofs/.conjecture_cache.json
-proofs/.operator_cache.json
-proofs/.tower_cache.json
+# Node.js (visualizer + tools)
+**/node_modules/
+**/.next/
+**/.turbo/
 
-# Junk files
-*.oops
-*.orig
-*.orig.*
-visualizer/node_modules/
-visualizer/.next/
-experiments/spectral/lambda-eff/target/
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/venv/
+**/.env
 
-# Cathedral dump splits (context-passing artifacts)
-cathedral-parts/
-cathedral-10/
-cathedral-rh/
-cathedral-parts/
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor artifacts
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Build logs
+npm-debug.log*
+yarn-debug.log*
+
+# LaTeX build artifacts (PDFs are committed intentionally)
+papers/*.aux
+papers/*.log
+papers/*.out
+papers/*.toc
+papers/*.fls
+papers/*.fdb_latexmk
+papers/*.synctex.gz

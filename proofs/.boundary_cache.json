@@ -1,0 +1,355 @@
+{
+  "analysis_time_sec": 0.06242203712463379,
+  "trigonometric_identity": {
+    "identity": "3 + 4cos(\u03b8) + cos(2\u03b8) = 2(1 + cos(\u03b8))\u00b2 \u2265 0",
+    "num_points_tested": 10000,
+    "minimum_value": 4.773959005888173e-15,
+    "minimum_at_theta": 3.141278462905366,
+    "minimum_at_theta_deg": 179.98199819982,
+    "algebraic_identity_error": 8.881784197001252e-16,
+    "proven_non_negative": true
+  },
+  "mertens_bounds": {
+    "t=14.134725": [
+      {
+        "sigma": 2.0,
+        "product": 1.3526835322601225,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 2.2510934929120903,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 4.4009321324332085,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 5.752746114326479,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 6.518604814778552,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 6.987957450856061,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 7.146049423490323,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 7.225716349435235,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 7.273792310001899,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 7.2898716545826385,
+        "satisfied": true
+      }
+    ],
+    "t=21.02204": [
+      {
+        "sigma": 2.0,
+        "product": 1.4860014333205078,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 2.572729117116964,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 5.797360513446966,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 8.824028761081895,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 11.334427500064606,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 13.390631882054008,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 14.201686861906497,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 14.635202015349511,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 14.904945983628487,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 14.996527444567173,
+        "satisfied": true
+      }
+    ],
+    "t=25.010858": [
+      {
+        "sigma": 2.0,
+        "product": 2.0060566531722523,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 3.5387062733546175,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 7.084244992410933,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 9.530726292342074,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 11.080386182987464,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 12.10151070903709,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 12.453830318255504,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 12.631797353840101,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 12.739092728137244,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 12.774938214472591,
+        "satisfied": true
+      }
+    ],
+    "t=5.0": [
+      {
+        "sigma": 2.0,
+        "product": 2.87343439470407,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 9.617432613349077,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 42.926999430109056,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 86.25272522454222,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 128.01650650840364,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 165.30600437534108,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 180.70170300974664,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 189.0839531356053,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 194.3527396232115,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 196.15077480844067,
+        "satisfied": true
+      }
+    ],
+    "t=10.0": [
+      {
+        "sigma": 2.0,
+        "product": 8.954086127032749,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 42.520406091524386,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 250.19001532133188,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 564.7879325918335,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 890.333664483184,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 1188.4761173765296,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 1312.0577663685472,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 1379.2751962943057,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 1421.474995926667,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 1435.8649419051217,
+        "satisfied": true
+      }
+    ],
+    "t=50.0": [
+      {
+        "sigma": 2.0,
+        "product": 2.002086114057206,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.5,
+        "product": 4.9457249838207575,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.2,
+        "product": 15.90675979206709,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.1,
+        "product": 27.883592765255848,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.05,
+        "product": 38.418265567322415,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.02,
+        "product": 47.237135787269104,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.01,
+        "product": 50.73718575702874,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.005,
+        "product": 52.6101959369336,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.002,
+        "product": 53.776025296107456,
+        "satisfied": true
+      },
+      {
+        "sigma": 1.001,
+        "product": 54.17187569069465,
+        "satisfied": true
+      }
+    ]
+  },
+  "boundary_sweep": {
+    "sigma": 1.001,
+    "t_range": [
+      0.1,
+      100.0
+    ],
+    "num_points": 200,
+    "min_magnitude": 0.29615855382638046,
+    "min_magnitude_at_t": 14.156281407035177,
+    "mean_magnitude": 1.1506559933581746,
+    "all_nonzero": true
+  },
+  "boundary_magnitudes": {
+    "t=0.1": 7.292019831097277,
+    "t=10.1": 1.466743764944611,
+    "t=20.2": 0.8633512206750016,
+    "t=30.2": 0.534741975206737,
+    "t=40.3": 0.8291833077638247,
+    "t=50.3": 0.7274455972477143,
+    "t=60.3": 0.5195350233660199,
+    "t=70.4": 1.1349823711020814,
+    "t=80.4": 1.926275948389676,
+    "t=90.5": 2.498880149500688
+  },
+  "pole_dominance": {
+    "residue_estimate": 0.007461736530148679,
+    "is_simple_pole": false,
+    "contradiction": "If \u03b6(1+14.134725i) = 0 with order m \u2265 1, then:\n  |\u03b6(\u03c3+14.134725i)| ~ C\u00b7(\u03c3-1)^m as \u03c3\u21921+\n  Mertens: \u03b6(\u03c3)\u00b3\u00b7|\u03b6(\u03c3+14.134725i)|\u2074\u00b7|\u03b6(\u03c3+2\u00b714.134725i)| \u2265 1\n  LHS ~ (\u03c3-1)^{4m-3} \u2192 0 when m \u2265 1\n  Contradiction! So \u03b6(1+14.134725i) \u2260 0."
+  }
+}

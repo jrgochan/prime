@@ -93,7 +93,7 @@ theorem rational_sum_eq_endpoints (j k : ℕ) (x_start x_end : ℝ) :
       (n₀/j + m/k) [left tile] → ((n₀-1)/j + m/k) [right tile]
 
     The JUMP in the log coefficient is 1/j. -/
-theorem log_coeff_jump_k_crossing (j k m n₀ : ℕ) (hn₀ : 1 ≤ n₀) :
+theorem log_coeff_jump_k_crossing (j k m n₀ : ℕ) (_hn₀ : 1 ≤ n₀) :
     ((n₀:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) -
     (((n₀:ℝ) - 1)/(j:ℝ) + (m:ℝ)/(k:ℝ)) = 1 / (j:ℝ) := by
   field_simp; ring
@@ -119,7 +119,7 @@ theorem log_coeff_jump_j_boundary (j k m n n' : ℕ) :
 /-- **SINGLE-TILE FTC VALUE**: For a single-tile row where
     the row boundaries ARE the tile boundaries, the FTC evaluation is:
     F(rowHi) - F(rowLo) = [rational + log + linear](rowHi) - [rational + log + linear](rowLo) -/
-theorem single_tile_ftc_decomposition (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+theorem single_tile_ftc_decomposition (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
     let lo := OffDiagPartition.rowLo j m
     let hi := OffDiagPartition.rowHi j m
     let jf := (j:ℝ); let kf := (k:ℝ); let mf := (m:ℝ); let nf := (n:ℝ)
@@ -157,7 +157,7 @@ theorem rational_row_diff (j k m : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
     = -(n/j + m/k) · log((m+1)/m)
 
     This is the term that accumulates into Digamma evaluations. -/
-theorem log_row_diff (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 ≤ m) :
+theorem log_row_diff (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) (_hm : 1 ≤ m) :
     F_log j k m n (OffDiagPartition.rowHi j m) -
     F_log j k m n (OffDiagPartition.rowLo j m) =
     -((n:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) *
@@ -177,7 +177,7 @@ theorem log_ratio_simplify (j m : ℕ) (hj : 1 ≤ j) (hm : 1 ≤ m) :
 /-- **LINEAR PART AT ROW ENDPOINTS** (single-tile case):
     F_linear(hi) - F_linear(lo) = mn · (1/(jm) - 1/(j(m+1)))
     = mn · 1/(jm(m+1)) = n/(j(m+1)) -/
-theorem linear_row_diff (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 ≤ m) :
+theorem linear_row_diff (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) (_hm : 1 ≤ m) :
     F_linear m n (OffDiagPartition.rowHi j m) -
     F_linear m n (OffDiagPartition.rowLo j m) =
     (m:ℝ) * (n:ℝ) * (1/((j:ℝ) * (m:ℝ)) - 1/((j:ℝ) * ((m:ℝ)+1))) := by

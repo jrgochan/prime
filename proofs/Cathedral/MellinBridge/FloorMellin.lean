@@ -244,7 +244,7 @@ private lemma piece_setIntegral (s : ℂ) (hs : 1 < s.re) (n : ℕ) :
   rw [intervalIntegral.integral_of_le (show 1/((↑(n+1:ℕ):ℝ)+1) ≤ 1/(↑(n+1:ℕ):ℝ) from by
     apply div_le_div_of_nonneg_left (by linarith) (by positivity)
     linarith [Nat.cast_nonneg (α := ℝ) n])] at h
-  convert h using 2 <;> push_cast <;> ring
+  convert h using 2 <;> push_cast <;> ring_nf
 
 /-- Inductive decomposition: ∫_{Ioc(1/(N+1), 1)} f = partial Abel sum / s. -/
 private lemma integral_decomp (s : ℂ) (hs : 1 < s.re) : ∀ N : ℕ,

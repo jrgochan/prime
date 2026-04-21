@@ -1,0 +1,351 @@
+# Cathedral Source — Assembly
+# Generated: Wed Apr 15 04:17:25 MDT 2026
+# Project: prime/proofs/Cathedral
+# Build: lake build — 3530 jobs, zero errors, zero sorry
+# Crown theorem: nyman_beurling_iff_rh (5 Cathedral axioms)
+# Total: 83 active files, 48 axioms
+
+
+================================================================
+FILE: Cathedral/Assembly/Assembly.lean
+================================================================
+
+/-
+  Cathedral/Assembly.lean
+
+  ## Re-export barrel for the Assembly module.
+
+  Assembly contains:
+  - Assembly/QuadFormBridge.lean — variational principle & NB distance structure
+  - Assembly/MainChain.lean     — Nyman-Beurling Equivalence & RH
+-/
+
+import Cathedral.Assembly.QuadFormBridge
+import Cathedral.Assembly.MainChain
+
+
+================================================================
+FILE: Cathedral/Assembly/MainChain.lean
+================================================================
+
+/-
+  Cathedral/Assembly/MainChain.lean
+
+  ## The Nyman-Beurling Equivalence — Cathedral Crown
+
+  After the Great Purge (April 6, 2026), the constant witness path was
+  amputated. The Cathedral now rests on two pillars:
+
+  - **Pillar I (Converse):** d² → 0 ⟹ RH, via infinite-dimensional
+    L² duality through the Mellin Bridge.
+  - **Pillar II (Forward):** RH ⟹ d² → 0, via the Sieve Engine
+    (Möbius weights annihilating the Θ(N²) off-diagonal mass).
+
+  The Capstone: Nyman-Beurling iff characterization.
+
+  Unconditional results preserved:
+  - `nyman_beurling` (the iff)
+  - `eigenvalue_limit_exists`
+  - `log_grows_unboundedly` (standard calculus)
+-/
+
+import Cathedral.Defs
+import Cathedral.Structural.Structural
+import Cathedral.MellinBridge.Basic
+import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.NymanBeurling
+
+noncomputable section
+open Complex Real
+
+-- ════════════════════════════════════════════════
+-- PILLAR I: THE CONVERSE (L² Duality)
+-- ════════════════════════════════════════════════
+
+/-- **PILLAR I**: If d²_N → 0, then RH is true.
+    The proof flows entirely through infinite-dimensional L² duality
+    via the Mellin Bridge. This is fully proved from axioms in
+    `MellinBridge/Separation.lean`. -/
+theorem distance_converges_to_zero_implies_rh :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) →
+    RiemannHypothesis := by
+  intro h
+  apply nyman_beurling_converse
+  intro ε hε
+  obtain ⟨N₀, hN₀⟩ := h ε hε
+  use max N₀ 2
+  intro N hN
+  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+  have hNn : N₀ ≤ N := le_trans (le_max_left _ _) hN
+  use (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+  have h_bridge := l2_error_eq_quad_error N hN2
+      ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
+  rw [h_bridge]
+  have h_dist := hN₀ N hNn
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N) with hc_def
+  set b := basisInnerProd N
+  set G := gramMatrix N
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN2
+  have h_Gc : G.mulVec c = b := by
+    simp [hc_def, G, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  have h_cGc : dotProduct c (G.mulVec c) = dotProduct c b := by rw [h_Gc]
+  have h_quad := nbDistSq_as_quadform N hN2
+  simp only [realQuadForm] at h_quad ⊢
+  have h_comm : dotProduct b c = dotProduct c b := dotProduct_comm b c
+  linarith [h_dist, h_cGc, h_comm]
+
+-- ════════════════════════════════════════════════
+-- NYMAN-BEURLING HELPERS
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: Existential L² form implies infimum form. -/
+theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
+    (v : Fin (N - 1) → ℝ)
+    (hv : ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) :
+    nbDistSq' N < ε :=
+  calc nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
+        realQuadForm (gramMatrix N) v := nbDistSq_le_test_vector N hN v
+    _ = ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 := (l2_error_eq_quad_error N hN v).symm
+    _ < ε := hv
+
+-- ════════════════════════════════════════════════
+-- PILLAR II: THE FORWARD DIRECTION (The Sieve Engine)
+-- ════════════════════════════════════════════════
+
+/-- **PILLAR II** (PROVED): If RH is true, the Möbius weights
+    drive d² → 0. Formerly an axiom; now derived from
+    `nyman_beurling_forward_from_sieve` + `existential_implies_infimum`. -/
+theorem rh_implies_distance_converges_to_zero :
+    RiemannHypothesis →
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) := by
+  intro hRH ε hε
+  obtain ⟨N₀, hN₀⟩ := Cathedral.Vasyunin.nyman_beurling_forward_from_sieve hRH ε hε
+  use max N₀ 2
+  intro N hN
+  have hN₀_le : N₀ ≤ N := le_trans (le_max_left _ _) hN
+  have hN2 : 2 ≤ N := le_trans (le_max_right _ _) hN
+  obtain ⟨v, hv⟩ := hN₀ N hN₀_le
+  exact existential_implies_infimum N hN2 ε v hv
+
+-- ════════════════════════════════════════════════
+-- LOGARITHMIC DIVERGENCE (STANDARD CALCULUS)
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: C/log(N) < ε eventually (standard calculus). -/
+theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
+    ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N → C / Real.log (N : ℝ) < ε := by
+  have h := tendsto_log_atTop.eventually (Filter.eventually_ge_atTop (C / ε + 1))
+  rw [Filter.eventually_atTop] at h
+  obtain ⟨M, hM⟩ := h
+  use ⌈max M 2⌉₊
+  intro N hN
+  have hN_cast : (N : ℝ) ≥ max M 2 := le_trans (Nat.le_ceil _) (by exact_mod_cast hN)
+  have hN_ge_M : (N : ℝ) ≥ M := le_trans (le_max_left _ _) hN_cast
+  have hlog_pos : 0 < Real.log (N : ℝ) := Real.log_pos (by linarith [le_max_right M 2])
+  have hlog_gt : C / ε < Real.log (N : ℝ) := by linarith [hM N hN_ge_M]
+  rw [div_lt_iff₀ hlog_pos]
+  have : C < ε * Real.log (N : ℝ) := by
+    calc C = ε * (C / ε) := by field_simp
+      _ < ε * Real.log (N : ℝ) := by nlinarith
+  linarith
+
+
+-- ════════════════════════════════════════════════
+-- THE NYMAN-BEURLING EQUIVALENCE (The Capstone)
+-- ════════════════════════════════════════════════
+
+/-- **THE NYMAN-BEURLING EQUIVALENCE** (BOTH DIRECTIONS PROVED)
+    The Riemann Hypothesis holds if and only if the Nyman-Beurling
+    distance d²_N converges to zero.
+
+    - Forward: `rh_implies_distance_converges_to_zero` (PROVED via Mertens bypass)
+    - Converse: `distance_converges_to_zero_implies_rh` (PROVED via Mellin Bridge) -/
+theorem nyman_beurling_equivalence :
+    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, nbDistSq' N < ε) ↔ RiemannHypothesis :=
+  ⟨distance_converges_to_zero_implies_rh, rh_implies_distance_converges_to_zero⟩
+
+-- ════════════════════════════════════════════════
+-- UNCONDITIONAL RESULTS
+-- ════════════════════════════════════════════════
+
+/-- The eigenvalue limit exists (unconditional). -/
+theorem eigenvalue_limit_exists :
+    ∃ L : ℝ, 0 ≤ L ∧
+    ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, |lambdaMin N - L| < ε := by
+  set f := fun n => lambdaMin (n + 2) with hf_def
+  have hanti : Antitone f := lambdaMin_shifted_antitone
+  have hbdd : BddBelow (Set.range f) := by
+    use 0; intro x ⟨n, hn⟩; rw [← hn]
+    exact le_of_lt (lambdaMin_pos (n + 2) (by omega))
+  have htend := tendsto_atTop_ciInf hanti hbdd
+  set L := ⨅ n, f n with hL_def
+  have hL_nonneg : 0 ≤ L := by
+    apply le_ciInf; intro n
+    exact le_of_lt (lambdaMin_pos (n + 2) (by omega))
+  rw [Metric.tendsto_atTop] at htend
+  refine ⟨L, hL_nonneg, fun ε hε => ?_⟩
+  obtain ⟨a, ha⟩ := htend ε hε
+  refine ⟨a + 2, fun N hN => ?_⟩
+  have hNa : a ≤ N - 2 := by omega
+  have hfN : f (N - 2) = lambdaMin N := by
+    simp [hf_def]; congr 1; omega
+  have := ha (N - 2) hNa
+  rw [hfN, Real.dist_eq] at this
+  exact this
+
+end
+
+-- ════════════════════════════════════════════════
+-- AXIOM AUDIT
+-- ════════════════════════════════════════════════
+#print axioms nyman_beurling_equivalence
+
+
+================================================================
+FILE: Cathedral/Assembly/QuadFormBridge.lean
+================================================================
+
+/-
+  Cathedral/Assembly/QuadFormBridge.lean
+
+  ## NB Distance Structural Theorems.
+
+  The variational principle and quadratic form bridge:
+  - nbDistSq_as_quadform (d² = 1 - cᵀGc)
+  - basis_inner_prod_nonzero (b ≠ 0)
+  - nbDistSq_lt_one (d² < 1)
+  - nbDistSq_le_test_vector (variational upper bound)
+-/
+
+import Cathedral.Defs
+import Cathedral.Structural.Structural
+import Cathedral.Sieve.ParitySchur
+
+noncomputable section
+open Complex Real
+
+/-- **THEOREM**: NB distance as Rayleigh quotient: d² = 1 - cᵀGc. -/
+theorem nbDistSq_as_quadform (N : ℕ) (hN : 2 ≤ N) :
+    let c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+    nbDistSq' N = 1 - realQuadForm (gramMatrix N) c := by
+  simp only [nbDistSq', realQuadForm]
+  congr 1
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+  have h_unit : IsUnit (gramMatrix N).det := gramMatrix_isUnit_det N hN
+  have h_Gc : (gramMatrix N).mulVec c = basisInnerProd N := by
+    rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  rw [h_Gc]
+  simp [dotProduct, Finset.sum_congr rfl (fun i _ => mul_comm _ _)]
+
+/-- **THEOREM**: The basis inner product vector b is nonzero. -/
+theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
+    basisInnerProd N ≠ 0 := by
+  intro h_eq
+  have h_zero : basisInnerProd N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
+  simp only [basisInnerProd] at h_zero
+  set f := (fun x : ℝ => Int.fract (((0 + 1 : ℕ) : ℝ) / x)) with hf_def
+  have hf_meas : Measurable f := (measurable_const.div measurable_id).fract
+  have hf_bound : ∀ x : ℝ, ‖f x‖ ≤ ‖(1 : ℝ)‖ := fun x => by
+    simp only [f, Real.norm_eq_abs, abs_one,
+      abs_of_nonneg (Int.fract_nonneg _)]
+    exact le_of_lt (Int.fract_lt_one _)
+  have hf_01 : IntervalIntegrable f MeasureTheory.volume 0 1 :=
+    IntervalIntegrable.mono_fun (intervalIntegrable_const (c := (1:ℝ)))
+      hf_meas.aestronglyMeasurable.restrict
+      (Filter.Eventually.of_forall hf_bound)
+  set c : ℝ := 1/2
+  have hc0 : (0:ℝ) ≤ c := by norm_num
+  have hcd : c < 1 := by norm_num
+  have hpos : ∀ x, x ∈ Set.Ioo c (1:ℝ) → 0 < f x := by
+    intro x ⟨hx_lo, hx_hi⟩
+    simp only [f]
+    have h12 : (↑(1:ℕ) : ℝ) / (↑(1:ℕ) + 1) < x := by norm_num; exact hx_lo
+    rw [fract_eq_sub (le_refl 1) (le_refl 1) h12 hx_hi]
+    have hxp : 0 < x := by linarith
+    have : (1:ℝ) / x > 1 := by rw [gt_iff_lt, lt_div_iff₀ hxp]; linarith
+    linarith
+  have hi_sub : IntervalIntegrable f MeasureTheory.volume c 1 :=
+    hf_01.mono_set (by
+      simp only [Set.uIcc_of_le (le_of_lt hcd), Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc hc0 le_rfl)
+  have hi_0c : IntervalIntegrable f MeasureTheory.volume 0 c :=
+    hf_01.mono_set (by
+      simp only [Set.uIcc_of_le hc0, Set.uIcc_of_le (zero_le_one)]
+      exact Set.Icc_subset_Icc le_rfl (le_of_lt hcd))
+  have h_sub_pos : 0 < ∫ x in c..1, f x :=
+    intervalIntegral.intervalIntegral_pos_of_pos_on hi_sub hpos hcd
+  have h_0c_nn : 0 ≤ ∫ x in (0:ℝ)..c, f x :=
+    intervalIntegral.integral_nonneg hc0 (fun x _ => Int.fract_nonneg _)
+  have h_split : ∫ x in (0:ℝ)..1, f x = (∫ x in (0:ℝ)..c, f x) + (∫ x in c..1, f x) :=
+    (intervalIntegral.integral_add_adjacent_intervals hi_0c hi_sub).symm
+  linarith
+
+/-- **THEOREM**: d² < 1 for all N ≥ 2. -/
+theorem nbDistSq_lt_one (N : ℕ) (hN : 2 ≤ N) :
+    nbDistSq' N < 1 := by
+  rw [nbDistSq_as_quadform N hN]
+  linarith [gram_pos_def N hN ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
+    (by
+     intro hc
+     have h_unit : IsUnit (gramMatrix N).det := gramMatrix_isUnit_det N hN
+     have h_Gc : (gramMatrix N).mulVec ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) =
+            basisInnerProd N := by
+       rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+     rw [hc, Matrix.mulVec_zero] at h_Gc
+     exact basis_inner_prod_nonzero N hN h_Gc.symm)]
+
+/-- **COROLLARY**: bᵀG⁻¹b > 0. -/
+theorem bGinvb_pos (N : ℕ) (hN : 2 ≤ N) :
+    0 < dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) := by
+  have h := nbDistSq_lt_one N hN
+  unfold nbDistSq' at h
+  linarith
+
+-- ════════════════════════════════════════════════
+-- THE VARIATIONAL PRINCIPLE
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM (Variational Upper Bound)**: For ANY test vector v,
+    d²_N ≤ 1 - 2·bᵀv + vᵀGv. -/
+theorem nbDistSq_le_test_vector (N : ℕ) (hN : 2 ≤ N)
+    (v : Fin (N - 1) → ℝ) :
+    nbDistSq' N ≤ 1 - 2 * dotProduct (basisInnerProd N) v +
+      realQuadForm (gramMatrix N) v := by
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N) with hc_def
+  set b := basisInnerProd N
+  set G := gramMatrix N
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN
+  have h_Gc : G.mulVec c = b := by
+    simp [hc_def, G, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  have h_dist := nbDistSq_as_quadform N hN
+  have h_cb : dotProduct c (G.mulVec c) = dotProduct c b := by rw [h_Gc]
+  suffices h : realQuadForm G v - 2 * dotProduct b v + dotProduct c b ≥ 0 by
+    simp only [realQuadForm] at h_dist h ⊢
+    linarith
+  rw [show dotProduct c b = realQuadForm G c from by
+    unfold realQuadForm; rw [h_Gc]]
+  rw [show dotProduct b v = dotProduct v (G.mulVec c) from by
+    rw [h_Gc]; exact dotProduct_comm b v]
+  have h_psd := (gramMatrix_posSemidef N hN).dotProduct_mulVec_nonneg (v - c)
+  have h_expand : dotProduct (v - c) (G.mulVec (v - c)) =
+      realQuadForm G v - 2 * dotProduct v (G.mulVec c) + realQuadForm G c := by
+    unfold realQuadForm
+    simp only [Matrix.mulVec_sub, sub_dotProduct, dotProduct_sub]
+    have h_sym : dotProduct c (G.mulVec v) = dotProduct v (G.mulVec c) := by
+      have hH := gramMatrix_hermitian N
+      simp only [dotProduct, Matrix.mulVec, Matrix.IsHermitian] at hH ⊢
+      simp_rw [Finset.mul_sum]
+      rw [Finset.sum_comm]
+      congr 1; ext j
+      congr 1; ext i
+      have : G i j = G j i := by
+        have := congr_fun (congr_fun hH i) j
+        simp [Matrix.conjTranspose_apply, star_trivial] at this
+        exact this.symm
+      ring_nf; rw [this]; ring
+    linarith
+  simp only [star_trivial] at h_psd
+  linarith
+
+end
+

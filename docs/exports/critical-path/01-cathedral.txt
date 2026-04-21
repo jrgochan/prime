@@ -1,0 +1,1570 @@
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# Cathedral Source — Part 1 of 10
+# Generated: 2026-04-20 02:52:05
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+#
+# THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
+# Lean 4 + Mathlib — Critical Path (RH chain)
+# Build: lake build — 0 errors, 0 sorry on crown path
+# Crown: nyman_beurling_equivalence (7 axioms, #print axioms verified)
+# Total: 84 active files, 42 axioms
+#
+# Crown axioms:
+#   1. rh_implies_mertens_bound   — RH → |M(x)| = O(x^{1/2} log²x)
+#   2. pnt_mu_div_k               — Σ μ(k)/k → 0 (PNT)
+#   3. pnt_mu_log_div_k           — Σ μ(k)log(k)/k → -1 (PNT)
+#   4. pnt_mu_log_sq_div_k        — Σ μ(k)log²(k)/k → -2γ (PNT)
+#   5. abel_mertens_tail_raw      — Abel summation tail bounds
+#   6. millennium_covariance_cancellation — 2D covariance bound
+#   7. vasyunin_offdiag_integral   — Off-diagonal Gram = integral
+#
+# This is part 1 of 10. Upload all files.
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+================================================================
+FILE: Cathedral/Gram/L2Bridge.lean
+================================================================
+
+/-
+  Cathedral/Structural/L2Tools.lean
+
+  ## The L² ↔ Matrix Bridge.
+
+  Provides the integration tools connecting the continuous L²(0,1)
+  approximation distance to the discrete matrix quadratic form:
+    ∫₀¹ (1 - Σ wᵢ{(i+1)/x})² dx = 1 - 2·bᵀw + wᵀGw
+-/
+
+import Cathedral.Defs
+import Cathedral.Gram.NbLinComb
+import Cathedral.Structural.Independence
+
+noncomputable section
+open Complex Real
+
+/-- Each w_i * fract((i+1)/x) is integrable on [0,1]. -/
+private lemma single_fract_integrable (k : ℕ) (c : ℝ) :
+    IntervalIntegrable (fun x : ℝ => c * Int.fract (↑k / x))
+      MeasureTheory.volume 0 1 := by
+  have hm : Measurable (fun x : ℝ => c * Int.fract (↑k / x)) :=
+    (measurable_const.div measurable_id).fract.const_mul c
+  exact IntervalIntegrable.mono_fun (intervalIntegrable_const (c := |c|))
+    hm.aestronglyMeasurable.restrict
+    (Filter.Eventually.of_forall (fun x => by
+      simp only [Real.norm_eq_abs, abs_abs]
+      calc |c * Int.fract (↑k / x)|
+          = |c| * |Int.fract (↑k / x)| := abs_mul _ _
+        _ ≤ |c| * 1 := by
+            apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+            rw [abs_of_nonneg (Int.fract_nonneg _)]
+            exact le_of_lt (Int.fract_lt_one _)
+        _ = |c| := mul_one _))
+
+/-- nbLinComb is integrable on [0,1]. -/
+theorem nbLinComb_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (nbLinComb N w) MeasureTheory.volume 0 1 := by
+  unfold nbLinComb
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
+    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_sum]
+  apply IntervalIntegrable.sum; intro i _
+  exact single_fract_integrable (i.val + 1) (w i)
+
+/-- ∫₀¹ nbLinComb = bᵀw. -/
+theorem integral_nbLinComb_eq_dotProduct (N : ℕ) (w : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, nbLinComb N w x =
+    dotProduct (basisInnerProd N) w := by
+  unfold nbLinComb dotProduct basisInnerProd
+  conv_lhs =>
+    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
+      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) i x) from by
+      ext x; simp]
+  rw [intervalIntegral.integral_finset_sum]
+  · congr 1; ext i
+    rw [intervalIntegral.integral_const_mul, mul_comm]
+  · intro i _
+    exact single_fract_integrable (i.val + 1) (w i)
+
+/-- **THE L² ↔ MATRIX BRIDGE** (PROVEN):
+    ∫₀¹ (1 - Σ wᵢ{(i+1)/x})² dx = 1 - 2·bᵀw + wᵀGw. -/
+theorem l2_error_eq_quad_error (N : ℕ) (hN : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, (1 - nbLinComb N w x) ^ 2 =
+    1 - 2 * dotProduct (basisInnerProd N) w + realQuadForm (gramMatrix N) w := by
+  have h_expand : (fun x : ℝ => (1 - nbLinComb N w x) ^ 2) =
+      (fun x : ℝ => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) := by
+    ext x; ring
+  rw [h_expand]
+  have hi_const : IntervalIntegrable (fun _ : ℝ => (1:ℝ)) MeasureTheory.volume 0 1 :=
+    intervalIntegrable_const
+  have hi_2f : IntervalIntegrable (fun x => 2 * nbLinComb N w x) MeasureTheory.volume 0 1 :=
+    (nbLinComb_integrable N w).const_mul 2
+  have hi_sq : IntervalIntegrable (fun x => (nbLinComb N w x) ^ 2) MeasureTheory.volume 0 1 :=
+    nbLinComb_sq_integrable N w
+  have h_sub_add : ∫ x in (0:ℝ)..1, (1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) =
+      (∫ x in (0:ℝ)..1, (1:ℝ)) - (∫ x in (0:ℝ)..1, 2 * nbLinComb N w x) +
+      (∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2) := by
+    rw [show (fun x : ℝ => 1 - 2 * nbLinComb N w x + (nbLinComb N w x) ^ 2) =
+        (fun x => (1 - 2 * nbLinComb N w x) + (nbLinComb N w x) ^ 2) from by ext x; ring]
+    rw [intervalIntegral.integral_add (hi_const.sub hi_2f) hi_sq]
+    rw [show (fun x : ℝ => 1 - 2 * nbLinComb N w x) =
+        (fun x => (1:ℝ) - 2 * nbLinComb N w x) from rfl]
+    rw [intervalIntegral.integral_sub hi_const hi_2f]
+  rw [h_sub_add]
+  rw [intervalIntegral.integral_const, sub_zero, smul_eq_mul, mul_one]
+  rw [show (fun x : ℝ => 2 * nbLinComb N w x) = (fun x => (2:ℝ) * nbLinComb N w x) from rfl,
+      intervalIntegral.integral_const_mul, integral_nbLinComb_eq_dotProduct]
+  rw [gram_l2_identity N hN w]
+
+end
+
+
+================================================================
+FILE: Cathedral/MellinBridge/MertensIntegral.lean
+================================================================
+
+/-
+  Cathedral/MellinBridge/MertensIntegral.lean
+
+  ## Structural Tools for the Mertens Bridge
+
+  NOTE (The Triangle Inequality Trap):
+  The L² error d²_N = 1 - 2bᵀv + vᵀGv is a 2D geometric quantity.
+  Bounding 1D coefficients via the triangle inequality destroys the
+  cross-term cancellation, yielding O(N) instead of O(1/log N).
+  The condition number κ(G_N) = Θ(N log N) is the gatekeeper.
+  abel_summation_l2_bound remains as a justified axiom isolating
+  the Mellin-Plancherel L² convergence rate.
+-/
+
+import Cathedral.Defs
+import Mathlib.Analysis.SpecificLimits.Normed
+import Mathlib.Topology.Algebra.InfiniteSum.Real
+
+open Finset BigOperators Real
+
+noncomputable section
+
+-- ════════════════════════════════════════════════
+-- PART I: LOGARITHMIC WEIGHT TOOLS
+-- ════════════════════════════════════════════════
+
+/-- The logarithmic weight function: f(k) = 1 - log(k)/log(N). -/
+def logWeight (N : ℕ) (k : ℕ) : ℝ :=
+  1 - Real.log (k : ℝ) / Real.log (N : ℝ)
+
+/-- **PROVED**: f(N) = 0 (the vanishing boundary term). -/
+theorem logWeight_self (N : ℕ) (hN : 2 ≤ N) : logWeight N N = 0 := by
+  unfold logWeight
+  have hlogN : Real.log (N : ℝ) ≠ 0 :=
+    ne_of_gt (Real.log_pos (by exact_mod_cast show 1 < N by omega))
+  field_simp
+  ring
+
+/-- **PROVED**: f(1) = 1 (the initial value). -/
+theorem logWeight_one (N : ℕ) (_hN : 2 ≤ N) : logWeight N 1 = 1 := by
+  unfold logWeight
+  simp [Real.log_one]
+
+/-- **PROVED**: The discrete derivative bound: |f(k+1) - f(k)| ≤ 1/(k · log N).
+    Uses the exponential characterization: log(1 + 1/k) ≤ 1/k. -/
+theorem log_weight_derivative_bound (k N : ℕ) (hk : 2 ≤ k) (hkN : k < N) :
+    |logWeight N (k + 1) - logWeight N k| ≤ 1 / ((k : ℝ) * Real.log (N : ℝ)) := by
+  unfold logWeight
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hN_gt1 : (1 : ℝ) < (N : ℝ) := by exact_mod_cast show 1 < N by omega
+  have hlog_N_pos : 0 < Real.log (N : ℝ) := Real.log_pos hN_gt1
+  have hk1_pos : (0 : ℝ) < ((k + 1 : ℕ) : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h1 : (1 : ℝ) - Real.log ((k + 1 : ℕ) : ℝ) / Real.log (N : ℝ) -
+      (1 - Real.log (k : ℝ) / Real.log (N : ℝ)) =
+      (Real.log (k : ℝ) - Real.log ((k + 1 : ℕ) : ℝ)) / Real.log (N : ℝ) := by ring
+  rw [h1, abs_div, abs_of_pos hlog_N_pos]
+  have h_le : Real.log (k : ℝ) ≤ Real.log ((k + 1 : ℕ) : ℝ) :=
+    Real.log_le_log hk_pos (by exact_mod_cast show k ≤ k + 1 by omega)
+  rw [abs_of_nonpos (by linarith), neg_sub]
+  have h_eq : Real.log ((k + 1 : ℕ) : ℝ) - Real.log (k : ℝ) =
+      Real.log (1 + 1 / (k : ℝ)) := by
+    rw [← Real.log_div (ne_of_gt hk1_pos) (ne_of_gt hk_pos)]
+    congr 1
+    rw [show ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 from by push_cast; ring]
+    field_simp
+  rw [h_eq]
+  have h_bound : Real.log (1 + 1 / (k : ℝ)) ≤ 1 / (k : ℝ) := by
+    rw [Real.log_le_iff_le_exp (by positivity)]
+    linarith [Real.add_one_le_exp (1 / (k : ℝ))]
+  rw [show 1 / ((k : ℝ) * Real.log (N : ℝ)) =
+      (1 / (k : ℝ)) / Real.log (N : ℝ) from by field_simp]
+  exact div_le_div_of_nonneg_right h_bound hlog_N_pos.le
+
+-- ════════════════════════════════════════════════
+-- PART II: CONVERGENT SERIES
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: The Convergent Series.
+    Σ_{k=2}^N log²(k) / k^{3/2} ≤ C for all N.
+
+    Proof uses log(k) ≤ 8·k^{1/8} (from log(x) ≤ x - 1 < x applied to
+    x = k^{1/8}) and bounds by the convergent p-series Σ 64·k^{-5/4}. -/
+theorem convergent_log_series_bound :
+    ∃ C : ℝ, 0 < C ∧ ∀ N : ℕ, 2 ≤ N →
+    (Finset.Ico 2 N).sum (fun k =>
+      (Real.log (k : ℝ)) ^ 2 / ((k : ℝ) ^ (3/2 : ℝ))) ≤ C := by
+  -- 1. The dominating p-series converges (p = -5/4 < -1)
+  have h_summable : Summable (fun k : ℕ => 64 * (k : ℝ) ^ (-(5/4) : ℝ)) := by
+    apply Summable.mul_left
+    exact Real.summable_nat_rpow.mpr (by norm_num)
+  -- 2. Set C to the infinite sum + 1
+  set C_inf := ∑' (k : ℕ), 64 * (k : ℝ) ^ (-(5/4) : ℝ)
+  use C_inf + 1
+  refine ⟨?_, fun N _ => ?_⟩
+  · -- Prove C > 0
+    have h_nonneg : 0 ≤ C_inf := by
+      apply tsum_nonneg
+      intro n
+      positivity
+    linarith
+  · -- Prove the partial sum is bounded by C
+    have h_summand : ∀ k : ℕ, 2 ≤ k →
+        (Real.log (k : ℝ)) ^ 2 / ((k : ℝ) ^ (3/2 : ℝ)) ≤ 64 * (k : ℝ) ^ (-(5/4) : ℝ) := by
+      intro k hk
+      have hk_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (show 0 < k by omega)
+      -- log(k^{1/8}) ≤ k^{1/8}
+      have hrpow_pos : (0 : ℝ) < (k : ℝ) ^ (1/8 : ℝ) := Real.rpow_pos_of_pos hk_pos _
+      have h_log_bound : Real.log ((k : ℝ) ^ (1/8 : ℝ)) ≤ (k : ℝ) ^ (1/8 : ℝ) := by
+        have := Real.log_le_sub_one_of_pos hrpow_pos
+        linarith
+      -- (1/8) log k ≤ k^{1/8}
+      have h_log_rpow : Real.log ((k : ℝ) ^ (1/8 : ℝ)) = (1/8 : ℝ) * Real.log (k : ℝ) :=
+        Real.log_rpow hk_pos (1/8 : ℝ)
+      rw [h_log_rpow] at h_log_bound
+      -- log k ≤ 8 * k^{1/8}
+      have h_log_le : Real.log (k : ℝ) ≤ 8 * (k : ℝ) ^ (1/8 : ℝ) := by linarith
+      -- square both sides
+      have h_sq : (Real.log (k : ℝ)) ^ 2 ≤ 64 * (k : ℝ) ^ (1/4 : ℝ) := by
+        have h_log_nn : 0 ≤ Real.log (k : ℝ) := Real.log_nonneg (by
+          exact_mod_cast show 1 ≤ k by omega)
+        have h_pow := pow_le_pow_left₀ h_log_nn h_log_le 2
+        calc (Real.log (k : ℝ)) ^ 2
+          _ ≤ (8 * (k : ℝ) ^ (1/8 : ℝ)) ^ 2 := h_pow
+          _ = 64 * (((k : ℝ) ^ (1/8 : ℝ)) ^ 2) := by ring
+          _ = 64 * (k : ℝ) ^ (1/4 : ℝ) := by
+            congr 1
+            rw [← Real.rpow_natCast ((k : ℝ) ^ (1/8 : ℝ)) 2,
+                ← Real.rpow_mul hk_pos.le]
+            norm_num
+      -- divide by k^{3/2}
+      have hk32_pos : (0 : ℝ) < (k : ℝ) ^ (3/2 : ℝ) := Real.rpow_pos_of_pos hk_pos _
+      rw [div_le_iff₀ hk32_pos]
+      calc (Real.log (k : ℝ)) ^ 2
+        _ ≤ 64 * (k : ℝ) ^ (1/4 : ℝ) := h_sq
+        _ = 64 * ((k : ℝ) ^ (-(5/4) : ℝ) * (k : ℝ) ^ (3/2 : ℝ)) := by
+            congr 2
+            rw [← Real.rpow_add hk_pos]
+            congr 1
+            norm_num
+        _ = 64 * (k : ℝ) ^ (-(5/4) : ℝ) * (k : ℝ) ^ (3/2 : ℝ) := by ring
+    -- Telescope the summation bound
+    calc (Finset.Ico 2 N).sum (fun k => (Real.log (k : ℝ)) ^ 2 / ((k : ℝ) ^ (3/2 : ℝ)))
+      _ ≤ (Finset.Ico 2 N).sum (fun k => 64 * (k : ℝ) ^ (-(5/4) : ℝ)) := by
+          apply Finset.sum_le_sum
+          intro k hk
+          rw [Finset.mem_Ico] at hk
+          exact h_summand k hk.1
+      _ ≤ C_inf := by
+          exact h_summable.sum_le_tsum _ (fun n _ => by positivity)
+      _ ≤ C_inf + 1 := by linarith
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- ZERO SORRY in this file!
+--
+--   ✅ logWeight                       — Definition
+--   ✅ logWeight_self                  — f(N) = 0
+--   ✅ logWeight_one                   — f(1) = 1
+--   ✅ log_weight_derivative_bound     — |Δf| ≤ 1/(k·log N)
+--   ✅ convergent_log_series_bound     — Σ log²k/k^{3/2} ≤ C
+
+end
+
+
+================================================================
+FILE: Cathedral/NymanBeurling/BDMellin.lean
+================================================================
+
+/-
+  Cathedral/NymanBeurling/BDMellin.lean
+
+  ## The Rank-1 Mellin Miracle
+
+  Proves `zeta_zero_separates_bd` — the NB converse for the correct
+  Báez-Duarte basis h_k(x) = {1/(kx)}.
+
+  ### The Rank-1 Structure
+  At a ζ zero ρ (where ζ(ρ) = 0, 0 < Re(ρ) < 1):
+    M[h_k](ρ) = ∫₀¹ {1/(kx)}·x^{ρ-1} dx = 1/(k(ρ-1))
+
+  This is a rank-1 tensor: M[h_k](ρ) = (1/k) · (1/(ρ-1)).
+  The k-dependence and ρ-dependence completely factorize.
+
+  ### The Separation Argument
+  For any REAL linear combination f_w = Σ wₖ h_k:
+    ℓ_ρ(1 - f_w) = 1/ρ - W/(ρ-1)  where W = Σ wₖ/k ∈ ℝ
+
+  Since Im(1/ρ) ≠ 0 for non-trivial zeros (t ≠ 0), and W/(ρ-1)
+  traces a real line in ℂ as W varies, the residual can NEVER be zero.
+
+  This gives: |ℓ_ρ(1-f_w)|² ≥ t²/(|ρ|⁴|ρ-1|²) > 0
+  And by Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²) > 0
+
+  ### Axioms (sub-axioms, reduced from 6 original)
+  All 6 original axioms are now THEOREMS. Remaining sub-axioms:
+  1. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation — **PROVED** (IdentityBypass.lean)
+  2. `completedRiemannZeta₀_bound_real` — θ-integral bound (ThetaBound.lean, PROVED)
+
+  Status: 0 sorry. 0 axioms. ALL PROVED.
+-/
+
+import Cathedral.Defs
+import Cathedral.Gram.FractIntegral
+import Cathedral.NymanBeurling.ThetaBound
+import Cathedral.MellinBridge.IdentityBypass
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.NumberTheory.LSeries.RiemannZeta
+
+noncomputable section
+open Complex Real MeasureTheory Set
+
+-- ════════════════════════════════════════════════
+-- DEFINITION: BD linear combination
+-- ════════════════════════════════════════════════
+
+/-- The Báez-Duarte linear combination: φ_w(x) = Σᵢ wᵢ · {1/((i+1)x)}.
+    Uses the CORRECT BD basis h_k(x) = {1/(kx)} with θ = 1/k ≤ 1.
+    By the Nyman-Beurling theorem: inf_w ‖1 - φ_w‖²_{L²(0,1)} → 0 iff RH. -/
+def bdLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
+  ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))
+
+/-- A single scaled BD basis function is integrable on [0,1]. -/
+lemma bd_single_fract_integrable (k : ℕ) (c : ℝ) :
+    IntervalIntegrable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x)))
+      MeasureTheory.volume 0 1 := by
+  have h_meas : Measurable (fun x : ℝ => c * Int.fract (1 / ((k : ℝ) * x))) :=
+    (measurable_fract_real.comp (measurable_const.div
+      (measurable_const.mul measurable_id))).const_mul c
+  have h_bound : ∀ x : ℝ, ‖c * Int.fract (1 / ((k : ℝ) * x))‖ ≤ |c| := by
+    intro x; rw [Real.norm_eq_abs, abs_mul]
+    exact mul_le_of_le_one_right (abs_nonneg _)
+      ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le)
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact ⟨h_meas.aestronglyMeasurable, .of_bounded
+    (Filter.Eventually.of_forall (fun x => h_bound x))⟩
+
+/-- The BD linear combination is integrable on [0,1]. -/
+theorem bdLinComb_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (bdLinComb N v) MeasureTheory.volume 0 1 := by
+  unfold bdLinComb
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+    (∑ i : Fin (N - 1), fun x : ℝ => v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) := by
+    ext x; simp [Finset.sum_apply]
+  rw [h_sum]
+  apply IntervalIntegrable.sum; intro i _
+  exact bd_single_fract_integrable (i.val + 1) (v i)
+
+/-- bdLinComb is square-integrable on [0,1]. -/
+lemma bdLinComb_sq_integrable (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (bdLinComb N v x) ^ 2) MeasureTheory.volume 0 1 := by
+  have h_meas : Measurable (fun x : ℝ => bdLinComb N v x) := by
+    unfold bdLinComb
+    exact Finset.measurable_sum _ (fun i _ =>
+      (measurable_fract_real.comp (measurable_const.div
+        (measurable_const.mul measurable_id))).const_mul (v i))
+  set C := ∑ i : Fin (N-1), |v i|
+  have h_bound : ∀ x, ‖(bdLinComb N v x) ^ 2‖ ≤ C ^ 2 := by
+    intro x; rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
+    have h_abs : |bdLinComb N v x| ≤ C := by
+      unfold bdLinComb
+      calc |∑ i, v i * Int.fract (1 / (↑(i.val + 1) * x))|
+          ≤ ∑ i, |v i * Int.fract (1 / (↑(i.val + 1) * x))| := Finset.abs_sum_le_sum_abs _ _
+        _ = ∑ i, |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := by congr 1; ext i; exact abs_mul _ _
+        _ ≤ ∑ i, |v i| * 1 := by
+          apply Finset.sum_le_sum; intro i _
+          exact mul_le_mul_of_nonneg_left ((abs_of_nonneg (Int.fract_nonneg _)).le.trans
+            (Int.fract_lt_one _).le) (abs_nonneg _)
+        _ = C := by simp [C]
+    have hC_nn : 0 ≤ C := by positivity
+    have h1 : bdLinComb N v x ≤ C := (le_abs_self _).trans h_abs
+    have h2 : -(C) ≤ bdLinComb N v x := le_trans (neg_le_neg h_abs) (neg_abs_le _)
+    exact sq_le_sq' h2 h1
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact ⟨(h_meas.pow_const 2).aestronglyMeasurable, .of_bounded
+    (Filter.Eventually.of_forall (fun x => h_bound x))⟩
+
+/-- The residual squared is integrable on [0,1]. -/
+private lemma bd_residual_sq_iint (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    IntervalIntegrable (fun x => (1 - bdLinComb N v x) ^ 2) MeasureTheory.volume 0 1 := by
+  rw [show (fun x => (1 - bdLinComb N v x) ^ 2) =
+      (fun x => 1 - 2 * bdLinComb N v x + (bdLinComb N v x) ^ 2) from by ext x; ring]
+  exact ((intervalIntegrable_const (c := (1:ℝ))).sub
+    ((bdLinComb_integrable N v).const_mul 2)).add (bdLinComb_sq_integrable N v)
+
+-- ════════════════════════════════════════════════
+-- AXIOM 1a ELIMINATION: The Mellin Reduction (inlined from MellinReduction.lean)
+-- ════════════════════════════════════════════════
+
+/-- For u > 1, we have 0 < 1/u < 1, so ⌊1/u⌋ = 0 and {1/u} = 1/u. -/
+private lemma fract_inv_of_gt_one {u : ℝ} (hu : 1 < u) : Int.fract (1 / u) = 1 / u := by
+  rw [Int.fract_eq_self]
+  constructor
+  · positivity
+  · rw [div_lt_one (by linarith)]
+    exact hu
+
+/-- The Mellin reduction for k=1 is an identity. -/
+private lemma bd_mellin_reduction_k1 (s : ℂ) (_hs : 0 < s.re) :
+    ∫ x in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / ((1:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    (1 / (1:ℂ) - (1 : ℂ) ^ (-s)) / (s - 1) +
+    (1 : ℂ) ^ (-s) *
+      ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+  simp only [one_mul, one_cpow, div_one, one_div]
+  ring_nf
+
+/-- Helper: (u/k)^s = u^s * k^{-s} for positive reals u, k. -/
+private lemma ofReal_div_cpow_real {u k : ℝ} (hu : 0 < u) (hk : 0 < k) (s : ℂ) :
+    ((u / k : ℝ) : ℂ) ^ s = (u : ℂ) ^ s * (k : ℂ) ^ (-s) := by
+  have hk_ne : (k : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hk)
+  rw [Complex.ofReal_div, div_eq_mul_inv, ← Complex.ofReal_inv]
+  rw [mul_cpow_ofReal_nonneg hu.le (inv_nonneg.mpr hk.le)]
+  rw [cpow_neg]
+  congr 1
+  rw [Complex.ofReal_inv]
+  exact inv_cpow _ _ (by rw [Complex.arg_ofReal_of_nonneg hk.le]; exact ne_of_gt Real.pi_pos |>.symm)
+
+/-- Substitution u = kx: change of variables for the BD Mellin integral.
+    PROVED via integral_comp_mul_right + cpow factoring. -/
+theorem mellin_substitution_ioo (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (_hs : 0 < s.re) :
+    ∫ x in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    (k : ℂ) ^ (-s) *
+      ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
+        ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) := by
+  have hk_pos : (0:ℝ) < k := by exact_mod_cast (show 0 < k by omega)
+  have hk_ne : (k:ℝ) ≠ 0 := ne_of_gt hk_pos
+  have hk_c_ne : (k:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hk_ne
+  let g : ℝ → ℂ := fun u =>
+    ((Int.fract (1 / u) : ℝ) : ℂ) * ((u / (k:ℝ) : ℝ) : ℂ) ^ (s - 1)
+  have h_eq_lhs : ∀ x ∈ Set.uIcc (0:ℝ) 1,
+      g (x * (k:ℝ)) = ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+    intro x hx
+    dsimp [g]
+    congr 1
+    · rw [mul_comm x (k:ℝ)]
+    · congr 1; push_cast; exact_mod_cast mul_div_cancel_right₀ x hk_ne
+  have h_expand : ∀ u ∈ Set.uIcc (0:ℝ) (k:ℝ),
+      g u = ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) := by
+    intro u hu
+    dsimp [g]
+    have hu_pos : 0 < u ∨ u = 0 := by
+      rw [Set.uIcc_of_le (le_of_lt hk_pos)] at hu; exact (lt_or_eq_of_le hu.1).imp_right Eq.symm
+    rcases hu_pos with h | rfl
+    · rw [ofReal_div_cpow_real h hk_pos (s - 1)]; push_cast; ring
+    · simp [div_zero, Int.fract_zero, zero_div, zero_mul]
+  -- Convert from Ioo to interval integrals
+  rw [← integral_Ioc_eq_integral_Ioo, ← integral_Ioc_eq_integral_Ioo]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  rw [← intervalIntegral.integral_of_le (show (0:ℝ) ≤ k from le_of_lt hk_pos)]
+  -- LHS rewrite
+  have h_lhs_eq : ∫ x in (0:ℝ)..1, ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+      ∫ x in (0:ℝ)..1, g (x * (k:ℝ)) :=
+    (intervalIntegral.integral_congr h_eq_lhs).symm
+  -- Expand g inside RHS
+  have h_g_expand : ∫ u in (0:ℝ)..(k:ℝ), g u =
+      (∫ u in (0:ℝ)..(k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+        (k : ℂ) ^ (-(s - 1)) := by
+    calc ∫ u in (0:ℝ)..(k:ℝ), g u
+        = ∫ u in (0:ℝ)..(k:ℝ),
+            ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) * (k : ℂ) ^ (-(s - 1)) :=
+          intervalIntegral.integral_congr h_expand
+      _ = _ := intervalIntegral.integral_mul_const _ _
+  rw [h_lhs_eq]
+  rw [intervalIntegral.integral_comp_mul_right (f := g) hk_ne]
+  simp only [zero_mul, one_mul]
+  -- Name the integral to avoid elaboration issues
+  set I := ∫ u in (0:ℝ)..(↑k:ℝ), g u with hI_def
+  -- I = (∫ f u) * k^{-(s-1)}
+  rw [show I = (∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) *
+    (↑k : ℂ) ^ (-(s - 1)) from h_g_expand]
+  -- smul→mul
+  set J := ∫ u in (0:ℝ)..(↑k:ℝ), ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+  show ((↑k : ℝ)⁻¹ : ℝ) • (J * (↑k : ℂ) ^ (-(s - 1))) = (↑k : ℂ) ^ (-s) * J
+  rw [Complex.real_smul]
+  push_cast
+  rw [← cpow_neg_one (↑k : ℂ)]
+  rw [← mul_assoc, mul_right_comm]
+  congr 1
+  rw [← cpow_add _ _ hk_c_ne]
+  congr 1; ring
+
+/-- Splitting ∫₀ᵏ = ∫₀¹ + ∫₁ᵏ for the Mellin integrand. -/
+private theorem mellin_integral_split (k : ℕ) (hk : 2 ≤ k) (s : ℂ) (hs : 0 < s.re) :
+    ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
+    (∫ u in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
+    (∫ u in Set.Ioo (1:ℝ) (k:ℝ),
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) := by
+  have h_le1 : (0:ℝ) ≤ 1 := by norm_num
+  have h_le2 : (1:ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+  have h_le3 : (0:ℝ) ≤ k := le_trans h_le1 h_le2
+  rw [← integral_Ioc_eq_integral_Ioo, ← integral_Ioc_eq_integral_Ioo,
+      ← integral_Ioc_eq_integral_Ioo]
+  rw [← intervalIntegral.integral_of_le h_le3,
+      ← intervalIntegral.integral_of_le h_le1,
+      ← intervalIntegral.integral_of_le h_le2]
+  let f : ℝ → ℂ := fun u => ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+  have h_int_1 : IntervalIntegrable f volume 0 1 := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    have h_dom : IntegrableOn (fun u : ℝ => u ^ (s.re - 1)) (Set.Ioc 0 1) := by
+      rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+      exact intervalIntegral.intervalIntegrable_rpow' (show -1 < s.re - 1 by linarith)
+    refine Integrable.mono h_dom ?_ ?_
+    · -- AEStronglyMeasurable for fract∘(1/·) * cpow on Ioc
+      apply AEStronglyMeasurable.mul
+      · -- Measurability of ↑(Int.fract(1/u))
+        have hmfloor : Measurable (Int.floor : ℝ → ℤ) := by
+          intro s hs
+          have : Int.floor ⁻¹' s = ⋃ n ∈ s, Set.Ico (↑n : ℝ) ((↑n : ℝ) + 1) := by
+            ext x; simp only [Set.mem_preimage, Set.mem_iUnion, Set.mem_Ico, exists_prop]
+            exact ⟨fun h => ⟨⌊x⌋, h, Int.floor_le x, Int.lt_floor_add_one x⟩,
+                   fun ⟨n, hn, h1, h2⟩ => by rwa [show ⌊x⌋ = n from Int.floor_eq_iff.mpr ⟨h1, h2⟩]⟩
+          rw [this]; exact MeasurableSet.biUnion s.to_countable (fun _ _ => measurableSet_Ico)
+        have hmfract : Measurable (Int.fract : ℝ → ℝ) :=
+          measurable_id.sub ((by fun_prop : Measurable (fun n : ℤ => (n : ℝ))).comp hmfloor)
+        exact (Complex.continuous_ofReal.measurable.comp
+          (hmfract.comp (measurable_const.div measurable_id))).aestronglyMeasurable.restrict
+      · -- AEStronglyMeasurable for u^{s-1} on Ioc
+        exact (ContinuousOn.cpow Complex.continuous_ofReal.continuousOn continuousOn_const
+          (fun x hx => Or.inl (by exact_mod_cast show 0 < x from hx.1))).aestronglyMeasurable
+            measurableSet_Ioc
+    · filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with u hu
+      simp only [f, norm_mul, Complex.norm_real]
+      have h_norm_eq : ‖(u : ℂ) ^ (s - 1)‖ = u ^ (s.re - 1) := by
+        rw [Complex.norm_cpow_eq_rpow_re_of_pos hu.1 (s - 1)]
+        simp [Complex.sub_re, Complex.one_re]
+      rw [h_norm_eq]
+      calc |Int.fract (1 / u)| * u ^ (s.re - 1)
+          ≤ 1 * u ^ (s.re - 1) := by
+            apply mul_le_mul_of_nonneg_right _ (Real.rpow_nonneg (le_of_lt hu.1) _)
+            exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le
+        _ = u ^ (s.re - 1) := one_mul _
+        _ ≤ ‖u ^ (s.re - 1)‖ := le_abs_self _
+  have h_int_2 : IntervalIntegrable f volume 1 k := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le h_le2]
+    let g : ℝ → ℂ := fun u => ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)
+    have hg_cont : ContinuousOn g (Set.Icc 1 k) := by
+      apply ContinuousOn.mul
+      · exact Complex.continuous_ofReal.continuousOn.comp
+          (continuousOn_const.div continuousOn_id (fun x hx => ne_of_gt (by linarith [hx.1])))
+          (fun x _ => Set.mem_univ _)
+      · apply ContinuousOn.cpow Complex.continuous_ofReal.continuousOn continuousOn_const
+        intro x hx; left; exact Complex.ofReal_re x ▸ show 0 < x by linarith [hx.1]
+    have hg_int : IntegrableOn g (Set.Icc 1 k) volume := hg_cont.integrableOn_Icc
+    apply IntegrableOn.congr_fun (hg_int.mono_set Set.Ioc_subset_Icc_self) _ measurableSet_Ioc
+    intro u hu; dsimp [f, g]; rw [fract_inv_of_gt_one hu.1]
+  exact (intervalIntegral.integral_add_adjacent_intervals h_int_1 h_int_2).symm
+
+/-- On (1,k), {1/u} = 1/u, so the tail integral simplifies. -/
+private theorem mellin_tail_fract_simplify (k : ℕ) (_hk : 2 ≤ k) (s : ℂ) (_hs : 0 < s.re) :
+    ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
+      ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
+    ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
+      ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) := by
+  apply MeasureTheory.setIntegral_congr_fun measurableSet_Ioo
+  intro u hu; simp only; rw [fract_inv_of_gt_one hu.1]
+
+/-- ∫₁ᵏ (1/u)·u^{s-1} du = (k^{s-1} - 1)/(s-1). Uses integral_cpow Or.inr. -/
+private theorem mellin_tail_evaluate (k : ℕ) (hk : 2 ≤ k) (s : ℂ)
+    (_hs : 0 < s.re) (hs1 : s ≠ 1) :
+    ∫ u in Set.Ioo (1:ℝ) (k:ℝ),
+      ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
+    ((k : ℂ) ^ (s - 1) - 1) / (s - 1) := by
+  have h_le : (1:ℝ) ≤ k := by exact_mod_cast (show 1 ≤ k by omega)
+  rw [← integral_Ioc_eq_integral_Ioo]
+  have h_eq : Set.EqOn
+      (fun u : ℝ => ((1 / u : ℝ) : ℂ) * (u : ℂ) ^ (s - 1))
+      (fun u : ℝ => (u : ℂ) ^ (s - 2))
+      (Set.Ioc 1 k) := by
+    intro u ⟨hu_lo, _⟩
+    have hu_ne : (u:ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt (by linarith))
+    dsimp only
+    rw [show (1 / u : ℝ) = u⁻¹ from one_div u, Complex.ofReal_inv]
+    rw [show (s - 2 : ℂ) = -1 + (s - 1) from by ring]
+    rw [cpow_add (-1) (s - 1) hu_ne, cpow_neg_one]
+  rw [setIntegral_congr_fun measurableSet_Ioc h_eq]
+  rw [← intervalIntegral.integral_of_le h_le]
+  have h_r_ne : s - 2 ≠ -1 := by
+    intro h; apply hs1
+    have : s = s - 2 + 2 := by ring
+    rw [h] at this; norm_num at this; exact this
+  rw [integral_cpow (Or.inr ⟨h_r_ne, fun h_mem => by
+    rw [Set.uIcc_of_le h_le] at h_mem; linarith [h_mem.1]⟩)]
+  rw [show s - 2 + 1 = s - 1 from by ring]
+  push_cast; rw [Complex.one_cpow]
+
+/-- **THEOREM** (Replaces Axiom 1a): The BD Mellin reduction.
+    ∫₀¹ {1/(kx)} x^{s-1} dx = (1/k - k⁻ˢ)/(s-1) + k⁻ˢ ∫₀¹ {1/x} x^{s-1} dx -/
+theorem bd_mellin_reduction_proved (k : ℕ) (hk : 1 ≤ k) (s : ℂ)
+    (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1,
+      ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
+    (k : ℂ) ^ (-s) *
+      ∫ x in Set.Ioo (0:ℝ) 1,
+        ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+  by_cases hk1 : k = 1
+  · subst hk1; simp only [Nat.cast_one]; exact bd_mellin_reduction_k1 s hs
+  have hk2 : 2 ≤ k := by omega
+  calc ∫ x in Set.Ioo (0:ℝ) 1,
+        ((Int.fract (1 / ((k:ℝ)*x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)
+      = (k : ℂ) ^ (-s) *
+        ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
+          ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) :=
+        mellin_substitution_ioo k hk2 s hs
+    _ = (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
+        (k : ℂ) ^ (-s) *
+          ∫ x in Set.Ioo (0:ℝ) 1,
+            ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+        have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast (show (k:ℝ) ≠ 0 by positivity)
+        have hfull : (k : ℂ) ^ (-s) *
+            ∫ u in Set.Ioo (0:ℝ) (k:ℝ),
+              ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1) =
+          (k : ℂ) ^ (-s) *
+            (∫ u in Set.Ioo (0:ℝ) 1,
+              ((Int.fract (1 / u) : ℝ) : ℂ) * (u : ℂ) ^ (s - 1)) +
+          (1 / k - (k : ℂ) ^ (-s)) / (s - 1) := by
+          rw [mellin_integral_split k hk2 s hs, mul_add]
+          congr 1
+          rw [mellin_tail_fract_simplify k hk2 s hs]
+          rw [mellin_tail_evaluate k hk2 s hs hs1]
+          rw [mul_div_assoc']
+          congr 1
+          rw [mul_sub, mul_one, ← cpow_add (-s) (s - 1) hk_ne]
+          rw [show (-s + (s - 1) : ℂ) = -1 from by ring, cpow_neg_one]
+          simp [one_div]
+        rw [hfull, add_comm]
+
+/-- **THEOREM** (was SUB-AXIOM 1b, now PROVED via Identity Theorem):
+    F(s) = ∫₀¹ {1/x}·x^{s-1} dx equals G(s) = 1/(s-1) - ζ(s)/s.
+    FloorMellin.lean proves F = G for Re(s) > 1; the identity theorem
+    (IdentityBypass.lean) extends this to all Re(s) > 0, s ≠ 1. -/
+theorem bd_mellin_base_case (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+    1 / (s - 1) - riemannZeta s / s :=
+  bd_mellin_base_case_proved s hs hs1
+
+/-- **THEOREM** (Replaces Axiom 1): BD Mellin transform at a zeta zero.
+    Chains the Basis Collapse + Identity Theorem + ζ(ρ)=0 cancellation. -/
+theorem bd_mellin_at_zero (k : ℕ) (hk : 1 ≤ k) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1)
+    (h_zero : riemannZeta ρ = 0) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) *
+      (x : ℂ) ^ (ρ - 1) = 1 / ((k : ℂ) * (ρ - 1)) := by
+  have hρ1 : ρ ≠ 1 := by intro h; rw [h] at hρ_lt; norm_num at hρ_lt
+  -- Apply the Basis Collapse (NOW A PROVED THEOREM)
+  rw [bd_mellin_reduction_proved k hk ρ hρ_pos hρ1]
+  -- Apply the Base Case
+  rw [bd_mellin_base_case ρ hρ_pos hρ1]
+  -- Apply ζ(ρ) = 0
+  rw [h_zero, zero_div, sub_zero]
+  -- Algebra: the k^{-ρ} terms perfectly cancel
+  have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt (by omega : 0 < k)
+  have hp_ne : ρ - 1 ≠ 0 := sub_ne_zero.mpr hρ1
+  calc (1 / ↑k - (↑k) ^ (-ρ)) / (ρ - 1) + (↑k) ^ (-ρ) * (1 / (ρ - 1))
+    _ = (1 / ↑k) / (ρ - 1) - ((↑k) ^ (-ρ)) / (ρ - 1) + ((↑k) ^ (-ρ)) / (ρ - 1) := by ring
+    _ = (1 / ↑k) / (ρ - 1) := by ring
+    _ = 1 / ((↑k) * (ρ - 1)) := by rw [div_div]
+
+-- ════════════════════════════════════════════════
+-- SHARED HELPERS (basis-independent, ported from BesselSeparation — now archived)
+-- ════════════════════════════════════════════════
+
+/-- re(x^(ρ-1))² is integrable on [0,1]. Dominated by x^{2σ-2}. -/
+private lemma bd_re_h_sq_iint (ρ : ℂ) (hρ : 1/2 < ρ.re) (_hρ' : ρ.re < 1) :
+    IntervalIntegrable (fun x => ((x : ℂ) ^ (ρ - 1)).re ^ 2) volume 0 1 := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have h_dom : IntegrableOn (fun x : ℝ => x ^ (2 * ρ.re - 2)) (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact intervalIntegral.intervalIntegrable_rpow' (show -1 < 2 * ρ.re - 2 by linarith)
+  refine Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) ?_
+  filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+  rw [Real.norm_of_nonneg (sq_nonneg _), Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)]
+  have h_bound := (Complex.abs_re_le_norm ((x : ℂ) ^ (ρ - 1))).trans
+    (Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (ρ - 1)).le
+  calc ((x : ℂ) ^ (ρ - 1)).re ^ 2
+      ≤ (x ^ (ρ - 1).re) ^ 2 := sq_le_sq' (abs_le.mp h_bound).1 (abs_le.mp h_bound).2
+    _ = x ^ (2 * (ρ - 1).re) := by rw [sq, ← Real.rpow_add hx.1]; ring_nf
+    _ = x ^ (2 * ρ.re - 2) := by congr 1; simp [Complex.sub_re]; ring
+
+/-- im(x^(ρ-1))² is integrable on [0,1]. Dominated by x^{2σ-2}. -/
+private lemma bd_im_h_sq_iint (ρ : ℂ) (hρ : 1/2 < ρ.re) (_hρ' : ρ.re < 1) :
+    IntervalIntegrable (fun x => ((x : ℂ) ^ (ρ - 1)).im ^ 2) volume 0 1 := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have h_dom : IntegrableOn (fun x : ℝ => x ^ (2 * ρ.re - 2)) (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact intervalIntegral.intervalIntegrable_rpow' (show -1 < 2 * ρ.re - 2 by linarith)
+  refine Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) ?_
+  filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+  rw [Real.norm_of_nonneg (sq_nonneg _), Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)]
+  have h_bound := (Complex.abs_im_le_norm ((x : ℂ) ^ (ρ - 1))).trans
+    (Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (ρ - 1)).le
+  calc ((x : ℂ) ^ (ρ - 1)).im ^ 2
+      ≤ (x ^ (ρ - 1).re) ^ 2 := sq_le_sq' (abs_le.mp h_bound).1 (abs_le.mp h_bound).2
+    _ = x ^ (2 * (ρ - 1).re) := by rw [sq, ← Real.rpow_add hx.1]; ring_nf
+    _ = x ^ (2 * ρ.re - 2) := by congr 1; simp [Complex.sub_re]; ring
+
+/-- Ioo integral = interval integral (Ioc and Ioo differ by measure zero). -/
+private lemma bd_ioo_eq_interval (f : ℝ → ℝ) (_hf : IntervalIntegrable f volume 0 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, f x = ∫ x in (0:ℝ)..1, f x := by
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  exact integral_Ioc_eq_integral_Ioo.symm
+
+/-- ∫(re²+im²) = ∫x^{2σ-2} (pointwise normSq identity). -/
+private lemma bd_norm_sq_cpow_integral (ρ : ℂ) (_hρ : 0 < ρ.re) (hρ' : ρ.re < 1) :
+    ∫ x in (0:ℝ)..1, (((x : ℂ) ^ (ρ - 1)).re ^ 2 + ((x : ℂ) ^ (ρ - 1)).im ^ 2) =
+    ∫ x in (0:ℝ)..1, x ^ (2 * ρ.re - 2) := by
+  apply intervalIntegral.integral_congr
+  intro x hx
+  simp only [Set.uIcc_of_le (by norm_num : (0:ℝ) ≤ 1), Set.mem_Icc] at hx
+  show ((x : ℂ) ^ (ρ - 1)).re ^ 2 + ((x : ℂ) ^ (ρ - 1)).im ^ 2 = x ^ (2 * ρ.re - 2)
+  rcases eq_or_lt_of_le hx.1 with rfl | hx_pos
+  · have h_ne : ρ - 1 ≠ 0 := by
+      intro h; have := congr_arg Complex.re h; simp at this; linarith
+    simp only [Complex.ofReal_zero, zero_cpow h_ne, Complex.zero_re, Complex.zero_im]
+    simp [Real.zero_rpow (show 2 * ρ.re - 2 ≠ 0 by linarith)]
+  · have h1 : ((x : ℂ) ^ (ρ-1)).re ^ 2 + ((x : ℂ) ^ (ρ-1)).im ^ 2 =
+        Complex.normSq ((x : ℂ) ^ (ρ-1)) := by rw [Complex.normSq_apply]; ring
+    rw [h1, Complex.normSq_eq_norm_sq, Complex.norm_cpow_eq_rpow_re_of_pos hx_pos,
+        sq, ← Real.rpow_add hx_pos]
+    congr 1; simp [Complex.sub_re]; ring
+
+private lemma bd_discrim_le {a b c : ℝ} (ha : 0 ≤ a)
+    (h : ∀ t, 0 ≤ a * t ^ 2 + b * t + c) : b ^ 2 ≤ 4 * a * c := by
+  by_contra h_neg; push_neg at h_neg
+  rcases eq_or_lt_of_le ha with rfl | ha_pos
+  · simp at h h_neg
+    have hb : b ≠ 0 := by intro hb; simp [hb] at h_neg
+    have := h (-(c + 1) / b); rw [mul_div_cancel₀ _ hb] at this; linarith
+  · have h4 : (0:ℝ) < 4 * a := by linarith
+    have hm := h (-b / (2 * a))
+    have heq : a * (-b / (2 * a)) ^ 2 + b * (-b / (2 * a)) + c =
+        c - b ^ 2 / (4 * a) := by field_simp; ring
+    rw [heq] at hm
+    have h1 : b ^ 2 / (4 * a) ≤ c := by linarith
+    have h2 : b ^ 2 ≤ c * (4 * a) := by rwa [div_le_iff₀ h4] at h1
+    linarith
+
+/-- (∫₀¹ f·g)² ≤ (∫₀¹ f²)(∫₀¹ g²). -/
+private lemma bd_cs_inner_le_sq (f g : ℝ → ℝ)
+    (hf2 : IntervalIntegrable (fun x => f x ^ 2) volume 0 1)
+    (hg2 : IntervalIntegrable (fun x => g x ^ 2) volume 0 1)
+    (hfg : IntervalIntegrable (fun x => f x * g x) volume 0 1)
+    (_hft : ∀ t, IntervalIntegrable (fun x => (f x + t * g x) ^ 2) volume 0 1) :
+    (∫ x in (0:ℝ)..1, f x * g x) ^ 2 ≤
+      (∫ x in (0:ℝ)..1, f x ^ 2) * (∫ x in (0:ℝ)..1, g x ^ 2) := by
+  have h_expand : ∀ t, ∫ x in (0:ℝ)..1, (f x + t * g x) ^ 2 =
+      (∫ x in (0:ℝ)..1, g x ^ 2) * t ^ 2 +
+      (2 * ∫ x in (0:ℝ)..1, f x * g x) * t +
+      (∫ x in (0:ℝ)..1, f x ^ 2) := by
+    intro t
+    rw [show (fun x => (f x + t * g x) ^ 2) =
+        (fun x => f x ^ 2 + 2 * t * (f x * g x) + t ^ 2 * g x ^ 2) from by ext x; ring]
+    rw [intervalIntegral.integral_add (hf2.add (hfg.const_mul (2*t))) (hg2.const_mul (t^2)),
+        intervalIntegral.integral_add hf2 (hfg.const_mul (2*t)),
+        intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]; ring
+  have h_nn : ∀ t, 0 ≤ (∫ x in (0:ℝ)..1, g x ^ 2) * t ^ 2 +
+      (2 * ∫ x in (0:ℝ)..1, f x * g x) * t + (∫ x in (0:ℝ)..1, f x ^ 2) := fun t => by
+    rw [← h_expand]; exact intervalIntegral.integral_nonneg (by norm_num) (fun x _ => sq_nonneg _)
+  nlinarith [bd_discrim_le
+    (intervalIntegral.integral_nonneg (by norm_num) (fun x _ => sq_nonneg _)) h_nn]
+
+-- ════════════════════════════════════════════════
+-- PROVED: Cauchy-Schwarz for BD residual
+-- (Ported from cauchy_schwarz_separation_bound in BesselSeparation — now archived)
+-- ════════════════════════════════════════════════
+
+/-- BD residual is Bochner-integrable on Ioo(0,1). -/
+private lemma bd_residual_cpow_integrableOn (N : ℕ) (_hN : 2 ≤ N)
+    (v : Fin (N-1) → ℝ) (ρ : ℂ) (hρ_pos : 0 < ρ.re) (_hρ_lt : ρ.re < 1) :
+    IntegrableOn (fun x : ℝ => ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
+      (Set.Ioo (0:ℝ) 1) := by
+  set C := 1 + ∑ i : Fin (N-1), |v i| with hC_def
+  have hC_nn : 0 ≤ C := by simp [hC_def]; linarith [Finset.sum_nonneg (fun i (_ : i ∈ Finset.univ) => abs_nonneg (v i))]
+  have h_dom : IntegrableOn (fun x : ℝ => C * x ^ (ρ.re - 1)) (Set.Ioo 0 1) :=
+    IntegrableOn.mono_set
+      (by rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+          exact (intervalIntegral.intervalIntegrable_rpow'
+            (show -1 < ρ.re - 1 by linarith)).const_mul C)
+      Set.Ioo_subset_Ioc_self
+  have h_f_bound : ∀ x : ℝ, |1 - bdLinComb N v x| ≤ C := by
+    intro x
+    have hf : |bdLinComb N v x| ≤ ∑ i : Fin (N-1), |v i| := by
+      unfold bdLinComb
+      calc |∑ i, v i * Int.fract (1 / (↑(i.val + 1) * x))|
+          ≤ ∑ i, |v i * Int.fract (1 / (↑(i.val + 1) * x))| := Finset.abs_sum_le_sum_abs _ _
+        _ = ∑ i, |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := by congr 1; ext i; exact abs_mul _ _
+        _ ≤ ∑ i, |v i| * 1 := Finset.sum_le_sum (fun i _ =>
+            mul_le_mul_of_nonneg_left ((abs_of_nonneg (Int.fract_nonneg _)).le.trans
+              (Int.fract_lt_one _).le) (abs_nonneg _))
+        _ = ∑ i, |v i| := by simp
+    calc |1 - bdLinComb N v x| ≤ |1| + |bdLinComb N v x| := abs_sub _ _
+      _ = 1 + |bdLinComb N v x| := by simp
+      _ ≤ C := by linarith
+  apply Integrable.mono h_dom
+  · exact (Complex.continuous_ofReal.comp_aestronglyMeasurable
+      (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
+        (Set.Ioo_subset_Ioc_self.trans (by simp [Set.uIoc_of_le (show (0:ℝ) ≤ 1 by norm_num)])))
+      ).mul (Measurable.aestronglyMeasurable (by fun_prop))
+  · filter_upwards [self_mem_ae_restrict measurableSet_Ioo] with x hx
+    rw [norm_mul, Complex.norm_real, Complex.norm_cpow_eq_rpow_re_of_pos hx.1 _,
+        Real.norm_of_nonneg (mul_nonneg hC_nn (Real.rpow_nonneg (le_of_lt hx.1) _))]
+    apply mul_le_mul_of_nonneg_right (h_f_bound x) (Real.rpow_nonneg (le_of_lt hx.1) _)
+
+/-- BD g·re(h) is integrable via AM-GM. -/
+private lemma bd_g_re_h_iint (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 1/2 < ρ.re) (hρ' : ρ.re < 1) :
+    IntervalIntegrable (fun x => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re) volume 0 1 := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have h_sum : IntegrableOn
+      (fun x => (1/2 : ℝ) * ((1 - bdLinComb N v x) ^ 2 + ((x:ℂ) ^ (ρ-1)).re ^ 2))
+      (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact ((bd_residual_sq_iint N v).add (bd_re_h_sq_iint ρ hρ hρ')).const_mul _
+  have h_meas : AEStronglyMeasurable (fun x : ℝ => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re)
+      (volume.restrict (Set.Ioc 0 1)) :=
+    (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
+      (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])).mul
+      (Measurable.aestronglyMeasurable (by fun_prop)).restrict
+  refine Integrable.mono h_sum h_meas ?_
+  filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x _
+  rw [Real.norm_of_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 1/2)
+      (add_nonneg (sq_nonneg _) (sq_nonneg _))), Real.norm_eq_abs, abs_mul]
+  nlinarith [sq_abs (1 - bdLinComb N v x), sq_abs (((x:ℂ)^(ρ-1)).re),
+             sq_nonneg (|1 - bdLinComb N v x| - |((x:ℂ)^(ρ-1)).re|)]
+
+/-- BD g·im(h) is integrable via AM-GM. -/
+private lemma bd_g_im_h_iint (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 1/2 < ρ.re) (hρ' : ρ.re < 1) :
+    IntervalIntegrable (fun x => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im) volume 0 1 := by
+  rw [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  have h_sum : IntegrableOn
+      (fun x => (1/2 : ℝ) * ((1 - bdLinComb N v x) ^ 2 + ((x:ℂ) ^ (ρ-1)).im ^ 2))
+      (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact ((bd_residual_sq_iint N v).add (bd_im_h_sq_iint ρ hρ hρ')).const_mul _
+  have h_meas : AEStronglyMeasurable (fun x : ℝ => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im)
+      (volume.restrict (Set.Ioc 0 1)) :=
+    (((intervalIntegrable_const (c := (1:ℝ))).sub (bdLinComb_integrable N v)).aestronglyMeasurable.mono_set
+      (by simp [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1)])).mul
+      (Measurable.aestronglyMeasurable (by fun_prop)).restrict
+  refine Integrable.mono h_sum h_meas ?_
+  filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x _
+  rw [Real.norm_of_nonneg (mul_nonneg (by norm_num : (0:ℝ) ≤ 1/2)
+      (add_nonneg (sq_nonneg _) (sq_nonneg _))), Real.norm_eq_abs, abs_mul]
+  nlinarith [sq_abs (1 - bdLinComb N v x), sq_abs (((x:ℂ)^(ρ-1)).im),
+             sq_nonneg (|1 - bdLinComb N v x| - |((x:ℂ)^(ρ-1)).im|)]
+
+/-- BD (g + t·re(h))² is interval-integrable. -/
+private lemma bd_cs_shift_re (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 1/2 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
+    IntervalIntegrable (fun x => ((1 - bdLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).re) ^ 2) volume 0 1 := by
+  rw [show (fun x => ((1 - bdLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).re) ^ 2) =
+      (fun x => (1 - bdLinComb N v x) ^ 2 + 2 * t * ((1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re) +
+        t ^ 2 * ((x : ℂ) ^ (ρ - 1)).re ^ 2) from by ext x; ring]
+  exact ((bd_residual_sq_iint N v).add ((bd_g_re_h_iint N hN v ρ hρ hρ').const_mul (2*t))).add
+    ((bd_re_h_sq_iint ρ hρ hρ').const_mul (t^2))
+
+/-- BD (g + t·im(h))² is interval-integrable. -/
+private lemma bd_cs_shift_im (N : ℕ) (hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ : 1/2 < ρ.re) (hρ' : ρ.re < 1) (t : ℝ) :
+    IntervalIntegrable (fun x => ((1 - bdLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).im) ^ 2) volume 0 1 := by
+  rw [show (fun x => ((1 - bdLinComb N v x) + t * ((x : ℂ) ^ (ρ - 1)).im) ^ 2) =
+      (fun x => (1 - bdLinComb N v x) ^ 2 + 2 * t * ((1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im) +
+        t ^ 2 * ((x : ℂ) ^ (ρ - 1)).im ^ 2) from by ext x; ring]
+  exact ((bd_residual_sq_iint N v).add ((bd_g_im_h_iint N hN v ρ hρ hρ').const_mul (2*t))).add
+    ((bd_im_h_sq_iint ρ hρ hρ').const_mul (t^2))
+
+private lemma bd_ofReal_mul_re (g : ℝ) (h : ℂ) : ((g : ℂ) * h).re = g * h.re := by
+  simp [Complex.mul_re, Complex.ofReal_re, Complex.ofReal_im]
+
+private lemma bd_ofReal_mul_im (g : ℝ) (h : ℂ) : ((g : ℂ) * h).im = g * h.im := by
+  simp [Complex.mul_im, Complex.ofReal_re, Complex.ofReal_im]
+
+/-- **THEOREM** (Replaces Axiom 2): Complex Cauchy-Schwarz for the BD residual.
+    |∫₀¹ (1-f) · x^{ρ-1} dx|² ≤ (∫₀¹ (1-f)² dx) · 1/(2σ-1) -/
+theorem bd_cauchy_schwarz (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_gt : 1/2 < ρ.re) :
+    Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1)) ≤
+    (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) * (1 / (2 * ρ.re - 1)) := by
+  set F := fun x : ℝ => ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1)
+  set z := ∫ x in Set.Ioo (0:ℝ) 1, F x
+  have h_int := bd_residual_cpow_integrableOn N hN v ρ hρ_pos hρ_lt
+  -- re(z) = ∫₀¹ g · re(h) via ContinuousLinearMap
+  have h_re : z.re = ∫ x in (0:ℝ)..1,
+      (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re := by
+    change Complex.reCLM (∫ x in Set.Ioo (0:ℝ) 1, F x) = _
+    rw [← Complex.reCLM.integral_comp_comm h_int]
+    have : (fun x => Complex.reCLM (F x)) =
+      (fun x => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).re) := by
+      ext x; exact bd_ofReal_mul_re _ _
+    rw [this]; exact bd_ioo_eq_interval _ (bd_g_re_h_iint N hN v ρ hρ_gt hρ_lt)
+  -- im(z) = ∫₀¹ g · im(h)
+  have h_im : z.im = ∫ x in (0:ℝ)..1,
+      (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im := by
+    change Complex.imCLM (∫ x in Set.Ioo (0:ℝ) 1, F x) = _
+    rw [← Complex.imCLM.integral_comp_comm h_int]
+    have : (fun x => Complex.imCLM (F x)) =
+      (fun x => (1 - bdLinComb N v x) * ((x : ℂ) ^ (ρ - 1)).im) := by
+      ext x; exact bd_ofReal_mul_im _ _
+    rw [this]; exact bd_ioo_eq_interval _ (bd_g_im_h_iint N hN v ρ hρ_gt hρ_lt)
+  -- Apply real CS × 2
+  set g := fun x : ℝ => 1 - bdLinComb N v x
+  have cs_re := bd_cs_inner_le_sq g (fun x => ((x : ℂ) ^ (ρ - 1)).re)
+    (bd_residual_sq_iint N v) (bd_re_h_sq_iint ρ hρ_gt hρ_lt)
+    (bd_g_re_h_iint N hN v ρ hρ_gt hρ_lt) (bd_cs_shift_re N hN v ρ hρ_gt hρ_lt)
+  have cs_im := bd_cs_inner_le_sq g (fun x => ((x : ℂ) ^ (ρ - 1)).im)
+    (bd_residual_sq_iint N v) (bd_im_h_sq_iint ρ hρ_gt hρ_lt)
+    (bd_g_im_h_iint N hN v ρ hρ_gt hρ_lt) (bd_cs_shift_im N hN v ρ hρ_gt hρ_lt)
+  -- normSq z ≤ ∫g² · (∫re(h)² + ∫im(h)²)
+  have h_bound : Complex.normSq z ≤ (∫ x in (0:ℝ)..1, g x ^ 2) *
+      ((∫ x in (0:ℝ)..1, ((x : ℂ) ^ (ρ-1)).re ^ 2) +
+       (∫ x in (0:ℝ)..1, ((x : ℂ) ^ (ρ-1)).im ^ 2)) := by
+    have hd : Complex.normSq z = z.re ^ 2 + z.im ^ 2 := by rw [Complex.normSq_apply]; ring
+    rw [hd, h_re, h_im]; nlinarith [cs_re, cs_im]
+  -- ∫re(h)² + ∫im(h)² = 1/(2σ-1)
+  have h_norm : (∫ x in (0:ℝ)..1, ((x : ℂ) ^ (ρ-1)).re ^ 2) +
+      (∫ x in (0:ℝ)..1, ((x : ℂ) ^ (ρ-1)).im ^ 2) = 1 / (2 * ρ.re - 1) := by
+    rw [← intervalIntegral.integral_add (bd_re_h_sq_iint ρ hρ_gt hρ_lt) (bd_im_h_sq_iint ρ hρ_gt hρ_lt),
+        bd_norm_sq_cpow_integral ρ hρ_pos hρ_lt,
+        integral_rpow (Or.inl (show -1 < 2 * ρ.re - 2 by linarith)),
+        show 2 * ρ.re - 2 + 1 = 2 * ρ.re - 1 from by ring,
+        Real.one_rpow, Real.zero_rpow (ne_of_gt (show 0 < 2 * ρ.re - 1 by linarith))]; ring
+  rw [h_norm] at h_bound; linarith
+
+-- ════════════════════════════════════════════════
+-- PROVED (modulo 3 sub-axioms): ζ has no real zeros in (0,1)
+-- Strategy: The Jacobi Theta Bypass
+-- ════════════════════════════════════════════════
+
+/-- Pole terms: for real s ∈ (0,1), -1/s - 1/(1-s) ≤ -4.
+    Follows from AM-GM: s(1-s) ≤ 1/4. -/
+private lemma pole_terms_le_neg_four (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    -1 / s + -1 / (1 - s) ≤ -4 := by
+  have hs1 : 0 < 1 - s := by linarith
+  rw [div_add_div _ _ (ne_of_gt hs_pos) (ne_of_gt hs1)]
+  rw [div_le_iff₀ (mul_pos hs_pos hs1)]
+  nlinarith [sq_nonneg (s - 1/2)]
+
+/-- **THEOREM (was SUB-AXIOM 3a)** (θ-integral bound): The entire function Λ₀(s) satisfies
+    Re(Λ₀(s)) < 4 for real s ∈ (0,1).
+
+    Proved in Cathedral/NymanBeurling/ThetaBound.lean via the Mellin transform
+    representation and exponential decay of the Jacobi theta kernel.
+    Zero sorry, zero axioms — pure Mathlib. -/
+private lemma completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    (completedRiemannZeta₀ (s : ℂ)).re < 4 :=
+  completedRiemannZeta₀_bound_real_proved s hs_pos hs_lt
+
+-- NOTE: completedRiemannZeta₀_real (sub-axiom 3b) was originally here but is unused.
+-- The real-part extraction is handled directly by push_cast + ring.
+
+-- PROVED: Gammaℝ(s) ≠ 0 for real s > 0.  (Mathlib: Gammaℝ_ne_zero_of_re_pos)
+
+/-- The completed zeta function is negative for real s ∈ (0,1).
+    By the Jacobi Theta Bypass: Λ(s) = Λ₀(s) - 1/s - 1/(1-s),
+    where Λ₀(s) < 4 and -1/s - 1/(1-s) ≤ -4. -/
+private theorem completedRiemannZeta_neg_on_unit_interval
+    (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    (completedRiemannZeta (s : ℂ)).re < 0 := by
+  have h_eq := completedRiemannZeta_eq (s : ℂ)
+  have h_Λ₀_bound := completedRiemannZeta₀_bound_real s hs_pos hs_lt
+  have h_poles := pole_terms_le_neg_four s hs_pos hs_lt
+  have h_re : (completedRiemannZeta (s : ℂ)).re =
+      (completedRiemannZeta₀ (s : ℂ)).re +
+      (-1 / s + -1 / (1 - s)) := by
+    conv_lhs => rw [h_eq]
+    -- For real s: 1/(s:ℂ) = (1/s : ℝ) and 1/((1-s):ℂ) = (1/(1-s) : ℝ)
+    have hs_ne : (s : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hs_pos
+    have hs1_ne : (1 : ℂ) - (s : ℂ) ≠ 0 := by
+      rw [← Complex.ofReal_one, ← Complex.ofReal_sub]
+      exact_mod_cast ne_of_gt (by linarith : (0:ℝ) < 1 - s)
+    rw [show (1 : ℂ) / (s : ℂ) = ((1 / s : ℝ) : ℂ) from by push_cast; rfl]
+    rw [show (1 : ℂ) / ((1 : ℂ) - (s : ℂ)) = (((1 / (1 - s)) : ℝ) : ℂ) from by push_cast; rfl]
+    simp only [Complex.sub_re, Complex.ofReal_re]
+    ring
+  rw [h_re]; linarith
+
+/-- **THEOREM** (Replaces Axiom 3): ζ(s) ≠ 0 for real s ∈ (0,1).
+    Proof via the Jacobi Theta Bypass:
+    riemannZeta s = completedRiemannZeta s / Gammaℝ s,
+    where the numerator < 0 and the denominator ≠ 0. -/
+theorem zeta_no_real_zeros_in_strip (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
+    riemannZeta (s : ℂ) ≠ 0 := by
+  have hs_ne : (s : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt hs_pos
+  rw [riemannZeta_def_of_ne_zero hs_ne]
+  have h_neg := completedRiemannZeta_neg_on_unit_interval s hs_pos hs_lt
+  have h_gamma := Gammaℝ_ne_zero_of_re_pos (by simp [hs_pos] : 0 < (s : ℂ).re)
+  apply div_ne_zero
+  · intro h; rw [h] at h_neg; simp at h_neg
+  · exact h_gamma
+
+-- ════════════════════════════════════════════════
+-- PROVED: Helper lemmas
+-- ════════════════════════════════════════════════
+
+/-- ρ ≠ 0 when Re(ρ) > 0. -/
+private lemma rho_ne_zero (ρ : ℂ) (hρ : 0 < ρ.re) : ρ ≠ 0 := by
+  intro h; rw [h] at hρ; simp at hρ
+
+/-- ρ-1 ≠ 0 when Re(ρ) < 1. -/
+private lemma rho_sub_one_ne_zero (ρ : ℂ) (hρ : ρ.re < 1) : ρ - 1 ≠ 0 := by
+  intro h; have := congr_arg Complex.re h; simp at this; linarith
+
+/-- ∫₀¹ x^{ρ-1} dx = 1/ρ (Ioo version). -/
+private lemma one_inner_cpow' (ρ : ℂ) (hρ_pos : 0 < ρ.re) :
+    ∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1) = 1 / ρ := by
+  rw [← integral_Ioc_eq_integral_Ioo,
+      ← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
+      integral_cpow (Or.inl (show -1 < (ρ-1).re by simp [Complex.sub_re]; linarith)),
+      show (ρ - 1) + 1 = ρ from by ring]
+  have hρ_ne : ρ ≠ 0 := rho_ne_zero ρ hρ_pos
+  simp only [Complex.ofReal_one, Complex.ofReal_zero, Complex.one_cpow, Complex.zero_cpow hρ_ne]
+  ring
+
+-- ════════════════════════════════════════════════
+-- PROVED: Integral linearity for BD residual
+-- (Ported from residual_inner_cpow_eq in BesselSeparation — now archived)
+-- ════════════════════════════════════════════════
+
+/-- x^{ρ-1} is L¹ on Ioc(0,1) as ℂ-valued. -/
+private lemma bd_cpow_integrableOn_Ioc (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+  have h_dom : IntegrableOn (fun x : ℝ => x ^ (ρ.re - 1)) (Set.Ioc 0 1) := by
+    rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    exact intervalIntegral.intervalIntegrable_rpow' (show -1 < ρ.re - 1 by linarith)
+  exact Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) (by
+    filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+    rw [Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (ρ - 1),
+        show (ρ - 1).re = ρ.re - 1 from by simp [Complex.sub_re],
+        Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)])
+
+/-- {1/(kx)}·x^{ρ-1} is L¹ on Ioc(0,1) (bounded × integrable). -/
+private lemma bd_fract_cpow_integrableOn_Ioc (k : ℕ) (ρ : ℂ) (hρ : 0 < ρ.re) :
+    IntegrableOn (fun x : ℝ => ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))
+      (Set.Ioc 0 1) :=
+  Integrable.bdd_mul (bd_cpow_integrableOn_Ioc ρ hρ)
+    ((Complex.continuous_ofReal.measurable.comp
+      (measurable_fract_real.comp (measurable_const.div
+        (measurable_const.mul measurable_id)))).aestronglyMeasurable)
+    (Filter.Eventually.of_forall (fun x => by
+      rw [Complex.norm_real]
+      exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le))
+
+/-- **THEOREM** (Replaces Axiom 4): Integral linearity for the BD residual.
+    ∫(1-f)·h = ∫h - Σ vᵢ·∫(fᵢ·h)
+
+    Proved by porting residual_inner_cpow_eq from BesselSeparation.lean (archived). -/
+theorem bd_integral_linearity (N : ℕ) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (_hρ_lt : ρ.re < 1) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+    (∫ x in Set.Ioo (0:ℝ) 1, (x : ℂ) ^ (ρ - 1)) -
+    ∑ i : Fin (N-1), (v i : ℂ) *
+      ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) := by
+  rw [← integral_Ioc_eq_integral_Ioo]
+  -- Expand: (1-f)·h = h - Σ vᵢ·({1/((i+1)x)}·h)
+  have h_eq : ∀ x : ℝ, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+      (x : ℂ) ^ (ρ - 1) - ∑ i : Fin (N-1),
+        ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) := by
+    intro x; rw [Complex.ofReal_sub, Complex.ofReal_one, sub_mul, one_mul]; congr 1
+    rw [show (bdLinComb N v x : ℂ) = ∑ i : Fin (N-1),
+      ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) from by
+      simp [bdLinComb, Complex.ofReal_sum, Complex.ofReal_mul]]
+    rw [Finset.sum_mul]
+  have h_sum_int : ∀ i : Fin (N-1), i ∈ Finset.univ →
+      IntegrableOn (fun x => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1)) (Set.Ioc 0 1) := by
+    intro i _
+    apply Integrable.bdd_mul (bd_cpow_integrableOn_Ioc ρ hρ_pos)
+    · exact (Complex.continuous_ofReal.measurable.comp
+        ((measurable_const.mul (measurable_fract_real.comp
+          (measurable_const.div (measurable_const.mul measurable_id)))))).aestronglyMeasurable
+    · exact Filter.Eventually.of_forall (fun x => by
+        rw [Complex.norm_real]
+        calc |v i * Int.fract (1 / (↑(i.val + 1) * x))|
+            = |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := abs_mul _ _
+          _ ≤ |v i| * 1 := mul_le_mul_of_nonneg_left
+              ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le) (abs_nonneg _)
+          _ = |v i| := mul_one _)
+  simp_rw [h_eq]
+  rw [integral_sub (bd_cpow_integrableOn_Ioc ρ hρ_pos) (integrable_finset_sum _ h_sum_int),
+      integral_finset_sum _ h_sum_int]
+  -- Factor out vᵢ from each integral
+  have h_terms : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioc (0:ℝ) 1, ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) =
+      (v i : ℂ) * ∫ x in Set.Ioc (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) := by
+    intro i
+    rw [show (fun x : ℝ => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+      (x : ℂ) ^ (ρ - 1)) = (fun x => (v i : ℂ) *
+      (((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1))) from by
+      ext x; push_cast; ring]
+    exact integral_const_mul _ _
+  simp_rw [h_terms]
+  -- Convert Ioc back to Ioo
+  congr 1
+  · exact integral_Ioc_eq_integral_Ioo
+  · congr 1; ext i
+    congr 1; exact integral_Ioc_eq_integral_Ioo
+
+-- ════════════════════════════════════════════════
+-- PROVED: The BD residual Mellin transform
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: The BD residual's Mellin transform.
+    ∫₀¹ (1 - bdLinComb) · x^{ρ-1} dx = 1/ρ - W/(ρ-1)
+    where W = Σ vₖ/(k+1) ∈ ℝ.
+
+    This is the key identity that makes the Rank-1 argument work:
+    the integral depends on v only through the single real number W. -/
+theorem bd_residual_mellin (N : ℕ) (_hN : 2 ≤ N) (v : Fin (N-1) → ℝ) (ρ : ℂ)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (h_zero : riemannZeta ρ = 0) :
+    ∫ x in Set.Ioo (0:ℝ) 1, ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ - 1) =
+    1 / ρ - (∑ i : Fin (N-1), (v i : ℂ) / (↑(i.val + 1) : ℂ)) * (1 / (ρ - 1)) := by
+  -- Step 1: Apply integral linearity to split the integral
+  rw [bd_integral_linearity N v ρ hρ_pos hρ_lt]
+  -- Step 2: The first integral is 1/ρ
+  rw [one_inner_cpow' ρ hρ_pos]
+  -- Step 3: Each basis integral is 1/((i+1)(ρ-1)) by bd_mellin_at_zero
+  -- After linearity: 1/ρ - Σᵢ vᵢ · ∫{1/((i+1)x)}·cpow
+  -- Each integral = 1/((i+1)(ρ-1))
+  congr 1
+  have h_terms : ∀ i : Fin (N-1),
+      ∫ x in Set.Ioo (0:ℝ) 1, ((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (ρ - 1) = 1 / ((↑(i.val + 1) : ℂ) * (ρ - 1)) := by
+    intro i
+    exact bd_mellin_at_zero (i.val + 1) (by omega) ρ hρ_pos hρ_lt h_zero
+  simp_rw [h_terms]
+  -- Now LHS = 1/ρ - Σ vᵢ * (1/((i+1)(ρ-1)))
+  -- RHS = 1/ρ - (Σ vᵢ/(i+1)) * (1/(ρ-1))
+  -- Rewrite each term: vᵢ * (1/((i+1)(ρ-1))) = vᵢ/(i+1) * (1/(ρ-1))
+  have key : ∀ i : Fin (N-1), (v i : ℂ) * (1 / ((↑(i.val + 1) : ℂ) * (ρ - 1))) =
+      (v i : ℂ) / (↑(i.val + 1) : ℂ) * (1 / (ρ - 1)) := by
+    intro i
+    have hi : (↑(i.val + 1) : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero i.val
+    have hρ1 : ρ - 1 ≠ 0 := rho_sub_one_ne_zero ρ hρ_lt
+    field_simp
+  simp_rw [key, ← Finset.sum_mul]
+
+-- ════════════════════════════════════════════════
+-- PROVED: The Rank-1 lower bound on |residual|²
+-- ════════════════════════════════════════════════
+
+/-- The key quadratic identity: D·((σu-1)² + (tu)²) = (Du-σ)² + t²
+    where D = σ² + t² = |ρ|². This is the perfect-square decomposition
+    that makes the Rank-1 lower bound trivial. -/
+private lemma quadratic_sq_identity (σ t u : ℝ) :
+    (σ^2 + t^2) * ((σ * u - 1)^2 + (t * u)^2) =
+    ((σ^2 + t^2) * u - σ)^2 + t^2 := by ring
+
+/-- normSq of the numerator (1-W)ρ-1 in terms of real components. -/
+private lemma normSq_linear_sub (σ t u : ℝ) :
+    (σ * u - 1)^2 + (t * u)^2 = (σ^2 + t^2) * u^2 - 2 * σ * u + 1 := by ring
+
+/-- **PROVED (Rank-1 Lower Bound)**: For all W ∈ ℝ,
+    |1/ρ - W/(ρ-1)|² ≥ t² / (|ρ|⁴·|ρ-1|²).
+
+    This is the geometric heart of the Rank-1 Mellin Miracle.
+    The key identity: setting u = 1-W,
+      |ρ|² · normSq((u·ρ - 1)) = (|ρ|²·u - σ)² + t²
+    which is ≥ t² (perfect square ≥ 0).
+    Therefore normSq(1/ρ - W/(ρ-1)) ≥ t²/(|ρ|⁴·|ρ-1|²). -/
+theorem rank1_lower_bound (ρ : ℂ) (hρ_ne : ρ ≠ 0) (hρ1_ne : ρ - 1 ≠ 0)
+    (_him : ρ.im ≠ 0) (W : ℝ) :
+    ρ.im ^ 2 / (Complex.normSq ρ ^ 2 * Complex.normSq (ρ - 1)) ≤
+    Complex.normSq (1 / ρ - (W : ℂ) / (ρ - 1)) := by
+  set σ := ρ.re; set t := ρ.im
+  have hD_pos : 0 < Complex.normSq ρ := Complex.normSq_pos.mpr hρ_ne
+  have hD2_pos : 0 < Complex.normSq (ρ - 1) := Complex.normSq_pos.mpr hρ1_ne
+  -- Step 1: Express as quotient
+  have heq : 1 / ρ - (↑W : ℂ) / (ρ - 1) = ((1 - ↑W) * ρ - 1) / (ρ * (ρ - 1)) := by
+    field_simp; ring
+  rw [heq, map_div₀, map_mul]
+  -- Step 2: Compute re/im of numerator
+  set z := (1 - (↑W : ℂ)) * ρ - 1
+  have hz_re : z.re = σ * (1 - W) - 1 := by
+    simp [z, Complex.mul_re, Complex.sub_re, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.one_re]; ring
+  have hz_im : z.im = t * (1 - W) := by
+    simp [z, Complex.mul_im, Complex.sub_im, Complex.ofReal_re, Complex.ofReal_im,
+      Complex.one_im]; ring
+  -- Step 3: normSq z = z.re² + z.im²
+  have hnum_ns : Complex.normSq z = (σ * (1 - W) - 1)^2 + (t * (1 - W))^2 := by
+    rw [Complex.normSq_apply, hz_re, hz_im]; ring
+  have hD_eq : Complex.normSq ρ = σ^2 + t^2 := by
+    rw [Complex.normSq_apply]; ring
+  rw [hnum_ns]
+  -- Step 4: Reduce to the core real inequality
+  -- Goal: t²/(D²·D2) ≤ ((σ(1-W)-1)²+(t(1-W))²)/(D·D2)
+  -- Suffices: t² ≤ ((σ(1-W)-1)²+(t(1-W))²) · D
+  suffices h : t^2 ≤ ((σ * (1 - W) - 1)^2 + (t * (1 - W))^2) * Complex.normSq ρ by
+    rw [div_le_div_iff₀ (mul_pos (pow_pos hD_pos 2) hD2_pos) (mul_pos hD_pos hD2_pos)]
+    nlinarith [mul_pos hD_pos hD2_pos]
+  -- Step 5: The quadratic identity closes it
+  rw [hD_eq]
+  nlinarith [quadratic_sq_identity σ t (1 - W),
+    sq_nonneg ((σ^2 + t^2) * (1 - W) - σ)]
+
+-- ════════════════════════════════════════════════
+-- PROVED: Functional equation reflection
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: If ρ has 0 < Re < 1 and Re ≠ 1/2, there exists ρ'
+    with ζ(ρ') = 0, 1/2 < Re(ρ') < 1, and Im(ρ') ≠ 0. -/
+theorem bd_exists_zero_re_gt_half (ρ : ℂ) (h_zero : riemannZeta ρ = 0)
+    (hρ_pos : 0 < ρ.re) (hρ_lt : ρ.re < 1) (hρ_ne : ρ.re ≠ 1/2) :
+    ∃ ρ' : ℂ, riemannZeta ρ' = 0 ∧ 1/2 < ρ'.re ∧ ρ'.re < 1 ∧ ρ'.im ≠ 0 := by
+  -- Helper: ρ with Im=0 can't be a zero in (0,1)
+  have no_real_zero : ∀ s : ℂ, riemannZeta s = 0 → 0 < s.re → s.re < 1 → s.im ≠ 0 := by
+    intro s hs hs_pos hs_lt him
+    -- If Im(s) = 0 then s = (s.re : ℂ)
+    have hreal : s = (s.re : ℂ) := by
+      apply Complex.ext <;> simp [him]
+    rw [hreal] at hs
+    exact absurd hs (zeta_no_real_zeros_in_strip s.re hs_pos hs_lt)
+  -- Step 1: Get a zero with Re > 1/2 (by functional equation reflection if needed)
+  rcases lt_or_gt_of_ne hρ_ne with h_lt | h_gt
+  · -- Case Re(ρ) < 1/2: reflect to 1-ρ which has Re > 1/2
+    have h_nni : ∀ n : ℕ, ρ ≠ -(↑n : ℂ) := by
+      intro n h; have := congr_arg Complex.re h; simp at this; linarith
+    have h_ne1 : ρ ≠ 1 := by intro h; rw [h] at hρ_lt; simp at hρ_lt
+    have h_func := riemannZeta_one_sub h_nni h_ne1
+    have h_1ρ_zero : riemannZeta (1 - ρ) = 0 := by rw [h_func, h_zero, mul_zero]
+    refine ⟨1 - ρ, h_1ρ_zero, by simp [Complex.sub_re]; linarith,
+      by simp [Complex.sub_re]; linarith, ?_⟩
+    -- Im(1-ρ) = -Im(ρ), so Im(1-ρ) ≠ 0 ↔ Im(ρ) ≠ 0
+    simp [Complex.sub_im]
+    exact no_real_zero ρ h_zero hρ_pos hρ_lt
+  · -- Case Re(ρ) > 1/2: use ρ directly
+    exact ⟨ρ, h_zero, h_gt, hρ_lt, no_real_zero ρ h_zero hρ_pos hρ_lt⟩
+
+-- ════════════════════════════════════════════════
+-- THE CROWN: ζ zero separation for BD basis
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: ζ zero separation for the BD basis.
+
+    If ζ(ρ) = 0 with 0 < Re(ρ) < 1 and Re(ρ) ≠ 1/2, then for all
+    N ≥ 2 and all real weight vectors v, the L² distance from 1 to
+    bdLinComb(v) is bounded below:
+
+      ∫₀¹ (1 - bdLinComb N v x)² dx ≥ δ > 0
+
+    **Proof** (via Cauchy-Schwarz + Rank-1):
+    1. Get ρ' with ζ(ρ')=0, Re(ρ')>1/2, Im(ρ')≠0
+    2. bd_residual_mellin: ∫(1-f)·cpow = 1/ρ' - W/(ρ'-1)
+    3. rank1_lower_bound: |1/ρ' - W/(ρ'-1)|² ≥ δ₀ > 0
+    4. bd_cauchy_schwarz: |∫(1-f)·cpow|² ≤ ∫(1-f)² · 1/(2σ'-1)
+    5. Combine: ∫(1-f)² ≥ (2σ'-1) · δ₀ -/
+theorem zeta_zero_separates_bd :
+    ∀ ρ : ℂ, riemannZeta ρ = 0 →
+    0 < ρ.re → ρ.re < 1 → ρ.re ≠ 1/2 →
+    ∃ δ : ℝ, 0 < δ ∧
+    ∀ N : ℕ, 2 ≤ N → ∀ v : Fin (N - 1) → ℝ,
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≥ δ := by
+  intro ρ h_zero hρ_pos hρ_lt hρ_ne
+  -- Step 1: Get a zero with Re > 1/2 and Im ≠ 0
+  obtain ⟨ρ', hz', hgt', hlt', him'⟩ :=
+    bd_exists_zero_re_gt_half ρ h_zero hρ_pos hρ_lt hρ_ne
+  have hρ'_pos : 0 < ρ'.re := by linarith
+  have hρ'_ne : ρ' ≠ 0 := rho_ne_zero ρ' hρ'_pos
+  have hρ'1_ne : ρ' - 1 ≠ 0 := rho_sub_one_ne_zero ρ' hlt'
+  -- Step 2: Define δ using the sharp Rank-1 bound (no phantom factor)
+  set σ' := ρ'.re
+  set t' := ρ'.im
+  -- The minimum of |1/ρ' - W/(ρ'-1)|² over W ∈ ℝ is t'²/(|ρ'|⁴·|ρ'-1|²)
+  -- Our separation bound is (2σ'-1) times this minimum:
+  set δ₀ := t' ^ 2 /
+    (Complex.normSq ρ' ^ 2 * Complex.normSq (ρ' - 1))
+  set δ := (2 * σ' - 1) * δ₀
+  have hδ₀_pos : 0 < δ₀ := by
+    apply div_pos
+    · exact sq_pos_of_ne_zero him'
+    · exact mul_pos (sq_pos_of_ne_zero (ne_of_gt (Complex.normSq_pos.mpr hρ'_ne)))
+        (Complex.normSq_pos.mpr hρ'1_ne)
+  have hδ_pos : 0 < δ := mul_pos (by linarith) hδ₀_pos
+  refine ⟨δ, hδ_pos, fun N hN v => ?_⟩
+  -- Step 3: Compute the residual integral via bd_residual_mellin
+  set W := ∑ i : Fin (N-1), v i / (↑(i.val + 1) : ℝ)
+  have h_resid := bd_residual_mellin N hN v ρ' hρ'_pos hlt' hz'
+  -- Step 4: Cauchy-Schwarz gives: normSq(integral) ≤ ∫(1-f)² · 1/(2σ'-1)
+  have h_cs := bd_cauchy_schwarz N hN v ρ' hρ'_pos hlt' hgt'
+  -- Step 5: Rank-1 gives: normSq(1/ρ' - W'/(ρ'-1)) ≥ δ₀
+  -- where W' = Σ vᵢ/(i+1) cast to ℂ and divided appropriately
+  -- The integral equals 1/ρ' - (Σ vᵢ/(i+1)) · 1/(ρ'-1) by h_resid
+  -- So normSq(integral) = normSq(1/ρ' - (Σ vᵢ/(i+1)) · 1/(ρ'-1))
+  -- But rank1_lower_bound needs W : ℝ such that W/(ρ-1) matches.
+  -- The residual is 1/ρ' - (Σ (vᵢ:ℂ)/(i+1)) * (1/(ρ'-1))
+  -- = 1/ρ' - (↑W' : ℂ) * (1/(ρ'-1)) where W' = Σ vᵢ/(i+1) ∈ ℝ
+  -- = 1/ρ' - (↑W' : ℂ) / (ρ'-1)
+  -- Rewrite the normSq of the integral using h_resid
+  have h_W_cast : (∑ i : Fin (N-1), (v i : ℂ) / (↑(i.val + 1) : ℂ)) = (↑W : ℂ) := by
+    simp only [W, Complex.ofReal_sum, Complex.ofReal_div, Complex.ofReal_natCast]
+  have h_resid' : ∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1) =
+      1 / ρ' - (↑W : ℂ) / (ρ' - 1) := by
+    rw [h_resid, h_W_cast]; ring
+  -- Apply rank1_lower_bound (PROVED): normSq(1/ρ' - ↑W/(ρ'-1)) ≥ δ₀
+  have h_rank1 := rank1_lower_bound ρ' hρ'_ne hρ'1_ne him' W
+  -- Combine: normSq(integral) ≥ δ₀
+  have h_ns_ge : δ₀ ≤ Complex.normSq (∫ x in Set.Ioo (0:ℝ) 1,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (ρ' - 1)) := by
+    rw [h_resid']; exact h_rank1
+  -- From CS: ∫(1-f)² · 1/(2σ'-1) ≥ normSq(integral) ≥ δ₀
+  -- So ∫(1-f)² ≥ (2σ'-1) · δ₀ = δ
+  have h_2σ_pos : (0:ℝ) < 2 * σ' - 1 := by linarith
+  have h_inv_pos : (0:ℝ) < 1 / (2 * σ' - 1) := by positivity
+  -- h_cs: normSq(integral) ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- h_ns_ge: δ₀ ≤ normSq(integral)
+  -- Therefore: δ₀ ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- So ∫(1-f)² ≥ δ₀ * (2σ'-1) = (2σ'-1) * δ₀ = δ
+  rw [ge_iff_le]
+  have h_combined : δ₀ ≤ (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) *
+      (1 / (2 * σ' - 1)) := le_trans h_ns_ge h_cs
+  -- h_combined: δ₀ ≤ ∫(1-f)² * (1/(2σ'-1))
+  -- goal: δ ≤ ∫(1-f)²  where δ = (2σ'-1) * δ₀
+  -- So: (2σ'-1) * δ₀ ≤ ∫(1-f)²
+  -- From h_combined: δ₀ ≤ I * (1/(2σ'-1)), multiply by (2σ'-1):
+  have h_mul : δ₀ * (2 * σ' - 1) ≤
+      (∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2) *
+      (1 / (2 * σ' - 1)) * (2 * σ' - 1) :=
+    mul_le_mul_of_nonneg_right h_combined (le_of_lt h_2σ_pos)
+  have h_cancel : (1 : ℝ) / (2 * σ' - 1) * (2 * σ' - 1) = 1 :=
+    div_mul_cancel₀ 1 (ne_of_gt h_2σ_pos)
+  rw [mul_assoc, h_cancel, mul_one] at h_mul
+  linarith
+
+end
+
+
+================================================================
+FILE: Cathedral/White/Kinematics.lean
+================================================================
+
+/-
+  Cathedral/White/Kinematics.lean
+
+  ## Phase I, Strike 1: Reflection Positivity — Kill Axiom 2
+
+  TARGET: Eliminate `autocorr_eval_zero` from PlancherelBypass.lean.
+
+  ### Physics
+  The energy of the vacuum is positive-definite.
+  The autocorrelation at zero lag equals the L² norm in position space.
+
+  ### Math
+  Change of variables x = e^{-u} maps (0,1] → [0,∞).
+  The Jacobian |dx/du| = e^{-u} is absorbed by the flattening factor:
+    g_N(u)² = r_N(e^{-u})² · e^{-u}
+  (already proved as `flattenedResidualV_sq_eq`).
+
+  ### Strategy
+  Use Mathlib's `integral_comp_mul_deriv_Ioi` or
+  `MeasureTheory.integral_image_eq_integral_abs_deriv_smul`
+  to formally execute the substitution.
+
+  ### Dependencies
+  - flattenedResidualV_sq_eq (PlancherelBypass.lean, PROVED)
+  - autocorrelation_zero_eq_l2 (PlancherelBypass.lean, PROVED)
+  - Mathlib.MeasureTheory.Integral.IntegralEqImproper
+-/
+
+import Cathedral.MellinBridge.PlancherelDefs
+import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.MeasureTheory.Function.JacobianOneDim
+
+noncomputable section
+open Real MeasureTheory Set Filter
+
+namespace Cathedral.White
+
+-- ════════════════════════════════════════════════
+-- §1. THE DIFFEOMORPHISM: x = exp(-u)
+-- ════════════════════════════════════════════════
+
+/-- The map u ↦ exp(-u) is strictly decreasing on [0,∞) with range (0,1]. -/
+lemma exp_neg_strictAntiOn : StrictAntiOn (fun u => Real.exp (-u)) (Set.Ici 0) := by
+  intro a _ b _ hab
+  exact Real.exp_strictMono (neg_lt_neg hab)
+
+/-- The derivative of u ↦ exp(-u) is -exp(-u). -/
+lemma hasDerivAt_exp_neg (u : ℝ) :
+    HasDerivAt (fun u => Real.exp (-u)) (-Real.exp (-u)) u := by
+  have := Real.hasDerivAt_exp (-u)
+  simpa using this.comp u (hasDerivAt_neg u)
+
+/-- exp(-u) maps [0,∞) into (0,1]. -/
+lemma exp_neg_mem_Ioc (u : ℝ) (hu : 0 ≤ u) :
+    Real.exp (-u) ∈ Set.Ioc 0 1 := by
+  constructor
+  · exact Real.exp_pos _
+  · rwa [Real.exp_le_one_iff, neg_le, neg_zero]
+
+-- ════════════════════════════════════════════════
+-- §2. THE JACOBIAN ABSORPTION (CORE IDENTITY)
+-- ════════════════════════════════════════════════
+
+/-- exp(-u) is antitone on Ioi(0). -/
+lemma exp_neg_antitoneOn : AntitoneOn (fun u : ℝ => Real.exp (-u)) (Set.Ioi 0) :=
+  fun _ _ _ _ hab => Real.exp_le_exp.mpr (neg_le_neg hab)
+
+/-- The derivative of exp(-u) within Ioi is -exp(-u). -/
+lemma hasDerivWithinAt_exp_neg (u : ℝ) (_ : u ∈ Set.Ioi (0 : ℝ)) :
+    HasDerivWithinAt (fun u => Real.exp (-u)) (-Real.exp (-u)) (Set.Ioi 0) u := by
+  have : HasDerivAt (fun u => Real.exp (-u)) (Real.exp (-u) * (-1)) u := by
+    exact (Real.hasDerivAt_exp (-u)).comp u (hasDerivAt_id u).neg
+  simp only [mul_neg, mul_one] at this
+  exact this.hasDerivWithinAt
+
+/-- exp(-·) maps Ioi(0) onto Ioo(0,1). -/
+lemma exp_neg_image_Ioi : (fun u : ℝ => Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 0 1 := by
+  ext x
+  simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+  constructor
+  · rintro ⟨u, hu, rfl⟩
+    exact ⟨Real.exp_pos _, by rwa [Real.exp_lt_one_iff, neg_neg_iff_pos]⟩
+  · intro ⟨hx_pos, hx_lt⟩
+    refine ⟨-Real.log x, ?_, ?_⟩
+    · rw [neg_pos]; exact Real.log_neg hx_pos hx_lt
+    · simp [Real.exp_log hx_pos]
+
+/-- **KEY STEP**: The integral of g_N² over (0,∞) equals the integral
+    of r_N² over (0,1) via x = exp(-u).
+
+    Uses Mathlib's antitone change of variables:
+      ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
+
+    With f(u) = exp(-u), -f'(u) = exp(-u), and
+    g_N(u)² = r_N(exp(-u))² · exp(-u)  [from flattenedResidualV_sq_eq]. -/
+theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
+    ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
+  -- Step 1: Rewrite g_N(u)² = r_N(exp(-u))² · exp(-u) using flattenedResidualV_sq_eq
+  have h_sq : ∀ u ∈ Set.Ioi (0 : ℝ),
+      (flattenedResidualV N v u) ^ 2 =
+      (bdResidualV N v (Real.exp (-u))) ^ 2 * Real.exp (-u) := by
+    intro u hu
+    exact flattenedResidualV_sq_eq N v u (le_of_lt (Set.mem_Ioi.mp hu))
+  -- Step 2: Rewrite the Ioi integral pointwise
+  rw [setIntegral_congr_fun measurableSet_Ioi h_sq]
+  -- Step 3: Apply antitone change of variables (JacobianOneDim)
+  -- For antitone f, ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
+  -- We reverse: ∫ u in s, (-f'(u)) • g(f(u)) = ∫ x in f '' s, g x
+  -- With f(u) = exp(-u), -f'(u) = exp(-u), f '' Ioi(0) = Ioo(0,1)
+  have h_antitone := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
+    measurableSet_Ioi
+    (fun u hu => hasDerivWithinAt_exp_neg u hu)
+    exp_neg_antitoneOn
+    (fun x : ℝ => (bdResidualV N v x : ℝ) ^ 2)
+  rw [exp_neg_image_Ioi] at h_antitone
+  -- h_antitone: ∫ x ∈ Ioo(0,1), g(x) = ∫ u ∈ Ioi(0), (-(-exp(-u))) • g(exp(-u))
+  simp only [neg_neg, smul_eq_mul] at h_antitone
+  -- h_antitone: ∫ x ∈ Ioo 0 1, .. = ∫ u ∈ Ioi 0, exp(-u) * (bdResidualV ..)²
+  -- Goal: ∫ u ∈ Ioi 0, (bdResidualV ..)² * exp(-u) = ∫ x in 0..1, (bdResidualV ..)²
+  -- First commute the multiplication in the goal to match h_antitone
+  rw [show (fun u => bdResidualV N v (Real.exp (-u)) ^ 2 * Real.exp (-u)) =
+      (fun u => Real.exp (-u) * bdResidualV N v (Real.exp (-u)) ^ 2) from by ext u; ring]
+  rw [← h_antitone, ← integral_Ioc_eq_integral_Ioo,
+      intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+
+-- ════════════════════════════════════════════════
+-- §3. FULL INTEGRAL SPLITTING
+-- ════════════════════════════════════════════════
+
+/-- g_N(u) = 0 for u < 0 by definition. -/
+lemma flattenedResidualV_zero_of_neg (N : ℕ) (v : Fin (N - 1) → ℝ) (u : ℝ) (hu : u < 0) :
+    flattenedResidualV N v u = 0 := by
+  unfold flattenedResidualV
+  simp [show ¬(0 ≤ u) from not_le.mpr hu]
+
+/-- g_N(u)² = 0 for u < 0, since g_N(u) = 0. -/
+lemma flattenedResidualV_sq_zero_of_neg (N : ℕ) (v : Fin (N - 1) → ℝ) (u : ℝ) (hu : u < 0) :
+    (flattenedResidualV N v u) ^ 2 = 0 := by
+  rw [flattenedResidualV_zero_of_neg N v u hu]; ring
+
+/-- The full-line integral of g_N² equals the [0,∞) integral.
+    On (-∞, 0), g_N = 0 pointwise, so the function is supported on [0,∞). -/
+lemma full_integral_eq_Ici (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
+    ∫ u in Set.Ici (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
+  symm
+  apply setIntegral_eq_integral_of_forall_compl_eq_zero
+  intro u hu
+  simp only [Set.mem_Ici, not_le] at hu
+  exact flattenedResidualV_sq_zero_of_neg N v u hu
+
+/-- The [0,∞) integral equals the (0,∞) integral, since {0} has measure zero. -/
+lemma Ici_eq_Ioi_integral (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u in Set.Ici (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
+    ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
+  apply setIntegral_congr_set
+  exact Ioi_ae_eq_Ici.symm
+
+/-- **PROVED**: The full-line integral of g_N² equals the half-line integral. -/
+lemma full_integral_eq_halfline (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
+    ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
+  rw [full_integral_eq_Ici N v, Ici_eq_Ioi_integral N v]
+
+-- ════════════════════════════════════════════════
+-- §4. THE THEOREM (AXIOM 2 ELIMINATION)
+-- ════════════════════════════════════════════════
+
+/-- **THEOREM**: Axiom 2 (`autocorr_eval_zero`) proved.
+
+    The autocorrelation at zero lag equals the L²(0,1) norm of the residual.
+
+    Proof chain:
+    1. h(0) = ∫ g_N² du                  [autocorrelation_zero_eq_l2, PROVED]
+    2. ∫ g_N² du = ∫₀^∞ g_N² du          [full_integral_eq_halfline, this file]
+    3. ∫₀^∞ g_N² du = ∫₀¹ r_N² dx        [flattened_l2_eq_residual_l2, this file]
+    4. Chain: h(0) = ∫₀¹ r_N² dx          [QED]
+
+    Physics: Reflection Positivity. The vacuum energy is the L² norm. -/
+theorem autocorr_eval_zero_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
+    residualAutocorrelation N v 0 = ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
+  -- Step 1: h(0) = ∫ g_N(u)² du {autocorrelation_zero_eq_l2, PROVED}
+  rw [autocorrelation_zero_eq_l2 N v]
+  -- Step 2: ∫ g_N² du = ∫₀^∞ g_N² du {full_integral_eq_halfline}
+  rw [full_integral_eq_halfline N v]
+  -- Step 3: ∫₀^∞ g_N² du = ∫₀¹ r_N² dx {flattened_l2_eq_residual_l2}
+  exact flattened_l2_eq_residual_l2 N v
+
+-- ════════════════════════════════════════════════
+-- AUDIT: AXIOM 2 STATUS — **COMPLETE**
+-- ════════════════════════════════════════════════
+-- autocorr_eval_zero_proved depends on:
+--   ✅ autocorrelation_zero_eq_l2 (PROVED in PlancherelBypass.lean)
+--   ✅ flattenedResidualV_sq_eq (PROVED in PlancherelBypass.lean)
+--   ✅ full_integral_eq_halfline (PROVED — integral splitting via Ici/Ioi)
+--   ✅ flattened_l2_eq_residual_l2 (PROVED — antitone CoV via JacobianOneDim)
+--
+-- Total sorry count: 0 🤍
+-- AXIOM 2 (Reflection Positivity) is ELIMINATED.
+-- Pure measure-theoretic proof. No number theory axioms.
+
+end Cathedral.White
+

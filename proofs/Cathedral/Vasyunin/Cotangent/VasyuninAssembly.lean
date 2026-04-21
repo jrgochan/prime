@@ -54,7 +54,7 @@ def gramIntegral (j k : ℕ) : ℝ :=
 /-- For the DIAGONAL case j = k, the integral has a simpler form:
     ∫₀¹ {1/(jx)}² dx = 1/(2j) - 1/(2j²)·(2γ - 1 + log(2πj²))
     (this is already handled by DiagonalBridge.lean) -/
-theorem gram_diagonal_excluded (j : ℕ) (hj : 1 ≤ j) :
+theorem gram_diagonal_excluded (j : ℕ) (_hj : 1 ≤ j) :
     gramIntegral j j = ∫ x in (0:ℝ)..1,
       Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((j:ℝ) * x)) := by
   rfl

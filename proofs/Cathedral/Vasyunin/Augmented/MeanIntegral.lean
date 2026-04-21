@@ -127,7 +127,7 @@ private lemma hasSum_inv_sub_log_euler :
           rw [show 1 + 1 / ((n + 1 : ℕ) : ℝ) = ((n : ℝ) + 2) / ((n : ℝ) + 1) from by
             push_cast; field_simp; ring]
           rw [Real.log_div (ne_of_gt hn2) (ne_of_gt hn1)]
-          push_cast; ring
+          push_cast; ring_nf
     simp_rw [hpart]
     -- H_N - log(N+1) → γ
     have h1 := Real.tendsto_harmonic_sub_log

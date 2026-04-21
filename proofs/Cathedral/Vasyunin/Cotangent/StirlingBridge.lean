@@ -99,7 +99,7 @@ private lemma sum_weighted_log_telescope (N : ℕ) :
     push_cast
     rw [Real.log_mul (ne_of_gt hn2)
       (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n + 1)))]
-    ring
+    ring_nf
 
 /-- P(K) = 2·log(K!) - 2K·log(K) + 2K - 1 - H_K via Stirling expansion. -/
 private lemma partialSum_expand (K : ℕ) (hK : 1 ≤ K) :
@@ -170,7 +170,7 @@ theorem partialSum_eq_series_sum' (M : ℕ) :
       intros; ring
     rw [Finset.sum_congr rfl this, ← Finset.mul_sum, sum_weighted_log_telescope (M + 1)]
     rw [show M + 1 + 1 = M + 2 from by omega]
-    push_cast; ring
+    push_cast; ring_nf
   rw [hlogsum]
   have hconst : ∑ n ∈ Finset.range (M + 1), ((2 : ℝ) - 1 / ((n : ℝ) + 2)) =
       2 * ((M : ℝ) + 1) - ∑ n ∈ Finset.range (M + 1), (1 / ((n : ℝ) + 2)) := by
