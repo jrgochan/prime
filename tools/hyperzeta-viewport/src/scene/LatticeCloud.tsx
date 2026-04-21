@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { useViewportStore } from "../stores/viewport";
-import { PARTICLE_COUNT } from "../engine/types";
 import { VIZ_MAP } from "../content/visualizations";
 
 import { vertexShader, fragmentShader } from "./shaders/lattice";
@@ -24,28 +23,40 @@ function getColors(modeId: string) {
 
 /**
  * GPU-accelerated particle cloud using THREE.Points + custom GLSL shaders.
- * All rendering state is read from the Visualization Registry.
+ * Geometry is rebuilt when particleCount changes.
  */
 export function LatticeCloud() {
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
   const frameCount = useRef(0);
 
-  // Stable geometry with pre-allocated position buffer
+  // Track geometry size to rebuild when particle count changes
   const geometryRef = useRef<THREE.BufferGeometry | null>(null);
-  if (!geometryRef.current) {
-    const geo = new THREE.BufferGeometry();
-    const positions = new Float32Array(PARTICLE_COUNT * 3);
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometryRef.current = geo;
-  }
+  const lastCountRef = useRef<number>(0);
 
   useFrame(() => {
-    const { hyperSystem, viewMode, speed, paused } =
+    const { hyperSystem, viewMode, speed, paused, particleCount } =
       useViewportStore.getState();
     if (!hyperSystem) return;
 
     const { engine, outputBuffer, inputBuffer } = hyperSystem;
+
+    // Rebuild geometry if particle count changed
+    if (particleCount !== lastCountRef.current) {
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+      // Replace geometry on the points mesh
+      if (pointsRef.current) {
+        if (geometryRef.current) geometryRef.current.dispose();
+        pointsRef.current.geometry = geo;
+      }
+      geometryRef.current = geo;
+      lastCountRef.current = particleCount;
+    }
+
+    if (!geometryRef.current) return;
 
     // Tick physics (skip when paused)
     if (!paused) {
@@ -67,9 +78,7 @@ export function LatticeCloud() {
     const activeBuffer = viz.usesOutputBuffer ? outputBuffer : inputBuffer;
 
     // Copy WASM buffer into geometry attribute
-    // Guard: WASM memory may have grown, invalidating the view.
-    // Also guard against buffer size mismatch.
-    const posAttr = geometryRef.current!.getAttribute(
+    const posAttr = geometryRef.current.getAttribute(
       "position"
     ) as THREE.BufferAttribute;
     const targetArr = posAttr.array as Float32Array;
@@ -77,7 +86,6 @@ export function LatticeCloud() {
     try {
       targetArr.set(activeBuffer.subarray(0, copyLen));
     } catch {
-      // Buffer detached — views will be refreshed on next engine init
       return;
     }
     posAttr.needsUpdate = true;
@@ -93,6 +101,16 @@ export function LatticeCloud() {
         useViewportStore.getState().lambda;
     }
   });
+
+  // Initialize geometry on first render
+  if (!geometryRef.current) {
+    const count = useViewportStore.getState().particleCount;
+    const geo = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometryRef.current = geo;
+    lastCountRef.current = count;
+  }
 
   return (
     <points ref={pointsRef} geometry={geometryRef.current!}>

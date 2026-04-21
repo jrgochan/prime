@@ -1,13 +1,18 @@
 "use client";
 
+import { useCallback } from "react";
 import { useViewportStore } from "../stores/viewport";
 import {
-  VISUALIZATIONS,
   VIZ_MAP,
   VIZ_ORDER,
 } from "../content/visualizations";
 
 const SPEEDS = [1, 2, 4, 8] as const;
+
+function formatCount(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(0)}K`;
+  return n.toString();
+}
 
 export function ModeBar() {
   const viewMode = useViewportStore((s) => s.viewMode);
@@ -18,6 +23,21 @@ export function ModeBar() {
   const togglePaused = useViewportStore((s) => s.togglePaused);
   const togglePalette = useViewportStore((s) => s.togglePalette);
   const hudVisible = useViewportStore((s) => s.hudVisible);
+  const particleCount = useViewportStore((s) => s.particleCount);
+  const setParticleCount = useViewportStore((s) => s.setParticleCount);
+
+  const handleSlider = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Exponential slider: maps 0-1 → 1K-500K
+      const t = parseFloat(e.target.value);
+      const count = Math.round(1000 * Math.pow(500, t));
+      setParticleCount(count);
+    },
+    [setParticleCount]
+  );
+
+  // Reverse: count → slider value (0-1)
+  const sliderValue = Math.log(particleCount / 1000) / Math.log(500);
 
   if (!hudVisible) return null;
 
@@ -56,6 +76,18 @@ export function ModeBar() {
               {s}×
             </button>
           ))}
+        </div>
+        <div className="mode-bar-particles" title="Particle count">
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={sliderValue}
+            onChange={handleSlider}
+            className="particle-slider"
+          />
+          <span className="particle-label">{formatCount(particleCount)}</span>
         </div>
       </div>
 

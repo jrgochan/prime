@@ -1,7 +1,6 @@
 "use client";
 
 import { useViewportStore } from "../stores/viewport";
-import { PARTICLE_COUNT } from "../engine/types";
 
 function MetricBar({
   label,
@@ -33,6 +32,7 @@ export function MetricsPanel() {
   const collapse = useViewportStore((s) => s.collapse);
   const lambda = useViewportStore((s) => s.lambda);
   const singularityCount = useViewportStore((s) => s.singularityCount);
+  const particleCount = useViewportStore((s) => s.particleCount);
 
   return (
     <div className="metrics-panel">
@@ -52,7 +52,7 @@ export function MetricsPanel() {
       </div>
       <div className="metric-row">
         <span className="metric-label">Particles</span>
-        <span className="metric-value">{PARTICLE_COUNT.toLocaleString()}</span>
+        <span className="metric-value">{particleCount.toLocaleString()}</span>
       </div>
       <div className="metric-row">
         <span className="metric-label">Engine</span>

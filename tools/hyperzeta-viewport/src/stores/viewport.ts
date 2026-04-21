@@ -6,7 +6,7 @@ import type {
   EngineState,
   HyperSystem,
 } from "../engine/types";
-import { VIEW_MODE_WASM } from "../engine/types";
+import { VIEW_MODE_WASM, DEFAULT_PARTICLE_COUNT } from "../engine/types";
 
 interface ViewportState {
   // ── Engine ──
@@ -15,6 +15,7 @@ interface ViewportState {
   collapse: number;
   lambda: number;
   singularityCount: number;
+  particleCount: number;
 
   // ── Controls ──
   speed: number;
@@ -40,6 +41,7 @@ interface ViewportState {
   setSpeed: (speed: number) => void;
   setViewMode: (mode: ViewMode) => void;
   setCameraPreset: (preset: CameraPreset) => void;
+  setParticleCount: (count: number) => void;
   togglePaused: () => void;
   toggleInfo: () => void;
   toggleHud: () => void;
@@ -57,6 +59,7 @@ export const useViewportStore = create<ViewportState>()(
     collapse: 1.0,
     lambda: 0.0,
     singularityCount: 0,
+    particleCount: DEFAULT_PARTICLE_COUNT,
 
     speed: 1,
     viewMode: "output",
@@ -97,6 +100,13 @@ export const useViewportStore = create<ViewportState>()(
     },
 
     setCameraPreset: (cameraPreset) => set({ cameraPreset }),
+
+    setParticleCount: (particleCount) => {
+      // Clamp to reasonable range
+      const clamped = Math.max(1_000, Math.min(500_000, particleCount));
+      set({ particleCount: clamped });
+    },
+
     togglePaused: () => set((s) => ({ paused: !s.paused })),
     toggleInfo: () => set((s) => ({ showInfo: !s.showInfo })),
     toggleHud: () => set((s) => ({ hudVisible: !s.hudVisible })),

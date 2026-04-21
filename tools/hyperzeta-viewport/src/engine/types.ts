@@ -17,7 +17,7 @@ export type ViewMode =
 
 // Maps ViewMode → WASM view_mode u8 (only for input-buffer modes)
 export const VIEW_MODE_WASM: Record<ViewMode, number> = {
-  output: 0,        // uses geometry_buffer, not input_buffer
+  output: 0,
   spiral: 0,
   "partial-sums": 1,
   landscape: 2,
@@ -34,7 +34,8 @@ export const VIEW_MODE_WASM: Record<ViewMode, number> = {
 export type CameraPreset = "orbital" | "zero-focus" | "side";
 export type EngineState = "booting" | "allocating" | "running" | "collapsed";
 
-export const PARTICLE_COUNT = 250_000;
+// Default particle count — user can change at runtime via slider
+export const DEFAULT_PARTICLE_COUNT = 50_000;
 
 export interface HyperSystem {
   engine: HyperEngine;

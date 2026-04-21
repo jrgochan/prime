@@ -2,17 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import init, { HyperEngine } from "../wasm/core_engine.js";
-import { PARTICLE_COUNT } from "./types";
 import { useViewportStore } from "../stores/viewport";
 
 /**
  * WASM lifecycle hook — boots the HyperEngine, binds both buffers,
- * and cleans up on unmount to prevent memory leaks.
+ * and reboots when particleCount changes.
  */
 export function useHyperEngine() {
   const engineRef = useRef<HyperEngine | null>(null);
+  const wasmModuleRef = useRef<any>(null);
   const setEngineState = useViewportStore((s) => s.setEngineState);
   const setHyperSystem = useViewportStore((s) => s.setHyperSystem);
+  const particleCount = useViewportStore((s) => s.particleCount);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,32 +21,50 @@ export function useHyperEngine() {
     const boot = async () => {
       try {
         setEngineState("booting");
-        const wasmModule = await init();
+
+        // Init WASM module (only first time)
+        if (!wasmModuleRef.current) {
+          wasmModuleRef.current = await init();
+        }
+        const wasmModule = wasmModuleRef.current;
 
         if (cancelled) return;
         setEngineState("allocating");
 
-        const engine = new HyperEngine(PARTICLE_COUNT);
+        // Free previous engine if rebooting
+        if (engineRef.current) {
+          engineRef.current.free();
+          engineRef.current = null;
+        }
+
+        const engine = new HyperEngine(particleCount);
         engineRef.current = engine;
 
         const outPtr = engine.get_buffer_pointer();
         const outputBuffer = new Float32Array(
           wasmModule.memory.buffer,
           outPtr,
-          PARTICLE_COUNT * 3
+          particleCount * 3
         );
 
         const inPtr = engine.get_input_buffer_pointer();
         const inputBuffer = new Float32Array(
           wasmModule.memory.buffer,
           inPtr,
-          PARTICLE_COUNT * 3
+          particleCount * 3
         );
 
         if (cancelled) {
           engine.free();
           engineRef.current = null;
           return;
+        }
+
+        // Re-apply current view mode to new engine
+        const { viewMode } = useViewportStore.getState();
+        const { VIEW_MODE_WASM } = await import("../engine/types");
+        if (viewMode !== "output") {
+          engine.set_view_mode(VIEW_MODE_WASM[viewMode]);
         }
 
         setHyperSystem({ engine, outputBuffer, inputBuffer });
@@ -65,5 +84,5 @@ export function useHyperEngine() {
         console.log("[HyperEngine] WASM memory freed.");
       }
     };
-  }, [setEngineState, setHyperSystem]);
+  }, [particleCount, setEngineState, setHyperSystem]);
 }

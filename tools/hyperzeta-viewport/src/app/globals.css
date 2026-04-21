@@ -757,6 +757,57 @@ body {
   font-weight: 700;
 }
 
+.mode-bar-particles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.particle-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 60px;
+  height: 3px;
+  background: var(--hz-border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.particle-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hz-green);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.particle-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.3);
+}
+
+.particle-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--hz-green);
+  border: none;
+  cursor: pointer;
+}
+
+.particle-label {
+  font-size: 9px;
+  color: var(--hz-text-dim);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  min-width: 28px;
+}
+
 .mode-bar-center {
   display: flex;
   align-items: center;
