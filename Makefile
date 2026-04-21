@@ -12,7 +12,7 @@
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
-.PHONY: sedenion axiom-hunt spectral-engine
+.PHONY: sedenion axiom-hunt spectral-engine viewport
 .DEFAULT_GOAL := help
 
 ENV := scripts/env.sh
@@ -107,6 +107,14 @@ spectral-engine: ## Run the G₂ spectral engine
 	@$(ENV) require cargo
 	cd tools/spectral-engine && cargo run --bin g2_spectral
 
+viewport: ## Launch the HyperZeta Viewport (3D visualizer)
+	@$(ENV) require node
+	@if [ ! -d tools/hyperzeta-viewport/node_modules ]; then \
+		echo "  Installing viewport dependencies..."; \
+		cd tools/hyperzeta-viewport && npm install; \
+	fi
+	cd tools/hyperzeta-viewport && npm run dev
+
 # ────────────────────────────────────────────
 # 🔍  ENVIRONMENT
 # ────────────────────────────────────────────
@@ -193,7 +201,7 @@ help: ## Show this help message
 	@grep -E '^(dashboard|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 3: HISTORICAL TOOLS ────────────────────────────"
-	@grep -E '^(sedenion|axiom-hunt|spectral-engine):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(sedenion|axiom-hunt|spectral-engine|viewport):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── ENVIRONMENT ─────────────────────────────────────────"
 	@grep -E '^(check|setup[a-z-]*):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
