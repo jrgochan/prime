@@ -34,7 +34,7 @@ export const VIEW_MODE_WASM: Record<ViewMode, number> = {
 export type CameraPreset = "orbital" | "zero-focus" | "side";
 export type EngineState = "booting" | "allocating" | "running" | "collapsed";
 
-export const PARTICLE_COUNT = 10_000;
+export const PARTICLE_COUNT = 250_000;
 
 export interface HyperSystem {
   engine: HyperEngine;

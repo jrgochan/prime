@@ -67,10 +67,19 @@ export function LatticeCloud() {
     const activeBuffer = viz.usesOutputBuffer ? outputBuffer : inputBuffer;
 
     // Copy WASM buffer into geometry attribute
+    // Guard: WASM memory may have grown, invalidating the view.
+    // Also guard against buffer size mismatch.
     const posAttr = geometryRef.current!.getAttribute(
       "position"
     ) as THREE.BufferAttribute;
-    (posAttr.array as Float32Array).set(activeBuffer);
+    const targetArr = posAttr.array as Float32Array;
+    const copyLen = Math.min(targetArr.length, activeBuffer.length);
+    try {
+      targetArr.set(activeBuffer.subarray(0, copyLen));
+    } catch {
+      // Buffer detached — views will be refreshed on next engine init
+      return;
+    }
     posAttr.needsUpdate = true;
 
     // Update shader uniforms from registry colors
