@@ -13,17 +13,24 @@ const PARTICLE_COUNT = 150_000;
    §1. PARTICLE CLOUD — True Zero-Copy WASM Rendering
    ═══════════════════════════════════════════════════════ */
 
+type ViewMode = "output" | "input";
+
 function LatticePointCloud({
   wasmEngine,
-  memoryArray,
+  outputArray,
+  inputArray,
+  viewMode,
   onMetrics,
   speed,
 }: {
   wasmEngine: HyperEngine;
-  memoryArray: Float32Array;
+  outputArray: Float32Array;
+  inputArray: Float32Array;
+  viewMode: ViewMode;
   onMetrics: (collapse: number, lambda: number) => void;
   speed: number;
 }) {
+  const memoryArray = viewMode === "input" ? inputArray : outputArray;
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const matrix = useMemo(() => new THREE.Matrix4(), []);
   const position = useMemo(() => new THREE.Vector3(), []);
@@ -64,7 +71,7 @@ function LatticePointCloud({
     <instancedMesh ref={meshRef} args={[undefined, undefined, PARTICLE_COUNT]}>
       <sphereGeometry args={[0.08, 4, 4]} />
       <meshBasicMaterial
-        color="#00ff88"
+        color={viewMode === "input" ? "#00ccff" : "#00ff88"}
         opacity={0.6}
         transparent
         depthWrite={false}
@@ -424,7 +431,8 @@ export default function Home() {
   const [engineState, setEngineState] = useState<EngineState>("booting");
   const [hyperSystem, setHyperSystem] = useState<{
     engine: HyperEngine;
-    memory: Float32Array;
+    outputMemory: Float32Array;
+    inputMemory: Float32Array;
   } | null>(null);
 
   const [collapse, setCollapse] = useState(1.0);
@@ -432,6 +440,7 @@ export default function Home() {
   const [showInfo, setShowInfo] = useState(false);
   const [singularityCount, setSingularityCount] = useState(0);
   const [speed, setSpeed] = useState(1);
+  const [viewMode, setViewMode] = useState<ViewMode>("output");
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>("orbital");
   const [toastMsg, setToastMsg] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
@@ -446,14 +455,22 @@ export default function Home() {
         setEngineState("allocating");
 
         const engine = new HyperEngine(PARTICLE_COUNT);
-        const ptr = engine.get_buffer_pointer();
-        const memoryArray = new Float32Array(
+
+        const outPtr = engine.get_buffer_pointer();
+        const outputMemory = new Float32Array(
           wasmModule.memory.buffer,
-          ptr,
+          outPtr,
           PARTICLE_COUNT * 3
         );
 
-        setHyperSystem({ engine, memory: memoryArray });
+        const inPtr = engine.get_input_buffer_pointer();
+        const inputMemory = new Float32Array(
+          wasmModule.memory.buffer,
+          inPtr,
+          PARTICLE_COUNT * 3
+        );
+
+        setHyperSystem({ engine, outputMemory, inputMemory });
         setEngineState("running");
       } catch (e) {
         console.error("WASM init failed:", e);
@@ -555,6 +572,26 @@ export default function Home() {
                 {s}×
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="control-group">
+          <label className="control-label">View</label>
+          <div className="view-buttons">
+            <button
+              className={`view-btn ${viewMode === "output" ? "active" : ""}`}
+              onClick={() => setViewMode("output")}
+              title="ζ(s) output values — shows collapse near zeros"
+            >
+              ζ(s)
+            </button>
+            <button
+              className={`view-btn ${viewMode === "input" ? "active" : ""}`}
+              onClick={() => setViewMode("input")}
+              title="Input coordinates — shows the 16D spiral structure"
+            >
+              Spiral
+            </button>
           </div>
         </div>
 
@@ -689,7 +726,9 @@ export default function Home() {
         {hyperSystem && (
           <LatticePointCloud
             wasmEngine={hyperSystem.engine}
-            memoryArray={hyperSystem.memory}
+            outputArray={hyperSystem.outputMemory}
+            inputArray={hyperSystem.inputMemory}
+            viewMode={viewMode}
             onMetrics={handleMetrics}
             speed={speed}
           />

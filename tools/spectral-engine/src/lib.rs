@@ -13,8 +13,10 @@ use math::{Quaternion, Octonion, Sedenion};
 
 #[wasm_bindgen]
 pub struct HyperEngine {
-    // WebGPU Native Float32 Output (The 3D Visual Shadow)
+    // Zeta OUTPUT buffer: ζ(s) values projected to 3D
     geometry_buffer: Vec<f32>, 
+    // Input POSITION buffer: sedenion coordinates projected to 3D (the spiral)
+    input_buffer: Vec<f32>,
     // Pure 64-Bit Sedenion Tensors (The Continuous Imaginary Sweep Paths)
     particles: Vec<Sedenion>,
     particle_count: usize,
@@ -27,6 +29,7 @@ impl HyperEngine {
     #[wasm_bindgen(constructor)]
     pub fn new(particle_count: usize) -> HyperEngine {
         let geometry_buffer = vec![0.0; particle_count * 3];
+        let input_buffer = vec![0.0; particle_count * 3];
         let mut particles = Vec::with_capacity(particle_count);
         
         let mut rng = rand::thread_rng();
@@ -47,6 +50,7 @@ impl HyperEngine {
         
         HyperEngine {
             geometry_buffer,
+            input_buffer,
             particles,
             particle_count,
             frame: 0.0,
@@ -54,9 +58,16 @@ impl HyperEngine {
         }
     }
 
+    /// Pointer to the ζ(s) OUTPUT buffer (collapse/breathing visualization)
     #[wasm_bindgen]
     pub fn get_buffer_pointer(&self) -> *const f32 {
         self.geometry_buffer.as_ptr()
+    }
+
+    /// Pointer to the INPUT SPACE buffer (spiral visualization)
+    #[wasm_bindgen]
+    pub fn get_input_buffer_pointer(&self) -> *const f32 {
+        self.input_buffer.as_ptr()
     }
 
     #[wasm_bindgen]
@@ -94,6 +105,14 @@ impl HyperEngine {
             // Force the Real dimension of every coordinate mathematically exactly to 1/2
             s_coord.a.a.r = 0.5; 
 
+            // INPUT SPACE: Write the 16D→3D projected input positions (the spiral)
+            let idx = i * 3;
+            let input_quat = s_coord.a.a;
+            let input_scale = 2.0; // Scale for visual clarity
+            self.input_buffer[idx]   = (input_quat.i * input_scale) as f32;
+            self.input_buffer[idx+1] = (input_quat.j * input_scale) as f32;
+            self.input_buffer[idx+2] = (input_quat.k * input_scale) as f32;
+
             // STEP 2: Calculate Riemann Zeta Dirichlet Series in 16-Dimensions:
             // zeta(S) = sum_{n=1}^{N} n^{-S} = sum e^(-S * ln(n))
             let mut zeta_sum = Sedenion::zero();
@@ -109,10 +128,8 @@ impl HyperEngine {
                 zeta_sum = zeta_sum.add(&dirichlet_term);
             }
             
-            // STEP 3: Project Output Mapping to WebGPU Shadow
-            // Rather than plotting S directly, we plot the algebraic Zeta(S) OUTPUT
+            // OUTPUT SPACE: Project ζ(s) to 3D
             // This visually proves that mathematical zeros physically dive exactly to origin (0,0,0)
-            let idx = i * 3;
             let output_quat = zeta_sum.a.a;
             
             // Map individual convergence to average structural scale
