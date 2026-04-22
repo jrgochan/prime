@@ -98,14 +98,85 @@ theorem finite_abel_s3_diff
              (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) +
       C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
         (N : ℝ) ^ (-(1:ℝ)/4) := by
-  -- Same proof as finite_abel_s2_diff:
-  -- 1. Abel summation decomposes into boundary + interior
-  -- 2. Boundary: |M(M)|·|f(M)| + |M(N)|·|f(N)| ≤ C_m·(boundary terms)
-  -- 3. Interior: Σ C_m·(k^{3/4}+N^{3/4})·w(k)/k²
-  --    where w(k) = log²k+2logk+2 (from DPR on log²(k)/k)
-  --    ≤ 2·C_m·logsq_weighted_tail by interior_bound_weighted
-  --    = C_m·(8log²N+96logN+496)·N^{-1/4}
-  sorry
+  -- ─── Step 1: S₃(M) - S₃(N) = Σ_{k=N+1}^M μ(k)·log²(k)/k ───
+  have h_diff : S₃_at M - S₃_at N =
+      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) *
+        (Real.log (k : ℝ)) ^ 2 / (k : ℝ)) := by
+    unfold S₃_at
+    rw [show Icc 1 M = Icc 1 N ∪ Icc (N+1) M from by
+      ext k; simp [Finset.mem_Icc, Finset.mem_union]; omega]
+    rw [Finset.sum_union (by
+      rw [Finset.disjoint_left]; intro k hk1 hk2
+      simp [Finset.mem_Icc] at hk1 hk2; omega)]
+    ring
+  -- ─── Step 2: Rewrite as Σ a(k)·f(k) ───
+  rw [h_diff]
+  set a := fun k => (↑(ArithmeticFunction.moebius k) : ℝ)
+  set f : ℕ → ℝ := fun k => (Real.log (k : ℝ)) ^ 2 / (k : ℝ)
+  set C_bound : ℕ → ℝ := fun k => C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4))
+  set δ : ℕ → ℝ := fun k => ((Real.log (k : ℝ)) ^ 2 + 2 * Real.log (k : ℝ) + 2) / (k : ℝ) ^ 2
+  have h_af : ∀ k, (↑(ArithmeticFunction.moebius k) : ℝ) *
+      (Real.log (k : ℝ)) ^ 2 / (k : ℝ) = a k * f k := by
+    intro k; simp only [a, f]; ring
+  rw [show (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) *
+      (Real.log (k : ℝ)) ^ 2 / (k : ℝ)) =
+      (Icc (N+1) M).sum (fun k => a k * f k) from
+      Finset.sum_congr rfl (fun k _ => h_af k)]
+  -- ─── Step 3: Abel summation ───
+  have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
+    (fun k hk1 hk2 => by
+      simp only [a, C_bound]
+      unfold partialSum
+      exact mertens_partial_sum_bound C_m hMertens N k hN (by omega))
+    (fun k hk1 hk2 => by
+      simp only [f, δ]
+      have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+      have hk1_cast : ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
+      rw [hk1_cast, show (Real.log ((k:ℝ) + 1)) ^ 2 / ((k:ℝ) + 1) -
+          (Real.log (k:ℝ)) ^ 2 / (k:ℝ) =
+          -((Real.log (k:ℝ)) ^ 2 / (k:ℝ) -
+            (Real.log ((k:ℝ) + 1)) ^ 2 / ((k:ℝ) + 1)) from by ring]
+      rw [abs_neg]
+      exact s3_discrete_diff_bound k (by omega))
+  -- ─── Step 4: Bound the Abel output ───
+  calc |(Icc (N+1) M).sum (fun k => a k * f k)|
+      ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
+    _ ≤ C_m * ((M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 +
+             (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) +
+        C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
+          (N : ℝ) ^ (-(1:ℝ)/4) := by
+      apply add_le_add
+      · -- Boundary: C_bound(M)*|f(M)| = C_m*(M^{3/4}+N^{3/4})*(log²(M)/M)
+        simp only [C_bound, f]
+        rw [abs_of_nonneg (div_nonneg (sq_nonneg _) (by positivity))]
+        rw [show C_m * ((M : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
+            ((Real.log (M : ℝ)) ^ 2 / (M : ℝ)) =
+            C_m * ((M : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ) +
+                   (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) from by ring]
+        gcongr
+        rw [show (M : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ) =
+            ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) * (Real.log (M : ℝ)) ^ 2 from by ring]
+        rw [rpow_34_div_eq M (by omega)]
+      · -- Interior: ≤ C_m * (8*log²N+96logN+496) * N^{-1/4}
+        simp only [C_bound, δ]
+        have h_int := interior_bound_weighted N M (by omega) hM C_m hC
+          (fun k => (Real.log (k : ℝ)) ^ 2 + 2 * Real.log (k : ℝ) + 2)
+          (fun k hk => by
+            rw [Finset.mem_Icc] at hk
+            have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast show 1 ≤ k by omega
+            have hlog_nn := Real.log_nonneg this
+            nlinarith [sq_nonneg (Real.log (k : ℝ))])
+          ((4 * (Real.log (N : ℝ)) ^ 2 + 48 * Real.log (N : ℝ) + 248) *
+            (N : ℝ) ^ (-(1:ℝ)/4))
+          (by
+            apply mul_nonneg
+            · have : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+              have hlog_nn := Real.log_nonneg this
+              nlinarith [sq_nonneg (Real.log (N : ℝ))]
+            · positivity)
+          (logsq_weighted_tail N M hN hM)
+        -- 2 * C_m * ((4log²N+48logN+248) * N^{-1/4}) = C_m * (8log²N+96logN+496) * N^{-1/4}
+        linarith
 
 -- ════════════════════════════════════════════════
 -- §4. S₃ DECAY VIA LIMIT ARGUMENT
