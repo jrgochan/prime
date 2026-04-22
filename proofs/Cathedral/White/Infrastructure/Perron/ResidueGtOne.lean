@@ -194,7 +194,7 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
   rw [hbot, htop, hright, hleft]
   -- The goal now has I * (-I * ... - -I * ...) terms. Simplify using I*(-I) = 1.
   have hII : (I : ℂ) * -I = 1 := by
-    simp [Complex.ext_iff, Complex.I_re, Complex.I_im]
+    simp [Complex.ext_iff]
   -- Normalize sign patterns
   have hs1 : (-↑R + -↑T * I : ℂ) = -↑R - ↑T * I := by ring
   have hs2 : (↑R - -↑T * I : ℂ) = ↑R + ↑T * I := by ring
@@ -447,9 +447,9 @@ lemma perron_integral_bound_with_R_gt_one {y c R T : ℝ} (hy : 1 < y)
     have key : rv = I⁻¹ * (I * rv) := by rw [inv_mul_cancel_left₀ hI_ne]
     rw [key, hrv_eq, Complex.inv_I]
     have hII : (-I : ℂ) * I = 1 := by
-      simp [Complex.ext_iff, Complex.I_re, Complex.I_im]
+      simp [Complex.ext_iff]
     ring_nf
-    simp [Complex.I_mul_I]
+    simp
   -- Step 2: perronIntegral - 1 = (1/(2π))(-I(top - bot) + lv)
   have hP_sub : perronIntegral y c T - 1 =
       (1 / (2 * ↑Real.pi)) * ((-I) * (top - bot) + lv) := by
