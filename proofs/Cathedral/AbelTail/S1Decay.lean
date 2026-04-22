@@ -15,6 +15,7 @@
   This is the HARDEST section and it's COMPLETELY PROVED.
 -/
 
+import Cathedral.AbelTail.AbelInterior
 import Cathedral.AbelTail.RectangleBound
 import Cathedral.AbelTail.Telescoping
 import Cathedral.AbelTail.MertensBridge
@@ -105,13 +106,7 @@ theorem finite_abel_s1_diff
         rw [show C_m * ((M : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) * (1 / (M : ℝ)) =
             C_m * ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) from by ring]
         gcongr
-        have h_rpow : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) = (M : ℝ) ^ (-(1:ℝ)/4) := by
-          have hM34 : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) ^ (1:ℝ) = (M : ℝ) ^ ((3:ℝ)/4 - 1) :=
-            (Real.rpow_sub (by positivity : (0:ℝ) < (M:ℝ)) _ _).symm ▸ rfl
-          rw [Real.rpow_one] at hM34
-          rw [hM34]
-          congr 1; ring
-        rw [h_rpow]
+        rw [rpow_34_div_eq M (by omega)]
       · -- Interior sum ≤ C_m * 5 * N^{-1/4}
         simp only [C_bound, δ]
         have h_ico_icc : (Ico (N+1) M).sum (fun k =>

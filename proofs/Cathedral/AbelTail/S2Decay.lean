@@ -121,15 +121,9 @@ theorem finite_abel_s2_diff
             C_m * ((M : ℝ) ^ ((3:ℝ)/4) * Real.log (M : ℝ) / (M : ℝ) +
                    (N : ℝ) ^ ((3:ℝ)/4) * Real.log (M : ℝ) / (M : ℝ)) from by ring]
         gcongr
-        -- M^{3/4}·log(M)/M = M^{-1/4}·log(M)
-        have h_rpow : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) = (M : ℝ) ^ (-(1:ℝ)/4) := by
-          have hM34 : (M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) ^ (1:ℝ) = (M : ℝ) ^ ((3:ℝ)/4 - 1) :=
-            (Real.rpow_sub (by positivity : (0:ℝ) < (M:ℝ)) _ _).symm ▸ rfl
-          rw [Real.rpow_one] at hM34
-          rw [hM34]; congr 1; ring
         rw [show (M : ℝ) ^ ((3:ℝ)/4) * Real.log (M : ℝ) / (M : ℝ) =
             ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) * Real.log (M : ℝ) from by ring]
-        rw [h_rpow]
+        rw [rpow_34_div_eq M (by omega)]
       · -- Interior sum ≤ C_m * 78 * N^{-1/4} * log(N)
         -- Apply interior_bound_weighted with w(k) = (log(k)+1)
         simp only [C_bound, δ]

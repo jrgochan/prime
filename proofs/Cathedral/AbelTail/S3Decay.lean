@@ -12,7 +12,12 @@
   STATUS: 1 sorry remaining (same pattern as S₂).
 -/
 
-import Cathedral.AbelTail.S2Decay
+import Cathedral.AbelTail.AbelInterior
+import Cathedral.AbelTail.MertensBridge
+import Cathedral.AbelTail.DiscreteProductRule
+import Cathedral.AbelTail.LogTailBound
+import Cathedral.MellinBridge.AbelSummation
+import Cathedral.Assembly.AbelEngine
 
 noncomputable section
 open Real Finset BigOperators
