@@ -100,7 +100,18 @@ lean_lib «Cathedral» where
     `Cathedral.Sieve.ParitySchur,
     `Cathedral.Sieve.BilinearSieve,
     `Cathedral.Sieve.MoebiusUncoupling,
-    -- Assembly
+    -- Abel tail engine (production split from Scratch)
+    `Cathedral.AbelTail.Antiderivative,
+    `Cathedral.AbelTail.RectangleBound,
+    `Cathedral.AbelTail.Telescoping,
+    `Cathedral.AbelTail.MertensBridge,
+    `Cathedral.AbelTail.DiscreteProductRule,
+    `Cathedral.AbelTail.S1Decay,
+    `Cathedral.AbelTail.S2Decay,
+    `Cathedral.AbelTail.S3Decay,
+    `Cathedral.AbelTail.Assembly,
+    -- Assembly (the crown)
+    `Cathedral.Assembly.CertifiedComputation,
     `Cathedral.Assembly.QuadFormBridge,
     `Cathedral.Assembly.GramWitness,
     `Cathedral.Assembly.BDBridge,
@@ -119,3 +130,4 @@ lean_lib «Cathedral» where
     -- White Singlet Infrastructure (Mathlib-ready scaffolds)
     `Cathedral.White.Infrastructure.MontgomeryVaughan
   ]
+

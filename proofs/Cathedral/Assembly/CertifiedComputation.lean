@@ -118,39 +118,39 @@ theorem certified_nb_distance_1000 : nbDistSq' 1000 < 0.103 := by
 -- §3. RAYLEIGH GROWTH — CERTIFICATE CONSISTENCY
 -- ════════════════════════════════════════════════
 
-/-- **COMPUTATIONAL OBSERVATION (from certificates):**
-
-    The Rayleigh quotient S²/Q for the Möbius log-cutoff witness
-    converges to a constant ≈ 21.65 (the Báez-Duarte constant).
-
-    | N    | S²/Q      | S²/(Q·lnN) |
-    |------|-----------|------------|
-    | 10   | 14.962    | 6.498      |
-    | 100  | 20.506    | 4.453      |
-    | 1000 | 22.124    | 3.203      |
-
-    This means: for the Möbius witness, ∫(1-f_N)² = 1/(1+S²/Q)
-    converges to ≈ 1/22.65 ≈ 0.044, not to 0.
-
-    The Möbius witness is NOT the optimal witness for the NB problem.
-    It certifies d² > 0 (which we know unconditionally from AugmentedGram),
-    not d² → 0 (which requires the OPTIMAL witness from G⁻¹b).
-
-    The forward direction proof uses the Mertens-weighted witness
-    (not the simple log-cutoff) and produces d² ≤ K/log(N) → 0. -/
+-- **COMPUTATIONAL OBSERVATION (from certificates):**
+--
+--   The Rayleigh quotient S²/Q for the Möbius log-cutoff witness
+--   converges to a constant ≈ 21.65 (the Báez-Duarte constant).
+--
+--   | N    | S²/Q      | S²/(Q·lnN) |
+--   |------|-----------|------------|
+--   | 10   | 14.962    | 6.498      |
+--   | 100  | 20.506    | 4.453      |
+--   | 1000 | 22.124    | 3.203      |
+--
+--   This means: for the Möbius witness, ∫(1-f_N)² = 1/(1+S²/Q)
+--   converges to ≈ 1/22.65 ≈ 0.044, not to 0.
+--
+--   The Möbius witness is NOT the optimal witness for the NB problem.
+--   It certifies d² > 0 (which we know unconditionally from AugmentedGram),
+--   not d² → 0 (which requires the OPTIMAL witness from G⁻¹b).
+--
+--   The forward direction proof uses the Mertens-weighted witness
+--   (not the simple log-cutoff) and produces d² ≤ K/log(N) → 0.
 
 -- ════════════════════════════════════════════════
 -- §4. CONSISTENCY CHECK: CERTIFICATE vs AUGMENTED GRAM
 -- ════════════════════════════════════════════════
 
-/-- The computational certificates are WEAKER than the formal proof.
-
-    AugmentedGram.lean proves G_N PD for ALL N ≥ 1 (unconditionally).
-    The certificates verify this for N ≤ 1000 at 256-bit precision.
-
-    Purpose: Independent cross-validation, not primary proof source.
-    The certificates also provide explicit witness values that connect
-    to the existential theorems in the proof chain. -/
+-- The computational certificates are WEAKER than the formal proof.
+--
+--   AugmentedGram.lean proves G_N PD for ALL N ≥ 1 (unconditionally).
+--   The certificates verify this for N ≤ 1000 at 256-bit precision.
+--
+--   Purpose: Independent cross-validation, not primary proof source.
+--   The certificates also provide explicit witness values that connect
+--   to the existential theorems in the proof chain.
 
 -- ════════════════════════════════════════════════
 -- §5. AXIOM AUDIT
