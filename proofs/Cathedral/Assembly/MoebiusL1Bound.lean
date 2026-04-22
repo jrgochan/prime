@@ -103,11 +103,49 @@ theorem moebius_dot_product_approx_one
     (N : ℕ) (hN : 10 ≤ N) :
     |1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)| ≤
     (C_m + 1) / Real.log ↑N := by
-  -- The dot product decomposes algebraically into S₁ and S₂ weighted sums.
-  -- Under the Mertens bound, the S₁/S₂ decay theorems (AbelTail, PROVED)
-  -- give |S₁(N)| and |S₂(N)+1| ≤ C·N^{-1/4}·logN.
-  -- The logWeight factor adds at most O(1/log N) additional error.
-  -- Assembly: |1-bᵀv| ≤ (1-γ)·|S₁_w| + |S₂_w+1| ≤ (C+1)/log N.
+  -- Step 0: Convert Mertens bound from O(√x·log²x) to O(x^{3/4})
+  -- Key: x^{1/2}·(log x)² ≤ 64·x^{3/4} for x ≥ 2 (from MertensConversion)
+  have hMertens34 : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ (64 * C_m) * x ^ ((3:ℝ)/4) := by
+    intro x hx
+    have hx_pos : (0 : ℝ) < x := by linarith
+    calc |((mertensFunction x : ℤ) : ℝ)|
+        ≤ C_m * x ^ ((1:ℝ)/2) * (Real.log x) ^ 2 := hMertens x hx
+      _ ≤ C_m * (64 * x ^ ((3:ℝ)/4)) := by
+          have h_key : x ^ ((1:ℝ)/2) * (Real.log x) ^ 2 ≤ 64 * x ^ ((3:ℝ)/4) := by
+            have ht_ge1 : 1 ≤ x ^ ((1:ℝ)/8) := by
+              rw [← Real.rpow_zero x]
+              exact Real.rpow_le_rpow_of_exponent_le (by linarith) (by norm_num)
+            have h_log_le : Real.log (x ^ ((1:ℝ)/8)) ≤ x ^ ((1:ℝ)/8) := by
+              linarith [Real.add_one_le_exp (Real.log (x ^ ((1:ℝ)/8))),
+                        Real.exp_log (lt_of_lt_of_le one_pos ht_ge1)]
+            have h_log_eq : Real.log x = 8 * Real.log (x ^ ((1:ℝ)/8)) := by
+              rw [Real.log_rpow hx_pos]; ring
+            have h_t_sq : (x ^ ((1:ℝ)/8)) ^ 2 = x ^ ((1:ℝ)/4) := by
+              rw [← Real.rpow_natCast (x ^ ((1:ℝ)/8)) 2,
+                  ← Real.rpow_mul (le_of_lt hx_pos)]
+              norm_num
+            calc x ^ ((1:ℝ)/2) * (Real.log x) ^ 2
+                = x ^ ((1:ℝ)/2) * (64 * (Real.log (x ^ ((1:ℝ)/8))) ^ 2) := by
+                  rw [h_log_eq]; ring
+              _ ≤ x ^ ((1:ℝ)/2) * (64 * (x ^ ((1:ℝ)/8)) ^ 2) := by
+                  apply mul_le_mul_of_nonneg_left _ (le_of_lt (Real.rpow_pos_of_pos hx_pos _))
+                  apply mul_le_mul_of_nonneg_left _ (by norm_num)
+                  exact pow_le_pow_left₀ (Real.log_nonneg ht_ge1) h_log_le 2
+              _ = 64 * (x ^ ((1:ℝ)/2) * x ^ ((1:ℝ)/4)) := by rw [h_t_sq]; ring
+              _ = 64 * x ^ ((3:ℝ)/4) := by
+                  congr 1; rw [← Real.rpow_add hx_pos]; norm_num
+          nlinarith [Real.rpow_pos_of_pos hx_pos ((1:ℝ)/2),
+                     Real.rpow_pos_of_pos hx_pos ((3:ℝ)/4)]
+      _ = (64 * C_m) * x ^ ((3:ℝ)/4) := by ring
+  -- Step 1: Get S₁ decay: |S₁(N)| ≤ C₁·N^{-1/4}
+  obtain ⟨C₁, hC₁_pos, h_s1⟩ := s1_decay (64 * C_m) (by positivity) hMertens34 hPNT₁
+  -- Step 2: Get S₂ decay: |S₂(N)+1| ≤ C₂·N^{-1/4}·log(N)
+  obtain ⟨C₂, hC₂_pos, h_s2⟩ := s2_decay (64 * C_m) (by positivity) hMertens34 hPNT₂
+  -- Step 3: The dot product = -(1-γ)·S₁_w - S₂_w where S₁_w, S₂_w are
+  -- weighted sums. These differ from S₁, S₂ by O(1/log N) corrections.
+  -- The bound combines the S₁/S₂ decay (O(N^{-1/4})) with the
+  -- logWeight correction (O(1/log N)) to give O((C+1)/log N).
   sorry
 
 -- ════════════════════════════════════════════════
