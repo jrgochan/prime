@@ -55,27 +55,27 @@ open Real
       cd experiments/spectral/rank1-interference
       cargo run --release --bin certified
 
-    Trust level: 256-bit MPFR computation, max f64 error < 5e-14.
+    Trust level: 256-bit MPFR computation, max f64 error < 1e-13.
     This is NOT a mathematical axiom — it is a claim about the output
     of a deterministic computation. -/
-axiom oracle_lambda_min_positive_1000 :
-    lambdaMin 1000 > 0
+axiom oracle_lambda_min_positive_2000 :
+    lambdaMin 2000 > 0
 
-/-- **THEOREM (PROVED):** G_N is positive definite for all 2 ≤ N ≤ 1000.
+/-- **THEOREM (PROVED):** G_N is positive definite for all 2 ≤ N ≤ 2000.
 
     Proof: By `lambdaMin_shifted_antitone` (PROVED unconditionally),
     λ_min is non-increasing: N₁ ≤ N₂ → λ_min(N₂) ≤ λ_min(N₁).
-    Combined with oracle_lambda_min_positive_1000, we get
-    λ_min(N) ≥ λ_min(1000) > 0 for all N ≤ 1000.
+    Combined with oracle_lambda_min_positive_2000, we get
+    λ_min(N) ≥ λ_min(2000) > 0 for all N ≤ 2000.
 
     Note: This is actually WEAKER than what AugmentedGram.lean proves
-    (which gives PD for ALL N, not just N ≤ 1000). The computational
+    (which gives PD for ALL N, not just N ≤ 2000). The computational
     certificate serves as independent cross-validation. -/
-theorem certified_gram_pd_up_to_1000 (N : ℕ) (hN : 2 ≤ N) (hN_le : N ≤ 1000) :
+theorem certified_gram_pd_up_to_2000 (N : ℕ) (hN : 2 ≤ N) (hN_le : N ≤ 2000) :
     lambdaMin N > 0 := by
-  have h_bound : lambdaMin 1000 ≤ lambdaMin N :=
-    lambdaMin_antitone_ge2 N 1000 hN hN_le
-  linarith [oracle_lambda_min_positive_1000]
+  have h_bound : lambdaMin 2000 ≤ lambdaMin N :=
+    lambdaMin_antitone_ge2 N 2000 hN hN_le
+  linarith [oracle_lambda_min_positive_2000]
 
 -- ════════════════════════════════════════════════
 -- §2. WITNESS CERTIFICATION — FINITE DISTANCE BOUNDS
@@ -157,7 +157,7 @@ theorem certified_nb_distance_1000 : nbDistSq' 1000 < 0.103 := by
 -- ════════════════════════════════════════════════
 
 -- Oracle axioms in this file (3 total):
---   oracle_lambda_min_positive_1000 : lambdaMin 1000 > 0
+--   oracle_lambda_min_positive_2000 : lambdaMin 2000 > 0
 --   oracle_witness_bound_100 : ∃ v, ∫(1-f)² < 0.064
 --   oracle_witness_bound_1000 : ∃ v, ∫(1-f)² < 0.103
 --
@@ -165,7 +165,7 @@ theorem certified_nb_distance_1000 : nbDistSq' 1000 < 0.103 := by
 --   cargo run --release --bin certified
 --
 -- Trust boundary: 256-bit MPFR arithmetic + nalgebra eigendecomposition
--- Precision: max|G_256 - G_f64| < 5e-14 at N=1000
+-- Precision: max|G_256 - G_f64| < 1e-13 at N=2000
 
 -- #print axioms certified_gram_pd_up_to_1000
 -- #print axioms certified_nb_distance_100

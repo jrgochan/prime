@@ -2,8 +2,8 @@
   "N": 800,
   "dim": 799,
   "precision_bits": 256,
-  "computation_time_s": 86.425,
-  "timestamp": "2026-04-22T05:21:28.633235+00:00",
+  "computation_time_s": 83.515,
+  "timestamp": "2026-04-22T06:07:41.022161+00:00",
   "precision_audit": {
     "max_f64_delta": 3.886908e-14,
     "f64_sufficient": true

@@ -7,9 +7,11 @@
     {"N_from": 200, "N_to": 300, "lambda_min_from": 3.125490226090792e-5, "lambda_min_to": 1.451156892786381e-5, "non_increasing": true},
     {"N_from": 300, "N_to": 500, "lambda_min_from": 1.451156892786381e-5, "lambda_min_to": 5.459895630082710e-6, "non_increasing": true},
     {"N_from": 500, "N_to": 800, "lambda_min_from": 5.459895630082710e-6, "lambda_min_to": 2.218415196350783e-6, "non_increasing": true},
-    {"N_from": 800, "N_to": 1000, "lambda_min_from": 2.218415196350783e-6, "lambda_min_to": 1.431801404182851e-6, "non_increasing": true}
+    {"N_from": 800, "N_to": 1000, "lambda_min_from": 2.218415196350783e-6, "lambda_min_to": 1.431801404182851e-6, "non_increasing": true},
+    {"N_from": 1000, "N_to": 1500, "lambda_min_from": 1.431801404182851e-6, "lambda_min_to": 6.683757078938187e-7, "non_increasing": true},
+    {"N_from": 1500, "N_to": 2000, "lambda_min_from": 6.683757078938187e-7, "lambda_min_to": 3.815552986616989e-7, "non_increasing": true}
   ],
   "chain_valid": true,
   "lean_theorem": "lambdaMin_shifted_antitone",
-  "conclusion": "G_N positive definite for all N <= 1000"
+  "conclusion": "G_N positive definite for all N <= 2000"
 }

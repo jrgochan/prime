@@ -196,6 +196,43 @@ fn main() {
     println!("    📋 {}/summary.json", args.output.display());
     println!("    📝 {}/report.txt", args.output.display());
     println!("    🔬 {}/eigenvalues_N*.tsv", args.output.display());
+
+    // Certificate output (Direction 5.1: Proof-Carrying Computation)
+    let cert_dir = args.output.join("certificates");
+    std::fs::create_dir_all(&cert_dir).unwrap();
+    let cert_path = cert_dir.join("covariance_cert.json");
+    let mut cert = std::fs::File::create(&cert_path).unwrap();
+    use std::io::Write;
+    writeln!(cert, "{{").unwrap();
+    writeln!(cert, "  \"experiment\": \"Covariance Matrix Probe\",").unwrap();
+    writeln!(cert, "  \"precision\": \"f64 (see certified.rs for 256-bit)\",").unwrap();
+    writeln!(cert, "  \"lean_bridge\": {{").unwrap();
+    writeln!(cert, "    \"axiom\": \"millennium_covariance_cancellation\",").unwrap();
+    writeln!(cert, "    \"file\": \"Cathedral/Assembly/FinalDragon.lean\",").unwrap();
+    writeln!(cert, "    \"claim\": \"vᵀCv ≤ K/logN for Möbius witness\"").unwrap();
+    writeln!(cert, "  }},").unwrap();
+    writeln!(cert, "  \"decay_data\": [").unwrap();
+    for (i, r) in results.iter().enumerate() {
+        let comma = if i + 1 < results.len() { "," } else { "" };
+        writeln!(cert, "    {{\"N\": {}, \"d_sq\": {:.15e}, \"inv_log_N\": {:.15e}, \"ratio\": {:.10}}}{}",
+            r.n, r.d_squared, r.inv_log_n, r.ratio, comma).unwrap();
+    }
+    writeln!(cert, "  ],").unwrap();
+    writeln!(cert, "  \"verdicts\": {{").unwrap();
+    let d_sq_decreasing = results.windows(2).all(|w| w[1].d_squared <= w[0].d_squared);
+    let ratio_stable = {
+        let rats: Vec<f64> = results.iter().filter(|r| r.n >= 10).map(|r| r.ratio).collect();
+        let avg = rats.iter().sum::<f64>() / rats.len() as f64;
+        let std = (rats.iter().map(|r| (r - avg).powi(2)).sum::<f64>() / rats.len() as f64).sqrt();
+        std / avg.abs() < 0.1
+    };
+    writeln!(cert, "    \"d_sq_decreasing\": {},", d_sq_decreasing).unwrap();
+    writeln!(cert, "    \"ratio_d_sq_logN_stable\": {},", ratio_stable).unwrap();
+    writeln!(cert, "    \"consistent_with_1_over_logN_decay\": {}", ratio_stable).unwrap();
+    writeln!(cert, "  }}").unwrap();
+    writeln!(cert, "}}").unwrap();
+    println!("    📜 {}", cert_path.display());
+
     println!();
     println!("  The matrix has spoken. 🏛️");
     println!();

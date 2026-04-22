@@ -1,45 +1,45 @@
 {
-  "N": 50,
-  "dim": 49,
+  "N": 1500,
+  "dim": 1499,
   "precision_bits": 256,
-  "computation_time_s": 0.036,
-  "timestamp": "2026-04-22T06:07:41.021803+00:00",
+  "computation_time_s": 562.682,
+  "timestamp": "2026-04-22T06:07:41.022319+00:00",
   "precision_audit": {
-    "max_f64_delta": 1.547373e-15,
+    "max_f64_delta": 7.850014e-14,
     "f64_sufficient": true
   },
   "eigenvalue_certificate": {
-    "lambda_min": 4.348058430845509e-4,
-    "lambda_max": 2.872647381816799e0,
+    "lambda_min": 6.683757078938187e-7,
+    "lambda_max": 4.923949100135145e0,
     "all_positive": true,
-    "condition_number": 6.606736e3,
-    "num_eigenvalues": 49,
-    "smallest_5": [4.348058430845509e-4, 5.136157061656719e-4, 5.345541291561459e-4, 5.642990270913262e-4, 5.721253662582997e-4],
-    "largest_5": [4.415027691192024e-2, 6.392201996170228e-2, 9.802986059521150e-2, 3.766476567529956e-1, 2.872647381816799e0]
+    "condition_number": 7.367038e6,
+    "num_eigenvalues": 1499,
+    "smallest_5": [6.683757078938187e-7, 6.751317193260457e-7, 6.839429983016185e-7, 6.976040820749819e-7, 7.022346870192795e-7],
+    "largest_5": [9.140759818829496e-2, 1.725733498855350e-1, 4.358593894577856e-1, 1.457342508820291e0, 4.923949100135145e0]
   },
   "witness_certificate": {
     "type": "moebius_log_cutoff",
-    "b_dot_v": 1.020104467211773,
-    "v_dot_Gv": 1.093493182950367,
-    "d_sq": 0.053284248526822,
+    "b_dot_v": 1.206739177128668,
+    "v_dot_Gv": 1.521579078247710,
+    "d_sq": 0.108100723990375,
     "d_sq_positive": true,
     "d_sq_formula": "1 - 2*b^T*v + v^T*G*v",
     "lean_bridge": {
       "theorem": "existential_implies_infimum",
-      "epsilon": 0.053284248527822,
-      "certified_bound": "nbDistSq' 50 < 0.0532842485"
+      "epsilon": 0.108100723991375,
+      "certified_bound": "nbDistSq' 1500 < 0.1081007240"
     }
   },
   "rayleigh_certificate": {
-    "S_squared": 1.040613124025414,
-    "v_dot_Cv": 0.052880058924953,
-    "S_sq_over_Q": 19.6787436546,
-    "c_times_logN": 5.0303241130,
-    "ln_N": 3.9120230054,
+    "S_squared": 1.456219441617174,
+    "v_dot_Cv": 0.065359636630536,
+    "S_sq_over_Q": 22.2801030833,
+    "c_times_logN": 3.0465515743,
+    "ln_N": 7.3132203871,
     "lean_bridge": {
       "theorem": "forward_bridge_from_lambda_trick",
-      "c_constant": 5.0303241130,
-      "log_N": 3.9120230054
+      "c_constant": 3.0465515743,
+      "log_N": 7.3132203871
     }
   },
   "gram_sample": [
@@ -61,11 +61,11 @@
     {"k": 6, "b_k": 3.690906340544204e-1}
   ],
   "witness_sample": [
-    {"k": 2, "v_k": 8.228161798644421e-1},
-    {"k": 3, "v_k": 7.191702893506186e-1},
+    {"k": 2, "v_k": 9.052199791785946e-1},
+    {"k": 3, "v_k": 8.497772211805020e-1},
     {"k": 4, "v_k": -0.000000000000000e0},
-    {"k": 5, "v_k": 5.885919100677790e-1},
-    {"k": 6, "v_k": -5.419864692150607e-1}
+    {"k": 5, "v_k": 7.799276068207697e-1},
+    {"k": 6, "v_k": -7.549972003590966e-1}
   ],
   "verdicts": {
     "gram_positive_definite": true,

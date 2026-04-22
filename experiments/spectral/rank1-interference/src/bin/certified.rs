@@ -595,7 +595,7 @@ fn main() {
     println!();
 
     // Certificate sizes: dense near small N, sparse at large N
-    let sizes = vec![10, 20, 50, 100, 200, 300, 500, 800, 1000];
+    let sizes = vec![10, 20, 50, 100, 200, 300, 500, 800, 1000, 1500, 2000];
     let mut certs = Vec::new();
 
     for &n in &sizes {

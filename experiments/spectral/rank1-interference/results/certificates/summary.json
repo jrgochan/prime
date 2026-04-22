@@ -1,9 +1,9 @@
 {
   "experiment": "Cathedral Proof-Carrying Computation",
   "precision_bits": 256,
-  "timestamp": "2026-04-22T05:21:28.633441+00:00",
-  "N_range": [10, 1000],
-  "num_certificates": 9,
+  "timestamp": "2026-04-22T06:07:41.022562+00:00",
+  "N_range": [10, 2000],
+  "num_certificates": 11,
   "lean_theorems_used": [
     "lambdaMin_shifted_antitone (PROVED)",
     "existential_implies_infimum (PROVED)",
@@ -20,7 +20,9 @@
     {"N": 300, "lambda_min": 1.451156892786381e-5, "d_sq": 0.082742290483862, "S_sq_over_Q": 21.4888779037, "c_logN": 3.7674785108, "all_positive": true, "d_sq_positive": true},
     {"N": 500, "lambda_min": 5.459895630082710e-6, "d_sq": 0.091491436048814, "S_sq_over_Q": 21.7978834958, "c_logN": 3.5075234272, "all_positive": true, "d_sq_positive": true},
     {"N": 800, "lambda_min": 2.218415196350783e-6, "d_sq": 0.098980813057619, "S_sq_over_Q": 22.0354983689, "c_logN": 3.2964515018, "all_positive": true, "d_sq_positive": true},
-    {"N": 1000, "lambda_min": 1.431801404182851e-6, "d_sq": 0.102087427245299, "S_sq_over_Q": 22.1238239322, "c_logN": 3.2027515508, "all_positive": true, "d_sq_positive": true}
+    {"N": 1000, "lambda_min": 1.431801404182851e-6, "d_sq": 0.102087427245299, "S_sq_over_Q": 22.1238239322, "c_logN": 3.2027515508, "all_positive": true, "d_sq_positive": true},
+    {"N": 1500, "lambda_min": 6.683757078938187e-7, "d_sq": 0.108100723990375, "S_sq_over_Q": 22.2801030833, "c_logN": 3.0465515743, "all_positive": true, "d_sq_positive": true},
+    {"N": 2000, "lambda_min": 3.815552986616989e-7, "d_sq": 0.112431841317316, "S_sq_over_Q": 22.3845607352, "c_logN": 2.9449872373, "all_positive": true, "d_sq_positive": true}
   ],
   "global_verdicts": {
     "all_gram_pd": true,

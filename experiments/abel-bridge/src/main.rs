@@ -450,4 +450,38 @@ fn main() {
     }
     println!("║                                                            ║");
     println!("╚══════════════════════════════════════════════════════════════╝");
+
+    // Certificate JSON (Direction 5.1: Proof-Carrying Computation)
+    fs::create_dir_all("results/certificates").unwrap();
+    {
+        let mut f = fs::File::create("results/certificates/abel_tail_cert.json").unwrap();
+        writeln!(f, "{{").unwrap();
+        writeln!(f, "  \"experiment\": \"Abel Summation Bridge v2\",").unwrap();
+        writeln!(f, "  \"precision\": \"f64 ({} Simpson nodes)\",", QUAD_POINTS).unwrap();
+        writeln!(f, "  \"lean_bridge\": {{").unwrap();
+        writeln!(f, "    \"axiom\": \"abel_mertens_tail_raw\",").unwrap();
+        writeln!(f, "    \"file\": \"Cathedral/MellinBridge/AbelSieve.lean\",").unwrap();
+        writeln!(f, "    \"claim\": \"Mertens bound implies Q(N) ≤ K/log(N)\"").unwrap();
+        writeln!(f, "  }},").unwrap();
+        writeln!(f, "  \"mertens_bound_constant\": {:.10},", max_mertens_c).unwrap();
+        writeln!(f, "  \"data\": [").unwrap();
+        for (i, row) in q_rows.iter().enumerate() {
+            let comma = if i + 1 < q_rows.len() { "," } else { "" };
+            writeln!(f, "    {{\"N\": {}, \"Q\": {:.15e}, \"Q_ln_N\": {:.10}, \"bt_v\": {:.10}, \"vt_Gv\": {:.10}}}{}",
+                row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v, comma).unwrap();
+        }
+        writeln!(f, "  ],").unwrap();
+        let q_stable = q_rows.len() >= 3 && {
+            let last = q_rows[q_rows.len()-1].q_times_ln_n;
+            let prev = q_rows[q_rows.len()-2].q_times_ln_n;
+            (last - prev).abs() < 0.5
+        };
+        writeln!(f, "  \"verdicts\": {{").unwrap();
+        writeln!(f, "    \"Q_positive\": {},", q_rows.iter().all(|r| r.q > 0.0)).unwrap();
+        writeln!(f, "    \"Q_ln_N_stabilizing\": {},", q_stable).unwrap();
+        writeln!(f, "    \"abel_identity_verified\": {}", abel_rows.iter().all(|r| r.difference < 1e-4)).unwrap();
+        writeln!(f, "  }}").unwrap();
+        writeln!(f, "}}").unwrap();
+    }
+    println!("  📄 results/certificates/abel_tail_cert.json");
 }
