@@ -36,7 +36,7 @@ theorem mertens_bound_real
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: M(k) = Σ_{n=1}^k μ(n) for k ≥ 1. -/
-theorem mertens_eq_icc_sum (k : ℕ) (hk : 1 ≤ k) :
+theorem mertens_eq_icc_sum (k : ℕ) (_hk : 1 ≤ k) :
     ((mertensFunction (k : ℝ) : ℤ) : ℝ) =
     (Icc 1 k).sum (fun n => (↑(ArithmeticFunction.moebius n) : ℝ)) := by
   unfold mertensFunction

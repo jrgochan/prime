@@ -189,18 +189,51 @@ theorem s2_decay
   suffices h_interior : |S₂_at N - (-1)| ≤
       C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) by
     linarith
-  -- We prove: for all ε > 0, |S₂(N)+1| ≤ interior + ε
   apply le_of_forall_pos_lt_add
   intro ε hε
-  -- From PNT₂: ∃ M₀, ∀ M ≥ M₀, |S₂(M)+1| < ε/2
-  have hε2 : (0 : ℝ) < ε / 2 := by linarith
-  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound hε2 hPNT₂
-  -- Choose M = max(N+1, M₀) — boundary vanishes via sorry for now
-  -- The boundary = C_m·(M^{-1/4}·logM + N^{3/4}·logM/M)
-  -- This → 0 as M → ∞. We need it < ε/2.
-  -- For M large enough: M^{-1/4}·logM < ε/(4·C_m) and N^{3/4}·logM/M < ε/(4·C_m).
-  -- Both hold for M > some M₁(N, ε, C_m). The existence of M₁ needs
-  -- Tendsto (fun M => M^{-1/4}·logM) atTop (nhds 0), which is in Mathlib.
-  sorry
+  -- Step 2a: From PNT₂, ∃ M₀ with |S₂(M)+1| ≤ ε/3 for M ≥ M₀
+  have hε3 : (0 : ℝ) < ε / 3 := by linarith
+  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound hε3 hPNT₂
+  -- Step 2b: From boundary_vanishes_nat, ∃ M₁ with C_m·bdry < ε/3 for M ≥ M₁
+  obtain ⟨M₁, hM₁⟩ := boundary_vanishes_nat N (by omega) C_m hC (ε / 3) hε3
+  -- Step 2c: Choose M = max(N+1, max(M₀, M₁))
+  set M := max (N + 1) (max M₀ M₁)
+  have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
+  have hM_ge_M0 : M₀ ≤ M := le_trans (le_max_left _ _) (le_max_right _ _)
+  have hM_ge_M1 : M₁ ≤ M := le_trans (le_max_right _ _) (le_max_right _ _)
+  -- Step 2d: |S₂(M)+1| ≤ ε/3
+  have hS2M : |S₂_at M - (-1)| ≤ ε / 3 := by
+    unfold S₂_at; exact hM₀ M hM_ge_M0
+  -- Step 2e: Abel bound (M-independent interior)
+  have hAbel := finite_abel_s2_diff C_m hC hMertens N M hN hM_ge_N1
+  -- Step 2f: boundary < ε/3
+  have hBdry := hM₁ M hM_ge_M1
+  -- Step 2g: Triangle inequality
+  have h_tri : |S₂_at N - (-1)| ≤ |S₂_at M - (-1)| + |S₂_at M - S₂_at N| := by
+    have : S₂_at N - (-1) = (S₂_at M - (-1)) + (S₂_at N - S₂_at M) := by ring
+    rw [this]
+    calc |S₂_at M - (-1) + (S₂_at N - S₂_at M)|
+        ≤ |S₂_at M - (-1)| + |S₂_at N - S₂_at M| := abs_add_le _ _
+      _ = |S₂_at M - (-1)| + |S₂_at M - S₂_at N| := by
+          congr 1; exact abs_sub_comm _ _
+  -- Step 2h: Combine
+  -- |S₂(N)+1| ≤ |S₂(M)+1| + |S₂(M)-S₂(N)|
+  --           ≤ ε/3 + (C_m·bdry + C_m·interior)
+  --           < ε/3 + ε/3 + C_m·interior
+  -- So |S₂(N)+1| < 2ε/3 + interior + ε (the +ε from le_of_forall_pos_lt_add)
+  -- Actually: we need |S₂(N)+1| < interior + ε, i.e.,
+  -- interior + ε > |S₂(N)+1|
+  calc |S₂_at N - (-1)|
+      ≤ |S₂_at M - (-1)| + |S₂_at M - S₂_at N| := h_tri
+    _ ≤ ε / 3 + |S₂_at M - S₂_at N| := by linarith [hS2M]
+    _ ≤ ε / 3 + (C_m * ((M : ℝ) ^ (-(1:ℝ)/4) * Real.log (M : ℝ) +
+            (N : ℝ) ^ ((3:ℝ)/4) * Real.log (M : ℝ) / (M : ℝ)) +
+          C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4)) := by
+        linarith [hAbel]
+    _ < ε / 3 + (ε / 3 +
+          C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4)) := by
+        linarith [hBdry]
+    _ = C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) + 2 * ε / 3 := by ring
+    _ < C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) + ε := by linarith
 
 end

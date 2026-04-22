@@ -42,7 +42,7 @@ private lemma hasDerivAt_log_rpow (x : ℝ) (hx : 0 < x) :
     hasDerivAt_neg4_rpow x hx
   have hg : HasDerivAt Real.log (x⁻¹) x := by
     have := Real.hasDerivAt_log hx_ne
-    simp only [one_div] at this; exact this
+    simp at this; exact this
   have hfg : HasDerivAt (fun t => -4 * t ^ (-(1:ℝ)/4) * Real.log t)
       (x ^ (-(5:ℝ)/4) * Real.log x + (-4 * x ^ (-(1:ℝ)/4)) * x⁻¹) x :=
     hf.mul hg
@@ -104,7 +104,8 @@ private lemma log_diff_le_harmonic (N k : ℕ) (hN : 1 ≤ N) (hk : N + 1 ≤ k)
     · -- Inductive case: split off last term
       have ih' := ih hm
       rw [show Ico N (m + 1) = (Ico N m) ∪ {m} from by
-        ext x; simp [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]; omega]
+        ext x; simp only [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]
+        omega]
       rw [Finset.sum_union (by
         rw [Finset.disjoint_singleton_right]; simp [Finset.mem_Ico])]
       simp only [Finset.sum_singleton]
@@ -123,7 +124,8 @@ private lemma log_diff_le_harmonic (N k : ℕ) (hN : 1 ≤ N) (hk : N + 1 ≤ k)
       have hm_eq : m = N := by omega
       rw [hm_eq]
       rw [show Ico N (N + 1) = {N} from by
-        ext x; simp [Finset.mem_Ico, Finset.mem_singleton]]
+        ext x; simp only [Finset.mem_Ico, Finset.mem_singleton]
+        omega]
       simp only [Finset.sum_singleton]
       have : Real.log (((N : ℕ) : ℝ) + 1) - Real.log ((N : ℕ) : ℝ) ≤ 1 / (N : ℝ) :=
         log_step_le_inv N hN
@@ -210,7 +212,8 @@ theorem finite_log_rpow_54_tail_bound (N M : ℕ) (hN : 2 ≤ N) (hNM : N + 1 �
     have hstep5 : (Ico N M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4)) ≤ 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
       -- Split: Ico N M = {N} ∪ Ico(N+1, M) → j=N term + tail
       rw [show Ico N M = {N} ∪ Ico (N+1) M from by
-        ext x; simp [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]; omega]
+        ext x; simp only [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]
+        omega]
       rw [Finset.sum_union (by
         rw [Finset.disjoint_singleton_left]; simp [Finset.mem_Ico])]
       simp only [Finset.sum_singleton]
