@@ -50,17 +50,20 @@ def S₃_at (M : ℕ) : ℝ :=
 
     The constant C satisfies C ≥ 4·(logN+1)²/log²N + 40·(logN+1)/log²N + ...
     For N ≥ 2 and choosing C large enough, this is M-independent. -/
-theorem logsq_weighted_tail (N M : ℕ) (hN : 2 ≤ N) (hNM : N + 1 ≤ M) :
+theorem logsq_weighted_tail (N M : ℕ) (_hN : 2 ≤ N) (_hNM : N + 1 ≤ M) :
     (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
       ((Real.log (k : ℝ)) ^ 2 + 2 * Real.log (k : ℝ) + 2)) ≤
     (4 * (Real.log (N : ℝ)) ^ 2 + 56 * Real.log (N : ℝ) + 200) *
       (N : ℝ) ^ (-(1:ℝ)/4) := by
-  -- Decompose: (log²k + 2logk + 2) = (logk+1)² + 1
-  -- (logk+1)² = (logN+1)² + 2(logN+1)(logk-logN) + (logk-logN)²
-  -- Part 1: (logN+1)²·Σ k^{-5/4} ≤ 4(logN+1)²·N^{-1/4}
-  -- Part 2: 2(logN+1)·h_part2 ≤ 2(logN+1)·20·N^{-1/4} = 40(logN+1)·N^{-1/4}
-  -- Part 3: Σ k^{-5/4}·(logk-logN)² ≤ ... (complex, use sorry)
-  -- Part 4: Σ k^{-5/4} ≤ 4·N^{-1/4}
+  -- Split: (log²k + 2logk + 2) = log²k + 2·(logk + 1).
+  -- Part A: 2·Σ k^{-5/4}·(logk+1) ≤ (8logN+48)·N^{-1/4}  [log_weighted_rpow_54_tail]
+  -- Part B: Σ k^{-5/4}·log²k. Split log²k = logN·logk + logk·(logk-logN).
+  --   B1: logN · Σ k^{-5/4}·logk ≤ (4log²N+20logN)·N^{-1/4}  [log tail × logN]
+  --   B2: Σ k^{-5/4}·logk·(logk-logN) via sum-swap:
+  --       ≤ Σ_j (4logj+20)·j^{-5/4} ≤ (16logN+180)·N^{-1/4}  [iterated tail]
+  -- Total: (4log²N + 20logN + 16logN+180 + 8logN+48)·N^{-1/4}
+  --      = (4log²N + 44logN + 228)·N^{-1/4} ≤ (4log²N+56logN+200)·N^{-1/4}
+  -- [Constant 228 < 200+56·0.5 = 228 — tight! Use logN ≥ log2 ≥ 0.5.]
   sorry
 
 -- ════════════════════════════════════════════════
