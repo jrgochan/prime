@@ -269,21 +269,28 @@ theorem summand_bound_34 (C_m : ℝ) (_hC : 0 < C_m) (N k : ℕ)
 
     This is a STANDARD integral comparison for convergent p-series.
     The Lean proof uses summation + rpow monotonicity. -/
-theorem sum_rpow_neg_quarter_bound (N : ℕ) (hN : 1 ≤ N) :
+theorem sum_rpow_neg_quarter_bound (N : ℕ) (_hN : 1 ≤ N) :
     (Finset.Icc 1 N).sum (fun k => (k : ℝ) ^ (-(1:ℝ)/4)) ≤
       (4:ℝ)/3 * (N : ℝ) ^ ((3:ℝ)/4) := by
-  -- Strategy: 1^{-1/4} = 1 ≤ 4/3. For k ≥ 2, use integral comparison.
-  -- Total: Σ k^{-1/4} ≤ 1 + ∫_1^N x^{-1/4} dx = 1 + (4/3)(N^{3/4} - 1)
-  --       = (4/3)N^{3/4} - 1/3 ≤ (4/3)N^{3/4}
+  -- Strategy: each k^{-1/4} ≤ (4/3)·(k^{3/4} - (k-1)^{3/4}), telescope.
+  -- For k ≥ 1: k^{-1/4} is the minimum of t^{-1/4} on [k-1, k],
+  -- so k^{-1/4} ≤ ∫_{k-1}^{k} t^{-1/4} dt = (4/3)(k^{3/4} - (k-1)^{3/4}).
+  -- This bound requires MVT or detailed rpow analysis.
   --
-  -- For the integral comparison, we need:
-  --   k^{-1/4} ≤ ∫_{k-1}^k x^{-1/4} dx for k ≥ 2
-  -- This holds because x^{-1/4} is decreasing on (0,∞), so
-  --   min_{x∈[k-1,k]} x^{-1/4} = k^{-1/4}
-  --   and k^{-1/4} · 1 ≤ ∫_{k-1}^k x^{-1/4} dx
+  -- Simpler approach: use weaker but sufficient bound.
+  -- Σ_{k=1}^N k^{-1/4} ≤ N (each term ≤ 1 for k ≥ 1).
+  -- N ≤ (4/3)·N^{3/4} iff N^{1/4} ≤ 4/3, which fails for N ≥ 4.
   --
-  -- Full formalization requires rpow monotonicity + integral bounds.
-  -- Deferred to a focused session on Lean measure theory infrastructure.
+  -- Correct approach: split k=1 term + induction with rpow telescope.
+  -- k=1: 1^{-1/4} = 1 ≤ (4/3)·1 = 4/3. ✓
+  -- k ≥ 2: k^{-1/4} is handled by integral comparison.
+  --
+  -- Full formalization requires rpow integral bounds.
+  -- Use the Icc → Ico + singleton split and bound Ico via rpow_54.
+  -- Actually: a clean approach is to bound each k^{-1/4} ≤ k^0 = 1
+  -- and use Σ 1 = N ≤ (4/3)·N... no this is wrong for large N.
+  --
+  -- Postpone: this lemma is unused and deep in L² infrastructure.
   sorry
 
 -- ════════════════════════════════════════════════
