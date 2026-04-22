@@ -22,6 +22,7 @@ members = [
     "experiments/spectral/spectral-fourier",
     "experiments/vasyunin",
     "experiments/vasyunin-integral",
+    "experiments/millennium-wall",
 ]
 
 [profile.release]

@@ -1,0 +1,10 @@
+[package]
+name = "millennium-wall"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Millennium Wall Validator — certifies Gram entry asymptotics, Vasyunin sum bounds, 1D Abel reduction, and covariance decay for the millennium_covariance_cancellation graduation"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
