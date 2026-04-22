@@ -107,6 +107,7 @@ lean_lib «Cathedral» where
     `Cathedral.AbelTail.MertensBridge,
     `Cathedral.AbelTail.DiscreteProductRule,
     `Cathedral.AbelTail.LogTailBound,
+    `Cathedral.AbelTail.AbelInterior,
     `Cathedral.AbelTail.S1Decay,
     `Cathedral.AbelTail.S2Decay,
     `Cathedral.AbelTail.S3Decay,
