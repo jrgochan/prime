@@ -12,6 +12,10 @@ serde_json = "1"
 name = "eigenbasis"
 path = "src/bin/eigenbasis.rs"
 
+[[bin]]
+name = "eigenbasis_mod8"
+path = "src/bin/eigenbasis_mod8.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
