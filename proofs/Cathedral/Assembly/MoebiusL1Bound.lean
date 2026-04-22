@@ -116,12 +116,27 @@ theorem moebius_quadform_finite_bound (N : ℕ) (hN : 2 ≤ N) :
       vasyuninGramEntry (i.val + 1) (j.val + 1))
       (bdMoebiusWeight N) ≤ ((N : ℝ) - 1) ^ 2 / 2 := by
   have h_l1 := moebius_weight_l1_crude N hN
-  have h_upper := bd_l2_error_upper_bound N (by omega) (bdMoebiusWeight N)
-  -- ∫(1-f)² = 1 - 2bᵀv + vᵀGv ≤ 1 - 2bᵀv + (1/2)(Σ|v|)²
-  -- So vᵀGv ≤ (1/2)(Σ|v|)² ≤ (1/2)(N-1)²
-  -- The bound follows from bd_l2_error_upper_bound internally.
-  -- For now, use the direct path through vasyuninQuadForm_le_half_l1_sq.
-  sorry
+  -- Step 1: vᵀGv ≤ (1/2)(Σ|v|)²
+  suffices h_quad : realQuadForm (Matrix.of fun i j =>
+      vasyuninGramEntry (i.val + 1) (j.val + 1))
+      (bdMoebiusWeight N) ≤ (1/2) * (∑ i : Fin (N-1), |bdMoebiusWeight N i|)^2 by
+    calc realQuadForm _ (bdMoebiusWeight N)
+        ≤ (1/2) * (∑ i : Fin (N-1), |bdMoebiusWeight N i|)^2 := h_quad
+      _ ≤ (1/2) * ((N : ℝ) - 1)^2 := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num)
+          exact pow_le_pow_left₀ (Finset.sum_nonneg fun i _ => abs_nonneg _) h_l1 2
+      _ = ((N : ℝ) - 1)^2 / 2 := by ring
+  -- Step 2: Match the quadratic form with vasyuninQuadForm_le_half_l1_sq
+  unfold realQuadForm
+  simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
+  simp_rw [Finset.mul_sum]
+  have h := vasyuninQuadForm_le_half_l1_sq (bdMoebiusWeight N)
+  calc ∑ i, ∑ j, bdMoebiusWeight N i *
+        (vasyuninGramEntry (↑i + 1) (↑j + 1) * bdMoebiusWeight N j)
+      = ∑ i, ∑ j, bdMoebiusWeight N i * bdMoebiusWeight N j *
+          vasyuninGramEntry (↑i + 1) (↑j + 1) := by
+        congr 1; ext i; congr 1; ext j; ring
+    _ ≤ _ := h
 
 -- ════════════════════════════════════════════════
 -- §5. THE MAIN ASSEMBLY: Mertens → L² bound
