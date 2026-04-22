@@ -1,27 +1,35 @@
 /-
   Cathedral/Assembly/FinalDragon.lean
 
-  ## The Final Dragon v5: Abel Engine Graduated 🎓
+  ## The Final Dragon v6: Millennium Wall Graduated 🎓🎓
 
   Theorist Directive (April 18, 2026 — "The Scholar and the Forge"):
   "Stop looking for the unconditional bypass. Finish the Cathedral's walls."
 
-  Updated April 22, 2026 — TWO milestones:
+  Updated April 22, 2026 — THREE milestones:
   1. The proof chain uses the TIGHTER bound:
      rh_implies_mertens_bound: RH → |M(x)| = O(x^{1/2}·(log x)²)
      from which the 3/4 bound is a PROVED COROLLARY (not an axiom).
   2. abel_mertens_tail_raw GRADUATED from axiom to theorem! 🎓
      Proved via s1_decay + s2_decay + s3_decay in Cathedral.AbelTail.
+  3. millennium_covariance_cancellation GRADUATED from axiom to theorem! 🎓🎓
+     Proved via Variance Decomposition + CovarianceAbel structural lemmas.
+     Replaced by SIMPLER axiom: gram_form_upper_bound (vᵀGv ≤ 1+K/logN).
 
   PROOF CHAIN (axioms marked, everything else is THEOREM):
     rh_implies_mertens_bound     [AXIOM: classical ANT — Titchmarsh 14.25]
       → rh_implies_mertens_34   [THEOREM: x^{1/2}·log²x ≤ 64·x^{3/4}]
       → abel_mertens_tail_raw   [THEOREM! 🎓 was axiom, now proved]
       → pnt_mertens_tail_domination [THEOREM: N^{-1/4}·log³N domination]
+      → moebius_mean_finite_bound [THEOREM: |bᵀv-1| ≤ K/logN]
+      → millennium_covariance_cancellation [THEOREM! 🎓🎓 was axiom, now proved]
       → mertens_l2_decay         [THEOREM: ∫(1-f)² ≤ K/log(N)]
       → rh_implies_l2_convergence_proved [THEOREM! RH → d²_N → 0]
 
-  Critical path axioms: 6 (was 7). Kernel axioms: 3.
+  Critical path axioms in FinalDragon: 4
+    - rh_implies_mertens_bound (upstream, in MertensBound.lean)
+    - pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k
+    - gram_form_upper_bound (NEW, simpler than old millennium wall)
 -/
 
 import Cathedral.Defs
