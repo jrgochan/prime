@@ -32,6 +32,7 @@ PAPERS=(
   cathedral-press
   cathedral-legal
   cathedral-letter
+  cathedral-next
 )
 
 GREEN='\033[0;32m'
