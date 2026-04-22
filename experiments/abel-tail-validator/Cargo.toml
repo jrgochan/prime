@@ -1,0 +1,10 @@
+[package]
+name = "abel-tail-validator"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Abel Tail Validator — certifies log-weighted tail bounds, S₂/S₃ decay rates, and L² bridge convergence with 256-bit MPFR precision"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

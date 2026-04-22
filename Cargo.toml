@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "experiments/abel-bridge",
+    "experiments/abel-tail-validator",
     "experiments/algebraic/cross-class-verifier",
     "experiments/algebraic/quaternion-rh",
     "experiments/baez-duarte",
