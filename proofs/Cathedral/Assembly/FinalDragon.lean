@@ -1,26 +1,27 @@
 /-
   Cathedral/Assembly/FinalDragon.lean
 
-  ## The Final Dragon v4: TIGHTER BOUND Architecture
+  ## The Final Dragon v5: Abel Engine Graduated 🎓
 
   Theorist Directive (April 18, 2026 — "The Scholar and the Forge"):
   "Stop looking for the unconditional bypass. Finish the Cathedral's walls."
 
-  Updated April 22, 2026 — the proof chain now uses the TIGHTER bound:
-    rh_implies_mertens_bound: RH → |M(x)| = O(x^{1/2}·(log x)²)
-  from which the 3/4 bound is a PROVED COROLLARY (not an axiom).
+  Updated April 22, 2026 — TWO milestones:
+  1. The proof chain uses the TIGHTER bound:
+     rh_implies_mertens_bound: RH → |M(x)| = O(x^{1/2}·(log x)²)
+     from which the 3/4 bound is a PROVED COROLLARY (not an axiom).
+  2. abel_mertens_tail_raw GRADUATED from axiom to theorem! 🎓
+     Proved via s1_decay + s2_decay + s3_decay in Cathedral.AbelTail.
 
-  PROOF CHAIN (with tighter bound highlighted):
-    rh_implies_mertens_bound   [AXIOM: classical ANT — Titchmarsh 14.25]
+  PROOF CHAIN (axioms marked, everything else is THEOREM):
+    rh_implies_mertens_bound     [AXIOM: classical ANT — Titchmarsh 14.25]
       → rh_implies_mertens_34   [THEOREM: x^{1/2}·log²x ≤ 64·x^{3/4}]
-      → abel_mertens_tail_raw   [AXIOM: Abel summation on tail]
+      → abel_mertens_tail_raw   [THEOREM! 🎓 was axiom, now proved]
       → pnt_mertens_tail_domination [THEOREM: N^{-1/4}·log³N domination]
       → mertens_l2_decay         [THEOREM: ∫(1-f)² ≤ K/log(N)]
       → rh_implies_l2_convergence_proved [THEOREM! RH → d²_N → 0]
 
-  NOTE: The tighter x^{1/2}·log²x bound gives FASTER decay in the
-  abel_mertens_tail channel: O(N^{-1/2}·log²N) vs O(N^{-1/4}).
-  A future abel_mertens_tail_log axiom could exploit this directly.
+  Critical path axioms: 6 (was 7). Kernel axioms: 3.
 -/
 
 import Cathedral.Defs
@@ -33,6 +34,9 @@ import Cathedral.MellinBridge.MertensIntegral
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.MeanIntegral
 import Cathedral.Vasyunin.Proof.LambdaTrick
+import Cathedral.AbelTail.S1Decay
+import Cathedral.AbelTail.S2Decay
+import Cathedral.AbelTail.S3Decay
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 noncomputable section
@@ -231,7 +235,7 @@ private lemma rpow_quarter_log_cube_bounded :
         exact pow_le_pow_left₀ (by positivity) h_piece 3
     _ = 1728 := by norm_num
 
-/-- **THE ABEL ENGINE AXIOM**: Raw Abel-Mertens tail bounds.
+/-- **THEOREM** (was THE ABEL ENGINE AXIOM — now GRADUATED to theorem! 🎓)
 
     From Mertens |M(x)| ≤ C_m·x^{3/4} + PNT convergence,
     Abel summation on the tail Σ_{k>N} gives:
@@ -239,29 +243,19 @@ private lemma rpow_quarter_log_cube_bounded :
       |S₂(N)+1| ≤ C·N^{-1/4}·logN
       |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N
 
-    NOTE (April 22, 2026): Since rh_implies_mertens_bound gives the
-    TIGHTER bound |M(x)| ≤ C·x^{1/2}·(log x)², and this is fed
-    through rh_implies_mertens_34 (PROVED: x^{1/2}·log²x ≤ 64·x^{3/4}),
-    the x^{3/4} input here is a conservative envelope. A future
-    abel_mertens_tail_log axiom taking the log bound directly would
-    give O(N^{-1/2}·log²N) decay — much faster than O(N^{-1/4}).
+    PROOF (April 22, 2026 — The Graduation):
+    Each bound is proved independently in the AbelTail module:
+      s1_decay: |S₁(N)| ≤ C₁·N^{-1/4}           [AbelTail/S1Decay.lean]
+      s2_decay: |S₂(N)+1| ≤ C₂·N^{-1/4}·logN     [AbelTail/S2Decay.lean]
+      s3_decay: |S₃(N)+2γ| ≤ C₃·N^{-1/4}·log²N   [AbelTail/S3Decay.lean]
+    Combined with C = max(C₁, max(C₂, C₃)).
 
-    Why this is an axiom (not a sorry):
-    The O(N^{-1/4}) decay rate requires Abel summation on the INFINITE
-    tail series: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1)), where the
-    tail convergence follows from |M(k)| ≤ C_m·k^{3/4} and the sum
-    Σ k^{-5/4} converges. PNT limits alone give convergence but not
-    the rate; the Mertens bound gives the rate via integral comparison:
-      Σ_{k≥N} k^{-5/4} ≤ ∫_{N-1}^∞ t^{-5/4} dt = 4(N-1)^{-1/4}
-
-    Proof sketch:
-    1. Abel: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
-    2. PNT: S₁(∞) = 0 implies Σ_{k=1}^∞ M(k)/(k(k+1)) = 0
-    3. Therefore: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
-    4. |M(N)/N| ≤ C_m·N^{-1/4} (direct from Mertens)
-    5. |Σ_{k≥N}| ≤ C_m·Σ k^{-5/4} ≤ 4·C_m·N^{-1/4} (integral comparison)
-    6. For S₂, S₃: same with log weights + explicit antiderivatives -/
-axiom abel_mertens_tail_raw
+    The proofs use:
+    1. Abel summation engine (partial summation with quantitative bounds)
+    2. Log-weighted tail bounds (iterated sum-swap, M-independent)
+    3. Discrete product rule (DPR for log^j(k)/k)
+    4. ε-argument (le_of_forall_pos_lt_add + boundary vanishing) -/
+theorem abel_mertens_tail_raw
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
@@ -280,7 +274,43 @@ axiom abel_mertens_tail_raw
     |S₁ N| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) ∧
     |S₂ N - (-1)| ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) ∧
     |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤
-      C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2
+      C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
+  -- Get individual constants from the three decay theorems
+  obtain ⟨C₁, hC₁_pos, h₁⟩ := s1_decay C_m hC hMertens hPNT₁
+  obtain ⟨C₂, hC₂_pos, h₂⟩ := s2_decay C_m hC hMertens hPNT₂
+  obtain ⟨C₃, hC₃_pos, h₃⟩ := s3_decay C_m hC hMertens
+    (-2 * Real.eulerMascheroniConstant) hPNT₃
+  -- Combine: C = max(C₁, max(C₂, C₃))
+  set C := max C₁ (max C₂ C₃)
+  refine ⟨C, by positivity, fun N hN => ?_⟩
+  -- The private defs S₁, S₂, S₃ are definitionally equal to S₁_at, S₂_at, S₃_at
+  have hS₁_eq : S₁ N = S₁_at N := rfl
+  have hS₂_eq : S₂ N = S₂_at N := rfl
+  have hS₃_eq : S₃ N = S₃_at N := rfl
+  rw [hS₁_eq, hS₂_eq, hS₃_eq]
+  refine ⟨?_, ?_, ?_⟩
+  · -- S₁: |S₁_at(N)| ≤ C₁·N^{-1/4} ≤ C·N^{-1/4}
+    calc |S₁_at N| ≤ C₁ * (N : ℝ) ^ (-(1:ℝ)/4) := h₁ N hN
+      _ ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) := by
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.rpow_pos_of_pos
+            (Nat.cast_pos.mpr (by omega)) _))
+          exact le_max_left C₁ _
+  · -- S₂: |S₂_at(N)+1| ≤ C₂·N^{-1/4}·logN ≤ C·N^{-1/4}·logN
+    calc |S₂_at N - (-1)| ≤ C₂ * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := h₂ N hN
+      _ ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
+          apply mul_le_mul_of_nonneg_right _ (Real.log_nonneg
+            (by exact_mod_cast show 1 ≤ N by omega))
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.rpow_pos_of_pos
+            (Nat.cast_pos.mpr (by omega)) _))
+          exact le_trans (le_max_left C₂ C₃) (le_max_right C₁ _)
+  · -- S₃: |S₃_at(N)+2γ| ≤ C₃·N^{-1/4}·log²N ≤ C·N^{-1/4}·log²N
+    calc |S₃_at N - (-2 * Real.eulerMascheroniConstant)|
+        ≤ C₃ * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := h₃ N hN
+      _ ≤ C * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
+          apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)
+          apply mul_le_mul_of_nonneg_right _ (le_of_lt (Real.rpow_pos_of_pos
+            (Nat.cast_pos.mpr (by omega)) _))
+          exact le_trans (le_max_right C₂ C₃) (le_max_right C₁ _)
 
 /-- **PROVED**: Tail domination — converts raw N^{-1/4} bounds to K/logN.
 
@@ -876,5 +906,7 @@ theorem rh_implies_l2_convergence_proved :
 -- ════════════════════════════════════════════════
 
 -- #print axioms rh_implies_l2_convergence_proved
+-- VERIFIED (April 22, 2026): 6 Cathedral axioms + 3 kernel axioms.
+-- abel_mertens_tail_raw is NO LONGER listed — it graduated to theorem! 🎓
 
 end

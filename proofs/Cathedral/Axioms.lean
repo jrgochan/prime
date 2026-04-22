@@ -11,47 +11,50 @@ import Cathedral.NymanBeurling.BDMellin
 
   ### COMPILER-VERIFIED Critical Path (April 20, 2026 — Night Assault)
 
-  `#print axioms nyman_beurling_equivalence` depends on exactly
-  **7 Cathedral axioms** (+ 3 Lean kernel axioms):
+  `#print axioms rh_implies_l2_convergence_proved` depends on exactly
+  **6 Cathedral axioms** (+ 3 Lean kernel axioms):
 
   | # | Axiom | Role | Tier |
   |---|-------|------|------|
-  | 1 | `rh_implies_mertens_34` | RH → |M(x)| = O(x^{3/4}) | 1 (RH content) |
+  | 1 | `rh_implies_mertens_bound` | RH → |M(x)| = O(x^{1/2}·log²x) | 1 (RH content) |
   | 2 | `pnt_mu_div_k` | PNT: Σ μ(k)/k → 0 | 2 (PNT-level) |
   | 3 | `pnt_mu_log_div_k` | PNT: Σ μ(k)log(k)/k → -1 | 2 (PNT-level) |
   | 4 | `pnt_mu_log_sq_div_k` | PNT: Σ μ(k)log²(k)/k → -2γ | 2 (PNT-level) |
-  | 5 | `abel_mertens_tail_raw` | Abel summation tail bounds | 3 (classical) |
-  | 6 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval/Gram) |
-  | 7 | `vasyunin_offdiag_integral` | Off-diagonal Gram = integral | 3 (Vasyunin 1995) |
+  | 5 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval/Gram) |
+  | 6 | `vasyunin_offdiag_integral` | Off-diagonal Gram = integral | 3 (Vasyunin 1995) |
 
   The Lean kernel axioms (propext, Classical.choice, Quot.sound) are
   standard and present in all nontrivial Lean programs.
 
-  ### ELIMINATED AXIOMS (April 20, 2026 — The Night Assault)
+  ### GRADUATED AXIOMS
   - `vasyunin_eq_integral` → THEOREM (diagonal proved via FTC, off-diagonal narrowed)
   - `fract_sq_integral` → THEOREM (proved via Stirling + Squeeze from Mathlib)
+  - `rh_implies_mertens_34` → THEOREM (from rh_implies_mertens_bound, x^{1/2}·log²x ≤ 64·x^{3/4})
+  - `abel_mertens_tail_raw` → THEOREM 🎓 (April 22, 2026 — proved via s1_decay + s2_decay + s3_decay)
 
   ### Crown Axiom Classification
 
   **Tier 1 — RH Content** (1 axiom):
-  - `rh_implies_mertens_34`: The sole axiom encoding the Riemann Hypothesis.
-    If M(x) = O(x^{1/2+ε}) (the full RH Mertens bound), this is immediate.
-    We use the weaker O(x^{3/4}) which suffices for L² convergence.
+  - `rh_implies_mertens_bound`: The sole axiom encoding the Riemann Hypothesis.
+    RH → |M(x)| ≤ C·x^{1/2}·(log x)². This is Titchmarsh 1986, Theorem 14.25.
+    The weaker O(x^{3/4}) bound is a PROVED COROLLARY (rh_implies_mertens_34).
 
   **Tier 2 — PNT Level** (3 axioms):
   - Three asymptotics of Möbius partial sums. These are unconditional
     (true regardless of RH) and follow from the Prime Number Theorem
-    via Abel's limit theorem and derivatives of 1/ζ(s) at s=1.
+    via Abel’s limit theorem and derivatives of 1/ζ(s) at s=1.
 
-  **Tier 3 — Classical Analysis** (3 axioms):
-  - `abel_mertens_tail_raw`: Abel summation converting Mertens + PNT
-    into N^{-1/4} tail bounds. Standard real analysis.
+  **Tier 3 — Classical Analysis** (2 axioms):
   - `millennium_covariance_cancellation`: The 2D covariance cancellation
     between the Gram matrix and the mean tensor. Requires Montgomery-Vaughan
     mean value theorems. This is the mathematically deepest axiom.
   - `vasyunin_offdiag_integral`: The off-diagonal Vasyunin identity for j≠k.
     The diagonal case G(k,k) is PROVED. Verified computationally to
     6-7 digits (256-bit MPFR, 1M rows). Requires Gauss digamma formula.
+
+  **GRADUATED (was Tier 3):**
+  - `abel_mertens_tail_raw` → THEOREM 🎓 (April 22, 2026)
+    Now proved via s1_decay + s2_decay + s3_decay in Cathedral.AbelTail.
 
   ### Alternative Forward Path (1 axiom)
 
