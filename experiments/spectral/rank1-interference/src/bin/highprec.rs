@@ -178,7 +178,8 @@ fn partition(n: usize, m: usize) -> Vec<Vec<usize>> {
     let mut c = vec![Vec::new(); m];
     for i in 0..dim {
         let k = i + 2;
-        c[if m == 2 { big_omega(k) % 2 } else { k % m }].push(i);
+        let class = if m == 1 { 0 } else if m == 2 { big_omega(k) % 2 } else { k % m };
+        c[class].push(i);
     }
     c
 }
@@ -296,11 +297,14 @@ struct NResult {
     time_s: f64,
     max_delta: f64,
     lmin_g: f64,
+    lmin_b1: f64,     // m=1 sanity check
     lmin_b2: f64,
     lmin_b8: f64,
+    ratio_b1: f64,    // should be exactly 1.0
     ratio_b2: f64,
     ratio_b8: f64,
     r_parity: f64,
+    r_trivial: f64,   // R for m=1 (should be 0 or NaN)
     parts: Vec<PartitionResult>,
     rayleigh: f64,
     witness_proj: f64,
@@ -354,8 +358,10 @@ fn print_result(r: &NResult) {
     // Eigenvalues
     println!("  {CYAN}│{RESET}  {BOLD}Eigenvalues{RESET}");
     println!("  {CYAN}│{RESET}    λ_min(G)       = {GREEN}{:.12e}{RESET}", r.lmin_g);
+    println!("  {CYAN}│{RESET}    λ_min(block₁)  = {:.12e}  {GREEN}(×{:.6}){RESET}  {DIM}← sanity: must be ×1.000{RESET}", r.lmin_b1, r.ratio_b1);
     println!("  {CYAN}│{RESET}    λ_min(block₂)  = {:.12e}  {YELLOW}(×{:.2}){RESET}", r.lmin_b2, r.ratio_b2);
     println!("  {CYAN}│{RESET}    λ_min(block₈)  = {:.12e}  {YELLOW}(×{:.2}){RESET}", r.lmin_b8, r.ratio_b8);
+    println!("  {CYAN}│{RESET}    R(trivial)     = {GREEN}{:.10}{RESET}  {DIM}← sanity: must be 0{RESET}", r.r_trivial);
     println!("  {CYAN}│{RESET}    R(parity)      = {MAGENTA}{:.10}{RESET}", r.r_parity);
     println!("  {CYAN}│{RESET}");
 
@@ -363,7 +369,12 @@ fn print_result(r: &NResult) {
     println!("  {CYAN}│{RESET}  {BOLD}Rank-1 Accuracy{RESET}  {DIM}(σ₁²/‖block‖²_F){RESET}");
     println!("  {CYAN}│{RESET}    {DIM}partition │ raw_mean     eig_mean     Δ           σ₁/σ₂    λ_eff     λ_eff/ln(N){RESET}");
     for p in &r.parts {
-        let label = match p.modulus { 2 => "mod 2   ", 4 => "mod 4   ", _ => "mod 8   " };
+        let label = match p.modulus { 1 => "m=1 ✓  ", 2 => "mod 2   ", 4 => "mod 4   ", _ => "mod 8   " };
+        if p.modulus == 1 {
+            // m=1: no inter-class pairs → all metrics are N/A
+            println!("  {CYAN}│{RESET}    {BOLD}{}{RESET} │ {DIM}N/A          N/A          N/A         N/A      N/A       N/A{RESET}  {GREEN}← trivial (no cross){RESET}", label);
+            continue;
+        }
         let acc_col = if p.raw_mean > 0.96 { GREEN } else if p.raw_mean > 0.93 { YELLOW } else { RED };
         println!("  {CYAN}│{RESET}    {BOLD}{}{RESET} │ {acc_col}{:.4}%{RESET}    {acc_col}{:.4}%{RESET}    {:+.4}%    {:.3}    {:.4}    {:.6}",
             label,
@@ -391,10 +402,11 @@ fn print_summary_table(results: &[NResult]) {
 
     // Eigenvalue table
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Eigenvalues & Spectral Gap{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}    N    │  λ_min(G)         │  block₂/G   │  block₈/G   │  R(parity){RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {DIM}    N    │  λ_min(G)         │  b₁/G       │  block₂/G   │  block₈/G   │  R(parity){RESET}");
     for r in results {
-        println!("  {BOLD}{CYAN}║{RESET}    {:>5} │  {GREEN}{:.8e}{RESET}  │  {YELLOW}×{:.3}{RESET}      │  {YELLOW}×{:.3}{RESET}      │  {MAGENTA}{:.8}{RESET}",
-            r.n, r.lmin_g, r.ratio_b2, r.ratio_b8, r.r_parity);
+        let b1_ok = if (r.ratio_b1 - 1.0).abs() < 1e-10 { GREEN } else { RED };
+        println!("  {BOLD}{CYAN}║{RESET}    {:>5} │  {GREEN}{:.8e}{RESET}  │  {b1_ok}×{:.6}{RESET}  │  {YELLOW}×{:.3}{RESET}      │  {YELLOW}×{:.3}{RESET}      │  {MAGENTA}{:.8}{RESET}",
+            r.n, r.lmin_g, r.ratio_b1, r.ratio_b2, r.ratio_b8, r.r_parity);
     }
     println!("  {BOLD}{CYAN}║{RESET}");
 
@@ -402,7 +414,7 @@ fn print_summary_table(results: &[NResult]) {
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Rank-1 Accuracy (mod 2){RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}    N    │  raw_mean    eig_mean   Δ          λ_eff     λ_eff/ln(N){RESET}");
     for r in results {
-        let p2 = &r.parts[0];
+        let p2 = &r.parts[1]; // index 1 because m=1 is now index 0
         let ln_n = (r.n as f64).ln();
         println!("  {BOLD}{CYAN}║{RESET}    {:>5} │  {:.4}%   {:.4}%  {:+.4}%   {:.4}    {GREEN}{:.6}{RESET}",
             r.n, p2.raw_mean * 100.0, p2.eig_mean * 100.0, p2.improvement * 100.0,
@@ -415,10 +427,11 @@ fn print_summary_table(results: &[NResult]) {
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}    N    │  λ_eff(m2)   λ_eff(m4)   λ_eff(m8)   │  m2/ln   m4/ln   m8/ln{RESET}");
     for r in results {
         let ln = (r.n as f64).ln();
+        // parts[0]=m1 (N/A), parts[1]=m2, parts[2]=m4, parts[3]=m8
         println!("  {BOLD}{CYAN}║{RESET}    {:>5} │  {:.4}      {:.4}      {:.4}      │  {GREEN}{:.4}{RESET}   {:.4}   {:.4}",
             r.n,
-            r.parts[0].lambda_eff, r.parts[1].lambda_eff, r.parts[2].lambda_eff,
-            r.parts[0].lambda_eff / ln, r.parts[1].lambda_eff / ln, r.parts[2].lambda_eff / ln);
+            r.parts[1].lambda_eff, r.parts[2].lambda_eff, r.parts[3].lambda_eff,
+            r.parts[1].lambda_eff / ln, r.parts[2].lambda_eff / ln, r.parts[3].lambda_eff / ln);
     }
     println!("  {BOLD}{CYAN}║{RESET}");
 
@@ -445,12 +458,19 @@ fn print_summary_table(results: &[NResult]) {
     // Verdicts
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}═══ VERDICTS ═══{RESET}");
     let all_delta_ok = results.iter().all(|r| r.max_delta < 1e-10);
-    let all_eig_inv = results.iter().all(|r| r.parts.iter().all(|p| p.improvement.abs() < 1e-4));
-    let leff_grows = results.last().unwrap().parts[0].lambda_eff > results.first().unwrap().parts[0].lambda_eff;
+    let all_eig_inv = results.iter().all(|r| r.parts.iter().filter(|p| p.modulus > 1).all(|p| p.improvement.abs() < 1e-4));
+    let leff_grows = results.last().unwrap().parts[1].lambda_eff > results.first().unwrap().parts[1].lambda_eff;
     let r_below_1 = results.iter().all(|r| r.r_parity < 1.0);
     let dsq_positive = results.iter().all(|r| r.d_sq > 0.0);
+    let sanity_b1 = results.iter().all(|r| (r.ratio_b1 - 1.0).abs() < 1e-10);
+    let sanity_r0 = results.iter().all(|r| r.r_trivial < 1e-10);
 
     let check = |b: bool| if b { format!("{GREEN}✓{RESET}") } else { format!("{RED}✗{RESET}") };
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Sanity Checks (m=1 trivial partition):{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}    {} block₁/G = 1.0 at all N (block = G)", check(sanity_b1));
+    println!("  {BOLD}{CYAN}║{RESET}    {} R(trivial) = 0 at all N (no cross-class)", check(sanity_r0));
+    println!("  {BOLD}{CYAN}║{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Main Verdicts:{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {} f64 precision sufficient (all Δ < 1e-10)", check(all_delta_ok));
     println!("  {BOLD}{CYAN}║{RESET}    {} Eigenbasis is a no-op (all |Δ| < 0.01%)", check(all_eig_inv));
     println!("  {BOLD}{CYAN}║{RESET}    {} λ_eff grows with N", check(leff_grows));
@@ -458,7 +478,7 @@ fn print_summary_table(results: &[NResult]) {
     println!("  {BOLD}{CYAN}║{RESET}    {} d²_N > 0 at all N (NB distance positive)", check(dsq_positive));
     println!("  {BOLD}{CYAN}║{RESET}");
 
-    let leff_ratios: Vec<f64> = results.iter().map(|r| r.parts[0].lambda_eff / (r.n as f64).ln()).collect();
+    let leff_ratios: Vec<f64> = results.iter().map(|r| r.parts[1].lambda_eff / (r.n as f64).ln()).collect();
     let mean_ratio: f64 = leff_ratios.iter().sum::<f64>() / leff_ratios.len() as f64;
     println!("  {BOLD}{CYAN}║{RESET}    λ_eff(mod2)/ln(N) ≈ {BOLD}{GREEN}{:.4}{RESET}  {DIM}(mean over all N){RESET}", mean_ratio);
     println!("  {BOLD}{CYAN}║{RESET}    Rank-1 accuracy decays as ≈ {BOLD}{YELLOW}N^{{-1/4}}{RESET}  {DIM}(finite-size effect){RESET}");
@@ -569,6 +589,15 @@ fn run(n: usize) -> NResult {
     for (i, &v) in eg.eigenvalues.iter().enumerate() { if v < eg.eigenvalues[mi] { mi = i; } }
     let vm = eg.eigenvectors.column(mi);
 
+    // m=1 sanity check: block = G, cross = 0
+    let (gb1, gc1) = block_cross(n, &g, 1);
+    let mut b1e: Vec<f64> = SymmetricEigen::new(gb1.clone()).eigenvalues.iter().cloned().collect();
+    b1e.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+    let df1 = vm.dot(&(&gb1 * &vm));
+    let cf1 = vm.dot(&(&gc1 * &vm));
+    let rr_trivial = if df1.abs() > 1e-30 { cf1.abs() / df1 } else { 0.0 };
+
     let (gb2, gc2) = block_cross(n, &g, 2);
     let (gb8, _) = block_cross(n, &g, 8);
     let mut b2e: Vec<f64> = SymmetricEigen::new(gb2.clone()).eigenvalues.iter().cloned().collect();
@@ -580,6 +609,7 @@ fn run(n: usize) -> NResult {
     let cf = vm.dot(&(&gc2 * &vm));
     let rr = if df.abs() > 1e-30 { cf.abs() / df } else { f64::NAN };
 
+    let r1 = analyze(n, &g, 1);
     let r2 = analyze(n, &g, 2);
     let r4 = analyze(n, &g, 4);
     let r8 = analyze(n, &g, 8);
@@ -606,12 +636,15 @@ fn run(n: usize) -> NResult {
         time_s: t0.elapsed().as_secs_f64(),
         max_delta: md,
         lmin_g: lm,
+        lmin_b1: b1e[0],
         lmin_b2: b2e[0],
         lmin_b8: b8e[0],
+        ratio_b1: b1e[0] / lm,
         ratio_b2: b2e[0] / lm,
         ratio_b8: b8e[0] / lm,
         r_parity: rr,
-        parts: vec![r2, r4, r8],
+        r_trivial: rr_trivial,
+        parts: vec![r1, r2, r4, r8],
         rayleigh: ray,
         witness_proj: wp,
         d_sq: dsq,
