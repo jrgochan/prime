@@ -128,6 +128,14 @@ lean_lib «Cathedral» where
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
     -- White Singlet Infrastructure (Mathlib-ready scaffolds)
-    `Cathedral.White.Infrastructure.MontgomeryVaughan
+    `Cathedral.White.Infrastructure.MontgomeryVaughan,
+    -- Perron formula (modular split, zero sorry)
+    `Cathedral.White.Infrastructure.Perron.Defs,
+    `Cathedral.White.Infrastructure.Perron.IntegralBounds,
+    `Cathedral.White.Infrastructure.Perron.Rectangle,
+    `Cathedral.White.Infrastructure.Perron.ResidueGtOne,
+    `Cathedral.White.Infrastructure.Perron.ResidueLtOne,
+    `Cathedral.White.Infrastructure.Perron.KernelBound,
+    `Cathedral.White.Infrastructure.Perron.Formula
   ]
 
