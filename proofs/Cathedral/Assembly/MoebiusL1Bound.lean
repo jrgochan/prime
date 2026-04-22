@@ -18,6 +18,7 @@ import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.DiagBound
 import Cathedral.Assembly.BDBridge
+import Cathedral.Assembly.DotProductIdentity
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 
@@ -138,42 +139,41 @@ theorem moebius_dot_product_approx_one
   obtain ⟨C₁, hC₁_pos, h_s1⟩ := s1_decay (64 * C_m) (by positivity) hMertens34 hPNT₁
   -- Step 2: S₂ decay: ∃ C₂ > 0, |S₂(N)+1| ≤ C₂·N^{-1/4}·log(N)
   obtain ⟨C₂, hC₂_pos, h_s2⟩ := s2_decay (64 * C_m) (by positivity) hMertens34 hPNT₂
-  -- Step 3: The dot product decomposes into S₁/S₂ weighted sums.
-  -- Key bound: N^{-1/4} · logN ≤ 4/e ≤ 2 for all N ≥ 1 (by calculus).
-  -- So |S₂(N)+1| ≤ 2·C₂ and (1-γ)·|S₁| ≤ C₁.
-  -- The algebraic identity plus triangle inequality gives:
-  --   |1-bᵀv| ≤ (1-γ)·C₁/N^{1/4} + C₂·logN/N^{1/4} + K/logN
-  -- where K controls |(1-γ)·S₂ + S₃|.
-  -- Since N^{-1/4} ≤ 2/logN for N ≥ 10, all terms ≤ const/logN.
-  -- Choose C_dot as the sum of all these constants.
-  refine ⟨2 * C₁ + 2 * C₂ + C_m + 2, by linarith, ?_⟩
+  -- Step 3: Bound S₂ universally using tendsto_universal_bound
+  obtain ⟨B₂, hB₂_ge, h_s2_univ⟩ := tendsto_universal_bound hPNT₂
+  -- |S₂(n)+1| ≤ B₂ for all n, so |S₂(n)| ≤ B₂+1
+  -- Step 4: Choose C_dot
+  -- From the algebraic identity (one_minus_dotProduct_identity):
+  --   |1-bᵀv| ≤ |1-γ|·|S₁| + |S₂+1| + |(1-γ)·S₂+S₃|/logN
+  -- Using (N-1)^{-1/4}·logN ≤ 2 (key calculus bound):
+  --   |S₁(N-1)|·logN ≤ C₁·(N-1)^{-1/4}·logN ≤ 2·C₁
+  --   |S₂(N-1)+1|·logN ≤ C₂·(N-1)^{-1/4}·log(N-1)·logN ≤ 9·C₂
+  -- For |(1-γ)S₂+S₃|: use |S₂| ≤ B₂+1 and |S₃| ≤ Σ log²k/k ≤ crude
+  -- KEY: both |S₁|·logN and |S₂+1|·logN are bounded BY CONSTANTS,
+  -- so |1-bᵀv|·logN ≤ bounded constant.
+  refine ⟨2 * C₁ + 9 * C₂ + (B₂ + 1) + C_m + 2, by linarith, ?_⟩
   -- Key facts about N
   have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
   have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
     Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN_ne : Real.log (↑N : ℝ) ≠ 0 := ne_of_gt hlogN_pos
   have hN1_ge2 : 2 ≤ N - 1 := by omega
-  -- Step 3a: Algebraic identity connecting dot product to S₁/S₂ weighted sums
-  -- This is the key identity that decomposes bᵀv into S₁ and S₂ partial sums.
-  -- The proof requires re-indexing Fin(N-1) ↔ Icc 1 (N-1) and distributing
-  -- the product (logk+1-γ)·logWeight over the Möbius sum.
-  -- ALGEBRAIC IDENTITY (pure sum manipulation):
-  --   dotProduct b v = -(1-γ)·(S₁_at(N-1) - S₂_at(N-1)/logN)
-  --                     - (S₂_at(N-1) - S₃_at(N-1)/logN)
-  -- Equivalently:
-  --   1 - dotProduct = (1-γ)·S₁_at(N-1) + (S₂_at(N-1)+1)
-  --                     - [(1-γ)·S₂_at(N-1) + S₃_at(N-1)]/logN
-  -- Step 3b: Use decay bounds
-  -- From s1_decay: |S₁_at(N-1)| ≤ C₁ · (N-1)^{-1/4}
+  -- Step 5: Apply the algebraic identity
+  have h_identity := one_minus_dotProduct_identity N (by omega) hlogN_ne
+  -- Step 6: Get S₁ and S₂ decay bounds
   have h_s1_N := h_s1 (N - 1) hN1_ge2
-  -- From s2_decay: |S₂_at(N-1)+1| ≤ C₂ · (N-1)^{-1/4} · log(N-1)
   have h_s2_N := h_s2 (N - 1) hN1_ge2
-  -- Key: N^{-1/4} ≤ 2/logN for N ≥ 10 (and hence (N-1)^{-1/4} ≤ 2/log(N-1))
-  -- This converts the N^{-1/4} decay into 1/logN decay.
-  -- For |S₁|: (1-γ)·C₁·(N-1)^{-1/4} ≤ C₁ since (N-1)^{-1/4} ≤ 1
-  -- For |S₂+1|: C₂·(N-1)^{-1/4}·log(N-1) ≤ 2·C₂ since N^{-1/4}·logN ≤ 2
-  -- These are all ≤ (2C₁+2C₂)/logN when we use N^{-1/4} ≤ 2/logN.
-  -- The remaining term |(1-γ)S₂+S₃|/logN is bounded by (C_m+2)/logN.
-  -- Total: |1-bᵀv| ≤ (2C₁+2C₂+C_m+2)/logN ✓
+  have h_s2_univ_N := h_s2_univ (N - 1)
+  -- |S₂(N-1)+1| ≤ B₂, so |S₂(N-1)| ≤ B₂+1
+  have h_s2_abs : |S₂_at (N - 1)| ≤ B₂ + 1 := by
+    have h1 : |S₂_at (N - 1) - (-1)| ≤ B₂ := h_s2_univ_N
+    -- |S₂| - 1 ≤ ||S₂| - |-1|| ≤ |S₂ - (-1)| ≤ B₂
+    linarith [abs_sub_abs_le_abs_sub (S₂_at (N - 1)) (-1 : ℝ),
+              abs_nonneg (S₂_at (N - 1) - (-1)),
+              show |(-1 : ℝ)| = 1 from by norm_num]
+  -- Step 7: Rewrite using the identity and bound via triangle inequality
+  rw [h_identity]
+  -- Goal: |(1-γ)·S₁ + (S₂+1) - [(1-γ)·S₂+S₃]/logN| ≤ C_dot/logN
   sorry
 
 -- ════════════════════════════════════════════════
