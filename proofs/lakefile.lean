@@ -55,6 +55,7 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,
     `Cathedral.Vasyunin.Augmented.IntegralBridge,
+    `Cathedral.Vasyunin.Augmented.CovarianceAbel,
     `Cathedral.Vasyunin.Proof.LambdaTrick,
     `Cathedral.Vasyunin.Proof.WitnessAsymptotics,
     `Cathedral.Vasyunin.Proof.WitnessConditional,
