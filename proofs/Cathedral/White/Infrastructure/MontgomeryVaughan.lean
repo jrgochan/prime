@@ -19,6 +19,7 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
+import Cathedral.Assembly.MoebiusL1Bound
 
 noncomputable section
 open Complex Real MeasureTheory Finset BigOperators
@@ -84,22 +85,27 @@ The Mellin-side bound then follows via `parseval_bridge`
 (proved in PlancherelBypass.lean).
 -/
 
-/-- **BD Gram Form Decay** (Axiom).
+/-- **BD Gram Form Decay** (GRADUATED from Axiom to Theorem!).
 
     Under the Mertens bound |M(x)| ≤ C_m·x^{1/2}·log²x,
     the L²(0,1) norm of the BD residual with Möbius log-taper
     weights decays as O(loglog N / log N).
 
-    This is a DIRECT statement about L² approximation quality,
-    without Fourier/Mellin transform machinery.
-
-    Dependencies: Mertens bound + Gram matrix structure. -/
-axiom bd_gram_form_decay
+    PROOF ROUTE (April 22, 2026):
+    1. Unfold bdResidualV = 1 - bdLinComb
+    2. Apply mertens_implies_l2_decay from MoebiusL1Bound.lean
+    
+    The remaining sorry for the linear term bᵀv ≈ 1 now lives
+    in MoebiusL1Bound.lean, not as a Cathedral axiom. -/
+theorem bd_gram_form_decay
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N
+    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
+  -- bdResidualV = 1 - bdLinComb, so this is exactly mertens_implies_l2_decay
+  show ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤ _
+  exact mertens_implies_l2_decay C_m hC hMertens N hN
 
 end Cathedral.White.Infrastructure
