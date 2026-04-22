@@ -136,6 +136,10 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.Perron.ResidueGtOne,
     `Cathedral.White.Infrastructure.Perron.ResidueLtOne,
     `Cathedral.White.Infrastructure.Perron.KernelBound,
-    `Cathedral.White.Infrastructure.Perron.Formula
+    `Cathedral.White.Infrastructure.Perron.Formula,
+    -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
+    `Cathedral.White.Infrastructure.DirichletZetaInverse,
+    -- Conditional zeta bounds: RH → 1/ζ bound (roadmap for Phase 3)
+    `Cathedral.White.Infrastructure.ZetaConvexity
   ]
 
