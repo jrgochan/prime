@@ -124,6 +124,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.DirectL2Crown,
     `Cathedral.Assembly.AbelL2Bridge,
     `Cathedral.Assembly.MoebiusL1Bound,
+    `Cathedral.Assembly.DotProductIdentity,
     `Cathedral.Assembly.AbelEngine,
     `Cathedral.Assembly.MertensConversion,
     `Cathedral.Assembly.PNTAbelMean,
