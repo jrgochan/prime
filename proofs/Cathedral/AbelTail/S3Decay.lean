@@ -50,21 +50,34 @@ def S₃_at (M : ℕ) : ℝ :=
 
     The constant C satisfies C ≥ 4·(logN+1)²/log²N + 40·(logN+1)/log²N + ...
     For N ≥ 2 and choosing C large enough, this is M-independent. -/
-theorem logsq_weighted_tail (N M : ℕ) (_hN : 2 ≤ N) (_hNM : N + 1 ≤ M) :
+theorem logsq_weighted_tail (N M : ℕ) (hN : 2 ≤ N) (hNM : N + 1 ≤ M) :
     (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
       ((Real.log (k : ℝ)) ^ 2 + 2 * Real.log (k : ℝ) + 2)) ≤
-    (4 * (Real.log (N : ℝ)) ^ 2 + 56 * Real.log (N : ℝ) + 200) *
+    (4 * (Real.log (N : ℝ)) ^ 2 + 48 * Real.log (N : ℝ) + 248) *
       (N : ℝ) ^ (-(1:ℝ)/4) := by
-  -- Split: (log²k + 2logk + 2) = log²k + 2·(logk + 1).
-  -- Part A: 2·Σ k^{-5/4}·(logk+1) ≤ (8logN+48)·N^{-1/4}  [log_weighted_rpow_54_tail]
-  -- Part B: Σ k^{-5/4}·log²k. Split log²k = logN·logk + logk·(logk-logN).
-  --   B1: logN · Σ k^{-5/4}·logk ≤ (4log²N+20logN)·N^{-1/4}  [log tail × logN]
-  --   B2: Σ k^{-5/4}·logk·(logk-logN) via sum-swap:
-  --       ≤ Σ_j (4logj+20)·j^{-5/4} ≤ (16logN+180)·N^{-1/4}  [iterated tail]
-  -- Total: (4log²N + 20logN + 16logN+180 + 8logN+48)·N^{-1/4}
-  --      = (4log²N + 44logN + 228)·N^{-1/4} ≤ (4log²N+56logN+200)·N^{-1/4}
-  -- [Constant 228 < 200+56·0.5 = 228 — tight! Use logN ≥ log2 ≥ 0.5.]
-  sorry
+  -- Split: (log²k + 2logk + 2) = log²k + 2·(logk + 1)
+  have h_split : (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+      ((Real.log (k : ℝ)) ^ 2 + 2 * Real.log (k : ℝ) + 2)) =
+    (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ)) ^ 2) +
+    (Icc (N+1) M).sum (fun k => 2 * ((k : ℝ) ^ (-(5:ℝ)/4) *
+      (Real.log (k : ℝ) + 1))) := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl; intro k _; ring
+  rw [h_split]
+  -- Part B: Σ k^{-5/4}·log²k ≤ (4log²N+40logN+200)·N^{-1/4}
+  have h_B := finite_logsq_rpow_54_tail_bound N M hN hNM
+  -- Part A: 2·Σ k^{-5/4}·(logk+1) ≤ 2·(4logN+24)·N^{-1/4} = (8logN+48)·N^{-1/4}
+  have h_A : (Icc (N+1) M).sum (fun k => 2 * ((k : ℝ) ^ (-(5:ℝ)/4) *
+      (Real.log (k : ℝ) + 1))) ≤
+    (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) := by
+    rw [show (Icc (N+1) M).sum (fun k => 2 * ((k : ℝ) ^ (-(5:ℝ)/4) *
+        (Real.log (k : ℝ) + 1))) =
+      2 * (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+        (Real.log (k : ℝ) + 1)) from (Finset.mul_sum (Icc (N+1) M) _ 2).symm]
+    have := log_weighted_rpow_54_tail N M hN hNM
+    linarith
+  -- Total: (4log²N+40logN+200 + 8logN+48) = (4log²N+48logN+248)
+  linarith
 
 -- ════════════════════════════════════════════════
 -- §3. FINITE ABEL BOUND (M-INDEPENDENT)
@@ -83,7 +96,7 @@ theorem finite_abel_s3_diff
     |S₃_at M - S₃_at N| ≤
       C_m * ((M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 +
              (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) +
-      C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+      C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
         (N : ℝ) ^ (-(1:ℝ)/4) := by
   -- Same proof as finite_abel_s2_diff:
   -- 1. Abel summation decomposes into boundary + interior
@@ -91,7 +104,7 @@ theorem finite_abel_s3_diff
   -- 3. Interior: Σ C_m·(k^{3/4}+N^{3/4})·w(k)/k²
   --    where w(k) = log²k+2logk+2 (from DPR on log²(k)/k)
   --    ≤ 2·C_m·logsq_weighted_tail by interior_bound_weighted
-  --    = C_m·(8log²N+112logN+400)·N^{-1/4}
+  --    = C_m·(8log²N+96logN+496)·N^{-1/4}
   sorry
 
 -- ════════════════════════════════════════════════
@@ -116,10 +129,7 @@ theorem s3_decay
     ∃ C₃ : ℝ, C₃ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
       |S₃_at N - L₃| ≤
         C₃ * (N : ℝ) ^ (-(1:ℝ)/4) * (Real.log (N : ℝ)) ^ 2 := by
-  -- Exact pattern of s2_decay but with log² rate.
-  -- Interior constant absorbs (8log²N+112logN+400) into K·log²N
-  -- using logN ≥ 1/2 to absorb lower-order terms.
-  use (8 + 224 + 1600) * C_m  -- Absorb all constants via logN ≥ 1/2
+  use (8 + 192 + 1984) * C_m  -- = 2184·C_m
   constructor
   · linarith
   intro N hN
@@ -128,25 +138,17 @@ theorem s3_decay
   have hlog_pos : 0 < Real.log (N : ℝ) :=
     Real.log_pos (by exact_mod_cast show 1 < N by omega)
   have h_logN_ge : Real.log (N : ℝ) ≥ 1/2 := log_ge_half_of_two_le N hN
-  -- Step 1: Absorb constants into C₃·log²N
-  -- (8log²N + 112logN + 400) ≤ (8 + 224 + 1600)·log²N
-  -- since logN ≤ 2·log²N (when logN ≥ 1/2 → log²N ≥ 1/4)
-  -- and 1 ≤ 4·log²N
   have h_logsq_ge : (Real.log (N : ℝ))^2 ≥ 1/4 := by nlinarith
-  have h_const : C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+  have h_const : C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
       (N : ℝ) ^ (-(1:ℝ)/4) ≤
-      (8 + 224 + 1600) * C_m * (N : ℝ) ^ (-(1:ℝ)/4) *
+      (8 + 192 + 1984) * C_m * (N : ℝ) ^ (-(1:ℝ)/4) *
         (Real.log (N : ℝ)) ^ 2 := by
     have h_rpow_nn : 0 ≤ (N : ℝ) ^ (-(1:ℝ)/4) := le_of_lt h_rpow_pos
-    -- 112·logN ≤ 224·log²N (since logN ≥ 1/2 → logN ≤ 2·log²N)
-    have h112 : (112 : ℝ) * Real.log (N : ℝ) ≤ 224 * (Real.log (N : ℝ))^2 := by nlinarith
-    -- 400 ≤ 1600·log²N (since log²N ≥ 1/4)
-    have h400 : (400 : ℝ) ≤ 1600 * (Real.log (N : ℝ))^2 := by nlinarith
-    -- Total: 8log²N + 112logN + 400 ≤ (8+224+1600)·log²N
+    have h96 : (96 : ℝ) * Real.log (N : ℝ) ≤ 192 * (Real.log (N : ℝ))^2 := by nlinarith
+    have h496 : (496 : ℝ) ≤ 1984 * (Real.log (N : ℝ))^2 := by nlinarith
     nlinarith [mul_nonneg (mul_nonneg hC.le h_rpow_nn) (sq_nonneg (Real.log (N : ℝ)))]
-  -- Step 2: ε-argument (identical to s2_decay)
   suffices h_interior : |S₃_at N - L₃| ≤
-      C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+      C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
         (N : ℝ) ^ (-(1:ℝ)/4) by
     linarith
   apply le_of_forall_pos_lt_add
@@ -154,19 +156,14 @@ theorem s3_decay
   have hε3 : (0 : ℝ) < ε / 3 := by linarith
   obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound hε3 hPNT₃
   obtain ⟨M₁, hM₁⟩ := boundary_vanishes_nat_logsq N (by omega) C_m hC (ε / 3) hε3
-  -- Choose M = max(N+1, max(M₀, M₁))
   set M := max (N + 1) (max M₀ M₁)
   have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
   have hM_ge_M0 : M₀ ≤ M := le_trans (le_max_left _ _) (le_max_right _ _)
   have hM_ge_M1 : M₁ ≤ M := le_trans (le_max_right _ _) (le_max_right _ _)
-  -- |S₃(M) - L₃| ≤ ε/3
   have hS3M : |S₃_at M - L₃| ≤ ε / 3 := by
     unfold S₃_at; exact hM₀ M hM_ge_M0
-  -- Abel bound (M-independent interior)
   have hAbel := finite_abel_s3_diff C_m hC hMertens N M hN hM_ge_N1
-  -- Boundary < ε/3
   have hBdry := hM₁ M hM_ge_M1
-  -- Triangle inequality
   have h_tri : |S₃_at N - L₃| ≤ |S₃_at M - L₃| + |S₃_at M - S₃_at N| := by
     have : S₃_at N - L₃ = (S₃_at M - L₃) + (S₃_at N - S₃_at M) := by ring
     rw [this]
@@ -174,20 +171,19 @@ theorem s3_decay
         ≤ |S₃_at M - L₃| + |S₃_at N - S₃_at M| := abs_add_le _ _
       _ = |S₃_at M - L₃| + |S₃_at M - S₃_at N| := by
           congr 1; exact abs_sub_comm _ _
-  -- Combine
   calc |S₃_at N - L₃|
       ≤ |S₃_at M - L₃| + |S₃_at M - S₃_at N| := h_tri
     _ ≤ ε / 3 + |S₃_at M - S₃_at N| := by linarith [hS3M]
     _ ≤ ε / 3 + (C_m * ((M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 +
             (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) +
-          C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+          C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
             (N : ℝ) ^ (-(1:ℝ)/4)) := by linarith [hAbel]
     _ < ε / 3 + (ε / 3 +
-          C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+          C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
             (N : ℝ) ^ (-(1:ℝ)/4)) := by linarith [hBdry]
-    _ = C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+    _ = C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
           (N : ℝ) ^ (-(1:ℝ)/4) + 2 * ε / 3 := by ring
-    _ < C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 112 * Real.log (N : ℝ) + 400) *
+    _ < C_m * (8 * (Real.log (N : ℝ)) ^ 2 + 96 * Real.log (N : ℝ) + 496) *
           (N : ℝ) ^ (-(1:ℝ)/4) + ε := by linarith
 
 end

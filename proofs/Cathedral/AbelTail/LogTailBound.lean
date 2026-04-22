@@ -268,4 +268,183 @@ theorem log_weighted_rpow_54_tail (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) 
   have h2 := finite_rpow_54_tail_bound N M (by omega) hM
   linarith
 
+-- ════════════════════════════════════════════════
+-- §5. LOG²-WEIGHTED TAIL BOUND
+-- ════════════════════════════════════════════════
+
+/-- **Σ k^{-5/4}·log²(k) ≤ (4·log²(N)+48·log(N)+180)·N^{-1/4}**
+    Strategy: split log²k = logN·logk + logk·(logk-logN).
+    Part B1: logN · Σ k^{-5/4}·logk ≤ (4log²N+20logN)·N^{-1/4}
+    Part B2: Σ k^{-5/4}·logk·(logk-logN) via sum-swap
+      ≤ Σ_{j∈Ico(N,M)} (4logj+20)·j^{-5/4} ≤ (20logN+180)·N^{-1/4}
+    Requires: finite_log_rpow_54_tail_bound for both inner sum and outer sum. -/
+theorem finite_logsq_rpow_54_tail_bound (N M : ℕ) (hN : 2 ≤ N) (hNM : N + 1 ≤ M) :
+    (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ)) ^ 2) ≤
+    (4 * (Real.log (N : ℝ)) ^ 2 + 40 * Real.log (N : ℝ) + 200) *
+      (N : ℝ) ^ (-(1:ℝ)/4) := by
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlog_N_nn : 0 ≤ Real.log (N : ℝ) :=
+    Real.log_nonneg (by exact_mod_cast show 1 ≤ N by omega)
+  have hN_rpow_nn : 0 ≤ (N : ℝ) ^ (-(1:ℝ)/4) := by positivity
+  -- Split: log²k = logN·logk + logk·(logk-logN)
+  -- Rewrite sum accordingly
+  have h_split_sum :
+      (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ)) ^ 2) =
+      (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+        Real.log (N : ℝ) * Real.log (k : ℝ)) +
+      (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+        Real.log (k : ℝ) * (Real.log (k : ℝ) - Real.log (N : ℝ))) := by
+    rw [← Finset.sum_add_distrib]
+    apply Finset.sum_congr rfl; intro k _; ring
+  rw [h_split_sum]
+  -- Part B1: logN · Σ k^{-5/4}·logk ≤ (4log²N+20logN)·N^{-1/4}
+  have h_B1 : (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+      Real.log (N : ℝ) * Real.log (k : ℝ)) ≤
+      (4 * (Real.log (N : ℝ)) ^ 2 + 20 * Real.log (N : ℝ)) *
+        (N : ℝ) ^ (-(1:ℝ)/4) := by
+    have h_factor : (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+        Real.log (N : ℝ) * Real.log (k : ℝ)) =
+      Real.log (N : ℝ) * (Icc (N+1) M).sum (fun k =>
+        (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ)) := by
+      rw [Finset.mul_sum]; apply Finset.sum_congr rfl; intro k _; ring
+    rw [h_factor]
+    have h_log_tail := finite_log_rpow_54_tail_bound N M hN hNM
+    calc Real.log (N : ℝ) * (Icc (N+1) M).sum (fun k =>
+            (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ))
+        ≤ Real.log (N : ℝ) * ((4 * Real.log (N : ℝ) + 20) * (N : ℝ) ^ (-(1:ℝ)/4)) :=
+          mul_le_mul_of_nonneg_left h_log_tail hlog_N_nn
+      _ = (4 * (Real.log (N : ℝ)) ^ 2 + 20 * Real.log (N : ℝ)) *
+          (N : ℝ) ^ (-(1:ℝ)/4) := by ring
+  -- Part B2: Σ k^{-5/4}·logk·(logk-logN) via iterated sum-swap
+  have h_B2 : (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+      Real.log (k : ℝ) * (Real.log (k : ℝ) - Real.log (N : ℝ))) ≤
+      (20 * Real.log (N : ℝ) + 200) * (N : ℝ) ^ (-(1:ℝ)/4) := by
+    -- Bound logk·(logk-logN) ≤ (logk+1)·(logk-logN)
+    -- since logk ≤ logk+1 for all k
+    have h_logk_bound : ∀ k : ℕ, k ∈ Icc (N+1) M →
+        (k : ℝ) ^ (-(5:ℝ)/4) * Real.log (k : ℝ) *
+          (Real.log (k : ℝ) - Real.log (N : ℝ)) ≤
+        (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ) + 1) *
+          (Real.log (k : ℝ) - Real.log (N : ℝ)) := by
+      intro k hk; rw [Finset.mem_Icc] at hk
+      have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+      have hlog_k_ge : Real.log (k : ℝ) ≥ Real.log (N : ℝ) :=
+        Real.log_le_log hN_pos (by exact_mod_cast show N ≤ k by omega)
+      have h_diff_nn : 0 ≤ Real.log (k : ℝ) - Real.log (N : ℝ) := by linarith
+      have hlog_k_nn : 0 ≤ Real.log (k : ℝ) :=
+        Real.log_nonneg (by exact_mod_cast show 1 ≤ k by omega)
+      nlinarith [Real.rpow_nonneg (le_of_lt hk_pos) (-(5:ℝ)/4)]
+    calc (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+            Real.log (k : ℝ) * (Real.log (k : ℝ) - Real.log (N : ℝ)))
+        ≤ (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+            (Real.log (k : ℝ) + 1) * (Real.log (k : ℝ) - Real.log (N : ℝ))) :=
+          Finset.sum_le_sum h_logk_bound
+      -- Step 1: bound by harmonic × (logk+1)
+      _ ≤ (Icc (N+1) M).sum (fun k =>
+          (Ico N k).sum (fun j => (k : ℝ) ^ (-(5:ℝ)/4) * (Real.log (k : ℝ) + 1) *
+            ((1 : ℝ) / (j : ℝ)))) := by
+        apply Finset.sum_le_sum; intro k hk; rw [Finset.mem_Icc] at hk
+        rw [← Finset.mul_sum]
+        apply mul_le_mul_of_nonneg_left (log_diff_le_harmonic N k (by omega) hk.1)
+        apply mul_nonneg (by positivity)
+        have : 0 ≤ Real.log (k : ℝ) :=
+          Real.log_nonneg (by exact_mod_cast show 1 ≤ k by omega)
+        linarith
+      -- Step 2: sum swap
+      _ = (Ico N M).sum (fun j =>
+          (Icc (j+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+            (Real.log (k : ℝ) + 1) * ((1 : ℝ) / (j : ℝ)))) := by
+        apply Finset.sum_comm'
+        intro k j; constructor <;> intro ⟨h1, h2⟩ <;>
+          simp only [Finset.mem_Icc, Finset.mem_Ico] at * <;>
+          constructor <;> omega
+      -- Step 3: factor out 1/j, apply log_weighted_rpow_54_tail
+      _ ≤ (Ico N M).sum (fun j =>
+          (4 * Real.log (j : ℝ) + 24) * (j : ℝ) ^ (-(1:ℝ)/4) *
+            ((1 : ℝ) / (j : ℝ))) := by
+        apply Finset.sum_le_sum; intro j hj; rw [Finset.mem_Ico] at hj
+        have h_factor : (Icc (j+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+            (Real.log (k : ℝ) + 1) * ((1 : ℝ) / (j : ℝ))) =
+          ((Icc (j+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4) *
+            (Real.log (k : ℝ) + 1))) * ((1 : ℝ) / (j : ℝ)) := by
+          rw [← Finset.sum_mul]
+        rw [h_factor]
+        apply mul_le_mul_of_nonneg_right _ (by positivity)
+        exact log_weighted_rpow_54_tail j M (by omega) (by omega)
+      -- Step 4: simplify (4logj+24)·j^{-1/4}·(1/j) = (4logj+24)·j^{-5/4}
+      _ ≤ (Ico N M).sum (fun j =>
+          (4 * Real.log (j : ℝ) + 24) * (j : ℝ) ^ (-(5:ℝ)/4)) := by
+        apply Finset.sum_le_sum; intro j hj; rw [Finset.mem_Ico] at hj
+        have hj_pos : (0 : ℝ) < (j : ℝ) := Nat.cast_pos.mpr (by omega)
+        have : (j : ℝ) ^ (-(1:ℝ)/4) * ((1:ℝ) / (j : ℝ)) ≤ (j : ℝ) ^ (-(5:ℝ)/4) := by
+          have hinv : (1:ℝ) / (j : ℝ) = (j : ℝ) ^ (-(1:ℝ)) := by
+            rw [Real.rpow_neg (le_of_lt hj_pos), Real.rpow_one]; ring
+          rw [hinv, ← Real.rpow_add hj_pos]
+          norm_num
+        nlinarith [Real.rpow_nonneg (le_of_lt hj_pos) (-(5:ℝ)/4),
+                   Real.log_nonneg (by exact_mod_cast (show 1 ≤ j by omega) : (1:ℝ) ≤ (j:ℝ))]
+      -- Step 5: split into 4·Σ j^{-5/4}·logj + 24·Σ j^{-5/4} over Ico(N,M)
+      _ = 4 * (Ico N M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4) * Real.log (j : ℝ)) +
+          24 * (Ico N M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4)) := by
+        rw [show (Ico N M).sum (fun j => (4 * Real.log (↑j : ℝ) + 24) * (↑j : ℝ) ^
+              (-(5:ℝ)/4)) =
+            (Ico N M).sum (fun j => 4 * ((↑j : ℝ) ^ (-(5:ℝ)/4) * Real.log (↑j : ℝ)) +
+              24 * ((↑j : ℝ) ^ (-(5:ℝ)/4))) from by
+          apply Finset.sum_congr rfl; intro j _; ring,
+          Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
+      -- Step 6: bound Ico(N,M) sums by splitting {N} ∪ Ico(N+1,M)
+      _ ≤ 4 * ((5 * Real.log (N : ℝ) + 20) * (N : ℝ) ^ (-(1:ℝ)/4)) +
+          24 * (5 * (N : ℝ) ^ (-(1:ℝ)/4)) := by
+        apply add_le_add
+        · apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 4)
+          -- Ico(N,M) = {N} ∪ Ico(N+1,M)
+          rw [show Ico N M = {N} ∪ Ico (N+1) M from by
+            ext x; simp only [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]
+            omega]
+          rw [Finset.sum_union (by
+            rw [Finset.disjoint_singleton_left]; simp [Finset.mem_Ico])]
+          simp only [Finset.sum_singleton]
+          -- {N} term: N^{-5/4}·logN ≤ N^{-1/4}·logN
+          have h_N_term : (N : ℝ) ^ (-(5:ℝ)/4) * Real.log (N : ℝ) ≤
+              (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
+            apply mul_le_mul_of_nonneg_right _ hlog_N_nn
+            exact Real.rpow_le_rpow_of_exponent_le
+              (by exact_mod_cast show 1 ≤ N by omega) (by norm_num)
+          have h_tail : (Ico (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4) *
+              Real.log (j : ℝ)) ≤
+            (4 * Real.log (N : ℝ) + 20) * (N : ℝ) ^ (-(1:ℝ)/4) := by
+            calc (Ico (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4) * Real.log (j : ℝ))
+                ≤ (Icc (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4) * Real.log (j : ℝ)) := by
+                  apply Finset.sum_le_sum_of_subset_of_nonneg
+                  · intro x hx; rw [Finset.mem_Ico] at hx; rw [Finset.mem_Icc]; omega
+                  · intro x hx _
+                    rw [Finset.mem_Icc] at hx
+                    apply mul_nonneg (by positivity)
+                    exact Real.log_nonneg (by exact_mod_cast (show 1 ≤ x by omega) : (1:ℝ) ≤ (x:ℝ))
+              _ ≤ _ := finite_log_rpow_54_tail_bound N M hN hNM
+          nlinarith
+        · apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 24)
+          rw [show Ico N M = {N} ∪ Ico (N+1) M from by
+            ext x; simp only [Finset.mem_Ico, Finset.mem_union, Finset.mem_singleton]
+            omega]
+          rw [Finset.sum_union (by
+            rw [Finset.disjoint_singleton_left]; simp [Finset.mem_Ico])]
+          simp only [Finset.sum_singleton]
+          have h_N_term : (N : ℝ) ^ (-(5:ℝ)/4) ≤ (N : ℝ) ^ (-(1:ℝ)/4) :=
+            Real.rpow_le_rpow_of_exponent_le
+              (by exact_mod_cast show 1 ≤ N by omega) (by norm_num)
+          have h_tail : (Ico (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4)) ≤
+              4 * (N : ℝ) ^ (-(1:ℝ)/4) := by
+            calc (Ico (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4))
+                ≤ (Icc (N+1) M).sum (fun j => (j : ℝ) ^ (-(5:ℝ)/4)) := by
+                  apply Finset.sum_le_sum_of_subset_of_nonneg
+                  · intro x hx; rw [Finset.mem_Ico] at hx; rw [Finset.mem_Icc]; omega
+                  · intro x _ _; positivity
+              _ ≤ _ := finite_rpow_54_tail_bound N M (by omega) hNM
+          linarith
+      -- Step 7: algebra
+      _ = (20 * Real.log (N : ℝ) + 200) * (N : ℝ) ^ (-(1:ℝ)/4) := by ring
+  linarith
+
 end
+
