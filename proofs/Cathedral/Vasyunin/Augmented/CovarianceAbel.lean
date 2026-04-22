@@ -87,7 +87,7 @@ theorem cov_form_eq_gram_minus_sq
 
 /-- **PROVED**: If |S - 1| ≤ K/L then S² ≥ 1 - 2K/L.
     Drops the (S-1)² ≥ 0 term for the lower bound. -/
-theorem sq_ge_one_minus_from_abs (S K L : ℝ) (hL : 0 < L)
+theorem sq_ge_one_minus_from_abs (S K L : ℝ) (_hL : 0 < L)
     (h : |S - 1| ≤ K / L) :
     S ^ 2 ≥ 1 - 2 * (K / L) := by
   have h_lower : S - 1 ≥ -(K / L) := by
