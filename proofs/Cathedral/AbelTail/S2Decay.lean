@@ -15,8 +15,12 @@
   Dependencies: S1Decay, LogTailBound, DiscreteProductRule
 -/
 
-import Cathedral.AbelTail.S1Decay
+import Cathedral.AbelTail.AbelInterior
+import Cathedral.AbelTail.MertensBridge
+import Cathedral.AbelTail.DiscreteProductRule
 import Cathedral.AbelTail.LogTailBound
+import Cathedral.MellinBridge.AbelSummation
+import Cathedral.Assembly.AbelEngine
 
 noncomputable section
 open Real Finset BigOperators
@@ -127,9 +131,25 @@ theorem finite_abel_s2_diff
             ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) * Real.log (M : ℝ) from by ring]
         rw [h_rpow]
       · -- Interior sum ≤ C_m * 78 * N^{-1/4} * log(N)
-        -- Uses: log_weighted_rpow_54_tail (PROVED), k^{-2} ≤ k^{-5/4}·N^{-3/4}
-        -- To be extracted into shared helper lemmas during refactor.
+        -- Apply interior_bound_weighted with w(k) = (log(k)+1)
         simp only [C_bound, δ]
+        have h_int := interior_bound_weighted N M (by omega) hM C_m hC
+          (fun k => Real.log (k : ℝ) + 1)
+          (fun k hk => by
+            rw [Finset.mem_Icc] at hk
+            have : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast show 1 ≤ k by omega
+            linarith [Real.log_nonneg this])
+          ((4 * Real.log (N : ℝ) + 24) * (N : ℝ) ^ (-(1:ℝ)/4))
+          (by
+            apply mul_nonneg
+            · have : (1 : ℝ) ≤ (N : ℝ) := by exact_mod_cast show 1 ≤ N by omega
+              linarith [Real.log_nonneg this]
+            · positivity)
+          (log_weighted_rpow_54_tail N M hN hM)
+        -- h_int: Σ Ico ≤ 2 * C_m * ((4*log(N)+24) * N^{-1/4})
+        -- Need to show the simp-unfolded form matches, then bound
+        -- 2*(4*log(N)+24)*N^{-1/4} = (8*log(N)+48)*N^{-1/4} ≤ 78*log(N)*N^{-1/4}
+        -- since 48 ≤ 70*log(N) for N≥2 (log(2)≈0.693 > 48/70≈0.686)
         sorry
 
 -- ════════════════════════════════════════════════
