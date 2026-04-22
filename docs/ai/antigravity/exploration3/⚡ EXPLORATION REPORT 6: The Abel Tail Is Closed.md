@@ -142,7 +142,7 @@ rh_implies_mertens_bound        [AXIOM: Titchmarsh 14.25]
 
 **The Abel tail decay theorems (s1_decay, s2_decay, s3_decay) are exactly what `abel_mertens_tail_raw` needs.**
 
-### 3.2 The Axiom That's Now Ready to Die
+### 3.2 The Axiom That's Ready to Graduate
 
 `abel_mertens_tail_raw` currently states:
 
@@ -180,12 +180,12 @@ Cathedral Axiom Census (Critical Path):
 
 **After this session:**
 ```
-  abel_mertens_tail_raw                   [READY TO PROVE]
+  abel_mertens_tail_raw                   [READY TO BECOME A THEOREM]
   ─────────────────────────────────────
-  Total: 6 axioms on critical path (after replacement)
+  Total: 6 axioms on critical path (after promotion)
 ```
 
-The replacement requires one more Lean proof (~30 lines) wiring s1_decay + s2_decay + s3_decay into the axiom's signature. This is pure plumbing.
+The promotion requires one more Lean proof (~30 lines) wiring s1_decay + s2_decay + s3_decay into the axiom's signature. This is pure plumbing — a graduation ceremony for a well-served axiom.
 
 ---
 
