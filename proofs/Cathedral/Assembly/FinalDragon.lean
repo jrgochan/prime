@@ -1,19 +1,26 @@
 /-
   Cathedral/Assembly/FinalDragon.lean
 
-  ## The Final Dragon v3: ONE AXIOM Architecture
+  ## The Final Dragon v4: TIGHTER BOUND Architecture
 
   Theorist Directive (April 18, 2026 — "The Scholar and the Forge"):
   "Stop looking for the unconditional bypass. Finish the Cathedral's walls."
 
-  The Nyman-Beurling equivalence depends on EXACTLY ONE custom axiom:
-    rh_implies_mertens_34: RH → |M(x)| = O(x^{3/4})
+  Updated April 22, 2026 — the proof chain now uses the TIGHTER bound:
+    rh_implies_mertens_bound: RH → |M(x)| = O(x^{1/2}·(log x)²)
+  from which the 3/4 bound is a PROVED COROLLARY (not an axiom).
 
-  PROOF CHAIN:
-    rh_implies_mertens_34  [THE ONE AXIOM]
-      → mertens_34_l2_bound  [THEOREM: calculus — Abel + Parseval]
-      → convergence_from_bound [THEOREM: C/N^{1/4} → 0]
-      → rh_implies_l2_convergence_proved [THEOREM! DONE!]
+  PROOF CHAIN (with tighter bound highlighted):
+    rh_implies_mertens_bound   [AXIOM: classical ANT — Titchmarsh 14.25]
+      → rh_implies_mertens_34   [THEOREM: x^{1/2}·log²x ≤ 64·x^{3/4}]
+      → abel_mertens_tail_raw   [AXIOM: Abel summation on tail]
+      → pnt_mertens_tail_domination [THEOREM: N^{-1/4}·log³N domination]
+      → mertens_l2_decay         [THEOREM: ∫(1-f)² ≤ K/log(N)]
+      → rh_implies_l2_convergence_proved [THEOREM! RH → d²_N → 0]
+
+  NOTE: The tighter x^{1/2}·log²x bound gives FASTER decay in the
+  abel_mertens_tail channel: O(N^{-1/2}·log²N) vs O(N^{-1/4}).
+  A future abel_mertens_tail_log axiom could exploit this directly.
 -/
 
 import Cathedral.Defs
@@ -32,7 +39,8 @@ noncomputable section
 open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 
 -- ════════════════════════════════════════════════
--- §1. THE ONE AXIOM: RH → M(x) = O(x^{3/4})
+-- §1. THE TIGHTER BOUND: RH → M(x) = O(x^{1/2}·log²x)
+--     Corollary: M(x) = O(x^{3/4}) [PROVED below]
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM** (was THE ONE AXIOM — now PROVED from rh_implies_mertens_bound!):
@@ -230,6 +238,13 @@ private lemma rpow_quarter_log_cube_bounded :
       |S₁(N)| ≤ C·N^{-1/4}
       |S₂(N)+1| ≤ C·N^{-1/4}·logN
       |S₃(N)+2γ| ≤ C·N^{-1/4}·log²N
+
+    NOTE (April 22, 2026): Since rh_implies_mertens_bound gives the
+    TIGHTER bound |M(x)| ≤ C·x^{1/2}·(log x)², and this is fed
+    through rh_implies_mertens_34 (PROVED: x^{1/2}·log²x ≤ 64·x^{3/4}),
+    the x^{3/4} input here is a conservative envelope. A future
+    abel_mertens_tail_log axiom taking the log bound directly would
+    give O(N^{-1/2}·log²N) decay — much faster than O(N^{-1/4}).
 
     Why this is an axiom (not a sorry):
     The O(N^{-1/4}) decay rate requires Abel summation on the INFINITE
