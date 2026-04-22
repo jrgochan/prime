@@ -419,9 +419,10 @@ fn main() {
     log_lines.push(verdict);
 
     // ─── Write output files ──────────────────────────────────────────
+    std::fs::create_dir_all("results").unwrap();
 
     // 1. TSV results
-    let tsv_path = "results.tsv";
+    let tsv_path = "results/results.tsv";
     let mut tsv = std::fs::File::create(tsv_path).unwrap();
     writeln!(tsv, "j\tk\tgcd\tformula\tintegral\terror\tdigits\ttime_ms").unwrap();
     for r in diag_results.iter().chain(offdiag_results.iter()) {
@@ -433,7 +434,7 @@ fn main() {
     println!("  📁 TSV results: {}", tsv_path);
 
     // 2. JSON results
-    let json_path = "results.json";
+    let json_path = "results/results.json";
     let mut json = std::fs::File::create(json_path).unwrap();
     writeln!(json, "{{").unwrap();
     writeln!(json, "  \"experiment\": \"vasyunin_integral_verifier\",").unwrap();
@@ -458,7 +459,7 @@ fn main() {
     println!("  📁 JSON results: {}", json_path);
 
     // 3. Full log
-    let log_path = "run.log";
+    let log_path = "results/run.log";
     let mut log = std::fs::File::create(log_path).unwrap();
     for line in &log_lines {
         writeln!(log, "{}", line).unwrap();
@@ -466,7 +467,7 @@ fn main() {
     println!("  📁 Full log: {}", log_path);
 
     // 4. High-precision values
-    let hp_path = "high_precision.txt";
+    let hp_path = "results/high_precision.txt";
     let mut hp = std::fs::File::create(hp_path).unwrap();
     writeln!(hp, "# Vasyunin Gram entry values at {}-bit precision", PREC).unwrap();
     writeln!(hp, "# G(j,k) = ∫₀¹ {{1/(jx)}}·{{1/(kx)}} dx").unwrap();
@@ -483,7 +484,7 @@ fn main() {
     println!("  📁 High-precision: {}", hp_path);
 
     // 5. Certificate JSON (Direction 5.1: Proof-Carrying Computation)
-    let cert_path = "certificates";
+    let cert_path = "results/certificates";
     std::fs::create_dir_all(cert_path).unwrap();
     let cert_file = format!("{}/gram_entries_cert.json", cert_path);
     let mut cert = std::fs::File::create(&cert_file).unwrap();

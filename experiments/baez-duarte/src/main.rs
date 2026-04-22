@@ -309,7 +309,8 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
             .chain(envelope_data.iter().map(|(k, mu_k, c, f, fs)| 
                 format!("{},{},{:.10},{:.10},{:.10}", k, mu_k, c, f, fs)))
             .collect();
-        let csv_file = format!("envelope_N{}.csv", n);
+        let csv_file = format!("results/envelope_N{}.csv", n);
+        std::fs::create_dir_all("results").unwrap();
         std::fs::write(&csv_file, csv_lines.join("\n")).ok();
     }
 
@@ -403,11 +404,12 @@ fn main() {
 
     let json = format!("{{\n  \"experiment\": \"baez_duarte_attack6\",\n  \"basis\": \"h_k(x) = {{1/(kx)}}\",\n  \"results\": [\n{}\n  ]\n}}\n",
         json_entries.join(",\n"));
-    std::fs::write("results_attack6.json", &json).expect("write failed");
-    println!("\n  📁 Results → results_attack6.json");
+    std::fs::create_dir_all("results").unwrap();
+    std::fs::write("results/results_attack6.json", &json).expect("write failed");
+    println!("\n  📁 Results → results/results_attack6.json");
 
     // Certificate JSON (Direction 5.1: Proof-Carrying Computation)
-    std::fs::create_dir_all("certificates").unwrap();
+    std::fs::create_dir_all("results/certificates").unwrap();
     let cert_entries: Vec<String> = results.iter().map(|r| {
         format!("    {{\"N\": {}, \"d2_N\": {:.15e}, \"X\": {:.10}, \"X_over_lnN\": {:.10}, \"X_monotone\": true}}",
             r.n, r.nb_dist_sq, r.x_val, r.x_over_ln_n)
@@ -416,6 +418,6 @@ fn main() {
     let cert = format!("{{\n  \"experiment\": \"Báez-Duarte Distance Certification\",\n  \"precision\": \"f64\",\n  \"lean_bridge\": {{\n    \"axiom\": \"rh_implies_l2_convergence\",\n    \"file\": \"Cathedral/Assembly/MainChain.lean\",\n    \"claim\": \"X = bᵀC⁻¹b diverges => d²_N → 0\"\n  }},\n  \"data\": [\n{}\n  ],\n  \"verdicts\": {{\n    \"X_monotone_increasing\": {},\n    \"d2_positive\": {},\n    \"X_over_lnN_converging\": true\n  }}\n}}\n",
         cert_entries.join(",\n"), x_mono,
         results.iter().all(|r| r.nb_dist_sq > 0.0));
-    std::fs::write("certificates/bd_distance_cert.json", &cert).unwrap();
-    println!("  📁 Certificate → certificates/bd_distance_cert.json");
+    std::fs::write("results/certificates/bd_distance_cert.json", &cert).unwrap();
+    println!("  📁 Certificate → results/certificates/bd_distance_cert.json");
 }
