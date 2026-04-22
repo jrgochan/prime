@@ -158,25 +158,49 @@ theorem s2_decay
       Filter.atTop (nhds (-1))) :
     ∃ C₂ : ℝ, C₂ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
       |S₂_at N - (-1)| ≤ C₂ * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
-  -- NOW that finite_abel_s2_diff has M-INDEPENDENT interior C_m·(8·logN+48)·N^{-1/4},
-  -- the limit argument is straightforward:
-  -- For each fixed N, choose M → ∞ so boundary → 0 and |S₂(M)+1| → 0.
-  -- Then: |S₂(N)+1| ≤ C_m·(8·logN+48)·N^{-1/4}.
-  --
-  -- Since (8·logN+48)·N^{-1/4} ≤ 56·N^{-1/4}·logN (for N ≥ 2, since 48 ≤ 48·logN
-  -- requires logN ≥ 1, i.e. N ≥ 3... almost), we use a larger constant.
-  -- (8·logN+48) ≤ (8+48)·logN = 56·logN only if logN ≥ 1.
-  -- For N = 2: 8·log2+48 ≈ 53.5 while 56·log2 ≈ 38.8. So NOT ≤ 56·logN.
-  -- Instead: (8·logN+48)·N^{-1/4} ≤ 8·logN·N^{-1/4} + 48·N^{-1/4}
-  -- For the existential, just absorb 48·N^{-1/4} by noting N^{-1/4} ≤ N^{-1/4}·logN/logN
-  -- ≤ N^{-1/4}·logN / log(2). Since 1/log(2) ≤ 2, we get 48·N^{-1/4} ≤ 96·N^{-1/4}·logN.
-  -- So total ≤ (8+96)·C_m·N^{-1/4}·logN = 104·C_m·N^{-1/4}·logN.
-  -- BUT we need log(2) ≥ 1/2 for this, requiring exp(1/2) ≤ 2.
-  -- Use: exp(1) < 4, so (exp(1/2))² < 4, so exp(1/2) < 2.
-  -- exp(1) < 4: from Taylor, exp(1) = Σ 1/k! ≤ 1+1+1/2+1/6+... < 3 < 4.
-  --
-  -- For now, prove with sorry for the numerical log(2) ≥ 1/2 bound.
-  -- The structural content (M-independent interior, triangle, ε-argument) is all valid.
+  -- Interior = C_m·(8·logN+48)·N^{-1/4} is M-independent.
+  -- Using logN ≥ 1/2: (8·logN+48) ≤ (8+96)·logN = 104·logN.
+  -- Boundary → 0 as M → ∞, and |S₂(M)+1| → 0 by Tendsto.
+  -- So |S₂(N)+1| ≤ 0 + 0 + 104·C_m·N^{-1/4}·logN.
+  use 104 * C_m
+  constructor
+  · linarith
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h_rpow_pos : 0 < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
+  have hlog_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- Step 1: Absorb constant term: (8·logN+48) ≤ 104·logN
+  have h_logN_ge : Real.log (N : ℝ) ≥ 1/2 := log_ge_half_of_two_le N hN
+  have h_const : C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) ≤
+      104 * C_m * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
+    have h_rpow_nn : 0 ≤ (N : ℝ) ^ (-(1:ℝ)/4) := le_of_lt h_rpow_pos
+    -- 8·logN + 48 ≤ 104·logN iff 48 ≤ 96·logN iff logN ≥ 1/2
+    have h48 : (48 : ℝ) ≤ 96 * Real.log (N : ℝ) := by nlinarith
+    -- C_m * (8*logN+48) * rpow ≤ C_m * 104*logN * rpow
+    -- = 104 * C_m * rpow * logN
+    nlinarith [mul_nonneg (mul_nonneg hC.le h_rpow_nn) hlog_pos.le]
+  -- Step 2: The bound |S₂(N)+1| ≤ C_m·(8·logN+48)·N^{-1/4} via ε-argument
+  -- For all ε > 0, choose M large enough that:
+  --   (a) |S₂(M)+1| < ε
+  --   (b) C_m·boundary(M,N) < ε
+  -- Then |S₂(N)+1| ≤ 2ε + interior(N). Since this holds for all ε > 0,
+  -- |S₂(N)+1| ≤ interior(N).
+  suffices h_interior : |S₂_at N - (-1)| ≤
+      C_m * (8 * Real.log (N : ℝ) + 48) * (N : ℝ) ^ (-(1:ℝ)/4) by
+    linarith
+  -- We prove: for all ε > 0, |S₂(N)+1| ≤ interior + ε
+  apply le_of_forall_pos_lt_add
+  intro ε hε
+  -- From PNT₂: ∃ M₀, ∀ M ≥ M₀, |S₂(M)+1| < ε/2
+  have hε2 : (0 : ℝ) < ε / 2 := by linarith
+  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound hε2 hPNT₂
+  -- Choose M = max(N+1, M₀) — boundary vanishes via sorry for now
+  -- The boundary = C_m·(M^{-1/4}·logM + N^{3/4}·logM/M)
+  -- This → 0 as M → ∞. We need it < ε/2.
+  -- For M large enough: M^{-1/4}·logM < ε/(4·C_m) and N^{3/4}·logM/M < ε/(4·C_m).
+  -- Both hold for M > some M₁(N, ε, C_m). The existence of M₁ needs
+  -- Tendsto (fun M => M^{-1/4}·logM) atTop (nhds 0), which is in Mathlib.
   sorry
 
 end
