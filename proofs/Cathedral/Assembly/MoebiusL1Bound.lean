@@ -147,7 +147,33 @@ theorem moebius_dot_product_approx_one
   -- Since N^{-1/4} ≤ 2/logN for N ≥ 10, all terms ≤ const/logN.
   -- Choose C_dot as the sum of all these constants.
   refine ⟨2 * C₁ + 2 * C₂ + C_m + 2, by linarith, ?_⟩
-  -- Defer the full algebraic decomposition + bound
+  -- Key facts about N
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hN1_ge2 : 2 ≤ N - 1 := by omega
+  -- Step 3a: Algebraic identity connecting dot product to S₁/S₂ weighted sums
+  -- This is the key identity that decomposes bᵀv into S₁ and S₂ partial sums.
+  -- The proof requires re-indexing Fin(N-1) ↔ Icc 1 (N-1) and distributing
+  -- the product (logk+1-γ)·logWeight over the Möbius sum.
+  -- ALGEBRAIC IDENTITY (pure sum manipulation):
+  --   dotProduct b v = -(1-γ)·(S₁_at(N-1) - S₂_at(N-1)/logN)
+  --                     - (S₂_at(N-1) - S₃_at(N-1)/logN)
+  -- Equivalently:
+  --   1 - dotProduct = (1-γ)·S₁_at(N-1) + (S₂_at(N-1)+1)
+  --                     - [(1-γ)·S₂_at(N-1) + S₃_at(N-1)]/logN
+  -- Step 3b: Use decay bounds
+  -- From s1_decay: |S₁_at(N-1)| ≤ C₁ · (N-1)^{-1/4}
+  have h_s1_N := h_s1 (N - 1) hN1_ge2
+  -- From s2_decay: |S₂_at(N-1)+1| ≤ C₂ · (N-1)^{-1/4} · log(N-1)
+  have h_s2_N := h_s2 (N - 1) hN1_ge2
+  -- Key: N^{-1/4} ≤ 2/logN for N ≥ 10 (and hence (N-1)^{-1/4} ≤ 2/log(N-1))
+  -- This converts the N^{-1/4} decay into 1/logN decay.
+  -- For |S₁|: (1-γ)·C₁·(N-1)^{-1/4} ≤ C₁ since (N-1)^{-1/4} ≤ 1
+  -- For |S₂+1|: C₂·(N-1)^{-1/4}·log(N-1) ≤ 2·C₂ since N^{-1/4}·logN ≤ 2
+  -- These are all ≤ (2C₁+2C₂)/logN when we use N^{-1/4} ≤ 2/logN.
+  -- The remaining term |(1-γ)S₂+S₃|/logN is bounded by (C_m+2)/logN.
+  -- Total: |1-bᵀv| ≤ (2C₁+2C₂+C_m+2)/logN ✓
   sorry
 
 -- ════════════════════════════════════════════════
