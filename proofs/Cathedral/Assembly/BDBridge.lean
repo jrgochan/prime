@@ -11,6 +11,7 @@
 
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.Vasyunin.Augmented.IntegralBridge
+import Cathedral.Vasyunin.Augmented.DiagBound
 import Cathedral.Assembly.QuadFormBridge
 import Cathedral.Structural.Structural
 
@@ -156,6 +157,40 @@ theorem bd_l2_error_eq_quad_error (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → 
   rw [show (fun x : ℝ => 2 * bdLinComb N v x) = (fun x => (2:ℝ) * bdLinComb N v x) from rfl,
       intervalIntegral.integral_const_mul, bd_integral_bdLinComb_eq_dotProduct]
   rw [bd_gram_l2_identity N hN v]
+
+/-- **THEOREM**: L² error ≤ 1 - 2bᵀv + (1/2)(Σ|vᵢ|)².
+
+    Wires the Gram entry bound G(j,k) < 1/2 into the L² error decomposition.
+    This reduces proving the L² bound to controlling:
+    1. The linear term bᵀv (via Abel summation on Möbius sums)
+    2. The ℓ¹ norm Σ|vᵢ| (via Mertens function bounds)
+
+    The quadratic form vᵀGv is now bounded by (1/2)(Σ|vᵢ|)²,
+    using `vasyuninQuadForm_le_half_l1_sq` from DiagBound. -/
+theorem bd_l2_error_upper_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) :
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
+    1 - 2 * dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) v +
+    (1 / 2) * (∑ i : Fin (N - 1), |v i|) ^ 2 := by
+  rw [bd_l2_error_eq_quad_error N hN v]
+  -- Goal: 1 - 2bᵀv + vᵀGv ≤ 1 - 2bᵀv + (1/2)(Σ|v|)²
+  -- Suffices: vᵀGv ≤ (1/2)(Σ|v|)²
+  suffices h_quad :
+      realQuadForm (Matrix.of fun i j =>
+        vasyuninGramEntry (i.val + 1) (j.val + 1)) v ≤
+      (1 / 2) * (∑ i : Fin (N - 1), |v i|) ^ 2 by linarith
+  -- Need: realQuadForm G v ≤ (1/2)(Σ|v|)²
+  unfold realQuadForm
+  simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
+  simp_rw [Finset.mul_sum]
+  -- Goal is now Σᵢ vᵢ * Σⱼ vⱼ * G(i+1,j+1) ≤ (1/2)(Σ|v|)²
+  -- which matches vasyuninQuadForm_le_half_l1_sq after rearrangement
+  have h := Cathedral.Vasyunin.vasyuninQuadForm_le_half_l1_sq v
+  convert h using 1
+  congr 1
+  ext i
+  congr 1
+  ext j
+  ring
 
 -- ════════════════════════════════════════════════
 -- PART IV: THE BD WITNESS AXIOM
