@@ -97,6 +97,9 @@ theorem moebius_dot_product_approx_one
         (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
     (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
+    (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
+        atTop (nhds (-2 * eulerMascheroniConstant)))
     (N : ℕ) (hN : 10 ≤ N) :
     ∃ C_dot : ℝ, C_dot > 0 ∧
     |1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)| ≤
@@ -139,19 +142,17 @@ theorem moebius_dot_product_approx_one
   obtain ⟨C₁, hC₁_pos, h_s1⟩ := s1_decay (64 * C_m) (by positivity) hMertens34 hPNT₁
   -- Step 2: S₂ decay: ∃ C₂ > 0, |S₂(N)+1| ≤ C₂·N^{-1/4}·log(N)
   obtain ⟨C₂, hC₂_pos, h_s2⟩ := s2_decay (64 * C_m) (by positivity) hMertens34 hPNT₂
-  -- Step 3: Bound S₂ universally using tendsto_universal_bound
+  -- Step 3: Bound S₂ and S₃ universally using tendsto_universal_bound
   obtain ⟨B₂, hB₂_ge, h_s2_univ⟩ := tendsto_universal_bound hPNT₂
-  -- |S₂(n)+1| ≤ B₂ for all n, so |S₂(n)| ≤ B₂+1
+  obtain ⟨B₃, hB₃_ge, h_s3_univ⟩ := tendsto_universal_bound hPNT₃
+  -- |S₂(n)+1| ≤ B₂ for all n, |S₃(n)+2γ| ≤ B₃ for all n
   -- Step 4: Choose C_dot
-  -- From the algebraic identity (one_minus_dotProduct_identity):
-  --   |1-bᵀv| ≤ |1-γ|·|S₁| + |S₂+1| + |(1-γ)·S₂+S₃|/logN
-  -- Using (N-1)^{-1/4}·logN ≤ 2 (key calculus bound):
-  --   |S₁(N-1)|·logN ≤ C₁·(N-1)^{-1/4}·logN ≤ 2·C₁
-  --   |S₂(N-1)+1|·logN ≤ C₂·(N-1)^{-1/4}·log(N-1)·logN ≤ 9·C₂
-  -- For |(1-γ)S₂+S₃|: use |S₂| ≤ B₂+1 and |S₃| ≤ Σ log²k/k ≤ crude
-  -- KEY: both |S₁|·logN and |S₂+1|·logN are bounded BY CONSTANTS,
-  -- so |1-bᵀv|·logN ≤ bounded constant.
-  refine ⟨2 * C₁ + 9 * C₂ + (B₂ + 1) + C_m + 2, by linarith, ?_⟩
+  -- From the algebraic identity + triangle inequality:
+  --   |1-bᵀv|·logN ≤ |1-γ|·|S₁|·logN + |S₂+1|·logN + |(1-γ)·S₂+S₃|
+  -- Using (N-1)^{-1/4}·logN ≤ 2:
+  --   |S₁|·logN ≤ C₁·2, |S₂+1|·logN ≤ C₂·9
+  --   |(1-γ)·S₂+S₃| ≤ |S₂|+1 + |S₃| ≤ B₂+2 + B₃+2|γ| ≤ B₂+B₃+4
+  refine ⟨2 * C₁ + 9 * C₂ + B₂ + B₃ + 4, by linarith, ?_⟩
   -- Key facts about N
   have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
   have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
@@ -160,20 +161,35 @@ theorem moebius_dot_product_approx_one
   have hN1_ge2 : 2 ≤ N - 1 := by omega
   -- Step 5: Apply the algebraic identity
   have h_identity := one_minus_dotProduct_identity N (by omega) hlogN_ne
-  -- Step 6: Get S₁ and S₂ decay bounds
+  -- Step 6: Get S₁ and S₂ decay bounds at N-1
   have h_s1_N := h_s1 (N - 1) hN1_ge2
   have h_s2_N := h_s2 (N - 1) hN1_ge2
-  have h_s2_univ_N := h_s2_univ (N - 1)
-  -- |S₂(N-1)+1| ≤ B₂, so |S₂(N-1)| ≤ B₂+1
+  -- Step 7: Universal bounds on |S₂| and |S₃|
   have h_s2_abs : |S₂_at (N - 1)| ≤ B₂ + 1 := by
-    have h1 : |S₂_at (N - 1) - (-1)| ≤ B₂ := h_s2_univ_N
-    -- |S₂| - 1 ≤ ||S₂| - |-1|| ≤ |S₂ - (-1)| ≤ B₂
-    linarith [abs_sub_abs_le_abs_sub (S₂_at (N - 1)) (-1 : ℝ),
-              abs_nonneg (S₂_at (N - 1) - (-1)),
-              show |(-1 : ℝ)| = 1 from by norm_num]
-  -- Step 7: Rewrite using the identity and bound via triangle inequality
+    have h1 := h_s2_univ (N - 1)
+    -- h1 : |Σ μ·logk/k - (-1)| ≤ B₂, this is |S₂+1| ≤ B₂
+    -- Need: |S₂| ≤ B₂ + 1
+    unfold S₂_at
+    -- Now goal has the raw sum. h1 also has the raw sum.
+    -- |Σ - (-1)| ≤ B₂ means -B₂ ≤ Σ+1 ≤ B₂ so -B₂-1 ≤ Σ ≤ B₂-1
+    have h2 := abs_le.mp h1
+    exact abs_le.mpr ⟨by linarith, by linarith⟩
+  have h_s3_abs : |S₃_at (N - 1)| ≤ B₃ + 2 := by
+    have h1 := h_s3_univ (N - 1)
+    -- h1 : |Σ μ·log²k/k - (-2γ)| ≤ B₃
+    unfold S₃_at
+    have h2 := abs_le.mp h1
+    -- -B₃ ≤ Σ + 2γ ≤ B₃, so -B₃-2γ ≤ Σ ≤ B₃-2γ
+    -- eulerMascheroniConstant ∈ (1/2, 2/3), so 2γ ∈ (1, 4/3) ⊂ (0,2)
+    have hγ_pos : 0 < eulerMascheroniConstant := by
+      linarith [one_half_lt_eulerMascheroniConstant]
+    have hγ_lt1 : eulerMascheroniConstant < 1 := by
+      linarith [eulerMascheroniConstant_lt_two_thirds]
+    exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
+  -- Step 8: Rewrite using the identity
   rw [h_identity]
   -- Goal: |(1-γ)·S₁ + (S₂+1) - [(1-γ)·S₂+S₃]/logN| ≤ C_dot/logN
+  -- The remaining sorry is the calculus bound: triangle ineq + N^{-1/4}·logN ≤ 2
   sorry
 
 -- ════════════════════════════════════════════════
@@ -232,6 +248,9 @@ theorem mertens_implies_l2_decay
         (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
     (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
+    (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
+        atTop (nhds (-2 * eulerMascheroniConstant)))
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
     (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
@@ -239,7 +258,7 @@ theorem mertens_implies_l2_decay
   have h_decomp := bd_l2_error_eq_quad_error N (by omega) (bdMoebiusWeight N)
   -- Step 2: bᵀv ≈ 1 (existential bound)
   obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
-    moebius_dot_product_approx_one C_m hC hMertens hPNT₁ hPNT₂ N hN
+    moebius_dot_product_approx_one C_m hC hMertens hPNT₁ hPNT₂ hPNT₃ N hN
   -- Step 3: vᵀGv ≤ (1/2)(Σ|v|)²
   have h_upper := bd_l2_error_upper_bound N (by omega) (bdMoebiusWeight N)
   -- Step 4: Assembly — combine bᵀv ≈ 1 with quadratic form bound
