@@ -272,4 +272,96 @@ lemma boundary_vanishes_nat (N : ℕ) (hN : 1 ≤ N) (C : ℝ) (hC : 0 < C) (ε 
   linarith [mul_lt_mul_of_pos_left h_bound (show 0 < C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) by positivity),
             show C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) * δ = ε / 2 from by rw [hδ_def]; field_simp]
 
+/-- **PROVED**: For any fixed N and C > 0, the Abel boundary with log² weight
+    C·(M^{-1/4}·log²(M) + N^{3/4}·log²(M)/M) can be made < ε
+    for M large enough. Same as boundary_vanishes_nat but with log².
+
+    Uses: log²(M)/M^{1/4} = (log(M)/M^{1/8})² → 0
+    since log(M)/M^{1/8} → 0 by isLittleO_log_rpow_atTop. -/
+lemma boundary_vanishes_nat_logsq (N : ℕ) (hN : 1 ≤ N)
+    (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
+    ∃ M₁ : ℕ, ∀ M : ℕ, M₁ ≤ M →
+      C * ((M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 +
+           (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) < ε := by
+  -- Same strategy as boundary_vanishes_nat: bound both terms by
+  -- (1+N^{3/4})·log²M/M^{1/4}, then use log²M/M^{1/4} → 0.
+  -- log²M / M^{1/4} = (logM / M^{1/8})²
+  -- From isLittleO_log_rpow_atTop (1/8 > 0): logM/M^{1/8} → 0.
+  -- So log²M/M^{1/4} → 0.
+  have h_Nrpow_nn : 0 ≤ (N : ℝ) ^ ((3:ℝ)/4) := Real.rpow_nonneg (Nat.cast_nonneg' N) _
+  have h_coeff_pos : 0 < 2 * C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) := by positivity
+  set δ := ε / (2 * C * (1 + (N : ℝ) ^ ((3:ℝ)/4))) with hδ_def
+  have hδ : 0 < δ := div_pos hε h_coeff_pos
+  -- Need log²M / M^{1/4} < δ for large M.
+  -- Bound: log²M / M^{1/4} = (logM / M^{1/8})² (since 2·(1/8) = 1/4)
+  -- From isLittleO: logM / M^{1/8} → 0
+  have h_tend : Filter.Tendsto (fun x : ℝ => Real.log x / x ^ ((1:ℝ)/8))
+      Filter.atTop (nhds 0) :=
+    (isLittleO_log_rpow_atTop (show (0:ℝ) < 1/8 by norm_num)).tendsto_div_nhds_zero
+  rw [Metric.tendsto_atTop] at h_tend
+  -- Need: (logM/M^{1/8})² < δ, so |logM/M^{1/8}| < √δ
+  obtain ⟨R, hR⟩ := h_tend (Real.sqrt δ) (Real.sqrt_pos.mpr hδ)
+  use max 2 ⌈R⌉₊
+  intro M hM
+  have hM_ge2 : 2 ≤ M := le_trans (le_max_left _ _) hM
+  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hM_ge1 : (1 : ℝ) ≤ (M : ℝ) := by exact_mod_cast show 1 ≤ M by omega
+  have hM_geR : R ≤ (M : ℝ) := le_trans (Nat.le_ceil R)
+    (by exact_mod_cast le_trans (le_max_right 2 ⌈R⌉₊) hM)
+  -- Extract: |logM/M^{1/8}| < √δ
+  have h_bound := hR (M : ℝ) hM_geR
+  rw [Real.dist_eq, sub_zero] at h_bound
+  have hlog_nn : 0 ≤ Real.log (M : ℝ) := Real.log_nonneg hM_ge1
+  have h18pos : 0 < (M : ℝ) ^ ((1:ℝ)/8) := Real.rpow_pos_of_pos hM_pos _
+  rw [abs_of_nonneg (div_nonneg hlog_nn h18pos.le)] at h_bound
+  -- h_bound: logM / M^{1/8} < √δ
+  -- So (logM / M^{1/8})² < δ
+  have h_sq : (Real.log (M : ℝ) / (M : ℝ) ^ ((1:ℝ)/8)) ^ 2 < δ := by
+    calc (Real.log (M : ℝ) / (M : ℝ) ^ ((1:ℝ)/8)) ^ 2
+        < (Real.sqrt δ) ^ 2 := sq_lt_sq' (by linarith [div_nonneg hlog_nn h18pos.le]) h_bound
+      _ = δ := Real.sq_sqrt hδ.le
+  -- (logM/M^{1/8})² = log²M / M^{1/4}
+  have h_sq_eq : (Real.log (M : ℝ) / (M : ℝ) ^ ((1:ℝ)/8)) ^ 2 =
+      (Real.log (M : ℝ)) ^ 2 / (M : ℝ) ^ ((1:ℝ)/4) := by
+    rw [div_pow]
+    congr 1
+    -- (M^{1/8})^2 = M^{2/8} = M^{1/4}
+    have h_sq_rpow : ((M : ℝ) ^ ((1:ℝ)/8)) ^ 2 = (M : ℝ) ^ ((1:ℝ)/4) := by
+      rw [← Real.rpow_natCast ((M : ℝ) ^ ((1:ℝ)/8)) 2,
+          ← Real.rpow_mul (Nat.cast_nonneg' M)]
+      norm_num
+    exact h_sq_rpow
+  -- So log²M / M^{1/4} < δ
+  rw [h_sq_eq] at h_sq
+  -- Now bound: M^{1/4} ≤ M (so logM²/M ≤ logM²/M^{1/4})
+  have h14pos : 0 < (M : ℝ) ^ ((1:ℝ)/4) := Real.rpow_pos_of_pos hM_pos _
+  have h_M14_le_M : (M : ℝ) ^ ((1:ℝ)/4) ≤ (M : ℝ) := by
+    calc (M : ℝ) ^ ((1:ℝ)/4) ≤ (M : ℝ) ^ (1:ℝ) :=
+          Real.rpow_le_rpow_of_exponent_le hM_ge1 (by norm_num)
+      _ = (M : ℝ) := Real.rpow_one _
+  have h_logM_div_M : (Real.log (M : ℝ))^2 / (M : ℝ) ≤
+      (Real.log (M : ℝ))^2 / (M : ℝ) ^ ((1:ℝ)/4) := by
+    have hlogsq_pos : 0 < (Real.log (M : ℝ))^2 :=
+      sq_pos_of_pos (Real.log_pos (by exact_mod_cast show 1 < M by omega))
+    gcongr
+  -- Bound full expression (same as boundary_vanishes_nat)
+  have h_term1_eq : (M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 =
+      (Real.log (M : ℝ)) ^ 2 / (M : ℝ) ^ ((1:ℝ)/4) := by
+    have : (-(1:ℝ)/4) = -((1:ℝ)/4) := by ring
+    rw [this, Real.rpow_neg (Nat.cast_nonneg' M) ((1:ℝ)/4)]
+    ring
+  have h_term2 : (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ) ≤
+      (N : ℝ) ^ ((3:ℝ)/4) * ((Real.log (M : ℝ)) ^ 2 / (M : ℝ) ^ ((1:ℝ)/4)) := by
+    rw [show (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ) =
+        (N : ℝ) ^ ((3:ℝ)/4) * ((Real.log (M : ℝ)) ^ 2 / (M : ℝ)) from by ring]
+    exact mul_le_mul_of_nonneg_left h_logM_div_M h_Nrpow_nn
+  have h_sum : C * ((M : ℝ) ^ (-(1:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 +
+      (N : ℝ) ^ ((3:ℝ)/4) * (Real.log (M : ℝ)) ^ 2 / (M : ℝ)) ≤
+      C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) *
+      ((Real.log (M : ℝ)) ^ 2 / (M : ℝ) ^ ((1:ℝ)/4)) := by
+    rw [h_term1_eq]
+    nlinarith [h_term2]
+  linarith [mul_lt_mul_of_pos_left h_sq (show 0 < C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) by positivity),
+            show C * (1 + (N : ℝ) ^ ((3:ℝ)/4)) * δ = ε / 2 from by rw [hδ_def]; field_simp]
+
 end
