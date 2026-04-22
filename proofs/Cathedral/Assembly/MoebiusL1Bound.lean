@@ -189,7 +189,17 @@ theorem moebius_dot_product_approx_one
   -- Step 8: Rewrite using the identity
   rw [h_identity]
   -- Goal: |(1-γ)·S₁ + (S₂+1) - [(1-γ)·S₂+S₃]/logN| ≤ C_dot/logN
-  -- The remaining sorry is the calculus bound: triangle ineq + N^{-1/4}·logN ≤ 2
+  -- We have all the ingredients:
+  -- h_s1_N : |S₁_at(N-1)| ≤ C₁·(N-1)^{-1/4}
+  -- h_s2_N : |S₂_at(N-1)+1| ≤ C₂·(N-1)^{-1/4}·log(N-1)
+  -- h_s2_abs : |S₂_at(N-1)| ≤ B₂+1
+  -- h_s3_abs : |S₃_at(N-1)| ≤ B₃+2
+  -- The proof needs:
+  -- 1. Triangle inequality: |a+b-c/L| ≤ |a|+|b|+|c|/L
+  -- 2. |a| ≤ C₁/N^{1/4}, |b| ≤ C₂·logN/N^{1/4}, |c| ≤ B₂+B₃+3
+  -- 3. Calculus bound: N^{-1/4}·logN ≤ 2 for N ≥ 10
+  -- 4. Calculus bound: N^{-1/4}·log²N ≤ 9 for N ≥ 10
+  -- 5. Assembly: 2C₁+9C₂+B₂+B₃+3 ≤ 2C₁+9C₂+B₂+B₃+4
   sorry
 
 -- ════════════════════════════════════════════════
