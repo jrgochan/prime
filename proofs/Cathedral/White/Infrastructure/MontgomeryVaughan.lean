@@ -20,6 +20,7 @@ import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.Assembly.MoebiusL1Bound
+import Cathedral.Assembly.PNTAbelMean
 
 noncomputable section
 open Complex Real MeasureTheory Finset BigOperators
@@ -106,6 +107,6 @@ theorem bd_gram_form_decay
     (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
   -- bdResidualV = 1 - bdLinComb, so this is exactly mertens_implies_l2_decay
   show ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤ _
-  exact mertens_implies_l2_decay C_m hC hMertens N hN
+  exact mertens_implies_l2_decay C_m hC hMertens pnt_mu_div_k pnt_mu_log_div_k N hN
 
 end Cathedral.White.Infrastructure
