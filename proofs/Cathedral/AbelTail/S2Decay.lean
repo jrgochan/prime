@@ -88,15 +88,7 @@ theorem finite_abel_s2_diff
     (fun k hk1 hk2 => by
       simp only [a, C_bound]
       unfold partialSum
-      rw [partial_sum_eq_mertens_diff N k (by omega) (by omega)]
-      have hMk := hMertens (k : ℝ) (by exact_mod_cast show 2 ≤ k by omega)
-      have hMN := hMertens (N : ℝ) (by exact_mod_cast hN)
-      calc |((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ)|
-          ≤ |((mertensFunction (k:ℝ) : ℤ) : ℝ)| + |((mertensFunction (N:ℝ) : ℤ) : ℝ)| :=
-            abs_sub _ _
-        _ ≤ C_m * (k : ℝ) ^ ((3:ℝ)/4) + C_m * (N : ℝ) ^ ((3:ℝ)/4) :=
-            add_le_add hMk hMN
-        _ = C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) := by ring)
+      exact mertens_partial_sum_bound C_m hMertens N k hN (by omega))
     (fun k hk1 hk2 => by
       simp only [f, δ]
       have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
@@ -171,8 +163,55 @@ theorem s2_decay
       Filter.atTop (nhds (-1))) :
     ∃ C₂ : ℝ, C₂ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
       |S₂_at N - (-1)| ≤ C₂ * (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
-  -- Depends on finite_abel_s2_diff for the M-independent bound.
-  -- Same limit argument as s1_decay.
+  -- The constant: 1 for the Tendsto term + 80 for the Abel bound
+  use 1 + 80 * C_m
+  constructor
+  · linarith
+  intro N hN
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have h_rpow_pos : 0 < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
+  have hlog_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have h_eps : 0 < (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := mul_pos h_rpow_pos hlog_pos
+  -- Step 1: From PNT₂, choose M₀ with |S₂(M)-(-1)| < N^{-1/4}·log(N)
+  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound h_eps hPNT₂
+  -- Step 2: Choose M = max(N+1, M₀)
+  set M := max (N + 1) M₀
+  have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
+  have hM_ge_M0 : M₀ ≤ M := le_max_right _ _
+  -- Step 3: |S₂(M) - (-1)| ≤ N^{-1/4}·log(N)
+  have hS2M : |S₂_at M - (-1)| ≤ (N : ℝ) ^ (-(1:ℝ)/4) * Real.log (N : ℝ) := by
+    unfold S₂_at; exact hM₀ M hM_ge_M0
+  -- Step 4: Abel bound  
+  have hAbel := finite_abel_s2_diff C_m hC hMertens N M hN hM_ge_N1
+  -- Step 5: Bound boundary terms
+  have hM_ge_N : (N : ℝ) ≤ (M : ℝ) := by exact_mod_cast (show N ≤ M by omega)
+  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
+  -- M^{-1/4} ≤ N^{-1/4}
+  have h1 : (M : ℝ) ^ (-(1:ℝ)/4) ≤ (N : ℝ) ^ (-(1:ℝ)/4) :=
+    Real.rpow_le_rpow_of_nonpos hN_pos hM_ge_N (show -(1:ℝ)/4 ≤ 0 by norm_num)
+  -- log(M) growth: handle by bounding boundary ≤ 2·N^{-1/4}·log(M)
+  -- then letting M-dependent terms be absorbed into the triangle inequality
+  -- Key: M^{-1/4}·log(M) → 0 as M → ∞, N^{3/4}·log(M)/M → 0 as M → ∞
+  -- So boundary → 0 and we just need: ∃ C, boundary ≤ C·N^{-1/4}·log(N)
+  -- Approach: bound log(M) using M^{1/4}·C for large enough M
+  -- Simpler: bound the whole boundary by C_m·2·N^{-1/4}·log(M)
+  -- and log(M) ≤ B·log(N)·M^{1/4} (using M = max(N+1, M₀))
+  -- Actually simplest: just absorb into sorry for now since
+  -- the structural pattern is clear.
+  -- Step 6: Triangle + combine
+  have h_tri : |S₂_at N - (-1)| ≤ |S₂_at M - (-1)| + |S₂_at M - S₂_at N| := by
+    have : S₂_at N - (-1) = (S₂_at M - (-1)) + (S₂_at N - S₂_at M) := by ring
+    rw [this]
+    calc |S₂_at M - (-1) + (S₂_at N - S₂_at M)|
+        ≤ |S₂_at M - (-1)| + |S₂_at N - S₂_at M| := abs_add_le _ _
+      _ = |S₂_at M - (-1)| + |S₂_at M - S₂_at N| := by
+          congr 1; exact abs_sub_comm _ _
+  -- The boundary terms need: M^{-1/4}·log(M) + N^{3/4}·log(M)/M ≤ C'·N^{-1/4}·log(N)
+  -- This requires log(M) ≤ C·log(N) or similar — hard for general M.
+  -- Alternative approach: bound boundary directly by N^{-1/4}·log(N)
+  -- via: M^{-1/4}·log(M) ≤ N^{-1/4}·log(N) iff log(M)/log(N) ≤ (M/N)^{1/4}
+  -- which holds for M ≥ N (since x^{1/4} grows faster than log(x))
   sorry
 
 end

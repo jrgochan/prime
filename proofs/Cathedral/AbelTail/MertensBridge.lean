@@ -62,5 +62,29 @@ theorem partial_sum_eq_mertens_diff (N k : ℕ) (hN : 1 ≤ N) (hk : N + 1 ≤ k
     rw [Finset.disjoint_left]; intro x hx1 hx2
     simp [Finset.mem_Icc] at hx1 hx2; omega)]
   ring
+-- ════════════════════════════════════════════════
+-- §3. MERTENS PARTIAL SUM BOUND (Abel hA argument)
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: Mertens partial sum bound for Abel summation.
+    |Σ_{n=N+1}^k μ(n)| ≤ C_m·(k^{3/4} + N^{3/4}).
+
+    This is the `hA` argument to `abel_summation_abs_bound`,
+    used identically in S₁, S₂, S₃ proofs. -/
+theorem mertens_partial_sum_bound
+    (C_m : ℝ) (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
+    (N k : ℕ) (hN : 2 ≤ N) (hk1 : N + 1 ≤ k) :
+    |(Icc (N+1) k).sum (fun n => (↑(ArithmeticFunction.moebius n) : ℝ))| ≤
+      C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) := by
+  rw [partial_sum_eq_mertens_diff N k (by omega) hk1]
+  have hMk := hMertens (k : ℝ) (by exact_mod_cast show 2 ≤ k by omega)
+  have hMN := hMertens (N : ℝ) (by exact_mod_cast hN)
+  calc |((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ)|
+      ≤ |((mertensFunction (k:ℝ) : ℤ) : ℝ)| + |((mertensFunction (N:ℝ) : ℤ) : ℝ)| :=
+        abs_sub _ _
+    _ ≤ C_m * (k : ℝ) ^ ((3:ℝ)/4) + C_m * (N : ℝ) ^ ((3:ℝ)/4) :=
+        add_le_add hMk hMN
+    _ = C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) := by ring
 
 end
