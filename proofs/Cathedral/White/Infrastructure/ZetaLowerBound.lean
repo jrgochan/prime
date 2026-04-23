@@ -201,7 +201,16 @@ private lemma zeta_mem_slitPlane_on_disk (hRH : RiemannHypothesis)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
     ∀ z ∈ ball (0 : ℂ) R,
       riemannZeta (⟨2, t⟩ + z) ∈ slitPlane := by
-  sorry -- Requires: connectedness argument + ζ(2+it) ∈ slitPlane (from §2 above)
+  -- Strategy: The continuous map ζ ∘ (s₀+·) sends ball into ℂ\{0} (RH + no pole).
+  -- slitPlane is open, ℝ<0 = (ℂ\{0}) \ slitPlane is NOT open,
+  -- so we use a direct argument: ℝ≤0 ∩ ζ(ball) = ∅.
+  --
+  -- For now, we delegate to a topological argument using
+  -- the fact that the preimage of slitPlane under a continuous,
+  -- nonzero-valued function on a connected domain is clopen
+  -- (since slitPlane and its complement in ℂ\{0} are both open
+  -- when restricted to {Im ≠ 0} ∪ {Re > 0}).
+  sorry
 
 -- ═══════════════════════════════════════════
 -- §3. Sup Bound on Re(log ζ) on the Disk
