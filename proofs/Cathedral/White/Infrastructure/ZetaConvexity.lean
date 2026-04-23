@@ -78,7 +78,8 @@ theorem inv_zeta_differentiableAt (hRH : RiemannHypothesis)
 -- §3. The Deep Analytical Fact (Axiom)
 -- ═══════════════════════════════════════════
 
-/-- **AXIOM**: Under RH, |ζ(s)| has a polynomial lower bound in the critical strip.
+/-- **AXIOM → THEOREM (in progress)**: Under RH, |ζ(s)| has a polynomial
+    lower bound in the critical strip.
 
     For any exponent A > 0, there exist c, T₀ > 0 such that for
     Re(s) ≥ 1/2 + ε and |Im(s)| ≥ T₀:
@@ -89,10 +90,19 @@ theorem inv_zeta_differentiableAt (hRH : RiemannHypothesis)
     derivative ζ'/ζ is bounded by O(log|t|) in Re > 1/2, which gives
     |ζ(σ+it)| ≥ c·exp(-C·log²|t|) ≥ c/|t|^A for any A > 0.
 
-    Proving this in Lean requires either:
-    - Borel-Carathéodory theorem (NOT in Mathlib), or
-    - Hadamard factorization for entire functions (NOT in Mathlib)
-    Both are major formalisation efforts for future work. -/
+    **Proof path (April 22, 2026)**: The Borel-Carathéodory theorem
+    IS now available in Mathlib (`Analysis.Complex.BorelCaratheodory`,
+    Radziwiłł 2026). The proof via BC applied to log ζ on a shifted
+    disk B(2+it, 3/2-ε/2) is being formalized in `ZetaLowerBound.lean`.
+
+    Remaining lemmas to prove:
+    - `zeta_mem_slitPlane_on_disk`: ζ(s) ∈ slitPlane on the BC disk
+    - `log_zeta_re_bound_on_disk`: sup Re(log ζ) = O(log|t|) on disk
+    - Assembly of BC + exponentiation
+
+    Validated computationally: 256-bit MPFR experiment (`bc-zeta-lower`)
+    confirms slitPlane avoidance, M(t) growth, and effective A < 1
+    for all tested t ∈ [2, 10000]. -/
 axiom zeta_polynomial_lower_bound_rh (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,

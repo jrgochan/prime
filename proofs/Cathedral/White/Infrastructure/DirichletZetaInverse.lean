@@ -64,7 +64,30 @@ def summatoryMoebius (x : ℝ) : ℤ :=
 /-- M(x) is bounded by x (trivially). -/
 lemma summatoryMoebius_le (x : ℝ) (hx : 0 < x) :
     |((summatoryMoebius x : ℤ) : ℝ)| ≤ x := by
-  sorry -- Each μ(n) ∈ {-1, 0, 1}, summing at most ⌊x⌋ terms
+  unfold summatoryMoebius
+  -- |Σ μ(n)| ≤ Σ |μ(n)| ≤ card(Icc) ≤ ⌊x⌋₊ ≤ x
+  -- Key fact: |μ(n)| ≤ 1 for all n
+  have h_abs_moeb : ∀ n : ℕ, |((μ n : ℤ) : ℝ)| ≤ 1 := by
+    intro n
+    -- μ(n) ∈ {-1, 0, 1}, so |μ(n)| ∈ {0, 1}
+    by_cases hn : Squarefree n
+    · -- μ(n) = (-1)^(cardFactors n), so |μ(n)| = 1
+      have := ArithmeticFunction.moebius_apply_of_squarefree hn
+      rw [this]; push_cast
+      simp [abs_pow, abs_neg, abs_one]
+    · -- μ(n) = 0
+      simp only [ArithmeticFunction.moebius_eq_zero_of_not_squarefree hn, Int.cast_zero, abs_zero]
+      exact zero_le_one
+  -- Now chain the bounds
+  rw [show ((∑ n ∈ Finset.Icc 1 ⌊x⌋₊, μ n : ℤ) : ℝ) =
+      ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, ((μ n : ℤ) : ℝ) from by push_cast; rfl]
+  calc |∑ n ∈ Finset.Icc 1 ⌊x⌋₊, ((μ n : ℤ) : ℝ)|
+      ≤ ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, |((μ n : ℤ) : ℝ)| := Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _n ∈ Finset.Icc 1 ⌊x⌋₊, (1 : ℝ) :=
+        Finset.sum_le_sum (fun n _ => h_abs_moeb n)
+    _ = (Finset.Icc 1 ⌊x⌋₊).card := by simp
+    _ ≤ ⌊x⌋₊ := by simp [Nat.card_Icc]
+    _ ≤ x := Nat.floor_le (le_of_lt hx)
 
 /-  **COROLLARY**: By Perron's formula (once proved),
     M(x) = (1/2πi) ∫_{c-iT}^{c+iT} x^s / (s·ζ(s)) ds + O(x^c/T)

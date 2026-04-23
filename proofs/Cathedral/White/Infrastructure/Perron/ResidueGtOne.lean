@@ -13,6 +13,10 @@ import Cathedral.White.Infrastructure.Perron.IntegralBounds
 import Cathedral.White.Infrastructure.Perron.Rectangle
 
 noncomputable section
+-- Suppress simp-arg/seq-focus linter in complex contour proofs where
+-- defensive simp args serve documentation/stability purposes
+set_option linter.unusedSimpArgs false
+set_option linter.unnecessarySeqFocus false
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
 namespace Cathedral.White.Infrastructure
@@ -29,7 +33,7 @@ noncomputable def perronFlattened (y : ℝ) : ℂ → ℂ :=
 
 /-- The key decomposition: y^s/s = g(s) + 1/s for s ≠ 0.
     This follows from dslope definition: g(s) = (y^s - f(0))/(s - 0) = (y^s - 1)/s. -/
-lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (hy : 0 < y) (s : ℂ) (hs : s ≠ 0) :
+lemma perronIntegrand_eq_flattened_add_inv (y : ℝ) (_hy : 0 < y) (s : ℂ) (hs : s ≠ 0) :
     perronIntegrand y s = perronFlattened y s + 1 / s := by
   simp only [perronIntegrand, perronFlattened, dslope_of_ne _ hs, slope, vsub_eq_sub, sub_zero,
              smul_eq_mul]
@@ -194,7 +198,7 @@ lemma rectangle_integral_inv_eq_two_pi_I {c R T : ℝ} (hc : 0 < c) (hR : 0 < R)
   rw [hbot, htop, hright, hleft]
   -- The goal now has I * (-I * ... - -I * ...) terms. Simplify using I*(-I) = 1.
   have hII : (I : ℂ) * -I = 1 := by
-    simp [Complex.ext_iff]
+    simp
   -- Normalize sign patterns
   have hs1 : (-↑R + -↑T * I : ℂ) = -↑R - ↑T * I := by ring
   have hs2 : (↑R - -↑T * I : ℂ) = ↑R + ↑T * I := by ring
@@ -447,7 +451,7 @@ lemma perron_integral_bound_with_R_gt_one {y c R T : ℝ} (hy : 1 < y)
     have key : rv = I⁻¹ * (I * rv) := by rw [inv_mul_cancel_left₀ hI_ne]
     rw [key, hrv_eq, Complex.inv_I]
     have hII : (-I : ℂ) * I = 1 := by
-      simp [Complex.ext_iff]
+      simp
     ring_nf
     simp
   -- Step 2: perronIntegral - 1 = (1/(2π))(-I(top - bot) + lv)

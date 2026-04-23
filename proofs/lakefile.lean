@@ -150,11 +150,9 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.Perron.Formula,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
     `Cathedral.White.Infrastructure.DirichletZetaInverse,
-    -- Conditional zeta bounds: RH → 1/ζ bound (roadmap for Phase 3)
+    -- Conditional Lindelöf bound + horizontal contour vanishing (2 sorry)
     `Cathedral.White.Infrastructure.ZetaConvexity,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
     `Cathedral.White.Infrastructure.HilbertInequality,
-    -- Dirichlet series integral representation (Abel summation extension)
-    `Cathedral.White.Infrastructure.DirichletSeries
   ]
 

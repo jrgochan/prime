@@ -1,0 +1,96 @@
+warning: unused import: `rug::ops::CompleteRound`
+  --> src/main.rs:20:5
+   |
+20 | use rug::ops::CompleteRound;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `n_c`
+   --> src/main.rs:140:9
+    |
+140 |     let n_c = c_new(n_terms as f64, 0.0);
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_n_c`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `n_pow`
+   --> src/main.rs:151:9
+    |
+151 |     let n_pow = c_pow_neg(n_terms, &one_minus_s); // n^{-(1-s)} = n^{s-1}
+    |         ^^^^^ help: if this is intentional, prefix it with an underscore: `_n_pow`
+
+warning: constant `RED` is never used
+  --> src/main.rs:38:7
+   |
+38 | const RED: &str = "\x1b[31m";
+   |       ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `c_clone` is never used
+  --> src/main.rs:62:4
+   |
+62 | fn c_clone(z: &C256) -> C256 {
+   |    ^^^^^^^
+
+warning: fields `worst_zeta_re` and `worst_zeta_im` are never read
+   --> src/main.rs:212:5
+    |
+206 | struct SlitPlaneResult {
+    |        --------------- fields in this struct
+...
+212 |     worst_zeta_re: f64,
+    |     ^^^^^^^^^^^^^
+213 |     worst_zeta_im: f64,
+    |     ^^^^^^^^^^^^^
+
+warning: `bc-zeta-lower` (bin "bc-zeta-lower") generated 6 warnings (run `cargo fix --bin "bc-zeta-lower" -p bc-zeta-lower` to apply 3 suggestions)
+    Finished `release` profile [optimized] target(s) in 0.01s
+     Running `target/release/bc-zeta-lower`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL BC-ZETA-LOWER VALIDATOR[0m                            [1m[36m║[0m
+  [1m[36m║[0m  [2m256-bit MPFR · Massively Parallel · Certified Bounds[0m        [1m[36m║[0m
+  [1m[36m║[0m  [2mTarget: zeta_polynomial_lower_bound_rh[0m                      [1m[36m║[0m
+  [1m[36m║[0m  [2mFile: Cathedral/White/Infrastructure/ZetaConvexity.lean:96[0m   [1m[36m║[0m
+  [1m[36m║[0m  [2m12 threads · MPFR 256-bit[0m                                   [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [2m▸ Sanity checking ζ at 256-bit...[0m
+  [32m✓[0m ζ(2) = [35m1.644938066848227[0m  (π²/6 = 1.644934066848226, err = 4.00e-6)
+  [32m✓[0m ζ(3) = [35m1.202056911159594[0m  (Apéry = 1.202056903159594, err = 8.00e-9)
+  [32m✓[0m |ζ(1/2+14.135i)| = [35m3.162273e-2[0m  (should be ≈ 0)
+
+  [1m[97m═══ §2. slitPlane SURVEY: Does ζ(σ+it) avoid ℝ_{≤0} for σ > 1? ═══[0m
+  [2mScanning ζ(σ+it) for σ ∈ [0.55, 2.05], t ∈ [2, 10000][0m
+  [2mKey question: Is Complex.log(ζ(s)) well-defined on our disk?[0m
+
+  [2m    σ     │ # Re(ζ)≤0 │  min |Im(ζ)| near ℝ≤0  │  (σ, t) of nearest[0m
+    0.55  │      6321 │  1.446454e-3             │  (0.55, 2262.9)
+    0.65  │      2239 │  1.114318e-1             │  (0.65, 5978.0)
+    0.75  │       615 │  2.940414e-1             │  (0.75, 7563.1)
+    0.85  │        81 │  6.405802e-1             │  (0.85, 8646.1)
+    0.95  │         1 │  1.220890e0             │  (0.95, 8646.3)
+    1.05  │         0 │  [32mnever ℝ≤0[0m               │
+    1.15  │         0 │  [32mnever ℝ≤0[0m               │
+    1.25  │         0 │  [32mnever ℝ≤0[0m               │
+    1.35  │         0 │  [32mnever ℝ≤0[0m               │
+    1.45  │         0 │  [32mnever ℝ≤0[0m               │
+    1.55  │         0 │  [32mnever ℝ≤0[0m               │
+    1.65  │         0 │  [32mnever ℝ≤0[0m               │
+    1.75  │         0 │  [32mnever ℝ≤0[0m               │
+    1.85  │         0 │  [32mnever ℝ≤0[0m               │
+    1.95  │         0 │  [32mnever ℝ≤0[0m               │
+    2.05  │         0 │  [32mnever ℝ≤0[0m               │
+
+  [1m[32m✓[0m ζ(σ+it) ∉ ℝ_{≤0} for ALL σ ≥ 1.0 across 550000 samples[0m
+  [1m[32m★ slitPlane condition: SATISFIED for the BC disk (Re > 1/2+ε)[0m
+  [2mTime: 1546.7s[0m
+
+  [2mChecking disk boundaries B(2+it, 1.4) for specific t values...[0m
+    t=    50: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=   100: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=   500: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=  1000: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=  5000: [32m✓[0m ζ on disk boundary avoids ℝ≤0

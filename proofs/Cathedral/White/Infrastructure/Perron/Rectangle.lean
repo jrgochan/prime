@@ -22,7 +22,7 @@ namespace Cathedral.White.Infrastructure
     For the rectangle [c, R] × [-T, T] with c > 0, y^s/s is holomorphic inside.
     Uses Mathlib's `integral_boundary_rect_eq_zero_of_differentiableOn` (Cauchy-Goursat). -/
 lemma rectangle_integral_perron_vanishes {y c R T : ℝ} (hy : 0 < y)
-    (hc : 0 < c) (hR : c < R) (hT : 0 < T) :
+    (hc : 0 < c) (hR : c < R) (_hT : 0 < T) :
     (∫ x in c..R, perronIntegrand y (x + (-T) * I)) -
     (∫ x in c..R, perronIntegrand y (x + T * I)) +
     I * (∫ t in (-T)..T, perronIntegrand y (R + t * I)) -
@@ -42,7 +42,7 @@ lemma rectangle_integral_perron_vanishes {y c R T : ℝ} (hy : 0 < y)
 
 /-- The right vertical segment is bounded by 2T·y^R/R for y < 1.
     For each t, ‖y^{R+tI}/(R+tI)‖ = y^R/‖R+tI‖ ≤ y^R/R since ‖R+tI‖ ≥ R. -/
-lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
+lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (_hy_lt : y < 1)
     (hR : 0 < R) (hT : 0 < T) :
     ‖∫ t in (-T)..T, perronIntegrand y (R + t * I)‖ ≤ 2 * T * y ^ R / R := by
   have pointwise_bound : ∀ t ∈ Set.uIoc (-T) T, ‖perronIntegrand y (↑R + ↑t * I)‖ ≤ y ^ R / R := by

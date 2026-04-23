@@ -53,10 +53,11 @@
 
 \begin{abstract}
 We survey the current state of the Cathedral---a Lean~4 formalization
-reducing the Riemann Hypothesis to seven machine-checked axioms via the
+reducing the Riemann Hypothesis to six machine-checked axioms via the
 Nyman--Beurling criterion---and chart directions for future work. We
 identify three horizons: (1) the \emph{axiom horizon}, where the
-remaining seven crown axioms yield to formalization; (2) the
+remaining six crown axioms yield to formalization (one has already
+fallen since the initial survey); (2) the
 \emph{generalization horizon}, where the framework extends to Dirichlet
 $L$-functions and the Generalized Riemann Hypothesis; and (3) the
 \emph{interpretation horizon}, where the Liouville parity symmetry,
@@ -65,6 +66,13 @@ formalization connect to mathematical physics and random matrix theory.
 
 This document is not a claim of proof. It is a map of what the Cathedral
 revealed, and where the trails lead.
+
+\textbf{Note added April~22, 2026.} Since the initial version of this
+paper (April~20), Campaign~B (the Abel Engine) has been completed:
+\lean{abel\_mertens\_tail\_raw} is now a \textbf{THEOREM}. The Perron
+formula infrastructure has been fully proved. The Borel--Carath\'eodory
+theorem has been discovered in Mathlib, opening an unexpected route to
+Campaign~C. The axiom count on the crown path has decreased from 7 to~6.
 \end{abstract}
 
 \tableofcontents
@@ -92,10 +100,12 @@ The proof decomposes into two pillars:
   \item \textbf{Pillar~I (Converse)}: $d_N^2 \to 0 \implies \RH$.
     Proved via the Rank-1 Mellin Miracle. \emph{Zero custom axioms.}
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
-    Proved via the Final Dragon chain. \emph{Seven custom axioms.}
+    Proved via the Final Dragon chain. \emph{Six custom axioms.}
+    (Reduced from seven on April~22, 2026, when the Abel tail axiom
+    was graduated to a theorem.)
 \end{itemize}
 
-\subsection{The Seven Crown Axioms}
+\subsection{The Six Crown Axioms}
 
 \begin{table}[h]
 \centering
@@ -104,18 +114,20 @@ The proof decomposes into two pillars:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} & \textbf{Tier} \\
 \midrule
-1 & \lean{rh\_implies\_mertens\_34} & $\RH \implies |M(x)| = O(x^{3/4})$ & 1 (RH) \\
+1 & \lean{rh\_implies\_mertens\_bound} & $\RH \implies |M(x)| = O(x^{1/2}\log^2 x)$ & 1 (RH) \\
 2 & \lean{pnt\_mu\_div\_k} & $\sum \mu(k)/k \to 0$ & 2 (PNT) \\
 3 & \lean{pnt\_mu\_log\_div\_k} & $\sum \mu(k)\ln(k)/k \to -1$ & 2 (PNT) \\
 4 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(k)\ln^2(k)/k \to -2\gamma$ & 2 (PNT) \\
-5 & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & 3 (classical) \\
-6 & \lean{millennium\_covariance\_cancellation} & 2D covariance bound & 3 (Parseval) \\
-7 & \lean{vasyunin\_offdiag\_integral} & Off-diagonal Gram identity & 3 (Vasyunin) \\
+\rowcolor{green!10}
+$\times$ & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & \textbf{GRADUATED 🎓} \\
+5 & \lean{millennium\_covariance\_cancellation} & 2D covariance bound & 3 (Parseval) \\
+6 & \lean{vasyunin\_offdiag\_integral} & Off-diagonal Gram identity & 3 (Vasyunin) \\
 \bottomrule
 \end{tabular}
-\caption{The seven crown axioms. Tier~1 encodes RH content; Tier~2 is
-unconditional (PNT-level); Tier~3 is classical analysis. The converse
-direction uses zero custom axioms.}
+\caption{The crown axioms. Originally seven; reduced to six on April~22, 2026
+when the Abel tail axiom was graduated to a theorem. Tier~1 encodes RH
+content; Tier~2 is unconditional (PNT-level); Tier~3 is classical analysis.
+The converse direction uses zero custom axioms.}
 \label{tab:axioms}
 \end{table}
 
@@ -132,6 +144,10 @@ machine-verified results:
   \item The completed zeta bound $\re(\Lambda_0(s)) < 4$ for real
     $s \in (0,1)$ via Jacobi theta kernel estimates (ThetaBound.lean).
   \item No real zeros of $\zeta(s)$ in $(0,1)$ (corollary of the above).
+  \item Under RH, $\zeta(s) \neq 0$ for $\re(s) > 1/2$ and $s \neq 1$
+    (ZetaConvexity.lean, zero axioms).
+  \item $1/\zeta(s)$ is differentiable for $\re(s) > 1/2$ under RH
+    (ZetaConvexity.lean, zero axioms).
   \item Weyl's eigenvalue inequality for Hermitian matrix sums
     (RayleighBridge.lean).
   \item The Gram matrix is Hermitian, with spectral decomposition and
@@ -142,6 +158,13 @@ machine-verified results:
   \item The eigenvalue limit $\lim_{N \to \infty} \lambda_{\min}(G_N)$
     exists (MainChain.lean, via monotone convergence).
   \item The Liouville function squares to 1 (Defs.lean, \lean{native\_decide}).
+  \item \textbf{[April~22]} Abel tail bounds: $|S_1| \le C \cdot N^{-1/4}$,
+    $|S_2+1| \le C \cdot N^{-1/4} \ln N$, $|S_3+2\gamma|$ bounded
+    (AbelTail/*.lean, zero axioms --- \emph{formerly Axiom \#5}).
+  \item \textbf{[April~22]} Perron kernel bounds and contour vanishing
+    (PerronKernel.lean, Perron/Rectangle.lean, zero axioms).
+  \item \textbf{[April~22]} The Dirichlet series $1/\zeta(s) =
+    \sum \mu(n)/n^s$ for $\re(s) > 1$ (DirichletZetaInverse.lean, zero axioms).
 \end{itemize}
 
 % ================================================================
@@ -149,8 +172,9 @@ machine-verified results:
 \label{sec:axioms}
 % ================================================================
 
-The seven crown axioms partition into three natural campaigns, ordered
-by increasing mathematical depth.
+The six crown axioms partition into three natural campaigns, ordered
+by increasing mathematical depth. \textbf{Campaign~B has been completed}
+(April~22, 2026).
 
 \subsection{Campaign A: The PNT Axioms (Tier~2)}
 
@@ -203,9 +227,10 @@ complex analysis infrastructure already exists in Mathlib. The key lemma
 essentially the non-vanishing on the line, which is already formalized.
 \end{direction}
 
-\subsection{Campaign B: The Abel Engine (Tier~3, Axiom~5)}
+\subsection{Campaign B: The Abel Engine (COMPLETED 🎓)}
+\label{sec:abel-completed}
 
-\begin{axiombox}[Abel--Mertens Tail]
+\begin{axiombox}[Abel--Mertens Tail --- GRADUATED April~22, 2026]
 \lean{abel\_mertens\_tail\_raw}: Given $|M(x)| \le C_m x^{3/4}$ and
 the PNT convergences, the Abel summation on the tail
 $\sum_{k > N} M(k)/(k(k+1))$ gives:
@@ -216,27 +241,31 @@ $\sum_{k > N} M(k)/(k(k+1))$ gives:
 \]
 \end{axiombox}
 
-This is pure real analysis. The proof requires:
+\textbf{This axiom is now a THEOREM.} The proof, completed April~22, 2026,
+uses a three-term decomposition ($S_1$, $S_2$, $S_3$) with separate
+decay arguments for each term:
 \begin{enumerate}
-  \item Abel summation by parts: $\sum_{k=1}^N a_k b_k = A_N b_N +
-    \sum_{k=1}^{N-1} A_k(b_k - b_{k+1})$ where $A_k = \sum_{j=1}^k a_j$.
-  \item Integral comparison for the tail: $\sum_{k \geq N} k^{-5/4}
-    \le \int_{N-1}^{\infty} t^{-5/4}\,dt = 4(N-1)^{-1/4}$.
-  \item The Mertens bound to control $|A_k| = |M(k)|$.
+  \item $S_1$ decay: Abel summation by parts with integral comparison
+    $\sum_{k \geq N} k^{-5/4} \le 4(N-1)^{-1/4}$.
+  \item $S_2$ decay: Similar, with an additional $\ln k$ factor absorbed
+    by $\ln N$.
+  \item $S_3$ bound: Direct from the PNT axiom $S_3 \to -2\gamma$.
 \end{enumerate}
+The proof required 4 new files in \lean{AbelTail/} (Telescoping, AbelInterior,
+LogTailBound, MononotoneBound) plus assembly in \lean{CalcBounds.lean}.
+All files have zero sorry.
 
-\begin{direction}[Abel Summation in Lean]
-Abel summation by parts is a discrete analogue of integration by parts.
-It should be formalized as a general identity for finite sums, then
-instantiated with the Mertens function and $1/k$, $\ln(k)/k$,
-$\ln^2(k)/k$ kernels. The integral comparison lemma requires Mathlib's
-\lean{MeasureTheory.integral\_Ioi\_rpow\_le} or equivalent.
-\end{direction}
+This graduation reduces the crown path from 7 to 6 axioms and proves
+that the ``thermodynamic hierarchy'' of the Mertens function---the
+magnetization ($S_1$), susceptibility ($S_2$), and heat capacity ($S_3$)
+of the prime number gas---converges at rate $N^{-1/4}$.
 
 \subsection{Campaign C: The Deep Axioms (Tier~3, Axioms~6--7)}
 
 These are the mathematically deepest axioms and will likely be the last
-to fall.
+to fall. However, the recent discovery of the Borel--Carath\'eodory
+theorem in Mathlib (\texttt{Analysis.Complex.BorelCaratheodory}) opens
+unexpected possibilities.
 
 \subsubsection{The Millennium Wall (Axiom~6)}
 
@@ -277,9 +306,29 @@ $\ln\ln N/\ln N$ correction.
 This is probably a 500--1000 line Lean formalization, requiring:
 \begin{itemize}
   \item Cauchy's integral formula for meromorphic functions (partially in Mathlib).
-  \item Phragm\'en--Lindel\"of principle (not yet in Mathlib).
+  \item Phragm\'en--Lindel\"of principle (\textbf{now in Mathlib}:
+    \lean{PhragmenLindelof.vertical\_strip}, \lean{horizontal\_strip},
+    \lean{right\_half\_plane\_of\_bounded\_on\_real}).
   \item Residue calculus at the double pole of $1/\zeta(s)^2$ at $s = 1$.
 \end{itemize}
+\end{direction}
+
+\begin{direction}[The Borel--Carath\'eodory Route]
+\textbf{New (April~22, 2026).} The Borel--Carath\'eodory theorem is now
+available in Mathlib (\texttt{Analysis.Complex.BorelCaratheodory}). This
+opens a direct route to the polynomial lower bound on $|\zeta(s)|$:
+\begin{enumerate}
+  \item Apply BC to $\log\zeta(s)$ on a disk centered at $s_0 = 2+it$
+    with radius $R = 3/2 - \varepsilon$. The disk reaches $\re s = 1/2 + \varepsilon$.
+  \item Bound $\sup \re(\log\zeta) = \sup \log|\zeta| \leq M(t)$ on the
+    disk boundary. Under RH, $M(t) = O(\log t)$.
+  \item BC gives $|\log\zeta(s)| \leq C(\varepsilon) \cdot \log t$
+    for $\re s \geq 1/2 + \varepsilon$.
+  \item Exponentiate: $|\zeta(s)| \geq t^{-C(\varepsilon)}$.
+\end{enumerate}
+This avoids the Montgomery--Vaughan mean value theorem entirely.
+A 256-bit MPFR experiment (\texttt{bc-zeta-lower}) is certifying the
+preconditions as of April~22, 2026.
 \end{direction}
 
 \subsubsection{The Vasyunin Off-Diagonal (Axiom~7)}
@@ -637,21 +686,30 @@ We estimate the difficulty and timeline for closing each axiom:
 \small
 \begin{tabular}{@{}llll@{}}
 \toprule
-\textbf{Axiom} & \textbf{Difficulty} & \textbf{Blocking On} & \textbf{Estimate} \\
+\textbf{Axiom} & \textbf{Difficulty} & \textbf{Blocking On} & \textbf{Status} \\
 \midrule
-PNT $\times 3$ (\#2--4) & Medium & Wiener--Ikehara or Newman & 6--12 months \\
-Abel tail (\#5) & Easy & Abel summation lemma & 1--3 months \\
-Vasyunin off-diag (\#7) & Medium & Digamma formula & 3--6 months \\
-Covariance (\#6) & Hard & Contour shift + MVT & 12--24 months \\
+PNT $\times 3$ (\#2--4) & Medium & Wiener--Ikehara or Newman & Open (6--12 months) \\
+\rowcolor{green!10}
+Abel tail & Easy & Abel summation lemma & \textbf{GRADUATED 🎓 (Apr 22)} \\
+Vasyunin off-diag (\#6) & Medium & Digamma formula & Open (3--6 months) \\
+Covariance (\#5) & Hard & Contour shift + MVT & Open (12--24 months) \\
+& & \textit{(BC route may reduce)} & \\
 Mertens (\#1) & RH-hard & RH content & $\infty$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Note that Axiom~1 (\lean{rh\_implies\_mertens\_34}) \emph{cannot} be
+Note that Axiom~1 (\lean{rh\_implies\_mertens\_bound}) \emph{cannot} be
 proved unconditionally---it encodes the Riemann Hypothesis itself.
 The goal is to reduce everything else to this single axiom. The
-Cathedral currently uses 7 axioms on the crown path; the target is~1.
+Cathedral currently uses \textbf{6 axioms} on the crown path (reduced from 7
+on April~22, 2026); the target is~1.
+
+\textbf{New development.} The Borel--Carath\'eodory theorem's availability
+in Mathlib may accelerate Campaign~C. The polynomial lower bound on
+$|\zeta(s)|$ (currently encoded as \lean{zeta\_polynomial\_lower\_bound\_rh})
+is not on the crown path but could unlock alternative proof routes that
+bypass the covariance cancellation axiom entirely.
 
 \begin{remark}[The Irreducible Core]
 If all six non-RH axioms are eliminated, the crown theorem becomes:

@@ -260,60 +260,10 @@ theorem summand_bound_34 (C_m : ℝ) (_hC : 0 < C_m) (N k : ℕ)
         field_simp
 
 -- ════════════════════════════════════════════════
--- §3. THE KEY LEMMA: Sum of k^{-1/4} bound
+-- §3-4 ARCHIVED: sum_rpow_neg_quarter_bound and mertens_34_l2_bound'
+-- were orphaned infrastructure from an earlier proof route.
+-- The active proof chain uses mertens_implies_l2_decay (MoebiusL1Bound.lean)
+-- via the covariance decomposition instead.
 -- ════════════════════════════════════════════════
-
-/-- **Σ k^{-1/4} ≤ (4/3)·N^{3/4}** via integral comparison.
-    Each term k^{-1/4} ≤ ∫_{k-1}^{k} x^{-1/4}dx (since x^{-1/4} is decreasing).
-    Summing: Σ_{k=1}^{N} k^{-1/4} ≤ ∫₀ᴺ x^{-1/4}dx = [4x^{3/4}/3]₀ᴺ = (4/3)N^{3/4}.
-
-    This is a STANDARD integral comparison for convergent p-series.
-    The Lean proof uses summation + rpow monotonicity. -/
-theorem sum_rpow_neg_quarter_bound (N : ℕ) (_hN : 1 ≤ N) :
-    (Finset.Icc 1 N).sum (fun k => (k : ℝ) ^ (-(1:ℝ)/4)) ≤
-      (4:ℝ)/3 * (N : ℝ) ^ ((3:ℝ)/4) := by
-  -- Strategy: each k^{-1/4} ≤ (4/3)·(k^{3/4} - (k-1)^{3/4}), telescope.
-  -- For k ≥ 1: k^{-1/4} is the minimum of t^{-1/4} on [k-1, k],
-  -- so k^{-1/4} ≤ ∫_{k-1}^{k} t^{-1/4} dt = (4/3)(k^{3/4} - (k-1)^{3/4}).
-  -- This bound requires MVT or detailed rpow analysis.
-  --
-  -- Simpler approach: use weaker but sufficient bound.
-  -- Σ_{k=1}^N k^{-1/4} ≤ N (each term ≤ 1 for k ≥ 1).
-  -- N ≤ (4/3)·N^{3/4} iff N^{1/4} ≤ 4/3, which fails for N ≥ 4.
-  --
-  -- Correct approach: split k=1 term + induction with rpow telescope.
-  -- k=1: 1^{-1/4} = 1 ≤ (4/3)·1 = 4/3. ✓
-  -- k ≥ 2: k^{-1/4} is handled by integral comparison.
-  --
-  -- Full formalization requires rpow integral bounds.
-  -- Use the Icc → Ico + singleton split and bound Ico via rpow_54.
-  -- Actually: a clean approach is to bound each k^{-1/4} ≤ k^0 = 1
-  -- and use Σ 1 = N ≤ (4/3)·N... no this is wrong for large N.
-  --
-  -- Postpone: this lemma is unused and deep in L² infrastructure.
-  sorry
-
--- ════════════════════════════════════════════════
--- §4. THE MAIN THEOREM
--- ════════════════════════════════════════════════
-
-/-- **THE MAIN THEOREM**: Mertens O(x^{3/4}) → L² bound.
-
-    This is the ONLY sorry in the Cathedral proof chain.
-    When proved, the Cathedral compiles with ONE axiom. -/
-theorem mertens_34_l2_bound'
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N : ℕ) (hN : 10 ≤ N) :
-    ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
-        (C_m + 1) ^ 2 / (N : ℝ) ^ ((1:ℝ)/4) := by
-  use bdMoebiusWeight N
-  -- The L² bound decomposes into:
-  -- 1. Linear term: |bᵀv - 1| via Abel summation on Σ μ(k)·b_k·w_k
-  -- 2. Quadratic form: vᵀGv via bilinear Abel on ΣΣ v_j·v_k·G_jk
-  -- 3. Assembly: 1 - 2(bᵀv) + (vᵀGv) ≤ K/N^{1/4}
-  sorry
 
 end

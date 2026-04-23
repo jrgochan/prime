@@ -41,7 +41,7 @@ theorem bdWitness_eq_bdMoebiusWeight (N : ℕ) (i : Fin (N - 1)) :
 
 /-- Helper: dot product bridge, parameterized as N = m+1.
     bᵀv over Fin(m+1) = bᵀv over Fin m when last weight is 0. -/
-private theorem dotProduct_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
+theorem dotProduct_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
     dotProduct (vasyuninMeanVec (m+1)) (logCutoffWitness (m+1)) =
     dotProduct (fun (i : Fin m) => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight (m+1)) := by
   unfold dotProduct

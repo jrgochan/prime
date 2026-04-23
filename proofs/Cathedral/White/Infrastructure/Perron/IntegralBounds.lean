@@ -21,7 +21,7 @@ namespace Cathedral.White.Infrastructure
 /-- For 0 < y < 1, the integral of y^σ over [c,R] is at most y^c/|log y|.
     Uses FTC: ∫_c^R y^σ dσ = (y^R - y^c)/log(y) ≤ y^c/|log y|. -/
 lemma integral_rpow_le_of_lt_one {y c R : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
-    (hc : 0 ≤ c) (hR : c ≤ R) :
+    (_hc : 0 ≤ c) (_hR : c ≤ R) :
     ∫ σ in c..R, y ^ σ ≤ y ^ c / |Real.log y| := by
   have hlog_neg : Real.log y < 0 := Real.log_neg hy_pos hy_lt
   have hlog_ne : Real.log y ≠ 0 := ne_of_lt hlog_neg
@@ -45,7 +45,7 @@ lemma integral_rpow_le_of_lt_one {y c R : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
 
 /-- For y > 1, the integral of y^σ over [-R,c] is at most y^c/log y.
     Uses FTC: ∫_{-R}^c y^σ dσ = (y^c - y^{-R})/log(y) ≤ y^c/log y. -/
-lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (hR : 0 ≤ R) :
+lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (_hR : 0 ≤ R) :
     ∫ σ in (-R)..c, y ^ σ ≤ y ^ c / Real.log y := by
   have hy_pos : 0 < y := lt_trans one_pos hy
   have hlog_pos : 0 < Real.log y := Real.log_pos hy

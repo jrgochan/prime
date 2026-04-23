@@ -1,0 +1,12 @@
+[package]
+name = "bc-zeta-lower"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral BC-Zeta-Lower Validator — certifies slitPlane avoidance, M(t) = sup log|ζ| on disks, polynomial lower bound exponents, and Borel-Carathéodory feasibility for zeta_polynomial_lower_bound_rh graduation"
+
+[workspace]
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

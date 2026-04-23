@@ -47,7 +47,7 @@ theorem dotProduct_as_icc (N : ℕ) (hN : 2 ≤ N) :
 -- ════════════════════════════════════════════════
 
 /-- Split the dot product sum into S₁, S₂, S₃ components. -/
-theorem icc_sum_split (N : ℕ) (hN : 2 ≤ N)
+theorem icc_sum_split (N : ℕ) (_hN : 2 ≤ N)
     (hlogN : Real.log (N : ℝ) ≠ 0) :
     ∑ k ∈ Finset.Icc 1 (N - 1),
       Cathedral.Vasyunin.vasyuninMeanEntry k *

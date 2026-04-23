@@ -52,7 +52,7 @@ lemma perronIntegrand_differentiableAt {y : ℝ} (hy : 0 < y) {s : ℂ} (hs : s 
 -- ═══════════════════════════════════════════
 
 /-- The norm of the Perron integrand: ‖y^s/s‖ = y^(Re s) / ‖s‖ for y > 0, s ≠ 0. -/
-lemma perronIntegrand_norm {y : ℝ} (hy : 0 < y) {s : ℂ} (hs : s ≠ 0) :
+lemma perronIntegrand_norm {y : ℝ} (hy : 0 < y) {s : ℂ} (_hs : s ≠ 0) :
     ‖perronIntegrand y s‖ = y ^ s.re / ‖s‖ := by
   unfold perronIntegrand
   rw [norm_div, norm_cpow_eq_rpow_re_of_pos hy]
