@@ -17,7 +17,6 @@
 
 use rayon::prelude::*;
 use rug::float::Round;
-use rug::ops::CompleteRound;
 use rug::Float;
 use std::f64::consts::PI;
 use std::fs;
@@ -35,7 +34,7 @@ const CYAN: &str = "\x1b[36m";
 const GREEN: &str = "\x1b[32m";
 const YELLOW: &str = "\x1b[33m";
 const MAGENTA: &str = "\x1b[35m";
-const RED: &str = "\x1b[31m";
+const _RED: &str = "\x1b[31m";
 const WHITE: &str = "\x1b[97m";
 const RESET: &str = "\x1b[0m";
 
@@ -137,7 +136,7 @@ fn c_pochhammer(s: &C256, k: usize) -> C256 {
 fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     let one = c_new(1.0, 0.0);
     let half = c_new(0.5, 0.0);
-    let n_c = c_new(n_terms as f64, 0.0);
+    let _n_c = c_new(n_terms as f64, 0.0);
 
     // Partial Dirichlet sum: Σ_{k=1}^{N} k^{-s}
     let mut sum = c_new(0.0, 0.0);
@@ -148,7 +147,7 @@ fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
 
     // Integral: N^{1-s}/(s-1)
     let one_minus_s = c_sub(&one, s);
-    let n_pow = c_pow_neg(n_terms, &one_minus_s); // n^{-(1-s)} = n^{s-1}
+    let _n_pow = c_pow_neg(n_terms, &one_minus_s); // n^{-(1-s)} = n^{s-1}
     // Actually n^{1-s}: we need exp((1-s)*ln(n))
     let ln_n = Float::with_val(P, Float::with_val(P, n_terms as u64).ln());
     let re_1ms = Float::with_val(P, &one_minus_s.0 * &ln_n);
@@ -591,6 +590,125 @@ fn main() {
     println!();
 
     // ══════════════════════════════════════════════════════════════
+    // §6. WITNESS ANALYSIS FOR THE EXISTENTIAL WRAPPER
+    // ══════════════════════════════════════════════════════════════
+    println!("  {BOLD}{WHITE}═══ §6. WITNESS ANALYSIS — EXISTENTIAL WRAPPER ═══{RESET}");
+    println!("  {DIM}For each ε, compute the theoretical BC exponent B_ε = 20(3-2ε)/ε{RESET}");
+    println!("  {DIM}and verify c/|t|^A ≤ |ζ(σ+it)| for concrete witnesses.{RESET}");
+    println!();
+
+    let witness_epsilons = [0.1_f64, 0.25, 0.5, 0.01];
+    let witness_ts: Vec<f64> = vec![10.0, 50.0, 100.0, 500.0, 1000.0, 5000.0, 10000.0];
+    let test_as = [1.0_f64, 5.0, 10.0, 50.0, 100.0, 500.0];
+
+    let mut witness_tsv = fs::File::create("results/witness_analysis.tsv").unwrap();
+    writeln!(witness_tsv, "eps\tB_eps\tK\tt\tA\tc_inner\tc_div_tA\tmin_zeta\tcheck").unwrap();
+
+    for &eps in &witness_epsilons {
+        let k = (6.0 - 4.0 * eps) / eps;  // K = (6-4ε)/ε = 2(3/2-ε)/(ε/2)
+        let b_eps = 10.0 * k;  // B_ε = 10K = 20(3-2ε)/ε
+        let c_0 = 0.25 * (4.0_f64).powf(-k);  // (1/4) · 4^{-K}
+
+        println!("  ε = {:.3}, K = {:.2}, B_ε = {:.2}, c₀ = (1/4)·4^{{-K}} = {:.4e}", eps, k, b_eps, c_0);
+        println!("  {DIM}  The BC bound gives: |ζ(s)| ≥ c₀ · (2+|t|)^{{-B_ε}}{RESET}");
+        println!("  {DIM}  Theoretical inner bound: c₀/{:.0}^B_ε = {:.4e} at t=100{RESET}",
+            100.0, c_0 / (102.0_f64).powf(b_eps));
+        println!();
+        println!("  {DIM}       t   │     A    │ c_inner/|t|^A │  actual |ζ| │   c/t^A ≤ |ζ|? │  ratio{RESET}");
+        println!("  {DIM}───────────┼──────────┼───────────────┼─────────────┼────────────────┼──────────{RESET}");
+
+        for &t in &witness_ts {
+            let actual_min = zeta_norm(0.5 + eps, t);
+            // BC theoretical lower bound: (1/4) · (2+t)^{-B_ε} · 4^{-K}
+            // = c_0 · (2+t)^{-B_ε}
+            let bc_lower = c_0 * (2.0 + t).powf(-b_eps);
+
+            for &a in &test_as {
+                // c_inner for this A: we need c/t^A ≤ bc_lower
+                // So c ≤ bc_lower · t^A
+                // If A ≥ B_ε: c = c_0·(2+t)^{-B_ε}·t^A grows → use c = c_0·2^{-B_ε}
+                // If A < B_ε: c = c_0·(2+t)^{-B_ε}·t^A → harder
+                let _c_max_at_t = bc_lower * t.powf(a);
+
+                // Use the Lean-matching witness: c_inner = (1/4)·2^{-B_ε}
+                let c_inner = 0.25 * (2.0_f64).powf(-b_eps);
+                let lhs = c_inner / t.powf(a);
+                let passes = lhs <= actual_min;
+                let ratio = actual_min / lhs;
+
+                writeln!(witness_tsv, "{:.4}\t{:.4}\t{:.4}\t{:.1}\t{:.1}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
+                    eps, b_eps, k, t, a, c_inner, lhs, actual_min, if passes { "PASS" } else { "FAIL" }).unwrap();
+
+                if a == 1.0 || a == b_eps.ceil() || a == test_as[test_as.len()-1] {
+                    println!("    {:>7.0} │  {:>6.0} │  {:.4e}   │  {:.4e}  │  {}        │ {:.2e}",
+                        t, a, lhs, actual_min, check(passes), ratio);
+                }
+            }
+        }
+
+        // Summary for this epsilon
+        println!();
+        println!("  {BOLD}Summary for ε = {:.3}:{RESET}", eps);
+        println!("    B_ε = {YELLOW}{:.2}{RESET}  (any A ≥ {:.0} works trivially)", b_eps, b_eps.ceil());
+        println!("    For A < B_ε: need sharper argument (iterated BC or Hadamard)");
+
+        // Check: does the witness c = (1/4)·2^{-B_ε} work for A = B_ε at all t?
+        let c_inner = 0.25 * (2.0_f64).powf(-b_eps);
+        let all_pass_at_b = witness_ts.iter().all(|&t| {
+            let lhs = c_inner / t.powf(b_eps);
+            let actual = zeta_norm(0.5 + eps, t);
+            lhs <= actual
+        });
+        println!("    {} c/(|t|^B_ε) ≤ |ζ| for ALL tested t (A = B_ε = {:.0})",
+            check(all_pass_at_b), b_eps.ceil());
+        println!();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // §7. ASYMPTOTIC REGIME — WHERE DOES THE LEAN PROOF BREAK?
+    // ══════════════════════════════════════════════════════════════
+    println!("  {BOLD}{WHITE}═══ §7. ASYMPTOTIC REGIME — LEAN PROOF GAP ANALYSIS ═══{RESET}");
+    println!("  {DIM}For each ε, find the max A where c/|t|^A ≤ |ζ| holds at all t ≥ 2{RESET}");
+    println!();
+
+    let mut gap_tsv = fs::File::create("results/gap_analysis.tsv").unwrap();
+    writeln!(gap_tsv, "eps\tB_eps\tmax_A_pass\tactual_A_eff").unwrap();
+
+    for &eps in &[0.1_f64, 0.25, 0.5] {
+        let k = (6.0 - 4.0 * eps) / eps;
+        let b_eps = 10.0 * k;
+        let c_inner = 0.25 * (2.0_f64).powf(-b_eps);
+
+        // Binary search for max A where c/|t|^A ≤ min|ζ(0.5+eps+it)| for all t ∈ test set
+        let mut a_lo = 0.0_f64;
+        let mut a_hi = 2.0 * b_eps;
+
+        for _ in 0..100 {
+            let a_mid = (a_lo + a_hi) / 2.0;
+            let all_pass = witness_ts.iter().all(|&t| {
+                let lhs = c_inner / t.powf(a_mid);
+                let actual = zeta_norm(0.5 + eps, t);
+                lhs <= actual
+            });
+            if all_pass { a_lo = a_mid; } else { a_hi = a_mid; }
+        }
+
+        // Effective A from strip minimum at t=1000
+        let strip_min = zeta_norm(0.5 + eps, 1000.0);
+        let a_eff = -(strip_min.ln()) / 1000.0_f64.ln();
+
+        writeln!(gap_tsv, "{:.4}\t{:.4}\t{:.4}\t{:.4}", eps, b_eps, a_lo, a_eff).unwrap();
+
+        println!("  ε = {:.3}:", eps);
+        println!("    Theoretical B_ε = {YELLOW}{:.2}{RESET}", b_eps);
+        println!("    Max A passing with c = (1/4)·2^{{-B_ε}}: {GREEN}{:.2}{RESET}", a_lo);
+        println!("    Actual effective A at t=1000: {GREEN}{:.4}{RESET}", a_eff);
+        println!("    {} Gap: proof handles A ≥ {:.0}, reality supports A down to {:.2}",
+            check(a_lo >= b_eps * 0.9), b_eps.ceil(), a_eff);
+        println!();
+    }
+
+    // ══════════════════════════════════════════════════════════════
     // GRAND CERTIFICATE
     // ══════════════════════════════════════════════════════════════
     let total_time = t_global.elapsed().as_secs_f64();
@@ -615,29 +733,29 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}    Max A_BC = {YELLOW}{:.4}{RESET}  Avg = {YELLOW}{:.4}{RESET}  ({} finite / {} total)",
         a_bc_max, a_bc_avg, finite_values.len(), a_bc_values.len());
     println!("  {BOLD}{CYAN}║{RESET}    {} Finite exponent obtained", check(!finite_values.is_empty()));
-    println!("  {BOLD}{CYAN}║{RESET}    {BOLD}{GREEN}★ The axiom ∀ A > 0 is satisfiable{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§D. Polynomial Lower Bound{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {} min |ζ(σ+it)| > 0 for ALL σ > 1/2 tested",
-        check(true));
-    println!("  {BOLD}{CYAN}║{RESET}    {DIM}Effective exponent A < {} across all measurements{RESET}",
-        a_bc_max.ceil() as u32);
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§D. Witness Analysis{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}    For ε=0.1:  B_ε = {YELLOW}{:.1}{RESET}, c_inner = {:.2e}",
+        20.0 * (3.0 - 0.2) / 0.1, 0.25 * (2.0_f64).powf(-20.0 * (3.0 - 0.2) / 0.1));
+    println!("  {BOLD}{CYAN}║{RESET}    For ε=0.25: B_ε = {YELLOW}{:.1}{RESET}, c_inner = {:.2e}",
+        20.0 * (3.0 - 0.5) / 0.25, 0.25 * (2.0_f64).powf(-20.0 * (3.0 - 0.5) / 0.25));
+    println!("  {BOLD}{CYAN}║{RESET}    For ε=0.5:  B_ε = {YELLOW}{:.1}{RESET}, c_inner = {:.2e}",
+        20.0 * (3.0 - 1.0) / 0.5, 0.25 * (2.0_f64).powf(-20.0 * (3.0 - 1.0) / 0.5));
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}VERDICT: Approach C (BC on shifted disk) is FEASIBLE{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}All preconditions for the Lean proof are validated.{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}VERDICT: BC lower bound is PROVED (zero sorry).{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}Existential wrapper needs rpow arithmetic for A < B_ε.{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
 
     // ─── Write summary JSON ───
     let summary = format!(r#"{{
-  "experiment": "Cathedral BC-Zeta-Lower Validator",
+  "experiment": "Cathedral BC-Zeta-Lower Validator v2",
   "precision_bits": {},
   "threads": {},
   "timestamp": "{}",
   "slitplane": {{
     "sigma_ge_1_clean": {},
-    "total_samples": {},
-    "min_sigma_for_neg_real": {:.4}
+    "total_samples": {}
   }},
   "disk_m_growth": {{
     "grows_sub_log": {},
@@ -647,33 +765,36 @@ fn main() {
   "bc_exponent": {{
     "max_A_BC": {:.15e},
     "avg_A_BC": {:.15e},
-    "all_finite": {},
-    "disk_radius": {},
-    "target_epsilon": {}
+    "all_finite": {}
   }},
-  "verdict": "Approach C (BC on shifted disk) is FEASIBLE",
+  "witness": {{
+    "eps_0.1_B": {:.4},
+    "eps_0.25_B": {:.4},
+    "eps_0.5_B": {:.4}
+  }},
+  "verdict": "BC lower bound PROVED. Existential wrapper: rpow arithmetic remaining.",
   "elapsed_seconds": {:.3}
 }}"#,
         P, n_threads,
         chrono::Utc::now().to_rfc3339(),
         sigma_gt1_clean,
         slit_results.iter().map(|r| r.n_scanned).sum::<u64>(),
-        slit_results.iter().filter(|r| r.neg_real_count > 0).map(|r| r.sigma).fold(f64::MAX, f64::min),
         m_growth_ok,
         radii.to_vec(),
         a_bc_max, a_bc_avg,
         a_bc_values.iter().all(|a| a.is_finite()),
-        "R=3/2-eps/2", bc_epsilons[0],
+        20.0 * (3.0 - 0.2) / 0.1,
+        20.0 * (3.0 - 0.5) / 0.25,
+        20.0 * (3.0 - 1.0) / 0.5,
         total_time
     );
     fs::write("results/summary.json", &summary).unwrap();
 
     println!();
     println!("  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", total_time, n_threads);
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{slitplane_survey,slitplane_disk,disk_scan,strip_minimum,bc_exponent}}.tsv");
-    println!("  {BOLD}{WHITE}Certificate:{RESET} results/summary.json");
+    println!("  {BOLD}{WHITE}Output:{RESET} results/{{*.tsv, summary.json}}");
     println!();
-    println!("  {BOLD}{WHITE}The last axiom has been measured at {}-bit precision across {} cores.{RESET}", P, n_threads);
-    println!("  {BOLD}{WHITE}Now we prove it. ⚡{RESET}");
+    println!("  {BOLD}{WHITE}The BC lower bound is machine-checked.{RESET}");
+    println!("  {BOLD}{WHITE}The witness analysis guides the last sorry. ⚡{RESET}");
     println!();
 }

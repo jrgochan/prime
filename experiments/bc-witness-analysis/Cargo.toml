@@ -1,0 +1,11 @@
+[package]
+name = "bc-witness-analysis"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral BC Witness Analysis — focused experiment computing B_ε, c_inner, and verifying c/|t|^A ≤ |ζ| for the existential wrapper sorry in ZetaLowerBound.lean"
+
+[workspace]
+
+[dependencies]
+rug = "1.26"
+chrono = "0.4"
