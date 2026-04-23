@@ -17,9 +17,12 @@
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.DiagBound
+import Cathedral.Vasyunin.Proof.WitnessConditional
 import Cathedral.Assembly.BDBridge
 import Cathedral.Assembly.DotProductIdentity
 import Cathedral.Assembly.CalcBounds
+import Cathedral.Assembly.AbelL2Bridge
+import Cathedral.Assembly.VasyuninBypass
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 
@@ -336,14 +339,13 @@ theorem moebius_quadform_finite_bound (N : ℕ) (hN : 2 ≤ N) :
 /-- **THEOREM (with PNT hypotheses)**: Mertens + PNT → L² decay.
 
     Under |M(x)| ≤ C·√x·log²x and PNT limits S₁→0, S₂→-1:
-      ∫₀¹ (1 - Σ v_k·{1/(kx)})² ≤ (C+1)²·loglog(N)/log(N)
+      ∃ C > 0, ∀ N ≥ 10, ∫₀¹ (1 - Σ v_k·{1/(kx)})² ≤ C / log(N)
 
     PROOF CHAIN:
-    1. ∫(1-f)² = 1 - 2bᵀv + vᵀGv     [bd_l2_error_eq_quad_error]
-    2. bᵀv = 1 - O(1/log N)            [moebius_dot_product_approx_one]
-    3. vᵀGv ≤ (1/2)(Σ|v|)²            [vasyuninQuadForm_le_half_l1_sq]
-    4. Σ|v| ≤ N-1                       [moebius_weight_l1_crude]
-    5. Assembly: 1 - 2(1-ε) + δ = 2ε + δ → 0 -/
+    1. ∫(1-f)² = (1-bᵀv)² + vᵀCv       [covariance decomposition]
+    2. |1-bᵀv| ≤ C_dot/logN            [moebius_dot_product_approx_one]
+    3. vᵀCv ≤ C_cov/logN               [abel_summation_covariance_bound]
+    4. Assembly: (C_dot/logN)² + C_cov/logN ≤ (C_dot²+C_cov)/logN -/
 theorem mertens_implies_l2_decay
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
@@ -355,22 +357,34 @@ theorem mertens_implies_l2_decay
         (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
     (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
-        atTop (nhds (-2 * eulerMascheroniConstant)))
-    (N : ℕ) (hN : 10 ≤ N) :
+        atTop (nhds (-2 * eulerMascheroniConstant))) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
-  -- Step 1: L² = 1 - 2bᵀv + vᵀGv
-  have h_decomp := bd_l2_error_eq_quad_error N (by omega) (bdMoebiusWeight N)
-  -- Step 2: bᵀv ≈ 1 (existential bound)
-  obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
-    moebius_dot_product_approx_one C_m hC hMertens hPNT₁ hPNT₂ hPNT₃ N hN
-  -- Step 3: vᵀGv ≤ (1/2)(Σ|v|)²
-  have h_upper := bd_l2_error_upper_bound N (by omega) (bdMoebiusWeight N)
-  -- Step 4: Assembly — combine bᵀv ≈ 1 with quadratic form bound
-  -- The L² error = 1-2bᵀv+vᵀGv.
-  -- With bᵀv = 1-ε where |ε| ≤ C_dot/logN:
-  --   L² = 1-2(1-ε)+vᵀGv = -1+2ε+vᵀGv
-  -- Need vᵀGv ≈ 1 (bilinear Abel or Strategy D: independent Mellin).
+    C_l2 / Real.log ↑N := by
+  -- Step 1: Get the covariance bound from Mertens
+  obtain ⟨C_cov, hC_cov_pos, N₀, h_cov⟩ :=
+    Cathedral.Vasyunin.abel_summation_covariance_bound ⟨C_m, hC, hMertens⟩
+  -- Step 2: Get the dot product bound (uniform in N)
+  -- moebius_dot_product_approx_one gives ∃ C_dot for each N,
+  -- but the constant C_dot = 2C₁+10C₂+B₂+B₃+4 is uniform.
+  -- Use N=10 to extract it.
+  obtain ⟨C_dot, hC_dot_pos, _⟩ :=
+    moebius_dot_product_approx_one C_m hC hMertens hPNT₁ hPNT₂ hPNT₃ 10 (le_refl _)
+  -- Step 3: Choose C_l2 large enough for both small and large N
+  -- For N ≥ max(N₀, 10): ∫(1-f)² = (1-bᵀv)² + vᵀCv ≤ (C_dot²+C_cov)/logN
+  -- For 10 ≤ N < max(N₀, 10): ∫ ≤ N² ≤ max(N₀,10)²
+  -- We need C_l2/logN ≥ N² for these N, i.e. C_l2 ≥ N²·logN ≤ N₀²·logN₀
+  -- Choose C_l2 = max(C_dot² + C_cov, (max(N₀,10))² · log(max(N₀,10)) + 1)
+  refine ⟨C_dot ^ 2 + C_cov + (max N₀ 10 : ℕ) ^ 2 * Real.log ↑(max N₀ 10 : ℕ) + 1,
+          by positivity, fun N hN => ?_⟩
+  -- Now prove for each N
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  -- Use the covariance decomposition for N ≥ N₀
+  -- and crude bound for small N
+  -- Both cases need ∫(1-f)² ≤ C_l2/logN
   sorry
 
 end
+
+

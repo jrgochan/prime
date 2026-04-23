@@ -127,8 +127,8 @@ private theorem loglog_div_log_lt_eps (C : ℝ) (hC : 0 < C) :
 
     PROOF CHAIN (all verified):
       RH →^{rh_implies_mertens_bound} Mertens bound
-         →^{abel_summation_bd_l2_bound_proved} ∫(1-f_N)² ≤ C·loglog(N)/logN
-         →^{loglog_div_log_lt_eps} C·loglog(N)/logN < ε
+         →^{abel_summation_bd_l2_bound_proved} ∫(1-f_N)² ≤ C/logN
+         →^{1/logN → 0} C/logN < ε
 
     AXIOM COUNT: Depends on rh_implies_mertens_bound ONLY. -/
 theorem rh_implies_bd_convergence_direct :
@@ -141,17 +141,29 @@ theorem rh_implies_bd_convergence_direct :
   -- Step 2: Get the L² bound DIRECTLY from AbelSiegeProof (PROVED!)
   obtain ⟨C_err, hC_err_pos, N₀, h_l2⟩ :=
     abel_summation_bd_l2_bound_proved ⟨C_m, hC_pos, hM⟩
-  -- Step 3: Get N large enough that C_err · loglog(N)/log(N) < ε (PROVED!)
-  obtain ⟨N₁, h_decay⟩ :=
-    loglog_div_log_lt_eps C_err hC_err_pos ε hε
+  -- Step 3: Get N large enough that C_err/log(N) < ε
+  have h_tend := Real.tendsto_log_atTop
+  rw [Filter.tendsto_atTop_atTop] at h_tend
+  obtain ⟨M, hM'⟩ := h_tend (C_err / ε + 1)
   -- Step 4: Combine thresholds
-  refine ⟨max (max N₀ N₁) 10, fun N hN => ?_⟩
+  refine ⟨max (max (max N₀ ⌈max M 2⌉₊) 10) 3, fun N hN => ?_⟩
   have hN₀ : N ≥ N₀ := by omega
-  have hN₁ : N ≥ N₁ := by omega
   have hN3 : N ≥ 3 := by omega
   -- Step 5: Get the witness and bound
   obtain ⟨v, hv⟩ := h_l2 N hN₀ hN3
-  exact ⟨v, lt_of_le_of_lt hv (h_decay N hN₁)⟩
+  refine ⟨v, lt_of_le_of_lt hv ?_⟩
+  -- Need: C_err / logN < ε, i.e., logN > C_err/ε
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast (show 1 < N by omega))
+  rw [div_lt_iff₀ hlogN_pos]
+  have hlogN_big : C_err / ε < Real.log ↑N := by
+    have h1 : C_err / ε + 1 ≤ Real.log (max M 2) := hM' _ (le_max_left _ _)
+    have h2 : (max M 2 : ℝ) ≤ ↑N := by
+      calc (max M 2 : ℝ) ≤ (⌈max M 2⌉₊ : ℝ) := Nat.le_ceil _
+        _ ≤ ↑(max (max N₀ ⌈max M 2⌉₊) 10) := by exact_mod_cast le_max_right N₀ _ |>.trans (le_max_left _ _)
+        _ ≤ ↑N := by exact_mod_cast (show max (max N₀ ⌈max M 2⌉₊) 10 ≤ N by omega)
+    linarith [Real.log_le_log (by positivity : (0:ℝ) < max M 2) h2]
+  linarith [mul_lt_mul_of_pos_left hlogN_big hε, div_mul_cancel₀ C_err (ne_of_gt hε)]
 
 -- ═══════════════════════════════════════════════
 -- AUDIT

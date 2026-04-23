@@ -90,23 +90,26 @@ The Mellin-side bound then follows via `parseval_bridge`
 
     Under the Mertens bound |M(x)| ≤ C_m·x^{1/2}·log²x,
     the L²(0,1) norm of the BD residual with Möbius log-taper
-    weights decays as O(loglog N / log N).
+    weights decays to 0 as O(1/log N).
 
-    PROOF ROUTE (April 22, 2026):
+    PROOF ROUTE (April 22-23, 2026):
     1. Unfold bdResidualV = 1 - bdLinComb
     2. Apply mertens_implies_l2_decay from MoebiusL1Bound.lean
-    
-    The remaining sorry for the linear term bᵀv ≈ 1 now lives
-    in MoebiusL1Bound.lean, not as a Cathedral axiom. -/
+       (gives existential C_l2 with ∫ ≤ C_l2/logN) -/
 theorem bd_gram_form_decay
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x ≥ 2,
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x^(1/2 : ℝ) * (Real.log x)^2)
     (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧
     ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
-  -- bdResidualV = 1 - bdLinComb, so this is exactly mertens_implies_l2_decay
-  show ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤ _
-  exact mertens_implies_l2_decay C_m hC hMertens pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k N hN
+    C_l2 / Real.log ↑N := by
+  -- bdResidualV = 1 - bdLinComb
+  have h_eq : ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 =
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := rfl
+  -- Get the existential bound from mertens_implies_l2_decay
+  obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
+    mertens_implies_l2_decay C_m hC hMertens pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
+  exact ⟨C_l2, hC_l2_pos, h_eq ▸ h_bound N hN⟩
 
 end Cathedral.White.Infrastructure

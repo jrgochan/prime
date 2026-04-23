@@ -18,6 +18,7 @@
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.PlancherelBypass
+import Cathedral.Assembly.MoebiusL1Bound
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.MellinBridge.AbelSummation
 import Cathedral.MellinBridge.MertensIntegral
@@ -133,8 +134,9 @@ theorem l2_from_pointwise_bound
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N :=
+      C_l2 / Real.log ↑N :=
   l2_from_pointwise_bound_derived C_m hC hMertens N hN
 
 -- ════════════════════════════════════════════════
@@ -152,14 +154,14 @@ theorem abel_summation_bd_l2_bound_proved :
       N ≥ 3 →
       ∃ v : Fin (N - 1) → ℝ,
         ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
-          C_err * Real.log (Real.log ↑N) / Real.log ↑N := by
+          C_err / Real.log ↑N := by
   intro ⟨C_m, hC_pos, hMertens⟩
-  use (C_m + 1) ^ 2, by positivity
-  use 10
-  intro N hN _hN3
-  exact ⟨bdMoebiusWeight N, l2_from_pointwise_bound C_m hC_pos hMertens N hN⟩
-
-end
+  -- Get uniform L² bound from mertens_implies_l2_decay
+  obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
+    mertens_implies_l2_decay C_m hC_pos (fun x hx => hMertens x hx)
+      pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
+  exact ⟨C_l2, hC_l2_pos, 10, fun N hN _hN3 =>
+    ⟨bdMoebiusWeight N, h_bound N hN⟩⟩
 
 -- ════════════════════════════════════════════════
 -- AUDIT

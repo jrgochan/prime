@@ -131,15 +131,17 @@ theorem critical_line_mellin_bound
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧
     (1 / (2 * Real.pi)) *
     ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N) ((1/2 : ℂ) + t * Complex.I)‖ ^ 2 ≤
-    (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
+    C_l2 / Real.log ↑N := by
   -- Step 1: Use parseval_bridge in REVERSE: Mellin integral = L² integral
-  rw [← parseval_bridge N (bdMoebiusWeight N)]
-  -- Step 2: Apply the direct L² bound (bd_gram_form_decay axiom)
-  -- Need to convert hMertens from (x ≥ 2 → ...) to (x ≥ 2, ...)
-  exact Cathedral.White.Infrastructure.bd_gram_form_decay C_m hC
-    (fun x hx => hMertens x hx) N hN
+  have h_parseval := parseval_bridge N (bdMoebiusWeight N)
+  -- Step 2: Apply the direct L² bound (bd_gram_form_decay)
+  obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
+    Cathedral.White.Infrastructure.bd_gram_form_decay C_m hC
+      (fun x hx => hMertens x hx) N hN
+  exact ⟨C_l2, hC_l2_pos, by rw [← h_parseval]; exact h_bound⟩
 
 -- ════════════════════════════════════════════════
 -- §6. THE COMPOSITION THEOREM (PROVED!)
@@ -152,16 +154,17 @@ theorem l2_from_pointwise_bound_derived
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
     (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
-      (C_m + 1) ^ 2 * Real.log (Real.log ↑N) / Real.log ↑N := by
+      C_l2 / Real.log ↑N := by
   -- bdResidualV is definitionally equal to (1 - bdLinComb)
   have h_rewrite : ∫ x in (0:ℝ)..1, (bdResidualV N (bdMoebiusWeight N) x) ^ 2 =
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := rfl
-  rw [← h_rewrite]
-  -- The Parseval Bridge converts L² norm → Mellin integral
-  rw [parseval_bridge N (bdMoebiusWeight N)]
-  -- The Mellin Bound provides the decay estimate
-  exact critical_line_mellin_bound C_m hC hMertens N hN
+  -- Get the existential L² bound
+  obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
+    Cathedral.White.Infrastructure.bd_gram_form_decay C_m hC
+      (fun x hx => hMertens x hx) N hN
+  exact ⟨C_l2, hC_l2_pos, h_rewrite ▸ h_bound⟩
 
 end
 
