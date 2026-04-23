@@ -239,7 +239,7 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
 
     The BC inner bound (bc_inner_bound) is ZERO SORRY.
     The existential wrapper case-splits on A ≥ B_ε vs A < B_ε:
-    - A ≥ B_ε: rpow witness arithmetic (1 sorry, pure algebra)
+    - A ≥ B_ε: FULLY PROVED (zero sorry)
     - A < B_ε: needs iterated BC or Hadamard (1 sorry, mathematical) -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
@@ -343,14 +343,65 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
             -- since K·log 4 = 2K·log 2
             have h_log4 : Real.log 4 = 2 * Real.log 2 := by
               rw [show (4:ℝ) = 2^2 from by norm_num, Real.log_pow]; ring
-            -- Assemble: we need c₀/|t|^A ≤ (1/4)·exp(-E)
-            -- i.e., (1/4)·exp(-K·log 4)·exp(-B_ε·log 2)/|t|^A ≤ (1/4)·exp(-E)
-            -- After converting 4^{-K}·2^{-B_ε}·|t|^{-A} to exp:
-            -- exp(-K·log 4 - B_ε·log 2 - A·log|t|) ≤ exp(-E)
-            -- i.e., E ≤ K·log 4 + B_ε·log 2 + A·log|t|
-            -- = K·log 4 + B_ε·(log(2+|t|) - log((2+|t|)/2)) + A·log|t|
-            -- ... this is getting circular. Use sorry for the rpow wrangling.
-            sorry
+            -- Convert rpow quantities to exp form
+            have h_4_rpow : (4:ℝ) ^ (-K_ε) = Real.exp (-(K_ε * Real.log 4)) := by
+              rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 4)]; ring_nf
+            have h_2_rpow : (2:ℝ) ^ (-B_ε) = Real.exp (-(B_ε * Real.log 2)) := by
+              rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]; ring_nf
+            have h_t_rpow : |s.im| ^ A = Real.exp (A * Real.log |s.im|) := by
+              rw [Real.rpow_def_of_pos ht_pos]; ring_nf
+            -- Direct approach: use h_4_rpow, h_2_rpow, h_t_rpow to convert, then
+            -- show the inequality via the monotonicity chain.
+            -- c₀ = (1/4)·4^{-K}·2^{-B_ε}
+            -- c₀ / |t|^A = c₀ · |t|^{-A}
+            -- We use: |t|^{-A} ≤ ((2+|t|)/2)^{-B_ε} (from h_key + exp comparison)
+            -- and ((2+|t|)/2)^{-B_ε} = 2^{B_ε}·(2+|t|)^{-B_ε} ... complex
+            --
+            -- SIMPLER: Work entirely in exp space.
+            -- c₀/|t|^A = (1/4)·exp(-K·log4 - B_ε·log2 - A·log|t|)
+            -- target = (1/4)·exp(-(K·log4 + B_ε·log(2+|t|)))
+            -- Need: -(K·log4 + B_ε·log2 + A·log|t|) ≤ -(K·log4 + B_ε·log(2+|t|))
+            -- i.e., K·log4 + B_ε·log(2+|t|) ≤ K·log4 + B_ε·log2 + A·log|t|
+            -- i.e., B_ε·(log(2+|t|) - log2) ≤ A·log|t|
+            -- i.e., B_ε·log((2+|t|)/2) ≤ A·log|t| ← h_key!
+            --
+            -- Translate: c₀/|t|^A = c₀ * (1/|t|^A)
+            have hA_rpow_pos : 0 < |s.im| ^ A := Real.rpow_pos_of_pos ht_pos A
+            -- Reformulate: a/b ≤ c ↔ a ≤ c * b (for b > 0)
+            rw [show c₀ / |s.im| ^ A ≤ _ ↔ c₀ ≤ _ * |s.im| ^ A from
+              div_le_iff₀ hA_rpow_pos]
+            rw [hc₀_def]
+            -- Convert all rpow to exp
+            rw [h_4_rpow, h_2_rpow, h_t_rpow]
+            -- (1/4)*exp(-K·log4)*exp(-B_ε·log2) ≤ (1/4)*exp(-E)*exp(A·log|t|)
+            -- Combine exp on each side
+            have h_combine_l : (1:ℝ)/4 * Real.exp (-(K_ε * Real.log 4)) *
+                Real.exp (-(B_ε * Real.log 2)) =
+                1/4 * Real.exp (-(K_ε * Real.log 4 + B_ε * Real.log 2)) := by
+              rw [mul_assoc]
+              congr 1
+              rw [← Real.exp_add]
+              congr 1
+              ring
+            have h_combine_r : (1:ℝ)/4 * Real.exp (-(2 * (Real.log 4 +
+                10 * Real.log (2 + |s.im|)) * (3/2 - ε) / (ε/2))) *
+                Real.exp (A * Real.log |s.im|) =
+                1/4 * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+                (3/2 - ε) / (ε/2)) + A * Real.log |s.im|) := by
+              rw [mul_assoc]
+              congr 1
+              rw [← Real.exp_add]
+            rw [h_combine_l, h_combine_r]
+            apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 1/4)
+            apply Real.exp_le_exp.mpr
+            -- Goal: -(K·log4 + B_ε·log2)
+            --     ≤ -(2·(log4 + 10·log(2+|t|))·(3/2-ε)/(ε/2)) + A·log|t|
+            -- = -(K·log4 + B_ε·log(2+|t|)) + A·log|t|   (via h_exp_identity)
+            -- So need: B_ε·log(2+|t|) - B_ε·log2 ≤ A·log|t|
+            have h_rearrange : B_ε * (Real.log (2 + |s.im|) - Real.log 2) =
+                B_ε * Real.log ((2 + |s.im|) / 2) := by
+              rw [← Real.log_div (ne_of_gt h2t_pos) (by norm_num : (2:ℝ) ≠ 0)]
+            linarith [h_key, h_rearrange, h_exp_identity]
         _ ≤ ‖riemannZeta s‖ := hbc
     · -- ══ Case A < B_ε: requires iterated BC or Hadamard argument ══
       -- The single-pass BC bound decays as |t|^{-B_ε}, which is faster than
