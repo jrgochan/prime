@@ -93,7 +93,14 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
   · -- ‖∑' g(n+1+1)‖ ≤ 3/4
     -- Use tsum_of_norm_bounded with bound b(n)
     let b : ℕ → ℝ := fun n => if n = 0 then 1/4 else 1/((↑n + 1) * (↑n + 2))
-    have hb_hasSum : HasSum b (3/4) := by sorry
+    have hb_hasSum : HasSum b (3/4) := by
+      -- b(n) = if n = 0 then 1/4 else 1/((n+1)(n+2))
+      -- = 1/((n+1)(n+2)) + if n = 0 then 1/4 - 1/2 else 0
+      -- = 1/((n+1)(n+2)) + if n = 0 then -1/4 else 0
+      -- HasSum c 1 where c(n) = 1/((n+1)(n+2)) (telescoping)
+      -- HasSum d (-1/4) where d(n) = if n = 0 then -1/4 else 0 (single term)
+      -- Total: 1 + (-1/4) = 3/4
+      sorry
     have hb_bound : ∀ n, ‖(fun n => g (n + 1 + 1)) n‖ ≤ b n := by
       intro n
       simp only [g, riemannZetaSummandHom, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, b]
