@@ -92,18 +92,12 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
         show Summable fun n => ‖g (n + 1 + 1)‖
         exact hg_ns.comp_injective (fun a b h => by omega)
     _ < 1 := by
-        -- Use: ∀ n, ‖g(n+1+1)‖ ≤ (n+2)^{-2} ≤ 1/((n+1)(n+2))
-        -- and Σ 1/((n+1)(n+2)) = 1 (telescoping), so norm ≤ 1.
-        -- But we need strict <. The first term gives 1/4 < 1/2 = 1/(1·2),
-        -- so: ‖g(1+1)‖ ≤ 1/4, and ∑_{n≥1} ‖g(n+2)‖ ≤ ∑_{n≥1} 1/((n+1)(n+2)) = 1/2
-        -- Total ≤ 1/4 + 1/2 = 3/4 < 1
-        -- We apply tsum_of_norm_bounded with bound function b(n) := 1/((n+1)(n+2))
-        -- This approach gives ≤ 1 by telescoping. For strict <, we note:
-        -- The bound series has sum 1 but ‖g‖ < b at n=0, giving strict inequality.
-        -- However, tsum_of_norm_bounded only gives ≤.
-        -- So use explicit approach: ∑ ‖g‖ ≤ ∑ 1/(n+2)^2 ≤ 3/4 < 1.
-        -- We provide this as a sorry for now and will formalize the arithmetic below.
-        sorry
+        -- ∑' ‖g(n+1+1)‖ = ∑' (n+2)^{-Re(s)} ≤ ∑' (n+2)^{-2} = ζ(2) - 1 ≈ 0.645 < 1
+        -- Each term: ‖(n+2)^{-s}‖ = (n+2)^{-Re(s)} ≤ (n+2)^{-2} since Re(s) ≥ 2
+        --   via norm_cpow_eq_rpow_re_of_pos and rpow_le_rpow_of_exponent_le
+        -- Sum bound: ∑ (n+2)^{-2} = ζ(2) - 1 = π²/6 - 1 < 1
+        --   established by split at n=0: 1/4 + ∑_{n≥1} 1/((n+1)(n+2)) = 1/4 + 1/2 = 3/4 < 1
+        sorry -- TODO: formalize arithmetic bound (3/4 < 1)
 
 /-- ζ(s) ∈ slitPlane for Re(s) ≥ 2 (far from critical strip).
 
