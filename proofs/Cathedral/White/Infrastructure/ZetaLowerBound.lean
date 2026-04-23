@@ -209,122 +209,52 @@ private lemma re_gt_half_on_disk {t : ℝ}
   have h_abs : |z.re| ≤ ‖z‖ := Complex.abs_re_le_norm z
   linarith [abs_le.mp (le_of_lt (lt_of_le_of_lt h_abs hz)) |>.1]
 
-/-- **Key Bridge Lemma**: A holomorphic nonvanishing function on a ball whose
-    center value lies in slitPlane maps the entire ball into slitPlane.
+-- ═══════════════════════════════════════════
+-- §2. Holomorphic Logarithm on the Disk
+-- ═══════════════════════════════════════════
 
-    PROOF SKETCH (holomorphic logarithm via covering space):
-    1. By `DifferentiableOn.isExactOn_ball`, the logarithmic derivative f'/f
-       has a holomorphic primitive G on ball, i.e., G' = f'/f.
-    2. Then (f · exp(-G))' = 0 on ball, so f = c · exp(G) for a constant c ≠ 0.
-    3. Im(G) is continuous on ball and Im(G(center)) ∈ (-π, π) (since f(center) ∈ slitPlane).
-    4. If f(z) ∈ ℝ<0 for some z, then Im(G(z)) ≡ π (mod 2π). Since |Im(G(z)) - Im(G(0))| < 2π
-       by the maximum principle applied to Im(G) on the ball, Im(G(z)) = π.
-    5. By the intermediate value theorem on the connected ball, Im(G) must pass through all
-       values between Im(G(0)) and π. In particular, Im(G) takes the value 0 somewhere,
-       meaning f is positive real there — contradicting the hypothesis that Im(G) reaches π
-       without G being constant.
+/-- **Holomorphic Logarithm**: A holomorphic nonvanishing function on a ball
+    admits a holomorphic logarithm (primitive of f'/f), normalized to vanish
+    at the center.
 
-    This is a standard result in complex analysis: nonvanishing holomorphic functions on
-    simply connected domains admit holomorphic logarithms, and the logarithm's imaginary
-    part determines the winding number, which is zero on a simply connected domain. -/
-private lemma image_ball_subset_slitPlane_of_ne_zero
+    This is a standard result: on a simply connected domain, a nonvanishing
+    holomorphic function f has a holomorphic log G with f = f(c)·exp(G).
+
+    Proof sketch:
+    1. f'/f is holomorphic on ball (f diff + f ≠ 0).
+    2. By `DifferentiableOn.isExactOn_ball`, f'/f has a holomorphic
+       primitive H with H'(z) = f'(z)/f(z).
+    3. Normalize: G(z) = H(z) - H(c), so G(c) = 0.
+    4. The function z ↦ f(z)·exp(-G(z)) has derivative 0:
+       (f·e⁻ᴳ)' = f'·e⁻ᴳ - f·G'·e⁻ᴳ = e⁻ᴳ·(f' - f·f'/f) = 0.
+    5. By `IsOpen.is_const_of_deriv_eq_zero` on the connected ball:
+       f(z)·exp(-G(z)) = f(c)·exp(-G(c)) = f(c)·1 = f(c).
+    6. So f(z) = f(c)·exp(G(z)) for all z ∈ ball.
+
+    This construction bypasses slitPlane entirely — no branch cut issues. -/
+private lemma holomorphic_log_exists_on_ball
     {c : ℂ} {R : ℝ} (hR : 0 < R)
     {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f (ball c R))
-    (hne : ∀ z ∈ ball c R, f z ≠ 0)
-    (hcenter : f c ∈ slitPlane) :
-    ∀ z ∈ ball c R, f z ∈ slitPlane := by
+    (hne : ∀ z ∈ ball c R, f z ≠ 0) :
+    ∃ G : ℂ → ℂ, DifferentiableOn ℂ G (ball c R) ∧ G c = 0 ∧
+      ∀ z ∈ ball c R, f z = f c * Complex.exp (G z) := by
   sorry
 
-/-- Under RH, ζ(s) ∈ slitPlane for all s in the BC disk B(s₀, R).
-    The disk is centered at s₀ with Re(s₀) = 2, radius R < 3/2,
-    so Re(s) > 1/2 throughout, and ζ ≠ 0 under RH.
+-- ═══════════════════════════════════════════
+-- §3. Upper Bound on log|ζ| on the Disk
+-- ═══════════════════════════════════════════
 
-    Proof uses `image_ball_subset_slitPlane_of_ne_zero` (the holomorphic
-    log bridge lemma) applied to f = ζ ∘ (s₀ + ·). -/
-private lemma zeta_mem_slitPlane_on_disk (hRH : RiemannHypothesis)
+/-- Convexity bound: ‖ζ(s)‖ ≤ (2+|t|)^10 for Re(s) > 1/2 on the BC disk.
+
+    For Re(s) ≥ 2: ‖ζ(s) - 1‖ ≤ 3/4, so ‖ζ‖ ≤ 7/4 < 2 ≤ (2+|t|)^10.
+    For 1/2 < Re(s) < 2: The Phragmén-Lindelöf convexity principle gives
+    ‖ζ(s)‖ ≤ C · (2 + |t|)^{(1-σ)/2} ≤ (2+|t|)^{3/4} ≤ (2+|t|)^10. -/
+private lemma zeta_norm_bound_on_disk
     {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
     ∀ z ∈ ball (0 : ℂ) R,
-      riemannZeta (⟨2, t⟩ + z) ∈ slitPlane := by
-  -- Apply the bridge lemma to f = ζ ∘ (s₀ + ·) on ball(0, R)
-  apply image_ball_subset_slitPlane_of_ne_zero hR_pos
-  · -- f is differentiable on ball (ζ is differentiable away from s=1, and s₀+z ≠ 1)
-    apply DifferentiableOn.comp differentiableOn_riemannZeta
-    · exact differentiableOn_const _ |>.add differentiableOn_id
-    · intro z hz
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      exact s_ne_one_on_disk ht hR_lt hz
-  · -- f(z) ≠ 0 for z in ball (ζ ≠ 0 under RH since Re > 1/2)
-    intro z hz
-    exact rh_zeta_ne_zero_local hRH (re_gt_half_on_disk hR_lt hz) (s_ne_one_on_disk ht hR_lt hz)
-  · -- f(0) = ζ(s₀) ∈ slitPlane (since Re(s₀) = 2 ≥ 2)
-    simp only [add_zero]
-    apply zeta_mem_slitPlane_of_re_ge_two (by norm_num : (2:ℝ) ≤ (⟨2, t⟩ : ℂ).re)
-    intro h
-    have him : t = 0 := by
-      have := congr_arg Complex.im h; simp at this; exact this
-    subst him; simp at ht; linarith
-
--- ═══════════════════════════════════════════
--- §3. Sup Bound on Re(log ζ) on the Disk
--- ═══════════════════════════════════════════
-
-/-- Convexity bound: log|ζ(s)| ≤ C · log(2 + |t|) for Re(s) ≥ 1/2 + ε.
-
-    This is the standard convexity bound for ζ in the critical strip.
-    For Re(s) ≥ 2: |ζ(s)| ≤ ζ(2) < 2, so log|ζ| ≤ 1.
-    For 1/2 < Re(s) < 2: The Phragmén-Lindelöf principle gives
-    |ζ(s)| ≤ C · (2 + |t|)^{(1-σ)/2} where σ = Re(s).
-    Hence log|ζ(s)| ≤ C' · log(2 + |t|).
-
-    Under RH this simplifies: ζ has no zeros for Re > 1/2, so
-    the convexity bound applies uniformly.
-
-    KEY SIMPLIFICATION: (Complex.log w).re = Real.log ‖w‖ for w ≠ 0.
-    So the bound reduces to showing ‖ζ(s₀+z)‖ ≤ (2+|t|)^10. -/
-private lemma log_zeta_re_bound_on_disk
-    {t : ℝ} (ht : 2 ≤ |t|)
-    {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2)
-    {ε : ℝ} (hε : 0 < ε) (hR_ε : R ≤ 3/2 - ε/2) :
-    ∃ M : ℝ, 0 < M ∧ M ≤ 10 * Real.log (2 + |t|) ∧
-    ∀ z ∈ ball (0 : ℂ) R,
-      (Complex.log (riemannZeta (⟨2, t⟩ + z))).re ≤ M := by
-  -- We choose M = 10 * log(2 + |t|) and prove the bound.
-  -- For Re(s) ≥ 2: |ζ| < 2, so log|ζ| < log 2 < 1 ≤ M.
-  -- For 1/2 < Re(s) < 2: requires convexity bound (Phragmén-Lindelöf).
-  refine ⟨10 * Real.log (2 + |t|), ?_, le_refl _, ?_⟩
-  · -- M > 0 since 2 + |t| > 1 (given |t| ≥ 2)
-    apply mul_pos (by norm_num : (0:ℝ) < 10)
-    exact Real.log_pos (by linarith : (1:ℝ) < 2 + |t|)
-  · intro z hz
-    -- The key identity: Re(log w) = Real.log ‖w‖
-    rw [Complex.log_re]
-    -- We need: Real.log ‖ζ(s₀+z)‖ ≤ 10 * Real.log (2 + |t|)
-    -- i.e., ‖ζ(s₀+z)‖ ≤ (2 + |t|)^10
-    -- Crude bound: ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 for Re(s₀+z) > 1/2
-    -- Case 1: Re ≥ 2 → ‖ζ - 1‖ ≤ 3/4, so ‖ζ‖ ≤ 7/4 < 2 ≤ (2+|t|)^10
-    -- Case 2: 1/2 < Re < 2 → needs convexity bound (PL/functional equation)
-    sorry -- Reduces to: ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 for Re ∈ (1/2, 2)
-
--- ═══════════════════════════════════════════
--- §4. Differentiability of log ζ on the Disk
--- ═══════════════════════════════════════════
-
-/-- log ∘ ζ ∘ (· + s₀) is differentiable on ball(0, R) under RH. -/
-private lemma log_zeta_differentiableOn_disk (hRH : RiemannHypothesis)
-    {t : ℝ} (ht : 2 ≤ |t|)
-    {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
-    DifferentiableOn ℂ (fun z => Complex.log (riemannZeta (⟨2, t⟩ + z)))
-      (ball 0 R) := by
-  apply DifferentiableOn.clog
-  · -- ζ ∘ (· + s₀) is differentiable on the ball
-    apply DifferentiableOn.comp differentiableOn_riemannZeta
-    · exact differentiableOn_const _ |>.add differentiableOn_id
-    · intro z hz
-      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      exact s_ne_one_on_disk ht hR_lt hz
-  · -- ζ(s₀ + z) ∈ slitPlane for all z in ball
-    exact zeta_mem_slitPlane_on_disk hRH ht hR_pos hR_lt
+      ‖riemannZeta (⟨2, t⟩ + z)‖ ≤ (2 + |t|) ^ (10 : ℝ) := by
+  sorry
 
 -- ═══════════════════════════════════════════
 -- §5. The Main Theorem: Polynomial Lower Bound
@@ -393,8 +323,17 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     refine ⟨1, one_pos, max 2 1, lt_max_of_lt_left (by norm_num : (0:ℝ) < 2), ?_⟩
     intro s hs him
     have ht_ge_2 : 2 ≤ |s.im| := le_trans (le_max_left 2 1) him
-    -- Apply BC to log ∘ ζ ∘ (· + s₀) on ball(0, R)
-    -- Then exponentiate to get the polynomial lower bound.
+    -- PROOF ARCHITECTURE (via holomorphic logarithm + BC):
+    -- 1. Get holomorphic log G with ζ(s₀+z) = ζ(s₀)·exp(G(z)), G(0) = 0
+    -- 2. Re(G(z)) = log(‖ζ(s₀+z)‖/‖ζ(s₀)‖) ≤ log((2+|t|)^10/‖ζ(s₀)‖)
+    --    ≤ 10·log(2+|t|) + 2 =: M  (since ‖ζ(s₀)‖ ≥ 1/4)
+    -- 3. BC: ‖G(z)‖ ≤ 2M·‖z‖/(R-‖z‖) + 0  (since G(0) = 0)
+    -- 4. For s = 1/2+ε+it: z = s - s₀ = (-3/2+ε, 0), ‖z‖ = 3/2-ε,
+    --    R - ‖z‖ = (3/2-ε/2) - (3/2-ε) = ε/2
+    -- 5. Re(G(z)) ≥ -‖G(z)‖ ≥ -2M(3/2-ε)/(ε/2) = -2M(3-2ε)/ε
+    -- 6. ‖ζ(s)‖ = ‖ζ(s₀)‖·exp(Re(G(z))) ≥ (1/4)·exp(-2M(3-2ε)/ε)
+    --    ≥ (1/4)·exp(-C·log|t|/ε) = (1/4)·|t|^(-C/ε)
+    -- 7. For A > 0: choose c and T₀ so that c/|t|^A ≤ (1/4)·|t|^(-C/ε)
     sorry
 
 end Cathedral.White.Infrastructure.ZetaLowerBound
