@@ -213,9 +213,20 @@ theorem moebius_dot_product_approx_one
       _ ≤ C₂ * 9 := mul_le_mul_of_nonneg_left h_calc2 hC₂_pos.le
       _ = 9 * C₂ := by ring
   -- Step 8c: Triangle inequality + assembly
-  -- |(1-γ)S₁+(S₂+1)-c/logN|·logN ≤ |1-γ|·|S₁|·logN + |S₂+1|·logN + |(1-γ)S₂+S₃|
-  -- ≤ |S₁|·logN + |S₂+1|·logN + |S₂|+1+|S₃|
-  -- ≤ 2C₁ + 9C₂ + B₂+1+B₃+2 = 2C₁+9C₂+B₂+B₃+3 ≤ C_dot
+  -- Sufficient: |...|·logN ≤ C_dot (since div by logN > 0)
+  suffices h_main : |(1 - eulerMascheroniConstant) * S₁_at (N - 1) +
+      (S₂_at (N - 1) + 1) -
+      ((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+        Real.log ↑N| * Real.log ↑N ≤
+      2 * C₁ + 9 * C₂ + B₂ + B₃ + 4 by
+    rw [le_div_iff₀ hlogN_pos]
+    linarith
+  -- Now: |A + B - C/L| · L ≤ D
+  -- Use: |A + B - C/L|·L ≤ (|A| + |B| + |C|/L)·L = |A|·L + |B|·L + |C|
+  -- We need triangle inequality: |a + b - c| ≤ |a| + |b| + |c|
+  -- and |S₂+1| = |S₂ - (-1)|
+  -- Key: convert |S₂+1| to match h_s2_logN
+  have h_s2_eq : S₂_at (N - 1) + 1 = S₂_at (N - 1) - (-1) := by ring
   sorry
 
 -- ════════════════════════════════════════════════
