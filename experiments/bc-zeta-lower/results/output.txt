@@ -100,3 +100,10 @@ warning: `bc-zeta-lower` (bin "bc-zeta-lower") generated 7 warnings (run `cargo 
     t=   500: [32m✓[0m ζ on disk boundary avoids ℝ≤0
     t=  1000: [32m✓[0m ζ on disk boundary avoids ℝ≤0
     t=  5000: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t= 10000: [31m✗[0m ζ on disk boundary avoids ℝ≤0  (closest |Im| = 3.51e-1)
+
+  [1m[97m═══ §3. M(t) = sup log|ζ| ON DISK B(2+it, R) ═══[0m
+  [2m256-bit MPFR, parallel over disk grid[0m
+
+  [2m     t     │     R   │  M=sup log|ζ| │  min log|ζ| │   BC bound  │    A_BC    │ min|ζ|[0m
+  [2m───────────┼─────────┼───────────────┼─────────────┼─────────────┼────────────┼──────────[0m

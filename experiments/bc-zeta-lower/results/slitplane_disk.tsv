@@ -4,3 +4,4 @@ t_center	radius	min_sigma_on_disk	ζ_on_neg_real	closest_im
 500	1.4	0.6000	false	NaN
 1000	1.4	0.6000	false	NaN
 5000	1.4	0.6000	false	NaN
+10000	1.4	0.6000	true	3.506726e-1

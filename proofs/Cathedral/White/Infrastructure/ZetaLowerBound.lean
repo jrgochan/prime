@@ -461,11 +461,36 @@ private lemma re_G_le_of_norm_bound
     (hc : (c : ℝ) ≤ ‖f 0‖) (hc_pos : 0 < c)
     {w : ℂ} (hw : w ∈ ball (0 : ℂ) R) :
     (G w).re ≤ Real.log B - Real.log c := by
-  -- f(w) = f(0) · exp(G(w))
-  -- ‖f(w)‖ = ‖f(0)‖ · |exp(G(w))| = ‖f(0)‖ · exp(Re(G(w)))
-  -- exp(Re(G(w))) = ‖f(w)‖ / ‖f(0)‖ ≤ B / c
-  -- Re(G(w)) ≤ log(B/c) = log(B) - log(c)
-  sorry
+  -- Chain: f(w) = f(0)·exp(G(w)), so ‖f(w)‖ = ‖f(0)‖·exp(Re G(w))
+  -- Then exp(Re G(w)) = ‖f(w)‖/‖f(0)‖ ≤ B/c, taking log gives result.
+  have hfw := hG_eq w hw
+  have hf0_pos : (0 : ℝ) < ‖f 0‖ := lt_of_lt_of_le hc_pos hc
+  have h_norm_fw : ‖f w‖ = ‖f 0‖ * Real.exp ((G w).re) := by
+    rw [hfw, norm_mul, Complex.norm_exp]
+  -- exp(Re G(w)) = ‖f(w)‖ / ‖f(0)‖
+  have h_exp_val : Real.exp ((G w).re) = ‖f w‖ / ‖f 0‖ := by
+    have hne : ‖f 0‖ ≠ 0 := ne_of_gt hf0_pos
+    rw [h_norm_fw, mul_div_cancel_left₀ _ hne]
+  -- B ≥ ‖f(w)‖ ≥ 0, so B ≥ 0
+  have hB_pos : 0 < B := by
+    have : 0 < ‖f w‖ := by
+      rw [h_norm_fw]; exact mul_pos hf0_pos (Real.exp_pos _)
+    linarith [hf_bound w hw]
+  -- exp(Re G(w)) ≤ B/c
+  have h_exp_le : Real.exp ((G w).re) ≤ B / c := by
+    rw [h_exp_val]
+    rw [div_le_div_iff₀ hf0_pos hc_pos]
+    calc ‖f w‖ * c ≤ ‖f w‖ * ‖f 0‖ := by
+          exact mul_le_mul_of_nonneg_left hc (norm_nonneg _)
+      _ = ‖f 0‖ * ‖f w‖ := by ring
+      _ ≤ ‖f 0‖ * B := by
+          exact mul_le_mul_of_nonneg_left (hf_bound w hw) (le_of_lt hf0_pos)
+      _ = B * ‖f 0‖ := by ring
+  -- Re G(w) ≤ log(B/c) = log B - log c
+  have hBc_pos : 0 < B / c := div_pos hB_pos hc_pos
+  calc (G w).re ≤ Real.log (Real.exp ((G w).re)) := le_of_eq (Real.log_exp _).symm
+    _ ≤ Real.log (B / c) := Real.log_le_log (Real.exp_pos _) h_exp_le
+    _ = Real.log B - Real.log c := Real.log_div (ne_of_gt hB_pos) (ne_of_gt hc_pos)
 
 -- ── Sub-lemma 4: Monotonicity for the BC bound simplification ──
 /-- `a/b ≤ c/d` when `a ≤ c`, `d ≤ b`, and `0 < d`, `0 < b`. -/
