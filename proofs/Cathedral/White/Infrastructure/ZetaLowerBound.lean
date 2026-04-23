@@ -436,9 +436,7 @@ private lemma zeta_norm_bound_on_disk
 private lemma norm_mk_sub {a b : ℝ} (hb : b = 0) :
     ‖(⟨a, b⟩ : ℂ)‖ = |a| := by
   subst hb
-  -- Need: ‖⟨a, 0⟩‖ = √(a² + 0²) = √(a²) = |a|
-  -- API: Complex.norm_def, normSq_mk
-  sorry
+  exact (Complex.abs_re_eq_norm.mpr rfl).symm
 
 -- ── Sub-lemma 2: ζ is differentiable on the shifted ball ──
 /-- `ζ ∘ (s₀ + ·)` is differentiable on `ball 0 R` when 1 ∉ ball(s₀, R). -/
@@ -472,10 +470,11 @@ private lemma re_G_le_of_norm_bound
 -- ── Sub-lemma 4: Monotonicity for the BC bound simplification ──
 /-- `a/b ≤ c/d` when `a ≤ c`, `d ≤ b`, and `0 < d`, `0 < b`. -/
 private lemma div_le_div_of_le_of_le
-    {a b c d : ℝ} (hac : a ≤ c) (hdb : d ≤ b) (hd : 0 < d) (hb : 0 < b) :
+    {a b c d : ℝ} (hac : a ≤ c) (hdb : d ≤ b) (hd : 0 < d) (hb : 0 < b) (ha : 0 ≤ a) :
     a / b ≤ c / d := by
-  -- a*d ≤ c*d (← hac) ≤ c*b (← hdb), then div_le_div_iff
-  sorry
+  rw [div_le_div_iff₀ hb hd]
+  calc a * d ≤ a * b := by exact mul_le_mul_of_nonneg_left hdb ha
+    _ ≤ c * b := by exact mul_le_mul_of_nonneg_right hac (le_of_lt hb)
 
 /-- **BC inner bound**: For Re(s) ≥ 1/2 + ε, |Im(s)| ≥ 2, under RH,
     ‖ζ(s)‖ ≥ (1/4) · exp(-C_ε · log(2+|t|)) where C_ε depends only on ε.
@@ -559,7 +558,7 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
       have h_num : 2 * M * ‖z‖ ≤ 2 * M * (3/2 - ε) :=
         mul_le_mul_of_nonneg_left hz_norm_bound (by positivity)
       have h_den : ε/2 ≤ R - ‖z‖ := hgap
-      exact le_trans hBC (div_le_div_of_le_of_le h_num h_den (by linarith) hR_sub_pos)
+      exact le_trans hBC (div_le_div_of_le_of_le h_num h_den (by linarith) hR_sub_pos (by positivity))
     -- Combine: ‖ζ(s₀)‖ · exp(Re(G z)) ≥ (1/4) · exp(-2M·(3/2-ε)/(ε/2))
     calc (1/4 : ℝ) * Real.exp (-(2 * M * (3/2 - ε) / (ε/2)))
         ≤ ‖riemannZeta s₀‖ * Real.exp (-(‖G z‖)) := by
