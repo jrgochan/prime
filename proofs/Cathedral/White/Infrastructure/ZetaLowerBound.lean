@@ -114,7 +114,25 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
               Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2),
               Real.rpow_natCast]; norm_num
       · -- n ≥ 1: (↑(n+2))^(-s.re) ≤ 1/((n+1)*(n+2))
-        sorry
+        -- Step 1: (n+2)^{-σ} ≤ (n+2)^{-2}
+        have h1 : (1:ℝ) ≤ ↑(n + 2) := by
+          exact_mod_cast Nat.one_le_iff_ne_zero.mpr (by omega)
+        have h_exp : (↑(n + 2) : ℝ) ^ (-s.re) ≤ (↑(n + 2) : ℝ) ^ (-(2:ℝ)) :=
+          Real.rpow_le_rpow_of_exponent_le h1 (by linarith)
+        -- Step 2: (n+2)^{-2} = 1/(n+2)^2
+        have h_inv : (↑(n + 2) : ℝ) ^ (-(2:ℝ)) = 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) := by
+          rw [Real.rpow_neg (by positivity : (0:ℝ) ≤ ↑(n+2))]
+          ring
+        -- Step 3: 1/(n+2)^2 ≤ 1/((n+1)*(n+2))
+        -- Since (n+1)*(n+2) ≤ (n+2)^2 (i.e., n+1 ≤ n+2), dividing inverts
+        have h_frac : 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) ≤ 1/((↑n + 1) * (↑n + 2)) := by
+          rw [show (2:ℝ) = ((2:ℕ):ℝ) from by norm_num, Real.rpow_natCast]
+          push_cast
+          -- 1/(↑n+2)^2 ≤ 1/((↑n+1)*(↑n+2)) iff (↑n+1)*(↑n+2) ≤ (↑n+2)^2
+          apply one_div_le_one_div_of_le (by positivity)
+          -- Goal: (↑n + 1) * (↑n + 2) ≤ (↑n + 2) ^ 2
+          nlinarith [show (0:ℝ) ≤ ↑n from Nat.cast_nonneg n]
+        linarith
     exact tsum_of_norm_bounded hb_hasSum hb_bound
   · -- Step: 3/4 < 1
     norm_num
