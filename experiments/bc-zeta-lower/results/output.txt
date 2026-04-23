@@ -72,3 +72,30 @@ warning: `bc-zeta-lower` (bin "bc-zeta-lower") generated 7 warnings (run `cargo 
   [2mScanning ζ(σ+it) for σ ∈ [0.55, 2.05], t ∈ [2, 10000][0m
   [2mKey question: Is Complex.log(ζ(s)) well-defined on our disk?[0m
 
+  [2m    σ     │ # Re(ζ)≤0 │  min |Im(ζ)| near ℝ≤0  │  (σ, t) of nearest[0m
+    0.55  │      6321 │  1.446454e-3             │  (0.55, 2262.9)
+    0.65  │      2239 │  1.114318e-1             │  (0.65, 5978.0)
+    0.75  │       615 │  2.940414e-1             │  (0.75, 7563.1)
+    0.85  │        81 │  6.405802e-1             │  (0.85, 8646.1)
+    0.95  │         1 │  1.220890e0             │  (0.95, 8646.3)
+    1.05  │         0 │  [32mnever ℝ≤0[0m               │
+    1.15  │         0 │  [32mnever ℝ≤0[0m               │
+    1.25  │         0 │  [32mnever ℝ≤0[0m               │
+    1.35  │         0 │  [32mnever ℝ≤0[0m               │
+    1.45  │         0 │  [32mnever ℝ≤0[0m               │
+    1.55  │         0 │  [32mnever ℝ≤0[0m               │
+    1.65  │         0 │  [32mnever ℝ≤0[0m               │
+    1.75  │         0 │  [32mnever ℝ≤0[0m               │
+    1.85  │         0 │  [32mnever ℝ≤0[0m               │
+    1.95  │         0 │  [32mnever ℝ≤0[0m               │
+    2.05  │         0 │  [32mnever ℝ≤0[0m               │
+
+  [1m[32m✓[0m ζ(σ+it) ∉ ℝ_{≤0} for ALL σ ≥ 1.0 across 550000 samples[0m
+  [1m[32m★ slitPlane condition: SATISFIED for the BC disk (Re > 1/2+ε)[0m
+  [2mTime: 1348.3s[0m
+
+  [2mChecking disk boundaries B(2+it, 1.4) for specific t values...[0m
+    t=    50: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=   100: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=   500: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=  1000: [32m✓[0m ζ on disk boundary avoids ℝ≤0

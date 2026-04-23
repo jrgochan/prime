@@ -430,6 +430,49 @@ private lemma zeta_norm_bound_on_disk
 -- §5. Inner BC Bound: Per-Point Lower Bound
 -- ═══════════════════════════════════════════
 
+
+-- ── Sub-lemma 1: Complex norm of a real horizontal shift ──
+/-- For a complex number with zero imaginary part, the norm equals |re|. -/
+private lemma norm_mk_sub {a b : ℝ} (hb : b = 0) :
+    ‖(⟨a, b⟩ : ℂ)‖ = |a| := by
+  sorry
+
+-- ── Sub-lemma 2: ζ is differentiable on the shifted ball ──
+/-- `ζ ∘ (s₀ + ·)` is differentiable on `ball 0 R` when 1 ∉ ball(s₀, R). -/
+private lemma zeta_differentiableOn_shifted_ball
+    {t : ℝ} (ht : 2 ≤ |t|)
+    {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
+    DifferentiableOn ℂ (fun w => riemannZeta (⟨2, t⟩ + w)) (ball 0 R) := by
+  intro w hw
+  have hw1 := s_ne_one_on_disk ht hR_lt hw
+  exact (differentiableAt_riemannZeta hw1).comp w
+    ((differentiableAt_const (⟨2, t⟩ : ℂ)).add differentiableAt_id) |>.differentiableWithinAt
+
+-- ── Sub-lemma 3: Re(G) bound on the disk ──
+/-- If `f(z) = f(0) · exp(G(z))` on a ball, `‖f(0)‖ ≥ c > 0`,
+    and `‖f(z)‖ ≤ B` on the ball, then `Re(G(z)) ≤ log(B/c)`. -/
+private lemma re_G_le_of_norm_bound
+    {R : ℝ} (hR : 0 < R)
+    {f G : ℂ → ℂ}
+    (hG_eq : ∀ z ∈ ball (0 : ℂ) R, f z = f 0 * Complex.exp (G z))
+    (hf_ne : f 0 ≠ 0)
+    (hf_bound : ∀ z ∈ ball (0 : ℂ) R, ‖f z‖ ≤ (B : ℝ))
+    (hc : (c : ℝ) ≤ ‖f 0‖) (hc_pos : 0 < c)
+    {w : ℂ} (hw : w ∈ ball (0 : ℂ) R) :
+    (G w).re ≤ Real.log B - Real.log c := by
+  -- f(w) = f(0) · exp(G(w))
+  -- ‖f(w)‖ = ‖f(0)‖ · |exp(G(w))| = ‖f(0)‖ · exp(Re(G(w)))
+  -- exp(Re(G(w))) = ‖f(w)‖ / ‖f(0)‖ ≤ B / c
+  -- Re(G(w)) ≤ log(B/c) = log(B) - log(c)
+  sorry
+
+-- ── Sub-lemma 4: Monotonicity for the BC bound simplification ──
+/-- `a/b ≤ c/d` when `a ≤ c`, `d ≤ b`, and `0 < d`, `0 < b`. -/
+private lemma div_le_div_of_le_of_le
+    {a b c d : ℝ} (hac : a ≤ c) (hdb : d ≤ b) (hd : 0 < d) (hb : 0 < b) :
+    a / b ≤ c / d := by
+  sorry
+
 /-- **BC inner bound**: For Re(s) ≥ 1/2 + ε, |Im(s)| ≥ 2, under RH,
     ‖ζ(s)‖ ≥ (1/4) · exp(-C_ε · log(2+|t|)) where C_ε depends only on ε.
 
@@ -456,17 +499,20 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     have hre_le_2 : s.re ≤ 2 := hre_le
     -- ‖z‖ = 2 - s.re
     have hz_norm : ‖z‖ = 2 - s.re := by
-      sorry -- norm calculation: ‖(s.re - 2, 0)‖ = |s.re - 2| = 2 - s.re
+      have h1 : ‖z‖ = |z.re| := by
+        have hq := @norm_mk_sub z.re z.im hz_im
+        rw [← Complex.eta z] at hq
+        exact hq
+      rw [h1, hz_re, abs_of_nonpos (by linarith)]
+      ring
     have hz_norm_bound : ‖z‖ ≤ 3/2 - ε := by rw [hz_norm]; linarith
     have hz_lt_R : ‖z‖ < R := by linarith
     have hz_ball : z ∈ ball (0 : ℂ) R := by
       simp only [mem_ball, dist_zero_right]; exact hz_lt_R
     have hgap : ε/2 ≤ R - ‖z‖ := by rw [hz_norm, hR_def]; ring_nf; linarith
     -- Step B: ζ is holomorphic and nonvanishing on ball(s₀, R)
-    have hζ_diff : DifferentiableOn ℂ (fun w => riemannZeta (s₀ + w)) (ball 0 R) := by
-      intro w hw
-      have hw1 := s_ne_one_on_disk ht hR_lt hw
-      sorry -- DifferentiableAt.comp for ζ ∘ (s₀ + ·)
+    have hζ_diff : DifferentiableOn ℂ (fun w => riemannZeta (s₀ + w)) (ball 0 R) :=
+      zeta_differentiableOn_shifted_ball ht hR_pos hR_lt
     have hζ_ne : ∀ w ∈ ball (0 : ℂ) R, riemannZeta (s₀ + w) ≠ 0 := by
       intro w hw
       have hw1 := s_ne_one_on_disk ht hR_lt hw
@@ -505,7 +551,11 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
       apply Real.exp_le_exp.mpr; linarith
     -- ‖G z‖ ≤ 2M·(3/2-ε)/(ε/2) (from BC + z bounds)
     have hGz_bound : ‖G z‖ ≤ 2 * M * (3/2 - ε) / (ε/2) := by
-      sorry
+      have hR_sub_pos : 0 < R - ‖z‖ := by linarith
+      have h_num : 2 * M * ‖z‖ ≤ 2 * M * (3/2 - ε) :=
+        mul_le_mul_of_nonneg_left hz_norm_bound (by positivity)
+      have h_den : ε/2 ≤ R - ‖z‖ := hgap
+      exact le_trans hBC (div_le_div_of_le_of_le h_num h_den (by linarith) hR_sub_pos)
     -- Combine: ‖ζ(s₀)‖ · exp(Re(G z)) ≥ (1/4) · exp(-2M·(3/2-ε)/(ε/2))
     calc (1/4 : ℝ) * Real.exp (-(2 * M * (3/2 - ε) / (ε/2)))
         ≤ ‖riemannZeta s₀‖ * Real.exp (-(‖G z‖)) := by
