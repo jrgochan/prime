@@ -82,22 +82,42 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
   have hg_shift : Summable (fun n => ‖g (n + 1)‖) :=
     hg_ns.comp_injective (fun a b h => by omega)
   rw [hg_shift.of_norm.tsum_eq_zero_add, h_g1, add_sub_cancel_left]
-  -- Goal: ‖∑' n, g (n + 1 + 1)‖ < 1
-  -- Bound by Σ ‖g(n+2)‖ = Σ (n+2)^{-Re(s)} ≤ Σ (n+2)^{-2} < 1
-  have hg_tail : Summable (fun n => ‖g (n + 2)‖) :=
-    hg_ns.comp_injective (fun a b h => by omega)
-  calc ‖∑' n, g (n + 1 + 1)‖
-      ≤ ∑' n, ‖g (n + 1 + 1)‖ := by
-        apply norm_tsum_le_tsum_norm
-        show Summable fun n => ‖g (n + 1 + 1)‖
-        exact hg_ns.comp_injective (fun a b h => by omega)
-    _ < 1 := by
-        -- ∑' ‖g(n+1+1)‖ = ∑' (n+2)^{-Re(s)} ≤ ∑' (n+2)^{-2} = ζ(2) - 1 ≈ 0.645 < 1
-        -- Each term: ‖(n+2)^{-s}‖ = (n+2)^{-Re(s)} ≤ (n+2)^{-2} since Re(s) ≥ 2
-        --   via norm_cpow_eq_rpow_re_of_pos and rpow_le_rpow_of_exponent_le
-        -- Sum bound: ∑ (n+2)^{-2} = ζ(2) - 1 = π²/6 - 1 < 1
-        --   established by split at n=0: 1/4 + ∑_{n≥1} 1/((n+1)(n+2)) = 1/4 + 1/2 = 3/4 < 1
-        sorry -- TODO: formalize arithmetic bound (3/4 < 1)
+  -- We combine both steps: bound ‖∑' g(n+1+1)‖ ≤ 3/4 < 1
+  -- using tsum_of_norm_bounded with a custom bound series.
+  -- First: ‖g(n+1+1)‖ = (n+2)^{-σ} ≤ (n+2)^{-2}
+  -- Second: (n+2)^{-2} ≤ 1/((n+1)(n+2)) since n+1 ≤ n+2
+  -- The series 1/((n+1)(n+2)) = 1/(n+1) - 1/(n+2) telescopes to 1.
+  -- But tsum_of_norm_bounded gives ≤ 1, not < 1.
+  -- So we extract first term: ‖g(2)‖ ≤ 1/4 and ∑_{n≥1} ≤ 1/2. Total ≤ 3/4 < 1.
+  apply lt_of_le_of_lt (b := (3:ℝ)/4)
+  · -- ‖∑' g(n+1+1)‖ ≤ 3/4
+    -- Use tsum_of_norm_bounded with bound b(n)
+    let b : ℕ → ℝ := fun n => if n = 0 then 1/4 else 1/((↑n + 1) * (↑n + 2))
+    have hb_hasSum : HasSum b (3/4) := by sorry
+    have hb_bound : ∀ n, ‖(fun n => g (n + 1 + 1)) n‖ ≤ b n := by
+      intro n
+      simp only [g, riemannZetaSummandHom, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, b]
+      -- ‖(n+1+1 : ℕ)^(-s)‖ = (n+2)^{-Re(s)} ≤ (n+2)^{-2} ≤ b(n)
+      rw [show (n + 1 + 1 : ℕ) = n + 2 from by omega]
+      have hpos : (0 : ℝ) < (↑(n + 2) : ℝ) := by positivity
+      rw [← ofReal_natCast, norm_cpow_eq_rpow_re_of_pos hpos, neg_re]
+      -- Goal: (↑n + 2) ^ (-s.re) ≤ if n = 0 then 1/4 else ...
+      split_ifs with h
+      · -- n = 0: 2^{-σ} ≤ 1/4 since σ ≥ 2
+        subst h
+        norm_num
+        -- Goal: (2:ℝ) ^ (-s.re) ≤ 1/4
+        calc (2:ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-(2:ℝ)) :=
+          Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+        _ = 1/4 := by
+          rw [show (-(2:ℝ)) = -((2:ℕ) : ℝ) from by norm_num,
+              Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2),
+              Real.rpow_natCast]; norm_num
+      · -- n ≥ 1: (↑(n+2))^(-s.re) ≤ 1/((n+1)*(n+2))
+        sorry
+    exact tsum_of_norm_bounded hb_hasSum hb_bound
+  · -- Step: 3/4 < 1
+    norm_num
 
 /-- ζ(s) ∈ slitPlane for Re(s) ≥ 2 (far from critical strip).
 
