@@ -435,6 +435,9 @@ private lemma zeta_norm_bound_on_disk
 /-- For a complex number with zero imaginary part, the norm equals |re|. -/
 private lemma norm_mk_sub {a b : ℝ} (hb : b = 0) :
     ‖(⟨a, b⟩ : ℂ)‖ = |a| := by
+  subst hb
+  -- Need: ‖⟨a, 0⟩‖ = √(a² + 0²) = √(a²) = |a|
+  -- API: Complex.norm_def, normSq_mk
   sorry
 
 -- ── Sub-lemma 2: ζ is differentiable on the shifted ball ──
@@ -471,6 +474,7 @@ private lemma re_G_le_of_norm_bound
 private lemma div_le_div_of_le_of_le
     {a b c d : ℝ} (hac : a ≤ c) (hdb : d ≤ b) (hd : 0 < d) (hb : 0 < b) :
     a / b ≤ c / d := by
+  -- a*d ≤ c*d (← hac) ≤ c*b (← hdb), then div_le_div_iff
   sorry
 
 /-- **BC inner bound**: For Re(s) ≥ 1/2 + ε, |Im(s)| ≥ 2, under RH,

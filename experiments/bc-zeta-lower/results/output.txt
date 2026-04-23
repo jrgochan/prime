@@ -99,3 +99,4 @@ warning: `bc-zeta-lower` (bin "bc-zeta-lower") generated 7 warnings (run `cargo 
     t=   100: [32m✓[0m ζ on disk boundary avoids ℝ≤0
     t=   500: [32m✓[0m ζ on disk boundary avoids ℝ≤0
     t=  1000: [32m✓[0m ζ on disk boundary avoids ℝ≤0
+    t=  5000: [32m✓[0m ζ on disk boundary avoids ℝ≤0
