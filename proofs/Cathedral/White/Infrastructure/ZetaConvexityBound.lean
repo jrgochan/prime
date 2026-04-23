@@ -150,7 +150,7 @@ private lemma norm_fract_integral_le {s : ℂ} (hs : 0 < s.re) :
     Uses the decomposition from IdentityBypass which is valid for ALL Re(s) > 0.
     No case-splitting needed — the formula works everywhere. -/
 private lemma norm_zeta_le {s : ℂ}
-    (hrs : 1/2 < s.re) (hrs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
+    (hrs : 1/2 < s.re) (_ : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
     ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ 2 := by
   -- s ≠ 1 since |Im(s)| ≥ 1/2 but Im(1) = 0
   have him0 : s.im ≠ 0 := by
