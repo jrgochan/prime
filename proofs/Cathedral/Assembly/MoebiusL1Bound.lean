@@ -151,9 +151,9 @@ theorem moebius_dot_product_approx_one
   -- From the algebraic identity + triangle inequality:
   --   |1-bᵀv|·logN ≤ |1-γ|·|S₁|·logN + |S₂+1|·logN + |(1-γ)·S₂+S₃|
   -- Using (N-1)^{-1/4}·logN ≤ 2:
-  --   |S₁|·logN ≤ C₁·2, |S₂+1|·logN ≤ C₂·9
+  --   |S₁|·logN ≤ C₁·2, |S₂+1|·logN ≤ C₂·10
   --   |(1-γ)·S₂+S₃| ≤ |S₂|+1 + |S₃| ≤ B₂+2 + B₃+2|γ| ≤ B₂+B₃+4
-  refine ⟨2 * C₁ + 9 * C₂ + B₂ + B₃ + 4, by linarith, ?_⟩
+  refine ⟨2 * C₁ + 10 * C₂ + B₂ + B₃ + 4, by linarith, ?_⟩
   -- Key facts about N
   have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
   have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
@@ -193,8 +193,8 @@ theorem moebius_dot_product_approx_one
   -- Step 8a: Calculus bounds
   have h_calc1 := rpow_quarter_logN_le_two N hN
   -- (N-1)^{-1/4} · logN ≤ 2
-  have h_calc2 := rpow_quarter_logsq_le_nine N hN
-  -- (N-1)^{-1/4} · log(N-1) · logN ≤ 9
+  have h_calc2 := rpow_quarter_logsq_le_ten N hN
+  -- (N-1)^{-1/4} · log(N-1) · logN ≤ 10
   -- Step 8b: Convert decay bounds to 1/logN bounds
   -- |S₁|·logN ≤ C₁·(N-1)^{-1/4}·logN ≤ 2·C₁
   have h_s1_logN : |S₁_at (N - 1)| * Real.log ↑N ≤ 2 * C₁ := by
@@ -205,20 +205,20 @@ theorem moebius_dot_product_approx_one
       _ ≤ C₁ * 2 := mul_le_mul_of_nonneg_left h_calc1 hC₁_pos.le
       _ = 2 * C₁ := by ring
   -- |S₂+1|·logN ≤ C₂·(N-1)^{-1/4}·log(N-1)·logN ≤ 9·C₂
-  have h_s2_logN : |S₂_at (N - 1) - (-1)| * Real.log ↑N ≤ 9 * C₂ := by
+  have h_s2_logN : |S₂_at (N - 1) - (-1)| * Real.log ↑N ≤ 10 * C₂ := by
     calc |S₂_at (N - 1) - (-1)| * Real.log ↑N
         ≤ C₂ * (↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N :=
           mul_le_mul_of_nonneg_right h_s2_N (le_of_lt hlogN_pos)
       _ = C₂ * ((↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N) := by ring
-      _ ≤ C₂ * 9 := mul_le_mul_of_nonneg_left h_calc2 hC₂_pos.le
-      _ = 9 * C₂ := by ring
+      _ ≤ C₂ * 10 := mul_le_mul_of_nonneg_left h_calc2 hC₂_pos.le
+      _ = 10 * C₂ := by ring
   -- Step 8c: Triangle inequality + assembly
   -- Sufficient: |...|·logN ≤ C_dot (since div by logN > 0)
   suffices h_main : |(1 - eulerMascheroniConstant) * S₁_at (N - 1) +
       (S₂_at (N - 1) + 1) -
       ((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
         Real.log ↑N| * Real.log ↑N ≤
-      2 * C₁ + 9 * C₂ + B₂ + B₃ + 4 by
+      2 * C₁ + 10 * C₂ + B₂ + B₃ + 4 by
     rw [le_div_iff₀ hlogN_pos]
     linarith
   -- Now: |A + B - C/L| · L ≤ D
@@ -292,10 +292,10 @@ theorem moebius_dot_product_approx_one
         |S₂_at (N - 1) + 1| * Real.log ↑N +
         |((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
           Real.log ↑N| * Real.log ↑N := by ring
-    _ ≤ 2 * C₁ + 9 * C₂ + (B₂ + B₃ + 3) := by
+    _ ≤ 2 * C₁ + 10 * C₂ + (B₂ + B₃ + 3) := by
         rw [h_s2_eq]
         linarith [h_term1_logN, h_s2_logN, h_div_logN]
-    _ ≤ 2 * C₁ + 9 * C₂ + B₂ + B₃ + 4 := by linarith
+    _ ≤ 2 * C₁ + 10 * C₂ + B₂ + B₃ + 4 := by linarith
 
 -- ════════════════════════════════════════════════
 -- §4. QUADRATIC FORM BOUND VIA L² BOUND
