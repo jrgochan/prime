@@ -133,32 +133,77 @@ theorem rpow_quarter_logsq_le_ten (N : ℕ) (hN : 10 ≤ N) :
     Real.log ↑N ≤ 10 := by
   have hM_pos : (0:ℝ) < ↑(N - 1) := Nat.cast_pos.mpr (by omega)
   have hM_ge1 : (1:ℝ) ≤ ↑(N - 1) := by exact_mod_cast (show (N-1 : ℕ) ≥ 1 from by omega)
+  have hM_ge9 : (9:ℝ) ≤ ↑(N - 1) := by exact_mod_cast (show (N-1 : ℕ) ≥ 9 from by omega)
   have hN_pos : (0:ℝ) < ↑N := Nat.cast_pos.mpr (by omega)
   have hN_ge1 : (1:ℝ) ≤ ↑N := by exact_mod_cast (show N ≥ 1 from by omega)
-  -- Split M^{-1/4} = M^{-1/8} · M^{-1/8}
+  -- Step 1: Split M^{-1/4} = M^{-1/8} · M^{-1/8}
   have h_split : (↑(N-1) : ℝ) ^ (-(1:ℝ)/4) =
       (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) := by
     rw [← rpow_add hM_pos]; congr 1; ring
-  -- Factor 1: logM · M^{-1/8} ≤ 8·exp(-1)
-  have h1 := log_mul_rpow_neg_eighth_le ↑(N-1) hM_ge1
-  -- Factor 2: logN · M^{-1/8} ≤ logN · N^{-1/8} · (N/M)^{1/8} ≤ 8·exp(-1) · (10/9)
-  -- Bound: M^{-1/8} ≤ N^{-1/8} · (N/M)^{1/8}
-  -- Actually: M^{-1/8} = N^{-1/8} · (N/M)^{1/8} exactly.
-  -- And (N/M)^{1/8} ≤ (N/M) ≤ N/(N-1) ≤ 10/9 for N ≥ 10
-  have h2_base := log_mul_rpow_neg_eighth_le ↑N hN_ge1
-  -- h2_base : logN · N^{-1/8} ≤ 8·exp(-1)
-  -- We need logN · M^{-1/8} = [logN · N^{-1/8}] · [N^{1/8} · M^{-1/8}]
-  --                          = [logN · N^{-1/8}] · (N/M)^{1/8}
-  -- For now, use the cruder: M^{-1/8} ≤ 1 (since M ≥ 1), so logN · M^{-1/8} ≤ logN
-  -- And logN ≤ 8·exp(-1)·N^{1/8} (rearranging h2_base)... grows.
-  -- Better: Use (N/M)^{1/8} ≤ (N/M) ≤ 10/9 (for M ≥ 9, N ≤ 10/9·M)
-  -- Then logN · M^{-1/8} ≤ (8·exp(-1)) · (10/9)
-  -- Product ≤ (8·exp(-1))² · (10/9) = 64·exp(-2)·(10/9) ≤ 10
-  -- The cleanest proof: just bound each factor by 8·exp(-1), then use (10/9) correction
-  -- Total: product = h_split ▸ [logM · M^{-1/8}] · [logN · M^{-1/8}]
-  --       ≤ (8·exp(-1)) · (logN · M^{-1/8})
-  --       ≤ (8·exp(-1)) · (8·exp(-1) · (10/9))  -- using (N/M) correction
-  --       = 64·exp(-2)·(10/9) ≤ 10
-  sorry
+  -- Step 2: Factor bounds
+  have h_factor1 := log_mul_rpow_neg_eighth_le ↑(N-1) hM_ge1
+  have h_factor2_base := log_mul_rpow_neg_eighth_le ↑N hN_ge1
+  -- Step 3: N/M ratio bound
+  have h_NM_ratio : ((↑N : ℝ) / (↑(N-1) : ℝ)) ≤ 10/9 := by
+    rw [div_le_div_iff₀ hM_pos (by norm_num : (0:ℝ) < 9)]
+    have : (↑N : ℝ) = (↑(N-1) : ℝ) + 1 := by
+      rw [Nat.cast_sub (by omega : 1 ≤ N)]; ring
+    nlinarith
+  have h_NM_ge1 : (1:ℝ) ≤ (↑N : ℝ) / (↑(N-1) : ℝ) := by
+    rw [le_div_iff₀ hM_pos]
+    have : (↑N : ℝ) = (↑(N-1) : ℝ) + 1 := by
+      rw [Nat.cast_sub (by omega : 1 ≤ N)]; ring
+    linarith
+  -- Step 4: (N/M)^{1/8} ≤ N/M (since N/M ≥ 1 and 1/8 ≤ 1)
+  have h_rpow_eighth_le : ((↑N : ℝ) / (↑(N-1) : ℝ)) ^ ((1:ℝ)/8) ≤ (↑N : ℝ) / (↑(N-1) : ℝ) := by
+    calc ((↑N : ℝ) / (↑(N-1) : ℝ)) ^ ((1:ℝ)/8)
+        ≤ ((↑N : ℝ) / (↑(N-1) : ℝ)) ^ (1:ℝ) :=
+          rpow_le_rpow_of_exponent_le h_NM_ge1 (by norm_num)
+      _ = (↑N : ℝ) / (↑(N-1) : ℝ) := rpow_one _
+  -- Step 5: N^{1/8} · M^{-1/8} = (N/M)^{1/8}
+  have h_rpow_ratio : (↑N : ℝ) ^ ((1:ℝ)/8) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) =
+      ((↑N : ℝ) / (↑(N-1) : ℝ)) ^ ((1:ℝ)/8) := by
+    rw [show (-(1:ℝ)/8) = -(((1:ℝ)/8)) from by ring, rpow_neg hM_pos.le,
+        ← div_eq_mul_inv, div_rpow hN_pos.le hM_pos.le]
+  -- Step 6: logN · M^{-1/8} ≤ 8·exp(-1) · (10/9)
+  have h_logN_nn : 0 ≤ Real.log ↑N := Real.log_nonneg hN_ge1
+  have h_rpow_nn : 0 ≤ (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) := (rpow_pos_of_pos hM_pos _).le
+  have h_factor2 : Real.log ↑N * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) ≤
+      8 * Real.exp (-1) * (10/9) := by
+    have h_expand : Real.log ↑N * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) =
+        (Real.log ↑N * (↑N : ℝ) ^ (-(1:ℝ)/8)) *
+        ((↑N : ℝ) ^ ((1:ℝ)/8) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8)) := by
+      have h1 : (↑N : ℝ) ^ (-(1:ℝ)/8) * (↑N : ℝ) ^ ((1:ℝ)/8) = 1 := by
+        rw [← rpow_add hN_pos]
+        simp only [show (-(1:ℝ)/8 + (1:ℝ)/8 : ℝ) = 0 from by ring]
+        exact rpow_zero _
+      calc Real.log ↑N * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8)
+          = Real.log ↑N * 1 * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) := by ring
+        _ = Real.log ↑N * ((↑N : ℝ) ^ (-(1:ℝ)/8) * (↑N : ℝ) ^ ((1:ℝ)/8)) *
+            (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) := by rw [h1]
+        _ = (Real.log ↑N * (↑N : ℝ) ^ (-(1:ℝ)/8)) *
+            ((↑N : ℝ) ^ ((1:ℝ)/8) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8)) := by ring
+    rw [h_expand, h_rpow_ratio]
+    calc (Real.log ↑N * (↑N : ℝ) ^ (-(1:ℝ)/8)) * (((↑N : ℝ) / (↑(N-1) : ℝ)) ^ ((1:ℝ)/8))
+        ≤ (8 * Real.exp (-1)) * ((↑N : ℝ) / (↑(N-1) : ℝ)) :=
+          mul_le_mul h_factor2_base (le_trans h_rpow_eighth_le (le_refl _))
+            (rpow_pos_of_pos (div_pos hN_pos hM_pos) _).le
+            (by linarith [exp_pos (-1)])
+      _ ≤ (8 * Real.exp (-1)) * (10/9) :=
+          mul_le_mul_of_nonneg_left h_NM_ratio (by linarith [exp_pos (-1)])
+  -- Step 7: Assembly
+  rw [h_split]
+  calc (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8) *
+      Real.log ↑(N-1) * Real.log ↑N
+      = (Real.log ↑(N-1) * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8)) *
+        (Real.log ↑N * (↑(N-1) : ℝ) ^ (-(1:ℝ)/8)) := by ring
+    _ ≤ (8 * Real.exp (-1)) * (8 * Real.exp (-1) * (10/9)) :=
+        mul_le_mul h_factor1 h_factor2
+          (mul_nonneg h_logN_nn h_rpow_nn) (by linarith [exp_pos (-1)])
+    _ = 64 * (Real.exp (-1) * Real.exp (-1)) * (10/9) := by ring
+    _ = 64 * Real.exp ((-1) + (-1)) * (10/9) := by rw [← Real.exp_add]
+    _ = 64 * Real.exp (-2) * (10/9) := by norm_num
+    _ ≤ 10 := sixtyFour_exp_neg_two_le
 
 end
+
