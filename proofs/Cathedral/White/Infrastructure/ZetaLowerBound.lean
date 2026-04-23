@@ -62,10 +62,18 @@ private theorem rh_zeta_ne_zero_local (hRH : RiemannHypothesis)
     Since ζ(s) is within distance < 1 from 1, it stays in
     {z | z.re > 0} ⊂ slitPlane.
 
-    This avoids the difficult slitPlane question for the full strip. -/
+    Proof uses `mem_slitPlane_of_norm_lt_one`: ‖z‖ < 1 → 1 + z ∈ slitPlane. -/
 private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (hs1 : s ≠ 1) :
     riemannZeta s ∈ slitPlane := by
-  sorry -- Requires: |ζ(s) - 1| < 1 for Re(s) ≥ 2, so Re(ζ(s)) > 0
+  -- ζ(s) = 1 + (ζ(s) - 1). We show ‖ζ(s) - 1‖ < 1.
+  -- Then mem_slitPlane_of_norm_lt_one gives 1 + (ζ(s) - 1) = ζ(s) ∈ slitPlane.
+  have h_re : 1 < s.re := by linarith
+  suffices h : ‖riemannZeta s - 1‖ < 1 by
+    have := mem_slitPlane_of_norm_lt_one h
+    rwa [add_sub_cancel] at this
+  -- ‖ζ(s) - 1‖ < 1 for Re(s) ≥ 2
+  -- ζ(s) - 1 = Σ_{n≥2} 1/n^s, and ‖Σ_{n≥2} 1/n^s‖ ≤ Σ_{n≥2} 1/n^Re(s) ≤ Σ_{n≥2} 1/n^2 < 1
+  sorry
 
 /-- Under RH, ζ(s) ∈ slitPlane for all s in the BC disk B(s₀, R).
     The disk is centered at s₀ with Re(s₀) = 2, radius R < 3/2,
