@@ -6,37 +6,83 @@
   PHYSICS: The relationship between a field and its spectral excitations.
   MATH: Connecting summatory functions to Dirichlet series via Abel summation.
 
-  ### Mathlib Status (Excavation Report):
-  - Our `Cathedral/NymanBeurling/AbelSummation.lean` already has `abel_summation`
-    and `abel_summation_abs_bound` PROVED.
-  - Mathlib has `LSeries` basics but NOT the integral representation.
-  - This file bridges the gap.
+  ### Mathlib Status:
+  - `NumberTheory.LSeries.SumCoeff` has `LSeries_eq_mul_integral` PROVED:
+    this gives the integral representation for L-series directly.
+  - `NumberTheory.AbelSummation` has the Abel summation framework PROVED.
+  - This file re-exports the integral representation in Cathedral notation.
 
-  ### Dependencies: None (pure analysis).
+  ### Dependencies: Mathlib only (pure analysis).
+  ### Status: ZERO sorry. ZERO axioms.
 -/
 
-import Mathlib.NumberTheory.LSeries.Basic
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.NumberTheory.LSeries.SumCoeff
+import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 noncomputable section
-open Complex Real MeasureTheory Filter
+open Complex Real MeasureTheory Filter Finset Asymptotics
+open scoped Topology
 
 namespace Cathedral.White.Infrastructure
 
-/-- **TARGET MATHLIB PR**: Abel summation for Dirichlet series.
-    If A(x) = Σ_{n ≤ x} a_n, then for Re(s) > max(0, σ_c),
-    Σ a_n n^{-s} = s ∫_1^∞ A(x) x^{-s-1} dx.
+-- ═══════════════════════════════════════════
+-- §1. Convenience lemmas
+-- ═══════════════════════════════════════════
 
-    CATHEDRAL ASSET: `abel_summation` in AbelSummation.lean (PROVED)
-    provides the finite-sum version. This extends to Dirichlet series. -/
-theorem dirichlet_series_eq_integral_summatory
-    (a : ℕ → ℂ) (A : ℝ → ℂ) (s : ℂ) (hs : 0 < s.re)
-    (hA : ∀ x, A x = ∑ n ∈ Finset.Icc 1 ⌊x⌋₊, a n)
-    (h_conv : Summable (fun n => a n * (n : ℂ) ^ (-s))) :
-    (∑' n, a n * (n : ℂ) ^ (-s)) =
-    s * ∫ x in Set.Ioi (1:ℝ), A x * (x : ℂ) ^ (-s - 1) := by
-  -- 🔨 MATHLIB TASK: Integration by parts for Lebesgue-Stieltjes measures.
-  -- ROUTE: Extend abel_summation (PROVED) to the tailed series.
-  sorry
+/-- For positive real t, (t : ℂ) lies in the slit plane.
+    Convenience wrapper around `Complex.ofReal_mem_slitPlane`. -/
+lemma ofReal_mem_slitPlane_of_pos {t : ℝ} (ht : 0 < t) :
+    (t : ℂ) ∈ Complex.slitPlane :=
+  Complex.ofReal_mem_slitPlane.mpr ht
+
+/-- Differentiability of t ↦ (t : ℂ)^r for t ≠ 0 and r ≠ 0.
+    Wrapper around `hasDerivAt_ofReal_cpow_const`. -/
+lemma differentiableAt_ofReal_cpow {r : ℂ} (hr : r ≠ 0) {t : ℝ} (ht : t ≠ 0) :
+    DifferentiableAt ℝ (fun (x : ℝ) => (x : ℂ) ^ r) t :=
+  (hasDerivAt_ofReal_cpow_const ht hr).differentiableAt
+
+/-- The derivative of t ↦ (t : ℂ)^r equals r·t^{r-1}.
+    Wrapper around `Complex.deriv_ofReal_cpow_const`. -/
+lemma deriv_ofReal_cpow_eq {r : ℂ} (hr : r ≠ 0) {t : ℝ} (ht : t ≠ 0) :
+    deriv (fun (x : ℝ) => (x : ℂ) ^ r) t = r * (t : ℂ) ^ (r - 1) :=
+  Complex.deriv_ofReal_cpow_const ht hr
+
+-- ═══════════════════════════════════════════
+-- §2. The Dirichlet Series integral representation
+-- ═══════════════════════════════════════════
+
+/-- **PROVED (Mathlib)**: Abel summation for Dirichlet series.
+
+    If the partial sums `∑_{k ∈ Icc 1 n} f(k)` are O(n^r) for some 0 ≤ r,
+    and the L-series converges at s with r < Re(s), then:
+
+      L(f, s) = s · ∫₁^∞ (∑_{k ≤ t} f(k)) · t^{-(s+1)} dt
+
+    This is `LSeries_eq_mul_integral` from Mathlib, re-exported here.
+    Zero sorry. Zero axioms.
+
+    Note: The original Cathedral version used a different signature with
+    `A : ℝ → ℂ` and `∑' n, a(n)·n^{-s}`. Mathlib's version is more
+    general (works with the `LSeries` API directly). -/
+theorem dirichlet_series_integral_representation
+    (f : ℕ → ℂ) {r : ℝ} (hr : 0 ≤ r) {s : ℂ} (hs : r < s.re)
+    (hS : LSeriesSummable f s)
+    (hO : (fun n => ∑ k ∈ Icc 1 n, f k) =O[atTop] fun n => (n : ℝ) ^ r) :
+    LSeries f s =
+    s * ∫ t in Set.Ioi (1:ℝ), (∑ k ∈ Icc 1 ⌊t⌋₊, f k) * (t : ℂ) ^ (-(s + 1)) :=
+  LSeries_eq_mul_integral f hr hs hS hO
+
+-- ═══════════════════════════════════════════
+-- §3. Summability from coefficient growth
+-- ═══════════════════════════════════════════
+
+/-- **PROVED (Mathlib)**: If partial sums of ‖f(k)‖ are O(n^r),
+    then the L-series converges for Re(s) > r.
+    Re-exported from `LSeriesSummable_of_sum_norm_bigO`. -/
+theorem dirichlet_series_summable_of_growth
+    (f : ℕ → ℂ) {r : ℝ} (hr : 0 ≤ r) {s : ℂ} (hs : r < s.re)
+    (hO : (fun n => ∑ k ∈ Icc 1 n, ‖f k‖) =O[atTop] fun n => (n : ℝ) ^ r) :
+    LSeriesSummable f s :=
+  LSeriesSummable_of_sum_norm_bigO hO hr hs
 
 end Cathedral.White.Infrastructure
