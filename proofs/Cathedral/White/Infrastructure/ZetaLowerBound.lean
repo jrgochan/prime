@@ -43,7 +43,7 @@ private theorem rh_zeta_ne_zero_local (hRH : RiemannHypothesis)
   intro hζ
   by_cases h1 : 1 ≤ s.re
   · exact absurd hζ (riemannZeta_ne_zero_of_one_le_re h1)
-  · push_neg at h1
+  · push Not at h1
     have hre_eq : s.re = 1 / 2 :=
       hRH s hζ (by
         rintro ⟨n, rfl⟩
@@ -171,7 +171,7 @@ private lemma zeta_sub_one_norm_le_three_fourths {s : ℂ} (hs : 2 ≤ s.re) :
     {z | z.re > 0} ⊂ slitPlane.
 
     Proof uses `mem_slitPlane_of_norm_lt_one`: ‖z‖ < 1 → 1 + z ∈ slitPlane. -/
-private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (hs1 : s ≠ 1) :
+private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (_hs1 : s ≠ 1) :
     riemannZeta s ∈ slitPlane := by
   -- ζ(s) = 1 + (ζ(s) - 1). Since ‖ζ(s) - 1‖ < 1, we get ζ(s) ∈ slitPlane.
   have h : ‖riemannZeta s - 1‖ < 1 := lt_of_le_of_lt (zeta_sub_one_norm_le_three_fourths hs) (by norm_num)
@@ -257,7 +257,7 @@ private lemma log_zeta_differentiableOn_disk (hRH : RiemannHypothesis)
         rw [← normSq_eq_norm_sq]; simp [h_nsq]; nlinarith [sq_abs t]
       have h_ge : ‖z‖ ≥ 2 := by
         by_contra h
-        push_neg at h
+        push Not at h
         have h_norm_pos := norm_nonneg z
         have : ‖z‖ ^ 2 < 4 := by nlinarith [mul_self_nonneg (‖z‖)]
         linarith
@@ -325,7 +325,7 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
         ≤ 1/4 := div_le_self (by norm_num) h_rpow_ge
       _ ≤ ‖riemannZeta s‖ := h_lower
   · -- ε < 1: Use BC on disk B(2+it, R) with R = 3/2 - ε/2
-    push_neg at hε1
+    push Not at hε1
     set R := 3/2 - ε/2 with hR_def
     have hR_pos : 0 < R := by rw [hR_def]; linarith
     have hR_lt : R < 3/2 := by rw [hR_def]; linarith
