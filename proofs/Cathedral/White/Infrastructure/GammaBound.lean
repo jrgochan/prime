@@ -58,6 +58,9 @@ private lemma normSq_sin (z : ℂ) :
       Real.cos z.re ^ 2 * Real.sinh z.im ^ 2 := by
   rw [Complex.sin_eq z]
   simp only [normSq_apply, sq]
+  -- The _im lemmas below are flagged as "unused" by simp but are needed for ring to close.
+  -- They reduce cosh(↑x).im and sinh(↑x).im to 0, enabling ring to see pure ℝ arithmetic.
+  set_option linter.unusedSimpArgs false in
   simp only [add_re, add_im, mul_re, mul_im, ofReal_re, ofReal_im, I_re, I_im,
     cosh_ofReal_re, cosh_ofReal_im, sinh_ofReal_re, sinh_ofReal_im,
     sin_ofReal_re, sin_ofReal_im, cos_ofReal_re, cos_ofReal_im]
