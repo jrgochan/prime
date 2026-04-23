@@ -45,10 +45,22 @@ lemma five_add_abs_le_sq (t : ℝ) (ht : 1/2 ≤ |t|) : 5 + |t| ≤ (2 + |t|) ^ 
 -- ════════════════════════════════════════════════════
 
 /-- ∫₀¹ t^{s-2} dt = 1/(s-1) for Re(s) > 1.
-    The antiderivative is t^{s-1}/(s-1), evaluated at t=1 and t→0+. -/
+    Uses Mathlib's `integral_cpow` with r = s-2, which has Re(r) > -1. -/
 private lemma integral_cpow_eq_inv_sub_one {s : ℂ} (hs : 1 < s.re) :
     ∫ t in Set.Ioc (0:ℝ) 1, (↑t : ℂ) ^ (s - 2) = 1 / (s - 1) := by
-  sorry
+  -- Convert set integral to interval integral
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- Apply integral_cpow with r = s - 2
+  have hre : -1 < (s - 2).re := by simp [sub_re]; linarith
+  rw [integral_cpow (Or.inl hre)]
+  -- Simplify: (1)^{s-1} = 1, (0)^{s-1} = 0 (since Re(s-1) > 0)
+  simp only [Complex.ofReal_one, Complex.ofReal_zero]
+  have hs1 : s - 2 + 1 = s - 1 := by ring
+  rw [hs1]
+  have hs1_ne : s - 1 ≠ 0 := by
+    intro h; have := congr_arg Complex.re h; simp at this; linarith
+  rw [one_cpow, zero_cpow hs1_ne]
+  simp
 
 /-- The FloorMellin integral decomposes via ⌊1/t⌋ = 1/t - {1/t}:
     ∫₀¹ ⌊1/t⌋·t^{s-1} dt = 1/(s-1) - ∫₀¹ {1/t}·t^{s-1} dt -/
