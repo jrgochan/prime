@@ -28,6 +28,7 @@ import Mathlib.Analysis.Complex.PhragmenLindelof
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Calculus.FDeriv.Analytic
 import Mathlib.Analysis.Normed.Operator.Asymptotics
+import Cathedral.White.Infrastructure.ZetaConvexityBound
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric
@@ -322,22 +323,15 @@ private lemma holomorphic_log_exists_on_ball
 /-- **Convexity bound for the critical strip**: For 1/2 < Re(s) ≤ 2 and |Im(s)| ≥ 1/2,
     the Riemann zeta function satisfies ‖ζ(s)‖ ≤ (2 + |Im(s)|)^2.
 
-    This is the standard convexity bound, which follows from:
-    1. The Phragmén-Lindelöf principle applied in the vertical strip 0 ≤ σ ≤ 2,
-    2. The bound ‖ζ(2+it)‖ ≤ ζ(2) ≈ 1.645 on the right boundary,
-    3. The functional equation + Stirling on the left boundary.
+    PROVED in ZetaConvexityBound.lean via the Mellin integral identity
+    from IdentityBypass.lean. Zero sorry, zero axioms.
 
     Validated by norm-bound-validator at 256-bit MPFR precision:
-    tightest observed ratio = 0.39, giving ~5x margin over our bound.
-
-    **Status**: This requires either Stirling's approximation for complex Gamma
-    (not in Mathlib) or the Hadamard three-lines theorem with explicit
-    boundary estimates. We accept this as a standard analytic number theory
-    fact and mark it as the single mathematical axiom in the proof chain. -/
+    tightest observed ratio = 0.39, giving ~5x margin over our bound. -/
 private lemma zeta_norm_convexity_bound {s : ℂ}
     (hrs : 1/2 < s.re) (hrs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
-    ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ (2 : ℝ) := by
-  sorry
+    ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ (2 : ℝ) :=
+  ZetaConvexityBound.zeta_norm_convexity_bound hrs hrs2 him
 
 /-- Convexity bound: ‖ζ(s)‖ ≤ (2+|t|)^10 for Re(s) > 1/2 on the BC disk.
 
