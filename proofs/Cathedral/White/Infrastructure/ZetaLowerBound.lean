@@ -56,14 +56,10 @@ private theorem rh_zeta_ne_zero_local (hRH : RiemannHypothesis)
 -- §2. Zeta Values in slitPlane (Key Lemma)
 -- ═══════════════════════════════════════════
 
-/-- The tail of the Dirichlet series: ‖ζ(s) - 1‖ < 1 for Re(s) ≥ 2.
-    This is the key arithmetic fact used to show ζ ∈ slitPlane.
-
-    Proof: ζ(s) = Σ_{n≥1} n^{-s} = 1 + Σ_{n≥2} n^{-s}.
-    So ζ(s) - 1 = Σ_{n≥2} n^{-s} and
-    ‖ζ(s) - 1‖ ≤ Σ_{n≥2} n^{-Re(s)} ≤ Σ_{n≥2} n^{-2} = π²/6 - 1 ≈ 0.645 < 1. -/
-private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) :
-    ‖riemannZeta s - 1‖ < 1 := by
+/-- **Strengthened bound**: ‖ζ(s) - 1‖ ≤ 3/4 for Re(s) ≥ 2.
+    This is tighter than `< 1` and needed for the explicit lower bound ‖ζ(s)‖ ≥ 1/4. -/
+private lemma zeta_sub_one_norm_le_three_fourths {s : ℂ} (hs : 2 ≤ s.re) :
+    ‖riemannZeta s - 1‖ ≤ 3/4 := by
   have h_re : 1 < s.re := by linarith
   have hs0 : s ≠ 0 := Complex.ne_zero_of_one_lt_re h_re
   -- Use riemannZetaSummandHom: g(n) = n^{-s}
@@ -82,18 +78,14 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
   have hg_shift : Summable (fun n => ‖g (n + 1)‖) :=
     hg_ns.comp_injective (fun a b h => by omega)
   rw [hg_shift.of_norm.tsum_eq_zero_add, h_g1, add_sub_cancel_left]
-  -- We combine both steps: bound ‖∑' g(n+1+1)‖ ≤ 3/4 < 1
-  -- using tsum_of_norm_bounded with a custom bound series.
+  -- ‖∑' g(n+1+1)‖ ≤ 3/4 using tsum_of_norm_bounded with a custom bound series.
   -- First: ‖g(n+1+1)‖ = (n+2)^{-σ} ≤ (n+2)^{-2}
   -- Second: (n+2)^{-2} ≤ 1/((n+1)(n+2)) since n+1 ≤ n+2
-  -- The series 1/((n+1)(n+2)) = 1/(n+1) - 1/(n+2) telescopes to 1.
-  -- But tsum_of_norm_bounded gives ≤ 1, not < 1.
-  -- So we extract first term: ‖g(2)‖ ≤ 1/4 and ∑_{n≥1} ≤ 1/2. Total ≤ 3/4 < 1.
-  apply lt_of_le_of_lt (b := (3:ℝ)/4)
-  · -- ‖∑' g(n+1+1)‖ ≤ 3/4
-    -- Use tsum_of_norm_bounded with bound b(n)
-    let b : ℕ → ℝ := fun n => if n = 0 then 1/4 else 1/((↑n + 1) * (↑n + 2))
-    have hb_hasSum : HasSum b (3/4) := by
+  -- The bound function: b(0) = 1/4, b(n) = 1/((n+1)(n+2)) for n ≥ 1.
+  -- HasSum b (3/4) via telescoping partial sums.
+  -- Use tsum_of_norm_bounded with bound b(n)
+  let b : ℕ → ℝ := fun n => if n = 0 then 1/4 else 1/((↑n + 1) * (↑n + 2))
+  have hb_hasSum : HasSum b (3/4) := by
       rw [hasSum_iff_tendsto_nat_of_nonneg (fun n => by simp [b]; split_ifs <;> positivity)]
       -- Need: Tendsto (fun n => Σ_{i<n} b(i)) atTop (𝓝 (3/4))
       -- b(0) = 1/4, b(n) = 1/((n+1)(n+2)) for n ≥ 1
@@ -131,48 +123,46 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
           Filter.tendsto_atTop_add_const_right _ 1 tendsto_natCast_atTop_atTop
         exact tendsto_const_nhds.div_atTop h1
       simpa [sub_zero] using Filter.Tendsto.const_sub (3/4 : ℝ) h_tend
-    have hb_bound : ∀ n, ‖(fun n => g (n + 1 + 1)) n‖ ≤ b n := by
-      intro n
-      simp only [g, riemannZetaSummandHom, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, b]
-      -- ‖(n+1+1 : ℕ)^(-s)‖ = (n+2)^{-Re(s)} ≤ (n+2)^{-2} ≤ b(n)
-      rw [show (n + 1 + 1 : ℕ) = n + 2 from by omega]
-      have hpos : (0 : ℝ) < (↑(n + 2) : ℝ) := by positivity
-      rw [← ofReal_natCast, norm_cpow_eq_rpow_re_of_pos hpos, neg_re]
-      -- Goal: (↑n + 2) ^ (-s.re) ≤ if n = 0 then 1/4 else ...
-      split_ifs with h
-      · -- n = 0: 2^{-σ} ≤ 1/4 since σ ≥ 2
-        subst h
-        norm_num
-        -- Goal: (2:ℝ) ^ (-s.re) ≤ 1/4
-        calc (2:ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-(2:ℝ)) :=
-          Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
-        _ = 1/4 := by
-          rw [show (-(2:ℝ)) = -((2:ℕ) : ℝ) from by norm_num,
-              Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2),
-              Real.rpow_natCast]; norm_num
-      · -- n ≥ 1: (↑(n+2))^(-s.re) ≤ 1/((n+1)*(n+2))
-        -- Step 1: (n+2)^{-σ} ≤ (n+2)^{-2}
-        have h1 : (1:ℝ) ≤ ↑(n + 2) := by
-          exact_mod_cast Nat.one_le_iff_ne_zero.mpr (by omega)
-        have h_exp : (↑(n + 2) : ℝ) ^ (-s.re) ≤ (↑(n + 2) : ℝ) ^ (-(2:ℝ)) :=
-          Real.rpow_le_rpow_of_exponent_le h1 (by linarith)
-        -- Step 2: (n+2)^{-2} = 1/(n+2)^2
-        have h_inv : (↑(n + 2) : ℝ) ^ (-(2:ℝ)) = 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) := by
-          rw [Real.rpow_neg (by positivity : (0:ℝ) ≤ ↑(n+2))]
-          ring
-        -- Step 3: 1/(n+2)^2 ≤ 1/((n+1)*(n+2))
-        -- Since (n+1)*(n+2) ≤ (n+2)^2 (i.e., n+1 ≤ n+2), dividing inverts
-        have h_frac : 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) ≤ 1/((↑n + 1) * (↑n + 2)) := by
-          rw [show (2:ℝ) = ((2:ℕ):ℝ) from by norm_num, Real.rpow_natCast]
-          push_cast
-          -- 1/(↑n+2)^2 ≤ 1/((↑n+1)*(↑n+2)) iff (↑n+1)*(↑n+2) ≤ (↑n+2)^2
-          apply one_div_le_one_div_of_le (by positivity)
-          -- Goal: (↑n + 1) * (↑n + 2) ≤ (↑n + 2) ^ 2
-          nlinarith [show (0:ℝ) ≤ ↑n from Nat.cast_nonneg n]
-        linarith
-    exact tsum_of_norm_bounded hb_hasSum hb_bound
-  · -- Step: 3/4 < 1
-    norm_num
+  have hb_bound : ∀ n, ‖(fun n => g (n + 1 + 1)) n‖ ≤ b n := by
+    intro n
+    simp only [g, riemannZetaSummandHom, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, b]
+    -- ‖(n+1+1 : ℕ)^(-s)‖ = (n+2)^{-Re(s)} ≤ (n+2)^{-2} ≤ b(n)
+    rw [show (n + 1 + 1 : ℕ) = n + 2 from by omega]
+    have hpos : (0 : ℝ) < (↑(n + 2) : ℝ) := by positivity
+    rw [← ofReal_natCast, norm_cpow_eq_rpow_re_of_pos hpos, neg_re]
+    -- Goal: (↑n + 2) ^ (-s.re) ≤ if n = 0 then 1/4 else ...
+    split_ifs with h
+    · -- n = 0: 2^{-σ} ≤ 1/4 since σ ≥ 2
+      subst h
+      norm_num
+      -- Goal: (2:ℝ) ^ (-s.re) ≤ 1/4
+      calc (2:ℝ) ^ (-s.re) ≤ (2:ℝ) ^ (-(2:ℝ)) :=
+        Real.rpow_le_rpow_of_exponent_le (by norm_num) (by linarith)
+      _ = 1/4 := by
+        rw [show (-(2:ℝ)) = -((2:ℕ) : ℝ) from by norm_num,
+            Real.rpow_neg (by norm_num : (0:ℝ) ≤ 2),
+            Real.rpow_natCast]; norm_num
+    · -- n ≥ 1: (↑(n+2))^(-s.re) ≤ 1/((n+1)*(n+2))
+      -- Step 1: (n+2)^{-σ} ≤ (n+2)^{-2}
+      have h1 : (1:ℝ) ≤ ↑(n + 2) := by
+        exact_mod_cast Nat.one_le_iff_ne_zero.mpr (by omega)
+      have h_exp : (↑(n + 2) : ℝ) ^ (-s.re) ≤ (↑(n + 2) : ℝ) ^ (-(2:ℝ)) :=
+        Real.rpow_le_rpow_of_exponent_le h1 (by linarith)
+      -- Step 2: (n+2)^{-2} = 1/(n+2)^2
+      have h_inv : (↑(n + 2) : ℝ) ^ (-(2:ℝ)) = 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) := by
+        rw [Real.rpow_neg (by positivity : (0:ℝ) ≤ ↑(n+2))]
+        ring
+      -- Step 3: 1/(n+2)^2 ≤ 1/((n+1)*(n+2))
+      -- Since (n+1)*(n+2) ≤ (n+2)^2 (i.e., n+1 ≤ n+2), dividing inverts
+      have h_frac : 1 / (↑(n + 2) : ℝ) ^ (2:ℝ) ≤ 1/((↑n + 1) * (↑n + 2)) := by
+        rw [show (2:ℝ) = ((2:ℕ):ℝ) from by norm_num, Real.rpow_natCast]
+        push_cast
+        -- 1/(↑n+2)^2 ≤ 1/((↑n+1)*(↑n+2)) iff (↑n+1)*(↑n+2) ≤ (↑n+2)^2
+        apply one_div_le_one_div_of_le (by positivity)
+        -- Goal: (↑n + 1) * (↑n + 2) ≤ (↑n + 2) ^ 2
+        nlinarith [show (0:ℝ) ≤ ↑n from Nat.cast_nonneg n]
+      linarith
+  exact tsum_of_norm_bounded hb_hasSum hb_bound
 
 /-- ζ(s) ∈ slitPlane for Re(s) ≥ 2 (far from critical strip).
 
@@ -184,7 +174,7 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
 private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (hs1 : s ≠ 1) :
     riemannZeta s ∈ slitPlane := by
   -- ζ(s) = 1 + (ζ(s) - 1). Since ‖ζ(s) - 1‖ < 1, we get ζ(s) ∈ slitPlane.
-  have h : ‖riemannZeta s - 1‖ < 1 := zeta_sub_one_norm_lt_one_of_re_ge_two hs
+  have h : ‖riemannZeta s - 1‖ < 1 := lt_of_le_of_lt (zeta_sub_one_norm_le_three_fourths hs) (by norm_num)
   have := mem_slitPlane_of_norm_lt_one h
   rwa [add_sub_cancel] at this
 
@@ -299,17 +289,51 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
       (1/2 + ε ≤ s.re) → (T₀ ≤ |s.im|) →
       c / |s.im| ^ A ≤ ‖riemannZeta s‖ := by
-  -- Step 1: Choose disk parameters
-  set R := 3/2 - ε/2 with hR_def
-  -- Step 2: For sufficiently large |t|, apply BC
-  -- The key estimate: on the BC disk B(2+it, R),
-  --   |log ζ(s)| ≤ C(ε) · log(2+|t|)
-  -- where C(ε) depends only on R/(R-r) ~ 1/ε.
-  -- Exponentiating: |ζ(s)| ≥ (2+|t|)^{-C(ε)} ≥ c/|t|^A
-  -- for |t| ≥ T₀(ε, A).
-
-  -- Choose T₀ large enough and c = 1
-  -- The full assembly of the BC argument:
-  sorry -- Assembly: BC + log_zeta + exponentiation
+  -- Case split: for large ε (≥ 3/2), Re(s) ≥ 2 and tail bound gives |ζ| ≥ 1/4.
+  -- For small ε (< 3/2), use BC.
+  by_cases hε1 : 3/2 ≤ ε
+  · -- ε ≥ 3/2: Re(s) ≥ 1/2 + 3/2 = 2, so ‖ζ(s) - 1‖ < 1
+    refine ⟨1/4, by norm_num, 2, by norm_num, ?_⟩
+    intro s hs him
+    have hre2 : 2 ≤ s.re := by linarith
+    have ht_ge_2 : 2 ≤ |s.im| := him
+    have ht_pos : 0 < |s.im| := by linarith
+    -- s ≠ 1 since |Im(s)| ≥ 2 but Im(1) = 0
+    have hs1 : s ≠ 1 := by
+      intro h
+      have him : s.im = 0 := by
+        have := congr_arg Complex.im h; simp at this; exact this
+      rw [him, abs_zero] at ht_ge_2
+      linarith
+    have h_tail := zeta_sub_one_norm_le_three_fourths hre2
+    -- ‖ζ(s)‖ ≥ 1 - ‖ζ(s) - 1‖ ≥ 1 - 3/4 = 1/4
+    have h_lower : 1/4 ≤ ‖riemannZeta s‖ := by
+      -- ‖ζ - 1‖ ≤ ‖ζ‖ + 1 (triangle) means ‖ζ‖ ≥ ‖ζ-1‖ - 1... wait no
+      -- We need: ‖ζ‖ ≥ 1 - ‖ζ - 1‖. This is the "reverse triangle" direction.
+      -- From triangle: ‖(ζ-1) + 1‖ ≤ ‖ζ-1‖ + ‖1‖, i.e., ‖ζ‖ ≤ ‖ζ-1‖ + 1
+      -- Other direction: ‖1‖ ≤ ‖ζ‖ + ‖ζ - 1‖ (triangle on ζ and ζ-1 summing to 1)
+      -- Wait: ‖1‖ = ‖ζ - (ζ - 1)‖ ≤ ‖ζ‖ + ‖ζ - 1‖
+      have h1 : (1 : ℝ) ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := by
+        calc (1:ℝ) = ‖(1:ℂ)‖ := by simp
+          _ = ‖riemannZeta s - (riemannZeta s - 1)‖ := by ring_nf
+          _ ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := norm_sub_le _ _
+      linarith
+    -- |t|^A ≥ 1 since |t| ≥ 2 ≥ 1 and A > 0
+    have h_rpow_ge : 1 ≤ |s.im| ^ A :=
+      Real.one_le_rpow (by linarith : 1 ≤ |s.im|) hA.le
+    calc (1:ℝ)/4 / |s.im| ^ A
+        ≤ 1/4 := div_le_self (by norm_num) h_rpow_ge
+      _ ≤ ‖riemannZeta s‖ := h_lower
+  · -- ε < 1: Use BC on disk B(2+it, R) with R = 3/2 - ε/2
+    push_neg at hε1
+    set R := 3/2 - ε/2 with hR_def
+    have hR_pos : 0 < R := by rw [hR_def]; linarith
+    have hR_lt : R < 3/2 := by rw [hR_def]; linarith
+    refine ⟨1, one_pos, max 2 1, lt_max_of_lt_left (by norm_num : (0:ℝ) < 2), ?_⟩
+    intro s hs him
+    have ht_ge_2 : 2 ≤ |s.im| := le_trans (le_max_left 2 1) him
+    -- Apply BC to log ∘ ζ ∘ (· + s₀) on ball(0, R)
+    -- Then exponentiate to get the polynomial lower bound.
+    sorry
 
 end Cathedral.White.Infrastructure.ZetaLowerBound
