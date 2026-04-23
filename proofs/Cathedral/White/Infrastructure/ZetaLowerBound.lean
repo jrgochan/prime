@@ -238,9 +238,11 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     ZetaConvexity.lean.
 
     The BC inner bound (bc_inner_bound) is ZERO SORRY.
-    The existential wrapper case-splits on A ≥ B_ε vs A < B_ε:
-    - A ≥ B_ε: FULLY PROVED (zero sorry)
-    - A < B_ε: needs iterated BC or Hadamard (1 sorry, mathematical) -/
+    The existential wrapper case-splits on A vs B_ε:
+    - A ≥ B_ε (= 20(3-2ε)/ε): FULLY PROVED (zero sorry)
+    - A < B_ε: ε-rescaling trick (ε' = 60/(A+40), B_{ε'} = A):
+      • Re(s) ≥ 1/2+ε': FULLY PROVED (zero sorry)
+      • 1/2+ε ≤ Re(s) < 1/2+ε': 1 sorry (needs Hadamard/PL) -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
