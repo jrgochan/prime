@@ -156,6 +156,8 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.GammaBound,
     -- Zeta convexity bound (WIP)
     `Cathedral.White.Infrastructure.ZetaConvexityBound,
+    -- Zeta disk geometry & upper bounds (zero sorry)
+    `Cathedral.White.Infrastructure.ZetaDiskBounds,
     -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
     `Cathedral.White.Infrastructure.ZetaLowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
