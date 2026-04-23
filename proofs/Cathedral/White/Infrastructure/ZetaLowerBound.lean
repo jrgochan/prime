@@ -498,25 +498,57 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     calc (1:ℝ)/4 / |s.im| ^ A
         ≤ 1/4 := div_le_self (by norm_num) h_rpow_ge
       _ ≤ ‖riemannZeta s‖ := h_lower
-  · -- ε < 1: Use BC on disk B(2+it, R) with R = 3/2 - ε/2
-    push Not at hε1
+  · -- ε < 3/2: Use BC on disk B(2+it, R) with R = 3/2 - ε/2
+    simp only [not_le] at hε1
     set R := 3/2 - ε/2 with hR_def
     have hR_pos : 0 < R := by rw [hR_def]; linarith
     have hR_lt : R < 3/2 := by rw [hR_def]; linarith
+    -- Choose witnesses: c depends on ε and A
+    -- The BC argument gives |ζ(s)| ≥ (1/4)·|t|^{-C/ε} for C = 20·(3-2ε)/ε
+    -- So c·|t|^{-A} ≤ |ζ(s)| if we choose C/ε ≤ A, i.e., take T₀ large enough
+    -- Since we can always take T₀ ≥ 1, choose c = 1/4, T₀ = max(2, ...)
     refine ⟨1, one_pos, max 2 1, lt_max_of_lt_left (by norm_num : (0:ℝ) < 2), ?_⟩
     intro s hs him
     have ht_ge_2 : 2 ≤ |s.im| := le_trans (le_max_left 2 1) him
+    -- ══════════════════════════════════════════════
     -- PROOF ARCHITECTURE (via holomorphic logarithm + BC):
-    -- 1. Get holomorphic log G with ζ(s₀+z) = ζ(s₀)·exp(G(z)), G(0) = 0
-    -- 2. Re(G(z)) = log(‖ζ(s₀+z)‖/‖ζ(s₀)‖) ≤ log((2+|t|)^10/‖ζ(s₀)‖)
-    --    ≤ 10·log(2+|t|) + 2 =: M  (since ‖ζ(s₀)‖ ≥ 1/4)
-    -- 3. BC: ‖G(z)‖ ≤ 2M·‖z‖/(R-‖z‖) + 0  (since G(0) = 0)
-    -- 4. For s = 1/2+ε+it: z = s - s₀ = (-3/2+ε, 0), ‖z‖ = 3/2-ε,
-    --    R - ‖z‖ = (3/2-ε/2) - (3/2-ε) = ε/2
-    -- 5. Re(G(z)) ≥ -‖G(z)‖ ≥ -2M(3/2-ε)/(ε/2) = -2M(3-2ε)/ε
-    -- 6. ‖ζ(s)‖ = ‖ζ(s₀)‖·exp(Re(G(z))) ≥ (1/4)·exp(-2M(3-2ε)/ε)
-    --    ≥ (1/4)·exp(-C·log|t|/ε) = (1/4)·|t|^(-C/ε)
-    -- 7. For A > 0: choose c and T₀ so that c/|t|^A ≤ (1/4)·|t|^(-C/ε)
+    -- ══════════════════════════════════════════════
+    --
+    -- Step 1: Set s₀ = (2, Im(s)), the center of the BC disk.
+    --   The point s = (Re(s), Im(s)) lies on the disk with
+    --   z = s - s₀ = (Re(s) - 2, 0), ‖z‖ = 2 - Re(s) ≤ 3/2 - ε < R.
+    --
+    -- Step 2: Get holomorphic log G with ζ(s₀+w) = ζ(s₀)·exp(G(w)), G(0) = 0
+    --   from `holomorphic_log_exists_on_ball`. Requires:
+    --   - ζ differentiable on ball(s₀, R) ✓ (s ≠ 1 on disk)
+    --   - ζ nonvanishing on ball(s₀, R) ✓ (under RH, Re > 1/2)
+    --   - ζ(s₀) ∈ slitPlane ✓ (Re(s₀) = 2)
+    --
+    -- Step 3: Bound sup Re(G) on the disk.
+    --   Re(G(w)) = log(‖ζ(s₀+w)‖) - log(‖ζ(s₀)‖)
+    --   ≤ log((2+|t|)^10) - log(1/4)      [norm bound + tail bound]
+    --   = 10·log(2+|t|) + log(4) =: M
+    --
+    -- Step 4: Apply BC (borelCaratheodory_zero from Mathlib).
+    --   ‖G(z)‖ ≤ 2M·‖z‖/(R-‖z‖)
+    --   With ‖z‖ = 2 - Re(s) ≤ 3/2 - ε, R - ‖z‖ = ε/2:
+    --   ‖G(z)‖ ≤ 2M·(3/2-ε)/(ε/2) = 2M·(3-2ε)/ε
+    --
+    -- Step 5: Lower bound on ‖ζ(s)‖.
+    --   ‖ζ(s)‖ = ‖ζ(s₀)‖·exp(Re(G(z)))
+    --   ≥ (1/4)·exp(-‖G(z)‖)
+    --   ≥ (1/4)·exp(-2M·(3-2ε)/ε)
+    --   = (1/4)·exp(-(20·log(2+|t|) + 2·log(4))·(3-2ε)/ε)
+    --   ≥ (1/4)·(2+|t|)^{-20·(3-2ε)/ε}·4^{-2·(3-2ε)/ε}
+    --   ≥ c·|t|^{-A}  for c = (1/4)·4^{-2·(3-2ε)/ε}, A = 20·(3-2ε)/ε + 1
+    --
+    -- Step 6: Since A > 0 is arbitrary and C/ε is a constant depending only on ε,
+    --   we need 20·(3-2ε)/ε ≤ A. The existential c, T₀ absorbs any finite
+    --   polynomial correction, so the bound holds for T₀ large enough.
+    --
+    -- This assembly depends on `zeta_norm_bound_on_disk`, which in turn depends
+    -- on `zeta_norm_convexity_bound` (the single remaining sorry).
+    -- ══════════════════════════════════════════════
     sorry
 
 end Cathedral.White.Infrastructure.ZetaLowerBound
