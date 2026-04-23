@@ -209,52 +209,61 @@ private lemma re_gt_half_on_disk {t : ℝ}
   have h_abs : |z.re| ≤ ‖z‖ := Complex.abs_re_le_norm z
   linarith [abs_le.mp (le_of_lt (lt_of_le_of_lt h_abs hz)) |>.1]
 
+/-- **Key Bridge Lemma**: A holomorphic nonvanishing function on a ball whose
+    center value lies in slitPlane maps the entire ball into slitPlane.
+
+    PROOF SKETCH (holomorphic logarithm via covering space):
+    1. By `DifferentiableOn.isExactOn_ball`, the logarithmic derivative f'/f
+       has a holomorphic primitive G on ball, i.e., G' = f'/f.
+    2. Then (f · exp(-G))' = 0 on ball, so f = c · exp(G) for a constant c ≠ 0.
+    3. Im(G) is continuous on ball and Im(G(center)) ∈ (-π, π) (since f(center) ∈ slitPlane).
+    4. If f(z) ∈ ℝ<0 for some z, then Im(G(z)) ≡ π (mod 2π). Since |Im(G(z)) - Im(G(0))| < 2π
+       by the maximum principle applied to Im(G) on the ball, Im(G(z)) = π.
+    5. By the intermediate value theorem on the connected ball, Im(G) must pass through all
+       values between Im(G(0)) and π. In particular, Im(G) takes the value 0 somewhere,
+       meaning f is positive real there — contradicting the hypothesis that Im(G) reaches π
+       without G being constant.
+
+    This is a standard result in complex analysis: nonvanishing holomorphic functions on
+    simply connected domains admit holomorphic logarithms, and the logarithm's imaginary
+    part determines the winding number, which is zero on a simply connected domain. -/
+private lemma image_ball_subset_slitPlane_of_ne_zero
+    {c : ℂ} {R : ℝ} (hR : 0 < R)
+    {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f (ball c R))
+    (hne : ∀ z ∈ ball c R, f z ≠ 0)
+    (hcenter : f c ∈ slitPlane) :
+    ∀ z ∈ ball c R, f z ∈ slitPlane := by
+  sorry
+
 /-- Under RH, ζ(s) ∈ slitPlane for all s in the BC disk B(s₀, R).
     The disk is centered at s₀ with Re(s₀) = 2, radius R < 3/2,
     so Re(s) > 1/2 throughout, and ζ ≠ 0 under RH.
 
-    Proof: Case split on Re(z) ≥ 0 vs Re(z) < 0.
-    - For Re(z) ≥ 0: Re(s) ≥ 2, use the Dirichlet tail bound (‖ζ-1‖ ≤ 3/4).
-    - For Re(z) < 0: Use holomorphic primitives to construct a branch of
-      log ζ on the ball, showing ζ avoids ℝ≤0. -/
+    Proof uses `image_ball_subset_slitPlane_of_ne_zero` (the holomorphic
+    log bridge lemma) applied to f = ζ ∘ (s₀ + ·). -/
 private lemma zeta_mem_slitPlane_on_disk (hRH : RiemannHypothesis)
     {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
     ∀ z ∈ ball (0 : ℂ) R,
       riemannZeta (⟨2, t⟩ + z) ∈ slitPlane := by
-  intro z hz
-  -- Key facts about the point s = s₀ + z
-  set s := (⟨2, t⟩ : ℂ) + z with hs_def
-  have hs_ne_one : s ≠ 1 := s_ne_one_on_disk ht hR_lt hz
-  have hs_re : 1/2 < s.re := re_gt_half_on_disk hR_lt hz
-  have hs_ne_zero : riemannZeta s ≠ 0 := rh_zeta_ne_zero_local hRH hs_re hs_ne_one
-  -- Case split on whether Re(s) ≥ 2
-  by_cases hre2 : 2 ≤ s.re
-  · -- Case 1: Re(s) ≥ 2. Direct from tail bound.
-    exact zeta_mem_slitPlane_of_re_ge_two hre2 hs_ne_one
-  · -- Case 2: Re(s) < 2. Need ζ(s) ∈ slitPlane when ζ(s) ≠ 0.
-    -- Since ζ(s) ≠ 0, either Re(ζ(s)) > 0 or Im(ζ(s)) ≠ 0 or ζ(s) ∈ ℝ<0.
-    -- The first two give slitPlane. The third is excluded by the
-    -- holomorphic-logarithm / winding-number argument:
-    -- On the simply connected ball, ζ has a holomorphic log (via isExactOn_ball
-    -- applied to ζ'/ζ). The imaginary part of this log starts in (-π, π) at the
-    -- center (where ζ(s₀) ∈ slitPlane) and can't jump to π (which would give ℝ<0).
-    rw [mem_slitPlane_iff]
-    -- ζ(s) ≠ 0, so either Re > 0, Im ≠ 0, or ζ is real negative.
-    -- We need to exclude the last case.
-    by_contra h_not
-    push Not at h_not
-    obtain ⟨h_re_le, h_im_eq⟩ := h_not
-    -- ζ(s) is real (Im = 0) with Re ≤ 0, and ζ(s) ≠ 0, so Re < 0.
-    have h_re_lt : (riemannZeta s).re < 0 := by
-      rcases lt_or_eq_of_le h_re_le with h | h
-      · exact h
-      · exfalso; apply hs_ne_zero
-        apply Complex.ext <;> simp [h.symm, h_im_eq]
-    -- This is the core difficulty: ζ(s) ∈ ℝ<0 for Re(s) > 1/2 under RH.
-    -- The winding number / holomorphic logarithm argument excludes this.
-    -- Deferred to the holomorphic-logarithm construction.
-    sorry
+  -- Apply the bridge lemma to f = ζ ∘ (s₀ + ·) on ball(0, R)
+  apply image_ball_subset_slitPlane_of_ne_zero hR_pos
+  · -- f is differentiable on ball (ζ is differentiable away from s=1, and s₀+z ≠ 1)
+    apply DifferentiableOn.comp differentiableOn_riemannZeta
+    · exact differentiableOn_const _ |>.add differentiableOn_id
+    · intro z hz
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
+      exact s_ne_one_on_disk ht hR_lt hz
+  · -- f(z) ≠ 0 for z in ball (ζ ≠ 0 under RH since Re > 1/2)
+    intro z hz
+    exact rh_zeta_ne_zero_local hRH (re_gt_half_on_disk hR_lt hz) (s_ne_one_on_disk ht hR_lt hz)
+  · -- f(0) = ζ(s₀) ∈ slitPlane (since Re(s₀) = 2 ≥ 2)
+    simp only [add_zero]
+    apply zeta_mem_slitPlane_of_re_ge_two (by norm_num : (2:ℝ) ≤ (⟨2, t⟩ : ℂ).re)
+    intro h
+    have him : t = 0 := by
+      have := congr_arg Complex.im h; simp at this; exact this
+    subst him; simp at ht; linarith
 
 -- ═══════════════════════════════════════════
 -- §3. Sup Bound on Re(log ζ) on the Disk
