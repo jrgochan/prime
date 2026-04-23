@@ -19,6 +19,7 @@ import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.DiagBound
 import Cathedral.Assembly.BDBridge
 import Cathedral.Assembly.DotProductIdentity
+import Cathedral.Assembly.CalcBounds
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 
@@ -189,17 +190,32 @@ theorem moebius_dot_product_approx_one
   -- Step 8: Rewrite using the identity
   rw [h_identity]
   -- Goal: |(1-γ)·S₁ + (S₂+1) - [(1-γ)·S₂+S₃]/logN| ≤ C_dot/logN
-  -- We have all the ingredients:
-  -- h_s1_N : |S₁_at(N-1)| ≤ C₁·(N-1)^{-1/4}
-  -- h_s2_N : |S₂_at(N-1)+1| ≤ C₂·(N-1)^{-1/4}·log(N-1)
-  -- h_s2_abs : |S₂_at(N-1)| ≤ B₂+1
-  -- h_s3_abs : |S₃_at(N-1)| ≤ B₃+2
-  -- The proof needs:
-  -- 1. Triangle inequality: |a+b-c/L| ≤ |a|+|b|+|c|/L
-  -- 2. |a| ≤ C₁/N^{1/4}, |b| ≤ C₂·logN/N^{1/4}, |c| ≤ B₂+B₃+3
-  -- 3. Calculus bound: N^{-1/4}·logN ≤ 2 for N ≥ 10
-  -- 4. Calculus bound: N^{-1/4}·log²N ≤ 9 for N ≥ 10
-  -- 5. Assembly: 2C₁+9C₂+B₂+B₃+3 ≤ 2C₁+9C₂+B₂+B₃+4
+  -- Step 8a: Calculus bounds
+  have h_calc1 := rpow_quarter_logN_le_two N hN
+  -- (N-1)^{-1/4} · logN ≤ 2
+  have h_calc2 := rpow_quarter_logsq_le_nine N hN
+  -- (N-1)^{-1/4} · log(N-1) · logN ≤ 9
+  -- Step 8b: Convert decay bounds to 1/logN bounds
+  -- |S₁|·logN ≤ C₁·(N-1)^{-1/4}·logN ≤ 2·C₁
+  have h_s1_logN : |S₁_at (N - 1)| * Real.log ↑N ≤ 2 * C₁ := by
+    calc |S₁_at (N - 1)| * Real.log ↑N
+        ≤ C₁ * (↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h_s1_N (le_of_lt hlogN_pos)
+      _ = C₁ * ((↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N) := by ring
+      _ ≤ C₁ * 2 := mul_le_mul_of_nonneg_left h_calc1 hC₁_pos.le
+      _ = 2 * C₁ := by ring
+  -- |S₂+1|·logN ≤ C₂·(N-1)^{-1/4}·log(N-1)·logN ≤ 9·C₂
+  have h_s2_logN : |S₂_at (N - 1) - (-1)| * Real.log ↑N ≤ 9 * C₂ := by
+    calc |S₂_at (N - 1) - (-1)| * Real.log ↑N
+        ≤ C₂ * (↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h_s2_N (le_of_lt hlogN_pos)
+      _ = C₂ * ((↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N) := by ring
+      _ ≤ C₂ * 9 := mul_le_mul_of_nonneg_left h_calc2 hC₂_pos.le
+      _ = 9 * C₂ := by ring
+  -- Step 8c: Triangle inequality + assembly
+  -- |(1-γ)S₁+(S₂+1)-c/logN|·logN ≤ |1-γ|·|S₁|·logN + |S₂+1|·logN + |(1-γ)S₂+S₃|
+  -- ≤ |S₁|·logN + |S₂+1|·logN + |S₂|+1+|S₃|
+  -- ≤ 2C₁ + 9C₂ + B₂+1+B₃+2 = 2C₁+9C₂+B₂+B₃+3 ≤ C_dot
   sorry
 
 -- ════════════════════════════════════════════════
