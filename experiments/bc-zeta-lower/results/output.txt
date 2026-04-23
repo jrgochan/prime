@@ -107,3 +107,4 @@ warning: `bc-zeta-lower` (bin "bc-zeta-lower") generated 7 warnings (run `cargo 
 
   [2m     t     │     R   │  M=sup log|ζ| │  min log|ζ| │   BC bound  │    A_BC    │ min|ζ|[0m
   [2m───────────┼─────────┼───────────────┼─────────────┼─────────────┼────────────┼──────────[0m
+         50 │  0.90  │  [35m     -0.0426[0m  │    -0.6553  │        inf  │  [33m     inf[0m  │ 5.1926e-1

@@ -563,8 +563,24 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
       have : 0 < Real.log (2 + |t|) := Real.log_pos (by linarith [abs_nonneg t])
       linarith
     -- Re(G w) ≤ M for all w ∈ ball
+    -- Apply re_G_le_of_norm_bound with B = (2+|t|)^10, c = 1/4
+    have hζs₀_ne : riemannZeta (s₀ + 0) ≠ 0 := by
+      simp; intro h; simp [h] at h_center_bound; linarith
     have hG_re_le : Set.MapsTo G (ball 0 R) {z | z.re ≤ M} := by
-      sorry -- Re(G) bound: norm arithmetic + log chain
+      intro w hw
+      simp only [Set.mem_setOf_eq]
+      -- ‖ζ(s₀+w)‖ ≤ (2+|t|)^10 on the disk
+      have h_disk := zeta_norm_bound_on_disk ht hR_pos hR_lt w hw
+      -- Apply the sub-lemma: Re(G w) ≤ log((2+|t|)^10) - log(1/4)
+      have h_center' : (1:ℝ)/4 ≤ ‖riemannZeta (s₀ + 0)‖ := by
+        rw [add_zero]; exact h_center_bound
+      have h_re := re_G_le_of_norm_bound hR_pos hG_eq hζs₀_ne
+        (fun z hz => zeta_norm_bound_on_disk ht hR_pos hR_lt z hz)
+        h_center' (by norm_num : (0:ℝ) < 1/4) hw
+      -- log((2+|t|)^10) - log(1/4) = 10·log(2+|t|) + log(4) = M
+      -- = 10·log(2+|t|) - (-log(4)) = 10·log(2+|t|) + log(4) = M
+      have h_eq : Real.log ((2 + |t|) ^ (10:ℝ)) - Real.log (1/4) = M := by sorry
+      linarith [h_re]
     -- Step E: Apply BC theorem
     have hBC := Complex.borelCaratheodory_zero hM_pos hG_diff hG_re_le hR_pos hz_ball hG0
     -- Step F: Lower bound on ‖ζ(s)‖
