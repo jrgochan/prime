@@ -25,6 +25,8 @@ import Mathlib.NumberTheory.LSeries.Dirichlet
 import Mathlib.Analysis.Complex.BorelCaratheodory
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 import Mathlib.Analysis.Complex.PhragmenLindelof
+import Mathlib.Analysis.Complex.HasPrimitives
+import Mathlib.Analysis.Calculus.FDeriv.Analytic
 import Mathlib.Analysis.Normed.Operator.Asymptotics
 
 noncomputable section
@@ -238,7 +240,75 @@ private lemma holomorphic_log_exists_on_ball
     (hne : ∀ z ∈ ball c R, f z ≠ 0) :
     ∃ G : ℂ → ℂ, DifferentiableOn ℂ G (ball c R) ∧ G c = 0 ∧
       ∀ z ∈ ball c R, f z = f c * Complex.exp (G z) := by
-  sorry
+  -- Step 1: The logarithmic derivative f'/f is differentiable on ball.
+  -- Chain: DifferentiableOn → AnalyticOnNhd → deriv is AnalyticOnNhd → DifferentiableOn
+  have hf_analytic := hf.analyticOnNhd isOpen_ball
+  have hderiv_f_diffOn : DifferentiableOn ℂ (deriv f) (ball c R) :=
+    hf_analytic.deriv.differentiableOn
+  have hlogDeriv_diffOn : DifferentiableOn ℂ (fun z => deriv f z / f z) (ball c R) :=
+    DifferentiableOn.fun_div hderiv_f_diffOn hf hne
+  -- Step 2: By isExactOn_ball, the log derivative has a holomorphic primitive H.
+  have hExact : IsExactOn (fun z => deriv f z / f z) (ball c R) :=
+    DifferentiableOn.isExactOn_ball hlogDeriv_diffOn
+  -- Step 3: Normalize H so that G(c) = 0 using with_val_at.
+  obtain ⟨G, hG0, hGderiv⟩ := hExact.with_val_at c 0
+  -- G is differentiable on ball (follows from HasDerivAt at each point).
+  have hG_diff : DifferentiableOn ℂ G (ball c R) := by
+    intro z hz
+    exact (hGderiv z hz).differentiableAt.differentiableWithinAt
+  -- Step 4: Show f(z) · exp(-G(z)) is constant on ball.
+  -- Its derivative = f'·e^(-G) - f·G'·e^(-G) = e^(-G)·(f' - f·f'/f) = 0.
+  -- This requires the product rule and chain rule plus G' = f'/f.
+  -- We use IsOpen.is_const_of_deriv_eq_zero on ball (open + connected).
+  set h : ℂ → ℂ := fun z => f z * Complex.exp (-G z) with hh_def
+  have hh_diff : DifferentiableOn ℂ h (ball c R) := by
+    apply DifferentiableOn.mul hf
+    exact DifferentiableOn.cexp (DifferentiableOn.neg hG_diff)
+  have hh_deriv_zero : (ball c R).EqOn (deriv h) 0 := by
+    -- Show deriv h z = 0 directly via HasDerivAt
+    -- h = f · exp(-G), so h' = f' · exp(-G) + f · exp(-G) · (-G')
+    -- With G' = f'/f: h' = exp(-G) · (f' - f · f'/f) = exp(-G) · 0 = 0
+    intro z hz
+    have hGd := hGderiv z hz
+    have hfd : DifferentiableAt ℂ f z :=
+      hf.differentiableAt (isOpen_ball.mem_nhds hz)
+    -- Build HasDerivAt for h = f · exp(-G) directly
+    have hnd : HasDerivAt (fun z => -G z) (-(deriv f z / f z)) z := hGd.neg
+    have hexp_hd : HasDerivAt (fun z => Complex.exp (-G z))
+        (Complex.exp (-G z) * (-(deriv f z / f z))) z :=
+      HasDerivAt.cexp hnd
+    have hf_hd : HasDerivAt f (deriv f z) z := hfd.hasDerivAt
+    have hh_hd : HasDerivAt h
+        (deriv f z * Complex.exp (-G z) +
+         f z * (Complex.exp (-G z) * (-(deriv f z / f z)))) z :=
+      hf_hd.mul hexp_hd
+    rw [Pi.zero_apply]
+    -- The derivative value equals 0
+    have hfz := hne z hz
+    have : deriv f z * Complex.exp (-G z) +
+      f z * (Complex.exp (-G z) * (-(deriv f z / f z))) = 0 := by
+      field_simp; ring
+    rw [← this]
+    exact hh_hd.deriv
+  -- Step 5: h is constant on ball, so h(z) = h(c) for all z.
+  have hh_const : ∀ z ∈ ball c R, h z = h c :=
+    fun z hz => isOpen_ball.is_const_of_deriv_eq_zero
+      isPreconnected_ball hh_diff hh_deriv_zero hz (mem_ball_self hR)
+  -- Step 6: h(c) = f(c) · exp(-G(c)) = f(c) · exp(0) = f(c) · 1 = f(c).
+  have hh_center : h c = f c := by
+    simp [hh_def, hG0]
+  -- Step 7: f(z) = f(c) · exp(G(z)) from h(z) = f(c).
+  refine ⟨G, hG_diff, hG0, fun z hz => ?_⟩
+  have := hh_const z hz
+  rw [hh_center] at this
+  -- this : f z * exp(-G z) = f c
+  -- Need: f z = f c * exp(G z)
+  have hexp_ne : Complex.exp (-G z) ≠ 0 := Complex.exp_ne_zero _
+  calc f z = f z * Complex.exp (-G z) * Complex.exp (G z) := by
+        rw [mul_assoc, ← Complex.exp_add]; simp
+    _ = f c * Complex.exp (G z) := by
+        -- this : f z * cexp(-G z) = f c (from step 5)
+        congr 1
 
 -- ═══════════════════════════════════════════
 -- §3. Upper Bound on log|ζ| on the Disk
