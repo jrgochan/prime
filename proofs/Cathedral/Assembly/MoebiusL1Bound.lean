@@ -225,9 +225,77 @@ theorem moebius_dot_product_approx_one
   -- Use: |A + B - C/L|·L ≤ (|A| + |B| + |C|/L)·L = |A|·L + |B|·L + |C|
   -- We need triangle inequality: |a + b - c| ≤ |a| + |b| + |c|
   -- and |S₂+1| = |S₂ - (-1)|
-  -- Key: convert |S₂+1| to match h_s2_logN
+  -- Key: |S₂+1| = |S₂ - (-1)| for matching h_s2_logN
   have h_s2_eq : S₂_at (N - 1) + 1 = S₂_at (N - 1) - (-1) := by ring
-  sorry
+  -- Bound |(1-γ)·S₂+S₃|
+  have h_num : |(1 - eulerMascheroniConstant) * S₂_at (N - 1) +
+      S₃_at (N - 1)| ≤ B₂ + B₃ + 3 := by
+    have hγ01 : 0 < 1 - eulerMascheroniConstant ∧
+        1 - eulerMascheroniConstant < 1 := by
+      constructor
+      · linarith [eulerMascheroniConstant_lt_two_thirds]
+      · linarith [one_half_lt_eulerMascheroniConstant]
+    -- |(1-γ)·S₂| ≤ |S₂| since |1-γ| < 1
+    have h_s2_bound : -(B₂ + 1) ≤ (1 - eulerMascheroniConstant) * S₂_at (N - 1) ∧
+        (1 - eulerMascheroniConstant) * S₂_at (N - 1) ≤ B₂ + 1 := by
+      constructor
+      · nlinarith [abs_le.mp h_s2_abs]
+      · nlinarith [abs_le.mp h_s2_abs]
+    have h_s3_bound := abs_le.mp h_s3_abs
+    exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
+  -- Bound |div term| · logN = |numerator| (cancel logN)
+  have h_div_logN : |((1 - eulerMascheroniConstant) * S₂_at (N - 1) +
+      S₃_at (N - 1)) / Real.log ↑N| * Real.log ↑N ≤ B₂ + B₃ + 3 := by
+    rw [abs_div, abs_of_pos hlogN_pos, div_mul_cancel₀ _ hlogN_ne]
+    exact h_num
+  -- Bound |(1-γ)·S₁|·logN ≤ |S₁|·logN ≤ 2C₁
+  have h_term1_logN : |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| *
+      Real.log ↑N ≤ 2 * C₁ := by
+    have hγ_bound : |1 - eulerMascheroniConstant| ≤ 1 := by
+      apply abs_le.mpr; constructor
+      · have := eulerMascheroniConstant_lt_two_thirds; linarith
+      · have := one_half_lt_eulerMascheroniConstant; linarith
+    have h1 : |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| ≤
+        |S₁_at (N - 1)| := by
+      rw [abs_mul]
+      exact le_trans (mul_le_mul_of_nonneg_right hγ_bound (abs_nonneg _))
+        (by rw [one_mul])
+    calc |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| * Real.log ↑N
+        ≤ |S₁_at (N - 1)| * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h1 (le_of_lt hlogN_pos)
+      _ ≤ 2 * C₁ := h_s1_logN
+  -- Final: |A+B-C/L|·L ≤ |A|·L + |B·L| + |C/L|·L by triangle ineq
+  -- Note: |a+b-c| ≤ |a| + |b-c| ≤ |a| + |b| + |c|
+  -- This is the abs triangle inequality applied twice.
+  have h_tri1 : ∀ a b c : ℝ, |a + b - c| ≤ |a| + |b| + |c| := by
+    intro a b c
+    have hab : |a + b| ≤ |a| + |b| := by
+      rcases le_or_gt 0 (a + b) with h | h
+      · rw [abs_of_nonneg h]; linarith [le_abs_self a, le_abs_self b]
+      · rw [abs_of_neg h]; linarith [neg_abs_le a, neg_abs_le b]
+    have habc : |a + b - c| ≤ |a + b| + |c| := by
+      rcases le_or_gt 0 (a + b - c) with h | h
+      · rw [abs_of_nonneg h]; linarith [le_abs_self (a + b), neg_abs_le c]
+      · rw [abs_of_neg h]; linarith [neg_abs_le (a + b), le_abs_self c]
+    linarith
+  calc |(1 - eulerMascheroniConstant) * S₁_at (N - 1) +
+        (S₂_at (N - 1) + 1) -
+        ((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+          Real.log ↑N| * Real.log ↑N
+      ≤ (|(1 - eulerMascheroniConstant) * S₁_at (N - 1)| +
+         |S₂_at (N - 1) + 1| +
+         |((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+           Real.log ↑N|) * Real.log ↑N := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt hlogN_pos)
+        exact h_tri1 _ _ _
+    _ = |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| * Real.log ↑N +
+        |S₂_at (N - 1) + 1| * Real.log ↑N +
+        |((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+          Real.log ↑N| * Real.log ↑N := by ring
+    _ ≤ 2 * C₁ + 9 * C₂ + (B₂ + B₃ + 3) := by
+        rw [h_s2_eq]
+        linarith [h_term1_logN, h_s2_logN, h_div_logN]
+    _ ≤ 2 * C₁ + 9 * C₂ + B₂ + B₃ + 4 := by linarith
 
 -- ════════════════════════════════════════════════
 -- §4. QUADRATIC FORM BOUND VIA L² BOUND
