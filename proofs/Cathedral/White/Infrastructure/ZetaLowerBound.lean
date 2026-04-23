@@ -578,8 +578,11 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
         (fun z hz => zeta_norm_bound_on_disk ht hR_pos hR_lt z hz)
         h_center' (by norm_num : (0:ℝ) < 1/4) hw
       -- log((2+|t|)^10) - log(1/4) = 10·log(2+|t|) + log(4) = M
-      -- = 10·log(2+|t|) - (-log(4)) = 10·log(2+|t|) + log(4) = M
-      have h_eq : Real.log ((2 + |t|) ^ (10:ℝ)) - Real.log (1/4) = M := by sorry
+      have ht_base : (0:ℝ) < 2 + |t| := by linarith [abs_nonneg t]
+      have h_eq : Real.log ((2 + |t|) ^ (10:ℝ)) - Real.log (1/4) = M := by
+        rw [Real.log_rpow ht_base, Real.log_div (by norm_num) (by norm_num : (4:ℝ) ≠ 0),
+            Real.log_one, hM_def]
+        ring
       linarith [h_re]
     -- Step E: Apply BC theorem
     have hBC := Complex.borelCaratheodory_zero hM_pos hG_diff hG_re_le hR_pos hz_ball hG0
