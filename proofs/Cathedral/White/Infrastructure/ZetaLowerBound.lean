@@ -403,25 +403,112 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
               rw [← Real.log_div (ne_of_gt h2t_pos) (by norm_num : (2:ℝ) ≠ 0)]
             linarith [h_key, h_rearrange, h_exp_identity]
         _ ≤ ‖riemannZeta s‖ := hbc
-    · -- ══ Case A < B_ε: requires iterated BC or Hadamard argument ══
-      -- The single-pass BC bound decays as |t|^{-B_ε}, which is faster than
-      -- |t|^{-A} when A < B_ε, so no fixed c > 0 satisfies c/|t|^A ≤ BC(|t|).
-      -- This case needs either:
-      --   (a) iterated application of BC on nested disks, or
-      --   (b) Hadamard factorization (giving |ζ| ≥ c·|t|^{-ε} under RH)
-      -- For now, use the BC bound with the original witness.
+    · -- ══ Case A < B_ε: ε-rescaling trick ══
+      -- Choose ε' = 60/(A+40) so B_{ε'} = A, then case-split on Re(s).
       simp only [not_le] at hAB
-      set c_inner := (1/4 : ℝ) * (2 : ℝ) ^ (-B_ε) with hc_inner_def
-      have hc_pos : 0 < c_inner := by positivity
-      refine ⟨c_inner, hc_pos, 2, by norm_num, ?_⟩
+      -- ε' = 60/(A+40): chosen so that 20*(3-2ε')/ε' = A
+      set ε' := 60 / (A + 40) with hε'_def
+      have hA40_pos : 0 < A + 40 := by linarith
+      have hε'_pos : 0 < ε' := by rw [hε'_def]; positivity
+      have hε'_lt : ε' < 3/2 := by
+        rw [hε'_def]
+        rw [div_lt_iff₀ hA40_pos]
+        nlinarith
+      -- ε' > ε (consequence of A < B_ε)
+      have hε_lt_ε' : ε < ε' := by
+        rw [hε'_def]
+        -- Need ε < 60/(A+40), i.e., ε*(A+40) < 60
+        have hBε_eq : B_ε = 20 * (3 - 2 * ε) / ε := by
+          rw [hB_def, hK_def]; field_simp; ring
+        -- A < B_ε = 20*(3-2ε)/ε means A*ε < 20*(3-2ε) = 60-40ε
+        have hAε : A * ε < 60 - 40 * ε := by
+          have h1 := mul_lt_mul_of_pos_right (by linarith [hBε_eq] : A < B_ε) hε
+          rw [hBε_eq, div_mul_cancel₀ _ (ne_of_gt hε)] at h1
+          linarith
+        have h_eps_bound : ε * (A + 40) < 60 := by nlinarith [hAε]
+        rwa [lt_div_iff₀ hA40_pos]
+      -- K_{ε'} and B_{ε'}
+      set K_ε' := 2 * (3/2 - ε') / (ε'/2) with hK'_def
+      set B_ε' := 10 * K_ε' with hB'_def
+      -- B_{ε'} = A (exact)
+      have hB'_eq_A : B_ε' = A := by
+        rw [hB'_def, hK'_def, hε'_def]; field_simp; ring
+      have hB'_pos : 0 < B_ε' := by rw [hB'_eq_A]; exact hA
+      -- Witness: c₀(ε') = (1/4)·4^{-K_{ε'}}·2^{-A}
+      set c₀ := (1/4 : ℝ) * (4 : ℝ) ^ (-K_ε') * (2 : ℝ) ^ (-B_ε') with hc₀_def
+      have hc₀_pos : 0 < c₀ := by positivity
+      refine ⟨c₀, hc₀_pos, 2, by norm_num, ?_⟩
       intro s hs him
       have ht_ge_2 : 2 ≤ |s.im| := him
-      have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
-      calc c_inner / |s.im| ^ A
-          ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
-              (3/2 - ε) / (ε/2))) := by
-            -- A < B_ε: single-pass BC insufficient, needs sharper analysis
-            sorry
-        _ ≤ ‖riemannZeta s‖ := hbc
+      have ht_pos : 0 < |s.im| := by linarith
+      have ht_ge_1 : 1 ≤ |s.im| := by linarith
+      by_cases hre : (1/2 + ε' : ℝ) ≤ s.re
+      · -- Case A: Re(s) ≥ 1/2+ε' → use bc_inner_bound(ε')
+        have hbc' := bc_inner_bound hRH ε' hε'_pos hε'_lt s hre ht_ge_2
+        -- Exactly the A ≥ B_{ε'} proof (since B_{ε'} = A)
+        have h2t_pos : 0 < 2 + |s.im| := by linarith
+        have h_half_pos : 0 < (2 + |s.im|) / 2 := by linarith
+        have h_half_le : (2 + |s.im|) / 2 ≤ |s.im| := by linarith
+        have h_log_t_pos : 0 ≤ Real.log |s.im| := Real.log_nonneg ht_ge_1
+        have h_log_le : Real.log ((2 + |s.im|) / 2) ≤ Real.log |s.im| :=
+          Real.log_le_log h_half_pos h_half_le
+        have hAB' : B_ε' ≤ A := le_of_eq hB'_eq_A
+        have h_key : B_ε' * Real.log ((2 + |s.im|) / 2) ≤ A * Real.log |s.im| :=
+          calc B_ε' * Real.log ((2 + |s.im|) / 2)
+              ≤ B_ε' * Real.log |s.im| :=
+                mul_le_mul_of_nonneg_left h_log_le hB'_pos.le
+            _ ≤ A * Real.log |s.im| :=
+                mul_le_mul_of_nonneg_right hAB' h_log_t_pos
+        have h_exp_identity : K_ε' * Real.log 4 + B_ε' * Real.log (2 + |s.im|) =
+            2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) * (3/2 - ε') / (ε'/2) := by
+          rw [hB'_def]; ring
+        -- rpow → exp
+        have h_4_rpow : (4:ℝ) ^ (-K_ε') = Real.exp (-(K_ε' * Real.log 4)) := by
+          rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 4)]; ring_nf
+        have h_2_rpow : (2:ℝ) ^ (-B_ε') = Real.exp (-(B_ε' * Real.log 2)) := by
+          rw [Real.rpow_def_of_pos (by norm_num : (0:ℝ) < 2)]; ring_nf
+        have h_t_rpow : |s.im| ^ A = Real.exp (A * Real.log |s.im|) := by
+          rw [Real.rpow_def_of_pos ht_pos]; ring_nf
+        -- Use calc: c₀/|t|^A ≤ (1/4)·exp(-E') ≤ ‖ζ(s)‖
+        -- First step: c₀/|t|^A ≤ (1/4)·exp(-E')
+        have h_step1 : c₀ / |s.im| ^ A ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 +
+            10 * Real.log (2 + |s.im|)) * (3/2 - ε') / (ε'/2))) := by
+          have hA_rpow_pos : 0 < |s.im| ^ A := Real.rpow_pos_of_pos ht_pos A
+          rw [div_le_iff₀ hA_rpow_pos, hc₀_def, h_4_rpow, h_2_rpow, h_t_rpow]
+          -- Need: 1/4*exp(-K'log4)*exp(-B'log2) ≤ (1/4)*exp(-E')*exp(A*log|t|)
+          -- Combine LHS
+          have h_combine_l : (1:ℝ)/4 * Real.exp (-(K_ε' * Real.log 4)) *
+              Real.exp (-(B_ε' * Real.log 2)) =
+              1/4 * Real.exp (-(K_ε' * Real.log 4 + B_ε' * Real.log 2)) := by
+            rw [mul_assoc]; congr 1; rw [← Real.exp_add]; congr 1; ring
+          rw [h_combine_l]
+          -- Need: 1/4*exp(X) ≤ (1/4*exp(Y))*exp(Z)
+          -- = 1/4*(exp(Y)*exp(Z)) = 1/4*exp(Y+Z)
+          -- So need exp(X) ≤ exp(Y+Z), i.e., X ≤ Y+Z
+          have h_rhs_eq : (1:ℝ)/4 * Real.exp (-(2 * (Real.log 4 +
+              10 * Real.log (2 + |s.im|)) * (3/2 - ε') / (ε'/2))) *
+              Real.exp (A * Real.log |s.im|) =
+              1/4 * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+              (3/2 - ε') / (ε'/2)) + A * Real.log |s.im|) := by
+            rw [mul_assoc]; congr 1; rw [← Real.exp_add]
+          rw [h_rhs_eq]
+          apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 1/4)
+          apply Real.exp_le_exp.mpr
+          have h_rearrange : B_ε' * (Real.log (2 + |s.im|) - Real.log 2) =
+              B_ε' * Real.log ((2 + |s.im|) / 2) := by
+            rw [← Real.log_div (ne_of_gt h2t_pos) (by norm_num : (2:ℝ) ≠ 0)]
+          linarith [h_key, h_rearrange, h_exp_identity]
+        linarith [hbc']
+      · -- Case B: 1/2+ε ≤ Re(s) < 1/2+ε' (thin strip)
+        -- This strip has width ε'-ε and requires either:
+        --   (1) Hadamard factorization (sharp exponent ε)
+        --   (2) Phragmén-Lindelöf interpolation
+        --   (3) Jensen's formula + zero density
+        -- The BC bound with ε gives |ζ| ≥ C/|t|^{B_ε} but A < B_ε
+        -- means c₀/|t|^A ≫ C/|t|^{B_ε} for large |t|.
+        -- Verified satisfiable numerically (bc-witness-analysis).
+        simp only [not_le] at hre
+        have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
+        sorry
 
 end Cathedral.White.Infrastructure.ZetaLowerBound
