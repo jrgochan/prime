@@ -21,10 +21,31 @@ open Complex Real MeasureTheory Set
 -- §1. |Γ(σ+it)| ≤ Γ(σ) for σ > 0
 -- ════════════════════════════════════════════════════
 
-/-- |Γ(s)| ≤ Γ(Re(s)) for Re(s) > 0, from the integral representation. -/
+/-- |Γ(s)| ≤ Γ(Re(s)) for Re(s) > 0, from the integral representation.
+    From Γ(s) = ∫ t^{s-1} e^{-t} dt and |t^{s-1}| = t^{σ-1} for t > 0,
+    we get |Γ(s)| ≤ ∫ t^{σ-1} e^{-t} dt = Γ(σ). -/
 theorem norm_Gamma_le_Gamma_re {s : ℂ} (hs : 0 < s.re) :
     ‖Complex.Gamma s‖ ≤ Real.Gamma s.re := by
-  sorry
+  -- Step 1: Γ(s) = GammaIntegral(s) = ∫ t ∈ Ioi 0, exp(-t) · t^(s-1)
+  rw [Complex.Gamma_eq_integral hs]
+  -- Step 2: Γ(σ) = ∫ t ∈ Ioi 0, exp(-t) · t^(σ-1)
+  rw [Real.Gamma_eq_integral hs]
+  -- GammaIntegral s = ∫ x in Ioi 0, ↑(exp(-x)) * ↑x ^ (s - 1)
+  unfold Complex.GammaIntegral
+  -- ‖∫ f‖ ≤ ∫ ‖f‖ ≤ ∫ g when ‖f‖ ≤ g a.e.
+  refine le_trans (norm_integral_le_integral_norm _) ?_
+  apply MeasureTheory.setIntegral_mono_on
+  · -- integrability of ‖f‖
+    exact (Complex.GammaIntegral_convergent hs).norm
+  · -- integrability of g
+    exact Real.GammaIntegral_convergent hs
+  · exact measurableSet_Ioi
+  · -- pointwise: ‖exp(-x) * x^(s-1)‖ = exp(-x) * x^(σ-1) for x > 0
+    intro x hx
+    rw [Set.mem_Ioi] at hx
+    apply le_of_eq
+    simp only [norm_mul, Complex.norm_of_nonneg (le_of_lt (Real.exp_pos (-x))),
+        norm_cpow_eq_rpow_re_of_pos hx, sub_re, one_re]
 
 -- ════════════════════════════════════════════════════
 -- §2. |sin(z)| ≤ cosh(Im(z))
