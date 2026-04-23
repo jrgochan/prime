@@ -152,6 +152,12 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.DirichletZetaInverse,
     -- Conditional Lindelöf bound + horizontal contour vanishing (2 sorry)
     `Cathedral.White.Infrastructure.ZetaConvexity,
+    -- Gamma function norm bounds (PROVED, zero sorry)
+    `Cathedral.White.Infrastructure.GammaBound,
+    -- Zeta convexity bound (WIP)
+    `Cathedral.White.Infrastructure.ZetaConvexityBound,
+    -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
+    `Cathedral.White.Infrastructure.ZetaLowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
     `Cathedral.White.Infrastructure.HilbertInequality,
   ]
