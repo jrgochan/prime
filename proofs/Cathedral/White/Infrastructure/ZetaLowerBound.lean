@@ -297,9 +297,14 @@ private lemma log_zeta_re_bound_on_disk
     apply mul_pos (by norm_num : (0:ℝ) < 10)
     exact Real.log_pos (by linarith : (1:ℝ) < 2 + |t|)
   · intro z hz
-    -- The key identity: Re(log w) = log ‖w‖ when w ≠ 0.
-    -- Complex.log_re z = Real.log (Complex.abs z) = Real.log ‖z‖
-    sorry -- Requires: upper bound ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 on the disk
+    -- The key identity: Re(log w) = Real.log ‖w‖
+    rw [Complex.log_re]
+    -- We need: Real.log ‖ζ(s₀+z)‖ ≤ 10 * Real.log (2 + |t|)
+    -- i.e., ‖ζ(s₀+z)‖ ≤ (2 + |t|)^10
+    -- Crude bound: ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 for Re(s₀+z) > 1/2
+    -- Case 1: Re ≥ 2 → ‖ζ - 1‖ ≤ 3/4, so ‖ζ‖ ≤ 7/4 < 2 ≤ (2+|t|)^10
+    -- Case 2: 1/2 < Re < 2 → needs convexity bound (PL/functional equation)
+    sorry -- Reduces to: ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 for Re ∈ (1/2, 2)
 
 -- ═══════════════════════════════════════════
 -- §4. Differentiability of log ζ on the Disk
