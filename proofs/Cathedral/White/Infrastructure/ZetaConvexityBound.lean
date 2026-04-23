@@ -63,7 +63,10 @@ private lemma integral_cpow_eq_inv_sub_one {s : ℂ} (hs : 1 < s.re) :
   simp
 
 /-- The FloorMellin integral decomposes via ⌊1/t⌋ = 1/t - {1/t}:
-    ∫₀¹ ⌊1/t⌋·t^{s-1} dt = 1/(s-1) - ∫₀¹ {1/t}·t^{s-1} dt -/
+    ∫₀¹ ⌊1/t⌋·t^{s-1} dt = 1/(s-1) - ∫₀¹ {1/t}·t^{s-1} dt
+
+    Pointwise: for t ∈ (0,1], ⌊1/t⌋ = 1/t - {1/t} (from self_sub_floor).
+    Then linearity of integration splits the integral. -/
 private lemma floor_mellin_decomp {s : ℂ} (hs : 1 < s.re) :
     ∫ t in Set.Ioc (0:ℝ) 1,
       (↑t : ℂ) ^ (s - 1) * (↑(⌊(1 : ℝ) / t⌋) : ℂ) =
