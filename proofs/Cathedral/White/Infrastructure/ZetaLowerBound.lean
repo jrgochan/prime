@@ -94,13 +94,43 @@ private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) 
     -- Use tsum_of_norm_bounded with bound b(n)
     let b : ℕ → ℝ := fun n => if n = 0 then 1/4 else 1/((↑n + 1) * (↑n + 2))
     have hb_hasSum : HasSum b (3/4) := by
-      -- b(n) = if n = 0 then 1/4 else 1/((n+1)(n+2))
-      -- = 1/((n+1)(n+2)) + if n = 0 then 1/4 - 1/2 else 0
-      -- = 1/((n+1)(n+2)) + if n = 0 then -1/4 else 0
-      -- HasSum c 1 where c(n) = 1/((n+1)(n+2)) (telescoping)
-      -- HasSum d (-1/4) where d(n) = if n = 0 then -1/4 else 0 (single term)
-      -- Total: 1 + (-1/4) = 3/4
-      sorry
+      rw [hasSum_iff_tendsto_nat_of_nonneg (fun n => by simp [b]; split_ifs <;> positivity)]
+      -- Need: Tendsto (fun n => Σ_{i<n} b(i)) atTop (𝓝 (3/4))
+      -- b(0) = 1/4, b(n) = 1/((n+1)(n+2)) for n ≥ 1
+      -- Partial sum Σ_{i<n} b(i) = 1/4 + Σ_{i=1}^{n-1} 1/((i+1)(i+2))
+      -- = 1/4 + (1/2 - 1/(n+1))  [telescoping for i≥1]
+      -- = 3/4 - 1/(n+1)
+      -- Tends to 3/4.
+      have h_partial : ∀ n, 1 ≤ n →
+          ∑ i ∈ Finset.range n, b i = 3/4 - 1/(↑n + 1) := by
+        intro n hn
+        induction n with
+        | zero => omega
+        | succ m ih =>
+          rw [Finset.sum_range_succ]
+          by_cases hm0 : m = 0
+          · subst hm0
+            simp only [Finset.sum_range_zero, b, if_true, Nat.cast_zero]
+            norm_num
+          · have hm1 : 1 ≤ m := Nat.one_le_iff_ne_zero.mpr hm0
+            specialize ih hm1
+            rw [ih]
+            -- Goal: 3/4 - 1/(↑m + 1) + b m = 3/4 - 1/(↑(m+1) + 1)
+            simp only [b, show m ≠ 0 from hm0, ite_false]
+            push_cast
+            field_simp
+            ring
+      -- For n = 0: partial sum is 0
+      -- For n ≥ 1: partial sum = 3/4 - 1/(n+1) → 3/4
+      suffices h_suff : Tendsto (fun n : ℕ => 3/4 - 1/((↑n : ℝ) + 1)) Filter.atTop (𝓝 (3/4 : ℝ)) by
+        apply Filter.Tendsto.congr' _ h_suff
+        filter_upwards [Filter.Ici_mem_atTop 1] with n hn
+        exact (h_partial n hn).symm
+      have h_tend : Tendsto (fun n : ℕ => (1 : ℝ) / ((↑n : ℝ) + 1)) Filter.atTop (𝓝 0) := by
+        have h1 : Tendsto (fun n : ℕ => (↑n : ℝ) + 1) Filter.atTop Filter.atTop :=
+          Filter.tendsto_atTop_add_const_right _ 1 tendsto_natCast_atTop_atTop
+        exact tendsto_const_nhds.div_atTop h1
+      simpa [sub_zero] using Filter.Tendsto.const_sub (3/4 : ℝ) h_tend
     have hb_bound : ∀ n, ‖(fun n => g (n + 1 + 1)) n‖ ≤ b n := by
       intro n
       simp only [g, riemannZetaSummandHom, MonoidWithZeroHom.coe_mk, ZeroHom.coe_mk, b]
