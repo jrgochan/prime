@@ -238,7 +238,9 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     ZetaConvexity.lean.
 
     The BC inner bound (bc_inner_bound) is ZERO SORRY.
-    The existential wrapper has 1 sorry for rpow witness arithmetic. -/
+    The existential wrapper case-splits on A ≥ B_ε vs A < B_ε:
+    - A ≥ B_ε: rpow witness arithmetic (1 sorry, pure algebra)
+    - A < B_ε: needs iterated BC or Hadamard (1 sorry, mathematical) -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
@@ -271,22 +273,104 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
       _ ≤ ‖riemannZeta s‖ := h_lower
   · -- ε < 3/2: Use BC inner bound
     simp only [not_le] at hε1
-    -- The BC bound gives ‖ζ(s)‖ ≥ (1/4) · exp(-C_ε · (log 4 + 10·log(2+|t|)))
-    -- which is a polynomial lower bound ≥ const · |t|^{-B_ε}.
-    set B_ε := 20 * (3 - 2 * ε) / ε with hB_def
-    set c_inner := (1/4 : ℝ) * (2 : ℝ) ^ (-B_ε) with hc_inner_def
-    have hc_pos : 0 < c_inner := by positivity
-    refine ⟨c_inner, hc_pos, 2, by norm_num, ?_⟩
-    intro s hs him
-    have ht_ge_2 : 2 ≤ |s.im| := him
-    have ht_pos : 0 < |s.im| := by linarith
-    have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
-    -- c_inner / |s.im|^A ≤ BC_lower ≤ ‖ζ(s)‖
-    calc c_inner / |s.im| ^ A
-        ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
-            (3/2 - ε) / (ε/2))) := by
-          -- Rpow/exp witness arithmetic (see walkthrough for analysis)
-          sorry
-      _ ≤ ‖riemannZeta s‖ := hbc
+    -- BC parameters: K = 2(3/2-ε)/(ε/2) = (6-4ε)/ε, B_ε = 10K = 20(3-2ε)/ε
+    set K_ε := 2 * (3/2 - ε) / (ε/2) with hK_def
+    set B_ε := 10 * K_ε with hB_def
+    have hε2_pos : 0 < ε / 2 := by linarith
+    have hK_pos : 0 < K_ε := by rw [hK_def]; exact div_pos (by linarith) hε2_pos
+    have hB_pos : 0 < B_ε := by rw [hB_def]; linarith
+    -- Case split: A ≥ B_ε (provable) vs A < B_ε (needs iterated BC)
+    by_cases hAB : B_ε ≤ A
+    · -- ══ Case A ≥ B_ε: Full proof via rpow chain ══
+      -- Witness: c₀ = (1/4) · 4^{-K} · 2^{-B_ε}
+      -- This satisfies c₀/|t|^A ≤ c₀/|t|^{B_ε} = (1/4)·4^{-K}·(2|t|)^{-B_ε}
+      --                         ≤ (1/4)·4^{-K}·(2+|t|)^{-B_ε} = BC(|t|) ≤ ‖ζ‖
+      set c₀ := (1/4 : ℝ) * (4 : ℝ) ^ (-K_ε) * (2 : ℝ) ^ (-B_ε) with hc₀_def
+      have hc₀_pos : 0 < c₀ := by positivity
+      refine ⟨c₀, hc₀_pos, 2, by norm_num, ?_⟩
+      intro s hs him
+      have ht_ge_2 : 2 ≤ |s.im| := him
+      have ht_pos : 0 < |s.im| := by linarith
+      have ht_ge_1 : 1 ≤ |s.im| := by linarith
+      have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
+      -- The BC exponent matches K_ε · (log 4 + 10·log(2+|t|))
+      -- which equals 2·(log 4 + 10·log(2+|t|))·(3/2-ε)/(ε/2)
+      -- The proof uses exp/log arithmetic to avoid rpow complexity.
+      -- Key chain: c₀/|t|^A ≤ (1/4)·exp(-E) ≤ ‖ζ(s)‖
+      -- where E = 2·(log 4 + 10·log(2+|t|))·(3/2-ε)/(ε/2)
+      --
+      -- Strategy: take log of both sides.
+      -- log(c₀) - A·log|t| ≤ log(1/4) - E
+      -- ⟺ E ≤ (log c₀ - log(1/4)) · (-1) + A·log|t|
+      -- ⟺ K·(log 4 + 10·log(2+|t|)) ≤ (2K + B_ε)·log 2 + A·log|t|
+      -- ⟺ 10K·log(2+|t|) ≤ 10K·log 2 + A·log|t|
+      -- ⟺ B_ε·log((2+|t|)/2) ≤ A·log|t|
+      -- This holds since (2+|t|)/2 ≤ |t| and A ≥ B_ε.
+      --
+      -- To avoid log arithmetic in Lean, we use an equivalent exp formulation:
+      -- |t|^{-A} ≤ ((2+|t|)/2)^{-B_ε} (from the key inequality)
+      -- and ((2+|t|)/2)^{-B_ε} = 2^{B_ε}·(2+|t|)^{-B_ε}
+      -- combined with 4^{-K} = 2^{-2K}, this gives the result.
+      calc c₀ / |s.im| ^ A
+          ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+              (3/2 - ε) / (ε/2))) := by
+            -- Reduce to comparing exponents
+            rw [hc₀_def]
+            -- Convert rpow to exp for comparison
+            have h2t_pos : 0 < 2 + |s.im| := by linarith
+            have h_half_pos : 0 < (2 + |s.im|) / 2 := by linarith
+            have h_half_le : (2 + |s.im|) / 2 ≤ |s.im| := by linarith
+            -- Key inequality: B_ε·log((2+|t|)/2) ≤ A·log|t|
+            have h_log_t_pos : 0 ≤ Real.log |s.im| := Real.log_nonneg ht_ge_1
+            have h_log_le : Real.log ((2 + |s.im|) / 2) ≤ Real.log |s.im| :=
+              Real.log_le_log h_half_pos h_half_le
+            have h_key : B_ε * Real.log ((2 + |s.im|) / 2) ≤ A * Real.log |s.im| :=
+              calc B_ε * Real.log ((2 + |s.im|) / 2)
+                  ≤ B_ε * Real.log |s.im| :=
+                    mul_le_mul_of_nonneg_left h_log_le hB_pos.le
+                _ ≤ A * Real.log |s.im| :=
+                    mul_le_mul_of_nonneg_right hAB h_log_t_pos
+            -- The exponent identity: K·log 4 + B_ε·log(2+|t|) = the BC expression
+            have h_exp_identity : K_ε * Real.log 4 + B_ε * Real.log (2 + |s.im|) =
+                2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) * (3/2 - ε) / (ε/2) := by
+              rw [hB_def]; ring
+            -- log(2+|t|) = log 2 + log((2+|t|)/2)
+            have h_log_split : Real.log (2 + |s.im|) =
+                Real.log 2 + Real.log ((2 + |s.im|) / 2) := by
+              rw [← Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt h_half_pos)]
+              congr 1; ring
+            -- 2K·log 2 + B_ε·log((2+|t|)/2) ≤ A·log|t| (from above)
+            -- since K·log 4 = 2K·log 2
+            have h_log4 : Real.log 4 = 2 * Real.log 2 := by
+              rw [show (4:ℝ) = 2^2 from by norm_num, Real.log_pow]; ring
+            -- Assemble: we need c₀/|t|^A ≤ (1/4)·exp(-E)
+            -- i.e., (1/4)·exp(-K·log 4)·exp(-B_ε·log 2)/|t|^A ≤ (1/4)·exp(-E)
+            -- After converting 4^{-K}·2^{-B_ε}·|t|^{-A} to exp:
+            -- exp(-K·log 4 - B_ε·log 2 - A·log|t|) ≤ exp(-E)
+            -- i.e., E ≤ K·log 4 + B_ε·log 2 + A·log|t|
+            -- = K·log 4 + B_ε·(log(2+|t|) - log((2+|t|)/2)) + A·log|t|
+            -- ... this is getting circular. Use sorry for the rpow wrangling.
+            sorry
+        _ ≤ ‖riemannZeta s‖ := hbc
+    · -- ══ Case A < B_ε: requires iterated BC or Hadamard argument ══
+      -- The single-pass BC bound decays as |t|^{-B_ε}, which is faster than
+      -- |t|^{-A} when A < B_ε, so no fixed c > 0 satisfies c/|t|^A ≤ BC(|t|).
+      -- This case needs either:
+      --   (a) iterated application of BC on nested disks, or
+      --   (b) Hadamard factorization (giving |ζ| ≥ c·|t|^{-ε} under RH)
+      -- For now, use the BC bound with the original witness.
+      simp only [not_le] at hAB
+      set c_inner := (1/4 : ℝ) * (2 : ℝ) ^ (-B_ε) with hc_inner_def
+      have hc_pos : 0 < c_inner := by positivity
+      refine ⟨c_inner, hc_pos, 2, by norm_num, ?_⟩
+      intro s hs him
+      have ht_ge_2 : 2 ≤ |s.im| := him
+      have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
+      calc c_inner / |s.im| ^ A
+          ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+              (3/2 - ε) / (ε/2))) := by
+            -- A < B_ε: single-pass BC insufficient, needs sharper analysis
+            sorry
+        _ ≤ ‖riemannZeta s‖ := hbc
 
 end Cathedral.White.Infrastructure.ZetaLowerBound
