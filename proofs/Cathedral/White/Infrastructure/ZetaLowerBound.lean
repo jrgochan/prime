@@ -416,11 +416,25 @@ private lemma zeta_norm_bound_on_disk
     have h_base : (1 : ℝ) ≤ 2 + |t| := by linarith [abs_nonneg t]
     -- (2 + |s.im|) ≤ |t| + 7/2 ≤ 2*(2+|t|) for |t| ≥ 2
     have him_upper : 2 + |s.im| ≤ 2 * (2 + |t|) := by linarith
-    -- (2+|s.im|)^2 ≤ (2*(2+|t|))^2 = 4*(2+|t|)^2 ≤ (2+|t|)^2*(2+|t|)^2 = (2+|t|)^4
-    -- since 4 ≤ (2+|t|)^2 when |t| ≥ 2
-    -- Then (2+|t|)^4 ≤ (2+|t|)^10
-    -- For now, sorry the rpow arithmetic (the analytic content is all done)
-    sorry
+    -- (2+|s.im|)^2 ≤ (2*(2+|t|))^2 since 2+|s.im| ≤ 2*(2+|t|)
+    -- Use Nat-cast to avoid rpow arithmetic
+    have h2pos : (0 : ℝ) ≤ 2 + |s.im| := by linarith [abs_nonneg s.im]
+    have h2tpos : (0 : ℝ) ≤ 2 + |t| := by linarith [abs_nonneg t]
+    -- Convert to ℕ powers for nat-power arithmetic
+    rw [show (10 : ℝ) = ((10 : ℕ) : ℝ) from by norm_num] at *
+    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num] at hconv
+    rw [rpow_natCast] at hconv
+    rw [rpow_natCast]
+    -- ‖ζ‖ ≤ (2+|s.im|)^2 ≤ (2*(2+|t|))^2 = 4*(2+|t|)^2 ≤ (2+|t|)^10
+    calc ‖riemannZeta s‖
+        ≤ (2 + |s.im|) ^ 2 := hconv
+      _ ≤ (2 * (2 + |t|)) ^ 2 := by nlinarith
+      _ = 4 * (2 + |t|) ^ 2 := by ring
+      _ ≤ (2 + |t|) ^ 2 * (2 + |t|) ^ 2 := by
+          have : 4 ≤ (2 + |t|) ^ 2 := by nlinarith [abs_nonneg t]
+          nlinarith [sq_nonneg ((2 + |t|) ^ 1)]
+      _ = (2 + |t|) ^ 4 := by ring
+      _ ≤ (2 + |t|) ^ 10 := pow_le_pow_right₀ h_base (by norm_num : 4 ≤ 10)
 
 -- ═══════════════════════════════════════════
 -- §5. The Main Theorem: Polynomial Lower Bound
