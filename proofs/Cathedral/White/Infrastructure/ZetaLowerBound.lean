@@ -56,6 +56,55 @@ private theorem rh_zeta_ne_zero_local (hRH : RiemannHypothesis)
 -- §2. Zeta Values in slitPlane (Key Lemma)
 -- ═══════════════════════════════════════════
 
+/-- The tail of the Dirichlet series: ‖ζ(s) - 1‖ < 1 for Re(s) ≥ 2.
+    This is the key arithmetic fact used to show ζ ∈ slitPlane.
+
+    Proof: ζ(s) = Σ_{n≥1} n^{-s} = 1 + Σ_{n≥2} n^{-s}.
+    So ζ(s) - 1 = Σ_{n≥2} n^{-s} and
+    ‖ζ(s) - 1‖ ≤ Σ_{n≥2} n^{-Re(s)} ≤ Σ_{n≥2} n^{-2} = π²/6 - 1 ≈ 0.645 < 1. -/
+private lemma zeta_sub_one_norm_lt_one_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) :
+    ‖riemannZeta s - 1‖ < 1 := by
+  have h_re : 1 < s.re := by linarith
+  have hs0 : s ≠ 0 := Complex.ne_zero_of_one_lt_re h_re
+  -- Use riemannZetaSummandHom: g(n) = n^{-s}
+  set g := riemannZetaSummandHom hs0
+  have hg_ns := summable_riemannZetaSummand h_re
+  -- ζ(s) = Σ g(n) and g(0) = 0, g(1) = 1
+  have h_zeta : riemannZeta s = ∑' n, g n := (tsum_riemannZetaSummand h_re).symm
+  have h_g0 : g 0 = 0 := by simp [g, riemannZetaSummandHom, hs0]
+  have h_g1 : g 1 = 1 := by simp [g, riemannZetaSummandHom]
+  -- ζ(s) - 1 = (Σ_{n≥0} g(n)) - 1 = (g(0) + Σ_{n≥1} g(n)) - 1 = Σ_{n≥1} g(n) - 1
+  -- = (g(1) + Σ_{n≥2} g(n)) - 1 = Σ_{n≥2} g(n)
+  rw [h_zeta, hg_ns.of_norm.tsum_eq_zero_add, h_g0, zero_add]
+  -- Now we need to extract g(1) from the shifted sum
+  -- Goal: ‖∑' n, g (n + 1) - 1‖ < 1
+  -- ∑' n, g(n+1) = g(1) + ∑' n, g(n+2) = 1 + ∑' n, g(n+2)
+  have hg_shift : Summable (fun n => ‖g (n + 1)‖) :=
+    hg_ns.comp_injective (fun a b h => by omega)
+  rw [hg_shift.of_norm.tsum_eq_zero_add, h_g1, add_sub_cancel_left]
+  -- Goal: ‖∑' n, g (n + 1 + 1)‖ < 1
+  -- Bound by Σ ‖g(n+2)‖ = Σ (n+2)^{-Re(s)} ≤ Σ (n+2)^{-2} < 1
+  have hg_tail : Summable (fun n => ‖g (n + 2)‖) :=
+    hg_ns.comp_injective (fun a b h => by omega)
+  calc ‖∑' n, g (n + 1 + 1)‖
+      ≤ ∑' n, ‖g (n + 1 + 1)‖ := by
+        apply norm_tsum_le_tsum_norm
+        show Summable fun n => ‖g (n + 1 + 1)‖
+        exact hg_ns.comp_injective (fun a b h => by omega)
+    _ < 1 := by
+        -- Use: ∀ n, ‖g(n+1+1)‖ ≤ (n+2)^{-2} ≤ 1/((n+1)(n+2))
+        -- and Σ 1/((n+1)(n+2)) = 1 (telescoping), so norm ≤ 1.
+        -- But we need strict <. The first term gives 1/4 < 1/2 = 1/(1·2),
+        -- so: ‖g(1+1)‖ ≤ 1/4, and ∑_{n≥1} ‖g(n+2)‖ ≤ ∑_{n≥1} 1/((n+1)(n+2)) = 1/2
+        -- Total ≤ 1/4 + 1/2 = 3/4 < 1
+        -- We apply tsum_of_norm_bounded with bound function b(n) := 1/((n+1)(n+2))
+        -- This approach gives ≤ 1 by telescoping. For strict <, we note:
+        -- The bound series has sum 1 but ‖g‖ < b at n=0, giving strict inequality.
+        -- However, tsum_of_norm_bounded only gives ≤.
+        -- So use explicit approach: ∑ ‖g‖ ≤ ∑ 1/(n+2)^2 ≤ 3/4 < 1.
+        -- We provide this as a sorry for now and will formalize the arithmetic below.
+        sorry
+
 /-- ζ(s) ∈ slitPlane for Re(s) ≥ 2 (far from critical strip).
 
     For Re(s) ≥ 2, |ζ(s) - 1| ≤ Σ_{n≥2} n^{-2} = π²/6 - 1 ≈ 0.645.
@@ -65,15 +114,10 @@ private theorem rh_zeta_ne_zero_local (hRH : RiemannHypothesis)
     Proof uses `mem_slitPlane_of_norm_lt_one`: ‖z‖ < 1 → 1 + z ∈ slitPlane. -/
 private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (hs1 : s ≠ 1) :
     riemannZeta s ∈ slitPlane := by
-  -- ζ(s) = 1 + (ζ(s) - 1). We show ‖ζ(s) - 1‖ < 1.
-  -- Then mem_slitPlane_of_norm_lt_one gives 1 + (ζ(s) - 1) = ζ(s) ∈ slitPlane.
-  have h_re : 1 < s.re := by linarith
-  suffices h : ‖riemannZeta s - 1‖ < 1 by
-    have := mem_slitPlane_of_norm_lt_one h
-    rwa [add_sub_cancel] at this
-  -- ‖ζ(s) - 1‖ < 1 for Re(s) ≥ 2
-  -- ζ(s) - 1 = Σ_{n≥2} 1/n^s, and ‖Σ_{n≥2} 1/n^s‖ ≤ Σ_{n≥2} 1/n^Re(s) ≤ Σ_{n≥2} 1/n^2 < 1
-  sorry
+  -- ζ(s) = 1 + (ζ(s) - 1). Since ‖ζ(s) - 1‖ < 1, we get ζ(s) ∈ slitPlane.
+  have h : ‖riemannZeta s - 1‖ < 1 := zeta_sub_one_norm_lt_one_of_re_ge_two hs
+  have := mem_slitPlane_of_norm_lt_one h
+  rwa [add_sub_cancel] at this
 
 /-- Under RH, ζ(s) ∈ slitPlane for all s in the BC disk B(s₀, R).
     The disk is centered at s₀ with Re(s₀) = 2, radius R < 3/2,
