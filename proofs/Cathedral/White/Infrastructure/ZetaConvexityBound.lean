@@ -5,63 +5,60 @@
 
   Target: ‖ζ(s)‖ ≤ (2 + |s.im|)² for 1/2 < Re(s) ≤ 2, |Im(s)| ≥ 1/2.
 
-  ### Strategy
+  ### Strategy (based on FloorMellin.lean)
 
-  Split into two cases:
-  1. Re(s) > 1: Use the Dirichlet series ζ(s) = Σ 1/n^s and triangle inequality.
-  2. 1/2 < Re(s) ≤ 1: Use the partial summation formula
-     ζ(s) = s/(s-1) - s∫₁^∞ {x}/x^{s+1} dx, proved via Abel summation and
-     analytic continuation.
+  From `floor_mellin_eq_zeta` (PROVED in FloorMellin.lean, zero sorry):
+    ∫₀¹ ⌊1/t⌋ · t^{s-1} dt = ζ(s)/s   for Re(s) > 1
 
-  ### Status: 1 sorry remains (the full convexity bound assembly)
-  ### Dependencies: Mathlib (ζ, L-series), ThetaBound
+  Decomposing ⌊1/t⌋ = 1/t - {1/t}:
+    ζ(s) = s/(s-1) - s · ∫₀¹ {1/t} · t^{s-1} dt
+
+  Bounding (for σ > 1, |t| ≥ 1/2):
+    |ζ(s)| ≤ |s|/|s-1| + |s|/σ ≤ (1+1/|t|) + (1+|t|) ≤ 4+|t| ≤ (2+|t|)²
+
+  ### Dependencies: Mathlib (ζ, L-series), FloorMellin, ThetaBound
 -/
 
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.Dirichlet
 import Mathlib.NumberTheory.LSeries.Nonvanishing
+import Cathedral.MellinBridge.FloorMellin
 import Cathedral.NymanBeurling.ThetaBound
 
 noncomputable section
-open Complex Real Filter Asymptotics MeasureTheory Finset
+open Complex Real Filter MeasureTheory
 open scoped Topology
 
 namespace Cathedral.White.Infrastructure.ZetaConvexityBound
 
 -- ════════════════════════════════════════════════════
--- §1. Dirichlet series norm bound for Re(s) > 1
+-- §1. Arithmetic lemma
 -- ════════════════════════════════════════════════════
 
-/-- For Re(s) > 1, the norm of the n-th term of the Dirichlet zeta series
-    satisfies ‖1/n^s‖ = 1/n^σ. -/
-private lemma norm_natCast_cpow {n : ℕ} (hn : n ≠ 0) (s : ℂ) :
-    ‖(n : ℂ) ^ s‖ = (n : ℝ) ^ s.re := by
-  have hpos : (0 : ℝ) < n := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
-  rw [← ofReal_natCast, norm_cpow_eq_rpow_re_of_pos hpos]
-
-/-- ζ(σ) ≤ 1 + 1/(σ-1) for real σ > 1, from comparison with the integral. -/
-private lemma zeta_real_crude_bound {σ : ℝ} (hσ : 1 < σ) (hσ2 : σ ≤ 2) :
-    ‖riemannZeta (↑σ)‖ ≤ 1 + 1 / (σ - 1) := by
-  sorry
-
-/-- For Re(s) > 1, ‖ζ(s)‖ ≤ ζ(Re(s)) via the Dirichlet series. -/
-private lemma norm_zeta_le_zeta_re {s : ℂ} (hs : 1 < s.re) :
-    ‖riemannZeta s‖ ≤ ‖riemannZeta (↑s.re)‖ := by
-  sorry
+/-- 4 + |t| ≤ (2 + |t|)² for all t : ℝ.
+    Proof: (2+|t|)² = 4 + 4|t| + t² ≥ 4 + |t| since 3|t| + t² ≥ 0. -/
+lemma four_add_abs_le_sq (t : ℝ) : 4 + |t| ≤ (2 + |t|) ^ 2 := by
+  nlinarith [abs_nonneg t, sq_abs t]
 
 -- ════════════════════════════════════════════════════
--- §2. Pole-avoiding bound
+-- §2. Decomposition from FloorMellin
 -- ════════════════════════════════════════════════════
 
-/-- (s-1)·ζ(s) extends to an entire function with residue 1 at s=1.
-    For |t| ≥ 1/2, this gives |ζ(s)| ≤ |(s-1)·ζ(s)| / |s-1| ≤ C / |t|.
-    The function g(s) = (s-1)·ζ(s) is differentiable everywhere. -/
-private lemma norm_zeta_via_pole {s : ℂ}
+/-- From `floor_mellin_eq_zeta`, we derive the bound ‖ζ(s)‖ ≤ 4 + |s.im| for Re(s) > 1.
+
+    Proof sketch:
+    1. floor_mellin_eq_zeta: ∫₀¹ ⌊1/t⌋·t^{s-1} dt = ζ(s)/s
+    2. Split ⌊1/t⌋ = 1/t - {1/t}
+    3. ∫₀¹ t^{s-2} dt = 1/(s-1)
+    4. So ζ(s) = s/(s-1) - s·∫₀¹ {1/t}·t^{s-1} dt
+    5. |∫ {1/t}·t^{s-1} dt| ≤ ∫ t^{σ-1} dt = 1/σ
+    6. |ζ(s)| ≤ |s/(s-1)| + |s|/σ
+    7. |s/(s-1)| = |1 + 1/(s-1)| ≤ 1 + 1/|s-1| ≤ 1 + 1/|t|
+    8. |s|/σ ≤ (σ+|t|)/σ = 1 + |t|/σ ≤ 1 + |t|
+    9. Total ≤ (1+1/|t|) + (1+|t|) ≤ 1+2+1+|t| = 4+|t| -/
+private lemma norm_zeta_le_of_re_gt_one {s : ℂ}
     (hs : 1 < s.re) (hs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
-    ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ (2 : ℝ) := by
-  -- For Re(s) > 1: ‖ζ(s)‖ ≤ ζ(σ) ≤ 1 + 1/(σ-1).
-  -- Also |s-1| ≥ |t| ≥ 1/2, so 1/(σ-1) is crude but we can refine using
-  -- the pole structure: (s-1)·ζ(s) is bounded near s=1.
+    ‖riemannZeta s‖ ≤ 4 + |s.im| := by
   sorry
 
 -- ════════════════════════════════════════════════════
@@ -70,15 +67,9 @@ private lemma norm_zeta_via_pole {s : ℂ}
 
 /-- **Convexity bound**: ‖ζ(s)‖ ≤ (2 + |s.im|)² for 1/2 < Re(s) ≤ 2, |Im(s)| ≥ 1/2.
 
-    This is the single remaining mathematical axiom in the Cathedral proof chain.
-    It is a standard result in analytic number theory, following from either:
-    - Phragmén-Lindelöf + functional equation + Stirling, or
-    - Euler-Maclaurin (approximate functional equation), or
-    - Abel partial summation: ζ(s) = s/(s-1) - s∫₁^∞ {x}/x^{s+1}dx.
-
-    The Abel approach gives |ζ(s)| ≤ |s|/|s-1| + |s|/σ ≤ 4(2+|t|) ≤ (2+|t|)²
-    for σ > 1/2, |t| ≥ 2. Formalizing this requires connecting the integral
-    representation to Mathlib's riemannZeta via analytic continuation.
+    For Re(s) > 1: Uses FloorMellin decomposition ζ(s) = s/(s-1) - s·∫.
+    For 1/2 < Re(s) ≤ 1: Uses analytic continuation of the integral formula
+    (via the identity theorem: `AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq`).
 
     Downstream dependency chain:
     zeta_norm_convexity_bound → zeta_norm_bound_on_disk → BC theorem →
@@ -86,6 +77,22 @@ private lemma norm_zeta_via_pole {s : ℂ}
 theorem zeta_norm_convexity_bound {s : ℂ}
     (hrs : 1/2 < s.re) (hrs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
     ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ (2 : ℝ) := by
-  sorry
+  by_cases hre : 1 < s.re
+  · -- Case 1: Re(s) > 1 — direct from FloorMellin decomposition
+    have h1 := norm_zeta_le_of_re_gt_one hre hrs2 him
+    have h2 := four_add_abs_le_sq s.im
+    -- (2+|t|)^2 ≤ (2+|t|)^(2:ℝ) since they're equal via rpow_natCast
+    calc ‖riemannZeta s‖
+        ≤ 4 + |s.im| := h1
+      _ ≤ (2 + |s.im|) ^ 2 := h2
+      _ = (2 + |s.im|) ^ (2 : ℝ) := by
+          rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, rpow_natCast]
+  · -- Case 2: 1/2 < Re(s) ≤ 1 — needs analytic continuation
+    -- The integral ∫₀¹ {1/t}·t^{s-1} dt converges for Re(s) > 0 and defines
+    -- an analytic function. By the identity theorem
+    -- (AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq), the formula
+    -- ζ(s) = s/(s-1) - s·∫₀¹ {1/t}·t^{s-1} dt extends from Re(s) > 1 to Re(s) > 0.
+    -- The same bound |ζ(s)| ≤ 4+|t| then applies.
+    sorry
 
 end Cathedral.White.Infrastructure.ZetaConvexityBound
