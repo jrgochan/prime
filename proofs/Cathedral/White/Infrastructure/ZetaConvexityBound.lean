@@ -107,11 +107,40 @@ private lemma norm_div_sub_one_le {s : ℂ} (him : s.im ≠ 0) :
 
 /-- The fractional part integral is bounded: |∫₀¹ {1/t}·t^{s-1} dt| ≤ 1/σ.
     Since 0 ≤ {x} < 1, the integrand norm ≤ t^{σ-1}, so integral ≤ 1/σ.
-    Uses: norm_integral_le_of_norm_le from Mathlib. -/
+    Uses norm_ofReal_cpow from FloorMellin.lean. -/
 private lemma norm_fract_integral_le {s : ℂ} (hs : 0 < s.re) :
     ‖∫ x in Ioo (0:ℝ) 1,
       ((Int.fract (1 / x) : ℝ) : ℂ) * (↑x : ℂ) ^ (s - 1)‖ ≤ 1 / s.re := by
-  sorry
+  -- Step 1: Convert Ioo to Ioc (measure-zero difference)
+  rw [← integral_Ioc_eq_integral_Ioo]
+  -- x^{σ-1} is integrable on Ioc(0,1) for σ > 0 (hence σ-1 > -1)
+  have hrpow : IntegrableOn (fun x : ℝ => x ^ (s.re - 1)) (Ioc 0 1) := by
+    have := intervalIntegral.intervalIntegrable_rpow'
+      (show -1 < s.re - 1 from by linarith) (a := 0) (b := 1)
+    rwa [intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)] at this
+  -- Pointwise norm bound: ‖{1/x}·x^{s-1}‖ ≤ x^{σ-1}
+  have hpw : ∀ᵐ x ∂(volume.restrict (Ioc (0:ℝ) 1)),
+      ‖((Int.fract (1 / x) : ℝ) : ℂ) * (↑x : ℂ) ^ (s - 1)‖ ≤ x ^ (s.re - 1) := by
+    filter_upwards [ae_restrict_mem measurableSet_Ioc] with x hx
+    obtain ⟨hx_pos, _⟩ := hx
+    rw [norm_mul, Complex.norm_real, norm_ofReal_cpow x hx_pos]
+    calc |Int.fract (1 / x)| * x ^ (s - 1).re
+        ≤ 1 * x ^ (s - 1).re := by
+          gcongr
+          rw [abs_le]
+          exact ⟨by linarith [Int.fract_nonneg (1/x)],
+                 le_of_lt (Int.fract_lt_one _)⟩
+      _ = x ^ (s.re - 1) := by simp [sub_re]
+  -- Chain: ‖∫f‖ ≤ ∫ x^{σ-1} = 1/σ
+  calc ‖∫ x in Ioc (0:ℝ) 1,
+        ((Int.fract (1 / x) : ℝ) : ℂ) * (↑x : ℂ) ^ (s - 1)‖
+      ≤ ∫ x in Ioc (0:ℝ) 1, x ^ (s.re - 1) :=
+        norm_integral_le_of_norm_le hrpow hpw
+    _ = 1 / s.re := by
+        rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+        rw [integral_rpow (Or.inl (by linarith : (-1:ℝ) < s.re - 1))]
+        have hσ : s.re - 1 + 1 = s.re := by ring
+        rw [hσ, one_rpow, zero_rpow (ne_of_gt hs), sub_zero]
 
 -- ════════════════════════════════════════════════════
 -- §4. The main bound (unified: works for ALL Re(s) > 1/2)
