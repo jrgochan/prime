@@ -178,29 +178,83 @@ private lemma zeta_mem_slitPlane_of_re_ge_two {s : ℂ} (hs : 2 ≤ s.re) (_hs1 
   have := mem_slitPlane_of_norm_lt_one h
   rwa [add_sub_cancel] at this
 
+/-- Helper: s₀ + z ≠ 1 for z in the BC disk, since the disk can't reach the pole.
+    |s₀ - 1| ≥ |t| ≥ 2 > 3/2 > R, so 1 ∉ ball(s₀, R). -/
+private lemma s_ne_one_on_disk {t : ℝ} (ht : 2 ≤ |t|)
+    {R : ℝ} (hR_lt : R < 3/2) {z : ℂ} (hz : z ∈ ball (0 : ℂ) R) :
+    (⟨2, t⟩ : ℂ) + z ≠ 1 := by
+  simp only [mem_ball, dist_zero_right] at hz
+  intro h_eq
+  have hz_re : z.re = -1 := by
+    have := congr_arg Complex.re h_eq; simp at this; linarith
+  have hz_im : z.im = -t := by
+    have := congr_arg Complex.im h_eq; simp at this; linarith
+  have h_nsq : Complex.normSq z = 1 + t ^ 2 := by
+    simp [Complex.normSq_apply, hz_re, hz_im]; ring
+  have h_norm_sq : ‖z‖ ^ 2 ≥ 4 := by
+    rw [← normSq_eq_norm_sq]; simp [h_nsq]; nlinarith [sq_abs t]
+  have h_ge : ‖z‖ ≥ 2 := by
+    by_contra h
+    push Not at h
+    have : ‖z‖ ^ 2 < 4 := by nlinarith [norm_nonneg z, mul_self_nonneg (‖z‖)]
+    linarith
+  linarith
+
+/-- Helper: Re(s₀ + z) > 1/2 for z in the BC disk. -/
+private lemma re_gt_half_on_disk {t : ℝ}
+    {R : ℝ} (hR_lt : R < 3/2) {z : ℂ} (hz : z ∈ ball (0 : ℂ) R) :
+    1/2 < ((⟨2, t⟩ : ℂ) + z).re := by
+  simp only [mem_ball, dist_zero_right] at hz
+  simp only [Complex.add_re]
+  have h_abs : |z.re| ≤ ‖z‖ := Complex.abs_re_le_norm z
+  linarith [abs_le.mp (le_of_lt (lt_of_le_of_lt h_abs hz)) |>.1]
+
 /-- Under RH, ζ(s) ∈ slitPlane for all s in the BC disk B(s₀, R).
     The disk is centered at s₀ with Re(s₀) = 2, radius R < 3/2,
     so Re(s) > 1/2 throughout, and ζ ≠ 0 under RH.
 
-    The slitPlane condition (ζ(s) ∉ ℝ≤0) is the hardest part.
-    We use a connectedness argument: ζ maps the simply connected
-    disk continuously to ℂ \ {0}, and ζ(s₀) has Re > 0, so
-    by path-lifting the image stays in a single branch. -/
+    Proof: Case split on Re(z) ≥ 0 vs Re(z) < 0.
+    - For Re(z) ≥ 0: Re(s) ≥ 2, use the Dirichlet tail bound (‖ζ-1‖ ≤ 3/4).
+    - For Re(z) < 0: Use holomorphic primitives to construct a branch of
+      log ζ on the ball, showing ζ avoids ℝ≤0. -/
 private lemma zeta_mem_slitPlane_on_disk (hRH : RiemannHypothesis)
     {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2) :
     ∀ z ∈ ball (0 : ℂ) R,
       riemannZeta (⟨2, t⟩ + z) ∈ slitPlane := by
-  -- Strategy: The continuous map ζ ∘ (s₀+·) sends ball into ℂ\{0} (RH + no pole).
-  -- slitPlane is open, ℝ<0 = (ℂ\{0}) \ slitPlane is NOT open,
-  -- so we use a direct argument: ℝ≤0 ∩ ζ(ball) = ∅.
-  --
-  -- For now, we delegate to a topological argument using
-  -- the fact that the preimage of slitPlane under a continuous,
-  -- nonzero-valued function on a connected domain is clopen
-  -- (since slitPlane and its complement in ℂ\{0} are both open
-  -- when restricted to {Im ≠ 0} ∪ {Re > 0}).
-  sorry
+  intro z hz
+  -- Key facts about the point s = s₀ + z
+  set s := (⟨2, t⟩ : ℂ) + z with hs_def
+  have hs_ne_one : s ≠ 1 := s_ne_one_on_disk ht hR_lt hz
+  have hs_re : 1/2 < s.re := re_gt_half_on_disk hR_lt hz
+  have hs_ne_zero : riemannZeta s ≠ 0 := rh_zeta_ne_zero_local hRH hs_re hs_ne_one
+  -- Case split on whether Re(s) ≥ 2
+  by_cases hre2 : 2 ≤ s.re
+  · -- Case 1: Re(s) ≥ 2. Direct from tail bound.
+    exact zeta_mem_slitPlane_of_re_ge_two hre2 hs_ne_one
+  · -- Case 2: Re(s) < 2. Need ζ(s) ∈ slitPlane when ζ(s) ≠ 0.
+    -- Since ζ(s) ≠ 0, either Re(ζ(s)) > 0 or Im(ζ(s)) ≠ 0 or ζ(s) ∈ ℝ<0.
+    -- The first two give slitPlane. The third is excluded by the
+    -- holomorphic-logarithm / winding-number argument:
+    -- On the simply connected ball, ζ has a holomorphic log (via isExactOn_ball
+    -- applied to ζ'/ζ). The imaginary part of this log starts in (-π, π) at the
+    -- center (where ζ(s₀) ∈ slitPlane) and can't jump to π (which would give ℝ<0).
+    rw [mem_slitPlane_iff]
+    -- ζ(s) ≠ 0, so either Re > 0, Im ≠ 0, or ζ is real negative.
+    -- We need to exclude the last case.
+    by_contra h_not
+    push Not at h_not
+    obtain ⟨h_re_le, h_im_eq⟩ := h_not
+    -- ζ(s) is real (Im = 0) with Re ≤ 0, and ζ(s) ≠ 0, so Re < 0.
+    have h_re_lt : (riemannZeta s).re < 0 := by
+      rcases lt_or_eq_of_le h_re_le with h | h
+      · exact h
+      · exfalso; apply hs_ne_zero
+        apply Complex.ext <;> simp [h.symm, h_im_eq]
+    -- This is the core difficulty: ζ(s) ∈ ℝ<0 for Re(s) > 1/2 under RH.
+    -- The winding number / holomorphic logarithm argument excludes this.
+    -- Deferred to the holomorphic-logarithm construction.
+    sorry
 
 -- ═══════════════════════════════════════════
 -- §3. Sup Bound on Re(log ζ) on the Disk
@@ -215,7 +269,10 @@ private lemma zeta_mem_slitPlane_on_disk (hRH : RiemannHypothesis)
     Hence log|ζ(s)| ≤ C' · log(2 + |t|).
 
     Under RH this simplifies: ζ has no zeros for Re > 1/2, so
-    the convexity bound applies uniformly. -/
+    the convexity bound applies uniformly.
+
+    KEY SIMPLIFICATION: (Complex.log w).re = Real.log ‖w‖ for w ≠ 0.
+    So the bound reduces to showing ‖ζ(s₀+z)‖ ≤ (2+|t|)^10. -/
 private lemma log_zeta_re_bound_on_disk
     {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2)
@@ -223,7 +280,17 @@ private lemma log_zeta_re_bound_on_disk
     ∃ M : ℝ, 0 < M ∧ M ≤ 10 * Real.log (2 + |t|) ∧
     ∀ z ∈ ball (0 : ℂ) R,
       (Complex.log (riemannZeta (⟨2, t⟩ + z))).re ≤ M := by
-  sorry -- Requires: convexity bound for ζ via PL principle
+  -- We choose M = 10 * log(2 + |t|) and prove the bound.
+  -- For Re(s) ≥ 2: |ζ| < 2, so log|ζ| < log 2 < 1 ≤ M.
+  -- For 1/2 < Re(s) < 2: requires convexity bound (Phragmén-Lindelöf).
+  refine ⟨10 * Real.log (2 + |t|), ?_, le_refl _, ?_⟩
+  · -- M > 0 since 2 + |t| > 1 (given |t| ≥ 2)
+    apply mul_pos (by norm_num : (0:ℝ) < 10)
+    exact Real.log_pos (by linarith : (1:ℝ) < 2 + |t|)
+  · intro z hz
+    -- The key identity: Re(log w) = log ‖w‖ when w ≠ 0.
+    -- Complex.log_re z = Real.log (Complex.abs z) = Real.log ‖z‖
+    sorry -- Requires: upper bound ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 on the disk
 
 -- ═══════════════════════════════════════════
 -- §4. Differentiability of log ζ on the Disk
@@ -240,28 +307,8 @@ private lemma log_zeta_differentiableOn_disk (hRH : RiemannHypothesis)
     apply DifferentiableOn.comp differentiableOn_riemannZeta
     · exact differentiableOn_const _ |>.add differentiableOn_id
     · intro z hz
-      -- Need: ⟨2, t⟩ + z ≠ 1
       simp only [Set.mem_compl_iff, Set.mem_singleton_iff]
-      intro h_eq
-      simp only [mem_ball, dist_zero_right] at hz
-      -- If ⟨2,t⟩ + z = 1 then z = ⟨-1, -t⟩, so ‖z‖ ≥ |t| ≥ 2 > R
-      have hz_re : z.re = -1 := by
-        have := congr_arg Complex.re h_eq; simp at this; linarith
-      have hz_im : z.im = -t := by
-        have := congr_arg Complex.im h_eq; simp at this; linarith
-      -- ‖z‖² = z.re² + z.im² = 1 + t² ≥ t² ≥ 4
-      have h_nsq : Complex.normSq z = 1 + t ^ 2 := by
-        simp [Complex.normSq_apply, hz_re, hz_im]; ring
-      -- ‖z‖² = normSq z ≥ 4, so ‖z‖ ≥ 2 > 3/2 > R
-      have h_norm_sq : ‖z‖ ^ 2 ≥ 4 := by
-        rw [← normSq_eq_norm_sq]; simp [h_nsq]; nlinarith [sq_abs t]
-      have h_ge : ‖z‖ ≥ 2 := by
-        by_contra h
-        push Not at h
-        have h_norm_pos := norm_nonneg z
-        have : ‖z‖ ^ 2 < 4 := by nlinarith [mul_self_nonneg (‖z‖)]
-        linarith
-      linarith
+      exact s_ne_one_on_disk ht hR_lt hz
   · -- ζ(s₀ + z) ∈ slitPlane for all z in ball
     exact zeta_mem_slitPlane_on_disk hRH ht hR_pos hR_lt
 
