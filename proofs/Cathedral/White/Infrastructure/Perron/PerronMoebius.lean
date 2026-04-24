@@ -93,11 +93,66 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
         linarith
       have hs1 : s ≠ 1 := fun h => hs_ne (Set.mem_singleton_iff.mpr h)
       exact perron_moebius_integrand_diffAt hRH x hx s hs_re hs1)
-  -- Step 2: Extract the norm bound from the identity
-  -- CG: bot - top + I·right - I·left = 0
-  -- ⟹ right - left  =  -I·(top - bot)  (?? signs)
-  -- The detailed sign/rearrangement + triangle inequality
-  sorry
+  -- Step 2: Simplify the CG identity (remove smul_eq_mul)
+  simp only [smul_eq_mul] at hCG
+  -- hCG : (∫ σ in sigma0..c, f(σ+(-T)I)) - (∫ σ in sigma0..c, f(σ+TI))
+  --       + I*(∫ t in (-T)..T, f(c+tI)) - I*(∫ t in (-T)..T, f(σ₀+tI)) = 0
+  -- Step 3: Extract ‖∫f_right - ∫f_left‖ ≤ ‖∫f_bot‖ + ‖∫f_top‖
+  have h_rearr : I * (∫ t in (-T)..T, f (↑c + ↑t * I)) -
+      I * (∫ t in (-T)..T, f (↑sigma0 + ↑t * I)) =
+    (∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+    (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)) := by
+    -- hCG: bot - top + I*right - I*left = 0
+    -- Group: (bot - top) + (I*right - I*left) = 0
+    -- So: I*right - I*left = -(bot - top) = top - bot
+    set bot := ∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)
+    set top := ∫ σ in sigma0..c, f (↑σ + ↑T * I)
+    set right := ∫ t in (-T)..T, f (↑c + ↑t * I)
+    set left := ∫ t in (-T)..T, f (↑sigma0 + ↑t * I)
+    -- hCG: (bot - top) + I * right - I * left = 0
+    have h0 : (bot - top) + (I * right - I * left) = 0 := by ring_nf; ring_nf at hCG; exact hCG
+    have := eq_neg_of_add_eq_zero_right h0
+    -- this: I * right - I * left = -(bot - top) = top - bot
+    rw [this, neg_sub]
+  -- ‖I*(C - D)‖ = ‖C - D‖
+  have h_norm_eq : ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
+      (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))‖ =
+    ‖(∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+     (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I))‖ := by
+    have : I * ((∫ t in (-T)..T, f (↑c + ↑t * I)) -
+        (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))) =
+      (∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+      (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)) := by
+      rw [mul_sub]; exact h_rearr
+    rw [← this, norm_mul, Complex.norm_I, one_mul]
+  -- Step 4: ‖∫ (f_c - f_σ₀)‖ = ‖∫ f_c - ∫ f_σ₀‖ (linearity)
+  -- The LHS of the goal is ‖∫(f_c(t) - f_σ₀(t)) dt‖
+  -- which equals ‖(∫ f_c) - (∫ f_σ₀)‖ by integral linearity
+  -- Step 5: Chain the bounds
+  -- The LHS is ‖∫ t, (f_c(t) - f_σ₀(t))‖.
+  -- We know ∫ t, f_c(t) - f_σ₀(t) = ∫ f_c - ∫ f_σ₀  (by linearity, when both integrable)
+  -- and ‖∫ f_c - ∫ f_σ₀‖ ≤ ‖∫ f_top‖ + ‖∫ f_bot‖ ≤ ∫‖f_top‖ + ∫‖f_bot‖.
+  -- Use ContinuousOn → integrable from the ContinuousOn sorry
+  -- Integrability of vertical integrands (follows from integrand_continuousOn sorry)
+  have h_int_c : IntervalIntegrable (fun t => f (↑c + ↑t * I)) volume (-T) T := sorry
+  have h_int_s : IntervalIntegrable (fun t => f (↑sigma0 + ↑t * I)) volume (-T) T := sorry
+  -- Convert the goal to use `f`
+  change ‖∫ t in (-T)..T, (f (↑c + ↑t * I) - f (↑sigma0 + ↑t * I))‖ ≤
+    (∫ σ in sigma0..c, ‖f (↑σ + ↑T * I)‖) +
+    (∫ σ in sigma0..c, ‖f (↑σ + ↑(-T) * I)‖)
+  calc ‖∫ t in (-T)..T, (f (↑c + ↑t * I) - f (↑sigma0 + ↑t * I))‖
+      = ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
+         (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))‖ := by
+        congr 1; exact intervalIntegral.integral_sub h_int_c h_int_s
+    _ = ‖(∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+         (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I))‖ := h_norm_eq
+    _ ≤ ‖∫ σ in sigma0..c, f (↑σ + ↑T * I)‖ +
+        ‖∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)‖ := norm_sub_le _ _
+    _ ≤ (∫ σ in sigma0..c, ‖f (↑σ + ↑T * I)‖) +
+        (∫ σ in sigma0..c, ‖f (↑σ + ↑(-T) * I)‖) :=
+        add_le_add
+          (intervalIntegral.norm_integral_le_integral_norm hsigma0_c.le)
+          (intervalIntegral.norm_integral_le_integral_norm hsigma0_c.le)
 
 /-- For real σ, T: σ + (-T)i = conj(σ + Ti). -/
 private lemma conj_sigma_sub_ti (σ T : ℝ) :
