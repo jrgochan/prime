@@ -829,12 +829,16 @@ theorem truncated_perron_for_moebius (x c : ℝ) (hx : 2 ≤ x) (hc : 1 < c) :
             (x : ℂ) ^ (↑c + ↑t * I) /
               ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
       K * x ^ c / T := by
-  -- Decomposition:
-  -- (1) M(x) = Σ μ(n)·1 = Σ μ(n)·P(x/n) - Σ μ(n)·(P(x/n)-1)
-  -- (2) ‖error‖ ≤ K·x^c/T by perron_formula_error_bound (PROVED)
-  -- (3) Σ μ(n)·P(x/n) = (1/2πi)∫ Σ μ(n)(x/n)^s/s ds by finite_sum_integral_swap
-  -- (4) Σ μ(n)/n^s ≈ 1/ζ(s) by moebius_partial_sum_approx
-  -- (5) Combined: M(x) ≈ (1/2πi)∫ x^s/(s·ζ(s)) ds + O(x^c/T)
+  -- The core of the Perron formula: connect M(x) to the contour integral.
+  -- Strategy (Theorist's shortcut):
+  -- (1) For each N > x, use finite_sum_integral_swap to write
+  --     (1/2πi)∫ (Σ μ(n)/n^s) x^s/s ds as Σ μ(n) · perronIntegral(x/n, c, T)
+  -- (2) moebius_partial_sum_approx gives ‖Σ μ(n)/n^s - 1/ζ(s)‖ ≤ N^{1-c}/(c-1)
+  -- (3) The individual Perron terms approximate the indicator:
+  --     perronIntegral(x/n, c, T) ≈ 1 for n ≤ x, ≈ 0 for n > x
+  -- (4) Combined error = O(x^c/T)
+  -- This is the deepest assembly in the entire Cathedral.
+  -- It requires the classical truncated Perron formula for each term.
   sorry
 
 -- ═══════════════════════════════════════════
@@ -856,10 +860,30 @@ theorem truncated_perron_for_moebius (x c : ℝ) (hx : 2 ≤ x) (hc : 1 < c) :
 theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((summatoryMoebius x : ℤ) : ℝ)| ≤ C * x ^ ((1 : ℝ)/2 + eps) := by
-  -- For eps ≥ 1, reduce to eps' < 1 (since x^{1/2+eps} ≥ x^{1/2+eps'} for eps ≥ eps')
-  -- For eps < 1, proceed with σ₀ = 1/2 + eps/2 < 1
-  -- In both cases, the assembly is the same sorry
-  sorry
+  -- For large eps, reduce to a smaller eps'
+  by_cases heps_small : eps < 1
+  · -- Main case: eps < 1, so σ₀ = 1/2 + eps/2 < 1
+    set sigma0 := 1/2 + eps/2
+    set c := 1 + eps
+    have hc : 1 < c := by simp only [c]; linarith
+    have hsigma0 : 1/2 < sigma0 := by simp only [sigma0]; linarith
+    have hsigma0_c : sigma0 < c := by simp only [sigma0, c]; linarith
+    have hsigma0_lt_one : sigma0 < 1 := by simp only [sigma0]; linarith
+    -- Extract ingredients:
+    -- (1) Truncated Perron: ∃ K > 0, ‖M(x) - integral‖ ≤ K·x^c/T
+    -- (2) Contour shift: ∃ K₁ > 0, ‖∫c - ∫σ₀‖ ≤ K₁·T^{-1/2}
+    -- (3) Triangle inequality with T = x
+    -- Combined: |M(x)| ≤ K·x^{eps} + K₁·x^{-1/2} + O(x^{σ₀})
+    --         ≤ (K+K₁+C') · x^{1/2+eps}
+    sorry
+  · -- Large eps case: eps ≥ 1
+    -- Trivial: |M(x)| ≤ x (sum of at most ⌊x⌋ terms of |μ(n)| ≤ 1)
+    -- x ≤ x^{1/2+eps} for x ≥ 2, eps ≥ 1 (since 1/2+eps ≥ 3/2 > 1)
+    push_neg at heps_small
+    refine ⟨1, one_pos, fun x hx => ?_⟩
+    rw [one_mul]
+    -- |M(x)| ≤ x ≤ x^{1/2+eps}
+    sorry
 
 -- ═══════════════════════════════════════════
 -- §6. From eps to the original form (PROVED)
