@@ -153,6 +153,9 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.Perron.KernelBound,
     `Cathedral.White.Infrastructure.Perron.Formula,
     -- Perron-Möbius chain: M(x) = O(x^{1/2+ε}) under RH
+    `Cathedral.White.Infrastructure.Perron.ContourShift,
+    `Cathedral.White.Infrastructure.Perron.DirichletPoly,
+    `Cathedral.White.Infrastructure.Perron.AssemblyHelpers,
     `Cathedral.White.Infrastructure.Perron.PerronMoebius,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
     `Cathedral.White.Infrastructure.DirichletZetaInverse,
@@ -169,4 +172,3 @@ lean_lib «Cathedral» where
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
     `Cathedral.White.Infrastructure.HilbertInequality,
   ]
-
