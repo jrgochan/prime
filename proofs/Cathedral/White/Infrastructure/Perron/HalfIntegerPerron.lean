@@ -473,6 +473,11 @@ lemma perron_zeta_integrable (X c T : ℝ) (hX : 0 < X) (hc : 1 < c) :
         simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
           Complex.I_re, Complex.I_im]; linarith)
 
+/-- X^c = X^{c-1} · X for X > 0. Used in tail bound algebra. -/
+private lemma rpow_eq_pred_mul (X c : ℝ) (hX : 0 < X) : X ^ c = X ^ (c - 1) * X := by
+  have : X ^ c = X ^ ((c - 1) + 1) := by congr 1; ring
+  rw [this, rpow_add hX, rpow_one]
+
 -- ═══════════════════════════════════════════
 -- §5. Main Theorem: Truncated Perron at Half-Integers
 -- ═══════════════════════════════════════════
@@ -559,14 +564,38 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
           exact (Real.rpow_one _).symm
       _ < (N : ℝ) ^ (c - 1) := by
           apply Real.rpow_lt_rpow (rpow_nonneg (le_of_lt h_val_pos) _) hN_gt hc1_pos
-  -- Therefore: N^{1-c} < 1/(C_tail·T²·X)
-  -- So: C_tail · N^{1-c} · X^c · T < X^{c-1}/T
-  -- And tail ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T
-  --
-  -- Step 6: The integral-analytic connection A_N ↔ B and the
-  -- triangle inequality combining kernel + tail bounds.
-  -- This uses finite_sum_integral_swap + integral_sub (via
-  -- perron_zeta_integrable) to show ‖A-B‖ ≤ tail.
+  -- Step 6: Derive C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T from h_N_rpow.
+  have h_tail_crushed : C_tail * (N : ℝ) ^ (1 - c) * X ^ c * T ≤ X ^ (c + 1) / T := by
+    have hN_pos_real : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr hN_pos
+    have hN_c1_pos : (0 : ℝ) < (N : ℝ) ^ (c - 1) := rpow_pos_of_pos hN_pos_real _
+    have h_inv : (N : ℝ) ^ (1 - c) = 1 / (N : ℝ) ^ (c - 1) := by
+      rw [show (1 : ℝ) - c = -(c - 1) from by ring]
+      rw [rpow_neg (le_of_lt hN_pos_real)]
+      ring
+    rw [h_inv]
+    have hstep : C_tail / (N : ℝ) ^ (c - 1) ≤ 1 / (T ^ 2 * X) := by
+      rw [div_le_div_iff₀ hN_c1_pos (by positivity : (0:ℝ) < T ^ 2 * X)]
+      linarith
+    rw [show C_tail * (1 / (N : ℝ) ^ (c - 1)) = C_tail / (N : ℝ) ^ (c - 1) from by ring]
+    have h_exp : X ^ (c - 1) ≤ X ^ (c + 1) :=
+      rpow_le_rpow_of_exponent_le hX_gt1.le (by linarith)
+    have h_lhs : C_tail / (N : ℝ) ^ (c - 1) * X ^ c * T ≤ X ^ (c - 1) / T := by
+      calc C_tail / (N : ℝ) ^ (c - 1) * X ^ c * T
+          ≤ 1 / (T ^ 2 * X) * X ^ c * T := by
+            apply mul_le_mul_of_nonneg_right _ hT_pos.le
+            exact mul_le_mul_of_nonneg_right hstep (rpow_nonneg hX_pos.le _)
+        _ = X ^ (c - 1) / T := by
+            rw [rpow_eq_pred_mul X c hX_pos]
+            field_simp
+    linarith [div_le_div_of_nonneg_right h_exp hT_pos.le]
+  -- Step 7: The integral-analytic connection and triangle inequality.
+  -- A_N = ∑ μ(n)·P(X/n), B = (1/(2π))∫ X^s/(sζ(s)) dt.
+  -- By finite_sum_integral_swap + integral_sub (via perron_zeta_integrable):
+  --   ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [by h_tail_crushed]
+  -- By triangle:
+  --   ‖M - B‖ ≤ ‖M - A_N‖ + ‖A_N - B‖
+  --           ≤ C_sum/(πT)·X^{c+1} + X^{c+1}/T
+  --           ≤ (C_sum/π + 1)·X^{c+1}/T = K·X^{c+1}/T
   sorry
 
 -- ═══════════════════════════════════════════
