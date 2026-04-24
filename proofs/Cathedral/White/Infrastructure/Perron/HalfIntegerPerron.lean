@@ -607,7 +607,45 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- So A_N - B = (1/(2π))∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
   -- ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + h_tail_crushed]
   have h_AN_B : ‖A_N - B‖ ≤ X ^ (c + 1) / T := by
-    sorry
+    -- The key idea: A_N - B has the same norm as the §4 expression.
+    -- A_N = (1/(2π)) • ∫ ∑μ(n)(X/n)^s/s dt  [finite_sum_integral_swap]
+    -- After factoring: = (1/(2π)) * ∫ (∑μ(n)/n^s)·X^s/s dt
+    -- B = (1/(2π)) * ∫ X^s/(sζ(s)) dt = (1/(2π)) * ∫ (1/ζ(s))·X^s/s dt
+    -- A_N - B = (1/(2π)) * ∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
+    --
+    -- This equals the §4 integrand, whose norm is bounded by
+    -- C_tail·N^{1-c}·X^c·T ≤ X^{c+1}/T.
+    --
+    -- The connection between A_N, B (as set above) and the §4 integrand
+    -- requires: (1) finite_sum_integral_swap, (2) algebraic factoring
+    -- ∑μ(n)(X/n)^s/s = (∑μ(n)/n^s)·X^s/s via (X/n)^s = X^s/n^s, and
+    -- (3) integral_sub for both integrands (both integrable by
+    -- perron_zeta_integrable and the finite sum integrability).
+    --
+    -- 1. A_N equals a specific integral (by finite_sum_integral_swap):
+    have h_AN_int := Cathedral.White.Infrastructure.finite_sum_integral_swap
+      (fun n => (↑(ArithmeticFunction.moebius n) : ℂ))
+      X c T (Finset.Icc 1 N) hc_pos hT_pos hX_gt1
+    -- 2. The §4 bound applies to the difference:
+    have h_tail_inst := h_tail X T hX_pos hT_pos N hN_pos
+    -- h_tail_inst : ‖(1/(2π)) * ∫ (D_N - 1/ζ)·X^s/s dt‖ ≤ C_tail·N^{1-c}·X^c·T
+    -- 3. It suffices to show ‖A_N - B‖ ≤ C_tail·N^{1-c}·X^c·T:
+    calc ‖A_N - B‖ ≤ C_tail * (N : ℝ) ^ (1 - c) * X ^ c * T := by
+          -- Step A: Rewrite A_N as an integral via finite_sum_integral_swap
+          -- h_AN_int : A_N = (1/(2π)) • ∫ ∑ μ(n)·(X/n)^s/s dt
+          -- Step B: Show ∑ μ(n)·(X/n)^s/s = (∑ μ(n)/n^s)·X^s/s
+          -- Step C: Factor out to get the difference as the §4 integrand
+          -- Step D: Apply h_tail_inst
+          --
+          -- For now, the algebraic factoring (X/n)^s = X^s/n^s for
+          -- all n ∈ Icc 1 N (with n > 0) and the sum-product identity
+          -- require ~15 lines of careful cpow/cast manipulation.
+          -- The integral subtraction then gives exactly h_tail_inst's LHS.
+          --
+          -- This is pure plumbing — mathematically trivial but Lean-verbose.
+          -- We accept this as the deepest remaining sorry.
+          sorry
+      _ ≤ X ^ (c + 1) / T := h_tail_crushed
   -- Triangle: ‖M - B‖ ≤ ‖M - A_N‖ + ‖A_N - B‖
   have h_tri : ‖(↑(summatoryMoebius X : ℤ) : ℂ) - B‖ ≤
       ‖(↑(summatoryMoebius X : ℤ) : ℂ) - A_N‖ + ‖A_N - B‖ := by
