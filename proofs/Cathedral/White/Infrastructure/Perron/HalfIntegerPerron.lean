@@ -27,6 +27,7 @@
 -/
 
 import Cathedral.White.Infrastructure.Perron.DirichletPoly
+import Cathedral.White.Infrastructure.Perron.KernelBound
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Cathedral.White.Infrastructure.SummabilityHelpers
 
@@ -186,22 +187,118 @@ lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
 -- §2. Unified Finite Perron Error
 -- ═══════════════════════════════════════════
 
+set_option maxHeartbeats 800000 in
 /-- **Helper 1**: The unified finite Perron error at half-integers.
 
     For X = m + 1/2 (hence X ≠ n for all n), the difference between the
     Perron integral sum and the Möbius summatory function is bounded by
     the pointwise Perron kernel error terms.
 
-    Uses: `perron_formula_error_bound` from Formula.lean for each n. -/
+    Requires N ≥ m so that M(X) = ∑_{n=1}^m μ(n) ⊆ the sum range.
+
+    Uses: `perron_kernel_bound` for each n (unified y > 1 and y < 1 cases). -/
 lemma perron_formula_error_bound_full (m : ℕ) (hm : 2 ≤ m) (c T : ℝ) (N : ℕ)
-    (hc : 0 < c) (hT : 0 < T) :
+    (hc : 0 < c) (hT : 0 < T) (hN : m ≤ N) :
     let X : ℝ := (m : ℝ) + 1/2
     ‖∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) *
         perronIntegral (X / ↑n) c T -
       (↑(summatoryMoebius X : ℤ) : ℂ)‖ ≤
     ∑ n ∈ Finset.Icc 1 N,
       (X / ↑n) ^ c / (Real.pi * T * |Real.log (X / ↑n)|) := by
-  sorry
+  intro X
+  have hX_pos : (0 : ℝ) < X := by positivity
+  -- Step 1: M(X) = ∑_{n=1}^m μ(n) since ⌊X⌋₊ = m
+  have h_floor : ⌊X⌋₊ = m := by
+    apply Nat.floor_eq_iff (by positivity : 0 ≤ X) |>.mpr
+    constructor <;> simp [X] <;> linarith
+  have hM : (summatoryMoebius X : ℤ) = ∑ n ∈ Finset.Icc 1 m, μ n := by
+    unfold summatoryMoebius; rw [h_floor]
+  -- Step 2: X/n > 1 ↔ n ≤ m, X/n < 1 ↔ n ≥ m+1
+  have h_gt_one : ∀ n : ℕ, 1 ≤ n → n ≤ m → 1 < X / ↑n := by
+    intro n hn1 hn2
+    rw [one_lt_div (Nat.cast_pos.mpr (by omega : 0 < n))]
+    have : (n : ℝ) ≤ (m : ℝ) := Nat.cast_le.mpr hn2
+    show (n : ℝ) < (m : ℝ) + 1 / 2; linarith
+  have h_lt_one : ∀ n : ℕ, m + 1 ≤ n → X / ↑n < 1 := by
+    intro n hn
+    rw [div_lt_one (Nat.cast_pos.mpr (by omega : 0 < n))]
+    have : (m : ℝ) + 1 ≤ (n : ℝ) := by exact_mod_cast hn
+    show (m : ℝ) + 1 / 2 < (n : ℝ); linarith
+  have h_pos : ∀ n : ℕ, 1 ≤ n → 0 < X / ↑n :=
+    fun n hn => div_pos hX_pos (Nat.cast_pos.mpr (by omega))
+  -- X/n ≠ 1 for all n ≥ 1 (half-integer vs integer)
+  have h_ne_one : ∀ n : ℕ, 1 ≤ n → X / ↑n ≠ 1 := by
+    intro n hn habs
+    -- X/n = 1 → X = n → m + 1/2 = n, impossible since 2*(m+1/2) = 2m+1 is odd
+    have hXn : X = (n : ℝ) := by
+      rwa [div_eq_one_iff_eq (Nat.cast_pos.mpr (by omega)).ne'] at habs
+    -- 2*X = 2m+1 (odd), but 2*n is even
+    have h1 : 2 * X = 2 * (m : ℝ) + 1 := by simp [X]; ring
+    have h2 : 2 * X = 2 * (n : ℝ) := by rw [hXn]
+    -- 2m+1 = 2n → odd = even, contradiction
+    have : 2 * (m : ℤ) + 1 = 2 * (n : ℤ) := by exact_mod_cast (by linarith : 2*(m:ℝ)+1 = 2*(n:ℝ))
+    omega
+  -- Step 3: Introduce the indicator and rewrite the difference
+  -- M(X) = ∑_{n ∈ Icc 1 m} μ(n) = ∑_{n ∈ Icc 1 N} μ(n)·𝟙(1 < X/n)
+  -- since: for n ≤ m, X/n > 1 (so 𝟙 = 1); for n > m, X/n < 1 (so 𝟙 = 0)
+  -- Therefore: LHS = ∑ μ(n)·(P(X/n) - 𝟙(1 < X/n))
+
+  -- First, establish that the indicator sum equals M(X)
+  have h_ind_eq : (↑(summatoryMoebius X : ℤ) : ℂ) =
+      ∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) * (if 1 < X / ↑n then 1 else 0) := by
+    rw [hM, Int.cast_sum]
+    -- Split Icc 1 N = Icc 1 m ∪ Icc (m+1) N
+    have h_disj : Finset.Icc 1 N = Finset.Icc 1 m ∪ Finset.Icc (m + 1) N := by
+      ext k; simp [Finset.mem_union, Finset.mem_Icc]; omega
+    have h_disjoint : Disjoint (Finset.Icc 1 m) (Finset.Icc (m + 1) N) := by
+      simp [Finset.disjoint_left]; omega
+    rw [h_disj, Finset.sum_union h_disjoint]
+    -- For n ∈ Icc (m+1) N: 𝟙(1 < X/n) = 0 since X/n < 1
+    have h_tail_zero : ∑ n ∈ Finset.Icc (m + 1) N,
+        (↑(μ n) : ℂ) * (if 1 < X / ↑n then 1 else 0) = 0 := by
+      apply Finset.sum_eq_zero; intro n hn
+      have hn_ge : m + 1 ≤ n := (Finset.mem_Icc.mp hn).1
+      simp [show ¬(1 < X / ↑n) from not_lt.mpr (le_of_lt (h_lt_one n hn_ge))]
+    rw [h_tail_zero, add_zero]
+    -- For n ∈ Icc 1 m: 𝟙(1 < X/n) = 1 since X/n > 1
+    apply Finset.sum_congr rfl; intro n hn
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+    have hn2 : n ≤ m := (Finset.mem_Icc.mp hn).2
+    simp [h_gt_one n hn1 hn2]
+
+  -- Step 4: Rewrite the difference
+  have h_diff : ∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) * perronIntegral (X / ↑n) c T -
+      (↑(summatoryMoebius X : ℤ) : ℂ) =
+    ∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) *
+      (perronIntegral (X / ↑n) c T - (if 1 < X / ↑n then 1 else 0)) := by
+    rw [h_ind_eq, ← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl; intro n _; ring
+
+  -- Step 5: Apply triangle inequality + perron_kernel_bound
+  rw [h_diff]
+  calc ‖∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) *
+        (perronIntegral (X / ↑n) c T - (if 1 < X / ↑n then 1 else 0))‖
+      ≤ ∑ n ∈ Finset.Icc 1 N, ‖(↑(μ n) : ℂ) *
+        (perronIntegral (X / ↑n) c T - (if 1 < X / ↑n then 1 else 0))‖ :=
+        norm_sum_le _ _
+    _ = ∑ n ∈ Finset.Icc 1 N, (‖(↑(μ n) : ℂ)‖ *
+        ‖perronIntegral (X / ↑n) c T - (if 1 < X / ↑n then 1 else 0)‖) := by
+        apply Finset.sum_congr rfl; intro n _; exact norm_mul _ _
+    _ ≤ ∑ n ∈ Finset.Icc 1 N,
+        (X / ↑n) ^ c / (Real.pi * T * |Real.log (X / ↑n)|) := by
+        apply Finset.sum_le_sum; intro n hn
+        have hn1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+        -- |μ(n)| ≤ 1
+        have h_mu_le : ‖(↑(μ n) : ℂ)‖ ≤ 1 := by
+          rw [Complex.norm_intCast]; exact_mod_cast abs_moebius_le_one
+        -- perron_kernel_bound gives the per-term error
+        have h_kern := Cathedral.White.Infrastructure.perron_kernel_bound (X / ↑n) c T
+          (h_pos n hn1) (h_ne_one n hn1) hc hT
+        calc ‖(↑(μ n) : ℂ)‖ * ‖perronIntegral (X / ↑n) c T -
+              (if 1 < X / ↑n then 1 else 0)‖
+            ≤ 1 * ((X / ↑n) ^ c / (Real.pi * T * |Real.log (X / ↑n)|)) :=
+              mul_le_mul h_mu_le h_kern (norm_nonneg _) one_pos.le
+          _ = _ := one_mul _
 
 -- ═══════════════════════════════════════════
 -- §3. Half-Integer Log Sum Bound
