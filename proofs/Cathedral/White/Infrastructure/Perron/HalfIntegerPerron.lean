@@ -588,15 +588,56 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
             rw [rpow_eq_pred_mul X c hX_pos]
             field_simp
     linarith [div_le_div_of_nonneg_right h_exp hT_pos.le]
-  -- Step 7: The integral-analytic connection and triangle inequality.
-  -- A_N = ∑ μ(n)·P(X/n), B = (1/(2π))∫ X^s/(sζ(s)) dt.
-  -- By finite_sum_integral_swap + integral_sub (via perron_zeta_integrable):
-  --   ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [by h_tail_crushed]
-  -- By triangle:
-  --   ‖M - B‖ ≤ ‖M - A_N‖ + ‖A_N - B‖
-  --           ≤ C_sum/(πT)·X^{c+1} + X^{c+1}/T
-  --           ≤ (C_sum/π + 1)·X^{c+1}/T = K·X^{c+1}/T
-  sorry
+  -- Step 7: Triangle inequality assembly.
+  -- Let A_N = ∑ μ(n)·P(X/n) and B = (1/(2π))∫ X^s/(sζ(s)) dt.
+  set A_N := ∑ n ∈ Finset.Icc 1 N,
+    (↑(ArithmeticFunction.moebius n) : ℂ) *
+      Cathedral.White.Infrastructure.perronIntegral (X / ↑n) c T
+  set B := (1 / (2 * ↑Real.pi)) *
+    ∫ t in (-T)..T, (X : ℂ) ^ (↑c + ↑t * I) /
+      ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))
+  -- h_kernel_bound : ‖A_N - M‖ ≤ C_sum/(πT) · X^{c+1}
+  -- So ‖M - A_N‖ ≤ C_sum/(πT) · X^{c+1}
+  have h_M_AN : ‖(↑(summatoryMoebius X : ℤ) : ℂ) - A_N‖ ≤
+      C_sum / (Real.pi * T) * X ^ (c + 1) := by
+    rw [norm_sub_rev]; exact h_kernel_bound
+  -- The integral connection: ‖A_N - B‖ ≤ X^{c+1}/T
+  -- Proof: A_N = (1/(2π))∫ (∑μ(n)(X/n)^s/s) dt  [finite_sum_integral_swap]
+  --        = (1/(2π))∫ (∑μ(n)/n^s)·X^s/s dt    [algebraic factoring]
+  -- So A_N - B = (1/(2π))∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
+  -- ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + h_tail_crushed]
+  have h_AN_B : ‖A_N - B‖ ≤ X ^ (c + 1) / T := by
+    sorry
+  -- Triangle: ‖M - B‖ ≤ ‖M - A_N‖ + ‖A_N - B‖
+  have h_tri : ‖(↑(summatoryMoebius X : ℤ) : ℂ) - B‖ ≤
+      ‖(↑(summatoryMoebius X : ℤ) : ℂ) - A_N‖ + ‖A_N - B‖ := by
+    calc ‖(↑(summatoryMoebius X : ℤ) : ℂ) - B‖
+        = ‖((↑(summatoryMoebius X : ℤ) : ℂ) - A_N) + (A_N - B)‖ := by
+          congr 1; ring
+      _ ≤ ‖(↑(summatoryMoebius X : ℤ) : ℂ) - A_N‖ + ‖A_N - B‖ :=
+          norm_add_le _ _
+  -- Combine: ‖M - B‖ ≤ C_sum/(πT)·X^{c+1} + X^{c+1}/T ≤ K·X^{c+1}/T
+  -- K = C_sum/π + 1, and C_sum/(πT) ≤ C_sum/π · 1/T
+  have h_final : C_sum / (Real.pi * T) * X ^ (c + 1) + X ^ (c + 1) / T ≤
+      K * X ^ (c + 1) / T := by
+    -- K = C_sum/π + 1
+    -- C_sum/(π·T) · X^{c+1} + X^{c+1}/T = (C_sum/π + 1) · X^{c+1}/T = K · X^{c+1}/T
+    -- This is an equality, not just ≤!
+    have : C_sum / (Real.pi * T) * X ^ (c + 1) + X ^ (c + 1) / T =
+        (C_sum / Real.pi + 1) * X ^ (c + 1) / T := by
+      have hpi : Real.pi ≠ 0 := ne_of_gt Real.pi_pos
+      have hT_ne : T ≠ 0 := ne_of_gt hT_pos
+      field_simp
+    rw [this]
+    -- Now goal: (C_sum/π + 1) * X^{c+1} / T ≤ K * X^{c+1} / T
+    -- K = C_sum/π + C_tail + 1 ≥ C_sum/π + 1 (since C_tail > 0)
+    apply div_le_div_of_nonneg_right _ hT_pos.le
+    apply mul_le_mul_of_nonneg_right _ (rpow_nonneg hX_pos.le _)
+    linarith
+  calc ‖(↑(summatoryMoebius X : ℤ) : ℂ) - B‖
+      ≤ C_sum / (Real.pi * T) * X ^ (c + 1) + X ^ (c + 1) / T := by
+        linarith [h_tri, h_M_AN, h_AN_B]
+    _ ≤ K * X ^ (c + 1) / T := h_final
 
 -- ═══════════════════════════════════════════
 -- §6. Transfer to General x via M(x) = M(⌊x⌋ + 1/2)
