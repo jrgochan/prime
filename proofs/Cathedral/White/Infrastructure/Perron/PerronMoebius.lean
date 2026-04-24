@@ -21,6 +21,9 @@
 import Cathedral.White.Infrastructure.Perron.Formula
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Cathedral.White.Infrastructure.ZetaConvexity
+import Mathlib.Analysis.SumIntegralComparisons
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+import Mathlib.Topology.Algebra.InfiniteSum.Real
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
@@ -374,6 +377,58 @@ private lemma partial_sum_minus_lseries (N : ℕ) (s : ℂ) (hs : 1 < s.re) :
   simp only [LSeries]
   rw [← h_range_eq, eq_sub_of_add_eq h_split]; ring
 
+/-- **PROVED**: Finite partial sum of x^{-σ} is bounded by N^{1-σ}/(σ-1).
+    Uses AntitoneOn.sum_le_integral + integral_rpow + algebraic sign manipulation.
+    Architecture due to Gemini Theorist: zero measure theory limits! -/
+private lemma rpow_tail_finite (N : ℕ) (hN : 0 < N) (σ : ℝ) (hσ : 1 < σ) (K : ℕ) :
+    ∑ i ∈ Finset.range K, ((↑N : ℝ) + ↑(i + 1)) ^ (-σ) ≤ (↑N : ℝ) ^ (1 - σ) / (σ - 1) := by
+  have hN_pos : (0 : ℝ) < (↑N : ℝ) := Nat.cast_pos.mpr hN
+  have hNK_le : (↑N : ℝ) ≤ (↑N : ℝ) + (↑K : ℝ) := le_add_of_nonneg_right (Nat.cast_nonneg K)
+  -- Step 1: Antitone of x^{-σ} on [N, N+K]
+  have h_anti : AntitoneOn (fun x : ℝ => x ^ (-σ)) (Set.Icc (↑N : ℝ) ((↑N : ℝ) + ↑K)) := by
+    intro a ha b hb hab; simp only
+    rw [rpow_neg (lt_of_lt_of_le hN_pos ha.1).le,
+        rpow_neg (lt_of_lt_of_le hN_pos hb.1).le, inv_eq_one_div, inv_eq_one_div]
+    exact one_div_le_one_div_of_le
+      (rpow_pos_of_pos (lt_of_lt_of_le hN_pos ha.1) σ)
+      (rpow_le_rpow (lt_of_lt_of_le hN_pos ha.1).le hab (by linarith : 0 ≤ σ))
+  -- Step 2: ∑ ≤ ∫ via AntitoneOn.sum_le_integral
+  have h_sum_le := h_anti.sum_le_integral
+  -- Step 3: Evaluate ∫_N^{N+K} x^{-σ} via integral_rpow
+  have h_not_in : (0 : ℝ) ∉ Set.uIcc (↑N : ℝ) ((↑N : ℝ) + (↑K : ℝ)) := by
+    rw [Set.uIcc_of_le hNK_le]
+    intro h; simp [Set.mem_Icc] at h; linarith [h.1]
+  have h_int := integral_rpow (a := (↑N : ℝ)) (b := (↑N : ℝ) + (↑K : ℝ)) (r := -σ)
+    (Or.inr ⟨by linarith, h_not_in⟩)
+  -- Step 4: Bound by dropping the nonpositive (N+K)^{-σ+1}/(-σ+1) term
+  have h_neg_term : ((↑N : ℝ) + ↑K) ^ (-σ + 1) / (-σ + 1) ≤ 0 :=
+    div_nonpos_iff.mpr (Or.inl ⟨rpow_nonneg (by linarith : (0:ℝ) ≤ ↑N + ↑K) _, by linarith⟩)
+  -- Chain: ∑ ≤ ∫ = formula ≤ bound
+  have step1 := le_trans h_sum_le (le_of_eq h_int)
+  have step2 : (((↑N : ℝ) + ↑K) ^ (-σ + 1) - (↑N : ℝ) ^ (-σ + 1)) / (-σ + 1) ≤
+      (↑N : ℝ) ^ (1 - σ) / (σ - 1) := by
+    rw [sub_div]
+    have h_main : -(↑N : ℝ) ^ (-σ + 1) / (-σ + 1) = (↑N : ℝ) ^ (1 - σ) / (σ - 1) := by
+      rw [show (-σ + 1 : ℝ) = 1 - σ from by ring,
+          show (1 - σ : ℝ) = -(σ - 1) from by ring]
+      exact neg_div_neg_eq _ _
+    calc _ ≤ 0 - (↑N : ℝ) ^ (-σ + 1) / (-σ + 1) := by linarith [h_neg_term]
+      _ = -(↑N : ℝ) ^ (-σ + 1) / (-σ + 1) := by ring
+      _ = _ := h_main
+  exact le_trans step1 step2
+
+/-- **PROVED** (zero sorry): The integral test for the Dirichlet series tail.
+    ∑' n, (N + (n+1))^{-σ} ≤ N^{1-σ}/(σ-1) for σ > 1 and N ≥ 1.
+    
+    Uses: AntitoneOn.sum_le_integral + integral_rpow + Real.tsum_le_of_sum_range_le.
+    Architecture due to Gemini Theorist: algebraic bound on finite sums,
+    then lift to tsum. Zero measure theory limits needed! -/
+private lemma rpow_tail_bound (N : ℕ) (hN : 0 < N) (σ : ℝ) (hσ : 1 < σ) :
+    ∑' (n : ℕ), ((↑N : ℝ) + ↑(n + 1)) ^ (-σ) ≤ (↑N : ℝ) ^ (1 - σ) / (σ - 1) :=
+  Real.tsum_le_of_sum_range_le
+    (fun n => rpow_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) N, Nat.cast_nonneg (α := ℝ) (n + 1)]) _)
+    (fun K => rpow_tail_finite N hN σ hσ K)
+
 /-- **Dirichlet polynomial identification**: For Re(s) > 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
 
@@ -381,7 +436,7 @@ private lemma partial_sum_minus_lseries (N : ℕ) (s : ℂ) (hs : 1 < s.re) :
     1. moebius_lseries_eq_inv_zeta: LSeries(μ,s) = 1/ζ(s) (PROVED)
     2. partial_sum_minus_lseries: tail extraction (PROVED)
     3. moebius_norm_le_one: |μ(n)| ≤ 1 (PROVED)
-    4. rpow_tail_bound: integral test (sorry) -/
+    4. rpow_tail_bound: integral test (PROVED — zero sorry!) -/
 private lemma moebius_partial_sum_approx (N : ℕ) (s : ℂ) (_hs : 1 < s.re) :
     ‖∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ s -
       (1 / riemannZeta s)‖ ≤ (↑N : ℝ) ^ (1 - s.re) / (s.re - 1) := by
@@ -397,9 +452,10 @@ private lemma moebius_partial_sum_approx (N : ℕ) (s : ℂ) (_hs : 1 < s.re) :
   -- Step 3: Apply tail extraction
   rw [partial_sum_minus_lseries N s _hs, norm_neg]
   -- Goal: ‖∑' n, LSeries.term (↗μ) s (n + (N+1))‖ ≤ N^{1-σ}/(σ-1)
-  -- Step 4: Bound the tail norm using triangle + |μ| ≤ 1
+  -- Step 4: Bound the tail norm using triangle + |μ| ≤ 1 + integral test
   -- ‖∑' n, a(n)‖ ≤ ∑' n, ‖a(n)‖  (norm_tsum_le_tsum_norm)
   -- ‖μ(n)/n^s‖ = |μ(n)| · 1/n^σ ≤ 1/n^σ
+  -- ∑' n, 1/(n+N+1)^σ ≤ N^{1-σ}/(σ-1) by rpow_tail_bound (PROVED)
   sorry
 
 -- ═══════════════════════════════════════════
