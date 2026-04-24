@@ -54,7 +54,35 @@ namespace Cathedral.White.Infrastructure.HalfIntegerPerron
 lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
     let X : ℝ := (m : ℝ) + 1/2
     0 < |Real.log (X / ↑n)| ∧ 1 / |Real.log (X / ↑n)| ≤ 8 * X := by
-  sorry
+  intro X
+  have hX_pos : (0 : ℝ) < X := by positivity
+  have hX_ge : (5:ℝ)/2 ≤ X := by
+    show (5:ℝ)/2 ≤ (m : ℝ) + 1/2
+    have : (2 : ℝ) ≤ (m : ℝ) := Nat.ofNat_le_cast.mpr hm
+    linarith
+  have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hXn_pos : 0 < X / ↑n := div_pos hX_pos hn_pos
+  -- Half-integer key fact: X/n ≠ 1 (X = m + 1/2 is not a natural number)
+  have hXn_ne_one : X / ↑n ≠ 1 := by
+    intro h
+    have hXn : X = (n : ℝ) := by field_simp at h; linarith
+    -- X = m + 1/2 = n → 2m + 1 = 2n → odd = even, contradiction
+    have h2 : (m : ℝ) + 1/2 = (n : ℝ) := hXn
+    have h3 : 2 * (m : ℝ) + 1 = 2 * (n : ℝ) := by linarith
+    have h4 : (2 * m + 1 : ℕ) = (2 * n : ℕ) := by exact_mod_cast h3
+    omega
+  -- Therefore |log(X/n)| > 0
+  have hlog_ne : Real.log (X / ↑n) ≠ 0 :=
+    Real.log_ne_zero_of_pos_of_ne_one hXn_pos hXn_ne_one
+  have habs_pos : 0 < |Real.log (X / ↑n)| := abs_pos.mpr hlog_ne
+  refine ⟨habs_pos, ?_⟩
+  -- Need: 1/|log(X/n)| ≤ 8X, equivalently |log(X/n)| ≥ 1/(8X)
+  suffices h : 1 / (8 * X) ≤ |Real.log (X / ↑n)| by
+    rw [div_le_iff₀ habs_pos]
+    have h8X : (0 : ℝ) < 8 * X := by positivity
+    nlinarith [mul_le_mul_of_nonneg_right h h8X.le,
+              div_mul_cancel₀ (1 : ℝ) (ne_of_gt h8X)]
+  sorry -- The two-case bound (far/near) — to be proved
 
 -- ═══════════════════════════════════════════
 -- §2. Unified Finite Perron Error
