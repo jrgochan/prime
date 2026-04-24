@@ -1,34 +1,90 @@
-/-
-  Scratch file: testing the zeta tail bound proof
-  Goal: ‖ζ(s) - 1‖ < 1 for Re(s) ≥ 2
--/
 import Mathlib.NumberTheory.LSeries.RiemannZeta
+import Mathlib.NumberTheory.ZetaValues
 import Mathlib.Analysis.Normed.Group.InfiniteSum
+import Mathlib.Analysis.Real.Pi.Bounds
+
+set_option maxHeartbeats 800000
 
 noncomputable section
 open Complex Real Nat
 
--- Key approach: work with the nat_add_one formulation
--- ζ(s) = Σ_{n≥0} 1/(n+1)^s (from zeta_eq_tsum_one_div_nat_add_one_cpow)
--- The n=0 term is 1/(0+1)^s = 1
--- So ζ(s) - 1 = Σ_{n≥1} 1/(n+1)^s
+/-!
+# Zeta Tail Bound: `‖ζ(s) - 1‖ < 1` for `Re(s) ≥ 2`
 
--- We need: ‖Σ_{n≥1} 1/(n+1)^s‖ ≤ Σ_{n≥1} ‖1/(n+1)^s‖ = Σ_{n≥1} 1/(n+1)^Re(s)
--- For Re(s) ≥ 2: ≤ Σ_{n≥1} 1/(n+1)^2 = π²/6 - 1 - 1 ≈ ζ(2) - 1 - 1
--- Wait, Σ_{n≥1} 1/(n+1)^2 = 1/4 + 1/9 + ... = ζ(2) - 1 ≈ 0.645 < 1
+This file proves that `‖ζ(s) - 1‖ < 1` when `Re(s) ≥ 2`, using the Dirichlet
+series representation and comparison with `ζ(2) - 1 = π²/6 - 1 ≈ 0.645 < 1`.
 
--- Actually we can be even simpler: bound by a geometric series.
--- Σ_{n≥1} 1/(n+1)^2 ≤ Σ_{n≥1} 1/(n(n+1)) = 1 (telescoping)
--- Better: Σ_{n≥2} 1/n^2 ≤ Σ_{n≥2} 1/(n(n-1)) = 1 (telescoping to 1/1 = 1)
--- Even better: Σ_{n≥2} 1/n^2 ≤ 1/4 + 1/9 + 1/16 + ... < 1/4 + 1/8 + 1/16 + ... = 1/2
+## Main results
 
--- Simplest bound: Σ_{n≥1} 1/(n+1)^2 ≤ Σ_{n≥1} 1/((n)(n+1))
---                = Σ_{n≥1} (1/n - 1/(n+1)) = 1/1 - lim 1/(n+1) = 1 > our sum
--- But we need STRICT < 1. So use: Σ_{n≥1} 1/(n+1)^2 ≤ Σ_{n≥2} 1/n^2 < Σ_{n≥2} 1/(n(n-1)) = 1
+* `zeta_sub_one_norm_lt_one` : `‖ζ(s) - 1‖ < 1` for `Re(s) ≥ 2`
+-/
 
--- The cleanest approach: show the sum ≤ ζ(2) - 1 and ζ(2) - 1 < 1, i.e., ζ(2) < 2.
--- ζ(2) = π²/6 ≈ 1.645, so ζ(2) - 1 ≈ 0.645 < 1. ✓
+/-- `π² < 12`; from `π < 3.1416` (Mathlib: `pi_lt_d4`). -/
+private lemma pi_sq_lt_twelve : π ^ 2 < 12 := by
+  nlinarith [pi_lt_d4, pi_pos, sq_nonneg (3.1416 - π)]
+
+/-- The tail sum `∑_{n≥0} 1/(n+2)^2 < 1`.
+    Proof: equals `ζ(2) - 1 = π²/6 - 1 ≈ 0.645 < 1`. -/
+private lemma tsum_tail_inv_sq_lt_one :
+    ∑' (n : ℕ), (1 : ℝ) / ((n : ℝ) + 2) ^ 2 < 1 := by
+  have hsumm := hasSum_zeta_two.summable
+  have h_val := hasSum_zeta_two.tsum_eq
+  have h1 := hsumm.tsum_eq_zero_add
+  have h0 : (1 : ℝ) / (0 : ℕ) ^ 2 = 0 := by norm_num
+  have hsumm1 := (summable_nat_add_iff 1).mpr hsumm
+  -- We need to match (n : ℝ) + 2 with ↑(n+2) from the shifts
+  have hconv : ∀ k : ℕ, (1 : ℝ) / (↑(k + 2)) ^ 2 = 1 / ((k : ℝ) + 2) ^ 2 := by
+    intro k; simp only [Nat.cast_add, Nat.cast_ofNat]
+  have h_val1 : ∑' (n : ℕ), (1 : ℝ) / (↑(n + 1)) ^ 2 = π ^ 2 / 6 := by
+    linarith [h1, h_val, h0]
+  have h2 := hsumm1.tsum_eq_zero_add
+  have h1v : (1 : ℝ) / (↑((0 : ℕ) + 1)) ^ 2 = 1 := by norm_num
+  -- ∑ 1/(↑(n+2))^2 = π²/6 - 1
+  have h_tail : ∑' (n : ℕ), (1 : ℝ) / (↑(n + 2)) ^ 2 = π ^ 2 / 6 - 1 := by
+    linarith [h2, h_val1, h1v]
+  -- Convert to our form
+  rw [show (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 2) ^ 2) =
+    (fun n : ℕ => (1 : ℝ) / (↑(n + 2)) ^ 2) from by ext n; exact (hconv n).symm]
+  linarith [h_tail, pi_sq_lt_twelve]
+
+/-- Summability of `n ↦ 1/(n+1)^s` when `1 < Re(s)`. -/
+private lemma summable_one_div_add_one_cpow {s : ℂ} (hs : 1 < s.re) :
+    Summable (fun n : ℕ => 1 / (↑n + 1 : ℂ) ^ s) := by
+  exact ((summable_nat_add_iff 1).mpr
+    (Complex.summable_one_div_nat_cpow.mpr hs)).congr (fun n => by
+      simp only [Nat.cast_add, Nat.cast_one])
+
+/-- Auxiliary: ‖1/(n+2)^s‖ ≤ 1/(n+2)^2 when Re(s) ≥ 2. -/
+private lemma norm_one_div_cpow_le {s : ℂ} (hs : 2 ≤ s.re) (n : ℕ) :
+    ‖1 / ((n : ℂ) + 2) ^ s‖ ≤ 1 / ((n : ℝ) + 2) ^ 2 := by
+  have hpos : (0 : ℝ) < (n : ℝ) + 2 := by positivity
+  rw [norm_div, norm_one,
+      show ((n : ℂ) + 2 : ℂ) = (↑((n : ℝ) + 2) : ℂ) from by push_cast; ring,
+      Complex.norm_cpow_eq_rpow_re_of_pos hpos,
+      one_div, one_div,
+      show ((n : ℝ) + 2) ^ (2 : ℕ) = ((n : ℝ) + 2) ^ ((2 : ℕ) : ℝ) from by rw [rpow_natCast]]
+  exact inv_anti₀ (rpow_pos_of_pos hpos _)
+    (rpow_le_rpow_of_exponent_le (by linarith : 1 ≤ (n : ℝ) + 2) (by exact_mod_cast hs))
 
 lemma zeta_sub_one_norm_lt_one {s : ℂ} (hs : 2 ≤ s.re) :
     ‖riemannZeta s - 1‖ < 1 := by
-  sorry
+  have hs1 : 1 < s.re := by linarith
+  have hsumm := summable_one_div_add_one_cpow hs1
+  -- ζ(s) - 1 = ∑' n, 1/(n+2)^s
+  have h_sub : riemannZeta s - 1 = ∑' n : ℕ, 1 / ((n : ℂ) + 2) ^ s := by
+    rw [zeta_eq_tsum_one_div_nat_add_one_cpow hs1, hsumm.tsum_eq_zero_add]
+    simp only [Nat.cast_zero, zero_add, one_cpow, div_one, add_sub_cancel_left]
+    congr 1; ext n; push_cast; ring_nf
+  rw [h_sub]
+  -- Summability of n ↦ 1/(n+2)^s
+  have hsumm2 : Summable (fun n : ℕ => 1 / ((n : ℂ) + 2) ^ s) := by
+    have := (summable_nat_add_iff 1).mpr hsumm
+    exact this.congr (fun n => by push_cast; ring_nf)
+  -- Summability of real comparison
+  have hsumm_real : Summable (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 2) ^ 2) := by
+    exact ((summable_nat_add_iff 2).mpr hasSum_zeta_two.summable).congr (fun n => by
+      push_cast; ring_nf)
+  -- Triangle + comparison + tail bound
+  apply lt_of_le_of_lt (norm_tsum_le_tsum_norm hsumm2.norm)
+  apply lt_of_le_of_lt (hsumm2.norm.tsum_le_tsum (fun n => norm_one_div_cpow_le hs n) hsumm_real)
+  exact tsum_tail_inv_sq_lt_one
