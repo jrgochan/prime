@@ -216,9 +216,40 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
   simp_rw [h_bot, h_top, h_right, h_left] at hCG
   -- hCG now has f instead of f_p on all boundary segments
   -- Step 4: Rearrange and bound via triangle inequality
-  -- Integrability (from ContinuousOn of components)
-  have h_int_c : IntervalIntegrable (fun t => f (↑c + ↑t * I)) volume (-T) T := sorry
-  have h_int_s : IntervalIntegrable (fun t => f (↑sigma0 + ↑t * I)) volume (-T) T := sorry
+  -- Integrability: f is ContinuousOn the vertical lines (since s ≠ 1 and s·ζ(s) ≠ 0)
+  have h_cont_vert : ∀ (σ : ℝ), σ ≠ 1 → (1/2 < σ) →
+      ContinuousOn (fun t : ℝ => f (↑σ + ↑t * I)) (Set.uIcc (-T) T) := by
+    intro σ hσ hσ_half
+    have hs_ne_one : ∀ t : ℝ, (↑σ + ↑t * I : ℂ) ≠ 1 := by
+      intro t h
+      apply hσ
+      have hre := congr_arg Complex.re h
+      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at hre
+      have him := congr_arg Complex.im h
+      simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re, Complex.I_re, Complex.I_im] at him
+      -- him : t = 0, hre : σ = 1
+      exact hre
+    apply ContinuousOn.div
+    · exact ContinuousOn.cpow continuousOn_const (by fun_prop)
+        (fun _ _ => Complex.ofReal_mem_slitPlane.mpr (by linarith))
+    · apply ContinuousOn.mul (by fun_prop)
+      -- riemannZeta ∘ (σ + t*I) is continuous: composition of differentiable functions
+      exact (fun t _ =>
+        ContinuousAt.continuousWithinAt <|
+          ContinuousAt.comp
+            (differentiableAt_riemannZeta (hs_ne_one t)).continuousAt
+            (by fun_prop : ContinuousAt (fun t : ℝ => (↑σ + ↑t * I : ℂ)) t))
+    · intro t _ h
+      apply absurd h
+      apply mul_ne_zero
+      · -- σ + t*I ≠ 0 since Re(s) = σ > 1/2 > 0
+        intro h0; have := congr_arg Complex.re h0; simp at this; linarith
+      · -- ζ(σ + t*I) ≠ 0 under RH
+        exact rh_zeta_ne_zero hRH (by simp; linarith) (hs_ne_one t)
+  have h_int_c : IntervalIntegrable (fun t => f (↑c + ↑t * I)) volume (-T) T :=
+    (h_cont_vert c (by linarith) (by linarith)).intervalIntegrable
+  have h_int_s : IntervalIntegrable (fun t => f (↑sigma0 + ↑t * I)) volume (-T) T :=
+    (h_cont_vert sigma0 (by linarith) (by linarith)).intervalIntegrable
   -- CG rearrangement and triangle inequality
   calc ‖∫ t in (-T)..T, (f (↑c + ↑t * I) - f (↑sigma0 + ↑t * I))‖
       = ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
@@ -226,10 +257,22 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
         congr 1; exact intervalIntegral.integral_sub h_int_c h_int_s
     _ ≤ ‖∫ σ in sigma0..c, f (↑σ + ↑T * I)‖ +
         ‖∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)‖ := by
-        -- hCG: bot - top + I*right - I*left = 0
-        -- So: I*(right - left) = top - bot
-        -- ‖right - left‖ = ‖top - bot‖ ≤ ‖top‖ + ‖bot‖
-        sorry
+        -- Convert smul to mul and normalize Complex.mk projections
+        simp only [smul_eq_mul] at hCG
+        have h_eq : I * ((∫ t in (-T)..T, f (↑c + ↑t * I)) -
+            (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))) =
+          (∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+          (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)) := by linear_combination hCG
+        -- ‖right - left‖ = ‖I * (right - left)‖ = ‖top - bot‖ ≤ ‖top‖ + ‖bot‖
+        calc ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
+              (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))‖
+            = ‖I * ((∫ t in (-T)..T, f (↑c + ↑t * I)) -
+              (∫ t in (-T)..T, f (↑sigma0 + ↑t * I)))‖ := by
+              rw [norm_mul, Complex.norm_I, one_mul]
+          _ = ‖(∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
+              (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I))‖ := by
+              rw [h_eq]
+          _ ≤ _ := norm_sub_le _ _
     _ ≤ (∫ σ in sigma0..c, ‖f (↑σ + ↑T * I)‖) +
         (∫ σ in sigma0..c, ‖f (↑σ + ↑(-T) * I)‖) :=
         add_le_add
