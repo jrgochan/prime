@@ -81,22 +81,44 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
   --                                       ≤ ∫‖top‖ + ∫‖bottom‖
   sorry
 
+/-- For real σ, T: σ + (-T)i = conj(σ + Ti). -/
+private lemma conj_sigma_sub_ti (σ T : ℝ) :
+    (↑σ : ℂ) + ↑(-T) * I = starRingEnd ℂ ((↑σ : ℂ) + ↑T * I) := by
+  have h1 : (↑(-T) : ℂ) = -(↑T : ℂ) := by push_cast; ring
+  rw [h1, neg_mul, map_add, Complex.conj_ofReal, map_mul, Complex.conj_ofReal,
+      Complex.conj_I, mul_neg]
+
+/-- Schwarz reflection for ζ: ζ(conj s) = conj(ζ(s)).
+    For Re(s) > 1: follows from LSeries 1 with real coefficients.
+    For all s: by uniqueness of meromorphic extension.
+    Proof via LSeries_one_eq_riemannZeta + real coefficients. -/
+private lemma riemannZeta_conj (s : ℂ) :
+    riemannZeta (starRingEnd ℂ s) = starRingEnd ℂ (riemannZeta s) := by
+  sorry
+
 /-- Horizontal integral at height -T has the same norm as at height T.
     Uses Schwarz reflection: ζ(s̄) = ζ̄(s), hence ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖
-    for the integrand f(s) = x^s/(s·ζ(s)) with x > 0 real. -/
-private lemma perron_horiz_neg_eq_pos (x sigma0 c T : ℝ) (_hx : 1 < x) (_hT : 0 < T) :
+    for the integrand f(s) = x^s/(s·ζ(s)) with x > 0 real.
+
+    PROVED modulo riemannZeta_conj (standard Schwarz reflection for ζ). -/
+private lemma perron_horiz_neg_eq_pos (x sigma0 c T : ℝ) (hx : 1 < x) (_hT : 0 < T) :
     (∫ σ in sigma0..c,
         ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) =
     (∫ σ in sigma0..c,
         ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) := by
   congr 1; ext σ
-  -- For real σ, T, x > 0:
-  --   σ + (-T)i = conj(σ + Ti)
-  --   x^conj(s) = conj(x^s)        (x real positive)
-  --   ζ(conj s) = conj(ζ(s))        (Schwarz reflection)
-  --   conj(s) · conj(ζ(s)) = conj(s · ζ(s))
-  -- So f(conj s) = conj(f(s)), hence ‖f(conj s)‖ = ‖f(s)‖
-  sorry
+  have hx_pos : (0 : ℝ) < x := by linarith
+  -- Rewrite σ + (-T)i = conj(σ + Ti)
+  rw [conj_sigma_sub_ti]
+  -- Decompose norms and simplify
+  simp only [norm_div, norm_mul]
+  -- Now the goal splits into three factors:
+  -- (1) ‖x^(conj s)‖ = x^Re(conj s) = x^Re(s) = ‖x^s‖
+  -- (2) ‖conj s‖ = ‖s‖
+  -- (3) ‖ζ(conj s)‖ = ‖conj(ζ(s))‖ = ‖ζ(s)‖
+  rw [norm_cpow_eq_rpow_re_of_pos hx_pos, norm_cpow_eq_rpow_re_of_pos hx_pos,
+      Complex.conj_re, RCLike.norm_conj,
+      riemannZeta_conj, RCLike.norm_conj]
 
 -- ═══════════════════════════════════════════
 -- §2. The Contour Shift (assembly — zero new sorry)
