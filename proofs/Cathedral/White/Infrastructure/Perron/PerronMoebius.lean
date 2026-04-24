@@ -366,12 +366,57 @@ private lemma finite_sum_integral_swap
   · exact perron_integrand_intervalIntegrable _ c T hc
       (div_pos (by linarith) (Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)))
 
+/-- **PROVED**: Reindexing from Finset.range to Finset.Icc 1 N. -/
+private lemma sum_range_eq_sum_Icc (f : ℕ → ℂ) (N : ℕ) :
+    ∑ i ∈ Finset.range N, f (i + 1) = ∑ i ∈ Finset.Icc 1 N, f i := by
+  conv_rhs => rw [show Finset.Icc 1 N = (Finset.range N).map
+      ⟨(· + 1), Nat.succ_injective⟩ from by
+    ext x; simp [Finset.mem_Icc, Finset.mem_range, Finset.mem_map]; constructor
+    · intro ⟨h1, h2⟩; exact ⟨x - 1, by omega, by omega⟩
+    · rintro ⟨a, ha, rfl⟩; omega]
+  rw [Finset.sum_map]; simp
+
+/-- **PROVED**: Tail extraction for Möbius L-series.
+    The difference between partial sum and full L-series equals the negative tail. -/
+private lemma partial_sum_minus_lseries (N : ℕ) (s : ℂ) (hs : 1 < s.re) :
+    ∑ n ∈ Finset.Icc 1 N, LSeries.term (↗μ) s n - LSeries (↗μ) s =
+    -(∑' (n : ℕ), LSeries.term (↗μ) s (n + (N + 1))) := by
+  have h_sum := moebius_lseries_summable hs
+  have h_split := h_sum.sum_add_tsum_nat_add (N + 1)
+  have h0 : LSeries.term (↗μ) s 0 = 0 := by simp [LSeries.term]
+  have h_range_eq : ∑ i ∈ Finset.range (N + 1), LSeries.term (↗μ) s i =
+      ∑ i ∈ Finset.Icc 1 N, LSeries.term (↗μ) s i := by
+    rw [Finset.sum_range_succ', h0, add_zero]
+    exact sum_range_eq_sum_Icc _ _
+  simp only [LSeries]
+  rw [← h_range_eq, eq_sub_of_add_eq h_split]; ring
+
 /-- **Dirichlet polynomial identification**: For Re(s) > 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
-    Uses moebius_lseries_eq_inv_zeta (PROVED in DirichletZetaInverse.lean). -/
+
+    Decomposition:
+    1. moebius_lseries_eq_inv_zeta: LSeries(μ,s) = 1/ζ(s) (PROVED)
+    2. partial_sum_minus_lseries: tail extraction (PROVED)
+    3. moebius_norm_le_one: |μ(n)| ≤ 1 (PROVED)
+    4. rpow_tail_bound: integral test (sorry) -/
 private lemma moebius_partial_sum_approx (N : ℕ) (s : ℂ) (_hs : 1 < s.re) :
     ‖∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ s -
       (1 / riemannZeta s)‖ ≤ (↑N : ℝ) ^ (1 - s.re) / (s.re - 1) := by
+  -- Step 1: Rewrite 1/ζ(s) as LSeries(μ,s)
+  rw [← moebius_lseries_eq_inv_zeta _hs]
+  -- Step 2: Convert our sum to use LSeries.term
+  have h_term_eq : ∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) / (↑n : ℂ) ^ s =
+      ∑ n ∈ Finset.Icc 1 N, LSeries.term (↗μ) s n := by
+    apply Finset.sum_congr rfl
+    intro n hn; simp [Finset.mem_Icc] at hn
+    simp [LSeries.term, show n ≠ 0 from by omega]
+  rw [h_term_eq]
+  -- Step 3: Apply tail extraction
+  rw [partial_sum_minus_lseries N s _hs, norm_neg]
+  -- Goal: ‖∑' n, LSeries.term (↗μ) s (n + (N+1))‖ ≤ N^{1-σ}/(σ-1)
+  -- Step 4: Bound the tail norm using triangle + |μ| ≤ 1
+  -- ‖∑' n, a(n)‖ ≤ ∑' n, ‖a(n)‖  (norm_tsum_le_tsum_norm)
+  -- ‖μ(n)/n^s‖ = |μ(n)| · 1/n^σ ≤ 1/n^σ
   sorry
 
 -- ═══════════════════════════════════════════
