@@ -30,20 +30,21 @@ verify: ## Verify the crown theorem's axiom foundation
 	@$(ENV) require lean
 	cd proofs && lake env lean Cathedral/Scratch/PrintAxioms.lean
 
-axioms: ## Print the 7 crown axioms
+axioms: ## List all axioms in the Cathedral
 	@echo ""
-	@echo "  The 7 Crown Axioms of nyman_beurling_equivalence:"
-	@echo "  ─────────────────────────────────────────────────"
-	@echo "  1. rh_implies_mertens_bound           RH → |M(x)| = O(x^{1/2} log²x)"
-	@echo "  2. pnt_mu_div_k                       Σ μ(k)/k → 0"
-	@echo "  3. pnt_mu_log_div_k                   Σ μ(k)log(k)/k → -1"
-	@echo "  4. pnt_mu_log_sq_div_k                Σ μ(k)log²(k)/k → -2γ"
-	@echo "  5. abel_mertens_tail_raw               Abel summation tail bounds"
-	@echo "  6. millennium_covariance_cancellation  2D covariance bound"
-	@echo "  7. vasyunin_offdiag_integral           Off-diagonal Gram = integral"
+	@echo "  🏛️  Cathedral Axioms"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@printf "  Total: " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@echo ""
+	@find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' \
+		-exec grep -Hn '^axiom ' {} \; 2>/dev/null | \
+		sed 's|proofs/Cathedral/||' | \
+		awk -F: '{printf "  %-50s %s:%s\n", $$3, $$1, $$2}' | \
+		sed 's/axiom //' | sort
 	@echo ""
 	@echo "  Plus Lean kernel: propext, Classical.choice, Quot.sound"
-	@echo "  Total axioms in codebase: 42"
+	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
 papers: ## Build all 23 companion papers
