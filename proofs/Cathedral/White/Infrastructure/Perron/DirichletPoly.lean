@@ -1,25 +1,24 @@
-/-
-  Cathedral/White/Infrastructure/Perron/DirichletPoly.lean
-
-  Dirichlet polynomial infrastructure for the Perron formula.
-  All lemmas in this file are PROVED (zero sorry).
-
-  Contents:
-  1. perron_integrand_intervalIntegrable: integrability of y^s/s
-  2. finite_sum_integral_swap: sum-integral swap for Dirichlet polynomials
-  3. sum_range_eq_sum_Icc: reindexing
-  4. partial_sum_minus_lseries: tail extraction
-  5. rpow_tail_finite, rpow_tail_bound: integral test for tail
-  6. rpow_shifted_summable: summability of shifted rpow
-  7. moebius_partial_sum_approx: Möbius Dirichlet polynomial ≈ 1/ζ(s)
--/
-
 import Cathedral.White.Infrastructure.Perron.Defs
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SumIntegralComparisons
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.Topology.Algebra.InfiniteSum.Real
+
+/-!
+# Dirichlet Polynomial Infrastructure for the Perron Formula
+
+This file provides the sum-integral swap for finite Dirichlet polynomials,
+the Möbius Dirichlet polynomial approximation to `1/ζ(s)`, and supporting
+tail bounds via the integral test.
+
+## Main results
+
+* `perron_integrand_intervalIntegrable` : integrability of `y^s/s` on `[-T, T]`
+* `finite_sum_integral_swap` : `∑ a(n)·P(x/n) = (1/2π) ∫ ∑ a(n)(x/n)^s/s`
+* `moebius_partial_sum_approx` : `‖∑_{n≤N} μ(n)/n^s - 1/ζ(s)‖ ≤ N^{1-σ}/(σ-1)`
+* `rpow_tail_bound` : `∑' (N+(n+1))^{-σ} ≤ N^{1-σ}/(σ-1)`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
@@ -46,11 +45,10 @@ lemma perron_integrand_intervalIntegrable (y c T : ℝ) (hc : 0 < c) (hy : 0 < y
     simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
     linarith
 
-/-- **PROVED (modulo integrability)**: Sum-integral swap for finite Dirichlet polynomials.
+/-- **PROVED**: Sum-integral swap for finite Dirichlet polynomials.
     Uses: Finset.mul_sum, intervalIntegral.integral_const_mul,
-    intervalIntegral.integral_finset_sum.
-
-    The only sorry is `perron_integrand_intervalIntegrable` (continuity of y^s/s). -/
+    intervalIntegral.integral_finset_sum,
+    perron_integrand_intervalIntegrable (continuity of y^s/s). -/
 lemma finite_sum_integral_swap
     (a : ℕ → ℂ) (x c T : ℝ) (S : Finset ℕ)
     (hc : 0 < c) (_hT : 0 < T) (_hx : 1 < x) :
@@ -239,7 +237,7 @@ lemma moebius_partial_sum_approx (N : ℕ) (hN : 0 < N) (s : ℂ) (_hs : 1 < s.r
           exact_mod_cast abs_moebius_le_one (n := n + (N + 1))
       _ = ((↑N : ℝ) + ↑(n + 1)) ^ (-s.re) := by
           rw [rpow_neg (by positivity : (0:ℝ) ≤ ↑N + ↑(n + 1)), one_div]
-          congr 1; push_cast; ring
+          congr 1; push_cast; ring_nf
   -- Chain: ‖∑' f‖ ≤ ∑' ‖f‖ ≤ ∑' g ≤ bound
   exact (norm_tsum_le_tsum_norm h_norm_summ).trans
     ((h_norm_summ.tsum_le_tsum h_pw h_rpow_summ).trans

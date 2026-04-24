@@ -1,14 +1,17 @@
-/-
-  Cathedral/White/Infrastructure/Perron/KernelBound.lean
-
-  ## The Unified Perron Kernel Bound
-
-  Combines the y > 1 and y < 1 cases into the single theorem:
-    |P(y) - 𝟙(y > 1)| ≤ y^c / (π·T·|log y|)
--/
-
 import Cathedral.White.Infrastructure.Perron.ResidueGtOne
 import Cathedral.White.Infrastructure.Perron.ResidueLtOne
+
+/-!
+# The Unified Perron Kernel Bound
+
+This file combines the `y > 1` (residue = 1) and `y < 1` (residue = 0) cases
+into the unified Perron kernel theorem: for `y > 0`, `y ≠ 1`,
+`‖P(y,c,T) - 𝟙(y > 1)‖ ≤ y^c / (π·T·|log y|)`.
+
+## Main results
+
+* `perron_kernel_bound` : the unified Perron kernel approximation bound
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

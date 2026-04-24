@@ -1,13 +1,17 @@
-/-
-  Cathedral/White/Infrastructure/Perron/IntegralBounds.lean
-
-  ## FTC-based Integral Bounds for y^σ
-
-  These are the key exponential decay/growth bounds used by both
-  the y < 1 and y > 1 cases.
--/
-
 import Cathedral.White.Infrastructure.Perron.Defs
+
+/-!
+# FTC-Based Integral Bounds for `y^σ`
+
+This file establishes bounds for the integral `∫ y^σ dσ` using the Fundamental
+Theorem of Calculus. These are the key exponential decay/growth estimates
+used by both the `y < 1` and `y > 1` cases of the Perron kernel.
+
+## Main results
+
+* `integral_rpow_le_of_lt_one` : for `0 < y < 1`, `∫_c^R y^σ ≤ y^c/|log y|`
+* `integral_rpow_le_of_gt_one` : for `y > 1`, `∫_{-R}^c y^σ ≤ y^c/log y`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

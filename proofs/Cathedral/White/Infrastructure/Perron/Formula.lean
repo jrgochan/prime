@@ -1,15 +1,16 @@
-/-
-  Cathedral/White/Infrastructure/Perron/Formula.lean
-
-  ## Perron's Formula — From Kernel to Summatory Function
-
-  Assembles the unified kernel bound into the per-term Perron formula
-  and the error bound for finite Dirichlet polynomials.
-
-  Status: ZERO SORRY ✅
--/
-
 import Cathedral.White.Infrastructure.Perron.KernelBound
+
+/-!
+# Perron's Formula: From Kernel to Summatory Function
+
+This file assembles the unified Perron kernel bound into per-term error bounds
+suitable for finite Dirichlet polynomial sums.
+
+## Main results
+
+* `perron_per_term_gt_one` : specialization of the kernel bound for `y > 1`
+* `perron_formula_error_bound` : triangle inequality bound for `∑ a(n)·(P(x/n) - 1)`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

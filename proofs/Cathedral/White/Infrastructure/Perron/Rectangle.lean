@@ -1,13 +1,17 @@
-/-
-  Cathedral/White/Infrastructure/Perron/Rectangle.lean
-
-  ## Rectangle Sub-lemmas
-
-  Cauchy-Goursat for y^s/s on the rectangle [c,R]×[-T,T]
-  and the right vertical segment bound.
--/
-
 import Cathedral.White.Infrastructure.Perron.Defs
+
+/-!
+# Rectangle Contour Lemmas for the Perron Kernel
+
+This file provides the Cauchy-Goursat vanishing theorem for `y^s/s` on the
+rectangle `[c, R] × [-T, T]` (where `c > 0` ensures the pole at `s = 0` is outside),
+and a pointwise bound on the right vertical segment `Re(s) = R`.
+
+## Main results
+
+* `rectangle_integral_perron_vanishes` : `∮_∂B y^s/s = 0` on `[c,R]×[-T,T]` with `c > 0`
+* `right_vertical_bound` : `‖∫_{-T}^T y^{R+tI}/(R+tI) dt‖ ≤ 2T·y^R/R`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

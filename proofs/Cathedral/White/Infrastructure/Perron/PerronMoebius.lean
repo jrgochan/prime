@@ -102,15 +102,15 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
     -- Algebraic exponent simplifications
     have h1_eval : K * x ^ c / x = K * x ^ eps' := by
       rw [mul_div_assoc, div_eq_mul_inv, ← Real.rpow_neg_one x, ← rpow_add hx_pos]
-      congr 1; simp only [c]; ring
+      congr 1; simp only [c]; ring_nf
 
     have h2_eval : K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) = K₁ * x ^ ((1 : ℝ)/2 + eps') := by
       rw [mul_assoc, ← rpow_add hx_pos]
-      congr 1; simp only [c]; ring
+      congr 1; simp only [c]; ring_nf
 
     have h3_eval : K₂ * x ^ sigma0 * x ^ (eps' / 2) = K₂ * x ^ ((1 : ℝ)/2 + eps') := by
       rw [mul_assoc, ← rpow_add hx_pos]
-      congr 1; simp only [sigma0]; ring
+      congr 1; simp only [sigma0]; ring_nf
 
     set_option maxHeartbeats 800000 in
     have h_bound_eps' : |((summatoryMoebius x : ℤ) : ℝ)| ≤

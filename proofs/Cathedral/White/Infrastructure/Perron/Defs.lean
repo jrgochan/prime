@@ -1,12 +1,3 @@
-/-
-  Cathedral/White/Infrastructure/Perron/Defs.lean
-
-  ## Core Definitions & Basic Properties
-
-  The Perron kernel integrand y^s/s, the vertical line integral,
-  and basic differentiability/norm lemmas.
--/
-
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
@@ -14,6 +5,26 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.Analysis.Real.Pi.Bounds
+
+/-!
+# Perron Kernel: Definitions and Basic Properties
+
+This file defines the Perron kernel integrand `y^s/s`, the truncated Perron integral
+`(1/2π) ∫_{-T}^{T} y^(c+tI)/(c+tI) dt`, and establishes basic differentiability,
+norm bounds, and prefactor absorption lemmas.
+
+## Main definitions
+
+* `perronIntegrand y s` : the function `y^s / s` for `y : ℝ` and `s : ℂ`
+* `perronIntegral y c T` : the truncated vertical line integral `(1/2π) ∫_{-T}^T y^(c+tI)/(c+tI) dt`
+
+## Main results
+
+* `perronIntegrand_differentiableAt` : `y^s/s` is differentiable for `y > 0`, `s ≠ 0`
+* `perronIntegrand_norm` : `‖y^s/s‖ = y^(Re s) / ‖s‖`
+* `perronIntegrand_bound_on_horizontal` : `‖y^s/s‖ ≤ y^σ/T` on horizontal lines
+* `norm_one_div_two_pi_le` : `‖1/(2π)‖ ≤ 1`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

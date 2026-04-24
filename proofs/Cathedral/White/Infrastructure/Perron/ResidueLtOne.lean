@@ -1,16 +1,21 @@
-/-
-  Cathedral/White/Infrastructure/Perron/ResidueLtOne.lean
-
-  ## The Perron Kernel for y < 1 (Residue = 0)
-
-  Proves that the Perron integral equals O(y^c/(T·|log y|)) for 0 < y < 1.
-  Uses the RIGHT-rectangle contour shift: Cauchy-Goursat on [c,R]×[-T,T]
-  (no pole enclosed) with R → ∞ making y^R → 0.
--/
-
 import Cathedral.White.Infrastructure.Perron.Defs
 import Cathedral.White.Infrastructure.Perron.IntegralBounds
 import Cathedral.White.Infrastructure.Perron.Rectangle
+
+/-!
+# Perron Kernel for `y < 1` (No Residue)
+
+This file proves that the Perron integral `(1/2π) ∫ y^s/s ds` is
+`O(y^c/(T·|log y|))` for `0 < y < 1`.
+
+The proof uses the **right-rectangle contour shift**: apply Cauchy-Goursat to `[c,R]×[-T,T]`
+(which encloses no poles since `c > 0`), bound the horizontal and right-vertical segments,
+then send `R → ∞`. The exponential decay `y^R → 0` for `0 < y < 1` kills the right vertical.
+
+## Main results
+
+* `perron_kernel_lt_one` : for `0 < y < 1`, `‖P(y,c,T)‖ ≤ y^c/(π·T·|log y|)`
+-/
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate

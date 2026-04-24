@@ -1,22 +1,31 @@
-/-
-  Cathedral/White/Infrastructure/Perron/ResidueGtOne.lean
-
-  ## The Perron Kernel for y > 1 (Residue = 1)
-
-  The crown jewel: proving that the Perron integral equals 1 + O(y^c/(T·log y))
-  for y > 1. Uses the dslope decomposition, the four-corner log identity,
-  FTC-based antiderivatives, and the left-rectangle contour shift with R → ∞.
--/
-
 import Cathedral.White.Infrastructure.Perron.Defs
 import Cathedral.White.Infrastructure.Perron.IntegralBounds
 import Cathedral.White.Infrastructure.Perron.Rectangle
 
+/-!
+# Perron Kernel for `y > 1` (Residue = 1)
+
+The crown jewel: proving `‖P(y,c,T) - 1‖ ≤ y^c/(π·T·|log y|)` for `y > 1`.
+
+The proof uses the **left-rectangle contour shift**: apply Cauchy-Goursat to `[-R,c]×[-T,T]`
+(which encloses the pole `s = 0`), and decompose `y^s/s = g(s) + 1/s` where `g = dslope(y^s, 0)`
+is entire. Cauchy-Goursat kills `∮ g = 0`, and `∮ 1/s = 2πi` is the winding number.
+Sending `R → ∞` kills the left vertical via `y^{-R} → 0` for `y > 1`.
+
+## Main results
+
+* `perron_kernel_gt_one` : for `y > 1`, `‖P(y,c,T) - 1‖ ≤ y^c/(π·T·|log y|)`
+
+## Supporting lemmas
+
+* `four_corner_log_sum` : the winding number identity `Σ ±log(corner) = 2πi`
+* `rectangle_integral_inv_eq_two_pi_I` : `∮_∂B 1/s = 2πi` via FTC
+* `left_rectangle_perron_winding` : `∮_∂B y^s/s = 2πi` via dslope decomposition
+-/
+
 noncomputable section
--- Suppress simp-arg/seq-focus linter in complex contour proofs where
--- defensive simp args serve documentation/stability purposes
+-- Defensive simp arg lists in complex contour proofs for stability
 set_option linter.unusedSimpArgs false
-set_option linter.unnecessarySeqFocus false
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
 namespace Cathedral.White.Infrastructure
@@ -127,8 +136,12 @@ lemma four_corner_log_sum {R T : ℝ} (hR : 0 < R) (hT : 0 < T) :
   have hlog_conj2 : Complex.log (-↑R - ↑T * I) = conj (Complex.log (-↑R + ↑T * I)) := by
     rw [← hconj_mRT, Complex.log_conj _ harg_ne_pi2]
   have key (z : ℂ) : z - conj z = 2 * I * ↑z.im := by
-    apply Complex.ext <;> simp [Complex.mul_re, Complex.I_re, Complex.I_im,
-                  Complex.mul_im, Complex.conj_re, Complex.conj_im] <;> ring
+    apply Complex.ext
+    · simp [Complex.mul_re, Complex.I_re, Complex.I_im,
+            Complex.mul_im, Complex.conj_re, Complex.conj_im]
+    · simp [Complex.mul_re, Complex.I_re, Complex.I_im,
+            Complex.mul_im, Complex.conj_re, Complex.conj_im]
+      ring
   calc -Complex.log (-↑R - ↑T * I) + Complex.log (-↑R + ↑T * I)
       - Complex.log (↑R - ↑T * I) + Complex.log (↑R + ↑T * I)
       = (Complex.log (-↑R + ↑T * I) - conj (Complex.log (-↑R + ↑T * I)))
@@ -338,7 +351,7 @@ lemma left_rectangle_perron_winding {y c R T : ℝ}
     have key := Complex.integral_boundary_rect_eq_zero_of_differentiableOn
       g ⟨-R, -T⟩ ⟨c, T⟩ hDiffOn
     simp only [smul_eq_mul] at key
-    convert key using 2 <;> push_cast <;> ring
+    convert key using 2 <;> (push_cast; ring)
   -- Step 3: Winding number for 1/s
   have rect_inv := rectangle_integral_inv_eq_two_pi_I hc hR hT
   -- Step 4: On each segment, split ∫ f = ∫ g + ∫ (1/s) using perronIntegrand_eq_flattened_add_inv.
