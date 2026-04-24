@@ -5,7 +5,7 @@
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{booktabs}
-\usepackage{xcolor}
+\usepackage[table]{xcolor}
 \usepackage{enumitem}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric}
@@ -119,7 +119,7 @@ The proof decomposes into two pillars:
 3 & \lean{pnt\_mu\_log\_div\_k} & $\sum \mu(k)\ln(k)/k \to -1$ & 2 (PNT) \\
 4 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(k)\ln^2(k)/k \to -2\gamma$ & 2 (PNT) \\
 \rowcolor{green!10}
-$\times$ & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & \textbf{GRADUATED 🎓} \\
+$\times$ & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & \textbf{GRADUATED} \\
 5 & \lean{millennium\_covariance\_cancellation} & 2D covariance bound & 3 (Parseval) \\
 6 & \lean{vasyunin\_offdiag\_integral} & Off-diagonal Gram identity & 3 (Vasyunin) \\
 \bottomrule
@@ -227,7 +227,7 @@ complex analysis infrastructure already exists in Mathlib. The key lemma
 essentially the non-vanishing on the line, which is already formalized.
 \end{direction}
 
-\subsection{Campaign B: The Abel Engine (COMPLETED 🎓)}
+\subsection{Campaign B: The Abel Engine (COMPLETED)}
 \label{sec:abel-completed}
 
 \begin{axiombox}[Abel--Mertens Tail --- GRADUATED April~22, 2026]
@@ -690,7 +690,7 @@ We estimate the difficulty and timeline for closing each axiom:
 \midrule
 PNT $\times 3$ (\#2--4) & Medium & Wiener--Ikehara or Newman & Open (6--12 months) \\
 \rowcolor{green!10}
-Abel tail & Easy & Abel summation lemma & \textbf{GRADUATED 🎓 (Apr 22)} \\
+Abel tail & Easy & Abel summation lemma & \textbf{GRADUATED (Apr 22)} \\
 Vasyunin off-diag (\#6) & Medium & Digamma formula & Open (3--6 months) \\
 Covariance (\#5) & Hard & Contour shift + MVT & Open (12--24 months) \\
 & & \textit{(BC route may reduce)} & \\
