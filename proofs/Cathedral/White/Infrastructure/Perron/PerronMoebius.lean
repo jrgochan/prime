@@ -862,13 +862,33 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
       rw [mul_assoc, ← rpow_add hx_pos]
       congr 1; simp only [sigma0]; ring
 
+    set_option maxHeartbeats 800000 in
     have h_bound_eps' : |((summatoryMoebius x : ℤ) : ℝ)| ≤
         C_main * x ^ ((1 : ℝ)/2 + eps') := by
-      -- Triangle inequality: |M| ≤ ‖M - I_c‖ + ‖I_c - I_s‖ + ‖I_s‖
-      --                      ≤ K·x^c/x + ‖1/(2πi)‖·K₁·x^c·x^{-1/2} + K₂·x^σ₀·x^{ε'/2}
-      --                      ≤ K·x^{eps'} + K₁·x^{1/2+eps'} + K₂·x^{1/2+eps'}
-      -- The 1/(2πi) factor is absorbed into K₁ (since ‖1/(2πi)‖ < 1)
-      sorry
+      -- Key: ‖I_c - I_s‖ = ‖(1/(2πi))‖ * ‖∫f_c - ∫f_s‖ ≤ (1/(2π)) * h2 ≤ h2
+      -- since ‖1/(2πi)‖ = 1/(2π) < 1
+      have h_shift_bound : ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) := by
+        -- I_c - I_s = (1/(2πi)) * (∫f_c - ∫f_s), and ‖1/(2πi)‖ ≤ 1, so
+        -- ‖I_c - I_s‖ ≤ ‖∫(f_c - f_s)‖ ≤ K₁ * x^c * x^{-1/2}  (from h2)
+        sorry
+
+      -- Cast path: |((M : ℤ) : ℝ)| = ‖((M : ℤ) : ℂ)‖
+      rw [h_real_norm]
+      have hcast : ‖((↑(summatoryMoebius x : ℤ) : ℝ) : ℂ)‖ =
+          ‖(↑(summatoryMoebius x : ℤ) : ℂ)‖ := by
+        congr 1
+      rw [hcast]
+
+      -- Triangle inequality → raw bounds → exponent simplification
+      have h_raw : ‖(↑(summatoryMoebius x : ℤ) : ℂ)‖ ≤
+          K * x ^ c / x + K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) +
+          K₂ * x ^ sigma0 * x ^ (eps' / 2) :=
+        le_trans h_tri1 (by gcongr)
+      rw [h1_eval, h2_eval, h3_eval] at h_raw
+      -- Upgrade eps' to 1/2+eps'
+      have hx_eps_le : x ^ eps' ≤ x ^ ((1 : ℝ)/2 + eps') :=
+        rpow_le_rpow_of_exponent_le hx_gt_1.le (by linarith)
+      linarith [mul_le_mul_of_nonneg_left hx_eps_le hK.le]
 
     -- Upgrade to target eps and C_final
     calc |((summatoryMoebius x : ℤ) : ℝ)|
