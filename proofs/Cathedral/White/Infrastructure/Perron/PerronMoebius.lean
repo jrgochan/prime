@@ -465,21 +465,101 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
                   (fun σ hσ => h_pw_top σ (Set.Icc_subset_uIcc hσ))
             _ = (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
                 rw [intervalIntegral.integral_const, smul_eq_mul]
-        -- Bottom: same bound (|Im(σ+(-T)i)| = T = |Im(σ+Ti)|)
         have h_bot_bound : (∫ σ in sigma0..c,
             ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) ≤
             (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
-          -- Key: ‖f(σ+(-T)i)‖ ≤ same bound as ‖f(σ+Ti)‖
-          -- because |Im(σ+(-T)i)| = T = |Im(σ+Ti)|
-          -- We need: for each σ, ‖f(σ-Ti)‖ ≤ x^c * C * T^(ε₀-1)
-          -- The lemma perron_integrand_bound_with_zeta gives this for +T.
-          -- For -T, we show ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖ or directly reprove.
-          -- Direct approach: the perron_integrand_bound_with_zeta works because
-          -- it only uses |Im(s)| = T, ‖s‖ ≥ T, ‖x^s‖ = x^σ.
-          -- All of these hold for s = σ + (-T)*I as well:
-          -- |Im(σ+(-T)i)| = |-T| = T, ‖σ+(-T)i‖ = √(σ²+T²) = ‖σ+Ti‖
-          -- So we apply the same bound.
-          sorry
+          -- Pointwise bound for -T: same proof as +T since |Im| = T
+          have h_pw_bot : ∀ σ ∈ Set.uIcc sigma0 c,
+              ‖(x : ℂ) ^ (↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) *
+                riemannZeta (↑σ + ↑(-T) * I))‖ ≤ x ^ c * C * T ^ (ε₀ - 1) := by
+            intro σ hσ_mem
+            have hσ_le_c : σ ≤ c := by
+              rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at hσ_mem; exact hσ_mem.2
+            have hσ₀_le : sigma0 ≤ σ := by
+              rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at hσ_mem; exact hσ_mem.1
+            set s : ℂ := ↑σ + ↑(-T) * I with hs_def
+            -- Re(s) = σ, Im(s) = -T
+            have hs_re : s.re = σ := by
+              simp [hs_def, Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+                Complex.I_re, Complex.I_im, Complex.ofReal_im]
+            have hs_im : s.im = -T := by
+              simp [hs_def, Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                Complex.ofReal_re, Complex.I_re, Complex.I_im]
+            have hs_abs_im : |s.im| = T := by rw [hs_im, abs_neg, abs_of_pos hT_pos]
+            -- Apply the 1/ζ bound
+            have h_re_bound : 1/2 + ε₀ ≤ s.re := by rw [hs_re]; linarith
+            have hT₀_le_im : T₀ ≤ |s.im| := by rw [hs_abs_im]; exact le_trans (le_max_left _ _) h_large
+            have h_inv_zeta : ‖(1 : ℂ) / riemannZeta s‖ ≤ C * T ^ ε₀ := by
+              have := hzeta_bound s h_re_bound hT₀_le_im; rwa [hs_abs_im] at this
+            -- Factor the norm
+            rw [norm_div, norm_mul]
+            rw [norm_cpow_eq_rpow_re_of_pos (by linarith : (0:ℝ) < x), hs_re]
+            -- ‖s‖ ≥ T
+            have h_norm_s_ge_T : T ≤ ‖s‖ := by rw [← hs_abs_im]; exact abs_im_le_norm s
+            have hx_σ_le_c : x ^ σ ≤ x ^ c :=
+              rpow_le_rpow_of_exponent_le (le_of_lt (by linarith : 1 < x)) hσ_le_c
+            have h_zeta_norm_inv : 1 / ‖riemannZeta s‖ ≤ C * T ^ ε₀ := by
+              rwa [norm_div, norm_one] at h_inv_zeta
+            by_cases hζ_zero : ‖riemannZeta s‖ = 0
+            · simp [hζ_zero]; exact mul_nonneg (mul_nonneg (rpow_nonneg (by linarith) _) hC_pos.le) (rpow_nonneg (by linarith) _)
+            · have hζ_pos : 0 < ‖riemannZeta s‖ := lt_of_le_of_ne (norm_nonneg _) (fun h => hζ_zero h.symm)
+              have h_norm_s_pos : 0 < ‖s‖ := lt_of_lt_of_le hT_pos h_norm_s_ge_T
+              rw [div_mul_eq_div_div]
+              have h_factor1 : x ^ σ / ‖s‖ ≤ x ^ c / T :=
+                div_le_div₀ (by positivity) hx_σ_le_c hT_pos h_norm_s_ge_T
+              calc x ^ σ / ‖s‖ / ‖riemannZeta s‖
+                    = (x ^ σ / ‖s‖) * (1 / ‖riemannZeta s‖) := by ring
+                _ ≤ (x ^ c / T) * (C * T ^ ε₀) := by
+                    apply mul_le_mul h_factor1 h_zeta_norm_inv (by positivity) (by positivity)
+                _ = x ^ c * C * (T ^ ε₀ / T) := by ring
+                _ = x ^ c * C * T ^ (ε₀ - 1) := by
+                    congr 1; rw [rpow_sub (by linarith : (0:ℝ) < T), rpow_one]
+          -- Now use h_pw_bot to bound the integral (same as top)
+          have h_intble : IntervalIntegrable (fun σ =>
+              ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖)
+              volume sigma0 c := by
+            apply IntervalIntegrable.mono_fun' (intervalIntegrable_const
+              (c := x ^ c * C * T ^ (ε₀ - 1)))
+            · -- AEStronglyMeasurable
+              apply ContinuousOn.aestronglyMeasurable _ measurableSet_uIoc
+              apply ContinuousOn.norm
+              have hT_ge_1 : 1 ≤ T := le_trans (le_max_right _ _) h_large
+              have hφ : Continuous (fun σ : ℝ => (↑σ + ↑(-T) * I : ℂ)) :=
+                continuous_ofReal.add continuous_const
+              have hs_ne : ∀ σ : ℝ, (↑σ + ↑(-T) * I : ℂ) ≠ 1 := by
+                intro σ h; have := congr_arg Complex.im h
+                simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                  Complex.ofReal_re, Complex.I_re, Complex.I_im] at this
+                linarith
+              apply ContinuousOn.div
+              · exact hφ.continuousOn.const_cpow
+                  (Or.inl (Complex.ofReal_ne_zero.mpr (by linarith : (x : ℝ) ≠ 0)))
+              · exact hφ.continuousOn.mul
+                  (fun σ _ => ContinuousAt.continuousWithinAt <|
+                    ContinuousAt.comp (differentiableAt_riemannZeta (hs_ne σ)).continuousAt hφ.continuousAt)
+              · intro σ hσ_mem; apply mul_ne_zero
+                · intro h0; have := congr_arg Complex.im h0
+                  simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                    Complex.ofReal_re, Complex.I_re, Complex.I_im] at this
+                  linarith
+                · have hre : (↑σ + ↑(-T) * I : ℂ).re = σ := by
+                    simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+                      Complex.I_re, Complex.I_im, Complex.ofReal_im]
+                  have hσ_ge : sigma0 ≤ σ := by
+                    have := Set.uIoc_subset_uIcc hσ_mem
+                    rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at this; exact this.1
+                  exact rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
+            · apply (ae_restrict_mem measurableSet_uIoc).mono
+              intro σ hσ; simp only [Real.norm_of_nonneg (norm_nonneg _)]
+              exact h_pw_bot σ (Set.uIoc_subset_uIcc hσ)
+          calc ∫ σ in sigma0..c,
+                ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖
+              ≤ ∫ _σ in sigma0..c, x ^ c * C * T ^ (ε₀ - 1) :=
+                intervalIntegral.integral_mono_on (by linarith) h_intble
+                  intervalIntegrable_const
+                  (fun σ hσ => h_pw_bot σ (Set.Icc_subset_uIcc hσ))
+            _ = (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
+                rw [intervalIntegral.integral_const, smul_eq_mul]
         -- Combined: top + bot ≤ 2·(c-σ₀)·x^c·C·T^{ε₀-1}
         have h_combined : (∫ σ in sigma0..c,
             ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
