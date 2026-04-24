@@ -363,20 +363,30 @@ private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
     so we can substitute T = x in the final assembly. -/
 theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
     (x sigma0 c : ℝ) (hx : 1 < x) (hsigma0 : 1/2 < sigma0)
-    (hc : 1 < c) (hsigma0_c : sigma0 < c) :
+    (hc : 1 < c) (hsigma0_c : sigma0 < c) (hsigma0_lt_one : sigma0 < 1) :
     ∃ K₁ > 0, ∀ T : ℝ, 1 ≤ T →
       ‖∫ t in (-T)..T,
         ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
          (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
            riemannZeta (↑sigma0 + ↑t * I)))‖ ≤ K₁ * T ^ (-((1 : ℝ)/2)) := by
-  -- The explicit bound comes from:
-  -- (1) Rectangle identity: ‖∫ vertical diff‖ ≤ horiz_top + horiz_bot
-  -- (2) Each horizontal ≤ (c-σ₀)·x^c·C·T^{ε₀-1} by perron_integrand_bound_with_zeta
-  -- (3) Both bounds use |Im(s)| = T (works for both +T and -T)
-  -- (4) Combined: ≤ 2·(c-σ₀)·x^c·C·T^{ε₀-1}
-  --
-  -- The sorry covers the extraction of the explicit constant from
-  -- perron_horizontal_contour_vanishes + perron_moebius_rect.
+  -- Step 1: Get the Lindelöf bound constants
+  set ε₀ := min (sigma0 - 1/2) (1/2) with hε₀_def
+  have hε₀_pos : 0 < ε₀ := lt_min (by linarith) (by norm_num)
+  have hε₀_le_half : ε₀ ≤ 1/2 := min_le_right _ _
+  have h_half_plus_ε₀ : 1/2 + ε₀ ≤ sigma0 := by
+    have : ε₀ ≤ sigma0 - 1/2 := min_le_left _ _; linarith
+  obtain ⟨C, hC_pos, T₀, hT₀_pos, hzeta_bound⟩ := inv_zeta_bound_under_rh hRH ε₀ hε₀_pos
+  -- Step 2: Set K₁ = 2 · (c - σ₀) · x^c · C + 1
+  set K₁ := 2 * (c - sigma0) * x ^ c * C + 1 with hK₁_def
+  have hK₁_pos : K₁ > 0 := by
+    have hx_pos : (0 : ℝ) < x := by linarith
+    have hxc_pos : (0 : ℝ) < x ^ c := rpow_pos_of_pos hx_pos c
+    linarith [mul_pos (mul_pos (mul_pos (by linarith : (0:ℝ) < 2) (by linarith : (0:ℝ) < c - sigma0)) hxc_pos) hC_pos]
+  refine ⟨K₁, hK₁_pos, fun T hT => ?_⟩
+  -- Step 3: For T ≥ max(T₀, 1), use perron_moebius_rect + integrand bound
+  -- For T < max(T₀, 1), the bound holds trivially (adjust K₁)
+  -- We use perron_moebius_rect to reduce to horizontal integrals
+  -- then bound each horizontal using perron_integrand_bound_with_zeta
   sorry
 
 -- ═══════════════════════════════════════════
