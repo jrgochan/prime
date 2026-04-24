@@ -157,6 +157,15 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
           (intervalIntegral.norm_integral_le_integral_norm hsigma0_c.le)
           (intervalIntegral.norm_integral_le_integral_norm hsigma0_c.le)
 
+-- ═══════════════════════════════════════════
+-- §1b. DEPRECATED: Schwarz Reflection Chain
+-- These lemmas are no longer used after the
+-- architectural restructuring (Gemini review).
+-- The contour shift now bounds both horizontals
+-- independently, bypassing Schwarz entirely.
+-- Kept for reference only.
+-- ═══════════════════════════════════════════
+
 /-- For real σ, T: σ + (-T)i = conj(σ + Ti). -/
 private lemma conj_sigma_sub_ti (σ T : ℝ) :
     (↑σ : ℂ) + ↑(-T) * I = starRingEnd ℂ ((↑σ : ℂ) + ↑T * I) := by
@@ -206,23 +215,17 @@ private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
   congr 1; ext n
   exact (conj_lseries_term n s).symm
 
-/-- Schwarz reflection for ζ: ζ(conj s) = conj(ζ(s)) for ALL s.
-    PROVED for Re(s) > 1 via riemannZeta_conj_re_gt.
-    The general case extends by uniqueness of meromorphic continuation
-    (both sides are meromorphic and agree on {Re > 1}). -/
+/-- **DEPRECATED**: Schwarz reflection for all s.
+    No longer needed by the contour shift (bypassed by independent horizontal bounds).
+    The sorry here is dead code — removing would reduce sorry count by 1.
+    Kept for potential future use (e.g., if needed for other applications). -/
 private lemma riemannZeta_conj (s : ℂ) :
     riemannZeta (starRingEnd ℂ s) = starRingEnd ℂ (riemannZeta s) := by
-  -- For Re(s) > 1: proved above via L-series
-  -- For Re(s) ≤ 1: follows by analytic continuation / functional equation
-  -- Both sides are meromorphic in s and agree on the half-plane {Re > 1},
-  -- hence they agree everywhere by the identity theorem.
   sorry
 
-/-- Horizontal integral at height -T has the same norm as at height T.
-    Uses Schwarz reflection: ζ(s̄) = ζ̄(s), hence ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖
-    for the integrand f(s) = x^s/(s·ζ(s)) with x > 0 real.
-
-    PROVED modulo riemannZeta_conj (standard Schwarz reflection for ζ). -/
+/-- **DEPRECATED**: Horizontal integral symmetry via Schwarz.
+    No longer used after contour shift restructuring.
+    Each horizontal is bounded independently using perron_integrand_bound_with_zeta. -/
 private lemma perron_horiz_neg_eq_pos (x sigma0 c T : ℝ) (hx : 1 < x) (_hT : 0 < T) :
     (∫ σ in sigma0..c,
         ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) =
@@ -230,14 +233,8 @@ private lemma perron_horiz_neg_eq_pos (x sigma0 c T : ℝ) (hx : 1 < x) (_hT : 0
         ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) := by
   congr 1; ext σ
   have hx_pos : (0 : ℝ) < x := by linarith
-  -- Rewrite σ + (-T)i = conj(σ + Ti)
   rw [conj_sigma_sub_ti]
-  -- Decompose norms and simplify
   simp only [norm_div, norm_mul]
-  -- Now the goal splits into three factors:
-  -- (1) ‖x^(conj s)‖ = x^Re(conj s) = x^Re(s) = ‖x^s‖
-  -- (2) ‖conj s‖ = ‖s‖
-  -- (3) ‖ζ(conj s)‖ = ‖conj(ζ(s))‖ = ‖ζ(s)‖
   rw [norm_cpow_eq_rpow_re_of_pos hx_pos, norm_cpow_eq_rpow_re_of_pos hx_pos,
       Complex.conj_re, RCLike.norm_conj,
       riemannZeta_conj, RCLike.norm_conj]
