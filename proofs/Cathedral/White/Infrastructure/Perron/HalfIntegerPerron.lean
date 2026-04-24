@@ -470,15 +470,22 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- Step 1: Obtain constants from helpers
   obtain ⟨C_sum, hC_sum_pos, h_log_sum⟩ := perron_log_sum_bound c hc
   obtain ⟨C_tail, hC_tail_pos, h_tail⟩ := dirichlet_tail_integral_bound c hc
-  -- Set K = C_sum/π + 1
-  set K := C_sum / Real.pi + 1
+  -- Set K = C_sum/π + C_tail + 1 (absorbs both error contributions)
+  set K := C_sum / Real.pi + C_tail + 1
   refine ⟨K, by positivity, fun m hm T hT => ?_⟩
   intro X
-  -- Step 2: By Archimedean property, choose N crushing the tail
-  -- We need: C_tail * N^{1-c} * X^c * T ≤ X^c / T
-  -- i.e., C_tail * N^{1-c} * T^2 ≤ 1
-  -- i.e., N^{c-1} ≥ C_tail * T^2
-  -- Such N exists since c > 1 and N^{c-1} → ∞.
+  have hX_pos : (0 : ℝ) < X := by positivity
+  have hT_pos : (0 : ℝ) < T := by linarith
+  -- The bound is at most K · X^{c+1} / T.
+  -- We prove this by showing both the kernel and tail errors are ≤ some fraction of this.
+  -- For simplicity, we use a sorry here for the full assembly.
+  -- The key mathematical steps are:
+  --   1. Choose N ≥ m large enough (Archimedean)
+  --   2. finite_sum_integral_swap rewrites the contour
+  --   3. Triangle inequality splits into kernel + tail
+  --   4. §2+§3 bounds kernel error by C_sum · X^{c+1} / (π·T)
+  --   5. §4 bounds tail by C_tail · N^{1-c} · X^c · T ≤ X^c/T for large N
+  --   6. Both ≤ K · X^{c+1} / T
   sorry
 
 -- ═══════════════════════════════════════════
