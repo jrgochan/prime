@@ -35,10 +35,13 @@ namespace Cathedral.White.Infrastructure
 theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps) :
     ∃ C_final : ℝ, C_final > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((summatoryMoebius x : ℤ) : ℝ)| ≤ C_final * x ^ ((1 : ℝ)/2 + eps) := by
-  -- 1. Clamp eps to eps' ≤ 1/2 so sigma0 < 1
-  set eps' := min eps (1/2)
-  have heps' : 0 < eps' := lt_min heps (by norm_num)
-  have heps'_le_eps : eps' ≤ eps := min_le_left _ _
+  -- 1. Choose eps' = min(2eps/3, 1/3) so that with T = x²:
+  --    sigma0 + eps' = 1/2 + 3eps'/2 ≤ 1/2 + eps
+  set eps' := min (2 * eps / 3) (1/3)
+  have heps' : 0 < eps' := lt_min (by linarith) (by norm_num)
+  have heps'_le_eps : 3 * eps' / 2 ≤ eps := by
+    have h1 : eps' ≤ 2 * eps / 3 := min_le_left _ _
+    linarith
 
   set sigma0 := 1/2 + eps'/2
   set c := 1 + eps'
@@ -48,7 +51,7 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
   have hsigma0_c : sigma0 < c := by show 1/2 + eps'/2 < 1 + eps'; linarith
   have hsigma0_lt_one : sigma0 < 1 := by
     show 1/2 + eps'/2 < 1
-    have : eps' ≤ 1/2 := min_le_right _ _; linarith
+    have : eps' ≤ 1/3 := min_le_right _ _; linarith
 
   -- 2. Extract the three fundamental bounds (quantified completely independent of x!)
   obtain ⟨K, hK, h_Perron⟩ := truncated_perron_for_moebius c hc
@@ -70,22 +73,28 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
   have hx_pos : 0 < x := by linarith
   have hx_gt_1 : 1 < x := by linarith
 
-  have h_eps_ineq : x ^ ((1 : ℝ)/2 + eps') ≤ x ^ ((1 : ℝ)/2 + eps) :=
-    rpow_le_rpow_of_exponent_le hx_gt_1.le (by linarith)
+  have h_eps_ineq : x ^ ((1 : ℝ)/2 + 3 * eps' / 2) ≤ x ^ ((1 : ℝ)/2 + eps) :=
+    rpow_le_rpow_of_exponent_le hx_gt_1.le (by linarith [heps'_le_eps])
 
   -- 4. Split behavior based on whether x is large enough for the asymptotic bounds
   by_cases hx_large : T_max ≤ x
-  · -- Case 1: x ≥ T_max. We set T = x.
+  · -- Case 1: x ≥ T_max. We set T = x².
+    set T := x ^ (2 : ℝ)
+    have hT_ge_1 : 1 ≤ T := Real.one_le_rpow (by linarith : 1 ≤ x) (by norm_num : (0:ℝ) ≤ 2)
+    have hT_max_le : T_max ≤ T := by
+      calc T_max ≤ x := hx_large
+        _ = x ^ (1 : ℝ) := (Real.rpow_one x).symm
+        _ ≤ x ^ (2 : ℝ) := rpow_le_rpow_of_exponent_le (by linarith : 1 ≤ x) (by norm_num)
     set I_c := (1 / (2 * ↑Real.pi)) *
-      ∫ t in (-x)..x, (x : ℂ) ^ (↑c + ↑t * I) /
+      ∫ t in (-T)..T, (x : ℂ) ^ (↑c + ↑t * I) /
         ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))
     set I_s := (1 / (2 * ↑Real.pi)) *
-      ∫ t in (-x)..x, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
+      ∫ t in (-T)..T, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
         ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I))
 
-    have h1 := h_Perron x hx x (by linarith)
-    have h2 := h_Shift x hx_gt_1 x (le_trans (le_max_left _ _) hx_large)
-    have h3 := h_Vert x hx x (le_trans (le_max_right _ _) hx_large)
+    have h1 := h_Perron x hx T hT_ge_1
+    have h2 := h_Shift x hx_gt_1 T (le_trans (le_max_left _ _) hT_max_le)
+    have h3 := h_Vert x hx T (le_trans (le_max_right _ _) hT_max_le)
 
     have h_tri1 : ‖(↑(summatoryMoebius x : ℤ) : ℂ)‖ ≤
         ‖(↑(summatoryMoebius x : ℤ) : ℂ) - I_c‖ + ‖I_c - I_s‖ + ‖I_s‖ := by
@@ -99,38 +108,48 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
         ‖((↑(summatoryMoebius x : ℤ) : ℝ) : ℂ)‖ := by
       rw [Complex.norm_real, Real.norm_eq_abs]
 
-    -- Algebraic exponent simplifications
-    have h1_eval : K * x ^ c / x = K * x ^ eps' := by
-      rw [mul_div_assoc, div_eq_mul_inv, ← Real.rpow_neg_one x, ← rpow_add hx_pos]
-      congr 1; simp only [c]; ring_nf
+    -- Algebraic exponent simplifications (with T = x²)
+    -- h1: K * x^{c+1} / x² = K * x^{c-1} = K * x^{eps'}
+    have h1_eval : K * x ^ (c + 1) / T = K * x ^ eps' := by
+      simp only [T]
+      rw [mul_div_assoc, ← Real.rpow_sub hx_pos]
+      congr 1; simp only [c]; ring
 
-    have h2_eval : K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) = K₁ * x ^ ((1 : ℝ)/2 + eps') := by
+    -- h2: K₁ * x^c * T^{-1/2} = K₁ * x^c * x^{-1} = K₁ * x^{eps'}
+    have h2_eval : K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) = K₁ * x ^ eps' := by
+      simp only [T]
+      rw [show (x ^ (2:ℝ)) ^ (-((1:ℝ)/2)) = x ^ (-(1 : ℝ)) from by
+        rw [← Real.rpow_mul hx_pos.le]; norm_num]
       rw [mul_assoc, ← rpow_add hx_pos]
-      congr 1; simp only [c]; ring_nf
+      congr 1; simp only [c]; ring
 
-    have h3_eval : K₂ * x ^ sigma0 * x ^ (eps' / 2) = K₂ * x ^ ((1 : ℝ)/2 + eps') := by
+    -- h3: K₂ * x^{σ₀} * T^{eps'/2} = K₂ * x^{σ₀+eps'} = K₂ * x^{1/2+3eps'/2}
+    have h3_eval : K₂ * x ^ sigma0 * T ^ (eps' / 2) = K₂ * x ^ ((1 : ℝ)/2 + 3 * eps' / 2) := by
+      simp only [T]
+      rw [show (x ^ (2:ℝ)) ^ (eps' / 2) = x ^ eps' from by
+        rw [← Real.rpow_mul hx_pos.le]; ring_nf]
       rw [mul_assoc, ← rpow_add hx_pos]
-      congr 1; simp only [sigma0]; ring_nf
+      congr 1; simp only [sigma0]; ring
 
     set_option maxHeartbeats 800000 in
     have h_bound_eps' : |((summatoryMoebius x : ℤ) : ℝ)| ≤
-        C_main * x ^ ((1 : ℝ)/2 + eps') := by
-      -- h2 now bounds ‖∫(f_c - f_s)‖ (raw, no prefactor). We need ‖I_c - I_s‖.
-      -- I_c - I_s = (1/(2π)) * (∫f_c - ∫f_s) = (1/(2π)) * ∫(f_c - f_s)
-      -- Since ‖1/(2π)‖ ≤ 1, we get ‖I_c - I_s‖ ≤ ‖∫(f_c - f_s)‖ ≤ K₁ bound.
-      have h_shift_bound : ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) := by
-        -- Step 1: I_c - I_s = (1/(2π)) * (∫f_c - ∫f_s) by ring
+        C_main * x ^ ((1 : ℝ)/2 + 3 * eps' / 2) := by
+      -- Shift bound: ‖I_c - I_s‖ ≤ K₁ * x^c * T^{-1/2}
+      have h_shift_bound : ‖I_c - I_s‖ ≤ K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := by
+        -- I_c - I_s = (1/(2π)) * (∫f_c - ∫f_s)
+        -- Since ‖1/(2π)‖ ≤ 1, ‖I_c - I_s‖ ≤ ‖∫(f_c - f_s)‖ ≤ K₁ bound
+        -- Proof structure identical to previous; integral limits are (-T)..T
         have h_eq : I_c - I_s = (1 / (2 * ↑Real.pi)) *
-            ((∫ t in (-x)..x, (x : ℂ) ^ (↑c + ↑t * I) /
+            ((∫ t in (-T)..T, (x : ℂ) ^ (↑c + ↑t * I) /
                 ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))) -
-             (∫ t in (-x)..x, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
+             (∫ t in (-T)..T, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
                 ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))) := by
           simp only [I_c, I_s]; ring
-        -- Step 2: Integrability of both vertical integrands
+        -- Integrability on [-T, T]
         have h_vert_cont : ∀ (σ : ℝ), σ ≠ 1 → (1/2 < σ) →
             ContinuousOn (fun t : ℝ => (x : ℂ) ^ (↑σ + ↑t * I) /
               ((↑σ + ↑t * I) * riemannZeta (↑σ + ↑t * I)))
-              (Set.uIcc (-x) x) := by
+              (Set.uIcc (-T) T) := by
           intro σ hσ hσ_half
           have hs_ne_one : ∀ t : ℝ, (↑σ + ↑t * I : ℂ) ≠ 1 := by
             intro t h; apply hσ
@@ -149,16 +168,15 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
             · exact rh_zeta_ne_zero hRH (by simp; linarith) (hs_ne_one t)
         have h_int_fc : IntervalIntegrable
             (fun t => (x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)))
-            volume (-x) x :=
+            volume (-T) T :=
           (h_vert_cont c (by linarith) (by linarith)).intervalIntegrable
         have h_int_fs : IntervalIntegrable
             (fun t => (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))
-            volume (-x) x :=
+            volume (-T) T :=
           (h_vert_cont sigma0 (by linarith) hsigma0).intervalIntegrable
-        show ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2))
-        -- Transform via: I_c - I_s = a*(∫f_c - ∫f_s) [ring] = a*∫(f_c-f_s) [integral_sub]
+        show ‖I_c - I_s‖ ≤ K₁ * x ^ c * T ^ (-((1 : ℝ)/2))
         have h_ic_is : I_c - I_s = (1 / (2 * ↑Real.pi) : ℂ) *
-            ∫ t in (-x)..x,
+            ∫ t in (-T)..T,
               ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
                (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
                 riemannZeta (↑sigma0 + ↑t * I))) := by
@@ -182,19 +200,21 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
 
       -- Triangle inequality → raw bounds → exponent simplification
       have h_raw : ‖(↑(summatoryMoebius x : ℤ) : ℂ)‖ ≤
-          K * x ^ c / x + K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) +
-          K₂ * x ^ sigma0 * x ^ (eps' / 2) :=
+          K * x ^ (c + 1) / T + K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) +
+          K₂ * x ^ sigma0 * T ^ (eps' / 2) :=
         le_trans h_tri1 (by gcongr)
       rw [h1_eval, h2_eval, h3_eval] at h_raw
-      -- Upgrade eps' to 1/2+eps'
-      have hx_eps_le : x ^ eps' ≤ x ^ ((1 : ℝ)/2 + eps') :=
+      -- All three terms now: K·x^{eps'} + K₁·x^{eps'} + K₂·x^{1/2+3eps'/2}
+      -- Upgrade eps' to 1/2+3eps'/2 via monotonicity
+      have hx_eps_le : x ^ eps' ≤ x ^ ((1 : ℝ)/2 + 3 * eps' / 2) :=
         rpow_le_rpow_of_exponent_le hx_gt_1.le (by linarith)
-      linarith [mul_le_mul_of_nonneg_left hx_eps_le hK.le]
+      linarith [mul_le_mul_of_nonneg_left hx_eps_le hK.le,
+               mul_le_mul_of_nonneg_left hx_eps_le hK₁.le]
 
     -- Upgrade to target eps and C_final
     calc |((summatoryMoebius x : ℤ) : ℝ)|
-        ≤ C_main * x ^ ((1 : ℝ)/2 + eps') := h_bound_eps'
-      _ ≤ C_final * x ^ ((1 : ℝ)/2 + eps') :=
+        ≤ C_main * x ^ ((1 : ℝ)/2 + 3 * eps' / 2) := h_bound_eps'
+      _ ≤ C_final * x ^ ((1 : ℝ)/2 + 3 * eps' / 2) :=
         mul_le_mul_of_nonneg_right (by simp only [C_final]; linarith [le_max_left C_main C_compact])
           (rpow_nonneg hx_pos.le _)
       _ ≤ C_final * x ^ ((1 : ℝ)/2 + eps) :=

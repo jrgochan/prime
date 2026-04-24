@@ -35,9 +35,9 @@ namespace Cathedral.White.Infrastructure
     **Architecture** (Silver Bullet — via half-integer shift):
     1. Shift x to X = ⌊x⌋ + 1/2 using `summatoryMoebius_eq_half_integer`
     2. Apply `truncated_perron_half_integer` at X (no log singularity)
-    3. Transfer back: X ≤ x + 1, so X^(c+1) ≤ (x+1)^(c+1) ≤ K' · x^(c+1)
+    3. Transfer back: X ≤ x + 1 ≤ 2x, so X^(c+1) ≤ 2^(c+1) · x^(c+1)
 
-    Error bound is O(x^(c+1)/T) instead of O(x^c/T) — absorbed by T = X². -/
+    Error bound is O(x^(c+1)/T). -/
 theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
     ∃ K > 0, ∀ x : ℝ, 2 ≤ x → ∀ T : ℝ, 1 ≤ T →
       ‖(↑(summatoryMoebius x : ℤ) : ℂ) -
@@ -45,9 +45,10 @@ theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
           ∫ t in (-T)..T,
             (x : ℂ) ^ (↑c + ↑t * I) /
               ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
-      K * x ^ c / T := by
+      K * x ^ (c + 1) / T := by
   -- Delegate to HalfIntegerPerron.truncated_perron_half_integer
-  -- via summatoryMoebius_eq_half_integer
+  -- via summatoryMoebius_eq_half_integer + triangle inequality
+  -- for the X^s → x^s integral transfer
   sorry
 
 -- ═══════════════════════════════════════════
