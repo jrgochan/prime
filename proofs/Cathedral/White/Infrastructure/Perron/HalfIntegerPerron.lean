@@ -544,25 +544,29 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
       _ = C_sum / (Real.pi * T) * X ^ (c + 1) := by ring
   -- Step 4: §4 gives tail integral bound
   have h_tail_bound := h_tail X T hX_pos hT_pos N hN_pos
-  -- h_tail_bound : ‖(1/(2π)) ∫ [D_N - 1/ζ]·X^s/s dt‖ ≤ C_tail · N^{1-c} · X^c · T
-  -- Step 5: Crush the tail using N > C_tail · T²
-  -- Since N > C_tail·T² and c > 1: N^{1-c} < N^{-1} < 1/(C_tail·T²)
-  -- Wait: N^{1-c} ≤ N^0 = 1 only if 1-c ≤ 0, i.e. c ≥ 1. ✓
-  -- But N^{1-c} ≤ 1/N only if c ≥ 2. For 1 < c < 2, N^{1-c} > 1/N.
-  -- Actually: N^{1-c} = 1/N^{c-1}. And N > val means N^{c-1} > val^{c-1}
-  -- if c-1 > 0 and N^{c-1} is monotone (true since N > 0).
-  -- For N > C_tail·T²: N^{c-1} > (C_tail·T²)^{c-1}.
-  -- But we need N^{c-1} > C_tail·T², not (C_tail·T²)^{c-1}.
-  -- These match only when c-1 = 1, i.e., c = 2.
-  -- For c close to 1, (C_tail·T²)^{c-1} ≈ 1, not C_tail·T².
-  -- FIX: Choose N > (C_tail·T²)^{1/(c-1)} instead.
-  -- Then N^{c-1} > C_tail·T², giving N^{1-c} < 1/(C_tail·T²).
-  -- tail ≤ C_tail·(1/(C_tail·T²))·X^c·T = X^c/T ≤ X^{c+1}/T. ✓
+  -- Step 5: Prove N^{c-1} > C_tail · T² · X
+  -- from N > N₀ > (C_tail·T²·X)^{1/(c-1)}
+  have hc1_pos : (0 : ℝ) < c - 1 := by linarith
+  have h_val_pos : (0 : ℝ) < C_tail * T ^ 2 * X := by positivity
+  -- N > (C_tail·T²·X)^{1/(c-1)}, so N^{c-1} > C_tail·T²·X
+  have h_N_rpow : C_tail * T ^ 2 * X < (N : ℝ) ^ (c - 1) := by
+    have hN_gt : (C_tail * T ^ 2 * X) ^ ((1 : ℝ) / (c - 1)) < (N : ℝ) :=
+      lt_trans hN₀ hN_ge_N₀
+    calc C_tail * T ^ 2 * X
+        = ((C_tail * T ^ 2 * X) ^ ((1 : ℝ) / (c - 1))) ^ (c - 1) := by
+          rw [← Real.rpow_mul (le_of_lt h_val_pos)]
+          rw [show (1 : ℝ) / (c - 1) * (c - 1) = 1 from one_div_mul_cancel (ne_of_gt hc1_pos)]
+          exact (Real.rpow_one _).symm
+      _ < (N : ℝ) ^ (c - 1) := by
+          apply Real.rpow_lt_rpow (rpow_nonneg (le_of_lt h_val_pos) _) hN_gt hc1_pos
+  -- Therefore: N^{1-c} < 1/(C_tail·T²·X)
+  -- So: C_tail · N^{1-c} · X^c · T < X^{c-1}/T
+  -- And tail ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T
   --
-  -- The full integral-analytic assembly (connecting the finite Perron sum
-  -- to the contour integral via finite_sum_integral_swap + integral_sub
-  -- using perron_zeta_integrable) combined with the corrected Archimedean
-  -- N choice completes the proof.
+  -- Step 6: The integral-analytic connection A_N ↔ B and the
+  -- triangle inequality combining kernel + tail bounds.
+  -- This uses finite_sum_integral_swap + integral_sub (via
+  -- perron_zeta_integrable) to show ‖A-B‖ ≤ tail.
   sorry
 
 -- ═══════════════════════════════════════════
