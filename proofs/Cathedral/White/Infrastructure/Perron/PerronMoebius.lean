@@ -32,38 +32,47 @@ namespace Cathedral.White.Infrastructure
 -- §1. Sub-lemmas for the Contour Shift
 -- ═══════════════════════════════════════════
 
-/-- The integrand x^s/(s·ζ(s)) is differentiable on rectangles
-    in {Re > 1/2} under RH, since ζ(s) ≠ 0 there (by rh_zeta_ne_zero)
-    and s ≠ 0 (since Re(s) ≥ σ₀ > 1/2 > 0).
-
-    The pole of ζ at s=1 is cancelled by the 1/s factor,
-    making the integrand holomorphic on the entire rectangle.
-
-    All ingredients are PROVED:
-    - rh_zeta_ne_zero (ZetaConvexity.lean)
-    - differentiableAt_riemannZeta (Mathlib, at s ≠ 1)
-    - DifferentiableAt.cpow, .div, .mul (Mathlib) -/
-private lemma perron_moebius_integrand_diffOn (hRH : RiemannHypothesis)
-    (x sigma0 c T : ℝ) (_hx : 1 < x) (hsigma0 : 1/2 < sigma0)
-    (_hc : 1 < c) (_hsigma0_c : sigma0 < c) (_hT : 0 < T) :
-    DifferentiableOn ℂ (fun s => (x : ℂ) ^ s / (s * riemannZeta s))
-      (Set.uIcc sigma0 c ×ℂ Set.uIcc (-T) T) := by
-  -- Each point s in the rectangle has Re(s) ≥ σ₀ > 1/2.
-  -- For s ≠ 1: ζ(s) ≠ 0 (rh_zeta_ne_zero), s ≠ 0, so x^s/(s·ζ(s)) is diff.
-  -- At s = 1: ζ has a simple pole, but 1/(s·ζ(s)) has a removable singularity
-  -- since (s-1)ζ(s) → 1, making 1/(s·ζ(s)) = (s-1)/(s·(s-1)·ζ(s)) → 1.
-  sorry
-
-/-- **Rectangle Identity**: For T > 0, the difference of vertical
-    Perron integrals at Re = c and Re = σ₀ is bounded by the norm
-    sum of horizontal integrals.
-
-    This follows from Cauchy-Goursat (integral_boundary_rect_eq_zero_of_differentiableOn)
-    applied to x^s/(s·ζ(s)) on the rectangle [σ₀,c]×[-T,T], plus
-    the triangle inequality to pass from the exact identity to a norm bound. -/
-private lemma perron_moebius_rect (hRH : RiemannHypothesis)
+/-- **ContinuousOn** for the integrand x^s/(s·ζ(s)) on the rectangle.
+    riemannZeta is defined (finite) at all s including s=1, and s·ζ(s) ≠ 0
+    at every point of the rectangle (s ≠ 0 since Re(s) > 1/2,
+    and ζ(s) ≠ 0 for Re(s) > 1/2 under RH, except at s=1 where ζ(1) ≠ 0
+    by definition). -/
+private lemma perron_moebius_integrand_continuousOn (_hRH : RiemannHypothesis)
     (x sigma0 c T : ℝ) (_hx : 1 < x) (_hsigma0 : 1/2 < sigma0)
     (_hc : 1 < c) (_hsigma0_c : sigma0 < c) (_hT : 0 < T) :
+    ContinuousOn (fun s => (x : ℂ) ^ s / (s * riemannZeta s))
+      (Set.uIcc sigma0 c ×ℂ Set.uIcc (-T) T) := by
+  -- riemannZeta is continuous on ℂ (defined everywhere, including s=1).
+  -- x^s is continuous (x > 0 ∈ slitPlane).
+  -- s·ζ(s) ≠ 0 on the rectangle: s ≠ 0 (Re > 1/2) and ζ(s) ≠ 0 (RH).
+  sorry
+
+/-- **PROVED**: The integrand x^s/(s·ζ(s)) is DifferentiableAt for s ≠ 1
+    with Re(s) > 1/2 under RH.
+    Uses: differentiableAt_riemannZeta (Mathlib), rh_zeta_ne_zero,
+    DifferentiableAt.cpow, .div, .mul. -/
+private lemma perron_moebius_integrand_diffAt (hRH : RiemannHypothesis)
+    (x : ℝ) (hx : 1 < x) (s : ℂ) (hs_re : 1/2 < s.re) (hs_ne : s ≠ 1) :
+    DifferentiableAt ℂ (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) s := by
+  have hx_pos : (0 : ℝ) < x := by linarith
+  have hs_ne_zero : s ≠ 0 := by
+    intro h; rw [h] at hs_re; simp at hs_re; linarith
+  have hζ_ne : riemannZeta s ≠ 0 := rh_zeta_ne_zero hRH hs_re hs_ne
+  have hsζ_ne : s * riemannZeta s ≠ 0 := mul_ne_zero hs_ne_zero hζ_ne
+  exact DifferentiableAt.div
+    (DifferentiableAt.const_cpow differentiableAt_id
+      (Or.inl (Complex.ofReal_ne_zero.mpr (ne_of_gt hx_pos))))
+    (differentiableAt_id.mul (differentiableAt_riemannZeta hs_ne))
+    hsζ_ne
+
+/-- **Rectangle Identity** via Cauchy-Goursat off_countable.
+    Uses: integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
+    with exceptional set {1} (the pole of ζ).
+    Sub-lemmas: perron_moebius_integrand_continuousOn (sorry),
+    perron_moebius_integrand_diffAt (PROVED). -/
+private lemma perron_moebius_rect (hRH : RiemannHypothesis)
+    (x sigma0 c T : ℝ) (hx : 1 < x) (hsigma0 : 1/2 < sigma0)
+    (hc : 1 < c) (hsigma0_c : sigma0 < c) (hT : 0 < T) :
     ‖∫ t in (-T)..T,
         ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
          (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
@@ -72,13 +81,22 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
         ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
     (∫ σ in sigma0..c,
         ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) := by
-  -- The Cauchy-Goursat identity says the four boundary integrals sum to zero:
-  --   ∫_{left} + ∫_{top} + ∫_{right} + ∫_{bottom} = 0
-  -- (via integral_boundary_rect_eq_zero_of_differentiableOn with
-  --  perron_moebius_integrand_diffOn)
-  -- Rearranging: ∫_{right} - ∫_{left} = -(∫_{top} + ∫_{bottom})
-  -- Taking norms: ‖∫_{right} - ∫_{left}‖ ≤ ‖∫_{top}‖ + ‖∫_{bottom}‖
-  --                                       ≤ ∫‖top‖ + ∫‖bottom‖
+  -- Step 1: Apply Cauchy-Goursat with exceptional set {1}
+  set f := fun s => (x : ℂ) ^ s / (s * riemannZeta s) with _hf_def
+  have hCG := Complex.integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
+    f ⟨sigma0, -T⟩ ⟨c, T⟩ {1} (Set.countable_singleton 1)
+    (perron_moebius_integrand_continuousOn hRH x sigma0 c T hx hsigma0 hc hsigma0_c hT)
+    (fun s ⟨hs_mem, hs_ne⟩ => by
+      have hs_re : 1/2 < s.re := by
+        have := (Complex.mem_reProdIm.mp hs_mem).1
+        simp [Set.mem_Ioo, min_eq_left hsigma0_c.le, max_eq_right hsigma0_c.le] at this
+        linarith
+      have hs1 : s ≠ 1 := fun h => hs_ne (Set.mem_singleton_iff.mpr h)
+      exact perron_moebius_integrand_diffAt hRH x hx s hs_re hs1)
+  -- Step 2: Extract the norm bound from the identity
+  -- CG: bot - top + I·right - I·left = 0
+  -- ⟹ right - left  =  -I·(top - bot)  (?? signs)
+  -- The detailed sign/rearrangement + triangle inequality
   sorry
 
 /-- For real σ, T: σ + (-T)i = conj(σ + Ti). -/
