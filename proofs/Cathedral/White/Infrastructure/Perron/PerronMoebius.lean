@@ -88,12 +88,58 @@ private lemma conj_sigma_sub_ti (σ T : ℝ) :
   rw [h1, neg_mul, map_add, Complex.conj_ofReal, map_mul, Complex.conj_ofReal,
       Complex.conj_I, mul_neg]
 
-/-- Schwarz reflection for ζ: ζ(conj s) = conj(ζ(s)).
-    For Re(s) > 1: follows from LSeries 1 with real coefficients.
-    For all s: by uniqueness of meromorphic extension.
-    Proof via LSeries_one_eq_riemannZeta + real coefficients. -/
+/-- arg(n : ℂ) = 0 for n : ℕ, since ↑n ≥ 0 on the real axis. -/
+private lemma arg_natCast' (n : ℕ) : (n : ℂ).arg = 0 := by
+  rw [show (n : ℂ) = ((n : ℝ) : ℂ) from by push_cast; ring]
+  exact Complex.arg_ofReal_of_nonneg (Nat.cast_nonneg n)
+
+/-- **PROVED**: conj(n^s) = n^(conj s) for n : ℕ, n > 0.
+    Uses cpow_conj from Mathlib + the fact that arg(n) = 0 ≠ π. -/
+private lemma conj_natCast_cpow (n : ℕ) (_hn : 0 < n) (s : ℂ) :
+    starRingEnd ℂ ((n : ℂ) ^ s) = (n : ℂ) ^ (starRingEnd ℂ s) := by
+  have h_arg : (n : ℂ).arg ≠ Real.pi := by rw [arg_natCast']; exact Real.pi_ne_zero.symm
+  have h := Complex.cpow_conj (n : ℂ) s h_arg
+  rw [show (starRingEnd ℂ) (n : ℂ) = (n : ℂ) from by
+    rw [show (n : ℂ) = ((n : ℝ) : ℂ) from by push_cast; ring]; exact Complex.conj_ofReal _] at h
+  exact h.symm
+
+/-- **PROVED**: conj(term 1 s n) = term 1 (conj s) n for each n.
+    Termwise conjugation of the ζ Dirichlet series. -/
+private lemma conj_lseries_term (n : ℕ) (s : ℂ) :
+    starRingEnd ℂ (LSeries.term 1 s n) = LSeries.term 1 (starRingEnd ℂ s) n := by
+  unfold LSeries.term
+  by_cases hn : n = 0
+  · simp [hn]
+  · simp only [hn, ↓reduceIte, Pi.one_apply, map_div₀, map_one]
+    congr 1
+    exact conj_natCast_cpow n (Nat.pos_of_ne_zero hn) s
+
+/-- **PROVED**: Schwarz reflection for ζ when Re(s) > 1.
+    ζ(conj s) = conj(ζ(s)) from the L-series + tsum conjugation. -/
+private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
+    riemannZeta (starRingEnd ℂ s) = starRingEnd ℂ (riemannZeta s) := by
+  have hs_conj : 1 < (starRingEnd ℂ s).re := by rw [Complex.conj_re]; exact hs
+  rw [← LSeries_one_eq_riemannZeta hs_conj, ← LSeries_one_eq_riemannZeta hs]
+  show LSeries 1 (starRingEnd ℂ s) = starRingEnd ℂ (LSeries 1 s)
+  have h_sum : Summable (fun n => LSeries.term 1 s n) := LSeriesSummable_one_iff.mpr hs
+  have h_tsum : starRingEnd ℂ (∑' n, LSeries.term 1 s n) =
+      ∑' n, starRingEnd ℂ (LSeries.term 1 s n) :=
+    Complex.conjCLE.toContinuousLinearMap.map_tsum h_sum
+  simp only [LSeries]
+  rw [h_tsum]
+  congr 1; ext n
+  exact (conj_lseries_term n s).symm
+
+/-- Schwarz reflection for ζ: ζ(conj s) = conj(ζ(s)) for ALL s.
+    PROVED for Re(s) > 1 via riemannZeta_conj_re_gt.
+    The general case extends by uniqueness of meromorphic continuation
+    (both sides are meromorphic and agree on {Re > 1}). -/
 private lemma riemannZeta_conj (s : ℂ) :
     riemannZeta (starRingEnd ℂ s) = starRingEnd ℂ (riemannZeta s) := by
+  -- For Re(s) > 1: proved above via L-series
+  -- For Re(s) ≤ 1: follows by analytic continuation / functional equation
+  -- Both sides are meromorphic in s and agree on the half-plane {Re > 1},
+  -- hence they agree everywhere by the identity theorem.
   sorry
 
 /-- Horizontal integral at height -T has the same norm as at height T.
