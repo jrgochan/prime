@@ -219,16 +219,20 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
 -- §3. Sub-lemmas for the Truncated Perron Formula
 -- ═══════════════════════════════════════════
 
-/-- **Integrability of the Perron integrand** on [-T, T].
-    The function t ↦ y^(c+tI)/(c+tI) is continuous for c > 0
-    (since c+tI ≠ 0), hence integrable on any bounded interval. -/
-private lemma perron_integrand_intervalIntegrable (y c T : ℝ) (_hc : 0 < c) :
+/-- **PROVED**: Integrability of the Perron integrand on [-T, T] for y > 0.
+    Uses: ContinuousOn.cpow (base in slitPlane since y > 0) + ContinuousOn.div. -/
+private lemma perron_integrand_intervalIntegrable (y c T : ℝ) (hc : 0 < c) (hy : 0 < y) :
     IntervalIntegrable (fun t : ℝ =>
       (y : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))
       MeasureTheory.volume (-T) T := by
-  -- y^(c+tI)/(c+tI) is continuous in t since c > 0 ensures c+tI ≠ 0
-  -- and y^z is entire for any fixed y
-  sorry
+  apply ContinuousOn.intervalIntegrable
+  apply ContinuousOn.div
+  · exact ContinuousOn.cpow continuousOn_const (by fun_prop)
+      (fun _ _ => Complex.ofReal_mem_slitPlane.mpr hy)
+  · fun_prop
+  · intro t _ h; have := congr_arg Complex.re h
+    simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+    linarith
 
 /-- **PROVED (modulo integrability)**: Sum-integral swap for finite Dirichlet polynomials.
     Uses: Finset.mul_sum, intervalIntegral.integral_const_mul,
@@ -265,8 +269,29 @@ private lemma finite_sum_integral_swap
   symm
   apply intervalIntegral.integral_finset_sum
   -- Each summand a(n) * ((↑x/↑n)^(c+tI)/(c+tI)) is integrable on [-T,T]
-  -- since c+tI ≠ 0 (c > 0) and the integrand is continuous.
-  intro n _; exact sorry
+  -- Uses perron_integrand_intervalIntegrable with y = x/n > 0
+  intro n _
+  apply IntervalIntegrable.const_mul
+  -- Need: IntervalIntegrable (fun t => (↑x / ↑n : ℂ)^(c+tI)/(c+tI))
+  -- This is the same as perron_integrand_intervalIntegrable (x/n) c T hc
+  -- once we identify ↑(x/↑n : ℝ) with (↑x/↑n : ℂ)
+  have : (fun t : ℝ => (↑x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) =
+    (fun t : ℝ => (↑(x / ↑n) : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := by
+    ext t; congr 1; push_cast; ring
+  rw [this]
+  by_cases hn : n = 0
+  · -- n = 0 case: x/0 = 0, and 0^(c+tI)/(c+tI) = 0 since c+tI ≠ 0
+    subst hn; simp only [Nat.cast_zero, div_zero, Complex.ofReal_zero]
+    have h_zero : (fun t : ℝ => (0 : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) =
+        (fun _ => (0 : ℂ)) := by
+      ext t; have : ↑c + ↑t * I ≠ (0 : ℂ) := by
+        intro h; have := congr_arg Complex.re h
+        simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+              Complex.I_re, Complex.I_im] at this; linarith
+      simp [Complex.zero_cpow this]
+    rw [h_zero]; exact intervalIntegrable_const
+  · exact perron_integrand_intervalIntegrable _ c T hc
+      (div_pos (by linarith) (Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)))
 
 /-- **Dirichlet polynomial identification**: For Re(s) > 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
