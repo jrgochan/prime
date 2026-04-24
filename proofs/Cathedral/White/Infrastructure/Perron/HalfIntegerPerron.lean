@@ -28,6 +28,7 @@
 
 import Cathedral.White.Infrastructure.Perron.DirichletPoly
 import Cathedral.White.Infrastructure.DirichletZetaInverse
+import Cathedral.White.Infrastructure.SummabilityHelpers
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction Finset
@@ -206,6 +207,9 @@ lemma perron_formula_error_bound_full (m : ℕ) (hm : 2 ≤ m) (c T : ℝ) (N : 
 -- §3. Half-Integer Log Sum Bound
 -- ═══════════════════════════════════════════
 
+
+
+set_option maxHeartbeats 800000 in
 /-- **Helper 2**: The half-integer log sum bound.
 
     At half-integers, using 1/|log(X/n)| ≤ 8X, we get:
@@ -218,7 +222,43 @@ lemma perron_log_sum_bound (c : ℝ) (hc : 1 < c) :
       let X : ℝ := (m : ℝ) + 1/2
       ∑ n ∈ Finset.Icc 1 N,
         (X / ↑n) ^ c / |Real.log (X / ↑n)| ≤ C_sum * X ^ (c + 1) := by
-  sorry
+  open Cathedral.White.Infrastructure.SummabilityHelpers in
+  -- Use pre-proved lemmas from SummabilityHelpers
+  set ζc := ∑' n : ℕ, ((n : ℝ) ^ c)⁻¹
+  have hζc_pos : 0 < ζc := rpow_inv_tsum_pos hc
+  refine ⟨8 * ζc, by linarith, fun m hm N => ?_⟩
+  intro X
+  have hX_pos : (0 : ℝ) < X := by positivity
+  -- Step 1: half_integer_log_bound gives: each term ≤ (X/n)^c · 8X
+  have step1 : ∑ n ∈ Finset.Icc 1 N, (X / ↑n) ^ c / |Real.log (X / ↑n)| ≤
+      ∑ n ∈ Finset.Icc 1 N, (X / ↑n) ^ c * (8 * X) := by
+    apply Finset.sum_le_sum; intro n hn
+    have hn1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+    obtain ⟨hlog_pos, hlog_bound⟩ := half_integer_log_bound m hm n hn1
+    have hA : 0 ≤ (X / ↑n) ^ c :=
+      rpow_nonneg (div_nonneg hX_pos.le (Nat.cast_nonneg' n)) c
+    calc (X / ↑n) ^ c / |Real.log (X / ↑n)|
+        = (X / ↑n) ^ c * (1 / |Real.log (X / ↑n)|) := by ring
+      _ ≤ (X / ↑n) ^ c * (8 * X) := mul_le_mul_of_nonneg_left hlog_bound hA
+  -- Steps 2-4: Factor, bound by tsum, assemble
+  -- ∑ (X/n)^c · 8X = 8X · ∑ X^c · n^{-c} = 8X^{c+1} · ∑ n^{-c} ≤ 8ζc · X^{c+1}
+  calc ∑ n ∈ Finset.Icc 1 N, (X / ↑n) ^ c / |Real.log (X / ↑n)|
+      ≤ ∑ n ∈ Finset.Icc 1 N, (X / ↑n) ^ c * (8 * X) := step1
+    _ ≤ 8 * ζc * X ^ (c + 1) := by
+        -- Each term: (X/n)^c * 8X = 8X^{c+1} · (n^c)^{-1}
+        -- Sum: 8X^{c+1} · ∑ (n^c)⁻¹ ≤ 8X^{c+1} · ζc
+        have h_bound : ∀ n ∈ Finset.Icc 1 N,
+            (X / ↑n) ^ c * (8 * X) = 8 * X ^ (c + 1) * ((n : ℝ) ^ c)⁻¹ := by
+          intro n hn
+          have hn1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+          rw [div_rpow_eq_mul_inv hX_pos (by omega) c]
+          -- Goal: X ^ c * ((n : ℝ) ^ c)⁻¹ * (8 * X) = 8 * X ^ (c + 1) * ((n : ℝ) ^ c)⁻¹
+          rw [show X ^ c * ((n : ℝ) ^ c)⁻¹ * (8 * X) =
+              8 * (X * X ^ c) * ((n : ℝ) ^ c)⁻¹ from by ring,
+            mul_rpow_eq_rpow_succ hX_pos c]
+        rw [Finset.sum_congr rfl h_bound, ← Finset.mul_sum]
+        have hstep3 := rpow_inv_partial_le_tsum hc (Finset.Icc 1 N)
+        nlinarith [rpow_nonneg hX_pos.le (c + 1)]
 
 -- ═══════════════════════════════════════════
 -- §4. Dirichlet Tail Integral Bound
