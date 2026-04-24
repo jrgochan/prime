@@ -52,6 +52,7 @@ const ROUTE_LABELS: Record<string, string> = {
 
 const CATEGORY_COLORS: Record<string, string> = {
   axiom: "#ef4444",
+  sorry: "#f59e0b",
   proved: "#10b981",
   definition: "#3b82f6",
 };
@@ -64,6 +65,7 @@ function getNodeColor(node: ProofNode, colorMode: string): string {
 function getNodeRadius(node: ProofNode): number {
   if (node.id === "riemann_hypothesis") return 16;
   if (node.category === "axiom") return 9;
+  if (node.category === "sorry") return 8;
   if (
     node.id === "nyman_beurling_equivalence" ||
     node.id === "lagarias_for_primes"
@@ -273,7 +275,7 @@ export default function ProofTreePage() {
       .attr("filter", (d) =>
         d.id === "riemann_hypothesis"
           ? "url(#glow-strong)"
-          : d.category === "axiom"
+          : d.category === "axiom" || d.category === "sorry"
             ? "url(#glow)"
             : "none"
       )
@@ -434,6 +436,7 @@ export default function ProofTreePage() {
             n.category === "axiom" &&
             (n.route === "converse" || n.route === "forward")
         ).length,
+        sorry: data.nodes.filter((n) => n.category === "sorry").length,
       }
     : null;
 
@@ -574,15 +577,15 @@ export default function ProofTreePage() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Axioms</span>
-              <span className="text-red-400 font-mono font-bold">
-                {stats.axioms}
+              <span className="text-slate-500">Sorry theorems</span>
+              <span className="text-amber-400 font-mono font-bold">
+                {stats.sorry}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-slate-500">Critical path axioms</span>
-              <span className="text-amber-400 font-mono font-bold">
-                {stats.criticalAxioms}
+              <span className="text-slate-500">Axioms</span>
+              <span className="text-red-400 font-mono font-bold">
+                {stats.axioms}
               </span>
             </div>
             <div className="flex justify-between">
@@ -597,18 +600,26 @@ export default function ProofTreePage() {
                 <span className="text-slate-500">Proof completion</span>
                 <span className="text-emerald-400 font-mono">
                   {Math.round(
-                    (stats.proved / (stats.proved + stats.axioms)) * 100
+                    (stats.proved / (stats.proved + stats.axioms + stats.sorry)) * 100
                   )}
                   %
                 </span>
               </div>
               <div className="w-full h-1.5 bg-[#1e2148] rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                  style={{
-                    width: `${(stats.proved / (stats.proved + stats.axioms)) * 100}%`,
-                  }}
-                />
+                <div className="h-full flex">
+                  <div
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    style={{
+                      width: `${(stats.proved / (stats.proved + stats.axioms + stats.sorry)) * 100}%`,
+                    }}
+                  />
+                  <div
+                    className="h-full bg-amber-500 transition-all duration-500"
+                    style={{
+                      width: `${(stats.sorry / (stats.proved + stats.axioms + stats.sorry)) * 100}%`,
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>

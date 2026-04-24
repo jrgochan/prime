@@ -64,6 +64,8 @@ def classify_category(kind: str, has_sorry: bool) -> str:
     if kind in ("def", "abbrev", "instance"):
         return "definition"
     # theorem/lemma
+    if has_sorry:
+        return "sorry"
     return "proved"
 
 
@@ -84,6 +86,34 @@ def extract_signature(lines: list[str], line_idx: int) -> str:
     return sig
 
 
+def find_body_end(lines: list[str], start_idx: int) -> int:
+    """Find the end of a declaration body by tracking indentation.
+    Returns the line index of the next top-level declaration or EOF."""
+    for i in range(start_idx + 1, len(lines)):
+        line = lines[i]
+        stripped = line.lstrip()
+        # Next top-level declaration
+        if stripped and not line[0].isspace() and DECL_RE.match(stripped):
+            return i
+        # Namespace/section boundaries
+        if stripped.startswith("end ") or stripped.startswith("namespace ") or stripped.startswith("section "):
+            return i
+    return len(lines)
+
+
+def count_sorry_in_body(lines: list[str], start_idx: int, end_idx: int) -> int:
+    """Count actual sorry statements (not in comments) in the body."""
+    count = 0
+    for i in range(start_idx, end_idx):
+        line = lines[i]
+        # Strip comments
+        comment_pos = line.find("--")
+        code_part = line[:comment_pos] if comment_pos >= 0 else line
+        if re.search(r'\bsorry\b', code_part):
+            count += 1
+    return count
+
+
 def parse_file(filepath: Path):
     """Parse a single Lean file for declarations and imports."""
     text = filepath.read_text(encoding="utf-8", errors="replace")
@@ -97,19 +127,34 @@ def parse_file(filepath: Path):
     for m in IMPORT_RE.finditer(text):
         imports.append(m.group(1))
 
-    # Extract declarations
+    # Collect all declaration positions first
+    decl_positions = []
     for m in DECL_RE.finditer(text):
         kind = m.group(1).replace("noncomputable ", "")
         name = m.group(2)
-
-        # Skip internal/helper names
         if name.startswith("_") or name in ("instDecidable",):
             continue
-
         line_num = text[: m.start()].count("\n") + 1
+        decl_positions.append((kind, name, line_num))
+
+    # Extract declarations with sorry detection
+    for idx, (kind, name, line_num) in enumerate(decl_positions):
         sig = extract_signature(lines, line_num - 1)
         route = classify_route(str(filepath.relative_to(CATHEDRAL_DIR)))
-        category = classify_category(kind, False)
+
+        # Find body extent: from this decl to the next one
+        if idx + 1 < len(decl_positions):
+            body_end = decl_positions[idx + 1][2] - 1
+        else:
+            body_end = len(lines)
+
+        # Count sorries in the body (not comments)
+        sorry_count = 0
+        if kind in ("theorem", "lemma"):
+            sorry_count = count_sorry_in_body(lines, line_num - 1, body_end)
+
+        has_sorry = sorry_count > 0
+        category = classify_category(kind, has_sorry)
 
         nodes.append(
             {
@@ -120,6 +165,7 @@ def parse_file(filepath: Path):
                 "file": rel_path,
                 "line": line_num,
                 "signature": sig,
+                "sorryCount": sorry_count,
             }
         )
 
@@ -198,6 +244,7 @@ def main():
     # Count stats
     axioms = [n for n in all_nodes if n["category"] == "axiom"]
     proved = [n for n in all_nodes if n["category"] == "proved"]
+    sorry_nodes = [n for n in all_nodes if n["category"] == "sorry"]
     defs = [n for n in all_nodes if n["category"] == "definition"]
 
     # Unique files
@@ -208,10 +255,11 @@ def main():
         "totalEdges": len(edges),
         "axiomCount": len(axioms),
         "theoremCount": len(proved),
+        "sorryCount": len(sorry_nodes),
         "definitionCount": len(defs),
         "provedTheorems": len(proved),
         "fileCount": len(files_set),
-        "description": f"Cathedral proof architecture: {len(axioms)} axioms, {len(proved)} theorems, {len(defs)} definitions across {len(files_set)} files",
+        "description": f"Cathedral proof architecture: {len(axioms)} axioms, {len(proved)} proved, {len(sorry_nodes)} sorry, {len(defs)} definitions across {len(files_set)} files",
         "generatedAt": datetime.now().isoformat(),
     }
 
@@ -222,7 +270,7 @@ def main():
         json.dump(data, f, indent=2)
 
     print(f"✓ Generated {OUTPUT}")
-    print(f"  Nodes: {meta['totalNodes']} ({meta['axiomCount']} axioms, {meta['theoremCount']} theorems, {meta['definitionCount']} defs)")
+    print(f"  Nodes: {meta['totalNodes']} ({meta['axiomCount']} axioms, {meta['theoremCount']} proved, {meta['sorryCount']} sorry, {meta['definitionCount']} defs)")
     print(f"  Edges: {meta['totalEdges']}")
     print(f"  Files: {meta['fileCount']}")
     print(f"  Routes: {dict(sorted({n['route'] for n in all_nodes}))}" if False else "")
@@ -234,9 +282,14 @@ def main():
     print(f"  Routes: {routes}")
 
     # Print axioms
-    print(f"\n  Axioms:")
+    print(f"\n  Axioms ({len(axioms)}):")
     for a in axioms:
         print(f"    - {a['id']} ({a['file']}:{a['line']})")
+
+    if sorry_nodes:
+        print(f"\n  Sorry theorems ({len(sorry_nodes)}):")
+        for s in sorry_nodes:
+            print(f"    - {s['id']} ({s['file']}:{s['line']}) [{s['sorryCount']} sorry]")
 
 
 if __name__ == "__main__":
