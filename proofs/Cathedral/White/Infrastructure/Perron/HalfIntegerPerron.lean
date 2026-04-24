@@ -357,17 +357,18 @@ lemma perron_log_sum_bound (c : ℝ) (hc : 1 < c) :
         have hstep3 := rpow_inv_partial_le_tsum hc (Finset.Icc 1 N)
         nlinarith [rpow_nonneg hX_pos.le (c + 1)]
 
--- ═══════════════════════════════════════════
--- §4. Dirichlet Tail Integral Bound
--- ═══════════════════════════════════════════
-
+set_option maxHeartbeats 800000 in
 /-- **Helper 3**: The Dirichlet tail integral bound.
 
     The difference between the finite Dirichlet polynomial and 1/ζ(s)
     integrated against x^s/s over [-T,T] is bounded by O(N^{1-c} · X^c · T).
 
     Uses: `moebius_partial_sum_approx` for the pointwise bound
-    ‖∑_{n=1}^N μ(n)/n^s - 1/ζ(s)‖ ≤ N^{1-Re(s)}/(Re(s)-1). -/
+    ‖∑_{n=1}^N μ(n)/n^s - 1/ζ(s)‖ ≤ N^{1-Re(s)}/(Re(s)-1).
+
+    Strategy: bound the integrand pointwise, then integrate the constant bound.
+    ‖(D_N - 1/ζ) · X^s/s‖ ≤ [N^{1-c}/(c-1)] · [X^c/c] on the line Re(s)=c.
+    Integrating over [-T,T] gives 2T times this, absorption of 1/(2π) ≤ 1. -/
 lemma dirichlet_tail_integral_bound (c : ℝ) (hc : 1 < c) :
     ∃ C_tail > 0, ∀ X T : ℝ, 0 < X → 0 < T → ∀ N : ℕ, 0 < N →
       ‖(1 / (2 * ↑Real.pi)) *
@@ -378,7 +379,64 @@ lemma dirichlet_tail_integral_bound (c : ℝ) (hc : 1 < c) :
             1 / riemannZeta (↑c + ↑t * I)) *
           ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))‖ ≤
       C_tail * (N : ℝ) ^ (1 - c) * X ^ c * T := by
-  sorry
+  -- C_tail = 2/(c · (c-1)) works (factor of 2 from [-T,T] length, 1/(2π) ≤ 1)
+  refine ⟨2 / (c * (c - 1)), div_pos two_pos (mul_pos (by linarith) (by linarith)),
+    fun X T hX hT N hN => ?_⟩
+  -- Step 1: Absorb 1/(2π) factor: ‖(1/(2π)) · z‖ ≤ ‖z‖
+  have h_pfx := Cathedral.White.Infrastructure.norm_one_div_two_pi_mul_le
+    (∫ t in (-T)..T,
+      (∑ n ∈ Finset.Icc 1 N,
+        (↑(ArithmeticFunction.moebius n) : ℂ) /
+          (↑n : ℂ) ^ (↑c + ↑t * I) -
+        1 / riemannZeta (↑c + ↑t * I)) *
+      ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)))
+  -- Step 2: Bound the integral norm by constant × interval length
+  -- Pointwise bound: for each t, the integrand norm ≤ N^{1-c}/(c-1) · X^c/c
+  have h_re_eq : ∀ t : ℝ, (↑c + ↑t * I : ℂ).re = c := by
+    intro t; simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im]
+  have h_s_ne : ∀ t : ℝ, (↑c + ↑t * I : ℂ) ≠ 0 := by
+    intro t h; have := congr_arg Complex.re h
+    simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+    linarith
+  have h_s_norm_ge : ∀ t : ℝ, c ≤ ‖(↑c + ↑t * I : ℂ)‖ := by
+    intro t; calc c = |(c : ℝ)| := (abs_of_pos (by linarith)).symm
+      _ = |(↑c + ↑t * I : ℂ).re| := by rw [h_re_eq]
+      _ ≤ ‖(↑c + ↑t * I : ℂ)‖ := Complex.abs_re_le_norm _
+  -- Step 3: Bound the integral
+  have h_int_bound : ‖∫ t in (-T)..T,
+      (∑ n ∈ Finset.Icc 1 N,
+        (↑(μ n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) -
+        1 / riemannZeta (↑c + ↑t * I)) *
+      ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))‖ ≤
+    (↑N : ℝ) ^ (1 - c) / (c - 1) * (X ^ c / c) * |T - (-T)| := by
+    apply intervalIntegral.norm_integral_le_of_norm_le_const
+    intro t _
+    -- ‖f · g‖ = ‖f‖ · ‖g‖
+    rw [norm_mul]
+    -- ‖f‖ ≤ N^{1-c}/(c-1) by moebius_partial_sum_approx
+    have h_tail := Cathedral.White.Infrastructure.moebius_partial_sum_approx
+      N hN (↑c + ↑t * I) (by rw [h_re_eq]; exact hc)
+    -- ‖g‖ = ‖X^s/s‖ = X^c/‖s‖ ≤ X^c/c
+    have h_norm_g : ‖(X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)‖ ≤ X ^ c / c := by
+      rw [norm_div, norm_cpow_eq_rpow_re_of_pos hX, h_re_eq]
+      exact div_le_div_of_nonneg_left (rpow_nonneg hX.le c) (by linarith : (0 : ℝ) < c) (h_s_norm_ge t)
+    -- Chain: ‖f·g‖ ≤ ‖f‖·‖g‖ ≤ bound₁·bound₂
+    have h_tail' : ‖∑ n ∈ Finset.Icc 1 N, (↑(μ n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) -
+        1 / riemannZeta (↑c + ↑t * I)‖ ≤ (↑N : ℝ) ^ (1 - c) / (c - 1) := by
+      calc _ ≤ (↑N : ℝ) ^ (1 - (↑c + ↑t * I).re) / ((↑c + ↑t * I).re - 1) := h_tail
+        _ = _ := by rw [h_re_eq]
+    exact mul_le_mul h_tail' h_norm_g (norm_nonneg _)
+      (div_nonneg (rpow_nonneg (Nat.cast_nonneg' N) _) (by linarith))
+  -- Step 4: Assemble: ‖(1/2π)·∫‖ ≤ ‖∫‖ ≤ bound · 2T = ...
+  have h_abs_2T : |T - (-T)| = 2 * T := by
+    rw [show T - (-T) = 2 * T from by ring, abs_of_pos (by linarith)]
+  calc ‖_‖ ≤ ‖∫ t in (-T)..T, _‖ := h_pfx
+    _ ≤ (↑N : ℝ) ^ (1 - c) / (c - 1) * (X ^ c / c) * |T - (-T)| := h_int_bound
+    _ = (↑N : ℝ) ^ (1 - c) / (c - 1) * (X ^ c / c) * (2 * T) := by rw [h_abs_2T]
+    _ = 2 / (c * (c - 1)) * (↑N : ℝ) ^ (1 - c) * X ^ c * T := by
+        have hc_pos : (0 : ℝ) < c := by linarith
+        have hc1_pos : (0 : ℝ) < c - 1 := by linarith
+        field_simp
 
 -- ═══════════════════════════════════════════
 -- §5. Main Theorem: Truncated Perron at Half-Integers
