@@ -583,8 +583,9 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
               apply mul_le_mul_of_nonneg_right _ (rpow_nonneg (by linarith) _)
               linarith
       · -- Small T case: 1 ≤ T < max(T₀, 1)
-        -- The integral is bounded by a continuous function on compact [1, max(T₀,1)]
-        -- T^{-1/2} ≥ max(T₀,1)^{-1/2} > 0, so K₁·T^{-1/2} is bounded below
+        -- This case requires bounding the integral on the compact T-range [1, max(T₀,1)]
+        -- and adjusting K₁ to absorb the maximum. The mathematical content is resolved
+        -- (continuous function on compact set is bounded), but the formalization is heavy.
         sorry
 
 -- ═══════════════════════════════════════════
