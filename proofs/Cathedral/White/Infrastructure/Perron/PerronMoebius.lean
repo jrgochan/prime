@@ -383,11 +383,119 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
     have hxc_pos : (0 : ℝ) < x ^ c := rpow_pos_of_pos hx_pos c
     linarith [mul_pos (mul_pos (mul_pos (by linarith : (0:ℝ) < 2) (by linarith : (0:ℝ) < c - sigma0)) hxc_pos) hC_pos]
   refine ⟨K₁, hK₁_pos, fun T hT => ?_⟩
-  -- Step 3: For T ≥ max(T₀, 1), use perron_moebius_rect + integrand bound
-  -- For T < max(T₀, 1), the bound holds trivially (adjust K₁)
-  -- We use perron_moebius_rect to reduce to horizontal integrals
-  -- then bound each horizontal using perron_integrand_bound_with_zeta
-  sorry
+  -- Step 3: Use the rectangle identity to reduce to horizontal bounds
+  have hT_pos : (0 : ℝ) < T := by linarith
+  have h_rect := perron_moebius_rect hRH x sigma0 c T hx hsigma0 hc hsigma0_c hT_pos hsigma0_lt_one
+  -- h_rect: ‖∫ diff‖ ≤ horiz_top + horiz_bot
+  -- Step 4: Bound each horizontal using perron_integrand_bound_with_zeta
+  -- For T ≥ max(T₀, 1), the integrand on each horizontal is ≤ x^c · C · T^{ε₀-1}
+  -- The horizontal integral over [σ₀, c] is then ≤ (c - σ₀) · x^c · C · T^{ε₀-1}
+  -- Both horizontals give the same bound (by |Im| = T for both ±T)
+  -- Total: ≤ 2 · (c-σ₀) · x^c · C · T^{ε₀-1}
+  -- Since ε₀ ≤ 1/2, T^{ε₀-1} ≤ T^{-1/2} for T ≥ 1
+  -- So: ≤ 2·(c-σ₀)·x^c·C · T^{-1/2} ≤ K₁ · T^{-1/2}
+  calc ‖∫ t in (-T)..T,
+      ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
+       (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
+         riemannZeta (↑sigma0 + ↑t * I)))‖
+      ≤ (∫ σ in sigma0..c,
+          ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
+        (∫ σ in sigma0..c,
+          ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) :=
+      h_rect
+    _ ≤ K₁ * T ^ (-((1 : ℝ)/2)) := by
+      -- Step A: bound each horizontal integral
+      -- Top horizontal: use perron_integrand_bound_with_zeta for σ + T*I
+      have h_bound_top := perron_integrand_bound_with_zeta x c sigma0 C T₀
+        hx hsigma0 hsigma0_c hC_pos hT₀_pos ε₀ hε₀_pos h_half_plus_ε₀ hzeta_bound
+      -- For T ≥ max(T₀, 1): pointwise bound on top horizontal
+      by_cases h_large : max T₀ 1 ≤ T
+      · -- Large T case: both horizontals bounded by integral_mono_on
+        have h_pw_top := h_bound_top T h_large
+        -- Top: ∫ ‖f(σ+Ti)‖ ≤ (c-σ₀)·x^c·C·T^{ε₀-1}
+        have h_top_bound : (∫ σ in sigma0..c,
+            ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) ≤
+            (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
+          have h_intble : IntervalIntegrable (fun σ =>
+              ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖)
+              volume sigma0 c := by
+            apply IntervalIntegrable.mono_fun' (intervalIntegrable_const
+              (c := x ^ c * C * T ^ (ε₀ - 1)))
+            · -- AEStronglyMeasurable: ContinuousOn.norm of the integrand
+              apply ContinuousOn.aestronglyMeasurable _ measurableSet_uIoc
+              apply ContinuousOn.norm
+              have hT_ge_1 : 1 ≤ T := le_trans (le_max_right _ _) h_large
+              have hφ : Continuous (fun σ : ℝ => (↑σ + ↑T * I : ℂ)) :=
+                continuous_ofReal.add continuous_const
+              have hs_ne : ∀ σ : ℝ, (↑σ + ↑T * I : ℂ) ≠ 1 := by
+                intro σ h; have := congr_arg Complex.im h
+                simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                  Complex.ofReal_re, Complex.I_re, Complex.I_im] at this
+                linarith
+              apply ContinuousOn.div
+              · exact hφ.continuousOn.const_cpow
+                  (Or.inl (Complex.ofReal_ne_zero.mpr (by linarith : (x : ℝ) ≠ 0)))
+              · exact hφ.continuousOn.mul
+                  (fun σ _ =>
+                    ContinuousAt.continuousWithinAt <|
+                      ContinuousAt.comp
+                        (differentiableAt_riemannZeta (hs_ne σ)).continuousAt
+                        hφ.continuousAt)
+              · intro σ hσ_mem; apply mul_ne_zero
+                · intro h0; have := congr_arg Complex.im h0
+                  simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im,
+                    Complex.ofReal_re, Complex.I_re, Complex.I_im] at this
+                  linarith
+                · have hre : (↑σ + ↑T * I : ℂ).re = σ := by
+                    simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+                      Complex.I_re, Complex.I_im, Complex.ofReal_im]
+                  have hσ_ge : sigma0 ≤ σ := by
+                    have := (Set.uIoc_subset_uIcc hσ_mem)
+                    rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at this
+                    exact this.1
+                  exact rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
+            · apply (ae_restrict_mem measurableSet_uIoc).mono
+              intro σ hσ; simp only [Real.norm_of_nonneg (norm_nonneg _)]
+              exact h_pw_top σ (Set.uIoc_subset_uIcc hσ)
+          calc ∫ σ in sigma0..c,
+                ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖
+              ≤ ∫ _σ in sigma0..c, x ^ c * C * T ^ (ε₀ - 1) :=
+                intervalIntegral.integral_mono_on (by linarith) h_intble
+                  intervalIntegrable_const
+                  (fun σ hσ => h_pw_top σ (Set.Icc_subset_uIcc hσ))
+            _ = (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
+                rw [intervalIntegral.integral_const, smul_eq_mul]
+        -- Bottom: same bound (|Im(σ+(-T)i)| = T = |Im(σ+Ti)|)
+        have h_bot_bound : (∫ σ in sigma0..c,
+            ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) ≤
+            (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
+          sorry -- Same as top by norm symmetry: ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖
+        -- Combined: top + bot ≤ 2·(c-σ₀)·x^c·C·T^{ε₀-1}
+        have h_combined : (∫ σ in sigma0..c,
+            ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
+          (∫ σ in sigma0..c,
+            ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) ≤
+          2 * (c - sigma0) * x ^ c * C * T ^ (ε₀ - 1) := by linarith
+        -- ε₀ ≤ 1/2 implies T^{ε₀-1} ≤ T^{-1/2} for T ≥ 1
+        have h_exp : T ^ (ε₀ - 1) ≤ T ^ (-((1 : ℝ)/2)) := by
+          apply rpow_le_rpow_of_exponent_le (by linarith)
+          linarith
+        -- Chain: ≤ 2(c-σ₀)·x^c·C · T^{-1/2} ≤ K₁ · T^{-1/2}
+        calc (∫ σ in sigma0..c,
+              ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
+            (∫ σ in sigma0..c,
+              ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖)
+            ≤ 2 * (c - sigma0) * x ^ c * C * T ^ (ε₀ - 1) := h_combined
+          _ ≤ 2 * (c - sigma0) * x ^ c * C * T ^ (-((1 : ℝ)/2)) := by
+              apply mul_le_mul_of_nonneg_left h_exp
+              apply mul_nonneg (mul_nonneg (mul_nonneg (by linarith) (by linarith)) (rpow_nonneg (by linarith) _)) hC_pos.le
+          _ ≤ K₁ * T ^ (-((1 : ℝ)/2)) := by
+              apply mul_le_mul_of_nonneg_right _ (rpow_nonneg (by linarith) _)
+              linarith
+      · -- Small T case: 1 ≤ T < max(T₀, 1)
+        -- The integral is bounded by a continuous function on compact [1, max(T₀,1)]
+        -- T^{-1/2} ≥ max(T₀,1)^{-1/2} > 0, so K₁·T^{-1/2} is bounded below
+        sorry
 
 -- ═══════════════════════════════════════════
 -- §3. Sub-lemmas for the Truncated Perron Formula
@@ -657,21 +765,9 @@ theorem truncated_perron_for_moebius (x c : ℝ) (hx : 2 ≤ x) (hc : 1 < c) :
 theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps) :
     ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((summatoryMoebius x : ℤ) : ℝ)| ≤ C * x ^ ((1 : ℝ)/2 + eps) := by
-  -- Parameter choices:
-  set sigma0 := 1/2 + eps/2 with _hσ₀_def
-  set c := 1 + eps with _hc_def
-  have hsigma0 : 1/2 < sigma0 := by linarith
-  have hc : 1 < c := by linarith
-  have hsigma0_c : sigma0 < c := by linarith
-  -- Key ingredients:
-  -- (1) Truncated Perron (corrected: complex integral, norm outside):
-  --     ‖M(x) - (1/2πi)∫_{Re=c}‖ ≤ K·x^c/T
-  -- (2) Contour shift (corrected: explicit bound, not Tendsto):
-  --     ‖∫_{Re=c} - ∫_{Re=σ₀}‖ ≤ K₁·T^{-1/2}
-  -- (3) Lindelöf bound on σ₀-line:
-  --     ‖∫_{Re=σ₀}‖ ≤ C·x^{σ₀}·T^{ε/2}
-  -- (4) Triangle inequality: |M(x)| ≤ (1) + (2) + (3)
-  -- (5) With T = x: O(x^ε) + O(x^{-1/2}) + O(x^{1/2+ε})
+  -- For eps ≥ 1, reduce to eps' < 1 (since x^{1/2+eps} ≥ x^{1/2+eps'} for eps ≥ eps')
+  -- For eps < 1, proceed with σ₀ = 1/2 + eps/2 < 1
+  -- In both cases, the assembly is the same sorry
   sorry
 
 -- ═══════════════════════════════════════════
