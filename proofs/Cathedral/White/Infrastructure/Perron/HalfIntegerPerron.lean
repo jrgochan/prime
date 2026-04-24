@@ -170,6 +170,18 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
     for arbitrary real x. -/
 lemma summatoryMoebius_eq_half_integer (x : ℝ) (hx : 2 ≤ x) :
     summatoryMoebius x = summatoryMoebius (↑⌊x⌋ + 1/2 : ℝ) := by
-  sorry
+  unfold summatoryMoebius
+  congr 1
+  -- Need: ⌊x⌋₊ = ⌊(↑⌊x⌋ : ℝ) + 1/2⌋₊
+  -- Key: ⌊x⌋₊ = n iff n ≤ x < n+1, and ⌊n + 1/2⌋₊ = n
+  have hx_nn : 0 ≤ x := by linarith
+  have : ⌊(⌊x⌋₊ : ℝ) + 1/2⌋₊ = ⌊x⌋₊ := by
+    apply Nat.floor_eq_iff (by positivity : 0 ≤ (⌊x⌋₊ : ℝ) + 1/2) |>.mpr
+    constructor
+    · linarith [Nat.floor_le hx_nn]
+    · linarith [Nat.lt_floor_add_one x]
+  -- Now need ↑⌊x⌋ = ⌊x⌋₊ in the cast
+  have hcast : (↑⌊x⌋ : ℝ) = (⌊x⌋₊ : ℝ) := (natCast_floor_eq_intCast_floor hx_nn).symm
+  rw [hcast, this]
 
 end Cathedral.White.Infrastructure.HalfIntegerPerron
