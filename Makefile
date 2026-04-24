@@ -8,11 +8,12 @@
 #   make setup   — install everything
 # ============================================
 
-.PHONY: help build papers dashboard verify axioms dump dump-rh stats clean
+.PHONY: help build papers dashboard visualizer verify axioms dump dump-rh stats clean
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
 .PHONY: sedenion axiom-hunt spectral-engine viewport
+.PHONY: proof-tree audit
 .DEFAULT_GOAL := help
 
 ENV := scripts/env.sh
@@ -60,6 +61,31 @@ dashboard: ## Launch the Cathedral Dashboard (Next.js)
 		cd visualizer && npm install; \
 	fi
 	cd visualizer && npm run dev
+
+visualizer: dashboard ## Alias for dashboard
+
+proof-tree: ## Regenerate proof tree data from Lean sources
+	@$(ENV) require python3
+	@echo "  Regenerating proof tree from Lean sources..."
+	@python3 visualizer/scripts/generate_proof_tree.py
+	@echo ""
+	@echo "  View at: http://localhost:3000/proof-tree"
+	@echo "  (Run 'make dashboard' if the server isn't running)"
+
+audit: ## Full Cathedral sorry/axiom audit
+	@$(ENV) require python3
+	@echo ""
+	@echo "  🏛️  Cathedral Audit"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@python3 visualizer/scripts/generate_proof_tree.py
+	@echo ""
+	@echo "  ── Sorry Details ──"
+	@find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/Scratch/*' \
+		-exec grep -Hn '^\s*sorry' {} \; 2>/dev/null | \
+		sed 's|proofs/Cathedral/||' || echo "  (none)"
+	@echo ""
+	@echo "  ═══════════════════════════════════════════"
 
 experiment-vasyunin: ## Run 256-bit MPFR Gram matrix verification
 	@$(ENV) require cargo
@@ -170,9 +196,9 @@ stats: ## Show project statistics
 	@printf "  Total lines:        " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
 	@printf "  Experiments:        " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
 	@echo ""
-	@echo "  Crown axioms:       7"
-	@echo "  Total axioms:       42"
-	@echo "  Release:            night-assault"
+	@printf "  Axioms:             " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^axiom ' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@printf "  Sorries:            " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec grep -c '^\s*sorry$$' {} + 2>/dev/null | awk -F: '{s+=$$2}END{print s}'
+	@echo ""
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
@@ -198,7 +224,7 @@ help: ## Show this help message
 	@grep -E '^(build|verify|axioms|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 2: EXPERIMENTS & VISUALIZATION ─────────────────"
-	@grep -E '^(dashboard|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(dashboard|visualizer|proof-tree|audit|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 3: HISTORICAL TOOLS ────────────────────────────"
 	@grep -E '^(sedenion|axiom-hunt|spectral-engine|viewport):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
