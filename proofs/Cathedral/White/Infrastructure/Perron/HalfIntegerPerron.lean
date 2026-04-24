@@ -127,7 +127,7 @@ lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
     · -- k ≥ 0: |k + 1/2| = k + 1/2 ≥ 1/2
       rw [abs_of_nonneg (by linarith)]; linarith
     · -- k < 0: k ≤ -1, so k + 1/2 ≤ -1/2, |k + 1/2| ≥ 1/2
-      push_neg at hk_nn
+      push Not at hk_nn
       have : k ≤ -1 := Int.le_sub_one_of_lt (by exact_mod_cast hk_nn)
       have : (k : ℝ) ≤ -1 := by exact_mod_cast this
       rw [abs_of_neg (by linarith)]; linarith
@@ -161,7 +161,7 @@ lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
         _ ≤ (↑n - X) / ↑n := h_bound
         _ ≤ |Real.log (X / ↑n)| := h_abs_log
     · -- n > 4X: X/n < 1/4, so |log(X/n)| ≥ 1 - X/n > 3/4 ≥ 1/(8X)
-      push_neg at hn_le
+      push Not at hn_le
       have hXn_small : X / ↑n < 1/4 := by
         rw [div_lt_iff₀ hn_pos]; linarith
       -- |log(X/n)| ≥ 1 - X/n > 1 - 1/4 = 3/4 ≥ 1/(8X) since X ≥ 5/2
@@ -210,7 +210,7 @@ lemma perron_formula_error_bound_full (m : ℕ) (hm : 2 ≤ m) (c T : ℝ) (N : 
   -- Step 1: M(X) = ∑_{n=1}^m μ(n) since ⌊X⌋₊ = m
   have h_floor : ⌊X⌋₊ = m := by
     apply Nat.floor_eq_iff (by positivity : 0 ≤ X) |>.mpr
-    constructor <;> simp [X] <;> linarith
+    refine ⟨?_, ?_⟩ <;> (simp [X]; try linarith)
   have hM : (summatoryMoebius X : ℤ) = ∑ n ∈ Finset.Icc 1 m, μ n := by
     unfold summatoryMoebius; rw [h_floor]
   -- Step 2: X/n > 1 ↔ n ≤ m, X/n < 1 ↔ n ≥ m+1
