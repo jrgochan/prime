@@ -52,6 +52,45 @@ theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
   sorry
 
 -- ═══════════════════════════════════════════
+-- §1b. rpow Helpers for T = X² Assembly
+-- All PROVED — zero sorry.
+-- ═══════════════════════════════════════════
+
+/-- (X²)^{-1/2} = X^{-1} for X > 0. -/
+lemma rpow_sq_neg_half {X : ℝ} (hX : 0 < X) :
+    (X ^ (2 : ℝ)) ^ (-((1:ℝ)/2)) = X ^ (-(1 : ℝ)) := by
+  rw [← rpow_mul hX.le]; norm_num
+
+/-- (X²)^{e} = X^{2e} for X > 0. -/
+lemma rpow_sq_mul_exp {X e : ℝ} (hX : 0 < X) :
+    (X ^ (2 : ℝ)) ^ e = X ^ (2 * e) := by
+  rw [← rpow_mul hX.le]
+
+/-- Perron term collapse: K * X^{c+1} / X² = K * X^{c-1}. -/
+lemma perron_exp_collapse {K X c : ℝ} (hX : 0 < X) :
+    K * X ^ (c + 1) / X ^ (2 : ℝ) = K * X ^ (c - 1) := by
+  rw [mul_div_assoc, ← rpow_sub hX]; congr 1; ring
+
+/-- Shift term collapse: K₁ * X^c * (X²)^{-1/2} = K₁ * X^{c-1}. -/
+lemma shift_exp_collapse {K₁ X c : ℝ} (hX : 0 < X) :
+    K₁ * X ^ c * (X ^ (2 : ℝ)) ^ (-((1:ℝ)/2)) = K₁ * X ^ (c - 1) := by
+  rw [rpow_sq_neg_half hX, mul_assoc, ← rpow_add hX]; ring_nf
+
+/-- Vertical term collapse: K₂ * X^σ₀ * (X²)^{eps'} = K₂ * X^{σ₀+2eps'}. -/
+lemma vert_exp_collapse {K₂ X sigma0 eps' : ℝ} (hX : 0 < X) :
+    K₂ * X ^ sigma0 * (X ^ (2 : ℝ)) ^ eps' = K₂ * X ^ (sigma0 + 2 * eps') := by
+  rw [rpow_sq_mul_exp hX, mul_assoc, ← rpow_add hX]
+
+-- norm_one_div_two_pi_le already in Defs.lean (imported via VerticalBounds)
+
+/-- Push X → x: X^α ≤ a^α * x^α when X ≤ a*x with a,x > 0, α > 0. -/
+lemma rpow_le_mul_rpow {X x a α : ℝ} (hX : 0 < X) (hx : 0 < x) (ha : 0 < a)
+    (hα : 0 < α) (h : X ≤ a * x) :
+    X ^ α ≤ a ^ α * x ^ α := by
+  calc X ^ α ≤ (a * x) ^ α := rpow_le_rpow hX.le h hα.le
+    _ = a ^ α * x ^ α := mul_rpow ha.le hx.le
+
+-- ═══════════════════════════════════════════
 -- §2. Inner Integral Bound (compact [-T₀,T₀])
 -- ═══════════════════════════════════════════
 
