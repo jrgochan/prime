@@ -21,6 +21,7 @@
 import Cathedral.White.Infrastructure.Perron.Formula
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Cathedral.White.Infrastructure.ZetaConvexity
+import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SumIntegralComparisons
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.Topology.Algebra.InfiniteSum.Real
@@ -35,20 +36,106 @@ namespace Cathedral.White.Infrastructure
 -- §1. Sub-lemmas for the Contour Shift
 -- ═══════════════════════════════════════════
 
-/-- **ContinuousOn** for the integrand x^s/(s·ζ(s)) on the rectangle.
-    riemannZeta is defined (finite) at all s including s=1, and s·ζ(s) ≠ 0
-    at every point of the rectangle (s ≠ 0 since Re(s) > 1/2,
-    and ζ(s) ≠ 0 for Re(s) > 1/2 under RH, except at s=1 where ζ(1) ≠ 0
-    by definition). -/
-private lemma perron_moebius_integrand_continuousOn (_hRH : RiemannHypothesis)
-    (x sigma0 c T : ℝ) (_hx : 1 < x) (_hsigma0 : 1/2 < sigma0)
+/-- **THE PATCHED FUNCTION TRICK** (due to Gemini Theorist):
+    Because `riemannZeta 1` evaluates to a finite junk value in Mathlib,
+    the unpatched integrand x^s/(s·ζ(s)) is discontinuous at s=1.
+    We patch it to 0, matching the mathematical limit since (s-1)ζ(s) → 1,
+    so x^s/(s·ζ(s)) → x^1/(1·∞) = 0. -/
+noncomputable def f_patch (x : ℝ) (s : ℂ) : ℂ :=
+  if s = 1 then 0 else (x : ℂ) ^ s / (s * riemannZeta s)
+
+/-- **ContinuousOn** for the PATCHED integrand on the rectangle.
+    Architecture (due to Gemini Theorist):
+    - Away from s=1: f_patch = x^s/(s·ζ(s)), differentiable hence continuous.
+    - At s=1: f_patch(1) = 0 matches lim_{s→1} x^s/(s·ζ(s)) = 0.
+      Factor: x^s/(s·ζ(s)) = (x^s/s) · (s-1)/((s-1)·ζ(s)).
+      By riemannZeta_residue_one: (s-1)·ζ(s) → 1, so the ratio → 0.
+    ContinuousOn follows since ContinuousAt holds at every point of the rectangle. -/
+private lemma f_patch_continuousOn (hRH : RiemannHypothesis)
+    (x sigma0 c T : ℝ) (hx : 1 < x) (hsigma0 : 1/2 < sigma0)
     (_hc : 1 < c) (_hsigma0_c : sigma0 < c) (_hT : 0 < T) :
-    ContinuousOn (fun s => (x : ℂ) ^ s / (s * riemannZeta s))
+    ContinuousOn (f_patch x)
       (Set.uIcc sigma0 c ×ℂ Set.uIcc (-T) T) := by
-  -- riemannZeta is continuous on ℂ (defined everywhere, including s=1).
-  -- x^s is continuous (x > 0 ∈ slitPlane).
-  -- s·ζ(s) ≠ 0 on the rectangle: s ≠ 0 (Re > 1/2) and ζ(s) ≠ 0 (RH).
-  sorry
+  -- ContinuousOn ↔ ContinuousAt at each point of the set
+  intro s hs
+  by_cases h1 : s = 1
+  · -- Case s = 1: Need ContinuousWithinAt at the pole
+    -- f_patch x 1 = 0, so we need Tendsto (f_patch x) (𝓝 1) (𝓝 0)
+    -- Factor: x^s/(s·ζ(s)) = (x^s/s) · (s-1)/((s-1)·ζ(s))
+    -- By riemannZeta_residue_one: (s-1)·ζ(s) → 1
+    -- So: (s-1)/((s-1)·ζ(s)) → 0/1 = 0, and x^s/s → x (bounded)
+    -- Product → x · 0 = 0 = f_patch x 1
+    subst h1
+    -- Goal: ContinuousWithinAt (f_patch x) rect 1
+    -- Suffices: ContinuousAt (f_patch x) 1
+    apply ContinuousAt.continuousWithinAt
+    -- f_patch x is an "update" function:
+    -- f_patch x = Function.update (fun s => x^s/(s·ζ(s))) 1 0
+    -- ContinuousAt ↔ the limit of x^s/(s·ζ(s)) as s → 1 equals 0
+    rw [show f_patch x = Function.update (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) 1 0 from by
+      ext s; simp only [f_patch, Function.update]
+      split_ifs <;> simp]
+    rw [continuousAt_update_same]
+    -- Goal: Tendsto (fun s => x^s/(s·ζ(s))) (𝓝[≠] 1) (𝓝 0)
+    -- Factor: x^s/(s·ζ(s)) = (x^s/s) · (s-1)/((s-1)·ζ(s))
+    have hx_pos : (0 : ℝ) < x := by linarith
+    -- Step 1: (s-1)/((s-1)·ζ(s)) → 0 as s → 1
+    have h_vanish : Tendsto (fun s => (s - 1) / ((s - 1) * riemannZeta s))
+        (𝓝[≠] (1 : ℂ)) (𝓝 0) := by
+      have h_num : Tendsto (fun s : ℂ => s - 1) (𝓝[≠] 1) (𝓝 0) := by
+        rw [show (0 : ℂ) = 1 - 1 from by ring]
+        exact (continuous_id.sub continuous_const).continuousAt.tendsto.mono_left
+          nhdsWithin_le_nhds
+      have h_den : Tendsto (fun s : ℂ => (s - 1) * riemannZeta s) (𝓝[≠] 1) (𝓝 1) :=
+        riemannZeta_residue_one
+      have := h_num.div h_den one_ne_zero
+      rwa [zero_div] at this
+    -- Step 2: x^s/s → x at s = 1 (continuous)
+    have h_bounded : Tendsto (fun s => (x : ℂ) ^ s / s)
+        (𝓝[≠] (1 : ℂ)) (𝓝 ((x : ℂ) ^ (1 : ℂ) / 1)) := by
+      apply Filter.Tendsto.mono_left _ nhdsWithin_le_nhds
+      exact ContinuousAt.div
+        (ContinuousAt.const_cpow continuousAt_id
+          (Or.inl (Complex.ofReal_ne_zero.mpr (ne_of_gt hx_pos))))
+        continuousAt_id (one_ne_zero)
+    -- Step 3: Product = x^s/(s·ζ(s))
+    rw [show (0 : ℂ) = (x : ℂ) ^ (1 : ℂ) / 1 * 0 from by ring]
+    have h_eq : (fun s => ((x : ℂ) ^ s / s) * ((s - 1) / ((s - 1) * riemannZeta s)))
+        =ᶠ[𝓝[≠] (1 : ℂ)] (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) := by
+      filter_upwards [self_mem_nhdsWithin] with s hs
+      simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hs
+      have hs1 : s - 1 ≠ 0 := sub_ne_zero.mpr hs
+      field_simp
+    exact (h_bounded.mul h_vanish).congr' h_eq
+  · -- Case s ≠ 1: f_patch agrees with x^s/(s·ζ(s)) near s
+    -- which is continuous since s·ζ(s) ≠ 0 and all components are continuous
+    rw [ContinuousWithinAt]
+    have hx_pos : (0 : ℝ) < x := by linarith
+    have hs_re : 1/2 < s.re := by
+      have := (Complex.mem_reProdIm.mp hs).1
+      simp [Set.mem_uIcc] at this
+      cases this with
+      | inl h => linarith [h.1]
+      | inr h => linarith [h.1]
+    have hs_ne_zero : s ≠ 0 := by
+      intro h; rw [h] at hs_re; simp at hs_re; linarith
+    have hζ_ne : riemannZeta s ≠ 0 := rh_zeta_ne_zero hRH hs_re h1
+    have hsζ_ne : s * riemannZeta s ≠ 0 := mul_ne_zero hs_ne_zero hζ_ne
+    -- x^s/(s·ζ(s)) is ContinuousAt s (direct from component continuity)
+    have h_cont : ContinuousAt (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) s := by
+      exact ContinuousAt.div
+        (ContinuousAt.const_cpow continuousAt_id
+          (Or.inl (Complex.ofReal_ne_zero.mpr (ne_of_gt hx_pos))))
+        (continuousAt_id.mul (differentiableAt_riemannZeta h1).continuousAt)
+        hsζ_ne
+    -- f_patch =ᶠ x^s/(s·ζ(s)) near s (since s ≠ 1)
+    have h_eq : f_patch x =ᶠ[𝓝 s] fun s => (x : ℂ) ^ s / (s * riemannZeta s) := by
+      exact Filter.eventuallyEq_iff_exists_mem.mpr
+        ⟨{1}ᶜ, isOpen_compl_singleton.mem_nhds h1,
+         fun z hz => by
+          simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz
+          simp only [f_patch, if_neg hz]⟩
+    exact (h_cont.congr h_eq.symm).continuousWithinAt
 
 /-- **PROVED**: The integrand x^s/(s·ζ(s)) is DifferentiableAt for s ≠ 1
     with Re(s) > 1/2 under RH.
@@ -68,14 +155,28 @@ private lemma perron_moebius_integrand_diffAt (hRH : RiemannHypothesis)
     (differentiableAt_id.mul (differentiableAt_riemannZeta hs_ne))
     hsζ_ne
 
+/-- **PROVED**: The patched function inherits differentiability away from s=1
+    via Filter.EventuallyEq on the punctured neighborhood. -/
+private lemma f_patch_diffAt (hRH : RiemannHypothesis)
+    (x : ℝ) (hx : 1 < x) (s : ℂ) (hs_re : 1/2 < s.re) (hs_ne : s ≠ 1) :
+    DifferentiableAt ℂ (f_patch x) s := by
+  have h_eq : (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) =ᶠ[𝓝 s] f_patch x := by
+    exact Filter.eventuallyEq_iff_exists_mem.mpr
+      ⟨{1}ᶜ, isOpen_compl_singleton.mem_nhds hs_ne,
+       fun z hz => by
+        simp only [Set.mem_compl_iff, Set.mem_singleton_iff] at hz
+        simp only [f_patch, if_neg hz]⟩
+  exact (perron_moebius_integrand_diffAt hRH x hx s hs_re hs_ne).congr_of_eventuallyEq h_eq.symm
+
 /-- **Rectangle Identity** via Cauchy-Goursat off_countable.
-    Uses: integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
-    with exceptional set {1} (the pole of ζ).
-    Sub-lemmas: perron_moebius_integrand_continuousOn (sorry),
-    perron_moebius_integrand_diffAt (PROVED). -/
+    Architecture: apply CG to `f_patch` (ContinuousOn the rectangle),
+    convert boundary integrals back to `f` (since s ≠ 1 on boundary),
+    then use triangle inequality.
+    Dependencies: f_patch_continuousOn ✅, f_patch_diffAt ✅. -/
 private lemma perron_moebius_rect (hRH : RiemannHypothesis)
     (x sigma0 c T : ℝ) (hx : 1 < x) (hsigma0 : 1/2 < sigma0)
-    (hc : 1 < c) (hsigma0_c : sigma0 < c) (hT : 0 < T) :
+    (hc : 1 < c) (hsigma0_c : sigma0 < c) (hT : 0 < T)
+    (hsigma0_lt_one : sigma0 < 1) :
     ‖∫ t in (-T)..T,
         ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
          (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
@@ -84,73 +185,51 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
         ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
     (∫ σ in sigma0..c,
         ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) := by
-  -- Step 1: Apply Cauchy-Goursat with exceptional set {1}
-  set f := fun s => (x : ℂ) ^ s / (s * riemannZeta s) with _hf_def
+  -- Step 1: Apply Cauchy-Goursat to f_patch with exceptional set {1}
+  set f := fun s => (x : ℂ) ^ s / (s * riemannZeta s) with hf_def
+  set f_p := f_patch x with hfp_def
   have hCG := Complex.integral_boundary_rect_eq_zero_of_differentiable_on_off_countable
-    f ⟨sigma0, -T⟩ ⟨c, T⟩ {1} (Set.countable_singleton 1)
-    (perron_moebius_integrand_continuousOn hRH x sigma0 c T hx hsigma0 hc hsigma0_c hT)
+    f_p ⟨sigma0, -T⟩ ⟨c, T⟩ {1} (Set.countable_singleton 1)
+    (f_patch_continuousOn hRH x sigma0 c T hx hsigma0 hc hsigma0_c hT)
     (fun s ⟨hs_mem, hs_ne⟩ => by
       have hs_re : 1/2 < s.re := by
-        have := (Complex.mem_reProdIm.mp hs_mem).1
-        simp [Set.mem_Ioo, min_eq_left hsigma0_c.le, max_eq_right hsigma0_c.le] at this
+        obtain ⟨h1, _⟩ := Complex.mem_reProdIm.mp hs_mem
+        simp only [Set.mem_Ioo, min_eq_left hsigma0_c.le, max_eq_right hsigma0_c.le] at h1
         linarith
-      have hs1 : s ≠ 1 := fun h => hs_ne (Set.mem_singleton_iff.mpr h)
-      exact perron_moebius_integrand_diffAt hRH x hx s hs_re hs1)
-  -- Step 2: Simplify the CG identity (remove smul_eq_mul)
-  simp only [smul_eq_mul] at hCG
-  -- hCG : (∫ σ in sigma0..c, f(σ+(-T)I)) - (∫ σ in sigma0..c, f(σ+TI))
-  --       + I*(∫ t in (-T)..T, f(c+tI)) - I*(∫ t in (-T)..T, f(σ₀+tI)) = 0
-  -- Step 3: Extract ‖∫f_right - ∫f_left‖ ≤ ‖∫f_bot‖ + ‖∫f_top‖
-  have h_rearr : I * (∫ t in (-T)..T, f (↑c + ↑t * I)) -
-      I * (∫ t in (-T)..T, f (↑sigma0 + ↑t * I)) =
-    (∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
-    (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)) := by
-    -- hCG: bot - top + I*right - I*left = 0
-    -- Group: (bot - top) + (I*right - I*left) = 0
-    -- So: I*right - I*left = -(bot - top) = top - bot
-    set bot := ∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)
-    set top := ∫ σ in sigma0..c, f (↑σ + ↑T * I)
-    set right := ∫ t in (-T)..T, f (↑c + ↑t * I)
-    set left := ∫ t in (-T)..T, f (↑sigma0 + ↑t * I)
-    -- hCG: (bot - top) + I * right - I * left = 0
-    have h0 : (bot - top) + (I * right - I * left) = 0 := by ring_nf; ring_nf at hCG; exact hCG
-    have := eq_neg_of_add_eq_zero_right h0
-    -- this: I * right - I * left = -(bot - top) = top - bot
-    rw [this, neg_sub]
-  -- ‖I*(C - D)‖ = ‖C - D‖
-  have h_norm_eq : ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
-      (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))‖ =
-    ‖(∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
-     (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I))‖ := by
-    have : I * ((∫ t in (-T)..T, f (↑c + ↑t * I)) -
-        (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))) =
-      (∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
-      (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)) := by
-      rw [mul_sub]; exact h_rearr
-    rw [← this, norm_mul, Complex.norm_I, one_mul]
-  -- Step 4: ‖∫ (f_c - f_σ₀)‖ = ‖∫ f_c - ∫ f_σ₀‖ (linearity)
-  -- The LHS of the goal is ‖∫(f_c(t) - f_σ₀(t)) dt‖
-  -- which equals ‖(∫ f_c) - (∫ f_σ₀)‖ by integral linearity
-  -- Step 5: Chain the bounds
-  -- The LHS is ‖∫ t, (f_c(t) - f_σ₀(t))‖.
-  -- We know ∫ t, f_c(t) - f_σ₀(t) = ∫ f_c - ∫ f_σ₀  (by linearity, when both integrable)
-  -- and ‖∫ f_c - ∫ f_σ₀‖ ≤ ‖∫ f_top‖ + ‖∫ f_bot‖ ≤ ∫‖f_top‖ + ∫‖f_bot‖.
-  -- Use ContinuousOn → integrable from the ContinuousOn sorry
-  -- Integrability of vertical integrands (follows from integrand_continuousOn sorry)
+      exact f_patch_diffAt hRH x hx s hs_re (fun h => hs_ne (Set.mem_singleton_iff.mpr h)))
+  -- Step 2: f_p = f on each boundary segment (where s ≠ 1)
+  have h_fpe : ∀ s : ℂ, s ≠ 1 → f_p s = f s := fun s hs => by
+    simp only [hfp_def, hf_def, f_patch, if_neg hs]
+  have h_bot : ∀ σ : ℝ, f_p (↑σ + ↑(-T) * I) = f (↑σ + ↑(-T) * I) := by
+    intro σ; apply h_fpe; intro h
+    have := congr_arg Complex.im h; simp at this; linarith
+  have h_top : ∀ σ : ℝ, f_p (↑σ + ↑T * I) = f (↑σ + ↑T * I) := by
+    intro σ; apply h_fpe; intro h
+    have := congr_arg Complex.im h; simp at this; linarith
+  have h_right : ∀ t : ℝ, f_p (↑c + ↑t * I) = f (↑c + ↑t * I) := by
+    intro t; apply h_fpe; intro h
+    have := congr_arg Complex.re h; simp at this; linarith
+  have h_left : ∀ t : ℝ, f_p (↑sigma0 + ↑t * I) = f (↑sigma0 + ↑t * I) := by
+    intro t; apply h_fpe; intro h
+    have := congr_arg Complex.re h; simp at this; linarith
+  -- Step 3: Rewrite CG from f_p to f
+  simp_rw [h_bot, h_top, h_right, h_left] at hCG
+  -- hCG now has f instead of f_p on all boundary segments
+  -- Step 4: Rearrange and bound via triangle inequality
+  -- Integrability (from ContinuousOn of components)
   have h_int_c : IntervalIntegrable (fun t => f (↑c + ↑t * I)) volume (-T) T := sorry
   have h_int_s : IntervalIntegrable (fun t => f (↑sigma0 + ↑t * I)) volume (-T) T := sorry
-  -- Convert the goal to use `f`
-  change ‖∫ t in (-T)..T, (f (↑c + ↑t * I) - f (↑sigma0 + ↑t * I))‖ ≤
-    (∫ σ in sigma0..c, ‖f (↑σ + ↑T * I)‖) +
-    (∫ σ in sigma0..c, ‖f (↑σ + ↑(-T) * I)‖)
+  -- CG rearrangement and triangle inequality
   calc ‖∫ t in (-T)..T, (f (↑c + ↑t * I) - f (↑sigma0 + ↑t * I))‖
       = ‖(∫ t in (-T)..T, f (↑c + ↑t * I)) -
          (∫ t in (-T)..T, f (↑sigma0 + ↑t * I))‖ := by
         congr 1; exact intervalIntegral.integral_sub h_int_c h_int_s
-    _ = ‖(∫ σ in sigma0..c, f (↑σ + ↑T * I)) -
-         (∫ σ in sigma0..c, f (↑σ + ↑(-T) * I))‖ := h_norm_eq
     _ ≤ ‖∫ σ in sigma0..c, f (↑σ + ↑T * I)‖ +
-        ‖∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)‖ := norm_sub_le _ _
+        ‖∫ σ in sigma0..c, f (↑σ + ↑(-T) * I)‖ := by
+        -- hCG: bot - top + I*right - I*left = 0
+        -- So: I*(right - left) = top - bot
+        -- ‖right - left‖ = ‖top - bot‖ ≤ ‖top‖ + ‖bot‖
+        sorry
     _ ≤ (∫ σ in sigma0..c, ‖f (↑σ + ↑T * I)‖) +
         (∫ σ in sigma0..c, ‖f (↑σ + ↑(-T) * I)‖) :=
         add_le_add
@@ -215,29 +294,15 @@ private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
   congr 1; ext n
   exact (conj_lseries_term n s).symm
 
-/-- **DEPRECATED**: Schwarz reflection for all s.
-    No longer needed by the contour shift (bypassed by independent horizontal bounds).
-    The sorry here is dead code — removing would reduce sorry count by 1.
-    Kept for potential future use (e.g., if needed for other applications). -/
-private lemma riemannZeta_conj (s : ℂ) :
-    riemannZeta (starRingEnd ℂ s) = starRingEnd ℂ (riemannZeta s) := by
-  sorry
+-- NOTE: riemannZeta_conj (Schwarz reflection for all s) was deleted here.
+-- Was dead code (not used after contour shift restructuring).
+-- Proved for Re(s) > 1 as `riemannZeta_conj_re_gt` above;
+-- general case not needed.
 
-/-- **DEPRECATED**: Horizontal integral symmetry via Schwarz.
-    No longer used after contour shift restructuring.
-    Each horizontal is bounded independently using perron_integrand_bound_with_zeta. -/
-private lemma perron_horiz_neg_eq_pos (x sigma0 c T : ℝ) (hx : 1 < x) (_hT : 0 < T) :
-    (∫ σ in sigma0..c,
-        ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) =
-    (∫ σ in sigma0..c,
-        ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) := by
-  congr 1; ext σ
-  have hx_pos : (0 : ℝ) < x := by linarith
-  rw [conj_sigma_sub_ti]
-  simp only [norm_div, norm_mul]
-  rw [norm_cpow_eq_rpow_re_of_pos hx_pos, norm_cpow_eq_rpow_re_of_pos hx_pos,
-      Complex.conj_re, RCLike.norm_conj,
-      riemannZeta_conj, RCLike.norm_conj]
+-- NOTE: perron_horiz_neg_eq_pos (horizontal symmetry via Schwarz) was deleted here.
+-- The contour shift now bounds both horizontal integrals independently
+-- using perron_integrand_bound_with_zeta (which works for both +T and -T),
+-- completely bypassing the need for Schwarz reflection.
 
 -- ═══════════════════════════════════════════
 -- §2. The Contour Shift (assembly — zero new sorry)
@@ -426,15 +491,32 @@ private lemma rpow_tail_bound (N : ℕ) (hN : 0 < N) (σ : ℝ) (hσ : 1 < σ) :
     (fun n => rpow_nonneg (by linarith [Nat.cast_nonneg (α := ℝ) N, Nat.cast_nonneg (α := ℝ) (n + 1)]) _)
     (fun K => rpow_tail_finite N hN σ hσ K)
 
-/-- **Dirichlet polynomial identification**: For Re(s) > 1,
+set_option maxHeartbeats 400000 in
+/-- **PROVED**: Summability of the shifted rpow sequence (N+(n+1))^{-σ}
+    for σ > 1, by comparison with the convergent p-series (n+1)^{-σ}.
+    Uses rpow_le_rpow_of_nonpos for the monotonicity comparison. -/
+private lemma rpow_shifted_summable (N : ℕ) (σ : ℝ) (hσ : 1 < σ) :
+    Summable (fun n : ℕ => ((↑N : ℝ) + ↑(n + 1)) ^ (-σ)) := by
+  apply (((summable_nat_add_iff 1).mpr
+    (Real.summable_nat_rpow.mpr (by linarith))).of_nonneg_of_le
+    (fun n => rpow_nonneg (by positivity) _)
+    (fun n => rpow_le_rpow_of_nonpos
+      (by positivity)
+      (by push_cast; linarith [Nat.cast_nonneg (α := ℝ) N])
+      (by linarith)))
+
+set_option maxHeartbeats 800000 in
+/-- **PROVED (zero sorry!)**: Dirichlet polynomial identification.
+    For Re(s) > 1 and N ≥ 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
 
-    Decomposition:
+    Proof chain:
     1. moebius_lseries_eq_inv_zeta: LSeries(μ,s) = 1/ζ(s) (PROVED)
     2. partial_sum_minus_lseries: tail extraction (PROVED)
-    3. moebius_norm_le_one: |μ(n)| ≤ 1 (PROVED)
-    4. rpow_tail_bound: integral test (PROVED — zero sorry!) -/
-private lemma moebius_partial_sum_approx (N : ℕ) (s : ℂ) (_hs : 1 < s.re) :
+    3. abs_moebius_le_one: |μ(n)| ≤ 1 (Mathlib)
+    4. norm_tsum_le_tsum_norm: ‖∑'f‖ ≤ ∑'‖f‖ (Mathlib)
+    5. rpow_tail_bound: integral test (PROVED — zero sorry!) -/
+private lemma moebius_partial_sum_approx (N : ℕ) (hN : 0 < N) (s : ℂ) (_hs : 1 < s.re) :
     ‖∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ s -
       (1 / riemannZeta s)‖ ≤ (↑N : ℝ) ^ (1 - s.re) / (s.re - 1) := by
   -- Step 1: Rewrite 1/ζ(s) as LSeries(μ,s)
@@ -449,11 +531,28 @@ private lemma moebius_partial_sum_approx (N : ℕ) (s : ℂ) (_hs : 1 < s.re) :
   -- Step 3: Apply tail extraction
   rw [partial_sum_minus_lseries N s _hs, norm_neg]
   -- Goal: ‖∑' n, LSeries.term (↗μ) s (n + (N+1))‖ ≤ N^{1-σ}/(σ-1)
-  -- Step 4: Bound the tail norm using triangle + |μ| ≤ 1 + integral test
-  -- ‖∑' n, a(n)‖ ≤ ∑' n, ‖a(n)‖  (norm_tsum_le_tsum_norm)
-  -- ‖μ(n)/n^s‖ = |μ(n)| · 1/n^σ ≤ 1/n^σ
-  -- ∑' n, 1/(n+N+1)^σ ≤ N^{1-σ}/(σ-1) by rpow_tail_bound (PROVED)
-  sorry
+  -- Step 4: Chain ‖∑'f‖ ≤ ∑'‖f‖ ≤ ∑'g ≤ bound
+  have h_summ : Summable (fun n => LSeries.term (↗μ) s (n + (N + 1))) :=
+    (summable_nat_add_iff (N + 1)).mpr (LSeriesSummable_moebius_iff.mpr _hs)
+  have h_norm_summ := h_summ.norm
+  have h_rpow_summ := rpow_shifted_summable N s.re _hs
+  -- Pointwise bound: ‖term (↗μ) s (n+N+1)‖ ≤ (N+(n+1))^{-σ}
+  have h_pw : ∀ n, ‖LSeries.term (↗μ) s (n + (N + 1))‖ ≤
+      ((↑N : ℝ) + ↑(n + 1)) ^ (-s.re) := by
+    intro n
+    have hm : n + (N + 1) ≠ 0 := by omega
+    rw [LSeries.norm_term_eq, if_neg hm]
+    calc ‖(↑(μ (n + (N + 1))) : ℂ)‖ / (↑(n + (N + 1)) : ℝ) ^ s.re
+        ≤ 1 / (↑(n + (N + 1)) : ℝ) ^ s.re := by
+          gcongr; rw [Complex.norm_intCast]
+          exact_mod_cast abs_moebius_le_one (n := n + (N + 1))
+      _ = ((↑N : ℝ) + ↑(n + 1)) ^ (-s.re) := by
+          rw [rpow_neg (by positivity : (0:ℝ) ≤ ↑N + ↑(n + 1)), one_div]
+          congr 1; push_cast; ring
+  -- Chain: ‖∑' f‖ ≤ ∑' ‖f‖ ≤ ∑' g ≤ bound
+  exact (norm_tsum_le_tsum_norm h_norm_summ).trans
+    ((h_norm_summ.tsum_le_tsum h_pw h_rpow_summ).trans
+      (rpow_tail_bound N hN s.re _hs))
 
 -- ═══════════════════════════════════════════
 -- §4. The Truncated Perron Formula
