@@ -521,27 +521,36 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
             linarith
         _ = K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := by rfl
 
-/-- **PROVED**: Corollary of the contour shift, bounding the factored difference
-    ‖(1/(2πi))∫f_c - (1/(2πi))∫f_s‖ ≤ K₁ * x^c * T^{-1/2}.
-    Uses norm_sub_le to avoid integral_sub integrability issues. -/
+/-- **PROVED**: Corollary of the contour shift with the 1/(2πi) prefactor.
+    The difference stays inside the integral to avoid integral_sub. -/
 theorem perron_moebius_contour_shift_factored (hRH : RiemannHypothesis)
     (sigma0 c : ℝ) (hsigma0 : 1/2 < sigma0)
     (hc : 1 < c) (hsigma0_c : sigma0 < c) (hsigma0_lt_one : sigma0 < 1) :
     ∃ K₁ > 0, ∃ T_min ≥ (1 : ℝ), ∀ x : ℝ, 1 < x → ∀ T : ℝ, T_min ≤ T →
       ‖(1 / (2 * ↑Real.pi * I)) *
-          ∫ t in (-T)..T, (x : ℂ) ^ (↑c + ↑t * I) /
-            ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
-        (1 / (2 * ↑Real.pi * I)) *
-          ∫ t in (-T)..T, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
-            ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I))‖ ≤
+          ∫ t in (-T)..T,
+            ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
+             (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
+               riemannZeta (↑sigma0 + ↑t * I)))‖ ≤
       K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := by
   obtain ⟨K₁, hK₁, T_min, hT_min, h_raw⟩ :=
     perron_moebius_contour_shift hRH sigma0 c hsigma0 hc hsigma0_c hsigma0_lt_one
   refine ⟨K₁, hK₁, T_min, hT_min, fun x hx T hT => ?_⟩
   have h2 := h_raw x hx T hT
-  -- ‖a*F - a*G‖ = ‖a*(F-G)‖ = ‖a‖*‖F-G‖ ≤ 1*h2 = h2
-  -- where ‖F-G‖ = ‖∫(f-g)‖ (by integral_sub, both integrands are continuous hence integrable)
-  -- and ‖a‖ = 1/(2π) ≤ 1. All building blocks are proved.
-  sorry
+  -- ‖a * ∫(f-g)‖ = ‖a‖ * ‖∫(f-g)‖ ≤ 1 * ‖∫(f-g)‖ ≤ K₁ * x^c * T^{-1/2}
+  set a := (1 : ℂ) / (2 * ↑Real.pi * I)
+  -- ‖1/(2πi)‖ = 1/(2π) ≤ 1
+  have h_norm_a : ‖a‖ ≤ 1 := by
+    simp only [a]
+    rw [norm_div, norm_one, norm_mul, norm_mul, Complex.norm_two, Complex.norm_I, mul_one]
+    rw [show ‖(↑Real.pi : ℂ)‖ = Real.pi from by
+      rw [Complex.norm_real]; exact abs_of_pos Real.pi_pos]
+    rw [div_le_one (by positivity : (0:ℝ) < 2 * Real.pi)]
+    linarith [Real.pi_gt_three]
+  calc ‖a * ∫ t in (-T)..T, _‖
+      = ‖a‖ * ‖∫ t in (-T)..T, _‖ := norm_mul a _
+    _ ≤ 1 * ‖∫ t in (-T)..T, _‖ := by gcongr
+    _ = ‖∫ t in (-T)..T, _‖ := one_mul _
+    _ ≤ K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := h2
 
 end Cathedral.White.Infrastructure

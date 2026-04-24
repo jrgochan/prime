@@ -115,14 +115,53 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
     set_option maxHeartbeats 800000 in
     have h_bound_eps' : |((summatoryMoebius x : ℤ) : ℝ)| ≤
         C_main * x ^ ((1 : ℝ)/2 + eps') := by
-      -- Key: ‖I_c - I_s‖ = ‖(1/(2πi))‖ * ‖∫f_c - ∫f_s‖ ≤ (1/(2π)) * h2 ≤ h2
-      -- since ‖1/(2πi)‖ = 1/(2π) < 1
+      -- h2 bounds the single integral ‖a * ∫(f_c - f_s)‖. We need ‖I_c - I_s‖.
+      -- I_c - I_s = a*∫f_c - a*∫f_s = a*(∫f_c - ∫f_s).
+      -- Since both integrands are integrable, ∫f_c - ∫f_s = ∫(f_c - f_s) by integral_sub.
+      -- But the factored corollary avoids this: it bounds ‖a * ∫(f_c-f_s)‖ directly.
+      -- We show ‖I_c - I_s‖ ≤ ‖a * ∫(f_c-f_s)‖ via norm_sub and scalar factoring.
       have h_shift_bound : ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) := by
-        -- h2 from perron_moebius_contour_shift_factored gives exactly this bound.
-        -- The expressions are definitionally equal (both are (1/(2πi))∫f_c - (1/(2πi))∫f_s)
-        -- but Lean's set tactic creates opaque names that don't match h2's raw type.
-        -- TODO: Remove set and use raw expressions, or use convert with whnf.
-        sorry
+        -- Step 1: I_c - I_s = a * (∫f_c - ∫f_s) by ring
+        have h_eq : I_c - I_s = (1 / (2 * ↑Real.pi * I)) *
+            ((∫ t in (-x)..x, (x : ℂ) ^ (↑c + ↑t * I) /
+                ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))) -
+             (∫ t in (-x)..x, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
+                ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))) := by
+          simp only [I_c, I_s]; ring
+        -- Step 2: Integrability of both vertical integrands
+        -- The integrand x^(σ+tI)/(σ+tI·ζ(σ+tI)) is ContinuousOn [-x,x] for σ ≠ 1, σ > 1/2
+        have h_vert_cont : ∀ (σ : ℝ), σ ≠ 1 → (1/2 < σ) →
+            ContinuousOn (fun t : ℝ => (x : ℂ) ^ (↑σ + ↑t * I) /
+              ((↑σ + ↑t * I) * riemannZeta (↑σ + ↑t * I)))
+              (Set.uIcc (-x) x) := by
+          intro σ hσ hσ_half
+          have hs_ne_one : ∀ t : ℝ, (↑σ + ↑t * I : ℂ) ≠ 1 := by
+            intro t h; apply hσ
+            have := congr_arg Complex.re h
+            simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
+              Complex.I_re, Complex.I_im] at this; exact this
+          apply ContinuousOn.div
+          · exact ContinuousOn.cpow continuousOn_const (by fun_prop)
+              (fun _ _ => Complex.ofReal_mem_slitPlane.mpr (by linarith))
+          · apply ContinuousOn.mul (by fun_prop)
+            exact (fun t _ => ContinuousAt.continuousWithinAt <|
+              ContinuousAt.comp (differentiableAt_riemannZeta (hs_ne_one t)).continuousAt
+                (by fun_prop : ContinuousAt (fun t : ℝ => (↑σ + ↑t * I : ℂ)) t))
+          · intro t _ h; apply absurd h; apply mul_ne_zero
+            · intro h0; have := congr_arg Complex.re h0; simp at this; linarith
+            · exact rh_zeta_ne_zero hRH (by simp; linarith) (hs_ne_one t)
+        have h_int_fc : IntervalIntegrable
+            (fun t => (x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)))
+            volume (-x) x :=
+          (h_vert_cont c (by linarith) (by linarith)).intervalIntegrable
+        have h_int_fs : IntervalIntegrable
+            (fun t => (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))
+            volume (-x) x :=
+          (h_vert_cont sigma0 (by linarith) hsigma0).intervalIntegrable
+        -- Step 3: ∫f_c - ∫f_s = ∫(f_c - f_s) by integral_sub
+        rw [h_eq, ← intervalIntegral.integral_sub h_int_fc h_int_fs]
+        -- Now the goal matches h2 exactly
+        exact h2
 
       -- Cast path: |((M : ℤ) : ℝ)| = ‖((M : ℤ) : ℂ)‖
       rw [h_real_norm]
