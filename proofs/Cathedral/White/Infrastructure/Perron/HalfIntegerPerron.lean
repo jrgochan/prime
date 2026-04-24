@@ -503,16 +503,13 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
       _ = C_sum / (Real.pi * T) * X ^ (c + 1) := by ring
   -- Step 4: §4 gives tail integral bound
   have h_tail_bound := h_tail X T hX_pos hT_pos N hN_pos
-  -- Step 2: Dynamic N trick (Archimedean property)
-  -- Choose N ≥ m large enough that C_tail · N^{1-c} · T² ≤ 1.
-  -- Since c > 1, N^{c-1} → ∞, so such N exists.
-  -- Then: C_tail · N^{1-c} · X^c · T ≤ X^c/T ≤ X^{c+1}/T.
-  -- We use a sorry for this Archimedean argument + integral connection.
-  -- The assembly structure is:
-  --   ‖M(X) - B‖ ≤ ‖M(X) - A‖ + ‖A - B‖
-  --   ‖M(X) - A‖ ≤ C_sum/(πT) · X^{c+1}  [§2 + §3]
-  --   ‖A - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + N choice]
-  --   Sum ≤ (C_sum/π + 1) · X^{c+1}/T = K · X^{c+1}/T
+  -- Step 5: Assembly. The remaining sorry encapsulates:
+  --   (a) Archimedean N choice: ∃ N ≥ m, N^{c-1} ≥ C_tail·T²
+  --   (b) Integral connection: A_N - B = (1/(2π))∫[D_N - 1/ζ]·X^s/s
+  --       via finite_sum_integral_swap + integral subtraction
+  --       (integrability: ζ(s)≠0 for Re(s)=c>1)
+  --   (c) Triangle: ‖M-B‖ ≤ C_sum/(πT)·X^{c+1} + X^{c+1}/T = K·X^{c+1}/T
+  -- All inputs (§2, §3, §4) are fully proved above.
   sorry
 
 -- ═══════════════════════════════════════════
