@@ -469,7 +469,17 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
         have h_bot_bound : (∫ σ in sigma0..c,
             ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) ≤
             (c - sigma0) * (x ^ c * C * T ^ (ε₀ - 1)) := by
-          sorry -- Same as top by norm symmetry: ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖
+          -- Key: ‖f(σ+(-T)i)‖ ≤ same bound as ‖f(σ+Ti)‖
+          -- because |Im(σ+(-T)i)| = T = |Im(σ+Ti)|
+          -- We need: for each σ, ‖f(σ-Ti)‖ ≤ x^c * C * T^(ε₀-1)
+          -- The lemma perron_integrand_bound_with_zeta gives this for +T.
+          -- For -T, we show ‖f(σ-Ti)‖ = ‖f(σ+Ti)‖ or directly reprove.
+          -- Direct approach: the perron_integrand_bound_with_zeta works because
+          -- it only uses |Im(s)| = T, ‖s‖ ≥ T, ‖x^s‖ = x^σ.
+          -- All of these hold for s = σ + (-T)*I as well:
+          -- |Im(σ+(-T)i)| = |-T| = T, ‖σ+(-T)i‖ = √(σ²+T²) = ‖σ+Ti‖
+          -- So we apply the same bound.
+          sorry
         -- Combined: top + bot ≤ 2·(c-σ₀)·x^c·C·T^{ε₀-1}
         have h_combined : (∫ σ in sigma0..c,
             ‖(x : ℂ)^(↑σ + ↑T * I) / ((↑σ + ↑T * I) * riemannZeta (↑σ + ↑T * I))‖) +
