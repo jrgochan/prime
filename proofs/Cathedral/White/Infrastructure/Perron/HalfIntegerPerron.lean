@@ -442,27 +442,26 @@ lemma dirichlet_tail_integral_bound (c : ℝ) (hc : 1 < c) :
 -- §5. Main Theorem: Truncated Perron at Half-Integers
 -- ═══════════════════════════════════════════
 
+set_option maxHeartbeats 800000 in
 /-- **The Truncated Perron Formula for M(x), evaluated at half-integers.**
 
     For X = m + 1/2, the summatory Möbius function M(X) is approximated by
-    the contour integral (1/2πi) ∫_{c-iT}^{c+iT} X^s/(s·ζ(s)) ds
+    the contour integral (1/2π) ∫_{-T}^{T} X^(c+it)/((c+it)·ζ(c+it)) dt
     with error O(X^{c+1}/T).
 
-    **Strategy** (The Silver Bullet):
-    1. By the Archimedean property, choose N so large that the Dirichlet
-       tail error is ≤ X^c/T (Dynamic N trick).
-    2. Apply `finite_sum_integral_swap` with this specific N.
-    3. Triangle inequality splits into:
-       - Perron kernel error (Helper 1 + 2): O(X^{c+1}/T)
-       - Dirichlet tail error (Helper 3): ≤ X^c/T by choice of N
-    4. Sum the two: O(X^{c+1}/T).
+    Note: The `dt` form uses 1/(2π) since the change of variables
+    s = c+it, ds = i·dt absorbs the `i` from the standard 1/(2πi)∫ds form.
 
-    No Fubini theorem, no DCT, no measure theory — pure algebra! -/
+    **Strategy** (The Silver Bullet):
+    1. Triangle inequality via an intermediate finite Perron sum.
+    2. Kernel error (§2 + §3): O(X^{c+1}/T) by the log sum bound.
+    3. Tail error (§4): O(N^{1-c} · X^c · T), crushed by choosing N large.
+    4. Sum the two: O(X^{c+1}/T). -/
 theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
     ∃ K > 0, ∀ m : ℕ, 2 ≤ m → ∀ T : ℝ, 1 ≤ T →
       let X : ℝ := (m : ℝ) + 1/2
       ‖(↑(summatoryMoebius X : ℤ) : ℂ) -
-        (1 / (2 * ↑Real.pi * I)) *
+        (1 / (2 * ↑Real.pi)) *
           ∫ t in (-T)..T,
             (X : ℂ) ^ (↑c + ↑t * I) /
               ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
@@ -470,22 +469,50 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- Step 1: Obtain constants from helpers
   obtain ⟨C_sum, hC_sum_pos, h_log_sum⟩ := perron_log_sum_bound c hc
   obtain ⟨C_tail, hC_tail_pos, h_tail⟩ := dirichlet_tail_integral_bound c hc
-  -- Set K = C_sum/π + C_tail + 1 (absorbs both error contributions)
+  -- K absorbs kernel error C_sum/π and tail contribution
   set K := C_sum / Real.pi + C_tail + 1
   refine ⟨K, by positivity, fun m hm T hT => ?_⟩
   intro X
   have hX_pos : (0 : ℝ) < X := by positivity
   have hT_pos : (0 : ℝ) < T := by linarith
-  -- The bound is at most K · X^{c+1} / T.
-  -- We prove this by showing both the kernel and tail errors are ≤ some fraction of this.
-  -- For simplicity, we use a sorry here for the full assembly.
-  -- The key mathematical steps are:
-  --   1. Choose N ≥ m large enough (Archimedean)
-  --   2. finite_sum_integral_swap rewrites the contour
-  --   3. Triangle inequality splits into kernel + tail
-  --   4. §2+§3 bounds kernel error by C_sum · X^{c+1} / (π·T)
-  --   5. §4 bounds tail by C_tail · N^{1-c} · X^c · T ≤ X^c/T for large N
-  --   6. Both ≤ K · X^{c+1} / T
+  have hc_pos : (0 : ℝ) < c := by linarith
+  have hX_gt1 : (1 : ℝ) < X := by
+    show 1 < (m : ℝ) + 1 / 2
+    have : (2 : ℝ) ≤ (m : ℝ) := by exact_mod_cast hm
+    linarith
+  -- Step 2: Use N = m as the finite truncation
+  set N := m with hN_def
+  have hN_m : m ≤ N := le_refl _
+  have hN_pos : 0 < N := by omega
+  -- Step 3: §2 + §3 give kernel error bound
+  have h_kernel := perron_formula_error_bound_full m hm c T N hc_pos hT_pos hN_m
+  have h_sum := h_log_sum m hm N
+  -- ‖∑ μP - M‖ ≤ ∑ (X/n)^c/(πT|log|) ≤ C_sum·X^{c+1}/(πT)
+  have h_kernel_bound : ‖∑ n ∈ Finset.Icc 1 N,
+      (↑(ArithmeticFunction.moebius n) : ℂ) *
+        Cathedral.White.Infrastructure.perronIntegral (X / ↑n) c T -
+      (↑(summatoryMoebius X : ℤ) : ℂ)‖ ≤
+    C_sum / (Real.pi * T) * X ^ (c + 1) := by
+    calc _ ≤ ∑ n ∈ Finset.Icc 1 N,
+        (X / ↑n) ^ c / (Real.pi * T * |Real.log (X / ↑n)|) := h_kernel
+      _ = 1 / (Real.pi * T) * ∑ n ∈ Finset.Icc 1 N,
+        (X / ↑n) ^ c / |Real.log (X / ↑n)| := by
+        rw [Finset.mul_sum]; apply Finset.sum_congr rfl; intro n _; field_simp
+      _ ≤ 1 / (Real.pi * T) * (C_sum * X ^ (c + 1)) :=
+        mul_le_mul_of_nonneg_left h_sum (by positivity)
+      _ = C_sum / (Real.pi * T) * X ^ (c + 1) := by ring
+  -- Step 4: §4 gives tail integral bound
+  have h_tail_bound := h_tail X T hX_pos hT_pos N hN_pos
+  -- Step 2: Dynamic N trick (Archimedean property)
+  -- Choose N ≥ m large enough that C_tail · N^{1-c} · T² ≤ 1.
+  -- Since c > 1, N^{c-1} → ∞, so such N exists.
+  -- Then: C_tail · N^{1-c} · X^c · T ≤ X^c/T ≤ X^{c+1}/T.
+  -- We use a sorry for this Archimedean argument + integral connection.
+  -- The assembly structure is:
+  --   ‖M(X) - B‖ ≤ ‖M(X) - A‖ + ‖A - B‖
+  --   ‖M(X) - A‖ ≤ C_sum/(πT) · X^{c+1}  [§2 + §3]
+  --   ‖A - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + N choice]
+  --   Sum ≤ (C_sum/π + 1) · X^{c+1}/T = K · X^{c+1}/T
   sorry
 
 -- ═══════════════════════════════════════════
