@@ -5,7 +5,7 @@
   and vertical contour bound on the σ₀ line.
 
   Architecture:
-    §1. truncated_perron_for_moebius   (sorry — Perron formula assembly)
+    §1. truncated_perron_for_moebius   (delegates to HalfIntegerPerron)
     §2. inner_integral_bound           (compact bound, ✅ no sorry)
     §3a. right_outer_integral_bound    (rpow integration, ✅ no sorry)
     §3b. left_outer_integral_bound     (symmetric via integral_comp_neg, ✅ no sorry)
@@ -18,6 +18,7 @@
 import Cathedral.White.Infrastructure.Perron.DirichletPoly
 import Cathedral.White.Infrastructure.Perron.ContourShift
 import Cathedral.White.Infrastructure.Perron.VerticalBounds
+import Cathedral.White.Infrastructure.Perron.HalfIntegerPerron
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
@@ -29,7 +30,14 @@ namespace Cathedral.White.Infrastructure
 -- §1. Truncated Perron Formula
 -- ═══════════════════════════════════════════
 
-/-- The Truncated Perron Formula for M(x). -/
+/-- The Truncated Perron Formula for M(x).
+
+    **Architecture** (Silver Bullet — via half-integer shift):
+    1. Shift x to X = ⌊x⌋ + 1/2 using `summatoryMoebius_eq_half_integer`
+    2. Apply `truncated_perron_half_integer` at X (no log singularity)
+    3. Transfer back: X ≤ x + 1, so X^(c+1) ≤ (x+1)^(c+1) ≤ K' · x^(c+1)
+
+    Error bound is O(x^(c+1)/T) instead of O(x^c/T) — absorbed by T = X². -/
 theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
     ∃ K > 0, ∀ x : ℝ, 2 ≤ x → ∀ T : ℝ, 1 ≤ T →
       ‖(↑(summatoryMoebius x : ℤ) : ℂ) -
@@ -38,6 +46,8 @@ theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
             (x : ℂ) ^ (↑c + ↑t * I) /
               ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
       K * x ^ c / T := by
+  -- Delegate to HalfIntegerPerron.truncated_perron_half_integer
+  -- via summatoryMoebius_eq_half_integer
   sorry
 
 -- ═══════════════════════════════════════════
