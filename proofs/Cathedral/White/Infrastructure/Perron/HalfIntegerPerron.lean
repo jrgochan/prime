@@ -607,44 +607,94 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- So A_N - B = (1/(2π))∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
   -- ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + h_tail_crushed]
   have h_AN_B : ‖A_N - B‖ ≤ X ^ (c + 1) / T := by
-    -- The key idea: A_N - B has the same norm as the §4 expression.
-    -- A_N = (1/(2π)) • ∫ ∑μ(n)(X/n)^s/s dt  [finite_sum_integral_swap]
-    -- After factoring: = (1/(2π)) * ∫ (∑μ(n)/n^s)·X^s/s dt
-    -- B = (1/(2π)) * ∫ X^s/(sζ(s)) dt = (1/(2π)) * ∫ (1/ζ(s))·X^s/s dt
-    -- A_N - B = (1/(2π)) * ∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
-    --
-    -- This equals the §4 integrand, whose norm is bounded by
-    -- C_tail·N^{1-c}·X^c·T ≤ X^{c+1}/T.
-    --
-    -- The connection between A_N, B (as set above) and the §4 integrand
-    -- requires: (1) finite_sum_integral_swap, (2) algebraic factoring
-    -- ∑μ(n)(X/n)^s/s = (∑μ(n)/n^s)·X^s/s via (X/n)^s = X^s/n^s, and
-    -- (3) integral_sub for both integrands (both integrable by
-    -- perron_zeta_integrable and the finite sum integrability).
-    --
-    -- 1. A_N equals a specific integral (by finite_sum_integral_swap):
-    have h_AN_int := Cathedral.White.Infrastructure.finite_sum_integral_swap
-      (fun n => (↑(ArithmeticFunction.moebius n) : ℂ))
-      X c T (Finset.Icc 1 N) hc_pos hT_pos hX_gt1
-    -- 2. The §4 bound applies to the difference:
+    have h_swap := Cathedral.White.Infrastructure.finite_sum_integral_swap
+      (fun n => ↑(ArithmeticFunction.moebius n)) X c T (Finset.Icc 1 N) hc_pos hT_pos hX_gt1
+
+    have h_int_B : IntervalIntegrable (fun t : ℝ => (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))) volume (-T) T :=
+      perron_zeta_integrable X c T hX_pos hc
+
+    have h_int_A : IntervalIntegrable (fun t : ℝ => ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) volume (-T) T := by
+      have : IntervalIntegrable (∑ n ∈ Finset.Icc 1 N, fun t : ℝ => (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) volume (-T) T := by
+        apply IntervalIntegrable.sum
+        intro n hn
+        have hn_pos : (0 : ℝ) < n := by
+          have := (Finset.mem_Icc.mp hn).1
+          exact Nat.cast_pos.mpr (by omega)
+        have hXn_pos : 0 < X / n := div_pos hX_pos hn_pos
+        exact (ContinuousOn.mul continuousOn_const
+          (ContinuousOn.div
+            (ContinuousOn.cpow continuousOn_const (by fun_prop)
+              (fun t _ => by
+                have hd : (X / ↑n : ℂ) = ((X / ↑n : ℝ) : ℂ) := by push_cast; rfl
+                rw [hd]; exact Complex.ofReal_mem_slitPlane.mpr hXn_pos))
+            (by fun_prop)
+            (fun t _ ht_zero => by
+              have := congr_arg Complex.re ht_zero
+              simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
+              linarith))).intervalIntegrable
+      convert this using 1
+      ext t; simp [Finset.sum_apply]
+
+    have h_integrand_eq : ∀ t : ℝ,
+        (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) -
+        (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) =
+        (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) - 1 / riemannZeta (↑c + ↑t * I)) *
+        ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := by
+      intro t
+      have h_cpow : ∀ n ∈ Finset.Icc 1 N,
+          (X / ↑n : ℂ) ^ (↑c + ↑t * I) =
+          (X : ℂ) ^ (↑c + ↑t * I) / (↑n : ℂ) ^ (↑c + ↑t * I) := by
+        intro n hn
+        have hn_ge_1 : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+        have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr (by omega)
+        have hX_ne : (X : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hX_pos.ne'
+        have hn_ne : (↑n : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr hn_pos.ne'
+        have hd : (X / ↑n : ℂ) = ((X / ↑n : ℝ) : ℂ) := by push_cast; rfl
+        rw [hd]
+        have hXn_ne : ((X / ↑n : ℝ) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (div_pos hX_pos hn_pos).ne'
+        rw [Complex.cpow_def_of_ne_zero hXn_ne, Complex.cpow_def_of_ne_zero hX_ne, Complex.cpow_def_of_ne_zero hn_ne]
+        conv_lhs => rw [show Complex.log ((X / ↑n : ℝ) : ℂ) = ↑(Real.log (X / ↑n)) from
+          (Complex.ofReal_log (le_of_lt (div_pos hX_pos hn_pos))).symm]
+        conv_rhs =>
+          rw [show Complex.log (X : ℂ) = ↑(Real.log X) from (Complex.ofReal_log (le_of_lt hX_pos)).symm]
+          rw [show Complex.log (↑n : ℂ) = ↑(Real.log ↑n) from (Complex.ofReal_log (le_of_lt hn_pos)).symm]
+        have h_log_div : Real.log (X / ↑n) = Real.log X - Real.log ↑n := Real.log_div hX_pos.ne' hn_pos.ne'
+        rw [h_log_div]
+        push_cast
+        rw [sub_mul, Complex.exp_sub]
+
+      calc (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) - (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))
+        _ = (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) - (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) := by
+          congr 1; apply Finset.sum_congr rfl; intro n hn
+          rw [h_cpow n hn]
+        _ = (∑ n ∈ Finset.Icc 1 N, ((↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I)) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) - (1 / riemannZeta (↑c + ↑t * I)) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := by
+          congr 1
+          · apply Finset.sum_congr rfl; intro n _; ring
+          · field_simp
+        _ = (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) - 1 / riemannZeta (↑c + ↑t * I)) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := by
+          rw [← Finset.sum_mul, sub_mul]
+
+    have h_sub_integral : ∫ t in (-T)..T, (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) - 1 / riemannZeta (↑c + ↑t * I)) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) =
+        (∫ t in (-T)..T, ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) -
+        ∫ t in (-T)..T, (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) := by
+      rw [← intervalIntegral.integral_sub h_int_A h_int_B]
+      apply intervalIntegral.integral_congr
+      intro t _
+      exact (h_integrand_eq t).symm
+
     have h_tail_inst := h_tail X T hX_pos hT_pos N hN_pos
-    -- h_tail_inst : ‖(1/(2π)) * ∫ (D_N - 1/ζ)·X^s/s dt‖ ≤ C_tail·N^{1-c}·X^c·T
-    -- 3. It suffices to show ‖A_N - B‖ ≤ C_tail·N^{1-c}·X^c·T:
-    calc ‖A_N - B‖ ≤ C_tail * (N : ℝ) ^ (1 - c) * X ^ c * T := by
-          -- Step A: Rewrite A_N as an integral via finite_sum_integral_swap
-          -- h_AN_int : A_N = (1/(2π)) • ∫ ∑ μ(n)·(X/n)^s/s dt
-          -- Step B: Show ∑ μ(n)·(X/n)^s/s = (∑ μ(n)/n^s)·X^s/s
-          -- Step C: Factor out to get the difference as the §4 integrand
-          -- Step D: Apply h_tail_inst
-          --
-          -- For now, the algebraic factoring (X/n)^s = X^s/n^s for
-          -- all n ∈ Icc 1 N (with n > 0) and the sum-product identity
-          -- require ~15 lines of careful cpow/cast manipulation.
-          -- The integral subtraction then gives exactly h_tail_inst's LHS.
-          --
-          -- This is pure plumbing — mathematically trivial but Lean-verbose.
-          -- We accept this as the deepest remaining sorry.
-          sorry
+    calc ‖A_N - B‖
+      _ = ‖(1 / (2 * ↑Real.pi)) * (∫ t in (-T)..T, ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) - (1 / (2 * ↑Real.pi)) * ∫ t in (-T)..T, (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ := by
+          congr 1
+          · dsimp [A_N]
+            rw [h_swap]
+            have h_smul : (1 / (2 * Real.pi) : ℝ) • (∫ t in (-T)..T, ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) =
+                ((1 / (2 * Real.pi) : ℝ) : ℂ) * ∫ t in (-T)..T, ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := rfl
+            rw [h_smul]
+            push_cast; rfl
+      _ = ‖(1 / (2 * ↑Real.pi)) * ((∫ t in (-T)..T, ∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) * ((X / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) - ∫ t in (-T)..T, (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)))‖ := by rw [← mul_sub]
+      _ = ‖(1 / (2 * ↑Real.pi)) * ∫ t in (-T)..T, (∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ (↑c + ↑t * I) - 1 / riemannZeta (↑c + ↑t * I)) * ((X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))‖ := by rw [← h_sub_integral]
+      _ ≤ C_tail * (N : ℝ) ^ (1 - c) * X ^ c * T := h_tail_inst
       _ ≤ X ^ (c + 1) / T := h_tail_crushed
   -- Triangle: ‖M - B‖ ≤ ‖M - A_N‖ + ‖A_N - B‖
   have h_tri : ‖(↑(summatoryMoebius X : ℤ) : ℂ) - B‖ ≤
