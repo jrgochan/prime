@@ -36,6 +36,38 @@ open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta 
 namespace Cathedral.White.Infrastructure.HalfIntegerPerron
 
 -- ═══════════════════════════════════════════
+-- §0. Foundational Log Bounds (reusable)
+-- ═══════════════════════════════════════════
+
+/-- **log(y) ≥ 1 - 1/y** for y > 0.
+    Proof: from `exp(t) ≥ 1 + t`, set `t = -log(y)`. -/
+lemma log_ge_one_sub_inv (y : ℝ) (hy : 0 < y) : 1 - 1/y ≤ Real.log y := by
+  have h := Real.add_one_le_exp (-Real.log y)
+  rw [Real.exp_neg, Real.exp_log hy] at h
+  rw [one_div]; linarith
+
+/-- **log(y) ≤ y - 1** for y > 0.
+    Proof: from `exp(t) ≥ 1 + t`, set `t = log(y)`. -/
+lemma log_le_sub_one (y : ℝ) (hy : 0 < y) : Real.log y ≤ y - 1 := by
+  have h := Real.add_one_le_exp (Real.log y)
+  rw [Real.exp_log hy] at h; linarith
+
+/-- For y > 1, log(y) > 0 and log(y) ≥ (y-1)/y = 1 - 1/y.
+    This gives |log(y)| = log(y) ≥ 1 - 1/y > 0 when y > 1. -/
+lemma abs_log_ge_of_gt_one (y : ℝ) (hy : 1 < y) :
+    |Real.log y| ≥ 1 - 1/y := by
+  rw [abs_of_pos (Real.log_pos hy)]
+  exact log_ge_one_sub_inv y (by linarith)
+
+/-- For 0 < y < 1, -log(y) > 0 and |log(y)| = -log(y) = log(1/y) ≥ 1 - y.
+    Proof: log(1/y) = -log(y), and log(1/y) ≥ 1 - 1/(1/y) = 1 - y. -/
+lemma abs_log_ge_of_lt_one (y : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1) :
+    |Real.log y| ≥ 1 - y := by
+  rw [abs_of_neg (Real.log_neg hy_pos hy_lt)]
+  have h := log_le_sub_one y hy_pos
+  linarith
+
+-- ═══════════════════════════════════════════
 -- §1. Half-Integer Log Bound
 -- ═══════════════════════════════════════════
 
@@ -45,12 +77,10 @@ namespace Cathedral.White.Infrastructure.HalfIntegerPerron
 
     This is the key insight that eliminates the log singularity.
 
-    **Proof sketch** (two cases):
-    - If n < X/2 or n > 2X: then X/n > 2 or X/n < 1/2,
-      so |log(X/n)| > log 2 > 1/(8X) for X ≥ 5/2.
-    - If X/2 ≤ n ≤ 2X: then |X - n| ≥ 1/2 (half-integer gap),
-      so |log(X/n)| = |log(1 + (X-n)/n)| ≥ |X-n|/(2n) ≥ 1/(4n) ≥ 1/(8X).
--/
+    **Proof** (two cases):
+    - If n < X or n > X (far): |log(X/n)| ≥ 1 - min(n/X, X/n) ≥ 1/(2X)
+      (using log(y) ≥ 1-1/y for y > 1, |log(y)| ≥ 1-y for y < 1)
+    - Both cases: since |X - n| ≥ 1/2, the bound 1/(2X) ≥ 1/(8X). -/
 lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
     let X : ℝ := (m : ℝ) + 1/2
     0 < |Real.log (X / ↑n)| ∧ 1 / |Real.log (X / ↑n)| ≤ 8 * X := by
@@ -82,7 +112,74 @@ lemma half_integer_log_bound (m : ℕ) (hm : 2 ≤ m) (n : ℕ) (hn : 1 ≤ n) :
     have h8X : (0 : ℝ) < 8 * X := by positivity
     nlinarith [mul_le_mul_of_nonneg_right h h8X.le,
               div_mul_cancel₀ (1 : ℝ) (ne_of_gt h8X)]
-  sorry -- The two-case bound (far/near) — to be proved
+  -- The core bound: |X - n| ≥ 1/2 (half-integer gap)
+  have hXn_gap : |X - ↑n| ≥ 1/2 := by
+    rw [show X - ↑n = (m : ℝ) + 1/2 - ↑n from rfl]
+    -- |m + 1/2 - n| = |m - n + 1/2|, and m - n is an integer
+    -- So the fractional part is 1/2, giving |·| ≥ 1/2
+    have : ∃ k : ℤ, (m : ℝ) - ↑n = ↑k := ⟨(m : ℤ) - n, by push_cast; ring⟩
+    obtain ⟨k, hk⟩ := this
+    rw [show (m : ℝ) + 1/2 - ↑n = ↑k + 1/2 from by linarith]
+    rw [show |(k : ℝ) + 1/2| = |↑k + 1/2| from rfl]
+    by_cases hk_nn : (0 : ℝ) ≤ (k : ℝ)
+    · -- k ≥ 0: |k + 1/2| = k + 1/2 ≥ 1/2
+      rw [abs_of_nonneg (by linarith)]; linarith
+    · -- k < 0: k ≤ -1, so k + 1/2 ≤ -1/2, |k + 1/2| ≥ 1/2
+      push_neg at hk_nn
+      have : k ≤ -1 := Int.le_sub_one_of_lt (by exact_mod_cast hk_nn)
+      have : (k : ℝ) ≤ -1 := by exact_mod_cast this
+      rw [abs_of_neg (by linarith)]; linarith
+  -- Two cases based on whether X/n > 1 or X/n < 1
+  rcases lt_or_gt_of_ne hXn_ne_one with hlt | hgt
+  · -- Case: X/n < 1, i.e. n > X
+    -- |log(X/n)| ≥ 1 - X/n = (n - X)/n ≥ (1/2)/n ≥ 1/(2n)
+    have hXn_lt : X / ↑n < 1 := hlt
+    have hn_gt_X : X < ↑n := by rwa [div_lt_one hn_pos] at hXn_lt
+    have h_abs_log : |Real.log (X / ↑n)| ≥ 1 - X / ↑n :=
+      abs_log_ge_of_lt_one (X / ↑n) hXn_pos hXn_lt
+    have h_diff : 1 - X / ↑n = (↑n - X) / ↑n := by field_simp
+    rw [h_diff] at h_abs_log
+    -- (n - X)/n ≥ (1/2)/n since |X - n| ≥ 1/2 and n > X means n - X ≥ 1/2
+    have h_nX : ↑n - X ≥ 1/2 := by
+      have := hXn_gap
+      rw [abs_of_nonpos (by linarith)] at this; linarith
+    have h_bound : (1/2) / ↑n ≤ (↑n - X) / ↑n :=
+      div_le_div_of_nonneg_right h_nX hn_pos.le
+    -- (1/2)/n ≥ 1/(8X) since n ≤ X + X = 2X (actually n ≤ bound, but
+    -- we need: 1/(2n) ≥ 1/(8X), i.e. 8X ≥ 2n, i.e. 4X ≥ n
+    -- Since n ≤ ⌊X⌋ + ... this is NOT always true. Use weaker bound:
+    -- |log| ≥ (n-X)/n ≥ 1/(2n). And 1/(2n) ≥ 1/(8X) iff 4X ≥ n.
+    -- But n could be > 4X! We need a different argument for large n.
+    -- For large n (n > 2X): X/n < 1/2, so |log(X/n)| > log 2 > 1/(8X)
+    -- For moderate n (X < n ≤ 2X): use the (n-X)/n bound
+    by_cases hn_le : (n : ℝ) ≤ 4 * X
+    · -- n ≤ 4X: 1/(2n) ≥ 1/(8X)
+      calc 1 / (8 * X) ≤ (1/2) / ↑n := by
+              rw [div_le_div_iff₀ (by positivity) hn_pos]; nlinarith
+        _ ≤ (↑n - X) / ↑n := h_bound
+        _ ≤ |Real.log (X / ↑n)| := h_abs_log
+    · -- n > 4X: X/n < 1/4, so |log(X/n)| ≥ 1 - X/n > 3/4 ≥ 1/(8X)
+      push_neg at hn_le
+      have hXn_small : X / ↑n < 1/4 := by
+        rw [div_lt_iff₀ hn_pos]; linarith
+      -- |log(X/n)| ≥ 1 - X/n > 1 - 1/4 = 3/4 ≥ 1/(8X) since X ≥ 5/2
+      have h1 : 1 / (8 * X) ≤ 1/20 := by
+        rw [div_le_div_iff₀ (by positivity) (by norm_num : (0:ℝ) < 20)]; nlinarith
+      linarith
+  · -- Case: X/n > 1, i.e. n < X
+    -- |log(X/n)| = log(X/n) ≥ 1 - n/X = (X - n)/X ≥ (1/2)/X = 1/(2X) ≥ 1/(8X)
+    have hXn_gt : 1 < X / ↑n := hgt
+    have hn_lt_X : ↑n < X := by rwa [lt_div_iff₀ hn_pos, one_mul] at hXn_gt
+    have h_abs_log : |Real.log (X / ↑n)| ≥ 1 - 1 / (X / ↑n) :=
+      abs_log_ge_of_gt_one (X / ↑n) hXn_gt
+    have h_simplify : 1 - 1 / (X / ↑n) = (X - ↑n) / X := by field_simp
+    rw [h_simplify] at h_abs_log
+    have h_Xn : X - ↑n ≥ 1/2 := by
+      have := hXn_gap; rw [abs_of_pos (by linarith)] at this; exact this
+    calc 1 / (8 * X) ≤ (1/2) / X := by
+            rw [div_le_div_iff₀ (by positivity) hX_pos]; nlinarith
+      _ ≤ (X - ↑n) / X := div_le_div_of_nonneg_right h_Xn hX_pos.le
+      _ ≤ |Real.log (X / ↑n)| := h_abs_log
 
 -- ═══════════════════════════════════════════
 -- §2. Unified Finite Perron Error
