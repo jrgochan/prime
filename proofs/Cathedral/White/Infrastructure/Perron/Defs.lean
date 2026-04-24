@@ -12,6 +12,8 @@ import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
 import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+import Mathlib.Analysis.Real.Pi.Bounds
 
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
@@ -66,5 +68,26 @@ lemma perronIntegrand_bound_on_horizontal {y σ : ℝ} (hy : 0 < y) {T : ℝ} (h
   -- Need: T ≤ ‖s‖
   rw [← hs_im]
   exact abs_im_le_norm s
+
+-- ═══════════════════════════════════════════
+-- §4. Prefactor Bounds
+-- ═══════════════════════════════════════════
+
+/-- ‖1/(2π)‖ ≤ 1. Used in every Perron formula application to absorb the prefactor.
+    Proof: 1/(2π) < 1 since 2π > 1. -/
+lemma norm_one_div_two_pi_le : ‖(1 : ℂ) / (2 * ↑Real.pi)‖ ≤ 1 := by
+  rw [norm_div, norm_one, norm_mul, Complex.norm_ofNat]
+  rw [show ‖(↑Real.pi : ℂ)‖ = Real.pi from by
+    rw [Complex.norm_real]; exact abs_of_pos Real.pi_pos]
+  rw [div_le_one (by positivity : (0:ℝ) < 2 * Real.pi)]
+  linarith [Real.pi_gt_three]
+
+/-- Absorbing the 1/(2π) prefactor: ‖(1/(2π)) * z‖ ≤ ‖z‖. -/
+lemma norm_one_div_two_pi_mul_le (z : ℂ) :
+    ‖(1 / (2 * ↑Real.pi)) * z‖ ≤ ‖z‖ := by
+  rw [norm_mul]
+  calc ‖(1 : ℂ) / (2 * ↑Real.pi)‖ * ‖z‖ ≤ 1 * ‖z‖ :=
+        mul_le_mul_of_nonneg_right norm_one_div_two_pi_le (norm_nonneg _)
+    _ = ‖z‖ := one_mul _
 
 end Cathedral.White.Infrastructure

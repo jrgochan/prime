@@ -53,9 +53,9 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
   -- 2. Extract the three fundamental bounds (quantified completely independent of x!)
   obtain ⟨K, hK, h_Perron⟩ := truncated_perron_for_moebius c hc
   obtain ⟨K₁, hK₁, T_S, hTS, h_Shift⟩ :=
-    perron_moebius_contour_shift_factored hRH sigma0 c hsigma0 hc hsigma0_c hsigma0_lt_one
+    perron_moebius_contour_shift hRH sigma0 c hsigma0 hc hsigma0_c hsigma0_lt_one
   obtain ⟨K₂, hK₂, T_V, hTV, h_Vert⟩ :=
-    perron_vertical_sigma0_bound hRH sigma0 hsigma0 (eps'/2) (by positivity)
+    perron_vertical_sigma0_bound hRH sigma0 hsigma0 (by linarith) (eps'/2) (by positivity)
 
   set T_max := max T_S T_V
   have hT_max_ge_1 : 1 ≤ T_max := le_trans hTS (le_max_left _ _)
@@ -76,10 +76,10 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
   -- 4. Split behavior based on whether x is large enough for the asymptotic bounds
   by_cases hx_large : T_max ≤ x
   · -- Case 1: x ≥ T_max. We set T = x.
-    set I_c := (1 / (2 * ↑Real.pi * I)) *
+    set I_c := (1 / (2 * ↑Real.pi)) *
       ∫ t in (-x)..x, (x : ℂ) ^ (↑c + ↑t * I) /
         ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))
-    set I_s := (1 / (2 * ↑Real.pi * I)) *
+    set I_s := (1 / (2 * ↑Real.pi)) *
       ∫ t in (-x)..x, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
         ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I))
 
@@ -115,21 +115,18 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
     set_option maxHeartbeats 800000 in
     have h_bound_eps' : |((summatoryMoebius x : ℤ) : ℝ)| ≤
         C_main * x ^ ((1 : ℝ)/2 + eps') := by
-      -- h2 bounds the single integral ‖a * ∫(f_c - f_s)‖. We need ‖I_c - I_s‖.
-      -- I_c - I_s = a*∫f_c - a*∫f_s = a*(∫f_c - ∫f_s).
-      -- Since both integrands are integrable, ∫f_c - ∫f_s = ∫(f_c - f_s) by integral_sub.
-      -- But the factored corollary avoids this: it bounds ‖a * ∫(f_c-f_s)‖ directly.
-      -- We show ‖I_c - I_s‖ ≤ ‖a * ∫(f_c-f_s)‖ via norm_sub and scalar factoring.
+      -- h2 now bounds ‖∫(f_c - f_s)‖ (raw, no prefactor). We need ‖I_c - I_s‖.
+      -- I_c - I_s = (1/(2π)) * (∫f_c - ∫f_s) = (1/(2π)) * ∫(f_c - f_s)
+      -- Since ‖1/(2π)‖ ≤ 1, we get ‖I_c - I_s‖ ≤ ‖∫(f_c - f_s)‖ ≤ K₁ bound.
       have h_shift_bound : ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2)) := by
-        -- Step 1: I_c - I_s = a * (∫f_c - ∫f_s) by ring
-        have h_eq : I_c - I_s = (1 / (2 * ↑Real.pi * I)) *
+        -- Step 1: I_c - I_s = (1/(2π)) * (∫f_c - ∫f_s) by ring
+        have h_eq : I_c - I_s = (1 / (2 * ↑Real.pi)) *
             ((∫ t in (-x)..x, (x : ℂ) ^ (↑c + ↑t * I) /
                 ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))) -
              (∫ t in (-x)..x, (x : ℂ) ^ (↑sigma0 + ↑t * I) /
                 ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))) := by
           simp only [I_c, I_s]; ring
         -- Step 2: Integrability of both vertical integrands
-        -- The integrand x^(σ+tI)/(σ+tI·ζ(σ+tI)) is ContinuousOn [-x,x] for σ ≠ 1, σ > 1/2
         have h_vert_cont : ∀ (σ : ℝ), σ ≠ 1 → (1/2 < σ) →
             ContinuousOn (fun t : ℝ => (x : ℂ) ^ (↑σ + ↑t * I) /
               ((↑σ + ↑t * I) * riemannZeta (↑σ + ↑t * I)))
@@ -158,10 +155,23 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
             (fun t => (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) * riemannZeta (↑sigma0 + ↑t * I)))
             volume (-x) x :=
           (h_vert_cont sigma0 (by linarith) hsigma0).intervalIntegrable
-        -- Step 3: ∫f_c - ∫f_s = ∫(f_c - f_s) by integral_sub
-        rw [h_eq, ← intervalIntegral.integral_sub h_int_fc h_int_fs]
-        -- Now the goal matches h2 exactly
-        exact h2
+        show ‖I_c - I_s‖ ≤ K₁ * x ^ c * x ^ (-((1 : ℝ)/2))
+        -- Transform via: I_c - I_s = a*(∫f_c - ∫f_s) [ring] = a*∫(f_c-f_s) [integral_sub]
+        have h_ic_is : I_c - I_s = (1 / (2 * ↑Real.pi) : ℂ) *
+            ∫ t in (-x)..x,
+              ((x : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I)) -
+               (x : ℂ) ^ (↑sigma0 + ↑t * I) / ((↑sigma0 + ↑t * I) *
+                riemannZeta (↑sigma0 + ↑t * I))) := by
+          simp only [I_c, I_s]
+          rw [← mul_sub, intervalIntegral.integral_sub h_int_fc h_int_fs]
+        rw [h_ic_is, norm_mul]
+        have h_norm_pfx : ‖(1 / (2 * ↑Real.pi) : ℂ)‖ ≤ 1 := by
+          rw [norm_div, norm_one, norm_mul, Complex.norm_ofNat]
+          rw [show ‖(↑Real.pi : ℂ)‖ = Real.pi from by
+            rw [Complex.norm_real]; exact abs_of_pos Real.pi_pos]
+          rw [div_le_one (by positivity : (0:ℝ) < 2 * Real.pi)]
+          linarith [Real.pi_gt_three]
+        exact le_trans (mul_le_of_le_one_left (norm_nonneg _) h_norm_pfx) h2
 
       -- Cast path: |((M : ℤ) : ℝ)| = ‖((M : ℤ) : ℂ)‖
       rw [h_real_norm]

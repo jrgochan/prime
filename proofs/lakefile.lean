@@ -155,6 +155,7 @@ lean_lib «Cathedral» where
     -- Perron-Möbius chain: M(x) = O(x^{1/2+ε}) under RH
     `Cathedral.White.Infrastructure.Perron.ContourShift,
     `Cathedral.White.Infrastructure.Perron.DirichletPoly,
+    `Cathedral.White.Infrastructure.Perron.VerticalBounds,
     `Cathedral.White.Infrastructure.Perron.AssemblyHelpers,
     `Cathedral.White.Infrastructure.Perron.PerronMoebius,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
