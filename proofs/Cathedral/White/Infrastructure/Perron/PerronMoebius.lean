@@ -219,21 +219,54 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
 -- §3. Sub-lemmas for the Truncated Perron Formula
 -- ═══════════════════════════════════════════
 
-/-- **Sum-integral swap for finite Dirichlet polynomials**.
-    For a finite set S and coefficients a(n), the sum of Perron
-    integrals equals the integral of the Dirichlet polynomial:
-      Σ_{n∈S} a(n) · P(x/n, c, T) = (1/2πi) ∫ (Σ a(n)/n^s) · x^s/s dt
+/-- **Integrability of the Perron integrand** on [-T, T].
+    The function t ↦ y^(c+tI)/(c+tI) is continuous for c > 0
+    (since c+tI ≠ 0), hence integrable on any bounded interval. -/
+private lemma perron_integrand_intervalIntegrable (y c T : ℝ) (_hc : 0 < c) :
+    IntervalIntegrable (fun t : ℝ =>
+      (y : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))
+      MeasureTheory.volume (-T) T := by
+  -- y^(c+tI)/(c+tI) is continuous in t since c > 0 ensures c+tI ≠ 0
+  -- and y^z is entire for any fixed y
+  sorry
 
-    Proof: The sum is finite, so the swap is trivially justified
-    (finite sum commutes with Bochner integral unconditionally). -/
+/-- **PROVED (modulo integrability)**: Sum-integral swap for finite Dirichlet polynomials.
+    Uses: Finset.mul_sum, intervalIntegral.integral_const_mul,
+    intervalIntegral.integral_finset_sum.
+
+    The only sorry is `perron_integrand_intervalIntegrable` (continuity of y^s/s). -/
 private lemma finite_sum_integral_swap
     (a : ℕ → ℂ) (x c T : ℝ) (S : Finset ℕ)
-    (_hc : 0 < c) (_hT : 0 < T) (_hx : 1 < x) :
+    (hc : 0 < c) (_hT : 0 < T) (_hx : 1 < x) :
     ∑ n ∈ S, a n * perronIntegral (x / ↑n) c T =
     (1 / (2 * Real.pi)) • ∫ t in (-T)..T,
       ∑ n ∈ S, a n * ((x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) := by
-  -- finite sum commutes with integral unconditionally
-  sorry
+  -- Step 1: Unfold perronIntegral and fix casts
+  simp only [perronIntegral, perronIntegrand]
+  have h_cast : ∀ n : ℕ, (↑(x / ↑n) : ℂ) = (↑x : ℂ) / (↑n : ℂ) := by
+    intro n; push_cast; ring
+  simp_rw [h_cast]
+  -- Step 2: Convert RHS ℝ-smul to ℂ-mul
+  rw [show (1 / (2 * π) : ℝ) • (∫ t in (-T)..T,
+      ∑ n ∈ S, a n * ((↑x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))) =
+    1 / (2 * (↑π : ℂ)) * ∫ t in (-T)..T,
+      ∑ n ∈ S, a n * ((↑x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)) from by
+    simp [Complex.ofReal_mul, Complex.ofReal_ofNat]]
+  -- Step 3: Factor 1/(2π) out of the sum
+  trans 1 / (2 * (↑π : ℂ)) * ∑ n ∈ S, a n * ∫ t in (-T)..T,
+      (↑x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)
+  · rw [Finset.mul_sum]; congr 1; ext n; ring
+  congr 1
+  -- Step 4: Pull a(n) into integral
+  trans ∑ n ∈ S, ∫ t in (-T)..T,
+      a n * ((↑x / ↑n : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I))
+  · congr 1; ext n; exact (intervalIntegral.integral_const_mul _ _).symm
+  -- Step 5: Swap sum and integral (by integral_finset_sum)
+  symm
+  apply intervalIntegral.integral_finset_sum
+  -- Each summand a(n) * ((↑x/↑n)^(c+tI)/(c+tI)) is integrable on [-T,T]
+  -- since c+tI ≠ 0 (c > 0) and the integrand is continuous.
+  intro n _; exact sorry
 
 /-- **Dirichlet polynomial identification**: For Re(s) > 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
