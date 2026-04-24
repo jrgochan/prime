@@ -502,13 +502,26 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
           linarith [h_key, h_rearrange, h_exp_identity]
         linarith [hbc']
       · -- Case B: 1/2+ε ≤ Re(s) < 1/2+ε' (thin strip)
-        -- This strip has width ε'-ε and requires either:
-        --   (1) Hadamard factorization (sharp exponent ε)
-        --   (2) Phragmén-Lindelöf interpolation
-        --   (3) Jensen's formula + zero density
-        -- The BC bound with ε gives |ζ| ≥ C/|t|^{B_ε} but A < B_ε
-        -- means c₀/|t|^A ≫ C/|t|^{B_ε} for large |t|.
-        -- Verified satisfiable numerically (bc-witness-analysis).
+        --
+        -- MATHEMATICAL OBSTRUCTION (verified by bc-witness-analysis):
+        -- The BC bound with ε gives ‖ζ‖ ≥ C·(2+|t|)^{-B_ε} where B_ε > A.
+        -- The witness c₀ = (1/4)·4^{-K_{ε'}}·2^{-A} yields
+        -- c₀/|t|^A ∼ C'·|t|^{-A} which decays SLOWER than (2+|t|)^{-B_ε}
+        -- since A < B_ε. So c₀/|t|^A > BC lower bound for large |t|.
+        --
+        -- The theorem IS true under RH (Hadamard factorization gives
+        -- ‖ζ(s)‖ ≥ c·exp(-C·(log|t|)^{2-2σ+ε}) for σ > 1/2),
+        -- but BC alone is too coarse to prove it for A < B_ε.
+        --
+        -- PROOF PATHS to close this sorry:
+        --   (1) Hadamard factorization: log ζ(s) = Σ log(1-s/ρ) + ...
+        --       Under RH, |s - ρ| ≥ σ - 1/2 ≥ ε, giving log|ζ| ≥ -C·log²|t|
+        --   (2) Jensen's formula + zero density: N(T) = (T/2π)·log(T/2πe) + ...
+        --       controls the number of nearby zeros, bounding log|ζ| from below
+        --   (3) Phragmén-Lindelöf in the strip [1/2+ε, 1/2+ε']
+        --
+        -- STATUS: 1 sorry. The BC inner bound (bc_inner_bound) is ZERO SORRY.
+        -- This sorry is the only remaining gap in the full proof chain.
         simp only [not_le] at hre
         have hbc := bc_inner_bound hRH ε hε hε1 s hs ht_ge_2
         sorry

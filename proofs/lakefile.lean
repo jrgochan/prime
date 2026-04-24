@@ -135,6 +135,10 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
+    -- PNT bridge (single axiom consolidation)
+    `Cathedral.Assembly.PNTBridge,
+    -- Mertens graduation (axiom → theorem via Perron)
+    `Cathedral.Assembly.MertensFromPerron,
     -- White Singlet (Phase I: Axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
@@ -148,6 +152,8 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.Perron.ResidueLtOne,
     `Cathedral.White.Infrastructure.Perron.KernelBound,
     `Cathedral.White.Infrastructure.Perron.Formula,
+    -- Perron-Möbius chain: M(x) = O(x^{1/2+ε}) under RH
+    `Cathedral.White.Infrastructure.Perron.PerronMoebius,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
     `Cathedral.White.Infrastructure.DirichletZetaInverse,
     -- Conditional Lindelöf bound + horizontal contour vanishing (2 sorry)
