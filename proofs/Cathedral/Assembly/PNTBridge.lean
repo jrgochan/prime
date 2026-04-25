@@ -50,15 +50,16 @@ import Mathlib.NumberTheory.LSeries.Deriv
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 import Mathlib.NumberTheory.LSeries.SumCoeff
+import PrimeNumberTheoremAnd.Consequences
 
 noncomputable section
-open Real Finset Filter
+open Real Finset Filter ArithmeticFunction ArithmeticFunction.Moebius
 
 -- ════════════════════════════════════════════════
--- THE SINGLE PNT AXIOM (Drop-In Point)
+-- THE PNT (now a THEOREM via PrimeNumberTheoremAnd)
 -- ════════════════════════════════════════════════
 
-/-- **THE PRIME NUMBER THEOREM** (single axiom form).
+/-- **THE PRIME NUMBER THEOREM** (summatory Möbius form).
 
     The partial sums of μ(k)/k converge to 0:
       Σ_{k=1}^{N} μ(k)/k → 0 as N → ∞
@@ -66,34 +67,80 @@ open Real Finset Filter
     This is equivalent to the Prime Number Theorem:
       ψ(x) ~ x, or equivalently π(x) ~ x/ln(x)
 
-    ### Drop-In Point
-    When PrimeNumberTheoremAnd (Kontorovich et al.) is available as a
-    lake dependency, replace this axiom with:
+    **PROVED** from `PrimeNumberTheoremAnd.mu_pnt_alt`:
+      `(fun x : ℝ ↦ Σ n ∈ range ⌊x⌋₊, (μ n : ℝ) / n) =o[atTop] (fun _ ↦ 1)`
 
-    ```
-    theorem pnt_moebius_sum_div_tendsto :
-        Tendsto (fun N => ...) atTop (nhds 0) := by
-      -- Bridge from PrimeNumberTheoremAnd.prime_number_theorem
-      -- via M(x) = o(x) → Abel summation → Σ μ(k)/k → 0
-      exact PrimeNumberTheoremAnd.moebius_sum_div_tendsto  -- (future)
-    ```
+    The bridge:
+    1. `mu_pnt_alt` gives o(1) over real-indexed partial sums (range ⌊x⌋₊)
+    2. o(1) implies Tendsto ... 0 (by isLittleO_one_iff)
+    3. Compose with (· : ℕ → ℝ) to get discrete version (range N)
+    4. Convert range N → Icc 1 N (μ(0) = 0, so the n=0 term vanishes)
 
-    Reference: Titchmarsh (1986), Chapter 3.
-    Equivalent forms: Hadamard/de la Vallée-Poussin (1896). -/
-axiom pnt_moebius_sum_div_tendsto :
-  Tendsto (fun N =>
-    ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-    atTop (nhds 0)
+    Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024-2026). -/
+theorem pnt_moebius_sum_div_tendsto :
+    Tendsto (fun N =>
+      ∑ k ∈ Finset.Icc 1 N, (↑(μ k) : ℝ) / (k : ℝ))
+      atTop (nhds 0) := by
+  -- mu_pnt_alt gives o(1) for the ℝ-indexed version over range ⌊x⌋₊
+  have h_o1 := mu_pnt_alt
+  rw [Asymptotics.isLittleO_one_iff] at h_o1
+  -- Compose with ℕ → ℝ to get discrete version
+  have h_range : Tendsto (fun N : ℕ =>
+      ∑ n ∈ Finset.range N, (↑(μ n) : ℝ) / (n : ℝ))
+      atTop (nhds 0) := by
+    have := h_o1.comp tendsto_natCast_atTop_atTop
+    simp only [Function.comp_def, Nat.floor_natCast] at this
+    exact this
+  -- The Icc 1 N sum equals the range (N+1) sum minus the n=0 term (which is 0)
+  -- Equivalently: Σ_{Icc 1 N} = Σ_{range N} + μ(N)/N - μ(0)/0
+  -- Since μ(0) = 0: Σ_{Icc 1 N} = Σ_{range N} + μ(N)/N
+  have h_eq : ∀ N : ℕ,
+      ∑ k ∈ Finset.Icc 1 N, (↑(μ k) : ℝ) / (k : ℝ) =
+      ∑ n ∈ Finset.range N, (↑(μ n) : ℝ) / (n : ℝ) + (↑(μ N) : ℝ) / (N : ℝ) := by
+    intro N
+    -- Icc 1 N ∪ {0} = range (N+1), and μ(0)/0 = 0
+    have h_union : Finset.Icc 1 N = (Finset.range (N + 1)).erase 0 := by
+      ext n; simp [Finset.mem_Icc, Finset.mem_range]; omega
+    rw [h_union]
+    rw [Finset.sum_erase_eq_sub (Finset.mem_range.mpr (Nat.zero_lt_succ N))]
+    simp only [ArithmeticFunction.map_zero, Int.cast_zero, zero_div, sub_zero]
+    rw [Finset.sum_range_succ]
+  -- The N-th term μ(N)/N → 0
+  have h_Nth : Tendsto (fun N : ℕ => (↑(μ N) : ℝ) / (N : ℝ)) atTop (nhds 0) := by
+    rw [Metric.tendsto_atTop]
+    intro ε hε
+    refine ⟨⌈1/ε⌉₊ + 1, fun N hN => ?_⟩
+    simp only [dist_zero_right]
+    have hN_pos : (0 : ℝ) < N := Nat.cast_pos.mpr (by omega)
+    calc ‖(↑(μ N) : ℝ) / (N : ℝ)‖
+        = |(↑(μ N) : ℝ)| / N := by
+          rw [norm_div, Real.norm_eq_abs, Real.norm_natCast]
+      _ ≤ 1 / N := by
+          apply div_le_div_of_nonneg_right _ hN_pos.le
+          exact_mod_cast abs_moebius_le_one
+      _ < ε := by
+          have h1ε : 1 / ε < N := calc
+            1 / ε ≤ ⌈1/ε⌉₊ := Nat.le_ceil (1/ε)
+            _ < ⌈1/ε⌉₊ + 1 := by linarith
+            _ ≤ N := by exact_mod_cast hN
+          exact (div_lt_iff₀ hN_pos).mpr (mul_comm ε ↑N ▸ (div_lt_iff₀ hε).mp h1ε)
+  -- Combine: Σ_{Icc 1 N} = Σ_{range N} + μ(N)/N → 0 + 0 = 0
+  have h_sum : Tendsto
+      ((fun N => ∑ n ∈ Finset.range N, (↑(μ n) : ℝ) / (n : ℝ)) +
+       (fun N => (↑(μ N) : ℝ) / (N : ℝ))) atTop (nhds 0) := by
+    rw [show (0:ℝ) = 0 + 0 from (add_zero 0).symm]
+    exact h_range.add h_Nth
+  exact h_sum.congr (fun N => (h_eq N).symm)
 
 -- ════════════════════════════════════════════════
--- DERIVED: pnt_mu_div_k (identical to the axiom)
+-- DERIVED: pnt_mu_div_k (identical to the theorem)
 -- ════════════════════════════════════════════════
 
 /-- **PNT AXIOM 1** (now a theorem): Σ μ(k)/k → 0.
-    Trivially equal to the single axiom. -/
+    Trivially equal to `pnt_moebius_sum_div_tendsto`. -/
 theorem pnt_mu_div_k_derived :
   Tendsto (fun N =>
-    ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
+    ∑ k ∈ Finset.Icc 1 N, (↑(μ k) : ℝ) / (k : ℝ))
     atTop (nhds 0) :=
   pnt_moebius_sum_div_tendsto
 
