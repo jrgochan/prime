@@ -42,6 +42,7 @@ import Cathedral.Vasyunin.Cotangent.TelescopeSum
 import Cathedral.Vasyunin.Cotangent.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
 import Cathedral.White.Infrastructure.DirichletTest
+import Cathedral.White.Infrastructure.CenteredFractBound
 import Mathlib.Analysis.SpecialFunctions.Stirling
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 import Mathlib.Algebra.Order.Floor.Semifield
@@ -266,12 +267,16 @@ axiom integral_eq_S_combined (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     period sums to 0).
 
     This is the key number-theoretic input that makes the Dirichlet
-    test applicable to the Vasyunin residual series. -/
-axiom centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
+    test applicable to the Vasyunin residual series.
+
+    **PROVED** — via CenteredFractBound.lean (zero sorry). -/
+theorem centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     ∃ C : ℝ, ∀ n : ℕ,
       |Cathedral.White.Infrastructure.DirichletTest.partialSum₀
-        (fun m => Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))) n| ≤ C
+        (fun m => Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))) n| ≤ C :=
+  ⟨(b:ℝ), Cathedral.White.Infrastructure.CenteredFractBound.centered_fract_partial_sums_bounded'
+    a b ha hb hab hcop⟩
 
 /-- **RESIDUAL CONVERGENCE**: The centered fractional-part series converges
     by the Dirichlet test.

@@ -191,6 +191,7 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.HilbertInequality,
     -- Dirichlet test for series convergence (PROVED, zero sorry, zero axiom)
     `Cathedral.White.Infrastructure.DirichletTest,
+    `Cathedral.White.Infrastructure.CenteredFractBound,
     -- Partial sum convergence (Vasyunin integral decomposition)
     `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
   ]
