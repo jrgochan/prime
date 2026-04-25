@@ -28,7 +28,7 @@ RH ↔ d²→0  (nyman_beurling_equivalence)
               ├── integral_eq_S_combined              (AXIOM — evaluative)
               ├── floor_weighted_log_sum_limit         (AXIOM — Gauss digamma)
               ├── linear_series_convergent             (AXIOM — next target!)
-              │     └── centered_fract_partial_sums_bounded  (AXIOM — ⚡ IMMEDIATE TARGET)
+              │     └── centered_fract_partial_sums_bounded  ✅ PROVED (CenteredFractBound)
               │           └── dirichlet_test                  ✅ PROVED
               └── centered_fract_residual_converges_sketch   ✅ PROVED
 ```
@@ -38,7 +38,8 @@ RH ↔ d²→0  (nyman_beurling_equivalence)
 | Path | Status | Description |
 |------|--------|-------------|
 | `White/Infrastructure/DirichletTest.lean` | ✅ PROVED | Abel summation + Dirichlet test |
-| `Vasyunin/Cotangent/PartialSumConvergence.lean` | 4 axioms | Three-sum decomposition |
+| `White/Infrastructure/CenteredFractBound.lean` | ✅ PROVED | Bounded partial sums (8 theorems) |
+| `Vasyunin/Cotangent/PartialSumConvergence.lean` | 3 axioms | Three-sum decomposition |
 | `Vasyunin/Cotangent/TelescopeLimit.lean` | ✅ PROVED | Squeeze theorem convergence |
 | `Vasyunin/Cotangent/StirlingBridge.lean` | ✅ PROVED | Stirling's formula infrastructure |
 | `Vasyunin/Cotangent/OffDiagPartition.lean` | ✅ PROVED | Integral partitioning |
@@ -49,7 +50,7 @@ RH ↔ d²→0  (nyman_beurling_equivalence)
 
 ---
 
-## Immediate Target: `centered_fract_partial_sums_bounded`
+## ~~Immediate Target: `centered_fract_partial_sums_bounded`~~ ✅ DONE
 
 ### The Statement
 
