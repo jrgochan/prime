@@ -107,7 +107,7 @@ private lemma div_le_div_of_le_of_le
 private lemma bc_inner_bound (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2)
     (s : ℂ) (hs : 1/2 + ε ≤ s.re) (ht : 2 ≤ |s.im|) :
-    (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+    (1/4 : ℝ) * Real.exp (-(4 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
       (3/2 - ε) / (ε/2))) ≤ ‖riemannZeta s‖ := by
   by_cases hre_le : s.re ≤ 2
   case pos =>
@@ -172,9 +172,28 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
             Real.log_one, hM_def]
         ring
       linarith [h_re]
-    -- TODO(4.28): borelCaratheodory_zero in 4.28 expects strict `<` bound
-    -- but our hG_re_le provides `≤`. Proof worked in 4.30.
-    have hBC : ‖G z‖ ≤ 2 * M * ‖z‖ / (R - ‖z‖) := by sorry
+    -- Apply BC with strict bound: Re(G w) ≤ M < M + 1
+    have hG_re_lt : Set.MapsTo G (ball 0 R) {w | w.re < M + 1} := by
+      intro w hw
+      simp only [Set.mem_setOf_eq]
+      have : (G w).re ≤ M := hG_re_le hw
+      linarith
+    have hM1_pos : 0 < M + 1 := by linarith
+    have hBC_raw := Complex.borelCaratheodory_zero hM1_pos hG_diff hG_re_lt hR_pos hz_ball hG0
+    -- hBC_raw : ‖G z‖ ≤ 2 * (M + 1) * ‖z‖ / (R - ‖z‖)
+    -- Since M > 1 (M = log 4 + ... > log 4 > 1), we have M + 1 ≤ 2M
+    have hlog4_pos : 0 < Real.log 4 := Real.log_pos (by norm_num)
+    have hlog2t_pos : 0 < Real.log (2 + |t|) := Real.log_pos (by linarith [abs_nonneg t])
+    have hM_ge_one : 1 ≤ M := by
+      have h1 : (1:ℝ) < Real.log 4 := by
+        rw [show (1:ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+        exact Real.log_lt_log (Real.exp_pos 1) (lt_trans exp_one_lt_three (by norm_num : (3:ℝ) < 4))
+      linarith [hlog2t_pos]
+    have h_M1_bound : 2 * (M + 1) ≤ 4 * M := by linarith
+    have hR_sub_pos : 0 < R - ‖z‖ := by linarith
+    have hBC : ‖G z‖ ≤ 4 * M * ‖z‖ / (R - ‖z‖) :=
+      le_trans hBC_raw (div_le_div_of_nonneg_right
+        (mul_le_mul_of_nonneg_right h_M1_bound (norm_nonneg z)) (le_of_lt hR_sub_pos))
     -- Lower bound on ‖ζ(s)‖
     have hs_eq : s = s₀ + z := by simp [hz_def, hs₀_def]
     have hG_eq_s := hG_eq z hz_ball
@@ -184,13 +203,12 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
       linarith [neg_abs_le (G z).re, Complex.abs_re_le_norm (G z)]
     have hexp_ge : Real.exp (-(‖G z‖)) ≤ Real.exp ((G z).re) := by
       apply Real.exp_le_exp.mpr; linarith
-    have hGz_bound : ‖G z‖ ≤ 2 * M * (3/2 - ε) / (ε/2) := by
-      have hR_sub_pos : 0 < R - ‖z‖ := by linarith
-      have h_num : 2 * M * ‖z‖ ≤ 2 * M * (3/2 - ε) :=
+    have hGz_bound : ‖G z‖ ≤ 4 * M * (3/2 - ε) / (ε/2) := by
+      have h_num : 4 * M * ‖z‖ ≤ 4 * M * (3/2 - ε) :=
         mul_le_mul_of_nonneg_left hz_norm_bound (by positivity)
       have h_den : ε/2 ≤ R - ‖z‖ := hgap
       exact le_trans hBC (div_le_div_of_le_of_le h_num h_den (by linarith) hR_sub_pos (by positivity))
-    calc (1/4 : ℝ) * Real.exp (-(2 * M * (3/2 - ε) / (ε/2)))
+    calc (1/4 : ℝ) * Real.exp (-(4 * M * (3/2 - ε) / (ε/2)))
         ≤ ‖riemannZeta s₀‖ * Real.exp (-(‖G z‖)) := by
           apply mul_le_mul h_center_bound _ (by positivity) (by positivity)
           exact Real.exp_le_exp.mpr (neg_le_neg hGz_bound)
@@ -211,7 +229,7 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
           _ = ‖riemannZeta s - (riemannZeta s - 1)‖ := by ring_nf
           _ ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := norm_sub_le _ _
       linarith
-    calc (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+    calc (1/4 : ℝ) * Real.exp (-(4 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
         (3/2 - ε) / (ε/2)))
         ≤ 1/4 * 1 := by
           apply mul_le_mul_of_nonneg_left _ (by norm_num)
@@ -277,8 +295,8 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
       _ ≤ ‖riemannZeta s‖ := h_lower
   · -- ε < 3/2: Use BC inner bound
     simp only [not_le] at hε1
-    -- BC parameters: K = 2(3/2-ε)/(ε/2) = (6-4ε)/ε, B_ε = 10K = 20(3-2ε)/ε
-    set K_ε := 2 * (3/2 - ε) / (ε/2) with hK_def
+    -- BC parameters: K = 4(3/2-ε)/(ε/2) = (12-8ε)/ε, B_ε = 10K = 40(3-2ε)/ε
+    set K_ε := 4 * (3/2 - ε) / (ε/2) with hK_def
     set B_ε := 10 * K_ε with hB_def
     have hε2_pos : 0 < ε / 2 := by linarith
     have hK_pos : 0 < K_ε := by rw [hK_def]; exact div_pos (by linarith) hε2_pos
@@ -316,7 +334,7 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
       -- and ((2+|t|)/2)^{-B_ε} = 2^{B_ε}·(2+|t|)^{-B_ε}
       -- combined with 4^{-K} = 2^{-2K}, this gives the result.
       calc c₀ / |s.im| ^ A
-          ≤ (1/4 : ℝ) * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+          ≤ (1/4 : ℝ) * Real.exp (-(4 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
               (3/2 - ε) / (ε/2))) := by
             -- Reduce to comparing exponents
             rw [hc₀_def]
@@ -336,7 +354,7 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
                     mul_le_mul_of_nonneg_right hAB h_log_t_pos
             -- The exponent identity: K·log 4 + B_ε·log(2+|t|) = the BC expression
             have h_exp_identity : K_ε * Real.log 4 + B_ε * Real.log (2 + |s.im|) =
-                2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) * (3/2 - ε) / (ε/2) := by
+                4 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) * (3/2 - ε) / (ε/2) := by
               rw [hB_def]; ring
             -- log(2+|t|) = log 2 + log((2+|t|)/2)
             have h_log_split : Real.log (2 + |s.im|) =
@@ -387,10 +405,10 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
               rw [← Real.exp_add]
               congr 1
               ring
-            have h_combine_r : (1:ℝ)/4 * Real.exp (-(2 * (Real.log 4 +
+            have h_combine_r : (1:ℝ)/4 * Real.exp (-(4 * (Real.log 4 +
                 10 * Real.log (2 + |s.im|)) * (3/2 - ε) / (ε/2))) *
                 Real.exp (A * Real.log |s.im|) =
-                1/4 * Real.exp (-(2 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
+                1/4 * Real.exp (-(4 * (Real.log 4 + 10 * Real.log (2 + |s.im|)) *
                 (3/2 - ε) / (ε/2)) + A * Real.log |s.im|) := by
               rw [mul_assoc]
               congr 1
@@ -399,7 +417,7 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
             apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 1/4)
             apply Real.exp_le_exp.mpr
             -- Goal: -(K·log4 + B_ε·log2)
-            --     ≤ -(2·(log4 + 10·log(2+|t|))·(3/2-ε)/(ε/2)) + A·log|t|
+            --     ≤ -(4·(log4 + 10·log(2+|t|))·(3/2-ε)/(ε/2)) + A·log|t|
             -- = -(K·log4 + B_ε·log(2+|t|)) + A·log|t|   (via h_exp_identity)
             -- So need: B_ε·log(2+|t|) - B_ε·log2 ≤ A·log|t|
             have h_rearrange : B_ε * (Real.log (2 + |s.im|) - Real.log 2) =

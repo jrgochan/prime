@@ -56,9 +56,65 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
     (∫ u : ℝ, flattenedResidualC N v u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)) =
     mellinBDResidual N v ((1/2 : ℂ) + (2 * Real.pi * ξ) * Complex.I) := by
-  -- TODO(4.28): Relies on `integral_image_eq_integral_deriv_smul_of_antitoneOn`
-  -- (available in Mathlib 4.30). Proof is antitone CoV with f(u) = exp(-u).
-  sorry
+  -- Step 1: Restrict LHS to Ioi(0) since flattenedResidualC = 0 for u < 0
+  have h_restrict : ∫ u : ℝ, flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+    ∫ u in Set.Ici (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) := by
+    symm; apply setIntegral_eq_integral_of_forall_compl_eq_zero
+    intro u hu; simp only [Set.mem_Ici, not_le] at hu
+    simp [flattenedResidualC, flattenedResidualV, show ¬(0 ≤ u) from not_le.mpr hu]
+  have h_ici_ioi : ∫ u in Set.Ici (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+    ∫ u in Set.Ioi (0 : ℝ), flattenedResidualC N v u *
+      Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) := by
+    apply setIntegral_congr_set Ioi_ae_eq_Ici.symm
+  rw [h_restrict, h_ici_ioi]
+  -- Step 2: Unfold mellinBDResidual and apply CoV
+  unfold mellinBDResidual
+  set s : ℂ := 1 / 2 + 2 * ↑Real.pi * ↑ξ * Complex.I with hs_def
+  set gM : ℝ → ℂ := fun x => (bdResidualV N v x : ℂ) * (x : ℂ) ^ (s - 1)
+  -- Step 3: Apply the antitone CoV (4.28 API)
+  have h_cov := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitone
+    measurableSet_Ioi
+    (fun u hu => hasDerivWithinAt_exp_neg u hu)
+    exp_neg_antitoneOn gM
+  rw [exp_neg_image_Ioi] at h_cov
+  -- h_cov : ∫_{Ioo(0,1)} gM = ∫_{Ioi(0)} (-(-exp(-u))) • gM(exp(-u))
+  -- i.e.:   ∫_{Ioo(0,1)} gM = ∫_{Ioi(0)} exp(-u) • gM(exp(-u))
+  rw [h_cov]
+  -- Both sides are ∫_{Ioi 0}. Show integrands agree pointwise.
+  apply setIntegral_congr_fun measurableSet_Ioi
+  intro u hu
+  simp only [Set.mem_Ioi] at hu
+  -- Simplify the double-negation: - -rexp(-u) = rexp(-u)
+  simp only [neg_neg, gM]
+  -- Unfold flattenedResidualC for u > 0:
+  have hu_nn : (0 : ℝ) ≤ u := le_of_lt hu
+  simp only [flattenedResidualC, flattenedResidualV, if_pos hu_nn]
+  have hx_pos : (0 : ℝ) < rexp (-u) := exp_pos _
+  have hx_ne : (rexp (-u) : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr (ne_of_gt hx_pos)
+  -- Prove the exponential identity:
+  -- ↑(rexp(-u/2)) * cexp(-2πξuI) = ↑(rexp(-u))^s
+  have h_exp_id : (rexp (-u / 2) : ℂ) * Complex.exp (-2 * ↑Real.pi * ↑ξ * ↑u * Complex.I) =
+      (rexp (-u) : ℂ) ^ s := by
+    rw [Complex.cpow_def_of_ne_zero hx_ne]
+    have h_log : Complex.log (↑(rexp (-u))) = ↑(-u) := by
+      rw [← Complex.ofReal_log (le_of_lt hx_pos), Real.log_exp]
+    rw [h_log]
+    have h_prod : ↑(-u) * s = ↑(-u / 2) + (-2 * ↑Real.pi * ↑ξ * ↑u) * Complex.I := by
+      simp only [hs_def]; push_cast; ring
+    rw [h_prod, Complex.exp_add, Complex.ofReal_exp]
+  rw [Complex.ofReal_mul, mul_assoc, h_exp_id]
+  change _ = (rexp (-u) : ℂ) * (↑(bdResidualV N v (rexp (-u))) * ↑(rexp (-u)) ^ (s - 1))
+  rw [mul_left_comm]
+  congr 1
+  rw [Complex.cpow_def_of_ne_zero hx_ne, Complex.cpow_def_of_ne_zero hx_ne]
+  have h_log : Complex.log (↑(rexp (-u))) = ↑(-u) := by
+    rw [← Complex.ofReal_log (le_of_lt hx_pos), Real.log_exp]
+  rw [h_log]
+  rw [show ↑(-u) * s = ↑(-u) * (s - 1) + ↑(-u) from by ring]
+  rw [Complex.exp_add, mul_comm, Complex.ofReal_exp]
 
 -- ════════════════════════════════════════════════
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)

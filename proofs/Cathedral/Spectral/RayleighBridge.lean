@@ -129,11 +129,10 @@ theorem min_eigenvalue_le_quadForm
     exact (inner_eq_dotProduct x (A.mulVec x)).symm
 
   -- Step 2: Self-adjointness: ⟪f(v), w⟫ = ⟪v, f(w)⟫ where f = toEuclideanLin A
-  -- TODO(4.28): This used `Matrix.isSymmetric_toEuclideanLin_iff` on 4.30.
-  -- Needs API adaptation for 4.28 (mathematically trivial: Hermitian ↔ self-adjoint)
+  -- Proved via Mathlib's isHermitian_iff_isSymmetric (4.28-compatible)
   have hS : ∀ (v w : EuclideanSpace ℝ (Fin n)),
       @inner ℝ _ _ (toEuclideanLin A v) w = @inner ℝ _ _ v (toEuclideanLin A w) := by
-    sorry
+    exact Matrix.isHermitian_iff_isSymmetric.mp hA
 
   -- toLpLin 2 2 A x' = toLp (A *ᵥ x), and toLpLin 2 2 = toEuclideanLin
   have h_toLpLin : toEuclideanLin A x' = WithLp.toLp 2 (A.mulVec x) := rfl

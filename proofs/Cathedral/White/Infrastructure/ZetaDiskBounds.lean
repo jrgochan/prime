@@ -201,9 +201,16 @@ theorem holomorphic_log_exists_on_ball
   have hExact : IsExactOn (fun z => deriv f z / f z) (ball c R) :=
     DifferentiableOn.isExactOn_ball hlogDeriv_diffOn
   -- Step 3: Normalize G(c) = 0
-  -- TODO(4.28): `IsExactOn.with_val_at` was available in 4.30
-  obtain ⟨G, hG0, hGderiv⟩ : ∃ G : ℂ → ℂ, G c = 0 ∧
-      ∀ z ∈ ball c R, HasDerivAt G (deriv f z / f z) z := by sorry
+  -- IsExactOn gives ∃ g, ∀ z ∈ U, HasDerivAt g (f z) z
+  -- Define G z = g z - g c to normalize G(c) = 0
+  obtain ⟨g₀, hg₀⟩ := hExact
+  set G : ℂ → ℂ := fun z => g₀ z - g₀ c with hG_def
+  have hG0 : G c = 0 := by simp [hG_def]
+  have hGderiv : ∀ z ∈ ball c R, HasDerivAt G (deriv f z / f z) z := by
+    intro z hz
+    have h := (hg₀ z hz).sub (hasDerivAt_const z (g₀ c))
+    simp only [sub_zero] at h
+    exact h
   have hG_diff : DifferentiableOn ℂ G (ball c R) := by
     intro z hz
     exact (hGderiv z hz).differentiableAt.differentiableWithinAt

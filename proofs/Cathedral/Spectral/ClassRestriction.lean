@@ -514,8 +514,7 @@ lemma min_eigenvalue_le_quadForm_scaled
     have hqf_inner : realQuadForm A v =
         @inner ℝ (EuclideanSpace ℝ (Fin n)) _ v' (WithLp.toLp 2 (A.mulVec v)) := by
       unfold realQuadForm; exact (inner_eq_dotProduct v (A.mulVec v)).symm
-    -- TODO(4.28): Missing isSymmetric_toEuclideanLin_iff in Mathlib 4.28
-    have hS : LinearMap.IsSymmetric (Matrix.toEuclideanLin A) := by sorry
+    have hS := Matrix.isHermitian_iff_isSymmetric.mp hA
     -- Step 2: ⟪eᵢ, A·v'⟫ = λᵢ · ⟪eᵢ, v'⟫
     have h_eig_inner : ∀ i : Fin n,
         @inner ℝ _ _ (b i) (WithLp.toLp 2 (A.mulVec v)) =
