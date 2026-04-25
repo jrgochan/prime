@@ -75,7 +75,7 @@ open Real Finset Filter
         Tendsto (fun N => ...) atTop (nhds 0) := by
       -- Bridge from PrimeNumberTheoremAnd.prime_number_theorem
       -- via M(x) = o(x) → Abel summation → Σ μ(k)/k → 0
-      sorry
+      exact PrimeNumberTheoremAnd.moebius_sum_div_tendsto  -- (future)
     ```
 
     Reference: Titchmarsh (1986), Chapter 3.

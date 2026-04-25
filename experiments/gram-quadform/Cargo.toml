@@ -1,0 +1,10 @@
+[package]
+name = "gram-quadform"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Gram Quadratic Form Validator — validates gram_form_upper_bound_34 and d²_N → 0 convergence at 256-bit MPFR precision"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

@@ -139,6 +139,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.PNTBridge,
     -- Mertens graduation (axiom → theorem via Perron)
     `Cathedral.Assembly.MertensFromPerron,
+    -- Perron Crown (axiom elimination + covariance graduation)
+    `Cathedral.Assembly.PerronCrown,
     -- White Singlet (Phase I: Axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
@@ -172,6 +174,8 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.ZetaDiskBounds,
     -- Zeta tail bound: ‖ζ(s)-1‖ < 1 for Re(s) ≥ 2 (PROVED, zero sorry)
     `Cathedral.White.Infrastructure.ZetaTailBound,
+    -- Hadamard three-circles + zero-counting axiom (thin-strip infrastructure)
+    `Cathedral.White.Infrastructure.ZetaHadamard,
     -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
     `Cathedral.White.Infrastructure.ZetaLowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)

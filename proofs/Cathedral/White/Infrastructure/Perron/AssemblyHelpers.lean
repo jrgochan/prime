@@ -5,7 +5,7 @@
   and vertical contour bound on the σ₀ line.
 
   Architecture:
-    §1. truncated_perron_for_moebius   (delegates to HalfIntegerPerron)
+    §1. (DELETED: truncated_perron_for_moebius — dead end, see exploration5)
     §2. inner_integral_bound           (compact bound, ✅ no sorry)
     §3a. right_outer_integral_bound    (rpow integration, ✅ no sorry)
     §3b. left_outer_integral_bound     (symmetric via integral_comp_neg, ✅ no sorry)
@@ -30,26 +30,17 @@ namespace Cathedral.White.Infrastructure
 -- §1. Truncated Perron Formula
 -- ═══════════════════════════════════════════
 
-/-- The Truncated Perron Formula for M(x).
-
-    **Architecture** (Silver Bullet — via half-integer shift):
-    1. Shift x to X = ⌊x⌋ + 1/2 using `summatoryMoebius_eq_half_integer`
-    2. Apply `truncated_perron_half_integer` at X (no log singularity)
-    3. Transfer back: X ≤ x + 1 ≤ 2x, so X^(c+1) ≤ 2^(c+1) · x^(c+1)
-
-    Error bound is O(x^(c+1)/T). -/
-theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
-    ∃ K > 0, ∀ x : ℝ, 2 ≤ x → ∀ T : ℝ, 1 ≤ T →
-      ‖(↑(summatoryMoebius x : ℤ) : ℂ) -
-        (1 / (2 * ↑Real.pi)) *
-          ∫ t in (-T)..T,
-            (x : ℂ) ^ (↑c + ↑t * I) /
-              ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
-      K * x ^ (c + 1) / T := by
-  -- Delegate to HalfIntegerPerron.truncated_perron_half_integer
-  -- via summatoryMoebius_eq_half_integer + triangle inequality
-  -- for the X^s → x^s integral transfer
-  sorry
+-- DELETED: truncated_perron_for_moebius (April 24, 2026)
+--
+-- This theorem attempted to bound M(x) via the Perron formula with x^s
+-- in the contour integral. This is a mathematical dead-end because the
+-- integral transfer X^s → x^s via MVT gives O(x^{c+1+2ε}) error,
+-- not the target O(x^{1/2+ε}). See docs/ai/antigravity/exploration5/
+-- "SUBJECT: ABORT THE TRANSFER" for the full analysis.
+--
+-- The correct approach (implemented in PerronMoebius.lean) works directly
+-- with X = ⌊x⌋ + 1/2, never putting x^s into a contour integral.
+-- M(x) = M(X) by step function property, then X ≤ (3/2)·x for the pushback.
 
 -- ═══════════════════════════════════════════
 -- §1b. rpow Helpers for T = X² Assembly

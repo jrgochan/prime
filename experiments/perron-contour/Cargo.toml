@@ -1,0 +1,10 @@
+[package]
+name = "perron-contour"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Perron Contour Integral Validator — validates the full Perron chain by comparing M(X) computed via contour integral vs direct summation at 256-bit MPFR precision"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
