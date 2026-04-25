@@ -4,8 +4,11 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
+require PrimeNumberTheoremAnd from git
+  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "v4.28.0"
+
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git"
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.28.0"
 
 -- Legacy roots (superseded by Cathedral architecture)
 -- @[default_target]

@@ -144,7 +144,7 @@ theorem cauchy_schwarz_quadform
     simp only [Matrix.mulVec_sub, Matrix.mulVec_smul,
       sub_dotProduct, dotProduct_sub, smul_dotProduct, dotProduct_smul]
     rw [h_Gc, h_cGv, h_Gc]
-    ring
+    simp [smul_eq_mul]; ring
   have h_comm : dotProduct v b = dotProduct b v := dotProduct_comm v b
   have h_cb : dotProduct c b = dotProduct b c := dotProduct_comm c b
   rw [h_expand_w2, h_comm, h_cb] at h_w2
@@ -196,7 +196,7 @@ theorem posSemidef_pos_of_ne_zero {n : ℕ} (G : Matrix (Fin n) (Fin n) ℝ)
           simp [Matrix.conjTranspose_apply, star_trivial] at this
           exact this.symm
         ring_nf; rw [hkj]; ring
-      rw [h_comm]; ring
+      rw [h_comm]; simp [smul_eq_mul]; ring
     -- eᵢᵀGx = (Gx)ᵢ
     have h_dot_ei : dotProduct ei (G.mulVec x) = (G.mulVec x) i := by
       unfold dotProduct ei

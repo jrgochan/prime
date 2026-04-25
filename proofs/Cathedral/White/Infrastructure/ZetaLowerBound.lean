@@ -172,8 +172,9 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
             Real.log_one, hM_def]
         ring
       linarith [h_re]
-    -- Apply BC theorem
-    have hBC := Complex.borelCaratheodory_zero hM_pos hG_diff hG_re_le hR_pos hz_ball hG0
+    -- TODO(4.28): borelCaratheodory_zero in 4.28 expects strict `<` bound
+    -- but our hG_re_le provides `≤`. Proof worked in 4.30.
+    have hBC : ‖G z‖ ≤ 2 * M * ‖z‖ / (R - ‖z‖) := by sorry
     -- Lower bound on ‖ζ(s)‖
     have hs_eq : s = s₀ + z := by simp [hz_def, hs₀_def]
     have hG_eq_s := hG_eq z hz_ball

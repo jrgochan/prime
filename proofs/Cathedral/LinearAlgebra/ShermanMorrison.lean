@@ -123,7 +123,7 @@ theorem dist_sq_eq_inv_one_plus_X
     (X : ℝ) (hX : X = dotProduct b y) :
     dotProduct b ((1 / (1 + X)) • y) = X / (1 + X) := by
   rw [dotProduct_smul, hX]
-  ring
+  simp [smul_eq_mul]; ring
 
 /-- The NB distance is exactly 1/(1+X) when computed via the
     Sherman-Morrison witness vector. -/

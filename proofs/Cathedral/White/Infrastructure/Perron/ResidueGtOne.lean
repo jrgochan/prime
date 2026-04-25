@@ -463,10 +463,15 @@ lemma perron_integral_bound_with_R_gt_one {y c R T : ℝ} (hy : 1 < y)
     have hI_ne : (I : ℂ) ≠ 0 := Complex.I_ne_zero
     have key : rv = I⁻¹ * (I * rv) := by rw [inv_mul_cancel_left₀ hI_ne]
     rw [key, hrv_eq, Complex.inv_I]
-    have hII : (-I : ℂ) * I = 1 := by
-      simp
-    ring_nf
-    simp
+    have hII : (I : ℂ) * I = -1 := by
+      have := Complex.I_sq; rw [sq] at this; exact this
+    have hII' : (-I : ℂ) * I = 1 := by
+      have : (-I : ℂ) * I = -(I * I) := by ring
+      rw [this, hII, neg_neg]
+    calc -I * (2 * ↑Real.pi * I - (bot - top) + I * lv)
+        = -I * I * (2 * ↑Real.pi) + I * bot - I * top + (-I) * I * lv := by ring
+      _ = 1 * (2 * ↑Real.pi) + I * bot - I * top + 1 * lv := by rw [hII']
+      _ = 2 * ↑Real.pi + (-I) * (top - bot) + lv := by ring
   -- Step 2: perronIntegral - 1 = (1/(2π))(-I(top - bot) + lv)
   have hP_sub : perronIntegral y c T - 1 =
       (1 / (2 * ↑Real.pi)) * ((-I) * (top - bot) + lv) := by
@@ -557,4 +562,3 @@ theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T
   linarith
 
 end Cathedral.White.Infrastructure
-

@@ -265,7 +265,7 @@ theorem bordered_matrix_posDef {n : ℕ}
         z ^ 2 * dotProduct g (A⁻¹.mulVec g) := by
       simp only [w, mulVec_add, mulVec_smul, add_dotProduct, dotProduct_add,
         smul_dotProduct, dotProduct_smul, hA_inv_g,
-        dotProduct_comm (A⁻¹.mulVec g) g]; ring
+        dotProduct_comm (A⁻¹.mulVec g) g]; simp [smul_eq_mul]; ring
     -- Key lemma: dot(A⁻¹g, Ay) = dot(g, y) by matrix symmetry
     have h1 : dotProduct (A⁻¹.mulVec g) (A.mulVec y) = dotProduct g y := by
       unfold dotProduct; simp only [mulVec, dotProduct]

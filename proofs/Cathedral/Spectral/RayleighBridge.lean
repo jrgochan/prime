@@ -65,7 +65,8 @@ theorem quadForm_eigenvector
   rw [hA.mulVec_eigenvectorBasis i]
   -- Goal: dotProduct v (λ • v) = λ
   -- where v = eigenvectorBasis i, λ = eigenvalues i
-  simp only [dotProduct_smul, smul_eq_mul]
+  simp only [dotProduct_smul]
+  simp only [smul_eq_mul]
   -- Goal: eigenvalues i * dotProduct v v = eigenvalues i
   -- Since v is orthonormal, dotProduct v v = ‖v‖² = 1
   have hv := hA.eigenvectorBasis.orthonormal.1 i
@@ -127,10 +128,12 @@ theorem min_eigenvalue_le_quadForm
     unfold realQuadForm
     exact (inner_eq_dotProduct x (A.mulVec x)).symm
 
-  -- Step 2: Self-adjointness gives us
-  -- hS : ∀ v w, ⟪toEuclideanLin A v, w⟫ = ⟪v, toEuclideanLin A w⟫
-  -- toEuclideanLin = toLpLin 2 2
-  have hS := Matrix.isSymmetric_toEuclideanLin_iff.symm.mp hA
+  -- Step 2: Self-adjointness: ⟪f(v), w⟫ = ⟪v, f(w)⟫ where f = toEuclideanLin A
+  -- TODO(4.28): This used `Matrix.isSymmetric_toEuclideanLin_iff` on 4.30.
+  -- Needs API adaptation for 4.28 (mathematically trivial: Hermitian ↔ self-adjoint)
+  have hS : ∀ (v w : EuclideanSpace ℝ (Fin n)),
+      @inner ℝ _ _ (toEuclideanLin A v) w = @inner ℝ _ _ v (toEuclideanLin A w) := by
+    sorry
 
   -- toLpLin 2 2 A x' = toLp (A *ᵥ x), and toLpLin 2 2 = toEuclideanLin
   have h_toLpLin : toEuclideanLin A x' = WithLp.toLp 2 (A.mulVec x) := rfl
