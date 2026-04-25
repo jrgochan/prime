@@ -23,6 +23,9 @@ members = [
     "experiments/vasyunin",
     "experiments/vasyunin-integral",
     "experiments/millennium-wall",
+    "experiments/gram-quadform",
+    "experiments/pnt-mobius-sums",
+    "experiments/perron-contour",
 ]
 
 [profile.release]

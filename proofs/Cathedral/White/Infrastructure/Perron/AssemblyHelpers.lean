@@ -5,7 +5,7 @@
   and vertical contour bound on the σ₀ line.
 
   Architecture:
-    §1. truncated_perron_for_moebius   (sorry — Perron formula assembly)
+    §1. (DELETED: truncated_perron_for_moebius — dead end, see exploration5)
     §2. inner_integral_bound           (compact bound, ✅ no sorry)
     §3a. right_outer_integral_bound    (rpow integration, ✅ no sorry)
     §3b. left_outer_integral_bound     (symmetric via integral_comp_neg, ✅ no sorry)
@@ -18,6 +18,7 @@
 import Cathedral.White.Infrastructure.Perron.DirichletPoly
 import Cathedral.White.Infrastructure.Perron.ContourShift
 import Cathedral.White.Infrastructure.Perron.VerticalBounds
+import Cathedral.White.Infrastructure.Perron.HalfIntegerPerron
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
@@ -29,16 +30,56 @@ namespace Cathedral.White.Infrastructure
 -- §1. Truncated Perron Formula
 -- ═══════════════════════════════════════════
 
-/-- The Truncated Perron Formula for M(x). -/
-theorem truncated_perron_for_moebius (c : ℝ) (hc : 1 < c) :
-    ∃ K > 0, ∀ x : ℝ, 2 ≤ x → ∀ T : ℝ, 1 ≤ T →
-      ‖(↑(summatoryMoebius x : ℤ) : ℂ) -
-        (1 / (2 * ↑Real.pi)) *
-          ∫ t in (-T)..T,
-            (x : ℂ) ^ (↑c + ↑t * I) /
-              ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))‖ ≤
-      K * x ^ c / T := by
-  sorry
+-- DELETED: truncated_perron_for_moebius (April 24, 2026)
+--
+-- This theorem attempted to bound M(x) via the Perron formula with x^s
+-- in the contour integral. This is a mathematical dead-end because the
+-- integral transfer X^s → x^s via MVT gives O(x^{c+1+2ε}) error,
+-- not the target O(x^{1/2+ε}). See docs/ai/antigravity/exploration5/
+-- "SUBJECT: ABORT THE TRANSFER" for the full analysis.
+--
+-- The correct approach (implemented in PerronMoebius.lean) works directly
+-- with X = ⌊x⌋ + 1/2, never putting x^s into a contour integral.
+-- M(x) = M(X) by step function property, then X ≤ (3/2)·x for the pushback.
+
+-- ═══════════════════════════════════════════
+-- §1b. rpow Helpers for T = X² Assembly
+-- All PROVED — zero sorry.
+-- ═══════════════════════════════════════════
+
+/-- (X²)^{-1/2} = X^{-1} for X > 0. -/
+lemma rpow_sq_neg_half {X : ℝ} (hX : 0 < X) :
+    (X ^ (2 : ℝ)) ^ (-((1:ℝ)/2)) = X ^ (-(1 : ℝ)) := by
+  rw [← rpow_mul hX.le]; norm_num
+
+/-- (X²)^{e} = X^{2e} for X > 0. -/
+lemma rpow_sq_mul_exp {X e : ℝ} (hX : 0 < X) :
+    (X ^ (2 : ℝ)) ^ e = X ^ (2 * e) := by
+  rw [← rpow_mul hX.le]
+
+/-- Perron term collapse: K * X^{c+1} / X² = K * X^{c-1}. -/
+lemma perron_exp_collapse {K X c : ℝ} (hX : 0 < X) :
+    K * X ^ (c + 1) / X ^ (2 : ℝ) = K * X ^ (c - 1) := by
+  rw [mul_div_assoc, ← rpow_sub hX]; congr 1; ring
+
+/-- Shift term collapse: K₁ * X^c * (X²)^{-1/2} = K₁ * X^{c-1}. -/
+lemma shift_exp_collapse {K₁ X c : ℝ} (hX : 0 < X) :
+    K₁ * X ^ c * (X ^ (2 : ℝ)) ^ (-((1:ℝ)/2)) = K₁ * X ^ (c - 1) := by
+  rw [rpow_sq_neg_half hX, mul_assoc, ← rpow_add hX]; ring_nf
+
+/-- Vertical term collapse: K₂ * X^σ₀ * (X²)^{eps'} = K₂ * X^{σ₀+2eps'}. -/
+lemma vert_exp_collapse {K₂ X sigma0 eps' : ℝ} (hX : 0 < X) :
+    K₂ * X ^ sigma0 * (X ^ (2 : ℝ)) ^ eps' = K₂ * X ^ (sigma0 + 2 * eps') := by
+  rw [rpow_sq_mul_exp hX, mul_assoc, ← rpow_add hX]
+
+-- norm_one_div_two_pi_le already in Defs.lean (imported via VerticalBounds)
+
+/-- Push X → x: X^α ≤ a^α * x^α when X ≤ a*x with a,x > 0, α > 0. -/
+lemma rpow_le_mul_rpow {X x a α : ℝ} (hX : 0 < X) (hx : 0 < x) (ha : 0 < a)
+    (hα : 0 < α) (h : X ≤ a * x) :
+    X ^ α ≤ a ^ α * x ^ α := by
+  calc X ^ α ≤ (a * x) ^ α := rpow_le_rpow hX.le h hα.le
+    _ = a ^ α * x ^ α := mul_rpow ha.le hx.le
 
 -- ═══════════════════════════════════════════
 -- §2. Inner Integral Bound (compact [-T₀,T₀])
