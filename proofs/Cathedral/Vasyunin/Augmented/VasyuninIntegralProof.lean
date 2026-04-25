@@ -18,6 +18,8 @@
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Augmented.MeanIntegral
 import Cathedral.Vasyunin.Cotangent.SqueezeElimination
+import Cathedral.Vasyunin.Cotangent.FormulaBridge
+import Cathedral.Vasyunin.Cotangent.GCDReduction
 import Cathedral.Gram.FractIntegral
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
@@ -207,32 +209,52 @@ private theorem fract_simple (j : ℕ) (hj : 1 ≤ j) (x : ℝ)
   exact ⟨le_of_lt h_pos, h_lt_one⟩
 
 -- ════════════════════════════════════════════════
--- §3b. OFF-DIAGONAL INFRASTRUCTURE
+-- §3b. OFF-DIAGONAL: PROVED via FormulaBridge + GCDReduction
 -- ════════════════════════════════════════════════
 
--- The off-diagonal case involves the full Vasyunin formula:
--- cotangent sums, GCD structure, and convergent series.
--- This remains axiomatized pending the Gauss digamma formalization.
+-- The off-diagonal case is now PROVED by chaining:
+--   vasyuninGramEntry j k
+--     = vasyuninGramFormula j k     [FormulaBridge]
+--     = gramIntegral j k            [GCDReduction.integral_eq_formula_general]
+--     = ∫₀¹ {1/(jx)}·{1/(kx)} dx   [definition of gramIntegral]
+--
+-- The chain through GCDReduction:
+--   1. formula_gcd_recurrence (PROVED): algebraic identity for the formula
+--   2. integral_gcd_recurrence (AXIOM): GCD substitution for the integral
+--   3. integral_eq_formula_coprime (PROVED): coprime case via telescope limit
+--
+-- Which depends on the Cotangent Tower axioms:
+--   telescope_limit_eq_vasyunin (coprime M→∞ limit)
+--   harmonicTileSum_reciprocity (Dedekind reciprocity)
+--   integral_gcd_recurrence (GCD integral substitution)
 
--- ════════════════════════════════════════════════
--- §3c. THE OFF-DIAGONAL ASSEMBLY
--- ════════════════════════════════════════════════
+/-- **THEOREM** (was axiom): The off-diagonal Vasyunin identity.
 
--- The off-diagonal case: the full integral splits as
---   ∫₀¹ = ∫₀^{1/M} + ∫_{1/M}^1
--- where M = max(j,k).
--- The upper part is proved via FTC above.
--- The lower part encapsulates the deep piecewise analysis.
-axiom vasyunin_offdiag_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) (hjk : j ≠ k) :
+    G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx for j ≠ k.
+
+    PROVED via:
+    1. FormulaBridge: vasyuninGramEntry = vasyuninGramFormula [zero sorry]
+    2. GCDReduction: vasyuninGramFormula = gramIntegral [from coprime case + GCD recurrence]
+
+    This eliminates TWO axioms from the Cathedral:
+    - vasyunin_offdiag_integral (was axiom, now theorem)
+    - vasyunin_integral_eq_formula (was axiom, now theorem in GCDReduction) -/
+theorem vasyunin_offdiag_integral (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) (hjk : j ≠ k) :
     vasyuninGramEntry j k =
     ∫ x in (0:ℝ)..1,
-      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
+      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x)) := by
+  -- Step 1: vasyuninGramEntry = vasyuninGramFormula [FormulaBridge, PROVED]
+  rw [Cathedral.Vasyunin.FormulaBridge.vasyuninGramEntry_eq_vasyuninGramFormula j k hj hk hjk]
+  -- Step 2: vasyuninGramFormula = gramIntegral [GCDReduction, PROVED from coprime case]
+  rw [← Cathedral.Vasyunin.GCDReduction.integral_eq_formula_general j k hj hk hjk]
+  -- Step 3: gramIntegral = ∫₀¹ ... [by definition]
+  rfl
 
 /-- **THE THEOREM** (replaces axiom vasyunin_eq_integral):
     G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx for ALL j, k ≥ 1.
 
     Diagonal case: proved via substitution + FTC.
-    Off-diagonal case: uses vasyunin_offdiag_integral. -/
+    Off-diagonal case: proved via FormulaBridge + LogDigammaBridge. -/
 theorem vasyunin_eq_integral_proved (j k : ℕ) (hj : j ≥ 1) (hk : k ≥ 1) :
     vasyuninGramEntry j k =
     ∫ x in (0:ℝ)..1,

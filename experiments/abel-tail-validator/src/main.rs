@@ -30,7 +30,7 @@ use std::io::Write;
 use std::time::Instant;
 
 const P: u32 = 256; // 256-bit MPFR precision
-const N_MAX: usize = 1_000_000; // Sieve up to 10^6
+const N_MAX: usize = 10_000_000; // Sieve up to 10^7 (millennium-level)
 
 // ═══════════════════════════════════════════════
 // TERMINAL COLORS
@@ -360,7 +360,7 @@ fn main() {
     println!();
 
     let test_ns = vec![2, 3, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000];
-    let m_large = 100_000; // Sum up to M = 100,000
+    let m_large = 500_000; // Sum up to M = 500,000
 
     let tail_results: Vec<_> = test_ns.iter().map(|&n| {
         verify_tail_bound(n, m_large.min(n * 1000))
@@ -405,7 +405,8 @@ fn main() {
 
     let decay_ns: Vec<usize> = vec![
         10, 20, 50, 100, 200, 500, 1000, 2000, 5000,
-        10000, 20000, 50000, 100000, 200000, 500000, N_MAX,
+        10000, 20000, 50000, 100000, 200000, 500000,
+        1000000, 2000000, 5000000, N_MAX,
     ];
 
     let decay_results: Vec<_> = decay_ns.iter().map(|&n| {

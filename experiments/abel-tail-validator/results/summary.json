@@ -1,8 +1,8 @@
 {
   "experiment": "Cathedral Abel Tail Validator",
   "precision_bits": 256,
-  "n_max": 1000000,
-  "timestamp": "2026-04-22T08:01:08.903563+00:00",
+  "n_max": 10000000,
+  "timestamp": "2026-04-25T04:32:56.377398+00:00",
   "rectangle_bound": {
     "tested_range": [3, 1000],
     "all_hold": false,
@@ -35,11 +35,11 @@
     "lean_theorem": "s3_decay"
   },
   "l2_bridge": {
-    "theoretical_sum": 878.9715569417,
-    "s2_weighted_sum": 0.8277845204,
-    "s3_weighted_sum": 1445.7439287388,
+    "theoretical_sum": 1395.7798369399,
+    "s2_weighted_sum": 0.8362651813,
+    "s3_weighted_sum": 4540.5574305513,
     "all_converge": true,
     "lean_theorem": "mertens_34_l2_bound'"
   },
-  "elapsed_seconds": 10.569
+  "elapsed_seconds": 63.912
 }

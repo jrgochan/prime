@@ -1,0 +1,208 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/vasyunin-integral-verifier`
+
+═══════════════════════════════════════════════════════════════════════
+║  VASYUNIN INTEGRAL VERIFIER v2.0 — CERTIFIED                      ║
+║  The Cathedral — Gram Matrix Identity Certification               ║
+═══════════════════════════════════════════════════════════════════════
+
+Identity:   G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx
+Method:     Exact piecewise FTC (zero quadrature error)
+Precision:  256 bits (~76 decimal digits)
+Rows:           100000 bulk +     900000 tail =    1000000 total
+Threads:    12
+Target:     All 1 ≤ j ≤ k ≤ 50
+
+───────────────────────────────────────────────────────────────────────
+
+  ━━━ PHASE 1: DIAGONAL G(k,k) for k = 1..50 ━━━
+  ✅ G(  1,  1)  gcd=1    formula=     0.260661401507813  integral=     0.260661068175229  Δ=3.33e-7  digits=6    8605ms
+  ✅ G(  2,  2)  gcd=2    formula=     0.380330700753906  integral=     0.380330534087615  Δ=1.67e-7  digits=6    8630ms
+  ✅ G(  3,  3)  gcd=3    formula=     0.309109356058160  integral=     0.309109244947299  Δ=1.11e-7  digits=6    8792ms
+  ✅ G(  4,  4)  gcd=4    formula=     0.252665350376953  integral=     0.252665267043807  Δ=8.33e-8  digits=7    8823ms
+  ✅ G(  5,  5)  gcd=5    formula=     0.212132280301563  integral=     0.212132213635046  Δ=6.67e-8  digits=7    8975ms
+  ✅ G(  6,  6)  gcd=6    formula=     0.182332455806858  integral=     0.182332400251427  Δ=5.56e-8  digits=7    8866ms
+  ✅ G(  7,  7)  gcd=7    formula=     0.159686322664381  integral=     0.159686275045441  Δ=4.76e-8  digits=7    8935ms
+  ✅ G(  8,  8)  gcd=8    formula=     0.141957675188477  integral=     0.141957633521904  Δ=4.17e-8  digits=7    8883ms
+  ✅ G(  9,  9)  gcd=9    formula=     0.127727810044078  integral=     0.127727773007124  Δ=3.70e-8  digits=7    9104ms
+  ✅ G( 10, 10)  gcd=10   formula=     0.116066140150781  integral=     0.116066106817523  Δ=3.33e-8  digits=7    8910ms
+  ✅ G( 11, 11)  gcd=11   formula=     0.106341119145338  integral=     0.106341088842376  Δ=3.03e-8  digits=7    8931ms
+  ✅ G( 12, 12)  gcd=12   formula=     0.098110672347873  integral=     0.098110644570158  Δ=2.78e-8  digits=7    8943ms
+  ✅ G( 13, 13)  gcd=13   formula=     0.091056794198826  integral=     0.091056768557858  Δ=2.56e-8  digits=7    9031ms
+  ✅ G( 14, 14)  gcd=14   formula=     0.084945202148517  integral=     0.084945178339047  Δ=2.38e-8  digits=7    8995ms
+  ✅ G( 15, 15)  gcd=15   formula=     0.079599648989410  integral=     0.079599626767238  Δ=2.22e-8  digits=7    8923ms
+  ✅ G( 16, 16)  gcd=16   formula=     0.074885087594238  integral=     0.074885066760952  Δ=2.08e-8  digits=7    8839ms
+  ✅ G( 17, 17)  gcd=17   formula=     0.070696345417415  integral=     0.070696325809616  Δ=1.96e-8  digits=7    8875ms
+  ✅ G( 18, 18)  gcd=18   formula=     0.066950324775125  integral=     0.066950306256649  Δ=1.85e-8  digits=7    8895ms
+  ✅ G( 19, 19)  gcd=19   formula=     0.063580516976865  integral=     0.063580499433045  Δ=1.75e-8  digits=7    8887ms
+  ✅ G( 20, 20)  gcd=20   formula=     0.060533070075391  integral=     0.060533053408761  Δ=1.67e-8  digits=7    9218ms
+  ✅ G( 21, 21)  gcd=21   formula=     0.057763921613751  integral=     0.057763905740771  Δ=1.59e-8  digits=7    9112ms
+  ✅ G( 22, 22)  gcd=22   formula=     0.055236675275149  integral=     0.055236660123667  Δ=1.52e-8  digits=7    9018ms
+  ✅ G( 23, 23)  gcd=23   formula=     0.052921006114706  integral=     0.052920991621985  Δ=1.45e-8  digits=7    8914ms
+  ✅ G( 24, 24)  gcd=24   formula=     0.050791447285048  integral=     0.050791433396190  Δ=1.39e-8  digits=7    9167ms
+  ✅ G( 25, 25)  gcd=25   formula=     0.048826456060313  integral=     0.048826442727009  Δ=1.33e-8  digits=7    8961ms
+  ✅ G( 26, 26)  gcd=26   formula=     0.047007687040241  integral=     0.047007674219757  Δ=1.28e-8  digits=7    9043ms
+  ✅ G( 27, 27)  gcd=27   formula=     0.045319420906325  integral=     0.045319408560674  Δ=1.23e-8  digits=7    8926ms
+  ✅ G( 28, 28)  gcd=28   formula=     0.043748111278340  integral=     0.043748099373605  Δ=1.19e-8  digits=7    9154ms
+  ✅ G( 29, 29)  gcd=29   formula=     0.042282022168521  integral=     0.042282010674294  Δ=1.15e-8  digits=7    9006ms
+  ✅ G( 30, 30)  gcd=30   formula=     0.040910935605816  integral=     0.040910924494730  Δ=1.11e-8  digits=7    9152ms
+  ✅ G( 31, 31)  gcd=31   formula=     0.039625914096506  integral=     0.039625903343842  Δ=1.08e-8  digits=7    8951ms
+  ✅ G( 32, 32)  gcd=32   formula=     0.038419106297119  integral=     0.038419095880476  Δ=1.04e-8  digits=7    9239ms
+  ✅ G( 33, 33)  gcd=33   formula=     0.037283587006206  integral=     0.037283576905218  Δ=1.01e-8  digits=7    9005ms
+  ✅ G( 34, 34)  gcd=34   formula=     0.036213224611821  integral=     0.036213214807922  Δ=9.80e-9  digits=8    8980ms
+  ✅ G( 35, 35)  gcd=35   formula=     0.035202570655325  integral=     0.035202561131537  Δ=9.52e-9  digits=8    9193ms
+  ✅ G( 36, 36)  gcd=36   formula=     0.034246767325834  integral=     0.034246758066596  Δ=9.26e-9  digits=8    9072ms
+  ✅ G( 37, 37)  gcd=37   formula=     0.033341469580562  integral=     0.033341460571573  Δ=9.01e-9  digits=8    9220ms
+  ✅ G( 38, 38)  gcd=38   formula=     0.032482779264056  integral=     0.032482770492146  Δ=8.77e-9  digits=8    8927ms
+  ✅ G( 39, 39)  gcd=39   formula=     0.031667189124789  integral=     0.031667180577800  Δ=8.55e-9  digits=8    8940ms
+  ✅ G( 40, 40)  gcd=40   formula=     0.030891535037695  integral=     0.030891526704381  Δ=8.33e-9  digits=8    9133ms
+  ✅ G( 41, 41)  gcd=41   formula=     0.030152955063546  integral=     0.030152946933483  Δ=8.13e-9  digits=8    9202ms
+  ✅ G( 42, 42)  gcd=42   formula=     0.029448854230912  integral=     0.029448846294422  Δ=7.94e-9  digits=8    9071ms
+  ✅ G( 43, 43)  gcd=43   formula=     0.028776874129170  integral=     0.028776866377250  Δ=7.75e-9  digits=8    8945ms
+  ✅ G( 44, 44)  gcd=44   formula=     0.028134866563194  integral=     0.028134858987454  Δ=7.58e-9  digits=8    8881ms
+  ✅ G( 45, 45)  gcd=45   formula=     0.027520870650791  integral=     0.027520863243400  Δ=7.41e-9  digits=8    9076ms
+  ✅ G( 46, 46)  gcd=46   formula=     0.026933092849414  integral=     0.026933085603053  Δ=7.25e-9  digits=8    9003ms
+  ✅ G( 47, 47)  gcd=47   formula=     0.026369889484322  integral=     0.026369882392139  Δ=7.09e-9  digits=8    8944ms
+  ✅ G( 48, 48)  gcd=48   formula=     0.025829751420302  integral=     0.025829744475873  Δ=6.94e-9  digits=8    9094ms
+  ✅ G( 49, 49)  gcd=49   formula=     0.025311290576378  integral=     0.025311283773672  Δ=6.80e-9  digits=8    8926ms
+  ✅ G( 50, 50)  gcd=50   formula=     0.024813228030156  integral=     0.024813221363505  Δ=6.67e-9  digits=8    8902ms
+
+  Diagonal: min 6 digits | ALL CERTIFIED ✅
+
+  ━━━ PHASE 2: OFF-DIAGONAL G(j,k) — 1225 pairs ━━━
+  Progress: 100/1225 pairs (8%)  Progress: 200/1225 pairs (16%)  Progress: 300/1225 pairs (24%)  Progress: 400/1225 pairs (33%)  Progress: 500/1225 pairs (41%)  Progress: 600/1225 pairs (49%)  Progress: 700/1225 pairs (57%)  Progress: 800/1225 pairs (65%)  Progress: 900/1225 pairs (73%)  Progress: 1000/1225 pairs (82%)  Progress: 1100/1225 pairs (90%)  Progress: 1200/1225 pairs (98%)  Progress: 1225/1225 pairs (100%)
+  ✅ G(  1,  2)  gcd=1    formula=     0.272209255990873  integral=     0.272208964324915  Δ=2.92e-7  digits=6    12088ms
+  ✅ G(  1,  3)  gcd=1    formula=     0.241670136128851  integral=     0.241669858351795  Δ=2.78e-7  digits=6    11435ms
+  ✅ G(  1,  4)  gcd=1    formula=     0.214402531371786  integral=     0.214402260538953  Δ=2.71e-7  digits=6    11439ms
+  ✅ G(  1,  5)  gcd=1    formula=     0.192478862338049  integral=     0.192478595671866  Δ=2.67e-7  digits=6    11241ms
+  ✅ G(  1,  6)  gcd=1    formula=     0.174835915080077  integral=     0.174835651192007  Δ=2.64e-7  digits=6    12245ms
+  ✅ G(  1,  7)  gcd=1    formula=     0.160406037640771  integral=     0.160405775736438  Δ=2.62e-7  digits=6    12507ms
+  ✅ G(  1,  8)  gcd=1    formula=     0.148396088347476  integral=     0.148395827931331  Δ=2.60e-7  digits=6    12084ms
+  ✅ G(  1,  9)  gcd=1    formula=     0.138240172854166  integral=     0.138239913595342  Δ=2.59e-7  digits=6    13525ms
+  ✅ G(  1, 10)  gcd=1    formula=     0.129532205174082  integral=     0.129531946841324  Δ=2.58e-7  digits=6    14330ms
+  ✅ G(  1, 11)  gcd=1    formula=     0.121975746122571  integral=     0.121975488547284  Δ=2.58e-7  digits=6    13680ms
+  ✅ G(  1, 12)  gcd=1    formula=     0.115350164621791  integral=     0.115349907677652  Δ=2.57e-7  digits=6    13460ms
+  ✅ G(  1, 13)  gcd=1    formula=     0.109488133394679  integral=     0.109487876984941  Δ=2.56e-7  digits=6    12559ms
+  ✅ G(  1, 14)  gcd=1    formula=     0.104260525735505  integral=     0.104260269783547  Δ=2.56e-7  digits=6    12089ms
+  ✅ G(  1, 15)  gcd=1    formula=     0.099566110452506  integral=     0.099565854897528  Δ=2.56e-7  digits=6    13343ms
+  ✅ G(  1, 16)  gcd=1    formula=     0.095324389290476  integral=     0.095324134082924  Δ=2.55e-7  digits=6    12195ms
+  ✅ G(  1, 17)  gcd=1    formula=     0.091470526005201  integral=     0.091470271103529  Δ=2.55e-7  digits=6    12715ms
+  ✅ G(  1, 18)  gcd=1    formula=     0.087951692822046  integral=     0.087951438192717  Δ=2.55e-7  digits=6    11960ms
+  ✅ G(  1, 19)  gcd=1    formula=     0.084724394741887  integral=     0.084724140356238  Δ=2.54e-7  digits=6    11897ms
+  ✅ G(  1, 20)  gcd=1    formula=     0.081752480165720  integral=     0.081752225999987  Δ=2.54e-7  digits=6    11536ms
+  ✅ G(  1, 21)  gcd=1    formula=     0.079005641087251  integral=     0.079005387119778  Δ=2.54e-7  digits=6    11915ms
+  ✅ G(  1, 22)  gcd=1    formula=     0.076458267819393  integral=     0.076458014031708  Δ=2.54e-7  digits=6    11274ms
+  ✅ G(  1, 23)  gcd=1    formula=     0.074088564090731  integral=     0.074088310467746  Δ=2.54e-7  digits=6    11331ms
+  ✅ G(  1, 24)  gcd=1    formula=     0.071877855858868  integral=     0.071877602387069  Δ=2.53e-7  digits=6    11022ms
+  ✅ G(  1, 25)  gcd=1    formula=     0.069810045996713  integral=     0.069809792664510  Δ=2.53e-7  digits=6    12049ms
+  ✅ G(  1, 26)  gcd=1    formula=     0.067871180058220  integral=     0.067870926853185  Δ=2.53e-7  digits=6    12700ms
+  ✅ G(  1, 27)  gcd=1    formula=     0.066049097511203  integral=     0.066048844425790  Δ=2.53e-7  digits=6    11724ms
+  ✅ G(  1, 28)  gcd=1    formula=     0.064333149368290  integral=     0.064332896392207  Δ=2.53e-7  digits=6    13262ms
+  ✅ G(  1, 29)  gcd=1    formula=     0.062713967867664  integral=     0.062713714994822  Δ=2.53e-7  digits=6    14455ms
+  ✅ G(  1, 30)  gcd=1    formula=     0.061183277299912  integral=     0.061183024522131  Δ=2.53e-7  digits=6    14002ms
+  ✅ G(  1, 31)  gcd=1    formula=     0.059733737617868  integral=     0.059733484930664  Δ=2.53e-7  digits=6    13899ms
+  ✅ G(  1, 32)  gcd=1    formula=     0.058358814359084  integral=     0.058358561756329  Δ=2.53e-7  digits=6    12624ms
+  ✅ G(  1, 33)  gcd=1    formula=     0.057052669833921  integral=     0.057052417309908  Δ=2.53e-7  digits=6    12296ms
+  ✅ G(  1, 34)  gcd=1    formula=     0.055810071612297  integral=     0.055809819162044  Δ=2.52e-7  digits=6    13352ms
+  ✅ G(  1, 35)  gcd=1    formula=     0.054626315168408  integral=     0.054626062787275  Δ=2.52e-7  digits=6    12174ms
+  ✅ G(  1, 36)  gcd=1    formula=     0.053497158179995  integral=     0.053496905865976  Δ=2.52e-7  digits=6    12725ms
+  ✅ G(  1, 37)  gcd=1    formula=     0.052418764473766  integral=     0.052418512222912  Δ=2.52e-7  digits=6    11909ms
+  ✅ G(  1, 38)  gcd=1    formula=     0.051387655995979  integral=     0.051387403803863  Δ=2.52e-7  digits=6    11813ms
+  ✅ G(  1, 39)  gcd=1    formula=     0.050400671492235  integral=     0.050400419356962  Δ=2.52e-7  digits=6    11505ms
+  ✅ G(  1, 40)  gcd=1    formula=     0.049454930822384  integral=     0.049454678740788  Δ=2.52e-7  digits=6    12009ms
+  ✅ G(  1, 41)  gcd=1    formula=     0.048547804029273  integral=     0.048547551996884  Δ=2.52e-7  digits=6    11132ms
+  ... (1185 more pairs)
+
+  Off-diagonal: min 6 digits (worst: G(1,2)) | ALL CERTIFIED ✅
+
+  ━━━ PHASE 3: GCD STRUCTURE ANALYSIS ━━━
+    gcd=1    773 pairs  digits: min=6, avg=7.1, max=8
+    gcd=2    199 pairs  digits: min=6, avg=7.2, max=8
+    gcd=3    79 pairs  digits: min=7, avg=7.2, max=8
+    gcd=4    45 pairs  digits: min=7, avg=7.2, max=8
+    gcd=5    31 pairs  digits: min=7, avg=7.2, max=8
+    gcd=6    21 pairs  digits: min=7, avg=7.2, max=8
+    gcd=7    17 pairs  digits: min=7, avg=7.3, max=8
+    gcd=8    11 pairs  digits: min=7, avg=7.2, max=8
+    gcd=9    9 pairs  digits: min=7, avg=7.3, max=8
+    gcd=10   9 pairs  digits: min=7, avg=7.3, max=8
+    gcd=11   5 pairs  digits: min=7, avg=7.2, max=8
+    gcd=12   5 pairs  digits: min=7, avg=7.2, max=8
+    gcd=13   3 pairs  digits: min=7, avg=7.0, max=7
+    gcd=14   3 pairs  digits: min=7, avg=7.3, max=8
+    gcd=15   3 pairs  digits: min=7, avg=7.3, max=8
+    gcd=16   3 pairs  digits: min=7, avg=7.3, max=8
+    gcd=17   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=18   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=19   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=20   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=21   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=22   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=23   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=24   1 pairs  digits: min=7, avg=7.0, max=7
+    gcd=25   1 pairs  digits: min=7, avg=7.0, max=7
+
+  ━━━ PHASE 4: FULL PRECISION SHOWCASE (256-bit) ━━━
+
+  G(1,1)  [gcd=1]:
+    Formula:  2.606614015078126229541473827288328486806356113356432268285358460806636650768500e-1
+    Integral: 2.606610681752292879485955188318788978591697530812777832972312576556670476098069e-1
+    |Error|:  3.33333e-7  (6 digits)
+
+  G(1,2)  [gcd=1]:
+    Formula:  2.722092559908731398613025066820804944916016749116686065912318821871493433152137e-1
+    Integral: 2.722089643249148048376953330620618632276711381933927300896752658345551489081612e-1
+    |Error|:  2.91666e-7  (6 digits)
+
+  G(2,3)  [gcd=1]:
+    Formula:  2.744368426127355096606692538027024885613749069876229231671141606497091605910985e-1
+    Integral: 2.744367106686070366782057922533384147684174147660200834118111456530118574019615e-1
+    |Error|:  1.31944e-7  (6 digits)
+
+  G(3,5)  [gcd=1]:
+    Formula:  2.068897702963464157236094323587369415715128365539933396305412049230254938755694e-1
+    Integral: 2.068896851113390079652973098062086163590164881338154584942459569930019091560267e-1
+    |Error|:  8.51850e-8  (7 digits)
+
+  G(5,7)  [gcd=1]:
+    Formula:  1.540228560106703932860565378043982213588353223781160528299112915538445959968732e-1
+    Integral: 1.540228055345865835436556979279546439126439144292824106293944972326911691796549e-1
+    |Error|:  5.04761e-8  (7 digits)
+
+  G(7,11)  [gcd=1]:
+
+  G(6,10)  [gcd=2]:
+
+═══════════════════════════════════════════════════════════════════════
+║  ✅  VASYUNIN INTEGRAL IDENTITY CERTIFIED TO 6 DIGITS
+║
+║  G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx   ∀ 1 ≤ j ≤ k ≤ 50
+║  Pairs verified: 1275  (50 diagonal + 1225 off-diagonal)
+║  Runtime: 2230.71s  |  Precision: 256 bits  |  Threads: 12
+║
+║  Lean axiom: vasyunin_offdiag_integral
+║  File: Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean
+║  Status: Empirically certified — formal proof in progress
+═══════════════════════════════════════════════════════════════════════
+
+  📁 Certificate: results/certificates/vasyunin_integral_cert.json
+  📁 TSV: results/results.tsv
+

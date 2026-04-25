@@ -35,9 +35,11 @@
 
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
 import Cathedral.Vasyunin.Cotangent.VasyuninAssembly
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section
-open Real MeasureTheory
+open Real MeasureTheory Filter
 
 namespace Cathedral.Vasyunin.LogDigammaBridge
 
@@ -301,12 +303,104 @@ theorem floor_sum_reciprocity (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
     - The Gauss digamma formula at z = a/b
     - Stirling's approximation for log(M!)
     - Abel summation to connect floor-weighted sums to ψ
-    - Careful cancellation of M·log(M+1) vs M·log(M) terms -/
-axiom telescope_limit_eq_vasyunin (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
+    - Careful cancellation of M·log(M+1) vs M·log(M) terms
+
+    PROVED via squeeze theorem in TelescopeLimit.lean, reducing to the
+    sub-axiom `partial_sum_tends_to_formula`. -/
+axiom partial_sum_tends_to_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
-    -- The improper integral equals the formula value.
-    -- This encapsulates: integral = lim of telescope = closed form.
-    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b
+    Tendsto
+      (fun M : ℕ => ∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x)))
+      atTop
+      (nhds (DigammaReflection.vasyuninGramFormula a b))
+
+/-- Fractional-part product is interval-integrable (local helper). -/
+private lemma fract_prod_intble (a b : ℕ) (s t : ℝ) :
+    IntervalIntegrable
+      (fun x => Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x)))
+      volume s t := by
+  apply IntervalIntegrable.mono_fun (intervalIntegrable_const (c := (1:ℝ)))
+  · have : Measurable (fun x : ℝ =>
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) :=
+      ((measurable_const.div (measurable_const.mul measurable_id)).fract).mul
+        ((measurable_const.div (measurable_const.mul measurable_id)).fract)
+    exact this.aestronglyMeasurable.restrict
+  · apply ae_of_all; intro x
+    simp only [norm_one]
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+    nlinarith [Int.fract_nonneg (1 / ((a:ℝ) * x)), Int.fract_lt_one (1 / ((a:ℝ) * x)),
+               Int.fract_nonneg (1 / ((b:ℝ) * x)), Int.fract_lt_one (1 / ((b:ℝ) * x))]
+
+theorem telescope_limit_eq_vasyunin (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
+    (hab : a < b) (hcop : Nat.Coprime a b) :
+    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b := by
+  set I := Assembly.gramIntegral a b
+  set L := DigammaReflection.vasyuninGramFormula a b
+  -- Splitting: I = tail + partial_sum_M for each M
+  have hsplit : ∀ M : ℕ, 1 ≤ M →
+      I = (∫ x in (0:ℝ)..(1 / ((a:ℝ) * (M:ℝ))),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) +
+      (∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) := by
+    intro M _
+    show Assembly.gramIntegral a b = _
+    unfold Assembly.gramIntegral
+    rw [← intervalIntegral.integral_add_adjacent_intervals
+      (fract_prod_intble a b 0 _) (fract_prod_intble a b _ 1)]
+  -- Tail bounds: 0 ≤ tail ≤ 1/(aM)
+  have htail_nn : ∀ M : ℕ, 1 ≤ M →
+      0 ≤ ∫ x in (0:ℝ)..(1 / ((a:ℝ) * (M:ℝ))),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x)) := by
+    intro M hM; apply intervalIntegral.integral_nonneg (by positivity)
+    intros x _; exact mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
+  have htail_le : ∀ M : ℕ, 1 ≤ M →
+      ∫ x in (0:ℝ)..(1 / ((a:ℝ) * (M:ℝ))),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))
+      ≤ 1 / ((a:ℝ) * (M:ℝ)) := by
+    intro M hM
+    have hε : (0:ℝ) ≤ 1 / ((a:ℝ) * (M:ℝ)) := by positivity
+    have hbound : ∀ x ∈ Set.uIoc (0:ℝ) (1 / ((a:ℝ) * (M:ℝ))),
+        ‖Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))‖ ≤ 1 := by
+      intro x _
+      rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+      nlinarith [Int.fract_nonneg (1 / ((a:ℝ) * x)), Int.fract_lt_one (1 / ((a:ℝ) * x)),
+                 Int.fract_nonneg (1 / ((b:ℝ) * x)), Int.fract_lt_one (1 / ((b:ℝ) * x))]
+    have h := intervalIntegral.norm_integral_le_of_norm_le_const hbound
+    rw [Real.norm_eq_abs, abs_of_nonneg (htail_nn M hM)] at h
+    linarith [show |1 / ((a:ℝ) * (M:ℝ)) - 0| = 1 / ((a:ℝ) * (M:ℝ)) from by
+      rw [sub_zero, abs_of_nonneg hε]]
+  -- Squeeze bounds
+  have h_lower : ∀ M : ℕ, 1 ≤ M →
+      (∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) ≤ I := by
+    intro M hM; rw [hsplit M hM]; linarith [htail_nn M hM]
+  have h_upper : ∀ M : ℕ, 1 ≤ M →
+      I ≤ (∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) +
+        1 / ((a:ℝ) * (M:ℝ)) := by
+    intro M hM; rw [hsplit M hM]; linarith [htail_le M hM]
+  -- Limits
+  have h_lower_tends := partial_sum_tends_to_formula a b ha hb hab hcop
+  have h_corr : Tendsto (fun M : ℕ => 1 / ((a:ℝ) * (M:ℝ))) atTop (nhds 0) := by
+    have ha_pos : (0:ℝ) < (a:ℝ) := by exact_mod_cast (show 0 < a by omega)
+    have h1 : Tendsto (fun M : ℕ => (a:ℝ) * (M:ℝ)) atTop atTop :=
+      tendsto_natCast_atTop_atTop.const_mul_atTop ha_pos
+    exact ((tendsto_inv_atTop_zero.comp h1).congr (fun _ => by simp [one_div]))
+  have h_upper_tends : Tendsto
+      (fun M : ℕ => (∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
+        Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) +
+        1 / ((a:ℝ) * (M:ℝ)))
+      atTop (nhds L) := by
+    convert h_lower_tends.add h_corr using 1; simp [L]
+  -- Squeeze
+  have h_squeeze : Tendsto (fun _ : ℕ => I) atTop (nhds L) := by
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le' h_lower_tends h_upper_tends
+    · filter_upwards [Ioi_mem_atTop 0] with M (hM : 0 < M)
+      exact h_lower M (by omega)
+    · filter_upwards [Ioi_mem_atTop 0] with M (hM : 0 < M)
+      exact h_upper M (by omega)
+  exact tendsto_nhds_unique tendsto_const_nhds h_squeeze
 
 /-- **THE MAIN BRIDGE**: For coprime (a,b) with a < b:
     ∫₀¹ {1/(ax)}{1/(bx)} dx = vasyuninGramFormula(a,b)

@@ -807,10 +807,13 @@ dependencies = [
 
 [[package]]
 name = "vasyunin-integral-verifier"
-version = "0.1.0"
+version = "2.0.0"
 dependencies = [
+ "chrono",
  "rayon",
  "rug",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

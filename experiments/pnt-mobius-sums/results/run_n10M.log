@@ -1,0 +1,68 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+   Compiling pnt-mobius-sums v0.1.0 (/Users/jrgochan/code/github.com/jrgochan/prime/experiments/pnt-mobius-sums)
+    Finished `release` profile [optimized] target(s) in 2.77s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/pnt-mobius-sums`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL PNT MÖBIUS SUM VALIDATOR[0m                           [1m[36m║[0m
+  [1m[36m║[0m  [2m256-bit MPFR · Certified Convergence[0m                        [1m[36m║[0m
+  [1m[36m║[0m  [2mTarget: pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k[0m[1m[36m║[0m
+  [1m[36m║[0m  [2m256-bit MPFR[0m                                                  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [2m▸ Sieving μ(k) for k ≤ 10000000...[0m
+  [32m✓[0m Sieve complete in 0.31s
+
+  [1m[97m═══ PNT MÖBIUS SUMS: S₁ → 0, S₂ → -1, S₃ → -2γ ═══[0m
+  [2m  2γ ≈ 1.154431329803066[0m
+
+  [2m        N   │  S₁ = Σμ/k          │  S₂+1 = Σμlnk/k+1   │  S₃+2γ              │  |S₁|·√N      │  time[0m
+           10 │  [35m 9.04761904761905e-2[0m │  [33m 2.16232654363825e-1[0m │   5.18149190058230e-1 │      0.286111 │ 0.00s
+          100 │  [35m 3.11315335290831e-2[0m │  [33m 1.42331485903062e-1[0m │   6.50493820591938e-1 │      0.311315 │ 0.00s
+         1000 │  [35m 4.41186977179174e-3[0m │  [33m 3.00691926177641e-2[0m │   2.04885903786245e-1 │      0.139516 │ 0.00s
+        10000 │  [35m-2.08269976748225e-3[0m │  [33m-1.92100361521890e-2[0m │  -1.77165491662258e-1 │      0.208270 │ 0.02s
+        50000 │  [35m 5.32127081644940e-4[0m │  [33m 5.72971941641687e-3[0m │   6.16848719137388e-2 │      0.118987 │ 0.11s
+       100000 │  [35m-4.87227617037536e-4[0m │  [33m-5.58467988899158e-3[0m │  -6.40060208225459e-2 │      0.154075 │ 0.22s
+       200000 │  [35m 2.50654400057022e-5[0m │  [33m 2.86470955350171e-4[0m │   3.25751295550014e-3 │      0.011210 │ 0.44s
+       500000 │  [35m 7.13275279880060e-6[0m │  [33m 7.84622124730960e-5[0m │   8.30834909417932e-4 │      0.005044 │ 1.08s
+      1000000 │  [35m 2.00604685387828e-4[0m │  [33m 2.78530477530436e-3[0m │   3.86709569952592e-2 │      0.200605 │ 2.15s
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mPNT MÖBIUS SUM VALIDATOR — CERTIFICATE[0m                     [1m[36m║[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  Precision: [33m256-bit MPFR[0m    N_max: [33m10000000[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§A. S₁ = Σμ(k)/k → 0[0m  [pnt_mu_div_k]
+  [1m[36m║[0m    [32m✓[0m S₁(10000000) = 2.00604685387828e-4
+  [1m[36m║[0m    [32m✓[0m |S₁|·N^{1/4} bounded by 0.0984
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§B. S₂ = Σμ(k)ln(k)/k → -1[0m  [pnt_mu_log_div_k]
+  [1m[36m║[0m    [32m✓[0m S₂(10000000) + 1 = 2.78530477530436e-3
+  [1m[36m║[0m    [32m✓[0m |S₂+1|·N^{1/4}/ln(N) bounded by 0.0977
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§C. S₃ = Σμ(k)ln²(k)/k → -2γ[0m  [pnt_mu_log_sq_div_k]
+  [1m[36m║[0m    [32m✓[0m S₃(10000000) + 2γ = 3.86709569952592e-2
+  [1m[36m║[0m    2γ = 1.154431329803066
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97mTotal:[0m [32m28.1s[0m
+  [1m[97mOutput:[0m results/{pnt_sums.tsv, certificate.json}
+

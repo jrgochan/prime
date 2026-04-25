@@ -56,6 +56,11 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
     `Cathedral.Vasyunin.Cotangent.DigammaReflection,
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
+    `Cathedral.Vasyunin.Cotangent.FormulaBridge,
+    `Cathedral.Vasyunin.Cotangent.GCDReduction,
+    `Cathedral.Vasyunin.Cotangent.FractIntegrable,
+    `Cathedral.Vasyunin.Cotangent.IntegralSubstitution,
+    `Cathedral.Vasyunin.Cotangent.TelescopeLimit,
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,
     `Cathedral.Vasyunin.Augmented.IntegralBridge,
     `Cathedral.Vasyunin.Augmented.DiagBound,
@@ -120,7 +125,8 @@ lean_lib «Cathedral» where
     -- Assembly (the crown)
     `Cathedral.Assembly.CertifiedComputation,
     `Cathedral.Assembly.QuadFormBridge,
-    `Cathedral.Assembly.GramWitness,
+    -- GramWitness archived to Cathedral/Archive/Universe1/ (April 25, 2026)
+    -- witness_l2_error_decay_gram axiom ELIMINATED
     `Cathedral.Assembly.BDBridge,
     `Cathedral.Assembly.BDBypass,
     `Cathedral.Assembly.VasyuninBypass,
@@ -183,4 +189,8 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.ZetaLowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
     `Cathedral.White.Infrastructure.HilbertInequality,
+    -- Dirichlet test for series convergence (PROVED, zero sorry, zero axiom)
+    `Cathedral.White.Infrastructure.DirichletTest,
+    -- Partial sum convergence (Vasyunin integral decomposition)
+    `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
   ]

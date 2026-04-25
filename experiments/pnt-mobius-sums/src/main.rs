@@ -86,7 +86,7 @@ fn main() {
     fs::create_dir_all("results").unwrap();
 
     // Sieve to N_MAX
-    let n_max: usize = 1_000_000; // Start with 10^6, can scale up
+    let n_max: usize = 10_000_000; // Promoted to 10^7 for deeper certification
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {}...{RESET}", n_max);
     let t = Instant::now();
     let mu = mobius_sieve(n_max);

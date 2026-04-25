@@ -1,0 +1,114 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/gram-quadform`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL GRAM QUADRATIC FORM VALIDATOR[0m                      [1m[36m║[0m
+  [1m[36m║[0m  [2m256-bit MPFR · Massively Parallel · Certified Bounds[0m        [1m[36m║[0m
+  [1m[36m║[0m  [2mTarget: gram_form_upper_bound_34 (PerronCrown.lean:60)[0m      [1m[36m║[0m
+  [1m[36m║[0m  [2m12 threads · 256-bit MPFR[0m                                    [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [2m▸ Sieving μ(k) for k ≤ 2000...[0m
+  [32m✓[0m Sieve complete
+
+  [1m[97m═══ GRAM QUADRATIC FORM: vᵀGv, bᵀv, d²_N ═══[0m
+  [2m  v_k = -μ(k)·(1 - ln(k)/ln(N)) [log-cutoff Möbius witness][0m
+
+  [2m     N   │  vᵀGv             │  bᵀv              │  d²_N              │  C_G·eff      │  d²·ln(N)     │ time[0m
+       10 │  [35m 5.969894419975e-1[0m │   8.867939794317e-1 │  [33m-1.765985168659e-1[0m │     -0.927966 │     -0.406633 │ 0.00s
+       20 │  [35m 8.500185452649e-1[0m │    1.115174505119e0 │  [33m-3.803304649740e-1[0m │     -0.449304 │     -1.139368 │ 0.00s
+       30 │  [35m 9.627798769624e-1[0m │    1.190796840292e0 │  [33m-4.188138036224e-1[0m │     -0.126593 │     -1.424468 │ 0.01s
+       50 │  [35m  1.093493182950e0[0m │    1.324049446417e0 │  [33m-5.546057098836e-1[0m │      0.365747 │     -2.169630 │ 0.03s
+       75 │  [35m  1.172074672257e0[0m │    1.372281344750e0 │  [33m-5.724880172422e-1[0m │      0.742930 │     -2.471710 │ 0.07s
+      100 │  [35m  1.221295495406e0[0m │    1.392625050643e0 │  [33m-5.639546058804e-1[0m │      1.019103 │     -2.597107 │ 0.17s
+      150 │  [35m  1.286572333658e0[0m │    1.466354421060e0 │  [33m-6.461365084621e-1[0m │      1.435909 │     -3.237554 │ 0.51s
+      200 │  [35m  1.327475706112e0[0m │    1.525946540898e0 │  [33m-7.244173756835e-1[0m │      1.735070 │     -3.838193 │ 1.27s
+      300 │  [35m  1.376295386597e0[0m │    1.560091851075e0 │  [33m-7.438883155521e-1[0m │      2.146307 │     -4.242977 │ 4.16s
+      500 │  [35m  1.430559431278e0[0m │    1.612751039200e0 │  [33m-7.949426471221e-1[0m │      2.675758 │     -4.940257 │ 18.09s
+      750 │  [35m  1.467664849344e0[0m │    1.631463800804e0 │  [33m-7.952627522648e-1[0m │      3.095976 │     -5.264698 │ 62.14s
+     1000 │  [35m  1.490137739462e0[0m │    1.552646431364e0 │  [33m-6.151551232656e-1[0m │      3.385752 │     -4.249341 │ 148.46s
+     1500 │  [35m  1.521579078248e0[0m │    1.556952952381e0 │  [33m-5.923268265141e-1[0m │      3.814423 │     -4.331817 │ 499.17s
+     2000 │  [35m  1.543390864222e0[0m │    1.692434442102e0 │  [33m-8.414780199816e-1[0m │      4.130261 │     -6.395992 │ 1193.39s
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mGRAM QUADRATIC FORM VALIDATOR — CERTIFICATE[0m                [1m[36m║[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  Precision: [33m256-bit MPFR[0m    Threads: [33m12[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§A. gram_form_upper_bound_34[0m  (vᵀGv ≤ 1 + C_G/ln(N))
+  [1m[36m║[0m    N=   10: vᵀGv-1 = -9.27966103e-1, C_G·eff = -0.927966  [31m✗[0m
+  [1m[36m║[0m    N=   20: vᵀGv-1 = -4.49304284e-1, C_G·eff = -0.449304  [31m✗[0m
+  [1m[36m║[0m    N=   30: vᵀGv-1 = -1.26592985e-1, C_G·eff = -0.126593  [31m✗[0m
+  [1m[36m║[0m    N=   50: vᵀGv-1 = 3.65747483e-1, C_G·eff = 0.365747  [32m✓[0m
+  [1m[36m║[0m    N=   75: vᵀGv-1 = 7.42930352e-1, C_G·eff = 0.742930  [32m✓[0m
+  [1m[36m║[0m    N=  100: vᵀGv-1 = 1.01910342e0, C_G·eff = 1.019103  [32m✓[0m
+  [1m[36m║[0m    N=  150: vᵀGv-1 = 1.43590945e0, C_G·eff = 1.435909  [32m✓[0m
+  [1m[36m║[0m    N=  200: vᵀGv-1 = 1.73507022e0, C_G·eff = 1.735070  [32m✓[0m
+  [1m[36m║[0m    N=  300: vᵀGv-1 = 2.14630703e0, C_G·eff = 2.146307  [32m✓[0m
+  [1m[36m║[0m    N=  500: vᵀGv-1 = 2.67575813e0, C_G·eff = 2.675758  [32m✓[0m
+  [1m[36m║[0m    N=  750: vᵀGv-1 = 3.09597554e0, C_G·eff = 3.095976  [32m✓[0m
+  [1m[36m║[0m    N= 1000: vᵀGv-1 = 3.38575156e0, C_G·eff = 3.385752  [32m✓[0m
+  [1m[36m║[0m    N= 1500: vᵀGv-1 = 3.81442275e0, C_G·eff = 3.814423  [32m✓[0m
+  [1m[36m║[0m    N= 2000: vᵀGv-1 = 4.13026096e0, C_G·eff = 4.130261  [32m✓[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§B. d²_N → 0 convergence[0m  (RH prediction)
+  [1m[36m║[0m    [31m✗[0m d²_N approximately decreasing
+  [1m[36m║[0m    d²·ln(N) ≈ [33m-3.763645[0m (should stabilize ≈ C ≈ 21.65)
+  [1m[36m║[0m    N=   10: d²_N = -1.76598517e-1, d²·ln(N) = -0.406633
+  [1m[36m║[0m    N=   20: d²_N = -3.80330465e-1, d²·ln(N) = -1.139368
+  [1m[36m║[0m    N=   30: d²_N = -4.18813804e-1, d²·ln(N) = -1.424468
+  [1m[36m║[0m    N=   50: d²_N = -5.54605710e-1, d²·ln(N) = -2.169630
+  [1m[36m║[0m    N=   75: d²_N = -5.72488017e-1, d²·ln(N) = -2.471710
+  [1m[36m║[0m    N=  100: d²_N = -5.63954606e-1, d²·ln(N) = -2.597107
+  [1m[36m║[0m    N=  150: d²_N = -6.46136508e-1, d²·ln(N) = -3.237554
+  [1m[36m║[0m    N=  200: d²_N = -7.24417376e-1, d²·ln(N) = -3.838193
+  [1m[36m║[0m    N=  300: d²_N = -7.43888316e-1, d²·ln(N) = -4.242977
+  [1m[36m║[0m    N=  500: d²_N = -7.94942647e-1, d²·ln(N) = -4.940257
+  [1m[36m║[0m    N=  750: d²_N = -7.95262752e-1, d²·ln(N) = -5.264698
+  [1m[36m║[0m    N= 1000: d²_N = -6.15155123e-1, d²·ln(N) = -4.249341
+  [1m[36m║[0m    N= 1500: d²_N = -5.92326827e-1, d²·ln(N) = -4.331817
+  [1m[36m║[0m    N= 2000: d²_N = -8.41478020e-1, d²·ln(N) = -6.395992
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97m═══ §C. LEAN ORACLE CERTIFICATES ═══[0m
+  [2mCopy these into CertifiedComputation.lean as oracle axioms:[0m
+
+  [32m✓[0m oracle_witness_bound_10: d² < -0.176599
+  [32m✓[0m oracle_witness_bound_20: d² < -0.380330
+  [32m✓[0m oracle_witness_bound_30: d² < -0.418814
+  [32m✓[0m oracle_witness_bound_50: d² < -0.554606
+  [32m✓[0m oracle_witness_bound_75: d² < -0.572488
+  [32m✓[0m oracle_witness_bound_100: d² < -0.563955
+  [32m✓[0m oracle_witness_bound_150: d² < -0.646137
+  [32m✓[0m oracle_witness_bound_200: d² < -0.724417
+  [32m✓[0m oracle_witness_bound_300: d² < -0.743888
+  [32m✓[0m oracle_witness_bound_500: d² < -0.794943
+  [32m✓[0m oracle_witness_bound_750: d² < -0.795263
+  [32m✓[0m oracle_witness_bound_1000: d² < -0.615155
+  [32m✓[0m oracle_witness_bound_1500: d² < -0.592327
+  [32m✓[0m oracle_witness_bound_2000: d² < -0.841478
+
+  [1m[97mOracle file:[0m results/oracle_axioms.lean
+
+  [1m[97mTotal:[0m [32m1927.6s[0m (12 threads)
+  [1m[97mOutput:[0m results/{quadform.tsv, certificate.json, oracle_axioms.lean}
+

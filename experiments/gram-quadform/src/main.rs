@@ -192,7 +192,7 @@ fn main() {
     fs::create_dir_all("results").unwrap();
 
     // Probe dimensions (N values)
-    let probe_ns: Vec<usize> = vec![10, 20, 30, 50, 75, 100, 150, 200, 300, 500];
+    let probe_ns: Vec<usize> = vec![10, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000];
 
     let sieve_max = *probe_ns.last().unwrap();
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {}...{RESET}", sieve_max);
@@ -231,13 +231,9 @@ fn main() {
                 })
             }).collect();
 
-        // Build dense Gram matrix (as f64 for now, but compute vᵀGv in full precision)
-        let mut gram_f64 = vec![0.0f64; dim * dim];
-        for (ji, ki, g) in &gram_entries {
-            let gf = g.to_f64();
-            gram_f64[ji * dim + ki] = gf;
-            gram_f64[ki * dim + ji] = gf;
-        }
+        // Build full-precision Gram matrix storage
+        // Store only upper triangle + diagonal
+        let gram_hp: Vec<(usize, usize, Float)> = gram_entries;
 
         // Compute weights at full precision
         let weights: Vec<Float> = (0..dim).map(|i| {
@@ -247,26 +243,39 @@ fn main() {
         // Compute mean entries b_k = 1 - 1/k for k=2..N
         let means: Vec<Float> = (0..dim).map(|i| mean_entry(i + 2)).collect();
 
-        // vᵀGv = Σ_j Σ_k v_j · G(j,k) · v_k (at f64 using precomputed Gram)
-        let mut vtgv = 0.0f64;
-        for ji in 0..dim {
-            let wj = weights[ji].to_f64();
-            if wj == 0.0 { continue; }
-            for ki in 0..dim {
-                let wk = weights[ki].to_f64();
-                if wk == 0.0 { continue; }
-                vtgv += wj * gram_f64[ji * dim + ki] * wk;
+        // vᵀGv at FULL 256-bit MPFR precision
+        // First build Gv = G·v at full precision
+        let mut gv = vec![Float::with_val(P, 0); dim];
+        for entry in &gram_hp {
+            let (ji, ki, g) = (&entry.0, &entry.1, &entry.2);
+            // G(ji, ki) * v(ki)
+            let term_k = Float::with_val(P, g * &weights[*ki]);
+            gv[*ji] += &term_k;
+            if ji != ki {
+                // Symmetric: G(ki, ji) * v(ji)
+                let term_j = Float::with_val(P, g * &weights[*ji]);
+                gv[*ki] += &term_j;
             }
         }
-
-        // bᵀv = Σ_k b_k · v_k
-        let mut btv = 0.0f64;
+        // Now vᵀ·(Gv) at full precision
+        let mut vtgv_hp = Float::with_val(P, 0);
         for i in 0..dim {
-            btv += means[i].to_f64() * weights[i].to_f64();
+            vtgv_hp += Float::with_val(P, &weights[i] * &gv[i]);
         }
+        let vtgv = vtgv_hp.to_f64();
 
-        // d²_N = 1 - 2bᵀv + vᵀGv
-        let d2 = 1.0 - 2.0 * btv + vtgv;
+        // bᵀv at full precision
+        let mut btv_hp = Float::with_val(P, 0);
+        for i in 0..dim {
+            btv_hp += Float::with_val(P, &means[i] * &weights[i]);
+        }
+        let btv = btv_hp.to_f64();
+
+        // d²_N = 1 - 2bᵀv + vᵀGv (at full precision)
+        let mut d2_hp = Float::with_val(P, 1);
+        d2_hp -= Float::with_val(P, &btv_hp * 2u32);
+        d2_hp += &vtgv_hp;
+        let d2 = d2_hp.to_f64();
 
         let nf = n as f64;
         let log_n = nf.ln();
@@ -334,8 +343,30 @@ fn main() {
     );
     fs::write("results/certificate.json", &summary).unwrap();
 
+    // ─── Oracle Certificate for CertifiedComputation.lean ───
+    println!();
+    println!("  {BOLD}{WHITE}═══ §C. LEAN ORACLE CERTIFICATES ═══{RESET}");
+    println!("  {DIM}Copy these into CertifiedComputation.lean as oracle axioms:{RESET}");
+    println!();
+    let mut oracle_lean = String::new();
+    for r in &results {
+        let d2_upper = (r.3 * 1.001 + 1e-15).max(r.3 + 1e-12);  // safety margin
+        oracle_lean += &format!(
+            "/-- Oracle: N={}, 256-bit MPFR, d² = {:.15e} --/\n\
+             axiom oracle_witness_bound_{} :\n\
+             \x20   ∃ v : Fin ({} - 1) → ℝ,\n\
+             \x20     ∫ x in (0:ℝ)..1, (1 - nbLinComb {} v x) ^ 2 < {:.6}\n\n",
+            r.0, r.3, r.0, r.0, r.0, d2_upper
+        );
+        println!("  {GREEN}✓{RESET} oracle_witness_bound_{}: d² < {:.6}",
+            r.0, d2_upper);
+    }
+    fs::write("results/oracle_axioms.lean", &oracle_lean).unwrap();
+    println!();
+    println!("  {BOLD}{WHITE}Oracle file:{RESET} results/oracle_axioms.lean");
+
     println!();
     println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", t_global.elapsed().as_secs_f64(), n_threads);
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{quadform.tsv, certificate.json}}");
+    println!("  {BOLD}{WHITE}Output:{RESET} results/{{quadform.tsv, certificate.json, oracle_axioms.lean}}");
     println!();
 }

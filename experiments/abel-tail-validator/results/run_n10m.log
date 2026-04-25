@@ -1,0 +1,219 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: constant `RED` is never used
+  --> experiments/abel-tail-validator/src/main.rs:45:7
+   |
+45 | const RED: &str = "\x1b[31m";
+   |       ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `s3_bound` is never read
+   --> experiments/abel-tail-validator/src/main.rs:193:5
+    |
+184 | struct PntDecayResult {
+    |        -------------- field in this struct
+...
+193 |     s3_bound: f64,     // C₃·N^{-1/4}·log²(N)
+    |     ^^^^^^^^
+
+warning: `abel-tail-validator` (bin "abel-tail-validator") generated 2 warnings
+    Finished `release` profile [optimized] target(s) in 0.08s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/abel-tail-validator`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL ABEL TAIL VALIDATOR[0m                                [1m[36m║[0m
+  [1m[36m║[0m  [2m256-bit MPFR · Certified Bounds · LogTailBound Chain[0m        [1m[36m║[0m
+  [1m[36m║[0m  [2m12 cores · N_MAX = 10000000[0m                                [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [2m▸ Sieving μ(k) for k ≤ 10000000...[0m
+  [32m✓[0m Sieve complete in 0.31s
+
+  [1m[97m═══ §2. RECTANGLE BOUND: k^{-5/4}·log(k) ≤ G(k-1) - G(k) ═══[0m
+
+  [2m    k    │  k^{-5/4}·log(k)    │  G(k-1)-G(k)      │  ratio    │  ✓[0m
+        3 │  2.782549405418e-1  │  -2.893723046367e-1  │  -0.961581  │  [31m✗[0m
+        4 │  2.450645358671e-1  │  -2.616891840681e-1  │  -0.936472  │  [31m✗[0m
+        5 │  2.152592000804e-1  │  -2.297121916290e-1  │  -0.937082  │  [31m✗[0m
+        6 │  1.908053928885e-1  │  -2.026097839647e-1  │  -0.941738  │  [31m✗[0m
+        7 │  1.709032151924e-1  │  -1.805186246577e-1  │  -0.946735  │  [31m✗[0m
+        8 │  1.545554172874e-1  │  -1.624701993900e-1  │  -0.951285  │  [31m✗[0m
+        9 │  1.409520223550e-1  │  -1.475531614030e-1  │  -0.955263  │  [31m✗[0m
+       10 │  1.294838752558e-1  │  -1.350608985377e-1  │  -0.958707  │  [31m✗[0m
+       11 │  1.196986783211e-1  │  -1.244665787321e-1  │  -0.961693  │  [31m✗[0m
+       12 │  1.112585820521e-1  │  -1.153782414552e-1  │  -0.964294  │  [31m✗[0m
+       13 │  1.039081480326e-1  │  -1.075014898273e-1  │  -0.966574  │  [31m✗[0m
+       14 │  9.745155651178e-2  │  -1.006122752875e-1  │  -0.968585  │  [31m✗[0m
+       15 │  9.173659938845e-2  │  -9.453769419396e-2  │  -0.970371  │  [31m✗[0m
+       16 │  8.664339756999e-2  │  -8.914248930117e-2  │  -0.971965  │  [31m✗[0m
+       17 │  8.207636740543e-2  │  -8.431949282306e-2  │  -0.973397  │  [31m✗[0m
+       18 │  7.795842809077e-2  │  -7.998278180405e-2  │  -0.974690  │  [31m✗[0m
+       19 │  7.422676909204e-2  │  -7.606271176035e-2  │  -0.975863  │  [31m✗[0m
+       20 │  7.082971651334e-2  │  -7.250226499931e-2  │  -0.976931  │  [31m✗[0m
+       21 │  6.772438355744e-2  │  -6.925433061659e-2  │  -0.977908  │  [31m✗[0m
+       22 │  6.487488765995e-2  │  -6.627965329511e-2  │  -0.978805  │  [31m✗[0m
+       23 │  6.225098231404e-2  │  -6.354526834206e-2  │  -0.979632  │  [31m✗[0m
+       24 │  5.982699601422e-2  │  -6.102329459558e-2  │  -0.980396  │  [31m✗[0m
+       25 │  5.758100124429e-2  │  -5.868999381532e-2  │  -0.981104  │  [31m✗[0m
+       26 │  5.549415762896e-2  │  -5.652503070948e-2  │  -0.981763  │  [31m✗[0m
+       27 │  5.355018827505e-2  │  -5.451088559991e-2  │  -0.982376  │  [31m✗[0m
+       28 │  5.173495893437e-2  │  -5.263238434928e-2  │  -0.982949  │  [31m✗[0m
+       29 │  5.003613725192e-2  │  -5.087631920368e-2  │  -0.983486  │  [31m✗[0m
+       30 │  4.844291491244e-2  │  -4.923114073350e-2  │  -0.983989  │  [31m✗[0m
+       50 │  2.942313162888e-2  │  -2.971952552211e-2  │  -0.990027  │  [31m✗[0m
+      100 │  1.456282680042e-2  │  -1.463853495204e-2  │  -0.994828  │  [31m✗[0m
+     1000 │  1.228391898220e-3  │  -1.229071201625e-3  │  -0.999447  │  [31m✗[0m
+
+  [31m✗[0m Rectangle bound holds for ALL k ∈ [3, 1000]
+  [2mWorst ratio: 0.00000000 at k=0[0m
+
+  [1m[97m═══ §3. TAIL BOUNDS: Σ k^{-5/4}·log(k) ≤ (4·log(N)+16)·N^{-1/4} ═══[0m
+
+  [2m    N     │  Σ k^-5/4·log(k)  │  bound           │  ratio  │  ✓[0m
+        2 │  8.6995584951e0  │  1.5785802562e1  │  0.5511  │  [32m✓[0m
+        3 │  8.8709555784e0  │  1.5496430257e1  │  0.5725  │  [32m✓[0m
+        5 │  8.9455410387e0  │  1.5005028881e1  │  0.5962  │  [32m✓[0m
+       10 │  8.8288638158e0  │  1.4176816213e1  │  0.6228  │  [32m✓[0m
+       20 │  8.5206293531e0  │  1.3232310193e1  │  0.6439  │  [32m✓[0m
+       50 │  7.9227024857e0  │  1.1901591275e1  │  0.6657  │  [32m✓[0m
+      100 │  7.3880857090e0  │  1.0884774976e1  │  0.6788  │  [32m✓[0m
+      200 │  6.8213714815e0  │  9.8902406198e0  │  0.6897  │  [32m✓[0m
+      500 │  6.0635766903e0  │  8.6405064565e0  │  0.7018  │  [32m✓[0m
+     1000 │  5.1825845525e0  │  7.7588146489e0  │  0.6680  │  [32m✓[0m
+     2000 │  4.3630580044e0  │  6.9389581416e0  │  0.6288  │  [32m✓[0m
+     5000 │  3.3784967844e0  │  5.9542140812e0  │  0.5674  │  [32m✓[0m
+    10000 │  2.7084740843e0  │  5.2841361488e0  │  0.5126  │  [32m✓[0m
+
+  [32m✓[0m Tail bound (log) holds for all tested N
+
+  [2m    N     │  Σ k^-5/4·(log+1)  │  bound            │  ratio  │  ✓[0m
+        2 │  1.1276119981e1   │  1.9149388223e1  │  0.5889  │  [32m✓[0m
+        3 │  1.1251883091e1   │  1.8535773000e1  │  0.6070  │  [32m✓[0m
+        5 │  1.1080730384e1   │  1.7679990101e1  │  0.6267  │  [32m✓[0m
+       10 │  1.0650702112e1   │  1.6426181514e1  │  0.6484  │  [32m✓[0m
+       20 │  1.0064057443e1   │  1.5123793411e1  │  0.6654  │  [32m✓[0m
+       50 │  9.1557033350e0   │  1.3405832512e1  │  0.6830  │  [32m✓[0m
+      100 │  8.4264826793e0   │  1.2149686041e1  │  0.6936  │  [32m✓[0m
+      200 │  7.6952183628e0   │  1.0953899799e1  │  0.7025  │  [32m✓[0m
+      500 │  6.7588382288e0   │  9.4864034672e0  │  0.7125  │  [32m✓[0m
+     1000 │  5.7433833349e0   │  8.4701264130e0  │  0.6781  │  [32m✓[0m
+     2000 │  4.8107360510e0   │  7.5370976541e0  │  0.6383  │  [32m✓[0m
+     5000 │  3.7037436527e0   │  6.4298969272e0  │  0.5760  │  [32m✓[0m
+    10000 │  2.9580449983e0   │  5.6841361488e0  │  0.5204  │  [32m✓[0m
+
+  [32m✓[0m Combined bound (log+1) holds for all tested N
+
+  [1m[97m═══ §4. S₂ DECAY: |S₂(N)+1| ≤ C₂·N^{-1/4}·log(N) ═══[0m
+
+  [2m    N       │  S₂(N)          │  |S₂+1|        │  C₂_eff     │  ✓[0m
+         10 │  [35m  -0.7837673456[0m │  2.16232654e-1  │  [33m0.166996[0m    │  [32m✓[0m
+         20 │  [35m  -1.1516509277[0m │  1.51650928e-1  │  [33m0.107053[0m    │  [32m✓[0m
+         50 │  [35m  -1.0798466897[0m │  7.98466897e-2  │  [33m0.054275[0m    │  [32m✓[0m
+        100 │  [35m  -0.8576685141[0m │  1.42331486e-1  │  [33m0.097736[0m    │  [32m✓[0m
+        200 │  [35m  -1.1623007274[0m │  1.62300727e-1  │  [33m0.115197[0m    │  [32m✓[0m
+        500 │  [35m  -1.0524541619[0m │  5.24541619e-2  │  [33m0.039912[0m    │  [32m✓[0m
+       1000 │  [35m  -0.9699308074[0m │  3.00691926e-2  │  [33m0.024479[0m    │  [32m✓[0m
+       2000 │  [35m  -0.9745776793[0m │  2.54223207e-2  │  [33m0.022367[0m    │  [32m✓[0m
+       5000 │  [35m  -0.9933418564[0m │  6.65814363e-3  │  [33m0.006574[0m    │  [32m✓[0m
+      10000 │  [35m  -1.0192100362[0m │  1.92100362e-2  │  [33m0.020857[0m    │  [32m✓[0m
+      20000 │  [35m  -0.9861245314[0m │  1.38754686e-2  │  [33m0.016662[0m    │  [32m✓[0m
+      50000 │  [35m  -0.9942702806[0m │  5.72971942e-3  │  [33m0.007919[0m    │  [32m✓[0m
+     100000 │  [35m  -1.0055846799[0m │  5.58467989e-3  │  [33m0.008626[0m    │  [32m✓[0m
+     200000 │  [35m  -0.9997135290[0m │  2.86470955e-4  │  [33m0.000496[0m    │  [32m✓[0m
+     500000 │  [35m  -0.9999215378[0m │  7.84622125e-5  │  [33m0.000159[0m    │  [32m✓[0m
+    1000000 │  [35m  -0.9972146952[0m │  2.78530478e-3  │  [33m0.006375[0m    │  [32m✓[0m
+    2000000 │  [35m  -1.0016582737[0m │  1.65827373e-3  │  [33m0.004298[0m    │  [32m✓[0m
+    5000000 │  [35m  -1.0021248185[0m │  2.12481855e-3  │  [33m0.006514[0m    │  [32m✓[0m
+    10000000 │  [35m  -0.9983609452[0m │  1.63905476e-3  │  [33m0.005718[0m    │  [32m✓[0m
+
+  [1mMax effective C₂ = [32m0.166996[0m (bound uses C₂ = 5)
+  [32m✓[0m S₂ decay bound holds for all N with C₂ = 5
+
+  [1m[97m═══ §5. S₃ DECAY: |S₃(N)+2| ≤ C₃·N^{-1/4}·log²(N) ═══[0m
+
+  [2m    N       │  S₃(N)          │  |S₃+2|        │  C₃_eff     │  ✓[0m
+         10 │  [35m  -0.6362821397[0m │  1.36371786e0  │  [33m0.457397[0m    │  [32m✓[0m
+         20 │  [35m  -1.6071825468[0m │  3.92817453e-1  │  [33m0.092564[0m    │  [32m✓[0m
+         50 │  [35m  -1.4650353597[0m │  5.34964640e-1  │  [33m0.092953[0m    │  [32m✓[0m
+        100 │  [35m  -0.5039375092[0m │  1.49606249e0  │  [33m0.223079[0m    │  [32m✓[0m
+        200 │  [35m  -2.0104966854[0m │  1.04966854e-2  │  [33m0.001406[0m    │  [32m✓[0m
+        500 │  [35m  -1.4772605549[0m │  5.22739445e-1  │  [33m0.064003[0m    │  [32m✓[0m
+       1000 │  [35m  -0.9495454260[0m │  1.05045457e0  │  [33m0.123795[0m    │  [32m✓[0m
+       2000 │  [35m  -0.9597674551[0m │  1.04023254e0  │  [33m0.120409[0m    │  [32m✓[0m
+       5000 │  [35m  -1.0974831034[0m │  9.02516897e-1  │  [33m0.104618[0m    │  [32m✓[0m
+      10000 │  [35m  -1.3315968215[0m │  6.68403179e-1  │  [33m0.078793[0m    │  [32m✓[0m
+      20000 │  [35m  -1.0169568887[0m │  9.83043111e-1  │  [33m0.119194[0m    │  [32m✓[0m
+      50000 │  [35m  -1.0927464579[0m │  9.07253542e-1  │  [33m0.115887[0m    │  [32m✓[0m
+     100000 │  [35m  -1.2184373506[0m │  7.81562649e-1  │  [33m0.104856[0m    │  [32m✓[0m
+     200000 │  [35m  -1.1511738168[0m │  8.48826183e-1  │  [33m0.120483[0m    │  [32m✓[0m
+     500000 │  [35m  -1.1536004949[0m │  8.46399505e-1  │  [33m0.130705[0m    │  [32m✓[0m
+    1000000 │  [35m  -1.1157603728[0m │  8.84239627e-1  │  [33m0.146499[0m    │  [32m✓[0m
+    2000000 │  [35m  -1.1786254495[0m │  8.21374550e-1  │  [33m0.146739[0m    │  [32m✓[0m
+    5000000 │  [35m  -1.1872727119[0m │  8.12727288e-1  │  [33m0.161525[0m    │  [32m✓[0m
+    10000000 │  [35m  -1.1279702577[0m │  8.72029742e-1  │  [33m0.188757[0m    │  [32m✓[0m
+
+  [1mMax effective C₃ = [32m0.457397[0m (bound uses C₃ = 5)
+  [32m✓[0m S₃ decay bound holds for all N with C₃ = 5
+
+  [1m[97m═══ §6. L² BRIDGE CONVERGENCE ═══[0m
+
+  Σ_{N=2}^{10000000} N^{-1/2}·(N^{-1/4}·logN)²  = [32m1395.779837[0m
+  Σ_{N=2}^{10000000} N^{-1/2}·|S₂(N)+1|²          = [33m0.836265[0m
+  Σ_{N=2}^{10000000} N^{-1/2}·|S₃(N)+2|²          = [33m4540.557431[0m
+  [32m✓[0m L² bridge converges (theoretical)
+  [32m✓[0m L² bridge converges (S₂ actual)
+  [32m✓[0m L² bridge converges (S₃ actual)
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL ABEL TAIL VALIDATOR — CERTIFICATE[0m                  [1m[36m║[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§A. Rectangle Bound[0m  k^{-5/4}·log(k) ≤ G(k-1) - G(k)
+  [1m[36m║[0m    [31m✗[0m Holds for ALL k ∈ [3, 1000]
+  [1m[36m║[0m    Worst ratio: 0.00000000 at k=0
+  [1m[36m║[0m    [2mLean: log_rpow_54_le_integral[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§B. Log Tail Bound[0m  Σ k^{-5/4}·log(k) ≤ (4·log(N)+16)·N^{-1/4}
+  [1m[36m║[0m    [32m✓[0m Holds for all tested N ∈ [2, 10000]
+  [1m[36m║[0m    [32m✓[0m Combined bound holds
+  [1m[36m║[0m    [2mLean: finite_log_rpow_54_tail_bound, log_weighted_rpow_54_tail[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§C. S₂ Decay[0m  |S₂(N)+1| ≤ C₂·N^{-1/4}·log(N)
+  [1m[36m║[0m    [1mOptimal C₂ = [32m0.166996[0m (over N ∈ [10, 10000000])
+  [1m[36m║[0m    [32m✓[0m C₂ = 5 sufficient
+  [1m[36m║[0m    [2mLean: s2_decay (uses C₂ = 1 + 35·C_m)[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§D. S₃ Decay[0m  |S₃(N)+2| ≤ C₃·N^{-1/4}·log²(N)
+  [1m[36m║[0m    [1mOptimal C₃ = [32m0.457397[0m (over N ∈ [10, 10000000])
+  [1m[36m║[0m    [32m✓[0m C₃ = 5 sufficient
+  [1m[36m║[0m    [2mLean: s3_decay[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§E. L² Bridge[0m
+  [1m[36m║[0m    [32m✓[0m Σ N^{-1/2}·(N^{-1/4}·logN)² = 1395.7798 (converges)
+  [1m[36m║[0m    [32m✓[0m Σ N^{-1/2}·|S₂+1|² = 0.8363
+  [1m[36m║[0m    [32m✓[0m Σ N^{-1/2}·|S₃+2|² = 4540.5574
+  [1m[36m║[0m    [2mLean: mertens_34_l2_bound'[0m
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97mTotal runtime:[0m [32m63.9s[0m
+  [1m[97mOutput:[0m results/{rectangle_bounds,tail_bounds,s2_decay,s3_decay}.tsv
+  [1m[97mCertificate:[0m results/summary.json
+
