@@ -3,6 +3,8 @@
 
   ## Mean Value Theorems for Dirichlet Polynomials
 
+  [ALTERNATIVE PATH — uses pnt_mu_log_sq_div_k, eliminated in v9]
+
   PHYSICS: Unitarity of the S-Matrix.
   MATH: The fourth moment method for exponential sums.
 

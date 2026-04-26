@@ -3,6 +3,8 @@
 
   ## Mertens Bound Conversion: x^{1/2}·log²x → x^{3/4}
 
+  [ON CROWN PATH — converts Perron result to x^{3/4} bound]
+
   Proves that the tighter RH-conditional Mertens bound
   |M(x)| ≤ C·x^{1/2}·(log x)² implies the coarser
   |M(x)| ≤ C'·x^{3/4} bound.

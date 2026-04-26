@@ -3,6 +3,8 @@
 
   ## The Crown: abel_mertens_tail as THEOREM
 
+  [ON CROWN PATH — abel_mertens_tail_raw GRADUATED to theorem 🎓]
+
   Combines s1_decay, s2_decay, s3_decay into a single uniform bound.
   When all sorry are closed, this replaces the axiom
   `abel_mertens_tail_raw` in FinalDragon.lean.

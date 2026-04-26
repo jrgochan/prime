@@ -3,6 +3,8 @@
 
   ## The Abel Summation Siege: Closing abel_summation_bd_l2_bound
 
+  [ON CROWN PATH — Abel summation proof infrastructure]
+
   Proves that the Mertens bound M(x) = O(x^{1/2} log²x) implies
   the existence of BD weights with L² error O(1/log N).
 

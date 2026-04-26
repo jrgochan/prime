@@ -3,6 +3,8 @@
 
   **THE INTEGRAL BRIDGE**
 
+  [ON CROWN PATH — Gram matrix integral formalization]
+
   Connects the Vasyunin discrete formulas to Lebesgue integrals.
   Extracted from GramPSD.lean to avoid import cycles.
 

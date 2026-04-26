@@ -3,6 +3,8 @@
 
   ## The Vasyunin Bypass: RH → d² → 0 via Covariance Decomposition
 
+  [ALTERNATIVE PATH — uses rh_implies_mertens_bound, graduated in v7]
+
   Replaces the BDBypass path (which goes through bd_gram_form_decay)
   with a direct proof using the Vasyunin tower's covariance decomposition.
 

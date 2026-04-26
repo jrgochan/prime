@@ -3,6 +3,9 @@
 
   ## THE FOUNDATION AXIOM: The Classical Mertens Bound (Tighter Form)
 
+  [OFF CROWN PATH — axiom graduated in v7 via Perron chain.
+   Retained for alternative-path files (BDBypass, VasyuninBypass, etc.)]
+
   This is the SINGLE foundational axiom of the Cathedral's proof chain.
   Everything else is either proved, unconditional (PNT), or structural.
 

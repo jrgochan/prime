@@ -3,6 +3,8 @@
 
   ## PROVING vasyunin_eq_integral — THE FULL ASSAULT
 
+  [ON CROWN PATH — diagonal proved, off-diagonal axiomatized]
+
   Strategy: Prove G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx for ALL j,k ≥ 1.
 
   For j = k (diagonal): Direct via substitution + known ∫₀¹{1/u}²du identity

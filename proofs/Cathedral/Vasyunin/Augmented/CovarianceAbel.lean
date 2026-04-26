@@ -3,6 +3,8 @@
 
   ## Covariance Bound via Variance Decomposition — Structural Lemmas
 
+  [ON CROWN PATH — structural lemmas for covariance bound]
+
   Provides the algebraic infrastructure for graduating the
   `millennium_covariance_cancellation` axiom.
 

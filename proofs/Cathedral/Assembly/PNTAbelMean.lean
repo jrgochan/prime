@@ -3,6 +3,9 @@
 
   ## PNT Axioms, Abel Tail Bounds, and the Mean Bound
 
+  [MIXED — pnt_mu_log_div_k is ON crown path (Axiom 1);
+   pnt_mu_log_sq_div_k is OFF crown path (eliminated v9, Abel Bypass)]
+
   Contains:
   - PNT axioms (pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k)
   - Abel tail analysis (rpow_quarter_log_bounded/cube_bounded)

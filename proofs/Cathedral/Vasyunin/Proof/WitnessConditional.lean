@@ -3,6 +3,8 @@
 
   The conditional direction: RH → witness_covariance_decay.
 
+  [ALTERNATIVE PATH — uses rh_implies_mertens_bound, graduated in v7]
+
   Combined with WitnessAsymptotics.lean (which proves the converse direction
   witness_covariance_decay → RH via the chain), this establishes:
 

@@ -3,6 +3,8 @@
 
   ## The Great Pivot: RH → L² Bound (Pillar II Bridge)
 
+  [ALTERNATIVE PATH — uses rh_implies_mertens_bound, graduated in v7]
+
   Wires the proved Abel Summation theorem from AbelSiegeProof.lean
   to the Nyman-Beurling distance, completing Pillar II.
 
