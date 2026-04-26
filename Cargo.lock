@@ -450,6 +450,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mellin-certificate"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "memchr"
 version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
