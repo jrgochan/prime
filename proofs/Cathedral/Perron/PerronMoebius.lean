@@ -18,10 +18,10 @@ import Cathedral.Perron.AssemblyHelpers
 import Cathedral.Perron.ContourShift
 
 noncomputable section
-open Complex Real MeasureTheory Set Filter ArithmeticFunction
+open Complex Real MeasureTheory Set Filter ArithmeticFunction Cathedral.Zeta
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- The Final Assembly: M(x) = O(x^{1/2+eps})
@@ -266,4 +266,4 @@ theorem mertens_bound_eps_implies_original
 -- and mertensFunction (MertensBound.lean) is handled in the
 -- assembly file MertensFromPerron.lean.
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

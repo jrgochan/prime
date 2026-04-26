@@ -16,7 +16,7 @@ and a pointwise bound on the right vertical segment `Re(s) = R`.
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §5. Rectangle Sub-lemmas
@@ -71,4 +71,4 @@ lemma right_vertical_bound {y R T : ℝ} (hy_pos : 0 < y) (_hy_lt : y < 1)
         rw [sub_neg_eq_add, ← two_mul, abs_of_pos (by linarith : 0 < 2 * T)]
         ring
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

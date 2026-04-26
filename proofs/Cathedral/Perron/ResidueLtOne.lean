@@ -20,7 +20,7 @@ then send `R → ∞`. The exponential decay `y^R → 0` for `0 < y < 1` kills t
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §7. The Perron Kernel for y < 1 (Residue = 0)
@@ -166,5 +166,5 @@ theorem perron_kernel_lt_one (y c T : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1)
   -- So target + δ = ‖perronIntegral‖, giving ‖perronIntegral‖ < ‖perronIntegral‖. Contradiction!
   linarith
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron
 

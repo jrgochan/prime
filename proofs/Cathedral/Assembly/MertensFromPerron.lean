@@ -35,9 +35,9 @@ open Real Finset Filter
 private theorem mertens_34_from_eps
     (hRH : RiemannHypothesis) :
     ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |((Cathedral.White.Infrastructure.summatoryMoebius x : ℤ) : ℝ)| ≤
+      |((Cathedral.Zeta.summatoryMoebius x : ℤ) : ℝ)| ≤
         C * x ^ ((3 : ℝ)/4) := by
-  have heps := Cathedral.White.Infrastructure.mertens_bound_eps hRH (1/4 : ℝ) (by norm_num)
+  have heps := Cathedral.Perron.mertens_bound_eps hRH (1/4 : ℝ) (by norm_num)
   obtain ⟨C, hC_pos, hM⟩ := heps
   exact ⟨C, hC_pos, fun x hx => by convert hM x hx using 2; norm_num⟩
 
@@ -50,8 +50,8 @@ private theorem mertens_34_from_eps
     `summatoryMoebius` (DirichletZetaInverse.lean): uses Icc 1 ⌊x⌋₊ -/
 private lemma mertensFunction_eq_summatoryMoebius (x : ℝ) (hx : 1 ≤ x) :
     (mertensFunction x : ℤ) =
-     Cathedral.White.Infrastructure.summatoryMoebius x := by
-  unfold mertensFunction Cathedral.White.Infrastructure.summatoryMoebius
+     Cathedral.Zeta.summatoryMoebius x := by
+  unfold mertensFunction Cathedral.Zeta.summatoryMoebius
   -- Both sum μ(n) over 1 ≤ n ≤ ⌊x⌋.
   -- mertensFunction: filter (fun n => (n:ℝ) ≤ x ∧ 0 < n) (range (⌊x⌋₊+1))
   -- summatoryMoebius: Icc 1 ⌊x⌋₊

@@ -29,7 +29,7 @@ norm bounds, and prefactor absorption lemmas.
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1. The Perron Kernel Integrand
@@ -101,4 +101,4 @@ lemma norm_one_div_two_pi_mul_le (z : ℂ) :
         mul_le_mul_of_nonneg_right norm_one_div_two_pi_le (norm_nonneg _)
     _ = ‖z‖ := one_mul _
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

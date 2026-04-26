@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/HilbertInequality.lean
+  Cathedral/Analysis/HilbertInequality.lean
 
   ## The Montgomery-Vaughan Hilbert Inequality
 
@@ -28,7 +28,7 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 noncomputable section
 open Complex Real Finset BigOperators
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Analysis
 
 -- ═══════════════════════════════════════════
 -- §1. Schur's Test for Discrete Operators
@@ -322,5 +322,5 @@ theorem montgomery_vaughan_inequality
   intro S
   exact montgomery_vaughan_bound x lam δ hδ h_sep
 
-end Cathedral.White.Infrastructure
+end Cathedral.Analysis
 

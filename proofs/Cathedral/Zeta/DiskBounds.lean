@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaDiskBounds.lean
+  Cathedral/Zeta/ZetaDiskBounds.lean
 
   ## Zeta Disk Geometry & Upper Bounds
 
@@ -13,7 +13,7 @@
   - §3. Holomorphic logarithm on the disk
   - §4. Upper bound on |ζ| on the disk
 
-  ### Dependencies: Mathlib (ζ, log, BC), ZetaConvexityBound.
+  ### Dependencies: Mathlib (ζ, log, BC), Cathedral.Zeta.ConvexityBound.
 -/
 
 import Mathlib.NumberTheory.LSeries.RiemannZeta
@@ -25,13 +25,13 @@ import Mathlib.Analysis.Complex.PhragmenLindelof
 import Mathlib.Analysis.Complex.HasPrimitives
 import Mathlib.Analysis.Calculus.FDeriv.Analytic
 import Mathlib.Analysis.Normed.Operator.Asymptotics
-import Cathedral.White.Infrastructure.ZetaConvexityBound
+import Cathedral.Zeta.ConvexityBound
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure.ZetaDiskBounds
+namespace Cathedral.Zeta.DiskBounds
 
 -- ═══════════════════════════════════════════
 -- §1. Zeta Nonvanishing Under RH
@@ -261,12 +261,12 @@ theorem holomorphic_log_exists_on_ball
 -- §4. Upper Bound on |ζ| on the Disk
 -- ═══════════════════════════════════════════
 
-/-- **Convexity bound** (from ZetaConvexityBound.lean, zero sorry):
+/-- **Convexity bound** (from Cathedral.Zeta.ConvexityBound.lean, zero sorry):
     ‖ζ(s)‖ ≤ (2 + |Im(s)|)^2 for 1/2 < Re(s) ≤ 2, |Im(s)| ≥ 1/2. -/
 theorem zeta_norm_convexity_bound {s : ℂ}
     (hrs : 1/2 < s.re) (hrs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :
     ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ (2 : ℝ) :=
-  ZetaConvexityBound.zeta_norm_convexity_bound hrs hrs2 him
+  Cathedral.Zeta.ConvexityBound.zeta_norm_convexity_bound hrs hrs2 him
 
 /-- **Disk upper bound**: ‖ζ(s₀+z)‖ ≤ (2+|t|)^10 on ball(0, R).
 
@@ -344,4 +344,4 @@ theorem zeta_norm_bound_on_disk
       _ = (2 + |t|) ^ 4 := by ring
       _ ≤ (2 + |t|) ^ 10 := pow_le_pow_right₀ h_base (by norm_num : 4 ≤ 10)
 
-end Cathedral.White.Infrastructure.ZetaDiskBounds
+end Cathedral.Zeta.DiskBounds

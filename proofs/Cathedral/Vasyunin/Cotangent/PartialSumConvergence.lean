@@ -41,8 +41,8 @@ import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
 import Cathedral.Vasyunin.Cotangent.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
-import Cathedral.White.Infrastructure.DirichletTest
-import Cathedral.White.Infrastructure.CenteredFractBound
+import Cathedral.Analysis.DirichletTest
+import Cathedral.Analysis.CenteredFractBound
 import Mathlib.Analysis.SpecialFunctions.Stirling
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.Analysis.Calculus.Deriv.MeanValue
@@ -679,9 +679,9 @@ theorem integral_eq_sum_actualRowIntegral (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤
 theorem centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     ∃ C : ℝ, ∀ n : ℕ,
-      |Cathedral.White.Infrastructure.DirichletTest.partialSum₀
+      |Cathedral.Analysis.DirichletTest.partialSum₀
         (fun m => Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))) n| ≤ C :=
-  ⟨(b:ℝ), Cathedral.White.Infrastructure.CenteredFractBound.centered_fract_partial_sums_bounded'
+  ⟨(b:ℝ), Cathedral.Analysis.CenteredFractBound.centered_fract_partial_sums_bounded'
     a b ha hb hab hcop⟩
 
 /-- **RESIDUAL CONVERGENCE**: The centered fractional-part series converges
@@ -706,7 +706,7 @@ theorem centered_fract_residual_converges_sketch (a b : ℕ) (ha : 1 ≤ a) (hb 
         (1 / ((m:ℝ) + 1)))
       atTop (nhds L) := by
   obtain ⟨C, hC⟩ := centered_fract_partial_sums_bounded a b ha hb hab hcop
-  obtain ⟨L, hL⟩ := Cathedral.White.Infrastructure.DirichletTest.dirichlet_test
+  obtain ⟨L, hL⟩ := Cathedral.Analysis.DirichletTest.dirichlet_test
     (fun m => Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ)))
     (fun m => 1 / ((m:ℝ) + 1))
     C hC

@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaHadamard.lean
+  Cathedral/Zeta/ZetaHadamard.lean
 
   ## Hadamard Three-Circles & Zeta Lower Bound on the Thin Strip
 
@@ -13,13 +13,13 @@
 
 import Mathlib.Analysis.Complex.Hadamard
 import Mathlib.Analysis.SpecialFunctions.Complex.Log
-import Cathedral.White.Infrastructure.ZetaDiskBounds
+import Cathedral.Zeta.DiskBounds
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric Set
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure.ZetaHadamard
+namespace Cathedral.Zeta.Hadamard
 open Complex.HadamardThreeLines
 
 -- ═══════════════════════════════════════════
@@ -271,4 +271,4 @@ theorem thin_strip_lower_bound_exists (hRH : RiemannHypothesis)
     rh_zeta_lower_bound_from_zero_counting hRH ε hε hε1 A hA
   exact ⟨c, hc_pos, 2, by norm_num, hbound⟩
 
-end Cathedral.White.Infrastructure.ZetaHadamard
+end Cathedral.Zeta.Hadamard

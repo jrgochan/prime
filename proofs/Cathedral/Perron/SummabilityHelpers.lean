@@ -25,7 +25,7 @@ set_option maxHeartbeats 800000
 noncomputable section
 open Real BigOperators Finset
 
-namespace Cathedral.White.Infrastructure.SummabilityHelpers
+namespace Cathedral.Perron.SummabilityHelpers
 
 -- ═══════════════════════════════════════════
 -- §1. Summability of 1/n^c
@@ -69,4 +69,4 @@ lemma mul_rpow_eq_rpow_succ {X : ℝ} (hX : 0 < X) (c : ℝ) :
   have := rpow_add hX c 1
   rw [rpow_one] at this; linarith
 
-end Cathedral.White.Infrastructure.SummabilityHelpers
+end Cathedral.Perron.SummabilityHelpers

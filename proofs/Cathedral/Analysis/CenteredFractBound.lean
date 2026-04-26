@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/CenteredFractBound.lean
+  Cathedral/Analysis/CenteredFractBound.lean
 
   ## BOUNDED PARTIAL SUMS OF CENTERED FRACTIONAL PARTS
 
@@ -14,14 +14,14 @@
   Status: COMPLETE — 8 lemmas/theorems, 0 sorry, 0 axiom
 -/
 
-import Cathedral.White.Infrastructure.DirichletTest
+import Cathedral.Analysis.DirichletTest
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Algebra.Order.Floor.Semifield
 
 noncomputable section
 open Filter Finset BigOperators
 
-namespace Cathedral.White.Infrastructure.CenteredFractBound
+namespace Cathedral.Analysis.CenteredFractBound
 
 -- ════════════════════════════════════════════════
 -- §1. FRACTIONAL PART = MODULAR ARITHMETIC
@@ -222,4 +222,4 @@ theorem centered_fract_partial_sums_bounded' (a b : ℕ)
 -- Architecture:
 --   fract_nat_div → mul_mod perm → Gauss sum → period=0 → |partial sums| ≤ b
 
-end Cathedral.White.Infrastructure.CenteredFractBound
+end Cathedral.Analysis.CenteredFractBound

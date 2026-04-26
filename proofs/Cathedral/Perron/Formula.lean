@@ -15,7 +15,7 @@ suitable for finite Dirichlet polynomial sums.
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §9. From Kernel to Summatory Function (The Assembly)
@@ -59,4 +59,4 @@ theorem perron_formula_error_bound
         (‖a n‖ * ((x / ↑n) ^ c / (Real.pi * T * |Real.log (x / ↑n)|))) :=
         Finset.sum_le_sum per_term
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

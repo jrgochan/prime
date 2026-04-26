@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/GammaBound.lean
+  Cathedral/Analysis/GammaBound.lean
 
   ## Gamma Function Norm Bounds via Reflection Formula
 

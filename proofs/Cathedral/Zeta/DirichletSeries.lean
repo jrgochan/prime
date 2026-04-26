@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/DirichletSeries.lean
+  Cathedral/Zeta/DirichletSeries.lean
 
   ## Abel Summation for Dirichlet Series
 
@@ -23,7 +23,7 @@ noncomputable section
 open Complex Real MeasureTheory Filter Finset Asymptotics
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Zeta
 
 -- ═══════════════════════════════════════════
 -- §1. Convenience lemmas
@@ -85,4 +85,4 @@ theorem dirichlet_series_summable_of_growth
     LSeriesSummable f s :=
   LSeriesSummable_of_sum_norm_bigO hO hr hs
 
-end Cathedral.White.Infrastructure
+end Cathedral.Zeta

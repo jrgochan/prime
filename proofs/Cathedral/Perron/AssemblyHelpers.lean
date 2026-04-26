@@ -24,7 +24,7 @@ noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1. Truncated Perron Formula
@@ -286,7 +286,7 @@ lemma perron_vertical_sigma0_bound (hRH : RiemannHypothesis)
     have : ε₀ ≤ (sigma0 - 1/2) / 2 :=
       div_le_div_of_nonneg_right (le_trans (min_le_left _ _) (min_le_right _ _)) (by norm_num)
     linarith
-  obtain ⟨C, hC_pos, T₀, hT₀_pos, hzeta_bound⟩ := inv_zeta_bound_under_rh hRH ε₀ hε₀_pos
+  obtain ⟨C, hC_pos, T₀, hT₀_pos, hzeta_bound⟩ := Cathedral.Zeta.inv_zeta_bound_under_rh hRH ε₀ hε₀_pos
   obtain ⟨g_min, hg_min_pos, hg_ge_min⟩ :=
     perron_denom_compact_min hRH sigma0 hsigma0 hsigma0_ne T₀ hT₀_pos
   -- Constants
@@ -352,4 +352,4 @@ lemma perron_vertical_sigma0_bound (hRH : RiemannHypothesis)
     linarith
   exact le_trans h_pfx h_final
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

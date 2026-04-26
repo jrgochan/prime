@@ -16,7 +16,7 @@ used by both the `y < 1` and `y > 1` cases of the Perron kernel.
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §4. Exponential Decay Integral
@@ -69,4 +69,4 @@ lemma integral_rpow_le_of_gt_one {y c R : ℝ} (hy : 1 < y) (_hR : 0 ≤ R) :
   have : 0 ≤ y ^ (-R) := rpow_nonneg hy_pos.le (-R)
   exact div_le_div_of_nonneg_right (by linarith) hlog_pos.le
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

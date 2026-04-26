@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaConvexity.lean
+  Cathedral/Zeta/ZetaConvexity.lean
 
   ## Conditional Bounds on the Riemann Zeta Function
 
@@ -17,20 +17,20 @@
     * `riemannZeta_ne_zero_of_one_le_re` — ζ(s) ≠ 0 for Re(s) ≥ 1
   - PROVED HERE: Application to 1/ζ(s) under RH.
 
-  ### Dependencies: Mathlib + ZetaLowerBound.
+  ### Dependencies: Mathlib + Cathedral.Zeta.LowerBound.
 -/
 
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.Nonvanishing
 import Mathlib.Analysis.Complex.PhragmenLindelof
 import Mathlib.Analysis.Normed.Operator.Asymptotics
-import Cathedral.White.Infrastructure.ZetaLowerBound
+import Cathedral.Zeta.LowerBound
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Zeta
 
 -- ═══════════════════════════════════════════
 -- §1. RH Implies Zero-Free Region
@@ -86,7 +86,7 @@ theorem inv_zeta_differentiableAt (hRH : RiemannHypothesis)
     Re(s) ≥ 1/2 + ε and |Im(s)| ≥ T₀:
       |ζ(s)| ≥ c / |Im(s)|^A
 
-    **NOW PROVED** (with 1 sorry) in ZetaLowerBound.lean via
+    **NOW PROVED** (with 1 sorry) in Cathedral.Zeta.LowerBound.lean via
     Borel-Carathéodory + ε-rescaling. The sorry covers only the
     thin strip 1/2+ε ≤ Re(s) < 1/2+ε' when A < B_ε. -/
 theorem zeta_polynomial_lower_bound_rh (hRH : RiemannHypothesis)
@@ -94,7 +94,7 @@ theorem zeta_polynomial_lower_bound_rh (hRH : RiemannHypothesis)
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
       (1/2 + ε ≤ s.re) → (T₀ ≤ |s.im|) →
       c / |s.im| ^ A ≤ ‖riemannZeta s‖ :=
-  ZetaLowerBound.zeta_polynomial_lower_bound_rh_proved hRH ε hε A hA
+  Cathedral.Zeta.LowerBound.zeta_polynomial_lower_bound_rh_proved hRH ε hε A hA
 
 -- ═══════════════════════════════════════════
 -- §4. Conditional Lindelöf Bound (PROVED)
@@ -341,4 +341,4 @@ theorem perron_horizontal_contour_vanishes (x c σ₀ : ℝ) (hx : 1 < x) (_hc :
           ring
   · exact h_decay
 
-end Cathedral.White.Infrastructure
+end Cathedral.Zeta

@@ -28,14 +28,14 @@
 
 import Cathedral.Perron.DirichletPoly
 import Cathedral.Perron.KernelBound
-import Cathedral.White.Infrastructure.DirichletZetaInverse
-import Cathedral.White.Infrastructure.SummabilityHelpers
+import Cathedral.Zeta.DirichletInverse
+import Cathedral.Perron.SummabilityHelpers
 
 noncomputable section
-open Complex Real MeasureTheory Set Filter ArithmeticFunction Finset
+open Complex Real MeasureTheory Set Filter ArithmeticFunction Finset Cathedral.Zeta
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta Topology
 
-namespace Cathedral.White.Infrastructure.HalfIntegerPerron
+namespace Cathedral.Perron.HalfIntegerPerron
 
 -- ═══════════════════════════════════════════
 -- §0. Foundational Log Bounds (reusable)
@@ -292,7 +292,7 @@ lemma perron_formula_error_bound_full (m : ℕ) (hm : 2 ≤ m) (c T : ℝ) (N : 
         have h_mu_le : ‖(↑(μ n) : ℂ)‖ ≤ 1 := by
           rw [Complex.norm_intCast]; exact_mod_cast abs_moebius_le_one
         -- perron_kernel_bound gives the per-term error
-        have h_kern := Cathedral.White.Infrastructure.perron_kernel_bound (X / ↑n) c T
+        have h_kern := Cathedral.Perron.perron_kernel_bound (X / ↑n) c T
           (h_pos n hn1) (h_ne_one n hn1) hc hT
         calc ‖(↑(μ n) : ℂ)‖ * ‖perronIntegral (X / ↑n) c T -
               (if 1 < X / ↑n then 1 else 0)‖
@@ -319,7 +319,7 @@ lemma perron_log_sum_bound (c : ℝ) (hc : 1 < c) :
       let X : ℝ := (m : ℝ) + 1/2
       ∑ n ∈ Finset.Icc 1 N,
         (X / ↑n) ^ c / |Real.log (X / ↑n)| ≤ C_sum * X ^ (c + 1) := by
-  open Cathedral.White.Infrastructure.SummabilityHelpers in
+  open Cathedral.Perron.SummabilityHelpers in
   -- Use pre-proved lemmas from SummabilityHelpers
   set ζc := ∑' n : ℕ, ((n : ℝ) ^ c)⁻¹
   have hζc_pos : 0 < ζc := rpow_inv_tsum_pos hc
@@ -383,7 +383,7 @@ lemma dirichlet_tail_integral_bound (c : ℝ) (hc : 1 < c) :
   refine ⟨2 / (c * (c - 1)), div_pos two_pos (mul_pos (by linarith) (by linarith)),
     fun X T hX hT N hN => ?_⟩
   -- Step 1: Absorb 1/(2π) factor: ‖(1/(2π)) · z‖ ≤ ‖z‖
-  have h_pfx := Cathedral.White.Infrastructure.norm_one_div_two_pi_mul_le
+  have h_pfx := Cathedral.Perron.norm_one_div_two_pi_mul_le
     (∫ t in (-T)..T,
       (∑ n ∈ Finset.Icc 1 N,
         (↑(ArithmeticFunction.moebius n) : ℂ) /
@@ -414,7 +414,7 @@ lemma dirichlet_tail_integral_bound (c : ℝ) (hc : 1 < c) :
     -- ‖f · g‖ = ‖f‖ · ‖g‖
     rw [norm_mul]
     -- ‖f‖ ≤ N^{1-c}/(c-1) by moebius_partial_sum_approx
-    have h_tail := Cathedral.White.Infrastructure.moebius_partial_sum_approx
+    have h_tail := Cathedral.Perron.moebius_partial_sum_approx
       N hN (↑c + ↑t * I) (by rw [h_re_eq]; exact hc)
     -- ‖g‖ = ‖X^s/s‖ = X^c/‖s‖ ≤ X^c/c
     have h_norm_g : ‖(X : ℂ) ^ (↑c + ↑t * I) / (↑c + ↑t * I)‖ ≤ X ^ c / c := by
@@ -536,7 +536,7 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   have h_sum := h_log_sum m hm N
   have h_kernel_bound : ‖∑ n ∈ Finset.Icc 1 N,
       (↑(ArithmeticFunction.moebius n) : ℂ) *
-        Cathedral.White.Infrastructure.perronIntegral (X / ↑n) c T -
+        Cathedral.Perron.perronIntegral (X / ↑n) c T -
       (↑(summatoryMoebius X : ℤ) : ℂ)‖ ≤
     C_sum / (Real.pi * T) * X ^ (c + 1) := by
     calc _ ≤ ∑ n ∈ Finset.Icc 1 N,
@@ -592,7 +592,7 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- Let A_N = ∑ μ(n)·P(X/n) and B = (1/(2π))∫ X^s/(sζ(s)) dt.
   set A_N := ∑ n ∈ Finset.Icc 1 N,
     (↑(ArithmeticFunction.moebius n) : ℂ) *
-      Cathedral.White.Infrastructure.perronIntegral (X / ↑n) c T
+      Cathedral.Perron.perronIntegral (X / ↑n) c T
   set B := (1 / (2 * ↑Real.pi)) *
     ∫ t in (-T)..T, (X : ℂ) ^ (↑c + ↑t * I) /
       ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))
@@ -607,7 +607,7 @@ theorem truncated_perron_half_integer (c : ℝ) (hc : 1 < c) :
   -- So A_N - B = (1/(2π))∫ [(∑μ(n)/n^s) - 1/ζ(s)]·X^s/s dt  [integral_sub]
   -- ‖A_N - B‖ ≤ C_tail · N^{1-c} · X^c · T ≤ X^{c+1}/T  [§4 + h_tail_crushed]
   have h_AN_B : ‖A_N - B‖ ≤ X ^ (c + 1) / T := by
-    have h_swap := Cathedral.White.Infrastructure.finite_sum_integral_swap
+    have h_swap := Cathedral.Perron.finite_sum_integral_swap
       (fun n => ↑(ArithmeticFunction.moebius n)) X c T (Finset.Icc 1 N) hc_pos hT_pos hX_gt1
 
     have h_int_B : IntervalIntegrable (fun t : ℝ => (X : ℂ) ^ (↑c + ↑t * I) / ((↑c + ↑t * I) * riemannZeta (↑c + ↑t * I))) volume (-T) T :=
@@ -750,4 +750,4 @@ lemma summatoryMoebius_eq_half_integer (x : ℝ) (hx : 2 ≤ x) :
   have hcast : (↑⌊x⌋ : ℝ) = (⌊x⌋₊ : ℝ) := (natCast_floor_eq_intCast_floor hx_nn).symm
   rw [hcast, this]
 
-end Cathedral.White.Infrastructure.HalfIntegerPerron
+end Cathedral.Perron.HalfIntegerPerron

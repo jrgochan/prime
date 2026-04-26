@@ -1,5 +1,5 @@
 import Cathedral.Perron.Defs
-import Cathedral.White.Infrastructure.DirichletZetaInverse
+import Cathedral.Zeta.DirichletInverse
 import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SumIntegralComparisons
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
@@ -21,10 +21,10 @@ tail bounds via the integral test.
 -/
 
 noncomputable section
-open Complex Real MeasureTheory Set Filter ArithmeticFunction
+open Complex Real MeasureTheory Set Filter ArithmeticFunction Cathedral.Zeta
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- Dirichlet Polynomial Infrastructure
@@ -243,4 +243,4 @@ lemma moebius_partial_sum_approx (N : ℕ) (hN : 0 < N) (s : ℂ) (_hs : 1 < s.r
     ((h_norm_summ.tsum_le_tsum h_pw h_rpow_summ).trans
       (rpow_tail_bound N hN s.re _hs))
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

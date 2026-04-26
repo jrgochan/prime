@@ -15,18 +15,18 @@
   5. `rpow_integral_bound` — ∫_{a}^{b} t^{α-1} dt ≤ b^α / α
 
   ### Dependencies:
-  - ZetaConvexity.lean: rh_zeta_ne_zero, inv_zeta_bound_under_rh
+  - ZetaConvexity.lean: Cathedral.Zeta.rh_zeta_ne_zero, Cathedral.Zeta.inv_zeta_bound_under_rh
   - Defs.lean: norm_one_div_two_pi_le
 -/
 
 import Cathedral.Perron.Defs
-import Cathedral.White.Infrastructure.ZetaConvexity
+import Cathedral.Zeta.Convexity
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1. Denominator Positivity
@@ -45,7 +45,7 @@ lemma perron_integrand_denom_ne_zero (hRH : RiemannHypothesis)
       have := congr_arg Complex.re h
       simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re,
         Complex.I_re, Complex.I_im] at this; exact this
-    exact rh_zeta_ne_zero hRH (by simp; linarith) hs_ne_one
+    exact Cathedral.Zeta.rh_zeta_ne_zero hRH (by simp; linarith) hs_ne_one
 
 /-- The denominator norm is strictly positive. -/
 lemma perron_integrand_denom_pos (hRH : RiemannHypothesis)
@@ -211,4 +211,4 @@ lemma perron_denom_compact_min (hRH : RiemannHypothesis)
   exact ⟨g t_min, perron_integrand_denom_pos hRH σ hσ hσ_ne t_min,
          fun t ht => ht_min_val ht⟩
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

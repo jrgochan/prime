@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaTailBound.lean
+  Cathedral/Zeta/ZetaTailBound.lean
 
   ## Zeta Tail Bound via Dirichlet Series
 
@@ -33,7 +33,7 @@ set_option maxHeartbeats 800000
 noncomputable section
 open Complex Real Nat
 
-namespace Cathedral.White.Infrastructure.ZetaTailBound
+namespace Cathedral.Zeta.TailBound
 
 /-!
 # Zeta Tail Bound: `‖ζ(s) - 1‖ < 1` for `Re(s) ≥ 2`
@@ -120,4 +120,4 @@ theorem zeta_sub_one_norm_lt_one {s : ℂ} (hs : 2 ≤ s.re) :
   apply lt_of_le_of_lt (hsumm2.norm.tsum_le_tsum (fun n => norm_one_div_cpow_le hs n) hsumm_real)
   exact tsum_tail_inv_sq_lt_one
 
-end Cathedral.White.Infrastructure.ZetaTailBound
+end Cathedral.Zeta.TailBound

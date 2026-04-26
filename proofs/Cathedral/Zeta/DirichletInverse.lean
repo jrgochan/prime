@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/DirichletZetaInverse.lean
+  Cathedral/Zeta/DirichletZetaInverse.lean
 
   ## The Dirichlet Series for 1/ζ(s)
 
@@ -22,7 +22,7 @@ open Complex Real ArithmeticFunction BigOperators
 -- access notation
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Zeta
 
 -- ═══════════════════════════════════════════
 -- §1. L(μ, s) = 1/ζ(s) — PROVED ✅
@@ -100,4 +100,4 @@ lemma summatoryMoebius_le (x : ℝ) (hx : 0 < x) :
     The contour shift from Re(s) = c to Re(s) = 1/2 + ε then gives
     M(x) = O(x^{1/2+ε}) under RH. -/
 
-end Cathedral.White.Infrastructure
+end Cathedral.Zeta

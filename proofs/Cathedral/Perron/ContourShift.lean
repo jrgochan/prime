@@ -14,19 +14,19 @@
   Key Dependencies (all PROVED):
   - Perron/Formula.lean: perron_formula_error_bound
   - DirichletZetaInverse.lean: moebius_lseries_eq_inv_zeta
-  - ZetaConvexity.lean: inv_zeta_bound_under_rh,
-      perron_integrand_bound_with_zeta, perron_horizontal_contour_vanishes
+  - ZetaConvexity.lean: Cathedral.Zeta.inv_zeta_bound_under_rh,
+      Cathedral.Zeta.perron_integrand_bound_with_zeta, perron_horizontal_contour_vanishes
 -/
 
 import Cathedral.Perron.Formula
-import Cathedral.White.Infrastructure.DirichletZetaInverse
-import Cathedral.White.Infrastructure.ZetaConvexity
+import Cathedral.Zeta.DirichletInverse
+import Cathedral.Zeta.Convexity
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction
 open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta Topology
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1. Sub-lemmas for the Contour Shift
@@ -115,7 +115,7 @@ private lemma f_patch_continuousOn (hRH : RiemannHypothesis)
       | inr h => linarith [h.1]
     have hs_ne_zero : s ≠ 0 := by
       intro h; rw [h] at hs_re; simp at hs_re; linarith
-    have hζ_ne : riemannZeta s ≠ 0 := rh_zeta_ne_zero hRH hs_re h1
+    have hζ_ne : riemannZeta s ≠ 0 := Cathedral.Zeta.rh_zeta_ne_zero hRH hs_re h1
     have hsζ_ne : s * riemannZeta s ≠ 0 := mul_ne_zero hs_ne_zero hζ_ne
     -- x^s/(s·ζ(s)) is ContinuousAt s (direct from component continuity)
     have h_cont : ContinuousAt (fun s => (x : ℂ) ^ s / (s * riemannZeta s)) s := by
@@ -135,7 +135,7 @@ private lemma f_patch_continuousOn (hRH : RiemannHypothesis)
 
 /-- **PROVED**: The integrand x^s/(s·ζ(s)) is DifferentiableAt for s ≠ 1
     with Re(s) > 1/2 under RH.
-    Uses: differentiableAt_riemannZeta (Mathlib), rh_zeta_ne_zero,
+    Uses: differentiableAt_riemannZeta (Mathlib), Cathedral.Zeta.rh_zeta_ne_zero,
     DifferentiableAt.cpow, .div, .mul. -/
 private lemma perron_moebius_integrand_diffAt (hRH : RiemannHypothesis)
     (x : ℝ) (hx : 1 < x) (s : ℂ) (hs_re : 1/2 < s.re) (hs_ne : s ≠ 1) :
@@ -143,7 +143,7 @@ private lemma perron_moebius_integrand_diffAt (hRH : RiemannHypothesis)
   have hx_pos : (0 : ℝ) < x := by linarith
   have hs_ne_zero : s ≠ 0 := by
     intro h; rw [h] at hs_re; simp at hs_re; linarith
-  have hζ_ne : riemannZeta s ≠ 0 := rh_zeta_ne_zero hRH hs_re hs_ne
+  have hζ_ne : riemannZeta s ≠ 0 := Cathedral.Zeta.rh_zeta_ne_zero hRH hs_re hs_ne
   have hsζ_ne : s * riemannZeta s ≠ 0 := mul_ne_zero hs_ne_zero hζ_ne
   exact DifferentiableAt.div
     (DifferentiableAt.const_cpow differentiableAt_id
@@ -241,7 +241,7 @@ private lemma perron_moebius_rect (hRH : RiemannHypothesis)
       · -- σ + t*I ≠ 0 since Re(s) = σ > 1/2 > 0
         intro h0; have := congr_arg Complex.re h0; simp at this; linarith
       · -- ζ(σ + t*I) ≠ 0 under RH
-        exact rh_zeta_ne_zero hRH (by simp; linarith) (hs_ne_one t)
+        exact Cathedral.Zeta.rh_zeta_ne_zero hRH (by simp; linarith) (hs_ne_one t)
   have h_int_c : IntervalIntegrable (fun t => f (↑c + ↑t * I)) volume (-T) T :=
     (h_cont_vert c (by linarith) (by linarith)).intervalIntegrable
   have h_int_s : IntervalIntegrable (fun t => f (↑sigma0 + ↑t * I)) volume (-T) T :=
@@ -340,7 +340,7 @@ private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
 
 -- NOTE: perron_horiz_neg_eq_pos (horizontal symmetry via Schwarz) was deleted here.
 -- The contour shift now bounds both horizontal integrals independently
--- using perron_integrand_bound_with_zeta (which works for both +T and -T),
+-- using Cathedral.Zeta.perron_integrand_bound_with_zeta (which works for both +T and -T),
 -- completely bypassing the need for Schwarz reflection.
 
 
@@ -364,7 +364,7 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
   have hε₀_le_half : ε₀ ≤ 1/2 := min_le_right _ _
   have h_half_plus_ε₀ : 1/2 + ε₀ ≤ sigma0 := by
     have : ε₀ ≤ sigma0 - 1/2 := min_le_left _ _; linarith
-  obtain ⟨C, hC_pos, T₀, hT₀_pos, hzeta_bound⟩ := inv_zeta_bound_under_rh hRH ε₀ hε₀_pos
+  obtain ⟨C, hC_pos, T₀, hT₀_pos, hzeta_bound⟩ := Cathedral.Zeta.inv_zeta_bound_under_rh hRH ε₀ hε₀_pos
 
   -- K₁ is purely absolute, depending only on c, σ₀, and C (NOT on x!)
   set K₁ := 2 * (c - sigma0) * C + 1
@@ -392,7 +392,7 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
           ‖(x : ℂ)^(↑σ + ↑(-T) * I) / ((↑σ + ↑(-T) * I) * riemannZeta (↑σ + ↑(-T) * I))‖) :=
       h_rect
     _ ≤ K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := by
-      have h_bound_top := perron_integrand_bound_with_zeta x c sigma0 C T₀
+      have h_bound_top := Cathedral.Zeta.perron_integrand_bound_with_zeta x c sigma0 C T₀
         hx hsigma0 hsigma0_c hC_pos hT₀_pos ε₀ hε₀_pos h_half_plus_ε₀ hzeta_bound
       have h_pw_top := h_bound_top T h_large
       -- Top horizontal bound
@@ -427,7 +427,7 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
                 have hσ_ge : sigma0 ≤ σ := by
                   have := Set.uIoc_subset_uIcc hσ_mem
                   rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at this; exact this.1
-                exact rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
+                exact Cathedral.Zeta.rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
           · apply (ae_restrict_mem measurableSet_uIoc).mono
             intro σ hσ; simp only [Real.norm_of_nonneg (norm_nonneg _)]
             exact h_pw_top σ (Set.uIoc_subset_uIcc hσ)
@@ -488,7 +488,7 @@ theorem perron_moebius_contour_shift (hRH : RiemannHypothesis)
                 simp [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re, Complex.I_re, Complex.I_im] at this; linarith
               · have hre : (↑σ + ↑(-T) * I : ℂ).re = σ := by simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im, Complex.ofReal_im]
                 have hσ_ge : sigma0 ≤ σ := by have := Set.uIoc_subset_uIcc hσ_mem; rw [Set.uIcc_of_le (le_of_lt hsigma0_c)] at this; exact this.1
-                exact rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
+                exact Cathedral.Zeta.rh_zeta_ne_zero hRH (by rw [hre]; linarith) (hs_ne σ)
           · apply (ae_restrict_mem measurableSet_uIoc).mono
             intro σ hσ; simp only [Real.norm_of_nonneg (norm_nonneg _)]
             exact h_pw_bot σ (Set.uIoc_subset_uIcc hσ)
@@ -553,4 +553,4 @@ theorem perron_moebius_contour_shift_factored (hRH : RiemannHypothesis)
     _ = ‖∫ t in (-T)..T, _‖ := one_mul _
     _ ≤ K₁ * x ^ c * T ^ (-((1 : ℝ)/2)) := h2
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

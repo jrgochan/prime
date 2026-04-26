@@ -16,7 +16,7 @@ into the unified Perron kernel theorem: for `y > 0`, `y ≠ 1`,
 noncomputable section
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §8. The Unified Perron Kernel Bound
@@ -39,4 +39,4 @@ theorem perron_kernel_bound (y c T : ℝ) (hy : 0 < y) (hy_ne : y ≠ 1)
     simp only [sub_zero]
     exact perron_kernel_lt_one y c T hy hlt hc hT
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron

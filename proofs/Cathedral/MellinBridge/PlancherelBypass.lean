@@ -34,7 +34,7 @@ import Cathedral.MellinBridge.BDWeights
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.White.Kinematics
 import Cathedral.White.Scattering
-import Cathedral.White.Infrastructure.MontgomeryVaughan
+import Cathedral.Analysis.MontgomeryVaughan
 import Mathlib.Analysis.Fourier.Inversion
 
 noncomputable section
@@ -139,7 +139,7 @@ theorem critical_line_mellin_bound
   have h_parseval := parseval_bridge N (bdMoebiusWeight N)
   -- Step 2: Apply the direct L² bound (bd_gram_form_decay)
   obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
-    Cathedral.White.Infrastructure.bd_gram_form_decay C_m hC
+    Cathedral.Analysis.bd_gram_form_decay C_m hC
       (fun x hx => hMertens x hx) N hN
   exact ⟨C_l2, hC_l2_pos, by rw [← h_parseval]; exact h_bound⟩
 
@@ -162,7 +162,7 @@ theorem l2_from_pointwise_bound_derived
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := rfl
   -- Get the existential L² bound
   obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
-    Cathedral.White.Infrastructure.bd_gram_form_decay C_m hC
+    Cathedral.Analysis.bd_gram_form_decay C_m hC
       (fun x hx => hMertens x hx) N hN
   exact ⟨C_l2, hC_l2_pos, h_rewrite ▸ h_bound⟩
 
@@ -194,6 +194,6 @@ end
 --   v4: 0 problem-specific axioms! (critical_line_mellin_bound PROVED via
 --        Parseval reverse bypass from bd_gram_form_decay)
 --        11 proved theorems, all wired through bd_gram_form_decay in
---        Cathedral.White.Infrastructure.MontgomeryVaughan
+--        Cathedral.Analysis.MontgomeryVaughan
 
 

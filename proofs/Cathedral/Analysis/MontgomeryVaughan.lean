@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/MontgomeryVaughan.lean
+  Cathedral/Analysis/MontgomeryVaughan.lean
 
   ## Mean Value Theorems for Dirichlet Polynomials
 
@@ -27,7 +27,7 @@ import Cathedral.Assembly.PNTAbelMean
 noncomputable section
 open Complex Real MeasureTheory Finset BigOperators
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Analysis
 
 -- ═══════════════════════════════════════════
 -- §1. Mean Value Theorem for Dirichlet Polynomials
@@ -114,4 +114,4 @@ theorem bd_gram_form_decay
     mertens_implies_l2_decay C_m hC hMertens pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
   exact ⟨C_l2, hC_l2_pos, h_eq ▸ h_bound N hN⟩
 
-end Cathedral.White.Infrastructure
+end Cathedral.Analysis

@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/DirichletTest.lean
+  Cathedral/Analysis/DirichletTest.lean
 
   ## THE DIRICHLET TEST FOR SERIES CONVERGENCE
 
@@ -27,7 +27,7 @@ import Mathlib.Analysis.SpecificLimits.Basic
 noncomputable section
 open Filter Finset
 
-namespace Cathedral.White.Infrastructure.DirichletTest
+namespace Cathedral.Analysis.DirichletTest
 
 -- ════════════════════════════════════════════════
 -- §1. ABEL SUMMATION (from Archive, zero sorry)
@@ -263,5 +263,5 @@ theorem dirichlet_test (a b : ℕ → ℝ) (C : ℝ)
 --   Cauchy sequence (via sdiff bounds) → convergent (ℝ complete) →
 --   Dirichlet test (Abel + bounded×zero + convergent sum)
 
-end Cathedral.White.Infrastructure.DirichletTest
+end Cathedral.Analysis.DirichletTest
 

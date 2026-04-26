@@ -156,11 +156,11 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.GramFormProof,
     `Cathedral.Assembly.CovarianceDirect,
     `Cathedral.Assembly.DotProductBound34,
-    -- White Singlet (Phase I: Axiom elimination)
+    -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
-    -- White Singlet Infrastructure (Mathlib-ready scaffolds)
-    `Cathedral.White.Infrastructure.MontgomeryVaughan,
+    -- Analysis (general analytic tools)
+    `Cathedral.Analysis.MontgomeryVaughan,
     -- Perron formula (modular split, zero sorry)
     `Cathedral.Perron.Defs,
     `Cathedral.Perron.IntegralBounds,
@@ -172,32 +172,32 @@ lean_lib «Cathedral» where
     -- Perron-Möbius chain: M(x) = O(x^{1/2+ε}) under RH
     `Cathedral.Perron.ContourShift,
     `Cathedral.Perron.DirichletPoly,
-    `Cathedral.White.Infrastructure.SummabilityHelpers,
+    `Cathedral.Perron.SummabilityHelpers,
     `Cathedral.Perron.HalfIntegerPerron,
     `Cathedral.Perron.VerticalBounds,
     `Cathedral.Perron.AssemblyHelpers,
     `Cathedral.Perron.PerronMoebius,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
-    `Cathedral.White.Infrastructure.DirichletZetaInverse,
+    `Cathedral.Zeta.DirichletInverse,
     -- Conditional Lindelöf bound + horizontal contour vanishing (2 sorry)
-    `Cathedral.White.Infrastructure.ZetaConvexity,
+    `Cathedral.Zeta.Convexity,
     -- Gamma function norm bounds (PROVED, zero sorry)
-    `Cathedral.White.Infrastructure.GammaBound,
+    `Cathedral.Analysis.GammaBound,
     -- Zeta convexity bound (WIP)
-    `Cathedral.White.Infrastructure.ZetaConvexityBound,
+    `Cathedral.Zeta.ConvexityBound,
     -- Zeta disk geometry & upper bounds (zero sorry)
-    `Cathedral.White.Infrastructure.ZetaDiskBounds,
+    `Cathedral.Zeta.DiskBounds,
     -- Zeta tail bound: ‖ζ(s)-1‖ < 1 for Re(s) ≥ 2 (PROVED, zero sorry)
-    `Cathedral.White.Infrastructure.ZetaTailBound,
+    `Cathedral.Zeta.TailBound,
     -- Hadamard three-circles + zero-counting axiom (thin-strip infrastructure)
-    `Cathedral.White.Infrastructure.ZetaHadamard,
+    `Cathedral.Zeta.Hadamard,
     -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
-    `Cathedral.White.Infrastructure.ZetaLowerBound,
+    `Cathedral.Zeta.LowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
-    `Cathedral.White.Infrastructure.HilbertInequality,
+    `Cathedral.Analysis.HilbertInequality,
     -- Dirichlet test for series convergence (PROVED, zero sorry, zero axiom)
-    `Cathedral.White.Infrastructure.DirichletTest,
-    `Cathedral.White.Infrastructure.CenteredFractBound,
+    `Cathedral.Analysis.DirichletTest,
+    `Cathedral.Analysis.CenteredFractBound,
     -- Partial sum convergence (Vasyunin integral decomposition)
     `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
     -- Integral = S_combined evaluative plumbing (building)

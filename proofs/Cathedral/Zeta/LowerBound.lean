@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaLowerBound.lean
+  Cathedral/Zeta/ZetaLowerBound.lean
 
   ## Polynomial Lower Bound on |ζ(s)| via Borel-Carathéodory
 
@@ -21,15 +21,15 @@
 
 import Mathlib.Analysis.Complex.BorelCaratheodory
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
-import Cathedral.White.Infrastructure.ZetaDiskBounds
-import Cathedral.White.Infrastructure.ZetaHadamard
+import Cathedral.Zeta.DiskBounds
+import Cathedral.Zeta.Hadamard
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure.ZetaLowerBound
-open Cathedral.White.Infrastructure.ZetaDiskBounds
+namespace Cathedral.Zeta.LowerBound
+open Cathedral.Zeta.DiskBounds
 
 -- ═══════════════════════════════════════════
 -- §1. Sub-lemmas for the BC Assembly
@@ -260,9 +260,9 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     The BC inner bound (bc_inner_bound) is ZERO SORRY.
     The existential wrapper case-splits on A vs B_ε:
     - A ≥ B_ε (= 20(3-2ε)/ε): FULLY PROVED (zero sorry)
-    - A < B_ε: delegated to ZetaHadamard.thin_strip_lower_bound_exists,
+    - A < B_ε: delegated to Cathedral.Zeta.Hadamard.thin_strip_lower_bound_exists,
       which uses the zero-counting axiom (Hadamard product + N(T) = O(T log T)).
-      ZERO SORRY in this file — axiom is in ZetaHadamard.lean. -/
+      ZERO SORRY in this file — axiom is in Cathedral.Zeta.Hadamard.lean. -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
@@ -429,7 +429,7 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
       -- The BC inner bound gives exponent B_ε > A, which is too large
       -- for the thin strip 1/2+ε ≤ Re(s) < 1/2+ε'. The resolution uses
       -- the Hadamard product + zero density estimate (axiomatized in
-      -- ZetaHadamard.lean as rh_zeta_lower_bound_from_zero_counting).
+      -- Cathedral.Zeta.Hadamard.lean as rh_zeta_lower_bound_from_zero_counting).
       --
       -- This axiom captures the well-known result (Titchmarsh §14.2):
       --   Under RH, |ζ(σ+it)| ≥ c/|t|^A for any A > 0.
@@ -440,6 +440,6 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
       -- 550K samples) confirms effective exponents ≈ 0.03-0.08.
       simp only [not_le] at hAB
       -- Direct delegation to the zero-counting axiom
-      exact ZetaHadamard.thin_strip_lower_bound_exists hRH ε hε hε1 A hA
+      exact Cathedral.Zeta.Hadamard.thin_strip_lower_bound_exists hRH ε hε hε1 A hA
 
-end Cathedral.White.Infrastructure.ZetaLowerBound
+end Cathedral.Zeta.LowerBound

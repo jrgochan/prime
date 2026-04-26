@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/ZetaConvexityBound.lean
+  Cathedral/Zeta/ZetaConvexityBound.lean
 
   ## Convexity Bound for |ζ(s)| in the Critical Strip
 
@@ -35,7 +35,7 @@ noncomputable section
 open Complex Real Filter MeasureTheory Set
 open scoped Topology
 
-namespace Cathedral.White.Infrastructure.ZetaConvexityBound
+namespace Cathedral.Zeta.ConvexityBound
 
 -- ════════════════════════════════════════════════════
 -- §1. Arithmetic lemma
@@ -219,4 +219,4 @@ theorem zeta_norm_convexity_bound {s : ℂ}
     _ = (2 + |s.im|) ^ (2 : ℝ) := by
         rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, rpow_natCast]
 
-end Cathedral.White.Infrastructure.ZetaConvexityBound
+end Cathedral.Zeta.ConvexityBound

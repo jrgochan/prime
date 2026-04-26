@@ -28,7 +28,7 @@ noncomputable section
 set_option linter.unusedSimpArgs false
 open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 
-namespace Cathedral.White.Infrastructure
+namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §6. The Perron Kernel for y > 1 (Residue = 1)
@@ -561,4 +561,4 @@ theorem perron_kernel_gt_one (y c T : ℝ) (hy : 1 < y) (hc : 0 < c) (hT : 0 < T
   -- But δ = ‖P - 1‖ - target, contradiction
   linarith
 
-end Cathedral.White.Infrastructure
+end Cathedral.Perron
