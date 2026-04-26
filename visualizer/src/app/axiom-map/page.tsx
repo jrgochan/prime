@@ -10,73 +10,83 @@ interface Axiom {
   math: string;
   desc: string;
   ref: string;
-  tier: 1 | 2 | 3;
+  tier: 1 | 2 | 3 | 4;
+  file: string;
   onCrown: boolean;
 }
 
 const CROWN_AXIOMS: Axiom[] = [
   {
-    name: "rh_implies_mertens_bound",
-    math: "RH → |M(x)| = O(x^{1/2} log²x)",
-    desc: "The sole RH-content axiom. If the Riemann Hypothesis holds, the Mertens function M(x) = Σμ(n) grows no faster than x^{1/2}·(log x)². The weaker O(x^{3/4}) bound is now a proved theorem. This is the mathematical heart of the forward direction.",
-    ref: "Titchmarsh 1986, Theorem 14.25",
-    tier: 1,
-    onCrown: true,
-  },
-  {
-    name: "pnt_mu_div_k",
-    math: "Σ μ(k)/k → 0",
-    desc: "The first Möbius sum converges to zero. This is equivalent to the Prime Number Theorem — unconditionally true, proved by de la Vallée-Poussin in 1896.",
-    ref: "Selberg 1949, de la Vallée-Poussin 1896",
-    tier: 2,
-    onCrown: true,
-  },
-  {
     name: "pnt_mu_log_div_k",
-    math: "Σ μ(k)log(k)/k → -1",
-    desc: "The logarithmically weighted Möbius sum. Controls the first-order correction in the log-cutoff witness. Unconditionally true — a deeper consequence of PNT.",
-    ref: "Selberg 1949",
+    math: "\u03A3 \u03BC(k)\u00B7log(k)/k \u2192 \u22121",
+    desc: "The logarithmically weighted M\u00F6bius sum converges to \u22121. This is a derivative-level consequence of the Prime Number Theorem \u2014 unconditionally true. Controls the first-order correction in the log-cutoff witness. Awaits a forward Tauberian theorem (Wiener\u2013Ikehara) in Lean.",
+    ref: "Selberg 1949, Wiener-Ikehara",
+    tier: 1,
+    file: "PNT/AbelMean.lean",
+    onCrown: true,
+  },
+  {
+    name: "covariance_bound_from_mertens_34",
+    math: "|M(x)| \u2264 Cx\u00BE \u27F9 v\u1D40Cv \u2264 C/log N",
+    desc: "The bilinear covariance bound: under the Mertens x\u00BE hypothesis, the centered Gram quadratic form v\u1D40(G\u2212bb\u1D40)v = O(1/log N). Infrastructure in place (s\u2081_decay, s\u2082_decay, s\u2083_uniform_bound proved). Needs direct Abel summation on the double sum.",
+    ref: "Abel summation, partial summation",
     tier: 2,
+    file: "Covariance/GramFormProof.lean",
     onCrown: true,
   },
   {
-    name: "pnt_mu_log_sq_div_k",
-    math: "Σ μ(k)log²(k)/k → -2γ",
-    desc: "The squared-log Möbius sum relates to the Euler-Mascheroni constant γ. Controls second-order asymptotics. Unconditionally true.",
-    ref: "Selberg 1949, Euler 1740",
-    tier: 2,
-    onCrown: true,
-  },
-  {
-    name: "abel_mertens_tail_raw",
-    math: "Abel summation tail bounds",
-    desc: "Bounds on the tail of Abel summation applied to the Mertens function. This is the engine that converts pointwise Mertens bounds into L² integral bounds on the witness function.",
-    ref: "Abel 1826",
+    name: "partial_integral_tends_to_formula",
+    math: "\u222B\u2080\u00B9 {1/(jx)}{1/(kx)} dx = Vasyunin formula",
+    desc: "The piecewise integral of fractional parts converges to the Vasyunin cotangent formula for off-diagonal Gram entries. Diagonal case (j=k) is fully proved. Off-diagonal requires Gauss digamma formula and dominated convergence. Blueprint exists in Archive/DiscreteMirage/.",
+    ref: "Vasyunin 1996, B\u00E1ez-Duarte 2005",
     tier: 3,
+    file: "Vasyunin/Cotangent/ConvergenceAxioms.lean",
     onCrown: true,
   },
   {
-    name: "millennium_covariance_cancellation",
-    math: "2D covariance bound → 0",
-    desc: "The deep covariance cancellation. The double sum ΣΣ v_j·v_k·(G_jk - b_j·b_k) vanishes as N→∞. This requires Parseval-level analysis in two dimensions.",
-    ref: "Plancherel 1910",
-    tier: 3,
-    onCrown: true,
-  },
-  {
-    name: "vasyunin_offdiag_integral",
-    math: "G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx  (j≠k)",
-    desc: "The off-diagonal Gram matrix entry equals the L² inner product integral. The diagonal case G(k,k) has been PROVED as a theorem (via Stirling + piecewise FTC, zero axioms). The off-diagonal identity for j≠k is numerically verified to 6–7 digits but requires the Gauss digamma formula for formalization.",
-    ref: "Vasyunin 1996, Báez-Duarte 2005",
-    tier: 3,
+    name: "rh_zeta_lower_bound_from_zero_counting",
+    math: "|\u03B6(s)| \u2265 c/|t|^A for Re(s) \u2265 \u00BD+\u03B5",
+    desc: "Under RH, the Riemann zeta function has a polynomial lower bound. Derived from the Hadamard product formula and Riemann-von Mangoldt zero-counting function N(T). Powers the Perron contour chain. Borel-Carath\u00E9odory is in Mathlib; the gap is connecting BC to the polynomial bound.",
+    ref: "Titchmarsh 1986, Hadamard product",
+    tier: 4,
+    file: "Zeta/Hadamard.lean",
     onCrown: true,
   },
 ];
 
 const NON_CROWN_GROUPS = [
   {
+    name: "Legacy / Graduated",
+    count: 8,
+    axioms: [
+      "gram_form_upper_bound",
+      "pnt_mu_log_sq_div_k",
+      "rh_implies_mertens_bound",
+      "abel_summation_covariance_bound",
+      "gauss_digamma_formula",
+      "bd_witness_l2_error_decay",
+      "dirichlet_polynomial_mean_value_bound",
+      "drop_formula_bound",
+    ],
+    desc: "Superseded by newer proof paths. Not on the crown theorem\u2019s dependency chain.",
+  },
+  {
+    name: "Resurrected (Isolated)",
+    count: 7,
+    axioms: [
+      "nyman_beurling_equivalence (BaezDuarte ns)",
+      "baez_duarte_covariance_divergence",
+      "schur_complement_lower",
+      "cross_norm_bound",
+      "mertens_squarefree_sum",
+      "mertens_tapered_sum",
+      "mertens_linear_tapered_sum",
+    ],
+    desc: "Sorry-free files resurrected from Archive. Self-contained, no import path to crown theorem.",
+  },
+  {
     name: "Spectral Engine",
-    count: 6,
+    count: 7,
     axioms: [
       "block_min_eq_class_min",
       "class_gap_strictly_larger",
@@ -84,6 +94,7 @@ const NON_CROWN_GROUPS = [
       "schur_bridge",
       "stable_ratio",
       "liouville_delocalization",
+      "oct_gap_lower_bound",
     ],
     desc: "Eigenvalue analysis via octonionic partition and class restriction.",
   },
@@ -96,21 +107,20 @@ const NON_CROWN_GROUPS = [
       "eigenvalue_implies_distance_bound",
       "moebius_uncoupling",
       "type_II_sieve_bound",
-      "vasyunin_large_gcd",
       "vaughan_decomposition",
+      "type_I_bound",
     ],
-    desc: "Bilinear sieve, Vaughan decomposition, and Möbius uncoupling.",
+    desc: "Bilinear sieve, Vaughan decomposition, and M\u00F6bius uncoupling.",
   },
   {
-    name: "Mellin Bridge",
-    count: 9,
+    name: "MellinBridge",
+    count: 8,
     axioms: [
-      "mertens_bound_from_rh",
-      "abel_summation_l2_bound",
-      "rh_implies_mertens_bound",
       "mellin_fourier_change",
       "fourier_inversion_autocorrelation",
       "gram_form_eq_l2_norm",
+      "mertens_bound_from_rh",
+      "abel_summation_l2_bound",
       "baezDuarte_is_L2",
       "baezDuarte_inner_one",
       "baezDuarte_inner_residual",
@@ -118,53 +128,60 @@ const NON_CROWN_GROUPS = [
     desc: "Mellin/Fourier transform infrastructure and orthogonal witnesses.",
   },
   {
-    name: "Cotangent Tower",
-    count: 4,
+    name: "Analysis & Computation",
+    count: 11,
     axioms: [
-      "gauss_digamma_formula",
-      "harmonicTileSum_reciprocity",
-      "telescope_limit_eq_vasyunin",
-      "vasyunin_integral_eq_formula",
+      "selbergMajorant (def)",
+      "selbergMajorant_ge_one_of_pos",
+      "selbergMajorant_le_neg_one_of_neg",
+      "selbergMajorant_integrable",
+      "selbergMajorant_integral",
+      "selbergMajorant_fourier_support",
+      "montgomery_vaughan_bound",
+      "vasyunin_large_gcd",
+      "oracle_lambda_min_positive_2000",
+      "oracle_witness_bound_100",
+      "oracle_witness_bound_1000",
     ],
-    desc: "Sub-axioms of the off-diagonal Vasyunin identity — Gauss digamma, Dedekind reciprocity, telescope limit.",
+    desc: "Selberg majorant (7), Vasyunin (1), certified oracle computations (3).",
   },
   {
-    name: "Other",
-    count: 10,
+    name: "Vasyunin Proof Chain",
+    count: 2,
     axioms: [
-      "oct_gap_lower_bound",
-      "type_I_bound",
-      "drop_formula_bound",
-      "abel_summation_covariance_bound",
-      "bd_witness_l2_error_decay",
-      "witness_covariance_decay",
       "witness_numerator_convergence",
-      "witness_l2_error_decay_gram",
-      "dirichlet_polynomial_mean_value_bound",
-      "bd_gram_form_decay",
+      "witness_covariance_decay",
     ],
-    desc: "Alternative proof paths, bypass engines, and witness constructions.",
+    desc: "Witness construction infrastructure for alternative proof paths.",
   },
 ];
 
-const TIER_COLORS = {
+const TIER_COLORS: Record<number, {
+  bg: string;
+  border: string;
+  text: string;
+  dot: string;
+  glow: string;
+  label: string;
+  sublabel: string;
+}> = {
   1: {
-    bg: "from-red-500/15 to-red-900/10",
-    border: "border-red-500/40",
-    text: "text-red-400",
-    dot: "bg-red-500",
-    glow: "shadow-red-500/20",
-    label: "Tier 1 — RH Content",
-    sublabel: "The only axiom that encodes actual RH information",
-  },
-  2: {
     bg: "from-blue-500/15 to-blue-900/10",
     border: "border-blue-500/40",
     text: "text-blue-400",
     dot: "bg-blue-500",
     glow: "shadow-blue-500/20",
-    label: "Tier 2 — Prime Number Theorem",
-    sublabel: "Unconditionally true (proved 1896), awaiting Lean formalization",
+    label: "Tier 1 \u2014 PNT",
+    sublabel: "Unconditionally true, awaiting Tauberian formalization",
+  },
+  2: {
+    bg: "from-amber-500/15 to-amber-900/10",
+    border: "border-amber-500/40",
+    text: "text-amber-400",
+    dot: "bg-amber-500",
+    glow: "shadow-amber-500/20",
+    label: "Tier 2 \u2014 Abel Summation",
+    sublabel: "Direct bilinear form computation",
   },
   3: {
     bg: "from-emerald-500/15 to-emerald-900/10",
@@ -172,8 +189,17 @@ const TIER_COLORS = {
     text: "text-emerald-400",
     dot: "bg-emerald-500",
     glow: "shadow-emerald-500/20",
-    label: "Tier 3 — Classical Analysis",
-    sublabel: "Well-known results in real/harmonic analysis",
+    label: "Tier 3 \u2014 Vasyunin Convergence",
+    sublabel: "Piecewise integral \u2192 cotangent formula",
+  },
+  4: {
+    bg: "from-red-500/15 to-red-900/10",
+    border: "border-red-500/40",
+    text: "text-red-400",
+    dot: "bg-red-500",
+    glow: "shadow-red-500/20",
+    label: "Tier 4 \u2014 Hadamard",
+    sublabel: "Zeta lower bound via zero-counting (conditional on RH)",
   },
 };
 
@@ -215,6 +241,9 @@ function AxiomCard({ axiom, index }: { axiom: Axiom; index: number }) {
           <div className="text-slate-300 text-sm mt-1 font-mono">
             {axiom.math}
           </div>
+          <div className="text-[10px] text-slate-600 font-mono mt-1">
+            {axiom.file}
+          </div>
         </div>
       </div>
 
@@ -232,7 +261,7 @@ function AxiomCard({ axiom, index }: { axiom: Axiom; index: number }) {
                 {axiom.desc}
               </p>
               <p className="text-[10px] text-slate-600 font-mono">
-                📚 {axiom.ref}
+                {"\uD83D\uDCDA"} {axiom.ref}
               </p>
             </div>
           </motion.div>
@@ -252,17 +281,17 @@ function ConverseBanner() {
     >
       <div className="flex items-center gap-4">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-          <span className="text-3xl">✅</span>
+          <span className="text-3xl">{"\u2705"}</span>
         </div>
         <div>
           <h3 className="text-lg font-bold text-emerald-400">
-            Converse Direction: d²_N → 0 ⟹ RH
+            Converse Direction: d\u00B2_N \u2192 0 \u27F9 RH
           </h3>
           <p className="text-sm text-slate-400 mt-1">
             <span className="text-emerald-400 font-bold text-lg">
               0 custom axioms
             </span>{" "}
-            — Pure Lean / Mathlib. The Rank-1 Mellin Miracle and contrapositive
+            &mdash; Pure Lean / Mathlib. The Rank-1 Mellin Miracle and contrapositive
             argument require no additional assumptions beyond the Lean kernel.
           </p>
           <p className="text-xs text-slate-600 mt-2 font-mono">
@@ -276,11 +305,12 @@ function ConverseBanner() {
 
 function NonCrownSection() {
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
+  const totalNonCrown = NON_CROWN_GROUPS.reduce((s, g) => s + g.count, 0);
 
   return (
     <div className="space-y-3">
       <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-        35 Supporting Axioms (not on crown path)
+        {totalNonCrown} Supporting Axioms (not on crown path)
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {NON_CROWN_GROUPS.map((group) => (
@@ -349,10 +379,10 @@ export default function AxiomMapPage() {
           href="/"
           className="text-xs text-slate-600 hover:text-slate-400 transition-colors"
         >
-          ← Back to Cathedral
+          &larr; Back to Cathedral
         </Link>
         <h1 className="text-3xl font-bold mt-3">
-          <span className="bg-gradient-to-r from-red-400 via-blue-400 to-emerald-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-blue-400 via-amber-400 to-red-400 bg-clip-text text-transparent">
             Axiom Architecture
           </span>
         </h1>
@@ -361,8 +391,8 @@ export default function AxiomMapPage() {
           <code className="text-amber-400/80">
             nyman_beurling_equivalence
           </code>{" "}
-          depends on exactly <strong className="text-white">7</strong>{" "}
-          mathematical axioms, organized into three tiers. The converse
+          depends on exactly <strong className="text-white">4</strong>{" "}
+          mathematical axioms, each in a different tier. The converse
           direction uses <strong className="text-emerald-400">zero</strong>{" "}
           custom axioms.
         </p>
@@ -376,32 +406,34 @@ export default function AxiomMapPage() {
         className="flex rounded-xl overflow-hidden h-10"
       >
         <div
-          className="bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center"
-          style={{ width: `${(1 / 7) * 100}%` }}
+          className="bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center"
+          style={{ width: "25%" }}
         >
-          <span className="text-[10px] font-bold text-white">RH</span>
+          <span className="text-[10px] font-bold text-white">PNT</span>
         </div>
         <div
-          className="bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center"
-          style={{ width: `${(3 / 7) * 100}%` }}
+          className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
+          style={{ width: "25%" }}
         >
-          <span className="text-[10px] font-bold text-white">
-            PNT (3)
-          </span>
+          <span className="text-[10px] font-bold text-white">Abel</span>
         </div>
         <div
           className="bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
-          style={{ width: `${(3 / 7) * 100}%` }}
+          style={{ width: "25%" }}
         >
-          <span className="text-[10px] font-bold text-white">
-            Classical (3)
-          </span>
+          <span className="text-[10px] font-bold text-white">Vasyunin</span>
+        </div>
+        <div
+          className="bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center"
+          style={{ width: "25%" }}
+        >
+          <span className="text-[10px] font-bold text-white">Hadamard</span>
         </div>
       </motion.div>
 
       {/* Tier legend */}
       <div className="flex flex-wrap gap-6 text-xs">
-        {([1, 2, 3] as const).map((t) => {
+        {([1, 2, 3, 4] as const).map((t) => {
           const tier = TIER_COLORS[t];
           return (
             <div key={t} className="flex items-center gap-2">
@@ -417,14 +449,14 @@ export default function AxiomMapPage() {
         })}
       </div>
 
-      {/* Forward direction: 7 axioms */}
+      {/* Forward direction: 4 axioms */}
       <div>
         <h2 className="text-lg font-bold text-slate-200 mb-1 flex items-center gap-2">
-          <span className="text-amber-400">▶</span>
-          Forward: RH ⟹ d²_N → 0
+          <span className="text-amber-400">{"\u25B6"}</span>
+          Forward: RH {"\u27F9"} d{"\u00B2"}_N {"\u2192"} 0
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Click any axiom to learn more. All 7 are on the crown path.
+          Click any axiom to learn more. All 4 are on the crown path.
         </p>
         <div className="space-y-3">
           {CROWN_AXIOMS.map((axiom, i) => (
@@ -436,8 +468,8 @@ export default function AxiomMapPage() {
       {/* Converse: 0 axioms */}
       <div>
         <h2 className="text-lg font-bold text-slate-200 mb-3 flex items-center gap-2">
-          <span className="text-emerald-400">◀</span>
-          Converse: d²_N → 0 ⟹ RH
+          <span className="text-emerald-400">{"\u25C0"}</span>
+          Converse: d{"\u00B2"}_N {"\u2192"} 0 {"\u27F9"} RH
         </h2>
         <ConverseBanner />
       </div>
@@ -452,8 +484,8 @@ export default function AxiomMapPage() {
         transition={{ delay: 1.3 }}
         className="text-center text-xs text-slate-600 pt-4 border-t border-slate-800"
       >
-        <code>#print axioms nyman_beurling_equivalence</code> — compiler
-        verified, April 20, 2026
+        <code>#print axioms nyman_beurling_equivalence</code> &mdash; compiler
+        verified, v11, April 26, 2026
       </motion.div>
     </div>
   );

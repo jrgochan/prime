@@ -17,9 +17,9 @@ const CARDS: CardInfo[] = [
     href: "/axiom-map",
     title: "Axiom Architecture",
     description:
-      "Interactive map of the 7 crown axioms organized by tier: 1 RH-content, 3 PNT, 3 classical analysis. Click to explore each axiom's role, mathematical statement, and references.",
-    icon: "🏛️",
-    stats: "7 crown · 42 total · 0 on converse",
+      "Interactive map of the 4 crown axioms organized by tier: 1 PNT, 1 Abel summation, 1 Vasyunin convergence, 1 Hadamard. Click to explore each axiom\u2019s role and mathematical statement.",
+    icon: "\u{1F3DB}\uFE0F",
+    stats: "4 crown \u00B7 53 total \u00B7 0 on converse",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
   },
@@ -28,8 +28,8 @@ const CARDS: CardInfo[] = [
     title: "Term Explorer",
     description:
       "Interactively explore the Vasyunin formula term by term. Toggle dimensions, inspect matrix entries, visualize the log cutoff witness, and walk the proof chain.",
-    icon: "🔬",
-    stats: "4 terms · live computation · interactive",
+    icon: "\uD83D\uDD2C",
+    stats: "4 terms \u00B7 live computation \u00B7 interactive",
     gradient: "from-violet-500/20 to-purple-500/20",
     border: "border-violet-500/20",
   },
@@ -38,18 +38,18 @@ const CARDS: CardInfo[] = [
     title: "Proof Dependency Tree",
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
-    icon: "🌳",
-    stats: "641 theorems · 42 axioms · 84 files · night-assault",
+    icon: "\uD83C\uDF33",
+    stats: "1,106 theorems \u00B7 53 axioms \u00B7 155 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
   {
     href: "/robin-lagarias",
-    title: "Robin–Lagarias Dashboard",
+    title: "Robin\u2013Lagarias Dashboard",
     description:
-      "The freshly-proved lagarias_for_primes theorem visualized: σ(p) vs the Lagarias bound for every prime, with the algebraic bypass and Taylor truncation.",
-    icon: "🏆",
-    stats: "PROVED · 0 sorry · milestone",
+      "The freshly-proved lagarias_for_primes theorem visualized: \u03C3(p) vs the Lagarias bound for every prime, with the algebraic bypass and Taylor truncation.",
+    icon: "\uD83C\uDFC6",
+    stats: "PROVED \u00B7 0 sorry \u00B7 milestone",
     gradient: "from-amber-500/20 to-orange-500/20",
     border: "border-amber-500/20",
   },
@@ -57,9 +57,9 @@ const CARDS: CardInfo[] = [
     href: "/gram-heatmap",
     title: "Gram Matrix Heatmap",
     description:
-      "Visualize the N×N Gram matrix of fractional part inner products. See the structure that makes the proof work.",
-    icon: "🔥",
-    stats: "N up to 80 · live computation",
+      "Visualize the N\u00D7N Gram matrix of fractional part inner products. See the structure that makes the proof work.",
+    icon: "\uD83D\uDD25",
+    stats: "N up to 80 \u00B7 live computation",
     gradient: "from-orange-500/20 to-red-500/20",
     border: "border-orange-500/20",
   },
@@ -67,9 +67,9 @@ const CARDS: CardInfo[] = [
     href: "/sawtooth",
     title: "Sawtooth Discovery",
     description:
-      "Watch the covariance stabilize instead of decaying — the moment formal verification caught a subtle error.",
-    icon: "📐",
-    stats: "C∞ ≈ 0.00227",
+      "Watch the covariance stabilize instead of decaying \u2014 the moment formal verification caught a subtle error.",
+    icon: "\uD83D\uDCD0",
+    stats: "C\u221E \u2248 0.00227",
     gradient: "from-blue-500/20 to-purple-500/20",
     border: "border-blue-500/20",
   },
@@ -77,9 +77,9 @@ const CARDS: CardInfo[] = [
     href: "/offdiag-margin",
     title: "Off-Diagonal Excess",
     description:
-      "The running sum of off-diagonal Gram excess vs the 3n bound — visualizing the structural margin in the Cathedral.",
-    icon: "📊",
-    stats: "18× margin at N=50",
+      "The running sum of off-diagonal Gram excess vs the 3n bound \u2014 visualizing the structural margin in the Cathedral.",
+    icon: "\uD83D\uDCCA",
+    stats: "18\u00D7 margin at N=50",
     gradient: "from-cyan-500/20 to-teal-500/20",
     border: "border-cyan-500/20",
   },
@@ -88,8 +88,8 @@ const CARDS: CardInfo[] = [
     title: "Fractional Part Waves",
     description:
       "Toggle sawtooth functions {k/x} and their products to see how Gram matrix entries arise from wave interference.",
-    icon: "🌊",
-    stats: "k = 1 to 8 · interactive",
+    icon: "\uD83C\uDF0A",
+    stats: "k = 1 to 8 \u00B7 interactive",
     gradient: "from-indigo-500/20 to-blue-500/20",
     border: "border-indigo-500/20",
   },
@@ -97,9 +97,9 @@ const CARDS: CardInfo[] = [
     href: "/hyperplane-trap",
     title: "The Hyperplane Trap",
     description:
-      "3D surface of the Mellin residual showing why spoofing weights cannot escape the Cauchy-Schwarz bound in the Báez-Duarte proof.",
-    icon: "🕳️",
-    stats: "3D · R3F interactive",
+      "3D surface of the Mellin residual showing why spoofing weights cannot escape the Cauchy-Schwarz bound in the B\u00E1ez-Duarte proof.",
+    icon: "\uD83D\uDD73\uFE0F",
+    stats: "3D \u00B7 R3F interactive",
     gradient: "from-red-500/20 to-pink-500/20",
     border: "border-red-500/20",
   },
@@ -107,9 +107,9 @@ const CARDS: CardInfo[] = [
     href: "/cathedral-3d",
     title: "Cathedral 3D",
     description:
-      "The proof architecture as a literal cathedral — two pillars (Converse, Forward) holding the golden roof of RH.",
-    icon: "⛪",
-    stats: "3D · auto-rotates",
+      "The proof architecture as a literal cathedral \u2014 two pillars (Converse, Forward) holding the golden roof of RH.",
+    icon: "\u26EA",
+    stats: "3D \u00B7 auto-rotates",
     gradient: "from-purple-500/20 to-indigo-500/20",
     border: "border-purple-500/20",
   },
@@ -125,25 +125,25 @@ interface RouteInfo {
 
 const ROUTES: RouteInfo[] = [
   {
-    label: "STEP 1 — PARSEVAL BRIDGE",
-    name: "L²(0,1) ↔ ∫|M̂(½+it)|² dt",
-    desc: "The Parseval Bridge (PROVED) decomposes the L² norm into a Mellin integral on the critical line via calculus axioms. Combined with the Mellin bound, this replaces the former opaque l2_from_pointwise_bound axiom.",
+    label: "PILLAR I \u2014 CONVERSE",
+    name: "d\u00B2_N \u2192 0 \u27F9 RH",
+    desc: "PURE MATHLIB: Zero custom axioms, zero sorry. The Rank-1 Mellin Miracle proves M[h\u2096](\u03C1) = 1/(k(\u03C1\u22121)) factorizes into rank-1 tensors, Cauchy-Schwarz separates off-critical zeros.",
+    color: "from-emerald-500/10 to-transparent",
+    borderColor: "border-emerald-500/20",
+  },
+  {
+    label: "PILLAR II \u2014 FORWARD",
+    name: "RH \u27F9 d\u00B2_N \u2192 0",
+    desc: "4 axioms, 0 sorry on crown path. The Perron Crown: RH \u2192 M(x) = O(x\u00B3\u2044\u2074) via 16-file Perron chain, then Gram form + dot product bounds give d\u00B2_N \u2264 C/log N \u2192 0.",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
   {
-    label: "STEP 2 — VARIATIONAL",
-    name: "Q(v) ≤ X_N → ∞ → d²→0",
-    desc: "Cauchy-Schwarz + Sherman-Morrison: the quadratic form X_N = bᵀC⁻¹b diverges, so d²_N = 1/(1+X_N) → 0. Abel summation + Mertens bound gives the L² decay.",
-    color: "from-blue-500/10 to-transparent",
-    borderColor: "border-blue-500/20",
-  },
-  {
-    label: "STEP 3 — ASSEMBLY",
-    name: "Crown: RH ↔ d²_N → 0",
-    desc: "Assembly layer chains both directions. The crown theorem nyman_beurling_equivalence lives here. 12 files, all on the critical path.",
-    color: "from-emerald-500/10 to-transparent",
-    borderColor: "border-emerald-500/20",
+    label: "CAPSTONE",
+    name: "RH \u27FA d\u00B2_N \u2192 0",
+    desc: "Assembly layer chains both directions via nyman_beurling_equivalence. The crown theorem is the \u27FA of the two pillars. 6 capstone files in Assembly/.",
+    color: "from-violet-500/10 to-transparent",
+    borderColor: "border-violet-500/20",
   },
 ];
 
@@ -163,18 +163,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          84 active files. 42 axioms — seven on the crown theorem&apos;s critical path.
+          155 active files. 53 axioms &mdash; four on the crown theorem&apos;s critical path.
           Zero custom axioms on the converse.
-          <span className="text-amber-400 text-sm ml-1">night-assault</span>
+          <span className="text-amber-400 text-sm ml-1">v11</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "84 active files" },
-            { color: "bg-red-500", text: "641 theorems" },
-            { color: "bg-amber-500", text: "42 axioms (7 on crown)" },
+            { color: "bg-emerald-500", text: "155 active files" },
+            { color: "bg-red-500", text: "1,106 theorems" },
+            { color: "bg-amber-500", text: "53 axioms (4 on crown)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "night-assault" },
+            { color: "bg-purple-500", text: "22 topic directories" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -184,9 +184,9 @@ export default function HomePage() {
         </div>
       </motion.div>
 
-      {/* Three Routes */}
+      {/* Two Pillars */}
       <h2 className="text-xl font-bold text-slate-200 mb-4">
-        The Vasyunin Path
+        The Two Pillars
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         {ROUTES.map((route, i) => (
@@ -215,61 +215,59 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.48 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/30"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🏛️</span>
-            <div>
-              <h3 className="text-sm font-bold text-violet-400">
-                THE GREAT AUDIT — 178 → 78 files (−56%)
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Deep audit identified 31 duplicate declarations, 9 ghost axioms (axioms already proved as theorems),
-                and 26 orphan files. 96 files archived. Every remaining file is on the critical path.
-                Active axioms: 56 → 39. Active sorries: 50 → 2 (off-path). April 18–19, 2026.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.5 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-600/5 to-transparent border border-orange-500/30"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🔥</span>
-            <div>
-              <h3 className="text-sm font-bold text-orange-400">
-                AXIOM ANNIHILATED — l2_from_pointwise_bound → THEOREM
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                The Parseval Bridge decomposes the opaque L² axiom into 4 transparent components.
-                parseval_bridge (PROVED) chains autocorr_eval_zero + fourier_inv_autocorr + mellin_fourier_scale
-                to establish L²(0,1) ↔ critical-line isometry. The Triangle Inequality Trap proves this bridge
-                is mathematically necessary — real-variable bounds destroy the cancellation 1−2+1=0. April 16–17, 2026.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.52 }}
+          transition={{ delay: 0.45 }}
           className="p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🏰</span>
+            <span className="text-2xl">{"\u{1F3DB}\uFE0F"}</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                Crown Theorem — 7 COMPILER-VERIFIED AXIOMS
+                v11 &mdash; MATHLIB-STYLE RESTRUCTURING (April 26, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                <code>#print axioms nyman_beurling_equivalence</code> — rh_implies_mertens_bound,
-                pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k, abel_mertens_tail_raw,
-                millennium_covariance_cancellation, vasyunin_offdiag_integral.
-                Converse: zero custom axioms (pure Mathlib).
+                Cathedral reorganized from role-based to topic-based directories.
+                Assembly 26 &rarr; 6 capstone files. White/Infrastructure/ dissolved into Perron/ (16), Zeta/ (8), Analysis/ (6).
+                5 sorry-free files resurrected from Archive. 22 topic directories, each mapping to a mathematical domain.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.48 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{"\u{1F451}"}</span>
+            <div>
+              <h3 className="text-sm font-bold text-emerald-400">
+                v10 &mdash; FOUR WALLS (April 25, 2026)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Crown theorem <code>nyman_beurling_equivalence</code> verified by <code>#print axioms</code>:
+                exactly 4 non-kernel axioms. <code>gram_form_upper_bound_34</code> graduated via variance decomposition.
+                Converse direction: PURE MATHLIB (zero custom axioms).
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.50 }}
+          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/30"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">{"\u26A1"}</span>
+            <div>
+              <h3 className="text-sm font-bold text-violet-400">
+                v9 &mdash; ABEL BYPASS (April 24, 2026)
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                <code>pnt_mu_log_sq_div_k</code> ELIMINATED via S&#x2083; uniform bound.
+                Instead of proving &Sigma; &mu;(k)log&sup2;(k)/k &rarr; &minus;2&gamma;, proved the S&#x2083; term is uniformly bounded,
+                bypassing Tauberian machinery entirely.
               </p>
             </div>
           </div>
@@ -278,17 +276,17 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.52 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent border border-indigo-500/20"
+          className="p-5 rounded-xl bg-gradient-to-r from-orange-500/10 via-amber-600/5 to-transparent border border-orange-500/30"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">🪞</span>
+            <span className="text-2xl">{"\uD83D\uDD25"}</span>
             <div>
-              <h3 className="text-sm font-bold text-indigo-400">
-                Digamma Reflection — ψ(1−s) − ψ(s) = π·cot(πs) PROVED
+              <h3 className="text-sm font-bold text-orange-400">
+                v7 &mdash; PERRON CROWN (April 20&ndash;22, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Proved via logDeriv of Mathlib&apos;s Gamma reflection Γ(s)Γ(1−s) = π/sin(πs).
-                Chain rule for z ↦ 1−z on LHS, derivative of sin(πz) on RHS. April 14, 2026.
+                <code>rh_implies_mertens_bound</code> GRADUATED: 16-file Perron contour formula chain proves
+                RH &rArr; |M(x)| = O(x&#xBD;&#x207A;&#x03B5;). <code>pnt_mu_div_k</code> GRADUATED via PrimeNumberTheoremAnd library bridge.
               </p>
             </div>
           </div>
@@ -297,18 +295,17 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.54 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-sky-500/10 via-sky-500/5 to-transparent border border-sky-500/20"
+          className="p-5 rounded-xl bg-gradient-to-r from-indigo-500/10 via-indigo-500/5 to-transparent border border-indigo-500/20"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">⚒️</span>
+            <span className="text-2xl">{"\uD83E\uDE9E"}</span>
             <div>
-              <h3 className="text-sm font-bold text-sky-400">
-                Floor Sum Identity — Σ⌊mb/a⌋ = (a−1)(b−1)/2 PROVED (Last sorry!)
+              <h3 className="text-sm font-bold text-indigo-400">
+                Digamma Reflection &mdash; &psi;(1&minus;s) &minus; &psi;(s) = &pi;&middot;cot(&pi;s) PROVED
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Hermite/Eisenstein lattice point identity via coprime mod permutation.
-                The &quot;Eisenstein maneuver&quot;: multiply by 2 to bypass ℕ division, independently
-                rediscovering Eisenstein&apos;s 1844 technique. April 14, 2026.
+                Proved via logDeriv of Mathlib&apos;s Gamma reflection &Gamma;(s)&Gamma;(1&minus;s) = &pi;/sin(&pi;s).
+                April 14, 2026.
               </p>
             </div>
           </div>
@@ -316,154 +313,19 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.55 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-red-500/10 via-red-500/5 to-transparent border border-red-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">💣</span>
-            <div>
-              <h3 className="text-sm font-bold text-red-400">
-                The Factorial Nuke — k₀=0 Edge Case DESTROYED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                On (1/(N!+1), 1/N!), divisibility (i+1)|N! forces all floor functions to be exact integers.
-                When A=0: g(x)=0, f(x)=w₀≠0. The degenerate case is annihilated.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.6 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-violet-500/10 via-violet-500/5 to-transparent border border-violet-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🔬</span>
-            <div>
-              <h3 className="text-sm font-bold text-violet-400">
-                Euler-Mascheroni Integral — ∫₀¹ {'{'}1/x{'}'} dx = 1 − γ PROVED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Substitution u=kx + series identity Σ(1/(m+1) − log(1+1/(m+1))) = γ via tendsto_harmonic_sub_log.
-                Axiom vasyunin_mean_eq_integral eliminated. April 12, 2026.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.65 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">✅</span>
-            <div>
-              <h3 className="text-sm font-bold text-emerald-400">
-                lagarias_for_primes — PROVED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                σ(p) ≤ H_p + exp(H_p)·ln(H_p) for ALL primes p. Zero axioms.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.72 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-transparent border border-rose-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚡</span>
-            <div>
-              <h3 className="text-sm font-bold text-rose-400">
-                Calculus Sorry KILLED — ln(ln N)/ln N → 0 PROVED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                The Theorist&apos;s algebraic bound: log(x) ≤ 2√x eliminates the final sorry in MainChain.lean.
-                Pure algebra — no L&apos;Hôpital, no topological filters. Compiles in 3 seconds. April 17, 2026.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.74 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-pink-500/10 via-pink-500/5 to-transparent border border-pink-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">⚠️</span>
-            <div>
-              <h3 className="text-sm font-bold text-pink-400">
-                The Triangle Inequality Trap — IDENTIFIED &amp; DEFUSED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                E(N) = 1−2b&apos;v+v&apos;Gv → 0 through exact cancellation (1−2·1+1=0).
-                Triangle inequality gives ≥4 for a quantity → 0. The Parseval Bridge is
-                mathematically necessary — only frequency-domain analysis captures the interference.
-                Discovery caught jointly by Claude and Gemini. April 17, 2026.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.56 }}
           className="p-5 rounded-xl bg-gradient-to-r from-cyan-500/10 via-cyan-500/5 to-transparent border border-cyan-500/20"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">💎</span>
+            <span className="text-2xl">{"\uD83D\uDD2C"}</span>
             <div>
               <h3 className="text-sm font-bold text-cyan-400">
-                covMatrix3_det3_pos — det(C₃) &gt; 0 PROVED
+                Rank-1 Mellin Miracle &mdash; Converse PURE MATHLIB
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Degree-6 polynomial in 5 transcendentals, verified by polynomial certificates.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.75 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-teal-500/10 via-teal-500/5 to-transparent border border-teal-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🗺️</span>
-            <div>
-              <h3 className="text-sm font-bold text-teal-400">
-                CrossTermFTC — Off-Diagonal Infrastructure DEPLOYED
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                6 theorems, 0 sorry. Piecewise FTC for ∫(1/(jx)−m)(1/(kx)−n)dx and Beatty sequence bound
-                (≤2 tiles per row when j≤k). Diagonal vasyunin_eq_integral axiom ELIMINATED using this engine.
-              </p>
-            </div>
-          </div>
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.77 }}
-          className="p-5 rounded-xl bg-gradient-to-r from-yellow-500/10 via-yellow-500/5 to-transparent border border-yellow-500/20"
-        >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🌙</span>
-            <div>
-              <h3 className="text-sm font-bold text-yellow-400">
-                THE NIGHT ASSAULT — 3 Axioms ANNIHILATED → 42 Total
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                vasyunin_eq_integral → THEOREM (diagonal G(k,k) proved via Stirling + piecewise FTC).
-                fract_sq_integral → THEOREM (Stirling + Squeeze). rh_implies_mertens_34 → THEOREM
-                (absorbed by rh_implies_mertens_bound via (log x)² ≤ 64·x^{'{'}1/4{'}'}).
-                Crown narrowed: vasyunin_offdiag_integral (off-diagonal only).
-                42 axioms — the Answer. April 20, 2026.
+                M[h&#x2096;](&rho;) = 1/(k(&rho;&minus;1)) factorizes as rank-1 tensor at every zeta zero.
+                Cauchy-Schwarz separation proves d&sup2; &gt; 0 for off-critical zeros.
+                Re(&Lambda;&#x2080;(s)) &lt; 4 for s &isin; (0,1) via Jacobi theta. Zero axioms, zero sorry.
               </p>
             </div>
           </div>

@@ -33,26 +33,45 @@ IMPORT_RE = re.compile(r"^import\s+([\w.]+)", re.MULTILINE)
 # Route classification by directory
 def classify_route(filepath: str) -> str:
     rel = filepath.replace(str(CATHEDRAL_DIR) + "/", "")
+    # Infrastructure layer
     if rel.startswith("LinearAlgebra/"):
         return "infrastructure"
     if rel.startswith("Gram/"):
         return "infrastructure"
     if rel.startswith("Structural/"):
         return "infrastructure"
+    if rel.startswith("Analysis/"):
+        return "infrastructure"
+    if rel.startswith("IntegralBasis/"):
+        return "infrastructure"
+    # Variational layer
     if rel.startswith("Vasyunin/"):
         return "variational"
     if rel.startswith("Sieve/"):
         return "variational"
     if rel.startswith("Spectral/"):
         return "variational"
+    if rel.startswith("Covariance/"):
+        return "variational"
+    # Mellin / analytic layer
     if rel.startswith("MellinBridge/"):
         return "mellin"
     if rel.startswith("NymanBeurling/"):
         return "mellin"
+    if rel.startswith("Perron/"):
+        return "mellin"
+    if rel.startswith("Zeta/"):
+        return "mellin"
+    if rel.startswith("PNT/"):
+        return "mellin"
+    if rel.startswith("AbelTail/"):
+        return "mellin"
+    # Crown
     if rel.startswith("Assembly/"):
         return "crown"
+    # Legacy
     if rel.startswith("White/"):
-        return "mellin"
+        return "infrastructure"
     if rel == "Defs.lean" or rel == "Axioms.lean":
         return "infrastructure"
     return "infrastructure"
