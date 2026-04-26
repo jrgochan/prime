@@ -77,7 +77,7 @@ theorem integral_rpow_neg_quarter (N : ℕ) (hN : 2 ≤ N) :
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM**: The integral bound implies the p-series bound. -/
-theorem integral_implies_sum_bound (N : ℕ) (hN : 2 ≤ N) :
+theorem integral_implies_sum_bound (N : ℕ) (_hN : 2 ≤ N) :
     (4:ℝ)/3 * ((N:ℝ) ^ ((3:ℝ)/4) - 1) < (4:ℝ)/3 * (N:ℝ) ^ ((3:ℝ)/4) := by
   have : (0:ℝ) < (4:ℝ)/3 := by norm_num
   linarith [mul_lt_mul_of_pos_left (show (N:ℝ) ^ ((3:ℝ)/4) - 1 < (N:ℝ) ^ ((3:ℝ)/4) from by linarith) this]

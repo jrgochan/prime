@@ -85,7 +85,7 @@ theorem mu_sq_one : mu_sq 1 = 1 := by
   simp [show (ArithmeticFunction.moebius 1 : ℤ) = 1 from ArithmeticFunction.moebius_apply_one]
 
 /-- The taper weight at k=1 is 1 (since ln(1) = 0). -/
-theorem taper_weight_one (N : ℕ) (hN : 2 ≤ N) :
+theorem taper_weight_one (N : ℕ) (_hN : 2 ≤ N) :
     (1 - Real.log (1 : ℝ) / Real.log ↑N) = 1 := by
   simp [Real.log_one]
 
