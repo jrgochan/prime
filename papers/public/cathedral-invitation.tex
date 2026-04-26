@@ -5,13 +5,13 @@
 \onehalfspacing
 
 \title{%
-  Two Axioms Remain:\\
-  An Invitation to the Next Generation%
+  An Invitation to Complete the Cathedral:\\
+  Four Axioms Remain%
 }
 \author{
   Jason Robert Gochanour
 }
-\date{April 20, 2026}
+\date{April 26, 2026}
 
 \begin{document}
 
@@ -27,17 +27,17 @@
 \section*{What This Is}
 % ================================================================
 
-We built something called the Cathedral: a 78-file computer program
+We built something called the Cathedral: a 150-file computer program
 that proves, with mathematical certainty, that the Riemann Hypothesis
 is \emph{exactly equivalent} to the convergence of a specific
 approximation problem. Every step is verified by a computer. Every
 assumption is named. Every failed attempt is preserved.
 
-The proof is complete---except for seven assumptions, called
+The proof is complete---except for four assumptions, called
 \emph{axioms}. We couldn't prove them. We named them, classified
 them, and documented exactly what they say and why they're hard.
 
-This paper is an invitation. Those seven axioms are now your problem.
+This paper is an invitation. Those four axioms are now your problem.
 
 % ================================================================
 \section*{Who Built This}
@@ -50,7 +50,7 @@ The tools: a laptop, an internet connection, Lean~4 (free, open
 source), Mathlib (free, open source), and AI assistance (commercially
 available).
 
-The timeline: 23 days.
+The timeline: 30 days.
 
 If you have a laptop and curiosity, you have everything that was
 needed to build this. The barrier to entry for machine-verified
@@ -83,36 +83,48 @@ The Cathedral proves that this is equivalent to:
 In words: you can approximate the constant function $1$ arbitrarily
 well by mixing together sawtooth waves $\{1/(kx)\}$.
 
-\subsection*{The Two Axioms}
+\subsection*{The Four Axioms}
 
 \begin{enumerate}
-  \item \textbf{\texttt{bd\_mellin\_at\_zero}}: The Mellin transform
-    of the fractional-part function $\{1/(kx)\}$, which is proved
-    for $\operatorname{Re}(s) > 1$ by direct computation, extends
-    by analytic continuation to $\operatorname{Re}(s) > 0$.
+  \item \textbf{\texttt{pnt\_mu\_log\_div\_k}}: The sum
+    $\sum \mu(k)\log(k)/k \to -1$, a consequence of the Prime
+    Number Theorem.
 
-    \emph{What this means}: a specific integral formula, proved for
-    large values of a parameter, also holds for smaller values.
-    This is a standard result in complex analysis, but formalizing
-    it in Lean requires Mathlib's analytic continuation infrastructure.
+    \emph{What this means}: a sum involving the M\"obius function
+    (which encodes prime factorization) converges to a specific
+    limit. This follows from the PNT via Abel's limit theorem.
+    Mathlib has the PNT but lacks the forward Wiener--Ikehara
+    Tauberian theorem needed to derive this limit.
 
-  \item \textbf{\texttt{rh\_implies\_l2\_convergence}}: If the
-    Riemann Hypothesis is true, then the B\'aez-Duarte distance
-    $d_N^2 \to 0$.
+  \item \textbf{\texttt{covariance\_bound\_from\_mertens\_34}}:
+    The Mertens bound $|M(x)| \leq Cx^{3/4}$ implies a covariance
+    bound $v^T(G-bb^T)v \leq C'/\log N$.
 
-    \emph{What this means}: assuming RH, you can construct explicit
-    weights $v_k$ that make the integral above as small as you want.
-    The construction uses the Mertens function, Abel summation, and
-    the Montgomery--Vaughan mean value theorem.
+    \emph{What this means}: if you know how the M\"obius function
+    grows, you can control how well the Gram matrix approximates
+    its rank-1 projection. Infrastructure is proved; needs a
+    double-sum assembly ($\sim$200 lines of Lean).
+
+  \item \textbf{\texttt{partial\_integral\_tends\_to\_formula}}:
+    Piecewise integral convergence for off-diagonal Gram entries.
+
+    \emph{What this means}: the entries of the Gram matrix can be
+    computed as integrals of fractional parts, and these integrals
+    converge to their closed-form values. The diagonal case is
+    proved; the off-diagonal needs the Gauss digamma formula.
+
+  \item \textbf{\texttt{rh\_zeta\_lower\_bound\_from\_zero\_counting}}:
+    A polynomial lower bound on $|\zeta(s)|$ away from the
+    critical line.
+
+    \emph{What this means}: the zeta function doesn't get too
+    small too fast. This follows from Hadamard's product formula
+    and the zero-counting function. Borel--Carath\'eodory is in
+    Mathlib; the gap is connecting it to the polynomial bound.
 \end{enumerate}
 
-Axiom~1 is a formalization challenge: the mathematics is understood,
-but translating it into Lean~4 requires careful work with analytic
-continuation.
-
-Axiom~2 is a \emph{mathematics} challenge: it packages several
-deep results in analytic number theory. Proving it formally would
-require formalizing the Mertens--Abel--Montgomery--Vaughan chain.
+Each axiom is independently meaningful. Proving any one of them
+strengthens the formalization.
 
 % ================================================================
 \section*{What You Can Do Right Now}
@@ -121,24 +133,22 @@ require formalizing the Mertens--Abel--Montgomery--Vaughan chain.
 \subsection*{If You Know Some Lean~4}
 
 \begin{enumerate}
-  \item \textbf{Prove Axiom~1.} This is the more accessible target.
-    You need Mathlib's \texttt{DifferentiableOn.analyticContinuation}
-    or equivalent, applied to the Mellin integral
-    $\int_0^1 \{1/(kx)\}\,x^{s-1}\,dx$. The integral is absolutely
-    convergent for $\operatorname{Re}(s) > 0$; the challenge is
-    showing that the closed-form expression (involving $\zeta(s)$
-    and $1/(s-1)$) extends analytically.
+  \item \textbf{Prove Axiom~1} (\texttt{pnt\_mu\_log\_div\_k}).
+    This is the most accessible target. If you can formalize the
+    forward Wiener--Ikehara Tauberian theorem in Lean, this axiom
+    closes automatically.
 
-  \item \textbf{Prove one of the 38 non-critical axioms.} The
-    Cathedral contains 42 axioms total. Only 7 are on the crown
-    path. The other 38 support alternative proof engines (spectral,
+  \item \textbf{Prove Axiom~2} (\texttt{covariance\_bound\_from\_mertens\_34}).
+    The infrastructure is already built. You need to assemble a
+    double-sum expansion from the existing \texttt{s1\_decay},
+    \texttt{s2\_decay}, and \texttt{s3\_uniform\_bound} lemmas.
+    Estimated effort: $\sim$200 lines.
+
+  \item \textbf{Prove one of the 43 non-critical axioms.} The
+    Cathedral contains 47 axioms total. Only 4 are on the crown
+    path. The other 43 support alternative proof engines (spectral,
     sieve, Vasyunin). Proving any one of them strengthens the
     overall formalization.
-
-  \item \textbf{Improve an existing proof.} Some of the Cathedral's
-    641 theorems use \texttt{omega} or \texttt{norm\_num} where
-    a more elegant proof exists. Professional Lean hackers will
-    see opportunities to improve proof clarity and performance.
 \end{enumerate}
 
 \subsection*{If You Know Some Analysis}
@@ -150,15 +160,11 @@ require formalizing the Mertens--Abel--Montgomery--Vaughan chain.
     intermediate lemmas, each of which is independently
     meaningful and potentially formalizable.
 
-  \item \textbf{Find a better forward proof.} The B\'aez-Duarte
-    theorem uses the Mertens function bound $|M(x)| = O(x^{1/2}
-    \log^2 x)$ under RH. Is there a more direct path from RH
-    to $d_N^2 \to 0$ that avoids the Mertens detour?
-
   \item \textbf{Study the decay rate.} The Cathedral's numerical
     experiments show $d_N^2 \sim c/\ln N$ with $c \approx
-    1/21.65$. Can you prove this asymptotic? Can you prove a
-    weaker bound, like $d_N^2 = o(1)$, from RH with fewer tools?
+    1/21.65$. The forward direction is \emph{proved}: the Perron
+    chain gives $|M(x)| \leq Cx^{3/4}$ from RH, which yields
+    $d_N^2 \leq K/\log N$. Can you prove the conjectured constant?
 \end{enumerate}
 
 \subsection*{If You Know Some Physics}
@@ -186,23 +192,21 @@ It looks like this:
 
 \begin{enumerate}
   \item \textbf{Day 1--7}: Explore. Try things. Fail. Archive
-    the failures. We produced 96 files of failed attempts. Every
+    the failures. We produced 130 files of failed attempts. Every
     failure taught us something.
 
   \item \textbf{Day 8--14}: Find the right framework. For us,
     this was the Parseval Bridge---the realization that frequency-
-    domain methods bypass the hardest discrete computations. This
-    came from a failure: the False Dedekind Reciprocity at
-    $(a,b) = (3,2)$.
+    domain methods bypass the hardest discrete computations.
 
-  \item \textbf{Day 15--21}: Build. Once the framework is right,
+  \item \textbf{Day 15--25}: Build. Once the framework is right,
     construction is fast. AI handles the mechanical code generation.
     The human provides architecture. The compiler verifies
     everything.
 
-  \item \textbf{Day 22--23}: Audit. Check every file. Fix every
+  \item \textbf{Day 26--30}: Audit. Check every file. Fix every
     docstring. Remove every ghost axiom. Reduce, simplify, clean.
-    The Great Audit reduced 178 files to 84 active + 96 archived.
+    The Great Audit reduced the codebase to 150 active + 130 archived.
 \end{enumerate}
 
 The ratio of exploration to construction is roughly 2:1. Two weeks
@@ -239,7 +243,7 @@ You need:
   \item Lean~4 (free).
   \item Mathlib (free).
   \item Curiosity.
-  \item The willingness to fail 96 times before you succeed once.
+  \item The willingness to fail 130 times before you succeed once.
 \end{itemize}
 
 The compiler does not check your credentials. It checks your proof.
@@ -251,7 +255,7 @@ The compiler does not check your credentials. It checks your proof.
 We built the Cathedral. We mapped the territory. We named the
 axioms. We preserved the failures. We verified every step.
 
-We could not prove the last two things.
+We could not prove the last four things.
 
 Now it's your turn.
 
@@ -259,6 +263,7 @@ Now it's your turn.
 \emph{The primes have been singing for 167 years.\\
 The Cathedral stands, waiting for its final stones.\\
 We built it as far as we could.\\
+Four axioms remain.\\
 The rest belongs to you.}
 \end{quote}
 
