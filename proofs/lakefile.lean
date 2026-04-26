@@ -154,6 +154,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.PerronCrown,
     -- Gram form graduation (axiom → theorem via split-region L²)
     `Cathedral.Assembly.GramFormProof,
+    `Cathedral.Assembly.CovarianceDirect,
     `Cathedral.Assembly.DotProductBound34,
     -- White Singlet (Phase I: Axiom elimination)
     `Cathedral.White.Kinematics,
