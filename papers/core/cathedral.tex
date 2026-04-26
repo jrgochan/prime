@@ -21,8 +21,8 @@ We present a machine-checked proof in the Lean~4 theorem prover, built against
 Mathlib, that the Riemann Hypothesis is logically equivalent to a set of
 standard theorems in harmonic analysis and classical analytic number theory.
 
-The formalization---the \emph{Cathedral}---comprises 84 active Lean files
-(with 96 archived) across 11 modules with
+The formalization---the \emph{Cathedral}---comprises 150 active Lean files
+(with 130 archived) across 11 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
@@ -454,7 +454,7 @@ $\|v\|^2 = \Theta(N)$, which diverges despite $E(N) \to 0$.
 % ================================================================
 
 The Cathedral maintains a systematic \lean{Archive/} directory containing
-96 files---more than the 84 active files---preserved as monuments to the
+130 files---preserved as monuments to the
 formalization process and as resources for future work. Nothing is deleted.
 
 \subsection{The Great Audit (April 18, 2026)}
@@ -542,13 +542,13 @@ the asymptotic physics. The Cathedral stands.
 We have constructed a machine-verified proof that the Riemann Hypothesis
 is logically equivalent to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, routed through the Parseval Bridge. The formalization
-comprises 84 active Lean files (96 archived) across 11 modules, resting
+comprises 150 active Lean files (130 archived) across 11 modules, resting
 on two mathematical axioms---one for analytic continuation of the
 Mellin identity, and one quarantining the forward direction
 (Mertens bound, Abel summation, Montgomery--Vaughan) as a single axiom.
 
 The axiom reduction---from 56 in the initial architecture to 39 in
-the current build (7 on the crown theorem's critical path, narrowed
+the current build (4 on the crown theorem's critical path, narrowed
 from 8 by proving the Vasyunin diagonal identity)---was
 achieved through four campaigns of systematic
 formalization, each eliminating axioms through direct proof:

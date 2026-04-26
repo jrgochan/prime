@@ -24,7 +24,7 @@ We report on the design, construction, and maintenance of the
 \emph{Cathedral}, a 20,000-line Lean~4 formalization (built on
 Mathlib v4.30) that establishes the logical equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
-distance. The project comprises 84 active source files containing
+distance. The project comprises 150 active source files containing
 theorems and 47 axioms, with an additional 130 archived files
 preserving superseded approaches. We describe the software
 engineering challenges of large-scale proof formalization:
@@ -56,12 +56,12 @@ dependency management, regression testing, documentation standards,
 and lifecycle processes for managing evolving definitions.
 
 The Cathedral project provides a case study in these challenges. Over
-23 days, we formalized the Nyman--Beurling criterion for the Riemann
+30 days, we formalized the Nyman--Beurling criterion for the Riemann
 Hypothesis in Lean~4, producing a system that is:
 
 \begin{itemize}
   \item \textbf{Large}: 36,738 lines of active Lean code across 150 files,
-    plus 23,115 lines of archived code across 96 files.
+    plus 23,115 lines of archived code across 130 files.
   \item \textbf{Modular}: 11 modules with explicit dependency DAGs.
   \item \textbf{Evolving}: The axiom count on the critical path was
     reduced from 56 to 7 through four systematic elimination campaigns.
@@ -110,7 +110,7 @@ Build jobs (\texttt{lake build}) & 3,537 \\
 Build errors & 0 \\
 Intentional \texttt{sorry} markers & 2 (alternative path) \\
 Companion Rust code & 211,202 lines \\
-Development time & 23 days \\
+Development time & 30 days \\
 \bottomrule
 \end{tabular}
 \caption{Cathedral system metrics as of April 20, 2026.}
@@ -752,7 +752,7 @@ Large-scale formalizations in proof assistants include:
 The Cathedral is distinguished by: (a) the high axiom count (39,
 reflecting the open status of RH), (b) the systematic axiom
 lifecycle management, (c) the high discard rate (54\%), and
-(d) the compressed development timeline (23 days, enabled by
+(d) the compressed development timeline (30 days, enabled by
 human-AI pair programming).
 
 % ================================================================
