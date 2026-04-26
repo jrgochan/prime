@@ -13,7 +13,7 @@
   C. Antiderivative Hack: F(t) = -4·t^{-1/4}, F'(t) = t^{-5/4}
 -/
 
-import Cathedral.Assembly.AbelEngine
+import Cathedral.AbelTail.Engine
 import Cathedral.MellinBridge.AbelSummation
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.MertensIntegral

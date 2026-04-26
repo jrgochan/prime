@@ -18,11 +18,11 @@ import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.Vasyunin.Augmented.DiagBound
 import Cathedral.Vasyunin.Proof.WitnessConditional
-import Cathedral.Assembly.BDBridge
-import Cathedral.Assembly.DotProductIdentity
-import Cathedral.Assembly.CalcBounds
-import Cathedral.Assembly.AbelL2Bridge
-import Cathedral.Assembly.VasyuninBypass
+import Cathedral.NymanBeurling.BDBridge
+import Cathedral.Covariance.DotProductIdentity
+import Cathedral.Covariance.CalcBounds
+import Cathedral.AbelTail.L2Bridge
+import Cathedral.NymanBeurling.VasyuninBypass
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 

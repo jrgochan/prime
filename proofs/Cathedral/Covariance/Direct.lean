@@ -16,8 +16,8 @@
   Created: April 26, 2026 — Exploration 8
 -/
 
-import Cathedral.Assembly.GramFormProof
-import Cathedral.Assembly.L2Convergence
+import Cathedral.Covariance.GramFormProof
+import Cathedral.Covariance.L2Convergence
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFunction

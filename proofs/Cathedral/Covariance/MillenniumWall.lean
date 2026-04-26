@@ -15,7 +15,7 @@
   Extracted from FinalDragon.lean §2c (April 22, 2026).
 -/
 
-import Cathedral.Assembly.PNTAbelMean
+import Cathedral.PNT.AbelMean
 import Cathedral.Vasyunin.Augmented.CovarianceAbel
 
 noncomputable section

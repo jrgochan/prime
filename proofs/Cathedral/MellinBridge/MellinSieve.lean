@@ -4,7 +4,7 @@ import Cathedral.MellinBridge.Separation
 import Cathedral.MellinBridge.MertensWeightBypass
 import Cathedral.Sieve.BilinearSieve
 import Cathedral.Sieve.MoebiusUncoupling
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.Gram.L2Bridge
 
 /-! # Cathedral.MellinBridge.MellinSieve

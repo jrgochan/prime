@@ -16,12 +16,12 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Assembly.BDBridge
+import Cathedral.NymanBeurling.BDBridge
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 import Cathedral.AbelTail.S3UniformBound
-import Cathedral.Assembly.DotProductIdentity
-import Cathedral.Assembly.CalcBounds
+import Cathedral.Covariance.DotProductIdentity
+import Cathedral.Covariance.CalcBounds
 
 noncomputable section
 open Real Matrix Finset Filter Cathedral.Vasyunin ArithmeticFunction

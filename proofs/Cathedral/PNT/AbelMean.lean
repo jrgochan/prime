@@ -23,10 +23,10 @@
 
 import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
-import Cathedral.Assembly.PNTBridge
-import Cathedral.Assembly.AbelL2Bridge
-import Cathedral.Assembly.BDBridge
-import Cathedral.Assembly.AbelEngine
+import Cathedral.PNT.Bridge
+import Cathedral.AbelTail.L2Bridge
+import Cathedral.NymanBeurling.BDBridge
+import Cathedral.AbelTail.Engine
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.MertensIntegral
 import Cathedral.MellinBridge.MertensBound

@@ -12,7 +12,7 @@ import Cathedral.Vasyunin.Augmented.DiagBound
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 import Cathedral.AbelTail.S3Decay
-import Cathedral.Assembly.AbelEngine
+import Cathedral.AbelTail.Engine
 
 noncomputable section
 open Real Finset BigOperators ArithmeticFunction

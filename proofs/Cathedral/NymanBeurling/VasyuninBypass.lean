@@ -19,7 +19,7 @@
 
 import Cathedral.Defs
 import Cathedral.Vasyunin.Proof.WitnessConditional
-import Cathedral.Assembly.BDBridge
+import Cathedral.NymanBeurling.BDBridge
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.PlancherelDefs
 

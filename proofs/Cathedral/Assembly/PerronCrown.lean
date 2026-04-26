@@ -32,14 +32,14 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Assembly.MertensFromPerron
-import Cathedral.Assembly.MoebiusL1Bound
+import Cathedral.Perron.MertensFromPerron
+import Cathedral.Covariance.MoebiusL1Bound
 import Cathedral.MellinBridge.AbelSiegeProof
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
 import Cathedral.AbelTail.S3UniformBound
-import Cathedral.Assembly.GramFormProof
+import Cathedral.Covariance.GramFormProof
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFunction

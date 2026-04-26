@@ -15,8 +15,8 @@
   Extracted from FinalDragon.lean §3–§4 (April 22, 2026).
 -/
 
-import Cathedral.Assembly.MillenniumWall
-import Cathedral.Assembly.MertensConversion
+import Cathedral.Covariance.MillenniumWall
+import Cathedral.Perron.MertensConversion
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Cathedral.Vasyunin

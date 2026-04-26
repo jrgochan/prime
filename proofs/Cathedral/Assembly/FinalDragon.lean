@@ -19,7 +19,7 @@
   compatibility.
 -/
 
-import Cathedral.Assembly.MertensConversion
-import Cathedral.Assembly.PNTAbelMean
-import Cathedral.Assembly.MillenniumWall
-import Cathedral.Assembly.L2Convergence
+import Cathedral.Perron.MertensConversion
+import Cathedral.PNT.AbelMean
+import Cathedral.Covariance.MillenniumWall
+import Cathedral.Covariance.L2Convergence

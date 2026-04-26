@@ -43,10 +43,10 @@
 import Cathedral.Defs
 import Cathedral.Structural.Structural
 import Cathedral.MellinBridge.Basic
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
-import Cathedral.Assembly.BDBypass
-import Cathedral.Assembly.VasyuninBypass
+import Cathedral.NymanBeurling.BDBypass
+import Cathedral.NymanBeurling.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
 import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown

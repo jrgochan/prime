@@ -21,8 +21,8 @@ import Mathlib.Analysis.InnerProductSpace.Basic
 import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
-import Cathedral.Assembly.MoebiusL1Bound
-import Cathedral.Assembly.PNTAbelMean
+import Cathedral.Covariance.MoebiusL1Bound
+import Cathedral.PNT.AbelMean
 
 noncomputable section
 open Complex Real MeasureTheory Finset BigOperators

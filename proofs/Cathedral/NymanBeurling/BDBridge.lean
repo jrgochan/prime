@@ -12,7 +12,7 @@
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.Vasyunin.Augmented.IntegralBridge
 import Cathedral.Vasyunin.Augmented.DiagBound
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.Structural.Structural
 
 noncomputable section

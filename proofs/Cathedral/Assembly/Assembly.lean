@@ -8,5 +8,5 @@
   - Assembly/MainChain.lean     — Nyman-Beurling Equivalence & RH
 -/
 
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.Assembly.MainChain

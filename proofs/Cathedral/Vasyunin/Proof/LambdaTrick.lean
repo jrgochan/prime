@@ -15,7 +15,7 @@
   Reference: Theorist Encryption "WHITE SINGLET — THE ONE CROWN", §I.
 -/
 
-import Cathedral.Assembly.BDBridge
+import Cathedral.NymanBeurling.BDBridge
 import Cathedral.Vasyunin.Augmented.Rayleigh
 import Cathedral.LinearAlgebra.Variational
 

@@ -29,8 +29,8 @@
 -/
 
 import Cathedral.Defs
-import Cathedral.Assembly.VasyuninBypass
-import Cathedral.Assembly.DotProductBound34
+import Cathedral.NymanBeurling.VasyuninBypass
+import Cathedral.Covariance.DotProductBound
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFunction
