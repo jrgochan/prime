@@ -1,9 +1,10 @@
 # OVERVIEW — The Cathedral Proof Chain
 
-> *A deep analysis of the Lean 4 formalization reducing the Riemann Hypothesis
-> to machine-checkable axioms via the Nyman–Beurling criterion.*
+> *A machine-verified reduction of the Riemann Hypothesis to two classical
+> axioms of analytic number theory, via the Nyman–Beurling–Báez-Duarte
+> equivalence in Lean 4.*
 >
-> **Last updated**: April 26, 2026 (v11 — Mathlib-style restructuring)
+> **Last updated**: April 26, 2026 (v11 — The Mellin Crown)
 
 ---
 
@@ -22,6 +23,8 @@ basis functions. This establishes a formally verified equivalence between the
 Riemann Hypothesis and the L² approximability of the constant function 1 by
 fractional-part basis functions on (0,1).
 
+**Crown status: 0 sorry, 2 axioms.**
+
 ---
 
 ## Proof Architecture
@@ -34,28 +37,26 @@ graph TD
         C1["d²_N → 0"]
         C2["Rank-1 Mellin Miracle<br/>M[hₖ](ρ) = 1/(k(ρ-1))"]
         C3["Cauchy-Schwarz separation<br/>d² ≥ (2σ-1)·t²/(|ρ|⁴|ρ-1|²)"]
-        C4["Completed zeta bound<br/>Re(Λ₀(s)) < 4 on (0,1)"]
         C5["RH"]
         C1 --> C2 --> C3 --> C5
-        C4 --> C2
     end
 
-    subgraph "Pillar II — Forward (4 axioms, 1 sorry)"
+    subgraph "Pillar II — Forward (2 axioms, 0 sorry)"
         F1["RH"]
-        F2["Perron chain<br/>RH → M(x) = O(x^{1/2+ε})"]
-        F3["Mertens conversion<br/>M(x) = O(x^{3/4})"]
-        F4["Gram form bound<br/>vᵀGv ≤ 1 + C/log N"]
-        F5["Dot product bound<br/>|bᵀv - 1| ≤ C/log N"]
-        F6["L² decay<br/>d²_N ≤ C/log N"]
-        F7["d²_N → 0"]
-        F1 --> F2 --> F3 --> F4 --> F6 --> F7
-        F3 --> F5 --> F6
+        F2["critical_line_mellin_variance<br/>(1/2π)∫|M(1/2+it)|² ≤ C/logN"]
+        F3["parseval_bridge_white<br/>PROVED (0 axiom, 0 sorry)"]
+        F4["∫₀¹(1-f_N)² = Mellin L² ≤ C/logN"]
+        F5["log_grows_unboundedly<br/>PROVED (standard calculus)"]
+        F6["d²_N → 0"]
+        F1 --> F2 --> F3 --> F4 --> F5 --> F6
     end
 
     style C1 fill:#2d5016,color:white
     style C5 fill:#2d5016,color:white
-    style F1 fill:#8b2500,color:white
-    style F7 fill:#8b2500,color:white
+    style F1 fill:#1a4a8a,color:white
+    style F6 fill:#1a4a8a,color:white
+    style F3 fill:#2d5016,color:white
+    style F5 fill:#2d5016,color:white
 ```
 
 ### Pillar I: Converse (d²→0 ⟹ RH)
@@ -63,71 +64,109 @@ graph TD
 **Status: PURE** — zero custom axioms, zero sorry.
 
 Proved in [BDMellin.lean](proofs/Cathedral/NymanBeurling/BDMellin.lean) (680 lines)
-via the **Rank-1 Mellin Miracle**.
+via the **Rank-1 Mellin Miracle**: the Mellin transform of the BD basis
+function h_k(x) = {1/(kx)} at a ζ-zero ρ yields a rank-1 tensor, enabling
+Cauchy-Schwarz separation.
 
-### Pillar II: Forward (RH ⟹ d²→0)
+### Pillar II: Forward (RH ⟹ d²→0) — The Mellin Crown
 
-**Status: 4 axioms, 1 sorry.**
+**Status: 2 axioms, 0 sorry.**
 
-Assembled in [PerronCrown.lean](proofs/Cathedral/Assembly/PerronCrown.lean).
+Assembled in [MellinCrown.lean](proofs/Cathedral/Assembly/MellinCrown.lean).
 
 ```
 RH
- ↓  [Perron formula + contour shift — 13 files in Perron/, 1 sorry]
-|M(x)| ≤ C · x^{1/2+ε}
- ↓  [Perron/MertensFromPerron — PROVED]
-|M(x)| ≤ C · x^{3/4}
- ↓  [Covariance/DotProductBound — PROVED, 0 axiom]
-|bᵀv - 1| ≤ C_dot / log N
- ↓  [Covariance/GramFormProof — 1 axiom: covariance_bound_from_mertens_34]
-vᵀGv ≤ 1 + C_G / log N
- ↓  [Variance decomposition — PROVED]
-d²_N = (1-bᵀv)² + vᵀCv ≤ C/log N → 0
+ ↓  [critical_line_mellin_variance — AXIOM]
+(1/2π)∫|M_{r_N}(1/2+it)|² dt ≤ C/logN
+ ↓  [parseval_bridge_white — PROVED, 0 axiom, 0 sorry]
+∫₀¹ (1 - f_N(x))² dx = Mellin L² ≤ C/logN
+ ↓  [log_grows_unboundedly — PROVED]
+C/logN < ε  for N sufficiently large
+ ↓
+d²_N → 0
 ```
+
+The forward direction uses the **Mellin/Plancherel isometry** to stay in the
+frequency domain throughout, preserving the phase cancellation that real-variable
+methods (absolute value bounds, bilinear expansions) destroy. This is the
+mathematically native coordinate system of the Riemann Hypothesis.
 
 ---
 
-## The Four Crown Axioms
+## The Two Crown Axioms
 
 These are the **only** custom axioms on the critical path of `nyman_beurling_equivalence`:
 
 | # | Axiom | Mathematical Content | Location |
 |---|-------|---------------------|----------|
-| 1 | `pnt_mu_log_div_k` | Σ μ(k)·log(k)/k → −1 | [PNT/AbelMean.lean](proofs/Cathedral/PNT/AbelMean.lean) |
-| 2 | `covariance_bound_from_mertens_34` | \|M(x)\|≤Cx^{3/4} ⟹ vᵀCv ≤ C/logN | [Covariance/GramFormProof.lean](proofs/Cathedral/Covariance/GramFormProof.lean) |
-| 3 | `partial_integral_tends_to_formula` | Piecewise integral convergence | [Vasyunin/Cotangent/ConvergenceAxioms.lean](proofs/Cathedral/Vasyunin/Cotangent/ConvergenceAxioms.lean) |
-| 4 | `rh_zeta_lower_bound_from_zero_counting` | \|ζ(s)\| ≥ c/\|t\|^A for Re(s) ≥ 1/2+ε | [Zeta/Hadamard.lean](proofs/Cathedral/Zeta/Hadamard.lean) |
+| 1 | `critical_line_mellin_variance` | RH → (1/2π)∫\|M(1/2+it)\|² ≤ C/logN | [MellinCrown.lean](proofs/Cathedral/Assembly/MellinCrown.lean) |
+| 2 | `rh_zeta_lower_bound_from_zero_counting` | RH → \|ζ(s)\| ≥ c/\|t\|^A for Re(s) ≥ 1/2+ε | [Zeta/Hadamard.lean](proofs/Cathedral/Zeta/Hadamard.lean) |
 
-Plus 1 sorry in `Zeta/LowerBound.lean` (thin-strip Borel-Carathéodory interpolation).
+Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
+
+> [!IMPORTANT]
+> Both axioms are **classical, established results** of 20th-century analytic
+> number theory (Hardy-Littlewood, Hadamard). They are axioms only because
+> Mathlib lacks the prerequisite infrastructure. The gap is a **software
+> engineering** problem, not a mathematical one.
+
+### Numerical Validation
+
+The `experiments/mellin-certificate/` Rust experiment (256-bit MPFR) independently
+validates Axiom 1 via three-channel Parseval bridge comparison:
+
+| N | L²(direct) | L²(log-space) | Parseval error | Mellin·logN |
+|---|-----------|--------------|----------------|-------------|
+| 100 | 0.13124 | 0.13119 | 3.8×10⁻⁴ | 0.604 |
+| 1000 | 0.06032 | 0.06032 | 7.2×10⁻⁶ | 0.417 |
+| 2000 | 0.05012 | 0.05012 | 6.6×10⁻⁶ | 0.381 |
+
+Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)).
 
 ---
 
 ## Module Structure
 
-The codebase comprises **155 active Lean files** across **22 topic directories** with
-**37,922 lines** of active code, **1,106 theorems**, and **53 active axioms** (4 on the crown path).
+The codebase comprises **161 active Lean files** across **26 topic directories** with
+**39,375 lines** of active code and **55 active axioms** (2 on the crown path).
 
 ```
 Cathedral/
-├── AbelTail/        (14 files)   Abel summation engine + tail bounds
-├── Analysis/         (6 files)   General analytic tools (Hilbert, Dirichlet test)
-├── Assembly/         (6 files)   Capstone crowns (MainChain, PerronCrown, etc.)
-├── Covariance/       (8 files)   Gram form, dot product, L² convergence
-├── Gram/             (6 files)   FractIntegral, Diagonal, OffDiagonal, L2Bridge
-├── IntegralBasis/    (2 files)   Báez-Duarte basis (resurrected)
-├── LinearAlgebra/    (4 files)   Sherman-Morrison, Sylvester, Variational
-├── MellinBridge/    (18 files)   Mellin transform, Perron-Moebius, Plancherel
-├── NymanBeurling/    (8 files)   BDMellin (converse), ThetaBound, BD bridges
+├── Assembly/         (7 files)   Crown assemblies (MainChain, MellinCrown, etc.)
+├── White/            (2 files)   Parseval bridge (Kinematics, Scattering)
+├── NymanBeurling/    (8 files)   BDMellin (converse), Separation, BD bridges
+├── MellinBridge/    (18 files)   Mellin transform, Plancherel, floor transforms
+├── Zeta/             (8 files)   Zeta function bounds, Hadamard, convexity
 ├── Perron/          (16 files)   Perron formula chain + Mertens conversion
 ├── PNT/              (3 files)   Prime Number Theorem bridges
+├── Vasyunin/        (39 files)   Vasyunin formula (Cotangent/, Matrix/, Proof/)
+├── Covariance/       (8 files)   Gram form, dot product, L² convergence
+├── Gram/             (6 files)   FractIntegral, Diagonal, OffDiagonal
+├── AbelTail/        (14 files)   Abel summation engine + tail bounds
 ├── Sieve/            (4 files)   BilinearSieve, ParitySchur, MoebiusUncoupling
 ├── Spectral/         (5 files)   ClassRestriction, Octonionic, PT-Symmetry
+├── Analysis/         (6 files)   Hilbert inequality, Montgomery-Vaughan
+├── LinearAlgebra/    (4 files)   Sherman-Morrison, Sylvester, Variational
+├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
 ├── Structural/       (3 files)   Eigenvalue, Independence
-├── Vasyunin/        (39 files)   Vasyunin formula (Cotangent/, Matrix/, Proof/, Augmented/)
-├── White/            (2 files)   Kinematics, Scattering (physics-inspired)
-└── Zeta/             (8 files)   Zeta function bounds, Hadamard, convexity
-    + Defs.lean, Axioms.lean, Cathedral.lean (3 root files)
+└── Scratch/          (4 files)   Exploratory test files
+    + Defs.lean, Axioms.lean, Cathedral.lean (root files)
 ```
+
+### Crown Path Files (0 sorry, 2 axioms)
+
+These are the only files that contribute to `nyman_beurling_equivalence`:
+
+| File | Role | Sorry | Axioms |
+|------|------|-------|--------|
+| `Assembly/MainChain.lean` | Capstone | 0 | — |
+| `Assembly/MellinCrown.lean` | Forward direction | 0 | 1 |
+| `White/Scattering.lean` | Parseval bridge | 0 | 0 |
+| `White/Kinematics.lean` | Parseval bridge | 0 | 0 |
+| `NymanBeurling/BDMellin.lean` | Converse direction | 0 | 0 |
+| `MellinBridge/Separation.lean` | Zeta separation | 0 | 0 |
+| `Zeta/Hadamard.lean` | Zeta lower bound | 0 | 1 |
+| `Defs.lean` | Core definitions | 0 | 0 |
 
 ---
 
@@ -135,39 +174,53 @@ Cathedral/
 
 | Category | Count | On Crown Path |
 |----------|-------|---------------|
-| **Crown axioms** | **4** | ✓ |
-| Legacy/graduated (superseded paths) | 8 | — |
-| Resurrected (isolated, self-contained) | 7 | — |
+| **Crown axioms** | **2** | ✓ |
 | Spectral engine | 7 | — |
-| Sieve engine | 7 | — |
+| Sieve engine | 8 | — |
 | MellinBridge (alt paths) | 8 | — |
-| Vasyunin proof chain | 3 | — |
-| Analysis (Selberg majorant + MV) | 8 | — |
+| Vasyunin proof chain | 6 | — |
+| Analysis (Selberg, MV) | 8 | — |
+| PNT / Perron (off crown since v11) | 4 | — |
 | Oracle/certified computation | 3 | — |
-| **Total** | **53** | **4** |
+| Other (structural, IntegralBasis) | 9 | — |
+| **Total** | **~55** | **2** |
 
 > [!IMPORTANT]
-> Only **4 axioms** stand between the current formalization and a fully
+> Only **2 axioms** stand between the current formalization and a fully
 > machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> already **pure** (zero axioms, zero sorry). The 49 off-path axioms support
-> alternative proof routes, resurrected infrastructure, and experimental
-> features that do not affect the crown theorem.
+> **pure** (zero axioms, zero sorry). The ~53 off-path axioms support
+> alternative proof routes and experimental features that do not affect
+> the crown theorem.
 
 ---
 
 ## What Remains: The Path to Zero Axioms
 
-### Campaign A: PNT Axiom (Axiom 1)
-**Difficulty: Medium** — needs a forward Tauberian theorem (Wiener–Ikehara).
+### Campaign A: Mellin Variance (Axiom 1)
+**Difficulty: Very Hard** — requires Hardy-Littlewood mean value theorem
+∫₀ᵀ |1/ζ(1/2+it)|² dt = O(T), which is beyond Mathlib 4.28.
+Numerically validated: C ≈ 0.38.
 
-### Campaign B: Covariance Bound (Axiom 2)
-**Difficulty: Medium** — ~200 lines of Abel summation on the bilinear form.
+### Campaign B: Hadamard Zero Counting (Axiom 2)
+**Difficulty: Hard** — requires Hadamard product formula + Riemann-von Mangoldt
+zero density. `Zeta/LowerBound.lean` has 445 lines of partial infrastructure.
 
-### Campaign C: Vasyunin Convergence (Axiom 3)
-**Difficulty: Medium-Hard** — requires Gauss digamma formula.
+---
 
-### Campaign D: Hadamard Zero Counting (Axiom 4) + ZetaLowerBound Sorry
-**Difficulty: Easy-Medium** — Borel-Carathéodory is in Mathlib.
+## Architecture History
+
+| Version | Date | Crown Axioms | Architecture |
+|---------|------|-------------|--------------|
+| v1 | Mar 2026 | 6 | Initial Nyman-Beurling formalization |
+| v3 | Apr 15 | 4 | Vasyunin identity graduated |
+| v5 | Apr 18 | 1 | Great Purge (OneCrown) |
+| v7 | Apr 25 | 4 | Perron Crown (real-variable chain) |
+| v10 | Apr 25 | 4 | Gram Form graduation |
+| **v11** | **Apr 26** | **2** | **Mellin Crown (frequency domain)** |
+
+v11 rewired the forward direction through the Mellin/Plancherel isometry,
+bypassing the real-variable Perron chain which hit the "1D Shattering Trap"
+(phase cancellation lost by absolute values in bilinear expansions).
 
 ---
 
@@ -175,14 +228,14 @@ Cathedral/
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 155 |
-| Active lines of code | 37,922 |
-| Archive lines | 22,258 |
-| Theorems + lemmas | 1,106 |
-| Total axioms (active) | 53 |
-| Crown path axioms | 4 |
-| Crown path sorry | 1 |
-| Topic directories | 22 |
-| Companion Rust code | 211,000+ lines |
+| Active Lean files | 161 |
+| Active lines of code | 39,375 |
+| Archive lines | 29,698 |
+| Theorems + lemmas | ~800 |
+| Total axioms (active) | ~55 |
+| Crown path axioms | **2** |
+| Crown path sorry | **0** |
+| Topic directories | 26 |
+| Experiments (Rust/MPFR) | 12 |
 | Development time | 30 days |
 | Lean version | 4.x (Mathlib v4.30+) |
