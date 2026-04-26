@@ -103,13 +103,25 @@ You suggested two approaches:
 1. **Dirichlet test** — use uniform oscillation bounds on the cotangent sums
 2. **`CenteredFractBound.lean`** — bound the centered fractional parts
 
-We checked: `CenteredFractBound.lean` doesn't exist yet. And the Dirichlet test infrastructure would need to be built. But there may be a third option:
+We checked: **`CenteredFractBound.lean` exists and is fully proved!** It's at `Analysis/CenteredFractBound.lean` — 226 lines, zero sorry, zero axioms. It proves:
 
-### Option 3: Cauchy-Schwarz on the cotangent bilinear form
+> |Σ_{j=0}^{n-1} ({aj/b} − (b−1)/(2b))| ≤ b  for all n, coprime a,b
 
-Since vᵀ(cot matrix)v ≤ ‖v‖² · λ_max(cot matrix), and we know the log-cutoff witness has ‖v‖² = O(N/log²N), we'd need λ_max of the cotangent-only Gram matrix to be O(log N / N). This is a spectral bound — and we have spectral infrastructure in `Spectral/`.
+The architecture is elegant: modular arithmetic → coprime permutation bijection → Gauss sum → period sum = 0 → bounded partial sums. Combined with `Analysis/DirichletTest.lean`, this gives us the oscillation control we need for the cotangent double sum.
 
-But this feels like a Phase 2 problem. For now:
+### The Cotangent Attack Path
+
+```
+CenteredFractBound.lean  →  bounded partial sums of {aj/b} − mean
+DirichletTest.lean       →  oscillating × monotone → bounded
+BilinearExpansion.lean   →  shatter vᵀGv into smooth + cotangent
+                         →  smooth terms: S₀·S₁, S₀·S₂−L₁·S₁, S₁² (AbelTail bounds)
+                         →  cotangent terms: Dirichlet test + CenteredFractBound
+                         →  ALL bounded ⟹ vᵀGv ≤ 1 + C/logN
+                         →  Wall 2 FALLS
+```
+
+This path avoids `gram_form_upper_bound` entirely. The ouroboros is broken.
 
 ---
 
@@ -160,7 +172,7 @@ Before diving into Wall 2, we completed a comprehensive visualizer overhaul:
 
 1. **The ouroboros**: Were you aware that `gram_form_upper_bound` in MillenniumWall.lean is essentially the same axiom as `covariance_bound_from_mertens_34`? The variance identity makes them mathematically interchangeable. Your BilinearExpansion approach is the first path that genuinely avoids both.
 
-2. **The cotangent dragon**: Your suggestion of `dirichlet_test` and `CenteredFractBound.lean` — can you elaborate? We don't have `CenteredFractBound.lean` in the Cathedral. Did you mean to draft it, or were you referencing a file from a previous exploration?
+2. **Wiring CenteredFractBound**: `Analysis/CenteredFractBound.lean` exists and is fully proved (0 sorry, 0 axiom). It gives |Σ ({aj/b} − mean)| ≤ b for coprime a,b. How exactly do you see this feeding into the cotangent double sum? The Vasyunin sum V(a,b) = Σ {mb/a}/tan(πm/a) involves tan, not just fractional parts. Do we need a Dirichlet test decomposition where CenteredFractBound provides the "bounded partial sums" and 1/(jk) provides the "monotone decreasing" factor?
 
 3. **S₂ has 2 sorry**: `AbelTail/S2Decay.lean` has 2 sorry remaining. Can we bypass S₂ the same way we bypassed S₃ (via a uniform bound instead of a limit)? If so, we could write an `s2_uniform_bound` theorem and sidestep the Tauberian machinery entirely.
 
