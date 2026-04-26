@@ -11,7 +11,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 20, 2026}
+\date{April 26, 2026}
 
 \begin{document}
 
@@ -20,7 +20,7 @@
 \begin{abstract}
 We describe the practical techniques for formalizing analytic number
 theory in Lean~4 with Mathlib, distilled from the Cathedral project:
-a 22,670-line formalization of the Nyman--Beurling criterion for the
+a 36{,}738-line formalization of the Nyman--Beurling criterion for the
 Riemann Hypothesis. We cover Mathlib API patterns that worked well
 (interval integrals, spectral theory), patterns that required
 workarounds (infinite sums, measure theory), and patterns that are
@@ -55,9 +55,9 @@ Each of these is well-developed in Mathlib individually. The challenge
 is using them \emph{together}, in a single proof, with consistent
 type coercions and compatible assumptions.
 
-The Cathedral project encountered this challenge over 23 days,
-producing 84 active Lean files. This paper distills the lessons
-into actionable advice for future formalizers.
+The Cathedral project encountered this challenge over 30 days,
+producing 150 active Lean files (with 130 more in Archive).
+This paper distills the lessons into actionable advice for future formalizers.
 
 \subsection{Scope}
 
@@ -343,23 +343,20 @@ axiom, even if axioms are declared in their respective modules:
 
 \begin{lstlisting}[language=ML,caption={Axiom registry pattern}]
 /-!
-# Cathedral Axiom Registry
-Total: 42 axioms (7 on crown path)
-Last audit: April 20, 2026
+# Cathedral Axiom Registry (v10)
+Total: 47 axioms (4 on crown path)
+Last audit: April 26, 2026
 
 ## Crown Path Axioms (compiler-verified)
-1. rh_implies_mertens_bound            -- RH content
-2. pnt_mu_div_k                     -- PNT limit
-3. pnt_mu_log_div_k                 -- PNT limit
-4. pnt_mu_log_sq_div_k              -- PNT limit
-5. abel_mertens_tail_raw            -- Abel summation
-6. millennium_covariance_cancellation -- Covariance
-7. vasyunin_offdiag_integral        -- Off-diag Gram
+1. pnt_mu_log_div_k                  -- PNT derivative
+2. covariance_bound_from_mertens_34  -- Abel covariance
+3. partial_integral_tends_to_formula  -- Vasyunin conv.
+4. rh_zeta_lower_bound_from_zero_counting -- Hadamard
 
-## Eliminated Axioms (April 20, 2026)
--- vasyunin_eq_integral  -> THEOREM (diagonal proved)
--- fract_sq_integral     -> THEOREM (Stirling+Squeeze)
--- rh_implies_mertens_34 -> THEOREM (absorbed by _bound)
+## Graduated Axioms (9 eliminations, v3--v10)
+-- rh_implies_mertens_bound -> THEOREM (Perron chain)
+-- pnt_mu_div_k -> THEOREM (PrimeNumberTheoremAnd)
+-- gram_form_upper_bound_34 -> THEOREM (variance)
 ...
 -/
 \end{lstlisting}
@@ -377,7 +374,9 @@ output are bugs.
   \item \textbf{Document every \lean{sorry}} with a comment explaining
     what it assumes and why it can't be proved yet.
   \item \textbf{Track \lean{sorry} count} as a project metric.
-    The Cathedral maintains: 0 on crown path, 2 on alternative paths.
+    The Cathedral maintains: 1 sorry on the crown path
+    (thin-strip Borel--Carath\'eodory, experimentally validated),
+    2 on alternative paths.
 \end{enumerate}
 
 % ================================================================
@@ -510,9 +509,10 @@ Dirichlet polynomial bounds).
 
 The practical advice in this paper---which APIs to use, how to
 structure projects, how to manage axioms---should help future
-formalizers avoid the 96 dead-end files we had to archive.
+formalizers avoid the 130 dead-end files we had to archive.
 
-The Cathedral took 23 days and produced 22,670 lines of active code.
+The Cathedral took 30 days and produced 36{,}738 lines of active code
+(with 130 archived files documenting the evolution).
 The next analytic number theory formalization, building on these
 lessons, should be faster. The tools are ready. The patterns are
 documented. Build your cathedral.

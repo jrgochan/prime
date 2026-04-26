@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 20, 2026}
+\date{April 26, 2026}
 
 \begin{document}
 
@@ -21,8 +21,9 @@ We analyze the logical foundations of the Cathedral, a Lean~4
 formalization establishing $\RH \iff d_N^2 \to 0$.
 The proof inhabits the Calculus of Inductive Constructions (CIC)
 extended with three kernel axioms (\lean{propext}, \lean{Classical.choice},
-\lean{Quot.sound}) and seven mathematical axioms
-(including \lean{rh\_implies\_mertens\_bound} and \lean{vasyunin\_offdiag\_integral}).
+\lean{Quot.sound}) and four mathematical axioms on the critical path
+(a PNT limit, an Abel summation bound, a Vasyunin convergence identity,
+and a Hadamard--Titchmarsh zeta lower bound).
 We establish the precise logical strength of the formalization:
 it is provable in $\ZFC$ plus the consistency of the kernel axioms
 (which is equiconsistent with $\ZFC$). We analyze the trust chain
@@ -49,7 +50,7 @@ Every machine-verified proof rests on a stack of trust:
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (7 on crown path, 42 total) \\
+5 & Mathematical axioms (4 on crown path, 47 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -132,12 +133,12 @@ the interpretation of $\ZFC$ in CIC with large cardinals
 (which are not needed here).
 
 % ================================================================
-\section{The Ten Axioms of the Cathedral}
+\section{The Seven Axioms of the Cathedral}
 \label{sec:axioms}
 % ================================================================
 
 The crown theorem \lean{nyman\_beurling\_equivalence} reports exactly
-10 axioms via \lean{\#print axioms} (3 kernel + 7 mathematical):
+7 axioms via \lean{\#print axioms} (3 kernel + 4 mathematical):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
@@ -147,77 +148,67 @@ The crown theorem \lean{nyman\_beurling\_equivalence} reports exactly
 1 & \lean{propext} & Lean kernel & --- \\
 2 & \lean{Classical.choice} & Lean kernel & --- \\
 3 & \lean{Quot.sound} & Lean kernel & --- \\
-4 & \lean{rh\_implies\_mertens\_bound} & Cathedral & 1 (RH content) \\
-5 & \lean{pnt\_mu\_div\_k} & Cathedral & 2 (PNT) \\
-6 & \lean{pnt\_mu\_log\_div\_k} & Cathedral & 2 (PNT) \\
-7 & \lean{pnt\_mu\_log\_sq\_div\_k} & Cathedral & 2 (PNT) \\
-8 & \lean{abel\_mertens\_tail\_raw} & Cathedral & 3 (Analysis) \\
-9 & \lean{millennium\_covariance\_cancellation} & Cathedral & 3 (Analysis) \\
-10 & \lean{vasyunin\_offdiag\_integral} & Cathedral & 3 (Analysis) \\
+4 & \lean{pnt\_mu\_log\_div\_k} & Cathedral & PNT \\
+5 & \lean{covariance\_bound\_from\_mertens\_34} & Cathedral & Abel \\
+6 & \lean{partial\_integral\_tends\_to\_formula} & Cathedral & Vasyunin \\
+7 & \lean{rh\_zeta\_lower\_bound\_from\_zero\_counting} & Cathedral & Hadamard \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 Axioms 1--3 are shared by every Lean~4 proof that uses Mathlib.
 They are part of the logical infrastructure, not the mathematical
-content. The foundationally interesting axioms are 4--10: one encodes
-the Riemann Hypothesis itself (Tier~1), three encode the Prime Number
-Theorem (Tier~2), and three encode classical analysis facts (Tier~3).
+content. The foundationally interesting axioms are 4--7: one encodes
+a PNT consequence (Tier~PNT), one an Abel summation bound
+(Tier~Abel), one a Vasyunin integral convergence (Tier~Vasyunin),
+and one a Hadamard--Titchmarsh zeta lower bound (Tier~Hadamard).
+Notably, the converse direction uses \textbf{zero} custom axioms.
 
-\subsection{Axiom 4: \lean{bd\_mellin\_at\_zero}}
+\subsection{Axiom 4: \lean{pnt\_mu\_log\_div\_k}}
 
-This axiom asserts the analytic continuation of the Mellin transform
-identity for the B\'aez-Duarte basis function:
+This axiom asserts a consequence of the Prime Number Theorem:
 
 \[
-  \int_0^1 \{1/(kx)\}\,x^{s-1}\,dx = \frac{k^{-s}}{s(s-1)}
-  \bigl(s\zeta(s+1)/k - (s-1)\zeta(s)/k + 1\bigr)
-  \quad (\re s > 0, s \neq 1).
+  \sum_{k=1}^{N} \frac{\mu(k) \log k}{k} \to -1
+  \quad \text{as } N \to \infty.
 \]
 
-This is proved for $\re s > 1$ by direct computation (telescoping
-sums over the floor function). The extension to $\re s > 0$ requires
-analytic continuation: both sides are analytic on $\{s \in \CC :
-\re s > 0, s \neq 1\}$ and agree on $\{s : \re s > 1\}$, so they
-agree everywhere by the identity theorem.
+This is equivalent to $-(1/\zeta)'(1) = -1$ and follows from
+the PNT via Abel's limit theorem.
 
 \begin{remark}[Logical strength]
 This axiom is provable in $\ZFC$ (and indeed in much weaker systems).
-It requires no set-theoretic strength beyond the existence of the
-Riemann zeta function and the identity theorem for analytic functions,
-both of which are in Mathlib. The axiom is a \emph{formalization gap},
-not a foundational one: Mathlib simply lacks the specific lemma
-connecting Mellin integrals to analytic continuation.
+It requires the PNT and a forward Tauberian theorem. The axiom is a
+\emph{formalization gap}: Mathlib has the PNT but lacks the forward
+Wiener--Ikehara theorem needed to derive this limit.
 \end{remark}
 
-\subsection{Axiom 5: \lean{rh\_implies\_l2\_convergence}}
+\subsection{Axiom 5: \lean{covariance\_bound\_from\_mertens\_34}}
 
-This axiom asserts the forward direction of the Nyman--Beurling
-criterion:
+This axiom asserts that the Mertens $x^{3/4}$ bound implies
+covariance cancellation in the Gram matrix:
 
 \[
-  \RH \implies \forall\,\varepsilon > 0,\;\exists\,N_0,\;
-  \forall\,N \geq N_0,\;\exists\,v :\quad d_N^2(v) < \varepsilon.
+  |M(x)| \leq C\,x^{3/4} \implies
+  v^T(G_N - bb^T)v \leq \frac{C'}{\log N}
 \]
 
-This is the B\'aez-Duarte theorem. Its proof requires:
+for the M\"obius witness $v_k = -\mu(k)(1 - \ln k/\ln N)$.
+The infrastructure (s1\_decay, s2\_decay, s3\_uniform\_bound) is proved;
+the double-sum assembly remains.
 
-\begin{enumerate}
-  \item The Mertens function bound $|M(x)| \leq C\sqrt{x}\log^2 x$
-    under \RH.
-  \item Abel summation to convert the Mertens bound into a
-    Dirichlet polynomial bound.
-  \item The Montgomery--Vaughan mean value theorem for controlling
-    $L^2$ norms of Dirichlet polynomials on the critical line.
-\end{enumerate}
+\subsection{Axiom 6: \lean{partial\_integral\_tends\_to\_formula}}
 
-\begin{remark}[Logical strength]
-This axiom is also provable in $\ZFC$. The deepest ingredient
-(Montgomery--Vaughan) uses only standard analytic tools: the large
-sieve inequality, Perron's formula, and the functional equation of
-$\zeta(s)$, all of which are elementary from a foundational
-perspective.
-\end{remark}
+This axiom asserts the convergence of piecewise integrals in the
+Vasyunin matrix representation. The diagonal case is proved via FTC;
+the off-diagonal case requires the Gauss digamma formula.
+
+\subsection{Axiom 7: \lean{rh\_zeta\_lower\_bound\_from\_zero\_counting}}
+
+This axiom provides a polynomial lower bound on $|\zeta(s)|$ for
+$\re s \geq 1/2 + \varepsilon$, which is the bedrock of the Perron
+contour integration chain. It follows from Hadamard's product formula
+and the zero-counting function $N(T) \sim T\log T / (2\pi)$.
 
 \subsection{The Cathedral Is Provable in ZFC}
 
@@ -225,7 +216,7 @@ perspective.
 \label{thm:zfc}
 The crown theorem $\RH \iff d_N^2 \to 0$, as stated in the
 Cathedral, is provable in $\ZFC$ (indeed in much weaker systems).
-The 7 mathematical axioms are formalization gaps, not foundational
+The 4 mathematical axioms are formalization gaps, not foundational
 gaps. The 3 kernel axioms are equiconsistent with $\ZFC$.
 \end{theorem}
 
@@ -324,7 +315,7 @@ verify the same proofs, providing redundancy.
 Lean kernel (type-checker) & $\sim$5{,}000 \\
 Lean elaborator + tactics & $\sim$100{,}000 \\
 Mathlib library & $\sim$1{,}400{,}000 \\
-Cathedral & $\sim$22{,}670 \\
+Cathedral & $\sim$36{,}738 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -346,8 +337,8 @@ to be true:
   \item \textbf{The hardware produced a wrong result.} Possible
     (cosmic rays, etc.) but mitigated by deterministic rebuilds on
     different machines.
-  \item \textbf{The mathematical axioms are false.} Both axioms are
-    provable in $\ZFC$ by standard methods. If either is false,
+  \item \textbf{The mathematical axioms are false.} All four axioms are
+    provable in $\ZFC$ by standard methods. If any is false,
     there is a fundamental error in classical analytic number theory.
   \item \textbf{The statement was formalized incorrectly.} This is the
     most realistic risk: the Lean type \lean{RiemannHypothesis} might
@@ -472,13 +463,12 @@ a finer gradation:
   \item \textbf{Kernel axioms}: Trusted by design; part of the logic.
     (3 in the Cathedral.)
   \item \textbf{Active mathematical axioms}: Believed true, not yet
-    formalized. On the critical path. (7 in the Cathedral.)
+    formalized. On the critical path. (4 in the Cathedral, v10.)
   \item \textbf{Off-path axioms}: Formalization gaps that do not
-    affect the crown theorem. (35 in the Cathedral.)
+    affect the crown theorem. (43 in the Cathedral.)
   \item \textbf{Theorems}: Machine-verified from axioms and Mathlib.
-    (641 in the Cathedral.)
   \item \textbf{Archived axioms}: Previously active, now proved and
-    excised. (19 eliminated during the project.)
+    excised. (9 graduated axioms eliminated during v3--v10.)
 \end{enumerate}
 
 This gradient makes the \emph{progress} of formalization visible.
@@ -491,8 +481,8 @@ management} concept layered on top of the foundations.
 The axiom-theorem gradient is analogous to the debt-equity spectrum
 in finance: axioms are ``debt'' (promises to prove later) and theorems
 are ``equity'' (fully owned mathematical knowledge). The Cathedral's
-reduction from 56 axioms to 42 (with 7 on the critical path) is a
-deleveraging of the proof's balance sheet.
+reduction from 56 crown axioms to 4 (with 9 graduations along the way)
+is a deleveraging of the proof's balance sheet.
 \end{remark}
 
 % ================================================================
@@ -504,18 +494,20 @@ If the Riemann Hypothesis were proved (by any means), what would
 happen to the Cathedral?
 
 \begin{enumerate}
-  \item \textbf{Axiom~5 becomes a theorem.} The forward direction
-    $\RH \implies d_N^2 \to 0$ would be provable, and the axiom
-    would be eliminated. The crown theorem would depend on 1
-    mathematical axiom.
-  \item \textbf{Axiom~4 might also fall.} The analytic continuation
-    axiom is independent of \RH{} and could be formalized separately.
-    If both axioms were eliminated, the crown theorem would depend
-    on zero mathematical axioms---only the 3 kernel axioms.
-  \item \textbf{The biconditional would become a theorem of
-    Lean~4 + Mathlib.} It would join the ranks of the Four-Color
-    Theorem, the Kepler Conjecture, and the Odd Order Theorem as
-    major results formalized in proof assistants.
+  \item \textbf{PNT axiom becomes a theorem.} When Mathlib gains a
+    forward Wiener--Ikehara Tauberian theorem,
+    \lean{pnt\_mu\_log\_div\_k} closes automatically.
+  \item \textbf{Covariance bound becomes a theorem.} The infrastructure
+    is proved; only the double-sum assembly remains ($\sim$200 lines).
+  \item \textbf{Vasyunin convergence becomes a theorem.} Diagonal is
+    proved; off-diagonal needs the Gauss digamma formula in Lean.
+  \item \textbf{Hadamard bound closes.} Borel--Carath\'eodory is in
+    Mathlib; the gap is connecting it to the polynomial bound.
+  \item \textbf{If all 4 axioms close, the crown theorem depends on
+    zero mathematical axioms}---only the 3 kernel axioms. The
+    biconditional $\RH \iff d_N^2 \to 0$ would join the ranks of the
+    Four-Color Theorem and the Kepler Conjecture as major results
+    formalized in proof assistants.
 \end{enumerate}
 
 Conversely, if \RH{} were \emph{disproved} (a zero found off the
