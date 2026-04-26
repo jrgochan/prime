@@ -48,124 +48,119 @@ const GL8: [(f64, f64); 8] = [
 ];
 
 // ═══════════════════════════════════════════════
-// CHANNEL A: Direct L²(0,1)
+// CHANNEL A: Direct L²(0,1)  [PARALLEL]
 // ═══════════════════════════════════════════════
 
-/// ∫₀¹ (1 - f_N(x))² dx via breakpoint quadrature (MPFR)
-fn channel_a(n: usize, w: &[Float]) -> f64 {
-    let mut bp: Vec<Float> = Vec::new();
-    bp.push(Float::with_val(P, 0));
+/// Evaluate r_N(x)² at a single MPFR point, given pre-filtered weights
+fn eval_rn_sq(x: &Float, w: &[Float]) -> Float {
+    let mut fn_val = Float::with_val(P, 0);
+    for (j, wk) in w.iter().enumerate() {
+        if wk.is_zero() { continue; }
+        let k = (j + 1) as u64;
+        let inv = Float::with_val(P, 1u32) / Float::with_val(P, Float::with_val(P, k) * x);
+        let frac = Float::with_val(P, &inv - inv.clone().floor());
+        fn_val += Float::with_val(P, wk * &frac);
+    }
+    let rn = Float::with_val(P, 1 - &fn_val);
+    rn.square()
+}
+
+/// Build sorted, deduped breakpoints as f64 pairs for parallel iteration
+fn build_x_breakpoints(n: usize, w: &[Float]) -> Vec<(f64, f64)> {
+    let mut bp: Vec<f64> = Vec::with_capacity(n * n);
+    bp.push(0.0);
     for (i, wk) in w.iter().enumerate() {
         if wk.is_zero() { continue; }
-        let k = (i + 1) as u64;
+        let k = (i + 1) as f64;
         for m in 1..=(n as u64) {
-            let x = Float::with_val(P, 1u32) / Float::with_val(P, k * m);
-            if x > 0 && x < 1 { bp.push(x); }
+            let x = 1.0 / (k * m as f64);
+            if x > 0.0 && x < 1.0 { bp.push(x); }
         }
     }
-    bp.push(Float::with_val(P, 1));
+    bp.push(1.0);
     bp.sort_by(|a, b| a.partial_cmp(b).unwrap());
     bp.dedup();
+    // Convert to interval pairs
+    bp.windows(2).filter(|w| w[1] > w[0] + 1e-18).map(|w| (w[0], w[1])).collect()
+}
 
-    let mut total = Float::with_val(P, 0);
-    for i in 0..bp.len() - 1 {
-        let a = &bp[i];
-        let b = &bp[i + 1];
-        if b <= a { continue; }
-        let half = Float::with_val(P, Float::with_val(P, b - a) / 2);
-        let mid = Float::with_val(P, Float::with_val(P, a + b) / 2);
+/// ∫₀¹ (1 - f_N(x))² dx via PARALLEL breakpoint quadrature (MPFR)
+fn channel_a(n: usize, w: &[Float]) -> f64 {
+    let intervals = build_x_breakpoints(n, w);
+
+    let partial_sums: Vec<Float> = intervals.par_iter().map(|&(a_f, b_f)| {
+        let a = Float::with_val(P, a_f);
+        let b = Float::with_val(P, b_f);
+        let half = Float::with_val(P, Float::with_val(P, &b - &a) / 2);
+        let mid = Float::with_val(P, Float::with_val(P, &a + &b) / 2);
+        let mut local = Float::with_val(P, 0);
 
         for &(node, weight) in &GL8 {
             let x = Float::with_val(P, &mid + Float::with_val(P, node) * &half);
             if x <= 0 { continue; }
-
-            let mut fn_val = Float::with_val(P, 0);
-            for (j, wk) in w.iter().enumerate() {
-                if wk.is_zero() { continue; }
-                let k = (j + 1) as u64;
-                let inv = Float::with_val(P, 1u32) / Float::with_val(P, Float::with_val(P, k) * &x);
-                let frac = Float::with_val(P, &inv - inv.clone().floor());
-                fn_val += Float::with_val(P, wk * &frac);
-            }
-            let rn = Float::with_val(P, 1 - &fn_val);
-            total += Float::with_val(P, Float::with_val(P, rn.square() * weight) * &half);
+            let rn_sq = eval_rn_sq(&x, w);
+            local += Float::with_val(P, Float::with_val(P, rn_sq * weight) * &half);
         }
-    }
+        local
+    }).collect();
+
+    let mut total = Float::with_val(P, 0);
+    for s in partial_sums { total += s; }
     total.to_f64()
 }
 
 // ═══════════════════════════════════════════════
-// CHANNEL B: ∫₀^∞ |g_N(u)|² du (log-space)
+// CHANNEL B: ∫₀^∞ |g_N(u)|² du (log-space)  [PARALLEL]
 // ═══════════════════════════════════════════════
 
-/// g_N(u) = r_N(e^{-u}) · e^{-u/2} for u ≥ 0
-/// This is the "flattened residual" from the Parseval bridge proof.
-///
-/// ∫₀^∞ |g_N(u)|² du = ∫₀^∞ |r_N(e^{-u})|² · e^{-u} du
-///
-/// Substituting x = e^{-u}, dx = -e^{-u} du:
-/// = ∫₀¹ |r_N(x)|² dx = Channel A  (the Parseval bridge!)
-///
-/// We compute it independently in u-space with breakpoints at u = ln(k·m).
-fn channel_b(n: usize, w: &[Float]) -> f64 {
-    // Breakpoints in u-space: u = ln(k·m) where {1/(k·e^{-u})} has discontinuities
-    // i.e., k·e^{-u} = m ⟹ u = ln(k/m) for integers m
-    // Since x = e^{-u} ∈ (0,1], we need u ∈ [0, ∞)
-    // In practice u ∈ [0, ln(N·N)] suffices since g_N decays exponentially
-
-    let mut bp: Vec<Float> = Vec::new();
-    bp.push(Float::with_val(P, 0));
+/// Build sorted u-space breakpoint intervals
+fn build_u_breakpoints(n: usize, w: &[Float]) -> Vec<(f64, f64)> {
+    let u_max = ((n * n) as f64).ln();
+    let mut bp: Vec<f64> = Vec::with_capacity(n * n);
+    bp.push(0.0);
     for (i, wk) in w.iter().enumerate() {
         if wk.is_zero() { continue; }
-        let k = (i + 1) as u64;
+        let k = (i + 1) as f64;
         for m in 1..=(n as u64) {
-            // x = 1/(km) is a breakpoint in x-space
-            // u = -ln(x) = ln(km)
-            let u = Float::with_val(P, (k * m) as u64).ln();
-            if u > 0 { bp.push(u); }
+            let u = (k * m as f64).ln();
+            if u > 0.0 && u <= u_max { bp.push(u); }
         }
     }
-    // u_max: beyond this g_N(u) ≈ 0 since r_N(e^{-u}) → 1 but e^{-u} → 0
-    let u_max = Float::with_val(P, Float::with_val(P, n as u64 * n as u64).ln());
-    bp.push(u_max.clone());
+    bp.push(u_max);
     bp.sort_by(|a, b| a.partial_cmp(b).unwrap());
     bp.dedup();
-    bp.retain(|u| *u <= u_max);
-    if bp.is_empty() || bp.last().unwrap() < &u_max { bp.push(u_max); }
+    bp.windows(2).filter(|w| w[1] > w[0] + 1e-18).map(|w| (w[0], w[1])).collect()
+}
 
-    let mut total = Float::with_val(P, 0);
-    for i in 0..bp.len() - 1 {
-        let a = &bp[i];
-        let b = &bp[i + 1];
-        if b <= a { continue; }
-        let half = Float::with_val(P, Float::with_val(P, b - a) / 2);
-        let mid = Float::with_val(P, Float::with_val(P, a + b) / 2);
+/// ∫₀^∞ |g_N(u)|² du via PARALLEL breakpoint quadrature (MPFR)
+/// g_N(u) = r_N(e^{-u}) · e^{-u/2}, so |g_N|² = r_N(e^{-u})² · e^{-u}
+fn channel_b(n: usize, w: &[Float]) -> f64 {
+    let intervals = build_u_breakpoints(n, w);
+
+    let partial_sums: Vec<Float> = intervals.par_iter().map(|&(a_f, b_f)| {
+        let a = Float::with_val(P, a_f);
+        let b = Float::with_val(P, b_f);
+        let half = Float::with_val(P, Float::with_val(P, &b - &a) / 2);
+        let mid = Float::with_val(P, Float::with_val(P, &a + &b) / 2);
+        let mut local = Float::with_val(P, 0);
 
         for &(node, weight) in &GL8 {
             let u = Float::with_val(P, &mid + Float::with_val(P, node) * &half);
             if u < 0 { continue; }
 
-            // x = e^{-u}
-            let neg_u = Float::with_val(P, -&u);
-            let x = neg_u.exp();
+            let x = Float::with_val(P, -&u).exp();
             if x <= 0 || x > 1 { continue; }
 
-            // r_N(x) = 1 - Σ w_k {1/(kx)}
-            let mut fn_val = Float::with_val(P, 0);
-            for (j, wk) in w.iter().enumerate() {
-                if wk.is_zero() { continue; }
-                let k = (j + 1) as u64;
-                let inv = Float::with_val(P, 1u32) / Float::with_val(P, Float::with_val(P, k) * &x);
-                let frac = Float::with_val(P, &inv - inv.clone().floor());
-                fn_val += Float::with_val(P, wk * &frac);
-            }
-            let rn = Float::with_val(P, 1 - &fn_val);
-
-            // |g_N(u)|² = |r_N(e^{-u})|² · e^{-u} = rn² · x
-            let integrand = Float::with_val(P, Float::with_val(P, rn.square()) * &x);
-            total += Float::with_val(P, Float::with_val(P, integrand * weight) * &half);
+            let rn_sq = eval_rn_sq(&x, w);
+            // |g_N(u)|² du = r_N(e^{-u})² · e^{-u} du = rn² · x · du
+            let integrand = Float::with_val(P, rn_sq * &x);
+            local += Float::with_val(P, Float::with_val(P, integrand * weight) * &half);
         }
-    }
+        local
+    }).collect();
+
+    let mut total = Float::with_val(P, 0);
+    for s in partial_sums { total += s; }
     total.to_f64()
 }
 
