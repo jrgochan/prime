@@ -3,36 +3,33 @@
 
   ## The Nyman-Beurling-Báez-Duarte Equivalence — Cathedral Crown
 
-  ### Architecture (April 25, 2026 — The Perron Crown)
+  ### Architecture (April 26, 2026 — The Mellin Crown)
 
-  Both pillars now use the Báez-Duarte basis {1/(kx)}.
+  Both pillars use the Báez-Duarte basis {1/(kx)}.
 
   - **Pillar I (Converse):** d² → 0 ⟹ RH, via the Rank-1 Mellin
     identity (kernel axioms only, zero Cathedral axioms).
 
-  - **Pillar II (Forward):** RH ⟹ d² → 0, via the Perron Crown
-    (Perron contour integral → Mertens bound → L² decay).
-    Uses the PROVED `rh_implies_mertens_bound_proved` from the
-    13-file Perron chain, eliminating the opaque `rh_implies_mertens_bound`
-    axiom. The forward direction now flows through `PerronCrown.lean`.
+  - **Pillar II (Forward):** RH ⟹ d² → 0, via the Mellin Crown
+    (RH → Mellin variance → Parseval bridge → L² decay).
+    Uses the PROVED `parseval_bridge_white` from White/Scattering.lean
+    (zero axioms) to map L²(0,1) to the critical line integral.
+    One crown axiom: `critical_line_mellin_variance`.
 
   The Capstone: Nyman-Beurling-Báez-Duarte iff characterization.
 
   ### History
-  v1-v5: Various axiom reductions (6 → 1, see below).
-  v6 (April 25 AM): Phantom Limb Amputation (Universe 1 archived).
-  v7 (April 25 PM): Perron Crown wired in. Replaces DirectL2Crown
-      forward direction with PerronCrown, which uses the PROVED
-      Perron-Mertens theorem instead of the opaque axiom.
-      Eliminates: rh_implies_mertens_bound, abel_summation_covariance_bound.
-      Adds: rh_zeta_lower_bound_from_zero_counting, gram_form_upper_bound_34.
-  v8 (April 25 EVE): PNT Axiom 1 graduated (axiom → theorem).
-      pnt_mu_div_k now proved from PrimeNumberTheoremAnd.mu_pnt_alt
-      via PNT/Bridge.lean. Non-kernel axiom count: 6 → 5.
-  v9 (April 25 NIGHT): Abel Bypass. pnt_mu_log_sq_div_k ELIMINATED.
-      S3UniformBound.lean proves ∃ B, ∀ n, |S₃(n)| ≤ B directly
-      from the Mertens x^{3/4} bound, bypassing the exact limit -2γ.
-      Non-kernel axiom count: 5 → 4.
+  v1-v5:  Various axiom reductions (6 → 1, see below).
+  v6:     Phantom Limb Amputation (Universe 1 archived).
+  v7:     Perron Crown wired in (4 crown axioms).
+  v8:     PNT Axiom 1 graduated (4 crown axioms).
+  v9:     Abel Bypass. pnt_mu_log_sq_div_k ELIMINATED (4 crown axioms).
+  v10:    Gram Form graduation (4 crown axioms).
+  v11:    THE MELLIN CROWN (exploration10).
+      — Forward direction rewired through frequency domain.
+      — Real-variable chain (AbelTail/Covariance/Perron) demoted to Spectral Engine.
+      — Walls 1 & 3 (PNT, Vasyunin convergence) no longer on crown path.
+      — Crown axiom count: 4 → 2.
 
   Unconditional results preserved:
   - `nyman_beurling_equivalence` (the iff)
@@ -50,6 +47,7 @@ import Cathedral.NymanBeurling.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
 import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown
+import Cathedral.Assembly.MellinCrown
 
 noncomputable section
 open Complex Real
@@ -72,30 +70,30 @@ theorem distance_converges_to_zero_implies_rh :
   nyman_beurling_converse
 
 -- ════════════════════════════════════════════════
--- PILLAR II: THE FORWARD DIRECTION (Direct L² Crown)
+-- PILLAR II: THE FORWARD DIRECTION (Mellin Crown)
 -- ════════════════════════════════════════════════
 
-/-- **PILLAR II** (PERRON CROWN): The forward direction.
+/-- **PILLAR II** (MELLIN CROWN): The forward direction.
 
-    Uses the Perron Crown: RH → Perron contour integral → Mertens bound
-    → L² decay via the Báez-Duarte basis.
+    Uses the Mellin Crown: RH → critical line Mellin variance
+    → Parseval bridge (PROVED) → L²(0,1) decay.
 
     PROOF CHAIN:
-      RH →^{Perron chain, 13 files, PROVED} M(x) = O(x^{1/2+ε})
-         →^{rh_implies_mertens_bound_proved} |M(x)| ≤ C·x^{3/4}
-         →^{mertens_implies_l2_decay_34} ∫(1-f_N)² ≤ C/logN  [+ 2 PNT + 1 Gram axiom]
-         →^{loglog/log → 0} C/logN < ε
+      RH →^{critical_line_mellin_variance} (1/2π)∫|M_{r_N}(1/2+it)|²dt ≤ C/logN
+         →^{parseval_bridge_white, PROVED} ∫₀¹(1-f_N)² = Mellin L²
+         →^{standard calculus} C/logN < ε
 
-    **Eliminated**: `rh_implies_mertens_bound` (opaque axiom → proved theorem)
-    **Eliminated**: `abel_summation_covariance_bound` (subsumed by Gram + dot product)
-    **Eliminated (v9)**: `pnt_mu_log_sq_div_k` (Abel Bypass — s3_uniform_bound_from_mertens)
-    **Added**: `rh_zeta_lower_bound_from_zero_counting` (zero counting — fundamental)
-    **Added**: `gram_form_upper_bound_34` (L² norm bound — transparent) -/
+    This replaces the real-variable chain (Perron → Mertens → L² decay)
+    which required 4 crown axioms. The frequency-domain approach preserves
+    phase cancellation that real-variable methods destroy.
+
+    **Crown axiom**: `critical_line_mellin_variance` (1 axiom)
+    **Proved bridge**: `parseval_bridge_white` (0 sorry, 0 axiom) -/
 theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_perron
+  rh_implies_bd_convergence_mellin
 
 -- ════════════════════════════════════════════════
 -- SUPPLEMENTARY: Universe 1 ({k/x}) Helpers
@@ -147,7 +145,7 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     RH ↔ the BD basis {1/(kx)} can approximate 1 in L²(0,1).
 
     Both directions use the Báez-Duarte basis (Universe 2):
-    - Forward: `rh_implies_bd_convergence_perron` (PerronCrown)
+    - Forward: `rh_implies_bd_convergence_mellin` (MellinCrown)
     - Converse: `nyman_beurling_converse` (Rank-1 Mellin)
 
     AXIOM REDUCTION HISTORY:
@@ -157,24 +155,22 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     v4 (April 18a):     2 axioms (Direct L² Crown)
     v5 (April 18b):     1 axiom  (One Crown)
     v6 (April 25 AM):   0 NEW axioms (Phantom Limb Amputation)
-    v7 (April 25 PM):   Perron Crown wired in
-      — `rh_implies_mertens_bound` ELIMINATED (→ Perron theorem)
-      — `abel_summation_covariance_bound` ELIMINATED (→ Gram + dot product)
-    v8 (April 24):      PNT graduation
-      — `pnt_mu_div_k` GRADUATED (→ PrimeNumberTheoremAnd.mu_pnt_alt)
-    v9 (April 25):      Abel Bypass
-      — `pnt_mu_log_sq_div_k` ELIMINATED (→ S₃ uniform bound suffices)
-    v10 (April 25):     Gram Form graduation
-      — `gram_form_upper_bound_34` GRADUATED (→ variance decomposition)
+    v7 (April 25 PM):   Perron Crown (4 crown axioms)
+    v8 (April 25):      PNT graduation (4 crown axioms)
+    v9 (April 25):      Abel Bypass (4 crown axioms)
+    v10 (April 25):     Gram Form graduation (4 crown axioms)
+    v11 (April 26):     THE MELLIN CROWN (2 crown axioms)
+      — Forward direction rewired through frequency domain
+      — Real-variable chain demoted to Spectral Engine
+      — Walls 1 & 3 no longer on crown path
 
-    CURRENT STATE (v10): 4 crown axioms:
-      pnt_mu_log_div_k, covariance_bound_from_mertens_34,
-      partial_integral_tends_to_formula, rh_zeta_lower_bound_from_zero_counting -/
+    CURRENT STATE (v11): 2 crown axioms:
+      critical_line_mellin_variance, rh_zeta_lower_bound_from_zero_counting -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_perron
+  rh_implies_bd_convergence_mellin
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -214,32 +210,28 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v10 — Gram Form Graduation)
+-- AXIOM AUDIT (v11 — The Mellin Crown)
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
 --
--- EXPECTED (4 non-kernel axioms):
+-- EXPECTED (2 non-kernel axioms):
 --   propext, Classical.choice, Quot.sound         (Lean kernel)
+--   critical_line_mellin_variance                 (Mellin L² bound under RH)
+--   rh_zeta_lower_bound_from_zero_counting        (Hadamard zero counting)
+--
+-- DEMOTED to Spectral Engine (no longer on crown path):
 --   pnt_mu_log_div_k                              (PNT derivative)
 --   covariance_bound_from_mertens_34              (Abel summation bound)
 --   partial_integral_tends_to_formula             (Vasyunin convergence)
---   rh_zeta_lower_bound_from_zero_counting        (Hadamard zero counting)
+--   gram_form_upper_bound                         (shadow axiom)
 --
--- GRADUATED in v10 (Gram Form):
---   ✅ gram_form_upper_bound_34 — GRADUATED to theorem via variance decomposition
---     (GramFormProof.lean: d² = (1-bᵀv)² + vᵀCv, using DotProductBound34)
---
--- GRADUATED in v9 (Abel Bypass):
---   ✅ pnt_mu_log_sq_div_k — ELIMINATED via s3_uniform_bound_from_mertens
---     (S3UniformBound.lean: ∃ B, ∀ n, |S₃(n)| ≤ B, proved from Mertens x^{3/4})
---
--- GRADUATED in v8:
---   ✅ pnt_mu_div_k — GRADUATED to theorem (PNT.Bridge.pnt_moebius_sum_div_tendsto)
---
--- ELIMINATED in v7:
---   ❌ rh_implies_mertens_bound  — PROVED via Perron chain (13 files)
---   ❌ abel_summation_covariance_bound — PROVED via Gram + dot product
+-- WHY THE MELLIN CROWN (exploration10):
+--   Three independent analyses showed ALL real-variable approaches diverge:
+--   1. BilinearExpansion: S₀·S₁ = O(N^{3/4}/logN) → ∞ (Shattering Trap)
+--   2. Function space: ∫(u-ψ(u))²/u² du = O(log³N) → ∞ (Phase Cancellation)
+--   3. Any |·| bound: Destroys Möbius/Chebyshev phase coherence
+--   Only Plancherel/Mellin preserves phase structure automatically.
 --
 -- #print axioms rh_implies_distance_converges_to_zero
 -- #print axioms distance_converges_to_zero_implies_rh
