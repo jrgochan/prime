@@ -3,16 +3,15 @@
 
   ## The Direct L² Crown: RH → d² → 0 Without Vasyunin Matrices
 
-  ELIMINATES THREE AXIOMS in one stroke:
-    - vasyunin_eq_integral (the off-diagonal integral identity)
-    - abel_summation_covariance_bound (the covariance quadratic form bound)
-    - witness_numerator_convergence (the PNT numerator convergence)
+  [ALTERNATIVE PATH — NOT the primary crown.]
+  The primary crown is PerronCrown.lean → MainChain.lean (4 axioms, v10).
+  This file uses the older rh_implies_mertens_bound axiom (graduated in v7
+  via the Perron chain) and is retained for backward compatibility.
 
-  By using the PROVED abel_summation_bd_l2_bound_proved directly,
-  which gives ∫₀¹ (1-f_N)² ≤ C·loglog(N)/log(N) from the Mertens bound alone,
-  we bypass the entire Vasyunin covariance decomposition.
-
-  FINAL CROWN: ONE Cathedral axiom — rh_implies_mertens_bound.
+  HISTORICAL: Eliminated 3 axioms in one stroke (April 18, 2026):
+    - vasyunin_eq_integral
+    - abel_summation_covariance_bound
+    - witness_numerator_convergence
 
   Created: April 18, 2026 (The Crown Restructure)
 -/
@@ -171,14 +170,10 @@ theorem rh_implies_bd_convergence_direct :
 
 -- #print axioms rh_implies_bd_convergence_direct
 
--- EXPECTED: [propext, Classical.choice, Quot.sound,
---            Cathedral.rh_implies_mertens_bound]
---
--- ELIMINATED (3 axioms gone):
---   ❌ abel_summation_covariance_bound — bypassed by direct L² path
---   ❌ vasyunin_eq_integral — bypassed by direct L² path
---   ❌ witness_numerator_convergence — bypassed by direct L² path
---
--- From FOUR axioms to ONE.
+-- NOTE: This is a SUPERSEDED alternative path.
+-- It depends on `rh_implies_mertens_bound`, which was graduated to a
+-- theorem in v7 via the Perron chain. The primary crown path
+-- (MainChain.nyman_beurling_equivalence) uses PerronCrown.lean and
+-- depends on only 4 axioms (v10).
 
 end

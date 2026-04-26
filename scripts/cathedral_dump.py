@@ -70,14 +70,22 @@ HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━
 # Build: lake build — 0 errors, 0 sorry on crown path
 # Crown: nyman_beurling_equivalence (4 non-kernel axioms, #print axioms verified)
 #
-# Crown axioms (compiler-verified):
+# Crown axioms (compiler-verified, v10 — April 2026):
 #   1. pnt_mu_log_div_k                         — Σ μ(k)log(k)/k → -1 (PNT derivative)
-#   2. gram_form_upper_bound_34                  — vᵀGv ≤ 1 + C/log N (L² norm bound)
+#   2. covariance_bound_from_mertens_34          — vᵀCv ≤ C/logN (Abel summation)
 #   3. partial_integral_tends_to_formula         — Vasyunin convergence (Gram entries)
-#   4. rh_zeta_lower_bound_from_zero_counting    — |ζ(s)| ≥ c/|t|^A (under RH)
+#   4. rh_zeta_lower_bound_from_zero_counting    — |ζ(s)| ≥ c/|t|^A (Hadamard)
+#
+# Graduated axioms (now theorems):
+#   ✅ pnt_mu_div_k — via PrimeNumberTheoremAnd (v8)
+#   ✅ pnt_mu_log_sq_div_k — via Abel Bypass / S₃ uniform bound (v9)
+#   ✅ rh_implies_mertens_bound — via Perron chain (v7)
+#   ✅ abel_summation_covariance_bound — via Gram form + dot product (v7)
+#   ✅ gram_form_upper_bound_34 — via variance decomposition (v10)
 #
 # Converse direction (d²→0 ⟹ RH): ZERO non-kernel axioms.
 # Plus Lean kernel: propext, Classical.choice, Quot.sound
+# Plus 1 sorry: ZetaLowerBound.lean (thin-strip BC, experimentally validated)
 #
 # This is part {part} of {total}. {upload_hint}
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

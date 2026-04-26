@@ -47,7 +47,7 @@ axioms: ## List all axioms in the Cathedral
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
-papers: ## Build all 23 companion papers
+papers: ## Build all 24 companion papers
 	@$(ENV) require pdflatex
 	cd papers && ./build.sh
 
@@ -193,7 +193,7 @@ stats: ## Show project statistics
 	@echo ""
 	@printf "  Active Lean files:  " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' | wc -l | tr -d ' '
 	@printf "  Archived files:     " && find proofs/Cathedral -name '*.lean' -path '*/Archive/*' | wc -l | tr -d ' '
-	@printf "  LaTeX papers:       " && ls papers/*.tex 2>/dev/null | wc -l | tr -d ' '
+	@printf "  LaTeX papers:       " && find papers -name '*.tex' -not -path '*/build/*' | wc -l | tr -d ' '
 	@printf "  Total lines:        " && find proofs/Cathedral -name '*.lean' -not -path '*/Archive/*' -not -path '*/.lake/*' -exec cat {} + 2>/dev/null | wc -l | tr -d ' '
 	@printf "  Experiments:        " && find experiments -maxdepth 1 -type d | tail -n +2 | wc -l | tr -d ' '
 	@echo ""
@@ -206,7 +206,7 @@ stats: ## Show project statistics
 clean: ## Clean build artifacts
 	cd proofs && lake clean 2>/dev/null || true
 	find experiments -name target -type d -exec rm -rf {} + 2>/dev/null || true
-	find papers -name '*.aux' -o -name '*.log' -o -name '*.out' -o -name '*.toc' | xargs rm -f 2>/dev/null || true
+	cd papers && ./build.sh clean 2>/dev/null || true
 	@echo "  Build artifacts cleaned."
 
 # ────────────────────────────────────────────

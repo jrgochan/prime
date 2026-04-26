@@ -3,30 +3,14 @@
 
   ## The One-Axiom Crown: RH ↔ d² → 0
 
-  The Cathedral's forward direction reduced to TWO axioms:
+  [ALTERNATIVE PATH — SUPERSEDED by PerronCrown.lean + MainChain.lean]
+  The primary crown now uses 4 axioms (v10) via the Perron chain.
+  This file uses the older rh_implies_mertens_bound axiom (graduated in v7)
+  and is retained for historical documentation and backward compatibility.
 
-    rh_implies_mertens_bound:
-      RH → ∃ C, ∀ x ≥ 2, |M(x)| ≤ C·x^{1/2}·(log x)²
-
-    bd_gram_form_decay:
-      Mertens → ∫₀¹(1-f_N)² ≤ (C+1)²·loglog(N)/logN
-
-  Combined these give:
-    RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v, ∫₀¹(1-f_N)² < ε
-
-  This is Theorem 1.1 of Báez-Duarte (2003), stating that
-  the Riemann Hypothesis implies the Báez-Duarte basis functions
-  {1/(kx)} can approximate 1 in L²(0,1) to arbitrary precision.
-
-  The converse direction (d²→0 → RH) is FULLY PROVED in
-  Cathedral/NymanBeurling/Separation.lean via:
-    ¬RH → ∃ρ off critical line → zeta_zero_separates → d²≥δ>0
-
-  PROOF ROUTE (The Direct BD Path):
-    rh_implies_mertens_bound [AXIOM 1]
-      → bd_gram_form_decay [AXIOM 2]
-      → loglog_div_log_lt_eps [PROVED — calculus]
-      → rh_implies_bd_convergence_direct [PROVED]
+  HISTORICAL: The forward direction was reduced to TWO axioms (v4):
+    rh_implies_mertens_bound (now graduated → Perron theorem)
+    bd_gram_form_decay (off-path Montgomery-Vaughan)
 
   AXIOM HISTORY:
     v1 (March 2026): 6 axioms
@@ -34,8 +18,8 @@
     v3 (April 16):   4 axioms (Parseval Bridge)
     v4 (April 18a):  2 axioms (Direct L² Crown)
     v5 (April 18b):  1 axiom  (One Crown)
-    v6 (April 22):   PROVED via FinalDragon (6 Cathedral axioms on proof path)
-    v7 (April 22):   PROVED via DirectL2Crown (2 Cathedral axioms!) ← NOW
+    v7 (April 22):   Perron Crown replaces this as primary path
+    v10 (April 25):  4 axioms on primary crown (PerronCrown.lean)
 -/
 
 import Cathedral.Defs
@@ -77,8 +61,10 @@ theorem rh_implies_l2_convergence :
 -- ═══════════════════════════════════════════════
 
 -- #print axioms rh_implies_l2_convergence
--- VERIFIED (April 22, 2026): 2 Cathedral axioms + 3 kernel axioms.
---   rh_implies_mertens_bound (MertensBound.lean)
---   bd_gram_form_decay (White/Infrastructure/MontgomeryVaughan.lean)
+-- NOTE: This is a SUPERSEDED alternative path.
+-- The primary crown (MainChain.nyman_beurling_equivalence) uses
+-- PerronCrown.lean and depends on 4 axioms (v10).
+-- This path depends on rh_implies_mertens_bound (graduated v7)
+-- and bd_gram_form_decay (off-path).
 
 end

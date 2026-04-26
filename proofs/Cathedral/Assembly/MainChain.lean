@@ -160,16 +160,16 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     v7 (April 25 PM):   Perron Crown wired in
       — `rh_implies_mertens_bound` ELIMINATED (→ Perron theorem)
       — `abel_summation_covariance_bound` ELIMINATED (→ Gram + dot product)
+    v8 (April 24):      PNT graduation
+      — `pnt_mu_div_k` GRADUATED (→ PrimeNumberTheoremAnd.mu_pnt_alt)
+    v9 (April 25):      Abel Bypass
+      — `pnt_mu_log_sq_div_k` ELIMINATED (→ S₃ uniform bound suffices)
+    v10 (April 25):     Gram Form graduation
+      — `gram_form_upper_bound_34` GRADUATED (→ variance decomposition)
 
-    ELIMINATED (all 6 original + 2 opaque axioms):
-      ❌ vasyunin_bd_index_bridge — proved
-      ❌ vasyunin_eq_integral — bypassed
-      ❌ abel_summation_covariance_bound — PROVED (Gram + dot product decomposition)
-      ❌ witness_numerator_convergence — bypassed
-      ❌ bd_gram_form_decay — collapsed into single axiom
-      ❌ rh_implies_mertens_bound — PROVED (Perron chain, 13 files, 0 sorry)
-      ❌ witness_l2_error_decay_gram — PHANTOM LIMB AMPUTATED
-      ❌ pnt_mu_log_sq_div_k — ELIMINATED (Abel Bypass, s3_uniform_bound_from_mertens) -/
+    CURRENT STATE (v10): 4 crown axioms:
+      pnt_mu_log_div_k, covariance_bound_from_mertens_34,
+      partial_integral_tends_to_formula, rh_zeta_lower_bound_from_zero_counting -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -214,29 +214,34 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v9 — Abel Bypass)
+-- AXIOM AUDIT (v10 — Gram Form Graduation)
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
 --
 -- EXPECTED (4 non-kernel axioms):
 --   propext, Classical.choice, Quot.sound         (Lean kernel)
---   gram_form_upper_bound_34                      (L² norm bound)
---   pnt_mu_log_div_k                              (PNT)
+--   pnt_mu_log_div_k                              (PNT derivative)
+--   covariance_bound_from_mertens_34              (Abel summation bound)
 --   partial_integral_tends_to_formula             (Vasyunin convergence)
---   rh_zeta_lower_bound_from_zero_counting         (Hadamard zero counting)
+--   rh_zeta_lower_bound_from_zero_counting        (Hadamard zero counting)
 --
--- GRADUATED in v8:
---   ✅ pnt_mu_div_k — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
+-- GRADUATED in v10 (Gram Form):
+--   ✅ gram_form_upper_bound_34 — GRADUATED to theorem via variance decomposition
+--     (GramFormProof.lean: d² = (1-bᵀv)² + vᵀCv, using DotProductBound34)
 --
 -- GRADUATED in v9 (Abel Bypass):
 --   ✅ pnt_mu_log_sq_div_k — ELIMINATED via s3_uniform_bound_from_mertens
 --     (S3UniformBound.lean: ∃ B, ∀ n, |S₃(n)| ≤ B, proved from Mertens x^{3/4})
 --
+-- GRADUATED in v8:
+--   ✅ pnt_mu_div_k — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
+--
 -- ELIMINATED in v7:
---   ❌ rh_implies_mertens_bound  — PROVED via Perron chain
+--   ❌ rh_implies_mertens_bound  — PROVED via Perron chain (13 files)
 --   ❌ abel_summation_covariance_bound — PROVED via Gram + dot product
 --
 -- #print axioms rh_implies_distance_converges_to_zero
 -- #print axioms distance_converges_to_zero_implies_rh
 -- #print axioms eigenvalue_limit_exists
+

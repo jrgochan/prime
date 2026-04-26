@@ -8,9 +8,9 @@
   - mertens_34_implies_convergence: x^{3/4} → L² convergence
   - rh_implies_l2_convergence_proved: RH → d²_N → 0 (alternative path)
 
-  This is the ALTERNATIVE crown proof path using 6 Cathedral axioms.
-  The primary crown now uses the Direct BD Path (DirectL2Crown.lean)
-  with only 2 axioms.
+  NOTE: This is an ALTERNATIVE crown proof path, NOT the primary crown.
+  The primary crown uses PerronCrown.lean → MainChain.lean with 4 axioms.
+  This path uses the older 6-axiom route via rh_implies_mertens_bound.
 
   Extracted from FinalDragon.lean §3–§4 (April 22, 2026).
 -/
@@ -127,7 +127,8 @@ theorem rh_implies_l2_convergence_proved :
 -- ════════════════════════════════════════════════
 
 -- #print axioms rh_implies_l2_convergence_proved
--- VERIFIED (April 22, 2026): 6 Cathedral axioms + 3 kernel axioms.
+-- NOTE: This is the ALTERNATIVE path. It uses more axioms than the
+-- primary crown (MainChain.nyman_beurling_equivalence, 4 axioms via PerronCrown).
 -- abel_mertens_tail_raw is NO LONGER listed — it graduated to theorem! 🎓
 
 end

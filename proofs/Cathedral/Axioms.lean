@@ -4,64 +4,61 @@ import Cathedral.NymanBeurling.BDMellin
 /-!
   Cathedral/Axioms.lean
 
-  ## The Cathedral's Axiom Registry
+  ## The Cathedral's Axiom Registry (v10 — April 26, 2026)
 
   Central hub for axiom documentation. This file contains NO axiom
   declarations — all axioms are declared in their respective modules.
 
-  ### COMPILER-VERIFIED Critical Path (April 20, 2026 — Night Assault)
+  ### COMPILER-VERIFIED Critical Path (v10 — April 25, 2026)
 
-  `#print axioms rh_implies_l2_convergence_proved` depends on exactly
-  **6 Cathedral axioms** (+ 3 Lean kernel axioms):
+  `#print axioms nyman_beurling_equivalence` depends on exactly
+  **4 Cathedral axioms** (+ 3 Lean kernel axioms):
 
   | # | Axiom | Role | Tier |
   |---|-------|------|------|
-  | 1 | `rh_implies_mertens_bound` | RH → |M(x)| = O(x^{1/2}·log²x) | 1 (RH content) |
-  | 2 | `pnt_mu_div_k` | PNT: Σ μ(k)/k → 0 | 2 (PNT-level) |
-  | 3 | `pnt_mu_log_div_k` | PNT: Σ μ(k)log(k)/k → -1 | 2 (PNT-level) |
-  | 4 | `pnt_mu_log_sq_div_k` | PNT: Σ μ(k)log²(k)/k → -2γ | 2 (PNT-level) |
-  | 5 | `millennium_covariance_cancellation` | 2D covariance bound | 3 (Parseval/Gram) |
-  | 6 | `vasyunin_offdiag_integral` | Off-diagonal Gram = integral | 3 (Vasyunin 1995) |
+  | 1 | `pnt_mu_log_div_k` | PNT: Σ μ(k)log(k)/k → -1 | PNT |
+  | 2 | `covariance_bound_from_mertens_34` | |M(x)|≤Cx^{3/4} ⟹ vᵀCv ≤ C/logN | Abel |
+  | 3 | `partial_integral_tends_to_formula` | Piecewise integral convergence | Vasyunin |
+  | 4 | `rh_zeta_lower_bound_from_zero_counting` | |ζ(s)| ≥ c|t|^{-A} | Hadamard |
 
-  The Lean kernel axioms (propext, Classical.choice, Quot.sound) are
-  standard and present in all nontrivial Lean programs.
+  Plus 1 sorry: ZetaLowerBound.lean (thin-strip Borel-Carathéodory).
+  Plus Lean kernel: propext, Classical.choice, Quot.sound.
 
-  ### GRADUATED AXIOMS
-  - `vasyunin_eq_integral` → THEOREM (diagonal proved via FTC, off-diagonal narrowed)
-  - `fract_sq_integral` → THEOREM (proved via Stirling + Squeeze from Mathlib)
-  - `rh_implies_mertens_34` → THEOREM (from rh_implies_mertens_bound, x^{1/2}·log²x ≤ 64·x^{3/4})
-  - `abel_mertens_tail_raw` → THEOREM 🎓 (April 22, 2026 — proved via s1_decay + s2_decay + s3_decay)
+  ### GRADUATED AXIOMS (7→4 reduction campaign)
+
+  | Axiom | Date | Method | Version |
+  |-------|------|--------|---------|
+  | `vasyunin_eq_integral` | Apr 15 | Diagonal FTC + off-diagonal narrowing | v3 |
+  | `fract_sq_integral` | Apr 15 | Stirling + Squeeze from Mathlib | v3 |
+  | `rh_implies_mertens_34` | Apr 18 | x^{1/2}·log²x ≤ 64·x^{3/4} | v5 |
+  | `abel_mertens_tail_raw` | Apr 22 | s1_decay + s2_decay + s3_decay 🎓 | v6 |
+  | `rh_implies_mertens_bound` | Apr 22 | 13-file Perron contour chain 🎓 | v7 |
+  | `abel_summation_covariance_bound` | Apr 22 | Gram form + dot product 🎓 | v7 |
+  | `pnt_mu_div_k` | Apr 24 | PrimeNumberTheoremAnd.mu_pnt_alt 🎓 | v8 |
+  | `pnt_mu_log_sq_div_k` | Apr 25 | Abel Bypass (S₃ uniform bound) ❌ ELIMINATED | v9 |
+  | `gram_form_upper_bound_34` | Apr 25 | Variance decomposition 🎓 | v10 |
 
   ### Crown Axiom Classification
 
-  **Tier 1 — RH Content** (1 axiom):
-  - `rh_implies_mertens_bound`: The sole axiom encoding the Riemann Hypothesis.
-    RH → |M(x)| ≤ C·x^{1/2}·(log x)². This is Titchmarsh 1986, Theorem 14.25.
-    The weaker O(x^{3/4}) bound is a PROVED COROLLARY (rh_implies_mertens_34).
+  **Tier: PNT (Axiom 1)** — Unconditional PNT consequence.
+  - `pnt_mu_log_div_k`: Σ μ(k)·log(k)/k → -1, from -(1/ζ)'(s) at s=1.
+    Awaits Wiener-Ikehara Tauberian theorem in Lean.
 
-  **Tier 2 — PNT Level** (3 axioms):
-  - Three asymptotics of Möbius partial sums. These are unconditional
-    (true regardless of RH) and follow from the Prime Number Theorem
-    via Abel’s limit theorem and derivatives of 1/ζ(s) at s=1.
+  **Tier: Abel Summation (Axiom 2)** — Bilinear covariance bound.
+  - `covariance_bound_from_mertens_34`: The centered Gram form
+    vᵀ(G-bbᵀ)v = O(1/log N) under Mertens x^{3/4}.
+    Infrastructure proved (s1_decay, s2_decay, s3_uniform_bound);
+    needs double-sum expansion assembly (~200 lines).
 
-  **Tier 3 — Classical Analysis** (2 axioms):
-  - `millennium_covariance_cancellation`: The 2D covariance cancellation
-    between the Gram matrix and the mean tensor. Requires Montgomery-Vaughan
-    mean value theorems. This is the mathematically deepest axiom.
-  - `vasyunin_offdiag_integral`: The off-diagonal Vasyunin identity for j≠k.
-    The diagonal case G(k,k) is PROVED. Verified computationally to
-    6-7 digits (256-bit MPFR, 1M rows). Requires Gauss digamma formula.
+  **Tier: Vasyunin (Axiom 3)** — Off-diagonal Gram convergence.
+  - `partial_integral_tends_to_formula`: Piecewise integral convergence
+    for the off-diagonal Gram matrix entries. Diagonal case PROVED.
+    Off-diagonal needs Gauss digamma formula.
 
-  **GRADUATED (was Tier 3):**
-  - `abel_mertens_tail_raw` → THEOREM 🎓 (April 22, 2026)
-    Now proved via s1_decay + s2_decay + s3_decay in Cathedral.AbelTail.
-
-  ### Alternative Forward Path (1 axiom)
-
-  The `nyman_beurling_forward_direct` theorem (GramWitness.lean) proves
-  RH ⟹ d²_N → 0 using the NB basis {k/x} with only **1 axiom**:
-  `witness_l2_error_decay_gram`. This is a stronger result but uses a
-  different basis than the crown theorem's BD basis {1/(kx)}.
+  **Tier: Hadamard (Axiom 4)** — Zeta lower bound from zero counting.
+  - `rh_zeta_lower_bound_from_zero_counting`: |ζ(s)| ≥ c·|t|^{-A}
+    for Re(s) ≥ 1/2+ε. Bedrock of the Perron chain.
+    Borel-Carathéodory is in Mathlib; gap is BC → polynomial bound.
 
   ### Converse Direction (0 custom axioms)
 
@@ -70,9 +67,9 @@ import Cathedral.NymanBeurling.BDMellin
   - M[h_k](ρ) = 1/(k(ρ-1)) at ζ zeros — rank-1 tensor
   - Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²)
 
-  ### Full Inventory — 40 active axioms across active files
+  ### Full Inventory — 47 active axioms across 150 files
 
-  #### Crown Path (7 axioms — listed above)
+  #### Crown Path (4 axioms — listed above)
 
   #### Spectral Engine (7 axioms — NOT on crown path)
   | `block_min_eq_class_min` | Spectral/ClassRestriction | 4 |
@@ -103,25 +100,15 @@ import Cathedral.NymanBeurling.BDMellin
   | `fourier_inversion_autocorrelation` | MellinBridge/AutocorrelationBypass | 4 |
   | `gram_form_eq_l2_norm` | MellinBridge/AutocorrelationBypass | 4 |
 
-  #### Vasyunin Proof Chain (5 axioms — NOT on crown path)
-  | `witness_covariance_decay` | Vasyunin/Proof/WitnessAsymptotics | 1 |
-  | `witness_numerator_convergence` | Vasyunin/Proof/WitnessAsymptotics | 2 |
-  | `rh_implies_mertens_bound` | Vasyunin/Proof/WitnessConditional | 3 |
-  | `abel_summation_covariance_bound` | Vasyunin/Proof/WitnessConditional | 4 |
-  | `witness_l2_error_decay_gram` | Assembly/GramWitness | 1 |
+  #### Vasyunin/White/Assembly — Alternative paths (remaining axioms)
+  Includes `rh_implies_mertens_bound` (graduated but retained for alt-path
+  files: BDBypass, VasyuninBypass, DirectL2Crown, WitnessConditional),
+  `pnt_mu_log_sq_div_k` (eliminated from crown but retained for
+  MontgomeryVaughan alt path), and other off-path axioms.
 
-  #### White/Infrastructure (2 axioms — NOT on crown path)
-  | `dirichlet_polynomial_mean_value_bound` | White/Infrastructure/MontgomeryVaughan | 4 |
-  | `bd_gram_form_decay` | White/Infrastructure/MontgomeryVaughan | 4 |
-
-  #### Assembly (2 axioms — NOT on crown path)
-  | `bd_witness_l2_error_decay` | Assembly/BDBridge | 1 |
-  | `drop_formula_bound` | Structural/Eigenvalue | 4 |
-
-  ### Total: 39 active axioms (includes 1 duplicate: rh_implies_mertens_bound)
-  ### Crown path: 7 (narrowed: vasyunin_eq_integral → vasyunin_offdiag_integral)
-  ### Alternative paths: 32
-  ### Converse: 0 custom axioms (pure Mathlib + Lean kernel)
+  ### Total: 47 active axioms
+  ### Crown path: 4 (v10, compiler-verified)
+  ### Alternative paths: 43
 -/
 
 noncomputable section

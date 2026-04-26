@@ -167,11 +167,17 @@ theorem pnt_mu_log_div_k_derived :
 
 -- ════════════════════════════════════════════════
 -- SORRY 2/2: pnt_mu_log_sq_div_k (second derivative of 1/ζ)
+-- NOTE: This axiom was ELIMINATED from the crown path in v9 (Abel Bypass).
+-- The S₃ uniform bound suffices for L² decay. This sorry is OFF-PATH.
 -- ════════════════════════════════════════════════
 
-/-- **SORRY** (blocked by upstream): Σ μ(k)·ln²(k)/k → -2γ.
+/-- **SORRY** (blocked by upstream, OFF CROWN PATH): Σ μ(k)·ln²(k)/k → -2γ.
 
     This is a standard PNT consequence, equivalent to (1/ζ)''(1) = -2γ.
+
+    NOTE: ELIMINATED from the crown path in v9 via the Abel Bypass.
+    The S₃ uniform bound (S3UniformBound.lean) suffices for the L² decay
+    without needing this exact limit.
 
     BLOCKING: Same as sorry 1/2 — needs forward Tauberian + γ from
               ζ's Laurent expansion at s=1.
