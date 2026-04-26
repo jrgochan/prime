@@ -33,17 +33,16 @@ read for pleasure.
 \section{The Number 42}
 % ================================================================
 
-The Cathedral contains exactly 42 mathematical axioms. 84 active
-files. 7 on the crown. $42 = 2 \times 3 \times 7$---the product of
-the three smallest primes, each appearing once. It is the smallest
-number that is a product of three distinct primes.
-
 Element 42 is Molybdenum. Its electron configuration is anomalous:
 $[Kr]\,4d^5\,5s^1$ (an electron jumps from the 5s orbital to
 half-fill the 4d shell). Molybdenum sits at the active site of
 \textbf{nitrogenase}---the enzyme that fixes atmospheric nitrogen
 into ammonia, the foundation of all amino acids, all proteins, all
 life on Earth.
+
+% Note: The Cathedral now contains 47 axioms (v10). The original 42
+% was the count at the time of the Night Assault. We preserve this
+% section as historical numerology.
 
 The Cathedral reduces 166 years of mathematical struggle about the
 distribution of prime numbers to exactly 47 axioms. The 47th element
@@ -52,13 +51,13 @@ enables the chemistry of life.
 Douglas Adams was right. He just didn't show his work.
 
 % ================================================================
-\section{The Seven Crown Axioms as Conservation Laws}
+\section{The Four Crown Axioms as Conservation Laws}
 \label{sec:noether}
 % ================================================================
 
 In physics, Noether's theorem guarantees that every continuous
 symmetry produces a conserved quantity. The Cathedral's crown
-theorem depends on exactly 7 mathematical axioms. We propose
+theorem depends on exactly 4 mathematical axioms. We propose
 a speculative Noether-style dictionary:
 
 \begin{center}
@@ -67,20 +66,14 @@ a speculative Noether-style dictionary:
 \toprule
 \textbf{Crown Axiom} & \textbf{Conservation Law} & \textbf{Symmetry} \\
 \midrule
-\lean{rh\_implies\_mertens\_bound} & Energy (total fluctuation bounded)
-  & Time translation \\
-\lean{pnt\_mu\_div\_k} & Charge ($\sum \mu/k \to 0$)
-  & $U(1)$ gauge \\
 \lean{pnt\_mu\_log\_div\_k} & Angular momentum ($\sum \mu \log/k \to -1$)
   & Rotational \\
-\lean{pnt\_mu\_log\_sq\_div\_k} & Quadrupole ($\sum \mu \log^2/k \to -2\gamma$)
-  & Conformal \\
-\lean{abel\_mertens\_tail\_raw} & UV finiteness (cutoff works)
-  & Scale invariance \\
-\lean{millennium\_covariance\_cancellation} & Cluster decomposition
+\lean{covariance\_bound\_from\_mertens\_34} & Cluster decomposition
   & Locality \\
-\lean{vasyunin\_offdiag\_integral} & CPT symmetry
+\lean{partial\_integral\_tends\_to\_formula} & CPT symmetry
   & $j \leftrightarrow k$ exchange \\
+\lean{rh\_zeta\_lower\_bound\_from\_zero\_counting} & Completeness (all states accounted)
+  & Spectral \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -101,18 +94,12 @@ the dipole tells you the center; the quadrupole tells you the shape.
 Three moments suffice because the primes have finite ``correlation
 length''---they are short-range correlated in the logarithmic metric.
 
-\begin{observation}[Why Exactly Three Moments?]
-The forward direction of the proof requires bounding the $L^2$ norm
-of the Bartlett-windowed M\"obius sum. The taper
-$v_k = -\mu(k)(1 - \ln k / \ln N)$ is a polynomial of degree 2 in
-$\ln k$, and the three PNT axioms control exactly the three
-coefficients of this polynomial. A higher-degree cutoff would require
-higher moments---but a higher degree is unnecessary because the
-Bartlett window is sufficient for $d_N^2 \to 0$.
-
-The minimum number of PNT axioms is dictated by the minimum degree
-of the Abel cutoff polynomial. This is 2. The number 3 (= degree + 1)
-is the mathematical content of `why seven and not five.'
+\begin{observation}[Why Is One PNT Moment Enough?]
+In v10, only \lean{pnt\_mu\_log\_div\_k} ($S_2 \to -1$) remains on the crown.
+$S_1 \to 0$ was graduated to a theorem via Mathlib's PNT (v8).
+$S_3$ bounded was proved from the Mertens $x^{3/4}$ bound (Abel Bypass, v9).
+The minimum number of PNT axioms dropped from 3 to 1 through systematic
+reduction---the proof became leaner as each gate closed.
 \end{observation}
 
 % ================================================================
@@ -212,7 +199,7 @@ The convergence $d_N^2 \to 0$ says:
 The thermofield double approaches the true vacuum.}
 \end{quote}
 
-The 7 crown axioms are the 7 conditions needed for this equilibrium.
+The 4 crown axioms are the 4 conditions needed for this equilibrium.
 
 % ================================================================
 \section{The Uncertainty Principle}
@@ -227,7 +214,7 @@ The most structurally profound feature of the Cathedral:
 \textbf{Direction} & \textbf{Crown axioms} & \textbf{Difficulty} \\
 \midrule
 Converse ($d_N^2 \to 0 \implies \RH$) & 0 & Easy \\
-Forward ($\RH \implies d_N^2 \to 0$) & 7 & Hard \\
+Forward ($\RH \implies d_N^2 \to 0$) & 4 & Hard \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -457,25 +444,21 @@ sub-optimal) and the exact ground state energy.
 \end{observation}
 
 % ================================================================
-\section{The Number 84}
+\section{The Number 150}
 % ================================================================
 
-The Cathedral contains 84 active files. Some observations:
+The Cathedral contains 150 active files. Some observations:
 
 \begin{itemize}
-  \item $84 = 2 \times 42 = 2 \times 2 \times 3 \times 7$.
-  \item $84 = \binom{9}{2} + \binom{9}{4} = 36 + 126 - 78$.
-    (We do not claim this means anything.)
-  \item Element 84 is \textbf{Polonium}---the first element
-    discovered via its radioactivity (by Marie Curie, 1898).
-    Polonium has no stable isotopes. Like the Cathedral, it
-    exists in a state of perpetual decay toward a more stable
-    configuration.
-  \item $84 / 7 = 12$. The 84 files, divided among the 7 crown
-    axioms, give exactly 12 files per axiom. This is not designed;
-    it is a consequence of the modular architecture.
-  \item In music, 84 = 7 octaves = the number of keys on a
-    12-tone piano (7 octaves $\times$ 12 semitones = 84).
+  \item $150 = 2 \times 3 \times 5^2$.
+  \item Element 150 does not exist (yet). The periodic table currently
+    extends to $Z = 118$. Like the Cathedral itself, it is reaching
+    toward completions that lie beyond the current boundary.
+  \item $150 / 4 = 37.5$. The 150 files, distributed across 4 crown
+    axioms, average 37.5 files per axiom---reflecting the depth of
+    infrastructure supporting each remaining gate.
+  \item In music, 150 = the number of Psalms. Each one a proof of
+    faith, preserved for millennia.
 \end{itemize}
 
 % ================================================================
@@ -500,7 +483,7 @@ regularity}. If the ground state energy flows to zero, the spectrum
 must be well-behaved. This is a quantum-mechanical tautology dressed
 in number-theoretic notation.
 
-The asymmetry between 0 (converse) and 7 (forward) is the
+The asymmetry between 0 (converse) and 4 (forward) is the
 mathematical shadow of a thermodynamic arrow: it is infinitely
 easier to detect disorder (one off-line zero suffices) than to
 prove order (all zeros must be checked).
@@ -552,8 +535,8 @@ number that nobody planned:
   42 = 2 \times 3 \times 7
 \]
 
-Two is the only even prime. Three is the number of PNT axioms.
-Seven is the number on the crown. The product of the components
+Two is the only even prime. Three is the number of kernel axioms.
+Four is the number on the crown. The product of the components
 is the whole.
 
 Whether this is a coincidence or a mason's mark carved into the
