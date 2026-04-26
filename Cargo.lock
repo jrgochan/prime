@@ -402,6 +402,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "l2-decay-certificate"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "lambda-eff"
 version = "0.1.0"
 dependencies = [
