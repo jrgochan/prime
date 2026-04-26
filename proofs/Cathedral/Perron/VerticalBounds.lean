@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/Perron/VerticalBounds.lean
+  Cathedral/Perron/VerticalBounds.lean
 
   ## Reusable Lemmas for Vertical Contour Bounds
 
@@ -19,7 +19,7 @@
   - Defs.lean: norm_one_div_two_pi_le
 -/
 
-import Cathedral.White.Infrastructure.Perron.Defs
+import Cathedral.Perron.Defs
 import Cathedral.White.Infrastructure.ZetaConvexity
 
 noncomputable section

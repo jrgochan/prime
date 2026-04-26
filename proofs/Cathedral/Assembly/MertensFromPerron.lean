@@ -20,7 +20,7 @@
   Created: April 23, 2026 (The Mertens Graduation)
 -/
 
-import Cathedral.White.Infrastructure.Perron.PerronMoebius
+import Cathedral.Perron.PerronMoebius
 import Cathedral.MellinBridge.MertensBound
 
 noncomputable section

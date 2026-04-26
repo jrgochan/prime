@@ -1,4 +1,4 @@
-import Cathedral.White.Infrastructure.Perron.Defs
+import Cathedral.Perron.Defs
 
 /-!
 # FTC-Based Integral Bounds for `y^σ`

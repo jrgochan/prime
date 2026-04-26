@@ -1,6 +1,6 @@
-import Cathedral.White.Infrastructure.Perron.Defs
-import Cathedral.White.Infrastructure.Perron.IntegralBounds
-import Cathedral.White.Infrastructure.Perron.Rectangle
+import Cathedral.Perron.Defs
+import Cathedral.Perron.IntegralBounds
+import Cathedral.Perron.Rectangle
 
 /-!
 # Perron Kernel for `y < 1` (No Residue)

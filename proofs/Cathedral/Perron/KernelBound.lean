@@ -1,5 +1,5 @@
-import Cathedral.White.Infrastructure.Perron.ResidueGtOne
-import Cathedral.White.Infrastructure.Perron.ResidueLtOne
+import Cathedral.Perron.ResidueGtOne
+import Cathedral.Perron.ResidueLtOne
 
 /-!
 # The Unified Perron Kernel Bound

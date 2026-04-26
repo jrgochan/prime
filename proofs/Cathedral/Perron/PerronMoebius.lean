@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/Perron/PerronMoebius.lean
+  Cathedral/Perron/PerronMoebius.lean
 
   The Final Assembly: M(x) = O(x^{1/2+eps}) under RH.
 
@@ -14,8 +14,8 @@
   BYPASSES truncated_perron_for_moebius entirely — works directly with X.
 -/
 
-import Cathedral.White.Infrastructure.Perron.AssemblyHelpers
-import Cathedral.White.Infrastructure.Perron.ContourShift
+import Cathedral.Perron.AssemblyHelpers
+import Cathedral.Perron.ContourShift
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction

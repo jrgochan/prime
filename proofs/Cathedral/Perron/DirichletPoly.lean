@@ -1,4 +1,4 @@
-import Cathedral.White.Infrastructure.Perron.Defs
+import Cathedral.Perron.Defs
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Mathlib.Analysis.PSeries
 import Mathlib.Analysis.SumIntegralComparisons

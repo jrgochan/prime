@@ -1,4 +1,4 @@
-import Cathedral.White.Infrastructure.Perron.KernelBound
+import Cathedral.Perron.KernelBound
 
 /-!
 # Perron's Formula: From Kernel to Summatory Function

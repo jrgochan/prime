@@ -1,4 +1,4 @@
-import Cathedral.White.Infrastructure.Perron.Defs
+import Cathedral.Perron.Defs
 
 /-!
 # Rectangle Contour Lemmas for the Perron Kernel

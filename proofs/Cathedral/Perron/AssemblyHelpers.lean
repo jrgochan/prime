@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/Perron/AssemblyHelpers.lean
+  Cathedral/Perron/AssemblyHelpers.lean
 
   Assembly helpers for the Mertens bound: truncated Perron formula
   and vertical contour bound on the σ₀ line.
@@ -15,10 +15,10 @@
   Uses production helpers from VerticalBounds.lean.
 -/
 
-import Cathedral.White.Infrastructure.Perron.DirichletPoly
-import Cathedral.White.Infrastructure.Perron.ContourShift
-import Cathedral.White.Infrastructure.Perron.VerticalBounds
-import Cathedral.White.Infrastructure.Perron.HalfIntegerPerron
+import Cathedral.Perron.DirichletPoly
+import Cathedral.Perron.ContourShift
+import Cathedral.Perron.VerticalBounds
+import Cathedral.Perron.HalfIntegerPerron
 
 noncomputable section
 open Complex Real MeasureTheory Set Filter ArithmeticFunction

@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/Perron/HalfIntegerPerron.lean
+  Cathedral/Perron/HalfIntegerPerron.lean
 
   ## The Silver Bullet: Half-Integer Perron Formula
 
@@ -26,8 +26,8 @@
     - DirichletZetaInverse (summatoryMoebius)
 -/
 
-import Cathedral.White.Infrastructure.Perron.DirichletPoly
-import Cathedral.White.Infrastructure.Perron.KernelBound
+import Cathedral.Perron.DirichletPoly
+import Cathedral.Perron.KernelBound
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Cathedral.White.Infrastructure.SummabilityHelpers
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/Perron/ContourShift.lean
+  Cathedral/Perron/ContourShift.lean
 
   The contour shift under RH: shifting ∫_{Re=c} to ∫_{Re=σ₀} via Cauchy-Goursat.
 
@@ -18,7 +18,7 @@
       perron_integrand_bound_with_zeta, perron_horizontal_contour_vanishes
 -/
 
-import Cathedral.White.Infrastructure.Perron.Formula
+import Cathedral.Perron.Formula
 import Cathedral.White.Infrastructure.DirichletZetaInverse
 import Cathedral.White.Infrastructure.ZetaConvexity
 
