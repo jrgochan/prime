@@ -1,12 +1,16 @@
 /-
-  Cathedral/Assembly.lean
+  Cathedral/Assembly/Assembly.lean
 
-  ## Re-export barrel for the Assembly module.
+  ## Re-export barrel for the Assembly capstone module.
 
-  Assembly contains:
-  - Assembly/QuadFormBridge.lean — variational principle & NB distance structure
-  - Assembly/MainChain.lean     — Nyman-Beurling Equivalence & RH
+  Assembly contains the capstone theorems that wire
+  the Cathedral's topic modules into final equivalences:
+  - MainChain.lean       — nyman_beurling_equivalence (THE theorem)
+  - PerronCrown.lean     — RH → d² → 0 via Perron-Möbius chain
+  - OneCrown.lean        — One-axiom crown
+  - DirectL2Crown.lean   — Direct L² crown
+  - FinalDragon.lean     — Re-export facade
 -/
 
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.Assembly.MainChain

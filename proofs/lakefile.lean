@@ -126,80 +126,85 @@ lean_lib «Cathedral» where
     `Cathedral.AbelTail.Assembly,
     -- Assembly (the crown)
     `Cathedral.Assembly.CertifiedComputation,
-    `Cathedral.Assembly.QuadFormBridge,
+    `Cathedral.NymanBeurling.QuadFormBridge,
     -- GramWitness archived to Cathedral/Archive/Universe1/ (April 25, 2026)
     -- witness_l2_error_decay_gram axiom ELIMINATED
-    `Cathedral.Assembly.BDBridge,
-    `Cathedral.Assembly.BDBypass,
-    `Cathedral.Assembly.VasyuninBypass,
+    `Cathedral.NymanBeurling.BDBridge,
+    `Cathedral.NymanBeurling.BDBypass,
+    `Cathedral.NymanBeurling.VasyuninBypass,
     `Cathedral.Assembly.DirectL2Crown,
-    `Cathedral.Assembly.AbelL2Bridge,
-    `Cathedral.Assembly.MoebiusL1Bound,
-    `Cathedral.Assembly.CalcBounds,
-    `Cathedral.Assembly.DotProductIdentity,
-    `Cathedral.Assembly.AbelEngine,
-    `Cathedral.Assembly.MertensConversion,
-    `Cathedral.Assembly.PNTAbelMean,
-    `Cathedral.Assembly.MillenniumWall,
-    `Cathedral.Assembly.L2Convergence,
-    `Cathedral.Assembly.FinalDragon,
+    `Cathedral.AbelTail.L2Bridge,
+    `Cathedral.Covariance.MoebiusL1Bound,
+    `Cathedral.Covariance.CalcBounds,
+    `Cathedral.Covariance.DotProductIdentity,
+    `Cathedral.AbelTail.Engine,
+    `Cathedral.Perron.MertensConversion,
+    `Cathedral.PNT.AbelMean,
+    `Cathedral.Covariance.MillenniumWall,
+    `Cathedral.Covariance.L2Convergence,
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (single axiom consolidation)
-    `Cathedral.Assembly.PNTBridge,
+    `Cathedral.PNT.Bridge,
     -- Mertens graduation (axiom → theorem via Perron)
-    `Cathedral.Assembly.MertensFromPerron,
+    `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
     `Cathedral.Assembly.PerronCrown,
     -- Gram form graduation (axiom → theorem via split-region L²)
-    `Cathedral.Assembly.GramFormProof,
-    `Cathedral.Assembly.CovarianceDirect,
-    `Cathedral.Assembly.DotProductBound34,
-    -- White Singlet (Phase I: Axiom elimination)
+    `Cathedral.Covariance.GramFormProof,
+    `Cathedral.Covariance.Direct,
+    `Cathedral.Covariance.DotProductBound,
+    -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
-    -- White Singlet Infrastructure (Mathlib-ready scaffolds)
-    `Cathedral.White.Infrastructure.MontgomeryVaughan,
+    -- Analysis (general analytic tools)
+    `Cathedral.Analysis.MontgomeryVaughan,
     -- Perron formula (modular split, zero sorry)
-    `Cathedral.White.Infrastructure.Perron.Defs,
-    `Cathedral.White.Infrastructure.Perron.IntegralBounds,
-    `Cathedral.White.Infrastructure.Perron.Rectangle,
-    `Cathedral.White.Infrastructure.Perron.ResidueGtOne,
-    `Cathedral.White.Infrastructure.Perron.ResidueLtOne,
-    `Cathedral.White.Infrastructure.Perron.KernelBound,
-    `Cathedral.White.Infrastructure.Perron.Formula,
+    `Cathedral.Perron.Defs,
+    `Cathedral.Perron.IntegralBounds,
+    `Cathedral.Perron.Rectangle,
+    `Cathedral.Perron.ResidueGtOne,
+    `Cathedral.Perron.ResidueLtOne,
+    `Cathedral.Perron.KernelBound,
+    `Cathedral.Perron.Formula,
     -- Perron-Möbius chain: M(x) = O(x^{1/2+ε}) under RH
-    `Cathedral.White.Infrastructure.Perron.ContourShift,
-    `Cathedral.White.Infrastructure.Perron.DirichletPoly,
-    `Cathedral.White.Infrastructure.SummabilityHelpers,
-    `Cathedral.White.Infrastructure.Perron.HalfIntegerPerron,
-    `Cathedral.White.Infrastructure.Perron.VerticalBounds,
-    `Cathedral.White.Infrastructure.Perron.AssemblyHelpers,
-    `Cathedral.White.Infrastructure.Perron.PerronMoebius,
+    `Cathedral.Perron.ContourShift,
+    `Cathedral.Perron.DirichletPoly,
+    `Cathedral.Perron.SummabilityHelpers,
+    `Cathedral.Perron.HalfIntegerPerron,
+    `Cathedral.Perron.VerticalBounds,
+    `Cathedral.Perron.AssemblyHelpers,
+    `Cathedral.Perron.PerronMoebius,
     -- Dirichlet series inverse: L(μ,s) = 1/ζ(s) (PROVED)
-    `Cathedral.White.Infrastructure.DirichletZetaInverse,
+    `Cathedral.Zeta.DirichletInverse,
     -- Conditional Lindelöf bound + horizontal contour vanishing (2 sorry)
-    `Cathedral.White.Infrastructure.ZetaConvexity,
+    `Cathedral.Zeta.Convexity,
     -- Gamma function norm bounds (PROVED, zero sorry)
-    `Cathedral.White.Infrastructure.GammaBound,
+    `Cathedral.Analysis.GammaBound,
     -- Zeta convexity bound (WIP)
-    `Cathedral.White.Infrastructure.ZetaConvexityBound,
+    `Cathedral.Zeta.ConvexityBound,
     -- Zeta disk geometry & upper bounds (zero sorry)
-    `Cathedral.White.Infrastructure.ZetaDiskBounds,
+    `Cathedral.Zeta.DiskBounds,
     -- Zeta tail bound: ‖ζ(s)-1‖ < 1 for Re(s) ≥ 2 (PROVED, zero sorry)
-    `Cathedral.White.Infrastructure.ZetaTailBound,
+    `Cathedral.Zeta.TailBound,
     -- Hadamard three-circles + zero-counting axiom (thin-strip infrastructure)
-    `Cathedral.White.Infrastructure.ZetaHadamard,
+    `Cathedral.Zeta.Hadamard,
     -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
-    `Cathedral.White.Infrastructure.ZetaLowerBound,
+    `Cathedral.Zeta.LowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
-    `Cathedral.White.Infrastructure.HilbertInequality,
+    `Cathedral.Analysis.HilbertInequality,
     -- Dirichlet test for series convergence (PROVED, zero sorry, zero axiom)
-    `Cathedral.White.Infrastructure.DirichletTest,
-    `Cathedral.White.Infrastructure.CenteredFractBound,
+    `Cathedral.Analysis.DirichletTest,
+    `Cathedral.Analysis.CenteredFractBound,
     -- Partial sum convergence (Vasyunin integral decomposition)
     `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
     -- Integral = S_combined evaluative plumbing (building)
     `Cathedral.Vasyunin.Cotangent.IntegralEqSCombined,
+    -- Resurrected from Archive (zero sorry, verified)
+    `Cathedral.Vasyunin.Matrix.GramPSD,
+    `Cathedral.Vasyunin.Proof.BartlettWindow,
+    `Cathedral.IntegralBasis.BaezDuarte,
+    `Cathedral.IntegralBasis.Quantitative,
+    `Cathedral.Analysis.IntervalCalc,
   ]

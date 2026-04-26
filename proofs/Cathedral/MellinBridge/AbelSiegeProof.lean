@@ -20,7 +20,7 @@
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.MellinBridge.PlancherelBypass
-import Cathedral.Assembly.MoebiusL1Bound
+import Cathedral.Covariance.MoebiusL1Bound
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.MellinBridge.AbelSummation
 import Cathedral.MellinBridge.MertensIntegral

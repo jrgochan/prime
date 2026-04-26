@@ -3,7 +3,7 @@
 
   REUSES CATHEDRAL INFRASTRUCTURE:
   - AbelSummation.lean: abel_summation, abel_summation_abs_bound (PROVED)
-  - AbelEngine.lean: tendsto_extract_bound, tendsto_universal_bound (PROVED)
+  - AbelTail/Engine.lean: tendsto_extract_bound, tendsto_universal_bound (PROVED)
   - FractIntegral.lean: HasDerivAt + integral_eq_sub_of_hasDerivAt pattern (BLUEPRINT)
   - MertensIntegral.lean: convergent_log_series_bound, log domination (PROVED)
 
@@ -13,7 +13,7 @@
   C. Antiderivative Hack: F(t) = -4·t^{-1/4}, F'(t) = t^{-5/4}
 -/
 
-import Cathedral.Assembly.AbelEngine
+import Cathedral.AbelTail.Engine
 import Cathedral.MellinBridge.AbelSummation
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.MertensIntegral

@@ -20,7 +20,7 @@ import Cathedral.AbelTail.MertensBridge
 import Cathedral.AbelTail.DiscreteProductRule
 import Cathedral.AbelTail.LogTailBound
 import Cathedral.MellinBridge.AbelSummation
-import Cathedral.Assembly.AbelEngine
+import Cathedral.AbelTail.Engine
 
 noncomputable section
 open Real Finset BigOperators

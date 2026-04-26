@@ -19,7 +19,7 @@ import Cathedral.AbelTail.AbelInterior
 import Cathedral.AbelTail.RectangleBound
 import Cathedral.AbelTail.Telescoping
 import Cathedral.AbelTail.MertensBridge
-import Cathedral.Assembly.AbelEngine
+import Cathedral.AbelTail.Engine
 import Cathedral.MellinBridge.AbelSummation
 
 noncomputable section

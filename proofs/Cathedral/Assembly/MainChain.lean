@@ -28,7 +28,7 @@
       Adds: rh_zeta_lower_bound_from_zero_counting, gram_form_upper_bound_34.
   v8 (April 25 EVE): PNT Axiom 1 graduated (axiom → theorem).
       pnt_mu_div_k now proved from PrimeNumberTheoremAnd.mu_pnt_alt
-      via PNTBridge.lean. Non-kernel axiom count: 6 → 5.
+      via PNT/Bridge.lean. Non-kernel axiom count: 6 → 5.
   v9 (April 25 NIGHT): Abel Bypass. pnt_mu_log_sq_div_k ELIMINATED.
       S3UniformBound.lean proves ∃ B, ∀ n, |S₃(n)| ≤ B directly
       from the Mertens x^{3/4} bound, bypassing the exact limit -2γ.
@@ -43,10 +43,10 @@
 import Cathedral.Defs
 import Cathedral.Structural.Structural
 import Cathedral.MellinBridge.Basic
-import Cathedral.Assembly.QuadFormBridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Cathedral.NymanBeurling.NymanBeurling
-import Cathedral.Assembly.BDBypass
-import Cathedral.Assembly.VasyuninBypass
+import Cathedral.NymanBeurling.BDBypass
+import Cathedral.NymanBeurling.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
 import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown
@@ -235,7 +235,7 @@ end
 --     (S3UniformBound.lean: ∃ B, ∀ n, |S₃(n)| ≤ B, proved from Mertens x^{3/4})
 --
 -- GRADUATED in v8:
---   ✅ pnt_mu_div_k — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
+--   ✅ pnt_mu_div_k — GRADUATED to theorem (PNT.Bridge.pnt_moebius_sum_div_tendsto)
 --
 -- ELIMINATED in v7:
 --   ❌ rh_implies_mertens_bound  — PROVED via Perron chain (13 files)
