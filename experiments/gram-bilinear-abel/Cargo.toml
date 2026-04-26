@@ -1,0 +1,10 @@
+[package]
+name = "gram-bilinear-abel"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Bilinear Abel Summation & Off-Diagonal Cancellation Validator — certifies the double Abel summation structure of vᵀGv and off-diagonal → O(1/logN) at 256-bit MPFR precision"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

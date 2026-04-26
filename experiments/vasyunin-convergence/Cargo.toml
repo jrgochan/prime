@@ -1,0 +1,12 @@
+[package]
+name = "vasyunin-convergence"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Vasyunin Convergence Validator — certifies partial_sum_tends_to_formula by verifying ∫_{1/(aM)}¹{1/(ax)}{1/(bx)}dx → vasyuninGramFormula(a,b) as M→∞ with O(1/(aM)) tail bound"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

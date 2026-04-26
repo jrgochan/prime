@@ -1,0 +1,2 @@
+import Cathedral.Assembly.VasyuninBypass
+#print axioms rh_implies_bd_convergence_vasyunin
