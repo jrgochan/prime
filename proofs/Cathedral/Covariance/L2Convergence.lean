@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/L2Convergence.lean
+  Cathedral/Covariance/L2Convergence.lean
 
   ## L² Convergence: The Alternative Chain Crown
 

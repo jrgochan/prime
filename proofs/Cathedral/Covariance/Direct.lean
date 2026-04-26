@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/CovarianceDirect.lean
+  Cathedral/Covariance/Direct.lean
 
   ## Direct Covariance Bound: Graduating covariance_bound_from_mertens_34
 

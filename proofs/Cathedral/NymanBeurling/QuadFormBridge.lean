@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/QuadFormBridge.lean
+  Cathedral/NymanBeurling/QuadFormBridge.lean
 
   ## NB Distance Structural Theorems.
 

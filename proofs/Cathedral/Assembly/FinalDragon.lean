@@ -7,7 +7,7 @@
   As of April 22, 2026, it has been decomposed into:
 
   - MertensConversion.lean: rh_implies_mertens_34 (x^{1/2}·log²x → x^{3/4})
-  - PNTAbelMean.lean: PNT axioms + Abel tail + mean bound (566 lines)
+  - PNT/AbelMean.lean: PNT axioms + Abel tail + mean bound (566 lines)
   - MillenniumWall.lean: Gram form axiom + covariance graduation 🎓🎓
   - L2Convergence.lean: L² decay + convergence theorem
 

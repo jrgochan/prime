@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/DotProductIdentity.lean
+  Cathedral/Covariance/DotProductIdentity.lean
 
   ## Algebraic Identity: 1 - bᵀv = (1-γ)·S₁ + (S₂+1) - [(1-γ)·S₂+S₃]/logN
 

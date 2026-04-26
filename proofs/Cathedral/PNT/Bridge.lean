@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/PNTBridge.lean
+  Cathedral/PNT/Bridge.lean
 
   ## The PNT Bridge: From PrimeNumberTheoremAnd to Cathedral
 
@@ -21,7 +21,7 @@
     - MainChain.lean builds with ZERO sorrys
     - The log-weighted sums flow through PNTAbelMean → MillenniumWall → FinalDragon
       which is an ALTERNATIVE chain, not the primary MainChain path
-    - The OneCrown/DirectL2Crown path uses PNT axioms from PNTAbelMean.lean
+    - The OneCrown/DirectL2Crown path uses PNT axioms from PNT/AbelMean.lean
       (not PNTBridge), so PNTBridge sorrys are completely isolated
 
   ### Why the 2 sorrys cannot be closed now

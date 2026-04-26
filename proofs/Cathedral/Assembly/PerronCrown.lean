@@ -83,7 +83,7 @@ private theorem sq_ge_one_minus' (S δ : ℝ)
     _ ≥ 0 + 2 * (1 - δ) - 1 := by linarith [sq_nonneg (S - 1)]
     _ = 1 - 2 * δ := by ring
 
--- §2 DOT PRODUCT BOUND: Now in DotProductBound34.lean (imported via GramFormProof)
+-- §2 DOT PRODUCT BOUND: Now in Covariance/DotProductBound.lean (imported via GramFormProof)
 -- moebius_dot_product_approx_one_uniform_34 is available from that import.
 
 -- ═══════════════════════════════════════════════
@@ -333,7 +333,7 @@ theorem nyman_beurling_equivalence_perron :
 --   gram_form_upper_bound_34                 (L² norm — classical analysis)
 --
 -- GRADUATED in v8:
---   ✅ pnt_mu_div_k  — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
+--   ✅ pnt_mu_div_k  — GRADUATED to theorem (PNT.Bridge.pnt_moebius_sum_div_tendsto)
 --
 -- GRADUATED (axiom → theorem):
 --   ✅ abel_summation_covariance_bound_34  — PROVED from gram_form + dot product

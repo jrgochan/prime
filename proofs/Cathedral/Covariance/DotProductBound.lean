@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/DotProductBound34.lean
+  Cathedral/Covariance/DotProductBound.lean
 
   ## Dot Product Bound from x^{3/4} Mertens
 

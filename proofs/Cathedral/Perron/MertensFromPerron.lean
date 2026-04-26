@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/MertensFromPerron.lean
+  Cathedral/Perron/MertensFromPerron.lean
 
   ## Graduating rh_implies_mertens_bound from Axiom to Theorem
 

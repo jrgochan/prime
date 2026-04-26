@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/VasyuninBypass.lean
+  Cathedral/NymanBeurling/VasyuninBypass.lean
 
   ## The Vasyunin Bypass: RH → d² → 0 via Covariance Decomposition
 

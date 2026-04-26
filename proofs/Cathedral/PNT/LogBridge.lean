@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/PNTLogBridge.lean
+  Cathedral/PNT/LogBridge.lean
 
   ## The Log-Weighted PNT Bridge: Σ μ(k)·log(k)/k → -1
 
@@ -133,7 +133,7 @@ private lemma frac_error_isLittleO :
 
 /-- **THE GRADUATED AXIOM**: Σ μ(k)·log(k)/k → -1 (discrete, ℕ-indexed).
 
-    This replaces the axiom `pnt_mu_log_div_k` in PNTAbelMean.lean. -/
+    This replaces the axiom `pnt_mu_log_div_k` in PNT/AbelMean.lean. -/
 theorem pnt_mu_log_div_k_proved :
     Tendsto (fun N =>
       ∑ k ∈ Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *

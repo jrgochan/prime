@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/MoebiusL1Bound.lean
+  Cathedral/Covariance/MoebiusL1Bound.lean
 
   ## THE MÖBIUS LINEAR TERM AND L² ASSEMBLY
 

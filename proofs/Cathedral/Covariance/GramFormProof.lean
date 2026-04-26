@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/GramFormProof.lean
+  Cathedral/Covariance/GramFormProof.lean
 
   ## Graduating gram_form_upper_bound_34
 
@@ -92,7 +92,7 @@ private lemma sq_le_one_plus_three_delta (S δ : ℝ) (hδ : 0 ≤ δ) (hδ1 : �
 
     Dependencies:
     - covariance_bound_from_mertens_34 (axiom, replaces gram_form axiom)
-    - moebius_dot_product_approx_one_uniform_34 (PROVED, DotProductBound34.lean)
+    - moebius_dot_product_approx_one_uniform_34 (PROVED, Covariance/DotProductBound.lean)
     - vasyuninCovMatrix decomposition (PROVED, VasyuninBypass.lean) -/
 theorem gram_form_upper_bound_34_proved
     (hMertens : ∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →

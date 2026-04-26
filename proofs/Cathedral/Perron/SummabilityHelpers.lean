@@ -1,5 +1,5 @@
 /-
-  Cathedral/White/Infrastructure/SummabilityHelpers.lean
+  Cathedral/Perron/SummabilityHelpers.lean
 
   ## Summability Helpers for Real Power Series
 

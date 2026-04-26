@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/BDBridge.lean
+  Cathedral/NymanBeurling/BDBridge.lean
 
   ## The BD L² Bridge
 

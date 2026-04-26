@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/CalcBounds.lean
+  Cathedral/Covariance/CalcBounds.lean
 
   ## Calculus Bounds for the Dot Product Assembly
 

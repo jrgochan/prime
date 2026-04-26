@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/AbelL2Bridge.lean
+  Cathedral/AbelTail/L2Bridge.lean
 
   ## The Abel-L² Bridge: Mertens O(x^{3/4}) → L² bound
 

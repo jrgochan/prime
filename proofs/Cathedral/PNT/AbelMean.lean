@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/PNTAbelMean.lean
+  Cathedral/PNT/AbelMean.lean
 
   ## PNT Axioms, Abel Tail Bounds, and the Mean Bound
 

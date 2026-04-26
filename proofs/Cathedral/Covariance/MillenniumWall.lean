@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/MillenniumWall.lean
+  Cathedral/Covariance/MillenniumWall.lean
 
   ## The Millennium Wall: Gram Form & Covariance Graduation 🎓🎓
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/BDBypass.lean
+  Cathedral/NymanBeurling/BDBypass.lean
 
   ## The Great Pivot: RH → L² Bound (Pillar II Bridge)
 
