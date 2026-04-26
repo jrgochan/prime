@@ -28,6 +28,7 @@ members = [
     "experiments/perron-contour",
     "experiments/vasyunin-convergence",
     "experiments/gram-bilinear-abel",
+    "experiments/l2-decay-certificate",
     "experiments/two-tile-analyzer",
     "experiments/gram-pointwise",
 ]
