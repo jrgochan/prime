@@ -67,7 +67,7 @@ The proof decomposes into two pillars:
     Proved via the Rank-1 Mellin Miracle. \emph{Zero custom axioms.}
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
     Proved via the Final Dragon chain. \emph{Six custom axioms.}
-    (Reduced from seven on April~22, 2026, when the Abel tail axiom
+    (Reduced from seven to four via v7--v10 graduations (April~22--25, 2026
     was graduated to a theorem.)
 \end{itemize}
 
@@ -90,7 +90,7 @@ $\times$ & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & \textb
 6 & \lean{vasyunin\_offdiag\_integral} & Off-diagonal Gram identity & 3 (Vasyunin) \\
 \bottomrule
 \end{tabular}
-\caption{The crown axioms. Originally seven; reduced to six on April~22, 2026
+\caption{The crown axioms. Originally seven; reduced to four via v7--v10 (April~22--25, 2026)
 when the Abel tail axiom was graduated to a theorem. Tier~1 encodes RH
 content; Tier~2 is unconditional (PNT-level); Tier~3 is classical analysis.
 The converse direction uses zero custom axioms.}
@@ -221,7 +221,7 @@ The proof required 4 new files in \lean{AbelTail/} (Telescoping, AbelInterior,
 LogTailBound, MononotoneBound) plus assembly in \lean{CalcBounds.lean}.
 All files have zero sorry.
 
-This graduation reduces the crown path from 7 to 6 axioms and proves
+Combined with v8--v10, the crown path is reduced from 7 to 4 axioms. This graduation proves
 that the ``thermodynamic hierarchy'' of the Mertens function---the
 magnetization ($S_1$), susceptibility ($S_2$), and heat capacity ($S_3$)
 of the prime number gas---converges at rate $N^{-1/4}$.

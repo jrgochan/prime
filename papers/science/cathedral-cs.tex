@@ -25,7 +25,7 @@ We report on the design, construction, and maintenance of the
 Mathlib v4.30) that establishes the logical equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
 distance. The project comprises 84 active source files containing
-641 theorems and 42 axioms, with an additional 96 archived files
+theorems and 47 axioms, with an additional 130 archived files
 preserving superseded approaches. We describe the software
 engineering challenges of large-scale proof formalization:
 modular architecture with explicit dependency management, axiom
@@ -60,7 +60,7 @@ The Cathedral project provides a case study in these challenges. Over
 Hypothesis in Lean~4, producing a system that is:
 
 \begin{itemize}
-  \item \textbf{Large}: 22,670 lines of active Lean code across 84 files,
+  \item \textbf{Large}: 36,738 lines of active Lean code across 150 files,
     plus 23,115 lines of archived code across 96 files.
   \item \textbf{Modular}: 11 modules with explicit dependency DAGs.
   \item \textbf{Evolving}: The axiom count on the critical path was
@@ -101,7 +101,7 @@ Lean version & 4.30.0-rc1 \\
 Mathlib dependency & v4.30 (leanprover-community/mathlib4) \\
 Active source files & 78 \\
 Archived source files & 96 \\
-Active lines of code & 22,670 \\
+Active lines of code & 36,738 \\
 Archived lines of code & 23,115 \\
 Theorems \& lemmas (active) & 644 \\
 Axioms (active) & 40 \\
@@ -238,6 +238,10 @@ axiom rh_implies_mertens_bound :
     |mertensFunction x| <= C * x ^ (1/2 : Real) * (Real.log x) ^ 2
 \end{lstlisting}
 
+\noindent\emph{Note: This axiom was graduated to a theorem in v7 (April~22)
+via the Perron contour integration chain. It is shown here as a
+historical example of the axiom declaration pattern.}
+
 Each axiom declaration includes a docstring with:
 (a) the mathematical content in natural language,
 (b) the classical source or reference, and
@@ -367,7 +371,7 @@ This reduced the active axiom count from 49 to 39 ($-20\%$).
 \toprule
 \textbf{Category} & \textbf{Files} & \textbf{LOC} & \textbf{\% of Total} \\
 \midrule
-Active code & 78 & 22,670 & 46\% \\
+Active code & 150 & 36,738 & 46\% \\
 Archived code & 96 & 23,115 & 54\% \\
 \midrule
 Total produced & 174 & 43,041 & 100\% \\
@@ -497,7 +501,7 @@ A nuance deserves emphasis: the ``Collaborative'' entries are not
 courtesy attributions. The AI actively proposed proof strategies---the
 Parseval Bridge implementation path, the Abel summation architecture,
 the Rank-1 Mellin approach to the converse direction, and the axiom
-elimination campaigns that reduced the crown path from 56 to 7 axioms.
+elimination campaigns that reduced the crown path from 56 to 4 axioms.
 While the human made final strategic decisions, the AI's proposals
 were substantive mathematical contributions, not mere implementation
 suggestions.

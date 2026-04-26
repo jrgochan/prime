@@ -133,11 +133,11 @@ Our proof was verified by a program called \textbf{Lean~4}, developed at
 Microsoft Research. It uses a mathematical library called \textbf{Mathlib}
 that contains over 100,000 theorems, all of them machine-checked.
 
-The result: every step of our argument --- all 84 files of it --- has been
+The result: every step of our argument --- all 150 files of it --- has been
 verified by the computer. There are zero errors. Zero gaps. Zero
 assumptions that aren't explicitly stated.
 
-What \emph{is} explicitly stated are seven assumptions (mathematicians call
+What \emph{is} explicitly stated are four assumptions (mathematicians call
 them ``axioms'') that our proof relies on. These are well-understood facts
 from classical mathematics that have been proved by humans but haven't
 yet been translated into Lean. They are the only places where you
@@ -250,7 +250,7 @@ exists as a single, machine-verified artifact where every assumption is
 named, every deduction is checked, and every dead end is preserved.
 
 If someone does eventually prove the Riemann Hypothesis, they will need
-to establish the seven facts that our proof takes as axioms. Conversely,
+to establish the four facts that our proof takes as axioms. Conversely,
 if someone finds a counterexample --- a zero that doesn't line up ---
 our proof tells you exactly what that would break: the sawtooth
 approximation would hit a wall and stop converging.
