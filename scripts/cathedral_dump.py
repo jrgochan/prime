@@ -3,7 +3,7 @@
 cathedral_dump.py — Balanced dump of Cathedral .lean files into N output files.
 
 Usage:
-  python3 scripts/cathedral_dump.py [--mode rh|all] [--parts N] [--outdir DIR]
+  python3 scripts/cathedral_dump.py --mode rh|all [--parts N] [--outdir DIR]
 
 Modes:
   rh   — Critical path only (files on the crown theorem's dependency chain)
@@ -22,25 +22,42 @@ from datetime import datetime
 CATHEDRAL_DIR = Path("proofs/Cathedral")
 
 # Files on the critical path to nyman_beurling_equivalence
-# Ordered by dependency depth (foundations first)
+# These patterns are matched against the relative path from proofs/Cathedral/
+# Updated: April 25, 2026 (v10 — 4 axioms, 114 modules)
 CRITICAL_PATH_PATTERNS = [
+    # Foundations
     "Defs.lean",
     "Axioms.lean",
+    # Linear algebra
     "LinearAlgebra/",
+    # Gram matrix infrastructure
     "Gram/",
+    # Vasyunin discrete formula
     "Vasyunin/Defs.lean",
     "Vasyunin/Witness.lean",
     "Vasyunin/Matrix/",
     "Vasyunin/Augmented/",
     "Vasyunin/Cotangent/",
     "Vasyunin/Proof/",
+    # Nyman-Beurling equivalence (converse direction)
     "NymanBeurling/",
+    # Assembly (forward direction)
     "Assembly/",
-    "MellinBridge/MertensBound.lean",
-    "MellinBridge/MertensIntegral.lean",
-    "MellinBridge/BDWeights.lean",
+    # Mellin bridge
+    "MellinBridge/",
+    # Structural
+    "Structural/",
+    # White infrastructure (Perron chain + zeta bounds)
     "White/Kinematics.lean",
     "White/Scattering.lean",
+    "White/Infrastructure/",
+    # Abel tail bounds
+    "AbelTail/",
+    # Sieve (ParitySchur is imported)
+    "Sieve/ParitySchur.lean",
+    # Spectral (PTSymmetry, RayleighBridge are imported)
+    "Spectral/PTSymmetry.lean",
+    "Spectral/RayleighBridge.lean",
 ]
 
 HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -51,17 +68,16 @@ HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
 # Lean 4 + Mathlib — {mode_desc}
 # Build: lake build — 0 errors, 0 sorry on crown path
-# Crown: nyman_beurling_equivalence (7 axioms, #print axioms verified)
-# Total: 84 active files, 42 axioms
+# Crown: nyman_beurling_equivalence (4 non-kernel axioms, #print axioms verified)
 #
-# Crown axioms:
-#   1. rh_implies_mertens_bound   — RH → |M(x)| = O(x^{{1/2}} log²x)
-#   2. pnt_mu_div_k               — Σ μ(k)/k → 0 (PNT)
-#   3. pnt_mu_log_div_k           — Σ μ(k)log(k)/k → -1 (PNT)
-#   4. pnt_mu_log_sq_div_k        — Σ μ(k)log²(k)/k → -2γ (PNT)
-#   5. abel_mertens_tail_raw      — Abel summation tail bounds
-#   6. millennium_covariance_cancellation — 2D covariance bound
-#   7. vasyunin_offdiag_integral   — Off-diagonal Gram = integral
+# Crown axioms (compiler-verified):
+#   1. pnt_mu_log_div_k                         — Σ μ(k)log(k)/k → -1 (PNT derivative)
+#   2. gram_form_upper_bound_34                  — vᵀGv ≤ 1 + C/log N (L² norm bound)
+#   3. partial_integral_tends_to_formula         — Vasyunin convergence (Gram entries)
+#   4. rh_zeta_lower_bound_from_zero_counting    — |ζ(s)| ≥ c/|t|^A (under RH)
+#
+# Converse direction (d²→0 ⟹ RH): ZERO non-kernel axioms.
+# Plus Lean kernel: propext, Classical.choice, Quot.sound
 #
 # This is part {part} of {total}. {upload_hint}
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -80,7 +96,9 @@ def collect_files(mode: str) -> list[tuple[str, int]]:
 
         if mode == "rh":
             # Only include files matching critical path patterns
-            if not any(pat in relpath for pat in CRITICAL_PATH_PATTERNS):
+            # Match against the Cathedral-relative path
+            cat_relpath = str(lean_file.relative_to(CATHEDRAL_DIR))
+            if not any(pat in cat_relpath for pat in CRITICAL_PATH_PATTERNS):
                 continue
 
         lines = lean_file.read_text().count('\n')
@@ -110,7 +128,7 @@ def bin_pack_greedy(files: list[tuple[str, int]], n_bins: int) -> list[list[tupl
     return bins
 
 
-def write_dumps(bins: list[list[tuple[str, int]]], outdir: str, mode: str):
+def write_dumps(bins: list[list[tuple[str, int]]], outdir: str, mode: str, prefix: str):
     """Write each bin to an output file."""
     os.makedirs(outdir, exist_ok=True)
 
@@ -128,7 +146,7 @@ def write_dumps(bins: list[list[tuple[str, int]]], outdir: str, mode: str):
 
     for i, bin_files in enumerate(bins):
         part = i + 1
-        outpath = Path(outdir) / f"{part:02d}-cathedral.txt"
+        outpath = Path(outdir) / f"{part:02d}-{prefix}.txt"
 
         header = HEADER_TEMPLATE.format(
             part=part, total=total, date=date,
@@ -166,11 +184,26 @@ def main():
     parser.add_argument("--parts", type=int, default=10,
                         help="Number of output files (default: 10)")
     parser.add_argument("--outdir", type=str, default=None,
-                        help="Output directory (default: cathedral-rh or cathedral-10)")
+                        help="Output directory (default: docs/exports/critical-path or docs/exports/full)")
+    parser.add_argument("--prefix", type=str, default="cathedral",
+                        help="Filename prefix (default: cathedral)")
+    # Legacy support: accept positional args and --exclude-archive silently
+    parser.add_argument("source_dir", nargs="?", default=None,
+                        help=argparse.SUPPRESS)
+    parser.add_argument("--exclude-archive", action="store_true", default=False,
+                        help=argparse.SUPPRESS)
+    parser.add_argument("--output-dir", type=str, default=None,
+                        help=argparse.SUPPRESS)
     args = parser.parse_args()
 
+    # Handle legacy invocation: `cathedral_dump.py proofs/Cathedral --exclude-archive`
+    if args.source_dir and args.exclude_archive:
+        args.mode = "rh"
+    if args.output_dir and not args.outdir:
+        args.outdir = args.output_dir
+
     if args.outdir is None:
-        args.outdir = "cathedral-rh" if args.mode == "rh" else "cathedral-10"
+        args.outdir = "docs/exports/critical-path" if args.mode == "rh" else "docs/exports/full"
 
     print(f"═══ Cathedral: {args.mode.upper()} dump into {args.parts} files ═══")
     print()
@@ -186,7 +219,7 @@ def main():
     print()
 
     bins = bin_pack_greedy(files, args.parts)
-    write_dumps(bins, args.outdir, args.mode)
+    write_dumps(bins, args.outdir, args.mode, args.prefix)
 
     print()
     print("  ✅ Done!")

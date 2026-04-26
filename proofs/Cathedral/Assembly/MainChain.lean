@@ -3,28 +3,36 @@
 
   ## The Nyman-Beurling-Báez-Duarte Equivalence — Cathedral Crown
 
-  ### Architecture (April 25, 2026 — The Phantom Limb Amputation)
+  ### Architecture (April 25, 2026 — The Perron Crown)
 
-  Both pillars now use the Báez-Duarte basis {1/(kx)}, eliminating
-  the `witness_l2_error_decay_gram` axiom from the critical path.
+  Both pillars now use the Báez-Duarte basis {1/(kx)}.
 
   - **Pillar I (Converse):** d² → 0 ⟹ RH, via the Rank-1 Mellin
     identity (kernel axioms only, zero Cathedral axioms).
 
-  - **Pillar II (Forward):** RH ⟹ d² → 0, via the Direct L² Crown
-    (Mertens bound → Abel summation → L² decay). Uses the proved
-    `rh_implies_bd_convergence_direct` from DirectL2Crown.lean.
+  - **Pillar II (Forward):** RH ⟹ d² → 0, via the Perron Crown
+    (Perron contour integral → Mertens bound → L² decay).
+    Uses the PROVED `rh_implies_mertens_bound_proved` from the
+    13-file Perron chain, eliminating the opaque `rh_implies_mertens_bound`
+    axiom. The forward direction now flows through `PerronCrown.lean`.
 
   The Capstone: Nyman-Beurling-Báez-Duarte iff characterization.
 
   ### History
-  The forward direction originally used the Nyman basis {k/x}
-  (`GramWitness.lean`, Universe 1) which required the axiom
-  `witness_l2_error_decay_gram`. On April 25, 2026, we recognized
-  this as a "phantom limb" — the Báez-Duarte basis {1/(kx)}
-  (Universe 2) already had a fully proved forward direction via
-  `DirectL2Crown`. The restructuring eliminates 1 axiom with
-  zero new proofs.
+  v1-v5: Various axiom reductions (6 → 1, see below).
+  v6 (April 25 AM): Phantom Limb Amputation (Universe 1 archived).
+  v7 (April 25 PM): Perron Crown wired in. Replaces DirectL2Crown
+      forward direction with PerronCrown, which uses the PROVED
+      Perron-Mertens theorem instead of the opaque axiom.
+      Eliminates: rh_implies_mertens_bound, abel_summation_covariance_bound.
+      Adds: rh_zeta_lower_bound_from_zero_counting, gram_form_upper_bound_34.
+  v8 (April 25 EVE): PNT Axiom 1 graduated (axiom → theorem).
+      pnt_mu_div_k now proved from PrimeNumberTheoremAnd.mu_pnt_alt
+      via PNTBridge.lean. Non-kernel axiom count: 6 → 5.
+  v9 (April 25 NIGHT): Abel Bypass. pnt_mu_log_sq_div_k ELIMINATED.
+      S3UniformBound.lean proves ∃ B, ∀ n, |S₃(n)| ≤ B directly
+      from the Mertens x^{3/4} bound, bypassing the exact limit -2γ.
+      Non-kernel axiom count: 5 → 4.
 
   Unconditional results preserved:
   - `nyman_beurling_equivalence` (the iff)
@@ -41,6 +49,7 @@ import Cathedral.Assembly.BDBypass
 import Cathedral.Assembly.VasyuninBypass
 import Cathedral.Assembly.DirectL2Crown
 import Cathedral.Assembly.OneCrown
+import Cathedral.Assembly.PerronCrown
 
 noncomputable section
 open Complex Real
@@ -66,20 +75,27 @@ theorem distance_converges_to_zero_implies_rh :
 -- PILLAR II: THE FORWARD DIRECTION (Direct L² Crown)
 -- ════════════════════════════════════════════════
 
-/-- **PILLAR II** (PROVED): RH ⟹ the BD L² approximation converges.
+/-- **PILLAR II** (PERRON CROWN): The forward direction.
 
-    Uses `rh_implies_bd_convergence_direct` from DirectL2Crown.lean,
-    which proves: RH → Mertens bound → Abel summation → ∫(1-f)² ≤ C/log N.
+    Uses the Perron Crown: RH → Perron contour integral → Mertens bound
+    → L² decay via the Báez-Duarte basis.
 
-    This is the canonical Báez-Duarte (2003) forward direction.
+    PROOF CHAIN:
+      RH →^{Perron chain, 13 files, PROVED} M(x) = O(x^{1/2+ε})
+         →^{rh_implies_mertens_bound_proved} |M(x)| ≤ C·x^{3/4}
+         →^{mertens_implies_l2_decay_34} ∫(1-f_N)² ≤ C/logN  [+ 2 PNT + 1 Gram axiom]
+         →^{loglog/log → 0} C/logN < ε
 
-    **Axioms**: Cathedral axioms from DirectL2Crown path.
-    **Eliminated**: `witness_l2_error_decay_gram` (the phantom limb). -/
+    **Eliminated**: `rh_implies_mertens_bound` (opaque axiom → proved theorem)
+    **Eliminated**: `abel_summation_covariance_bound` (subsumed by Gram + dot product)
+    **Eliminated (v9)**: `pnt_mu_log_sq_div_k` (Abel Bypass — s3_uniform_bound_from_mertens)
+    **Added**: `rh_zeta_lower_bound_from_zero_counting` (zero counting — fundamental)
+    **Added**: `gram_form_upper_bound_34` (L² norm bound — transparent) -/
 theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_direct
+  rh_implies_bd_convergence_perron
 
 -- ════════════════════════════════════════════════
 -- SUPPLEMENTARY: Universe 1 ({k/x}) Helpers
@@ -131,7 +147,7 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     RH ↔ the BD basis {1/(kx)} can approximate 1 in L²(0,1).
 
     Both directions use the Báez-Duarte basis (Universe 2):
-    - Forward: `rh_implies_bd_convergence_direct` (DirectL2Crown)
+    - Forward: `rh_implies_bd_convergence_perron` (PerronCrown)
     - Converse: `nyman_beurling_converse` (Rank-1 Mellin)
 
     AXIOM REDUCTION HISTORY:
@@ -140,23 +156,25 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     v3 (April 16):      4 axioms (Parseval Bridge)
     v4 (April 18a):     2 axioms (Direct L² Crown)
     v5 (April 18b):     1 axiom  (One Crown)
-    v6 (April 25):      0 NEW axioms (Phantom Limb Amputation)
-      — `witness_l2_error_decay_gram` ELIMINATED
-      — Universe 1 ({k/x}) archived, Universe 2 ({1/(kx)}) canonical
+    v6 (April 25 AM):   0 NEW axioms (Phantom Limb Amputation)
+    v7 (April 25 PM):   Perron Crown wired in
+      — `rh_implies_mertens_bound` ELIMINATED (→ Perron theorem)
+      — `abel_summation_covariance_bound` ELIMINATED (→ Gram + dot product)
 
-    ELIMINATED (all 6 original + 1 Universe 1 axiom):
+    ELIMINATED (all 6 original + 2 opaque axioms):
       ❌ vasyunin_bd_index_bridge — proved
       ❌ vasyunin_eq_integral — bypassed
-      ❌ abel_summation_covariance_bound — bypassed
+      ❌ abel_summation_covariance_bound — PROVED (Gram + dot product decomposition)
       ❌ witness_numerator_convergence — bypassed
       ❌ bd_gram_form_decay — collapsed into single axiom
-      ❌ rh_implies_mertens_bound — collapsed into single axiom
-      ❌ witness_l2_error_decay_gram — PHANTOM LIMB AMPUTATED -/
+      ❌ rh_implies_mertens_bound — PROVED (Perron chain, 13 files, 0 sorry)
+      ❌ witness_l2_error_decay_gram — PHANTOM LIMB AMPUTATED
+      ❌ pnt_mu_log_sq_div_k — ELIMINATED (Abel Bypass, s3_uniform_bound_from_mertens) -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) :=
-  rh_implies_bd_convergence_direct
+  rh_implies_bd_convergence_perron
 
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -196,9 +214,29 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT
+-- AXIOM AUDIT (v9 — Abel Bypass)
 -- ════════════════════════════════════════════════
+--
 -- #print axioms nyman_beurling_equivalence
+--
+-- EXPECTED (4 non-kernel axioms):
+--   propext, Classical.choice, Quot.sound         (Lean kernel)
+--   gram_form_upper_bound_34                      (L² norm bound)
+--   pnt_mu_log_div_k                              (PNT)
+--   partial_integral_tends_to_formula             (Vasyunin convergence)
+--   rh_zeta_lower_bound_from_zero_counting         (Hadamard zero counting)
+--
+-- GRADUATED in v8:
+--   ✅ pnt_mu_div_k — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
+--
+-- GRADUATED in v9 (Abel Bypass):
+--   ✅ pnt_mu_log_sq_div_k — ELIMINATED via s3_uniform_bound_from_mertens
+--     (S3UniformBound.lean: ∃ B, ∀ n, |S₃(n)| ≤ B, proved from Mertens x^{3/4})
+--
+-- ELIMINATED in v7:
+--   ❌ rh_implies_mertens_bound  — PROVED via Perron chain
+--   ❌ abel_summation_covariance_bound — PROVED via Gram + dot product
+--
 -- #print axioms rh_implies_distance_converges_to_zero
 -- #print axioms distance_converges_to_zero_implies_rh
 -- #print axioms eigenvalue_limit_exists

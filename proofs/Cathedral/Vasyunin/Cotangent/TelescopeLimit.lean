@@ -124,23 +124,21 @@ theorem squeeze_upper (a b M : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b) (hM : 1 ≤ M)
 -- §4. THE LIMIT AXIOM (bridge to digamma)
 -- ════════════════════════════════════════════════
 
-/-- **THE PARTIAL SUM LIMIT** (sub-axiom):
+/-- **THE PARTIAL SUM LIMIT** — delegates to the canonical axiom in LogDigammaBridge.
+
     The partial sum ∫_{1/(aM)}^1 {1/(ax)}{1/(bx)} dx converges
     to vasyuninGramFormula a b as M → ∞.
 
-    This is the analytic content: the piecewise FTC evaluation of each row
-    produces rational + log + linear terms that telescope to the Vasyunin
-    formula when summed. The convergence proof requires:
-    1. The rational telescope Σ 1/b = M/b (cancels divergence)
-    2. The log sum → ψ(a/b) via Gauss digamma formula
-    3. The linear sum → convergent series -/
-axiom partial_sum_tends_to_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
+    This was previously a duplicate axiom declaration. Now it references
+    the single canonical axiom in LogDigammaBridge. -/
+theorem partial_sum_tends_to_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     Tendsto
       (fun M : ℕ => ∫ x in (1 / ((a:ℝ) * (M:ℝ)))..(1:ℝ),
         Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x)))
       atTop
-      (nhds (DigammaReflection.vasyuninGramFormula a b))
+      (nhds (DigammaReflection.vasyuninGramFormula a b)) :=
+  LogDigammaBridge.partial_sum_tends_to_formula a b ha hb hab hcop
 
 -- ════════════════════════════════════════════════
 -- §5. THE BOSS FIGHT — TELESCOPE LIMIT PROVED

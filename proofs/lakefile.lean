@@ -55,6 +55,7 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.TelescopeSum,
     `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
     `Cathedral.Vasyunin.Cotangent.DigammaReflection,
+    `Cathedral.Vasyunin.Cotangent.ConvergenceAxioms,
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Cotangent.FormulaBridge,
     `Cathedral.Vasyunin.Cotangent.GCDReduction,
@@ -121,6 +122,7 @@ lean_lib «Cathedral» where
     `Cathedral.AbelTail.S1Decay,
     `Cathedral.AbelTail.S2Decay,
     `Cathedral.AbelTail.S3Decay,
+    `Cathedral.AbelTail.S3UniformBound,
     `Cathedral.AbelTail.Assembly,
     -- Assembly (the crown)
     `Cathedral.Assembly.CertifiedComputation,
@@ -194,4 +196,6 @@ lean_lib «Cathedral» where
     `Cathedral.White.Infrastructure.CenteredFractBound,
     -- Partial sum convergence (Vasyunin integral decomposition)
     `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
+    -- Integral = S_combined evaluative plumbing (building)
+    `Cathedral.Vasyunin.Cotangent.IntegralEqSCombined,
   ]

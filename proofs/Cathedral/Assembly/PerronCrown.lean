@@ -38,6 +38,7 @@ import Cathedral.MellinBridge.AbelSiegeProof
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.AbelTail.S1Decay
 import Cathedral.AbelTail.S2Decay
+import Cathedral.AbelTail.S3UniformBound
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFunction
@@ -121,10 +122,7 @@ theorem moebius_dot_product_approx_one_uniform_34
     (hPNT₁ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
     (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-        (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
-    (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-        (↑(ArithmeticFunction.moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
-        atTop (nhds (-2 * eulerMascheroniConstant))) :
+        (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1))) :
     ∃ C_dot : ℝ, C_dot > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     |1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)| ≤
     C_dot / Real.log ↑N := by
@@ -132,7 +130,8 @@ theorem moebius_dot_product_approx_one_uniform_34
   obtain ⟨C₁, hC₁_pos, h_s1⟩ := s1_decay C_34 hC hMertens34 hPNT₁
   obtain ⟨C₂, hC₂_pos, h_s2⟩ := s2_decay C_34 hC hMertens34 hPNT₂
   obtain ⟨B₂, _hB₂_ge, h_s2_univ⟩ := tendsto_universal_bound hPNT₂
-  obtain ⟨B₃, _hB₃_ge, h_s3_univ⟩ := tendsto_universal_bound hPNT₃
+  -- THE ABEL BYPASS: use s3_uniform_bound_from_mertens instead of tendsto_universal_bound hPNT₃
+  obtain ⟨B₃, _hB₃_ge, h_s3_univ⟩ := s3_uniform_bound_from_mertens C_34 hC hMertens34
   refine ⟨2 * C₁ + 10 * C₂ + B₂ + B₃ + 4, by linarith, fun N hN => ?_⟩
   have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
   have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
@@ -147,15 +146,8 @@ theorem moebius_dot_product_approx_one_uniform_34
     unfold S₂_at
     have h2 := abs_le.mp h1
     exact abs_le.mpr ⟨by linarith, by linarith⟩
-  have h_s3_abs : |S₃_at (N - 1)| ≤ B₃ + 2 := by
-    have h1 := h_s3_univ (N - 1)
-    unfold S₃_at
-    have h2 := abs_le.mp h1
-    have hγ_pos : 0 < eulerMascheroniConstant := by
-      linarith [one_half_lt_eulerMascheroniConstant]
-    have hγ_lt1 : eulerMascheroniConstant < 1 := by
-      linarith [eulerMascheroniConstant_lt_two_thirds]
-    exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
+  -- ABEL BYPASS: direct bound, no limit value needed
+  have h_s3_abs : |S₃_at (N - 1)| ≤ B₃ := h_s3_univ (N - 1)
   rw [h_identity]
   have h_calc1 := rpow_quarter_logN_le_two N hN
   have h_calc2 := rpow_quarter_logsq_le_ten N hN
@@ -193,6 +185,7 @@ theorem moebius_dot_product_approx_one_uniform_34
       constructor
       · nlinarith [abs_le.mp h_s2_abs]
       · nlinarith [abs_le.mp h_s2_abs]
+    -- ABEL BYPASS: h_s3_abs gives |S₃_at _| ≤ B₃ directly (no +2 needed)
     have h_s3_bound := abs_le.mp h_s3_abs
     exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
   have h_div_logN : |((1 - eulerMascheroniConstant) * S₂_at (N - 1) +
@@ -260,10 +253,7 @@ theorem abel_summation_covariance_bound_34
         (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
     (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ))
-        atTop (nhds (-1)))
-    (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-        (↑(ArithmeticFunction.moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
-        atTop (nhds (-2 * eulerMascheroniConstant))) :
+        atTop (nhds (-1))) :
     ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       dotProduct (Cathedral.Vasyunin.logCutoffWitness N)
@@ -273,7 +263,7 @@ theorem abel_summation_covariance_bound_34
   obtain ⟨C_G, hC_G_pos, N₁, h_gram⟩ :=
     gram_form_upper_bound_34 ⟨C_m, hC_m_pos, hM⟩
   obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
-    moebius_dot_product_approx_one_uniform_34 C_m hC_m_pos hM hPNT₁ hPNT₂ hPNT₃
+    moebius_dot_product_approx_one_uniform_34 C_m hC_m_pos hM hPNT₁ hPNT₂
   refine ⟨C_G + 2 * C_dot, by positivity, max N₁ 10, fun N hN hN3 => ?_⟩
   have hN₁ : N ≥ N₁ := by omega
   have hN10 : 10 ≤ N := by omega
@@ -319,20 +309,17 @@ theorem mertens_implies_l2_decay_34
     (hPNT₁ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
         (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
     (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-        (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
-    (hPNT₃ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-        (↑(ArithmeticFunction.moebius k) : ℝ) * (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
-        atTop (nhds (-2 * eulerMascheroniConstant))) :
+        (↑(ArithmeticFunction.moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1))) :
     ∃ C_l2 : ℝ, C_l2 > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
     C_l2 / Real.log ↑N := by
   -- Step 1: Covariance bound from x^{3/4} (PROVED from gram_form + dot product)
   obtain ⟨C_cov, hC_cov_pos, N₀, h_cov⟩ :=
-    abel_summation_covariance_bound_34 ⟨C_34, hC, hMertens34⟩ hPNT₁ hPNT₂ hPNT₃
+    abel_summation_covariance_bound_34 ⟨C_34, hC, hMertens34⟩ hPNT₁ hPNT₂
   -- Step 2: UNIFORM dot product bound from PNT (PROVED, x^{3/4} interface)
   obtain ⟨C_dot, hC_dot_pos, h_dot_uniform⟩ :=
     moebius_dot_product_approx_one_uniform_34 C_34 hC
-      (fun x hx => hMertens34 x hx) hPNT₁ hPNT₂ hPNT₃
+      (fun x hx => hMertens34 x hx) hPNT₁ hPNT₂
   -- Reuse the SAME assembly as mertens_implies_l2_decay
   -- (the algebra is identical — only the constant sources differ)
   set N_big : ℕ := max N₀ 10
@@ -430,10 +417,11 @@ theorem mertens_implies_l2_decay_34
     PROOF CHAIN:
       RH →  mertens_bound_eps              [Perron, 1 sorry]
          →  mertens_34_from_eps             [PROVED]
-         →  mertens_implies_l2_decay_34     [3 PNT axioms + 1 covariance axiom]
+         →  mertens_implies_l2_decay_34     [2 PNT axioms + 1 covariance axiom]
          →  loglog_div_log_lt_eps           [PROVED — calculus]
 
-    AXIOM COUNT: 3 PNT + 1 covariance = 4 axioms, but rh_implies_mertens_bound ELIMINATED
+    AXIOM COUNT: 2 PNT + 1 Gram = 3 axioms + S₃ uniform bound (PROVED via Abel Bypass)
+    pnt_mu_log_sq_div_k ELIMINATED (Abel Bypass — s3_uniform_bound_from_mertens)
     SORRY COUNT: 1 (ZetaLowerBound thin strip, experimentally validated) -/
 theorem rh_implies_bd_convergence_perron :
     RiemannHypothesis →
@@ -442,9 +430,9 @@ theorem rh_implies_bd_convergence_perron :
   intro hRH ε hε
   -- Step 1: Get the x^{3/4} Mertens bound from Perron (NO rh_implies_mertens_bound axiom!)
   obtain ⟨C_m, hC_pos, hM⟩ := rh_implies_mertens_bound_proved hRH
-  -- Step 2: Get the L² bound via the x^{3/4} path
+  -- Step 2: Get the L² bound via the x^{3/4} path (NO pnt_mu_log_sq_div_k axiom!)
   obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
-    mertens_implies_l2_decay_34 C_m hC_pos hM pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
+    mertens_implies_l2_decay_34 C_m hC_pos hM pnt_mu_div_k pnt_mu_log_div_k
   -- Step 3: Get N large enough that C_l2/log(N) < ε
   have h_tend := Real.tendsto_log_atTop
   rw [Filter.tendsto_atTop_atTop] at h_tend
@@ -491,10 +479,12 @@ theorem nyman_beurling_equivalence_perron :
 --
 -- EXPECTED:
 --   propext, Classical.choice, Quot.sound    (Lean kernel)
---   pnt_mu_div_k                             (PNT — unconditional)
 --   pnt_mu_log_div_k                         (PNT — unconditional)
 --   pnt_mu_log_sq_div_k                      (PNT — unconditional)
 --   gram_form_upper_bound_34                 (L² norm — classical analysis)
+--
+-- GRADUATED in v8:
+--   ✅ pnt_mu_div_k  — GRADUATED to theorem (PNTBridge.pnt_moebius_sum_div_tendsto)
 --
 -- GRADUATED (axiom → theorem):
 --   ✅ abel_summation_covariance_bound_34  — PROVED from gram_form + dot product

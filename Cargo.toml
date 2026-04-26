@@ -26,6 +26,9 @@ members = [
     "experiments/gram-quadform",
     "experiments/pnt-mobius-sums",
     "experiments/perron-contour",
+    "experiments/vasyunin-convergence",
+    "experiments/gram-bilinear-abel",
+    "experiments/two-tile-analyzer",
 ]
 
 [profile.release]

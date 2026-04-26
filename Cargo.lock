@@ -303,6 +303,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gram-bilinear-abel"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "gram-oracle"
 version = "0.1.0"
 dependencies = [
@@ -772,6 +781,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "two-tile-analyzer"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "typenum"
 version = "1.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -802,6 +822,17 @@ dependencies = [
  "nalgebra",
  "rayon",
  "rug",
+ "serde_json",
+]
+
+[[package]]
+name = "vasyunin-convergence"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+ "serde",
  "serde_json",
 ]
 

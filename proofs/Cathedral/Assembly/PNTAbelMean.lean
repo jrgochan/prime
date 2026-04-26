@@ -20,6 +20,7 @@
 
 import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
+import Cathedral.Assembly.PNTBridge
 import Cathedral.Assembly.AbelL2Bridge
 import Cathedral.Assembly.BDBridge
 import Cathedral.Assembly.AbelEngine
@@ -45,10 +46,11 @@ open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
     Proof: 1/ζ(s) = Σ μ(n)/n^s for Re(s) > 1.
     As s → 1⁺, ζ(s) → ∞, so 1/ζ(s) → 0.
     Abel’s limit theorem gives the convergence. -/
-axiom pnt_mu_div_k :
+theorem pnt_mu_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-    Filter.atTop (nhds 0)
+    Filter.atTop (nhds 0) :=
+  pnt_moebius_sum_div_tendsto
 
 /-- **PNT AXIOM 2**: The weighted sum Σ μ(k)·ln(k)/k converges to -1.
     From the derivative: -(1/ζ(s))' = ζ'(s)/ζ(s)² At s=1: ζ'(s)/ζ(s)² → 1.
