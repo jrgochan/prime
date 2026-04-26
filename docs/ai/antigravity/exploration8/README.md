@@ -49,6 +49,46 @@ is bounded by the inverse system temperature.
 | Gram ↔ L² | `Assembly/BDBridge.lean` | ∫(1-f)² = 1-2bᵀv+vᵀGv | ✅ Proved |
 | (bᵀv)² bound | `Assembly/GramFormProof.lean` | (bᵀv)² ≤ 1 + 3C/logN | ✅ Proved |
 
+### Existing Reusable Infrastructure (21 active files)
+
+We have **significant** prior work on double sums, centered fractional
+parts, Abel-L² bridges, and bilinear sieve infrastructure. Key files:
+
+#### Double Sum / Quadratic Form Expansion
+- **`Gram/NbLinComb.lean`** — `quadForm_as_double_sum`, `integral_sq_as_double_sum`,
+  `gram_l2_identity` (vᵀGv = ∫₀¹ (bdLinComb)² dx). All proved.
+
+#### Centered Fractional Parts
+- **`White/Infrastructure/CenteredFractBound.lean`** — `centered_period_sum_zero`
+  (Σ over period = 0), `centered_fract_partial_sums_bounded'` (|partial sums| ≤ b),
+  `fract_nat_div`. **8 lemmas, 0 sorry, 0 axiom.**
+
+#### Abel Summation Under x^{3/4}
+- **`Assembly/AbelL2Bridge.lean`** — `abel_bound_34` (|Σ μ(k)·log-weight| bounded),
+  `summand_bound_34`, `l2_expansion`. All proved under the x^{3/4} hypothesis.
+- **`Scratch/AbelTailProof.lean`** — Full scratch work for s1/s2 decomposition
+  (may be cannibalized for centered pointwise bound).
+
+#### L² ↔ Quadratic Form Bridges
+- **`Assembly/BDBridge.lean`** — `bd_l2_error_eq_quad_error` (∫(1-f)² = 1-2bᵀv+vᵀGv).
+  The exact algebraic identity we need.
+
+#### Bilinear / Schur Test
+- **`White/Infrastructure/HilbertInequality.lean`** — `schur_test_discrete`
+  (Schur test for bilinear forms). May be useful for bounding kernel norms.
+- **`Sieve/BilinearSieve.lean`** — `crossParityBilinear_eq` and bilinear sieve
+  infrastructure. Different setting but related techniques.
+
+#### Millennium Wall (Parallel Chain)
+- **`Assembly/MillenniumWall.lean`** — `millennium_covariance_cancellation` is
+  already proved as a THEOREM, but it uses `gram_form_upper_bound` (axiom).
+  The proof structure is our template — we just need to remove the axiom dependency.
+
+> **Key insight**: The `MillenniumWall.lean` proof already shows the *shape*
+> of the graduation. We need to replace its `gram_form_upper_bound` axiom
+> dependency with a direct argument. The AbelL2Bridge infrastructure under
+> x^{3/4} gives us the pieces; the centered pointwise bound is the missing glue.
+
 ---
 
 ## 3. Why It's Not Trivial
