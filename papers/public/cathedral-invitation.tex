@@ -1,0 +1,286 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+\usepackage{setspace}
+\onehalfspacing
+
+\title{%
+  Two Axioms Remain:\\
+  An Invitation to the Next Generation%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 20, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\emph{For the student who hasn't started yet.}
+\end{center}
+
+\vspace{1cm}
+
+% ================================================================
+\section*{What This Is}
+% ================================================================
+
+We built something called the Cathedral: a 78-file computer program
+that proves, with mathematical certainty, that the Riemann Hypothesis
+is \emph{exactly equivalent} to the convergence of a specific
+approximation problem. Every step is verified by a computer. Every
+assumption is named. Every failed attempt is preserved.
+
+The proof is complete---except for seven assumptions, called
+\emph{axioms}. We couldn't prove them. We named them, classified
+them, and documented exactly what they say and why they're hard.
+
+This paper is an invitation. Those seven axioms are now your problem.
+
+% ================================================================
+\section*{Who Built This}
+% ================================================================
+
+A computer scientist in New Mexico. Not a professional mathematician.
+No PhD in mathematics. No university affiliation. No research grant.
+
+The tools: a laptop, an internet connection, Lean~4 (free, open
+source), Mathlib (free, open source), and AI assistance (commercially
+available).
+
+The timeline: 23 days.
+
+If you have a laptop and curiosity, you have everything that was
+needed to build this. The barrier to entry for machine-verified
+mathematics is now approximately zero.
+
+% ================================================================
+\section*{What You Need to Know}
+% ================================================================
+
+\subsection*{The Problem}
+
+The Riemann Hypothesis (1859) says: all non-trivial zeros of the
+Riemann zeta function $\zeta(s) = \sum_{n=1}^\infty n^{-s}$ lie
+on the line $\operatorname{Re}(s) = \frac{1}{2}$.
+
+Nobody has proved this. Nobody has disproved it. It has been open
+for 167 years. There is a \$1,000,000 prize.
+
+\subsection*{The Translation}
+
+The Cathedral proves that this is equivalent to:
+
+\[
+  \forall\,\varepsilon > 0,\;\exists\,N_0,\;\forall\,N \geq N_0,\;
+  \exists\,v \in \mathbb{R}^{N-1}:\quad
+  \int_0^1 \left(1 - \sum_{k=2}^N v_k\left\{\frac{1}{kx}\right\}
+  \right)^2 dx < \varepsilon.
+\]
+
+In words: you can approximate the constant function $1$ arbitrarily
+well by mixing together sawtooth waves $\{1/(kx)\}$.
+
+\subsection*{The Two Axioms}
+
+\begin{enumerate}
+  \item \textbf{\texttt{bd\_mellin\_at\_zero}}: The Mellin transform
+    of the fractional-part function $\{1/(kx)\}$, which is proved
+    for $\operatorname{Re}(s) > 1$ by direct computation, extends
+    by analytic continuation to $\operatorname{Re}(s) > 0$.
+
+    \emph{What this means}: a specific integral formula, proved for
+    large values of a parameter, also holds for smaller values.
+    This is a standard result in complex analysis, but formalizing
+    it in Lean requires Mathlib's analytic continuation infrastructure.
+
+  \item \textbf{\texttt{rh\_implies\_l2\_convergence}}: If the
+    Riemann Hypothesis is true, then the B\'aez-Duarte distance
+    $d_N^2 \to 0$.
+
+    \emph{What this means}: assuming RH, you can construct explicit
+    weights $v_k$ that make the integral above as small as you want.
+    The construction uses the Mertens function, Abel summation, and
+    the Montgomery--Vaughan mean value theorem.
+\end{enumerate}
+
+Axiom~1 is a formalization challenge: the mathematics is understood,
+but translating it into Lean~4 requires careful work with analytic
+continuation.
+
+Axiom~2 is a \emph{mathematics} challenge: it packages several
+deep results in analytic number theory. Proving it formally would
+require formalizing the Mertens--Abel--Montgomery--Vaughan chain.
+
+% ================================================================
+\section*{What You Can Do Right Now}
+% ================================================================
+
+\subsection*{If You Know Some Lean~4}
+
+\begin{enumerate}
+  \item \textbf{Prove Axiom~1.} This is the more accessible target.
+    You need Mathlib's \texttt{DifferentiableOn.analyticContinuation}
+    or equivalent, applied to the Mellin integral
+    $\int_0^1 \{1/(kx)\}\,x^{s-1}\,dx$. The integral is absolutely
+    convergent for $\operatorname{Re}(s) > 0$; the challenge is
+    showing that the closed-form expression (involving $\zeta(s)$
+    and $1/(s-1)$) extends analytically.
+
+  \item \textbf{Prove one of the 38 non-critical axioms.} The
+    Cathedral contains 42 axioms total. Only 7 are on the crown
+    path. The other 38 support alternative proof engines (spectral,
+    sieve, Vasyunin). Proving any one of them strengthens the
+    overall formalization.
+
+  \item \textbf{Improve an existing proof.} Some of the Cathedral's
+    641 theorems use \texttt{omega} or \texttt{norm\_num} where
+    a more elegant proof exists. Professional Lean hackers will
+    see opportunities to improve proof clarity and performance.
+\end{enumerate}
+
+\subsection*{If You Know Some Analysis}
+
+\begin{enumerate}
+  \item \textbf{Decompose Axiom~2.} The current axiom is a
+    ``black box'' that packages the entire forward direction.
+    A useful contribution would be to decompose it into 3--5
+    intermediate lemmas, each of which is independently
+    meaningful and potentially formalizable.
+
+  \item \textbf{Find a better forward proof.} The B\'aez-Duarte
+    theorem uses the Mertens function bound $|M(x)| = O(x^{1/2}
+    \log^2 x)$ under RH. Is there a more direct path from RH
+    to $d_N^2 \to 0$ that avoids the Mertens detour?
+
+  \item \textbf{Study the decay rate.} The Cathedral's numerical
+    experiments show $d_N^2 \sim c/\ln N$ with $c \approx
+    1/21.65$. Can you prove this asymptotic? Can you prove a
+    weaker bound, like $d_N^2 = o(1)$, from RH with fewer tools?
+\end{enumerate}
+
+\subsection*{If You Know Some Physics}
+
+\begin{enumerate}
+  \item \textbf{Identify the operator.} The Gram matrix $G_N$ is
+    the finite-dimensional shadow of some infinite-dimensional
+    operator whose spectral properties encode RH. What is this
+    operator? The eigenvalue data ($\lambda_{\min} \sim C/\ln N$,
+    $\lambda_{\max} \sim N$, GUE-like statistics) constrain it.
+
+  \item \textbf{Interpret the constant.} The quantum stiffness
+    $C \approx 21.65 = 1/(2 + \gamma - \ln 4\pi)$ appears to
+    be a physical constant of the ``prime number vacuum.'' Does
+    it arise naturally from any known quantum system?
+\end{enumerate}
+
+% ================================================================
+\section*{What Modern Math Research Actually Looks Like}
+% ================================================================
+
+It doesn't look like a genius working alone in a garret.
+
+It looks like this:
+
+\begin{enumerate}
+  \item \textbf{Day 1--7}: Explore. Try things. Fail. Archive
+    the failures. We produced 96 files of failed attempts. Every
+    failure taught us something.
+
+  \item \textbf{Day 8--14}: Find the right framework. For us,
+    this was the Parseval Bridge---the realization that frequency-
+    domain methods bypass the hardest discrete computations. This
+    came from a failure: the False Dedekind Reciprocity at
+    $(a,b) = (3,2)$.
+
+  \item \textbf{Day 15--21}: Build. Once the framework is right,
+    construction is fast. AI handles the mechanical code generation.
+    The human provides architecture. The compiler verifies
+    everything.
+
+  \item \textbf{Day 22--23}: Audit. Check every file. Fix every
+    docstring. Remove every ghost axiom. Reduce, simplify, clean.
+    The Great Audit reduced 178 files to 84 active + 96 archived.
+\end{enumerate}
+
+The ratio of exploration to construction is roughly 2:1. Two weeks
+of wandering, one week of building. This is normal. If you're not
+failing most of the time, you're not exploring hard enough.
+
+% ================================================================
+\section*{Why You Should Care}
+% ================================================================
+
+The Riemann Hypothesis is not just a mathematical curiosity. It
+controls the distribution of prime numbers, which are the atoms
+of arithmetic. Every encryption algorithm, every hash function,
+every digital signature depends on properties of primes.
+
+But more than that: the RH is a test case for whether humans can
+understand the deepest structures in mathematics. If we can prove
+it, we learn something profound about the nature of number. If we
+can't, we learn something profound about the limits of mathematical
+reasoning.
+
+Either way, the attempt is worth making.
+
+% ================================================================
+\section*{A Note on Credentials}
+% ================================================================
+
+You do not need a PhD to contribute to this project. You do not
+need a university appointment. You do not need a research grant.
+
+You need:
+\begin{itemize}
+  \item A laptop.
+  \item Lean~4 (free).
+  \item Mathlib (free).
+  \item Curiosity.
+  \item The willingness to fail 96 times before you succeed once.
+\end{itemize}
+
+The compiler does not check your credentials. It checks your proof.
+
+% ================================================================
+\section*{The Torch}
+% ================================================================
+
+We built the Cathedral. We mapped the territory. We named the
+axioms. We preserved the failures. We verified every step.
+
+We could not prove the last two things.
+
+Now it's your turn.
+
+\begin{quote}
+\emph{The primes have been singing for 167 years.\\
+The Cathedral stands, waiting for its final stones.\\
+We built it as far as we could.\\
+The rest belongs to you.}
+\end{quote}
+
+\begin{thebibliography}{99}
+
+\bibitem{baezduarte2003}
+L.~B\'aez-Duarte, \emph{A strengthening of the Nyman--Beurling
+criterion for the Riemann hypothesis}, Atti Accad. Naz. Lincei
+Rend. Lincei Mat. Appl. \textbf{14} (2003), 5--11.
+
+\bibitem{lean4}
+L.~de~Moura \emph{et al.}, \emph{The Lean~4 Theorem Prover and
+Programming Language}, CADE-28, 2021.
+
+\bibitem{avigad}
+J.~Avigad \emph{et al.}, \emph{Mathematics in Lean}, online
+textbook, 2023.
+
+\bibitem{buzzard}
+K.~Buzzard, \emph{The Natural Number Game},
+\url{https://adam.math.hhu.de/\#/g/leanprover-community/nng4}.
+
+\end{thebibliography}
+
+\end{document}

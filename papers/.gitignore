@@ -1,0 +1,22 @@
+# LaTeX build artifacts (direct — pre-latexmk era)
+*.aux
+*.log
+*.toc
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+
+# latexmk build directories
+build/
+
+# OS files
+.DS_Store
+
+# Keep PDFs (they're tracked for distribution)
+# !*.pdf

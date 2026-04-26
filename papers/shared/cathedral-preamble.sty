@@ -1,0 +1,98 @@
+% cathedral-preamble.sty — Shared macros for the Cathedral paper suite
+%
+% Usage: \usepackage{cathedral-preamble}  (or with relative path)
+%
+% This provides a consistent set of packages, theorem environments,
+% and notation across all 24 Cathedral papers.
+
+\ProvidesPackage{cathedral-preamble}[2026/04/25 Cathedral Paper Suite Shared Preamble]
+
+% ═══════════════════════════════════════════════
+% §1. PACKAGES
+% ═══════════════════════════════════════════════
+
+\RequirePackage{amsmath,amssymb,amsthm,mathtools}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{hyperref}
+\RequirePackage{geometry}
+\RequirePackage{booktabs}
+\RequirePackage{xcolor}
+\RequirePackage{enumitem}
+
+\geometry{margin=1in}
+
+% ═══════════════════════════════════════════════
+% §2. THEOREM ENVIRONMENTS
+% ═══════════════════════════════════════════════
+
+% Primary counter: definition (per-section numbering)
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{theorem}[definition]{Theorem}
+\newtheorem{lemma}[definition]{Lemma}
+\newtheorem{proposition}[definition]{Proposition}
+\newtheorem{corollary}[definition]{Corollary}
+\newtheorem{axiombox}[definition]{Axiom}
+\newtheorem{example}[definition]{Example}
+\newtheorem{conjecture}[definition]{Conjecture}
+\newtheorem{open}[definition]{Open Problem}
+\newtheorem{direction}[definition]{Direction}
+\newtheorem{discovery}[definition]{Discovery}
+\newtheorem{claim}[definition]{Claim}
+\newtheorem{myth}{Myth}
+
+% Remark-style (upright text)
+\theoremstyle{remark}
+\newtheorem{remark}[definition]{Remark}
+\newtheorem{observation}[definition]{Observation}
+\newtheorem{principle}[definition]{Principle}
+\newtheorem{correspondence}[definition]{Correspondence}
+
+% ═══════════════════════════════════════════════
+% §3. NOTATION — NUMBER SETS
+% ═══════════════════════════════════════════════
+
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\HH}{\mathcal{H}}          % Hilbert space (default)
+\newcommand{\OO}{\mathbb{O}}           % Octonions
+\newcommand{\SSS}{\mathbb{S}}          % Sphere
+
+% ═══════════════════════════════════════════════
+% §4. NOTATION — OPERATORS & SHORTCUTS
+% ═══════════════════════════════════════════════
+
+\newcommand{\RH}{\ensuremath{\mathrm{RH}}}
+\newcommand{\GRH}{\ensuremath{\mathrm{GRH}}}
+\newcommand{\ZFC}{\mathrm{ZFC}}
+\newcommand{\CIC}{\mathrm{CIC}}
+\newcommand{\re}{\operatorname{Re}}
+\newcommand{\im}{\operatorname{Im}}
+\newcommand{\Tr}{\operatorname{Tr}}
+\newcommand{\lcm}{\operatorname{lcm}}
+\newcommand{\fract}[1]{\{#1\}}         % Fractional part
+\newcommand{\lean}[1]{\texttt{#1}}     % Lean code reference
+
+% ═══════════════════════════════════════════════
+% §5. NOTATION — PHYSICS (optional, harmless if unused)
+% ═══════════════════════════════════════════════
+
+\newcommand{\bra}[1]{\langle #1 |}
+\newcommand{\ket}[1]{| #1 \rangle}
+\newcommand{\braket}[2]{\langle #1 | #2 \rangle}
+\newcommand{\expect}[1]{\langle #1 \rangle}
+
+% ═══════════════════════════════════════════════
+% §6. HYPERREF CONFIGURATION
+% ═══════════════════════════════════════════════
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!70!black,
+  citecolor=green!50!black,
+  urlcolor=blue!60!black
+}
+
+\endinput

@@ -1,0 +1,792 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+\usepackage[table]{xcolor}  % for \rowcolor
+
+\title{%
+  Cathedral Next:\\
+  Open Horizons in Machine-Verified\\
+  Analytic Number Theory%
+}
+\author{
+  Cathedral Project Notes
+}
+\date{April 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We survey the current state of the Cathedral---a Lean~4 formalization
+reducing the Riemann Hypothesis to six machine-checked axioms via the
+Nyman--Beurling criterion---and chart directions for future work. We
+identify three horizons: (1) the \emph{axiom horizon}, where the
+remaining six crown axioms yield to formalization (one has already
+fallen since the initial survey); (2) the
+\emph{generalization horizon}, where the framework extends to Dirichlet
+$L$-functions and the Generalized Riemann Hypothesis; and (3) the
+\emph{interpretation horizon}, where the Liouville parity symmetry,
+octonionic partition, and spectral gap phenomena discovered during
+formalization connect to mathematical physics and random matrix theory.
+
+This document is not a claim of proof. It is a map of what the Cathedral
+revealed, and where the trails lead.
+
+\textbf{Note added April~22, 2026.} Since the initial version of this
+paper (April~20), Campaign~B (the Abel Engine) has been completed:
+\lean{abel\_mertens\_tail\_raw} is now a \textbf{THEOREM}. The Perron
+formula infrastructure has been fully proved. The Borel--Carath\'eodory
+theorem has been discovered in Mathlib, opening an unexpected route to
+Campaign~C. The axiom count on the crown path has decreased from 7 to~6.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Where We Stand}
+\label{sec:status}
+% ================================================================
+
+\subsection{The Crown Theorem}
+
+The Cathedral's crown theorem \lean{nyman\_beurling\_equivalence}
+establishes:
+\[
+  \RH \;\iff\;
+  \forall\,\varepsilon > 0,\;\exists\,N_0,\;\forall\,N \geq N_0,\;
+  \exists\,v : \mathrm{Fin}(N-1) \to \RR,\quad
+  \int_0^1 \bigl(1 - f_{N,v}(x)\bigr)^2\,dx < \varepsilon
+\]
+where $f_{N,v}(x) = \sum_{k=2}^{N} v_k\,\{1/(kx)\}$ is a linear
+combination of B\'aez-Duarte basis functions.
+
+The proof decomposes into two pillars:
+\begin{itemize}
+  \item \textbf{Pillar~I (Converse)}: $d_N^2 \to 0 \implies \RH$.
+    Proved via the Rank-1 Mellin Miracle. \emph{Zero custom axioms.}
+  \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
+    Proved via the Final Dragon chain. \emph{Six custom axioms.}
+    (Reduced from seven on April~22, 2026, when the Abel tail axiom
+    was graduated to a theorem.)
+\end{itemize}
+
+\subsection{The Six Crown Axioms}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{\#} & \textbf{Axiom} & \textbf{Content} & \textbf{Tier} \\
+\midrule
+1 & \lean{rh\_implies\_mertens\_bound} & $\RH \implies |M(x)| = O(x^{1/2}\log^2 x)$ & 1 (RH) \\
+2 & \lean{pnt\_mu\_div\_k} & $\sum \mu(k)/k \to 0$ & 2 (PNT) \\
+3 & \lean{pnt\_mu\_log\_div\_k} & $\sum \mu(k)\ln(k)/k \to -1$ & 2 (PNT) \\
+4 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(k)\ln^2(k)/k \to -2\gamma$ & 2 (PNT) \\
+\rowcolor{green!10}
+$\times$ & \lean{abel\_mertens\_tail\_raw} & Abel summation tail bounds & \textbf{GRADUATED} \\
+5 & \lean{millennium\_covariance\_cancellation} & 2D covariance bound & 3 (Parseval) \\
+6 & \lean{vasyunin\_offdiag\_integral} & Off-diagonal Gram identity & 3 (Vasyunin) \\
+\bottomrule
+\end{tabular}
+\caption{The crown axioms. Originally seven; reduced to six on April~22, 2026
+when the Abel tail axiom was graduated to a theorem. Tier~1 encodes RH
+content; Tier~2 is unconditional (PNT-level); Tier~3 is classical analysis.
+The converse direction uses zero custom axioms.}
+\label{tab:axioms}
+\end{table}
+
+\subsection{What Was Proved Along the Way}
+
+The formalization is not merely a scaffolding of axioms. Among the fully
+machine-verified results:
+
+\begin{itemize}
+  \item The \emph{Rank-1 Mellin Miracle}: $\mathcal{M}[h_k](\rho) =
+    1/(k(\rho-1))$ at zeta zeros (BDMellin.lean, 1066 lines).
+  \item The base-case Mellin identity via the Identity Theorem for
+    holomorphic functions (IdentityBypass.lean).
+  \item The completed zeta bound $\re(\Lambda_0(s)) < 4$ for real
+    $s \in (0,1)$ via Jacobi theta kernel estimates (ThetaBound.lean).
+  \item No real zeros of $\zeta(s)$ in $(0,1)$ (corollary of the above).
+  \item Under RH, $\zeta(s) \neq 0$ for $\re(s) > 1/2$ and $s \neq 1$
+    (ZetaConvexity.lean, zero axioms).
+  \item $1/\zeta(s)$ is differentiable for $\re(s) > 1/2$ under RH
+    (ZetaConvexity.lean, zero axioms).
+  \item Weyl's eigenvalue inequality for Hermitian matrix sums
+    (RayleighBridge.lean).
+  \item The Gram matrix is Hermitian, with spectral decomposition and
+    Rayleigh quotient characterization (Defs.lean, ClassRestriction.lean).
+  \item The octonionic gap dominance $\lambda_{\min}(G) \le
+    \lambda_{\min}(G^{\mathbb{O}})$ via class-restricted Rayleigh
+    quotients (ClassRestriction.lean, 647 lines, zero axioms).
+  \item The eigenvalue limit $\lim_{N \to \infty} \lambda_{\min}(G_N)$
+    exists (MainChain.lean, via monotone convergence).
+  \item The Liouville function squares to 1 (Defs.lean, \lean{native\_decide}).
+  \item \textbf{[April~22]} Abel tail bounds: $|S_1| \le C \cdot N^{-1/4}$,
+    $|S_2+1| \le C \cdot N^{-1/4} \ln N$, $|S_3+2\gamma|$ bounded
+    (AbelTail/*.lean, zero axioms --- \emph{formerly Axiom \#5}).
+  \item \textbf{[April~22]} Perron kernel bounds and contour vanishing
+    (PerronKernel.lean, Perron/Rectangle.lean, zero axioms).
+  \item \textbf{[April~22]} The Dirichlet series $1/\zeta(s) =
+    \sum \mu(n)/n^s$ for $\re(s) > 1$ (DirichletZetaInverse.lean, zero axioms).
+\end{itemize}
+
+% ================================================================
+\section{Horizon I: Closing the Axioms}
+\label{sec:axioms}
+% ================================================================
+
+The six crown axioms partition into three natural campaigns, ordered
+by increasing mathematical depth. \textbf{Campaign~B has been completed}
+(April~22, 2026).
+
+\subsection{Campaign A: The PNT Axioms (Tier~2)}
+
+\begin{axiombox}[PNT Partial Sums]
+\label{ax:pnt}
+The three PNT axioms state:
+\begin{align}
+  \sum_{k=1}^{N} \frac{\mu(k)}{k} &\to 0, \label{eq:pnt1} \\
+  \sum_{k=1}^{N} \frac{\mu(k)\ln k}{k} &\to -1, \label{eq:pnt2} \\
+  \sum_{k=1}^{N} \frac{\mu(k)\ln^2 k}{k} &\to -2\gamma. \label{eq:pnt3}
+\end{align}
+\end{axiombox}
+
+These are unconditional consequences of the Prime Number Theorem.
+The proof route is well-understood:
+
+\begin{enumerate}
+  \item \eqref{eq:pnt1} follows from PNT via
+    $1/\zeta(s) = \sum \mu(n)/n^s$ and Abel's limit theorem as $s \to 1^+$.
+  \item \eqref{eq:pnt2} follows by differentiating $-\zeta'(s)/\zeta(s)^2$
+    and applying the same limit.
+  \item \eqref{eq:pnt3} follows from the Laurent expansion of $1/\zeta(s)$
+    near $s = 1$.
+\end{enumerate}
+
+\begin{direction}[PNT in Lean~4]
+Mathlib already contains \lean{riemannZeta} and its analytic continuation.
+The obstacle is the Wiener--Ikehara Tauberian theorem, which converts
+Dirichlet series asymptotics into partial sum asymptotics. Three approaches:
+
+\begin{enumerate}
+  \item \textbf{Formalizing Wiener--Ikehara directly.} This requires
+    convolution theory, Fej\'er kernel estimates, and the non-vanishing
+    $\zeta(1+it) \neq 0$. The non-vanishing is proved in Mathlib
+    (\lean{riemannZeta\_ne\_zero\_of\_one\_le\_re}).
+
+  \item \textbf{The Newman--Korevaar shortcut.} A simplified proof of
+    PNT via contour integration, avoiding the Tauberian theorem entirely.
+    Requires only the analyticity of $\sum \mu(n)/n^s - 1/(s-1)\zeta(s)$
+    in $\re(s) \geq 1$ and a Laplace transform lemma.
+
+  \item \textbf{Selberg--Erd\H{o}s elementary proof.} Entirely real-variable,
+    avoiding complex analysis. Longer but requires no Tauberian machinery.
+    May be the most Lean-friendly route.
+\end{enumerate}
+
+The author's recommendation: the Newman--Korevaar route, since most of the
+complex analysis infrastructure already exists in Mathlib. The key lemma
+(analytic continuation of $\zeta'(s)/\zeta(s)$ to $\re(s) \geq 1$) is
+essentially the non-vanishing on the line, which is already formalized.
+\end{direction}
+
+\subsection{Campaign B: The Abel Engine (COMPLETED)}
+\label{sec:abel-completed}
+
+\begin{axiombox}[Abel--Mertens Tail --- GRADUATED April~22, 2026]
+\lean{abel\_mertens\_tail\_raw}: Given $|M(x)| \le C_m x^{3/4}$ and
+the PNT convergences, the Abel summation on the tail
+$\sum_{k > N} M(k)/(k(k+1))$ gives:
+\[
+  |S_1(N)| \le C \cdot N^{-1/4}, \quad
+  |S_2(N)+1| \le C \cdot N^{-1/4}\ln N, \quad
+  |S_3(N)+2\gamma| \le C \cdot N^{-1/4}\ln^2 N.
+\]
+\end{axiombox}
+
+\textbf{This axiom is now a THEOREM.} The proof, completed April~22, 2026,
+uses a three-term decomposition ($S_1$, $S_2$, $S_3$) with separate
+decay arguments for each term:
+\begin{enumerate}
+  \item $S_1$ decay: Abel summation by parts with integral comparison
+    $\sum_{k \geq N} k^{-5/4} \le 4(N-1)^{-1/4}$.
+  \item $S_2$ decay: Similar, with an additional $\ln k$ factor absorbed
+    by $\ln N$.
+  \item $S_3$ bound: Direct from the PNT axiom $S_3 \to -2\gamma$.
+\end{enumerate}
+The proof required 4 new files in \lean{AbelTail/} (Telescoping, AbelInterior,
+LogTailBound, MononotoneBound) plus assembly in \lean{CalcBounds.lean}.
+All files have zero sorry.
+
+This graduation reduces the crown path from 7 to 6 axioms and proves
+that the ``thermodynamic hierarchy'' of the Mertens function---the
+magnetization ($S_1$), susceptibility ($S_2$), and heat capacity ($S_3$)
+of the prime number gas---converges at rate $N^{-1/4}$.
+
+\subsection{Campaign C: The Deep Axioms (Tier~3, Axioms~6--7)}
+
+These are the mathematically deepest axioms and will likely be the last
+to fall. However, the recent discovery of the Borel--Carath\'eodory
+theorem in Mathlib (\texttt{Analysis.Complex.BorelCaratheodory}) opens
+unexpected possibilities.
+
+\subsubsection{The Millennium Wall (Axiom~6)}
+
+\begin{axiombox}[Covariance Cancellation]
+\lean{millennium\_covariance\_cancellation}: The covariance matrix
+$C = G - bb^T$ satisfies $v^T C v \le K_{\mathrm{cov}}/\ln N$ for the
+M\"obius witness $v$.
+\end{axiombox}
+
+This is the \emph{irreducible analytic content} of the forward direction.
+It requires:
+\begin{enumerate}
+  \item The Mellin--Plancherel isometry converting the bilinear form
+    to a critical-line integral.
+  \item The Montgomery--Vaughan mean value theorem bounding
+    $\int |\zeta(1/2+it) W_N(1/2+it)|^2 / (1/4+t^2)\,dt$.
+  \item Contour shifting from $\re(s) = 1/2$ to $\re(s) = 2$,
+    picking up the residue at the double pole $s = 1$.
+\end{enumerate}
+
+\begin{direction}[The Contour Shift Route]
+The Parseval Bridge (cathedral.tex, \S4) shows that the Plancherel
+isometry converts the spatial bilinear form into a frequency-domain
+integral. The Cathedral already contains the algebraic three-term
+decomposition
+\[
+  \int_0^1 |1 - f_{N,v}|^2\,dx
+  = \frac{1}{2\pi}\int_{-\infty}^{\infty}
+    \frac{|1 - \zeta(s)W_N(s)|^2}{|s|^2}\,dt,
+    \quad s = \tfrac{1}{2}+it.
+\]
+The contour shift $\re(s) = 1/2 \to \re(s) = 2$ is standard in analytic
+number theory (Phragm\'en--Lindel\"of for the horizontal segments,
+Cauchy's theorem for the rectangle). The pole at $s = 1$ contributes
+a residue involving $W_N(1)$ and $W_N'(1)$, which encode the
+$\ln\ln N/\ln N$ correction.
+
+This is probably a 500--1000 line Lean formalization, requiring:
+\begin{itemize}
+  \item Cauchy's integral formula for meromorphic functions (partially in Mathlib).
+  \item Phragm\'en--Lindel\"of principle (\textbf{now in Mathlib}:
+    \lean{PhragmenLindelof.vertical\_strip}, \lean{horizontal\_strip},
+    \lean{right\_half\_plane\_of\_bounded\_on\_real}).
+  \item Residue calculus at the double pole of $1/\zeta(s)^2$ at $s = 1$.
+\end{itemize}
+\end{direction}
+
+\begin{direction}[The Borel--Carath\'eodory Route]
+\textbf{New (April~22, 2026).} The Borel--Carath\'eodory theorem is now
+available in Mathlib (\texttt{Analysis.Complex.BorelCaratheodory}). This
+opens a direct route to the polynomial lower bound on $|\zeta(s)|$:
+\begin{enumerate}
+  \item Apply BC to $\log\zeta(s)$ on a disk centered at $s_0 = 2+it$
+    with radius $R = 3/2 - \varepsilon$. The disk reaches $\re s = 1/2 + \varepsilon$.
+  \item Bound $\sup \re(\log\zeta) = \sup \log|\zeta| \leq M(t)$ on the
+    disk boundary. Under RH, $M(t) = O(\log t)$.
+  \item BC gives $|\log\zeta(s)| \leq C(\varepsilon) \cdot \log t$
+    for $\re s \geq 1/2 + \varepsilon$.
+  \item Exponentiate: $|\zeta(s)| \geq t^{-C(\varepsilon)}$.
+\end{enumerate}
+This avoids the Montgomery--Vaughan mean value theorem entirely.
+A 256-bit MPFR experiment (\texttt{bc-zeta-lower}) is certifying the
+preconditions as of April~22, 2026.
+\end{direction}
+
+\subsubsection{The Vasyunin Off-Diagonal (Axiom~7)}
+
+\begin{axiombox}[Off-Diagonal Identity]
+\lean{vasyunin\_offdiag\_integral}: For $j \neq k$, the Gram matrix
+entry $G(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$ equals the
+Vasyunin cotangent formula.
+\end{axiombox}
+
+The \emph{diagonal} case ($j = k$) is fully proved in the Cathedral via
+the Stirling--Squeeze bridge (piecewise FTC + Stirling's approximation).
+The off-diagonal case requires the Gauss digamma formula
+$\psi(p/q) = -\gamma - \ln(2q) - (\pi/2)\cot(\pi p/q) +
+2\sum_{n=1}^{\lfloor(q-1)/2\rfloor} \cos(2\pi np/q)\ln\sin(\pi n/q)$
+and careful handling of the piecewise-constant fractional part.
+
+\begin{direction}[Off-Diagonal via Fourier]
+An alternative to the direct computation: decompose $\{1/(jx)\}\{1/(kx)\}$
+in the Fourier basis $\{e^{2\pi inx}\}$ on $(0,1)$. The Fourier
+coefficients of $\{u\}$ are known ($c_n = -1/(2\pi in)$ for $n \neq 0$),
+and the integral becomes a Parseval identity. This avoids the cotangent
+formula entirely, at the cost of requiring Fourier theory for the
+fractional part function.
+\end{direction}
+
+% ================================================================
+\section{Horizon II: Beyond RH}
+\label{sec:generalization}
+% ================================================================
+
+\subsection{The Generalized Riemann Hypothesis}
+
+The Nyman--Beurling framework generalizes naturally to Dirichlet
+$L$-functions. For a Dirichlet character $\chi$ modulo~$q$, define the
+twisted basis
+\[
+  h_{k,\chi}(x) = \chi(k)\,\fract{1/(kx)}, \quad k \ge 2,
+\]
+and the twisted distance
+\[
+  d_{N,\chi}^2 = \inf_v \int_0^1
+    \biggl|\chi_0(x) - \sum_{k=2}^N v_k\,h_{k,\chi}(x)\biggr|^2\,dx
+\]
+where $\chi_0$ is the principal character. Then:
+
+\begin{conjecture}[Generalized Nyman--Beurling]
+For each primitive character $\chi$ modulo~$q$:
+\[
+  L(s,\chi) \neq 0 \text{ for } \re(s) > \tfrac{1}{2}
+  \;\iff\;
+  d_{N,\chi}^2 \to 0 \text{ as } N \to \infty.
+\]
+\end{conjecture}
+
+The Rank-1 Mellin argument generalizes immediately: at a zero $\rho$ of
+$L(s,\chi)$, the Mellin transform $\mathcal{M}[h_{k,\chi}](\rho) =
+\chi(k)/(k(\rho-1))$ is again rank-1 in $k$. The separation argument
+goes through unchanged because $\chi(k)/k$ is real only when $\chi$ is
+real (and even then, $\im(1/\rho) \neq 0$ provides the separation).
+
+\begin{direction}[GRH Formalization]
+The Cathedral's converse direction ports to $L$-functions with minimal
+modification. The forward direction requires:
+\begin{enumerate}
+  \item Twisted Mertens bounds: $|M_\chi(x)| := |\sum_{n \le x} \mu(n)\chi(n)|
+    = O(x^{1/2+\varepsilon})$ under GRH.
+  \item Twisted Abel summation and the analogue of the covariance cancellation.
+  \item The analytic continuation of $L(s,\chi)$ (already in Mathlib:
+    \lean{DirichletCharacter.LSeries}).
+\end{enumerate}
+The real bottleneck is the Montgomery--Vaughan mean value theorem for
+twisted Dirichlet polynomials, which is strictly harder than the
+untwisted case.
+\end{direction}
+
+\subsection{Selberg Class}
+
+The Nyman--Beurling criterion extends conjecturally to the Selberg class
+of $L$-functions satisfying axioms for analytic continuation, functional
+equation, Euler product, and Ramanujan bound. The Cathedral's
+architecture---axiom-driven, Mellin-based---is naturally suited to this
+generalization.
+
+\begin{open}
+Can the Rank-1 Mellin Miracle be stated for an abstract $L$-function
+satisfying the Selberg axioms? The key question is whether the Mellin
+transform of the normalized basis $\{1/(kx)\}$ continues to factorize
+at the zeros of a general Selberg class element.
+\end{open}
+
+% ================================================================
+\section{Horizon III: The Discoveries}
+\label{sec:discoveries}
+% ================================================================
+
+The formalization process produced several unexpected mathematical
+structures that warrant independent investigation.
+
+\subsection{The Liouville Parity Symmetry}
+
+\begin{definition}[Parity Operator]
+The Liouville parity operator $P = \mathrm{diag}(\lambda(2), \lambda(3),
+\ldots, \lambda(N))$ where $\lambda(n) = (-1)^{\Omega(n)}$ is the
+Liouville function. Since $\lambda(n)^2 = 1$, $P^2 = I$ and $P$
+defines a $\ZZ/2$-grading on $\RR^{N-1}$.
+\end{definition}
+
+\begin{theorem}[Approximate PT-Symmetry, Computational]
+The Gram matrix $G_N$ approximately commutes with the parity operator~$P$:
+\begin{enumerate}
+  \item The commutator $[G, P]$ is dominated by a rank-1 component whose
+    singular direction is the Liouville vector itself (correlation $> 0.99999$).
+  \item After removing this rank-1 component,
+    $\|[G,P]_{\mathrm{residual}}\|/\|G\| \to 0$ as $N \to \infty$.
+  \item The parity-even block $G_{\mathrm{even}} = (G + PGP)/2$ has
+    spectral gap $\lambda_{\min}(G_{\mathrm{even}})/\lambda_{\min}(G)
+    \approx 1.85 \cdot N^{0.116}$, growing with $N$.
+\end{enumerate}
+\end{theorem}
+
+This means the small spectral gap of $G$ is \emph{entirely caused by
+parity-breaking cross-coupling} between the even ($\lambda = +1$) and
+odd ($\lambda = -1$) sectors. The Liouville function is the mixing
+direction.
+
+\begin{direction}[PT-Symmetry and Quantum Mechanics]
+The approximate $[G, P] \approx 0$ structure is reminiscent of
+PT-symmetry in non-Hermitian quantum mechanics (Bender--Boettcher, 1998).
+In that context, a Hamiltonian $H$ with $[H, PT] = 0$ has real spectrum
+despite being non-Hermitian. Here, the Gram matrix $G$ is Hermitian, but
+the parity decomposition $G = G_{\mathrm{even}} + G_{\mathrm{odd}}$
+separates the ``free'' dynamics (within-parity, large gap) from the
+``interaction'' (cross-parity, small gap).
+
+Could this be evidence for an underlying non-Hermitian operator whose
+PT-symmetry is the Liouville involution? The experimental scaling
+$|{\langle v_{\min}, \hat{\lambda}\rangle}| \sim N^{-0.174}$ suggests
+this mixing decays---but not fast enough to make the spectral gap
+obvious.
+\end{direction}
+
+\subsection{The Octonionic Partition}
+
+\begin{definition}[Octonionic Class]
+Define $\mathrm{class}(k) = k \bmod 8$ (with identification $0 \equiv 8$).
+This partitions $\{2, 3, \ldots, N\}$ into 8 residue classes modulo 8.
+\end{definition}
+
+The \emph{block-diagonal} Gram matrix $G^{\mathrm{block}}$ retains only
+within-class entries: $G^{\mathrm{block}}(j,k) = G(j,k)$ if
+$\mathrm{class}(j) = \mathrm{class}(k)$, zero otherwise.
+
+\begin{theorem}[Class Gap, Machine-Verified]
+$\lambda_{\min}(G) \le \lambda_{\min}(G^{\mathrm{block}})$.
+\end{theorem}
+
+This is proved in \lean{ClassRestriction.lean} (zero axioms) via the
+Rayleigh quotient characterization. The cross-class entries \emph{always
+lower the spectral gap}.
+
+\begin{remark}[Why 8?]
+The choice of 8 classes comes from the Cayley--Dickson hierarchy:
+$\RR \to \CC \to \HH \to \OO \to \SSS$, with dimensions $1, 2, 4, 8, 16$.
+The octonionic level ($\bmod 8$) is the last division algebra---past the
+octonions, zero divisors appear (the sedenions $\SSS$). The arithmetic
+of $\mu(k)$ modulo 8 has special structure because the M\"obius function
+is multiplicative and $8 = 2^3$.
+
+Whether this partition has deep arithmetic significance or is simply a
+convenient computational grouping remains open. The experimental
+evidence (class gap ratio $\approx 3.4$--$4.2\times$) suggests
+genuine structural content.
+\end{remark}
+
+\begin{direction}[Rank-1 Interference]
+The cross-class interaction matrix $M = G - G^{\mathrm{block}}$ in the
+eigenbasis of $G^{\mathrm{block}}$ has the remarkable property that each
+$(m_1, m_2)$-block is rank-1 to $\ge 99.8\%$ accuracy (verified for
+$N \le 800$, accuracy \emph{increasing} with $N$).
+
+This suggests that in the $N \to \infty$ limit, the cross-class
+interaction becomes \emph{exactly} rank-1, reducing the infinite-dimensional
+spectral gap problem to an $8 \times 8$ bilinear form problem. If proved,
+this would provide a finite-dimensional reduction of RH.
+\end{direction}
+
+\subsection{The B\'aez-Duarte Constant}
+
+The optimal Rayleigh quotient $Q_N^{\mathrm{opt}} \sim C \ln N$ where
+\[
+  C = \frac{1}{\sum_{\zeta(\rho)=0} |\rho|^{-2}}
+  = \frac{1}{2 + \gamma - \ln(4\pi)}
+  \approx 21.6498.
+\]
+
+This constant has interpretations in:
+\begin{enumerate}
+  \item \textbf{Signal processing}: The maximum information extraction
+    rate from the ``prime noise'' through the spectral holes of $|\zeta|^2$.
+  \item \textbf{Statistical mechanics}: The heat capacity of the prime
+    number gas, governing the cooling rate $d_N^2 \sim c/\ln N$.
+  \item \textbf{Random matrix theory}: Connected to the resolvent trace
+    $(H^2 + I/4)^{-1}$ of the hypothetical Riemann Hamiltonian.
+\end{enumerate}
+
+\begin{direction}[Formalizing the Constant]
+The sum $\sum |\rho|^{-2} = 2 + \gamma - \ln(4\pi)$ follows from the
+Hadamard product for $\zeta(s)/(s-1)$ and logarithmic differentiation.
+The ingredients (Hadamard factorization, functional equation of $\xi(s)$)
+are within reach of Mathlib + Cathedral infrastructure. Formalizing this
+would provide a machine-verified computation of the B\'aez-Duarte
+constant, connecting the spectral gap decay rate to the arithmetic of
+zeta zeros.
+\end{direction}
+
+% ================================================================
+\section{Horizon IV: The Engineering}
+\label{sec:engineering}
+% ================================================================
+
+\subsection{Certified Computation}
+
+The Cathedral maintains parallel implementations: Lean~4 proofs and a
+Rust/WASM computational engine (7 modules, 11 visualization modes).
+Currently, these are connected only by architectural correspondence---the
+Rust engine computes what the Lean proofs formalize, but there is no
+formal bridge.
+
+\begin{direction}[Proof-Carrying Computation]
+Connect the Rust engine to the Lean proofs via:
+\begin{enumerate}
+  \item \textbf{Certified extraction}: Generate verified Rust code from
+    Lean definitions using the \lean{native\_decide} framework or the
+    FFI. The Gram matrix entries could be computed in Lean via
+    \lean{native\_decide} for small $N$, then extrapolated.
+  \item \textbf{Interval arithmetic}: Use verified interval arithmetic
+    (MPFR with Lean bindings) to certify that the computed Gram matrix
+    eigenvalues are positive for $N \le N_0$, then use the monotone
+    convergence theorem ($\lambda_{\min}$ is non-increasing) to extend
+    to all $N$.
+  \item \textbf{Finite witness certification}: For each $N$, the
+    forward direction provides an explicit witness~$v_N$. Certify
+    $\int_0^1 (1 - f_{N,v_N})^2 < \varepsilon$ by computing the
+    quadratic form $1 - 2b^T v + v^T G v$ in exact rational arithmetic.
+\end{enumerate}
+\end{direction}
+
+\subsection{The HyperZeta Viewport}
+
+The Cathedral's visualization system (HyperZeta Viewport) renders 11
+views of the zeta function's structure:
+
+\begin{center}
+\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{\#} & \textbf{Mode} & \textbf{Shows} & \textbf{Axiom Connection} \\
+\midrule
+1 & Sedenion Cloud & $\zeta_{\SSS}(s)$ in 16D & Full system \\
+2 & Riemann Spiral & $\zeta(1/2+it)$ spiral & Zero locations \\
+3 & Cornu Spirals & Partial sum galaxy & Dirichlet series \\
+4 & Zero Landscape & $\log|\zeta(\sigma+it)|$ & Critical strip \\
+5 & Euler Product & $\prod_p (1-p^{-s})^{-1}$ & Euler product \\
+6 & Cayley--Dickson Tower & $\CC \to \HH \to \OO \to \SSS$ & Algebraic consistency \\
+7 & Explicit Formula & $\pi(x) \approx \mathrm{Li}(x) - \sum_\rho$ & Zero corrections \\
+8 & Functional Equation & $\zeta(s) = \chi(s)\zeta(1-s)$ & Symmetry \\
+9 & Random Matrix & GUE pair correlation & Montgomery--Odlyzko \\
+10 & Mertens Turbulence & $M(x) = \sum \mu(n)$ & Axiom 1 \\
+11 & Spectral Gap & $\lambda_{\min}(G_N)$ surface & The Cathedral itself \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{direction}[Interactive Proof Explorer]
+Extend the viewport into a proof assistant companion:
+\begin{enumerate}
+  \item Clicking on a visualization mode highlights the axioms it depends on.
+  \item The Spectral Gap view could overlay the proof dependency graph,
+    showing which axioms support each region of the $(\sigma, N)$ surface.
+  \item Interactive sliders could show how changing axiom assumptions
+    (e.g., weakening $O(x^{3/4})$ to $O(x^{7/8})$) affects the decay
+    rate.
+\end{enumerate}
+\end{direction}
+
+% ================================================================
+\section{Horizon V: Connections to Physics}
+\label{sec:physics}
+% ================================================================
+
+\subsection{The Hilbert--P\'olya Program}
+
+The Cathedral's spectral structure---particularly the Gram matrix as a
+discrete approximation to the hypothetical Riemann operator---invites
+connection to the Hilbert--P\'olya conjecture.
+
+\begin{conjecture}[Hilbert--P\'olya, 1914/1950]
+There exists a self-adjoint operator $T$ on a Hilbert space $\mathcal{H}$
+whose eigenvalues are exactly $\{1/2 + i\gamma_n\}$ where
+$\zeta(1/2 + i\gamma_n) = 0$.
+\end{conjecture}
+
+The Gram matrix $G_N$ is a finite-rank approximation to the integral
+operator with kernel $K(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$.
+Its spectrum approximates the spectrum of this kernel operator. The
+Nyman--Beurling theorem says RH is equivalent to this operator having
+the function~$1$ in its range closure.
+
+\begin{direction}[From Gram to Hilbert--P\'olya]
+The Vasyunin formula for $G(j,k)$ involves the digamma function
+$\psi(p/q)$, which is the logarithmic derivative of the Gamma function.
+The connection to the Hilbert--P\'olya operator runs through the
+spectral decomposition of $G$ in terms of zeta zeros:
+\[
+  G(j,k) = \frac{1}{2\pi i} \oint \frac{\zeta(s)\zeta(1-s)}{j^s k^{1-s} s(1-s)}\,ds.
+\]
+The poles of this integrand are at $s = 0, 1$ and the zeta zeros.
+The residues at the zeros give the spectral decomposition. Formalizing
+this connection would provide a bridge between the Cathedral's discrete
+Gram matrix and the continuous Hilbert--P\'olya operator.
+\end{direction}
+
+\subsection{The Montgomery--Odlyzko Connection}
+
+The GUE hypothesis (Montgomery, 1973; Odlyzko, 1987) states that the
+local statistics of zeta zeros match those of random Hermitian matrix
+eigenvalues. The Cathedral's Rust engine validates this for the first
+200 zeros.
+
+\begin{direction}[GUE and the Gram Matrix]
+The Gram matrix $G_N$ is itself a random-matrix-like object: its entries
+are correlations of quasi-random functions (fractional parts). As $N \to
+\infty$, does $G_N$ approach a random matrix ensemble? The parity
+decomposition $G = G_{\mathrm{even}} + G_{\mathrm{odd}}$ resembles the
+block structure of symplectic random matrices. The rank-1 interference
+between octonionic classes suggests a spiked model:
+\[
+  G \approx G^{\mathrm{block}} + \text{rank-28 perturbation}
+\]
+($8 \times 7 / 2 = 28$ cross-class pairs, each contributing one singular
+value). This is precisely the setting of spiked random matrix models
+(Baik--Ben Arous--P\'ech\'e, 2005), where phase transitions occur
+when spike strength exceeds a threshold.
+\end{direction}
+
+% ================================================================
+\section{The Axiom Reduction Timeline}
+\label{sec:timeline}
+% ================================================================
+
+We estimate the difficulty and timeline for closing each axiom:
+
+\begin{center}
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Axiom} & \textbf{Difficulty} & \textbf{Blocking On} & \textbf{Status} \\
+\midrule
+PNT $\times 3$ (\#2--4) & Medium & Wiener--Ikehara or Newman & Open (6--12 months) \\
+\rowcolor{green!10}
+Abel tail & Easy & Abel summation lemma & \textbf{GRADUATED (Apr 22)} \\
+Vasyunin off-diag (\#6) & Medium & Digamma formula & Open (3--6 months) \\
+Covariance (\#5) & Hard & Contour shift + MVT & Open (12--24 months) \\
+& & \textit{(BC route may reduce)} & \\
+Mertens (\#1) & RH-hard & RH content & $\infty$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Note that Axiom~1 (\lean{rh\_implies\_mertens\_bound}) \emph{cannot} be
+proved unconditionally---it encodes the Riemann Hypothesis itself.
+The goal is to reduce everything else to this single axiom. The
+Cathedral currently uses \textbf{6 axioms} on the crown path (reduced from 7
+on April~22, 2026); the target is~1.
+
+\textbf{New development.} The Borel--Carath\'eodory theorem's availability
+in Mathlib may accelerate Campaign~C. The polynomial lower bound on
+$|\zeta(s)|$ (currently encoded as \lean{zeta\_polynomial\_lower\_bound\_rh})
+is not on the crown path but could unlock alternative proof routes that
+bypass the covariance cancellation axiom entirely.
+
+\begin{remark}[The Irreducible Core]
+If all six non-RH axioms are eliminated, the crown theorem becomes:
+\[
+  \RH \iff d_N^2 \to 0
+\]
+where the forward direction assumes only
+\lean{rh\_implies\_mertens\_34}: $\RH \implies |M(x)| = O(x^{3/4})$.
+The converse direction is already fully proved.
+
+This is the theoretical minimum: one axiom encoding the analytic content
+of RH, with everything else machine-verified. The reduction from
+$|M(x)| = O(x^{3/4})$ to $d_N^2 \to 0$ would then be a theorem about
+the structural consequence of Mertens bounds, provable without assuming
+RH directly.
+\end{remark}
+
+% ================================================================
+\section{Reflections}
+\label{sec:reflections}
+% ================================================================
+
+The Cathedral was not built to prove the Riemann Hypothesis. It was built
+to understand what the Riemann Hypothesis \emph{is}---to decompose it
+into pieces small enough for a machine to hold, and to discover which
+pieces are hard and which are merely unfamiliar.
+
+The answer surprised us. The \emph{converse} direction---if primes are
+well-distributed then zeros are on the line---is easy. The Rank-1 Mellin
+Miracle gives it for free, with zero custom axioms. The \emph{forward}
+direction---if zeros are on the line then primes are well-distributed---is
+where the arithmetic lives. And within the forward direction, the
+hardest single piece is the 2D covariance cancellation
+(Axiom~6), which encodes the delicate interference between the Gram
+matrix and the Prime Number Theorem.
+
+This is, in retrospect, exactly what one should expect. The Riemann
+Hypothesis is a statement about how much cancellation the primes exhibit.
+The Gram matrix \emph{is} that cancellation, frozen into a symmetric,
+positive-definite matrix. The spectral gap \emph{is} the margin by which
+the cancellation succeeds. And the axioms that remain are the axioms
+that control how tightly the primes cancel.
+
+The Cathedral does not resolve the Riemann Hypothesis. What it does is
+translate a 167-year-old analytic conjecture into a collection of
+precisely stated, machine-checkable assertions about symmetric matrices,
+Abel summation, and the Prime Number Theorem. Some of these assertions
+are easy. Some are hard. One is equivalent to RH itself. The machine
+holds the rest.
+
+\begin{flushright}
+\emph{The stone is the same.\\
+The light through the windows is clearer.}
+\end{flushright}
+
+% ================================================================
+% BIBLIOGRAPHY
+% ================================================================
+\begin{thebibliography}{99}
+
+\bibitem{nyman1950}
+B.~Nyman, \emph{On the one-dimensional translation group and semi-group in
+certain function spaces}, Thesis, Uppsala, 1950.
+
+\bibitem{beurling1955}
+A.~Beurling, \emph{A closure problem related to the Riemann zeta function},
+Proc. Nat. Acad. Sci. USA \textbf{41} (1955), 312--314.
+
+\bibitem{baezduarte2003}
+L.~B\'aez-Duarte, \emph{A strengthening of the Nyman--Beurling criterion for
+the Riemann hypothesis}, Atti Accad. Naz. Lincei Rend. Lincei Mat. Appl.
+\textbf{14} (2003), 5--11.
+
+\bibitem{vasyunin1995}
+V.I.~Vasyunin, \emph{On a biorthogonal system associated with the Riemann
+hypothesis}, St. Petersburg Math. J. \textbf{7} (1996), 405--419.
+
+\bibitem{montgomery1973}
+H.L.~Montgomery, \emph{The pair correlation of zeros of the zeta function},
+Proc. Symp. Pure Math. \textbf{24} (1973), 181--193.
+
+\bibitem{odlyzko1987}
+A.M.~Odlyzko, \emph{On the distribution of spacings between zeros of the zeta
+function}, Math. Comp. \textbf{48} (1987), 273--308.
+
+\bibitem{balazard2000}
+M.~Balazard and E.~Saias, \emph{The Nyman--Beurling equivalent form for the
+Riemann Hypothesis}, Expo. Math. \textbf{18} (2000), 131--138.
+
+\bibitem{bender1998}
+C.M.~Bender and S.~Boettcher, \emph{Real spectra in non-Hermitian
+Hamiltonians having PT symmetry}, Phys. Rev. Lett. \textbf{80} (1998),
+5243--5246.
+
+\bibitem{baik2005}
+J.~Baik, G.~Ben~Arous, and S.~P\'ech\'e, \emph{Phase transition of the
+largest eigenvalue for nonnull complex sample covariance matrices},
+Ann. Probab. \textbf{33} (2005), 1643--1697.
+
+\bibitem{newman1998}
+D.J.~Newman, \emph{Simple analytic proof of the prime number theorem},
+Amer. Math. Monthly \textbf{87} (1980), 693--696.
+
+\bibitem{korevaar2002}
+J.~Korevaar, \emph{A century of complex Tauberian theory},
+Bull. AMS \textbf{39} (2002), 475--531.
+
+\bibitem{mathlib}
+The Mathlib Community, \emph{Mathlib: A unified library of mathematics
+formalized in Lean~4}, \url{https://github.com/leanprover-community/mathlib4}.
+
+\end{thebibliography}
+
+\end{document}

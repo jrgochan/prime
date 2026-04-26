@@ -29,6 +29,7 @@ members = [
     "experiments/vasyunin-convergence",
     "experiments/gram-bilinear-abel",
     "experiments/two-tile-analyzer",
+    "experiments/gram-pointwise",
 ]
 
 [profile.release]

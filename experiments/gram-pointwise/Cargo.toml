@@ -1,0 +1,10 @@
+[package]
+name = "gram-pointwise"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Pointwise f_N(x) Validator — certifies |f_N(x)| ≤ 1 and vᵀGv < 1 via 512-bit MPFR numerical integration with Abel summation analysis"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

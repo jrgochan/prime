@@ -319,6 +319,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gram-pointwise"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "gram-quadform"
 version = "0.1.0"
 dependencies = [

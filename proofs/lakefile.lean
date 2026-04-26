@@ -152,6 +152,9 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
     `Cathedral.Assembly.PerronCrown,
+    -- Gram form graduation (axiom → theorem via split-region L²)
+    `Cathedral.Assembly.GramFormProof,
+    `Cathedral.Assembly.DotProductBound34,
     -- White Singlet (Phase I: Axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,

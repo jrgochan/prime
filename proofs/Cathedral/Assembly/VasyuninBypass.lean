@@ -54,7 +54,7 @@ theorem dotProduct_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
 
 /-- Helper: quad form bridge, parameterized as N = m+1.
     vᵀGv over Fin(m+1) = vᵀGv over Fin m when last weight is 0. -/
-private theorem quadForm_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
+theorem quadForm_bridge_aux (m : ℕ) (hm : 2 ≤ m) :
     dotProduct (logCutoffWitness (m+1)) ((vasyuninGramMatrix (m+1)).mulVec (logCutoffWitness (m+1))) =
     realQuadForm (of fun (i j : Fin m) => vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight (m+1)) := by
   unfold dotProduct Matrix.mulVec realQuadForm
