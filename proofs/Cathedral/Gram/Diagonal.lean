@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Gram/Diagonal.lean
+
+  Diagonal Gram matrix entries G(k,k) = ∫₀¹ {1/(kx)}² dx.
+  Computes the exact formula via Stirling numbers and proves
+  G(k,k) = 1 - (1 + 1/2 + ... + 1/k)/k + O(log²k/k²).
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Defs
 import Cathedral.Gram.FractIntegral
 

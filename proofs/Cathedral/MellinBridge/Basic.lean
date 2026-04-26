@@ -1,3 +1,12 @@
+/-!
+  Cathedral/MellinBridge/Basic.lean
+
+  Re-export hub for the MellinBridge library. Imports all submodules
+  of the MellinBridge subsystem including Separation, FloorMellin,
+  HilbertSetup, and the autocorrelation/Mertens bypass paths.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Defs
 import Cathedral.Structural.Structural
 import Mathlib.Analysis.MellinTransform

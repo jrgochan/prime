@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Spectral/RayleighBridge.lean
+
+  Rayleigh quotient bridge: connects λ_min(G_N) to the
+  Nyman-Beurling distance d²_N via the Schur complement
+  and eigenvalue drop formula.
+
+  Zero axioms. NOT on the v11 crown path.
+-/
 import Cathedral.Defs
 import Mathlib.Analysis.InnerProductSpace.PiL2
 

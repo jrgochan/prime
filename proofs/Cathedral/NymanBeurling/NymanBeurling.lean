@@ -7,24 +7,22 @@ import Cathedral.NymanBeurling.BDMellin
 
   ## The Nyman-Beurling-Báez-Duarte Criterion
 
-  ### Architecture (April 25, 2026 — The Phantom Limb Amputation)
+  ### Architecture (v11 — April 26, 2026 — The Mellin Crown)
 
-  Both directions now use the Báez-Duarte basis `bdLinComb` = Σ wₖ{1/(kx)}.
+  Both directions use the Báez-Duarte basis `bdLinComb` = Σ wₖ{1/(kx)}.
 
   - **Converse** (d²→0 ⟹ RH): PROVED via `nyman_beurling_converse`
     from Separation.lean, using the Rank-1 Mellin identity.
+    Zero custom axioms.
 
-  - **Forward** (RH ⟹ d²→0): PROVED via `rh_implies_bd_convergence_direct`
-    from DirectL2Crown.lean, using the Mertens bound + Abel summation.
-
-  The old forward direction used the Nyman basis {k/x} (Universe 1)
-  via `GramWitness.lean`. This has been archived — the Báez-Duarte
-  basis {1/(kx)} (Universe 2) is mathematically preferred and already
-  fully proved.
+  - **Forward** (RH ⟹ d²→0): PROVED via `rh_implies_bd_convergence_mellin`
+    from Assembly/MellinCrown.lean. Uses the Mellin Crown:
+    RH → Mellin variance ≤ C/logN → Parseval bridge → L²(0,1) decay.
+    1 crown axiom: `critical_line_mellin_variance`.
 
   ### Key results (re-exported)
   - `nyman_beurling_converse`: d²_BD → 0 ⟹ RH (kernel axioms only)
-  - `rh_implies_bd_convergence_direct`: RH ⟹ d²_BD → 0 (DirectL2Crown)
+  - `rh_implies_bd_convergence_mellin`: RH ⟹ d²_BD → 0 (MellinCrown)
 -/
 
 noncomputable section

@@ -1,3 +1,12 @@
+/-!
+  Cathedral/NymanBeurling/Separation.lean
+
+  The separation lemma: if ρ is a ζ-zero off the critical line,
+  then d²_N ≥ δ > 0 for all N. Combined with the Mellin identity
+  from BDMellin.lean to prove the converse direction.
+
+  **On the crown path. Zero custom axioms.**
+-/
 import Cathedral.Axioms
 import Cathedral.NymanBeurling.BDMellin
 import Mathlib.NumberTheory.LSeries.Nonvanishing

@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Sieve/MoebiusUncoupling.lean
+
+  Vaughan-style Möbius function decomposition.
+  Splits μ(n) sums into Type I and Type II components.
+  Axioms: vaughan_decomposition, type_I_bound.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Sieve.VasyuninExpansion
 import Cathedral.Sieve.BilinearSieve
 import Mathlib.NumberTheory.ArithmeticFunction.Defs

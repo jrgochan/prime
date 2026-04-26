@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Sieve/VasyuninExpansion.lean
+
+  Vasyunin formula expansion for large GCD terms.
+  Axiom: vasyunin_large_gcd.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Gram.Bounds
 import Cathedral.Gram.OffDiagonal
 

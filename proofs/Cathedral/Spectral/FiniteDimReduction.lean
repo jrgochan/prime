@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Spectral/FiniteDimReduction.lean
+
+  Finite-dimensional reduction: shows that spectral gap analysis
+  can be reduced to a finite block of the Gram matrix.
+  Axiom: stable_ratio.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Defs
 import Cathedral.Spectral.OctonionicPartition
 import Cathedral.Spectral.ClassRestriction

@@ -1,3 +1,12 @@
+/-!
+  Cathedral/MellinBridge/FloorDivMellin.lean
+
+  Mellin transforms of h_k(x) = {1/(kx)} — the Báez-Duarte basis.
+  Establishes M[h_k](s) = ζ(s)/(k^s · s) - 1/(k^s · (s-1)) and
+  related identities used in the separation argument.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.FloorMellin
 

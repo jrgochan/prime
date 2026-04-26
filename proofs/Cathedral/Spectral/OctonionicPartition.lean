@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Spectral/OctonionicPartition.lean
+
+  Octonionic partition of the Gram matrix eigenvalues.
+  Uses mod-8 arithmetic structure to partition the spectrum.
+  Axiom: oct_gap_lower_bound.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Defs
 
 /-! # SpectralRH.OctonionicPartition

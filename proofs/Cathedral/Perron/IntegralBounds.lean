@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Perron/IntegralBounds.lean
+
+  Bounds on the vertical and horizontal integrals appearing
+  in the Perron formula contour.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.Perron.Defs
 
 /-!

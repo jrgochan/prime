@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Gram/Bounds.lean
+
+  Upper bounds on Gram matrix entries G(j,k).
+  Proves pointwise estimates needed for spectral analysis
+  and convergence rate arguments.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Defs
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor

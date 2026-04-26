@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Perron/DirichletPoly.lean
+
+  Dirichlet polynomial approximation to 1/ζ(s).
+  Proves bounds on truncated Dirichlet series and their
+  connection to Möbius function partial sums.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Perron.Defs
 import Cathedral.Zeta.DirichletInverse
 import Mathlib.Analysis.PSeries

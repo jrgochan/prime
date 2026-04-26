@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Perron/ResidueLtOne.lean
+
+  Residue analysis for σ < 1 in the Perron contour.
+  Handles the contribution from ζ-zeros inside the contour.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.Perron.Defs
 import Cathedral.Perron.IntegralBounds
 import Cathedral.Perron.Rectangle

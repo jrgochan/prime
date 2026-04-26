@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Perron/ResidueGtOne.lean
+
+  Residue computation for σ > 1 in the Perron formula.
+  The dominant contribution from the pole of ζ(s)/s at s = 1.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.Perron.Defs
 import Cathedral.Perron.IntegralBounds
 import Cathedral.Perron.Rectangle

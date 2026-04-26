@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Sieve/BilinearSieve.lean
+
+  Bilinear sieve decomposition for the Nyman-Beurling residual.
+  Axioms: moebius_uncoupling, type_II_sieve_bound.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Sieve.ParitySchur
 import Cathedral.Sieve.VasyuninExpansion
 

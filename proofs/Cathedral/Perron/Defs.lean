@@ -1,3 +1,12 @@
+/-!
+  Cathedral/Perron/Defs.lean
+
+  Core definitions for the Perron formula contour integration:
+  Perron kernel, vertical integrals, rectangle contours, and
+  the Dirichlet series cutoff machinery.
+
+  Zero sorry. Zero axioms.
+-/
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.Complex.RemovableSingularity
 import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv

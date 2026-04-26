@@ -1,3 +1,10 @@
+/-!
+  Cathedral/MellinBridge/HilbertSetup.lean
+
+  Hilbert space setup for the L²(0,1) framework.
+  Defines the inner product structure and connects it to the
+  Gram matrix representation used throughout the Cathedral.
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.FloorDivMellin
 

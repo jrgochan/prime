@@ -1,3 +1,13 @@
+/-!
+  Cathedral/Spectral/PTSymmetry.lean
+
+  PT-Symmetry (parity-time symmetry) of the Gram matrix.
+  The Liouville function defines a Z/2 grading, and the
+  Gram matrix approximately commutes with the parity operator.
+  Axiom: liouville_delocalization.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Defs
 
 /-! # SpectralRH.PTSymmetry

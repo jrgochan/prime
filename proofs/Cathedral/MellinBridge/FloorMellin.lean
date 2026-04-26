@@ -1,3 +1,12 @@
+/-!
+  Cathedral/MellinBridge/FloorMellin.lean
+
+  Mellin transforms of floor-fractional-part functions.
+  Proves analytic properties of M[{1/x}](s) and related transforms
+  needed for the frequency-domain analysis of Nyman-Beurling residuals.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.MellinBridge.Basic
 
 /-! # Cathedral.MellinBridge.FloorMellin

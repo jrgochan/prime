@@ -1,3 +1,12 @@
+/-!
+  Cathedral/MellinBridge/MellinSieve.lean
+
+  Mellin-domain sieve: connects Möbius function sums to Mellin
+  integrals of 1/ζ(s). Used by the sieve engine for Type I/II
+  sum decompositions.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.HilbertSetup
 import Cathedral.MellinBridge.Separation

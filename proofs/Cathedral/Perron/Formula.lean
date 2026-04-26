@@ -1,3 +1,11 @@
+/-!
+  Cathedral/Perron/Formula.lean
+
+  Statement of Perron's formula connecting Dirichlet series
+  to partial sums via contour integration.
+
+  Zero sorry. Zero axioms.
+-/
 import Cathedral.Perron.KernelBound
 
 /-!

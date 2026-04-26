@@ -1,3 +1,12 @@
+/-!
+  Cathedral/MellinBridge/AutocorrelationBypass.lean
+
+  Alternative forward path via the autocorrelation representation.
+  Axioms: mellin_fourier_change, fourier_inversion_autocorrelation,
+  gram_form_eq_l2_norm.
+
+  NOT on the v11 crown path (alternative route).
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.HilbertSetup
 import Cathedral.MellinBridge.MellinSieve

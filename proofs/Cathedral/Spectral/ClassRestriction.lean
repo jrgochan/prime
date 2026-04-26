@@ -1,3 +1,14 @@
+/-!
+  Cathedral/Spectral/ClassRestriction.lean
+
+  Octonionic class restriction: partitions eigenvalues into
+  8 arithmetic progression classes and proves the spectral gap
+  is determined by the worst class.
+  Axioms: block_min_eq_class_min, class_gap_strictly_larger,
+  oct_equals_block, schur_bridge.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Defs
 import Cathedral.Spectral.OctonionicPartition
 import Cathedral.Structural.Structural

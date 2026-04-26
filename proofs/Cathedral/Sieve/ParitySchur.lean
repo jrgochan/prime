@@ -1,3 +1,14 @@
+/-!
+  Cathedral/Sieve/ParitySchur.lean
+
+  Parity-Schur complement analysis of the Gram matrix.
+  Uses the Liouville parity decomposition (PT-Symmetry discovery)
+  to relate spectral gap to parity-breaking coupling.
+  Axioms: stable_ratio_parity, gram_eigenvalue_log_scaling,
+  eigenvalue_implies_distance_bound.
+
+  NOT on the v11 crown path (part of Spectral Engine).
+-/
 import Cathedral.Defs
 import Cathedral.Structural.Structural
 import Cathedral.Spectral.PTSymmetry

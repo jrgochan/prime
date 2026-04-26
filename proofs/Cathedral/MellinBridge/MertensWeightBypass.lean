@@ -1,3 +1,11 @@
+/-!
+  Cathedral/MellinBridge/MertensWeightBypass.lean
+
+  Alternative forward direction via direct Mertens weight bounds.
+  Axioms: mertens_bound_from_rh, abel_summation_l2_bound.
+
+  NOT on the v11 crown path (bypassed by Mellin Crown).
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.MellinBridge.HilbertSetup
 import Cathedral.Defs

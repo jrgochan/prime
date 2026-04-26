@@ -1,3 +1,18 @@
+/-!
+  Cathedral/MellinBridge/Separation.lean
+
+  ## Zeta Zero Separation (Rank-1 Mellin Identity)
+
+  Proves that if ζ has a zero ρ off the critical line, then the
+  Nyman-Beurling distance d²_N is bounded below by a positive constant.
+  This is the core of the CONVERSE direction (d²→0 ⟹ RH).
+
+  Key theorem: `nyman_beurling_converse`
+  Proof technique: The Mellin transform M[h_k](s) = 1/(k^s · (s-1))
+  at ζ zeros creates a rank-1 tensor, enabling Cauchy-Schwarz separation.
+
+  **Zero custom axioms. On the crown path.**
+-/
 import Cathedral.MellinBridge.Basic
 import Cathedral.Axioms
 

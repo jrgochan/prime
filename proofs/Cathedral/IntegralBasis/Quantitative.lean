@@ -1,3 +1,11 @@
+/-!
+  Cathedral/IntegralBasis/Quantitative.lean
+
+  Quantitative bounds for the integral basis representation.
+  Axioms: schur_complement_lower, cross_norm_bound.
+
+  NOT on the v11 crown path.
+-/
 import Cathedral.Defs
 import Cathedral.Structural.Structural
 
