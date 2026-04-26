@@ -134,10 +134,10 @@ function Pillar({
         <Text
           key={axiom}
           position={[0, -0.3 - i * 0.15, 0]}
-          fontSize={0.045}
+          fontSize={0.04}
           color="#94a3b8"
           anchorX="center"
-          maxWidth={1.2}
+          maxWidth={1.4}
         >
           {axiom}
         </Text>
@@ -195,7 +195,7 @@ function CathedralStructure({
 }) {
   const bricks = useMemo(
     () => [
-      // Row 1: Core definitions
+      // Row 1: Foundations
       {
         pos: [-1.2, 0.1, 0] as [number, number, number],
         label: "Defs",
@@ -204,64 +204,64 @@ function CathedralStructure({
       },
       {
         pos: [-0.4, 0.1, 0] as [number, number, number],
-        label: "FractIntegral",
+        label: "Gram/",
         color: "#1e4d2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [0.4, 0.1, 0] as [number, number, number],
-        label: "NbLinComb",
+        label: "LinearAlgebra/",
         color: "#1e4d2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [1.2, 0.1, 0] as [number, number, number],
-        label: "GramDiag",
+        label: "Vasyunin/",
         color: "#1e4d2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
-      // Row 2: Middle layer
+      // Row 2: Analytic machinery
       {
         pos: [-1, 0.45, 0] as [number, number, number],
-        label: "OrthogonalWitness",
+        label: "Perron/",
         color: "#2d5a1e",
         size: [0.8, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [0, 0.45, 0] as [number, number, number],
-        label: "MellinBridge",
+        label: "Zeta/",
         color: "#2d5a1e",
         size: [0.8, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [1, 0.45, 0] as [number, number, number],
-        label: "MertensWeightBypass",
+        label: "NymanBeurling/",
         color: "#2d5a1e",
         size: [0.8, 0.18, 0.45] as [number, number, number],
       },
-      // Row 3: Bridge / Robin
+      // Row 3: Bridge layers
       {
         pos: [-0.8, 0.8, 0] as [number, number, number],
-        label: "Separation",
+        label: "Covariance/",
         color: "#3a6b2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [0.1, 0.8, 0] as [number, number, number],
-        label: "MellinSieve",
+        label: "PNT/",
         color: "#3a6b2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
       {
         pos: [0.9, 0.8, 0] as [number, number, number],
-        label: "Robin/",
-        color: "#6b5a1e",
+        label: "AbelTail/",
+        color: "#3a6b2e",
         size: [0.7, 0.18, 0.45] as [number, number, number],
       },
-      // Row 4: Assembly
+      // Row 4: Assembly (capstone)
       {
         pos: [0, 1.2, 0] as [number, number, number],
-        label: "Assembly",
+        label: "Assembly/",
         color: "#4a8b3e",
         size: [1.6, 0.2, 0.5] as [number, number, number],
       },
@@ -309,7 +309,7 @@ function Roof() {
           anchorX="center"
           fontWeight="bold"
         >
-          riemann_hypothesis
+          nyman_beurling_equivalence
         </Text>
       </Float>
     </group>
@@ -358,38 +358,39 @@ export default function Cathedral3DPage() {
   const [selected, setSelected] = useState<string | null>(null);
 
   const brickInfo: Record<string, string> = {
-    Defs: "Core definitions: NB distance d²_N, Gram matrix G_N, fractional parts, RiemannHypothesis",
-    FractIntegral:
-      "Fractional part integrals: ∫₀¹{j/x}{k/x}dx computation, basis_entry_lower",
-    NbLinComb:
-      "Nyman-Beurling linear combination φ_w(x) = Σ wᵢ{(i+1)/x}, L²↔quadform bridge",
-    GramDiag:
-      "Gram matrix diagonal/off-diagonal bounds, aggregate excess structure",
-    OrthogonalWitness:
-      "Báez-Duarte Möbius witness h_ρ(x). Cauchy-Schwarz trap-breaker. 7 theorems PROVED.",
-    MellinBridge:
-      "Mellin transform infrastructure: Floor-Mellin identity, Hilbert space setup",
-    MertensWeightBypass:
-      "Mertens bound → Abel summation → weight construction. Pole-free theorem PROVED.",
-    Separation:
-      "Converse direction: ¬RH → defect δ > 0 via off-line zero separation",
-    MellinSieve:
-      "Forward direction: RH → phase_3_chain → d² ≤ C/log(N). PROVED from rh_weight_construction.",
-    "Robin/":
-      "Discrete arithmetic front: lagarias_for_primes PROVED!, Robin↔RH↔Lagarias equivalence, BaseCases, PrimeBounds",
-    Assembly:
-      "Final assembly: nyman_beurling_equivalence, eigenvalue_limit_exists, the Crown of the Cathedral",
+    "Defs":
+      "Core definitions: NB distance d\u00B2_N, Gram matrix G_N, bdBasis {1/(kx)}, RiemannHypothesis. The foundation of everything.",
+    "Gram/":
+      "FractIntegral (diagonal G(k,k) PROVED), Diagonal, OffDiagonal, L2Bridge. 6 files, Gram matrix infrastructure.",
+    "LinearAlgebra/":
+      "Sherman-Morrison inverse, Sylvester criterion, Variational bounds. 4 files of abstract linear algebra.",
+    "Vasyunin/":
+      "The largest module (39 files). Cotangent formula, Matrix entries, Proof chain, Augmented witnesses. Contains the off-diagonal convergence axiom.",
+    "Perron/":
+      "16-file Perron contour formula chain. RH \u2192 |M(x)| = O(x^{\u00BD+\u03B5}). The analytic heart of the forward direction.",
+    "Zeta/":
+      "8 files: Hadamard product, convexity bounds, Dirichlet series, disk bounds. Contains crown axiom #4.",
+    "NymanBeurling/":
+      "The converse direction. BDMellin (Rank-1 Mellin Miracle, PURE MATHLIB), ThetaBound, Separation. Zero axioms.",
+    "Covariance/":
+      "Gram form bounds, dot product identity, L\u00B2 convergence, Millennium Wall. Contains crown axiom #2. 8 files.",
+    "PNT/":
+      "Prime Number Theorem bridges. Abel mean, PNTAnd library bridge. Contains crown axiom #1. 3 files.",
+    "AbelTail/":
+      "Abel summation engine: S\u2081/S\u2082/S\u2083 decay, telescoping, tail assembly. 14 files. All PROVED.",
+    "Assembly/":
+      "6 capstone files only. MainChain (THE theorem), PerronCrown, OneCrown, DirectL2Crown, CertifiedComputation.",
   };
 
   return (
     <div className="h-full flex flex-col">
       <div className="p-6 border-b border-[#1e2148]">
         <h2 className="text-2xl font-bold text-slate-200">
-          The Cathedral — 3D Architecture
+          The Cathedral &mdash; 3D Architecture
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          Three pillars hold the roof of RH: Variational (Vasyunin), Robin
-          (Discrete), and the Mellin Bridge.
+          Two pillars hold the golden roof: Converse (pure Mathlib, 0 axioms)
+          and Forward (Perron Crown, 4 axioms). 155 files across 22 topic directories.
         </p>
       </div>
 
@@ -406,7 +407,7 @@ export default function Cathedral3DPage() {
             <pointLight
               position={[-3, 4, -2]}
               intensity={0.3}
-              color="#8b5cf6"
+              color="#10b981"
             />
             <pointLight
               position={[3, 2, 2]}
@@ -422,26 +423,25 @@ export default function Cathedral3DPage() {
             <Foundation />
             <Pillar
               position={[-1.5, 0, 0]}
-              label="Variational"
-              color="#8b5cf6"
+              label="Converse"
+              color="#10b981"
               axioms={[
-                "log_cutoff_witness_bound",
-                "vasyuninCovMatrix_posDef",
-              ]}
-            />
-            <Pillar
-              position={[0, 0, 0.4]}
-              label="Mellin"
-              color="#3b82f6"
-              axioms={[
-                "nyman_beurling_from_mellin",
+                "0 custom axioms",
+                "Rank-1 Mellin Miracle",
+                "Cauchy-Schwarz separation",
+                "PURE MATHLIB",
               ]}
             />
             <Pillar
               position={[1.5, 0, 0]}
-              label="Robin"
+              label="Forward"
               color="#f59e0b"
-              axioms={["lagarias_iff_rh", "robin_iff_rh"]}
+              axioms={[
+                "pnt_mu_log_div_k",
+                "covariance_bound_from_mertens_34",
+                "partial_integral_tends_to_formula",
+                "rh_zeta_lower_bound_...",
+              ]}
             />
             <CathedralStructure onSelectBrick={setSelected} />
             <Roof />
@@ -457,18 +457,18 @@ export default function Cathedral3DPage() {
           </Canvas>
 
           <div className="absolute bottom-4 left-4 text-xs text-slate-500">
-            Drag to orbit · Click bricks to inspect · Auto-rotates
+            Drag to orbit &middot; Click bricks to inspect &middot; Auto-rotates
           </div>
         </div>
 
         <div className="w-80 p-4 border-l border-[#1e2148] space-y-4 overflow-auto">
           <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20">
             <div className="text-xs font-mono text-amber-400 mb-2">
-              STRUCTURE
+              STRUCTURE (v11)
             </div>
             <p className="text-sm text-slate-300">
-              21 Lean files form the bricks. Three pillars carry 4 foundational
-              axioms. RH is the roof.
+              155 Lean files across 22 topic directories. Two pillars carry the
+              crown theorem. 4 axioms on the critical path.
             </p>
           </div>
 
@@ -490,14 +490,13 @@ export default function Cathedral3DPage() {
 
           <div className="space-y-2">
             {[
-              { color: "#f59e0b", label: "Roof: riemann_hypothesis" },
+              { color: "#f59e0b", label: "Roof: nyman_beurling_equivalence" },
               {
-                color: "#8b5cf6",
-                label: "Pillar 1: Variational (Vasyunin)",
+                color: "#10b981",
+                label: "Pillar 1: Converse (0 axioms)",
               },
-              { color: "#3b82f6", label: "Pillar 2: Mellin Bridge" },
-              { color: "#f59e0b", label: "Pillar 3: Robin (Discrete)" },
-              { color: "#4a8b3e", label: "Bricks: Proved theorems" },
+              { color: "#f59e0b", label: "Pillar 2: Forward (4 axioms)" },
+              { color: "#4a8b3e", label: "Bricks: Topic directories" },
               { color: "#1e3a5f", label: "Foundation: Mathlib" },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-2 text-xs">
