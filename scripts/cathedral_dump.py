@@ -23,7 +23,7 @@ CATHEDRAL_DIR = Path("proofs/Cathedral")
 
 # Files on the critical path to nyman_beurling_equivalence
 # These patterns are matched against the relative path from proofs/Cathedral/
-# Updated: April 25, 2026 (v10 — 4 axioms, 114 modules)
+# Updated: April 26, 2026 (v11 — Mathlib-style restructuring)
 CRITICAL_PATH_PATTERNS = [
     # Foundations
     "Defs.lean",
@@ -41,18 +41,29 @@ CRITICAL_PATH_PATTERNS = [
     "Vasyunin/Proof/",
     # Nyman-Beurling equivalence (converse direction)
     "NymanBeurling/",
-    # Assembly (forward direction)
+    # Assembly (capstone crowns)
     "Assembly/",
     # Mellin bridge
     "MellinBridge/",
     # Structural
     "Structural/",
-    # White infrastructure (Perron chain + zeta bounds)
+    # Perron formula chain (moved from White/Infrastructure/)
+    "Perron/",
+    # Zeta function bounds (moved from White/Infrastructure/)
+    "Zeta/",
+    # General analytic tools (moved from White/Infrastructure/)
+    "Analysis/",
+    # Physics-inspired (retained in White/)
     "White/Kinematics.lean",
     "White/Scattering.lean",
-    "White/Infrastructure/",
     # Abel tail bounds
     "AbelTail/",
+    # Covariance / Gram form bounds (moved from Assembly/)
+    "Covariance/",
+    # PNT bridges (moved from Assembly/)
+    "PNT/",
+    # Integral basis (resurrected from Archive)
+    "IntegralBasis/",
     # Sieve (ParitySchur is imported)
     "Sieve/ParitySchur.lean",
     # Spectral (PTSymmetry, RayleighBridge are imported)
@@ -70,7 +81,7 @@ HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━
 # Build: lake build — 0 errors, 0 sorry on crown path
 # Crown: nyman_beurling_equivalence (4 non-kernel axioms, #print axioms verified)
 #
-# Crown axioms (compiler-verified, v10 — April 2026):
+# Crown axioms (compiler-verified, v11 — April 2026):
 #   1. pnt_mu_log_div_k                         — Σ μ(k)log(k)/k → -1 (PNT derivative)
 #   2. covariance_bound_from_mertens_34          — vᵀCv ≤ C/logN (Abel summation)
 #   3. partial_integral_tends_to_formula         — Vasyunin convergence (Gram entries)
