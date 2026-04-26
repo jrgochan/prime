@@ -179,7 +179,7 @@ dump: ## Generate balanced 10-part cathedral dump (all files)
 	python3 scripts/cathedral_dump.py proofs/Cathedral \
 		--parts 10 --output-dir docs/exports/full --prefix cathedral
 
-dump-rh: ## Generate RH-critical path dump (4 axioms, 114 modules)
+dump-rh: ## Generate RH-critical path dump (2 crown axioms, Mellin Crown)
 	@$(ENV) require python3
 	python3 scripts/cathedral_dump.py --mode rh \
 		--parts 10 --outdir docs/exports/critical-path \
