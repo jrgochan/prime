@@ -142,7 +142,6 @@ lean_lib «Cathedral» where
     `Cathedral.PNT.AbelMean,
     `Cathedral.Covariance.MillenniumWall,
     `Cathedral.Covariance.L2Convergence,
-    `Cathedral.Assembly.FinalDragon,
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
@@ -202,4 +201,10 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.PartialSumConvergence,
     -- Integral = S_combined evaluative plumbing (building)
     `Cathedral.Vasyunin.Cotangent.IntegralEqSCombined,
+    -- Resurrected from Archive (zero sorry, verified)
+    `Cathedral.Vasyunin.Matrix.GramPSD,
+    `Cathedral.Vasyunin.Proof.BartlettWindow,
+    `Cathedral.IntegralBasis.BaezDuarte,
+    `Cathedral.IntegralBasis.Quantitative,
+    `Cathedral.Analysis.IntervalCalc,
   ]
