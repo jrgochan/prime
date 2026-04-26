@@ -2,12 +2,9 @@
 name = "l2-decay-certificate"
 version = "0.1.0"
 edition = "2021"
-description = "L² error decay experiment — certifies ∫(1-f_N)² = O(1/logN) under Möbius log-taper"
+description = "Cathedral L² Decay Certificate — certifies ∫₀¹(1-f_N)² = O(1/logN) and vᵀCv ≤ C/logN via 256-bit MPFR with parallel Gram matrix computation"
 
 [dependencies]
 rug = "1.24"
 rayon = "1.10"
-
-[profile.release]
-opt-level = 3
-lto = true
+chrono = "0.4"

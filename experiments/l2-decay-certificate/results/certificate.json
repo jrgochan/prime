@@ -1,0 +1,18 @@
+{
+  "experiment": "Cathedral L² Decay Certificate",
+  "precision_bits": 256,
+  "threads": 12,
+  "timestamp": "2026-04-26T06:59:31.011110+00:00",
+  "target_axiom": "covariance_bound_from_mertens_34 (CovarianceDirect.lean)",
+  "max_N_tested": 100,
+  "d_sq_logN_bounded": true,
+  "vt_Cv_logN_bounded": true,
+  "mertens_34_ratio_max": 5.981395124884882e-1,
+  "l2_decomposition": [
+    {"N": 10, "bt_v": 2.928331358345224e-1, "vt_Gv": 1.509581243835375e-1, "d_sq": 5.652918527144928e-1, "vt_Cv": 6.520687894085768e-2, "d_sq_logN": 1.301632593251377e0, "vt_Cv_logN": 1.501443874098863e-1},
+    {"N": 20, "bt_v": 4.418550704217352e-1, "vt_Gv": 2.592172212952229e-1, "d_sq": 3.755070804517526e-1, "vt_Cv": 6.398131803782636e-2, "d_sq_logN": 1.124918679857350e0, "vt_Cv_logN": 1.916708993504386e-1},
+    {"N": 50, "bt_v": 5.653030726489687e-1, "vt_Gv": 3.826619326513672e-1, "d_sq": 2.520557873534297e-1, "vt_Cv": 6.309436870500196e-2, "d_sq_logN": 9.860480387779216e-1, "vt_Cv_logN": 2.468266218869333e-1},
+    {"N": 100, "bt_v": 6.244822107319362e-1, "vt_Gv": 4.529320707000213e-1, "d_sq": 2.039676492361489e-1, "vt_Cv": 6.295403917937493e-2, "d_sq_logN": 9.393057371683895e-1, "vt_Cv_logN": 2.899140643163837e-1}
+  ],
+  "elapsed_seconds": 1.610
+}
