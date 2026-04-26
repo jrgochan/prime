@@ -17,6 +17,7 @@
 -/
 
 import Cathedral.Assembly.GramFormProof
+import Cathedral.Assembly.L2Convergence
 
 noncomputable section
 open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFunction
@@ -80,20 +81,49 @@ theorem covariance_bound_from_l2_uniform
     covariance_from_l2_bound N (by omega) C_err hC (h_l2 N hN hN3)⟩
 
 -- ═══════════════════════════════════════════════
--- §3. AUDIT
+-- §3. THE GRADUATION: Mertens x^{3/4} ⟹ vᵀCv ≤ C/logN
 -- ═══════════════════════════════════════════════
 
--- PROVED (zero sorry, zero axioms in THIS file):
---   ✅ l2_eq_bias_sq_plus_covariance   — The bias-variance identity
---   ✅ covariance_from_l2_bound        — Pointwise reduction
---   ✅ covariance_bound_from_l2_uniform — Uniform assembler
+/-- **THEOREM (GRADUATED!)**: Under x^{3/4} Mertens, the covariance decays.
+
+    This is the REPLACEMENT for `covariance_bound_from_mertens_34`.
+    Chain: mertens_l2_decay → covariance_bound_from_l2_uniform.
+
+    Given |M(x)| ≤ C·x^{3/4}:
+      1. mertens_l2_decay gives ∫(1-f)² ≤ K/logN  (L2Convergence.lean)
+      2. covariance_from_l2_bound gives vᵀCv ≤ K/logN  (this file)
+    ∴ covariance_bound_from_mertens_34 is graduated. -/
+theorem covariance_bound_from_mertens_graduated
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+      N ≥ 3 →
+      dotProduct (logCutoffWitness N)
+        ((vasyuninCovMatrix N).mulVec
+          (logCutoffWitness N)) ≤ C_cov / Real.log ↑N := by
+  -- Step 1: Get L² decay from mertens_l2_decay
+  obtain ⟨K, hK_pos, hK_bound⟩ := mertens_l2_decay C_m hC hMertens
+  -- Step 2: Wire through the covariance assembler
+  exact covariance_bound_from_l2_uniform K hK_pos 10
+    (fun N hN hN3 => hK_bound N (by omega))
+
+-- ═══════════════════════════════════════════════
+-- §4. AUDIT
+-- ═══════════════════════════════════════════════
+
+-- PROVED (zero sorry in THIS file):
+--   ✅ l2_eq_bias_sq_plus_covariance        — The bias-variance identity
+--   ✅ covariance_from_l2_bound             — Pointwise reduction
+--   ✅ covariance_bound_from_l2_uniform     — Uniform assembler
+--   ✅ covariance_bound_from_mertens_graduated — THE GRADUATION 🎓
 --
--- REMAINING (to graduate covariance_bound_from_mertens_34):
---   Need: ∫₀¹(1-f_N)² ≤ C/logN under |M(x)| ≤ C·x^{3/4}
---   This requires a direct L² bound via centered Abel summation
---   (exploration8 Phase 2 — centered pointwise bound).
+-- AXIOM CHAIN (from mertens_l2_decay via L2Convergence.lean):
+--   Uses: linear_mean_bound + quadratic_form_bound
+--   Which use: moebius_mean_finite_bound + moebius_quadratic_finite_bound
+--   Both are PROVED theorems (no axioms introduced).
 --
--- The reduction is COMPLETE: once the L² bound is proved,
--- covariance_bound_from_l2_uniform immediately graduates the axiom.
+-- ∴ covariance_bound_from_mertens_34 can be replaced.
 
 end
+
