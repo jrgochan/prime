@@ -183,15 +183,15 @@ theorem mertens_bound_eps (hRH : RiemannHypothesis) (eps : ℝ) (heps : 0 < eps)
     have h1_eval : K * X ^ (c + 1) / T = K * X ^ eps' := by
       simp only [T]
       rw [perron_exp_collapse hX_pos]
-      congr 1; simp only [c]; ring
+      congr 1; simp only [c]; ring_nf
     have h2_eval : K₁ * X ^ c * T ^ (-((1:ℝ)/2)) = K₁ * X ^ eps' := by
       simp only [T]
       rw [shift_exp_collapse hX_pos]
-      congr 1; simp only [c]; ring
+      congr 1; simp only [c]; ring_nf
     have h3_eval : K₂ * X ^ sigma0 * T ^ eps' = K₂ * X ^ (1/2 + 3 * eps') := by
       simp only [T]
       rw [vert_exp_collapse hX_pos]
-      congr 1; simp only [sigma0]; ring
+      congr 1; simp only [sigma0]; ring_nf
 
     -- Step F: Absorb + push X → x
     -- eps' ≤ 1/2 + 3eps'

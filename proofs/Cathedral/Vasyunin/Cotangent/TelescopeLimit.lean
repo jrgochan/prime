@@ -84,7 +84,7 @@ lemma fract_prod_intervalIntegrable (a b : ℕ) (s t : ℝ) :
 
 /-- Splitting the gramIntegral at 1/(aM):
     gramIntegral a b = tail + ∫_{1/(aM)}^{1} f(x) dx -/
-theorem gramIntegral_split (a b M : ℕ) (ha : 1 ≤ a) (_hb : 1 ≤ b) (hM : 1 ≤ M) :
+theorem gramIntegral_split (a b M : ℕ) (_ha : 1 ≤ a) (_hb : 1 ≤ b) (_hM : 1 ≤ M) :
     Assembly.gramIntegral a b =
     (∫ x in (0:ℝ)..(1 / ((a:ℝ) * (M:ℝ))),
       Int.fract (1 / ((a:ℝ) * x)) * Int.fract (1 / ((b:ℝ) * x))) +

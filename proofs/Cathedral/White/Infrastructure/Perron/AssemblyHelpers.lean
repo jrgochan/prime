@@ -60,7 +60,7 @@ lemma rpow_sq_mul_exp {X e : ℝ} (hX : 0 < X) :
 /-- Perron term collapse: K * X^{c+1} / X² = K * X^{c-1}. -/
 lemma perron_exp_collapse {K X c : ℝ} (hX : 0 < X) :
     K * X ^ (c + 1) / X ^ (2 : ℝ) = K * X ^ (c - 1) := by
-  rw [mul_div_assoc, ← rpow_sub hX]; congr 1; ring
+  rw [mul_div_assoc, ← rpow_sub hX]; congr 1; ring_nf
 
 /-- Shift term collapse: K₁ * X^c * (X²)^{-1/2} = K₁ * X^{c-1}. -/
 lemma shift_exp_collapse {K₁ X c : ℝ} (hX : 0 < X) :

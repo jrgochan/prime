@@ -302,7 +302,7 @@ theorem S_combined_eq_sum_rowTerm (a b M : ℕ) (hM : 1 ≤ M) :
     Uses the AM log bound to reduce to (am - b·n)/(2abm(m+1)) ≥ 0,
     which holds since n = ⌊am/b⌋ implies b·n ≤ am. -/
 lemma rowTerm_nonneg (a b m : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hm : 1 ≤ m) : 0 ≤ rowTerm a b m := by
+    (_hab : a < b) (hm : 1 ≤ m) : 0 ≤ rowTerm a b m := by
   simp only [rowTerm]
   set n := tileIndex a b m
   set L := Real.log (((m:ℝ) + 1) / (m:ℝ))
@@ -353,7 +353,7 @@ lemma rowTerm_nonneg (a b m : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
       and δ = am/b - n ≤ 1.
     Total: R ≤ (a+b)/(abm(m+1)) ≤ (a+b)/(abm²). -/
 lemma rowTerm_le_upper (a b m : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hm : 1 ≤ m) :
+    (_hab : a < b) (hm : 1 ≤ m) :
     rowTerm a b m ≤ ((a:ℝ) + (b:ℝ)) / ((a:ℝ) * (b:ℝ)) / (m:ℝ)^2 := by
   simp only [rowTerm]
   set n := tileIndex a b m
@@ -463,7 +463,7 @@ lemma rowTerm_le_upper (a b m : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     - R(m) ≤ 1/m² (so partial sums are bounded by ζ(2) = π²/6)
     - By the monotone convergence theorem, the limit exists. -/
 theorem S_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hcop : Nat.Coprime a b) :
+    (hab : a < b) (_hcop : Nat.Coprime a b) :
     ∃ L : ℝ,
     Tendsto (fun M : ℕ => S_combined a b M) atTop (nhds L) := by
   -- Step 1: rowTerm(n+1) is summable (by comparison with C/(n+1)²)

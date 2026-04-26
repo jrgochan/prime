@@ -46,7 +46,7 @@ theorem inner_eq_dotProduct (x y : Fin n → ℝ) :
       (WithLp.toLp 2 x) (WithLp.toLp 2 y) = dotProduct x y := by
   simp only [PiLp.inner_apply, dotProduct]
   congr 1; ext i
-  simp [inner, mul_comm]
+  simp [mul_comm]
 
 -- Note: The L2 norm ‖WithLp.toLp 2 x‖ is NOT equal to the Pi norm ‖x‖ (which is L∞).
 -- Instead, we use the L2 norm directly in min_eigenvalue_le_quadForm's hypothesis.
