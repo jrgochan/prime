@@ -225,9 +225,90 @@ theorem gram_form_proved
       dotProduct (logCutoffWitness N)
         ((vasyuninGramMatrix N).mulVec
           (logCutoffWitness N)) ≤ 1 + C_G / Real.log ↑N := by
-  -- From covariance_bound_proved + existing gram_form proof
-  -- This is exactly what gram_form_upper_bound_34_proved does,
-  -- but using covariance_bound_proved instead of the axiom.
-  sorry
+  -- From covariance_bound_proved + dot product bound.
+  -- Exactly mirrors gram_form_upper_bound_34_proved in GramFormProof.lean,
+  -- but uses covariance_bound_proved instead of the axiom.
+  obtain ⟨C_m, hC_m_pos, hM⟩ := hMertens
+  -- Step 1: Covariance bound (PROVED, no axiom!)
+  obtain ⟨C_cov, hC_cov_pos, N₁, h_cov⟩ :=
+    covariance_bound_proved ⟨C_m, hC_m_pos, hM⟩ hPNT₁ hPNT₂
+  -- Step 2: Dot product bound (PROVED from x^{3/4} + PNT₁ + PNT₂)
+  obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
+    moebius_dot_product_approx_one_uniform_34 C_m hC_m_pos hM hPNT₁ hPNT₂
+  -- Step 3: Choose N_big so logN ≥ C_dot (ensuring C_dot/logN ≤ 1)
+  set N_big := Nat.ceil (Real.exp C_dot) + 1
+  -- Step 4: Choose C_G = C_cov + 3·C_dot, N₀ = max N₁ (max 10 N_big)
+  refine ⟨C_cov + 3 * C_dot, by linarith,
+    max N₁ (max 10 N_big), fun N hN hN3 => ?_⟩
+  have hN₁ : N ≥ N₁ := by omega
+  have hN10 : 10 ≤ N := by omega
+  have hN_ge_big : N ≥ N_big := by omega
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- Step 5: logN ≥ C_dot, so C_dot/logN ≤ 1
+  have hlogN_ge_C : C_dot ≤ Real.log ↑N := by
+    have h1 : (N_big : ℝ) ≤ (N : ℝ) := by exact_mod_cast hN_ge_big
+    have h2 : Real.exp C_dot ≤ (N_big : ℝ) := by
+      calc Real.exp C_dot ≤ ↑⌈Real.exp C_dot⌉₊ := Nat.le_ceil _
+        _ ≤ ↑(⌈Real.exp C_dot⌉₊ + 1) := by exact_mod_cast Nat.le_succ _
+    calc C_dot = Real.log (Real.exp C_dot) := (Real.log_exp C_dot).symm
+      _ ≤ Real.log ↑N_big := Real.log_le_log (Real.exp_pos C_dot) h2
+      _ ≤ Real.log ↑N := Real.log_le_log (by exact_mod_cast Nat.pos_of_ne_zero (by omega : N_big ≠ 0)) h1
+  have h_small : C_dot / Real.log ↑N ≤ 1 := (div_le_one hlogN_pos).mpr hlogN_ge_C
+  -- Step 6: Get bounds at N
+  have h_cov_N := h_cov N hN₁ hN3
+  have h_dot_N := h_dot N hN10
+  -- Step 7: Variance identity — vᵀCv = vᵀGv - (bᵀv)²
+  have h_cov_eq_gram_minus_sq :
+      dotProduct (logCutoffWitness N)
+        ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) =
+      dotProduct (logCutoffWitness N)
+        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) -
+      (dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 := by
+    unfold vasyuninCovMatrix
+    simp [Matrix.sub_mulVec, dotProduct_sub, vecMulVec_mulVec]
+    have hdc := dotProduct_comm (logCutoffWitness N) (vasyuninMeanVec N)
+    linarith [mul_self_nonneg (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N),
+      show logCutoffWitness N ⬝ᵥ vasyuninMeanVec N *
+           vasyuninMeanVec N ⬝ᵥ logCutoffWitness N =
+           (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N)^2
+      from by rw [hdc]; ring]
+  -- Step 8: Bridge dot products via index bridge
+  have h_N_sub : (N-1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_dot_eq : dotProduct (vasyuninMeanVec N) (logCutoffWitness N) =
+      dotProduct (fun (i : Fin (N - 1)) =>
+        vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N) := by
+    exact h_N_sub ▸ dotProduct_bridge_aux (N-1) (by omega)
+  set bv := dotProduct (fun (i : Fin (N - 1)) =>
+      vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)
+  -- |1 - bv| ≤ C_dot/logN ≤ 1
+  have h_bv_bound : |1 - bv| ≤ C_dot / Real.log ↑N := h_dot_N
+  have h_bv_bound' : |bv - 1| ≤ C_dot / Real.log ↑N := by rwa [abs_sub_comm] at h_bv_bound
+  -- Step 9: vᵀGv = vᵀCv + (bᵀv)²
+  have h_gram_eq : dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) =
+      dotProduct (logCutoffWitness N)
+        ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) + bv ^ 2 := by
+    have := h_cov_eq_gram_minus_sq
+    rw [h_dot_eq] at this; linarith
+  rw [h_gram_eq]
+  -- Step 10: bv² ≤ 1 + 3·C_dot/logN (since |bv-1| ≤ C_dot/logN ≤ 1)
+  have h_bv_sq : bv ^ 2 ≤ 1 + 3 * (C_dot / Real.log ↑N) := by
+    -- S = bv, δ = C_dot/logN
+    have h_upper : bv ≤ 1 + C_dot / Real.log ↑N := by linarith [(abs_le.mp h_bv_bound').2]
+    have : bv ^ 2 = 1 + 2 * (bv - 1) + (bv - 1) ^ 2 := by ring
+    rw [this]
+    have h1 : 2 * (bv - 1) ≤ 2 * (C_dot / Real.log ↑N) := by linarith
+    have h2 : (bv - 1) ^ 2 ≤ (C_dot / Real.log ↑N) ^ 2 := by
+      apply sq_le_sq'; linarith [(abs_le.mp h_bv_bound').1]; linarith
+    have h3 : (C_dot / Real.log ↑N) ^ 2 ≤ C_dot / Real.log ↑N := by
+      nlinarith [h_small, sq_nonneg (C_dot / Real.log ↑N),
+                 div_nonneg hC_dot_pos.le hlogN_pos.le]
+    linarith
+  -- Step 11: vᵀCv + bv² ≤ C_cov/logN + 1 + 3C_dot/logN = 1 + (C_cov+3C_dot)/logN
+  calc dotProduct (logCutoffWitness N)
+          ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) + bv ^ 2
+      ≤ C_cov / Real.log ↑N + (1 + 3 * (C_dot / Real.log ↑N)) := by linarith
+    _ = 1 + (C_cov + 3 * C_dot) / Real.log ↑N := by ring
 
 end
