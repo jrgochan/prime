@@ -16,6 +16,7 @@
 mod sieve;
 mod gram;
 mod fmt;
+mod chebyshev;
 
 use rayon::prelude::*;
 use std::fs;
@@ -313,6 +314,76 @@ fn main() {
         }
         println!();
     }
+
+    // ═══ §H. DIRICHLET CONVOLUTION IDENTITIES ═══
+    println!("  {BOLD}{WHITE}═══ §H. DIRICHLET CONVOLUTION IDENTITIES ═══{RESET}");
+    println!("  {DIM}  Verifying Möbius inversion: Σ μ(k)⌊y/k⌋ = 1{RESET}");
+    println!("  {DIM}  Verifying Chebyshev:        Σ μ(k)log(k)⌊y/k⌋ = -ψ(y){RESET}");
+    println!("  {DIM}     y    │  Σμ⌊y/k⌋  │ Σμlog⌊y/k⌋ │    -ψ(y)    │  error  │{RESET}");
+
+    let primes = chebyshev::prime_log_table(sieve_max, &mu);
+    let mut tsv_h = fs::File::create("results/dirichlet.tsv").unwrap();
+    writeln!(tsv_h, "y\tid1\tid2_sum\tneg_psi\terror").unwrap();
+
+    let test_ys = [5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
+    let mut id1_all_pass = true;
+    let mut id2_max_err = 0.0f64;
+
+    for &y in &test_ys {
+        if y > sieve_max { break; }
+        let id1 = chebyshev::dirichlet_identity_1(y, &mu);
+        let id2 = chebyshev::dirichlet_identity_2(y, &mu);
+        let psi = chebyshev::chebyshev_psi(y, &primes);
+        let err = (id2 + psi).abs();
+        if id1 != 1 { id1_all_pass = false; }
+        id2_max_err = id2_max_err.max(err);
+
+        println!("  {:>6} │ {:>9} │ {:>11.4} │ {:>11.4} │ {:>7.1e} │ {} {}",
+            y, id1, id2, -psi, err,
+            check(id1 == 1), check(err < 1e-8));
+        writeln!(tsv_h, "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}",
+            y, id1, id2, -psi, err).unwrap();
+    }
+    println!("  {DIM}  Identity 1: {} (all = 1)   Identity 2: max error = {:.1e} {}{RESET}",
+        check(id1_all_pass), id2_max_err, check(id2_max_err < 1e-6));
+    println!();
+
+    // ═══ §I. GEMINI'S ALGEBRAIC MIRACLE ═══
+    println!("  {BOLD}{WHITE}═══ §I. GEMINI'S ALGEBRAIC MIRACLE: 1-f_N = PNT error ═══{RESET}");
+    println!("  {DIM}  1 - f_N(1/y) = -y·E_N - (ψ(y)-y)/logN{RESET}");
+    println!("  {DIM}     N  │   E_N      │    y    │ 1-f(actual) │ 1-f(Gemini) │  error{RESET}");
+
+    let mut tsv_i = fs::File::create("results/algebraic_miracle.tsv").unwrap();
+    writeln!(tsv_i, "N\tE_N\ty\tresid_actual\tresid_gemini\terror").unwrap();
+
+    for &n in &[100usize, 500, 1000, 2000] {
+        if n > sieve_max { break; }
+        let log_n = (n as f64).ln();
+        let weights = gram::precompute_weights(n, &mu);
+        let e_n = chebyshev::compute_e_n(&mu, n);
+
+        // Test at several y values
+        for &y in &[2.0, 5.0, 10.0, 50.0, 100.0, (n as f64 / 2.0).floor()] {
+            if y < 1.0 || y >= n as f64 { continue; }
+            let yi = y as usize;
+
+            // Actual: 1 - f_N(1/y)
+            let x = 1.0 / y;
+            let f_actual = gram::f_n_at(x, &weights);
+            let resid_actual = 1.0 - f_actual;
+
+            // Gemini formula: -y·E_N - (ψ(y) - y)/logN
+            let psi_y = chebyshev::chebyshev_psi(yi, &primes);
+            let resid_gemini = chebyshev::residual_gemini(y, e_n, psi_y, log_n);
+
+            let err = (resid_actual - resid_gemini).abs();
+            println!("  {:>6} │ {:>10.6} │ {:>7.0} │ {:>11.6} │ {:>11.6} │ {:>7.1e} {}",
+                n, e_n, y, resid_actual, resid_gemini, err, check(err < 0.01));
+            writeln!(tsv_i, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+                n, e_n, y, resid_actual, resid_gemini, err).unwrap();
+        }
+    }
+    println!();
 
     // ═══ CERTIFICATE ═══
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
