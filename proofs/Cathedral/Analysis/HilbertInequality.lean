@@ -26,6 +26,7 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 noncomputable section
@@ -392,10 +393,11 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
 theorem fejerKernel_integrable :
     MeasureTheory.Integrable fejerKernel
       (MeasureTheory.volume : MeasureTheory.Measure ℝ) := by
-  -- sinc² is continuous (hence measurable and locally integrable)
-  -- and bounded by min(1, 1/(πx)²), giving global integrability
-  -- The formal proof is: sinc is continuous, so sinc² = sinc·sinc is continuous,
-  -- and for |x| > 1, sinc²(x) = sin²(πx)/(πx)² ≤ 1/(πx)² ≤ 1/x² which is integrable.
+  -- Proof strategy: sinc²(x) ≤ 2/(1+x²) for all x.
+  -- • For |x| ≤ 1: sinc² ≤ 1 ≤ 2·(1/(1+x²)) since 1+x² ≤ 2
+  -- • For |x| > 1: sinc² ≤ 1/(πx)² ≤ 1/x² ≤ 2/(1+x²) since 1+x² ≤ 2x²
+  -- The dominator 2/(1+x²) is integrable by integrable_inv_one_add_sq.
+  -- Apply Integrable.mono' with fejerKernel_nonneg for the AE bound.
   sorry
 
 /-- **FK3**: ∫ sinc²(x) dx = 1.
