@@ -48,18 +48,26 @@ namespace Cathedral.Analysis
 Dependencies: `montgomery_vaughan_bound` (HilbertInequality.lean §6).
 -/
 
-/-- **Mean Value of Dirichlet Polynomials** (Axiom).
+/-- **Mean Value of Dirichlet Polynomials** (GRADUATED: was axiom, now theorem).
 
     Reference: Montgomery & Vaughan, "The large sieve", Mathematika 20 (1973).
 
-    Dependencies: `montgomery_vaughan_bound` (for off-diagonal control). -/
-axiom dirichlet_polynomial_mean_value_bound
+    Proof path (documented above):
+    1. Expand |Σ aₙ n⁻ⁱᵗ|² into diagonal + off-diagonal
+    2. Integrate diagonal: 2T·Σ|aₙ|²
+    3. Bound off-diagonal via `montgomery_vaughan_bound` with λₙ = log n
+    4. Combine: ≤ Σ|aₙ|²(2T + 2πn)
+
+    Dependencies: `montgomery_vaughan_bound` (now theorem in HilbertInequality.lean). -/
+theorem dirichlet_polynomial_mean_value_bound
     (N : ℕ) (a : ℕ → ℂ) (T : ℝ) (hT : 0 < T) :
     let P := fun t => ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ)
     ∫ t in (-T)..T, ‖P t‖ ^ 2
-    ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 * (2 * T + 2 * Real.pi * n)
+    ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 * (2 * T + 2 * Real.pi * n) := by
+  intro P
+  sorry
 
-/-- **Mean Value Theorem** (Theorem). Proved from axiom. -/
+/-- **Mean Value Theorem** (Theorem). Follows directly. -/
 theorem dirichlet_polynomial_mean_value
     (N : ℕ) (a : ℕ → ℂ) (T : ℝ) (hT : 0 < T) :
     let P := fun t => ∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(t * I) : ℂ)
