@@ -1,0 +1,10 @@
+[package]
+name = "fejer-kernel"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Fejér Kernel Validation — numerically certifies FK2 (integrability), FK3 (∫sinc²=1), FK4 (band-limitation), and tests M-V bound with the Fejér kernel"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

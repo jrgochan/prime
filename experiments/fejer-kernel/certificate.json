@@ -1,0 +1,23 @@
+{
+  "experiment": "fejer-kernel",
+  "timestamp": "2026-04-27T01:43:49.815806+00:00",
+  "precision_bits": 512,
+  "results": {
+    "FK1_nonneg": true,
+    "FK2_integrable": true,
+    "FK3_integral_eq_1": {
+      "value": 0.999898678821491,
+      "error": 1.01e-4,
+      "pass": true
+    },
+    "FK4_band_limited": {
+      "max_outside_1": 3.16e-8,
+      "pass": true
+    },
+    "MV_bound": {
+      "tests_passed": 4,
+      "all_pass": true
+    }
+  },
+  "certified": true
+}
