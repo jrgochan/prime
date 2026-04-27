@@ -1,0 +1,9 @@
+[package]
+name = "gram-form-identity"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Gram Form Identity Explorer — numerical decomposition of vᵀGv into S₁/S₂/S₃ bilinear products to discover the identity needed for gram_form_bound_raw"
+
+[dependencies]
+rayon = "1.10"
+chrono = "0.4"
