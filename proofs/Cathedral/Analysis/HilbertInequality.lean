@@ -23,6 +23,8 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.MeasureTheory.Integral.Bochner.Set
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 noncomputable section
@@ -301,7 +303,7 @@ theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
     This is the key identity: ∫₋₁¹ (1-|ξ|)·cos(2πxξ) dξ = sinc²(x).
 
     Proof outline:
-    - x = 0: ∫₋₁¹ (1-|ξ|) dξ = 2·∫₀¹ (1-ξ) dξ = 2·[ξ-ξ²/2]₀¹ = 1 = sinc²(0) ✓
+    - x = 0: ∫₋₁¹ (1-|ξ|) dξ = 2·∫₀¹ (1-ξ) dξ = 2·(1-1/2) = 1 = sinc²(0) ✓
     - x ≠ 0: By symmetry, 2·∫₀¹ (1-ξ)·cos(2πxξ) dξ.
       Integration by parts:
         = 2·[(1-ξ)·sin(2πxξ)/(2πx)]₀¹ + 2·∫₀¹ sin(2πxξ)/(2πx) dξ
@@ -309,10 +311,27 @@ theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
         = 2·(1-cos(2πx))/(2πx)²
         = 2·2sin²(πx)/(2πx)²     (using 1-cos2θ = 2sin²θ)
         = (sin(πx)/(πx))²
-        = sinc²(x) ✓ -/
+        = sinc²(x) ✓
+
+    The x ≠ 0 case requires `integral_deriv_mul_eq_sub` (Mathlib IBP)
+    and the double-angle formula `cos_sq` / `cos_two_mul`. -/
+
+-- Helper: ∫₋₁¹ (1-|ξ|) dξ = 1 (the x = 0 case of the Bridge).
+-- This is a basic integral: 2·∫₀¹ (1-ξ) dξ = 2·(1-1/2) = 1.
+private lemma triangle_integral_eq_one :
+    ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ = 1 := by
+  sorry
+
 theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ * Real.cos (2 * π * x * ξ) = fejerKernel x := by
-  sorry
+  by_cases hx : x = 0
+  · -- x = 0: cos(0) = 1, so integral = ∫ Λ = 1 = sinc²(0) = 1
+    subst hx
+    simp only [mul_zero, zero_mul, Real.cos_zero, mul_one]
+    rw [triangle_integral_eq_one]
+    simp [fejerKernel, sinc_zero]
+  · -- x ≠ 0: integration by parts
+    sorry
 
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
 
