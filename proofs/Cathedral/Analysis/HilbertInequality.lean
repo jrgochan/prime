@@ -22,7 +22,10 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Sinc
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
@@ -490,20 +493,73 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     field_simp
     ring
 
+/-- Our sinc equals Mathlib's sinc composed with π·. -/
+private lemma sinc_eq_real_sinc (x : ℝ) : sinc x = Real.sinc (π * x) := by
+  unfold sinc
+  split_ifs with h
+  · simp [h, Real.sinc_zero]
+  · rw [Real.sinc_of_ne_zero (mul_ne_zero Real.pi_ne_zero h)]
+
+/-- |sinc(y)| ≤ |y|⁻¹ for y ≠ 0. From |sin(y)| ≤ 1. -/
+private lemma abs_real_sinc_le_inv (y : ℝ) (hy : y ≠ 0) :
+    |Real.sinc y| ≤ |y|⁻¹ := by
+  rw [Real.sinc_of_ne_zero hy, abs_div, inv_eq_one_div]
+  exact div_le_div_of_nonneg_right (Real.abs_sin_le_one y) (abs_pos.mpr hy).le
+
+/-- sinc²(y) ≤ |y|⁻² for y ≠ 0. -/
+private lemma real_sinc_sq_le_inv_sq (y : ℝ) (hy : y ≠ 0) :
+    Real.sinc y ^ 2 ≤ |y|⁻¹ ^ 2 := by
+  rw [← sq_abs (Real.sinc y)]
+  exact pow_le_pow_left₀ (abs_nonneg _) (abs_real_sinc_le_inv y hy) 2
+
+/-- **Key bound**: sinc²(πx) · (1+x²) ≤ 2 for all x.
+    Case x² ≤ 1: sinc² ≤ 1 and 1·(1+x²) ≤ 2.
+    Case x² > 1: sinc² ≤ 1/(πx)² ≤ 1/x² and (1/x²)·(1+x²) ≤ 2. -/
+private lemma sinc_sq_cauchy_bound (x : ℝ) :
+    Real.sinc (π * x) ^ 2 * (1 + x ^ 2) ≤ 2 := by
+  by_cases hx : x = 0
+  · simp [hx, Real.sinc_zero]
+  · have hx2 : (0 : ℝ) < x ^ 2 := by positivity
+    have hpx : π * x ≠ 0 := mul_ne_zero Real.pi_ne_zero hx
+    by_cases hle : x ^ 2 ≤ 1
+    · nlinarith [Real.sinc_le_one (π * x), Real.neg_one_le_sinc (π * x)]
+    · push_neg at hle
+      have h_sq := real_sinc_sq_le_inv_sq (π * x) hpx
+      have h_pi_bound : |π * x|⁻¹ ≤ |x|⁻¹ := by
+        apply inv_anti₀ (abs_pos.mpr hx)
+        rw [abs_mul, abs_of_pos Real.pi_pos]
+        nlinarith [abs_nonneg x, two_le_pi]
+      have h_sq_bound : |π * x|⁻¹ ^ 2 ≤ |x|⁻¹ ^ 2 :=
+        pow_le_pow_left₀ (by positivity) h_pi_bound 2
+      have h_sinc_le_invx : Real.sinc (π * x) ^ 2 ≤ |x|⁻¹ ^ 2 := by linarith
+      have h_inv_eq : |x|⁻¹ ^ 2 = 1 / x ^ 2 := by field_simp; rw [sq_abs]
+      rw [h_inv_eq] at h_sinc_le_invx
+      have : (1 / x ^ 2) * (1 + x ^ 2) = 1 + 1 / x ^ 2 := by field_simp; ring
+      nlinarith [show 1 / x ^ 2 ≤ 1 from by rw [div_le_one₀ hx2]; linarith]
+
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
 
-    Via Fourier inversion: Λ ∈ L¹ (compact support), and its inverse
-    FT = sinc² ≥ 0, so sinc² ∈ L¹ by Tonelli/monotone convergence.
-    Alternatively: sinc²(x) ≤ min(1, 1/(πx)²), both tails integrable. -/
+    Via Cauchy domination: sinc²(x) ≤ 2/(1+x²), and the Cauchy
+    distribution (1+x²)⁻¹ is integrable over ℝ. -/
 theorem fejerKernel_integrable :
     MeasureTheory.Integrable fejerKernel
       (MeasureTheory.volume : MeasureTheory.Measure ℝ) := by
-  -- Proof strategy: sinc²(x) ≤ 2/(1+x²) for all x.
-  -- • For |x| ≤ 1: sinc² ≤ 1 ≤ 2·(1/(1+x²)) since 1+x² ≤ 2
-  -- • For |x| > 1: sinc² ≤ 1/(πx)² ≤ 1/x² ≤ 2/(1+x²) since 1+x² ≤ 2x²
-  -- The dominator 2/(1+x²) is integrable by integrable_inv_one_add_sq.
-  -- Apply Integrable.mono' with fejerKernel_nonneg for the AE bound.
-  sorry
+  apply MeasureTheory.Integrable.mono'
+    (integrable_inv_one_add_sq.const_mul 2)
+  · -- fejerKernel is measurable (continuous → strongly measurable)
+    exact (Continuous.aestronglyMeasurable (by
+      show Continuous fejerKernel
+      rw [show fejerKernel = fun x => Real.sinc (π * x) ^ 2 from by
+        ext x; unfold fejerKernel; rw [sinc_eq_real_sinc]]
+      exact (Real.continuous_sinc.comp (continuous_const.mul continuous_id)).pow 2))
+  · -- Pointwise bound: ‖fejerKernel x‖ ≤ 2 * (1+x²)⁻¹
+    filter_upwards with x
+    rw [show fejerKernel x = Real.sinc (π * x) ^ 2
+      from by unfold fejerKernel; rw [sinc_eq_real_sinc]]
+    rw [Real.norm_of_nonneg (sq_nonneg _)]
+    rw [show (2 : ℝ) * (1 + x ^ 2)⁻¹ = 2 / (1 + x ^ 2) from by ring]
+    rw [le_div_iff₀ (by positivity : (0 : ℝ) < 1 + x ^ 2)]
+    exact sinc_sq_cauchy_bound x
 
 /-- **FK3**: ∫ sinc²(x) dx = 1.
 
