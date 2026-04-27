@@ -197,32 +197,33 @@ theorem covariance_bound_proved
   --
   -- The L² residual bound provides: ∫(1-f)² ≤ C_l2/logN
   refine ⟨C_l2, by positivity, max 10 3, fun N hN hN3 => ?_⟩
-  -- The variance identity: vᵀCv = vᵀGv - (bᵀv)²
-  have h_cov_eq :
-      dotProduct (logCutoffWitness N)
-        ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) =
-      dotProduct (logCutoffWitness N)
-        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) -
-      (dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 := by
-    unfold vasyuninCovMatrix
-    simp [Matrix.sub_mulVec, dotProduct_sub, vecMulVec_mulVec]
-    have hdc := dotProduct_comm (logCutoffWitness N) (vasyuninMeanVec N)
-    linarith [mul_self_nonneg (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N),
-      show logCutoffWitness N ⬝ᵥ vasyuninMeanVec N *
-           vasyuninMeanVec N ⬝ᵥ logCutoffWitness N =
-           (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N)^2
-      from by rw [hdc]; ring]
   -- The L² identity: ∫(1-f)² = 1-2bᵀv+vᵀGv (PROVED in BDBridge)
   have h_l2_eq := bd_l2_error_eq_quad_error N (by omega : 2 ≤ N) (bdMoebiusWeight N)
-  -- Therefore: vᵀCv = vᵀGv - (bᵀv)²
-  --                  = (∫(1-f)² - 1 + 2bᵀv) - (bᵀv)²
-  --                  = ∫(1-f)² - (1 - bᵀv)²
-  --                  ≤ ∫(1-f)² ≤ C_l2/logN
-  -- Since (1 - bᵀv)² ≥ 0, vᵀCv ≤ ∫(1-f)².
-  -- But we need to bridge between the two representations.
-  -- The L² identity uses bdMoebiusWeight, while the covariance uses logCutoffWitness.
-  -- This bridge is provided by the existing index bridges.
-  sorry
+  -- Use the L² residual bound from Abel summation
+  have h_l2 := l2_residual_from_mertens C_m hC_m_pos hM hPNT₁ hPNT₂ N (by omega)
+  -- Index bridge: connects Vasyunin representation to BD representation
+  -- (1-bᵀv_V)² + vᵀCv_V = 1-2bᵀv_BD + vᵀGv_BD = ∫(1-f)²
+  have h_bridge :
+      (1 - dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 +
+      dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) =
+      1 - 2 * dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N) +
+      realQuadForm (of fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) :=
+    Nat.sub_add_cancel (show 1 ≤ N by omega) ▸ vasyunin_bd_index_bridge (N-1) (by omega)
+  -- Combine: (1-bᵀv)² + vᵀCv = ∫(1-f)²
+  have h_sum_eq : (1 - dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 +
+      dotProduct (logCutoffWitness N) ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) =
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := by
+    rw [h_l2_eq]; linarith [h_bridge]
+  -- Since (1-bᵀv)² ≥ 0, we have vᵀCv ≤ ∫(1-f)²
+  have h_sq_nn : 0 ≤ (1 - dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 :=
+    sq_nonneg _
+  -- vᵀCv ≤ ∫(1-f)²
+  have h_cov_le_l2 : dotProduct (logCutoffWitness N)
+      ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 := by
+    linarith [h_sum_eq]
+  -- Chain: vᵀCv ≤ ∫(1-f)² ≤ C_l2/logN
+  linarith
 
 -- ═══════════════════════════════════════════════
 -- §6. THE GRAM FORM BOUND (COROLLARY)
