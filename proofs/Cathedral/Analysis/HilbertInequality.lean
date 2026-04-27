@@ -634,18 +634,36 @@ private lemma ft_integrand_outside (w v : ℝ) (hv : v ∉ Set.Icc (-1 : ℝ) 1)
   have : 1 < |v| := by rw [Set.mem_Icc, ← abs_le] at hv; exact not_le.mp hv
   simp [Λ_ℂ_outside v this]
 
+/-- Support restriction: the FT integral reduces to [-1,1]. -/
+private lemma ft_Λ_ℂ_restrict (w : ℝ) :
+    𝓕 Λ_ℂ w = ∫ v in Set.Icc (-1 : ℝ) 1,
+      Complex.exp (↑(-2 * π * (v * w)) * Complex.I) * Λ_ℂ v := by
+  rw [ft_Λ_ℂ_unfold]
+  rw [← MeasureTheory.setIntegral_eq_integral_of_forall_compl_eq_zero]
+  intro v hv
+  have : 1 < |v| := by rw [Set.mem_Icc, ← abs_le] at hv; exact not_le.mp hv
+  simp [Λ_ℂ_outside v this]
+
+/-- On [-1,1], Λ_ℂ simplifies to (1 - |v| : ℂ). -/
+private lemma Λ_ℂ_on_Icc (v : ℝ) (hv : v ∈ Set.Icc (-1 : ℝ) 1) :
+    Λ_ℂ v = ((1 - |v|) : ℂ) := by
+  rw [Set.mem_Icc] at hv
+  have hab : |v| ≤ 1 := abs_le.mpr ⟨by linarith [hv.1], hv.2⟩
+  show ((max (1 - |v|) 0 : ℝ) : ℂ) = ((1 - |v|) : ℂ)
+  simp [max_def, sub_nonneg.mpr hab]
+
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
 
-    Proven building blocks (zero sorry):
+    Proven building blocks (all zero sorry):
     - `ft_Λ_ℂ_unfold`: 𝓕 Λ_ℂ(w) = ∫ exp(-2πivw) · Λ_ℂ(v) dv
     - `Λ_ℂ_outside`: Λ_ℂ(v) = 0 for |v| > 1
     - `ft_integrand_outside`: integrand = 0 outside [-1,1]
+    - `ft_Λ_ℂ_restrict`: 𝓕 Λ_ℂ(w) = ∫_{[-1,1]} exp · Λ_ℂ
+    - `Λ_ℂ_on_Icc`: Λ_ℂ(v) = (1-|v|:ℂ) on [-1,1]
 
-    Remaining sorry covers the final assembly:
-    1. Restrict integral to [-1,1] (using ft_integrand_outside)
-    2. Decompose exp into cos - i·sin (Euler's formula)
-    3. Split into cos integral = Bridge = sinc², sin integral = 0 -/
+    Remaining sorry: integral assembly
+    (exp → cos+sin, split integral, cos=Bridge, sin=0) -/
 private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
     𝓕 Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
   sorry
