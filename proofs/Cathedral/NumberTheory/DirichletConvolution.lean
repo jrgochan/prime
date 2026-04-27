@@ -30,7 +30,9 @@
 
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 import Mathlib.NumberTheory.ArithmeticFunction.Zeta
-import Mathlib.NumberTheory.VonMangoldt
+-- import Mathlib.NumberTheory.VonMangoldt  -- deprecated, split into:
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
+import Mathlib.NumberTheory.ArithmeticFunction.Misc
 
 noncomputable section
 open Finset BigOperators ArithmeticFunction Nat
@@ -104,20 +106,24 @@ theorem divisor_sum_swap (f : ℕ → ℤ) (n : ℕ) :
     In Mathlib: `ArithmeticFunction.moebius_mul_coe_zeta`. -/
 lemma moebius_divisor_sum (n : ℕ) (hn : n ≠ 0) :
     n.divisors.sum (fun d => (μ d : ℤ)) = if n = 1 then 1 else 0 := by
-  -- The Dirichlet product μ * ζ = 1 (the multiplicative identity)
-  -- evaluated at n gives: Σ_{d|n} μ(d)·ζ(n/d) = [n=1]
-  -- Since ζ(m) = 1 for m > 0, this simplifies to Σ_{d|n} μ(d) = [n=1]
-  have h := congr_fun (congr_arg (↑) moebius_mul_coe_zeta) n
-  simp only [coe_mul, coe_one, coe_zeta, Finset.sum_congr] at h
-  -- h : Σ d in n.divisors, μ d * (if n/d = 0 then 0 else 1) = if n = 0 then 0 else if n = 1 then 1 else 0
-  rw [show (if n = 0 then (0 : ℤ) else if n = 1 then 1 else 0) =
-      (if n = 1 then 1 else 0) from by split_ifs <;> omega] at h
-  convert h using 1
+  -- μ * ζ = 1 (Dirichlet multiplicative identity)
+  have h_conv := moebius_mul_coe_zeta
+  have h := congr_fun (congr_arg (↑) h_conv) n
+  simp only [ArithmeticFunction.mul_apply, ArithmeticFunction.one_apply,
+             ArithmeticFunction.natCoe_apply] at h
+  -- h : Σ x ∈ n.divisorsAntidiagonal, μ x.1 * ↑(zeta x.2) = if n=1 then 1 else 0
+  rw [← h]
+  -- Goal: Σ_{d|n} μ(d) = Σ_{x ∈ antidiag} μ(x.1) * ↑(ζ(x.2))
+  -- Step 1: Convert antidiagonal sum to divisor sum
+  rw [Nat.sum_divisorsAntidiagonal (f := fun a b => μ a * ↑(zeta b))]
+  -- Goal: Σ_{d|n} μ(d) = Σ_{d|n} μ(d) * ↑(ζ(n/d))
   apply Finset.sum_congr rfl
   intro d hd
   have hd_dvd := Nat.dvd_of_mem_divisors hd
-  have h_div_ne : n / d ≠ 0 := Nat.div_ne_zero_iff_of_dvd hd_dvd |>.mpr ⟨Nat.pos_of_ne_zero hn, Nat.pos_of_dvd_of_pos hd_dvd (Nat.pos_of_ne_zero hn)⟩
-  simp [h_div_ne]
+  have h_div_pos : 0 < n / d := Nat.div_pos
+    (Nat.le_of_dvd (Nat.pos_of_ne_zero hn) hd_dvd)
+    (Nat.pos_of_dvd_of_pos hd_dvd (Nat.pos_of_ne_zero hn))
+  simp [ArithmeticFunction.zeta_apply, Nat.pos_iff_ne_zero.mp h_div_pos]
 
 /-- **IDENTITY 1: Σ_{k=1}^n μ(k)⌊n/k⌋ = 1**
 
@@ -151,7 +157,7 @@ theorem mobius_floor_sum_eq_one (n : ℕ) (hn : 1 ≤ n) :
 -- §3. IDENTITY 2: Σ μ(k)log(k)⌊y/k⌋ = -ψ(y)
 -- ═══════════════════════════════════════════════
 
-/-- **IDENTITY 2: Σ_{k=1}^N μ(k)·log(k)·⌊N/k⌋ = -ψ(N)**
+/- **IDENTITY 2: Σ_{k=1}^N μ(k)·log(k)·⌊N/k⌋ = -ψ(N)**
 
     ALREADY PROVED in PNT/LogBridge.lean as `sum_mu_log_floor_icc`.
 
@@ -164,8 +170,8 @@ theorem mobius_floor_sum_eq_one (n : ℕ) (hn : 1 ≤ n) :
 
     The identity is imported from `Cathedral.PNT.LogBridge.sum_mu_log_floor_icc`.
 
-    Numerically verified to max error 2.6e-11 for n ≤ 5000
     (gram-form-identity experiment §H). -/
+-- (Identity 2 lives in Cathedral.PNT.LogBridge.sum_mu_log_floor_icc)
 -- Re-export for convenience:
 -- theorem sum_mu_log_floor_icc (N : ℕ) :
 --     ∑ n ∈ Icc 1 N, (μ n : ℝ) * Real.log n * (N / n : ℕ) = -Psi N

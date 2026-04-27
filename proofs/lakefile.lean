@@ -211,4 +211,11 @@ lean_lib «Cathedral» where
     `Cathedral.IntegralBasis.BaezDuarte,
     `Cathedral.IntegralBasis.Quantitative,
     `Cathedral.Analysis.IntervalCalc,
+    -- PNT LogBridge (Dirichlet convolution identity, 1 sorry)
+    `Cathedral.PNT.LogBridge,
+    -- Number theory (Dirichlet convolution identities, Exploration 13)
+    `Cathedral.NumberTheory.DirichletConvolution,
+    -- Covariance Abel engine (Exploration 13)
+    `Cathedral.Covariance.QuadFormIdentity,
+    `Cathedral.Covariance.BilinearAbel,
   ]
