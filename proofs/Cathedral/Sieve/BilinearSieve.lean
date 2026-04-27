@@ -1,3 +1,6 @@
+import Cathedral.Sieve.ParitySchur
+import Cathedral.Sieve.VasyuninExpansion
+
 /-!
   Cathedral/Sieve/BilinearSieve.lean
 
@@ -6,8 +9,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Sieve.ParitySchur
-import Cathedral.Sieve.VasyuninExpansion
 
 /-! # SpectralRH.BilinearSieve
 

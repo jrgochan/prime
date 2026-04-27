@@ -1,3 +1,6 @@
+import Cathedral.Defs
+import Mathlib.Analysis.InnerProductSpace.PiL2
+
 /-!
   Cathedral/Spectral/RayleighBridge.lean
 
@@ -7,8 +10,6 @@
 
   Zero axioms. NOT on the v11 crown path.
 -/
-import Cathedral.Defs
-import Mathlib.Analysis.InnerProductSpace.PiL2
 
 /-! # SpectralRH.RayleighBridge
 The bridge between the Rayleigh quotient (quadratic form) and matrix eigenvalues.

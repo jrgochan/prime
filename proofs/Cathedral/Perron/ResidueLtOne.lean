@@ -1,3 +1,7 @@
+import Cathedral.Perron.Defs
+import Cathedral.Perron.IntegralBounds
+import Cathedral.Perron.Rectangle
+
 /-!
   Cathedral/Perron/ResidueLtOne.lean
 
@@ -6,9 +10,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.Perron.Defs
-import Cathedral.Perron.IntegralBounds
-import Cathedral.Perron.Rectangle
 
 /-!
 # Perron Kernel for `y < 1` (No Residue)

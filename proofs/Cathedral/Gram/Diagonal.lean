@@ -1,3 +1,6 @@
+import Cathedral.Defs
+import Cathedral.Gram.FractIntegral
+
 /-!
   Cathedral/Gram/Diagonal.lean
 
@@ -7,8 +10,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.Defs
-import Cathedral.Gram.FractIntegral
 
 /-! # Cathedral.GramDiag
 

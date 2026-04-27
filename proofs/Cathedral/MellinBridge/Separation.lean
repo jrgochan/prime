@@ -1,3 +1,6 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.Axioms
+
 /-!
   Cathedral/MellinBridge/Separation.lean
 
@@ -13,8 +16,6 @@
 
   **Zero custom axioms. On the crown path.**
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.Axioms
 
 /-! # Cathedral.MellinBridge.Separation
 

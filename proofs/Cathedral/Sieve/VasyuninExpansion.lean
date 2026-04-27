@@ -1,3 +1,6 @@
+import Cathedral.Gram.Bounds
+import Cathedral.Gram.OffDiagonal
+
 /-!
   Cathedral/Sieve/VasyuninExpansion.lean
 
@@ -6,8 +9,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.Gram.Bounds
-import Cathedral.Gram.OffDiagonal
 
 /-! # Cathedral.VasyuninExpansion
 

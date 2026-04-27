@@ -1,3 +1,6 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.MellinBridge.FloorMellin
+
 /-!
   Cathedral/MellinBridge/FloorDivMellin.lean
 
@@ -7,8 +10,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.FloorMellin
 
 /-! # Cathedral.MellinBridge.FloorDivMellin
 

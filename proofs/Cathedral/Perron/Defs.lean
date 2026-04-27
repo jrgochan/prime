@@ -1,3 +1,11 @@
+import Mathlib.Analysis.Complex.CauchyIntegral
+import Mathlib.Analysis.Complex.RemovableSingularity
+import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
+import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
+import Mathlib.Analysis.Real.Pi.Bounds
+
 /-!
   Cathedral/Perron/Defs.lean
 
@@ -7,13 +15,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Mathlib.Analysis.Complex.CauchyIntegral
-import Mathlib.Analysis.Complex.RemovableSingularity
-import Mathlib.Analysis.SpecialFunctions.Complex.LogDeriv
-import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.Analysis.SpecialFunctions.Trigonometric.Bounds
-import Mathlib.Analysis.Real.Pi.Bounds
 
 /-!
 # Perron Kernel: Definitions and Basic Properties

@@ -1,3 +1,5 @@
+import Cathedral.Defs
+
 /-!
   Cathedral/Spectral/OctonionicPartition.lean
 
@@ -7,7 +9,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Defs
 
 /-! # SpectralRH.OctonionicPartition
 

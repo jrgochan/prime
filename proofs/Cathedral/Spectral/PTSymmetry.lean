@@ -1,3 +1,5 @@
+import Cathedral.Defs
+
 /-!
   Cathedral/Spectral/PTSymmetry.lean
 
@@ -8,7 +10,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Defs
 
 /-! # SpectralRH.PTSymmetry
 The PT-symmetry discovery: Liouville parity decomposition,

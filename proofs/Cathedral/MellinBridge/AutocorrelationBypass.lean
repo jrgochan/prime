@@ -1,3 +1,8 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.MellinBridge.HilbertSetup
+import Cathedral.MellinBridge.MellinSieve
+import Cathedral.Defs
+
 /-!
   Cathedral/MellinBridge/AutocorrelationBypass.lean
 
@@ -7,10 +12,6 @@
 
   NOT on the v11 crown path (alternative route).
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.MellinBridge.MellinSieve
-import Cathedral.Defs
 
 /-! # Cathedral.MellinBridge.AutocorrelationBypass
 

@@ -1,3 +1,8 @@
+import Cathedral.Defs
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.MeasureTheory.Group.Arithmetic
+
 /-!
   Cathedral/Gram/Bounds.lean
 
@@ -7,10 +12,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.Defs
-import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
-import Mathlib.MeasureTheory.Function.Floor
-import Mathlib.MeasureTheory.Group.Arithmetic
 
 /-! # SpectralRH.GramBounds
 

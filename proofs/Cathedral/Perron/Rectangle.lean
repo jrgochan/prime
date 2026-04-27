@@ -1,3 +1,5 @@
+import Cathedral.Perron.Defs
+
 /-!
   Cathedral/Perron/Rectangle.lean
 
@@ -6,7 +8,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.Perron.Defs
 
 /-!
 # Rectangle Contour Lemmas for the Perron Kernel

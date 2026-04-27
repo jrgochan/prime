@@ -1,3 +1,7 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.MellinBridge.HilbertSetup
+import Cathedral.Defs
+
 /-!
   Cathedral/MellinBridge/MertensWeightBypass.lean
 
@@ -6,9 +10,6 @@
 
   NOT on the v11 crown path (bypassed by Mellin Crown).
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.Defs
 
 /-! # Cathedral.MellinBridge.MertensWeightBypass
 

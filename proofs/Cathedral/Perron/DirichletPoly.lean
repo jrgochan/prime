@@ -1,3 +1,10 @@
+import Cathedral.Perron.Defs
+import Cathedral.Zeta.DirichletInverse
+import Mathlib.Analysis.PSeries
+import Mathlib.Analysis.SumIntegralComparisons
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
+import Mathlib.Topology.Algebra.InfiniteSum.Real
+
 /-!
   Cathedral/Perron/DirichletPoly.lean
 
@@ -7,12 +14,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.Perron.Defs
-import Cathedral.Zeta.DirichletInverse
-import Mathlib.Analysis.PSeries
-import Mathlib.Analysis.SumIntegralComparisons
-import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
-import Mathlib.Topology.Algebra.InfiniteSum.Real
 
 /-!
 # Dirichlet Polynomial Infrastructure for the Perron Formula

@@ -1,3 +1,5 @@
+import Cathedral.Perron.KernelBound
+
 /-!
   Cathedral/Perron/Formula.lean
 
@@ -6,7 +8,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.Perron.KernelBound
 
 /-!
 # Perron's Formula: From Kernel to Summatory Function

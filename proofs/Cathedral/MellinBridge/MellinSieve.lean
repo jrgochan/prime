@@ -1,3 +1,12 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.MellinBridge.HilbertSetup
+import Cathedral.MellinBridge.Separation
+import Cathedral.MellinBridge.MertensWeightBypass
+import Cathedral.Sieve.BilinearSieve
+import Cathedral.Sieve.MoebiusUncoupling
+import Cathedral.NymanBeurling.QuadFormBridge
+import Cathedral.Gram.L2Bridge
+
 /-!
   Cathedral/MellinBridge/MellinSieve.lean
 
@@ -7,14 +16,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.HilbertSetup
-import Cathedral.MellinBridge.Separation
-import Cathedral.MellinBridge.MertensWeightBypass
-import Cathedral.Sieve.BilinearSieve
-import Cathedral.Sieve.MoebiusUncoupling
-import Cathedral.NymanBeurling.QuadFormBridge
-import Cathedral.Gram.L2Bridge
 
 /-! # Cathedral.MellinBridge.MellinSieve
 

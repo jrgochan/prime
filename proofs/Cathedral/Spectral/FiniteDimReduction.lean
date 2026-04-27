@@ -1,3 +1,7 @@
+import Cathedral.Defs
+import Cathedral.Spectral.OctonionicPartition
+import Cathedral.Spectral.ClassRestriction
+
 /-!
   Cathedral/Spectral/FiniteDimReduction.lean
 
@@ -7,9 +11,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Defs
-import Cathedral.Spectral.OctonionicPartition
-import Cathedral.Spectral.ClassRestriction
 
 /-! # SpectralRH.FiniteDimReduction
 

@@ -1,3 +1,6 @@
+import Cathedral.Perron.ResidueGtOne
+import Cathedral.Perron.ResidueLtOne
+
 /-!
   Cathedral/Perron/KernelBound.lean
 
@@ -5,8 +8,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.Perron.ResidueGtOne
-import Cathedral.Perron.ResidueLtOne
 
 /-!
 # The Unified Perron Kernel Bound

@@ -1,3 +1,8 @@
+import Cathedral.Sieve.VasyuninExpansion
+import Cathedral.Sieve.BilinearSieve
+import Mathlib.NumberTheory.ArithmeticFunction.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Moebius
+
 /-!
   Cathedral/Sieve/MoebiusUncoupling.lean
 
@@ -7,10 +12,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Sieve.VasyuninExpansion
-import Cathedral.Sieve.BilinearSieve
-import Mathlib.NumberTheory.ArithmeticFunction.Defs
-import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 /-! # Cathedral.MoebiusUncoupling
 

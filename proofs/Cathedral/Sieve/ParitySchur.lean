@@ -1,3 +1,7 @@
+import Cathedral.Defs
+import Cathedral.Structural.Structural
+import Cathedral.Spectral.PTSymmetry
+
 /-!
   Cathedral/Sieve/ParitySchur.lean
 
@@ -9,9 +13,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Defs
-import Cathedral.Structural.Structural
-import Cathedral.Spectral.PTSymmetry
 
 /-! # SpectralRH.ParitySchur
 

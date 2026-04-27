@@ -1,3 +1,9 @@
+import Cathedral.Defs
+import Cathedral.Spectral.OctonionicPartition
+import Cathedral.Structural.Structural
+import Cathedral.Spectral.RayleighBridge
+import Cathedral.Assembly.Assembly
+
 /-!
   Cathedral/Spectral/ClassRestriction.lean
 
@@ -9,11 +15,6 @@
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
-import Cathedral.Defs
-import Cathedral.Spectral.OctonionicPartition
-import Cathedral.Structural.Structural
-import Cathedral.Spectral.RayleighBridge
-import Cathedral.Assembly.Assembly
 
 /-! # SpectralRH.ClassRestriction
 

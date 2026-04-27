@@ -1,3 +1,6 @@
+import Cathedral.MellinBridge.Basic
+import Cathedral.MellinBridge.FloorDivMellin
+
 /-!
   Cathedral/MellinBridge/HilbertSetup.lean
 
@@ -5,8 +8,6 @@
   Defines the inner product structure and connects it to the
   Gram matrix representation used throughout the Cathedral.
 -/
-import Cathedral.MellinBridge.Basic
-import Cathedral.MellinBridge.FloorDivMellin
 
 /-! # Cathedral.MellinBridge.HilbertSetup
 

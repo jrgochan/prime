@@ -1,3 +1,5 @@
+import Cathedral.Perron.Defs
+
 /-!
   Cathedral/Perron/IntegralBounds.lean
 
@@ -6,7 +8,6 @@
 
   Zero sorry. Zero axioms.
 -/
-import Cathedral.Perron.Defs
 
 /-!
 # FTC-Based Integral Bounds for `y^σ`

@@ -1,3 +1,7 @@
+import Cathedral.Axioms
+import Cathedral.NymanBeurling.BDMellin
+import Mathlib.NumberTheory.LSeries.Nonvanishing
+
 /-!
   Cathedral/NymanBeurling/Separation.lean
 
@@ -7,9 +11,6 @@
 
   **On the crown path. Zero custom axioms.**
 -/
-import Cathedral.Axioms
-import Cathedral.NymanBeurling.BDMellin
-import Mathlib.NumberTheory.LSeries.Nonvanishing
 
 /-!
   Cathedral/NymanBeurling/Separation.lean

@@ -1,3 +1,6 @@
+import Cathedral.Defs
+import Cathedral.Structural.Structural
+
 /-!
   Cathedral/IntegralBasis/Quantitative.lean
 
@@ -6,8 +9,6 @@
 
   NOT on the v11 crown path.
 -/
-import Cathedral.Defs
-import Cathedral.Structural.Structural
 
 /-! # SpectralRH.Quantitative
 Numerically-verified bounds: certified base, Schur complement, cross-norm.
