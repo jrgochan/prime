@@ -392,6 +392,10 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
 theorem fejerKernel_integrable :
     MeasureTheory.Integrable fejerKernel
       (MeasureTheory.volume : MeasureTheory.Measure ℝ) := by
+  -- sinc² is continuous (hence measurable and locally integrable)
+  -- and bounded by min(1, 1/(πx)²), giving global integrability
+  -- The formal proof is: sinc is continuous, so sinc² = sinc·sinc is continuous,
+  -- and for |x| > 1, sinc²(x) = sin²(πx)/(πx)² ≤ 1/(πx)² ≤ 1/x² which is integrable.
   sorry
 
 /-- **FK3**: ∫ sinc²(x) dx = 1.
