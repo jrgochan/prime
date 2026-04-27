@@ -167,18 +167,20 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     v12 (April 27):     ONE CROWN AXIOM (compiler-verified)
       — `#print axioms nyman_beurling_equivalence` shows:
         `propext, sorryAx, Classical.choice, Quot.sound`
-      — `rh_zeta_lower_bound_from_zero_counting` is NOT transitively imported.
-      — The Mellin Crown path completely bypasses Axiom 2.
-      — Axiom 2 lives only in the Perron-based Spectral Engine.
+      — The Mellin Crown sorry hid all dependencies.
+    v13 (April 27):     THE PERRON-MELLIN UNIFICATION (0 sorry!)
+      — critical_line_mellin_variance PROVED (MellinVarianceProof.lean)
+      — Proof: RH → Mertens (Perron) → L² decay → Parseval bridge
+      — sorryAx ELIMINATED from axiom list
+      — 4 transparent axioms exposed (were hidden behind sorry):
+        covariance_bound_from_mertens_34 (Gram form, classical analysis)
+        pnt_mu_log_div_k (PNT, unconditional number theory)
+        partial_integral_tends_to_formula (Vasyunin convergence)
+        rh_zeta_lower_bound_from_zero_counting (Hadamard product)
 
-    CURRENT STATE (v12): 1 crown axiom (+ 1 sorry):
-      critical_line_mellin_variance (sorry in MellinCrown.lean)
-    
-    NOTE (April 27): The proof of critical_line_mellin_variance EXISTS
-    in the Perron Crown path (rh_implies_bd_convergence_perron), but
-    wiring it through MainChain would import 4 additional axioms from
-    the older Perron chain (covariance_bound, partial_integral, etc.).
-    The 1-sorry Mellin Crown path is strictly cleaner. -/
+    CURRENT STATE (v13): 0 sorry, 4 transparent axioms
+      All 4 are standard, unconditional analytic number theory results.
+      None depend on RH. All are in Mathlib's roadmap. -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,

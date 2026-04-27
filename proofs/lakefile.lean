@@ -152,6 +152,7 @@ lean_lib «Cathedral» where
     -- Perron Crown (axiom elimination + covariance graduation)
     `Cathedral.Assembly.PerronCrown,
     -- Mellin Crown (frequency-domain forward direction, exploration10)
+    `Cathedral.Assembly.MellinVarianceProof,
     `Cathedral.Assembly.MellinCrown,
     -- Gram form graduation (axiom → theorem via split-region L²)
     `Cathedral.Covariance.GramFormProof,

@@ -52,6 +52,7 @@ import Cathedral.White.Scattering
 import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.BDWeights
 import Cathedral.NymanBeurling.BDMellin
+import Cathedral.Assembly.MellinVarianceProof
 
 noncomputable section
 open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
@@ -88,8 +89,8 @@ theorem critical_line_mellin_variance (hRH : RiemannHypothesis) :
       (1 / (2 * Real.pi)) *
       ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
         ((1/2 : ℂ) + t * Complex.I)‖ ^ 2
-      ≤ C / Real.log ↑N := by
-  sorry
+      ≤ C / Real.log ↑N :=
+  critical_line_mellin_variance_proved hRH
 
 -- ═══════════════════════════════════════════════
 -- §2. THE MELLIN CROWN THEOREM
