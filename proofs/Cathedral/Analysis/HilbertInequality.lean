@@ -33,9 +33,13 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
+import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.Fourier.Inversion
+import Mathlib.MeasureTheory.Function.LocallyIntegrable
 
 noncomputable section
 open Complex Real Finset BigOperators
+open scoped FourierTransform
 
 namespace Cathedral.Analysis
 
@@ -561,13 +565,54 @@ theorem fejerKernel_integrable :
     rw [le_div_iff₀ (by positivity : (0 : ℝ) < 1 + x ^ 2)]
     exact sinc_sq_cauchy_bound x
 
+/-! ### Fourier inversion infrastructure for FK3/FK4
+
+We cast the triangle function to ℂ and use Mathlib's Fourier inversion theorem
+(`fourier_fourierInv_eq`) to derive the integral and support properties. -/
+
+/-- The triangle function cast to ℂ for Fourier theory. -/
+private def Λ_ℂ (ξ : ℝ) : ℂ := ((max (1 - |ξ|) 0 : ℝ) : ℂ)
+
+private lemma Λ_ℂ_continuous : Continuous Λ_ℂ := by
+  unfold Λ_ℂ
+  exact continuous_ofReal.comp ((continuous_const.sub continuous_abs).max continuous_const)
+
+private lemma Λ_ℂ_hasCompactSupport : HasCompactSupport Λ_ℂ := by
+  rw [hasCompactSupport_def]
+  apply IsCompact.of_isClosed_subset isCompact_Icc isClosed_closure
+  exact closure_minimal (show Function.support Λ_ℂ ⊆ Set.Icc (-1) 1 from by
+    intro ξ hξ
+    simp only [Function.mem_support, ne_eq] at hξ
+    rw [Set.mem_Icc]
+    have h : (0 : ℝ) < max (1 - |ξ|) 0 := by
+      have : (max (1 - |ξ|) 0 : ℝ) ≠ 0 := by
+        intro heq; apply hξ; show Λ_ℂ ξ = 0; simp [Λ_ℂ, heq]
+      exact lt_of_le_of_ne (le_max_right _ _) (Ne.symm this)
+    have h2 : 0 < 1 - |ξ| := by
+      by_contra h3; push_neg at h3
+      linarith [le_max_right (1 - |ξ|) (0 : ℝ), max_eq_right h3]
+    exact ⟨by linarith [neg_abs_le ξ], by linarith [le_abs_self ξ]⟩) isClosed_Icc
+
+private lemma Λ_ℂ_integrable : MeasureTheory.Integrable Λ_ℂ
+    (MeasureTheory.volume : MeasureTheory.Measure ℝ) :=
+  Λ_ℂ_continuous.integrable_of_hasCompactSupport Λ_ℂ_hasCompactSupport
+
+private lemma Λ_ℂ_zero : Λ_ℂ 0 = 1 := by simp [Λ_ℂ]
+
+private lemma fourier_at_zero (f : ℝ → ℂ) : 𝓕 f 0 = ∫ v : ℝ, f v := by
+  simp [Real.fourier_eq]
+
 /-- **FK3**: ∫ sinc²(x) dx = 1.
 
-    By the Fourier bridge: ∫ K(x) dx = ∫ K(x)·cos(0) dx = Λ(0) = 1.
-    This is Fourier inversion at x = 0 (or equivalently ξ = 0). -/
+    By Fourier inversion: 𝓕(𝓕⁻ Λ_ℂ)(0) = Λ_ℂ(0) = 1, and
+    𝓕(g)(0) = ∫ g(x) dx, so ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1.
+    The Bridge theorem identifies 𝓕⁻ Λ_ℂ with fejerKernel. -/
 theorem fejerKernel_integral :
     ∫ x : ℝ, fejerKernel x
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 1 := by
+  -- The Fourier inversion proof:
+  -- ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1, and 𝓕⁻ Λ_ℂ = fejerKernel_ℂ (Bridge matching)
+  -- Remaining gap: matching 𝓕 Λ_ℂ with fejerKernel in Mathlib's FT convention
   sorry
 
 /-- **FK4**: Fourier transform of sinc² vanishes outside [-1,1].
