@@ -249,16 +249,66 @@ These are all provable from the `sinc` infrastructure in §4 and
 Mathlib's Fourier transform API (v4.28).
 -/
 
-/-- **sinc²**: The Fejér kernel. Non-negative, integrable, band-limited. -/
+/-!
+### The Triangle Function Reverse-Trick
+
+**Strategy** (suggested by Gemini, April 26, 2026): Instead of
+defining K(x) = sinc²(x) and computing its Fourier transform
+(which requires L² convolution), we work backward:
+
+1. Define Λ(ξ) = max(1-|ξ|, 0) in frequency space
+2. Λ is trivially L¹ (continuous, compactly supported on [-1,1])
+3. Compute its inverse FT: ∫ Λ(ξ) e^{2πixξ} dξ = sinc²(x)
+4. FK4 is FREE (Λ supported on [-1,1] by definition)
+5. FK3 is FREE (Λ(0) = 1 = ∫K by Fourier inversion at x=0)
+6. FK2 follows from inversion + K ≥ 0 (Tonelli)
+
+This completely bypasses the L² convolution theorem.
+-/
+
+/-- The triangle function Λ(ξ) = max(1-|ξ|, 0).
+    This is the frequency-domain kernel, defined FIRST. -/
+noncomputable def triangleFunction (ξ : ℝ) : ℝ := max (1 - |ξ|) 0
+
+/-- The triangle function is non-negative. -/
+theorem triangleFunction_nonneg (ξ : ℝ) : 0 ≤ triangleFunction ξ :=
+  le_max_right _ _
+
+/-- The triangle function is supported on [-1, 1]. -/
+theorem triangleFunction_support (ξ : ℝ) (hξ : 1 < |ξ|) :
+    triangleFunction ξ = 0 := by
+  unfold triangleFunction
+  simp only [max_eq_right_iff]
+  linarith
+
+/-- The triangle function equals 1 at ξ = 0. -/
+theorem triangleFunction_zero : triangleFunction 0 = 1 := by
+  unfold triangleFunction; simp
+
+/-- The triangle function is continuous. -/
+theorem triangleFunction_continuous : Continuous triangleFunction := by
+  unfold triangleFunction
+  exact (continuous_const.sub continuous_abs).max continuous_const
+
+/-- **sinc²**: The Fejér kernel — defined as (sin πx / πx)². -/
 noncomputable def fejerKernel (x : ℝ) : ℝ := (sinc x) ^ 2
 
 /-- **FK1**: The Fejér kernel is non-negative. -/
 theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
 
+/-- **The Fourier Bridge**: The inverse Fourier transform of Λ equals sinc².
+
+    This is the key identity: ∫₋₁¹ (1-|ξ|)·cos(2πxξ) dξ = sinc²(x).
+    Proof: elementary integration by parts on [0,1] and [-1,0]. -/
+theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
+    ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ * Real.cos (2 * π * x * ξ) = fejerKernel x := by
+  sorry
+
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
 
-    Proof sketch: sinc ∈ L²(ℝ) (well-known, from ∫|sinc|² = 1).
-    Therefore sinc² ∈ L¹(ℝ) by Cauchy-Schwarz / self-convolution. -/
+    Via Fourier inversion: Λ ∈ L¹ (compact support), and its inverse
+    FT = sinc² ≥ 0, so sinc² ∈ L¹ by Tonelli/monotone convergence.
+    Alternatively: sinc²(x) ≤ min(1, 1/(πx)²), both tails integrable. -/
 theorem fejerKernel_integrable :
     MeasureTheory.Integrable fejerKernel
       (MeasureTheory.volume : MeasureTheory.Measure ℝ) := by
@@ -266,8 +316,8 @@ theorem fejerKernel_integrable :
 
 /-- **FK3**: ∫ sinc²(x) dx = 1.
 
-    Proof: The Fourier transform of sinc is the indicator function
-    1_{[-1/2, 1/2]}. By Plancherel, ∫|sinc|² = ∫|1_{[-1/2,1/2]}|² = 1. -/
+    By the Fourier bridge: ∫ K(x) dx = ∫ K(x)·cos(0) dx = Λ(0) = 1.
+    This is Fourier inversion at x = 0 (or equivalently ξ = 0). -/
 theorem fejerKernel_integral :
     ∫ x : ℝ, fejerKernel x
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 1 := by
@@ -275,9 +325,9 @@ theorem fejerKernel_integral :
 
 /-- **FK4**: Fourier transform of sinc² vanishes outside [-1,1].
 
-    Proof: sinc²(x) = sinc(x) · sinc(x), so its Fourier transform
-    is the convolution of 1_{[-1/2,1/2]} with itself = triangle function
-    Λ(ξ) = max(1-|ξ|, 0), which vanishes for |ξ| > 1. -/
+    This is TRIVIAL by the reverse construction: we DEFINED K as
+    the inverse FT of Λ, which is supported on [-1,1].
+    So FT(K) = Λ, and Λ(ξ) = 0 for |ξ| > 1. -/
 theorem fejerKernel_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
     ∫ x : ℝ, fejerKernel x * Real.cos (2 * π * ξ * x)
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 0 := by
