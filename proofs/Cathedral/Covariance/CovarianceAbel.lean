@@ -69,7 +69,19 @@ def l2Residual (N : ℕ) : ℝ :=
 theorem partialSum_neg_moebius_eq_neg_mertens (M : ℕ) (hM : 1 ≤ M) :
     partialSum (fun k => -(↑(moebius k) : ℝ)) 1 M =
     -(↑(mertensFunction ↑M : ℤ) : ℝ) := by
-  sorry
+  unfold partialSum mertensFunction
+  simp only [Finset.sum_neg_distrib, neg_inj]
+  -- Goal: Σ_{k ∈ Icc 1 M} (μ(k) : ℝ) = ↑(Σ_{n ∈ filter ...} μ(n) : ℤ)
+  -- Both are sums of μ over {1,...,M}, just with different Finset representations
+  push_cast
+  congr 1
+  -- Show the Finsets are equal
+  ext n
+  simp only [Finset.mem_Icc, Finset.mem_filter, Finset.mem_range, Nat.lt_add_one_iff,
+             Nat.cast_le, Nat.floor_natCast]
+  constructor
+  · intro ⟨h1, h2⟩; exact ⟨h2, by exact_mod_cast h2, by exact_mod_cast h1⟩
+  · intro ⟨h1, h2, h3⟩; exact ⟨by exact_mod_cast h3, by exact_mod_cast h1⟩
 
 /-- **POINTWISE BOUND**: For fixed x ∈ (0,1], the BD approximant satisfies:
     |f_N(x)| ≤ (1 + C_m·N^{3/4})·1 + Σ_{k=1}^{N-2} (1 + C_m·k^{3/4})·δ(k)
