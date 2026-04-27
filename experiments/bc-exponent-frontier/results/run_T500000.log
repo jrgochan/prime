@@ -1,0 +1,148 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: field `t_max` is never read
+  --> experiments/bc-exponent-frontier/src/main.rs:83:5
+   |
+80 | struct EffExponent {
+   |        ----------- field in this struct
+...
+83 |     t_max: f64,
+   |     ^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `bc-exponent-frontier` (bin "bc-exponent-frontier") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/bc-exponent-frontier 500000 10000`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL BC-EXPONENT FRONTIER[0m
+  [1m[36m║[0m  [2mTarget: test PL path for rh_zeta_lower_bound · T_max = 500000, 10000 samples[0m
+  [1m[36m║[0m  [2m64-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97m═══ §A. BC EXPONENT MAP ═══[0m
+  [2m  B_ε = 40(3-2ε)/ε — threshold above which LowerBound.lean PROVES the bound[0m
+  [2m  For A ≥ B_ε: ZERO SORRY. For A < B_ε: needs axiom.[0m
+
+    [2m       ε     │     B_ε       │    K_ε        │  regime[0m
+       0.0050 │     23920.00 │      2392.00 │  [31mlarge[0m — axiom needed
+       0.0100 │     11920.00 │      1192.00 │  [31mlarge[0m — axiom needed
+       0.0200 │      5920.00 │       592.00 │  [31mlarge[0m — axiom needed
+       0.0500 │      2320.00 │       232.00 │  [31mlarge[0m — axiom needed
+       0.1000 │      1120.00 │       112.00 │  [31mlarge[0m — axiom needed
+       0.1500 │       720.00 │        72.00 │  [31mlarge[0m — axiom needed
+       0.2000 │       520.00 │        52.00 │  [31mlarge[0m — axiom needed
+       0.2500 │       400.00 │        40.00 │  [31mlarge[0m — axiom needed
+       0.3000 │       320.00 │        32.00 │  [31mlarge[0m — axiom needed
+       0.5000 │       160.00 │        16.00 │  [31mlarge[0m — axiom needed
+       0.7500 │        80.00 │         8.00 │  [33mmoderate[0m
+       1.0000 │        40.00 │         4.00 │  [33mmoderate[0m
+       1.2500 │        16.00 │         1.60 │  [33mmoderate[0m
+       1.4900 │         0.54 │         0.05 │  [32msmall[0m — BC covers most A
+
+  [1m[97m═══ §B. EFFECTIVE EXPONENT: actual min|ζ(σ+it)| ═══[0m
+  [2m  Measured A where |ζ| ≈ c/|t|^A at the observed minimum[0m
+
+    [2m       ε     │  σ=½+ε  │  min|ζ|              │  eff. A     │  B_ε         │ gap[0m
+        0.010 │  0.5100 │      1.5650044202e-2 │     0.3185 │     11920.00 │ 11919.7  [2m(0.0s)[0m
+        0.020 │  0.5200 │      1.8566619398e-3 │     0.4819 │      5920.00 │ 5919.5  [2m(0.0s)[0m
+        0.050 │  0.5500 │      1.4526808557e-2 │     0.3657 │      2320.00 │ 2319.6  [2m(0.0s)[0m
+        0.100 │  0.6000 │      1.5764797376e-2 │     0.3203 │      1120.00 │ 1119.7  [2m(0.0s)[0m
+        0.200 │  0.7000 │      2.7272306276e-2 │     0.2766 │       520.00 │ 519.7  [2m(0.0s)[0m
+        0.300 │  0.8000 │      3.4619806344e-2 │     0.2604 │       320.00 │ 319.7  [2m(0.0s)[0m
+        0.500 │  1.0000 │      2.4440477410e-1 │     0.1440 │       160.00 │ 159.9  [2m(0.0s)[0m
+        1.000 │  1.5000 │      5.2444812295e-1 │     0.0537 │        40.00 │ 39.9  [2m(0.0s)[0m
+
+  [1m[97m═══ §C. PHRAGMÉN-LINDELÖF: |1/ζ(σ+it)| growth across the strip ═══[0m
+  [2m  If |1/ζ| grows polynomially, Three-Lines (IN MATHLIB) gives a lower bound[0m
+  [2m  Boundary data: |1/ζ(2+it)| ≤ 4 (PROVED in TailBound.lean)[0m
+
+    [2m     σ     │ max|1/ζ(σ+it)|  │   at t    │  log(max)/log(T) │ polynomial?[0m
+       0.51 │      6.389758e1 │  465397.2 │           0.3168 │ [32m✓[0m  [2m(0.0s)[0m
+       0.52 │      5.386010e2 │  465397.2 │           0.4793 │ [32m✓[0m  [2m(0.0s)[0m
+       0.55 │      6.883824e1 │  105968.5 │           0.3225 │ [32m✓[0m  [2m(0.0s)[0m
+       0.60 │      6.343247e1 │  422793.8 │           0.3163 │ [32m✓[0m  [2m(0.0s)[0m
+       0.65 │      1.795903e2 │  241579.3 │           0.3956 │ [32m✓[0m  [2m(0.0s)[0m
+       0.70 │      3.666723e1 │  451546.1 │           0.2745 │ [32m✓[0m  [2m(0.0s)[0m
+       0.75 │      4.076253e2 │  264831.2 │           0.4580 │ [32m✓[0m  [2m(0.0s)[0m
+       0.80 │      2.888520e1 │  406392.5 │           0.2563 │ [32m✓[0m  [2m(0.0s)[0m
+       0.90 │      7.328703e0 │   17761.4 │           0.1518 │ [32m✓[0m  [2m(0.0s)[0m
+       1.00 │      4.091573e0 │   17761.4 │           0.1074 │ [32m✓[0m  [2m(0.0s)[0m
+       1.20 │      2.588004e0 │  164773.2 │           0.0725 │ [32m✓[0m  [2m(0.0s)[0m
+       1.50 │      1.906766e0 │  164773.2 │           0.0492 │ [32m✓[0m  [2m(0.0s)[0m
+       2.00 │      1.452339e0 │   89817.2 │           0.0284 │ [32m✓[0m  [2m(0.0s)[0m
+
+  [1m[97m═══ §D. LOG GROWTH: log|ζ(2+it)| vs log(2+|t|) ═══[0m
+  [2m  If ratio → 0, iterated BC can reduce exponent. If constant, cannot.[0m
+
+    [2m      |t|   │  log|ζ(2+it)| │  log(2+|t|) │  ratio       │  log²(2+|t|)[0m
+           10 │      0.184422 │    2.484907 │     0.074217 │     6.174761
+           20 │      0.029906 │    3.091042 │     0.009675 │     9.554543
+           50 │      0.242656 │    3.951244 │     0.061412 │    15.612327
+          100 │      0.175735 │    4.624973 │     0.037997 │    21.390374
+          200 │      0.386776 │    5.308268 │     0.072863 │    28.177706
+          500 │      0.071800 │    6.218600 │     0.011546 │    38.670987
+         1000 │      0.040912 │    6.909753 │     0.005921 │    47.744690
+         2000 │      0.234955 │    7.601902 │     0.030907 │    57.788913
+         5000 │      0.217806 │    8.517593 │     0.025571 │    72.549392
+        10000 │      0.041403 │    9.210540 │     0.004495 │    84.834054
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mBC-EXPONENT FRONTIER — CERTIFICATE[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  T_max: [33m500000[0m    Samples: [33m10000[0m    Threads: [33m12[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§B. Effective exponents vs BC threshold[0m
+  [1m[36m║[0m    ε=0.010: A_eff = [35m0.3185[0m  B_ε = 11920  gap = [33m37420×[0m
+  [1m[36m║[0m    ε=0.020: A_eff = [35m0.4819[0m  B_ε = 5920  gap = [33m12285×[0m
+  [1m[36m║[0m    ε=0.050: A_eff = [35m0.3657[0m  B_ε = 2320  gap = [33m6344×[0m
+  [1m[36m║[0m    ε=0.100: A_eff = [35m0.3203[0m  B_ε = 1120  gap = [33m3496×[0m
+  [1m[36m║[0m    ε=0.200: A_eff = [35m0.2766[0m  B_ε = 520  gap = [33m1880×[0m
+  [1m[36m║[0m    ε=0.300: A_eff = [35m0.2604[0m  B_ε = 320  gap = [33m1229×[0m
+  [1m[36m║[0m    ε=0.500: A_eff = [35m0.1440[0m  B_ε = 160  gap = [33m1111×[0m
+  [1m[36m║[0m    ε=1.000: A_eff = [35m0.0537[0m  B_ε = 40  gap = [33m744×[0m
+  [1m[36m║[0m    [31m✗ BC gap too large for tightening alone[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§C. Phragmén-Lindelöf viability[0m
+  [1m[36m║[0m    σ=0.51: max|1/ζ| = [35m6.3898e1[0m  growth = [35m0.3168[0m [32m✓[0m
+  [1m[36m║[0m    σ=0.52: max|1/ζ| = [35m5.3860e2[0m  growth = [35m0.4793[0m [32m✓[0m
+  [1m[36m║[0m    σ=0.55: max|1/ζ| = [35m6.8838e1[0m  growth = [35m0.3225[0m [32m✓[0m
+  [1m[36m║[0m    σ=1.00: max|1/ζ| = [35m4.0916e0[0m  growth = [35m0.1074[0m [32m✓[0m
+  [1m[36m║[0m    σ=2.00: max|1/ζ| = [35m1.4523e0[0m  growth = [35m0.0284[0m [32m✓[0m
+  [1m[36m║[0m    [32m✓[0m |1/ζ| grows polynomially at ALL tested σ (max exp = 0.479)
+  [1m[36m║[0m
+  [1m[36m║[0m  [1mVERDICT[0m
+  [1m[36m║[0m    [32m[1m✓ PHRAGMÉN-LINDELÖF PATH VIABLE[0m
+  [1m[36m║[0m    [32m  |1/ζ(σ+it)| grows polynomially (exp ≤ 0.479)[0m
+  [1m[36m║[0m    [32m  Three-Lines theorem (IN MATHLIB) can interpolate[0m
+  [1m[36m║[0m    [32m  between σ=2 (|1/ζ|≤4, PROVED) and σ=½+ε[0m
+  [1m[36m║[0m    [32m  → may ELIMINATE rh_zeta_lower_bound axiom![0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1mPATH RANKING[0m
+  [1m[36m║[0m    1. [32mPhragmén-Lindelöf[0m — uses only existing Mathlib tools
+  [1m[36m║[0m    2. [33mAccept axiom[0m — mathematically sound (Titchmarsh §14.2)
+  [1m[36m║[0m    3. [31mTighten BC[0m — gap too large (11,920× at ε=0.01)
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97mTotal:[0m [32m0.2s[0m (12 threads)
+  [1m[97mOutput:[0m results/{bc_map,effective_exponent,phragmen_lindelof,log_growth}.tsv
+  [1m[97mCertificate:[0m results/certificate.json
+
