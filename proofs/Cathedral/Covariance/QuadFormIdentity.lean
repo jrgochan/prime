@@ -55,12 +55,17 @@ def gramProduct (N j k : ℕ) : ℝ :=
 -- ═══════════════════════════════════════════════
 
 /-- Unfold the Fin-indexed quadratic form into a double Icc sum.
-    realQuadForm G v = Σ_{j=1}^{N-1} Σ_{k=1}^{N-1} v_j · v_k · G(j,k) -/
+    realQuadForm G v = Σ_{j=1}^{N-1} Σ_{k=1}^{N-1} v_j · v_k · G(j,k)
+
+    Mechanical index rewriting: Fin(N-1) ↔ Icc 1 (N-1) applied twice,
+    using fin_sum_eq_icc_sum from Engine.lean. -/
 theorem quadForm_as_double_sum (N : ℕ) (hN : 3 ≤ N) :
-    realQuadForm (Matrix.of fun (i j : Fin (N - 1)) =>
+    Cathedral.Variational.realQuadForm (Matrix.of fun (i j : Fin (N - 1)) =>
       vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) =
     ∑ j ∈ Finset.Icc 1 (N - 1), ∑ k ∈ Finset.Icc 1 (N - 1),
       gramProduct N j k := by
+  -- Strategy: unfold realQuadForm into dotProduct/mulVec, then convert
+  -- each Fin(N-1) sum to Icc 1 (N-1) using fin_sum_eq_icc_sum.
   sorry
 
 -- ═══════════════════════════════════════════════
