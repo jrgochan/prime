@@ -659,6 +659,55 @@ private lemma euler_mul_real (θ r : ℝ) :
     ↑(Real.cos θ * r) + ↑(Real.sin θ * r) * Complex.I := by
   rw [Complex.exp_mul_I]; simp [Complex.ofReal_cos, Complex.ofReal_sin]; ring
 
+/-- Bridge adapter: cos(-2πvw)(1-|v|) integral = fejerKernel w.
+    Converts from our triangleFunction_inverseFT_eq_fejerKernel which uses
+    cos(2πxξ)·triangleFunction(ξ) to the FT convention cos(-2πvw)·(1-|v|). -/
+private lemma bridge_cos_integral (w : ℝ) :
+    ∫ v in Set.Icc (-1 : ℝ) 1,
+      (Real.cos (-2 * π * (v * w)) * (1 - |v|)) = fejerKernel w := by
+  have : ∀ v ∈ Set.Icc (-1 : ℝ) 1,
+      Real.cos (-2 * π * (v * w)) * (1 - |v|) =
+      triangleFunction v * Real.cos (2 * π * w * v) := by
+    intro v hv
+    have h1 : Real.cos (-2 * π * (v * w)) = Real.cos (2 * π * w * v) := by
+      rw [show (-2 : ℝ) * π * (v * w) = -(2 * π * w * v) from by ring]
+      exact Real.cos_neg _
+    rw [h1, mul_comm]
+    congr 1
+    -- triangleFunction v = max(1-|v|, 0) = 1-|v| on [-1,1]
+    have hab : |v| ≤ 1 := abs_le.mpr ⟨by linarith [hv.1], hv.2⟩
+    simp [triangleFunction, max_eq_left (sub_nonneg.mpr hab)]
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Icc this]
+  exact triangleFunction_inverseFT_eq_fejerKernel w
+
+/-- Sine integral vanishes: ∫₋₁¹ sin(-2πvw)(1-|v|) dv = 0.
+    Odd function on symmetric interval: sin(-2π(-v)w)(1-|-v|) = -sin(-2πvw)(1-|v|). -/
+private lemma sin_integral_vanishes (w : ℝ) :
+    ∫ v in Set.Icc (-1 : ℝ) 1,
+      (Real.sin (-2 * π * (v * w)) * (1 - |v|)) = 0 := by
+  sorry  -- odd function on symmetric interval; will graduate next
+
+/-- Integrability of ↑(cos·Λ) on [-1,1] (continuous on compact). -/
+private lemma cos_ofReal_integrableOn (w : ℝ) :
+    MeasureTheory.IntegrableOn
+      (fun v => (↑(Real.cos (-2 * π * (v * w)) * (1 - |v|)) : ℂ))
+      (Set.Icc (-1 : ℝ) 1) := by
+  sorry  -- continuous on compact; will graduate next
+
+/-- Integrability of ↑(sin·Λ)·I on [-1,1] (continuous on compact). -/
+private lemma sinI_ofReal_integrableOn (w : ℝ) :
+    MeasureTheory.IntegrableOn
+      (fun v => ↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) * Complex.I)
+      (Set.Icc (-1 : ℝ) 1) := by
+  sorry  -- continuous on compact; will graduate next
+
+/-- Integrability of ↑(sin·Λ) on [-1,1] (continuous on compact). -/
+private lemma sin_ofReal_integrableOn (w : ℝ) :
+    MeasureTheory.IntegrableOn
+      (fun v => (↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) : ℂ))
+      (Set.Icc (-1 : ℝ) 1) := by
+  sorry  -- continuous on compact; will graduate next
+
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
 
@@ -669,8 +718,10 @@ private lemma euler_mul_real (θ r : ℝ) :
     - `ft_Λ_ℂ_restrict`: 𝓕 Λ_ℂ(w) = ∫_{[-1,1]} exp · Λ_ℂ
     - `Λ_ℂ_on_Icc`: Λ_ℂ(v) = (1-|v|:ℂ) on [-1,1]
     - `euler_mul_real`: exp(↑θ I) * ↑r = ↑(cos θ r) + ↑(sin θ r) I
+    - `bridge_cos_integral`: ∫ cos(-2πvw)(1-|v|) = fejerKernel w
+    - `sin_integral_vanishes`: ∫ sin(-2πvw)(1-|v|) = 0
 
-    Remaining sorry: integral linearity + cos=Bridge + sin=0 -/
+    Assembly uses: integral_add, integral_ofReal, integral_mul_const_of_integrable -/
 private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
     𝓕 Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
   calc 𝓕 Λ_ℂ w
@@ -688,7 +739,25 @@ private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
       simp
     -- Step 3: Integral linearity + Bridge + sin vanishing
     _ = ((fejerKernel w : ℝ) : ℂ) := by
-      sorry
+      -- Split ∫(a+b) = ∫a + ∫b
+      rw [MeasureTheory.integral_add (cos_ofReal_integrableOn w) (sinI_ofReal_integrableOn w)]
+      -- Cos part: ∫ ↑f = ↑(∫ f) = ↑(fejerKernel w)
+      have h_cos : ∫ v in Set.Icc (-1 : ℝ) 1,
+          (↑(Real.cos (-2 * π * (v * w)) * (1 - |v|)) : ℂ) =
+        ↑(fejerKernel w) := by
+        rw [← bridge_cos_integral w]
+        exact integral_ofReal
+      rw [h_cos]
+      -- Sin part: ∫ (↑g · I) = (∫ ↑g) · I = ↑(0) · I = 0
+      have h_sin : ∫ v in Set.Icc (-1 : ℝ) 1,
+          (↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) : ℂ) * Complex.I = 0 := by
+        rw [integral_mul_const_of_integrable (sin_ofReal_integrableOn w)]
+        have : ∫ v in Set.Icc (-1 : ℝ) 1,
+            (↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) : ℂ) =
+          ↑(0 : ℝ) := by
+          rw [← sin_integral_vanishes w]; exact integral_ofReal
+        rw [this]; simp
+      rw [h_sin, add_zero]
 
 /-- Integrability of 𝓕 Λ_ℂ, from Bridge matching + FK2. -/
 private lemma ft_Λ_ℂ_integrable :
