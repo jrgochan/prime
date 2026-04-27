@@ -35,6 +35,7 @@ members = [
     "experiments/mvt-decomposition",
     "experiments/bc-exponent-frontier",
     "experiments/fejer-kernel", "experiments/gram-form-identity",
+    "experiments/crown-cancellation",
 ]
 
 [profile.release]

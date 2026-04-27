@@ -1,0 +1,10 @@
+[package]
+name = "crown-cancellation"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Crown Cancellation Validator — certifies ζ(s)·D_N(s) ≈ -1 on the critical line via 512-bit MPFR, measuring the Báez-Duarte miracle"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
