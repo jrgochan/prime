@@ -41,9 +41,9 @@ export const EDUCATIONAL_CARDS = [
       <>
         This viewport was the origin of <Glossary term="Cathedral" /> — a Lean
         4 formal verification framework. The proof reduces the Riemann
-        Hypothesis to 7 crown axioms, all machine-checked. The sedenion
-        structure here inspired the octonionic partition used in the spectral
-        analysis.
+        Hypothesis to 2 crown axioms via the Mellin Crown architecture, all
+        machine-checked. The sedenion structure here inspired the spectral
+        analysis in the formalization.
       </>
     ),
   },

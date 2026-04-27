@@ -17,9 +17,9 @@ const CARDS: CardInfo[] = [
     href: "/axiom-map",
     title: "Axiom Architecture",
     description:
-      "Interactive map of the 4 crown axioms organized by tier: 1 PNT, 1 Abel summation, 1 Vasyunin convergence, 1 Hadamard. Click to explore each axiom\u2019s role and mathematical statement.",
+      "Interactive map of the 2 crown axioms: Mellin variance (Hardy\u2013Littlewood) and Hadamard zero bound. Click to explore each axiom\u2019s role and mathematical statement.",
     icon: "\u{1F3DB}\uFE0F",
-    stats: "4 crown \u00B7 53 total \u00B7 0 on converse",
+    stats: "2 crown \u00B7 55 total \u00B7 0 on converse",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
   },
@@ -39,7 +39,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "\uD83C\uDF33",
-    stats: "1,106 theorems \u00B7 53 axioms \u00B7 155 files",
+    stats: "~1,335 theorems \u00B7 55 axioms \u00B7 161 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -134,7 +134,7 @@ const ROUTES: RouteInfo[] = [
   {
     label: "PILLAR II \u2014 FORWARD",
     name: "RH \u27F9 d\u00B2_N \u2192 0",
-    desc: "4 axioms, 0 sorry on crown path. The Perron Crown: RH \u2192 M(x) = O(x\u00B3\u2044\u2074) via 16-file Perron chain, then Gram form + dot product bounds give d\u00B2_N \u2264 C/log N \u2192 0.",
+    desc: "2 axioms, 0 sorry on crown path. The Mellin Crown: RH \u2192 Mellin variance bound via Hardy\u2013Littlewood, then Parseval Bridge gives d\u00B2_N \u2264 C/log N \u2192 0.",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
@@ -163,16 +163,16 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          155 active files. 53 axioms &mdash; four on the crown theorem&apos;s critical path.
+          155 active files. 55 axioms &mdash; two on the crown theorem&apos;s critical path.
           Zero custom axioms on the converse.
           <span className="text-amber-400 text-sm ml-1">v11</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "155 active files" },
-            { color: "bg-red-500", text: "1,106 theorems" },
-            { color: "bg-amber-500", text: "53 axioms (4 on crown)" },
+            { color: "bg-emerald-500", text: "161 active files" },
+            { color: "bg-red-500", text: "~1,335 theorems" },
+            { color: "bg-amber-500", text: "55 axioms (2 on crown)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
             { color: "bg-purple-500", text: "22 topic directories" },
           ].map((item) => (

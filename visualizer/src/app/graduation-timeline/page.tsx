@@ -146,16 +146,17 @@ const MILESTONES: Milestone[] = [
   {
     version: "v11",
     date: "Apr 26",
-    axiomCount: 4,
+    axiomCount: 2,
     sorryCount: 0,
-    title: "The Restructuring",
+    title: "Mellin Crown",
     changes: [
-      "Mathlib-style topic-based reorganization",
-      "Assembly 26 \u2192 6 capstone files",
-      "22 topic directories (Perron/, Zeta/, Covariance/, ...)",
+      "Mellin Crown architecture: 4 \u2192 2 crown axioms",
+      "Parseval Bridge bypasses PNT, Abel, and Vasyunin chains",
+      "Mathlib-style topic-based reorganization (22 directories)",
       "5 sorry-free files resurrected from Archive",
-      "155 files, 37,922 lines, 1,106 theorems",
+      "161 files, 39,375 lines, ~1,335 theorems",
     ],
+    graduated: ["pnt_mu_log_div_k", "covariance_bound_from_mertens_34", "partial_integral_tends_to_formula"],
     color: "#f59e0b",
   },
 ];
@@ -321,7 +322,7 @@ export default function GraduationTimelinePage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Watch axioms fall one by one. From 6 crown axioms to 4 in 19 days.
+          Watch axioms fall one by one. From 6 crown axioms to 2 in 19 days.
           {" "}<strong className="text-emerald-400">{totalGraduated} axioms graduated</strong> to theorems.
         </p>
       </motion.div>
@@ -342,11 +343,11 @@ export default function GraduationTimelinePage() {
           </div>
           <div className="flex gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">155</div>
+              <div className="text-2xl font-bold text-blue-400">161</div>
               <div className="text-[10px] text-slate-600">files</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-violet-400">1,106</div>
+              <div className="text-2xl font-bold text-violet-400">~1,335</div>
               <div className="text-[10px] text-slate-600">theorems</div>
             </div>
             <div>

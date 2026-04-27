@@ -152,7 +152,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>4 crown axioms &middot; 0 sorry &middot; 1,106 thms</span>
+            <span>2 crown axioms &middot; 0 sorry &middot; ~1,335 thms</span>
           </div>
           <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
             <div
@@ -161,7 +161,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             />
           </div>
           <div className="text-[10px] text-slate-600">
-            8,198 build jobs &middot; 155 files &middot; 37,922 lines
+            8,198 build jobs &middot; 161 files &middot; 39,375 lines
           </div>
         </div>
       </nav>

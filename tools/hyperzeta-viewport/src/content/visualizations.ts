@@ -369,7 +369,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "Tighter Than Expected",
-        body: "The Cathedral proves the tighter bound |M(x)| = O(x^{1/2+ε}), not just O(x^{3/4}). This stronger result is computed by the zeta::mertens module — the Rust backbone of this visualization.",
+        body: "Under RH, |M(x)| = O(x^{1/2+ε}). The Cathedral proves that this bound, combined with the Mellin Crown architecture, drives the Nyman-Beurling distance d²_N → 0 — the formal equivalence.",
       },
       {
         title: "👁️ Look For",
@@ -377,7 +377,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "🏛️ Cathedral Connection",
-        body: "Axiom 1 (rh_implies_mertens): This visualization is the Tier 1 axiom — the sole axiom encoding the Riemann Hypothesis. The PNT sums (Tier 2) control the walk's drift, and Abel summation (Tier 3) controls its tail decay.",
+        body: "The Mertens function connects to the Cathedral through the Mellin transform: the Mellin variance of the BD residual on the critical line (crown axiom 1) controls the covariance of the log-Möbius sums, which in turn bound this random walk.",
       },
     ],
     wasmMode: 8,
@@ -415,7 +415,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "🏛️ Cathedral Connection",
-        body: "This IS the Cathedral. The Gram matrix is computed by zeta::nyman_beurling, the off-diagonal integrals by zeta::vasyunin, and the covariance cancellation (Axiom 6) ensures the floor is sturdy. What you see is the proof, rendered.",
+        body: "This IS the Cathedral. The Gram matrix is computed by zeta::nyman_beurling, the eigenvalue structure by the Parseval Bridge, and the two crown axioms (Mellin variance + Hadamard zero bound) ensure the floor is sturdy. What you see is the proof, rendered.",
       },
     ],
     wasmMode: 9,

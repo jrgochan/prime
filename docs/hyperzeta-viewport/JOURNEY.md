@@ -124,7 +124,7 @@ Nothing, formally. A visualization is not a proof.
 
 But it demonstrates, viscerally, that the mathematical machinery works. That the Cayley-Dickson tower produces meaningful zeta values. That the zeros appear exactly where they should — on the critical line. That the spectral structure of the zeta function is not an abstraction but a physical geometry that can be computed, rendered, and observed in real time.
 
-The Cathedral's 7 axioms aim to prove this rigorously. The viewport lets you *watch* it happen.
+The Cathedral's 2 crown axioms aim to prove this rigorously. The viewport lets you *watch* it happen.
 
 ---
 

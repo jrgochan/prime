@@ -369,13 +369,13 @@ export default function Cathedral3DPage() {
     "Perron/":
       "16-file Perron contour formula chain. RH \u2192 |M(x)| = O(x^{\u00BD+\u03B5}). The analytic heart of the forward direction.",
     "Zeta/":
-      "8 files: Hadamard product, convexity bounds, Dirichlet series, disk bounds. Contains crown axiom #4.",
+      "8 files: Hadamard product, convexity bounds, Dirichlet series, disk bounds. Contains crown axiom: rh_zeta_lower_bound_from_zero_counting.",
     "NymanBeurling/":
       "The converse direction. BDMellin (Rank-1 Mellin Miracle, PURE MATHLIB), ThetaBound, Separation. Zero axioms.",
     "Covariance/":
-      "Gram form bounds, dot product identity, L\u00B2 convergence, Millennium Wall. Contains crown axiom #2. 8 files.",
+      "Gram form bounds, dot product identity, L\u00B2 convergence, Millennium Wall. 8 files. Off-crown since v11 Mellin Crown.",
     "PNT/":
-      "Prime Number Theorem bridges. Abel mean, PNTAnd library bridge. Contains crown axiom #1. 3 files.",
+      "Prime Number Theorem bridges. Abel mean, PNTAnd library bridge. Off-crown since v11 Mellin Crown. 3 files.",
     "AbelTail/":
       "Abel summation engine: S\u2081/S\u2082/S\u2083 decay, telescoping, tail assembly. 14 files. All PROVED.",
     "Assembly/":
@@ -390,7 +390,7 @@ export default function Cathedral3DPage() {
         </h2>
         <p className="text-sm text-slate-500 mt-1">
           Two pillars hold the golden roof: Converse (pure Mathlib, 0 axioms)
-          and Forward (Perron Crown, 4 axioms). 155 files across 22 topic directories.
+          and Forward (Mellin Crown, 2 axioms). 161 files across 22 topic directories.
         </p>
       </div>
 
@@ -437,9 +437,7 @@ export default function Cathedral3DPage() {
               label="Forward"
               color="#f59e0b"
               axioms={[
-                "pnt_mu_log_div_k",
-                "covariance_bound_from_mertens_34",
-                "partial_integral_tends_to_formula",
+                "critical_line_mellin_variance",
                 "rh_zeta_lower_bound_...",
               ]}
             />
@@ -467,8 +465,8 @@ export default function Cathedral3DPage() {
               STRUCTURE (v11)
             </div>
             <p className="text-sm text-slate-300">
-              155 Lean files across 22 topic directories. Two pillars carry the
-              crown theorem. 4 axioms on the critical path.
+              161 Lean files across 22 topic directories. Two pillars carry the
+              crown theorem. 2 axioms on the critical path.
             </p>
           </div>
 
@@ -495,7 +493,7 @@ export default function Cathedral3DPage() {
                 color: "#10b981",
                 label: "Pillar 1: Converse (0 axioms)",
               },
-              { color: "#f59e0b", label: "Pillar 2: Forward (4 axioms)" },
+              { color: "#f59e0b", label: "Pillar 2: Forward (2 axioms)" },
               { color: "#4a8b3e", label: "Bricks: Topic directories" },
               { color: "#1e3a5f", label: "Foundation: Mathlib" },
             ].map((item) => (

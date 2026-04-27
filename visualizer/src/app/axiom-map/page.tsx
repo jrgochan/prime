@@ -17,44 +17,36 @@ interface Axiom {
 
 const CROWN_AXIOMS: Axiom[] = [
   {
-    name: "pnt_mu_log_div_k",
-    math: "\u03A3 \u03BC(k)\u00B7log(k)/k \u2192 \u22121",
-    desc: "The logarithmically weighted M\u00F6bius sum converges to \u22121. This is a derivative-level consequence of the Prime Number Theorem \u2014 unconditionally true. Controls the first-order correction in the log-cutoff witness. Awaits a forward Tauberian theorem (Wiener\u2013Ikehara) in Lean.",
-    ref: "Selberg 1949, Wiener-Ikehara",
+    name: "critical_line_mellin_variance",
+    math: "\u222B\u2080\u1D40 |1/\u03B6(\u00BD+it)|\u00B2 dt = O(T)",
+    desc: "The Mellin variance of the BD residual on the critical line decays as O(1/log N). This follows from the Hardy\u2013Littlewood mean value theorem (1918). The key formalization gap: Mathlib lacks mean value theorems for Dirichlet polynomials (Montgomery\u2013Vaughan).",
+    ref: "Hardy\u2013Littlewood 1918, Titchmarsh \u00A79.2",
     tier: 1,
-    file: "PNT/AbelMean.lean",
-    onCrown: true,
-  },
-  {
-    name: "covariance_bound_from_mertens_34",
-    math: "|M(x)| \u2264 Cx\u00BE \u27F9 v\u1D40Cv \u2264 C/log N",
-    desc: "The bilinear covariance bound: under the Mertens x\u00BE hypothesis, the centered Gram quadratic form v\u1D40(G\u2212bb\u1D40)v = O(1/log N). Infrastructure in place (s\u2081_decay, s\u2082_decay, s\u2083_uniform_bound proved). Needs direct Abel summation on the double sum.",
-    ref: "Abel summation, partial summation",
-    tier: 2,
-    file: "Covariance/GramFormProof.lean",
-    onCrown: true,
-  },
-  {
-    name: "partial_integral_tends_to_formula",
-    math: "\u222B\u2080\u00B9 {1/(jx)}{1/(kx)} dx = Vasyunin formula",
-    desc: "The piecewise integral of fractional parts converges to the Vasyunin cotangent formula for off-diagonal Gram entries. Diagonal case (j=k) is fully proved. Off-diagonal requires Gauss digamma formula and dominated convergence. Blueprint exists in Archive/DiscreteMirage/.",
-    ref: "Vasyunin 1996, B\u00E1ez-Duarte 2005",
-    tier: 3,
-    file: "Vasyunin/Cotangent/ConvergenceAxioms.lean",
+    file: "MellinBridge/MellinCrown.lean",
     onCrown: true,
   },
   {
     name: "rh_zeta_lower_bound_from_zero_counting",
     math: "|\u03B6(s)| \u2265 c/|t|^A for Re(s) \u2265 \u00BD+\u03B5",
-    desc: "Under RH, the Riemann zeta function has a polynomial lower bound. Derived from the Hadamard product formula and Riemann-von Mangoldt zero-counting function N(T). Powers the Perron contour chain. Borel-Carath\u00E9odory is in Mathlib; the gap is connecting BC to the polynomial bound.",
-    ref: "Titchmarsh 1986, Hadamard product",
-    tier: 4,
+    desc: "Under RH, the Riemann zeta function has a polynomial lower bound. Derived from the Hadamard product formula and Riemann-von Mangoldt zero-counting function N(T). Powers the Perron contour chain. Borel-Carath\u00E9odory is in Mathlib; the gap is connecting BC to the polynomial bound via entire function theory.",
+    ref: "Titchmarsh 1986, Hadamard product, \u00A714.2",
+    tier: 2,
     file: "Zeta/Hadamard.lean",
     onCrown: true,
   },
 ];
 
 const NON_CROWN_GROUPS = [
+  {
+    name: "v11 Bypassed (Mellin Crown)",
+    count: 3,
+    axioms: [
+      "pnt_mu_log_div_k",
+      "covariance_bound_from_mertens_34",
+      "partial_integral_tends_to_formula",
+    ],
+    desc: "Were crown axioms in v10 Perron Crown. Bypassed by Mellin Crown architecture (Parseval Bridge). Still axioms in codebase but no longer on crown path.",
+  },
   {
     name: "Legacy / Graduated",
     count: 8,
@@ -171,34 +163,16 @@ const TIER_COLORS: Record<number, {
     text: "text-blue-400",
     dot: "bg-blue-500",
     glow: "shadow-blue-500/20",
-    label: "Tier 1 \u2014 PNT",
-    sublabel: "Unconditionally true, awaiting Tauberian formalization",
+    label: "Tier 1 \u2014 Hardy\u2013Littlewood",
+    sublabel: "Mellin variance on the critical line",
   },
   2: {
-    bg: "from-amber-500/15 to-amber-900/10",
-    border: "border-amber-500/40",
-    text: "text-amber-400",
-    dot: "bg-amber-500",
-    glow: "shadow-amber-500/20",
-    label: "Tier 2 \u2014 Abel Summation",
-    sublabel: "Direct bilinear form computation",
-  },
-  3: {
-    bg: "from-emerald-500/15 to-emerald-900/10",
-    border: "border-emerald-500/40",
-    text: "text-emerald-400",
-    dot: "bg-emerald-500",
-    glow: "shadow-emerald-500/20",
-    label: "Tier 3 \u2014 Vasyunin Convergence",
-    sublabel: "Piecewise integral \u2192 cotangent formula",
-  },
-  4: {
     bg: "from-red-500/15 to-red-900/10",
     border: "border-red-500/40",
     text: "text-red-400",
     dot: "bg-red-500",
     glow: "shadow-red-500/20",
-    label: "Tier 4 \u2014 Hadamard",
+    label: "Tier 2 \u2014 Hadamard",
     sublabel: "Zeta lower bound via zero-counting (conditional on RH)",
   },
 };
@@ -391,8 +365,8 @@ export default function AxiomMapPage() {
           <code className="text-amber-400/80">
             nyman_beurling_equivalence
           </code>{" "}
-          depends on exactly <strong className="text-white">4</strong>{" "}
-          mathematical axioms, each in a different tier. The converse
+          depends on exactly <strong className="text-white">2</strong>{" "}
+          crown axioms, the Mellin Crown. The converse
           direction uses <strong className="text-emerald-400">zero</strong>{" "}
           custom axioms.
         </p>
@@ -407,25 +381,13 @@ export default function AxiomMapPage() {
       >
         <div
           className="bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center"
-          style={{ width: "25%" }}
+          style={{ width: "50%" }}
         >
-          <span className="text-[10px] font-bold text-white">PNT</span>
-        </div>
-        <div
-          className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
-          style={{ width: "25%" }}
-        >
-          <span className="text-[10px] font-bold text-white">Abel</span>
-        </div>
-        <div
-          className="bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center"
-          style={{ width: "25%" }}
-        >
-          <span className="text-[10px] font-bold text-white">Vasyunin</span>
+          <span className="text-[10px] font-bold text-white">Mellin Variance</span>
         </div>
         <div
           className="bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center"
-          style={{ width: "25%" }}
+          style={{ width: "50%" }}
         >
           <span className="text-[10px] font-bold text-white">Hadamard</span>
         </div>
@@ -433,7 +395,7 @@ export default function AxiomMapPage() {
 
       {/* Tier legend */}
       <div className="flex flex-wrap gap-6 text-xs">
-        {([1, 2, 3, 4] as const).map((t) => {
+        {([1, 2] as const).map((t) => {
           const tier = TIER_COLORS[t];
           return (
             <div key={t} className="flex items-center gap-2">
@@ -449,14 +411,14 @@ export default function AxiomMapPage() {
         })}
       </div>
 
-      {/* Forward direction: 4 axioms */}
+      {/* Forward direction: 2 crown axioms */}
       <div>
         <h2 className="text-lg font-bold text-slate-200 mb-1 flex items-center gap-2">
           <span className="text-amber-400">{"\u25B6"}</span>
           Forward: RH {"\u27F9"} d{"\u00B2"}_N {"\u2192"} 0
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Click any axiom to learn more. All 4 are on the crown path.
+          Click any axiom to learn more. Both are on the crown path.
         </p>
         <div className="space-y-3">
           {CROWN_AXIOMS.map((axiom, i) => (
