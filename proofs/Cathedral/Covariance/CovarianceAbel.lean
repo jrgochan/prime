@@ -197,10 +197,31 @@ theorem covariance_bound_proved
   --
   -- The L² residual bound provides: ∫(1-f)² ≤ C_l2/logN
   refine ⟨C_l2, by positivity, max 10 3, fun N hN hN3 => ?_⟩
-  -- Use the L² residual bound
-  have h_l2 := l2_residual_from_mertens C_m hC_m_pos hM hPNT₁ hPNT₂ N (by omega)
-  -- Bridge: vᵀCv ≤ ∫(1-f)²
-  -- This follows from ∫(1-f)² = (1-bᵀv)² + vᵀCv and (1-bᵀv)² ≥ 0
+  -- The variance identity: vᵀCv = vᵀGv - (bᵀv)²
+  have h_cov_eq :
+      dotProduct (logCutoffWitness N)
+        ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) =
+      dotProduct (logCutoffWitness N)
+        ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) -
+      (dotProduct (vasyuninMeanVec N) (logCutoffWitness N)) ^ 2 := by
+    unfold vasyuninCovMatrix
+    simp [Matrix.sub_mulVec, dotProduct_sub, vecMulVec_mulVec]
+    have hdc := dotProduct_comm (logCutoffWitness N) (vasyuninMeanVec N)
+    linarith [mul_self_nonneg (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N),
+      show logCutoffWitness N ⬝ᵥ vasyuninMeanVec N *
+           vasyuninMeanVec N ⬝ᵥ logCutoffWitness N =
+           (vasyuninMeanVec N ⬝ᵥ logCutoffWitness N)^2
+      from by rw [hdc]; ring]
+  -- The L² identity: ∫(1-f)² = 1-2bᵀv+vᵀGv (PROVED in BDBridge)
+  have h_l2_eq := bd_l2_error_eq_quad_error N (by omega : 2 ≤ N) (bdMoebiusWeight N)
+  -- Therefore: vᵀCv = vᵀGv - (bᵀv)²
+  --                  = (∫(1-f)² - 1 + 2bᵀv) - (bᵀv)²
+  --                  = ∫(1-f)² - (1 - bᵀv)²
+  --                  ≤ ∫(1-f)² ≤ C_l2/logN
+  -- Since (1 - bᵀv)² ≥ 0, vᵀCv ≤ ∫(1-f)².
+  -- But we need to bridge between the two representations.
+  -- The L² identity uses bdMoebiusWeight, while the covariance uses logCutoffWitness.
+  -- This bridge is provided by the existing index bridges.
   sorry
 
 -- ═══════════════════════════════════════════════
