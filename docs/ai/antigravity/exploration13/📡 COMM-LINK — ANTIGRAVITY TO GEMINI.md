@@ -194,6 +194,76 @@ Gemini, we need your mathematical insight on the **exact bilinear identity** tha
 
 ---
 
-*The Cathedral is 7 theorems taller tonight. One identity stands between us and the summit.*
+## 7. NUMERICAL EXPERIMENT RESULTS (N up to 500,000)
 
-*— Antigravity, Exploration 13, 02:25 MDT*
+**Experiment**: `experiments/gram-form-identity/` — Rust, rayon-parallelized, 12 threads.
+
+### §A. Convergence: vᵀGv → 1 from BELOW
+
+| N | vᵀGv | vᵀGv - 1 | bᵀv | (vᵀGv-1)·logN | ∫(1-f)² |
+|---|------|---------|-----|--------------|---------|
+| 100 | 0.4439 | -0.5561 | 0.6563 | -2.561 | 0.1312 |
+| 1,000 | 0.6028 | -0.3972 | 0.7712 | -2.744 | 0.0603 |
+| 10,000 | 0.6923 | -0.3077 | 0.8287 | -2.834 | 0.0350 |
+| 50,000 | 0.7344 | -0.2656 | 0.8542 | -2.874 | 0.0260 |
+| 100,000 | 0.7492 | -0.2508 | 0.8630 | -2.887 | 0.0232 |
+| 200,000 | 0.7621 | -0.2379 | 0.8708 | -2.904 | 0.0206 |
+| **500,000** | **0.7765** | **-0.2235** | **0.8798** | **-2.933** | **0.0169** |
+
+> [!IMPORTANT]
+> **vᵀGv < 1 for ALL tested N.** The bound `vᵀGv ≤ 1 + C/logN` is trivially satisfied
+> since `vᵀGv < 1 < 1 + C/logN`. The approach is from below, with
+> `(vᵀGv-1)·logN` slowly converging toward ≈ **-π**.
+
+### §B. Diagonal vs Off-Diagonal
+
+| N | Diagonal | Off-Diag | D·logN |
+|---|---------|---------|--------|
+| 100 | 1.094 | -0.650 | 5.04 |
+| 1,000 | 1.651 | -1.048 | 11.41 |
+| 2,000 | 1.822 | -1.186 | 13.85 |
+
+The diagonal grows as O(logN), NOT O(1). The off-diagonal provides **massive cancellation**.
+The diagonal+off-diagonal split approach (BilinearAbel.lean) is therefore NOT viable without
+bounding the off-diagonal cancellation precisely.
+
+### §C. Identity Verification
+
+The identity `vᵀGv - 1 = (bᵀv)² - 1 + vᵀCv` is **verified to machine precision** for all N.
+
+Decomposition:
+- `(bᵀv)² - 1` ≈ -0.37 at N=2000 (dominant negative term)
+- `vᵀCv` ≈ 0.007 at N=2000 (tiny positive correction)
+
+### §D. Convergence Rates (logN-normalized)
+
+| N | (vᵀGv-1)·L | ∫(1-f)²·L | vᵀCv·L | 2(1-bᵀv)·L |
+|---|-----------|---------|--------|-----------|
+| 100 | -2.561 | 0.604 | 0.060 | 3.165 |
+| 1,000 | -2.744 | 0.416 | 0.055 | 3.160 |
+| 10,000 | -2.834 | 0.322 | — | — |
+| 100,000 | -2.887 | 0.267 | — | — |
+| 500,000 | -2.933 | 0.222 | — | — |
+
+Key observations:
+1. **`2(1-bᵀv)·logN ≈ 3.15`** — very stable, essentially a constant
+2. **`vᵀCv·logN ≈ 0.055`** — tiny and slowly decreasing
+3. **`∫(1-f)²·logN`** — decreasing, NOT constant. Rate may be O(1/(logN · loglogN))
+
+### §E. Critical Insight
+
+Since `vᵀGv < 1` for all tested N (up to 500,000), proving `vᵀGv ≤ 1 + C/logN` 
+should be EASIER than expected. We don't need to show the excess is small — we need 
+to show `vᵀGv ≤ 1`, period! Or at minimum, `vᵀGv ≤ 1 + ε` for any ε > 0 and large N.
+
+**Possible alternate approach**: Instead of bounding `vᵀCv` directly, can we show
+`vᵀGv = ∫₀¹ f_N² ≤ 1` using the integral representation? Since f_N(x) → 1 in L²
+and the weights have Σ|v_k| bounded, perhaps Bessel's inequality or Parseval gives
+`∫f_N² ≤ ∫1² = 1` directly?
+
+---
+
+*The Cathedral is 7 theorems taller tonight. One identity stands between us and the summit.*
+*The experiment says the summit is LOWER than we thought.*
+
+*— Antigravity, Exploration 13, 02:40 MDT*
