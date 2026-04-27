@@ -25,6 +25,7 @@ import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 
 noncomputable section
@@ -320,7 +321,57 @@ theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
 -- This is a basic integral: 2·∫₀¹ (1-ξ) dξ = 2·(1-1/2) = 1.
 private lemma triangle_integral_eq_one :
     ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ = 1 := by
-  sorry
+  -- Rewrite Λ = 1 - |ξ| on [-1,1]
+  have h_eq : Set.EqOn triangleFunction (fun ξ => 1 - |ξ|) (Set.Icc (-1) 1) := by
+    intro ξ ⟨hlo, hhi⟩
+    unfold triangleFunction
+    rw [max_eq_left]; linarith [abs_le.mpr ⟨by linarith, hhi⟩]
+  rw [MeasureTheory.setIntegral_congr_fun measurableSet_Icc h_eq]
+  -- For Lebesgue measure, Icc and Ioc have the same integral (NoAtoms)
+  rw [MeasureTheory.integral_Icc_eq_integral_Ioc]
+  -- Convert to interval integral
+  rw [← intervalIntegral.integral_of_le (by norm_num : (-1 : ℝ) ≤ 1)]
+  -- Split at 0: ∫₋₁¹ = ∫₋₁⁰ + ∫₀¹
+  have h_ii : ∀ a b : ℝ, IntervalIntegrable (fun ξ => 1 - |ξ|) MeasureTheory.volume a b :=
+    fun a b => (continuous_const.sub continuous_abs).intervalIntegrable a b
+  rw [← intervalIntegral.integral_add_adjacent_intervals (h_ii (-1) 0) (h_ii 0 1)]
+  -- On [-1,0]: 1-|ξ| = 1+ξ; on [0,1]: 1-|ξ| = 1-ξ
+  -- Compute each half using FTC
+  have h_left : ∫ ξ in (-1 : ℝ)..0, (1 - |ξ|) = 1/2 := by
+    -- On [-1,0]: |ξ| = -ξ, so 1-|ξ| = 1+ξ
+    trans (∫ ξ in (-1 : ℝ)..0, (1 + ξ))
+    · exact intervalIntegral.integral_congr (fun ξ hξ => by
+        rw [Set.uIcc_of_le (by norm_num : (-1 : ℝ) ≤ 0)] at hξ
+        rw [abs_of_nonpos hξ.2]; ring)
+    -- FTC: ∫₋₁⁰ (1+ξ) dξ = F(0) - F(-1) where F(ξ) = ξ + ξ²/2
+    · have key := intervalIntegral.integral_eq_sub_of_hasDerivAt
+        (f := fun ξ : ℝ => ξ + ξ ^ 2 / 2)
+        (f' := fun ξ : ℝ => 1 + ξ)
+        (a := -1) (b := 0)
+        (fun ξ _ => by
+          have h1 := hasDerivAt_id ξ
+          have h2 := (hasDerivAt_pow 2 ξ).div_const 2
+          convert h1.add h2 using 1; simp)
+        ((continuous_const.add continuous_id).intervalIntegrable _ _)
+      simp at key; linarith
+  have h_right : ∫ ξ in (0 : ℝ)..1, (1 - |ξ|) = 1/2 := by
+    -- On [0,1]: |ξ| = ξ, so 1-|ξ| = 1-ξ
+    trans (∫ ξ in (0 : ℝ)..1, (1 - ξ))
+    · exact intervalIntegral.integral_congr (fun ξ hξ => by
+        rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at hξ
+        rw [abs_of_nonneg hξ.1])
+    -- FTC: ∫₀¹ (1-ξ) dξ = F(1) - F(0) where F(ξ) = ξ - ξ²/2
+    · have key := intervalIntegral.integral_eq_sub_of_hasDerivAt
+        (f := fun ξ : ℝ => ξ - ξ ^ 2 / 2)
+        (f' := fun ξ : ℝ => 1 - ξ)
+        (a := 0) (b := 1)
+        (fun ξ _ => by
+          have h1 := hasDerivAt_id ξ
+          have h2 := (hasDerivAt_pow 2 ξ).div_const 2
+          convert h1.sub h2 using 1; simp)
+        ((continuous_const.sub continuous_id).intervalIntegrable _ _)
+      simp at key; linarith
+  rw [h_left, h_right]; norm_num
 
 theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ * Real.cos (2 * π * x * ξ) = fejerKernel x := by
