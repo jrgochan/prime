@@ -154,6 +154,8 @@ lean_lib «Cathedral» where
     -- Mellin Crown (frequency-domain forward direction, exploration10)
     `Cathedral.Assembly.MellinVarianceProof,
     `Cathedral.Assembly.MellinCrown,
+    -- Mellin residual expansion (Crown graduation path, Exploration 13)
+    `Cathedral.Assembly.MellinResidualExpansion,
     -- Gram form graduation (axiom → theorem via split-region L²)
     `Cathedral.Covariance.CovarianceBound,
     `Cathedral.Covariance.GramFormProof,
