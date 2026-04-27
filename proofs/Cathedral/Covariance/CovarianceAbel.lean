@@ -123,19 +123,45 @@ theorem abel_diff_bound (N k : ℕ) (hk : 1 ≤ k) (hkN : k + 1 ≤ N)
 -- §4. THE L² RESIDUAL BOUND VIA ABEL
 -- ═══════════════════════════════════════════════
 
+/-- **THE IRREDUCIBLE CONTENT**: vᵀGv ≤ 1 + C/logN for BD weights.
+
+    This is mathematically equivalent to ∫(1-f)² ≤ C'/logN
+    (since ∫(1-f)² = 1-2bᵀv+vᵀGv and bᵀv ≈ 1).
+
+    The proof requires showing that the Möbius cancellation
+    (|M(k)| ≤ C·k^{3/4}) propagates through the Gram quadratic form.
+
+    This bound is a **necessary consequence** of the Mertens bound:
+    the Gram matrix entries G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx are
+    bilinear in the fractional parts, and the BD weights
+    v_k = -μ(k)·(1-logk/logN) inherit the Mertens cancellation.
+
+    The proof must NOT use the covariance axiom (circular).
+    The proof must NOT use the L² residual bound (self-referential).
+    
+    The Mertens bound + PNT hypotheses are sufficient. -/
+private theorem gram_form_bound_raw
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3 : ℝ)/4))
+    (hPNT₁ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
+    (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1)))
+    (N : ℕ) (hN : 10 ≤ N) :
+    realQuadForm (Matrix.of fun (i j : Fin (N - 1)) =>
+      vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) ≤
+    1 + C_m ^ 2 / Real.log ↑N := by
+  sorry
+
 /-- **CORE ESTIMATE**: Under Mertens x^{3/4}, the L² residual satisfies:
     ∫₀¹ (1 - f_N(x))² dx ≤ C/logN.
 
-    Proof outline:
-    1. Abel summation decomposes f_N(x) into boundary + sum of differences
-    2. Boundary term: M(N)·w(N,x) → 0 by Mertens (|M(N)| ≤ C·N^{3/4})
-    3. Sum of differences: Σ M(k)·Δw(k,x), bounded by
-       Σ C·k^{3/4} · (1/(k·logN) + 1/k) ≤ C'/logN + C''
-    4. Actually f_N ≈ 1 - M(N)/(N·logN) + ..., so
-       1 - f_N(x) ≈ small, and ∫(1-f)² ≤ C/logN
-
-    The key subtlety: f_N(x) ≈ 1 for most x ∈ (0,1] because
-    Σ μ(k)/k → 0 (PNT) and the taper weights optimize the rate. -/
+    Factored proof:
+    1. ∫(1-f)² = 1 - 2bᵀv + vᵀGv     [bd_l2_error_eq_quad_error, PROVED]
+    2. bᵀv ≥ 1 - C_dot/logN            [dot product bound, PROVED]
+    3. vᵀGv ≤ 1 + C_gram/logN          [gram_form_bound_raw, sorry]
+    4. Assembly: ∫(1-f)² ≤ 2C_dot/logN + C_gram/logN  -/
 theorem l2_residual_from_mertens
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -147,6 +173,24 @@ theorem l2_residual_from_mertens
     (N : ℕ) (hN : 10 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
       (C_m ^ 2 + 4 * C_m + 2) / Real.log ↑N := by
+  -- Step 1: ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+  have h_eq := bd_l2_error_eq_quad_error N (by omega : 2 ≤ N) (bdMoebiusWeight N)
+  rw [h_eq]
+  -- Step 2: Dot product bound
+  obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
+    moebius_dot_product_approx_one_uniform_34 C_m hC hMertens hPNT₁ hPNT₂
+  have h_dot_N := h_dot N (by omega : 10 ≤ N)
+  -- Step 3: Gram form bound
+  have h_gram := gram_form_bound_raw C_m hC hMertens hPNT₁ hPNT₂ N hN
+  -- Step 4: Assembly
+  -- Need: 1 - 2bᵀv + vᵀGv ≤ (C_m²+4C_m+2)/logN
+  -- From h_dot_N: |1 - bᵀv| ≤ C_dot/logN, so bᵀv ≥ 1 - C_dot/logN
+  -- From h_gram: vᵀGv ≤ 1 + C_m²/logN
+  -- So: 1 - 2bᵀv + vᵀGv ≤ 1 - 2(1-C_dot/logN) + 1 + C_m²/logN
+  --                       = 2C_dot/logN + C_m²/logN
+  -- Need: 2C_dot + C_m² ≤ C_m²+4C_m+2
+  -- i.e.: 2C_dot ≤ 4C_m+2. This depends on C_dot ≤ 2C_m+1.
+  -- For now, sorry the final assembly (C_dot bound needed).
   sorry
 
 -- ═══════════════════════════════════════════════
