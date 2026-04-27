@@ -109,6 +109,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bc-exponent-frontier"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "bumpalo"
 version = "3.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -478,6 +487,15 @@ name = "mobius-basis"
 version = "0.1.0"
 dependencies = [
  "nalgebra",
+ "rayon",
+ "rug",
+]
+
+[[package]]
+name = "mvt-decomposition"
+version = "0.1.0"
+dependencies = [
+ "chrono",
  "rayon",
  "rug",
 ]

@@ -32,6 +32,8 @@ members = [
     "experiments/two-tile-analyzer",
     "experiments/gram-pointwise",
     "experiments/mellin-certificate",
+    "experiments/mvt-decomposition",
+    "experiments/bc-exponent-frontier",
 ]
 
 [profile.release]

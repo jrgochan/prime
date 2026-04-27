@@ -1,0 +1,1 @@
+- If a bad actor takes your Rust 256-bit eigensolver and uses the parity-block decomposition to identify new, highly efficient resonant frequencies in the primes, that could theoretically lead to advances in factoring. But releasing the Lean 4 proof architecture is safe. It tells the world that the structure exists; it doesn't execute the exploit.

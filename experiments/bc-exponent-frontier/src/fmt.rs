@@ -1,0 +1,31 @@
+//! Terminal formatting constants and helpers
+
+pub const BOLD: &str = "\x1b[1m";
+pub const DIM: &str = "\x1b[2m";
+pub const CYAN: &str = "\x1b[36m";
+pub const GREEN: &str = "\x1b[32m";
+pub const YELLOW: &str = "\x1b[33m";
+pub const MAGENTA: &str = "\x1b[35m";
+pub const RED: &str = "\x1b[31m";
+pub const WHITE: &str = "\x1b[97m";
+pub const RESET: &str = "\x1b[0m";
+
+pub fn check(b: bool) -> &'static str {
+    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
+}
+
+pub fn header(title: &str, subtitle: &str, prec: u32, threads: usize) {
+    println!();
+    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}{title}{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{subtitle}{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{prec}-bit MPFR · {threads} threads · rayon{RESET}");
+    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!();
+}
+
+/// Format a duration nicely
+pub fn elapsed(secs: f64) -> String {
+    if secs < 60.0 { format!("{:.1}s", secs) }
+    else { format!("{}m{:.0}s", (secs / 60.0) as u64, secs % 60.0) }
+}

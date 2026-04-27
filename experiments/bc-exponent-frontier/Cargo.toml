@@ -1,0 +1,15 @@
+[package]
+name = "bc-exponent-frontier"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral Axiom 2 Strategy Experiment: Tests whether the Borel-Carathéodory
+exponent threshold B_ε can be tightened or eliminated. If the Perron chain
+only needs exponents A in a range covered by BC, the zero-counting axiom
+(rh_zeta_lower_bound_from_zero_counting) becomes unnecessary.
+"""
+
+[dependencies]
+rug = "1.24"
+rayon = "1.10"
+chrono = "0.4"
