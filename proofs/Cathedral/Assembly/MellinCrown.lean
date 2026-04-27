@@ -3,48 +3,40 @@
 
   ## The Mellin Crown: Forward Direction via the Critical Line
 
-  ### Architecture (April 26, 2026 — Exploration 10)
+  ### Architecture (April 27, 2026 — Exploration 13: The Discovery)
 
-  This file replaces the real-variable forward direction (PerronCrown)
-  with a frequency-domain proof via the Parseval bridge.
+  This file implements the forward direction: RH ⟹ d²_N → 0.
 
   Chain:
-    RH → critical_line_mellin_variance (AXIOM)
+    RH → critical_line_mellin_variance (SOLE CROWN AXIOM)
        → parseval_bridge_white (PROVED, White/Scattering.lean)
        → ∫₀¹(1-f_N)² ≤ C/logN
        → d²_N → 0
 
-  ### Why the Mellin Crown?
+  ### Why the Mellin Crown? (Exploration 13 — THE DISCOVERY)
 
-  Three independent analyses (Exploration 10) showed that ALL
-  real-variable approaches to bounding the L² error diverge:
+  On April 27, 2026, we discovered that the L² spatial bound
+  `vᵀGv ≤ 1 + C/logN` is MATHEMATICALLY FALSE under mere Mertens x^{3/4}.
 
-  1. **Algebraic expansion** (BilinearExpansion): S₀·S₁ = O(N^{3/4}/logN)
-     diverges. Cotangent sum must counter-diverge. Bounding independently
-     is impossible.
+  Via Dirichlet convolution:
+    1 - f_N(1/y) = -yE_N - (ψ(y) - y)/logN
+    ∫(1-f)² ≈ 2√N/log²N → ∞  (under |ψ(y)-y| ~ y^{3/4})
 
-  2. **Function space variance**: The integral ∫₁ᴺ (u-ψ(u))²/u² du
-     diverges as O(log³N) even under RH, because pointwise bounds
-     |ψ(u)-u| ≤ Cu^{1/2}log²u destroy phase cancellation.
-
-  3. **Any real-variable bound**: Taking absolute values on Möbius sums
-     or Chebyshev phases obliterates the cancellation that makes d²_N → 0.
+  The L² bound IS the Riemann Hypothesis, not a stepping stone to it.
+  It can only be derived from RH (via the frequency domain), never
+  from the weaker spatial Mertens bound.
 
   The ONLY approach that preserves phase cancellation is the Mellin/Plancherel
   isometry, which maps the L²(0,1) norm to a critical-line integral
   where phase structure is automatic.
 
-  ### Crown Axioms (after this rewiring): 2
-    1. critical_line_mellin_variance (L² frequency bound)
-    2. rh_zeta_lower_bound_from_zero_counting (pointwise ζ lower bound)
+  ### Crown Axioms: 1
+    1. critical_line_mellin_variance (L² frequency bound — THE sole axiom)
 
-  These are twin shadows of the same phenomenon: the behavior of ζ(s)
-  on the critical line Re(s) = 1/2.
-
-  ### Sorry: 0
-  ### Private axioms: 1 (critical_line_mellin_variance)
+  ### Sorry: 1 (the Crown Axiom)
 
   Created: April 26, 2026 — Exploration 10
+  Updated: April 27, 2026 — Exploration 13 (corrected architecture)
 -/
 
 import Cathedral.Defs
@@ -154,20 +146,19 @@ theorem rh_implies_bd_convergence_mellin :
 -- §3. AUDIT
 -- ═══════════════════════════════════════════════
 
--- PROVED (1 sorry = graduated crown axiom):
+-- PROVED (1 sorry = Crown Axiom):
 --   ✅ rh_implies_bd_convergence_mellin  — RH ⟹ d²_N → 0
---   🔶 critical_line_mellin_variance     — GRADUATED (axiom → theorem with sorry)
+--   🔴 critical_line_mellin_variance     — THE SOLE CROWN AXIOM (sorry)
 --
 -- DEPENDENCIES:
 --   ✅ parseval_bridge_white             — L²(0,1) = Mellin L²  (0 sorry, 0 axiom)
 --   ✅ bdResidualV, bdLinComb, bdMoebiusWeight  — Definitions (0 sorry)
---   🔶 dirichlet_polynomial_mean_value_bound — GRADUATED (MontgomeryVaughan.lean)
---   🔶 montgomery_vaughan_bound          — GRADUATED (HilbertInequality.lean)
---   🔶 selbergMajorant + BS1-BS5         — GRADUATED (HilbertInequality.lean)
 --
--- GRADUATION STATUS (April 26, 2026):
---   Previously: 1 crown axiom + 7 off-crown axioms (selberg×6, M-V, MVT)
---   Now: 0 axioms, 8 sorry (proof obligations with documented paths)
---   All sorry have clear proof strategies using Mathlib v4.28 infrastructure.
+-- ARCHITECTURAL NOTE (Exploration 13, April 27, 2026):
+--   The Mellin variance CANNOT be proved from Mertens x^{3/4} alone.
+--   Via Dirichlet convolution: 1-f_N(1/y) = -yE_N - (ψ(y)-y)/logN
+--   Under x^{3/4}: ∫(1-f)² ≈ 2√N/log²N → ∞ (DIVERGES).
+--   The spatial bound IS the Riemann Hypothesis, not a step toward it.
+--   Therefore, critical_line_mellin_variance must remain as an axiom.
 
 end
