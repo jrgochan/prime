@@ -841,7 +841,60 @@ theorem fejerKernel_integral :
 theorem fejerKernel_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
     ∫ x : ℝ, fejerKernel x * Real.cos (2 * π * ξ * x)
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 0 := by
-  sorry
+  -- Step 1: Fourier inversion: 𝓕(𝓕⁻ Λ_ℂ)(ξ) = Λ_ℂ(ξ) = 0 for |ξ| > 1
+  have h_inv := Λ_ℂ_integrable.fourier_fourierInv_eq ft_Λ_ℂ_integrable
+    Λ_ℂ_continuous.continuousAt (v := ξ)
+  rw [Λ_ℂ_outside ξ hξ] at h_inv
+  -- Step 2: 𝓕⁻ Λ_ℂ = fejerKernel_ℂ
+  rw [show 𝓕⁻ Λ_ℂ = (fun x => ((fejerKernel x : ℝ) : ℂ)) from
+    funext fourierInv_Λ_ℂ_eq] at h_inv
+  -- h_inv : 𝓕(fun x => ↑(fejerKernel x))(ξ) = 0
+  -- Step 3: Extract Re[𝓕(fejerKernel_ℂ)(ξ)] = 0
+  have h_re := congr_arg Complex.re h_inv
+  simp only [Complex.zero_re] at h_re
+  -- h_re : (𝓕(fun x => ↑(fejerKernel x))(ξ)).re = 0
+  -- Step 4: Re[∫ g] = ∫ Re[g] (via integral_re) then Re[↑r·e^{iθ}] = r·cos(θ)
+  -- Re[𝓕(fejerKernel_ℂ)(ξ)] = ∫ Re[↑(fejerKernel x)·char(x,ξ)] = ∫ fejerKernel cos(2πξx)
+  -- Step 4: Use Re extraction. Re[𝓕 f ξ] = ∫ Re[𝐞(-(v*ξ)) • ↑(fejerKernel v)]
+  -- Since 𝓕 f ξ = ∫ 𝐞(-(v*ξ)) • ↑(fejerKernel v) and this is integrable,
+  -- Re[∫ g] = ∫ Re[g] by integral_re.
+  -- And Re[𝐞(-(v*ξ)) • ↑r] = cos(2πξv) · r.
+  rw [Real.fourier_real_eq] at h_re
+  -- h_re : (∫ v, 𝐞 (-(v * ξ)) • ↑(fejerKernel v)).re = 0
+  have h_int : MeasureTheory.Integrable
+      (fun v => (Real.fourierChar (-(v * ξ))) • ((fejerKernel v : ℝ) : ℂ))
+      MeasureTheory.volume := by
+    have := (Real.fourierIntegral_convergent_iff (f := fun v => ((fejerKernel v : ℝ) : ℂ)) ξ).mpr
+      fejerKernel_integrable.ofReal
+    -- this : Integrable (fun v => 𝐞(-⟪v, ξ⟫_ℝ) • ↑(fejerKernel v))
+    -- For ℝ: ⟪v, ξ⟫_ℝ = v * ξ  (by RCLike.inner_apply')
+    convert this using 1
+    funext v
+    show Real.fourierChar (-(v * ξ)) • _ = Real.fourierChar (-@inner ℝ ℝ _ v ξ) • _
+    congr 2
+    rw [show @inner ℝ ℝ _ v ξ = v * ξ from by
+      rw [RCLike.inner_apply]; simp [conj_trivial, mul_comm]]
+  -- Step 5: integral_re says: ∫ Re[f x] = Re[∫ f x]. Combine with h_re.
+  -- h_re says (∫ f).re = 0. integral_re says ∫ Re[f] = Re[∫ f] = 0.
+  have h5 : ∫ v, RCLike.re (𝐞 (-(v * ξ)) • ((fejerKernel v : ℝ) : ℂ)) = 0 := by
+    rw [integral_re h_int]; exact h_re
+  -- Step 6: Show Re[𝐞(-(v*ξ)) • ↑(fejerKernel v)] = fejerKernel v · cos(2πξv)
+  -- And match with the goal.
+  rw [← h5]
+  congr 1
+  funext v
+  -- RCLike.re (𝐞(-(v*ξ)) • ↑r) = fejerKernel v * cos(2πξv)
+  -- Unfold Circle smul, fourierChar, and extract Re
+  simp only [Circle.smul_def, Real.fourierChar_apply, smul_eq_mul, RCLike.re_to_complex]
+  rw [mul_comm (Complex.exp _) (↑(fejerKernel v) : ℂ), Complex.re_ofReal_mul]
+  congr 1
+  rw [Complex.exp_mul_I]
+  simp only [Complex.add_re, Complex.mul_re,
+    Complex.I_re, Complex.I_im, mul_zero,
+    Complex.cos_ofReal_re, Complex.sin_ofReal_im,
+    mul_one, sub_zero, add_zero]
+  rw [show 2 * π * (-(v * ξ)) = -(2 * π * ξ * v) from by ring]
+  exact (Real.cos_neg _).symm
 
 -- Legacy aliases for downstream compatibility
 noncomputable def selbergMajorant := fejerKernel
