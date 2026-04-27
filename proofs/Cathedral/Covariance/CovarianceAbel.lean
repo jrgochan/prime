@@ -152,6 +152,25 @@ private theorem gram_form_bound_raw
     realQuadForm (Matrix.of fun (i j : Fin (N - 1)) =>
       vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) ≤
     1 + C_m ^ 2 / Real.log ↑N := by
+  -- ═══════════════════════════════════════════════
+  -- PROOF ARCHITECTURE (Gemini's "Integrate First, Abel Sum Second")
+  --
+  -- Step 1: Convert to double Icc sum [quadForm_as_double_sum ✅]
+  --   vᵀGv = Σ_j Σ_k gramProduct N j k
+  --
+  -- Step 2: For each fixed j, decompose inner sum via Abel [inner_sum_abel ✅]
+  --   Σ_k v_k G(j,k) = M(N-1)·logWeight(N-1)·G(j,N-1)
+  --                   - Σ_k M(k)·Δ[logWeight(k)·G(j,k)]
+  --
+  -- Step 3: Bound boundary term using:
+  --   |M(N-1)| ≤ C_m·(N-1)^{3/4}  [hMertens]
+  --   |logWeight(N-1)| ≤ 2/logN     [logWeight_at_N_minus_1 ✅]
+  --   |G(j,N-1)| ≤ growth bound     [gramEntry_growth_bound]
+  --
+  -- Step 4: Bound Abel remainder using S₁/S₂/S₃ decay [PROVED in AbelTail/]
+  --
+  -- Step 5: Sum over j with weights v_j to get vᵀGv bound
+  -- ═══════════════════════════════════════════════
   sorry
 
 /-- **CORE ESTIMATE**: Under Mertens x^{3/4}, the L² residual satisfies:
