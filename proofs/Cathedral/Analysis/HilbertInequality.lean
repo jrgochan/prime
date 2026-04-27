@@ -615,18 +615,37 @@ private lemma Λ_ℂ_zero : Λ_ℂ 0 = 1 := by simp [Λ_ℂ]
 private lemma fourier_at_zero (f : ℝ → ℂ) : 𝓕 f 0 = ∫ v : ℝ, f v := by
   simp [Real.fourier_eq]
 
+private lemma real_inner_eq_mul (v w : ℝ) : @inner ℝ ℝ _ v w = v * w := by
+  simp; ring
+
+/-- Unfolding the FT to an explicit exp·mul integral. -/
+private lemma ft_Λ_ℂ_unfold (w : ℝ) :
+    𝓕 Λ_ℂ w = ∫ v : ℝ,
+      Complex.exp (↑(-2 * π * (v * w)) * Complex.I) * Λ_ℂ v := by
+  rw [fourier_eq']; congr 1; ext v; congr 1; congr 1; simp; ring
+
+/-- Λ_ℂ vanishes outside [-1,1]. -/
+private lemma Λ_ℂ_outside (v : ℝ) (hv : 1 < |v|) : Λ_ℂ v = 0 := by
+  simp [Λ_ℂ, max_eq_right (show 1 - |v| ≤ 0 by linarith)]
+
+/-- The FT integrand vanishes outside [-1,1]. -/
+private lemma ft_integrand_outside (w v : ℝ) (hv : v ∉ Set.Icc (-1 : ℝ) 1) :
+    Complex.exp (↑(-2 * π * (v * w)) * Complex.I) * Λ_ℂ v = 0 := by
+  have : 1 < |v| := by rw [Set.mem_Icc, ← abs_le] at hv; exact not_le.mp hv
+  simp [Λ_ℂ_outside v this]
+
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
 
-    This follows from our Bridge theorem + evenness of Λ:
-    - 𝓕 Λ_ℂ(w) = ∫ exp(-2πixw) Λ(x) dx = ∫₋₁¹ (cos - i·sin)(2πxw)(1-|x|)dx
-    - Real part = ∫₋₁¹ Λ(x)cos(2πxw)dx = sinc²(w) (Bridge, proved)
-    - Imaginary part = -∫₋₁¹ Λ(x)sin(2πxw)dx = 0 (odd × even = odd)
-    - ∴ 𝓕 Λ_ℂ(w) = (sinc²(w) : ℂ) = (fejerKernel(w) : ℂ)
+    Proven building blocks (zero sorry):
+    - `ft_Λ_ℂ_unfold`: 𝓕 Λ_ℂ(w) = ∫ exp(-2πivw) · Λ_ℂ(v) dv
+    - `Λ_ℂ_outside`: Λ_ℂ(v) = 0 for |v| > 1
+    - `ft_integrand_outside`: integrand = 0 outside [-1,1]
 
-    All mathematical content is verified; this sorry is purely
-    Mathlib convention plumbing (Lebesgue ↔ interval integral,
-    complex exponential ↔ cos/sin decomposition). -/
+    Remaining sorry covers the final assembly:
+    1. Restrict integral to [-1,1] (using ft_integrand_outside)
+    2. Decompose exp into cos - i·sin (Euler's formula)
+    3. Split into cos integral = Bridge = sinc², sin integral = 0 -/
 private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
     𝓕 Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
   sorry
