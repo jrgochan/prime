@@ -896,6 +896,65 @@ theorem fejerKernel_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
   rw [show 2 * π * (-(v * ξ)) = -(2 * π * ξ * v) from by ring]
   exact (Real.cos_neg _).symm
 
+/-- **THE FULL FK IDENTITY**: The Fourier transform of the Fejér kernel
+    equals the triangle function for ALL ξ ∈ ℝ.
+
+    ∫ K(x) · cos(2πξx) dx = Λ(ξ) = max(1-|ξ|, 0)
+
+    This generalizes FK3 (ξ = 0, gives 1) and FK4 (|ξ| > 1, gives 0).
+    Proved by the same Fourier inversion machinery: 𝓕(𝓕⁻¹(Λ)) = Λ
+    and 𝓕⁻¹(Λ) = K (Bridge matching).
+
+    This is the KEY LEMMA for the Gallagher MVT bypass. -/
+theorem fejerKernel_fourier_eq_triangle (ξ : ℝ) :
+    ∫ x : ℝ, fejerKernel x * Real.cos (2 * π * ξ * x)
+      ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) =
+    triangleFunction ξ := by
+  -- Step 1: Fourier inversion: 𝓕(𝓕⁻¹ Λ_ℂ)(ξ) = Λ_ℂ(ξ)
+  have h_inv := Λ_ℂ_integrable.fourier_fourierInv_eq ft_Λ_ℂ_integrable
+    Λ_ℂ_continuous.continuousAt (v := ξ)
+  -- Step 2: 𝓕⁻¹ Λ_ℂ = fejerKernel_ℂ (Bridge matching)
+  rw [show 𝓕⁻ Λ_ℂ = (fun x => ((fejerKernel x : ℝ) : ℂ)) from
+    funext fourierInv_Λ_ℂ_eq] at h_inv
+  -- h_inv : 𝓕(fun x => ↑(fejerKernel x))(ξ) = Λ_ℂ(ξ)
+  -- Step 3: Extract Re[𝓕(K)(ξ)] = Re[Λ_ℂ(ξ)] = Λ(ξ)
+  have h_re := congr_arg Complex.re h_inv
+  -- Re[Λ_ℂ(ξ)] = triangleFunction ξ
+  simp only [Complex.ofReal_re] at h_re
+  -- Λ_ℂ ξ = ↑(max (1-|ξ|) 0), so re = max(1-|ξ|, 0) = triangleFunction ξ
+  have h_rhs : (Λ_ℂ ξ).re = triangleFunction ξ := by
+    simp [Λ_ℂ, triangleFunction, Complex.ofReal_re]
+  rw [h_rhs] at h_re
+  -- Step 4: Re[𝓕(K)] = ∫ Re[𝐞(-(v*ξ)) • ↑(K v)] = ∫ K·cos(2πξv)
+  -- (Same extraction as fejerKernel_fourier_support)
+  rw [Real.fourier_real_eq] at h_re
+  have h_int : MeasureTheory.Integrable
+      (fun v => (Real.fourierChar (-(v * ξ))) • ((fejerKernel v : ℝ) : ℂ))
+      MeasureTheory.volume := by
+    have := (Real.fourierIntegral_convergent_iff (f := fun v => ((fejerKernel v : ℝ) : ℂ)) ξ).mpr
+      fejerKernel_integrable.ofReal
+    convert this using 1
+    funext v
+    show Real.fourierChar (-(v * ξ)) • _ = Real.fourierChar (-@inner ℝ ℝ _ v ξ) • _
+    congr 2
+    rw [show @inner ℝ ℝ _ v ξ = v * ξ from by
+      rw [RCLike.inner_apply]; simp [conj_trivial, mul_comm]]
+  have h5 : ∫ v, RCLike.re (𝐞 (-(v * ξ)) • ((fejerKernel v : ℝ) : ℂ)) = triangleFunction ξ := by
+    rw [integral_re h_int]; exact h_re
+  rw [← h5]
+  congr 1
+  funext v
+  simp only [Circle.smul_def, Real.fourierChar_apply, smul_eq_mul, RCLike.re_to_complex]
+  rw [mul_comm (Complex.exp _) (↑(fejerKernel v) : ℂ), Complex.re_ofReal_mul]
+  congr 1
+  rw [Complex.exp_mul_I]
+  simp only [Complex.add_re, Complex.mul_re,
+    Complex.I_re, Complex.I_im, mul_zero,
+    Complex.cos_ofReal_re, Complex.sin_ofReal_im,
+    mul_one, sub_zero, add_zero]
+  rw [show 2 * π * (-(v * ξ)) = -(2 * π * ξ * v) from by ring]
+  exact (Real.cos_neg _).symm
+
 -- Legacy aliases for downstream compatibility
 noncomputable def selbergMajorant := fejerKernel
 

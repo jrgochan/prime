@@ -2,9 +2,9 @@
   "experiment": "Cathedral Crown Cancellation Validator",
   "precision_bits": 512,
   "threads": 12,
-  "timestamp": "2026-04-27T23:04:16.922268+00:00",
+  "timestamp": "2026-04-27T23:08:13.149630+00:00",
   "target": "crown_graduation_target (MellinResidualExpansion.lean)",
-  "max_N_tested": 10000000,
+  "max_N_tested": 100000000,
   "t_max": 100,
   "zeta_validated": true,
   "mellin_logn_bounded": true,
@@ -18,7 +18,7 @@
     {"N": 1000, "int_mellin_sq": 5.974242857148900e-2, "mellin_logN": 4.126860763439164e-1, "int_cancel_sq": 8.833672208191341e0, "cancel_logN": 6.102084582893153e1},
     {"N": 2000, "int_mellin_sq": 4.980372727270491e-2, "mellin_logN": 3.785532731214659e-1, "int_cancel_sq": 8.188620055315988e0, "cancel_logN": 6.224090231870692e1},
     {"N": 5000, "int_mellin_sq": 4.048309181014310e-2, "mellin_logN": 3.448023139328293e-1, "int_cancel_sq": 7.472816198135809e0, "cancel_logN": 6.364741924346729e1},
-    {"N": 10000000, "int_mellin_sq": 1.359568926579486e-2, "mellin_logN": 2.191366200267889e-1, "int_cancel_sq": 4.632710732487578e0, "cancel_logN": 7.467047470945597e1}
+    {"N": 100000000, "int_mellin_sq": 1.104891867421296e-2, "mellin_logN": 2.035286034635703e-1, "int_cancel_sq": 4.252356968250475e0, "cancel_logN": 7.833131012146319e1}
   ],
-  "elapsed_seconds": 22.425
+  "elapsed_seconds": 230.788
 }
