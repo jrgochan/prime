@@ -685,28 +685,61 @@ private lemma bridge_cos_integral (w : ℝ) :
 private lemma sin_integral_vanishes (w : ℝ) :
     ∫ v in Set.Icc (-1 : ℝ) 1,
       (Real.sin (-2 * π * (v * w)) * (1 - |v|)) = 0 := by
-  sorry  -- odd function on symmetric interval; will graduate next
+  set f := fun v => Real.sin (-2 * π * (v * w)) * (1 - |v|) with hf_def
+  have h_odd : ∀ v : ℝ, f (-v) = -f v := by
+    intro v; simp only [hf_def]
+    rw [show -2 * π * ((-v) * w) = -(-2 * π * (v * w)) from by ring,
+        Real.sin_neg, abs_neg, neg_mul]
+  rw [MeasureTheory.integral_Icc_eq_integral_Ioc,
+      ← intervalIntegral.integral_of_le (by norm_num : (-1 : ℝ) ≤ 1)]
+  have h_eq : (∫ v in (-1 : ℝ)..1, f v) =
+      ∫ v in (-1 : ℝ)..1, f (-v) := by
+    have h1 : (∫ v in (-1 : ℝ)..1, f (-v)) = ∫ v in -1..-(-1 : ℝ), f v :=
+      intervalIntegral.integral_comp_neg f
+    rw [h1, neg_neg]
+  have h_neg : (∫ v in (-1 : ℝ)..1, f (-v)) = -(∫ v in (-1 : ℝ)..1, f v) := by
+    have : (fun v => f (-v)) = (fun v => -f v) := funext h_odd
+    rw [show (∫ v in (-1 : ℝ)..1, f (-v)) = (∫ v in (-1 : ℝ)..1, (fun v => f (-v)) v) from rfl,
+        this]
+    exact intervalIntegral.integral_neg
+  linarith [h_eq, h_neg]
+
+-- Helper: the real-valued cos integrand is continuous
+private lemma continuous_cos_integrand (w : ℝ) :
+    Continuous (fun v => Real.cos (-2 * π * (v * w)) * (1 - |v|)) :=
+  (Real.continuous_cos.comp (continuous_const.mul
+    (continuous_id.mul continuous_const))).mul
+    (continuous_const.sub continuous_abs)
+
+-- Helper: the real-valued sin integrand is continuous
+private lemma continuous_sin_integrand (w : ℝ) :
+    Continuous (fun v => Real.sin (-2 * π * (v * w)) * (1 - |v|)) :=
+  (Real.continuous_sin.comp (continuous_const.mul
+    (continuous_id.mul continuous_const))).mul
+    (continuous_const.sub continuous_abs)
 
 /-- Integrability of ↑(cos·Λ) on [-1,1] (continuous on compact). -/
 private lemma cos_ofReal_integrableOn (w : ℝ) :
     MeasureTheory.IntegrableOn
       (fun v => (↑(Real.cos (-2 * π * (v * w)) * (1 - |v|)) : ℂ))
-      (Set.Icc (-1 : ℝ) 1) := by
-  sorry  -- continuous on compact; will graduate next
-
-/-- Integrability of ↑(sin·Λ)·I on [-1,1] (continuous on compact). -/
-private lemma sinI_ofReal_integrableOn (w : ℝ) :
-    MeasureTheory.IntegrableOn
-      (fun v => ↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) * Complex.I)
-      (Set.Icc (-1 : ℝ) 1) := by
-  sorry  -- continuous on compact; will graduate next
+      (Set.Icc (-1 : ℝ) 1) :=
+  (Complex.continuous_ofReal.comp (continuous_cos_integrand w)).continuousOn.integrableOn_compact
+    isCompact_Icc
 
 /-- Integrability of ↑(sin·Λ) on [-1,1] (continuous on compact). -/
 private lemma sin_ofReal_integrableOn (w : ℝ) :
     MeasureTheory.IntegrableOn
       (fun v => (↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) : ℂ))
-      (Set.Icc (-1 : ℝ) 1) := by
-  sorry  -- continuous on compact; will graduate next
+      (Set.Icc (-1 : ℝ) 1) :=
+  (Complex.continuous_ofReal.comp (continuous_sin_integrand w)).continuousOn.integrableOn_compact
+    isCompact_Icc
+
+/-- Integrability of ↑(sin·Λ)·I on [-1,1] (continuous on compact). -/
+private lemma sinI_ofReal_integrableOn (w : ℝ) :
+    MeasureTheory.IntegrableOn
+      (fun v => ↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) * Complex.I)
+      (Set.Icc (-1 : ℝ) 1) :=
+  (sin_ofReal_integrableOn w).mul_const _
 
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
