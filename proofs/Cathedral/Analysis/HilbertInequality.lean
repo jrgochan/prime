@@ -299,7 +299,17 @@ theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
 /-- **The Fourier Bridge**: The inverse Fourier transform of Λ equals sinc².
 
     This is the key identity: ∫₋₁¹ (1-|ξ|)·cos(2πxξ) dξ = sinc²(x).
-    Proof: elementary integration by parts on [0,1] and [-1,0]. -/
+
+    Proof outline:
+    - x = 0: ∫₋₁¹ (1-|ξ|) dξ = 2·∫₀¹ (1-ξ) dξ = 2·[ξ-ξ²/2]₀¹ = 1 = sinc²(0) ✓
+    - x ≠ 0: By symmetry, 2·∫₀¹ (1-ξ)·cos(2πxξ) dξ.
+      Integration by parts:
+        = 2·[(1-ξ)·sin(2πxξ)/(2πx)]₀¹ + 2·∫₀¹ sin(2πxξ)/(2πx) dξ
+        = 0 + 2·[-cos(2πxξ)/(2πx)²]₀¹
+        = 2·(1-cos(2πx))/(2πx)²
+        = 2·2sin²(πx)/(2πx)²     (using 1-cos2θ = 2sin²θ)
+        = (sin(πx)/(πx))²
+        = sinc²(x) ✓ -/
 theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     ∫ ξ in Set.Icc (-1 : ℝ) 1, triangleFunction ξ * Real.cos (2 * π * x * ξ) = fejerKernel x := by
   sorry
