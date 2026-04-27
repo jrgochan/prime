@@ -72,11 +72,11 @@ def bdMellinBasis (k : ℕ) (s : ℂ) : ℂ :=
     PROOF: Direct integral linearity — expand bdResidualV = 1 - Σ v_i {1/((i+1)x)},
     distribute over the integral, then evaluate ∫₀¹ x^{s-1} = 1/s. -/
 theorem mellin_residual_decomp (N : ℕ) (v : Fin (N - 1) → ℝ)
-    (s : ℂ) (hs : 1 < s.re) :
+    (s : ℂ) (hs : 0 < s.re) :
     mellinBDResidual N v s =
     1 / s - ∑ i : Fin (N - 1), (v i : ℂ) *
       bdMellinBasis (i.val + 1) s := by
-  have hs0 : 0 < s.re := by linarith
+  have hs0 : 0 < s.re := hs
   -- Unfold to the integral level
   unfold mellinBDResidual bdResidualV bdMellinBasis
   -- Step 1: Expand the integrand
@@ -144,14 +144,12 @@ theorem mellin_residual_decomp (N : ℕ) (v : Fin (N - 1) → ℝ)
     bdMellinBasis(k, s) = (1/k - k^{-s})/(s-1) + k^{-s} · (1/(s-1) - ζ(s)/s)
 
     For Re(s) > 1 and s ≠ 1. Combines bd_mellin_reduction_proved + bd_mellin_base_case. -/
-theorem bdMellinBasis_explicit (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
+theorem bdMellinBasis_explicit (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     bdMellinBasis k s =
     (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
     (k : ℂ) ^ (-s) * (1 / (s - 1) - riemannZeta s / s) := by
   unfold bdMellinBasis
-  have hs0 : 0 < s.re := by linarith
-  have hs1 : s ≠ 1 := by intro h; rw [h, Complex.one_re] at hs; linarith
-  rw [bd_mellin_reduction_proved k hk s hs0 hs1, bd_mellin_base_case s hs0 hs1]
+  rw [bd_mellin_reduction_proved k hk s hs hs1, bd_mellin_base_case s hs hs1]
 
 /-- The Mellin residual fully expanded via bdMellinBasis_explicit.
 
@@ -161,7 +159,7 @@ theorem bdMellinBasis_explicit (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re
     The ζ(s) terms appear but are multiplied by the BD weights,
     creating massive cancellation under the optimal Möbius choice. -/
 theorem mellin_residual_explicit (N : ℕ) (v : Fin (N - 1) → ℝ)
-    (s : ℂ) (hs : 1 < s.re) :
+    (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     mellinBDResidual N v s =
     1 / s - ∑ i : Fin (N - 1), (v i : ℂ) *
       ((1 / ↑(i.val + 1 : ℕ) - (↑(i.val + 1 : ℕ) : ℂ) ^ (-s)) / (s - 1) +
@@ -171,7 +169,7 @@ theorem mellin_residual_explicit (N : ℕ) (v : Fin (N - 1) → ℝ)
   apply Finset.sum_congr rfl
   intro i _
   congr 1
-  exact bdMellinBasis_explicit (i.val + 1) (by omega) s hs
+  exact bdMellinBasis_explicit (i.val + 1) (by omega) s hs hs1
 
 -- ═══════════════════════════════════════════════
 -- §2. SIMPLIFIED MELLIN BASIS
@@ -181,13 +179,11 @@ theorem mellin_residual_explicit (N : ℕ) (v : Fin (N - 1) → ℝ)
     bdMellinBasis(k, s) = 1/(k(s-1)) - k^{-s} · ζ(s)/s
 
     Proof: algebraic simplification of the explicit formula. -/
-theorem bdMellinBasis_simplified (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
+theorem bdMellinBasis_simplified (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     bdMellinBasis k s =
     1 / ((k : ℂ) * (s - 1)) - (k : ℂ) ^ (-s) * (riemannZeta s / s) := by
-  rw [bdMellinBasis_explicit k hk s hs]
-  have hs1 : s - 1 ≠ 0 := by
-    intro h; have := congr_arg Complex.re h
-    simp [Complex.sub_re] at this; linarith
+  rw [bdMellinBasis_explicit k hk s hs hs1]
+  have hs1' : s - 1 ≠ 0 := sub_ne_zero.mpr hs1
   have hk_ne : (k : ℂ) ≠ 0 := by exact_mod_cast ne_of_gt (show 0 < k by omega)
   field_simp
   ring
@@ -199,7 +195,7 @@ theorem bdMellinBasis_simplified (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.
     The second bracket contains ζ(s) times a Dirichlet polynomial.
     Under RH, ζ(s) ≠ 0 on Re(s) = 1/2, so this is well-defined. -/
 theorem mellin_residual_structural (N : ℕ) (v : Fin (N - 1) → ℝ)
-    (s : ℂ) (hs : 1 < s.re) :
+    (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     mellinBDResidual N v s =
     (1 / s - ∑ i : Fin (N - 1), (v i : ℂ) / ((↑(i.val + 1 : ℕ) : ℂ) * (s - 1))) +
     (riemannZeta s / s) *
@@ -210,7 +206,7 @@ theorem mellin_residual_structural (N : ℕ) (v : Fin (N - 1) → ℝ)
       bdMellinBasis (i.val + 1) s =
       1 / ((↑(i.val + 1 : ℕ) : ℂ) * (s - 1)) -
       (↑(i.val + 1 : ℕ) : ℂ) ^ (-s) * (riemannZeta s / s) :=
-    fun i => bdMellinBasis_simplified (i.val + 1) (by omega) s hs
+    fun i => bdMellinBasis_simplified (i.val + 1) (by omega) s hs hs1
   simp_rw [h_simp]
   -- Goal algebra: 1/s - Σ v_k(a_k - b_k) = (1/s - Σ v_k·a_k) + (ζ/s · Σ v_k·b_k')
   simp only [mul_sub]
@@ -246,11 +242,11 @@ def bdRationalPart (N : ℕ) (v : Fin (N - 1) → ℝ) (s : ℂ) : ℂ :=
 
 /-- The Mellin residual = rational part + ζ(s)/s · Dirichlet polynomial. -/
 theorem mellin_residual_poly_form (N : ℕ) (v : Fin (N - 1) → ℝ)
-    (s : ℂ) (hs : 1 < s.re) :
+    (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
     mellinBDResidual N v s =
     bdRationalPart N v s + (riemannZeta s / s) * bdDirichletPoly N v s := by
   unfold bdRationalPart bdDirichletPoly
-  exact mellin_residual_structural N v s hs
+  exact mellin_residual_structural N v s hs hs1
 
 -- ═══════════════════════════════════════════════
 -- §4. CROWN GRADUATION TARGETS
