@@ -255,7 +255,7 @@ fn main() {
 
     let max_n: usize = std::env::args().nth(1)
         .and_then(|s| s.parse().ok())
-        .unwrap_or(500);
+        .unwrap_or(5000);
 
     header(
         "CATHEDRAL CROWN CANCELLATION VALIDATOR",
@@ -265,7 +265,7 @@ fn main() {
 
     fs::create_dir_all("results").unwrap();
 
-    let mut test_ns: Vec<usize> = vec![10, 20, 50, 100, 200, 500, 1000];
+    let mut test_ns: Vec<usize> = vec![10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
     test_ns.retain(|&n| n <= max_n);
     if !test_ns.contains(&max_n) && max_n > 10 { test_ns.push(max_n); }
     test_ns.sort();
