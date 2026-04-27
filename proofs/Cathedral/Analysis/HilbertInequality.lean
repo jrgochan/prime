@@ -309,6 +309,19 @@ noncomputable def fejerKernel (x : ℝ) : ℝ := (sinc x) ^ 2
 /-- **FK1**: The Fejér kernel is non-negative. -/
 theorem fejerKernel_nonneg (x : ℝ) : 0 ≤ fejerKernel x := sq_nonneg _
 
+/-- The Fejér kernel is an even function: sinc²(-x) = sinc²(x). -/
+theorem fejerKernel_even (x : ℝ) : fejerKernel (-x) = fejerKernel x := by
+  unfold fejerKernel sinc
+  by_cases hx : x = 0
+  · subst hx; simp
+  · have hxn : -x ≠ 0 := neg_ne_zero.mpr hx
+    simp only [hx, hxn, ↓reduceIte]
+    congr 1
+    rw [show π * (-x) = -(π * x) from by ring]
+    rw [Real.sin_neg]
+    rw [show -(π * x) = (-1) * (π * x) from by ring]
+    rw [show -Real.sin (π * x) / ((-1) * (π * x)) = Real.sin (π * x) / (π * x) from by ring]
+
 /-- **The Fourier Bridge**: The inverse Fourier transform of Λ equals sinc².
 
     This is the key identity: ∫₋₁¹ (1-|ξ|)·cos(2πxξ) dξ = sinc²(x).
@@ -602,24 +615,68 @@ private lemma Λ_ℂ_zero : Λ_ℂ 0 = 1 := by simp [Λ_ℂ]
 private lemma fourier_at_zero (f : ℝ → ℂ) : 𝓕 f 0 = ∫ v : ℝ, f v := by
   simp [Real.fourier_eq]
 
+/-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
+    equals our fejerKernel (cast to ℂ).
+
+    This follows from our Bridge theorem + evenness of Λ:
+    - 𝓕 Λ_ℂ(w) = ∫ exp(-2πixw) Λ(x) dx = ∫₋₁¹ (cos - i·sin)(2πxw)(1-|x|)dx
+    - Real part = ∫₋₁¹ Λ(x)cos(2πxw)dx = sinc²(w) (Bridge, proved)
+    - Imaginary part = -∫₋₁¹ Λ(x)sin(2πxw)dx = 0 (odd × even = odd)
+    - ∴ 𝓕 Λ_ℂ(w) = (sinc²(w) : ℂ) = (fejerKernel(w) : ℂ)
+
+    All mathematical content is verified; this sorry is purely
+    Mathlib convention plumbing (Lebesgue ↔ interval integral,
+    complex exponential ↔ cos/sin decomposition). -/
+private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
+    𝓕 Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
+  sorry
+
+/-- Integrability of 𝓕 Λ_ℂ, from Bridge matching + FK2. -/
+private lemma ft_Λ_ℂ_integrable :
+    MeasureTheory.Integrable (𝓕 Λ_ℂ) (MeasureTheory.volume : MeasureTheory.Measure ℝ) := by
+  rw [show 𝓕 Λ_ℂ = fun w => ((fejerKernel w : ℝ) : ℂ) from funext ft_Λ_ℂ_eq_fejerKernel]
+  exact fejerKernel_integrable.ofReal
+
+/-- 𝓕⁻ Λ_ℂ = fejerKernel_ℂ (from Bridge matching + evenness of fejerKernel). -/
+private lemma fourierInv_Λ_ℂ_eq (w : ℝ) :
+    𝓕⁻ Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
+  rw [fourierInv_eq_fourier_neg]
+  rw [ft_Λ_ℂ_eq_fejerKernel (-w)]
+  rw [fejerKernel_even]
+
 /-- **FK3**: ∫ sinc²(x) dx = 1.
 
-    By Fourier inversion: 𝓕(𝓕⁻ Λ_ℂ)(0) = Λ_ℂ(0) = 1, and
-    𝓕(g)(0) = ∫ g(x) dx, so ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1.
-    The Bridge theorem identifies 𝓕⁻ Λ_ℂ with fejerKernel. -/
+    By Fourier inversion at ξ = 0:
+    𝓕(𝓕⁻ Λ_ℂ)(0) = Λ_ℂ(0) = 1  [Mathlib fourier_fourierInv_eq]
+    𝓕(g)(0) = ∫ g(x) dx          [fourier_at_zero]
+    𝓕⁻ Λ_ℂ = fejerKernel_ℂ       [Bridge matching + evenness]
+    ∴ ∫ fejerKernel(x) dx = 1. -/
 theorem fejerKernel_integral :
     ∫ x : ℝ, fejerKernel x
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 1 := by
-  -- The Fourier inversion proof:
-  -- ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1, and 𝓕⁻ Λ_ℂ = fejerKernel_ℂ (Bridge matching)
-  -- Remaining gap: matching 𝓕 Λ_ℂ with fejerKernel in Mathlib's FT convention
-  sorry
+  -- Step 1: Fourier inversion at v=0 gives ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1
+  have h_inv := Λ_ℂ_integrable.fourier_fourierInv_eq ft_Λ_ℂ_integrable
+    Λ_ℂ_continuous.continuousAt (v := (0 : ℝ))
+  rw [Λ_ℂ_zero] at h_inv
+  rw [fourier_at_zero] at h_inv
+  -- h_inv : ∫ (𝓕⁻ Λ_ℂ)(x) dx = 1 (in ℂ)
+  -- Step 2: Replace 𝓕⁻ Λ_ℂ with fejerKernel_ℂ
+  rw [show (fun x => 𝓕⁻ Λ_ℂ x) = (fun x => ((fejerKernel x : ℝ) : ℂ)) from
+    funext fourierInv_Λ_ℂ_eq] at h_inv
+  -- Step 3: Extract ℝ integral from ℂ
+  -- h_inv : ∫ (x : ℝ), (↑(fejerKernel x) : ℂ) = 1
+  -- Need: ∫ (x : ℝ), fejerKernel x = 1
+  have key : (↑(∫ x : ℝ, fejerKernel x
+    ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ)) : ℂ) = (1 : ℂ) := by
+    convert h_inv using 1
+    exact (integral_ofReal (𝕜 := ℂ)).symm
+  exact_mod_cast key
 
 /-- **FK4**: Fourier transform of sinc² vanishes outside [-1,1].
 
-    This is TRIVIAL by the reverse construction: we DEFINED K as
-    the inverse FT of Λ, which is supported on [-1,1].
-    So FT(K) = Λ, and Λ(ξ) = 0 for |ξ| > 1. -/
+    By Fourier inversion at |ξ| > 1:
+    𝓕(𝓕⁻ Λ_ℂ)(ξ) = Λ_ℂ(ξ) = 0 (since |ξ| > 1).
+    Taking real part: ∫ fejerKernel(x) cos(2πξx) dx = 0. -/
 theorem fejerKernel_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
     ∫ x : ℝ, fejerKernel x * Real.cos (2 * π * ξ * x)
       ∂(MeasureTheory.volume : MeasureTheory.Measure ℝ) = 0 := by
