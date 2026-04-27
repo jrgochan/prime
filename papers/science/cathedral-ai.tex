@@ -20,8 +20,8 @@
 We report on a 30-day collaboration between a mathematician and an
 LLM-based AI coding assistant to formalize the Nyman--Beurling
 criterion for the Riemann Hypothesis in Lean~4. The resulting
-artifact---the \emph{Cathedral}---comprises 36,738 lines of
-machine-verified proof across 150 files, with 47
+artifact---the \emph{Cathedral}---comprises 39,375 lines of
+machine-verified proof across 161 files, with 55
 axioms. We analyze the division of labor between human and AI,
 finding a genuinely \textbf{collaborative} dynamic: the AI
 generated $\sim$85\% of code by volume and actively proposed
@@ -53,7 +53,7 @@ momentum with AlphaProof's IMO silver medal (2024), Lean Copilot
 These systems operate at the level of individual lemmas: given a
 statement, find its proof. The Cathedral project operates at a
 qualitatively different scale: not proving one theorem, but designing
-an entire proof \emph{architecture}---84 files, 11 modules, 644
+an entire proof \emph{architecture}---161 files, 22 modules, 1,335
 theorems---for a major open problem in mathematics.
 
 This paper analyzes the human-AI collaboration that produced the
@@ -297,7 +297,7 @@ maintenance policy and reviewed all proofs for axiom minimality.
 \toprule
 & \textbf{AlphaProof} & \textbf{LeanDojo} & \textbf{Lean Copilot} & \textbf{Cathedral} \\
 \midrule
-Scale & Single problem & Single lemma & Single tactic & 150-file project \\
+Scale & Single problem & Single lemma & Single tactic & 161-file project \\
 Autonomy & High & High & Low & Low (human-directed) \\
 Math level & IMO & Mathlib & Mathlib & Research frontier \\
 Novel math & Some & None & None & Collaborative \\
@@ -393,7 +393,7 @@ tradeoff, enabled by the AI's ability to make exploration cheap.
     verify that the \emph{right thing} was proved.
 
   \item \textbf{Discard culture is healthy.} The willingness to
-    archive 130 files without regret is essential. Sunk cost fallacy
+    archive 128 files without regret is essential. Sunk cost fallacy
     is the enemy of proof search. The AI's ability to regenerate
     code cheaply makes discarding psychologically easier.
 
@@ -412,7 +412,7 @@ tradeoff, enabled by the AI's ability to make exploration cheap.
 
 The Cathedral demonstrates that LLMs can be genuine mathematical
 collaborators, not merely fast typists. The collaboration produced
-36,738 lines of machine-verified proof in 30 days---a pace that
+39,375 lines of machine-verified proof in 30 days---a pace that
 would be extraordinary for any team, let alone a single
 mathematician paired with an AI.
 

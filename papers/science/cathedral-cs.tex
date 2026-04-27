@@ -22,10 +22,10 @@
 \begin{abstract}
 We report on the design, construction, and maintenance of the
 \emph{Cathedral}, a 20,000-line Lean~4 formalization (built on
-Mathlib v4.30) that establishes the logical equivalence between
+Mathlib v4.28) that establishes the logical equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
-distance. The project comprises 150 active source files containing
-theorems and 47 axioms, with an additional 130 archived files
+distance. The project comprises 161 active source files containing
+theorems and 55 axioms, with an additional 128 archived files
 preserving superseded approaches. We describe the software
 engineering challenges of large-scale proof formalization:
 modular architecture with explicit dependency management, axiom
@@ -60,11 +60,11 @@ The Cathedral project provides a case study in these challenges. Over
 Hypothesis in Lean~4, producing a system that is:
 
 \begin{itemize}
-  \item \textbf{Large}: 36,738 lines of active Lean code across 150 files,
-    plus 23,115 lines of archived code across 130 files.
-  \item \textbf{Modular}: 11 modules with explicit dependency DAGs.
+  \item \textbf{Large}: 39,375 lines of active Lean code across 161 files,
+    plus 29,784 lines of archived code across 128 files.
+  \item \textbf{Modular}: 22 modules with explicit dependency DAGs.
   \item \textbf{Evolving}: The axiom count on the critical path was
-    reduced from 56 to 7 through four systematic elimination campaigns.
+    reduced from 56 to 2 through eleven systematic elimination campaigns.
   \item \textbf{Auditable}: Every axiom is registered, tiered, and tracked
     to its consumers.
 \end{itemize}
@@ -97,14 +97,14 @@ Hypothesis in Lean~4, producing a system that is:
 \toprule
 \textbf{Metric} & \textbf{Value} \\
 \midrule
-Lean version & 4.30.0-rc1 \\
-Mathlib dependency & v4.30 (leanprover-community/mathlib4) \\
-Active source files & 78 \\
-Archived source files & 96 \\
-Active lines of code & 36,738 \\
-Archived lines of code & 23,115 \\
-Theorems \& lemmas (active) & 644 \\
-Axioms (active) & 40 \\
+Lean version & 4.28.0 \\
+Mathlib dependency & v4.28.0 (leanprover-community/mathlib4) \\
+Active source files & 161 \\
+Archived source files & 128 \\
+Active lines of code & 39,375 \\
+Archived lines of code & 29,784 \\
+Theorems \& lemmas (active) & $\sim$1,335 \\
+Axioms (active) & 55 \\
 Axioms on crown path & 2 \\
 Build jobs (\texttt{lake build}) & 3,537 \\
 Build errors & 0 \\
@@ -157,7 +157,7 @@ and contains the crown theorem.
 \subsection{The Lakefile Configuration}
 
 The build is managed by Lake (Lean's package manager). The
-\lean{lakefile.lean} enumerates all 78 source files as roots
+\lean{lakefile.lean} enumerates all 161 source files as roots
 of a single library target:
 
 \begin{lstlisting}[language=ML,caption={Lakefile structure (abbreviated)}]
@@ -356,7 +356,8 @@ Each ghost axiom was resolved by:
 (c) updating all consumers to import the theorem, and
 (d) archiving the file if it contained only the ghost axiom.
 
-This reduced the active axiom count from 49 to 39 ($-20\%$).
+This reduced the active axiom count from 49 to 39 ($-20\%$),
+which has since grown to 55 as new proof paths were formalized.
 
 % ================================================================
 \section{Proof Engineering Metrics}
@@ -371,10 +372,10 @@ This reduced the active axiom count from 49 to 39 ($-20\%$).
 \toprule
 \textbf{Category} & \textbf{Files} & \textbf{LOC} & \textbf{\% of Total} \\
 \midrule
-Active code & 150 & 36,738 & 46\% \\
-Archived code & 96 & 23,115 & 54\% \\
+Active code & 161 & 39,375 & 57\% \\
+Archived code & 128 & 29,784 & 43\% \\
 \midrule
-Total produced & 174 & 43,041 & 100\% \\
+Total produced & 289 & 69,159 & 100\% \\
 \bottomrule
 \end{tabular}
 \caption{Code volume breakdown. The 54\% discard rate reflects the
@@ -457,7 +458,7 @@ Mathlib is rebuilt only when the dependency version changes.
 \bottomrule
 \end{tabular}
 \caption{Axiom count evolution. Crown path axioms were reduced
-from 56 to 7 in 20 days.}
+from 56 to 2 over 30 days.}
 \label{tab:axiom-history}
 \end{table}
 
@@ -501,7 +502,7 @@ A nuance deserves emphasis: the ``Collaborative'' entries are not
 courtesy attributions. The AI actively proposed proof strategies---the
 Parseval Bridge implementation path, the Abel summation architecture,
 the Rank-1 Mellin approach to the converse direction, and the axiom
-elimination campaigns that reduced the crown path from 56 to 4 axioms.
+elimination campaigns that reduced the crown path from 56 to 2 axioms.
 While the human made final strategic decisions, the AI's proposals
 were substantive mathematical contributions, not mere implementation
 suggestions.
@@ -749,7 +750,7 @@ Large-scale formalizations in proof assistants include:
     conjecture in Lean~4. Community-driven, $\sim$25,000 LOC.
 \end{itemize}
 
-The Cathedral is distinguished by: (a) the high axiom count (39,
+The Cathedral is distinguished by: (a) the high axiom count (55,
 reflecting the open status of RH), (b) the systematic axiom
 lifecycle management, (c) the high discard rate (54\%), and
 (d) the compressed development timeline (30 days, enabled by

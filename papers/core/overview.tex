@@ -20,7 +20,7 @@ $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 \texttt{nyman\_beurling\_equivalence}.
 
 The formalization comprises 161 active Lean files
-(with 127 archived) across 26 modules totaling 39{,}375 lines.
+(with 128 archived) across 22 modules totaling 39{,}375 lines.
 The crown theorem depends
 on exactly \textbf{two mathematical axioms}: one encoding the
 Hardy--Littlewood mean-value bound for $1/\zeta(s)$ on the critical line,
@@ -166,7 +166,7 @@ suggesting the true rate may be faster than $O(1/\log N)$.
 
 \begin{verbatim}
 cd proofs
-lake build    # 161 active files, 127 archived
+lake build    # 161 active files, 128 archived
 \end{verbatim}
 
 \noindent To inspect the axiom foundation:
@@ -192,6 +192,6 @@ accomplished through eleven versions over 30 days.
 The converse direction was proved pure (zero axioms, zero sorry) via
 the Rank-1 Mellin Miracle in \texttt{BDMellin.lean} (680 lines).
 The forward direction was rewired through the frequency domain in v11,
-eliminating the real-variable Perron chain and its four axioms.
+eliminating the real-variable Perron chain and reducing from four to two axioms.
 
 \end{document}

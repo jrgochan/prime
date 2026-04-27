@@ -18,7 +18,7 @@
 \begin{abstract}
 We collect observations, coincidences, and speculative connections
 that emerged during the construction of the Cathedral---a Lean~4
-formalization reducing the Riemann Hypothesis to 47 axioms (4 on the
+formalization reducing the Riemann Hypothesis to 55 axioms (2 on the
 crown path) via the Nyman--Beurling criterion. Some of these are
 rigorous structural correspondences between number theory and physics.
 Others are numerological coincidences that we present without apology.
@@ -40,25 +40,25 @@ half-fill the 4d shell). Molybdenum sits at the active site of
 into ammonia, the foundation of all amino acids, all proteins, all
 life on Earth.
 
-% Note: The Cathedral now contains 47 axioms (v10). The original 42
-% was the count at the time of the Night Assault. We preserve this
-% section as historical numerology.
+% Note: The Cathedral now contains 55 axioms (v11, 2 on crown). The
+% original 42 was the count at the time of the Night Assault. We
+% preserve this section as historical numerology.
 
 The Cathedral reduces 166 years of mathematical struggle about the
-distribution of prime numbers to 47 axioms---but it was \\emph{42}
+distribution of prime numbers to 55 axioms---but it was \\emph{42}
 that mattered. Element~42 enables the chemistry of life.
 The other five are just Silver, Tin, Antimony, Tellurium, and Iodine.
 
 Douglas Adams was right. He just didn't show his work.
 
 % ================================================================
-\section{The Four Crown Axioms as Conservation Laws}
+\section{The Two Crown Axioms as Conservation Laws}
 \label{sec:noether}
 % ================================================================
 
 In physics, Noether's theorem guarantees that every continuous
 symmetry produces a conserved quantity. The Cathedral's crown
-theorem depends on exactly 4 mathematical axioms. We propose
+theorem depends on exactly 2 mathematical axioms. We propose
 a speculative Noether-style dictionary:
 
 \begin{center}
@@ -67,17 +67,21 @@ a speculative Noether-style dictionary:
 \toprule
 \textbf{Crown Axiom} & \textbf{Conservation Law} & \textbf{Symmetry} \\
 \midrule
-\lean{pnt\_mu\_log\_div\_k} & Angular momentum ($\sum \mu \log/k \to -1$)
-  & Rotational \\
-\lean{covariance\_bound\_from\_mertens\_34} & Cluster decomposition
-  & Locality \\
-\lean{partial\_integral\_tends\_to\_formula} & CPT symmetry
-  & $j \leftrightarrow k$ exchange \\
+\lean{critical\_line\_mellin\_variance} & Energy (Mellin $L^2$ bound)
+  & Spectral \\
 \lean{rh\_zeta\_lower\_bound\_from\_zero\_counting} & Completeness (all states accounted)
   & Spectral \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\begin{remark}[Historical Note]
+In v7--v10 (the Perron Crown), four axioms served as crown gates:
+\lean{pnt\_mu\_log\_div\_k}, \lean{covariance\_bound\_from\_mertens\_34},
+\lean{partial\_integral\_tends\_to\_formula}, and the Hadamard bound.
+The v11 Mellin Crown bypassed the first three by routing through the
+frequency domain, reducing the crown to two axioms.
+\end{remark}
 
 \subsection{The Moment Hierarchy}
 
@@ -200,7 +204,7 @@ The convergence $d_N^2 \to 0$ says:
 The thermofield double approaches the true vacuum.}
 \end{quote}
 
-The 4 crown axioms are the 4 conditions needed for this equilibrium.
+The 2 crown axioms are the conditions needed for this equilibrium.
 
 % ================================================================
 \section{The Uncertainty Principle}
@@ -215,7 +219,7 @@ The most structurally profound feature of the Cathedral:
 \textbf{Direction} & \textbf{Crown axioms} & \textbf{Difficulty} \\
 \midrule
 Converse ($d_N^2 \to 0 \implies \RH$) & 0 & Easy \\
-Forward ($\RH \implies d_N^2 \to 0$) & 4 & Hard \\
+Forward ($\RH \implies d_N^2 \to 0$) & 2 & Hard \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -263,7 +267,7 @@ In the Cathedral:
   \item Detecting a violation of RH requires one zero off the line.
   \item Proving RH requires controlling all $L^2$ norms simultaneously.
 \end{itemize}
-The asymmetry between 0 and 4 axioms is the mathematical shadow of
+The asymmetry between 0 and 2 axioms is the mathematical shadow of
 this physical asymmetry. Detection is local; certification is global.
 \end{observation}
 
@@ -445,18 +449,17 @@ sub-optimal) and the exact ground state energy.
 \end{observation}
 
 % ================================================================
-\section{The Number 150}
+\section{The Number 161}
 % ================================================================
 
-The Cathedral contains 150 active files. Some observations:
+The Cathedral contains 161 active files. Some observations:
 
 \begin{itemize}
-  \item $150 = 2 \times 3 \times 5^2$.
-  \item Element 150 does not exist (yet). The periodic table currently
-    extends to $Z = 118$. Like the Cathedral itself, it is reaching
-    toward completions that lie beyond the current boundary.
-  \item $150 / 4 = 37.5$. The 150 files, distributed across 4 crown
-    axioms, average 37.5 files per axiom---reflecting the depth of
+  \item $161 = 7 \times 23$.
+  \item Both 7 and 23 are prime. The product of two primes for a
+    project about prime numbers.
+  \item $161 / 2 = 80.5$. The 161 files, distributed across 2 crown
+    axioms, average 80.5 files per axiom---reflecting the depth of
     infrastructure supporting each remaining gate.
   \item In music, 150 = the number of Psalms. Each one a proof of
     faith, preserved for millennia.
@@ -484,7 +487,7 @@ regularity}. If the ground state energy flows to zero, the spectrum
 must be well-behaved. This is a quantum-mechanical tautology dressed
 in number-theoretic notation.
 
-The asymmetry between 0 (converse) and 4 (forward) is the
+The asymmetry between 0 (converse) and 2 (forward) is the
 mathematical shadow of a thermodynamic arrow: it is infinitely
 easier to detect disorder (one off-line zero suffices) than to
 prove order (all zeros must be checked).
@@ -528,17 +531,17 @@ spin glass trapped in a metastable configuration.
 \section{The Last Observation}
 % ================================================================
 
-The Cathedral was built in 30 days. It contains 47 axioms, 150 files,
-theorems, 36,738 lines of Lean~4, 24 companion papers, and one
+The Cathedral was built in 30 days. It contains 55 axioms, 161 files,
+theorems, 39,375 lines of Lean~4, 24 companion papers, and one
 number that nobody planned:
 
 \[
   42 = 2 \times 3 \times 7
 \]
 
-Two is the only even prime. Three is the number of kernel axioms.
-Four is the number on the crown. The product of the components
-is the whole.
+Two is the number of crown axioms (and the only even prime). Three is
+the number of kernel axioms. Seven is a factor of 161 (the file count).
+The product of the components is the whole.
 
 Whether this is a coincidence or a mason's mark carved into the
 invisible rafters of the universe, we leave as an exercise for
@@ -552,7 +555,7 @@ the reader.
 \emph{The critical line is the mass shell.}\\
 \emph{The Riemann Hypothesis is the statement}\\
 \emph{that the vacuum is stable.}\\[0.5cm]
-\emph{And the number of axioms is 42.}
+\emph{And the number of crown axioms is two.}
 \end{flushright}
 
 \vspace{1cm}

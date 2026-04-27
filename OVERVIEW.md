@@ -5,6 +5,8 @@
 > equivalence in Lean 4.*
 >
 > **Last updated**: April 26, 2026 (v11 — The Mellin Crown)
+>
+> **Last audited**: April 26, 2026 — comprehensive codebase audit
 
 ---
 
@@ -127,8 +129,9 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 
 ## Module Structure
 
-The codebase comprises **161 active Lean files** across **26 topic directories** with
-**39,375 lines** of active code and **55 active axioms** (2 on the crown path).
+The codebase comprises **161 active Lean files** across **22 topic directories** with
+**39,375 lines** of active code, **~1,335 theorems/lemmas**, and **55 active axioms**
+(2 on the crown path).
 
 ```
 Cathedral/
@@ -139,7 +142,7 @@ Cathedral/
 ├── Zeta/             (8 files)   Zeta function bounds, Hadamard, convexity
 ├── Perron/          (16 files)   Perron formula chain + Mertens conversion
 ├── PNT/              (3 files)   Prime Number Theorem bridges
-├── Vasyunin/        (39 files)   Vasyunin formula (Cotangent/, Matrix/, Proof/)
+├── Vasyunin/        (39 files)   Vasyunin formula (Cotangent/, Matrix/, Proof/, Augmented/)
 ├── Covariance/       (8 files)   Gram form, dot product, L² convergence
 ├── Gram/             (6 files)   FractIntegral, Diagonal, OffDiagonal
 ├── AbelTail/        (14 files)   Abel summation engine + tail bounds
@@ -149,8 +152,8 @@ Cathedral/
 ├── LinearAlgebra/    (4 files)   Sherman-Morrison, Sylvester, Variational
 ├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
 ├── Structural/       (3 files)   Eigenvalue, Independence
-└── Scratch/          (4 files)   Exploratory test files
-    + Defs.lean, Axioms.lean, Cathedral.lean (root files)
+└── Scratch/          (5 files)   Exploratory test files
+    + Defs.lean, Axioms.lean, _vasyunin_audit.lean (root files)
 ```
 
 ### Crown Path Files (0 sorry, 2 axioms)
@@ -177,20 +180,39 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | **Crown axioms** | **2** | ✓ |
 | Spectral engine | 7 | — |
 | Sieve engine | 8 | — |
-| MellinBridge (alt paths) | 8 | — |
-| Vasyunin proof chain | 6 | — |
+| MellinBridge (alt paths) | 9 | — |
+| Vasyunin proof chain | 8 | — |
 | Analysis (Selberg, MV) | 8 | — |
-| PNT / Perron (off crown since v11) | 4 | — |
+| IntegralBasis | 4 | — |
 | Oracle/certified computation | 3 | — |
-| Other (structural, IntegralBasis) | 9 | — |
-| **Total** | **~55** | **2** |
+| Covariance | 2 | — |
+| PNT bridges | 2 | — |
+| Structural / NymanBeurling | 2 | — |
+| **Total** | **55** | **2** |
 
 > [!IMPORTANT]
 > Only **2 axioms** stand between the current formalization and a fully
 > machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> **pure** (zero axioms, zero sorry). The ~53 off-path axioms support
+> **pure** (zero axioms, zero sorry). The 53 off-path axioms support
 > alternative proof routes and experimental features that do not affect
 > the crown theorem.
+
+---
+
+## Sorry Inventory
+
+8 `sorry` placeholders exist in the active tree, **all off-crown**:
+
+| File | Count | Context |
+|------|-------|---------|
+| `PNT/LogBridge.lean` | 1 | Log-weight PNT bridge (off-crown since v11) |
+| `PNT/Bridge.lean` | 2 | PNT wiring to Perron chain (off-crown since v11) |
+| `Scratch/AbelTailProof.lean` | 5 | Exploratory Abel tail proof (scratch) |
+
+> [!NOTE]
+> Zero sorry on the crown path. The PNT sorry are remnants of the Perron Crown
+> (v7–v10) forward chain, now superseded by the Mellin Crown. The Scratch sorry
+> are in exploratory files.
 
 ---
 
@@ -198,7 +220,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 ### Campaign A: Mellin Variance (Axiom 1)
 **Difficulty: Very Hard** — requires Hardy-Littlewood mean value theorem
-∫₀ᵀ |1/ζ(1/2+it)|² dt = O(T), which is beyond Mathlib 4.28.
+∫₀ᵀ |1/ζ(1/2+it)|² dt = O(T), which is beyond Mathlib v4.28.0.
 Numerically validated: C ≈ 0.38.
 
 ### Campaign B: Hadamard Zero Counting (Axiom 2)
@@ -230,12 +252,14 @@ bypassing the real-variable Perron chain which hit the "1D Shattering Trap"
 |--------|-------|
 | Active Lean files | 161 |
 | Active lines of code | 39,375 |
-| Archive lines | 29,698 |
-| Theorems + lemmas | ~800 |
-| Total axioms (active) | ~55 |
+| Archive files | 128 |
+| Archive lines | 29,784 |
+| Theorems + lemmas | ~1,335 |
+| Total axioms (active) | 55 |
 | Crown path axioms | **2** |
 | Crown path sorry | **0** |
-| Topic directories | 26 |
-| Experiments (Rust/MPFR) | 12 |
+| Off-crown sorry | 8 |
+| Topic directories | 22 |
+| Experiments (Rust/MPFR) | 27 |
 | Development time | 30 days |
-| Lean version | 4.x (Mathlib v4.30+) |
+| Lean version | 4.28.0 (Mathlib v4.28.0) |

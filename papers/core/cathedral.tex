@@ -22,7 +22,7 @@ Mathlib, that the Riemann Hypothesis is logically equivalent to the decay of
 the Nyman--Beurling distance $d_N^2 \to 0$.
 
 The formalization---the \emph{Cathedral}---comprises 161 active Lean files
-(with 127 archived) across 26 modules with
+(with 128 archived) across 22 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
@@ -447,7 +447,7 @@ $\|v\|^2 = \Theta(N)$, which diverges despite $E(N) \to 0$.
 % ================================================================
 
 The Cathedral maintains a systematic \lean{Archive/} directory containing
-130 files---preserved as monuments to the
+128 files---preserved as monuments to the
 formalization process and as resources for future work. Nothing is deleted.
 
 \subsection{The Great Audit (April 18, 2026)}
@@ -470,9 +470,9 @@ A deep audit of the codebase identified:
     \lean{Vasyunin/Cotangent/}).
 \end{itemize}
 
-The cleanup reduced the active codebase from 178 to 150 files ($-56\%$),
-with every remaining file on the critical path to
-\lean{rh\_implies\_l2\_convergence\_proved}.
+The cleanup reduced the active codebase from 178 to 161 files,
+with every remaining file contributing to the crown path or active
+alternative proof routes.
 
 \subsection{Archived Subsystems}
 
@@ -536,7 +536,7 @@ The Cathedral stands.
 We have constructed a machine-verified proof that the Riemann Hypothesis
 is logically equivalent to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, routed through the Mellin Crown. The formalization
-comprises 161 active Lean files (127 archived) across 26 modules, resting
+comprises 161 active Lean files (128 archived) across 22 modules, resting
 on two mathematical axioms---the Hardy--Littlewood mean-value bound
 for the Mellin variance on the critical line, and the Hadamard
 zero-counting zeta lower bound.

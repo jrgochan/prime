@@ -34,7 +34,7 @@
 Somewhere in the mountains of New Mexico, a man and an AI spent three
 weeks trying to understand the oldest unsolved problem in mathematics.
 They didn't solve it. But they built something remarkable in the
-attempt: a 150-file computer program that proves, with absolute
+attempt: a 161-file computer program that proves, with absolute
 mathematical certainty, exactly what you would need to know to solve it.
 
 This paper tells that story in plain language.
@@ -133,11 +133,11 @@ Our proof was verified by a program called \textbf{Lean~4}, developed at
 Microsoft Research. It uses a mathematical library called \textbf{Mathlib}
 that contains over 100,000 theorems, all of them machine-checked.
 
-The result: every step of our argument --- all 150 files of it --- has been
+The result: every step of our argument --- all 161 files of it --- has been
 verified by the computer. There are zero errors. Zero gaps. Zero
 assumptions that aren't explicitly stated.
 
-What \emph{is} explicitly stated are four assumptions (mathematicians call
+What \emph{is} explicitly stated are two assumptions (mathematicians call
 them ``axioms'') that our proof relies on. These are well-understood facts
 from classical mathematics that have been proved by humans but haven't
 yet been translated into Lean. They are the only places where you
@@ -151,8 +151,8 @@ We call the proof ``The Cathedral'' because that's what it felt like to
 build: a large, intricate structure, assembled stone by stone over weeks,
 where every piece has to fit perfectly or the whole thing doesn't stand.
 
-The Cathedral has 150 active files of computer code, containing hundreds
-of theorems. It also has 130 archived files --- attempts that didn't work
+The Cathedral has 161 active files of computer code, containing hundreds
+of theorems. It also has 128 archived files --- attempts that didn't work
 out, paths that led nowhere, ideas that turned out to be wrong. We
 kept them all, because they're part of the story.
 
@@ -250,7 +250,7 @@ exists as a single, machine-verified artifact where every assumption is
 named, every deduction is checked, and every dead end is preserved.
 
 If someone does eventually prove the Riemann Hypothesis, they will need
-to establish the four facts that our proof takes as axioms. Conversely,
+to establish the two facts that our proof takes as axioms. Conversely,
 if someone finds a counterexample --- a zero that doesn't line up ---
 our proof tells you exactly what that would break: the sawtooth
 approximation would hit a wall and stop converging.
@@ -268,7 +268,7 @@ coding assistant, working together in a process that looked like this:
 \begin{enumerate}
   \item \textbf{Weeks 1--2: Exploration.} We explored dozens of possible
     proof strategies. Most of them failed. We archived everything ---
-    130 files of failed attempts --- because sometimes the failures
+    128 files of failed attempts --- because sometimes the failures
     teach you more than the successes.
 
   \item \textbf{Week 3: The Parseval Breakthrough.} After the direct

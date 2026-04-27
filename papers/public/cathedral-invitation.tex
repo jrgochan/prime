@@ -6,7 +6,7 @@
 
 \title{%
   An Invitation to Complete the Cathedral:\\
-  Four Axioms Remain%
+  Two Axioms Remain%
 }
 \author{
   Jason Robert Gochanour
@@ -27,17 +27,17 @@
 \section*{What This Is}
 % ================================================================
 
-We built something called the Cathedral: a 150-file computer program
+We built something called the Cathedral: a 161-file computer program
 that proves, with mathematical certainty, that the Riemann Hypothesis
 is \emph{exactly equivalent} to the convergence of a specific
 approximation problem. Every step is verified by a computer. Every
 assumption is named. Every failed attempt is preserved.
 
-The proof is complete---except for four assumptions, called
+The proof is complete---except for two assumptions, called
 \emph{axioms}. We couldn't prove them. We named them, classified
 them, and documented exactly what they say and why they're hard.
 
-This paper is an invitation. Those four axioms are now your problem.
+This paper is an invitation. Those two axioms are now your problem.
 
 % ================================================================
 \section*{Who Built This}
@@ -83,35 +83,18 @@ The Cathedral proves that this is equivalent to:
 In words: you can approximate the constant function $1$ arbitrarily
 well by mixing together sawtooth waves $\{1/(kx)\}$.
 
-\subsection*{The Four Axioms}
+\subsection*{The Two Crown Axioms}
 
 \begin{enumerate}
-  \item \textbf{\texttt{pnt\_mu\_log\_div\_k}}: The sum
-    $\sum \mu(k)\log(k)/k \to -1$, a consequence of the Prime
-    Number Theorem.
+  \item \textbf{\texttt{critical\_line\_mellin\_variance}}: Under RH,
+    the Mellin variance of the BD residual on the critical line
+    decays as $O(1/\log N)$.
 
-    \emph{What this means}: a sum involving the M\"obius function
-    (which encodes prime factorization) converges to a specific
-    limit. This follows from the PNT via Abel's limit theorem.
-    Mathlib has the PNT but lacks the forward Wiener--Ikehara
-    Tauberian theorem needed to derive this limit.
-
-  \item \textbf{\texttt{covariance\_bound\_from\_mertens\_34}}:
-    The Mertens bound $|M(x)| \leq Cx^{3/4}$ implies a covariance
-    bound $v^T(G-bb^T)v \leq C'/\log N$.
-
-    \emph{What this means}: if you know how the M\"obius function
-    grows, you can control how well the Gram matrix approximates
-    its rank-1 projection. Infrastructure is proved; needs a
-    double-sum assembly ($\sim$200 lines of Lean).
-
-  \item \textbf{\texttt{partial\_integral\_tends\_to\_formula}}:
-    Piecewise integral convergence for off-diagonal Gram entries.
-
-    \emph{What this means}: the entries of the Gram matrix can be
-    computed as integrals of fractional parts, and these integrals
-    converge to their closed-form values. The diagonal case is
-    proved; the off-diagonal needs the Gauss digamma formula.
+    \emph{What this means}: the Mellin transform of the approximation
+    error, evaluated on the critical line, has bounded $L^2$ norm.
+    This follows from the Hardy--Littlewood mean value theorem
+    $\int_0^T |1/\zeta(1/2+it)|^2\,dt = O(T)$ (1918).
+    Mathlib lacks this infrastructure.
 
   \item \textbf{\texttt{rh\_zeta\_lower\_bound\_from\_zero\_counting}}:
     A polynomial lower bound on $|\zeta(s)|$ away from the
@@ -120,10 +103,11 @@ well by mixing together sawtooth waves $\{1/(kx)\}$.
     \emph{What this means}: the zeta function doesn't get too
     small too fast. This follows from Hadamard's product formula
     and the zero-counting function. Borel--Carath\'eodory is in
-    Mathlib; the gap is connecting it to the polynomial bound.
+    Mathlib; the gap is connecting it to the Hadamard product
+    and Riemann--von Mangoldt zero counting.
 \end{enumerate}
 
-Each axiom is independently meaningful. Proving any one of them
+Each axiom is independently meaningful. Proving either one
 strengthens the formalization.
 
 % ================================================================
@@ -133,21 +117,19 @@ strengthens the formalization.
 \subsection*{If You Know Some Lean~4}
 
 \begin{enumerate}
-  \item \textbf{Prove Axiom~1} (\texttt{pnt\_mu\_log\_div\_k}).
-    This is the most accessible target. If you can formalize the
-    forward Wiener--Ikehara Tauberian theorem in Lean, this axiom
-    closes automatically.
+  \item \textbf{Prove Axiom~1} (\texttt{critical\_line\_mellin\_variance}).
+    This requires formalizing the Hardy--Littlewood mean value theorem
+    in Lean. The approximate functional equation and fourth-moment
+    method are the key tools.
 
-  \item \textbf{Prove Axiom~2} (\texttt{covariance\_bound\_from\_mertens\_34}).
-    The infrastructure is already built. You need to assemble a
-    double-sum expansion from the existing \texttt{s1\_decay},
-    \texttt{s2\_decay}, and \texttt{s3\_uniform\_bound} lemmas.
-    Estimated effort: $\sim$200 lines.
+  \item \textbf{Prove Axiom~2} (\texttt{rh\_zeta\_lower\_bound\_from\_zero\_counting}).
+    Borel--Carath\'eodory is in Mathlib. The gap is the Hadamard
+    product formula and Riemann--von Mangoldt zero counting.
 
-  \item \textbf{Prove one of the 43 non-critical axioms.} The
-    Cathedral contains 47 axioms total. Only 4 are on the crown
-    path. The other 43 support alternative proof engines (spectral,
-    sieve, Vasyunin). Proving any one of them strengthens the
+  \item \textbf{Prove one of the 53 non-critical axioms.} The
+    Cathedral contains 55 axioms total. Only 2 are on the crown
+    path. The other 53 support alternative proof engines (spectral,
+    sieve, Perron). Proving any one of them strengthens the
     overall formalization.
 \end{enumerate}
 
@@ -192,7 +174,7 @@ It looks like this:
 
 \begin{enumerate}
   \item \textbf{Day 1--7}: Explore. Try things. Fail. Archive
-    the failures. We produced 130 files of failed attempts. Every
+    the failures. We produced 128 files of failed attempts. Every
     failure taught us something.
 
   \item \textbf{Day 8--14}: Find the right framework. For us,
@@ -206,7 +188,7 @@ It looks like this:
 
   \item \textbf{Day 26--30}: Audit. Check every file. Fix every
     docstring. Remove every ghost axiom. Reduce, simplify, clean.
-    The Great Audit reduced the codebase to 150 active + 130 archived.
+    The Great Audit reduced the codebase to 161 active + 128 archived.
 \end{enumerate}
 
 The ratio of exploration to construction is roughly 2:1. Two weeks
@@ -243,7 +225,7 @@ You need:
   \item Lean~4 (free).
   \item Mathlib (free).
   \item Curiosity.
-  \item The willingness to fail 130 times before you succeed once.
+  \item The willingness to fail 128 times before you succeed once.
 \end{itemize}
 
 The compiler does not check your credentials. It checks your proof.
@@ -255,7 +237,7 @@ The compiler does not check your credentials. It checks your proof.
 We built the Cathedral. We mapped the territory. We named the
 axioms. We preserved the failures. We verified every step.
 
-We could not prove the last four things.
+We could not prove the last two things.
 
 Now it's your turn.
 
@@ -263,7 +245,7 @@ Now it's your turn.
 \emph{The primes have been singing for 167 years.\\
 The Cathedral stands, waiting for its final stones.\\
 We built it as far as we could.\\
-Four axioms remain.\\
+Two axioms remain.\\
 The rest belongs to you.}
 \end{quote}
 
