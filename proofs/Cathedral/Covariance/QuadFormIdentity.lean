@@ -64,9 +64,32 @@ theorem quadForm_as_double_sum (N : ℕ) (hN : 3 ≤ N) :
       vasyuninGramEntry (i.val + 1) (j.val + 1)) (bdMoebiusWeight N) =
     ∑ j ∈ Finset.Icc 1 (N - 1), ∑ k ∈ Finset.Icc 1 (N - 1),
       gramProduct N j k := by
-  -- Strategy: unfold realQuadForm into dotProduct/mulVec, then convert
-  -- each Fin(N-1) sum to Icc 1 (N-1) using fin_sum_eq_icc_sum.
-  sorry
+  -- Step 1: bdMoebiusWeight N i = bdWeight N (i.val + 1)
+  have h_weight : ∀ i : Fin (N - 1), bdMoebiusWeight N i = bdWeight N (i.val + 1) := by
+    intro i; unfold bdMoebiusWeight bdWeight; rfl
+  -- Step 2: Unfold realQuadForm and rewrite summands
+  unfold Cathedral.Variational.realQuadForm
+  simp only [dotProduct, Matrix.mulVec, Matrix.of_apply]
+  simp_rw [Finset.mul_sum]
+  -- Now goal: Σ i, Σ j, w(i) * (G(i+1,j+1) * w(j)) = Σ_Icc Σ_Icc gramProduct
+  -- Step 3: Rewrite each summand as gramProduct N (i+1) (j+1)
+  have h_summand : ∀ (i j : Fin (N - 1)),
+      bdMoebiusWeight N i * (vasyuninGramEntry (i.val + 1) (j.val + 1) *
+        bdMoebiusWeight N j) =
+      gramProduct N (i.val + 1) (j.val + 1) := by
+    intro i j; rw [h_weight i, h_weight j]; unfold gramProduct; ring
+  simp_rw [h_summand]
+  -- Now goal: Σ i : Fin(N-1), Σ j : Fin(N-1), gramProduct N (i+1) (j+1)
+  --         = Σ j ∈ Icc 1 (N-1), Σ k ∈ Icc 1 (N-1), gramProduct N j k
+  -- Step 4: Apply fin_sum_eq_icc_sum to inner sum first
+  have h_inner : ∀ (i : Fin (N - 1)),
+      ∑ j : Fin (N - 1), gramProduct N (i.val + 1) (j.val + 1) =
+      ∑ k ∈ Finset.Icc 1 (N - 1), gramProduct N (i.val + 1) k := by
+    intro i; exact fin_sum_eq_icc_sum (by omega : 2 ≤ N) _
+  simp_rw [h_inner]
+  -- Step 5: Apply fin_sum_eq_icc_sum to outer sum
+  exact fin_sum_eq_icc_sum (by omega : 2 ≤ N)
+    (fun j => ∑ k ∈ Finset.Icc 1 (N - 1), gramProduct N j k)
 
 -- ═══════════════════════════════════════════════
 -- §3. INNER ABEL: FIX j, ABEL SUM OVER k
