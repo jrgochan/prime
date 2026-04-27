@@ -231,10 +231,19 @@ theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     _ ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ) := by
         gcongr
 
-/-- Off-diagonal Gram entry bound: |G(j,k)| ≤ C·(1/j + 1/k). -/
-theorem gramEntry_off_diag_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
+/-- Off-diagonal Gram entry growth bound.
+    |G(j,k)| ≤ C · log(max(j,k)+1) / min(j,k).
+
+    The log factor is necessary: the term (j-k)/(2jk)·log(k/j) in the
+    Gram entry formula grows as log(max(j,k)/min(j,k)) when j and k are
+    far apart. The bound C·(1/j+1/k) is FALSE for large k/j ratios.
+
+    NOTE: This lemma is NOT required for the Abel strategy. The Abel
+    approach (inner_sum_abel) handles the full sum Σ_k v_k G(j,k)
+    directly, without needing individual entry bounds. -/
+theorem gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     |vasyuninGramEntry j k| ≤
-    (Real.log (2 * Real.pi) + 2) / 2 * (1 / (j : ℝ) + 1 / (k : ℝ)) := by
+    2 * Real.log (↑(max j k) + 1) / ↑(min j k) := by
   sorry
 
 -- ═══════════════════════════════════════════════
