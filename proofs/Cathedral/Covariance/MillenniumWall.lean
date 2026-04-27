@@ -21,6 +21,13 @@ import Cathedral.Vasyunin.Augmented.CovarianceAbel
 noncomputable section
 open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 
+-- ⚠️  DEPRECATED AXIOM (Exploration 13, April 27, 2026)
+-- This axiom is MATHEMATICALLY FALSE under mere Mertens x^{3/4}.
+-- Via Dirichlet convolution: ∫(1-f)² ≈ 2√N/log²N → ∞ under x^{3/4}.
+-- The gram form bound IS the Riemann Hypothesis, not a consequence
+-- of Mertens. This axiom is retained for the "alternative chain"
+-- (not on the Direct BD Crown Path).
+-- The correct proof chain: Crown Axiom 1 (Mellin) → Parseval → gram form.
 axiom gram_form_upper_bound
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →

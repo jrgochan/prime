@@ -123,23 +123,23 @@ theorem abel_diff_bound (N k : ℕ) (hk : 1 ≤ k) (hkN : k + 1 ≤ N)
 -- §4. THE L² RESIDUAL BOUND VIA ABEL
 -- ═══════════════════════════════════════════════
 
-/-- **THE IRREDUCIBLE CONTENT**: vᵀGv ≤ 1 + C/logN for BD weights.
+/-- **DEPRECATED — THIS THEOREM IS FALSE** (Exploration 13, April 27, 2026)
 
-    This is mathematically equivalent to ∫(1-f)² ≤ C'/logN
-    (since ∫(1-f)² = 1-2bᵀv+vᵀGv and bᵀv ≈ 1).
+    The bound vᵀGv ≤ 1 + C/logN CANNOT be proved from Mertens x^{3/4} alone.
 
-    The proof requires showing that the Möbius cancellation
-    (|M(k)| ≤ C·k^{3/4}) propagates through the Gram quadratic form.
+    PROOF OF FALSITY (Gemini Actual, Dirichlet Convolution):
+    Via Möbius inversion: 1 - f_N(1/y) = -yE_N - (ψ(y) - y)/logN
+    Under |M(x)| ≤ C·x^{3/4}: |ψ(y)-y| ~ y^{3/4}, so
+    ∫(1-f)² ≈ 2√N/log²N → ∞ (DIVERGES).
 
-    This bound is a **necessary consequence** of the Mertens bound:
-    the Gram matrix entries G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx are
-    bilinear in the fractional parts, and the BD weights
-    v_k = -μ(k)·(1-logk/logN) inherit the Mertens cancellation.
+    The spatial L² bound IS the Riemann Hypothesis, not a consequence
+    of Mertens. The Lean compiler correctly refuses to compile this.
 
-    The proof must NOT use the covariance axiom (circular).
-    The proof must NOT use the L² residual bound (self-referential).
-    
-    The Mertens bound + PNT hypotheses are sufficient. -/
+    CORRECT APPROACH: Derive vᵀGv ≤ 1 + K/logN from the Crown Axiom
+    (critical_line_mellin_variance) via Parseval, running the chain FORWARD.
+    See MellinCrown.lean for the correct architecture.
+
+    This theorem is kept (with sorry) as a historical artifact. -/
 private theorem gram_form_bound_raw
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
