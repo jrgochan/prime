@@ -429,8 +429,66 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
           (Real.continuous_cos.comp (continuous_const.mul continuous_id))).intervalIntegrable _ _)
       convert key using 1
       simp [Real.sin_zero, Real.cos_zero, Real.cos_neg, Real.sin_neg]; ring
-    -- Now assemble: set integral → interval integral → split → FTC → trig identity
-    sorry
+    -- Assembly: connect set integral to interval integral results
+    -- Goal: ∫ ξ in Icc(-1,1), Λ(ξ)·cos(cξ) = fejerKernel x
+    -- Strategy: suffices (1-cos c)/c² + (1-cos c)/c² = fejerKernel x,
+    -- then prove the set integral equals the sum of two interval integrals
+    suffices hsuff : (1 - Real.cos c) / c ^ 2 + (1 - Real.cos c) / c ^ 2 =
+        fejerKernel x by
+      -- Convert set integral → interval integral → split → remove |ξ| → FTC
+      have h_set_to_int : ∫ ξ in Set.Icc (-1 : ℝ) 1,
+          triangleFunction ξ * Real.cos (c * ξ) =
+          ∫ ξ in (-1 : ℝ)..1, triangleFunction ξ * Real.cos (c * ξ) := by
+        rw [MeasureTheory.integral_Icc_eq_integral_Ioc,
+            ← intervalIntegral.integral_of_le (by norm_num : (-1 : ℝ) ≤ 1)]
+      rw [h_set_to_int]
+      -- Split at 0
+      have h_ii : ∀ a b : ℝ, IntervalIntegrable
+          (fun ξ => triangleFunction ξ * Real.cos (c * ξ)) MeasureTheory.volume a b :=
+        fun a b => (triangleFunction_continuous.mul
+          (Real.continuous_cos.comp (continuous_const.mul continuous_id))).intervalIntegrable a b
+      rw [← intervalIntegral.integral_add_adjacent_intervals (h_ii (-1) 0) (h_ii 0 1)]
+      -- Remove |ξ| on each half: Λ(ξ) = 1+ξ on [-1,0], Λ(ξ) = 1-ξ on [0,1]
+      have h_left_eq : ∫ ξ in (-1 : ℝ)..0, triangleFunction ξ * Real.cos (c * ξ) =
+          ∫ ξ in (-1 : ℝ)..0, (1 + ξ) * Real.cos (c * ξ) := by
+        apply intervalIntegral.integral_congr
+        intro ξ hξ
+        rw [Set.uIcc_of_le (by norm_num : (-1 : ℝ) ≤ 0)] at hξ
+        have h_neg : ξ ≤ 0 := hξ.2
+        have h_low : -1 ≤ ξ := hξ.1
+        show max (1 - |ξ|) 0 * Real.cos (c * ξ) = (1 + ξ) * Real.cos (c * ξ)
+        rw [abs_of_nonpos h_neg]
+        simp only [sub_neg_eq_add]
+        rw [max_eq_left (by linarith)]
+      have h_right_eq : ∫ ξ in (0 : ℝ)..1, triangleFunction ξ * Real.cos (c * ξ) =
+          ∫ ξ in (0 : ℝ)..1, (1 - ξ) * Real.cos (c * ξ) := by
+        apply intervalIntegral.integral_congr
+        intro ξ hξ
+        rw [Set.uIcc_of_le (by norm_num : (0 : ℝ) ≤ 1)] at hξ
+        have h_pos : 0 ≤ ξ := hξ.1
+        have h_hi : ξ ≤ 1 := hξ.2
+        show max (1 - |ξ|) 0 * Real.cos (c * ξ) = (1 - ξ) * Real.cos (c * ξ)
+        rw [abs_of_nonneg h_pos]
+        rw [max_eq_left (by linarith)]
+      rw [h_left_eq, h_right_eq, h_left_val, h_right_val, hsuff]
+    -- Now prove: 2(1-cos c)/c² = sinc²(x) where c = 2πx
+    unfold fejerKernel sinc
+    rw [if_neg hx]
+    rw [hc_def]
+    -- Need: (1-cos(2πx))/(2πx)² + (1-cos(2πx))/(2πx)² = (sin(πx)/(πx))²
+    -- Use half-angle: 1-cos(2θ) = 2sin²(θ) with θ = πx
+    have hpx : π * x ≠ 0 := mul_ne_zero Real.pi_ne_zero hx
+    have h_half : 1 - Real.cos (2 * (π * x)) = 2 * Real.sin (π * x) ^ 2 := by
+      have h1 := Real.sin_sq_add_cos_sq (π * x)
+      have h2 := Real.cos_sq (π * x)  -- cos²(πx) + sin²(πx) = 1
+      -- cos(2θ) = cos²θ - sin²θ = 1 - 2sin²θ
+      -- So 1 - cos(2θ) = 2sin²θ
+      rw [Real.cos_two_mul']
+      nlinarith
+    rw [show 2 * π * x = 2 * (π * x) from by ring]
+    rw [h_half]
+    field_simp
+    ring
 
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
 
