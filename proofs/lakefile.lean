@@ -155,6 +155,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.MellinVarianceProof,
     `Cathedral.Assembly.MellinCrown,
     -- Gram form graduation (axiom → theorem via split-region L²)
+    `Cathedral.Covariance.CovarianceBound,
     `Cathedral.Covariance.GramFormProof,
     `Cathedral.Covariance.Direct,
     `Cathedral.Covariance.DotProductBound,

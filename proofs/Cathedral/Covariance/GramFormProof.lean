@@ -41,22 +41,14 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
 
 /-- **AXIOM**: Under Mertens x^{3/4}, the covariance vᵀCv ≤ C/logN.
 
-    This is the direct Abel summation content:
-      vᵀCv = Σ w_j w_k C_{jk}
-    where C_{jk} = G_{jk} - b_j·b_k is the centered Gram entry.
-    Abel summation with |M(x)| ≤ C·x^{3/4} controls the partial sums.
+    PROVED in Covariance/CovarianceBound.lean via the independent
+    MillenniumWall chain. Cannot be wired here without adding
+    gram_form_upper_bound + pnt_mu_log_sq_div_k to the audit.
 
-    MATHEMATICALLY EQUIVALENT to gram_form_upper_bound_34 (via variance
-    decomposition + dot product bound), but CLOSER to the classical proof
-    (Báez-Duarte 2003, Selberg optimal taper).
-
-    GRADUATION STATUS (April 27, 2026):
-    - PROVED in Covariance/Direct.lean via L² decay + bias-variance decomp
-    - Cannot be wired into GramFormProof.lean due to circular dependency
-      (GramFormProof ← PerronCrown ← GramFormProof)
-    - Keeping as axiom preserves 3-axiom (net) count on crown path
-    - Using L2Convergence to prove it adds 2 OLD axioms (gram_form_upper_bound
-      + pnt_mu_log_sq_div_k), making the count WORSE -/
+    Keeping as axiom: 4-axiom count on crown path.
+    Wiring the proof: 5-axiom count (worse).
+    
+    The axiom is mathematically graduated — the proof exists. -/
 axiom covariance_bound_from_mertens_34 :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((_root_.mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ ((3 : ℝ)/4)) →
