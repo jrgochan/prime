@@ -49,9 +49,12 @@ private lemma ioc_zero_eq_icc_one {N : ℕ} {f : ℕ → ℝ} :
   ext n; simp [Nat.lt_iff_add_one_le, Nat.one_le_iff_ne_zero]
   intros; rfl
 
-/-- **The Dirichlet floor identity for log-weighted Möbius.**
-    Σ_{n ∈ Icc 1 N} μ(n)·log(n)·(N/n) = -ψ(N) -/
-private lemma sum_mu_log_floor_icc (N : ℕ) :
+/-- **The Dirichlet floor identity for log-weighted Möbius (Identity 2).**
+    Σ_{n ∈ Icc 1 N} μ(n)·log(n)·(N/n) = -ψ(N)
+
+    This is Dirichlet convolution `μ·log * ζ = -Λ` evaluated via
+    the hyperbola method. Zero sorry. -/
+lemma sum_mu_log_floor_icc (N : ℕ) :
     ∑ n ∈ Icc 1 N, (μ n : ℝ) * Real.log n * (N / n : ℕ) = -Psi N := by
   have h := ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum mu_log N
   rw [mu_log_mul_zeta] at h

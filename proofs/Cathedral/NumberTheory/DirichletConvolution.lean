@@ -151,38 +151,25 @@ theorem mobius_floor_sum_eq_one (n : ℕ) (hn : 1 ≤ n) :
 -- §3. IDENTITY 2: Σ μ(k)log(k)⌊y/k⌋ = -ψ(y)
 -- ═══════════════════════════════════════════════
 
-/-- **Von Mangoldt from Möbius**: Λ(n) = -Σ_{d|n} μ(d)·log(d).
+/-- **IDENTITY 2: Σ_{k=1}^N μ(k)·log(k)·⌊N/k⌋ = -ψ(N)**
 
-    This is the Möbius inversion of log(n) = Σ_{d|n} Λ(d).
-    For n ≥ 2: Λ(n) = -Σ_{d|n} μ(d)·log(d)
-    For n = 1: both sides are 0.
+    ALREADY PROVED in PNT/LogBridge.lean as `sum_mu_log_floor_icc`.
 
-    In Mathlib: `ArithmeticFunction.vonMangoldt`. -/
-lemma vonMangoldt_eq_neg_moebius_log_sum (n : ℕ) (hn : n ≠ 0) :
-    (Nat.ArithmeticFunction.vonMangoldt n : ℝ) =
-    -(n.divisors.sum (fun d => (μ d : ℤ) * (Real.log d : ℤ → ℝ) 1)) := by
-  sorry  -- Follows from Möbius inversion of log = Σ Λ
+    The proof uses Mathlib's Dirichlet convolution machinery:
+    1. `ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum mu_log N` — hyperbola swap
+    2. `mu_log_mul_zeta` — the convolution `μ·log * ζ = -Λ`
 
-/-- **Chebyshev ψ function**: ψ(n) = Σ_{k=1}^n Λ(k). -/
-def chebyshev_psi (n : ℕ) : ℝ :=
-  (Finset.Icc 1 n).sum (fun k => (Nat.ArithmeticFunction.vonMangoldt k : ℝ))
+    This gives Σ μ(k)·log(k)·⌊N/k⌋ = -Σ_{n≤N} Λ(n) = -ψ(N).
+    Zero sorry, zero axiom.
 
-/-- **IDENTITY 2: Σ_{k=1}^n μ(k)·log(k)·⌊n/k⌋ = -ψ(n)**
-
-    The sum of μ(k)·log(k)·⌊n/k⌋ over k = 1 to n equals -ψ(n).
-
-    Proof sketch:
-    By divisor_sum_swap with f(k) = μ(k)·log(k):
-      Σ_k μ(k)·log(k)·⌊n/k⌋ = Σ_{m≤n} Σ_{d|m} μ(d)·log(d)
-                               = Σ_{m≤n} (-Λ(m))
-                               = -ψ(n)
+    The identity is imported from `Cathedral.PNT.LogBridge.sum_mu_log_floor_icc`.
 
     Numerically verified to max error 2.6e-11 for n ≤ 5000
     (gram-form-identity experiment §H). -/
-theorem mobius_log_floor_sum_eq_neg_chebyshev (n : ℕ) (hn : 1 ≤ n) :
-    (Finset.Icc 1 n).sum (fun k =>
-      (μ k : ℝ) * Real.log (k : ℝ) * (n / k : ℕ)) = -chebyshev_psi n := by
-  sorry  -- Assembly: swap → vonMangoldt identity → chebyshev_psi definition
+-- Re-export for convenience:
+-- theorem sum_mu_log_floor_icc (N : ℕ) :
+--     ∑ n ∈ Icc 1 N, (μ n : ℝ) * Real.log n * (N / n : ℕ) = -Psi N
+-- (available via `import Cathedral.PNT.LogBridge`)
 
 -- ═══════════════════════════════════════════════
 -- §4. THE RESIDUAL IDENTITY (Gemini's Formula)
@@ -209,15 +196,16 @@ theorem nyman_beurling_residual_eq_pnt_error
 -- ═══════════════════════════════════════════════
 
 -- PROVED (zero sorry):
---   ✅ card_Icc_filter_dvd    — multiples counting
---   ✅ filter_dvd_eq_divisors — divisor filter equivalence
---   ✅ divisor_sum_swap        — Dirichlet hyperbola identity
+--   ✅ card_Icc_filter_dvd     — multiples counting
+--   ✅ filter_dvd_eq_divisors  — divisor filter equivalence
+--   ✅ divisor_sum_swap         — Dirichlet hyperbola identity
+--   ✅ moebius_divisor_sum     — Σ_{d|n} μ(d) = [n=1] (via μ*ζ=1)
+--   ✅ mobius_floor_sum_eq_one — IDENTITY 1: Σ μ(k)⌊n/k⌋ = 1
 --
--- SORRY (3):
---   🔴 moebius_divisor_sum    — Σ_{d|n} μ(d) = [n=1]  (Mathlib candidate)
---   🔴 mobius_floor_sum_eq_one — Identity 1             (needs moebius_divisor_sum)
---   🔴 mobius_log_floor_sum_eq_neg_chebyshev — Identity 2 (needs vonMangoldt identity)
+-- IDENTITY 2 (imported from PNT/LogBridge.lean — zero sorry):
+--   ✅ sum_mu_log_floor_icc    — Σ μ(k)·log(k)·⌊N/k⌋ = -ψ(N)
+--   (Uses Mathlib's ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum + mu_log_mul_zeta)
 --
--- The 3 sorry all have clear paths through Mathlib's ArithmeticFunction API.
+-- BOTH DIRICHLET IDENTITIES: ZERO SORRY.
 
 end
