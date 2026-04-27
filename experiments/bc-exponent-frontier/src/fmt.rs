@@ -1,4 +1,4 @@
-//! Terminal formatting constants and helpers
+//! Terminal formatting constants
 
 pub const BOLD: &str = "\x1b[1m";
 pub const DIM: &str = "\x1b[2m";
@@ -19,13 +19,7 @@ pub fn header(title: &str, subtitle: &str, prec: u32, threads: usize) {
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}{title}{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}{subtitle}{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{prec}-bit MPFR · {threads} threads · rayon{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{prec}-bit MPFR · {threads} threads{RESET}");
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
     println!();
-}
-
-/// Format a duration nicely
-pub fn elapsed(secs: f64) -> String {
-    if secs < 60.0 { format!("{:.1}s", secs) }
-    else { format!("{}m{:.0}s", (secs / 60.0) as u64, secs % 60.0) }
 }

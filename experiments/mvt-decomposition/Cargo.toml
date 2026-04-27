@@ -1,15 +1,10 @@
 [package]
 name = "mvt-decomposition"
 version = "0.1.0"
-edition = "2021"
-description = """
-Cathedral Axiom 1 Strategy Experiment: Decomposes the mean value integral
-∫|Σ aₙ n⁻ⁱᵗ|² dt into diagonal and off-diagonal terms for BD Möbius weights.
-Tests whether a simpler inequality (weaker than full Montgomery-Vaughan)
-suffices for the critical_line_mellin_variance axiom.
-"""
+edition = "2024"
+description = "Cathedral MVT Decomposition — decomposes ∫|Σ aₙ n⁻ⁱᵗ|² into diagonal + off-diagonal for BD Möbius weights, testing whether simpler bounds can graduate critical_line_mellin_variance"
 
 [dependencies]
-rug = "1.24"
+rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"

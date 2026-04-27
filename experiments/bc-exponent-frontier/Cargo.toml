@@ -1,15 +1,10 @@
 [package]
 name = "bc-exponent-frontier"
 version = "0.1.0"
-edition = "2021"
-description = """
-Cathedral Axiom 2 Strategy Experiment: Tests whether the Borel-Carathéodory
-exponent threshold B_ε can be tightened or eliminated. If the Perron chain
-only needs exponents A in a range covered by BC, the zero-counting axiom
-(rh_zeta_lower_bound_from_zero_counting) becomes unnecessary.
-"""
+edition = "2024"
+description = "Cathedral BC Exponent Frontier — maps the Borel-Carathéodory exponent gap and tests Phragmén-Lindelöf as an alternative path to eliminate rh_zeta_lower_bound_from_zero_counting"
 
 [dependencies]
-rug = "1.24"
+rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"
