@@ -951,7 +951,30 @@ theorem montgomery_vaughan_bound
         (if i = j then (0 : ℂ)
          else (x i * starRingEnd ℂ (x j)) / ((lam i - lam j : ℝ) : ℂ))‖
     ≤ (π / δ) * ∑ i : Fin N, ‖x i‖ ^ 2 := by
-  sorry
+  -- ═══════════════════════════════════════════════════════
+  -- Proof via Fejér kernel (FK1-FK4 all PROVED above).
+  --
+  -- Strategy (Montgomery-Vaughan, 1974):
+  -- 1. Define f(t) = Σ xᵣ e^{2πiλᵣt}
+  -- 2. I = ∫ₐ |f(t)|² · K(t·δ) dt where K = sinc² (Fejér kernel)
+  -- 3. I ≥ 0 by FK1 (K ≥ 0)
+  -- 4. Expand |f|² and integrate term-by-term:
+  --    I = (1/δ) Σᵢⱼ xᵢx̄ⱼ · K̂((λᵢ-λⱼ)/δ)
+  -- 5. Diagonal (i=j): K̂(0) = ∫K = 1 (FK3), gives (1/δ)Σ|xᵢ|²
+  -- 6. Off-diagonal (i≠j): |λᵢ-λⱼ| ≥ δ, so |(λᵢ-λⱼ)/δ| ≥ 1,
+  --    so K̂((λᵢ-λⱼ)/δ) = 0 by FK4 (band-limitation)
+  -- 7. Therefore I = (1/δ)Σ|xᵢ|² and the off-diagonal is absorbed.
+  --
+  -- The Hilbert form Σ xᵢx̄ⱼ/(λᵢ-λⱼ) is then bounded by
+  -- comparing with the convolution integral representation:
+  --   1/(λᵢ-λⱼ) = ∫₀^∞ e^{2πi(λᵢ-λⱼ)t} dt · (πi)
+  -- which gives the π/δ constant.
+  --
+  -- ALL FK properties (FK1, FK2, FK3, FK4) are PROVED above.
+  -- The remaining gap: the Fubini interchange and convolution
+  -- identity connecting the bilinear form to the Fejér integral.
+  -- ═══════════════════════════════════════════════════════
+  sorry  -- Fubini + FK → bilinear bound (FK1-FK4 all proved)
 
 /-- **Montgomery-Vaughan Hilbert Inequality** (convenience wrapper). -/
 theorem montgomery_vaughan_inequality
