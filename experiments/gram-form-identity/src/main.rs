@@ -113,7 +113,7 @@ fn main() {
 
     let max_n: usize = std::env::args().nth(1)
         .and_then(|s| s.parse().ok())
-        .unwrap_or(2000);
+        .unwrap_or(50000);
 
     header(
         "CATHEDRAL GRAM FORM IDENTITY EXPLORER",
@@ -123,13 +123,19 @@ fn main() {
 
     fs::create_dir_all("results").unwrap();
 
-    let mut test_ns: Vec<usize> = vec![10, 20, 50, 100, 200, 500, 1000];
-    if max_n >= 2000 { test_ns.push(2000); }
-    if max_n >= 5000 { test_ns.push(5000); }
+    // Small N: exact Gram matrix computation (N ≤ 2000)
+    let mut test_ns: Vec<usize> = vec![10, 20, 50, 100, 200, 500, 1000, 2000];
     test_ns.retain(|&n| n <= max_n);
-    test_ns.sort();
-    test_ns.dedup();
-    let sieve_max = *test_ns.last().unwrap();
+
+    // High N: integral-based computation (fast O(N·pts))
+    let mut high_ns: Vec<usize> = Vec::new();
+    for &step in &[5000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000] {
+        if step <= max_n { high_ns.push(step); }
+    }
+    if max_n > 2000 && !high_ns.contains(&max_n) { high_ns.push(max_n); }
+
+    let sieve_max = *test_ns.last().unwrap().max(
+        high_ns.last().unwrap_or(&0));
 
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {sieve_max}...{RESET}");
     let mu = sieve::mobius_sieve(sieve_max);
@@ -257,6 +263,56 @@ fn main() {
             2.0 * (1.0 - r.btv) * log_n);
     }
     println!();
+
+    // ═══ §G. HIGH-N INTEGRAL SCAN ═══
+    if !high_ns.is_empty() {
+        println!("  {BOLD}{WHITE}═══ §G. HIGH-N SCAN (integral quadrature, O(N·pts)) ═══{RESET}");
+        println!("  {DIM}  Using ∫₀¹ f_N(x)² dx instead of Gram matrix{RESET}");
+        println!("  {DIM}     N  │    vᵀGv    │  vᵀGv - 1  │    bᵀv     │  (vᵀGv-1)·L │  ∫(1-f)²  │  points{RESET}");
+
+        let mut tsv_g = fs::File::create("results/high_n.tsv").unwrap();
+        writeln!(tsv_g, "N\tvtGv\tvtGv_minus_1\tbtv\texcess_logN\tl2_residual\tn_pts").unwrap();
+
+        for &n in &high_ns {
+            let t = Instant::now();
+            let weights = gram::precompute_weights(n, &mu);
+            // Adaptive points: more for smaller N, fewer for huge N
+            let n_pts = if n <= 10_000 { 200_000 }
+                else if n <= 50_000 { 100_000 }
+                else if n <= 200_000 { 50_000 }
+                else { 20_000 };
+
+            // Parallel quadrature
+            let dx = 1.0 / n_pts as f64;
+            let vtgv: f64 = (0..n_pts).into_par_iter().map(|i| {
+                let x = (i as f64 + 0.5) * dx;
+                let f = gram::f_n_at(x, &weights);
+                f * f * dx
+            }).sum();
+
+            let btv: f64 = (0..n_pts).into_par_iter().map(|i| {
+                let x = (i as f64 + 0.5) * dx;
+                gram::f_n_at(x, &weights) * dx
+            }).sum();
+
+            let log_n = (n as f64).ln();
+            let excess_l = (vtgv - 1.0) * log_n;
+            let l2 = 1.0 - 2.0 * btv + vtgv;
+
+            println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>11.6} │ {:>9.6} │ {:>7} ({:.1}s)",
+                n, vtgv, vtgv - 1.0, btv, excess_l, l2, n_pts,
+                t.elapsed().as_secs_f64());
+            writeln!(tsv_g, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
+                n, vtgv, vtgv - 1.0, btv, excess_l, l2, n_pts).unwrap();
+
+            conv_results.push(ConvergenceResult {
+                n, vtgv, btv,
+                vtcv: vtgv - btv * btv,
+                l2_residual: l2,
+            });
+        }
+        println!();
+    }
 
     // ═══ CERTIFICATE ═══
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");

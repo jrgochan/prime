@@ -72,3 +72,48 @@ pub fn s3(mu: &[i8], m: usize) -> f64 {
         mu[k] as f64 * logk * logk / k as f64
     }).sum()
 }
+
+/// Evaluate f_N(x) = Σ_{k=1}^{N-1} v_k · {1/(kx)}
+/// where {y} = y - floor(y) is the fractional part
+pub fn f_n_at(x: f64, weights: &[f64]) -> f64 {
+    if x <= 0.0 { return 0.0; }
+    let mut sum = 0.0;
+    for k in 1..weights.len() {
+        let w = weights[k];
+        if w == 0.0 { continue; }
+        let y = 1.0 / (k as f64 * x);
+        let frac = y - y.floor();
+        sum += w * frac;
+    }
+    sum
+}
+
+/// Compute vᵀGv = ∫₀¹ f_N(x)² dx via midpoint quadrature
+/// This is O(N·n_pts) instead of O(N²) for the Gram matrix approach
+pub fn vtgv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
+    let dx = 1.0 / n_pts as f64;
+    (0..n_pts).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        let f = f_n_at(x, weights);
+        f * f * dx
+    }).sum()
+}
+
+/// Compute bᵀv = ∫₀¹ f_N(x) dx via midpoint quadrature
+pub fn btv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
+    let dx = 1.0 / n_pts as f64;
+    (0..n_pts).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        f_n_at(x, weights) * dx
+    }).sum()
+}
+
+/// Precompute BD weights vector for a given N
+pub fn precompute_weights(n: usize, mu: &[i8]) -> Vec<f64> {
+    let m = n - 1;
+    let log_n = (n as f64).ln();
+    (0..=m).map(|k| {
+        if k == 0 { 0.0 } else { bd_weight(mu[k], k as u64, log_n) }
+    }).collect()
+}
+
