@@ -149,29 +149,36 @@ theorem fejer_orthogonality
     (h_sep : IsDeltaSeparated lam δ) :
     fejerWeightedL2 a lam δ = ∑ n : Fin N, ‖a n‖ ^ 2 := by
   unfold fejerWeightedL2 trigPoly
-  -- Goal: ∫ ‖Σ aₙ eₙ(t)‖² · δK(δt) dt = Σ ‖aₙ‖²
-  --
-  -- The mathematical proof:
-  -- 1. ‖Σ aₙ eₙ(t)‖² = normSq(Σ aₙ eₙ(t)) = (conj(Σ) · Σ).re
-  -- 2. Expand (conj(Σ) · Σ) = Σₘ Σₙ conj(aₙ)·conj(eₙ)·aₘ·eₘ
-  -- 3. Each cross-term integrates to Λ((λₘ-λₙ)/δ) by cross_term_integral
-  -- 4. Λ = δₘₙ by triangle_kronecker
-  -- 5. Diagonal: ‖aₙ‖² = (conj(aₙ)·aₙ).re = normSq(aₙ)
-  --
-  -- The formalization challenge: step 1-2 requires expanding ‖z‖²
-  -- for z = Σ cₙ as a double sum, which is ~50 lines of algebra.
-  -- Steps 3-5 use PROVED lemmas.
-  --
-  -- ARCHITECTURAL DECISION: This sorry encodes NO new mathematics.
-  -- Every mathematical component is proved:
-  --   • cross_term_integral: ∫ cos(2πωt)·δK(δt) dt = Λ(ω/δ)  ✅
-  --   • triangle_kronecker: Λ((λₘ-λₙ)/δ) = δₘₙ              ✅
-  --   • fejerKernel_fourier_eq_triangle: ∫ K·cos = Λ          ✅
-  --
-  -- What remains is PURELY:
-  --   • ‖Σ cₙ‖² = Σₘ Σₙ Re(cₘ · conj(cₙ))  (complex algebra)
-  --   • ∫ Σ f = Σ ∫ f                         (Mathlib: integral_finset_sum)
-  --   • Re(aₙ · conj(aₙ)) = ‖aₙ‖²            (complex algebra)
+  -- INNER PRODUCT APPROACH
+  -- Step 1: ‖z‖² = ⟪z, z⟫_ℝ (real inner product on ℂ)
+  simp_rw [← @real_inner_self_eq_norm_sq ℂ]
+  -- Step 2: ⟪Σ fₙ, Σ fₘ⟫ = Σₙ Σₘ ⟪fₙ, fₘ⟫
+  simp_rw [@sum_inner ℝ ℂ _ _ _ _ Finset.univ, @inner_sum ℝ ℂ _ _ _ _ Finset.univ]
+  -- Goal: ∫ (Σₓ Σᵢ ⟪aₓeₓ, aᵢeᵢ⟫_ℝ) * w(t) = Σₓ ⟪aₓ, aₓ⟫_ℝ
+  -- Step 3: ⟪w, z⟫_ℝ = Re(z * conj w) (Complex.inner)
+  simp_rw [Complex.inner]
+  -- Goal: ∫ (Σ Σ Re(aᵢeᵢ * conj(aₓeₓ))) * w = Σ Re(aₓ * conj(aₓ))
+  -- Step 4: Swap ∫ and Σ Σ
+  -- First: distribute w over the sum: (Σ Σ f) * w = Σ Σ (f * w)
+  simp_rw [Finset.sum_mul]
+  -- Now: ∫ Σₓ Σᵢ Re(...) * w = Σₓ Re(...)
+  -- Goal: ∫ Σₓ Σᵢ Re(aᵢeᵢ * conj(aₓ) · conj(eₓ)) * w = Σₓ Re(aₓ * conj(aₓ))
+  -- Step 5: Expand conj(aₓ * eₓ) = conj(aₓ) * conj(eₓ)
+  simp_rw [map_mul (starRingEnd ℂ)]
+  -- Step 6: Swap ∫ and ΣΣ using integral_finset_sum
+  rw [integral_finset_sum Finset.univ (fun x _ => by exact sorry)]
+  -- Main goal: Σₓ ∫ (Σᵢ ...) * w = Σₓ Re(aₓ * conj(aₓ))
+  congr 1; ext x
+  -- Step 7: Inner swap ∫ and Σᵢ
+  rw [integral_finset_sum Finset.univ (fun i _ => by exact sorry)]
+  -- Goal: Σᵢ ∫ Re(aᵢeᵢ * conj(aₓ)conj(eₓ)) · δK(δt) = Re(aₓ * conj(aₓ))
+  -- Each integral: ∫ Re(aᵢconj(aₓ) · eᵢconj(eₓ)) · w dt
+  --   = Re(aᵢconj(aₓ)) · ∫ cos(2π(λᵢ-λₓ)t) · w dt  (even kernel kills sin)
+  --   = Re(aᵢconj(aₓ)) · Λ((λᵢ-λₓ)/δ)                (cross_term_integral ✅)
+  --   = Re(aᵢconj(aₓ)) · δᵢₓ                           (triangle_kronecker ✅)
+  -- Sum collapses: Σᵢ Re(aᵢconj(aₓ))·δᵢₓ = Re(aₓconj(aₓ))
+  -- This final step needs the sin integral = 0 (parity: sin·even = odd)
+  -- and the proved cross_term_integral + triangle_kronecker
   sorry
 
 -- ═══════════════════════════════════════════════
