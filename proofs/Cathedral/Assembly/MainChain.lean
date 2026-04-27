@@ -159,13 +159,19 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     v8 (April 25):      PNT graduation (4 crown axioms)
     v9 (April 25):      Abel Bypass (4 crown axioms)
     v10 (April 25):     Gram Form graduation (4 crown axioms)
-    v11 (April 26):     THE MELLIN CROWN (2 crown axioms)
+    v11 (April 26):     THE MELLIN CROWN (2 crown axioms, docstring)
       — Forward direction rewired through frequency domain
       — Real-variable chain demoted to Spectral Engine
       — Walls 1 & 3 no longer on crown path
+    v12 (April 27):     ONE CROWN AXIOM (compiler-verified)
+      — `#print axioms nyman_beurling_equivalence` shows:
+        `propext, sorryAx, Classical.choice, Quot.sound`
+      — `rh_zeta_lower_bound_from_zero_counting` is NOT transitively imported.
+      — The Mellin Crown path completely bypasses Axiom 2.
+      — Axiom 2 lives only in the Perron-based Spectral Engine.
 
-    CURRENT STATE (v11): 2 crown axioms:
-      critical_line_mellin_variance, rh_zeta_lower_bound_from_zero_counting -/
+    CURRENT STATE (v12): 1 crown axiom (+ 1 sorry):
+      critical_line_mellin_variance (sorry in MellinCrown.lean) -/
 theorem rh_implies_bd_convergence :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -210,17 +216,32 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v11 — The Mellin Crown)
+-- AXIOM AUDIT (v12 — ONE CROWN AXIOM)
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
 --
--- EXPECTED (2 non-kernel axioms):
---   propext, Classical.choice, Quot.sound         (Lean kernel)
---   critical_line_mellin_variance                 (Mellin L² bound under RH)
---   rh_zeta_lower_bound_from_zero_counting        (Hadamard zero counting)
+-- COMPILER-VERIFIED OUTPUT (April 27, 2026):
+--   propext, sorryAx, Classical.choice, Quot.sound
 --
--- DEMOTED to Spectral Engine (no longer on crown path):
+-- INTERPRETATION:
+--   propext, Classical.choice, Quot.sound         (Lean kernel — unavoidable)
+--   sorryAx                                       (from critical_line_mellin_variance)
+--
+-- NOTE: rh_zeta_lower_bound_from_zero_counting is NOT listed.
+--   It is NOT transitively imported by nyman_beurling_equivalence.
+--   The Mellin Crown path (MellinCrown.lean) imports:
+--     Cathedral.White.Scattering (parseval_bridge_white — PROVED)
+--     Cathedral.MellinBridge.PlancherelDefs
+--     Cathedral.MellinBridge.BDWeights
+--     Cathedral.NymanBeurling.BDMellin
+--   NONE of which import Cathedral.Zeta.Hadamard.
+--
+-- CROWN AXIOMS ON CRITICAL PATH: 1
+--   critical_line_mellin_variance (sorry in MellinCrown.lean)
+--
+-- NOT ON CRITICAL PATH (Spectral Engine / Perron approach):
+--   rh_zeta_lower_bound_from_zero_counting        (Hadamard.lean — Perron only)
 --   pnt_mu_log_div_k                              (PNT derivative)
 --   covariance_bound_from_mertens_34              (Abel summation bound)
 --   partial_integral_tends_to_formula             (Vasyunin convergence)
@@ -234,6 +255,9 @@ end
 --   Only Plancherel/Mellin preserves phase structure automatically.
 --
 -- #print axioms rh_implies_distance_converges_to_zero
+--   → propext, sorryAx, Classical.choice, Quot.sound (1 sorry only)
 -- #print axioms distance_converges_to_zero_implies_rh
+--   → propext, Classical.choice, Quot.sound (FULLY PROVED — 0 sorry)
 -- #print axioms eigenvalue_limit_exists
+--   → propext, Classical.choice, Quot.sound (FULLY PROVED — 0 sorry)
 
