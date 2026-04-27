@@ -183,10 +183,24 @@ theorem covariance_bound_proved
   -- |1-bᵀv| ≤ C_dot/logN
   obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
     moebius_dot_product_approx_one_uniform_34 C_m hC_m_pos hM hPNT₁ hPNT₂
-  -- Step 4: vᵀCv = ∫(1-f)² - (1-bᵀv)²
-  --        ≤ C_l2/logN - 0 = C_l2/logN
-  -- (We can be more precise: vᵀCv ≤ ∫(1-f)² ≤ C_l2/logN)
+  -- Step 4: The key identity: ∫(1-f)² = (1-bᵀv)² + vᵀCv
+  -- Therefore: vᵀCv = ∫(1-f)² - (1-bᵀv)² ≤ ∫(1-f)² ≤ C_l2/logN
+  -- (since (1-bᵀv)² ≥ 0)
+  --
+  -- This uses the PROVED identity from VasyuninBypass:
+  --   bd_l2_error_eq_quad_error: ∫(1-f)² = 1-2bᵀv+vᵀGv
+  -- and the PROVED covariance decomposition:
+  --   vᵀCv = vᵀGv - (bᵀv)²
+  --
+  -- Combining: ∫(1-f)² = (1-bᵀv)² + vᵀCv
+  -- So: vᵀCv ≤ ∫(1-f)²
+  --
+  -- The L² residual bound provides: ∫(1-f)² ≤ C_l2/logN
   refine ⟨C_l2, by positivity, max 10 3, fun N hN hN3 => ?_⟩
+  -- Use the L² residual bound
+  have h_l2 := l2_residual_from_mertens C_m hC_m_pos hM hPNT₁ hPNT₂ N (by omega)
+  -- Bridge: vᵀCv ≤ ∫(1-f)²
+  -- This follows from ∫(1-f)² = (1-bᵀv)² + vᵀCv and (1-bᵀv)² ≥ 0
   sorry
 
 -- ═══════════════════════════════════════════════
