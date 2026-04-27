@@ -36,6 +36,7 @@ import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
 import Mathlib.Analysis.Fourier.FourierTransform
 import Mathlib.Analysis.Fourier.Inversion
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
+import Mathlib.Analysis.Complex.Trigonometric
 
 noncomputable section
 open Complex Real Finset BigOperators
@@ -652,6 +653,12 @@ private lemma Λ_ℂ_on_Icc (v : ℝ) (hv : v ∈ Set.Icc (-1 : ℝ) 1) :
   show ((max (1 - |v|) 0 : ℝ) : ℂ) = ((1 - |v|) : ℂ)
   simp [max_def, sub_nonneg.mpr hab]
 
+/-- Euler's formula applied to the integrand: exp(↑θ * I) * ↑r = ↑(cos θ · r) + ↑(sin θ · r) * I -/
+private lemma euler_mul_real (θ r : ℝ) :
+    Complex.exp (↑θ * Complex.I) * (↑r : ℂ) =
+    ↑(Real.cos θ * r) + ↑(Real.sin θ * r) * Complex.I := by
+  rw [Complex.exp_mul_I]; simp [Complex.ofReal_cos, Complex.ofReal_sin]; ring
+
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
 
@@ -661,12 +668,27 @@ private lemma Λ_ℂ_on_Icc (v : ℝ) (hv : v ∈ Set.Icc (-1 : ℝ) 1) :
     - `ft_integrand_outside`: integrand = 0 outside [-1,1]
     - `ft_Λ_ℂ_restrict`: 𝓕 Λ_ℂ(w) = ∫_{[-1,1]} exp · Λ_ℂ
     - `Λ_ℂ_on_Icc`: Λ_ℂ(v) = (1-|v|:ℂ) on [-1,1]
+    - `euler_mul_real`: exp(↑θ I) * ↑r = ↑(cos θ r) + ↑(sin θ r) I
 
-    Remaining sorry: integral assembly
-    (exp → cos+sin, split integral, cos=Bridge, sin=0) -/
+    Remaining sorry: integral linearity + cos=Bridge + sin=0 -/
 private lemma ft_Λ_ℂ_eq_fejerKernel (w : ℝ) :
     𝓕 Λ_ℂ w = ((fejerKernel w : ℝ) : ℂ) := by
-  sorry
+  calc 𝓕 Λ_ℂ w
+    -- Step 1: Restrict integral to [-1,1], simplify Λ_ℂ to (1-|v|)
+    _ = ∫ v in Set.Icc (-1 : ℝ) 1,
+        Complex.exp (↑(-2 * π * (v * w)) * Complex.I) * ((1 - |v|) : ℂ) := by
+      rw [ft_Λ_ℂ_restrict]
+      exact MeasureTheory.setIntegral_congr_fun measurableSet_Icc (fun v hv => by rw [Λ_ℂ_on_Icc v hv])
+    -- Step 2: Apply Euler's formula
+    _ = ∫ v in Set.Icc (-1 : ℝ) 1,
+        (↑(Real.cos (-2 * π * (v * w)) * (1 - |v|)) +
+         ↑(Real.sin (-2 * π * (v * w)) * (1 - |v|)) * Complex.I) := by
+      refine MeasureTheory.setIntegral_congr_fun measurableSet_Icc (fun v _ => ?_)
+      convert euler_mul_real (-2 * π * (v * w)) (1 - |v|) using 1
+      simp
+    -- Step 3: Integral linearity + Bridge + sin vanishing
+    _ = ((fejerKernel w : ℝ) : ℂ) := by
+      sorry
 
 /-- Integrability of 𝓕 Λ_ℂ, from Bridge matching + FK2. -/
 private lemma ft_Λ_ℂ_integrable :
