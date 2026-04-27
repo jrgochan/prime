@@ -1,51 +1,59 @@
--- Scratch: full FK2 pipeline
+-- Scratch: FK3/FK4 implementation
+import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.Fourier.Inversion
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Sinc
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-open Real MeasureTheory
+open MeasureTheory Real Complex
+open scoped FourierTransform
 
 noncomputable section
 
--- |sinc(y)| ≤ |y|⁻¹ for y ≠ 0
-lemma abs_sinc_le_inv (y : ℝ) (hy : y ≠ 0) : |sinc y| ≤ |y|⁻¹ := by
-  rw [sinc_of_ne_zero hy, abs_div, inv_eq_one_div]
-  exact div_le_div_of_nonneg_right (abs_sin_le_one y) (abs_pos.mpr hy).le
+-- The triangle function, ℂ-valued
+def Λ_ℂ (ξ : ℝ) : ℂ := ((max (1 - |ξ|) 0 : ℝ) : ℂ)
 
--- sinc²(y) ≤ |y|⁻² for y ≠ 0
-lemma sinc_sq_le_inv_sq (y : ℝ) (hy : y ≠ 0) : sinc y ^ 2 ≤ |y|⁻¹ ^ 2 := by
-  rw [← sq_abs (sinc y)]
-  exact pow_le_pow_left₀ (abs_nonneg _) (abs_sinc_le_inv y hy) 2
+-- 𝓕(f)(0) = ∫ f(x) dx
+lemma fourier_at_zero (f : ℝ → ℂ) : 𝓕 f 0 = ∫ v : ℝ, f v := by
+  simp [Real.fourier_eq]
 
--- sinc²(πx) * (1+x²) ≤ 2 for all x
-lemma sinc_sq_mul_one_add_sq (x : ℝ) : sinc (π * x) ^ 2 * (1 + x ^ 2) ≤ 2 := by
-  by_cases hx : x = 0
-  · simp [hx, sinc_zero]
-  · have hx2 : (0 : ℝ) < x ^ 2 := by positivity
-    have hpx : π * x ≠ 0 := mul_ne_zero pi_ne_zero hx
-    have h_sinc_sq_le_1 : sinc (π * x) ^ 2 ≤ 1 := by
-      nlinarith [sinc_le_one (π * x), neg_one_le_sinc (π * x)]
-    by_cases hle : x ^ 2 ≤ 1
-    · -- sinc² ≤ 1 and 1+x² ≤ 2
-      nlinarith
-    · -- x² > 1: use sinc² ≤ |πx|⁻²
-      push_neg at hle
-      have h_sq := sinc_sq_le_inv_sq (π * x) hpx
-      -- |πx|⁻² ≤ 1/x² (since |πx| ≥ |x|, so |πx|⁻¹ ≤ |x|⁻¹)
-      have h_pi_bound : |π * x|⁻¹ ≤ |x|⁻¹ := by
-        apply inv_anti₀ (abs_pos.mpr hx)
-        rw [abs_mul, abs_of_pos pi_pos]
-        nlinarith [abs_nonneg x, two_le_pi]
-      -- |πx|⁻² ≤ |x|⁻² = 1/x²
-      have h_sq_bound : |π * x|⁻¹ ^ 2 ≤ |x|⁻¹ ^ 2 := by
-        exact pow_le_pow_left₀ (by positivity) h_pi_bound 2
-      -- sinc²(πx) ≤ 1/x²
-      have h_sinc_le_invx : sinc (π * x) ^ 2 ≤ |x|⁻¹ ^ 2 := by linarith
-      -- Simplify |x|⁻² to 1/x²
-      have h_inv_eq : |x|⁻¹ ^ 2 = 1 / x ^ 2 := by
-        field_simp; rw [sq_abs]
-      rw [h_inv_eq] at h_sinc_le_invx
-      -- sinc²*(1+x²) ≤ (1/x²)*(1+x²) = 1+1/x² ≤ 2
-      have : (1 / x ^ 2) * (1 + x ^ 2) = 1 + 1 / x ^ 2 := by field_simp; ring
-      nlinarith [show 1 / x ^ 2 ≤ 1 from by rw [div_le_one₀ hx2]; linarith]
+-- Now the FK3 plan:
+-- 1. Apply fourier_fourierInv_eq to Λ_ℂ at ξ=0:
+--    𝓕(𝓕⁻ Λ_ℂ)(0) = Λ_ℂ(0) = 1
+-- 2. By fourier_at_zero: 𝓕(𝓕⁻ Λ_ℂ)(0) = ∫ (𝓕⁻ Λ_ℂ)(x) dx
+-- 3. Need: ∫ (𝓕⁻ Λ_ℂ)(x) dx = ∫ fejerKernel(x) dx  (matching)
+
+-- Step 1: Test that Λ_ℂ(0) = 1
+example : Λ_ℂ 0 = 1 := by
+  simp [Λ_ℂ]
+
+-- Step 2: Integrable Λ_ℂ 
+-- Λ_ℂ is bounded (≤ 1) and has support [-1,1], so it's integrable.
+-- This needs some work...
+
+-- Step 3: Integrable (𝓕 Λ_ℂ)
+-- This is equivalent to FK2 (modulo matching 𝓕 Λ_ℂ with fejerKernel)
+-- For now, let me see what 𝓕 Λ_ℂ unfolds to:
+
+-- 𝓕 Λ_ℂ (w) = ∫ 𝐞(-(v * w)) • Λ_ℂ(v) dv
+-- where 𝐞(x) = exp(2πix) (the Fourier character on ℝ)
+-- = ∫ exp(-2πi v w) * max(1-|v|, 0) dv
+
+-- This is a Lebesgue integral. For w=0:
+-- 𝓕 Λ_ℂ (0) = ∫ 1 * max(1-|v|, 0) dv = ∫₋₁¹ (1-|v|) dv = 1
+
+-- For general w, this equals sinc²(w) = sin²(πw)/(πw)²
+-- (our Bridge theorem, extended to complex notation)
+
+-- The matching requires showing that the Lebesgue integral
+-- of exp(-2πivw) * Λ(v) equals sinc²(w).
+
+-- Let me try a direct proof that 𝓕 Λ_ℂ = 𝓕⁻ Λ_ℂ (evenness)
+lemma Λ_ℂ_even (ξ : ℝ) : Λ_ℂ (-ξ) = Λ_ℂ ξ := by
+  simp [Λ_ℂ, abs_neg]
+
+-- And check if fourierInv is defined as 𝓕 applied with negation
+-- 𝓕⁻ f(w) = 𝓕 f(-w) in the standard definition
+-- So for even f: 𝓕 f(w) = ∫ 𝐞(-vw) f(v) dv = ∫ 𝐞((-v)w) f(-v) dv (v → -v)
+-- = ∫ 𝐞(vw) f(v) dv (since f(-v) = f(v)) = 𝓕⁻ f(w)
