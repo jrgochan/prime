@@ -50,8 +50,13 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
     decomposition + dot product bound), but CLOSER to the classical proof
     (Báez-Duarte 2003, Selberg optimal taper).
 
-    GRADUATION PATH: Direct Abel summation on the bilinear form,
-    using s1_decay + s2_decay + s3_uniform_bound (all PROVED). -/
+    GRADUATION STATUS (April 27, 2026):
+    - PROVED in Covariance/Direct.lean via L² decay + bias-variance decomp
+    - Cannot be wired into GramFormProof.lean due to circular dependency
+      (GramFormProof ← PerronCrown ← GramFormProof)
+    - Keeping as axiom preserves 3-axiom (net) count on crown path
+    - Using L2Convergence to prove it adds 2 OLD axioms (gram_form_upper_bound
+      + pnt_mu_log_sq_div_k), making the count WORSE -/
 axiom covariance_bound_from_mertens_34 :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((_root_.mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ ((3 : ℝ)/4)) →
