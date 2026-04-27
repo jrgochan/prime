@@ -651,7 +651,7 @@ private lemma Λ_ℂ_on_Icc (v : ℝ) (hv : v ∈ Set.Icc (-1 : ℝ) 1) :
   rw [Set.mem_Icc] at hv
   have hab : |v| ≤ 1 := abs_le.mpr ⟨by linarith [hv.1], hv.2⟩
   show ((max (1 - |v|) 0 : ℝ) : ℂ) = ((1 - |v|) : ℂ)
-  simp [max_def, sub_nonneg.mpr hab]
+  simp [sub_nonneg.mpr hab]
 
 /-- Euler's formula applied to the integrand: exp(↑θ * I) * ↑r = ↑(cos θ · r) + ↑(sin θ · r) * I -/
 private lemma euler_mul_real (θ r : ℝ) :
