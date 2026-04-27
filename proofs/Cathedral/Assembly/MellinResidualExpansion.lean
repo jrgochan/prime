@@ -55,23 +55,107 @@ open Complex Real MeasureTheory Set Filter Finset BigOperators
 -- §1. MELLIN RESIDUAL DECOMPOSITION
 -- ═══════════════════════════════════════════════
 
+/-- The BD Mellin basis integral: ∫₀¹ {1/(kx)} · x^{s-1} dx.
+    This is the Mellin transform of the TRUE BD basis h_k(x) = {1/(kx)}
+    (not {k/x} which is the high-frequency basis). -/
+def bdMellinBasis (k : ℕ) (s : ℂ) : ℂ :=
+  ∫ x in Set.Ioo (0 : ℝ) 1,
+    ((Int.fract (1 / ((k : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)
+
 /-- The Mellin residual decomposes into target minus basis sum.
 
-    M_{r_N}(s) = M[1](s) - Σ_{i} v_i · M[{(i+1)/·}](s)
+    M_{r_N}(s) = 1/s - Σ_{i} v_i · bdMellinBasis(i+1, s)
 
-    where M[1](s) = 1/s (target Mellin transform)
-    and M[{k/·}](s) is given by `mellin_fractBasis`. -/
+    where 1/s = ∫₀¹ x^{s-1} dx (target Mellin transform)
+    and bdMellinBasis(k,s) = ∫₀¹ {1/(kx)} x^{s-1} dx.
+
+    PROOF: Direct integral linearity — expand bdResidualV = 1 - Σ v_i {1/((i+1)x)},
+    distribute over the integral, then evaluate ∫₀¹ x^{s-1} = 1/s. -/
 theorem mellin_residual_decomp (N : ℕ) (v : Fin (N - 1) → ℝ)
     (s : ℂ) (hs : 1 < s.re) :
     mellinBDResidual N v s =
     1 / s - ∑ i : Fin (N - 1), (v i : ℂ) *
-      mellinRestricted (fractBasisC (i.val + 1)) s := by
-  sorry  -- Linearity of the Mellin transform over the finite sum
-         -- + the target Mellin: ∫₀¹ x^{s-1} dx = 1/s
+      bdMellinBasis (i.val + 1) s := by
+  have hs0 : 0 < s.re := by linarith
+  -- Unfold to the integral level
+  unfold mellinBDResidual bdResidualV bdMellinBasis
+  -- Step 1: Expand the integrand
+  have h_expand : ∀ x : ℝ,
+      ((1 - bdLinComb N v x : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
+      (x : ℂ) ^ (s - 1) - ∑ i : Fin (N - 1),
+        ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) := by
+    intro x; rw [Complex.ofReal_sub, Complex.ofReal_one, sub_mul, one_mul]; congr 1
+    rw [show (bdLinComb N v x : ℂ) = ∑ i : Fin (N - 1),
+      ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) from by
+      simp [bdLinComb, Complex.ofReal_sum, Complex.ofReal_mul]]
+    rw [Finset.sum_mul]
+  -- Step 2: Integrability
+  have h_cpow_int : IntegrableOn (fun x : ℝ => (x : ℂ) ^ (s - 1)) (Set.Ioc 0 1) := by
+    have h_dom : IntegrableOn (fun x : ℝ => x ^ (s.re - 1)) (Set.Ioc 0 1) := by
+      rw [← intervalIntegrable_iff_integrableOn_Ioc_of_le (by norm_num : (0:ℝ) ≤ 1)]
+      exact intervalIntegral.intervalIntegrable_rpow' (show -1 < s.re - 1 by linarith)
+    exact Integrable.mono h_dom (Measurable.aestronglyMeasurable (by fun_prop)) (by
+      filter_upwards [self_mem_ae_restrict measurableSet_Ioc] with x hx
+      rw [Complex.norm_cpow_eq_rpow_re_of_pos hx.1 (s - 1),
+          show (s - 1).re = s.re - 1 from by simp [Complex.sub_re],
+          Real.norm_of_nonneg (Real.rpow_nonneg (le_of_lt hx.1) _)])
+  have h_term_int : ∀ i : Fin (N - 1), i ∈ Finset.univ →
+      IntegrableOn (fun x => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+        (x : ℂ) ^ (s - 1)) (Set.Ioc 0 1) := by
+    intro i _
+    apply Integrable.bdd_mul h_cpow_int
+    · exact (Complex.continuous_ofReal.measurable.comp
+        ((measurable_const.mul (measurable_fract_real.comp
+          (measurable_const.div (measurable_const.mul measurable_id)))))).aestronglyMeasurable
+    · exact Filter.Eventually.of_forall (fun x => by
+        rw [Complex.norm_real]
+        calc |v i * Int.fract (1 / (↑(i.val + 1) * x))|
+            = |v i| * |Int.fract (1 / (↑(i.val + 1) * x))| := abs_mul _ _
+          _ ≤ |v i| * 1 := mul_le_mul_of_nonneg_left
+              ((abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le) (abs_nonneg _)
+          _ = |v i| := mul_one _)
+  -- Step 3: Split the integral
+  rw [← integral_Ioc_eq_integral_Ioo]
+  simp_rw [h_expand]
+  rw [integral_sub h_cpow_int (integrable_finset_sum _ h_term_int),
+      integral_finset_sum _ h_term_int]
+  -- Step 4: Factor out v_i and convert Ioc → Ioo
+  congr 1
+  · -- ∫ x^{s-1} = 1/s
+    -- Convert Ioc → interval integral → evaluate via integral_cpow
+    rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    rw [integral_cpow (Or.inl (show -1 < (s - 1).re from by simp [Complex.sub_re]; linarith))]
+    rw [show (s - 1) + 1 = s from by ring]
+    have hs_ne : s ≠ 0 := by intro h; rw [h, Complex.zero_re] at hs; linarith
+    simp only [Complex.ofReal_one, Complex.ofReal_zero, Complex.one_cpow,
+               Complex.zero_cpow hs_ne, sub_zero]
+  · -- Σ v_i · ∫ = Σ v_i · bdMellinBasis
+    apply Finset.sum_congr rfl
+    intro i _
+    -- Factor v_i out of integral
+    rw [show (fun x : ℝ => ((v i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) *
+      (x : ℂ) ^ (s - 1)) = (fun x => (v i : ℂ) *
+      (((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1))) from by
+      ext x; push_cast; ring]
+    rw [integral_const_mul, integral_Ioc_eq_integral_Ioo]
 
-/-- The Mellin residual fully expanded via `mellin_fractBasis`.
+/-- The BD Mellin basis has an explicit formula via bd_mellin_reduction_proved:
 
-    M_{r_N}(s) = 1/s - Σ_k v_k [k/(s(s-1)) + (k^s/s)(Σ_{m<k}(m+1)^{-s} - ζ(s))]
+    bdMellinBasis(k, s) = (1/k - k^{-s})/(s-1) + k^{-s} · (1/(s-1) - ζ(s)/s)
+
+    For Re(s) > 1 and s ≠ 1. Combines bd_mellin_reduction_proved + bd_mellin_base_case. -/
+theorem bdMellinBasis_explicit (k : ℕ) (hk : 1 ≤ k) (s : ℂ) (hs : 1 < s.re) :
+    bdMellinBasis k s =
+    (1 / k - (k : ℂ) ^ (-s)) / (s - 1) +
+    (k : ℂ) ^ (-s) * (1 / (s - 1) - riemannZeta s / s) := by
+  unfold bdMellinBasis
+  have hs0 : 0 < s.re := by linarith
+  have hs1 : s ≠ 1 := by intro h; rw [h, Complex.one_re] at hs; linarith
+  rw [bd_mellin_reduction_proved k hk s hs0 hs1, bd_mellin_base_case s hs0 hs1]
+
+/-- The Mellin residual fully expanded via bdMellinBasis_explicit.
+
+    M_{r_N}(s) = 1/s - Σ_k v_k [(1/k - k^{-s})/(s-1) + k^{-s}·(1/(s-1) - ζ(s)/s)]
 
     This is a finite, explicit formula: no axioms, no ζ-poles needed.
     The ζ(s) terms appear but are multiplied by the BD weights,
@@ -80,16 +164,14 @@ theorem mellin_residual_explicit (N : ℕ) (v : Fin (N - 1) → ℝ)
     (s : ℂ) (hs : 1 < s.re) :
     mellinBDResidual N v s =
     1 / s - ∑ i : Fin (N - 1), (v i : ℂ) *
-      ((↑(i.val + 1 : ℕ) : ℂ) / (s * (s - 1)) +
-       ((↑(i.val + 1 : ℕ) : ℂ) ^ s / s) *
-         ((range (i.val + 1)).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) -
-          riemannZeta s)) := by
+      ((1 / ↑(i.val + 1 : ℕ) - (↑(i.val + 1 : ℕ) : ℂ) ^ (-s)) / (s - 1) +
+       (↑(i.val + 1 : ℕ) : ℂ) ^ (-s) * (1 / (s - 1) - riemannZeta s / s)) := by
   rw [mellin_residual_decomp N v s hs]
   congr 1
   apply Finset.sum_congr rfl
   intro i _
   congr 1
-  exact mellin_fractBasis (i.val + 1) (by omega) s hs
+  exact bdMellinBasis_explicit (i.val + 1) (by omega) s hs
 
 -- ═══════════════════════════════════════════════
 -- §2. COEFFICIENT EXTRACTION
