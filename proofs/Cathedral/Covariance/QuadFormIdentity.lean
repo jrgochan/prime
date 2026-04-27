@@ -109,10 +109,60 @@ theorem logWeight_at_N_minus_1 (N : ℕ) (hN : 10 ≤ N) :
 -- §5. GRAM ENTRY GROWTH
 -- ═══════════════════════════════════════════════
 
-/-- Diagonal Gram entry bound: G(k,k) ≈ const/k. -/
+/-- Diagonal Gram entry bound: |G(k,k)| ≤ (log(2π)+1)/k.
+    Uses the closed form G(k,k) = (log(2π)-γ)/k - 1/k².
+    Since log(2π)-γ > 0 and 1/k² ≤ (log(2π)-γ)/k (for k ≥ 1),
+    we have 0 ≤ G(k,k) ≤ (log(2π)-γ)/k ≤ (log(2π)+1)/k. -/
 theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     |vasyuninGramEntry k k| ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ) := by
-  sorry
+  rw [vasyuninGramEntry_diag]
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hk_ge : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
+  have h_log_pos : 0 < Real.log (2 * Real.pi) := by
+    apply Real.log_pos; linarith [Real.pi_gt_three]
+  -- log(2π) - γ > 0 (since γ < 2/3 < log(2π) ≈ 1.84)
+  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
+    Real.log_mul (by norm_num : (2:ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
+  have h_log2 := Real.log_two_gt_d9
+  have h_log_pi : 1 < Real.log Real.pi := by
+    have : 1 < Real.log 3 := by
+      rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
+      exact Real.log_lt_log (Real.exp_pos 1) Real.exp_one_lt_three
+    exact lt_trans this (Real.log_lt_log (by norm_num : (0:ℝ) < 3) Real.pi_gt_three)
+  have h_a_pos : 0 < Real.log (2 * Real.pi) - eulerMascheroniConstant := by
+    linarith [Real.eulerMascheroniConstant_lt_two_thirds]
+  -- Stronger: log(2π) - γ > 1 (since log(2) > 0.69, log(π) > 1, γ < 2/3)
+  have h_a_pos_strong : 1 < Real.log (2 * Real.pi) - eulerMascheroniConstant := by
+    linarith [Real.eulerMascheroniConstant_lt_two_thirds]
+  -- The expression a/k - 1/k² = (a·k - 1)/k² ≥ 0 for a > 0, k ≥ 1
+  -- (since a·k ≥ a ≥ log(2π) - 2/3 > 1)
+  -- And a/k - 1/k² ≤ a/k ≤ (log(2π)+1)/k
+  -- Use: a/k - 1/k² ≤ a/k (subtract nonneg)
+  have h_sub_le : (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ) -
+      1 / (k : ℝ) ^ 2 ≤
+      (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ) :=
+    sub_le_self _ (by positivity)
+  -- a ≤ log(2π) + 1 (since γ > 0)
+  have h_a_le : Real.log (2 * Real.pi) - eulerMascheroniConstant ≤
+      Real.log (2 * Real.pi) + 1 := by
+    linarith [one_half_lt_eulerMascheroniConstant]
+  -- 0 ≤ G(k,k): a/k - 1/k² ≥ 0 iff a·k ≥ 1
+  -- We have a > 1 (since log(2π) > 1.69, γ < 0.67) and k ≥ 1, so a·k ≥ a > 1.
+  have h_nn : 0 ≤ (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ) -
+      1 / (k : ℝ) ^ 2 := by
+    have hak : 1 ≤ (Real.log (2 * Real.pi) - eulerMascheroniConstant) * (k : ℝ) :=
+      le_of_lt (lt_of_lt_of_le h_a_pos_strong (le_mul_of_one_le_right (le_of_lt h_a_pos) hk_ge))
+    have hk_sq_pos : (0 : ℝ) < (k : ℝ) ^ 2 := by positivity
+    rw [sub_nonneg, div_le_div_iff₀ hk_sq_pos hk_pos, one_mul]
+    nlinarith [show (k : ℝ) ^ 2 * ((Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ)) =
+        (Real.log (2 * Real.pi) - eulerMascheroniConstant) * (k : ℝ) from by field_simp]
+  rw [abs_of_nonneg h_nn]
+  -- a/k - 1/k² ≤ a/k ≤ (log(2π)+1)/k
+  calc (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ) -
+        1 / (k : ℝ) ^ 2
+      ≤ (Real.log (2 * Real.pi) - eulerMascheroniConstant) / (k : ℝ) := h_sub_le
+    _ ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ) := by
+        gcongr
 
 /-- Off-diagonal Gram entry bound: |G(j,k)| ≤ C·(1/j + 1/k). -/
 theorem gramEntry_off_diag_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hjk : j ≠ k) :
