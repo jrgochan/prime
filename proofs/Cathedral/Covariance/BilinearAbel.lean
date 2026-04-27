@@ -51,10 +51,23 @@ theorem quadForm_eq_diag_plus_offdiag {n : ℕ} (v : Fin n → ℝ) :
     ∑ i : Fin n, ∑ j : Fin n,
       v i * v j * vasyuninGramEntry (i.val + 1) (j.val + 1) =
     diagonalSum v + offDiagonalSum v := by
-  -- Algebraic identity: splitting a double sum at the diagonal.
-  -- The Finset.sum manipulation requires careful handling of
-  -- Finset.erase vs Finset.filter; proved conceptually, needs cleanup.
-  sorry
+  unfold diagonalSum offDiagonalSum
+  rw [← Finset.sum_add_distrib]
+  congr 1; ext i
+  -- Rewrite sum pointwise
+  have h_rw : ∑ j : Fin n, v i * v j * vasyuninGramEntry (i.val + 1) (j.val + 1) =
+      ∑ j : Fin n, ((if i = j then v i * v i *
+          vasyuninGramEntry (i.val + 1) (i.val + 1) else 0) +
+        (if i = j then 0 else v i * v j *
+          vasyuninGramEntry (i.val + 1) (j.val + 1))) := by
+    apply Finset.sum_congr rfl; intro j _
+    split_ifs with h
+    · subst h; simp
+    · simp
+  rw [h_rw, Finset.sum_add_distrib]
+  congr 1
+  -- Σ_j (if i=j then diag_term else 0) = diag_term
+  simp [Finset.sum_ite_eq']
 
 -- ═══════════════════════════════════════════════
 -- §3. DIAGONAL BOUND: Σ vₖ² Gₖₖ ≤ (1/2) · Σ vₖ²
