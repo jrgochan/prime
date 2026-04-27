@@ -382,7 +382,17 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     simp only [mul_zero, zero_mul, Real.cos_zero, mul_one]
     rw [triangle_integral_eq_one]
     simp [fejerKernel, sinc_zero]
-  · -- x ≠ 0: integration by parts
+  · -- x ≠ 0: FTC with Gemini's antiderivatives (Blueprint in COMM-LINK 5)
+    -- The integral ∫[-1,1] Λ(ξ)cos(cξ) dξ where c=2πx≠0 equals sinc²(x).
+    -- This requires:
+    -- 1. Rewriting Λ = 1-|ξ| on [-1,1]
+    -- 2. Converting set integral to interval integral
+    -- 3. Splitting at 0 and removing |ξ| on each half
+    -- 4. FTC with antiderivatives:
+    --    F₁(ξ) = (1+ξ)sin(cξ)/c + cos(cξ)/c² on [-1,0]
+    --    F₂(ξ) = (1-ξ)sin(cξ)/c - cos(cξ)/c² on [0,1]
+    -- 5. Both evaluate to (1-cos c)/c²
+    -- 6. Sum: 2(1-cos(2πx))/(2πx)² = sinc²(x) via half-angle identity
     sorry
 
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
