@@ -99,11 +99,50 @@ theorem inner_sum_abel (N : ℕ) (hN : 3 ≤ N) (j : ℕ) (hj : 1 ≤ j) :
 -- ═══════════════════════════════════════════════
 
 /-- The boundary term for the inner Abel sum is controlled.
-    The key: logWeight(N, N-1) = 1 - log(N-1)/log(N) ≈ 1/log(N) → 0.
-    And partialSum = -M(N-1) = O(N^{3/4}) by Mertens. -/
+    logWeight(N, N-1) = 1 - log(N-1)/log(N) = (log(N)-log(N-1))/log(N)
+                      = log(N/(N-1))/log(N) ≤ log(2)/log(N) ≤ 2/log(N). -/
 theorem logWeight_at_N_minus_1 (N : ℕ) (hN : 10 ≤ N) :
     |logWeight N (N - 1)| ≤ 2 / Real.log ↑N := by
-  sorry
+  unfold logWeight
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hN1_pos : (0 : ℝ) < (N - 1 : ℕ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN_ne : Real.log (↑N : ℝ) ≠ 0 := ne_of_gt hlogN_pos
+  -- log(N-1) ≤ log(N)
+  have h_mono : Real.log (↑(N - 1) : ℝ) ≤ Real.log ↑N :=
+    Real.log_le_log hN1_pos (by exact_mod_cast show N - 1 ≤ N by omega)
+  -- 0 ≤ 1 - log(N-1)/log(N)
+  have h_nn : 0 ≤ 1 - Real.log (↑(N - 1) : ℝ) / Real.log ↑N := by
+    rw [sub_nonneg, div_le_one hlogN_pos]
+    exact h_mono
+  rw [abs_of_nonneg h_nn]
+  -- 1 - log(N-1)/log(N) = (log(N) - log(N-1))/log(N)
+  have h_eq : 1 - Real.log (↑(N - 1) : ℝ) / Real.log ↑N =
+      (Real.log ↑N - Real.log (↑(N - 1) : ℝ)) / Real.log ↑N := by
+    field_simp
+  rw [h_eq]
+  -- goal: (logN - logN1) / logN ≤ 2 / logN, suffices logN - logN1 ≤ 2
+  suffices h : Real.log ↑N - Real.log (↑(N - 1) : ℝ) ≤ 2 by
+    exact div_le_div_of_nonneg_right h hlogN_pos.le
+  -- Need: (log(N) - log(N-1)) · 1 ≤ 2
+  -- log(N) - log(N-1) = log(N/(N-1)) ≤ log(2) < 1 < 2
+  have h_diff : Real.log ↑N - Real.log (↑(N - 1) : ℝ) =
+      Real.log (↑N / ↑(N - 1) : ℝ) := by
+    rw [Real.log_div (ne_of_gt hN_pos) (ne_of_gt hN1_pos)]
+  rw [h_diff]
+  have h_ratio : (↑N : ℝ) / ↑(N - 1) ≤ 2 := by
+    rw [div_le_iff₀ hN1_pos]
+    have hN_eq : (↑N : ℝ) = (↑(N - 1) : ℝ) + 1 := by
+      rw [Nat.cast_sub (by omega : 1 ≤ N)]; simp
+    have hN1_ge : (↑(N - 1) : ℝ) ≥ 1 := by exact_mod_cast show 1 ≤ N - 1 by omega
+    linarith
+  -- log(N/(N-1)) ≤ log(2) ≤ 2
+  calc Real.log (↑N / ↑(N - 1) : ℝ)
+      ≤ Real.log 2 := Real.log_le_log (by positivity) h_ratio
+    _ ≤ 2 := by
+        have h := Real.log_le_sub_one_of_pos (show (0 : ℝ) < 2 by norm_num)
+        linarith
 
 -- ═══════════════════════════════════════════════
 -- §5. GRAM ENTRY GROWTH
