@@ -22,9 +22,11 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Basic
 import Mathlib.Algebra.BigOperators.Group.Finset.Sigma
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
+import Mathlib.Analysis.SpecialFunctions.Trigonometric.Deriv
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
+import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Measure.Lebesgue.Basic
@@ -383,16 +385,51 @@ theorem triangleFunction_inverseFT_eq_fejerKernel (x : ℝ) :
     rw [triangle_integral_eq_one]
     simp [fejerKernel, sinc_zero]
   · -- x ≠ 0: FTC with Gemini's antiderivatives (Blueprint in COMM-LINK 5)
-    -- The integral ∫[-1,1] Λ(ξ)cos(cξ) dξ where c=2πx≠0 equals sinc²(x).
-    -- This requires:
-    -- 1. Rewriting Λ = 1-|ξ| on [-1,1]
-    -- 2. Converting set integral to interval integral
-    -- 3. Splitting at 0 and removing |ξ| on each half
-    -- 4. FTC with antiderivatives:
-    --    F₁(ξ) = (1+ξ)sin(cξ)/c + cos(cξ)/c² on [-1,0]
-    --    F₂(ξ) = (1-ξ)sin(cξ)/c - cos(cξ)/c² on [0,1]
-    -- 5. Both evaluate to (1-cos c)/c²
-    -- 6. Sum: 2(1-cos(2πx))/(2πx)² = sinc²(x) via half-angle identity
+    -- hΛ: Λ(ξ) = 1-|ξ| on [-1,1]
+    have hΛ : ∀ ξ ∈ Set.Icc (-1 : ℝ) 1,
+        triangleFunction ξ = 1 - |ξ| := by
+      intro ξ ⟨hlo, hhi⟩; unfold triangleFunction
+      rw [max_eq_left]; linarith [abs_le.mpr ⟨by linarith, hhi⟩]
+    -- Reduce to ∫ (1-|ξ|)cos(cξ) via suffices + convert
+    set c := 2 * π * x with hc_def
+    have hc : c ≠ 0 := by rw [hc_def]; positivity
+    -- Helper: the HasDerivAt chain for the antiderivative
+    have hDeriv_right : ∀ ξ ∈ Set.uIcc (0 : ℝ) 1,
+        HasDerivAt (fun t => (1 - t) * Real.sin (c * t) / c - Real.cos (c * t) / c ^ 2)
+          ((1 - ξ) * Real.cos (c * ξ)) ξ := by
+      intro ξ _
+      have h1 : HasDerivAt (fun t => (1 : ℝ) - t) (-1) ξ := by
+        simpa using (hasDerivAt_id ξ).const_sub 1
+      have h2 := (hasDerivAt_const_mul c (x := ξ)).sin
+      have h3 := (hasDerivAt_const_mul c (x := ξ)).cos
+      convert (h1.mul h2).div_const c |>.sub (h3.div_const (c ^ 2)) using 1
+      field_simp; ring
+    have hDeriv_left : ∀ ξ ∈ Set.uIcc (-1 : ℝ) 0,
+        HasDerivAt (fun t => (1 + t) * Real.sin (c * t) / c + Real.cos (c * t) / c ^ 2)
+          ((1 + ξ) * Real.cos (c * ξ)) ξ := by
+      intro ξ _
+      have h1 : HasDerivAt (fun t => (1 : ℝ) + t) 1 ξ := by
+        simpa using (hasDerivAt_id ξ).const_add 1
+      have h2 := (hasDerivAt_const_mul c (x := ξ)).sin
+      have h3 := (hasDerivAt_const_mul c (x := ξ)).cos
+      convert (h1.mul h2).div_const c |>.add (h3.div_const (c ^ 2)) using 1
+      field_simp; ring
+    -- FTC: compute each half-integral
+    have h_right_val : ∫ ξ in (0 : ℝ)..1, (1 - ξ) * Real.cos (c * ξ) =
+        (1 - Real.cos c) / c ^ 2 := by
+      have key := intervalIntegral.integral_eq_sub_of_hasDerivAt hDeriv_right
+        (((continuous_const.sub continuous_id).mul
+          (Real.continuous_cos.comp (continuous_const.mul continuous_id))).intervalIntegrable _ _)
+      convert key using 1
+      simp [Real.sin_zero, Real.cos_zero]; ring
+    have h_left_val : ∫ ξ in (-1 : ℝ)..0, (1 + ξ) * Real.cos (c * ξ) =
+        (1 - Real.cos c) / c ^ 2 := by
+      have key := intervalIntegral.integral_eq_sub_of_hasDerivAt hDeriv_left
+        (((continuous_const.add continuous_id).mul
+          (Real.continuous_cos.comp (continuous_const.mul continuous_id))).intervalIntegrable _ _)
+      convert key using 1
+      simp [Real.sin_zero, Real.cos_zero, Real.cos_neg, Real.sin_neg]; ring
+    -- Now assemble: set integral → interval integral → split → FTC → trig identity
     sorry
 
 /-- **FK2**: The Fejér kernel is Lebesgue integrable.
