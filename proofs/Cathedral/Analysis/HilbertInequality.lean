@@ -295,6 +295,13 @@ theorem triangleFunction_support (ξ : ℝ) (hξ : 1 < |ξ|) :
   simp only [max_eq_right_iff]
   linarith
 
+/-- The triangle function is supported on [-1, 1] (weak version: 1 ≤ |ξ|). -/
+theorem triangleFunction_support_le (ξ : ℝ) (hξ : 1 ≤ |ξ|) :
+    triangleFunction ξ = 0 := by
+  unfold triangleFunction
+  simp only [max_eq_right_iff]
+  linarith
+
 /-- The triangle function equals 1 at ξ = 0. -/
 theorem triangleFunction_zero : triangleFunction 0 = 1 := by
   unfold triangleFunction; simp

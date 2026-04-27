@@ -105,10 +105,30 @@ theorem cross_term_integral (ω δ : ℝ) (hδ : 0 < δ) :
   rw [smul_comm, smul_smul, abs_inv, abs_of_pos hδ,
     inv_mul_cancel₀ (ne_of_gt hδ), one_smul]
   exact fejerKernel_fourier_eq_triangle (ω / δ)
+/-- Helper: for δ-separated frequencies, the triangle function
+    Λ((λₘ-λₙ)/δ) equals the Kronecker delta.
 
--- ═══════════════════════════════════════════════
--- §3. THE FEJÉR ORTHOGONALITY IDENTITY
--- ═══════════════════════════════════════════════
+    m = n → Λ(0) = 1
+    m ≠ n → |λₘ-λₙ| ≥ δ → |(λₘ-λₙ)/δ| ≥ 1 → Λ = 0 -/
+theorem triangle_kronecker {N : ℕ} {lam : Fin N → ℝ} {δ : ℝ}
+    (hδ : 0 < δ) (h_sep : IsDeltaSeparated lam δ)
+    (m n : Fin N) :
+    triangleFunction ((lam m - lam n) / δ) =
+    if m = n then 1 else 0 := by
+  split
+  case isTrue h =>
+    -- m = n: Λ(0/δ) = Λ(0) = 1
+    subst h; simp [triangleFunction_zero]
+  case isFalse h =>
+    -- m ≠ n: |λₘ-λₙ| ≥ δ, so |(λₘ-λₙ)/δ| ≥ 1
+    have h_sep_mn := h_sep m n h
+    have h_ge : 1 ≤ |(lam m - lam n) / δ| := by
+      rw [abs_div, abs_of_pos hδ]
+      rwa [le_div_iff₀ hδ, one_mul]
+    -- Λ(ξ) = max(1-|ξ|, 0) = 0 when 1 ≤ |ξ|
+    unfold triangleFunction
+    simp only [max_eq_right_iff]
+    linarith
 
 /-- **FEJÉR ORTHOGONALITY**: For δ-separated frequencies, the
     Fejér-weighted L² integral equals the sum of squared amplitudes.
@@ -128,21 +148,28 @@ theorem fejer_orthogonality
     {N : ℕ} (a : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
     (h_sep : IsDeltaSeparated lam δ) :
     fejerWeightedL2 a lam δ = ∑ n : Fin N, ‖a n‖ ^ 2 := by
-  -- The proof assembles PROVED facts:
-  -- 1. Expand |f(t)|² = Σ_m Σ_n a_m * conj(a_n) * e^{2πi(λ_m-λ_n)t}
-  -- 2. Swap ∫ and Σ (integral_finset_sum, trivial for finite sums)
-  -- 3. Each cross-term via cross_term_integral:
-  --    ∫ exp(2πi(λ_m-λ_n)t) · δ·K(δt) dt = Λ((λ_m-λ_n)/δ)
-  -- 4. Off-diagonal (m≠n): |λ_m-λ_n| ≥ δ, so |(λ_m-λ_n)/δ| ≥ 1
-  --    → Λ = 0 by triangleFunction_support (PROVED)
-  -- 5. Diagonal (m=n): Λ(0) = 1 by triangleFunction_zero (PROVED)
-  -- 6. Total = Σ |a_n|² · 1 = Σ |a_n|²
-  sorry  -- Assembly of proved components:
-         -- • cross_term_integral (uses fejerKernel_fourier_eq_triangle ✅)
-         -- • triangleFunction_support ✅
-         -- • triangleFunction_zero ✅
-         -- • integral_finset_sum (Mathlib) ✅
-         -- • IsDeltaSeparated → |λ_m-λ_n| ≥ δ ✅
+  -- The proof chain:
+  -- ∫ ‖f(t)‖² · δK(δt) dt
+  -- = ∫ (Σₘ Σₙ Re(aₘ conj(aₙ) e^{2πi(λₘ-λₙ)t})) · δK(δt) dt
+  --                                        [by norm_sq_trigPoly_eq]
+  -- = Σₘ Σₙ Re(aₘ conj(aₙ)) · ∫ cos(2π(λₘ-λₙ)t) · δK(δt) dt
+  --                                        [by integral_finset_sum + linearity]
+  -- = Σₘ Σₙ Re(aₘ conj(aₙ)) · Λ((λₘ-λₙ)/δ)
+  --                                        [by cross_term_integral ✅]
+  -- = Σₘ Σₙ Re(aₘ conj(aₙ)) · δₘₙ
+  --                                        [by triangle_kronecker ✅]
+  -- = Σₙ Re(aₙ conj(aₙ)) = Σₙ |aₙ|²
+  --
+  -- Steps 1-2 involve expanding ‖f‖² and swapping ∫ with finite Σ.
+  -- This is the main formalization effort — pure bookkeeping.
+  sorry  -- The only remaining gap: norm_sq expansion + integral_finset_sum wiring
+         -- All mathematical content is in PROVED lemmas:
+         --   cross_term_integral ✅ (the hard part)
+         --   triangle_kronecker ✅ (uses triangleFunction_support + _zero)
+         --   norm_sq_trigPoly_eq 🟡 (complex algebra, 1 sorry)
+         --
+         -- TOTAL: 1 algebraic sorry in norm_sq_trigPoly_eq
+         -- + 1 assembly sorry here
 
 -- ═══════════════════════════════════════════════
 -- §4. THE FEJÉR-WEIGHTED MVT
