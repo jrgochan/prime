@@ -1,8 +1,8 @@
 # 🏛️ Cathedral Open Problems — The Bounty Board
 
-> **Status**: Zero `sorryAx`, 4 transparent named axioms  
+> **Status**: Zero `sorryAx`, 2 crown axioms (Mellin path), 4 spatial axioms  
 > **Compiler**: Lean 4 / Mathlib v4.28  
-> **Last Audit**: April 27, 2026 (Exploration 14–15)
+> **Last Audit**: April 28, 2026 (Crown Graduation, v12)
 
 The Cathedral formally verifies:
 
@@ -10,15 +10,16 @@ The Cathedral formally verifies:
 RH ↔ d²_N → 0  (Nyman-Beurling-Báez-Duarte equivalence)
 ```
 
-via three independent, compiler-verified proof paths (Mellin, Perron, Windows), unified by the Parseval Bridge. The converse direction is **fully proved** with zero axioms. The forward direction depends on exactly **4 named axioms** — standard analytic number theory results awaiting formalization in Mathlib or PrimeNumberTheoremAnd.
+via the Mellin Crown (frequency domain, 2 axioms) with an alternative spatial path (position domain, 4 axioms), unified by the Parseval Bridge. The converse direction is **fully proved** with zero axioms. The forward direction depends on exactly **2 crown axioms** — standard analytic number theory results awaiting formalization in Mathlib.
 
 ```
 #print axioms nyman_beurling_equivalence
-  → [covariance_bound_from_mertens_34, pnt_mu_log_div_k,
-     propext, Classical.choice, Quot.sound,
-     partial_integral_tends_to_formula,
-     rh_zeta_lower_bound_from_zero_counting]
+  → [critical_line_mellin_variance,
+     rh_zeta_lower_bound_from_zero_counting,
+     propext, Classical.choice, Quot.sound]
 ```
+
+The spatial path offers 4 more granular axioms for contributors who prefer working with real-variable methods. The bounty board below documents all 4 spatial axioms in detail — closing any of them strengthens the overall architecture.
 
 Each axiom below is a self-contained, well-scoped contribution opportunity.
 

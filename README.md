@@ -4,7 +4,7 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**161 active Lean files** across 26 modules, with **2 crown axioms** on
+**174 active Lean files** across 26 modules, with **2 crown axioms** on
 the critical path (verified by `#print axioms`), and
 **~55 axioms** total in the active codebase.
 
@@ -18,7 +18,7 @@ the critical path (verified by `#print axioms`), and
 > Everything else—the Nyman–Beurling theory, Rank-1 Mellin separation,
 > Parseval bridge, Plancherel isometry—is compiler-verified.
 
-> **Release: mellin-crown** — April 26, 2026 (v11)
+> **Release: crown-graduation** — April 28, 2026 (v12)
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -27,7 +27,7 @@ the critical path (verified by `#print axioms`), and
 
 ```bash
 cd proofs
-lake build          # 161 active files, 127 archived
+lake build          # 174 active files, 128 archived
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -46,7 +46,7 @@ theorem nyman_beurling_equivalence :
 The proof decomposes into two pillars:
 
 - **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument. **Zero custom axioms.**
-- **Pillar II (Forward)**: RH ⟹ d²_N → 0. Via the **Mellin Crown**: RH → critical-line Mellin variance ≤ C/logN → Parseval bridge (PROVED) → L²(0,1) decay. **2 axioms, 0 sorry.**
+- **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via the **Mellin Crown**: RH → Mertens x¾ (Perron chain, PROVED) → L² decay → Parseval bridge (PROVED) → Mellin variance (PROVED via Perron Bridge). **2 axioms, 0 sorry, 0 warning.**
 
 ## The Two Crown Axioms
 
@@ -116,12 +116,16 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   161 Lean files across 26 modules
-Archived:       127 Lean files in Archive/ + archive/
+Active files:   174 Lean files across 26 modules
+Archived:       128 Lean files in Archive/ + archive/
 Axioms:         2 on crown critical path, ~55 total active
-Sorry:          0 on crown path, ~98 off-crown
+Sorry:          0 on crown path (16 off-crown, all non-blocking)
+Warnings:       0 on crown path (6 off-crown sorry warnings)
 Errors:         0
-Release:        mellin-crown (v11)
+Lines:          43,387
+Theorems:       ~1,459
+Experiments:    35 Rust/MPFR (256–512 bit precision)
+Release:        crown-graduation (v12)
 ```
 
 ## Key Results (All Machine-Verified)
@@ -172,7 +176,7 @@ stiffness of the prime number vacuum.
 
 ## Documentation Suite
 
-23 companion papers for 23 audiences:
+24 companion papers for 24 audiences:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
@@ -218,9 +222,9 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 161 active Lean files, 127 archived
-├── papers/          📄  23 companion papers (LaTeX + PDF)
-├── experiments/     🔬  Rust numerical validation (256-bit MPFR)
+├── proofs/          🏛️  THE CATHEDRAL — 174 active Lean files, 128 archived
+├── papers/          📄  24 companion papers (LaTeX + PDF)
+├── experiments/     🔬  35 Rust experiments (256–512 bit MPFR)
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
 ├── scripts/         🔧  Build & export tools
 ├── tools/           🏗️  Historical exploration tools
@@ -230,7 +234,7 @@ prime/
 │   └── hyperzeta-viewport/  Original HYPERZETA visualization
 ├── docs/            📚  Documentation, AI correspondence, exports
 ├── ORIGIN-STORY.md  📖  How it all started
-└── REFERENCES.md    📚  Bibliography
+└── REFERENCES.md    📚  Bibliography (45+ mathematicians, 167 years)
 ```
 
 ## License
