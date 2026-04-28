@@ -8,7 +8,7 @@
   \large to Two Analytic Bounds in Lean~4%
 }
 \author{Jason Robert Gochanour}
-\date{April 26, 2026}
+\date{April 28, 2026}
 
 \begin{document}
 \maketitle
@@ -19,8 +19,8 @@ the Riemann Hypothesis to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 \texttt{nyman\_beurling\_equivalence}.
 
-The formalization comprises 161 active Lean files
-(with 128 archived) across 22 modules totaling 39{,}375 lines.
+The formalization comprises 174 active Lean files
+(with 128 archived) across 26 modules totaling 43{,}387 lines.
 The crown theorem depends
 on exactly \textbf{two mathematical axioms}: one encoding the
 Hardy--Littlewood mean-value bound for $1/\zeta(s)$ on the critical line,
@@ -105,7 +105,7 @@ formula, Hardy--Littlewood mean value theorem), not because the mathematics is u
 
 \subsection*{Architecture History}
 
-The crown path was reduced from 6 axioms to 2 through eleven versions:
+The crown path was reduced from 6 axioms to 2 through twelve versions:
 
 \begin{itemize}
 \item \textbf{v1--v6} (March--April 2026): Initial formalization, 6--4 axioms via
@@ -115,6 +115,10 @@ The crown path was reduced from 6 axioms to 2 through eleven versions:
 \item \textbf{v11} (April 26): \emph{The Mellin Crown}. Forward direction rewired
   through frequency space. The Mellin/Plancherel isometry preserves phase
   cancellation that real-variable methods destroy. \textbf{2 axioms.}
+\item \textbf{v12} (April 28): \emph{Crown Graduation}. Closed
+  \lean{crown\_graduation\_target} sorry, eliminating all warnings on the
+  crown path. Zero sorry, zero warning across the forward chain.
+  Montgomery--Vaughan MVT machine-verified. 35 experiments at 512-bit MPFR.
 \end{itemize}
 
 \section{The Mellin Crown}
@@ -166,7 +170,7 @@ suggesting the true rate may be faster than $O(1/\log N)$.
 
 \begin{verbatim}
 cd proofs
-lake build    # 161 active files, 128 archived
+lake build    # 174 active files, 128 archived
 \end{verbatim}
 
 \noindent To inspect the axiom foundation:
@@ -188,10 +192,14 @@ the Parseval bridge implementation, and the mellin-certificate experiment.
 All proofs are compiler-verified.
 
 The axiom reduction---from 6 to 2 on the crown critical path---was
-accomplished through eleven versions over 30 days.
+accomplished through twelve versions over 32 days.
 The converse direction was proved pure (zero axioms, zero sorry) via
 the Rank-1 Mellin Miracle in \texttt{BDMellin.lean} (680 lines).
 The forward direction was rewired through the frequency domain in v11,
-eliminating the real-variable Perron chain and reducing from four to two axioms.
+reducing from four to two axioms. The Crown Graduation (v12) closed the
+final sorry on the forward path and eliminated all build warnings,
+producing a continuous, compiler-verified chain with zero sorry across
+174 active files and 43{,}387 lines. Thirty-five Rust/MPFR experiments
+(256--512 bit precision) validate the spectral correspondence.
 
 \end{document}

@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 26, 2026 --- mellin-crown (v11)}
+\date{April 28, 2026 --- Crown Graduation (v12)}
 
 \begin{document}
 
@@ -21,8 +21,8 @@ We present a machine-checked proof in the Lean~4 theorem prover, built against
 Mathlib, that the Riemann Hypothesis is logically equivalent to the decay of
 the Nyman--Beurling distance $d_N^2 \to 0$.
 
-The formalization---the \emph{Cathedral}---comprises 161 active Lean files
-(with 128 archived) across 22 modules with
+The formalization---the \emph{Cathedral}---comprises 174 active Lean files
+(with 128 archived) across 26 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
@@ -470,9 +470,10 @@ A deep audit of the codebase identified:
     \lean{Vasyunin/Cotangent/}).
 \end{itemize}
 
-The cleanup reduced the active codebase from 178 to 161 files,
-with every remaining file contributing to the crown path or active
-alternative proof routes.
+The cleanup reduced the active codebase from 178 to 161 files in v8;
+subsequent explorations (v9--v12) grew the active tree to 174 files
+as the Perron chain, Abel tail machinery, Rotors, and Hilbert inequality
+modules were added.
 
 \subsection{Archived Subsystems}
 
@@ -536,13 +537,13 @@ The Cathedral stands.
 We have constructed a machine-verified proof that the Riemann Hypothesis
 is logically equivalent to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, routed through the Mellin Crown. The formalization
-comprises 161 active Lean files (128 archived) across 22 modules, resting
+comprises 174 active Lean files (128 archived) across 26 modules, resting
 on two mathematical axioms---the Hardy--Littlewood mean-value bound
 for the Mellin variance on the critical line, and the Hadamard
 zero-counting zeta lower bound.
 
 The axiom reduction---from 6 in the initial architecture to 2 in
-the current v11 build---was achieved through eleven versions of systematic
+the current v12 build---was achieved through twelve versions of systematic
 formalization:
 \begin{itemize}
   \item \textbf{v1--v6}: PNT graduation, Vasyunin identity proof,
@@ -551,6 +552,10 @@ formalization:
     via Perron contour integration. 4 axioms.
   \item \textbf{v11}: The Mellin Crown---frequency-domain forward
     direction via Mellin/Plancherel isometry. \textbf{2 axioms.}
+  \item \textbf{v12}: Crown Graduation---closed the final sorry on the
+    forward chain, eliminated all build warnings, machine-verified the
+    Montgomery--Vaughan MVT, and certified the Hilbert inequality at
+    512-bit MPFR precision. \textbf{2 axioms, 0 sorry, 0 warning.}
 \end{itemize}
 
 The formalization process itself served as a discovery tool, catching
@@ -605,6 +610,37 @@ Riemann Hypothesis}, Expo. Math. \textbf{18} (2000), 131--138.
 \bibitem{mertens1897}
 F.~Mertens, \emph{\"Uber eine Eigenschaft der Riemannschen $\zeta$-Function},
 Sitzber. Akad. Wiss. Wien \textbf{106} (1897), 761--830.
+
+\bibitem{perron1908}
+O.~Perron, \emph{Zur Theorie der Dirichletschen Reihen},
+J. Reine Angew. Math. \textbf{134} (1908), 95--143.
+
+\bibitem{hadamard1893}
+J.~Hadamard, \emph{\'Etude sur les propri\'et\'es des fonctions enti\`eres
+et en particulier d'une fonction consid\'er\'ee par Riemann},
+J. Math. Pures Appl. 4(9) (1893), 171--216.
+
+\bibitem{hardylittlewood1918}
+G.H.~Hardy and J.E.~Littlewood, \emph{Contributions to the theory of the
+Riemann zeta-function and the theory of the distribution of primes},
+Acta Math. \textbf{41} (1918), 119--196.
+
+\bibitem{montgomeryvaughan1974}
+H.L.~Montgomery and R.C.~Vaughan, \emph{Hilbert's inequality},
+J. London Math. Soc. \textbf{8}(2) (1974), 73--82.
+
+\bibitem{kontorovich2024}
+A.~Kontorovich, H.~Macbeth, et al., \emph{PrimeNumberTheoremAnd:
+A formal proof of the Prime Number Theorem in Lean~4},
+\url{https://github.com/AlexKontorovich/PrimeNumberTheoremAnd}, 2024--2026.
+
+\bibitem{titchmarsh1986}
+E.C.~Titchmarsh, \emph{The Theory of the Riemann Zeta-Function},
+2nd ed. (revised by D.R. Heath-Brown), Oxford University Press, 1986.
+
+\bibitem{lean4}
+L.~de Moura and S.~Ullrich, \emph{The Lean 4 Theorem Prover and
+Programming Language}, CADE-28, 2021.
 
 \bibitem{mathlib}
 The Mathlib Community, \emph{Mathlib: A unified library of mathematics
