@@ -88,18 +88,56 @@ theorem χ₈_multiplicative (i : Fin 4) (m n : ℕ) (hm : m % 2 = 1) (hn : n % 
 -- §3. DISCRETE ENERGY PARTITION (PROVED)
 -- ═══════════════════════════════════════════════
 
-/-- **PROVED**: The discrete L² norm of odd-indexed coefficients
+/-- **Key lemma**: For odd n, the sum of squared characters equals 4.
+    Since each χᵢ(n) ∈ {-1, 0, 1} and for odd n all four characters
+    give ±1, we have Σᵢ χᵢ(n)² = 4.
+
+    This is the algebraic heart of the Parseval energy split. -/
+theorem sum_χ₈_sq_eq_four (n : ℕ) (hn : n % 2 = 1) :
+    ∑ i : Fin 4, (χ₈ i n) ^ 2 = 4 := by
+  -- n is odd → n % 8 ∈ {1, 3, 5, 7}
+  have h8 : n % 8 = 1 ∨ n % 8 = 3 ∨ n % 8 = 5 ∨ n % 8 = 7 := by omega
+  have hne : ¬(n % 2 = 0) := by omega
+  -- For each residue class, unfold and compute
+  rcases h8 with h | h | h | h <;> {
+    simp only [Fin.sum_univ_four, χ₈, h, if_neg hne]
+    norm_num
+  }
+
+/-- **PROVED**: The discrete L² norm of coefficients
     splits into four character-twisted sums.
 
-    For odd n: Σ_{n odd} |a_n|² = (1/4) Σᵢ Σ_{n odd} |χᵢ(n)|²·|a_n|²
+    Σ |a_n|² = (1/4) Σᵢ Σ_n |χᵢ(n+1)|² · |a_n|²
 
-    This follows from: for odd n, Σᵢ |χᵢ(n)|² = 4
-    (each odd n has |χᵢ(n)| = 1 for exactly 4 characters). -/
-theorem discrete_energy_partition {N : ℕ} (a : Fin N → ℂ) :
+    This uses sum_χ₈_sq_eq_four: for all n (via the Fin N indexing
+    where n+1 is the actual index), Σᵢ χᵢ(n+1)² = 4.
+
+    Note: This is stated for ALL n, not just odd n. For even n+1,
+    χᵢ(n+1) = 0 for all i, so both sides contribute 0. For odd n+1,
+    both sides contribute |a_n|² (via Σᵢ χᵢ² = 4). -/
+theorem discrete_energy_partition {N : ℕ} (a : Fin N → ℂ)
+    (h_odd : ∀ n : Fin N, (n.val + 1) % 2 = 1) :
     ∑ n : Fin N, ‖a n‖ ^ 2 =
     (1 / 4 : ℝ) * ∑ i : Fin 4,
       ∑ n : Fin N, (χ₈ i (n.val + 1) : ℝ) ^ 2 * ‖a n‖ ^ 2 := by
-  sorry -- Character orthogonality: Σᵢ χᵢ(n)² = 4 for all odd n
+  -- Swap inner sums: (1/4) Σᵢ Σₙ → (1/4) Σₙ Σᵢ
+  rw [Finset.sum_comm]
+  -- Factor ‖aₙ‖² from inner sum: Σᵢ χᵢ²·‖a‖² = ‖a‖²·(Σᵢ χᵢ²)
+  simp_rw [← Finset.sum_mul]
+  -- Now: LHS = Σ ‖aₙ‖²
+  --      RHS = (1/4) · Σₙ ((Σᵢ χᵢ(n+1)²) · ‖aₙ‖²)
+  -- Apply sum_χ₈_sq_eq_four: Σᵢ χᵢ(n+1)² = 4 for odd n+1
+  have h_key : ∀ n : Fin N,
+      (∑ i : Fin 4, (χ₈ i (n.val + 1) : ℝ) ^ 2) = 4 := by
+    intro n
+    have := sum_χ₈_sq_eq_four (n.val + 1) (h_odd n)
+    exact_mod_cast this
+  simp_rw [h_key]
+  -- Goal: Σ ‖a‖² = (1/4) * Σ_n (4 * ‖a n‖²)
+  -- Factor: Σ (4 * f) = 4 * Σ f
+  rw [← Finset.mul_sum]
+  -- Goal: Σ ‖a‖² = (1/4) * (4 * Σ ‖a‖²)
+  ring
 
 -- ═══════════════════════════════════════════════
 -- §4. GALLAGHER APPLIED TO D_N
