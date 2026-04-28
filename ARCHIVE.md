@@ -4,9 +4,9 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: April 26, 2026 (v11 — The Mellin Crown)
+> **Last updated**: April 28, 2026 (v12 — The Crown Graduation)
 >
-> **Last audited**: April 26, 2026 — comprehensive codebase audit
+> **Last audited**: April 28, 2026 — comprehensive codebase audit
 
 ---
 
@@ -22,17 +22,19 @@ and **29,784 lines** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **161 files / 39,375 lines / ~1,335 theorems**.
+For comparison, the active codebase is **174 files / 43,387 lines / ~1,459 theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
 
-### Architecture Context (v11)
+### Architecture Context (v12)
 
-The Cathedral's crown path now uses the **Mellin Crown** (2 axioms, 0 sorry).
-This means the entire real-variable forward chain (Perron → Mertens → Gram → L²)
-is **off the crown path**. The following archived components are therefore doubly
-superseded — first by the Perron Crown (v7), then by the Mellin Crown (v11):
+The Cathedral's crown path now uses the **Mellin Crown** (2 axioms, 0 sorry),
+with the forward direction closed via the **Perron Bridge** (Exploration 17).
+The `crown_graduation_target` is PROVED. The entire real-variable forward
+chain (Perron → Mertens → Gram → L²) feeds INTO the Mellin Crown via
+`critical_line_mellin_variance_from_perron`. The following archived components
+are therefore doubly superseded:
 
 - `DirectL2Crown.lean` — superseded by MellinCrown
 - `OneCrown.lean` — superseded by MellinCrown
@@ -213,13 +215,15 @@ since v11. They remain as alternative proof routes and supporting infrastructure
 
 ### Off-Crown Sorry (Active Tree)
 
-8 `sorry` placeholders exist in the active tree, all off-crown:
+16 `sorry` placeholders exist in the active tree, all off-crown:
 
 | File | Sorry Count | Context |
 |------|-------------|---------|
-| `PNT/LogBridge.lean` | 1 | Log-weight PNT bridge |
-| `PNT/Bridge.lean` | 2 | PNT wiring to Perron chain |
-| `Scratch/AbelTailProof.lean` | 5 | Exploratory Abel tail proof |
+| `PNT/LogBridge.lean` | 1 | Tauberian gap (off-crown) |
+| `PNT/Bridge.lean` | 2 | Tauberian gaps (off-crown) |
+| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial integrals |
+| `Covariance/QuadFormIdentity.lean` | 1 | DEPRECATED (numerically falsified) |
+| `Scratch/*` | 10 | Exploratory files |
 
 ---
 
@@ -259,9 +263,9 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 161 | 128 | 1.26× |
-| Lines | 39,375 | 29,784 | 1.32× |
-| Theorems | ~1,335 | ~994 | 1.34× |
+| Files | 174 | 128 | 1.36× |
+| Lines | 43,387 | 29,784 | 1.46× |
+| Theorems | ~1,459 | ~994 | 1.47× |
 | Crown axioms | **2** | — | — |
 
 ---
@@ -292,12 +296,13 @@ The project evolved through five major phases:
 3. **Cathedral v1-v6** (2 weeks) — NB formalization, reduced from 7 to 4 axioms
 4. **Cathedral v7-v10** (1 week) — Perron Crown, real-variable forward chain (4 axioms)
 5. **Cathedral v11** (1 day) — **The Mellin Crown** — frequency-domain forward chain (2 axioms)
+6. **Cathedral v12** (1 day) — **Crown Graduation** — Perron Bridge closes forward path, MVT proved, 0 actionable sorry
 
 ---
 
 ## Experiment Index
 
-The repository contains **27 Rust/MPFR experiment directories** under `experiments/`:
+The repository contains **35 Rust/MPFR experiment directories** under `experiments/`:
 
 | Experiment | Purpose |
 |-----------|---------|
@@ -328,3 +333,5 @@ The repository contains **27 Rust/MPFR experiment directories** under `experimen
 | `two-tile-analyzer` | Two-tile decomposition |
 | `algebraic` | Algebraic structure exploration |
 | `numerical` | General numerical experiments |
+| `siegel-walfisz` | **Siegel-Walfisz** — 512-bit prime distribution certification |
+| `hilbert-spectral` | **Hilbert spectral** — 512-bit π constant certification for MV inequality |

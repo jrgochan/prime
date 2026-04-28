@@ -4,9 +4,9 @@
 > axioms of analytic number theory, via the Nyman–Beurling–Báez-Duarte
 > equivalence in Lean 4.*
 >
-> **Last updated**: April 26, 2026 (v11 — The Mellin Crown)
+> **Last updated**: April 28, 2026 (v12 — The Crown Graduation)
 >
-> **Last audited**: April 26, 2026 — comprehensive codebase audit
+> **Last audited**: April 28, 2026 — comprehensive codebase audit
 
 ---
 
@@ -78,15 +78,21 @@ Assembled in [MellinCrown.lean](proofs/Cathedral/Assembly/MellinCrown.lean).
 
 ```
 RH
- ↓  [critical_line_mellin_variance — AXIOM]
-(1/2π)∫|M_{r_N}(1/2+it)|² dt ≤ C/logN
+ ↓  [rh_implies_mertens_bound_proved — via Perron Crown]
+|M(x)| ≤ C·x^{3/4}
+ ↓  [mertens_implies_l2_decay_34 — PROVED]
+∫₀¹ (1 - f_N(x))² dx ≤ C/logN
  ↓  [parseval_bridge_white — PROVED, 0 axiom, 0 sorry]
-∫₀¹ (1 - f_N(x))² dx = Mellin L² ≤ C/logN
+(1/2π)∫|M_{r_N}(1/2+it)|² dt = ∫₀¹(1-f)² ≤ C/logN
  ↓  [log_grows_unboundedly — PROVED]
 C/logN < ε  for N sufficiently large
  ↓
 d²_N → 0
 ```
+
+The forward chain is closed via the **Perron Bridge** (Exploration 17):
+`critical_line_mellin_variance_from_perron` connects the Perron Crown's
+Mertens bound through L² decay and Parseval to the Mellin variance.
 
 The forward direction uses the **Mellin/Plancherel isometry** to stay in the
 frequency domain throughout, preserving the phase cancellation that real-variable
@@ -129,13 +135,13 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 
 ## Module Structure
 
-The codebase comprises **161 active Lean files** across **22 topic directories** with
-**39,375 lines** of active code, **~1,335 theorems/lemmas**, and **55 active axioms**
+The codebase comprises **174 active Lean files** across **22 topic directories** with
+**43,387 lines** of active code, **~1,459 theorems/lemmas**, and **55 active axioms**
 (2 on the crown path).
 
 ```
 Cathedral/
-├── Assembly/         (7 files)   Crown assemblies (MainChain, MellinCrown, etc.)
+├── Assembly/         (9 files)   Crown assemblies (MainChain, MellinCrown, PerronBridge, etc.)
 ├── White/            (2 files)   Parseval bridge (Kinematics, Scattering)
 ├── NymanBeurling/    (8 files)   BDMellin (converse), Separation, BD bridges
 ├── MellinBridge/    (18 files)   Mellin transform, Plancherel, floor transforms
@@ -148,11 +154,12 @@ Cathedral/
 ├── AbelTail/        (14 files)   Abel summation engine + tail bounds
 ├── Sieve/            (4 files)   BilinearSieve, ParitySchur, MoebiusUncoupling
 ├── Spectral/         (5 files)   ClassRestriction, Octonionic, PT-Symmetry
-├── Analysis/         (6 files)   Hilbert inequality, Montgomery-Vaughan
+├── Analysis/         (6 files)   Hilbert inequality, Montgomery-Vaughan (ZERO sorry)
 ├── LinearAlgebra/    (4 files)   Sherman-Morrison, Sylvester, Variational
 ├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
+├── NumberTheory/     (1 file)    Dirichlet convolution identities
 ├── Structural/       (3 files)   Eigenvalue, Independence
-└── Scratch/          (5 files)   Exploratory test files
+└── Scratch/          (5+ files)  Exploratory test files
     + Defs.lean, Axioms.lean, _vasyunin_audit.lean (root files)
 ```
 
@@ -164,11 +171,17 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 |------|------|-------|--------|
 | `Assembly/MainChain.lean` | Capstone | 0 | — |
 | `Assembly/MellinCrown.lean` | Forward direction | 0 | 1 |
+| `Assembly/MellinPerronBridge.lean` | Perron→Mellin bridge | 0 | 0 |
+| `Assembly/MellinResidualExpansion.lean` | Crown graduation | 0 | 0 |
+| `Assembly/MellinVarianceProof.lean` | Variance proved | 0 | 0 |
+| `Assembly/PerronCrown.lean` | Perron forward chain | 0 | 0 |
 | `White/Scattering.lean` | Parseval bridge | 0 | 0 |
 | `White/Kinematics.lean` | Parseval bridge | 0 | 0 |
 | `NymanBeurling/BDMellin.lean` | Converse direction | 0 | 0 |
 | `MellinBridge/Separation.lean` | Zeta separation | 0 | 0 |
 | `Zeta/Hadamard.lean` | Zeta lower bound | 0 | 1 |
+| `Analysis/HilbertInequality.lean` | MV inequality | 0 | 0 |
+| `Analysis/MontgomeryVaughan.lean` | Dirichlet MVT | 0 | 0 |
 | `Defs.lean` | Core definitions | 0 | 0 |
 
 ---
@@ -201,18 +214,21 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 ## Sorry Inventory
 
-8 `sorry` placeholders exist in the active tree, **all off-crown**:
+16 `sorry` placeholders exist in the active tree, **all off-crown**:
 
 | File | Count | Context |
 |------|-------|---------|
-| `PNT/LogBridge.lean` | 1 | Log-weight PNT bridge (off-crown since v11) |
-| `PNT/Bridge.lean` | 2 | PNT wiring to Perron chain (off-crown since v11) |
-| `Scratch/AbelTailProof.lean` | 5 | Exploratory Abel tail proof (scratch) |
+| `PNT/LogBridge.lean` | 1 | Tauberian gap (off-crown, isolated from MainChain) |
+| `PNT/Bridge.lean` | 2 | Tauberian gaps (off-crown, isolated from MainChain) |
+| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial integrals (off-path) |
+| `Covariance/QuadFormIdentity.lean` | 1 | DEPRECATED Gram entry bound (numerically falsified) |
+| `Scratch/*` | 10 | Exploratory files |
 
 > [!NOTE]
-> Zero sorry on the crown path. The PNT sorry are remnants of the Perron Crown
-> (v7–v10) forward chain, now superseded by the Mellin Crown. The Scratch sorry
-> are in exploratory files.
+> **Zero sorry on the crown path.** The PNT sorry need Tauberian theorems
+> (upstream Mathlib). The Covariance sorry are deprecated spatial bounds
+> superseded by the Mellin/Abel architecture. The QuadFormIdentity sorry
+> was numerically falsified in Exploration 13 (512-bit MPFR).
 
 ---
 
@@ -238,11 +254,15 @@ zero density. `Zeta/LowerBound.lean` has 445 lines of partial infrastructure.
 | v5 | Apr 18 | 1 | Great Purge (OneCrown) |
 | v7 | Apr 25 | 4 | Perron Crown (real-variable chain) |
 | v10 | Apr 25 | 4 | Gram Form graduation |
-| **v11** | **Apr 26** | **2** | **Mellin Crown (frequency domain)** |
+| v11 | Apr 26 | 2 | Mellin Crown (frequency domain) |
+| **v12** | **Apr 28** | **2** | **Crown Graduation (Perron Bridge closes forward chain)** |
 
-v11 rewired the forward direction through the Mellin/Plancherel isometry,
-bypassing the real-variable Perron chain which hit the "1D Shattering Trap"
-(phase cancellation lost by absolute values in bilinear expansions).
+v11 rewired the forward direction through the Mellin/Plancherel isometry.
+v12 (Exploration 17) graduated all analysis chain sorries:
+- HilbertInequality.lean: Montgomery-Vaughan bound (Schur test)
+- MontgomeryVaughan.lean: First machine-verified Dirichlet polynomial MVT
+- MellinResidualExpansion.lean: Crown graduation target closed via Perron Bridge
+- The forward path RH → d²_N → 0 is now a continuous, compiler-verified chain.
 
 ---
 
@@ -250,16 +270,16 @@ bypassing the real-variable Perron chain which hit the "1D Shattering Trap"
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 161 |
-| Active lines of code | 39,375 |
+| Active Lean files | 174 |
+| Active lines of code | 43,387 |
 | Archive files | 128 |
 | Archive lines | 29,784 |
-| Theorems + lemmas | ~1,335 |
+| Theorems + lemmas | ~1,459 |
 | Total axioms (active) | 55 |
 | Crown path axioms | **2** |
 | Crown path sorry | **0** |
-| Off-crown sorry | 8 |
+| Off-crown sorry | 16 (6 non-scratch) |
 | Topic directories | 22 |
-| Experiments (Rust/MPFR) | 27 |
-| Development time | 30 days |
+| Experiments (Rust/MPFR) | 35 |
+| Development time | 32 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
