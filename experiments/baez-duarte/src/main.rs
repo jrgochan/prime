@@ -71,7 +71,7 @@ fn run_fast_mode(args: &[String]) {
     println!("  ║  BÁEZ-DUARTE CONVERGENCE TRACKER — FAST MODE                         ║");
     println!("  ║  Cathedral Lean Proof · High-N Convergence Analysis                   ║");
     println!(
-        "  ║  f64 (53-bit), {} threads{:>43}║",
+        "  ║  f64 Gram + 128-bit MPFR solve, {} threads{:>30}║",
         threads,
         format!("N_max = {}", max_n)
     );
@@ -79,7 +79,7 @@ fn run_fast_mode(args: &[String]) {
     println!();
     println!("  Lean theorem: nyman_beurling_equivalence_mellin (Assembly/MainChain.lean)");
     println!("  Claim:        RH ↔ d²_N → 0  with  d²_N ≈ C/ln(N),  C ≈ 0.0462");
-    println!("  Mode:         FAST (f64) — convergence trend, not certification");
+    println!("  Mode:         FAST (f64 Gram, 128-bit MPFR Cholesky)");
 
     let _mu = arithmetic::mobius_sieve(max_n + 1);
     let ln_cache = gram_f64::precompute_ln1p_cache_f64(max_n);
