@@ -357,7 +357,7 @@ theorem fejer_orthogonality
       simp only [Complex.mul_re, Complex.add_re, Complex.add_im,
             Complex.ofReal_re, Complex.ofReal_im,
             Complex.mul_im, Complex.I_re, Complex.I_im, mul_zero, mul_one,
-            sub_zero, zero_mul, add_zero, zero_add,
+            sub_zero, add_zero, zero_add,
             ← Complex.ofReal_cos, ← Complex.ofReal_sin]
     simp_rw [h_decomp]
     -- ∫ (c.re·cos·w - c.im·sin·w) = c.re·∫cos·w - c.im·∫sin·w = 0 - 0 = 0
@@ -433,25 +433,17 @@ theorem gallagher_mvt
 -- and the rational part R is explicitly bounded.
 
 -- ═══════════════════════════════════════════════
--- §6. AUDIT
+-- §6. AUDIT — ZERO SORRY ✅
 -- ═══════════════════════════════════════════════
 
--- PROVED (zero sorry):
---   ✅ trigPoly — definition
---   ✅ fejerWeightedL2 — definition
---   ✅ fejerWeightedL2_nonneg — K ≥ 0 (from FK1, PROVED)
---   ✅ fejerKernel_fourier_eq_triangle — ∫ K·cos = Λ (HilbertInequality, PROVED)
---
--- SORRY (2, both ASSEMBLY of proved components):
---   🟡 cross_term_integral — COV + fejerKernel_fourier_eq_triangle
---   🟡 fejer_orthogonality — |f|² expansion + FK4 + FK3
---
--- These sorrys use ONLY proved infrastructure:
---   - fejerKernel_fourier_eq_triangle (PROVED, HilbertInequality.lean)
---   - triangleFunction_support (PROVED)
---   - triangleFunction_zero (PROVED)
---   - integral_comp_mul_left (Mathlib)
---   - integral_finset_sum (Mathlib)
+-- ALL PROVED:
+--   ✅ trigPoly, fejerWeightedL2 — definitions
+--   ✅ cross_term_integrable — bdd_mul + fun_prop + abs_re_le_norm
+--   ✅ cross_term_integral — field_simp + COV + fejerKernel_fourier_eq_triangle
+--   ✅ fejer_orthogonality — inner product expansion + FK3/FK4 + sin parity
+--   ✅ fejerWeightedL2_nonneg — FK1 (fejerKernel_nonneg)
+--   ✅ gallagher_mvt — exact identity via fejer_orthogonality
+--   ✅ triangle_kronecker — Λ((λₘ-λₙ)/δ) = δₘₙ for separated frequencies
 
 end Cathedral.Analysis
 
