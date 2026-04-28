@@ -82,7 +82,11 @@ theorem cross_term_integral (ω δ : ℝ) (hδ : 0 < δ) :
   -- Step 1: Rearrange: cos(2πωt)·δ·K(δt) = δ·(K(δt)·cos(2π(ω/δ)·(δt)))
   have h_eq : ∀ t, Real.cos (2 * π * ω * t) * (δ * fejerKernel (δ * t)) =
       δ * (fejerKernel (δ * t) * Real.cos (2 * π * (ω / δ) * (δ * t))) := by
-    intro t; sorry -- cos(2πωt)·(δK) = δ·(K·cos(2π(ω/δ)(δt))) by rearrangement
+    intro t
+    -- cos argument: 2πωt = 2π(ω/δ)(δt) after clearing denominator
+    have h1 : (2 : ℝ) * π * ω * t = 2 * π * (ω / δ) * (δ * t) := by field_simp
+    -- Rewrite cos arg, then commute: cos(X)·(δ·K) = (δ·K)·cos(X) = δ·(K·cos(X))
+    rw [h1, mul_comm (Real.cos _) (δ * fejerKernel (δ * t)), mul_assoc]
   simp_rw [h_eq]
   -- Step 2: Factor out δ as smul
   rw [show (fun t => δ * (fejerKernel (δ * t) * Real.cos (2 * π * (ω / δ) * (δ * t)))) =
@@ -149,10 +153,11 @@ private lemma cross_term_integrable
     Integrable (fun (t : ℝ) => (c₁ * cexp (2 * ↑π * ↑l₁ * ↑t * I) *
       ((starRingEnd ℂ) c₂ * (starRingEnd ℂ) (cexp (2 * ↑π * ↑l₂ * ↑t * I)))).re *
       (δ * fejerKernel (δ * t))) := by
-  -- PROOF: |Re(z)| ≤ ‖z‖ ≤ ‖c₁‖ * ‖c₂‖ (exp has unit norm)
-  -- So |f(t)| ≤ ‖c₁‖ * ‖c₂‖ * |δ * K(δt)|.
-  -- Bounding function is L¹ by FK3 (∫ δK(δt) = 1).
-  -- Formal close: Integrable.mono with the bound above.
+  -- Proof strategy: Integrable.mono with bound ‖f(t)‖ ≤ ‖c₁‖·‖c₂‖ · |δ·K(δt)|
+  -- |Re(z)| ≤ ‖z‖ (Complex.abs_re_le_norm)
+  -- ‖c₁·exp·conj(c₂)·conj(exp)‖ = ‖c₁‖·‖c₂‖ (exp unit norm)
+  -- Bounding function integrable: const_mul + FK3 (fejerKernel_integrable + COV)
+  -- Measurability: Re ∘ (continuous × continuous) * continuous = continuous → measurable
   sorry
 
 theorem fejer_orthogonality
@@ -231,25 +236,42 @@ theorem fejer_orthogonality
     rw [h_fk3, mul_one]
   · -- OFF-DIAGONAL CASE (i ≠ x)
     intro i _ hix
-    -- The integrand is Re(aᵢ·eᵢ · conj(aₓ)·conj(eₓ)) · δK(δt)
-    -- where eⱼ = exp(2πiλⱼt). For i ≠ x with δ-separated frequencies,
-    -- this integral vanishes because the Fejér kernel's Fourier transform
-    -- has support in [-1,1] and |λᵢ-λₓ|/δ ≥ 1.
+    -- Goal: ∫ Re(aᵢ·eᵢ · conj(aₓ)·conj(eₓ)) · δK(δt) dt = 0
+    -- where eⱼ = exp(2πiλⱼt), |λᵢ-λₓ| ≥ δ
     --
-    -- We use a helper approach: show the integral of the COMPLEX exponential
-    -- product against the kernel equals Λ((λᵢ-λₓ)/δ) = 0.
+    -- PROOF DECOMPOSITION:
+    -- 1. eᵢ·conj(eₓ) = exp(2πi(λᵢ-λₓ)t) [exp algebra]
+    -- 2. Let c = aᵢ·conj(aₓ), ω = λᵢ-λₓ
+    -- 3. Re(c·exp(iωt)) = Re(c)·cos(ωt) - Im(c)·sin(ωt)
+    -- 4. ∫ Re(c)·cos(ωt)·δK(δt) = Re(c)·Λ(ω/δ) [cross_term_integral]
+    -- 5. ∫ Im(c)·sin(ωt)·δK(δt) = Im(c)·0 [sin × even = odd, ∫ = 0]
+    -- 6. Λ(ω/δ) = 0 [triangle_kronecker: |ω|/δ ≥ 1]
+    -- 7. Total = Re(c)·0 - Im(c)·0 = 0
     --
-    -- Step 1: Rearrange into (constant) * (oscillating) * (weight)
-    -- aᵢ·eᵢ·conj(aₓ)·conj(eₓ) = (aᵢ·conj(aₓ)) · exp(2πi(λᵢ-λₓ)t)
-    -- Re of this = Re(c)·cos(ωt) - Im(c)·sin(ωt) where ω = λᵢ-λₓ
-    -- ∫ [Re(c)·cos(ωt) - Im(c)·sin(ωt)] · w(t) dt
-    --   = Re(c)·Λ(ω/δ) - Im(c)·0  (cross_term_integral + sin parity)
-    --   = Re(c)·0 = 0  (triangle_kronecker: |ω/δ| ≥ 1 → Λ = 0)
+    -- Steps 4,6 use PROVED lemmas (cross_term_integral, triangle_kronecker).
+    -- Step 5 uses parity (odd × even function over ℝ integrates to 0).
+    -- Steps 1-3 are algebraic wiring.
     --
-    -- ALL mathematical components are PROVED:
-    --   cross_term_integral ✅, triangle_kronecker ✅
-    -- The sorry covers only sin-parity wiring and exp algebra.
-    sorry
+    -- Establish the frequency gap
+    have h_gap : δ ≤ |lam i - lam x| := h_sep i x hix
+    -- triangle_kronecker: Λ((λᵢ-λₓ)/δ) = 0 since i ≠ x
+    have h_tri_zero : triangleFunction ((lam i - lam x) / δ) = 0 := by
+      have := triangle_kronecker hδ h_sep i x
+      rw [if_neg hix] at this; exact this
+    -- The cross-term integral gives:
+    -- ∫ cos(2π(lam i - lam x)t) · δK(δt) = Λ((lam i - lam x)/δ) = 0
+    have h_cos_zero : ∫ t : ℝ, Real.cos (2 * π * (lam i - lam x) * t) *
+        (δ * fejerKernel (δ * t)) = 0 := by
+      rw [cross_term_integral _ _ hδ, h_tri_zero]
+    -- The sin integral vanishes by parity (sin is odd, K is even):
+    -- ∫ sin(2π(lam i - lam x)t) · δK(δt) = 0
+    have h_sin_zero : ∫ t : ℝ, Real.sin (2 * π * (lam i - lam x) * t) *
+        (δ * fejerKernel (δ * t)) = 0 := by
+      sorry -- Parity: sin(ωt) is odd, δK(δt) is even → integrand is odd → ∫ = 0
+    -- Combine: decompose Re(c·exp(iωt))·w into cos and sin parts
+    -- Re(c·exp(iωt)) = Re(c)·cos(ωt) - Im(c)·sin(ωt)
+    -- ∫ [Re(c)·cos - Im(c)·sin]·w = Re(c)·∫cos·w - Im(c)·∫sin·w = 0 - 0 = 0
+    sorry -- Algebraic wiring: decompose Re(complex product) and apply h_cos_zero, h_sin_zero
 
 -- ═══════════════════════════════════════════════
 -- §4. THE FEJÉR-WEIGHTED MVT
