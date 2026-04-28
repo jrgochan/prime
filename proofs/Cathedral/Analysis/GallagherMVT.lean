@@ -171,20 +171,53 @@ theorem fejer_orthogonality
   congr 1; ext x
   -- Step 7: Inner swap ∫ and Σᵢ
   rw [integral_finset_sum Finset.univ (fun i _ => by exact sorry)]
-  -- Goal: Σᵢ ∫ Re(aᵢeᵢ * conj(aₓ)conj(eₓ)) · δK(δt) = Re(aₓ * conj(aₓ))
-  -- STRATEGY: Use Finset.sum_eq_single to isolate the diagonal term (i = x)
-  -- Off-diagonal: i ≠ x → integral = 0 (by δ-separation + support of Λ)
-  -- Diagonal: i = x → exp cancels, integral = Re(aₓ·conj(aₓ)) · 1
-  --
-  -- Both cases ultimately need:
-  --   • cross_term_integral: ∫ cos(2πωt)·δK(δt) = Λ(ω/δ)     ✅
-  --   • triangle_kronecker: Λ((λᵢ-λₓ)/δ) = δᵢₓ               ✅
-  --   • sin(2πωt)·δK(δt) integrates to 0 (parity: odd × even)
-  --   • exp(a)·conj(exp(b)) algebra → cos/sin decomposition
-  --
-  -- ALL MATHEMATICAL CONTENT IS PROVED.
-  -- Remaining sorry: algebraic wiring (Re·exp decomposition, sin parity)
-  sorry
+  -- DIAGONAL COLLAPSE via Finset.sum_eq_single_of_mem
+  rw [Finset.sum_eq_single_of_mem x (Finset.mem_univ x)]
+  · -- DIAGONAL CASE (i = x): exp(z) * conj(exp(z)) = |exp(z)|² = 1
+    have h_exp_cancel : ∀ t : ℝ,
+      (a x * cexp (2 * ↑π * ↑(lam x) * ↑t * I) *
+        ((starRingEnd ℂ) (a x) * (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I)))).re =
+      (a x * (starRingEnd ℂ) (a x)).re := by
+      intro t
+      -- Rearrange: a*e*(conj a * conj e) = (a*conj a) * (e*conj e)
+      rw [show a x * cexp (2 * ↑π * ↑(lam x) * ↑t * I) *
+        ((starRingEnd ℂ) (a x) * (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I))) =
+        (a x * (starRingEnd ℂ) (a x)) *
+        (cexp (2 * ↑π * ↑(lam x) * ↑t * I) *
+         (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I))) from by ring]
+      -- e * conj(e) = ↑(normSq e)
+      rw [Complex.mul_conj (cexp _)]
+      -- Now goal has: (↑normSq(a) * ↑normSq(exp(...))).re = (↑normSq(a)).re
+      have h_ns : Complex.normSq (cexp (2 * ↑π * ↑(lam x) * ↑t * I)) = 1 := by
+        rw [Complex.normSq_eq_norm_sq]
+        have : (2 * ↑π * ↑(lam x) * ↑t * I : ℂ) = ↑(2 * π * lam x * t) * I := by push_cast; ring
+        rw [this, Complex.norm_exp_ofReal_mul_I]; norm_num
+      rw [h_ns, Complex.ofReal_one, mul_one]
+    simp_rw [h_exp_cancel]
+    -- Goal: ∫ Re(aₓ·conj(aₓ)) * δK(δt) dt = Re(aₓ·conj(aₓ))
+    -- Factor out constant c = Re(aₓ·conj(aₓ)):
+    -- ∫ c * g(t) dt = c * ∫ g(t) dt = c * 1 = c  (FK3: ∫ δK(δt) = 1)
+    rw [show (fun t => (a x * (starRingEnd ℂ) (a x)).re * (δ * fejerKernel (δ * t))) =
+      (fun t => (a x * (starRingEnd ℂ) (a x)).re • (δ * fejerKernel (δ * t))) from by
+      ext; simp [smul_eq_mul]]
+    rw [integral_smul, smul_eq_mul]
+    -- Goal: Re(aₓ·conj(aₓ)) * ∫ δK(δt) dt = Re(aₓ·conj(aₓ))
+    -- FK3 scaled: ∫ δK(δt) dt = 1
+    have h_fk3 : ∫ t : ℝ, δ * fejerKernel (δ * t) = 1 := by
+      -- COV u = δt: ∫ g(δt) dt = |δ⁻¹| ∫ g(u) du
+      have h_cov := Measure.integral_comp_mul_left (fun u => fejerKernel u) δ
+      -- ∫ K(δt) dt = |δ⁻¹| · ∫ K(u) du
+      -- ∫ δ·K(δt) dt = δ · ∫ K(δt) dt = δ · |δ⁻¹| · ∫ K(u) du = 1 · ∫ K(u) du = 1
+      rw [show (fun t => δ * fejerKernel (δ * t)) =
+        (fun t => δ • (fejerKernel (δ * t))) from by ext; simp [smul_eq_mul]]
+      rw [integral_smul, h_cov, smul_comm, smul_smul,
+        abs_inv, abs_of_pos hδ, inv_mul_cancel₀ (ne_of_gt hδ), one_smul]
+      exact fejerKernel_integral
+    rw [h_fk3, mul_one]
+  · -- OFF-DIAGONAL CASE (i ≠ x): ∫ Re(aᵢeᵢ * conj(aₓ)conj(eₓ)) · w = 0
+    -- |λᵢ-λₓ| ≥ δ so Λ((λᵢ-λₓ)/δ) = 0, integral vanishes
+    intro i _ hix
+    sorry
 
 -- ═══════════════════════════════════════════════
 -- §4. THE FEJÉR-WEIGHTED MVT
