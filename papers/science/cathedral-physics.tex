@@ -51,12 +51,14 @@ The Hilbert spectral engine (512-bit MPFR, massively parallel) certifies
 the $\pi$ constant limit of the Montgomery--Vaughan Hilbert operator
 norm, validating the Schur test used in the Lean proof.
 The crown theorem \lean{nyman\_beurling\_equivalence}
-now depends on exactly \textbf{four transparent named axioms}---the
-covariance bound (virial theorem), the log-weighted M\"obius sum
-(magnetic susceptibility), the Vasyunin integral convergence (ergodic
-hypothesis), and the Hadamard zero-counting zeta lower bound (Weyl law),
-all classical results of 20th-century analytic number
-theory---plus the three Lean kernel axioms.
+now depends on exactly \textbf{two composite axioms}---the
+Hardy--Littlewood Mellin variance bound and the Hadamard zero-counting
+zeta lower bound---both classical results of 20th-century analytic number
+theory, plus the three Lean kernel axioms.
+An alternative spatial path achieves the same result via four more
+granular axioms: the covariance bound (virial theorem), the log-weighted
+M\"obius sum (magnetic susceptibility), the Vasyunin integral convergence
+(ergodic hypothesis), and the shared Hadamard bound (Weyl law).
 A dual proof path through the Mellin Crown (frequency domain)
 achieves the same result with two composite axioms; the
 \lean{MellinPerronBridge} proves their equivalence via the
