@@ -511,7 +511,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "crown", renderer: "graph", dataTier: "static",
-    proof: { leanFile: "Assembly/MainChain.lean", theoremName: "nyman_beurling_equivalence", status: "proved" },
+    proof: { leanFile: "Assembly/MainChain.lean", theoremName: "nyman_beurling_equivalence_mellin", status: "proved" },
     showsParticleSlider: false,
   },
   {
@@ -546,7 +546,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 0, usesOutputBuffer: false,
     group: "crown", renderer: "chart", dataTier: "precomputed",
     experimentSource: "l2-decay-certificate",
-    proof: { leanFile: "Assembly/MellinCrown.lean", theoremName: "mellin_crown_forward", status: "proved" },
+    proof: { leanFile: "Assembly/MellinCrown.lean", theoremName: "rh_implies_bd_convergence_mellin", status: "proved" },
     showsParticleSlider: false,
   },
 
@@ -569,7 +569,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 0, usesOutputBuffer: false,
     group: "analysis", renderer: "dual-chart", dataTier: "precomputed",
     experimentSource: "mellin-certificate",
-    proof: { leanFile: "White/Scattering.lean", theoremName: "parseval_bridge_white", status: "proved" },
+    proof: { leanFile: "White/Scattering.lean", theoremName: "fourier_inv_autocorr_proved", status: "proved" },
     showsParticleSlider: false,
   },
   {
@@ -628,7 +628,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "arithmetic", renderer: "curves", dataTier: "live",
-    proof: { leanFile: "White/Perron/PerronBound.lean", status: "proved" },
+    proof: { leanFile: "Perron/MertensFromPerron.lean", status: "proved" },
   },
   {
     id: "abel-thermo",
@@ -645,7 +645,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 0, usesOutputBuffer: false,
     group: "arithmetic", renderer: "chart", dataTier: "precomputed",
     experimentSource: "pnt-mobius-sums",
-    proof: { leanFile: "AbelTail/AbelTailBound.lean", status: "proved" },
+    proof: { leanFile: "AbelTail/Assembly.lean", status: "proved" },
     showsParticleSlider: false,
   },
   {
@@ -680,7 +680,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 0, usesOutputBuffer: false,
     group: "analysis", renderer: "surface", dataTier: "precomputed",
     experimentSource: "gram-matrix",
-    proof: { leanFile: "Vasyunin/GramMatrix.lean", status: "proved" },
+    proof: { leanFile: "Vasyunin/Matrix/GramPSD.lean", status: "proved" },
     showsParticleSlider: false,
   },
   {
@@ -716,7 +716,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 0, usesOutputBuffer: false,
     group: "analysis", renderer: "chart", dataTier: "precomputed",
     experimentSource: "vasyunin-convergence",
-    proof: { leanFile: "Vasyunin/Cotangent/VasyuninBound.lean", status: "proved" },
+    proof: { leanFile: "Vasyunin/Cotangent/VasyuninAssembly.lean", status: "proved" },
     showsParticleSlider: false,
   },
   {

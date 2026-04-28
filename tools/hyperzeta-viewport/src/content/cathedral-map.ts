@@ -41,7 +41,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "zeta_lb",
     label: "|ζ(s)| ≥ c|t|⁻ᴬ",
-    leanFile: "Cathedral/Zeta/Hadamard.lean",
+    leanFile: "Zeta/Hadamard.lean",
     status: "axiom",
     group: "crown",
     description: "Hadamard zero-counting zeta lower bound. Crown axiom 2 of 2.",
@@ -75,7 +75,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "gram",
     label: "Gram Matrix PD",
-    leanFile: "Vasyunin/GramMatrix.lean",
+    leanFile: "Vasyunin/Matrix/GramPSD.lean",
     status: "proved",
     group: "analysis",
     description: "Gram matrix is positive definite. Uses Abel summation.",
@@ -83,7 +83,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "spectral",
     label: "Spectral Gap ≥ ε",
-    leanFile: "Spectral/SpectralGap.lean",
+    leanFile: "Spectral/RayleighBridge.lean",
     status: "proved",
     group: "analysis",
     description: "Uniform lower bound on smallest eigenvalue of G_N.",
@@ -91,7 +91,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "rank1",
     label: "Rank-1 Separation",
-    leanFile: "Assembly/Rank1.lean",
+    leanFile: "NymanBeurling/Separation.lean",
     status: "proved",
     group: "analysis",
     description: "Decomposition of b_N into rank-1 + remainder.",
@@ -101,7 +101,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "perron",
     label: "Perron Chain",
-    leanFile: "White/Perron/PerronBound.lean",
+    leanFile: "Perron/MertensFromPerron.lean",
     status: "proved",
     group: "arithmetic",
     description: "RH → |M(x)| ≤ Cx^{3/4}. 16-file chain.",
@@ -109,7 +109,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "abel_s1",
     label: "S₁ = Σμ/k → 0",
-    leanFile: "AbelTail/AbelTailBound.lean",
+    leanFile: "AbelTail/Assembly.lean",
     status: "proved",
     group: "arithmetic",
     description: "First PNT moment. Zero axioms.",
@@ -117,7 +117,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
   {
     id: "pnt",
     label: "PNT via Selberg",
-    leanFile: "Cathedral/PNT/SelbergBound.lean",
+    leanFile: "PNT/Bridge.lean",
     status: "proved",
     group: "arithmetic",
     description: "Prime Number Theorem via Selberg symmetry formula.",
