@@ -1638,6 +1638,12 @@ Sherman--Morrison & Rank-1 scattering update & \lean{ShermanMorrison.lean} & pro
 Schur complement & Supersymmetric localization & \lean{Structural/*.lean} & proved & \ref{sec:spectral} \\
 Mod-8 decomposition & Wigner--Eckart / Bott periodicity & \lean{Spectral/ClassRestriction.lean} & axiom & \ref{sec:spectral} \\
 $N \to \infty$ limit & IR fixed point (RG flow) & \lean{MellinCrown.lean} & 2 ax. & \ref{sec:tqft} \\
+Mellin--Perron Bridge & Bohr complementarity & \lean{MellinPerronBridge.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Gauge choice (spatial/Mellin) & Lorenz / unitary gauge & \lean{MainChain.lean} & \textbf{proved} & \ref{sec:axiom-audit} \\
+Gallagher MVT & Completeness relation & \lean{GallagherMVT.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Character energy partition & Stabilizer QEC code & \lean{GallagherPartition.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Log-frequency separation & Dispersion relation & \lean{FrequencySeparation.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Conservation of Difficulty & Gauss--Bonnet obstruction & (conceptual, E15) & --- & \ref{sec:axiom-audit} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -1739,6 +1745,28 @@ $2\pi$ rescaling & Renormalization scale & \lean{White/Scattering.lean} & proved
 \end{tabular}
 \end{center}
 
+\subsection{Stained Glass Rotors (v12)}
+
+\begin{center}
+\small
+\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+Gallagher MVT & Completeness relation & \lean{GallagherMVT.lean} & proved & \ref{sec:parseval} \\
+Fej\'er kernel convolution & Spectral window function & \lean{GallagherMVT.lean} & proved & \ref{sec:parseval} \\
+Dirichlet characters mod 8 & Syndrome channels (QEC) & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+$\chi_8$ orthogonality & Perfect decoupling & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+Discrete energy partition & Fourfold energy split & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+Log-frequency $\lambda_n = \log n$ & Lattice dispersion relation & \lean{FrequencySeparation.lean} & proved & \ref{sec:parseval} \\
+$|\lambda_i - \lambda_j| \geq 1/(N+1)$ & Spectral gap / Van Hove & \lean{FrequencySeparation.lean} & proved & \ref{sec:parseval} \\
+Mellin--Perron Bridge & Bohr complementarity & \lean{MellinPerronBridge.lean} & proved & \ref{sec:parseval} \\
+Spatial vs.~Mellin path & Lorenz vs.~unitary gauge & \lean{MainChain.lean} & proved & \ref{sec:axiom-audit} \\
+Conservation of Difficulty & Gauss--Bonnet obstruction & (E15, conceptual) & --- & \ref{sec:axiom-audit} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \subsection{Summary Statistics}
 
 \begin{center}
@@ -1746,12 +1774,13 @@ $2\pi$ rescaling & Renormalization scale & \lean{White/Scattering.lean} & proved
 \toprule
 \textbf{Metric} & \textbf{Count} \\
 \midrule
-Total physics phenomena mapped & 80+ \\
-Proved (zero sorry, zero axiom) & 50+ \\
+Total physics phenomena mapped & 95+ \\
+Proved (zero sorry, zero axiom) & 65+ \\
 Axiom (off-crown) & $\sim$20 \\
-Crown axioms & \textbf{2} \\
-Physical domains covered & 6 \\
-Cathedral Lean modules referenced & 40+ \\
+Crown axioms (spatial gauge) & \textbf{4} \\
+Crown axioms (Mellin gauge) & \textbf{2} \\
+Physical domains covered & 7 \\
+Cathedral Lean modules referenced & 45+ \\
 Numerical experiments & 27 \\
 \bottomrule
 \end{tabular}
