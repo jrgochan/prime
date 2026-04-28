@@ -39,23 +39,23 @@ namespace Cathedral.Vasyunin.TelescopeSum
 
 /-- The rational component of the antiderivative: -1/(jkx).
     This depends only on x, not on the tile indices (m,n). -/
-def F_rational (j k : ℕ) (x : ℝ) : ℝ := -1 / ((j:ℝ) * (k:ℝ) * x)
+def f_rational (j k : ℕ) (x : ℝ) : ℝ := -1 / ((j:ℝ) * (k:ℝ) * x)
 
 /-- The log component of the antiderivative: -(n/j + m/k)·log(x).
     The coefficient depends on the tile indices. -/
-def F_log (j k m n : ℕ) (x : ℝ) : ℝ :=
+def f_log (j k m n : ℕ) (x : ℝ) : ℝ :=
   -((n:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) * Real.log x
 
 /-- The linear component of the antiderivative: mn·x.
     The coefficient depends on the tile indices. -/
-def F_linear (m n : ℕ) (x : ℝ) : ℝ := (m:ℝ) * (n:ℝ) * x
+def f_linear (m n : ℕ) (x : ℝ) : ℝ := (m:ℝ) * (n:ℝ) * x
 
 /-- The full antiderivative equals the sum of its three components. -/
-theorem F_eq_components (j k m n : ℕ) (x : ℝ) :
+theorem f_eq_components (j k m n : ℕ) (x : ℝ) :
     (-1 / ((j:ℝ) * (k:ℝ) * x) - ((n:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) * Real.log x +
      (m:ℝ) * (n:ℝ) * x) =
-    F_rational j k x + F_log j k m n x + F_linear m n x := by
-  unfold F_rational F_log F_linear; ring
+    f_rational j k x + f_log j k m n x + f_linear m n x := by
+  unfold f_rational f_log f_linear; ring
 
 -- ════════════════════════════════════════════════
 -- §2. RATIONAL TERM TELESCOPING
@@ -64,22 +64,22 @@ theorem F_eq_components (j k m n : ℕ) (x : ℝ) :
 /-- **RATIONAL TELESCOPE**: The -1/(jkx) terms cancel perfectly between
     adjacent tiles sharing a boundary point x₀:
 
-    [F_rational(x₀) from end of left tile] - [F_rational(x₀) from start of right tile] = 0
+    [f_rational(x₀) from end of left tile] - [f_rational(x₀) from start of right tile] = 0
 
-    This is trivially true because F_rational depends only on x,
-    so F_rational(x₀) = F_rational(x₀). -/
+    This is trivially true because f_rational depends only on x,
+    so f_rational(x₀) = f_rational(x₀). -/
 theorem rational_telescope (j k : ℕ) (x₀ : ℝ) :
-    F_rational j k x₀ - F_rational j k x₀ = 0 := sub_self _
+    f_rational j k x₀ - f_rational j k x₀ = 0 := sub_self _
 
-/-- When we sum F_rational(hi) - F_rational(lo) across tiles from
+/-- When we sum f_rational(hi) - f_rational(lo) across tiles from
     x_start to x_end, only the outermost boundaries survive:
-    Σ [F_rational(hi_i) - F_rational(lo_i)] = F_rational(x_end) - F_rational(x_start)
+    Σ [f_rational(hi_i) - f_rational(lo_i)] = f_rational(x_end) - f_rational(x_start)
 
     (This is because adjacent tiles share boundaries.) -/
 theorem rational_sum_eq_endpoints (j k : ℕ) (x_start x_end : ℝ) :
-    F_rational j k x_end - F_rational j k x_start =
+    f_rational j k x_end - f_rational j k x_start =
     -1 / ((j:ℝ) * (k:ℝ) * x_end) - (-1 / ((j:ℝ) * (k:ℝ) * x_start)) := by
-  unfold F_rational; ring
+  unfold f_rational; ring
 
 -- ════════════════════════════════════════════════
 -- §3. LOG COEFFICIENT CHANGES AT CROSSING POINTS
@@ -105,7 +105,7 @@ theorem log_coeff_jump_k_crossing (j k m n₀ : ℕ) (_hn₀ : 1 ≤ n₀) :
     Since n might also change at the row boundary, the jump is:
       (n'-n)/j + 1/k
 
-    For the rational telescope, this doesn't matter (F_rational cancels).
+    For the rational telescope, this doesn't matter (f_rational cancels).
     For the log telescope, this is how the harmonic-like sums arise. -/
 theorem log_coeff_jump_j_boundary (j k m n n' : ℕ) :
     ((n':ℝ)/(j:ℝ) + ((m:ℝ)+1)/(k:ℝ)) - ((n:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) =
@@ -125,25 +125,25 @@ theorem single_tile_ftc_decomposition (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 �
     let jf := (j:ℝ); let kf := (k:ℝ); let mf := (m:ℝ); let nf := (n:ℝ)
     (-1 / (jf * kf * hi) - (nf/jf + mf/kf) * Real.log hi + mf * nf * hi) -
     (-1 / (jf * kf * lo) - (nf/jf + mf/kf) * Real.log lo + mf * nf * lo) =
-    (F_rational j k hi - F_rational j k lo) +
-    (F_log j k m n hi - F_log j k m n lo) +
-    (F_linear m n hi - F_linear m n lo) := by
-  unfold F_rational F_log F_linear; ring
+    (f_rational j k hi - f_rational j k lo) +
+    (f_log j k m n hi - f_log j k m n lo) +
+    (f_linear m n hi - f_linear m n lo) := by
+  unfold f_rational f_log f_linear; ring
 
 /-- **RATIONAL PART AT ROW ENDPOINTS**:
-    F_rational(rowHi j m) - F_rational(rowLo j m)
+    f_rational(rowHi j m) - f_rational(rowLo j m)
     = -1/(jk · 1/(jm)) + 1/(jk · 1/(j(m+1)))
     = -m/k + (m+1)/k = 1/k
 
     Wait: rowHi j m = 1/(jm), rowLo j m = 1/(j(m+1)).
-    F_rational(1/(jm)) = -1/(jk · 1/(jm)) = -jm/(jk) = -m/k
-    F_rational(1/(j(m+1))) = -1/(jk · 1/(j(m+1))) = -j(m+1)/(jk) = -(m+1)/k
+    f_rational(1/(jm)) = -1/(jk · 1/(jm)) = -jm/(jk) = -m/k
+    f_rational(1/(j(m+1))) = -1/(jk · 1/(j(m+1))) = -j(m+1)/(jk) = -(m+1)/k
 
-    So F_rational(hi) - F_rational(lo) = -m/k + (m+1)/k = 1/k. -/
+    So f_rational(hi) - f_rational(lo) = -m/k + (m+1)/k = 1/k. -/
 theorem rational_row_diff (j k m : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 ≤ m) :
-    F_rational j k (OffDiagPartition.rowHi j m) -
-    F_rational j k (OffDiagPartition.rowLo j m) = 1 / (k:ℝ) := by
-  unfold F_rational OffDiagPartition.rowHi OffDiagPartition.rowLo
+    f_rational j k (OffDiagPartition.rowHi j m) -
+    f_rational j k (OffDiagPartition.rowLo j m) = 1 / (k:ℝ) := by
+  unfold f_rational OffDiagPartition.rowHi OffDiagPartition.rowLo
   have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
   have hk_pos : (0:ℝ) < (k:ℝ) := Nat.cast_pos.mpr (by omega)
   have hm_pos : (0:ℝ) < (m:ℝ) := Nat.cast_pos.mpr (by omega)
@@ -152,17 +152,17 @@ theorem rational_row_diff (j k m : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
   ring
 
 /-- **LOG PART AT ROW ENDPOINTS** (single-tile case with fixed n):
-    F_log(hi) - F_log(lo)
+    f_log(hi) - f_log(lo)
     = -(n/j + m/k) · (log(1/(jm)) - log(1/(j(m+1))))
     = -(n/j + m/k) · log((m+1)/m)
 
     This is the term that accumulates into Digamma evaluations. -/
 theorem log_row_diff (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) (_hm : 1 ≤ m) :
-    F_log j k m n (OffDiagPartition.rowHi j m) -
-    F_log j k m n (OffDiagPartition.rowLo j m) =
+    f_log j k m n (OffDiagPartition.rowHi j m) -
+    f_log j k m n (OffDiagPartition.rowLo j m) =
     -((n:ℝ)/(j:ℝ) + (m:ℝ)/(k:ℝ)) *
     (Real.log (1/((j:ℝ) * (m:ℝ))) - Real.log (1/((j:ℝ) * ((m:ℝ)+1)))) := by
-  unfold F_log OffDiagPartition.rowHi OffDiagPartition.rowLo; ring
+  unfold f_log OffDiagPartition.rowHi OffDiagPartition.rowLo; ring
 
 /-- **LOG DIFFERENCE SIMPLIFICATION**: The log ratio simplifies to log((m+1)/m). -/
 theorem log_ratio_simplify (j m : ℕ) (hj : 1 ≤ j) (hm : 1 ≤ m) :
@@ -175,13 +175,13 @@ theorem log_ratio_simplify (j m : ℕ) (hj : 1 ≤ j) (hm : 1 ≤ m) :
   field_simp
 
 /-- **LINEAR PART AT ROW ENDPOINTS** (single-tile case):
-    F_linear(hi) - F_linear(lo) = mn · (1/(jm) - 1/(j(m+1)))
+    f_linear(hi) - f_linear(lo) = mn · (1/(jm) - 1/(j(m+1)))
     = mn · 1/(jm(m+1)) = n/(j(m+1)) -/
 theorem linear_row_diff (j k m n : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) (_hm : 1 ≤ m) :
-    F_linear m n (OffDiagPartition.rowHi j m) -
-    F_linear m n (OffDiagPartition.rowLo j m) =
+    f_linear m n (OffDiagPartition.rowHi j m) -
+    f_linear m n (OffDiagPartition.rowLo j m) =
     (m:ℝ) * (n:ℝ) * (1/((j:ℝ) * (m:ℝ)) - 1/((j:ℝ) * ((m:ℝ)+1))) := by
-  unfold F_linear OffDiagPartition.rowHi OffDiagPartition.rowLo; ring
+  unfold f_linear OffDiagPartition.rowHi OffDiagPartition.rowLo; ring
 
 /-- **LINEAR DIFFERENCE SIMPLIFICATION**: The difference simplifies. -/
 theorem linear_diff_simplify (j m n : ℕ) (hj : 1 ≤ j) (hm : 1 ≤ m) :
@@ -198,19 +198,19 @@ theorem linear_diff_simplify (j m n : ℕ) (hj : 1 ≤ j) (hm : 1 ≤ m) :
 /-- **RATIONAL TELESCOPE ACROSS ALL ROWS**: When we sum the rational parts
     from row 1 to row M, only the outer boundaries survive:
 
-    Σ_{m=1}^{M} [F_rational(hi_m) - F_rational(lo_m)]
-    = F_rational(rowHi 1) - F_rational(rowLo M)
-    = F_rational(1/j) - F_rational(1/(j(M+1)))
+    Σ_{m=1}^{M} [f_rational(hi_m) - f_rational(lo_m)]
+    = f_rational(rowHi 1) - f_rational(rowLo M)
+    = f_rational(1/j) - f_rational(1/(j(M+1)))
     = -1/k + (M+1)/k = M/k  -/
 theorem rational_telescope_sum (j k M : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (_hM : 1 ≤ M) :
     ∑ m ∈ Finset.Icc 1 M,
-      (F_rational j k (OffDiagPartition.rowHi j m) -
-       F_rational j k (OffDiagPartition.rowLo j m)) =
+      (f_rational j k (OffDiagPartition.rowHi j m) -
+       f_rational j k (OffDiagPartition.rowLo j m)) =
     (M:ℝ) / (k:ℝ) := by
   -- Each term = 1/k by rational_row_diff
   have h_each : ∀ m ∈ Finset.Icc 1 M,
-      F_rational j k (OffDiagPartition.rowHi j m) -
-      F_rational j k (OffDiagPartition.rowLo j m) = 1 / (k:ℝ) := by
+      f_rational j k (OffDiagPartition.rowHi j m) -
+      f_rational j k (OffDiagPartition.rowLo j m) = 1 / (k:ℝ) := by
     intro m hm
     simp [Finset.mem_Icc] at hm
     exact rational_row_diff j k m hj hk hm.1
@@ -336,7 +336,7 @@ theorem row_ftc_combined (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
 -- ════════════════════════════════════════════════
 
 -- PROVED (zero sorry):
---   ✅ F_eq_components           — F = rational + log + linear
+--   ✅ f_eq_components           — F = rational + log + linear
 --   ✅ rational_telescope        — rational terms cancel at shared boundaries
 --   ✅ rational_sum_eq_endpoints — rational telescope to endpoints
 --   ✅ log_coeff_jump_k_crossing — log coefficient jump = 1/j at k-crossing

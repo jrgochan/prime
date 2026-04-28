@@ -17,19 +17,19 @@
 
   The sum splits into three components:
 
-  S_rational(M) = (M-1)/b                                    (diverges)
-  S_log(M)      = -Σ (n(m)/a + m/b)·log((m+1)/m)            (diverges)
-  S_linear(M)   = Σ n(m)/(a(m+1))                            (diverges)
+  s_rational(M) = (M-1)/b                                    (diverges)
+  s_log(M)      = -Σ (n(m)/a + m/b)·log((m+1)/m)            (diverges)
+  s_linear(M)   = Σ n(m)/(a(m+1))                            (diverges)
 
   ### The Convergence Structure (CORRECTED April 25, 2026)
 
   **CRITICAL**: No sub-sum converges individually. Only the FULL combination
-  S_combined(M) = S_rational + S_log + S_linear converges as M → ∞.
+  s_combined(M) = s_rational + s_log + s_linear converges as M → ∞.
 
   The cancellation structure:
-  1. S_log = S_log_stirling + S_log_digamma
-  2. S_rational + S_log_stirling cancels the O(M) divergence (proved)
-  3. The remaining log-divergent pieces in S_log_digamma + S_linear
+  1. s_log = s_log_stirling + s_log_digamma
+  2. s_rational + s_log_stirling cancels the O(M) divergence (proved)
+  3. The remaining log-divergent pieces in s_log_digamma + s_linear
      cancel through floor/fract decomposition and Dirichlet test
   4. What survives is finite and equals vasyuninGramFormula
 
@@ -71,42 +71,42 @@ lemma tileIndex_nonneg (a b m : ℕ) : 0 ≤ (tileIndex a b m : ℝ) :=
 -- ════════════════════════════════════════════════
 
 /-- The rational partial sum: Σ_{m=1}^{M-1} 1/b = (M-1)/b. -/
-def S_rational (b M : ℕ) : ℝ := ((M:ℝ) - 1) / (b:ℝ)
+def s_rational (b M : ℕ) : ℝ := ((M:ℝ) - 1) / (b:ℝ)
 
 /-- The log partial sum: -Σ_{m=1}^{M-1} (n(m)/a + m/b) · log((m+1)/m). -/
-def S_log (a b M : ℕ) : ℝ :=
+def s_log (a b M : ℕ) : ℝ :=
   -∑ m ∈ Finset.Icc 1 (M - 1),
     ((tileIndex a b m : ℝ) / (a:ℝ) + (m:ℝ) / (b:ℝ)) *
     Real.log (((m:ℝ) + 1) / (m:ℝ))
 
 /-- The linear partial sum: Σ_{m=1}^{M-1} n(m) / (a·(m+1)). -/
-def S_linear (a b M : ℕ) : ℝ :=
+def s_linear (a b M : ℕ) : ℝ :=
   ∑ m ∈ Finset.Icc 1 (M - 1),
     (tileIndex a b m : ℝ) / ((a:ℝ) * ((m:ℝ) + 1))
 
-/-- The combined partial sum S(M) = S_rational + S_log + S_linear. -/
-def S_combined (a b M : ℕ) : ℝ :=
-  S_rational b M + S_log a b M + S_linear a b M
+/-- The combined partial sum S(M) = s_rational + s_log + s_linear. -/
+def s_combined (a b M : ℕ) : ℝ :=
+  s_rational b M + s_log a b M + s_linear a b M
 
 -- ════════════════════════════════════════════════
 -- §3. THE LOG SUM SPLITS INTO STIRLING + DIGAMMA
 -- ════════════════════════════════════════════════
 
-/-- The log sum splits: S_log = S_log_stirling + S_log_digamma
+/-- The log sum splits: s_log = s_log_stirling + s_log_digamma
     where:
-      S_log_stirling = -(1/b) · Σ m · log((m+1)/m)
-      S_log_digamma  = -(1/a) · Σ n(m) · log((m+1)/m) -/
-def S_log_stirling (b M : ℕ) : ℝ :=
+      s_log_stirling = -(1/b) · Σ m · log((m+1)/m)
+      s_log_digamma  = -(1/a) · Σ n(m) · log((m+1)/m) -/
+def s_log_stirling (b M : ℕ) : ℝ :=
   -(1/(b:ℝ)) * ∑ m ∈ Finset.Icc 1 (M - 1),
     (m:ℝ) * Real.log (((m:ℝ) + 1) / (m:ℝ))
 
-def S_log_digamma (a b M : ℕ) : ℝ :=
+def s_log_digamma (a b M : ℕ) : ℝ :=
   -(1/(a:ℝ)) * ∑ m ∈ Finset.Icc 1 (M - 1),
     (tileIndex a b m : ℝ) * Real.log (((m:ℝ) + 1) / (m:ℝ))
 
-theorem S_log_split (a b M : ℕ) :
-    S_log a b M = S_log_stirling b M + S_log_digamma a b M := by
-  simp only [S_log, S_log_stirling, S_log_digamma]
+theorem s_log_split (a b M : ℕ) :
+    s_log a b M = s_log_stirling b M + s_log_digamma a b M := by
+  simp only [s_log, s_log_stirling, s_log_digamma]
   rw [neg_mul, neg_mul, ← neg_add]
   congr 1
   rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
@@ -117,19 +117,19 @@ theorem S_log_split (a b M : ℕ) :
 -- ════════════════════════════════════════════════
 
 -- The Stirling component uses the already-proved m_log_partial_sum_formula.
--- S_rational + S_log_stirling cancels the divergent M/b and leaves
+-- s_rational + s_log_stirling cancels the divergent M/b and leaves
 -- finite terms related to ln(2π)/2 and Euler-Mascheroni constant.
 
-/-- **CANCELLATION LEMMA**: S_rational(M) + S_log_stirling(M) =
+/-- **CANCELLATION LEMMA**: s_rational(M) + s_log_stirling(M) =
     -(1/b) · [M·log(M) - M + log(2π)/2 + ...] + (M-1)/b
 
     The M/b terms cancel, leaving finite terms. -/
 theorem rational_plus_stirling (b M : ℕ) (_hb : 1 ≤ b) (hM : 2 ≤ M) :
-    S_rational b M + S_log_stirling b M =
+    s_rational b M + s_log_stirling b M =
     ((M:ℝ) - 1) / (b:ℝ) -
     (1/(b:ℝ)) * (((M:ℝ) - 1) * Real.log (M:ℝ) -
       ∑ m ∈ Finset.Icc 1 (M - 1), Real.log (m:ℝ)) := by
-  simp only [S_rational, S_log_stirling]
+  simp only [s_rational, s_log_stirling]
   rw [neg_mul]
   have h := TelescopeSum.m_log_partial_sum_formula (M - 1) (by omega)
   have hcast : ((M - 1 : ℕ) : ℝ) = (M : ℝ) - 1 := by
@@ -149,13 +149,13 @@ theorem rational_plus_stirling (b M : ℕ) (_hb : 1 ≤ b) (hM : 2 ≤ M) :
 -- correction, but the allocation left log-divergent remainders in both.
 --
 -- Numerics confirm: for a=1, b=2,
---   S_linear(M) - (1/b)·Stirling(M) ≈ -(1/4)·log(M) → -∞
---   S_log_digamma(M) + (a/b²)·Stirling(M) → -∞
+--   s_linear(M) - (1/b)·Stirling(M) ≈ -(1/4)·log(M) → -∞
+--   s_log_digamma(M) + (a/b²)·Stirling(M) → -∞
 --
 -- The divergence rates are -(a+b-1)/(2ab)·log(M) and similar, which
--- do NOT cancel individually. Only the TOTAL S_combined converges.
+-- do NOT cancel individually. Only the TOTAL s_combined converges.
 --
--- CORRECTED: Merge into a single axiom about S_combined convergence.
+-- CORRECTED: Merge into a single axiom about s_combined convergence.
 
 -- ════════════════════════════════════════════════
 -- §4b. LOG BOUND INFRASTRUCTURE (derivative-based)
@@ -269,22 +269,22 @@ private lemma tileIndex_mul_le (a b m : ℕ) :
   rw [mul_comm] at this
   exact this
 
-/-- The single-row contribution to S_combined.
+/-- The single-row contribution to s_combined.
 
     R(m) = 1/b - (⌊am/b⌋/a + m/b)·log((m+1)/m) + ⌊am/b⌋/(a·(m+1))
 
-    S_combined(M) = Σ_{m=1}^{M-1} R(m). -/
+    s_combined(M) = Σ_{m=1}^{M-1} R(m). -/
 def rowTerm (a b m : ℕ) : ℝ :=
   1 / (b:ℝ) -
   ((tileIndex a b m : ℝ) / (a:ℝ) + (m:ℝ) / (b:ℝ)) *
     Real.log (((m:ℝ) + 1) / (m:ℝ)) +
   (tileIndex a b m : ℝ) / ((a:ℝ) * ((m:ℝ) + 1))
 
-/-- S_combined equals Σ rowTerm for M ≥ 1. -/
-theorem S_combined_eq_sum_rowTerm (a b M : ℕ) (hM : 1 ≤ M) :
-    S_combined a b M =
+/-- s_combined equals Σ rowTerm for M ≥ 1. -/
+theorem s_combined_eq_sum_rowTerm (a b M : ℕ) (hM : 1 ≤ M) :
+    s_combined a b M =
     ∑ m ∈ Finset.Icc 1 (M - 1), rowTerm a b m := by
-  simp only [S_combined, S_rational, S_log, S_linear, rowTerm]
+  simp only [s_combined, s_rational, s_log, s_linear, rowTerm]
   -- Rewrite (M-1)/b as a constant sum over Icc 1 (M-1)
   have h_rat : ((M:ℝ) - 1) / (b:ℝ) =
       ∑ _m ∈ Finset.Icc 1 (M - 1), (1:ℝ) / (b:ℝ) := by
@@ -455,17 +455,17 @@ lemma rowTerm_le_upper (a b m : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
 
 /-- **THEOREM (Combined Convergence)** — GRADUATED from axiom!
 
-    The total partial sum S_combined(M) = S_rational + S_log + S_linear
+    The total partial sum s_combined(M) = s_rational + s_log + s_linear
     converges to a finite limit as M → ∞.
 
-    **Proof**: S_combined(M) = Σ_{m=1}^{M-1} R(m) where:
+    **Proof**: s_combined(M) = Σ_{m=1}^{M-1} R(m) where:
     - R(m) ≥ 0 (so partial sums are monotone increasing)
     - R(m) ≤ 1/m² (so partial sums are bounded by ζ(2) = π²/6)
     - By the monotone convergence theorem, the limit exists. -/
-theorem S_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
+theorem s_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (_hcop : Nat.Coprime a b) :
     ∃ L : ℝ,
-    Tendsto (fun M : ℕ => S_combined a b M) atTop (nhds L) := by
+    Tendsto (fun M : ℕ => s_combined a b M) atTop (nhds L) := by
   -- Step 1: rowTerm(n+1) is summable (by comparison with C/(n+1)²)
   set C := ((a:ℝ) + (b:ℝ)) / ((a:ℝ) * (b:ℝ)) with hC_def
   have hC_pos : 0 < C := by positivity
@@ -494,11 +494,11 @@ theorem S_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
       (fun N : ℕ => ∑ n ∈ Finset.range N, rowTerm a b (n + 1))
       atTop (nhds L) :=
     (hasSum_iff_tendsto_nat_of_nonneg h_nonneg L).mp hL
-  -- Step 3: Show Σ_{n<N} rowTerm(n+1) = S_combined(N+1)
+  -- Step 3: Show Σ_{n<N} rowTerm(n+1) = s_combined(N+1)
   have h_eq : ∀ N : ℕ, ∑ n ∈ Finset.range N, rowTerm a b (n + 1) =
-      S_combined a b (N + 1) := by
+      s_combined a b (N + 1) := by
     intro N
-    rw [S_combined_eq_sum_rowTerm a b (N + 1) (by omega), show N + 1 - 1 = N from by omega]
+    rw [s_combined_eq_sum_rowTerm a b (N + 1) (by omega), show N + 1 - 1 = N from by omega]
     apply Finset.sum_nbij' (fun n => n + 1) (fun m => m - 1)
     · intro n hn; simp [Finset.mem_Icc, Finset.mem_range] at *; omega
     · intro m hm; simp [Finset.mem_Icc, Finset.mem_range] at *; omega
@@ -506,7 +506,7 @@ theorem S_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     · intro m hm; simp [Finset.mem_Icc] at hm; omega
     · intro n _hn; rfl
   -- Step 4: f(n+1) → L implies f(n) → L (shift by 1 in atTop filter)
-  have h_shift : Tendsto (fun N => S_combined a b (N + 1)) atTop (nhds L) :=
+  have h_shift : Tendsto (fun N => s_combined a b (N + 1)) atTop (nhds L) :=
     h_tendsto.congr (fun N => h_eq N)
   rw [Filter.tendsto_atTop'] at h_shift ⊢
   intro s hs
@@ -520,38 +520,38 @@ theorem S_combined_converges (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
 -- §5b. CONVERGENCE STRUCTURE — PROVED REDUCTIONS
 -- ════════════════════════════════════════════════
 
-/-- **KEY IDENTITY**: S_combined rewrites via floor/fract decomposition.
+/-- **KEY IDENTITY**: s_combined rewrites via floor/fract decomposition.
 
-    S_combined(M) = S_rational(M) + S_log_stirling(M)
-                  + S_log_digamma(M) + S_linear(M)
+    s_combined(M) = s_rational(M) + s_log_stirling(M)
+                  + s_log_digamma(M) + s_linear(M)
 
-    where S_log = S_log_stirling + S_log_digamma (proved in S_log_split). -/
-theorem S_combined_four_way (a b M : ℕ) :
-    S_combined a b M =
-    (S_rational b M + S_log_stirling b M) +
-    (S_log_digamma a b M + S_linear a b M) := by
-  simp only [S_combined, S_log_split]; ring
+    where s_log = s_log_stirling + s_log_digamma (proved in s_log_split). -/
+theorem s_combined_four_way (a b M : ℕ) :
+    s_combined a b M =
+    (s_rational b M + s_log_stirling b M) +
+    (s_log_digamma a b M + s_linear a b M) := by
+  simp only [s_combined, s_log_split]; ring
 
 /-- **FRACTIONAL PART SERIES**: The convergent remainder after
-    subtracting the main term from S_linear.
+    subtracting the main term from s_linear.
 
-    S_linear_residual = -1/a · Σ {am/b} / (m+1)
+    s_linear_residual = -1/a · Σ {am/b} / (m+1)
 
     This converges absolutely since 0 ≤ {am/b} < 1. -/
-def S_linear_residual (a b M : ℕ) : ℝ :=
+def s_linear_residual (a b M : ℕ) : ℝ :=
   -(1/(a:ℝ)) * ∑ m ∈ Finset.Icc 1 (M - 1),
     (Int.fract ((a:ℝ) * (m:ℝ) / (b:ℝ))) / ((m:ℝ) + 1)
 
 /-- The linear sum decomposes into a main term + convergent residual.
-    S_linear = (1/b)·Σ m/(m+1) + S_linear_residual
+    s_linear = (1/b)·Σ m/(m+1) + s_linear_residual
 
     This follows from ⌊am/b⌋ = am/b - {am/b}. -/
-theorem S_linear_decompose (a b M : ℕ) (_ha : 1 ≤ a) (hb : 1 ≤ b) :
-    S_linear a b M =
+theorem s_linear_decompose (a b M : ℕ) (_ha : 1 ≤ a) (hb : 1 ≤ b) :
+    s_linear a b M =
     (1/(b:ℝ)) * ∑ m ∈ Finset.Icc 1 (M - 1),
       (m:ℝ) / ((m:ℝ) + 1) +
-    S_linear_residual a b M := by
-  simp only [S_linear, S_linear_residual, tileIndex]
+    s_linear_residual a b M := by
+  simp only [s_linear, s_linear_residual, tileIndex]
   rw [neg_mul, ← sub_eq_add_neg, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
   apply Finset.sum_congr rfl; intro m _
   have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)
@@ -746,17 +746,17 @@ theorem centered_fract_residual_converges_sketch (a b : ℕ) (ha : 1 ≤ a) (hb 
 --   ✗ linear_series_convergent            — DELETED: log-divergent remainder
 --   ✗ integral_eq_S_combined              — DELETED: rowTerm wrong for two-tile rows
 --   The Stirling correction was incorrectly allocated between these two;
---   only the FULL S_combined converges, not individual pieces.
+--   only the FULL s_combined converges, not individual pieces.
 --
 -- PROVED (zero sorry):
---   ✅ S_log_split                            — Log sum = Stirling + Digamma parts
+--   ✅ s_log_split                            — Log sum = Stirling + Digamma parts
 --   ✅ rational_plus_stirling                 — M/b cancellation with Stirling
 --   ✅ tileIndex_nonneg                       — Tile index ≥ 0
---   ✅ S_linear_decompose                     — Floor decomposition identity
+--   ✅ s_linear_decompose                     — Floor decomposition identity
 --   ✅ centered_fract_partial_sums_bounded    — Periodic partial sums bounded
 --   ✅ centered_fract_residual_converges_sketch — Centered residual converges (Dirichlet!)
---   ✅ S_combined_four_way                    — Four-way decomposition identity
---   ✅ S_combined_converges                   — GRADUATED: Combined convergence theorem
+--   ✅ s_combined_four_way                    — Four-way decomposition identity
+--   ✅ s_combined_converges                   — GRADUATED: Combined convergence theorem
 --   ✅ actualRowIntegral_nonneg               — Row integral ≥ 0
 --   ✅ actualRowIntegral_le                   — Row integral ≤ 1/(am²) (geometric bound)
 --   ✅ integral_eq_sum_actualRowIntegral       — GRADUATED: integral = Σ row integrals
@@ -766,7 +766,7 @@ theorem centered_fract_residual_converges_sketch (a b : ℕ) (ha : 1 ≤ a) (hb 
 --     ← OffDiagPartition.integral_eq_sum_rows (PROVED)
 --   actualRowIntegral_le (geometric bound)
 --     ← integrand ∈ [0,1) + row width = 1/(a·m·(m+1))
---   S_combined_converges (monotone bounded)
+--   s_combined_converges (monotone bounded)
 --     ← rowTerm_nonneg + rowTerm_le_upper + comparison with Σ 1/m²
 
 end Cathedral.Vasyunin.PartialSumConvergence

@@ -56,7 +56,7 @@ namespace Cathedral.Vasyunin.ConvergenceAxioms
        (from OffDiagPartition.integral_eq_sum_rows + TelescopeSum.row_ftc_combined)
 
     2. STIRLING CANCELLATION: The divergent parts of
-       S_rational(M) and S_log_stirling(M) cancel
+       s_rational(M) and s_log_stirling(M) cancel
        (from StirlingBridge.tendsto_partialSum + TelescopeSum.m_log_partial_sum_formula)
 
     3. DIGAMMA CONVERGENCE: The floor-weighted log sum converges to

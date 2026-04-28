@@ -246,7 +246,7 @@ theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     DO NOT attempt to prove the O(1/max(j,k)) version — it is FALSE.
 
     Status: OFF-PATH. Superseded by MellinCrown + Abel summation. -/
-theorem DEPRECATED_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+theorem deprecated_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     |vasyuninGramEntry j k| ≤
     2 * Real.log (↑(max j k) + 1) / ↑(min j k) := by
   -- WIP: Deprecated off-diagonal bound (see docstring above — NUMERICALLY FALSE
