@@ -338,6 +338,9 @@ private theorem gram_form_bound_raw
   --
   -- Step 5: Sum over j with weights v_j to get vᵀGv bound
   -- ═══════════════════════════════════════════════
+  -- WIP: Deprecated spatial approach — MATHEMATICALLY FALSE (see docstring above).
+  -- The correct approach runs through MellinCrown.lean (frequency domain).
+  -- Kept as historical artifact of Exploration 13. Left for future reference.
   sorry
 
 /-- **CORE ESTIMATE**: Under Mertens x^{3/4}, the L² residual satisfies:
@@ -377,6 +380,9 @@ theorem l2_residual_from_mertens
   -- Need: 2C_dot + C_m² ≤ C_m²+4C_m+2
   -- i.e.: 2C_dot ≤ 4C_m+2. This depends on C_dot ≤ 2C_m+1.
   -- For now, sorry the final assembly (C_dot bound needed).
+  -- WIP: Assembly step blocked by gram_form_bound_raw (above, deprecated).
+  -- This path is superseded by the Mellin Crown architecture (v11+).
+  -- Left for future exploration of alternative spatial routes.
   sorry
 
 -- ═══════════════════════════════════════════════

@@ -128,6 +128,9 @@ private lemma main_identity (N : ℕ) (_hN : 0 < N) :
 private lemma frac_error_isLittleO :
     (fun N : ℕ => ∑ n ∈ Icc 1 N, (↑(μ n) : ℝ) * Real.log n * ((↑(N % n) : ℝ) / n))
     =o[atTop] (fun N => (N : ℝ)) := by
+  -- WIP: Incomplete alternative spatial route for axiom graduation.
+  -- This path is superseded by the Mellin Crown architecture (v11+).
+  -- Requires signed Wiener-Ikehara extension. Left for future exploration.
   sorry
 
 -- ════════════════════════════════════════════════

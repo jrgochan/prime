@@ -163,6 +163,9 @@ theorem pnt_mu_log_div_k_derived :
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         Real.log (k : ℝ) / (k : ℝ))
       atTop (nhds (-1)) := by
+  -- WIP: Incomplete alternative spatial route. This path is superseded by
+  -- the Mellin Crown architecture (v11+). Requires forward Tauberian theorem
+  -- not available in Mathlib 4.28. Left for future exploration.
   sorry
 
 -- ════════════════════════════════════════════════
@@ -188,6 +191,9 @@ theorem pnt_mu_log_sq_div_k_derived :
       ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
         (Real.log (k : ℝ)) ^ 2 / (k : ℝ))
       atTop (nhds (-2 * eulerMascheroniConstant)) := by
+  -- WIP: Incomplete alternative spatial route, OFF CROWN PATH since v9.
+  -- Superseded by Abel Bypass + S₃ uniform bound. Requires forward Tauberian
+  -- theorem + Euler-Mascheroni from ζ Laurent expansion. Left for future.
   sorry
 
 -- ════════════════════════════════════════════════
