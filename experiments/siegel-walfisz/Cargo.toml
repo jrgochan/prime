@@ -1,0 +1,13 @@
+[package]
+name = "siegel-walfisz"
+version = "0.1.0"
+edition = "2021"
+description = "Siegel-Walfisz PNT-in-AP certification for q=8 — Cathedral v12"
+
+[dependencies]
+rug = { version = "1.24", features = ["float"] }
+rayon = "1.10"
+
+[profile.release]
+opt-level = 3
+lto = true
