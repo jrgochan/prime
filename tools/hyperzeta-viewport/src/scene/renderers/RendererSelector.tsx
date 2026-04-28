@@ -4,6 +4,7 @@ import { useViewportStore } from "../../stores/viewport";
 import { VIZ_MAP } from "../../content/visualizations";
 import { ParticleRenderer } from "./ParticleRenderer";
 import { CurveRenderer } from "./CurveRenderer";
+import { SurfaceRenderer } from "./SurfaceRenderer";
 
 /**
  * RendererSelector — picks the appropriate 3D renderer based on
@@ -29,13 +30,10 @@ export function RendererSelector() {
       return <CurveRenderer />;
 
     case "surface":
-      // Phase 4: SurfaceRenderer (THREE.Mesh with displacement)
-      // For now, fall back to particles
-      return <ParticleRenderer />;
+      return <SurfaceRenderer />;
 
     case "dual-particles":
-      // Phase 4: DualParticleRenderer
-      // For now, fall back to single particle view
+      // Phase 5: DualParticleRenderer
       return <ParticleRenderer />;
 
     // 2D renderers don't render in the 3D canvas — they go in ChartOverlay
