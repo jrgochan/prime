@@ -2,6 +2,7 @@
 
 import { useViewportStore } from "../stores/viewport";
 import { VIZ_MAP } from "../content/visualizations";
+import { ChartRenderer } from "./renderers/ChartRenderer";
 
 /**
  * ChartOverlay — HTML layer positioned above the R3F Canvas.
@@ -10,7 +11,7 @@ import { VIZ_MAP } from "../content/visualizations";
  *
  * When a 3D mode is active, this renders nothing.
  * When a 2D mode is active, the 3D canvas shows a subtle ambient
- * background while this overlay displays the chart content.
+ * background (Stars) while this overlay displays the chart content.
  */
 export function ChartOverlay() {
   const viewMode = useViewportStore((s) => s.viewMode);
@@ -32,14 +33,10 @@ export function ChartOverlay() {
   return (
     <div className="chart-overlay">
       <div className="chart-container">
-        {rendererType === "chart" && (
-          <ChartPlaceholder label={viz.label} equation={viz.equation.main} />
-        )}
+        {rendererType === "chart" && <ChartRenderer />}
+        {rendererType === "dual-chart" && <ChartRenderer />}
         {rendererType === "graph" && (
-          <ChartPlaceholder label={viz.label} equation={viz.equation.main} />
-        )}
-        {rendererType === "dual-chart" && (
-          <ChartPlaceholder label={viz.label} equation={viz.equation.main} />
+          <GraphPlaceholder label={viz.label} equation={viz.equation.main} />
         )}
       </div>
     </div>
@@ -47,10 +44,9 @@ export function ChartOverlay() {
 }
 
 /**
- * Temporary placeholder for chart/graph modes.
- * Will be replaced by actual renderers in Phase 2-5.
+ * Placeholder for graph mode — will be replaced in Phase 5.
  */
-function ChartPlaceholder({
+function GraphPlaceholder({
   label,
   equation,
 }: {
@@ -59,11 +55,11 @@ function ChartPlaceholder({
 }) {
   return (
     <div className="chart-placeholder">
-      <div className="chart-placeholder-icon">📊</div>
+      <div className="chart-placeholder-icon">🏛️</div>
       <h2 className="chart-placeholder-title">{label}</h2>
       <p className="chart-placeholder-equation">{equation}</p>
       <p className="chart-placeholder-hint">
-        Visualization coming soon — Phase 2
+        Interactive proof graph — Phase 5
       </p>
     </div>
   );

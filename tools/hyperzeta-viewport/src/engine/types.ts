@@ -47,7 +47,7 @@ export type ViewMode =
   | "harmonics"       // Prime harmonics — log(p) standing waves
   // New (v2) — Crown
   | "crown-theorem"   // Axiom dependency graph
-  | "mellin-crown"    // Forward chain animation
+  | "mellin-crown"    // Forward chain animation + L² decay chart
   | "graduation"      // v1 → v12 timeline
   // New (v2) — Analysis
   | "parseval-bridge"  // L² ↔ Mellin isometry

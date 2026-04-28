@@ -530,6 +530,25 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     group: "crown", renderer: "chart", dataTier: "static",
     showsParticleSlider: false,
   },
+  {
+    id: "mellin-crown",
+    label: "Mellin Crown",
+    shortLabel: "Crown",
+    icon: "👑",
+    hotkey: "M",
+    color: { core: "#ffd700", edge: "#664400" },
+    equation: { main: "RH → M(x) ≤ Cx^{3/4} → d²_N ≤ C/logN → 0", sub: "forward chain" },
+    description: "The forward proof chain animated step by step. Watch d²_N decay under RH.",
+    cards: [
+      { title: "The Forward Chain", body: "RH implies Mertens x^{3/4} bound, which implies L² decay d²_N ≤ C/logN → 0 via the Parseval Bridge and Mellin variance." },
+      { title: "🏛️ Cathedral Connection", body: "MellinCrown.lean assembles the forward direction using exactly 2 axioms: critical_line_mellin_variance and rh_zeta_lower_bound_from_zero_counting." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "crown", renderer: "chart", dataTier: "precomputed",
+    experimentSource: "l2-decay-certificate",
+    proof: { leanFile: "Assembly/MellinCrown.lean", theoremName: "mellin_crown_forward", status: "proved" },
+    showsParticleSlider: false,
+  },
 
   // ════════════════════════════════════════════════════════════════
   // NEW v2 MODES — Analysis Group
@@ -648,6 +667,30 @@ export const VISUALIZATIONS: VisualizationMode[] = [
   },
 ];
 
+// ── Default assignments for v1 modes that lack v2 fields ────
+// Assign all original particle modes to appropriate groups
+const GROUP_DEFAULTS: Partial<Record<ViewMode, VizGroup>> = {
+  output: "spectral",
+  spiral: "spectral",
+  "partial-sums": "spectral",
+  landscape: "spectral",
+  "euler-rose": "spectral",
+  tower: "spectral",
+  waves: "arithmetic",
+  mirror: "spectral",
+  gue: "spectral",
+  mertens: "arithmetic",
+  "spectral-gap": "analysis",
+};
+
+for (const viz of VISUALIZATIONS) {
+  if (!viz.group && GROUP_DEFAULTS[viz.id]) {
+    viz.group = GROUP_DEFAULTS[viz.id];
+  }
+  if (!viz.renderer) viz.renderer = "particles";
+  if (!viz.dataTier) viz.dataTier = "live";
+}
+
 // Index by ID for O(1) lookup
 // All registered modes are guaranteed to exist in the map.
 export const VIZ_MAP = Object.fromEntries(
@@ -656,3 +699,8 @@ export const VIZ_MAP = Object.fromEntries(
 
 // Ordered IDs for prev/next navigation
 export const VIZ_ORDER = VISUALIZATIONS.map((v) => v.id);
+
+// Modes filtered by group
+export function getModesForGroup(group: VizGroup): VisualizationMode[] {
+  return VISUALIZATIONS.filter((v) => v.group === group);
+}
