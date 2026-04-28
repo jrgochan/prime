@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026 --- Crown Graduation (v12)}
+\date{April 28, 2026 --- v14, Dual Path Architecture}
 
 \begin{document}
 
@@ -21,26 +21,27 @@ We present a machine-checked proof in the Lean~4 theorem prover, built against
 Mathlib, that the Riemann Hypothesis is logically equivalent to the decay of
 the Nyman--Beurling distance $d_N^2 \to 0$.
 
-The formalization---the \emph{Cathedral}---comprises 174 active Lean files
-(with 128 archived) across 26 modules with
+The formalization---the \emph{Cathedral}---comprises 167 active Lean files
+(with 99 archived) across 26 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
   \RH \;\iff\; d_N^2 \to 0
 \]
 where $d_N^2 = \inf_{v} \int_0^1 \bigl(1 - \sum_{k=2}^{N} v_k \{1/(kx)\}\bigr)^2\,dx$
-is the Nyman--Beurling distance. The crown theorem depends on exactly
-\textbf{two mathematical axioms}: a Hardy--Littlewood mean-value bound for
-the Mellin transform of the residual on the critical line, and a Hadamard
-zero-counting zeta lower bound. Both are classical results of 20th-century
-analytic number theory, axiomatic only because Mathlib lacks the prerequisites.
+is the Nyman--Beurling distance. The crown theorem is proved via
+\textbf{two independent paths}: the Mellin Crown (2 axioms, frequency domain)
+and the Perron Crown (4 transparent axioms, spatial domain). Both are
+classical results of 20th-century analytic number theory, axiomatic only
+because Mathlib lacks the prerequisites.
 
 The forward direction is proved via the \emph{Mellin Crown}: the
 Mellin/Plancherel isometry maps the $L^2(0,1)$ residual to a critical-line
 integral, preserving the phase cancellation that real-variable methods destroy.
 The Parseval bridge connecting the two domains is \emph{fully proved}
-(zero axioms, zero sorry). Companion Rust experiments validate the bridge
-to $6.6 \times 10^{-6}$ relative error at $N = 2000$.
+(zero axioms, zero sorry). Companion Rust experiments validate the
+B\'aez-Duarte convergence at 512-bit MPFR precision with Sherman-Morrison
+match to $10^{-17}$.
 \end{abstract}
 
 % ================================================================
@@ -83,18 +84,27 @@ The proof decomposes into two pillars:
     tensor, yielding a uniform lower bound $d_N^2 \geq \delta > 0$.
     \textbf{Zero custom axioms.} Zero sorry.
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
-    Via the \emph{Mellin Crown}: RH $\to$ Mellin variance $\le C/\log N$
-    $\to$ Parseval bridge (\textbf{proved}) $\to$ $L^2$ decay.
-    \textbf{Two axioms.} Zero sorry.
+    Proved via \textbf{two independent paths}:
+    \begin{itemize}
+      \item \textbf{Path A (Mellin Crown)}: RH $\to$ Mellin variance $\le C/\log N$
+        $\to$ Parseval bridge (\textbf{proved}) $\to$ $L^2$ decay.
+        2 axioms.
+      \item \textbf{Path B (Perron Crown)}: RH $\to$ Mertens bound
+        $\to$ covariance decay $\to$ $L^2$ decay.
+        \textbf{4 transparent axioms, 0 sorry.} (Primary export.)
+    \end{itemize}
 \end{itemize}
 
 \subsection{The Axiomatic Foundation}
 
-The Cathedral's mathematical content rests on ${\sim}55$ axioms in the active
-codebase, organized hierarchically. The crown theorem
-\lean{nyman\_beurling\_equivalence} depends on exactly two;
-Table~\ref{tab:axioms} lists these. Everything else---the Nyman--Beurling
-theory, the Parseval bridge, the Rank-1 Mellin separation---is machine-checked.
+The Cathedral's mathematical content rests on 45 axioms in the active
+codebase, organized hierarchically. The primary export
+\lean{nyman\_beurling\_equivalence} depends on four (via the Perron path);
+the alternative Mellin path depends on two.
+Table~\ref{tab:axioms} lists the Mellin Crown axioms. Everything
+else---the Nyman--Beurling theory, the Parseval bridge, the Rank-1 Mellin
+separation---is machine-checked.
+
 
 \begin{table}[h]
 \centering
@@ -536,15 +546,14 @@ The Cathedral stands.
 
 We have constructed a machine-verified proof that the Riemann Hypothesis
 is logically equivalent to the decay of the Nyman--Beurling distance
-$d_N^2 \to 0$, routed through the Mellin Crown. The formalization
-comprises 174 active Lean files (128 archived) across 26 modules, resting
-on two mathematical axioms---the Hardy--Littlewood mean-value bound
-for the Mellin variance on the critical line, and the Hadamard
-zero-counting zeta lower bound.
+$d_N^2 \to 0$, proved via two independent paths: the Mellin Crown
+(frequency domain, 2 axioms) and the Perron Crown (spatial domain,
+4 transparent axioms, 0 sorry). The formalization
+comprises 167 active Lean files (99 archived) across 26 modules.
 
-The axiom reduction---from 6 in the initial architecture to 2 in
-the current v12 build---was achieved through twelve versions of systematic
-formalization:
+The axiom reduction---from 6 in the initial architecture to 2 on the
+Mellin path (4 on the primary Perron path)---was achieved through
+fourteen versions of systematic formalization:
 \begin{itemize}
   \item \textbf{v1--v6}: PNT graduation, Vasyunin identity proof,
     Mertens bound proof via Abel summation. 6 $\to$ 4 axioms.
@@ -556,6 +565,11 @@ formalization:
     forward chain, eliminated all build warnings, machine-verified the
     Montgomery--Vaughan MVT, and certified the Hilbert inequality at
     512-bit MPFR precision. \textbf{2 axioms, 0 sorry, 0 warning.}
+  \item \textbf{v14}: Dual Path Architecture---both Mellin and Perron
+    paths independently verified. Perron path promoted to primary
+    export (0 sorry, 4 transparent axioms). Active axiom count reduced
+    from 55 to 45. B\'aez-Duarte certification engine validates
+    convergence to $10^{-17}$ Sherman-Morrison match.
 \end{itemize}
 
 The formalization process itself served as a discovery tool, catching
