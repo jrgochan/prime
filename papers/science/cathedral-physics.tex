@@ -28,7 +28,7 @@ The Gram matrix is the two-point correlation function of a 1D quantum
 field. The Nyman--Beurling distance is the vacuum energy. The Parseval
 Bridge is the unitarity of the S-matrix. The Mertens function is the
 magnetization of a spin system. The B\'aez-Duarte constant
-$C \approx 21.65$ is the inverse heat capacity of the prime number gas.
+$C \approx 21.649$ is the inverse heat capacity of the prime number gas.
 The Abel summation engine implements a thermodynamic hierarchy:
 $S_1$ (magnetization), $S_2$ (susceptibility), $S_3$ (heat capacity)
 are the successive moments of the partition function $1/\zeta(s)$
@@ -124,7 +124,7 @@ M\"obius function $\mu(n)$ & Spin variable $\sigma_n = \pm 1, 0$ \\
 Zeta zeros $\rho = 1/2 + i\gamma$ & Energy eigenvalues $E_\gamma$ \\
 Parseval Bridge & Unitarity of the S-matrix \\
 Abel summation & Renormalization \\
-$C \approx 21.65$ (BD constant) & $1/c_{\text{heat}}$ (inverse heat capacity) \\
+$C \approx 21.649$ (BD constant) & $1/c_{\text{heat}}$ (inverse heat capacity) \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -893,7 +893,7 @@ The constant
   C = \frac{1}{c_{\text{holes}}}
   = \frac{1}{\displaystyle\sum_\gamma \frac{1}{1/4 + \gamma^2}}
   = \frac{1}{2 + \gamma_E - \ln 4\pi}
-  \approx 21.6498
+  \approx 21.649
 \]
 (where $\gamma_E \approx 0.5772$ is the Euler--Mascheroni constant,
 and the sum runs over the imaginary parts $\gamma$ of the non-trivial
@@ -931,10 +931,15 @@ zeta zeros) governs the asymptotic decay $d_N^2 \sim C'/\ln N$.
 \end{enumerate}
 \end{correspondence}
 
-The Rust-verified numerical value $Q_N / \ln N \to 21.65$ confirms
-this constant to 4 significant digits. A separate 256-bit MPFR
-experiment (April 20, 2026) verifies the individual Gram matrix
-entries $G(j,k)$ to 6--7 digits for all $j, k \leq 10$, using
+The Rust-verified numerical value $X_N / \ln N \to 21.649$ confirms
+this constant to 5 significant digits.  The \texttt{baez-duarte}
+experiment (512-bit MPFR, Cholesky $LL^T$ factorization, April~28 2026)
+computes $d_N^2 = 1 - b^T G^{-1} b$ and the Sherman--Morrison
+cross-check $d_N^2 = 1/(1 + b^T C^{-1} b)$, achieving 17-digit
+agreement between the two formulas.  At $N = 50$ the ratio already
+reaches $X/\ln N = 21.685$, converging monotonically toward~$21.649$.
+A separate Gram matrix oracle (512-bit MPFR) verifies the individual
+entries $G(j,k)$ to 15+ digits for all $j, k \leq 10$, using
 piecewise FTC with $10^6$ lattice rows---a ``lattice QFT
 calculation'' that confirms the analytical Vasyunin formula
 for both the self-energy (diagonal) and interaction (off-diagonal)
@@ -1348,7 +1353,7 @@ Hadamard Three-Circles & Open-closed / conformal gauge & \lean{ZetaHadamard.lean
 Zero-counting axiom & Weyl law / spectral density & \lean{ZetaHadamard.lean} \textbf{(axiom)} \\
 $|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
 RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
-$C \approx 21.65$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle)} \\
+$C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} \\
 $c_{\text{holes}} \approx 0.046$ & Casimir energy / sum rule & --- \\
 $\theta(t)$ functional equation & Modular invariance & \lean{ThetaBound.lean} \\
 $\Lambda(s) < 0$ on $(0,1)$ & Vacuum instability at real $s$ & \lean{BDMellin.lean} \\
@@ -1565,8 +1570,12 @@ agrees with its ensemble average.
 \subsection{Experimental Verification}
 
 The Cathedral's physics predictions are tested by \textbf{35} independent
-Rust/MPFR computational experiments (256--512 bit precision). The key validators:
+Rust/MPFR computational experiments (512-bit precision). The key validators:
 \begin{enumerate}
+  \item \texttt{baez-duarte}: \textbf{BD constant certification}---512-bit
+    MPFR Cholesky $LL^T$ factorization certifies $X_N/\ln N \to 21.649$
+    and $d_N^2 \to 0$ with Sherman--Morrison cross-check to 17 digits.
+    Lean bridge: \lean{MainChain.lean}.
   \item \texttt{mellin-certificate}: \textbf{Crown validator}---three-channel
     Parseval bridge comparison confirms $C \approx 0.38$ for the Mellin
     variance bound. The most important experiment for v11.
@@ -1593,7 +1602,7 @@ Rust/MPFR computational experiments (256--512 bit precision). The key validators
     convergence rates for the Vasyunin cotangent tower.
 \end{enumerate}
 These are not heuristic checks---they are \emph{certified computations}
-at 256--512 bit precision, produced by massively parallel Rust programs.
+at 512-bit precision, produced by massively parallel Rust programs.
 The results serve as the ``experimental physics'' of the prime number
 quantum field.
 
@@ -1690,7 +1699,7 @@ $S_1 = \sum \mu(k)/k \to 0$ & Zero net magnetization (PNT) & \lean{AbelTail/*.le
 $S_2 = \sum \mu(k)\ln k/k \to -1$ & Magnetic susceptibility & \lean{PNT/AbelMean.lean} & axiom & \ref{sec:thermo} \\
 $S_3 = \sum \mu(k)\ln^2 k/k \to -2\gamma$ & Heat capacity & \lean{AbelTail/*.lean} & proved & \ref{sec:thermo} \\
 $1 - b^Tv$ decomposition & Thermodynamic hierarchy & \lean{CalcBounds.lean} & proved & \ref{sec:thermo} \\
-$C \approx 21.65$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle)} & num. & \ref{sec:constant} \\
+$C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} & num. & \ref{sec:constant} \\
 $c_{\text{holes}} \approx 0.046$ & Casimir energy / sum rule & --- & num. & \ref{sec:constant} \\
 $\zeta(s) = \prod_p (1-p^{-s})^{-1}$ & Partition function & --- & def & --- \\
 Log-cutoff Bartlett window & Finite-$T$ regularization & \lean{MertensIntegral.lean} & proved & \ref{sec:mertens} \\

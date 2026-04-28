@@ -291,7 +291,7 @@ any positive growth rate $c \ln N$ with $c > 0$ suffices for the proof.
 Numerical experiments (Section~\ref{sec:rust}) confirm:
 \begin{itemize}
   \item The log-cutoff ansatz achieves $Q_N^{\mathrm{ansatz}} \sim 12.45 \ln N$.
-  \item The exact minimizer achieves $Q_N^{\mathrm{opt}} \sim 21.65 \ln N$.
+  \item The exact minimizer achieves $Q_N^{\mathrm{opt}} \sim 21.649 \ln N$.
   \item Both diverge, validating the $d_N^2 \to 0$ decay.
 \end{itemize}
 
@@ -300,7 +300,7 @@ Numerical experiments (Section~\ref{sec:rust}) confirm:
 \label{sec:constant}
 % ================================================================
 
-The constant $C \approx 21.6498$ appearing in the optimal Rayleigh quotient
+The constant $C \approx 21.649$ appearing in the optimal Rayleigh quotient
 has a deep physical interpretation. Define:
 \[
   c_{\mathrm{holes}} = \sum_{\zeta(\rho)=0} \frac{1}{|\rho|^2}
@@ -308,7 +308,7 @@ has a deep physical interpretation. Define:
   = 2 + \gamma_{\mathrm{Euler}} - \ln(4\pi)
   \approx 0.04619.
 \]
-Then $C = 1/c_{\mathrm{holes}} \approx 21.6498$ is:
+Then $C = 1/c_{\mathrm{holes}} \approx 21.649$ is:
 \begin{enumerate}
   \item \textbf{Signal processing}: The maximum information extraction rate
     from the prime number noise through the spectral holes of $|\zeta(1/2+it)|^2$.
@@ -357,7 +357,7 @@ $N$ & $Q_N$ & $\ln N$ & $Q_N / \ln N$ \\
 \end{tabular}
 \end{center}
 The ratio $Q_N/\ln N$ monotonically increases toward the theoretical
-limit $C \approx 21.65$, confirming the spectral bridge.
+limit $C \approx 21.649$, confirming the spectral bridge.
 
 \subsection{The Contour Oracle}
 
@@ -419,7 +419,7 @@ sums entirely in the formal proof.
 
 \begin{discovery}[The Rayleigh--Ritz Shift]
 The log-cutoff M\"obius witness achieves $Q_N \sim 12.45 \ln N$, not
-the optimal $21.65 \ln N$, because it is a Bartlett window (sub-optimal
+the optimal $21.649 \ln N$, because it is a Bartlett window (sub-optimal
 trial wavefunction). The formal proof only requires $\exists\,c > 0$,
 so either constant suffices.
 \end{discovery}

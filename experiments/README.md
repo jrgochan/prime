@@ -29,7 +29,7 @@ Each certificate links to the specific Lean theorem it validates:
 | `vasyunin-integral/` | Gram entry G(j,k) via FTC | 256-bit MPFR | `vasyuninGramEntry` |
 | `covariance-probe/` | Eigenvalue decay λ_min ~ c/ln N | 128-bit | `millennium_covariance_cancellation` |
 | `gram-oracle/` | BD L² error 1-2bᵀv+vᵀGv | 128-bit | `witness_l2_error_decay_gram` |
-| `baez-duarte/` | BD distance Q_N/ln N → 21.65 | 64-bit | `rh_implies_l2_convergence` |
+| `baez-duarte/` | BD distance X/ln N → 21.649 | 512-bit | `nyman_beurling_equivalence_mellin` |
 | `abel-bridge/` | Abel summation verification | 64-bit | `abel_mertens_tail_raw` |
 
 ### Tier 2: Structural Validation
@@ -78,7 +78,7 @@ Results are written to `results/` or `output/` or `*.json`.
 - All Gram matrices positive definite ✓
 - λ_min monotonically non-increasing ✓
 - All d²_N > 0 ✓
-- S²/Q → Báez-Duarte constant ≈ 21.65 ✓
+- S²/Q → Báez-Duarte constant ≈ 21.649 ✓
 
 ### Vasyunin Integral (April 20, 2026)
 256-bit MPFR verification of all 60 Gram matrix entries G(j,k)
@@ -86,7 +86,7 @@ for j,k ≤ 10, matching the Vasyunin cotangent formula to 6–7
 decimal digits.
 
 ### BD Distance
-Q_N/ln N monotonically increases toward C ≈ 21.65, confirming
+Q_N/ln N monotonically increases toward C ≈ 21.649, confirming
 the Báez-Duarte constant to 4 significant digits at N = 5000.
 
 ### High-Precision Spectral (April 21, 2026)

@@ -151,7 +151,7 @@ Exact discrete Vasyunin computation confirms the spectral correspondence:
 | 2000 | 139.48 | 7.601 | 18.35 |
 | 5000 | 158.67 | 8.517 | 18.63 |
 
-Q_N / ln N → C ≈ 21.65, where C = 1/(2 + γ - ln 4π) is the quantum
+Q_N / ln N → C ≈ 21.649, where C = 1/(2 + γ - ln 4π) is the quantum
 stiffness of the prime number vacuum.
 
 ## Five Discoveries
@@ -164,7 +164,7 @@ stiffness of the prime number vacuum.
    any proof attempt wasted time.
 
 3. **The Rayleigh–Ritz Shift**: The log-cutoff Möbius ansatz achieves
-   Q_N ~ 12.45 ln N (sub-optimal Bartlett window), not the optimal 21.65 ln N.
+   Q_N ~ 12.45 ln N (sub-optimal Bartlett window), not the optimal 21.649 ln N.
    Either constant suffices.
 
 4. **The Selberg Emergence**: The L² variational principle independently
