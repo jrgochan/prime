@@ -1,6 +1,6 @@
 // hilbert-spectral/src/hilbert.rs
 //
-// Hilbert matrix construction and spectral analysis
+// Hilbert matrix spectral analysis — 512-bit MPFR precision
 //
 // The discrete Hilbert matrix H_N has entries:
 //   H(m,n) = 1/(m-n)  for m ≠ n,  H(m,m) = 0
@@ -9,101 +9,179 @@
 // This is the fundamental constant underlying the Montgomery-Vaughan
 // Hilbert inequality used in the Cathedral proof.
 
-use nalgebra::{DMatrix, DVector, SymmetricEigen};
+use rug::Float;
+use rayon::prelude::*;
 
-/// Build the antisymmetric Hilbert kernel matrix H_N.
-/// H(i,j) = 1/(i-j) for i ≠ j, 0 for i = j.
-/// The matrix is real and antisymmetric: H(i,j) = -H(j,i).
+const PREC: u32 = 512;
+
+/// 512-bit π reference value.
+pub fn pi_512() -> Float {
+    Float::with_val(PREC, rug::float::Constant::Pi)
+}
+
+/// Power iteration to estimate largest singular value of the
+/// antisymmetric Hilbert kernel H(m,n) = 1/(m-n).
 ///
-/// For operator norm computation, we use H^T H (which is symmetric positive semidefinite).
-pub fn build_hilbert_kernel(n: usize) -> DMatrix<f64> {
-    DMatrix::from_fn(n, n, |i, j| {
-        if i == j {
-            0.0
-        } else {
-            1.0 / (i as f64 - j as f64)
-        }
-    })
-}
+/// Uses 512-bit MPFR arithmetic throughout.
+/// Returns (estimated norm, iterations).
+pub fn power_iteration_norm_mpfr(n: usize, max_iter: usize, tol: f64) -> (Float, usize) {
+    // Initialize vector: v_i = sin(i+1) (deterministic, not axis-aligned)
+    let mut v: Vec<Float> = (0..n)
+        .map(|i| {
+            let x = Float::with_val(PREC, i as f64 + 1.0);
+            x.sin()
+        })
+        .collect();
 
-/// Build the SYMMETRIC Hilbert matrix (Hilbert's original):
-/// H(i,j) = 1/(i+j+1) for 0-indexed, or 1/(i+j-1) for 1-indexed.
-/// Its largest eigenvalue → π as N → ∞.
-pub fn build_symmetric_hilbert(n: usize) -> DMatrix<f64> {
-    DMatrix::from_fn(n, n, |i, j| {
-        1.0 / (i as f64 + j as f64 + 1.0)
-    })
-}
-
-/// Build the Montgomery-Vaughan kernel with log-separation:
-/// K(m,n) = 1/|log(m+1) - log(n+1)| for m ≠ n (0-indexed, +1 for positivity)
-/// K(m,m) = 0
-/// Row sums of this kernel approximate π·(n+1) for large N.
-pub fn build_mv_kernel(n: usize) -> DMatrix<f64> {
-    DMatrix::from_fn(n, n, |i, j| {
-        if i == j {
-            0.0
-        } else {
-            let li = ((i + 1) as f64).ln();
-            let lj = ((j + 1) as f64).ln();
-            1.0 / (li - lj).abs()
-        }
-    })
-}
-
-/// Compute the operator norm ‖A‖ = max singular value = √(max eigenvalue of A^T A).
-/// For an antisymmetric matrix, this equals the largest singular value.
-pub fn operator_norm(a: &DMatrix<f64>) -> f64 {
-    let ata = a.transpose() * a;
-    let eigen = SymmetricEigen::new(ata);
-    eigen.eigenvalues.iter()
-        .cloned()
-        .fold(0.0f64, f64::max)
-        .sqrt()
-}
-
-/// Compute all eigenvalues of a symmetric matrix, sorted descending.
-pub fn eigenvalues_descending(a: &DMatrix<f64>) -> Vec<f64> {
-    let eigen = SymmetricEigen::new(a.clone());
-    let mut eigs: Vec<f64> = eigen.eigenvalues.iter().cloned().collect();
-    eigs.sort_by(|a, b| b.partial_cmp(a).unwrap());
-    eigs
-}
-
-/// Compute row sums of absolute values: R_i = Σ_{j≠i} |K(i,j)|
-pub fn row_sums(a: &DMatrix<f64>) -> Vec<f64> {
-    (0..a.nrows()).map(|i| {
-        (0..a.ncols()).map(|j| a[(i, j)].abs()).sum()
-    }).collect()
-}
-
-/// Power iteration to estimate largest singular value (for large matrices).
-/// Returns (estimated norm, number of iterations).
-pub fn power_iteration_norm(a: &DMatrix<f64>, max_iter: usize, tol: f64) -> (f64, usize) {
-    let n = a.ncols();
-    let ata = a.transpose() * a;
-
-    // Random-ish starting vector
-    let mut v = DVector::from_fn(n, |i, _| (i as f64 + 1.0).sin());
-    v.normalize_mut();
-
-    let mut lambda = 0.0;
-    for iter in 0..max_iter {
-        let w = &ata * &v;
-        let new_lambda = w.norm();
-        v = w / new_lambda;
-
-        if (new_lambda - lambda).abs() / new_lambda.max(1e-15) < tol {
-            return (new_lambda.sqrt(), iter + 1);
-        }
-        lambda = new_lambda;
+    // Normalize
+    let norm_v = vec_norm(&v);
+    for vi in v.iter_mut() {
+        *vi /= &norm_v;
     }
-    (lambda.sqrt(), max_iter)
+
+    let mut lambda = Float::with_val(PREC, 0.0);
+
+    for iter in 0..max_iter {
+        // w = H^T H v  (done as two matrix-vector products: u = Hv, w = H^T u)
+        // For antisymmetric H: H^T = -H, so H^T H = -H(-H) = H² ... wait
+        // Actually H^T H v = H^T (Hv). Since H is antisymmetric, H^T = -H.
+        // So H^T H = -H · H = -(H²). But H^T H is positive semidefinite...
+        // Actually for antisymmetric H: (H^T H)_{ij} = Σ_k H_{ki} H_{kj} = Σ_k (-H_{ik})(H_{kj})
+        // Let's just compute the singular values via |Hv|.
+
+        // Step 1: u = H · v
+        let u: Vec<Float> = (0..n)
+            .into_par_iter()
+            .map(|i| {
+                let mut sum = Float::with_val(PREC, 0.0);
+                for j in 0..n {
+                    if i != j {
+                        let denom = Float::with_val(PREC, i as i64 - j as i64);
+                        let mut term = v[j].clone();
+                        term /= &denom;
+                        sum += term;
+                    }
+                }
+                sum
+            })
+            .collect();
+
+        // Step 2: w = H^T · u = -H · u (antisymmetric)
+        let w: Vec<Float> = (0..n)
+            .into_par_iter()
+            .map(|i| {
+                let mut sum = Float::with_val(PREC, 0.0);
+                for j in 0..n {
+                    if i != j {
+                        let denom = Float::with_val(PREC, j as i64 - i as i64); // -H = H^T
+                        let mut term = u[j].clone();
+                        term /= &denom;
+                        sum += term;
+                    }
+                }
+                sum
+            })
+            .collect();
+
+        // eigenvalue estimate = |w|
+        let new_lambda = vec_norm(&w);
+
+        // Normalize w -> v
+        let inv_lambda = Float::with_val(PREC, 1.0) / &new_lambda;
+        let new_v: Vec<Float> = w.into_iter().map(|wi| {
+            let mut r = wi;
+            r *= &inv_lambda;
+            r
+        }).collect();
+
+        // Check convergence
+        let rel_change = if new_lambda > 1e-15 {
+            let mut diff = new_lambda.clone();
+            diff -= &lambda;
+            diff.abs().to_f64() / new_lambda.to_f64()
+        } else {
+            1.0
+        };
+
+        v = new_v;
+        lambda = new_lambda;
+
+        if rel_change < tol {
+            // lambda is eigenvalue of H^T H, so ‖H‖ = sqrt(lambda)
+            let norm = lambda.sqrt();
+            return (norm, iter + 1);
+        }
+    }
+
+    let norm = lambda.sqrt();
+    (norm, max_iter)
 }
 
-/// Compute the Schur test bound: max(max_row_sum, max_col_sum).
-/// For a symmetric matrix, this is just the max row sum.
-pub fn schur_test_bound(a: &DMatrix<f64>) -> f64 {
-    let rsums = row_sums(a);
-    rsums.iter().cloned().fold(0.0f64, f64::max)
+/// Compute row sums of the MV kernel in 512-bit MPFR.
+/// R_n = Σ_{m=1, m≠n}^N 1/|log(m) - log(n)|
+///
+/// This is trivially parallel — each row is independent.
+pub fn mv_row_sum_mpfr(n_1idx: usize, n_max: usize) -> Float {
+    let log_n = Float::with_val(PREC, n_1idx as f64).ln();
+    let mut sum = Float::with_val(PREC, 0.0);
+    for m in 1..=n_max {
+        if m != n_1idx {
+            let log_m = Float::with_val(PREC, m as f64).ln();
+            let mut diff = log_m;
+            diff -= &log_n;
+            diff = diff.abs();
+            let term = Float::with_val(PREC, 1.0) / diff;
+            sum += term;
+        }
+    }
+    sum
+}
+
+/// Compute the Schur test bound (max row sum) for the antisymmetric
+/// Hilbert kernel H(m,n) = 1/(m-n) on {1, ..., N}.
+///
+/// R_i = Σ_{j≠i} 1/|i-j| = Σ_{k=1}^{i-1} 1/k + Σ_{k=1}^{N-i} 1/k
+///     = H(i-1) + H(N-i)
+/// where H(k) = harmonic number.
+pub fn schur_bound_harmonic(n: usize) -> Float {
+    // Max row sum is at i = N/2 (middle), where R = 2·H(N/2)
+    // Actually compute all row sums and take max
+    let mut max_r = Float::with_val(PREC, 0.0);
+    for i in 1..=n {
+        let mut r = Float::with_val(PREC, 0.0);
+        // H(i-1) + H(N-i)
+        for k in 1..i {
+            r += Float::with_val(PREC, 1.0) / Float::with_val(PREC, k);
+        }
+        for k in 1..=(n - i) {
+            r += Float::with_val(PREC, 1.0) / Float::with_val(PREC, k);
+        }
+        if r > max_r {
+            max_r = r;
+        }
+    }
+    max_r
+}
+
+/// Compute log-separation δ_n = min_{m≠n} |log(m) - log(n)| in MPFR.
+/// For n ≥ 2, this is log(n/(n-1)) or log((n+1)/n).
+pub fn log_separation_mpfr(n: usize) -> Float {
+    if n == 1 {
+        Float::with_val(PREC, 2u32).ln() // log(2/1) = log(2)
+    } else {
+        // δ_n = min(log(n/(n-1)), log((n+1)/n))
+        // For n ≥ 2: log(n/(n-1)) > log((n+1)/n), so δ_n = log(1 + 1/n)
+        let ratio = Float::with_val(PREC, n as f64 + 1.0) / Float::with_val(PREC, n as f64);
+        ratio.ln()
+    }
+}
+
+fn vec_norm(v: &[Float]) -> Float {
+    let mut s = Float::with_val(PREC, 0.0);
+    for vi in v {
+        let mut sq = vi.clone();
+        sq *= vi;
+        s += sq;
+    }
+    s.sqrt()
 }

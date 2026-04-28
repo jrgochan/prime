@@ -2,38 +2,33 @@
   "experiment": "Hilbert Matrix Spectral Analysis — π Constant Certification",
   "cathedral_version": "v12",
   "exploration": 17,
+  "precision_bits": 512,
   "threads": 12,
-  "max_N": 500,
-  "elapsed_seconds": 0.115,
+  "max_N": 1000,
+  "elapsed_seconds": 77.125,
 
-  "pi_reference": 3.141592653589793e0,
+  "pi_reference": "3.1415926535897932384626433832795028841971693993751",
 
   "operator_norm_convergence": {
-    "best_N": 500,
-    "best_norm": 3.120820594258336e0,
-    "best_error": 2.077206e-2,
+    "best_N": 1000,
+    "best_norm": 3.130494648247070e0,
+    "best_error": 1.109801e-2,
     "convergence_rate": "O(1/N)",
-    "comment": "‖H_N‖_op → π (Schur 1911)"
+    "method": "power_iteration_512bit_mpfr"
   },
 
   "schur_test_analysis": {
     "schur_always_ge_norm": true,
-    "comment": "Schur test max(row_sum) ≥ ‖K‖_op always (correct bound)"
+    "schur_scaling": "O(log N) — grows slowly",
+    "norm_scaling": "O(1) — converges to π"
   },
 
   "mv_kernel_insight": {
     "delta_n_approx": "1/n",
     "pi_over_delta_n": "πn",
-    "current_lean_bound": "N/δ ≈ N²",
-    "optimal_bound": "π/δ_n ≈ πn",
-    "gap_factor": "N/π (linear in N)"
-  },
-
-  "lean_upgrade_path": {
-    "current": "Schur test → N/δ → 2T·(N+1) in MVT",
-    "target": "Distributional FT → π/δ → 2T + 2πn in MVT",
-    "mathlib_status": "TemperedDistribution.fourierTransformCLM exists, 𝓕[sgn] missing",
-    "alternative": "Schur 1911 via Σ sin(kθ)/k = (π-θ)/2"
+    "current_lean_bound": "Schur: N over delta approx N squared",
+    "optimal_bound": "pi over delta_n approx pi*n",
+    "gap_factor": "N over pi (linear in N)"
   },
 
   "verdicts": {
