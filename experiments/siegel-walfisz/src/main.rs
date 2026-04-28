@@ -64,6 +64,7 @@ fn main() {
 
     let test_points: Vec<usize> = vec![
         1_000, 10_000, 50_000, 100_000, 500_000, 1_000_000,
+        5_000_000, 10_000_000,
     ].into_iter().filter(|&x| x <= max_n).collect();
 
     println!("    {:>10} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ bias",
@@ -138,6 +139,7 @@ fn main() {
 
     let moebius_test_points: Vec<usize> = vec![
         100, 1_000, 10_000, 50_000, 100_000, 500_000, 1_000_000,
+        5_000_000, 10_000_000,
     ].into_iter().filter(|&x| x <= max_n).collect();
 
     // Parallel computation of character-twisted Möbius sums
@@ -215,6 +217,7 @@ fn main() {
 
     let sw_points: Vec<usize> = vec![
         10_000, 50_000, 100_000, 500_000, 1_000_000,
+        5_000_000, 10_000_000,
     ].into_iter().filter(|&x| x <= max_n).collect();
 
     println!("    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
