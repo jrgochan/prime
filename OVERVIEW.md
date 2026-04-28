@@ -136,7 +136,7 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 ## Module Structure
 
 The codebase comprises **174 active Lean files** across **22 topic directories** with
-**43,387 lines** of active code, **~1,459 theorems/lemmas**, and **55 active axioms**
+**43,387 lines** of active code, **~1,459 theorems/lemmas**, and **45 active axioms**
 (2 on the crown path).
 
 ```
@@ -159,8 +159,8 @@ Cathedral/
 ├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
 ├── NumberTheory/     (1 file)    Dirichlet convolution identities
 ├── Structural/       (3 files)   Eigenvalue, Independence
-└── Scratch/          (5+ files)  Exploratory test files
-    + Defs.lean, Axioms.lean, _vasyunin_audit.lean (root files)
+├── Archive/         (128+ files) Archived explorations, scratch, graduated code
+└── Defs.lean, Axioms.lean        Root definition and axiom files
 ```
 
 ### Crown Path Files (0 sorry, 2 axioms)
@@ -196,17 +196,16 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | MellinBridge (alt paths) | 9 | — |
 | Vasyunin proof chain | 8 | — |
 | Analysis (Selberg, MV) | 8 | — |
-| IntegralBasis | 4 | — |
-| Oracle/certified computation | 3 | — |
+| IntegralBasis | 3 | — |
 | Covariance | 2 | — |
 | PNT bridges | 2 | — |
 | Structural / NymanBeurling | 2 | — |
-| **Total** | **55** | **2** |
+| **Total** | **45** | **2** |
 
 > [!IMPORTANT]
 > Only **2 axioms** stand between the current formalization and a fully
 > machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> **pure** (zero axioms, zero sorry). The 53 off-path axioms support
+> **pure** (zero axioms, zero sorry). The 43 off-path axioms support
 > alternative proof routes and experimental features that do not affect
 > the crown theorem.
 
@@ -214,21 +213,20 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 ## Sorry Inventory
 
-16 `sorry` placeholders exist in the active tree, **all off-crown**:
+6 `sorry` placeholders exist in the active tree, **all off-crown**:
 
 | File | Count | Context |
 |------|-------|---------|
-| `PNT/LogBridge.lean` | 1 | Tauberian gap (off-crown, isolated from MainChain) |
-| `PNT/Bridge.lean` | 2 | Tauberian gaps (off-crown, isolated from MainChain) |
-| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial integrals (off-path) |
-| `Covariance/QuadFormIdentity.lean` | 1 | DEPRECATED Gram entry bound (numerically falsified) |
-| `Scratch/*` | 10 | Exploratory files |
+| `PNT/LogBridge.lean` | 1 | Tauberian gap — requires signed Wiener-Ikehara |
+| `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib 4.28 |
+| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial approach (mathematically false) |
+| `Covariance/QuadFormIdentity.lean` | 1 | Deprecated off-diagonal bound (numerically falsified) |
 
 > [!NOTE]
-> **Zero sorry on the crown path.** The PNT sorry need Tauberian theorems
-> (upstream Mathlib). The Covariance sorry are deprecated spatial bounds
-> superseded by the Mellin/Abel architecture. The QuadFormIdentity sorry
-> was numerically falsified in Exploration 13 (512-bit MPFR).
+> **Zero sorry on the crown path.** All 6 sorry are marked as WIP alternative
+> spatial routes superseded by the Mellin Crown architecture (v11+).
+> The PNT sorry will close when Mathlib gains a forward Abel/Tauberian theorem.
+> The Covariance sorry are historical artifacts of Exploration 13.
 
 ---
 
@@ -272,14 +270,22 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 |--------|-------|
 | Active Lean files | 174 |
 | Active lines of code | 43,387 |
-| Archive files | 128 |
+| Archive files | 128+ |
 | Archive lines | 29,784 |
 | Theorems + lemmas | ~1,459 |
-| Total axioms (active) | 55 |
+| Total axioms (active) | **45** |
 | Crown path axioms | **2** |
 | Crown path sorry | **0** |
-| Off-crown sorry | 16 (6 non-scratch) |
+| Off-crown sorry | **6** |
 | Topic directories | 22 |
-| Experiments (Rust/MPFR) | 35 |
+| Experiments (Rust/MPFR) | 38 |
 | Development time | 32 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
+
+> [!NOTE]
+> The Cathedral maintains a **dual-path architecture**: the Mellin Crown
+> (frequency domain, 2 composite axioms) and the Spatial path (position domain,
+> 4 elementary axioms). Both paths are formally verified and connected by the
+> Parseval Bridge. This is the **gauge fixing** of the proof — the Mellin path
+> is the Unitary Gauge (compact), the Spatial path is the Lorenz Gauge
+> (transparent). See `cathedral-physics.tex` §5.
