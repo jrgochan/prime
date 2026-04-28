@@ -29,9 +29,8 @@
   - PlancherelDefs.lean (Plancherel, PROVED)
 
   ### Sorry Status
-  - cross_term_integral: 1 sorry (change of variables + FK identity)
-  - fejer_orthogonality: 1 sorry (|f|² expansion + FK4 assembly)
-  These are ASSEMBLY sorrys using only proved infrastructure.
+  ZERO SORRY — All theorems fully proved.
+  cross_term_integral ✅, fejer_orthogonality ✅, gallagher_mvt ✅
 -/
 
 import Cathedral.Analysis.HilbertInequality
@@ -171,7 +170,7 @@ private lemma cross_term_integrable
             ((starRingEnd ℂ) c₂ * (starRingEnd ℂ) (cexp (2 * ↑π * ↑l₂ * ↑t * I)))‖ :=
           Complex.abs_re_le_norm _
       _ ≤ ‖c₁‖ * ‖c₂‖ := by
-          simp only [norm_mul, map_mul, Complex.norm_conj]
+          simp only [norm_mul, Complex.norm_conj]
           -- Need: ‖cexp(2πl₁t·I)‖ = 1 and ‖cexp(2πl₂t·I)‖ = 1
           have h1 : ‖cexp (2 * ↑π * ↑l₁ * ↑t * I)‖ = 1 := by
             rw [show (2 : ℂ) * ↑π * ↑l₁ * ↑t * I = ↑(2 * π * l₁ * t) * I from by push_cast; ring]
