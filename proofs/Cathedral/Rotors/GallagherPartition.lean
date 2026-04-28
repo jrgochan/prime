@@ -161,9 +161,14 @@ lemma dirichlet_eq_trigPoly_term (n : ℕ) (hn : 0 < n) (t : ℝ) :
   have hn_ne : ((n : ℝ) : ℂ) ≠ 0 := by exact_mod_cast Nat.pos_iff_ne_zero.mp hn
   rw [Complex.cpow_def_of_ne_zero hn_ne]
   congr 1
-  -- Both sides equal -t * I * Complex.log(↑n)
-  -- The RHS has the 2π/(2π) cancellation from the frequency def
-  sorry -- Exponent algebra: ring + π⁻¹ cancellation
+  -- Goal: Complex.log ↑n * -(↑t * I) = 2π · ↑(-log n/(2π)) · ↑t · I
+  -- Step 1: Convert Complex.log ↑n to ↑(Real.log n)
+  rw [← Complex.ofReal_log (Nat.cast_nonneg n)]
+  -- Step 2: Push ofReal through the RHS expression
+  simp only [Complex.ofReal_div, Complex.ofReal_neg, Complex.ofReal_mul, Complex.ofReal_ofNat]
+  -- Step 3: field_simp cancels the π/(2π) factor
+  have hpi : (π : ℝ) ≠ 0 := pi_ne_zero
+  field_simp
 
 /-- **The Gallagher energy identity for finite Dirichlet sums.**
 
