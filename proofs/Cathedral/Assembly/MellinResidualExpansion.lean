@@ -271,19 +271,13 @@ theorem mellin_residual_poly_form (N : ℕ) (v : Fin (N - 1) → ℝ)
     Combining: the full integral is O(1/logN). -/
 theorem crown_graduation_target
     (hRH : RiemannHypothesis)
-    (N : ℕ) (hN : 10 ≤ N) :
+    (_N : ℕ) (_hN : 10 ≤ _N) :
     ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N' : ℕ, N' ≥ N₀ → N' ≥ 3 →
       (1 / (2 * Real.pi)) *
       ∫ t : ℝ, ‖mellinBDResidual N' (bdMoebiusWeight N')
         ((1/2 : ℂ) + t * Complex.I)‖ ^ 2
-      ≤ C / Real.log ↑N' := by
-  sorry  -- Full assembly:
-         -- 1. mellin_residual_poly_form decomposes M_{r_N} (PROVED)
-         -- 2. Triangle inequality: |R + ζ/s · D|² ≤ 2|R|² + 2|ζ/s|²|D|²
-         -- 3. |R(1/2+it)|² bounded (rational, explicit)
-         -- 4. |ζ(1/2+it)/s|² bounded under RH (uses rh_zeta_lower_bound)
-         -- 5. MVT: ∫|D(1/2+it)|² ≤ Σ|v_k|²/k (NEARLY PROVED)
-         -- 6. Σ|v_k|²/k = O(1/logN) from PNT sums (PROVED infrastructure)
+      ≤ C / Real.log ↑N' :=
+  critical_line_mellin_variance_proved hRH
 
 -- ═══════════════════════════════════════════════
 -- §5. AUDIT
