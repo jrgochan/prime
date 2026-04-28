@@ -1,0 +1,13 @@
+[package]
+name = "hilbert-spectral"
+version = "0.1.0"
+edition = "2021"
+description = "Hilbert matrix spectral analysis — π constant certification for Cathedral v12"
+
+[dependencies]
+rayon = "1.10"
+nalgebra = "0.33"
+
+[profile.release]
+opt-level = 3
+lto = true

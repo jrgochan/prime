@@ -38,6 +38,7 @@ members = [
     "experiments/crown-cancellation",
     "experiments/rotor-spectroscopy",
     "experiments/siegel-walfisz",
+    "experiments/hilbert-spectral",
 ]
 
 [profile.release]
