@@ -140,33 +140,111 @@ function abelThermoChart(): ChartConfig {
 }
 
 // ── BD Constant ──────────────────────────────────────────────
+// Real data from: experiments/baez-duarte (512-bit MPFR, Cholesky)
+// Lean bridge: Assembly/MainChain.lean → nyman_beurling_equivalence_mellin
 
 const BD_DATA = [
-  { N: 10, Q_logN: 15.2 },
-  { N: 20, Q_logN: 17.8 },
-  { N: 50, Q_logN: 19.4 },
-  { N: 100, Q_logN: 20.1 },
-  { N: 200, Q_logN: 20.7 },
-  { N: 500, Q_logN: 21.1 },
-  { N: 1000, Q_logN: 21.3 },
-  { N: 2000, Q_logN: 21.45 },
-  { N: 5000, Q_logN: 21.55 },
+  { N: 10, X_logN: 18.60, d2: 0.0228 },
+  { N: 20, X_logN: 20.42, d2: 0.0161 },
+  { N: 50, X_logN: 21.69, d2: 0.0117 },
 ];
 
 function bdConstantChart(): ChartConfig {
   return {
-    title: "Báez-Duarte Constant: Q_N/logN → C",
+    title: "Báez-Duarte: X/ln(N) → 1/C  (512-bit MPFR)",
     xLabel: "Basis dimension N",
-    yLabel: "Rayleigh quotient / logN",
+    yLabel: "X / ln(N)",
     xLog: true,
-    precision: "256-bit MPFR",
+    precision: "512-bit MPFR",
     series: [
       {
-        label: "Q_N / logN",
+        label: "X / ln(N)",
         color: "#ffaa00",
-        points: BD_DATA.map((d) => ({ x: d.N, y: d.Q_logN })),
-        asymptote: 21.65,
-        asymptoteLabel: "C ≈ 21.65",
+        points: BD_DATA.map((d) => ({ x: d.N, y: d.X_logN })),
+        asymptote: 21.649,
+        asymptoteLabel: "1/C ≈ 21.649",
+      },
+      {
+        label: "d²_N × 1000",
+        color: "#00ccff",
+        dashed: true,
+        points: BD_DATA.map((d) => ({ x: d.N, y: d.d2 * 1000 })),
+        asymptote: 0,
+        asymptoteLabel: "→ 0 (RH)",
+      },
+    ],
+  };
+}
+
+// ── MVT Certificate ──────────────────────────────────────────
+// From: experiments/mvt-decomposition (512-bit MPFR)
+// Lean bridge: Analysis/MontgomeryVaughan.lean
+
+const MVT_DATA = [
+  { N: 10, ratio: 1.411, off_vs_mv: 0.492 },
+  { N: 20, ratio: 1.721, off_vs_mv: 0.525 },
+  { N: 50, ratio: 2.375, off_vs_mv: 0.475 },
+  { N: 100, ratio: 3.177, off_vs_mv: 0.395 },
+  { N: 200, ratio: 4.422, off_vs_mv: 0.315 },
+  { N: 500, ratio: 7.241, off_vs_mv: 0.207 },
+  { N: 1000, ratio: 10.907, off_vs_mv: 0.129 },
+  { N: 2000, ratio: 16.867, off_vs_mv: 0.072 },
+  { N: 5000, ratio: 31.040, off_vs_mv: 0.024 },
+];
+
+function mvtCertChart(): ChartConfig {
+  return {
+    title: "Montgomery-Vaughan Decomposition Certificate",
+    xLabel: "Basis dimension N",
+    yLabel: "Ratio / Fraction",
+    xLog: true,
+    precision: "512-bit MPFR",
+    series: [
+      {
+        label: "Weight ratio Σka²/Σa²",
+        color: "#ff6b9d",
+        points: MVT_DATA.map((d) => ({ x: d.N, y: d.ratio })),
+      },
+      {
+        label: "Off-diag / MV bound",
+        color: "#00ff88",
+        points: MVT_DATA.map((d) => ({ x: d.N, y: d.off_vs_mv })),
+        asymptote: 0,
+        asymptoteLabel: "→ 0 (dominated)",
+      },
+    ],
+  };
+}
+
+// ── Vasyunin Telescope ───────────────────────────────────────
+// From: experiments/vasyunin-convergence (512-bit MPFR)
+// Lean bridge: Vasyunin/Cotangent/VasyuninAssembly.lean
+
+const VASYUNIN_PAIRS = [
+  { pair: "(1,2)", err: 0.2917 },
+  { pair: "(1,3)", err: 0.2779 },
+  { pair: "(1,5)", err: 0.2667 },
+  { pair: "(2,3)", err: 0.2648 },
+  { pair: "(2,5)", err: 0.2583 },
+  { pair: "(3,5)", err: 0.2556 },
+  { pair: "(5,7)", err: 0.2538 },
+  { pair: "(7,9)", err: 0.2513 },
+  { pair: "(9,10)", err: 0.2509 },
+];
+
+function vasyuninTelescopeChart(): ChartConfig {
+  return {
+    title: "Vasyunin Cotangent Convergence (row pairs)",
+    xLabel: "Pair index",
+    yLabel: "sup |error × a·M|",
+    precision: "512-bit MPFR",
+    series: [
+      {
+        label: "Error bound (all pairs < 0.3)",
+        color: "#bb88ff",
+        points: VASYUNIN_PAIRS.map((d, i) => ({ x: i + 1, y: d.err })),
+        asymptote: 0.25,
+        asymptoteLabel: "1/4 (conjectured limit)",
       },
     ],
   };
@@ -252,14 +330,17 @@ const CHART_REGISTRY: Partial<Record<ViewMode, () => ChartConfig>> = {
   "bd-constant": bdConstantChart,
   "graduation": graduationChart,
   "phase-shattering": phaseShatteringChart,
-  "parseval-bridge": mellinCrownChart, // Reuse L2 data for now
+  "parseval-bridge": mellinCrownChart, // Shares L² decay data
+  "mvt-cert": mvtCertChart,
+  "vasyunin-telescope": vasyuninTelescopeChart,
 };
 
 /**
  * Get chart data for a visualization mode.
- * Returns null if no chart data is available.
+ * Returns null if no chart data is available (mode shows placeholder).
  */
 export function getChartData(mode: ViewMode): ChartConfig | null {
   const factory = CHART_REGISTRY[mode];
   return factory ? factory() : null;
 }
+
