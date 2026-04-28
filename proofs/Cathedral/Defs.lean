@@ -32,11 +32,12 @@ open Complex Real
 /-- The fractional part {x} = x - ⌊x⌋, using Mathlib's Int.fract -/
 def fracPart' (x : ℝ) : ℝ := Int.fract x
 
-/-- Báez-Duarte basis: h_k(x) = {1/(kx)} for x ∈ (0,1].
-    NOTE: This is the SHIFTED Báez-Duarte basis, NOT {k/x}.
-    The Vasyunin discrete formula computes the Gram matrix of {1/(kx)},
-    not {k/x}. Verified numerically: G(2,2) ≈ 0.3803 matches ∫{1/(2x)}²,
-    not ∫{2/x}² ≈ 0.2937. See RED ALERT memo (April 11, 2026). -/
+/-- **DEPRECATED**: This uses the original Nyman-Beurling basis h_k(x) = {k/x}
+    with θ = k > 1, which leads to the High-Frequency Divergence Trap.
+    The Periodicity Miracle causes these basis functions to span L²(0,1)
+    unconditionally, regardless of RH. Superseded by `bdLinComb` in
+    BDMellin.lean which uses the correct Báez-Duarte basis {1/(kx)}.
+    See: docs/ai/claude/exploration/The θ>1 Trap.md -/
 def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract ((k : ℝ) / x)
 
 /-- Gram matrix entry G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx
@@ -240,9 +241,10 @@ noncomputable def liouvilleProjection (N : ℕ) : ℝ :=
     Real.sqrt (∑ i ∈ min_idx, (dotProduct liouville_hat (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2)
   else 0
 
-/-- The Nyman-Beurling linear combination: φ_w(x) = Σᵢ wᵢ · {(i+2)/x}.
-    This is the general linear combination of NB basis functions.
-    The NB theorem states: inf_w ‖1 - φ_w‖² → 0 iff RH. -/
+/-- **DEPRECATED**: This linear combination uses nbBasis' (the wrong basis {k/x}
+    with θ = k > 1). The crown theorem uses `bdLinComb` from BDMellin.lean
+    which uses the correct Báez-Duarte basis {1/(kx)} with θ = 1/k ≤ 1.
+    Retained only for Archive/ compilation compatibility. -/
 noncomputable def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
   ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
 

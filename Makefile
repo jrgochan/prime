@@ -28,7 +28,7 @@ build: ## Build the Lean 4 proofs (THE main event)
 
 verify: ## Verify the crown theorem's axiom foundation
 	@$(ENV) require lean
-	cd proofs && lake env lean Cathedral/Scratch/PrintAxioms.lean
+	cd proofs && lake env lean Cathedral/Archive/Scratch/PrintAxioms.lean
 
 axioms: ## List all axioms in the Cathedral
 	@echo ""

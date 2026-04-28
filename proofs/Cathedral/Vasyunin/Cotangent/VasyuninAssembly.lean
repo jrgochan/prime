@@ -12,7 +12,7 @@
     = Σ_rows ∫_row {1/(jx)}{1/(kx)} dx                [integral_eq_sum_rows]
     = Σ_rows Σ_tiles ∫_tile (polynomial) dx             [tile_integral_eq_ftc]
     = Σ_tiles [F(hi) - F(lo)]                            [cross_piece_integral_ftc]
-    = Σ [rational] + Σ [log] + Σ [linear]                [F_eq_components]
+    = Σ [rational] + Σ [log] + Σ [linear]                [f_eq_components]
     = M/k + log_terms + linear_terms                     [rational_telescope_sum]
     → log_terms contain ψ(j/k) via Gauss digamma         [gauss_digamma_formula]
     → ψ(j/k) involves cot(πj/k) via reflection           [digamma_reflection_complex]

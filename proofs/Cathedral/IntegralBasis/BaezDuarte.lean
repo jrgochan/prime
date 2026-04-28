@@ -187,22 +187,11 @@ axiom nyman_beurling_equivalence :
     (∀ s : ℂ, s.re > 0 ∧ s.re < 1 ∧ riemannZeta s = 0 → s.re = 1/2) →
     Filter.Tendsto bdDistSq Filter.atTop (nhds 0)
 
-/-- **THE FINAL AXIOM: The Báez-Duarte Covariance Divergence.**
-
-    STATE OF THE ART: This axiom is the Riemann Hypothesis itself,
-    restated as a property of a finite-dimensional matrix sequence.
-
-    If true, it implies d²_N → 0 via the Sherman-Morrison identity,
-    which combined with the Nyman-Beurling equivalence gives RH.
-
-    The empirical evidence (Attack 6, N ≤ 500):
-      X_N / ln(N) ≈ 21.65  (matching the Báez-Duarte constant 1/0.0462)
-      SM match to 10⁻¹⁴ precision at κ(C) = 444,636
-
-    The optimal coefficients c* = G⁻¹b reproduce the Möbius function:
-      sign(c*_k) = -μ(k) for all squarefree k tested. -/
-axiom baez_duarte_covariance_divergence :
-    ∃ c : ℝ, c > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      c * Real.log (N : ℝ) ≤ bdQuadForm N
+-- ARCHIVED (April 28, 2026 — Punch List cleanup):
+-- The axiom `baez_duarte_covariance_divergence` was removed because it was
+-- never referenced by any theorem in the Cathedral. The converse direction
+-- (d²_N → 0 ⟹ RH) is proved via `zeta_zero_separates_bd` in BDMellin.lean
+-- with ZERO axioms. The forward direction (RH ⟹ d²_N → 0) is the crown
+-- theorem, proved via the Perron chain + covariance bound.
 
 end Cathedral.BaezDuarte

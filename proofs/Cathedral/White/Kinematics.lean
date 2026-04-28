@@ -151,7 +151,7 @@ lemma full_integral_eq_Ici (N : ℕ) (v : Fin (N - 1) → ℝ) :
   exact flattenedResidualV_sq_zero_of_neg N v u hu
 
 /-- The [0,∞) integral equals the (0,∞) integral, since {0} has measure zero. -/
-lemma Ici_eq_Ioi_integral (N : ℕ) (v : Fin (N - 1) → ℝ) :
+lemma ici_eq_ioi_integral (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ u in Set.Ici (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
     ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
   apply setIntegral_congr_set
@@ -161,7 +161,7 @@ lemma Ici_eq_Ioi_integral (N : ℕ) (v : Fin (N - 1) → ℝ) :
 lemma full_integral_eq_halfline (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ u : ℝ, (flattenedResidualV N v u) ^ 2 =
     ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 := by
-  rw [full_integral_eq_Ici N v, Ici_eq_Ioi_integral N v]
+  rw [full_integral_eq_Ici N v, ici_eq_ioi_integral N v]
 
 -- ════════════════════════════════════════════════
 -- §4. THE THEOREM (AXIOM 2 ELIMINATION)

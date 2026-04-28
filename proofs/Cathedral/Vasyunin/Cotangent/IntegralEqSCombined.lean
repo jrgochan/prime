@@ -3,7 +3,7 @@
 
   ## INTEGRAL = STRIP + S_COMBINED: The Evaluative Plumbing
 
-  Proves: ∫_{1/(aM)}^1 {1/(ax)}{1/(bx)} dx = strip + S_combined a b M
+  Proves: ∫_{1/(aM)}^1 {1/(ax)}{1/(bx)} dx = strip + s_combined a b M
 
   Created: April 25, 2026
   Status: BUILDING — two-tile telescoping in progress

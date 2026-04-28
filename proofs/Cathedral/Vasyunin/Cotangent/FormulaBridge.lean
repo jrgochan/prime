@@ -42,7 +42,7 @@ theorem cot_eq_inv_tan (x : ℝ) (_hsin : Real.sin x ≠ 0) :
 -- ════════════════════════════════════════════════
 
 /-- `Ico 1 a = Icc 1 (a-1)` for natural numbers with a ≥ 2. -/
-theorem Ico_eq_Icc_pred (a : ℕ) (ha : 2 ≤ a) :
+theorem ico_eq_icc_pred (a : ℕ) (ha : 2 ≤ a) :
     Ico 1 a = Icc 1 (a - 1) := by
   ext m; simp [Finset.mem_Ico, Finset.mem_Icc]; omega
 
@@ -79,7 +79,7 @@ theorem vasyuninSum_eq_vasyuninCotSum (a b : ℕ) :
     have ha2 : 2 ≤ a := by omega
     unfold Cathedral.Vasyunin.vasyuninSum DigammaReflection.vasyuninCotSum
     simp only [show ¬(a ≤ 1) from by omega, ↓reduceIte]
-    rw [Ico_eq_Icc_pred a ha2]
+    rw [ico_eq_icc_pred a ha2]
     apply Finset.sum_congr rfl
     intro m hm
     -- Each summand: fract and trig parts

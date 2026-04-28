@@ -1,2 +1,0 @@
-import Cathedral.NymanBeurling.VasyuninBypass
-#print axioms rh_implies_bd_convergence_vasyunin

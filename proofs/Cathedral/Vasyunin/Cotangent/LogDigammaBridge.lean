@@ -460,13 +460,13 @@ private lemma gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1
   --   ∫_{1/(a(m+1))}^{1/(am)} {1/(ax)}{1/(bx)} dx = R(m)
   -- where R(m) = 1/b - (n(m)/a + m/b)·log((m+1)/m) + n(m)/(a(m+1))
   --
-  -- Summing: ∫_{1/(aM)}^1 = strip + Σ_{m=1}^{M-1} R(m) = S_combined(M)
+  -- Summing: ∫_{1/(aM)}^1 = strip + Σ_{m=1}^{M-1} R(m) = s_combined(M)
   --
-  -- The M→∞ limit of S_combined(M) equals L by:
-  --   S_rational → ∞ (diverges)
-  --   S_log_stirling → ∞ (diverges, but cancels with S_rational)
-  --   S_log_digamma → evaluates via Gauss digamma formula
-  --   S_linear → evaluates via floor decomposition + Dirichlet test
+  -- The M→∞ limit of s_combined(M) equals L by:
+  --   s_rational → ∞ (diverges)
+  --   s_log_stirling → ∞ (diverges, but cancels with s_rational)
+  --   s_log_digamma → evaluates via Gauss digamma formula
+  --   s_linear → evaluates via floor decomposition + Dirichlet test
   --
   -- All divergences cancel, leaving the Vasyunin formula.
   have hB : Tendsto partialM atTop (nhds L) :=
