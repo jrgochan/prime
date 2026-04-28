@@ -5,6 +5,8 @@ import { useViewportStore } from "../stores/viewport";
 import {
   VIZ_MAP,
   VIZ_ORDER,
+  MODE_GROUPS,
+  VISUALIZATIONS,
 } from "../content/visualizations";
 
 const SPEEDS = [1, 2, 4, 8] as const;
@@ -123,6 +125,29 @@ export function ModeBar() {
       </div>
 
       <div className="mode-bar-center">
+        {/* Group tabs */}
+        <div className="mode-group-tabs">
+          {MODE_GROUPS.map((g) => {
+            const isActive = viz.group === g.id;
+            return (
+              <button
+                key={g.id}
+                className={`mode-group-tab${isActive ? " active" : ""}`}
+                style={isActive ? { color: g.color, borderColor: g.color + "40" } : undefined}
+                onClick={() => {
+                  // Jump to first mode in this group
+                  const first = VISUALIZATIONS.find((v) => v.group === g.id);
+                  if (first) setViewMode(first.id);
+                }}
+                title={g.label}
+              >
+                {g.icon} {g.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Mode navigator */}
         <button className="mode-bar-nav" onClick={prevMode} title="Previous (←)">
           ‹
         </button>

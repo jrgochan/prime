@@ -95,9 +95,11 @@ export const useViewportStore = create<ViewportState>()(
 
     setViewMode: (viewMode) => {
       // Tell the WASM engine which visualization to compute
+      // (only for modes that have a WASM mapping)
+      const wasmMode = VIEW_MODE_WASM[viewMode];
       const system = useViewportStore.getState().hyperSystem;
-      if (system?.engine && viewMode !== "output") {
-        system.engine.set_view_mode(VIEW_MODE_WASM[viewMode]);
+      if (system?.engine && wasmMode !== undefined) {
+        system.engine.set_view_mode(wasmMode);
       }
       set({ viewMode, paletteOpen: false });
     },

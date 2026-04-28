@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ViewMode } from "../engine/types";
+import type { ViewMode, RendererType, DataTier, VizGroup, ProofMetadata } from "../engine/types";
 
 export interface EducationalCard {
   title: string;
@@ -20,7 +20,39 @@ export interface VisualizationMode {
   usesOutputBuffer: boolean;
   /** What the N slider controls in this mode (shown in controls label) */
   nSliderLabel?: string;
+
+  // ── v2: Renderer & Data ──
+  /** Which renderer to use (default: "particles") */
+  renderer?: RendererType;
+  /** Data source tier (default: "live") */
+  dataTier?: DataTier;
+  /** Proof module group for ModeBar grouping */
+  group?: VizGroup;
+  /** Cathedral proof mapping */
+  proof?: ProofMetadata;
+  /** Experiment source for Tier 2 precomputed data */
+  experimentSource?: string;
+  /** Whether to show the particle count slider (default: true for particles) */
+  showsParticleSlider?: boolean;
 }
+
+/**
+ * MODE GROUPS — organizes visualizations by proof module.
+ * Used by the grouped ModeBar for navigation.
+ */
+export interface ModeGroup {
+  id: VizGroup;
+  label: string;
+  icon: string;
+  color: string;
+}
+
+export const MODE_GROUPS: ModeGroup[] = [
+  { id: "crown", label: "Crown", icon: "🏛️", color: "#ffd700" },
+  { id: "analysis", label: "Analysis", icon: "🔬", color: "#00ff88" },
+  { id: "arithmetic", label: "Arithmetic", icon: "⚡", color: "#ff8844" },
+  { id: "spectral", label: "Spectral", icon: "🎵", color: "#bb88ff" },
+];
 
 /**
  * THE VISUALIZATION REGISTRY
@@ -456,13 +488,171 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     wasmMode: 10,
     usesOutputBuffer: false,
     nSliderLabel: "Dirichlet terms",
+    group: "spectral",
+    renderer: "particles",
+    dataTier: "live",
+  },
+
+  // ════════════════════════════════════════════════════════════════
+  // NEW v2 MODES — Crown Group
+  // ════════════════════════════════════════════════════════════════
+  {
+    id: "crown-theorem",
+    label: "Crown Theorem",
+    shortLabel: "Crown",
+    icon: "🏛️",
+    hotkey: "C",
+    color: { core: "#ffd700", edge: "#664400" },
+    equation: { main: "RH ↔ d²_N → 0", sub: "nyman_beurling_equivalence" },
+    description: "Interactive proof dependency tree. The Cathedral's axiom graph, rendered.",
+    cards: [
+      { title: "The Proof Tree", body: "Every node is a theorem or axiom. Green = proved. Amber = crown axiom. The two amber nodes are the only assumptions. Everything else is machine-checked." },
+      { title: "🏛️ This IS the Cathedral", body: "Click any node to see its Lean statement. The crown theorem depends on exactly 2 axioms + 3 Lean kernel axioms." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "crown", renderer: "graph", dataTier: "static",
+    proof: { leanFile: "Assembly/MainChain.lean", theoremName: "nyman_beurling_equivalence", status: "proved" },
+    showsParticleSlider: false,
+  },
+  {
+    id: "graduation",
+    label: "Graduation Timeline",
+    shortLabel: "Timeline",
+    icon: "📜",
+    hotkey: "G",
+    color: { core: "#ffd700", edge: "#664400" },
+    equation: { main: "56 → 2 axioms", sub: "v1 → v12 · 32 days" },
+    description: "The axiom reduction campaign. 12 versions, from 56 axioms to 2.",
+    cards: [
+      { title: "The Journey", body: "March 27 to April 28, 2026. 12 versions. Each version eliminated axioms by proving them as theorems from Mathlib." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "crown", renderer: "chart", dataTier: "static",
+    showsParticleSlider: false,
+  },
+
+  // ════════════════════════════════════════════════════════════════
+  // NEW v2 MODES — Analysis Group
+  // ════════════════════════════════════════════════════════════════
+  {
+    id: "parseval-bridge",
+    label: "Parseval Bridge",
+    shortLabel: "Bridge",
+    icon: "🌉",
+    hotkey: "B",
+    color: { core: "#00ff88", edge: "#006644" },
+    equation: { main: "∫₀¹|1-f_N|²dx = (1/2π)∫|M(½+it)|²dt", sub: "L² ↔ Mellin isometry · PROVED" },
+    description: "The crown jewel. Watch the same energy flow between position and frequency space.",
+    cards: [
+      { title: "The Bridge", body: "Left: L²(0,1) integral. Right: Mellin L² on the critical line. They are the SAME NUMBER. This theorem is proved with zero axioms." },
+      { title: "🏛️ Cathedral Connection", body: "parseval_bridge_white in White/Scattering.lean. Zero axioms, zero sorry. The heart of the v11 Mellin Crown." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "analysis", renderer: "dual-chart", dataTier: "precomputed",
+    experimentSource: "mellin-certificate",
+    proof: { leanFile: "White/Scattering.lean", theoremName: "parseval_bridge_white", status: "proved" },
+    showsParticleSlider: false,
+  },
+  {
+    id: "hilbert-pi",
+    label: "Hilbert π",
+    shortLabel: "Hilbert",
+    icon: "π",
+    hotkey: "I",
+    color: { core: "#00ff88", edge: "#006644" },
+    equation: { main: "‖H_N‖_op → π", sub: "512-bit MPFR · N=1000" },
+    description: "The Hilbert matrix operator norm converges to π. Certified at 512-bit precision.",
+    cards: [
+      { title: "The Convergence", body: "The Hilbert matrix H(i,j) = 1/(i+j-1) has operator norm converging to π. The Schur test gives a valid but loose O(logN) bound." },
+      { title: "🏛️ Cathedral Connection", body: "HilbertInequality.lean proves the Schur test bound used in the Montgomery-Vaughan MVT chain." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "analysis", renderer: "chart", dataTier: "precomputed",
+    experimentSource: "hilbert-spectral",
+    proof: { leanFile: "Analysis/HilbertInequality.lean", status: "proved" },
+    showsParticleSlider: false,
+  },
+  {
+    id: "phase-shattering",
+    label: "Phase Shattering",
+    shortLabel: "Phase",
+    icon: "💥",
+    hotkey: "P",
+    color: { core: "#ff4444", edge: "#661111" },
+    equation: { main: "Σμ(n)n⁻ˢ converges ≠ Σ|μ(n)|n⁻ˢ diverges", sub: "why Parseval is necessary" },
+    description: "The most educational viz. Phase coherence vs destruction, side by side.",
+    cards: [
+      { title: "The Trap", body: "Left: Möbius sums with complex phases — beautiful interference, convergence. Right: same sums with absolute values — chaos, divergence. Real-variable bounds destroy the cancellation." },
+      { title: "🏛️ Cathedral Connection", body: "This is the Triangle Inequality Trap (Discovery 5). It proves the Parseval Bridge is mathematically NECESSARY, not just convenient." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "analysis", renderer: "dual-chart", dataTier: "precomputed",
+    experimentSource: "crown-cancellation",
+    showsParticleSlider: false,
+  },
+
+  // ════════════════════════════════════════════════════════════════
+  // NEW v2 MODES — Arithmetic Group
+  // ════════════════════════════════════════════════════════════════
+  {
+    id: "perron-contour",
+    label: "Perron Contour",
+    shortLabel: "Perron",
+    icon: "⚡",
+    hotkey: "R",
+    color: { core: "#00ccff", edge: "#004466" },
+    equation: { main: "M(x) = (1/2πi) ∮ xˢ/(s·ζ(s)) ds", sub: "16-file Perron chain" },
+    description: "Animated contour integral. Watch the contour sweep through poles, collecting the Mertens function.",
+    cards: [
+      { title: "The Contour", body: "A vertical line at Re(s)=c sweeps leftward. At s=1, a residue flash. The integral collects M(x) = Σμ(n) as it goes." },
+      { title: "🏛️ Cathedral Connection", body: "The 16-file Perron chain (White/Perron/*.lean) proves RH → |M(x)| ≤ Cx^{3/4}. Machine-verified." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "arithmetic", renderer: "curves", dataTier: "live",
+    proof: { leanFile: "White/Perron/PerronBound.lean", status: "proved" },
+  },
+  {
+    id: "abel-thermo",
+    label: "Abel Thermometer",
+    shortLabel: "Abel",
+    icon: "🌡️",
+    hotkey: "A",
+    color: { core: "#ff8844", edge: "#663311" },
+    equation: { main: "S₁→0, S₂→-1, S₃→2", sub: "thermodynamic moments" },
+    description: "Three PNT limits as thermometers: magnetization, susceptibility, heat capacity.",
+    cards: [
+      { title: "The Hierarchy", body: "S₁ = Σμ(k)/k → 0 (blue). S₂ = Σμ(k)logk/k → -1 (amber). S₃ = Σμ(k)log²k/k → 2 (red). Each is a deeper PNT result." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "arithmetic", renderer: "chart", dataTier: "precomputed",
+    experimentSource: "pnt-mobius-sums",
+    proof: { leanFile: "AbelTail/AbelTailBound.lean", status: "proved" },
+    showsParticleSlider: false,
+  },
+  {
+    id: "bd-constant",
+    label: "BD Constant",
+    shortLabel: "BD",
+    icon: "♨️",
+    hotkey: "D",
+    color: { core: "#ffaa00", edge: "#663300" },
+    equation: { main: "C = 1/(2+γ-ln4π) ≈ 21.65", sub: "inverse heat capacity of the prime gas" },
+    description: "The Báez-Duarte constant: spectral holes of ζ and the Rayleigh quotient convergence.",
+    cards: [
+      { title: "The Constant", body: "Q_N/logN → C ≈ 21.65. This is the maximum information extraction rate from the prime number noise through the spectral holes of |ζ(1/2+it)|²." },
+    ],
+    wasmMode: 0, usesOutputBuffer: false,
+    group: "arithmetic", renderer: "chart", dataTier: "precomputed",
+    experimentSource: "gram-oracle",
+    showsParticleSlider: false,
   },
 ];
 
 // Index by ID for O(1) lookup
+// All registered modes are guaranteed to exist in the map.
 export const VIZ_MAP = Object.fromEntries(
   VISUALIZATIONS.map((v) => [v.id, v])
-) as Record<ViewMode, VisualizationMode>;
+) as Record<string, VisualizationMode>;
 
 // Ordered IDs for prev/next navigation
 export const VIZ_ORDER = VISUALIZATIONS.map((v) => v.id);

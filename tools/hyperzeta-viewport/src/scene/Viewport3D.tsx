@@ -3,10 +3,19 @@
 import { Canvas } from "@react-three/fiber";
 import { Stars } from "@react-three/drei";
 import { Suspense } from "react";
-import { LatticeCloud } from "./LatticeCloud";
+import { RendererSelector } from "./renderers/RendererSelector";
 import { AxisLabels } from "./AxisLabels";
 import { CameraController } from "./CameraController";
 
+/**
+ * Viewport3D — the React Three Fiber canvas.
+ * Uses RendererSelector to dispatch to the appropriate 3D renderer
+ * based on the active visualization mode.
+ *
+ * 2D modes (chart, graph) render nothing in this canvas —
+ * they go in the ChartOverlay HTML layer instead.
+ * The Stars background provides subtle ambient life for 2D modes.
+ */
 export function Viewport3D() {
   return (
     <Canvas
@@ -27,7 +36,7 @@ export function Viewport3D() {
       <CameraController />
       <AxisLabels />
       <Suspense fallback={null}>
-        <LatticeCloud />
+        <RendererSelector />
       </Suspense>
     </Canvas>
   );

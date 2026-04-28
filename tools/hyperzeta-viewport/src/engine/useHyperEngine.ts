@@ -63,8 +63,9 @@ export function useHyperEngine() {
         // Re-apply current view mode to new engine
         const { viewMode } = useViewportStore.getState();
         const { VIEW_MODE_WASM } = await import("../engine/types");
-        if (viewMode !== "output") {
-          engine.set_view_mode(VIEW_MODE_WASM[viewMode]);
+        const wasmMode = VIEW_MODE_WASM[viewMode];
+        if (wasmMode !== undefined) {
+          engine.set_view_mode(wasmMode);
         }
 
         setHyperSystem({ engine, outputBuffer, inputBuffer });

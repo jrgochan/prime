@@ -3,7 +3,9 @@
 import { useHyperEngine } from "../engine/useHyperEngine";
 import { useKeyboard } from "../hud/useKeyboard";
 import { Viewport3D } from "../scene/Viewport3D";
+import { ChartOverlay } from "../scene/ChartOverlay";
 import { Header } from "../hud/Header";
+import { ProofBreadcrumb } from "../hud/ProofBreadcrumb";
 import { ModeBar } from "../hud/ModeBar";
 import { MetricsPanel } from "../hud/MetricsPanel";
 import { EquationOverlay } from "../hud/EquationOverlay";
@@ -28,10 +30,12 @@ export default function Home() {
     <main className="viewport-root">
       {/* ── Always visible ── */}
       <Viewport3D />
+      <ChartOverlay />
       <Toast />
 
       {/* ── Zen-mode aware ── */}
       <Header />
+      <ProofBreadcrumb />
       {hudVisible && <MetricsPanel />}
       <EquationOverlay />
       {hudVisible && <CriticalStripMap />}
