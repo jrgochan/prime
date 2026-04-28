@@ -145,11 +145,10 @@ fn main() {
         500_000_000, 1_000_000_000,
     ].into_iter().filter(|&x| x <= max_n).collect();
 
-    // Parallel computation of character-twisted Möbius sums
-    let char_results: Vec<Vec<(f64, f64)>> = (0..4).into_par_iter().map(|i| {
-        moebius_test_points.iter().map(|&n| {
-            moebius_ap::character_moebius_sums(i, &mu, n)
-        }).collect()
+    // Character-twisted Möbius sums — INCREMENTAL + parallel inner loops
+    // Total work: O(4 × max_N) instead of O(4 × 13 × max_N)
+    let char_results: Vec<Vec<(f64, f64)>> = (0..4).map(|i| {
+        moebius_ap::character_moebius_incremental(i, &mu, &moebius_test_points)
     }).collect();
 
     for i in 0..4 {
@@ -173,8 +172,9 @@ fn main() {
              "N", "k≡1", "k≡3", "k≡5", "k≡7", "total");
 
     let mut decomp_ok = true;
-    for &n in &moebius_test_points {
-        let (parts, total) = moebius_ap::pnt_s2_by_residue(&mu, n);
+    let residue_results = moebius_ap::s2_residue_incremental(&mu, &moebius_test_points);
+    for (j, &n) in moebius_test_points.iter().enumerate() {
+        let (parts, total) = &residue_results[j];
         let last = n == *moebius_test_points.last().unwrap();
         if last {
             // check that TOTAL converges to -1 (not individual parts)
@@ -262,8 +262,9 @@ fn main() {
     println!("    {:>10} │ {:>12} │ {:>12} │ {:>12} │ {:>14}",
              "N", "S₁ (→0)", "S₂ (→-1)", "S₃ (→-2γ)", "S₃+2γ");
 
-    for &n in &moebius_test_points {
-        let (s1, s2, s3) = moebius_ap::pnt_moebius_sums(&mu, n);
+    let pnt_results = moebius_ap::pnt_moebius_incremental(&mu, &moebius_test_points);
+    for (j, &n) in moebius_test_points.iter().enumerate() {
+        let (s1, s2, s3) = pnt_results[j];
         let s3_err = s3 + 2.0 * euler_gamma;
         println!("    {:>10} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:>14.10}",
                  n, s1, s2, s3, s3_err);
