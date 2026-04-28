@@ -267,7 +267,28 @@ theorem fejer_orthogonality
     -- ∫ sin(2π(lam i - lam x)t) · δK(δt) = 0
     have h_sin_zero : ∫ t : ℝ, Real.sin (2 * π * (lam i - lam x) * t) *
         (δ * fejerKernel (δ * t)) = 0 := by
-      sorry -- Parity: sin(ωt) is odd, δK(δt) is even → integrand is odd → ∫ = 0
+      -- Parity argument: sin(ωt) is odd, δK(δt) is even
+      -- So the integrand is odd: f(-t) = sin(-ωt)·δK(-δt) = -sin(ωt)·δK(δt) = -f(t)
+      -- ∫ f(t) dt = ∫ f(-t) dt [COV t→-t, Lebesgue measure invariant]
+      --           = ∫ -f(t) dt = -∫ f(t) dt
+      -- So 2·∫ f = 0, hence ∫ f = 0
+      set f := fun t => Real.sin (2 * π * (lam i - lam x) * t) * (δ * fejerKernel (δ * t))
+      -- f(-t) = -f(t) because sin is odd and K is even
+      have h_odd : ∀ t, f (-t) = -f t := by
+        intro t; simp only [f]
+        rw [show 2 * π * (lam i - lam x) * (-t) = -(2 * π * (lam i - lam x) * t) from by ring,
+           Real.sin_neg,
+           show δ * (-t) = -(δ * t) from by ring,
+           fejerKernel_even]
+        ring
+      -- COV t → -t: ∫ f(t) = ∫ f(-t) [Lebesgue measure is symmetric]
+      have h_cov : ∫ t, f t = ∫ t, f (-t) := by
+        have : (fun t => f (-t)) = (fun t => f ((-1) * t)) := by ext; simp
+        rw [this, Measure.integral_comp_mul_left f (-1 : ℝ)]
+        simp [abs_of_pos (show (0 : ℝ) < 1 from one_pos)]
+      -- ∫ f = ∫ (-f) = -∫ f, so 2∫f = 0
+      linarith [show ∫ t, f (-t) = ∫ t, -f t from by congr 1; ext t; exact h_odd t,
+                show ∫ t, -f t = -(∫ t, f t) from integral_neg f]
     -- Combine: decompose Re(c·exp(iωt))·w into cos and sin parts
     -- Re(c·exp(iωt)) = Re(c)·cos(ωt) - Im(c)·sin(ωt)
     -- ∫ [Re(c)·cos - Im(c)·sin]·w = Re(c)·∫cos·w - Im(c)·∫sin·w = 0 - 0 = 0
