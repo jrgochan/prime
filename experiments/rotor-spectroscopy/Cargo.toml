@@ -1,0 +1,10 @@
+[package]
+name = "rotor-spectroscopy"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Rotor Spectroscopy — validates the mod-8 character energy partition (Stained Glass), Gallagher MVT completeness, and dispersion relation across the BD Dirichlet polynomial"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
