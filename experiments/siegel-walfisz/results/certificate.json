@@ -1,0 +1,83 @@
+{
+  "experiment": "Siegel-Walfisz PNT-in-AP Certification for q=8",
+  "cathedral_version": "v12",
+  "precision_bits": 512,
+  "threads": 12,
+  "max_N": 100000,
+  "prime_count": 9592,
+  "elapsed_seconds": 1.250,
+
+  "pnt_axiom_convergence": {
+    "S1_at_N": -2.690121130555360e-4,
+    "S1_target": 0.0,
+    "S1_comment": "Σ μ(k)/k → 0 (PNT, PROVED in Lean)",
+
+    "S2_at_N": -1.005584679888992e0,
+    "S2_target": -1.0,
+    "S2_comment": "Σ μ(k)·ln(k)/k → -1 (PNT axiom 2, ON CROWN)",
+
+    "S3_at_N": -1.218437350625612e0,
+    "S3_target_minus_2gamma": -1.1544313298030657,
+    "S3_plus_2gamma": -6.400602082254592e-2,
+    "S3_comment": "Σ μ(k)·ln²(k)/k → -2γ (PNT axiom 3, Abel Bypass)"
+  },
+
+  "l_function_values": {
+    "L1_chi2_computed": 6.232252400402305e-1,
+    "L1_chi2_exact": 6.232252401402304e-1,
+    "L1_chi2_rel_error": 1.604555e-10,
+
+    "L1_chi3_computed": 1.110710734539595e0,
+    "L1_chi3_exact": 1.110720734539592e0,
+    "L1_chi3_rel_error": 9.003163e-6,
+
+    "L1_chi4_computed": 7.853931633974488e-1,
+    "L1_chi4_exact": 7.853981633974483e-1,
+    "L1_chi4_rel_error": 6.366198e-6
+  },
+
+  "character_twisted_mobius_at_N": {
+    "S1_chi1": -2.690121130555360e-4,
+    "S1_chi2": 1.604425444526913e0,
+    "S1_chi3": 8.996580543420464e-1,
+    "S1_chi4": 1.272888859949399e0,
+    "S1_chi2_vs_inv_L": 1.308789e-4,
+    "S1_chi3_vs_inv_L": 6.582618e-4,
+    "S1_chi4_vs_inv_L": 3.506848e-4,
+    "comment": "S₁(χ) → 1/L(1,χ) — Mathlib LFunction_ne_zero"
+  },
+
+  "residue_decomposition_at_N": {
+    "S2_mod_1": -1.769819553131894e-1,
+    "S2_mod_3": -8.378577886101528e-1,
+    "S2_mod_5": -6.701349976508544e-1,
+    "S2_mod_7": -3.180776851695122e-1,
+    "S2_total_odd": -2.003052426743709e0
+  },
+
+  "prime_distribution_at_N": {
+    "pi_mod8_1": 2384,
+    "pi_mod8_3": 2409,
+    "pi_mod8_5": 2399,
+    "pi_mod8_7": 2399,
+    "Li_x_over_4": 2.4073277288e3,
+    "chebyshev_bias": "nonsquare residues (3,5,7) lead"
+  },
+
+  "zero_free_region": {
+    "c_parameter": 0.1,
+    "chi1_min_abs_L": 4.5751240741e-1,
+    "chi2_min_abs_L": 5.6235350579e-1,
+    "chi3_min_abs_L": 5.2497765388e-1,
+    "chi4_min_abs_L": 4.4377247922e-1,
+    "all_nonzero": true
+  },
+
+  "verdicts": {
+    "l_function_values": true,
+    "decomposition": true,
+    "zero_free_region": true,
+    "sw_error_scaling": true,
+    "all_pass": true
+  }
+}
