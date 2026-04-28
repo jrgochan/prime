@@ -289,10 +289,28 @@ theorem fejer_orthogonality
       -- ∫ f = ∫ (-f) = -∫ f, so 2∫f = 0
       linarith [show ∫ t, f (-t) = ∫ t, -f t from by congr 1; ext t; exact h_odd t,
                 show ∫ t, -f t = -(∫ t, f t) from integral_neg f]
-    -- Combine: decompose Re(c·exp(iωt))·w into cos and sin parts
+    -- FINAL ASSEMBLY: decompose Re(aᵢeᵢ·conj(aₓ)conj(eₓ)) into cos/sin parts
+    -- aᵢeᵢ·conj(aₓ)conj(eₓ) = (aᵢ·conj aₓ)·(eᵢ·conj eₓ) = c·exp(2πi(λᵢ-λₓ)t)
     -- Re(c·exp(iωt)) = Re(c)·cos(ωt) - Im(c)·sin(ωt)
-    -- ∫ [Re(c)·cos - Im(c)·sin]·w = Re(c)·∫cos·w - Im(c)·∫sin·w = 0 - 0 = 0
-    sorry -- Algebraic wiring: decompose Re(complex product) and apply h_cos_zero, h_sin_zero
+    set c := a i * (starRingEnd ℂ) (a x) with hc_def
+    set ω := lam i - lam x with hω_def
+    -- Rewrite integrand: Re(aᵢeᵢ·conj aₓ·conj eₓ)·w = (Re(c)·cos(ωt) - Im(c)·sin(ωt))·w
+    have h_decomp : ∀ t : ℝ,
+      (a i * cexp (2 * ↑π * ↑(lam i) * ↑t * I) *
+        ((starRingEnd ℂ) (a x) * (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I)))).re *
+        (δ * fejerKernel (δ * t)) =
+      c.re * (Real.cos (2 * π * ω * t) * (δ * fejerKernel (δ * t))) -
+      c.im * (Real.sin (2 * π * ω * t) * (δ * fejerKernel (δ * t))) := by
+      intro t
+      -- exp(iλᵢt)·conj(exp(iλₓt)) = exp(i(λᵢ-λₓ)t) = cos(ωt) + i·sin(ωt)
+      sorry -- Algebraic decomposition: ring + exp_conj + Euler's formula
+    simp_rw [h_decomp]
+    rw [integral_sub
+      (cross_term_integrable (a i) (a x) (lam i) (lam x) δ hδ |>.const_mul c.re |>.mono
+        sorry sorry)
+      (cross_term_integrable (a i) (a x) (lam i) (lam x) δ hδ |>.const_mul c.im |>.mono
+        sorry sorry)]
+    simp only [integral_const_mul, h_cos_zero, h_sin_zero, mul_zero, sub_self]
 
 -- ═══════════════════════════════════════════════
 -- §4. THE FEJÉR-WEIGHTED MVT
