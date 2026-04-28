@@ -3,6 +3,7 @@
 import { useViewportStore } from "../../stores/viewport";
 import { VIZ_MAP } from "../../content/visualizations";
 import { ParticleRenderer } from "./ParticleRenderer";
+import { CurveRenderer } from "./CurveRenderer";
 
 /**
  * RendererSelector — picks the appropriate 3D renderer based on
@@ -25,9 +26,7 @@ export function RendererSelector() {
       return <ParticleRenderer />;
 
     case "curves":
-      // Phase 3: CurveRenderer (THREE.Line with glow)
-      // For now, fall back to particles
-      return <ParticleRenderer />;
+      return <CurveRenderer />;
 
     case "surface":
       // Phase 4: SurfaceRenderer (THREE.Mesh with displacement)
