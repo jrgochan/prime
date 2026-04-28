@@ -153,12 +153,33 @@ private lemma cross_term_integrable
     Integrable (fun (t : ℝ) => (c₁ * cexp (2 * ↑π * ↑l₁ * ↑t * I) *
       ((starRingEnd ℂ) c₂ * (starRingEnd ℂ) (cexp (2 * ↑π * ↑l₂ * ↑t * I)))).re *
       (δ * fejerKernel (δ * t))) := by
-  -- Proof strategy: Integrable.mono with bound ‖f(t)‖ ≤ ‖c₁‖·‖c₂‖ · |δ·K(δt)|
-  -- |Re(z)| ≤ ‖z‖ (Complex.abs_re_le_norm)
-  -- ‖c₁·exp·conj(c₂)·conj(exp)‖ = ‖c₁‖·‖c₂‖ (exp unit norm)
-  -- Bounding function integrable: const_mul + FK3 (fejerKernel_integrable + COV)
-  -- Measurability: Re ∘ (continuous × continuous) * continuous = continuous → measurable
-  sorry
+  -- The integrand is f(t) * g(t) where f(t) = Re(complex), g(t) = δK(δt)
+  -- |f(t)| ≤ ‖c₁‖·‖c₂‖ since |Re(z)| ≤ ‖z‖ ≤ ‖c₁‖·‖c₂‖ (exp has unit norm)
+  -- g is integrable by FK3 + COV
+  have h_wt : Integrable (fun t => δ * fejerKernel (δ * t)) :=
+    (fejerKernel_integrable.comp_mul_left' (ne_of_gt hδ)).const_mul δ
+  apply h_wt.bdd_mul
+  · -- AEStronglyMeasurable: composition of continuous functions
+    -- Re of (c₁ * exp(iλ₁t) * conj(c₂) * conj(exp(iλ₂t))) is continuous hence measurable
+    fun_prop
+  · -- Norm bound: ‖Re(z)‖ ≤ ‖c₁‖ * ‖c₂‖
+    filter_upwards with t
+    rw [Real.norm_eq_abs]
+    calc |(c₁ * cexp (2 * ↑π * ↑l₁ * ↑t * I) *
+            ((starRingEnd ℂ) c₂ * (starRingEnd ℂ) (cexp (2 * ↑π * ↑l₂ * ↑t * I)))).re|
+        ≤ ‖c₁ * cexp (2 * ↑π * ↑l₁ * ↑t * I) *
+            ((starRingEnd ℂ) c₂ * (starRingEnd ℂ) (cexp (2 * ↑π * ↑l₂ * ↑t * I)))‖ :=
+          Complex.abs_re_le_norm _
+      _ ≤ ‖c₁‖ * ‖c₂‖ := by
+          simp only [norm_mul, map_mul, Complex.norm_conj]
+          -- Need: ‖cexp(2πl₁t·I)‖ = 1 and ‖cexp(2πl₂t·I)‖ = 1
+          have h1 : ‖cexp (2 * ↑π * ↑l₁ * ↑t * I)‖ = 1 := by
+            rw [show (2 : ℂ) * ↑π * ↑l₁ * ↑t * I = ↑(2 * π * l₁ * t) * I from by push_cast; ring]
+            exact Complex.norm_exp_ofReal_mul_I _
+          have h2 : ‖cexp (2 * ↑π * ↑l₂ * ↑t * I)‖ = 1 := by
+            rw [show (2 : ℂ) * ↑π * ↑l₂ * ↑t * I = ↑(2 * π * l₂ * t) * I from by push_cast; ring]
+            exact Complex.norm_exp_ofReal_mul_I _
+          rw [h1, h2, mul_one, mul_one]
 
 theorem fejer_orthogonality
     {N : ℕ} (a : Fin N → ℂ) (lam : Fin N → ℝ) (δ : ℝ) (hδ : 0 < δ)
@@ -302,14 +323,65 @@ theorem fejer_orthogonality
       c.re * (Real.cos (2 * π * ω * t) * (δ * fejerKernel (δ * t))) -
       c.im * (Real.sin (2 * π * ω * t) * (δ * fejerKernel (δ * t))) := by
       intro t
-      -- exp(iλᵢt)·conj(exp(iλₓt)) = exp(i(λᵢ-λₓ)t) = cos(ωt) + i·sin(ωt)
-      sorry -- Algebraic decomposition: ring + exp_conj + Euler's formula
+      -- Factor out the weight: suffices to prove the Re identity
+      suffices h_re : (a i * cexp (2 * ↑π * ↑(lam i) * ↑t * I) *
+        ((starRingEnd ℂ) (a x) * (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I)))).re =
+        c.re * Real.cos (2 * π * ω * t) - c.im * Real.sin (2 * π * ω * t) by
+        rw [h_re]; ring
+      -- Step 1: Rearrange to c * (exp(λᵢ) * conj(exp(λₓ)))
+      have h1 : a i * cexp (2 * ↑π * ↑(lam i) * ↑t * I) *
+        ((starRingEnd ℂ) (a x) * (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I))) =
+        c * (cexp (2 * ↑π * ↑(lam i) * ↑t * I) *
+          (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I))) := by
+        -- (a i * e_i) * (conj(a x) * conj(e_x)) = (a i * conj(a x)) * (e_i * conj(e_x))
+        simp only [hc_def, mul_assoc, mul_comm ((starRingEnd ℂ) (a x)), mul_left_comm]
+      rw [h1]
+      -- Step 2: conj(exp(2πiλₓt)) = exp(-2πiλₓt)
+      have h_conj : (starRingEnd ℂ) (cexp (2 * ↑π * ↑(lam x) * ↑t * I)) =
+          cexp (-(2 * ↑π * ↑(lam x) * ↑t * I)) := by
+        rw [← Complex.exp_conj]
+        congr 1
+        simp [map_mul, Complex.conj_I, Complex.conj_ofReal, map_ofNat]
+      rw [h_conj]
+      -- Step 3: exp(a) * exp(-b) = exp(a-b)
+      rw [← Complex.exp_add]
+      -- Combine exponents: 2πiλᵢt + (-2πiλₓt) = 2πiωt
+      have h_arg : 2 * ↑π * ↑(lam i) * ↑t * I + -(2 * ↑π * ↑(lam x) * ↑t * I) =
+          ↑(2 * π * ω * t) * I := by
+        push_cast [hω_def]; ring
+      rw [h_arg]
+      -- Step 4: exp(↑θ * I) = ↑(cos θ) + ↑(sin θ) * I (Euler's formula)
+      rw [Complex.exp_mul_I]
+      -- Step 5: Re(c * (↑cos + ↑sin * I)) = c.re * cos - c.im * sin
+      -- exp_mul_I gives: ↑(Real.cos θ) + ↑(Real.sin θ) * I
+      -- so Re(c * this) = c.re * cos - c.im * sin by direct complex mul
+      simp only [Complex.mul_re, Complex.add_re, Complex.add_im,
+            Complex.ofReal_re, Complex.ofReal_im,
+            Complex.mul_im, Complex.I_re, Complex.I_im, mul_zero, mul_one,
+            sub_zero, zero_mul, add_zero, zero_add,
+            ← Complex.ofReal_cos, ← Complex.ofReal_sin]
     simp_rw [h_decomp]
-    rw [integral_sub
-      (cross_term_integrable (a i) (a x) (lam i) (lam x) δ hδ |>.const_mul c.re |>.mono
-        sorry sorry)
-      (cross_term_integrable (a i) (a x) (lam i) (lam x) δ hδ |>.const_mul c.im |>.mono
-        sorry sorry)]
+    -- ∫ (c.re·cos·w - c.im·sin·w) = c.re·∫cos·w - c.im·∫sin·w = 0 - 0 = 0
+    have h_eq : ∀ t, c.re * (Real.cos (2 * π * ω * t) * (δ * fejerKernel (δ * t))) -
+        c.im * (Real.sin (2 * π * ω * t) * (δ * fejerKernel (δ * t))) =
+        (fun t => c.re * (Real.cos (2 * π * ω * t) * (δ * fejerKernel (δ * t)))) t -
+        (fun t => c.im * (Real.sin (2 * π * ω * t) * (δ * fejerKernel (δ * t)))) t := by
+      intro t; rfl
+    simp_rw [h_eq]
+    -- Integrability: bounded trig × integrable weight (Integrable.bdd_mul)
+    -- δK(δt) is integrable by FK3 + COV (proved in cross_term_integral)
+    have h_wt : Integrable (fun t => δ * fejerKernel (δ * t)) := by
+      -- FK is integrable → FK(δ·) is integrable → δ·FK(δ·) is integrable
+      exact (fejerKernel_integrable.comp_mul_left' (ne_of_gt hδ)).const_mul δ
+    have h_int_cos : Integrable (fun t => Real.cos (2 * π * ω * t) *
+        (δ * fejerKernel (δ * t))) :=
+      h_wt.bdd_mul (Real.continuous_cos.comp (continuous_const.mul continuous_id)).aestronglyMeasurable
+        (by filter_upwards; intro t; rw [Real.norm_eq_abs]; exact Real.abs_cos_le_one _)
+    have h_int_sin : Integrable (fun t => Real.sin (2 * π * ω * t) *
+        (δ * fejerKernel (δ * t))) :=
+      h_wt.bdd_mul (Real.continuous_sin.comp (continuous_const.mul continuous_id)).aestronglyMeasurable
+        (by filter_upwards; intro t; rw [Real.norm_eq_abs]; exact Real.abs_sin_le_one _)
+    rw [integral_sub (h_int_cos.const_mul _) (h_int_sin.const_mul _)]
     simp only [integral_const_mul, h_cos_zero, h_sin_zero, mul_zero, sub_self]
 
 -- ═══════════════════════════════════════════════
