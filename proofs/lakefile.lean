@@ -220,4 +220,9 @@ lean_lib «Cathedral» where
     -- Covariance Abel engine (Exploration 13)
     `Cathedral.Covariance.QuadFormIdentity,
     `Cathedral.Covariance.BilinearAbel,
+    -- Gallagher MVT and frequency separation (Exploration 13-14, ZERO SORRY)
+    `Cathedral.Analysis.GallagherMVT,
+    `Cathedral.Analysis.FrequencySeparation,
+    -- Rotors: Gallagher energy partition (Exploration 14)
+    `Cathedral.Rotors.GallagherPartition,
   ]
