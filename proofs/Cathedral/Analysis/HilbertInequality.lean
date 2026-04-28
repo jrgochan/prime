@@ -927,7 +927,7 @@ theorem fejerKernel_fourier_eq_triangle (ξ : ℝ) :
   -- Step 3: Extract Re[𝓕(K)(ξ)] = Re[Λ_ℂ(ξ)] = Λ(ξ)
   have h_re := congr_arg Complex.re h_inv
   -- Re[Λ_ℂ(ξ)] = triangleFunction ξ
-  simp only [Complex.ofReal_re] at h_re
+  simp at h_re
   -- Λ_ℂ ξ = ↑(max (1-|ξ|) 0), so re = max(1-|ξ|, 0) = triangleFunction ξ
   have h_rhs : (Λ_ℂ ξ).re = triangleFunction ξ := by
     simp [Λ_ℂ, triangleFunction, Complex.ofReal_re]
