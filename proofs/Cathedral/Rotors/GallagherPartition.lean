@@ -79,10 +79,26 @@ theorem χ₈_orthogonality (i j : Fin 4) :
     if i = j then 4 else 0 := by
   fin_cases i <;> fin_cases j <;> native_decide
 
-/-- **PROVED**: Characters are completely multiplicative on odd integers. -/
+/-- **PROVED**: Characters are completely multiplicative on odd integers.
+    χ₀: odd*odd = odd, so 1·1 = 1.
+    χ₁,₂,₃: reduce to mod 8, exhaustive 16-case check. -/
 theorem χ₈_multiplicative (i : Fin 4) (m n : ℕ) (hm : m % 2 = 1) (hn : n % 2 = 1) :
     χ₈ i (m * n) = χ₈ i m * χ₈ i n := by
-  sorry -- Decidable for mod-8 residue arithmetic
+  fin_cases i
+  · -- χ₀: odd * odd = odd
+    simp only [χ₈]
+    have hmn : (m * n) % 2 ≠ 0 := by rw [Nat.mul_mod, hm, hn]; norm_num
+    simp [hmn, show m % 2 ≠ 0 from by omega, show n % 2 ≠ 0 from by omega]
+  -- χ₁, χ₂, χ₃: mod-8 case split (16 cases each, all by norm_num)
+  all_goals {
+    simp only [χ₈]
+    have hkey := Nat.mul_mod m n 8
+    have hm8 : m % 8 = 1 ∨ m % 8 = 3 ∨ m % 8 = 5 ∨ m % 8 = 7 := by omega
+    have hn8 : n % 8 = 1 ∨ n % 8 = 3 ∨ n % 8 = 5 ∨ n % 8 = 7 := by omega
+    rcases hm8 with hm8 | hm8 | hm8 | hm8 <;>
+      rcases hn8 with hn8 | hn8 | hn8 | hn8 <;>
+      simp only [hm8, hn8, hkey] <;> norm_num
+  }
 
 -- ═══════════════════════════════════════════════
 -- §3. DISCRETE ENERGY PARTITION (PROVED)
