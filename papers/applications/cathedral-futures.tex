@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 20, 2026}
+\date{April 28, 2026 --- v14, Dual Path Architecture}
 
 \begin{document}
 
@@ -23,7 +23,14 @@ The Cathedral establishes a machine-verified equivalence between
 the Riemann Hypothesis and the decay of the Nyman--Beurling
 distance, using techniques from spectral theory, harmonic analysis,
 variational methods, and number-theoretic sieve constructions.
-While the proof itself concerns pure mathematics, the
+Since the original version of this paper (April~20, 2026), the
+Cathedral has evolved from a single proof path to a \emph{dual-path
+architecture} (v14): two independent, compiler-verified forward
+proofs---the Mellin Crown (frequency domain) and the Perron Crown
+(spatial domain)---connected by the fully proved Parseval Bridge
+(zero axioms, zero sorry). The entire v5~$\to$~v14 evolution was
+conducted through AI-assisted pair programming.
+While the proof concerns pure mathematics, the
 \emph{structures} it reveals---arithmetic Gram matrices, M\"obius
 sieve weights, spectral gaps over multiplicative lattices, and the
 Parseval Bridge between time and frequency domains---suggest
@@ -117,8 +124,9 @@ sieve.
     matrix condition number $\kappa \sim N \ln N$).
   \item Optimal weights computable via the Rayleigh--Ritz principle
     applied to the arithmetic Gram matrix.
-  \item The Parseval Bridge provides an exact relationship between
-    the spatial pattern and the frequency response.
+  \item The Parseval Bridge---now \textbf{fully proved} in Lean~4
+    with zero axioms and zero sorry---provides an exact, machine-verified
+    relationship between the spatial pattern and the frequency response.
 \end{itemize}
 
 \subsection{Feasibility}
@@ -330,6 +338,15 @@ be a major advance in aviation safety certification. Current DO-178C
 standards require extensive testing; a machine-checked proof would
 complement or replace testing for the most critical properties.
 
+\textbf{v14 update}: The Cathedral's dual-path architecture provides
+a concrete template for \emph{defense-in-depth} verification: prove
+stability via two independent mathematical frameworks (e.g., Lyapunov
+\emph{and} frequency-domain passivity), then prove their equivalence
+via a Parseval-type bridge. The AI-assisted development methodology
+demonstrated by the Cathedral suggests that such dual-path certificates
+could be produced in weeks rather than months, with AI pair programming
+assisting the formal verification engineer.
+
 % ================================================================
 \section{Prime-Gap Metamaterials}
 \label{sec:metamaterials}
@@ -516,12 +533,19 @@ methods:
 
 \subsection{Feasibility}
 
-\textbf{Medium.} The Cathedral demonstrates that 39,375 lines of
+\textbf{Medium.} The Cathedral demonstrates that 41{,}979 lines of
 nontrivial mathematics can be machine-verified in Lean~4. A simple
 1D FEM solver with formal convergence proof would be $\sim$5,000
 lines---well within current capabilities. The challenge is scaling
 to 2D/3D problems and connecting to efficient compiled linear
 algebra.
+
+\textbf{Working prototype}: The Cathedral's B\'aez-Duarte certification
+engine (Exploration~18) already demonstrates the pattern: a 512-bit
+MPFR numerical solver validates convergence to Sherman-Morrison match
+of $10^{-17}$, with results cross-checked against the formal Lean
+proof architecture. This is a concrete existence proof that
+axiom-tiered numerical verification works in practice.
 
 \textbf{Near-term milestone}: A formally verified 1D Poisson solver
 with proved $O(h^2$) convergence, producing a PDF certificate that
@@ -609,12 +633,28 @@ mathematical structures that engineers have never used---not
 because the structures are unknown, but because the connection
 between number theory and engineering has never been made explicit.
 
+The dual-path architecture (v14) adds a new dimension to this
+connection: the same engineering problem can be analyzed in two
+independent mathematical frameworks (time domain and frequency
+domain), with a machine-verified bridge proving their equivalence.
+This is not merely a mathematical curiosity---it is a template for
+\emph{defense-in-depth engineering}, where critical systems are
+verified from multiple independent perspectives.
+
+The AI collaboration methodology that produced the v5~$\to$~v14
+evolution demonstrates that these tools are not confined to
+mathematicians. An engineer working with an AI mathematical
+assistant could apply the Cathedral's organizational template
+(axiom registry, tiered assumptions, dual-path verification) to
+their own domain in weeks rather than years.
+
 These seven proposals are that connection. Some will fail. Some may
 succeed. All are grounded in real mathematics, verified by machine.
 
 \begin{quote}
 \emph{The primes are not a bridge you can walk across.\\
-They are the blueprint for bridges not yet imagined.}
+They are the blueprint for bridges not yet imagined.\\
+And now, with AI at our side, we can read the blueprint.}
 \end{quote}
 
 \vspace{0.5cm}
@@ -648,6 +688,15 @@ SIAM, 2018.
 J.R.~Gochanour, \emph{From Zeta Zeros to Engineering: What the
 Cathedral's Mathematical Physics Means for Practicing Engineers},
 2026.
+
+\bibitem{cathedral-v14}
+J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
+Architecture for the Riemann Hypothesis (v14, Dual Path
+Architecture)}, 2026.
+
+\bibitem{cathedral-dualuse}
+J.R.~Gochanour, \emph{The Dark Mirror: Dual-Use Risks of
+Number-Theoretic Engineering from the Cathedral Project}, 2026.
 
 \end{thebibliography}
 
