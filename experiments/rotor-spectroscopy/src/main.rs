@@ -106,23 +106,25 @@ fn main() {
     println!();
 
     let mut tsv_c = fs::File::create("results/energy_partition.tsv").unwrap();
-    writeln!(tsv_c, "N\ttotal\todd\teven\tE1\tE2\tE3\tE4\tpartition_sum\terror").unwrap();
+    writeln!(tsv_c, "N\ttotal\todd\teven\tE1\tE2\tE3\tE4\tpartition_sum\tf64_err\tmpfr_err").unwrap();
 
-    println!("    {DIM}     N │  total  │   odd   │  even  │  f(χ₁)  │  f(χ₂)  │  f(χ₃)  │  f(χ₄)  │ err{RESET}");
+    println!("    {DIM}     N │  total  │   odd   │  even  │  f(χ₁)  │  f(χ₂)  │  f(χ₃)  │  f(χ₄)  │ f64 err   │ 512-bit err{RESET}");
     let mut partition_results = Vec::new();
     for &n in &test_ns {
         let v = weights::bd_weights(n, &mu);
-        let b = characters::channel_breakdown(n, &v);
-        let ok = b.partition_error < 1e-12;
-        println!("    {:>5} │{:>8.2} │{:>8.2} │{:>7.2} │ {:>7.4} │ {:>7.4} │ {:>7.4} │ {:>7.4} │ {:.1e} {}",
+        let v_mp = weights::bd_weights_mpfr(n, &mu);
+        let b = characters::channel_breakdown(n, &v, &v_mp);
+        let ok = b.mpfr_partition_error < 1e-100;
+        println!("    {:>5} │{:>8.2} │{:>8.2} │{:>7.2} │ {:>7.4} │ {:>7.4} │ {:>7.4} │ {:>7.4} │ {:.1e} │ {:.1e} {}",
             n, b.total_energy, b.odd_energy, b.even_energy,
             b.channel_fraction[0], b.channel_fraction[1],
-            b.channel_fraction[2], b.channel_fraction[3], b.partition_error, check(ok));
-        writeln!(tsv_c, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            b.channel_fraction[2], b.channel_fraction[3],
+            b.partition_error, b.mpfr_partition_error, check(ok));
+        writeln!(tsv_c, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
             n, b.total_energy, b.odd_energy, b.even_energy,
             b.channel_energy[0], b.channel_energy[1],
             b.channel_energy[2], b.channel_energy[3],
-            b.partition_sum, b.partition_error).unwrap();
+            b.partition_sum, b.partition_error, b.mpfr_partition_error).unwrap();
         partition_results.push(b);
     }
     println!();
@@ -237,7 +239,7 @@ fn main() {
     println!();
 
     // ═══ CERTIFICATE ═══
-    let all_partition_ok = partition_results.iter().all(|b| b.partition_error < 1e-12);
+    let all_partition_ok = partition_results.iter().all(|b| b.mpfr_partition_error < 1e-100);
     let all_dispersion_ok = test_ns.iter().all(|&n| spectral::dispersion_relation(n).ratio >= 1.0 - 1e-10);
 
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");

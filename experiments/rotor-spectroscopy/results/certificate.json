@@ -2,7 +2,7 @@
   "experiment": "Cathedral Rotor Spectroscopy",
   "precision_bits": 512,
   "threads": 12,
-  "timestamp": "2026-04-28T03:08:18.491044+00:00",
+  "timestamp": "2026-04-28T03:12:11.961362+00:00",
   "target": "discrete_energy_partition (GallagherPartition.lean)",
   "max_N_tested": 10000,
   "sieve_validated": true,
@@ -10,5 +10,5 @@
   "partition_identity_verified": true,
   "dispersion_verified": true,
   "channel_fractions_at_max_N": [1.000000, 1.000000, 1.000000, 1.000000],
-  "elapsed_seconds": 0.681
+  "elapsed_seconds": 0.744
 }
