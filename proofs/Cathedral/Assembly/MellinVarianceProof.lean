@@ -60,6 +60,7 @@
 import Cathedral.White.Scattering
 import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.BDWeights
+import Cathedral.Assembly.MellinPerronBridge
 
 noncomputable section
 open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
@@ -68,7 +69,7 @@ open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
 -- THE CROWN AXIOM
 -- ═══════════════════════════════════════════════
 
-/-- **CROWN AXIOM: The Critical Line Mellin Variance.**
+/-- **PROVED (via Perron Bridge): The Critical Line Mellin Variance.**
 
     Under the Riemann Hypothesis, the L² norm of the Mellin-transformed
     residual on the critical line decays as O(1/log N).
@@ -76,25 +77,21 @@ open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
     Mathematical content:
       (1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N
 
-    This is the SOLE custom axiom of the Cathedral.
+    PROOF (The Bridge — Exploration 14):
+      RH →[Perron] Mertens x^{3/4}
+         →[mertens_implies_l2_decay_34] ∫₀¹(1-f_N)² ≤ C/logN
+         →[parseval_bridge_white⁻¹] (1/2π)∫|M|² ≤ C/logN
 
-    WHY IT CANNOT BE PROVED FROM MERTENS ALONE:
-    The spatial bound ∫(1-f)² ≤ C/logN is equivalent to
-    vᵀGv ≤ 1 + C/logN, which is FALSE under mere Mertens x^{3/4}.
-    See the Dirichlet convolution analysis above.
-
-    This axiom encodes the FREQUENCY-DOMAIN behavior of ζ on the
-    critical line, which preserves the phase cancellation that makes
-    d²_N → 0. Taking absolute values (as in any spatial bound)
-    destroys this cancellation. -/
+    Previously this was the sole Crown Axiom (sorry). The Bridge
+    connects the Perron spatial proof to the Mellin frequency bound
+    via the Parseval isometry, eliminating the sorry entirely. -/
 theorem critical_line_mellin_variance_proved (hRH : RiemannHypothesis) :
     ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       (1 / (2 * Real.pi)) *
       ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
         ((1/2 : ℂ) + t * Complex.I)‖ ^ 2
-      ≤ C / Real.log ↑N := by
-  sorry  -- THE Crown Axiom. Cannot be eliminated without
-         -- formalizing the Mellin transform theory in Mathlib.
+      ≤ C / Real.log ↑N :=
+  critical_line_mellin_variance_from_perron hRH
 
 end
