@@ -165,7 +165,7 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
       Physics: Measures global L² spectral energy on the critical line.
       The sorry isolates the exact boundary of Mathlib's complex analysis.
 
-    PATH B — THE WINDOWS (Spatial Domain / Perron Crown):
+    PATH B — PERRON (Spatial Domain / Perron Crown):
       `#print axioms`: [covariance_bound_from_mertens_34, pnt_mu_log_div_k,
         propext, Classical.choice, Quot.sound,
         partial_integral_tends_to_formula,
@@ -183,26 +183,26 @@ theorem nyman_beurling_equivalence_mellin :
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_mellin⟩
 
--- ──── PATH B: THE WINDOWS (Perron Crown) ────
+-- ──── PATH B: PERRON (Spatial Domain / Perron Crown) ────
 -- 0 sorry, 4 transparent named axioms
 -- `#print axioms`: [covariance_bound_from_mertens_34, pnt_mu_log_div_k,
 --   propext, Classical.choice, Quot.sound,
 --   partial_integral_tends_to_formula,
 --   rh_zeta_lower_bound_from_zero_counting]
-theorem nyman_beurling_equivalence_windows :
+theorem nyman_beurling_equivalence_spatial :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_perron⟩
 
--- ──── PRIMARY EXPORT: THE WINDOWS (sorryAx-free) ────
--- The primary theorem uses the Perron path for transparent axiom output.
+-- ──── PRIMARY EXPORT: SPATIAL PATH (sorryAx-free) ────
+-- The primary theorem uses the spatial/Perron path for transparent axiom output.
 -- Both paths prove the SAME mathematical statement independently.
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
-  nyman_beurling_equivalence_windows
+  nyman_beurling_equivalence_spatial
 
 -- ════════════════════════════════════════════════
 -- UNCONDITIONAL RESULTS
@@ -250,7 +250,7 @@ end
 --   → [propext, sorryAx, Classical.choice, Quot.sound]
 --   1 sorryAx (from critical_line_mellin_variance).
 --
--- #print axioms nyman_beurling_equivalence_perron
+-- #print axioms nyman_beurling_equivalence_spatial
 --   → SAME as nyman_beurling_equivalence (0 sorryAx, 4 axioms)
 --
 -- #print axioms distance_converges_to_zero_implies_rh
