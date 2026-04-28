@@ -231,17 +231,22 @@ theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     _ ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ) := by
         gcongr
 
-/-- Off-diagonal Gram entry growth bound.
-    |G(j,k)| ≤ C · log(max(j,k)+1) / min(j,k).
+/-- ⚠️ DEPRECATED/NUMERICALLY-UNVERIFIED — Off-diagonal Gram entry growth bound.
 
-    The log factor is necessary: the term (j-k)/(2jk)·log(k/j) in the
-    Gram entry formula grows as log(max(j,k)/min(j,k)) when j and k are
-    far apart. The bound C·(1/j+1/k) is FALSE for large k/j ratios.
+    The proposed bound |G(j,k)| ≤ C · log(max(j,k)+1) / min(j,k) is
+    plausible but unproved. The ORIGINAL bound |G(j,k)| ≤ C·(1/j + 1/k)
+    was NUMERICALLY FALSIFIED by 512-bit MPFR Rust telemetry in
+    Exploration 13 — Dedekind cotangent sums grow logarithmically.
 
-    NOTE: This lemma is NOT required for the Abel strategy. The Abel
-    approach (inner_sum_abel) handles the full sum Σ_k v_k G(j,k)
-    directly, without needing individual entry bounds. -/
-theorem gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+    This lemma is NOT required for the Crown Axiom graduation path.
+    The Abel summation approach (inner_sum_abel) handles the full sum
+    Σ_k v_k G(j,k) directly, without needing individual entry bounds.
+    The correct architecture uses MellinCrown.lean (frequency domain).
+
+    DO NOT attempt to prove the O(1/max(j,k)) version — it is FALSE.
+
+    Status: OFF-PATH. Superseded by MellinCrown + Abel summation. -/
+theorem DEPRECATED_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     |vasyuninGramEntry j k| ≤
     2 * Real.log (↑(max j k) + 1) / ↑(min j k) := by
   sorry
