@@ -66,7 +66,7 @@ def l2Residual (N : ℕ) : ℝ :=
 
 /-- **Bridge**: The partial sum of -μ(k) from 1 to M equals -M(M).
     This connects the abstract partialSum with the Mertens function. -/
-theorem partialSum_neg_moebius_eq_neg_mertens (M : ℕ) (hM : 1 ≤ M) :
+theorem partialSum_neg_moebius_eq_neg_mertens (M : ℕ) (_hM : 1 ≤ M) :
     partialSum (fun k => -(↑(moebius k) : ℝ)) 1 M =
     -(↑(mertensFunction ↑M : ℤ) : ℝ) := by
   unfold partialSum mertensFunction
@@ -83,13 +83,99 @@ theorem partialSum_neg_moebius_eq_neg_mertens (M : ℕ) (hM : 1 ≤ M) :
   · intro ⟨h1, h2⟩; exact ⟨h2, by exact_mod_cast h2, by exact_mod_cast h1⟩
   · intro ⟨h1, h2, h3⟩; exact ⟨by exact_mod_cast h3, by exact_mod_cast h1⟩
 
-/-- **POINTWISE BOUND**: For fixed x ∈ (0,1], the BD approximant satisfies:
+-- ═══════════════════════════════════════════════
+-- §2a. BOUNDING THE ABEL DIFFERENCES (moved before §2 for dependency)
+-- ═══════════════════════════════════════════════
+
+/-- **ESTIMATE (PROVED)**: The difference w(k+1,x) - w(k,x) decomposes as:
+
+    Δw(k,x) = (taper(k+1) - taper(k)) · {1/((k+1)x)}
+            + taper(k) · ({1/((k+1)x)} - {1/(kx)})
+
+    The first term has |Δtaper| ≤ 1/(k·logN) (from log(1+1/k) ≤ 1/k).
+    The second term is bounded by |taper|·|Δfract| ≤ 1·1 = 1.
+
+    Combined: |Δw| ≤ 1/(k·logN) + 1. -/
+theorem abel_diff_bound (N k : ℕ) (hk : 1 ≤ k) (hkN : k + 1 ≤ N)
+    (x : ℝ) (_hx : 0 < x) (_hx1 : x ≤ 1) :
+    |(1 - Real.log ↑(k+1) / Real.log ↑N) * Int.fract (1 / (((k+1) : ℝ) * x)) -
+     (1 - Real.log ↑k / Real.log ↑N) * Int.fract (1 / ((k : ℝ) * x))| ≤
+    1 / ((k : ℝ) * Real.log ↑N) + 1 := by
+  set a₁ := 1 - Real.log ↑(k+1) / Real.log ↑N
+  set a₀ := 1 - Real.log ↑k / Real.log ↑N
+  set b₁ := Int.fract (1 / (((k+1) : ℝ) * x))
+  set b₀ := Int.fract (1 / ((k : ℝ) * x))
+  have h_prod : a₁ * b₁ - a₀ * b₀ = (a₁ - a₀) * b₁ + a₀ * (b₁ - b₀) := by ring
+  rw [h_prod]
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hN_gt1 : (1 : ℝ) < (N : ℝ) := by exact_mod_cast show 1 < N by omega
+  have hlogN_pos : 0 < Real.log ↑N := Real.log_pos hN_gt1
+  calc |(a₁ - a₀) * b₁ + a₀ * (b₁ - b₀)|
+      ≤ |(a₁ - a₀) * b₁| + |a₀ * (b₁ - b₀)| := abs_add_le _ _
+    _ = |a₁ - a₀| * |b₁| + |a₀| * |b₁ - b₀| := by rw [abs_mul, abs_mul]
+    _ ≤ 1 / ((k : ℝ) * Real.log ↑N) + 1 := by
+        have h_da : |a₁ - a₀| ≤ 1 / ((k : ℝ) * Real.log ↑N) := by
+          show |(1 - Real.log ↑(k+1) / Real.log ↑N) -
+               (1 - Real.log ↑k / Real.log ↑N)| ≤ _
+          rw [show (1 - Real.log ↑(k+1) / Real.log ↑N) -
+                 (1 - Real.log ↑k / Real.log ↑N) =
+                 (Real.log ↑k - Real.log ↑(k+1)) / Real.log ↑N from by ring,
+              abs_div, abs_of_pos hlogN_pos]
+          have h_le : Real.log (k : ℝ) ≤ Real.log ((k+1 : ℕ) : ℝ) :=
+            Real.log_le_log hk_pos (by exact_mod_cast show k ≤ k + 1 by omega)
+          rw [abs_of_nonpos (by linarith), neg_sub]
+          have hk1_pos : (0 : ℝ) < ((k+1 : ℕ) : ℝ) := Nat.cast_pos.mpr (by omega)
+          rw [show Real.log ((k+1 : ℕ) : ℝ) - Real.log (k : ℝ) =
+              Real.log (1 + 1 / (k : ℝ)) from by
+            rw [← Real.log_div (ne_of_gt hk1_pos) (ne_of_gt hk_pos)]
+            congr 1
+            rw [show ((k+1 : ℕ) : ℝ) = (k : ℝ) + 1 from by push_cast; ring]
+            field_simp]
+          rw [show 1 / ((k : ℝ) * Real.log ↑N) =
+              (1 / (k : ℝ)) / Real.log ↑N from by field_simp]
+          exact div_le_div_of_nonneg_right
+            (by rw [Real.log_le_iff_le_exp (by positivity)]
+                linarith [Real.add_one_le_exp (1 / (k : ℝ))])
+            hlogN_pos.le
+        have h_b1 : |b₁| ≤ 1 := by
+          rw [abs_le]; exact ⟨by linarith [Int.fract_nonneg (1 / (((k+1) : ℝ) * x))],
+            by linarith [Int.fract_lt_one (1 / (((k+1) : ℝ) * x))]⟩
+        have h_a0 : |a₀| ≤ 1 := by
+          rw [abs_le]
+          have h_log_k_nn : 0 ≤ Real.log (k : ℝ) :=
+            Real.log_nonneg (by exact_mod_cast (show 1 ≤ k from hk))
+          have h_ratio_nn : 0 ≤ Real.log (k : ℝ) / Real.log ↑N :=
+            div_nonneg h_log_k_nn hlogN_pos.le
+          have h_ratio_le_one : Real.log (k : ℝ) / Real.log ↑N ≤ 1 :=
+            (div_le_one hlogN_pos).mpr (Real.log_le_log hk_pos
+              (by exact_mod_cast show k ≤ N by omega))
+          exact ⟨by linarith, by linarith⟩
+        have h_db : |b₁ - b₀| ≤ 1 := by
+          rw [abs_le]; exact
+            ⟨by linarith [Int.fract_nonneg (1 / (((k+1) : ℝ) * x)),
+                          Int.fract_lt_one (1 / ((k : ℝ) * x))],
+             by linarith [Int.fract_nonneg (1 / ((k : ℝ) * x)),
+                          Int.fract_lt_one (1 / (((k+1) : ℝ) * x))]⟩
+        have h_t1 : |a₁ - a₀| * |b₁| ≤ 1 / ((k : ℝ) * Real.log ↑N) := by
+          calc |a₁ - a₀| * |b₁|
+              ≤ (1 / ((k : ℝ) * Real.log ↑N)) * 1 :=
+                mul_le_mul h_da h_b1 (abs_nonneg _) (by positivity)
+            _ = 1 / ((k : ℝ) * Real.log ↑N) := mul_one _
+        have h_t2 : |a₀| * |b₁ - b₀| ≤ 1 := by
+          calc |a₀| * |b₁ - b₀|
+              ≤ 1 * 1 := mul_le_mul h_a0 h_db (abs_nonneg _) (by linarith)
+            _ = 1 := mul_one _
+        linarith
+
+/-- **POINTWISE BOUND (PROVED)**: For fixed x ∈ (0,1], the BD approximant satisfies:
     |f_N(x)| ≤ (1 + C_m·N^{3/4})·1 + Σ_{k=1}^{N-2} (1 + C_m·k^{3/4})·δ(k)
 
-    where δ(k) bounds |w(k+1,x) - w(k,x)|.
+    where δ(k) = 1/(k·logN) + 1 bounds |w(k+1,x) - w(k,x)| (from abel_diff_bound).
 
-    This follows from `abel_summation_abs_bound` applied to
-    a(k) = -μ(k) and f(k) = taper(k)·{1/(kx)}. -/
+    Proof: Wire `abel_summation_abs_bound` with:
+    - a(k) = -μ(k), f(k) = taper(k) · {1/(kx)}
+    - C_bound(k) from Mertens x^{3/4} via partialSum_neg_moebius_eq_neg_mertens
+    - δ(k) from abel_diff_bound -/
 theorem bdApprox_pointwise_bound (N : ℕ) (hN : 3 ≤ N) (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1)
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ y : ℝ, y ≥ 2 →
@@ -98,29 +184,110 @@ theorem bdApprox_pointwise_bound (N : ℕ) (hN : 3 ≤ N) (x : ℝ) (hx : 0 < x)
     (1 + C_m * (N : ℝ) ^ ((3:ℝ)/4)) +
     ∑ k ∈ Finset.Ico 1 (N - 1),
       (1 + C_m * (k : ℝ) ^ ((3:ℝ)/4)) *
-      (1 / ((k : ℝ) * Real.log ↑N) + 1 / (k : ℝ)) := by
-  sorry
+      (1 / ((k : ℝ) * Real.log ↑N) + 1) := by
+  -- ─── Step 1: Define a(k) and f(k) for Abel summation ───
+  set a : ℕ → ℝ := fun k => -(↑(moebius k) : ℝ)
+  set f : ℕ → ℝ := fun k =>
+    (1 - Real.log ↑k / Real.log ↑N) * Int.fract (1 / ((k : ℝ) * x))
+  -- ─── Step 2: Rewrite bdApprox as Σ a(k) * f(k) ───
+  have h_rewrite : bdApprox N x = (Finset.Icc 1 (N - 1)).sum (fun k => a k * f k) := by
+    unfold bdApprox
+    apply Finset.sum_congr rfl
+    intro k _; simp [a, f]; ring
+  rw [h_rewrite]
+  -- ─── Step 3: Define the bounds ───
+  set C_bound : ℕ → ℝ := fun k => 1 + C_m * (k : ℝ) ^ ((3:ℝ)/4)
+  set δ : ℕ → ℝ := fun k =>
+    1 / ((k : ℝ) * Real.log ↑N) + 1
+  -- ─── Step 4: Verify hypotheses for abel_summation_abs_bound ───
+  -- Hypothesis hA: |A(k)| ≤ C_bound(k) for 1 ≤ k ≤ N-1
+  have hA : ∀ k, 1 ≤ k → k ≤ N - 1 → |partialSum a 1 k| ≤ C_bound k := by
+    intro k hk1 hkN1
+    by_cases hk2 : (k : ℝ) ≥ 2
+    · -- For k ≥ 2: use partialSum = -M(k) then Mertens bound
+      rw [partialSum_neg_moebius_eq_neg_mertens k hk1, abs_neg]
+      have h := hMertens (k : ℝ) hk2
+      linarith
+    · -- For k = 1: |A(1)| = |a(1)| = |μ(1)| = 1 ≤ C_bound(1)
+      push_neg at hk2
+      have hk_eq : k = 1 := by
+        have : k < 2 := by exact_mod_cast hk2
+        omega
+      subst hk_eq
+      -- partialSum a 1 1 = (Icc 1 1).sum a = a(1) = -μ(1)
+      simp only [partialSum, Finset.Icc_self, Finset.sum_singleton, a, abs_neg]
+      -- Goal: |↑(moebius 1)| ≤ C_bound 1
+      -- μ(1) = 1 (by Mathlib), so |μ(1)| = 1
+      simp [C_bound]
+      -- Goal: 1 ≤ 1 + C_m · 1^{3/4}
+      linarith [Real.rpow_nonneg (Nat.cast_nonneg' 1) ((3:ℝ)/4)]
+  -- Hypothesis hf_mono: |f(k+1) - f(k)| ≤ δ(k) for 1 ≤ k < N-1
+  have hf_mono : ∀ k, 1 ≤ k → k < N - 1 →
+      |f (k + 1) - f k| ≤ δ k := by
+    intro k hk1 hkN1
+    -- Unfold f and δ
+    simp only [f, δ]
+    -- Goal now involves explicit taper·fract expressions
+    -- The issue: Lean writes ↑(k+1) differently from abel_diff_bound's ↑k + 1
+    have h := abel_diff_bound N k hk1 (by omega) x hx hx1
+    -- h has ↑k + 1 in some places, goal has ↑(k+1). These are equal by push_cast.
+    convert h using 3
+    all_goals (push_cast; ring)
+  -- ─── Step 5: Apply abel_summation_abs_bound ───
+  have hAbel := abel_summation_abs_bound a f 1 (N - 1) (by omega) C_bound δ hA hf_mono
+  -- hAbel : |Σ a(k)*f(k)| ≤ C_bound(N-1)*|f(N-1)| + Σ C_bound(k)*δ(k)
+  -- ─── Step 6: Bound the boundary term ───
+  -- C_bound(N-1)*|f(N-1)| ≤ (1 + C_m·N^{3/4}) * 1
+  have h_boundary : C_bound (N - 1) * |f (N - 1)| ≤
+      (1 + C_m * (N : ℝ) ^ ((3:ℝ)/4)) := by
+    -- |f(N-1)| ≤ 1 (product of taper ∈ [0,1] and fract ∈ [0,1))
+    have h_f_le : |f (N - 1)| ≤ 1 := by
+      simp only [f]
+      rw [abs_mul]
+      calc |1 - Real.log ↑(N-1) / Real.log ↑N| * |Int.fract (1 / (↑(N-1) * x))|
+          ≤ 1 * 1 := by
+            apply mul_le_mul
+            · -- |taper(N-1)| ≤ 1
+              rw [abs_le]
+              have hlogN_pos : 0 < Real.log ↑N :=
+                Real.log_pos (by exact_mod_cast show 1 < N by omega)
+              have h_log_nn : 0 ≤ Real.log (↑(N-1) : ℝ) :=
+                Real.log_nonneg (by exact_mod_cast show 1 ≤ N - 1 by omega)
+              have h_ratio_nn : 0 ≤ Real.log (↑(N-1) : ℝ) / Real.log ↑N :=
+                div_nonneg h_log_nn hlogN_pos.le
+              have h_ratio_le : Real.log (↑(N-1) : ℝ) / Real.log ↑N ≤ 1 :=
+                (div_le_one hlogN_pos).mpr (Real.log_le_log
+                  (by exact_mod_cast show 0 < N - 1 by omega)
+                  (by exact_mod_cast show N - 1 ≤ N by omega))
+              exact ⟨by linarith, by linarith⟩
+            · -- |fract| ≤ 1
+              rw [abs_le]
+              exact ⟨by linarith [Int.fract_nonneg (1 / (↑(N-1) * x))],
+                     by linarith [Int.fract_lt_one (1 / (↑(N-1) * x))]⟩
+            · exact abs_nonneg _
+            · linarith
+        _ = 1 := mul_one 1
+    -- C_bound(N-1) ≤ C_bound(N) since (N-1)^{3/4} ≤ N^{3/4}
+    calc C_bound (N - 1) * |f (N - 1)|
+        ≤ C_bound (N - 1) * 1 :=
+          mul_le_mul_of_nonneg_left h_f_le (by simp [C_bound]; positivity)
+      _ = C_bound (N - 1) := mul_one _
+      _ ≤ 1 + C_m * (N : ℝ) ^ ((3:ℝ)/4) := by
+          simp only [C_bound]
+          have : (↑(N - 1) : ℝ) ^ ((3:ℝ)/4) ≤ (↑N : ℝ) ^ ((3:ℝ)/4) :=
+            Real.rpow_le_rpow (by positivity)
+              (Nat.cast_le.mpr (Nat.sub_le N 1))
+              (by norm_num)
+          linarith [mul_le_mul_of_nonneg_left this hC.le]
+  -- ─── Step 7: Combine hAbel and h_boundary ───
+  linarith
+
 
 -- ═══════════════════════════════════════════════
--- §3. BOUNDING THE ABEL DIFFERENCES
--- ═══════════════════════════════════════════════
-
-/-- **ESTIMATE**: The difference w(k+1,x) - w(k,x) decomposes as:
-
-    Δw(k,x) = (taper(k+1) - taper(k)) · {1/((k+1)x)}
-            + taper(k) · ({1/((k+1)x)} - {1/(kx)})
-
-    The first term has |Δtaper| ≈ 1/(k·logN) (from log difference).
-    The second term involves the fractional part difference. -/
-theorem abel_diff_bound (N k : ℕ) (hk : 1 ≤ k) (hkN : k + 1 ≤ N)
-    (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1) :
-    |(1 - Real.log ↑(k+1) / Real.log ↑N) * Int.fract (1 / (((k+1) : ℝ) * x)) -
-     (1 - Real.log ↑k / Real.log ↑N) * Int.fract (1 / ((k : ℝ) * x))| ≤
-    1 / ((k : ℝ) * Real.log ↑N) + 1 / (k : ℝ) := by
-  sorry
-
--- ═══════════════════════════════════════════════
--- §4. THE L² RESIDUAL BOUND VIA ABEL
+-- §4. DEPRECATED: L² RESIDUAL VIA SPATIAL BOUND
+-- ⚠️  APPROACH IS MATHEMATICALLY FALSE (see docstrings)
+-- ⚠️  2 SORRY — both are OFF CROWN PATH
+-- ⚠️  Correct approach: MellinCrown.lean (frequency domain)
 -- ═══════════════════════════════════════════════
 
 /-- **DEPRECATED — THIS THEOREM IS FALSE** (Exploration 13, April 27, 2026)
