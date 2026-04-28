@@ -21,12 +21,12 @@ pub fn elapsed(s: f64) -> String {
     else { format!("{:.1}h", s / 3600.0) }
 }
 
-pub fn header(title: &str, subtitle: &str, threads: usize) {
+pub fn header(title: &str, subtitle: &str, prec: u32, threads: usize) {
     println!();
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}{title}{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}{subtitle}{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Threads: {threads} · f64 precision · {}{RESET}",
+    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{prec}-bit MPFR · {threads} threads · {}{RESET}",
         chrono::Local::now().format("%Y-%m-%d %H:%M:%S"));
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
     println!();

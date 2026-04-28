@@ -39,7 +39,7 @@ fn main() {
     header(
         "CATHEDRAL ROTOR SPECTROSCOPY",
         &format!("Stained Glass Rotors · mod-8 character partition · max N = {max_n}"),
-        threads,
+        weights::P, threads,
     );
 
     fs::create_dir_all("results").unwrap();
@@ -152,8 +152,10 @@ fn main() {
     println!("  {BOLD}{WHITE}═══ §E. SPECTRAL PROFILE — |D_N(1/2+it)|² per channel ═══{RESET}");
     println!();
 
+    // Compute MPFR weights for certified spectral profile
+    let v_mpfr = weights::bd_weights_mpfr(last_n, &mu);
     let t_profile: Vec<f64> = (1..=15).map(|i| i as f64 * 5.0).collect();
-    let profile = spectral::spectral_profile(&v_last, &t_profile);
+    let profile = spectral::spectral_profile_mpfr(&v_mpfr, &t_profile);
 
     let mut tsv_e = fs::File::create("results/spectral_profile.tsv").unwrap();
     writeln!(tsv_e, "t\ttotal\tch1\tch2\tch3\tch4").unwrap();
@@ -241,7 +243,7 @@ fn main() {
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}ROTOR SPECTROSCOPY — CERTIFICATE{RESET}");
     println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}f64{RESET}    Threads: {YELLOW}{threads}{RESET}    Max N: {YELLOW}{last_n}{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{threads}{RESET}    Max N: {YELLOW}{last_n}{RESET}", weights::P);
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. Sieve{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {} μ(k) validated at {} test points", check(sieve_ok), test_vals.len());
@@ -269,7 +271,7 @@ fn main() {
     // JSON certificate
     let cert = format!(r#"{{
   "experiment": "Cathedral Rotor Spectroscopy",
-  "precision": "f64",
+  "precision_bits": 512,
   "threads": {threads},
   "timestamp": "{}",
   "target": "discrete_energy_partition (GallagherPartition.lean)",
