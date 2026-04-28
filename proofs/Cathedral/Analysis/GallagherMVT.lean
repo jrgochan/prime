@@ -214,9 +214,13 @@ theorem fejer_orthogonality
         abs_inv, abs_of_pos hδ, inv_mul_cancel₀ (ne_of_gt hδ), one_smul]
       exact fejerKernel_integral
     rw [h_fk3, mul_one]
-  · -- OFF-DIAGONAL CASE (i ≠ x): ∫ Re(aᵢeᵢ * conj(aₓ)conj(eₓ)) · w = 0
-    -- |λᵢ-λₓ| ≥ δ so Λ((λᵢ-λₓ)/δ) = 0, integral vanishes
+  · -- OFF-DIAGONAL CASE (i ≠ x)
     intro i _ hix
+    -- Off-diagonal: i ≠ x, frequencies are δ-separated
+    -- Rearrange: a_i*e_i * conj(a_x)*conj(e_x) = (a_i*conj(a_x)) * (e_i*conj(e_x))
+    -- Then e_i*conj(e_x) = exp(2πi(λᵢ-λₓ)t), and for |λᵢ-λₓ| ≥ δ:
+    --   ∫ Re(c·exp(iωt))·w = Re(c)·Λ(ω/δ) - Im(c)·0 = Re(c)·0 = 0
+    -- Uses: cross_term_integral ✅, triangle_kronecker ✅, sin parity
     sorry
 
 -- ═══════════════════════════════════════════════
