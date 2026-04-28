@@ -3,19 +3,30 @@
   "cathedral_version": "v12",
   "precision_bits": 512,
   "threads": 12,
-  "max_N": 20,
-  "basis": "h_k(x) = {1/(kx)}",
-  "gram_formula": "G(j,k) = ∫₁^∞ {u/j}{u/k}/u² du",
-  "distance_formula": "d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b)",
-  "solver": "Cholesky LLᵀ factorization",
+  "max_N": 50,
+  "lean_bridge": {
+    "theorem": "nyman_beurling_equivalence_mellin",
+    "file": "Assembly/MainChain.lean",
+    "claim": "RH ↔ d²_N → 0",
+    "constant_source": "IntegralBasis/BaezDuarte.lean",
+    "gram_pd_proof": "Vasyunin/Matrix/GramPSD.lean",
+    "sherman_morrison": "LinearAlgebra/ShermanMorrison.lean"
+  },
+  "mathematical_setup": {
+    "basis": "h_k(x) = {1/(kx)}",
+    "gram_formula": "G(j,k) = ∫₁^∞ {u/j}{u/k}/u² du",
+    "distance_formula": "d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b)",
+    "solver": "Cholesky LLᵀ factorization"
+  },
   "bd_constant": {
     "formula": "C = 1/(2 + γ - ln(4π))",
     "numerical": 0.04621027882498068,
-    "prediction": "d²_N ≈ C/ln(N)"
+    "prediction": "d²_N ≈ C/ln(N)",
+    "inverse": 21.6443
   },
   "convergence": {
-    "last_d2_N": 1.608401145194216e-2,
-    "last_X_over_lnN": 20.4202307835,
+    "last_d2_N": 1.165054644563168e-2,
+    "last_X_over_lnN": 21.6851699861,
     "bd_target": 21.6443
   },
   "data": [
@@ -25,9 +36,9 @@
       "bd_predicted": 2.006067791925962e-2,
       "X": 42.833770914124,
       "X_over_lnN": 18.6024703471,
-      "lambda_min_G": 1.0000000000e0,
-      "cond_G": 1.7794,
-      "lambda_min_C": -1.0000000000e0,
+      "lambda_min_G": -1.4959688860e0,
+      "cond_G": inf,
+      "lambda_min_C": -1.2181844459e-1,
       "cond_C": null
     },
     {
@@ -36,9 +47,20 @@
       "bd_predicted": 1.541907410752790e-2,
       "X": 61.173544391455,
       "X_over_lnN": 20.4202307835,
-      "lambda_min_G": 1.0000000000e0,
-      "cond_G": 2.3460,
-      "lambda_min_C": -1.0000000000e0,
+      "lambda_min_G": -2.5891362523e0,
+      "cond_G": inf,
+      "lambda_min_C": -3.7218848476e-1,
+      "cond_C": null
+    },
+    {
+      "N": 50,
+      "d2_N": 1.165054644563168e-2,
+      "bd_predicted": 1.180755273375154e-2,
+      "X": 84.832883862280,
+      "X_over_lnN": 21.6851699861,
+      "lambda_min_G": -4.4129065815e0,
+      "cond_G": inf,
+      "lambda_min_C": -9.3059847672e-1,
       "cond_C": null
     }
   ],

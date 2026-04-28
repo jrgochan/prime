@@ -1,9 +1,15 @@
 // ═══════════════════════════════════════════════════════════════════════
 //  arithmetic.rs — Number-theoretic foundations
-//  Möbius sieve, GCD, primality
+//
+//  Lean bridge:
+//    proofs/Cathedral/NumberTheory/DirichletConvolution.lean  (μ properties)
+//    proofs/Cathedral/Covariance/GramFormProof.lean           (GCD reduction)
 // ═══════════════════════════════════════════════════════════════════════
 
 /// Linear sieve for the Möbius function μ(n), 0..=n.
+///
+/// μ(1) = 1, μ(p₁p₂...pₖ) = (-1)^k for distinct primes, μ(n) = 0 if p²|n.
+/// The Lean formalization uses this for the Perron chain and Abel tail proofs.
 pub fn mobius_sieve(n: usize) -> Vec<i32> {
     let mut mu = vec![0i32; n + 1];
     mu[1] = 1;
@@ -30,7 +36,11 @@ pub fn mobius_sieve(n: usize) -> Vec<i32> {
     mu
 }
 
-/// Greatest common divisor (binary GCD).
+/// Greatest common divisor (Euclidean algorithm).
+///
+/// Used in the Gram entry GCD reduction: G(j,k) depends on gcd(j,k)
+/// through both the period lcm(j,k) and the tail mean formula.
+/// Lean: Covariance/GramFormProof.lean uses gcd for the cotangent identity.
 pub fn gcd(a: usize, b: usize) -> usize {
     let (mut a, mut b) = (a, b);
     while b != 0 {
@@ -41,7 +51,8 @@ pub fn gcd(a: usize, b: usize) -> usize {
     a
 }
 
-/// Trial-division primality.
+/// Trial-division primality test.
+#[allow(dead_code)]
 pub fn is_prime(n: usize) -> bool {
     if n < 2 {
         return false;

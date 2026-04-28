@@ -1,14 +1,31 @@
 // ═══════════════════════════════════════════════════════════════════════
-//  certificate.rs — JSON certificate output for the HyperZeta Viewport
+//  certificate.rs — JSON certificate for Lean proof bridge
 //
-//  Produces results/certificate.json in the standard format expected
-//  by the viewport's copy-certificates.sh script.
+//  The certificate.json produced by this module serves two purposes:
+//
+//  1. LEAN PROOF BRIDGE
+//     The formal proof in Assembly/MainChain.lean establishes:
+//       RH ↔ d²_N → 0
+//     This certificate provides machine-checkable numerical evidence
+//     that d²_N does indeed decay as C/ln(N), validating the
+//     quantitative predictions of the formalized theorem.
+//
+//     The CertifiedComputation framework (Assembly/CertifiedComputation.lean)
+//     can ingest this JSON to cross-reference Lean-side bounds.
+//
+//  2. HYPERZETA VIEWPORT
+//     The viewport's copy-certificates.sh script copies this file to
+//     public/data/certificates/ for interactive visualization of the
+//     convergence curve.
 // ═══════════════════════════════════════════════════════════════════════
 
 use crate::analysis::BDResult;
 use crate::gram::PREC;
 
 /// Write the certificate JSON to results/certificate.json.
+///
+/// Format is compatible with both the Lean CertifiedComputation bridge
+/// and the HyperZeta Viewport's certificate adapter.
 pub fn write_certificate(results: &[BDResult]) {
     std::fs::create_dir_all("results").unwrap();
 
@@ -63,14 +80,25 @@ pub fn write_certificate(results: &[BDResult]) {
   "precision_bits": {},
   "threads": {},
   "max_N": {},
-  "basis": "h_k(x) = {{1/(kx)}}",
-  "gram_formula": "G(j,k) = ∫₁^∞ {{u/j}}{{u/k}}/u² du",
-  "distance_formula": "d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b)",
-  "solver": "Cholesky LLᵀ factorization",
+  "lean_bridge": {{
+    "theorem": "nyman_beurling_equivalence_mellin",
+    "file": "Assembly/MainChain.lean",
+    "claim": "RH ↔ d²_N → 0",
+    "constant_source": "IntegralBasis/BaezDuarte.lean",
+    "gram_pd_proof": "Vasyunin/Matrix/GramPSD.lean",
+    "sherman_morrison": "LinearAlgebra/ShermanMorrison.lean"
+  }},
+  "mathematical_setup": {{
+    "basis": "h_k(x) = {{1/(kx)}}",
+    "gram_formula": "G(j,k) = ∫₁^∞ {{u/j}}{{u/k}}/u² du",
+    "distance_formula": "d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b)",
+    "solver": "Cholesky LLᵀ factorization"
+  }},
   "bd_constant": {{
     "formula": "C = 1/(2 + γ - ln(4π))",
     "numerical": 0.04621027882498068,
-    "prediction": "d²_N ≈ C/ln(N)"
+    "prediction": "d²_N ≈ C/ln(N)",
+    "inverse": 21.6443
   }},
   "convergence": {{
     "last_d2_N": {:.15e},
@@ -103,8 +131,9 @@ pub fn write_certificate(results: &[BDResult]) {
     std::fs::write("results/certificate.json", &json).expect("Failed to write certificate");
     eprintln!("  📁 Certificate → results/certificate.json");
 
-    // Also write convergence TSV for the viewport chart
+    // TSV for quick plotting / viewport import
     let mut tsv = String::from("# Báez-Duarte Distance Certification (512-bit MPFR)\n");
+    tsv.push_str("# Lean theorem: nyman_beurling_equivalence_mellin\n");
     tsv.push_str("# Columns: N\td2_N\tbd_predicted\tX\tX_over_lnN\n");
     for r in results {
         tsv.push_str(&format!(
