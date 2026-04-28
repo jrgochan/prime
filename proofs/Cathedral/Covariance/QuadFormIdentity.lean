@@ -106,7 +106,7 @@ theorem quadForm_as_double_sum (N : ℕ) (hN : 3 ≤ N) :
     Σ_{k=1}^M a(k)·f(k) = A(M)·f(M) - Σ_{k=1}^{M-1} A(k)·Δf(k)
 
     where A(k) = Σ_{ℓ=1}^k (-μ(ℓ)) = -M(k). -/
-theorem inner_sum_abel (N : ℕ) (hN : 3 ≤ N) (j : ℕ) (hj : 1 ≤ j) :
+theorem inner_sum_abel (N : ℕ) (hN : 3 ≤ N) (j : ℕ) (_hj : 1 ≤ j) :
     ∑ k ∈ Finset.Icc 1 (N - 1),
       bdWeight N k * vasyuninGramEntry j k =
     partialSum (fun k => -(↑(moebius k) : ℝ)) 1 (N - 1) *

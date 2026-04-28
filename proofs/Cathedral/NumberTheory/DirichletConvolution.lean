@@ -193,7 +193,7 @@ theorem mobius_floor_sum_eq_one (n : ℕ) (hn : 1 ≤ n) :
 
     Therefore, gram_form_bound_raw is MATHEMATICALLY FALSE under x^{3/4}. -/
 theorem nyman_beurling_residual_eq_pnt_error
-    (N : ℕ) (hN : 3 ≤ N) (y : ℝ) (hy1 : 1 ≤ y) (hyN : y ≤ N) :
+    (_N : ℕ) (_hN : 3 ≤ _N) (_y : ℝ) (_hy1 : 1 ≤ _y) (_hyN : _y ≤ _N) :
     True := by  -- Placeholder: full statement requires BD weight infrastructure
   trivial
 
