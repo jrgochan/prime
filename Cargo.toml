@@ -39,9 +39,6 @@ members = [
     "experiments/rotor-spectroscopy",
     "experiments/siegel-walfisz",
     "experiments/hilbert-spectral",
-    "experiments/bc-witness-analysis",
-    "experiments/bc-zeta-lower",
-    "experiments/norm-bound-validator",
 ]
 
 [profile.release]
