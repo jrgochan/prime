@@ -3,6 +3,7 @@
 import { useViewportStore } from "../stores/viewport";
 import { VIZ_MAP } from "../content/visualizations";
 import { ChartRenderer } from "./renderers/ChartRenderer";
+import { GraphRenderer } from "./renderers/GraphRenderer";
 
 /**
  * ChartOverlay — HTML layer positioned above the R3F Canvas.
@@ -35,32 +36,8 @@ export function ChartOverlay() {
       <div className="chart-container">
         {rendererType === "chart" && <ChartRenderer />}
         {rendererType === "dual-chart" && <ChartRenderer />}
-        {rendererType === "graph" && (
-          <GraphPlaceholder label={viz.label} equation={viz.equation.main} />
-        )}
+        {rendererType === "graph" && <GraphRenderer />}
       </div>
-    </div>
-  );
-}
-
-/**
- * Placeholder for graph mode — will be replaced in Phase 5.
- */
-function GraphPlaceholder({
-  label,
-  equation,
-}: {
-  label: string;
-  equation: string;
-}) {
-  return (
-    <div className="chart-placeholder">
-      <div className="chart-placeholder-icon">🏛️</div>
-      <h2 className="chart-placeholder-title">{label}</h2>
-      <p className="chart-placeholder-equation">{equation}</p>
-      <p className="chart-placeholder-hint">
-        Interactive proof graph — Phase 5
-      </p>
     </div>
   );
 }
