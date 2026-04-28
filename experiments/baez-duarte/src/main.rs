@@ -82,7 +82,6 @@ fn run_fast_mode(args: &[String]) {
     println!("  Mode:         FAST (f64 Gram, 128-bit MPFR Cholesky)");
 
     let _mu = arithmetic::mobius_sieve(max_n + 1);
-    let ln_cache = gram_f64::precompute_ln1p_cache_f64(max_n);
 
     // Dense sampling for convergence tracking
     let mut sizes: Vec<usize> = vec![10, 20, 50, 100, 200, 300, 500];
@@ -104,17 +103,17 @@ fn run_fast_mode(args: &[String]) {
     for &n in &sizes {
         println!("\n{}", "━".repeat(74));
         println!(
-            "  N = {}  ({}×{}, f64, {} threads)",
+            "  N = {}  ({}×{}, 128-bit MPFR, {} threads)",
             n, n, n, threads
         );
         println!("{}", "━".repeat(74));
 
         let t0 = Instant::now();
 
-        let b = gram_f64::build_mean_vector_f64(n);
-        let g = gram_f64::build_gram_matrix_f64(n, &ln_cache);
-
-        let res = analysis_f64::analyze_f64(n, &g, &b);
+        // analyze_f64 now builds its own MPFR Gram matrix internally
+        let dummy_b: Vec<f64> = vec![];
+        let dummy_g: Vec<Vec<f64>> = vec![];
+        let res = analysis_f64::analyze_f64(n, &dummy_g, &dummy_b);
 
         let sm_dist = 1.0 / (1.0 + res.x_val);
         let sm_match = (res.d2_n - sm_dist).abs();

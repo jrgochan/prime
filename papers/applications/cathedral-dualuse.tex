@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 20, 2026}
+\date{April 28, 2026 --- v14, Dual Path Architecture}
 
 \begin{document}
 
@@ -23,22 +23,34 @@ The companion papers \emph{What Could Be Built} and \emph{The
 Prime Number Grid} propose engineering applications of the
 mathematical structures discovered during the Cathedral project.
 Responsible disclosure requires examining the same technologies
-from an adversarial perspective. This paper identifies five
+from an adversarial perspective. This paper identifies six
 dual-use risks: (1)~precision harmonic injection attacks on power
 grids, (2)~resonance-targeted industrial sabotage via arithmetic
 vibration analysis, (3)~adversarial use of verified instability
 certificates for cascade failure engineering, (4)~broadband stealth
-and jamming from prime-spaced antenna arrays, and (5)~covert RF
-surveillance via arithmetic energy harvesting. For each risk, we
+and jamming from prime-spaced antenna arrays, (5)~covert RF
+surveillance via arithmetic energy harvesting, and
+(6)~AI-accelerated mathematical attack planning, where large
+language models lower the expertise barrier from graduate-level
+mathematics to natural-language prompting.
+Since the original version of this paper (April~20, 2026),
+the Cathedral has evolved from a single-path, single-axiom
+architecture (v5) to a \emph{dual-path} architecture (v14) with
+two independent compiler-verified proof routes connected by the
+Parseval Bridge---a zero-axiom isometry between time and frequency
+domains. This architectural upgrade strengthens both the defensive
+and offensive implications of formal verification.
+For each risk, we
 assess the severity, the novelty (whether the attack vector is
 genuinely new), the current state of defenses, and recommended
 mitigations. We conclude that the mathematical structures in the
 Cathedral do not create fundamentally new attack capabilities, but
 could make existing attack vectors more \emph{precise} and harder
-to detect. We recommend specific defensive measures and argue that
-publishing this analysis openly is the responsible path: attackers
-already have access to these mathematical tools; defenders need to
-understand them too. This paper exists because the authors believe
+to detect. The most significant new development is the
+demonstration that AI pair programming can produce formally verified
+mathematical infrastructure---lowering the barrier to both
+defensive and offensive applications.
+This paper exists because the authors believe
 that \emph{thinking about misuse before deployment} is a moral
 obligation of anyone who builds powerful tools.
 \end{abstract}
@@ -68,9 +80,11 @@ We publish this analysis openly for three reasons:
 \begin{enumerate}
   \item \textbf{Attackers already know the math.} The M\"obius
     function, Fourier analysis, spectral theory, and variational
-    methods are textbook material. Anyone with a graduate education
-    in mathematics or engineering already has access to these tools.
-    Suppressing this paper would not deny attackers any capability.
+    methods are textbook material. Suppressing this paper would not
+    deny attackers any capability. Moreover, the emergence of AI
+    mathematical assistants means that the effective barrier to
+    applying these tools is no longer a graduate education---it is
+    the ability to describe the problem to a language model.
 
   \item \textbf{Defenders need to understand the threats.} Grid
     operators, infrastructure security teams, and turbine
@@ -83,6 +97,30 @@ We publish this analysis openly for three reasons:
     positive applications would be intellectually dishonest and
     ethically incomplete.
 \end{enumerate}
+
+\subsection{What Changed: The Dual Path Architecture}
+
+Since the initial version of this paper (April~20), the Cathedral
+has undergone a fundamental architectural transformation:
+
+\begin{itemize}
+  \item \textbf{Dual proof paths}: The crown theorem is now proved
+    via two independent routes---the Mellin Crown (frequency domain,
+    1 sorry, 0 named axioms) and the Perron Crown (spatial domain,
+    0 sorry, 4 transparent axioms)---connected by the Parseval
+    Bridge, a fully proved zero-axiom isometry.
+  \item \textbf{Axiom reduction}: 55 $\to$ 45 active axioms,
+    16 $\to$ 6 sorry placeholders (all off the critical path).
+  \item \textbf{Numerical certification}: A 512-bit MPFR engine
+    validates the B\'aez-Duarte convergence to Sherman-Morrison
+    match of $10^{-17}$.
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v14 journey
+    was conducted through human-AI pair programming, demonstrating
+    the feasibility of AI-assisted formal verification.
+\end{itemize}
+
+These changes affect the dual-use landscape. Each risk section
+below notes where the v14 architecture alters the assessment.
 
 % ================================================================
 \section{Risk 1: Precision Harmonic Injection Attacks on Power Grids}
@@ -134,7 +172,7 @@ grid could:
 \textbf{Factor} & \textbf{Assessment} \\
 \midrule
 Novelty & Low --- harmonic injection is a known attack vector \\
-Precision gain & Medium --- M\"obius optimizes the injection \\
+Precision gain & \textbf{High} --- Parseval Bridge (v14) provides \\
 Stealth gain & \textbf{High} --- attack looks like natural distortion \\
 Physical access required & Grid connection (industrial inverter) \\
 Detection difficulty & High if designed using M\"obius structure \\
@@ -157,6 +195,16 @@ Potential impact & Localized transformer/capacitor damage \\
     M\"obius-decomposed harmonic spectrum to detect injections that
     deviate from historical patterns.
 \end{enumerate}
+
+\textbf{v14 update}: The Parseval Bridge
+(\texttt{White/Scattering.lean}, proved, 0 axioms) now provides a
+\emph{machine-verified} bijection between time-domain waveforms and
+frequency-domain spectral representations. An attacker could use this
+to compute the $L^2$-optimal injection waveform for a given target
+spectrum, with verified energy conservation. However, the same bridge
+gives defenders an equally powerful detection tool: any anomalous
+frequency pattern can be immediately converted to its unique
+time-domain signature, making stealth harder, not easier.
 
 % ================================================================
 \section{Risk 2: Resonance-Targeted Industrial Sabotage}
@@ -284,6 +332,26 @@ the \textbf{verification}: a machine-checked proof that the attack
 \emph{will} succeed, removing uncertainty from the attacker's
 planning.
 
+\textbf{v14 update}: The dual-path architecture significantly amplifies
+this risk. A verified instability certificate can now be confirmed
+through \emph{two independent mathematical frameworks}: the Mellin
+Crown (frequency-domain spectral analysis) and the Perron Crown
+(spatial-domain contour integration). If both paths agree that a
+perturbation sequence causes instability, the confidence is
+qualitatively different from a single-path verification---it is
+analogous to the difference between a single witness and two
+independent witnesses in law. The Parseval Bridge proves the
+mathematical equivalence of both frameworks, meaning an instability
+certificate verified in one domain is \emph{guaranteed} to hold in
+the other.
+
+Moreover, the B\'aez-Duarte numerical certification engine (512-bit
+MPFR, Sherman-Morrison cross-validation to $10^{-17}$) provides a
+third, independent validation layer. An attacker who validates their
+instability model against the BD engine's numerical output gains
+quantitative confidence that their formal proof corresponds to
+physical reality.
+
 \subsection{Defenses}
 
 \begin{enumerate}
@@ -291,6 +359,9 @@ planning.
     find verified instabilities, the grid operator should find them
     first. Deploy the same Lean~4 framework to systematically
     identify and remediate all N-3 and N-4 vulnerabilities.
+    \textbf{Critically, require dual-path verification}: any
+    stability certificate should be verified through both the Mellin
+    and Spatial paths to achieve cryptographic-grade trust.
   \item \textbf{Protect grid models}: Limit public access to
     detailed grid topology and impedance data. Current CEII
     (Critical Energy Infrastructure Information) rules should be
@@ -301,6 +372,11 @@ planning.
   \item \textbf{Adversarial stability margins}: Design with larger
     stability margins specifically in regions where N-3/N-4
     analysis reveals verified instabilities.
+  \item \textbf{Continuous numerical monitoring}: Deploy BD-style
+    convergence monitors that continuously validate stability
+    margins against the theoretical $C/\ln(N)$ decay rate. Any
+    deviation from the predicted trajectory signals either model
+    error or active manipulation.
 \end{enumerate}
 
 % ================================================================
@@ -428,6 +504,99 @@ Potential impact & Espionage, corporate/government intelligence \\
 \end{enumerate}
 
 % ================================================================
+\section{Risk 6: AI-Accelerated Mathematical Attack Planning}
+\label{sec:ai}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+The Cathedral was built through human-AI pair programming: a human
+computer scientist directing AI assistants (Claude, Gemini) to formalize,
+debug, and verify Lean~4 proofs. This collaboration model reduced the
+development time for the v5~$\to$~v14 evolution from an estimated
+months of solo work to approximately two weeks.
+
+\subsection{The Dark Mirror}
+
+The same AI-assisted formalization methodology could be applied to
+adversarial engineering:
+
+\begin{enumerate}
+  \item \textbf{Barrier reduction}: The original version of this paper
+    (April~20) identified ``graduate education in mathematics'' as the
+    expertise barrier for applying number-theoretic tools offensively.
+    AI mathematical assistants substantially lower this barrier. An
+    attacker no longer needs to understand the M\"obius function,
+    contour integration, or spectral theory---they need to describe
+    \emph{what they want to achieve} in natural language, and the AI
+    can formalize the mathematical attack plan.
+
+  \item \textbf{Verification assistance}: The same AI tools that
+    help a human verify a stability proof can help an adversary verify
+    an instability proof. The AI does not distinguish between
+    defensive and offensive goals---it formalizes whatever the human
+    asks it to formalize.
+
+  \item \textbf{Rapid iteration}: The Cathedral's development
+    demonstrates that AI pair programming enables rapid exploration of
+    mathematical strategies. An attacker could iterate through
+    multiple attack designs in hours rather than weeks, testing each
+    against the formal verification framework until finding one that
+    produces a verified certificate.
+
+  \item \textbf{Knowledge synthesis}: AI assistants can draw on the
+    full corpus of published mathematics, engineering, and security
+    literature simultaneously. An attacker who understands grid
+    operations but not number theory---or vice versa---can use AI to
+    bridge the knowledge gap.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & \textbf{Very High} --- AI-assisted formal attack planning is new \\
+Precision gain & \textbf{High} --- AI enables mathematical optimization \\
+Stealth gain & Low --- the AI collaboration itself is not stealthy \\
+Access required & Internet access and an AI subscription \\
+Detection difficulty & N/A (planning phase, not execution) \\
+Potential impact & Force multiplier for all other risks \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Honest assessment}: This is the most important new risk
+since the paper's original publication. It is also the most
+difficult to mitigate, because the same AI capabilities that
+enable offensive planning are essential for defensive analysis.
+Any restriction on AI-assisted mathematics would harm defenders
+(who operate openly and benefit from AI assistance) more than
+attackers (who can use unrestricted models or open-source
+alternatives).
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Normalize defensive AI use}: The most effective
+    defense is to ensure that infrastructure operators adopt
+    AI-assisted formal verification \emph{before} attackers do.
+    The defender's advantage is system access and domain knowledge;
+    AI amplifies this advantage if the defender uses it first.
+  \item \textbf{AI safety alignment}: AI systems should be designed
+    to recognize and flag requests that appear to target critical
+    infrastructure, while preserving the ability to assist
+    legitimate defensive analysis. This is a difficult but
+    necessary balance.
+  \item \textbf{Institutional capacity}: Invest in training
+    infrastructure security teams to use AI-assisted formal
+    verification tools. The barrier should be lowered for
+    defenders, not raised for everyone.
+\end{enumerate}
+
+% ================================================================
 \section{Risk Assessment Summary}
 % ================================================================
 
@@ -441,9 +610,11 @@ Potential impact & Espionage, corporate/government intelligence \\
 Grid harmonic injection & Low & Medium & High & MHA defensive monitoring \\
 Vibration sabotage & Medium & High & Medium & Broadband monitoring \\
 Verified instability & \textbf{High} & \textbf{Very High} &
-  Medium & Defensive verification \\
+  Medium & Dual-path defensive verification \\
 Stealth/jamming & Low & Low & High & Existing countermeasures \\
 RF surveillance & Medium & Medium & Medium & Physical/supply chain \\
+\textbf{AI attack planning} & \textbf{Very High} & \textbf{High} &
+  \textbf{Very High} & \textbf{Normalize defensive AI use} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -479,11 +650,19 @@ is:
     and engineering.
   \item \textbf{Verification}: The machine-verified proof
     methodology could, in principle, be applied to verify attack
-    plans rather than proofs.
+    plans rather than proofs. The dual-path architecture (v14)
+    makes verified claims carry extraordinary weight: two
+    independent mathematical witnesses, connected by a proved
+    isometry, cannot both be wrong.
   \item \textbf{Precision}: The number-theoretic structure (primes,
     M\"obius function, Selberg weights) provides optimal or
     near-optimal parameters for certain engineering tasks,
     including adversarial ones.
+  \item \textbf{Accessibility}: The demonstration that AI pair
+    programming can produce formally verified mathematics lowers
+    the effective barrier from ``graduate-level expertise'' to
+    ``ability to direct an AI assistant.'' This is the most
+    significant change since the paper's original publication.
 \end{enumerate}
 
 The dual-use question is not whether to publish (the math is
@@ -498,7 +677,10 @@ the answer is yes, because:
 Defenders (grid operators, turbine manufacturers, infrastructure
 security teams) have domain knowledge, system access, and
 institutional resources. Attackers must operate covertly, with
-limited access and imperfect models. Providing defenders with a
+limited access and imperfect models. AI amplifies the defender's
+advantage more than the attacker's, because the defender can
+leverage AI with full system access while the attacker cannot.
+Providing defenders with a
 new mathematical framework strengthens them more than it
 strengthens attackers.
 
@@ -516,7 +698,9 @@ strengthens attackers.
   \item \textbf{Extend N-k contingency analysis.} Use the Cathedral's
     verified stability framework to systematically identify N-3 and
     N-4 grid vulnerabilities. Remediate them before an adversary
-    discovers them independently.
+    discovers them independently. \textbf{Require dual-path
+    verification} (Mellin + Spatial) for all critical stability
+    certificates.
 
   \item \textbf{Add sub-harmonic channels to vibration monitors.}
     Current turbine monitoring focuses on integer harmonics of the
@@ -527,6 +711,17 @@ strengthens attackers.
   \item \textbf{Classify verified instability certificates.}
     Machine-checked proofs of grid instability should be treated
     as sensitive information (CEII) and protected accordingly.
+
+  \item \textbf{Invest in AI-assisted defensive verification.}
+    Train infrastructure security teams to use AI pair programming
+    for formal verification of grid stability. The defender who
+    uses AI first gains an asymmetric advantage.
+
+  \item \textbf{Develop AI safety guidelines for infrastructure
+    mathematics.} Establish norms for how AI assistants should
+    handle requests involving critical infrastructure analysis.
+    The goal is not to restrict mathematical capability but to
+    ensure responsible use.
 
   \item \textbf{Publish this paper.} Suppressing dual-use analysis
     protects no one. The mathematical tools are public. The
@@ -546,12 +741,22 @@ multiplicative structure. The Rayleigh quotient bounds eigenvalues.
 These tools do not care whether they are used to protect a power
 grid or to attack one.
 
-What matters is who learns to use them first.
+What matters is who learns to use them first---and in the age of
+AI-assisted mathematics, ``learning'' happens faster than ever before.
+
+The dual-path architecture adds a new dimension to this neutrality.
+The proof has a gauge symmetry: the same truth can be witnessed in
+two independent mathematical frameworks, connected by the Parseval
+isometry. This makes verified claims---whether stability or
+instability certificates---carry extraordinary epistemic weight.
+A claim verified in both gauges cannot be forged, but it also
+cannot be dismissed.
 
 This paper exists to ensure that the people who protect critical
-infrastructure understand the same mathematics that could threaten
-it. We believe that open, honest analysis of dual-use risks---even
-uncomfortable analysis---is a more effective defense than silence.
+infrastructure understand the same mathematics---and the same
+AI-assisted methodology---that could threaten it. We believe that
+open, honest analysis of dual-use risks---even uncomfortable
+analysis---is a more effective defense than silence.
 
 The Cathedral was built to illuminate. This paper points the light
 at the shadows.
@@ -559,6 +764,7 @@ at the shadows.
 \begin{quote}
 \emph{A tool that can diagnose can also deceive.\\
 A proof that certifies stability can also certify its absence.\\
+An AI that helps a defender can help an attacker.\\
 The mathematics does not choose sides.\\
 We must.}
 \end{quote}
@@ -590,6 +796,15 @@ Frontiers}, 2026.
 \bibitem{cathedral-energy}
 J.R.~Gochanour, \emph{The Prime Number Grid: Energy Systems
 Applications}, 2026.
+
+\bibitem{cathedral-v14}
+J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
+Architecture for the Riemann Hypothesis (v14, Dual Path
+Architecture)}, 2026.
+
+\bibitem{cathedral-physics}
+J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
+Between the Cathedral Proof and Quantum Mechanics}, 2026.
 
 \end{thebibliography}
 

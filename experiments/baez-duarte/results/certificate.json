@@ -3,7 +3,7 @@
   "cathedral_version": "v12",
   "precision_bits": 512,
   "threads": 12,
-  "max_N": 500,
+  "max_N": 100,
   "lean_bridge": {
     "theorem": "nyman_beurling_equivalence_mellin",
     "file": "Assembly/MainChain.lean",
@@ -25,86 +25,53 @@
     "inverse": 21.6443
   },
   "convergence": {
-    "last_d2_N": 7.353787006805779e-3,
-    "last_X_over_lnN": 21.7204939046,
+    "last_d2_N": 1.002739055625279e-2,
+    "last_X_over_lnN": 21.4382614851,
     "bd_target": 21.6443
   },
   "data": [
     {
       "N": 10,
-      "d2_N": 2.281400325025673e-2,
+      "d2_N": 2.281400325025429e-2,
       "bd_predicted": 2.006067791925962e-2,
-      "X": 42.832728041219,
+      "X": 42.832728041224,
       "X_over_lnN": 18.6020174332,
-      "lambda_min_G": -1.4959696238e0,
+      "lambda_min_G": 0.0000000000e0,
       "cond_G": inf,
-      "lambda_min_C": -1.2181885894e-1,
+      "lambda_min_C": 0.0000000000e0,
       "cond_C": null
     },
     {
       "N": 20,
-      "d2_N": 1.608460655234834e-2,
+      "d2_N": 1.608460655234867e-2,
       "bd_predicted": 1.541907410752790e-2,
-      "X": 61.171244086415,
+      "X": 61.171244086414,
       "X_over_lnN": 20.4194629228,
-      "lambda_min_G": -2.5891379701e0,
+      "lambda_min_G": 0.0000000000e0,
       "cond_G": inf,
-      "lambda_min_C": -3.7218988312e-1,
+      "lambda_min_C": 0.0000000000e0,
       "cond_C": null
     },
     {
       "N": 50,
-      "d2_N": 1.165245070005738e-2,
+      "d2_N": 1.165245070006071e-2,
       "bd_predicted": 1.180755273375154e-2,
-      "X": 84.818856971871,
+      "X": 84.818856971846,
       "X_over_lnN": 21.6815844013,
-      "lambda_min_G": -4.4129101388e0,
+      "lambda_min_G": 0.0000000000e0,
       "cond_G": inf,
-      "lambda_min_C": -9.3060298357e-1,
+      "lambda_min_C": 0.0000000000e0,
       "cond_C": null
     },
     {
       "N": 100,
-      "d2_N": 1.002739055625013e-2,
+      "d2_N": 1.002739055625279e-2,
       "bd_predicted": 1.003033895962981e-2,
-      "X": 98.726842630727,
+      "X": 98.726842630701,
       "X_over_lnN": 21.4382614851,
-      "lambda_min_G": -6.0772513649e0,
+      "lambda_min_G": 0.0000000000e0,
       "cond_G": inf,
-      "lambda_min_C": -1.5452334182e0,
-      "cond_C": null
-    },
-    {
-      "N": 200,
-      "d2_N": 8.797147343316825e-3,
-      "bd_predicted": 8.718129688470641e-3,
-      "X": 112.673212573811,
-      "X_over_lnN": 21.2658481512,
-      "lambda_min_G": -7.9850922043e0,
-      "cond_G": inf,
-      "lambda_min_C": -2.3368662229e0,
-      "cond_C": null
-    },
-    {
-      "N": 300,
-      "d2_N": 7.906410311329881e-3,
-      "bd_predicted": 8.098383509098712e-3,
-      "X": 125.479648870106,
-      "X_over_lnN": 21.9993748758,
-      "lambda_min_G": -9.2134981538e0,
-      "cond_G": inf,
-      "lambda_min_C": -2.8880405760e0,
-      "cond_C": null
-    },
-    {
-      "N": 500,
-      "d2_N": 7.353787006805779e-3,
-      "bd_predicted": 7.432716142465914e-3,
-      "X": 134.984357321542,
-      "X_over_lnN": 21.7204939046,
-      "lambda_min_G": -1.0879076482e1,
-      "cond_G": inf,
-      "lambda_min_C": -3.6652698972e0,
+      "lambda_min_C": 0.0000000000e0,
       "cond_C": null
     }
   ],

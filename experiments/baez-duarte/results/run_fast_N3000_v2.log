@@ -1,0 +1,154 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: unused import: `crate::gram_f64`
+  --> experiments/baez-duarte/src/analysis_f64.rs:18:5
+   |
+18 | use crate::gram_f64;
+   |     ^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `EULER_GAMMA` is never used
+  --> experiments/baez-duarte/src/gram_f64.rs:31:7
+   |
+31 | const EULER_GAMMA: f64 = 0.5772156649015328606;
+   |       ^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `mean_entry_f64` is never used
+  --> experiments/baez-duarte/src/gram_f64.rs:34:8
+   |
+34 | pub fn mean_entry_f64(k: usize) -> f64 {
+   |        ^^^^^^^^^^^^^^
+
+warning: function `build_mean_vector_f64` is never used
+  --> experiments/baez-duarte/src/gram_f64.rs:40:8
+   |
+40 | pub fn build_mean_vector_f64(n: usize) -> Vec<f64> {
+   |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `precompute_ln1p_cache_f64` is never used
+  --> experiments/baez-duarte/src/gram_f64.rs:46:8
+   |
+46 | pub fn precompute_ln1p_cache_f64(max_n: usize) -> Vec<f64> {
+   |        ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `gram_entry_f64` is never used
+  --> experiments/baez-duarte/src/gram_f64.rs:68:8
+   |
+68 | pub fn gram_entry_f64(j: usize, k: usize, ln_cache: &[f64]) -> f64 {
+   |        ^^^^^^^^^^^^^^
+
+warning: function `build_gram_matrix_f64` is never used
+   --> experiments/baez-duarte/src/gram_f64.rs:112:8
+    |
+112 | pub fn build_gram_matrix_f64(n: usize, ln_cache: &[f64]) -> Vec<Vec<f64>> {
+    |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: `baez-duarte` (bin "baez-duarte") generated 7 warnings (run `cargo fix --bin "baez-duarte" -p baez-duarte` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.02s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/baez-duarte --fast 3000`
+
+  ╔═══════════════════════════════════════════════════════════════════════╗
+  ║  BÁEZ-DUARTE CONVERGENCE TRACKER — FAST MODE                         ║
+  ║  Cathedral Lean Proof · High-N Convergence Analysis                   ║
+  ║  f64 Gram + 128-bit MPFR solve, 12 threads                  N_max = 3000║
+  ╚═══════════════════════════════════════════════════════════════════════╝
+
+  Lean theorem: nyman_beurling_equivalence_mellin (Assembly/MainChain.lean)
+  Claim:        RH ↔ d²_N → 0  with  d²_N ≈ C/ln(N),  C ≈ 0.0462
+  Mode:         FAST (f64 Gram, 128-bit MPFR Cholesky)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 10  (10×10, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 10×10 Gram matrix (55 entries, 12 threads, 128-bit MPFR)...
+    G: [100.0%] 55/55       G: Done in 0.1s (55 entries, 12 cores, 128-bit)              
+    Gram + mean built in 0.1s
+    C = G - bbᵀ built in 0.0s
+    Cholesky solve (128-bit) in 0.0s
+
+  d²_N = 0.02281400325025,  X = 42.83272804,  X/ln(N) = 18.602017
+  SM match = 6.94e-18,  κ(G) ≈ inf
+  ⏱  N=10 completed in 0.1s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 20  (20×20, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 20×20 Gram matrix (210 entries, 12 threads, 128-bit MPFR)...
+    G: [100.0%] 210/210       G: Done in 0.2s (210 entries, 12 cores, 128-bit)              
+    Gram + mean built in 0.2s
+    C = G - bbᵀ built in 0.0s
+    Cholesky solve (128-bit) in 0.0s
+
+  d²_N = 0.01608460655235,  X = 61.17124409,  X/ln(N) = 20.419463
+  SM match = 2.08e-17,  κ(G) ≈ inf
+  ⏱  N=20 completed in 0.2s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 50  (50×50, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 50×50 Gram matrix (1275 entries, 12 threads, 128-bit MPFR)...
+    G: [ 39.2%] 500/1275       G: [ 78.4%] 1000/1275       G: [100.0%] 1275/1275       G: Done in 1.5s (1275 entries, 12 cores, 128-bit)              
+    Gram + mean built in 1.5s
+    C = G - bbᵀ built in 0.0s
+    Cholesky solve (128-bit) in 0.0s
+
+  d²_N = 0.01165245070006,  X = 84.81885697,  X/ln(N) = 21.681584
+  SM match = 2.08e-17,  κ(G) ≈ inf
+  ⏱  N=50 completed in 1.5s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 100  (100×100, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 100×100 Gram matrix (5050 entries, 12 threads, 128-bit MPFR)...
+    G: [  9.9%] 500/5050       G: [ 19.8%] 1000/5050       G: [ 29.7%] 1500/5050       G: [ 39.6%] 2000/5050       G: [ 49.5%] 2500/5050       G: [ 59.4%] 3000/5050       G: [ 69.3%] 3500/5050       G: [ 79.2%] 4000/5050       G: [ 89.1%] 4500/5050       G: [ 99.0%] 5000/5050       G: [100.0%] 5050/5050       G: Done in 16.2s (5050 entries, 12 cores, 128-bit)              
+    Gram + mean built in 16.2s
+    C = G - bbᵀ built in 0.0s
+    Cholesky solve (128-bit) in 0.0s
+
+  d²_N = 0.01002739055625,  X = 98.72684263,  X/ln(N) = 21.438261
+  SM match = 1.04e-17,  κ(G) ≈ inf
+  ⏱  N=100 completed in 16.2s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 200  (200×200, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 200×200 Gram matrix (20100 entries, 12 threads, 128-bit MPFR)...
+    G: [  2.5%] 500/20100       G: [  5.0%] 1000/20100       G: [  7.5%] 1500/20100       G: [ 10.0%] 2000/20100       G: [ 12.4%] 2500/20100       G: [ 14.9%] 3000/20100       G: [ 17.4%] 3500/20100       G: [ 19.9%] 4000/20100       G: [ 22.4%] 4500/20100       G: [ 24.9%] 5000/20100       G: [ 27.4%] 5500/20100       G: [ 29.9%] 6000/20100       G: [ 32.3%] 6500/20100       G: [ 34.8%] 7000/20100       G: [ 37.3%] 7500/20100       G: [ 39.8%] 8000/20100       G: [ 42.3%] 8500/20100       G: [ 44.8%] 9000/20100       G: [ 47.3%] 9500/20100       G: [ 49.8%] 10000/20100       G: [ 52.2%] 10500/20100       G: [ 54.7%] 11000/20100       G: [ 57.2%] 11500/20100       G: [ 59.7%] 12000/20100       G: [ 62.2%] 12500/20100       G: [ 64.7%] 13000/20100       G: [ 67.2%] 13500/20100       G: [ 69.7%] 14000/20100       G: [ 72.1%] 14500/20100       G: [ 74.6%] 15000/20100       G: [ 77.1%] 15500/20100       G: [ 79.6%] 16000/20100       G: [ 82.1%] 16500/20100       G: [ 84.6%] 17000/20100       G: [ 87.1%] 17500/20100       G: [ 89.6%] 18000/20100       G: [ 92.0%] 18500/20100       G: [ 94.5%] 19000/20100       G: [ 97.0%] 19500/20100       G: [ 99.5%] 20000/20100       G: [100.0%] 20100/20100       G: Done in 277.2s (20100 entries, 12 cores, 128-bit)              
+    Gram + mean built in 277.2s
+    C = G - bbᵀ built in 0.0s
+    Cholesky solve (128-bit) in 0.2s
+
+  d²_N = 0.00879714734332,  X = 112.67321257,  X/ln(N) = 21.265848
+  SM match = 3.47e-17,  κ(G) ≈ inf
+  ⏱  N=200 completed in 277.4s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  N = 300  (300×300, 128-bit MPFR, 12 threads)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    Building 300×300 Gram matrix (45150 entries, 12 threads, 128-bit MPFR)...
+    G: [  1.1%] 500/45150       G: [  2.2%] 1000/45150       G: [  3.3%] 1500/45150       G: [  4.4%] 2000/45150       G: [  5.5%] 2500/45150       G: [  6.6%] 3000/45150       G: [  7.8%] 3500/45150       G: [  8.9%] 4000/45150       G: [ 10.0%] 4500/45150       G: [ 11.1%] 5000/45150       G: [ 12.2%] 5500/45150       G: [ 13.3%] 6000/45150       G: [ 14.4%] 6500/45150       G: [ 15.5%] 7000/45150       G: [ 16.6%] 7500/45150       G: [ 17.7%] 8000/45150       G: [ 18.8%] 8500/45150       G: [ 19.9%] 9000/45150       G: [ 21.0%] 9500/45150       G: [ 22.1%] 10000/45150       G: [ 23.3%] 10500/45150       G: [ 24.4%] 11000/45150       G: [ 25.5%] 11500/45150       G: [ 26.6%] 12000/45150       G: [ 27.7%] 12500/45150       G: [ 28.8%] 13000/45150       G: [ 29.9%] 13500/45150       G: [ 31.0%] 14000/45150       G: [ 32.1%] 14500/45150       G: [ 33.2%] 15000/45150       G: [ 34.3%] 15500/45150       G: [ 35.4%] 16000/45150       G: [ 36.5%] 16500/45150       G: [ 37.7%] 17000/45150       G: [ 38.8%] 17500/45150       G: [ 39.9%] 18000/45150       G: [ 41.0%] 18500/45150       G: [ 42.1%] 19000/45150       G: [ 43.2%] 19500/45150       G: [ 44.3%] 20000/45150       G: [ 45.4%] 20500/45150       G: [ 46.5%] 21000/45150       G: [ 47.6%] 21500/45150       G: [ 48.7%] 22000/45150       G: [ 49.8%] 22500/45150       G: [ 50.9%] 23000/45150       G: [ 52.0%] 23500/45150       G: [ 53.2%] 24000/45150       G: [ 54.3%] 24500/45150       G: [ 55.4%] 25000/45150       G: [ 56.5%] 25500/45150       G: [ 57.6%] 26000/45150       G: [ 58.7%] 26500/45150       G: [ 59.8%] 27000/45150       G: [ 60.9%] 27500/45150       G: [ 62.0%] 28000/45150       G: [ 63.1%] 28500/45150       G: [ 64.2%] 29000/45150       G: [ 65.3%] 29500/45150       G: [ 66.4%] 30000/45150       G: [ 67.6%] 30500/45150       G: [ 68.7%] 31000/45150   
