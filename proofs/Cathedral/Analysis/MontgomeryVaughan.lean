@@ -18,6 +18,7 @@
 
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Algebra.Order.Chebyshev
 import Cathedral.MellinBridge.PlancherelDefs
 import Cathedral.MellinBridge.MertensBound
 import Cathedral.MellinBridge.BDWeights
@@ -69,19 +70,85 @@ theorem dirichlet_polynomial_mean_value_bound
     ∫ t in (-T)..T, ‖P t‖ ^ 2
     ≤ (2 * T * (↑N + 1)) * ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2 := by
   intro P
-  -- The integral is over a finite interval of a continuous bounded function.
-  -- We bound ‖P t‖² ≤ (N+1) · Σ ‖aₙ‖² pointwise, then integrate.
-  --
-  -- For this weakened bound, we use the per-N existential approach:
-  -- For fixed N, a, T, both sides are specific real numbers.
-  -- The LHS is ∫_{-T}^T ‖P t‖² dt, a finite integral of a continuous function.
-  -- We bound it by 2T · sup ‖P t‖², which is finite.
-  --
-  -- Since ‖P t‖ ≤ Σ ‖aₙ‖ (triangle inequality + |n^{-it}| = 1)
-  -- and (Σ ‖aₙ‖)² ≤ N · Σ ‖aₙ‖² (Cauchy-Schwarz), we get
-  -- ‖P t‖² ≤ N · Σ ‖aₙ‖².
-  -- Therefore ∫ ‖P‖² ≤ 2T · N · Σ ‖aₙ‖² ≤ 2T·(N+1) · Σ ‖aₙ‖².
-  sorry
+  -- N = 0 case: empty sum
+  by_cases hN : N = 0
+  · subst hN; simp [P]
+  -- Set up constants
+  set S := ∑ n ∈ Finset.Icc 1 N, ‖a n‖ ^ 2
+  set card := (Finset.Icc 1 N).card
+  -- Step 1: Pointwise bound ‖P t‖² ≤ card · S
+  have h_ptwise : ∀ t : ℝ, ‖P t‖ ^ 2 ≤ ↑card * S := by
+    intro t
+    -- ‖P t‖ ≤ Σ ‖aₙ‖ (since ‖n^{-it}‖ = 1 for n ≥ 1)
+    have h_norm_le : ‖P t‖ ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ := by
+      calc ‖P t‖ = ‖∑ n ∈ Finset.Icc 1 N, a n * (n : ℂ) ^ (-(↑t * I) : ℂ)‖ := rfl
+        _ ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n * (n : ℂ) ^ (-(↑t * I) : ℂ)‖ :=
+            norm_sum_le _ _
+        _ = ∑ n ∈ Finset.Icc 1 N, ‖a n‖ * ‖(n : ℂ) ^ (-(↑t * I) : ℂ)‖ := by
+            congr 1; ext n; exact norm_mul _ _
+        _ ≤ ∑ n ∈ Finset.Icc 1 N, ‖a n‖ * 1 := by
+            gcongr with n hn
+            -- ‖n^{-(t·I)}‖ = n^(Re(-(t·I))) = n^0 = 1
+            have h_n_pos : 0 < n := by
+              have := (Finset.mem_Icc.mp hn).1; omega
+            rw [norm_natCast_cpow_of_pos h_n_pos]
+            have h_re : (-(↑t * I) : ℂ).re = 0 := by
+              simp [Complex.neg_re, Complex.mul_re, Complex.ofReal_re,
+                    Complex.ofReal_im, Complex.I_re, Complex.I_im]
+            rw [h_re, rpow_zero]
+        _ = ∑ n ∈ Finset.Icc 1 N, ‖a n‖ := by simp
+    -- Cauchy-Schwarz: (Σ xₙ)² ≤ card · Σ xₙ² (standard)
+    calc ‖P t‖ ^ 2 ≤ (∑ n ∈ Finset.Icc 1 N, ‖a n‖) ^ 2 := by
+          exact sq_le_sq' (by linarith [norm_nonneg (P t)]) h_norm_le
+      _ ≤ ↑card * S := by
+          -- Finset C-S: (Σ xₙ)² ≤ card · Σ xₙ²
+          simp only [S, card]
+          exact sq_sum_le_card_mul_sum_sq
+  -- Step 2: card(Icc 1 N) ≤ N + 1
+  have h_card_le : (card : ℝ) ≤ ↑N + 1 := by
+    -- card(Icc 1 N) = N + 1 - 1 = N (for N ≥ 1), ≤ N + 1
+    simp only [card]
+    have h1 : (Finset.Icc 1 N).card ≤ N + 1 := by
+      calc (Finset.Icc 1 N).card ≤ (Finset.range (N + 1)).card := by
+            apply Finset.card_le_card
+            intro x hx
+            simp [Finset.mem_Icc] at hx
+            simp [Finset.mem_range]; omega
+        _ = N + 1 := Finset.card_range _
+    exact_mod_cast h1
+  -- Step 3: Strengthen pointwise bound: ‖P t‖² ≤ (N+1) · S
+  have h_S_nn : (0 : ℝ) ≤ S := Finset.sum_nonneg (fun i _ => sq_nonneg _)
+  have h_ptwise' : ∀ t : ℝ, ‖P t‖ ^ 2 ≤ (↑N + 1) * S := by
+    intro t; calc ‖P t‖ ^ 2 ≤ ↑card * S := h_ptwise t
+      _ ≤ (↑N + 1) * S := by gcongr
+  -- Step 4: Integral comparison
+  -- ∫_{-T}^T ‖P t‖² ≤ ∫_{-T}^T (N+1)·S = 2T·(N+1)·S
+  calc ∫ t in (-T)..T, ‖P t‖ ^ 2
+      ≤ ∫ t in (-T)..T, ((↑N + 1) * S) := by
+        apply intervalIntegral.integral_mono_on (by linarith)
+        · -- IntervalIntegrable: ‖P t‖² is continuous → integrable on [-T,T]
+          apply Continuous.intervalIntegrable
+          apply Continuous.pow
+          apply Continuous.norm
+          -- P t = Σ aₙ · n^{-(t·I)} is continuous in t
+          -- Each term aₙ · n^{-(t·I)} is continuous (exp of linear function)
+          apply continuous_finset_sum
+          intro n hn
+          apply Continuous.mul continuous_const
+          -- n^{-(t·I)} = cpow(n, -(t·I)) with n constant, exponent linear in t
+          -- This is continuous: exp(linear · log(const)) is smooth
+          apply Continuous.cpow continuous_const
+            (Continuous.neg (Continuous.mul Complex.continuous_ofReal continuous_const))
+          intro t
+          have h_n_pos : 1 ≤ n := (Finset.mem_Icc.mp hn).1
+          simp; positivity
+        · exact intervalIntegrable_const
+        · intro t _; exact h_ptwise' t
+    _ = ((↑N + 1) * S) * (T - (-T)) := by
+        rw [intervalIntegral.integral_const]
+        simp [smul_eq_mul]; ring
+    _ = 2 * T * (↑N + 1) * S := by ring
+    _ = (2 * T * (↑N + 1)) * S := by ring
 
 /-- **Mean Value Theorem** (Theorem). Follows directly. -/
 theorem dirichlet_polynomial_mean_value
