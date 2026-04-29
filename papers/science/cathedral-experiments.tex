@@ -117,6 +117,14 @@ computation and formal proof. It:
     \lean{Assembly/OracleAxioms.lean}.
 \end{enumerate}
 
+This architecture implements \emph{artifact-backed formal verification}:
+the heavy, heuristic computation (Rust/MPFR, floating-point eigensolvers)
+is cleanly separated from the formal logic (Lean~4), with only
+machine-readable certificates crossing the boundary. The Lean side
+consumes these as isolated oracle axioms---explicitly marked, auditable,
+and never contaminating the pure proof chain. This ensures that
+floating-point roundoff cannot propagate into the formal logic.
+
 \subsection{Three Certificate Types}
 
 \begin{enumerate}

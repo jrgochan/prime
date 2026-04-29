@@ -46,6 +46,11 @@ The Cathedral was not built by a single mind. It was built by three:
     design, and systematic codebase management.
 \end{itemize}
 
+A fourth entity---the Lean~4 compiler---served as an incorruptible
+referee, providing absolute ground truth that kept all three minds
+tethered to mathematical reality. No claim advanced without its
+approval.
+
 This paper examines how this collaboration worked, what failed,
 and what it implies for the future of mathematical research.
 
@@ -113,6 +118,15 @@ passed through the human via markdown documents (``COMM-LINKS'')
 written by Gemini and read by Claude. This created a natural
 bottleneck that was, paradoxically, beneficial: the human's act of
 reading and relaying forced comprehension and quality control.
+
+Critically, this architecture functioned as an \emph{air gap for
+hallucinations}. Because the two AI systems operated in isolated
+context windows, they could not infect each other with shared errors.
+The human acted as a \emph{semantic firewall}: only verified
+mathematical content---checked against the Lean compiler's
+output---crossed the gap. This ensured that a hallucinated lemma
+in one context window could not propagate to the other, providing
+a structural defense against correlated AI failure modes.
 
 \subsection{The Exploration Protocol}
 
