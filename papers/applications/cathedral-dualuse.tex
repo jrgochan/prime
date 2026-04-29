@@ -38,7 +38,7 @@ where high-condition-number spectral injections cause
 defender software to hallucinate.
 Since the original version of this paper (April~20, 2026),
 the Cathedral has evolved from a single-path, single-axiom
-architecture (v5) to a \emph{dual-path} architecture (v14) with
+architecture (v5) to a \emph{dual-path} architecture (v15) with
 two independent compiler-verified proof routes connected by the
 Parseval Bridge---a zero-axiom isometry between time and frequency
 domains. This architectural upgrade strengthens both the defensive
@@ -109,21 +109,21 @@ has undergone a fundamental architectural transformation:
 \begin{itemize}
   \item \textbf{Dual proof paths}: The crown theorem is now proved
     via two independent routes---the Mellin Crown (frequency domain,
-    1 sorry, 0 named axioms) and the Perron Crown (spatial domain,
+    0 sorry, 2 composite axioms) and the Perron Crown (spatial domain,
     0 sorry, 4 transparent axioms)---connected by the Parseval
     Bridge, a fully proved zero-axiom isometry.
   \item \textbf{Axiom reduction}: 55 $\to$ 45 active axioms,
-    16 $\to$ 6 sorry placeholders (all off the critical path).
+    0 sorry placeholders on the critical path.
   \item \textbf{Numerical certification}: A 512-bit MPFR engine
     validates the B\'aez-Duarte convergence to Sherman-Morrison
     match of $10^{-17}$.
-  \item \textbf{AI collaboration}: The entire v5 $\to$ v14 journey
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v15 journey
     was conducted through human-AI pair programming, demonstrating
     the feasibility of AI-assisted formal verification.
 \end{itemize}
 
 These changes affect the dual-use landscape. Each risk section
-below notes where the v14 architecture alters the assessment.
+below notes where the v15 architecture alters the assessment.
 
 % ================================================================
 \section{Risk 1: Precision Harmonic Injection Attacks on Power Grids}
@@ -175,7 +175,7 @@ grid could:
 \textbf{Factor} & \textbf{Assessment} \\
 \midrule
 Novelty & Low --- harmonic injection is a known attack vector \\
-Precision gain & \textbf{High} --- Parseval Bridge (v14) provides \\
+Precision gain & \textbf{High} --- Parseval Bridge (v15) provides \\
 Stealth gain & \textbf{High} --- attack looks like natural distortion \\
 Physical access required & Grid connection (industrial inverter) \\
 Detection difficulty & High if designed using M\"obius structure \\
@@ -199,7 +199,7 @@ Potential impact & Localized transformer/capacitor damage \\
     deviate from historical patterns.
 \end{enumerate}
 
-\textbf{v14 update}: The Parseval Bridge
+\textbf{v15 update}: The Parseval Bridge
 (\texttt{White/Scattering.lean}, proved, 0 axioms) now provides a
 \emph{machine-verified} bijection between time-domain waveforms and
 frequency-domain spectral representations. An attacker could use this
@@ -354,7 +354,7 @@ the \textbf{verification}: a machine-checked proof that the attack
 \emph{will} succeed, removing uncertainty from the attacker's
 planning.
 
-\textbf{v14 update}: The dual-path architecture significantly amplifies
+\textbf{v15 update}: The dual-path architecture significantly amplifies
 this risk. A verified instability certificate can now be confirmed
 through \emph{two independent mathematical frameworks}: the Mellin
 Crown (frequency-domain spectral analysis) and the Perron Crown
@@ -551,7 +551,7 @@ Potential impact & Espionage, corporate/government intelligence \\
 The Cathedral was built through human-AI pair programming: a human
 computer scientist directing AI assistants (Claude, Gemini) to formalize,
 debug, and verify Lean~4 proofs. This collaboration model reduced the
-development time for the v5~$\to$~v14 evolution from an estimated
+development time for the v5~$\to$~v15 evolution from an estimated
 months of solo work to approximately two weeks.
 
 \subsection{The Dark Mirror}
@@ -765,7 +765,7 @@ is:
     and engineering.
   \item \textbf{Verification}: The machine-verified proof
     methodology could, in principle, be applied to verify attack
-    plans rather than proofs. The dual-path architecture (v14)
+    plans rather than proofs. The dual-path architecture (v15)
     makes verified claims carry extraordinary weight: two
     independent mathematical witnesses, connected by a proved
     isometry, cannot both be wrong.
@@ -912,10 +912,10 @@ Frontiers}, 2026.
 J.R.~Gochanour, \emph{The Prime Number Grid: Energy Systems
 Applications}, 2026.
 
-\bibitem{cathedral-v14}
+\bibitem{cathedral-v15}
 J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
-Architecture for the Riemann Hypothesis (v14, Dual Path
-Architecture)}, 2026.
+Architecture for the Riemann Hypothesis (v15, Spectral
+Universality)}, 2026.
 
 \bibitem{cathedral-physics}
 J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
