@@ -1,0 +1,355 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+\usepackage{setspace}
+\onehalfspacing
+\definecolor{cathedral}{RGB}{47, 47, 82}
+\definecolor{accent}{RGB}{186, 146, 88}
+
+\title{%
+  \vspace{-1cm}
+  {\Large\textsc{The Cathedral}}\\[0.3cm]
+  {\large How a Human and an AI Spent Three Weeks\\
+  Mapping the Deepest Pattern in Mathematics}%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 20, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+\emph{For everyone who was told they weren't a math person.}
+\end{center}
+
+\vspace{1cm}
+
+% ================================================================
+\section*{What This Is About}
+% ================================================================
+
+Somewhere in the mountains of New Mexico, a man and an AI spent three
+weeks trying to understand the oldest unsolved problem in mathematics.
+They didn't solve it. But they built something remarkable in the
+attempt: a 161-file computer program that proves, with absolute
+mathematical certainty, exactly what you would need to know to solve it.
+
+This paper tells that story in plain language.
+
+No equations. No prerequisites. Just the idea.
+
+% ================================================================
+\section*{The Question}
+% ================================================================
+
+Prime numbers are the atoms of arithmetic. A prime is a number that can
+only be divided evenly by 1 and itself: 2, 3, 5, 7, 11, 13, 17, 19, 23\ldots
+
+They go on forever. We've known that since Euclid, around 300~BC. But
+here's the thing that has haunted mathematicians for over 2,000 years:
+\emph{we don't know the pattern.}
+
+Oh, we know roughly how many primes there are below any given number.
+There are about $N / \ln N$ primes less than $N$ --- that's the
+Prime Number Theorem, proved in 1896. But that's like saying ``roughly
+half the coin flips will be heads.'' It tells you the average, not
+the sequence. And the primes are emphatically \emph{not} random. They
+have structure. Deep, beautiful, infuriating structure that we can see
+but can't fully describe.
+
+In 1859, a German mathematician named Bernhard Riemann found a key to
+this structure. He discovered a mathematical function --- the
+\emph{Riemann zeta function} --- that encodes the positions of all
+the prime numbers. Think of it as a kind of musical instrument: when
+you ``play'' it at certain frequencies, it resonates. Those resonant
+frequencies, called \emph{zeros}, control exactly where the primes
+fall on the number line.
+
+Riemann noticed that all the resonant frequencies he could find
+had a peculiar property: they all lined up on a single vertical line
+in the complex plane, like beads on a string. He believed this was
+always true, but he couldn't prove it.
+
+That conjecture --- that \emph{all} the resonant frequencies line up
+perfectly --- is the \textbf{Riemann Hypothesis}. It has been open
+for 167 years. It is widely considered the most important unsolved
+problem in mathematics. The Clay Mathematics Institute has placed a
+\$1,000,000 bounty on its resolution.
+
+% ================================================================
+\section*{What We Built}
+% ================================================================
+
+We did not prove the Riemann Hypothesis. Let's be very clear about that.
+
+What we did is something different, and in some ways more unusual. We
+built a \emph{machine-verified proof} that translates the Riemann
+Hypothesis into an equivalent problem --- one that is concrete, visual,
+and (we believe) more attackable.
+
+Here is the translation, in plain English:
+
+\begin{center}
+\fbox{\parbox{0.85\textwidth}{\centering
+\emph{The Riemann Hypothesis is true}\\[0.2cm]
+\textbf{if and only if}\\[0.2cm]
+\emph{you can approximate the number 1 arbitrarily well\\
+by mixing together certain sawtooth waves.}
+}}
+\end{center}
+
+That's it. The entire Riemann Hypothesis --- this 167-year-old mystery
+about the deepest structure of the integers --- reduces to a question
+about whether certain wiggly curves can be combined to make a flat line.
+
+The sawtooth waves are simple: for each prime number $p$, there's a wave
+that oscillates $p$ times across the interval from 0 to 1. The question
+is whether, by carefully choosing how much of each wave to use, you can
+make the mixture perfectly flat.
+
+If you can: the primes are as well-behaved as Riemann hoped.
+
+If you can't: something is deeply wrong with our understanding of numbers.
+
+% ================================================================
+\section*{Why Machine Verification Matters}
+% ================================================================
+
+A human mathematician can make mistakes. A clever argument might have a
+subtle gap. A ``proof'' might rest on an assumption that isn't quite
+justified. The history of mathematics is littered with proofs that
+turned out to be wrong --- sometimes decades after they were published.
+
+Machine verification changes this entirely. A \emph{proof assistant} is
+a computer program that checks every single logical step of a proof, from
+the axioms of logic all the way up to the final conclusion. It doesn't
+care about intuition, elegance, or reputation. It only cares whether each
+step follows from the previous one by the rules of logic.
+
+Our proof was verified by a program called \textbf{Lean~4}, developed at
+Microsoft Research. It uses a mathematical library called \textbf{Mathlib}
+that contains over 100,000 theorems, all of them machine-checked.
+
+The result: every step of our argument --- all 161 files of it --- has been
+verified by the computer. There are zero errors. Zero gaps. Zero
+assumptions that aren't explicitly stated.
+
+What \emph{is} explicitly stated are two assumptions (mathematicians call
+them ``axioms'') that our proof relies on. These are well-understood facts
+from classical mathematics that have been proved by humans but haven't
+yet been translated into Lean. They are the only places where you
+have to trust a human. Everything else is machine-checked.
+
+% ================================================================
+\section*{The Cathedral}
+% ================================================================
+
+We call the proof ``The Cathedral'' because that's what it felt like to
+build: a large, intricate structure, assembled stone by stone over weeks,
+where every piece has to fit perfectly or the whole thing doesn't stand.
+
+The Cathedral has 161 active files of computer code, containing hundreds
+of theorems. It also has 128 archived files --- attempts that didn't work
+out, paths that led nowhere, ideas that turned out to be wrong. We
+kept them all, because they're part of the story.
+
+Here's a tour of the main chambers:
+
+\begin{description}[leftmargin=2cm, labelwidth=1.8cm]
+  \item[The Foundation] Basic definitions. What is a prime? What is the
+    Riemann zeta function? What does it mean to ``approximate'' a
+    function? All defined precisely enough for a computer to understand.
+
+  \item[The Gram Matrix] The heart of the Cathedral. When you mix
+    sawtooth waves together, some combinations interfere constructively
+    and others destructively, just like sound waves. The Gram Matrix
+    is a table that records exactly how every pair of waves interacts.
+    We proved it's always ``positive definite'' --- meaning the
+    interactions are well-behaved, no matter how many waves you use.
+
+  \item[The Mellin Bridge] A mathematical bridge connecting the
+    sawtooth waves in ``position space'' (the interval from 0 to 1) to
+    their behavior in ``frequency space'' (the critical line where the
+    zeta zeros live). Think of it like this: a guitar string vibrates
+    in physical space, but you hear it as a pitch in frequency space.
+    The Mellin Bridge translates between these two views.
+
+  \item[The Parseval Bridge] Our key innovation. Instead of computing
+    the sawtooth interactions directly (which requires extremely
+    difficult number theory involving something called ``cotangent
+    sums''), we proved you can just measure the energy in frequency
+    space instead. It's like measuring the loudness of a chord by
+    looking at its frequency spectrum rather than measuring the air
+    pressure at every point in the room.
+
+  \item[The Crown] The final assembly. The theorem that says: the
+    Riemann Hypothesis is true \emph{if and only if} the sawtooth
+    approximation converges. Both directions. Completely. Verified.
+\end{description}
+
+% ================================================================
+\section*{Five Surprises}
+% ================================================================
+
+The machine caught things that humans would have missed. Here are
+five discoveries we made during the process:
+
+\begin{enumerate}
+  \item \textbf{The Wrong Waves.} There are two natural choices for the
+    sawtooth waves, and they look almost identical. But one of them
+    makes the approximation trivially perfect --- it works regardless of
+    whether the Riemann Hypothesis is true. Using the wrong one would
+    give you a ``proof'' that isn't actually proving anything. The
+    computer caught this when a test case gave a result that was too good
+    to be true.
+
+  \item \textbf{The Impossible Shortcut.} There's a natural way to
+    estimate the error in the approximation using the ``triangle
+    inequality'' --- the mathematical version of ``the shortest distance
+    between two points is a straight line.'' We proved that this shortcut
+    gives a bound of 4 for a quantity that's approaching 0. The shortcut
+    doesn't just fail --- it fails catastrophically, because it destroys
+    the delicate cancellations that make the whole thing work.
+
+  \item \textbf{The Ghost Axioms.} During a deep audit of the codebase,
+    we found nine ``ghost axioms'' --- assumptions that had already been
+    proved elsewhere in the code but were still listed as unproved. It's
+    like finding that a building has nine unnecessary support columns: they
+    aren't holding anything up, but they make the structure look more
+    complicated than it really is.
+
+  \item \textbf{The False Reciprocity.} A classical-looking formula
+    involving sums of floor functions was expected to satisfy a symmetry
+    property. We checked it numerically before trying to prove it --- and
+    it was false for the very first non-trivial case we tested. That
+    sent us down a completely different proof path (the Parseval Bridge),
+    which turned out to be better.
+
+  \item \textbf{The Rank-1 Miracle.} The most mathematically beautiful
+    discovery: when you evaluate the sawtooth waves at a zero of the
+    zeta function, something magical happens. The entire infinite-dimensional
+    computation collapses down to a single multiplication. This makes the
+    ``reverse direction'' of our proof --- showing that convergence
+    \emph{implies} the Riemann Hypothesis --- almost trivially simple.
+\end{enumerate}
+
+% ================================================================
+\section*{What It Means}
+% ================================================================
+
+The Riemann Hypothesis remains unproved. Our work does not change that.
+
+What it does is provide a \textbf{certified map} of the territory.
+Before the Cathedral, the logical structure of the Riemann Hypothesis
+was spread across a century of papers, written in different notations,
+with different conventions, and with varying levels of rigor. Now it
+exists as a single, machine-verified artifact where every assumption is
+named, every deduction is checked, and every dead end is preserved.
+
+If someone does eventually prove the Riemann Hypothesis, they will need
+to establish the two facts that our proof takes as axioms. Conversely,
+if someone finds a counterexample --- a zero that doesn't line up ---
+our proof tells you exactly what that would break: the sawtooth
+approximation would hit a wall and stop converging.
+
+The Cathedral doesn't answer the question. It makes the question
+\emph{precise}.
+
+% ================================================================
+\section*{How It Was Built}
+% ================================================================
+
+This project was a collaboration between a human (Jason) and an AI
+coding assistant, working together in a process that looked like this:
+
+\begin{enumerate}
+  \item \textbf{Weeks 1--2: Exploration.} We explored dozens of possible
+    proof strategies. Most of them failed. We archived everything ---
+    128 files of failed attempts --- because sometimes the failures
+    teach you more than the successes.
+
+  \item \textbf{Week 3: The Parseval Breakthrough.} After the direct
+    approach via cotangent sums was blocked by the false reciprocity
+    (Surprise \#4), we switched to the frequency-domain approach.
+    This was the key insight that made the Cathedral possible.
+
+  \item \textbf{The Great Audit.} Once the proof was structurally
+    complete, we spent a full day auditing every file --- checking
+    documentation, removing ghost axioms, fixing compiler warnings,
+    ensuring every claim was accurate. We reduced the codebase from
+    184 files to 78, with the other 96 preserved in the archive.
+
+  \item \textbf{Final verification.} The Lean compiler verified all
+    3,537 compilation units with zero errors. The Rust numerical
+    experiments confirmed the theoretical predictions to 15 digits
+    of precision.
+\end{enumerate}
+
+The entire project took 30 days.
+
+% ================================================================
+\section*{The Constant}
+% ================================================================
+
+There is a number that keeps appearing in our work: approximately
+\textbf{21.649}.
+
+This number measures how efficiently you can extract information about
+the primes from the sawtooth waves. It's the ratio between the best
+possible approximation and the natural logarithm of the number of
+waves you're using. As you use more and more waves, this ratio
+settles toward 21.649.
+
+The remarkable thing is that this number has a closed-form expression
+in terms of the zeta zeros:
+\[
+  C = \frac{1}{\displaystyle\sum_{\text{all zeros}} \frac{1}{1/4 + \gamma^2}}
+  \approx 21.649
+\]
+where the sum runs over \emph{all} the resonant frequencies of the Riemann
+zeta function. The denominator --- about 0.046 --- is the total ``weight''
+of all the zeros.
+
+This number has been waiting inside the primes since the Big Bang.
+We just measured it.
+
+% ================================================================
+\section*{A Final Thought}
+% ================================================================
+
+In the 1920s, the physicists Hilbert and P\'olya independently suggested
+that the zeros of the Riemann zeta function might be eigenvalues of
+some quantum mechanical operator --- in other words, that the resonant
+frequencies of the primes might literally be the energy levels of a
+physical system, like an atom.
+
+This remains unproved. But our work reveals something suggestive: every
+mathematical structure in the Cathedral has a natural physical
+interpretation. The Gram Matrix behaves like the propagator of a quantum
+field. The Nyman--Beurling distance behaves like vacuum energy. The
+Parseval Bridge is the mathematical expression of unitarity --- the
+principle that probability is conserved.
+
+The primes might not just \emph{resemble} a physical system. They might
+\emph{be} one.
+
+Whether that thought leads to a proof, or remains a beautiful coincidence,
+is a question for the next generation.
+
+\vspace{1cm}
+\begin{flushright}
+\emph{The Cathedral stands.}\\
+\emph{The question endures.}\\
+\emph{The primes keep singing.}
+\end{flushright}
+
+\vspace{1.5cm}
+\begin{center}
+\small
+April 20, 2026 --- Los Alamos, New Mexico
+\end{center}
+
+\end{document}

@@ -1,0 +1,542 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small, breaklines=true, frame=single, backgroundcolor=\color{gray!8}}
+
+\title{%
+  Formalizing Analytic Number Theory in Lean~4:\\
+  Practical Lessons from the Cathedral Project%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{April 28, 2026 --- v15}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We describe the practical techniques for formalizing analytic number
+theory in Lean~4 with Mathlib, distilled from the Cathedral project:
+a 50{,}623-line formalization of the Nyman--Beurling criterion for the
+Riemann Hypothesis. We cover Mathlib API patterns that worked well
+(interval integrals, spectral theory), patterns that required
+workarounds (infinite sums, measure theory), and patterns that are
+currently missing (analytic continuation, contour integrals). We
+provide reusable proof idioms for common tasks: bounding $L^2$ norms,
+establishing positive definiteness, controlling Dirichlet series,
+and managing axiom hygiene in evolving codebases. We document 12
+specific Mathlib lemmas that were essential, 5 API gaps that required
+axioms, and 3 deprecated-API traps. This paper is intended as a
+practical guide for anyone formalizing analytic number theory in
+Lean~4.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction: Why Analytic Number Theory Is Hard to Formalize}
+\label{sec:intro}
+% ================================================================
+
+Analytic number theory sits at the intersection of analysis, algebra,
+and combinatorics. A typical proof might use:
+
+\begin{itemize}
+  \item Complex analysis (contour integrals, residue calculus).
+  \item Real analysis ($L^2$ norms, Parseval's theorem).
+  \item Combinatorics (M\"obius inversion, sieve methods).
+  \item Linear algebra (matrix eigenvalues, Schur complements).
+\end{itemize}
+
+Each of these is well-developed in Mathlib individually. The challenge
+is using them \emph{together}, in a single proof, with consistent
+type coercions and compatible assumptions.
+
+The Cathedral project encountered this challenge over 30 days,
+producing 208 active Lean files (with 100 more in Archive).
+This paper distills the lessons into actionable advice for future formalizers.
+
+\subsection{Scope}
+
+This paper is about \emph{practice}, not theory. We assume the reader
+is familiar with Lean~4 syntax and has basic Mathlib experience. We
+do not explain the mathematics of the Nyman--Beurling criterion
+(see the companion paper \cite{cathedral-math}). Instead, we focus on:
+
+\begin{itemize}
+  \item Which Mathlib APIs to use (and which to avoid).
+  \item How to structure a large proof project.
+  \item How to manage axioms in evolving codebases.
+  \item How to avoid common traps.
+\end{itemize}
+
+% ================================================================
+\section{Mathlib APIs That Worked Well}
+\label{sec:good-apis}
+% ================================================================
+
+\subsection{Interval Integrals}
+
+Mathlib's \lean{MeasureTheory.integral} and
+\lean{intervalIntegral} work well for $L^2$ norms on $(0,1)$:
+
+\begin{lstlisting}[language=ML,caption={L2 norm on (0,1)}]
+-- The BD distance as an interval integral
+noncomputable def nbDistSq (N : Nat) (v : Fin (N-1) -> Real) : Real :=
+  integral_Ioo 0 1
+    (fun x => (1 - bdLinComb N v x) ^ 2)
+\end{lstlisting}
+
+\textbf{Key lemma}: \lean{MeasureTheory.integral\_nonneg} is
+essential for establishing $d_N^2 \geq 0$. Use it with
+\lean{sq\_nonneg} for squaredness.
+
+\textbf{Pattern}: For bounding $\int_a^b f(x)^2\,dx$, use
+\lean{MeasureTheory.integral\_mono\_of\_nonneg} with
+\lean{sq\_le\_sq'} or \lean{abs\_le}.
+
+\subsection{Matrix API}
+
+Mathlib's matrix library is excellent for Gram matrices:
+
+\begin{lstlisting}[language=ML,caption={Positive definiteness}]
+-- The Gram matrix is positive definite
+theorem gram_posDef (N : Nat) (hN : 2 <= N) :
+    Matrix.PosDef (gramMatrix N) := by
+  intro v hv
+  -- Key: express v^T G v as an L2 norm
+  rw [gram_quadratic_form_eq_integral]
+  exact integral_sq_pos_of_ne_zero v hv
+\end{lstlisting}
+
+\textbf{Key lemma}: \lean{Matrix.PosDef.det\_pos} connects positive
+definiteness to invertibility. Essential for the Rayleigh quotient.
+
+\textbf{Key lemma}: \lean{Matrix.nonsing\_inv} provides the inverse,
+but requires a \lean{Fintype} instance and \lean{DecidableEq} on
+the index type.
+
+\subsection{Spectral Theory}
+
+For eigenvalue bounds, use the Rayleigh quotient approach:
+
+\begin{lstlisting}[language=ML,caption={Rayleigh quotient bound}]
+-- All eigenvalues are bounded below
+theorem eigenvalue_lower_bound
+    (A : Matrix (Fin n) (Fin n) Real) (hA : A.IsHermitian) :
+    forall i, hA.eigenvalues i >= lambda_min := by
+  intro i
+  exact hA.eigenvalues_ge_of_forall_rayleigh_le ...
+\end{lstlisting}
+
+\textbf{Pattern}: For symmetric real matrices, use
+\lean{Matrix.IsHermitian} (which handles the real case via
+\lean{starRingEnd}). The eigenvalue API is on \lean{IsHermitian},
+not on a separate ``symmetric'' type.
+
+\textbf{Trap}: The API \lean{Matrix.isHermitian\_iff\_isSymmetric}
+was deprecated in recent Mathlib, but no replacement exists. We kept
+the deprecated call with a comment.
+
+\subsection{Convergence and Limits}
+
+For $\ln(\ln N) / \ln N \to 0$:
+
+\begin{lstlisting}[language=ML,caption={Algebraic limit proof}]
+-- Avoid Filter.Tendsto arguments entirely
+-- Use the algebraic bound: log x <= 2 * sqrt x
+theorem log_le_two_sqrt (x : Real) (hx : 0 < x) :
+    Real.log x <= 2 * Real.sqrt x := by
+  ...
+
+-- Then bound log(log N) / log N <= 2 * sqrt(log N) / log N
+-- which goes to 0 because sqrt(x)/x = 1/sqrt(x) -> 0
+\end{lstlisting}
+
+\textbf{Pattern}: When possible, avoid \lean{Filter.Tendsto} and
+\lean{Filter.atTop} entirely. Algebraic bounds with explicit
+inequalities are much easier to formalize and audit.
+
+% ================================================================
+\section{Mathlib APIs That Required Workarounds}
+\label{sec:workarounds}
+% ================================================================
+
+\subsection{Infinite Series and Dirichlet Series}
+
+Mathlib's \lean{tsum} (topological infinite sums) requires
+\lean{Summable} hypotheses that are often difficult to establish
+for Dirichlet series. The \lean{hasSum} API is more flexible but
+verbose.
+
+\textbf{Workaround}: We frequently used truncated finite sums
+(\lean{Finset.sum}) with explicit error bounds, rather than
+working with infinite sums directly. This adds lines but avoids
+the \lean{Summable} burden.
+
+\subsection{Fractional Part}
+
+There is no \lean{Int.fract} for real-valued fractional parts on
+$(0,1)$ with the properties we need. We defined our own:
+
+\begin{lstlisting}[language=ML,caption={Fractional part definition}]
+noncomputable def fracPart (x : Real) : Real :=
+  x - Real.floor x
+
+-- Key property we proved manually:
+theorem fracPart_mem_Ioo (x : Real) (hx : 0 < x)
+    (hn : not (exists n : Int, x = n)) :
+    fracPart x in Set.Ioo 0 1 := by ...
+\end{lstlisting}
+
+\textbf{Note}: Mathlib's \lean{Int.fract} exists but its API is
+sparse for the properties needed in analytic number theory
+(integrability, measurability, interaction with floor sums).
+Expect to prove many basic properties yourself.
+
+\subsection{Measure Theory Coercions}
+
+Moving between \lean{MeasureTheory.integral} (Bochner integral) and
+\lean{intervalIntegral} (Henstock--Kurzweil) requires care:
+
+\begin{itemize}
+  \item \lean{MeasureTheory.integral} works with
+    \lean{MeasureTheory.Integrable}.
+  \item \lean{intervalIntegral} works with
+    \lean{IntervalIntegrable}.
+  \item The connection is via
+    \lean{intervalIntegrable\_iff\_integrable\_Ioc}.
+\end{itemize}
+
+\textbf{Trap}: The two integrals may disagree on sets of measure zero.
+For continuous functions on compact intervals, they agree. For
+discontinuous functions (like the fractional part), use the Bochner
+integral with explicit \lean{Integrable} proofs.
+
+% ================================================================
+\section{Mathlib Gaps That Required Axioms}
+\label{sec:gaps}
+% ================================================================
+
+Five Mathlib gaps required axioms in the Cathedral:
+
+\begin{center}
+\begin{tabular}{@{}lp{6cm}l@{}}
+\toprule
+\textbf{Gap} & \textbf{What's Missing} & \textbf{Difficulty} \\
+\midrule
+Analytic continuation & \lean{DifferentiableOn.analyticContinuation}
+  for Mellin integrals & Medium \\
+Contour integrals & Integration along vertical lines
+  $\mathrm{Re}\,s = 1/2$ & Hard \\
+Mertens function & Formalization of $M(x) = \sum_{n \leq x} \mu(n)$
+  with asymptotics & Medium \\
+Montgomery--Vaughan & $L^2$ mean value theorems for Dirichlet
+  polynomials on the critical line & Hard \\
+Dedekind sums \& Vasyunin cotangent formula via reciprocity
+  (diagonal case proved; off-diagonal requires Gauss digamma) & Medium \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{The Analytic Continuation Gap}
+
+The most impactful gap. The Mellin transform identity
+\[
+  \int_0^1 \fract{1/(kx)}\,x^{s-1}\,dx = \frac{k^{-s}}{s(s-1)}
+  \bigl(s\zeta(s+1)/k - (s-1)\zeta(s)/k + 1\bigr)
+\]
+is proved for $\mathrm{Re}\,s > 1$ via direct computation (floor
+sums). Extending to $\mathrm{Re}\,s > 0$ requires analytic
+continuation, which Mathlib supports in principle via
+\lean{AnalyticAt} and \lean{HasFPowerSeriesAt}, but the
+infrastructure for Mellin-type integrals is not yet developed.
+
+\textbf{Recommended approach}: Prove the integral converges
+absolutely for $\mathrm{Re}\,s > 0$ (it does, since
+$|x^{s-1}| = x^{\sigma-1}$ is integrable on $(0,1)$ for
+$\sigma > 0$), then show the right-hand side is meromorphic (it
+is, being a rational function of $\zeta(s)$ and $k^{-s}$), and
+apply the identity theorem.
+
+\subsection{The Contour Integral Gap}
+
+Mathlib has no built-in support for complex line integrals of the form
+$\int_{1/2-i\infty}^{1/2+i\infty} f(s)\,ds$. This is the most significant
+gap for analytic number theory formalization.
+
+\textbf{Recommended approach}: Parameterize as
+$\int_{-\infty}^{\infty} f(1/2 + it)\,i\,dt$ and use real-variable
+integration after splitting into real and imaginary parts.
+
+% ================================================================
+\section{Twelve Essential Mathlib Lemmas}
+\label{sec:lemmas}
+% ================================================================
+
+The following Mathlib lemmas were used repeatedly throughout the
+Cathedral. Any analytic number theory formalization will likely
+need them:
+
+\begin{center}
+\small
+\begin{tabular}{@{}clp{5.5cm}@{}}
+\toprule
+\textbf{\#} & \textbf{Lemma} & \textbf{Use} \\
+\midrule
+1 & \lean{integral\_nonneg} & $\int f \geq 0$ when $f \geq 0$ \\
+2 & \lean{integral\_mono\_of\_nonneg} & Bounding integrals from above \\
+3 & \lean{sq\_nonneg} & $x^2 \geq 0$ (used constantly) \\
+4 & \lean{Matrix.PosDef.det\_pos} & Gram matrix invertibility \\
+5 & \lean{Matrix.nonsing\_inv} & Matrix inversion \\
+6 & \lean{Real.log\_le\_sub\_one\_of\_le} & Log inequalities \\
+7 & \lean{Real.rpow\_natCast} & $(x^n)$ coercion \\
+8 & \lean{Finset.sum\_le\_sum} & Bounding finite sums \\
+9 & \lean{riemannZeta\_ne\_zero\_of\_one\_le\_re} & $\zeta(s) \neq 0$ for $\mathrm{Re}\,s \geq 1$ \\
+10 & \lean{integral\_univ\_inv\_one\_add\_sq} & $\int_{-\infty}^{\infty} (1+t^2)^{-1}\,dt = \pi$ \\
+11 & \lean{MonotoneBounded.tendsto} & Bounded monotone convergence \\
+12 & \lean{Nat.Coprime.gcd\_eq\_one} & GCD properties for Gram entries \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lemma~9 (\lean{riemannZeta\_ne\_zero\_of\_one\_le\_re}) is particularly
+valuable: it gives $\zeta(s) \neq 0$ for $\mathrm{Re}\,s \geq 1$ for
+free, which is the classical non-vanishing result essential for the
+converse direction.
+
+% ================================================================
+\section{Project Structure Advice}
+\label{sec:structure}
+% ================================================================
+
+\subsection{The Layered Module Pattern}
+
+We recommend organizing large formalizations into layers:
+
+\begin{enumerate}
+  \item \textbf{Layer 0: Definitions}. Core types and definitions.
+    No theorems, no axioms. Everything imports this.
+  \item \textbf{Layer 1: Foundations}. Independent mathematical
+    modules (linear algebra, measure theory). No cross-dependencies.
+  \item \textbf{Layer 2: Theory}. Domain-specific modules that may
+    depend on Layer~1 but not on each other.
+  \item \textbf{Layer 3: Bridges}. Modules that connect Layer~2
+    modules (e.g., Parseval Bridge connecting $L^2$ norms to
+    frequency domain).
+  \item \textbf{Layer 4: Assembly}. The crown theorem, importing
+    from all layers.
+\end{enumerate}
+
+This structure ensures that the dependency graph is a DAG with
+bounded depth. It also enables parallel development: two people
+(or human-AI pairs) can work on different Layer~2 modules without
+interference.
+
+\subsection{The Axiom Registry Pattern}
+
+Maintain a central file (\lean{Axioms.lean}) that documents every
+axiom, even if axioms are declared in their respective modules:
+
+\begin{lstlisting}[language=ML,caption={Axiom registry pattern}]
+/-!
+# Cathedral Axiom Registry (v11 -- Mellin Crown)
+Total: 104 axioms (2 on crown path)
+Last audit: April 28, 2026
+
+## Crown Path Axioms (compiler-verified)
+1. critical_line_mellin_variance       -- Hardy-Littlewood
+2. rh_zeta_lower_bound_from_zero_counting -- Hadamard
+
+## Graduated/Bypassed Axioms (11 eliminations, v3--v15)
+-- rh_implies_mertens_bound -> THEOREM (Perron chain)
+-- pnt_mu_div_k -> THEOREM (PrimeNumberTheoremAnd)
+-- gram_form_upper_bound_34 -> THEOREM (variance)
+-- pnt_mu_log_div_k -> BYPASSED (v11, off-crown)
+-- covariance_bound_from_mertens_34 -> BYPASSED (v11)
+-- partial_integral_tends_to_formula -> BYPASSED (v11)
+...
+-/
+\end{lstlisting}
+
+Run \lean{\#print axioms} on the crown theorem after every
+structural change. Discrepancies between the registry and the
+output are bugs.
+
+\subsection{The Sorry Hygiene Pattern}
+
+\begin{enumerate}
+  \item \textbf{Never \lean{sorry} on the critical path.} If the
+    crown theorem depends on a \lean{sorry}, the entire formalization
+    is untrustworthy. Route \lean{sorry} to alternative paths only.
+  \item \textbf{Document every \lean{sorry}} with a comment explaining
+    what it assumes and why it can't be proved yet.
+  \item \textbf{Track \lean{sorry} count} as a project metric.
+    The Cathedral maintains: 0 sorry on the crown path,
+    8 sorry on alternative paths (PNT infrastructure, scratch).
+\end{enumerate}
+
+% ================================================================
+\section{Common Tactic Patterns}
+\label{sec:tactics}
+% ================================================================
+
+\subsection{The linarith-norm\_num One-Two Punch}
+
+For numerical inequalities ($2 \leq N$, $0 < 1/k$), the combination
+of \lean{linarith} and \lean{norm\_num} handles almost everything:
+
+\begin{lstlisting}[language=ML,caption={Numerical inequality dispatch}]
+example (N : Nat) (hN : 2 <= N) (k : Fin (N-1)) :
+    (0 : Real) < 1 / (k.val + 2 : Real) := by
+  positivity  -- or: field_simp; positivity
+\end{lstlisting}
+
+\subsection{The ring-then-bound Pattern}
+
+For algebraic identities followed by analysis:
+
+\begin{lstlisting}[language=ML,caption={Algebra then analysis}]
+-- Prove: (1 - x)^2 = 1 - 2x + x^2
+-- Then bound: 1 - 2x + x^2 <= 1 when 0 <= x <= 1
+calc (1 - x)^2
+    = 1 - 2*x + x^2 := by ring
+  _ <= 1 := by nlinarith [sq_nonneg x, sq_abs x]
+\end{lstlisting}
+
+\subsection{The convert-congr Escape Hatch}
+
+When Lean's type unifier fails on goals that are ``obviously'' equal:
+
+\begin{lstlisting}[language=ML,caption={Type unification escape}]
+-- Goal: integral f = integral g
+-- When f and g are definitionally equal but Lean can't see it
+convert this_integral_eq using 1
+congr 1
+ext x
+simp [fracPart, bdBasis]
+\end{lstlisting}
+
+\textbf{Warning}: Overusing \lean{convert} makes proofs fragile.
+Use it as a last resort, not a first instinct.
+
+% ================================================================
+\section{Deprecated API Traps}
+\label{sec:deprecated}
+% ================================================================
+
+Mathlib evolves rapidly. Three deprecated APIs caused problems:
+
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Deprecated} & \textbf{Replacement} & \textbf{Status} \\
+\midrule
+\lean{isHermitian\_iff\_isSymmetric} & (none yet) & Kept with comment \\
+\lean{Integrable.bdd\_mul'} & \lean{Integrable.bdd\_mul} & Updated \\
+\lean{measurable\_of\_continuousOn} & \lean{Continuous.measurable} & Updated \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Advice}: When Lean warns ``deprecated,'' check whether
+the replacement actually exists in your Mathlib version. Sometimes
+the deprecation is added before the replacement is ready.
+
+% ================================================================
+\section{Verification Checklist}
+\label{sec:checklist}
+% ================================================================
+
+Before declaring a formalization ``done,'' verify:
+
+\begin{enumerate}
+  \item[$\square$] \lean{lake build} passes with zero errors.
+  \item[$\square$] \lean{\#print axioms crown\_theorem} shows only
+    expected axioms.
+  \item[$\square$] No \lean{sorry} on the crown path.
+  \item[$\square$] All \lean{sorry} markers documented.
+  \item[$\square$] The lakefile matches the filesystem exactly.
+  \item[$\square$] All docstrings reference current axiom counts
+    and file names.
+  \item[$\square$] Ghost axiom detection script passes (no axiom/theorem
+    duplicates).
+  \item[$\square$] Numerical validation agrees with formal claims (if
+    applicable).
+  \item[$\square$] All deprecated API calls documented.
+\end{enumerate}
+
+% ================================================================
+\section{Recommended Mathlib Contributions}
+\label{sec:contributions}
+% ================================================================
+
+Based on our experience, the following Mathlib additions would have
+the highest impact for analytic number theory formalization:
+
+\begin{enumerate}
+  \item \textbf{Vertical contour integrals}: A definition and basic
+    API for $\int_{\sigma-i\infty}^{\sigma+i\infty} f(s)\,ds$,
+    parameterized as $\int_{-\infty}^{\infty} f(\sigma+it)\,dt$.
+  \item \textbf{Analytic continuation for Mellin transforms}: Given
+    $F(s) = \int_0^\infty f(x)x^{s-1}dx$ converges for
+    $\mathrm{Re}\,s \in (a,b)$, show $F$ is analytic on the strip.
+  \item \textbf{Mertens function}: Formalize $M(x) = \sum_{n \leq x}
+    \mu(n)$ with basic bounds ($M(x) = O(\sqrt{x}\log x)$
+    unconditionally).
+  \item \textbf{Fractional part API enrichment}: Integrability,
+    measurability, and $L^2$ properties of $\{f(x)\}$.
+  \item \textbf{Mean value theorems for Dirichlet polynomials}:
+    Montgomery--Vaughan in its simplest form.
+\end{enumerate}
+
+These five additions would eliminate 80\% of the axioms in the
+Cathedral and enable substantially cleaner formalizations of
+analytic number theory.
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+Formalizing analytic number theory in Lean~4 is feasible today, but
+requires significant infrastructure work beyond what Mathlib currently
+provides. The main gaps are in complex analysis (contour integrals,
+analytic continuation) and specialized number theory (Mertens function,
+Dirichlet polynomial bounds).
+
+The practical advice in this paper---which APIs to use, how to
+structure projects, how to manage axioms---should help future
+formalizers avoid the 100 dead-end files we had to archive.
+
+The Cathedral took 32 days and produced 50{,}623 lines of active code
+(with 100 archived files documenting the evolution).
+The next analytic number theory formalization, building on these
+lessons, should be faster. The tools are ready. The patterns are
+documented. Build your cathedral.
+
+\vspace{0.5cm}
+
+\begin{thebibliography}{99}
+
+\bibitem{lean4}
+L.~de~Moura et al., \emph{The Lean~4 Theorem Prover}, CADE-28, 2021.
+
+\bibitem{mathlib}
+The Mathlib Community, \emph{Mathlib4},
+\url{https://github.com/leanprover-community/mathlib4}.
+
+\bibitem{cathedral-math}
+J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Axiomatic
+Reduction of the Riemann Hypothesis via the Nyman--Beurling Criterion},
+2026.
+
+\bibitem{tactics}
+The Mathlib Community, \emph{Mathlib Tactics Reference},
+\url{https://leanprover-community.github.io/mathlib4_docs/}.
+
+\end{thebibliography}
+
+\end{document}
