@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 26, 2026}
+\date{April 28, 2026 --- v15}
 
 \begin{document}
 
@@ -50,7 +50,7 @@ Every machine-verified proof rests on a stack of trust:
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (2 on crown path, 55 total) \\
+5 & Mathematical axioms (2 on crown path, 104 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -296,7 +296,7 @@ verify the same proofs, providing redundancy.
 Lean kernel (type-checker) & $\sim$5{,}000 \\
 Lean elaborator + tactics & $\sim$100{,}000 \\
 Mathlib library & $\sim$1{,}400{,}000 \\
-Cathedral & $\sim$39{,}375 \\
+Cathedral & $\sim$50{,}623 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -444,12 +444,12 @@ a finer gradation:
   \item \textbf{Kernel axioms}: Trusted by design; part of the logic.
     (3 in the Cathedral.)
   \item \textbf{Active mathematical axioms}: Believed true, not yet
-    formalized. On the critical path. (2 in the Cathedral, v11.)
+    formalized. On the critical path. (2 in the Cathedral, v11--v15.)
   \item \textbf{Off-path axioms}: Formalization gaps that do not
-    affect the crown theorem. (53 in the Cathedral.)
+    affect the crown theorem. (102 in the Cathedral.)
   \item \textbf{Theorems}: Machine-verified from axioms and Mathlib.
   \item \textbf{Archived axioms}: Previously active, now proved or
-    bypassed. (11 eliminations during v3--v11.)
+    bypassed. (11 eliminations during v3--v15.)
 \end{enumerate}
 
 This gradient makes the \emph{progress} of formalization visible.

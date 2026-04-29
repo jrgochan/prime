@@ -11,7 +11,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 26, 2026}
+\date{April 28, 2026 --- v15}
 
 \begin{document}
 
@@ -20,7 +20,7 @@
 \begin{abstract}
 We describe the practical techniques for formalizing analytic number
 theory in Lean~4 with Mathlib, distilled from the Cathedral project:
-a 39{,}375-line formalization of the Nyman--Beurling criterion for the
+a 50{,}623-line formalization of the Nyman--Beurling criterion for the
 Riemann Hypothesis. We cover Mathlib API patterns that worked well
 (interval integrals, spectral theory), patterns that required
 workarounds (infinite sums, measure theory), and patterns that are
@@ -56,7 +56,7 @@ is using them \emph{together}, in a single proof, with consistent
 type coercions and compatible assumptions.
 
 The Cathedral project encountered this challenge over 30 days,
-producing 161 active Lean files (with 128 more in Archive).
+producing 208 active Lean files (with 100 more in Archive).
 This paper distills the lessons into actionable advice for future formalizers.
 
 \subsection{Scope}
@@ -344,14 +344,14 @@ axiom, even if axioms are declared in their respective modules:
 \begin{lstlisting}[language=ML,caption={Axiom registry pattern}]
 /-!
 # Cathedral Axiom Registry (v11 -- Mellin Crown)
-Total: 55 axioms (2 on crown path)
-Last audit: April 26, 2026
+Total: 104 axioms (2 on crown path)
+Last audit: April 28, 2026
 
 ## Crown Path Axioms (compiler-verified)
 1. critical_line_mellin_variance       -- Hardy-Littlewood
 2. rh_zeta_lower_bound_from_zero_counting -- Hadamard
 
-## Graduated/Bypassed Axioms (11 eliminations, v3--v11)
+## Graduated/Bypassed Axioms (11 eliminations, v3--v15)
 -- rh_implies_mertens_bound -> THEOREM (Perron chain)
 -- pnt_mu_div_k -> THEOREM (PrimeNumberTheoremAnd)
 -- gram_form_upper_bound_34 -> THEOREM (variance)
@@ -509,10 +509,10 @@ Dirichlet polynomial bounds).
 
 The practical advice in this paper---which APIs to use, how to
 structure projects, how to manage axioms---should help future
-formalizers avoid the 128 dead-end files we had to archive.
+formalizers avoid the 100 dead-end files we had to archive.
 
-The Cathedral took 30 days and produced 39{,}375 lines of active code
-(with 128 archived files documenting the evolution).
+The Cathedral took 32 days and produced 50{,}623 lines of active code
+(with 100 archived files documenting the evolution).
 The next analytic number theory formalization, building on these
 lessons, should be faster. The tools are ready. The patterns are
 documented. Build your cathedral.

@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026 --- v14, Dual Path Architecture}
+\date{April 28, 2026 --- v15, Spectral Universality}
 
 \begin{document}
 
@@ -21,8 +21,8 @@ We present a machine-checked proof in the Lean~4 theorem prover, built against
 Mathlib, that the Riemann Hypothesis is logically equivalent to the decay of
 the Nyman--Beurling distance $d_N^2 \to 0$.
 
-The formalization---the \emph{Cathedral}---comprises 167 active Lean files
-(with 99 archived) across 26 modules with
+The formalization---the \emph{Cathedral}---comprises 208 active Lean files
+(with 100 archived) across 28 modules with
 \textbf{zero compilation errors}. The crown theorem
 \lean{nyman\_beurling\_equivalence} establishes the biconditional
 \[
@@ -97,7 +97,7 @@ The proof decomposes into two pillars:
 
 \subsection{The Axiomatic Foundation}
 
-The Cathedral's mathematical content rests on 45 axioms in the active
+The Cathedral's mathematical content rests on 104 axioms in the active
 codebase, organized hierarchically. The primary export
 \lean{nyman\_beurling\_equivalence} depends on four (via the Perron path);
 the alternative Mellin path depends on two.
@@ -457,7 +457,7 @@ $\|v\|^2 = \Theta(N)$, which diverges despite $E(N) \to 0$.
 % ================================================================
 
 The Cathedral maintains a systematic \lean{Archive/} directory containing
-128 files---preserved as monuments to the
+100 files---preserved as monuments to the
 formalization process and as resources for future work. Nothing is deleted.
 
 \subsection{The Great Audit (April 18, 2026)}
@@ -481,9 +481,10 @@ A deep audit of the codebase identified:
 \end{itemize}
 
 The cleanup reduced the active codebase from 178 to 161 files in v8;
-subsequent explorations (v9--v12) grew the active tree to 174 files
-as the Perron chain, Abel tail machinery, Rotors, and Hilbert inequality
-modules were added.
+subsequent explorations (v9--v15) grew the active tree to 208 files
+as the Perron chain, Abel tail machinery, Rotors, Hilbert inequality,
+resource class decomposition, and eigenvector localization modules
+were added.
 
 \subsection{Archived Subsystems}
 
@@ -549,7 +550,7 @@ is logically equivalent to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, proved via two independent paths: the Mellin Crown
 (frequency domain, 2 axioms) and the Perron Crown (spatial domain,
 4 transparent axioms, 0 sorry). The formalization
-comprises 167 active Lean files (99 archived) across 26 modules.
+comprises 208 active Lean files (100 archived) across 28 modules.
 
 The axiom reduction---from 6 in the initial architecture to 2 on the
 Mellin path (4 on the primary Perron path)---was achieved through
@@ -567,9 +568,13 @@ fourteen versions of systematic formalization:
     512-bit MPFR precision. \textbf{2 axioms, 0 sorry, 0 warning.}
   \item \textbf{v14}: Dual Path Architecture---both Mellin and Perron
     paths independently verified. Perron path promoted to primary
-    export (0 sorry, 4 transparent axioms). Active axiom count reduced
-    from 55 to 45. B\'aez-Duarte certification engine validates
-    convergence to $10^{-17}$ Sherman-Morrison match.
+    export (0 sorry, 4 transparent axioms). B\'aez-Duarte certification
+    engine validates convergence to $10^{-17}$ Sherman-Morrison match.
+  \item \textbf{v15}: Spectral Universality Update---generalized
+    residue class decomposition (proving mod-8 is not privileged),
+    eigenvector localization with participation ratio bounds,
+    certified spectral pipeline through $N = 1000$. 38 experiments.
+    208 active files, 50{,}623 lines, 104 axioms (2 on crown).
 \end{itemize}
 
 The formalization process itself served as a discovery tool, catching
