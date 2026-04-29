@@ -1,0 +1,10 @@
+[package]
+name = "van-hove-probe"
+version = "0.1.0"
+edition = "2024"
+description = "Cathedral Van Hove Singularity Probe — eigenvalue DOS, level spacing, and thermodynamics of the Nyman–Beurling Gram matrix via 128-bit MPFR"
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"

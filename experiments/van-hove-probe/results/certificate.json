@@ -1,0 +1,19 @@
+{
+  "experiment": "Cathedral Van Hove Singularity Probe",
+  "precision_bits": 128,
+  "threads": 12,
+  "timestamp": "2026-04-29T00:33:16.794163+00:00",
+  "question": "Is d²_N ~ C/ln(N) a 2D Van Hove logarithmic singularity?",
+  "max_N_tested": 50,
+  "van_hove_r2_avg": 7.269639967310548e-1,
+  "van_hove_confirmed": false,
+  "bd_constant_target": 21.649,
+  "c_holes_target": 0.04619,
+  "eigenvalue_data": [
+    {"N": 10, "dim": 9, "lambda_min": 8.858276429321542e-3, "lambda_max": 1.563263005827064e0, "lambda_min_logN": 2.039693525577631e-2},
+    {"N": 20, "dim": 19, "lambda_min": 2.584536686264767e-3, "lambda_max": 2.139316331645795e0, "lambda_min_logN": 7.742579963227648e-3},
+    {"N": 30, "dim": 29, "lambda_min": 8.956248536069314e-4, "lambda_max": 2.471839130417867e0, "lambda_min_logN": 3.046196907039446e-3},
+    {"N": 50, "dim": 49, "lambda_min": 1.622599091752580e-4, "lambda_max": 2.869131867949976e0, "lambda_min_logN": 6.347644975522908e-4}
+  ],
+  "elapsed_seconds": 0.801
+}

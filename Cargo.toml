@@ -39,6 +39,7 @@ members = [
     "experiments/rotor-spectroscopy",
     "experiments/siegel-walfisz",
     "experiments/hilbert-spectral",
+    "experiments/van-hove-probe",
 ]
 
 [profile.release]
