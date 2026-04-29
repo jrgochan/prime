@@ -211,7 +211,7 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}PR = 1/Σ|v_i|⁴ (IPR⁻¹). PR=dim → delocalized, PR=1 → localized{RESET}");
     println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
 
-    let test_ns: Vec<usize> = vec![100, 150, 200, 300, 400, 500]
+    let test_ns: Vec<usize> = vec![100, 150, 200, 300, 400, 500, 750, 1000]
         .into_iter()
         .filter(|&n| n <= max_n)
         .collect();
