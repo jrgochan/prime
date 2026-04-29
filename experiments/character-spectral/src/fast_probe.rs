@@ -1,15 +1,18 @@
 //! ═══════════════════════════════════════════════════════════════════════════
-//!  CATHEDRAL FAST SPECTRAL PROBE — f64 / nalgebra
+//!  CATHEDRAL FAST SPECTRAL PROBE — hybrid MPFR/f64
 //!
-//!  Hardware-accelerated eigendecomposition for rapid exploration at high N.
-//!  Trades MPFR precision for ~100x speed. Level spacing statistics are
-//!  insensitive to floating-point precision beyond ~10 digits.
+//!  Builds Gram matrix in 128-bit MPFR for accuracy, eigensolves via
+//!  nalgebra (hardware f64) for speed. Best of both worlds.
+//!
+//!  For N < 500: f64 Gram build (fast, accurate enough)
+//!  For N ≥ 500: 128-bit MPFR Gram build → f64 conversion → nalgebra
 //!
 //!  Usage: fast-probe [max_N]  (default 500)
 //! ═══════════════════════════════════════════════════════════════════════════
 
 mod characters;
 mod fmt;
+mod gram;
 mod spectral;
 
 use characters::*;
@@ -98,6 +101,23 @@ fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {
     (mat, dim)
 }
 
+/// Build Gram matrix using 128-bit MPFR, then convert to f64.
+/// Used for N ≥ 500 where f64 accumulation may lose accuracy.
+fn build_gram_mpfr_to_f64(n: usize) -> (Vec<f64>, usize) {
+    let (mpfr_mat, dim) = gram::build_gram_matrix_mpfr(n);
+    let f64_mat: Vec<f64> = mpfr_mat.iter().map(|v| v.to_f64()).collect();
+    (f64_mat, dim)
+}
+
+/// Build Gram matrix with appropriate precision for given N.
+fn build_gram_auto(n: usize) -> (Vec<f64>, usize) {
+    if n >= 500 {
+        build_gram_mpfr_to_f64(n)
+    } else {
+        build_gram_f64(n)
+    }
+}
+
 /// Extract eigenvalues using nalgebra's optimized decomposition.
 fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
     if dim == 0 {
@@ -163,11 +183,11 @@ fn main() {
         .unwrap_or(500);
 
     header(
-        "CATHEDRAL FAST SPECTRAL PROBE (f64/nalgebra)",
+        "CATHEDRAL FAST SPECTRAL PROBE (hybrid MPFR/f64)",
         &format!(
-            "Hardware-accelerated residue class decomposition · max N = {max_n}"
+            "MPFR Gram (N≥500) + nalgebra eigensolve · max N = {max_n}"
         ),
-        64,
+        128,
         threads,
     );
 
@@ -196,8 +216,8 @@ fn main() {
 
         println!("  {BOLD}{WHITE}═══ N={n} ═══{RESET}");
 
-        // Build Gram matrix (parallel)
-        let (full_mat, full_dim) = build_gram_f64(n);
+        // Build Gram matrix (hybrid: MPFR for N≥500, f64 below)
+        let (full_mat, full_dim) = build_gram_auto(n);
 
         // Residue class indices
         let res_indices: Vec<Vec<usize>> = RESIDUE_CLASSES
