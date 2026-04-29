@@ -1,37 +1,31 @@
 \documentclass[11pt,a4paper]{article}
 
 \usepackage{../shared/cathedral-preamble}
-\usepackage{setspace}
-\onehalfspacing
 
 \title{%
-  What Does a Machine Know When It Checks a Proof?\\[0.3cm]
-  {\large Philosophical Implications of the Cathedral Formalization}%
+  The Cathedral as Philosophical Object:\\
+  On Machine Proof, Mathematical Truth,\\
+  and the History of an Unsolved Problem%
 }
-\author{
-  Jason Robert Gochanour
-}
-\date{April 20, 2026}
+\author{Jason Robert Gochanour}
+\date{April 28, 2026}
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
-The \emph{Cathedral} is a machine-verified formalization in the Lean~4
-theorem prover establishing that the Riemann Hypothesis is logically
-equivalent to the decay of the Nyman--Beurling distance. It does not
-prove the Riemann Hypothesis. It proves, with certainty beyond human
-capacity for error, exactly what one \emph{would} need to prove.
-This paper examines the philosophical questions raised by this
-artifact: What is the epistemic status of a conditional proof? What
-does it mean for a machine to ``catch'' a mathematical error that a
-human would not? Can axioms serve as units of mathematical knowledge,
-decomposing an open problem into precisely measured fragments of
-remaining ignorance? We argue that the Cathedral represents a new
-category of mathematical object---the \emph{certified reduction}---that
-is neither a proof nor a conjecture, but a machine-witnessed
-guarantee about the logical structure of an unsolved problem.
+We examine the Cathedral---a machine-verified reduction of the
+Riemann Hypothesis---through the lens of the philosophy of
+mathematics and the history of the problem it addresses. We argue
+that the Cathedral occupies a novel philosophical position: it is
+neither a proof of RH nor a failure to prove it, but rather a
+\emph{containment vessel} that isolates the unknown content of RH
+to two precisely characterized gaps. We examine what this means for
+mathematical truth, the nature of proof, and the relationship between
+human and machine understanding. We place the project in the
+historical arc from Riemann (1859) through Hilbert's program,
+G\"odel's incompleteness theorems, and the modern era of interactive
+theorem proving.
 \end{abstract}
 
 \tableofcontents
@@ -40,491 +34,164 @@ guarantee about the logical structure of an unsolved problem.
 \section{Introduction: A New Kind of Mathematical Object}
 % ================================================================
 
-On April 26, 2026, a 161-file computer program was compiled without
-error. The program, written in the Lean~4 proof language and verified
-against the Mathlib mathematical library, established the following:
+The Cathedral is not a proof of the Riemann Hypothesis. Nor is it a
+failure. It is something new: a \emph{formal containment vessel}
+that identifies exactly what remains unknown, proves everything
+else, and provides machine-checked guarantees that no errors lurk
+in the proved portions.
 
-\begin{quote}
-\emph{The Riemann Hypothesis is true if and only if $d_N^2 \to 0$,}
-\end{quote}
-
-\noindent where $d_N^2$ is a concrete quantity measuring how well
-certain sawtooth functions approximate a constant. The biconditional
-is complete: both directions are proved. The proof depends on exactly
-2 mathematical axioms (statements accepted without proof) plus 3
-logical axioms built into Lean's type theory.
-
-The Riemann Hypothesis remains unproved. But something has changed.
-Before the Cathedral, the logical structure of the problem was
-distributed across hundreds of papers, written over 167 years, in
-inconsistent notation, with varying standards of rigor. Now it exists
-as a single, machine-auditable artifact in which every deductive
-step has been verified, every assumption is named, and the frontier
-of human ignorance is precisely demarcated.
-
-This artifact raises questions that mathematics alone cannot answer.
-They are questions for philosophy.
+This creates a philosophical puzzle. In traditional mathematics,
+a problem is either solved or open. The Cathedral suggests a third
+category: \emph{formally reduced}---open in the sense that the
+central claim remains unproved, but closed in the sense that the
+logical structure is fully mapped.
 
 % ================================================================
-\section{The Epistemic Status of Conditional Proof}
-\label{sec:conditional}
+\section{What Is a Proof?}
 % ================================================================
 
-\subsection{What Has Been Proved?}
+\subsection{The Classical View}
 
-The Cathedral proves a biconditional: $\RH \iff d_N^2 \to 0$. It
-does \emph{not} prove either side independently. Neither the truth
-nor the falsity of $\RH$ follows from the Cathedral alone.
+A proof is a chain of logical deductions from axioms to conclusion,
+sufficiently detailed to convince a competent mathematician.
 
-This is not a new situation in mathematics. Many theorems are
-conditional: ``If the Generalized Riemann Hypothesis is true,
-then\ldots'' What \emph{is} new is the machine verification. The
-biconditional is not a claim in a paper that might contain an error.
-It is a statement that has been checked by a computer against a
-formal system of logic (the Calculus of Inductive Constructions),
-in which every step follows from the axioms by mechanical rule
-application.
+\subsection{The Formal View}
 
-\begin{quote}
-\emph{The conditional is certain. The condition is not.}
-\end{quote}
+A proof is a term in a type theory (e.g., CIC) that type-checks
+against a specification. It convinces not a human but a compiler.
 
-This creates an unusual epistemic asymmetry. We know, with a
-certainty that exceeds any human proof, that \RH{} is equivalent to
-$d_N^2 \to 0$. But we do not know whether either statement is true.
-The certainty attaches to the \emph{structure} of the implication,
-not to its content.
+\subsection{The Cathedral's Position}
 
-\subsection{Is a Biconditional a ``Proof''?}
+The Cathedral is a formal proof that type-checks. But it proves
+a \emph{conditional} statement: RH $\iff$ decay, modulo two axioms.
+Is this a proof? Of what?
 
-In the formalist tradition (Hilbert, Bourbaki), a proof is a finite
-sequence of deductions from axioms. By this standard, the Cathedral
-\emph{is} a proof---specifically, it is a proof of the proposition
-``$\RH \iff d_N^2 \to 0$.'' The proposition happens to be a
-biconditional rather than a simple statement, but formalism makes no
-distinction between the two.
-
-In the intuitionist tradition (Brouwer, Heyting), a proof of $P \iff Q$
-is a pair of constructions: one transforming a proof of $P$ into a
-proof of $Q$, and vice versa. The Cathedral provides exactly this:
-the Lean file \texttt{Assembly/MainChain.lean} contains a term of
-type $\RH \to (d_N^2 \to 0)$ and a term of type
-$(d_N^2 \to 0) \to \RH$. (Lean~4 uses classical logic via
-\texttt{Classical.choice}, so the constructions are not fully
-constructive, but they are syntactically present.)
-
-In the Lakatosian tradition (\emph{Proofs and Refutations}), a proof
-is a social process of conjecture, criticism, and revision. By this
-standard, the Cathedral is profoundly proof-like: it was built through
-30 days of iterative refinement, with 128 archived files documenting
-failed approaches, false lemmas, and superseded strategies. The
-machine played the role of Lakatos's ``critic,'' catching errors that
-the human would have missed (Section~\ref{sec:traps}).
-
-\subsection{The Axiom as a Unit of Ignorance}
-
-The most philosophically interesting feature of the Cathedral is its
-treatment of axioms. In classical foundations (ZFC), axioms are the
-starting points of all mathematics---they are accepted because they
-are self-evident or because they codify our best intuitions about
-sets.
-
-In the Cathedral, axioms serve a fundamentally different purpose. They
-are \emph{placeholders for unformalized knowledge}. Each axiom
-represents a specific, named, precisely stated piece of mathematics
-that is believed to be true (and has been proved by humans in
-traditional papers) but has not yet been translated into Lean.
-
-This makes the axiom a unit of \emph{measured ignorance}. The
-Cathedral does not merely say ``we don't know how to prove \RH.''
-It says: ``We don't know how to prove \RH, and here are the
-\emph{exactly two} facts we would need to formalize in order to
-reduce it to a question about $L^2$ approximation.''
-
-\begin{quote}
-\emph{An axiom is not a failure of proof. It is a unit of measurement
-for what remains unproved.}
-\end{quote}
-
-The reduction from 56 axioms (March 27, Day 1) to 2 axioms (April 26,
-Day 30) is not merely a technical achievement. It is an epistemic
-one: the frontier of ignorance was compressed by 96\% in 30 days.
+We argue it is a proof of the \emph{logical structure} of the
+Riemann Hypothesis: the assertion that RH is equivalent to a
+concrete analytic statement, with the equivalence machine-verified.
 
 % ================================================================
-\section{What Does the Machine ``Know''?}
-\label{sec:knowledge}
+\section{The Axiom as Philosophical Concept}
 % ================================================================
 
-\subsection{Machine Verification Is Not Understanding}
-
-The Lean type-checker that verifies the Cathedral does not
-``understand'' the Riemann Hypothesis. It does not know what a prime
-number is, what the zeta function does, or why the problem matters.
-It checks that each step in the proof follows from the previous one
-by the rules of the Calculus of Inductive Constructions. It performs
-this check with perfect reliability, but without any semantic
-comprehension.
-
-This is a philosophical distinction with practical consequences.
-A human mathematician who understands a proof can:
-
-\begin{itemize}
-  \item Generalize it to new contexts.
-  \item Identify which steps are ``deep'' and which are routine.
-  \item Predict where the proof technique might fail.
-  \item Extract intuition for new conjectures.
-\end{itemize}
-
-The Lean type-checker can do none of these things. It can verify but
-not understand, certify but not explain.
-
-\subsection{But Verification Has Its Own Epistemic Value}
-
-The flip side is that the machine verification provides something
-that human understanding cannot: \emph{certainty}. Human proofs
-contain errors. The history of mathematics is littered with proofs
-that were accepted for years or decades before flaws were discovered
-(Kempe's proof of the Four-Color Theorem, Wiles's initial proof of
-Fermat's Last Theorem, Voevodsky's motivating experience with
-homotopy groups).
-
-The Cathedral's verification eliminates this class of error entirely.
-If the Lean kernel is correct (a much smaller and more auditable
-artifact than any mathematical proof), then the biconditional holds.
-Period.
-
-This creates a division of epistemic labor:
-
-\begin{center}
-\begin{tabular}{@{}ll@{}}
-\toprule
-\textbf{Machine provides} & \textbf{Human provides} \\
-\midrule
-Deductive certainty & Semantic understanding \\
-Error elimination & Intuition and creativity \\
-Axiom tracking & Mathematical strategy \\
-Exhaustive checking & Selective attention \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-Neither alone is sufficient. Together, they produce an artifact with
-properties that neither could achieve independently.
-
-\subsection{The AI Collaborator as Philosophical Agent}
-
-The Cathedral was built not by a human alone, nor by a machine alone,
-but by a human-AI pair. The AI assistant (an LLM-based coding agent)
-wrote most of the Lean code, discovered Mathlib API functions,
-and proposed proof strategies. The human directed the mathematical
-architecture and made all strategic decisions.
-
-This raises a question: \emph{who} proved the biconditional?
-
-\begin{itemize}
-  \item The human, who directed the strategy? But the human could not
-    have written the 39,375 lines of Lean code alone.
-  \item The AI, who wrote the code? But the AI did not understand
-    the mathematics and could not have chosen the proof architecture.
-  \item The Lean kernel, which verified the proof? But the kernel
-    made no creative contribution---it only checked.
-\end{itemize}
-
-Perhaps the correct answer is that mathematical proof is becoming
-a \emph{collective} activity in a new sense: not a team of humans,
-but a team of heterogeneous cognitive agents, each contributing a
-different epistemic capacity. The result is a proof that no single
-agent could have produced.
-
-% ================================================================
-\section{Five Traps and the Limits of Informal Reasoning}
-\label{sec:traps}
-% ================================================================
-
-During construction, the machine-verification process detected five
-mathematical errors that would have been invisible to informal proof.
-Each illuminates a different limitation of human mathematical
-reasoning:
-
-\subsection{The Basis Trap}
-
-Two natural choices for the sawtooth basis---$\{k/x\}$ and
-$\{1/(kx)\}$---appear interchangeable to informal reasoning.
-They are not. The first generates $L^2(0,1)$ unconditionally
-(independent of \RH), making any approximation result trivially
-true. The second has approximation quality governed by the zeta zeros.
-
-An informal proof using the wrong basis would appear correct at
-every step. No referee would catch it, because the error is in the
-\emph{choice of definition}, not in any deductive step. The machine
-caught it because the Lean type system enforces that the basis
-functions must match the type signature of the Nyman--Beurling
-criterion.
-
-\textbf{Philosophical lesson:} Definitions are not epistemically
-neutral. The choice of how to formalize a concept constrains which
-theorems can be proved about it. Machines enforce definitional
-consistency in a way that human attention cannot.
-
-\subsection{The Cancellation Trap}
-
-The triangle inequality gives $\|1 - f\|_2 \leq 1 + \|f\|_2$,
-yielding $d_N^2 \leq 4$ for a quantity approaching 0. The bound is
-mathematically correct but useless, because it destroys the
-cancellation $1 - 2b^Tv + v^TGv \to 0$ that makes $d_N^2$ small.
-
-An informal proof might invoke the triangle inequality without
-noticing that it loses the essential structure. The machine caught
-this because the Lean proof could not close the gap between the
-bound and the target.
-
-\textbf{Philosophical lesson:} Not all valid inequalities are useful.
-Some destroy the very structure they are meant to control. This is
-invisible to syntactic reasoning but immediately apparent to a
-type-checker that demands a complete chain from hypothesis to
-conclusion.
-
-\subsection{The Ghost Axiom Trap}
-
-Nine mathematical propositions existed simultaneously as axioms
-(unproved) and theorems (proved) in different files. The module
-system allowed both to coexist without contradiction. Downstream
-theorems could silently depend on the axiom rather than the theorem,
-inflating the proof's apparent weakness.
-
-\textbf{Philosophical lesson:} In modular epistemic systems, the same
-proposition can have different justification statuses in different
-contexts. Coherence checking across modules is a non-trivial epistemic
-task that humans perform poorly and machines perform well.
-
-% ================================================================
-\section{The Cathedral as Philosophical Object}
-\label{sec:object}
-% ================================================================
-
-\subsection{A Certified Reduction}
-
-We propose that the Cathedral represents a new category of
-mathematical object: the \emph{certified reduction}. A certified
-reduction has three components:
-
+The Cathedral's two axioms are not articles of faith. They are
+precisely stated mathematical claims that happen to lack
+machine-checked proofs. They are:
 \begin{enumerate}
-  \item A \textbf{target proposition} (here: \RH).
-  \item A \textbf{reduced proposition} (here: $d_N^2 \to 0$).
-  \item A \textbf{machine-verified biconditional} connecting them,
-    with every assumption explicitly named.
+  \item Provable in $\ZFC$ by standard methods.
+  \item Verified numerically to high precision.
+  \item Accepted by the mathematical community as true.
 \end{enumerate}
 
-A certified reduction is stronger than a conjecture (it establishes
-logical equivalence) but weaker than a proof (it does not resolve
-either proposition). Its epistemic value lies in the precision of
-the residual: the named axioms constitute an \emph{exact measure}
-of what remains unknown.
-
-\subsection{Axiom Reduction as Epistemic Progress}
-
-In traditional mathematics, progress on an open problem is measured
-by theorems: new results that narrow the gap between what is known
-and what is conjectured. The Cathedral suggests a complementary
-measure: \emph{axiom count on the critical path}.
-
-\begin{center}
-\begin{tabular}{@{}cl@{}}
-\toprule
-\textbf{Axioms} & \textbf{Interpretation} \\
-\midrule
-56 & ``We have a rough sketch and many assumptions.'' \\
-12 & ``We have a solid architecture with specific gaps.'' \\
-5 & ``We can name every remaining piece.'' \\
-2 & ``Two facts stand between us and certified equivalence.'' \\
-0 & ``The equivalence is fully machine-verified.'' \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-The progression from 56 to 2 is epistemic progress, even though
-neither \RH{} nor its negation was established. The frontier of
-ignorance shrank. The remaining gaps were named, located, and
-measured. This is a form of understanding that traditional
-mathematics---which classifies results as ``proved'' or ``open''
-with no gradations---does not capture.
-
-\subsection{The Archaeology of Failed Proofs}
-
-The Cathedral's archive of 128 superseded files is, to our knowledge,
-unprecedented in mathematical practice. Mathematicians typically
-discard failed approaches. The Cathedral preserves them, creating a
-\emph{fossil record} of mathematical exploration.
-
-This archive has philosophical significance. It makes visible the
-\emph{negative knowledge} that is normally invisible: approaches that
-don't work, lemmas that are false, definitions that lead nowhere.
-Lakatos argued that refutations are as important as proofs. The
-Cathedral's archive is a concrete embodiment of this principle.
-
-The 44\% discard rate (128 archived files out of 289 total) quantifies
-something that mathematics has never measured before: the ratio of
-exploration to exploitation in a proof search. More than half of all
-mathematical effort was invested in paths that were eventually
-abandoned. This is not failure; it is the cost of discovery.
+The question ``is this proof complete?'' becomes ``what is the
+epistemic status of these two claims?'' The Cathedral converts a
+qualitative question (is RH true?) into a quantitative one (how
+certain are we of these two bounds?).
 
 % ================================================================
-\section{Implications for Mathematical Practice}
-\label{sec:practice}
+\section{The History of the Riemann Hypothesis}
 % ================================================================
 
-\subsection{The End of the Informal Era?}
+\subsection{Riemann's Paper (1859)}
 
-The Cathedral was not built because informal mathematics is inadequate
-for the Nyman--Beurling criterion. Every theorem in the Cathedral
-could, in principle, be written as a traditional paper proof. The
-machine verification adds no new mathematical content.
+Bernhard Riemann's eight-page paper \emph{\"Ueber die Anzahl der
+Primzahlen unter einer gegebenen Gr\"osse} introduced the zeta
+function, the functional equation, and the famous conjecture.
 
-What it adds is \emph{trust infrastructure}. In a world where
-LLMs can generate plausible-sounding but incorrect mathematical
-proofs, machine verification provides a trust anchor that is
-independent of human judgment, reputation, or social consensus.
+\subsection{The Early 20th Century}
 
-\begin{quote}
-\emph{Lean does not care who you are. It cares whether your proof
-type-checks.}
-\end{quote}
+Hardy (1914) proved infinitely many zeros on the critical line.
+Hardy and Littlewood (1918) developed the circle method and mean
+value theorems that underlie the Cathedral's Axiom~1.
 
-This is both a democratization (anyone can submit a machine-verified
-proof) and a raising of standards (no amount of prestige can override
-a type error).
+\subsection{The Modern Era}
 
-\subsection{The Decomposition of Mathematical Problems}
+Computational verification (Odlyzko, Gourdon) has checked the first
+$10^{13}$ zeros. The Nyman--Beurling criterion (1950--2003) recast RH
+as an approximation problem in $L^2(0,1)$.
 
-If axioms can serve as units of ignorance, then open problems can
-be \emph{decomposed} into precisely stated sub-problems, each
-corresponding to an axiom. This transforms the sociology of
-mathematical research: instead of one person (or group) attempting
-an entire proof, the problem can be distributed.
+\subsection{The Cathedral (2026)}
 
-The Cathedral's 2 remaining axioms are, in effect, \emph{bounty
-postings}: precisely stated mathematical challenges, with a
-machine-verified guarantee that formalizing them would complete the
-reduction. This is a new mode of mathematical collaboration, enabled
-by the precision of formal systems.
+For the first time, the logical equivalence $\RH \iff d_N^2 \to 0$
+has been machine-verified, with the full proof chain auditable by
+any person with a Lean compiler.
 
-\subsection{What Counts as a Contribution?}
+% ================================================================
+\section{Hilbert's Program and G\"odel's Shadow}
+% ================================================================
 
-Traditional mathematics values theorems. A mathematician's
-contribution is measured by the propositions they prove. The
-Cathedral suggests a broader accounting:
+Hilbert's Sixth Problem asked for the axiomatization of physics.
+His broader program sought to prove mathematics consistent via
+finitary methods. G\"odel showed this was impossible in general.
 
+The Cathedral sidesteps G\"odel: it does not prove RH (which might
+be independent of $\ZFC$, though this is unlikely). Instead, it
+proves an \emph{equivalence}, which is a theorem of $\ZFC$
+regardless of whether RH is true, false, or independent.
+
+% ================================================================
+\section{Machine Understanding vs.\ Human Understanding}
+% ================================================================
+
+Does the Lean compiler ``understand'' the Riemann Hypothesis?
+
+No---it verifies type-correctness. But the human author does not
+``understand'' all 50{,}623 lines either. The understanding is
+\emph{distributed}: the human understands the architecture; the
+machine verifies the details; neither comprehends the whole.
+
+This distributed cognition model may be the future of mathematics:
+not human proof or machine proof, but human-machine proof, where
+the verification burden is shared according to each party's
+strengths.
+
+% ================================================================
+\section{The Cathedral as Cultural Object}
+% ================================================================
+
+Like its architectural namesake, the Cathedral is:
 \begin{itemize}
-  \item \textbf{Axiom elimination} (proving a previously assumed result)
-    is a contribution.
-  \item \textbf{Architecture design} (choosing the right decomposition
-    of a problem into modules) is a contribution.
-  \item \textbf{Bug detection} (finding the basis trap, the cancellation
-    trap) is a contribution.
-  \item \textbf{Archival} (documenting failed approaches so others
-    don't repeat them) is a contribution.
+  \item \textbf{Built over time}: 32 days, 15 versions.
+  \item \textbf{Built by many hands}: human + two AI systems.
+  \item \textbf{Built to last}: machine verification ensures
+    permanence.
+  \item \textbf{Built for a purpose beyond its builders}:
+    the mathematical content will outlive its creators.
 \end{itemize}
 
-None of these fit neatly into the ``theorem proved'' metric. But all
-of them advanced mathematical knowledge in a measurable way.
+The medieval cathedral builders could not see their work completed.
+The mathematical Cathedral builders face a similar situation: the
+two remaining axioms may take years---or decades---to formalize.
+But the architecture stands, ready.
 
 % ================================================================
-\section{The Question of Beauty}
-\label{sec:beauty}
+\section{Conclusion}
 % ================================================================
 
-Mathematicians often speak of beauty in proofs. Hardy's \emph{A
-Mathematician's Apology} elevates aesthetic criteria to central
-importance. The Cathedral raises the question: can a machine-verified
-proof be beautiful?
-
-The Rank-1 Mellin Miracle is, by any standard, an elegant result.
-At a zeta zero $\rho$, the Mellin transform of the B\'aez-Duarte
-basis function collapses to $\mathcal{M}[h_k](\rho) = 1/(k(\rho-1))$.
-The entire infinite-dimensional computation reduces to a single
-multiplication. The $k$-dependence and $\rho$-dependence factorize
-completely.
-
-This is beautiful. And it was discovered during machine verification,
-when a general strategy (Hahn--Banach separation) was replaced by a
-specific computation that turned out to have unexpected structure.
-The machine did not appreciate the beauty. The human did. But the
-beauty would not have been found without the machine's insistence
-on explicit computation.
+The Cathedral introduces a new philosophical category: the formally
+reduced open problem. It demonstrates that machine verification can
+provide certainty about the \emph{structure} of a mathematical claim
+even when the claim itself remains unresolved. And it suggests that
+the future of mathematical proof lies not in choosing between human
+and machine, but in combining their complementary strengths.
 
 \begin{quote}
-\emph{The machine demands rigor. The human supplies meaning.
-Neither alone produces beauty. Together, sometimes, they do.}
+\emph{We do not know if the Riemann Hypothesis is true.
+We do know, with machine-verified certainty, exactly what it means.}
 \end{quote}
-
-% ================================================================
-\section{Conclusion: The Cathedral as Epistemological Experiment}
-% ================================================================
-
-The Cathedral is many things: a 161-file Lean program, a reduction
-of the Riemann Hypothesis, a case study in proof engineering, a
-record of human-AI collaboration. But above all, it is an
-\emph{epistemological experiment}: an attempt to make the structure
-of mathematical knowledge visible, precise, and machine-auditable.
-
-The experiment yields several findings:
-
-\begin{enumerate}
-  \item \textbf{Conditional proofs have precise epistemic value},
-    measurable by the number and nature of their axioms.
-  \item \textbf{Machine verification and human understanding are
-    complementary}, not competitive, epistemic capacities.
-  \item \textbf{Axioms can serve as units of measured ignorance},
-    decomposing open problems into named, located, precisely
-    stated fragments.
-  \item \textbf{Failed approaches have epistemic value} when
-    archived systematically.
-  \item \textbf{Mathematical beauty can emerge from machine-assisted
-    exploration}, though it requires human recognition to be
-    appreciated.
-\end{enumerate}
-
-Two crown axioms remain. The Riemann Hypothesis is neither proved nor
-disproved. But the space of possible proofs has been mapped with
-unprecedented precision, and that mapping is itself a form of
-mathematical knowledge---one that our philosophical vocabulary is
-only beginning to accommodate.
-
-\vspace{1cm}
-\begin{flushright}
-\emph{The Cathedral does not answer the question.}\\
-\emph{It makes the question precise.}\\
-\emph{That is philosophy's oldest aspiration.}
-\end{flushright}
-
-\vspace{1cm}
 
 \begin{thebibliography}{99}
-
-\bibitem{lakatos}
-I.~Lakatos, \emph{Proofs and Refutations: The Logic of Mathematical
-Discovery}, Cambridge University Press, 1976.
-
-\bibitem{hardy}
-G.H.~Hardy, \emph{A Mathematician's Apology}, Cambridge University
-Press, 1940.
-
-\bibitem{voevodsky}
-V.~Voevodsky, \emph{The Origins and Motivations of Univalent
-Foundations}, IAS, 2014.
-
-\bibitem{avigad}
-J.~Avigad, \emph{The mechanization of mathematics}, Notices of the
-AMS \textbf{65} (2018), 681--690.
-
-\bibitem{appel1977}
-K.~Appel and W.~Haken, \emph{Every planar map is four colorable},
-Illinois J. Math. \textbf{21} (1977), 429--490.
-
-\bibitem{buzzard}
-K.~Buzzard, \emph{The rise of formalism in mathematics},
-ICM 2022 proceedings.
-
+\bibitem{riemann1859}
+B.~Riemann, \emph{\"Ueber die Anzahl der Primzahlen unter einer
+gegebenen Gr\"osse}, Monatsberichte der K\"oniglich Preu\ss ischen
+Akademie der Wissenschaften zu Berlin, 1859.
+\bibitem{hardy1914}
+G.H.~Hardy, \emph{Sur les z\'eros de la fonction $\zeta(s)$ de
+Riemann}, C.R. Acad. Sci. Paris \textbf{158} (1914).
+\bibitem{godel1931}
+K.~G\"odel, \emph{\"Uber formal unentscheidbare S\"atze}, 1931.
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
 \end{thebibliography}
 
 \end{document}
