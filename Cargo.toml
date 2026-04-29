@@ -40,6 +40,7 @@ members = [
     "experiments/siegel-walfisz",
     "experiments/hilbert-spectral",
     "experiments/van-hove-probe",
+    "experiments/character-spectral",
 ]
 
 [profile.release]
