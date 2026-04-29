@@ -161,6 +161,25 @@ theorem ipr_basis {n : ℕ} (k : Fin n) :
     if i = k then 1 else 0 from by split_ifs <;> norm_num]
   simp [Finset.sum_ite_eq', Finset.mem_univ]
 
+/-- **IPR of the uniform vector** (maximally delocalized):
+    The vector (1/√n, ..., 1/√n) has IPR = 1/n, the minimum.
+    Proof: Σ (1/√n)⁴ = n · 1/(√n)⁴ = n · 1/n² = 1/n. -/
+theorem ipr_uniform {n : ℕ} (hn : 0 < n) :
+    ipr (fun _ : Fin n => (1 : ℝ) / Real.sqrt n) = 1 / (n : ℝ) := by
+  unfold ipr
+  simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
+  have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
+  have hsqrt_pos : (0 : ℝ) < Real.sqrt n := Real.sqrt_pos.mpr hn_pos
+  rw [div_pow, one_pow]
+  -- Goal: ↑n * (1 / (√n)⁴) = 1 / ↑n
+  -- Key identity: (√n)⁴ = ((√n)²)² = n²
+  have h_sq : Real.sqrt n ^ 2 = (n : ℝ) := Real.sq_sqrt (le_of_lt hn_pos)
+  have h_pow4 : Real.sqrt n ^ 4 = (n : ℝ) ^ 2 := by
+    calc Real.sqrt n ^ 4 = (Real.sqrt n ^ 2) ^ 2 := by ring
+    _ = (n : ℝ) ^ 2 := by rw [h_sq]
+  rw [h_pow4]
+  field_simp
+
 -- ════════════════════════════════════════════════
 -- §3. EXPERIMENTAL CONSTANTS (Exploration 19)
 -- ════════════════════════════════════════════════
