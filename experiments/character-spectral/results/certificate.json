@@ -2,15 +2,19 @@
   "experiment": "Cathedral Character-Projected Spectral Probe",
   "precision_bits": 128,
   "threads": 12,
-  "timestamp": "2026-04-29T01:21:47.791872+00:00",
+  "timestamp": "2026-04-29T01:31:45.614592+00:00",
   "character_modulus": 8,
   "num_channels": 4,
   "question": "Does Poisson→GUE transition depend on mod-8 character channel?",
-  "max_N_tested": 50,
+  "max_N_tested": 200,
   "character_orthogonality_verified": true,
   "results": [
     {"N": 30, "full_class": "Poisson", "dark_class": "Poisson", "chi_dims": [14, 14, 14, 14]},
-    {"N": 50, "full_class": "Poisson", "dark_class": "Poisson", "chi_dims": [24, 24, 24, 24]}
+    {"N": 50, "full_class": "Poisson", "dark_class": "Poisson", "chi_dims": [24, 24, 24, 24]},
+    {"N": 75, "full_class": "GOE (β=1)", "dark_class": "Poisson", "chi_dims": [37, 37, 37, 37]},
+    {"N": 100, "full_class": "GOE (β=1)", "dark_class": "Poisson", "chi_dims": [49, 49, 49, 49]},
+    {"N": 150, "full_class": "GOE (β=1)", "dark_class": "GOE (β=1)", "chi_dims": [74, 74, 74, 74]},
+    {"N": 200, "full_class": "GOE (β=1)", "dark_class": "GOE (β=1)", "chi_dims": [99, 99, 99, 99]}
   ],
-  "elapsed_seconds": 3.682
+  "elapsed_seconds": 573.437
 }

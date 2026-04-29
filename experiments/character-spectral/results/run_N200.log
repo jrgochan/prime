@@ -1,0 +1,378 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL CHARACTER-PROJECTED SPECTRAL PROBE[0m
+  [1m[36m║[0m  [2mMod-8 character decomposition of G_N eigenvalue spectrum · max N = 200[0m
+  [1m[36m║[0m  [2m128-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [2m▸ Character orthogonality self-test...[0m
+    [32m✓[0m Σ χᵢ(k)·χⱼ(k) = 4·δᵢⱼ for all 16 pairs (matches Lean χ₈_orthogonality)
+
+  [2mTest schedule: [30, 50, 75, 100, 150, 200][0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=30) ═══[0m
+    Building 29×29 Gram matrix (435 entries, 128-bit MPFR)...
+    Full dim: 29 | Odd: 14 | Even: 15 | χ₀: 14 | χ₁: 14 | χ₂: 14 | χ₃: 14
+    [32m✓[0m dim(odd) + dim(even) = 29 = dim(full) = 29
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=30) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │    29 │   0.0012373179 │   2.4724041722 │     1.998e3 │ 0.9s
+  χ₀ (principal) │    14 │   0.0024787501 │   1.1712382896 │     4.725e2 │ 0.0s
+  χ₁             │    14 │   0.0024787501 │   1.1712382896 │     4.725e2 │ 0.0s
+  χ₂             │    14 │   0.0024787501 │   1.1712382896 │     4.725e2 │ 0.0s
+  χ₃             │    14 │   0.0024787501 │   1.1712382896 │     4.725e2 │ 0.0s
+  Odd sector     │    14 │   0.0024787501 │   1.1712382896 │     4.725e2 │ 0.0s
+  Dark (even)    │    15 │   0.0020500030 │   1.3320749574 │     6.498e2 │ 0.0s
+    [32m✓[0m Tr(full) = 3.163521 ≈ Tr(odd)+Tr(even) = 3.163521 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=30) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.3187 │   0.3956 │   0.2444 │   0.6014 │ [33mPoisson[0m
+  χ₀ (principal) │   0.1212 │   0.1358 │   0.1088 │   0.2233 │ [33mPoisson[0m
+  χ₁             │   0.1212 │   0.1358 │   0.1088 │   0.2233 │ [33mPoisson[0m
+  χ₂             │   0.1212 │   0.1358 │   0.1088 │   0.2233 │ [33mPoisson[0m
+  χ₃             │   0.1212 │   0.1358 │   0.1088 │   0.2233 │ [33mPoisson[0m
+  Odd sector     │   0.1212 │   0.1358 │   0.1088 │   0.2233 │ [33mPoisson[0m
+  Dark (even)    │   0.1692 │   0.2026 │   0.1408 │   0.4040 │ [33mPoisson[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=30) ═══[0m
+    Full G_N      : A=0.038643 E₀=1.224945e-3 B=0.431736 R²=0.8403 [31m✗[0m
+    χ₀ (principal): A=0.048499 E₀=2.453963e-3 B=0.523259 R²=0.7780 [31m✗[0m
+    χ₁            : A=0.048499 E₀=2.453963e-3 B=0.523259 R²=0.7780 [31m✗[0m
+    χ₂            : A=0.048499 E₀=2.453963e-3 B=0.523259 R²=0.7780 [31m✗[0m
+    χ₃            : A=0.048499 E₀=2.453963e-3 B=0.523259 R²=0.7780 [31m✗[0m
+    Odd sector    : A=0.048499 E₀=2.453963e-3 B=0.523259 R²=0.7780 [31m✗[0m
+    Dark (even)   : A=0.045568 E₀=2.029503e-3 B=0.500558 R²=0.7774 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=30) ═══[0m
+    Dark sector (even indices): 15 eigenvalues
+    Level spacing: GUE=0.1692 GOE=0.2026 Poisson=0.4040 → [33mPoisson[0m
+    [32m✓[0m Dark sector is Poisson (uncorrelated) — characters don't see these levels
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=30) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.8331
+    Odd  vs Dark: ρ = +0.9116
+
+    [2mN=30 completed in 0.9s[0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=50) ═══[0m
+    Building 49×49 Gram matrix (1225 entries, 128-bit MPFR)...
+    Full dim: 49 | Odd: 24 | Even: 25 | χ₀: 24 | χ₁: 24 | χ₂: 24 | χ₃: 24
+    [32m✓[0m dim(odd) + dim(even) = 49 = dim(full) = 49
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=50) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │    49 │   0.0004345566 │   2.8726535536 │     6.611e3 │ 2.7s
+  χ₀ (principal) │    24 │   0.0009599383 │   1.3782306134 │     1.436e3 │ 0.0s
+  χ₁             │    24 │   0.0009599383 │   1.3782306134 │     1.436e3 │ 0.0s
+  χ₂             │    24 │   0.0009599383 │   1.3782306134 │     1.436e3 │ 0.0s
+  χ₃             │    24 │   0.0009599383 │   1.3782306134 │     1.436e3 │ 0.0s
+  Odd sector     │    24 │   0.0009599383 │   1.3782306134 │     1.436e3 │ 0.0s
+  Dark (even)    │    25 │   0.0007708112 │   1.5209079365 │     1.973e3 │ 0.0s
+    [32m✓[0m Tr(full) = 3.786186 ≈ Tr(odd)+Tr(even) = 3.786186 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=50) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.4140 │   0.5332 │   0.3064 │   0.7699 │ [33mPoisson[0m
+  χ₀ (principal) │   0.2430 │   0.2640 │   0.2170 │   0.3311 │ [33mPoisson[0m
+  χ₁             │   0.2430 │   0.2640 │   0.2170 │   0.3311 │ [33mPoisson[0m
+  χ₂             │   0.2430 │   0.2640 │   0.2170 │   0.3311 │ [33mPoisson[0m
+  χ₃             │   0.2430 │   0.2640 │   0.2170 │   0.3311 │ [33mPoisson[0m
+  Odd sector     │   0.2430 │   0.2640 │   0.2170 │   0.3311 │ [33mPoisson[0m
+  Dark (even)    │   0.3096 │   0.3666 │   0.2585 │   0.5879 │ [33mPoisson[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=50) ═══[0m
+    Full G_N      : A=0.038198 E₀=4.302110e-4 B=0.440736 R²=0.7083 [31m✗[0m
+    χ₀ (principal): A=0.033366 E₀=9.503390e-4 B=0.389685 R²=0.8170 [31m✗[0m
+    χ₁            : A=0.033366 E₀=9.503390e-4 B=0.389685 R²=0.8170 [31m✗[0m
+    χ₂            : A=0.033366 E₀=9.503390e-4 B=0.389685 R²=0.8170 [31m✗[0m
+    χ₃            : A=0.033366 E₀=9.503390e-4 B=0.389685 R²=0.8170 [31m✗[0m
+    Odd sector    : A=0.033366 E₀=9.503390e-4 B=0.389685 R²=0.8170 [31m✗[0m
+    Dark (even)   : A=0.030171 E₀=7.631031e-4 B=0.359520 R²=0.7876 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=50) ═══[0m
+    Dark sector (even indices): 25 eigenvalues
+    Level spacing: GUE=0.3096 GOE=0.3666 Poisson=0.5879 → [33mPoisson[0m
+    [32m✓[0m Dark sector is Poisson (uncorrelated) — characters don't see these levels
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=50) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.8309
+    Odd  vs Dark: ρ = +0.9544
+
+    [2mN=50 completed in 2.9s[0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=75) ═══[0m
+    Building 74×74 Gram matrix (2775 entries, 128-bit MPFR)...
+    Full dim: 74 | Odd: 37 | Even: 37 | χ₀: 37 | χ₁: 37 | χ₂: 37 | χ₃: 37
+    [32m✓[0m dim(odd) + dim(even) = 74 = dim(full) = 74
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=75) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │    74 │   0.0002043769 │   3.1742504757 │     1.553e4 │ 12.4s
+  χ₀ (principal) │    37 │   0.0004236882 │   1.5385758629 │     3.631e3 │ 0.2s
+  χ₁             │    37 │   0.0004236882 │   1.5385758629 │     3.631e3 │ 0.2s
+  χ₂             │    37 │   0.0004236882 │   1.5385758629 │     3.631e3 │ 0.2s
+  χ₃             │    37 │   0.0004236882 │   1.5385758629 │     3.631e3 │ 0.2s
+  Odd sector     │    37 │   0.0004236882 │   1.5385758629 │     3.631e3 │ 0.2s
+  Dark (even)    │    37 │   0.0003756550 │   1.6595159982 │     4.418e3 │ 0.2s
+    [32m✓[0m Tr(full) = 4.286607 ≈ Tr(odd)+Tr(even) = 4.286607 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=75) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.5593 │   0.7272 │   0.3827 │   0.6953 │ [33mGOE (β=1)[0m
+  χ₀ (principal) │   0.5115 │   0.6022 │   0.3984 │   0.6398 │ [33mPoisson[0m
+  χ₁             │   0.5115 │   0.6022 │   0.3984 │   0.6398 │ [33mPoisson[0m
+  χ₂             │   0.5115 │   0.6022 │   0.3984 │   0.6398 │ [33mPoisson[0m
+  χ₃             │   0.5115 │   0.6022 │   0.3984 │   0.6398 │ [33mPoisson[0m
+  Odd sector     │   0.5115 │   0.6022 │   0.3984 │   0.6398 │ [33mPoisson[0m
+  Dark (even)    │   0.3695 │   0.4395 │   0.3007 │   0.5004 │ [33mPoisson[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=75) ═══[0m
+    Full G_N      : A=0.042179 E₀=2.023331e-4 B=0.503463 R²=0.7776 [31m✗[0m
+    χ₀ (principal): A=0.036421 E₀=4.194514e-4 B=0.432276 R²=0.7004 [31m✗[0m
+    χ₁            : A=0.036421 E₀=4.194514e-4 B=0.432276 R²=0.7004 [31m✗[0m
+    χ₂            : A=0.036421 E₀=4.194514e-4 B=0.432276 R²=0.7004 [31m✗[0m
+    χ₃            : A=0.036421 E₀=4.194514e-4 B=0.432276 R²=0.7004 [31m✗[0m
+    Odd sector    : A=0.036421 E₀=4.194514e-4 B=0.432276 R²=0.7004 [31m✗[0m
+    Dark (even)   : A=0.036781 E₀=3.718984e-4 B=0.440002 R²=0.7355 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=75) ═══[0m
+    Dark sector (even indices): 37 eigenvalues
+    Level spacing: GUE=0.3695 GOE=0.4395 Poisson=0.5004 → [33mPoisson[0m
+    [32m✓[0m Dark sector is Poisson (uncorrelated) — characters don't see these levels
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=75) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.8338
+    Odd  vs Dark: ρ = +0.9667
+
+    [2mN=75 completed in 13.6s[0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=100) ═══[0m
+    Building 99×99 Gram matrix (4950 entries, 128-bit MPFR)...
+    Full dim: 99 | Odd: 49 | Even: 50 | χ₀: 49 | χ₁: 49 | χ₂: 49 | χ₃: 49
+    [32m✓[0m dim(odd) + dim(even) = 99 = dim(full) = 99
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=100) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │    99 │   0.0001203650 │   3.3788236538 │     2.807e4 │ 38.2s
+  χ₀ (principal) │    49 │   0.0002533982 │   1.6388307106 │     6.467e3 │ 0.5s
+  χ₁             │    49 │   0.0002533982 │   1.6388307106 │     6.467e3 │ 0.5s
+  χ₂             │    49 │   0.0002533982 │   1.6388307106 │     6.467e3 │ 0.5s
+  χ₃             │    49 │   0.0002533982 │   1.6388307106 │     6.467e3 │ 0.5s
+  Odd sector     │    49 │   0.0002533982 │   1.6388307106 │     6.467e3 │ 0.6s
+  Dark (even)    │    50 │   0.0002177520 │   1.7616916336 │     8.090e3 │ 0.6s
+    [32m✓[0m Tr(full) = 4.643896 ≈ Tr(odd)+Tr(even) = 4.643896 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=100) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.5860 │   0.7711 │   0.3912 │   0.6355 │ [33mGOE (β=1)[0m
+  χ₀ (principal) │   0.5569 │   0.6275 │   0.4455 │   0.5026 │ [33mGOE (β=1)[0m
+  χ₁             │   0.5569 │   0.6275 │   0.4455 │   0.5026 │ [33mGOE (β=1)[0m
+  χ₂             │   0.5569 │   0.6275 │   0.4455 │   0.5026 │ [33mGOE (β=1)[0m
+  χ₃             │   0.5569 │   0.6275 │   0.4455 │   0.5026 │ [33mGOE (β=1)[0m
+  Odd sector     │   0.5569 │   0.6275 │   0.4455 │   0.5026 │ [33mGOE (β=1)[0m
+  Dark (even)    │   0.4372 │   0.5663 │   0.3191 │   0.6469 │ [33mPoisson[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=100) ═══[0m
+    Full G_N      : A=0.046058 E₀=1.191614e-4 B=0.562353 R²=0.7779 [31m✗[0m
+    χ₀ (principal): A=0.037168 E₀=2.508642e-4 B=0.450504 R²=0.7144 [31m✗[0m
+    χ₁            : A=0.037168 E₀=2.508642e-4 B=0.450504 R²=0.7144 [31m✗[0m
+    χ₂            : A=0.037168 E₀=2.508642e-4 B=0.450504 R²=0.7144 [31m✗[0m
+    χ₃            : A=0.037168 E₀=2.508642e-4 B=0.450504 R²=0.7144 [31m✗[0m
+    Odd sector    : A=0.037168 E₀=2.508642e-4 B=0.450504 R²=0.7144 [31m✗[0m
+    Dark (even)   : A=0.037490 E₀=2.155745e-4 B=0.458495 R²=0.7092 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=100) ═══[0m
+    Dark sector (even indices): 50 eigenvalues
+    Level spacing: GUE=0.4372 GOE=0.5663 Poisson=0.6469 → [33mPoisson[0m
+    [32m✓[0m Dark sector is Poisson (uncorrelated) — characters don't see these levels
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=100) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.7876
+    Odd  vs Dark: ρ = +0.9730
+
+    [2mN=100 completed in 41.3s[0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=150) ═══[0m
+    Building 149×149 Gram matrix (11175 entries, 128-bit MPFR)...
+    Full dim: 149 | Odd: 74 | Even: 75 | χ₀: 74 | χ₁: 74 | χ₂: 74 | χ₃: 74
+    [32m✓[0m dim(odd) + dim(even) = 149 = dim(full) = 149
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=150) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │   149 │   0.0000562562 │   3.6534370382 │     6.494e4 │ 122.1s
+  χ₀ (principal) │    74 │   0.0001154102 │   1.7798431746 │     1.542e4 │ 1.7s
+  χ₁             │    74 │   0.0001154102 │   1.7798431746 │     1.542e4 │ 1.7s
+  χ₂             │    74 │   0.0001154102 │   1.7798431746 │     1.542e4 │ 1.7s
+  χ₃             │    74 │   0.0001154102 │   1.7798431746 │     1.542e4 │ 1.7s
+  Odd sector     │    74 │   0.0001154102 │   1.7798431746 │     1.542e4 │ 1.7s
+  Dark (even)    │    75 │   0.0001021596 │   1.8930186669 │     1.853e4 │ 1.7s
+    [32m✓[0m Tr(full) = 5.149651 ≈ Tr(odd)+Tr(even) = 5.149651 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=150) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.6162 │   0.7881 │   0.4160 │   0.5965 │ [33mGOE (β=1)[0m
+  χ₀ (principal) │   0.5370 │   0.6957 │   0.3884 │   0.7621 │ [33mPoisson[0m
+  χ₁             │   0.5370 │   0.6957 │   0.3884 │   0.7621 │ [33mPoisson[0m
+  χ₂             │   0.5370 │   0.6957 │   0.3884 │   0.7621 │ [33mPoisson[0m
+  χ₃             │   0.5370 │   0.6957 │   0.3884 │   0.7621 │ [33mPoisson[0m
+  Odd sector     │   0.5370 │   0.6957 │   0.3884 │   0.7621 │ [33mPoisson[0m
+  Dark (even)    │   0.5601 │   0.7434 │   0.3869 │   0.7143 │ [33mGOE (β=1)[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=150) ═══[0m
+    Full G_N      : A=0.049432 E₀=5.569366e-5 B=0.630104 R²=0.8052 [31m✗[0m
+    χ₀ (principal): A=0.041390 E₀=1.142561e-4 B=0.514012 R²=0.7085 [31m✗[0m
+    χ₁            : A=0.041390 E₀=1.142561e-4 B=0.514012 R²=0.7085 [31m✗[0m
+    χ₂            : A=0.041390 E₀=1.142561e-4 B=0.514012 R²=0.7085 [31m✗[0m
+    χ₃            : A=0.041390 E₀=1.142561e-4 B=0.514012 R²=0.7085 [31m✗[0m
+    Odd sector    : A=0.041390 E₀=1.142561e-4 B=0.514012 R²=0.7085 [31m✗[0m
+    Dark (even)   : A=0.041460 E₀=1.011380e-4 B=0.524194 R²=0.7807 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=150) ═══[0m
+    Dark sector (even indices): 75 eigenvalues
+    Level spacing: GUE=0.5601 GOE=0.7434 Poisson=0.7143 → [33mGOE (β=1)[0m
+    [31m✗[0m Dark sector is correlated — unexpected!
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=150) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.7884
+    Odd  vs Dark: ρ = +0.9767
+
+    [2mN=150 completed in 132.3s[0m
+
+  [1m[97m═══ §A. GRAM MATRIX & PROJECTION (N=200) ═══[0m
+    Building 199×199 Gram matrix (19900 entries, 128-bit MPFR)...
+    Full dim: 199 | Odd: 99 | Even: 100 | χ₀: 99 | χ₁: 99 | χ₂: 99 | χ₃: 99
+    [32m✓[0m dim(odd) + dim(even) = 199 = dim(full) = 199
+
+  [1m[97m═══ §B. EIGENVALUE EXTRACTION (N=200) ═══[0m
+  [2m  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+  Full G_N       │   199 │   0.0000316698 │   3.8385521201 │     1.212e5 │ 352.3s
+  χ₀ (principal) │    99 │   0.0000665242 │   1.8747967846 │     2.818e4 │ 5.0s
+  χ₁             │    99 │   0.0000665242 │   1.8747967846 │     2.818e4 │ 4.9s
+  χ₂             │    99 │   0.0000665242 │   1.8747967846 │     2.818e4 │ 5.0s
+  χ₃             │    99 │   0.0000665242 │   1.8747967846 │     2.818e4 │ 5.0s
+  Odd sector     │    99 │   0.0000665242 │   1.8747967846 │     2.818e4 │ 5.0s
+  Dark (even)    │   100 │   0.0000598059 │   1.9817635986 │     3.314e4 │ 5.1s
+    [32m✓[0m Tr(full) = 5.509630 ≈ Tr(odd)+Tr(even) = 5.509630 (err=0.00e0)
+
+  [1m[97m═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N=200) ═══[0m
+  [2m  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class[0m
+  Full G_N       │   0.7383 │   0.8863 │   0.5195 │   0.5660 │ [33mGOE (β=1)[0m
+  χ₀ (principal) │   0.7224 │   0.8360 │   0.5174 │   0.5164 │ [33mGOE (β=1)[0m
+  χ₁             │   0.7224 │   0.8360 │   0.5174 │   0.5164 │ [33mGOE (β=1)[0m
+  χ₂             │   0.7224 │   0.8360 │   0.5174 │   0.5164 │ [33mGOE (β=1)[0m
+  χ₃             │   0.7224 │   0.8360 │   0.5174 │   0.5164 │ [33mGOE (β=1)[0m
+  Odd sector     │   0.7224 │   0.8360 │   0.5174 │   0.5164 │ [33mGOE (β=1)[0m
+  Dark (even)    │   0.5548 │   0.7258 │   0.3660 │   0.5971 │ [33mGOE (β=1)[0m
+
+  [1m[97m═══ §D. DENSITY OF STATES (N=200) ═══[0m
+    Full G_N      : A=0.050978 E₀=3.135309e-5 B=0.668380 R²=0.7871 [31m✗[0m
+    χ₀ (principal): A=0.044327 E₀=6.585895e-5 B=0.561642 R²=0.7025 [31m✗[0m
+    χ₁            : A=0.044327 E₀=6.585895e-5 B=0.561642 R²=0.7025 [31m✗[0m
+    χ₂            : A=0.044327 E₀=6.585895e-5 B=0.561642 R²=0.7025 [31m✗[0m
+    χ₃            : A=0.044327 E₀=6.585895e-5 B=0.561642 R²=0.7025 [31m✗[0m
+    Odd sector    : A=0.044327 E₀=6.585895e-5 B=0.561642 R²=0.7025 [31m✗[0m
+    Dark (even)   : A=0.045684 E₀=5.920784e-5 B=0.588404 R²=0.7678 [31m✗[0m
+
+  [1m[97m═══ §E. DARK SECTOR ANALYSIS (N=200) ═══[0m
+    Dark sector (even indices): 100 eigenvalues
+    Level spacing: GUE=0.5548 GOE=0.7258 Poisson=0.5971 → [33mGOE (β=1)[0m
+    [31m✗[0m Dark sector is correlated — unexpected!
+
+  [1m[97m═══ §F. CROSS-CHANNEL CORRELATIONS (N=200) ═══[0m
+  [2m  Pearson ρ between eigenvalue staircases:[0m
+    χ₀ (principal) vs χ₁ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₀ (principal) vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₂ : ρ = +1.0000 [31m✗[0m
+    χ₁ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    χ₂ vs χ₃ : ρ = +1.0000 [31m✗[0m
+    Full vs Odd : ρ = +0.7868
+    Odd  vs Dark: ρ = +0.9815
+
+    [2mN=200 completed in 382.3s[0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCHARACTER-PROJECTED SPECTRAL PROBE — CERTIFICATE[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  Precision: [33m128-bit MPFR[0m    Threads: [33m12[0m
+  [1m[36m║[0m  Characters: [33mmod 8 (4 channels)[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1mLevel Spacing Universality Classes:[0m
+  [1m[36m║[0m    N=30  : Full=[33mPoisson    [0m Dark=[33mPoisson    [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mPoisson[0m
+  [1m[36m║[0m            χ₁=[33mPoisson[0m
+  [1m[36m║[0m            χ₂=[33mPoisson[0m
+  [1m[36m║[0m            χ₃=[33mPoisson[0m
+  [1m[36m║[0m    N=50  : Full=[33mPoisson    [0m Dark=[33mPoisson    [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mPoisson[0m
+  [1m[36m║[0m            χ₁=[33mPoisson[0m
+  [1m[36m║[0m            χ₂=[33mPoisson[0m
+  [1m[36m║[0m            χ₃=[33mPoisson[0m
+  [1m[36m║[0m    N=75  : Full=[33mGOE (β=1)  [0m Dark=[33mPoisson    [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mPoisson[0m
+  [1m[36m║[0m            χ₁=[33mPoisson[0m
+  [1m[36m║[0m            χ₂=[33mPoisson[0m
+  [1m[36m║[0m            χ₃=[33mPoisson[0m
+  [1m[36m║[0m    N=100 : Full=[33mGOE (β=1)  [0m Dark=[33mPoisson    [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₁=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₂=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₃=[33mGOE (β=1)[0m
+  [1m[36m║[0m    N=150 : Full=[33mGOE (β=1)  [0m Dark=[33mGOE (β=1)  [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mPoisson[0m
+  [1m[36m║[0m            χ₁=[33mPoisson[0m
+  [1m[36m║[0m            χ₂=[33mPoisson[0m
+  [1m[36m║[0m            χ₃=[33mPoisson[0m
+  [1m[36m║[0m    N=200 : Full=[33mGOE (β=1)  [0m Dark=[33mGOE (β=1)  [0m
+  [1m[36m║[0m            χ₀ (principal)=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₁=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₂=[33mGOE (β=1)[0m
+  [1m[36m║[0m            χ₃=[33mGOE (β=1)[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1mDark Sector Hypothesis:[0m
+  [1m[36m║[0m    [32m[1m✓ Dark sector (even) is Poisson — uncorrelated[0m
+  [1m[36m║[0m    [32m  Characters partition the quantum chaos[0m
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97mTotal:[0m [32m573.4s[0m (12 threads)
+  [1m[97mOutput:[0m results/{eigenvalues_*,spacing_*,dos_*,van_hove_*,cross_corr_*}.tsv
+  [1m[97mCertificate:[0m results/certificate.json
+
