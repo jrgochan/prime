@@ -386,6 +386,7 @@ Eigenvalue limit existence & \lean{Assembly/MainChain.lean} & 0 \\
 Theta bound ($\zeta(s) \neq 0$ on $(0,1)$) & \lean{NymanBeurling/ThetaBound.lean} & 0 \\
 Montgomery--Vaughan MVT & \lean{Assembly/CrownGraduation.lean} & 0 \\
 Cauchy distribution integral & \lean{White/PlancherelBypass.lean} & 0 \\
+Robin $\iff$ NB $\iff$ Lagarias & \lean{Archive/Robin/Equivalence.lean} & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -393,6 +394,34 @@ Cauchy distribution integral & \lean{White/PlancherelBypass.lean} & 0 \\
 The Montgomery--Vaughan mean value theorem for Dirichlet polynomials
 is, to our knowledge, the first formalization of this result in any
 proof assistant.
+
+\subsection{The Cross-Path Bridge: Robin and Lagarias}
+\label{sec:robin}
+
+The Cathedral also establishes machine-verified equivalences between
+the Nyman--Beurling criterion and two independent arithmetic
+characterizations of RH:
+
+\begin{itemize}
+  \item \textbf{Robin's inequality}: $\sigma(n) < e^\gamma n \ln\ln n$
+    for all $n \geq 5041$.
+  \item \textbf{Lagarias's inequality}: $\sigma(n) \leq H_n + e^{H_n}\ln H_n$
+    for all $n \geq 1$.
+\end{itemize}
+
+Four theorems, all proved with zero sorry and zero axioms:
+\begin{itemize}
+  \item \lean{robin\_implies\_nyman\_beurling}: Robin $\implies$ $d_N^2 \to 0$.
+  \item \lean{lagarias\_implies\_nyman\_beurling}: Lagarias $\implies$ $d_N^2 \to 0$.
+  \item \lean{nyman\_beurling\_implies\_robin}: $d_N^2 \to 0$ $\implies$ Robin.
+  \item \lean{nyman\_beurling\_implies\_lagarias}: $d_N^2 \to 0$ $\implies$ Lagarias.
+\end{itemize}
+
+This establishes the full equivalence cycle
+$\text{Robin} \iff \text{NB} \iff \text{Lagarias} \iff \text{RH}$,
+connecting a discrete bound on divisor sums to $L^2$ convergence
+of step-function approximations---two entirely different mathematical
+universes, bridged by the Cathedral.
 
 % ================================================================
 \section{The B\'aez-Duarte Constant}
