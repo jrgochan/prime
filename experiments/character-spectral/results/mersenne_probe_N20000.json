@@ -1,0 +1,19 @@
+{
+  "experiment": "mersenne-probe",
+  "N": 20000,
+  "candidates": 1421,
+  "lambda_min_submatrix": -1.814521380241e-9,
+  "prime_weight": 0.1183557793,
+  "composite_weight": 0.8816442207,
+  "top_fermion": {
+    "k": 1224,
+    "weight": 4.032575375123e-2,
+    "d_k": 24,
+    "omega": 3,
+    "factors": "2^3·3^2·17"
+  },
+  "top_boson": {
+    "k": 613,
+    "weight": 1.915907512945e-2
+  }
+}

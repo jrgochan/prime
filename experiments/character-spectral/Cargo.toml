@@ -32,6 +32,10 @@ path = "src/boson_fermion.rs"
 name = "particle-sieve"
 path = "src/particle_sieve.rs"
 
+[[bin]]
+name = "mersenne-probe"
+path = "src/mersenne_probe.rs"
+
 [dependencies]
 rug = "1.26"
 rayon = "1.10"
