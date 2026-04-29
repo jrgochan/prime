@@ -1,0 +1,19 @@
+{
+  "experiment": "particle-sieve",
+  "N": 1000000000,
+  "prime_count": 50847534,
+  "composite_count": 949152465,
+  "prime_density": 0.05084753,
+  "highly_composite_count": 65,
+  "superabundant_count": 45,
+  "max_omega": 9,
+  "top_highly_composite": {
+    "k": 735134400,
+    "d_k": 1344,
+    "sigma_k": 3809756160,
+    "omega": 7,
+    "factors": "2^6·3^3·5^2·7·11·13·17"
+  },
+  "omega_distribution": [{"omega": 1, "count": 50851223}, {"omega": 2, "count": 206415108}, {"omega": 3, "count": 332590117}, {"omega": 4, "count": 269536378}, {"omega": 5, "count": 114407511}, {"omega": 6, "count": 24020091}, {"omega": 7, "count": 2124141}, {"omega": 8, "count": 55292}, {"omega": 9, "count": 138}],
+  "elapsed_secs": 147.76
+}

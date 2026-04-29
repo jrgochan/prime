@@ -38,65 +38,90 @@ struct SieveResult {
 }
 
 fn arithmetic_sieve(n: usize) -> SieveResult {
+    let t0 = Instant::now();
+
+    // ── Phase 0: Allocate arrays ──
+    eprintln!("  {DIM}  Allocating {:.1} GB...{RESET}",
+        (n + 1) as f64 * (1 + 4 + 8 + 1 + 1) as f64 / 1e9);
     let mut is_prime = vec![true; n + 1];
-    let mut smallest_pf = vec![0u32; n + 1];
     let mut num_divisors = vec![0u32; n + 1];
     let mut divisor_sum = vec![0u64; n + 1];
     let mut omega = vec![0u8; n + 1];
     let mut big_omega = vec![0u8; n + 1];
+    eprintln!("  {DIM}  Allocated ({:.1}s){RESET}", t0.elapsed().as_secs_f64());
 
     is_prime[0] = false;
     is_prime[1] = false;
 
-    // Step 1: Sieve of Eratosthenes + smallest prime factor
+    // ── Phase 1: Sieve of Eratosthenes + additive ω/Ω sieve ──
+    // For each prime p, mark composites AND increment ω/Ω for all multiples.
+    // This is O(N log log N) — much faster than trial division at N=1B.
+    eprintln!("  {DIM}  Phase 1: Prime sieve + ω/Ω (O(N log log N))...{RESET}");
+    let sqrt_n = (n as f64).sqrt() as usize + 1;
+
     for p in 2..=n {
         if !is_prime[p] { continue; }
-        smallest_pf[p] = p as u32;
-        if p as u128 * p as u128 > n as u128 { continue; }
-        let mut j = p * p;
-        while j <= n {
-            if is_prime[j] {
+
+        // p is prime: set its own ω and Ω
+        omega[p] = 1;
+        big_omega[p] = 1;
+
+        // Mark composites (only need to start at p² for primality)
+        if p <= sqrt_n {
+            let mut j = p * p;
+            while j <= n {
                 is_prime[j] = false;
-                smallest_pf[j] = p as u32;
+                j += p;
             }
+        }
+
+        // Increment ω for all multiples of p (starting at 2p)
+        let mut j = 2 * p;
+        while j <= n {
+            omega[j] += 1;
             j += p;
         }
-    }
 
-    // Fix: for composites whose smallest_pf wasn't set (shouldn't happen with sieve)
-    for k in 2..=n {
-        if smallest_pf[k] == 0 && !is_prime[k] {
-            for p in 2.. {
-                if k % p == 0 {
-                    smallest_pf[k] = p as u32;
-                    break;
-                }
+        // Increment Ω for all multiples of p, p², p³, ...
+        let mut pk = p; // p^1, p^2, p^3, ...
+        loop {
+            // Check overflow before multiplication
+            if pk > n / p { break; } // pk * p would overflow or exceed n
+            let next_pk = pk * p;
+            if next_pk > n { break; }
+            pk = next_pk;
+            let mut j = pk;
+            while j <= n {
+                big_omega[j] += 1;
+                j += pk;
             }
+        }
+
+        if p % 10_000_000 == 1 && p > 1 {
+            eprint!("\r  {DIM}  Phase 1: p = {} ({:.0}%) {:.1}s{RESET}    ",
+                p, 100.0 * p as f64 / n as f64, t0.elapsed().as_secs_f64());
         }
     }
 
-    // Step 2: Compute ω(k) and Ω(k) by trial division using smallest_pf
+    // Ω: we counted extra powers above; the base count for each prime is
+    // done via the omega pass. But Ω = total prime factors with multiplicity.
+    // Easier approach: Ω(k) = sum over p|k of v_p(k).
+    // The additive sieve above incremented omega[j] once per prime p dividing j,
+    // and big_omega[j] once per prime power p^a dividing j (for a >= 2).
+    // So big_omega[j] currently has the count of higher powers only.
+    // Total Ω = omega + big_omega (omega counts the base, big_omega the extras).
     for k in 2..=n {
-        let mut m = k;
-        let mut w = 0u8;
-        let mut big_w = 0u8;
-        while m > 1 {
-            let p = if is_prime[m] { m as u32 } else { smallest_pf[m] };
-            if p == 0 { break; }
-            w += 1;
-            while m % (p as usize) == 0 {
-                m /= p as usize;
-                big_w += 1;
-            }
-        }
-        omega[k] = w;
-        big_omega[k] = big_w;
+        big_omega[k] += omega[k];
     }
 
-    // Step 3: Compute d(k) and σ(k) using multiplicative sieve
-    // d(k) = Σ_{d|k} 1, σ(k) = Σ_{d|k} d
+    eprintln!("\r  {DIM}  Phase 1 done ({:.1}s){RESET}                    ", t0.elapsed().as_secs_f64());
+
+    // ── Phase 2: Divisor sieve for d(k) and σ(k) ──
+    // This is O(N log N) — the slowest phase at ~21B ops for N=1B.
+    eprintln!("  {DIM}  Phase 2: Divisor sieve d(k), σ(k) (O(N log N))...{RESET}");
     num_divisors[1] = 1;
     divisor_sum[1] = 1;
+    let phase2_start = Instant::now();
     for d in 1..=n {
         let mut k = d;
         while k <= n {
@@ -104,9 +129,21 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
             divisor_sum[k] += d as u64;
             k += d;
         }
+        if d % 10_000_000 == 0 {
+            let frac = d as f64 / n as f64;
+            let elapsed = phase2_start.elapsed().as_secs_f64();
+            let eta = elapsed / frac * (1.0 - frac);
+            eprint!("\r  {DIM}  Phase 2: d = {} ({:.0}%) ETA {:.0}s{RESET}    ",
+                d, frac * 100.0, eta);
+        }
     }
+    eprintln!("\r  {DIM}  Phase 2 done ({:.1}s){RESET}                        ", t0.elapsed().as_secs_f64());
 
-    SieveResult { n, is_prime, smallest_pf, num_divisors, divisor_sum, omega, big_omega }
+    SieveResult {
+        n, is_prime,
+        smallest_pf: Vec::new(), // not needed at large N
+        num_divisors, divisor_sum, omega, big_omega,
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
