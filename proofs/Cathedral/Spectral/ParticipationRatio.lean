@@ -1,5 +1,6 @@
 import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
+import Mathlib.Algebra.Order.Chebyshev
 
 /-!
   Cathedral/Spectral/ParticipationRatio.lean
@@ -110,12 +111,15 @@ theorem ipr_lower_bound {n : ℕ} (hn : 0 < n) (v : Fin n → ℝ)
   -- Suffices: (Σ v_i²)² ≤ n * Σ v_i⁴
   suffices h : (∑ i : Fin n, v i ^ 2) ^ 2 ≤ ↑n * ∑ i : Fin n, v i ^ 4 by
     rw [h_sum_sq] at h; linarith
-  -- The standard Cauchy-Schwarz for finite sums:
-  -- (Σ a_i)² ≤ n · Σ a_i² where a_i = v_i²
-  -- This follows from 0 ≤ n·Σa² - (Σa)², which equals Σ_{i,j} (a_i - a_j)²/2
-  -- We prove this using Finset.sum_div_pow_mul_pow_le_pow_mul from Mathlib,
-  -- or by a direct sorry (the bound is elementary but the Lean proof is verbose)
-  sorry -- Elementary: (Σ a_i)² ≤ n · Σ a_i² for a_i = v_i²
+  -- Use Chebyshev/Cauchy-Schwarz: (Σ a_i)² ≤ #s · Σ a_i² for a_i = v_i²
+  -- Mathlib: sq_sum_le_card_mul_sum_sq
+  calc (∑ i : Fin n, v i ^ 2) ^ 2
+      ≤ ↑(Finset.univ : Finset (Fin n)).card *
+        ∑ i : Fin n, (v i ^ 2) ^ 2 := sq_sum_le_card_mul_sum_sq
+    _ = ↑n * ∑ i : Fin n, v i ^ 4 := by
+        congr 1
+        · simp [Finset.card_univ, Fintype.card_fin]
+        · congr 1; ext i; ring
 
 /-- **Participation ratio range**: 1 ≤ PR(v) ≤ n for any unit vector.
 
