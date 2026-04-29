@@ -1,0 +1,187 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+
+\title{%
+  The Cathedral and Society:\\
+  Legal, Policy, and Educational Perspectives\\
+  on Machine-Verified Mathematics%
+}
+\author{Jason Robert Gochanour}
+\date{April 28, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We examine the legal, policy, and educational implications of the
+Cathedral project. We address intellectual property questions
+(can a machine-verified proof be patented? who owns AI-assisted
+mathematics?), governance implications (how should formally
+verified results be treated by standards bodies?), and educational
+applications (how can the Cathedral be used to teach analytic number
+theory, formal verification, and mathematical research methodology?).
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction}
+% ================================================================
+
+The Cathedral is a mathematical object, but it exists in a legal,
+political, and educational context. A formally verified reduction
+of the Riemann Hypothesis raises questions that pure mathematics
+does not usually encounter.
+
+% ================================================================
+\section{Intellectual Property}
+% ================================================================
+
+\subsection{Copyright}
+
+Mathematical theorems cannot be copyrighted (Baker v. Selden, 1879).
+However, the \emph{expression} of a proof---the specific Lean code,
+the paper text, the documentation---is copyrightable. The Cathedral's
+code is released under an open-source license.
+
+\subsection{Patents}
+
+Mathematical methods are generally not patentable (Alice Corp. v.
+CLS Bank, 2014). However, specific \emph{applications} of the
+Cathedral's mathematical infrastructure---such as the M\"obius
+Harmonic Analyzer or the arithmetic fingerprinting protocol---could
+potentially be patented as methods or devices.
+
+The author has chosen not to pursue patents, consistent with the
+tradition of mathematical openness.
+
+\subsection{AI Authorship}
+
+The Cathedral was built with significant AI contributions. Under
+current U.S. law (Thaler v. Perlmutter, 2023), AI systems cannot
+be listed as authors or inventors. The human author retains sole
+authorship, with AI contributions acknowledged.
+
+This legal framework may evolve. The Cathedral's detailed records
+of human-AI collaboration (COMM-LINKs, exploration logs) provide
+a useful case study for future legal analysis.
+
+% ================================================================
+\section{Policy Implications}
+% ================================================================
+
+\subsection{Standards for Formal Verification}
+
+Should formally verified mathematical results carry more weight
+than traditional peer-reviewed proofs? We argue yes, with caveats:
+
+\begin{enumerate}
+  \item \textbf{Compiler trust}: The verification is only as
+    trustworthy as the Lean kernel (5{,}000 LOC).
+  \item \textbf{Specification trust}: The formalization must
+    faithfully represent the mathematical intent.
+  \item \textbf{Axiom transparency}: All axioms must be
+    explicitly documented.
+\end{enumerate}
+
+The Cathedral satisfies all three criteria.
+
+\subsection{Dual-Use Governance}
+
+The Cathedral's dual-use paper (\emph{The Dark Mirror}) identifies
+7 risk categories where the mathematical infrastructure could be
+weaponized. This raises governance questions:
+\begin{itemize}
+  \item Should verified instability certificates be classified?
+  \item Who is responsible for misuse of openly published
+    mathematical results?
+  \item How should the tension between mathematical openness and
+    security be managed?
+\end{itemize}
+
+We follow the tradition of responsible disclosure: publishing
+the mathematics with explicit threat analysis and defense strategies.
+
+\subsection{Funding and Incentives}
+
+Formal verification is expensive (32 days of intensive work for
+the Cathedral). Current academic incentive structures reward
+traditional papers, not machine-verified proofs. Policy changes
+that could help:
+\begin{itemize}
+  \item Funding agencies accepting formal proofs as deliverables.
+  \item Journals accepting Lean code as supplementary material.
+  \item Tenure committees recognizing formalization contributions.
+\end{itemize}
+
+% ================================================================
+\section{Educational Applications}
+% ================================================================
+
+\subsection{Teaching Analytic Number Theory}
+
+The Cathedral provides a structured curriculum:
+\begin{enumerate}
+  \item \textbf{Week 1--2}: The Nyman--Beurling criterion
+    (definitions, Gram matrix, positive definiteness).
+  \item \textbf{Week 3--4}: The converse direction
+    (Mellin transforms, rank-1 factorization).
+  \item \textbf{Week 5--6}: The forward direction
+    (Parseval bridge, Hardy--Littlewood MVT).
+  \item \textbf{Week 7--8}: Numerical experiments
+    (Rust/MPFR, Vasyunin formula, eigenvalue computation).
+\end{enumerate}
+
+Each topic has both a mathematical treatment (the companion papers)
+and a machine-verified formalization (the Lean code).
+
+\subsection{Teaching Formal Verification}
+
+The Cathedral demonstrates practical ITP skills:
+\begin{itemize}
+  \item Working with Mathlib APIs (interval integrals, matrices).
+  \item Managing axioms in evolving codebases.
+  \item The layered module architecture pattern.
+  \item Debugging type-class inference failures.
+\end{itemize}
+
+\subsection{Teaching Research Methodology}
+
+The Cathedral's archive of 100 abandoned approaches, 5 formalization
+traps, and 11 axiom graduations provides a realistic picture of
+mathematical research---including the failures that are usually
+invisible in published papers.
+
+% ================================================================
+\section{Accessibility}
+% ================================================================
+
+The Cathedral is designed for accessibility:
+\begin{itemize}
+  \item All code is open source.
+  \item All papers are freely available.
+  \item The Lean code compiles with standard tooling.
+  \item The Rust experiments build with \texttt{cargo build}.
+  \item No proprietary software is required at any step.
+\end{itemize}
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The Cathedral exists at the intersection of mathematics, computer
+science, law, and education. Its open-source release, transparent
+axiom documentation, and dual-use risk assessment provide a model
+for responsible publication of formally verified frontier mathematics.
+
+\begin{thebibliography}{99}
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
+\bibitem{alice2014}
+Alice Corp. v. CLS Bank International, 573 U.S. 208 (2014).
+\bibitem{thaler2023}
+Thaler v. Perlmutter, No. 1:22-cv-01564 (D.D.C. 2023).
+\end{thebibliography}
+
+\end{document}

@@ -9,7 +9,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026}
+\date{April 28, 2026 --- v15, Spectral Universality}
 
 \begin{document}
 
@@ -24,8 +24,8 @@ equivalence
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^N v_k \fract{1/(kx)})^2\,dx$
 is the Nyman--Beurling distance in the B\'aez-Duarte basis. The
-formalization comprises 174 active Lean files (43{,}387 lines) with zero
-compilation errors, resting on 55 mathematical axioms. Of these, only
+formalization comprises 208 active Lean files (50{,}623 lines) with zero
+compilation errors, resting on 104 mathematical axioms. Of these, only
 \textbf{2} appear on the critical path of the crown theorem
 \lean{nyman\_beurling\_equivalence}: one Hardy--Littlewood Mellin variance
 bound and one Hadamard zero-counting zeta lower bound---both classical
@@ -425,7 +425,7 @@ Zero sorry on the crown path.
 
 \subsection{The Full Axiom Registry}
 
-The complete codebase contains 55 axioms across 174 active files,
+The complete codebase contains 104 axioms across 208 active files,
 organized by tier:
 
 \begin{center}
@@ -436,15 +436,15 @@ organized by tier:
 1 & Crown axioms (Mellin variance, Hadamard) & 2 & 2 \\
 2 & Spectral engine (off-path) & 7 & 0 \\
 3 & Sieve engine (off-path) & 8 & 0 \\
-4 & MellinBridge / alt paths / Vasyunin & 25 & 0 \\
-5 & Analysis / PNT / other & 13 & 0 \\
+4 & MellinBridge / alt paths / Vasyunin & 42 & 0 \\
+5 & Analysis / PNT / other & 38 & 0 \\
 \midrule
-& \textbf{Total} & \textbf{55} & \textbf{2} \\
+& \textbf{Total} & \textbf{104} & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-The 53 non-critical axioms support alternative proof paths
+The 102 non-critical axioms support alternative proof paths
 (spectral engine, sieve engine, Perron chain, Vasyunin cotangent formula)
 that are formalized but not on the shortest path to the crown theorem.
 
@@ -479,6 +479,11 @@ The v12 Crown Graduation (April 28, 2026) closed the final
 warnings on the crown path, and machine-verified the
 Montgomery--Vaughan mean value theorem---the first Dirichlet
 polynomial MVT formalized in any proof assistant.
+The v15 Spectral Universality update (April~28, 2026) added
+generalized residue class decomposition (\lean{ResidueDecomposition.lean})
+and participation ratio bounds (\lean{ParticipationRatio.lean}),
+supporting certified eigenvalue and eigenvector analysis through
+$N = 1000$ via the \texttt{cert-export} pipeline.
 
 Each reduction was achieved by proving axioms as theorems from
 Mathlib, archiving the superseded declarations, and verifying
@@ -680,16 +685,18 @@ The Cathedral is organized into 13 modules:
 \lean{MellinBridge} & Mellin transforms, Plancherel & 14 & 0 \\
 \lean{Gram} & Gram matrix bounds & 8 & 0 \\
 \lean{LinearAlgebra} & Sherman--Morrison, Schur, Sylvester & 4 & 0 \\
-\lean{Spectral} & Rayleigh, PT-symmetry (off-path) & 6 & 0 \\
+\lean{Spectral} & Rayleigh, class restriction, residue decomp. & 9 & 0 \\
 \lean{Sieve} & Bilinear sieve (off-path) & 5 & 0 \\
 \lean{Structural} & Eigenvalue bounds & 3 & 0 \\
+\lean{Rotors} & Stained Glass (Gallagher partition) & 10 & 0 \\
+\lean{Zeta} & Zeta bounds, Borel--Carath\'eodory & 14 & 0 \\
 \midrule
-& \textbf{Total} & \textbf{174} (active) & \textbf{2} \\
+& \textbf{Total} & \textbf{208} (active) & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-An additional 128 files are preserved in \lean{Archive/}, documenting
+An additional 100 files are preserved in \lean{Archive/}, documenting
 superseded approaches (see \texttt{ARCHIVE.md}).
 
 \subsection{The Axiom Audit Protocol}

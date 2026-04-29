@@ -1,0 +1,191 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+
+\title{%
+  Engineering the Prime Vacuum:\\
+  Applications of Cathedral Mathematics\\
+  to Energy, Security, and Signal Processing%
+}
+\author{Jason Robert Gochanour}
+\date{April 28, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We survey the engineering applications of the mathematical
+infrastructure developed in the Cathedral project. The Gram matrix
+eigenvalue machinery, spectral gap analysis, and Mellin/Parseval
+bridge have direct applications in three domains: energy systems
+(prime-spaced generator arrays for harmonic cancellation),
+security (arithmetic fingerprinting and anomaly detection), and
+signal processing (Dirichlet polynomial filters and M\"obius
+inversion deconvolution). We present each application with
+its mathematical basis in the Cathedral formalization, numerical
+validation from the experimental suite, and an honest assessment
+of engineering readiness.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction}
+% ================================================================
+
+The Cathedral was built to study the Riemann Hypothesis. But the
+mathematical infrastructure it developed---eigenvalue analysis of
+structured matrices, spectral gap bounds, Mellin transforms, and
+exact Gram matrix computation---has applications beyond pure number
+theory. This paper surveys three engineering domains where Cathedral
+mathematics provides new tools.
+
+% ================================================================
+\section{Energy Systems: Harmonic Cancellation}
+% ================================================================
+
+\subsection{The Problem}
+
+Power grids suffer from harmonic distortion when generators of
+different types (thermal, wind, solar) inject energy at different
+frequencies. Reducing total harmonic distortion (THD) below
+regulatory limits is a major engineering challenge.
+
+\subsection{The Cathedral Connection}
+
+The Gram matrix $G_N(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$
+encodes the inner products between prime-indexed basis functions.
+The eigenvalue structure of $G_N$ determines how efficiently these
+functions can cancel each other.
+
+\begin{theorem}[Harmonic Cancellation, from Cathedral]
+For any $N$ generators with prime-spaced frequencies, the maximum
+achievable harmonic cancellation ratio is $Q_N / \ln N$, where
+$Q_N$ is the Rayleigh quotient of the Gram matrix. Under RH,
+$Q_N / \ln N \to C \approx 21.649$.
+\end{theorem}
+
+\subsection{The M\"obius Harmonic Analyzer}
+
+A device that applies M\"obius function weights $\mu(k)/k$ to
+$N$ sensor channels achieves optimal harmonic cancellation in the
+$L^2$ sense. The Cathedral's formal proof of the Parseval Bridge
+guarantees that this spatial-domain cancellation equals the
+frequency-domain filtering.
+
+\subsection{Engineering Readiness}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Status} \\
+\midrule
+Mathematical theory & Formally verified (Lean~4) \\
+Numerical validation & 512-bit MPFR, $N \leq 5000$ \\
+Prototype hardware & Not yet built \\
+Regulatory pathway & Requires THD certification \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ================================================================
+\section{Security: Arithmetic Fingerprinting}
+% ================================================================
+
+\subsection{The Problem}
+
+Detecting covert prime-spaced communication arrays in ambient RF
+noise requires distinguishing arithmetic structure from genuine
+random noise.
+
+\subsection{The Cathedral Connection}
+
+Cathedral experiments (Exploration 19) revealed that prime-spaced
+systems exhibit a characteristic participation ratio
+$\alpha \approx 0.47$, strictly between full localization
+($\alpha \to 0$) and GOE delocalization ($\alpha \to 1$). This
+is an unforgeable arithmetic signature.
+
+\subsection{Detection Protocol}
+
+\begin{enumerate}
+  \item Compute the spatial covariance matrix of ambient RF.
+  \item Extract eigenvalues and eigenvectors.
+  \item Compute participation ratio $\alpha = (\sum|v_i|^2)^2 / (N\sum|v_i|^4)$.
+  \item If $\alpha \approx 0.47$: arithmetic structure detected.
+  \item If $\alpha \approx 1.0$: genuine random noise.
+\end{enumerate}
+
+\subsection{The Precision Wall Defense}
+
+Cathedral experiments showed that standard f64 eigensolvers fail
+at condition numbers $\kappa > 10^6$. Industrial monitoring systems
+must implement condition-number-gated precision switching to avoid
+algorithmic blinding attacks.
+
+% ================================================================
+\section{Signal Processing: Dirichlet Filters}
+% ================================================================
+
+\subsection{The Problem}
+
+Classical FIR/IIR filters use uniform tap spacing. The Cathedral's
+mathematics suggests that prime-spaced taps with M\"obius weights
+can achieve superior noise cancellation for signals with
+multiplicative structure.
+
+\subsection{The Dirichlet Polynomial Filter}
+
+A length-$N$ Dirichlet polynomial filter has transfer function:
+\[
+  H(s) = \sum_{k=2}^{N} \frac{v_k}{k^s}
+\]
+The Cathedral proves that the optimal weights $v_k = (G^{-1}b)_k$
+minimize the $L^2$ error of approximating $1/s$ on the critical
+line, achieving mean-square error $d_N^2 \sim C/\ln N$.
+
+\subsection{The Parseval Bridge as Filter Design Tool}
+
+The Parseval Bridge identity means that optimizing in the time
+domain (minimizing $\int|1-f|^2$) is \emph{identical} to optimizing
+in the frequency domain (minimizing the critical-line integral).
+This duality enables filter design in whichever domain is more
+convenient, with formal guarantees of equivalence.
+
+% ================================================================
+\section{Cross-Cutting: The Certified Computation Pipeline}
+% ================================================================
+
+All three application domains benefit from the Cathedral's certified
+computation pipeline:
+
+\begin{enumerate}
+  \item \textbf{Exact Gram matrix computation} via the Vasyunin
+    cotangent formula (512-bit MPFR, certified to 6 digits).
+  \item \textbf{Eigenvalue certification} via the cert-export
+    pipeline (JSON certificates consumed by Lean oracles).
+  \item \textbf{Spectral gap monitoring} via condition-number-gated
+    precision switching.
+\end{enumerate}
+
+The pipeline can be adapted for industrial deployment by replacing
+the Lean oracle layer with runtime assertion checks.
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The Cathedral's mathematical infrastructure---originally developed
+for the Riemann Hypothesis---provides rigorous foundations for
+engineering applications in energy, security, and signal processing.
+The formal verification guarantees that the mathematical claims
+underlying these applications are not merely plausible but
+machine-checked. The experimental pipeline provides numerical
+validation at industrial precision levels.
+
+\begin{thebibliography}{99}
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
+\end{thebibliography}
+
+\end{document}

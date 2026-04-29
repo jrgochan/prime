@@ -20,3 +20,4 @@ build/
 
 # Keep PDFs (they're tracked for distribution)
 # !*.pdf
+*.pdf

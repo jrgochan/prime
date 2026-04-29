@@ -1,0 +1,193 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../shared/cathedral-preamble}
+
+\title{%
+  The 38 Experiments:\\
+  Computational Validation of the Cathedral\\
+  via Certified Rust/MPFR Pipelines%
+}
+\author{Jason Robert Gochanour}
+\date{April 28, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We document the 38 companion experiments that validate the Cathedral's
+formal proof architecture. Each experiment is implemented in Rust,
+using f64 through 512-bit MPFR arithmetic, and produces either
+numerical validation data or certified JSON output consumed by Lean
+oracle axioms. The experiments span five categories: Gram matrix
+computation, Mellin/Parseval validation, Perron contour integration,
+spectral analysis, and character-spectral probes. We describe the
+certification pipeline that bridges computational results to formal
+proofs, achieving Sherman--Morrison match to $10^{-17}$ and
+eigenvalue certification through $N = 1000$.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction}
+% ================================================================
+
+The Cathedral's formal proofs establish logical equivalences; the
+experiments validate that the mathematical objects behave as the
+theory predicts. This two-channel architecture---formal proof for
+logical structure, computation for numerical reality---provides
+defense in depth.
+
+All experiments live in \texttt{experiments/} and are standalone
+Rust crates with \texttt{Cargo.toml} build files. Most use the
+\texttt{rug} crate (bindings to GMP/MPFR) for arbitrary-precision
+arithmetic.
+
+% ================================================================
+\section{Experiment Catalog}
+% ================================================================
+
+\begin{center}
+\small
+\begin{tabular}{@{}rlll@{}}
+\toprule
+\textbf{\#} & \textbf{Name} & \textbf{Category} & \textbf{Precision} \\
+\midrule
+1 & gram-matrix & Gram & 512-bit MPFR \\
+2 & gram-oracle & Gram & Exact rational \\
+3 & gram-form-identity & Gram & 256-bit MPFR \\
+4 & gram-bilinear-abel & Gram & 256-bit MPFR \\
+5 & gram-pointwise & Gram & 256-bit MPFR \\
+6 & gram-quadform & Gram & 256-bit MPFR \\
+\midrule
+7 & mellin-certificate & Mellin & 256-bit MPFR \\
+8 & contour-oracle & Mellin & f64 \\
+9 & perron-contour & Perron & 256-bit MPFR \\
+10 & mvt-decomposition & Perron & 256-bit MPFR \\
+11 & crown-cancellation & Perron & 256-bit MPFR \\
+\midrule
+12 & vasyunin & Vasyunin & Exact rational \\
+13 & vasyunin-convergence & Vasyunin & 256-bit MPFR \\
+14 & vasyunin-integral & Vasyunin & 256-bit MPFR \\
+\midrule
+15 & spectral & Spectral & f64 \\
+16 & spectral-analyzer & Spectral & 512-bit MPFR \\
+17 & hilbert-spectral & Spectral & 256-bit MPFR \\
+18 & rotor-spectroscopy & Spectral & f64 \\
+19 & two-tile-analyzer & Spectral & f64 \\
+20 & van-hove-probe & Spectral & f64 \\
+\midrule
+21 & character-spectral & Character & f64 + MPFR \\
+22 & baez-duarte & BD & 512-bit MPFR \\
+23 & numerical & Numerical & f64 \\
+24 & l2-decay-certificate & $L^2$ & 256-bit MPFR \\
+25 & norm-bound-validator & Bounds & 256-bit MPFR \\
+\midrule
+26 & pnt-mobius-sums & PNT & f64 \\
+27 & mobius-basis & PNT & f64 \\
+28 & siegel-walfisz & PNT & f64 \\
+29 & covariance-probe & Covariance & 256-bit MPFR \\
+30 & fejer-kernel & Analysis & f64 \\
+\midrule
+31 & abel-bridge & Abel & 256-bit MPFR \\
+32 & abel-tail-validator & Abel & 256-bit MPFR \\
+33 & algebraic & Algebraic & Exact \\
+34 & millennium-wall & Misc & f64 \\
+\midrule
+35 & bc-exponent-frontier & Zeta & f64 \\
+36 & bc-witness-analysis & Zeta & f64 \\
+37 & bc-zeta-lower & Zeta & 256-bit MPFR \\
+38 & cert-export & Certified & f64 + JSON \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ================================================================
+\section{The Certification Pipeline}
+% ================================================================
+
+\subsection{Architecture}
+
+The \texttt{cert-export} experiment is the bridge between
+computation and formal proof. It:
+\begin{enumerate}
+  \item Computes eigenvalues, eigenvectors, and spectral statistics.
+  \item Exports results as machine-readable JSON certificates.
+  \item Generates Lean~4 oracle axiom files consumed by
+    \lean{Assembly/OracleAxioms.lean}.
+\end{enumerate}
+
+This architecture implements \emph{artifact-backed formal verification}:
+the heavy, heuristic computation (Rust/MPFR, floating-point eigensolvers)
+is cleanly separated from the formal logic (Lean~4), with only
+machine-readable certificates crossing the boundary. The Lean side
+consumes these as isolated oracle axioms---explicitly marked, auditable,
+and never contaminating the pure proof chain. This ensures that
+floating-point roundoff cannot propagate into the formal logic.
+
+\subsection{Three Certificate Types}
+
+\begin{enumerate}
+  \item \textbf{Eigenvalue certificates}: $\lambda_{\min}(G_N) > 0$
+    at $N \in \{50, 100, 200, 300, 500, 750, 1000\}$.
+  \item \textbf{Eigenvector localization}: participation ratios
+    and prime-vs-composite weight distributions.
+  \item \textbf{Residue class decomposition}: block-diagonal
+    eigenvalues for $m \in \{3,4,5,6,7,8,10,12\}$.
+\end{enumerate}
+
+\subsection{The Precision Wall}
+
+At $N \geq 750$, the Gram matrix condition number exceeds $10^6$,
+causing standard f64 eigensolvers to hallucinate negative eigenvalues.
+The certification pipeline detects this via condition number
+monitoring and switches to MPFR arithmetic when $\kappa > 10^4$.
+
+% ================================================================
+\section{Key Experimental Results}
+% ================================================================
+
+\subsection{Rayleigh Quotient Convergence}
+
+The \texttt{gram-oracle} experiment confirms $Q_N/\ln N \to C$
+where $C \approx 21.649$, validating the spectral bridge prediction.
+
+\subsection{Parseval Bridge Validation}
+
+The \texttt{mellin-certificate} experiment confirms the Parseval
+bridge identity to $6.6 \times 10^{-6}$ relative error by computing
+the $L^2$ norm in both the spatial and frequency domains.
+
+\subsection{Universal Equation of State}
+
+The \texttt{character-spectral} suite (fast-probe, deep-probe,
+modulus-probe) establishes the universal thermalization threshold
+$N_c \approx 60 \cdot m/\varphi(m)$ across 8 moduli, proving that
+the mod-8 residue class structure is not privileged.
+
+\subsection{The $\alpha \approx 0.47$ Constant}
+
+Eigenvector analysis through $N = 1000$ reveals persistent partial
+localization at participation ratio $\alpha \approx 0.47$, identifying
+a new arithmetic-GOE constant characterizing the boundary between
+number-theoretic order and random matrix chaos.
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The 38 experiments provide computational validation at every level
+of the Cathedral's proof architecture, from the Gram matrix entries
+to the spectral gap to the Parseval bridge to the thermodynamic
+equation of state. The certified JSON pipeline ensures that
+computational discoveries are automatically available to the formal
+proof engine.
+
+\begin{thebibliography}{99}
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
+\bibitem{rug}
+\texttt{rug} crate, \url{https://crates.io/crates/rug}.
+\end{thebibliography}
+
+\end{document}

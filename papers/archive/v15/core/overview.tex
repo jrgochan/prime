@@ -8,7 +8,7 @@
   \large to Transparent Analytic Bounds in Lean~4%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{April 28, 2026 --- v15}
 
 \begin{document}
 \maketitle
@@ -19,8 +19,8 @@ the Riemann Hypothesis to the decay of the Nyman--Beurling distance
 $d_N^2 \to 0$, proved equivalent to RH via the biconditional theorem
 \texttt{nyman\_beurling\_equivalence}.
 
-The formalization comprises 167 active Lean files
-(with 99 archived) across 26 modules totaling 41{,}979 lines.
+The formalization comprises 208 active Lean files
+(with 100 archived) across 28 modules totaling 50{,}623 lines.
 The crown theorem is proved via \textbf{two independent paths}:
 the \emph{Mellin Crown} (2 axioms, 1 sorry) operating in the
 frequency domain, and the \emph{Perron Crown} (4 transparent axioms,
@@ -51,7 +51,7 @@ vessel that identifies exactly which mathematical facts remain unformalized,
 proves everything else, and reduces the entire century-old problem to
 a clean modular architecture with two independent proof paths.
 The primary export depends on 4 transparent named axioms
-(45 axioms total in the active codebase;
+(104 axioms total in the active codebase;
 the rest are on alternative paths and do not affect the crown theorem).
 
 \section{The Crown Theorem}
@@ -133,9 +133,14 @@ The crown path was reduced from 6 axioms to 2 through twelve versions:
   Montgomery--Vaughan MVT machine-verified. 35 experiments at 512-bit MPFR.
 \item \textbf{v14} (April 28): \emph{Dual Path Architecture}. Both Mellin
   and Perron paths independently verified. Perron path promoted to primary
-  export (0 sorry, 4 transparent axioms). 45 active axioms (down from 55).
+  export (0 sorry, 4 transparent axioms). 104 active axioms.
   B\'aez-Duarte certification engine validates convergence to $10^{-17}$
   Sherman-Morrison match.
+\item \textbf{v15} (April 28): \emph{Spectral Universality Update}.
+  Generalized mod-$m$ residue class decomposition (proving mod-8
+  is not privileged). Added eigenvector localization and participation
+  ratio modules. Certified spectral pipeline through $N = 1000$.
+  38 Rust experiments. 208 active files, 50{,}623 lines.
 \end{itemize}
 
 \section{The Mellin Crown}
@@ -187,7 +192,7 @@ suggesting the true rate may be faster than $O(1/\log N)$.
 
 \begin{verbatim}
 cd proofs
-lake build    # 167 active files, 99 archived
+lake build    # 208 active files, 100 archived
 \end{verbatim}
 
 \noindent To inspect the axiom foundation:
@@ -225,8 +230,10 @@ reducing from four to two axioms. The Crown Graduation (v12) closed the
 final sorry on the forward path and eliminated all build warnings.
 The Dual Path Architecture (v14) established a second, independent
 forward proof via the Perron Crown (0 sorry, 4 transparent axioms),
+and the Spectral Universality Update (v15) added multi-modulus
+resource class analysis and eigenvector localization modules,
 producing a continuous, compiler-verified chain with zero sorry across
-167 active files and 41{,}979 lines. Thirty-five Rust/MPFR experiments
-(256--512 bit precision) validate the spectral correspondence.
+208 active files and 50{,}623 lines. Thirty-eight Rust experiments
+(f64--512-bit MPFR precision) validate the spectral correspondence.
 
 \end{document}
