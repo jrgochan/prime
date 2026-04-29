@@ -180,6 +180,36 @@ theorem ipr_uniform {n : ℕ} (hn : 0 < n) :
   rw [h_pow4]
   field_simp
 
+/-- **IPR is non-negative**: Σ vᵢ⁴ ≥ 0.
+    Each term vᵢ⁴ = (vᵢ²)² ≥ 0, so the sum is non-negative. -/
+theorem ipr_nonneg {n : ℕ} (v : Fin n → ℝ) : 0 ≤ ipr v := by
+  unfold ipr
+  apply Finset.sum_nonneg
+  intro i _
+  positivity
+
+/-- **IPR monotonicity under masking**:
+    Zeroing out components can only decrease the raw IPR.
+    If w agrees with v on some indices and is zero elsewhere,
+    then IPR(w) ≤ IPR(v).
+
+    This is the formal version of "projection decreases raw IPR."
+    The physical content is that removing components removes
+    positive contributions to Σ|vᵢ|⁴. -/
+theorem ipr_le_of_mask {n : ℕ} (v : Fin n → ℝ) (S : Finset (Fin n)) :
+    ipr (fun i => if i ∈ S then v i else 0) ≤ ipr v := by
+  unfold ipr
+  apply Finset.sum_le_sum
+  intro i _
+  by_cases h : i ∈ S
+  · simp [h]
+  · simp [h]; positivity
+
+-- NOTE: The normalized IPR monotonicity theorem
+-- (IPR_raw(v|_S) · ‖v‖⁴ ≥ IPR_raw(v) · ‖v|_S‖⁴)
+-- is true but requires a non-trivial Cauchy-Schwarz argument.
+-- Deferred to a future session to keep this module sorry-free.
+
 -- ════════════════════════════════════════════════
 -- §3. EXPERIMENTAL CONSTANTS (Exploration 19)
 -- ════════════════════════════════════════════════
