@@ -28,6 +28,10 @@ path = "src/cert_export.rs"
 name = "boson-fermion"
 path = "src/boson_fermion.rs"
 
+[[bin]]
+name = "particle-sieve"
+path = "src/particle_sieve.rs"
+
 [dependencies]
 rug = "1.26"
 rayon = "1.10"
