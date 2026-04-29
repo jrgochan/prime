@@ -134,6 +134,24 @@ lemma gramMatrixBlockDiag_mod_hermitian (N m : ℕ) :
     unfold gramEntry; congr 1; ext x; ring
   · rw [if_neg h, if_neg (Ne.symm h)]
 
+/-- **Block-diagonal trace identity**: Tr(G^block_m) = Tr(G).
+    On the diagonal (i = j), the condition (i+2) ≡ (i+2) (mod m)
+    is trivially true, so the block-diagonal matrix agrees with the
+    full Gram matrix on every diagonal entry.
+
+    Physical interpretation: the total spectral weight (sum of all
+    eigenvalues) is preserved by the block decomposition. This is
+    the spectral analogue of energy conservation under the residue
+    class partition. -/
+theorem blockDiag_trace_eq_gram_trace (N m : ℕ) :
+    Matrix.trace (gramMatrixBlockDiag_mod N m) =
+    Matrix.trace (gramMatrix N) := by
+  simp only [Matrix.trace, Matrix.diag, gramMatrixBlockDiag_mod,
+    gramMatrix, Matrix.of_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  simp  -- (i.val + 2) % m = (i.val + 2) % m is trivially true
+
 /-- The block-diagonal quadratic form decomposes over classes:
     vᵀ G^{block}_m v = Σ_r (v_r)ᵀ G (v_r)
 

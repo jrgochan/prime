@@ -60,6 +60,12 @@ lemma gramMatrix_hermitian (N : ℕ) :
   simp only [Matrix.conjTranspose_apply, star_trivial, gramMatrix, Matrix.of_apply, gramEntry]
   congr 1; ext x; ring
 
+/-- **Gram entry commutativity**: G(j,k) = G(k,j).
+    Direct corollary of the fact that multiplication is commutative
+    under the integral: ∫ {j/x}·{k/x} dx = ∫ {k/x}·{j/x} dx. -/
+theorem gramEntry_comm (j k : ℕ) : gramEntry j k = gramEntry k j := by
+  unfold gramEntry; congr 1; ext x; ring
+
 /-- λ_min(G_N): smallest eigenvalue of the (N-1)×(N-1) Gram matrix.
     For N ≥ 2, this is the minimum of the eigenvalues of the real symmetric
     matrix gramMatrix N. For N < 2, we define it as 0.
