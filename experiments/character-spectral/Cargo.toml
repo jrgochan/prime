@@ -16,6 +16,10 @@ path = "src/fast_probe.rs"
 name = "modulus-probe"
 path = "src/modulus_probe.rs"
 
+[[bin]]
+name = "deep-probe"
+path = "src/deep_probe.rs"
+
 [dependencies]
 rug = "1.26"
 rayon = "1.10"
