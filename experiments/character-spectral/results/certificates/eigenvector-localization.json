@@ -2,7 +2,7 @@
   "experiment": "eigenvector-localization",
   "precision": "f64",
   "timestamp": "2026-04-29T04:49:00Z",
-  "ns": [100, 200, 300, 500],
+  "ns": [100, 200, 300, 500, 750, 1000],
   "data": {
     "100": {
       "dim": 99,
@@ -39,6 +39,24 @@
       "pr_goe_ratio": 0.482075,
       "ground_state_pr": 7.0666,
       "ground_state_prime_weight": 0.061404
+    },
+    "750": {
+      "dim": 749,
+      "lambda_min": -3.318731639653130e-6,
+      "mean_pr": 118.5586,
+      "goe_predicted_pr": 249.6667,
+      "pr_goe_ratio": 0.474868,
+      "ground_state_pr": 22.4206,
+      "ground_state_prime_weight": 0.073509
+    },
+    "1000": {
+      "dim": 999,
+      "lambda_min": -3.865984867479035e-6,
+      "mean_pr": 154.9310,
+      "goe_predicted_pr": 333.0000,
+      "pr_goe_ratio": 0.465258,
+      "ground_state_pr": 16.6971,
+      "ground_state_prime_weight": 0.132051
     }
   }
 }

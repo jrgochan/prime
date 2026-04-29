@@ -24,6 +24,12 @@
 /-- Oracle: λ_min(G_500) = 2.331457214973713e-6, f64 --/
 -- axiom oracle_lambda_min_pos_500 : lambdaMin 500 > 0
 
+/-- Oracle: λ_min(G_750) = -3.318731639653130e-6, f64 --/
+-- WARNING: λ_min negative at N=750 (f64 precision wall)
+
+/-- Oracle: λ_min(G_1000) = -3.865984867479035e-6, f64 --/
+-- WARNING: λ_min negative at N=1000 (f64 precision wall)
+
 -- ════════════════════════════════════════════════
 -- §2. RESIDUE CLASS λ_min > 0
 -- ════════════════════════════════════════════════
@@ -108,6 +114,46 @@
 -- axiom oracle_class_eigenvalue_pos_N500_mod12 :
 --     ∀ r : Fin 12, 0 < lambdaMinClass_mod 12 r 500
 
+/-- Oracle: min_r λ_min(G_750|_{k≡r(mod 3)}) = 3.5671254248e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N750_mod3 :
+--     ∀ r : Fin 3, 0 < lambdaMinClass_mod 3 r 750
+
+/-- Oracle: min_r λ_min(G_750|_{k≡r(mod 5)}) = 8.8689519817e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N750_mod5 :
+--     ∀ r : Fin 5, 0 < lambdaMinClass_mod 5 r 750
+
+/-- Oracle: min_r λ_min(G_750|_{k≡r(mod 7)}) = 1.3952497677e-5, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N750_mod7 :
+--     ∀ r : Fin 7, 0 < lambdaMinClass_mod 7 r 750
+
+/-- Oracle: min_r λ_min(G_750|_{k≡r(mod 8)}) = 1.6217719170e-5, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N750_mod8 :
+--     ∀ r : Fin 8, 0 < lambdaMinClass_mod 8 r 750
+
+/-- Oracle: min_r λ_min(G_750|_{k≡r(mod 12)}) = 2.4321750602e-5, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N750_mod12 :
+--     ∀ r : Fin 12, 0 < lambdaMinClass_mod 12 r 750
+
+/-- Oracle: min_r λ_min(G_1000|_{k≡r(mod 3)}) = 1.5107815350e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N1000_mod3 :
+--     ∀ r : Fin 3, 0 < lambdaMinClass_mod 3 r 1000
+
+/-- Oracle: min_r λ_min(G_1000|_{k≡r(mod 5)}) = 5.3006776378e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N1000_mod5 :
+--     ∀ r : Fin 5, 0 < lambdaMinClass_mod 5 r 1000
+
+/-- Oracle: min_r λ_min(G_1000|_{k≡r(mod 7)}) = 8.4252875434e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N1000_mod7 :
+--     ∀ r : Fin 7, 0 < lambdaMinClass_mod 7 r 1000
+
+/-- Oracle: min_r λ_min(G_1000|_{k≡r(mod 8)}) = 9.8531026007e-6, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N1000_mod8 :
+--     ∀ r : Fin 8, 0 < lambdaMinClass_mod 8 r 1000
+
+/-- Oracle: min_r λ_min(G_1000|_{k≡r(mod 12)}) = 1.5169085056e-5, f64 --/
+-- axiom oracle_class_eigenvalue_pos_N1000_mod12 :
+--     ∀ r : Fin 12, 0 < lambdaMinClass_mod 12 r 1000
+
 -- ════════════════════════════════════════════════
 -- §3. PARTICIPATION RATIO
 -- ════════════════════════════════════════════════
@@ -123,4 +169,10 @@
 
 /-- Oracle: N=500, mean PR = 80.1851, GOE pred = 166.3333, ratio = 0.482075 --/
 -- axiom oracle_pr_ratio_500 : mean_pr 500 / (499 / 3) = 0.482075
+
+/-- Oracle: N=750, mean PR = 118.5586, GOE pred = 249.6667, ratio = 0.474868 --/
+-- axiom oracle_pr_ratio_750 : mean_pr 750 / (749 / 3) = 0.474868
+
+/-- Oracle: N=1000, mean PR = 154.9310, GOE pred = 333.0000, ratio = 0.465258 --/
+-- axiom oracle_pr_ratio_1000 : mean_pr 1000 / (999 / 3) = 0.465258
 

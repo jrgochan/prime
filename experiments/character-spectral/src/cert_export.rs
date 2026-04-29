@@ -109,7 +109,7 @@ fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
 
 fn export_residue_eigenvalues(max_n: usize) -> String {
     let moduli = [3, 5, 7, 8, 12];
-    let test_ns: Vec<usize> = vec![50, 100, 200, 300, 500]
+    let test_ns: Vec<usize> = vec![50, 100, 200, 300, 500, 750, 1000]
         .into_iter().filter(|&n| n <= max_n).collect();
 
     let mut json = String::from("{\n");
@@ -164,7 +164,7 @@ fn export_residue_eigenvalues(max_n: usize) -> String {
 // ═══════════════════════════════════════════════════════════════════════
 
 fn export_eigenvector_localization(max_n: usize) -> String {
-    let test_ns: Vec<usize> = vec![100, 200, 300, 500]
+    let test_ns: Vec<usize> = vec![100, 200, 300, 500, 750, 1000]
         .into_iter().filter(|&n| n <= max_n).collect();
 
     let mut json = String::from("{\n");
@@ -233,7 +233,7 @@ fn export_eigenvector_localization(max_n: usize) -> String {
 // ═══════════════════════════════════════════════════════════════════════
 
 fn generate_lean_oracles(max_n: usize) -> String {
-    let test_ns: Vec<usize> = vec![100, 200, 300, 500]
+    let test_ns: Vec<usize> = vec![100, 200, 300, 500, 750, 1000]
         .into_iter().filter(|&n| n <= max_n).collect();
     let moduli = [3usize, 5, 7, 8, 12];
 
