@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026 --- Crown Graduation (v12)}
+\date{April 28, 2026 --- Definitive Edition (v15)}
 
 \begin{document}
 
@@ -68,8 +68,8 @@ The Crown Graduation (Exploration~17, April~28) closed the
 \lean{crown\_graduation\_target} sorry, proving the forward chain
 RH $\to$ Mertens $\to$ L\textsuperscript{2} decay $\to$ Parseval $\to$
 Mellin variance is a continuous, compiler-verified logical chain
-with zero sorry, zero warning, and zero error across all 174 active files
-and 43,387 lines of formal logic.
+with zero sorry, zero warning, and zero error across all 208 active files
+and 50,623 lines of formal logic.
 This correspondence is not metaphorical---it is structural, reflecting
 a deep identity between number theory and quantum physics that the
 formalization makes precise.
@@ -1500,11 +1500,11 @@ PNT axioms $S_1, S_2, S_3$ & Response function asymptotics & \lean{PNT/AbelMean.
 \bottomrule
 \end{tabular}
 \caption{The complete physics--mathematics dictionary of the Cathedral
-(updated April~28, 2026, v12 Crown Graduation). The table is organized by subsystem.
+(updated April~28, 2026, v15 Spectral Universality). The table is organized by subsystem.
 Entries marked \textbf{(proved)} denote theorems with zero sorry;
 \textbf{(axiom)} denotes off-crown mathematical axioms.
-\textbf{Four} transparent named axioms remain on the critical path (spatial gauge);
-the Mellin gauge achieves two composite axioms.
+\textbf{Two} composite axioms remain on the critical path (Mellin gauge);
+the spatial gauge achieves the same result with four transparent axioms.
 The forward chain from RH to $d_N^2 \to 0$ is now a continuous,
 compiler-verified logical chain with zero sorry and zero warning.
 Every mathematical equation in the proof corresponds to a physical
@@ -1513,12 +1513,13 @@ concept, and this correspondence is not metaphorical but structural.}
 \end{table}
 
 % ================================================================
-\section{Axiom Audit: Gauge Fixing (v12, April 28, 2026)}
+\section{Axiom Audit: Gauge Fixing (v15, April 28, 2026)}
 \label{sec:axiom-audit}
 % ================================================================
 
 The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
-\textbf{four} transparent named mathematical axioms (beyond the three
+\textbf{two} composite mathematical axioms in the Mellin gauge, or equivalently
+\textbf{four} transparent named mathematical axioms in the spatial gauge (beyond the three
 Lean kernel axioms \texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
 Each is a standard result of analytic number theory with a precise physical
@@ -1582,7 +1583,7 @@ different \emph{gauge choice}:
   \item \textbf{The Mellin Path} (\lean{nyman\_beurling\_equivalence\_mellin}):
     Works in frequency coordinates on the critical line $\re s = 1/2$.
     Uses 2 composite axioms (the Mellin variance and the Hadamard bound).
-    Contains 1~\texttt{sorryAx}. This is the \emph{unitary gauge}: fewer
+    Zero \texttt{sorry}. This is the \emph{unitary gauge}: fewer
     variables, but each axiom encodes multiple classical results.
 \end{itemize}
 
@@ -1979,8 +1980,8 @@ Crown axioms (Mellin gauge) & \textbf{2} \\
 Physical domains covered & 7 \\
 Cathedral Lean modules referenced & 47+ \\
 Numerical experiments & \textbf{38} \\
-Active Lean files & 176 \\
-Active lines of code & 44,100+ \\
+Active Lean files & 208 \\
+Active lines of code & 50,623 \\
 Crown path sorry & \textbf{0} \\
 New constants identified & \textbf{$\alpha \approx 0.47$} \\
 \bottomrule
