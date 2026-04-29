@@ -1,15 +1,15 @@
 //! Gram matrix construction, channel projection, and eigenvalue extraction.
 //!
 //! Builds the Nyman–Beurling Gram matrix G(j,k) using the exact Vasyunin
-//! sum expansion in 128-bit MPFR. Projects to character sub-matrices and
-//! extracts eigenvalues via MPFR Jacobi rotation.
+//! sum expansion in 256-bit MPFR. Projects to character sub-matrices and
+//! extracts eigenvalues via optimized cyclic Jacobi rotation.
 
 use rayon::prelude::*;
 use rug::Float;
 use rug::ops::CompleteRound;
 
 /// MPFR precision bits
-pub const PREC: u32 = 128;
+pub const PREC: u32 = 256;
 
 /// GCD helper
 fn gcd(a: usize, b: usize) -> usize {
@@ -162,7 +162,11 @@ pub fn project_gram_weighted(
 }
 
 
-/// Jacobi eigenvalue algorithm in MPFR arithmetic.
+/// Optimized cyclic Jacobi eigenvalue algorithm in MPFR arithmetic.
+///
+/// Uses cyclic sweeps over all (p,q) pairs instead of searching for the
+/// maximum off-diagonal element each iteration. This reduces per-rotation
+/// cost from O(N²) to O(N), with quadratic convergence per sweep.
 pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
     if dim == 0 {
         return vec![];
@@ -172,81 +176,87 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
     }
 
     let mut a: Vec<Float> = mat.to_vec();
-    let max_iter = 200 * dim * dim;
-    let tol = Float::with_val(PREC, 1e-30);
+    let max_sweeps = 100 * dim;
+    let tol = Float::with_val(PREC, 1e-40);
+    let tol_sq = Float::with_val(PREC, &tol * &tol);
 
-    for _sweep in 0..max_iter {
-        // Find largest off-diagonal element
-        let mut max_off = Float::with_val(PREC, 0.0);
-        let mut p = 0usize;
-        let mut q = 1usize;
-
+    for _sweep in 0..max_sweeps {
+        // Compute off-diagonal Frobenius norm²
+        let mut off_norm_sq = Float::with_val(PREC, 0.0);
         for i in 0..dim {
             for j in (i + 1)..dim {
-                let val = a[i * dim + j].clone().abs();
-                if val > max_off {
-                    max_off = val;
-                    p = i;
-                    q = j;
-                }
+                let v = &a[i * dim + j];
+                off_norm_sq += Float::with_val(PREC, v * v);
             }
         }
-
-        if max_off < tol {
+        if off_norm_sq < tol_sq {
             break;
         }
 
-        // Compute Jacobi rotation angle
-        let app = a[p * dim + p].clone();
-        let aqq = a[q * dim + q].clone();
-        let apq = a[p * dim + q].clone();
+        // Cyclic sweep: rotate every (p, q) pair with |a_pq| > threshold
+        let thresh = Float::with_val(PREC, &off_norm_sq / (dim * dim) as u64).sqrt();
 
-        let diff = Float::with_val(PREC, &app - &aqq);
-        let (c, s): (Float, Float) = if diff.clone().abs() < Float::with_val(PREC, 1e-60)
-        {
-            let half = Float::with_val(PREC, 0.5f64);
-            let sqrt2_inv = Float::with_val(PREC, half.sqrt_ref());
-            (sqrt2_inv.clone(), sqrt2_inv)
-        } else {
-            let tau = Float::with_val(PREC, 2.0) * &apq / &diff;
-            let theta: Float = Float::with_val(PREC, tau.atan_ref());
-            let half_theta: Float = theta / 2u32;
-            let cos_t = Float::with_val(PREC, half_theta.cos_ref());
-            let sin_t = Float::with_val(PREC, half_theta.sin_ref());
-            (cos_t, sin_t)
-        };
+        for p in 0..dim {
+            for q in (p + 1)..dim {
+                let apq_abs = a[p * dim + q].clone().abs();
+                if apq_abs < thresh {
+                    continue; // skip near-zero elements
+                }
 
-        // Save old values for rotation
-        let mut old_ip: Vec<Float> = Vec::with_capacity(dim);
-        let mut old_iq: Vec<Float> = Vec::with_capacity(dim);
-        for i in 0..dim {
-            old_ip.push(a[i * dim + p].clone());
-            old_iq.push(a[i * dim + q].clone());
-        }
+                let app = a[p * dim + p].clone();
+                let aqq = a[q * dim + q].clone();
+                let apq = a[p * dim + q].clone();
 
-        for i in 0..dim {
-            if i != p && i != q {
-                let new_ip = Float::with_val(PREC, &c * &old_ip[i])
-                    + Float::with_val(PREC, &s * &old_iq[i]);
-                let new_iq = Float::with_val(PREC, &c * &old_iq[i])
-                    - Float::with_val(PREC, &s * &old_ip[i]);
-                a[i * dim + p] = new_ip.clone();
-                a[p * dim + i] = new_ip;
-                a[i * dim + q] = new_iq.clone();
-                a[q * dim + i] = new_iq;
+                let diff = Float::with_val(PREC, &app - &aqq);
+                let (c, s): (Float, Float) =
+                    if diff.clone().abs() < Float::with_val(PREC, 1e-80) {
+                        let half = Float::with_val(PREC, 0.5f64);
+                        let sqrt2_inv = Float::with_val(PREC, half.sqrt_ref());
+                        (sqrt2_inv.clone(), sqrt2_inv)
+                    } else {
+                        let tau = Float::with_val(PREC, 2.0) * &apq / &diff;
+                        let theta: Float = Float::with_val(PREC, tau.atan_ref());
+                        let half_theta: Float = theta / 2u32;
+                        let cos_t = Float::with_val(PREC, half_theta.cos_ref());
+                        let sin_t = Float::with_val(PREC, half_theta.sin_ref());
+                        (cos_t, sin_t)
+                    };
+
+                // Apply rotation to rows/cols p and q
+                let mut old_ip: Vec<Float> = Vec::with_capacity(dim);
+                let mut old_iq: Vec<Float> = Vec::with_capacity(dim);
+                for i in 0..dim {
+                    old_ip.push(a[i * dim + p].clone());
+                    old_iq.push(a[i * dim + q].clone());
+                }
+
+                for i in 0..dim {
+                    if i != p && i != q {
+                        let new_ip = Float::with_val(PREC, &c * &old_ip[i])
+                            + Float::with_val(PREC, &s * &old_iq[i]);
+                        let new_iq = Float::with_val(PREC, &c * &old_iq[i])
+                            - Float::with_val(PREC, &s * &old_ip[i]);
+                        a[i * dim + p] = new_ip.clone();
+                        a[p * dim + i] = new_ip;
+                        a[i * dim + q] = new_iq.clone();
+                        a[q * dim + i] = new_iq;
+                    }
+                }
+
+                let c2 = Float::with_val(PREC, &c * &c);
+                let s2 = Float::with_val(PREC, &s * &s);
+                let cs2 = Float::with_val(PREC, 2.0) * &c * &s * &apq;
+
+                a[p * dim + p] = Float::with_val(PREC, &c2 * &app)
+                    + &cs2
+                    + Float::with_val(PREC, &s2 * &aqq);
+                a[q * dim + q] = Float::with_val(PREC, &s2 * &app)
+                    - &cs2
+                    + Float::with_val(PREC, &c2 * &aqq);
+                a[p * dim + q] = Float::with_val(PREC, 0.0);
+                a[q * dim + p] = Float::with_val(PREC, 0.0);
             }
         }
-
-        let c2 = Float::with_val(PREC, &c * &c);
-        let s2 = Float::with_val(PREC, &s * &s);
-        let cs2 = Float::with_val(PREC, 2.0) * &c * &s * &apq;
-
-        a[p * dim + p] =
-            Float::with_val(PREC, &c2 * &app) + &cs2 + Float::with_val(PREC, &s2 * &aqq);
-        a[q * dim + q] =
-            Float::with_val(PREC, &s2 * &app) - &cs2 + Float::with_val(PREC, &c2 * &aqq);
-        a[p * dim + q] = Float::with_val(PREC, 0.0);
-        a[q * dim + p] = Float::with_val(PREC, 0.0);
     }
 
     let mut eigs: Vec<f64> = (0..dim).map(|i| a[i * dim + i].to_f64()).collect();

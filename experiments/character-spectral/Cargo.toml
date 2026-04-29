@@ -2,9 +2,18 @@
 name = "character-spectral"
 version = "0.1.0"
 edition = "2024"
-description = "Cathedral Character-Projected Spectral Probe — mod-8 Dirichlet character decomposition of the Gram matrix eigenvalue spectrum via 128-bit MPFR Jacobi"
+description = "Cathedral Character-Projected Spectral Probe — mod-8 residue class decomposition of the Gram matrix eigenvalue spectrum"
+
+[[bin]]
+name = "character-spectral"
+path = "src/main.rs"
+
+[[bin]]
+name = "fast-probe"
+path = "src/fast_probe.rs"
 
 [dependencies]
 rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"
+nalgebra = "0.33"

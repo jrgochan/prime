@@ -63,7 +63,7 @@ fn main() {
     println!();
 
     // Test schedule
-    let all_ns: Vec<usize> = vec![30, 50, 75, 100, 150, 200]
+    let all_ns: Vec<usize> = vec![30, 50, 75, 100, 150, 200, 300]
         .into_iter()
         .filter(|&n| n <= max_n)
         .collect();
@@ -305,7 +305,9 @@ fn main() {
     // Dark sector verdict
     if let Some(last) = all_results.last() {
         let even_sp = spectral::compute_spacing(&last.even_eigs);
-        let dark_poisson = even_sp.poisson_fit > even_sp.gue_fit;
+        let dark_poisson = even_sp.poisson_fit > even_sp.gue_fit
+            && even_sp.poisson_fit > even_sp.goe_fit
+            && even_sp.poisson_fit > even_sp.gse_fit;
         println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Dark Sector Hypothesis:{RESET}");
         if dark_poisson {
             println!("  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ Dark sector (even) is Poisson — uncorrelated{RESET}");
