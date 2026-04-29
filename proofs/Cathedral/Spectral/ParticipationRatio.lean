@@ -205,10 +205,15 @@ theorem ipr_le_of_mask {n : ℕ} (v : Fin n → ℝ) (S : Finset (Fin n)) :
   · simp [h]
   · simp [h]; positivity
 
--- NOTE: The normalized IPR monotonicity theorem
--- (IPR_raw(v|_S) · ‖v‖⁴ ≥ IPR_raw(v) · ‖v|_S‖⁴)
--- is true but requires a non-trivial Cauchy-Schwarz argument.
--- Deferred to a future session to keep this module sorry-free.
+-- NOTE: "Normalized IPR increases under projection" is FALSE.
+-- Counterexample: v = (1, 1, 10), S = {1,2}.
+--   Normalized IPR(v)   = 10002/10404 ≈ 0.96
+--   Normalized IPR(v|_S) = 2/4 = 0.50
+-- The outlier v₃=10 dominates the full IPR. Removing it *decreases*
+-- the normalized IPR, contrary to the naive "localization increases
+-- under projection" intuition. The correct monotonicity results are:
+--   ipr_le_of_mask (raw IPR decreases under masking)
+--   ipr_lower_bound (normalized IPR ≥ 1/n for unit vectors)
 
 -- ════════════════════════════════════════════════
 -- §3. EXPERIMENTAL CONSTANTS (Exploration 19)

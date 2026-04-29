@@ -106,54 +106,64 @@ infrastructure, organized by feasibility.
 
 These require only existing Mathlib + Cathedral infrastructure.
 
-#### 1. IPR Monotonicity Under Projection
-```
-theorem ipr_increases_under_projection :
-    -- Projecting a vector to fewer components increases IPR
-    -- (localization increases when you restrict to a subspace)
-    ∀ (n m : ℕ) (hn : m ≤ n) (v : Fin n → ℝ),
-    ipr (fun i : Fin m => v ⟨i, by omega⟩) ≥ ipr v
-```
-**Difficulty:** Medium. Requires showing Σ_{i<m} v_i⁴ / (Σ_{i<m} v_i²)² ≥ Σ_i v_i⁴.
+#### ~~1. IPR Monotonicity Under Projection~~ — RETRACTED
 
-#### 2. Gram Entry Symmetry (Strengthened)
-```
-theorem gramEntry_comm_exact :
-    ∀ j k, gramEntry j k = gramEntry k j
-```
-**Difficulty:** Easy. Already implicit in gramMatrix_hermitian, but stating
-it directly as a standalone theorem about gramEntry would be useful.
+> **This theorem is FALSE.** The original claim was that projecting a
+> vector to fewer components increases IPR. This is wrong in both directions:
+>
+> - **Raw IPR** (Σvᵢ⁴) *decreases* under projection (fewer positive terms).
+>   This is now proved as `ipr_le_of_mask`.
+> - **Normalized IPR** (Σvᵢ⁴/(Σvᵢ²)²) can go *either way*.
+>
+> **Counterexample:** v = (1, 1, 10), S = {1,2}:
+> - Normalized IPR(v) = 10002/10404 ≈ 0.96
+> - Normalized IPR(v|_S) = 2/4 = 0.50
+> - IPR *decreased* — the outlier v₃=10 dominated the full vector's IPR.
+>
+> The correct theorems about IPR and restriction are:
+> - `ipr_le_of_mask` ✅ — raw IPR decreases under masking
+> - `ipr_lower_bound` ✅ — normalized IPR ≥ 1/n for unit vectors
+> - `ipr_nonneg` ✅ — raw IPR ≥ 0
 
-#### 3. Block-Diagonal Trace Identity
+
+#### 2. Gram Entry Symmetry — ✅ PROVED as `gramEntry_comm`
 ```
-theorem blockDiag_trace_eq_gram_trace (N m : ℕ) (hm : 0 < m) :
+theorem gramEntry_comm (j k : ℕ) : gramEntry j k = gramEntry k j
+```
+Proved in `Defs.lean` via `congr`/`ext`/`ring`.
+
+#### 3. Block-Diagonal Trace Identity — ✅ PROVED as `blockDiag_trace_eq_gram_trace`
+```
+theorem blockDiag_trace_eq_gram_trace (N m : ℕ) :
     Matrix.trace (gramMatrixBlockDiag_mod N m) = Matrix.trace (gramMatrix N)
 ```
-**Difficulty:** Medium. The block-diagonal matrix has the same diagonal entries
-as the full Gram matrix (the diagonal is always in the same class as itself).
+Proved in `ResidueDecomposition.lean` via `sum_congr`/`simp` (diagonal trivially matches).
 
-#### 4. Class Restriction Orthogonality
+#### 4. Class Restriction Orthogonality — ✅ PROVED as `classRestrict_mod_orthogonal`
 ```
-theorem classRestrict_mod_orthogonal (N m : ℕ) (hm : 0 < m)
+theorem classRestrict_mod_orthogonal (N m : ℕ) (_hm : 0 < m)
     (r₁ r₂ : Fin m) (hr : r₁ ≠ r₂) (v : Fin (N-1) → ℝ) :
     dotProduct (classRestrict_mod N m r₁ v) (classRestrict_mod N m r₂ v) = 0
 ```
-**Difficulty:** Easy. Class restrictions to different classes have disjoint
-support, so their inner product is zero.
+Proved in `ResidueDecomposition.lean` via `split_ifs`/`Fin.ext`/`ring`.
 
-#### 5. IPR of Uniform Vector
+#### 5. IPR of Uniform Vector — ✅ PROVED as `ipr_uniform`
 ```
-theorem ipr_uniform (n : ℕ) (hn : 0 < n) :
-    ipr (fun _ : Fin n => (1 : ℝ) / Real.sqrt n) = 1 / n
+theorem ipr_uniform {n : ℕ} (hn : 0 < n) :
+    ipr (fun _ : Fin n => (1 : ℝ) / Real.sqrt n) = 1 / (n : ℝ)
 ```
-**Difficulty:** Easy-Medium. Direct computation: Σ (1/√n)⁴ = n · 1/n² = 1/n.
+Proved in `ParticipationRatio.lean` via `sq_sqrt`/`field_simp`.
 
-#### 6. IPR of Basis Vector
+#### 6. IPR of Basis Vector — ✅ PROVED as `ipr_basis`
 ```
-theorem ipr_basis (n : ℕ) (hn : 0 < n) (k : Fin n) :
-    ipr (fun i : Fin n => if i = k then 1 else 0) = 1
+theorem ipr_basis {n : ℕ} (k : Fin n) :
+    ipr (fun i : Fin n => if i = k then (1 : ℝ) else 0) = 1
 ```
-**Difficulty:** Easy. Only one nonzero term: 1⁴ = 1.
+Proved in `ParticipationRatio.lean` via `conv`/`split_ifs`/`sum_ite_eq'`.
+
+#### Additional Theorems (not in original report)
+- `ipr_nonneg` ✅ — raw IPR ≥ 0 (`positivity`)
+- `ipr_le_of_mask` ✅ — raw IPR decreases under masking (`sum_le_sum`/`positivity`)
 
 ### Tier 2: Requires Moderate Infrastructure
 
