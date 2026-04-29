@@ -148,6 +148,20 @@ theorem pr_range {n : ℕ} (hn : 0 < n) (v : Fin n → ℝ)
             apply mul_le_mul_of_nonneg_left h_ipr_lb (Nat.cast_nonneg _)
 
 -- ════════════════════════════════════════════════
+-- §2.5. IPR EXTREMAL EXAMPLES — PROVED
+-- ════════════════════════════════════════════════
+
+/-- **IPR of a basis vector** (maximally localized):
+    The standard basis vector e_k has IPR = 1, the maximum.
+    Only one component is nonzero (= 1), so Σ|v_i|⁴ = 1⁴ = 1. -/
+theorem ipr_basis {n : ℕ} (k : Fin n) :
+    ipr (fun i : Fin n => if i = k then (1 : ℝ) else 0) = 1 := by
+  unfold ipr
+  conv_lhs => arg 2; ext i; rw [show (if i = k then (1 : ℝ) else 0) ^ 4 =
+    if i = k then 1 else 0 from by split_ifs <;> norm_num]
+  simp [Finset.sum_ite_eq', Finset.mem_univ]
+
+-- ════════════════════════════════════════════════
 -- §3. EXPERIMENTAL CONSTANTS (Exploration 19)
 -- ════════════════════════════════════════════════
 

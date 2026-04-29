@@ -85,6 +85,28 @@ theorem classRestrict_mod_partition (N m : ℕ) (hm : 0 < m)
   simp_rw [this, Finset.sum_ite_eq']
   simp [Finset.mem_univ]
 
+/-- **Class restrictions to different classes are orthogonal.**
+    If r₁ ≠ r₂, then ⟨v_{r₁}, v_{r₂}⟩ = 0 because the supports
+    are disjoint: for each index i, at most one of the indicator
+    functions is nonzero.
+
+    This is the number-theoretic incarnation of orthogonality of
+    eigenspaces: residue classes modulo m partition the indices
+    into non-overlapping sets. -/
+theorem classRestrict_mod_orthogonal (N m : ℕ) (_hm : 0 < m)
+    (r₁ r₂ : Fin m) (hr : r₁ ≠ r₂) (v : Fin (N - 1) → ℝ) :
+    dotProduct (classRestrict_mod N m r₁ v)
+              (classRestrict_mod N m r₂ v) = 0 := by
+  simp only [dotProduct, classRestrict_mod]
+  apply Finset.sum_eq_zero
+  intro i _
+  split_ifs with h1 h2
+  · -- both classes match — impossible since r₁ ≠ r₂
+    exact absurd (Fin.ext (h1.symm.trans h2)) hr
+  · ring  -- first matches, second doesn't: v i * 0 = 0
+  · ring  -- first doesn't match, second does: 0 * v i = 0
+  · ring  -- neither matches: 0 * 0 = 0
+
 -- ════════════════════════════════════════════════
 -- §2. BLOCK-DIAGONAL DECOMPOSITION
 -- ════════════════════════════════════════════════
