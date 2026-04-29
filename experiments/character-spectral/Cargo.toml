@@ -24,6 +24,10 @@ path = "src/deep_probe.rs"
 name = "cert-export"
 path = "src/cert_export.rs"
 
+[[bin]]
+name = "boson-fermion"
+path = "src/boson_fermion.rs"
+
 [dependencies]
 rug = "1.26"
 rayon = "1.10"
