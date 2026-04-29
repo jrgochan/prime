@@ -83,6 +83,9 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.OctonionicPartition,
     `Cathedral.Spectral.ClassRestriction,
     `Cathedral.Spectral.FiniteDimReduction,
+    -- Spectral exploration (Exploration 19, NOT on crown path)
+    `Cathedral.Spectral.ResidueDecomposition,
+    `Cathedral.Spectral.ParticipationRatio,
     -- Structural layer
     `Cathedral.Structural.Independence,
     `Cathedral.Structural.Eigenvalue,

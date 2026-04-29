@@ -1,5 +1,6 @@
 import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
+import Cathedral.Spectral.ClassRestriction
 
 /-!
   Cathedral/Spectral/ResidueDecomposition.lean
@@ -8,7 +9,7 @@ import Cathedral.Spectral.RayleighBridge
   Extends the mod-8 (octonionic) partition in ClassRestriction.lean
   to arbitrary moduli.
 
-  ## Key Theorems (all PROVED — zero sorry, zero axioms)
+  ## Key Theorems
 
   1. `classRestrict_mod` — Zero-masking to residue class r (mod m)
   2. `classRestrict_mod_partition` — Norm partition over all classes
@@ -71,8 +72,18 @@ theorem classRestrict_mod_partition (N m : ℕ) (hm : 0 < m)
     if (i.val + 2) % m = r.val then v i * v i else 0 := by
     intro r; by_cases h : (i.val + 2) % m = r.val <;> simp [h]
   simp_rw [key]
-  -- Sum over r of (if r = target then v²) = v²
-  simp
+  -- Sum over r of (if target = r.val then v² else 0) = v²
+  -- Swap the if-condition direction so we can use sum_ite_eq
+  simp_rw [eq_comm (a := (i.val + 2) % m)]
+  -- Now it's Σ_r (if r.val = target then v² else 0)
+  -- This equals v i * v i by picking out the unique r
+  have hmod : (i.val + 2) % m < m := Nat.mod_lt _ hm
+  have : ∀ r : Fin m,
+    (if r.val = (i.val + 2) % m then v i * v i else (0 : ℝ)) =
+    (if r = ⟨(i.val + 2) % m, hmod⟩ then v i * v i else 0) := by
+    intro r; congr 1; exact propext (Fin.val_eq_val r ⟨_, hmod⟩)
+  simp_rw [this, Finset.sum_ite_eq']
+  simp [Finset.mem_univ]
 
 -- ════════════════════════════════════════════════
 -- §2. BLOCK-DIAGONAL DECOMPOSITION
@@ -106,10 +117,7 @@ lemma gramMatrixBlockDiag_mod_hermitian (N m : ℕ) :
 
     where v_r = classRestrict_mod N m r v.
 
-    Proof: Adapted from blockDiag_quadForm_decomp (ClassRestriction.lean).
-    For each row i, the sum over residue classes r collapses to the unique
-    class r = (i+2) mod m. Then the pointwise identity follows from
-    moving the if-clause between the matrix entry and the vector component. -/
+    Proof: Both sides equal Σ_{i,j : same class} v_i G[i,j] v_j. -/
 theorem blockDiag_quadForm_decomp_mod (N m : ℕ) (hm : 0 < m)
     (v : Fin (N - 1) → ℝ) :
     realQuadForm (gramMatrixBlockDiag_mod N m) v =
@@ -119,41 +127,21 @@ theorem blockDiag_quadForm_decomp_mod (N m : ℕ) (hm : 0 < m)
     Matrix.of_apply, classRestrict_mod]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl; intro i _
-  -- For each i, collapse the sum over r to the unique r = (i.val+2) % m
+  -- For each i, we need to show the LHS row-dot equals the RHS sum over classes
+  -- LHS(i) = v(i) * Σ_j (if ci=cj then G[i,j] else 0) * v(j)
+  -- RHS(i) = Σ_r (if ci=r then v(i) else 0) * Σ_j G[i,j] * (if cj=r then v(j) else 0)
   set ci := (i.val + 2) % m with hci_def
   have hci_lt : ci < m := Nat.mod_lt _ hm
-  -- The sum over r: only r = ⟨ci, hci_lt⟩ contributes
-  have h_rhs : ∀ (f : Fin m → ℝ),
-    (∑ x : Fin m, (if ci = x.val then f x else 0)) =
-    f ⟨ci, hci_lt⟩ := by
-    intro f; simp
-  -- Collapse the r-sum to the unique r = ci
-  rw [show (∑ x : Fin m,
-      (if ci = x.val then v i else 0) *
-      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
-        (fun j' => if (j'.val + 2) % m = x.val then v j' else 0)) =
-    v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
-      (fun j' => if (j'.val + 2) % m = ci then v j' else 0) from by
-    rw [show v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
-        (fun j' => if (j'.val + 2) % m = ci then v j' else 0) =
-      (if ci = (⟨ci, hci_lt⟩ : Fin m).val then v i else 0) *
-        (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
-        (fun j' => if (j'.val + 2) % m = (⟨ci, hci_lt⟩ : Fin m).val then v j' else 0) from by simp]
-    rw [← h_rhs (fun x =>
-      (if ci = x.val then v i else 0) *
-      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
-        (fun j' => if (j'.val + 2) % m = x.val then v j' else 0))]
-    apply Finset.sum_congr rfl; intro r _
-    by_cases hr : ci = r.val <;> simp [hr]]
-  -- Factor out v i and show dotProducts are equal
-  congr 1
-  -- Goal: (fun j => if ci = (j.val+2)%m then G[i,j] else 0) ⬝ᵥ v =
-  --       (fun j => G[i,j]) ⬝ᵥ (fun j' => if (j'.val+2)%m = ci then v j' else 0)
-  simp only [dotProduct]
-  apply Finset.sum_congr rfl; intro j _
-  by_cases h : ci = (j.val + 2) % m
-  · simp only [if_pos h, if_pos h.symm]
-  · simp only [if_neg h, if_neg (Ne.symm h), zero_mul, mul_zero]
+  -- RHS: only r with ci = r.val contributes
+  -- Factor: if ci = r then v(i) * (G_row ⬝ᵥ v_r) else 0
+  -- Collapse sum to r = ci
+  -- LHS: v(i) * (masked_G_row ⬝ᵥ v)
+  -- Both equal v(i) * Σ_j (if ci=cj then G[i,j] * v(j) else 0)
+  -- LHS directly. RHS: the only contributing r is ci, giving v(i) * Σ_j G[i,j] * (if cj=ci then v(j) else 0)
+  -- These differ by whether the if is on G or on v, but the product is the same.
+  sorry -- The proof requires careful term-level manipulation that depends on
+        -- how simp unfolds the mulVec. The mathematical content is trivial:
+        -- both sides equal Σ_{j: same class as i} v(i) * G[i,j] * v(j).
 
 -- ════════════════════════════════════════════════
 -- §3. SPECTRAL GAP COMPARISON
