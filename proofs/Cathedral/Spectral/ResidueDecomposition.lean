@@ -127,21 +127,51 @@ theorem blockDiag_quadForm_decomp_mod (N m : ℕ) (hm : 0 < m)
     Matrix.of_apply, classRestrict_mod]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl; intro i _
-  -- For each i, we need to show the LHS row-dot equals the RHS sum over classes
-  -- LHS(i) = v(i) * Σ_j (if ci=cj then G[i,j] else 0) * v(j)
-  -- RHS(i) = Σ_r (if ci=r then v(i) else 0) * Σ_j G[i,j] * (if cj=r then v(j) else 0)
-  set ci := (i.val + 2) % m with hci_def
-  have hci_lt : ci < m := Nat.mod_lt _ hm
-  -- RHS: only r with ci = r.val contributes
-  -- Factor: if ci = r then v(i) * (G_row ⬝ᵥ v_r) else 0
-  -- Collapse sum to r = ci
-  -- LHS: v(i) * (masked_G_row ⬝ᵥ v)
-  -- Both equal v(i) * Σ_j (if ci=cj then G[i,j] * v(j) else 0)
-  -- LHS directly. RHS: the only contributing r is ci, giving v(i) * Σ_j G[i,j] * (if cj=ci then v(j) else 0)
-  -- These differ by whether the if is on G or on v, but the product is the same.
-  sorry -- The proof requires careful term-level manipulation that depends on
-        -- how simp unfolds the mulVec. The mathematical content is trivial:
-        -- both sides equal Σ_{j: same class as i} v(i) * G[i,j] * v(j).
+  -- Unfold the remaining dotProduct and classRestrict_mod
+  simp only [dotProduct, classRestrict_mod]
+  -- Goal after unfold:
+  -- v i * Σ_j (if ci=cj then G else 0) * v(j) =
+  -- Σ_r (if ci=r then v(i) else 0) * Σ_j G * (if cj=r then v(j) else 0)
+  --
+  -- LHS: pull v(i) into sum, normalize
+  rw [Finset.mul_sum]
+  simp_rw [show ∀ j : Fin (N - 1),
+      v i * ((if (↑i + 2) % m = (↑j + 2) % m
+        then gramEntry (↑i + 1) (↑j + 1) else 0) * v j) =
+      if (↑i + 2) % m = (↑j + 2) % m
+        then v i * gramEntry (↑i + 1) (↑j + 1) * v j else 0
+    from fun j => by split <;> ring]
+  -- RHS: collapse outer sum over r
+  symm
+  have hmod : (i.val + 2) % m < m := Nat.mod_lt _ hm
+  have nat_fin_iff : ∀ r : Fin m,
+      ((↑i + 2) % m = ↑r) ↔ (r = ⟨(↑i + 2) % m, hmod⟩) := by
+    intro r; constructor
+    · intro h; ext; simpa using h.symm
+    · intro h; simp [h]
+  have factor : ∀ r : Fin m,
+      (if (↑i + 2) % m = ↑r then v i else 0) *
+      ∑ j : Fin (N - 1), gramEntry (↑i + 1) (↑j + 1) *
+        (if (↑j + 2) % m = ↑r then v j else 0) =
+      if r = ⟨(↑i + 2) % m, hmod⟩ then
+        v i * ∑ j : Fin (N - 1), gramEntry (↑i + 1) (↑j + 1) *
+          (if (↑j + 2) % m = (↑i + 2) % m then v j else 0)
+      else 0 := by
+    intro r
+    by_cases hr : (↑i + 2) % m = ↑r
+    · rw [if_pos hr, if_pos ((nat_fin_iff r).mp hr)]
+      congr 1; apply Finset.sum_congr rfl; intro j _
+      congr 1; simp only [hr]
+    · rw [if_neg hr, if_neg (mt (nat_fin_iff r).mpr hr), zero_mul]
+  simp_rw [factor, Finset.sum_ite_eq']
+  simp only [Finset.mem_univ, ite_true]
+  -- Now: v i * Σ_j G * (if cj=ci then v(j) else 0) =
+  --      Σ_j (if ci=cj then vi*G*vj else 0)
+  rw [Finset.mul_sum]
+  apply Finset.sum_congr rfl; intro j _
+  by_cases h : (↑i + 2) % m = (↑j + 2) % m
+  · rw [if_pos h.symm, if_pos h]; ring
+  · rw [if_neg (Ne.symm h), if_neg h]; ring
 
 -- ════════════════════════════════════════════════
 -- §3. SPECTRAL GAP COMPARISON
