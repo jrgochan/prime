@@ -1,0 +1,133 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL MULTI-MODULUS UNIVERSALITY PROBE[0m
+  [1m[36m║[0m  [2mFano control experiment · max N = 1000[0m
+  [1m[36m║[0m  [2m64-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [2mTest schedule: [50, 75, 100, 150, 200, 300, 400, 500, 750, 1000][0m
+  [2mModuli: [3, 5, 7, 8, 12][0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mMODULUS = 3[0m
+  [1m[36m║[0m  [2mOdd residues: [1] (1 classes)[0m
+  [1m[36m║[0m  [2mEven residues: [2] (1 classes)[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2mN     │ Full     │ k≡1(3) │ Dark[0m
+  [1m[36m║[0m  50    │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  75    │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  100   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  150   │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  200   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+  [1m[36m║[0m  300   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-3 N=300 in 1.1s
+  [1m[36m║[0m  400   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-3 N=400 in 3.3s
+  [1m[36m║[0m  500   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-3 N=500 in 6.0s
+  [1m[36m║[0m  750   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-3 N=750 in 18.2s
+  [1m[36m║[0m  1000  │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-3 N=1000 in 39.0s
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mMODULUS = 5[0m
+  [1m[36m║[0m  [2mOdd residues: [1, 3] (2 classes)[0m
+  [1m[36m║[0m  [2mEven residues: [2, 4] (2 classes)[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2mN     │ Full     │ k≡1(5) │ k≡3(5) │ Dark[0m
+  [1m[36m║[0m  50    │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  75    │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  100   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  150   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  200   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  300   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-5 N=300 in 1.2s
+  [1m[36m║[0m  400   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-5 N=400 in 3.1s
+  [1m[36m║[0m  500   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-5 N=500 in 6.3s
+  [1m[36m║[0m  750   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-5 N=750 in 18.6s
+  [1m[36m║[0m  1000  │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-5 N=1000 in 37.1s
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mMODULUS = 7[0m
+  [1m[36m║[0m  [2mOdd residues: [1, 3, 5] (3 classes)[0m
+  [1m[36m║[0m  [2mEven residues: [2, 4, 6] (3 classes)[0m
+  [1m[36m║[0m  [31m⚠ NO Fano structure (6 classes ≠ 7 points) ← CONTROL[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2mN     │ Full     │ k≡1(7) │ k≡3(7) │ k≡5(7) │ Dark[0m
+  [1m[36m║[0m  50    │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  75    │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  100   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  150   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  200   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  300   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-7 N=300 in 1.1s
+  [1m[36m║[0m  400   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-7 N=400 in 3.0s
+  [1m[36m║[0m  500   │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-7 N=500 in 6.6s
+  [1m[36m║[0m  750   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-7 N=750 in 19.7s
+  [1m[36m║[0m  1000  │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-7 N=1000 in 39.9s
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mMODULUS = 8[0m
+  [1m[36m║[0m  [2mOdd residues: [1, 3, 5, 7] (4 classes)[0m
+  [1m[36m║[0m  [2mEven residues: [2, 4, 6] (3 classes)[0m
+  [1m[36m║[0m  [33m⚡ Fano plane PG(2,2): 7 points = (Z/2)³\{0} ← BASELINE[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2mN     │ Full     │ k≡1(8) │ k≡3(8) │ k≡5(8) │ k≡7(8) │ Dark[0m
+  [1m[36m║[0m  50    │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  75    │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  100   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  150   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  200   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  300   │ [32mGOE     [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-8 N=300 in 1.1s
+  [1m[36m║[0m  400   │ [32mGOE     [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-8 N=400 in 3.1s
+  [1m[36m║[0m  500   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-8 N=500 in 6.4s
+  [1m[36m║[0m  750   │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-8 N=750 in 19.8s
+  [1m[36m║[0m  1000  │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-8 N=1000 in 39.8s
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mMODULUS = 12[0m
+  [1m[36m║[0m  [2mOdd residues: [1, 3, 5, 7, 9, 11] (6 classes)[0m
+  [1m[36m║[0m  [2mEven residues: [2, 4, 6, 8, 10] (5 classes)[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2mN     │ Full     │ k≡1(12) │ k≡3(12) │ k≡5(12) │ k≡7(12) │ k≡9(12) │ k≡11(12) │ Dark[0m
+  [1m[36m║[0m  50    │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  75    │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  100   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson[0m
+  [1m[36m║[0m  150   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  200   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+  [1m[36m║[0m  300   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-12 N=300 in 1.1s
+  [1m[36m║[0m  400   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-12 N=400 in 3.0s
+  [1m[36m║[0m  500   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-12 N=500 in 6.3s
+  [1m[36m║[0m  750   │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE     [0m │ [33mPoisson [0m │ [33mPoisson [0m │ [32mGOE[0m
+    mod-12 N=750 in 20.1s
+  [1m[36m║[0m  1000  │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE     [0m │ [32mGOE[0m
+    mod-12 N=1000 in 39.2s
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97m═══ UNIVERSALITY VERDICT ═══[0m
+  [2mIf all moduli show the same cascade → universal thermodynamics[0m
+  [2mIf mod-8 differs from mod-7 → Fano plane is physics[0m
+
+  [1m[97mTotal:[0m [32m345.9s[0m (12 threads, f64/nalgebra)
+
