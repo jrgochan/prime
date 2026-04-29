@@ -993,6 +993,36 @@ Certificate: \texttt{experiments/character-spectral/results/certificates/}\\
 \texttt{eigenvector-localization.json} (f64, $N \leq 1000$).
 \end{correspondence}
 
+\begin{remark}[Exploration~20: Extremal State Certification]
+The IPR bounds cited above ($1/n \leq \mathrm{IPR} \leq 1$) are
+now complemented by machine-verified extremal examples:
+\begin{itemize}
+  \item \lean{ipr\_basis}: the standard basis vector $e_k$ achieves
+    $\mathrm{IPR}(e_k) = 1$ (maximally localized state, Anderson insulator).
+  \item \lean{ipr\_uniform}: the uniform vector $(1/\sqrt{n}, \ldots, 1/\sqrt{n})$
+    achieves $\mathrm{IPR}(u) = 1/n$ (maximally delocalized state, GOE Haar measure).
+  \item \lean{ipr\_le\_of\_mask}: zeroing out components can only
+    decrease the raw IPR, i.e., $\sum_{i \in S} v_i^4 \leq \sum_i v_i^4$.
+    Physically: removing degrees of freedom from a quantum system
+    cannot increase its total fourth-moment weight.
+\end{itemize}
+These certifications establish that the IPR bounds are tight:
+the ground state's experimental $\mathrm{PR} \approx 7$ at $N = 500$
+sits firmly between the proven extremes of $\mathrm{PR} = 1$
+(basis vector) and $\mathrm{PR} = n$ (uniform vector).
+
+Additionally, Exploration~20 proved that the residue class
+partition produces \emph{orthogonal} restricted vectors
+(\lean{classRestrict\_mod\_orthogonal}) and that the block-diagonal
+decomposition preserves the trace
+(\lean{blockDiag\_trace\_eq\_gram\_trace}).
+In quantum field theory language, the residue partition is a
+\emph{superselection rule}: different residue classes define
+orthogonal sectors of the Hilbert space, and the total spectral
+weight (sum of all eigenvalues) is conserved across the
+decomposition.
+\end{remark}
+
 \subsection{The Dark Sector Crossover}
 \label{sec:dark-sector}
 
@@ -1878,6 +1908,16 @@ IPR bounds $1/n \leq \text{IPR} \leq 1$ & Localization bounds & \lean{Participat
 Ground state PR $= \mathcal{O}(1)$ & Quantum scarring & \lean{(Rust cert, f64)} & num. & \ref{sec:localization} \\
 Prime weight $\sim 1/\log N$ & Composite dominance & \lean{ParticipationRatio.lean} & conj. & \ref{sec:localization} \\
 Dark sector crossover & KT-like topological transition & \lean{(Rust cert, f64)} & num. & \ref{sec:dark-sector} \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Exploration~20 certified theorems (April~29, 2026):}} \\
+\midrule
+$\langle v_{r_1}, v_{r_2} \rangle = 0$ & Eigenspace orthogonality & \lean{ResidueDecomposition.lean} & proved & \ref{sec:universality} \\
+$\mathrm{Tr}(G^{\mathrm{block}}_m) = \mathrm{Tr}(G)$ & Spectral weight conservation & \lean{ResidueDecomposition.lean} & proved & \ref{sec:universality} \\
+$G(j,k) = G(k,j)$ & Time-reversal symmetry & \lean{Defs.lean} & proved & \ref{sec:spectral} \\
+IPR$(e_k) = 1$ & Maximally localized state & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(u) = 1/n$ & Maximally delocalized state & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(v) \geq 0$ & Non-negative localization & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(v|_S) \leq \text{IPR}(v)$ & Masking decreases weight & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
 \bottomrule
 \end{tabular}
 \end{center}
