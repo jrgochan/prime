@@ -2,7 +2,7 @@
 # build.sh — Cathedral Paper Suite build script (latexmk wrapper)
 #
 # Usage:
-#   ./build.sh                       Build all 24 papers
+#   ./build.sh                       Build all 13 papers
 #   ./build.sh cathedral-physics     Build one paper (auto-finds directory)
 #   ./build.sh science/              Build all papers in a group
 #   ./build.sh clean                 Remove all build artifacts
