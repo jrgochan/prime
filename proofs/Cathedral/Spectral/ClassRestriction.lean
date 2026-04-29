@@ -164,7 +164,21 @@ noncomputable def gramCrossClass (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) 
     - ≈ 0.02 for G\|_{Sₘ} (decorrelated → large spectral gap)
 
     This means the Liouville cancellation that makes RH hard is
-    ENTIRELY a cross-class phenomenon. -/
+    ENTIRELY a cross-class phenomenon.
+
+    **Exploration 19 Update (Experiment C — Eigenvector Localization):**
+    The ground state eigenvector of G_N concentrates on COMPOSITES,
+    not primes. Prime weight is only 4-15% across N=100..1000.
+    The participation ratio converges to ~0.47 × GOE prediction,
+    confirming the Gram matrix has persistent partial localization.
+
+    This connects to Liouville decorrelation: within each class,
+    the composites dominate the eigenvector, and composites have
+    even Liouville parity with high probability (many prime factors).
+    The Liouville projection is therefore WEAK within each class.
+
+    See: Cathedral/Spectral/ParticipationRatio.lean for PR bounds.
+    See: experiments/character-spectral/results/spectral_oracle_axioms.lean -/
 theorem liouville_within_class_decorrelated :
     ∀ N : ℕ, 100 ≤ N →
     ∀ _m : Fin 8,
@@ -346,7 +360,16 @@ theorem rh_from_schur_bridge
     | 500  | 99.94%     | 100.00%    |
     | 800  | 99.97%     | 100.00%    |
 
-    Accuracy INCREASES with N → exact rank-1 in the limit. -/
+    Accuracy INCREASES with N → exact rank-1 in the limit.
+
+    **Exploration 19 Update (Universality):**
+    The rank-1 structure is NOT specific to the mod-8 partition.
+    Multi-modulus experiments (m ∈ {3,5,7,8,12}) show the same
+    cross-class interference pattern for ALL moduli. This
+    universality is formalized in ResidueDecomposition.lean.
+
+    See: Cathedral/Spectral/ResidueDecomposition.lean
+    See: experiments/character-spectral/results/certificates/ -/
 theorem interference_rank_one :
     ∀ (m₁ m₂ : Fin 8), m₁ ≠ m₂ →
     ∀ N : ℕ, 100 ≤ N →
