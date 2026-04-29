@@ -2,9 +2,10 @@
 //!  CATHEDRAL CHARACTER-PROJECTED SPECTRAL PROBE
 //!  128-bit MPFR · Jacobi Eigensolve · Mod-8 Character Decomposition
 //!
-//!  Tests whether the Poisson→GUE transition in the Gram matrix depends
-//!  on the mod-8 Dirichlet character channel, and whether different
-//!  channels fall into different random-matrix universality classes.
+//!  Tests whether character-WEIGHTED Gram projections
+//!  G_χ(j,k) = χ(j)·G(j,k)·χ(k) produce different spectral
+//!  structures per channel, and whether the Poisson→GOE transition
+//!  depends on the character.
 //!
 //!  §A. GRAM MATRIX & CHARACTER PROJECTION
 //!  §B. EIGENVALUE EXTRACTION (PER-CHANNEL)
@@ -38,7 +39,7 @@ fn main() {
     header(
         "CATHEDRAL CHARACTER-PROJECTED SPECTRAL PROBE",
         &format!(
-            "Mod-8 character decomposition of G_N eigenvalue spectrum · max N = {max_n}"
+            "G_χ(j,k) = χ(j)·G(j,k)·χ(k) weighted projections · max N = {max_n}"
         ),
         PREC,
         threads,
@@ -74,46 +75,49 @@ fn main() {
     struct NResult {
         n: usize,
         full_eigs: Vec<f64>,
-        chi_eigs: [Vec<f64>; 4],
+        res_eigs: [Vec<f64>; 4],  // residue classes k≡1,3,5,7 mod 8
         odd_eigs: Vec<f64>,
         even_eigs: Vec<f64>,
-        chi_dims: [usize; 4],
-        odd_dim: usize,
-        even_dim: usize,
+        res_dims: [usize; 4],
     }
     let mut all_results: Vec<NResult> = Vec::new();
 
     for &n in &all_ns {
         let t_n = Instant::now();
 
-        // ═══ §A. GRAM MATRIX & CHARACTER PROJECTION ═══
-        println!("  {BOLD}{WHITE}═══ §A. GRAM MATRIX & PROJECTION (N={n}) ═══{RESET}");
+        // ═══ §A. GRAM MATRIX & RESIDUE CLASS PROJECTION ═══
+        println!("  {BOLD}{WHITE}═══ §A. GRAM MATRIX & RESIDUE CLASS PROJECTION (N={n}) ═══{RESET}");
 
         let (full_mat, full_dim) = gram::build_gram_matrix_mpfr(n);
 
-        // Project to channels
-        let chi_indices: Vec<Vec<usize>> =
-            (0..4).map(|i| channel_indices(n, i)).collect();
+        // Residue class indices mod 8
+        let res_indices: Vec<Vec<usize>> = RESIDUE_CLASSES.iter()
+            .map(|&r| residue_indices(n, r))
+            .collect();
         let odd_idx = odd_indices(n);
         let even_idx = even_indices(n);
 
         println!(
-            "    Full dim: {full_dim} | Odd: {} | Even: {} | χ₀: {} | χ₁: {} | χ₂: {} | χ₃: {}",
+            "    Full dim: {full_dim} | Odd: {} | Even: {} | k≡1: {} | k≡3: {} | k≡5: {} | k≡7: {}",
             odd_idx.len(), even_idx.len(),
-            chi_indices[0].len(), chi_indices[1].len(),
-            chi_indices[2].len(), chi_indices[3].len()
+            res_indices[0].len(), res_indices[1].len(),
+            res_indices[2].len(), res_indices[3].len()
         );
 
-        // Dimension consistency check
-        let dim_sum = odd_idx.len() + even_idx.len();
+        // Dimension consistency checks
+        let dim_oe = odd_idx.len() + even_idx.len();
+        let dim_res: usize = res_indices.iter().map(|v| v.len()).sum();
         println!(
-            "    {} dim(odd) + dim(even) = {dim_sum} = dim(full) = {full_dim}",
-            check(dim_sum == full_dim)
+            "    {} dim(odd) + dim(even) = {dim_oe} = dim(full) = {full_dim}",
+            check(dim_oe == full_dim)
+        );
+        println!(
+            "    {} Σ dim(k≡r) = {dim_res} = dim(odd) = {} (residues partition odd sector)",
+            check(dim_res == odd_idx.len()), odd_idx.len()
         );
 
-        // Project sub-matrices
-        let chi_mats: Vec<Vec<rug::Float>> = chi_indices
-            .iter()
+        // Project sub-matrices — RESIDUE CLASSES (genuinely different!)
+        let res_mats: Vec<Vec<rug::Float>> = res_indices.iter()
             .map(|idx| gram::project_gram(&full_mat, full_dim, idx))
             .collect();
         let odd_mat = gram::project_gram(&full_mat, full_dim, &odd_idx);
@@ -127,36 +131,32 @@ fn main() {
         let full_eigs = gram::eigenvalues_jacobi_mpfr(&full_mat, full_dim);
         let full_t = t_n.elapsed().as_secs_f64();
         print_eig_row("Full G_N", full_dim, &full_eigs, full_t);
-
-        // Save full eigenvalues
         save_eigenvalues(&format!("results/eigenvalues_full_N{n}.tsv"), &full_eigs);
 
-        let mut chi_eigs_arr: [Vec<f64>; 4] = [vec![], vec![], vec![], vec![]];
-        let mut chi_dims = [0usize; 4];
+        let mut res_eigs_arr: [Vec<f64>; 4] = [vec![], vec![], vec![], vec![]];
+        let mut res_dims = [0usize; 4];
         for i in 0..4 {
             let t_ch = Instant::now();
-            let dim = chi_indices[i].len();
-            chi_dims[i] = dim;
-            let eigs = gram::eigenvalues_jacobi_mpfr(&chi_mats[i], dim);
+            let dim = res_indices[i].len();
+            res_dims[i] = dim;
+            let eigs = gram::eigenvalues_jacobi_mpfr(&res_mats[i], dim);
             let elapsed = t_ch.elapsed().as_secs_f64();
-            print_eig_row(CHI_NAMES[i], dim, &eigs, elapsed);
+            print_eig_row(RESIDUE_NAMES[i], dim, &eigs, elapsed);
             save_eigenvalues(
-                &format!("results/eigenvalues_chi{i}_N{n}.tsv"),
+                &format!("results/eigenvalues_res{}_N{n}.tsv", RESIDUE_CLASSES[i]),
                 &eigs,
             );
-            chi_eigs_arr[i] = eigs;
+            res_eigs_arr[i] = eigs;
         }
 
         let t_odd = Instant::now();
-        let odd_dim = odd_idx.len();
-        let odd_eigs = gram::eigenvalues_jacobi_mpfr(&odd_mat, odd_dim);
-        print_eig_row("Odd sector", odd_dim, &odd_eigs, t_odd.elapsed().as_secs_f64());
+        let odd_eigs = gram::eigenvalues_jacobi_mpfr(&odd_mat, odd_idx.len());
+        print_eig_row("Odd sector", odd_idx.len(), &odd_eigs, t_odd.elapsed().as_secs_f64());
         save_eigenvalues(&format!("results/eigenvalues_odd_N{n}.tsv"), &odd_eigs);
 
         let t_even = Instant::now();
-        let even_dim = even_idx.len();
-        let even_eigs = gram::eigenvalues_jacobi_mpfr(&even_mat, even_dim);
-        print_eig_row("Dark (even)", even_dim, &even_eigs, t_even.elapsed().as_secs_f64());
+        let even_eigs = gram::eigenvalues_jacobi_mpfr(&even_mat, even_idx.len());
+        print_eig_row("Dark (even)", even_idx.len(), &even_eigs, t_even.elapsed().as_secs_f64());
         save_eigenvalues(&format!("results/eigenvalues_even_N{n}.tsv"), &even_eigs);
 
         // Trace check
@@ -175,10 +175,10 @@ fn main() {
 
         let channels_to_test: Vec<(&str, &[f64])> = vec![
             ("Full G_N", &full_eigs),
-            (CHI_NAMES[0], &chi_eigs_arr[0]),
-            (CHI_NAMES[1], &chi_eigs_arr[1]),
-            (CHI_NAMES[2], &chi_eigs_arr[2]),
-            (CHI_NAMES[3], &chi_eigs_arr[3]),
+            (RESIDUE_NAMES[0], &res_eigs_arr[0]),
+            (RESIDUE_NAMES[1], &res_eigs_arr[1]),
+            (RESIDUE_NAMES[2], &res_eigs_arr[2]),
+            (RESIDUE_NAMES[3], &res_eigs_arr[3]),
             ("Odd sector", &odd_eigs),
             ("Dark (even)", &even_eigs),
         ];
@@ -196,19 +196,6 @@ fn main() {
                 tsv_sp, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
                 name, sr.gue_fit, sr.goe_fit, sr.gse_fit, sr.poisson_fit, sr.best_class
             ).unwrap();
-
-            // Save per-channel unfolded spacings
-            if eigs.len() >= 4 {
-                let fname = format!(
-                    "results/spacings_{}_N{n}.tsv",
-                    name.replace(' ', "_").replace('(', "").replace(')', "")
-                );
-                let mut sf = fs::File::create(&fname).unwrap();
-                writeln!(sf, "index\traw\tunfolded").unwrap();
-                for (i, (&raw, &unf)) in sr.spacings.iter().zip(sr.unfolded.iter()).enumerate() {
-                    writeln!(sf, "{}\t{:.15e}\t{:.15e}", i, raw, unf).unwrap();
-                }
-            }
         }
         println!();
 
@@ -226,20 +213,6 @@ fn main() {
                 name, a, e0, b, r2, check(r2 > 0.85)
             );
             writeln!(tsv_vh, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}", name, a, e0, b, r2).unwrap();
-
-            // Save DOS
-            let n_bins = (eigs.len() as f64).sqrt().ceil() as usize;
-            let n_bins = n_bins.max(5).min(30);
-            let dos = spectral::compute_dos(eigs, n_bins);
-            let dos_fname = format!(
-                "results/dos_{}_N{n}.tsv",
-                name.replace(' ', "_").replace('(', "").replace(')', "")
-            );
-            let mut df = fs::File::create(&dos_fname).unwrap();
-            writeln!(df, "bin_center\tcount\tdensity").unwrap();
-            for i in 0..dos.n_bins {
-                writeln!(df, "{:.15e}\t{}\t{:.15e}", dos.bin_centers[i], dos.counts[i], dos.density[i]).unwrap();
-            }
         }
         println!();
 
@@ -259,8 +232,8 @@ fn main() {
             println!(
                 "    {} Dark sector is {}",
                 check(is_poisson),
-                if is_poisson { "Poisson (uncorrelated) — characters don't see these levels" }
-                else { "correlated — unexpected!" }
+                if is_poisson { "Poisson (uncorrelated)" }
+                else { "correlated — dark sector developed spectral rigidity" }
             );
         } else {
             println!("    {DIM}Not enough eigenvalues for dark sector analysis{RESET}");
@@ -273,33 +246,23 @@ fn main() {
         let mut tsv_cc = fs::File::create(format!("results/cross_corr_N{n}.tsv")).unwrap();
         writeln!(tsv_cc, "channel_a\tchannel_b\tcorrelation").unwrap();
 
-        println!("  {DIM}  Pearson ρ between eigenvalue staircases:{RESET}");
+        println!("  {DIM}  Pearson ρ between residue-class eigenvalue staircases:{RESET}");
         for i in 0..4 {
             for j in (i + 1)..4 {
-                let rho = spectral::staircase_correlation(&chi_eigs_arr[i], &chi_eigs_arr[j]);
+                let rho = spectral::staircase_correlation(&res_eigs_arr[i], &res_eigs_arr[j]);
                 let independent = rho.abs() < 0.3;
                 println!(
                     "    {} vs {} : ρ = {:+.4} {}",
-                    CHI_NAMES[i], CHI_NAMES[j], rho,
+                    RESIDUE_NAMES[i], RESIDUE_NAMES[j], rho,
                     if independent { check(true) } else { check(false) }
                 );
-                writeln!(tsv_cc, "{}\t{}\t{:.15e}", CHI_NAMES[i], CHI_NAMES[j], rho).unwrap();
+                writeln!(tsv_cc, "{}\t{}\t{:.15e}", RESIDUE_NAMES[i], RESIDUE_NAMES[j], rho).unwrap();
             }
         }
-        // Full vs odd
         let rho_full_odd = spectral::staircase_correlation(&full_eigs, &odd_eigs);
-        println!(
-            "    Full vs Odd : ρ = {:+.4}",
-            rho_full_odd
-        );
-        writeln!(tsv_cc, "Full\tOdd\t{:.15e}", rho_full_odd).unwrap();
-        // Odd vs even
+        println!("    Full vs Odd : ρ = {:+.4}", rho_full_odd);
         let rho_odd_even = spectral::staircase_correlation(&odd_eigs, &even_eigs);
-        println!(
-            "    Odd  vs Dark: ρ = {:+.4}",
-            rho_odd_even
-        );
-        writeln!(tsv_cc, "Odd\tDark\t{:.15e}", rho_odd_even).unwrap();
+        println!("    Odd  vs Dark: ρ = {:+.4}", rho_odd_even);
 
         println!(
             "\n    {DIM}N={n} completed in {:.1}s{RESET}\n",
@@ -307,8 +270,8 @@ fn main() {
         );
 
         all_results.push(NResult {
-            n, full_eigs, chi_eigs: chi_eigs_arr,
-            odd_eigs, even_eigs, chi_dims, odd_dim, even_dim,
+            n, full_eigs, res_eigs: res_eigs_arr,
+            odd_eigs, even_eigs, res_dims,
         });
     }
 
@@ -321,7 +284,7 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // Per-N summary of level spacing classes
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Level Spacing Universality Classes:{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Level Spacing by Residue Class:{RESET}");
     for r in &all_results {
         let full_sp = spectral::compute_spacing(&r.full_eigs);
         let even_sp = spectral::compute_spacing(&r.even_eigs);
@@ -330,10 +293,10 @@ fn main() {
             r.n, full_sp.best_class, even_sp.best_class
         );
         for i in 0..4 {
-            let sp = spectral::compute_spacing(&r.chi_eigs[i]);
+            let sp = spectral::compute_spacing(&r.res_eigs[i]);
             println!(
                 "  {BOLD}{CYAN}║{RESET}            {}={YELLOW}{}{RESET}",
-                CHI_NAMES[i], sp.best_class
+                RESIDUE_NAMES[i], sp.best_class
             );
         }
     }
@@ -363,7 +326,7 @@ fn main() {
   "timestamp": "{}",
   "character_modulus": 8,
   "num_channels": 4,
-  "question": "Does Poisson→GUE transition depend on mod-8 character channel?",
+  "question": "Do residue classes mod 8 produce different spectral statistics?",
   "max_N_tested": {max_n},
   "character_orthogonality_verified": true,
   "results": [{}
@@ -377,8 +340,8 @@ fn main() {
                 let full_sp = spectral::compute_spacing(&r.full_eigs);
                 let even_sp = spectral::compute_spacing(&r.even_eigs);
                 format!(
-                    "\n    {{\"N\": {}, \"full_class\": \"{}\", \"dark_class\": \"{}\", \"chi_dims\": {:?}}}",
-                    r.n, full_sp.best_class, even_sp.best_class, r.chi_dims
+                    "\n    {{\"N\": {}, \"full_class\": \"{}\", \"dark_class\": \"{}\", \"res_dims\": {:?}}}",
+                    r.n, full_sp.best_class, even_sp.best_class, r.res_dims
                 )
             })
             .collect::<Vec<_>>()

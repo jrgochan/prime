@@ -127,6 +127,41 @@ pub fn project_gram(full_mat: &[Float], full_dim: usize, indices: &[usize]) -> V
     sub
 }
 
+/// Character-WEIGHTED Gram projection: G_χ(j,k) = χ(j) · G(j,k) · χ(k).
+///
+/// Unlike `project_gram` which only selects indices, this multiplies each entry
+/// by the character values at both row and column indices. Since χ(k) ∈ {-1, 0, 1},
+/// this flips signs of off-diagonal elements, creating genuinely different spectral
+/// structures per character channel.
+///
+/// The resulting matrix is still real symmetric (since χ is real-valued).
+pub fn project_gram_weighted(
+    full_mat: &[Float],
+    full_dim: usize,
+    indices: &[usize],
+    chi_fn: &dyn Fn(usize) -> i8,
+) -> Vec<Float> {
+    let sub_dim = indices.len();
+    let mut sub: Vec<Float> = (0..sub_dim * sub_dim)
+        .map(|_| Float::with_val(PREC, 0.0))
+        .collect();
+
+    for (si, &ki) in indices.iter().enumerate() {
+        let ri = ki - 2;
+        let ci = chi_fn(ki) as f64; // χ(j)
+        for (sj, &kj) in indices.iter().enumerate() {
+            let rj = kj - 2;
+            let cj = chi_fn(kj) as f64; // χ(k)
+            let mut val = full_mat[ri * full_dim + rj].clone();
+            val *= ci * cj; // G_χ(j,k) = χ(j) · G(j,k) · χ(k)
+            sub[si * sub_dim + sj] = val;
+        }
+    }
+
+    sub
+}
+
+
 /// Jacobi eigenvalue algorithm in MPFR arithmetic.
 pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
     if dim == 0 {

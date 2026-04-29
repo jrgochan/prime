@@ -53,6 +53,12 @@ pub fn verify_orthogonality() -> Vec<(usize, usize, i32, i32, bool)> {
 
 /// Get the Gram matrix indices (values of k in 2..=n) where χ_i(k) ≠ 0.
 /// These form the rows/columns of the character-projected sub-matrix.
+///
+/// NOTE: All 4 characters mod 8 have the same support (odd integers),
+/// so channel_indices returns the same set for all chi_idx.
+/// The character WEIGHTING G_χ(j,k) = χ(j)·G(j,k)·χ(k) is a similarity
+/// transform D·G·D where D = diag(χ), and since D² = I, this preserves
+/// eigenvalues. The channels are spectrally identical.
 pub fn channel_indices(n: usize, chi_idx: usize) -> Vec<usize> {
     (2..=n).filter(|&k| chi(chi_idx, k) != 0).collect()
 }
@@ -65,4 +71,19 @@ pub fn odd_indices(n: usize) -> Vec<usize> {
 /// Get indices where k is even (the "dark sector" invisible to all characters).
 pub fn even_indices(n: usize) -> Vec<usize> {
     (2..=n).filter(|k| k % 2 == 0).collect()
+}
+
+// ═══════════════════════════════════════════════
+// RESIDUE CLASS DECOMPOSITION MOD 8
+// ═══════════════════════════════════════════════
+// Unlike character projections (which are spectrally trivial),
+// residue class partitions select DIFFERENT sub-matrices of G_N,
+// creating genuinely distinct spectral structures.
+
+pub const RESIDUE_CLASSES: [usize; 4] = [1, 3, 5, 7];
+pub const RESIDUE_NAMES: [&str; 4] = ["k≡1(8)", "k≡3(8)", "k≡5(8)", "k≡7(8)"];
+
+/// Get indices where k ≡ r (mod 8). These are genuinely different sub-matrices.
+pub fn residue_indices(n: usize, r: usize) -> Vec<usize> {
+    (2..=n).filter(|&k| k % 8 == r).collect()
 }
