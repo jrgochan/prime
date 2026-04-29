@@ -25,7 +25,7 @@ import Cathedral.Spectral.RayleighBridge
   expressible: the partition and spectral gap comparison work for ANY
   modulus, not just the octonionic mod-8.
 
-  Status: Zero sorry. Zero axioms. NOT on the crown path.
+  Status: Zero axioms. NOT on the crown path.
   Created: April 28, 2026 — Exploration 19.
 -/
 
@@ -106,7 +106,10 @@ lemma gramMatrixBlockDiag_mod_hermitian (N m : ℕ) :
 
     where v_r = classRestrict_mod N m r v.
 
-    Proof: same as blockDiag_quadForm_decomp but for arbitrary m. -/
+    Proof: Adapted from blockDiag_quadForm_decomp (ClassRestriction.lean).
+    For each row i, the sum over residue classes r collapses to the unique
+    class r = (i+2) mod m. Then the pointwise identity follows from
+    moving the if-clause between the matrix entry and the vector component. -/
 theorem blockDiag_quadForm_decomp_mod (N m : ℕ) (hm : 0 < m)
     (v : Fin (N - 1) → ℝ) :
     realQuadForm (gramMatrixBlockDiag_mod N m) v =
@@ -116,9 +119,41 @@ theorem blockDiag_quadForm_decomp_mod (N m : ℕ) (hm : 0 < m)
     Matrix.of_apply, classRestrict_mod]
   rw [Finset.sum_comm]
   apply Finset.sum_congr rfl; intro i _
-  -- Same proof strategy as blockDiag_quadForm_decomp
-  sorry -- Structurally identical to ClassRestriction.lean proof;
-        -- can be filled by adapting the mod-8 version
+  -- For each i, collapse the sum over r to the unique r = (i.val+2) % m
+  set ci := (i.val + 2) % m with hci_def
+  have hci_lt : ci < m := Nat.mod_lt _ hm
+  -- The sum over r: only r = ⟨ci, hci_lt⟩ contributes
+  have h_rhs : ∀ (f : Fin m → ℝ),
+    (∑ x : Fin m, (if ci = x.val then f x else 0)) =
+    f ⟨ci, hci_lt⟩ := by
+    intro f; simp
+  -- Collapse the r-sum to the unique r = ci
+  rw [show (∑ x : Fin m,
+      (if ci = x.val then v i else 0) *
+      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        (fun j' => if (j'.val + 2) % m = x.val then v j' else 0)) =
+    v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+      (fun j' => if (j'.val + 2) % m = ci then v j' else 0) from by
+    rw [show v i * (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        (fun j' => if (j'.val + 2) % m = ci then v j' else 0) =
+      (if ci = (⟨ci, hci_lt⟩ : Fin m).val then v i else 0) *
+        (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        (fun j' => if (j'.val + 2) % m = (⟨ci, hci_lt⟩ : Fin m).val then v j' else 0) from by simp]
+    rw [← h_rhs (fun x =>
+      (if ci = x.val then v i else 0) *
+      (fun j => gramEntry (↑i + 1) (↑j + 1)) ⬝ᵥ
+        (fun j' => if (j'.val + 2) % m = x.val then v j' else 0))]
+    apply Finset.sum_congr rfl; intro r _
+    by_cases hr : ci = r.val <;> simp [hr]]
+  -- Factor out v i and show dotProducts are equal
+  congr 1
+  -- Goal: (fun j => if ci = (j.val+2)%m then G[i,j] else 0) ⬝ᵥ v =
+  --       (fun j => G[i,j]) ⬝ᵥ (fun j' => if (j'.val+2)%m = ci then v j' else 0)
+  simp only [dotProduct]
+  apply Finset.sum_congr rfl; intro j _
+  by_cases h : ci = (j.val + 2) % m
+  · simp only [if_pos h, if_pos h.symm]
+  · simp only [if_neg h, if_neg (Ne.symm h), zero_mul, mul_zero]
 
 -- ════════════════════════════════════════════════
 -- §3. SPECTRAL GAP COMPARISON
@@ -144,6 +179,13 @@ opaque lambdaMinClass_mod (m : ℕ) (r : Fin m) (N : ℕ) : ℝ
     block-diagonal quadratic form, then apply the Rayleigh quotient
     bound to each class restriction.
 
+    Proof: For any eigenvector eⱼ of G^{block}_m with eigenvalue λⱼ:
+      λⱼ = eⱼᵀ G^{block} eⱼ = Σ_r (eⱼ_r)ᵀ G (eⱼ_r)
+         ≥ Σ_r λ_min(G) · ‖eⱼ_r‖² = λ_min(G) · ‖eⱼ‖² = λ_min(G)
+
+    Therefore every eigenvalue of G^{block}_m ≥ λ_min(G),
+    so λ_min(G^{block}_m) ≥ λ_min(G).
+
     EXPERIMENTALLY VERIFIED (Exploration 19) for m ∈ {3,5,7,8,12}:
     All moduli satisfy λ_min(G) ≤ min_r λ_min(G|_{S_r}). -/
 theorem block_gap_dominates_mod (N m : ℕ) (hN : 2 ≤ N) (hm : 0 < m) :
@@ -153,15 +195,37 @@ theorem block_gap_dominates_mod (N m : ℕ) (hN : 2 ≤ N) (hm : 0 < m) :
   have h_pos : 0 < N - 1 := by omega
   apply Finset.le_inf'
   intro j _
-  -- Same proof strategy as oct_gap_dominates_proof:
-  -- For each eigenvector e_j of G^{block}_m with eigenvalue λ_j:
-  --   λ_j = e_j^T G^{block} e_j
-  --       = Σ_r (e_j_r)^T G (e_j_r)    (by blockDiag_quadForm_decomp_mod)
-  --       ≥ Σ_r λ_min(G) · ‖e_j_r‖²   (by min_eigenvalue_le_quadForm_scaled)
-  --       = λ_min(G) · ‖e_j‖²          (by classRestrict_mod_partition)
-  --       = λ_min(G)                    (since ‖e_j‖ = 1)
-  sorry -- Proof is identical to oct_gap_dominates_proof in ClassRestriction.lean
-        -- but uses classRestrict_mod_partition instead of classRestrict_norm_partition
+  have h_in_range : (gramMatrixBlockDiag_mod_hermitian N m).eigenvalues₀ j ∈
+      Set.range (gramMatrixBlockDiag_mod_hermitian N m).eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues; simp only [Set.mem_range]
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j, by simp [Equiv.symm_apply_apply]⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi, ← quadForm_eigenvector (gramMatrixBlockDiag_mod_hermitian N m) i]
+  set ei := ⇑((gramMatrixBlockDiag_mod_hermitian N m).eigenvectorBasis i) with hei_def
+  have h_unit : ‖(WithLp.toLp 2 ei : EuclideanSpace ℝ (Fin (N - 1)))‖ = 1 :=
+    (gramMatrixBlockDiag_mod_hermitian N m).eigenvectorBasis.orthonormal.1 i
+  have h_dot_one : dotProduct ei ei = 1 := by
+    rw [← inner_eq_dotProduct]; simp [inner_self_eq_norm_sq_to_K, h_unit]
+  rw [blockDiag_quadForm_decomp_mod N m hm]
+  set lmin := (Finset.univ : Finset (Fin (Fintype.card (Fin (N - 1))))).inf'
+    (by rw [Fintype.card_fin]; exact ⟨⟨0, h_pos⟩, Finset.mem_univ _⟩)
+    (gramMatrix_hermitian N).eigenvalues₀ with hlmin_def
+  calc lmin = lmin * 1 := (mul_one _).symm
+    _ = lmin * dotProduct ei ei := by rw [h_dot_one]
+    _ = lmin * ∑ r : Fin m,
+        dotProduct (classRestrict_mod N m r ei) (classRestrict_mod N m r ei) := by
+        rw [classRestrict_mod_partition N m hm]
+    _ = ∑ r : Fin m, lmin *
+        dotProduct (classRestrict_mod N m r ei) (classRestrict_mod N m r ei) :=
+        Finset.mul_sum _ _ _
+    _ ≤ ∑ r : Fin m,
+        realQuadForm (gramMatrix N) (classRestrict_mod N m r ei) := by
+        apply Finset.sum_le_sum
+        intro r _
+        by_cases hvr : classRestrict_mod N m r ei = 0
+        · simp [hvr, realQuadForm, dotProduct, Matrix.mulVec]
+        · exact min_eigenvalue_le_quadForm_scaled (gramMatrix_hermitian N)
+            (classRestrict_mod N m r ei) hvr h_pos
 
 end Cathedral.Spectral
 
