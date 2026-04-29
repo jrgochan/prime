@@ -1,0 +1,23 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL VAN HOVE SINGULARITY PROBE[0m
+  [1m[36m║[0m  [2mTesting: d²_N ~ C/ln(N) as 2D Van Hove logarithm · max N = 200[0m
+  [1m[36m║[0m  [2m128-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [2mTest schedule: [10, 20, 30, 50, 75, 100, 150, 200][0m
+
+  [1m[97m═══ §A. EIGENVALUE EXTRACTION ═══[0m
+  [2m  Full spectrum of G_N via Jacobi rotation on 128-bit MPFR Gram matrix[0m
+  [2m     N  │   dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+    Building 9×9 Gram matrix (45 entries, 128-bit MPFR)...
+      10 │     9 │   0.0090597507 │   1.5642431142 │     1.727e2 │ 0.1s
+    Building 19×19 Gram matrix (190 entries, 128-bit MPFR)...
+      20 │    19 │   0.0026059848 │   2.1442379621 │     8.228e2 │ 0.4s
+    Building 29×29 Gram matrix (435 entries, 128-bit MPFR)...
+      30 │    29 │   0.0012136942 │   2.4750912850 │     2.039e3 │ 0.7s
+    Building 49×49 Gram matrix (1225 entries, 128-bit MPFR)...
+      50 │    49 │   0.0003627208 │   2.8750569295 │     7.926e3 │ 2.3s
+    Building 74×74 Gram matrix (2775 entries, 128-bit MPFR)...
+      75 │    74 │   0.0001015208 │   3.1766175110 │     3.129e4 │ 5.6s
+    Building 99×99 Gram matrix (4950 entries, 128-bit MPFR)...

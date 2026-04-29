@@ -75,11 +75,11 @@ fn main() {
         let dim = n - 1;
         let t = Instant::now();
 
-        // Build Gram matrix
-        let (mat, _b) = gram::build_gram_matrix(n);
+        // Build Gram matrix in MPFR
+        let mat = gram::build_gram_matrix_mpfr(n);
 
-        // Extract eigenvalues
-        let eigs = gram::eigenvalues_jacobi(&mat, dim);
+        // Extract eigenvalues via MPFR Jacobi
+        let eigs = gram::eigenvalues_jacobi_mpfr(&mat, dim);
         let elapsed = t.elapsed().as_secs_f64();
 
         let lmin = eigs[0];

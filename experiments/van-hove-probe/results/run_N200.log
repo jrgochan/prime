@@ -1,0 +1,103 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL VAN HOVE SINGULARITY PROBE[0m
+  [1m[36m║[0m  [2mTesting: d²_N ~ C/ln(N) as 2D Van Hove logarithm · max N = 200[0m
+  [1m[36m║[0m  [2m128-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [2mTest schedule: [10, 20, 30, 50, 75, 100, 150, 200][0m
+
+  [1m[97m═══ §A. EIGENVALUE EXTRACTION ═══[0m
+  [2m  Full spectrum of G_N via Jacobi rotation on 128-bit MPFR Gram matrix[0m
+  [2m     N  │   dim  │  λ_min         │  λ_max         │  κ(G)       │ time[0m
+    Building 9×9 Gram matrix (45 entries, 128-bit MPFR)...
+      10 │     9 │   0.0088582764 │   1.5632630058 │     1.765e2 │ 0.0s
+    Building 19×19 Gram matrix (190 entries, 128-bit MPFR)...
+      20 │    19 │   0.0025845367 │   2.1393163316 │     8.277e2 │ 0.1s
+    Building 29×29 Gram matrix (435 entries, 128-bit MPFR)...
+      30 │    29 │   0.0008956249 │   2.4718391304 │     2.760e3 │ 0.2s
+    Building 49×49 Gram matrix (1225 entries, 128-bit MPFR)...
+      50 │    49 │   0.0001622599 │   2.8691318679 │     1.768e4 │ 0.5s
+    Building 74×74 Gram matrix (2775 entries, 128-bit MPFR)...
+      75 │    74 │  -0.0000000000 │   3.1705057895 │   -1.388e18 │ 1.2s
+    Building 99×99 Gram matrix (4950 entries, 128-bit MPFR)...
+     100 │    99 │  -0.0000000000 │   3.3766239143 │   -1.465e18 │ 2.0s
+    Building 149×149 Gram matrix (11175 entries, 128-bit MPFR)...
+     150 │   149 │  -0.0000000000 │   3.6478559610 │   -6.956e17 │ 4.6s
+    Building 199×199 Gram matrix (19900 entries, 128-bit MPFR)...
+     200 │   199 │  -0.0000000000 │   3.8340656091 │   -5.940e17 │ 8.5s
+
+  [1m[97m═══ §B. DENSITY OF STATES ═══[0m
+  [2m  Histogram + KDE of eigenvalue distribution[0m
+    N= 20: 10 bins, peak density = 4.433726 at E = 0.109421
+    N= 30: 10 bins, peak density = 3.767931 at E = 0.124443
+    N= 50: 10 bins, peak density = 3.343304 at E = 0.143611
+    N= 75: 10 bins, peak density = 3.068826 at E = 0.158525
+    N=100: 10 bins, peak density = 2.901709 at E = 0.168831
+    N=150: 13 bins, peak density = 3.515902 at E = 0.140302
+    N=200: 15 bins, peak density = 3.872977 at E = 0.127802
+
+  [1m[97m═══ §C. VAN HOVE SINGULARITY FIT ═══[0m
+  [2m  Fitting ρ(E) = A·ln|E - E₀| + B near λ_min[0m
+  [2m     N  │      A       │      E₀      │      B       │    R²    │ van Hove?[0m
+      30 │   0.03014317 │   0.00088667 │   0.34731626 │ 0.7610  │ [31m✗[0m
+      50 │   0.03029345 │   0.00016064 │   0.37447677 │ 0.6929  │ [31m✗[0m
+      75 │          NaN │  -0.00000000 │          NaN │ NaN  │ [31m✗[0m
+     100 │          NaN │  -0.00000000 │          NaN │ NaN  │ [31m✗[0m
+     150 │          NaN │  -0.00000000 │          NaN │ NaN  │ [31m✗[0m
+     200 │          NaN │  -0.00000000 │          NaN │ NaN  │ [31m✗[0m
+
+  [1m[97m═══ §D. LEVEL SPACING STATISTICS ═══[0m
+  [2m  Unfolded spacings: Wigner-Dyson (GUE) vs Poisson[0m
+  [2m     N  │ mean spacing │  Wigner fit  │ Poisson fit │ statistics[0m
+      20 │ 1.18707322e-1 │     0.268801 │    0.490333 │ [33mPoisson-like[0m
+      30 │ 8.82479823e-2 │     0.344628 │    0.561838 │ [33mPoisson-like[0m
+      50 │ 5.97702002e-2 │     0.450519 │    0.619826 │ [33mPoisson-like[0m
+      75 │ 4.34315862e-2 │     0.597927 │    0.816207 │ [33mPoisson-like[0m
+     100 │ 3.44553461e-2 │     0.538664 │    0.845961 │ [33mPoisson-like[0m
+     150 │ 2.46476754e-2 │     0.671714 │    0.793924 │ [33mPoisson-like[0m
+     200 │ 1.93639677e-2 │     0.539152 │    0.880119 │ [33mPoisson-like[0m
+
+  [1m[97m═══ §E. THERMODYNAMICS ═══[0m
+  [2m  Partition function Z(β), specific heat C_V(β)[0m
+  [2m     N  │  β_c ≈ 1/λ_min │  max C_V     │  C_V growth[0m
+      20 │     3.869165e2 │     0.686143 │ [33mbounded[0m
+      30 │     1.116539e3 │     0.837250 │ [33mbounded[0m
+      50 │     6.162952e3 │     0.911693 │ [33mbounded[0m
+      75 │    1.000000e15 │     0.971698 │ [33mbounded[0m
+     100 │    1.000000e15 │     0.397346 │ [33mbounded[0m
+     150 │    1.000000e15 │     0.163406 │ [33mbounded[0m
+     200 │    1.000000e15 │     0.104926 │ [33mbounded[0m
+
+  [1m[97m═══ §F. SPECTRAL STAIRCASE: N(E) = #{λ_k ≤ E} ═══[0m
+    N= 20: staircase saved (19 steps)
+    N= 30: staircase saved (29 steps)
+    N= 50: staircase saved (49 steps)
+    N= 75: staircase saved (74 steps)
+    N=100: staircase saved (99 steps)
+    N=150: staircase saved (149 steps)
+    N=200: staircase saved (199 steps)
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mVAN HOVE SINGULARITY PROBE — CERTIFICATE[0m
+  [1m[36m╠═══════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  Precision: [33m128-bit MPFR[0m    Threads: [33m12[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1m§C. Van Hove singularity[0m
+  [1m[36m║[0m    Average R² = [33mNaN[0m
+  [1m[36m║[0m    [31m✗ Van Hove fit inconclusive (R² < 0.80)[0m
+  [1m[36m║[0m    [2mMay require larger N or alternative edge model[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [1mSpectral summary (N = 200)[0m
+  [1m[36m║[0m    λ_min = [35m-6.4543416455e-18[0m
+  [1m[36m║[0m    λ_max = [35m3.8340656091e0[0m
+  [1m[36m║[0m    λ_min · ln(N) = [33m-0.00000000[0m
+  [1m[36m║[0m    [2mTheory: λ_min · ln(N) → c_holes ≈ 0.04619[0m
+  [1m[36m║[0m    [2mBD constant: C = 1/c_holes ≈ 21.649[0m
+  [1m[36m║[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[97mTotal:[0m [32m17.4s[0m (12 threads)
+  [1m[97mOutput:[0m results/{eigenvalues_*,dos,kde_*,van_hove_fit,level_spacing,thermo_*,staircase_*}.tsv
+  [1m[97mCertificate:[0m results/certificate.json
+
