@@ -584,6 +584,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "nb-distance"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "nalgebra",
+ "rayon",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"

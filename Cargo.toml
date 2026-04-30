@@ -44,6 +44,7 @@ members = [
     "experiments/van-hove-probe",
     "experiments/character-spectral",
     "experiments/spectral-road",
+    "experiments/nb-distance",
 ]
 
 [profile.release]

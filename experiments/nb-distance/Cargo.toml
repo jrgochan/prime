@@ -1,0 +1,18 @@
+[package]
+name = "nb-distance"
+version = "0.1.0"
+edition = "2021"
+description = """
+Nyman-Beurling Distance Probe: the most direct computational test of the
+Riemann Hypothesis. Computes d²_N = 1 - b^T G_N^{-1} b for N = 3..2000,
+where RH ⟺ d²_N → 0 as N → ∞.
+"""
+
+[[bin]]
+name = "nb-distance"
+path = "src/main.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rayon = "1.10"
