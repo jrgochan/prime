@@ -18,7 +18,8 @@ use crate::gram::GramMatrix;
 // ═══════════════════════════════════════════════════════════════
 
 /// Default number of envelope basis functions (degree of F).
-pub const DEFAULT_NUM_BASIS: usize = 4;
+/// K=10 chosen via sweep: K=4→10 drops d² by ~1%, K=12 shows conditioning degradation.
+pub const DEFAULT_NUM_BASIS: usize = 10;
 
 /// The arithmetic core function to use.
 #[derive(Debug, Clone, Copy)]
