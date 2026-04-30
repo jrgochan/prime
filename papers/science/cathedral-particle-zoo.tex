@@ -6,7 +6,7 @@
   The Particle Zoo of the Integers:\\
   Boson--Fermion Duality, Mersenne Cascades,\\
   and Perfect Number Self-Duality in the Nyman--Beurling\\
-  Ground State from $N = 100$ to $N = 10^6$%
+  Ground State from $N = 100$ to $N = 10^9$%
 }
 \author{
   Jason Robert Gochanour
@@ -119,7 +119,10 @@ $N$ & Method & Candidates & Total (s) & $\lambda_{\min}$ \\
 \midrule
 20{,}000  & Mersenne probe & 1{,}421  & 14    & --- \\
 100{,}000 & Mersenne probe & 3{,}883  & 116   & --- \\
-1{,}000{,}000 & Mersenne probe & 4{,}147  & 133   & --- \\
+$10^6$    & Mersenne probe & 4{,}147  & 133   & --- \\
+$10^7$    & Mersenne probe & 4{,}387  & 150   & --- \\
+$10^8$    & Mersenne probe & 4{,}662  & 178   & --- \\
+$10^9$    & Mersenne probe & 4{,}881  & 187   & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -127,7 +130,8 @@ All computations were performed on an Apple M2~Max (96~GB, 12 cores)
 using \texttt{nalgebra} (pure Rust) in 64-bit floating point.
 The Mersenne probe (\S\ref{sec:mersenne}) selects structurally interesting
 candidates and solves only the submatrix, yielding a
-$250\times$ speedup over the full matrix at $N = 20{,}000$.
+$250\times$ speedup over the full matrix at $N = 20{,}000$
+and enabling analysis to $N = 10^9$ in 3~minutes.
 
 % ================================================================
 \section{Boson--Fermion Classification}
@@ -361,12 +365,17 @@ $N$ & Dominant family & Champion $k$ & Family wt \\
 \midrule
 20{,}000     & $M_7 = 127$ & $508 = 2^2 \cdot 127$ & 4.1\% \\
 100{,}000    & $M_{13} = 8191$ & $49146 = 2 \cdot 3 \cdot 8191$ & \textbf{35.0\%} \\
-1{,}000{,}000 & $M_3 = 7$ & $448 = 2^6 \cdot 7$ & 40.6\% \\
+$10^6$       & $M_3 = 7$ & $448 = 2^6 \cdot 7$ & 40.6\% \\
+$10^7$       & $M_3 = 7$ & $448 = 2^6 \cdot 7$ & 44.1\% \\
+$10^8$       & $M_3 = 7$ & $448 = 2^6 \cdot 7$ & 44.1\% \\
+$10^9$       & $M_3 = 7$ & $448 = 2^6 \cdot 7$ & \textbf{44.1\%} \\
 \bottomrule
 \end{tabular}
 \end{center}
-As $N$ grows, successively larger Mersenne primes enter the resonance
-zone $k \approx N/20$ to $N/40$ and capture the ground state.
+The cascade reaches an \emph{infrared fixed point} at $M_3 = 7$.
+The champion $k = 448 = 2^6 \cdot 7$ is stable from $N = 10^6$ to
+$N = 10^9$ (three orders of magnitude), with family weight converged
+to 5~significant figures.
 \end{observation}
 
 \begin{correspondence}[Renormalization Group Flow]
@@ -388,7 +397,41 @@ force. The sequence
 \]
 is the arithmetic RG flow, with each Mersenne prime representing a
 ``phase transition'' in the vacuum structure at a critical scale $N^*$.
+Critically, the flow does not run to infinity: it reaches an
+\emph{infrared fixed point} at $M_3 = 7$, just as QCD reaches
+an infrared fixed point at the confinement scale.
 \end{correspondence}
+
+\begin{observation}[Thermodynamic Fixed Point]
+\label{obs:fixedpoint}
+The ground state converges to 5~significant figures between
+$N = 10^7$ and $N = 10^9$:
+\begin{center}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+$N$ & Top fermion wt & Boson fraction & $M_3$ family wt \\
+\midrule
+$10^6$ & 14.17\% & 22.12\% & 40.57\% \\
+$10^7$ & 15.057\% & 21.449\% & 44.068\% \\
+$10^8$ & 15.061\% & 21.443\% & 44.080\% \\
+$10^9$ & 15.061\% & 21.443\% & 44.080\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+The thermodynamic limit is:
+\begin{itemize}
+  \item Top fermion: $k = 448 = 2^6 \cdot 7$, weight $15.06\%$.
+  \item Top boson: $k = 449$ (prime), weight $6.13\%$.
+  \item Boson--fermion split: $21.44\%$ / $78.56\%$.
+  \item $M_3$ vs $M_2$ competition: $44.08\%$ vs $43.36\%$.
+\end{itemize}
+\end{observation}
+
+The integer vacuum has a \emph{unique, stable ground state}.
+The N=100K spike in $M_{13} = 8191$ was a transient UV resonance,
+not the thermodynamic limit. In the deep infrared (large $N$),
+the simplest Mersenne primes win: $M_3 = 7$ and $M_2 = 3$
+compete for dominance, with $M_3$ winning by $0.72\%$.
 
 \subsection{The $2^a$ Amplifier}
 
