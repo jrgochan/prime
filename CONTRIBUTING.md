@@ -36,13 +36,12 @@ the alternative chain:
 
 ### 3. Close Off-Path Sorries
 
-16 `sorry` markers remain in the active tree, all off the crown path:
+6 `sorry` markers remain in the active tree, all off the crown path:
 
 - `PNT/Bridge.lean` (2) — Forward Tauberian gap (needs Mathlib)
 - `PNT/LogBridge.lean` (1) — Same Tauberian gap
 - `Covariance/CovarianceAbel.lean` (2) — Deprecated spatial integrals
 - `Covariance/QuadFormIdentity.lean` (1) — Numerically falsified (deprecated)
-- `Scratch/*` (10) — Exploratory files
 
 ### 4. Contribute to Mathlib
 
@@ -58,6 +57,7 @@ Several Mathlib PRs would unlock axiom closures:
 
 - Extend `hilbert-spectral` to larger N (512-bit MPFR, massively parallel)
 - Extend `siegel-walfisz` beyond N = 10⁹
+- Run `character-spectral` Mersenne probe to higher N (currently N = 10⁹)
 - Explore new spectral diagnostics
 
 ## Building

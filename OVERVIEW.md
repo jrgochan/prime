@@ -4,9 +4,9 @@
 > axioms of analytic number theory, via the Nyman–Beurling–Báez-Duarte
 > equivalence in Lean 4.*
 >
-> **Last updated**: April 28, 2026 (v12 — The Crown Graduation)
+> **Last updated**: April 29, 2026 (v12 — The Crown Graduation + Particle Zoo)
 >
-> **Last audited**: April 28, 2026 — comprehensive codebase audit
+> **Last audited**: April 29, 2026 — comprehensive codebase audit
 
 ---
 
@@ -135,8 +135,8 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 
 ## Module Structure
 
-The codebase comprises **174 active Lean files** across **22 topic directories** with
-**43,387 lines** of active code, **~1,459 theorems/lemmas**, and **45 active axioms**
+The codebase comprises **169 active Lean files** across **22 topic directories** with
+**42,605 lines** of active code, **~1,459 theorems/lemmas**, and **45 active axioms**
 (2 on the crown path).
 
 ```
@@ -268,8 +268,8 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 174 |
-| Active lines of code | 43,387 |
+| Active Lean files | 169 |
+| Active lines of code | 42,605 |
 | Archive files | 128+ |
 | Archive lines | 29,784 |
 | Theorems + lemmas | ~1,459 |
@@ -278,7 +278,7 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 | Crown path sorry | **0** |
 | Off-crown sorry | **6** |
 | Topic directories | 22 |
-| Experiments (Rust/MPFR) | 38 |
+| Experiments (Rust/MPFR) | 37 |
 | Development time | 32 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
 

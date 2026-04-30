@@ -4,9 +4,9 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: April 28, 2026 (v12 — The Crown Graduation)
+> **Last updated**: April 29, 2026 (v12 — The Crown Graduation + Particle Zoo)
 >
-> **Last audited**: April 28, 2026 — comprehensive codebase audit
+> **Last audited**: April 29, 2026 — comprehensive codebase audit
 
 ---
 
@@ -302,7 +302,7 @@ The project evolved through five major phases:
 
 ## Experiment Index
 
-The repository contains **35 Rust/MPFR experiment directories** under `experiments/`:
+The repository contains **37 Rust/MPFR experiment directories** under `experiments/`:
 
 | Experiment | Purpose |
 |-----------|---------|
@@ -335,3 +335,4 @@ The repository contains **35 Rust/MPFR experiment directories** under `experimen
 | `numerical` | General numerical experiments |
 | `siegel-walfisz` | **Siegel-Walfisz** — 512-bit prime distribution certification |
 | `hilbert-spectral` | **Hilbert spectral** — 512-bit π constant certification for MV inequality |
+| `character-spectral` | **Character spectral** — Mersenne probe to N=10⁹, Particle Zoo (boson-fermion classification, Mersenne Cascade, twin-prime sandwiches) |

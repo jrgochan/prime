@@ -4,9 +4,9 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**174 active Lean files** across 26 modules, with **2 crown axioms** on
+**169 active Lean files** across 26 modules, with **2 crown axioms** on
 the critical path (verified by `#print axioms`), and
-**~55 axioms** total in the active codebase.
+**~45 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
 > its entire mathematical content to **two** precisely stated, classical
@@ -19,6 +19,9 @@ the critical path (verified by `#print axioms`), and
 > Parseval bridge, Plancherel isometry—is compiler-verified.
 
 > **Release: crown-graduation** — April 28, 2026 (v12)
+>
+> **Latest**: Particle Zoo to N = 10⁹ — April 29, 2026
+>  — *The integer vacuum converges to k = 448 = 2⁶ · 7 across 7 orders of magnitude*
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -116,15 +119,15 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   174 Lean files across 26 modules
+Active files:   169 Lean files across 26 modules
 Archived:       128 Lean files in Archive/ + archive/
-Axioms:         2 on crown critical path, ~55 total active
-Sorry:          0 on crown path (16 off-crown, all non-blocking)
-Warnings:       0 on crown path (6 off-crown sorry warnings)
+Axioms:         2 on crown critical path, ~45 total active
+Sorry:          0 on crown path
 Errors:         0
-Lines:          43,387
+Lines:          42,605
 Theorems:       ~1,459
-Experiments:    35 Rust/MPFR (256–512 bit precision)
+Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
+Experiments:    37 Rust/MPFR (256–512 bit precision)
 Release:        crown-graduation (v12)
 ```
 
@@ -176,33 +179,31 @@ stiffness of the prime number vacuum.
 
 ## Documentation Suite
 
-24 companion papers for 24 audiences:
+15 companion papers across 6 categories:
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| `cathedral.tex` | Technical overview | 9 |
-| `overview.tex` | Quick reference | 4 |
-| `cathedral-math.tex` | Research mathematicians | 12 |
-| `cathedral-physics.tex` | Physicists | 10 |
-| `cathedral-public.tex` | General public | 7 |
-| `cathedral-cs.tex` | Proof engineers / CS | 12 |
-| `cathedral-security.tex` | Security researchers | 10 |
-| `cathedral-philosophy.tex` | Philosophers of mathematics | 10 |
-| `cathedral-ai.tex` | AI/ML researchers | 7 |
-| `cathedral-lean.tex` | Lean/ITP community | 9 |
-| `cathedral-foundations.tex` | Logicians / foundations | 9 |
+| **Core** | | |
+| `cathedral.tex` | Technical overview | 11 |
+| `cathedral-lean.tex` | Lean/ITP community | 6 |
+| **Science** | | |
+| `cathedral-physics.tex` | Physicists | 29 |
+| `cathedral-ai.tex` | AI/ML researchers | 5 |
+| `cathedral-experiments.tex` | Experimentalists | 4 |
+| `cathedral-particle-zoo.tex` | **The Particle Zoo** — N=100 to N=10⁹ | 10 |
+| **Applications** | | |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 15 |
+| `cathedral-engineering.tex` | Practicing engineers | 4 |
+| `cathedral-frontiers.tex` | Engineering frontiers | 4 |
+| **Humanities** | | |
 | `cathedral-fun.tex` | Primes, physics & numerology | 8 |
-| `cathedral-engineering.tex` | Practicing engineers | 8 |
-| `cathedral-futures.tex` | Engineering frontiers | 12 |
-| `cathedral-energy.tex` | Energy systems engineers | 10 |
-| `cathedral-dualuse.tex` | Dual-use risk assessment | 10 |
-| `cathedral-politics.tex` | Policy / governance | 9 |
-| `cathedral-education.tex` | Educators | 6 |
-| `cathedral-history.tex` | Historians of mathematics | 7 |
-| `cathedral-invitation.tex` | Mathematicians (open challenge) | 5 |
-| `cathedral-press.tex` | Press / media | 5 |
-| `cathedral-legal.tex` | Legal / IP professionals | 8 |
-| `cathedral-letter.tex` | A letter from the builder | 6 |
+| `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
+| **Public** | | |
+| `cathedral-claude.tex` | Anthropic/Claude reflections | 6 |
+| `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
+| `cathedral-public.tex` | General public | 4 |
+| **Policy** | | |
+| `cathedral-policy.tex` | Policy / governance | 4 |
 
 Build all PDFs:
 ```bash
@@ -222,9 +223,10 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 174 active Lean files, 128 archived
-├── papers/          📄  24 companion papers (LaTeX + PDF)
-├── experiments/     🔬  35 Rust experiments (256–512 bit MPFR)
+├── proofs/          🏛️  THE CATHEDRAL — 169 active Lean files, 128 archived
+├── papers/          📄  15 companion papers (LaTeX + PDF)
+├── experiments/     🔬  37 Rust experiments (256–512 bit MPFR)
+│   └── character-spectral/  🧬 Mersenne probe to N=10⁹ (Particle Zoo)
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
 ├── scripts/         🔧  Build & export tools
 ├── tools/           🏗️  Historical exploration tools
