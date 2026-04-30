@@ -286,16 +286,20 @@ fn main() {
 
     // ═══ §G. ENVELOPE OPTIMIZATION ════════════════════════════════
     println!("  {BOLD}{WHITE}═══ §G. SIEVE ENVELOPE OPTIMIZER ═══{RESET}");
-    println!("  {DIM}F(x) = c₁(1-x) + c₂(1-x)² + c₃(1-x)³ + c₄(1-x)⁴{RESET}");
+    println!("  {DIM}F(x) = Σ c_ℓ (1-x)^ℓ  — sweeping K = 4, 6, 8, 10, 12 basis functions{RESET}");
     println!("  {DIM}Minimizing d²_N = 1 - 2c^T b + c^T G c via exact linear solve{RESET}");
     println!();
 
     let opt_theta = 0.9;
+    let basis_counts = [4, 6, 8, 10, 12];
+    let opt_ns: Vec<usize> = test_ns.iter().copied().filter(|&n| n >= 10 && n <= 1000).collect();
+
+    // Run with default (4) for full output
+    let opt_results = optimizer::sweep(&gram_matrix, &opt_ns, opt_theta, 4);
+
+    println!("  {DIM}  K=4 (default):{RESET}");
     println!("  {DIM}     N  │ Core       │ d²_opt        │ d²_sel        │ improve │ c₁       c₂       c₃       c₄{RESET}");
     println!("  {DIM}  ──────┼────────────┼───────────────┼───────────────┼─────────┼───────────────────────────────{RESET}");
-
-    let opt_ns: Vec<usize> = test_ns.iter().copied().filter(|&n| n >= 10 && n <= 1000).collect();
-    let opt_results = optimizer::sweep(&gram_matrix, &opt_ns, opt_theta);
 
     for r in &opt_results {
         let core_color = if r.core == "Liouville" { GREEN } else { YELLOW };
@@ -307,15 +311,38 @@ fn main() {
     }
     println!();
 
+    // Sweep basis counts for key N values
+    println!("  {BOLD}{WHITE}═══ §G'. BASIS FUNCTION SWEEP ═══{RESET}");
+    println!("  {DIM}Liouville core at θ=0.9, comparing K = 4, 6, 8, 10, 12{RESET}");
+    println!();
+    println!("  {DIM}     N  │  K=4          │  K=6          │  K=8          │  K=10         │  K=12{RESET}");
+    println!("  {DIM}  ──────┼───────────────┼───────────────┼───────────────┼───────────────┼──────────────{RESET}");
+
+    let sweep_ns: Vec<usize> = opt_ns.iter().copied()
+        .filter(|&n| n == 50 || n == 100 || n == 200 || n == 300 || n == 500 || n == 700 || n == 1000)
+        .collect();
+
+    for &n in &sweep_ns {
+        print!("  {:<6}", n);
+        for &k in &basis_counts {
+            let r = optimizer::optimize(&gram_matrix, n, opt_theta, optimizer::ArithCore::Liouville, k);
+            let marker = if r.d2_min > 0.0 { GREEN } else { "\x1b[31m" };
+            print!(" │ {marker}{:+.6e}{RESET}", r.d2_min);
+        }
+        println!();
+    }
+    println!();
+
     // Write optimizer results
     {
         let mut f = std::fs::File::create("results/optimizer.tsv").unwrap();
         use std::io::Write;
-        writeln!(f, "N\tcore\ttheta\tD\td2_min\td2_selberg\timprovement\tc1\tc2\tc3\tc4").unwrap();
+        writeln!(f, "N\tcore\ttheta\tD\tnum_basis\td2_min\td2_selberg\timprovement\tparams").unwrap();
         for r in &opt_results {
-            writeln!(f, "{}\t{}\t{:.2}\t{}\t{:.15e}\t{:.15e}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
-                r.n, r.core, r.theta, r.d_level, r.d2_min, r.d2_selberg, r.improvement,
-                r.params[0], r.params[1], r.params[2], r.params[3]).unwrap();
+            let params_str: Vec<String> = r.params.iter().map(|p| format!("{:.10}", p)).collect();
+            writeln!(f, "{}\t{}\t{:.2}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.10}\t{}",
+                r.n, r.core, r.theta, r.d_level, r.num_basis, r.d2_min, r.d2_selberg, r.improvement,
+                params_str.join(",")).unwrap();
         }
     }
 

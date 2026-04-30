@@ -8,7 +8,7 @@
     "matrix_memory_mb": 7
   },
   "threads": 12,
-  "timestamp": "2026-04-30T05:20:58.053601+00:00",
+  "timestamp": "2026-04-30T05:26:28.652485+00:00",
   "max_N_tested": 1000,
   "max_N_all_positive": 1000,
   "all_eigenvalues_positive": true,
@@ -38,5 +38,5 @@
     {"N": 1000, "dim": 999, "method": "full_eigen", "lambda_min": 4.243609409557123e-6, "lambda_2": 4.281811950501975e-6, "gap": 1.0090023697, "positive": true}
   ],
   "lean_claim": "∀ N ≤ 1000, lambdaMin N > 0 ∧ lambdaMin monotone decreasing",
-  "elapsed_seconds": 3.317
+  "elapsed_seconds": 3.717
 }
