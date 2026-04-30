@@ -1,0 +1,22 @@
+[package]
+name = "nb-distance-gpu"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "nb-distance-gpu"
+path = "src/main.rs"
+
+[[bin]]
+name = "gram-gpu-test"
+path = "src/gram_gpu_test.rs"
+
+[[bin]]
+name = "hybrid-probe"
+path = "src/hybrid_probe.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rayon = "1"
+rug = "1"

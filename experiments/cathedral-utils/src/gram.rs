@@ -40,7 +40,7 @@ pub const MAX_STORABLE_DIM: usize = 30_000;
 pub const MAX_LN_TABLE: usize = 200_000;
 
 // ═══════════════════════════════════════════════════════════════
-// PRECOMPUTED LN TABLE
+// PRECOMPUTED LN TABLE (ln(1+1/n) — used by original algorithm)
 // ═══════════════════════════════════════════════════════════════
 
 pub struct LnTable {
@@ -79,6 +79,45 @@ impl LnTable {
     #[inline]
     pub fn get(&self, n: usize) -> &Float {
         &self.values[n.min(self.max_n)]
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRECOMPUTED LN(N) TABLE — for block-based fast algorithm
+// ═══════════════════════════════════════════════════════════════
+
+/// Table of ln(n) for n = 0..max_n+1 at MPFR precision.
+/// Used by the block-based fast Gram entry algorithm.
+/// KEY IDENTITY: Σ_{n=a}^{b} ln(1+1/n) = ln(b+1) - ln(a)  [telescoping!]
+pub struct LnNTable {
+    /// ln_n[n] = ln(n) at MPFR precision. ln_n[0] = 0 (unused).
+    ln_n: Vec<Float>,
+    pub max_n: usize,
+    pub precision: u32,
+}
+
+impl LnNTable {
+    /// Build ln(n) table for n = 0..=max_val at given MPFR precision.
+    pub fn new(max_val: usize, precision: u32) -> Self {
+        let p = precision;
+        eprintln!("  \x1b[2m▸ Precomputing ln(n) table for n ≤ {} at {p}-bit...\x1b[0m", max_val);
+        let t0 = std::time::Instant::now();
+        let ln_n: Vec<Float> = (0..=max_val)
+            .into_par_iter()
+            .map(|n| {
+                if n == 0 { Float::with_val(p, 0) }
+                else { Float::with_val(p, n as u64).ln() }
+            })
+            .collect();
+        eprintln!("  \x1b[32m✓\x1b[0m ln(n) table ready ({} entries, {:.2}s)",
+            max_val, t0.elapsed().as_secs_f64());
+        Self { ln_n, max_n: max_val, precision: p }
+    }
+
+    /// ln(n) at MPFR precision.
+    #[inline]
+    pub fn ln(&self, n: usize) -> &Float {
+        &self.ln_n[n.min(self.max_n)]
     }
 }
 
@@ -201,6 +240,120 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
             if ratio < 1e-18 {
                 break;
             }
+        }
+    }
+
+    // Euler-Maclaurin tail correction (3 terms)
+    let jk = Float::with_val(p, &jf * &kf);
+    let d = Float::with_val(p, g as u64);
+    let d_sq = Float::with_val(p, &d * &d);
+    let twelve_jk = Float::with_val(p, Float::with_val(p, 12u32) * &jk);
+    let tail_frac = Float::with_val(p, &d_sq / &twelve_jk);
+    let tail_mean = Float::with_val(p, Float::with_val(p, 0.25f64) + &tail_frac);
+    let t_f = Float::with_val(p, t_direct as u64);
+    let inv_t = Float::with_val(p, Float::with_val(p, 1u32) / &t_f);
+    let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
+    let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
+    total += Float::with_val(p, &tail_mean * &inv_t);
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
+    total
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BLOCK-BASED FAST GRAM ENTRY — O(T/j + T/k) instead of O(T)
+//
+// Uses telescoping identities to reduce per-entry work:
+//   Σ_{n=a}^b ln(1+1/n) = ln(b+1) - ln(a)       → 2 table lookups
+//   Σ_{n=a}^b 1/(n(n+1)) = 1/a - 1/(b+1)         → 2 divisions
+//
+// Between consecutive breakpoints of ⌊n/j⌋ and ⌊n/k⌋, the floor
+// values are constant, so each block is O(1) MPFR operations.
+// Total blocks per entry: O(T/j + T/k) ≈ 10-100 for large j,k.
+// ═══════════════════════════════════════════════════════════════
+
+/// Block-based fast Gram entry computation.
+/// Uses precomputed ln(n) table to exploit telescoping sums.
+/// Complexity: O(T/j + T/k) MPFR ops instead of O(T).
+pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
+    let p = ln_table.precision;
+    let g = arith::gcd(j, k);
+    let lcm_jk = (j / g) * k;
+    let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n - 1);
+
+    let jf = Float::with_val(p, j as u64);
+    let kf = Float::with_val(p, k as u64);
+    let inv_jk = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, &jf * &kf));
+    let inv_j = Float::with_val(p, Float::with_val(p, 1u32) / &jf);
+    let inv_k = Float::with_val(p, Float::with_val(p, 1u32) / &kf);
+
+    // Collect breakpoints where ⌊n/j⌋ or ⌊n/k⌋ changes.
+    // Between consecutive breakpoints, both floor values are constant.
+    let mut breakpoints = Vec::with_capacity(t_direct / j + t_direct / k + 4);
+    breakpoints.push(1usize);
+    for m in 1..=(t_direct / j + 1) {
+        let bp = m * j;
+        if bp <= t_direct { breakpoints.push(bp); }
+    }
+    for m in 1..=(t_direct / k + 1) {
+        let bp = m * k;
+        if bp <= t_direct { breakpoints.push(bp); }
+    }
+    breakpoints.push(t_direct + 1);
+    breakpoints.sort_unstable();
+    breakpoints.dedup();
+
+    let mut total = Float::with_val(p, 0);
+    let mut scratch = Float::with_val(p, 0);
+
+    for w in 0..breakpoints.len() - 1 {
+        let n1 = breakpoints[w];
+        let n2 = breakpoints[w + 1]; // exclusive upper bound
+        if n1 > t_direct { break; }
+        let n2 = n2.min(t_direct + 1);
+        if n1 >= n2 { continue; }
+
+        let a = n1 / j; // ⌊n/j⌋ constant in [n1, n2)
+        let b = n1 / k; // ⌊n/k⌋ constant in [n1, n2)
+        let count = (n2 - n1) as u64;
+
+        // Term 1: count/(jk)
+        scratch.assign(&inv_jk);
+        scratch *= count;
+        total += &scratch;
+
+        // Term 2: -(a/k + b/j) * [ln(n2) - ln(n1)]  [telescoping!]
+        if a > 0 || b > 0 {
+            // coeff = a/k + b/j
+            let coeff_val = (a as f64) / (k as f64) + (b as f64) / (j as f64);
+            if coeff_val > 0.0 {
+                let mut coeff = Float::with_val(p, a as u64);
+                coeff *= &inv_k;
+                let mut bj = Float::with_val(p, b as u64);
+                bj *= &inv_j;
+                coeff += &bj;
+                // ln_sum = ln(n2) - ln(n1)
+                scratch.assign(ln_table.ln(n2));
+                scratch -= ln_table.ln(n1);
+                coeff *= &scratch;
+                total -= &coeff;
+            }
+        }
+
+        // Term 3: a*b * [1/n1 - 1/n2]  [telescoping of 1/(n(n+1))]
+        if a > 0 && b > 0 {
+            let ab = (a as u64) * (b as u64);
+            // 1/n1 - 1/n2
+            scratch.assign(n2 as u64);
+            let mut inv_n1 = Float::with_val(p, n1 as u64);
+            // (n2 - n1) / (n1 * n2)
+            let diff = (n2 - n1) as u64;
+            scratch *= &inv_n1; // scratch = n1 * n2
+            inv_n1.assign(diff); // reuse as numerator
+            inv_n1 /= &scratch;  // inv_n1 = (n2-n1)/(n1*n2)
+            inv_n1 *= ab;
+            total += &inv_n1;
         }
     }
 
@@ -397,6 +550,165 @@ impl GramMatrix {
         eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
 
         Self { data, max_dim: dim, max_n, mpfr_built: use_mpfr, precision: prec }
+    }
+
+    /// Build using the FAST block-based algorithm — O(T/j+T/k) per entry.
+    /// Uses precomputed ln(n) table to exploit telescoping sums.
+    /// For N=10000: ~50-200x faster than the standard MPFR approach.
+    pub fn build_fast(max_n: usize, ln_n_table: &LnNTable) -> Self {
+        let dim = max_n - 1;
+        let total_entries = dim * (dim + 1) / 2;
+        let mem_mb = (dim * dim * 8) / (1024 * 1024);
+        let prec = ln_n_table.precision;
+        let t0 = std::time::Instant::now();
+
+        eprintln!("  \x1b[2m▸ Building {dim}×{dim} Gram matrix ({total_entries} entries, ~{mem_mb} MB)\x1b[0m");
+        eprintln!("  \x1b[2m  Method: FAST block-based ({prec}-bit MPFR, telescoping sums)\x1b[0m");
+
+        let pairs: Vec<(usize, usize)> = (0..dim)
+            .flat_map(|row| (row..dim).map(move |col| (row, col)))
+            .collect();
+
+        let done = std::sync::atomic::AtomicUsize::new(0);
+
+        let entries: Vec<((usize, usize), f64)> = pairs
+            .par_iter()
+            .map(|&(row, col)| {
+                let val = gram_entry_fast(row + 2, col + 2, ln_n_table).to_f64();
+
+                let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                    let elapsed = t0.elapsed().as_secs_f64();
+                    let frac = count as f64 / total_entries as f64;
+                    let eta = elapsed / frac * (1.0 - frac);
+                    eprint!("\r  \x1b[2m  {count}/{total_entries} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                }
+
+                ((row, col), val)
+            })
+            .collect();
+
+        if dim > 200 { eprintln!(); }
+
+        let mut data = vec![0.0f64; dim * dim];
+        for ((r, c), v) in entries {
+            data[r * dim + c] = v;
+            data[c * dim + r] = v;
+        }
+
+        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
+
+        Self { data, max_dim: dim, max_n, mpfr_built: true, precision: prec }
+    }
+
+    /// Build using the FAST block-based algorithm, storing in DD precision.
+    /// Returns (data_hi, data_lo) where each entry = hi + lo at ~31 digit accuracy.
+    /// The MPFR-128 result is split: hi = f64(result), lo = f64(result - hi).
+    pub fn build_fast_dd(max_n: usize, ln_n_table: &LnNTable) -> (Vec<f64>, Vec<f64>, usize) {
+        let dim = max_n - 1;
+        let total_entries = dim * (dim + 1) / 2;
+        let mem_mb = (dim * dim * 16) / (1024 * 1024);
+        let prec = ln_n_table.precision;
+        let t0 = std::time::Instant::now();
+
+        eprintln!("  \x1b[2m▸ Building {dim}×{dim} Gram matrix DD ({total_entries} entries, ~{mem_mb} MB)\x1b[0m");
+        eprintln!("  \x1b[2m  Method: FAST block-based ({prec}-bit MPFR → DD pairs)\x1b[0m");
+
+        let pairs: Vec<(usize, usize)> = (0..dim)
+            .flat_map(|row| (row..dim).map(move |col| (row, col)))
+            .collect();
+
+        let done = std::sync::atomic::AtomicUsize::new(0);
+
+        let entries: Vec<((usize, usize), (f64, f64))> = pairs
+            .par_iter()
+            .map(|&(row, col)| {
+                let mpfr_val = gram_entry_fast(row + 2, col + 2, ln_n_table);
+                let hi = mpfr_val.to_f64();
+                // lo = exact_value - hi (captures the residual)
+                let lo = {
+                    let mut residual = mpfr_val;
+                    residual -= hi;
+                    residual.to_f64()
+                };
+
+                let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                    let elapsed = t0.elapsed().as_secs_f64();
+                    let frac = count as f64 / total_entries as f64;
+                    let eta = elapsed / frac * (1.0 - frac);
+                    eprint!("\r  \x1b[2m  {count}/{total_entries} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                }
+
+                ((row, col), (hi, lo))
+            })
+            .collect();
+
+        if dim > 200 { eprintln!(); }
+
+        let mut data_hi = vec![0.0f64; dim * dim];
+        let mut data_lo = vec![0.0f64; dim * dim];
+        for ((r, c), (hi, lo)) in entries {
+            data_hi[r * dim + c] = hi;
+            data_hi[c * dim + r] = hi;
+            data_lo[r * dim + c] = lo;
+            data_lo[c * dim + r] = lo;
+        }
+
+        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix DD built in {:.1}s", t0.elapsed().as_secs_f64());
+
+        (data_hi, data_lo, dim)
+    }
+
+    /// Build full MPFR-precision Gram matrix (no f64 conversion).
+    /// Returns (Vec<Float>, dim) where Float has `prec` bits.
+    /// Used for MPFR Cholesky when DD precision (~31 digits) isn't enough.
+    pub fn build_fast_mpfr(max_n: usize, ln_n_table: &LnNTable) -> (Vec<Float>, usize) {
+        let dim = max_n - 1;
+        let total_entries = dim * (dim + 1) / 2;
+        let prec = ln_n_table.precision;
+        let bytes_per = (prec as usize + 7) / 8 + 16; // rough estimate
+        let mem_mb = (dim * dim * bytes_per) / (1024 * 1024);
+        let t0 = std::time::Instant::now();
+
+        eprintln!("  \x1b[2m▸ Building {dim}×{dim} full MPFR Gram ({total_entries} entries, ~{mem_mb} MB)\x1b[0m");
+        eprintln!("  \x1b[2m  Method: FAST block-based ({prec}-bit MPFR, full precision)\x1b[0m");
+
+        let pairs: Vec<(usize, usize)> = (0..dim)
+            .flat_map(|row| (row..dim).map(move |col| (row, col)))
+            .collect();
+
+        let done = std::sync::atomic::AtomicUsize::new(0);
+
+        let entries: Vec<((usize, usize), Float)> = pairs
+            .par_iter()
+            .map(|&(row, col)| {
+                let val = gram_entry_fast(row + 2, col + 2, ln_n_table);
+
+                let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                    let elapsed = t0.elapsed().as_secs_f64();
+                    let frac = count as f64 / total_entries as f64;
+                    let eta = elapsed / frac * (1.0 - frac);
+                    eprint!("\r  \x1b[2m  {count}/{total_entries} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                }
+
+                ((row, col), val)
+            })
+            .collect();
+
+        if dim > 200 { eprintln!(); }
+
+        let zero = Float::with_val(prec, 0.0);
+        let mut data: Vec<Float> = vec![zero; dim * dim];
+        for ((r, c), val) in entries {
+            data[c * dim + r] = val.clone();
+            data[r * dim + c] = val;
+        }
+
+        eprintln!("  \x1b[32m✓\x1b[0m MPFR Gram matrix built in {:.1}s ({prec}-bit)", t0.elapsed().as_secs_f64());
+
+        (data, dim)
     }
 
     /// Build using double-double arithmetic (~31 digits, pure Rust).

@@ -153,6 +153,115 @@ pub fn load_gram(path: &Path) -> Option<GramMatrix> {
     })
 }
 
+
+const DD_MAGIC: u64 = 0x5F5F444448544143; // "CATHDD__"
+const DD_VERSION: u32 = 1;
+
+/// Compute the default cache file path for a DD Gram matrix.
+pub fn dd_gram_cache_path(max_n: usize, precision: u32) -> PathBuf {
+    cache_dir().join(format!("dd_gram_N{max_n}_mpfr{precision}.bin"))
+}
+
+/// Save a DD Gram matrix (hi/lo f64 pairs) to a binary cache file.
+///
+/// Format:
+/// ```text
+/// [magic: u64]     — 0x5F5F444448544143 ("CATHDD__")
+/// [version: u32]   — format version (currently 1)
+/// [max_n: u32]     — maximum N used to build
+/// [precision: u32] — MPFR precision bits used to build
+/// [dim: u32]       — matrix dimension (= max_n - 1)
+/// [checksum: u64]  — checksum of first 64 hi values
+/// [hi: f64×dim²]   — DD high part, row-major
+/// [lo: f64×dim²]   — DD low part, row-major
+/// ```
+pub fn save_dd_gram(path: &Path, hi: &[f64], lo: &[f64], dim: usize, max_n: usize, precision: u32) -> std::io::Result<()> {
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let mut f = std::fs::File::create(path)?;
+
+    f.write_all(&DD_MAGIC.to_le_bytes())?;
+    f.write_all(&DD_VERSION.to_le_bytes())?;
+    f.write_all(&(max_n as u32).to_le_bytes())?;
+    f.write_all(&precision.to_le_bytes())?;
+    f.write_all(&(dim as u32).to_le_bytes())?;
+    f.write_all(&checksum(hi).to_le_bytes())?;
+
+    // Write hi and lo as raw bytes
+    let hi_bytes: &[u8] = unsafe {
+        std::slice::from_raw_parts(hi.as_ptr() as *const u8, hi.len() * 8)
+    };
+    let lo_bytes: &[u8] = unsafe {
+        std::slice::from_raw_parts(lo.as_ptr() as *const u8, lo.len() * 8)
+    };
+    f.write_all(hi_bytes)?;
+    f.write_all(lo_bytes)?;
+
+    let mb = (hi.len() + lo.len()) * 8 / (1024 * 1024);
+    eprintln!("  \x1b[32m✓\x1b[0m DD Gram cached to {} ({} MB)", path.display(), mb);
+    Ok(())
+}
+
+/// Load a DD Gram matrix from a binary cache file.
+///
+/// Returns `None` if the file doesn't exist, has wrong magic/version,
+/// or the checksum doesn't match. Returns `(hi, lo, dim)`.
+pub fn load_dd_gram(path: &Path) -> Option<(Vec<f64>, Vec<f64>, usize)> {
+    let mut f = std::fs::File::open(path).ok()?;
+
+    let mut buf8 = [0u8; 8];
+    let mut buf4 = [0u8; 4];
+
+    // Read and validate header
+    f.read_exact(&mut buf8).ok()?;
+    if u64::from_le_bytes(buf8) != DD_MAGIC { return None; }
+
+    f.read_exact(&mut buf4).ok()?;
+    if u32::from_le_bytes(buf4) != DD_VERSION { return None; }
+
+    f.read_exact(&mut buf4).ok()?;
+    let _max_n = u32::from_le_bytes(buf4) as usize;
+
+    f.read_exact(&mut buf4).ok()?;
+    let _precision = u32::from_le_bytes(buf4);
+
+    f.read_exact(&mut buf4).ok()?;
+    let dim = u32::from_le_bytes(buf4) as usize;
+
+    f.read_exact(&mut buf8).ok()?;
+    let expected_checksum = u64::from_le_bytes(buf8);
+
+    // Read hi
+    let mut hi = vec![0.0f64; dim * dim];
+    let hi_bytes: &mut [u8] = unsafe {
+        std::slice::from_raw_parts_mut(hi.as_mut_ptr() as *mut u8, hi.len() * 8)
+    };
+    f.read_exact(hi_bytes).ok()?;
+
+    // Read lo
+    let mut lo = vec![0.0f64; dim * dim];
+    let lo_bytes: &mut [u8] = unsafe {
+        std::slice::from_raw_parts_mut(lo.as_mut_ptr() as *mut u8, lo.len() * 8)
+    };
+    f.read_exact(lo_bytes).ok()?;
+
+    // Validate checksum
+    if checksum(&hi) != expected_checksum {
+        eprintln!("  \x1b[33m⚠\x1b[0m DD cache checksum mismatch!");
+        return None;
+    }
+
+    let mb = (hi.len() + lo.len()) * 8 / (1024 * 1024);
+    eprintln!(
+        "  \x1b[32m✓\x1b[0m DD Gram loaded from cache ({} MB, dim={dim})",
+        mb
+    );
+
+    Some((hi, lo, dim))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
