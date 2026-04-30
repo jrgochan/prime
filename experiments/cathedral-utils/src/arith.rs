@@ -178,14 +178,56 @@ pub fn big_omega(n: usize) -> u32 {
     count
 }
 
-/// Nyman-Beurling b-vector: b_k = 1 - 1/(2(k+1)) for k = 2, ..., dim+1.
+/// Euler-Mascheroni constant γ ≈ 0.5772156649...
+pub const EULER_GAMMA: f64 = 0.5772156649015328606;
+
+/// Nyman-Beurling b-vector (analytic formula).
 ///
-/// b_k = ∫₀¹ {1/(kt)} dt where {x} = x - ⌊x⌋.
+/// b_k = ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ) / k
+///
+/// where {x} = x - ⌊x⌋ is the fractional part function and
+/// γ is the Euler-Mascheroni constant.
+///
+/// NOTE: b_k → 0 as k → ∞ (decays like ln(k)/k).
 pub fn b_vector(dim: usize) -> Vec<f64> {
     (0..dim)
         .map(|i| {
             let k = (i + 2) as f64;
-            1.0 - 1.0 / (2.0 * k)
+            (k.ln() + 1.0 - EULER_GAMMA) / k
+        })
+        .collect()
+}
+
+/// Nyman-Beurling b-vector (discretization-consistent Vasyunin expansion).
+///
+/// Uses the same ln(1+1/n) series as the Gram matrix computation,
+/// ensuring G and b live in the same discrete Hilbert space:
+///
+///   b_k = Σ_{n=1}^{T} [ ln(1+1/n)/k - ⌊n/k⌋/(n(n+1)) ] + tail
+///
+/// When T → ∞, this converges exactly to (ln k + 1 - γ)/k.
+///
+/// `ln_values`: precomputed ln(1+1/n) table (same one used for Gram entries).
+/// `t_max`: truncation point (should match Gram matrix series length).
+pub fn b_vector_discrete(dim: usize, ln_values: &[f64], t_max: usize) -> Vec<f64> {
+    (0..dim)
+        .map(|i| {
+            let k = i + 2;
+            let kf = k as f64;
+            let mut total = 0.0f64;
+            let t = t_max.min(ln_values.len() - 1);
+            for n in 1..=t {
+                let ln_term = ln_values[n]; // ln(1 + 1/n)
+                let floor_nk = (n / k) as f64;
+                let frac = floor_nk / ((n as f64) * ((n + 1) as f64));
+                total += ln_term / kf - frac;
+            }
+            // Euler-Maclaurin tail correction (matches gram.rs tail)
+            let tf = t as f64;
+            let inv_t = 1.0 / tf;
+            // Leading tail: ~ (1/k) * (1/t) * (1/2 + ...)
+            total += (1.0 / kf) * inv_t * 0.5;
+            total
         })
         .collect()
 }
@@ -250,13 +292,17 @@ mod tests {
     }
 
     #[test]
-    fn test_b_vector_decreasing() {
+    fn test_b_vector_decaying() {
         let b = b_vector(20);
-        for i in 1..b.len() {
-            assert!(b[i] > b[i - 1], "b-vector must be increasing");
+        // b_k = (ln k + 1 - γ) / k → 0 as k → ∞
+        // b_2 = (ln 2 + 1 - γ) / 2 ≈ (0.6931 + 0.4228) / 2 ≈ 0.5580
+        assert!((b[0] - 0.5580).abs() < 0.001, "b[0] = {} ≈ 0.558", b[0]);
+        // Must be decreasing for large k (ln(k)/k is eventually decreasing)
+        for i in 2..b.len() {
+            assert!(b[i] < b[i - 1], "b-vector should be decreasing for k >= 4");
         }
-        // b_2 = 1 - 1/4 = 0.75
-        assert!((b[0] - 0.75).abs() < 1e-10);
+        // Must decay toward zero
+        assert!(b[19] < 0.2, "b[19] should be small, got {}", b[19]);
     }
 
     #[test]
