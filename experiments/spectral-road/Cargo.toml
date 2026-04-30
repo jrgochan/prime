@@ -1,0 +1,20 @@
+[package]
+name = "spectral-road"
+version = "0.1.0"
+edition = "2021"
+description = "Cathedral Three Roads Probe — Road 2 (eigenvalue decay) and Road 3 (GRH verification)"
+
+[[bin]]
+name = "road2-eigenvalue-decay"
+path = "src/main.rs"
+
+[[bin]]
+name = "road3-grh-verify"
+path = "src/road3.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
+nalgebra = "0.33"

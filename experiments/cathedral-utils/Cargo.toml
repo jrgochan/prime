@@ -1,0 +1,18 @@
+[package]
+name = "cathedral-utils"
+version = "0.1.0"
+edition = "2021"
+description = "Shared utilities for Cathedral numerical experiments"
+
+[[bin]]
+name = "gram-builder"
+path = "src/bin/gram_builder.rs"
+
+
+[dependencies]
+# Pinned versions — all experiments must use these
+nalgebra = "0.33"
+rug = { version = "1.26", features = ["float"] }
+rayon = "1.10"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }

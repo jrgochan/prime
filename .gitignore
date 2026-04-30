@@ -45,3 +45,6 @@ papers/*.toc
 papers/*.fls
 papers/*.fdb_latexmk
 papers/*.synctex.gz
+
+# Cached binary data (Gram matrices, etc.)
+experiments/cache/*.bin

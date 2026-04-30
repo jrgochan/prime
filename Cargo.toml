@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "experiments/cathedral-utils",
     "experiments/abel-bridge",
     "experiments/abel-tail-validator",
     "experiments/algebraic/cross-class-verifier",
@@ -42,6 +43,7 @@ members = [
     "experiments/hilbert-spectral",
     "experiments/van-hove-probe",
     "experiments/character-spectral",
+    "experiments/spectral-road",
 ]
 
 [profile.release]

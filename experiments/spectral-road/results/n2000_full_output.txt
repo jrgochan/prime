@@ -1,0 +1,16 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mROAD 2: EIGENVALUE DECAY PROBE[0m
+  [1m[36m║[0m  [2mDoes λ_min(G_N) → 0?  (≡ RH)  ·  max N = 2000[0m
+  [1m[36m║[0m  [2m512-bit MPFR · 12 threads[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [2mHardware: M2 Max · 96 GB RAM · 12 cores[0m
+
+  [1m[97m═══ §0. SETUP ═══[0m
+
+  [2m▸ Precomputing ln(1+1/n) table for n ≤ 10000 at 512-bit...[0m
+  [32m✓[0m ln table ready (10000 entries, 0.0s)
+  [2m▸ Building 1999×1999 Gram matrix (1999000 unique entries, ~30 MB)[0m
+  [2m  Precision: 512-bit MPFR (precomputed ln)[0m
+  [2m  row 1782/1999 (89%) ETA 19s[0m       [2m  row 99/1999 (5%) ETA 5341s[0m       [2m  row 1881/1999 (94%) ETA 30s[0m       [2m  row 1980/1999 (99%) ETA 6s[0m       [2m  row 396/1999 (20%) ETA 3110s[0m       [2m  row 1584/1999 (79%) ETA 202s[0m       [2m  row 495/1999 (25%) ETA 4038s[0m       [2m  row 1683/1999 (84%) ETA 259s[0m       [2m  row 1386/1999 (69%) ETA 688s[0m       [2m  row 1287/1999 (64%) ETA 886s[0m       [2m  row 1089/1999 (54%) ETA 1450s[0m       [2m  row 297/1999 (15%) ETA 9972s[0m       [2m  row 891/1999 (45%) ETA 2210s[0m       [2m  row 1188/1999 (59%) ETA 1366s[0m     

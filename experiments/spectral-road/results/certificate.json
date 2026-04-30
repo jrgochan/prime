@@ -1,0 +1,37 @@
+{
+  "format": "cathedral-eigenvalue-certificate-v2",
+  "experiment": "Road 2: Eigenvalue Decay Probe (build-once)",
+  "hardware": "Apple M2 Max, 96 GB RAM, 12 cores",
+  "precision": {
+    "gram_entries": "512-bit MPFR (precomputed ln table)",
+    "eigendecomposition": "f64 (nalgebra symmetric_eigen)",
+    "matrix_memory_mb": 1
+  },
+  "threads": 12,
+  "timestamp": "2026-04-30T04:54:33.917989+00:00",
+  "max_N_tested": 500,
+  "max_N_all_positive": 500,
+  "all_eigenvalues_positive": true,
+  "monotone_decreasing": true,
+  "decay_fit": {
+    "power_law": { "C": 6.5210648152e-1, "alpha": 1.8684093799, "R2": 0.9961452328 },
+    "log_decay": { "beta": 8.8147519085, "R2": 0.9954625161 }
+  },
+  "data_points": 12,
+  "eigenvalue_sequence": [
+    {"N": 10, "dim": 9, "method": "full_eigen", "lambda_min": 9.180132388077652e-3, "lambda_2": 1.137244555939860e-2, "gap": 1.2388106270, "positive": true},
+    {"N": 20, "dim": 19, "method": "full_eigen", "lambda_min": 2.595645325043776e-3, "lambda_2": 3.007179383753861e-3, "gap": 1.1585478781, "positive": true},
+    {"N": 30, "dim": 29, "method": "full_eigen", "lambda_min": 1.237323578669231e-3, "lambda_2": 1.377109206524703e-3, "gap": 1.1129741890, "positive": true},
+    {"N": 50, "dim": 49, "method": "full_eigen", "lambda_min": 4.347096872806790e-4, "lambda_2": 5.137153470402509e-4, "gap": 1.1817434993, "positive": true},
+    {"N": 75, "dim": 74, "method": "full_eigen", "lambda_min": 2.043582058680993e-4, "lambda_2": 2.195720873006352e-4, "gap": 1.0744471276, "positive": true},
+    {"N": 100, "dim": 99, "method": "full_eigen", "lambda_min": 1.200555567109699e-4, "lambda_2": 1.293199314924543e-4, "gap": 1.0771673968, "positive": true},
+    {"N": 150, "dim": 149, "method": "full_eigen", "lambda_min": 5.605237257403993e-5, "lambda_2": 5.916848711316333e-5, "gap": 1.0555929106, "positive": true},
+    {"N": 200, "dim": 199, "method": "full_eigen", "lambda_min": 2.955139942674820e-5, "lambda_2": 3.125876148019511e-5, "gap": 1.0577760135, "positive": true},
+    {"N": 250, "dim": 249, "method": "full_eigen", "lambda_min": 1.833017197514514e-5, "lambda_2": 1.912036184476747e-5, "gap": 1.0431086992, "positive": true},
+    {"N": 300, "dim": 299, "method": "full_eigen", "lambda_min": 1.403009070334037e-5, "lambda_2": 1.455989122308393e-5, "gap": 1.0377617316, "positive": true},
+    {"N": 400, "dim": 399, "method": "full_eigen", "lambda_min": 9.407157533412159e-6, "lambda_2": 9.835975433790245e-6, "gap": 1.0455842159, "positive": true},
+    {"N": 500, "dim": 499, "method": "full_eigen", "lambda_min": 7.365996501627497e-6, "lambda_2": 7.539259368741540e-6, "gap": 1.0235219861, "positive": true}
+  ],
+  "lean_claim": "∀ N ≤ 500, lambdaMin N > 0 ∧ lambdaMin monotone decreasing",
+  "elapsed_seconds": 0.296
+}
