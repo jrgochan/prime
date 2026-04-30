@@ -17,7 +17,7 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use rayon::prelude::*;
-use rug::Float;
+use rug::{Assign, Float};
 
 use crate::arith;
 
@@ -131,41 +131,81 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
     total
 }
 
-/// MPFR Gram entry using precomputed ln table.
+/// MPFR Gram entry using precomputed ln table — optimized.
 ///
 /// Precision is taken from the ln_table.
+/// Uses pre-allocated scratch floats to avoid heap allocations in the hot loop.
+/// Includes adaptive early-exit when the series has converged.
 pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
     let p = ln_table.precision;
+
+    // Pre-compute constants (allocated once)
     let jf = Float::with_val(p, j as u64);
     let kf = Float::with_val(p, k as u64);
-    let jk = Float::with_val(p, &jf * &kf);
-    let inv_jk = Float::with_val(p, Float::with_val(p, 1u32) / &jk);
-    let inv_jf = Float::with_val(p, Float::with_val(p, 1u32) / &jf);
-    let inv_kf = Float::with_val(p, Float::with_val(p, 1u32) / &kf);
+    let inv_jk = Float::with_val(p, 1u32) / Float::with_val(p, &jf * &kf);
+    let inv_jf = Float::with_val(p, 1u32) / &jf;
+    let inv_kf = Float::with_val(p, 1u32) / &kf;
 
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
     let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n);
 
+    // Pre-allocate scratch variables (reused every iteration)
     let mut total = Float::with_val(p, 0);
+    let mut scratch_a = Float::with_val(p, 0);
+    let mut scratch_b = Float::with_val(p, 0);
+    let mut scratch_ab = Float::with_val(p, 0);
+    let mut scratch_term = Float::with_val(p, 0);
+    let mut scratch_frac = Float::with_val(p, 0);
+    let mut scratch_denom = Float::with_val(p, 0);
+
+    // Minimum terms before early-exit check (ensure accuracy)
+    let min_terms = (lcm_jk * 3).max(2_000);
+
     for n in 1..=t_direct {
-        let nf = Float::with_val(p, n as u64);
         let a_int = n / j;
         let b_int = n / k;
         let ln_term = ln_table.get(n);
-        let a_coeff = Float::with_val(p, Float::with_val(p, a_int as u64) * &inv_kf);
-        let b_coeff = Float::with_val(p, Float::with_val(p, b_int as u64) * &inv_jf);
-        let ab_coeff = Float::with_val(p, &a_coeff + &b_coeff);
-        let ab_frac = if a_int > 0 && b_int > 0 {
-            let num = Float::with_val(p, Float::with_val(p, a_int as u64) * Float::with_val(p, b_int as u64));
-            let np1 = Float::with_val(p, &nf + Float::with_val(p, 1u32));
-            Float::with_val(p, num / Float::with_val(p, &nf * &np1))
-        } else { Float::with_val(p, 0) };
-        let term = Float::with_val(p, &ab_coeff * ln_term);
-        let contrib = Float::with_val(p, &inv_jk - &term);
-        total += Float::with_val(p, &contrib + &ab_frac);
+
+        // scratch_a = (a_int / k) * ln_term
+        scratch_a.assign(a_int as u64);
+        scratch_a *= &inv_kf;
+
+        // scratch_b = (b_int / j) * ln_term
+        scratch_b.assign(b_int as u64);
+        scratch_b *= &inv_jf;
+
+        // scratch_ab = (scratch_a + scratch_b) * ln_term
+        scratch_ab.assign(&scratch_a);
+        scratch_ab += &scratch_b;
+        scratch_ab *= ln_term;
+
+        // scratch_term = inv_jk - scratch_ab
+        scratch_term.assign(&inv_jk);
+        scratch_term -= &scratch_ab;
+
+        // Add floor fraction: a_int * b_int / (n * (n+1))
+        if a_int > 0 && b_int > 0 {
+            scratch_frac.assign((a_int * b_int) as u64);
+            scratch_denom.assign(n as u64);
+            scratch_denom *= (n + 1) as u64;
+            scratch_frac /= &scratch_denom;
+            scratch_term += &scratch_frac;
+        }
+
+        total += &scratch_term;
+
+        // Adaptive early-exit: if term is negligible relative to total
+        if n > min_terms && n % 500 == 0 {
+            let ratio = scratch_term.to_f64().abs() / total.to_f64().abs();
+            if ratio < 1e-18 {
+                break;
+            }
+        }
     }
 
+    // Euler-Maclaurin tail correction (3 terms)
+    let jk = Float::with_val(p, &jf * &kf);
     let d = Float::with_val(p, g as u64);
     let d_sq = Float::with_val(p, &d * &d);
     let twelve_jk = Float::with_val(p, Float::with_val(p, 12u32) * &jk);
@@ -219,27 +259,34 @@ impl GramMatrix {
         eprintln!("  \x1b[2m▸ Building {dim}×{dim} Gram matrix ({total_entries} unique entries, ~{mem_mb} MB)\x1b[0m");
         eprintln!("  \x1b[2m  Precision: {}\x1b[0m", if use_mpfr { format!("{prec}-bit MPFR (precomputed ln)") } else { "f64 (Kahan summation)".to_string() });
 
-        let entries: Vec<((usize, usize), f64)> = (0..dim)
-            .into_par_iter()
-            .flat_map(|row| {
-                let result: Vec<_> = (row..dim)
-                    .map(|col| {
-                        let val = if use_mpfr {
-                            gram_entry_mpfr(row + 2, col + 2, ln_table.unwrap()).to_f64()
-                        } else {
-                            gram_entry_f64(row + 2, col + 2)
-                        };
-                        ((row, col), val)
-                    })
-                    .collect();
-                // Progress for large matrices
-                if dim > 200 && row % (dim / 20).max(1) == 0 && row > 0 {
+        // Generate all upper-triangle (row, col) pairs for entry-level parallelism.
+        // This gives much better load balance than row-level parallelism because
+        // early rows (j=2,3) have vastly more work per entry than late rows.
+        let pairs: Vec<(usize, usize)> = (0..dim)
+            .flat_map(|row| (row..dim).map(move |col| (row, col)))
+            .collect();
+
+        let done = std::sync::atomic::AtomicUsize::new(0);
+
+        let entries: Vec<((usize, usize), f64)> = pairs
+            .par_iter()
+            .map(|&(row, col)| {
+                let val = if use_mpfr {
+                    gram_entry_mpfr(row + 2, col + 2, ln_table.unwrap()).to_f64()
+                } else {
+                    gram_entry_f64(row + 2, col + 2)
+                };
+
+                // Progress tracking
+                let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
                     let elapsed = t0.elapsed().as_secs_f64();
-                    let frac = row as f64 / dim as f64;
+                    let frac = count as f64 / total_entries as f64;
                     let eta = elapsed / frac * (1.0 - frac);
-                    eprint!("\r  \x1b[2m  row {row}/{dim} ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                    eprint!("\r  \x1b[2m  {count}/{total_entries} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
                 }
-                result
+
+                ((row, col), val)
             })
             .collect();
 
