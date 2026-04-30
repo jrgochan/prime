@@ -168,6 +168,62 @@ fn main() {
     }
     println!();
 
+    // ═══ DELOCALIZATION ANALYSIS ═══
+    println!("  {BOLD}{WHITE}═══ §D. EIGENVECTOR DELOCALIZATION ═══{RESET}");
+    println!("  {DIM}Path B probe: if D(N) = ||v_min||_∞ · √N is bounded, then RH follows{RESET}");
+    println!();
+    println!("  {DIM}     N  │ ||v_min||_∞  │ D(N)         │ IPR(v_min)   │ |⟨b,v_min⟩|{RESET}");
+    println!("  {DIM}  ──────┼──────────────┼──────────────┼──────────────┼─────────────{RESET}");
+
+    let deloc_data: Vec<(f64, f64)> = results.iter()
+        .filter(|r| r.n >= 10)
+        .map(|r| {
+            println!("  {:<6} │ {:.6e}  │ {:.6e}  │ {:.6e}  │ {:.6e}",
+                r.n, r.vmin_linf, r.delocalization_ratio, r.ipr, r.b_vmin_proj);
+            (r.n as f64, r.delocalization_ratio)
+        })
+        .collect();
+
+    println!();
+
+    // Fit D(N) ~ A · N^β to see if it's bounded (β ≈ 0) or growing
+    if deloc_data.len() >= 3 {
+        let log_deloc: Vec<(f64, f64)> = deloc_data.iter()
+            .filter(|(_, d)| *d > 0.0)
+            .map(|(n, d)| (n.ln(), d.ln()))
+            .collect();
+        if log_deloc.len() >= 3 {
+            let (slope, intercept, r2) = fitting::linreg(&log_deloc);
+            let a = intercept.exp();
+            println!("  {DIM}D(N) scaling fit:{RESET}");
+            println!("    D(N) ~ {:.4} · N^({:.4})   R² = {:.4}", a, slope, r2);
+            if slope.abs() < 0.1 {
+                println!("    {GREEN}✓ D(N) approximately BOUNDED → delocalization holds{RESET}");
+            } else if slope > 0.0 {
+                println!("    {YELLOW}⚠ D(N) growing as N^{:.3} — needs more data{RESET}", slope);
+            }
+            println!();
+        }
+
+        // IPR scaling: IPR ~ A · N^β  (should be β ≈ -1 for uniform delocalization)
+        let ipr_data: Vec<(f64, f64)> = results.iter()
+            .filter(|r| r.n >= 10 && r.ipr > 0.0)
+            .map(|r| (r.n as f64, r.ipr))
+            .collect();
+        if ipr_data.len() >= 3 {
+            let log_ipr: Vec<(f64, f64)> = ipr_data.iter()
+                .map(|(n, ipr)| (n.ln(), ipr.ln()))
+                .collect();
+            let (slope, intercept, r2) = fitting::linreg(&log_ipr);
+            println!("  {DIM}IPR scaling fit:{RESET}");
+            println!("    IPR ~ {:.4} · N^({:.4})   R² = {:.4}", intercept.exp(), slope, r2);
+            if slope < -0.5 {
+                println!("    {GREEN}✓ IPR decaying → eigenvector delocalized{RESET}");
+            }
+        }
+    }
+    println!();
+
     // ═══ CERTIFICATE ═══
     let max_tested = results.last().map_or(0, |r| r.n);
     let min_d2 = results.iter().map(|r| r.d2).fold(f64::INFINITY, f64::min);
