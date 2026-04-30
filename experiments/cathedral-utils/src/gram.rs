@@ -223,6 +223,102 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// DOUBLE-DOUBLE GRAM ENGINE (Pure Rust, ~31 decimal digits)
+// ~5-10x faster than MPFR for equivalent precision.
+// ═══════════════════════════════════════════════════════════════
+
+use crate::dd::DD;
+
+/// Precomputed ln(1+1/n) table at double-double precision.
+pub struct DDLnTable {
+    values: Vec<DD>,
+    pub max_n: usize,
+}
+
+impl DDLnTable {
+    pub fn new(max_n: usize) -> Self {
+        let cap = max_n.min(MAX_LN_TABLE);
+        eprintln!("  \x1b[2m▸ Precomputing DD ln(1+1/n) table for n ≤ {cap}...\x1b[0m");
+        let t0 = std::time::Instant::now();
+        let values: Vec<DD> = (0..=cap)
+            .into_par_iter()
+            .map(|n| {
+                if n == 0 { DD::from_f64(0.0) }
+                else { DD::ln1p_inv(n as u64) }
+            })
+            .collect();
+        eprintln!("  \x1b[32m✓\x1b[0m DD ln table ready ({cap} entries, {:.1}s)", t0.elapsed().as_secs_f64());
+        Self { values, max_n: cap }
+    }
+
+    #[inline]
+    pub fn get(&self, n: usize) -> DD {
+        self.values[n.min(self.max_n)]
+    }
+}
+
+/// Double-double Gram entry using precomputed DD ln table.
+///
+/// Same algorithm as gram_entry_mpfr but uses pure-Rust double-double
+/// arithmetic (~31 decimal digits) instead of MPFR.
+pub fn gram_entry_dd(j: usize, k: usize, ln_table: &DDLnTable) -> f64 {
+    let jf = DD::from_u64(j as u64);
+    let kf = DD::from_u64(k as u64);
+    let inv_jk = DD::from_f64(1.0) / (jf * kf);
+    let inv_jf = DD::from_f64(1.0) / jf;
+    let inv_kf = DD::from_f64(1.0) / kf;
+
+    let g = arith::gcd(j, k);
+    let lcm_jk = (j / g) * k;
+    let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n);
+
+    let mut total = DD::from_f64(0.0);
+    let min_terms = (lcm_jk * 3).max(2_000);
+
+    for n in 1..=t_direct {
+        let a_int = n / j;
+        let b_int = n / k;
+        let ln_term = ln_table.get(n);
+
+        // ab_coeff = (a_int/k + b_int/j)
+        let a_coeff = DD::from_u64(a_int as u64) * inv_kf;
+        let b_coeff = DD::from_u64(b_int as u64) * inv_jf;
+        let ab_coeff = (a_coeff + b_coeff) * ln_term;
+
+        // term = 1/(jk) - ab_coeff
+        let mut term = inv_jk - ab_coeff;
+
+        // Floor fraction: a_int * b_int / (n * (n+1))
+        if a_int > 0 && b_int > 0 {
+            let num = DD::from_u64((a_int * b_int) as u64);
+            let denom = DD::from_u64(n as u64) * DD::from_u64((n + 1) as u64);
+            term += num / denom;
+        }
+
+        total += term;
+
+        // Adaptive early-exit
+        if n > min_terms && n % 500 == 0 {
+            let ratio = term.hi.abs() / total.hi.abs();
+            if ratio < 1e-20 {
+                break;
+            }
+        }
+    }
+
+    // Euler-Maclaurin tail
+    let d = g as f64;
+    let jkf = (j * k) as f64;
+    let tail_mean = 0.25 + d * d / (12.0 * jkf);
+    let inv_t = 1.0 / t_direct as f64;
+    let tail = tail_mean * inv_t + tail_mean * 0.5 * inv_t * inv_t
+        + tail_mean * (1.0/6.0) * inv_t * inv_t * inv_t;
+    total += DD::from_f64(tail);
+
+    total.to_f64()
+}
+
+// ═══════════════════════════════════════════════════════════════
 // BUILD-ONCE GRAM MATRIX
 // G_N is upper-left (N-1)×(N-1) submatrix of G_max.
 // We build G_max ONCE and extract submatrices for all test N.
@@ -301,6 +397,53 @@ impl GramMatrix {
         eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
 
         Self { data, max_dim: dim, max_n, mpfr_built: use_mpfr, precision: prec }
+    }
+
+    /// Build using double-double arithmetic (~31 digits, pure Rust).
+    /// ~5-10x faster than MPFR for the same effective precision.
+    pub fn build_dd(max_n: usize, dd_table: &DDLnTable) -> Self {
+        let dim = max_n - 1;
+        let total_entries = dim * (dim + 1) / 2;
+        let mem_mb = (dim * dim * 8) / (1024 * 1024);
+        let t0 = std::time::Instant::now();
+
+        eprintln!("  \x1b[2m▸ Building {dim}×{dim} Gram matrix ({total_entries} unique entries, ~{mem_mb} MB)\x1b[0m");
+        eprintln!("  \x1b[2m  Precision: double-double (~31 digits, pure Rust)\x1b[0m");
+
+        let pairs: Vec<(usize, usize)> = (0..dim)
+            .flat_map(|row| (row..dim).map(move |col| (row, col)))
+            .collect();
+
+        let done = std::sync::atomic::AtomicUsize::new(0);
+
+        let entries: Vec<((usize, usize), f64)> = pairs
+            .par_iter()
+            .map(|&(row, col)| {
+                let val = gram_entry_dd(row + 2, col + 2, dd_table);
+
+                let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                if dim > 200 && count % (total_entries / 100).max(1) == 0 && count > 0 {
+                    let elapsed = t0.elapsed().as_secs_f64();
+                    let frac = count as f64 / total_entries as f64;
+                    let eta = elapsed / frac * (1.0 - frac);
+                    eprint!("\r  \x1b[2m  {count}/{total_entries} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                }
+
+                ((row, col), val)
+            })
+            .collect();
+
+        if dim > 200 { eprintln!(); }
+
+        let mut data = vec![0.0f64; dim * dim];
+        for ((r, c), v) in entries {
+            data[r * dim + c] = v;
+            data[c * dim + r] = v;
+        }
+
+        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
+
+        Self { data, max_dim: dim, max_n, mpfr_built: false, precision: 106 }
     }
 
     /// Extract the (n-1)×(n-1) submatrix for G_n.

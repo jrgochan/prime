@@ -19,6 +19,7 @@
 pub mod arith;
 pub mod cache;
 pub mod certificate;
+pub mod dd;
 pub mod fitting;
 pub mod fmt;
 pub mod gram;
