@@ -48,24 +48,32 @@ fn main() {
     // ═══ LOAD GRAM MATRIX ═══
     println!("  {BOLD}{WHITE}═══ §A. GRAM MATRIX ═══{RESET}");
 
-    // Try MPFR cache first, then f64
+    // Try caches: MPFR-512 > DD (106) > MPFR-256 > MPFR-128 > f64
     let (gram_matrix, precision) = {
-        let mpfr_path = cache::gram_cache_path(max_n, 512);
-        if let Some(g) = cache::load_gram(&mpfr_path) {
-            (g, 512u32)
-        } else {
-            let f64_path = cache::gram_cache_path(max_n, 0);
-            if let Some(g) = cache::load_gram(&f64_path) {
-                (g, 0u32)
-            } else {
+        let precisions = [512, 106, 256, 128, 0];
+        let mut found = None;
+        for &p in &precisions {
+            let path = cache::gram_cache_path(max_n, p);
+            if let Some(g) = cache::load_gram(&path) {
+                found = Some((g, p));
+                break;
+            }
+        }
+        match found {
+            Some(x) => x,
+            None => {
                 eprintln!("  No cached Gram matrix for N={max_n}.");
-                eprintln!("  Run: gram-builder {max_n} --precision 512");
+                eprintln!("  Run: gram-builder {max_n}");
                 std::process::exit(1);
             }
         }
     };
 
-    let prec_str = if precision > 0 { format!("{precision}-bit MPFR") } else { "f64".to_string() };
+    let prec_str = match precision {
+        0 => "f64".to_string(),
+        106 => "double-double".to_string(),
+        p => format!("{p}-bit MPFR"),
+    };
     println!("  {GREEN}✓{RESET} Loaded {prec_str} Gram matrix (N={}, {} MB)", gram_matrix.max_n, gram_matrix.mem_mb());
     println!();
 
