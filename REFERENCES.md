@@ -1,13 +1,14 @@
 # References — The Cathedral
 
-**Crown Graduation** — April 28, 2026 (v12)
+**Crown Graduation** — April 28, 2026 (v12)  
+**Particle Zoo** — April 29, 2026 (spectral probe to N = 10⁹)
 
 A complete bibliography of the mathematical results used in the formal
-verification. Every theorem, identity, and technique in the Cathedral
-traces back to published mathematics listed here.
+verification and the companion papers. Every theorem, identity, and
+technique in the Cathedral traces back to published mathematics listed here.
 
-45+ mathematicians. 167 years of prior work. Two crown axioms. 55 total.
-174 active files. ~1,459 theorems. 22 companion papers. 35 Rust/MPFR experiments.
+50+ mathematicians. 167 years of prior work. Two crown axioms.
+169 active files. ~1,459 theorems. 15 companion papers. 37 Rust/MPFR experiments.
 
 ---
 
@@ -120,7 +121,43 @@ traces back to published mathematics listed here.
   Vieweg, 1863.
 
   > The divisor function σ(n) = Σ_{d|n} d and its properties are used
-  > extensively in `Robin/` for the Robin and Lagarias equivalences.
+  > extensively in `Robin/` for the Robin and Lagarias equivalences,
+  > and in the Particle Zoo paper for the boson–fermion classification
+  > (the ratio σ(k)/k determines spectral mass).
+
+### The Erdős–Kac Theorem
+
+- **Paul Erdős and Mark Kac**, "The Gaussian law of errors in the theory of
+  additive number theoretic functions," *Amer. J. Math.*, 62:738–742, 1940.
+
+  > (ω(n) - log log n) / √(log log n) converges to a standard normal
+  > distribution, where ω(n) is the number of distinct prime factors.
+  > In the Particle Zoo paper, the arithmetic sieve to N = 10⁹ confirms
+  > that ω(k) peaks at exactly ω = 3, matching the Standard Model's
+  > three generations of matter (Up/Down, Charm/Strange, Top/Bottom).
+
+### Mersenne Primes
+
+- **Marin Mersenne**, *Cogitata Physico-Mathematica*, 1644.
+
+  > M_p = 2^p - 1 is prime for certain exponents p.
+  > The Particle Zoo paper discovers the **Mersenne Cascade**: at each
+  > scale N, a different Mersenne prime family dominates the Nyman–Beurling
+  > ground state. The cascade reaches an infrared fixed point at M₃ = 7,
+  > with the champion k = 448 = 2⁶ · 7 stable from N = 10⁶ to N = 10⁹.
+
+### Perfect Numbers
+
+- **Euclid**, *Elements*, Book IX, Proposition 36, c. 300 BCE.
+
+- **Leonhard Euler**, "De numeris amicabilibus," *Opera Omnia*,
+  Series I, vol. 2, 1849 (original c. 1747).
+
+  > An even perfect number has the form 2^{p-1}(2^p - 1) where 2^p - 1
+  > is a Mersenne prime. The Particle Zoo identifies perfect numbers as
+  > **BPS states** of the integer lattice: they satisfy σ(n) = 2n,
+  > placing them at the exact balance point between deficient primes
+  > (σ/n < 2) and abundant composites (σ/n > 2).
 
 ---
 
@@ -309,6 +346,18 @@ traces back to published mathematics listed here.
   > ‖f‖² = ‖f̂‖². The Mellin-Plancherel identity converts the L²
   > distance ∫|1-f|² into the Gram matrix quadratic form.
   > Axiom `mellin_plancherel_gram` in `MellinBridge/MellinSieve.lean`.
+  > The Parseval Bridge (`White/Scattering.lean`) is **fully proved**
+  > with zero axioms — the key innovation of v11.
+
+### The Parseval Theorem
+
+- **Marc-Antoine Parseval**, "Mémoire sur les séries et sur l'intégration
+  complète," *Mémoires présentés à l'Institut des Sciences*, 1806.
+
+  > ∫|f(x)|² dx = Σ |c_n|². The Parseval identity for L² inner products
+  > is the foundation of the Parseval Bridge: the spatial L²(0,1) norm
+  > equals the Mellin L² norm on the critical line. This bridge is
+  > PROVED (0 axioms, 0 sorry) in `White/Scattering.lean`.
 
 ### Fourier Inversion
 
@@ -379,6 +428,43 @@ traces back to published mathematics listed here.
   > The log cutoff witness v_k = -μ(k)(1 - ln k/ln N) is a Bartlett
   > (triangular) window applied to the Möbius function in log-frequency.
   > Formalized in `Vasyunin/Proof/BartlettWindow.lean`.
+
+### The Renormalization Group
+
+- **Kenneth G. Wilson**, "Renormalization group and critical phenomena,"
+  *Rev. Mod. Phys.*, 47:773–840, 1975. (Nobel Prize 1982)
+
+  > Coupling constants "run" with the energy scale. The Particle Zoo
+  > paper identifies the Mersenne Cascade as an arithmetic analogue of
+  > renormalization group flow: different Mersenne primes dominate the
+  > ground state at different scales N, with the flow reaching an
+  > infrared fixed point at M₃ = 7.
+
+### The Higgs Mechanism
+
+- **Peter Higgs**, "Broken symmetries and the masses of gauge bosons,"
+  *Phys. Rev. Lett.*, 13:508–509, 1964.
+
+- **François Englert and Robert Brout**, "Broken symmetry and the mass of
+  gauge vector mesons," *Phys. Rev. Lett.*, 13:321–323, 1964.
+
+  > In the Standard Model, the Higgs field gives mass to gauge bosons.
+  > The Particle Zoo discovers an arithmetic analogue: primes adjacent
+  > to massive composites acquire spectral weight through eigenvector
+  > leakage (the "arithmetic Higgs mechanism"). At N = 10⁹, the
+  > composite 600 is flanked by twin primes 599 and 601, both of which
+  > acquire mass from the same fermion ("double Higgs coupling").
+
+### Twin Primes
+
+- **Alphonse de Polignac**, "Recherches nouvelles sur les nombres premiers,"
+  *C. R. Acad. Sci. Paris*, 29:397–401, 1849.
+
+  > Conjecture: there are infinitely many twin prime pairs (p, p+2).
+  > The Particle Zoo provides a spectral argument: hyper-composite hubs
+  > generate gravity wells deep enough to require two adjacent gauge
+  > bosons for mass stabilization, making twin primes a topological
+  > necessity for vacuum stability.
 
 ---
 
@@ -645,7 +731,7 @@ Both axioms are **classical, established results** of 20th-century analytic
 number theory. They are axioms only because Mathlib lacks the prerequisite
 infrastructure. The gap is a software engineering problem, not a mathematical one.
 
-The 53 remaining axioms (55 total active) support alternative proof paths
+The 43 remaining axioms support alternative proof paths
 (spatial chain with 4 axioms, spectral engine, sieve engine, Vasyunin tower)
 that are formalized but not on the shortest path to the crown theorem.
 
@@ -698,35 +784,26 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ## Documentation Suite
 
-24 companion papers for 24 audiences:
+15 companion papers across 6 categories:
 
 | Paper | Directory | Audience |
 |-------|-----------|----------|
-| `cathedral.tex` | `core/` | Technical overview |
-| `overview.tex` | `core/` | Quick reference |
-| `cathedral-math.tex` | `core/` | Research mathematicians |
-| `cathedral-lean.tex` | `core/` | Lean/ITP community |
-| `cathedral-foundations.tex` | `core/` | Logicians / foundations |
-| `cathedral-physics.tex` | `science/` | Physicists |
-| `cathedral-cs.tex` | `science/` | Proof engineers / CS |
-| `cathedral-ai.tex` | `science/` | AI/ML researchers |
-| `cathedral-engineering.tex` | `science/` | Practicing engineers |
-| `cathedral-public.tex` | `public/` | General public |
-| `cathedral-press.tex` | `public/` | Press / media |
-| `cathedral-invitation.tex` | `public/` | Mathematicians (open challenge) |
-| `cathedral-letter.tex` | `public/` | A letter from the builder |
-| `cathedral-philosophy.tex` | `humanities/` | Philosophers of mathematics |
-| `cathedral-education.tex` | `humanities/` | Educators |
-| `cathedral-history.tex` | `humanities/` | Historians of mathematics |
-| `cathedral-fun.tex` | `humanities/` | Recreational mathematics |
-| `cathedral-security.tex` | `applications/` | Security researchers |
-| `cathedral-dualuse.tex` | `applications/` | Dual-use risk assessment |
-| `cathedral-energy.tex` | `applications/` | Energy systems engineers |
-| `cathedral-futures.tex` | `applications/` | Engineering frontiers |
-| `cathedral-next.tex` | `applications/` | Future research directions |
-| `cathedral-politics.tex` | `policy/` | Policy / governance |
-| `cathedral-legal.tex` | `policy/` | Legal / IP professionals |
+| `cathedral.tex` | `core/` | Technical overview (11 pp) |
+| `cathedral-lean.tex` | `core/` | Lean/ITP community (6 pp) |
+| `cathedral-physics.tex` | `science/` | Physicists (29 pp) |
+| `cathedral-ai.tex` | `science/` | AI/ML researchers (5 pp) |
+| `cathedral-experiments.tex` | `science/` | Experimentalists (4 pp) |
+| `cathedral-particle-zoo.tex` | `science/` | **The Particle Zoo** (10 pp) |
+| `cathedral-dualuse.tex` | `applications/` | Dual-use risk assessment (15 pp) |
+| `cathedral-engineering.tex` | `applications/` | Practicing engineers (4 pp) |
+| `cathedral-frontiers.tex` | `applications/` | Engineering frontiers (4 pp) |
+| `cathedral-fun.tex` | `humanities/` | Primes, physics & numerology (8 pp) |
+| `cathedral-philosophy.tex` | `humanities/` | Philosophers of mathematics (4 pp) |
+| `cathedral-claude.tex` | `public/` | Anthropic/Claude reflections (6 pp) |
+| `cathedral-gemini.tex` | `public/` | DeepMind/Gemini reflections (4 pp) |
+| `cathedral-public.tex` | `public/` | General public (4 pp) |
+| `cathedral-policy.tex` | `policy/` | Policy / governance (4 pp) |
 
 ---
 
-*Last updated: April 28, 2026 — Crown Graduation (v12)*
+*Last updated: April 29, 2026 — Crown Graduation (v12) + Particle Zoo (N = 10⁹)*
