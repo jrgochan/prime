@@ -112,6 +112,17 @@ extern "C" {
         y: *const f64, incy: c_int,
         result: *mut f64,
     ) -> c_int;
+    fn cublasDgemv_v2(
+        handle: CublasHandle,
+        trans: c_int,  // 0=NoTrans, 1=Trans
+        m: c_int,
+        n: c_int,
+        alpha: *const f64,
+        a: *const f64, lda: c_int,
+        x: *const f64, incx: c_int,
+        beta: *const f64,
+        y: *mut f64, incy: c_int,
+    ) -> c_int;
 }
 
 const CUDA_MEMCPY_HOST_TO_DEVICE: c_int = 1;
@@ -262,6 +273,242 @@ pub fn gpu_syevd(gram_data: &[f64], n: usize) -> Result<GpuEigenResult, String> 
             eigenvectors,
             gpu_time_secs: gpu_time,
         })
+    }
+}
+
+/// Result of GPU spectral projection — eigenvalues + projection amplitudes only.
+/// Does NOT download the full N×N eigenvector matrix.
+pub struct GpuSpectralResult {
+    /// Eigenvalues in ascending order (cuSOLVER sorts them)
+    pub eigenvalues: Vec<f64>,
+    /// c_k = ⟨b, v_k⟩ — projection of b onto each eigenvector
+    pub projections: Vec<f64>,
+    /// GPU time in seconds
+    pub gpu_time_secs: f64,
+}
+
+/// GPU spectral projections: eigendecomposition + V^T b entirely on GPU.
+///
+/// For N=40,000 this uses ~12.8 GB VRAM (matrix) + ~320 KB (eigenvalues)
+/// + workspace. The eigenvector matrix stays on GPU — we compute
+/// c = V^T b via cuBLAS dgemv and only download eigenvalues + c.
+///
+/// This avoids the 12.8 GB device→host transfer of the eigenvector matrix.
+pub fn gpu_spectral_projections(
+    gram_data: &[f64], n: usize, b: &[f64],
+) -> Result<GpuSpectralResult, String> {
+    let n_i32 = n as c_int;
+    let matrix_bytes = n * n * 8;
+    let vec_bytes = n * 8;
+
+    // For symmetric matrices, row-major = column-major (A = A^T),
+    // so we can skip the transpose for the Gram matrix!
+    // cuSOLVER dsyevd only reads the lower triangle anyway.
+
+    unsafe {
+        let start = std::time::Instant::now();
+
+        // Create handles
+        let mut solver_handle: CusolverDnHandle = ptr::null_mut();
+        let mut blas_handle: CublasHandle = ptr::null_mut();
+        let s = cusolverDnCreate(&mut solver_handle);
+        if s != 0 { return Err(format!("cusolverDnCreate failed: {}", s)); }
+        let s = cublasCreate_v2(&mut blas_handle);
+        if s != 0 {
+            cusolverDnDestroy(solver_handle);
+            return Err(format!("cublasCreate failed: {}", s));
+        }
+
+        // Allocate GPU memory
+        let mut d_a: *mut f64 = ptr::null_mut();  // matrix → eigenvectors after dsyevd
+        let mut d_w: *mut f64 = ptr::null_mut();  // eigenvalues
+        let mut d_b: *mut f64 = ptr::null_mut();  // b vector
+        let mut d_c: *mut f64 = ptr::null_mut();  // c = V^T b (projections)
+        let mut d_info: *mut c_int = ptr::null_mut();
+
+        let s1 = cudaMalloc(&mut d_a, matrix_bytes);
+        let s2 = cudaMalloc(&mut d_w, vec_bytes);
+        let s3 = cudaMalloc(&mut d_b, vec_bytes);
+        let s4 = cudaMalloc(&mut d_c, vec_bytes);
+        let s5 = cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
+        if s1 != 0 || s2 != 0 || s3 != 0 || s4 != 0 || s5 != 0 {
+            return Err(format!("cudaMalloc failed: {},{},{},{},{}", s1, s2, s3, s4, s5));
+        }
+
+        // Upload matrix and b vector
+        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(d_b, b.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+
+        let t_upload = start.elapsed().as_secs_f64();
+        eprintln!("  GPU upload: {:.1}s ({:.0} MB)", t_upload, matrix_bytes as f64 / 1e6);
+
+        // Query workspace size
+        let mut lwork: c_int = 0;
+        cusolverDnDsyevd_bufferSize(
+            solver_handle, CusolverEigMode::Vec, CublasFillMode::Lower,
+            n_i32, d_a, n_i32, d_w, &mut lwork,
+        );
+        eprintln!("  cuSOLVER workspace: {} MB", (lwork as usize * 8) / (1024 * 1024));
+
+        let mut d_work: *mut f64 = ptr::null_mut();
+        let s = cudaMalloc(&mut d_work, lwork as usize * 8);
+        if s != 0 {
+            return Err(format!("cudaMalloc workspace failed: {} ({} MB)", s, (lwork as usize * 8) / (1024*1024)));
+        }
+
+        // ═══ EIGENDECOMPOSITION ═══
+        // After this, d_a contains eigenvectors (column-major) and d_w contains eigenvalues
+        let t_eigen_start = std::time::Instant::now();
+        let status = cusolverDnDsyevd(
+            solver_handle, CusolverEigMode::Vec, CublasFillMode::Lower,
+            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+        );
+        cudaDeviceSynchronize();
+        let t_eigen = t_eigen_start.elapsed().as_secs_f64();
+        eprintln!("  GPU eigendecomposition: {:.1}s", t_eigen);
+
+        // Free workspace immediately to reclaim VRAM
+        cudaFree(d_work);
+
+        if status != 0 {
+            cudaFree(d_a); cudaFree(d_w); cudaFree(d_b); cudaFree(d_c);
+            cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(solver_handle); cublasDestroy_v2(blas_handle);
+            return Err(format!("cusolverDnDsyevd failed: {}", status));
+        }
+
+        // ═══ SPECTRAL PROJECTIONS ═══
+        // c = V^T b where V is stored column-major in d_a
+        // cublasDgemv: y = α * op(A) * x + β * y
+        // We want c = V^T * b, so trans=1 (Transpose), m=n, n=n
+        let alpha = 1.0f64;
+        let beta_val = 0.0f64;
+        let t_proj_start = std::time::Instant::now();
+        let s = cublasDgemv_v2(
+            blas_handle,
+            1, // CUBLAS_OP_T = transpose
+            n_i32, n_i32,
+            &alpha,
+            d_a, n_i32,  // V (column-major eigenvectors)
+            d_b, 1,       // b vector
+            &beta_val,
+            d_c, 1,       // c = V^T b output
+        );
+        cudaDeviceSynchronize();
+        let t_proj = t_proj_start.elapsed().as_secs_f64();
+        eprintln!("  GPU V^T b projection: {:.3}s", t_proj);
+
+        if s != 0 {
+            eprintln!("  ⚠ cublasDgemv failed ({}), falling back to host", s);
+        }
+
+        // Download eigenvalues and projections (tiny: 2 × N × 8 bytes)
+        let mut eigenvalues = vec![0.0f64; n];
+        let mut projections = vec![0.0f64; n];
+        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(projections.as_mut_ptr(), d_c, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+
+        let gpu_time = start.elapsed().as_secs_f64();
+
+        // Cleanup all GPU memory
+        cudaFree(d_a); cudaFree(d_w); cudaFree(d_b); cudaFree(d_c);
+        cudaFree(d_info as *mut f64);
+        cusolverDnDestroy(solver_handle);
+        cublasDestroy_v2(blas_handle);
+
+        eprintln!("  GPU total: {:.1}s", gpu_time);
+
+        Ok(GpuSpectralResult {
+            eigenvalues,
+            projections,
+            gpu_time_secs: gpu_time,
+        })
+    }
+}
+
+/// GPU eigenvalues-only: dsyevd with NoVec mode.
+///
+/// This uses dramatically less workspace than the full eigendecomposition
+/// (no eigenvector storage needed). For N=40,000:
+/// - Full (Vec):   12.8 GB matrix + ~12 GB workspace = ~25 GB (exceeds 24 GB VRAM)
+/// - NoVec:        12.8 GB matrix + ~1 GB workspace = ~14 GB (fits!)
+///
+/// After this, you can get d² from Cholesky and use the eigenvalue distribution
+/// for the spectral analysis.
+pub fn gpu_eigenvalues_only(
+    gram_data: &[f64], n: usize,
+) -> Result<(Vec<f64>, f64), String> {
+    let n_i32 = n as c_int;
+    let matrix_bytes = n * n * 8;
+    let vec_bytes = n * 8;
+
+    unsafe {
+        let start = std::time::Instant::now();
+
+        let mut handle: CusolverDnHandle = ptr::null_mut();
+        let s = cusolverDnCreate(&mut handle);
+        if s != 0 { return Err(format!("cusolverDnCreate failed: {}", s)); }
+
+        let mut d_a: *mut f64 = ptr::null_mut();
+        let mut d_w: *mut f64 = ptr::null_mut();
+        let mut d_info: *mut c_int = ptr::null_mut();
+
+        let s1 = cudaMalloc(&mut d_a, matrix_bytes);
+        let s2 = cudaMalloc(&mut d_w, vec_bytes);
+        let s3 = cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
+        if s1 != 0 || s2 != 0 || s3 != 0 {
+            return Err(format!("cudaMalloc failed: {},{},{}", s1, s2, s3));
+        }
+
+        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+
+        let t_upload = start.elapsed().as_secs_f64();
+        eprintln!("  GPU upload: {:.1}s ({:.0} MB)", t_upload, matrix_bytes as f64 / 1e6);
+
+        // NoVec mode — much smaller workspace
+        let mut lwork: c_int = 0;
+        cusolverDnDsyevd_bufferSize(
+            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
+            n_i32, d_a, n_i32, d_w, &mut lwork,
+        );
+        let ws_mb = (lwork as usize * 8) / (1024 * 1024);
+        eprintln!("  cuSOLVER workspace (NoVec): {} MB", ws_mb);
+
+        let mut d_work: *mut f64 = ptr::null_mut();
+        let s = cudaMalloc(&mut d_work, lwork as usize * 8);
+        if s != 0 {
+            cudaFree(d_a); cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
+            return Err(format!("workspace alloc failed: {} ({} MB)", s, ws_mb));
+        }
+
+        let t_eigen_start = std::time::Instant::now();
+        let status = cusolverDnDsyevd(
+            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
+            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+        );
+        cudaDeviceSynchronize();
+        let t_eigen = t_eigen_start.elapsed().as_secs_f64();
+        eprintln!("  GPU eigenvalues (NoVec): {:.1}s", t_eigen);
+
+        cudaFree(d_work);
+        cudaFree(d_a);
+
+        if status != 0 {
+            cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
+            return Err(format!("cusolverDnDsyevd NoVec failed: {}", status));
+        }
+
+        let mut eigenvalues = vec![0.0f64; n];
+        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+
+        let gpu_time = start.elapsed().as_secs_f64();
+        cudaFree(d_w); cudaFree(d_info as *mut f64);
+        cusolverDnDestroy(handle);
+
+        eprintln!("  GPU eigenvalues total: {:.1}s", gpu_time);
+        Ok((eigenvalues, gpu_time))
     }
 }
 

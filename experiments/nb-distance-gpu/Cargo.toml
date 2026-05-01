@@ -15,6 +15,14 @@ path = "src/gram_gpu_test.rs"
 name = "hybrid-probe"
 path = "src/hybrid_probe.rs"
 
+[[bin]]
+name = "particle-zoo"
+path = "src/particle_zoo.rs"
+
+[[bin]]
+name = "gpu-spectral"
+path = "src/gpu_spectral.rs"
+
 [dependencies]
 cathedral-utils = { path = "../cathedral-utils" }
 nalgebra = "0.33"
