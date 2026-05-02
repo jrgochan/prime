@@ -45,6 +45,7 @@
 import Mathlib.Data.Matrix.Basic
 import Mathlib.Data.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.Tactic.NoncommRing
 
 open Complex Matrix
 
@@ -106,13 +107,49 @@ def gamma_standard : Idx → Matrix (Fin 2) (Fin 2) ℂ :=
 def gamma5 (γ : Idx → Matrix (Fin 2) (Fin 2) ℂ) : Matrix (Fin 2) (Fin 2) ℂ :=
   γ 0 * γ 1
 
+/-- Off-diagonal Clifford anticommutation: {γ^μ, γ^ν} = 0 when μ ≠ ν
+    (since η^{μν} = 0 for the off-diagonal Minkowski metric). -/
+private lemma gamma_anticommute_offdiag (γ : Idx → Matrix (Fin 2) (Fin 2) ℂ)
+    [h : DiracAlgebra1D γ] {μ ν : Idx} (hne : μ ≠ ν) :
+    γ μ * γ ν + γ ν * γ μ = 0 := by
+  have := h.anticommute μ ν
+  have hη : minkowski1D μ ν = 0 := by
+    unfold minkowski1D; rw [diagonal_apply_ne _ hne]
+  rw [hη] at this; simp at this; exact this
+
+/-- γ¹γ⁰ = -γ⁰γ¹, from the off-diagonal Clifford anticommutation. -/
+private lemma gamma10_eq_neg (γ : Idx → Matrix (Fin 2) (Fin 2) ℂ)
+    [h : DiracAlgebra1D γ] :
+    γ 1 * γ 0 = -(γ 0 * γ 1) := by
+  have h01 := gamma_anticommute_offdiag γ (show (0 : Idx) ≠ 1 by decide)
+  rw [add_comm] at h01
+  exact add_eq_zero_iff_eq_neg.mp h01
+
 /-- γ⁵ anticommutes with both γ⁰ and γ¹ (chiral symmetry).
     This is the algebraic origin of the parity structure in the
-    Gram matrix eigenvalue spectrum. -/
+    Gram matrix eigenvalue spectrum.
+
+    Proof: γ⁵ = γ⁰γ¹, and since {γ⁰, γ¹} = 0 (off-diagonal Minkowski),
+    we have γ¹γ⁰ = -γ⁰γ¹. Then for each μ ∈ {0,1}, the two terms in
+    {γ⁵, γ^μ} perfectly cancel by non-commutative ring arithmetic. -/
 theorem gamma5_anticommutes (γ : Idx → Matrix (Fin 2) (Fin 2) ℂ)
     [h : DiracAlgebra1D γ] (μ : Idx) :
     gamma5 γ * γ μ + γ μ * gamma5 γ = 0 := by
-  sorry -- TODO: derive from Clifford anticommutation
+  unfold gamma5
+  have h10 := gamma10_eq_neg γ
+  fin_cases μ
+  · -- μ = 0: (γ⁰γ¹)γ⁰ + γ⁰(γ⁰γ¹) = γ⁰(γ¹γ⁰) + γ⁰(γ⁰γ¹)
+    --       = γ⁰(-γ⁰γ¹) + γ⁰(γ⁰γ¹) = 0
+    calc γ 0 * γ 1 * γ 0 + γ 0 * (γ 0 * γ 1)
+        = γ 0 * (γ 1 * γ 0) + γ 0 * (γ 0 * γ 1) := by noncomm_ring
+      _ = γ 0 * (-(γ 0 * γ 1)) + γ 0 * (γ 0 * γ 1) := by rw [h10]
+      _ = 0 := by noncomm_ring
+  · -- μ = 1: (γ⁰γ¹)γ¹ + γ¹(γ⁰γ¹) = γ⁰(γ¹²) + (γ¹γ⁰)γ¹
+    --       = γ⁰(γ¹²) + (-γ⁰γ¹)γ¹ = 0
+    calc γ 0 * γ 1 * γ 1 + γ 1 * (γ 0 * γ 1)
+        = γ 0 * (γ 1 * γ 1) + (γ 1 * γ 0) * γ 1 := by noncomm_ring
+      _ = γ 0 * (γ 1 * γ 1) + (-(γ 0 * γ 1)) * γ 1 := by rw [h10]
+      _ = 0 := by noncomm_ring
 
 -- ════════════════════════════════════════════════
 -- §4. SPINOR FIELDS AND THE DIRAC EQUATION
@@ -197,9 +234,9 @@ def fermionParityOperator (n : ℕ) : ℤ :=
 --   ✅ satisfies_dirac_1d             — The Dirac equation (i∂̸ − m)ψ = 0
 --   ✅ BurnolScatteringData           — S-matrix structure
 --   ✅ fermionParityOperator          — Liouville λ(n) = (−1)^Ω(n)
---
--- SORRY (1):
---   ⚠  gamma5_anticommutes — {γ⁵, γ^μ} = 0 (routine algebra)
+--   ✅ gamma_anticommute_offdiag     — {γ^μ, γ^ν} = 0 when μ ≠ ν
+--   ✅ gamma10_eq_neg                 — γ¹γ⁰ = -γ⁰γ¹
+--   ✅ gamma5_anticommutes            — {γ⁵, γ^μ} = 0
 --
 -- STATUS: Conceptual beacon — does NOT participate in main proof chain.
 -- FUTURE: Connect to Cathedral.Spectral via Hilbert-Pólya bridge.
