@@ -1,0 +1,95 @@
+
+╔══════════════════════════════════════════════════════════════════╗
+║  🔭 GPU SPECTRAL OBSERVATORY                                   ║
+║  cuSOLVER eigendecomposition + cuBLAS spectral projections      ║
+║  Cathedral Core Team — April 30, 2026                          ║
+╚══════════════════════════════════════════════════════════════════╝
+  GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+  📦 Smart Cache: loading largest matrix (N=40000) once...
+  Trying DD: /mnt/c/Users/jrgochan.flux-bawkz/code/github.com/jrgochan/prime/experiments/cache/dd_gram_N40000_mpfr256.bin
+  [32m✓[0m DD Gram loaded from cache (24412 MB, dim=39999)
+  ✓ Master cache loaded: dim=39999 (11.9 GB, 101.1s)
+  Will truncate for 1 N values: [40000]
+
+
+════════════════════════════════════════════════════════════════════════
+  🔭 GPU SPECTRAL OBSERVATORY — N = 40000
+════════════════════════════════════════════════════════════════════════
+  Gram matrix: dim=39999 (11.9 GB)
+  ‖b‖ = 1.70108342
+  Mode: HYBRID — eigenvalues-only + Cholesky d² (~12.9 GB VRAM)
+         (full eigen+vecs needs 35.8 GB, exceeds VRAM)
+  Phase 1: Computing d² via GPU Cholesky...
+  d² = 0.039986405989 (30.3s)
+  Phase 2: CPU LAPACK eigendecomposition (~35.8 GB RAM needed)...
+  LAPACK dsyev (QR, FULL eigen+vecs): dim=39999 (11.9 GB matrix)
+  ⚠ Using dsyev instead of dsyevd (workspace 3200079997 exceeds i32::MAX)
+  OpenBLAS threads: 16
+  LAPACK workspace: 10 MB (lwork=1359966)
+  Computing eigenvalues + eigenvectors (all cores, QR method)...
+  LAPACK dsyev (eigen+vecs): 36168.5s
+  λ_min = 1.56418758e-7, λ_max = 6.08484506e0
+  Computing projections c_k = ⟨b, v_k⟩...
+  Projections computed: 1.1s
+  LAPACK full eigen total: 36171.4s
+  λ_min = 1.56418758e-7
+  λ_max = 6.08484506e0
+  cond(G) = 3.8901e7
+
+  ── SPECTRAL DECOMPOSITION ──
+  Σ c_k²/λ_k = 0.960013594011
+  d²_N = 1 - Σ c_k²/λ_k = 0.039986405989
+
+  ── QUANTUM DECOUPLING ANALYSIS ──
+      k            λ_k           c_k²       E_k=c²/λ        S_cum
+  ───── ────────────── ────────────── ────────────── ────────────
+      0  1.56418758e-7 7.43154936e-16  4.75106019e-9   0.00000000
+      1  1.60772295e-7 1.88032969e-15  1.16956077e-8   0.00000002
+      2  1.62677382e-7 1.74933033e-16  1.07533716e-9   0.00000002
+      3  1.64021741e-7 1.00300383e-16 6.11506633e-10   0.00000002
+      4  1.64442744e-7 2.41134608e-16  1.46637427e-9   0.00000002
+      5  1.64818882e-7 3.70799624e-17 2.24973995e-10   0.00000002
+      6  1.65155180e-7 4.84904212e-16  2.93605210e-9   0.00000002
+      7  1.65617881e-7 1.52015829e-16 9.17870874e-10   0.00000002
+      8  1.66181096e-7 1.76650315e-18 1.06299886e-11   0.00000002
+      9  1.66925730e-7 3.83762872e-16  2.29900371e-9   0.00000003
+     10  1.67493641e-7 2.21895417e-17 1.32479905e-10   0.00000003
+     11  1.67626753e-7 1.25686277e-15  7.49798435e-9   0.00000003
+     12  1.67800098e-7 5.10031356e-17 3.03951763e-10   0.00000003
+     13  1.68485712e-7 1.35540427e-16 8.04462438e-10   0.00000003
+     14  1.68744118e-7 1.72863371e-17 1.02441124e-10   0.00000003
+     15  1.69149215e-7 1.82245918e-17 1.07742692e-10   0.00000003
+     16  1.70001429e-7 9.09265198e-18 5.34857386e-11   0.00000003
+     17  1.70034879e-7 6.10857188e-16  3.59254049e-9   0.00000004
+     18  1.70257447e-7 1.30200863e-16 7.64729330e-10   0.00000004
+     19  1.70582828e-7 6.24570981e-17 3.66139422e-10   0.00000004
+    ...
+  39994  2.25290055e-1  6.32967176e-3  2.80956554e-2   0.05639419
+  39995  4.50525973e-1  3.53509849e-2  7.84660309e-2   0.13486022
+  39996   1.05071422e0  2.01291662e-1  1.91576032e-1   0.32643626
+  39997   2.68856016e0  9.54638869e-1  3.55074393e-1   0.68151065
+  39998   6.08484506e0   1.69464727e0  2.78502945e-1   0.96001359
+
+  ── DECOUPLING POWER LAW ──
+  β = 2.216095  (fit over bottom 500 modes, 500/500 valid)
+  ✅ β > 1: QUANTUM DECOUPLING CONFIRMED
+
+  ── MULTI-WINDOW β STABILITY ──
+  ⚠️  bottom 2% (799 modes): β = 0.1736
+  ❌ bottom 5% (1999 modes): β = -0.2913
+  ❌ bottom 10% (3999 modes): β = -0.2321
+  ❌ bottom 20% (7999 modes): β = -0.5809
+  ⚠️  bottom 33% (13199 modes): β = 0.3647
+
+  ── ORTHOGONALITY SHIELD ──
+  |⟨b, v_min⟩|² = 7.43154936e-16
+  λ_min          = 1.56418758e-7
+  E_0 = c₀²/λ   = 4.75106019e-9
+  E_0 / d²_N     = 1.18816885e-7
+
+  Data saved to: /mnt/c/Users/jrgochan.flux-bawkz/code/github.com/jrgochan/prime/experiments/nb-distance-gpu/results/spectral-observatory/gpu_spectral_N40000.tsv
+  📜 Certificate → /mnt/c/Users/jrgochan.flux-bawkz/code/github.com/jrgochan/prime/experiments/nb-distance-gpu/results/spectral-observatory/certificate_N40000.json
+  📋 Log file → /mnt/c/Users/jrgochan.flux-bawkz/code/github.com/jrgochan/prime/experiments/nb-distance-gpu/results/spectral-observatory/observatory_run_2026-05-01T16-55-19Z.log
+
+  🔭 GPU Observatory complete.

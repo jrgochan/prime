@@ -13,7 +13,6 @@ import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
 import Cathedral.Vasyunin.Cotangent.CrossTermFTC
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
-import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 
 noncomputable section

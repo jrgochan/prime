@@ -157,6 +157,66 @@ pub fn factorize(n: usize) -> String {
     factors.join("·")
 }
 
+/// Count of distinct prime factors: ω(n).
+///
+/// ω(n) = number of distinct primes dividing n.
+/// ω(1) = 0, ω(p) = 1, ω(pq) = 2, ω(p²) = 1.
+pub fn small_omega(n: usize) -> u32 {
+    if n <= 1 {
+        return 0;
+    }
+    let mut count = 0u32;
+    let mut rem = n;
+    let mut p = 2;
+    while p * p <= rem {
+        if rem % p == 0 {
+            count += 1;
+            while rem % p == 0 {
+                rem /= p;
+            }
+        }
+        p += 1;
+    }
+    if rem > 1 {
+        count += 1;
+    }
+    count
+}
+
+/// Table of ω(n) for n = 0..=max_n.
+pub fn small_omega_table(max_n: usize) -> Vec<u32> {
+    let mut omega = vec![0u32; max_n + 1];
+    let is_prime = sieve_primes(max_n);
+    for p in 2..=max_n {
+        if is_prime[p] {
+            for m in (p..=max_n).step_by(p) {
+                omega[m] += 1;
+            }
+        }
+    }
+    omega
+}
+
+/// Von Mangoldt function: Λ(n) = ln(p) if n = p^k, else 0.
+pub fn von_mangoldt(n: usize) -> f64 {
+    if n <= 1 {
+        return 0.0;
+    }
+    let mut rem = n;
+    let mut p = 2;
+    while p * p <= rem {
+        if rem % p == 0 {
+            while rem % p == 0 {
+                rem /= p;
+            }
+            return if rem == 1 { (p as f64).ln() } else { 0.0 };
+        }
+        p += 1;
+    }
+    // n itself is prime
+    (n as f64).ln()
+}
+
 /// Count of prime factors with multiplicity: Ω(n).
 pub fn big_omega(n: usize) -> u32 {
     if n <= 1 {

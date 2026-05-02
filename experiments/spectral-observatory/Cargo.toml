@@ -1,0 +1,10 @@
+[package]
+name = "spectral-observatory"
+version = "0.1.0"
+edition = "2021"
+description = "Spectral Observatory — Quantum Decoupling of the Riemann Vacuum"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rayon = "1.10"

@@ -633,6 +633,7 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
 // CPU LAPACK EIGENDECOMPOSITION via OpenBLAS (multi-threaded)
 // ═══════════════════════════════════════════════════════════════════
 
+#[link(name = "openblas")]
 extern "C" {
     /// LAPACK symmetric eigendecomposition (divide-and-conquer)
     /// Uses all CPU cores via OpenBLAS threading.

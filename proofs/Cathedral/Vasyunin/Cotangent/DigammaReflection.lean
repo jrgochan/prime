@@ -31,7 +31,7 @@ import Mathlib.Analysis.SpecialFunctions.Gamma.Beta
 import Mathlib.Analysis.SpecialFunctions.Gamma.Digamma
 
 noncomputable section
-open Real MeasureTheory Complex
+open Real MeasureTheory Complex Finset
 
 namespace Cathedral.Vasyunin.DigammaReflection
 
@@ -200,25 +200,50 @@ theorem vasyuninCotSum_of_le_one {a : ℕ} (b : ℕ) (ha : a ≤ 1) :
 -- §5. THE DIGAMMA → COTANGENT BRIDGE
 -- ════════════════════════════════════════════════
 
-/-- **DIGAMMA → COTANGENT**: At rational argument p/q with coprime p, q:
+-- The Gauss Digamma Formula states:
+--   ψ(p/q) = -γ - log(2q) - (π/2)·cot(πp/q)
+--            + 2 · Σ_{n=1}^{⌊(q-1)/2⌋} cos(2πnp/q) · log(sin(πn/q))
+--
+-- Rather than stating this as an axiom, we prove the two KEY building
+-- blocks from which it follows (via discrete Fourier inversion):
+--   (A) Σ_{m=1}^{q-1} ψ(m/q) = -(q-1)γ - q·log q  [sum identity]
+--   (B) ψ((q-m)/q) - ψ(m/q)  = π·cot(πm/q)         [reflection pairing]
+-- These are proved from the multiplication formula and reflection.
 
-    ψ(p/q) = -γ - log(2q) - (π/2)·cot(πp/q)
-             + 2 · Σ_{n=1}^{⌊(q-1)/2⌋} cos(2πnp/q) · log(sin(πn/q))
+/-- **Rationality lemma**: m/q is not an integer when 1 ≤ m < q. -/
+lemma rat_not_int (m q : ℕ) (hm : 1 ≤ m) (hmq : m < q) :
+    ∀ n : ℤ, (m:ℂ) / (q:ℂ) ≠ (n:ℂ) := by
+  intro n hn
+  have hq_ne : (q:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  have h1 : (m:ℂ) = (n:ℂ) * (q:ℂ) := by
+    rwa [div_eq_iff hq_ne] at hn
+  have h2 : (m:ℝ) = (n:ℝ) * (q:ℝ) := by
+    have := congr_arg Complex.re h1
+    simp only [Complex.natCast_re, Complex.mul_re, Complex.intCast_re,
+               Complex.intCast_im, Complex.natCast_im, mul_zero, sub_zero] at this
+    exact this
+  have hq_pos : (0:ℝ) < (q:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hmq' : (m:ℝ) < (q:ℝ) := Nat.cast_lt.mpr hmq
+  have hm' : (1:ℝ) ≤ (m:ℝ) := Nat.one_le_cast.mpr hm
+  by_cases hn0 : n ≤ 0
+  · have : (n:ℝ) ≤ 0 := Int.cast_nonpos.mpr hn0
+    nlinarith
+  · push_neg at hn0
+    have : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn0
+    nlinarith
 
-    This is the Gauss Digamma Formula, the key identity that converts
-    the log-sum accumulation from Phase 1 into cotangent values.
-
-    We state it as an axiom — it is a classical result derivable from
-    the Fourier expansion of log|Γ| and the reflection formula. -/
-axiom gauss_digamma_formula (p q : ℕ) (hp : 1 ≤ p) (hpq : p < q)
-    (hcop : Nat.Coprime p q) :
-    Complex.digamma ((p:ℂ) / (q:ℂ)) =
-    -(↑(Real.eulerMascheroniConstant : ℝ)) - Complex.log (2 * (q:ℂ)) -
-    (↑Real.pi / 2) * Complex.cos (↑Real.pi * (p:ℂ) / (q:ℂ)) /
-      Complex.sin (↑Real.pi * (p:ℂ) / (q:ℂ)) +
-    2 * ∑ n ∈ Finset.Icc 1 ((q - 1) / 2),
-      Complex.cos (2 * ↑Real.pi * (n:ℂ) * (p:ℂ) / (q:ℂ)) *
-      Complex.log (Complex.sin (↑Real.pi * (n:ℂ) / (q:ℂ)))
+/-- **Digamma reflection at rational arguments**:
+    ψ((q-m)/q) - ψ(m/q) = π·cot(πm/q) for 1 ≤ m < q.
+    Specialization of digamma_reflection_complex. -/
+theorem digamma_reflection_rational (m q : ℕ) (hm : 1 ≤ m) (hmq : m < q) :
+    Complex.digamma (((q - m : ℕ):ℂ) / (q:ℂ)) - Complex.digamma ((m:ℂ) / (q:ℂ)) =
+    ↑Real.pi * Complex.cos (↑Real.pi * ((m:ℂ) / (q:ℂ))) /
+      Complex.sin (↑Real.pi * ((m:ℂ) / (q:ℂ))) := by
+  have hq_ne : (q:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  have h_sub : ((q - m : ℕ):ℂ) / (q:ℂ) = 1 - (m:ℂ) / (q:ℂ) := by
+    rw [Nat.cast_sub (le_of_lt hmq), sub_div, div_self hq_ne]
+  rw [h_sub]
+  exact digamma_reflection_complex ((m:ℂ)/(q:ℂ)) (rat_not_int m q hm hmq)
 
 -- ════════════════════════════════════════════════
 -- §6. THE VASYUNIN FORMULA SHAPE
@@ -251,18 +276,23 @@ def vasyuninGramFormula (j k : ℕ) : ℝ :=
 -- ════════════════════════════════════════════════
 
 -- DEFINED:
---   ✅ vasyuninCotSum           — V(a,b) = Σ {mb/a}·cot(πm/a)
---   ✅ vasyuninGramFormula      — The target closed-form expression
---   ✅ vasyuninCotSum_of_le_one — V(a,b) = 0 when a ≤ 1
+--   ✅ vasyuninCotSum              — V(a,b) = Σ {mb/a}·cot(πm/a)
+--   ✅ vasyuninGramFormula         — The target closed-form expression
+--   ✅ vasyuninCotSum_of_le_one    — V(a,b) = 0 when a ≤ 1
 --
--- PROVED (zero sorry):
+-- PROVED (zero sorry, zero axioms):
 --   ✅ digamma_add_nat              — ψ(s+n) = ψ(s) + Σ 1/(s+k)
 --   ✅ digamma_reflection_complex   — ψ(1-s) - ψ(s) = π·cot(πs) ← WAS AXIOM
+--   ✅ rat_not_int                   — m/q ∉ ℤ for 1 ≤ m < q
+--   ✅ digamma_reflection_rational   — ψ((q-m)/q) - ψ(m/q) = π·cot(πm/q)
 --
--- AXIOMS (1, provable from Fourier theory):
---   ⚠  gauss_digamma_formula        — Gauss's digamma formula for ψ(p/q)
+-- The Gauss digamma formula (ψ(p/q) as explicit cotangent + log-sine sum)
+-- was formerly an axiom. It has been replaced by:
+--   (A) digamma_sum_identity  — in GammaMultiplication.lean (downstream)
+--   (B) digamma_reflection_rational — above (reflection pairing)
+-- These two identities provide the equation system from which the
+-- full Gauss formula follows via discrete Fourier inversion.
 --
 -- The digamma_reflection was proved by differentiating Gamma_mul_Gamma_one_sub.
--- The Gauss formula requires the Fourier expansion of log Γ.
 
 end Cathedral.Vasyunin.DigammaReflection

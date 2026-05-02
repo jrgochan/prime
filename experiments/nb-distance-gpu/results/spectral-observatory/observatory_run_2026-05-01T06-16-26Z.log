@@ -1,0 +1,6 @@
+GPU Spectral Observatory Run
+Timestamp: 2026-05-01T06:16:26Z
+N values: [25000, 30000, 40000]
+
+N= 25000  d²=0.040260258645  λ_min=1.81552502e-7  λ_max=5.95331768e0  cond=3.2791e7  β=1.0550  mode=CPU_LAPACK
+N= 30000  d²=0.040178784141  λ_min=1.71069441e-7  λ_max=6.00545414e0  cond=3.5105e7  β=2.1135  mode=CPU_LAPACK

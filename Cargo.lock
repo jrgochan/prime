@@ -593,6 +593,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nb-distance-gpu"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "nalgebra",
+ "rayon",
+ "rug",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -853,6 +863,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "series-decomposition-verifier"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "chrono",
+ "rayon",
+ "rug",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "shlex"
 version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -889,6 +911,15 @@ dependencies = [
 [[package]]
 name = "spectral-fourier"
 version = "0.1.0"
+
+[[package]]
+name = "spectral-observatory"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "nalgebra",
+ "rayon",
+]
 
 [[package]]
 name = "spectral-road"

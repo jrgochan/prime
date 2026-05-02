@@ -56,6 +56,7 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
     `Cathedral.Vasyunin.Cotangent.DigammaReflection,
     `Cathedral.Vasyunin.Cotangent.ConvergenceAxioms,
+    `Cathedral.Vasyunin.Cotangent.ConvergenceProof,
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Cotangent.FormulaBridge,
     `Cathedral.Vasyunin.Cotangent.GCDReduction,
@@ -192,6 +193,9 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.Convexity,
     -- Gamma function norm bounds (PROVED, zero sorry)
     `Cathedral.Analysis.GammaBound,
+    -- Gamma multiplication formula (Gauss, via Stirling)
+    `Cathedral.Analysis.GammaProductEval,
+    `Cathedral.Analysis.GammaMultiplication,
     -- Zeta convexity bound (WIP)
     `Cathedral.Zeta.ConvexityBound,
     -- Zeta disk geometry & upper bounds (zero sorry)
@@ -229,4 +233,18 @@ lean_lib «Cathedral» where
     `Cathedral.Analysis.FrequencySeparation,
     -- Rotors: Gallagher energy partition (Exploration 14)
     `Cathedral.Rotors.GallagherPartition,
+    -- Renormalization: Arithmetic α-decay (Exploration 23, April 30, 2026)
+    `Cathedral.Renormalization.Defs,
+    `Cathedral.Renormalization.Axiom,
+    `Cathedral.Renormalization.Bridge,
+    -- Algebraic limit identification (axiom graduation infrastructure)
+    `Cathedral.Vasyunin.Cotangent.AlgebraicLimit,
+    -- Gram integral proof (axiom graduation: gramIntegral = vasyuninGramFormula)
+    `Cathedral.Vasyunin.Cotangent.GramIntegralProof,
+    -- Diagonal strike (a=1 case: gramIntegral(1,b) = vasyuninGramFormula(1,b))
+    `Cathedral.Vasyunin.Cotangent.DiagonalStrike,
+    -- Fract series evaluation (axiom graduation: fract correction closed form)
+    `Cathedral.Vasyunin.Cotangent.FractSeriesEval,
+    -- Physics: 1+1D Dirac equation (conceptual beacon, NOT on proof chain)
+    `Cathedral.Physics.Dirac,
   ]

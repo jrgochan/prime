@@ -1,0 +1,42 @@
+{
+  "experiment": "series-decomposition-verifier",
+  "m_values": [
+    100,
+    500,
+    1000,
+    5000,
+    10000,
+    50000,
+    100000
+  ],
+  "max_b": 20,
+  "max_m": 100000,
+  "num_pairs": 127,
+  "precision_bits": 512,
+  "results": {
+    "algebraic_path": {
+      "all_bounded": false,
+      "note": "rowTerm ≠ actualRowIntegral for two-tile rows; correction is summable",
+      "worst_pair": "(19,20)",
+      "worst_tail_product": 38958.74171151823
+    },
+    "ftc_path": {
+      "all_bounded": true,
+      "certified": true,
+      "worst_pair": "(1,2)",
+      "worst_tail_product": 0.2916654171125632
+    },
+    "two_tile_analysis": {
+      "pairs_with_two_tile": 108,
+      "pairs_without_two_tile": 19,
+      "total_two_tile_rows": 5202686
+    }
+  },
+  "runtime_seconds": "43.12",
+  "tail_bound_C": 1.0,
+  "threads": 12,
+  "throughput_rows_per_sec": "295000",
+  "timestamp": "2026-05-02T01:13:11.539544+00:00",
+  "total_rows_computed": 12699873,
+  "version": "0.1.0"
+}

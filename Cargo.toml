@@ -45,6 +45,9 @@ members = [
     "experiments/character-spectral",
     "experiments/spectral-road",
     "experiments/nb-distance",
+    "experiments/spectral-observatory",
+    "experiments/nb-distance-gpu",
+    "experiments/series-decomposition-verifier",
 ]
 
 [profile.release]

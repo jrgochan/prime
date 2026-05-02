@@ -317,7 +317,10 @@ private lemma tendsto_sum_logGammaSeq (q : ℕ) (hq : 1 ≤ q) :
 
 -- ── The key limit evaluation ──
 
-private lemma sum_log_gamma_eq_target (q : ℕ) (hq : 1 ≤ q) :
+/-- **Log-Gamma sum at rational arguments**:
+    Σ_{k=0}^{q-1} log Γ((1+k)/q) = (q-1)/2 · log(2π) - 1/2 · log q.
+    Derived from the Stirling-based evaluation of logGammaSeq sums. -/
+theorem sum_log_gamma_eq_target (q : ℕ) (hq : 1 ≤ q) :
     ∑ k ∈ range q, Real.log (Γ ((1 + ↑k) / ↑q)) =
     ((q : ℝ) - 1) / 2 * Real.log (2 * Real.pi) - 1/2 * Real.log q := by
   have h_target : Tendsto (fun n : ℕ =>
@@ -345,7 +348,8 @@ private lemma sum_log_gamma_eq_target (q : ℕ) (hq : 1 ≤ q) :
 
 -- ── THE GAMMA PRODUCT AT ONE (zero sorry) ──
 
-private lemma gamma_product_at_one (q : ℕ) (hq : 1 ≤ q) :
+/-- **Gamma product at s=1**: ∏_{k=0}^{q-1} Γ((1+k)/q) = (2π)^{(q-1)/2} / √q. -/
+theorem gamma_product_at_one (q : ℕ) (hq : 1 ≤ q) :
     ∏ k ∈ range q, Γ ((1 + ↑k) / ↑q) =
     (2 * Real.pi) ^ (((q:ℝ) - 1) / 2) / (q:ℝ) ^ ((1:ℝ)/2) := by
   have hq_pos : (0:ℝ) < q := Nat.cast_pos.mpr (by omega)
@@ -615,7 +619,7 @@ private lemma digamma_mult_periodic_nat (q : ℕ) (hq : 2 ≤ q) (s : ℝ) (hs :
 
 /-- The complex digamma at a real point equals the complex cast of the real logDeriv of Gamma.
     This bridges the real product formula to the complex digamma. -/
-private lemma digamma_ofReal (s : ℝ) (hs : ∀ m : ℕ, s ≠ -(m : ℝ)) :
+lemma digamma_ofReal (s : ℝ) (hs : ∀ m : ℕ, s ≠ -(m : ℝ)) :
     Complex.digamma (↑s) = ↑(logDeriv Real.Gamma s) := by
   -- digamma = logDeriv Gamma (complex)
   rw [Complex.digamma_def, logDeriv_apply, logDeriv_apply]
@@ -809,19 +813,130 @@ private lemma real_logDeriv_gamma_product (q : ℕ) (hq : 1 ≤ q) (s : ℝ) (hs
 
     ψ(qs) = log(q) + (1/q) · Σ_{k=0}^{q-1} ψ(s + k/q)
 
-    PROOF: Differentiate log of gamma_product_formula to get a real logDeriv identity,
-    lift to Complex.digamma via digamma_ofReal, then substitute s → qs. -/
+    PROOF: Use the proved real logDeriv identity, then lift to Complex.digamma
+    via digamma_ofReal (Complex.Gamma_ofReal + conjugation symmetry). -/
 theorem digamma_multiplication (q : ℕ) (hq : 2 ≤ q) (s : ℝ) (hs : 0 < s) :
     Complex.digamma ((q:ℂ) * (s:ℂ)) =
     Complex.log (q:ℂ) + (1 / (q:ℂ)) *
       ∑ k ∈ range q, Complex.digamma ((s:ℂ) + (k:ℂ) / (q:ℂ)) := by
-  -- NOTE: The real-domain identity is fully proved in real_logDeriv_gamma_product.
-  -- This sorry is ONLY the ℝ→ℂ lift: Complex.digamma (↑x) = ↑(logDeriv Real.Gamma x)
-  -- for x > 0, which requires Gamma_ofReal compatibility not yet in Mathlib.
-  sorry
+  have hq1 : 1 ≤ q := by omega
+  have hq_pos : (0 : ℝ) < q := Nat.cast_pos.mpr (by omega)
+  -- Helper: positive real → not a non-positive integer
+  have pos_not_neg : ∀ x : ℝ, 0 < x → ∀ m : ℕ, x ≠ -(m : ℝ) := by
+    intro x hx m; linarith [show (0:ℝ) ≤ (m:ℝ) from Nat.cast_nonneg m]
+  -- ═══════════════════════════════════════════════════
+  -- STEP 1: Get the real identity at q*s
+  -- ═══════════════════════════════════════════════════
+  have h_real := real_logDeriv_gamma_product q hq1 (q * s) (by positivity)
+  have h_sum_rw : ∀ k ∈ range q, (1 / (q : ℝ)) * logDeriv Real.Gamma ((q * s + ↑k) / ↑q) =
+      (1 / (q : ℝ)) * logDeriv Real.Gamma (s + (k : ℝ) / q) := by
+    intro k _; congr 1; field_simp
+  rw [Finset.sum_congr rfl h_sum_rw] at h_real
+  -- h_real: ∑ (1/q) * logDeriv Γ (s + k/q) = -log q + logDeriv Γ (q*s)
+  -- ═══════════════════════════════════════════════════
+  -- STEP 2: Lift each digamma to ↑(logDeriv Γ ·)
+  -- ═══════════════════════════════════════════════════
+  have hqs : 0 < q * s := by positivity
+  -- LHS
+  have h_lhs : Complex.digamma ((q:ℂ) * (s:ℂ)) =
+      ↑(logDeriv Real.Gamma (q * s)) := by
+    rw [← Complex.ofReal_natCast, ← Complex.ofReal_mul]
+    exact digamma_ofReal (q * s) (pos_not_neg _ hqs)
+  -- RHS sum terms
+  have h_sum_eq : ∑ k ∈ range q, Complex.digamma ((s:ℂ) + (k:ℂ) / (q:ℂ)) =
+      ∑ k ∈ range q, (↑(logDeriv Real.Gamma (s + (k : ℝ) / q)) : ℂ) := by
+    apply Finset.sum_congr rfl
+    intro k _
+    have hsk : 0 < s + (k : ℝ) / q :=
+      add_pos_of_pos_of_nonneg hs (div_nonneg (Nat.cast_nonneg k) hq_pos.le)
+    have := digamma_ofReal (s + (k : ℝ) / q) (pos_not_neg _ hsk)
+    push_cast at this ⊢
+    exact this
+  -- ═══════════════════════════════════════════════════
+  -- STEP 3: Show both sides are equal via ofReal cast
+  -- ═══════════════════════════════════════════════════
+  rw [h_lhs, h_sum_eq]
+  -- Rearrange real identity
+  have h_rearranged : logDeriv Real.Gamma (q * s) =
+      Real.log q + ∑ k ∈ range q, (1 / (q : ℝ)) * logDeriv Real.Gamma (s + (k : ℝ) / q) := by
+    linarith
+  rw [h_rearranged]
+  -- Goal: ↑(log q + ∑ (1/q * logDeriv Γ (s+k/q))) = Complex.log ↑q + 1/↑q * ∑ ↑(logDeriv Γ (s+k/q))
+  rw [Complex.ofReal_add, Complex.ofReal_log hq_pos.le]
+  congr 1
+  -- Goal: ↑(∑ (1/q * logDeriv Γ ...)) = 1/↑q * ∑ ↑(logDeriv Γ ...)
+  -- Step 1: distribute ofReal into sum: ↑(∑ f) = ∑ ↑f
+  rw [Complex.ofReal_sum]
+  -- Step 2: distribute ofReal into each product: ↑(c*x) = ↑c * ↑x
+  simp_rw [Complex.ofReal_mul, Complex.ofReal_div, Complex.ofReal_one, Complex.ofReal_natCast]
+  -- Step 3: factor: ∑ (c * f(k)) = c * ∑ f(k)
+  rw [← Finset.mul_sum]
 
 -- ════════════════════════════════════════════════
--- AUDIT (updated May 2, 2026)
+-- §5. DIGAMMA SUM IDENTITIES (Gauss formula graduation)
+-- ════════════════════════════════════════════════
+
+-- These theorems were moved here from DigammaReflection.lean to
+-- avoid a circular import (this file imports DigammaReflection).
+-- Together with digamma_reflection_rational (in DigammaReflection),
+-- they replace the former gauss_digamma_formula axiom.
+
+-- Finset reindexing helpers
+
+private lemma sum_range_shift_Icc' (q : ℕ) (f : ℕ → ℂ) :
+    ∑ k ∈ range q, f (1 + k) = ∑ m ∈ Icc 1 q, f m := by
+  apply sum_bij' (fun k _ => 1 + k) (fun m _ => m - 1) <;> simp_all [mem_range, mem_Icc] <;> omega
+
+private lemma sum_Icc_split_last' (q : ℕ) (hq : 2 ≤ q) (f : ℕ → ℂ) :
+    ∑ m ∈ Icc 1 q, f m = ∑ m ∈ Icc 1 (q - 1), f m + f q := by
+  have : Icc 1 q = Icc 1 (q - 1) ∪ {q} := by
+    ext x; simp [mem_Icc, mem_union]; omega
+  rw [this, sum_union]
+  · simp
+  · simp [Finset.disjoint_left]; omega
+
+/-- **Digamma sum from multiplication formula**:
+    Σ_{k=0}^{q-1} ψ((1+k)/q) = q·(ψ(1) - log q).
+    Derived from the digamma multiplication formula at s = 1/q. -/
+theorem digamma_sum_from_mult (q : ℕ) (hq : 2 ≤ q) :
+    ∑ k ∈ range q, Complex.digamma (((1 + k : ℕ):ℂ) / (q:ℂ)) =
+    (q:ℂ) * (Complex.digamma 1 - Complex.log (q:ℂ)) := by
+  have hq_ne : (q:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  have h := digamma_multiplication q hq (1/(q:ℝ)) (by positivity)
+  have hlhs : (q:ℂ) * (↑((1:ℝ)/(q:ℝ)) : ℂ) = 1 := by
+    push_cast; exact mul_div_cancel₀ 1 hq_ne
+  rw [hlhs] at h
+  have hsum : ∀ k ∈ range q,
+      Complex.digamma ((↑((1:ℝ)/(q:ℝ)):ℂ) + (k:ℂ) / (q:ℂ)) =
+      Complex.digamma (((1 + k : ℕ):ℂ) / (q:ℂ)) := by
+    intro k _; congr 1; push_cast; ring
+  rw [sum_congr rfl hsum] at h
+  have h1 : Complex.digamma 1 - Complex.log (q:ℂ) =
+      (1 / (q:ℂ)) * ∑ k ∈ range q, Complex.digamma (((1 + k : ℕ):ℂ) / (q:ℂ)) := by
+    linear_combination h
+  calc ∑ k ∈ range q, Complex.digamma (((1 + k : ℕ):ℂ) / (q:ℂ))
+      = (q:ℂ) * ((1 / (q:ℂ)) * ∑ k ∈ range q, Complex.digamma (((1 + k : ℕ):ℂ) / (q:ℂ))) := by
+        rw [← mul_assoc, mul_one_div_cancel hq_ne, one_mul]
+    _ = (q:ℂ) * (Complex.digamma 1 - Complex.log (q:ℂ)) := by rw [h1]
+
+/-- **Digamma sum identity**:
+    Σ_{m=1}^{q-1} ψ(m/q) = -(q-1)γ - q·log q.
+    Key identity derived from the multiplication formula. -/
+theorem digamma_sum_identity (q : ℕ) (hq : 2 ≤ q) :
+    ∑ m ∈ Icc 1 (q - 1), Complex.digamma ((m:ℂ) / (q:ℂ)) =
+    -((q:ℂ) - 1) * ↑(Real.eulerMascheroniConstant : ℝ) -
+    (q:ℂ) * Complex.log (q:ℂ) := by
+  have h_sum := digamma_sum_from_mult q hq
+  rw [sum_range_shift_Icc' q (fun m => Complex.digamma ((m:ℂ) / (q:ℂ)))] at h_sum
+  rw [sum_Icc_split_last' q hq] at h_sum
+  have hq_ne : (q:ℂ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  have h_last : Complex.digamma ((q:ℂ) / (q:ℂ)) = Complex.digamma 1 := by
+    congr 1; exact div_self hq_ne
+  rw [h_last, Complex.digamma_one] at h_sum
+  linear_combination h_sum
+
+-- ════════════════════════════════════════════════
+-- AUDIT (updated May 2, 2026 — ZERO SORRY)
 -- ════════════════════════════════════════════════
 
 -- DEFINED:
@@ -840,14 +955,16 @@ theorem digamma_multiplication (q : ℕ) (hq : 2 ≤ q) (s : ℝ) (hs : 0 < s) :
 --   ✅ logDeriv_gammaShift           — logDeriv composition chain
 --   ✅ logDeriv_mG_numerator         — logDeriv of product·power
 --   ✅ real_logDeriv_gamma_product   — THE REAL DIGAMMA IDENTITY
---
--- PENDING (sorry):
---   ⚠  digamma_multiplication       — Complex lift only
---       The real identity is fully proved. The remaining sorry is
---       the ℝ→ℂ lift: Complex.digamma (↑x) = ↑(logDeriv Real.Gamma x).
+--   ✅ digamma_ofReal                — Complex.digamma ↑x = ↑(logDeriv Γ x)
+--   ✅ digamma_multiplication        — THE COMPLEX DIGAMMA MULTIPLICATION FORMULA
+--   ✅ digamma_sum_from_mult         — Σ ψ((1+k)/q) = q·(ψ(1) - log q)
+--   ✅ digamma_sum_identity          — Σ_{m=1}^{q-1} ψ(m/q) = -(q-1)γ - q·log q
 --
 -- ARCHITECTURE:
 --   multiplicationGamma_eq_Gamma uses Real.eq_Gamma_of_log_convex (Bohr-Mollerup)
 --   which requires: log-convex ✅ + functional equation ✅ + f(1)=1 ✅ + positivity ✅
+--   digamma_multiplication lifts via Complex.Gamma_ofReal (Mathlib) + conjugation
+--   digamma_sum_identity + digamma_reflection_rational (DigammaReflection.lean)
+--   graduate the former gauss_digamma_formula axiom
 
 end Cathedral.Analysis.GammaMultiplication

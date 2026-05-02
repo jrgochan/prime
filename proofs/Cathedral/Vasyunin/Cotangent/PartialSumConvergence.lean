@@ -37,7 +37,6 @@
   Status: BUILDING — Convergence axiom corrected
 -/
 
-import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
 import Cathedral.Vasyunin.Cotangent.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
