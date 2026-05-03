@@ -48,6 +48,7 @@ members = [
     "experiments/spectral-observatory",
     "experiments/nb-distance-gpu",
     "experiments/series-decomposition-verifier",
+    "experiments/moebius-microscope",
 ]
 
 [profile.release]

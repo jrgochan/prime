@@ -241,6 +241,78 @@ pub fn big_omega(n: usize) -> u32 {
 /// Euler-Mascheroni constant γ ≈ 0.5772156649...
 pub const EULER_GAMMA: f64 = 0.5772156649015328606;
 
+/// Sum-of-divisors σ₁(n) for a single n.
+pub fn sigma1(n: usize) -> usize {
+    if n <= 1 { return n; }
+    let mut s = 0usize;
+    let mut d = 1;
+    while d * d <= n {
+        if n % d == 0 {
+            s += d;
+            if d != n / d { s += n / d; }
+        }
+        d += 1;
+    }
+    s
+}
+
+/// σ₁(n) table for n = 0..=max_n.
+pub fn sigma1_table(max_n: usize) -> Vec<usize> {
+    let mut s = vec![0usize; max_n + 1];
+    for d in 1..=max_n {
+        for m in (d..=max_n).step_by(d) {
+            s[m] += d;
+        }
+    }
+    s
+}
+
+/// Dirichlet character mod 8. Returns value in {-1, 0, 1}.
+/// Matches Cathedral/Rotors/GallagherPartition.lean.
+///   ch=0: principal (1 for all odd)
+///   ch=1: (1,-1,-1,1) on residues 1,3,5,7
+///   ch=2: (1,-1,1,-1) — Kronecker symbol (2/·)
+///   ch=3: (1,1,-1,-1) — Kronecker symbol (-1/·)
+pub fn chi8(ch: usize, n: usize) -> i64 {
+    if n % 2 == 0 { return 0; }
+    match ch {
+        0 => 1,
+        1 => match n % 8 { 1 => 1, 3 => -1, 5 => -1, 7 => 1, _ => 0 },
+        2 => match n % 8 { 1 => 1, 3 => -1, 5 => 1, 7 => -1, _ => 0 },
+        3 => match n % 8 { 1 => 1, 3 => 1, 5 => -1, 7 => -1, _ => 0 },
+        _ => 0,
+    }
+}
+
+/// Bartlett-tapered Möbius weights: v_k = -μ(k)(1 - ln k / ln N)
+/// for k = 2..=n. Returns vec of length n-1 (index 0 → k=2).
+pub fn mobius_weights(n: usize) -> Vec<f64> {
+    let mu = mobius_table(n);
+    let ln_n = (n as f64).ln();
+    (2..=n).map(|k| {
+        -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n)
+    }).collect()
+}
+
+/// Kahan compensated summation accumulator.
+/// Use for long sums where catastrophic cancellation matters.
+#[derive(Clone, Copy, Default, Debug)]
+pub struct Kahan {
+    pub sum: f64,
+    pub comp: f64,
+}
+
+impl Kahan {
+    pub fn new() -> Self { Self::default() }
+    pub fn add(&mut self, val: f64) {
+        let y = val - self.comp;
+        let t = self.sum + y;
+        self.comp = (t - self.sum) - y;
+        self.sum = t;
+    }
+    pub fn value(&self) -> f64 { self.sum }
+}
+
 /// Nyman-Beurling b-vector (analytic formula).
 ///
 /// b_k = ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ) / k

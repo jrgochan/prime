@@ -628,7 +628,7 @@ lemma digamma_ofReal (s : ℝ) (hs : ∀ m : ℕ, s ≠ -(m : ℝ)) :
   -- Need: deriv Complex.Gamma ↑s = ↑(deriv Real.Gamma s)
   -- This follows from Gamma ∘ ofReal = ofReal ∘ Real.Gamma and chain rule
   have hcplx : ∀ m : ℕ, (s : ℂ) ≠ -(m : ℂ) := by
-    intro m; specialize hs m; push_cast; exact_mod_cast hs
+    intro m; specialize hs m; exact_mod_cast hs
   have hd_complex := Complex.differentiableAt_Gamma (↑s) hcplx
   -- The real derivative of Real.Gamma at s can be computed from the complex derivative
   have h_real_of_complex := hd_complex.hasDerivAt.real_of_complex
@@ -667,13 +667,13 @@ lemma digamma_ofReal (s : ℝ) (hs : ∀ m : ℕ, s ≠ -(m : ℝ)) :
 private def gammaShift (q : ℕ) (k : ℕ) : ℝ → ℝ := fun s => Γ ((s + k) / q)
 
 -- Helper: each gammaShift is nonzero for s > 0
-private lemma gammaShift_ne_zero (q : ℕ) (hq : 1 ≤ q) (k : ℕ) (hk : k ∈ range q)
+private lemma gammaShift_ne_zero (q : ℕ) (hq : 1 ≤ q) (k : ℕ) (_hk : k ∈ range q)
     (s : ℝ) (hs : 0 < s) : gammaShift q k s ≠ 0 := by
   unfold gammaShift
   exact (Gamma_pos_of_pos (by positivity : 0 < (s + k) / q)).ne'
 
 -- Helper: each gammaShift is differentiable at s > 0
-private lemma gammaShift_differentiableAt (q : ℕ) (hq : 1 ≤ q) (k : ℕ) (hk : k ∈ range q)
+private lemma gammaShift_differentiableAt (q : ℕ) (hq : 1 ≤ q) (k : ℕ) (_hk : k ∈ range q)
     (s : ℝ) (hs : 0 < s) : DifferentiableAt ℝ (gammaShift q k) s := by
   unfold gammaShift
   have hq_pos : (0 : ℝ) < q := Nat.cast_pos.mpr (by omega)
@@ -890,7 +890,7 @@ private lemma sum_range_shift_Icc' (q : ℕ) (f : ℕ → ℂ) :
 private lemma sum_Icc_split_last' (q : ℕ) (hq : 2 ≤ q) (f : ℕ → ℂ) :
     ∑ m ∈ Icc 1 q, f m = ∑ m ∈ Icc 1 (q - 1), f m + f q := by
   have : Icc 1 q = Icc 1 (q - 1) ∪ {q} := by
-    ext x; simp [mem_Icc, mem_union]; omega
+    ext x; simp [mem_Icc]; omega
   rw [this, sum_union]
   · simp
   · simp [Finset.disjoint_left]; omega

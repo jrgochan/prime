@@ -1,0 +1,938 @@
+═══ OCTONION PROBE — SWEEP ═══
+Log: results/sweep_20260502_231001.log
+
+━━━━━ N=100 ━━━━━
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/octonion-probe 100 50000`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC GRAM MATRIX — BOTT PERIODICITY PROBE v2            ║
+║  4 experiments · Exploration 24                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+  N=100, quadrature points=50000
+
+
+═══ EXPERIMENT 1: MOD-8 RESIDUE DECOMPOSITION (N=100) ═══
+
+  8×8 Residue Matrix Q(r₁,r₂):
+
+         r≡ 0       r≡ 1       r≡ 2       r≡ 3       r≡ 4       r≡ 5       r≡ 6       r≡ 7     
+  r≡0           —          —          —          —          —          —          —          —
+  r≡1           —  6.3626e-3  8.3332e-3  3.6263e-2          —  2.5919e-2 -2.8868e-2  1.2063e-2
+  r≡2           —  8.3332e-3  1.5934e-1  1.2817e-1          —  7.2229e-2 -7.4365e-2  3.4716e-2
+  r≡3           —  3.6263e-2  1.2817e-1  3.7495e-1          —  2.3285e-1 -2.4803e-1  1.1100e-1
+  r≡4           —          —          —          —          —          —          —          —
+  r≡5           —  2.5919e-2  7.2229e-2  2.3285e-1          —  1.8321e-1 -1.7474e-1  7.7681e-2
+  r≡6           — -2.8868e-2 -7.4365e-2 -2.4803e-1          — -1.7474e-1  1.9471e-1 -8.6411e-2
+  r≡7           —  1.2063e-2  3.4716e-2  1.1100e-1          —  7.7681e-2 -8.6411e-2  4.9079e-2
+
+  4×4 ODD BLOCK (residues {1,3,5,7}):
+
+         r≡ 1       r≡ 3       r≡ 5       r≡ 7     
+  r≡1   6.3626e-3  3.6263e-2  2.5919e-2  1.2063e-2
+  r≡3   3.6263e-2  3.7495e-1  2.3285e-1  1.1100e-1
+  r≡5   2.5919e-2  2.3285e-1  1.8321e-1  7.7681e-2
+  r≡7   1.2063e-2  1.1100e-1  7.7681e-2  4.9079e-2
+
+  DIRICHLET CHARACTER EIGENVALUES:
+
+    χ_0: 4.0129359553e-1  (ratio: 1.0000)
+    χ_1: 1.5042800565e-1  (ratio: 0.3749)
+    χ_2: 4.2431908328e-2  (ratio: 0.1057)
+    χ_3: 1.9454512659e-2  (ratio: 0.0485)
+
+  ODD BLOCK STRUCTURE:
+    Trace: 6.136080e-1
+    Total: 1.605174e0
+    Trace/Total: 0.3823
+
+  4×4 ODD BLOCK EIGENVALUES:
+    λ_1 = 2.5108079067e-3
+    λ_2 = 1.3102132938e-2
+    λ_3 = 2.7844169881e-2
+    λ_4 = 5.7015091144e-1
+    Negative eigenvalues: 0/4
+    Condition number: 2.27e2
+  Done in 0.1s
+
+═══ EXPERIMENT 2: BOTT PERIODICITY — BLOCK DIAGONAL (N=50) ═══
+
+  Block diagonal G¹⊕G²⊕...⊕Gᶜ: λ_min = min over channels
+  (No cross-channel coupling — this is the trivial extension)
+
+  power      λ_min(Gᵖ)    ratio to G¹       time
+  ───────────────────────────────────────────────
+  x^1     0.0179773522       1.000000      0.0s
+  x^2     0.0182032420       1.012565      0.0s
+  x^3     0.0181876933       1.011700      0.0s
+  x^4     0.0182631041       1.015895      0.0s
+  x^5     0.0183593076       1.021246      0.0s
+  x^6     0.0182128457       1.013099      0.0s
+  x^7     0.0181900928       1.011834      0.0s
+  x^8     0.0182003126       1.012402      0.0s
+  x^9     0.0180611467       1.004661      0.0s
+  x^10    0.0176557215       0.982109      0.0s
+  x^11    0.0175898272       0.978444      0.0s
+  x^12    0.0172360879       0.958767      0.0s
+
+  BLOCK DIAGONAL λ_min (min over channels):
+
+    channels       λ_min(⊕)          ratio
+  ──────────────────────────────────────────
+           1   0.0179773522       1.000000
+           2   0.0179773522       1.000000
+           3   0.0179773522       1.000000
+           4   0.0179773522       1.000000
+           5   0.0179773522       1.000000
+           6   0.0179773522       1.000000
+           7   0.0179773522       1.000000
+           8   0.0179773522       1.000000
+          10   0.0176557215       0.982109
+          12   0.0172360879       0.958767
+
+  NOTE: Block diagonal = trivial extension. λ_min is just min
+  over individual channels. Cross-coupling is tested in Exp 3.
+  Total: 0.3s
+
+═══ EXPERIMENT 3: COUPLED MULTI-CHANNEL SPECTRAL GAP (N=30) ═══
+
+  Full G^C matrix with cross-channel terms ∫{j/x^p}{k/x^q}dx
+  Testing if coupling IMPROVES λ_min over block diagonal
+
+       C        dim λ_min(coupled) λ_min(blkdiag) coupling boost     time
+  ────────────────────────────────────────────────────────────────────────
+       1         29   0.0198621047   0.0198621047       1.0000×    0.0s
+       2         58   0.0165799790   0.0198621047       0.8348×    0.0s
+       3         87   0.0098360833   0.0198621047       0.4952×    0.1s
+       4        116   0.0051969720   0.0198621047       0.2617×    0.1s
+       5        145  -0.0049901623   0.0198621047      -0.2512×    0.1s
+       6        174  -0.0171050441   0.0198621047      -0.8612×    0.2s
+       7        203  -0.0283461586   0.0198621047      -1.4271×    0.3s
+       8        232  -0.0399843391   0.0198621047      -2.0131×    0.4s
+
+    10 smallest eigenvalues of G^𝕆 (C=8, N=30):
+      λ_ 1 =  -0.0399843391
+      λ_ 2 =   0.0109258225
+      λ_ 3 =   0.0131569987
+      λ_ 4 =   0.0144468320
+      λ_ 5 =   0.0152337055
+      λ_ 6 =   0.0163516410
+      λ_ 7 =   0.0172049776
+      λ_ 8 =   0.0180520482
+      λ_ 9 =   0.0186808045
+      λ_10 =   0.0194264939
+    Kramers pairs: 0/116 (50% = perfect GSE)
+    Negative eigenvalues: 1/232
+    Is G^𝕆 positive definite? ❌ NO
+
+  INTERPRETATION:
+    Coupling boost > 1 means cross-channel terms HELP the spectral gap
+    Bott periodicity predicts the boost stabilizes at C=8
+  Total: 1.2s
+
+═══ EXPERIMENT 4: CROSS-CHANNEL CONTRACTION (N=100) ═══
+
+  C(p,q) = Σ vⱼ · G^{p,q}(j,k) · vₖ  (contracted with Möbius weights)
+
+  Active indices: 60 (computing 8×8 contraction)
+  (1,1) done      (1,2) done      (1,3) done      (1,4) done      (1,5) done      (1,6) done      (1,7) done      (1,8) done      (2,2) done      (2,3) done      (2,4) done      (2,5) done      (2,6) done      (2,7) done      (2,8) done      (3,3) done      (3,4) done      (3,5) done      (3,6) done      (3,7) done      (3,8) done      (4,4) done      (4,5) done      (4,6) done      (4,7) done      (4,8) done      (5,5) done      (5,6) done      (5,7) done      (5,8) done      (6,6) done      (6,7) done      (6,8) done      (7,7) done      (7,8) done      (8,8) done    
+
+  8×8 CROSS-CHANNEL CONTRACTION C(p,q):
+
+         p= 1        p= 2        p= 3        p= 4        p= 5        p= 6        p= 7        p= 8      
+  p=1    1.2561e0   1.1324e0   1.1152e0   1.1136e0   1.1105e0   1.1087e0   1.1050e0   1.0959e0
+  p=2    1.1324e0   1.3177e0   1.1407e0   1.1629e0   1.1486e0   1.1467e0   1.1388e0   1.1322e0
+  p=3    1.1152e0   1.1407e0   1.3399e0   1.1592e0   1.1519e0   1.1694e0   1.1505e0   1.1414e0
+  p=4    1.1136e0   1.1629e0   1.1592e0   1.3496e0   1.1705e0   1.1599e0   1.1471e0   1.1595e0
+  p=5    1.1105e0   1.1486e0   1.1519e0   1.1705e0   1.3563e0   1.1605e0   1.1614e0   1.1533e0
+  p=6    1.1087e0   1.1467e0   1.1694e0   1.1599e0   1.1605e0   1.3618e0   1.1637e0   1.1574e0
+  p=7    1.1050e0   1.1388e0   1.1505e0   1.1471e0   1.1614e0   1.1637e0   1.3550e0   1.1501e0
+  p=8    1.0959e0   1.1322e0   1.1414e0   1.1595e0   1.1533e0   1.1574e0   1.1501e0   1.3490e0
+
+  NORMALIZED (correlation matrix):
+
+           p= 1       p= 2       p= 3       p= 4       p= 5       p= 6       p= 7       p= 8   
+  p=1   1.000000  0.880179  0.859616  0.855246  0.850822  0.847738  0.847001  0.841903
+  p=2   0.880179  1.000000  0.858506  0.871984  0.859158  0.856065  0.852269  0.849222
+  p=3   0.859616  0.858506  1.000000  0.862031  0.854475  0.865736  0.853879  0.848942
+  p=4   0.855246  0.871984  0.862031  1.000000  0.865110  0.855602  0.848245  0.859305
+  p=5   0.850822  0.859158  0.854475  0.865110  1.000000  0.853936  0.856731  0.852598
+  p=6   0.847738  0.856065  0.865736  0.855602  0.853936  1.000000  0.856695  0.853908
+  p=7   0.847001  0.852269  0.853879  0.848245  0.856731  0.856695  1.000000  0.850650
+  p=8   0.841903  0.849222  0.848942  0.859305  0.852598  0.853908  0.850650  1.000000
+
+  EIGENVALUES:
+    λ_1 =  1.48795966e-1  (  1.4%)
+    λ_2 =  1.75737605e-1  (  1.6%)
+    λ_3 =  1.80248105e-1  (  1.7%)
+    λ_4 =  1.95129137e-1  (  1.8%)
+    λ_5 =  2.04005361e-1  (  1.9%)
+    λ_6 =  2.12495628e-1  (  2.0%)
+    λ_7 =  2.30004916e-1  (  2.2%)
+    λ_8 =   9.33903688e0  ( 87.4%)
+
+  DOMINANT EIGENVECTOR (channel weights):
+    p=1:  0.34193 ████████████████████████████
+    p=2:  0.35281 █████████████████████████████
+    p=3:  0.35471 █████████████████████████████
+    p=4:  0.35680 █████████████████████████████
+    p=5:  0.35645 █████████████████████████████
+    p=6:  0.35704 ██████████████████████████████
+    p=7:  0.35486 █████████████████████████████
+    p=8:  0.35359 █████████████████████████████
+
+  DIAGONAL DECAY:
+    C(1,1) =   1.256127e0  (×1.0000 of C(1,1))
+    C(2,2) =   1.317696e0  (×1.0490 of C(1,1))
+    C(3,3) =   1.339892e0  (×1.0667 of C(1,1))
+    C(4,4) =   1.349645e0  (×1.0744 of C(1,1))
+    C(5,5) =   1.356281e0  (×1.0797 of C(1,1))
+    C(6,6) =   1.361767e0  (×1.0841 of C(1,1))
+    C(7,7) =   1.355017e0  (×1.0787 of C(1,1))
+    C(8,8) =   1.349028e0  (×1.0740 of C(1,1))
+
+  QUATERNION vs OCTONION:
+    Trace(4×4): 5.263361e0  Off-diag: 1.364797e1
+    Trace(8×8): 1.068545e1  Off-diag: 6.401442e1
+    Extra diagonal: 103.0%
+    Extra coupling: 369.0%
+
+  Total: 3.2s
+
+═══ ALL EXPERIMENTS COMPLETE (4.7s) ═══
+  📄 Results written to results/summary_N100.json
+
+━━━━━ N=500 ━━━━━
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/octonion-probe 500 50000`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC GRAM MATRIX — BOTT PERIODICITY PROBE v2            ║
+║  4 experiments · Exploration 24                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+  N=500, quadrature points=50000
+
+
+═══ EXPERIMENT 1: MOD-8 RESIDUE DECOMPOSITION (N=500) ═══
+
+  8×8 Residue Matrix Q(r₁,r₂):
+
+         r≡ 0       r≡ 1       r≡ 2       r≡ 3       r≡ 4       r≡ 5       r≡ 6       r≡ 7     
+  r≡0           —          —          —          —          —          —          —          —
+  r≡1           —  1.9870e-2 -2.0097e-3  7.6822e-2          —  5.8015e-2 -7.0059e-2  2.6890e-2
+  r≡2           — -2.0097e-3  1.7282e-1  7.4665e-2          —  2.7381e-2 -2.8230e-2  1.4146e-2
+  r≡3           —  7.6822e-2  7.4665e-2  5.5064e-1          —  3.6760e-1 -4.1818e-1  1.7440e-1
+  r≡4           —          —          —          —          —          —          —          —
+  r≡5           —  5.8015e-2  2.7381e-2  3.6760e-1          —  3.0678e-1 -3.1252e-1  1.2827e-1
+  r≡6           — -7.0059e-2 -2.8230e-2 -4.1818e-1          — -3.1252e-1  3.6981e-1 -1.5289e-1
+  r≡7           —  2.6890e-2  1.4146e-2  1.7440e-1          —  1.2827e-1 -1.5289e-1  8.2039e-2
+
+  4×4 ODD BLOCK (residues {1,3,5,7}):
+
+         r≡ 1       r≡ 3       r≡ 5       r≡ 7     
+  r≡1   1.9870e-2  7.6822e-2  5.8015e-2  2.6890e-2
+  r≡3   7.6822e-2  5.5064e-1  3.6760e-1  1.7440e-1
+  r≡5   5.8015e-2  3.6760e-1  3.0678e-1  1.2827e-1
+  r≡7   2.6890e-2  1.7440e-1  1.2827e-1  8.2039e-2
+
+  DIRICHLET CHARACTER EIGENVALUES:
+
+    χ_0: 6.5582649529e-1  (ratio: 1.0000)
+    χ_1: 2.1832311326e-1  (ratio: 0.3329)
+    χ_2: 5.6248452739e-2  (ratio: 0.0858)
+    χ_3: 2.8930695743e-2  (ratio: 0.0441)
+
+  ODD BLOCK STRUCTURE:
+    Trace: 9.593288e-1
+    Total: 2.623306e0
+    Trace/Total: 0.3657
+
+  4×4 ODD BLOCK EIGENVALUES:
+    λ_1 = 8.2126005208e-3
+    λ_2 = 2.2772039630e-2
+    λ_3 = 4.1730856000e-2
+    λ_4 = 8.8661326088e-1
+    Negative eigenvalues: 0/4
+    Condition number: 1.08e2
+  Done in 13.7s
+
+═══ EXPERIMENT 2: BOTT PERIODICITY — BLOCK DIAGONAL (N=50) ═══
+
+  Block diagonal G¹⊕G²⊕...⊕Gᶜ: λ_min = min over channels
+  (No cross-channel coupling — this is the trivial extension)
+
+  power      λ_min(Gᵖ)    ratio to G¹       time
+  ───────────────────────────────────────────────
+  x^1     0.0179773522       1.000000      0.0s
+  x^2     0.0182032420       1.012565      0.0s
+  x^3     0.0181876933       1.011700      0.0s
+  x^4     0.0182631041       1.015895      0.0s
+  x^5     0.0183593076       1.021246      0.0s
+  x^6     0.0182128457       1.013099      0.0s
+  x^7     0.0181900928       1.011834      0.0s
+  x^8     0.0182003126       1.012402      0.0s
+  x^9     0.0180611467       1.004661      0.0s
+  x^10    0.0176557215       0.982109      0.0s
+  x^11    0.0175898272       0.978444      0.0s
+  x^12    0.0172360879       0.958767      0.0s
+
+  BLOCK DIAGONAL λ_min (min over channels):
+
+    channels       λ_min(⊕)          ratio
+  ──────────────────────────────────────────
+           1   0.0179773522       1.000000
+           2   0.0179773522       1.000000
+           3   0.0179773522       1.000000
+           4   0.0179773522       1.000000
+           5   0.0179773522       1.000000
+           6   0.0179773522       1.000000
+           7   0.0179773522       1.000000
+           8   0.0179773522       1.000000
+          10   0.0176557215       0.982109
+          12   0.0172360879       0.958767
+
+  NOTE: Block diagonal = trivial extension. λ_min is just min
+  over individual channels. Cross-coupling is tested in Exp 3.
+  Total: 0.2s
+
+═══ EXPERIMENT 3: COUPLED MULTI-CHANNEL SPECTRAL GAP (N=30) ═══
+
+  Full G^C matrix with cross-channel terms ∫{j/x^p}{k/x^q}dx
+  Testing if coupling IMPROVES λ_min over block diagonal
+
+       C        dim λ_min(coupled) λ_min(blkdiag) coupling boost     time
+  ────────────────────────────────────────────────────────────────────────
+       1         29   0.0198621047   0.0198621047       1.0000×    0.0s
+       2         58   0.0165799790   0.0198621047       0.8348×    0.0s
+       3         87   0.0098360833   0.0198621047       0.4952×    0.0s
+       4        116   0.0051969720   0.0198621047       0.2617×    0.1s
+       5        145  -0.0049901623   0.0198621047      -0.2512×    0.1s
+       6        174  -0.0171050441   0.0198621047      -0.8612×    0.2s
+       7        203  -0.0283461586   0.0198621047      -1.4271×    0.3s
+       8        232  -0.0399843391   0.0198621047      -2.0131×    0.3s
+
+    10 smallest eigenvalues of G^𝕆 (C=8, N=30):
+      λ_ 1 =  -0.0399843391
+      λ_ 2 =   0.0109258225
+      λ_ 3 =   0.0131569987
+      λ_ 4 =   0.0144468320
+      λ_ 5 =   0.0152337055
+      λ_ 6 =   0.0163516410
+      λ_ 7 =   0.0172049776
+      λ_ 8 =   0.0180520482
+      λ_ 9 =   0.0186808045
+      λ_10 =   0.0194264939
+    Kramers pairs: 0/116 (50% = perfect GSE)
+    Negative eigenvalues: 1/232
+    Is G^𝕆 positive definite? ❌ NO
+
+  INTERPRETATION:
+    Coupling boost > 1 means cross-channel terms HELP the spectral gap
+    Bott periodicity predicts the boost stabilizes at C=8
+  Total: 1.0s
+
+═══ EXPERIMENT 4: CROSS-CHANNEL CONTRACTION (N=100) ═══
+
+  C(p,q) = Σ vⱼ · G^{p,q}(j,k) · vₖ  (contracted with Möbius weights)
+
+  Active indices: 60 (computing 8×8 contraction)
+  (1,1) done      (1,2) done      (1,3) done      (1,4) done      (1,5) done      (1,6) done      (1,7) done      (1,8) done      (2,2) done      (2,3) done      (2,4) done      (2,5) done      (2,6) done      (2,7) done      (2,8) done      (3,3) done      (3,4) done      (3,5) done      (3,6) done      (3,7) done      (3,8) done      (4,4) done      (4,5) done      (4,6) done      (4,7) done      (4,8) done      (5,5) done      (5,6) done      (5,7) done      (5,8) done      (6,6) done      (6,7) done      (6,8) done      (7,7) done      (7,8) done      (8,8) done    
+
+  8×8 CROSS-CHANNEL CONTRACTION C(p,q):
+
+         p= 1        p= 2        p= 3        p= 4        p= 5        p= 6        p= 7        p= 8      
+  p=1    1.2561e0   1.1324e0   1.1152e0   1.1136e0   1.1105e0   1.1087e0   1.1050e0   1.0959e0
+  p=2    1.1324e0   1.3177e0   1.1407e0   1.1629e0   1.1486e0   1.1467e0   1.1388e0   1.1322e0
+  p=3    1.1152e0   1.1407e0   1.3399e0   1.1592e0   1.1519e0   1.1694e0   1.1505e0   1.1414e0
+  p=4    1.1136e0   1.1629e0   1.1592e0   1.3496e0   1.1705e0   1.1599e0   1.1471e0   1.1595e0
+  p=5    1.1105e0   1.1486e0   1.1519e0   1.1705e0   1.3563e0   1.1605e0   1.1614e0   1.1533e0
+  p=6    1.1087e0   1.1467e0   1.1694e0   1.1599e0   1.1605e0   1.3618e0   1.1637e0   1.1574e0
+  p=7    1.1050e0   1.1388e0   1.1505e0   1.1471e0   1.1614e0   1.1637e0   1.3550e0   1.1501e0
+  p=8    1.0959e0   1.1322e0   1.1414e0   1.1595e0   1.1533e0   1.1574e0   1.1501e0   1.3490e0
+
+  NORMALIZED (correlation matrix):
+
+           p= 1       p= 2       p= 3       p= 4       p= 5       p= 6       p= 7       p= 8   
+  p=1   1.000000  0.880179  0.859616  0.855246  0.850822  0.847738  0.847001  0.841903
+  p=2   0.880179  1.000000  0.858506  0.871984  0.859158  0.856065  0.852269  0.849222
+  p=3   0.859616  0.858506  1.000000  0.862031  0.854475  0.865736  0.853879  0.848942
+  p=4   0.855246  0.871984  0.862031  1.000000  0.865110  0.855602  0.848245  0.859305
+  p=5   0.850822  0.859158  0.854475  0.865110  1.000000  0.853936  0.856731  0.852598
+  p=6   0.847738  0.856065  0.865736  0.855602  0.853936  1.000000  0.856695  0.853908
+  p=7   0.847001  0.852269  0.853879  0.848245  0.856731  0.856695  1.000000  0.850650
+  p=8   0.841903  0.849222  0.848942  0.859305  0.852598  0.853908  0.850650  1.000000
+
+  EIGENVALUES:
+    λ_1 =  1.48795966e-1  (  1.4%)
+    λ_2 =  1.75737605e-1  (  1.6%)
+    λ_3 =  1.80248105e-1  (  1.7%)
+    λ_4 =  1.95129137e-1  (  1.8%)
+    λ_5 =  2.04005361e-1  (  1.9%)
+    λ_6 =  2.12495628e-1  (  2.0%)
+    λ_7 =  2.30004916e-1  (  2.2%)
+    λ_8 =   9.33903688e0  ( 87.4%)
+
+  DOMINANT EIGENVECTOR (channel weights):
+    p=1:  0.34193 ████████████████████████████
+    p=2:  0.35281 █████████████████████████████
+    p=3:  0.35471 █████████████████████████████
+    p=4:  0.35680 █████████████████████████████
+    p=5:  0.35645 █████████████████████████████
+    p=6:  0.35704 ██████████████████████████████
+    p=7:  0.35486 █████████████████████████████
+    p=8:  0.35359 █████████████████████████████
+
+  DIAGONAL DECAY:
+    C(1,1) =   1.256127e0  (×1.0000 of C(1,1))
+    C(2,2) =   1.317696e0  (×1.0490 of C(1,1))
+    C(3,3) =   1.339892e0  (×1.0667 of C(1,1))
+    C(4,4) =   1.349645e0  (×1.0744 of C(1,1))
+    C(5,5) =   1.356281e0  (×1.0797 of C(1,1))
+    C(6,6) =   1.361767e0  (×1.0841 of C(1,1))
+    C(7,7) =   1.355017e0  (×1.0787 of C(1,1))
+    C(8,8) =   1.349028e0  (×1.0740 of C(1,1))
+
+  QUATERNION vs OCTONION:
+    Trace(4×4): 5.263361e0  Off-diag: 1.364797e1
+    Trace(8×8): 1.068545e1  Off-diag: 6.401442e1
+    Extra diagonal: 103.0%
+    Extra coupling: 369.0%
+
+  Total: 3.0s
+
+═══ ALL EXPERIMENTS COMPLETE (18.0s) ═══
+  📄 Results written to results/summary_N500.json
+
+━━━━━ N=1000 ━━━━━
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/octonion-probe 1000 50000`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC GRAM MATRIX — BOTT PERIODICITY PROBE v2            ║
+║  4 experiments · Exploration 24                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+  N=1000, quadrature points=50000
+
+
+═══ EXPERIMENT 1: MOD-8 RESIDUE DECOMPOSITION (N=1000) ═══
+
+  8×8 Residue Matrix Q(r₁,r₂):
+
+         r≡ 0       r≡ 1       r≡ 2       r≡ 3       r≡ 4       r≡ 5       r≡ 6       r≡ 7     
+  r≡0           —          —          —          —          —          —          —          —
+  r≡1           —  2.5808e-2 -8.5679e-3  9.2267e-2          —  6.9180e-2 -8.5953e-2  3.1805e-2
+  r≡2           — -8.5679e-3  1.8605e-1  4.7267e-2          —  5.6220e-3 -2.9145e-3  4.4596e-3
+  r≡3           —  9.2267e-2  4.7267e-2  6.2189e-1          —  4.1754e-1 -4.8574e-1  1.9723e-1
+  r≡4           —          —          —          —          —          —          —          —
+  r≡5           —  6.9180e-2  5.6220e-3  4.1754e-1          —  3.4908e-1 -3.6242e-1  1.4436e-1
+  r≡6           — -8.5953e-2 -2.9145e-3 -4.8574e-1          — -3.6242e-1  4.3833e-1 -1.7621e-1
+  r≡7           —  3.1805e-2  4.4596e-3  1.9723e-1          —  1.4436e-1 -1.7621e-1  9.3190e-2
+
+  4×4 ODD BLOCK (residues {1,3,5,7}):
+
+         r≡ 1       r≡ 3       r≡ 5       r≡ 7     
+  r≡1   2.5808e-2  9.2267e-2  6.9180e-2  3.1805e-2
+  r≡3   9.2267e-2  6.2189e-1  4.1754e-1  1.9723e-1
+  r≡5   6.9180e-2  4.1754e-1  3.4908e-1  1.4436e-1
+  r≡7   3.1805e-2  1.9723e-1  1.4436e-1  9.3190e-2
+
+  DIRICHLET CHARACTER EIGENVALUES:
+
+    χ_0: 7.4867938378e-1  (ratio: 1.0000)
+    χ_1: 2.4564285005e-1  (ratio: 0.3281)
+    χ_2: 6.2709498207e-2  (ratio: 0.0838)
+    χ_3: 3.2932970937e-2  (ratio: 0.0440)
+
+  ODD BLOCK STRUCTURE:
+    Trace: 1.089965e0
+    Total: 2.994718e0
+    Trace/Total: 0.3640
+
+  4×4 ODD BLOCK EIGENVALUES:
+    λ_1 = 1.1111122090e-2
+    λ_2 = 2.6624228485e-2
+    λ_3 = 4.6376125641e-2
+    λ_4 = 1.0058532268e0
+    Negative eigenvalues: 0/4
+    Condition number: 9.05e1
+  Done in 62.4s
+
+═══ EXPERIMENT 2: BOTT PERIODICITY — BLOCK DIAGONAL (N=50) ═══
+
+  Block diagonal G¹⊕G²⊕...⊕Gᶜ: λ_min = min over channels
+  (No cross-channel coupling — this is the trivial extension)
+
+  power      λ_min(Gᵖ)    ratio to G¹       time
+  ───────────────────────────────────────────────
+  x^1     0.0179773522       1.000000      0.0s
+  x^2     0.0182032420       1.012565      0.0s
+  x^3     0.0181876933       1.011700      0.0s
+  x^4     0.0182631041       1.015895      0.0s
+  x^5     0.0183593076       1.021246      0.0s
+  x^6     0.0182128457       1.013099      0.0s
+  x^7     0.0181900928       1.011834      0.0s
+  x^8     0.0182003126       1.012402      0.0s
+  x^9     0.0180611467       1.004661      0.0s
+  x^10    0.0176557215       0.982109      0.0s
+  x^11    0.0175898272       0.978444      0.0s
+  x^12    0.0172360879       0.958767      0.0s
+
+  BLOCK DIAGONAL λ_min (min over channels):
+
+    channels       λ_min(⊕)          ratio
+  ──────────────────────────────────────────
+           1   0.0179773522       1.000000
+           2   0.0179773522       1.000000
+           3   0.0179773522       1.000000
+           4   0.0179773522       1.000000
+           5   0.0179773522       1.000000
+           6   0.0179773522       1.000000
+           7   0.0179773522       1.000000
+           8   0.0179773522       1.000000
+          10   0.0176557215       0.982109
+          12   0.0172360879       0.958767
+
+  NOTE: Block diagonal = trivial extension. λ_min is just min
+  over individual channels. Cross-coupling is tested in Exp 3.
+  Total: 0.2s
+
+═══ EXPERIMENT 3: COUPLED MULTI-CHANNEL SPECTRAL GAP (N=30) ═══
+
+  Full G^C matrix with cross-channel terms ∫{j/x^p}{k/x^q}dx
+  Testing if coupling IMPROVES λ_min over block diagonal
+
+       C        dim λ_min(coupled) λ_min(blkdiag) coupling boost     time
+  ────────────────────────────────────────────────────────────────────────
+       1         29   0.0198621047   0.0198621047       1.0000×    0.0s
+       2         58   0.0165799790   0.0198621047       0.8348×    0.0s
+       3         87   0.0098360833   0.0198621047       0.4952×    0.0s
+       4        116   0.0051969720   0.0198621047       0.2617×    0.1s
+       5        145  -0.0049901623   0.0198621047      -0.2512×    0.1s
+       6        174  -0.0171050441   0.0198621047      -0.8612×    0.2s
+       7        203  -0.0283461586   0.0198621047      -1.4271×    0.3s
+       8        232  -0.0399843391   0.0198621047      -2.0131×    0.3s
+
+    10 smallest eigenvalues of G^𝕆 (C=8, N=30):
+      λ_ 1 =  -0.0399843391
+      λ_ 2 =   0.0109258225
+      λ_ 3 =   0.0131569987
+      λ_ 4 =   0.0144468320
+      λ_ 5 =   0.0152337055
+      λ_ 6 =   0.0163516410
+      λ_ 7 =   0.0172049776
+      λ_ 8 =   0.0180520482
+      λ_ 9 =   0.0186808045
+      λ_10 =   0.0194264939
+    Kramers pairs: 0/116 (50% = perfect GSE)
+    Negative eigenvalues: 1/232
+    Is G^𝕆 positive definite? ❌ NO
+
+  INTERPRETATION:
+    Coupling boost > 1 means cross-channel terms HELP the spectral gap
+    Bott periodicity predicts the boost stabilizes at C=8
+  Total: 1.0s
+
+═══ EXPERIMENT 4: CROSS-CHANNEL CONTRACTION (N=100) ═══
+
+  C(p,q) = Σ vⱼ · G^{p,q}(j,k) · vₖ  (contracted with Möbius weights)
+
+  Active indices: 60 (computing 8×8 contraction)
+  (1,1) done      (1,2) done      (1,3) done      (1,4) done      (1,5) done      (1,6) done      (1,7) done      (1,8) done      (2,2) done      (2,3) done      (2,4) done      (2,5) done      (2,6) done      (2,7) done      (2,8) done      (3,3) done      (3,4) done      (3,5) done      (3,6) done      (3,7) done      (3,8) done      (4,4) done      (4,5) done      (4,6) done      (4,7) done      (4,8) done      (5,5) done      (5,6) done      (5,7) done      (5,8) done      (6,6) done      (6,7) done      (6,8) done      (7,7) done      (7,8) done      (8,8) done    
+
+  8×8 CROSS-CHANNEL CONTRACTION C(p,q):
+
+         p= 1        p= 2        p= 3        p= 4        p= 5        p= 6        p= 7        p= 8      
+  p=1    1.2561e0   1.1324e0   1.1152e0   1.1136e0   1.1105e0   1.1087e0   1.1050e0   1.0959e0
+  p=2    1.1324e0   1.3177e0   1.1407e0   1.1629e0   1.1486e0   1.1467e0   1.1388e0   1.1322e0
+  p=3    1.1152e0   1.1407e0   1.3399e0   1.1592e0   1.1519e0   1.1694e0   1.1505e0   1.1414e0
+  p=4    1.1136e0   1.1629e0   1.1592e0   1.3496e0   1.1705e0   1.1599e0   1.1471e0   1.1595e0
+  p=5    1.1105e0   1.1486e0   1.1519e0   1.1705e0   1.3563e0   1.1605e0   1.1614e0   1.1533e0
+  p=6    1.1087e0   1.1467e0   1.1694e0   1.1599e0   1.1605e0   1.3618e0   1.1637e0   1.1574e0
+  p=7    1.1050e0   1.1388e0   1.1505e0   1.1471e0   1.1614e0   1.1637e0   1.3550e0   1.1501e0
+  p=8    1.0959e0   1.1322e0   1.1414e0   1.1595e0   1.1533e0   1.1574e0   1.1501e0   1.3490e0
+
+  NORMALIZED (correlation matrix):
+
+           p= 1       p= 2       p= 3       p= 4       p= 5       p= 6       p= 7       p= 8   
+  p=1   1.000000  0.880179  0.859616  0.855246  0.850822  0.847738  0.847001  0.841903
+  p=2   0.880179  1.000000  0.858506  0.871984  0.859158  0.856065  0.852269  0.849222
+  p=3   0.859616  0.858506  1.000000  0.862031  0.854475  0.865736  0.853879  0.848942
+  p=4   0.855246  0.871984  0.862031  1.000000  0.865110  0.855602  0.848245  0.859305
+  p=5   0.850822  0.859158  0.854475  0.865110  1.000000  0.853936  0.856731  0.852598
+  p=6   0.847738  0.856065  0.865736  0.855602  0.853936  1.000000  0.856695  0.853908
+  p=7   0.847001  0.852269  0.853879  0.848245  0.856731  0.856695  1.000000  0.850650
+  p=8   0.841903  0.849222  0.848942  0.859305  0.852598  0.853908  0.850650  1.000000
+
+  EIGENVALUES:
+    λ_1 =  1.48795966e-1  (  1.4%)
+    λ_2 =  1.75737605e-1  (  1.6%)
+    λ_3 =  1.80248105e-1  (  1.7%)
+    λ_4 =  1.95129137e-1  (  1.8%)
+    λ_5 =  2.04005361e-1  (  1.9%)
+    λ_6 =  2.12495628e-1  (  2.0%)
+    λ_7 =  2.30004916e-1  (  2.2%)
+    λ_8 =   9.33903688e0  ( 87.4%)
+
+  DOMINANT EIGENVECTOR (channel weights):
+    p=1:  0.34193 ████████████████████████████
+    p=2:  0.35281 █████████████████████████████
+    p=3:  0.35471 █████████████████████████████
+    p=4:  0.35680 █████████████████████████████
+    p=5:  0.35645 █████████████████████████████
+    p=6:  0.35704 ██████████████████████████████
+    p=7:  0.35486 █████████████████████████████
+    p=8:  0.35359 █████████████████████████████
+
+  DIAGONAL DECAY:
+    C(1,1) =   1.256127e0  (×1.0000 of C(1,1))
+    C(2,2) =   1.317696e0  (×1.0490 of C(1,1))
+    C(3,3) =   1.339892e0  (×1.0667 of C(1,1))
+    C(4,4) =   1.349645e0  (×1.0744 of C(1,1))
+    C(5,5) =   1.356281e0  (×1.0797 of C(1,1))
+    C(6,6) =   1.361767e0  (×1.0841 of C(1,1))
+    C(7,7) =   1.355017e0  (×1.0787 of C(1,1))
+    C(8,8) =   1.349028e0  (×1.0740 of C(1,1))
+
+  QUATERNION vs OCTONION:
+    Trace(4×4): 5.263361e0  Off-diag: 1.364797e1
+    Trace(8×8): 1.068545e1  Off-diag: 6.401442e1
+    Extra diagonal: 103.0%
+    Extra coupling: 369.0%
+
+  Total: 2.8s
+
+═══ ALL EXPERIMENTS COMPLETE (66.5s) ═══
+  📄 Results written to results/summary_N1000.json
+
+━━━━━ N=2000 ━━━━━
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/octonion-probe 2000 50000`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC GRAM MATRIX — BOTT PERIODICITY PROBE v2            ║
+║  4 experiments · Exploration 24                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+  N=2000, quadrature points=50000
+
+
+═══ EXPERIMENT 1: MOD-8 RESIDUE DECOMPOSITION (N=2000) ═══
+
+  8×8 Residue Matrix Q(r₁,r₂):
+
+         r≡ 0       r≡ 1       r≡ 2       r≡ 3       r≡ 4       r≡ 5       r≡ 6       r≡ 7     
+  r≡0           —          —          —          —          —          —          —          —
+  r≡1           —  3.1844e-2 -1.4940e-2  1.0537e-1          —  8.0167e-2 -1.0131e-1  3.7042e-2
+  r≡2           — -1.4940e-2  1.9934e-1  2.4523e-2          — -1.4951e-2  2.0787e-2 -5.3532e-3
+  r≡3           —  1.0537e-1  2.4523e-2  6.7551e-1          —  4.6050e-1 -5.4265e-1  2.1856e-1
+  r≡4           —          —          —          —          —          —          —          —
+  r≡5           —  8.0167e-2 -1.4951e-2  4.6050e-1          —  3.9175e-1 -4.1130e-1  1.6221e-1
+  r≡6           — -1.0131e-1  2.0787e-2 -5.4265e-1          — -4.1130e-1  5.0371e-1 -2.0098e-1
+  r≡7           —  3.7042e-2 -5.3532e-3  2.1856e-1          —  1.6221e-1 -2.0098e-1  1.0590e-1
+
+  4×4 ODD BLOCK (residues {1,3,5,7}):
+
+         r≡ 1       r≡ 3       r≡ 5       r≡ 7     
+  r≡1   3.1844e-2  1.0537e-1  8.0167e-2  3.7042e-2
+  r≡3   1.0537e-1  6.7551e-1  4.6050e-1  2.1856e-1
+  r≡5   8.0167e-2  4.6050e-1  3.9175e-1  1.6221e-1
+  r≡7   3.7042e-2  2.1856e-1  1.6221e-1  1.0590e-1
+
+  DIRICHLET CHARACTER EIGENVALUES:
+
+    χ_0: 8.3317296998e-1  (ratio: 1.0000)
+    χ_1: 2.6686781114e-1  (ratio: 0.3203)
+    χ_2: 6.8055906383e-2  (ratio: 0.0817)
+    χ_3: 3.6910198516e-2  (ratio: 0.0443)
+
+  ODD BLOCK STRUCTURE:
+    Trace: 1.205007e0
+    Total: 3.332692e0
+    Trace/Total: 0.3616
+
+  4×4 ODD BLOCK EIGENVALUES:
+    λ_1 = 1.4184703787e-2
+    λ_2 = 3.0669308085e-2
+    λ_3 = 5.1888300294e-2
+    λ_4 = 1.1082645739e0
+    Negative eigenvalues: 0/4
+    Condition number: 7.81e1
+  Done in 260.8s
+
+═══ EXPERIMENT 2: BOTT PERIODICITY — BLOCK DIAGONAL (N=50) ═══
+
+  Block diagonal G¹⊕G²⊕...⊕Gᶜ: λ_min = min over channels
+  (No cross-channel coupling — this is the trivial extension)
+
+  power      λ_min(Gᵖ)    ratio to G¹       time
+  ───────────────────────────────────────────────
+  x^1     0.0179773522       1.000000      0.0s
+  x^2     0.0182032420       1.012565      0.0s
+  x^3     0.0181876933       1.011700      0.0s
+  x^4     0.0182631041       1.015895      0.0s
+  x^5     0.0183593076       1.021246      0.0s
+  x^6     0.0182128457       1.013099      0.0s
+  x^7     0.0181900928       1.011834      0.0s
+  x^8     0.0182003126       1.012402      0.0s
+  x^9     0.0180611467       1.004661      0.0s
+  x^10    0.0176557215       0.982109      0.0s
+  x^11    0.0175898272       0.978444      0.0s
+  x^12    0.0172360879       0.958767      0.0s
+
+  BLOCK DIAGONAL λ_min (min over channels):
+
+    channels       λ_min(⊕)          ratio
+  ──────────────────────────────────────────
+           1   0.0179773522       1.000000
+           2   0.0179773522       1.000000
+           3   0.0179773522       1.000000
+           4   0.0179773522       1.000000
+           5   0.0179773522       1.000000
+           6   0.0179773522       1.000000
+           7   0.0179773522       1.000000
+           8   0.0179773522       1.000000
+          10   0.0176557215       0.982109
+          12   0.0172360879       0.958767
+
+  NOTE: Block diagonal = trivial extension. λ_min is just min
+  over individual channels. Cross-coupling is tested in Exp 3.
+  Total: 0.2s
+
+═══ EXPERIMENT 3: COUPLED MULTI-CHANNEL SPECTRAL GAP (N=30) ═══
+
+  Full G^C matrix with cross-channel terms ∫{j/x^p}{k/x^q}dx
+  Testing if coupling IMPROVES λ_min over block diagonal
+
+       C        dim λ_min(coupled) λ_min(blkdiag) coupling boost     time
+  ────────────────────────────────────────────────────────────────────────
+       1         29   0.0198621047   0.0198621047       1.0000×    0.0s
+       2         58   0.0165799790   0.0198621047       0.8348×    0.0s
+       3         87   0.0098360833   0.0198621047       0.4952×    0.0s
+       4        116   0.0051969720   0.0198621047       0.2617×    0.1s
+       5        145  -0.0049901623   0.0198621047      -0.2512×    0.1s
+       6        174  -0.0171050441   0.0198621047      -0.8612×    0.2s
+       7        203  -0.0283461586   0.0198621047      -1.4271×    0.2s
+       8        232  -0.0399843391   0.0198621047      -2.0131×    0.3s
+
+    10 smallest eigenvalues of G^𝕆 (C=8, N=30):
+      λ_ 1 =  -0.0399843391
+      λ_ 2 =   0.0109258225
+      λ_ 3 =   0.0131569987
+      λ_ 4 =   0.0144468320
+      λ_ 5 =   0.0152337055
+      λ_ 6 =   0.0163516410
+      λ_ 7 =   0.0172049776
+      λ_ 8 =   0.0180520482
+      λ_ 9 =   0.0186808045
+      λ_10 =   0.0194264939
+    Kramers pairs: 0/116 (50% = perfect GSE)
+    Negative eigenvalues: 1/232
+    Is G^𝕆 positive definite? ❌ NO
+
+  INTERPRETATION:
+    Coupling boost > 1 means cross-channel terms HELP the spectral gap
+    Bott periodicity predicts the boost stabilizes at C=8
+  Total: 1.0s
+
+═══ EXPERIMENT 4: CROSS-CHANNEL CONTRACTION (N=100) ═══
+
+  C(p,q) = Σ vⱼ · G^{p,q}(j,k) · vₖ  (contracted with Möbius weights)
+
+  Active indices: 60 (computing 8×8 contraction)
+  (1,1) done      (1,2) done      (1,3) done      (1,4) done      (1,5) done      (1,6) done      (1,7) done      (1,8) done      (2,2) done      (2,3) done      (2,4) done      (2,5) done      (2,6) done      (2,7) done      (2,8) done      (3,3) done      (3,4) done      (3,5) done      (3,6) done      (3,7) done      (3,8) done      (4,4) done      (4,5) done      (4,6) done      (4,7) done      (4,8) done      (5,5) done      (5,6) done      (5,7) done      (5,8) done      (6,6) done      (6,7) done      (6,8) done      (7,7) done      (7,8) done      (8,8) done    
+
+  8×8 CROSS-CHANNEL CONTRACTION C(p,q):
+
+         p= 1        p= 2        p= 3        p= 4        p= 5        p= 6        p= 7        p= 8      
+  p=1    1.2561e0   1.1324e0   1.1152e0   1.1136e0   1.1105e0   1.1087e0   1.1050e0   1.0959e0
+  p=2    1.1324e0   1.3177e0   1.1407e0   1.1629e0   1.1486e0   1.1467e0   1.1388e0   1.1322e0
+  p=3    1.1152e0   1.1407e0   1.3399e0   1.1592e0   1.1519e0   1.1694e0   1.1505e0   1.1414e0
+  p=4    1.1136e0   1.1629e0   1.1592e0   1.3496e0   1.1705e0   1.1599e0   1.1471e0   1.1595e0
+  p=5    1.1105e0   1.1486e0   1.1519e0   1.1705e0   1.3563e0   1.1605e0   1.1614e0   1.1533e0
+  p=6    1.1087e0   1.1467e0   1.1694e0   1.1599e0   1.1605e0   1.3618e0   1.1637e0   1.1574e0
+  p=7    1.1050e0   1.1388e0   1.1505e0   1.1471e0   1.1614e0   1.1637e0   1.3550e0   1.1501e0
+  p=8    1.0959e0   1.1322e0   1.1414e0   1.1595e0   1.1533e0   1.1574e0   1.1501e0   1.3490e0
+
+  NORMALIZED (correlation matrix):
+
+           p= 1       p= 2       p= 3       p= 4       p= 5       p= 6       p= 7       p= 8   
+  p=1   1.000000  0.880179  0.859616  0.855246  0.850822  0.847738  0.847001  0.841903
+  p=2   0.880179  1.000000  0.858506  0.871984  0.859158  0.856065  0.852269  0.849222
+  p=3   0.859616  0.858506  1.000000  0.862031  0.854475  0.865736  0.853879  0.848942
+  p=4   0.855246  0.871984  0.862031  1.000000  0.865110  0.855602  0.848245  0.859305
+  p=5   0.850822  0.859158  0.854475  0.865110  1.000000  0.853936  0.856731  0.852598
+  p=6   0.847738  0.856065  0.865736  0.855602  0.853936  1.000000  0.856695  0.853908
+  p=7   0.847001  0.852269  0.853879  0.848245  0.856731  0.856695  1.000000  0.850650
+  p=8   0.841903  0.849222  0.848942  0.859305  0.852598  0.853908  0.850650  1.000000
+
+  EIGENVALUES:
+    λ_1 =  1.48795966e-1  (  1.4%)
+    λ_2 =  1.75737605e-1  (  1.6%)
+    λ_3 =  1.80248105e-1  (  1.7%)
+    λ_4 =  1.95129137e-1  (  1.8%)
+    λ_5 =  2.04005361e-1  (  1.9%)
+    λ_6 =  2.12495628e-1  (  2.0%)
+    λ_7 =  2.30004916e-1  (  2.2%)
+    λ_8 =   9.33903688e0  ( 87.4%)
+
+  DOMINANT EIGENVECTOR (channel weights):
+    p=1:  0.34193 ████████████████████████████
+    p=2:  0.35281 █████████████████████████████
+    p=3:  0.35471 █████████████████████████████
+    p=4:  0.35680 █████████████████████████████
+    p=5:  0.35645 █████████████████████████████
+    p=6:  0.35704 ██████████████████████████████
+    p=7:  0.35486 █████████████████████████████
+    p=8:  0.35359 █████████████████████████████
+
+  DIAGONAL DECAY:
+    C(1,1) =   1.256127e0  (×1.0000 of C(1,1))
+    C(2,2) =   1.317696e0  (×1.0490 of C(1,1))
+    C(3,3) =   1.339892e0  (×1.0667 of C(1,1))
+    C(4,4) =   1.349645e0  (×1.0744 of C(1,1))
+    C(5,5) =   1.356281e0  (×1.0797 of C(1,1))
+    C(6,6) =   1.361767e0  (×1.0841 of C(1,1))
+    C(7,7) =   1.355017e0  (×1.0787 of C(1,1))
+    C(8,8) =   1.349028e0  (×1.0740 of C(1,1))
+
+  QUATERNION vs OCTONION:
+    Trace(4×4): 5.263361e0  Off-diag: 1.364797e1
+    Trace(8×8): 1.068545e1  Off-diag: 6.401442e1
+    Extra diagonal: 103.0%
+    Extra coupling: 369.0%
+
+  Total: 2.7s
+
+═══ ALL EXPERIMENTS COMPLETE (264.8s) ═══
+  📄 Results written to results/summary_N2000.json
+
+━━━━━ N=5000 ━━━━━
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/octonion-probe 5000 50000`
+╔══════════════════════════════════════════════════════════════════╗
+║  OCTONIONIC GRAM MATRIX — BOTT PERIODICITY PROBE v2            ║
+║  4 experiments · Exploration 24                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+  N=5000, quadrature points=50000
+
+
+═══ EXPERIMENT 1: MOD-8 RESIDUE DECOMPOSITION (N=5000) ═══
+
+
+═══ SWEEP COMPLETE ═══
+Results in: results/

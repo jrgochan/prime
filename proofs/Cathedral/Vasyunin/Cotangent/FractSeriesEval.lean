@@ -150,7 +150,7 @@ private lemma abel_sum (N : ℕ) (A : ℕ → ℝ) :
     · rw [ih]; push_cast; ring
 
 /-- Log-Gamma sum via the multiplication formula. -/
-private lemma sum_log_gamma_eval (b : ℕ) (hb : 2 ≤ b) :
+lemma sum_log_gamma_eval (b : ℕ) (hb : 2 ≤ b) :
     ∑ r ∈ Icc 1 (b - 1), Real.log (Real.Gamma ((r:ℝ)/(b:ℝ))) =
     ((b:ℝ) - 1) / 2 * Real.log (2 * Real.pi) - 1/2 * Real.log (b:ℝ) := by
   have h := Cathedral.Analysis.GammaMultiplication.sum_log_gamma_eq_target b (by omega)
@@ -340,7 +340,7 @@ private lemma tendsto_comp_sub_one {f : ℕ → ℝ} {ℓ : ℝ} (hf : Tendsto f
 
 /-- Limit of `logGammaSeq(α,K) - logGammaSeq(β,K) + (1/b)·digammaSeq(β,K)` as `K → ∞`,
     using Bohr-Mollerup `tendsto_log_gamma` and the certified `tendsto_digammaSeq`. -/
-private lemma inner_sum_limit_core (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 ≤ r) (hr2 : r ≤ b - 1) :
+lemma inner_sum_limit_core (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 ≤ r) (hr2 : r ≤ b - 1) :
     Tendsto (fun K : ℕ =>
       BohrMollerup.logGammaSeq ((r:ℝ) / (b:ℝ)) (K - 1) -
       BohrMollerup.logGammaSeq (((r:ℝ) + 1) / (b:ℝ)) (K - 1) +
@@ -363,7 +363,7 @@ private lemma inner_sum_limit_core (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 �
 --   Σ_{j=0}^{K-1} [log((jb+r+1)/(jb+r)) - 1/(jb+r+1)]
 -- converges as K→∞ to:
 --   logΓ(r/b) - logΓ((r+1)/b) + (1/b)·ψ((r+1)/b)
-private lemma inner_sum_limit (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 ≤ r) (hr2 : r ≤ b - 1) :
+theorem inner_sum_limit (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 ≤ r) (hr2 : r ≤ b - 1) :
     Tendsto (fun K : ℕ => ∑ j ∈ range K,
       (Real.log ((↑(j * b + r) + 1) / ↑(j * b + r)) -
        1 / (↑(j * b + r) + 1)))
@@ -624,7 +624,7 @@ private lemma tsum_fract_eq_residue_sum (b : ℕ) (hb : 2 ≤ b) :
 --   4. Assembly: combine 1-3 → RHS
 
 /-- Real digamma at positive reals via the complex bridge: `logDeriv Γ(s) = Re(ψ(s))`. -/
-private lemma logDeriv_Gamma_pos (s : ℝ) (hs : 0 < s) :
+lemma logDeriv_Gamma_pos (s : ℝ) (hs : 0 < s) :
     logDeriv Real.Gamma s = (Complex.digamma (↑s)).re := by
   have h_not_neg : ∀ m : ℕ, s ≠ -(m : ℝ) := by
     intro m; exact ne_of_gt (lt_of_le_of_lt (neg_nonpos_of_nonneg (Nat.cast_nonneg m)) hs)
@@ -633,7 +633,7 @@ private lemma logDeriv_Gamma_pos (s : ℝ) (hs : 0 < s) :
 
 /-- Real digamma sum identity: `∑_{m=1}^{b-1} ψ(m/b) = -(b-1)γ - b·log(b)`.
     Proved by casting to ℂ via `digamma_ofReal` and applying `digamma_sum_identity`. -/
-private lemma real_digamma_sum (b : ℕ) (hb : 2 ≤ b) :
+lemma real_digamma_sum (b : ℕ) (hb : 2 ≤ b) :
     ∑ m ∈ Icc 1 (b - 1), logDeriv Real.Gamma ((m:ℝ)/(b:ℝ)) =
     -((b:ℝ) - 1) * eulerMascheroniConstant - (b:ℝ) * Real.log (b:ℝ) := by
   have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)

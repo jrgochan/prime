@@ -23,8 +23,13 @@ path = "src/particle_zoo.rs"
 name = "gpu-spectral"
 path = "src/gpu_spectral.rs"
 
+[[bin]]
+name = "ooc-probe"
+path = "src/ooc_probe.rs"
+
 [dependencies]
 cathedral-utils = { path = "../cathedral-utils" }
 nalgebra = "0.33"
 rayon = "1"
 rug = "1"
+libc = "0.2"

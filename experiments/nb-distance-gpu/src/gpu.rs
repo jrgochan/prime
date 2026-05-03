@@ -1010,3 +1010,37 @@ pub fn gpu_resident_gram_dim() -> usize {
 pub fn gpu_free_resident_gram() {
     unsafe { gpu_free_gram(); }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// PUBLIC FFI — raw CUDA/cuBLAS access for OOC probe
+// ═══════════════════════════════════════════════════════════════════
+
+/// Public access to raw CUDA/cuBLAS FFI for use by ooc_probe's GPU matvec.
+pub mod ffi {
+    use std::ffi::c_int;
+
+    #[link(name = "cudart")]
+    extern "C" {
+        pub fn cudaMalloc(devPtr: *mut *mut f64, size: usize) -> c_int;
+        pub fn cudaFree(devPtr: *mut f64) -> c_int;
+        pub fn cudaMemcpy(dst: *mut f64, src: *const f64, count: usize, kind: c_int) -> c_int;
+    }
+
+    type CublasHandle = *mut std::ffi::c_void;
+
+    #[link(name = "cublas")]
+    extern "C" {
+        pub fn cublasCreate_v2(handle: *mut CublasHandle) -> c_int;
+        pub fn cublasDestroy_v2(handle: CublasHandle) -> c_int;
+        pub fn cublasDgemv_v2(
+            handle: CublasHandle,
+            trans: c_int,
+            m: c_int, n: c_int,
+            alpha: *const f64,
+            a: *const f64, lda: c_int,
+            x: *const f64, incx: c_int,
+            beta: *const f64,
+            y: *mut f64, incy: c_int,
+        ) -> c_int;
+    }
+}

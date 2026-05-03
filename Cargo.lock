@@ -548,6 +548,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "moebius-microscope"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "nalgebra",
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "mvt-decomposition"
 version = "0.1.0"
 dependencies = [
@@ -597,6 +608,7 @@ name = "nb-distance-gpu"
 version = "0.1.0"
 dependencies = [
  "cathedral-utils",
+ "libc",
  "nalgebra",
  "rayon",
  "rug",

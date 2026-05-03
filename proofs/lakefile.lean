@@ -245,6 +245,20 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.DiagonalStrike,
     -- Fract series evaluation (axiom graduation: fract correction closed form)
     `Cathedral.Vasyunin.Cotangent.FractSeriesEval,
+    -- General fract series evaluation (Phase 1: coprime (a,b) decomposition)
+    `Cathedral.Vasyunin.Cotangent.GeneralFractSeriesEval,
+    -- Two-tile correction (Phase 2: Δ(m) = actualRowIntegral - rowTerm)
+    `Cathedral.Vasyunin.Cotangent.TwoTileCorrection,
+    -- Generalized residue-class evaluation (Phase 3: {ar/b} weights)
+    `Cathedral.Vasyunin.Cotangent.GeneralResidueEval,
     -- Physics: 1+1D Dirac equation (conceptual beacon, NOT on proof chain)
     `Cathedral.Physics.Dirac,
+    -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
+    `Cathedral.Robin.Defs,
+    `Cathedral.Robin.SigmaProps,
+    `Cathedral.Robin.BaseCases,
+    `Cathedral.Robin.HarmonicBounds,
+    `Cathedral.Robin.PrimeBounds,
+    `Cathedral.Robin.Equivalence,
+    `Cathedral.Robin.GramDiagonalBound,
   ]
