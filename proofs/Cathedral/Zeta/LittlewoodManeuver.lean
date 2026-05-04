@@ -28,6 +28,7 @@
 import Cathedral.Zeta.DiskBounds
 import Cathedral.Zeta.Hadamard
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
+import Mathlib.Analysis.Calculus.MeanValue
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric Set
@@ -125,25 +126,53 @@ For G with exp(G(z)) = ζ(s₀+z)/ζ(s₀) and G(0) = 0:
 
 This bound is COMPLETELY INDEPENDENT of t. -/
 
+/-- **Derivative bound**: ‖G'(w)‖ ≤ 6 for w ∈ closedBall 0 1 (where Re ≥ 2).
+
+    G'(w) = ζ'(s₀+w)/ζ(s₀+w). For Re(s₀+w) ≥ 2:
+    - |ζ(s₀+w)| ≥ 1/4 (from zeta_sub_one_norm_le_three_fourths)
+    - |ζ'(s₀+w)/ζ(s₀+w)| = |L(Λ, s₀+w)| ≤ L(Λ, 2) ≈ 0.57 ≤ 6
+    Uses LSeries_vonMangoldt_eq_deriv_riemannZeta_div from Mathlib. -/
+private lemma G_deriv_bound_on_inner_ball
+    {t : ℝ} (_ht : 2 ≤ |t|)
+    {R : ℝ} (hR_ge : 1 < R)
+    {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R)) :
+    ∀ w ∈ closedBall (0:ℂ) 1, ‖deriv G w‖ ≤ 6 := by
+  -- For w ∈ closedBall 0 1 ⊂ ball 0 R: Re(s₀+w) ≥ 2.
+  -- deriv G w = ζ'(s₀+w)/ζ(s₀+w) = -L(Λ, s₀+w)
+  -- |L(Λ, s)| ≤ Σ Λ(n)/n^σ ≤ Σ Λ(n)/n^2 ≈ 0.57 ≤ 6
+  sorry
+
 /-- **Inner Anchor**: ‖G(z)‖ ≤ 6 on ‖z‖ = 1, t-independent.
 
-    Uses the Right Half-Plane Trap: for Re(s) ≥ 2, ζ is trapped in
-    {w : Re(w) > 1/4}, so |log ζ| ≤ log 4 + π/2 < 3. -/
+    Uses the Mean Value Theorem: G is differentiable on closedBall 0 1
+    (which is convex), G(0) = 0, and ‖G'(w)‖ ≤ 6 on closedBall 0 1.
+    By MVT: ‖G(z) - G(0)‖ ≤ 6 · ‖z - 0‖ = 6 · 1 = 6. -/
 lemma G_inner_bound_fixed
-    {t : ℝ} (_ht : 2 ≤ |t|)
+    {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (_hR_pos : 0 < R) (hR_ge : 1 < R)
-    {G : ℂ → ℂ} (_hG_diff : DifferentiableOn ℂ G (ball 0 R))
-    (_hG0 : G 0 = 0)
+    {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
+    (hG0 : G 0 = 0)
     (_hG_eq : ∀ z ∈ ball (0:ℂ) R,
       riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z)) :
     ∀ z, ‖z‖ = 1 → ‖G z‖ ≤ 6 := by
-  -- On ‖z‖ = 1: Re(s₀+z) ≥ 2. Both ζ(s₀+z) and ζ(s₀) are in
-  -- the right half-plane. exp(G(z)) = ζ(s₀+z)/ζ(s₀).
-  -- |G(z)| ≤ |Re(G)| + |Im(G)|
-  -- |Re(G)| = |log|exp(G)|| ≤ log 7 (ratio ∈ [1/7, 7])
-  -- |Im(G)| < π (continuous from G(0)=0, exp(G) avoids (-∞,0])
-  -- Total ≤ log 7 + π ≈ 1.95 + 3.14 ≈ 5.09 ≤ 6
-  sorry
+  intro z hz
+  have hconv : Convex ℝ (closedBall (0:ℂ) 1) := convex_closedBall 0 1
+  have hsub : closedBall (0:ℂ) 1 ⊆ ball (0:ℂ) R := by
+    intro x hx
+    simp [mem_closedBall, dist_zero_right] at hx
+    simp [mem_ball, dist_zero_right]; linarith
+  have hG_diff_pts : ∀ x ∈ closedBall (0:ℂ) 1, DifferentiableAt ℂ G x :=
+    fun x hx => (hG_diff.differentiableAt (isOpen_ball.mem_nhds (hsub hx)))
+  have hz_mem : z ∈ closedBall (0:ℂ) 1 := by
+    simp [mem_closedBall, dist_zero_right, hz]
+  have h0_mem : (0:ℂ) ∈ closedBall (0:ℂ) 1 := by
+    simp [mem_closedBall]
+  have hderiv := G_deriv_bound_on_inner_ball ht hR_ge hG_diff
+  have hmvt := hconv.norm_image_sub_le_of_norm_deriv_le
+    hG_diff_pts hderiv h0_mem hz_mem
+  simp only [hG0, sub_zero] at hmvt
+  rw [hz] at hmvt
+  linarith
 
 -- ═══════════════════════════════════════════
 -- §3. Outer Bound (Lemma 2 — adapted for center (3,t))
