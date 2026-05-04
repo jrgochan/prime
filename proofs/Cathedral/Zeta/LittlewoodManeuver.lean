@@ -29,10 +29,11 @@ import Cathedral.Zeta.DiskBounds
 import Cathedral.Zeta.Hadamard
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 import Mathlib.Analysis.Calculus.MeanValue
+import Mathlib.NumberTheory.LSeries.Dirichlet
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric Set
-open scoped Topology
+open scoped Topology ArithmeticFunction LSeries.notation
 
 namespace Cathedral.Zeta.LittlewoodManeuver
 open Cathedral.Zeta.DiskBounds
@@ -146,9 +147,31 @@ private lemma deriv_zeta_comp {s₀ w : ℂ} (hw : s₀ + w ≠ 1) :
 private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
     (hs1 : s ≠ 1) :
     ‖deriv riemannZeta s / riemannZeta s‖ ≤ 6 := by
-  -- ‖ζ'/ζ(s)‖ = ‖L(Λ, s)‖ ≤ Σ Λ(n)/n^σ ≤ Σ log(n)/n^2 ≤ 6
-  -- Actual value: -ζ'(2)/ζ(2) ≈ 0.57. Bound 6 is 10× headroom.
-  sorry
+  have h1 : 1 < s.re := by linarith
+  -- Step 1: rewrite ‖ζ'/ζ(s)‖ = ‖L(Λ, s)‖ using the Dirichlet identity
+  have hlseries := ArithmeticFunction.LSeries_vonMangoldt_eq_deriv_riemannZeta_div h1
+  have hnorm_eq : ‖deriv riemannZeta s / riemannZeta s‖ = ‖L ↗Λ s‖ := by
+    have heq : -(deriv riemannZeta s / riemannZeta s) = L ↗Λ s := by
+      rw [hlseries]; ring
+    rw [← norm_neg, heq]
+  rw [hnorm_eq]
+  -- Step 2: triangle inequality + monotonicity in σ
+  have hsum := ArithmeticFunction.LSeriesSummable_vonMangoldt h1
+  have hsum2 : LSeriesSummable ↗Λ (2:ℂ) :=
+    ArithmeticFunction.LSeriesSummable_vonMangoldt (by simp : 1 < (2:ℂ).re)
+  -- ‖L ↗Λ s‖ ≤ Σ ‖term ↗Λ s n‖ ≤ Σ ‖term ↗Λ 2 n‖ ≤ 6
+  calc ‖L ↗Λ s‖
+      ≤ ∑' n, ‖LSeries.term (↗Λ) s n‖ := norm_tsum_le_tsum_norm hsum.norm
+    _ ≤ ∑' n, ‖LSeries.term (↗Λ) (2:ℂ) n‖ :=
+        hsum.norm.tsum_le_tsum
+          (fun n => LSeries.norm_term_le_of_re_le_re (↗Λ)
+            (show (2:ℂ).re ≤ s.re by simp; exact hs) n)
+          hsum2.norm
+    _ ≤ 6 := by
+        -- Σ ‖term ↗Λ 2 n‖ = Σ Λ(n)/n²
+        -- Λ(n) ≤ log(n) ≤ √n, so Σ ≤ Σ 1/n^{3/2} = ζ(3/2) ≤ 3 ≤ 6
+        -- Actual value: Σ Λ(n)/n² ≈ 0.57.
+        sorry
 
 /-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
     This is the algebraic derivative identity from the exponential representation,
