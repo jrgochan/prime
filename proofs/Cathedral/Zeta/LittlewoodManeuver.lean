@@ -162,8 +162,11 @@ lemma sub_logarithmic_bound
     {α A : ℝ} (_hα : 0 < α) (hα1 : α < 1) (hA : 0 < A) :
     ∃ T₀ > 0, ∀ t : ℝ, T₀ ≤ t →
       (Real.log t) ^ α < A * Real.log t := by
-  -- Equivalent: (log t)^{α-1} < A for large t
-  -- Since α - 1 < 0 and log t → ∞, (log t)^{α-1} → 0
+  -- For log t ≥ L where L^{α-1} < A, i.e. L > A^{1/(α-1)} = (1/A)^{1/(1-α)}
+  -- Choose T₀ = exp((1/A)^{1/(1-α)} + 1)
+  -- Then log T₀ ≥ (1/A)^{1/(1-α)} + 1 > (1/A)^{1/(1-α)}
+  -- So (log T₀)^{1-α} > 1/A, i.e. (log T₀)^{α-1} < A
+  -- i.e. (log T₀)^α < A · log T₀
   sorry
 
 -- ═══════════════════════════════════════════
