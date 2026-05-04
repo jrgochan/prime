@@ -1,0 +1,27 @@
+{
+  "experiment": "littlewood-maneuver",
+  "version": "0.2.0",
+  "target": "LittlewoodManeuver.lean — axiom graduation",
+  "geometry": {
+    "center_re": 3,
+    "inner_radius": 1,
+    "outer_radius_formula": "5/2 - eps/2"
+  },
+  "precision_bits": 256,
+  "threads": 12,
+  "timestamp": "2026-05-04T11:28:58.568856+00:00",
+  "inner_anchor": {
+    "max_G_norm": 0.245989,
+    "bound": 6.0,
+    "pass": true
+  },
+  "outer_bound": {
+    "pass": true
+  },
+  "sub_logarithmic": {
+    "alpha_eps_0.5": 0.854756
+  },
+  "legacy_c_epsilon": [{"eps": 0.1000, "C": 0.824298}, {"eps": 0.5000, "C": 0.186944}, {"eps": 1.0000, "C": 0.087818}],
+  "verdict": "PASS — all constants validated",
+  "elapsed_seconds": 151.862
+}

@@ -147,3 +147,18 @@ pub fn zeta_log_deriv_norm(s_re: f64, s_im: f64) -> f64 {
     let (re, im) = zeta_log_deriv(s_re, s_im);
     (re * re + im * im).sqrt()
 }
+
+/// ζ(s) returned as (f64, f64).
+pub fn zeta_complex(s_re: f64, s_im: f64) -> C256 {
+    zeta(s_re, s_im)
+}
+
+/// |z| for a C256, returned as f64.
+pub fn c_norm(z: &C256) -> f64 {
+    c_abs(z).to_f64_round(Round::Nearest)
+}
+
+/// Complex division returning (f64, f64).
+pub fn c_div_f64(a: &C256, b: &C256) -> (f64, f64) {
+    c_to_f64(&c_div(a, b))
+}
