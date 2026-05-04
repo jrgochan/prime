@@ -70,8 +70,8 @@ lemma s_ne_one_on_ball_3
     {t : ℝ} (ht : 2 ≤ |t|) {ε : ℝ} (hε : 0 < ε)
     {z : ℂ} (hz : z ∈ ball (0 : ℂ) (5/2 - ε/2)) :
     (⟨3, t⟩ : ℂ) + z ≠ 1 := by
-  -- s₀ + z = 1 implies ‖z‖ = ‖1 - s₀‖ = √(4 + t²) ≥ √8 > 5/2 - ε/2
-  -- This contradicts hz : ‖z‖ < 5/2 - ε/2
+  -- ‖z‖² = z.re² + z.im² = 4 + t² ≥ 8 > (5/2)² = 6.25 > (5/2-ε/2)²
+  -- Geometrically obvious but needs Complex.normSq identity which is API-sensitive.
   sorry
 
 /-- Re(s₀ + z) > 1/2 on ball(0, r₃) with center (3, t). -/
