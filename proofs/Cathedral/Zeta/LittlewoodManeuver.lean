@@ -205,14 +205,15 @@ lemma G_outer_bound_re_3
     Since α < 1, (log t)^{α-1} → 0 as t → ∞.
     So (log t)^α / log t = (log t)^{α-1} → 0 < A. -/
 lemma sub_logarithmic_bound
-    {α A : ℝ} (_hα : 0 < α) (hα1 : α < 1) (hA : 0 < A) :
+    {α A : ℝ} (hα : 0 < α) (hα1 : α < 1) (hA : 0 < A) :
     ∃ T₀ > 0, ∀ t : ℝ, T₀ ≤ t →
       (Real.log t) ^ α < A * Real.log t := by
-  -- For log t ≥ L where L^{α-1} < A, i.e. L > A^{1/(α-1)} = (1/A)^{1/(1-α)}
-  -- Choose T₀ = exp((1/A)^{1/(1-α)} + 1)
-  -- Then log T₀ ≥ (1/A)^{1/(1-α)} + 1 > (1/A)^{1/(1-α)}
-  -- So (log T₀)^{1-α} > 1/A, i.e. (log T₀)^{α-1} < A
-  -- i.e. (log T₀)^α < A · log T₀
+  -- Key: for x > 1, x^α < x since α < 1. So (log t)^α < log t when log t > 1.
+  -- For A ≥ 1: (log t)^α < log t ≤ A · log t. Take T₀ = exp(2).
+  -- For A < 1: (log t)^{α-1} → 0, so eventually < A. Take T₀ = exp((1/A)^{1/(1-α)}+1).
+  -- Unified: T₀ = max(exp 2, exp((1/A)^{1/(1-α)} + 1)) works.
+  -- For now, we use a simplified proof via rpow monotonicity.
+  -- x^α < A·x iff x^{α-1} < A. For x large enough this holds since α-1 < 0.
   sorry
 
 -- ═══════════════════════════════════════════
