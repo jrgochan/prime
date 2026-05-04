@@ -189,11 +189,12 @@ lemma G_outer_bound_re_3
         ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ := by
       rw [← norm_mul, ← h_eq]
     rw [← this, mul_div_cancel_left₀ _ (ne_of_gt h_zeta0_pos)]
-  -- Re(G) = log(|ζ(s₀+z)|/|ζ(s₀)|) = log|ζ(s₀+z)| - log|ζ(s₀)|
-  -- We need: log|ζ(s₀+z)| - log|ζ(s₀)| ≤ 10·log(2+|t|) + log 4
-  -- Since -log|ζ(s₀)| ≤ -log(1/4) = log 4
-  -- and log|ζ(s₀+z)| ≤ 10·log(2+|t|) (from zeta convexity/tail bound)
-  -- This requires showing |ζ(s₀+z)| ≤ (2+|t|)^10 on ball(0, R) centered at (3,t)
+  -- We use: Re(G) = log|exp(G)| and |exp(G)| = |ζ(s₀+z)|/|ζ(s₀)|
+  rw [hre_G, h_exp_eq]
+  -- log(|ζ|/|ζ₀|) = log|ζ| - log|ζ₀| ≤ log|ζ| + log 4
+  -- Need: log|ζ(s₀+z)| ≤ 10·log(2+|t|)
+  -- i.e. |ζ(s₀+z)| ≤ (2+|t|)^10
+  -- This follows from convexity bound + tail bound, similar to zeta_norm_bound_on_disk
   sorry
 
 -- ═══════════════════════════════════════════
