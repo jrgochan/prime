@@ -67,12 +67,29 @@ lemma re_ge_two_on_inner {z : ℂ} (hz : ‖z‖ ≤ 1) :
 /-- s₀ + z ≠ 1 on ball(0, r₃) when center is (3, t) with |t| ≥ 2.
     Pole distance: |s₀ - 1| = √(4+t²) ≥ √8 > 5/2. -/
 lemma s_ne_one_on_ball_3
-    {t : ℝ} (ht : 2 ≤ |t|) {ε : ℝ} (hε : 0 < ε)
+    {t : ℝ} (ht : 2 ≤ |t|) {ε : ℝ} (hε : 0 < ε) (hε1 : ε < 3/2)
     {z : ℂ} (hz : z ∈ ball (0 : ℂ) (5/2 - ε/2)) :
     (⟨3, t⟩ : ℂ) + z ≠ 1 := by
-  -- ‖z‖² = z.re² + z.im² = 4 + t² ≥ 8 > (5/2)² = 6.25 > (5/2-ε/2)²
-  -- Geometrically obvious but needs Complex.normSq identity which is API-sensitive.
-  sorry
+  simp only [mem_ball, dist_zero_right] at hz
+  intro heq
+  -- z = 1 - s₀, extract re/im
+  have hzre : z.re = -2 := by
+    have := congr_arg Complex.re heq; simp at this; linarith
+  have hzim : z.im = -t := by
+    have := congr_arg Complex.im heq; simp at this; linarith
+  -- ‖z‖² = normSq z = z.re² + z.im² = 4 + t²
+  have h_nsq : Complex.normSq z = 4 + t^2 := by
+    simp [Complex.normSq_apply, hzre, hzim]; ring
+  -- ‖z‖² = normSq z (as reals)
+  have h_norm_sq : ‖z‖^2 = 4 + t^2 := by
+    rw [← Complex.normSq_eq_norm_sq]; exact_mod_cast h_nsq
+  -- 4 + t² ≥ 8 since |t| ≥ 2
+  have h8 : 8 ≤ 4 + t^2 := by nlinarith [sq_abs t]
+  -- (5/2 - ε/2)² < 25/4 < 8
+  have hlt : (5/2 - ε/2)^2 < 8 := by nlinarith [sq_nonneg ε]
+  -- ‖z‖² ≥ 8 > (5/2-ε/2)² so ‖z‖ > 5/2 - ε/2, contradicting hz
+  have : ‖z‖ ≥ 0 := norm_nonneg _
+  nlinarith [sq_nonneg (‖z‖ - (5/2 - ε/2)), sq_abs (5/2 - ε/2)]
 
 /-- Re(s₀ + z) > 1/2 on ball(0, r₃) with center (3, t). -/
 lemma re_gt_half_on_ball_3
