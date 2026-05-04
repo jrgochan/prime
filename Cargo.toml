@@ -49,6 +49,7 @@ members = [
     "experiments/nb-distance-gpu",
     "experiments/series-decomposition-verifier",
     "experiments/moebius-microscope",
+    "experiments/two-tile-decomposition",
 ]
 
 [profile.release]

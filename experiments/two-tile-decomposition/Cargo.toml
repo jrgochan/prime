@@ -1,0 +1,18 @@
+[package]
+name = "two-tile-decomposition"
+version = "0.2.0"
+edition = "2024"
+description = """
+Cathedral Two-Tile Decomposition Validator — certifies the four-way
+decomposition gramIntegral = strip + Σ'rowTerm + Σ'Δ, validates the
+Vasyunin formula against exact piecewise FTC row integrals, and
+computes the Σ'Δ correction tail convergence law at 512-bit MPFR.
+"""
+
+[dependencies]
+rug = "1.26"
+rayon = "1.10"
+chrono = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+cathedral-utils = { path = "../cathedral-utils" }

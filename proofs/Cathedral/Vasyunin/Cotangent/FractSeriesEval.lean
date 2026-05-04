@@ -191,7 +191,7 @@ private lemma fract_residue_class (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 �
 
 /-- The sequence log(n) - ∑_{m=0}^{n} 1/(x+m), the discrete analogue of digamma.
     Converges to logDeriv Γ(x) for x > 0 by Bohr-Mollerup squeeze. -/
-private def digammaSeq (x : ℝ) (n : ℕ) : ℝ :=
+def digammaSeq (x : ℝ) (n : ℕ) : ℝ :=
   Real.log n - ∑ m ∈ range (n + 1), 1 / (x + m)
 
 /-- **Digamma sequence convergence** — the final analytical bridge.
@@ -213,7 +213,7 @@ private def digammaSeq (x : ℝ) (n : ℕ) : ℝ :=
     Cathedral.DigammaReflection.digamma_add_nat) to Real.logDeriv Γ.
     This bridge (Re(ψ(x)) = logDeriv Γ(x) for real x > 0) is the
     remaining technical step. -/
-private lemma tendsto_digammaSeq (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1) :
+lemma tendsto_digammaSeq (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1) :
     Tendsto (digammaSeq x) atTop (nhds (logDeriv Real.Gamma x)) := by
   -- ── Helper: x > 0 ⟹ x ≠ -m for all m : ℕ ──
   have pos_nn : ∀ y : ℝ, 0 < y → ∀ m : ℕ, y ≠ -(m : ℝ) :=
@@ -302,7 +302,7 @@ private lemma tendsto_digammaSeq (x : ℝ) (hx : 0 < x) (hx1 : x ≤ 1) :
 
 /-- Telescope identity: `∑_{j<n+1} [log(j+β) - log(j+α)]` equals a difference
     of Bohr-Mollerup `logGammaSeq` values plus a `(β-α)·log(n)` correction. -/
-private lemma sum_eq_logGammaSeq_diff (α β : ℝ) (n : ℕ) :
+lemma sum_eq_logGammaSeq_diff (α β : ℝ) (n : ℕ) :
     ∑ j ∈ range (n + 1), (Real.log (↑j + β) - Real.log (↑j + α)) =
     BohrMollerup.logGammaSeq α n - BohrMollerup.logGammaSeq β n + (β - α) * Real.log n := by
   simp only [BohrMollerup.logGammaSeq]
@@ -312,7 +312,7 @@ private lemma sum_eq_logGammaSeq_diff (α β : ℝ) (n : ℕ) :
   rw [Finset.sum_congr rfl h1, Finset.sum_congr rfl h2]; ring
 
 /-- Reciprocal sum identity: `∑_{j<n+1} 1/(j+β) = log(n) - digammaSeq(β,n)`. -/
-private lemma sum_recip_eq_digammaSeq (β : ℝ) (n : ℕ) :
+lemma sum_recip_eq_digammaSeq (β : ℝ) (n : ℕ) :
     ∑ j ∈ range (n + 1), (1 / (↑j + β)) =
     Real.log n - digammaSeq β n := by
   simp only [digammaSeq]
@@ -323,7 +323,7 @@ private lemma sum_recip_eq_digammaSeq (β : ℝ) (n : ℕ) :
     `logGammaSeq` and `digammaSeq`, giving the clean decomposition
     `∑ [log-diff] - c·∑ [recip] = logGammaSeq(α) - logGammaSeq(β) + c·digammaSeq(β)`
     when `c = β - α`. This is the algebraic core of the inner sum limit. -/
-private lemma combined_identity (α β c : ℝ) (hc : c = β - α) (K : ℕ) (hK : 1 ≤ K) :
+lemma combined_identity (α β c : ℝ) (hc : c = β - α) (K : ℕ) (hK : 1 ≤ K) :
     ∑ j ∈ range K, (Real.log (↑j + β) - Real.log (↑j + α)) -
     c * ∑ j ∈ range K, (1 / (↑j + β)) =
     BohrMollerup.logGammaSeq α (K - 1) - BohrMollerup.logGammaSeq β (K - 1) +
@@ -332,7 +332,7 @@ private lemma combined_identity (α β c : ℝ) (hc : c = β - α) (K : ℕ) (hK
   rw [sum_eq_logGammaSeq_diff, sum_recip_eq_digammaSeq, hc]; ring
 
 /-- If `f` tends to `ℓ` at infinity, so does `n ↦ f(n - 1)`. -/
-private lemma tendsto_comp_sub_one {f : ℕ → ℝ} {ℓ : ℝ} (hf : Tendsto f atTop (nhds ℓ)) :
+lemma tendsto_comp_sub_one {f : ℕ → ℝ} {ℓ : ℝ} (hf : Tendsto f atTop (nhds ℓ)) :
     Tendsto (fun K : ℕ => f (K - 1)) atTop (nhds ℓ) := by
   apply hf.comp
   apply Filter.tendsto_atTop.mpr

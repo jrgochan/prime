@@ -137,7 +137,8 @@ theorem mellin_residual_decomp (N : ℕ) (v : Fin (N - 1) → ℝ)
       (x : ℂ) ^ (s - 1)) = (fun x => (v i : ℂ) *
       (((Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1))) from by
       ext x; push_cast; ring]
-    rw [integral_const_mul, integral_Ioc_eq_integral_Ioo]
+    simp only [integral_Ioc_eq_integral_Ioo]
+    exact MeasureTheory.integral_const_mul _ _
 
 /-- The BD Mellin basis has an explicit formula via bd_mellin_reduction_proved:
 

@@ -4,11 +4,13 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
-require PrimeNumberTheoremAnd from git
-  "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "v4.28.0"
+-- PrimeNumberTheoremAnd temporarily disabled for Mathlib v4.29 compatibility
+-- (only used by Cathedral.PNT.Bridge and Cathedral.PNT.LogBridge, both off-crown)
+-- require PrimeNumberTheoremAnd from git
+--   "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "v4.28.0"
+  "https://github.com/leanprover-community/mathlib4.git" @ "v4.29.0"
 
 -- Legacy roots (superseded by Cathedral architecture)
 -- @[default_target]
@@ -150,7 +152,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (single axiom consolidation)
-    `Cathedral.PNT.Bridge,
+    -- TEMPORARILY DISABLED: PrimeNumberTheoremAnd incompatible with Mathlib v4.29
+    -- `Cathedral.PNT.Bridge,
     -- Mertens graduation (axiom → theorem via Perron)
     `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
@@ -222,7 +225,8 @@ lean_lib «Cathedral» where
     `Cathedral.IntegralBasis.Quantitative,
     `Cathedral.Analysis.IntervalCalc,
     -- PNT LogBridge (Dirichlet convolution identity, 1 sorry)
-    `Cathedral.PNT.LogBridge,
+    -- TEMPORARILY DISABLED: PrimeNumberTheoremAnd incompatible with Mathlib v4.29
+    -- `Cathedral.PNT.LogBridge,
     -- Number theory (Dirichlet convolution identities, Exploration 13)
     `Cathedral.NumberTheory.DirichletConvolution,
     -- Covariance Abel engine (Exploration 13)
@@ -251,6 +255,15 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.TwoTileCorrection,
     -- Generalized residue-class evaluation (Phase 3: {ar/b} weights)
     `Cathedral.Vasyunin.Cotangent.GeneralResidueEval,
+    -- Weighted digamma general (Phase 4: tsum = fractTarget)
+    `Cathedral.Vasyunin.Cotangent.WeightedDigammaGeneral,
+    -- Two-tile evaluation (Phase 5-6: assembly → axiom graduation)
+    `Cathedral.Vasyunin.Cotangent.FractTargetEval,
+    `Cathedral.Vasyunin.Cotangent.ColumnSumEval,
+    `Cathedral.Vasyunin.Cotangent.DeltaDirectEval,
+    `Cathedral.Vasyunin.Cotangent.DeltaResidueEval,
+    `Cathedral.Vasyunin.Cotangent.TsumDirectEval,
+    `Cathedral.Vasyunin.Cotangent.TwoTileEval,
     -- Physics: 1+1D Dirac equation (conceptual beacon, NOT on proof chain)
     `Cathedral.Physics.Dirac,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)

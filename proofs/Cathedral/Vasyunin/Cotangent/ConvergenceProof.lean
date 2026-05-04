@@ -46,6 +46,7 @@
 -/
 
 import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
+import Cathedral.Vasyunin.Cotangent.TwoTileEval
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
 
 noncomputable section
@@ -95,5 +96,25 @@ theorem gramIntegral_eq_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
 --   Uses ConvergenceAxioms.partial_integral_tends_to_formula (transitively
 --   through LogDigammaBridge). When that axiom is graduated, this file
 --   becomes fully independent.
+
+-- ════════════════════════════════════════════════
+-- §2. GRADUATION OF AlgebraicLimit
+-- ════════════════════════════════════════════════
+
+/-- **GRADUATION**: Proves the a≥2 case of AlgebraicLimit.gramIntegral_eq_formula_axiom.
+
+    This theorem is equivalent to AlgebraicLimit.gramIntegral_eq_formula_axiom
+    but proved via TwoTileEval.gramIntegral_eq_formula_coprime, which uses
+    the DeltaDirectEval chain (now zero-sorry).
+
+    This breaks the import cycle:
+    - AlgebraicLimit uses sorry for a≥2 (imports only FractSeriesEval)
+    - DeltaDirectEval uses LogDigammaBridge (via AlgebraicLimit → ConvergenceAxioms)
+    - TwoTileEval uses DeltaDirectEval (via TsumDirectEval)
+    - This file (ConvergenceProof) imports BOTH, providing the graduation. -/
+theorem gramIntegral_eq_formula_graduated (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
+    (hab : a < b) (hcop : Nat.Coprime a b) :
+    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b :=
+  TwoTileEval.gramIntegral_eq_formula_coprime a b ha hb hab hcop
 
 end Cathedral.Vasyunin.ConvergenceProof

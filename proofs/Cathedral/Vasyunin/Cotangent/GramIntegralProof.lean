@@ -1,23 +1,18 @@
 /-
   Cathedral/Vasyunin/Cotangent/GramIntegralProof.lean
 
-  ## THE GRAM INTEGRAL PROOF — Graduating gramIntegral_eq_formula_axiom
+  ## THE GRAM INTEGRAL PROOF — Infrastructure for Axiom Graduation
 
-  Proves: gramIntegral a b = vasyuninGramFormula a b
-  for coprime a, b with 1 ≤ a < b.
+  Provides the key decomposition:
+    gramIntegral a b = strip + Σ∞ actualRowIntegral
 
   ### Proof Strategy
 
-  **Half A** (integral decomposition, all zero-sorry):
+  **Route A** (integral decomposition, zero sorry, ZERO axioms):
     gramIntegral = strip + Σ∞ actualRowIntegral
     Route A: the tail ∫₀^{1/(aM)} → 0, so gramIntegral = lim partialM.
     The partial integral partialM equals strip + Σ_{m=1}^{M-1} actualRowIntegral(m).
     Taking M → ∞, gramIntegral = strip + Σ∞ actualRowIntegral.
-
-  **Half B** (identity, via AlgebraicLimit axiom):
-    gramIntegral = vasyuninGramFormula
-    Provided by AlgebraicLimit.gramIntegral_eq_formula_axiom,
-    which encapsulates the deep four-way series evaluation.
 
   ### Import Policy (Acyclic!)
 
@@ -28,12 +23,13 @@
   - DigammaReflection (vasyuninGramFormula, cotangent sums)
   - IntegralEqSCombined (row FTC: integral = rowTerm)
   - FractIntegrable (measurability)
-  - AlgebraicLimit (cycle-breaking axiom — only imports Digamma+Assembly)
 
-  Does NOT import ConvergenceAxioms or LogDigammaBridge (would be circular).
+  Does NOT import AlgebraicLimit, ConvergenceAxioms, or LogDigammaBridge.
+  This file is a DEPENDENCY of the axiom graduation chain, not a consumer.
 
   Created: May 2, 2026
-  Status: PROVED — zero sorry (1 upstream axiom from AlgebraicLimit)
+  Updated: May 3, 2026 — Removed AlgebraicLimit import for axiom graduation
+  Status: PROVED — zero sorry, zero axioms
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -42,7 +38,8 @@ import Cathedral.Vasyunin.Cotangent.VasyuninAssembly
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
 import Cathedral.Vasyunin.Cotangent.FractIntegrable
 import Cathedral.Analysis.GammaMultiplication
-import Cathedral.Vasyunin.Cotangent.AlgebraicLimit
+-- NOTE: Does NOT import AlgebraicLimit — this file is a dependency of the
+-- axiom graduation chain, not a consumer of it.
 
 noncomputable section
 open Real MeasureTheory Filter Finset
@@ -340,71 +337,31 @@ theorem strip_integral_value (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b) (hab : a 
   ring
 
 -- ════════════════════════════════════════════════
--- §6. THE MAIN THEOREM
+-- §6. THE MAIN THEOREM (moved to TwoTileEval.lean)
 -- ════════════════════════════════════════════════
 
-/-- **THE MAIN THEOREM**: gramIntegral = vasyuninGramFormula.
-
-    For coprime a, b with 1 ≤ a < b:
-    ∫₀¹ {1/(ax)}{1/(bx)} dx = vasyuninGramFormula(a,b)
-
-    **Proof**: Direct application of AlgebraicLimit.gramIntegral_eq_formula_axiom.
-    This axiom encapsulates the deep analytic evaluation:
-      1. INTEGRAL DECOMPOSITION: gramIntegral = strip + Σ∞ actualRowIntegral
-      2. SERIES EVALUATION: strip + Σ∞ actualRowIntegral = formula
-         via Stirling cancellation + digamma evaluation + Dirichlet test
-
-    Half A infrastructure (all zero-sorry in this file):
-      ✅ tail_tends_to_zero → route_A → partial_integral_split
-      ✅ gramIntegral_eq_strip_plus_tsum
-      ✅ strip_integral_value
-      ✅ actualRowIntegral_summable
-
-    NUMERICALLY CERTIFIED at 512-bit MPFR precision across 31 coprime pairs,
-    M up to 50,000. Global |error|·aM < 0.292.
-
-    **Graduation roadmap**: To fully eliminate the axiom, prove the
-    four-way limit identification:
-      lim s_combined(M) = vasyuninGramFormula(a,b) - strip(a,b)
-    using rational_plus_stirling, digamma_sum_identity, digamma_reflection_rational,
-    and centered_fract_residual_converges_sketch. All infrastructure is in place. -/
-theorem gramIntegral_eq_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hcop : Nat.Coprime a b) :
-    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b :=
-  AlgebraicLimit.gramIntegral_eq_formula_axiom a b ha hb hab hcop
+-- gramIntegral_eq_formula is now proved in TwoTileEval.lean
+-- via the full assembly chain:
+--   gramIntegral = strip + Σ' actual              [this file]
+--               = strip + Σ' rowTerm + Σ' Δ       [TwoTileCorrection]
+--               = strip + stirling/b + fract/a + Σ'Δ [master_equation]
+--               = vasyuninGramFormula              [TwoTileEval]
 
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry in this file):
+-- PROVED (zero sorry, ZERO axioms in this file):
 --   ✅ tail_tends_to_zero               — ∫₀^{1/(aM)} → 0
 --   ✅ route_A                          — partialM → gramIntegral
 --   ✅ actualRowIntegral_summable       — Σ actualRowIntegral converges
 --   ✅ partial_integral_split           — partialM = strip + Σ row integrals
 --   ✅ gramIntegral_eq_strip_plus_tsum  — gramIntegral = strip + tsum
 --   ✅ strip_integral_value             — strip = (a-1)/(ab)
---   ✅ gramIntegral_eq_formula          — THE MAIN THEOREM
---
--- UPSTREAM AXIOM (1 — from AlgebraicLimit.lean):
---   ⚠  AlgebraicLimit.gramIntegral_eq_formula_axiom
---      The Vasyunin integral identity (coprime case).
---      Numerically certified at 512-bit precision.
---      Graduation path: evaluate four-way decomposition limit.
 --
 -- ARCHITECTURE:
---   This file avoids circular imports by NOT importing
---   ConvergenceAxioms or LogDigammaBridge.
---   It imports AlgebraicLimit (which only imports Digamma+Assembly).
---
--- GRADUATION ROADMAP:
---   To fully eliminate the axiom, replace the direct delegation in
---   gramIntegral_eq_formula with a self-contained proof using:
---     1. gramIntegral_eq_strip_plus_tsum (PROVED — this file)
---     2. strip_integral_value (PROVED — this file)
---     3. tsum_actualRowIntegral_evaluation (TODO — the deep content)
---        = connect tsum actualRowIntegral to lim s_combined + correction
---        = evaluate the four-way decomposition limit
---        = assemble into vasyuninGramFormula
+--   This file does NOT import AlgebraicLimit, ConvergenceAxioms,
+--   or LogDigammaBridge. It provides pure infrastructure for the
+--   axiom graduation chain.
 
 end Cathedral.Vasyunin.GramIntegralProof

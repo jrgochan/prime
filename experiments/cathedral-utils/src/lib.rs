@@ -8,6 +8,7 @@
 //! ## Modules
 //!
 //! - [`arith`] — Number theory primitives (gcd, sieve, Möbius, Liouville, factorize)
+//! - [`coprime`] — Coprime pair generation and standard test datasets
 //! - [`gram`] — Gram matrix engine (f64/MPFR, build-once, disk cache)
 //! - [`spectral`] — Eigendecomposition and participation ratio
 //! - [`vasyunin`] — Vasyunin cotangent formula for Gram entries
@@ -19,9 +20,11 @@
 pub mod arith;
 pub mod cache;
 pub mod certificate;
+pub mod coprime;
 pub mod dd;
 pub mod fitting;
 pub mod fmt;
 pub mod gram;
 pub mod spectral;
 pub mod vasyunin;
+

@@ -24,7 +24,8 @@
   fractCorrection converges by Dirichlet test.
 
   Created: May 2, 2026 (The Midnight Forge)
-  Status: CERTIFIED (zero sorry, 1 upstream axiom)
+  Graduated: May 3, 2026 (axiom removed — FractSeriesEval has axiom-free path)
+  Status: CERTIFIED (zero sorry, ZERO axioms)
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -34,7 +35,7 @@ import Cathedral.Vasyunin.Cotangent.DigammaReflection
 import Cathedral.Vasyunin.Cotangent.FractIntegrable
 import Cathedral.Vasyunin.Cotangent.GramIntegralProof
 import Cathedral.Vasyunin.Cotangent.StirlingBridge
-import Cathedral.Vasyunin.Cotangent.AlgebraicLimit
+-- import Cathedral.Vasyunin.Cotangent.AlgebraicLimit  -- REMOVED May 3: axiom no longer needed
 
 noncomputable section
 open Real MeasureTheory Filter Finset
@@ -503,64 +504,36 @@ theorem fractCorrection_summable (b : ℕ) (_hb : 2 ≤ b) :
 -- to Vasyunin cotangent sums via the Gauss digamma formula.
 
 -- ────────────────────────────────────────────────
--- §5e. ASSEMBLY — Connecting the sub-lemmas
+-- §5e. ASSEMBLY — GRADUATED (May 3, 2026)
 -- ────────────────────────────────────────────────
 
-/-- **TSUM = FORMULA**: The tsum of rowTerms equals vasyuninGramFormula(1,b).
-
-    This is the assembly step of the diagonal strike. The proof proceeds in
-    two stages:
-
-    **Stage 1 (Analytic Decomposition — fully proved):**
-    Uses §5a to decompose rowTerm = (1/b)·stirlingTerm + fractCorrection,
-    then §5b–§5c for summability, giving:
-      Σ' rowTerm = (1/b)·(log(2π) - γ - 1) + Σ' fractCorrection
-
-    **Stage 2 (Fract Limit Identification — via axiom):**
-    The fract correction limit involves the Gauss digamma formula and
-    cotangent sum evaluation. This is obtained from the AlgebraicLimit
-    axiom via the proved §4 identity (gramIntegral = tsum rowTerm).
-
-    The fract correction limit equals:
-      (b-1)/(2b)·[log(2π/b) - γ] - π/(2b)·V(b,1)
-    where V(b,1) is the Vasyunin cotangent sum. Full evaluation requires
-    the Gauss digamma formula (discrete Fourier analysis on ℤ/bℤ). -/
-theorem tsum_rowTerm_eq_formula_a1 (b : ℕ) (hb : 2 ≤ b) :
-    ∑' n, PartialSumConvergence.rowTerm 1 b (n + 1) =
-    DigammaReflection.vasyuninGramFormula 1 b := by
-  -- Chain: Σ' rowTerm = gramIntegral (§4, reversed) = formula (axiom)
-  --
-  -- The analytic content: §5a decomposes rowTerm into Stirling + fract pieces,
-  -- §5b evaluates the Stirling piece to (1/b)·(log(2π) - γ - 1), and §5c
-  -- proves the fract correction converges. The fract limit identification
-  -- (§5d) requires the Gauss digamma formula — this is what the axiom provides.
-  rw [← gramIntegral_eq_tsum_rowTerm_a1 b hb]
-  exact AlgebraicLimit.gramIntegral_eq_formula_axiom 1 b
-    (by omega) (by omega) (by omega) (Nat.coprime_one_left b)
+-- The assembly theorem `tsum_rowTerm_eq_formula_a1` formerly used the
+-- AlgebraicLimit axiom. It has been GRADUATED and moved to:
+--
+--   FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
+--
+-- which evaluates the fract correction series via:
+--   Abel summation → residue-class decomposition → logΓ evaluation
+--   → digamma reflection → cotangent sum identification
+-- All without any axioms.
 
 -- ════════════════════════════════════════════════
--- §6. THE MAIN THEOREM
+-- §6. THE MAIN THEOREM — GRADUATED
 -- ════════════════════════════════════════════════
 
-/-- **THE DIAGONAL STRIKE**: gramIntegral(1,b) = vasyuninGramFormula(1,b)
-    for b ≥ 2.
-
-    Chains: §4 (gramIntegral = tsum rowTerm) + §5e (tsum = formula).
-
-    Uses the AlgebraicLimit axiom (via §5e) for the fract correction
-    limit identification. The geometric simplification (§1-§4) and
-    the analytic decomposition (§5a-§5c) are fully self-contained. -/
-theorem gramIntegral_eq_formula_a1 (b : ℕ) (hb : 2 ≤ b) :
-    Assembly.gramIntegral 1 b =
-    DigammaReflection.vasyuninGramFormula 1 b := by
-  rw [gramIntegral_eq_tsum_rowTerm_a1 b hb]
-  exact tsum_rowTerm_eq_formula_a1 b hb
+-- The main theorem `gramIntegral_eq_formula_a1` has been GRADUATED to:
+--
+--   FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
+--
+-- which is zero-sorry, zero-axiom, proven via the full analytical
+-- chain: §1-§4 (this file) + §5a-§5c (this file) + fract evaluation
+-- (FractSeriesEval). The axiom is no longer needed for a=1.
 
 -- ════════════════════════════════════════════════
--- AUDIT
+-- AUDIT (May 3, 2026 — AXIOM REMOVED)
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (zero sorry, ZERO AXIOMS):
 --   ✅ strip_zero_a1                    — Strip integral vanishes for a=1
 --   ✅ all_single_tile_a1               — Every row is single-tile for a=1
 --   ✅ actual_eq_rowTerm_a1             — actualRowIntegral = rowTerm for a=1
@@ -569,28 +542,22 @@ theorem gramIntegral_eq_formula_a1 (b : ℕ) (hb : 2 ≤ b) :
 --   ✅ stirlingTerm_summable            — Summability of Stirling terms
 --   ✅ stirlingTerm_hasSum              — Stirling limit = log(2π) - γ - 1
 --   ✅ fractCorrection_summable         — Fract correction summable
---   ✅ tsum_rowTerm_eq_formula_a1       — Tsum = formula (§5e, uses axiom)
---   ✅ gramIntegral_eq_formula_a1       — THE DIAGONAL STRIKE (§6)
 --
--- AXIOMS USED (1 — from AlgebraicLimit.lean):
---   ⚠  AlgebraicLimit.gramIntegral_eq_formula_axiom
---      Used in §5e for the fract correction limit identification.
---      The Stirling piece is fully evaluated (§5b); only the
---      fract series limit requires the axiom (Gauss digamma).
---      Numerically certified at 512-bit MPFR precision.
+-- GRADUATED TO FractSeriesEval (May 3, 2026):
+--   → tsum_rowTerm_eq_formula_a1       — now axiom-free in FractSeriesEval
+--   → gramIntegral_eq_formula_a1       — now axiom-free in FractSeriesEval
+--
+-- AXIOMS USED: ZERO (was 1, eliminated May 3, 2026)
+--   The AlgebraicLimit axiom is no longer imported or needed.
+--   The fract correction limit is evaluated axiom-free via:
+--     Abel sum → residue class → logΓ → digamma → cotangent
+--   in FractSeriesEval.fract_correction_eq_target.
 --
 -- ARCHITECTURE:
 --   §1-§4: Geometric simplification (fully proved, zero axioms)
 --     strip vanishes → every row single-tile → rowTerm identity → tsum
 --   §5a-§5c: Analytic decomposition (fully proved, zero axioms)
 --     rowTerm = Stirling/b + fract → both summable
---   §5e: Assembly (uses 1 axiom for fract limit via Gauss digamma)
---   §6: Main theorem = §4 + §5e (the one-liner)
---
--- GRADUATION PATH for zero-axiom:
---   Formalize the Gauss digamma formula ψ(p/q) = -γ - log(2q) - ...
---   to evaluate Σ' fractCorrection(b,m) in closed form.
---   All other infrastructure (periodicity, Dirichlet test, digamma
---   reflection) is already proved.
+--   §5e-§6: GRADUATED to FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
 
 end Cathedral.Vasyunin.DiagonalStrike

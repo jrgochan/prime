@@ -172,15 +172,8 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
             Real.log_one, hM_def]
         ring
       linarith [h_re]
-    -- Apply BC with strict bound: Re(G w) ≤ M < M + 1
-    have hG_re_lt : Set.MapsTo G (ball 0 R) {w | w.re < M + 1} := by
-      intro w hw
-      simp only [Set.mem_setOf_eq]
-      have : (G w).re ≤ M := hG_re_le hw
-      linarith
-    have hM1_pos : 0 < M + 1 := by linarith
-    have hBC_raw := Complex.borelCaratheodory_zero hM1_pos hG_diff hG_re_lt hR_pos hz_ball hG0
-    -- hBC_raw : ‖G z‖ ≤ 2 * (M + 1) * ‖z‖ / (R - ‖z‖)
+    have hBC_raw := Complex.borelCaratheodory_zero hM_pos hG_diff hG_re_le hR_pos hz_ball hG0
+    -- hBC_raw : ‖G z‖ ≤ 2 * M * ‖z‖ / (R - ‖z‖)
     -- Since M > 1 (M = log 4 + ... > log 4 > 1), we have M + 1 ≤ 2M
     have hlog4_pos : 0 < Real.log 4 := Real.log_pos (by norm_num)
     have hlog2t_pos : 0 < Real.log (2 + |t|) := Real.log_pos (by linarith [abs_nonneg t])
@@ -189,11 +182,11 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
         rw [show (1:ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
         exact Real.log_lt_log (Real.exp_pos 1) (lt_trans exp_one_lt_three (by norm_num : (3:ℝ) < 4))
       linarith [hlog2t_pos]
-    have h_M1_bound : 2 * (M + 1) ≤ 4 * M := by linarith
+    have h_M_bound : 2 * M ≤ 4 * M := by linarith
     have hR_sub_pos : 0 < R - ‖z‖ := by linarith
     have hBC : ‖G z‖ ≤ 4 * M * ‖z‖ / (R - ‖z‖) :=
       le_trans hBC_raw (div_le_div_of_nonneg_right
-        (mul_le_mul_of_nonneg_right h_M1_bound (norm_nonneg z)) (le_of_lt hR_sub_pos))
+        (mul_le_mul_of_nonneg_right h_M_bound (norm_nonneg z)) (le_of_lt hR_sub_pos))
     -- Lower bound on ‖ζ(s)‖
     have hs_eq : s = s₀ + z := by simp [hz_def, hs₀_def]
     have hG_eq_s := hG_eq z hz_ball

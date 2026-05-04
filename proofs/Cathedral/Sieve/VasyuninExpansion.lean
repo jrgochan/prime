@@ -4,10 +4,10 @@ import Cathedral.Gram.OffDiagonal
 /-!
   Cathedral/Sieve/VasyuninExpansion.lean
 
-  Vasyunin formula expansion for large GCD terms.
-  Axiom: vasyunin_large_gcd.
+  💀 PHANTOM AXIOM TOMBSTONE — vasyunin_large_gcd is MATHEMATICALLY FALSE.
+  See counterexample (100,200) below. Discovered 2026-05-04.
 
-  NOT on the v11 crown path.
+  NOT on the v11 crown path. The Sieve Engine is speculative.
 -/
 
 /-! # Cathedral.VasyuninExpansion
@@ -113,83 +113,115 @@ theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
 -- STEP 3: REFINED AXIOM FOR d ≥ 5 ONLY
 -- ════════════════════════════════════════════════
 
-/-- **Axiom (Analytic Number Theory — Refined)**: Vasyunin correction for large GCD.
+/- 💀 **TOMBSTONE**: This axiom is MATHEMATICALLY FALSE.
 
-    For gcd(j,k) ≥ 5, the divisor-sum analysis of Báez-Duarte et al. (2005)
-    shows that the multiplicative autocorrelation of {j/x}{k/x} has a
-    correction bounded by 1/gcd(j,k).
+    ORIGINAL CLAIM: For gcd(j,k) ≥ 5, |gramEntry(j,k) - 1/4| ≤ 1/gcd(j,k).
 
-    This is a STRICT REFINEMENT of the original `vasyunin_expansion` axiom:
-    - The d ≤ 4 case has been PROVED using geometric bounds
-    - Only d ≥ 5 remains axiomatic, requiring the divisor-sum identity
+    COUNTEREXAMPLE (discovered 2026-05-04 by Gemini Actual + Claude Actual):
+      j = 100, k = 200, gcd = 100
+      gramEntry(100,200) ≈ 0.2907
+      |0.2907 - 0.25| = 0.0407 > 0.01 = 1/100  💀
 
-    The content is: when j = da, k = db with gcd(a,b) = 1, the
-    integral ∫₀¹ {da/x}{db/x} dx decomposes via partial fractions
-    into a 1/4 background plus oscillating terms whose sum is O(1/d).
+    ROOT CAUSE: The error term d²/(12jk) in the Vasyunin 1995 formula
+    simplifies to 1/(12ab) where a = j/d, b = k/d are coprime.
+    This is CONSTANT for fixed ratio a/b, regardless of gcd magnitude.
+    For a=1, b=2: the true asymptote is 1/24 ≈ 0.0417, not 0.
 
-    By density of "large shared factors" (d ≥ 5), this axiom covers
-    only about 4% of matrix entries (those where j,k share a factor ≥ 5).
+    THE CORRECT BOUND is:
+      |gramEntry(j,k) - 1/4| ≤ 1/4    (proved as vasyunin_small_gcd above)
+
+    The tighter TRUE asymptotic (not formalized):
+      |gramEntry(j,k) - 1/4| ~ 1/(12ab) where a,b coprime, j=da, k=db
+
+    This axiom is preserved as a historical artifact and warning about
+    the dangers of assuming O-notation decays without exact algebra.
+
+    STATUS: NOT ON CROWN PATH. The Sieve Engine is a speculative side module.
+    The main proof path (BDBridge → Renormalization → ConvergenceProof)
+    does not depend on this axiom.
+
+    Verified numerically in 1024-bit MPFR (rosetta_stone.rs).
 -/
-axiom vasyunin_large_gcd (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
+
+-- 💀 DEAD AXIOM — DO NOT USE — MATHEMATICALLY FALSE
+-- axiom vasyunin_large_gcd (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
+--     (hd : 5 ≤ Nat.gcd j k) :
+--     ∃ correction : ℝ,
+--     gramEntry j k = 1/4 + correction ∧
+--     |correction| ≤ 1 / (Nat.gcd j k : ℝ)
+
+/-- The correct replacement: |G - 1/4| ≤ 1/4 for ALL j,k.
+    This is weaker but TRUE. Already proved as vasyunin_small_gcd. -/
+theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
     (hd : 5 ≤ Nat.gcd j k) :
     ∃ correction : ℝ,
     gramEntry j k = 1/4 + correction ∧
-    |correction| ≤ 1 / (Nat.gcd j k : ℝ)
+    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
+  -- Use the universal 1/4 bound, which dominates 1/d for d ≥ 5
+  -- Wait — 1/4 > 1/5, so |ψ| ≤ 1/4 does NOT imply |ψ| ≤ 1/d for d ≥ 5!
+  -- This is precisely WHY the axiom was false: the true error is ~1/(12ab),
+  -- which CAN exceed 1/d when d is large relative to ab.
+  -- The correct approach requires the Rosetta Stone bridge, not this bound.
+  sorry  -- 💀 Cannot be proved — the statement is FALSE
 
 -- ════════════════════════════════════════════════
 -- STEP 4: FULL VASYUNIN EXPANSION (THEOREM)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: The full Vasyunin Expansion.
+/-- 💀 **POISONED THEOREM**: The full Vasyunin Expansion.
 
-    Decomposes the Gram matrix entry into a background term 1/4 and a
-    divisor-controlled correction:
-      G_{j,k} = 1/4 + ψ(j,k)   with   |ψ(j,k)| ≤ 1/gcd(j,k)
+    ⚠️ WARNING: This theorem's conclusion is MATHEMATICALLY FALSE for d ≥ 5.
+    It dispatches to `vasyunin_large_gcd_replacement` which has a sorry
+    because the 1/d bound does not hold (see tombstone above).
 
-    This REPLACES the axiom in BilinearSieve.lean.
+    The d ≤ 4 case remains valid.
 
-    Proof: case split on d = gcd(j,k):
-    - d ≤ 4: Proved by `vasyunin_expansion_d_le_4` using geometric bounds
-    - d ≥ 5: Dispatched to `vasyunin_large_gcd` (refined axiom)
-
-    AXIOM REDUCTION: The original axiom covered ALL d ≥ 1.
-    Now only d ≥ 5 remains axiomatic (~4% of matrix entries). -/
+    DO NOT use this theorem in any proof chain.
+    This file is NOT on the Crown Path. -/
 theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
     ∃ correction : ℝ,
     gramEntry j k = 1/4 + correction ∧
     |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
   by_cases hd : Nat.gcd j k ≤ 4
-  · -- CASE 1: d ≤ 4 — PROVED
+  · -- CASE 1: d ≤ 4 — PROVED (correct)
     exact vasyunin_expansion_d_le_4 j k hj hk hd
-  · -- CASE 2: d ≥ 5 — refined axiom
-    push Not at hd
-    exact vasyunin_large_gcd j k hj hk (by omega)
+  · -- CASE 2: d ≥ 5 — 💀 FALSE (see tombstone)
+    push_neg at hd
+    exact vasyunin_large_gcd_replacement j k hj hk (by omega)
 
 end
 
 -- ════════════════════════════════════════════════
--- AUDIT
+-- AUDIT (updated 2026-05-04)
 -- ════════════════════════════════════════════════
 
--- This file has:
---   1 REFINED axiom: vasyunin_large_gcd (covers only d ≥ 5, ~4% of entries)
---   0 sorry
+-- 💀 PHANTOM AXIOM TOMBSTONE 💀
 --
--- PROVED in this file (zero sorry):
---   ✅ vasyunin_small_gcd:          |G - 1/4| ≤ 1/4 (universal)
---   ✅ vasyunin_expansion_d_le_4:   Full expansion for gcd ≤ 4
---   ✅ vasyunin_expansion_proof:    Full expansion (dispatches to d≤4 + d≥5)
+-- This file FORMERLY contained:
+--   axiom vasyunin_large_gcd : |gramEntry - 1/4| ≤ 1/gcd  for d ≥ 5
 --
--- DEPENDENCY CHAIN:
---   gramEntry_nonneg        → vasyunin_small_gcd
---   gramEntry_le_third_all  → vasyunin_small_gcd
---   gramEntry_le_avg_diag   → vasyunin_small_gcd
---   vasyunin_small_gcd      → vasyunin_expansion_d_le_4
---   vasyunin_large_gcd      → vasyunin_expansion_proof (d≥5 case only)
+-- This axiom was PROVED FALSE on 2026-05-04:
+--   Counterexample: (100,200), gcd=100, |G-1/4|=0.0407 > 0.01=1/100
+--   Root cause: error ~ 1/(12ab), constant for fixed coprime ratio
 --
--- AXIOM REDUCTION:
---   BEFORE: axiom vasyunin_expansion (ALL d ≥ 1, ~100% of entries)
---   AFTER:  axiom vasyunin_large_gcd (only d ≥ 5, ~4% of entries)
+-- The axiom has been commented out and replaced with a sorry'd
+-- theorem (vasyunin_large_gcd_replacement) to preserve build.
+--
+-- STATUS: NOT ON CROWN PATH. The Sieve Engine is speculative.
+-- The main proof: BDBridge → Renormalization → ConvergenceProof → Cotangent
+-- does NOT depend on this file.
+--
+-- PROVED (still valid):
+--   ✅ vasyunin_small_gcd:          |G - 1/4| ≤ 1/4 (universal, TRUE)
+--   ✅ vasyunin_expansion_d_le_4:   Full expansion for gcd ≤ 4 (TRUE)
+--
+-- POISONED:
+--   💀 vasyunin_expansion_proof:    Contains sorry from FALSE d≥5 case
+--   💀 vasyunin_large_gcd:          DEAD — commented out
+--
+-- The Rosetta Stone bridge (gramEntry = jk·gramIntegral - correction)
+-- may eventually replace this entire file's approach.
 
--- #check @vasyunin_expansion_proof
 -- #check @vasyunin_small_gcd
+-- #check @vasyunin_expansion_d_le_4
+

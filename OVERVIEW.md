@@ -4,9 +4,9 @@
 > axioms of analytic number theory, via the Nyman–Beurling–Báez-Duarte
 > equivalence in Lean 4.*
 >
-> **Last updated**: April 29, 2026 (v12 — The Crown Graduation + Particle Zoo)
+> **Last updated**: May 4, 2026 (v12.1 — Phantom Axiom Tombstone + Rosetta Stone)
 >
-> **Last audited**: April 29, 2026 — comprehensive codebase audit
+> **Last audited**: May 4, 2026 — Phantom Axiom excised, Rosetta Stone bridge verified
 
 ---
 
@@ -136,7 +136,7 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 ## Module Structure
 
 The codebase comprises **169 active Lean files** across **22 topic directories** with
-**42,605 lines** of active code, **~1,459 theorems/lemmas**, and **45 active axioms**
+**42,605 lines** of active code, **~1,459 theorems/lemmas**, and **44 active axioms**
 (2 on the crown path).
 
 ```
@@ -192,7 +192,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 |----------|-------|---------------|
 | **Crown axioms** | **2** | ✓ |
 | Spectral engine | 7 | — |
-| Sieve engine | 8 | — |
+| Sieve engine | 7 | — |
 | MellinBridge (alt paths) | 9 | — |
 | Vasyunin proof chain | 8 | — |
 | Analysis (Selberg, MV) | 8 | — |
@@ -200,20 +200,24 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | Covariance | 2 | — |
 | PNT bridges | 2 | — |
 | Structural / NymanBeurling | 2 | — |
-| **Total** | **45** | **2** |
+| **Total** | **44** | **2** |
 
 > [!IMPORTANT]
 > Only **2 axioms** stand between the current formalization and a fully
 > machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> **pure** (zero axioms, zero sorry). The 43 off-path axioms support
+> **pure** (zero axioms, zero sorry). The 42 off-path axioms support
 > alternative proof routes and experimental features that do not affect
 > the crown theorem.
+>
+> **Note (May 4, 2026)**: `vasyunin_large_gcd` was discovered to be
+> mathematically FALSE (counterexample: j=100, k=200). It has been
+> excised from the axiom inventory. See `VasyuninExpansion.lean` tombstone.
 
 ---
 
 ## Sorry Inventory
 
-6 `sorry` placeholders exist in the active tree, **all off-crown**:
+7 `sorry` placeholders exist in the active tree, **all off-crown**:
 
 | File | Count | Context |
 |------|-------|---------|
@@ -221,6 +225,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib 4.28 |
 | `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial approach (mathematically false) |
 | `Covariance/QuadFormIdentity.lean` | 1 | Deprecated off-diagonal bound (numerically falsified) |
+| `Sieve/VasyuninExpansion.lean` | 1 | 💀 Phantom Axiom tombstone — statement is FALSE |
 
 > [!NOTE]
 > **Zero sorry on the crown path.** All 6 sorry are marked as WIP alternative
@@ -273,10 +278,10 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 | Archive files | 128+ |
 | Archive lines | 29,784 |
 | Theorems + lemmas | ~1,459 |
-| Total axioms (active) | **45** |
+| Total axioms (active) | **44** |
 | Crown path axioms | **2** |
 | Crown path sorry | **0** |
-| Off-crown sorry | **6** |
+| Off-crown sorry | **7** |
 | Topic directories | 22 |
 | Experiments (Rust/MPFR) | 37 |
 | Development time | 32 days |

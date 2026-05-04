@@ -624,13 +624,13 @@ private lemma fourier_at_zero (f : ℝ → ℂ) : 𝓕 f 0 = ∫ v : ℝ, f v :=
   simp [Real.fourier_eq]
 
 private lemma real_inner_eq_mul (v w : ℝ) : @inner ℝ ℝ _ v w = v * w := by
-  simp; ring
+  exact RCLike.inner_apply' (𝕜 := ℝ) v w ▸ conj_trivial v ▸ rfl
 
 /-- Unfolding the FT to an explicit exp·mul integral. -/
 private lemma ft_Λ_ℂ_unfold (w : ℝ) :
     𝓕 Λ_ℂ w = ∫ v : ℝ,
       Complex.exp (↑(-2 * π * (v * w)) * Complex.I) * Λ_ℂ v := by
-  rw [fourier_eq']; congr 1; ext v; congr 1; congr 1; simp; ring
+  rw [fourier_eq']; congr 1; ext v; congr 1; congr 1; rw [real_inner_eq_mul]
 
 /-- Λ_ℂ vanishes outside [-1,1]. -/
 private lemma Λ_ℂ_outside (v : ℝ) (hv : 1 < |v|) : Λ_ℂ v = 0 := by
@@ -879,8 +879,7 @@ theorem fejerKernel_fourier_support (ξ : ℝ) (hξ : 1 < |ξ|) :
     funext v
     show Real.fourierChar (-(v * ξ)) • _ = Real.fourierChar (-@inner ℝ ℝ _ v ξ) • _
     congr 2
-    rw [show @inner ℝ ℝ _ v ξ = v * ξ from by
-      rw [RCLike.inner_apply]; simp [conj_trivial, mul_comm]]
+    rw [real_inner_eq_mul]
   -- Step 5: integral_re says: ∫ Re[f x] = Re[∫ f x]. Combine with h_re.
   -- h_re says (∫ f).re = 0. integral_re says ∫ Re[f] = Re[∫ f] = 0.
   have h5 : ∫ v, RCLike.re (𝐞 (-(v * ξ)) • ((fejerKernel v : ℝ) : ℂ)) = 0 := by
@@ -944,8 +943,7 @@ theorem fejerKernel_fourier_eq_triangle (ξ : ℝ) :
     funext v
     show Real.fourierChar (-(v * ξ)) • _ = Real.fourierChar (-@inner ℝ ℝ _ v ξ) • _
     congr 2
-    rw [show @inner ℝ ℝ _ v ξ = v * ξ from by
-      rw [RCLike.inner_apply]; simp [conj_trivial, mul_comm]]
+    rw [real_inner_eq_mul]
   have h5 : ∫ v, RCLike.re (𝐞 (-(v * ξ)) • ((fejerKernel v : ℝ) : ℂ)) = triangleFunction ξ := by
     rw [integral_re h_int]; exact h_re
   rw [← h5]

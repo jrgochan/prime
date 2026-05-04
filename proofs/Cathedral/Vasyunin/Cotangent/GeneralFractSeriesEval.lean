@@ -207,29 +207,55 @@ theorem tsum_rowTerm_eq_stirling_plus_fract_general (a b : ℕ) (ha : 1 ≤ a) (
 -- ════════════════════════════════════════════════
 
 /-- The target value for the general fract correction series.
-    If we can prove Σ' fractCorrection_general = fractTarget_general,
-    then Σ' rowTerm = formula (modulo the two-tile correction). -/
+
+    **CORRECTED (May 3, 2026)**: Defined as the residue sum expression itself —
+    the ACTUAL value that the tsum converges to via Phase 3.
+
+    Previous definition used `vasyuninGramFormula` which assumed the false identity
+    `(a-1)/(ab) + Σ' rowTerm = gramFormula` for a > 1. That identity fails because
+    `rowTerm ≠ actualRowIntegral` for two-tile rows when a ≥ 2.
+
+    The new definition is the literal finite sum that Phase 3 proves equals the tsum.
+    For a=1, this reduces to `FractSeriesEval.fractTarget b` (proved below). -/
 def fractTarget_general (a b : ℕ) : ℝ :=
-  (a:ℝ) * (DigammaReflection.vasyuninGramFormula a b -
-    ((a:ℝ) - 1) / ((a:ℝ) * (b:ℝ)) -
-    (1 / (b:ℝ)) * (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1))
+  ∑ r ∈ Finset.Icc 1 (b - 1),
+    Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) *
+      (Real.log (Real.Gamma ((r:ℝ)/(b:ℝ))) -
+       Real.log (Real.Gamma (((r:ℝ)+1)/(b:ℝ))) +
+       (1/(b:ℝ)) * logDeriv Real.Gamma (((r:ℝ)+1)/(b:ℝ)))
 
-/-- If tsum fractCorrection_general = fractTarget_general, then
-    strip + tsum rowTerm = formula.
+/-- The tsum of rowTerms decomposes into Stirling constant + residue sum.
+    This is a direct corollary of the tsum decomposition and Stirling evaluation.
 
-    This assumes that actualRowIntegral = rowTerm for ALL rows
-    (i.e., the two-tile correction is zero or handled separately). -/
-theorem tsum_rowTerm_of_fract_target_general (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
+    ∑' rowTerm(a,b,n+1) = (1/b)·(log(2π) - γ - 1) + (1/a)·fractTarget_general(a,b)
+
+    For the connection to `vasyuninGramFormula`, a separate theorem is needed
+    that accounts for the two-tile correction between `rowTerm` and `actualRowIntegral`. -/
+theorem tsum_rowTerm_eq_stirling_plus_residue (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
     (h : ∑' n, fractCorrection_general a b (n + 1) = fractTarget_general a b) :
-    ((a:ℝ) - 1) / ((a:ℝ) * (b:ℝ)) +
     ∑' n, PartialSumConvergence.rowTerm a b (n + 1) =
-    DigammaReflection.vasyuninGramFormula a b := by
+    (1 / (b:ℝ)) * (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1) +
+    (1 / (a:ℝ)) * fractTarget_general a b := by
   rw [tsum_rowTerm_eq_stirling_plus_fract_general a b ha hb, h]
+
+/-- For a=1, fractTarget_general recovers the original FractSeriesEval.fractTarget.
+    This ensures backward compatibility with the a=1 proof chain, where
+    `Σ' rowTerm(1,b) = vasyuninGramFormula(1,b)` holds exactly (no two-tile correction). -/
+theorem fractTarget_general_a1 (b : ℕ) (hb : 2 ≤ b) :
+    fractTarget_general 1 b =
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      (r:ℝ) / (b:ℝ) *
+        (Real.log (Real.Gamma ((r:ℝ)/(b:ℝ))) -
+         Real.log (Real.Gamma (((r:ℝ)+1)/(b:ℝ))) +
+         (1/(b:ℝ)) * logDeriv Real.Gamma (((r:ℝ)+1)/(b:ℝ))) := by
   unfold fractTarget_general
-  have ha_pos : (0:ℝ) < (a:ℝ) := Nat.cast_pos.mpr (by omega)
-  have ha_ne : (a:ℝ) ≠ 0 := ne_of_gt ha_pos
-  field_simp
-  ring
+  apply Finset.sum_congr rfl; intro r hr
+  simp only [Finset.mem_Icc] at hr
+  congr 1
+  -- {1·r/b} = r/b for 1 ≤ r ≤ b-1
+  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)
+  rw [Nat.cast_one, one_mul, Int.fract_eq_self.mpr]
+  exact ⟨by positivity, by rw [div_lt_one hb_pos]; exact_mod_cast (show r < b by omega)⟩
 
 -- ════════════════════════════════════════════════
 -- AUDIT
@@ -242,12 +268,13 @@ theorem tsum_rowTerm_of_fract_target_general (a b : ℕ) (ha : 1 ≤ a) (hb : 2 
 --   ✅ fractCorrection_general_summable — Summability by comparison with 1/m²
 --   ✅ tsum_rowTerm_decompose_general   — Tsum splits into Stirling + fract
 --   ✅ tsum_rowTerm_eq_stirling_plus_fract_general — Stirling evaluated
---   ✅ tsum_rowTerm_of_fract_target_general — Reduction to fract target
+--   ✅ tsum_rowTerm_eq_stirling_plus_residue — Tsum = Stirling + residue sum
+--   ✅ fractTarget_general_a1           — a=1 backward compatibility
 --
--- ARCHITECTURE:
---   rowTerm(a,b,m) = (1/b)·stirlingTerm(m) + (1/a)·{am/b}·gap(m)
---   The Stirling piece is universal (a-independent) and already evaluated.
---   The fract piece requires Phases 3-4 for evaluation.
---   The two-tile correction (Phases 2+5) bridges actualRowIntegral ↔ rowTerm.
+-- ARCHITECTURE (CORRECTED May 3):
+--   fractTarget_general := finite residue sum (NOT derived from gramFormula)
+--   Phase 3 proves: tsum fractCorrection = fractTarget_general
+--   Phase 4 assembly: trivially closes (definitional equality)
+--   The connection to gramFormula requires the two-tile correction (separate effort).
 
 end Cathedral.Vasyunin.GeneralFractSeriesEval

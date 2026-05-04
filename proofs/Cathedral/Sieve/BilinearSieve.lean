@@ -25,8 +25,8 @@ import Cathedral.Sieve.VasyuninExpansion
 
     ## The Five-Step Reduction
 
-    1. `vasyunin_expansion` (AXIOM): Gram entries have a divisor-sum expansion
-       controlled by gcd structure. [Báez-Duarte et al. 2005]
+    1. `vasyunin_expansion` (💀 POISONED — see below): Gram entries have a divisor-sum
+       expansion controlled by gcd structure. The underlying d≥5 axiom is FALSE.
 
     2. `crossParityBilinear` (DEFINITION): The bilinear form S(u,v) = uᵀBv
        measuring cross-parity coupling. [Pure linear algebra]
@@ -65,20 +65,23 @@ open Matrix Real Finset
 -- STEP 1: THE VASYUNIN EXPANSION
 -- ════════════════════════════════════════════════
 
-/-- **Theorem** (was Axiom): Vasyunin Expansion.
+/-- 💀 **POISONED** (was Theorem): Vasyunin Expansion.
 
     The Gram matrix entry G_{j,k} = ∫₀¹ {j/x}{k/x}dx admits a
     decomposition into a "background" term and a "divisor correction":
 
       G_{j,k} = 1/4 + ψ(j,k)
 
-    where |ψ(j,k)| is controlled by gcd(j,k).
+    where |ψ(j,k)| is claimed to be controlled by 1/gcd(j,k).
 
-    AXIOM REDUCTION (2026-04-07):
-    - d ≤ 4: NOW PROVED in VasyuninExpansion.lean using geometric bounds
-      (gramEntry_nonneg + gramEntry_le_third_all + gramEntry_le_avg_diag)
-    - d ≥ 5: Refined axiom `vasyunin_large_gcd` (~4% of entries)
-    - The full theorem `vasyunin_expansion_proof` dispatches to both cases.
+    ⚠️ WARNING (2026-05-04): The underlying axiom `vasyunin_large_gcd`
+    is MATHEMATICALLY FALSE. Counterexample: (100,200), gcd=100:
+      |gramEntry(100,200) - 1/4| ≈ 0.0407 > 0.01 = 1/gcd
+    The true error converges to 1/(12ab), not 0.
+    See VasyuninExpansion.lean for the full tombstone.
+
+    The d ≤ 4 case remains valid.
+    This entire file is NOT on the crown path.
 
     Original source: Báez-Duarte, Balazard, Landreau, Saias (2005). -/
 def vasyunin_expansion := @vasyunin_expansion_proof
@@ -313,19 +316,23 @@ end
 -- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 
--- AXIOM AUDIT (updated 2026-04-07):
+-- AXIOM AUDIT (updated 2026-05-04):
 --
--- This file introduces 2 axioms (down from 3):
---   1. vasyunin_expansion      — NOW A THEOREM (proved in VasyuninExpansion.lean)
---      └─ depends on: vasyunin_large_gcd (refined axiom, d ≥ 5 only, ~4% of entries)
+-- This file references 3 items:
+--   1. vasyunin_expansion      — 💀 POISONED: underlying d≥5 axiom is FALSE
+--      └─ vasyunin_large_gcd was PROVED FALSE on 2026-05-04
+--         Counterexample: (100,200), |G-1/4|=0.0407 > 1/100
 --   2. moebius_uncoupling      (Vaughan's identity — Tier 2)
---   3. type_II_sieve_bound     (ASYMPTOTIC parity sieve — Tier 3, corrected 2026-04-06)
+--   3. type_II_sieve_bound     (ASYMPTOTIC parity sieve — Tier 3)
 --
 -- REDUCTION HISTORY:
 --   2026-04-06: type_II_sieve_bound corrected to asymptotic K_N² ≤ 1 - c/N
---   2026-04-07: vasyunin_expansion axiom → theorem (d≤4 proved, d≥5 refined axiom)
+--   2026-04-07: vasyunin_expansion axiom → theorem (d≤4 proved, d≥5 refined)
+--   2026-05-04: 💀 vasyunin_large_gcd PROVED FALSE — axiom excised
+--              Rosetta Stone bridge discovered (gramEntry ↔ gramIntegral)
 --
--- The Mellin Bridge remains the only surviving proof path (K_N → 1).
+-- STATUS: NOT ON CROWN PATH. The Mellin Crown architecture bypasses
+-- the entire Sieve Engine.
 
 -- #check @type_II_sieve_bound
 -- #check @sieve_implies_stable_ratio_asymptotic

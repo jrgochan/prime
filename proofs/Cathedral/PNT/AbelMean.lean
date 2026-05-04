@@ -23,7 +23,8 @@
 
 import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
-import Cathedral.PNT.Bridge
+-- Cathedral.PNT.Bridge import temporarily disabled for Mathlib v4.29 compatibility
+-- import Cathedral.PNT.Bridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.NymanBeurling.BDBridge
 import Cathedral.AbelTail.Engine
@@ -46,14 +47,12 @@ open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 
 /-- **PNT AXIOM 1**: The Möbius partial sums Σ μ(k)/k converge to 0.
     Equivalent to the Prime Number Theorem.
-    Proof: 1/ζ(s) = Σ μ(n)/n^s for Re(s) > 1.
-    As s → 1⁺, ζ(s) → ∞, so 1/ζ(s) → 0.
-    Abel’s limit theorem gives the convergence. -/
-theorem pnt_mu_div_k :
+    Proof: In Cathedral.PNT.Bridge (disabled for Mathlib v4.29 compatibility).
+    Will be re-connected when PrimeNumberTheoremAnd upgrades to v4.29. -/
+axiom pnt_mu_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-    Filter.atTop (nhds 0) :=
-  pnt_moebius_sum_div_tendsto
+    Filter.atTop (nhds 0)
 
 /-- **PNT AXIOM 2**: The weighted sum Σ μ(k)·ln(k)/k converges to -1.
     From the derivative: -(1/ζ(s))' = ζ'(s)/ζ(s)² At s=1: ζ'(s)/ζ(s)² → 1.
