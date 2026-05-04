@@ -126,20 +126,67 @@ For G with exp(G(z)) = ζ(s₀+z)/ζ(s₀) and G(0) = 0:
 
 This bound is COMPLETELY INDEPENDENT of t. -/
 
+/-- Chain rule: deriv of ζ ∘ (s₀ + ·) at w equals deriv ζ at s₀+w. -/
+private lemma deriv_zeta_comp {s₀ w : ℂ} (hw : s₀ + w ≠ 1) :
+    deriv (fun z => riemannZeta (s₀ + z)) w = deriv riemannZeta (s₀ + w) := by
+  have hd : HasDerivAt (fun z : ℂ => riemannZeta (s₀ + z))
+      (deriv riemannZeta (s₀ + w) * 1) w := by
+    apply HasDerivAt.comp
+    · exact (differentiableAt_riemannZeta hw).hasDerivAt
+    · exact (hasDerivAt_id w).const_add s₀
+  rw [mul_one] at hd
+  exact hd.deriv
+
+/-- **Log-derivative bound**: ‖ζ'(s)/ζ(s)‖ ≤ 6 for Re(s) ≥ 2.
+
+    By `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`:
+      −ζ'(s)/ζ(s) = L(Λ, s) = Σ Λ(n)/n^s
+    For Re(s) ≥ 2: ‖L(Λ, s)‖ ≤ Σ Λ(n)/n² ≤ Σ log(n)/n² ≈ 0.57 ≤ 6.
+    Uses `vonMangoldt_le_log` and absolute convergence from Mathlib. -/
+private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
+    (hs1 : s ≠ 1) :
+    ‖deriv riemannZeta s / riemannZeta s‖ ≤ 6 := by
+  -- ‖ζ'/ζ(s)‖ = ‖L(Λ, s)‖ ≤ Σ Λ(n)/n^σ ≤ Σ log(n)/n^2 ≤ 6
+  -- Actual value: -ζ'(2)/ζ(2) ≈ 0.57. Bound 6 is 10× headroom.
+  sorry
+
 /-- **Derivative bound**: ‖G'(w)‖ ≤ 6 for w ∈ closedBall 0 1 (where Re ≥ 2).
 
-    G'(w) = ζ'(s₀+w)/ζ(s₀+w). For Re(s₀+w) ≥ 2:
-    - |ζ(s₀+w)| ≥ 1/4 (from zeta_sub_one_norm_le_three_fourths)
-    - |ζ'(s₀+w)/ζ(s₀+w)| = |L(Λ, s₀+w)| ≤ L(Λ, 2) ≈ 0.57 ≤ 6
-    Uses LSeries_vonMangoldt_eq_deriv_riemannZeta_div from Mathlib. -/
+    G'(w) = ζ'(s₀+w)/ζ(s₀+w) by differentiation of f = f(0)·exp(G).
+    For w ∈ closedBall 0 1: Re(s₀+w) ≥ 2, and `norm_zeta_logderiv_le` applies. -/
 private lemma G_deriv_bound_on_inner_ball
-    {t : ℝ} (_ht : 2 ≤ |t|)
+    {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_ge : 1 < R)
-    {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R)) :
+    {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
+    (hG_eq : ∀ z ∈ ball (0:ℂ) R,
+      riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z))
+    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0) :
     ∀ w ∈ closedBall (0:ℂ) 1, ‖deriv G w‖ ≤ 6 := by
-  -- For w ∈ closedBall 0 1 ⊂ ball 0 R: Re(s₀+w) ≥ 2.
-  -- deriv G w = ζ'(s₀+w)/ζ(s₀+w) = -L(Λ, s₀+w)
-  -- |L(Λ, s)| ≤ Σ Λ(n)/n^σ ≤ Σ Λ(n)/n^2 ≈ 0.57 ≤ 6
+  intro w hw
+  -- w ∈ ball 0 R since closedBall 0 1 ⊂ ball 0 R
+  have hw_ball : w ∈ ball (0:ℂ) R := by
+    simp [mem_closedBall, dist_zero_right] at hw
+    simp [mem_ball, dist_zero_right]; linarith
+  -- Re(s₀+w) ≥ 2 since s₀ = (3, t) and ‖w‖ ≤ 1
+  have hw_norm : ‖w‖ ≤ 1 := by
+    simp [mem_closedBall, dist_zero_right] at hw; exact hw
+  have hre : 2 ≤ (⟨3, t⟩ + w : ℂ).re := by
+    have : (⟨3, t⟩ + w : ℂ).re = 3 + w.re := by simp [Complex.add_re]
+    rw [this]
+    have := neg_abs_le w.re
+    linarith [Complex.abs_re_le_norm w]
+  -- s₀ + w ≠ 1
+  have hs1 : (⟨3, t⟩ : ℂ) + w ≠ 1 := by
+    intro h; have hre1 := congr_arg Complex.re h
+    simp [Complex.add_re] at hre1
+    linarith [Complex.abs_re_le_norm w, neg_abs_le w.re]
+  -- G' = f'/f from the exponential representation
+  -- deriv G w = deriv(ζ∘(s₀+·)) w / ζ(s₀+w) (from holomorphic log construction)
+  -- = deriv ζ (s₀+w) / ζ(s₀+w) (by chain rule)
+  -- This uses that G was constructed as a primitive of f'/f.
+  -- We bound ‖deriv G w‖ = ‖ζ'/ζ(s₀+w)‖ ≤ 6.
+  -- Key gap: formally connecting deriv G to ζ'/ζ from the exp equation.
+  -- For now, we use norm_zeta_logderiv_le on the composed derivative.
   sorry
 
 /-- **Inner Anchor**: ‖G(z)‖ ≤ 6 on ‖z‖ = 1, t-independent.
@@ -152,8 +199,9 @@ lemma G_inner_bound_fixed
     {R : ℝ} (_hR_pos : 0 < R) (hR_ge : 1 < R)
     {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (hG0 : G 0 = 0)
-    (_hG_eq : ∀ z ∈ ball (0:ℂ) R,
-      riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z)) :
+    (hG_eq : ∀ z ∈ ball (0:ℂ) R,
+      riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z))
+    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0) :
     ∀ z, ‖z‖ = 1 → ‖G z‖ ≤ 6 := by
   intro z hz
   have hconv : Convex ℝ (closedBall (0:ℂ) 1) := convex_closedBall 0 1
@@ -167,7 +215,7 @@ lemma G_inner_bound_fixed
     simp [mem_closedBall, dist_zero_right, hz]
   have h0_mem : (0:ℂ) ∈ closedBall (0:ℂ) 1 := by
     simp [mem_closedBall]
-  have hderiv := G_deriv_bound_on_inner_ball ht hR_ge hG_diff
+  have hderiv := G_deriv_bound_on_inner_ball ht hR_ge hG_diff hG_eq hζ_ne
   have hmvt := hconv.norm_image_sub_le_of_norm_deriv_le
     hG_diff_pts hderiv h0_mem hz_mem
   simp only [hG0, sub_zero] at hmvt
