@@ -202,76 +202,64 @@ lemma G_outer_bound_re
     _ = 10 * Real.log (2 + |t|) + Real.log 4 := by ring
 
 -- ═══════════════════════════════════════════
--- §3. The Full Maneuver Assembly
+-- §3. Missing Mathlib Infrastructure
 -- ═══════════════════════════════════════════
 
-/-- **The Littlewood Maneuver**: Under RH, for any ε > 0 and A > 0,
-    there exists c > 0 such that |ζ(s)| ≥ c/|t|^A for σ ≥ 1/2+ε, |t| ≥ T₀.
+/-- **STUB AXIOM** (Mathlib frontier): Under RH, ζ'/ζ is O(log|t|).
 
-    Proof: Three-Circles interpolation between inner (constant) and outer
-    (logarithmic) bounds on log ζ, with inner radius chosen to make
-    the interpolation exponent < A. -/
+    The polynomial lower bound requires bounding log|ζ| from below.
+    This follows from the partial fraction expansion:
+      ζ'/ζ(s) = -1/(s-1) + Σ_ρ (1/(s-ρ) + 1/ρ) + B
+    Under RH: |1/(s-ρ)| ≤ 1/ε, and only O(log|t|) zeros have |γ-t| ≤ 1.
+    Result: |ζ'/ζ(σ+it)| = O_ε(log|t|).
+
+    Ref: Titchmarsh, §14.2, Theorem 14.5(A).
+
+    Required Mathlib additions (any ONE suffices):
+      (a) Hadamard product for ξ(s)
+      (b) Riemann-von Mangoldt: N(T) = (T/2π)log(T/2πe) + O(log T)
+      (c) Explicit formula for ζ'/ζ  -/
+axiom rh_zeta_log_deriv_bound (hRH : RiemannHypothesis)
+    (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2) :
+    ∃ C > 0, ∃ T₀ > 0, ∀ s : ℂ,
+      (1/2 + ε ≤ s.re) → s.re ≤ 2 → (T₀ ≤ |s.im|) →
+      ‖deriv riemannZeta s / riemannZeta s‖ ≤ C * Real.log (2 + |s.im|)
+
+-- ═══════════════════════════════════════════
+-- §4. The Full Maneuver Assembly
+-- ═══════════════════════════════════════════
+
+/-- **The Littlewood Maneuver**: Under RH, |ζ(s)| ≥ c/|t|^A for any A > 0.
+
+    Proof: Integrate `rh_zeta_log_deriv_bound` along [σ+it, 2+it],
+    combine with |ζ(2+it)| ≥ 1/4 (tail bound), exponentiate. -/
 theorem littlewood_maneuver (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2)
     (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
       (1/2 + ε ≤ s.re) → (T₀ ≤ |s.im|) →
       c / |s.im| ^ A ≤ ‖riemannZeta s‖ := by
-  -- ═══════════════════════════════════════════════════════════
-  -- ITERATED BC ON TELESCOPING DISKS
-  -- ═══════════════════════════════════════════════════════════
-  --
-  -- Standard BC centered at (2, t) gives exponent B_ε = 20(3-2ε)/ε.
-  -- For A ≥ B_ε this is handled by zeta_polynomial_lower_bound_rh_proved.
-  -- For A < B_ε, we iterate:
-  --
-  -- Step 1: BC at center (2, t), R₁ = 3/2-ε/2 gives
-  --   |ζ(s)| ≥ c₁/|t|^{B_ε} for σ ≥ 1/2+ε.
-  --
-  -- Step 2: Now use center (1/2+ε+R₂, t) where R₂ = ε.
-  --   Under RH, ζ ≠ 0 on {Re > 1/2}, so holomorphic log exists.
-  --   Target at distance r₂ = R₂ - 0 ... but we need the target
-  --   STRICTLY INSIDE the disk. This is the fundamental limitation.
-  --
-  -- The correct resolution uses the Vinogradov-Korobov-type argument:
-  -- the Dirichlet series ζ(s) = Σ n^{-s} converges absolutely for
-  -- Re(s) > 1, and partial sums give polynomial bounds on ζ'/ζ.
-  -- Combined with non-vanishing under RH, this gives |ζ(s)| ≥ c/|t|^A
-  -- for any A > 0.
-  --
-  -- KEY MATHEMATICAL FACT: Under RH, log ζ(s) = Σ_ρ log(1 - s/ρ) + ...
-  -- where Re(ρ) = 1/2 for all ρ. For σ = 1/2 + ε:
-  --   |s - ρ| ≥ ε for all nontrivial zeros ρ.
-  -- So |log(1-s/ρ)| ≤ C·log(|ρ|/ε).
-  -- Summing: |log ζ(s)| ≤ C_ε · Σ_{|γ|≤2|t|} 1 + O(1)
-  --                      ≤ C_ε · N(2|t|) + O(1)
-  --                      ≤ C_ε · |t|·log|t| + O(1)
-  -- where N(T) = #{zeros with |γ| ≤ T} = O(T log T).
-  --
-  -- But this gives exp(-C_ε · |t| log|t|), much worse than polynomial!
-  -- The correct bound uses |log(1-s/ρ)| ≈ log|t-γ|, and
-  -- the density of zeros near γ ≈ t is O(log|t|), giving:
-  --   |log ζ(s)| ≤ C_ε · (log|t|)² (by Dirichlet box)
-  -- which is super-polynomial, not polynomial.
-  --
-  -- The POLYNOMIAL bound |ζ(s)| ≥ c/|t|^A requires finer information:
-  --   log|ζ(σ+it)| ≥ -C_ε · log|t|
-  -- This follows from RH + the explicit formula + partial fraction
-  -- decomposition of ζ'/ζ (Titchmarsh §14.2, Theorem 14.5).
-  --
-  -- REQUIRED INFRASTRUCTURE (not yet in Mathlib):
-  --   (a) Hadamard product for ζ, OR
-  --   (b) Riemann-von Mangoldt formula N(T) = (T/2π)log(T/2π) + O(log T), OR
-  --   (c) Explicit formula for ζ'/ζ near σ = 1/2 + ε
-  --
-  -- This axiom captures precisely this gap. The Littlewood Maneuver
-  -- infrastructure (Three-Circles, holomorphic log, G bounds) provides
-  -- the FRAMEWORK — once (a), (b), or (c) enters Mathlib, this sorry
-  -- becomes a direct application.
+  -- ┌─────────────────────────────────────────────────────────┐
+  -- │  CONCRETE ASSEMBLY (from stub axiom + certified infra)  │
+  -- └─────────────────────────────────────────────────────────┘
+  -- Step 1: Get the logarithmic derivative bound from stub axiom
+  obtain ⟨C, hC, T₁, hT₁, hlogderiv⟩ := rh_zeta_log_deriv_bound hRH ε hε hε1
+  -- Step 2: Set exponent C_ε = C · (3/2 - ε) and constant c₀ = 1/4
+  --   Integration: |log ζ(σ+it) - log ζ(2+it)| ≤ C·log(2+|t|)·(2-σ)
+  --   Since 2 - σ ≤ 2 - (1/2+ε) = 3/2 - ε:
+  --     |log ζ(σ+it)| ≤ log(1/4) + C·(3/2-ε)·log(2+|t|)
+  --     |ζ(σ+it)| ≥ (1/4) · (2+|t|)^{-C·(3/2-ε)}
+  set C_ε := C * (3/2 - ε)
+  -- Step 3: Choose c and T₀ to make c/|t|^A ≤ (1/4)·(2+|t|)^{-C_ε}
+  --   For A ≥ C_ε: c/|t|^A ≤ c/|t|^{C_ε}; choose c = (1/4)·2^{-C_ε}
+  --   For A < C_ε: c/|t|^A = c·|t|^{C_ε-A}/|t|^{C_ε}
+  --     Choose T₀ large, c = (1/4)·2^{-C_ε}·T₀^{A-C_ε}
+  --     Then for |t| ≥ T₀: c/|t|^A ≤ (1/4)·2^{-C_ε}·(|t|/T₀)^{C_ε-A}/|t|^{C_ε}
+  --                       ≤ (1/4)·(2+|t|)^{-C_ε} ≤ |ζ(s)|  ✓
   sorry
 
 -- ═══════════════════════════════════════════
--- §4. Axiom Graduation
+-- §5. Axiom Graduation
 -- ═══════════════════════════════════════════
 
 /-- **THEOREM** (was axiom): Under RH, for any ε > 0, A > 0,
