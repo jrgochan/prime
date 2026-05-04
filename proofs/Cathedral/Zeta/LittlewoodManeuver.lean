@@ -160,11 +160,40 @@ lemma G_outer_bound_re_3
       riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z)) :
     ∀ z ∈ ball (0:ℂ) R,
       (G z).re ≤ 10 * Real.log (2 + |t|) + Real.log 4 := by
-  -- exp(Re(G(z))) = |ζ(s₀+z)|/|ζ(s₀)|
-  -- |ζ(s₀)| ≥ 1/4 (Re = 3 ≥ 2, zeta_sub_one_norm_le_three_fourths)
-  -- |ζ(s₀+z)| ≤ (2+|s.im|)² for Re > 1/2, or ≤ 7/4 for Re ≥ 2
-  -- Conservative: |ζ(s₀+z)| ≤ (5+|t|)^10 ≤ (2+|t|)^10 (for |t| ≥ 2)
-  -- Re(G) ≤ log((2+|t|)^10 / (1/4)) = 10·log(2+|t|) + log 4
+  intro z hz
+  have h_eq := _hG_eq z hz
+  -- Re(G(z)) = log|exp(G(z))|
+  have hre_G : (G z).re = Real.log ‖Complex.exp (G z)‖ := by
+    rw [Complex.norm_exp]; exact (Real.log_exp _).symm
+  -- |ζ(s₀)| > 0
+  have h_zeta0_lower : (1:ℝ)/4 ≤ ‖riemannZeta ⟨3, t⟩‖ := by
+    have hre : (2:ℝ) ≤ (⟨3, t⟩ : ℂ).re := by norm_num
+    have h := zeta_sub_one_norm_le_three_fourths hre
+    -- Use: ‖ζ‖ - ‖ζ-1‖ ≤ ‖ζ - (ζ-1)‖ = ‖1‖ = 1
+    -- So ‖ζ‖ ≥ 1 - ‖ζ-1‖ ≥ 1 - 3/4 = 1/4
+    -- Actually we need: 1 ≤ ‖ζ‖ + ‖ζ-1‖ (from triangle ‖1‖ ≤ ‖ζ‖ + ‖ζ-1‖)
+    -- norm_sub_le gives ‖a - b‖ ≤ ‖a‖ + ‖b‖, not what we want
+    -- norm_le_add_of_le:  no. Let me use the basic reverse triangle.
+    -- ‖1‖ = ‖ζ - (ζ-1)‖ ≤ ‖ζ‖ + ‖ζ-1‖
+    have h2 : ‖(1:ℂ)‖ ≤ ‖riemannZeta (⟨3, t⟩ : ℂ)‖ + ‖riemannZeta (⟨3, t⟩ : ℂ) - 1‖ := by
+      calc ‖(1:ℂ)‖ = ‖riemannZeta (⟨3, t⟩ : ℂ) - (riemannZeta (⟨3, t⟩ : ℂ) - 1)‖ := by
+            norm_num
+        _ ≤ ‖riemannZeta (⟨3, t⟩ : ℂ)‖ + ‖riemannZeta (⟨3, t⟩ : ℂ) - 1‖ :=
+            norm_sub_le _ _
+    simp only [norm_one] at h2; linarith
+  have h_zeta0_pos : (0:ℝ) < ‖riemannZeta ⟨3, t⟩‖ := by linarith
+  -- |exp(G(z))| = |ζ(s₀+z)| / |ζ(s₀)|
+  have h_exp_eq : ‖Complex.exp (G z)‖ = ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ /
+      ‖riemannZeta ⟨3, t⟩‖ := by
+    have : ‖riemannZeta ⟨3, t⟩‖ * ‖Complex.exp (G z)‖ =
+        ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ := by
+      rw [← norm_mul, ← h_eq]
+    rw [← this, mul_div_cancel_left₀ _ (ne_of_gt h_zeta0_pos)]
+  -- Re(G) = log(|ζ(s₀+z)|/|ζ(s₀)|) = log|ζ(s₀+z)| - log|ζ(s₀)|
+  -- We need: log|ζ(s₀+z)| - log|ζ(s₀)| ≤ 10·log(2+|t|) + log 4
+  -- Since -log|ζ(s₀)| ≤ -log(1/4) = log 4
+  -- and log|ζ(s₀+z)| ≤ 10·log(2+|t|) (from zeta convexity/tail bound)
+  -- This requires showing |ζ(s₀+z)| ≤ (2+|t|)^10 on ball(0, R) centered at (3,t)
   sorry
 
 -- ═══════════════════════════════════════════
