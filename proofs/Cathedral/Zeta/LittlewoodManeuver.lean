@@ -59,31 +59,20 @@ lemma exists_small_radius_for_exponent
     (hK : 0 < K) (hA : 0 < A) :
     ∃ r₁ > 0, r₁ < r₂ ∧
       K * (Real.log (r₂ / r₁) / Real.log (R / r₁)) < A := by
-  -- As r₁ → 0⁺, log(r₂/r₁)/log(R/r₁) → 1 (both → ∞, but their ratio → 1)
-  -- Wait, that's wrong. log(r₂/r₁) = log r₂ - log r₁, log(R/r₁) = log R - log r₁.
-  -- As r₁ → 0⁺, log r₁ → -∞, so ratio → (-∞ - log r₁)/(-∞ - log r₁) → 1.
-  -- That means θ → 1, not 0! The interpolation goes the WRONG way.
+  -- Choose r₁ close to r₂ so θ = log(r₂/r₁)/log(R/r₁) is small.
+  -- As r₁ → r₂⁻, θ → log(1)/log(R/r₂) = 0.
   --
-  -- CORRECTION: The Three-Circles theorem has θ measured from the inner
-  -- circle. For z on the INNER side (r₂ close to r₁), θ ≈ 0 and the
-  -- bound is dominated by the inner circle bound.
-  -- For z on the OUTER side (r₂ close to R), θ ≈ 1 and the bound is
-  -- dominated by the outer circle bound.
+  -- Strategy: pick r₁ = r₂ / (1 + δ) for small δ > 0.
+  -- Then r₂/r₁ = 1 + δ, R/r₁ = R(1+δ)/r₂.
+  -- θ = log(1+δ) / log(R(1+δ)/r₂) = log(1+δ) / (log(R/r₂) + log(1+δ))
+  -- For small δ: θ ≈ δ / (log(R/r₂) + δ) → 0.
+  -- So K·θ → 0 < A.
   --
-  -- We want the target point to be near the INNER circle where G is small.
-  -- So we need r₂ close to r₁, meaning r₁ close to r₂.
-  -- But then r₁ < r₂ < R means the annulus [r₁, R] contains |z| = r₂.
+  -- Rather than computing exactly, use Filter.Tendsto to show
+  -- K·θ → K·0 = 0 < A, then extract a witness.
   --
-  -- As r₁ → r₂⁻, θ = log(r₂/r₁)/log(R/r₁) → log(1)/log(R/r₂) = 0.
-  -- YES! θ → 0 as r₁ → r₂. So we need r₁ close to r₂ (from below).
-  --
-  -- Choose r₁ = r₂ · (1 - δ) for small δ > 0.
-  -- Then r₂/r₁ = 1/(1-δ), R/r₁ = R/(r₂(1-δ)).
-  -- θ = log(1/(1-δ)) / log(R/(r₂(1-δ)))
-  --   ≈ δ / (log(R/r₂) + δ)  for small δ
-  --   → 0 as δ → 0.
-  --
-  -- So K·θ → 0, and we can make K·θ < A.
+  -- Simple approach: use that log(r₂/r₁)/log(R/r₁) is continuous
+  -- in r₁ and equals 0 at r₁ = r₂.
   sorry
 
 -- ═══════════════════════════════════════════
@@ -122,11 +111,58 @@ lemma G_inner_bound
 lemma G_outer_bound_re
     {t : ℝ} (ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_lt : R < 3/2)
-    {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
+    {G : ℂ → ℂ} (_hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (hG_eq : ∀ z ∈ ball (0:ℂ) R,
       riemannZeta (⟨2, t⟩ + z) = riemannZeta ⟨2, t⟩ * Complex.exp (G z)) :
     ∀ z ∈ ball (0:ℂ) R, (G z).re ≤ 10 * Real.log (2 + |t|) + Real.log 4 := by
-  sorry
+  intro z hz
+  -- From hG_eq: |ζ(s₀+z)| = |ζ(s₀)| · |exp(G(z))| = |ζ(s₀)| · exp(Re(G(z)))
+  -- So Re(G(z)) = log(|ζ(s₀+z)|/|ζ(s₀)|) ≤ log((2+|t|)^10 / (1/4))
+  --            = 10·log(2+|t|) + log 4
+  have h_eq := hG_eq z hz
+  -- |ζ(s₀+z)| ≤ (2+|t|)^10
+  have h_upper := zeta_norm_bound_on_disk ht hR_pos hR_lt z hz
+  -- |ζ(s₀)| ≥ 1/4 (tail bound at Re=2)
+  have h_lower : (1/4 : ℝ) ≤ ‖riemannZeta ⟨2, t⟩‖ := by
+    have hre2 : (2:ℝ) ≤ (⟨2, t⟩ : ℂ).re := by simp
+    have hsub := zeta_sub_one_norm_le_three_fourths hre2
+    -- ‖ζ - 1‖ ≤ 3/4, and ‖ζ‖ ≥ ‖1‖ - ‖ζ - 1‖ by triangle.
+    -- ‖1‖ ≤ ‖ζ - 1‖ + ‖ζ‖ (triangle: ‖a‖ ≤ ‖a - b‖ + ‖b‖ with a=1, b=ζ)
+    have h_tri : ‖(1:ℂ)‖ ≤ ‖(1:ℂ) - riemannZeta ⟨2, t⟩‖ + ‖riemannZeta ⟨2, t⟩‖ := by
+      have := norm_le_insert' (1:ℂ) (riemannZeta ⟨2, t⟩)
+      linarith
+    -- ‖1 - ζ‖ = ‖ζ - 1‖
+    have h_symm : ‖(1:ℂ) - riemannZeta ⟨2, t⟩‖ = ‖riemannZeta ⟨2, t⟩ - 1‖ := norm_sub_rev _ _
+    rw [h_symm, norm_one] at h_tri
+    linarith
+  -- exp(Re(G(z))) = |exp(G(z))| = |ζ(s₀+z)|/|ζ(s₀)|
+  have h_exp_re : Real.exp (G z).re = ‖Complex.exp (G z)‖ :=
+    (Complex.norm_exp (G z)).symm
+  have h_norm_eq : ‖riemannZeta (⟨2, t⟩ + z)‖ =
+      ‖riemannZeta ⟨2, t⟩‖ * ‖Complex.exp (G z)‖ := by
+    rw [h_eq, norm_mul]
+  have h_zeta_pos : (0 : ℝ) < ‖riemannZeta ⟨2, t⟩‖ := by linarith
+  -- Re(G(z)) = log(|ζ(s₀+z)|/|ζ(s₀)|)
+  have h_exp_eq : Real.exp (G z).re =
+      ‖riemannZeta (⟨2, t⟩ + z)‖ / ‖riemannZeta ⟨2, t⟩‖ := by
+    rw [h_exp_re, h_norm_eq, mul_div_cancel_left₀ _ (ne_of_gt h_zeta_pos)]
+  -- exp(Re(G(z))) ≤ (2+|t|)^10 / (1/4) = 4·(2+|t|)^10
+  have h_ratio_bound : ‖riemannZeta (⟨2, t⟩ + z)‖ / ‖riemannZeta ⟨2, t⟩‖ ≤
+      4 * (2 + |t|) ^ (10:ℝ) := by
+    rw [div_le_iff₀ h_zeta_pos]
+    nlinarith [rpow_nonneg (by linarith : (0:ℝ) ≤ 2 + |t|) (10:ℝ)]
+  -- Re(G(z)) ≤ log(4·(2+|t|)^10) = log 4 + 10·log(2+|t|)
+  have h_pos_ratio : 0 < 4 * (2 + |t|) ^ (10:ℝ) := by positivity
+  have h_exp_le : Real.exp (G z).re ≤ 4 * (2 + |t|) ^ (10:ℝ) := by
+    rw [h_exp_eq]; linarith
+  have := Real.log_le_log (Real.exp_pos _) h_exp_le
+  rw [Real.log_exp] at this
+  calc (G z).re ≤ Real.log (4 * (2 + |t|) ^ (10:ℝ)) := this
+    _ = Real.log 4 + Real.log ((2 + |t|) ^ (10:ℝ)) := by
+        rw [Real.log_mul (by norm_num : (4:ℝ) ≠ 0) (by positivity)]
+    _ = Real.log 4 + 10 * Real.log (2 + |t|) := by
+        rw [Real.log_rpow (by linarith : 0 < 2 + |t|)]
+    _ = 10 * Real.log (2 + |t|) + Real.log 4 := by ring
 
 -- ═══════════════════════════════════════════
 -- §3. The Full Maneuver Assembly
