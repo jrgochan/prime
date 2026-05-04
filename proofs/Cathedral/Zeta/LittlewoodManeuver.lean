@@ -59,20 +59,37 @@ lemma exists_small_radius_for_exponent
     (hK : 0 < K) (hA : 0 < A) :
     ∃ r₁ > 0, r₁ < r₂ ∧
       K * (Real.log (r₂ / r₁) / Real.log (R / r₁)) < A := by
-  -- Choose r₁ close to r₂ so θ = log(r₂/r₁)/log(R/r₁) is small.
-  -- As r₁ → r₂⁻, θ → log(1)/log(R/r₂) = 0.
+  -- Choose r₁ = r₂/2. Then:
+  -- r₂/r₁ = 2, R/r₁ = 2R/r₂
+  -- θ = log 2 / log(2R/r₂)
+  -- K·θ = K · log 2 / log(2R/r₂)
   --
-  -- Strategy: pick r₁ = r₂ / (1 + δ) for small δ > 0.
-  -- Then r₂/r₁ = 1 + δ, R/r₁ = R(1+δ)/r₂.
-  -- θ = log(1+δ) / log(R(1+δ)/r₂) = log(1+δ) / (log(R/r₂) + log(1+δ))
-  -- For small δ: θ ≈ δ / (log(R/r₂) + δ) → 0.
-  -- So K·θ → 0 < A.
+  -- But we can make θ arbitrarily small by choosing r₁ close to r₂.
+  -- At r₁ = r₂, θ = log(1)/log(R/r₂) = 0.
+  -- By continuity, for r₁ close enough to r₂, K·θ < A.
   --
-  -- Rather than computing exactly, use Filter.Tendsto to show
-  -- K·θ → K·0 = 0 < A, then extract a witness.
+  -- Explicit construction: choose r₁ so that θ < A/K.
+  -- θ = log(r₂/r₁)/log(R/r₁) < A/K when
+  -- K·log(r₂/r₁) < A·log(R/r₁)
+  -- i.e. K·log(r₂/r₁) < A·(log(R/r₂) + log(r₂/r₁))
+  -- i.e. (K-A)·log(r₂/r₁) < A·log(R/r₂)
   --
-  -- Simple approach: use that log(r₂/r₁)/log(R/r₁) is continuous
-  -- in r₁ and equals 0 at r₁ = r₂.
+  -- Case K ≤ A: trivially satisfied since θ ∈ [0,1].
+  -- Case K > A: need log(r₂/r₁) < A·log(R/r₂)/(K-A).
+  -- Choose r₁ = r₂·exp(-A·log(R/r₂)/(2(K-A))).
+  --
+  -- For simplicity, use a clean δ approach:
+  -- Set δ = A/(2K) (ensuring K·δ/(log(R/r₂)+δ) < A for small enough δ)
+  -- Choose r₁ = r₂ · exp(-δ) for δ > 0 small.
+  -- Then r₂/r₁ = exp(δ), log(r₂/r₁) = δ.
+  -- R/r₁ = R·exp(δ)/r₂, log(R/r₁) = log(R/r₂) + δ.
+  -- θ = δ/(log(R/r₂) + δ).
+  -- K·θ = K·δ/(log(R/r₂) + δ).
+  --
+  -- We need K·δ/(log(R/r₂) + δ) < A.
+  -- Since log(R/r₂) > 0, this holds when K·δ < A·(log(R/r₂) + δ),
+  -- i.e., (K-A)·δ < A·log(R/r₂).
+  -- If K ≤ A, any δ > 0 works. If K > A, δ < A·log(R/r₂)/(K-A).
   sorry
 
 -- ═══════════════════════════════════════════
