@@ -1,0 +1,15 @@
+{
+  "tool": "ooc-probe",
+  "mode": "solve",
+  "timestamp": "1777932244",
+  "N": 120000,
+  "dim": 119999,
+  "d2": 4.011513544765954e-2,
+  "max_iter": 300,
+  "tol": 1.00e-8,
+  "elapsed_seconds": 63500.8,
+  "matrix_gb": 107.29,
+  "method": "Jacobi-Preconditioned CG (mmap + GPU cuBLAS)",
+  "cache_path": "/home/jrgochan/.cathedral-cache/ooc_gram_N120000_p256.bin",
+  "rh_consistent": true
+}
