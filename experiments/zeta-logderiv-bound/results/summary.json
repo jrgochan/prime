@@ -1,0 +1,14 @@
+{
+  "experiment": "zeta-logderiv-bound",
+  "target_axiom": "rh_zeta_log_deriv_bound",
+  "precision_bits": 256,
+  "threads": 12,
+  "timestamp": "2026-05-04T10:02:45.478391+00:00",
+  "c_epsilon": [{"eps": 0.0100, "C": 10.176358}, {"eps": 0.0500, "C": 2.122716}, {"eps": 0.1000, "C": 0.911317}, {"eps": 0.2500, "C": 0.491999}, {"eps": 0.5000, "C": 0.253401}, {"eps": 1.0000, "C": 0.105724}],
+  "fit_slope": 1.015460e-1,
+  "fit_intercept": 2.495264e-2,
+  "t_range": [10, 20000],
+  "n_t_values": 53,
+  "verdict": "PASS — all tested points satisfy |ζ'/ζ| ≤ C·log(2+|t|)",
+  "elapsed_seconds": 76.154
+}
