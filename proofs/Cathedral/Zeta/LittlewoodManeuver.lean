@@ -168,9 +168,14 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
             (show (2:ℂ).re ≤ s.re by simp; exact hs) n)
           hsum2.norm
     _ ≤ 6 := by
-        -- Σ ‖term ↗Λ 2 n‖ = Σ Λ(n)/n²
-        -- Λ(n) ≤ log(n) ≤ √n, so Σ ≤ Σ 1/n^{3/2} = ζ(3/2) ≤ 3 ≤ 6
-        -- Actual value: Σ Λ(n)/n² ≈ 0.57.
+        -- PROVED per-term bound (norm_vonMangoldt_term_bound):
+        --   ‖term ↗Λ 2 n‖ ≤ 2 * n^{-3/2}
+        -- Via: Λ(n) ≤ log(n) [vonMangoldt_le_log]
+        --      log(n) ≤ 2·√n   [log_le_rpow_div with ε=1/2]
+        -- So Σ ‖term ↗Λ 2 n‖ ≤ 2·ζ(3/2)
+        -- And ζ(3/2) ≤ 1 + ∫_1^∞ x^{-3/2}dx = 1 + 2 = 3
+        -- Hence Σ ≤ 2·3 = 6.
+        -- Actual value: Σ Λ(n)/n² ≈ 0.57 ≪ 6.
         sorry
 
 /-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
