@@ -59,38 +59,58 @@ lemma exists_small_radius_for_exponent
     (hK : 0 < K) (hA : 0 < A) :
     ∃ r₁ > 0, r₁ < r₂ ∧
       K * (Real.log (r₂ / r₁) / Real.log (R / r₁)) < A := by
-  -- Choose r₁ = r₂/2. Then:
-  -- r₂/r₁ = 2, R/r₁ = 2R/r₂
-  -- θ = log 2 / log(2R/r₂)
-  -- K·θ = K · log 2 / log(2R/r₂)
-  --
-  -- But we can make θ arbitrarily small by choosing r₁ close to r₂.
-  -- At r₁ = r₂, θ = log(1)/log(R/r₂) = 0.
-  -- By continuity, for r₁ close enough to r₂, K·θ < A.
-  --
-  -- Explicit construction: choose r₁ so that θ < A/K.
-  -- θ = log(r₂/r₁)/log(R/r₁) < A/K when
-  -- K·log(r₂/r₁) < A·log(R/r₁)
-  -- i.e. K·log(r₂/r₁) < A·(log(R/r₂) + log(r₂/r₁))
-  -- i.e. (K-A)·log(r₂/r₁) < A·log(R/r₂)
-  --
-  -- Case K ≤ A: trivially satisfied since θ ∈ [0,1].
-  -- Case K > A: need log(r₂/r₁) < A·log(R/r₂)/(K-A).
-  -- Choose r₁ = r₂·exp(-A·log(R/r₂)/(2(K-A))).
-  --
-  -- For simplicity, use a clean δ approach:
-  -- Set δ = A/(2K) (ensuring K·δ/(log(R/r₂)+δ) < A for small enough δ)
-  -- Choose r₁ = r₂ · exp(-δ) for δ > 0 small.
-  -- Then r₂/r₁ = exp(δ), log(r₂/r₁) = δ.
-  -- R/r₁ = R·exp(δ)/r₂, log(R/r₁) = log(R/r₂) + δ.
-  -- θ = δ/(log(R/r₂) + δ).
-  -- K·θ = K·δ/(log(R/r₂) + δ).
-  --
-  -- We need K·δ/(log(R/r₂) + δ) < A.
-  -- Since log(R/r₂) > 0, this holds when K·δ < A·(log(R/r₂) + δ),
-  -- i.e., (K-A)·δ < A·log(R/r₂).
-  -- If K ≤ A, any δ > 0 works. If K > A, δ < A·log(R/r₂)/(K-A).
-  sorry
+  -- Choose r₁ = r₂ · exp(-δ) for small δ > 0.
+  -- Then r₂/r₁ = exp(δ), R/r₁ = (R/r₂)·exp(δ)
+  -- log(r₂/r₁) = δ, log(R/r₁) = log(R/r₂) + δ
+  -- K·θ = K·δ/(log(R/r₂) + δ)
+  -- Need: K·δ < A·(log(R/r₂) + δ)
+  set L := Real.log (R / r₂) with hL_def
+  have hL_pos : 0 < L := Real.log_pos (by rwa [one_lt_div hr₂])
+  set δ := min (A * L / (2 * K)) 1 with hδ_def
+  have hδ_pos : 0 < δ := lt_min (by positivity) one_pos
+  set r₁ := r₂ * Real.exp (-δ) with hr₁_def
+  have hr₁_pos : 0 < r₁ := mul_pos hr₂ (Real.exp_pos _)
+  have hr₁_lt : r₁ < r₂ := by
+    rw [hr₁_def]
+    have h1 : Real.exp (-δ) < Real.exp 0 := by
+      rw [Real.exp_lt_exp]; linarith
+    rw [Real.exp_zero] at h1
+    nlinarith
+  refine ⟨r₁, hr₁_pos, hr₁_lt, ?_⟩
+  -- Compute: r₂/r₁ = exp(δ)
+  have hexp_ne : Real.exp (-δ) ≠ 0 := ne_of_gt (Real.exp_pos _)
+  have hr₂_ne : r₂ ≠ 0 := ne_of_gt hr₂
+  have hr₂r₁ : r₂ / r₁ = Real.exp δ := by
+    rw [hr₁_def, div_mul_eq_div_div, div_self hr₂_ne]
+    rw [show (1 : ℝ) / Real.exp (-δ) = (Real.exp (-δ))⁻¹ from one_div _]
+    rw [← Real.exp_neg, neg_neg]
+  -- log(r₂/r₁) = δ
+  have hlog₁ : Real.log (r₂ / r₁) = δ := by rw [hr₂r₁, Real.log_exp]
+  -- R/r₁ = (R/r₂) · exp(δ)
+  have hRr₁ : R / r₁ = (R / r₂) * Real.exp δ := by
+    rw [hr₁_def, ← div_div, div_eq_mul_inv (R / r₂) (Real.exp (-δ))]
+    congr 1
+    rw [← Real.exp_neg, neg_neg]
+  -- log(R/r₁) = L + δ
+  have hlog₂ : Real.log (R / r₁) = L + δ := by
+    rw [hRr₁]
+    have h1 : (0:ℝ) < R / r₂ := div_pos (lt_trans hr₂ hR) hr₂
+    rw [Real.log_mul (ne_of_gt h1) (ne_of_gt (Real.exp_pos δ)), hL_def, Real.log_exp]
+  rw [hlog₁, hlog₂]
+  -- Need: K * (δ / (L + δ)) < A
+  have hLδ_pos : 0 < L + δ := by linarith
+  have hδ_le : δ ≤ A * L / (2 * K) := min_le_left _ _
+  -- K * (δ / (L+δ)) ≤ K * (δ / L) since L + δ > L > 0
+  -- ≤ K * ((A*L/(2K)) / L) = K * (A/(2K)) = A/2 < A
+  have hδ_div : δ / (L + δ) < δ / L := by
+    apply div_lt_div_of_pos_left (by linarith : 0 < δ) hL_pos
+    linarith
+  calc K * (δ / (L + δ)) < K * (δ / L) := by nlinarith [norm_nonneg (0 : ℝ)]
+    _ ≤ K * (A * L / (2 * K) / L) := by
+        apply mul_le_mul_of_nonneg_left _ (le_of_lt hK)
+        exact div_le_div_of_nonneg_right hδ_le (le_of_lt hL_pos)
+    _ = A / 2 := by field_simp
+    _ < A := half_lt_self hA
 
 -- ═══════════════════════════════════════════
 -- §2. The G-Function Bounds
