@@ -27,6 +27,7 @@
 
 import Cathedral.Zeta.DiskBounds
 import Cathedral.Zeta.Hadamard
+import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric Set
@@ -206,16 +207,37 @@ lemma G_outer_bound_re_3
     Since α < 1, (log t)^{α-1} → 0 as t → ∞.
     So (log t)^α / log t = (log t)^{α-1} → 0 < A. -/
 lemma sub_logarithmic_bound
-    {α A : ℝ} (hα : 0 < α) (hα1 : α < 1) (hA : 0 < A) :
+    {α A : ℝ} (_hα : 0 < α) (hα1 : α < 1) (hA : 0 < A) :
     ∃ T₀ > 0, ∀ t : ℝ, T₀ ≤ t →
       (Real.log t) ^ α < A * Real.log t := by
-  -- Key: for x > 1, x^α < x since α < 1. So (log t)^α < log t when log t > 1.
-  -- For A ≥ 1: (log t)^α < log t ≤ A · log t. Take T₀ = exp(2).
-  -- For A < 1: (log t)^{α-1} → 0, so eventually < A. Take T₀ = exp((1/A)^{1/(1-α)}+1).
-  -- Unified: T₀ = max(exp 2, exp((1/A)^{1/(1-α)} + 1)) works.
-  -- For now, we use a simplified proof via rpow monotonicity.
-  -- x^α < A·x iff x^{α-1} < A. For x large enough this holds since α-1 < 0.
-  sorry
+  -- Chain: (log t)^{α-1} → 0 via tendsto_rpow_neg_atTop ∘ tendsto_log_atTop.
+  -- Extract T₀ from Metric.tendsto_atTop, then rpow_add seals it.
+  have h1mα : 0 < 1 - α := sub_pos.mpr hα1
+  have h_tend_x : Tendsto (fun x : ℝ => x ^ (-(1-α))) atTop (𝓝 0) :=
+    tendsto_rpow_neg_atTop h1mα
+  have h_tend : Tendsto (fun t : ℝ => (Real.log t) ^ (α - 1)) atTop (𝓝 0) := by
+    have : (fun t => (Real.log t) ^ (-(1-α))) = (fun t => (Real.log t) ^ (α - 1)) := by
+      ext; ring_nf
+    rw [← this]
+    exact h_tend_x.comp tendsto_log_atTop
+  rw [Metric.tendsto_atTop] at h_tend
+  obtain ⟨N, hN⟩ := h_tend A hA
+  refine ⟨max N (Real.exp 2), lt_of_lt_of_le (Real.exp_pos 2) (le_max_right _ _), fun t ht => ?_⟩
+  have hN_le : N ≤ t := le_trans (le_max_left _ _) ht
+  have hexp_le : Real.exp 2 ≤ t := le_trans (le_max_right _ _) ht
+  have hlog_ge2 : (2 : ℝ) ≤ Real.log t := by
+    rwa [← Real.log_exp 2, Real.log_le_log_iff (Real.exp_pos 2)
+      (lt_of_lt_of_le (Real.exp_pos 2) hexp_le)]
+  have hlog_pos : 0 < Real.log t := by linarith
+  have h_dist := hN t hN_le
+  rw [Real.dist_eq, sub_zero] at h_dist
+  have h_rpow_pos : 0 < Real.log t ^ (α - 1) := rpow_pos_of_pos hlog_pos _
+  rw [abs_of_pos h_rpow_pos] at h_dist
+  have h_mul : Real.log t ^ (α - 1) * Real.log t < A * Real.log t := by nlinarith
+  have h_rpow_eq : Real.log t ^ (α - 1) * Real.log t = Real.log t ^ α := by
+    have := rpow_add hlog_pos (α - 1) 1
+    rw [rpow_one, sub_add_cancel] at this; linarith
+  linarith
 
 -- ═══════════════════════════════════════════
 -- §5. The Full Littlewood Maneuver Assembly
