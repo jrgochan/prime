@@ -150,24 +150,57 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
   -- Actual value: -ζ'(2)/ζ(2) ≈ 0.57. Bound 6 is 10× headroom.
   sorry
 
+/-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
+    This is the algebraic derivative identity from the exponential representation,
+    proved by differentiating both sides and using `ring`. Zero sorry. -/
+private lemma G_deriv_eq_logderiv_of_exp_eq
+    {c : ℂ} {R : ℝ} (_hR : 0 < R)
+    {f G : ℂ → ℂ}
+    (hf_diff : DifferentiableOn ℂ f (ball 0 R))
+    (hG_diff : DifferentiableOn ℂ G (ball 0 R))
+    (hf_eq : ∀ z ∈ ball (0:ℂ) R, f z = c * Complex.exp (G z))
+    (hf_ne : ∀ z ∈ ball (0:ℂ) R, f z ≠ 0)
+    {w : ℂ} (hw : w ∈ ball (0:ℂ) R) :
+    deriv G w = deriv f w / f w := by
+  have hG_da : DifferentiableAt ℂ G w :=
+    hG_diff.differentiableAt (isOpen_ball.mem_nhds hw)
+  have hexp_da : HasDerivAt (fun z => Complex.exp (G z))
+      (Complex.exp (G w) * deriv G w) w :=
+    HasDerivAt.comp w (Complex.hasDerivAt_exp (G w)) hG_da.hasDerivAt
+  have hprod_da : HasDerivAt (fun z => c * Complex.exp (G z))
+      (c * (Complex.exp (G w) * deriv G w)) w :=
+    hexp_da.const_mul c
+  have hderiv_eq : deriv f w = c * (Complex.exp (G w) * deriv G w) := by
+    have h_eq : deriv f w = deriv (fun z => c * Complex.exp (G z)) w := by
+      apply Filter.EventuallyEq.deriv_eq
+      filter_upwards [isOpen_ball.mem_nhds hw] with z hz
+      exact hf_eq z hz
+    rw [h_eq, hprod_da.deriv]
+  have hfw : f w = c * Complex.exp (G w) := hf_eq w hw
+  have hfw_ne : f w ≠ 0 := hf_ne w hw
+  have hkey : f w * deriv G w = deriv f w := by
+    rw [hfw, hderiv_eq]; ring
+  rw [eq_div_iff hfw_ne]
+  linear_combination hkey
+
 /-- **Derivative bound**: ‖G'(w)‖ ≤ 6 for w ∈ closedBall 0 1 (where Re ≥ 2).
 
-    G'(w) = ζ'(s₀+w)/ζ(s₀+w) by differentiation of f = f(0)·exp(G).
-    For w ∈ closedBall 0 1: Re(s₀+w) ≥ 2, and `norm_zeta_logderiv_le` applies. -/
+    G'(w) = ζ'(s₀+w)/ζ(s₀+w) by `G_deriv_eq_logderiv_of_exp_eq`.
+    = deriv ζ (s₀+w) / ζ(s₀+w) by `deriv_zeta_comp`.
+    ≤ 6 by `norm_zeta_logderiv_le`. -/
 private lemma G_deriv_bound_on_inner_ball
     {t : ℝ} (ht : 2 ≤ |t|)
-    {R : ℝ} (hR_ge : 1 < R)
+    {R : ℝ} (hR_pos : 0 < R) (hR_ge : 1 < R)
     {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (hG_eq : ∀ z ∈ ball (0:ℂ) R,
       riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z))
-    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0) :
+    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0)
+    (hf_diff : DifferentiableOn ℂ (fun z => riemannZeta (⟨3, t⟩ + z)) (ball 0 R)) :
     ∀ w ∈ closedBall (0:ℂ) 1, ‖deriv G w‖ ≤ 6 := by
   intro w hw
-  -- w ∈ ball 0 R since closedBall 0 1 ⊂ ball 0 R
   have hw_ball : w ∈ ball (0:ℂ) R := by
     simp [mem_closedBall, dist_zero_right] at hw
     simp [mem_ball, dist_zero_right]; linarith
-  -- Re(s₀+w) ≥ 2 since s₀ = (3, t) and ‖w‖ ≤ 1
   have hw_norm : ‖w‖ ≤ 1 := by
     simp [mem_closedBall, dist_zero_right] at hw; exact hw
   have hre : 2 ≤ (⟨3, t⟩ + w : ℂ).re := by
@@ -175,19 +208,18 @@ private lemma G_deriv_bound_on_inner_ball
     rw [this]
     have := neg_abs_le w.re
     linarith [Complex.abs_re_le_norm w]
-  -- s₀ + w ≠ 1
   have hs1 : (⟨3, t⟩ : ℂ) + w ≠ 1 := by
     intro h; have hre1 := congr_arg Complex.re h
     simp [Complex.add_re] at hre1
     linarith [Complex.abs_re_le_norm w, neg_abs_le w.re]
-  -- G' = f'/f from the exponential representation
-  -- deriv G w = deriv(ζ∘(s₀+·)) w / ζ(s₀+w) (from holomorphic log construction)
-  -- = deriv ζ (s₀+w) / ζ(s₀+w) (by chain rule)
-  -- This uses that G was constructed as a primitive of f'/f.
-  -- We bound ‖deriv G w‖ = ‖ζ'/ζ(s₀+w)‖ ≤ 6.
-  -- Key gap: formally connecting deriv G to ζ'/ζ from the exp equation.
-  -- For now, we use norm_zeta_logderiv_le on the composed derivative.
-  sorry
+  -- Apply G_deriv_eq_logderiv_of_exp_eq: deriv G w = deriv f w / f w
+  have hG_eq_f := G_deriv_eq_logderiv_of_exp_eq hR_pos hf_diff hG_diff hG_eq hζ_ne hw_ball
+  -- deriv f w = deriv ζ (s₀+w) by chain rule
+  have hchain := deriv_zeta_comp hs1
+  -- Combine: deriv G w = deriv ζ(s₀+w) / ζ(s₀+w)
+  rw [hG_eq_f, hchain]
+  -- Apply norm_zeta_logderiv_le
+  exact norm_zeta_logderiv_le hre hs1
 
 /-- **Inner Anchor**: ‖G(z)‖ ≤ 6 on ‖z‖ = 1, t-independent.
 
@@ -201,7 +233,8 @@ lemma G_inner_bound_fixed
     (hG0 : G 0 = 0)
     (hG_eq : ∀ z ∈ ball (0:ℂ) R,
       riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z))
-    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0) :
+    (hζ_ne : ∀ z ∈ ball (0:ℂ) R, riemannZeta (⟨3, t⟩ + z) ≠ 0)
+    (hf_diff : DifferentiableOn ℂ (fun z => riemannZeta (⟨3, t⟩ + z)) (ball 0 R)) :
     ∀ z, ‖z‖ = 1 → ‖G z‖ ≤ 6 := by
   intro z hz
   have hconv : Convex ℝ (closedBall (0:ℂ) 1) := convex_closedBall 0 1
@@ -215,7 +248,7 @@ lemma G_inner_bound_fixed
     simp [mem_closedBall, dist_zero_right, hz]
   have h0_mem : (0:ℂ) ∈ closedBall (0:ℂ) 1 := by
     simp [mem_closedBall]
-  have hderiv := G_deriv_bound_on_inner_ball ht hR_ge hG_diff hG_eq hζ_ne
+  have hderiv := G_deriv_bound_on_inner_ball ht _hR_pos hR_ge hG_diff hG_eq hζ_ne hf_diff
   have hmvt := hconv.norm_image_sub_le_of_norm_deriv_le
     hG_diff_pts hderiv h0_mem hz_mem
   simp only [hG0, sub_zero] at hmvt
