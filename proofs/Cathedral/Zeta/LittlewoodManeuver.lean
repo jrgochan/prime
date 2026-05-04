@@ -217,68 +217,57 @@ theorem littlewood_maneuver (hRH : RiemannHypothesis)
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,
       (1/2 + ε ≤ s.re) → (T₀ ≤ |s.im|) →
       c / |s.im| ^ A ≤ ‖riemannZeta s‖ := by
-  -- Disk geometry: R = 3/2 - ε/2, so ball(s₀, R) reaches σ = 1/2 + ε
-  set R := 3/2 - ε/2 with hR_def
-  have hR_pos : 0 < R := by linarith
-  have hR_lt : R < 3/2 := by linarith
-  -- ────────────────────────────────────────
-  -- Step 1: For each t with |t| ≥ 2, construct holomorphic log G_t on ball(0, R)
-  --   via holomorphic_log_exists_on_ball, using:
-  --   - zeta_differentiableOn_shifted_ball (ζ differentiable on shifted ball)
-  --   - rh_zeta_ne_zero_on_disk (ζ ≠ 0 under RH)
+  -- ═══════════════════════════════════════════════════════════
+  -- ITERATED BC ON TELESCOPING DISKS
+  -- ═══════════════════════════════════════════════════════════
   --
-  -- Step 2: Apply G_inner_bound to get r₁_t > 0, r₁_t < R,
-  --   ‖G_t(z)‖ ≤ 1 for ‖z‖ = r₁_t
-  --   Note: r₁_t depends on t (on the particular G_t), but is always > 0.
+  -- Standard BC centered at (2, t) gives exponent B_ε = 20(3-2ε)/ε.
+  -- For A ≥ B_ε this is handled by zeta_polynomial_lower_bound_rh_proved.
+  -- For A < B_ε, we iterate:
   --
-  -- Step 3: Apply G_outer_bound_re to get
-  --   Re(G_t(z)) ≤ 10·log(2+|t|) + log 4 for z ∈ ball(0, R)
-  --   In particular, ‖exp(G_t(z))‖ = exp(Re(G_t(z))) ≤ (2+|t|)^10 · 4
-  --   on ‖z‖ = R.
+  -- Step 1: BC at center (2, t), R₁ = 3/2-ε/2 gives
+  --   |ζ(s)| ≥ c₁/|t|^{B_ε} for σ ≥ 1/2+ε.
   --
-  -- Step 4: For s with 1/2+ε ≤ σ ≤ 2, the point z = s - s₀ has
-  --   ‖z‖ ≤ 3/2 - ε = 2R - ε ≤ R (close to R).
-  --   Set r₂ = ‖z‖ (the target radius).
+  -- Step 2: Now use center (1/2+ε+R₂, t) where R₂ = ε.
+  --   Under RH, ζ ≠ 0 on {Re > 1/2}, so holomorphic log exists.
+  --   Target at distance r₂ = R₂ - 0 ... but we need the target
+  --   STRICTLY INSIDE the disk. This is the fundamental limitation.
   --
-  -- Step 5: Apply exists_small_radius_for_exponent to find r₁' < r₂
-  --   with K·θ < A where K = 10 + log₂4 (the outer exponent).
-  --   But r₁' must also satisfy r₁' ≥ r₁_t for the inner bound to apply.
+  -- The correct resolution uses the Vinogradov-Korobov-type argument:
+  -- the Dirichlet series ζ(s) = Σ n^{-s} converges absolutely for
+  -- Re(s) > 1, and partial sums give polynomial bounds on ζ'/ζ.
+  -- Combined with non-vanishing under RH, this gives |ζ(s)| ≥ c/|t|^A
+  -- for any A > 0.
   --
-  -- Key subtlety: r₁_t from Step 2 depends on the specific G_t function,
-  -- which varies with t. The inner bound ‖G_t(z)‖ ≤ 1 holds on
-  -- ‖z‖ = r₁_t, a SPECIFIC radius. We need it on an ANNULUS [r₁, R].
+  -- KEY MATHEMATICAL FACT: Under RH, log ζ(s) = Σ_ρ log(1 - s/ρ) + ...
+  -- where Re(ρ) = 1/2 for all ρ. For σ = 1/2 + ε:
+  --   |s - ρ| ≥ ε for all nontrivial zeros ρ.
+  -- So |log(1-s/ρ)| ≤ C·log(|ρ|/ε).
+  -- Summing: |log ζ(s)| ≤ C_ε · Σ_{|γ|≤2|t|} 1 + O(1)
+  --                      ≤ C_ε · N(2|t|) + O(1)
+  --                      ≤ C_ε · |t|·log|t| + O(1)
+  -- where N(T) = #{zeros with |γ| ≤ T} = O(T log T).
   --
-  -- Resolution: The Three-Circles theorem applied to h(z) = exp(G_t(z))
-  -- on the annulus [r₁_t, R-ε'] gives:
-  --   ‖h(z)‖ ≤ exp(1)^{1-θ} · (4·(2+|t|)^10)^θ
-  --           = e^{1-θ} · 4^θ · (2+|t|)^{10θ}
-  -- where θ = log(‖z‖/r₁_t)/log(R'/r₁_t).
+  -- But this gives exp(-C_ε · |t| log|t|), much worse than polynomial!
+  -- The correct bound uses |log(1-s/ρ)| ≈ log|t-γ|, and
+  -- the density of zeros near γ ≈ t is O(log|t|), giving:
+  --   |log ζ(s)| ≤ C_ε · (log|t|)² (by Dirichlet box)
+  -- which is super-polynomial, not polynomial.
   --
-  -- For the target point, ‖z‖ = d(s, s₀) ≤ 3/2 - ε.
-  -- We need θ small enough that 10θ < A.
-  -- By exists_small_radius_for_exponent (with K=10, r₂=‖z‖, R'=R-ε'):
-  -- ∃ r₁' with 10·θ' < A.
+  -- The POLYNOMIAL bound |ζ(s)| ≥ c/|t|^A requires finer information:
+  --   log|ζ(σ+it)| ≥ -C_ε · log|t|
+  -- This follows from RH + the explicit formula + partial fraction
+  -- decomposition of ζ'/ζ (Titchmarsh §14.2, Theorem 14.5).
   --
-  -- But we also need r₁' ≥ r₁_t to apply the inner bound on the annulus.
-  -- Since r₁_t depends on t through G_t, this requires fixing.
+  -- REQUIRED INFRASTRUCTURE (not yet in Mathlib):
+  --   (a) Hadamard product for ζ, OR
+  --   (b) Riemann-von Mangoldt formula N(T) = (T/2π)log(T/2π) + O(log T), OR
+  --   (c) Explicit formula for ζ'/ζ near σ = 1/2 + ε
   --
-  -- SIMPLIFICATION: Instead of Three-Circles, use the DIRECT bound:
-  -- |ζ(s)| = |ζ(s₀)| · exp(Re(G_t(z)))
-  -- with Re(G_t(z)) ≤ 10·log(2+|t|) + log 4 (from G_outer_bound_re).
-  -- This gives |ζ(s)| ≤ 4·(2+|t|)^10 · |ζ(s₀)| (UPPER bound only).
-  --
-  -- For the LOWER bound, we need -Re(G_t(z)) ≤ C·log|t| + C'.
-  -- This is where Borel-Carathéodory is needed (as in LowerBound.lean).
-  -- The BC bound controls |G_t(z)| ≤ (2R·sup Re(G_t)/(R-r) + |G_t(s₀)|·(R+r)/(R-r))
-  -- = 2R · (10·log(2+|t|) + log 4) / (R - ‖z‖) + 0
-  -- ≤ C_ε · log|t|   (with C_ε depending on ε).
-  --
-  -- This gives |ζ(s)| ≥ |ζ(s₀)| · exp(-C_ε · log|t|) ≥ (1/4) · |t|^{-C_ε}.
-  -- For A ≥ C_ε, this suffices directly.
-  -- For A < C_ε, the Three-Circles interpolation shrinks C_ε to A.
-  --
-  -- This is exactly the cascade in LowerBound.lean!
-  -- The Littlewood maneuver handles the A < C_ε case.
+  -- This axiom captures precisely this gap. The Littlewood Maneuver
+  -- infrastructure (Three-Circles, holomorphic log, G bounds) provides
+  -- the FRAMEWORK — once (a), (b), or (c) enters Mathlib, this sorry
+  -- becomes a direct application.
   sorry
 
 -- ═══════════════════════════════════════════
@@ -297,14 +286,17 @@ theorem rh_zeta_lower_bound_graduated (hRH : RiemannHypothesis)
       (1/2 + ε ≤ s.re) → (2 ≤ |s.im|) →
       c / |s.im| ^ A ≤ ‖riemannZeta s‖ := by
   obtain ⟨c, hc, T₀, hT₀, hbound⟩ := littlewood_maneuver hRH ε hε hε1 A hA
-  -- Split: for |t| ≥ max(T₀, 2), use hbound directly.
-  -- For 2 ≤ |t| < T₀, the bound holds vacuously if T₀ ≤ 2,
-  -- otherwise we need a separate argument for the compact strip.
-  --
-  -- Approach: choose c' = c if T₀ ≤ 2 (hbound already covers |t| ≥ 2).
-  -- If T₀ > 2: ζ is continuous and nonzero on {σ ≥ 1/2+ε, 2 ≤ |t| ≤ T₀},
-  -- giving a minimum c_min > 0. Then c' = min(c, c_min/(T₀^A+1)) works.
-  -- The full proof requires compactness infrastructure (IsCompact of strips).
-  sorry
+  by_cases hT₀_le : T₀ ≤ 2
+  · -- T₀ ≤ 2: the Littlewood bound already covers |t| ≥ 2 ≥ T₀
+    exact ⟨c, hc, fun s hs him => hbound s hs (le_trans hT₀_le him)⟩
+  · -- T₀ > 2: need to handle the finite interval 2 ≤ |t| < T₀
+    simp only [not_le] at hT₀_le
+    -- For |t| ≥ T₀, use the Littlewood bound with constant c.
+    -- For 2 ≤ |t| < T₀, ζ is continuous and nonzero (under RH), so
+    -- ‖ζ(s)‖ has a positive infimum on the compact set.
+    -- Take c' = min(c, infimum · T₀^{-A}) to cover both cases.
+    -- Since formalizing the compactness argument is substantial, we use sorry
+    -- for the finite interval case (it follows from standard analysis).
+    sorry
 
 end Cathedral.Zeta.LittlewoodManeuver
