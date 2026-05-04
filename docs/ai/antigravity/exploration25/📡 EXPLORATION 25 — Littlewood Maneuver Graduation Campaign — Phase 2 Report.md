@@ -161,13 +161,94 @@ The **bypass** is Gemini's integral approach: avoid the topology entirely by com
 
 ---
 
+## 🔍 Cathedral & Archive Scan Results
+
+### CRITICAL DISCOVERY: `LSeries_vonMangoldt_eq_deriv_riemannZeta_div` in Mathlib
+
+**Location:** `Mathlib.NumberTheory.LSeries.Dirichlet` (line 434)
+
+```lean
+lemma LSeries_vonMangoldt_eq_deriv_riemannZeta_div {s : ℂ} (hs : 1 < s.re) :
+    L ↗Λ s = - deriv riemannZeta s / riemannZeta s
+```
+
+**This is −ζ'/ζ(s) = L(Λ, s) formalized!** The Dirichlet series for the log-derivative is already in Mathlib. Combined with `LSeriesSummable_vonMangoldt` (summability for Re > 1), this opens Gemini's integral bound approach:
+
+1. `L(Λ, s) = -ζ'/ζ(s)` for Re(s) > 1 ✅ (Mathlib)
+2. `LSeriesSummable_vonMangoldt` for Re(s) > 1 ✅ (Mathlib)
+3. `‖L(Λ, s)‖ ≤ L(|Λ|, σ)` (triangle inequality on Dirichlet series)
+4. For σ = 2: `L(|Λ|, 2) = -ζ'(2)/ζ(2) ≈ 0.57`
+5. So `‖ζ'/ζ(s)‖ ≤ 0.57` for Re(s) ≥ 2
+6. By MVT: `‖G(z)‖ ≤ 0.57 · ‖z‖ ≤ 0.57 ≤ 6` on ‖z‖ = 1
+
+> [!IMPORTANT]
+> **Nobody in the Cathedral is currently using this Mathlib lemma.** It is an untapped resource that could directly solve the Inner Anchor.
+
+### Existing Proof Pattern: `Cathedral/Zeta/LowerBound.lean`
+
+**Status:** Zero sorry in this file (delegates one case to `Hadamard.lean`)
+
+`LowerBound.lean` already implements the **identical proof pattern** our Littlewood Maneuver needs, centered at s₀ = (2, t) with R = 3/2 - ε/2:
+
+| Step | LowerBound.lean | LittlewoodManeuver.lean |
+|------|:---:|:---:|
+| Center | s₀ = (2, t) | s₀ = (3, t) |
+| Radius | R = 3/2 − ε/2 | r₃ = 5/2 − ε/2 |
+| Hol. log | `holomorphic_log_exists_on_ball` ✅ | Same tool available |
+| Upper bound | `zeta_norm_bound_on_disk` ✅ | Needs (3,t)-centered version |
+| Lower bound | `zeta_sub_one_norm_le_three_fourths` ✅ | Same |
+| RH nonzero | `rh_zeta_ne_zero` ✅ | Same |
+| BC application | `borelCaratheodory_zero` ✅ | Needs Three-Circles instead |
+
+> [!TIP]
+> The LittlewoodManeuver could potentially **import LowerBound's proof directly** for the A ≥ B_ε case, and only use the Three-Circles approach for A < B_ε where the sub-logarithmic improvement matters.
+
+### Key DiskBounds Infrastructure (all zero-sorry)
+
+| Theorem | What it gives |
+|---------|---------------|
+| `rh_zeta_ne_zero` | Under RH: ζ(s) ≠ 0 for Re(s) > 1/2 |
+| `zeta_sub_one_norm_le_three_fourths` | ‖ζ(s) − 1‖ ≤ 3/4 for Re(s) ≥ 2 |
+| `holomorphic_log_exists_on_ball` | ∃ G analytic, G(c)=0, f = f(c)·exp(G) |
+| `zeta_norm_bound_on_disk` | ‖ζ(⟨2,t⟩+z)‖ ≤ (2+|t|)^10 on ball(0,R) |
+| `s_ne_one_on_disk` | s=1 excluded from ball |
+| `re_gt_half_on_disk` | Re(s₀+z) > 1/2 on disk |
+
+### Perron Compactness Pattern (`VerticalBounds.lean`)
+
+**Lines 200-215:** Uses `IsCompact.exists_isMinOn isCompact_Icc` to extract a minimum of ‖ζ‖ on a compact interval. This is the **exact pattern** needed for sorry 4 (compactness):
+
+```lean
+obtain ⟨t_min, ht_min_mem, ht_min_val⟩ :=
+    IsCompact.exists_isMinOn isCompact_Icc
+      (⟨0, by constructor <;> linarith⟩ : (Set.Icc (-T₀) T₀).Nonempty)
+      hg_cont.continuousOn
+```
+
+### Perron Winding Number Work (`Archive/White/Infrastructure/PerronKernel.lean`)
+
+Contains working `Complex.arg` manipulation (lines 295-340):
+- `Complex.arg_lt_pi_iff`, `arg_neg_eq_arg_add_pi_of_im_neg`
+- `Complex.log_conj`, `Complex.log_im`
+- Four-corner logarithm identity with 2πi winding number
+
+This demonstrates that `Complex.arg` bounds ARE formalizable in our Lean setup, though the PerronKernel context is different from our Inner Anchor needs.
+
+### Hadamard Three-Circles (`Hadamard.lean`)
+
+**Status:** Zero sorry. Already imports `isCompact_closedBall` and uses annulus compactness.
+
+`hadamard_three_circles` (line 159) is the Three-Circles theorem, ready for the assembly.
+
+---
+
 ## Recommendations for Next Session
 
-1. **Outer Bound (sorry 2):** Most tractable. Wire `zeta_norm_convexity_bound` into the case-split. The convexity bound is already zero-sorry.
+1. **Outer Bound (sorry 2):** Most tractable. Wire `zeta_norm_convexity_bound` into the case-split. The convexity bound is already zero-sorry. May need a (3,t)-centered variant of `zeta_norm_bound_on_disk`.
 
-2. **Inner Anchor (sorry 1):** Two options:
-   - **Fast path:** Shrink inner radius to ¾, adjust geometry. Avoids all topology.
-   - **Proper path:** Formalize Σ Λ(n)/n² ≤ 1 using partial sums + tail bound. Then ‖ζ'/ζ‖ ≤ 4 on Re ≥ 2, and MVT gives ‖G‖ ≤ 4.
+2. **Inner Anchor (sorry 1) — PATH UNLOCKED BY SCAN:**
+   - **New primary path:** Use `LSeries_vonMangoldt_eq_deriv_riemannZeta_div` from Mathlib to get `−ζ'/ζ = L(Λ, s)`. Then bound `‖L(Λ, 2)‖` using `LSeriesSummable_vonMangoldt` + triangle inequality. This gives `‖G'‖ ≤ C` on Re ≥ 2. Apply `norm_image_sub_le_of_norm_deriv_le` (MVT) to get `‖G(z)‖ ≤ C`.
+   - **Fallback:** Shrink inner radius to ¾, adjust geometry.
 
 3. **Compactness (sorry 4):** Standard once sorry 3 is done. Use `IsCompact.exists_isMinOn`.
 
