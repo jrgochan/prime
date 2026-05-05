@@ -50,6 +50,7 @@ members = [
     "experiments/series-decomposition-verifier",
     "experiments/moebius-microscope",
     "experiments/two-tile-decomposition",
+    "experiments/gram-scaling-oracle",
 ]
 
 [profile.release]

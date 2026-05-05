@@ -1,0 +1,23 @@
+[package]
+name = "gram-scaling-oracle"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral Gram Scaling Oracle — Algebraic autopsy of the N=120K Gram matrix.
+Extracts the α≈0.855 scaling limit using purely rational/algebraic properties
+of the Gram matrix G_{jk} = ∫₀¹ {j/t}{k/t} dt, bypassing the complex plane.
+
+Phase 1: GCD-class decomposition of G_N into coprimality blocks
+Phase 2: Spectral analysis within each block
+Phase 3: Rational recurrence hunting in eigenvalue sequences
+Phase 4: α extraction from block structure
+"""
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rug = { version = "1.26", features = ["float"] }
+rayon = "1.10"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+chrono = "0.4"
