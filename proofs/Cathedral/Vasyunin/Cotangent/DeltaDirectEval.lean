@@ -793,8 +793,69 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
     ∑ r ∈ Finset.Icc 1 (b - 1),
       Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (f r - f (r - 1)) -
     f (b - 1) := by
-  -- The proof expands J(m) = ⌊a(m+1)/b⌋ - ⌊am/b⌋ as a/b + frac diff,
-  -- sums J(m)·f(m) = Σ_{TT∪{b-1}} f(m), then subtracts f(b-1).
+  -- Strategy: Σ_{TT} f(m) = Σ_{step filter} f(m) - f(b-1)
+  -- where step filter = {m ∈ Icc 1 (b-1) : J(m) > 0}
+  -- and Σ_{step filter} f(m) = Σ_{m=0}^{b-1} J(m)·f(m)  (since J∈{0,1})
+  -- Then expand J(m) = a/b + {am/b} - {a(m+1)/b} and Abel-sum.
+  --
+  -- However, the Abel summation by parts in the fractional-part expansion
+  -- is a deep calculation. We use the already-proved infrastructure:
+  --   tt_eq_erase: twoTileSet = step_filter.erase (b-1)
+  -- Combined with sum_erase_eq to subtract f(b-1).
+  --
+  -- For the Abel expansion of the step-filter sum, we work in ℝ.
+
+  -- Step 1: twoTileSet = step_filter \ {b-1}
+  have h_tt := tt_eq_erase a b ha hb hab hcop
+  have h_bdry := bdry_in_step a b ha hb hab
+
+  -- Step 2: Σ_{TT} f = Σ_{step} f - f(b-1)
+  rw [h_tt, Finset.sum_erase_eq_sub f h_bdry]
+
+  -- Step 3: Σ_{step} f = Σ_{m ∈ Icc 1 (b-1)} J(m)·f(m)
+  -- where J(m) = a*(m+1)/b - a*m/b ∈ {0,1}
+  -- For J ∈ {0,1}: Σ (J(m) * f(m) : m with J(m) > 0) = Σ J(m)·f(m) over all m
+  have h_J01 : ∀ m ∈ Icc 1 (b-1),
+      (a * (m+1) / b - a * m / b : ℕ) ≤ 1 :=
+    fun m _ => by have := floor_step_le_one a b m (le_of_lt hab) (by omega); omega
+
+  -- The sum over the filter = sum of J(m)·f(m) over Icc
+  have h_filter_sum :
+      ∑ m ∈ (Icc 1 (b-1)).filter (fun m => 0 < a * (m+1) / b - a * m / b), f m =
+      ∑ m ∈ Icc 1 (b-1), (a * (m+1) / b - a * m / b : ℝ) * f m := by
+    conv_rhs => rw [show ∀ m, (a * (m+1) / b - a * m / b : ℝ) * f m =
+      ((a * (m+1) / b - a * m / b : ℕ) : ℝ) * f m from fun m => by
+        push_cast; ring]
+    rw [← Finset.sum_filter_of_ne]
+    apply Finset.sum_congr rfl
+    intro m hm
+    obtain ⟨_, hJ⟩ := Finset.mem_filter.mp hm
+    have hJ1 := h_J01 m (Finset.mem_filter.mp hm).1
+    have : (a * (m+1) / b - a * m / b : ℕ) = 1 := by omega
+    rw [this, Nat.cast_one, one_mul]
+    intro m hm hf
+    simp only [Finset.mem_filter] at hm ⊢
+    constructor
+    · exact hm
+    · intro hJ0
+      have : (a * (m+1) / b - a * m / b : ℕ) = 0 := by omega
+      simp [this] at hf
+
+  -- Step 4: Now we need to show:
+  -- Σ_{Icc} J(m)·f(m) = (a/b)·Σ_{range b} f(m) + Σ_{Icc} {ar/b}·(f(r)-f(r-1))
+  --
+  -- This is the Abel summation by parts identity for J(m) = a/b + frac_diff.
+  -- J(m) = (a*(m+1)/b - a*m/b : ℝ) but in ℕ.
+  -- In ℝ: a*(m+1)/b = ⌊a*(m+1)/b⌋ + {a*(m+1)/b}
+  -- So J(m) as ℝ = (a/b) + {a*m/b} - {a*(m+1)/b}  (by cancellation of integer parts)
+  --
+  -- This requires a careful Abel summation by parts argument.
+  -- We defer this final algebraic identity to native_decide / norm_num
+  -- or to a separate lemma.
+
+  -- For now, the structural decomposition (erase + subtract) is established.
+  -- The algebraic identity Σ J·f = (a/b)Σf + Σ{ar/b}(f(r)-f(r-1)) is
+  -- a real-analysis Abel summation by parts.
   sorry
 
 -- ══════════════════════════════════════════════════════════════════
