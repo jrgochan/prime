@@ -199,6 +199,8 @@ lean_lib «Cathedral» where
     -- Gamma multiplication formula (Gauss, via Stirling)
     `Cathedral.Analysis.GammaProductEval,
     `Cathedral.Analysis.GammaMultiplication,
+    -- Floor-fract infrastructure (ℕ division ↔ ℝ fractional parts, ZERO SORRY)
+    `Cathedral.Analysis.FloorFract,
     -- Zeta convexity bound (WIP)
     `Cathedral.Zeta.ConvexityBound,
     -- Zeta disk geometry & upper bounds (zero sorry)

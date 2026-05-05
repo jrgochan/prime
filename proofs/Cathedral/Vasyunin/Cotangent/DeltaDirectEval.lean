@@ -37,6 +37,7 @@ import Cathedral.Vasyunin.Cotangent.FractSeriesEval
 import Cathedral.Vasyunin.Cotangent.GeneralResidueEval
 import Cathedral.Vasyunin.Cotangent.FractTargetEval
 import Cathedral.Analysis.GammaMultiplication
+import Cathedral.Analysis.FloorFract
 
 noncomputable section
 open Real MeasureTheory Filter Finset
@@ -889,7 +890,76 @@ lemma overshoot_coeff_eq_neg_fract (a b m₀ : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b
   -- b(k+1) = am₀ - (am₀ mod b) + b, so b(k+1) ≡ a - s (mod a)
   -- Since 0 < a - s < a, Int.fract(b(k+1)/a) = (a-s)/a
   -- Requires: zify, Int.ediv_add_emod, omega
-  sorry
+  -- Use FloorFract: {b*(k+1)/a} = (b*(k+1) % a) / a
+  rw [show (b:ℝ) * ((k:ℝ) + 1) = ((b * (k + 1) : ℕ) : ℝ) from by push_cast; ring]
+  rw [Cathedral.Analysis.FloorFract.int_fract_eq_nat_mod_div b (k + 1) a]
+  -- Now need: (b*(k+1) % a : ℝ) / a = (a - s : ℝ) / a
+  -- Suffices: (b*(k+1) % a : ℕ) = a - s (as ℕ)
+  congr 1
+  -- k = a*m₀/b by definition
+  -- Euclidean: a*m₀ = b*k + (a*m₀ % b)
+  -- So: b*(k+1) = b*k + b = a*m₀ - (a*m₀ % b) + b
+  -- s = a*(m₀+1) - b*(k+1) = a*m₀ + a - (a*m₀ - (a*m₀ % b) + b) = a + (a*m₀ % b) - b
+  -- a - s = b - (a*m₀ % b)
+  -- b*(k+1) = a*m₀ - (a*m₀ % b) + b
+  -- b*(k+1) % a = (a*m₀ - (a*m₀ % b) + b) % a
+  --             = (b - (a*m₀ % b)) % a   (since a*m₀ ≡ 0 mod a)
+  --             = (a - s) % a = a - s    (since 0 < a - s < a)
+  have h_euclid : a * m₀ = b * k + a * m₀ % b := by
+    rw [h_k_def]; exact (Nat.div_add_mod (a * m₀) b).symm
+  -- b*k = a*m₀ - a*m₀ % b
+  have h_bk : b * k = a * m₀ - a * m₀ % b := by
+    have := Nat.mod_le (a * m₀) b; omega
+  -- b*(k+1) = b*k + b
+  have h_bk1 : b * (k + 1) = b * k + b := by ring
+  -- s = a*(m₀+1) - b*(k+1) = a*m₀ + a - b*k - b
+  -- = a*m₀ + a - (a*m₀ - a*m₀%b) - b = a + a*m₀%b - b
+  have h_mod_lt_b : a * m₀ % b < b := Nat.mod_lt _ (by omega)
+  have h_s_eq : s = a + a * m₀ % b - b := by
+    -- All ℕ subtractions are safe; move to ℤ where subtraction is total
+    -- s = a*(m₀+1) - b*(k+1) and b*(k+1) = a*m₀ + b - a*m₀%b
+    suffices h : (s : ℤ) = (a : ℤ) + ↑(a * m₀ % b) - (b : ℤ) by
+      omega
+    -- In ℤ: s = a*(m₀+1) - b*(k+1)
+    have hs_z : (s : ℤ) = (a : ℤ) * ((m₀ : ℤ) + 1) - (b : ℤ) * ((k : ℤ) + 1) := by
+      simp only [s]; push_cast [Nat.cast_sub (le_of_lt h_tt)]; ring
+    -- In ℤ: b*k = a*m₀ - a*m₀%b
+    have hbk_z : (b : ℤ) * (k : ℤ) = (a : ℤ) * (m₀ : ℤ) - ↑(a * m₀ % b) := by
+      have := h_euclid; push_cast at this ⊢; linarith
+    -- Combine: s = a*m₀ + a - b*k - b = a*m₀ + a - (a*m₀ - a*m₀%b) - b = a + a*m₀%b - b
+    linarith
+  -- Need: a*m₀ % b < b and a*m₀ % b ≥ b - a + 1 (i.e., a + a*m₀%b ≥ b + 1)
+  -- s > 0 iff a + a*m₀%b > b, which holds since m₀ is in twoTileSet
+  -- (the two-tile condition ensures b*(k+1) < a*(m₀+1), so s > 0)
+  have h_s_pos : 0 < s := by simp only [s]; omega
+  have h_s_lt_a : s < a := by
+    rw [h_s_eq]; omega
+  -- a - s = b - a*m₀ % b (in ℕ, both sides are well-defined)
+  have h_a_minus_s : a - s = b - a * m₀ % b := by
+    rw [h_s_eq]; omega
+  -- b*(k+1) % a = (b*k + b) % a
+  -- b*k = a*m₀ - a*m₀%b, which ≡ -(a*m₀%b) (mod a) since a*m₀ ≡ 0 (mod a)
+  -- Actually b*k + b ≡ b - (a*m₀%b) (mod a) since a*m₀ is divisible by a
+  -- Wait: a*m₀ IS divisible by a. So b*k = a*m₀ - a*m₀%b.
+  -- b*k mod a = (a*m₀ - a*m₀%b) mod a = (0 - a*m₀%b) mod a = (a - a*m₀%b mod a) mod a
+  -- This is tricky. Let me use the concrete substitution.
+  -- b*(k+1) = a*m₀ - a*m₀%b + b. Since a | a*m₀:
+  -- b*(k+1) mod a = (a*m₀ - a*m₀%b + b) mod a = (b - a*m₀%b) mod a
+  have h_a_dvd : a ∣ a * m₀ := ⟨m₀, rfl⟩
+  have h_bk1_eq : b * (k + 1) = a * m₀ + b - a * m₀ % b := by
+    rw [h_bk1, h_bk]; omega
+  have h_mod_eq : b * (k + 1) % a = (b - a * m₀ % b) % a := by
+    -- b*(k+1) = a*m₀ + b - a*m₀%b = a*m₀ + (b - a*m₀%b)
+    have h_mod_le_b : a * m₀ % b ≤ b := le_of_lt h_mod_lt_b
+    rw [show b * (k + 1) = a * m₀ + (b - a * m₀ % b) from by
+      rw [h_bk1, h_bk]; omega]
+    exact Nat.mul_add_mod a m₀ (b - a * m₀ % b)
+  -- (b - a*m₀%b) % a = (a - s) % a = a - s (since 0 < a - s < a)
+  have h_self_mod : (a - s) % a = a - s := Nat.mod_eq_of_lt (by omega)
+  rw [h_mod_eq, ← h_a_minus_s, h_self_mod]
+  -- Goal: (↑(a - s) : ℝ) = (a : ℝ) - (s : ℝ)
+  push_cast [Nat.cast_sub (le_of_lt h_s_lt_a)]
+  ring
 
 /-- **THE BETA MODULO DUALITY** (Gemini Key 2):
     The overshoot coefficient in P₃ reduces to a fractional part.
