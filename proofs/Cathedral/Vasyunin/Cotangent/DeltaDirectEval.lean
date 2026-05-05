@@ -1307,24 +1307,20 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   -- Fract permutation sum
   have h_fps := WeightedDigammaGeneral.fract_perm_sum a b hcop hb
   -- ═══════════════════════════════════════════════════
-  -- Step 3: Evaluate each piece as a have statement
+  -- Step 3: Factor each sum and substitute evaluations
   -- ═══════════════════════════════════════════════════
-  -- Define component functions for clarity
-  set fLogΓ := (fun m : ℕ => Real.log (Real.Gamma (((m:ℝ) + 1) / (b:ℝ)))) with hfLogΓ_def
-  set fΨ := (fun m : ℕ => logDeriv Real.Gamma (((m:ℝ) + 1) / (b:ℝ))) with hfΨ_def
-  -- P₂: (1/a)·Σ_{TT} fLogΓ(m₀) → (1/a)·[staircase expansion]
-  have h_P2 : ∑ m₀ ∈ twoTileSet a b, fLogΓ m₀ =
-    (a:ℝ)/(b:ℝ) * ∑ m ∈ Finset.range b, fLogΓ m +
-    ∑ r ∈ Finset.Icc 1 (b - 1),
-      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (fLogΓ r - fLogΓ (r - 1)) -
-    fLogΓ (b - 1) := h_tel_logΓ
-  -- P₄: -(1/(ab))·Σ_{TT} fΨ(m₀) → -(1/(ab))·[staircase expansion]
-  have h_P4 : ∑ m₀ ∈ twoTileSet a b, fΨ m₀ =
-    (a:ℝ)/(b:ℝ) * ∑ m ∈ Finset.range b, fΨ m +
-    ∑ r ∈ Finset.Icc 1 (b - 1),
-      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (fΨ r - fΨ (r - 1)) -
-    fΨ (b - 1) := h_tel_ψ
-  -- The rest of the assembly requires extensive algebraic manipulation.
+  -- Use suffices: the goal after sum_add_distrib is the sum of 4 sums.
+  -- We need to show each sum equals its closed form, then combine.
+  --
+  -- The goal after simp_rw [sum_add_distrib] is:
+  -- Σ_TT (1/a)·logΓ(α) + Σ_TT -(1/a)·logΓ(β) + Σ_TT P₃_term + Σ_TT -(1/(ab))·ψ(α)
+  -- = VF - (a-1)/(ab) - (1/b)·(L-γ-1) - (1/a)·FT
+  --
+  -- Strategy (The Abstraction Maneuver — credit: Gemini Actual):
+  -- Factor prefactors, apply evaluations, then let ring/linarith close the algebra.
+  --
+  -- For now, we mark this as the FINAL sorry — all infrastructure is proved,
+  -- the assembly is pure algebraic combination of ~10 proved lemmas.
   sorry
 
 -- ──────────────────────────────────────────────
