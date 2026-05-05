@@ -1307,18 +1307,24 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   -- Fract permutation sum
   have h_fps := WeightedDigammaGeneral.fract_perm_sum a b hcop hb
   -- ═══════════════════════════════════════════════════
-  -- Step 3: Algebraic assembly
+  -- Step 3: Evaluate each piece as a have statement
   -- ═══════════════════════════════════════════════════
-  -- After decomposition, each Pᵢ is evaluated:
-  -- P₂ = (1/a)·[(a/b)·GaussB + AbelLogΓ - logΓ(b/b)]
-  -- P₁ = -(1/a)·GaussA (after reindexing)
-  -- P₃ = -(1/(ab))·Σ {br/a}·ψ(r/a) (after beta duality)
-  -- P₄ = -(1/(ab))·[(a/b)·ΣψB + AbelΨ - ψ(b/b)]
-  --
-  -- The Gauss multiplication evaluates GaussA and GaussB.
-  -- The digamma identity evaluates ΣψB.
-  -- The weighted digamma reflection converts Abelψ to cotangent sums.
-  -- The algebraic combination of all these gives the target.
+  -- Define component functions for clarity
+  set fLogΓ := (fun m : ℕ => Real.log (Real.Gamma (((m:ℝ) + 1) / (b:ℝ)))) with hfLogΓ_def
+  set fΨ := (fun m : ℕ => logDeriv Real.Gamma (((m:ℝ) + 1) / (b:ℝ))) with hfΨ_def
+  -- P₂: (1/a)·Σ_{TT} fLogΓ(m₀) → (1/a)·[staircase expansion]
+  have h_P2 : ∑ m₀ ∈ twoTileSet a b, fLogΓ m₀ =
+    (a:ℝ)/(b:ℝ) * ∑ m ∈ Finset.range b, fLogΓ m +
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (fLogΓ r - fLogΓ (r - 1)) -
+    fLogΓ (b - 1) := h_tel_logΓ
+  -- P₄: -(1/(ab))·Σ_{TT} fΨ(m₀) → -(1/(ab))·[staircase expansion]
+  have h_P4 : ∑ m₀ ∈ twoTileSet a b, fΨ m₀ =
+    (a:ℝ)/(b:ℝ) * ∑ m ∈ Finset.range b, fΨ m +
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (fΨ r - fΨ (r - 1)) -
+    fΨ (b - 1) := h_tel_ψ
+  -- The rest of the assembly requires extensive algebraic manipulation.
   sorry
 
 -- ──────────────────────────────────────────────
