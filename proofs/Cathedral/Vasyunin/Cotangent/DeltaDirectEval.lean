@@ -1446,10 +1446,25 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   have hb_ne : (b:ℝ) ≠ 0 := by positivity
   field_simp
   ring_nf
-  -- The identity is a linear combination of the hypotheses.
-  -- After field_simp + ring_nf, the goal is a polynomial identity
-  -- involving the sums from the hypotheses.
-  -- Try nlinarith with the available hypotheses.
+  -- Normalize argument order in sums
+  simp_rw [show ∀ (x : ℕ), (a:ℝ) * (x:ℝ) * ((b:ℝ))⁻¹ = (a:ℝ) * ((b:ℝ))⁻¹ * (x:ℝ) from
+    fun x => by ring]
+  simp_rw [show ∀ (x : ℕ), (x:ℝ) * ((b:ℝ))⁻¹ + ((b:ℝ))⁻¹ = ((b:ℝ))⁻¹ + ((b:ℝ))⁻¹ * (x:ℝ) from
+    fun x => by ring]
+  -- After all the rewrites, the remaining identity is NOT purely algebraic —
+  -- it requires using the hypotheses h_wdr, h_fps, h_digamma_b.
+  -- These are NOT yet consumed. They relate the sums on LHS to the terms on RHS.
+  -- Strategy: rewrite with h_wdr, h_fps, h_digamma_b, then field_simp + ring.
+  --
+  -- h_wdr relates: ∑ {ar/b}·ψ(r/b) = 1/2 · (∑ ψ(r/b) - π·Vba)
+  -- h_fps gives: ∑ {ar/b} = (b-1)/2
+  -- h_digamma_b gives the digamma sum identity.
+  --
+  -- BUT these hypotheses have DIFFERENT notational forms (/ vs ⁻¹).
+  -- We need to normalize them too.
+  -- 
+  -- Actually let's try: use linarith with ALL hypotheses.
+  -- After field_simp, the goal should be closeable by linarith with h_wdr, h_fps, h_digamma_b.
   sorry
 
 -- ──────────────────────────────────────────────
