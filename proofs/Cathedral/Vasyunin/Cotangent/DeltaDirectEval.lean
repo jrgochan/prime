@@ -830,8 +830,35 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
   -- ═══════════════════════════════════════════════════════
   -- PROOF: Gemini Tactical Sequence (Comm-Link 22)
   -- CERTIFIED: 30.4M coprime pairs, max |err| < 5e-12.
+  --
+  -- Step A: Σ_{TT} f = Σ_{range b} J(m)·f(m) - f(b-1)
+  -- Step B: Σ_{range b} J(m)·f(m) = (a/b)·Σf + Σ{ar/b}·(f(r)-f(r-1))
   -- ═══════════════════════════════════════════════════════
-  sorry
+
+  -- ─── Step A: Convert twoTileSet to indicator sum ───
+  -- Key facts:
+  --   • For m ∈ Icc 1 (b-2), coprime: J(m)=1 ↔ m ∈ TT
+  --   • J(0) = 0 (since a < b)
+  --   • J(b-1) = 1 but b-1 ∉ TT (equality, not strict <)
+  -- Therefore: Σ_{TT} f + f(b-1) = Σ_{range b} J(m)·f(m)
+  have h_stepA : ∑ m₀ ∈ twoTileSet a b, f m₀ + f (b - 1) =
+      ∑ m ∈ Finset.range b, (↑(floorStep a b m) : ℝ) * f m := by
+    sorry
+
+  -- ─── Step B: Expand indicator sum via Abel SBP ───
+  -- J(m) = a/b + {am/b} - {a(m+1)/b} (floor_step_eq_frac_diff)
+  -- Distribute, index-shift the third sum, boundaries vanish
+  have h_stepB : ∑ m ∈ Finset.range b, (↑(floorStep a b m) : ℝ) * f m =
+      (a:ℝ) / (b:ℝ) * ∑ m ∈ Finset.range b, f m +
+      ∑ r ∈ Finset.Icc 1 (b - 1),
+        Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (f r - f (r - 1)) := by
+    -- Core identity: Σ J(m)*f(m) = (a/b)*Σf + Σ_{Icc}{ar/b}*f(r) - Σ_{Icc}{ar/b}*f(r-1)
+    -- Which equals (a/b)*Σf + Σ_{Icc}{ar/b}*(f(r)-f(r-1))
+    -- Proof: expand J = a/b + {am/b} - {a(m+1)/b}, distribute, boundary peel, shift
+    sorry
+
+  -- ─── Combine: Σ_{TT} f = (a/b)·Σf + Σ{ar/b}·(f(r)-f(r-1)) - f(b-1) ───
+  linarith
 
 -- ══════════════════════════════════════════════════════════════════
 -- §D₃. THE BETA MODULO DUALITY (Gemini Key 2)
