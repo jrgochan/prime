@@ -30,6 +30,8 @@ import Cathedral.Zeta.Hadamard
 import Mathlib.Analysis.SpecialFunctions.Pow.Asymptotics
 import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.NumberTheory.LSeries.Dirichlet
+import Mathlib.Analysis.PSeries
+import Mathlib.Topology.Algebra.InfiniteSum.Real
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric Set
@@ -138,6 +140,81 @@ private lemma deriv_zeta_comp {s₀ w : ℂ} (hw : s₀ + w ≠ 1) :
   rw [mul_one] at hd
   exact hd.deriv
 
+/-- Telescoping bound: m^{-3/2} ≤ 2·((m-1)^{-1/2} - m^{-1/2}) for m ≥ 2.
+    Reduces to m(m-1) ≤ (m+1)², i.e. 0 ≤ 3m+1. -/
+private lemma rpow_neg_three_half_le {m : ℝ} (hm : 2 ≤ m) :
+    m ^ (-3/2 : ℝ) ≤ 2 * ((m - 1) ^ (-1/2 : ℝ) - m ^ (-1/2 : ℝ)) := by
+  have hm0 : 0 < m := by linarith
+  have hm1 : 0 < m - 1 := by linarith
+  have hsm : 0 < Real.sqrt m := Real.sqrt_pos.mpr hm0
+  have hsm1 : 0 < Real.sqrt (m-1) := Real.sqrt_pos.mpr hm1
+  have lhs_eq : m ^ (-3/2 : ℝ) = (m * Real.sqrt m)⁻¹ := by
+    rw [show (-3/2 : ℝ) = -1 + -(1/2) from by norm_num, rpow_add hm0]
+    simp only [rpow_neg hm0.le, ← Real.sqrt_eq_rpow, rpow_one]
+    rw [mul_inv]
+  have rhs_eq : 2 * ((m - 1) ^ (-1/2 : ℝ) - m ^ (-1/2 : ℝ)) =
+      2 * (Real.sqrt m - Real.sqrt (m-1)) / (Real.sqrt (m-1) * Real.sqrt m) := by
+    rw [show (-1/2 : ℝ) = -(1/2) from by norm_num,
+        rpow_neg hm0.le, rpow_neg hm1.le,
+        ← Real.sqrt_eq_rpow, ← Real.sqrt_eq_rpow,
+        inv_sub_inv hsm1.ne' hsm.ne']
+    ring
+  rw [lhs_eq, rhs_eq]
+  suffices h : Real.sqrt (m-1) * Real.sqrt m ≤
+      2 * (Real.sqrt m - Real.sqrt (m-1)) * (m * Real.sqrt m) by
+    have hmsm : 0 < m * Real.sqrt m := mul_pos hm0 hsm
+    have hrhs_pos : 0 < 2 * (Real.sqrt m - Real.sqrt (m-1)) / (Real.sqrt (m-1) * Real.sqrt m) := by
+      apply div_pos (mul_pos (by norm_num : (0:ℝ) < 2) _) (mul_pos hsm1 hsm)
+      exact sub_pos.mpr (Real.sqrt_lt_sqrt hm1.le (by linarith))
+    rw [show (m * Real.sqrt m)⁻¹ = 1 / (m * Real.sqrt m) from (one_div _).symm,
+        div_le_div_iff₀ hmsm (mul_pos hsm1 hsm)]
+    linarith
+  set a := Real.sqrt (m - 1)
+  set b := Real.sqrt m
+  have ha2 : a ^ 2 = m - 1 := Real.sq_sqrt hm1.le
+  have hb2 : b ^ 2 = m := Real.sq_sqrt hm0.le
+  nlinarith [sq_nonneg (2*b^3 - a*(1 + 2*b^2)),
+             sq_nonneg b, sq_nonneg a, ha2, hb2,
+             mul_self_nonneg (b - a), mul_self_nonneg a,
+             mul_pos hsm hsm, mul_pos hsm1 hsm]
+
+/-- Partial sums of the p-series tail are bounded by 2 via telescoping. -/
+private lemma partial_sum_rpow_le (N : ℕ) :
+    ∑ i ∈ Finset.range N, ((i + 2 : ℕ) : ℝ) ^ (-3/2 : ℝ) ≤ 2 := by
+  calc ∑ i ∈ Finset.range N, ((i + 2 : ℕ) : ℝ) ^ (-3/2 : ℝ)
+      ≤ ∑ i ∈ Finset.range N,
+          (2 * (((i + 1 : ℕ) : ℝ) ^ (-1/2 : ℝ) - ((i + 2 : ℕ) : ℝ) ^ (-1/2 : ℝ))) := by
+        gcongr with i _hi
+        have hcast : ((i + 1 : ℕ) : ℝ) = ((i + 2 : ℕ) : ℝ) - 1 := by push_cast; ring
+        conv_rhs => rw [show ((i + 1 : ℕ) : ℝ) = ((i + 2 : ℕ) : ℝ) - 1 from hcast]
+        apply rpow_neg_three_half_le
+        exact (show (2:ℝ) ≤ ((i+2:ℕ):ℝ) by exact_mod_cast Nat.le_add_left 2 i)
+    _ = 2 * ∑ i ∈ Finset.range N,
+          (((i + 1 : ℕ) : ℝ) ^ (-1/2 : ℝ) - ((i + 2 : ℕ) : ℝ) ^ (-1/2 : ℝ)) := by
+        rw [← Finset.mul_sum]
+    _ = 2 * ((1 : ℝ) ^ (-1/2 : ℝ) - ((N + 1 : ℕ) : ℝ) ^ (-1/2 : ℝ)) := by
+        congr 1
+        rw [Finset.sum_range_sub' (fun k => ((k + 1 : ℕ) : ℝ) ^ (-1/2 : ℝ))]
+        push_cast; ring_nf
+    _ ≤ 2 * 1 := by
+        gcongr
+        simp [one_rpow]
+        positivity
+    _ = 2 := by ring
+
+/-- ζ(3/2) ≤ 3, proved via splitting off n=0,1 and bounding the tail by telescoping. -/
+private lemma zeta_three_half_le : ∑' (n : ℕ), (n : ℝ) ^ (-3/2 : ℝ) ≤ 3 := by
+  have hsum : Summable (fun n : ℕ => (n:ℝ)^(-3/2:ℝ)) :=
+    Iff.mpr Real.summable_nat_rpow (by norm_num)
+  rw [hsum.tsum_eq_zero_add]
+  simp only [Nat.cast_zero, zero_rpow (show (-3/2:ℝ) ≠ 0 by norm_num), zero_add]
+  have hsum1 : Summable (fun n : ℕ => (↑(n + 1) : ℝ)^(-3/2:ℝ)) :=
+    hsum.comp_injective (fun a b h => by omega)
+  rw [hsum1.tsum_eq_zero_add]
+  simp only [zero_add, Nat.cast_one, one_rpow]
+  suffices h : ∑' n : ℕ, ((n + 2 : ℕ) : ℝ) ^ (-3/2:ℝ) ≤ 2 by linarith
+  exact Real.tsum_le_of_sum_range_le (fun n => by positivity) partial_sum_rpow_le
+
 /-- **Log-derivative bound**: ‖ζ'(s)/ζ(s)‖ ≤ 6 for Re(s) ≥ 2.
 
     By `LSeries_vonMangoldt_eq_deriv_riemannZeta_div`:
@@ -198,8 +275,18 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
                 congr 1; rw [div_eq_iff (rpow_pos_of_pos hn_pos 2).ne', ← rpow_add hn_pos]
                 norm_num
     _ ≤ 6 := by
-        -- Σ g(n) = 2·ζ(3/2), and ζ(3/2) ≤ 1 + ∫₁^∞ x⁻³ᐟ² dx = 3.
-        sorry
+        -- The if-then-else tsum equals 2·ζ(3/2) since 0^{-3/2}=0.
+        -- And ζ(3/2) ≤ 3 (zeta_three_half_le), so 2·ζ(3/2) ≤ 6.
+        have htsum_eq : ∑' n, (if (n:ℕ) = 0 then (0:ℝ) else 2 * (n:ℝ)^(-3/2:ℝ)) =
+            2 * ∑' (n : ℕ), (n:ℝ)^(-3/2:ℝ) := by
+          have heq : (fun n : ℕ => if n = 0 then (0:ℝ) else 2 * (n:ℝ)^(-3/2:ℝ)) =
+              (fun n : ℕ => 2 * (n:ℝ)^(-3/2:ℝ)) := by
+            ext n; rcases eq_or_ne n 0 with rfl | hn
+            · simp [zero_rpow (show (-3/2:ℝ) ≠ 0 by norm_num)]
+            · simp [hn]
+          rw [heq, tsum_mul_left]
+        rw [htsum_eq]
+        linarith [zeta_three_half_le]
 
 /-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
     This is the algebraic derivative identity from the exponential representation,
