@@ -402,8 +402,8 @@ lemma G_inner_bound_fixed
     Same argument as G_outer_bound_re but with center (3, t):
     exp(Re(G(z))) = |ζ(s₀+z)/ζ(s₀)| ≤ upper/lower. -/
 lemma G_outer_bound_re_3
-    {t : ℝ} (ht : 2 ≤ |t|)
-    {R : ℝ} (_hR_pos : 0 < R) (_hR_lt : R < 3)
+    {R : ℝ} (_hR_pos : 0 < R) (_hR_lt : R < 5/2)
+    {t : ℝ} (ht : R + 1/2 ≤ |t|)
     {G : ℂ → ℂ} (_hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (_hG_eq : ∀ z ∈ ball (0:ℂ) R,
       riemannZeta (⟨3, t⟩ + z) = riemannZeta ⟨3, t⟩ * Complex.exp (G z)) :
@@ -440,11 +440,85 @@ lemma G_outer_bound_re_3
     rw [← this, mul_div_cancel_left₀ _ (ne_of_gt h_zeta0_pos)]
   -- We use: Re(G) = log|exp(G)| and |exp(G)| = |ζ(s₀+z)|/|ζ(s₀)|
   rw [hre_G, h_exp_eq]
-  -- log(|ζ|/|ζ₀|) = log|ζ| - log|ζ₀| ≤ log|ζ| + log 4
-  -- Need: log|ζ(s₀+z)| ≤ 10·log(2+|t|)
-  -- i.e. |ζ(s₀+z)| ≤ (2+|t|)^10
-  -- This follows from convexity bound + tail bound, similar to zeta_norm_bound_on_disk
-  sorry
+  -- Step 1: |ζ(s₀+z)| ≤ (2+|t|)^10 (via tail or convexity bound)
+  have h_zeta_upper : ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ ≤ (2 + |t|) ^ (10 : ℝ) := by
+    set s := (⟨3, t⟩ : ℂ) + z with hs_def
+    simp only [mem_ball, dist_zero_right] at hz
+    by_cases hre : 2 ≤ s.re
+    · -- Re(s) ≥ 2: ‖ζ(s)‖ ≤ 7/4 ≤ (2+|t|)^10
+      have h74 : ‖riemannZeta s‖ ≤ 7/4 := by
+        have hsub := zeta_sub_one_norm_le_three_fourths hre
+        have h1 : ‖riemannZeta s‖ ≤ ‖riemannZeta s - 1‖ + 1 := by
+          have := norm_le_insert' (riemannZeta s) (1 : ℂ); simp at this; linarith
+        linarith
+      calc ‖riemannZeta s‖ ≤ 7/4 := h74
+        _ ≤ 2 := by norm_num
+        _ ≤ 2 + |t| := le_add_of_nonneg_right (abs_nonneg t)
+        _ ≤ (2 + |t|) ^ (10 : ℝ) := by
+            have hbase : (1:ℝ) ≤ 2 + |t| := by linarith [abs_nonneg t]
+            have := rpow_le_rpow_of_exponent_le hbase (show (1:ℝ) ≤ 10 by norm_num)
+            rwa [rpow_one] at this
+    · -- Re(s) < 2: use convexity bound ‖ζ(s)‖ ≤ (2+|s.im|)^2
+      push_neg at hre
+      have hrs : 1/2 < s.re := by
+        have hsre : s.re = 3 + z.re := by simp [hs_def]
+        have : -R < z.re := by
+          have := neg_le_abs z.re
+          linarith [Complex.abs_re_le_norm z]
+        linarith
+      have him : 1/2 ≤ |s.im| := by
+        have hsim : s.im = t + z.im := by simp [hs_def]
+        rw [hsim]
+        have hzim_lt : |z.im| < R :=
+          lt_of_le_of_lt (Complex.abs_im_le_norm z) hz
+        have h1 : |t| - |z.im| ≤ |t + z.im| := by
+          -- |t+z.im| = |t-(-z.im)| ≥ ||t|-|-z.im|| = ||t|-|z.im|| ≥ |t|-|z.im|
+          have h := abs_sub_abs_le_abs_sub t (-z.im)
+          rw [abs_neg, sub_neg_eq_add] at h
+          exact h
+        linarith
+      have hconv := zeta_norm_convexity_bound hrs (le_of_lt hre) him
+      have him_bound : |s.im| < |t| + R := by
+        have hsim : s.im = t + z.im := by simp [hs_def]
+        rw [hsim]
+        calc |t + z.im| ≤ |t| + |z.im| := abs_add_le t z.im
+          _ < |t| + R := by linarith [Complex.abs_im_le_norm z]
+      have h_base : (1:ℝ) ≤ 2 + |t| := by linarith [abs_nonneg t]
+      -- R ≤ |t| - 1/2 < |t| from ht
+      have him_upper : 2 + |s.im| ≤ 2 * (2 + |t|) := by linarith
+      rw [show (10 : ℝ) = ((10 : ℕ) : ℝ) from by norm_num] at *
+      rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num] at hconv
+      rw [rpow_natCast] at hconv; rw [rpow_natCast]
+      calc ‖riemannZeta s‖ ≤ (2 + |s.im|) ^ 2 := hconv
+        _ ≤ (2 * (2 + |t|)) ^ 2 := by
+            have : 0 ≤ 2 + |s.im| := by linarith [abs_nonneg s.im]
+            nlinarith
+        _ = 4 * (2 + |t|) ^ 2 := by ring
+        _ ≤ (2 + |t|) ^ 2 * (2 + |t|) ^ 2 := by
+            have h4 : 4 ≤ (2 + |t|) ^ 2 := by nlinarith [abs_nonneg t]
+            nlinarith
+        _ = (2 + |t|) ^ 4 := by ring
+        _ ≤ (2 + |t|) ^ 10 := pow_le_pow_right₀ h_base (by norm_num)
+  -- Step 2: Combine via log arithmetic
+  -- If ζ(s₀+z) = 0, then log(0/‖ζ₀‖) = -∞ ≤ anything. Else decompose log(a/b) = log a - log b.
+  rcases eq_or_ne (riemannZeta ((⟨3, t⟩ : ℂ) + z)) 0 with hzero | hne
+  · rw [hzero, norm_zero, zero_div, Real.log_zero]
+    have : 0 ≤ 10 * Real.log (2 + |t|) := by
+      apply mul_nonneg (by norm_num)
+      exact Real.log_nonneg (by linarith [abs_nonneg t])
+    linarith [Real.log_nonneg (show (1:ℝ) ≤ 4 by norm_num)]
+  · have h_norm_sz_pos : 0 < ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ := norm_pos_iff.mpr hne
+    rw [Real.log_div (ne_of_gt h_norm_sz_pos) (ne_of_gt h_zeta0_pos)]
+    have hlog_upper : Real.log ‖riemannZeta ((⟨3, t⟩ : ℂ) + z)‖ ≤ 10 * Real.log (2 + |t|) := by
+      rw [show (10 : ℝ) = ((10:ℕ):ℝ) from by norm_num] at h_zeta_upper ⊢
+      rw [rpow_natCast] at h_zeta_upper
+      rw [← Real.log_pow]
+      exact Real.log_le_log h_norm_sz_pos h_zeta_upper
+    have hlog_lower : -Real.log ‖riemannZeta ⟨3, t⟩‖ ≤ Real.log 4 := by
+      rw [neg_le_iff_add_nonneg, ← Real.log_mul (by norm_num : (4:ℝ) ≠ 0) (ne_of_gt h_zeta0_pos)]
+      apply Real.log_nonneg
+      nlinarith
+    linarith
 
 -- ═══════════════════════════════════════════
 -- §4. Sub-Logarithmic Annihilation (Lemma 4)
