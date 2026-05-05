@@ -1440,32 +1440,48 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   rw [show (b:ℝ) / (b:ℝ) = 1 from div_self (by positivity : (b:ℝ) ≠ 0)]
   rw [Real.Gamma_one, Real.log_one]
   -- Now all (r-1) terms are gone. Shatter + field_simp + ring
+  -- Shatter mul-add/sub so individual sums become visible for hypothesis substitution
   simp_rw [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
-  -- Clear denominators and normalize
+  -- Step 5: Substitute remaining hypotheses BEFORE field_simp normalization
+  -- h_wdr: Σ {ar/b}·ψ(r/b) = 1/2·(Σ ψ(r/b) - π·V(b,a))
+  -- h_fps: Σ {ar/b} = (b-1)/2
+  -- These use / notation matching the current goal form.
+  rw [h_wdr]
+  -- Reindex: ∑ m ∈ range b, ψ((m+1)/b) = ∑ k ∈ Icc 1 (b-1), ψ(k/b) + ψ(1)
+  rw [show ∑ m ∈ Finset.range b, logDeriv Real.Gamma ((↑m + 1) / ↑b) =
+    ∑ k ∈ Finset.Icc 1 (b - 1), logDeriv Real.Gamma (↑k / ↑b) +
+    logDeriv Real.Gamma 1 from by
+    -- range b = {0,...,b-1}, shift k = m+1 gives Icc 1 b, split off last term
+    rw [show ∑ m ∈ Finset.range b, logDeriv Real.Gamma ((↑m + 1) / ↑b) =
+      ∑ k ∈ Finset.Icc 1 b, logDeriv Real.Gamma (↑k / ↑b) from by
+      apply Finset.sum_nbij' (fun m => m + 1) (fun k => k - 1)
+      · intro m hm; simp [Finset.mem_range, Finset.mem_Icc] at hm ⊢; omega
+      · intro k hk; simp [Finset.mem_range, Finset.mem_Icc] at hk ⊢; omega
+      · intro m hm; simp [Finset.mem_range] at hm; omega
+      · intro k hk; simp [Finset.mem_Icc] at hk; omega
+      · intro m _; push_cast; ring_nf]
+    rw [show Finset.Icc 1 b = Finset.Icc 1 (b - 1) ∪ {b} from by
+      ext x; simp [Finset.mem_Icc]; omega]
+    rw [Finset.sum_union (by simp [Finset.disjoint_left, Finset.mem_Icc]; omega)]
+    simp [show (b:ℝ) / (b:ℝ) = 1 from div_self (by positivity : (b:ℝ) ≠ 0)]]
+  -- Apply the real digamma sum identity
+  rw [FractSeriesEval.real_digamma_sum b hb]
+  -- Evaluate ψ(1) = -γ
+  rw [show logDeriv Real.Gamma 1 = -eulerMascheroniConstant from by
+    rw [FractSeriesEval.logDeriv_Gamma_pos 1 one_pos]
+    simp [Complex.ofReal_one, Complex.digamma_one, Complex.neg_re, Complex.ofReal_re]]
+  -- Now everything is algebraic
+  -- Need symmetric weighted digamma reflection for the SBA sum
+  have h_wdr_sym := WeightedDigammaGeneral.weighted_digamma_reflection_solve_general b a hcop.symm ha
+  -- h_wdr_sym : ∑ {br/a}·ψ(r/a) = 1/2·(∑ ψ(r/a) - π·V(a,b))
+  rw [h_wdr_sym]
+  -- Real digamma sum for a
+  rw [FractSeriesEval.real_digamma_sum a ha]
+  -- Now everything is algebraic
   have ha_ne : (a:ℝ) ≠ 0 := by positivity
   have hb_ne : (b:ℝ) ≠ 0 := by positivity
   field_simp
-  ring_nf
-  -- Normalize argument order in sums
-  simp_rw [show ∀ (x : ℕ), (a:ℝ) * (x:ℝ) * ((b:ℝ))⁻¹ = (a:ℝ) * ((b:ℝ))⁻¹ * (x:ℝ) from
-    fun x => by ring]
-  simp_rw [show ∀ (x : ℕ), (x:ℝ) * ((b:ℝ))⁻¹ + ((b:ℝ))⁻¹ = ((b:ℝ))⁻¹ + ((b:ℝ))⁻¹ * (x:ℝ) from
-    fun x => by ring]
-  -- After all the rewrites, the remaining identity is NOT purely algebraic —
-  -- it requires using the hypotheses h_wdr, h_fps, h_digamma_b.
-  -- These are NOT yet consumed. They relate the sums on LHS to the terms on RHS.
-  -- Strategy: rewrite with h_wdr, h_fps, h_digamma_b, then field_simp + ring.
-  --
-  -- h_wdr relates: ∑ {ar/b}·ψ(r/b) = 1/2 · (∑ ψ(r/b) - π·Vba)
-  -- h_fps gives: ∑ {ar/b} = (b-1)/2
-  -- h_digamma_b gives the digamma sum identity.
-  --
-  -- BUT these hypotheses have DIFFERENT notational forms (/ vs ⁻¹).
-  -- We need to normalize them too.
-  -- 
-  -- Actually let's try: use linarith with ALL hypotheses.
-  -- After field_simp, the goal should be closeable by linarith with h_wdr, h_fps, h_digamma_b.
-  sorry
+  ring
 
 -- ──────────────────────────────────────────────
 -- Sub-lemma D: The sum of per-class limits equals deltaTarget.
