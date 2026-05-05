@@ -42,6 +42,7 @@ mod gram_crossref;
 mod class_eval;
 mod honest_algebra;
 mod rosetta_stone;
+mod axiom_graduation;
 
 use std::time::Instant;
 use rayon::prelude::*;
@@ -503,6 +504,41 @@ fn main() {
         ]).collect();
         certificate::write_tsv("results/rosetta_stone.tsv", bridge_headers, &bridge_rows);
         println!("    {} results/rosetta_stone.tsv", fmt::check(true));
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // §10. AXIOM GRADUATION CERTIFIER
+    //      gramIntegral_eq_formula_ge2 — The last Cathedral axiom
+    // ═══════════════════════════════════════════════════════════════
+
+    if !cert_pairs.is_empty() {
+        println!();
+        let grad_input: Vec<(usize, usize)> = cert_pairs.iter()
+            .map(|p| (p.a, p.b)).collect();
+        let grad_results = axiom_graduation::certify_all(&grad_input);
+        axiom_graduation::print_certification(&grad_results);
+
+        // Write graduation TSV
+        let grad_headers = &["a", "b", "n_two_tile",
+            "beta_bij", "s_perm", "overshoot_id",
+            "gauss_lgA_err", "gauss_lgB_err", "gauss_dA_err", "gauss_dB_err",
+            "sum_pcl", "delta_target", "identity_err", "certified"];
+        let grad_rows: Vec<Vec<String>> = grad_results.iter().map(|r| vec![
+            r.a.to_string(), r.b.to_string(), r.n_two_tile.to_string(),
+            r.beta_bijection.to_string(),
+            r.s_permutation.to_string(),
+            r.overshoot_identity.to_string(),
+            format!("{:.6e}", r.gauss_loggamma_a_err),
+            format!("{:.6e}", r.gauss_loggamma_b_err),
+            format!("{:.6e}", r.gauss_digamma_a_err),
+            format!("{:.6e}", r.gauss_digamma_b_err),
+            format!("{:.15e}", r.sum_pcl),
+            format!("{:.15e}", r.delta_target),
+            format!("{:.6e}", r.identity_err),
+            r.certified.to_string(),
+        ]).collect();
+        certificate::write_tsv("results/axiom_graduation.tsv", grad_headers, &grad_rows);
+        println!("    {} results/axiom_graduation.tsv", fmt::check(true));
     }
 
     println!();
