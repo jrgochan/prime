@@ -1,0 +1,28 @@
+[package]
+name = "two-tile-decomposition-gpu"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral Two-Tile Decomposition GPU Certifier — Skeleton Key Validator.
+
+Certifies the Staircase Telescope (Gemini Key 1) and Beta Modulo Duality
+(Gemini Key 2) across ALL coprime pairs (a,b) with 2 ≤ a < b ≤ B_max
+using GPU-accelerated f64 arithmetic.
+
+Key computations:
+  - logΓ and ψ (digamma) via CUDA device functions (lgamma/digamma)
+  - Staircase telescope: Σ_{TT} f(m₀) = (a/b)·Σf + Σ{ar/b}(f(r)-f(r-1)) - f(b-1)
+  - Beta modulo duality: (s-a)/(a²b) = -(1/(ab))·{b(k+1)/a}
+  - Full graduation identity: Σ perClassLimit = deltaTarget
+
+Target: NVIDIA RTX 4090 (24 GB VRAM)
+  - Each pair needs O(b) work, parallelized across SM
+  - Can certify b ≤ 10,000+ pairs in seconds
+"""
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }
+libm = "0.2"

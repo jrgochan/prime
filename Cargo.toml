@@ -52,6 +52,7 @@ members = [
     "experiments/two-tile-decomposition",
     "experiments/gram-scaling-oracle",
     "experiments/gram-scaling-oracle-gpu",
+    "experiments/two-tile-decomposition-gpu",
 ]
 
 [profile.release]

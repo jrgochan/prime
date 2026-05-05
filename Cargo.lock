@@ -1008,6 +1008,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "two-tile-decomposition-gpu"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "libm",
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "typenum"
 version = "1.20.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -1,0 +1,25 @@
+{
+  "all_certified": true,
+  "beta_duality": {
+    "all_certified": true,
+    "all_pointwise": true,
+    "max_sum_err": 5.551115123125783e-17
+  },
+  "elapsed_secs": 0.003844875,
+  "experiment": "two-tile-decomposition-gpu",
+  "graduation_identity": {
+    "all_certified": true,
+    "max_err": 2.609024107869118e-15
+  },
+  "max_b": 20,
+  "mode": "CPU",
+  "n_certified": 108,
+  "n_pairs": 108,
+  "precision": "f64",
+  "staircase_telescope": {
+    "all_certified": true,
+    "max_digamma_err": 2.1316282072803006e-14,
+    "max_loggamma_err": 3.552713678800501e-15
+  },
+  "version": "1.0"
+}
