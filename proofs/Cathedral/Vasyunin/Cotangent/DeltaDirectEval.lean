@@ -724,6 +724,40 @@ lemma partial_sum_delta_residue_decomp (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
   linarith [Finset.sum_eq_zero h_single_zero]
 
 -- ──────────────────────────────────────────────
+-- Sub-lemma D₁: The β-sum of logΓ via Gauss multiplication.
+--
+-- By Beta Bijection, Σ_{m₀∈TT} logΓ((n₀+1)/a) = Σ_{k=0}^{a-2} logΓ((k+1)/a)
+-- By Gauss multiplication: Σ_{k=0}^{a-1} logΓ((k+1)/a) = (a-1)/2·log(2π) - (1/2)log(a)
+-- Since logΓ(a/a) = logΓ(1) = 0, the k=a-1 term vanishes.
+-- Therefore: Σ_{k=0}^{a-2} logΓ((k+1)/a) = (a-1)/2·log(2π) - (1/2)log(a)
+-- ──────────────────────────────────────────────
+
+/-- The β-sum of logΓ equals the Gauss multiplication closed form. -/
+lemma sum_logGamma_beta_eval (a : ℕ) (ha : 2 ≤ a) :
+    ∑ k ∈ Finset.range (a - 1),
+      Real.log (Real.Gamma (((k:ℝ) + 1) / (a:ℝ))) =
+    ((a:ℝ) - 1) / 2 * Real.log (2 * Real.pi) - 1/2 * Real.log (a:ℝ) := by
+  -- Use GammaMultiplication.sum_log_gamma_eq_target with q = a
+  have h_full := Cathedral.Analysis.GammaMultiplication.sum_log_gamma_eq_target a (by omega)
+  -- The full sum is over range a = {0, ..., a-1}
+  -- Split off the last term k = a-1: logΓ((a-1+1)/a) = logΓ(1) = log(1) = 0
+  have h_split : ∑ k ∈ Finset.range a,
+      Real.log (Real.Gamma (((1:ℝ) + (k:ℝ)) / (a:ℝ))) =
+    ∑ k ∈ Finset.range (a - 1),
+      Real.log (Real.Gamma ((1 + (k:ℝ)) / (a:ℝ))) +
+    Real.log (Real.Gamma ((1 + ((a-1:ℕ):ℝ)) / (a:ℝ))) := by
+    rw [show a = (a - 1) + 1 from by omega]
+    exact Finset.sum_range_succ _ _
+  have h_last : Real.log (Real.Gamma ((1 + ((a-1:ℕ):ℝ)) / (a:ℝ))) = 0 := by
+    have ha_cast : (1:ℝ) + ((a-1:ℕ):ℝ) = (a:ℝ) := by
+      rw [Nat.cast_sub (by omega : 1 ≤ a)]; ring
+    rw [ha_cast, div_self (Nat.cast_ne_zero.mpr (by omega)), Real.Gamma_one, Real.log_one]
+  rw [h_split, h_last, add_zero] at h_full
+  rw [← h_full]
+  apply Finset.sum_congr rfl; intro k _
+  rw [show (1:ℝ) + (k:ℝ) = (k:ℝ) + 1 from add_comm 1 (k:ℝ)]
+
+-- ──────────────────────────────────────────────
 -- Sub-lemma D: The sum of per-class limits equals deltaTarget.
 -- ──────────────────────────────────────────────
 
