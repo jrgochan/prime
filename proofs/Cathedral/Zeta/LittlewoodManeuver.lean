@@ -695,6 +695,53 @@ private lemma sub_log_to_polynomial
   rw [ge_iff_le, ← hexp_eq]
   exact mul_le_mul_of_nonneg_left hexp_ge (by norm_num)
 
+/-- M = 10·log(2+|t|) + log 4 ≤ 11·log(2+|t|) when |t| ≥ 2. -/
+private lemma M_le_11_log {t : ℝ} (ht : 2 ≤ |t|) :
+    10 * Real.log (2 + |t|) + Real.log 4 ≤ 11 * Real.log (2 + |t|) := by
+  have h2t : (4 : ℝ) ≤ 2 + |t| := by linarith
+  have h4_pos : (0 : ℝ) < 4 := by norm_num
+  have h2t_pos : (0 : ℝ) < 2 + |t| := by linarith [abs_nonneg t]
+  have hlog_le : Real.log 4 ≤ Real.log (2 + |t|) :=
+    Real.log_le_log h4_pos h2t
+  linarith
+
+/-- The Three-Circles output 6^(1-α)·b^α is bounded by K·(log(2+|t|))^α,
+    where K = 6^(1-α)·(22·R₃/(R₄-R₃))^α depends only on ε. -/
+private lemma three_circles_to_sub_log
+    {R₃ R₄ α : ℝ} (hα : 0 ≤ α) (_hα1 : α ≤ 1)
+    (hR₃_pos : 0 < R₃) (hR₃_lt_R₄ : R₃ < R₄)
+    {t : ℝ} (ht : 2 ≤ |t|)
+    (bound : ℝ) (hbound : bound = 6 ^ (1 - α) *
+      (2 * (10 * Real.log (2 + |t|) + Real.log 4) * R₃ / (R₄ - R₃)) ^ α) :
+    bound ≤ (6 ^ (1 - α) * (22 * R₃ / (R₄ - R₃)) ^ α) *
+            (Real.log (2 + |t|)) ^ α := by
+  rw [hbound]
+  have h2t_pos : (0 : ℝ) < 2 + |t| := by linarith [abs_nonneg t]
+  have hlog_pos : 0 < Real.log (2 + |t|) := Real.log_pos (by linarith)
+  have hgap_pos : 0 < R₄ - R₃ := by linarith
+  have hM_le := M_le_11_log ht
+  have hb_le : 2 * (10 * Real.log (2 + |t|) + Real.log 4) * R₃ / (R₄ - R₃) ≤
+               22 * R₃ / (R₄ - R₃) * Real.log (2 + |t|) := by
+    rw [div_mul_eq_mul_div]
+    apply div_le_div_of_nonneg_right _ (le_of_lt hgap_pos)
+    nlinarith
+  have hb_nonneg : 0 ≤ 2 * (10 * Real.log (2 + |t|) + Real.log 4) * R₃ / (R₄ - R₃) := by
+    apply div_nonneg
+    · apply mul_nonneg
+      · apply mul_nonneg (by norm_num)
+        linarith [Real.log_nonneg (show (1:ℝ) ≤ 4 by norm_num)]
+      · exact le_of_lt hR₃_pos
+    · exact le_of_lt hgap_pos
+  calc 6 ^ (1 - α) * (2 * (10 * Real.log (2 + |t|) + Real.log 4) * R₃ / (R₄ - R₃)) ^ α
+      ≤ 6 ^ (1 - α) * (22 * R₃ / (R₄ - R₃) * Real.log (2 + |t|)) ^ α := by
+        apply mul_le_mul_of_nonneg_left
+        · exact rpow_le_rpow hb_nonneg hb_le hα
+        · exact le_of_lt (rpow_pos_of_pos (by norm_num : (0:ℝ) < 6) _)
+    _ = (6 ^ (1 - α) * (22 * R₃ / (R₄ - R₃)) ^ α) * (Real.log (2 + |t|)) ^ α := by
+        rw [mul_rpow (le_of_lt (by positivity : (0:ℝ) < 22 * R₃ / (R₄ - R₃)))
+                      (le_of_lt hlog_pos)]
+        ring
+
 -- ═══════════════════════════════════════════
 -- §5. The Full Littlewood Maneuver Assembly
 -- ═══════════════════════════════════════════
