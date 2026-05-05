@@ -1477,7 +1477,16 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   rw [h_wdr_sym]
   -- Real digamma sum for a
   rw [FractSeriesEval.real_digamma_sum a ha]
-  -- Now everything is algebraic
+  -- Handle log(b/a) = log b - log a on the RHS
+  rw [show Real.log ((b:ℝ) / (a:ℝ)) = Real.log (b:ℝ) - Real.log (a:ℝ) from
+    Real.log_div (by positivity : (b:ℝ) ≠ 0) (by positivity : (a:ℝ) ≠ 0)]
+  -- Extract 1/b from the per-class ψ sum using sum_congr
+  have h_pull_b : 
+    ∑ x ∈ Finset.Icc 1 (b - 1), Int.fract ((a:ℝ) * (x:ℝ) / (b:ℝ)) * (1 / (b:ℝ) * logDeriv Real.Gamma (((x:ℝ) + 1) / (b:ℝ))) =
+    1 / (b:ℝ) * ∑ x ∈ Finset.Icc 1 (b - 1), Int.fract ((a:ℝ) * (x:ℝ) / (b:ℝ)) * logDeriv Real.Gamma (((x:ℝ) + 1) / (b:ℝ)) := by
+    rw [Finset.mul_sum]; apply Finset.sum_congr rfl; intro x _; ring
+  rw [h_pull_b]
+  -- Now field_simp + ring should close
   have ha_ne : (a:ℝ) ≠ 0 := by positivity
   have hb_ne : (b:ℝ) ≠ 0 := by positivity
   field_simp
