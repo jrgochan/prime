@@ -3,26 +3,26 @@
   "beta_duality": {
     "all_certified": true,
     "all_pointwise": true,
-    "max_sum_err": 6.245004513516506e-17
+    "max_sum_err": 6.046200786193438e-17
   },
-  "elapsed_secs": 0.588105625,
+  "elapsed_secs": 792.411494354,
   "experiment": "two-tile-decomposition-gpu",
   "gauss_formulas": {
     "all_certified": true,
-    "max_digamma_a_err": 1.2278178473934531e-11,
-    "max_digamma_b_err": 1.2278178473934531e-11,
-    "max_loggamma_a_err": 8.526512829121202e-13,
-    "max_loggamma_b_err": 8.526512829121202e-13
+    "max_digamma_a_err": 1.3096723705530167e-10,
+    "max_digamma_b_err": 1.3096723705530167e-10,
+    "max_loggamma_a_err": 3.637978807091713e-12,
+    "max_loggamma_b_err": 3.637978807091713e-12
   },
   "graduation_identity": {
     "all_certified": true,
-    "max_err": 1.939897895097964e-14
+    "max_err": 4.430183368957463e-13
   },
-  "max_b": 500,
+  "max_b": 10000,
   "max_m": 1000,
-  "mode": "CPU",
-  "n_certified": 75616,
-  "n_pairs": 75616,
+  "mode": "GPU",
+  "n_certified": 30387486,
+  "n_pairs": 30387486,
   "precision": "f64",
   "sections": {
     "class_eval": false,
@@ -33,8 +33,8 @@
   },
   "staircase_telescope": {
     "all_certified": true,
-    "max_digamma_err": 1.000444171950221e-11,
-    "max_loggamma_err": 7.389644451905042e-13
+    "max_digamma_err": 4.3655745685100555e-11,
+    "max_loggamma_err": 5.4569682106375694e-12
   },
   "structural": {
     "beta_bijection": true,
