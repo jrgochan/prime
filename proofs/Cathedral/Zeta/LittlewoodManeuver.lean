@@ -993,47 +993,86 @@ theorem littlewood_maneuver (hRH : RiemannHypothesis)
   -- │  BC Conversion Layer + Three-Circles + Sub-Log Annihil.   │
   -- │  Credit: Gemini Actual (Los Alamos, May 4 2026)           │
   -- └────────────────────────────────────────────────────────────┘
-  -- Geometry: R₄ = 5/2-ε/4, R₃ = 5/2-ε/2, R₂ = 5/2-ε, R₁ = 1
-  set R₄ := 5/2 - ε/4 with hR₄_def
-  set R₃ := 5/2 - ε/2 with hR₃_def
-  set R₂ := 5/2 - ε with hR₂_def
-  have hR₄_pos : 0 < R₄ := by linarith
-  have hR₃_pos : 0 < R₃ := by linarith
-  have hR₂_pos : 0 < R₂ := by linarith
-  have hR₃_lt_R₄ : R₃ < R₄ := by linarith
-  have hR₂_lt_R₃ : R₂ < R₃ := by linarith
-  have h1_lt_R₂ : 1 < R₂ := by linarith
-  have hR₄_lt_52 : R₄ < 5/2 := by linarith
-  -- α = interpolation exponent, 0 < α < 1
-  set α := Real.log R₂ / Real.log R₃ with hα_def
+  -- Geometry
+  set R₄ := 5/2 - ε/4
+  set R₃ := 5/2 - ε/2
+  set R₂ := 5/2 - ε
+  set α := Real.log R₂ / Real.log R₃
+  have hR₃_pos : 0 < R₃ := by simp only [R₃]; linarith
+  have hR₄_pos : 0 < R₄ := by simp only [R₄]; linarith
+  have hR₃_lt_R₄ : R₃ < R₄ := by simp only [R₃, R₄]; linarith
   have hα_lt_1 : α < 1 := by
-    rw [hα_def, div_lt_one (Real.log_pos (by linarith))]
-    exact Real.log_lt_log (by linarith) hR₂_lt_R₃
+    show Real.log R₂ / Real.log R₃ < 1
+    rw [div_lt_one (Real.log_pos (by simp only [R₃]; linarith))]
+    exact Real.log_lt_log (by simp only [R₂]; linarith) (by simp only [R₂, R₃]; linarith)
   have hα_pos : 0 < α := by
-    rw [hα_def]
-    exact div_pos (Real.log_pos (by linarith)) (Real.log_pos (by linarith))
-  -- K = constant controlling the Three-Circles output (depends only on ε)
-  -- K = 6^(1-α) · (2·(10+1)·R₃/(R₄-R₃))^α is a valid choice, but
-  -- for the sub_log_to_polynomial lemma we just need K > 0.
-  -- We use 2·(10+1)·R₃/(R₄-R₃) = 2·11·R₃/(ε/4) = 88·R₃/ε as the BC coefficient.
-  set K_bc := 2 * (10 * Real.log (2 + 3) + Real.log 4 + 1) * R₃ / (R₄ - R₃) with hK_bc_def
-  -- For the exodia bound, we need K > 0 (which depends only on ε)
-  -- The full Three-Circles bound at z* gives ‖G(z*)‖ ≤ 6^(1-α) · b^α
-  -- where b = BC output ≤ K_bc · log(2+|t|) for large |t|.
-  -- The full constant K = 6^(1-α) · K_bc^α works.
-  -- For now, we delegate to the axiom while the rpow algebra is completed.
-  -- ═══════════════════════════════════════════════════════
-  -- PROOF PATH: The six stages are individually proved (zero sorry):
-  -- 1. holomorphic_log_exists_on_ball(R₄) via zeta_differentiable_on_wide_ball
-  -- 2. G_outer_bound_re_3(R₄) → Re(G) ≤ M on ball
-  -- 3. bc_re_to_norm(R₄→R₃) → ‖G‖ ≤ 2M·R₃/(R₄-R₃) on ‖z‖=R₃
-  -- 4. G_inner_bound_fixed → ‖G‖ ≤ 6 on ‖z‖=1
-  -- 5. three_circles_at_target → ‖G(z*)‖ ≤ 6^(1-α)·b^α
-  -- 6. sub_log_to_polynomial → ∀ A, ∃ T₀: K·(log)^α < A·log
-  -- The assembly wiring connects these; the rpow algebra
-  -- (separating M into C·log(2+|t|) to extract K·(log)^α)
-  -- is the remaining formalization step.
-  exact thin_strip_lower_bound_exists hRH ε hε hε1 A hA
+    show 0 < Real.log R₂ / Real.log R₃
+    exact div_pos (Real.log_pos (by simp only [R₂]; linarith)) (Real.log_pos (by simp only [R₃]; linarith))
+  -- K (depends only on ε)
+  set K_tc := 6 * (22 * R₃ / (R₄ - R₃))
+  have hgap_pos : 0 < R₄ - R₃ := by simp only [R₃, R₄]; linarith
+  have hK_tc_pos : 0 < K_tc := by
+    apply mul_pos (by norm_num : (0:ℝ) < 6)
+    exact div_pos (by positivity) hgap_pos
+  -- Use sub_log_to_polynomial to convert (log)^α → polynomial
+  obtain ⟨T₁, hT₁_pos, hT₁⟩ := sub_log_to_polynomial hK_tc_pos hα_pos hα_lt_1 hA
+  -- T₀ = max(T₁, 3), c = (1/4)·(1/2)^A
+  refine ⟨1/4 * (1/2)^A, by positivity, max T₁ 3, lt_max_of_lt_right (by norm_num), ?_⟩
+  intro s hs ht
+  have ht_ge_T₁ : T₁ ≤ |s.im| := le_trans (le_max_left _ _) ht
+  have ht_ge_3 : 3 ≤ |s.im| := le_trans (le_max_right _ _) ht
+  have ht_pos : 0 < |s.im| := by linarith
+  have h2t_pos : 0 < 2 + |s.im| := by linarith
+  -- Case split: s.re ≤ 2 or s.re > 2
+  by_cases hs_hi : s.re ≤ 2
+  · -- Case: 1/2+ε ≤ s.re ≤ 2 — apply three_circles_inner_bound
+    have h_inner := three_circles_inner_bound hRH ε hε hε1 s hs hs_hi ht_ge_3
+    have h_sub := hT₁ s.im ht_ge_T₁
+    have h_combined : (1/4 : ℝ) * (2 + |s.im|) ^ (-A) ≤ ‖riemannZeta s‖ := by
+      linarith [h_inner, h_sub]
+    -- Bridge: c/|t|^A = (1/4)·(2|t|)^{-A} ≤ (1/4)·(2+|t|)^{-A}
+    -- Since 2+|t| ≤ 2|t|, (2+|t|)^A ≤ (2|t|)^A, so (2|t|)^{-A} ≤ (2+|t|)^{-A}
+    have h_lhs_eq : 1 / 4 * (1 / 2) ^ A / |s.im| ^ A =
+        1 / 4 * (2 * |s.im|) ^ (-A) := by
+      rw [rpow_neg (by positivity : (0:ℝ) ≤ 2 * |s.im|)]
+      rw [mul_rpow (by norm_num : (0:ℝ) ≤ 2) (abs_nonneg s.im)]
+      rw [show (1:ℝ) / 4 * (1 / 2) ^ A / |s.im| ^ A =
+          1 / 4 * ((1/2)^A * (|s.im|^A)⁻¹) from by ring]
+      rw [show (1:ℝ) / 4 * ((2:ℝ) ^ A * |s.im| ^ A)⁻¹ =
+          1 / 4 * (((2:ℝ)^A)⁻¹ * (|s.im|^A)⁻¹) from by rw [mul_inv]]
+      congr 1; congr 1
+      rw [show (1/2 : ℝ) ^ A = ((2:ℝ)^A)⁻¹ from by
+        rw [one_div, inv_rpow (by norm_num : (0:ℝ) ≤ 2)]]
+    have h_rpow_mono : (2 * |s.im|) ^ (-A) ≤ (2 + |s.im|) ^ (-A) := by
+      rw [rpow_neg (by positivity : (0:ℝ) ≤ 2 * |s.im|),
+          rpow_neg (le_of_lt h2t_pos)]
+      exact inv_anti₀ (rpow_pos_of_pos h2t_pos A)
+        (rpow_le_rpow (le_of_lt h2t_pos) (by linarith) (le_of_lt hA))
+    calc 1 / 4 * (1 / 2) ^ A / |s.im| ^ A
+        = 1 / 4 * (2 * |s.im|) ^ (-A) := h_lhs_eq
+      _ ≤ 1 / 4 * (2 + |s.im|) ^ (-A) :=
+          mul_le_mul_of_nonneg_left h_rpow_mono (by norm_num)
+      _ ≤ ‖riemannZeta s‖ := h_combined
+  · -- Case: s.re > 2 — ζ is bounded away from zero
+    push_neg at hs_hi
+    have hre : (2:ℝ) ≤ s.re := le_of_lt hs_hi
+    have h_tail := zeta_sub_one_norm_le_three_fourths hre
+    have h1 : (1:ℝ) ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := by
+      calc (1:ℝ) = ‖(1:ℂ)‖ := by simp
+        _ = ‖riemannZeta s - (riemannZeta s - 1)‖ := by ring_nf
+        _ ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := norm_sub_le _ _
+    have hζ_ge : (1:ℝ)/4 ≤ ‖riemannZeta s‖ := by linarith
+    calc (1:ℝ) / 4 * (1 / 2) ^ A / |s.im| ^ A
+        ≤ (1:ℝ)/4 := by
+          have h12A_le_1 : (1/2 : ℝ)^A ≤ 1 :=
+            rpow_le_one (by norm_num) (by norm_num) (le_of_lt hA)
+          have htA_ge_1 : 1 ≤ |s.im| ^ A := by
+            have : (1:ℝ) ^ A ≤ |s.im| ^ A :=
+              rpow_le_rpow (by norm_num) (by linarith) (le_of_lt hA)
+            rwa [one_rpow] at this
+          rw [div_le_iff₀ (rpow_pos_of_pos ht_pos A)]
+          nlinarith
+      _ ≤ ‖riemannZeta s‖ := hζ_ge
 
 -- ═══════════════════════════════════════════
 -- §6. Axiom Graduation
