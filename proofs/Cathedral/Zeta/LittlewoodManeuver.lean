@@ -46,7 +46,7 @@ open Cathedral.Zeta.Hadamard
 -- ═══════════════════════════════════════════
 
 /-- r₃ = 5/2 - ε/2 is positive. -/
-private lemma outer_radius_pos {ε : ℝ} (hε : 0 < ε) (hε1 : ε < 3/2) :
+private lemma outer_radius_pos {ε : ℝ} (_hε : 0 < ε) (hε1 : ε < 3/2) :
     0 < 5/2 - ε/2 := by linarith
 
 /-- r₂ = 5/2 - ε is positive. -/
@@ -65,7 +65,7 @@ private lemma target_lt_outer {ε : ℝ} (hε : 0 < ε) :
 lemma re_ge_two_on_inner {z : ℂ} (hz : ‖z‖ ≤ 1) :
     2 ≤ ((⟨3, t⟩ : ℂ) + z).re := by
   have : |z.re| ≤ ‖z‖ := Complex.abs_re_le_norm z
-  simp only [Complex.add_re, Complex.ofReal_re]
+  simp only [Complex.add_re]
   show 2 ≤ 3 + z.re
   linarith [(abs_le.mp (le_trans this hz)).1]
 
@@ -98,7 +98,7 @@ lemma s_ne_one_on_ball_3
 
 /-- Re(s₀ + z) > 1/2 on ball(0, r₃) with center (3, t). -/
 lemma re_gt_half_on_ball_3
-    {ε : ℝ} (hε : 0 < ε) (hε1 : ε < 3/2)
+    {ε : ℝ} (hε : 0 < ε) (_hε1 : ε < 3/2)
     {z : ℂ} (hz : z ∈ ball (0 : ℂ) (5/2 - ε/2)) :
     1/2 < ((⟨3, t⟩ : ℂ) + z).re := by
   simp only [mem_ball, dist_zero_right] at hz
@@ -272,7 +272,7 @@ private lemma zeta_three_half_le : ∑' (n : ℕ), (n : ℝ) ^ (-3/2 : ℝ) ≤ 
     For Re(s) ≥ 2: ‖L(Λ, s)‖ ≤ Σ Λ(n)/n² ≤ Σ log(n)/n² ≈ 0.57 ≤ 6.
     Uses `vonMangoldt_le_log` and absolute convergence from Mathlib. -/
 private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
-    (hs1 : s ≠ 1) :
+    (_hs1 : s ≠ 1) :
     ‖deriv riemannZeta s / riemannZeta s‖ ≤ 6 := by
   have h1 : 1 < s.re := by linarith
   -- Step 1: rewrite ‖ζ'/ζ(s)‖ = ‖L(Λ, s)‖ using the Dirichlet identity
@@ -344,7 +344,7 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
 private lemma G_deriv_eq_logderiv_of_exp_eq
     {c : ℂ} {R : ℝ} (_hR : 0 < R)
     {f G : ℂ → ℂ}
-    (hf_diff : DifferentiableOn ℂ f (ball 0 R))
+    (_hf_diff : DifferentiableOn ℂ f (ball 0 R))
     (hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (hf_eq : ∀ z ∈ ball (0:ℂ) R, f z = c * Complex.exp (G z))
     (hf_ne : ∀ z ∈ ball (0:ℂ) R, f z ≠ 0)
@@ -377,7 +377,7 @@ private lemma G_deriv_eq_logderiv_of_exp_eq
     = deriv ζ (s₀+w) / ζ(s₀+w) by `deriv_zeta_comp`.
     ≤ 6 by `norm_zeta_logderiv_le`. -/
 private lemma G_deriv_bound_on_inner_ball
-    {t : ℝ} (ht : 2 ≤ |t|)
+    {t : ℝ} (_ht : 2 ≤ |t|)
     {R : ℝ} (hR_pos : 0 < R) (hR_ge : 1 < R)
     {G : ℂ → ℂ} (hG_diff : DifferentiableOn ℂ G (ball 0 R))
     (hG_eq : ∀ z ∈ ball (0:ℂ) R,
@@ -509,7 +509,7 @@ lemma G_outer_bound_re_3
             have := rpow_le_rpow_of_exponent_le hbase (show (1:ℝ) ≤ 10 by norm_num)
             rwa [rpow_one] at this
     · -- Re(s) < 2: use convexity bound ‖ζ(s)‖ ≤ (2+|s.im|)^2
-      push_neg at hre
+      push Not at hre
       have hrs : 1/2 < s.re := by
         have hsre : s.re = 3 + z.re := by simp [hs_def]
         have : -R < z.re := by
@@ -1054,7 +1054,7 @@ theorem littlewood_maneuver (hRH : RiemannHypothesis)
           mul_le_mul_of_nonneg_left h_rpow_mono (by norm_num)
       _ ≤ ‖riemannZeta s‖ := h_combined
   · -- Case: s.re > 2 — ζ is bounded away from zero
-    push_neg at hs_hi
+    push Not at hs_hi
     have hre : (2:ℝ) ≤ s.re := le_of_lt hs_hi
     have h_tail := zeta_sub_one_norm_le_three_fourths hre
     have h1 : (1:ℝ) ≤ ‖riemannZeta s‖ + ‖riemannZeta s - 1‖ := by
