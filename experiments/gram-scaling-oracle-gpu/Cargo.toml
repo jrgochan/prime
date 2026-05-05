@@ -1,0 +1,21 @@
+[package]
+name = "gram-scaling-oracle-gpu"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral Gram Scaling Oracle — GPU Accelerated (RTX 4090 / cuSOLVER).
+
+Extracts the α≈0.855 scaling limit of λ_min(G_N) using:
+  - cuSOLVER dsyevd for GPU eigendecomposition (N ≤ ~50K)
+  - OpenBLAS dsyevr for CPU λ_min-only (fallback / large N)
+  - GCD-class block decomposition for block-level analysis
+  - Cross-N sweep with certified JSON/TSV output
+
+Target hardware: NVIDIA RTX 4090 (24 GB VRAM) + AMD Ryzen 9 7950X3D (16 cores)
+"""
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+serde_json = "1"
+serde = { version = "1", features = ["derive"] }

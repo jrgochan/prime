@@ -51,6 +51,7 @@ members = [
     "experiments/moebius-microscope",
     "experiments/two-tile-decomposition",
     "experiments/gram-scaling-oracle",
+    "experiments/gram-scaling-oracle-gpu",
 ]
 
 [profile.release]
