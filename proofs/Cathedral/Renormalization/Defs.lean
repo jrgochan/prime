@@ -24,8 +24,7 @@
   This α is the "fine-structure constant of the integers" — derivable
   from the microscopic Euler product over individual primes.
 
-  2 sorry (combinatorial partition lemmas: ω-class and Liouville parity).
-  Zero axioms.
+  Zero sorry. Zero axioms.
 -/
 
 import Cathedral.Defs
@@ -88,12 +87,47 @@ def totalEnergy (N : ℕ) (a_star b_vec : ℕ → ℝ) : ℝ :=
   ∑ n ∈ (Finset.range (N + 1)).filter (fun n => 2 ≤ n),
     a_star n * b_vec n
 
-/-- Total energy equals sum of ω-class energies (decomposition). -/
+/-- Total energy equals sum of ω-class energies (decomposition).
+    PROVED: pure Finset partition — the set {n : 2 ≤ n ≤ N} is the
+    disjoint union of {n : 2 ≤ n ≤ N, ω(n) = k} over k. -/
 theorem totalEnergy_eq_sum_omegaClass (N : ℕ) (a_star b_vec : ℕ → ℝ) :
     totalEnergy N a_star b_vec =
     ∑ k ∈ Finset.range (N + 1),
       omegaClassEnergy N k a_star b_vec := by
-  sorry -- Requires partition of {2,..,N} by ω-class
+  unfold totalEnergy omegaClassEnergy
+  symm
+  rw [← Finset.sum_biUnion (fun k₁ _ k₂ _ hne => by
+    apply Finset.disjoint_filter.mpr
+    intro n _ ⟨_, h1⟩ ⟨_, h2⟩
+    exact hne (h1.symm.trans h2))]
+  congr 1; ext n
+  constructor
+  · intro hn
+    rw [Finset.mem_biUnion] at hn
+    obtain ⟨k, _, hn'⟩ := hn
+    have hf := Finset.mem_filter.mp hn'
+    exact Finset.mem_filter.mpr (And.intro hf.1 hf.2.1)
+  · intro hn
+    rw [Finset.mem_biUnion]
+    have hn_filter := Finset.mem_filter.mp hn
+    have hn_range := hn_filter.1
+    have hn_ge2 := hn_filter.2
+    have hn_lt : n < N + 1 := Finset.mem_range.mp hn_range
+    -- ω(n) ≤ n: distinct prime factors can't exceed n
+    have h_omega_le : smallOmega n < N + 1 := by
+      -- Each prime factor p satisfies 2 ≤ p ≤ n, so ω(n) ≤ #{2,...,n} = n-1 ≤ n
+      have : n.primeFactors ⊆ Finset.Icc 2 n := fun p hp => by
+        simp only [Finset.mem_Icc]
+        exact ⟨(Nat.prime_of_mem_primeFactors hp).two_le,
+               Nat.le_of_dvd (by omega) (Nat.dvd_of_mem_primeFactors hp)⟩
+      have h1 : n.primeFactors.card ≤ (Finset.Icc 2 n).card := Finset.card_le_card this
+      have h2 : (Finset.Icc 2 n).card = n + 1 - 2 := Nat.card_Icc 2 n
+      -- smallOmega n = ω n = n.primeFactors.card
+      have h3 : smallOmega n = n.primeFactors.card := by
+        unfold smallOmega; rfl
+      omega
+    refine ⟨smallOmega n, Finset.mem_range.mpr h_omega_le, ?_⟩
+    exact Finset.mem_filter.mpr (And.intro hn_range (And.intro hn_ge2 rfl))
 
 -- ════════════════════════════════════════════════
 -- §3. EULER PRODUCT (SELBERG-DELANGE PARAMETER)
@@ -143,10 +177,38 @@ def cancellationRatio (N : ℕ) (a_star b_vec : ℕ → ℝ) : ℝ :=
   |liouvilleEvenEnergy N a_star b_vec + liouvilleOddEnergy N a_star b_vec| /
   (|liouvilleEvenEnergy N a_star b_vec| + |liouvilleOddEnergy N a_star b_vec|)
 
-/-- Total energy = even + odd (partition by Liouville parity). -/
+/-- Total energy = even + odd (partition by Liouville parity).
+    PROVED: pure Finset partition — every n ≥ 2 has λ(n) ∈ {1, -1},
+    so filtering by λ(n) = 1 vs λ(n) = -1 is a complete partition. -/
 theorem totalEnergy_eq_liouville_sum (N : ℕ) (a_star b_vec : ℕ → ℝ) :
     totalEnergy N a_star b_vec =
     liouvilleEvenEnergy N a_star b_vec + liouvilleOddEnergy N a_star b_vec := by
-  sorry -- Requires partition of {2,..,N} by Liouville parity
+  unfold totalEnergy liouvilleEvenEnergy liouvilleOddEnergy
+  -- LHS: range.filter (2 ≤ ·)
+  -- RHS: range.filter (2 ≤ · ∧ λ=1) + range.filter (2 ≤ · ∧ λ=-1)
+  -- Now both sides have single-level filters on Finset.range
+  -- LHS: range.filter (2 ≤ ·)
+  -- RHS: range.filter (2 ≤ · ∧ λ=1) + range.filter (2 ≤ · ∧ λ=-1)
+  rw [← Finset.sum_filter_add_sum_filter_not
+    ((Finset.range (N + 1)).filter (fun n => 2 ≤ n))
+    (fun n => liouvilleFunction n = 1)]
+  congr 1
+  -- filter (λ=1) on filter (2≤·) range = filter (2≤· ∧ λ=1) range
+  · simp only [Finset.filter_filter]
+  -- filter (¬λ=1) on filter (2≤·) range = filter (2≤· ∧ λ=-1) range
+  · simp only [Finset.filter_filter]
+    congr 1; ext n
+    simp only [Finset.mem_filter, Finset.mem_range]
+    constructor
+    · intro h
+      refine ⟨h.1, h.2.1, ?_⟩
+      have h_ne := h.2.2
+      unfold liouvilleFunction at h_ne ⊢
+      rcases neg_one_pow_eq_or (R := ℤ) (n.factorization.sum fun _ e => e) with h | h
+      · exact absurd h h_ne
+      · exact h
+    · intro h
+      refine ⟨h.1, h.2.1, ?_⟩
+      have := h.2.2; unfold liouvilleFunction at this ⊢; omega
 
 end
