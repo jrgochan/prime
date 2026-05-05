@@ -613,6 +613,38 @@ private lemma three_circles_at_target
              b ^ ((Real.log ‖z‖ - Real.log R₁) / (Real.log R₃ - Real.log R₁)) :=
   hadamard_three_circles hR₁_pos h13 hG ha hb z hz₁ hz₂
 
+/-- Sub-logarithmic to polynomial: if the ζ lower bound has form
+    (1/4)·exp(-K·(log(2+|t|))^α) with α < 1, then for any A > 0
+    it eventually dominates (1/4)·(2+|t|)^{-A}.
+    Uses sub_logarithmic_bound to crush the exponent. -/
+private lemma sub_log_to_polynomial
+    {K : ℝ} (hK : 0 < K) {α : ℝ} (hα : 0 < α) (hα1 : α < 1)
+    {A : ℝ} (hA : 0 < A) :
+    ∃ T₀ > 0, ∀ t : ℝ, T₀ ≤ |t| →
+      (1/4 : ℝ) * Real.exp (-(K * (Real.log (2 + |t|)) ^ α)) ≥
+      (1/4 : ℝ) * (2 + |t|) ^ (-A) := by
+  have hAK : 0 < A / K := div_pos hA hK
+  obtain ⟨T₁, hT₁_pos, hT₁⟩ := sub_logarithmic_bound hα hα1 hAK
+  refine ⟨max T₁ 2, lt_of_lt_of_le (by norm_num : (0:ℝ) < 2) (le_max_right _ _), ?_⟩
+  intro t ht
+  have hT₁_le : T₁ ≤ |t| := le_trans (le_max_left _ _) ht
+  have ht_ge_2 : 2 ≤ |t| := le_trans (le_max_right _ _) ht
+  have h2t_pos : 0 < 2 + |t| := by linarith [abs_nonneg t]
+  have h2t_ge_T : T₁ ≤ 2 + |t| := by linarith
+  have hlog_sub := hT₁ (2 + |t|) h2t_ge_T
+  have hK_bound : K * (Real.log (2 + |t|)) ^ α < A * Real.log (2 + |t|) := by
+    have h1 := mul_lt_mul_of_pos_left hlog_sub hK
+    have h2 : K * (A / K * Real.log (2 + |t|)) = A * Real.log (2 + |t|) := by
+      field_simp
+    linarith
+  have hexp_ge : Real.exp (-(A * Real.log (2 + |t|))) ≤
+      Real.exp (-(K * (Real.log (2 + |t|)) ^ α)) :=
+    Real.exp_le_exp.mpr (neg_le_neg (le_of_lt hK_bound))
+  have hexp_eq : Real.exp (-(A * Real.log (2 + |t|))) = (2 + |t|) ^ (-A) := by
+    rw [Real.rpow_def_of_pos h2t_pos]; ring_nf
+  rw [ge_iff_le, ← hexp_eq]
+  exact mul_le_mul_of_nonneg_left hexp_ge (by norm_num)
+
 -- ═══════════════════════════════════════════
 -- §5. The Full Littlewood Maneuver Assembly
 -- ═══════════════════════════════════════════
