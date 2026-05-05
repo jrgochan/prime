@@ -278,8 +278,13 @@ end
 --   1. covariance_bound_from_mertens_34  — Abel summation covariance bound
 --   2. pnt_mu_div_k                      — PNT: Σ μ(k)/k → 0
 --   3. pnt_mu_log_div_k                  — PNT: Σ μ(k)ln(k)/k → -1
---   4. gramIntegral_eq_formula_ge2       — Vasyunin Gram identity (cycle-breaking;
---                                           proved downstream in ConvergenceProof.lean)
+--   4. gramIntegral_eq_formula_ge2       — Vasyunin Gram identity (a ≥ 2)
+--      STATUS: Proved in TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry).
+--      BLOCKER: Lean import cycle prevents wiring.
+--      The cycle: DeltaDirectEval → LogDigammaBridge → ConvergenceAxioms → AlgebraicLimit
+--      To graduate: Rewrite DeltaDirectEval.sum_perClassLimits_eq_deltaTarget
+--      to prove Σ perClassLimit = deltaTarget directly (via Gauss logΓ multiplication)
+--      without using gramIntegral = formula as an intermediate step.
 --
 -- GRADUATED (v17-18):
 --   rh_zeta_lower_bound_from_zero_counting → Littlewood Maneuver 🎓
