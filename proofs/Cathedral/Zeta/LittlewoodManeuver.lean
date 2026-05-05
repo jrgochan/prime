@@ -560,6 +560,58 @@ lemma sub_logarithmic_bound
     have := rpow_add hlog_pos (α - 1) 1
     rw [rpow_one, sub_add_cancel] at this; linarith
   linarith
+-- ═══════════════════════════════════════════
+-- §4.5. Assembly Infrastructure
+-- ═══════════════════════════════════════════
+
+/-- DiffContOnCl on a closed annulus from DifferentiableOn on a larger ball.
+    For closed sets, DiffContOnCl ↔ DifferentiableOn (Mathlib). -/
+private lemma diffContOnCl_on_annulus_of_ball
+    {G : ℂ → ℂ} {R₁ R₃ R₄ : ℝ}
+    (_hR₁_pos : 0 < R₁) (hR₃_lt : R₃ < R₄)
+    (hG_diff : DifferentiableOn ℂ G (ball 0 R₄)) :
+    DiffContOnCl ℂ G {z : ℂ | R₁ ≤ ‖z‖ ∧ ‖z‖ ≤ R₃} := by
+  have h_closed : IsClosed {z : ℂ | R₁ ≤ ‖z‖ ∧ ‖z‖ ≤ R₃} := by
+    apply IsClosed.inter
+    · exact isClosed_le continuous_const continuous_norm
+    · exact isClosed_le continuous_norm continuous_const
+  have h_sub : {z : ℂ | R₁ ≤ ‖z‖ ∧ ‖z‖ ≤ R₃} ⊆ ball (0 : ℂ) R₄ := by
+    intro z ⟨_, hz₂⟩
+    simp only [mem_ball, dist_zero_right]
+    linarith
+  rw [h_closed.diffContOnCl_iff]
+  exact hG_diff.mono h_sub
+
+/-- BC conversion layer: Re(G) ≤ M on ball(0, R₄) → ‖G‖ ≤ K on ‖z‖ = R₃.
+    Uses Mathlib's `borelCaratheodory_zero` to convert a real-part bound
+    into a complex norm bound, stepping inward from R₄ to R₃. -/
+private lemma bc_re_to_norm
+    {G : ℂ → ℂ} {R₃ R₄ M : ℝ}
+    (_hR₃_pos : 0 < R₃) (_hR₃_lt : R₃ < R₄) (hR₄_pos : 0 < R₄)
+    (hM_pos : 0 < M)
+    (hG_diff : DifferentiableOn ℂ G (ball 0 R₄))
+    (hG0 : G 0 = 0)
+    (hG_re : ∀ z ∈ ball (0 : ℂ) R₄, (G z).re ≤ M) :
+    ∀ z, ‖z‖ = R₃ → ‖G z‖ ≤ 2 * M * R₃ / (R₄ - R₃) := by
+  intro z hz
+  have hz_ball : z ∈ ball (0 : ℂ) R₄ := by
+    simp only [mem_ball, dist_zero_right]; linarith
+  have hG_re_maps : MapsTo G (ball 0 R₄) {w | w.re ≤ M} := by
+    intro w hw; exact hG_re w hw
+  have hBC := Complex.borelCaratheodory_zero hM_pos hG_diff hG_re_maps hR₄_pos hz_ball hG0
+  rwa [hz] at hBC
+
+/-- Three-Circles at target: given inner/outer norm bounds, interpolate. -/
+private lemma three_circles_at_target
+    {G : ℂ → ℂ} {R₁ R₃ a b : ℝ}
+    (hR₁_pos : 0 < R₁) (h13 : R₁ < R₃)
+    (hG : DiffContOnCl ℂ G {z : ℂ | R₁ ≤ ‖z‖ ∧ ‖z‖ ≤ R₃})
+    (ha : ∀ z, ‖z‖ = R₁ → ‖G z‖ ≤ a)
+    (hb : ∀ z, ‖z‖ = R₃ → ‖G z‖ ≤ b)
+    (z : ℂ) (hz₁ : R₁ ≤ ‖z‖) (hz₂ : ‖z‖ ≤ R₃) :
+    ‖G z‖ ≤ a ^ (1 - (Real.log ‖z‖ - Real.log R₁) / (Real.log R₃ - Real.log R₁)) *
+             b ^ ((Real.log ‖z‖ - Real.log R₁) / (Real.log R₃ - Real.log R₁)) :=
+  hadamard_three_circles hR₁_pos h13 hG ha hb z hz₁ hz₂
 
 -- ═══════════════════════════════════════════
 -- §5. The Full Littlewood Maneuver Assembly
