@@ -722,23 +722,46 @@ theorem littlewood_maneuver (hRH : RiemannHypothesis)
   -- │  BC Conversion Layer + Three-Circles + Sub-Log Annihil.   │
   -- │  Credit: Gemini Actual (Los Alamos, May 4 2026)           │
   -- └────────────────────────────────────────────────────────────┘
-  -- Four concentric radii:
-  --   R₄ = 5/2 - ε/4  (absolute outer boundary — holomorphic log domain)
-  --   R₃ = 5/2 - ε/2  (BC output / Three-Circles outer boundary)
-  --   R₂ = 5/2 - ε    (target boundary touching σ = 1/2+ε)
-  --   R₁ = 1           (inner anchor)
-  --
-  -- Stage 1: holomorphic_log_exists_on_ball on R₄
-  -- Stage 2: G_outer_bound_re_3 on R₄ → Re(G) ≤ M·log(2+|t|)
-  -- Stage 3: borelCaratheodory_zero from R₄ to R₃ → ‖G‖ ≤ K·log(2+|t|)
-  -- Stage 4: G_inner_bound_fixed on R₁ → ‖G‖ ≤ 6
-  -- Stage 5: hadamard_three_circles on [R₁, R₃] → ‖G(z*)‖ ≤ 6^{1-α}·K^α
-  -- Stage 6: sub_logarithmic_bound → ∀ A > 0, ∃ T₀: bound < A·log|t|
-  --
-  -- TEMPORARY: Delegate to axiom while the assembly is being wired.
-  -- Each stage above is individually proved (zero sorry).
-  -- The assembly wiring requires DiffContOnCl ↔ DifferentiableOn conversion
-  -- and careful log/exp arithmetic that is being formalized.
+  -- Geometry: R₄ = 5/2-ε/4, R₃ = 5/2-ε/2, R₂ = 5/2-ε, R₁ = 1
+  set R₄ := 5/2 - ε/4 with hR₄_def
+  set R₃ := 5/2 - ε/2 with hR₃_def
+  set R₂ := 5/2 - ε with hR₂_def
+  have hR₄_pos : 0 < R₄ := by linarith
+  have hR₃_pos : 0 < R₃ := by linarith
+  have hR₂_pos : 0 < R₂ := by linarith
+  have hR₃_lt_R₄ : R₃ < R₄ := by linarith
+  have hR₂_lt_R₃ : R₂ < R₃ := by linarith
+  have h1_lt_R₂ : 1 < R₂ := by linarith
+  have hR₄_lt_52 : R₄ < 5/2 := by linarith
+  -- α = interpolation exponent, 0 < α < 1
+  set α := Real.log R₂ / Real.log R₃ with hα_def
+  have hα_lt_1 : α < 1 := by
+    rw [hα_def, div_lt_one (Real.log_pos (by linarith))]
+    exact Real.log_lt_log (by linarith) hR₂_lt_R₃
+  have hα_pos : 0 < α := by
+    rw [hα_def]
+    exact div_pos (Real.log_pos (by linarith)) (Real.log_pos (by linarith))
+  -- K = constant controlling the Three-Circles output (depends only on ε)
+  -- K = 6^(1-α) · (2·(10+1)·R₃/(R₄-R₃))^α is a valid choice, but
+  -- for the sub_log_to_polynomial lemma we just need K > 0.
+  -- We use 2·(10+1)·R₃/(R₄-R₃) = 2·11·R₃/(ε/4) = 88·R₃/ε as the BC coefficient.
+  set K_bc := 2 * (10 * Real.log (2 + 3) + Real.log 4 + 1) * R₃ / (R₄ - R₃) with hK_bc_def
+  -- For the exodia bound, we need K > 0 (which depends only on ε)
+  -- The full Three-Circles bound at z* gives ‖G(z*)‖ ≤ 6^(1-α) · b^α
+  -- where b = BC output ≤ K_bc · log(2+|t|) for large |t|.
+  -- The full constant K = 6^(1-α) · K_bc^α works.
+  -- For now, we delegate to the axiom while the rpow algebra is completed.
+  -- ═══════════════════════════════════════════════════════
+  -- PROOF PATH: The six stages are individually proved (zero sorry):
+  -- 1. holomorphic_log_exists_on_ball(R₄) via zeta_differentiable_on_wide_ball
+  -- 2. G_outer_bound_re_3(R₄) → Re(G) ≤ M on ball
+  -- 3. bc_re_to_norm(R₄→R₃) → ‖G‖ ≤ 2M·R₃/(R₄-R₃) on ‖z‖=R₃
+  -- 4. G_inner_bound_fixed → ‖G‖ ≤ 6 on ‖z‖=1
+  -- 5. three_circles_at_target → ‖G(z*)‖ ≤ 6^(1-α)·b^α
+  -- 6. sub_log_to_polynomial → ∀ A, ∃ T₀: K·(log)^α < A·log
+  -- The assembly wiring connects these; the rpow algebra
+  -- (separating M into C·log(2+|t|) to extract K·(log)^α)
+  -- is the remaining formalization step.
   exact thin_strip_lower_bound_exists hRH ε hε hε1 A hA
 
 -- ═══════════════════════════════════════════
