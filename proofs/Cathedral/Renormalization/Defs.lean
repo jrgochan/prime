@@ -24,7 +24,8 @@
   This α is the "fine-structure constant of the integers" — derivable
   from the microscopic Euler product over individual primes.
 
-  Zero sorry. Zero axioms.
+  2 sorry (combinatorial partition lemmas: ω-class and Liouville parity).
+  Zero axioms.
 -/
 
 import Cathedral.Defs

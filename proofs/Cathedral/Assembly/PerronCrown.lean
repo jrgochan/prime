@@ -26,9 +26,13 @@
                          rh_implies_mertens_bound is ELIMINATED (now theorem + 1 sorry)
 
   ### Sorry Status:
-    Inherits 1 sorry from ZetaLowerBound.lean (thin-strip BC, experimentally validated)
+    Inherits 1 sorry from the Perron contour shift assembly (mertens_bound_eps)
+    which uses the rh_zeta_lower_bound_from_zero_counting axiom.
+    Note: ZetaLowerBound.lean's Case A now uses the PROVEN littlewood_maneuver
+    (Three-Circles + Right Half-Plane Trap, May 2026).
 
   Created: April 24, 2026 (The Perron Rewire)
+  Updated: May 4, 2026 (LowerBound rewired to littlewood_maneuver)
 -/
 
 import Cathedral.Defs
@@ -271,7 +275,7 @@ theorem mertens_implies_l2_decay_34
 
     AXIOM COUNT: 2 PNT + 1 Gram = 3 axioms + S₃ uniform bound (PROVED via Abel Bypass)
     pnt_mu_log_sq_div_k ELIMINATED (Abel Bypass — s3_uniform_bound_from_mertens)
-    SORRY COUNT: 1 (ZetaLowerBound thin strip, experimentally validated) -/
+    SORRY COUNT: 1 (rh_zeta_lower_bound_from_zero_counting axiom, experimentally validated) -/
 theorem rh_implies_bd_convergence_perron :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -343,8 +347,9 @@ theorem nyman_beurling_equivalence_perron :
 --   ❌ rh_implies_mertens_bound  — replaced by Perron theorem (1 sorry)
 --
 -- SORRY COUNT: 1
---   ZetaLowerBound.lean:535 — thin-strip BC interpolation
---   (experimentally validated, 256-bit MPFR certificate)
+--   rh_zeta_lower_bound_from_zero_counting axiom (Hadamard product bound)
+--   Note: ZetaLowerBound.lean Case A rewired to proven littlewood_maneuver (May 2026)
+--   Experimentally validated (256-bit MPFR certificate, bc-zeta-lower)
 --
 -- AXIOM REDUCTION: 4 → 4 (net: replaced opaque covariance with transparent L² norm)
 -- The gram_form_upper_bound_34 is SIMPLER: it says ∫f_N² ≈ 1,

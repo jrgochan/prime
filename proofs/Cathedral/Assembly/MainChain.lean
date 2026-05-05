@@ -93,12 +93,11 @@ theorem distance_converges_to_zero_implies_rh :
 
     This replaces the Mellin Crown's sorry with the Perron-proved chain.
     The Perron Crown inherits sorry from:
-    - mertens_bound_eps (contour shift assembly)
-    - pnt_mu_log_div_k_derived (forward Tauberian)
-    Both are upstream infrastructure sorrys, not Cathedral axioms.
+    - rh_zeta_lower_bound_from_zero_counting axiom (Hadamard product bound)
+    Note: ZetaLowerBound.lean Case A now uses PROVEN littlewood_maneuver (May 2026).
 
     **Crown axioms on critical path**: 0
-    **Sorry (inherited)**: 2 (contour shift + forward Tauberian) -/
+    **Sorry (inherited)**: 1 (rh_zeta_lower_bound_from_zero_counting) -/
 theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,

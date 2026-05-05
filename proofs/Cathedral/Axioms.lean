@@ -4,7 +4,7 @@ import Cathedral.NymanBeurling.BDMellin
 /-!
   Cathedral/Axioms.lean
 
-  ## The Cathedral's Axiom Registry (v11 — April 26, 2026)
+  ## The Cathedral's Axiom Registry (v12 — May 4, 2026)
 
   Central hub for axiom documentation. This file contains NO axiom
   declarations — all axioms are declared in their respective modules.
@@ -56,6 +56,7 @@ import Cathedral.NymanBeurling.BDMellin
   | `pnt_mu_log_div_k` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
   | `covariance_bound_from_mertens_34` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
   | `partial_integral_tends_to_formula` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
+  | `selberg_delange_decay` | Apr 30 | PATH C α=1 mean-field 🎓 | v15 |
 
   ### REMAINING CROWN AXIOM PATHS
 
@@ -66,8 +67,12 @@ import Cathedral.NymanBeurling.BDMellin
 
   **Axiom 2: `rh_zeta_lower_bound_from_zero_counting`** (Zeta/Hadamard.lean)
   - Content: RH → |ζ(s)| ≥ c·|t|^{-A} for Re(s) ≥ 1/2+ε
-  - Graduation: Requires Hadamard product formula + zero counting.
-    Partial infrastructure in Zeta/LowerBound.lean (445 lines).
+  - Partial graduation: `littlewood_maneuver` (May 2026) proves the ∃ T₀ form
+    via Three-Circles + Right Half-Plane Trap in LittlewoodManeuver.lean.
+    LowerBound.lean Case A now uses littlewood_maneuver (PROVEN).
+    The axiom remains for the fixed T₀=2 interface in the Perron chain.
+  - Full graduation: Requires Hadamard product formula + zero counting.
+    Partial infrastructure in Zeta/LowerBound.lean (440 lines).
 
   ### CONVERSE DIRECTION (0 custom axioms)
 
@@ -78,10 +83,16 @@ import Cathedral.NymanBeurling.BDMellin
 
   ### FULL AXIOM INVENTORY
 
-  Total active axioms: ~55 across 149 files.
+  Total active axioms: ~55 across 150+ files.
   Crown path: 2 (v11, compiler-verified).
   Off-crown (Spectral Engine, Sieve, MellinBridge, Perron, etc.): ~53.
   See individual module docstrings for details.
+
+  ### RECENT PROGRESS (May 2026)
+  - Littlewood Maneuver: Three-Circles + Right Half-Plane Trap (1095 lines)
+  - LowerBound.lean: Case A rewired to proven littlewood_maneuver
+  - Deprecation cleanup: push_neg → push Not, NormedAddCommGroup, antitoneOn
+  - Gram Scaling Oracle: Cross-N λ_min sweep with LAPACK dsyevr
 -/
 
 noncomputable section
