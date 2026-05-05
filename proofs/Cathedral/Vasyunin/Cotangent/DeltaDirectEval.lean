@@ -956,10 +956,55 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
       (a:ℝ) / (b:ℝ) * ∑ m ∈ Finset.range b, f m +
       ∑ r ∈ Finset.Icc 1 (b - 1),
         Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) * (f r - f (r - 1)) := by
-    -- Core identity: Σ J(m)*f(m) = (a/b)*Σf + Σ_{Icc}{ar/b}*f(r) - Σ_{Icc}{ar/b}*f(r-1)
-    -- Which equals (a/b)*Σf + Σ_{Icc}{ar/b}*(f(r)-f(r-1))
-    -- Proof: expand J = a/b + {am/b} - {a(m+1)/b}, distribute, boundary peel, shift
-    sorry
+    -- B1: Pointwise expand J(m) = a/b + {am/b} - {a(m+1)/b}
+    have h_expand : ∀ m ∈ Finset.range b,
+      (↑(floorStep a b m) : ℝ) * f m =
+      ((a:ℝ)/(b:ℝ) * f m + Int.fract ((↑(a*m):ℝ)/↑b) * f m -
+       Int.fract ((↑(a*(m+1)):ℝ)/↑b) * f m) := by
+      intro m _; unfold floorStep
+      rw [Cathedral.Analysis.FloorFract.floor_step_eq_frac_diff a b m (by omega)
+        (Nat.div_le_div_right (Nat.mul_le_mul_left a (Nat.le_succ m)))]
+      ring
+    rw [Finset.sum_congr rfl h_expand]
+    -- B2: Split Σ(a + b - c) into Σa + Σb - Σc
+    simp_rw [show ∀ (x y z : ℝ), x + y - z = x + (y - z) from fun _ _ _ => by ring]
+    rw [Finset.sum_add_distrib, ← Finset.mul_sum, Finset.sum_sub_distrib]
+    -- B3: Peel {a*0/b}*f(0) = 0 from second sum
+    have h_peel0 : ∑ m ∈ Finset.range b, Int.fract ((↑(a * m) : ℝ) / ↑b) * f m =
+        ∑ r ∈ Finset.Icc 1 (b - 1), Int.fract ((↑(a * r) : ℝ) / ↑b) * f r := by
+      have h_sp : Finset.range b = {0} ∪ Finset.Icc 1 (b - 1) := by
+        ext m; simp [Finset.mem_range, Finset.mem_Icc]; omega
+      rw [h_sp, Finset.sum_union (by simp [Finset.mem_Icc]),
+        Finset.sum_singleton]; simp [Int.fract_zero]
+    -- B4: Index shift (m ↦ m+1) + peel {a*b/b} = 0 for third sum
+    have h_shift : ∑ m ∈ Finset.range b, Int.fract ((↑(a * (m + 1)) : ℝ) / ↑b) * f m =
+        ∑ r ∈ Finset.Icc 1 (b - 1), Int.fract ((↑(a * r) : ℝ) / ↑b) * f (r - 1) := by
+      -- Bijection m ↦ m+1 from range b to Icc 1 b
+      have h_bij : ∑ m ∈ Finset.range b, Int.fract ((↑(a * (m + 1)) : ℝ) / ↑b) * f m =
+          ∑ r ∈ Finset.Icc 1 b, Int.fract ((↑(a * r) : ℝ) / ↑b) * f (r - 1) := by
+        apply Finset.sum_nbij (fun m => m + 1)
+        · intro m hm; simp only [Finset.mem_range] at hm
+          simp only [Finset.mem_Icc]; constructor <;> omega
+        · intro m₁ _ m₂ _ h; exact Nat.succ_injective h
+        · intro r hr; simp only [Finset.mem_coe, Finset.mem_Icc] at hr
+          exact ⟨r - 1, by simp only [Finset.mem_coe, Finset.mem_range]; omega,
+            by show r - 1 + 1 = r; omega⟩
+        · intro m _; congr 1
+      rw [h_bij]
+      -- Split Icc 1 b = Icc 1 (b-1) ∪ {b}, peel r=b boundary
+      rw [show Finset.Icc 1 b = Finset.Icc 1 (b - 1) ∪ {b} from by
+          ext r; simp [Finset.mem_Icc]; omega,
+        Finset.sum_union (by simp [Finset.disjoint_singleton_right, Finset.mem_Icc]; omega),
+        Finset.sum_singleton,
+        show (↑(a * b) : ℝ) / (↑b : ℝ) = (↑a : ℝ) from by push_cast; field_simp,
+        Int.fract_natCast, zero_mul, add_zero]
+    rw [h_peel0, h_shift]
+    -- B5: Cast normalization ↑(a*r)/↑b → (a:ℝ)*(r:ℝ)/(b:ℝ)
+    simp_rw [show ∀ r : ℕ, (↑(a * r) : ℝ) / (↑b : ℝ) = (↑a : ℝ) * (↑r : ℝ) / (↑b : ℝ)
+      from fun r => by push_cast; ring]
+    -- B6: Combine Σ{ar/b}*f(r) - Σ{ar/b}*f(r-1) = Σ{ar/b}*(f(r)-f(r-1))
+    congr 1; rw [← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl; intro r _; ring
 
   -- ─── Combine: Σ_{TT} f = (a/b)·Σf + Σ{ar/b}·(f(r)-f(r-1)) - f(b-1) ───
   linarith
