@@ -808,6 +808,39 @@ private lemma isTwoTile_imp_floorStep_pos (a b m : ℕ) (hb : 1 ≤ b)
 -- At m = b-1 with coprime a,b: J(b-1) = 1 but b*(k+1) = a*b (equality, not strict <).
 -- This is exactly why the staircase telescope has the explicit -f(b-1) term.
 
+/-- J(b-1) = 1 for 1 ≤ a < b. -/
+private lemma floorStep_bsub1 (a b : ℕ) (ha : 1 ≤ a) (hab : a < b) :
+    floorStep a b (b - 1) = 1 := by
+  unfold floorStep
+  have hb : 0 < b := by omega
+  rw [show b - 1 + 1 = b from by omega, Nat.mul_div_cancel a hb]
+  suffices h : a * (b - 1) / b = a - 1 by omega
+  have h_eq : a * (b - 1) = b * (a - 1) + (b - a) := by
+    zify [show 1 ≤ b from by omega, show a ≤ b from by omega, ha]; ring
+  rw [h_eq, Nat.mul_add_div hb, Nat.div_eq_of_lt (by omega : b - a < b)]; omega
+
+/-- For coprime a,b: J(m) = 1 AND m+1 < b implies isTwoTileClass (strict <). -/
+private lemma floorStep_one_imp_twoTile_coprime (a b m : ℕ)
+    (hcop : Nat.Coprime a b) (hb : 1 ≤ b)
+    (h_step : floorStep a b m = 1) (hm1 : m + 1 < b) :
+    isTwoTileClass a b m = true := by
+  unfold floorStep at h_step
+  unfold isTwoTileClass PartialSumConvergence.tileIndex
+  simp only [decide_eq_true_eq]
+  -- J(m) = 1 gives a*(m+1)/b = a*m/b + 1
+  have h_eq : a * (m + 1) / b = a * m / b + 1 := by omega
+  -- So b*(a*m/b + 1) ≤ a*(m+1)
+  have h_le : b * (a * m / b + 1) ≤ a * (m + 1) := by
+    have := Nat.div_mul_le_self (a * (m + 1)) b
+    rw [h_eq] at this; linarith [mul_comm (a * m / b + 1) b]
+  -- Coprimality gives STRICT inequality (equality ⟹ b | a*(m+1) ⟹ b | (m+1), contradiction)
+  by_contra h_not_lt; push_neg at h_not_lt
+  have h_eq2 : b * (a * m / b + 1) = a * (m + 1) := by omega
+  have h_dvd : b ∣ a * (m + 1) := ⟨a * m / b + 1, by linarith⟩
+  have h_dvd' : b ∣ (m + 1) * a := by rwa [mul_comm]
+  exact Nat.not_dvd_of_pos_of_lt (by omega) hm1
+    (hcop.symm.dvd_of_dvd_mul_right h_dvd')
+
 /-- **THE STAIRCASE TELESCOPE** (Gemini Key 1):
     Converts a partial sum over twoTileSet into a full Abel sum
     with fractional-part weights.
