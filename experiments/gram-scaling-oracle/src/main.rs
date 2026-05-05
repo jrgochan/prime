@@ -1,23 +1,21 @@
 //! ═══════════════════════════════════════════════════════════════════════════
-//!  CATHEDRAL GRAM SCALING ORACLE v1
-//!  Algebraic Autopsy · GCD-Class Decomposition · Spectral Structure
+//!  CATHEDRAL GRAM SCALING ORACLE v2
+//!  Algebraic Autopsy · GCD-Class Decomposition · Cross-N Scaling
 //!
 //!  "You open the 107 GB binary file. You reverse-engineer the α≈0.855
 //!   scaling limit strictly using the algebraic, rational properties
 //!   of the Gram matrix. You bypass the complex plane entirely."
 //!                                      — Gemini Actual, May 4 2026
 //!
-//!  Architecture:
-//!    gcd_decomp.rs    — GCD-class block decomposition of G_N
-//!    block_spectrum.rs — Eigenvalue analysis within coprimality blocks
-//!    alpha_fit.rs      — α extraction from cross-block scaling
-//!    certificate.rs    — JSON + TSV certified output
+//!  MODES:
+//!    1. Block decomposition: GCD-class analysis at a single N
+//!    2. Cross-N sweep: compute λ_min(G_N) for multiple cached N values
+//!       and fit the true global scaling exponent
 //!
-//!  Scaling modes:
-//!    N ≤ 500:    Build from scratch (f64 Gram, sub-second)
-//!    N ≤ 5000:   Load/build standard cache, full eigendecomp
-//!    N ≤ 40000:  Load DD cache, eigendecomp blocks with dim ≤ MAX_EIGEN_DIM
-//!    N ≤ 120000: Load OOC cache, eigendecomp blocks with dim ≤ MAX_EIGEN_DIM
+//!  PARALLELISM:
+//!    - Small blocks (dim ≤ 1000): parallel via rayon (many cores, small tasks)
+//!    - Large blocks (dim > 1000): sequential, LAPACK uses all cores internally
+//!    - dsyevr for λ_min only: orders of magnitude faster than full decomp
 //!
 //!  Hardware: Apple M2 Max, 96 GB RAM, 12 cores
 //! ═══════════════════════════════════════════════════════════════════════════
@@ -29,17 +27,18 @@ mod gcd_decomp;
 
 use cathedral_utils::cache;
 use cathedral_utils::gram::GramMatrix;
-use nalgebra::DMatrix;
 use std::time::Instant;
 
 // ═══════════════════════════════════════════════════════════════
 // CONFIGURATION
 // ═══════════════════════════════════════════════════════════════
 
-/// Maximum block dimension for full eigendecomposition.
-/// nalgebra symmetric_eigen is O(n³) — dim=5000 takes ~30s, dim=10000 takes ~240s.
-/// Beyond this, blocks are skipped for eigenvalue analysis.
+/// Maximum block dimension for eigendecomposition.
 const MAX_EIGEN_DIM: usize = 5_000;
+
+/// N values for cross-N sweep (ascending).
+/// Must have cached matrices available.
+const CROSS_N_SCHEDULE: &[usize] = &[100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000];
 
 // ═══════════════════════════════════════════════════════════════
 // TERMINAL FORMATTING
@@ -56,45 +55,40 @@ const WHITE: &str = "\x1b[97m";
 const RED: &str = "\x1b[31m";
 const RESET: &str = "\x1b[0m";
 
-/// Try to load a cached Gram matrix from disk.
-/// Searches: dd_gram first (higher precision), then standard cache.
+/// Try to load a cached Gram matrix. Returns (data, dim).
 fn load_cached_gram(max_n: usize) -> Option<(Vec<f64>, usize)> {
-    // Try DD cache first (dd_gram_N{max_n}_mpfr256.bin)
+    // Try DD cache first
     let dd_path = cache::dd_gram_cache_path(max_n, 256);
     if dd_path.exists() {
-        println!("  {DIM}     Loading DD cache: {}{RESET}", dd_path.display());
         if let Some((hi, _lo, dim)) = cache::load_dd_gram(&dd_path) {
-            println!("  {GREEN}✓{RESET} DD Gram loaded ({dim}×{dim}, {} GB)",
-                     (hi.len() * 8) / (1024 * 1024 * 1024));
             return Some((hi, dim));
         }
     }
-
-    // Try standard cache (gram_N{max_n}_mpfr256.bin or similar)
+    // Try standard cache
     for prec in [256u32, 512, 128, 106, 0] {
         let path = cache::gram_cache_path(max_n, prec);
         if path.exists() {
-            println!("  {DIM}     Loading cache: {}{RESET}", path.display());
             if let Some(gm) = cache::load_gram(&path) {
-                let dim = gm.max_dim;
-                return Some((gm.data, dim));
+                return Some((gm.data, gm.max_dim));
             }
         }
     }
-
     None
 }
 
-/// Build a Gram matrix from scratch (for small N).
+/// Build a Gram matrix from scratch.
 fn build_gram(max_n: usize) -> (Vec<f64>, usize) {
     let gm = GramMatrix::build(max_n, None);
-    let dim = gm.max_dim;
-    (gm.data, dim)
+    (gm.data, gm.max_dim)
 }
 
-/// Convert raw Vec<f64> storage to nalgebra DMatrix.
-fn raw_to_nalgebra(data: &[f64], dim: usize) -> DMatrix<f64> {
-    DMatrix::from_fn(dim, dim, |i, j| data[i * dim + j])
+/// Load or build a Gram matrix.
+fn get_gram(max_n: usize) -> (Vec<f64>, usize) {
+    if let Some(cached) = load_cached_gram(max_n) {
+        cached
+    } else {
+        build_gram(max_n)
+    }
 }
 
 fn main() {
@@ -104,128 +98,184 @@ fn main() {
 
     println!();
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL GRAM SCALING ORACLE v1{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Algebraic Autopsy · GCD-Class Decomposition · α Extraction");
-    println!("  {BOLD}{CYAN}║{RESET}  N = {max_n}  ·  max eigen dim = {max_eigen_dim}  ·  rayon parallel");
+    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL GRAM SCALING ORACLE v2{RESET}");
+    println!("  {BOLD}{CYAN}║{RESET}  Algebraic Autopsy · Cross-N Scaling · LAPACK Accelerated");
+    println!("  {BOLD}{CYAN}║{RESET}  N = {max_n}  ·  max eigen dim = {max_eigen_dim}  ·  dsyevr + dsyevd");
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
     println!();
 
     let t_total = Instant::now();
 
     // ═══════════════════════════════════════════════════════════════
-    // §1. LOAD OR BUILD GRAM MATRIX
+    // §1. CROSS-N SWEEP — TRUE GLOBAL α
+    //
+    // Compute λ_min(G_N) for multiple N values using cached matrices.
+    // This gives the TRUE scaling because we measure the actual minimum
+    // eigenvalue of the full matrix at each N.
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§1{RESET}  {BOLD}Loading Gram Matrix G_N ...{RESET}");
-    let t0 = Instant::now();
+    println!("  {BOLD}{MAGENTA}§1{RESET}  {BOLD}Cross-N Sweep — True Global λ_min(G_N) ...{RESET}");
 
-    let (data, dim) = if let Some(cached) = load_cached_gram(max_n) {
-        cached
+    // Determine which N values to sweep (up to our target N)
+    let sweep_ns: Vec<usize> = CROSS_N_SCHEDULE.iter()
+        .filter(|&&n| n <= max_n)
+        .cloned()
+        .collect();
+
+    let mut cross_n_data: Vec<(usize, f64)> = Vec::new();
+
+    println!("  {DIM}     Schedule: {:?}{RESET}", sweep_ns);
+    println!();
+
+    for &n in &sweep_ns {
+        let t0 = Instant::now();
+        eprint!("  {DIM}     N={n:<6} → loading...{RESET}");
+
+        let (data, dim) = get_gram(n);
+        let load_time = t0.elapsed().as_secs_f64();
+
+        eprint!("\r  {DIM}     N={n:<6} ({dim}×{dim}, {:.1}s load) → computing λ_min via dsyevr...{RESET}          ",
+                load_time);
+
+        let t1 = Instant::now();
+        let lmin = block_spectrum::full_matrix_lambda_min(&data, dim);
+        let eigen_time = t1.elapsed().as_secs_f64();
+
+        eprintln!("\r  {GREEN}✓{RESET} N={n:<6} dim={dim:<6} λ_min = {lmin:<20.12e}  ({load_time:.1}s load + {eigen_time:.1}s eigen)          ");
+
+        cross_n_data.push((n, lmin));
+
+        // Free memory immediately for large matrices
+        drop(data);
+    }
+    println!();
+
+    // Fit the cross-N scaling
+    println!("  {BOLD}  Cross-N Scaling Fit:{RESET}");
+    let cross_ns: Vec<f64> = cross_n_data.iter().map(|&(n, _)| n as f64).collect();
+    let cross_lmins: Vec<f64> = cross_n_data.iter().map(|&(_, lm)| lm).collect();
+
+    let (_, alpha_power, r2_power) = if cross_ns.len() >= 3 {
+        cathedral_utils::fitting::power_law_fit(&cross_ns, &cross_lmins)
+    } else { (0.0, 0.0, 0.0) };
+
+    let (_, alpha_log, r2_log) = if cross_ns.len() >= 3 {
+        cathedral_utils::fitting::log_decay_fit(&cross_ns, &cross_lmins)
+    } else { (0.0, 0.0, 0.0) };
+
+    println!("    Power law:  λ_min(G_N) ~ c · N^(-{alpha_power:.4})   R² = {r2_power:.6}");
+    println!("    Log decay:  λ_min(G_N) ~ c / (ln N)^{alpha_log:.4}    R² = {r2_log:.6}");
+    println!("    Target α:   0.855 (Three-Circles prediction)");
+    if r2_log > r2_power {
+        println!("    {GREEN}→ Log-decay model fits better{RESET}");
     } else {
-        println!("  {DIM}     No cache found, building from scratch ...{RESET}");
-        build_gram(max_n)
-    };
-
-    let mem_gb = (data.len() * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
-    println!("  {DIM}     Matrix: {dim}×{dim} ({mem_gb:.2} GB) loaded in {:.2}s{RESET}",
-             t0.elapsed().as_secs_f64());
+        println!("    {GREEN}→ Power-law model fits better{RESET}");
+    }
     println!();
 
     // ═══════════════════════════════════════════════════════════════
-    // §2. GCD-CLASS DECOMPOSITION
+    // §2. LOAD PRIMARY MATRIX + GCD DECOMPOSITION
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§2{RESET}  {BOLD}GCD-Class Decomposition ...{RESET}");
+    println!("  {BOLD}{MAGENTA}§2{RESET}  {BOLD}Loading Primary Matrix G_{max_n} ...{RESET}");
+    let t0 = Instant::now();
+    let (data, dim) = get_gram(max_n);
+    let mem_gb = (data.len() * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
+    println!("  {DIM}     {dim}×{dim} ({mem_gb:.2} GB) in {:.2}s{RESET}", t0.elapsed().as_secs_f64());
+
     let t0 = Instant::now();
     let decomp = gcd_decomp::decompose(max_n);
-    println!("  {DIM}     Found {} GCD classes in {:.2}s{RESET}",
-             decomp.classes.len(), t0.elapsed().as_secs_f64());
+    println!("  {DIM}     {}/{} GCD classes in {:.2}s{RESET}",
+             decomp.classes.len(), max_n, t0.elapsed().as_secs_f64());
 
-    // Count how many blocks are within eigen dim limit
     let eigen_eligible: usize = decomp.classes.values()
         .filter(|indices| {
-            let valid = indices.iter().filter(|&&j| j >= 2 && j <= max_n).count();
+            let valid = indices.iter().filter(|&&j| j >= 2 && j <= max_n && (j-2) < dim).count();
             valid >= 2 && valid <= max_eigen_dim
         })
         .count();
-    let skipped = decomp.classes.len() - eigen_eligible;
-    println!("  {DIM}     Blocks eligible for eigendecomp: {eigen_eligible} (skipping {skipped} too large/small){RESET}");
-
-    // Print the top classes by size
-    let mut sorted_classes: Vec<_> = decomp.classes.iter().collect();
-    sorted_classes.sort_by(|a, b| b.1.len().cmp(&a.1.len()));
-    println!();
-    println!("  {BOLD}  Top GCD classes by size:{RESET}");
-    println!("  {DIM}  ┌──────┬──────────┬────────────┬──────────┐{RESET}");
-    println!("  {DIM}  │ gcd  │   size   │ frac of N  │ eigen?   │{RESET}");
-    println!("  {DIM}  ├──────┼──────────┼────────────┼──────────┤{RESET}");
-    for (d, indices) in sorted_classes.iter().take(15) {
-        let valid = indices.iter().filter(|&&j| j >= 2 && j <= max_n).count();
-        let frac = indices.len() as f64 / max_n as f64;
-        let eigen = if valid >= 2 && valid <= max_eigen_dim { format!("{GREEN}yes{RESET}") }
-                    else { format!("{DIM}skip{RESET}") };
-        println!("  {DIM}  │{RESET} {d:>4} {DIM}│{RESET} {:<8} {DIM}│{RESET} {:.4}     {DIM}│{RESET} {eigen}     {DIM}│{RESET}",
-                 indices.len(), frac);
-    }
-    println!("  {DIM}  └──────┴──────────┴────────────┴──────────┘{RESET}");
+    println!("  {DIM}     Blocks for eigendecomp: {eigen_eligible}{RESET}");
     println!();
 
     // ═══════════════════════════════════════════════════════════════
     // §3. BLOCK SPECTRAL ANALYSIS
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Block Spectral Analysis (max dim = {max_eigen_dim}) ...{RESET}");
+    println!("  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Block Spectral Analysis (hybrid parallel) ...{RESET}");
     let t0 = Instant::now();
     let block_results = block_spectrum::analyze_blocks_raw(&data, dim, &decomp, max_n, max_eigen_dim);
     println!("  {DIM}     Analyzed {} blocks in {:.2}s{RESET}",
              block_results.len(), t0.elapsed().as_secs_f64());
     println!();
 
-    // Display results
+    // Display top blocks
     println!("  {BOLD}  Block eigenvalue summary:{RESET}");
     println!("  {DIM}  ┌──────┬──────┬──────────────┬──────────────┬──────────────┐{RESET}");
     println!("  {DIM}  │ gcd  │ dim  │   λ_min      │   λ_max      │  condition   │{RESET}");
     println!("  {DIM}  ├──────┼──────┼──────────────┼──────────────┼──────────────┤{RESET}");
-    for br in block_results.iter().take(25) {
+    for br in block_results.iter().take(20) {
         let cond = if br.lambda_min > 1e-15 { br.lambda_max / br.lambda_min } else { f64::INFINITY };
         println!("  {DIM}  │{RESET} {:<4} {DIM}│{RESET} {:<4} {DIM}│{RESET} {:>12.6e} {DIM}│{RESET} {:>12.6e} {DIM}│{RESET} {:>12.2e} {DIM}│{RESET}",
                  br.gcd_class, br.dim, br.lambda_min, br.lambda_max, cond);
     }
-    if block_results.len() > 25 {
+    if block_results.len() > 20 {
         println!("  {DIM}  │ ...  │ ...  │   ...        │   ...        │   ...        │{RESET}");
     }
     println!("  {DIM}  └──────┴──────┴──────────────┴──────────────┴──────────────┘{RESET}");
     println!();
 
     // ═══════════════════════════════════════════════════════════════
-    // §4. CROSS-BLOCK α EXTRACTION
+    // §4. α EXTRACTION (block-level)
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§4{RESET}  {BOLD}Cross-Block α Extraction ...{RESET}");
+    println!("  {BOLD}{MAGENTA}§4{RESET}  {BOLD}Block-Level α Extraction ...{RESET}");
     let alpha_results = alpha_fit::extract_alpha(&block_results, max_n);
 
+    // ═══════════════════════════════════════════════════════════════
+    // §5. MASTER RESULTS
+    // ═══════════════════════════════════════════════════════════════
     println!();
-    println!("  {BOLD}{CYAN}  ┌─────────────────────────────────────────────────────────┐{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}SCALING ORACLE RESULTS{RESET}                                 {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  ├─────────────────────────────────────────────────────────┤{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  N = {max_n:<10}                                      {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  GCD classes:       {:<10}                       {BOLD}{CYAN}│{RESET}", decomp.classes.len());
-    println!("  {BOLD}{CYAN}  │{RESET}  Blocks analyzed:   {:<10}                       {BOLD}{CYAN}│{RESET}", block_results.len());
-    println!("  {BOLD}{CYAN}  │{RESET}  λ_min (smallest block): {:<16.12e}       {BOLD}{CYAN}│{RESET}", alpha_results.global_lambda_min);
-    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{YELLOW}α (power law):     {:<20.6}{RESET}           {BOLD}{CYAN}│{RESET}", alpha_results.alpha_power);
-    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{YELLOW}α (log decay):     {:<20.6}{RESET}           {BOLD}{CYAN}│{RESET}", alpha_results.alpha_log);
-    println!("  {BOLD}{CYAN}  │{RESET}  R² (power law):    {:<20.6}           {BOLD}{CYAN}│{RESET}", alpha_results.r2_power);
-    println!("  {BOLD}{CYAN}  │{RESET}  R² (log decay):    {:<20.6}           {BOLD}{CYAN}│{RESET}", alpha_results.r2_log);
-    println!("  {BOLD}{CYAN}  │{RESET}  Target α:          0.855 (Three-Circles)             {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  └─────────────────────────────────────────────────────────┘{RESET}");
+    println!("  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}SCALING ORACLE — MASTER RESULTS{RESET}                             {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}CROSS-N SCALING (TRUE GLOBAL):{RESET}                              {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}    N range:         {:?}{:<20}{BOLD}{CYAN}│{RESET}",
+             *sweep_ns.first().unwrap_or(&0), format!("..{}", sweep_ns.last().unwrap_or(&0)));
+    println!("  {BOLD}{CYAN}  │{RESET}    {BOLD}{YELLOW}α (power law):   {alpha_power:<12.6}{RESET}  R² = {r2_power:.6}          {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}    {BOLD}{YELLOW}α (log decay):   {alpha_log:<12.6}{RESET}  R² = {r2_log:.6}          {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}                                                            {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}BLOCK-LEVEL SCALING:{RESET}                                       {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}    Blocks analyzed: {:<10}                              {BOLD}{CYAN}│{RESET}", block_results.len());
+    println!("  {BOLD}{CYAN}  │{RESET}    α (power law):   {:<12.6}  R² = {:.6}          {BOLD}{CYAN}│{RESET}",
+             alpha_results.alpha_power, alpha_results.r2_power);
+    println!("  {BOLD}{CYAN}  │{RESET}    α (log decay):   {:<12.6}  R² = {:.6}          {BOLD}{CYAN}│{RESET}",
+             alpha_results.alpha_log, alpha_results.r2_log);
+    println!("  {BOLD}{CYAN}  │{RESET}                                                            {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}TARGET:{RESET} α ≈ 0.855 (Three-Circles / Parseval Mirror)        {BOLD}{CYAN}│{RESET}");
+    println!("  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}");
+    println!();
+
+    // Cross-N data table
+    println!("  {BOLD}  Cross-N λ_min data:{RESET}");
+    println!("  {DIM}  ┌──────────┬──────────────────────┬────────────┐{RESET}");
+    println!("  {DIM}  │    N     │      λ_min(G_N)      │   ln(N)    │{RESET}");
+    println!("  {DIM}  ├──────────┼──────────────────────┼────────────┤{RESET}");
+    for &(n, lm) in &cross_n_data {
+        println!("  {DIM}  │{RESET} {n:>8} {DIM}│{RESET} {lm:>20.12e} {DIM}│{RESET} {:<10.4} {DIM}│{RESET}",
+                 (n as f64).ln());
+    }
+    println!("  {DIM}  └──────────┴──────────────────────┴────────────┘{RESET}");
     println!();
 
     // ═══════════════════════════════════════════════════════════════
-    // §5. CERTIFIED OUTPUT
+    // §6. CERTIFIED OUTPUT
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§5{RESET}  {BOLD}Writing Certified Results ...{RESET}");
+    println!("  {BOLD}{MAGENTA}§6{RESET}  {BOLD}Writing Certified Results ...{RESET}");
     certificate::write_all(max_n, &decomp, &block_results, &alpha_results);
+
+    // Write cross-N data
+    certificate::write_cross_n(max_n, &cross_n_data, alpha_power, r2_power, alpha_log, r2_log);
 
     let elapsed = t_total.elapsed().as_secs_f64();
     println!();
     println!("  {BOLD}{GREEN}  ══════════════════════════════════════════════════════{RESET}");
-    println!("  {BOLD}{GREEN}  ORACLE COMPLETE{RESET}  ·  N = {max_n}  ·  {elapsed:.2}s total");
+    println!("  {BOLD}{GREEN}  ORACLE COMPLETE{RESET}  ·  N = {max_n}  ·  {elapsed:.1}s total");
     println!("  {BOLD}{GREEN}  ══════════════════════════════════════════════════════{RESET}");
     println!();
 }

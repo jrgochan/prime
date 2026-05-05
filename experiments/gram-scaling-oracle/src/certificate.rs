@@ -91,6 +91,51 @@ fn write_scaling_tsv(alpha: &AlphaResults) {
     }
 }
 
+/// Write cross-N scaling data and fit results.
+pub fn write_cross_n(
+    max_n: usize,
+    cross_n_data: &[(usize, f64)],
+    alpha_power: f64, r2_power: f64,
+    alpha_log: f64, r2_log: f64,
+) {
+    fs::create_dir_all(RESULTS_DIR).ok();
+
+    // TSV data
+    let path = format!("{RESULTS_DIR}/cross_n_scaling_N{max_n}.tsv");
+    let mut f = fs::File::create(&path).expect("Failed to create cross-N TSV");
+    writeln!(f, "N\tdim\tlambda_min\tln_N\tln_lambda_min").unwrap();
+    for &(n, lm) in cross_n_data {
+        writeln!(f, "{}\t{}\t{:.15e}\t{:.10}\t{:.10}",
+                 n, n - 1, lm, (n as f64).ln(), lm.ln()).unwrap();
+    }
+
+    // JSON certificate
+    let json_path = format!("{RESULTS_DIR}/cross_n_certificate_N{max_n}.json");
+    let mut f = fs::File::create(&json_path).expect("Failed to create cross-N JSON");
+    let timestamp = chrono::Utc::now().to_rfc3339();
+    writeln!(f, "{{").unwrap();
+    writeln!(f, "  \"format\": \"cathedral-gram-cross-n-scaling-v1\",").unwrap();
+    writeln!(f, "  \"timestamp\": \"{timestamp}\",").unwrap();
+    writeln!(f, "  \"max_N\": {max_n},").unwrap();
+    writeln!(f, "  \"scaling\": {{").unwrap();
+    writeln!(f, "    \"alpha_power_law\": {alpha_power:.10},").unwrap();
+    writeln!(f, "    \"r2_power_law\": {r2_power:.10},").unwrap();
+    writeln!(f, "    \"alpha_log_decay\": {alpha_log:.10},").unwrap();
+    writeln!(f, "    \"r2_log_decay\": {r2_log:.10}").unwrap();
+    writeln!(f, "  }},").unwrap();
+    writeln!(f, "  \"three_circles_target\": 0.855,").unwrap();
+    writeln!(f, "  \"data_points\": [").unwrap();
+    for (i, &(n, lm)) in cross_n_data.iter().enumerate() {
+        let comma = if i + 1 < cross_n_data.len() { "," } else { "" };
+        writeln!(f, "    {{ \"N\": {n}, \"lambda_min\": {lm:.15e} }}{comma}").unwrap();
+    }
+    writeln!(f, "  ]").unwrap();
+    writeln!(f, "}}").unwrap();
+
+    println!("    ├── cross_n_scaling_N{max_n}.tsv");
+    println!("    └── cross_n_certificate_N{max_n}.json");
+}
+
 // Terminal colors
 const GREEN: &str = "\x1b[32m";
 const RESET: &str = "\x1b[0m";
