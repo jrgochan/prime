@@ -1,8 +1,13 @@
 //! ═══════════════════════════════════════════════════════════════════════════
-//!  CPU MODULE — Fallback certification using rayon parallelism
+//!  CPU MODULE — Full certification using rayon parallelism
 //!
-//!  Mirrors the GPU kernel logic using f64 CPU arithmetic.
-//!  Uses rayon for pair-level parallelism.
+//!  Mirrors the CPU two-tile-decomposition axiom_graduation module
+//!  at f64 precision. Includes ALL certification checks:
+//!    §1. Structural invariants (beta bijection, s permutation, overshoot)
+//!    §2. Gauss formula verification (logΓ and ψ sums vs closed forms)
+//!    §3. Staircase telescope (Gemini Key 1)
+//!    §4. Beta modulo duality (Gemini Key 2)
+//!    §5. Graduation identity (Σ perClassLimit = deltaTarget)
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use std::ffi::c_int;
@@ -10,8 +15,13 @@ use rayon::prelude::*;
 
 use crate::gpu::PairResult;
 
+// ────────────────────────────────────────────────
+// Helper functions
+// ────────────────────────────────────────────────
+
 fn frac_part(x: f64) -> f64 { x - x.floor() }
 
+/// Digamma via asymptotic expansion + recurrence (matches CUDA kernel)
 fn digamma_cpu(mut x: f64) -> f64 {
     if x <= 0.0 { return f64::NAN; }
     let mut result = 0.0;
@@ -42,14 +52,78 @@ fn is_two_tile(a: usize, b: usize, m0: usize) -> bool {
     b * (n0 + 1) < a * (m0 + 1)
 }
 
+fn overshoot(a: usize, b: usize, m0: usize) -> usize {
+    let n0 = tile_index(a, b, m0);
+    a * (m0 + 1) - b * (n0 + 1)
+}
+
+const EULER_GAMMA: f64 = 0.57721566490153286_f64;
+
+// ────────────────────────────────────────────────
+// Full certification per pair
+// ────────────────────────────────────────────────
+
 fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let af = a as f64;
     let bf = b as f64;
+    let pi = std::f64::consts::PI;
+    let log_2pi = (2.0 * pi).ln();
 
     let tt_classes: Vec<usize> = (1..b).filter(|&m0| is_two_tile(a, b, m0)).collect();
     let n_tt = tt_classes.len();
 
-    // ═══ STAIRCASE TELESCOPE ═══
+    // ═══════════════════════════════════════════════════
+    // §1. STRUCTURAL INVARIANTS
+    // ═══════════════════════════════════════════════════
+
+    // Beta Bijection: tileIndex maps twoTileSet → {0,...,a-2} bijectively
+    let mut beta_vals: Vec<usize> = tt_classes.iter()
+        .map(|&m0| tile_index(a, b, m0)).collect();
+    beta_vals.sort();
+    let expected_betas: Vec<usize> = (0..a-1).collect();
+    let beta_bijection = beta_vals == expected_betas && n_tt == a - 1;
+
+    // S Permutation: overshoot values form {1,...,a-1}
+    let mut s_vals: Vec<usize> = tt_classes.iter()
+        .map(|&m0| overshoot(a, b, m0)).collect();
+    s_vals.sort();
+    let expected_s: Vec<usize> = (1..a).collect();
+    let s_permutation = s_vals == expected_s;
+
+    // Overshoot identity: s - a ≡ (am₀ mod b) - b for each m₀
+    let overshoot_id = tt_classes.iter().all(|&m0| {
+        let s = overshoot(a, b, m0) as isize;
+        let r = ((a * m0) % b) as isize;
+        s - (a as isize) == r - (b as isize)
+    });
+
+    // ═══════════════════════════════════════════════════
+    // §2. GAUSS FORMULA VERIFICATION
+    // ═══════════════════════════════════════════════════
+
+    // logΓ for a-grid: Σ_{k=1}^{a-1} logΓ(k/a) vs (a-1)/2·log(2π) - (1/2)·log(a)
+    let gauss_lg_a_direct: f64 = (1..a).map(|k| libm::lgamma(k as f64 / af)).sum();
+    let gauss_lg_a_closed = (af - 1.0) / 2.0 * log_2pi - 0.5 * af.ln();
+    let gauss_lg_a_err = (gauss_lg_a_direct - gauss_lg_a_closed).abs();
+
+    // logΓ for b-grid
+    let gauss_lg_b_direct: f64 = (1..b).map(|k| libm::lgamma(k as f64 / bf)).sum();
+    let gauss_lg_b_closed = (bf - 1.0) / 2.0 * log_2pi - 0.5 * bf.ln();
+    let gauss_lg_b_err = (gauss_lg_b_direct - gauss_lg_b_closed).abs();
+
+    // Digamma for a-grid: Σ_{k=1}^{a-1} ψ(k/a) vs -(a-1)γ - a·log(a)
+    let gauss_d_a_direct: f64 = (1..a).map(|k| digamma_cpu(k as f64 / af)).sum();
+    let gauss_d_a_closed = -(af - 1.0) * EULER_GAMMA - af * af.ln();
+    let gauss_d_a_err = (gauss_d_a_direct - gauss_d_a_closed).abs();
+
+    // Digamma for b-grid
+    let gauss_d_b_direct: f64 = (1..b).map(|k| digamma_cpu(k as f64 / bf)).sum();
+    let gauss_d_b_closed = -(bf - 1.0) * EULER_GAMMA - bf * bf.ln();
+    let gauss_d_b_err = (gauss_d_b_direct - gauss_d_b_closed).abs();
+
+    // ═══════════════════════════════════════════════════
+    // §3. STAIRCASE TELESCOPE (Gemini Key 1)
+    // ═══════════════════════════════════════════════════
     let f_lg = |m: usize| -> f64 { libm::lgamma(((m + 1) as f64) / bf) };
     let f_psi = |m: usize| -> f64 { digamma_cpu(((m + 1) as f64) / bf) };
 
@@ -60,12 +134,10 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let full_psi: f64 = (0..b).map(|m| f_psi(m)).sum();
 
     let abel_lg: f64 = (1..b).map(|r| {
-        let fv = frac_part(af * r as f64 / bf);
-        fv * (f_lg(r) - f_lg(r - 1))
+        frac_part(af * r as f64 / bf) * (f_lg(r) - f_lg(r - 1))
     }).sum();
     let abel_psi: f64 = (1..b).map(|r| {
-        let fv = frac_part(af * r as f64 / bf);
-        fv * (f_psi(r) - f_psi(r - 1))
+        frac_part(af * r as f64 / bf) * (f_psi(r) - f_psi(r - 1))
     }).sum();
 
     let rhs_lg = (af / bf) * full_lg + abel_lg - f_lg(b - 1);
@@ -74,33 +146,36 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let tel_lg_err = (tt_lg - rhs_lg).abs();
     let tel_psi_err = (tt_psi - rhs_psi).abs();
 
-    // ═══ BETA DUALITY ═══
+    // ═══════════════════════════════════════════════════
+    // §4. BETA MODULO DUALITY (Gemini Key 2)
+    // ═══════════════════════════════════════════════════
     let beta_lhs: f64 = tt_classes.iter().map(|&m0| {
         let n0 = tile_index(a, b, m0);
-        let s = a * (m0 + 1) - b * (n0 + 1);
+        let s = overshoot(a, b, m0);
         let coeff = (s as f64 - af) / (af * af * bf);
         coeff * digamma_cpu((n0 + 1) as f64 / af)
     }).sum();
 
     let beta_rhs_sum: f64 = (1..a).map(|r| {
-        let fv = frac_part(bf * r as f64 / af);
-        fv * digamma_cpu(r as f64 / af)
+        frac_part(bf * r as f64 / af) * digamma_cpu(r as f64 / af)
     }).sum();
     let beta_rhs = -(1.0 / (af * bf)) * beta_rhs_sum;
 
     let beta_pw = tt_classes.iter().all(|&m0| {
         let n0 = tile_index(a, b, m0);
-        let s = a * (m0 + 1) - b * (n0 + 1);
+        let s = overshoot(a, b, m0);
         let coeff_l = (s as f64 - af) / (af * af * bf);
         let fv = frac_part(bf * (n0 + 1) as f64 / af);
         let coeff_r = -(1.0 / (af * bf)) * fv;
         (coeff_l - coeff_r).abs() < 1e-10
     });
 
-    // ═══ GRADUATION IDENTITY ═══
+    // ═══════════════════════════════════════════════════
+    // §5. GRADUATION IDENTITY
+    // ═══════════════════════════════════════════════════
     let sum_pcl: f64 = tt_classes.iter().map(|&m0| {
         let n0 = tile_index(a, b, m0);
-        let s = a * (m0 + 1) - b * (n0 + 1);
+        let s = overshoot(a, b, m0);
         let alpha = (m0 + 1) as f64 / bf;
         let beta = (n0 + 1) as f64 / af;
         -(1.0 / af) * (libm::lgamma(beta) - libm::lgamma(alpha))
@@ -109,21 +184,18 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     }).sum();
 
     // vasyuninGramFormula
-    let gamma_c = 0.57721566490153286_f64;
-    let log_2pi = (2.0 * std::f64::consts::PI).ln();
-
     let vab: f64 = (1..b).map(|m| {
-        frac_part(af * m as f64 / bf) * (std::f64::consts::PI * m as f64 / bf).cos()
-            / (std::f64::consts::PI * m as f64 / bf).sin()
+        frac_part(af * m as f64 / bf) * (pi * m as f64 / bf).cos()
+            / (pi * m as f64 / bf).sin()
     }).sum();
     let vba: f64 = (1..a).map(|m| {
-        frac_part(bf * m as f64 / af) * (std::f64::consts::PI * m as f64 / af).cos()
-            / (std::f64::consts::PI * m as f64 / af).sin()
+        frac_part(bf * m as f64 / af) * (pi * m as f64 / af).cos()
+            / (pi * m as f64 / af).sin()
     }).sum();
 
-    let formula = (log_2pi - gamma_c) / 2.0 * (1.0/af + 1.0/bf)
+    let formula = (log_2pi - EULER_GAMMA) / 2.0 * (1.0/af + 1.0/bf)
         + (af - bf) / (2.0*af*bf) * (bf / af).ln()
-        - std::f64::consts::PI / (2.0*af*bf) * (vab + vba)
+        - pi / (2.0*af*bf) * (vab + vba)
         - 1.0 / (af*bf);
 
     let ft: f64 = (1..b).map(|r| {
@@ -135,20 +207,29 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     }).sum();
 
     let strip = (af - 1.0) / (af * bf);
-    let stir = (1.0 / bf) * (log_2pi - gamma_c - 1.0);
+    let stir = (1.0 / bf) * (log_2pi - EULER_GAMMA - 1.0);
     let dt = formula - strip - stir - ft / af;
 
     let id_err = (sum_pcl - dt).abs();
 
-    let certified = tel_lg_err < 1e-8 && tel_psi_err < 1e-8
+    // ═══ CERTIFICATION ═══
+    let certified = beta_bijection && s_permutation && overshoot_id
+        && gauss_lg_a_err < 1e-8 && gauss_lg_b_err < 1e-8
+        && gauss_d_a_err < 1e-8 && gauss_d_b_err < 1e-8
+        && tel_lg_err < 1e-8 && tel_psi_err < 1e-8
         && beta_pw && (beta_lhs - beta_rhs).abs() < 1e-8
         && id_err < 1e-8;
 
     PairResult {
         a: a as c_int, b: b as c_int,
         n_two_tile: n_tt as c_int,
-        beta_bijection: if n_tt == a - 1 { 1 } else { 0 },
-        s_permutation: 0,  // skip in f64 mode
+        beta_bijection: if beta_bijection { 1 } else { 0 },
+        s_permutation: if s_permutation { 1 } else { 0 },
+        overshoot_identity: if overshoot_id { 1 } else { 0 },
+        gauss_loggamma_a_err: gauss_lg_a_err,
+        gauss_loggamma_b_err: gauss_lg_b_err,
+        gauss_digamma_a_err: gauss_d_a_err,
+        gauss_digamma_b_err: gauss_d_b_err,
         telescope_lg_err: tel_lg_err,
         telescope_psi_err: tel_psi_err,
         beta_duality_pw: if beta_pw { 1 } else { 0 },

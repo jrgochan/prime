@@ -11,25 +11,39 @@ use std::ffi::c_int;
 // FFI types matching CUDA kernel
 // ────────────────────────────────────────────────
 
+/// Full certification result — matches CPU experiment's GraduationResult 1:1.
 #[repr(C)]
 #[derive(Debug, Clone, Default)]
 pub struct PairResult {
     pub a: c_int,
     pub b: c_int,
     pub n_two_tile: c_int,
+
+    // Structural invariants
     pub beta_bijection: c_int,
     pub s_permutation: c_int,
+    pub overshoot_identity: c_int,
 
+    // Gauss formula verification
+    pub gauss_loggamma_a_err: f64,
+    pub gauss_loggamma_b_err: f64,
+    pub gauss_digamma_a_err: f64,
+    pub gauss_digamma_b_err: f64,
+
+    // Staircase Telescope (Gemini Key 1)
     pub telescope_lg_err: f64,
     pub telescope_psi_err: f64,
 
+    // Beta Modulo Duality (Gemini Key 2)
     pub beta_duality_pw: c_int,
     pub beta_duality_sum_err: f64,
 
+    // Graduation identity
     pub sum_pcl: f64,
     pub delta_target: f64,
     pub identity_err: f64,
 
+    // Pass/fail
     pub certified: c_int,
 }
 
@@ -90,10 +104,10 @@ pub fn detect_gpu() -> Option<GpuInfo> {
 /// Launch GPU certification for all pairs.
 pub fn gpu_certify(pairs: &[(usize, usize)]) -> Vec<PairResult> {
     let n = pairs.len();
-    let max_b = pairs.iter().map(|&(_, b)| b).max().unwrap_or(3);
+    let _max_b = pairs.iter().map(|&(_, b)| b).max().unwrap_or(3);
 
     // Flatten pairs into c_int array
-    let flat_pairs: Vec<c_int> = pairs.iter()
+    let _flat_pairs: Vec<c_int> = pairs.iter()
         .flat_map(|&(a, b)| vec![a as c_int, b as c_int])
         .collect();
 
@@ -102,16 +116,17 @@ pub fn gpu_certify(pairs: &[(usize, usize)]) -> Vec<PairResult> {
     #[cfg(target_os = "linux")]
     unsafe {
         launch_skeleton_keys(
-            flat_pairs.as_ptr(),
+            _flat_pairs.as_ptr(),
             results.as_mut_ptr(),
             n as c_int,
-            max_b as c_int,
+            _max_b as c_int,
         );
     }
 
     #[cfg(not(target_os = "linux"))]
     {
         eprintln!("WARNING: GPU not available. Use CPU mode (--cpu).");
+        let _ = &mut results; // suppress warning
     }
 
     results
