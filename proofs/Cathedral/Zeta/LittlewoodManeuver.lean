@@ -167,15 +167,38 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
           (fun n => LSeries.norm_term_le_of_re_le_re (↗Λ)
             (show (2:ℂ).re ≤ s.re by simp; exact hs) n)
           hsum2.norm
+    _ ≤ ∑' n, (if (n:ℕ) = 0 then (0:ℝ) else 2 * (n : ℝ) ^ (-3/2 : ℝ)) := by
+        -- Per-term bound: ‖term ↗Λ 2 n‖ ≤ 2·n^{-3/2}
+        -- Via: Λ(n) ≤ log(n) ≤ 2√n, so Λ(n)/n² ≤ 2·n^{-3/2}
+        have hg_sum : Summable (fun n : ℕ =>
+            if n = 0 then (0:ℝ) else 2 * (n:ℝ)^(-3/2:ℝ)) := by
+          exact (Real.summable_nat_rpow.mpr (by norm_num : (-3/2:ℝ) < -1)).mul_left 2
+            |>.of_nonneg_of_le
+              (fun n => by split_ifs <;> positivity)
+              (fun n => by split_ifs with hn <;> simp_all)
+        apply hsum2.norm.tsum_le_tsum _ hg_sum
+        intro n
+        rcases eq_or_ne n 0 with rfl | hn
+        · simp [LSeries.term_zero]
+        · rw [if_neg hn, LSeries.norm_term_eq, if_neg hn]
+          have hre : (2:ℂ).re = (2:ℝ) := by norm_num
+          rw [hre]
+          have hn_pos : (0:ℝ) < n := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+          have hΛ : ‖(↗Λ) n‖ ≤ 2 * (n : ℝ) ^ (1/2 : ℝ) := by
+            have h1 : ‖(↗Λ) n‖ = Λ n := by
+              simp [Complex.norm_real, abs_of_nonneg ArithmeticFunction.vonMangoldt_nonneg]
+            rw [h1]
+            calc Λ n ≤ Real.log n := ArithmeticFunction.vonMangoldt_le_log
+              _ ≤ (n:ℝ)^(1/2:ℝ) / (1/2:ℝ) :=
+                Real.log_le_rpow_div n.cast_nonneg (by norm_num)
+              _ = 2 * (n:ℝ)^(1/2:ℝ) := by ring
+          calc ‖(↗Λ) n‖ / (n:ℝ)^(2:ℝ) ≤ (2*(n:ℝ)^(1/2:ℝ)) / (n:ℝ)^(2:ℝ) := by gcongr
+            _ = 2 * ((n:ℝ)^(1/2:ℝ) / (n:ℝ)^(2:ℝ)) := by ring
+            _ = 2 * (n:ℝ)^(-3/2:ℝ) := by
+                congr 1; rw [div_eq_iff (rpow_pos_of_pos hn_pos 2).ne', ← rpow_add hn_pos]
+                norm_num
     _ ≤ 6 := by
-        -- PROVED per-term bound (norm_vonMangoldt_term_bound):
-        --   ‖term ↗Λ 2 n‖ ≤ 2 * n^{-3/2}
-        -- Via: Λ(n) ≤ log(n) [vonMangoldt_le_log]
-        --      log(n) ≤ 2·√n   [log_le_rpow_div with ε=1/2]
-        -- So Σ ‖term ↗Λ 2 n‖ ≤ 2·ζ(3/2)
-        -- And ζ(3/2) ≤ 1 + ∫_1^∞ x^{-3/2}dx = 1 + 2 = 3
-        -- Hence Σ ≤ 2·3 = 6.
-        -- Actual value: Σ Λ(n)/n² ≈ 0.57 ≪ 6.
+        -- Σ g(n) = 2·ζ(3/2), and ζ(3/2) ≤ 1 + ∫₁^∞ x⁻³ᐟ² dx = 3.
         sorry
 
 /-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
