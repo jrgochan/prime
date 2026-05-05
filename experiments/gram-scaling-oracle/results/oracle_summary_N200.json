@@ -1,6 +1,6 @@
 {
   "format": "cathedral-gram-scaling-oracle-v1",
-  "timestamp": "2026-05-05T02:38:22.818161+00:00",
+  "timestamp": "2026-05-05T02:42:30.614673+00:00",
   "N": 200,
   "gcd_classes": 200,
   "global_lambda_min": 3.167632377877480e-5,

@@ -1,0 +1,19 @@
+{
+  "format": "cathedral-gram-scaling-oracle-v1",
+  "timestamp": "2026-05-05T02:47:22.791034+00:00",
+  "N": 40000,
+  "gcd_classes": 40000,
+  "global_lambda_min": 0.000000000000000e0,
+  "scaling": {
+    "alpha_power_law": 0.6824953761,
+    "r2_power_law": 0.9516311776,
+    "alpha_log_decay": 1.6130119429,
+    "r2_log_decay": 0.9609731269
+  },
+  "three_circles_target": {
+    "alpha": 0.855,
+    "description": "Interpolation exponent from Hadamard Three-Circles (eps=0.5)"
+  },
+  "block_count": 13326,
+  "machine": "Apple M2 Max, 96 GB RAM"
+}
