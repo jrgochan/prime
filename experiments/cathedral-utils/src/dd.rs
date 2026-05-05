@@ -167,9 +167,88 @@ impl std::ops::DivAssign for DD {
     }
 }
 
-// ═══ ln(1 + 1/n) for precomputed table ═══
+// ═══ Comparisons ═══
+
+impl PartialEq for DD {
+    fn eq(&self, other: &Self) -> bool {
+        self.hi == other.hi && self.lo == other.lo
+    }
+}
+
+impl PartialOrd for DD {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.hi.partial_cmp(&other.hi) {
+            Some(std::cmp::Ordering::Equal) => self.lo.partial_cmp(&other.lo),
+            other_ord => other_ord,
+        }
+    }
+}
+
+// ═══ Transcendental functions ═══
 
 impl DD {
+    /// Floor function.
+    pub fn floor(self) -> Self {
+        let fl = self.hi.floor();
+        if fl == self.hi {
+            // hi is exact integer, check lo
+            let lo_fl = self.lo.floor();
+            DD::quick_two_sum(fl, lo_fl).into()
+        } else {
+            DD::from_f64(fl)
+        }
+    }
+
+    /// Fractional part: {x} = x - floor(x)
+    pub fn frac(self) -> Self {
+        self - self.floor()
+    }
+
+    /// Natural logarithm via argument reduction + Taylor series.
+    /// ln(x) = ln(m·2^e) = e·ln(2) + ln(m) where m ∈ [1,2)
+    /// For ln(m): use ln(1 + (m-1)) with Padé-accelerated Taylor.
+    pub fn ln(self) -> Self {
+        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+
+        // ln(2) at DD precision
+        let ln2 = DD::new(
+            0.6931471805599453,
+            2.3190468138462996e-17,
+        );
+
+        // Argument reduction: x = m · 2^e
+        let (mantissa, exp) = frexp_dd(self);
+        let e = DD::from_f64(exp as f64);
+
+        // Now compute ln(m) where m ∈ [0.5, 1.0)
+        // Shift to ln(2m) - ln(2) if m < 0.75 for better convergence
+        let (m, adjust) = if mantissa.hi < 0.75 {
+            (mantissa + mantissa, DD::from_f64(-1.0))
+        } else {
+            (mantissa, DD::from_f64(0.0))
+        };
+
+        // ln(m) where m ∈ [0.75, 2.0) via ln(1 + u) where u = m - 1
+        let u = m - DD::from_f64(1.0);
+
+        // Taylor series: ln(1+u) = u - u²/2 + u³/3 - ...
+        // For better convergence, use the identity:
+        // ln(1+u) = 2·atanh(u/(u+2)) = 2·Σ (u/(u+2))^(2k+1)/(2k+1)
+        let v = u / (u + DD::from_f64(2.0));
+        let v2 = v * v;
+        let mut term = v;
+        let mut sum = v;
+        for k in 1..=30 {
+            term *= v2;
+            let contrib = term / DD::from_u64(2 * k + 1);
+            sum += contrib;
+            if contrib.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+        }
+        let ln_m = sum + sum; // 2·atanh
+
+        (e + adjust) * ln2 + ln_m
+    }
+
     /// Compute ln(1 + 1/n) at double-double precision.
     /// Uses the series: ln(1+x) = x - x²/2 + x³/3 - x⁴/4 + ...
     /// where x = 1/n.
@@ -187,7 +266,143 @@ impl DD {
         }
         sum
     }
+
+    /// Digamma function ψ(x) via recurrence + asymptotic expansion.
+    /// Uses ψ(x+1) = ψ(x) + 1/x to shift x ≥ 20, then asymptotic.
+    pub fn digamma(mut self) -> Self {
+        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+
+        let mut result = DD::from_f64(0.0);
+
+        // Recurrence: shift to large argument
+        while self.hi < 20.0 {
+            result = result - DD::from_f64(1.0) / self;
+            self = self + DD::from_f64(1.0);
+        }
+
+        // Asymptotic: ψ(x) ≈ ln(x) - 1/(2x) - Σ B_{2k}/(2k·x^{2k})
+        result = result + self.ln();
+        let inv_x = DD::from_f64(1.0) / self;
+        let inv_x2 = inv_x * inv_x;
+
+        result = result - inv_x * DD::from_f64(0.5);
+
+        let mut x2k = inv_x2;
+        // B₂/(2·1) = 1/12
+        result = result - x2k / DD::from_f64(12.0);
+        x2k = x2k * inv_x2;
+        // -B₄/(4·2) = 1/120
+        result = result + x2k / DD::from_f64(120.0);
+        x2k = x2k * inv_x2;
+        result = result - x2k / DD::from_f64(252.0);
+        x2k = x2k * inv_x2;
+        result = result + x2k / DD::from_f64(240.0);
+        x2k = x2k * inv_x2;
+        result = result - x2k * DD::from_f64(5.0) / DD::from_f64(660.0);
+        x2k = x2k * inv_x2;
+        result = result + x2k * DD::from_f64(691.0) / DD::from_f64(360360.0);
+        x2k = x2k * inv_x2;
+        result = result - x2k / DD::from_f64(12.0);  // B₁₄ term
+
+        result
+    }
+
+    /// Log-gamma: ln|Γ(x)| via Stirling + recurrence.
+    pub fn lgamma(mut self) -> Self {
+        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+
+        let mut prefix = DD::from_f64(0.0);
+
+        // Recurrence: Γ(x+1) = x·Γ(x) → logΓ(x) = logΓ(x+1) - ln(x)
+        while self.hi < 20.0 {
+            prefix = prefix - self.ln();
+            self = self + DD::from_f64(1.0);
+        }
+
+        // Stirling: logΓ(x) ≈ (x-1/2)·ln(x) - x + (1/2)·ln(2π) + Σ B_{2k}/(2k(2k-1)x^{2k-1})
+        let half = DD::from_f64(0.5);
+        // ln(2π) at DD precision
+        let ln_2pi = DD::new(1.8378770664093453, -1.0725750903041484e-16);
+
+        let result = (self - half) * self.ln() - self + half * ln_2pi;
+
+        // Bernoulli correction terms
+        let inv_x = DD::from_f64(1.0) / self;
+        let inv_x2 = inv_x * inv_x;
+        let mut corr = inv_x / DD::from_f64(12.0);
+        let mut x2k1 = inv_x * inv_x2;
+        corr = corr - x2k1 / DD::from_f64(360.0);
+        x2k1 = x2k1 * inv_x2;
+        corr = corr + x2k1 / DD::from_f64(1260.0);
+        x2k1 = x2k1 * inv_x2;
+        corr = corr - x2k1 / DD::from_f64(1680.0);
+        x2k1 = x2k1 * inv_x2;
+        corr = corr + x2k1 / DD::from_f64(1188.0);
+
+        prefix + result + corr
+    }
+
+    /// Sine via Taylor series with argument reduction.
+    pub fn sin(self) -> Self {
+        let pi = DD::new(std::f64::consts::PI, 1.2246467991473532e-16);
+        let two_pi = pi + pi;
+
+        // Reduce to [0, 2π)
+        let k = (self / two_pi).floor();
+        let x = self - k * two_pi;
+
+        // Taylor: sin(x) = x - x³/3! + x⁵/5! - ...
+        let x2 = x * x;
+        let mut term = x;
+        let mut sum = x;
+        for n in 1..=20 {
+            term = term * (-x2) / DD::from_u64((2*n) * (2*n + 1));
+            sum = sum + term;
+            if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+        }
+        sum
+    }
+
+    /// Cosine via Taylor series with argument reduction.
+    pub fn cos(self) -> Self {
+        let pi = DD::new(std::f64::consts::PI, 1.2246467991473532e-16);
+        let two_pi = pi + pi;
+
+        let k = (self / two_pi).floor();
+        let x = self - k * two_pi;
+
+        let x2 = x * x;
+        let mut term = DD::from_f64(1.0);
+        let mut sum = DD::from_f64(1.0);
+        for n in 1..=20 {
+            term = term * (-x2) / DD::from_u64((2*n - 1) * (2*n));
+            sum = sum + term;
+            if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+        }
+        sum
+    }
+
+    /// Cotangent: cos(x)/sin(x)
+    pub fn cot(self) -> Self {
+        self.cos() / self.sin()
+    }
 }
+
+/// Helper: extract mantissa and exponent (frexp equivalent for DD)
+fn frexp_dd(x: DD) -> (DD, i32) {
+    // Use the hi part for exponent extraction
+    let bits = x.hi.to_bits();
+    let exp = ((bits >> 52) & 0x7FF) as i32 - 1022;
+    let scale = 2.0_f64.powi(-exp);
+    (DD::new(x.hi * scale, x.lo * scale), exp)
+}
+
+impl From<(f64, f64)> for DD {
+    fn from((hi, lo): (f64, f64)) -> Self {
+        DD { hi, lo }
+    }
+}
+
 
 #[cfg(test)]
 mod tests {
