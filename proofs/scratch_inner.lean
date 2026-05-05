@@ -116,13 +116,13 @@ private lemma three_circles_inner_bound (hRH : RiemannHypothesis)
   have hG_re : ∀ z ∈ ball (0:ℂ) R₄,
       (G z).re ≤ 10 * Real.log (2 + |t|) + Real.log 4 := by
     intro z hz
-    -- G_outer_bound_re_3 gives Re(G(z)) ≤ 10·log(2+|t|) + log 4
-    -- It needs G_diff, G_eq (which we have), R_pos, R < 5/2, R+1/2 ≤ |t|
-    -- The existing lemma signature may need the original f representation.
-    -- We use the Re bound directly from the exp representation:
-    -- exp(Re(G(z))) = |exp(G(z))| = |ζ(s₀+z)|/|ζ(s₀)|
-    -- So Re(G(z)) = log(|ζ(s₀+z)|/|ζ(s₀)|) = log|ζ(s₀+z)| - log|ζ(s₀)|
-    sorry
+    -- G_outer_bound_re_3 needs: hG_eq : ζ(s₀+z) = ζ(s₀)·exp(G(z))
+    -- holomorphic_log gives: ζ(s₀+z) = ζ(s₀+0)·exp(G(z))
+    -- These are equal since s₀+0 = s₀.
+    have hG_eq' : ∀ w ∈ ball (0:ℂ) R₄,
+        riemannZeta (s₀ + w) = riemannZeta s₀ * Complex.exp (G w) := by
+      intro w hw; have := hG_eq w hw; simp at this; exact this
+    exact Cathedral.Zeta.LittlewoodManeuver.G_outer_bound_re_3 hR₄_pos hR₄_lt_52 hR₄_half hG_diff hG_eq' z hz
   -- ── Stage 3: BC conversion ──
   set M := 10 * Real.log (2 + |t|) + Real.log 4
   set b := 2 * M * R₃ / (R₄ - R₃)
@@ -148,7 +148,10 @@ private lemma three_circles_inner_bound (hRH : RiemannHypothesis)
   -- This uses G_inner_bound_fixed which needs G_eq, ζ_ne, f_diff
   have hR₄_ge_1 : 1 < R₄ := by simp only [R₄]; linarith
   have h_inner : ∀ z, ‖z‖ = 1 → ‖G z‖ ≤ 6 := by
-    sorry -- need to adapt G_inner_bound_fixed to wide ball signature
+    have hG_eq' : ∀ w ∈ ball (0:ℂ) R₄,
+        riemannZeta (s₀ + w) = riemannZeta s₀ * Complex.exp (G w) := by
+      intro w hw; have := hG_eq w hw; simp at this; exact this
+    exact Cathedral.Zeta.LittlewoodManeuver.G_inner_bound_fixed ht_ge_2 hR₄_pos hR₄_ge_1 hG_diff hG0 hG_eq' hf_ne hf_diff
   -- ── Stage 5: Three-Circles ──
   -- DiffContOnCl on annulus [1, R₃]
   have hR₂_lt_R₃ : R₂ < R₃ := by simp only [R₂, R₃]; linarith
