@@ -876,7 +876,78 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
   -- Therefore: Σ_{TT} f + f(b-1) = Σ_{range b} J(m)·f(m)
   have h_stepA : ∑ m₀ ∈ twoTileSet a b, f m₀ + f (b - 1) =
       ∑ m ∈ Finset.range b, (↑(floorStep a b m) : ℝ) * f m := by
-    sorry
+    -- Convert J(m)*f(m) to if-then-else using J ∈ {0,1}
+    have h_ite : ∀ m ∈ Finset.range b,
+        (↑(floorStep a b m) : ℝ) * f m = if floorStep a b m = 1 then f m else 0 := by
+      intro m hm
+      have h_le1 := floorStep_le_one a b m (by omega) hab
+      rcases Nat.le_one_iff_eq_zero_or_eq_one.mp h_le1 with h0 | h1
+      · rw [h0]; simp
+      · rw [h1]; simp
+    rw [Finset.sum_congr rfl h_ite]
+    -- Now: Σ_{TT} f + f(b-1) = Σ_{range b} (if J=1 then f else 0)
+    -- RHS = Σ_{(range b).filter (J=1)} f (by Finset.sum_filter)
+    rw [← Finset.sum_filter]
+    -- Need: (range b).filter (fun m => floorStep a b m = 1) = twoTileSet ∪ {b-1}
+    -- and then use sum_union
+    have h_filter_eq : (Finset.range b).filter (fun m => floorStep a b m = 1) =
+        twoTileSet a b ∪ {b - 1} := by
+      ext m; simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_union,
+        Finset.mem_singleton]
+      constructor
+      · intro ⟨hm, hJ⟩
+        -- J(m) = 1 and m < b
+        -- m ≠ 0 since J(0) = 0
+        have hm_pos : 1 ≤ m := by
+          by_contra h; push_neg at h
+          have : m = 0 := by omega
+          subst this; rw [floorStep_zero a b hab] at hJ; exact absurd hJ (by omega)
+        by_cases hm_eq : m = b - 1
+        · right; exact hm_eq
+        · left  -- m ∈ TT
+          unfold twoTileSet; simp only [Finset.mem_filter, Finset.mem_Icc]
+          refine ⟨⟨hm_pos, by omega⟩, ?_⟩
+          exact floorStep_one_imp_twoTile_coprime a b m hcop (by omega) hJ (by omega)
+      · intro h
+        rcases h with h_tt | h_eq
+        · -- m ∈ TT → J(m) = 1
+          unfold twoTileSet at h_tt
+          simp only [Finset.mem_filter, Finset.mem_Icc] at h_tt
+          exact ⟨by omega, by
+            have h1 := isTwoTile_imp_floorStep_pos a b m (by omega) h_tt.2
+            have h2 := floorStep_le_one a b m (by omega) hab
+            omega⟩
+        · -- m = b-1 → J(b-1) = 1
+          subst h_eq
+          exact ⟨by omega, floorStep_bsub1 a b (by omega) hab⟩
+    rw [h_filter_eq]
+    -- Σ_{TT ∪ {b-1}} f = Σ_{TT} f + f(b-1) if disjoint
+    have h_disj : Disjoint (twoTileSet a b) {b - 1} := by
+      rw [Finset.disjoint_singleton_right]
+      -- Show b-1 ∉ twoTileSet
+      intro h_mem
+      unfold twoTileSet at h_mem
+      simp only [Finset.mem_filter] at h_mem
+      -- h_mem.2 : isTwoTileClass a b (b-1) = true
+      unfold isTwoTileClass PartialSumConvergence.tileIndex at h_mem
+      simp only [decide_eq_true_eq] at h_mem
+      -- h_mem.2 : b * (a*(b-1)/b + 1) < a * (b-1+1) = a*b
+      have h_eq : b - 1 + 1 = b := by omega
+      rw [h_eq] at h_mem
+      -- a*(b-1)/b = a-1 (proved in floorStep_bsub1)
+      have h_div : a * (b - 1) / b = a - 1 := by
+        have h_e : a * (b - 1) = b * (a - 1) + (b - a) := by
+          zify [show 1 ≤ b from by omega, show a ≤ b from by omega, show 1 ≤ a from by omega]
+          ring
+        rw [h_e, Nat.mul_add_div (by omega), Nat.div_eq_of_lt (by omega)]; omega
+      rw [h_div] at h_mem
+      -- h_mem.2 : b * (a-1+1) < a*b, i.e., b*a < a*b — contradiction!
+      have h_lt := h_mem.2
+      have h_simp : a - 1 + 1 = a := by omega
+      rw [h_simp] at h_lt
+      -- h_lt : b * a < a * b, but b*a = a*b
+      nlinarith [mul_comm a b]
+    rw [Finset.sum_union h_disj, Finset.sum_singleton]
 
   -- ─── Step B: Expand indicator sum via Abel SBP ───
   -- J(m) = a/b + {am/b} - {a(m+1)/b} (floor_step_eq_frac_diff)
