@@ -1364,20 +1364,92 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   -- Step 4a: Unmask the target definitions (VF and FT)
   unfold DigammaReflection.vasyuninGramFormula GeneralFractSeriesEval.fractTarget_general
   simp only [Nat.Coprime.gcd_eq_one hcop, Nat.div_one]
-  -- Step 4b: Shatter compound sums into atomic ones
+  -- ═══════════════════════════════════════════════════
+  -- Step 4c: ABEL ARGUMENT NORMALIZATION
+  -- ═══════════════════════════════════════════════════
+  -- The Abel telescope sums have f((r-1+1)/b) = f(r/b) but the Nat cast
+  -- gives ((r-1:ℕ):ℝ) + 1 ≠ (r:ℝ) for r=0 (Nat underflow).
+  -- But our sums are over Icc 1 (b-1), so r ≥ 1.
+  -- Use congr rewrites to normalize these arguments inside the sums.
+  have h_nat_cast_sub : ∀ r : ℕ, r ∈ Finset.Icc 1 (b - 1) →
+      ((r - 1 : ℕ):ℝ) + 1 = (r:ℝ) := by
+    intro r hr
+    have h1r : 1 ≤ r := (Finset.mem_Icc.mp hr).1
+    have : r - 1 + 1 = r := Nat.sub_add_cancel h1r
+    exact_mod_cast this
+  -- Normalize ↑(r-1)+1 → ↑r in the Abel sums' arguments
+  -- The f((r-1+1)/b) terms match f(r/b) for r ∈ Icc 1 (b-1)
+  have h_div_norm : ∀ r : ℕ, r ∈ Finset.Icc 1 (b - 1) →
+      (((r - 1 : ℕ):ℝ) + 1) / (b:ℝ) = (r:ℝ) / (b:ℝ) := by
+    intro r hr; rw [h_nat_cast_sub r hr]
+  -- Rewrite each Abel telescope sum argument
+  -- The sums over Icc 1 (b-1) with f((r-1+1)/b) become f(r/b)
+  -- Apply h_nat_cast_sub inside the telescope sums via sum_congr.
+  -- The telescope hypotheses h_tel_logΓ and h_tel_ψ have
+  -- f((r-1+1)/b) which equals f(r/b) for r ∈ Icc 1 (b-1).
+  --
+  -- Rewrite in h_tel_logΓ: the sum body has logΓ((r+1)/b) - logΓ((r-1+1)/b)
+  -- which should become logΓ((r+1)/b) - logΓ(r/b).
+  rw [show ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) *
+        (Real.log (Real.Gamma (((r:ℝ) + 1) / (b:ℝ))) -
+         Real.log (Real.Gamma ((((r - 1 : ℕ):ℝ) + 1) / (b:ℝ)))) =
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) *
+        (Real.log (Real.Gamma (((r:ℝ) + 1) / (b:ℝ))) -
+         Real.log (Real.Gamma ((r:ℝ) / (b:ℝ)))) from
+    Finset.sum_congr rfl (fun r hr => by rw [h_nat_cast_sub r hr])] at h_tel_logΓ
+  -- Similarly for h_tel_ψ
+  rw [show ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) *
+        (logDeriv Real.Gamma (((r:ℝ) + 1) / (b:ℝ)) -
+         logDeriv Real.Gamma ((((r - 1 : ℕ):ℝ) + 1) / (b:ℝ))) =
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * (r:ℝ) / (b:ℝ)) *
+        (logDeriv Real.Gamma (((r:ℝ) + 1) / (b:ℝ)) -
+         logDeriv Real.Gamma ((r:ℝ) / (b:ℝ))) from
+    Finset.sum_congr rfl (fun r hr => by rw [h_nat_cast_sub r hr])] at h_tel_ψ
+  -- Normalize boundary terms: (b-1+1) = b
+  have h_bcast : ((b - 1 : ℕ):ℝ) + 1 = (b:ℝ) := by
+    have : b - 1 + 1 = b := Nat.sub_add_cancel (by omega : 1 ≤ b)
+    exact_mod_cast this
+  -- Rewrite boundary in h_tel_logΓ and h_tel_ψ
+  rw [h_bcast] at h_tel_logΓ h_tel_ψ
+  -- Rewrite boundary AND sum terms in the GOAL
+  -- Boundary: ↑(b-1)+1 → ↑b
+  rw [h_bcast]
+  -- logΓ sums: (↑(r-1)+1)/↑b → ↑r/↑b in two sum positions
+  -- First sum (logΓ): in LHS, 3rd argument position
+  rw [show ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * ↑r / ↑b) *
+        (Real.log (Real.Gamma ((↑r + 1) / ↑b)) - Real.log (Real.Gamma ((↑(r - 1) + 1) / ↑b))) =
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * ↑r / ↑b) *
+        (Real.log (Real.Gamma ((↑r + 1) / ↑b)) - Real.log (Real.Gamma (↑r / ↑b))) from
+    Finset.sum_congr rfl (fun r hr => by rw [h_div_norm r hr])]
+  -- Second sum (ψ): same pattern
+  rw [show ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * ↑r / ↑b) *
+        (logDeriv Real.Gamma ((↑r + 1) / ↑b) - logDeriv Real.Gamma ((↑(r - 1) + 1) / ↑b)) =
+    ∑ r ∈ Finset.Icc 1 (b - 1),
+      Int.fract ((a:ℝ) * ↑r / ↑b) *
+        (logDeriv Real.Gamma ((↑r + 1) / ↑b) - logDeriv Real.Gamma (↑r / ↑b)) from
+    Finset.sum_congr rfl (fun r hr => by rw [h_div_norm r hr])]
+  -- Now the Abel sums match the fractTarget sums.
+  -- Evaluate boundary: logΓ(↑b/↑b) = logΓ(1) = 0
+  rw [show (b:ℝ) / (b:ℝ) = 1 from div_self (by positivity : (b:ℝ) ≠ 0)]
+  rw [Real.Gamma_one, Real.log_one]
+  -- Now all (r-1) terms are gone. Shatter + field_simp + ring
   simp_rw [mul_add, mul_sub, Finset.sum_add_distrib, Finset.sum_sub_distrib]
-  have ha_pos : (0:ℝ) < (a:ℝ) := Nat.cast_pos.mpr (by omega)
-  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)
-  have ha_ne : (a:ℝ) ≠ 0 := ne_of_gt ha_pos
-  have hb_ne : (b:ℝ) ≠ 0 := ne_of_gt hb_pos
-  -- Step 4c: field_simp + ring_nf to normalize
+  -- Clear denominators and normalize
+  have ha_ne : (a:ℝ) ≠ 0 := by positivity
+  have hb_ne : (b:ℝ) ≠ 0 := by positivity
   field_simp
   ring_nf
-  -- Now generalize EVERYTHING including the (x-1) sums as distinct opaque variables
-  -- The identity is NOT a ring identity — it requires the Abel cancellation insight.
-  -- We commit the sorry here: the proof requires matching ~12 distinct sum expressions
-  -- through carefully chained rewrites.
-  -- CERTIFIED: 12,032 pairs at f64, 108 pairs at 1024-bit MPFR (10⁻¹²⁵).
+  -- The identity is a linear combination of the hypotheses.
+  -- After field_simp + ring_nf, the goal is a polynomial identity
+  -- involving the sums from the hypotheses.
+  -- Try nlinarith with the available hypotheses.
   sorry
 
 -- ──────────────────────────────────────────────
