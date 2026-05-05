@@ -1307,37 +1307,60 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
   -- Fract permutation sum
   have h_fps := WeightedDigammaGeneral.fract_perm_sum a b hcop hb
   -- ═══════════════════════════════════════════════════
-  -- Step 3: The Abel Cancellation Strategy
+  -- Step 3: Factor prefactors + apply evaluations
   -- ═══════════════════════════════════════════════════
+  have ha_pos : (0:ℝ) < (a:ℝ) := Nat.cast_pos.mpr (by omega)
+  have ha_ne : (a:ℝ) ≠ 0 := ne_of_gt ha_pos
+  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hb_ne : (b:ℝ) ≠ 0 := ne_of_gt hb_pos
+  -- Use have statements to evaluate each component sum individually.
+  -- Then combine at the end.
   --
-  -- KEY ALGEBRAIC INSIGHT (verified numerically at 50dp):
-  --   S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{ar/b}·ψ((r+1)/b)
-  --
-  -- This is because:
-  --   S₁ = (1/a)·[(a/b)·GaussB + AbelLogΓ - 0]
-  --   (1/a)·FT = (1/a)·[-AbelLogΓ + (1/b)·Σ{ar/b}·ψ((r+1)/b)]
-  --   Sum: the AbelLogΓ terms cancel, leaving scalar sums.
-  --
-  -- After this cancellation, the remaining pieces S₂, S₃, S₄
-  -- combine with the GaussB and ψ terms to give the target.
-  --
-  -- The full evaluation requires:
-  --   1. GaussB = (b-1)/2·log(2π) - 1/2·log(b) → from h_gauss_b
-  --   2. GaussA = (a-1)/2·log(2π) - 1/2·log(a) → from h_P1
-  --   3. ΣψB evaluation → from h_digamma_b (complex → real bridge)
-  --   4. ψ((r+1)/b) weighted sum → via h_wdr (weighted digamma reflection)
-  --   5. {br/a}·ψ(r/a) weighted sum → from S₃ via h_wdr applied to (b,a)
-  --   6. VF unfolds to cotangent sums V(a,b) + V(b,a)
-  --
-  -- The combination of all these evaluations matches the target
-  -- by elementary algebra (log, γ, cotangent terms all cancel correctly).
-  --
-  -- NUMERICALLY CERTIFIED: 8 coprime pairs at 50-digit MPFR,
-  -- max |error| < 10⁻⁵¹.
-  --
-  -- This is the FINAL sorry in the Vasyunin identity proof chain.
-  -- All component lemmas are proved; the remaining work is purely
-  -- algebraic bookkeeping connecting the ~10 evaluation results.
+  -- S₁ = (1/a)·Σ_{TT} logΓ(α)
+  have hS1_eq : ∑ m₀ ∈ twoTileSet a b,
+    (1 / (a:ℝ)) * Real.log (Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ))) =
+    (1/(a:ℝ)) * ∑ m₀ ∈ twoTileSet a b,
+      Real.log (Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ))) :=
+    (Finset.mul_sum ..).symm
+  -- S₂ = -(1/a)·Σ_{TT} logΓ(β)
+  have hS2_eq : ∑ m₀ ∈ twoTileSet a b,
+    (-(1 / (a:ℝ)) * Real.log (Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ)))) =
+    -(1/(a:ℝ)) * ∑ m₀ ∈ twoTileSet a b,
+      Real.log (Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ))) := by
+    rw [← Finset.mul_sum]
+  -- S₃: negate the sum
+  have hS3_eq : ∑ m₀ ∈ twoTileSet a b,
+    (-(((((a * (m₀ + 1) - b * (PartialSumConvergence.tileIndex a b m₀ + 1)):ℕ):ℝ) - (a:ℝ)) /
+        ((a:ℝ)*(a:ℝ)*(b:ℝ))) *
+      logDeriv Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ))) =
+    -(∑ m₀ ∈ twoTileSet a b,
+      ((((a * (m₀ + 1) - b * (PartialSumConvergence.tileIndex a b m₀ + 1)):ℕ):ℝ) - (a:ℝ)) /
+        ((a:ℝ)*(a:ℝ)*(b:ℝ)) *
+      logDeriv Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ))) := by
+    rw [← Finset.sum_neg_distrib]; apply Finset.sum_congr rfl; intros; ring
+  -- S₄ = -(1/(ab))·Σ_{TT} ψ(α)
+  have hS4_eq : ∑ m₀ ∈ twoTileSet a b,
+    (-(1 / ((a:ℝ) * (b:ℝ))) *
+      logDeriv Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ))) =
+    -(1/((a:ℝ)*(b:ℝ))) * ∑ m₀ ∈ twoTileSet a b,
+      logDeriv Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ)) := by
+    rw [← Finset.mul_sum]
+  -- Step 3b: Rewrite all four sums
+  rw [hS1_eq, hS2_eq, hS3_eq, hS4_eq]
+  -- Step 3c: Apply evaluations
+  rw [h_bij, h_P1]    -- S₂: β-reindex + Gauss_A
+  rw [h_beta]          -- S₃: beta modulo duality
+  rw [h_tel_logΓ]      -- S₁: staircase on logΓ
+  rw [h_tel_ψ]         -- S₄: staircase on ψ
+  -- Step 3d: Normalize logΓ argument order for Gauss multiplication
+  -- The staircase produces logΓ((m+1)/b) but Gauss expects logΓ((1+k)/q)
+  rw [show ∑ m ∈ Finset.range b,
+    Real.log (Real.Gamma (((m:ℝ) + 1) / (b:ℝ))) =
+    ∑ k ∈ Finset.range b,
+      Real.log (Real.Gamma ((1 + (k:ℝ)) / (b:ℝ))) from
+    Finset.sum_congr rfl (fun m _ => by congr 1; congr 1; ring)]
+  rw [h_gauss_b]
+  -- The remaining goal should be a large algebraic identity.
   sorry
 
 -- ──────────────────────────────────────────────
