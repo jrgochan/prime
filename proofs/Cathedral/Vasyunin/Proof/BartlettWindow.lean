@@ -281,7 +281,7 @@ theorem bartlett_window_ratio :
           rw [abs_le]; exact ⟨by linarith [h_num_lb], by linarith [h_num_ub]⟩
       _ < ε * flatEnergy N := by nlinarith [hC_flat_nn, hC_tap_nn, h_f_lb, h_aL, hε_small]
   · -- Large ε (> 8/3 > 2/3): use |T - F/3| ≤ 2F/3 < εF directly
-    push_neg at hε_small
+    push Not at hε_small
     have h_le := taperedEnergy_le_flatEnergy N hN_ge_2
     have h_abs_bd : |taperedEnergy N - 1 / 3 * flatEnergy N| ≤ 2 / 3 * flatEnergy N := by
       rw [abs_le]; constructor
@@ -441,7 +441,7 @@ theorem peak_amplitude_ratio :
             nlinarith [h_f_lb]
           have h_expand : ε * (α * Real.log ↑N - C_flat) = ε * (α * Real.log ↑N) - ε * C_flat := by ring
           nlinarith [hC_flat_nn, hC_lin_nn, hε_small]
-  · push_neg at hε_small
+  · push Not at hε_small
     have h_le := linearTaperedEnergy_le_flatEnergy N hN_ge_2
     have h_abs_bd : |linearTaperedEnergy N - 1 / 2 * flatEnergy N| ≤ 1 / 2 * flatEnergy N := by
       rw [abs_le]; constructor

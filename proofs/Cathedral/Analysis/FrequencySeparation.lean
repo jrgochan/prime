@@ -56,7 +56,7 @@ lemma log_nat_separation (m n N : ℕ) (hm : 1 ≤ m) (hn : 1 ≤ n)
     (1 : ℝ) / (N + 1) ≤ |Real.log m - Real.log n| := by
   -- WLOG m > n (swap if needed)
   wlog h : n < m with H
-  · push_neg at h
+  · push Not at h
     have : m < n := lt_of_le_of_ne h hmn
     rw [abs_sub_comm]
     exact H n m N hn hm hnN hmN (Ne.symm hmn) this

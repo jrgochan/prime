@@ -108,7 +108,7 @@ theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
   -- 4.28 API: integral_image_eq_integral_deriv_smul_of_antitone
   -- For antitone f with deriv f', ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
   -- With f(u) = exp(-u), f'(u) = -exp(-u), so -f'(u) = exp(-u)
-  have h_antitone := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitone
+  have h_antitone := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
     measurableSet_Ioi
     (fun u hu => hasDerivWithinAt_exp_neg u hu)
     exp_neg_antitoneOn

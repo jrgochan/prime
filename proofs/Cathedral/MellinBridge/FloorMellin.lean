@@ -140,9 +140,9 @@ open Topology in
     Zero sorry, zero axioms. -/
 lemma tail_vanishes' (s : ℂ) (hs : 1 < s.re) :
     Tendsto (fun N : ℕ => (↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s) atTop (nhds 0) := by
-  rw [NormedAddCommGroup.tendsto_nhds_zero]
+  rw [NormedAddGroup.tendsto_nhds_zero]
   intro ε hε
-  have h_tail := (NormedAddCommGroup.tendsto_nhds_zero.mp) (rpow_neg_tendsto' s.re hs) ε hε
+  have h_tail := (NormedAddGroup.tendsto_nhds_zero.mp) (rpow_neg_tendsto' s.re hs) ε hε
   filter_upwards [h_tail] with N hN
   have hN1 : (0 : ℝ) < (N : ℝ) + 1 := by positivity
   calc ‖(↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s‖

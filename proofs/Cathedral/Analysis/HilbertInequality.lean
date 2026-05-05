@@ -548,7 +548,7 @@ private lemma sinc_sq_cauchy_bound (x : ℝ) :
     have hpx : π * x ≠ 0 := mul_ne_zero Real.pi_ne_zero hx
     by_cases hle : x ^ 2 ≤ 1
     · nlinarith [Real.sinc_le_one (π * x), Real.neg_one_le_sinc (π * x)]
-    · push_neg at hle
+    · push Not at hle
       have h_sq := real_sinc_sq_le_inv_sq (π * x) hpx
       have h_pi_bound : |π * x|⁻¹ ≤ |x|⁻¹ := by
         apply inv_anti₀ (abs_pos.mpr hx)
@@ -610,7 +610,7 @@ private lemma Λ_ℂ_hasCompactSupport : HasCompactSupport Λ_ℂ := by
         intro heq; apply hξ; show Λ_ℂ ξ = 0; simp [Λ_ℂ, heq]
       exact lt_of_le_of_ne (le_max_right _ _) (Ne.symm this)
     have h2 : 0 < 1 - |ξ| := by
-      by_contra h3; push_neg at h3
+      by_contra h3; push Not at h3
       linarith [le_max_right (1 - |ξ|) (0 : ℝ), max_eq_right h3]
     exact ⟨by linarith [neg_abs_le ξ], by linarith [le_abs_self ξ]⟩) isClosed_Icc
 

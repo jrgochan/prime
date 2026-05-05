@@ -75,7 +75,7 @@ theorem vasyuninSum_eq_vasyuninCotSum (a b : ℕ) :
     simp [ha]
     exact (DigammaReflection.vasyuninCotSum_of_le_one b ha).symm
   · -- a ≥ 2 case
-    push_neg at ha
+    push Not at ha
     have ha2 : 2 ≤ a := by omega
     unfold Cathedral.Vasyunin.vasyuninSum DigammaReflection.vasyuninCotSum
     simp only [show ¬(a ≤ 1) from by omega, ↓reduceIte]

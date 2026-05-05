@@ -1078,11 +1078,14 @@ theorem littlewood_maneuver (hRH : RiemannHypothesis)
 -- §6. Axiom Graduation
 -- ═══════════════════════════════════════════
 
-/-- **THEOREM** (was axiom): Under RH, for any ε > 0, A > 0,
+/-- **THEOREM** (axiom bridge): Under RH, for any ε > 0, A > 0,
     there exists c > 0 such that |ζ(s)| ≥ c/|t|^A for σ ≥ 1/2+ε, |t| ≥ 2.
 
-    Graduated from `rh_zeta_lower_bound_from_zero_counting` via the
-    Littlewood Maneuver (Three-Circles + Right Half-Plane Trap). -/
+    NOTE: `littlewood_maneuver` proves the ∃ T₀ form (used by LowerBound.lean).
+    This bridge provides the fixed T₀ = 2 form via the axiom.
+    The axiom is subsumed by the maneuver for all practical purposes;
+    this theorem exists only for backward compatibility with code that
+    requires the exact `2 ≤ |s.im|` interface. -/
 theorem rh_zeta_lower_bound_graduated (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2)
     (A : ℝ) (hA : 0 < A) :

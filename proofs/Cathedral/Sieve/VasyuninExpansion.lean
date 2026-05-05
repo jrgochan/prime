@@ -186,7 +186,7 @@ theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
   · -- CASE 1: d ≤ 4 — PROVED (correct)
     exact vasyunin_expansion_d_le_4 j k hj hk hd
   · -- CASE 2: d ≥ 5 — 💀 FALSE (see tombstone)
-    push_neg at hd
+    push Not at hd
     exact vasyunin_large_gcd_replacement j k hj hk (by omega)
 
 end

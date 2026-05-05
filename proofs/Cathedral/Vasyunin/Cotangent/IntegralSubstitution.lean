@@ -152,7 +152,7 @@ theorem elementary_inv_sq_integral (j' k' d : ℕ) (hj : 1 ≤ j') (hk : 1 ≤ k
   simp_rw [hpow]
   -- Now use integral_rpow
   have h_notzero : (0:ℝ) ∉ Set.uIcc (1:ℝ) (d:ℝ) := by
-    rw [Set.uIcc_of_le h1d, Set.mem_Icc]; push_neg; intro; linarith
+    rw [Set.uIcc_of_le h1d, Set.mem_Icc]; push Not; intro; linarith
   rw [integral_rpow (Or.inr ⟨by norm_num, h_notzero⟩)]
   rw [show (-2:ℝ) + 1 = -1 by norm_num]
   simp only [rpow_neg_one]

@@ -118,7 +118,7 @@ theorem s3_uniform_bound_from_mertens
     have := le_max_right B_fin (|S₃_at 2| + 1 + K_int + 1)
     linarith
   · -- Small case
-    push_neg at hn
+    push Not at hn
     exact le_trans (h_small n hn) (le_max_left _ _)
 
 end

@@ -52,7 +52,7 @@ lemma fract_coprime_ne_zero (a b r : ℕ) (hab : Nat.Coprime a b)
   have h_real : (a:ℝ) * (r:ℝ) = (z:ℝ) * (b:ℝ) := by
     field_simp at hz; linarith
   have hz_nn : 0 ≤ z := by
-    by_contra h_neg; push_neg at h_neg
+    by_contra h_neg; push Not at h_neg
     have : (z:ℝ) * (b:ℝ) < 0 :=
       mul_neg_of_neg_of_pos (Int.cast_lt_zero.mpr h_neg) (Nat.cast_pos.mpr hb_pos)
     linarith [mul_nonneg (Nat.cast_nonneg' a (α := ℝ)) (Nat.cast_nonneg' r (α := ℝ))]
@@ -212,7 +212,7 @@ lemma weighted_digamma_reflection_solve_general (a b : ℕ) (hab : Nat.Coprime a
     -- = Σ {ar/b} · (1/tan(πr/b))   [since sum over r = 1..b-1]
     simp only [V, DigammaReflection.vasyuninCotSum]
     rw [Finset.mul_sum]
-    apply Finset.sum_congr rfl; intro r _; ring
+    apply Finset.sum_congr rfl; intro r _; ring_nf
   -- Prove (B): Σ {ar/b}·ψ((b-r)/b) = S - W
   -- Via bijection r ↦ b-r: Σ {ar/b}·ψ((b-r)/b) = Σ {a(b-r)/b}·ψ(r/b)
   -- = Σ (1-{ar/b})·ψ(r/b) = S - W

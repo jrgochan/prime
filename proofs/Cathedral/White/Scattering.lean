@@ -75,7 +75,7 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
   set s : ℂ := 1 / 2 + 2 * ↑Real.pi * ↑ξ * Complex.I with hs_def
   set gM : ℝ → ℂ := fun x => (bdResidualV N v x : ℂ) * (x : ℂ) ^ (s - 1)
   -- Step 3: Apply the antitone CoV (4.28 API)
-  have h_cov := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitone
+  have h_cov := MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
     measurableSet_Ioi
     (fun u hu => hasDerivWithinAt_exp_neg u hu)
     exp_neg_antitoneOn gM

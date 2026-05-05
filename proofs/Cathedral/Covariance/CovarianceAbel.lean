@@ -209,7 +209,7 @@ theorem bdApprox_pointwise_bound (N : ℕ) (hN : 3 ≤ N) (x : ℝ) (hx : 0 < x)
       have h := hMertens (k : ℝ) hk2
       linarith
     · -- For k = 1: |A(1)| = |a(1)| = |μ(1)| = 1 ≤ C_bound(1)
-      push_neg at hk2
+      push Not at hk2
       have hk_eq : k = 1 := by
         have : k < 2 := by exact_mod_cast hk2
         omega

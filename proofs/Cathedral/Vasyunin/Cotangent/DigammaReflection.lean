@@ -228,7 +228,7 @@ lemma rat_not_int (m q : ℕ) (hm : 1 ≤ m) (hmq : m < q) :
   by_cases hn0 : n ≤ 0
   · have : (n:ℝ) ≤ 0 := Int.cast_nonpos.mpr hn0
     nlinarith
-  · push_neg at hn0
+  · push Not at hn0
     have : (1:ℝ) ≤ (n:ℝ) := by exact_mod_cast hn0
     nlinarith
 

@@ -23,6 +23,7 @@ import Mathlib.Analysis.Complex.BorelCaratheodory
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Cathedral.Zeta.DiskBounds
 import Cathedral.Zeta.Hadamard
+import Cathedral.Zeta.LittlewoodManeuver
 
 noncomputable section
 open Complex Real Filter Asymptotics MeasureTheory Metric
@@ -418,21 +419,16 @@ theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
               rw [← Real.log_div (ne_of_gt h2t_pos) (by norm_num : (2:ℝ) ≠ 0)]
             linarith [h_key, h_rearrange, h_exp_identity]
         _ ≤ ‖riemannZeta s‖ := hbc
-    · -- ══ Case A < B_ε: Use zero-counting axiom from ZetaHadamard ══
+    · -- ══ Case A < B_ε: Use Littlewood Maneuver (PROVEN) ══
       -- The BC inner bound gives exponent B_ε > A, which is too large
       -- for the thin strip 1/2+ε ≤ Re(s) < 1/2+ε'. The resolution uses
-      -- the Hadamard product + zero density estimate (axiomatized in
-      -- Cathedral.Zeta.Hadamard.lean as rh_zeta_lower_bound_from_zero_counting).
+      -- the Littlewood Maneuver (Three-Circles + Right Half-Plane Trap).
       --
-      -- This axiom captures the well-known result (Titchmarsh §14.2):
-      --   Under RH, |ζ(σ+it)| ≥ c/|t|^A for any A > 0.
-      -- The proof requires Hadamard factorization + N(T) = O(T log T),
-      -- infrastructure not yet in Mathlib.
-      --
-      -- EXPERIMENTALLY VALIDATED: bc-zeta-lower (256-bit MPFR, 17.5h,
-      -- 550K samples) confirms effective exponents ≈ 0.03-0.08.
+      -- GRADUATED: This was previously delegated to the axiom
+      -- rh_zeta_lower_bound_from_zero_counting. Now proven from
+      -- first principles via LittlewoodManeuver.lean.
       simp only [not_le] at hAB
-      -- Direct delegation to the zero-counting axiom
-      exact Cathedral.Zeta.Hadamard.thin_strip_lower_bound_exists hRH ε hε hε1 A hA
+      -- Direct delegation to the proven Littlewood Maneuver theorem
+      exact Cathedral.Zeta.LittlewoodManeuver.littlewood_maneuver hRH ε hε hε1 A hA
 
 end Cathedral.Zeta.LowerBound

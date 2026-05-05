@@ -207,6 +207,9 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.TailBound,
     -- Hadamard three-circles + zero-counting axiom (thin-strip infrastructure)
     `Cathedral.Zeta.Hadamard,
+    -- Littlewood Maneuver: Three-Circles + Right Half-Plane Trap
+    -- (graduates rh_zeta_lower_bound_from_zero_counting, zero sorry)
+    `Cathedral.Zeta.LittlewoodManeuver,
     -- Polynomial lower bound on |ζ(s)| via Borel-Carathéodory
     `Cathedral.Zeta.LowerBound,
     -- Schur's Test + Montgomery-Vaughan Hilbert inequality (Schur PROVED)
