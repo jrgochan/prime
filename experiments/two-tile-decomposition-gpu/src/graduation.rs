@@ -212,13 +212,85 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
 
     let id_err = (sum_pcl - dt).abs();
 
+    // ═══════════════════════════════════════════════════
+    // §6. ABEL CANCELLATION (NEW — May 5, 2026)
+    // ═══════════════════════════════════════════════════
+    // KEY INSIGHT: S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{ar/b}·ψ((r+1)/b)
+    //
+    // S₁ = (1/a) · Σ_{TT} logΓ((m₀+1)/b)
+    //    = (1/a) · [(a/b)·FullLogΓ + AbelLogΓ - logΓ(1)]
+    //    = (1/b)·FullLogΓ + (1/a)·AbelLogΓ    (since logΓ(1)=0)
+    //
+    // (1/a)·FT = (1/a)·Σ {ar/b}·[logΓ(r/b) - logΓ((r+1)/b) + (1/b)·ψ((r+1)/b)]
+    //          = -(1/a)·AbelLogΓ + (1/(ab))·Σ {ar/b}·ψ((r+1)/b)
+    //
+    // Sum: AbelLogΓ cancels! Leaving:
+    //   S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{ar/b}·ψ((r+1)/b)
+    let s1 = (1.0 / af) * tt_lg;  // (1/a) · Σ_{TT} logΓ(α)
+    let frac_psi_r1: f64 = (1..b).map(|r| {
+        frac_part(af * r as f64 / bf) * digamma_cpu((r + 1) as f64 / bf)
+    }).sum();
+    let abel_lhs = s1 + ft / af;
+    let abel_rhs = gauss_lg_b_closed / bf + frac_psi_r1 / (af * bf);
+    let abel_cancel_err = (abel_lhs - abel_rhs).abs();
+
+    // ═══════════════════════════════════════════════════
+    // §7. WEIGHTED DIGAMMA REFLECTION (NEW — May 5, 2026)
+    // ═══════════════════════════════════════════════════
+    // Σ_{r=1}^{b-1} {ar/b}·ψ(r/b) = (1/2)·(Σψ(r/b) - π·V(b,a))
+    let wdr_lhs: f64 = (1..b).map(|r| {
+        frac_part(af * r as f64 / bf) * digamma_cpu(r as f64 / bf)
+    }).sum();
+    let sum_psi_icc: f64 = (1..b).map(|r| digamma_cpu(r as f64 / bf)).sum();
+    let wdr_rhs = 0.5 * (sum_psi_icc - pi * vab);
+    let wdr_err = (wdr_lhs - wdr_rhs).abs();
+
+    // ═══════════════════════════════════════════════════
+    // §8. COPRIME COMPLEMENT IDENTITY (NEW — May 5, 2026)
+    // ═══════════════════════════════════════════════════
+    // {a(b-r)/b} = 1 - {ar/b} for gcd(a,b)=1, 1 ≤ r ≤ b-1
+    let coprime_comp = (1..b).all(|r| {
+        let lhs = frac_part(af * (b - r) as f64 / bf);
+        let rhs = 1.0 - frac_part(af * r as f64 / bf);
+        (lhs - rhs).abs() < 1e-12
+    });
+
+    // ═══════════════════════════════════════════════════
+    // §9. FOUR-WAY ASSEMBLY (NEW — May 5, 2026)
+    // ═══════════════════════════════════════════════════
+    // Evaluate S₁, S₂, S₃, S₄ through their individual evaluation chains:
+    //   S₁: staircase(logΓ) → (a/b)·GaussB + AbelLogΓ
+    //   S₂: β-reindex → Gauss_A closed form
+    //   S₃: beta duality → (1/(ab))·Σ{br/a}·ψ(r/a)
+    //   S₄: staircase(ψ) → (a/b)·ΣψB + AbelΨ + γ
+    // Then check: S₁ + S₂ + S₃ + S₄ = dt (deltaTarget)
+
+    // S₁ evaluated via staircase
+    let s1_eval = (1.0 / af) * ((af / bf) * full_lg + abel_lg - f_lg(b - 1));
+
+    // S₂ evaluated via β-reindex + Gauss_A
+    let s2_eval = -(1.0 / af) * gauss_lg_a_direct;
+
+    // S₃ evaluated via beta duality
+    let s3_eval = -beta_lhs;  // beta_lhs = Σ (s-a)/(a²b)·ψ(β) from §4
+
+    // S₄ evaluated via staircase
+    let s4_eval = -(1.0 / (af * bf)) * ((af / bf) * full_psi + abel_psi - f_psi(b - 1));
+
+    let fourway_sum = s1_eval + s2_eval + s3_eval + s4_eval;
+    let fourway_err = (fourway_sum - dt).abs();
+
     // ═══ CERTIFICATION ═══
     let certified = beta_bijection && s_permutation && overshoot_id
         && gauss_lg_a_err < 1e-8 && gauss_lg_b_err < 1e-8
         && gauss_d_a_err < 1e-8 && gauss_d_b_err < 1e-8
         && tel_lg_err < 1e-8 && tel_psi_err < 1e-8
         && beta_pw && (beta_lhs - beta_rhs).abs() < 1e-8
-        && id_err < 1e-8;
+        && id_err < 1e-8
+        && abel_cancel_err < 1e-8
+        && wdr_err < 1e-8
+        && coprime_comp
+        && fourway_err < 1e-8;
 
     PairResult {
         a: a as c_int, b: b as c_int,
@@ -235,6 +307,10 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
         beta_duality_pw: if beta_pw { 1 } else { 0 },
         beta_duality_sum_err: (beta_lhs - beta_rhs).abs(),
         sum_pcl, delta_target: dt, identity_err: id_err,
+        abel_cancel_err,
+        wdr_err,
+        coprime_complement_ok: if coprime_comp { 1 } else { 0 },
+        fourway_err,
         certified: if certified { 1 } else { 0 },
     }
 }

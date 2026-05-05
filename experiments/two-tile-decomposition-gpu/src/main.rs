@@ -322,6 +322,75 @@ fn main() {
     }
     println!();
 
+    // §11. Abel Cancellation
+    fmt::section("§11. ABEL CANCELLATION (The Key Insight)");
+    println!("  S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{{ar/b}}·ψ((r+1)/b)");
+    println!();
+
+    let max_abel_err = results.iter().map(|r| r.abel_cancel_err).fold(0.0_f64, f64::max);
+    let abel_ok = max_abel_err < 1e-8;
+
+    println!("  Max |Abel cancellation error| : {:.4e}", max_abel_err);
+    if abel_ok {
+        println!("  {} Abel cancellation: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true), n_pairs);
+    } else {
+        let n_fail = results.iter().filter(|r| r.abel_cancel_err > 1e-8).count();
+        println!("  {} {} failures", fmt::check(false), n_fail);
+    }
+    println!();
+
+    // §12. Weighted Digamma Reflection
+    fmt::section("§12. WEIGHTED DIGAMMA REFLECTION");
+    println!("  Σ {{ar/b}}·ψ(r/b) = (1/2)·(Σψ - π·V(b,a))");
+    println!();
+
+    let max_wdr_err = results.iter().map(|r| r.wdr_err).fold(0.0_f64, f64::max);
+    let wdr_ok = max_wdr_err < 1e-8;
+
+    println!("  Max |weighted digamma reflection error| : {:.4e}", max_wdr_err);
+    if wdr_ok {
+        println!("  {} Weighted digamma reflection: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true), n_pairs);
+    } else {
+        let n_fail = results.iter().filter(|r| r.wdr_err > 1e-8).count();
+        println!("  {} {} failures", fmt::check(false), n_fail);
+    }
+    println!();
+
+    // §13. Coprime Complement
+    fmt::section("§13. COPRIME COMPLEMENT IDENTITY");
+    println!("  {{a(b-r)/b}} = 1 - {{ar/b}} for gcd(a,b)=1");
+    println!();
+
+    let all_coprime_comp = results.iter().all(|r| r.coprime_complement_ok != 0);
+    println!("  Pointwise verification : {} ({}/{} pairs)",
+        if all_coprime_comp { fmt::check(true) } else { fmt::check(false) },
+        results.iter().filter(|r| r.coprime_complement_ok != 0).count(), n_pairs);
+    if all_coprime_comp {
+        println!("  {} Coprime complement: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true), n_pairs);
+    }
+    println!();
+
+    // §14. Four-Way Assembly
+    fmt::section("§14. FOUR-WAY ASSEMBLY");
+    println!("  S₁(staircase) + S₂(Gauss_A) + S₃(beta) + S₄(staircase) = deltaTarget");
+    println!();
+
+    let max_fourway_err = results.iter().map(|r| r.fourway_err).fold(0.0_f64, f64::max);
+    let fourway_ok = max_fourway_err < 1e-8;
+
+    println!("  Max |four-way assembly error| : {:.4e}", max_fourway_err);
+    if fourway_ok {
+        println!("  {} Four-way assembly: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true), n_pairs);
+    } else {
+        let n_fail = results.iter().filter(|r| r.fourway_err > 1e-8).count();
+        println!("  {} {} failures", fmt::check(false), n_fail);
+    }
+    println!();
+
     // ═══ OVERALL ═══
     let all_certified = results.iter().all(|r| r.certified != 0);
     let n_certified = results.iter().filter(|r| r.certified != 0).count();
@@ -341,6 +410,10 @@ fn main() {
         println!("    §8.  Staircase telescope     : ✓ Gemini Key 1");
         println!("    §9.  Beta modulo duality     : ✓ Gemini Key 2");
         println!("    §10. Graduation identity     : ✓ Σ perClassLimit = deltaTarget");
+        println!("    §11. Abel cancellation       : ✓ AbelLogΓ cancel between S₁ and FT");
+        println!("    §12. Weighted digamma refl.  : ✓ Σ{{ar/b}}·ψ(r/b) = ½(Σψ - πV)");
+        println!("    §13. Coprime complement      : ✓ {{a(b-r)/b}} = 1 - {{ar/b}}");
+        println!("    §14. Four-way assembly       : ✓ S₁+S₂+S₃+S₄ = deltaTarget");
         println!("    FULL CERTIFICATION — gramIntegral_eq_formula_ge2 GRADUATION READY");
     } else {
         println!("  {} {}/{} pairs certified (B_max = {})",

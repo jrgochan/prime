@@ -43,6 +43,18 @@ pub struct PairResult {
     pub delta_target: f64,
     pub identity_err: f64,
 
+    // §11. Abel Cancellation: S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{ar/b}·ψ((r+1)/b)
+    pub abel_cancel_err: f64,
+
+    // §12. Weighted Digamma Reflection: Σ{ar/b}·ψ(r/b) = (1/2)·(Σψ - π·V(b,a))
+    pub wdr_err: f64,
+
+    // §13. Coprime Complement: {a(b-r)/b} = 1 - {ar/b}
+    pub coprime_complement_ok: c_int,
+
+    // §14. Four-Way Assembly: S₁+S₂+S₃+S₄ individually evaluated = target
+    pub fourway_err: f64,
+
     // Pass/fail
     pub certified: c_int,
 }
