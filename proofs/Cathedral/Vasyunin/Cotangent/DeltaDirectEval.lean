@@ -1360,7 +1360,18 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
       Real.log (Real.Gamma ((1 + (k:ℝ)) / (b:ℝ))) from
     Finset.sum_congr rfl (fun m _ => by congr 1; congr 1; ring)]
   rw [h_gauss_b]
-  -- The remaining goal should be a large algebraic identity.
+  -- ═══════════════════════════════════════════════════
+  -- Step 4: The Abstraction Maneuver (Gemini Actual)
+  -- ═══════════════════════════════════════════════════
+  -- Blind the compiler: generalize all transcendentals to dummy vars.
+  -- Then the goal becomes a pure polynomial/rational identity.
+  -- Try field_simp + ring to close the algebra
+  unfold DigammaReflection.vasyuninGramFormula GeneralFractSeriesEval.fractTarget_general
+  simp only [Nat.Coprime.gcd_eq_one hcop, Nat.div_one]
+  -- The goal has a/b, 1/(a*b) etc as coefficients.
+  -- field_simp clears all denominators.
+  field_simp
+  ring_nf
   sorry
 
 -- ──────────────────────────────────────────────
