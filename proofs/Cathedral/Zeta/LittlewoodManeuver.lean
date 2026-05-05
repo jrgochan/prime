@@ -742,6 +742,36 @@ private lemma three_circles_to_sub_log
                       (le_of_lt hlog_pos)]
         ring
 
+/-- Three-Circles rpow monotonicity: a^(1-θ)·b^θ ≤ (a·C)·ℓ^α
+    when a ≥ 1, b ≤ C·ℓ, C ≥ 1, ℓ ≥ 1, 0 ≤ θ ≤ α ≤ 1.
+    This converts the Three-Circles output (exponent θ) to a sub-logarithmic
+    bound (exponent α) by factoring the weighted geometric mean:
+    a^(1-θ) ≤ a, C^θ ≤ C, ℓ^θ ≤ ℓ^α. -/
+private lemma tc_rpow_bound {a b C ℓ θ α : ℝ}
+    (ha : 1 ≤ a) (hC : 1 ≤ C) (hℓ : 1 ≤ ℓ)
+    (hb : 0 ≤ b) (hbCℓ : b ≤ C * ℓ)
+    (hθ : 0 ≤ θ) (hθα : θ ≤ α) (hα : α ≤ 1) :
+    a ^ (1 - θ) * b ^ θ ≤ a * C * ℓ ^ α := by
+  have hCℓ : 0 ≤ C * ℓ := mul_nonneg (le_trans zero_le_one hC) (le_trans zero_le_one hℓ)
+  have h_b_rpow : b ^ θ ≤ (C * ℓ) ^ θ := rpow_le_rpow hb hbCℓ hθ
+  have h1mθ_le : 1 - θ ≤ 1 := by linarith
+  have h_a_rpow : a ^ (1 - θ) ≤ a := by
+    have := rpow_le_rpow_of_exponent_le ha h1mθ_le; rwa [rpow_one] at this
+  have h_mul_rpow : (C * ℓ) ^ θ = C ^ θ * ℓ ^ θ :=
+    mul_rpow (le_trans zero_le_one hC) (le_trans zero_le_one hℓ)
+  have h_C_rpow : C ^ θ ≤ C := by
+    have := rpow_le_rpow_of_exponent_le hC (le_trans hθα hα); rwa [rpow_one] at this
+  have h_ℓ_rpow : ℓ ^ θ ≤ ℓ ^ α := rpow_le_rpow_of_exponent_le hℓ hθα
+  calc a ^ (1 - θ) * b ^ θ
+      ≤ a * (C * ℓ) ^ θ := by
+        apply mul_le_mul h_a_rpow h_b_rpow (rpow_nonneg hb _) (le_trans zero_le_one ha)
+    _ = a * (C ^ θ * ℓ ^ θ) := by rw [h_mul_rpow]
+    _ ≤ a * (C * ℓ ^ α) := by
+        apply mul_le_mul_of_nonneg_left _ (le_trans zero_le_one ha)
+        exact mul_le_mul h_C_rpow h_ℓ_rpow (rpow_nonneg (le_trans zero_le_one hℓ) _)
+          (le_trans zero_le_one hC)
+    _ = a * C * ℓ ^ α := by ring
+
 /-- **Three-Circles Inner Bound**: For 1/2+ε ≤ Re(s) ≤ 2, |Im(s)| ≥ 3, under RH:
     ‖ζ(s)‖ ≥ (1/4)·exp(-K·(log(2+|t|))^α) where α < 1 and K depends only on ε.
 
@@ -758,7 +788,7 @@ private lemma three_circles_inner_bound (hRH : RiemannHypothesis)
     let R₄ := 5/2 - ε/4
     let R₃ := 5/2 - ε/2
     let α := Real.log (5/2 - ε) / Real.log R₃
-    let K := 6 ^ (1 - α) * (22 * R₃ / (R₄ - R₃)) ^ α
+    let K := 6 * (22 * R₃ / (R₄ - R₃))
     (1/4 : ℝ) * Real.exp (-(K * (Real.log (2 + |s.im|)) ^ α)) ≤ ‖riemannZeta s‖ := by
   -- ── Setup ──
   set t := s.im
@@ -767,7 +797,7 @@ private lemma three_circles_inner_bound (hRH : RiemannHypothesis)
   set R₂ := 5/2 - ε
   set s₀ : ℂ := ⟨3, t⟩
   set α := Real.log R₂ / Real.log R₃
-  set K := 6 ^ (1 - α) * (22 * R₃ / (R₄ - R₃)) ^ α
+  set K := 6 * (22 * R₃ / (R₄ - R₃))
   have hR₄_pos : 0 < R₄ := by simp only [R₄]; linarith
   have hR₃_pos : 0 < R₃ := by simp only [R₃]; linarith
   have hR₃_lt_R₄ : R₃ < R₄ := by simp only [R₃, R₄]; linarith
@@ -860,37 +890,81 @@ private lemma three_circles_inner_bound (hRH : RiemannHypothesis)
   -- Then: ‖ζ(s₀)‖·exp(Re(G z*)) ≥ (1/4)·exp(-‖G z*‖) ≥ (1/4)·exp(-K·...)
   have hre_ge : -(G z_star).re ≤ ‖G z_star‖ := by
     linarith [neg_abs_le (G z_star).re, Complex.abs_re_le_norm (G z_star)]
-  -- Chain: (1/4)·exp(-K·(log)^α) ≤ ‖ζ(s₀)‖·exp(Re(G z*))
-  -- Step 1: ‖G z*‖ ≤ 6^(1-θ)·b^θ from h_tc
-  -- Step 2: ‖G z*‖ ≤ b (geometric mean ≤ max, since b ≥ 0 and we bound b^θ ≤ max(1, b))
-  -- Step 3: b = 2M·R₃/(R₄-R₃), three_circles_to_sub_log: 6^(1-α)·b^α ≤ K·(log)^α
-  -- For the chain, we use: ‖G z*‖ ≤ h_tc ≤ K·(log)^α
-  -- Need: 6^(1-θ)·b^θ ≤ K·(log(2+|t|))^α
-  -- Since K = 6^(1-α)·(22·R₃/(R₄-R₃))^α, we need:
-  --   6^(1-θ)·b^θ ≤ 6^(1-α)·(22·R₃/(R₄-R₃))^α · (log(2+|t|))^α
-  -- This follows from: 6^(1-θ) ≤ 6^(1-α) [since θ ≤ α, 1-θ ≥ 1-α, 6 ≥ 1]
-  -- and b^θ ≤ (22·R₃/(R₄-R₃))^α · (log(2+|t|))^α [since b ≤ C·log, θ ≤ α]
-  -- The full rpow chain is technical; we use the proved three_circles_to_sub_log.
-  -- Key: ‖G z*‖ ≤ bound from TC ≤ K·(log)^α
-  -- Then: exp(Re(G z*)) ≥ exp(-‖G z*‖) ≥ exp(-K·(log)^α)
-  -- And: ‖ζ(s₀)‖·exp(Re(G z*)) ≥ (1/4)·exp(-K·(log)^α)
-  -- For the TC bound → K·(log)^α conversion:
-  -- We use a direct bound: ‖G z*‖ ≤ h_tc ≤ b (since 6^(1-θ)·b^θ ≤ max(6,b) ≤ b+6)
-  -- Then b ≤ C·log and C·log ≤ K·(log)^α for |t| large enough (since α < 1).
-  -- Actually, for the pointwise bound, we don't need sub-log at this stage.
-  -- The sub-log conversion happens later in littlewood_maneuver.
-  -- Here we just need: exp(-‖G z*‖) ≥ exp(-K·(log)^α) where K = 6^(1-α)·(22R₃/(R₄-R₃))^α.
-  -- This requires ‖G z*‖ ≤ K·(log)^α, i.e., 6^(1-θ)·b^θ ≤ K·(log)^α.
-  -- Strategy: bound the TC output by b (linear), then bound b ≤ K·(log)^α... no, that's wrong.
-  -- The correct approach: b = 2M·R₃/(R₄-R₃) and M = 10·log(2+|t|)+log4.
-  -- So the TC output = 6^(1-θ)·(2M·R₃/(R₄-R₃))^θ.
-  -- And K·(log)^α = 6^(1-α)·(22R₃/(R₄-R₃))^α·(log)^α
-  -- We need: 6^(1-θ)·(2M·R₃/(R₄-R₃))^θ ≤ 6^(1-α)·(22R₃/(R₄-R₃)·log)^α
-  -- This follows from monotonicity of the weighted geometric mean when the ratio b/6 ≥ 1.
-  -- For now, use the simpler bound: ‖G z*‖ ≤ b ≤ K'·log and complete with sorry-free arithmetic.
-  -- PLACEHOLDER: This sorry represents rpow monotonicity of the three-circles interpolation.
-  -- All mathematical content is proved; what remains is Lean rpow algebra for θ ≤ α.
-  sorry
+  -- ── The rpow chain: ‖G z*‖ ≤ K·(log(2+|t|))^α ──
+  -- Three-Circles θ = (log‖z*‖ - log 1)/(log R₃ - log 1) = log‖z*‖/log R₃
+  set θ := (Real.log ‖z_star‖ - Real.log 1) / (Real.log R₃ - Real.log 1)
+  -- Simplify θ: log 1 = 0
+  have hθ_eq : θ = Real.log ‖z_star‖ / Real.log R₃ := by
+    simp [θ, Real.log_one]
+  -- θ ≥ 0
+  have hθ_nonneg : 0 ≤ θ := by
+    rw [hθ_eq]
+    exact div_nonneg (Real.log_nonneg hz_ge_1) (le_of_lt (Real.log_pos (by simp only [R₃]; linarith)))
+  -- θ ≤ α (since ‖z*‖ ≤ R₂ and log is monotone)
+  have hR₃_gt_1 : 1 < R₃ := by simp only [R₃]; linarith
+  have hθ_le_α : θ ≤ α := by
+    rw [hθ_eq]
+    apply div_le_div_of_nonneg_right _ (le_of_lt (Real.log_pos hR₃_gt_1))
+    exact Real.log_le_log (by linarith [norm_nonneg z_star]) hz_le_R₂
+  -- α < 1 (from the existing proof infrastructure)
+  have hα_lt_1 : α < 1 := by
+    show Real.log R₂ / Real.log R₃ < 1
+    rw [div_lt_one (Real.log_pos hR₃_gt_1)]
+    exact Real.log_lt_log (by simp only [R₂]; linarith) (by simp only [R₂, R₃]; linarith)
+  -- b ≤ C·L where C = 22·R₃/(R₄-R₃), L = log(2+|t|)
+  set C_ε := 22 * R₃ / (R₄ - R₃)
+  set logT := Real.log (2 + |t|)
+  have hlogT_pos : 0 < logT := Real.log_pos (by linarith [abs_nonneg t])
+  have hlogT_ge_1 : 1 ≤ logT := by
+    have h4le : (4:ℝ) ≤ 2 + |t| := by linarith [abs_nonneg t]
+    -- 1 < log 4 ⟺ exp 1 < 4; exp 1 ≈ 2.718 < 4
+    have hlog4 : (1:ℝ) < Real.log 4 := by
+      have : Real.exp 1 < 4 := lt_trans Real.exp_one_lt_three (by norm_num)
+      exact (Real.lt_log_iff_exp_lt (by norm_num : (0:ℝ) < 4)).mpr this
+    have hlog_mono : Real.log 4 ≤ Real.log (2 + |t|) :=
+      Real.log_le_log (by norm_num : (0:ℝ) < 4) h4le
+    show 1 ≤ Real.log (2 + |t|)
+    linarith
+  have hgap_pos : 0 < R₄ - R₃ := by simp only [R₃, R₄]; linarith
+  have hC_pos : 0 < C_ε := by positivity
+  have hC_ge_1 : 1 ≤ C_ε := by
+    have hR₃_ge : 1 ≤ R₃ := by simp only [R₃]; linarith
+    have hgap_le : R₄ - R₃ ≤ 22 * R₃ := by simp only [R₃, R₄]; nlinarith
+    have h22R₃_pos : 0 < 22 * R₃ := by linarith
+    calc (1:ℝ) ≤ (R₄ - R₃) / (R₄ - R₃) := by rw [div_self (ne_of_gt hgap_pos)]
+      _ ≤ 22 * R₃ / (R₄ - R₃) := by
+          exact div_le_div_of_nonneg_right hgap_le (le_of_lt hgap_pos)
+  -- b = 2·M·R₃/(R₄-R₃) where M = 10·log(2+|t|)+log 4 ≤ 11·log(2+|t|) = 11·logT
+  -- So b ≤ 2·11·logT·R₃/(R₄-R₃) = 22·R₃/(R₄-R₃)·logT = C_ε·logT
+  have hb_nonneg : 0 ≤ b := by
+    simp only [b, M]; apply div_nonneg; apply mul_nonneg; apply mul_nonneg
+    · linarith
+    · linarith [Real.log_nonneg (show (1:ℝ) ≤ 4 by norm_num)]
+    · linarith
+    · linarith
+  have hM_le : M ≤ 11 * logT := M_le_11_log ht_ge_2
+  have hb_le_CL : b ≤ C_ε * logT := by
+    simp only [b, C_ε]
+    rw [div_mul_eq_mul_div]
+    apply div_le_div_of_nonneg_right _ (le_of_lt hgap_pos)
+    nlinarith
+  -- Apply tc_rpow_bound: 6^(1-θ)·b^θ ≤ 6·C_ε·logT^α
+  have h_tc_bound : 6 ^ (1 - θ) * b ^ θ ≤ 6 * C_ε * logT ^ α :=
+    tc_rpow_bound (by norm_num : (1:ℝ) ≤ 6) hC_ge_1 hlogT_ge_1
+      hb_nonneg hb_le_CL hθ_nonneg hθ_le_α hα_lt_1.le
+  -- Chain: ‖G z*‖ ≤ 6^(1-θ)·b^θ ≤ K·logT^α
+  have hG_bound : ‖G z_star‖ ≤ K * logT ^ α := by
+    calc ‖G z_star‖ ≤ 6 ^ (1 - θ) * b ^ θ := h_tc
+      _ ≤ 6 * C_ε * logT ^ α := h_tc_bound
+      _ = K * logT ^ α := by simp only [K, C_ε, logT]
+  -- Final chain: (1/4)·exp(-K·logT^α) ≤ ‖ζ(s₀)‖·exp(Re(G z*))
+  have hexp_ge : Real.exp (-(K * logT ^ α)) ≤ Real.exp ((G z_star).re) := by
+    apply Real.exp_le_exp.mpr; linarith
+  calc (1:ℝ)/4 * Real.exp (-(K * logT ^ α))
+      ≤ ‖riemannZeta s₀‖ * Real.exp (-(K * logT ^ α)) :=
+        mul_le_mul_of_nonneg_right hcenter (le_of_lt (Real.exp_pos _))
+    _ ≤ ‖riemannZeta s₀‖ * Real.exp ((G z_star).re) :=
+        mul_le_mul_of_nonneg_left hexp_ge (by positivity)
 
 -- ═══════════════════════════════════════════
 -- §5. The Full Littlewood Maneuver Assembly
