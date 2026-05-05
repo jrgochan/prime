@@ -522,6 +522,8 @@ fn main() {
         let grad_headers = &["a", "b", "n_two_tile",
             "beta_bij", "s_perm", "overshoot_id",
             "gauss_lgA_err", "gauss_lgB_err", "gauss_dA_err", "gauss_dB_err",
+            "telescope_lg_err", "telescope_psi_err",
+            "beta_duality_pw", "beta_duality_sum_err",
             "sum_pcl", "delta_target", "identity_err", "certified"];
         let grad_rows: Vec<Vec<String>> = grad_results.iter().map(|r| vec![
             r.a.to_string(), r.b.to_string(), r.n_two_tile.to_string(),
@@ -532,6 +534,10 @@ fn main() {
             format!("{:.6e}", r.gauss_loggamma_b_err),
             format!("{:.6e}", r.gauss_digamma_a_err),
             format!("{:.6e}", r.gauss_digamma_b_err),
+            format!("{:.6e}", r.telescope_loggamma_err),
+            format!("{:.6e}", r.telescope_digamma_err),
+            r.beta_duality_pointwise.to_string(),
+            format!("{:.6e}", r.beta_duality_sum_err),
             format!("{:.15e}", r.sum_pcl),
             format!("{:.15e}", r.delta_target),
             format!("{:.6e}", r.identity_err),

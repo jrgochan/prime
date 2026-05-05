@@ -179,7 +179,147 @@ fn gauss_digamma_direct(q: usize) -> Float {
 }
 
 // ────────────────────────────────────────────────
-// §4. Full certification result
+// §4. STAIRCASE TELESCOPE (Gemini Key 1)
+//
+// Σ_{TT} f(m₀) = (a/b)·Σ_{m∈{0..b-1}} f(m)
+//              + Σ_{r=1}^{b-1} {ar/b}·(f(r) - f(r-1))
+//              - f(b-1)
+// ────────────────────────────────────────────────
+
+/// Compute LHS of staircase telescope: Σ_{m₀∈TT} f(m₀)
+fn staircase_lhs(a: usize, b: usize, f: &dyn Fn(usize) -> Float) -> Float {
+    let mut sum = Float::with_val(PREC, 0);
+    for m0 in 1..b {
+        if is_two_tile(a, b, m0) {
+            sum += f(m0);
+        }
+    }
+    sum
+}
+
+/// Compute RHS of staircase telescope: (a/b)Σf(m) + Σ{ar/b}(f(r)-f(r-1)) - f(b-1)
+fn staircase_rhs(a: usize, b: usize, f: &dyn Fn(usize) -> Float) -> Float {
+    let af = fu(a);
+    let bf = fu(b);
+
+    // Full sum: Σ_{m=0}^{b-1} f(m)
+    let mut full_sum = Float::with_val(PREC, 0);
+    for m in 0..b {
+        full_sum += f(m);
+    }
+
+    // Abel sum: Σ_{r=1}^{b-1} {ar/b}·(f(r) - f(r-1))
+    let mut abel_sum = Float::with_val(PREC, 0);
+    for r in 1..b {
+        let frac_val = {
+            let x = Float::with_val(PREC, fu(a * r) / &bf);
+            let fl = Float::with_val(PREC, x.clone().floor());
+            Float::with_val(PREC, &x - &fl)
+        };
+        let diff = Float::with_val(PREC, f(r) - f(r - 1));
+        abel_sum += Float::with_val(PREC, &frac_val * &diff);
+    }
+
+    // RHS = (a/b)·full_sum + abel_sum - f(b-1)
+    Float::with_val(PREC,
+        Float::with_val(PREC,
+            Float::with_val(PREC, &af / &bf) * &full_sum + &abel_sum
+        ) - f(b - 1)
+    )
+}
+
+/// Certify staircase telescope for logΓ((m+1)/b) and ψ((m+1)/b)
+fn certify_staircase(a: usize, b: usize) -> (f64, f64) {
+    let bf = fu(b);
+
+    // f₁(m) = logΓ((m+1)/b)
+    let f_lg = |m: usize| -> Float {
+        let arg = Float::with_val(PREC, fu(m + 1) / &bf);
+        log_gamma(&arg)
+    };
+    let lg_lhs = staircase_lhs(a, b, &f_lg);
+    let lg_rhs = staircase_rhs(a, b, &f_lg);
+    let lg_err = Float::with_val(PREC, &lg_lhs - &lg_rhs).abs();
+
+    // f₂(m) = ψ((m+1)/b)
+    let f_psi = |m: usize| -> Float {
+        let arg = Float::with_val(PREC, fu(m + 1) / &bf);
+        digamma_f(&arg)
+    };
+    let psi_lhs = staircase_lhs(a, b, &f_psi);
+    let psi_rhs = staircase_rhs(a, b, &f_psi);
+    let psi_err = Float::with_val(PREC, &psi_lhs - &psi_rhs).abs();
+
+    (lg_err.to_f64(), psi_err.to_f64())
+}
+
+// ────────────────────────────────────────────────
+// §5. BETA MODULO DUALITY (Gemini Key 2)
+//
+// For m₀∈TT with k = tileIndex(a,b,m₀):
+//   (s-a)/(a²b) = -(1/(ab))·{b(k+1)/a}
+//
+// After Beta Bijection reindexing (k → r = k+1):
+//   Σ_{TT} coeff·ψ(β) = -(1/(ab))·Σ_{r=1}^{a-1} {br/a}·ψ(r/a)
+// ────────────────────────────────────────────────
+
+/// Certify beta modulo duality: (s-a)/(a²b) = -(1/(ab))·{b(k+1)/a} for each m₀
+fn certify_beta_duality(a: usize, b: usize) -> (bool, f64) {
+    let af = fu(a);
+    let bf = fu(b);
+    let a2b = Float::with_val(PREC, Float::with_val(PREC, &af * &af) * &bf);
+    let ab = Float::with_val(PREC, &af * &bf);
+
+    let tt_classes: Vec<usize> = (1..b).filter(|&m0| is_two_tile(a, b, m0)).collect();
+
+    // LHS: Σ_{TT} ((s-a)/(a²b))·ψ(β)
+    let mut lhs = Float::with_val(PREC, 0);
+    for &m0 in &tt_classes {
+        let n0 = tile_index(a, b, m0);
+        let s = overshoot(a, b, m0);
+        let sf = fu(s);
+        let coeff = Float::with_val(PREC, Float::with_val(PREC, &sf - &af) / &a2b);
+        let beta = Float::with_val(PREC, fu(n0 + 1) / &af);
+        let psi_val = digamma_f(&beta);
+        lhs += Float::with_val(PREC, &coeff * &psi_val);
+    }
+
+    // RHS: -(1/(ab))·Σ_{r=1}^{a-1} {br/a}·ψ(r/a)
+    let mut rhs_sum = Float::with_val(PREC, 0);
+    for r in 1..a {
+        let frac_val = {
+            let x = Float::with_val(PREC, fu(b * r) / &af);
+            let fl = Float::with_val(PREC, x.clone().floor());
+            Float::with_val(PREC, &x - &fl)
+        };
+        let psi_val = digamma_f(&Float::with_val(PREC, fu(r) / &af));
+        rhs_sum += Float::with_val(PREC, &frac_val * &psi_val);
+    }
+    let rhs = Float::with_val(PREC, -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &rhs_sum);
+
+    let err = Float::with_val(PREC, &lhs - &rhs).abs();
+
+    // Also verify per-element: (s-a)/(a²b) = -(1/(ab))·{b(k+1)/a}
+    let pointwise_ok = tt_classes.iter().all(|&m0| {
+        let n0 = tile_index(a, b, m0);
+        let s = overshoot(a, b, m0);
+        let sf = fu(s);
+        let coeff_lhs = Float::with_val(PREC, Float::with_val(PREC, &sf - &af) / &a2b);
+        let frac_val = {
+            let x = Float::with_val(PREC, fu(b * (n0 + 1)) / &af);
+            let fl = Float::with_val(PREC, x.clone().floor());
+            Float::with_val(PREC, &x - &fl)
+        };
+        let coeff_rhs = Float::with_val(PREC, -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &frac_val);
+        let diff = Float::with_val(PREC, &coeff_lhs - &coeff_rhs).abs();
+        diff.to_f64() < 1e-200
+    });
+
+    (pointwise_ok, err.to_f64())
+}
+
+// ────────────────────────────────────────────────
+// §6. Full certification result
 // ────────────────────────────────────────────────
 
 #[derive(Debug, Clone)]
@@ -191,19 +331,27 @@ pub struct GraduationResult {
     // Structural
     pub beta_bijection: bool,
     pub s_permutation: bool,
-    pub overshoot_identity: bool,  // s-a = (am₀%b) - b
+    pub overshoot_identity: bool,
 
     // Gauss multiplication
-    pub gauss_loggamma_a_err: f64,  // |direct - closed|
+    pub gauss_loggamma_a_err: f64,
     pub gauss_loggamma_b_err: f64,
     pub gauss_digamma_a_err: f64,
     pub gauss_digamma_b_err: f64,
+
+    // Staircase Telescope (Gemini Key 1)
+    pub telescope_loggamma_err: f64,
+    pub telescope_digamma_err: f64,
+
+    // Beta Modulo Duality (Gemini Key 2)
+    pub beta_duality_pointwise: bool,
+    pub beta_duality_sum_err: f64,
 
     // The identity
     pub sum_pcl: f64,
     pub delta_target: f64,
     pub identity_err: f64,
-    
+
     // Pass/fail
     pub certified: bool,
 }
@@ -213,19 +361,17 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
     let n_tt = tt_classes.len();
 
     // ═══ STRUCTURAL CHECKS ═══
-    
+
     // Beta Bijection: tileIndex maps twoTileSet → {0,...,a-2}
     let mut beta_vals: Vec<usize> = tt_classes.iter()
         .map(|&m0| tile_index(a, b, m0)).collect();
     beta_vals.sort();
     let beta_bijection = beta_vals == (0..a-1).collect::<Vec<_>>() && n_tt == a - 1;
 
-    // Overshoot permutation: s values form {1,...,a-1} ∪ {0} but
-    // actually for two-tile classes with boundary excluded: s ∈ {1,...,a-1}
+    // Overshoot permutation: s values form {1,...,a-1}
     let mut s_vals: Vec<usize> = tt_classes.iter()
         .map(|&m0| overshoot(a, b, m0)).collect();
     s_vals.sort();
-    // The s values should be {1,...,a-1} (since boundary m0=b-1 is excluded, s=0 is not present)
     let s_permutation = s_vals == (1..a).collect::<Vec<_>>();
 
     // Overshoot identity: s - a = (am₀ % b) - b for each m₀
@@ -236,7 +382,7 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
     });
 
     // ═══ GAUSS FORMULA CHECKS ═══
-    
+
     let glg_a_direct = gauss_log_gamma_direct(a);
     let glg_a_closed = gauss_log_gamma_closed(a);
     let glg_a_err = Float::with_val(PREC, &glg_a_direct - &glg_a_closed).abs();
@@ -253,8 +399,14 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
     let gd_b_closed = gauss_digamma_closed(b);
     let gd_b_err = Float::with_val(PREC, &gd_b_direct - &gd_b_closed).abs();
 
+    // ═══ STAIRCASE TELESCOPE (Gemini Key 1) ═══
+    let (tel_lg_err, tel_psi_err) = certify_staircase(a, b);
+
+    // ═══ BETA MODULO DUALITY (Gemini Key 2) ═══
+    let (beta_pw, beta_sum_err) = certify_beta_duality(a, b);
+
     // ═══ THE IDENTITY ═══
-    
+
     let mut sum_pcl = Float::with_val(PREC, 0);
     for &m0 in &tt_classes {
         sum_pcl += per_class_limit(a, b, m0);
@@ -268,6 +420,10 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
         && glg_b_err.to_f64() < 1e-100
         && gd_a_err.to_f64() < 1e-100
         && gd_b_err.to_f64() < 1e-100
+        && tel_lg_err < 1e-100
+        && tel_psi_err < 1e-100
+        && beta_pw
+        && beta_sum_err < 1e-100
         && id_err.to_f64() < 1e-100;
 
     GraduationResult {
@@ -277,6 +433,10 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
         gauss_loggamma_b_err: glg_b_err.to_f64(),
         gauss_digamma_a_err: gd_a_err.to_f64(),
         gauss_digamma_b_err: gd_b_err.to_f64(),
+        telescope_loggamma_err: tel_lg_err,
+        telescope_digamma_err: tel_psi_err,
+        beta_duality_pointwise: beta_pw,
+        beta_duality_sum_err: beta_sum_err,
         sum_pcl: sum_pcl.to_f64(),
         delta_target: dt.to_f64(),
         identity_err: id_err.to_f64(),
@@ -320,23 +480,57 @@ pub fn print_certification(results: &[GraduationResult]) {
     println!();
     println!("  {}§2. GAUSS FORMULA VERIFICATION{}", fmt::BOLD, fmt::RESET);
     println!();
-    
+
     let max_glg = results.iter()
         .map(|r| r.gauss_loggamma_a_err.max(r.gauss_loggamma_b_err))
         .fold(0.0_f64, f64::max);
     let max_gd = results.iter()
         .map(|r| r.gauss_digamma_a_err.max(r.gauss_digamma_b_err))
         .fold(0.0_f64, f64::max);
-    
+
     println!("  Max |logΓ direct - closed| : {:.4e}", max_glg);
     println!("  Max |ψ direct - closed|    : {:.4e}", max_gd);
     if max_glg < 1e-100 && max_gd < 1e-100 {
         println!("  {} Gauss multiplication + digamma: EXACT", fmt::check(true));
     }
 
-    // §3. The identity
+    // §3. Staircase Telescope (Gemini Key 1)
     println!();
-    println!("  {}§3. THE GRADUATION IDENTITY{}", fmt::BOLD, fmt::RESET);
+    println!("  {}§3. STAIRCASE TELESCOPE (Gemini Key 1){}", fmt::BOLD, fmt::RESET);
+    println!("  Σ_{{TT}} f(m₀) = (a/b)·Σf(m) + Σ{{ar/b}}·(f(r)-f(r-1)) - f(b-1)");
+    println!();
+
+    let max_tel_lg = results.iter().map(|r| r.telescope_loggamma_err).fold(0.0_f64, f64::max);
+    let max_tel_psi = results.iter().map(|r| r.telescope_digamma_err).fold(0.0_f64, f64::max);
+
+    println!("  Max |telescope logΓ error| : {:.4e}", max_tel_lg);
+    println!("  Max |telescope ψ error|    : {:.4e}", max_tel_psi);
+    if max_tel_lg < 1e-100 && max_tel_psi < 1e-100 {
+        println!("  {} Staircase telescope: CERTIFIED ★", fmt::check(true));
+    } else {
+        println!("  {} Staircase telescope: FAILED", fmt::check(false));
+    }
+
+    // §4. Beta Modulo Duality (Gemini Key 2)
+    println!();
+    println!("  {}§4. BETA MODULO DUALITY (Gemini Key 2){}", fmt::BOLD, fmt::RESET);
+    println!("  (s-a)/(a²b) = -(1/(ab))·{{b(k+1)/a}}");
+    println!();
+
+    let all_beta_pw = results.iter().all(|r| r.beta_duality_pointwise);
+    let max_beta_sum = results.iter().map(|r| r.beta_duality_sum_err).fold(0.0_f64, f64::max);
+
+    println!("  Pointwise coefficient match : {}", if all_beta_pw { fmt::check(true) } else { fmt::check(false) });
+    println!("  Max |sum LHS - sum RHS|     : {:.4e}", max_beta_sum);
+    if all_beta_pw && max_beta_sum < 1e-100 {
+        println!("  {} Beta modulo duality: CERTIFIED ★", fmt::check(true));
+    } else {
+        println!("  {} Beta modulo duality: FAILED", fmt::check(false));
+    }
+
+    // §5. The graduation identity
+    println!();
+    println!("  {}§5. THE GRADUATION IDENTITY{}", fmt::BOLD, fmt::RESET);
     println!("  ∑ perClassLimit(a,b,m₀) = vasyuninGramFormula - strip - stir/b - ft/a");
     println!();
     println!("  {:>5} {:>5}  {:>22}  {:>22}  {:>14}",
@@ -359,7 +553,7 @@ pub fn print_certification(results: &[GraduationResult]) {
     println!("  Max |error|: {:.4e}", max_err);
     println!();
     if all_cert {
-        println!("  ★ {} ALL {} PAIRS CERTIFIED — gramIntegral_eq_formula_ge2 GRADUATION READY ★",
+        println!("  ★ {} ALL {} PAIRS CERTIFIED — SKELETON KEYS + GRADUATION READY ★",
             fmt::check(true), results.len());
     } else {
         println!("  {} SOME PAIRS FAILED", fmt::check(false));
