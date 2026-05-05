@@ -1003,7 +1003,49 @@ lemma beta_modulo_duality (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
   --
   -- CERTIFIED: 30.4M coprime pairs, max |err| = 6.05e-17.
   -- ═══════════════════════════════════════════════════════
-  sorry
+  -- Step 1: Apply overshoot_coeff_eq_neg_fract pointwise to transform each term
+  have h_pw : ∀ m₀ ∈ twoTileSet a b,
+    ((((a * (m₀ + 1) - b * (PartialSumConvergence.tileIndex a b m₀ + 1)):ℕ):ℝ) - (a:ℝ)) /
+      ((a:ℝ)*(a:ℝ)*(b:ℝ)) *
+    logDeriv Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ)) =
+    -(1 / ((a:ℝ) * (b:ℝ))) *
+    (Int.fract ((b:ℝ) * ((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ)) *
+      logDeriv Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ))) := by
+    intro m₀ hm₀
+    have h_oc := overshoot_coeff_eq_neg_fract a b m₀ ha hb hab hm₀
+    simp only at h_oc
+    rw [h_oc]; ring
+  rw [Finset.sum_congr rfl h_pw]
+  -- Step 2: Factor out -(1/(ab))
+  rw [← Finset.mul_sum]
+  congr 1
+  -- Step 3: Reindex via Beta Bijection
+  -- Σ_{TT} {b(k+1)/a}·ψ((k+1)/a) = Σ_{range(a-1)} {b(k+1)/a}·ψ((k+1)/a)
+  rw [sum_twoTileSet_reindex a b ha hb hab hcop
+    (fun k => Int.fract ((b:ℝ) * ((k:ℝ) + 1) / (a:ℝ)) *
+      logDeriv Real.Gamma (((k:ℝ) + 1) / (a:ℝ)))]
+  -- Step 4: Index shift range(a-1) → Icc 1 (a-1) via k ↦ k+1
+  -- Σ_{k ∈ range(a-1)} g(k) where g(k) = {b(k+1)/a}·ψ((k+1)/a)
+  -- = Σ_{r ∈ Icc 1 (a-1)} {br/a}·ψ(r/a) via r = k+1
+  apply Finset.sum_nbij (fun k => k + 1)
+  · -- maps range(a-1) → Icc 1 (a-1)
+    intro k hk
+    simp only [Finset.mem_range] at hk
+    simp only [Finset.mem_Icc]
+    constructor <;> omega
+  · -- injective on range(a-1)
+    intro k₁ hk₁ k₂ hk₂ h
+    exact Nat.succ_injective h
+  · -- surjective onto Icc 1 (a-1)
+    intro r hr
+    rw [Finset.mem_coe, Finset.mem_Icc] at hr
+    obtain ⟨h1r, h2r⟩ := hr
+    refine ⟨r - 1, ?_, ?_⟩
+    · rw [Finset.mem_coe]; exact Finset.mem_range.mpr (by omega)
+    · show r - 1 + 1 = r; omega
+  · -- pointwise equal: g(k) = h(k+1) (cast manipulation)
+    intro k hk
+    simp only [Nat.cast_add, Nat.cast_one]
 
 -- ══════════════════════════════════════════════════════════════════
 -- §D₄. THE ALGEBRAIC ASSEMBLY
