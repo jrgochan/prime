@@ -1267,42 +1267,58 @@ private lemma sum_perClass_eq_deltaTarget_algebraic (a b : ℕ) (ha : 2 ≤ a) (
     (1 / (b:ℝ)) * (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1) -
     (1 / (a:ℝ)) * GeneralFractSeriesEval.fractTarget_general a b := by
   -- ═══════════════════════════════════════════════════
-  -- DIRECT ALGEBRAIC PROOF (no four_way_eq_formula dependency)
-  --
-  -- The perClassLimit sum decomposes into 4 pieces via linearity:
-  --   LHS = P₁ + P₂ + P₃ + P₄
-  --
-  -- P₁ = -(1/a)·Σ_{TT} logΓ(β) — evaluated by Gauss multiplication (PROVED)
-  -- P₂ = +(1/a)·Σ_{TT} logΓ(α) — evaluated by staircase telescope + Gauss
-  -- P₃ = overshoot ψ-β sum     — evaluated by Beta modulo duality
-  -- P₄ = -(1/(ab))·Σ_{TT} ψ(α) — evaluated by staircase telescope + digamma
-  --
-  -- After evaluation, all pieces combine to match deltaTarget.
+  -- Step 1: Decompose Σ perClassLimit into P₁ + P₂ + P₃ + P₄
   -- ═══════════════════════════════════════════════════
-  -- Apply staircase telescope to P₂ (logΓ α-sum)
+  -- Step 1a: Rewrite each perClassLimit as sum of four terms
+  have h_decomp : ∀ m₀ ∈ twoTileSet a b,
+    perClassLimit a b m₀ =
+    (1/(a:ℝ)) * Real.log (Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ))) +
+    (-(1/(a:ℝ)) * Real.log (Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ)))) +
+    (-(((((a * (m₀ + 1) - b * (PartialSumConvergence.tileIndex a b m₀ + 1)):ℕ):ℝ) - (a:ℝ)) /
+        ((a:ℝ)*(a:ℝ)*(b:ℝ))) *
+      logDeriv Real.Gamma (((PartialSumConvergence.tileIndex a b m₀:ℝ) + 1) / (a:ℝ))) +
+    (-(1/((a:ℝ)*(b:ℝ))) *
+      logDeriv Real.Gamma (((m₀:ℝ) + 1) / (b:ℝ))) := by
+    intro m₀ _; unfold perClassLimit; ring
+  rw [Finset.sum_congr rfl h_decomp]
+  -- Step 1b: Split into four separate sums
+  simp_rw [Finset.sum_add_distrib]
+  -- ═══════════════════════════════════════════════════
+  -- Step 2: Load all evaluation hypotheses
+  -- ═══════════════════════════════════════════════════
+  -- P₂: α logΓ via staircase telescope
   have h_tel_logΓ := staircase_telescope a b ha hb hab hcop
     (fun m => Real.log (Real.Gamma (((m:ℝ) + 1) / (b:ℝ))))
-  -- Apply staircase telescope to P₄ (ψ α-sum)
+  -- P₄: α ψ via staircase telescope
   have h_tel_ψ := staircase_telescope a b ha hb hab hcop
     (fun m => logDeriv Real.Gamma (((m:ℝ) + 1) / (b:ℝ)))
-  -- Apply Beta modulo duality to P₃
+  -- P₃: β ψ with overshoot via beta modulo duality
   have h_beta := beta_modulo_duality a b ha hb hab hcop
-  -- Apply Gauss multiplication for P₁ (β-sum of logΓ)
+  -- P₁: β logΓ via beta bijection + Gauss multiplication
   have h_P1 := sum_logGamma_beta_eval a ha
-  -- Apply Beta Bijection to reindex P₁'s β-sum
   have h_bij := sum_twoTileSet_reindex a b ha hb hab hcop
     (fun k => Real.log (Real.Gamma (((k:ℝ) + 1) / (a:ℝ))))
-  -- Apply Gauss multiplication for full logΓ sum over b
+  -- Full logΓ sum over b (for staircase output)
   have h_gauss_b := Cathedral.Analysis.GammaMultiplication.sum_log_gamma_eq_target b (by omega)
-  -- Apply digamma sum identity for full ψ sum over b
+  -- Full ψ sum over b (for staircase output)
   have h_digamma_b := Cathedral.Analysis.GammaMultiplication.digamma_sum_identity b (by omega)
-  -- Apply weighted digamma reflection for {ar/b}·ψ sums
+  -- Weighted digamma reflection (for Abel sum from staircase)
   have h_wdr := WeightedDigammaGeneral.weighted_digamma_reflection_solve_general a b hcop hb
-  -- Apply fract permutation sum
+  -- Fract permutation sum
   have h_fps := WeightedDigammaGeneral.fract_perm_sum a b hcop hb
-  -- The assembly combines all pieces. The transcendental terms (logΓ, ψ)
-  -- cancel, leaving cotangent sums V(a,b), V(b,a) and elementary constants
-  -- that match the vasyuninGramFormula.
+  -- ═══════════════════════════════════════════════════
+  -- Step 3: Algebraic assembly
+  -- ═══════════════════════════════════════════════════
+  -- After decomposition, each Pᵢ is evaluated:
+  -- P₂ = (1/a)·[(a/b)·GaussB + AbelLogΓ - logΓ(b/b)]
+  -- P₁ = -(1/a)·GaussA (after reindexing)
+  -- P₃ = -(1/(ab))·Σ {br/a}·ψ(r/a) (after beta duality)
+  -- P₄ = -(1/(ab))·[(a/b)·ΣψB + AbelΨ - ψ(b/b)]
+  --
+  -- The Gauss multiplication evaluates GaussA and GaussB.
+  -- The digamma identity evaluates ΣψB.
+  -- The weighted digamma reflection converts Abelψ to cotangent sums.
+  -- The algebraic combination of all these gives the target.
   sorry
 
 -- ──────────────────────────────────────────────
