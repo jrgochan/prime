@@ -39,16 +39,21 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
 -- §1. THE COVARIANCE AXIOM (replaces gram_form axiom)
 -- ═══════════════════════════════════════════════
 
-/-- **AXIOM**: Under Mertens x^{3/4}, the covariance vᵀCv ≤ C/logN.
+/-- **AXIOM (DEPRECATED — OFF CROWN PATH)**
 
-    PROVED in Covariance/CovarianceBound.lean via the independent
-    MillenniumWall chain. Cannot be wired here without adding
-    gram_form_upper_bound + pnt_mu_log_sq_div_k to the audit.
+    ⚠️ THE MILLENNIUM PARADOX (May 5, 2026):
+    This axiom is MATHEMATICALLY FALSE under Mertens x^{3/4} alone.
+    The spatial L² norm ∫(1-f_N)² diverges under real-variable bounds.
+    L² convergence is strictly a frequency-domain phenomenon requiring
+    Parseval's identity (Báez-Duarte 2003).
 
-    Keeping as axiom: 4-axiom count on crown path.
-    Wiring the proof: 5-axiom count (worse).
-    
-    The axiom is mathematically graduated — the proof exists. -/
+    This axiom is retained ONLY for the alternative Path B (Perron Crown)
+    chain in PerronCrown.lean. It is NOT on the Crown Path.
+
+    The Crown Path uses `baez_duarte_forward` (MainChain.lean) — the
+    honest, single-axiom Báez-Duarte anchor.
+
+    See: Cathedral/Archive/TheMertensWall/README.md -/
 axiom covariance_bound_from_mertens_34 :
     (∃ C : ℝ, C > 0 ∧ ∀ x : ℝ, x ≥ 2 →
       |((_root_.mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ ((3 : ℝ)/4)) →

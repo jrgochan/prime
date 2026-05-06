@@ -4,29 +4,41 @@ import Cathedral.NymanBeurling.BDMellin
 /-!
   Cathedral/Axioms.lean
 
-  ## The Cathedral's Axiom Registry (v17 — May 5, 2026)
+  ## The Cathedral's Axiom Registry (v20 — The One-Pillar Cathedral)
 
   Central hub for axiom documentation. This file contains NO axiom
   declarations — all axioms are declared in their respective modules.
 
-  ### CROWN PATH (v17 — Littlewood Maneuver Graduation)
+  ### CROWN PATH (v20 — May 5, 2026)
 
   `#print axioms nyman_beurling_equivalence` (compiler-verified May 5, 2026):
 
   | # | Name | Role | Status |
   |---|------|------|--------|
-  | 1 | `covariance_bound_from_mertens_34` | Abel summation bound | Perron path axiom |
-  | 2 | `pnt_mu_div_k` | PNT: Σ μ(k)/k → 0 | Perron path axiom |
-  | 3 | `pnt_mu_log_div_k` | PNT: Σ μ(k)ln(k)/k → -1 | Perron path axiom |
-  | 4 | `sorryAx` | (sorry in chain) | From critical_line_mellin_variance |
-  | 5 | `propext` | Lean kernel | |
-  | 6 | `Classical.choice` | Lean kernel | |
-  | 7 | `Quot.sound` | Lean kernel | |
+  | 1 | `baez_duarte_forward` | RH → L² approximation | **THE ONE PILLAR** |
+  | 2 | `propext` | Lean kernel | |
+  | 3 | `Classical.choice` | Lean kernel | |
+  | 4 | `Quot.sound` | Lean kernel | |
 
-  **Key result:** `rh_zeta_lower_bound_from_zero_counting` is NO LONGER
-  on the crown path. The Littlewood Maneuver (Three-Circles + Right
-  Half-Plane Trap) in LittlewoodManeuver.lean graduated it automatically
-  by providing the polynomial lower bound through LowerBound.lean.
+  **THE ONE-PILLAR CATHEDRAL**: The entire Nyman-Beurling-Báez-Duarte
+  equivalence rests on a single literature axiom — Báez-Duarte's 2003
+  forward direction theorem (IMRN no. 36, pp. 1989–2009).
+
+  The Converse (d²→0 ⟹ RH) is fully proved with zero axioms.
+
+  ### THE MILLENNIUM PARADOX (Exploration 26 Discovery)
+
+  The forward direction (RH ⟹ d²→0) CANNOT be proved from the Prime
+  Number Theorem + Abel summation alone. Under Mertens x^{3/4}, the
+  spatial L² norm ∫(1-f_N)² diverges (Gemini Actual, May 2026).
+
+  If such a proof existed, combining with the 0-axiom converse would
+  unconditionally prove the Riemann Hypothesis — a Millennium Prize.
+  The Lean 4 compiler acts as a topological shield preventing this.
+
+  The correct proof requires complex-analytic machinery (Parseval/Mellin
+  identity on the critical line s = 1/2 + it). This is encapsulated
+  honestly in `baez_duarte_forward`.
 
   ### ARCHITECTURE HISTORY
 
@@ -38,13 +50,13 @@ import Cathedral.NymanBeurling.BDMellin
   | v10 | Apr 25 | 4 | Gram Form graduation |
   | v11 | Apr 26 | 2 | Mellin Crown |
   | v15 | Apr 30 | 2 | Triple Path (selberg_delange graduated) |
-  | **v17** | **May 5** | **3+sorry** | **Littlewood Maneuver graduation** |
+  | v17 | May 5 | 3 | Littlewood Maneuver graduation |
+  | **v20** | **May 5** | **1** | **The One-Pillar Cathedral** |
 
-  v17: The Littlewood Maneuver (1,094 lines, 0 sorry, 0 axioms) proved
-  the sub-logarithmic zeta lower bound from first principles, removing
-  `rh_zeta_lower_bound_from_zero_counting` from the crown dependency chain.
-  The remaining `sorryAx` comes from `critical_line_mellin_variance`
-  (Hardy-Littlewood Mellin Variance), which is beyond Mathlib v4.29.
+  v20: The Millennium Paradox revealed that spatial Abel summation cannot
+  prove L² convergence. The false `covariance_bound_from_mertens_34` axiom
+  replaced by the honest `baez_duarte_forward` (2003 literature).
+  All three prior paths preserved as alternatives.
 
   ### GRADUATED AXIOMS (complete history)
 
@@ -60,36 +72,24 @@ import Cathedral.NymanBeurling.BDMellin
   | `pnt_mu_log_sq_div_k` | Apr 25 | Abel Bypass ❌ ELIMINATED | v9 |
   | `gram_form_upper_bound_34` | Apr 25 | Variance decomposition 🎓 | v10 |
   | `pnt_mu_log_div_k` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
-  | `covariance_bound_from_mertens_34` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
   | `partial_integral_tends_to_formula` | Apr 26 | Off crown (Mellin Crown bypass) | v11 |
   | `selberg_delange_decay` | Apr 30 | PATH C α=1 mean-field 🎓 | v15 |
-  | **`rh_zeta_lower_bound_from_zero_counting`** | **May 5** | **Littlewood Maneuver 🎓** | **v17** |
+  | `rh_zeta_lower_bound_from_zero_counting` | May 5 | Littlewood Maneuver 🎓 | v17 |
+  | **`covariance_bound_from_mertens_34`** | **May 5** | **Millennium Paradox — replaced by `baez_duarte_forward` 🎓** | **v20** |
 
-  ### THE HARDY-LITTLEWOOD WALL
+  ### ALTERNATIVE PATHS (still live)
 
-  The only remaining substantive axiom is `critical_line_mellin_variance`,
-  which manifests as `sorryAx` in the compiler output. It requires the
-  Hardy-Littlewood mean value theorem for ζ(1/2+it) — beyond Mathlib v4.29.
-  Numerically validated: C ≈ 0.38 for N ≤ 2000.
+  - PATH A (Mellin):          `nyman_beurling_equivalence_mellin`
+  - PATH B (Spatial/Perron):  `nyman_beurling_equivalence_spatial`
+  - PATH C (Renormalization): `nyman_beurling_equivalence_renormalization`
 
-  The 3 Perron axioms (`covariance_bound_from_mertens_34`, `pnt_mu_div_k`,
-  `pnt_mu_log_div_k`) are standard analytic number theory results that
-  could be graduated with additional Perron contour formalization work.
+  Each has its own axiom footprint. The Crown Path uses `baez_duarte_forward`.
 
   ### CONVERSE DIRECTION (0 custom axioms)
 
   `nyman_beurling_converse` is **PURE** — zero custom axioms.
   Proved via the Rank-1 Mellin Miracle in BDMellin.lean:
   - M[h_k](ρ) = 1/(k(ρ-1)) at ζ zeros — rank-1 tensor
-  - Cauchy-Schwarz: d²_N ≥ (2σ-1) · t²/(|ρ|⁴|ρ-1|²)
-
-  ### RECENT PROGRESS (May 2026)
-  - **Littlewood Maneuver**: Three-Circles + Right Half-Plane Trap (1,094 lines)
-    Graduated rh_zeta_lower_bound_from_zero_counting from the crown path.
-  - **LowerBound.lean**: Case A rewired to proven littlewood_maneuver
-  - **Renormalization/Defs.lean**: Fully certified (0 sorry)
-  - Deprecation cleanup: push_neg → push Not, NormedAddCommGroup, antitoneOn
-  - GPU Gram Scaling Oracle: Cross-N λ_min sweep on RTX 4090
 -/
 
 noncomputable section
