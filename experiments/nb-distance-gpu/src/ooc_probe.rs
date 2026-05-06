@@ -302,19 +302,30 @@ unsafe impl Send for MmapGram {}
 unsafe impl Sync for MmapGram {}
 
 // ═══════════════════════════════════════════════════════════════════
-// GPU-ACCELERATED MATRIX-VECTOR MULTIPLY
+// GPU-ACCELERATED MATRIX-VECTOR MULTIPLY (DOUBLE-BUFFERED)
 // ═══════════════════════════════════════════════════════════════════
 
-/// GPU state for chunk-based matrix-vector multiplication.
-/// Keeps the x vector resident on GPU across chunks.
+/// Double-buffered GPU matvec state.
+///
+/// Uses two CUDA streams with two device chunk buffers to overlap
+/// PCIe H2D transfer with GPU compute:
+///
+///   Stream 0: [upload chunk 0] [compute chunk 0] [upload chunk 2] ...
+///   Stream 1:                  [upload chunk 1]  [compute chunk 1] ...
+///
+/// For a 23 GB matrix with 1.7 GB chunks:
+///   Single-buffer: upload(1.7s) → compute(0.5s) → upload → compute = ~2.2s/chunk
+///   Double-buffer: upload overlaps compute = ~max(1.7, 0.5) = 1.7s/chunk (~30% faster)
+///
+/// For 108 GB (N=120k): ~60s/iter instead of ~90s/iter.
 struct GpuMatvecState {
     blas_handle: *mut std::ffi::c_void,
-    d_x: *mut f64,      // x vector (resident on GPU)
-    d_chunk: *mut f64,   // chunk buffer (reused)
-    d_y_chunk: *mut f64, // y chunk output (reused)
+    d_x: *mut f64,               // x vector (resident on GPU)
+    d_chunk: [*mut f64; 2],      // double chunk buffers on GPU
+    d_y_chunk: [*mut f64; 2],    // double y output buffers on GPU
+    streams: [gpu::ffi::CudaStream; 2],
     chunk_rows: usize,
     dim: usize,
-    chunk_alloc: usize,  // allocated chunk capacity in rows
 }
 
 impl GpuMatvecState {
@@ -330,33 +341,66 @@ impl GpuMatvecState {
             if s != 0 { return Err(format!("cublasCreate failed: {}", s)); }
 
             let mut d_x: *mut f64 = std::ptr::null_mut();
-            let mut d_chunk: *mut f64 = std::ptr::null_mut();
-            let mut d_y_chunk: *mut f64 = std::ptr::null_mut();
+            let mut d_chunk0: *mut f64 = std::ptr::null_mut();
+            let mut d_chunk1: *mut f64 = std::ptr::null_mut();
+            let mut d_y0: *mut f64 = std::ptr::null_mut();
+            let mut d_y1: *mut f64 = std::ptr::null_mut();
 
             let s1 = gpu::ffi::cudaMalloc(&mut d_x, vec_bytes);
-            let s2 = gpu::ffi::cudaMalloc(&mut d_chunk, chunk_bytes);
-            let s3 = gpu::ffi::cudaMalloc(&mut d_y_chunk, chunk_y_bytes);
-            if s1 != 0 || s2 != 0 || s3 != 0 {
-                return Err(format!("cudaMalloc failed: {},{},{}", s1, s2, s3));
+            let s2 = gpu::ffi::cudaMalloc(&mut d_chunk0, chunk_bytes);
+            let s3 = gpu::ffi::cudaMalloc(&mut d_chunk1, chunk_bytes);
+            let s4 = gpu::ffi::cudaMalloc(&mut d_y0, chunk_y_bytes);
+            let s5 = gpu::ffi::cudaMalloc(&mut d_y1, chunk_y_bytes);
+            if s1 != 0 || s2 != 0 || s3 != 0 || s4 != 0 || s5 != 0 {
+                return Err(format!("cudaMalloc failed: {},{},{},{},{}", s1, s2, s3, s4, s5));
             }
 
+            // Create two CUDA streams
+            let mut stream0: gpu::ffi::CudaStream = std::ptr::null_mut();
+            let mut stream1: gpu::ffi::CudaStream = std::ptr::null_mut();
+            let sc0 = gpu::ffi::cudaStreamCreate(&mut stream0);
+            let sc1 = gpu::ffi::cudaStreamCreate(&mut stream1);
+            if sc0 != 0 || sc1 != 0 {
+                return Err(format!("cudaStreamCreate failed: {},{}", sc0, sc1));
+            }
+
+            let vram_mb = (vec_bytes + 2 * chunk_bytes + 2 * chunk_y_bytes) / (1024 * 1024);
+            eprintln!("  ✓ Double-buffered GPU matvec: 2×{:.0} MB chunks, {} MB total VRAM",
+                chunk_bytes as f64 / 1e6, vram_mb);
+
             Ok(GpuMatvecState {
-                blas_handle, d_x, d_chunk, d_y_chunk,
-                chunk_rows, dim, chunk_alloc: chunk_rows,
+                blas_handle, d_x,
+                d_chunk: [d_chunk0, d_chunk1],
+                d_y_chunk: [d_y0, d_y1],
+                streams: [stream0, stream1],
+                chunk_rows, dim,
             })
         }
     }
 
-    /// Upload x vector to GPU (call once per CG iteration)
+    /// Upload x vector to GPU (call once per CG iteration, synchronous)
     fn upload_x(&self, x: &[f64]) {
         unsafe {
             gpu::ffi::cudaMemcpy(self.d_x, x.as_ptr(), x.len() * 8, 1); // H2D
         }
     }
 
-    /// Multiply a chunk of rows by x on GPU: y_chunk = chunk * x
-    /// chunk is rows×dim in row-major order.
-    fn matvec_chunk(&self, chunk: &[f64], rows: usize, y_out: &mut [f64]) {
+    /// Async upload chunk data to device buffer [buf_idx] on stream [buf_idx]
+    fn upload_chunk_async(&self, chunk: &[f64], rows: usize, buf_idx: usize) {
+        let bytes = rows * self.dim * 8;
+        unsafe {
+            gpu::ffi::cudaMemcpyAsync(
+                self.d_chunk[buf_idx],
+                chunk.as_ptr(),
+                bytes,
+                1, // cudaMemcpyHostToDevice
+                self.streams[buf_idx],
+            );
+        }
+    }
+
+    /// Compute dgemv on stream [buf_idx]: y = chunk * x
+    fn compute_chunk_async(&self, rows: usize, buf_idx: usize) {
         use std::ffi::c_int;
         let m = rows as c_int;
         let n = self.dim as c_int;
@@ -364,27 +408,36 @@ impl GpuMatvecState {
         let beta_val = 0.0f64;
 
         unsafe {
-            // Upload chunk (row-major = column-major transpose)
-            gpu::ffi::cudaMemcpy(self.d_chunk, chunk.as_ptr(), rows * self.dim * 8, 1);
+            // Set cuBLAS to use this stream
+            gpu::ffi::cublasSetStream_v2(self.blas_handle, self.streams[buf_idx]);
 
-            // cuBLAS dgemv: y = alpha * A * x + beta * y
-            // A is row-major (rows × dim), which cuBLAS sees as col-major (dim × rows)
-            // So we compute: y = A^T * x in cuBLAS terms, but actually we want A * x
-            // For row-major A: cublas sees it as A^T in col-major
-            // y = A_rowmajor * x  =>  cuBLAS: y = (A_colmajor)^T * x = CUBLAS_OP_T
             gpu::ffi::cublasDgemv_v2(
                 self.blas_handle,
-                1, // CUBLAS_OP_T (transpose, since row-major = col-major transposed)
-                n, m, // cuBLAS sees (dim × rows) in col-major
+                1, // CUBLAS_OP_T
+                n, m,
                 &alpha,
-                self.d_chunk, n, // leading dim = n (col-major layout)
+                self.d_chunk[buf_idx], n,
                 self.d_x, 1,
                 &beta_val,
-                self.d_y_chunk, 1,
+                self.d_y_chunk[buf_idx], 1,
             );
+        }
+    }
 
-            // Download result
-            gpu::ffi::cudaMemcpy(y_out.as_mut_ptr(), self.d_y_chunk, rows * 8, 2); // D2H
+    /// Download y result from device buffer [buf_idx] (synchronous — waits for stream)
+    fn download_y_sync(&self, rows: usize, buf_idx: usize, y_out: &mut [f64]) {
+        unsafe {
+            // Wait for this stream's compute to finish
+            gpu::ffi::cudaStreamSynchronize(self.streams[buf_idx]);
+            // Copy result back (D2H, synchronous)
+            gpu::ffi::cudaMemcpy(y_out.as_mut_ptr(), self.d_y_chunk[buf_idx] as *const f64, rows * 8, 2);
+        }
+    }
+
+    /// Synchronize a specific stream
+    fn sync_stream(&self, buf_idx: usize) {
+        unsafe {
+            gpu::ffi::cudaStreamSynchronize(self.streams[buf_idx]);
         }
     }
 }
@@ -393,15 +446,27 @@ impl Drop for GpuMatvecState {
     fn drop(&mut self) {
         unsafe {
             gpu::ffi::cudaFree(self.d_x);
-            gpu::ffi::cudaFree(self.d_chunk);
-            gpu::ffi::cudaFree(self.d_y_chunk);
+            gpu::ffi::cudaFree(self.d_chunk[0]);
+            gpu::ffi::cudaFree(self.d_chunk[1]);
+            gpu::ffi::cudaFree(self.d_y_chunk[0]);
+            gpu::ffi::cudaFree(self.d_y_chunk[1]);
+            gpu::ffi::cudaStreamDestroy(self.streams[0]);
+            gpu::ffi::cudaStreamDestroy(self.streams[1]);
             gpu::ffi::cublasDestroy_v2(self.blas_handle);
         }
     }
 }
 
-/// Compute y = G · x using mmap + GPU cuBLAS.
-/// The matrix data is memory-mapped; chunks are uploaded to GPU for dgemv.
+/// Compute y = G · x using mmap + double-buffered GPU cuBLAS.
+///
+/// Pipeline per CG iteration:
+///   1. Upload x to GPU (once, synchronous)
+///   2. For each chunk pair (i, i+1):
+///      - Stream A: async upload chunk[i] → dgemv
+///      - Stream B: async upload chunk[i+1] → (overlaps with A's dgemv)
+///      - Sync stream A → download y[i]
+///      - Swap streams
+///   3. madvise(MADV_WILLNEED) prefetches next chunk's mmap pages
 fn gpu_matvec(gram: &MmapGram, gpu: &GpuMatvecState, x: &[f64], y: &mut [f64]) {
     let dim = gram.dim;
     let chunk_rows = gpu.chunk_rows;
@@ -409,12 +474,60 @@ fn gpu_matvec(gram: &MmapGram, gpu: &GpuMatvecState, x: &[f64], y: &mut [f64]) {
     // Upload x to GPU once
     gpu.upload_x(x);
 
-    for start_row in (0..dim).step_by(chunk_rows) {
-        let rows = chunk_rows.min(dim - start_row);
-        let chunk = gram.row_chunk(start_row, rows);
+    let chunks: Vec<(usize, usize)> = (0..dim)
+        .step_by(chunk_rows)
+        .map(|start| {
+            let rows = chunk_rows.min(dim - start);
+            (start, rows)
+        })
+        .collect();
 
-        // GPU matvec for this chunk
-        gpu.matvec_chunk(chunk, rows, &mut y[start_row..start_row + rows]);
+    let n_chunks = chunks.len();
+    if n_chunks == 0 { return; }
+
+    // Prefetch first chunk
+    let (start0, rows0) = chunks[0];
+    let chunk0 = gram.row_chunk(start0, rows0);
+
+    // Kick off first upload on stream 0
+    gpu.upload_chunk_async(chunk0, rows0, 0);
+
+    for c in 0..n_chunks {
+        let buf = c % 2;
+        let (start, rows) = chunks[c];
+
+        // If there's a next chunk, prefetch its mmap pages and start async upload
+        if c + 1 < n_chunks {
+            let (next_start, next_rows) = chunks[c + 1];
+            let next_buf = (c + 1) % 2;
+
+            // madvise: tell kernel to pre-fault next chunk's pages
+            let next_ptr = gram.row_chunk(next_start, next_rows).as_ptr();
+            let next_bytes = next_rows * dim * 8;
+            unsafe {
+                libc::madvise(
+                    next_ptr as *mut libc::c_void,
+                    next_bytes,
+                    libc::MADV_WILLNEED,
+                );
+            }
+
+            // Wait for stream[buf] upload to finish, then start compute
+            gpu.sync_stream(buf);
+            gpu.compute_chunk_async(rows, buf);
+
+            // While GPU computes chunk[c] on stream[buf],
+            // start uploading chunk[c+1] on stream[next_buf]
+            let next_chunk = gram.row_chunk(next_start, next_rows);
+            gpu.upload_chunk_async(next_chunk, next_rows, next_buf);
+        } else {
+            // Last chunk — just wait and compute
+            gpu.sync_stream(buf);
+            gpu.compute_chunk_async(rows, buf);
+        }
+
+        // Download result for this chunk (waits for compute to finish)
+        gpu.download_y_sync(rows, buf, &mut y[start..start + rows]);
     }
 }
 

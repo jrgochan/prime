@@ -1016,22 +1016,53 @@ pub fn gpu_free_resident_gram() {
 // ═══════════════════════════════════════════════════════════════════
 
 /// Public access to raw CUDA/cuBLAS FFI for use by ooc_probe's GPU matvec.
+///
+/// Includes stream APIs for double-buffered async pipeline:
+///   Stream A: upload chunk[N]   → compute chunk[N]
+///   Stream B: upload chunk[N+1] → (overlaps with A's compute)
 pub mod ffi {
     use std::ffi::c_int;
+
+    /// Opaque CUDA stream handle.
+    pub type CudaStream = *mut std::ffi::c_void;
 
     #[link(name = "cudart")]
     extern "C" {
         pub fn cudaMalloc(devPtr: *mut *mut f64, size: usize) -> c_int;
         pub fn cudaFree(devPtr: *mut f64) -> c_int;
         pub fn cudaMemcpy(dst: *mut f64, src: *const f64, count: usize, kind: c_int) -> c_int;
+
+        // ── Stream management ──
+        pub fn cudaStreamCreate(stream: *mut CudaStream) -> c_int;
+        pub fn cudaStreamDestroy(stream: CudaStream) -> c_int;
+        pub fn cudaStreamSynchronize(stream: CudaStream) -> c_int;
+
+        // ── Async memory copy (requires pinned host memory or pageable with stream) ──
+        pub fn cudaMemcpyAsync(
+            dst: *mut f64, src: *const f64,
+            count: usize, kind: c_int,
+            stream: CudaStream,
+        ) -> c_int;
+
+        // ── Page-locked host memory for true async overlap ──
+        pub fn cudaMallocHost(ptr: *mut *mut f64, size: usize) -> c_int;
+        pub fn cudaFreeHost(ptr: *mut f64) -> c_int;
+
+        // ── Device synchronization ──
+        pub fn cudaDeviceSynchronize() -> c_int;
     }
 
-    type CublasHandle = *mut std::ffi::c_void;
+    pub type CublasHandle = *mut std::ffi::c_void;
 
     #[link(name = "cublas")]
     extern "C" {
         pub fn cublasCreate_v2(handle: *mut CublasHandle) -> c_int;
         pub fn cublasDestroy_v2(handle: CublasHandle) -> c_int;
+
+        /// Set the CUDA stream used by subsequent cuBLAS calls.
+        /// This is the key to overlapping compute with transfer.
+        pub fn cublasSetStream_v2(handle: CublasHandle, stream: CudaStream) -> c_int;
+
         pub fn cublasDgemv_v2(
             handle: CublasHandle,
             trans: c_int,
