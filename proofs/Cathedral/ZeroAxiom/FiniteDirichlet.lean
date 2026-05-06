@@ -132,58 +132,49 @@ lemma residual_sq_eq (N : ℕ) (v : Fin (N - 1) → ℝ) :
   rfl
 
 -- ════════════════════════════════════════════════
--- §3. THE MELLIN L² DECAY (THE HEART)
+-- §3. THE MATHEMATICAL WALL
 -- ════════════════════════════════════════════════
 
-/-- **KEY LEMMA**: Under RH, the critical-line Mellin L² norm of the
-    BD residual with Fejér-Möbius weights decays to 0.
+/-!
+  ## Why the Forward Direction Cannot Be Closed Constructively
 
-    The Mellin transform of the residual evaluates to:
-      M[r_N](s) = 1/s + (ζ(s)/s) · D_N(s) - C_N(s)/(s-1)
-    where D_N(s) = Σ_{k≤N-1} μ(k)·taper(k)·k^{-s} and
-    C_N(s) = Σ_{k≤N-1} μ(k)·taper(k)/k.
+  The forward direction (`baez_duarte_forward`: RH → d²_N → 0) requires
+  showing that SOME weights v make the L² residual arbitrarily small.
 
-    Under RH, D_N(s) → -1/ζ(s) uniformly on compact subsets of σ > 1/2,
-    making (ζ(s)/s)·D_N(s) → -1/s, and C_N → 0 (by PNT).
-    Thus M[r_N](s) → 0.
+  ### Why Explicit Möbius Weights Fail
 
-    The L² decay follows from:
-    1. Pointwise convergence of |M[r_N](1/2+it)|² → 0
-    2. Dominated convergence via Littlewood Maneuver polynomial growth bounds
-    3. Abel summation with mertens_bound_eps for truncation error control -/
-theorem mellin_l2_decay (hRH : RiemannHypothesis) :
-    ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀,
-      (1 / (2 * Real.pi)) *
-      ∫ t : ℝ, ‖mellinBDResidual N
-        (moebiusWeightVec N) ((1/2 : ℂ) + t * Complex.I)‖ ^ 2 < ε := by
-  sorry
+  The Fejér-Möbius weights `v_k = -μ(k)·(1 - log k / log N)` give rise
+  to the Dirichlet polynomial `P_N(s)` that approximates `1/ζ(s)`.
 
--- ════════════════════════════════════════════════
--- §4. THE FORWARD DIRECTION
--- ════════════════════════════════════════════════
+  On the critical line σ = 1/2, Abel summation with M(x) = O(x^{1/2+ε}) gives:
+    ∫_N^∞ x^{1/2+ε} · x^{-3/2} dx = ∫_N^∞ x^{ε-1} dx → ∞
 
-/-- **THEOREM** (Replaces `baez_duarte_forward`):
-    Under the Riemann Hypothesis, the BD basis functions
-    approximate 1 in L²(0,1) to arbitrary precision.
+  The truncation error does not decay — it GROWS. The Dirichlet series for
+  1/ζ(s) has abscissa of convergence exactly 1/2 under RH, so it does not
+  converge (even conditionally) on the critical line.
 
-    Proof chain:
-    1. Choose Fejér-Möbius weights: v = moebiusWeightVec N
-    2. Parseval bridge: ∫₀¹|r_N|² = (1/2π)∫|M[r_N](1/2+it)|² dt
-    3. mellin_l2_decay: the RHS → 0 under RH -/
-theorem baez_duarte_forward_proved :
-    RiemannHypothesis →
-    ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε := by
-  intro hRH ε hε
-  -- Step 1: Get N₀ from the Mellin L² decay
-  obtain ⟨N₀, hN₀⟩ := mellin_l2_decay hRH ε hε
-  -- Step 2: For each N ≥ N₀, produce the witness
-  refine ⟨N₀, fun N hN => ⟨moebiusWeightVec N, ?_⟩⟩
-  -- Step 3: Wire through Parseval
-  rw [residual_sq_eq]
-  rw [Cathedral.White.parseval_bridge_white]
-  -- Step 4: Apply the Mellin decay
-  exact hN₀ N hN
+  ### What Would Be Required
+
+  The forward direction requires the abstract density of translations
+  {θ/x} in the Hardy space H²(ℂ₊), via Beurling's theorem. The optimal
+  weights are solutions to the Vasyunin Gram matrix system — they exist
+  by the Riesz Representation Theorem but cannot be expressed as finite
+  Möbius sums.
+
+  Formalizing this would require ~20,000 lines of:
+  - Complex H² Hardy space theory
+  - L² boundary values of analytic functions
+  - Beurling's theorem on invariant subspaces
+
+  ### Cathedral Architecture Decision
+
+  `baez_duarte_forward` correctly remains as a literature axiom, citing
+  Báez-Duarte (2003). The Cathedral reduces the Riemann Hypothesis to
+  this single, well-established result from analytic number theory.
+
+  The infrastructure below (weight definitions, algebraic identities,
+  Parseval bridge) documents the exact boundary and provides the
+  foundation for future H² formalization.
+-/
 
 end Cathedral.ZeroAxiom
-
