@@ -150,8 +150,11 @@ extern "C" {
 
 // ═══════════════════════════════════════════════════════════════════
 // CUSTOM CUDA KERNELS (DD, DS, QS Cholesky + Gram build)
+// Auto-compiled by build.rs from src/gpu/cuda/*.cu
+// The cfg flag `has_cuda_kernels` is set by build.rs when nvcc succeeds.
 // ═══════════════════════════════════════════════════════════════════
 
+#[cfg(has_cuda_kernels)]
 #[link(name = "ddcholesky")]
 extern "C" {
     pub fn gpu_dd_cholesky_d2(
@@ -163,6 +166,7 @@ extern "C" {
     ) -> f64;
 }
 
+#[cfg(has_cuda_kernels)]
 #[link(name = "dscholesky")]
 extern "C" {
     pub fn gpu_ds_cholesky_d2(
@@ -174,6 +178,7 @@ extern "C" {
     ) -> f64;
 }
 
+#[cfg(has_cuda_kernels)]
 #[link(name = "qscholesky")]
 extern "C" {
     pub fn gpu_qs_cholesky_d2(
@@ -185,6 +190,7 @@ extern "C" {
     ) -> f64;
 }
 
+#[cfg(has_cuda_kernels)]
 #[link(name = "gramgpu")]
 extern "C" {
     pub fn gpu_build_gram_qs(

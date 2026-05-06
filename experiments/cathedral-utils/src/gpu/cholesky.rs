@@ -136,7 +136,8 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
 /// Compute d² via DD Cholesky (~31 digit precision).
 ///
 /// Input: DD Gram matrix (hi + lo components), b vector.
-/// Requires the `ddcholesky` CUDA library to be compiled.
+/// Requires the `custom_kernels` feature and compiled CUDA libraries.
+#[cfg(has_cuda_kernels)]
 pub fn d_sq_dd(
     gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
 ) -> Result<CholeskyResult, String> {
@@ -167,6 +168,7 @@ pub fn d_sq_dd(
 }
 
 /// Compute d² via QS Cholesky (~28 digit precision at f32 speed).
+#[cfg(has_cuda_kernels)]
 pub fn d_sq_qs(
     gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
 ) -> Result<CholeskyResult, String> {
@@ -194,6 +196,7 @@ pub fn d_sq_qs(
 }
 
 /// Compute d² via DS Cholesky (~14 digit precision, fastest).
+#[cfg(has_cuda_kernels)]
 pub fn d_sq_ds(
     gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
 ) -> Result<CholeskyResult, String> {
@@ -219,3 +222,4 @@ pub fn d_sq_ds(
         })
     }
 }
+
