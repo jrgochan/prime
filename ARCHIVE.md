@@ -4,9 +4,9 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: April 29, 2026 (v12 — The Crown Graduation + Particle Zoo)
+> **Last updated**: May 6, 2026 (v16 — Observatory Edition)
 >
-> **Last audited**: April 29, 2026 — comprehensive codebase audit
+> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline
 
 ---
 
@@ -22,19 +22,17 @@ and **29,784 lines** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **174 files / 43,387 lines / ~1,459 theorems**.
+For comparison, the active codebase is **308 files / 78,435 lines / ~1,500+ theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
 
-### Architecture Context (v12)
+### Architecture Context (v16)
 
-The Cathedral's crown path now uses the **Mellin Crown** (2 axioms, 0 sorry),
-with the forward direction closed via the **Perron Bridge** (Exploration 17).
-The `crown_graduation_target` is PROVED. The entire real-variable forward
-chain (Perron → Mertens → Gram → L²) feeds INTO the Mellin Crown via
-`critical_line_mellin_variance_from_perron`. The following archived components
-are therefore doubly superseded:
+The Cathedral's crown path now uses the **One-Pillar** architecture (1 axiom:
+`baez_duarte_forward`), with three alternative forward paths (Mellin Crown 2 axioms,
+Perron Crown 4 axioms, Renormalization graduated). The Parseval Bridge connects all
+paths. The following archived components are therefore multiply superseded:
 
 - `DirectL2Crown.lean` — superseded by MellinCrown
 - `OneCrown.lean` — superseded by MellinCrown
@@ -263,10 +261,10 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 174 | 128 | 1.36× |
-| Lines | 43,387 | 29,784 | 1.46× |
-| Theorems | ~1,459 | ~994 | 1.47× |
-| Crown axioms | **2** | — | — |
+| Files | 308 | 128 | 2.41× |
+| Lines | 78,435 | 29,784 | 2.63× |
+| Theorems | ~1,500+ | ~994 | 1.51× |
+| Crown axioms | **1** | — | — |
 
 ---
 
@@ -297,12 +295,14 @@ The project evolved through five major phases:
 4. **Cathedral v7-v10** (1 week) — Perron Crown, real-variable forward chain (4 axioms)
 5. **Cathedral v11** (1 day) — **The Mellin Crown** — frequency-domain forward chain (2 axioms)
 6. **Cathedral v12** (1 day) — **Crown Graduation** — Perron Bridge closes forward path, MVT proved, 0 actionable sorry
+7. **Cathedral v15** (2 days) — **Spectral Universality** — Dual-path architecture, DD solver inception
+8. **Cathedral v16** (1 week) — **Observatory Edition** — One-Pillar Cathedral (1 axiom), DD-precision pipeline, N=55,440 certified
 
 ---
 
 ## Experiment Index
 
-The repository contains **37 Rust/MPFR experiment directories** under `experiments/`:
+The repository contains **48+ Rust/MPFR/DD experiment directories** under `experiments/`:
 
 | Experiment | Purpose |
 |-----------|---------|

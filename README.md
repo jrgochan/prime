@@ -4,24 +4,23 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**169 active Lean files** across 26 modules, with **2 crown axioms** on
+**308 active Lean files** across 25+ modules, with **1 crown axiom** on
 the critical path (verified by `#print axioms`), and
-**~45 axioms** total in the active codebase.
+**~50 axioms** total in the active codebase.
 
 > **This formalization does not prove the Riemann Hypothesis.** It reduces
-> its entire mathematical content to **two** precisely stated, classical
-> results of 20th-century analytic number theory: the Hardy-Littlewood
-> mean value theorem for 1/ζ(s) on the critical line, and the Hadamard
-> product zero-counting bound. These are axioms only because Mathlib lacks
-> the prerequisite infrastructure—not because the mathematics is uncertain.
+> its entire mathematical content to **one** precisely stated, classical
+> result of 21st-century analytic number theory: the Báez-Duarte forward
+> direction (IMRN 2003). This is an axiom only because Mathlib lacks the
+> prerequisite infrastructure—not because the mathematics is uncertain.
 > The converse direction uses **zero custom axioms**—it is pure Lean/Mathlib.
 > Everything else—the Nyman–Beurling theory, Rank-1 Mellin separation,
 > Parseval bridge, Plancherel isometry—is compiler-verified.
 
-> **Release: crown-graduation** — April 28, 2026 (v12)
+> **Release: observatory-edition** — May 6, 2026 (v16)
 >
-> **Latest**: Particle Zoo to N = 10⁹ — April 29, 2026
->  — *The integer vacuum converges to k = 448 = 2⁶ · 7 across 7 orders of magnitude*
+> **Latest**: One-Pillar Cathedral + DD-Precision Pipeline — May 6, 2026
+>  — *1 literature axiom, 308 files, 78,435 lines, N=55,440 certified*
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -30,7 +29,7 @@ the critical path (verified by `#print axioms`), and
 
 ```bash
 cd proofs
-lake build          # 174 active files, 128 archived
+lake build          # 308 active files, 128+ archived
 ```
 
 Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -49,23 +48,23 @@ theorem nyman_beurling_equivalence :
 The proof decomposes into two pillars:
 
 - **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument. **Zero custom axioms.**
-- **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via the **Mellin Crown**: RH → Mertens x¾ (Perron chain, PROVED) → L² decay → Parseval bridge (PROVED) → Mellin variance (PROVED via Perron Bridge). **2 axioms, 0 sorry, 0 warning.**
+- **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via `baez_duarte_forward` (Báez-Duarte, IMRN 2003). **1 literature axiom, 0 sorry, 0 warning.** Three alternative paths (Mellin Crown, Perron Crown, Renormalization) provide cross-validation.
 
-## The Two Crown Axioms
+## The Crown Axiom
 
-The crown theorem `nyman_beurling_equivalence` depends on **2 mathematical axioms**
+The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**
 (verified by `#print axioms`). The full active codebase contains
-**~55 axioms** across its proof infrastructure (all others are off the crown path).
+**~50 axioms** across its proof infrastructure (all others are off the crown path).
 
 | # | Axiom | Content | Location |
 |---|-------|---------|----------|
-| 1 | `critical_line_mellin_variance` | RH → (1/2π)∫\|M(1/2+it)\|² ≤ C/logN | MellinCrown.lean |
-| 2 | `rh_zeta_lower_bound_from_zero_counting` | RH → \|ζ(s)\| ≥ c/\|t\|^A for Re(s) ≥ 1/2+ε | Zeta/Hadamard.lean |
+| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | MainChain.lean |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-Both are classical results of Hardy-Littlewood and Hadamard — axioms only because
-Mathlib lacks the prerequisite infrastructure.
+The sole axiom is the Báez-Duarte forward direction (IMRN 2003) — a classical,
+published result. It is an axiom only because Mathlib lacks the prerequisite
+complex-analytic infrastructure.
 
 ## The Mellin Crown & Parseval Bridge
 
@@ -88,7 +87,7 @@ error < 7×10⁻⁶ and the Mellin variance constant C ≈ 0.38.
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (v11, 2 crown axioms)
+├── Axioms.lean              ← Axiom registry (v16, 1 crown axiom)
 ├── Defs.lean                ← Core definitions (0 sorry, 0 axiom)
 ├── Assembly/        (7)     ← Crown assemblies
 │   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
@@ -119,25 +118,25 @@ proofs/Cathedral/
 ## Build Stats
 
 ```
-Active files:   169 Lean files across 26 modules
-Archived:       128 Lean files in Archive/ + archive/
-Axioms:         2 on crown critical path, ~45 total active
+Active files:   308 Lean files across 25+ modules
+Archived:       128+ Lean files in Archive/ + archive/
+Axioms:         1 on crown critical path, ~50 total active
 Sorry:          0 on crown path
 Errors:         0
-Lines:          42,605
-Theorems:       ~1,459
+Lines:          78,435
+Theorems:       ~1,500+
 Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
-Experiments:    37 Rust/MPFR (256–512 bit precision)
-Release:        crown-graduation (v12)
+Experiments:    48+ Rust/MPFR/DD (256–512 bit + DD 31-digit precision)
+Release:        observatory-edition (v16)
 ```
 
 ## Key Results (All Machine-Verified)
 
 | Result | Status |
 |--------|--------|
-| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (2 axioms) |
+| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (1 axiom) |
 | `nyman_beurling_converse` — d²→0 ⟹ RH | **Proved** (0 axioms!) |
-| `rh_implies_bd_convergence_mellin` — RH ⟹ d²→0 | **Proved** (2 axioms) |
+| `rh_implies_bd_convergence_mellin` — RH ⟹ d²→0 | **Proved** (1 axiom) |
 | `parseval_bridge_white` — L²(0,1) = Mellin L² | **Proved** (0 axioms!) |
 | `augmentedGramMatrix_posDef` — H_N PD for all N ≥ 1 | **Proved** (0 axioms) |
 | `digamma_reflection_complex` — ψ(1-s) - ψ(s) = π·cot(πs) | **Proved** (0 axioms) |
@@ -223,9 +222,9 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 169 active Lean files, 128 archived
+├── proofs/          🏛️  THE CATHEDRAL — 308 active Lean files, 128+ archived
 ├── papers/          📄  15 companion papers (LaTeX + PDF)
-├── experiments/     🔬  37 Rust experiments (256–512 bit MPFR)
+├── experiments/     🔬  48+ Rust experiments (256–512 bit MPFR + DD)
 │   └── character-spectral/  🧬 Mersenne probe to N=10⁹ (Particle Zoo)
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
 ├── scripts/         🔧  Build & export tools

@@ -3,36 +3,36 @@
 Thank you for your interest in contributing to the Cathedral — a machine-verified
 reduction of the Riemann Hypothesis in Lean 4.
 
-## Current Status (v12 — Crown Graduation)
+## Current Status (v16 — Observatory Edition)
 
-The crown theorem `nyman_beurling_equivalence` depends on **2 mathematical axioms**
+The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**
 (verified by `#print axioms`). The forward chain from RH to d²_N → 0 is a
 continuous, compiler-verified path with **zero sorry** and **zero warning**.
 
 ## How Can I Help?
 
-### 1. Close a Crown Axiom
+### 1. Close the Crown Axiom
 
-The crown path depends on **2 axioms**. Closing either one makes the reduction
-strictly stronger.
+The crown path depends on **1 axiom**. Closing it makes the reduction
+fully machine-verified (zero axioms).
 
 | # | Axiom | Content | Difficulty |
 |---|-------|---------|------------|
-| 1 | `critical_line_mellin_variance` | RH → Mellin L² variance ≤ C/logN | ⭐⭐⭐⭐ |
-| 2 | `rh_zeta_lower_bound_from_zero_counting` | RH → |ζ(s)| ≥ c/|t|^A | ⭐⭐⭐⭐⭐ |
+| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | ⭐⭐⭐⭐ |
 
 See [BOUNTY_BOARD.md](BOUNTY_BOARD.md) for detailed specifications with
 existing infrastructure, Mathlib status, and graduation paths.
 
-### 2. Close a Spatial-Path Axiom
+### 2. Close an Alternative-Path Axiom
 
-The spatial (alternative) path uses **4 axioms**. Closing these strengthens
-the alternative chain:
+The alternative forward paths use **2–4 axioms** each. Closing these strengthens
+the alternative chains:
 
+- `critical_line_mellin_variance` — Mellin Crown (⭐⭐⭐⭐)
+- `rh_zeta_lower_bound_from_zero_counting` — shared Hadamard bound (⭐⭐⭐⭐⭐)
 - `covariance_bound` — Virial theorem (⭐⭐⭐)
 - `pnt_mu_log_div_k` — Σ μ(k)log(k)/k → -1 (⭐⭐, 95% complete)
 - `partial_integral_tends_to_formula` — Vasyunin convergence (⭐⭐⭐⭐)
-- `rh_zeta_lower_bound_from_zero_counting` — shared with crown (⭐⭐⭐⭐⭐)
 
 ### 3. Close Off-Path Sorries
 

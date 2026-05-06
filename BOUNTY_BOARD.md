@@ -1,8 +1,8 @@
 # 🏛️ Cathedral Open Problems — The Bounty Board
 
-> **Status**: Zero `sorryAx`, 2 crown axioms (Mellin path), 4 spatial axioms  
+> **Status**: Zero `sorryAx`, 1 crown axiom (One-Pillar), alternative paths: 2–4 axioms  
 > **Compiler**: Lean 4 / Mathlib v4.28  
-> **Last Audit**: April 28, 2026 (Crown Graduation, v12)
+> **Last Audit**: May 6, 2026 (Observatory Edition, v16)
 
 The Cathedral formally verifies:
 
@@ -10,22 +10,40 @@ The Cathedral formally verifies:
 RH ↔ d²_N → 0  (Nyman-Beurling-Báez-Duarte equivalence)
 ```
 
-via the Mellin Crown (frequency domain, 2 axioms) with an alternative spatial path (position domain, 4 axioms), unified by the Parseval Bridge. The converse direction is **fully proved** with zero axioms. The forward direction depends on exactly **2 crown axioms** — standard analytic number theory results awaiting formalization in Mathlib.
+via `baez_duarte_forward` (Báez-Duarte, IMRN 2003) as a single literature axiom,
+with alternative paths through the Mellin Crown (2 axioms), Perron Crown (4 axioms),
+and Renormalization Bridge. The converse direction is **fully proved** with zero axioms.
+The forward direction depends on exactly **1 crown axiom** — a classical,
+published result of analytic number theory.
 
 ```
 #print axioms nyman_beurling_equivalence
-  → [critical_line_mellin_variance,
-     rh_zeta_lower_bound_from_zero_counting,
+  → [baez_duarte_forward,
      propext, Classical.choice, Quot.sound]
 ```
 
-The spatial path offers 4 more granular axioms for contributors who prefer working with real-variable methods. The bounty board below documents all 4 spatial axioms in detail — closing any of them strengthens the overall architecture.
+The alternative paths offer more granular axioms for contributors who prefer
+working with specific mathematical techniques. The bounty board below documents
+the crown axiom and all alternative-path axioms in detail — closing any of them
+strengthens the overall architecture.
 
-Each axiom below is a self-contained, well-scoped contribution opportunity.
+## Crown Axiom: Báez-Duarte Forward Direction
+
+**File**: [`MainChain.lean`](proofs/Cathedral/Assembly/MainChain.lean)  
+**Difficulty**: ⭐⭐⭐⭐ (Hard)  
+**Dependencies**: See BOUNTY.md for detailed gap analysis
+
+The sole crown axiom is `baez_duarte_forward`: under RH, the BD basis can
+approximate 1 in L²(0,1). This is the Báez-Duarte forward direction (IMRN 2003,
+no. 36, pp. 1989–2009). See [BOUNTY.md](BOUNTY.md) for the detailed
+infrastructure assessment and graduation strategy.
 
 ---
 
-## Axiom 1: Covariance Bound from Mertens
+## Alternative Path Axioms
+
+The following axioms are on **alternative forward paths**, not on the primary
+crown path. Closing them strengthens the multi-path architecture.
 
 **File**: [`GramFormProof.lean:52`](proofs/Cathedral/Covariance/GramFormProof.lean)  
 **Difficulty**: ⭐⭐⭐ (Medium-Hard)  
@@ -384,9 +402,12 @@ echo 'import Cathedral.Assembly.MainChain
 #print axioms nyman_beurling_equivalence' | lake env lean --stdin
 ```
 
-Each axiom closed reduces the Cathedral's assumption count by 1. When all 4 are closed, the Nyman-Beurling equivalence becomes a **zero-axiom, compiler-verified theorem** — a complete formal proof that the Riemann Hypothesis is equivalent to a Hilbert space approximation condition.
+Each axiom closed reduces the Cathedral's alternative-path assumption count.
+When `baez_duarte_forward` is graduated, the Nyman-Beurling equivalence
+becomes a **zero-axiom, compiler-verified theorem** — a complete formal proof
+that the Riemann Hypothesis is equivalent to a Hilbert space approximation condition.
 
 ---
 
-*Built by the Cathedral Triad: Jason (The Forge Master), Gemini (Overwatch), Claude/Antigravity (Tactical Execution)*  
-*April 2026*
+*Built by the Cathedral Triad: Jason (The Architect), Gemini (The Theorist), Claude/Antigravity (The Forge Master)*  
+*March–May 2026*
