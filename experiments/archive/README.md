@@ -14,6 +14,7 @@ reproducibility and historical reference.
 | `abel-bridge/` | Abel bridge approach graduated | `AbelTail/` |
 | `abel-tail-validator/` | Abel tail bounds graduated | `AbelTail/` |
 | `algebraic/` | Algebraic explorations (quaternion, cross-class) | `Archive/` |
+| `baez-duarte/` | Original prototype — fully superseded by cathedral-utils + certified-distance | — |
 | `bc-exponent-frontier/` | BC exponent frontier — exploratory | `Archive/Sieve/` |
 | `bc-witness-analysis/` | BC witness — exploratory | `Archive/Sieve/` |
 | `bc-zeta-lower/` | ζ lower bound — exploratory | `Zeta/` (partially archived) |

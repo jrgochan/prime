@@ -203,6 +203,7 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 name = "character-spectral"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "nalgebra",
  "rayon",
@@ -349,6 +350,7 @@ checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
 name = "crown-cancellation"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -390,6 +392,7 @@ checksum = "34aa73646ffb006b8f5147f3dc182bd4bcb190227ce861fc4a4844bf8e3cb2c0"
 name = "fejer-kernel"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -635,6 +638,7 @@ dependencies = [
 name = "mellin-certificate"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -755,6 +759,7 @@ dependencies = [
 name = "norm-bound-validator"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -855,6 +860,7 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 name = "perron-contour"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -864,6 +870,7 @@ dependencies = [
 name = "pnt-mobius-sums"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -938,6 +945,7 @@ dependencies = [
 name = "rotor-spectroscopy"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -1053,6 +1061,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 name = "siegel-walfisz"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "rayon",
  "rug",
 ]
@@ -1122,6 +1131,7 @@ dependencies = [
 name = "two-tile-analyzer"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -1180,6 +1190,7 @@ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
 name = "van-hove-probe"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -1189,6 +1200,7 @@ dependencies = [
 name = "vasyunin"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "nalgebra",
  "rayon",
  "rug",
@@ -1199,6 +1211,7 @@ dependencies = [
 name = "vasyunin-convergence"
 version = "0.1.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",
@@ -1210,6 +1223,7 @@ dependencies = [
 name = "vasyunin-integral-verifier"
 version = "2.0.0"
 dependencies = [
+ "cathedral-utils",
  "chrono",
  "rayon",
  "rug",

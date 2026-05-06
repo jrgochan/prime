@@ -5,6 +5,7 @@ edition = "2021"
 description = "Cathedral Mellin Crown Certificate — independently validates (1/2π)∫|M_{r_N}(1/2+it)|²dt = ∫₀¹(1-f_N)²dx via 256-bit MPFR, certifying critical_line_mellin_variance"
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rug = "1.24"
 rayon = "1.10"
 chrono = "0.4"

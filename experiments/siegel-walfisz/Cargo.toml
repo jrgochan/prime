@@ -5,6 +5,7 @@ edition = "2021"
 description = "Siegel-Walfisz PNT-in-AP certification for q=8 — Cathedral v12"
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rug = { version = "1.24", features = ["float"] }
 rayon = "1.10"
 

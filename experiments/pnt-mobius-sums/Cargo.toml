@@ -5,6 +5,7 @@ edition = "2024"
 description = "Cathedral PNT Möbius Sum Validator — validates pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k at 256-bit MPFR precision"
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"

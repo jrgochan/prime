@@ -76,17 +76,13 @@ Shared mathematics lives in `cathedral-utils/`. Archived experiments are in `arc
 | `two-tile-analyzer/` | Two-tile correction analyzer (512-bit MPFR) | `Vasyunin/Cotangent/` |
 | `series-decomposition-verifier/` | Series decomposition verification | `Vasyunin/` |
 
-## Other
-
-| Crate | Description |
-|-------|-------------|
-| `baez-duarte/` | Original Báez-Duarte exploration (early, pre-cathedral-utils) |
-
 ---
 
 ## Archive
 
-**21 archived experiments** in `archive/` — see [archive/README.md](archive/README.md) for provenance.
+**22 archived experiments** in `archive/` — see [archive/README.md](archive/README.md) for provenance.
+
+All 30 active experiments depend on `cathedral-utils` — zero local math duplications.
 
 ## Data
 

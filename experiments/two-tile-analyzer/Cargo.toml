@@ -7,6 +7,7 @@ rowTerm formula error in two-tile rows. Discovers the correct unified formula an
 certifies convergence bounds for the Lean proof of IntegralEqSCombined.lean."""
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"

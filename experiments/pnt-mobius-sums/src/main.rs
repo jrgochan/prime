@@ -17,6 +17,8 @@ use std::fs;
 use std::io::Write;
 use std::time::Instant;
 
+use cathedral_utils::arith::mobius_table;
+
 const P: u32 = 256;
 
 const BOLD: &str = "\x1b[1m";
@@ -33,42 +35,7 @@ fn check(b: bool) -> &'static str {
 }
 
 fn euler_gamma() -> Float {
-    Float::with_val(P, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467"
-    ).unwrap())
-}
-
-// ═══════════════════════════════════════════════
-// MÖBIUS SIEVE
-// ═══════════════════════════════════════════════
-
-fn mobius_sieve(n: usize) -> Vec<i8> {
-    let mut mu = vec![0i8; n + 1];
-    let mut spf = vec![0usize; n + 1];
-    mu[1] = 1;
-    for p in 2..=n {
-        if spf[p] != 0 { continue; }
-        spf[p] = p;
-        for m in (2 * p..=n).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
-        }
-    }
-    for k in 2..=n {
-        let mut val = k;
-        let mut nf = 0u32;
-        let mut sq = false;
-        while val > 1 {
-            let p = spf[val];
-            let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
-            nf += 1;
-        }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
-    }
-    mu
+    Float::with_val(P, rug::float::Constant::Euler)
 }
 
 fn main() {
@@ -89,7 +56,7 @@ fn main() {
     let n_max: usize = 10_000_000; // Promoted to 10^7 for deeper certification
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {}...{RESET}", n_max);
     let t = Instant::now();
-    let mu = mobius_sieve(n_max);
+    let mu = mobius_table(n_max);
     eprintln!("  {GREEN}✓{RESET} Sieve complete in {:.2}s", t.elapsed().as_secs_f64());
     println!();
 

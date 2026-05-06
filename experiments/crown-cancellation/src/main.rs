@@ -19,7 +19,7 @@
 //!  Target: Validate `crown_graduation_target` (MellinResidualExpansion.lean)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod sieve;
+// mod sieve; — replaced by cathedral-utils
 mod zeta;
 mod fmt;
 
@@ -273,7 +273,7 @@ fn main() {
     let sieve_max = *test_ns.last().unwrap();
 
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {sieve_max}...{RESET}");
-    let mu = sieve::mobius_sieve(sieve_max);
+    let mu = cathedral_utils::arith::mobius_table(sieve_max);
     eprintln!("  {GREEN}✓{RESET} Sieve complete ({} squarefree)",
         mu[1..].iter().filter(|&&m| m != 0).count());
     println!();

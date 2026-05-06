@@ -9,7 +9,6 @@ members = [
     # ═══════════════════════════════════════════════
     # Active experiments
     # ═══════════════════════════════════════════════
-    "experiments/baez-duarte",
     "experiments/certified-distance",
     "experiments/character-spectral",
     "experiments/crown-cancellation",
@@ -47,6 +46,7 @@ members = [
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",
     "experiments/archive/algebraic/quaternion-rh",
+    "experiments/archive/baez-duarte",
     "experiments/archive/bc-exponent-frontier",
     "experiments/archive/bc-witness-analysis",
     "experiments/archive/bc-zeta-lower",

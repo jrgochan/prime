@@ -17,12 +17,13 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use rayon::prelude::*;
-use rug::float::Round;
-use rug::ops::CompleteRound;
 use rug::Float;
 use std::fs;
 use std::io::Write;
 use std::time::Instant;
+
+use cathedral_utils::arith::mobius_table;
+use cathedral_utils::mertens::mertens_at;
 
 const P: u32 = 256;
 
@@ -40,46 +41,8 @@ fn check(b: bool) -> &'static str {
 }
 
 // ═══════════════════════════════════════════════
-// §1. MÖBIUS SIEVE
+// §1. MÖBIUS SIEVE — via cathedral-utils
 // ═══════════════════════════════════════════════
-
-fn mobius_sieve(n: usize) -> Vec<i8> {
-    let mut mu = vec![0i8; n + 1];
-    let mut spf = vec![0usize; n + 1];
-    mu[1] = 1;
-    for p in 2..=n {
-        if spf[p] != 0 { continue; }
-        spf[p] = p;
-        for m in (2 * p..=n).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
-        }
-    }
-    for k in 2..=n {
-        let mut val = k;
-        let mut nf = 0u32;
-        let mut sq = false;
-        while val > 1 {
-            let p = spf[val];
-            let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
-            nf += 1;
-        }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
-    }
-    mu
-}
-
-fn mertens_direct(x: f64, mu: &[i8]) -> i64 {
-    let n = x.floor() as usize;
-    let mut m: i64 = 0;
-    for k in 1..=n.min(mu.len() - 1) {
-        m += mu[k] as i64;
-    }
-    m
-}
 
 // ═══════════════════════════════════════════════
 // §2. ZETA EVALUATION (partial Dirichlet series)
@@ -183,7 +146,7 @@ fn main() {
     // Sieve for direct Mertens computation
     let sieve_max = 10_001;
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {}...{RESET}", sieve_max);
-    let mu = mobius_sieve(sieve_max);
+    let mu = mobius_table(sieve_max);
     eprintln!("  {GREEN}✓{RESET} Sieve complete");
     println!();
 
@@ -207,7 +170,7 @@ fn main() {
     let mut all_results = Vec::new();
 
     for &x in &x_values {
-        let m_direct = mertens_direct(x, &mu);
+        let m_direct = mertens_at(&mu, x);
 
         for &t_max in &t_values {
             let t = Instant::now();

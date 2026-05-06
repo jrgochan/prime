@@ -9,6 +9,7 @@ Cathedral Project — April 2026
 """
 
 [dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
 rug = { version = "1", features = ["float"] }
 rayon = "1"
 serde = { version = "1", features = ["derive"] }

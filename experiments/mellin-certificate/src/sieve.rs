@@ -1,48 +1,8 @@
-//! Möbius sieve, Mertens function, and weight computation
+//! MPFR-precision weight computation — delegates sieving to cathedral-utils
 
 use rug::Float;
 
 pub const P: u32 = 256;
-
-/// Sieve of Eratosthenes-style Möbius function computation.
-/// Returns μ(n) for 0 ≤ n ≤ limit.
-pub fn mobius_sieve(limit: usize) -> Vec<i8> {
-    let mut mu = vec![0i8; limit + 1];
-    let mut spf = vec![0usize; limit + 1];
-    mu[1] = 1;
-    for p in 2..=limit {
-        if spf[p] != 0 { continue; }
-        spf[p] = p;
-        for m in (2 * p..=limit).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
-        }
-    }
-    for k in 2..=limit {
-        let mut val = k;
-        let mut nf = 0u32;
-        let mut sq = false;
-        while val > 1 {
-            let p = spf[val];
-            let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
-            nf += 1;
-        }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
-    }
-    mu
-}
-
-/// Mertens function: M(n) = Σ_{k=1}^{n} μ(k)
-pub fn mertens_values(mu: &[i8]) -> Vec<i64> {
-    let mut m = vec![0i64; mu.len()];
-    for i in 1..mu.len() {
-        m[i] = m[i - 1] + mu[i] as i64;
-    }
-    m
-}
 
 /// Log-cutoff Möbius weights: w_k = -μ(k) · (1 - ln(k)/ln(N))
 /// Matches Lean's `bdMoebiusWeight N i = -μ(i+1) · logWeight(N, i+1)`
