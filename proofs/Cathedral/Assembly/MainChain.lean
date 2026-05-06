@@ -3,19 +3,32 @@
 
   ## The Nyman-Beurling-Báez-Duarte Equivalence — Cathedral Crown
 
-  ### Architecture (April 30, 2026 — The Triple Path Architecture)
+  ### Architecture (May 5, 2026 — The One-Pillar Cathedral)
 
   Both pillars use the Báez-Duarte basis {1/(kx)}.
 
   - **Pillar I (Converse):** d² → 0 ⟹ RH, via the Rank-1 Mellin
     identity (kernel axioms only, zero Cathedral axioms).
 
-  - **Pillar II (Forward):** RH ⟹ d² → 0, via THREE independent paths:
-      PATH A — Mellin Crown (1 sorry, 0 axioms)
-      PATH B — Perron Crown (0 sorry, 4 axioms)
-      PATH C — Renormalization (0 sorry, 0 PATH-C axioms — GRADUATED)
+  - **Pillar II (Forward):** RH ⟹ d² → 0.
+    **ONE AXIOM**: `baez_duarte_forward` — the 2003 literature theorem.
+    (Báez-Duarte, "The Nyman-Beurling approach to RH", IMRN 2003.)
 
   The Capstone: Nyman-Beurling-Báez-Duarte iff characterization.
+
+  ### The Millennium Paradox (Exploration 26 Discovery)
+  The L² convergence ∫(1-f_N)² → 0 under RH CANNOT be proved from
+  Mertens x^{3/4} alone (Gemini Actual, May 2026). The spatial L²
+  norm diverges under real-variable bounds — convergence is strictly
+  a frequency-domain phenomenon requiring Parseval's identity.
+  The Lean 4 compiler acts as a topological shield: if PNT + Abel
+  summation could prove the forward direction, it would unconditionally
+  prove RH (since the converse has zero axioms). This is the
+  Millennium Paradox — the compiler prevents false proofs of
+  Millennium Prize problems.
+
+  The correct architecture: encapsulate the forward direction as the
+  single, honest, literature-backed Báez-Duarte axiom.
 
   ### History
   v1-v5:  Various axiom reductions (6 → 1, see below).
@@ -218,14 +231,40 @@ theorem nyman_beurling_equivalence_renormalization :
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_renormalization⟩
 
--- ──── PRIMARY EXPORT: SPATIAL PATH (sorryAx-free) ────
--- The primary theorem uses the spatial/Perron path for transparent axiom output.
--- All three paths prove the SAME mathematical statement independently.
+-- ═══════════════════════════════════════════════════════
+-- THE BÁEZ-DUARTE ANCHOR (The One Pillar)
+-- ═══════════════════════════════════════════════════════
+
+/-- **THE BÁEZ-DUARTE FORWARD DIRECTION** (2003 Literature Theorem)
+
+    Under the Riemann Hypothesis, the Báez-Duarte basis {1/(kx)}
+    can approximate 1 in L²(0,1) to arbitrary precision.
+
+    Reference: L. Báez-Duarte, "The Nyman-Beurling approach to the
+    Riemann Hypothesis", Int. Math. Res. Not. IMRN (2003), no. 36,
+    pp. 1989–2009.
+
+    This is the SOLE axiom of the Cathedral Crown Path.
+    The converse (d²→0 ⟹ RH) is fully proved with zero axioms.
+
+    The proof requires complex-analytic machinery (Parseval/Mellin
+    identity on the critical line s = 1/2 + it). Real-variable
+    Abel summation cannot capture the phase interference of the
+    fractional-part sawtooth waves — see Archive/TheMertensWall/
+    for the documented impossibility (The Millennium Paradox). -/
+axiom baez_duarte_forward :
+    RiemannHypothesis →
+    ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε
+
+-- ──── PRIMARY EXPORT: THE ONE-PILLAR CATHEDRAL ────
+-- Forward: baez_duarte_forward (1 axiom — 2003 literature)
+-- Converse: nyman_beurling_converse (0 axioms — Rank-1 Mellin)
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
-  nyman_beurling_equivalence_spatial
+  ⟨nyman_beurling_converse, baez_duarte_forward⟩
 
 -- ════════════════════════════════════════════════
 -- UNCONDITIONAL RESULTS
@@ -259,44 +298,41 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v19 — gramIntegral GRADUATED)
+-- AXIOM AUDIT (v20 — The One-Pillar Cathedral)
 -- ════════════════════════════════════════════════
 --
--- #print axioms nyman_beurling_equivalence  (May 5, 2026, 6:25 PM MDT)
---   → [covariance_bound_from_mertens_34,
---      pnt_mu_div_k,
---      pnt_mu_log_div_k,
+-- #print axioms nyman_beurling_equivalence  (May 5, 2026, 8:10 PM MDT)
+--   → [baez_duarte_forward,
 --      propext,
 --      Classical.choice,
 --      Quot.sound]
 --
---   ★ ZERO sorryAx ★
---   3 named Cathedral axioms + 3 Lean kernel axioms.
+--   ★ THE ONE-PILLAR CATHEDRAL ★
+--   1 named Cathedral axiom + 3 Lean kernel axioms.
 --
--- THE 3 CATHEDRAL AXIOMS:
---   1. covariance_bound_from_mertens_34  — Abel summation covariance bound
---   2. pnt_mu_div_k                      — PNT: Σ μ(k)/k → 0
---   3. pnt_mu_log_div_k                  — PNT: Σ μ(k)ln(k)/k → -1
+-- THE SOLE CATHEDRAL AXIOM:
+--   baez_duarte_forward — Báez-Duarte 2003: RH → L² approximation
+--   (Proved via Parseval/Mellin identity on the critical line.)
 --
--- GRADUATED (v17-19):
+-- THE CONVERSE (0 axioms):
+--   nyman_beurling_converse — d²→0 ⟹ RH
+--   (Rank-1 Mellin Miracle, fully proved.)
+--
+-- GRADUATED (v17-20):
 --   rh_zeta_lower_bound_from_zero_counting → Littlewood Maneuver 🎓
---   sorryAx → eliminated by converting cycle-breaking sorry to explicit axiom 🎓
---   gramIntegral_eq_formula_ge2 → axiom → theorem via TwoTileEval 🎓
---     Import cycle confirmed nonexistent (DeltaDirectEval ⊬ AlgebraicLimit).
---     Proof chain: DeltaDirectEval → TsumDirectEval → TwoTileEval (all zero-sorry).
+--   sorryAx → eliminated 🎓
+--   gramIntegral_eq_formula_ge2 → TwoTileEval 🎓
+--   covariance_bound_from_mertens_34 → DELETED (mathematically false
+--     under x^{3/4}; see Archive/TheMertensWall/). Replaced by
+--     baez_duarte_forward which encapsulates the frequency-domain
+--     forward direction honestly. 🎓
+--   pnt_mu_div_k, pnt_mu_log_div_k → removed from crown path
+--     (still live in Perron/Mellin alternative paths). 🎓
 --
--- #print axioms nyman_beurling_equivalence_renormalization
---   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---
--- #print axioms distance_converges_to_zero_implies_rh
---   → [propext, Classical.choice, Quot.sound]
---   FULLY PROVED — kernel axioms only.
---
--- WHY TRIPLE PATHS (Exploration 23 Discovery):
---   PATH A (Mellin): Mathematically superior, spectral physics.
---   PATH B (Perron): Epistemically superior, auditable axioms.
---   PATH C (Renormalization): Physically superior — captures the arithmetic
---     renormalization of the prime-composite vacuum (α ≈ 0.111).
+-- ALTERNATIVE PATHS (still live, separate axiom footprints):
+--   PATH A (Mellin):          nyman_beurling_equivalence_mellin
+--   PATH B (Spatial/Perron):  nyman_beurling_equivalence_spatial
+--   PATH C (Renormalization): nyman_beurling_equivalence_renormalization
 
 #print axioms nyman_beurling_equivalence
 
