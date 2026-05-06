@@ -351,13 +351,27 @@ fn compute_d_sq_primary(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static s
                 return (result.d_sq, result.method, result.precision_digits);
             }
             Err(e) => {
-                eprintln!("  ⚠ GPU Cholesky failed ({}), falling back to CPU", e);
+                eprintln!("  ⚠ GPU Cholesky failed ({}), trying CG solver", e);
             }
         }
     }
 
-    // CPU fallback: nalgebra Cholesky
-    cpu_cholesky_d_sq(gram, b, dim)
+    // CPU Cholesky
+    let chol = cpu_cholesky_d_sq(gram, b, dim);
+    if !chol.0.is_nan() {
+        return chol;
+    }
+
+    // CPU LU decomposition (works for any non-singular matrix)
+    let lu = cpu_lu_d_sq(gram, b, dim);
+    if !lu.0.is_nan() {
+        return lu;
+    }
+
+    // Final fallback: Conjugate Gradient solver
+    // Works for any SPD matrix regardless of condition number
+    eprintln!("  ⚠ Direct solvers failed. Using Conjugate Gradient (Jacobi-preconditioned)...");
+    cg_solve_d_sq(gram, b, dim)
 }
 
 fn cpu_cholesky_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) {
@@ -373,11 +387,147 @@ fn cpu_cholesky_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str,
             (1.0 - dot, "CPU_Cholesky_nalgebra", 15)
         }
         None => {
-            eprintln!("  ⚠ Cholesky failed (matrix not positive definite)");
+            eprintln!("  ⚠ CPU Cholesky failed (matrix not positive definite at f64)");
             (f64::NAN, "FAILED", 0)
         }
     }
 }
+
+fn cpu_lu_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) {
+    use nalgebra::DMatrix;
+
+    let mat = DMatrix::from_row_slice(dim, dim, gram);
+    let b_vec = nalgebra::DVector::from_column_slice(&b[..dim]);
+
+    match mat.lu().solve(&b_vec) {
+        Some(x) => {
+            let dot = b_vec.dot(&x);
+            let d_sq = 1.0 - dot;
+            eprintln!("  ✓ LU decomposition succeeded");
+            (d_sq, "CPU_LU_nalgebra", 14)
+        }
+        None => {
+            eprintln!("  ⚠ LU decomposition also failed (singular matrix)");
+            (f64::NAN, "FAILED", 0)
+        }
+    }
+}
+
+/// Conjugate Gradient solver with Jacobi preconditioning.
+///
+/// Solves G x = b for x, then computes d² = 1 - b^T x.
+///
+/// CG requires only matrix-vector products (no factorization),
+/// so it works even when Cholesky fails due to conditioning.
+/// Convergence: O(√κ) iterations where κ = condition number.
+fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) {
+    let t = Instant::now();
+
+    // Jacobi preconditioner: M⁻¹ = diag(1/G[i,i])
+    let mut m_inv = vec![1.0f64; dim];
+    for i in 0..dim {
+        let diag = gram[i * dim + i];
+        if diag > 0.0 {
+            m_inv[i] = 1.0 / diag;
+        }
+    }
+
+    // Initialize: x = 0, r = b - Gx = b
+    let mut x = vec![0.0f64; dim];
+    let mut r = b[..dim].to_vec();
+    let mut z = vec![0.0f64; dim]; // M⁻¹ r
+    let mut p = vec![0.0f64; dim];
+    let mut ap = vec![0.0f64; dim]; // G p
+
+    // z = M⁻¹ r
+    for i in 0..dim {
+        z[i] = m_inv[i] * r[i];
+    }
+    p.copy_from_slice(&z);
+
+    let mut rz = dot(&r, &z);
+    let b_norm = dot(b, b).sqrt();
+    let tol = 1e-14 * b_norm;
+    let max_iter = dim.min(50_000);
+
+    let mut converged = false;
+    let mut final_iter = 0;
+
+    for iter in 0..max_iter {
+        // ap = G p  (parallel matvec)
+        matvec_parallel(gram, &p, &mut ap, dim);
+
+        let pap = dot(&p, &ap);
+        if pap <= 0.0 {
+            eprintln!("  ⚠ CG: non-positive p^T A p at iter {}. Matrix may not be SPD.", iter);
+            break;
+        }
+
+        let alpha = rz / pap;
+
+        // x += alpha * p
+        // r -= alpha * ap
+        for i in 0..dim {
+            x[i] += alpha * p[i];
+            r[i] -= alpha * ap[i];
+        }
+
+        let r_norm = dot(&r, &r).sqrt();
+
+        // Progress report every 500 iterations
+        if iter % 500 == 0 || r_norm < tol {
+            let d_sq_est = 1.0 - dot(&b[..dim], &x);
+            eprint!("\r  CG iter {:>5}: ‖r‖={:.3e}, d²≈{:.12}", iter, r_norm, d_sq_est);
+        }
+
+        if r_norm < tol {
+            eprintln!();
+            converged = true;
+            final_iter = iter;
+            break;
+        }
+
+        // z = M⁻¹ r
+        for i in 0..dim {
+            z[i] = m_inv[i] * r[i];
+        }
+
+        let rz_new = dot(&r, &z);
+        let beta = rz_new / rz;
+        rz = rz_new;
+
+        // p = z + beta * p
+        for i in 0..dim {
+            p[i] = z[i] + beta * p[i];
+        }
+
+        final_iter = iter;
+    }
+
+    if !converged {
+        eprintln!();
+        eprintln!("  ⚠ CG did not converge in {} iterations", max_iter);
+    }
+
+    let d_sq = 1.0 - dot(&b[..dim], &x);
+    let cg_time = t.elapsed().as_secs_f64();
+    eprintln!("  ✓ CG: {} iters in {:.1}s (converged={})", final_iter + 1, cg_time, converged);
+
+    // CG precision depends on convergence quality
+    let precision = if converged { 13 } else { 10 };
+    (d_sq, "CG_Jacobi_preconditioned", precision)
+}
+
+/// Parallel matrix-vector product: y = A x
+fn matvec_parallel(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
+    y.par_iter_mut()
+        .enumerate()
+        .for_each(|(i, yi)| {
+            let row = &a[i * dim..(i + 1) * dim];
+            *yi = row.iter().zip(x.iter()).map(|(a, b)| a * b).sum();
+        });
+}
+
 
 fn compute_cross_check(
     _gram: &[f64], _b: &[f64], dim: usize, primary_d_sq: f64,

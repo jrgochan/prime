@@ -8,8 +8,10 @@
 //! ## Modules
 //!
 //! - [`arith`] — Number theory primitives (gcd, sieve, Möbius, Liouville, factorize)
+//! - [`abel`] — Abel summation engine (discrete summation by parts)
 //! - [`coprime`] — Coprime pair generation and standard test datasets
 //! - [`gram`] — Gram matrix engine (f64/MPFR, build-once, disk cache)
+//! - [`mertens`] — Mertens function, Chebyshev θ/ψ, witness vectors
 //! - [`spectral`] — Eigendecomposition and participation ratio
 //! - [`vasyunin`] — Vasyunin cotangent formula for Gram entries
 //! - [`fitting`] — Curve fitting (linear regression, power-law, log-decay)
@@ -19,6 +21,7 @@
 //! - [`gpu`] — GPU acceleration via CUDA/cuSOLVER/cuBLAS (feature-gated)
 //! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
 
+pub mod abel;
 pub mod arith;
 pub mod cache;
 pub mod certificate;
@@ -28,7 +31,7 @@ pub mod fitting;
 pub mod fmt;
 pub mod gram;
 pub mod gpu;
+pub mod mertens;
+pub mod ooc;
 pub mod spectral;
 pub mod vasyunin;
-
-pub mod ooc;
