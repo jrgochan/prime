@@ -32,7 +32,7 @@ cd proofs
 lake build          # 308 active files, 128+ archived
 ```
 
-Requires: [Lean v4.30.0-rc1](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
+Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
 
 ## The Crown Theorem
 

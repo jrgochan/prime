@@ -193,7 +193,7 @@ Cathedral/
 └── Defs.lean, Axioms.lean        Root definition and axiom files
 ```
 
-### Crown Path Files (0 sorry, 2 axioms)
+### Crown Path Files (0 sorry, 1 axiom)
 
 These are the only files that contribute to `nyman_beurling_equivalence`:
 
@@ -258,8 +258,8 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | `Sieve/VasyuninExpansion.lean` | 1 | 💀 Phantom Axiom tombstone — statement is FALSE |
 
 > [!NOTE]
-> **Zero sorry on the crown path.** All 6 sorry are marked as WIP alternative
-> spatial routes superseded by the Mellin Crown architecture (v11+).
+> **Zero sorry on the crown path.** All 7 sorry are in off-crown WIP
+> alternative spatial routes superseded by the Mellin Crown architecture (v11+).
 > The PNT sorry will close when Mathlib gains a forward Abel/Tauberian theorem.
 > The Covariance sorry are historical artifacts of Exploration 13.
 
