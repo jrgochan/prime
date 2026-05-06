@@ -59,13 +59,12 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
     `Cathedral.Vasyunin.Cotangent.DigammaReflection,
     `Cathedral.Vasyunin.Cotangent.ConvergenceAxioms,
-    `Cathedral.Vasyunin.Cotangent.ConvergenceProof,
+    -- ConvergenceProof: REMOVED (dead leaf — graduation site superseded by AlgebraicLimit)
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Cotangent.FormulaBridge,
     `Cathedral.Vasyunin.Cotangent.GCDReduction,
-
     `Cathedral.Vasyunin.Cotangent.IntegralSubstitution,
-    `Cathedral.Vasyunin.Cotangent.TelescopeLimit,
+    -- TelescopeLimit: REMOVED (dead leaf — squeeze limit superseded by direct evaluation)
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,
     `Cathedral.Vasyunin.Augmented.IntegralBridge,
     `Cathedral.Vasyunin.Augmented.DiagBound,
