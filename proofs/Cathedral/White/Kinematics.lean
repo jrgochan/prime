@@ -167,7 +167,7 @@ lemma full_integral_eq_halfline (N : ℕ) (v : Fin (N - 1) → ℝ) :
     3. ∫₀^∞ g_N² du = ∫₀¹ r_N² dx        [flattened_l2_eq_residual_l2, this file]
     4. Chain: h(0) = ∫₀¹ r_N² dx          [QED]
 
-    Physics: Reflection Positivity. The vacuum energy is the L² norm. -/
+    Chain: `h(0) = ∫ g_N² = ∫₀^∞ g_N² = ∫₀¹ r_N²`. -/
 theorem autocorr_eval_zero_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
     residualAutocorrelation N v 0 = ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
   -- Step 1: h(0) = ∫ g_N(u)² du {autocorrelation_zero_eq_l2, PROVED}

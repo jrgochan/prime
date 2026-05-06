@@ -151,7 +151,7 @@ theorem rh_via_renormalization : RiemannHypothesis := by
 --   selberg_delange_decay: AXIOM → THEOREM
 --   Method: α = 1 (mean-field approximation)
 --   Source: bd_witness_l2_error_decay + bd_l2_error_eq_quad_error
---   Physics: empirical α ≈ 0.111 (Euler product, N=40K GPU)
+--   Empirical α ≈ 0.111 (Euler product, N=40K GPU)
 --           retained as numerical prediction / beacon
 --
 -- ZERO SORRY IN THIS FILE.
