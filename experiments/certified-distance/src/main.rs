@@ -54,6 +54,19 @@ fn main() {
             certify::certify_single(max_n, explicit_source, &search_paths, &output_dir);
         }
 
+        "build-dd" => {
+            if args.len() < 3 {
+                eprintln!("Usage: certified-distance build-dd <N> [--precision <bits>]");
+                std::process::exit(1);
+            }
+            let max_n: usize = args[2].parse().expect("N must be a number");
+            let precision: u32 = parse_flag_str(&args, "--precision")
+                .and_then(|s| s.parse().ok())
+                .unwrap_or(256);
+
+            build_dd_matrix(max_n, precision);
+        }
+
         "sweep" => {
             let output_dir = parse_flag_str(&args, "--output")
                 .unwrap_or_else(|| "certificates".to_string());
@@ -115,6 +128,7 @@ fn main() {
 fn print_usage() {
     eprintln!("Usage:");
     eprintln!("  certified-distance certify <N>              Certify d²_N for a specific N");
+    eprintln!("  certified-distance build-dd <N>             Build DD-precision Gram matrix");
     eprintln!("  certified-distance sweep                    Certify all cached matrices");
     eprintln!("  certified-distance discover                 List discoverable matrices");
     eprintln!("  certified-distance report [dir]             Human-readable summary");
@@ -124,6 +138,74 @@ fn print_usage() {
     eprintln!("Options:");
     eprintln!("  --source <path>    Explicit matrix file path");
     eprintln!("  --output <dir>     Output directory (default: certificates/)");
+    eprintln!("  --precision <bits> MPFR precision for build-dd (default: 256)");
+}
+
+/// Build a DD-precision Gram matrix (MPFR → hi/lo pairs) and cache it.
+///
+/// This is the key fix for N > 40000: f64 Gram entries lose enough precision
+/// that the matrix appears non-PD. DD entries (hi + lo, ~31 digits) preserve
+/// positive-definiteness for the CG solver.
+fn build_dd_matrix(max_n: usize, precision: u32) {
+    use cathedral_utils::{gram, cache};
+    use std::time::Instant;
+
+    let dim = max_n - 1;
+    let mem_gb = (dim as u64 * dim as u64 * 16) / (1024 * 1024 * 1024);
+
+    println!("  ┌─────────────────────────────────────────────────────────────┐");
+    println!("  │  BUILDING DD GRAM MATRIX  N = {:>6}                        │", max_n);
+    println!("  │  dim = {:>6}  precision = {:>4}-bit  ~{:>3} GB               │", dim, precision, mem_gb);
+    println!("  └─────────────────────────────────────────────────────────────┘");
+    println!();
+
+    // Check if already cached
+    let cache_path = cache::dd_gram_cache_path(max_n, precision);
+    if cache_path.exists() {
+        let size = std::fs::metadata(&cache_path).map(|m| m.len()).unwrap_or(0);
+        println!("  ⚠ DD cache already exists: {} ({:.1} GB)",
+            cache_path.display(), size as f64 / 1_073_741_824.0);
+        println!("  Delete the file to rebuild.");
+        return;
+    }
+
+    let t0 = Instant::now();
+
+    // Step 1: Build ln(n) table at MPFR precision
+    let ln_table = gram::LnNTable::new(max_n, precision);
+
+    // Step 2: Build DD Gram matrix (MPFR computation → hi/lo split)
+    let (hi, lo, built_dim) = gram::GramMatrix::build_fast_dd(max_n, &ln_table);
+    assert_eq!(built_dim, dim);
+
+    // Step 3: Cache to disk
+    match cache::save_dd_gram(&cache_path, &hi, &lo, dim, max_n, precision) {
+        Ok(()) => {
+            let total = t0.elapsed().as_secs_f64();
+            println!();
+            println!("  ✓ DD Gram matrix built and cached in {:.1}s", total);
+            println!("  ✓ Path: {}", cache_path.display());
+            println!("  ✓ Size: {:.1} GB", (hi.len() + lo.len()) as f64 * 8.0 / 1_073_741_824.0);
+
+            // Validate: check diagonal is positive
+            let mut min_diag = f64::MAX;
+            let mut max_diag = f64::MIN;
+            for i in 0..dim {
+                let d = hi[i * dim + i] + lo[i * dim + i];
+                min_diag = min_diag.min(d);
+                max_diag = max_diag.max(d);
+            }
+            println!("  ✓ Diagonal range: [{:.6e}, {:.6e}]", min_diag, max_diag);
+            if min_diag > 0.0 {
+                println!("  ✓ All diagonal entries positive");
+            } else {
+                println!("  ⚠ WARNING: negative diagonal entries detected!");
+            }
+        }
+        Err(e) => {
+            eprintln!("  ✗ Failed to save: {}", e);
+        }
+    }
 }
 
 fn default_search_paths() -> Vec<PathBuf> {

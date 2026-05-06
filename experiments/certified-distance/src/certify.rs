@@ -108,7 +108,11 @@ pub fn certify_single(
     println!();
 
     // ─── TIER 1: Load or build matrix ───
-    let (gram_data, matrix_source_path, matrix_sha256) = load_matrix(max_n, dim, explicit_source, search_paths);
+    let (gram_data, dd_lo, matrix_source_path, matrix_sha256) = load_matrix(max_n, dim, explicit_source, search_paths);
+    let has_dd = dd_lo.is_some();
+    if has_dd {
+        println!("  ✓ DD-precision matrix loaded (hi + lo, ~31 digits per entry)");
+    }
 
     // ─── Build b vector ───
     let b = arith::b_vector(dim);
@@ -116,7 +120,12 @@ pub fn certify_single(
 
     // ─── TIER 2: Compute d² (primary) ───
     let t_d2 = Instant::now();
-    let (d_sq, method, precision_digits) = compute_d_sq_primary(&gram_data, &b, dim);
+    let (d_sq, method, precision_digits) = if let Some(ref lo) = dd_lo {
+        // Use DD-matrix-aware CG solver
+        compute_d_sq_primary_dd(&gram_data, lo, &b, dim)
+    } else {
+        compute_d_sq_primary(&gram_data, &b, dim)
+    };
     let d2_time = t_d2.elapsed().as_secs_f64();
     println!("  ✓ d²_{} = {:.15}  ({})", max_n, d_sq, method);
     println!("    Precision: {} digits, time: {:.1}s", precision_digits, d2_time);
@@ -236,7 +245,7 @@ fn load_matrix(
     max_n: usize, dim: usize,
     explicit_source: Option<String>,
     search_paths: &[PathBuf],
-) -> (Vec<f64>, String, String) {
+) -> (Vec<f64>, Option<Vec<f64>>, String, String) {
     let t = Instant::now();
 
     // Try explicit source first
@@ -244,27 +253,44 @@ fn load_matrix(
         let path = PathBuf::from(path_str);
         if path.exists() {
             println!("  Loading: {}", path.display());
-            if let Some(data) = load_from_path(&path, dim) {
+            if let Some((data, lo)) = load_from_path(&path, dim) {
                 let sha = compute_sha256_prefix(&data);
                 println!("  ✓ Loaded in {:.1}s ({:.0} MB), SHA256: {}...",
                     t.elapsed().as_secs_f64(),
                     data.len() as f64 * 8.0 / 1e6, &sha[..16]);
-                return (data, path_str.clone(), sha);
+                return (data, lo, path_str.clone(), sha);
             }
         }
     }
 
-    // Discover from search paths
+    // Discover from search paths — prefer DD cache over f64
     let sources = ooc::discover_matrices(search_paths);
+    // First pass: look for DD cache
+    for source in &sources {
+        if source.max_n == max_n {
+            let name = source.path.file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default();
+            if name.starts_with("dd_gram_N") {
+                println!("  Found DD: {} ({:?})", source.path.display(), source.format);
+                if let Some((data, lo)) = load_from_path(&source.path, dim) {
+                    let sha = compute_sha256_prefix(&data);
+                    println!("  ✓ Loaded in {:.1}s ({:.0} MB), SHA256: {}...",
+                        t.elapsed().as_secs_f64(),
+                        data.len() as f64 * 8.0 / 1e6, &sha[..16]);
+                    return (data, lo, source.path.to_string_lossy().to_string(), sha);
+                }
+            }
+        }
+    }
+    // Second pass: any format
     for source in &sources {
         if source.max_n == max_n {
             println!("  Found: {} ({:?})", source.path.display(), source.format);
-            if let Some(data) = load_from_path(&source.path, dim) {
+            if let Some((data, lo)) = load_from_path(&source.path, dim) {
                 let sha = compute_sha256_prefix(&data);
                 println!("  ✓ Loaded in {:.1}s ({:.0} MB), SHA256: {}...",
                     t.elapsed().as_secs_f64(),
                     data.len() as f64 * 8.0 / 1e6, &sha[..16]);
-                return (data, source.path.to_string_lossy().to_string(), sha);
+                return (data, lo, source.path.to_string_lossy().to_string(), sha);
             }
         }
     }
@@ -294,20 +320,21 @@ fn load_matrix(
     let sha = compute_sha256_prefix(&data);
     println!("  ✓ Built in {:.1}s, SHA256: {}...",
         t.elapsed().as_secs_f64(), &sha[..16]);
-    (data, "built_from_scratch".to_string(), sha)
+    (data, None, "built_from_scratch".to_string(), sha)
 }
 
-fn load_from_path(path: &Path, dim: usize) -> Option<Vec<f64>> {
+/// Load matrix from path, returning (hi_data, optional_lo_data).
+fn load_from_path(path: &Path, dim: usize) -> Option<(Vec<f64>, Option<Vec<f64>>)> {
     let name = path.file_name()?.to_string_lossy();
 
     if name.starts_with("dd_gram_N") {
-        // DD cache: load hi part only (f64 precision)
-        let (hi, _lo, loaded_dim) = cache::load_dd_gram(path)?;
+        // DD cache: load both hi and lo parts
+        let (hi, lo, loaded_dim) = cache::load_dd_gram(path)?;
         if loaded_dim != dim {
             eprintln!("  ⚠ Dimension mismatch: loaded {} vs expected {}", loaded_dim, dim);
             return None;
         }
-        return Some(hi);
+        return Some((hi, Some(lo)));
     }
 
     if name.starts_with("ooc_gram_N") {
@@ -325,14 +352,14 @@ fn load_from_path(path: &Path, dim: usize) -> Option<Vec<f64>> {
             std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, total * 8)
         };
         file.read_exact(bytes).ok()?;
-        return Some(data);
+        return Some((data, None));
     }
 
     if name.starts_with("gram_N") {
         // Legacy format
-        let (hi, _, loaded_dim) = cache::load_dd_gram(path)?;
-        if loaded_dim != dim { return None; }
-        return Some(hi);
+        let gram = cache::load_gram(path)?;
+        if gram.max_dim != dim { return None; }
+        return Some((gram.data, None));
     }
 
     None
@@ -599,14 +626,12 @@ fn dd_two_prod(a: f64, b: f64) -> (f64, f64) {
     (p, e)
 }
 
-/// Parallel matrix-vector product: y = A x (f64, stays fast)
+/// Parallel matrix-vector product: y = A x (f64 matrix, DD accumulation)
 fn matvec_parallel(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
     y.par_iter_mut()
         .enumerate()
         .for_each(|(i, yi)| {
             let row = &a[i * dim..(i + 1) * dim];
-            // Use DD accumulation for the matvec dot product too —
-            // small overhead but critical for conditioning
             let mut acc = DD::from_f64(0.0);
             for j in 0..dim {
                 let (hi, lo) = dd_two_prod(row[j], x[j]);
@@ -614,6 +639,170 @@ fn matvec_parallel(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
             }
             *yi = acc.to_f64();
         });
+}
+
+/// Parallel DD-matrix-vector product: y = A x where A is stored as (hi, lo) pairs.
+///
+/// Each entry A[i,j] = hi[i*dim+j] + lo[i*dim+j] (~31 digits).
+/// The matvec accumulates in DD precision throughout.
+/// This is ~2x slower than f64 matvec but preserves positive-definiteness.
+fn matvec_dd(a_hi: &[f64], a_lo: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
+    y.par_iter_mut()
+        .enumerate()
+        .for_each(|(i, yi)| {
+            let offset = i * dim;
+            let mut acc = DD::from_f64(0.0);
+            for j in 0..dim {
+                // A[i,j] as DD = (hi, lo)
+                let a_dd = DD::new(a_hi[offset + j], a_lo[offset + j]);
+                // a_dd * x[j], accumulated in DD
+                let prod = a_dd * DD::from_f64(x[j]);
+                acc += prod;
+            }
+            *yi = acc.to_f64();
+        });
+}
+
+/// DD-matrix-aware CG solver.
+///
+/// Uses DD-precision matvec (reading hi+lo Gram entries) for ALL matrix operations.
+/// This is the fix for N > 40000: the f64 Gram matrix appears non-PD, but the
+/// DD Gram matrix preserves the tiny positive eigenvalues.
+fn compute_d_sq_primary_dd(
+    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize
+) -> (f64, &'static str, u32) {
+    // Try GPU Cholesky on hi part first (works for N ≤ 40k)
+    #[cfg(feature = "gpu")]
+    if gpu::detect().is_some() && dim <= 40000 {
+        match gpu::cholesky::d_sq_f64(gram_hi, b, dim) {
+            Ok(result) => {
+                return (result.d_sq, result.method, result.precision_digits);
+            }
+            Err(e) => {
+                eprintln!("  ⚠ GPU Cholesky failed ({}), using DD CG", e);
+            }
+        }
+    }
+
+    eprintln!("  → Using DD-Matrix CG (full DD matvec, Jacobi-preconditioned)...");
+    cg_solve_d_sq_dd_matrix(gram_hi, gram_lo, b, dim)
+}
+
+/// Full DD-matrix CG solver.
+///
+/// Unlike cg_solve_d_sq_dd (which does DD dot products on an f64 matrix),
+/// this does DD matvec from DD matrix entries. This is the correct solver
+/// for N > 40000 where f64 matrix entries are insufficiently precise.
+fn cg_solve_d_sq_dd_matrix(
+    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize
+) -> (f64, &'static str, u32) {
+    let t = Instant::now();
+
+    // Jacobi preconditioner from DD diagonal
+    let m_inv: Vec<f64> = (0..dim).into_par_iter()
+        .map(|i| {
+            let diag = gram_hi[i * dim + i] + gram_lo[i * dim + i];
+            if diag > 0.0 { 1.0 / diag } else { 1.0 }
+        }).collect();
+
+    // Initialize: x = 0, r = b
+    let mut x = vec![0.0f64; dim];
+    let mut r = b[..dim].to_vec();
+    let mut z: Vec<f64> = r.par_iter().zip(m_inv.par_iter())
+        .map(|(ri, mi)| ri * mi).collect();
+    let mut p = z.clone();
+    let mut ap = vec![0.0f64; dim];
+
+    let mut rz = par_dot_dd(&r, &z);
+    let b_norm_sq = par_dot_dd(b, b);
+    let b_norm = b_norm_sq.to_f64().sqrt();
+    let tol = 1e-14 * b_norm;
+    let max_iter = dim.min(50_000);
+
+    let mut converged = false;
+    let mut final_iter = 0;
+    let mut stagnation_count = 0;
+    let mut prev_r_norm = f64::MAX;
+
+    for iter in 0..max_iter {
+        // ap = G p  using DD matvec — the key difference!
+        matvec_dd(gram_hi, gram_lo, &p, &mut ap, dim);
+
+        let pap = par_dot_dd(&p, &ap);
+        if pap.hi <= 0.0 && pap.lo <= 0.0 {
+            eprintln!("  ⚠ CG-DD-Matrix: non-positive p^T A p at iter {} (DD: {:.6e}+{:.6e})",
+                iter, pap.hi, pap.lo);
+            break;
+        }
+
+        let alpha = rz / pap;
+        let alpha_f64 = alpha.to_f64();
+
+        x.par_iter_mut().zip(p.par_iter())
+            .for_each(|(xi, pi)| *xi += alpha_f64 * pi);
+        r.par_iter_mut().zip(ap.par_iter())
+            .for_each(|(ri, api)| *ri -= alpha_f64 * api);
+
+        let r_norm_sq = par_dot_dd(&r, &r);
+        let r_norm = r_norm_sq.to_f64().sqrt();
+
+        if iter % 500 == 0 || r_norm < tol {
+            let bx = par_dot_dd(&b[..dim], &x);
+            let d_sq_est = 1.0 - bx.to_f64();
+            eprint!("\r  CG-DD-Matrix iter {:>5}: ‖r‖={:.3e}, d²≈{:.12}", iter, r_norm, d_sq_est);
+        }
+
+        if r_norm < tol {
+            eprintln!();
+            converged = true;
+            final_iter = iter;
+            break;
+        }
+
+        // Stagnation detection with residual recomputation
+        if r_norm >= prev_r_norm * 0.9999 {
+            stagnation_count += 1;
+            if stagnation_count >= 50 && stagnation_count % 100 == 0 {
+                matvec_dd(gram_hi, gram_lo, &x, &mut ap, dim);
+                r.par_iter_mut().enumerate()
+                    .for_each(|(i, ri)| *ri = b[i] - ap[i]);
+                z.par_iter_mut().enumerate()
+                    .for_each(|(i, zi)| *zi = m_inv[i] * r[i]);
+                rz = par_dot_dd(&r, &z);
+                p = z.clone();
+                continue;
+            }
+        } else {
+            stagnation_count = 0;
+        }
+        prev_r_norm = r_norm;
+
+        z.par_iter_mut().enumerate()
+            .for_each(|(i, zi)| *zi = m_inv[i] * r[i]);
+
+        let rz_new = par_dot_dd(&r, &z);
+        let beta = rz_new / rz;
+        let beta_f64 = beta.to_f64();
+        rz = rz_new;
+
+        p.par_iter_mut().zip(z.par_iter())
+            .for_each(|(pi, zi)| *pi = zi + beta_f64 * *pi);
+
+        final_iter = iter;
+    }
+
+    if !converged {
+        eprintln!();
+        eprintln!("  ⚠ CG-DD-Matrix did not fully converge in {} iterations", max_iter);
+    }
+
+    let bx = par_dot_dd(&b[..dim], &x);
+    let d_sq = 1.0 - bx.to_f64();
+    let cg_time = t.elapsed().as_secs_f64();
+    eprintln!("  ✓ CG-DD-Matrix: {} iters in {:.1}s (converged={})", final_iter + 1, cg_time, converged);
+
+    let precision = if converged { 15 } else { 12 };
+    (d_sq, "CG_DD_Matrix_Jacobi", precision)
 }
 
 
