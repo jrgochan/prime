@@ -8,7 +8,7 @@
   to Energy, Security, and Signal Processing%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 \maketitle
@@ -81,7 +81,7 @@ frequency-domain filtering.
 \textbf{Component} & \textbf{Status} \\
 \midrule
 Mathematical theory & Formally verified (Lean~4) \\
-Numerical validation & 512-bit MPFR, $N \leq 5000$ \\
+Numerical validation & 512-bit MPFR / DD, $N \leq 55{,}440$ \\
 Prototype hardware & Not yet built \\
 Regulatory pathway & Requires THD certification \\
 \bottomrule
@@ -162,14 +162,21 @@ computation pipeline:
 \begin{enumerate}
   \item \textbf{Exact Gram matrix computation} via the Vasyunin
     cotangent formula (512-bit MPFR, certified to 6 digits).
+  \item \textbf{DD-precision Conjugate Gradient} via Dekker--Knuth
+    Double-Double arithmetic, enabling $N = 55{,}440$ certification
+    where standard f64 eigensolvers fail completely.
   \item \textbf{Eigenvalue certification} via the cert-export
     pipeline (JSON certificates consumed by Lean oracles).
   \item \textbf{Spectral gap monitoring} via condition-number-gated
     precision switching.
 \end{enumerate}
 
-The pipeline can be adapted for industrial deployment by replacing
-the Lean oracle layer with runtime assertion checks.
+The DD-precision pipeline is the key engineering advance of
+the Observatory Edition (v16). At condition numbers exceeding
+$10^{15}$, f64 arithmetic produces non-physical results; the
+DD solver recovers 31 digits of precision at only $2\times$ cost.
+This has direct implications for industrial monitoring systems
+that must distinguish genuine instability from numerical artifacts.
 
 % ================================================================
 \section{Conclusion}

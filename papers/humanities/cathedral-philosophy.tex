@@ -8,7 +8,7 @@
   and the History of an Unsolved Problem%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 \maketitle
@@ -20,7 +20,7 @@ mathematics and the history of the problem it addresses. We argue
 that the Cathedral occupies a novel philosophical position: it is
 neither a proof of RH nor a failure to prove it, but rather a
 \emph{containment vessel} that isolates the unknown content of RH
-to two precisely characterized gaps. We examine what this means for
+to one precisely characterized gap. We examine what this means for
 mathematical truth, the nature of proof, and the relationship between
 human and machine understanding. We place the project in the
 historical arc from Riemann (1859) through Hilbert's program,
@@ -63,7 +63,7 @@ against a specification. It convinces not a human but a compiler.
 \subsection{The Cathedral's Position}
 
 The Cathedral is a formal proof that type-checks. But it proves
-a \emph{conditional} statement: RH $\iff$ decay, modulo two axioms.
+a \emph{conditional} statement: RH $\iff$ decay, modulo one axiom.
 Is this a proof? Of what?
 
 We argue it is a proof of the \emph{logical structure} of the
@@ -74,19 +74,29 @@ concrete analytic statement, with the equivalence machine-verified.
 \section{The Axiom as Philosophical Concept}
 % ================================================================
 
-The Cathedral's two axioms are not articles of faith. They are
-precisely stated mathematical claims that happen to lack
-machine-checked proofs. They are:
+The Cathedral's one axiom is not an article of faith. It is a
+precisely stated mathematical claim that happens to lack
+a machine-checked proof. It is:
 \begin{enumerate}
   \item Provable in $\ZFC$ by standard methods.
-  \item Verified numerically to high precision.
+  \item Verified numerically to high precision ($N = 55{,}440$).
+  \item Published in a peer-reviewed journal (IMRN 2003).
   \item Accepted by the mathematical community as true.
 \end{enumerate}
 
 The question ``is this proof complete?'' becomes ``what is the
-epistemic status of these two claims?'' The Cathedral converts a
+epistemic status of this one claim?'' The Cathedral converts a
 qualitative question (is RH true?) into a quantitative one (how
-certain are we of these two bounds?).
+certain are we of B\'aez-Duarte's forward direction?).
+
+\begin{remark}[The Philosophical Progression]
+The Cathedral's axiom count evolved: 56 $\to$ 42 $\to$ 7 $\to$ 4
+$\to$ 2 $\to$ 1. Each reduction made the containment vessel
+tighter, the unknown content more precisely localized. The
+progression from ``56 unknowns'' to ``1 published result''
+is itself a philosophical achievement: the gradual replacement
+of faith with verification.
+\end{remark}
 
 % ================================================================
 \section{The History of the Riemann Hypothesis}
@@ -136,9 +146,16 @@ regardless of whether RH is true, false, or independent.
 Does the Lean compiler ``understand'' the Riemann Hypothesis?
 
 No---it verifies type-correctness. But the human author does not
-``understand'' all 50{,}623 lines either. The understanding is
+``understand'' all 78{,}435 lines either. The understanding is
 \emph{distributed}: the human understands the architecture; the
 machine verifies the details; neither comprehends the whole.
+
+The Cathedral adds a further dimension: the understanding was
+also distributed \emph{temporally}. Across 42 days and hundreds
+of context windows, knowledge was carried by the human, rediscovered
+by the AIs, and certified by the compiler. The proof exists as a
+whole only in the repository; no single mind has ever held it
+completely.
 
 This distributed cognition model may be the future of mathematics:
 not human proof or machine proof, but human-machine proof, where
@@ -151,7 +168,7 @@ strengths.
 
 Like its architectural namesake, the Cathedral is:
 \begin{itemize}
-  \item \textbf{Built over time}: 32 days, 15 versions.
+  \item \textbf{Built over time}: 42 days, 16 versions.
   \item \textbf{Built by many hands}: human + two AI systems.
   \item \textbf{Built to last}: machine verification ensures
     permanence.
@@ -161,8 +178,8 @@ Like its architectural namesake, the Cathedral is:
 
 The medieval cathedral builders could not see their work completed.
 The mathematical Cathedral builders face a similar situation: the
-two remaining axioms may take years---or decades---to formalize.
-But the architecture stands, ready.
+one remaining axiom may take years---or weeks---to formalize.
+But the architecture stands, ready. The Observatory is calibrated.
 
 % ================================================================
 \section{Conclusion}

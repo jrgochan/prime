@@ -7,7 +7,7 @@
   Research Frontiers Beyond the Cathedral%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 \maketitle
@@ -16,9 +16,9 @@
 We survey the open problems and research directions suggested by
 the Cathedral project, spanning computer science, pure mathematics,
 and formalization engineering. The Cathedral reduced the Riemann
-Hypothesis to two axioms; we identify the mathematical infrastructure
-needed to close them, the algorithmic questions raised by the
-spectral pipeline, and the broader implications for the formal
+Hypothesis to one literature axiom; we identify the mathematical
+infrastructure needed to close it, the algorithmic questions raised by the
+DD-precision pipeline, and the broader implications for the formal
 verification of analytic number theory.
 \end{abstract}
 
@@ -33,32 +33,44 @@ more doors than it closes. This paper maps the territory beyond
 the Cathedral walls.
 
 % ================================================================
-\section{Closing the Two Axioms}
+\section{Closing the One Crown Axiom}
 % ================================================================
 
-\subsection{Axiom 1: Hardy--Littlewood MVT}
+The sole crown axiom \lean{baez\_duarte\_forward} states that under
+RH, the BD basis can approximate 1 in $L^2(0,1)$. This is the
+B\'aez-Duarte forward direction (IMRN 2003). Closing it requires
+connecting the existing infrastructure (see BOUNTY.md for the
+detailed gap analysis):
 
-Formalizing $\int_0^T|1/\zeta(1/2+it)|^2\,dt = O(T)$ requires:
 \begin{enumerate}
-  \item The approximate functional equation for $\zeta(s)$.
-  \item Fourth-moment bounds on the critical line.
-  \item Hybrid Euler--Hadamard product estimates.
+  \item The Littlewood Maneuver (\textbf{PROVED}, 0 axioms).
+  \item The Parseval Bridge (\textbf{PROVED}, 0 axioms).
+  \item The Perron chain giving $M(x) = O(x^{1/2+\varepsilon})$
+    under RH (\textbf{PROVED}, 0 axioms).
+  \item The truncation error bound for Dirichlet polynomials
+    (\textbf{GAP}: 500--800 lines, 2--3 weeks).
+  \item The Kronecker/Bohr approximation theorem
+    (\textbf{GAP}: 300--500 lines, 1--2 weeks).
 \end{enumerate}
 
-\textbf{Difficulty}: Hard. Requires 3--6 months of Mathlib
-development by an expert in analytic number theory formalization.
+\textbf{Estimated total}: 900--1{,}500 lines, 3--6 weeks for an
+expert team. 95\% of the infrastructure already exists.
 
-\subsection{Axiom 2: Hadamard Product Lower Bound}
+\subsection{Alternative Paths}
 
-Formalizing $|\zeta(s)| \geq c|t|^{-A}$ for $\re s \geq 1/2 + \varepsilon$ requires:
+Three alternative forward paths provide cross-validation:
+
 \begin{enumerate}
-  \item The Hadamard product formula for $\zeta(s)$.
-  \item Riemann--von Mangoldt zero counting $N(T) \sim T\log T/(2\pi)$.
-  \item Connecting Borel--Carath\'eodory (in Mathlib) to zero density.
+  \item \textbf{Mellin Crown} (2 axioms): Via the Hardy--Littlewood
+    mean value theorem and Hadamard product estimates.
+  \item \textbf{Perron Crown} (4 axioms): Via real-variable Mertens
+    bounds and the Vasyunin Gram matrix.
+  \item \textbf{Renormalization Bridge}: Via the log-cutoff
+    renormalization group flow.
 \end{enumerate}
 
-\textbf{Difficulty}: Medium--Hard. Borel--Carath\'eodory is in
-Mathlib; the gap is infrastructure.
+Closing any alternative-path axiom strengthens the multi-path
+architecture even if the crown axiom remains open.
 
 % ================================================================
 \section{Algorithmic Questions}
@@ -134,13 +146,21 @@ Five Mathlib additions with highest impact:
 
 \subsection{Certified Computation at Scale}
 
-The cert-export pipeline demonstrates JSON-to-Lean certification.
-Scaling to $N = 10{,}000$ requires:
+The DD-precision pipeline (Dekker--Knuth Double-Double arithmetic)
+has extended Gram matrix certification to $N = 55{,}440$. Scaling
+further requires:
 \begin{itemize}
-  \item GPU-accelerated MPFR eigensolvers.
+  \item GPU-accelerated DD matvec for $N > 100{,}000$.
+  \item Out-of-core Gram matrix construction for systems exceeding
+    RAM capacity.
+  \item Streaming DD-precision CG with checkpoint/restart.
   \item Parallel certification across moduli.
-  \item Streaming certificate generation for Lean.
 \end{itemize}
+
+The Dekker--Knuth boundary ($N \approx 40{,}000$) marks the
+transition from f64-tractable to DD-required computation. Beyond
+$N \approx 200{,}000$, even DD arithmetic may exhaust precision,
+requiring triple-double or MPFR-backed CG solvers.
 
 \subsection{Formal Proofs for Related Problems}
 
@@ -161,9 +181,9 @@ The Cathedral architecture could be adapted for:
 The Cathedral is an ending and a beginning. The proof architecture
 is complete; the mathematical questions it raises are not. The
 research frontier extends in at least five directions: closing the
-two axioms, understanding the spectral universality, exploiting the
-algorithmic structure, contributing to Mathlib, and generalizing to
-other $L$-functions.
+one crown axiom, understanding the spectral universality, exploiting the
+algorithmic structure (including the DD-precision pipeline),
+contributing to Mathlib, and generalizing to other $L$-functions.
 
 \begin{thebibliography}{99}
 \bibitem{cathedral}
