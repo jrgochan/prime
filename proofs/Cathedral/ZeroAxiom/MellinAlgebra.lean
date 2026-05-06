@@ -95,10 +95,11 @@ lemma weight_sum_eq_neg_poly (N : ℕ) (s : ℂ) :
   unfold fejerDirichletPoly bdMoebiusWeight fejerTaper
   simp only [show ∀ i : Fin (N - 1), (i.val + 1) ≠ 0 from fun i => Nat.succ_ne_zero i.val,
              ↓reduceIte]
-  -- The LHS has ℤ→ℝ→ℂ coercion path, the RHS has ℤ→ℂ path.
-  -- Both are negation over a finite sum — mathematically trivial.
-  -- TODO: resolve the ℝ↔ℂ cast chain (Coercion Bypass)
-  sorry
+  push_cast
+  rw [← Finset.sum_neg_distrib]
+  apply Finset.sum_congr rfl
+  intro i _
+  ring
 
 -- ════════════════════════════════════════════════
 -- §5. THE NORM BOUND ON THE CRITICAL LINE
