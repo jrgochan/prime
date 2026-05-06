@@ -21,6 +21,7 @@
 use cathedral_utils::arith::{b_vector, EULER_GAMMA};
 use cathedral_utils::cache::{self, load_gram};
 use cathedral_utils::lanczos;
+use cathedral_utils::ooc;
 use nalgebra::DMatrix;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -40,6 +41,11 @@ fn main() {
         .find(|s| s.starts_with("--k="))
         .and_then(|s| s.strip_prefix("--k=").and_then(|v| v.parse().ok()))
         .unwrap_or(50);
+    // OOC search directories (for N=55440+ where only OOC format exists)
+    let ooc_dirs: Vec<PathBuf> = args.iter()
+        .filter(|s| s.starts_with("--ooc-dir="))
+        .filter_map(|s| s.strip_prefix("--ooc-dir=").map(PathBuf::from))
+        .collect();
     let sizes: Vec<usize> = args.iter()
         .filter(|s| !s.starts_with("--"))
         .filter_map(|s| s.parse().ok())
@@ -55,12 +61,15 @@ fn main() {
     } else {
         println!("  Mode: FULL eigendecomposition");
     }
+    if !ooc_dirs.is_empty() {
+        println!("  OOC dirs: {:?}", ooc_dirs);
+    }
 
     let mut all_results: Vec<SpectralResult> = Vec::new();
 
     for &n in &sizes {
         let result = if use_lanczos || n > 5000 {
-            run_spectral_observatory_lanczos(n, lanczos_k)
+            run_spectral_observatory_lanczos(n, lanczos_k, &ooc_dirs)
         } else {
             run_spectral_observatory(n)
         };
@@ -441,6 +450,27 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
 // LANCZOS MODE — for large N where full eigendecomp is infeasible
 // ═══════════════════════════════════════════════════════════════════════
 
+/// Load a Gram matrix from OOC (CATHOOC) format.
+/// Reads the 40-byte header, then the raw f64 matrix data.
+fn load_ooc_matrix(path: &std::path::Path, dim: usize) -> Option<Vec<f64>> {
+    use std::io::Read;
+    let mut file = std::fs::File::open(path).ok()?;
+    let header = ooc::read_header(&mut file).ok()??;
+    eprintln!("  OOC header: N={}, dim={}, precision={}", header.max_n, header.dim, header.precision);
+    if header.dim != dim {
+        eprintln!("  ⚠ Dimension mismatch: OOC has dim={}, expected {}", header.dim, dim);
+        return None;
+    }
+    let total = dim * dim;
+    let mut data = vec![0.0f64; total];
+    let bytes: &mut [u8] = unsafe {
+        std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, total * 8)
+    };
+    eprintln!("  Reading {:.1} GB matrix data...", (total * 8) as f64 / 1e9);
+    file.read_exact(bytes).ok()?;
+    Some(data)
+}
+
 /// Dense matvec for Lanczos: out = mat · v (row-major).
 fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
     use rayon::prelude::*;
@@ -463,12 +493,12 @@ fn shifted_matvec(mat: &[f64], dim: usize, sigma: f64, v: &[f64], out: &mut [f64
     }
 }
 
-fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize) -> Option<SpectralResult> {
+fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathBuf]) -> Option<SpectralResult> {
     println!("\n{}", "═".repeat(72));
     println!("  🔭 SPECTRAL OBSERVATORY [LANCZOS] — N = {n}");
     println!("{}", "═".repeat(72));
 
-    // Load Gram matrix (same logic as full mode)
+    // Load Gram matrix — try standard cache, DD cache, then OOC
     let t0 = Instant::now();
     let cache_candidates = [
         cache::gram_cache_path(n, 106),
@@ -487,6 +517,7 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize) -> Option<Spectra
         assert_eq!(dim, n - 1);
         (gram.data, dim)
     } else {
+        // Try DD cache
         let dd_candidates = [
             cache::dd_gram_cache_path(n, 256),
             cache::dd_gram_cache_path(n, 128),
@@ -501,7 +532,23 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize) -> Option<Spectra
             assert_eq!(dim, n - 1);
             (hi, dim)
         } else {
-            return None;
+            // Try OOC format from all search dirs + standard cache dir
+            let mut search = ooc_dirs.to_vec();
+            search.push(cache::cache_dir());
+            let sources = ooc::discover_matrices(&search);
+            if let Some(source) = sources.iter().find(|s| s.max_n == n && s.format == ooc::MatrixFormat::Ooc) {
+                eprintln!("  Trying OOC: {}", source.path.display());
+                let dim = n - 1;
+                match load_ooc_matrix(&source.path, dim) {
+                    Some(data) => (data, dim),
+                    None => {
+                        eprintln!("  ⚠ Failed to load OOC matrix");
+                        return None;
+                    }
+                }
+            } else {
+                return None;
+            }
         }
     };
 
