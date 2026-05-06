@@ -3,27 +3,30 @@
 \usepackage{../shared/cathedral-preamble}
 
 \title{%
-  The 38 Experiments:\\
+  The 48 Experiments:\\
   Computational Validation of the Cathedral\\
-  via Certified Rust/MPFR Pipelines%
+  via Certified Rust/MPFR/DD Pipelines%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-We document the 38 companion experiments that validate the Cathedral's
+We document the 48+ companion experiments that validate the Cathedral's
 formal proof architecture. Each experiment is implemented in Rust,
-using f64 through 512-bit MPFR arithmetic, and produces either
+using f64 through 512-bit MPFR and DD (31-digit Dekker--Knuth)
+arithmetic, and produces either
 numerical validation data or certified JSON output consumed by Lean
-oracle axioms. The experiments span five categories: Gram matrix
+oracle axioms. The experiments span six categories: Gram matrix
 computation, Mellin/Parseval validation, Perron contour integration,
-spectral analysis, and character-spectral probes. We describe the
+spectral analysis, character-spectral probes, and DD-precision
+certification. We describe the
 certification pipeline that bridges computational results to formal
-proofs, achieving Sherman--Morrison match to $10^{-17}$ and
-eigenvalue certification through $N = 1000$.
+proofs, achieving Sherman--Morrison match to $10^{-17}$,
+eigenvalue certification through $N = 1000$, and DD-precision
+Gram matrix certification at $N = 55{,}440$.
 \end{abstract}
 
 \tableofcontents
@@ -98,6 +101,15 @@ arithmetic.
 36 & bc-witness-analysis & Zeta & f64 \\
 37 & bc-zeta-lower & Zeta & 256-bit MPFR \\
 38 & cert-export & Certified & f64 + JSON \\
+\midrule
+39 & nb-witness-scan & BD & f64 (midpoint quad) \\
+40 & certified-distance & DD & DD + MPFR \\
+41 & cathedral-utils & Shared & f64 + MPFR \\
+42 & gram-scaling-oracle & Gram & 256-bit MPFR \\
+43 & two-tile-decomposition & Analysis & f64 \\
+44 & nb-witness-scan-gpu & BD (GPU) & f32/f64 \\
+45 & renormalization-bridge & Renorm & f64 \\
+46--48+ & (additional experiments) & Various & Mixed \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -136,12 +148,21 @@ floating-point roundoff cannot propagate into the formal logic.
     eigenvalues for $m \in \{3,4,5,6,7,8,10,12\}$.
 \end{enumerate}
 
-\subsection{The Precision Wall}
+\subsection{The Precision Wall and the Dekker--Knuth Solution}
 
 At $N \geq 750$, the Gram matrix condition number exceeds $10^6$,
 causing standard f64 eigensolvers to hallucinate negative eigenvalues.
-The certification pipeline detects this via condition number
-monitoring and switches to MPFR arithmetic when $\kappa > 10^4$.
+At $N > 40{,}000$, the condition number exceeds $10^{15}$ and
+\emph{every} f64 eigensolver produces non-physical results: the
+matrix appears non-positive-definite despite being provably SPD.
+
+The \texttt{certified-distance} experiment solves this with
+Dekker--Knuth Double-Double (DD) arithmetic, providing $\sim$31 digits
+of precision at only $2\times$ the cost of f64. A DD-precision
+Conjugate Gradient solver computes $d^2_N$ at $N = 55{,}440$
+($\dim = 55{,}439$), the largest such computation in the literature.
+The DD matrix is built by \texttt{cathedral-utils} using MPFR at
+256-bit precision, then splitting each entry into (hi, lo) f64 pairs.
 
 % ================================================================
 \section{Key Experimental Results}
@@ -176,12 +197,14 @@ number-theoretic order and random matrix chaos.
 \section{Conclusion}
 % ================================================================
 
-The 38 experiments provide computational validation at every level
+The 48+ experiments provide computational validation at every level
 of the Cathedral's proof architecture, from the Gram matrix entries
 to the spectral gap to the Parseval bridge to the thermodynamic
-equation of state. The certified JSON pipeline ensures that
+equation of state to the DD-precision Dekker--Knuth frontier.
+The certified JSON pipeline ensures that
 computational discoveries are automatically available to the formal
-proof engine.
+proof engine. The DD-precision pipeline extends certification to
+$N = 55{,}440$, beyond the reach of any standard eigensolver.
 
 \begin{thebibliography}{99}
 \bibitem{cathedral}

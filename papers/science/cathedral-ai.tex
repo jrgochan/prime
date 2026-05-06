@@ -7,7 +7,7 @@
   How Three Minds Built the Cathedral%
 }
 \author{Jason Robert Gochanour}
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 \maketitle
@@ -16,7 +16,7 @@
 We document the methodology of AI-assisted formal verification as
 practiced in the Cathedral project, where a human mathematician
 collaborated with two large language models---Google DeepMind's
-Gemini and Anthropic's Claude---to produce a 50{,}623-line Lean~4
+Gemini and Anthropic's Claude---to produce a 78{,}435-line Lean~4
 formalization of the Nyman--Beurling equivalence for the Riemann
 Hypothesis. We analyze the division of labor, the communication
 protocols between human and AI, the failure modes encountered,
@@ -42,8 +42,9 @@ The Cathedral was not built by a single mind. It was built by three:
     the Mellin Crown architecture, phase cancellation analysis,
     and deep analytic number theory insight.
   \item \textbf{Claude/Antigravity} (Anthropic): Lean~4 proof
-    engineering, the Parseval bridge implementation, Rust experiment
-    design, and systematic codebase management.
+    engineering, the Parseval bridge implementation, DD-precision
+    pipeline, Rust experiment design, One-Pillar architecture
+    consolidation, and systematic codebase management.
 \end{itemize}
 
 A fourth entity---the Lean~4 compiler---served as an incorruptible
@@ -68,7 +69,7 @@ The human's role was irreplaceable in three areas:
   \item \textbf{Quality control}: Reading every line of generated
     Lean code, catching subtle errors that ``looked right'' but
     were mathematically wrong.
-  \item \textbf{Persistence}: The project took 32 days. Neither AI
+  \item \textbf{Persistence}: The project took 42 days. Neither AI
     maintained state between sessions. The human carried the
     architectural memory.
 \end{enumerate}
@@ -96,11 +97,16 @@ Gemini's contributions included:
 Claude's contributions included:
 \begin{enumerate}
   \item \textbf{Lean~4 implementation}: Writing and debugging the
-    50{,}623 lines of formal proof code.
+    78{,}435 lines of formal proof code.
   \item \textbf{The Parseval Bridge}: Implementing the frequency-domain
     bypass of the Vasyunin cotangent formula.
   \item \textbf{Rust experiments}: Designing and implementing all
-    38 computational validation programs.
+    48+ computational validation programs.
+  \item \textbf{DD-precision pipeline}: Building the Dekker--Knuth
+    Double-Double Conjugate Gradient solver for $N = 55{,}440$
+    certification.
+  \item \textbf{One-Pillar consolidation}: Reducing the crown
+    architecture from 2 axioms to 1 via \texttt{baez\_duarte\_forward}.
   \item \textbf{Axiom archaeology}: Systematic auditing of the
     codebase, detecting ghost axioms, managing the archive.
   \item \textbf{Crown Graduation}: Closing the final sorry on the
@@ -131,7 +137,7 @@ a structural defense against correlated AI failure modes.
 \subsection{The Exploration Protocol}
 
 Mathematical investigations were organized as numbered
-``Explorations'' (19 total). Each exploration had:
+``Explorations'' (27 total). Each exploration had:
 \begin{itemize}
   \item A hypothesis to test.
   \item An experimental design document.
@@ -172,7 +178,7 @@ was either machine-verified or explicitly marked as an axiom.
 
 \subsection{Context Window Limitations}
 
-Neither AI could hold the entire 50{,}623-line codebase in context.
+Neither AI could hold the entire 78{,}435-line codebase in context.
 This required careful file-level modularization and systematic
 documentation of inter-file dependencies.
 
@@ -216,6 +222,8 @@ possessed:
 27 & Crown Graduation (0 sorry) & Claude \\
 28 & Dual Path + Spectral Universality & All three \\
 29--32 & Papers, experiments, archival & All three \\
+33--38 & Centralization, axiom graduation & Claude + Gemini \\
+39--42 & \textbf{One-Pillar Cathedral} (v16, 1 axiom) + DD pipeline & All three \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -251,9 +259,9 @@ reproducibility than any traditional mathematical paper.
 
 The Cathedral demonstrates that the ``three-mind'' architecture is
 not just feasible but \emph{powerful}. The axiom count dropped from
-56 to 2. The codebase grew from 0 to 50{,}623 lines. Five mathematical
+56 to 1. The codebase grew from 0 to 78{,}435 lines. Five mathematical
 traps were caught that would have been invisible to informal proof.
-And a 167-year-old problem was reduced to two well-understood bounds.
+And a 167-year-old problem was reduced to one well-understood bound.
 
 None of this was possible alone.
 

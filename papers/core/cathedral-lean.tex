@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 
@@ -21,7 +21,7 @@
 \begin{abstract}
 We describe the practical techniques and logical foundations for
 formalizing analytic number theory in Lean~4 with Mathlib, distilled
-from the Cathedral project: a 50{,}623-line formalization of the
+from the Cathedral project: a 78{,}435-line formalization of the
 Nyman--Beurling criterion for the Riemann Hypothesis.
 
 The first half covers foundations: the type-theoretic setting (CIC
@@ -57,7 +57,7 @@ the \emph{foundational} (what are we trusting?) and the
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (2 on crown path, 104 total) \\
+5 & Mathematical axioms (1 on crown path, $\sim$50 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -69,8 +69,8 @@ the \emph{foundational} (what are we trusting?) and the
 The Cathedral project encountered the challenge of using complex
 analysis, real analysis, combinatorics, and linear algebra
 \emph{together} in a single proof, with consistent type coercions
-and compatible assumptions. Over 32 days it produced 169 active
-Lean files (with 100 archived). This paper distills the lessons.
+and compatible assumptions. Over 42 days it produced 308 active
+Lean files (with 128+ archived). This paper distills the lessons.
 
 % ================================================================
 \section{The Type-Theoretic Foundation}
@@ -98,8 +98,8 @@ is equiconsistent with $\ZFC$.
 
 \subsection{The Seven Axioms of the Cathedral}
 
-The crown theorem reports exactly 5 axioms via \lean{\#print axioms}
-(3 kernel + 2 mathematical):
+The crown theorem reports exactly 4 axioms via \lean{\#print axioms}
+(3 kernel + 1 mathematical):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
@@ -109,14 +109,14 @@ The crown theorem reports exactly 5 axioms via \lean{\#print axioms}
 1 & \lean{propext} & Lean kernel & --- \\
 2 & \lean{Classical.choice} & Lean kernel & --- \\
 3 & \lean{Quot.sound} & Lean kernel & --- \\
-4 & \lean{critical\_line\_mellin\_variance} & Cathedral & Mellin \\
-5 & \lean{rh\_zeta\_lower\_bound} & Cathedral & Hadamard \\
+4 & \lean{baez\_duarte\_forward} & Cathedral & BD (IMRN 2003) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Both mathematical axioms are provable in $\ZFC$ by standard methods.
-They are formalization gaps, not foundational gaps.
+The sole mathematical axiom is the B\'aez-Duarte forward direction
+(IMRN 2003, no.~36), provable in $\ZFC$ by standard methods.
+It is a formalization gap, not a foundational gap.
 
 \subsection{Constructivity Analysis}
 
@@ -136,7 +136,7 @@ requiring the Montgomery--Vaughan MVT and Perron's formula.
 Lean kernel (type-checker) & $\sim$5{,}000 \\
 Lean elaborator + tactics & $\sim$100{,}000 \\
 Mathlib library & $\sim$1{,}400{,}000 \\
-Cathedral & $\sim$50{,}623 \\
+Cathedral & $\sim$78{,}435 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -153,15 +153,15 @@ The Cathedral introduces a foundational concept: the
 
 \begin{enumerate}
   \item \textbf{Kernel axioms}: Trusted by design. (3)
-  \item \textbf{Crown axioms}: On the critical path. (2)
-  \item \textbf{Off-path axioms}: Don't affect the crown. (102)
+  \item \textbf{Crown axioms}: On the critical path. (1)
+  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$49)
   \item \textbf{Theorems}: Machine-verified from Mathlib.
   \item \textbf{Archived axioms}: Previously active, now proved. (11)
 \end{enumerate}
 
 This gradient makes progress visible. Each axiom elimination moves
 a statement from category~2/3 to category~4. The reduction from
-56 crown axioms to 2 is a deleveraging of the proof's balance sheet.
+56 crown axioms to 1 is a deleveraging of the proof's balance sheet.
 
 % ================================================================
 \section{Mathlib APIs That Worked Well}
@@ -348,7 +348,7 @@ Formalizing analytic number theory in Lean~4 is feasible today, but
 requires significant infrastructure work. The main gaps are in
 complex analysis (contour integrals, analytic continuation) and
 specialized number theory (Mertens function, Dirichlet polynomial
-bounds). The Cathedral took 32 days and produced 50{,}623 lines.
+bounds). The Cathedral took 42 days and produced 78{,}435 lines.
 
 The foundational analysis shows the proof inhabits ordinary
 mathematics ($\ZFC$), requires no large cardinals, and achieves
