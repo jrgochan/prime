@@ -55,6 +55,7 @@ members = [
     "experiments/two-tile-decomposition-gpu",
     "experiments/certified-distance",
     "experiments/nb-witness-scan",
+    "experiments/nb-witness-scan-gpu",
 ]
 
 [profile.release]
