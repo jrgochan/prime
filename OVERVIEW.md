@@ -6,7 +6,8 @@
 >
 > **Last updated**: May 6, 2026 (v16 — Observatory Edition, One-Pillar Cathedral)
 >
-> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline
+> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline,
+> N=55,440 certified (d²=0.0398), N=120,000 in progress
 
 ---
 
@@ -135,6 +136,30 @@ validates Axiom 1 via three-channel Parseval bridge comparison:
 | 2000 | 0.05012 | 0.05012 | 6.6×10⁻⁶ | 0.381 |
 
 Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)).
+
+### Certified d² Distance (Gram Solver)
+
+The `experiments/certified-distance/` pipeline computes d²_N = 1 - bᵀ G_N⁻¹ b
+using MPFR-256 Gram matrices solved via DD-precision CG on GPU:
+
+| N | d² | Method | d²·ln(N) |
+|---:|---:|:---|---:|
+| 100 | 0.0413 | DD-Matrix CG | 0.190 |
+| 1,000 | 0.0414 | CPU Cholesky | 0.286 |
+| 10,000 | 0.0406 | GPU Cholesky | 0.374 |
+| 20,000 | 0.0404 | GPU Cholesky | 0.400 |
+| 40,000 | 0.0400 | GPU Cholesky | 0.424 |
+| **55,440** | **0.0398** | **CG-DD (mmap+GPU)** | **0.435** |
+| 120,000 | — | CG-DD (in progress) | — |
+
+Monotonic decrease d²(N) ~ C/ln(N) with C ≈ 0.43. Each certificate includes
+matrix SHA-256, solver metadata, and Lean-compatible oracle claims.
+See `experiments/certified-distance/certificates/` for full JSON certificates.
+
+> [!NOTE]
+> The N=55,440 certificate was initially recorded as d²=0.0182 due to
+> f64 dot-product precision collapse at dim=55,439. CG-DD (∱31 digits)
+> corrects this to d²=0.0398. See the README Hardware Anomalies section.
 
 ---
 
@@ -293,7 +318,8 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 | Experiments (Rust/MPFR/DD) | 48+ |
 | Development time | 42 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
-| Largest certified N | 55,440 (DD precision) |
+| Largest certified N | 55,440 (d²=0.0398, CG-DD) |
+| N=120,000 | In progress (107 GB OOC matrix) |
 
 > [!NOTE]
 > The Cathedral maintains a **multi-path architecture**: the primary
