@@ -1,29 +1,20 @@
-/-
-  Cathedral/White/Kinematics.lean
+/-!
+  # Change of Variables for the Flattened Residual
 
-  ## Phase I, Strike 1: Reflection Positivity — Kill Axiom 2
+  Establishes the equality between the L² norm of the flattened residual
+  `g_N(u) = r_N(e^{-u}) · e^{-u/2}` over `(0,∞)` and the interval integral
+  of `r_N²` over `(0,1)`, via the substitution `x = e^{-u}`.
 
-  TARGET: Eliminate `autocorr_eval_zero` from PlancherelBypass.lean.
+  ## Main Results
 
-  ### Physics
-  The energy of the vacuum is positive-definite.
-  The autocorrelation at zero lag equals the L² norm in position space.
+  * `flattened_l2_eq_residual_l2` : `∫_{Ioi 0} g_N² = ∫_0^1 r_N²`
+  * `autocorr_eval_zero_proved` : autocorrelation at zero = `∫_0^1 r_N²`
 
-  ### Math
-  Change of variables x = e^{-u} maps (0,1] → [0,∞).
-  The Jacobian |dx/du| = e^{-u} is absorbed by the flattening factor:
-    g_N(u)² = r_N(e^{-u})² · e^{-u}
-  (already proved as `flattenedResidualV_sq_eq`).
+  ## Strategy
 
-  ### Strategy
-  Use Mathlib's `integral_comp_mul_deriv_Ioi` or
-  `MeasureTheory.integral_image_eq_integral_abs_deriv_smul`
-  to formally execute the substitution.
-
-  ### Dependencies
-  - flattenedResidualV_sq_eq (PlancherelBypass.lean, PROVED)
-  - autocorrelation_zero_eq_l2 (PlancherelBypass.lean, PROVED)
-  - Mathlib.MeasureTheory.Integral.IntegralEqImproper
+  Uses the antitone change of variables from `Mathlib.MeasureTheory.Function.JacobianOneDim`
+  applied to `f(u) = exp(-u)`, which maps `[0,∞)` to `(0,1]`.
+  The Jacobian `|dx/du| = e^{-u}` is absorbed by the flattening factor.
 -/
 
 import Cathedral.MellinBridge.PlancherelDefs
@@ -85,14 +76,13 @@ lemma exp_neg_image_Ioi : (fun u : ℝ => Real.exp (-u)) '' Set.Ioi 0 = Set.Ioo 
     · rw [neg_pos]; exact Real.log_neg hx_pos hx_lt
     · simp [Real.exp_log hx_pos]
 
-/-- **KEY STEP**: The integral of g_N² over (0,∞) equals the integral
-    of r_N² over (0,1) via x = exp(-u).
+/-- The integral of `g_N²` over `(0,∞)` equals the integral of `r_N²` over `(0,1)`
+    via the substitution `x = exp(-u)`.
 
-    Uses Mathlib's antitone change of variables:
-      ∫ x in f '' s, g x = ∫ u in s, (-f'(u)) • g(f(u))
-
-    With f(u) = exp(-u), -f'(u) = exp(-u), and
-    g_N(u)² = r_N(exp(-u))² · exp(-u)  [from flattenedResidualV_sq_eq]. -/
+    Uses the antitone change of variables:
+      `∫_{f '' s} g = ∫_s (-f'(u)) • g(f(u))`
+    with `f(u) = exp(-u)`, `-f'(u) = exp(-u)`, and
+    `g_N(u)² = r_N(exp(-u))² · exp(-u)` from `flattenedResidualV_sq_eq`. -/
 theorem flattened_l2_eq_residual_l2 (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ u in Set.Ioi (0 : ℝ), (flattenedResidualV N v u) ^ 2 =
     ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 := by
@@ -186,18 +176,5 @@ theorem autocorr_eval_zero_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
   rw [full_integral_eq_halfline N v]
   -- Step 3: ∫₀^∞ g_N² du = ∫₀¹ r_N² dx {flattened_l2_eq_residual_l2}
   exact flattened_l2_eq_residual_l2 N v
-
--- ════════════════════════════════════════════════
--- AUDIT: AXIOM 2 STATUS — **COMPLETE**
--- ════════════════════════════════════════════════
--- autocorr_eval_zero_proved depends on:
---   ✅ autocorrelation_zero_eq_l2 (PROVED in PlancherelBypass.lean)
---   ✅ flattenedResidualV_sq_eq (PROVED in PlancherelBypass.lean)
---   ✅ full_integral_eq_halfline (PROVED — integral splitting via Ici/Ioi)
---   ✅ flattened_l2_eq_residual_l2 (PROVED — antitone CoV via JacobianOneDim)
---
--- Total sorry count: 0 🤍
--- AXIOM 2 (Reflection Positivity) is ELIMINATED.
--- Pure measure-theoretic proof. No number theory axioms.
 
 end Cathedral.White

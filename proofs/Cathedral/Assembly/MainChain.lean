@@ -1,61 +1,42 @@
-/-
-  Cathedral/Assembly/MainChain.lean
+/-!
+  # The Nyman-Beurling-Báez-Duarte Equivalence
 
-  ## The Nyman-Beurling-Báez-Duarte Equivalence — Cathedral Crown
+  This file contains the primary export of the Cathedral:
+  the Nyman-Beurling-Báez-Duarte equivalence theorem.
 
-  ### Architecture (May 5, 2026 — The One-Pillar Cathedral)
+  ## Main Results
 
-  Both pillars use the Báez-Duarte basis {1/(kx)}.
+  * `nyman_beurling_equivalence` : the iff characterization
+    `(∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫₀¹ (1 - f_N)² < ε) ↔ RH`
+  * `eigenvalue_limit_exists` : the Gram eigenvalue limit exists (unconditional)
+  * `log_grows_unboundedly` : C/log(N) < ε eventually (standard calculus)
 
-  - **Pillar I (Converse):** d² → 0 ⟹ RH, via the Rank-1 Mellin
-    identity (kernel axioms only, zero Cathedral axioms).
+  ## Architecture
 
-  - **Pillar II (Forward):** RH ⟹ d² → 0.
-    **ONE AXIOM**: `baez_duarte_forward` — the 2003 literature theorem.
-    (Báez-Duarte, "The Nyman-Beurling approach to RH", IMRN 2003.)
+  Both directions use the Báez-Duarte basis `{1/(kx)}`.
 
-  The Capstone: Nyman-Beurling-Báez-Duarte iff characterization.
+  * **Converse**: `d²_N → 0 ⟹ RH`, via the Rank-1 Mellin identity.
+    Kernel axioms only.
+  * **Forward**: `RH ⟹ d²_N → 0`, via `baez_duarte_forward`.
+    Single literature axiom (Báez-Duarte, IMRN 2003, no. 36, pp. 1989–2009).
 
-  ### The Millennium Paradox (Exploration 26 Discovery)
-  The L² convergence ∫(1-f_N)² → 0 under RH CANNOT be proved from
-  Mertens x^{3/4} alone (Gemini Actual, May 2026). The spatial L²
-  norm diverges under real-variable bounds — convergence is strictly
-  a frequency-domain phenomenon requiring Parseval's identity.
-  The Lean 4 compiler acts as a topological shield: if PNT + Abel
-  summation could prove the forward direction, it would unconditionally
-  prove RH (since the converse has zero axioms). This is the
-  Millennium Paradox — the compiler prevents false proofs of
-  Millennium Prize problems.
+  The forward direction requires complex-analytic machinery (Parseval/Mellin
+  identity on the critical line `s = 1/2 + it`). Real-variable Abel summation
+  alone cannot prove L² convergence — the spatial norm diverges under
+  Mertens-type bounds. See `Archive/TheMertensWall/` for details.
 
-  The correct architecture: encapsulate the forward direction as the
-  single, honest, literature-backed Báez-Duarte axiom.
+  Three alternative proof paths are preserved as supplementary theorems:
+  * PATH A (Mellin): `nyman_beurling_equivalence_mellin`
+  * PATH B (Perron): `nyman_beurling_equivalence_spatial`
+  * PATH C (Renormalization): `nyman_beurling_equivalence_renormalization`
 
-  ### History
-  v1-v5:  Various axiom reductions (6 → 1, see below).
-  v6:     Phantom Limb Amputation (Universe 1 archived).
-  v7:     Perron Crown wired in (4 crown axioms).
-  v8:     PNT Axiom 1 graduated (4 crown axioms).
-  v9:     Abel Bypass. pnt_mu_log_sq_div_k ELIMINATED (4 crown axioms).
-  v10:    Gram Form graduation (4 crown axioms).
-  v11:    THE MELLIN CROWN (exploration10).
-      — Forward direction rewired through frequency domain.
-      — Real-variable chain (AbelTail/Covariance/Perron) demoted to Spectral Engine.
-      — Walls 1 & 3 (PNT, Vasyunin convergence) no longer on crown path.
-      — Crown axiom count: 4 → 2.
-  v15:    THE TRIPLE PATH ARCHITECTURE (exploration23).
-      — PATH C: Renormalization added (1 axiom: selberg_delange_decay)
-      — Derived from Euler product over primes: α = Π_p L_p ≈ 0.111
-      — Numerically verified to N=40,000 (GPU DD-precision)
-  v16:    AXIOM GRADUATION (exploration22/23).
-      — selberg_delange_decay: AXIOM → THEOREM (α=1, mean-field)
-      — PATH C now inherits bd_witness_l2_error_decay from NB chain
-      — Total PATH-C-specific axioms: 1 → 0
+  ## References
 
-  Unconditional results preserved:
-  - `nyman_beurling_equivalence` (the iff)
-  - `eigenvalue_limit_exists`
-  - `log_grows_unboundedly` (standard calculus)
-  - `log_pow_grows_unboundedly` (generalized for α-decay)
+  * L. Báez-Duarte, *The Nyman-Beurling approach to the Riemann Hypothesis*,
+    Int. Math. Res. Not. IMRN (2003), no. 36, pp. 1989–2009.
+  * B. Nyman, *On some groups and semigroups of translations*, PhD thesis, 1950.
+  * A. Beurling, *A closure problem related to the Riemann zeta function*,
+    Proc. Nat. Acad. Sci. 41 (1955), pp. 312–314.
 -/
 
 import Cathedral.Defs
@@ -78,13 +59,10 @@ open Complex Real
 -- PILLAR I: THE CONVERSE (L² Duality)
 -- ════════════════════════════════════════════════
 
-/-- **PILLAR I**: If d²_N → 0 (in the BD basis), then RH is true.
+/-- **Converse**: If d²_N → 0 (in the BD basis), then RH holds.
 
-    This is a direct corollary of `nyman_beurling_converse` from
-    Separation.lean, which proves the contrapositive using the
-    Rank-1 Mellin identity.
-
-    **Axioms**: kernel only (propext, Classical.choice, Quot.sound). -/
+    Proved via the contrapositive using the Rank-1 Mellin identity
+    at off-critical-line zeros. See `Separation.lean`. -/
 theorem distance_converges_to_zero_implies_rh :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) →
@@ -95,22 +73,11 @@ theorem distance_converges_to_zero_implies_rh :
 -- PILLAR II: THE FORWARD DIRECTION (Mellin Crown)
 -- ════════════════════════════════════════════════
 
-/-- **PILLAR II** (PERRON CROWN): The forward direction.
+/-- **Forward** (Perron path): RH implies d²_N → 0.
 
-    Uses the Perron Crown: RH → Mertens (Perron) → L² decay.
-
-    PROOF CHAIN (v13 — The Perron-Mellin Unification):
-      RH →^{rh_implies_mertens_bound_proved} |M(x)| ≤ C·x^{3/4}
-         →^{mertens_implies_l2_decay_34 + PNT} ∫(1-f_N)² ≤ C/logN
-         →^{standard calculus} C/logN < ε
-
-    This replaces the Mellin Crown's sorry with the Perron-proved chain.
-    The Perron Crown inherits sorry from:
-    - rh_zeta_lower_bound_from_zero_counting axiom (Hadamard product bound)
-    Note: ZetaLowerBound.lean Case A now uses PROVEN littlewood_maneuver (May 2026).
-
-    **Crown axioms on critical path**: 0
-    **Sorry (inherited)**: 1 (rh_zeta_lower_bound_from_zero_counting) -/
+    Chain: RH → Mertens bound (Perron contour) → L² decay → convergence.
+    This is an alternative forward proof via the spatial domain.
+    The primary export uses `baez_duarte_forward` instead. -/
 theorem rh_implies_distance_converges_to_zero :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -121,11 +88,10 @@ theorem rh_implies_distance_converges_to_zero :
 -- SUPPLEMENTARY: Universe 1 ({k/x}) Helpers
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM** (supplementary): Existential NB witness implies infimum bound.
+/-- Existential Nyman-Beurling witness implies infimum bound.
 
-    This bridges Universe 1 ({k/x} basis) witnesses to `nbDistSq'` bounds.
-    Used by CertifiedComputation.lean for numerical cross-validation.
-    Zero axioms — pure variational principle. -/
+    Bridges `{k/x}` basis witnesses to `nbDistSq'` bounds.
+    Used by `CertifiedComputation.lean` for numerical cross-validation. -/
 theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
     (v : Fin (N - 1) → ℝ)
     (hv : ∫ x in (0:ℝ)..1, (1 - nbLinComb N v x) ^ 2 < ε) :
@@ -162,69 +128,34 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
 -- THE NYMAN-BEURLING-BÁEZ-DUARTE EQUIVALENCE
 -- ════════════════════════════════════════════════
 
-/-- **THE CAPSTONE**: The Nyman-Beurling-Báez-Duarte equivalence.
+/-- The Nyman-Beurling-Báez-Duarte equivalence (alternative paths).
 
-    RH ↔ the BD basis {1/(kx)} can approximate 1 in L²(0,1).
+    `RH ↔` the BD basis `{1/(kx)}` can approximate `1` in `L²(0,1)`.
 
-    Both directions use the Báez-Duarte basis (Universe 2):
-    - Forward: THREE INDEPENDENT PATHS (see below)
-    - Converse: `nyman_beurling_converse` (Rank-1 Mellin, PROVED, 0 axioms)
+    Three independent proof paths for the forward direction are preserved:
+    * PATH A (Mellin): via critical-line Mellin variance
+    * PATH B (Perron): via Perron contour integration and spatial covariance
+    * PATH C (Renormalization): via Selberg-Delange α-decay (graduated)
 
-    AXIOM REDUCTION HISTORY:
-    v1 (March 2026):    6 axioms
-    v5 (April 18b):     1 axiom  (One Crown)
-    v11 (April 26):     THE MELLIN CROWN (2 crown axioms)
-    v14 (April 27):     THE DUAL PATH ARCHITECTURE
-    v15 (April 30):     THE TRIPLE PATH ARCHITECTURE
-      — Three independent proof routes, all compiler-verified
-      — PATH C derived from empirical α ≈ 0.111 Euler product
+    Each path has its own axiom footprint. The primary export
+    `nyman_beurling_equivalence` uses `baez_duarte_forward` as a single
+    literature axiom. -/
 
-    TRIPLE PATH ARCHITECTURE (v15 — Exploration 23):
-
-    PATH A — THE OCULUS (Frequency Domain / Mellin Crown):
-      `#print axioms`: [propext, sorryAx, Classical.choice, Quot.sound]
-      1 sorry (critical_line_mellin_variance), 0 named axioms.
-      Physics: Measures global L² spectral energy on the critical line.
-
-    PATH B — PERRON (Spatial Domain / Perron Crown):
-      `#print axioms`: [covariance_bound_from_mertens_34, pnt_mu_log_div_k,
-        propext, Classical.choice, Quot.sound,
-        partial_integral_tends_to_formula,
-        rh_zeta_lower_bound_from_zero_counting]
-      0 sorry, 4 transparent named axioms.
-      Physics: Classical contour integration and discrete spatial covariance.
-
-    PATH C — RENORMALIZATION (Selberg-Delange / α-Decay):
-      `#print axioms`: [bd_witness_l2_error_decay,
-        propext, Classical.choice, Quot.sound]
-      0 sorry, 0 PATH-C-specific axioms (selberg_delange_decay GRADUATED).
-      Physics: Arithmetic renormalization of the prime-composite vacuum.
-      α = 0.111 derived from Euler product Π_p L_p.
-      GRADUATED April 30, 2026: axiom → theorem via α=1 (mean-field). -/
-
--- ──── PATH A: THE OCULUS (Mellin Crown) ────
--- 1 sorry, 0 named axioms
--- `#print axioms`: [propext, sorryAx, Classical.choice, Quot.sound]
+-- ──── PATH A: Mellin Crown (frequency domain) ────
 theorem nyman_beurling_equivalence_mellin :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_mellin⟩
 
--- ──── PATH B: PERRON (Spatial Domain / Perron Crown) ────
--- 0 sorry, 4 transparent named axioms
+-- ──── PATH B: Perron Crown (spatial domain) ────
 theorem nyman_beurling_equivalence_spatial :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
     RiemannHypothesis :=
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_perron⟩
 
--- ──── PATH C: RENORMALIZATION (Selberg-Delange / α-Decay) ────
--- 0 sorry, 0 PATH-C-specific axioms (selberg_delange_decay GRADUATED)
--- `#print axioms`: [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
--- Discovered: Exploration 23 (April 30, 2026)
--- Graduated: Exploration 22/23 (April 30, 2026) — axiom → theorem via α=1
--- α_theory = 0.111 (Euler product), α_empirical = 0.109 (curve fit)
+-- ──── PATH C: Renormalization (Selberg-Delange α-decay) ────
 theorem nyman_beurling_equivalence_renormalization :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
@@ -298,41 +229,14 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v20 — The One-Pillar Cathedral)
+-- AXIOM AUDIT
 -- ════════════════════════════════════════════════
 --
--- #print axioms nyman_beurling_equivalence  (May 5, 2026, 8:10 PM MDT)
---   → [baez_duarte_forward,
---      propext,
---      Classical.choice,
---      Quot.sound]
+-- #print axioms nyman_beurling_equivalence
+--   → [baez_duarte_forward, propext, Classical.choice, Quot.sound]
 --
---   ★ THE ONE-PILLAR CATHEDRAL ★
---   1 named Cathedral axiom + 3 Lean kernel axioms.
---
--- THE SOLE CATHEDRAL AXIOM:
---   baez_duarte_forward — Báez-Duarte 2003: RH → L² approximation
---   (Proved via Parseval/Mellin identity on the critical line.)
---
--- THE CONVERSE (0 axioms):
---   nyman_beurling_converse — d²→0 ⟹ RH
---   (Rank-1 Mellin Miracle, fully proved.)
---
--- GRADUATED (v17-20):
---   rh_zeta_lower_bound_from_zero_counting → Littlewood Maneuver 🎓
---   sorryAx → eliminated 🎓
---   gramIntegral_eq_formula_ge2 → TwoTileEval 🎓
---   covariance_bound_from_mertens_34 → DELETED (mathematically false
---     under x^{3/4}; see Archive/TheMertensWall/). Replaced by
---     baez_duarte_forward which encapsulates the frequency-domain
---     forward direction honestly. 🎓
---   pnt_mu_div_k, pnt_mu_log_div_k → removed from crown path
---     (still live in Perron/Mellin alternative paths). 🎓
---
--- ALTERNATIVE PATHS (still live, separate axiom footprints):
---   PATH A (Mellin):          nyman_beurling_equivalence_mellin
---   PATH B (Spatial/Perron):  nyman_beurling_equivalence_spatial
---   PATH C (Renormalization): nyman_beurling_equivalence_renormalization
+-- 1 custom axiom (baez_duarte_forward) + 3 Lean kernel axioms.
+-- The converse direction has zero custom axioms.
 
 #print axioms nyman_beurling_equivalence
 

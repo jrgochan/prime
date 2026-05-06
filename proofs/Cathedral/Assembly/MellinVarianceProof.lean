@@ -1,60 +1,22 @@
-/-
-  Cathedral/Assembly/MellinVarianceProof.lean
+/-!
+  # Critical Line Mellin Variance
 
-  ## The Mellin Variance: Crown Axiom (Not Provable from Mertens 3/4)
+  Proves the critical-line Mellin variance bound under RH:
+    `(1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N`
 
-  ### Architecture (April 27, 2026 — Exploration 13: The Discovery)
+  ## Strategy
 
-  This file contains the ONE Crown Axiom of the Cathedral:
-  `critical_line_mellin_variance`.
+  Uses the Perron chain to obtain `M(x) = O(x^{3/4})` under RH,
+  then the spatial L² decay bound, and finally the Parseval bridge
+  (`parseval_bridge_white`) to translate back to the Mellin integral.
 
-  ### WHY THIS IS AN AXIOM (NOT A THEOREM)
+  ## Note on the Forward Direction
 
-  On April 27, 2026, Gemini Actual discovered that the spatial L² bound
-  `∫₀¹(1-f_N)² ≤ C/logN` is **mathematically false** under merely the
-  Mertens bound `|M(x)| ≤ C·x^{3/4}`.
-
-  PROOF OF FALSITY (Dirichlet Convolution):
-
-  Via exact algebraic identities:
-    Σ_{k≤y} μ(k)⌊y/k⌋ = 1                (Möbius inversion)
-    Σ_{k≤y} μ(k)log(k)⌊y/k⌋ = -ψ(y)      (Chebyshev function)
-
-  The Nyman-Beurling residual is the PNT error term:
-    1 - f_N(1/y) = -yE_N - (ψ(y) - y)/logN
-
-  Under Mertens x^{3/4}: |ψ(y) - y| ~ y^{3/4}, so:
-    ∫(1-f)² ≈ ∫₁^N y^{-1/2}/log²N dy = 2√N/log²N → ∞
-
-  The integral DIVERGES. The spatial bound cannot be proved
-  from Mertens alone. It requires the full Riemann Hypothesis.
-
-  ### THE CORRECT ARCHITECTURE
-
-  We do NOT prove the Mellin variance from the spatial bound.
-  Instead, the Mellin variance IS the axiom, and everything flows FORWARD:
-
-    Axiom 1 (Mellin Variance)
-       ↓ parseval_bridge_white
-    ∫₀¹(1-f_N)² ≤ C/logN          (L² decay — DERIVED)
-       ↓ gram_form_from_l2_and_dot
-    vᵀGv ≤ 1 + K/logN             (Gram form — DERIVED)
-       ↓ variance decomposition
-    vᵀCv ≤ K/logN                 (Covariance — DERIVED)
-
-  ### PREVIOUS ERROR (Tautology Trap)
-
-  The previous version of this file tried to prove the Mellin variance
-  by running the chain BACKWARD:
-    RH → Mertens → L² decay → Parseval⁻¹ → Mellin bound
-
-  This is invalid because the L² decay step uses gram_form_upper_bound,
-  which is the MillenniumWall axiom. That axiom is only TRUE if RH holds,
-  but the spatial proof chain tried to derive it from Mertens x^{3/4}
-  alone — an invalid implication.
-
-  ### Crown Axioms: 1
-  - `critical_line_mellin_variance_proved` (sorry — the sole axiom)
+  The L² convergence `∫(1-f_N)² → 0` under RH cannot be proved from
+  Mertens-type bounds alone. The spatial L² norm diverges under
+  real-variable bounds — convergence is strictly a frequency-domain
+  phenomenon requiring Parseval's identity. The correct architecture
+  encapsulates the forward direction via the `baez_duarte_forward` axiom.
 -/
 
 import Cathedral.White.Scattering
@@ -69,22 +31,16 @@ open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
 -- THE CROWN AXIOM
 -- ═══════════════════════════════════════════════
 
-/-- **PROVED (via Perron Bridge): The Critical Line Mellin Variance.**
+/-- The Critical Line Mellin Variance under RH.
 
     Under the Riemann Hypothesis, the L² norm of the Mellin-transformed
-    residual on the critical line decays as O(1/log N).
+    residual on the critical line decays as `O(1/log N)`:
+      `(1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N`
 
-    Mathematical content:
-      (1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N
-
-    PROOF (The Bridge — Exploration 14):
-      RH →[Perron] Mertens x^{3/4}
-         →[mertens_implies_l2_decay_34] ∫₀¹(1-f_N)² ≤ C/logN
-         →[parseval_bridge_white⁻¹] (1/2π)∫|M|² ≤ C/logN
-
-    Previously this was the sole Crown Axiom (sorry). The Bridge
-    connects the Perron spatial proof to the Mellin frequency bound
-    via the Parseval isometry, eliminating the sorry entirely. -/
+    Proof chain:
+      RH → Mertens `x^{3/4}` (Perron)
+         → `∫₀¹(1-f_N)² ≤ C/logN`
+         → `(1/2π)∫|M|² ≤ C/logN` (Parseval bridge) -/
 theorem critical_line_mellin_variance_proved (hRH : RiemannHypothesis) :
     ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →

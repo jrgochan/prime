@@ -1,25 +1,22 @@
-/-
-  Cathedral/White/Scattering.lean
+/-!
+  # The Parseval Bridge: Fourier-Mellin Connection
 
-  ## Phase I, Strike 2: Spectral Condition & Scale Covariance — Kill Axioms 3 & 4
+  Establishes the Parseval/Plancherel identity connecting the L²(0,1) norm
+  of the BD residual to the critical-line Mellin integral.
 
-  TARGET: Eliminate `fourier_inv_autocorr` and `mellin_fourier_scale`.
+  ## Main Results
 
-  ### Physics
-  - Axiom 3: The Källén-Lehmann spectral representation — the propagator
-    decomposes into momentum eigenstates.
-  - Axiom 4: Scale covariance — the renormalization scale connecting
-    position space L²(0,1) to momentum space L²(Re s = 1/2).
+  * `fourier_eq_mellin_critical` : the Fourier transform of the flattened
+    residual equals the Mellin transform on the critical line
+  * `fourier_inv_autocorr_proved` : autocorrelation at zero = ∫|F[g_N]|²
+  * `mellin_fourier_scale_proved` : 2π rescaling between Fourier and Mellin
+  * `parseval_bridge_white` : ∫₀¹|r_N|² = (1/2π)∫|M(1/2+it)|² dt
 
-  ### Math
-  - Axiom 3: Mathlib's `fourierIntegral_eq` + Wiener-Khinchin for
-    autocorrelation: R_f(0) = ∫ |f̂(ξ)|² dξ.
-  - Axiom 4: Linear substitution t = 2πξ in the Mellin integral.
+  ## Strategy
 
-  ### Dependencies
-  - Mathlib.Analysis.Fourier.Inversion
-  - flattenedResidualC (PlancherelBypass.lean)
-  - mellinBDResidual (PlancherelBypass.lean)
+  1. Change of variables connecting Fourier and Mellin representations
+  2. Plancherel theorem (via Mathlib's `fourierTransformĺi`)
+  3. Linear substitution t = 2πξ
 -/
 
 import Cathedral.MellinBridge.PlancherelDefs
@@ -39,19 +36,12 @@ namespace Cathedral.White
 -- §1. FOURIER-MELLIN CONNECTION
 -- ════════════════════════════════════════════════
 
-/-- The Fourier integral of g_N matches the Mellin transform on the critical line.
+/-- The Fourier integral of `g_N` matches the Mellin transform on the critical line.
 
-    F[g_N](ξ) = ∫ g_N(u) e^{-2πiξu} du
-              = ∫₀^∞ r_N(e^{-u}) e^{-u/2} e^{-2πiξu} du
+    `F[g_N](ξ) = M_{r_N}(1/2 + 2πiξ)`
 
-    Substituting x = e^{-u}, u = -log x, du = -dx/x:
-              = ∫₀¹ r_N(x) x^{-1/2} x^{2πiξ} dx/x
-              = ∫₀¹ r_N(x) x^{-1/2 + 2πiξ - 1} dx
-              = M_{r_N}(1/2 + 2πiξ)
-
-    where M_{r_N}(s) = ∫₀¹ r_N(x) x^{s-1} dx is the Mellin transform.
-
-    This is the change from position to momentum representation. -/
+    where `M_{r_N}(s) = ∫₀¹ r_N(x) x^{s-1} dx` is the Mellin transform.
+    Proof: change of variables `x = e^{-u}` in the Fourier integral. -/
 lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) :
     (∫ u : ℝ, flattenedResidualC N v u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)) =
@@ -120,22 +110,13 @@ lemma fourier_eq_mellin_critical (N : ℕ) (v : Fin (N - 1) → ℝ) (ξ : ℝ) 
 -- §2. AXIOM 3 ELIMINATION (Spectral Condition)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: Axiom 3 (`fourier_inv_autocorr`) proved.
+/-- The autocorrelation at zero equals the integral of `|F[g_N]|²`.
 
-    The autocorrelation at zero equals the integral of |F[g_N]|².
+    `h(0) = ∫ |g_N(u)|² du = ∫ |ĝ_N(ξ)|² dξ`
 
-    By the Wiener-Khinchin theorem (or direct computation):
-      h(0) = (g_N ⋆ g̃_N)(0) = ∫ g_N(u)² du = ∫ |ĝ_N(ξ)|² dξ
-
-    The last equality is Parseval/Plancherel for L² functions.
-
-    Since g_N ∈ L¹ ∩ L² (from flattenedResidualV_bound), we can use:
-    1. Plancherel: ‖g_N‖²₂ = ‖ĝ_N‖²₂
-    2. Or: Fourier inversion of h at t=0, since ĥ = |ĝ_N|² ∈ L¹
-
-    Physics: This is the spectral decomposition. The vacuum energy
-    (position-space L² norm) equals the sum over all momentum modes
-    (frequency-space |F̂|² integral). -/
+    The last equality is Plancherel's theorem for L² functions.
+    Since `g_N ∈ L¹ ∩ L²` (from `flattenedResidualV_bound`), we apply
+    `plancherel_integral_axiom` (proved via Mathlib's `fourierTransformĺi`). -/
 
 -- ──── PROVED: Measurability & Integrability ────
 
@@ -243,18 +224,12 @@ theorem fourier_inv_autocorr_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §3. AXIOM 4 ELIMINATION (Scale Covariance)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: Axiom 4 (`mellin_fourier_scale`) proved.
-
-    The 2π rescaling connecting Fourier (ξ-convention) to
+/-- The 2π rescaling connecting Fourier (ξ-convention) to
     Mellin (t-convention) on the critical line.
 
-    ∫ |F[g_N](ξ)|² dξ = (1/2π) ∫ |M_{r_N}(1/2+it)|² dt
+    `∫ |F[g_N](ξ)|² dξ = (1/2π) ∫ |M_{r_N}(1/2+it)|² dt`
 
-    Proof: Change of variables t = 2πξ, dt = 2π dξ.
-
-    Physics: Scale covariance. The normalization convention relating
-    position-space (x ∈ (0,1)) and momentum-space (t ∈ ℝ)
-    representations is the renormalization scale of the prime vacuum. -/
+    Proof: change of variables `t = 2πξ`, `dt = 2π dξ`. -/
 theorem mellin_fourier_scale_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ ξ : ℝ, ‖∫ u : ℝ, flattenedResidualC N v u *
       Complex.exp (-2 * Real.pi * ξ * u * Complex.I)‖ ^ 2 =
@@ -286,16 +261,10 @@ theorem mellin_fourier_scale_proved (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §4. THE WHITE PARSEVAL BRIDGE (All Three Combined)
 -- ════════════════════════════════════════════════
 
-/-- **THE WHITE BRIDGE**: The Parseval Bridge proved from zero axioms.
+/-- **The Parseval Bridge**: `∫₀¹ |r_N(x)|² dx = (1/2π) ∫ |M_{r_N}(1/2 + it)|² dt`.
 
-    ∫₀¹ |r_N(x)|² dx = (1/2π) ∫ |M_{r_N}(1/2 + it)|² dt
-
-    This replaces `parseval_bridge` in PlancherelBypass.lean, which
-    currently depends on axioms 2-4. When this theorem compiles
-    without sorry, those three axioms can be deleted.
-
-    Physics: The LSZ reduction formula. Position-space correlator
-    equals the on-shell scattering amplitude. -/
+    Connects the L²(0,1) norm of the BD residual to the critical-line
+    Mellin integral via Plancherel's theorem and a change of variables. -/
 theorem parseval_bridge_white (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2 =
     (1 / (2 * Real.pi)) *
