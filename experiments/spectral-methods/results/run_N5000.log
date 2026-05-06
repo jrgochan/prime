@@ -1,0 +1,210 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: unused import: `std::f64::consts::PI`
+  --> experiments/cathedral-utils/src/constants.rs:20:5
+   |
+20 | use std::f64::consts::PI;
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> experiments/cathedral-utils/src/rsvd.rs:109:9
+    |
+109 |     let mut omega: Vec<Vec<f64>> = (0..l)
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cathedral-utils` (lib) generated 2 warnings (run `cargo fix --lib -p cathedral-utils` to apply 2 suggestions)
+warning: value assigned to `lanczos_eigenvalues` is never read
+   --> experiments/spectral-methods/src/main.rs:159:49
+    |
+159 |           let mut lanczos_eigenvalues: Vec<f64> = lanczos_shifted.eigenvalues.iter()
+    |  _________________________________________________^
+160 | |             .map(|&lam| sigma - lam)
+161 | |             .collect();
+    | |______________________^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: `spectral-methods` (bin "spectral-methods") generated 1 warning
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/spectral-methods 5000 20`
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[37mSPECTRAL METHODS COMPARISON[0m
+  [1m[36m║[0m  Lanczos vs RSVD vs Full · bottom-20 eigenvalues · N_max = 5000
+  [1m[36m║[0m  [2mPrecision: 64-bit MPFR  ·  Threads: 12[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  Test schedule: [200, 500, 1000, 2000, 3000, 5000]
+  Bottom k = 20 eigenvalues
+
+  [1m[37m═══ N = 200 ═══[0m
+    Gram matrix: 199×199 (0.23s)
+    §A Full:    λ_min = 3.16763238e-5  (0.00s)
+    §B Lanczos: λ_min = 3.16763238e-5  (0.04s, m=199, err_max=1.53e-14, res=2.21e-14)
+    §C RSVD:    λ_min = 6.40494588e-4  (0.01s, 360 matvecs, err_max=2.92e-3)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │  3.167632377877e-5 │ 3.167632377643e-5 │   2.3442e-15 │ 6.404945884730e-4 │    6.0882e-4
+       1 │  3.263169282664e-5 │ 3.263169283230e-5 │   5.6548e-15 │ 6.729554149061e-4 │    6.4032e-4
+       2 │  3.478231593049e-5 │ 3.478231592702e-5 │   3.4722e-15 │ 6.994978145585e-4 │    6.6472e-4
+       3 │  3.539684113344e-5 │ 3.539684113640e-5 │   2.9659e-15 │ 7.930143825581e-4 │    7.5762e-4
+       4 │  3.575119275209e-5 │ 3.575119276622e-5 │   1.4127e-14 │ 8.227627558570e-4 │    7.8701e-4
+       5 │  3.617953788352e-5 │ 3.617953787849e-5 │   5.0311e-15 │ 8.421516209278e-4 │    8.0597e-4
+       6 │  3.695582715157e-5 │ 3.695582714158e-5 │   9.9912e-15 │ 9.065746880275e-4 │    8.6962e-4
+       7 │  3.790239143311e-5 │ 3.790239143786e-5 │   4.7490e-15 │ 1.053995958382e-3 │    1.0161e-3
+       8 │  3.914499395671e-5 │ 3.914499394142e-5 │   1.5285e-14 │ 1.226005915091e-3 │    1.1869e-3
+       9 │  4.025778755087e-5 │ 4.025778754713e-5 │   3.7403e-15 │ 1.247969499608e-3 │    1.2077e-3
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 0.1×, RSVD = 0.5×
+
+  [1m[37m═══ N = 500 ═══[0m
+    Gram matrix: 499×499 (2.13s)
+    §A Full:    λ_min = 1.87003434e-6  (0.07s)
+    §B Lanczos: λ_min = 1.87003434e-6  (0.28s, m=300, err_max=2.81e-6, res=1.02e-6)
+    §C RSVD:    λ_min = 3.91853814e-4  (0.07s, 360 matvecs, err_max=1.57e-3)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │  1.870034335957e-6 │ 1.870034337159e-6 │   1.2024e-15 │ 3.918538139622e-4 │    3.8998e-4
+       1 │  2.119880190941e-6 │ 2.119880209150e-6 │   1.8210e-14 │ 4.072170923823e-4 │    4.0510e-4
+       2 │  2.228995466935e-6 │ 2.228995469977e-6 │   3.0425e-15 │ 4.316837630807e-4 │    4.2945e-4
+       3 │  2.408289900703e-6 │ 2.408289986100e-6 │   8.5397e-14 │ 4.572572215018e-4 │    4.5485e-4
+       4 │  2.627248921241e-6 │ 2.627264823474e-6 │   1.5902e-11 │ 4.846760063684e-4 │    4.8205e-4
+       5 │  2.730416884588e-6 │ 2.731656683075e-6 │    1.2398e-9 │ 5.159361211078e-4 │    5.1321e-4
+       6 │  2.934261796869e-6 │ 2.958821000654e-6 │    2.4559e-8 │ 5.364560966665e-4 │    5.3352e-4
+       7 │  3.016596813302e-6 │ 3.049858020354e-6 │    3.3261e-8 │ 5.865996127410e-4 │    5.8358e-4
+       8 │  3.237840188194e-6 │ 3.449049783555e-6 │    2.1121e-7 │ 6.224472465046e-4 │    6.1921e-4
+       9 │  3.397175229020e-6 │ 3.608010360701e-6 │    2.1084e-7 │ 7.241460445124e-4 │    7.2075e-4
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 0.2×, RSVD = 1.0×
+
+  [1m[37m═══ N = 1000 ═══[0m
+    Gram matrix: 999×999 (9.99s)
+    §A Full:    λ_min = -4.00328500e-6  (0.52s)
+    §B Lanczos: λ_min = -4.00317807e-6  (0.81s, m=300, err_max=6.84e-6, res=3.15e-6)
+    §C RSVD:    λ_min = 2.44965806e-4  (0.30s, 360 matvecs, err_max=9.27e-4)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │ -4.003284996723e-6 │ -4.003178071699e-6 │   1.0693e-10 │ 2.449658055017e-4 │    2.4897e-4
+       1 │ -3.923280570700e-6 │ -3.845618282483e-6 │    7.7662e-8 │ 2.590061670009e-4 │    2.6293e-4
+       2 │ -3.837809689941e-6 │ -3.797641703329e-6 │    4.0168e-8 │ 2.688325807494e-4 │    2.7267e-4
+       3 │ -3.781471427234e-6 │ -3.605546039509e-6 │    1.7593e-7 │ 2.872979615400e-4 │    2.9108e-4
+       4 │ -3.632938731890e-6 │ -3.419223991941e-6 │    2.1371e-7 │ 3.084423013231e-4 │    3.1208e-4
+       5 │ -3.532271697452e-6 │ -3.221176818613e-6 │    3.1109e-7 │ 3.462373481060e-4 │    3.4977e-4
+       6 │ -3.489146028038e-6 │ -3.053543110809e-6 │    4.3560e-7 │ 3.763404161266e-4 │    3.7983e-4
+       7 │ -3.393482859092e-6 │ -2.699973025599e-6 │    6.9351e-7 │ 3.914083289693e-4 │    3.9480e-4
+       8 │ -3.354652754582e-6 │ -2.301213495315e-6 │    1.0534e-6 │ 4.272543281321e-4 │    4.3061e-4
+       9 │ -3.306532839544e-6 │ -1.915659060714e-6 │    1.3909e-6 │ 4.467770320655e-4 │    4.5008e-4
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 0.6×, RSVD = 1.7×
+
+  [1m[37m═══ N = 2000 ═══[0m
+    Gram matrix: 1999×1999 (41.96s)
+    §A Full:    λ_min = -6.46429244e-6  (4.26s)
+    §B Lanczos: λ_min = -6.46419820e-6  (2.77s, m=300, err_max=9.78e-6, res=2.57e-6)
+    §C RSVD:    λ_min = 1.77465157e-4  (1.25s, 360 matvecs, err_max=5.79e-4)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │ -6.464292436367e-6 │ -6.464198200717e-6 │   9.4236e-11 │ 1.774651569360e-4 │    1.8393e-4
+       1 │ -6.374982435792e-6 │ -6.362566823626e-6 │    1.2416e-8 │ 1.807238386196e-4 │    1.8710e-4
+       2 │ -6.315164349583e-6 │ -6.258486706656e-6 │    5.6678e-8 │ 1.921514503067e-4 │    1.9847e-4
+       3 │ -6.284269633705e-6 │ -5.974115843799e-6 │    3.1015e-7 │ 2.085145197483e-4 │    2.1480e-4
+       4 │ -6.264517976055e-6 │ -5.797589704315e-6 │    4.6693e-7 │ 2.222762130639e-4 │    2.2854e-4
+       5 │ -6.183264652994e-6 │ -5.488944660570e-6 │    6.9432e-7 │ 2.366341417321e-4 │    2.4282e-4
+       6 │ -6.123154476672e-6 │ -5.172279648136e-6 │    9.5087e-7 │ 2.393428320033e-4 │    2.4547e-4
+       7 │ -6.080981003642e-6 │ -4.705040952402e-6 │    1.3759e-6 │ 2.654785683518e-4 │    2.7156e-4
+       8 │ -5.960347406245e-6 │ -4.347081087985e-6 │    1.6133e-6 │ 2.696051884410e-4 │    2.7557e-4
+       9 │ -5.923394103117e-6 │ -3.761789647783e-6 │    2.1616e-6 │ 3.062854456690e-4 │    3.1221e-4
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 1.5×, RSVD = 3.4×
+
+  [1m[37m═══ N = 3000 ═══[0m
+    Gram matrix: 2999×2999 (97.07s)
+    §A Full:    λ_min = -6.91559571e-6  (14.85s)
+    §B Lanczos: λ_min = -6.90933275e-6  (5.82s, m=300, err_max=1.14e-5, res=3.52e-6)
+    §C RSVD:    λ_min = 1.23519627e-4  (2.81s, 360 matvecs, err_max=4.38e-4)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │ -6.915595712100e-6 │ -6.909332748606e-6 │    6.2630e-9 │ 1.235196270475e-4 │    1.3044e-4
+       1 │ -6.841890033907e-6 │ -6.781392801969e-6 │    6.0497e-8 │ 1.313126026457e-4 │    1.3815e-4
+       2 │ -6.804002352642e-6 │ -6.656064236665e-6 │    1.4794e-7 │ 1.367035678079e-4 │    1.4351e-4
+       3 │ -6.750116926581e-6 │ -6.448210440269e-6 │    3.0191e-7 │ 1.477633678562e-4 │    1.5451e-4
+       4 │ -6.718889548269e-6 │ -6.138219438512e-6 │    5.8067e-7 │ 1.527206776313e-4 │    1.5944e-4
+       5 │ -6.658244557959e-6 │ -5.825809582305e-6 │    8.3243e-7 │ 1.635352693388e-4 │    1.7019e-4
+       6 │ -6.603135656876e-6 │ -5.395903766470e-6 │    1.2072e-6 │ 1.741990221511e-4 │    1.8080e-4
+       7 │ -6.550470806198e-6 │ -4.915522065829e-6 │    1.6349e-6 │ 1.982833138054e-4 │    2.0483e-4
+       8 │ -6.458298245980e-6 │ -4.338041900809e-6 │    2.1203e-6 │ 2.070393633726e-4 │    2.1350e-4
+       9 │ -6.417595437604e-6 │ -3.788518426973e-6 │    2.6291e-6 │ 2.178249320561e-4 │    2.2424e-4
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 2.6×, RSVD = 5.3×
+
+  [1m[37m═══ N = 5000 ═══[0m
+    Gram matrix: 4999×4999 (270.87s)
+    §A Full:    λ_min = -7.15188415e-6  (78.03s)
+    §B Lanczos: λ_min = -7.13612333e-6  (15.44s, m=300, err_max=1.37e-5, res=3.63e-6)
+    §C RSVD:    λ_min = 8.50193881e-5  (7.77s, 360 matvecs, err_max=2.75e-4)
+
+    [2m    k │       Full (exact) │         Lanczos │       err(L) │           RSVD │       err(R)[0m
+       0 │ -7.151884145296e-6 │ -7.136123327811e-6 │    1.5761e-8 │ 8.501938810923e-5 │    9.2171e-5
+       1 │ -7.126838491812e-6 │ -7.091042498075e-6 │    3.5796e-8 │ 8.996007039741e-5 │    9.7087e-5
+       2 │ -7.096535771239e-6 │ -6.837002251459e-6 │    2.5953e-7 │ 9.304008137079e-5 │    1.0014e-4
+       3 │ -7.017039341903e-6 │ -6.559164832609e-6 │    4.5787e-7 │ 1.004741691499e-4 │    1.0749e-4
+       4 │ -6.983511108870e-6 │ -6.230484370207e-6 │    7.5303e-7 │ 1.018216836144e-4 │    1.0881e-4
+       5 │ -6.925395107616e-6 │ -5.899860767045e-6 │    1.0255e-6 │ 1.094887911233e-4 │    1.1641e-4
+       6 │ -6.893173598949e-6 │ -5.318503841778e-6 │    1.5747e-6 │ 1.150985326834e-4 │    1.2199e-4
+       7 │ -6.797473741103e-6 │ -4.757352019880e-6 │    2.0401e-6 │ 1.164605520607e-4 │    1.2326e-4
+       8 │ -6.748649592787e-6 │ -4.203431924310e-6 │    2.5452e-6 │ 1.327065316659e-4 │    1.3946e-4
+       9 │ -6.736468486759e-6 │ -3.379278972204e-6 │    3.3572e-6 │ 1.475995715623e-4 │    1.5434e-4
+    [2m  ... (20 total, showing first 10)[0m
+
+    Speedup: Lanczos = 5.1×, RSVD = 10.0×
+
+  [1m[36m╔════════════════════════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[37mSPECTRAL METHODS COMPARISON — SUMMARY[0m
+  [1m[36m╠════════════════════════════════════════════════════════════════════════════════════════╣[0m
+  [1m[36m║[0m  [2m   N   │  Full(s) │ Lanczos(s) │ RSVD(s) │  L_err_max │  R_err_max │ L_spd │ R_spd[0m
+  [1m[36m║[0m    200 │     0.00 │       0.04 │    0.01 │   1.53e-14 │    2.92e-3 │   0.1× │   0.5×
+  [1m[36m║[0m    500 │     0.07 │       0.28 │    0.07 │    2.81e-6 │    1.57e-3 │   0.2× │   1.0×
+  [1m[36m║[0m   1000 │     0.52 │       0.81 │    0.30 │    6.84e-6 │    9.27e-4 │   0.6× │   1.7×
+  [1m[36m║[0m   2000 │     4.26 │       2.77 │    1.25 │    9.78e-6 │    5.79e-4 │   1.5× │   3.4×
+  [1m[36m║[0m   3000 │    14.85 │       5.82 │    2.81 │    1.14e-5 │    4.38e-4 │   2.6× │   5.3×
+  [1m[36m║[0m   5000 │    78.03 │      15.44 │    7.77 │    1.37e-5 │    2.75e-4 │   5.1× │  10.0×
+  [1m[36m╚════════════════════════════════════════════════════════════════════════════════════════╝[0m
+
+  [32m✓ Wrote results/certificate.json[0m
+
+  [1m[37mTotal:[0m [32m557.3s[0m (12 threads)
+

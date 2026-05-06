@@ -29,6 +29,7 @@ members = [
     "experiments/rotor-spectroscopy",
     "experiments/series-decomposition-verifier",
     "experiments/siegel-walfisz",
+    "experiments/spectral-methods",
     "experiments/spectral-observatory",
     "experiments/spectral-road",
     "experiments/two-tile-analyzer",

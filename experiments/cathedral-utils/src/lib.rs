@@ -12,7 +12,9 @@
 //! - [`constants`] — Mathematical constants (γ, ζ(2/3), digamma, harmonic, quadrature)
 //! - [`coprime`] — Coprime pair generation and standard test datasets
 //! - [`gram`] — Gram matrix engine (f64/MPFR, build-once, disk cache)
+//! - [`lanczos`] — Lanczos iteration for partial eigendecomposition
 //! - [`mertens`] — Mertens function, Chebyshev θ/ψ, witness vectors
+//! - [`rsvd`] — Randomized SVD (Halko-Martinsson-Tropp) for partial eigendecomp
 //! - [`spectral`] — Eigendecomposition and participation ratio
 //! - [`vasyunin`] — Vasyunin cotangent formula for Gram entries
 //! - [`fitting`] — Curve fitting (linear regression, power-law, log-decay)
@@ -33,7 +35,9 @@ pub mod fitting;
 pub mod fmt;
 pub mod gram;
 pub mod gpu;
+pub mod lanczos;
 pub mod mertens;
 pub mod ooc;
+pub mod rsvd;
 pub mod spectral;
 pub mod vasyunin;

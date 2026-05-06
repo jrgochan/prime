@@ -1091,6 +1091,16 @@ name = "spectral-fourier"
 version = "0.1.0"
 
 [[package]]
+name = "spectral-methods"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "nalgebra",
+ "rayon",
+ "serde_json",
+]
+
+[[package]]
 name = "spectral-observatory"
 version = "0.1.0"
 dependencies = [
