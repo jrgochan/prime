@@ -168,6 +168,81 @@ pub fn quadratic_form(
     1.0 - 2.0 * bt_v + vt_gv
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// NYMAN-BEURLING APPROXIMANT
+// ═══════════════════════════════════════════════════════════════════
+
+/// Evaluate the Nyman-Beurling approximant f_N(x) = Σ_{k=1}^{N-1} w_k · {1/(kx)}
+///
+/// where {y} = y - ⌊y⌋ is the fractional part.
+///
+/// This is the function whose L² distance from the indicator function
+/// on [0,1] gives d²_N. The witness weights w_k come from
+/// [`log_cutoff_weights`].
+pub fn f_n_at(x: f64, weights: &[f64]) -> f64 {
+    if x <= 0.0 { return 0.0; }
+    let mut sum = 0.0;
+    for (k_minus_1, &w) in weights.iter().enumerate() {
+        if w == 0.0 { continue; }
+        let k = (k_minus_1 + 1) as f64;
+        let y = 1.0 / (k * x);
+        sum += w * (y - y.floor());
+    }
+    sum
+}
+
+/// Compute vᵀGv = ∫₀¹ f_N(x)² dx via midpoint quadrature.
+///
+/// This is O(N·n_pts) instead of O(N²) for the Gram matrix approach,
+/// useful for cross-checking or when the full matrix isn't available.
+pub fn vtgv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
+    let dx = 1.0 / n_pts as f64;
+    (0..n_pts).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        let f = f_n_at(x, weights);
+        f * f * dx
+    }).sum()
+}
+
+/// Compute bᵀv = ∫₀¹ f_N(x) dx via midpoint quadrature.
+pub fn btv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
+    let dx = 1.0 / n_pts as f64;
+    (0..n_pts).map(|i| {
+        let x = (i as f64 + 0.5) * dx;
+        f_n_at(x, weights) * dx
+    }).sum()
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// PNT PARTIAL SUMS
+// ═══════════════════════════════════════════════════════════════════
+
+/// S₁(M) = Σ_{k=1}^{M} μ(k)/k
+///
+/// PNT target: S₁(∞) = 0 (equivalent to PNT).
+pub fn pnt_s1(mu: &[i8], m: usize) -> f64 {
+    (1..=m.min(mu.len() - 1)).map(|k| mu[k] as f64 / k as f64).sum()
+}
+
+/// S₂(M) = Σ_{k=1}^{M} μ(k)·ln(k)/k
+///
+/// PNT target: S₂(∞) = -1.
+pub fn pnt_s2(mu: &[i8], m: usize) -> f64 {
+    (1..=m.min(mu.len() - 1)).map(|k| {
+        mu[k] as f64 * (k as f64).ln() / k as f64
+    }).sum()
+}
+
+/// S₃(M) = Σ_{k=1}^{M} μ(k)·ln²(k)/k
+///
+/// PNT target: S₃(∞) = -2γ (where γ is Euler-Mascheroni).
+pub fn pnt_s3(mu: &[i8], m: usize) -> f64 {
+    (1..=m.min(mu.len() - 1)).map(|k| {
+        let logk = (k as f64).ln();
+        mu[k] as f64 * logk * logk / k as f64
+    }).sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -202,5 +277,26 @@ mod tests {
         let theta = chebyshev_theta(&sieve, 10);
         // θ(10) = ln(2) + ln(3) + ln(5) + ln(7) ≈ 5.347
         assert!((theta - 5.347).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_pnt_sums() {
+        let mu = arith::mobius_table(10000);
+        let s1 = pnt_s1(&mu, 10000);
+        let s2 = pnt_s2(&mu, 10000);
+        // S₁ should be close to 0, S₂ close to -1
+        assert!(s1.abs() < 0.1, "S₁(10000) = {}", s1);
+        assert!((s2 + 1.0).abs() < 0.2, "S₂(10000) = {}", s2);
+    }
+
+    #[test]
+    fn test_f_n_at() {
+        let mu = arith::mobius_table(20);
+        let w = log_cutoff_weights(10, &mu);
+        // f_N(0.5) should be finite
+        let val = f_n_at(0.5, &w);
+        assert!(val.is_finite());
+        // f_N at x=0 should be 0 (guarded)
+        assert_eq!(f_n_at(0.0, &w), 0.0);
     }
 }
