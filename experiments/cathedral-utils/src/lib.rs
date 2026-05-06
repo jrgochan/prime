@@ -9,6 +9,7 @@
 //!
 //! - [`arith`] — Number theory primitives (gcd, sieve, Möbius, Liouville, factorize)
 //! - [`abel`] — Abel summation engine (discrete summation by parts)
+//! - [`constants`] — Mathematical constants (γ, ζ(2/3), digamma, harmonic, quadrature)
 //! - [`coprime`] — Coprime pair generation and standard test datasets
 //! - [`gram`] — Gram matrix engine (f64/MPFR, build-once, disk cache)
 //! - [`mertens`] — Mertens function, Chebyshev θ/ψ, witness vectors
@@ -25,6 +26,7 @@ pub mod abel;
 pub mod arith;
 pub mod cache;
 pub mod certificate;
+pub mod constants;
 pub mod coprime;
 pub mod dd;
 pub mod fitting;

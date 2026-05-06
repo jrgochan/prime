@@ -351,26 +351,29 @@ fn compute_d_sq_primary(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static s
                 return (result.d_sq, result.method, result.precision_digits);
             }
             Err(e) => {
-                eprintln!("  ⚠ GPU Cholesky failed ({}), trying CG solver", e);
+                eprintln!("  ⚠ GPU Cholesky failed ({}), trying fallbacks", e);
             }
         }
     }
 
-    // CPU Cholesky
-    let chol = cpu_cholesky_d_sq(gram, b, dim);
-    if !chol.0.is_nan() {
-        return chol;
+    // CPU Cholesky — skip for dim > 25000 (too slow single-threaded)
+    if dim <= 25000 {
+        let chol = cpu_cholesky_d_sq(gram, b, dim);
+        if !chol.0.is_nan() {
+            return chol;
+        }
+
+        // CPU LU decomposition — also skip for large matrices
+        let lu = cpu_lu_d_sq(gram, b, dim);
+        if !lu.0.is_nan() {
+            return lu;
+        }
+    } else {
+        eprintln!("  ⚠ Skipping CPU direct solvers (dim={} > 25000, would be too slow)", dim);
     }
 
-    // CPU LU decomposition (works for any non-singular matrix)
-    let lu = cpu_lu_d_sq(gram, b, dim);
-    if !lu.0.is_nan() {
-        return lu;
-    }
-
-    // Final fallback: Conjugate Gradient solver
-    // Works for any SPD matrix regardless of condition number
-    eprintln!("  ⚠ Direct solvers failed. Using Conjugate Gradient (Jacobi-preconditioned)...");
+    // Conjugate Gradient: fully parallel matvec, works at any scale
+    eprintln!("  → Using Conjugate Gradient (Jacobi-preconditioned, parallel matvec)...");
     cg_solve_d_sq(gram, b, dim)
 }
 
@@ -420,33 +423,31 @@ fn cpu_lu_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) 
 /// CG requires only matrix-vector products (no factorization),
 /// so it works even when Cholesky fails due to conditioning.
 /// Convergence: O(√κ) iterations where κ = condition number.
+///
+/// All operations are parallelized via rayon:
+///   - matvec: parallel row-wise
+///   - dot products: parallel reduction
+///   - vector updates: parallel element-wise
 fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) {
     let t = Instant::now();
 
     // Jacobi preconditioner: M⁻¹ = diag(1/G[i,i])
-    let mut m_inv = vec![1.0f64; dim];
-    for i in 0..dim {
-        let diag = gram[i * dim + i];
-        if diag > 0.0 {
-            m_inv[i] = 1.0 / diag;
-        }
-    }
+    let m_inv: Vec<f64> = (0..dim).into_par_iter()
+        .map(|i| {
+            let diag = gram[i * dim + i];
+            if diag > 0.0 { 1.0 / diag } else { 1.0 }
+        }).collect();
 
-    // Initialize: x = 0, r = b - Gx = b
+    // Initialize: x = 0, r = b
     let mut x = vec![0.0f64; dim];
     let mut r = b[..dim].to_vec();
-    let mut z = vec![0.0f64; dim]; // M⁻¹ r
-    let mut p = vec![0.0f64; dim];
-    let mut ap = vec![0.0f64; dim]; // G p
+    let mut z: Vec<f64> = r.par_iter().zip(m_inv.par_iter())
+        .map(|(ri, mi)| ri * mi).collect();
+    let mut p = z.clone();
+    let mut ap = vec![0.0f64; dim];
 
-    // z = M⁻¹ r
-    for i in 0..dim {
-        z[i] = m_inv[i] * r[i];
-    }
-    p.copy_from_slice(&z);
-
-    let mut rz = dot(&r, &z);
-    let b_norm = dot(b, b).sqrt();
+    let mut rz = par_dot(&r, &z);
+    let b_norm = par_dot(b, b).sqrt();
     let tol = 1e-14 * b_norm;
     let max_iter = dim.min(50_000);
 
@@ -454,10 +455,10 @@ fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32
     let mut final_iter = 0;
 
     for iter in 0..max_iter {
-        // ap = G p  (parallel matvec)
+        // ap = G p  (parallel matvec — the dominant cost)
         matvec_parallel(gram, &p, &mut ap, dim);
 
-        let pap = dot(&p, &ap);
+        let pap = par_dot(&p, &ap);
         if pap <= 0.0 {
             eprintln!("  ⚠ CG: non-positive p^T A p at iter {}. Matrix may not be SPD.", iter);
             break;
@@ -465,18 +466,17 @@ fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32
 
         let alpha = rz / pap;
 
-        // x += alpha * p
-        // r -= alpha * ap
-        for i in 0..dim {
-            x[i] += alpha * p[i];
-            r[i] -= alpha * ap[i];
-        }
+        // x += alpha * p; r -= alpha * ap  (parallel)
+        x.par_iter_mut().zip(p.par_iter())
+            .for_each(|(xi, pi)| *xi += alpha * pi);
+        r.par_iter_mut().zip(ap.par_iter())
+            .for_each(|(ri, api)| *ri -= alpha * api);
 
-        let r_norm = dot(&r, &r).sqrt();
+        let r_norm = par_dot(&r, &r).sqrt();
 
         // Progress report every 500 iterations
         if iter % 500 == 0 || r_norm < tol {
-            let d_sq_est = 1.0 - dot(&b[..dim], &x);
+            let d_sq_est = 1.0 - par_dot(&b[..dim], &x);
             eprint!("\r  CG iter {:>5}: ‖r‖={:.3e}, d²≈{:.12}", iter, r_norm, d_sq_est);
         }
 
@@ -487,19 +487,17 @@ fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32
             break;
         }
 
-        // z = M⁻¹ r
-        for i in 0..dim {
-            z[i] = m_inv[i] * r[i];
-        }
+        // z = M⁻¹ r (parallel)
+        z.par_iter_mut().enumerate()
+            .for_each(|(i, zi)| *zi = m_inv[i] * r[i]);
 
-        let rz_new = dot(&r, &z);
+        let rz_new = par_dot(&r, &z);
         let beta = rz_new / rz;
         rz = rz_new;
 
-        // p = z + beta * p
-        for i in 0..dim {
-            p[i] = z[i] + beta * p[i];
-        }
+        // p = z + beta * p (parallel)
+        p.par_iter_mut().zip(z.par_iter())
+            .for_each(|(pi, zi)| *pi = zi + beta * *pi);
 
         final_iter = iter;
     }
@@ -509,13 +507,20 @@ fn cg_solve_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32
         eprintln!("  ⚠ CG did not converge in {} iterations", max_iter);
     }
 
-    let d_sq = 1.0 - dot(&b[..dim], &x);
+    let d_sq = 1.0 - par_dot(&b[..dim], &x);
     let cg_time = t.elapsed().as_secs_f64();
     eprintln!("  ✓ CG: {} iters in {:.1}s (converged={})", final_iter + 1, cg_time, converged);
 
     // CG precision depends on convergence quality
     let precision = if converged { 13 } else { 10 };
     (d_sq, "CG_Jacobi_preconditioned", precision)
+}
+
+/// Parallel dot product using rayon's parallel sum
+fn par_dot(a: &[f64], b: &[f64]) -> f64 {
+    a.par_iter().zip(b.par_iter())
+        .map(|(ai, bi)| ai * bi)
+        .sum()
 }
 
 /// Parallel matrix-vector product: y = A x
@@ -527,6 +532,7 @@ fn matvec_parallel(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
             *yi = row.iter().zip(x.iter()).map(|(a, b)| a * b).sum();
         });
 }
+
 
 
 fn compute_cross_check(
