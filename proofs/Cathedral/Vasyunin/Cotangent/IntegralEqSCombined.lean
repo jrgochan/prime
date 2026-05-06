@@ -11,7 +11,7 @@
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
-import Cathedral.Vasyunin.Cotangent.CrossTermFTC
+import Cathedral.Analysis.CrossTermFTC
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 

@@ -19,8 +19,8 @@
   Created: April 12, 2026, 7:20 PM MDT (The Squeeze)
 -/
 
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
-import Cathedral.Vasyunin.Cotangent.PiecewiseFTC
+import Cathedral.Analysis.StirlingBridge
+import Cathedral.Analysis.PiecewiseFTC
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.Topology.Order.Basic

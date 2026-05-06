@@ -16,7 +16,7 @@
   Created: April 12, 2026, 7:29 PM MDT (The Piecewise Campaign)
 -/
 
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
+import Cathedral.Analysis.StirlingBridge
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Function.Floor

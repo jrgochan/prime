@@ -32,9 +32,9 @@ import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
 import Cathedral.Vasyunin.Cotangent.IntegralEqSCombined
 import Cathedral.Vasyunin.Cotangent.VasyuninAssembly
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 import Cathedral.Vasyunin.Cotangent.GramIntegralProof
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
+import Cathedral.Analysis.StirlingBridge
 -- import Cathedral.Vasyunin.Cotangent.AlgebraicLimit  -- REMOVED May 3: axiom no longer needed
 
 noncomputable section

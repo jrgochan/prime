@@ -21,8 +21,8 @@
 -/
 
 import Cathedral.Vasyunin.Defs
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
-import Cathedral.Vasyunin.Cotangent.SqueezeElimination
+import Cathedral.Analysis.StirlingBridge
+import Cathedral.Analysis.SqueezeElimination
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic

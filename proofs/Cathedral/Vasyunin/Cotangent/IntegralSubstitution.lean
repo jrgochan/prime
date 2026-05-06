@@ -14,7 +14,7 @@
 -/
 
 import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.Order.Filter.Basic

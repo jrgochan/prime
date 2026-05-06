@@ -28,9 +28,9 @@ import Cathedral.Vasyunin.Cotangent.DigammaReflection
 import Cathedral.Vasyunin.Cotangent.VasyuninAssembly
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
+import Cathedral.Analysis.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor
 

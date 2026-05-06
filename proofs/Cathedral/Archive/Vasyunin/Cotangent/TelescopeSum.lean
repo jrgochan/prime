@@ -26,7 +26,7 @@
 -/
 
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
-import Cathedral.Vasyunin.Cotangent.CrossTermFTC
+import Cathedral.Analysis.CrossTermFTC
 
 noncomputable section
 open Real MeasureTheory

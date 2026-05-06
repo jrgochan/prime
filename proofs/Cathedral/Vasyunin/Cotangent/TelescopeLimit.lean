@@ -30,7 +30,7 @@
 import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor
 

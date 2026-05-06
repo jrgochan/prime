@@ -25,7 +25,7 @@
   Status: Building...
 -/
 
-import Cathedral.Vasyunin.Cotangent.CrossTermFTC
+import Cathedral.Analysis.CrossTermFTC
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Function.Floor
 

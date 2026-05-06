@@ -40,7 +40,7 @@ import Cathedral.Vasyunin.Cotangent.WeightedDigammaGeneral
 import Cathedral.Vasyunin.Cotangent.DiagonalStrike
 import Cathedral.Vasyunin.Cotangent.DeltaResidueEval
 import Cathedral.Vasyunin.Cotangent.DeltaDirectEval
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 
 noncomputable section
 open Real MeasureTheory Filter

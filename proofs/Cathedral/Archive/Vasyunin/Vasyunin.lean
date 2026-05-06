@@ -12,7 +12,7 @@ import Cathedral.Vasyunin.Matrix.CovDet3
 import Cathedral.Vasyunin.Witness
 import Cathedral.Vasyunin.Augmented.Rayleigh
 import Cathedral.Vasyunin.Proof.Chain
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
+import Cathedral.Analysis.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.DiagonalBridge
-import Cathedral.Vasyunin.Cotangent.PiecewiseFTC
-import Cathedral.Vasyunin.Cotangent.SqueezeElimination
+import Cathedral.Analysis.PiecewiseFTC
+import Cathedral.Analysis.SqueezeElimination

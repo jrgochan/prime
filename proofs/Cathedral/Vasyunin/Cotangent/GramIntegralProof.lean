@@ -36,7 +36,7 @@ import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
 import Cathedral.Vasyunin.Cotangent.IntegralEqSCombined
 import Cathedral.Vasyunin.Cotangent.VasyuninAssembly
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
-import Cathedral.Vasyunin.Cotangent.FractIntegrable
+import Cathedral.Analysis.FractIntegrable
 import Cathedral.Analysis.GammaMultiplication
 -- NOTE: Does NOT import AlgebraicLimit — this file is a dependency of the
 -- axiom graduation chain, not a consumer of it.

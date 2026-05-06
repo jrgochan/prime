@@ -19,7 +19,7 @@
 
 import Cathedral.Vasyunin.Defs
 import Cathedral.Vasyunin.Augmented.MeanIntegral
-import Cathedral.Vasyunin.Cotangent.SqueezeElimination
+import Cathedral.Analysis.SqueezeElimination
 import Cathedral.Vasyunin.Cotangent.FormulaBridge
 import Cathedral.Vasyunin.Cotangent.GCDReduction
 import Cathedral.Gram.FractIntegral

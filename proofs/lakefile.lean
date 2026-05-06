@@ -47,12 +47,13 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Augmented.LinIndep,
     `Cathedral.Vasyunin.Augmented.Rayleigh,
     `Cathedral.Vasyunin.Augmented.MeanIntegral,
-    -- Cotangent tower (diagonal proof chain, sorry-free)
-    `Cathedral.Vasyunin.Cotangent.StirlingBridge,
-    `Cathedral.Vasyunin.Cotangent.PiecewiseFTC,
-    `Cathedral.Vasyunin.Cotangent.SqueezeElimination,
+    -- Analysis (moved from Cotangent, Phase 1 refactoring)
+    `Cathedral.Analysis.StirlingBridge,
+    `Cathedral.Analysis.PiecewiseFTC,
+    `Cathedral.Analysis.SqueezeElimination,
+    `Cathedral.Analysis.CrossTermFTC,
+    `Cathedral.Analysis.FractIntegrable,
     -- Cotangent tower (off-diagonal infrastructure)
-    `Cathedral.Vasyunin.Cotangent.CrossTermFTC,
     `Cathedral.Vasyunin.Cotangent.OffDiagPartition,
     `Cathedral.Vasyunin.Cotangent.TelescopeSum,
     `Cathedral.Vasyunin.Cotangent.VasyuninAssembly,
@@ -62,7 +63,7 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.LogDigammaBridge,
     `Cathedral.Vasyunin.Cotangent.FormulaBridge,
     `Cathedral.Vasyunin.Cotangent.GCDReduction,
-    `Cathedral.Vasyunin.Cotangent.FractIntegrable,
+
     `Cathedral.Vasyunin.Cotangent.IntegralSubstitution,
     `Cathedral.Vasyunin.Cotangent.TelescopeLimit,
     `Cathedral.Vasyunin.Augmented.VasyuninIntegralProof,

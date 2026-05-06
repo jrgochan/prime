@@ -38,7 +38,7 @@
 -/
 
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
-import Cathedral.Vasyunin.Cotangent.StirlingBridge
+import Cathedral.Analysis.StirlingBridge
 import Cathedral.Vasyunin.Cotangent.OffDiagPartition
 import Cathedral.Analysis.DirichletTest
 import Cathedral.Analysis.CenteredFractBound
