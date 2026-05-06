@@ -401,7 +401,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "Tighter Than Expected",
-        body: "Under RH, |M(x)| = O(x^{1/2+ε}). The Cathedral proves that this bound, combined with the Mellin Crown architecture, drives the Nyman-Beurling distance d²_N → 0 — the formal equivalence.",
+        body: "Under RH, |M(x)| = O(x^{1/2+ε}). The Cathedral proves that this bound, combined with the One-Pillar architecture, drives the Nyman-Beurling distance d²_N → 0 — the formal equivalence.",
       },
       {
         title: "👁️ Look For",
@@ -409,7 +409,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "🏛️ Cathedral Connection",
-        body: "The Mertens function connects to the Cathedral through the Mellin transform: the Mellin variance of the BD residual on the critical line (crown axiom 1) controls the covariance of the log-Möbius sums, which in turn bound this random walk.",
+        body: "The Mertens function connects to the Cathedral through the Perron contour chain: RH → |M(x)| = O(x^{1/2+ε}) via the 16-file Perron proof. This bound, combined with the Parseval Bridge, drives d²_N → 0.",
       },
     ],
     wasmMode: 8,
@@ -447,7 +447,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
       },
       {
         title: "🏛️ Cathedral Connection",
-        body: "This IS the Cathedral. The Gram matrix is computed by zeta::nyman_beurling, the eigenvalue structure by the Parseval Bridge, and the two crown axioms (Mellin variance + Hadamard zero bound) ensure the floor is sturdy. What you see is the proof, rendered.",
+        body: "This IS the Cathedral. The Gram matrix is computed by zeta::nyman_beurling, the eigenvalue structure by the Parseval Bridge, and the one crown axiom (baez_duarte_forward) ensures the forward direction. The DD-precision pipeline certifies this surface at N=55,440 with 31 digits of precision.",
       },
     ],
     wasmMode: 9,
@@ -506,12 +506,12 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     equation: { main: "RH ↔ d²_N → 0", sub: "nyman_beurling_equivalence" },
     description: "Interactive proof dependency tree. The Cathedral's axiom graph, rendered.",
     cards: [
-      { title: "The Proof Tree", body: "Every node is a theorem or axiom. Green = proved. Amber = crown axiom. The two amber nodes are the only assumptions. Everything else is machine-checked." },
-      { title: "🏛️ This IS the Cathedral", body: "Click any node to see its Lean statement. The crown theorem depends on exactly 2 axioms + 3 Lean kernel axioms." },
+      { title: "The Proof Tree", body: "Every node is a theorem or axiom. Green = proved. Amber = crown axiom. The single amber node (baez_duarte_forward) is the only assumption. Everything else is machine-checked." },
+      { title: "🏛️ This IS the Cathedral", body: "Click any node to see its Lean statement. The crown theorem depends on exactly 1 axiom (baez_duarte_forward) + 3 Lean kernel axioms." },
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "crown", renderer: "graph", dataTier: "static",
-    proof: { leanFile: "Assembly/MainChain.lean", theoremName: "nyman_beurling_equivalence_mellin", status: "proved" },
+    proof: { leanFile: "Assembly/MainChain.lean", theoremName: "nyman_beurling_equivalence", status: "proved" },
     showsParticleSlider: false,
   },
   {
@@ -521,10 +521,10 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     icon: "📜",
     hotkey: "G",
     color: { core: "#ffd700", edge: "#664400" },
-    equation: { main: "56 → 2 axioms", sub: "v1 → v12 · 32 days" },
-    description: "The axiom reduction campaign. 12 versions, from 56 axioms to 2.",
+    equation: { main: "56 → 1 axiom", sub: "v1 → v16 · 42 days" },
+    description: "The axiom reduction campaign. 16 versions, from 56 axioms to 1.",
     cards: [
-      { title: "The Journey", body: "March 27 to April 28, 2026. 12 versions. Each version eliminated axioms by proving them as theorems from Mathlib." },
+      { title: "The Journey", body: "March 27 to May 6, 2026. 16 versions. Each version eliminated axioms by proving them as theorems from Mathlib. The One-Pillar Cathedral stands on a single axiom: baez_duarte_forward." },
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "crown", renderer: "chart", dataTier: "static",
@@ -540,8 +540,8 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     equation: { main: "RH → M(x) ≤ Cx^{3/4} → d²_N ≤ C/logN → 0", sub: "forward chain" },
     description: "The forward proof chain animated step by step. Watch d²_N decay under RH.",
     cards: [
-      { title: "The Forward Chain", body: "RH implies Mertens x^{3/4} bound, which implies L² decay d²_N ≤ C/logN → 0 via the Parseval Bridge and Mellin variance." },
-      { title: "🏛️ Cathedral Connection", body: "MellinCrown.lean assembles the forward direction using exactly 2 axioms: critical_line_mellin_variance and rh_zeta_lower_bound_from_zero_counting." },
+      { title: "The Forward Chain", body: "RH implies the BD basis can approximate 1 in L²(0,1), so d²_N → 0. The Parseval Bridge and Mellin variance provide the rate: d²_N ≤ C/logN." },
+      { title: "🏛️ Cathedral Connection", body: "In v16, the forward direction uses 1 crown axiom: baez_duarte_forward. The Mellin Crown (2 axioms) and Perron Crown (4 axioms) are retained as alternative paths." },
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "crown", renderer: "chart", dataTier: "precomputed",
@@ -564,7 +564,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     description: "The crown jewel. Watch the same energy flow between position and frequency space.",
     cards: [
       { title: "The Bridge", body: "Left: L²(0,1) integral. Right: Mellin L² on the critical line. They are the SAME NUMBER. This theorem is proved with zero axioms." },
-      { title: "🏛️ Cathedral Connection", body: "parseval_bridge_white in White/Scattering.lean. Zero axioms, zero sorry. The heart of the v11 Mellin Crown." },
+      { title: "🏛️ Cathedral Connection", body: "parseval_bridge_white proved with zero axioms, zero sorry. The heart of the v16 Observatory's forward chain." },
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "analysis", renderer: "dual-chart", dataTier: "precomputed",

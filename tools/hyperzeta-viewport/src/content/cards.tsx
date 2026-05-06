@@ -41,7 +41,7 @@ export const EDUCATIONAL_CARDS = [
       <>
         This viewport was the origin of <Glossary term="Cathedral" /> — a Lean
         4 formal verification framework. The proof reduces the Riemann
-        Hypothesis to 2 crown axioms via the Mellin Crown architecture, all
+        Hypothesis to 1 crown axiom via the One-Pillar architecture (v16), all
         machine-checked. The sedenion structure here inspired the spectral
         analysis in the formalization.
       </>

@@ -31,20 +31,12 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     description: "Nyman-Beurling equivalence: The Riemann Hypothesis is equivalent to the distance decay in L²(0,1).",
   },
   {
-    id: "mellin_var",
-    label: "Mellin Variance ≤ C/logN",
-    leanFile: "Assembly/MellinCrown.lean",
+    id: "bd_fwd",
+    label: "baez_duarte_forward",
+    leanFile: "Assembly/MainChain.lean",
     status: "axiom",
     group: "crown",
-    description: "Hardy-Littlewood critical line mean value bound. Crown axiom 1 of 2.",
-  },
-  {
-    id: "zeta_lb",
-    label: "|ζ(s)| ≥ c|t|⁻ᴬ",
-    leanFile: "Zeta/Hadamard.lean",
-    status: "axiom",
-    group: "crown",
-    description: "Hadamard zero-counting zeta lower bound. Crown axiom 2 of 2.",
+    description: "BD forward direction (IMRN 2003): RH ⟹ d²_N → 0. Sole crown axiom of the One-Pillar Cathedral (v16).",
   },
 
   // ── Analysis ──
@@ -152,8 +144,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
 
 export const CATHEDRAL_EDGES: ProofEdge[] = [
   // Crown depends on
-  { from: "nbe", to: "mellin_var" },
-  { from: "nbe", to: "zeta_lb" },
+  { from: "nbe", to: "bd_fwd" },
   { from: "nbe", to: "parseval" },
   { from: "nbe", to: "rank1" },
   { from: "nbe", to: "spectral" },
@@ -185,9 +176,8 @@ export function computeGraphLayout(): Map<string, { x: number; y: number }> {
   // Manual tree layout (root at top)
   positions.set("nbe", { x: 400, y: 40 });
 
-  // Crown axioms
-  positions.set("mellin_var", { x: 200, y: 140 });
-  positions.set("zeta_lb", { x: 600, y: 140 });
+  // Crown axiom (single)
+  positions.set("bd_fwd", { x: 400, y: 140 });
 
   // Analysis row
   positions.set("parseval", { x: 120, y: 240 });
