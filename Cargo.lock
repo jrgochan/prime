@@ -702,6 +702,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nb-witness-scan"
+version = "1.0.0"
+dependencies = [
+ "cathedral-utils",
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "num-bigint"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"

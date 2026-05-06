@@ -54,6 +54,7 @@ members = [
     "experiments/gram-scaling-oracle-gpu",
     "experiments/two-tile-decomposition-gpu",
     "experiments/certified-distance",
+    "experiments/nb-witness-scan",
 ]
 
 [profile.release]
