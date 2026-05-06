@@ -1,3 +1,16 @@
+import Cathedral.Defs
+import Cathedral.Structural.Structural
+import Cathedral.MellinBridge.Basic
+import Cathedral.NymanBeurling.QuadFormBridge
+import Cathedral.NymanBeurling.NymanBeurling
+import Cathedral.NymanBeurling.BDBypass
+import Cathedral.NymanBeurling.VasyuninBypass
+import Cathedral.Assembly.DirectL2Crown
+import Cathedral.Assembly.OneCrown
+import Cathedral.Assembly.PerronCrown
+import Cathedral.Assembly.MellinCrown
+import Cathedral.Renormalization.Bridge
+
 /-!
   # The Nyman-Beurling-Báez-Duarte Equivalence
 
@@ -38,19 +51,6 @@
   * A. Beurling, *A closure problem related to the Riemann zeta function*,
     Proc. Nat. Acad. Sci. 41 (1955), pp. 312–314.
 -/
-
-import Cathedral.Defs
-import Cathedral.Structural.Structural
-import Cathedral.MellinBridge.Basic
-import Cathedral.NymanBeurling.QuadFormBridge
-import Cathedral.NymanBeurling.NymanBeurling
-import Cathedral.NymanBeurling.BDBypass
-import Cathedral.NymanBeurling.VasyuninBypass
-import Cathedral.Assembly.DirectL2Crown
-import Cathedral.Assembly.OneCrown
-import Cathedral.Assembly.PerronCrown
-import Cathedral.Assembly.MellinCrown
-import Cathedral.Renormalization.Bridge
 
 noncomputable section
 open Complex Real
