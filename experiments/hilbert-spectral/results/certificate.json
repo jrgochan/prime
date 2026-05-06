@@ -1,40 +1,27 @@
 {
+  "cathedral_version": "v16",
+  "elapsed_seconds": 73.9900955,
   "experiment": "Hilbert Matrix Spectral Analysis — π Constant Certification",
-  "cathedral_version": "v12",
-  "exploration": 17,
-  "precision_bits": 512,
-  "threads": 12,
   "max_N": 1000,
-  "elapsed_seconds": 77.125,
-
-  "pi_reference": "3.1415926535897932384626433832795028841971693993751",
-
   "operator_norm_convergence": {
     "best_N": 1000,
-    "best_norm": 3.130494648247070e0,
-    "best_error": 1.109801e-2,
+    "best_error": 0.011098005342723205,
+    "best_norm": 3.13049464824707,
     "convergence_rate": "O(1/N)",
     "method": "power_iteration_512bit_mpfr"
   },
-
+  "pi_reference": "3.1415926535897932384626433832795028841971693993751",
+  "precision_bits": 512,
   "schur_test_analysis": {
+    "norm_scaling": "O(1) — converges to π",
     "schur_always_ge_norm": true,
-    "schur_scaling": "O(log N) — grows slowly",
-    "norm_scaling": "O(1) — converges to π"
+    "schur_scaling": "O(log N) — grows slowly"
   },
-
-  "mv_kernel_insight": {
-    "delta_n_approx": "1/n",
-    "pi_over_delta_n": "πn",
-    "current_lean_bound": "Schur: N over delta approx N squared",
-    "optimal_bound": "pi over delta_n approx pi*n",
-    "gap_factor": "N over pi (linear in N)"
-  },
-
+  "threads": 12,
   "verdicts": {
-    "norm_converges_to_pi": true,
-    "schur_bound_valid": true,
+    "all_pass": true,
     "convergence_rate_linear": true,
-    "all_pass": true
+    "norm_converges_to_pi": true,
+    "schur_bound_valid": true
   }
 }

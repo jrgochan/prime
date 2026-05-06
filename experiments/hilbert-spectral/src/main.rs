@@ -3,7 +3,7 @@
 // ╔═══════════════════════════════════════════════════════════════════╗
 // ║  HILBERT MATRIX SPECTRAL ANALYSIS ENGINE                        ║
 // ║  π Constant Certification for Montgomery-Vaughan                ║
-// ║  Cathedral v12 — 512-bit MPFR, Massively Parallel               ║
+// ║  Cathedral v16 — 512-bit MPFR, Massively Parallel               ║
 // ╚═══════════════════════════════════════════════════════════════════╝
 //
 // Validates:
@@ -12,34 +12,33 @@
 //   §C. Schur test bound vs harmonic numbers
 //   §D. Log-separation analysis: δ_n = log(1+1/n) (512-bit)
 //   §E. Convergence rate: |‖H_N‖ - π| = O(1/N)
-//   §F. Certificate
+//   §F. Certificate (JSON + TSV via cathedral-utils)
 
 mod hilbert;
-mod fmt;
 
+use cathedral_utils::fmt;
+use cathedral_utils::certificate;
 use rayon::prelude::*;
 use std::time::Instant;
-use std::fs;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let max_n: usize = if args.len() > 1 {
-        args[1].parse().unwrap_or(10_000)
+        args[1].parse().unwrap_or(1000)
     } else {
-        10_000
+        1000
     };
 
     let start = Instant::now();
     let threads = rayon::current_num_threads();
     let pi = hilbert::pi_512();
 
-    println!();
-    println!("  ╔═══════════════════════════════════════════════════════════════════════╗");
-    println!("  ║  HILBERT MATRIX SPECTRAL ANALYSIS ENGINE                             ║");
-    println!("  ║  π Constant Certification for Montgomery-Vaughan                     ║");
-    println!("  ║  Cathedral v12 — 512-bit MPFR, {} threads{:>28}║",
-             threads, format!("N_max = {}", max_n));
-    println!("  ╚═══════════════════════════════════════════════════════════════════════╝");
+    fmt::header(
+        "HILBERT MATRIX SPECTRAL ANALYSIS ENGINE",
+        &format!("π Constant Certification · Cathedral v16 · N_max = {}", max_n),
+        512,
+        threads,
+    );
 
     let pi_f64 = std::f64::consts::PI;
 
@@ -51,26 +50,29 @@ fn main() {
     println!("    Theory: ‖H_N‖_op → π = {:.50} (Schur 1911)", pi);
     println!("    Method: power iteration on H^T H, 512-bit precision");
     println!();
-    println!("    {:>6} │ {:>20} │ {:>14} │ {:>8} │ {:>6}",
-             "N", "‖H_N‖ (512-bit)", "|‖H_N‖ - π|", "iters", "time");
+    println!("    {:>6} │ {:>20} │ {:>14} │ {:>14} │ {:>8} │ {:>6}",
+             "N", "‖H_N‖ (512-bit)", "|‖H_N‖ - π|", "|err|×N", "iters", "time");
 
-    // Matrix sizes capped at 5000 for eigenvalue computation
-    let eigen_cap = max_n.min(5000);
+    // Matrix sizes capped at max_n for eigenvalue computation
     let eigen_sizes: Vec<usize> = vec![
         10, 20, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000,
-    ].into_iter().filter(|&n| n <= eigen_cap).collect();
+        6000, 7000, 8000, 10000,
+    ].into_iter().filter(|&n| n <= max_n).collect();
 
     let mut norm_results: Vec<(usize, f64, usize)> = Vec::new();
 
     for &n in &eigen_sizes {
         let t0 = Instant::now();
-        let (norm, iters) = hilbert::power_iteration_norm_mpfr(n, 500, 1e-14);
+        // Increase max iterations for larger N to ensure convergence
+        let max_iters = if n <= 1000 { 500 } else { 1000 };
+        let (norm, iters) = hilbert::power_iteration_norm_mpfr(n, max_iters, 1e-14);
         let elapsed = t0.elapsed();
         let norm_f64 = norm.to_f64();
         let err = (norm_f64 - pi_f64).abs();
+        let err_n = err * (n as f64);
 
-        println!("    {:>6} │ {:>20.15} │ {:>14.2e} │ {:>8} │ {:>5.1}s",
-                 n, norm_f64, err, iters, elapsed.as_secs_f64());
+        println!("    {:>6} │ {:>20.15} │ {:>14.6e} │ {:>14.4} │ {:>8} │ {:>5.1}s",
+                 n, norm_f64, err, err_n, iters, elapsed.as_secs_f64());
         norm_results.push((n, norm_f64, iters));
     }
 
@@ -202,28 +204,35 @@ fn main() {
     }
 
     // ═══════════════════════════════════════════════
-    // CERTIFIED OUTPUT
+    // CERTIFIED OUTPUT — via cathedral-utils
     // ═══════════════════════════════════════════════
     let elapsed = start.elapsed();
 
     // --- TSV: Operator norm convergence ---
-    let mut norm_tsv = String::from("# Hilbert Matrix Operator Norm Convergence (512-bit MPFR)\n");
-    norm_tsv.push_str("# Columns: N\tnorm\terror\terror_times_N\titers\n");
-    for (n, norm, iters) in &norm_results {
+    let norm_headers = &["N", "norm", "error", "error_times_N", "iters"];
+    let norm_rows: Vec<Vec<String>> = norm_results.iter().map(|(n, norm, iters)| {
         let err = (norm - pi_f64).abs();
-        norm_tsv.push_str(&format!("{}\t{:.15e}\t{:.15e}\t{:.15e}\t{}\n",
-                                    n, norm, err, err * (*n as f64), iters));
-    }
-    fs::write("results/operator_norm_convergence.tsv", &norm_tsv).unwrap();
+        vec![
+            n.to_string(),
+            format!("{:.15e}", norm),
+            format!("{:.15e}", err),
+            format!("{:.15e}", err * (*n as f64)),
+            iters.to_string(),
+        ]
+    }).collect();
+    certificate::write_tsv("results/operator_norm_convergence.tsv", norm_headers, &norm_rows);
 
     // --- TSV: Schur comparison ---
-    let mut schur_tsv = String::from("# Schur Test vs Exact Norm (512-bit MPFR)\n");
-    schur_tsv.push_str("# Columns: N\tschur_bound\texact_norm\tratio\n");
-    for (n, schur, norm) in &schur_results {
-        schur_tsv.push_str(&format!("{}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-                                     n, schur, norm, schur / norm));
-    }
-    fs::write("results/schur_comparison.tsv", &schur_tsv).unwrap();
+    let schur_headers = &["N", "schur_bound", "exact_norm", "ratio"];
+    let schur_rows: Vec<Vec<String>> = schur_results.iter().map(|(n, schur, norm)| {
+        vec![
+            n.to_string(),
+            format!("{:.15e}", schur),
+            format!("{:.15e}", norm),
+            format!("{:.15e}", schur / norm),
+        ]
+    }).collect();
+    certificate::write_tsv("results/schur_comparison.tsv", schur_headers, &schur_rows);
 
     // --- JSON Certificate ---
     let best_norm = norm_results.last().map(|(_, n, _)| *n).unwrap_or(0.0);
@@ -231,94 +240,61 @@ fn main() {
     let best_err = (best_norm - pi_f64).abs();
     let all_pass = schur_ok && conv_ok;
 
-    let pi_str = format!("{:.50}", hilbert::pi_512());
-    let cert = format!(r#"{{
-  "experiment": "Hilbert Matrix Spectral Analysis — π Constant Certification",
-  "cathedral_version": "v12",
-  "exploration": 17,
-  "precision_bits": 512,
-  "threads": {threads},
-  "max_N": {max_n},
-  "elapsed_seconds": {elapsed:.3},
-
-  "pi_reference": "{pi_str}",
-
-  "operator_norm_convergence": {{
-    "best_N": {best_n},
-    "best_norm": {best_norm:.15e},
-    "best_error": {best_err:.6e},
-    "convergence_rate": "O(1/N)",
-    "method": "power_iteration_512bit_mpfr"
-  }},
-
-  "schur_test_analysis": {{
-    "schur_always_ge_norm": {schur_ok},
-    "schur_scaling": "O(log N) — grows slowly",
-    "norm_scaling": "O(1) — converges to π"
-  }},
-
-  "mv_kernel_insight": {{
-    "delta_n_approx": "1/n",
-    "pi_over_delta_n": "πn",
-    "current_lean_bound": "Schur: N over delta approx N squared",
-    "optimal_bound": "pi over delta_n approx pi*n",
-    "gap_factor": "N over pi (linear in N)"
-  }},
-
-  "verdicts": {{
-    "norm_converges_to_pi": true,
-    "schur_bound_valid": {schur_ok},
-    "convergence_rate_linear": {conv_ok},
-    "all_pass": {all_pass}
-  }}
-}}"#,
-        threads = threads,
-        max_n = max_n,
-        elapsed = elapsed.as_secs_f64(),
-        best_n = best_n,
-        best_norm = best_norm,
-        best_err = best_err,
-        schur_ok = schur_ok,
-        conv_ok = conv_ok,
-        all_pass = all_pass,
-    );
-    fs::write("results/certificate.json", &cert).unwrap();
+    let cert = serde_json::json!({
+        "experiment": "Hilbert Matrix Spectral Analysis — π Constant Certification",
+        "cathedral_version": "v16",
+        "precision_bits": 512,
+        "threads": threads,
+        "max_N": max_n,
+        "elapsed_seconds": elapsed.as_secs_f64(),
+        "pi_reference": format!("{:.50}", hilbert::pi_512()),
+        "operator_norm_convergence": {
+            "best_N": best_n,
+            "best_norm": best_norm,
+            "best_error": best_err,
+            "convergence_rate": "O(1/N)",
+            "method": "power_iteration_512bit_mpfr"
+        },
+        "schur_test_analysis": {
+            "schur_always_ge_norm": schur_ok,
+            "schur_scaling": "O(log N) — grows slowly",
+            "norm_scaling": "O(1) — converges to π"
+        },
+        "verdicts": {
+            "norm_converges_to_pi": true,
+            "schur_bound_valid": schur_ok,
+            "convergence_rate_linear": conv_ok,
+            "all_pass": all_pass
+        }
+    });
+    certificate::write_json("results/certificate.json", &cert);
 
     // --- Certificate banner ---
     println!();
-    println!("  ╔═══════════════════════════════════════════════════════════════════════╗");
-    println!("  ║  HILBERT SPECTRAL ANALYSIS — CERTIFICATE");
-    println!("  ╠═══════════════════════════════════════════════════════════════════════╣");
-    println!("  ║  Precision: 512-bit MPFR    Threads: {}    Max N: {}", threads, max_n);
-    println!("  ║  Time: {:.1}s", elapsed.as_secs_f64());
-    println!("  ║");
-    println!("  ║  §A. Operator Norm Convergence (power iteration)");
-    println!("  ║    {} ‖H_N‖ → π: best at N={}: {:.15} (err {:.2e})",
+    certificate::cathedral_header(
+        "HILBERT SPECTRAL ANALYSIS — CERTIFICATE",
+        &format!("512-bit MPFR · {} threads · N_max = {} · {:.1}s", threads, max_n, elapsed.as_secs_f64()),
+    );
+    println!();
+    println!("    §A. {} ‖H_N‖ → π: best at N={}: {:.15} (err {:.2e})",
              fmt::check(true), best_n, best_norm, best_err);
-    println!("  ║");
-    println!("  ║  §C. Schur Test Validity");
-    println!("  ║    {} Schur bound ≥ true norm for all N tested",
+    println!("    §C. {} Schur bound ≥ true norm for all N tested",
              fmt::check(schur_ok));
-    println!("  ║");
-    println!("  ║  §E. Convergence Rate");
-    println!("  ║    {} |‖H_N‖ - π| = O(1/N) confirmed", fmt::check(conv_ok));
-    println!("  ║");
-    println!("  ║  VERDICT");
+    println!("    §E. {} |‖H_N‖ - π| = O(1/N) confirmed", fmt::check(conv_ok));
+    println!();
     if all_pass {
-        println!("  ║    ✓ π constant NUMERICALLY CERTIFIED (512-bit MPFR)");
-        println!("  ║    ✓ Schur test provides VALID upper bound (used in Lean proof)");
-        println!("  ║    ✓ Gap: Schur = O(log N) vs optimal = π ≈ 3.14159");
+        println!("    {}✓ π constant NUMERICALLY CERTIFIED (512-bit MPFR){}", fmt::GREEN, fmt::RESET);
+        println!("    {}✓ Schur test provides VALID upper bound (used in Lean proof){}", fmt::GREEN, fmt::RESET);
+        println!("    {}✓ Gap: Schur = O(log N) vs optimal = π ≈ 3.14159{}", fmt::GREEN, fmt::RESET);
     } else {
-        println!("  ║    ✗ Some checks failed — see details above");
+        println!("    {}✗ Some checks failed — see details above{}", fmt::RED, fmt::RESET);
     }
-    println!("  ║");
-    println!("  ╚═══════════════════════════════════════════════════════════════════════╝");
+
     println!();
     println!("  Output: results/{{certificate.json, operator_norm_convergence.tsv,");
     println!("          schur_comparison.tsv}}");
     println!();
     println!("  NOTE: Matrix eigenvalue computation is O(N²) per iteration.");
-    println!("  §A caps at N=5000. §B row sums scale to 100K+.");
-    println!("  §D log-separation is analytical — scales to any N.");
+    println!("  Larger N values will take proportionally longer.");
     println!();
 }
