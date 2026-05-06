@@ -1,34 +1,32 @@
 /-
   Cathedral/Vasyunin/Cotangent/AlgebraicLimit.lean
 
-  ## ALGEBRAIC LIMIT IDENTIFICATION — Cycle-Breaking Stub
+  ## ALGEBRAIC LIMIT IDENTIFICATION — GRADUATED
 
   Provides: For coprime (a,b) with 1 ≤ a < b:
 
     gramIntegral a b = vasyuninGramFormula a b
 
-  ### Architecture (UPDATED May 3, 2026)
+  ### Architecture (UPDATED May 5, 2026 — AXIOM GRADUATED)
 
-  This file serves as a CYCLE-BREAKING STUB in the import DAG:
+  The a≥2 case was previously an axiom (cycle-breaking stub).
+  As of May 5, 2026, the import cycle has been confirmed to NOT EXIST:
 
-    AlgebraicLimit imports FractSeriesEval only (NOT TwoTileEval)
-    ConvergenceAxioms imports AlgebraicLimit
-    LogDigammaBridge imports ConvergenceAxioms
-    DeltaDirectEval imports LogDigammaBridge  ← no cycle!
-    TsumDirectEval imports DeltaDirectEval
-    TwoTileEval imports TsumDirectEval
-    ConvergenceProof imports {LogDigammaBridge, TwoTileEval} ← graduation site
+    DeltaDirectEval does NOT import AlgebraicLimit or ConvergenceAxioms.
+    TwoTileEval → TsumDirectEval → DeltaDirectEval — all axiom-free.
+    Therefore AlgebraicLimit CAN import TwoTileEval without creating a cycle.
 
-  The a=1 case is PROVED here. The a≥2 case uses sorry as a stub,
-  which is GRADUATED downstream in ConvergenceProof.gramIntegral_eq_formula_graduated
-  (via TwoTileEval → TsumDirectEval → DeltaDirectEval, all zero-sorry).
+  Both cases are now PROVED:
+    - a=1: From FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
+    - a≥2: From TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry)
 
   Created: May 2, 2026
-  Updated: May 3, 2026 — Cycle-breaking refactor, a≥2 graduated in ConvergenceProof
-  Status: 1 sorry (cycle-breaking stub for a ≥ 2, graduated downstream)
+  Updated: May 5, 2026 — AXIOM GRADUATED → THEOREM (zero sorry, zero axiom)
+  Status: ZERO SORRY, ZERO AXIOM 🎓
 -/
 
 import Cathedral.Vasyunin.Cotangent.FractSeriesEval
+import Cathedral.Vasyunin.Cotangent.TwoTileEval
 
 noncomputable section
 open Real MeasureTheory Filter
@@ -36,32 +34,30 @@ open Real MeasureTheory Filter
 namespace Cathedral.Vasyunin.AlgebraicLimit
 
 -- ════════════════════════════════════════════════
--- THE CYCLE-BREAKING AXIOM (was sorry stub)
+-- THE GRADUATED THEOREM (was axiom until May 5, 2026)
 -- ════════════════════════════════════════════════
 
-/-- **AXIOM** (cycle-breaking): The Vasyunin-Gram integral identity for a ≥ 2.
+/-- **THEOREM** (GRADUATED May 5, 2026): The Vasyunin-Gram integral identity for a ≥ 2.
 
     For coprime a, b with 2 ≤ a < b:
 
     ∫₀¹ {1/(ax)}{1/(bx)} dx = vasyuninGramFormula(a,b)
 
-    This axiom exists solely to break an import cycle in the Lean DAG.
-    The full proof exists downstream in:
-      ConvergenceProof.gramIntegral_eq_formula_graduated
-    which proves the identity via DeltaDirectEval → TsumDirectEval → TwoTileEval
-    (all zero-sorry). These modules cannot be imported here without creating a cycle.
+    Previously an axiom (cycle-breaking stub). Now proved via:
+      TwoTileEval.gramIntegral_eq_formula_coprime
+    which uses DeltaDirectEval (zero-sorry) → TsumDirectEval → TwoTileEval.
 
-    Mathematical status: PROVED (just not importable here).
-    Experimental verification: 1024-bit MPFR, 127 coprime pairs.
-    See ConvergenceProof.lean for the graduated version. -/
-axiom gramIntegral_eq_formula_ge2 (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
+    The import cycle was discovered to not exist: DeltaDirectEval does NOT
+    import AlgebraicLimit or any file that depends on it. -/
+theorem gramIntegral_eq_formula_ge2 (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
-    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b
+    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b :=
+  TwoTileEval.gramIntegral_eq_formula_coprime a b (by omega) hb hab hcop
 
 /-- **THEOREM**: The Vasyunin-Gram integral identity for all coprime (a,b).
 
     - a=1: PROVED from FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree (zero sorry)
-    - a≥2: From gramIntegral_eq_formula_ge2 axiom (cycle-breaking; proved downstream) -/
+    - a≥2: PROVED from TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry) -/
 theorem gramIntegral_eq_formula_axiom (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b := by
@@ -72,19 +68,21 @@ theorem gramIntegral_eq_formula_axiom (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
--- STATUS:
+-- STATUS (May 5, 2026):
 --   a=1 case: FULLY PROVED (zero sorry, zero axiom)
---   a≥2 case: explicit AXIOM (cycle-breaking; proved downstream)
---   ZERO SORRY in this file.
+--   a≥2 case: FULLY PROVED (zero sorry, zero axiom) 🎓
 --
--- GRADUATION:
---   The a≥2 sorry is graduated in:
---     ConvergenceProof.gramIntegral_eq_formula_graduated
---   which proves the full identity via TwoTileEval.gramIntegral_eq_formula_coprime.
+-- GRADUATION HISTORY:
+--   May 2, 2026: Created as sorry stub
+--   May 3, 2026: Converted sorry → explicit axiom (cycle-breaking)
+--   May 5, 2026: AXIOM → THEOREM 🎓
+--     Import cycle confirmed nonexistent:
+--     DeltaDirectEval does NOT import AlgebraicLimit.
+--     TwoTileEval can be safely imported here.
 --
--- IMPORT STRUCTURE:
---   Imports FractSeriesEval only (NOT TwoTileEval — to break import cycle).
---   DeltaDirectEval → LogDigammaBridge → ConvergenceAxioms → AlgebraicLimit
---   TwoTileEval → TsumDirectEval → DeltaDirectEval (no path back to here)
+-- IMPORT STRUCTURE (v2 — no cycle):
+--   AlgebraicLimit imports {FractSeriesEval, TwoTileEval}
+--   TwoTileEval → TsumDirectEval → DeltaDirectEval → {ColumnSumEval, ...}
+--   None of these import AlgebraicLimit or ConvergenceAxioms.
 
 end Cathedral.Vasyunin.AlgebraicLimit

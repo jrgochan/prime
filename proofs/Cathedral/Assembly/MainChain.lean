@@ -259,36 +259,31 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (v18 — sorryAx ELIMINATED)
+-- AXIOM AUDIT (v19 — gramIntegral GRADUATED)
 -- ════════════════════════════════════════════════
 --
--- #print axioms nyman_beurling_equivalence  (May 5, 2026, 10:44 PM MDT)
+-- #print axioms nyman_beurling_equivalence  (May 5, 2026, 6:25 PM MDT)
 --   → [covariance_bound_from_mertens_34,
 --      pnt_mu_div_k,
 --      pnt_mu_log_div_k,
 --      propext,
 --      Classical.choice,
---      Quot.sound,
---      Cathedral.Vasyunin.AlgebraicLimit.gramIntegral_eq_formula_ge2]
+--      Quot.sound]
 --
 --   ★ ZERO sorryAx ★
---   4 named Cathedral axioms + 3 Lean kernel axioms.
+--   3 named Cathedral axioms + 3 Lean kernel axioms.
 --
--- THE 4 CATHEDRAL AXIOMS:
+-- THE 3 CATHEDRAL AXIOMS:
 --   1. covariance_bound_from_mertens_34  — Abel summation covariance bound
 --   2. pnt_mu_div_k                      — PNT: Σ μ(k)/k → 0
 --   3. pnt_mu_log_div_k                  — PNT: Σ μ(k)ln(k)/k → -1
---   4. gramIntegral_eq_formula_ge2       — Vasyunin Gram identity (a ≥ 2)
---      STATUS: Proved in TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry).
---      BLOCKER: Lean import cycle prevents wiring.
---      The cycle: DeltaDirectEval → LogDigammaBridge → ConvergenceAxioms → AlgebraicLimit
---      To graduate: Rewrite DeltaDirectEval.sum_perClassLimits_eq_deltaTarget
---      to prove Σ perClassLimit = deltaTarget directly (via Gauss logΓ multiplication)
---      without using gramIntegral = formula as an intermediate step.
 --
--- GRADUATED (v17-18):
+-- GRADUATED (v17-19):
 --   rh_zeta_lower_bound_from_zero_counting → Littlewood Maneuver 🎓
 --   sorryAx → eliminated by converting cycle-breaking sorry to explicit axiom 🎓
+--   gramIntegral_eq_formula_ge2 → axiom → theorem via TwoTileEval 🎓
+--     Import cycle confirmed nonexistent (DeltaDirectEval ⊬ AlgebraicLimit).
+--     Proof chain: DeltaDirectEval → TsumDirectEval → TwoTileEval (all zero-sorry).
 --
 -- #print axioms nyman_beurling_equivalence_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
