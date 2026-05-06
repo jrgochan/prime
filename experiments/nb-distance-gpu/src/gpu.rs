@@ -123,6 +123,25 @@ extern "C" {
         beta: *const f64,
         y: *mut f64, incy: c_int,
     ) -> c_int;
+    fn cublasDscal_v2(
+        handle: CublasHandle,
+        n: c_int,
+        alpha: *const f64,
+        x: *mut f64, incx: c_int,
+    ) -> c_int;
+    fn cublasDaxpy_v2(
+        handle: CublasHandle,
+        n: c_int,
+        alpha: *const f64,
+        x: *const f64, incx: c_int,
+        y: *mut f64, incy: c_int,
+    ) -> c_int;
+    fn cublasDnrm2_v2(
+        handle: CublasHandle,
+        n: c_int,
+        x: *const f64, incx: c_int,
+        result: *mut f64,
+    ) -> c_int;
 }
 
 const CUDA_MEMCPY_HOST_TO_DEVICE: c_int = 1;
@@ -509,6 +528,234 @@ pub fn gpu_eigenvalues_only(
 
         eprintln!("  GPU eigenvalues total: {:.1}s", gpu_time);
         Ok((eigenvalues, gpu_time))
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GPU LANCZOS — bottom-k eigenvalues via cuBLAS matvec
+// ═══════════════════════════════════════════════════════════════
+
+/// Result of GPU Lanczos iteration.
+pub struct GpuLanczosResult {
+    /// Bottom-k eigenvalues (ascending order)
+    pub eigenvalues: Vec<f64>,
+    /// Ritz vectors in the Lanczos basis (m × k matrix, row-major)
+    /// Multiply by basis to get full eigenvectors
+    pub ritz_vectors: Vec<Vec<f64>>,
+    /// Lanczos basis vectors (m vectors of length N, stored on HOST)
+    pub basis: Vec<Vec<f64>>,
+    /// GPU time in seconds
+    pub gpu_time_secs: f64,
+    /// Number of Lanczos iterations actually performed
+    pub iterations: usize,
+}
+
+/// GPU Lanczos for bottom-k eigenvalues using spectral shift.
+///
+/// The matrix G stays on GPU. The Lanczos iteration uses:
+///   - cublasDgemv for y = G·x  (the dominant cost, ~O(N²) per step)
+///   - cublasDdot for dot products
+///   - cudaMemcpy for basis vector download (O(N) per step)
+///
+/// VRAM budget at N=40,000:
+///   - Matrix: N² × 8 = 12.8 GB
+///   - Vectors: 3 × N × 8 = 960 KB (v_j, v_{j-1}, w)
+///   - Total: ~12.8 GB  (fits in 24 GB easily!)
+///
+/// Compare with dsyevd(Vec): ~25 GB (exceeds 24 GB VRAM)
+///
+/// The m basis vectors are downloaded to HOST memory (m × N × 8 bytes).
+/// For m=300, N=40K: 300 × 40K × 8 = 96 MB — trivial.
+///
+/// After m iterations, the m×m tridiagonal matrix is eigendecomposed on CPU
+/// (instant for m ≤ 1000), and the top-k Ritz values of (σI-G) give the
+/// bottom-k eigenvalues of G.
+pub fn gpu_lanczos_bottom_k(
+    d_gram: *const f64,  // GPU pointer — matrix already uploaded
+    dim: usize,
+    k: usize,           // number of bottom eigenvalues
+    m: usize,            // Lanczos subspace dimension (typically 15*k)
+    blas_handle: CublasHandle,
+) -> Result<GpuLanczosResult, String> {
+    use cathedral_utils::lanczos;
+
+    let n_i32 = dim as c_int;
+    let vec_bytes = dim * 8;
+    let m_actual = m.min(dim);
+    let start = std::time::Instant::now();
+
+    // Estimate sigma from diagonal (download diagonal only)
+    let mut diag = vec![0.0f64; dim];
+    for i in 0..dim {
+        unsafe {
+            cudaMemcpy(
+                diag.as_mut_ptr().add(i),
+                (d_gram as *const f64).add(i * dim + i),
+                8,
+                CUDA_MEMCPY_DEVICE_TO_HOST,
+            );
+        }
+    }
+    let trace: f64 = diag.iter().sum();
+    let sigma = trace * 1.1;
+
+    unsafe {
+        // Allocate GPU vectors: v_curr, v_prev, w
+        let mut d_v_curr: *mut f64 = ptr::null_mut();
+        let mut d_v_prev: *mut f64 = ptr::null_mut();
+        let mut d_w: *mut f64 = ptr::null_mut();
+
+        let s1 = cudaMalloc(&mut d_v_curr, vec_bytes);
+        let s2 = cudaMalloc(&mut d_v_prev, vec_bytes);
+        let s3 = cudaMalloc(&mut d_w, vec_bytes);
+        if s1 != 0 || s2 != 0 || s3 != 0 {
+            return Err(format!("cudaMalloc failed: {},{},{}", s1, s2, s3));
+        }
+
+        // Initialize v_0 = random unit vector
+        let mut v0 = vec![0.0f64; dim];
+        let seed = 0x12345678u64;
+        for i in 0..dim {
+            // Simple deterministic initialization
+            let x = ((seed.wrapping_mul(i as u64 + 1).wrapping_add(0x9E3779B97F4A7C15)) as f64)
+                / (u64::MAX as f64) - 0.5;
+            v0[i] = x;
+        }
+        let norm: f64 = v0.iter().map(|x| x * x).sum::<f64>().sqrt();
+        for x in &mut v0 { *x /= norm; }
+
+        cudaMemcpy(d_v_curr, v0.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+
+        // Zero v_prev
+        let zeros = vec![0.0f64; dim];
+        cudaMemcpy(d_v_prev, zeros.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+
+        // Lanczos tridiagonal coefficients
+        let mut alphas = Vec::with_capacity(m_actual);
+        let mut betas = Vec::with_capacity(m_actual + 1);
+        betas.push(0.0);
+
+        // Basis vectors (downloaded to host)
+        let mut basis: Vec<Vec<f64>> = Vec::with_capacity(m_actual);
+
+        let alpha_one = 1.0f64;
+        let beta_zero = 0.0f64;
+
+        for j in 0..m_actual {
+            // Download current basis vector to host
+            let mut v_host = vec![0.0f64; dim];
+            cudaMemcpy(v_host.as_mut_ptr(), d_v_curr, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+            basis.push(v_host);
+
+            // w = G · v_curr  via cuBLAS dgemv
+            // Since G is stored row-major on GPU (symmetric, so row=col),
+            // use NoTrans: w = G * v_curr
+            cublasDgemv_v2(
+                blas_handle,
+                0, // CUBLAS_OP_N
+                n_i32, n_i32,
+                &alpha_one,
+                d_gram, n_i32,
+                d_v_curr, 1,
+                &beta_zero,
+                d_w, 1,
+            );
+            cudaDeviceSynchronize();
+
+            // Apply spectral shift: w = sigma * v_curr - w
+            // (w now contains G*v, we want (σI-G)*v = σ*v - G*v)
+            // w[i] = sigma * v_curr[i] - w[i]
+            // Using cuBLAS: w = -1*w + sigma*v_curr
+            // First: w = -w (scale by -1), then w += sigma * v_curr
+            let neg_one = -1.0f64;
+            // cublasDscal: w = -1 * w
+            cublasDscal_v2(blas_handle, n_i32, &neg_one, d_w, 1);
+            // cublasDaxpy: w = w + sigma * v_curr
+            cublasDaxpy_v2(blas_handle, n_i32, &sigma, d_v_curr, 1, d_w, 1);
+
+            // α_j = v_curr^T · w  via cuBLAS ddot
+            let mut alpha_j = 0.0f64;
+            cublasDdot_v2(blas_handle, n_i32, d_v_curr, 1, d_w, 1, &mut alpha_j);
+            alphas.push(alpha_j);
+
+            // w = w - α_j * v_curr - β_{j-1} * v_prev
+            let neg_alpha = -alpha_j;
+            cublasDaxpy_v2(blas_handle, n_i32, &neg_alpha, d_v_curr, 1, d_w, 1);
+            if j > 0 {
+                let neg_beta = -betas[j];
+                cublasDaxpy_v2(blas_handle, n_i32, &neg_beta, d_v_prev, 1, d_w, 1);
+            }
+
+            // Full reorthogonalization against all previous basis vectors
+            for prev in 0..basis.len() {
+                // Upload basis[prev] to d_v_prev temporarily
+                cudaMemcpy(d_v_prev, basis[prev].as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+                let mut overlap = 0.0f64;
+                cublasDdot_v2(blas_handle, n_i32, d_w, 1, d_v_prev, 1, &mut overlap);
+                let neg_overlap = -overlap;
+                cublasDaxpy_v2(blas_handle, n_i32, &neg_overlap, d_v_prev, 1, d_w, 1);
+            }
+
+            // β_j = ‖w‖  via cuBLAS dnrm2
+            let mut beta_j = 0.0f64;
+            cublasDnrm2_v2(blas_handle, n_i32, d_w, 1, &mut beta_j);
+
+            if beta_j < 1e-14 {
+                eprintln!("  GPU Lanczos: invariant subspace found at step {}", j);
+                break;
+            }
+            betas.push(beta_j);
+
+            // v_prev = v_curr, v_curr = w / β_j
+            // Swap pointers
+            let tmp = d_v_prev;
+            d_v_prev = d_v_curr;
+            d_v_curr = tmp;
+            // v_curr = w / β_j
+            let inv_beta = 1.0 / beta_j;
+            cudaMemcpy(d_v_curr, d_w as *const f64, vec_bytes, 2); // device-to-device? No, use scale
+            // Actually: copy w to v_curr, then scale
+            // cudaMemcpyDeviceToDevice = 3
+            let d2d: c_int = 3;
+            cudaMemcpy(d_v_curr, d_w as *const f64, vec_bytes, d2d);
+            cublasDscal_v2(blas_handle, n_i32, &inv_beta, d_v_curr, 1);
+        }
+
+        // Free GPU vectors
+        cudaFree(d_v_curr);
+        cudaFree(d_v_prev);
+        cudaFree(d_w);
+
+        let gpu_time = start.elapsed().as_secs_f64();
+        let m_done = basis.len();
+
+        // Build tridiagonal matrix and eigendecompose on CPU
+        let tri = lanczos::TridiagMatrix {
+            alpha: alphas,
+            beta: betas,
+            m: m_done,
+        };
+        let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);
+
+        // Top-k of (σI-G) = bottom-k of G
+        let n_ritz = ritz_values.len();
+        let top_start = n_ritz.saturating_sub(k);
+        let mut eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+            .map(|&lam| sigma - lam)
+            .collect();
+        eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        let selected_ritz: Vec<Vec<f64>> = (top_start..n_ritz)
+            .map(|i| ritz_vectors[i].clone())
+            .collect();
+
+        Ok(GpuLanczosResult {
+            eigenvalues,
+            ritz_vectors: selected_ritz,
+            basis,
+            gpu_time_secs: gpu_time,
+            iterations: m_done,
+        })
     }
 }
 
