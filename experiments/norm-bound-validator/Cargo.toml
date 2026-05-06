@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2024"
 description = "Cathedral Norm-Bound Validator — certifies ‖ζ(2+it+z)‖ ≤ (2+|t|)^C on BC disks for zeta_norm_bound_on_disk graduation"
 
-[workspace]
 
 [dependencies]
 rug = "1.26"

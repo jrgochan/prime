@@ -4,7 +4,6 @@ version = "0.2.0"
 edition = "2021"
 description = "Cathedral Littlewood Maneuver Certifier — validates all constants for the Three-Circles axiom graduation: inner anchor, outer bound, sub-logarithmic exponent, ζ'/ζ bounds"
 
-[workspace]
 
 [dependencies]
 cathedral-utils = { path = "../cathedral-utils" }

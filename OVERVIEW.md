@@ -315,7 +315,7 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 | Crown path sorry | **0** |
 | Off-crown sorry | **7** |
 | Topic directories | 25+ |
-| Experiments (Rust/MPFR/DD) | 48+ |
+| Experiments (Rust/MPFR/DD) | 31 active + 21 archived |
 | Development time | 42 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
 | Largest certified N | 55,440 (d²=0.0398, CG-DD) |

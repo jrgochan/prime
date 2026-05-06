@@ -1,96 +1,94 @@
-# Experiments — Numerical Validation & Certification
+# 🔬 Experiments — The Cathedral Numerical Engine
 
-Rust-based numerical experiments that validate the Cathedral's formal
-proofs to high precision. Each experiment is a standalone Cargo project.
+All experiments use **256-bit MPFR** or **DD (~31 digit)** precision unless noted.
+Shared mathematics lives in `cathedral-utils/`. Archived experiments are in `archive/`.
 
-## Certification Pipeline (Direction 5.1)
+> **To add an experiment**: create `experiments/<descriptive-name>/`, add to workspace `Cargo.toml`, add a line below.
+>
+> **To retire an experiment**: `git mv experiments/foo experiments/archive/foo`, update workspace paths.
 
-The certified witness engine produces JSON certificates that formally
-bridge the Rust computational engine to the Lean 4 proof architecture.
+---
 
-```bash
-cd spectral/rank1-interference
-cargo run --release --bin certified    # ~5 min on M2 Max
-# Output: results/certificates/*.json
-```
+## Shared Library
 
-Each certificate links to the specific Lean theorem it validates:
-- `lambdaMin_antitone_ge2` — eigenvalue positivity chain
-- `existential_implies_infimum` — witness evaluation
-- `forward_bridge_from_lambda_trick` — Rayleigh growth
+| Crate | Description |
+|-------|-------------|
+| `cathedral-utils/` | Canonical math library — arith, gram, DD, abel, mertens, constants, cache, OOC, GPU |
 
-## Experiment Tiers
+---
 
-### Tier 1: Critical Path (validate axioms on the main proof chain)
+## Compute Engines
 
-| Experiment | What it validates | Precision | Lean axiom |
-|---|---|---|---|
-| `spectral/rank1-interference/certified` ⭐ | Master certification | 256-bit MPFR | Multiple |
-| `vasyunin-integral/` | Gram entry G(j,k) via FTC | 256-bit MPFR | `vasyuninGramEntry` |
-| `covariance-probe/` | Eigenvalue decay λ_min ~ c/ln N | 128-bit | `millennium_covariance_cancellation` |
-| `gram-oracle/` | BD L² error 1-2bᵀv+vᵀGv | 128-bit | `witness_l2_error_decay_gram` |
-| `baez-duarte/` | BD distance X/ln N → 21.649 | 512-bit | `nyman_beurling_equivalence_mellin` |
-| `abel-bridge/` | Abel summation verification | 64-bit | `abel_mertens_tail_raw` |
+| Crate | Description | Key Output |
+|-------|-------------|------------|
+| `nb-distance-gpu/` | Primary GPU solver: cuBLAS matvec + cuSOLVER Cholesky + OOC streaming + CG-DD | d²(N) certificates |
+| `gram-scaling-oracle-gpu/` | MPFR-256 Gram matrix builder (GPU parallel, OOC binary output) | `ooc_gram_N*.bin` |
+| `gram-scaling-oracle/` | CPU MPFR-256 Gram matrix builder | Gram matrices |
+| `nb-distance/` | CPU-only NB distance solver (DD CG) — fallback for non-GPU | d²(N) |
 
-### Tier 2: Structural Validation
+## Certificates & Validation
 
-| Experiment | What it validates | Lean file |
-|---|---|---|
-| `spectral/rank1-interference/highprec` | Rank-1, λ_eff, R ratio | `FiniteDimReduction.lean` |
-| `spectral/parity-schur/` | Lichnerowicz decomposition | `ParitySchur.lean` |
-| `spectral/offdiag-excess/` | Off-diagonal bounds | `GramBounds.lean` |
-| `spectral-analyzer/` | Witness comparison | `WitnessConditional.lean` |
-| `spectral/lambda-eff/` | λ_eff growth | `ClassRestriction.lean` |
-| `gram-matrix/selberg-validation/` | Selberg constants | `BilinearSieve.lean` |
+| Crate | Description | Validates |
+|-------|-------------|-----------|
+| `certified-distance/` | Multi-tier d² pipeline — JSON certificates for N=100..55,440 | Crown d² claims |
+| `mellin-certificate/` | Parseval bridge cross-validation (MPFR-256) | `parseval_bridge_white` |
+| `crown-cancellation/` | ζ(s)·D_N(s) ≈ -1 on critical line (512-bit MPFR) | `MellinCrown` axiom |
+| `pnt-mobius-sums/` | PNT sum convergence: S₁→0, S₂→-1, S₃→-2γ | `PNT/` axioms |
+| `perron-contour/` | Perron contour integral vs direct M(x) comparison | `Perron/` chain |
+| `norm-bound-validator/` | ζ norm bound on Borel-Carathéodory disks | `Zeta/` bounds |
+| `fejer-kernel/` | Fejér kernel axiom validation (FK2, FK3, FK4) | `Analysis/` |
+| `vasyunin-convergence/` | Partial sum → Vasyunin formula convergence | `Vasyunin/` |
+| `vasyunin-integral/` | Vasyunin integral verification | `Vasyunin/` |
+| `littlewood-maneuver/` | Three-Circles axiom constants certification | `Zeta/` |
 
-### Tier 3: Exploratory
+## Spectral Analysis
 
-| Experiment | What it explores |
-|---|---|
-| `spectral/g2-spectral/` | G₂ Lie group action on octonionic structures |
-| `spectral/spectral-fourier/` | Riemann-Siegel zero computation |
-| `numerical/weil-explicit/` | 40+ sub-experiments (legacy) |
-| `algebraic/` | Quaternionic/cross-class structures |
+| Crate | Description | Key Output |
+|-------|-------------|------------|
+| `spectral-observatory/` | Eigenvalue DOS, quantum decoupling, viewport data | Observatory JSON |
+| `spectral-road/` | Road 2 (eigenvalue decay) and Road 3 (GRH verification) | Spectral certificates |
+| `van-hove-probe/` | DOS, level spacing, thermodynamics of Gram matrix (128-bit) | Van Hove analysis |
+| `hilbert-spectral/` | π constant certification for Hilbert inequality | `Analysis/` |
 
-### Tier 4: Historical (superseded)
+## NB Witness Scan
 
-| Experiment | Superseded by |
-|---|---|
-| `vasyunin/` (attacks 8-10) | `vasyunin-integral/` |
-| `mobius-basis/` (attack 5) | `covariance-probe/` |
-| `contour-oracle/` | `abel-bridge/` + `covariance-probe/` |
+| Crate | Description | Key Output |
+|-------|-------------|------------|
+| `nb-witness-scan/` | Systematic d² for N=2..10,000 using explicit Möbius log-cutoff weights | `d_sq_decay.tsv` |
+| `nb-witness-scan-gpu/` | GPU-accelerated witness scan (scaffolding for N=120k+) | — |
 
-## Quick Start
+## Algebraic Structure
 
-Each experiment is a standalone Rust project:
+| Crate | Description | Key Output |
+|-------|-------------|------------|
+| `character-spectral/` | Mersenne probe to N=10⁹ — the Particle Zoo | Character spectral data |
+| `rotor-spectroscopy/` | Mod-8 energy partition, Gallagher MVT, dispersion | Stained Glass data |
+| `siegel-walfisz/` | PNT-in-arithmetic-progressions for q=8 | Siegel-Walfisz bounds |
+| `moebius-microscope/` | Möbius cancellation decomposition by GCD, rotor, Vaughan, Liouville | Microscope analysis |
 
-```bash
-cd vasyunin-integral
-cargo run --release    # ~30 seconds
-```
+## Vasyunin & Two-Tile
 
-Results are written to `results/` or `output/` or `*.json`.
+| Crate | Description | Validates |
+|-------|-------------|-----------|
+| `vasyunin/` | Multi-attack suite for Vasyunin identity proof | `Vasyunin/` (39 files) |
+| `two-tile-decomposition/` | Two-tile correction term analysis | `Vasyunin/Cotangent/` |
+| `two-tile-decomposition-gpu/` | GPU-accelerated two-tile computation | `Vasyunin/Cotangent/` |
+| `two-tile-analyzer/` | Two-tile correction analyzer (512-bit MPFR) | `Vasyunin/Cotangent/` |
+| `series-decomposition-verifier/` | Series decomposition verification | `Vasyunin/` |
 
-## Key Results
+## Other
 
-### Certified Witness Engine (April 22, 2026)
-256-bit MPFR certification for N=10..1000:
-- All Gram matrices positive definite ✓
-- λ_min monotonically non-increasing ✓
-- All d²_N > 0 ✓
-- S²/Q → Báez-Duarte constant ≈ 21.649 ✓
+| Crate | Description |
+|-------|-------------|
+| `baez-duarte/` | Original Báez-Duarte exploration (early, pre-cathedral-utils) |
 
-### Vasyunin Integral (April 20, 2026)
-256-bit MPFR verification of all 60 Gram matrix entries G(j,k)
-for j,k ≤ 10, matching the Vasyunin cotangent formula to 6–7
-decimal digits.
+---
 
-### BD Distance
-Q_N/ln N monotonically increases toward C ≈ 21.649, confirming
-the Báez-Duarte constant to 4 significant digits at N = 5000.
+## Archive
 
-### High-Precision Spectral (April 21, 2026)
-256-bit verification of spectral claims for N=50..2000:
-- Rank-1 conjecture REFUTED (decay from 98.6% to 90.7%)
-- λ_eff growth confirmed logarithmic, not linear
-- f64 precision validated to < 5e-14
+**21 archived experiments** in `archive/` — see [archive/README.md](archive/README.md) for provenance.
+
+## Data
+
+- `cache/` — Active OOC certificates and cached coefficient files
+- Each experiment stores results in its own `results/` subdirectory

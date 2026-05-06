@@ -126,7 +126,7 @@ Errors:         0
 Lines:          78,435
 Theorems:       ~1,500+
 Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
-Experiments:    48+ Rust/MPFR/DD (256–512 bit + DD 31-digit precision)
+Experiments:    31 active Rust/MPFR/DD + 21 archived (256–512 bit + DD 31-digit precision)
 Release:        observatory-edition (v16)
 ```
 
@@ -266,8 +266,8 @@ All proofs are compiler-verified.
 prime/
 ├── proofs/          🏛️  THE CATHEDRAL — 308 active Lean files, 128+ archived
 ├── papers/          📄  15 companion papers (LaTeX + PDF)
-├── experiments/     🔬  48+ Rust experiments (256–512 bit MPFR + DD)
-│   └── character-spectral/  🧬 Mersenne probe to N=10⁹ (Particle Zoo)
+├── experiments/     🔬  31 active Rust experiments + 21 archived (256–512 bit MPFR + DD)
+│   └── archive/              Graduated/superseded experiments
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
 ├── scripts/         🔧  Build & export tools
 ├── tools/           🏗️  Historical exploration tools
