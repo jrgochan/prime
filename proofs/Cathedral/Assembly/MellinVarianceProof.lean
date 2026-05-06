@@ -1,3 +1,8 @@
+import Cathedral.White.Scattering
+import Cathedral.MellinBridge.PlancherelDefs
+import Cathedral.MellinBridge.BDWeights
+import Cathedral.Assembly.MellinPerronBridge
+
 /-!
   # Critical Line Mellin Variance
 
@@ -19,10 +24,6 @@
   encapsulates the forward direction via the `baez_duarte_forward` axiom.
 -/
 
-import Cathedral.White.Scattering
-import Cathedral.MellinBridge.PlancherelDefs
-import Cathedral.MellinBridge.BDWeights
-import Cathedral.Assembly.MellinPerronBridge
 
 noncomputable section
 open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction

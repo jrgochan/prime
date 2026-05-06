@@ -1,3 +1,11 @@
+import Cathedral.MellinBridge.PlancherelDefs
+import Cathedral.White.Kinematics
+import Mathlib.Analysis.Fourier.Inversion
+import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.MeasureTheory.Integral.ExpDecay
+import Mathlib.MeasureTheory.Function.Floor
+import Mathlib.MeasureTheory.Function.L2Space
+
 /-!
   # The Parseval Bridge: Fourier-Mellin Connection
 
@@ -19,13 +27,6 @@
   3. Linear substitution t = 2πξ
 -/
 
-import Cathedral.MellinBridge.PlancherelDefs
-import Cathedral.White.Kinematics
-import Mathlib.Analysis.Fourier.Inversion
-import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-import Mathlib.MeasureTheory.Integral.ExpDecay
-import Mathlib.MeasureTheory.Function.Floor
-import Mathlib.MeasureTheory.Function.L2Space
 
 noncomputable section
 open Real MeasureTheory Set Complex Fourier

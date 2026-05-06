@@ -1,3 +1,6 @@
+import Mathlib.NumberTheory.LSeries.SumCoeff
+import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+
 /-!
   # Abel Summation for Dirichlet Series
 
@@ -5,8 +8,6 @@
   for the integral representation of L-series via Abel summation.
 -/
 
-import Mathlib.NumberTheory.LSeries.SumCoeff
-import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 
 noncomputable section
 open Complex Real MeasureTheory Filter Finset Asymptotics

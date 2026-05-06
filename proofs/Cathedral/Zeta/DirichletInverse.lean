@@ -1,3 +1,5 @@
+import Mathlib.NumberTheory.LSeries.Dirichlet
+
 /-!
   # The Dirichlet Series for 1/ζ(s)
 
@@ -10,8 +12,6 @@
   * `moebius_lseries_summable` : absolute convergence for `Re(s) > 1`
   * `summatoryMoebius_le` : `|M(x)| ≤ x` (trivial bound)
 -/
-
-import Mathlib.NumberTheory.LSeries.Dirichlet
 
 noncomputable section
 open Complex Real ArithmeticFunction BigOperators

@@ -279,4 +279,6 @@ lean_lib «Cathedral» where
     `Cathedral.Robin.PrimeBounds,
     `Cathedral.Robin.Equivalence,
     `Cathedral.Robin.GramDiagonalBound,
+    -- Zero-axiom forward direction (Exploration 27: The Millennium Strike)
+    `Cathedral.ZeroAxiom.FiniteDirichlet,
   ]
