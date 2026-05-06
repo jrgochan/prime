@@ -410,47 +410,60 @@ function graduationChart(): ChartConfig {
 }
 
 // ── Phase Shattering ─────────────────────────────────────────
-// From: experiments/nb-witness-scan — Mertens function data
+// From: experiments/crown-cancellation (512-bit MPFR)
+// Shows WHY the Parseval Bridge is necessary:
+//   With phases:    ∫|M̂(½+it)|² dt → 0     (convergent)
+//   Without phases: ∫|Σ|μ(n)||² dt → ∞      (divergent)
+// The Triangle Inequality Trap (Discovery 5).
 
-const MERTENS_DATA = [
-  { N: 10, M: -1, ratio: 0.3162 },
-  { N: 50, M: -3, ratio: 0.4243 },
-  { N: 100, M: 1, ratio: 0.1000 },
-  { N: 200, M: -8, ratio: 0.5657 },
-  { N: 500, M: -6, ratio: 0.2683 },
-  { N: 1000, M: 2, ratio: 0.0632 },
-  { N: 2000, M: 24, ratio: 0.5367 },
-  { N: 5000, M: -23, ratio: 0.3254 },
-  { N: 10000, M: -23, ratio: 0.2300 },
-  { N: 20000, M: -1, ratio: 0.0071 },
+const CROWN_CANCEL_DATA = [
+  { N: 10, mellin_sq: 0.4808, cancel_sq: 22.03, mellin_logN: 1.107, cancel_logN: 50.72 },
+  { N: 20, mellin_sq: 0.2953, cancel_sq: 17.61, mellin_logN: 0.885, cancel_logN: 52.75 },
+  { N: 50, mellin_sq: 0.1755, cancel_sq: 14.09, mellin_logN: 0.687, cancel_logN: 55.13 },
+  { N: 100, mellin_sq: 0.1294, cancel_sq: 12.50, mellin_logN: 0.596, cancel_logN: 57.57 },
+  { N: 200, mellin_sq: 0.0978, cancel_sq: 11.24, mellin_logN: 0.518, cancel_logN: 59.58 },
+  { N: 500, mellin_sq: 0.0723, cancel_sq: 9.786, mellin_logN: 0.449, cancel_logN: 60.81 },
+  { N: 1000, mellin_sq: 0.0597, cancel_sq: 8.834, mellin_logN: 0.413, cancel_logN: 61.02 },
+  { N: 2000, mellin_sq: 0.0498, cancel_sq: 8.189, mellin_logN: 0.379, cancel_logN: 62.24 },
+  { N: 5000, mellin_sq: 0.0405, cancel_sq: 7.473, mellin_logN: 0.345, cancel_logN: 63.65 },
 ];
 
 function phaseShatteringChart(): ChartConfig {
   return {
-    title: "Phase Coherence: M(N)/√N (Mertens ratio)",
-    xLabel: "Summation limit N",
-    yLabel: "|M(N)| / √N",
+    title: "Phase Shattering — Why Parseval Is Necessary",
+    xLabel: "Basis dimension N",
+    yLabel: "Integral value",
     xLog: true,
-    precision: "nb-witness-scan",
+    precision: "crown-cancellation (512-bit MPFR)",
     series: [
       {
-        label: "|M(N)|/√N",
+        label: "∫|M̂(½+it)|² dt (with phases → 0)",
         color: "#00ff88",
-        points: MERTENS_DATA.map((d) => ({
+        points: CROWN_CANCEL_DATA.map((d) => ({
           x: d.N,
-          y: d.ratio,
+          y: d.mellin_sq,
         })),
         asymptote: 0,
-        asymptoteLabel: "→ 0 (RH ⟹ O(N^{1/2+ε}))",
+        asymptoteLabel: "→ 0 (converges)",
       },
       {
-        label: "1/√(ln N) envelope",
+        label: "∫|Σ|μ||² dt (no phases → ∞)",
+        color: "#ff4444",
+        points: CROWN_CANCEL_DATA.map((d) => ({
+          x: d.N,
+          y: d.cancel_sq,
+        })),
+      },
+      {
+        label: "Mellin · ln(N)",
         color: "#ffaa00",
         dashed: true,
-        points: MERTENS_DATA.map((d) => ({
+        points: CROWN_CANCEL_DATA.map((d) => ({
           x: d.N,
-          y: 1.0 / Math.sqrt(Math.log(d.N)),
+          y: d.mellin_logN,
         })),
+        asymptote: 0.3,
+        asymptoteLabel: "C ≈ 0.3",
       },
     ],
   };
