@@ -6,66 +6,16 @@
 
 use rayon::prelude::*;
 use rug::Float;
-use rug::ops::CompleteRound;
+use cathedral_utils::gram;
 
 /// MPFR precision bits
 pub const PREC: u32 = 256;
 
-/// GCD helper
-fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
-}
-
 /// Compute a single Gram matrix entry G(j,k) using the exact Vasyunin formula.
+///
+/// Delegates to cathedral_utils::gram::gram_entry_standalone.
 pub fn gram_entry(j: usize, k: usize) -> Float {
-    let jf = Float::with_val(PREC, j as u64);
-    let kf = Float::with_val(PREC, k as u64);
-    let jk = Float::with_val(PREC, &jf * &kf);
-    let inv_jk = Float::with_val(PREC, Float::with_val(PREC, 1u32) / &jk);
-
-    let lcm_jk = j / gcd(j, k) * k;
-    let t_direct = (lcm_jk * 3).max(2_000).min(200_000);
-
-    let mut total = Float::with_val(PREC, 0u32);
-
-    for n in 1..=t_direct {
-        let nf = Float::with_val(PREC, n as u64);
-        let a_int = n / j;
-        let b_int = n / k;
-        let a = Float::with_val(PREC, a_int as u64);
-        let b = Float::with_val(PREC, b_int as u64);
-
-        let inv_n = Float::with_val(PREC, Float::with_val(PREC, 1u32) / &nf);
-        let ln_term = Float::with_val(PREC, inv_n.ln_1p());
-
-        let ab_coeff =
-            Float::with_val(PREC, &a / &kf) + Float::with_val(PREC, &b / &jf);
-
-        let n_plus_1 = Float::with_val(PREC, &nf + 1u32);
-        let ab_frac = if a_int > 0 && b_int > 0 {
-            Float::with_val(PREC, &a * &b) / Float::with_val(PREC, &nf * &n_plus_1)
-        } else {
-            Float::with_val(PREC, 0u32)
-        };
-
-        let piece =
-            Float::with_val(PREC, &inv_jk - Float::with_val(PREC, &ab_coeff * &ln_term))
-                + &ab_frac;
-        total += piece;
-    }
-
-    // Tail correction
-    let d = Float::with_val(PREC, gcd(j, k) as u64);
-    let twelve_jk = Float::with_val(PREC, 12u32) * &jk;
-    let tail_mean =
-        Float::with_val(PREC, 0.25f64) + Float::with_val(PREC, &d * &d) / &twelve_jk;
-    let t_f = Float::with_val(PREC, t_direct as u64);
-    let tail1 = Float::with_val(PREC, &tail_mean / &t_f);
-    let tail2 = Float::with_val(PREC, &tail_mean / Float::with_val(PREC, 2u32))
-        / Float::with_val(PREC, &t_f * &t_f);
-    total += tail1;
-    total += tail2;
-    total
+    gram::gram_entry_standalone(j, k, PREC)
 }
 
 /// Build the full Gram matrix in MPFR. Indices 2..=n, stored as flat row-major.

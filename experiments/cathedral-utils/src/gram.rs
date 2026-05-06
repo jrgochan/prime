@@ -170,6 +170,97 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
     total
 }
 
+/// Standalone MPFR Gram entry — no pre-built ln table required.
+///
+/// Computes ln(1+1/n) inline at `prec` bits of precision.
+/// Slower than [`gram_entry_mpfr`] for batch computation, but ideal
+/// for one-off evaluations or small experiments that don't want to
+/// manage a precomputed ln table.
+///
+/// # Example
+/// ```rust,no_run
+/// use cathedral_utils::gram::gram_entry_standalone;
+/// let g22 = gram_entry_standalone(2, 2, 256);
+/// assert!((g22.to_f64() - 0.1957).abs() < 0.001);
+/// ```
+pub fn gram_entry_standalone(j: usize, k: usize, prec: u32) -> Float {
+    let p = prec;
+    let jf = Float::with_val(p, j as u64);
+    let kf = Float::with_val(p, k as u64);
+    let jk = Float::with_val(p, &jf * &kf);
+    let inv_jk = Float::with_val(p, Float::with_val(p, 1u32) / &jk);
+    let inv_jf = Float::with_val(p, Float::with_val(p, 1u32) / &jf);
+    let inv_kf = Float::with_val(p, Float::with_val(p, 1u32) / &kf);
+
+    let g = arith::gcd(j, k);
+    let lcm_jk = (j / g) * k;
+    let t_direct = (lcm_jk * 3).max(2_000).min(200_000);
+
+    let mut total = Float::with_val(p, 0u32);
+    let min_terms = (lcm_jk * 2).max(1_000);
+
+    // Pre-allocate scratch to avoid heap allocations in the hot loop
+    let mut scratch_ab = Float::with_val(p, 0);
+    let mut scratch_bj = Float::with_val(p, 0);
+    let mut scratch_term = Float::with_val(p, 0);
+
+    for n in 1..=t_direct {
+        let a_int = n / j;
+        let b_int = n / k;
+
+        // ln(1+1/n) computed inline at full precision
+        let nf = Float::with_val(p, n as u64);
+        let inv_n = Float::with_val(p, Float::with_val(p, 1u32) / &nf);
+        let ln_term = Float::with_val(p, inv_n.ln_1p());
+
+        // ab_coeff = (a/k + b/j) · ln(1+1/n)
+        scratch_ab.assign(a_int as u64);
+        scratch_ab *= &inv_kf;
+        scratch_bj.assign(b_int as u64);
+        scratch_bj *= &inv_jf;
+        scratch_ab += &scratch_bj;
+        scratch_ab *= &ln_term;
+
+        // term = 1/(jk) - ab_coeff
+        scratch_term.assign(&inv_jk);
+        scratch_term -= &scratch_ab;
+
+        // + floor fraction: a_int * b_int / (n * (n+1))
+        if a_int > 0 && b_int > 0 {
+            let mut frac = Float::with_val(p, (a_int * b_int) as u64);
+            let mut denom = Float::with_val(p, n as u64);
+            denom *= (n + 1) as u64;
+            frac /= &denom;
+            scratch_term += &frac;
+        }
+
+        total += &scratch_term;
+
+        // Adaptive early-exit
+        if n > min_terms && n % 500 == 0 {
+            let ratio = scratch_term.to_f64().abs() / total.to_f64().abs();
+            if ratio < 1e-18 { break; }
+        }
+    }
+
+    // Euler-Maclaurin tail correction (3 terms)
+    let d = Float::with_val(p, g as u64);
+    let d_sq = Float::with_val(p, &d * &d);
+    let twelve_jk = Float::with_val(p, Float::with_val(p, 12u32) * &jk);
+    let tail_frac = Float::with_val(p, &d_sq / &twelve_jk);
+    let tail_mean = Float::with_val(p, Float::with_val(p, 0.25f64) + &tail_frac);
+    let t_f = Float::with_val(p, t_direct as u64);
+    let inv_t = Float::with_val(p, Float::with_val(p, 1u32) / &t_f);
+    let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
+    let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
+    total += Float::with_val(p, &tail_mean * &inv_t);
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
+
+    total
+}
+
 /// MPFR Gram entry using precomputed ln table — optimized.
 ///
 /// Precision is taken from the ln_table.

@@ -41,6 +41,41 @@ pub const ZETA_2: f64 = 1.6449340668482264;
 pub const ZETA_3: f64 = 1.2020569031595943;
 
 // ═══════════════════════════════════════════════════════════════════
+// FUNDAMENTAL CONSTANTS (MPFR — arbitrary precision)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Euler-Mascheroni constant γ at arbitrary MPFR precision.
+///
+/// ```rust
+/// use cathedral_utils::constants::euler_gamma_mpfr;
+/// let gamma = euler_gamma_mpfr(256); // 256-bit precision
+/// assert!((gamma.to_f64() - 0.5772156649015329).abs() < 1e-15);
+/// ```
+pub fn euler_gamma_mpfr(prec: u32) -> rug::Float {
+    rug::Float::with_val(prec, rug::float::Constant::Euler)
+}
+
+/// ln(2π) at arbitrary MPFR precision.
+///
+/// ```rust
+/// use cathedral_utils::constants::ln2pi_mpfr;
+/// let l = ln2pi_mpfr(256);
+/// assert!((l.to_f64() - 1.8378770664093455).abs() < 1e-14);
+/// ```
+pub fn ln2pi_mpfr(prec: u32) -> rug::Float {
+    let two_pi = rug::Float::with_val(prec, rug::float::Constant::Pi) * 2u32;
+    two_pi.ln()
+}
+
+/// Stirling bridge constant ln(2π) - γ - 1 at arbitrary MPFR precision.
+pub fn stirling_const_mpfr(prec: u32) -> rug::Float {
+    let mut val = ln2pi_mpfr(prec);
+    val -= euler_gamma_mpfr(prec);
+    val -= 1u32;
+    val
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // SPECIAL FUNCTIONS
 // ═══════════════════════════════════════════════════════════════════
 

@@ -22,51 +22,7 @@ use std::fs;
 use std::io::Write;
 use std::time::Instant;
 
-/// Build Gram matrix entry G(j,k) in f64 using Vasyunin sum.
-fn gram_entry_f64(j: usize, k: usize) -> f64 {
-    let jf = j as f64;
-    let kf = k as f64;
-    let inv_jk = 1.0 / (jf * kf);
-
-    fn gcd(a: usize, b: usize) -> usize {
-        if b == 0 { a } else { gcd(b, a % b) }
-    }
-
-    let lcm_jk = j / gcd(j, k) * k;
-    let t_direct = (lcm_jk * 3).max(2_000).min(200_000);
-
-    let mut total = 0.0f64;
-
-    for n in 1..=t_direct {
-        let nf = n as f64;
-        let a_int = n / j;
-        let b_int = n / k;
-        let a = a_int as f64;
-        let b = b_int as f64;
-
-        let inv_n = 1.0 / nf;
-        let ln_term = (1.0 + inv_n).ln();
-
-        let ab_coeff = a / kf + b / jf;
-
-        let ab_frac = if a_int > 0 && b_int > 0 {
-            (a * b) / (nf * (nf + 1.0))
-        } else {
-            0.0
-        };
-
-        total += inv_jk - ab_coeff * ln_term + ab_frac;
-    }
-
-    // Tail correction
-    let d = gcd(j, k) as f64;
-    let twelve_jk = 12.0 * jf * kf;
-    let tail_mean = 0.25 + d * d / twelve_jk;
-    let t_f = t_direct as f64;
-    total += tail_mean / t_f;
-    total += tail_mean / (2.0 * t_f * t_f);
-    total
-}
+use cathedral_utils::gram::gram_entry_f64;
 
 /// Build full Gram matrix in f64, indices 2..=n, fully parallel via rayon.
 fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {

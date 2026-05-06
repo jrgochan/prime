@@ -89,3 +89,109 @@ mod tests {
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// MPFR-PRECISION VASYUNIN FORMULA
+//
+// G(j,k) = (ln(2π)-γ)/2 · (1/j + 1/k)
+//        + (j-k)/(2jk) · ln(k/j)
+//        - πd/(2jk) · (V(j',k') + V(k',j'))
+//        - 1/(jk)
+//
+// where d = gcd(j,k), j' = j/d, k' = k/d.
+// ═══════════════════════════════════════════════════════════════════
+
+/// Vasyunin cotangent sum at MPFR precision:
+/// V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
+pub fn vasyunin_cot_sum_mpfr(a: usize, b: usize, prec: u32) -> rug::Float {
+    use rug::Float;
+    let p = prec;
+    if a <= 1 { return Float::with_val(p, 0); }
+    let pi = Float::with_val(p, rug::float::Constant::Pi);
+    let af = Float::with_val(p, a as u64);
+    let mut total = Float::with_val(p, 0);
+
+    for m in 1..a {
+        let mb_mod_a = (m * b) % a;
+        let frac = Float::with_val(p, mb_mod_a as u64) / &af;
+        let angle = Float::with_val(p, &pi * m as u64) / &af;
+        let (sin_v, cos_v) = angle.sin_cos(Float::new(p));
+        if sin_v.to_f64().abs() < 1e-30 { continue; }
+        let cot_v = Float::with_val(p, &cos_v / &sin_v);
+        total += Float::with_val(p, &frac * &cot_v);
+    }
+    total
+}
+
+/// Gram matrix entry via the closed-form Vasyunin cotangent formula
+/// at arbitrary MPFR precision.
+///
+/// Uses the exact formula:
+/// ```text
+/// G(j,k) = (ln(2π)-γ)/2 · (1/j + 1/k)
+///        + (j-k)/(2jk) · ln(k/j)
+///        - πd/(2jk) · (V(j/d, k/d) + V(k/d, j/d))
+///        - 1/(jk)
+/// ```
+///
+/// For diagonal: G(k,k) = (ln(2π)-γ)/k - 1/k²
+///
+/// # Example
+/// ```rust,no_run
+/// use cathedral_utils::vasyunin::gram_entry_vasyunin_mpfr;
+/// let g23 = gram_entry_vasyunin_mpfr(2, 3, 256);
+/// assert!(g23.to_f64() > 0.0);
+/// ```
+pub fn gram_entry_vasyunin_mpfr(j: usize, k: usize, prec: u32) -> rug::Float {
+    use rug::Float;
+    let p = prec;
+    let gamma = crate::constants::euler_gamma_mpfr(p);
+    let l2p = crate::constants::ln2pi_mpfr(p);
+    let pi = Float::with_val(p, rug::float::Constant::Pi);
+    let jf = Float::with_val(p, j as u64);
+    let kf = Float::with_val(p, k as u64);
+
+    if j == k {
+        // G(k,k) = (ln(2π)-γ)/k - 1/k²
+        let a = Float::with_val(p, &l2p - &gamma);
+        let b = Float::with_val(p, &a / &jf);
+        let c = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, &jf * &jf));
+        return Float::with_val(p, b - c);
+    }
+
+    let jk = Float::with_val(p, &jf * &kf);
+    let d = arith::gcd(j, k);
+    let jp = j / d;
+    let kp = k / d;
+    let df = Float::with_val(p, d as u64);
+
+    // Term 1: (ln(2π)-γ)/2 · (1/j + 1/k)
+    let coeff = Float::with_val(p, Float::with_val(p, &l2p - &gamma) / 2u32);
+    let inv_sum = Float::with_val(p,
+        Float::with_val(p, Float::with_val(p, 1u32) / &jf)
+        + Float::with_val(p, Float::with_val(p, 1u32) / &kf));
+    let term1 = Float::with_val(p, &coeff * &inv_sum);
+
+    // Term 2: (j-k)/(2jk) · ln(k/j)
+    let diff = Float::with_val(p, &jf - &kf);
+    let two_jk = Float::with_val(p, Float::with_val(p, 2u32) * &jk);
+    let log_ratio = Float::with_val(p, Float::with_val(p, &kf / &jf).ln());
+    let term2 = Float::with_val(p, Float::with_val(p, &diff / &two_jk) * &log_ratio);
+
+    // Term 3: -πd/(2jk) · (V(j',k') + V(k',j'))
+    let v1 = vasyunin_cot_sum_mpfr(jp, kp, p);
+    let v2 = vasyunin_cot_sum_mpfr(kp, jp, p);
+    let v_sum = Float::with_val(p, &v1 + &v2);
+    let pi_d = Float::with_val(p, &pi * &df);
+    let term3 = Float::with_val(p, Float::with_val(p, &pi_d / &two_jk) * &v_sum);
+
+    // Term 4: -1/(jk)
+    let term4 = Float::with_val(p, Float::with_val(p, 1u32) / &jk);
+
+    // G = term1 + term2 - term3 - term4
+    let mut result = Float::with_val(p, &term1 + &term2);
+    result -= &term3;
+    result -= &term4;
+    result
+}
+
