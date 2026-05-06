@@ -159,6 +159,22 @@ const MILESTONES: Milestone[] = [
     graduated: ["pnt_mu_log_div_k", "covariance_bound_from_mertens_34", "partial_integral_tends_to_formula"],
     color: "#f59e0b",
   },
+  {
+    version: "v16",
+    date: "May 6",
+    axiomCount: 1,
+    sorryCount: 0,
+    title: "Observatory Edition",
+    changes: [
+      "One-Pillar architecture: baez_duarte_forward sole crown axiom",
+      "DD-precision pipeline (Dekker\u2013Knuth) certifies N=55,440",
+      "N=20,000 witness scan: d\u00B2\u00B7ln(N) = 0.305",
+      "96% vacuum reconstruction from 55,439 prime-frequency waves",
+      "308 files, 78,435 lines, 15 papers, ~1,500+ theorems",
+    ],
+    graduated: ["critical_line_mellin_variance", "rh_zeta_lower_bound_from_zero_counting"],
+    color: "#10b981",
+  },
 ];
 
 /* ───────── components ───────── */
@@ -322,7 +338,7 @@ export default function GraduationTimelinePage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Watch axioms fall one by one. From 6 crown axioms to 2 in 19 days.
+          Watch axioms fall one by one. From 6 crown axioms to 1 in 42 days.
           {" "}<strong className="text-emerald-400">{totalGraduated} axioms graduated</strong> to theorems.
         </p>
       </motion.div>
@@ -343,11 +359,11 @@ export default function GraduationTimelinePage() {
           </div>
           <div className="flex gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">161</div>
+              <div className="text-2xl font-bold text-blue-400">308</div>
               <div className="text-[10px] text-slate-600">files</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-violet-400">~1,335</div>
+              <div className="text-2xl font-bold text-violet-400">~1,500+</div>
               <div className="text-[10px] text-slate-600">theorems</div>
             </div>
             <div>

@@ -389,8 +389,8 @@ export default function Cathedral3DPage() {
           The Cathedral &mdash; 3D Architecture
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          Two pillars hold the golden roof: Converse (pure Mathlib, 0 axioms)
-          and Forward (Mellin Crown, 2 axioms). 161 files across 22 topic directories.
+          One pillar holds the golden roof: the Converse (pure Mathlib, 0 axioms)
+          is free; the Forward uses 1 crown axiom (baez_duarte_forward). 308 files, 78,435 lines.
         </p>
       </div>
 
@@ -437,8 +437,8 @@ export default function Cathedral3DPage() {
               label="Forward"
               color="#f59e0b"
               axioms={[
-                "critical_line_mellin_variance",
-                "rh_zeta_lower_bound_...",
+                "baez_duarte_forward",
+                "(sole crown axiom)",
               ]}
             />
             <CathedralStructure onSelectBrick={setSelected} />
@@ -462,11 +462,11 @@ export default function Cathedral3DPage() {
         <div className="w-80 p-4 border-l border-[#1e2148] space-y-4 overflow-auto">
           <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20">
             <div className="text-xs font-mono text-amber-400 mb-2">
-              STRUCTURE (v11)
+              STRUCTURE (v16 Observatory)
             </div>
             <p className="text-sm text-slate-300">
-              161 Lean files across 22 topic directories. Two pillars carry the
-              crown theorem. 2 axioms on the critical path.
+              308 Lean files. One-Pillar architecture: baez_duarte_forward
+              is the sole crown axiom. 1 axiom on the critical path.
             </p>
           </div>
 
@@ -493,7 +493,7 @@ export default function Cathedral3DPage() {
                 color: "#10b981",
                 label: "Pillar 1: Converse (0 axioms)",
               },
-              { color: "#f59e0b", label: "Pillar 2: Forward (2 axioms)" },
+              { color: "#f59e0b", label: "Pillar 2: Forward (1 axiom)" },
               { color: "#4a8b3e", label: "Bricks: Topic directories" },
               { color: "#1e3a5f", label: "Foundation: Mathlib" },
             ].map((item) => (

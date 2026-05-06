@@ -397,7 +397,7 @@ export default function AxiomMapPage() {
         })}
       </div>
 
-      {/* Forward direction: 2 crown axioms */}
+      {/* Forward direction: 1 crown axiom */}
       <div>
         <h2 className="text-lg font-bold text-slate-200 mb-1 flex items-center gap-2">
           <span className="text-amber-400">{"\u25B6"}</span>
