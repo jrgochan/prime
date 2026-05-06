@@ -1,7 +1,7 @@
 /-
   Cathedral/Vasyunin/Cotangent/TwoTileEval.lean
 
-  ## THE TWO-TILE EVALUATION — Phase 5-6 of Axiom Graduation
+  ## THE TWO-TILE EVALUATION — Crown Jewel of the Cotangent Chain
 
   Proves the Vasyunin integral identity for coprime (a,b):
 
@@ -20,13 +20,13 @@
   - TwoTileCorrection (master_equation, tsum decomposition)
   - WeightedDigammaGeneral (fract_correction_general_eq_target)
   - DiagonalStrike (a=1 case)
-  - TsumDirectEval (independent proof for a≥2 — breaks the cycle)
+  - TsumDirectEval (independent proof for a≥2)
 
-  It does NOT import AlgebraicLimit (which will import THIS file
-  to graduate the axiom).
+  AlgebraicLimit imports THIS file directly to provide
+  gramIntegral_eq_formula_ge2 as a THEOREM (graduated May 5, 2026).
 
-  Created: May 3, 2026 — The Axiom Graduation
-  Updated: May 3, 2026 — ZERO SORRY (via DeltaDirectEval chain)
+  Created: May 3, 2026
+  Updated: May 5, 2026 — AlgebraicLimit now imports TwoTileEval directly
   Status: PROVED (zero sorry, zero axiom)
 -/
 
@@ -111,14 +111,13 @@ theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (zero sorry, zero axiom):
 --   ✅ tsum_actual_eq_stirling_target_delta — Σ' actual = 3-way decomposition
 --   ✅ gramIntegral_eq_formula_coprime — Delegates to TsumDirectEval (ZERO SORRY)
 --
 -- ARCHITECTURE:
---   This file sits at the TOP of the proof chain.
+--   This file sits at the TOP of the Cotangent proof chain.
 --   It imports TwoTileCorrection, WeightedDigammaGeneral, DiagonalStrike, TsumDirectEval.
---   It does NOT import AlgebraicLimit or ConvergenceAxioms.
---   ConvergenceProof imports THIS file to graduate AlgebraicLimit.
+--   AlgebraicLimit imports THIS file to provide gramIntegral_eq_formula_ge2 as a THEOREM.
 
 end Cathedral.Vasyunin.TwoTileEval

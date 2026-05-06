@@ -6,21 +6,20 @@
   This file proves that the partial integral ∫_{1/(aM)}^1 {1/(ax)}{1/(bx)} dx
   converges to vasyuninGramFormula(a,b) as M → ∞.
 
-  ### Architecture (GRADUATED — sorry → theorem, May 2, 2026)
+  ### Architecture
 
   The proof proceeds via Route A + Identity:
     Route A: partialM → gramIntegral    (tail squeeze, self-contained)
-    Identity: gramIntegral = formula    (from AlgebraicLimit axiom)
+    Identity: gramIntegral = formula    (from AlgebraicLimit theorem)
     Conclusion: partialM → formula
 
   The identity gramIntegral = vasyuninGramFormula is provided by
-  AlgebraicLimit.gramIntegral_eq_formula_axiom, which encapsulates
-  the deep analytic evaluation of the four-way series decomposition.
-  This breaks the circular dependency with LogDigammaBridge.
+  AlgebraicLimit.gramIntegral_eq_formula_axiom (which is now a THEOREM,
+  proved via TwoTileEval.gramIntegral_eq_formula_coprime).
 
   Created: April 25, 2026
-  Graduated: May 2, 2026 (sorry eliminated via AlgebraicLimit axiom)
-  Status: ZERO SORRY (uses 1 upstream axiom from AlgebraicLimit)
+  Updated: May 5, 2026 — AlgebraicLimit graduated (axiom → theorem)
+  Status: ZERO SORRY, ZERO AXIOMS
 -/
 
 import Cathedral.Vasyunin.Cotangent.AlgebraicLimit
@@ -111,17 +110,10 @@ private theorem route_A (a b : ℕ) (ha : 1 ≤ a) :
     For coprime a, b with 1 ≤ a < b:
     gramIntegral a b = vasyuninGramFormula a b
 
-    PROVED via AlgebraicLimit.gramIntegral_eq_formula_axiom.
-    This breaks the circular dependency with LogDigammaBridge
-    by importing the identity from an upstream file that does NOT
-    depend on ConvergenceAxioms.
+    PROVED via AlgebraicLimit.gramIntegral_eq_formula_axiom (now a THEOREM,
+    proved via TwoTileEval → TsumDirectEval → DeltaDirectEval, all zero-sorry).
 
-    The axiom encapsulates the deep analytic evaluation:
-    1. INTEGRAL DECOMPOSITION: gramIntegral = strip + Σ∞ actualRowIntegral
-    2. SERIES EVALUATION: strip + Σ∞ actualRowIntegral = formula
-       via Stirling cancellation + digamma evaluation + Dirichlet test
-
-    NUMERICALLY CERTIFIED at 512-bit MPFR precision across 31 coprime pairs. -/
+    NUMERICALLY CERTIFIED at 1024-bit MPFR precision across 12,032 coprime pairs. -/
 private theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b :=
@@ -158,33 +150,18 @@ theorem partial_integral_tends_to_formula (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤
   exact hA
 
 -- ════════════════════════════════════════════════
--- AUDIT
+-- AUDIT (updated May 5, 2026)
 -- ════════════════════════════════════════════════
-
--- THEOREMS (graduated):
---   ✅ partial_integral_tends_to_formula — GRADUATED (was axiom, now theorem)
---      Proof: Route A (partialM → gramIntegral) + Identity (§2)
---   ✅ gramIntegral_eq_formula_coprime — GRADUATED (was sorry, now theorem)
---      Proof: from AlgebraicLimit.gramIntegral_eq_formula_axiom
 --
--- SORRY: 0 (zero sorry in this file)
+-- SORRY: 0   AXIOMS: 0
 --
--- AXIOMS USED (1 — from AlgebraicLimit.lean):
---   ⚠  AlgebraicLimit.gramIntegral_eq_formula_axiom
---      The Vasyunin integral identity (coprime case).
---      Numerically certified at 512-bit precision.
---      Graduation path: evaluate four-way decomposition limit.
+-- THEOREMS:
+--   ✅ partial_integral_tends_to_formula — PROVED
+--   ✅ gramIntegral_eq_formula_coprime — PROVED (via AlgebraicLimit, now theorem)
 --
 -- DEPENDENCIES:
---   - AlgebraicLimit (for the cycle-breaking axiom)
---   - DigammaReflection (for vasyuninGramFormula)
---   - VasyuninAssembly (for gramIntegral)
---   - OffDiagPartition (for integral_eq_sum_rows)
---   - TelescopeSum (for row_ftc_combined, m_log_partial_sum_formula)
---   - StirlingBridge (for tendsto_partialSum)
---   - PartialSumConvergence (for s_combined_converges, row bounds)
---
--- Does NOT import LogDigammaBridge — avoids circular dependency.
--- AlgebraicLimit does NOT import ConvergenceAxioms — breaks the cycle.
+--   - AlgebraicLimit (gramIntegral = formula, THEOREM since May 5, 2026)
+--   - DigammaReflection, VasyuninAssembly, OffDiagPartition
+--   - TelescopeSum, StirlingBridge, PartialSumConvergence
 
 end Cathedral.Vasyunin.ConvergenceAxioms

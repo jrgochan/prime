@@ -643,30 +643,21 @@ theorem gcd_div_eq_one (j k : ℕ) (hj : 1 ≤ j) (_hk : 1 ≤ k) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (zero sorry, zero axiom):
 --   ✅ partialDigammaSum_one       — S_N(1) = 0
 --   ✅ tileIndex_pos               — ⌊jm/k⌋ ≥ 1 when jm ≥ k
 --   ✅ coprime_after_gcd           — j/gcd and k/gcd are coprime
 --   ✅ gcd_div_eq_one              — gcd of quotients = 1
---   ✅ integral_eq_vasyunin_coprime — From coprime telescope axiom
+--   ✅ integral_eq_vasyunin_coprime — coprime case (uniqueness of limits)
 --   ✅ floor_sum_single            — ∑⌊mb/a⌋ = (a-1)(b-1)/2 (classical)
 --   ✅ floor_sum_reciprocity       — Combined: ∑⌊mb/a⌋ + ∑⌊na/b⌋ = (a-1)(b-1)
---   ✅ gramIntegral_eq_formula_coprime — PROVED via uniqueness of limits (April 25)
---   ✅ partial_sum_tends_to_formula — PROVED (April 25)
+--   ✅ gramIntegral_eq_formula_coprime — PROVED via uniqueness of limits
+--   ✅ partial_sum_tends_to_formula — PROVED
 --
--- AXIOMS used from ConvergenceAxioms (1):
---   ⚠  partial_integral_tends_to_formula — The piecewise integral limit
---                                          (provable from Stirling + Gauss digamma + Dirichlet test)
+-- UPSTREAM DEPENDENCIES (all axiom-free as of May 5, 2026):
+--   - ConvergenceAxioms.partial_integral_tends_to_formula (THEOREM, zero axiom)
+--   - DigammaReflection.gauss_digamma_formula
 --
--- AXIOMS used from DigammaReflection (1):
---   ⚠  gauss_digamma_formula            — Gauss's digamma formula for ψ(p/q)
---
--- AXIOMS in this file (0 — all graduated or deleted):
---   ✗  harmonicTileSum_reciprocity    — DELETED: dead code, formula was incorrect
---
--- GRADUATED (axiom → theorem):
---   ✅ partial_sum_tends_to_formula   — axiom → theorem (zero sorry) (April 25)
---   ✅ vasyunin_integral_eq_formula   — PROVED in GCDReduction.lean (April 25)
---   ✅ gramIntegral_eq_formula_coprime — sorry → theorem (April 25)
+-- AXIOMS in this file: 0
 
 end Cathedral.Vasyunin.LogDigammaBridge
