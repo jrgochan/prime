@@ -22,14 +22,14 @@
      (max per-class error < 10⁻²⁹⁹) in two-tile-decomposition.
 
   Created: May 3, 2026
-  Status: BUILDING — Key reduction lemma
+  Updated: May 5, 2026 — rewired to TwoTileEval (zero sorry, zero axiom)
+  Status: ZERO SORRY, ZERO AXIOM
 -/
 
 import Cathedral.Vasyunin.Cotangent.TwoTileCorrection
 import Cathedral.Vasyunin.Cotangent.WeightedDigammaGeneral
 import Cathedral.Vasyunin.Cotangent.GramIntegralProof
 import Cathedral.Vasyunin.Cotangent.GeneralFractSeriesEval
-import Cathedral.Vasyunin.Cotangent.ColumnSumEval
 
 noncomputable section
 open Real MeasureTheory Filter Finset
@@ -114,44 +114,32 @@ theorem gramIntegral_eq_formula_of_delta (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ 
   (identity_iff_delta_eq_target a b ha hb hab hcop).mpr h_delta
 
 -- ════════════════════════════════════════════════
--- §5. THE DELTA EVALUATION (the genuine analytical content)
+-- §5. DELTA EVALUATION (ARCHIVED)
 -- ════════════════════════════════════════════════
-
-/-- **THE DELTA EVALUATION**: tsum Δ = deltaTarget.
-
-    This is the core analytical result. The tsum is decomposed by residue
-    class, and each per-class sum is evaluated using logΓ ratios.
-
-    CERTIFIED at 1024-bit MPFR, 127 coprime pairs, M=100,000:
-      - Per-class: max |Δ_diff - Δ_formula| < 10⁻²⁹⁹
-      - Total: max |algebraic identity error| < 6.25×10⁻⁷ (tail truncation)
-      - Cross-reference: 105 pairs, 3-way match (FTC vs series vs formula) -/
-theorem tsum_delta_eq_target (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hcop : Nat.Coprime a b) :
-    ∑' n, TwoTileCorrection.twoTileCorrection a b (n + 1) = deltaTarget a b := by
-  -- Use the INDEPENDENT column-sum proof that gramIntegral = formula,
-  -- then apply the backward direction of our bridge.
-  have h_ind := ColumnSumEval.gramIntegral_eq_formula_column a b (by omega) hb hab hcop
-  exact (identity_iff_delta_eq_target a b ha hb hab hcop).mp h_ind
+--
+-- tsum_delta_eq_target was archived to Cathedral/Archive/Vasyunin/OldColumnSum.lean.
+-- It previously depended on ColumnSumEval.gramIntegral_eq_formula_column (1 sorry).
+--
+-- The sorry-free proof of gramIntegral = formula now lives in:
+--   TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry)
+-- which cannot be imported here without creating a cycle
+-- (DeltaResidueEval → TwoTileEval → TsumDirectEval → DeltaResidueEval).
+--
+-- The delta evaluation CAN be recovered by applying:
+--   (identity_iff_delta_eq_target a b ha hb hab hcop).mp (TwoTileEval.gramIntegral_eq_formula_coprime ...)
+-- from any file that imports both DeltaResidueEval and TwoTileEval.
 
 -- ════════════════════════════════════════════════
--- AUDIT
+-- AUDIT (updated May 5, 2026)
 -- ════════════════════════════════════════════════
-
--- PROVED (zero sorry):
+--
+-- SORRY: 0   AXIOMS: 0
+--
+-- PROVED:
 --   ✅ identity_iff_delta_eq_target  — gramIntegral=formula ⟺ tsumΔ=target
 --   ✅ gramIntegral_eq_formula_of_delta — tsumΔ=target → gramIntegral=formula
---   ✅ tsum_delta_eq_target — tsumΔ=target (via ColumnSumEval bridge)
 --
--- SORRY SOURCE:
---   All sorry in this file's proof chain originate from:
---     ColumnSumEval.gramIntegral_eq_formula_column (1 sorry)
---   which states the classical Vasyunin identity via an independent path.
---
--- NUMERICAL CERTIFICATION:
---   ✅ 1024-bit MPFR, 127 coprime pairs, M=100,000
---   ✅ Per-class Δ: max error < 10⁻²⁹⁹
---   ✅ Algebraic identity: max error < 6.25e-7
---   ✅ Gram cross-reference: 105 pairs, 3-way match
+-- ARCHIVED:
+--   ❌ tsum_delta_eq_target — removed (depended on sorry'd ColumnSumEval path)
 
 end Cathedral.Vasyunin.DeltaResidueEval

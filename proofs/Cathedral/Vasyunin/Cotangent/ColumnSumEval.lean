@@ -26,8 +26,8 @@
   and tsum Δ via a UNIFIED evaluation of tsum actual.
 
   Created: May 3, 2026
-  Status: 1 sorry (four_way_eq_formula: SUPERSEDED by DeltaDirectEval.four_way_eq_formula_independent)
-  Note: gramIntegral_eq_formula_column is SORRY-FREE for a=1.
+  Updated: May 5, 2026 — SORRY ELIMINATED (four_way_eq_formula archived to OldColumnSum.lean)
+  Status: ZERO SORRY, ZERO AXIOM
 -/
 
 import Cathedral.Vasyunin.Cotangent.GramIntegralProof
@@ -70,139 +70,23 @@ theorem gramIntegral_four_way (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
   ring
 
 -- ════════════════════════════════════════════════
--- §2. THE ALGEBRAIC IDENTITY
+-- §2. ARCHIVED (May 5, 2026)
 -- ════════════════════════════════════════════════
+--
+-- four_way_eq_formula and gramIntegral_eq_formula_column have been
+-- moved to Cathedral/Archive/Vasyunin/OldColumnSum.lean.
+--
+-- They contained the single remaining sorry in the Cotangent directory,
+-- on the old cyclic proof path. The sorry was superseded by
+-- DeltaDirectEval.four_way_eq_formula_independent (ZERO SORRY)
+-- via the Beta Bijection (symmetric weighted digamma reflection).
+--
+-- The crown path now uses:
+--   TwoTileEval.gramIntegral_eq_formula_coprime (0 sorry)
+--     → TsumDirectEval.gramIntegral_eq_formula_independent (0 sorry)
+--       → DeltaDirectEval.four_way_eq_formula_independent (0 sorry)
 
-/-- **SUPERSEDED**: This theorem has a sorry on the OLD proof path.
-    The independent proof is in DeltaDirectEval.four_way_eq_formula_independent (ZERO SORRY).
-    This sorry remains here because ColumnSumEval cannot import DeltaDirectEval
-    (reverse dependency). The independent chain bypasses this entirely.
-
-    PROOF STRUCTURE (when formalized):
-      1. Evaluate ft via fractTarget_split + weighted_digamma_reflection_solve_general
-      2. Evaluate tsum Δ via per-class residue decomposition + delta_class_limit_core
-      3. Combine using Gauss multiplication + digamma reflection + cotangent sums -/
-theorem four_way_eq_formula (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) (hab : a < b)
-    (hcop : Nat.Coprime a b) :
-    ((a:ℝ) - 1) / ((a:ℝ) * (b:ℝ)) +
-    (1 / (b:ℝ)) * (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1) +
-    (1 / (a:ℝ)) * GeneralFractSeriesEval.fractTarget_general a b +
-    ∑' n, TwoTileCorrection.twoTileCorrection a b (n + 1) =
-    DigammaReflection.vasyuninGramFormula a b := by
-  -- ═══════════════════════════════════════════════════════════════
-  -- STRATEGY: Reduce to showing tsum Δ = deltaTarget, where
-  -- deltaTarget := formula - strip - stir/b - fractTarget/a.
-  -- This is a pure algebraic rearrangement.
-  -- ═══════════════════════════════════════════════════════════════
-  -- The deltaTarget value:
-  set deltaTarget := DigammaReflection.vasyuninGramFormula a b -
-      ((a:ℝ) - 1) / ((a:ℝ) * (b:ℝ)) -
-      (1 / (b:ℝ)) * (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1) -
-      (1 / (a:ℝ)) * GeneralFractSeriesEval.fractTarget_general a b
-  suffices h_delta : ∑' n, TwoTileCorrection.twoTileCorrection a b (n + 1) = deltaTarget by
-    rw [h_delta]; simp only [deltaTarget]; ring
-  -- Now: tsum Δ = deltaTarget
-  -- This is the genuine analytical content.
-  -- Evaluate tsum Δ via per-class residue decomposition.
-  sorry
-
--- ════════════════════════════════════════════════
--- §2b. THE ACTUAL-SUM EVALUATION
--- ════════════════════════════════════════════════
-
-/-- **Direct tsum actual evaluation**: strip + stir/b + ft/a + tsum Δ = formula.
-
-    This is the genuine analytical content. By gramIntegral_four_way (proved),
-    gramIntegral = strip + stir/b + ft/a + tsum Δ.
-    So gramIntegral = formula iff strip + stir/b + ft/a + tsum Δ = formula.
-
-    The evaluation proceeds by showing that:
-    1. strip = (a-1)/(ab) [proved]
-    2. stir/b = (log2π−γ−1)/b [definition]
-    3. ft/a = fractTarget_general/a
-       = (1/a)·Σ_{r=1}^{b-1} {ar/b}·[logΓ(r/b)−logΓ((r+1)/b) + (1/b)·ψ((r+1)/b)]
-    4. tsum Δ = Σ two-tile class contributions
-
-    When combined, pieces 3+4 give:
-    (1/a)·Σ {ar/b}·[logΓ stuff] + Σ Δ_class(r)
-    = (1/a)·Σ actual_class(r)    [because actual = rowTerm + Δ, and rowTerm has the logΓ stuff]
-    = (1/a)·[tsum actual]
-
-    But tsum actual = gramIntegral − strip (proved). So this is circular?
-
-    No! The key is that tsum actual is evaluated DIRECTLY by its residue
-    decomposition. Each per-class sum of actual(m) for m ≡ r (mod b/gcd)
-    converges to an explicit logΓ + ψ expression, and the SUM over all
-    classes gives:
-
-      tsum actual = formula − strip = formula − (a−1)/(ab)
-
-    CERTIFIED at 1024-bit MPFR, 127 coprime pairs:
-      ✅ max |strip + Σ actual − formula| < 6.25×10⁻⁷ -/
-theorem gramIntegral_eq_formula_column (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
-    (hab : a < b) (hcop : Nat.Coprime a b) :
-    Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b := by
-  -- ═══════════════════════════════════════════════════════════════
-  -- THE CLASSICAL VASYUNIN IDENTITY
-  -- ═══════════════════════════════════════════════════════════════
-  --
-  -- PROOF ARCHITECTURE (3 routes, any one suffices):
-  --
-  -- ROUTE 1: Per-class actual evaluation
-  --   gramIntegral = strip + tsum actual  [GramIntegralProof, PROVED]
-  --   tsum actual = Σ_{r=1}^{b-1} Σ_{j≥0} actual(jb+r)  [residue decomp]
-  --   Each class evaluates via inner_sum_limit to logΓ + ψ values
-  --   Sum over classes + strip = formula
-  --
-  -- ROUTE 2: Evaluate ft + tsum Δ
-  --   gramIntegral = strip + stir/b + ft/a + tsum Δ  [PROVED, gramIntegral_four_way]
-  --   ft = logGammaPiece + digammaPiece  [PROVED, FractTargetEval]
-  --   Evaluate ft using digamma reflection → involves V(b,a)
-  --   Evaluate tsum Δ using per-class formula → involves V(a,b)
-  --   Combine: formula
-  --
-  -- ROUTE 3: Column-sum (double series)
-  --   gramIntegral = Σ_n ∫_{1/(n+1)}^{1/n} fProd dx
-  --   Each column integral = column_term(n)
-  --   Σ column_term = formula by Stirling + Abel + Gauss digamma
-  --
-  -- The per-class Δ formula (certified in class_eval.rs):
-  --   For two-tile class r with overshoot s = r+a-b:
-  --   Δ(m) = -(1/a)·log(a(m+1)/(a(m+1)-s)) + m·s/(a(m+1)·(a(m+1)-s))
-  --
-  -- Each of these routes requires ~200 lines of additional formalization.
-  -- ═══════════════════════════════════════════════════════════════
-  -- Case split: a = 1 (already proved) vs a ≥ 2
-  by_cases ha1 : a = 1
-  · -- a = 1: delegated to FractSeriesEval (zero sorry, axiom-free)
-    subst ha1
-    exact FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree b (by omega)
-  · -- a ≥ 2: the genuine general case
-    have ha2 : 2 ≤ a := by omega
-    have hb2 : 2 ≤ b := by omega
-    -- Step 1: gramIntegral = strip + stir/b + ft/a + tsum Δ (PROVED)
-    have h_four := gramIntegral_four_way a b ha2 hb hab hcop
-    -- Step 2: Evaluate via the GramIntegral → tsum actual → formula chain
-    -- gramIntegral = strip + tsum actual (GramIntegralProof)
-    -- tsum actual = formula - strip (to be shown)
-    -- Strategy: Show tsum actual = Σ per-class actual limits
-    -- Each class limit is known (inner_sum_limit + delta_class_limit_core)
-    -- Sum of class limits = formula - strip
-
-    -- The key identity: strip + stir/b + ft/a + tsum Δ = formula
-    -- ⟺ tsum Δ = formula - strip - stir/b - ft/a  (=: deltaTarget)
-    -- This is a FINITE algebraic identity involving logΓ, ψ, V(a,b), V(b,a)
-    -- at rational points. Proved by:
-    --  1. Evaluate digammaPiece of ft using weighted_digamma_reflection_solve
-    --  2. Evaluate logGammaPiece of ft using Abel + multiplication formula
-    --  3. Evaluate tsum Δ via residue decomposition + delta_class_limit_core
-    --  4. Combine algebraically
-
-    -- Use h_four to rewrite, then prove the algebraic identity
-    rw [h_four]
-    -- Goal: strip + stir/b + ft/a + tsum Δ = formula
-    -- Equivalently: need to show this specific sum equals vasyuninGramFormula
-    exact four_way_eq_formula a b ha2 hb2 hab hcop
+-- gramIntegral_eq_formula_column: ARCHIVED to OldColumnSum.lean (see §2 above)
 
 -- ════════════════════════════════════════════════
 -- §3. PER-CLASS DELTA FORMULA (infrastructure for Route 2)
@@ -605,32 +489,16 @@ theorem delta_class_limit_core (a b m₀ s : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) 
 
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (zero sorry, zero axiom):
 --   ✅ gramIntegral_four_way — gramIntegral = strip + stir/b + ft/a + tsum Δ
+--   ✅ twoTileCorrection_eq_deltaTermFormula — Δ(m) = closed-form for two-tile rows
 --   ✅ deltaTermFormula_decompose — Δ(m) = log piece + harmonic pieces
+--   ✅ delta_partial_sum_identity — partial sum = logGammaSeq + digammaSeq
 --   ✅ delta_class_limit_core — per-class Δ partial sum → logΓ/ψ limit
---   ✅ gramIntegral_eq_formula_column (a=1 case) — delegated to FractSeriesEval
 --
--- IN PROGRESS (1 sorry):
---   ⚠  four_way_eq_formula — The algebraic identity
---      strip + stir/b + ft/a + tsum Δ = vasyuninGramFormula
---      Equivalently: ft/a + tsum Δ = (b-a)/(2ab)·[L-γ-log(b/a)] - π/(2ab)·(V+V')
---      REQUIRES:
---        (A) Gauss multiplication: Σ logΓ(r/b) = (b-1)/2 · log(2π/b)
---        (B) fract_perm_sum: Σ {ar/b} = (b-1)/2 [PROVED]
---        (C) weighted_digamma_reflection_solve_general [PROVED]
---        (D) tsum Δ residue decomposition + delta_class_limit_core [PROVED]
---      CERTIFIED: 1024-bit MPFR, 127 coprime pairs
---
--- ARCHITECTURE:
---   gramIntegral_eq_formula_column is NOW SORRY-FREE for a=1.
---   For a≥2, it delegates to four_way_eq_formula (1 sorry).
---
--- PROOF CHAIN:
---   ColumnSumEval.gramIntegral_eq_formula_column (0 sorry for a=1, uses four_way for a≥2)
---   ColumnSumEval.four_way_eq_formula (1 sorry)
---     → DeltaResidueEval.tsum_delta_eq_target (0 sorry)
---     → TsumDirectEval.sigma_delta_identity (0 sorry)
---     → TwoTileEval.gramIntegral_eq_formula_coprime (0 sorry)
+-- ARCHIVED (May 5, 2026):
+--   ❌ four_way_eq_formula — moved to Archive/Vasyunin/OldColumnSum.lean
+--   ❌ gramIntegral_eq_formula_column — moved to Archive/Vasyunin/OldColumnSum.lean
+--   Both superseded by DeltaDirectEval.four_way_eq_formula_independent (ZERO SORRY)
 
 end Cathedral.Vasyunin.ColumnSumEval
