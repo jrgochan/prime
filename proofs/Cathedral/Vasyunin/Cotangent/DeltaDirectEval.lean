@@ -784,7 +784,7 @@ private lemma floorStep_le_one (a b m : ℕ) (ha : 1 ≤ a) (hab : a < b) :
   suffices h : a * (m + 1) / b ≤ a * m / b + 1 by omega
   rw [show a * (m + 1) = a * m + a from by ring]
   have hb : 0 < b := by omega
-  by_contra h; push_neg at h
+  by_contra h; push Not at h
   have h2 := (Nat.le_div_iff_mul_le hb).mp (by omega : a * m / b + 2 ≤ (a * m + a) / b)
   have h3 : a * m / b * b + 2 * b ≤ a * m + a := by linarith [mul_comm (a * m / b + 2) b]
   linarith [Nat.div_add_mod (a * m) b, Nat.mod_lt (a * m) hb, mul_comm b (a * m / b)]
@@ -821,7 +821,7 @@ private lemma floorStep_bsub1 (a b : ℕ) (ha : 1 ≤ a) (hab : a < b) :
 
 /-- For coprime a,b: J(m) = 1 AND m+1 < b implies isTwoTileClass (strict <). -/
 private lemma floorStep_one_imp_twoTile_coprime (a b m : ℕ)
-    (hcop : Nat.Coprime a b) (hb : 1 ≤ b)
+    (hcop : Nat.Coprime a b) (_hb : 1 ≤ b)
     (h_step : floorStep a b m = 1) (hm1 : m + 1 < b) :
     isTwoTileClass a b m = true := by
   unfold floorStep at h_step
@@ -834,7 +834,7 @@ private lemma floorStep_one_imp_twoTile_coprime (a b m : ℕ)
     have := Nat.div_mul_le_self (a * (m + 1)) b
     rw [h_eq] at this; linarith [mul_comm (a * m / b + 1) b]
   -- Coprimality gives STRICT inequality (equality ⟹ b | a*(m+1) ⟹ b | (m+1), contradiction)
-  by_contra h_not_lt; push_neg at h_not_lt
+  by_contra h_not_lt; push Not at h_not_lt
   have h_eq2 : b * (a * m / b + 1) = a * (m + 1) := by omega
   have h_dvd : b ∣ a * (m + 1) := ⟨a * m / b + 1, by linarith⟩
   have h_dvd' : b ∣ (m + 1) * a := by rwa [mul_comm]
@@ -899,7 +899,7 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
         -- J(m) = 1 and m < b
         -- m ≠ 0 since J(0) = 0
         have hm_pos : 1 ≤ m := by
-          by_contra h; push_neg at h
+          by_contra h; push Not at h
           have : m = 0 := by omega
           subst this; rw [floorStep_zero a b hab] at hJ; exact absurd hJ (by omega)
         by_cases hm_eq : m = b - 1
@@ -1035,7 +1035,7 @@ lemma staircase_telescope (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
 
     CERTIFIED: 30.4M coprime pairs on RTX 4090, max err = 6.05e-17. -/
 lemma overshoot_coeff_eq_neg_fract (a b m₀ : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
-    (hab : a < b) (hm₀ : m₀ ∈ twoTileSet a b) :
+    (_hab : a < b) (hm₀ : m₀ ∈ twoTileSet a b) :
     let k := PartialSumConvergence.tileIndex a b m₀
     let s := a * (m₀ + 1) - b * (k + 1)
     ((s:ℝ) - (a:ℝ)) / ((a:ℝ) * (a:ℝ) * (b:ℝ)) =
