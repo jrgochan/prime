@@ -1,0 +1,39 @@
+{
+  "format": "cathedral-certified-distance-v2",
+  "version": "1.0.0",
+  "N": 100,
+  "dim": 99,
+  "distance": {
+    "d_sq": 0.043094828840568145,
+    "method": "CPU_Cholesky_nalgebra",
+    "precision_digits": 15,
+    "compute_time_secs": 0.000041542,
+    "cross_check": null
+  },
+  "spectrum": {
+    "lambda_min": 0.00012005496366876546,
+    "lambda_min_positive": true,
+    "lambda_max": 3.378812386985815,
+    "condition_number": 28143.879134460778,
+    "compute_time_secs": 0.000639792
+  },
+  "monotonicity": null,
+  "verification": {
+    "matrix_source": "built_from_scratch",
+    "matrix_sha256": "e350f6a60a4da3cfcbf28762d99152d0964bd9a2ac451f201b3f2b09481c81c0",
+    "matrix_size_bytes": 78408,
+    "gram_formula": "G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx",
+    "b_vector_formula": "b[j] = ∫₀¹ {1/(jx)} dx"
+  },
+  "machine": {
+    "hostname": "unknown",
+    "gpu": null,
+    "gpu_vram_mb": null,
+    "compute_time_total_secs": 0.292766708
+  },
+  "lean_claims": [
+    "nbDistSq' 100 < 0.0431",
+    "0 < lambdaMin 100"
+  ],
+  "timestamp": "1778040303"
+}

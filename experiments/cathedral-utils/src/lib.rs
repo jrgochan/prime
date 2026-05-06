@@ -16,6 +16,8 @@
 //! - [`certificate`] — JSON/TSV output generation
 //! - [`cache`] — Binary matrix serialization to/from disk
 //! - [`fmt`] — Terminal formatting constants
+//! - [`gpu`] — GPU acceleration via CUDA/cuSOLVER/cuBLAS (feature-gated)
+//! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
 
 pub mod arith;
 pub mod cache;
@@ -25,6 +27,8 @@ pub mod dd;
 pub mod fitting;
 pub mod fmt;
 pub mod gram;
+pub mod gpu;
 pub mod spectral;
 pub mod vasyunin;
 
+pub mod ooc;

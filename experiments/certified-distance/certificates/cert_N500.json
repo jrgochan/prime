@@ -1,0 +1,44 @@
+{
+  "format": "cathedral-certified-distance-v2",
+  "version": "1.0.0",
+  "N": 500,
+  "dim": 499,
+  "distance": {
+    "d_sq": 0.041846657950854405,
+    "method": "CPU_Cholesky_nalgebra",
+    "precision_digits": 15,
+    "compute_time_secs": 0.004133042,
+    "cross_check": null
+  },
+  "spectrum": {
+    "lambda_min": 7.3662651516622845e-6,
+    "lambda_min_positive": true,
+    "lambda_max": 4.375898491772584,
+    "condition_number": 594045.7479710883,
+    "compute_time_secs": 0.066133042
+  },
+  "monotonicity": {
+    "previous_n": 200,
+    "previous_d_sq": 0.04251653400766709,
+    "strictly_decreased": true,
+    "decrease_amount": 0.0006698760568126863
+  },
+  "verification": {
+    "matrix_source": "built_from_scratch",
+    "matrix_sha256": "f5328d95f1a482548ab4a8e12cb6a340fca648838af9df56f23c91c0bd8c9ffe",
+    "matrix_size_bytes": 1992008,
+    "gram_formula": "G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx",
+    "b_vector_formula": "b[j] = ∫₀¹ {1/(jx)} dx"
+  },
+  "machine": {
+    "hostname": "unknown",
+    "gpu": null,
+    "gpu_vram_mb": null,
+    "compute_time_total_secs": 2.626945167
+  },
+  "lean_claims": [
+    "nbDistSq' 500 < 0.0419",
+    "0 < lambdaMin 500"
+  ],
+  "timestamp": "1778040336"
+}

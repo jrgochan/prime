@@ -9,6 +9,10 @@ name = "gram-builder"
 path = "src/bin/gram_builder.rs"
 
 
+[features]
+default = []
+gpu = ["libc"]
+
 [dependencies]
 # Pinned versions — all experiments must use these
 nalgebra = "0.33"
@@ -16,3 +20,5 @@ rug = { version = "1.26", features = ["float"] }
 rayon = "1.10"
 serde_json = "1"
 serde = { version = "1", features = ["derive"] }
+libc = { version = "0.2", optional = true }
+sha2 = "0.10"

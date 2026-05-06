@@ -53,6 +53,7 @@ members = [
     "experiments/gram-scaling-oracle",
     "experiments/gram-scaling-oracle-gpu",
     "experiments/two-tile-decomposition-gpu",
+    "experiments/certified-distance",
 ]
 
 [profile.release]

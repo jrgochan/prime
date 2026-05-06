@@ -1,0 +1,31 @@
+[package]
+name = "certified-distance"
+version = "1.0.0"
+edition = "2021"
+description = """
+Production-grade certified d²_N computation pipeline.
+
+Loads existing Gram matrices (DD cache, OOC cache, or builds from scratch),
+computes d²_N = 1 - b^T G_N^{-1} b with multi-tier verification,
+and produces independently verifiable JSON certificates per N.
+
+Part of the Cathedral formal verification project.
+"""
+
+[[bin]]
+name = "certified-distance"
+path = "src/main.rs"
+
+[features]
+default = []
+gpu = ["cathedral-utils/gpu", "libc"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rayon = "1"
+rug = "1"
+libc = { version = "0.2", optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
