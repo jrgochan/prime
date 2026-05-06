@@ -12,17 +12,17 @@
 use std::f64::consts::PI;
 use rayon::prelude::*;
 
-const GAMMA: f64 = 0.5772156649015329;
+use cathedral_utils::arith::{gcd, EULER_GAMMA, mobius_table};
 
 fn main() {
-    let a = std::f64::consts::TAU.ln() - GAMMA; // A = ln(2π) - γ
+    let a = std::f64::consts::TAU.ln() - EULER_GAMMA; // A = ln(2π) - γ
     println!("═══ Attack 9: The Dimensional Autopsy (Rust) ═══");
     println!("  A = ln(2π) - γ = {:.10}", a);
     println!();
 
     // Sieve μ
     let max_n = 50_000usize;
-    let mu = mobius_sieve(max_n);
+    let mu = mobius_table(max_n);
 
     // PNT diagnostic
     println!("═══ PNT Diagnostic: Σμ(k)/k ═══");
@@ -145,7 +145,7 @@ fn dimensional_autopsy(n: usize, mu: &[i8], a: f64) -> AutopsyResult {
     let mut b = vec![0.0f64; n + 1];
     for k in 1..=n {
         v[k] = -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n);
-        b[k] = ((k as f64).ln() + 1.0 - GAMMA) / k as f64;
+        b[k] = ((k as f64).ln() + 1.0 - EULER_GAMMA) / k as f64;
     }
 
     // Rank-1 sums (instant)
@@ -217,35 +217,3 @@ fn vasyunin_sum(a: usize, b: usize) -> f64 {
     total
 }
 
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 {
-        let t = b;
-        b = a % b;
-        a = t;
-    }
-    a
-}
-
-fn mobius_sieve(n: usize) -> Vec<i8> {
-    let mut mu = vec![0i8; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1;
-        }
-        for &p in &primes {
-            if i * p > n { break; }
-            is_prime[i * p] = false;
-            if i % p == 0 {
-                mu[i * p] = 0;
-                break;
-            } else {
-                mu[i * p] = -mu[i];
-            }
-        }
-    }
-    mu
-}

@@ -22,30 +22,8 @@ use std::sync::Mutex;
 use std::time::Instant;
 use rayon::prelude::*;
 
-// ─── Arithmetic ───────────────────────────────────────────────────
+use cathedral_utils::arith::{gcd, EULER_GAMMA, mobius_table};
 
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
-
-fn mobius_sieve(n: usize) -> Vec<i32> {
-    let mut mu = vec![0i32; n + 1];
-    mu[1] = 1;
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    for i in 2..=n {
-        if is_prime[i] { primes.push(i); mu[i] = -1; }
-        for &p in &primes {
-            if i * p > n { break; }
-            is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
-        }
-    }
-    mu
-}
 
 // ─── Vasyunin sum with memoization ────────────────────────────────
 
@@ -83,9 +61,7 @@ fn vasyunin_cached(a: usize, b: usize, cache: &VCache) -> f64 {
     val
 }
 
-// ─── Vasyunin Gram entry (f64, exact formula) ─────────────────────
 
-const EULER_GAMMA: f64 = 0.5772156649015328606;
 
 fn gram_entry_f64(j: usize, k: usize, cache: &VCache) -> f64 {
     let pi = std::f64::consts::PI;
@@ -239,7 +215,9 @@ fn main() {
 
     let sizes = vec![1000, 2000, 5000, 10000, 20000, 50000];
     let max_n = *sizes.last().unwrap();
-    let mu = mobius_sieve(max_n);
+    let mu_table = mobius_table(max_n);
+    // Convert i8 → i32 for this experiment's API
+    let mu: Vec<i32> = mu_table.iter().map(|&v| v as i32).collect();
     let cache: VCache = Mutex::new(HashMap::new());
 
     let mut results: Vec<(usize, f64, f64, f64, f64, f64, f64)> = Vec::new();
