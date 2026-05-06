@@ -17,35 +17,35 @@ interface Axiom {
 
 const CROWN_AXIOMS: Axiom[] = [
   {
-    name: "critical_line_mellin_variance",
-    math: "\u222B\u2080\u1D40 |1/\u03B6(\u00BD+it)|\u00B2 dt = O(T)",
-    desc: "The Mellin variance of the BD residual on the critical line decays as O(1/log N). This follows from the Hardy\u2013Littlewood mean value theorem (1918). The key formalization gap: Mathlib lacks mean value theorems for Dirichlet polynomials (Montgomery\u2013Vaughan).",
-    ref: "Hardy\u2013Littlewood 1918, Titchmarsh \u00A79.2",
+    name: "baez_duarte_forward",
+    math: "RH \u27F9 d\u00B2_N \u2192 0",
+    desc: "The B\u00E1ez-Duarte forward direction (IMRN 2003): under the Riemann Hypothesis, the Nyman\u2013Beurling basis functions can approximate the constant function 1 in L\u00B2(0,1), so the BD distance d\u00B2_N converges to zero. This is the sole crown axiom of the One-Pillar Cathedral (v16). 95% of the formalization infrastructure to close it already exists.",
+    ref: "B\u00E1ez-Duarte, IMRN 2003, No. 36",
     tier: 1,
-    file: "MellinBridge/MellinCrown.lean",
-    onCrown: true,
-  },
-  {
-    name: "rh_zeta_lower_bound_from_zero_counting",
-    math: "|\u03B6(s)| \u2265 c/|t|^A for Re(s) \u2265 \u00BD+\u03B5",
-    desc: "Under RH, the Riemann zeta function has a polynomial lower bound. Derived from the Hadamard product formula and Riemann-von Mangoldt zero-counting function N(T). Powers the Perron contour chain. Borel-Carath\u00E9odory is in Mathlib; the gap is connecting BC to the polynomial bound via entire function theory.",
-    ref: "Titchmarsh 1986, Hadamard product, \u00A714.2",
-    tier: 2,
-    file: "Zeta/Hadamard.lean",
+    file: "Assembly/MainChain.lean",
     onCrown: true,
   },
 ];
 
 const NON_CROWN_GROUPS = [
   {
-    name: "v11 Bypassed (Mellin Crown)",
+    name: "v11 Mellin Crown (Alternative Path)",
+    count: 2,
+    axioms: [
+      "critical_line_mellin_variance",
+      "rh_zeta_lower_bound_from_zero_counting",
+    ],
+    desc: "Were crown axioms in v11\u2013v15. Superseded by One-Pillar (v16). Retained as alternative forward path with 2 axioms.",
+  },
+  {
+    name: "v10 Perron Crown (Alternative Path)",
     count: 3,
     axioms: [
       "pnt_mu_log_div_k",
       "covariance_bound_from_mertens_34",
       "partial_integral_tends_to_formula",
     ],
-    desc: "Were crown axioms in v10 Perron Crown. Bypassed by Mellin Crown architecture (Parseval Bridge). Still axioms in codebase but no longer on crown path.",
+    desc: "Were crown axioms in v7\u2013v10 Perron Crown. Retained as alternative forward path with 4 axioms (3 + Hadamard).",
   },
   {
     name: "Legacy / Graduated",
@@ -158,22 +158,13 @@ const TIER_COLORS: Record<number, {
   sublabel: string;
 }> = {
   1: {
-    bg: "from-blue-500/15 to-blue-900/10",
-    border: "border-blue-500/40",
-    text: "text-blue-400",
-    dot: "bg-blue-500",
-    glow: "shadow-blue-500/20",
-    label: "Tier 1 \u2014 Hardy\u2013Littlewood",
-    sublabel: "Mellin variance on the critical line",
-  },
-  2: {
-    bg: "from-red-500/15 to-red-900/10",
-    border: "border-red-500/40",
-    text: "text-red-400",
-    dot: "bg-red-500",
-    glow: "shadow-red-500/20",
-    label: "Tier 2 \u2014 Hadamard",
-    sublabel: "Zeta lower bound via zero-counting (conditional on RH)",
+    bg: "from-amber-500/15 to-amber-900/10",
+    border: "border-amber-500/40",
+    text: "text-amber-400",
+    dot: "bg-amber-500",
+    glow: "shadow-amber-500/20",
+    label: "Crown \u2014 B\u00E1ez-Duarte Forward",
+    sublabel: "The sole axiom on the crown path (IMRN 2003)",
   },
 };
 
@@ -365,8 +356,9 @@ export default function AxiomMapPage() {
           <code className="text-amber-400/80">
             nyman_beurling_equivalence
           </code>{" "}
-          depends on exactly <strong className="text-white">2</strong>{" "}
-          crown axioms, the Mellin Crown. The converse
+          depends on exactly <strong className="text-white">1</strong>{" "}
+          crown axiom: <code className="text-amber-400/80">baez_duarte_forward</code>{" "}
+          (the One-Pillar architecture, v16). The converse
           direction uses <strong className="text-emerald-400">zero</strong>{" "}
           custom axioms.
         </p>
@@ -380,22 +372,16 @@ export default function AxiomMapPage() {
         className="flex rounded-xl overflow-hidden h-10"
       >
         <div
-          className="bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-center"
-          style={{ width: "50%" }}
+          className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
+          style={{ width: "100%" }}
         >
-          <span className="text-[10px] font-bold text-white">Mellin Variance</span>
-        </div>
-        <div
-          className="bg-gradient-to-r from-red-600 to-red-500 flex items-center justify-center"
-          style={{ width: "50%" }}
-        >
-          <span className="text-[10px] font-bold text-white">Hadamard</span>
+          <span className="text-[10px] font-bold text-white">ba\u00E9z_duarte_forward (IMRN 2003)</span>
         </div>
       </motion.div>
 
       {/* Tier legend */}
       <div className="flex flex-wrap gap-6 text-xs">
-        {([1, 2] as const).map((t) => {
+        {([1] as const).map((t) => {
           const tier = TIER_COLORS[t];
           return (
             <div key={t} className="flex items-center gap-2">
@@ -418,7 +404,7 @@ export default function AxiomMapPage() {
           Forward: RH {"\u27F9"} d{"\u00B2"}_N {"\u2192"} 0
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Click any axiom to learn more. Both are on the crown path.
+          Click the axiom to learn more. This is the sole crown axiom.
         </p>
         <div className="space-y-3">
           {CROWN_AXIOMS.map((axiom, i) => (
@@ -447,7 +433,7 @@ export default function AxiomMapPage() {
         className="text-center text-xs text-slate-600 pt-4 border-t border-slate-800"
       >
         <code>#print axioms nyman_beurling_equivalence</code> &mdash; compiler
-        verified, v11, April 26, 2026
+        verified, v16 Observatory, May 6, 2026
       </motion.div>
     </div>
   );

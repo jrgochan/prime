@@ -17,9 +17,9 @@ const CARDS: CardInfo[] = [
     href: "/axiom-map",
     title: "Axiom Architecture",
     description:
-      "Interactive map of the 2 crown axioms: Mellin variance (Hardy\u2013Littlewood) and Hadamard zero bound. Click to explore each axiom\u2019s role and mathematical statement.",
+      "Interactive map of the 1 crown axiom: ba\u00E9z_duarte_forward (IMRN 2003). The One-Pillar architecture. Click to explore its role and mathematical statement.",
     icon: "\u{1F3DB}\uFE0F",
-    stats: "2 crown \u00B7 55 total \u00B7 0 on converse",
+    stats: "1 crown \u00B7 ~50 total \u00B7 0 on converse",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
   },
@@ -39,7 +39,7 @@ const CARDS: CardInfo[] = [
     description:
       "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
     icon: "\uD83C\uDF33",
-    stats: "~1,335 theorems \u00B7 55 axioms \u00B7 161 files",
+    stats: "~1,500+ theorems \u00B7 ~50 axioms \u00B7 308 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -107,7 +107,7 @@ const CARDS: CardInfo[] = [
     href: "/cathedral-3d",
     title: "Cathedral 3D",
     description:
-      "The proof architecture as a literal cathedral \u2014 two pillars (Converse, Forward) holding the golden roof of RH.",
+      "The proof architecture as a literal cathedral \u2014 one pillar (ba\u00E9z_duarte_forward) holding the golden roof of RH \u27FA d\u00B2\u2099 \u2192 0.",
     icon: "\u26EA",
     stats: "3D \u00B7 auto-rotates",
     gradient: "from-purple-500/20 to-indigo-500/20",
@@ -132,9 +132,9 @@ const ROUTES: RouteInfo[] = [
     borderColor: "border-emerald-500/20",
   },
   {
-    label: "PILLAR II \u2014 FORWARD",
+    label: "PILLAR \u2014 FORWARD (ONE-PILLAR)",
     name: "RH \u27F9 d\u00B2_N \u2192 0",
-    desc: "2 axioms, 0 sorry on crown path. The Mellin Crown: RH \u2192 Mellin variance bound via Hardy\u2013Littlewood, then Parseval Bridge gives d\u00B2_N \u2264 C/log N \u2192 0.",
+    desc: "1 axiom (ba\u00E9z_duarte_forward), 0 sorry on crown path. The BD forward direction (IMRN 2003) directly gives d\u00B2_N \u2192 0 under RH. Alternative paths: Mellin (2 axioms), Perron (4 axioms).",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
@@ -163,18 +163,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          155 active files. 55 axioms &mdash; two on the crown theorem&apos;s critical path.
+          308 active files. ~50 axioms &mdash; one on the crown theorem&apos;s critical path.
           Zero custom axioms on the converse.
-          <span className="text-amber-400 text-sm ml-1">v11</span>
+          <span className="text-amber-400 text-sm ml-1">v16 Observatory</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "161 active files" },
-            { color: "bg-red-500", text: "~1,335 theorems" },
-            { color: "bg-amber-500", text: "55 axioms (2 on crown)" },
+            { color: "bg-emerald-500", text: "308 active files" },
+            { color: "bg-red-500", text: "~1,500+ theorems" },
+            { color: "bg-amber-500", text: "~50 axioms (1 on crown)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "22 topic directories" },
+            { color: "bg-purple-500", text: "78,435 lines of Lean 4" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -186,7 +186,7 @@ export default function HomePage() {
 
       {/* Two Pillars */}
       <h2 className="text-xl font-bold text-slate-200 mb-4">
-        The Two Pillars
+        The One-Pillar Architecture
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
         {ROUTES.map((route, i) => (
@@ -222,12 +222,13 @@ export default function HomePage() {
             <span className="text-2xl">{"\u{1F3DB}\uFE0F"}</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                v11 &mdash; MATHLIB-STYLE RESTRUCTURING (April 26, 2026)
+                v16 &mdash; OBSERVATORY EDITION (May 6, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Cathedral reorganized from role-based to topic-based directories.
-                Assembly 26 &rarr; 6 capstone files. White/Infrastructure/ dissolved into Perron/ (16), Zeta/ (8), Analysis/ (6).
-                5 sorry-free files resurrected from Archive. 22 topic directories, each mapping to a mathematical domain.
+                One-Pillar Cathedral: <code>baez_duarte_forward</code> as sole crown axiom.
+                DD-precision pipeline (Dekker&ndash;Knuth) certifies N=55,440 Gram matrices.
+                N=20,000 witness scan confirms d&sup2; &sim; 0.43/ln(N) scaling law.
+                96% vacuum reconstruction. 308 files, 78,435 lines, 15 papers.
               </p>
             </div>
           </div>

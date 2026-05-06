@@ -138,7 +138,7 @@ export default function Shell({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2 mt-1.5">
             <span className="text-[10px] text-slate-500">Proof Visualizer</span>
             <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 font-mono font-bold border border-amber-500/20">
-              v11
+              v16
             </span>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function Shell({ children }: { children: ReactNode }) {
         <div className="p-4 border-t border-[#1e2148] space-y-2">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>2 crown axioms &middot; 0 sorry &middot; ~1,335 thms</span>
+            <span>1 crown axiom &middot; 0 sorry &middot; ~1,500 thms</span>
           </div>
           <div className="w-full h-1 bg-[#1e2148] rounded-full overflow-hidden">
             <div
@@ -161,7 +161,7 @@ export default function Shell({ children }: { children: ReactNode }) {
             />
           </div>
           <div className="text-[10px] text-slate-600">
-            8,198 build jobs &middot; 161 files &middot; 39,375 lines
+            78,435 lines &middot; 308 files &middot; 15 papers
           </div>
         </div>
       </nav>
