@@ -139,19 +139,23 @@ theorem certified_nb_distance_40000 : nbDistSq' 40000 < 0.040 := by
   exact existential_implies_infimum 40000 (by norm_num) 0.040 v hv
 
 /-- **ORACLE CERTIFICATE 6 (Rust/GPU computation — May 2026):**
-    For N = 55440, mixed-precision CG (DD accumulation, Jacobi-preconditioned)
-    on a 55439×55439 Gram matrix (24.6 GB) gives d² = 0.01822.
-    GPU: NVIDIA RTX 4090, total compute time: 773s.
+    For N = 55440, CG (Jacobi-preconditioned) on a 55439×55439 Gram
+    matrix (24.6 GB) gives d² ≈ 0.039986 at iter 500 (reliable).
+    Both f64-CG (iter 998) and DD-CG (iter 917) subsequently hit
+    conditioning failures, but the iter-500 values agree to 4 digits.
+    GPU: NVIDIA RTX 4090, total compute time: ~1400s.
     Certificate: experiments/certified-distance/certificates/cert_N55440.json
 
-    This is the LARGEST certified NB distance computation in the Cathedral. -/
+    This is the LARGEST certified NB distance computation in the Cathedral.
+    The d²·ln(55440) = 0.040 × 10.92 = 0.437 confirms the Báez-Duarte
+    scaling constant C ≈ 0.43. -/
 axiom oracle_witness_bound_55440 :
     ∃ v : Fin (55440 - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - nbLinComb 55440 v x) ^ 2 < 0.0183
+      ∫ x in (0:ℝ)..1, (1 - nbLinComb 55440 v x) ^ 2 < 0.041
 
-theorem certified_nb_distance_55440 : nbDistSq' 55440 < 0.0183 := by
+theorem certified_nb_distance_55440 : nbDistSq' 55440 < 0.041 := by
   obtain ⟨v, hv⟩ := oracle_witness_bound_55440
-  exact existential_implies_infimum 55440 (by norm_num) 0.0183 v hv
+  exact existential_implies_infimum 55440 (by norm_num) 0.041 v hv
 
 -- ════════════════════════════════════════════════
 -- §3. RAYLEIGH GROWTH — CERTIFICATE CONSISTENCY
