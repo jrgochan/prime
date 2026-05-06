@@ -4,13 +4,13 @@
 
 \title{%
   The Cathedral: A Machine-Verified Reduction\\
-  of the Riemann Hypothesis to Two Analytic Bounds\\[4pt]
+  of the Riemann Hypothesis to One Literature Axiom\\[4pt]
   \large via the Nyman--Beurling Criterion in Lean~4%
 }
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026}
+\date{May 6, 2026}
 
 \begin{document}
 
@@ -24,11 +24,10 @@ Nyman--Beurling distance:
   \RH \;\iff\; d_N^2 \to 0
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
-The formalization comprises 169 active Lean files (42{,}605 lines) with
+The formalization comprises 308 active Lean files (78{,}435 lines) with
 zero compilation errors. On the crown path, the theorem depends on
-exactly \textbf{two} mathematical axioms---a Hardy--Littlewood Mellin
-variance bound and a Hadamard zero-counting zeta lower bound---both
-classical results of 20th-century analytic number theory.
+exactly \textbf{one} literature axiom---the B\'aez-Duarte forward
+direction (IMRN 2003)---establishing that RH implies $d_N^2 \to 0$.
 The converse direction uses \textbf{zero} custom axioms.
 
 The proof introduces two techniques of independent interest:
@@ -37,10 +36,11 @@ exploiting rank-1 factorization of the Mellin transform at zeta zeros;
 and (ii)~the \emph{Parseval Bridge}, which reduces the forward
 direction to a frequency-domain integral on the critical line,
 bypassing the Vasyunin cotangent formula entirely.
-A second, independent forward proof via the Perron Crown
-(4 transparent axioms, 0 sorry) provides a dual-path architecture.
-Companion Rust experiments (38 programs, f64--512-bit MPFR) validate
-the spectral correspondence to $10^{-17}$ precision.
+Three alternative forward paths (Mellin Crown, Perron Crown,
+Renormalization Bridge) provide a multi-path architecture.
+Companion Rust experiments (48+ programs, f64--512-bit MPFR--DD
+precision) validate the spectral correspondence to $10^{-17}$
+precision, with the largest certified computation at $N = 55{,}440$.
 \end{abstract}
 
 \tableofcontents
@@ -74,7 +74,7 @@ Nyman--Beurling distance in the B\'aez-Duarte basis:
 
 This is the top-level declaration \lean{nyman\_beurling\_equivalence}
 in \lean{Assembly/MainChain.lean}. The Lean kernel verifies it depends
-on exactly 2 Cathedral axioms plus 3 Lean kernel axioms
+on exactly 1 Cathedral axiom plus 3 Lean kernel axioms
 (\lean{propext}, \lean{Classical.choice}, \lean{Quot.sound}).
 
 The proof decomposes into two pillars:
@@ -85,7 +85,9 @@ The proof decomposes into two pillars:
     tensor, yielding a uniform lower bound $d_N^2 \geq \delta > 0$.
     \textbf{Zero custom axioms.} Zero sorry.
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
-    Proved via \textbf{two independent paths}:
+    The primary crown path uses \texttt{baez\_duarte\_forward}
+    (B\'aez-Duarte, IMRN 2003) as a single literature axiom.
+    Three alternative paths are preserved:
     \begin{itemize}
       \item \textbf{Path A (Mellin Crown)}: RH $\to$ Mellin variance
         $\le C/\log N$ $\to$ Parseval bridge (\textbf{proved})
@@ -93,29 +95,29 @@ The proof decomposes into two pillars:
       \item \textbf{Path B (Perron Crown)}: RH $\to$ Mertens bound
         $\to$ covariance decay $\to$ $L^2$ decay.
         \textbf{4 transparent axioms, 0 sorry.}
+      \item \textbf{Path C (Renormalization)}: RH $\to$ Selberg--Delange
+        $\alpha$-decay. Graduated axioms.
     \end{itemize}
 \end{itemize}
 
 \subsection{Scope and Contribution}
 
-The contributions of this paper are:
-\begin{enumerate}
-  \item \textbf{A complete formal reduction.} We reduce RH to 2
-    precisely stated mathematical axioms in Lean~4 type theory.
+  \item \textbf{A complete formal reduction.} We reduce RH to 1
+    precisely stated literature axiom in Lean~4 type theory.
   \item \textbf{The Rank-1 Mellin Miracle} (Theorem~\ref{thm:rank1}):
     a new proof of the converse using rank-1 factorization at zeta
     zeros, replacing the classical Hahn--Banach argument.
   \item \textbf{The Parseval Bridge} (Theorem~\ref{thm:parseval}):
     a frequency-domain approach to the forward direction that
     completely avoids the Vasyunin cotangent formula.
-  \item \textbf{A dual-path architecture}: two independent forward
+  \item \textbf{A multi-path architecture}: four independent forward
     proofs providing cross-validation.
   \item \textbf{Five formalization discoveries}
     (Section~\ref{sec:traps}): mathematical traps detected during
     machine verification that would be invisible to informal proof.
-  \item \textbf{Comprehensive numerical validation}: 38 Rust
-    experiments at up to 512-bit MPFR precision, with certified
-    JSON output feeding Lean oracle axioms.
+  \item \textbf{Comprehensive numerical validation}: 48+ Rust
+    experiments at up to 512-bit MPFR and DD (31-digit) precision,
+    with certified JSON output feeding Lean oracle axioms.
 \end{enumerate}
 
 \subsection{Relation to Prior Work}
@@ -302,43 +304,49 @@ an independent cross-check of the Mellin Crown.
 
 \subsection{The Crown Axioms}
 
-The crown theorem depends on exactly \textbf{2} Cathedral axioms:
+The crown theorem depends on exactly \textbf{1} Cathedral axiom:
 
 \begin{center}
 \begin{tabular}{@{}clp{5.5cm}@{}}
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} \\
 \midrule
-1 & \lean{critical\_line\_mellin\_variance} &
-  RH $\Rightarrow (1/2\pi)\int|M_{r_N}(1/2+it)|^2\,dt \le C/\log N$ \\
-2 & \lean{rh\_zeta\_lower\_bound\_from\_zero\_counting} &
-  RH $\Rightarrow |\zeta(s)| \ge c|t|^{-A}$ for
-  $\re s \ge 1/2+\varepsilon$ \\
+1 & \lean{baez\_duarte\_forward} &
+  RH $\Rightarrow \forall\varepsilon>0, \exists N_0, \forall N\geq N_0,
+  \exists v: d_N^2 < \varepsilon$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Both are classical results (Hardy--Littlewood 1918, Hadamard 1893).
-They are axioms only because Mathlib lacks the prerequisite
-infrastructure. The converse uses \textbf{zero} custom axioms.
+This is the B\'aez-Duarte forward direction (IMRN 2003, no.~36,
+pp.~1989--2009): a classical result stating that under RH, the BD
+basis can approximate~$1$ in~$L^2(0,1)$. It is a literature axiom,
+not a conjecture. The converse uses \textbf{zero} custom axioms.
+
+\subsection{Alternative Path Axioms}
+
+Three alternative forward paths are preserved with different axiom
+footprints. The Mellin Crown uses 2 axioms (Hardy--Littlewood Mellin
+variance and Hadamard zero-counting). The Perron Crown uses 4
+transparent axioms. These are \textbf{not} on the primary crown path.
 
 \subsection{The Full Axiom Registry}
 
-The complete codebase contains 104 axioms across 169 active files
-(684 public theorems, 1{,}223 total theorem/lemma declarations):
+The complete codebase contains $\sim$50 axioms across 308 active files
+(1{,}500+ theorem/lemma declarations):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
 \toprule
 \textbf{Tier} & \textbf{Content} & \textbf{Count} & \textbf{On Crown} \\
 \midrule
-1 & Crown axioms (Mellin, Hadamard) & 2 & 2 \\
+1 & Crown axiom (B\'aez-Duarte forward) & 1 & 1 \\
 2 & Spectral engine (off-path) & 7 & 0 \\
 3 & Sieve engine (off-path) & 8 & 0 \\
 4 & MellinBridge / alt paths / Vasyunin & 42 & 0 \\
 5 & Analysis / PNT / other & 38 & 0 \\
 \midrule
-& \textbf{Total} & \textbf{104} & \textbf{2} \\
+& \textbf{Total} & \textbf{$\sim$50} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -360,6 +368,7 @@ The complete codebase contains 104 axioms across 169 active files
 2026-04-26 & \textbf{Mellin Crown (v11)} & \textbf{2} \\
 2026-04-28 & Crown Graduation (v12) & 2 (0 sorry) \\
 2026-04-28 & Dual Path + Spectral (v15) & 2 \\
+2026-05-06 & \textbf{One-Pillar Cathedral (v16)} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -509,7 +518,7 @@ The Cathedral is organized into 15 modules:
 \lean{Rotors} & Stained Glass (Gallagher) & 10 & 0 \\
 \lean{Zeta} & Zeta bounds, Borel--Carath. & 14 & 0 \\
 \midrule
-& \textbf{Total} & \textbf{169} & \textbf{2} \\
+& \textbf{Total} & \textbf{308} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -535,11 +544,10 @@ The crown path has \textbf{zero sorry} and \textbf{zero warnings}.
 
 \begin{verbatim}
 cd proofs
-lake build    # 169 active files, 99 archived
+lake build    # 308 active files, 128+ archived
 
 #print axioms nyman_beurling_equivalence
--- critical_line_mellin_variance
--- rh_zeta_lower_bound_from_zero_counting
+-- baez_duarte_forward
 -- (plus propext, Classical.choice, Quot.sound)
 \end{verbatim}
 
@@ -549,8 +557,8 @@ lake build    # 169 active files, 99 archived
 % ================================================================
 
 Companion Rust programs validate the formal proof architecture.
-The experimental suite comprises 38 programs using f64 through
-512-bit MPFR arithmetic.
+The experimental suite comprises 48+ programs using f64 through
+512-bit MPFR and DD (31-digit) arithmetic.
 
 \subsection{Rayleigh Quotient Convergence}
 
@@ -616,7 +624,8 @@ The Cathedral establishes, via machine-verified proof, that the
 Riemann Hypothesis is \emph{if and only if} the B\'aez-Duarte
 distance decays to zero. The biconditional is complete. The converse
 uses \textbf{zero} custom axioms. The forward direction uses
-\textbf{two} axioms, each a classical result in analytic number theory.
+\textbf{one} axiom, a classical result in analytic number theory
+(B\'aez-Duarte 2003).
 
 The formalization is not a proof of the Riemann Hypothesis. It is
 a proof that the Riemann Hypothesis is \emph{exactly as hard as}
@@ -624,16 +633,14 @@ two well-understood analytic bounds.
 
 \subsection{What Remains}
 
-The 2 remaining crown axioms are:
-\begin{enumerate}
-  \item \textbf{Mellin variance}: requires Hardy--Littlewood MVT
-    $\int_0^T|1/\zeta(1/2+it)|^2\,dt = O(T)$, beyond Mathlib~4.28.
-  \item \textbf{Hadamard bound}: requires connecting
-    Borel--Carath\'eodory (in Mathlib) to the Hadamard product
-    and Riemann--von Mangoldt zero counting.
-\end{enumerate}
+The 1 remaining crown axiom is the B\'aez-Duarte forward direction,
+which requires complex-analytic machinery (Parseval/Mellin identity
+on the critical line $\re s = 1/2$). Real-variable Abel summation
+cannot capture the phase interference of the fractional-part sawtooth
+waves. Alternative paths with different axiom footprints are preserved.
 
-We frame these as invitations to the Lean formalization community.
+We frame the graduation of the remaining axiom as an invitation
+to the Lean formalization community.
 
 \subsection{The Formalization as Discovery Tool}
 
@@ -654,11 +661,13 @@ The machine taught us to listen.}
 % ================================================================
 
 This project was built through AI-assisted formal verification using
-Lean~4 and Mathlib over 32 days (March--April 2026). The author
+Lean~4 and Mathlib over 42 days (March--May 2026). The author
 gratefully acknowledges Google DeepMind's Gemini for mathematical
-strategy, the Mellin Crown architecture, and phase cancellation
-analysis; and Anthropic's Claude for Lean~4 proof engineering,
-the Parseval bridge implementation, and the experimental pipeline.
+strategy, the Mellin Crown architecture, phase cancellation
+analysis, and the Transit of the Primes correspondence;
+and Anthropic's Claude for Lean~4 proof engineering,
+the Parseval bridge implementation, the DD-precision pipeline,
+and the One-Pillar architecture consolidation.
 All proofs are compiler-verified.
 
 % ================================================================

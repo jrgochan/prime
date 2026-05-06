@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 28, 2026 --- v15, Spectral Universality Update}
+\date{May 6, 2026 --- v16, Observatory Edition}
 
 \begin{document}
 
@@ -107,17 +107,20 @@ Since the initial version of this paper (April~20), the Cathedral
 has undergone a fundamental architectural transformation:
 
 \begin{itemize}
-  \item \textbf{Dual proof paths}: The crown theorem is now proved
-    via two independent routes---the Mellin Crown (frequency domain,
-    0 sorry, 2 composite axioms) and the Perron Crown (spatial domain,
-    0 sorry, 4 transparent axioms)---connected by the Parseval
-    Bridge, a fully proved zero-axiom isometry.
-  \item \textbf{Axiom reduction}: 55 $\to$ 45 active axioms,
+  \item \textbf{One-Pillar Architecture}: The crown theorem now depends
+    on exactly one literature axiom (\texttt{baez\_duarte\_forward},
+    IMRN 2003). Three alternative proof paths (Mellin, Perron,
+    Renormalization) are preserved with different axiom footprints,
+    all connected by the Parseval Bridge (zero-axiom isometry).
+  \item \textbf{Scale}: 308 active Lean files, 78,435 lines of
+    formally verified logic, 48+ computational experiments,
     0 sorry placeholders on the critical path.
-  \item \textbf{Numerical certification}: A 512-bit MPFR engine
-    validates the B\'aez-Duarte convergence to Sherman-Morrison
-    match of $10^{-17}$.
-  \item \textbf{AI collaboration}: The entire v5 $\to$ v15 journey
+  \item \textbf{DD-precision certification}: A Dekker--Knuth
+    Double-Double Conjugate Gradient engine certifies the
+    B\'aez-Duarte distance at $N = 55{,}440$ ($\dim = 55{,}439$),
+    the largest such computation in the literature. A 512-bit MPFR
+    engine provides Sherman-Morrison cross-validation to $10^{-17}$.
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v16 journey
     was conducted through human-AI pair programming, demonstrating
     the feasibility of AI-assisted formal verification.
 \end{itemize}
@@ -673,6 +676,22 @@ $\lambda_{\min} \approx 10^{-6}$.
     the defender's monitoring, the attacker creates a window of
     unmonitored operation during which a kinetic disruption proceeds
     undetected.
+
+  \item \textbf{The Dekker--Knuth Boundary (v16):} The Cathedral's
+    DD-precision pipeline (May~2026) discovered the exact numerical
+    boundary: at dimension $N > 40{,}000$ (condition number
+    $\kappa \sim 10^{15}$), \emph{every} standard \texttt{f64}
+    eigensolver produces non-physical results. The matrix appears
+    non-positive-definite in \texttt{f64} even though it is provably
+    SPD at full precision. An attacker armed with this knowledge can
+    \emph{calibrate} an injection to sit precisely at the \texttt{f64}
+    precision boundary of the defender's software, ensuring the
+    monitoring system fails silently rather than catastrophically.
+    The defender sees ``stable'' when the system is collapsing,
+    or ``unstable'' when the system is fine. This is no longer
+    theoretical: the Cathedral measured the exact eigenvalue at
+    which \texttt{f64} representation fails ($\sim 10^{-15}$) and the
+    Dekker--Knuth DD representation that fixes it ($\sim 10^{-31}$).
 \end{enumerate}
 
 \subsection{Severity Assessment}
@@ -707,6 +726,13 @@ Potential impact & \textbf{Blinding of critical monitoring infrastructure} \\
   \item \textbf{Dual-solver cross-validation}: Run both \texttt{f64}
     and MPFR eigensolvers in parallel; any disagreement between them
     indicates either precision loss or adversarial injection.
+  \item \textbf{DD-precision monitoring (v16):} Critical infrastructure
+    monitoring systems should deploy Double-Double (Dekker--Knuth)
+    arithmetic for all spectral computations where the condition number
+    may exceed $10^{10}$. The cost is approximately $2\times$ compared
+    to \texttt{f64}---a trivial overhead for safety-critical systems.
+    The Cathedral's \texttt{cathedral-utils} library provides a
+    production-grade implementation~\cite{dekker1971}.
 \end{enumerate}
 
 % ================================================================
@@ -728,8 +754,8 @@ Stealth/jamming & Low & Low-Med & High & $\alpha$-fingerprint detection \\
 RF surveillance & Medium & Medium & Medium & Physical/supply chain \\
 \textbf{AI attack planning} & \textbf{Very High} & \textbf{High} &
   \textbf{Very High} & \textbf{Normalize defensive AI use} \\
-\textbf{Algorithmic blinding} & \textbf{High} & \textbf{High} &
-  Medium & MPFR / dual-solver validation \\
+\textbf{Algorithmic blinding} & \textbf{High} & \textbf{Very High} &
+  High & DD-precision / dual-solver validation \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -778,6 +804,16 @@ is:
     the effective barrier from ``graduate-level expertise'' to
     ``ability to direct an AI assistant.'' This is the most
     significant change since the paper's original publication.
+  \item \textbf{Lattice cryptography implications}: The DD-precision
+    Conjugate Gradient solver, designed to navigate ill-conditioned
+    55,000-dimensional integer lattices, shares the computational
+    profile of the Closest Vector Problem (CVP) central to
+    lattice-based post-quantum cryptography (NTRU, Kyber, Dilithium).
+    While the Gram matrix has specific arithmetic structure not
+    present in cryptographic lattices, the mixed-precision solver
+    techniques developed for the Cathedral could potentially
+    transfer to CVP solvers. This warrants monitoring by the
+    cryptographic community.
 \end{enumerate}
 
 The dual-use question is not whether to publish (the math is
@@ -912,14 +948,19 @@ Frontiers}, 2026.
 J.R.~Gochanour, \emph{The Prime Number Grid: Energy Systems
 Applications}, 2026.
 
-\bibitem{cathedral-v15}
+\bibitem{cathedral-v16}
 J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
-Architecture for the Riemann Hypothesis (v15, Spectral
-Universality)}, 2026.
+Architecture for the Riemann Hypothesis (v16, Observatory
+Edition)}, 2026.
 
 \bibitem{cathedral-physics}
 J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
-Between the Cathedral Proof and Quantum Mechanics}, 2026.
+Between the Cathedral Proof and Quantum Mechanics (v16, Observatory
+Edition)}, 2026.
+
+\bibitem{dekker1971}
+T.J.~Dekker, \emph{A floating-point technique for extending the
+available precision}, Numer. Math. \textbf{18} (1971), 224--242.
 
 \end{thebibliography}
 

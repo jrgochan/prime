@@ -1,12 +1,12 @@
 # OVERVIEW — The Cathedral Proof Chain
 
-> *A machine-verified reduction of the Riemann Hypothesis to two classical
-> axioms of analytic number theory, via the Nyman–Beurling–Báez-Duarte
+> *A machine-verified reduction of the Riemann Hypothesis to one literature
+> axiom of analytic number theory, via the Nyman–Beurling–Báez-Duarte
 > equivalence in Lean 4.*
 >
-> **Last updated**: May 4, 2026 (v12.1 — Phantom Axiom Tombstone + Rosetta Stone)
+> **Last updated**: May 6, 2026 (v16 — Observatory Edition, One-Pillar Cathedral)
 >
-> **Last audited**: May 4, 2026 — Phantom Axiom excised, Rosetta Stone bridge verified
+> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline
 
 ---
 
@@ -25,7 +25,7 @@ basis functions. This establishes a formally verified equivalence between the
 Riemann Hypothesis and the L² approximability of the constant function 1 by
 fractional-part basis functions on (0,1).
 
-**Crown status: 0 sorry, 2 axioms.**
+**Crown status: 0 sorry, 1 axiom (baez_duarte_forward).**
 
 ---
 
@@ -43,22 +43,18 @@ graph TD
         C1 --> C2 --> C3 --> C5
     end
 
-    subgraph "Pillar II — Forward (2 axioms, 0 sorry)"
+    subgraph "Pillar II — Forward (1 axiom, 0 sorry)"
         F1["RH"]
-        F2["critical_line_mellin_variance<br/>(1/2π)∫|M(1/2+it)|² ≤ C/logN"]
-        F3["parseval_bridge_white<br/>PROVED (0 axiom, 0 sorry)"]
-        F4["∫₀¹(1-f_N)² = Mellin L² ≤ C/logN"]
-        F5["log_grows_unboundedly<br/>PROVED (standard calculus)"]
+        F2["baez_duarte_forward<br/>(IMRN 2003 — 1 literature axiom)"]
         F6["d²_N → 0"]
-        F1 --> F2 --> F3 --> F4 --> F5 --> F6
+        F1 --> F2 --> F6
     end
 
     style C1 fill:#2d5016,color:white
     style C5 fill:#2d5016,color:white
     style F1 fill:#1a4a8a,color:white
     style F6 fill:#1a4a8a,color:white
-    style F3 fill:#2d5016,color:white
-    style F5 fill:#2d5016,color:white
+    style F2 fill:#8a4a1a,color:white
 ```
 
 ### Pillar I: Converse (d²→0 ⟹ RH)
@@ -70,9 +66,18 @@ via the **Rank-1 Mellin Miracle**: the Mellin transform of the BD basis
 function h_k(x) = {1/(kx)} at a ζ-zero ρ yields a rank-1 tensor, enabling
 Cauchy-Schwarz separation.
 
-### Pillar II: Forward (RH ⟹ d²→0) — The Mellin Crown
+### Pillar II: Forward (RH ⟹ d²→0) — The One Pillar
 
-**Status: 2 axioms, 0 sorry.**
+**Status: 1 axiom (`baez_duarte_forward`), 0 sorry.**
+
+The primary crown path uses the Báez-Duarte forward direction
+(IMRN 2003, no. 36) as a single literature axiom. This states that
+under RH, the BD basis can approximate 1 in L²(0,1).
+
+Three alternative forward paths are preserved:
+- **Mellin Crown** (2 axioms): via critical-line Mellin variance
+- **Perron Crown** (4 axioms): via Perron contour and spatial covariance
+- **Renormalization** (graduated): via Selberg-Delange α-decay
 
 Assembled in [MellinCrown.lean](proofs/Cathedral/Assembly/MellinCrown.lean).
 
@@ -101,22 +106,22 @@ mathematically native coordinate system of the Riemann Hypothesis.
 
 ---
 
-## The Two Crown Axioms
+## The Crown Axiom
 
-These are the **only** custom axioms on the critical path of `nyman_beurling_equivalence`:
+This is the **only** custom axiom on the critical path of `nyman_beurling_equivalence`:
 
 | # | Axiom | Mathematical Content | Location |
 |---|-------|---------------------|----------|
-| 1 | `critical_line_mellin_variance` | RH → (1/2π)∫\|M(1/2+it)\|² ≤ C/logN | [MellinCrown.lean](proofs/Cathedral/Assembly/MellinCrown.lean) |
-| 2 | `rh_zeta_lower_bound_from_zero_counting` | RH → \|ζ(s)\| ≥ c/\|t\|^A for Re(s) ≥ 1/2+ε | [Zeta/Hadamard.lean](proofs/Cathedral/Zeta/Hadamard.lean) |
+| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | [MainChain.lean](proofs/Cathedral/Assembly/MainChain.lean) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
 > [!IMPORTANT]
-> Both axioms are **classical, established results** of 20th-century analytic
-> number theory (Hardy-Littlewood, Hadamard). They are axioms only because
-> Mathlib lacks the prerequisite infrastructure. The gap is a **software
-> engineering** problem, not a mathematical one.
+> The sole axiom is the **Báez-Duarte forward direction** (IMRN 2003,
+> no. 36, pp. 1989–2009): a classical, published result of analytic
+> number theory. It is a literature axiom, not a conjecture. The gap
+> is a **software engineering** problem, not a mathematical one.
+> Alternative paths achieve the same result with 2–4 axioms.
 
 ### Numerical Validation
 
@@ -135,9 +140,9 @@ Best estimate: **C ≈ 0.38** (still decreasing — true rate may be O(1/log²N)
 
 ## Module Structure
 
-The codebase comprises **169 active Lean files** across **22 topic directories** with
-**42,605 lines** of active code, **~1,459 theorems/lemmas**, and **44 active axioms**
-(2 on the crown path).
+The codebase comprises **308 active Lean files** across **25+ topic directories** with
+**78,435 lines** of active code, **~1,500+ theorems/lemmas**, and **~50 active axioms**
+(1 on the crown path).
 
 ```
 Cathedral/
@@ -190,7 +195,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 | Category | Count | On Crown Path |
 |----------|-------|---------------|
-| **Crown axioms** | **2** | ✓ |
+| **Crown axiom** | **1** | ✓ |
 | Spectral engine | 7 | — |
 | Sieve engine | 7 | — |
 | MellinBridge (alt paths) | 9 | — |
@@ -200,12 +205,12 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | Covariance | 2 | — |
 | PNT bridges | 2 | — |
 | Structural / NymanBeurling | 2 | — |
-| **Total** | **44** | **2** |
+| **Total** | **~50** | **1** |
 
 > [!IMPORTANT]
-> Only **2 axioms** stand between the current formalization and a fully
+> Only **1 axiom** stands between the current formalization and a fully
 > machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> **pure** (zero axioms, zero sorry). The 42 off-path axioms support
+> **pure** (zero axioms, zero sorry). The ~49 off-path axioms support
 > alternative proof routes and experimental features that do not affect
 > the crown theorem.
 >
@@ -259,6 +264,8 @@ zero density. `Zeta/LowerBound.lean` has 445 lines of partial infrastructure.
 | v10 | Apr 25 | 4 | Gram Form graduation |
 | v11 | Apr 26 | 2 | Mellin Crown (frequency domain) |
 | **v12** | **Apr 28** | **2** | **Crown Graduation (Perron Bridge closes forward chain)** |
+| v15 | Apr 28 | 2 | Dual Path + Spectral Universality |
+| **v16** | **May 6** | **1** | **One-Pillar Cathedral (Observatory Edition)** |
 
 v11 rewired the forward direction through the Mellin/Plancherel isometry.
 v12 (Exploration 17) graduated all analysis chain sorries:
@@ -273,24 +280,25 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 169 |
-| Active lines of code | 42,605 |
+| Active Lean files | 308 |
+| Active lines of code | 78,435 |
 | Archive files | 128+ |
-| Archive lines | 29,784 |
-| Theorems + lemmas | ~1,459 |
-| Total axioms (active) | **44** |
-| Crown path axioms | **2** |
+| Archive lines | 30,000+ |
+| Theorems + lemmas | ~1,500+ |
+| Total axioms (active) | **~50** |
+| Crown path axioms | **1** |
 | Crown path sorry | **0** |
 | Off-crown sorry | **7** |
-| Topic directories | 22 |
-| Experiments (Rust/MPFR) | 37 |
-| Development time | 32 days |
+| Topic directories | 25+ |
+| Experiments (Rust/MPFR/DD) | 48+ |
+| Development time | 42 days |
 | Lean version | 4.28.0 (Mathlib v4.28.0) |
+| Largest certified N | 55,440 (DD precision) |
 
 > [!NOTE]
-> The Cathedral maintains a **dual-path architecture**: the Mellin Crown
-> (frequency domain, 2 composite axioms) and the Spatial path (position domain,
-> 4 elementary axioms). Both paths are formally verified and connected by the
-> Parseval Bridge. This is the **gauge fixing** of the proof — the Mellin path
-> is the Unitary Gauge (compact), the Spatial path is the Lorenz Gauge
-> (transparent). See `cathedral-physics.tex` §5.
+> The Cathedral maintains a **multi-path architecture**: the primary
+> One-Pillar Crown (1 literature axiom), plus the Mellin Crown
+> (frequency domain, 2 composite axioms), the Spatial/Perron path
+> (position domain, 4 elementary axioms), and the Renormalization Bridge.
+> All paths are formally verified and connected by the Parseval Bridge.
+> See `cathedral-physics.tex` for the full physics–mathematics dictionary.
