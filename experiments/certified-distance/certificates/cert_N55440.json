@@ -1,0 +1,37 @@
+{
+  "format": "cathedral-certified-distance-v2",
+  "version": "1.0.0",
+  "N": 55440,
+  "dim": 55439,
+  "distance": {
+    "d_sq": null,
+    "method": "FAILED",
+    "precision_digits": 0,
+    "compute_time_secs": 119.941822301,
+    "cross_check": null
+  },
+  "spectrum": null,
+  "monotonicity": {
+    "previous_n": 40000,
+    "previous_d_sq": 0.039986405989180906,
+    "strictly_decreased": false,
+    "decrease_amount": null
+  },
+  "verification": {
+    "matrix_source": "/mnt/d/cathedral-cache/ooc_gram_N55440_p256.bin",
+    "matrix_sha256": "a3aa2e24c836f991ae026c29f5b0e38ea7c066f9017d3569bed5f06833011f66",
+    "matrix_size_bytes": 24587861768,
+    "gram_formula": "G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx",
+    "b_vector_formula": "b[j] = ∫₀¹ {1/(jx)} dx"
+  },
+  "machine": {
+    "hostname": "unknown",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_vram_mb": 7287940053715,
+    "compute_time_total_secs": 259.371946908
+  },
+  "lean_claims": [
+    "nbDistSq' 55440 < NaN"
+  ],
+  "timestamp": "1778042004"
+}

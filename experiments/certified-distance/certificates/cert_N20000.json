@@ -1,0 +1,44 @@
+{
+  "format": "cathedral-certified-distance-v2",
+  "version": "1.0.0",
+  "N": 20000,
+  "dim": 19999,
+  "distance": {
+    "d_sq": 0.040359530975006996,
+    "method": "GPU_Cholesky_f64",
+    "precision_digits": 15,
+    "compute_time_secs": 4.630940912,
+    "cross_check": null
+  },
+  "spectrum": {
+    "lambda_min": 1.9454691151057282e-7,
+    "lambda_min_positive": true,
+    "lambda_max": 5.8874329599523865,
+    "condition_number": 30262279.23249467,
+    "compute_time_secs": 23.605724037
+  },
+  "monotonicity": {
+    "previous_n": 10000,
+    "previous_d_sq": 0.040644763935474,
+    "strictly_decreased": true,
+    "decrease_amount": 0.0002852329604670009
+  },
+  "verification": {
+    "matrix_source": "../cache/dd_gram_N20000_mpfr256.bin",
+    "matrix_sha256": "165778c30c0b217501602240a8b32402ee2f80c36139e835e59f282037330063",
+    "matrix_size_bytes": 3199680008,
+    "gram_formula": "G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx",
+    "b_vector_formula": "b[j] = ∫₀¹ {1/(jx)} dx"
+  },
+  "machine": {
+    "hostname": "unknown",
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gpu_vram_mb": 7287940053715,
+    "compute_time_total_secs": 60.819976184
+  },
+  "lean_claims": [
+    "nbDistSq' 20000 < 0.0404",
+    "0 < lambdaMin 20000"
+  ],
+  "timestamp": "1778041587"
+}

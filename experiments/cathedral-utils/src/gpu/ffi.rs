@@ -204,6 +204,18 @@ extern "C" {
     pub fn gpu_gram_max_n() -> c_int;
 }
 
+#[cfg(has_cuda_kernels)]
+#[link(name = "qqcholesky")]
+extern "C" {
+    pub fn gpu_qq_cholesky_d2(
+        gram_hi: *const f64,
+        gram_lo: *const f64,
+        b: *const f64,
+        dim: c_int,
+        fail_col: *mut c_int,
+    ) -> f64;
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // GPU DETECTION
 // ═══════════════════════════════════════════════════════════════════

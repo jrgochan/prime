@@ -9,6 +9,7 @@
  *   - dd_cholesky.cu  → libddcholesky.so   (DD Cholesky, ~31 digits)
  *   - ds_cholesky.cu  → libdscholesky.so   (DS Cholesky, ~14 digits)
  *   - qs_cholesky.cu  → libqscholesky.so   (QS Cholesky, ~28 digits)
+ *   - qq_cholesky.cu  → libqqcholesky.so   (QQ Cholesky, ~62 digits)
  *   - gram_build.cu   → libgramgpu.so      (GPU Gram matrix build)
  *   - gram_build_dd.cu → libgramgpudd.so   (DD Gram matrix build)
  *
@@ -27,11 +28,15 @@ const KERNELS: &[(&str, &str)] = &[
     ("dd_cholesky.cu",   "ddcholesky"),
     ("ds_cholesky.cu",   "dscholesky"),
     ("qs_cholesky.cu",   "qscholesky"),
+    ("qq_cholesky.cu",   "qqcholesky"),
     ("gram_build.cu",    "gramgpu"),
     ("gram_build_dd.cu", "gramgpudd"),
 ];
 
 fn main() {
+    // Register custom cfg so Rust doesn't warn about it
+    println!("cargo::rustc-check-cfg=cfg(has_cuda_kernels)");
+
     // Only compile CUDA kernels when the gpu feature is enabled
     if env::var("CARGO_FEATURE_GPU").is_err() {
         return;

@@ -223,3 +223,38 @@ pub fn d_sq_ds(
     }
 }
 
+/// Compute d² via QQ Cholesky (~62 digit precision, highest tier).
+///
+/// Input: DD Gram matrix (hi + lo components), b vector.
+/// Uses 4×f64 per element → 32 × N² bytes VRAM.
+/// Recommended: N ≤ 20,000.
+#[cfg(has_cuda_kernels)]
+pub fn d_sq_qq(
+    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+) -> Result<CholeskyResult, String> {
+    if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
+        return Err(format!("Gram size mismatch: {} vs {}²", gram_hi.len(), dim));
+    }
+    if b.len() < dim {
+        return Err(format!("b vector too short: {} < {}", b.len(), dim));
+    }
+
+    unsafe {
+        let start = std::time::Instant::now();
+        let mut fail_col: c_int = 0;
+        let d2 = ffi::gpu_qq_cholesky_d2(
+            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
+            dim as c_int, &mut fail_col,
+        );
+        let gpu_time = start.elapsed().as_secs_f64();
+
+        Ok(CholeskyResult {
+            d_sq: d2,
+            fail_col: fail_col as i32,
+            gpu_time_secs: gpu_time,
+            method: "GPU_QQ_Cholesky_62digit",
+            precision_digits: 62,
+        })
+    }
+}
+
