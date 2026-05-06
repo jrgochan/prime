@@ -1,17 +1,23 @@
-/-
-  Cathedral/MellinBridge/PlancherelDefs.lean
+/-!
+  # Parseval Bridge: Definitions and Plancherel Infrastructure
 
-  ## Shared Definitions for the Parseval Bridge
+  Shared definitions and lemmas for the Parseval bridge connecting
+  the L²(0,1) norm of the BD residual to the Mellin transform on
+  the critical line.
 
-  Definitions used by both PlancherelBypass.lean (the axiom-based chain)
-  and White/Scattering.lean (the axiom-free chain).
+  ## Main Definitions
 
-  Extracted to break the circular dependency:
-    PlancherelBypass ← White/Kinematics
-    PlancherelBypass ← White/Scattering
-  became:
-    PlancherelDefs ← PlancherelBypass (axioms)
-    PlancherelDefs ← White/ (proofs)
+  * `bdResidualV` : the BD residual `r_N(x) = 1 - f_N(x)`
+  * `mellinBDResidual` : Mellin transform of the BD residual
+  * `flattenedResidualV` : `g_N(u) = r_N(e^{-u}) · e^{-u/2}` for `u ≥ 0`
+  * `flattenedResidualC` : complex-valued lift for Fourier compatibility
+  * `residualAutocorrelation` : `h(t) = (g_N ⋆ ̃g_N)(t)`
+
+  ## Main Results
+
+  * `flattenedResidualV_bound` : `|g_N(u)| ≤ C · e^{-u/2}`
+  * `plancherel_integral_axiom` : `∫ ‖f‖² = ∫ ‖̂f‖²` for `f ∈ L¹ ∩ L²`
+  * `l2_fourier_eq_l1_fourier_ae` : L² Fourier =ᵃᵉ L¹ Fourier for `f ∈ L¹ ∩ L²`
 -/
 
 import Cathedral.NymanBeurling.BDMellin

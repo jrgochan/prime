@@ -1,19 +1,8 @@
-/-
-  Cathedral/Zeta/DirichletSeries.lean
+/-!
+  # Abel Summation for Dirichlet Series
 
-  ## Abel Summation for Dirichlet Series
-
-  PHYSICS: The relationship between a field and its spectral excitations.
-  MATH: Connecting summatory functions to Dirichlet series via Abel summation.
-
-  ### Mathlib Status:
-  - `NumberTheory.LSeries.SumCoeff` has `LSeries_eq_mul_integral` PROVED:
-    this gives the integral representation for L-series directly.
-  - `NumberTheory.AbelSummation` has the Abel summation framework PROVED.
-  - This file re-exports the integral representation in Cathedral notation.
-
-  ### Dependencies: Mathlib only (pure analysis).
-  ### Status: ZERO sorry. ZERO axioms.
+  Convenience wrappers around Mathlib's `LSeries_eq_mul_integral`
+  for the integral representation of L-series via Abel summation.
 -/
 
 import Mathlib.NumberTheory.LSeries.SumCoeff

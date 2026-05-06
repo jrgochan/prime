@@ -1,17 +1,14 @@
-/-
-  Cathedral/Zeta/DirichletZetaInverse.lean
+/-!
+  # The Dirichlet Series for 1/ζ(s)
 
-  ## The Dirichlet Series for 1/ζ(s)
+  Establishes `L(μ, s) = 1/ζ(s)` for `Re(s) > 1` from Mathlib's
+  Dirichlet convolution identity `ζ · μ = 1`.
 
-  PHYSICS: The inverse propagator — Möbius inversion in the S-matrix.
-  MATH: L(μ, s) = 1/ζ(s) for Re(s) > 1, pure algebra.
+  ## Main Results
 
-  ### Mathlib Status: FULLY COVERED ✅
-  - `ArithmeticFunction.LSeries_zeta_mul_Lseries_moebius` (ζ·μ = 1)
-  - `ArithmeticFunction.LSeries_zeta_eq_riemannZeta` (L(ζ,s) = ζ(s))
-  - `ArithmeticFunction.LSeriesSummable_moebius_iff` (convergence)
-
-  ### Dependencies: Mathlib only.
+  * `moebius_lseries_eq_inv_zeta` : `L(μ, s) = 1/ζ(s)` for `Re(s) > 1`
+  * `moebius_lseries_summable` : absolute convergence for `Re(s) > 1`
+  * `summatoryMoebius_le` : `|M(x)| ≤ x` (trivial bound)
 -/
 
 import Mathlib.NumberTheory.LSeries.Dirichlet
@@ -25,14 +22,13 @@ open scoped LSeries.notation ArithmeticFunction.Moebius ArithmeticFunction.zeta
 namespace Cathedral.Zeta
 
 -- ═══════════════════════════════════════════
--- §1. L(μ, s) = 1/ζ(s) — PROVED ✅
+-- §1. L(μ, s) = 1/ζ(s)
 -- ═══════════════════════════════════════════
 
-/-- **PROVED**: The L-series of the Möbius function is the reciprocal of ζ(s).
+/-- The L-series of the Möbius function is the reciprocal of ζ(s).
 
-    This is the fundamental identity: ∑ μ(n)/n^s = 1/ζ(s) for Re(s) > 1.
-    Proof: Pure algebra from Mathlib's `LSeries_zeta_mul_Lseries_moebius`
-    and `LSeries_zeta_eq_riemannZeta`. -/
+    `∑ μ(n)/n^s = 1/ζ(s)` for `Re(s) > 1`.
+    From Mathlib's `LSeries_zeta_mul_Lseries_moebius`. -/
 theorem moebius_lseries_eq_inv_zeta {s : ℂ} (hs : 1 < s.re) :
     LSeries (↗μ) s = 1 / riemannZeta s := by
   have hζ_ne : riemannZeta s ≠ 0 := riemannZeta_ne_zero_of_one_lt_re hs
@@ -43,12 +39,12 @@ theorem moebius_lseries_eq_inv_zeta {s : ℂ} (hs : 1 < s.re) :
   rw [one_div]
   exact mul_left_cancel₀ hζ_ne (by rw [mul_inv_cancel₀ hζ_ne]; exact h_prod)
 
-/-- **PROVED**: The Möbius L-series converges absolutely for Re(s) > 1. -/
+/-- The Möbius L-series converges absolutely for `Re(s) > 1`. -/
 theorem moebius_lseries_summable {s : ℂ} (hs : 1 < s.re) :
     LSeriesSummable (↗μ) s :=
   LSeriesSummable_moebius_iff.mpr hs
 
-/-- **PROVED**: ζ(s) ≠ 0 for Re(s) > 1. -/
+/-- `ζ(s) ≠ 0` for `Re(s) > 1`. -/
 theorem zeta_ne_zero_of_re_gt_one {s : ℂ} (hs : 1 < s.re) :
     riemannZeta s ≠ 0 :=
   riemannZeta_ne_zero_of_one_lt_re hs
