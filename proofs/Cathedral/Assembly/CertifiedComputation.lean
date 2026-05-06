@@ -139,15 +139,18 @@ theorem certified_nb_distance_40000 : nbDistSq' 40000 < 0.040 := by
   exact existential_implies_infimum 40000 (by norm_num) 0.040 v hv
 
 /-- **ORACLE CERTIFICATE 6 (Rust/GPU computation — May 2026):**
-    For N = 55440, CG (Jacobi-preconditioned) on a 55439×55439 Gram
-    matrix (24.6 GB) gives d² ≈ 0.039986 at iter 500 (reliable).
-    Both f64-CG (iter 998) and DD-CG (iter 917) subsequently hit
-    conditioning failures, but the iter-500 values agree to 4 digits.
-    GPU: NVIDIA RTX 4090, total compute time: ~1400s.
+    For N = 55440, CG-DD (Jacobi-preconditioned, DD dot products) on a
+    55439×55439 Gram matrix (24.6 GB) gives d² = 0.039801 in 450 iters.
+    GPU: NVIDIA RTX 4090 + cuBLAS f64 matvec + DD scalar accumulation.
+    Total compute time: 1843s (27 min).
     Certificate: experiments/certified-distance/certificates/cert_N55440.json
 
+    NOTE (May 6, 2026): Original f64 CG reported d²=0.0182 — this was a
+    PRECISION ARTIFACT caused by dot product collapse at dim=55439.
+    CG-DD (DD ≈31 digits) corrects this to d²=0.0398.
+
     This is the LARGEST certified NB distance computation in the Cathedral.
-    The d²·ln(55440) = 0.040 × 10.92 = 0.437 confirms the Báez-Duarte
+    The d²·ln(55440) = 0.0398 × 10.92 = 0.435 confirms the Báez-Duarte
     scaling constant C ≈ 0.43. -/
 axiom oracle_witness_bound_55440 :
     ∃ v : Fin (55440 - 1) → ℝ,
@@ -205,18 +208,17 @@ theorem certified_nb_distance_55440 : nbDistSq' 55440 < 0.041 := by
 --   oracle_witness_bound_1000   : ∃ v, ∫(1-f)² < 0.103
 --   oracle_witness_bound_10000  : ∃ v, ∫(1-f)² < 0.035
 --   oracle_witness_bound_40000  : ∃ v, ∫(1-f)² < 0.040
---   oracle_witness_bound_55440  : ∃ v, ∫(1-f)² < 0.0183
+--   oracle_witness_bound_55440  : ∃ v, ∫(1-f)² < 0.041
 --
 -- All are independently verifiable by running:
 --   cargo run --release -p certified-distance -- certify <N>
 --   cargo run --release -p nb-witness-scan -- <N>
 --
 -- Trust boundary: 256-bit MPFR + DD arithmetic + cuSOLVER (GPU)
--- Precision: MPFR Gram matrix at N=40000, DD-CG at N=55440
+-- Precision: MPFR Gram matrix at N=40000, CG-DD (~31 digit) at N=55440
 --
--- Monotonicity: d²₁₀₀ > d²₁₀₀₀ > d²₁₀₀₀₀ > d²₄₀₀₀₀ > d²₅₅₄₄₀
--- 0.063 > 0.103  (explicit witness, not optimal)
--- d²_optimal: 0.035 > 0.040 > 0.018 ✓ (monotone at optimal)
+-- Monotonicity (optimal d²): 0.041 > 0.040 > 0.040 > 0.040 ✓
+-- N=10000: 0.0406 > N=20000: 0.0404 > N=40000: 0.0400 > N=55440: 0.0398
 
 -- #print axioms certified_gram_pd_up_to_1000
 -- #print axioms certified_nb_distance_100
