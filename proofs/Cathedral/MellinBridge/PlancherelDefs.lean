@@ -1,3 +1,10 @@
+import Cathedral.NymanBeurling.BDMellin
+import Mathlib.Analysis.SpecialFunctions.Pow.Complex
+import Mathlib.Analysis.Fourier.FourierTransform
+import Mathlib.Analysis.Fourier.LpSpace
+import Mathlib.MeasureTheory.Function.L2Space
+import Mathlib.Analysis.Distribution.TemperedDistribution
+
 /-!
   # Parseval Bridge: Definitions and Plancherel Infrastructure
 
@@ -20,12 +27,6 @@
   * `l2_fourier_eq_l1_fourier_ae` : L² Fourier =ᵃᵉ L¹ Fourier for `f ∈ L¹ ∩ L²`
 -/
 
-import Cathedral.NymanBeurling.BDMellin
-import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-import Mathlib.Analysis.Fourier.FourierTransform
-import Mathlib.Analysis.Fourier.LpSpace
-import Mathlib.MeasureTheory.Function.L2Space
-import Mathlib.Analysis.Distribution.TemperedDistribution
 
 set_option maxHeartbeats 400000
 

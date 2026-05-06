@@ -1,3 +1,7 @@
+import Cathedral.MellinBridge.PlancherelDefs
+import Mathlib.MeasureTheory.Integral.IntegralEqImproper
+import Mathlib.MeasureTheory.Function.JacobianOneDim
+
 /-!
   # Change of Variables for the Flattened Residual
 
@@ -17,9 +21,6 @@
   The Jacobian `|dx/du| = e^{-u}` is absorbed by the flattening factor.
 -/
 
-import Cathedral.MellinBridge.PlancherelDefs
-import Mathlib.MeasureTheory.Integral.IntegralEqImproper
-import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 noncomputable section
 open Real MeasureTheory Set Filter
