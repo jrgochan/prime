@@ -8,6 +8,7 @@
 //!
 //! RH ⟺ d²_N → 0 as N → ∞.
 
+use cathedral_utils::lanczos;
 use nalgebra::{DMatrix, DVector};
 
 /// Full result for a single N.
@@ -42,10 +43,34 @@ pub struct DistanceResult {
     pub b_vmin_proj: f64,
 }
 
+/// Dense matvec for Lanczos: out = mat · v.
+fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
+    for i in 0..dim {
+        let mut sum = 0.0f64;
+        let row_start = i * dim;
+        for j in 0..dim {
+            sum += mat[row_start + j] * v[j];
+        }
+        out[i] = sum;
+    }
+}
+
+/// Shifted matvec: out = (σI - A)·v.
+fn shifted_matvec(mat: &[f64], dim: usize, sigma: f64, v: &[f64], out: &mut [f64]) {
+    dense_matvec(mat, dim, v, out);
+    for i in 0..dim {
+        out[i] = sigma * v[i] - out[i];
+    }
+}
+
 /// Compute the unconstrained NB distance for a given N.
 ///
 /// Uses Cholesky decomposition (G is symmetric positive definite).
 /// Falls back to LU if Cholesky fails.
+///
+/// For spectral analysis (eigenvalues, delocalization):
+///   - dim ≤ 5000: full eigendecomposition (nalgebra)
+///   - dim > 5000: Lanczos with spectral shift for bottom-k eigenvalues
 pub fn compute_distance(
     gram_data: &[f64],
     dim: usize,
@@ -67,47 +92,97 @@ pub fn compute_distance(
     let projection = bv.dot(&coeffs_vec);
     let d2 = 1.0 - projection;
 
-    // Eigendecomposition for conditioning + delocalization
-    let eig = g.symmetric_eigen();
-    let eigenvalues = &eig.eigenvalues;
-    let lambda_min = eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-    let lambda_max = eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    let condition = if lambda_min > 1e-30 { lambda_max / lambda_min } else { f64::INFINITY };
-
-    // Find ground-state eigenvector (v_min)
-    let min_idx = eigenvalues.iter()
-        .enumerate()
-        .min_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-        .map(|(i, _)| i)
-        .unwrap_or(0);
-
-    let v_min = eig.eigenvectors.column(min_idx);
-
-    // Delocalization metrics
-    let vmin_linf = v_min.iter().cloned().fold(0.0f64, |acc, x| acc.max(x.abs()));
-    let delocalization_ratio = vmin_linf * (dim as f64).sqrt();
-    let v4_sum: f64 = v_min.iter().map(|x| x.powi(4)).sum();
-    let v2_sum: f64 = v_min.iter().map(|x| x.powi(2)).sum();
-    let ipr = if v2_sum > 0.0 { v4_sum / (v2_sum * v2_sum) } else { 1.0 };
-    let b_vmin_proj: f64 = bv.dot(&DVector::from_column_slice(v_min.as_slice())).abs();
-
     let coeffs: Vec<f64> = coeffs_vec.iter().cloned().collect();
     let coeff_energy: f64 = coeffs.iter().map(|c| c * c).sum();
     let coeff_mass: f64 = coeffs.iter().map(|c| c.abs()).sum();
 
-    DistanceResult {
-        n,
-        d2,
-        coeffs,
-        lambda_min,
-        lambda_max,
-        condition,
-        coeff_energy,
-        coeff_mass,
-        projection,
-        vmin_linf,
-        delocalization_ratio,
-        ipr,
-        b_vmin_proj,
+    // Spectral analysis: full eigendecomp for small N, Lanczos for large N
+    if dim <= 5000 {
+        // Full eigendecomposition
+        let eig = g.symmetric_eigen();
+        let eigenvalues = &eig.eigenvalues;
+        let lambda_min = eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+        let lambda_max = eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let condition = if lambda_min > 1e-30 { lambda_max / lambda_min } else { f64::INFINITY };
+
+        // Find ground-state eigenvector (v_min)
+        let min_idx = eigenvalues.iter()
+            .enumerate()
+            .min_by(|a, b| a.1.partial_cmp(b.1).unwrap())
+            .map(|(i, _)| i)
+            .unwrap_or(0);
+
+        let v_min = eig.eigenvectors.column(min_idx);
+
+        // Delocalization metrics
+        let vmin_linf = v_min.iter().cloned().fold(0.0f64, |acc, x| acc.max(x.abs()));
+        let delocalization_ratio = vmin_linf * (dim as f64).sqrt();
+        let v4_sum: f64 = v_min.iter().map(|x| x.powi(4)).sum();
+        let v2_sum: f64 = v_min.iter().map(|x| x.powi(2)).sum();
+        let ipr = if v2_sum > 0.0 { v4_sum / (v2_sum * v2_sum) } else { 1.0 };
+        let b_vmin_proj: f64 = bv.dot(&DVector::from_column_slice(v_min.as_slice())).abs();
+
+        DistanceResult {
+            n, d2, coeffs, lambda_min, lambda_max, condition,
+            coeff_energy, coeff_mass, projection,
+            vmin_linf, delocalization_ratio, ipr, b_vmin_proj,
+        }
+    } else {
+        // Lanczos for large matrices: extract bottom-k eigenvalues + eigenvectors
+        eprintln!("  → Lanczos spectral analysis (dim={} > 5000)", dim);
+        let k = 20; // bottom eigenvalues
+        let m = (15 * k).min(dim);
+
+        // Estimate spectral shift σ from trace
+        let trace: f64 = (0..dim).map(|i| gram_data[i * dim + i]).sum();
+        let sigma = trace * 1.1;
+
+        // Run shifted Lanczos
+        let (tri, basis) = lanczos::lanczos_tridiag(
+            &|v: &[f64], out: &mut [f64]| shifted_matvec(gram_data, dim, sigma, v, out),
+            dim, m, None,
+        );
+        let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);
+
+        // Top-k of (σI-G) = bottom-k of G
+        let n_ritz = ritz_values.len();
+        let top_start = n_ritz.saturating_sub(k);
+        let mut eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+            .map(|&lam| sigma - lam)
+            .collect();
+        eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        let lambda_min = eigenvalues[0];
+        // λ_max estimate from bottom of shifted spectrum
+        let lambda_max_est = sigma - ritz_values[0];
+        let condition = if lambda_min > 1e-30 { lambda_max_est / lambda_min } else { f64::INFINITY };
+
+        // Reconstruct ground-state eigenvector for delocalization metrics
+        let min_shifted_idx = n_ritz - 1; // largest of shifted = smallest of original
+        let rv = &ritz_vectors[min_shifted_idx];
+        let rv_len = rv.len().min(basis.len());
+        let mut v_min = vec![0.0f64; dim];
+        for j in 0..rv_len {
+            for ii in 0..dim {
+                v_min[ii] += rv[j] * basis[j][ii];
+            }
+        }
+        let norm: f64 = v_min.iter().map(|x| x * x).sum::<f64>().sqrt();
+        if norm > 1e-15 {
+            for x in &mut v_min { *x /= norm; }
+        }
+
+        let vmin_linf = v_min.iter().fold(0.0f64, |acc, &x| acc.max(x.abs()));
+        let delocalization_ratio = vmin_linf * (dim as f64).sqrt();
+        let v4_sum: f64 = v_min.iter().map(|x| x.powi(4)).sum();
+        let v2_sum: f64 = v_min.iter().map(|x| x.powi(2)).sum();
+        let ipr = if v2_sum > 0.0 { v4_sum / (v2_sum * v2_sum) } else { 1.0 };
+        let b_vmin_proj: f64 = b.iter().zip(v_min.iter()).map(|(bi, vi)| bi * vi).sum::<f64>().abs();
+
+        DistanceResult {
+            n, d2, coeffs, lambda_min, lambda_max: lambda_max_est, condition,
+            coeff_energy, coeff_mass, projection,
+            vmin_linf, delocalization_ratio, ipr, b_vmin_proj,
+        }
     }
 }

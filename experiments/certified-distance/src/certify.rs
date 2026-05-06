@@ -8,7 +8,7 @@
 //! 5. Verifies monotonicity against previous certificates
 //! 6. Writes an independently verifiable JSON certificate
 
-use cathedral_utils::{arith, gram, cache, ooc, dd::DD};
+use cathedral_utils::{arith, gram, cache, lanczos, ooc, dd::DD};
 #[cfg(feature = "gpu")]
 use cathedral_utils::gpu;
 use rayon::prelude::*;
@@ -443,6 +443,22 @@ fn cpu_lu_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) 
     }
 }
 
+/// CG coefficients collected during the solve, for the CG→Lanczos bridge.
+///
+/// The CG–Lanczos connection (Paige 1971): the CG coefficients (α_k, β_k)
+/// encode a tridiagonal matrix whose eigenvalues approximate those of G.
+/// This gives us spectral information for FREE from every d² computation.
+pub struct CgCoefficients {
+    pub cg_alphas: Vec<f64>,
+    pub cg_betas: Vec<f64>,
+    pub iterations: usize,
+    pub converged: bool,
+}
+
+/// Thread-local storage for the most recent CG coefficients.
+/// Allows compute_spectrum to extract Lanczos data after CG completes.
+static CG_COEFFICIENTS: std::sync::Mutex<Option<CgCoefficients>> = std::sync::Mutex::new(None);
+
 /// Mixed-Precision Conjugate Gradient solver.
 ///
 /// KEY INSIGHT: The f64 CG fails at large N because dot products of ~55k terms
@@ -454,6 +470,9 @@ fn cpu_lu_d_sq(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) 
 ///
 /// This gives us f64 speed with DD robustness.
 /// Expected: works cleanly to N=120,000+ without the "non-positive p^T Ap" failure.
+///
+/// NEW (v16): Also collects CG α_k and β_k coefficients for the CG→Lanczos
+/// bridge, enabling free eigenvalue estimation from every d² run.
 fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, u32) {
     let t = Instant::now();
 
@@ -484,6 +503,11 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
     let mut stagnation_count = 0;
     let mut prev_r_norm = f64::MAX;
 
+    // CG→Lanczos coefficient collection
+    let mut cg_alphas: Vec<f64> = Vec::with_capacity(max_iter.min(2000));
+    let mut cg_betas: Vec<f64> = Vec::with_capacity(max_iter.min(2000));
+    cg_betas.push(0.0); // β_0 = 0 by convention
+
     for iter in 0..max_iter {
         // ap = G p  (parallel f64 matvec — the dominant cost, stays f64)
         matvec_parallel(gram, &p, &mut ap, dim);
@@ -499,6 +523,9 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
 
         let alpha = rz / pap;
         let alpha_f64 = alpha.to_f64();
+
+        // Save CG α coefficient for Lanczos bridge
+        cg_alphas.push(alpha_f64);
 
         // x += alpha * p; r -= alpha * ap  (parallel, f64 storage)
         x.par_iter_mut().zip(p.par_iter())
@@ -558,6 +585,9 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
         let beta_f64 = beta.to_f64();
         rz = rz_new;
 
+        // Save CG β coefficient for Lanczos bridge
+        cg_betas.push(beta_f64);
+
         // p = z + beta * p (parallel)
         p.par_iter_mut().zip(z.par_iter())
             .for_each(|(pi, zi)| *pi = zi + beta_f64 * *pi);
@@ -568,6 +598,16 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
     if !converged {
         eprintln!();
         eprintln!("  ⚠ CG-DD did not fully converge in {} iterations", max_iter);
+    }
+
+    // Store CG coefficients for the Lanczos bridge
+    if let Ok(mut guard) = CG_COEFFICIENTS.lock() {
+        *guard = Some(CgCoefficients {
+            cg_alphas,
+            cg_betas,
+            iterations: final_iter + 1,
+            converged,
+        });
     }
 
     // Final d² with DD-precision dot product
@@ -823,12 +863,6 @@ fn compute_cross_check(
 fn compute_spectrum(gram: &[f64], dim: usize) -> Option<SpectrumResult> {
     let t = Instant::now();
 
-    // For large matrices, skip spectral analysis (too expensive)
-    if dim > 25000 {
-        eprintln!("  ⚠ Spectral analysis skipped (dim={} > 25000)", dim);
-        return None;
-    }
-
     // Try GPU eigenvalues
     #[cfg(feature = "gpu")]
     if gpu::detect().is_some() {
@@ -850,7 +884,7 @@ fn compute_spectrum(gram: &[f64], dim: usize) -> Option<SpectrumResult> {
         }
     }
 
-    // CPU fallback for small matrices
+    // CPU full eigendecomposition for small matrices
     if dim <= 5000 {
         use nalgebra::DMatrix;
         let mat = DMatrix::from_row_slice(dim, dim, gram);
@@ -869,6 +903,34 @@ fn compute_spectrum(gram: &[f64], dim: usize) -> Option<SpectrumResult> {
         });
     }
 
+    // ── CG→Lanczos bridge for large matrices ──
+    // Extract eigenvalue estimates from the CG coefficients collected during d² computation.
+    // This is FREE — no extra matvecs needed.
+    if let Ok(guard) = CG_COEFFICIENTS.lock() {
+        if let Some(ref coeffs) = *guard {
+            if coeffs.cg_alphas.len() >= 10 {
+                eprintln!("  → CG→Lanczos bridge: extracting spectrum from {} CG iterations", coeffs.iterations);
+                let tri = lanczos::cg_to_lanczos(&coeffs.cg_alphas, &coeffs.cg_betas);
+                let (eigenvalues, _) = lanczos::tridiag_eigen(&tri);
+
+                if !eigenvalues.is_empty() {
+                    let lambda_min = eigenvalues[0];
+                    let lambda_max = *eigenvalues.last().unwrap();
+                    eprintln!("  ✓ CG→Lanczos: {} Ritz values, λ_min≈{:.6e}, λ_max≈{:.6e}",
+                        eigenvalues.len(), lambda_min, lambda_max);
+                    return Some(SpectrumResult {
+                        lambda_min,
+                        lambda_min_positive: lambda_min > 0.0,
+                        lambda_max,
+                        condition_number: if lambda_min > 0.0 { lambda_max / lambda_min } else { f64::INFINITY },
+                        compute_time_secs: t.elapsed().as_secs_f64(),
+                    });
+                }
+            }
+        }
+    }
+
+    eprintln!("  ⚠ Spectral analysis: no method available for dim={}", dim);
     None
 }
 
