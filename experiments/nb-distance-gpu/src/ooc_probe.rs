@@ -17,6 +17,7 @@ mod gpu;
 
 use cathedral_utils::gram;
 use cathedral_utils::arith;
+use cathedral_utils::dd::DD;
 use rayon::prelude::*;
 use std::io::{Read, Write, Seek, SeekFrom, BufWriter};
 use std::path::{Path, PathBuf};
@@ -432,9 +433,12 @@ fn cpu_matvec(gram: &MmapGram, x: &[f64], y: &mut [f64]) {
 /// Reduces effective condition number by 10-100×, dramatically cutting
 /// the iteration count needed for convergence.
 ///
-/// Performance at N=20K:
-///   - Unpreconditioned: residual ~1e-4 after 200 iters (0.32s/iter)
-///   - Jacobi PCG:       residual ~1e-10 in ~50-100 iters (0.32s/iter)
+/// KEY FIX (v2): DD-precision dot products for critical scalars.
+/// At N=120k, summing 120k terms in f64 loses ~5 digits, causing:
+///   - False pAp ≤ 0 (CG breakdown)
+///   - Slow/stalled convergence
+/// DD accumulation (~31 digits) eliminates this. The matvec stays
+/// f64 (GPU cuBLAS) since that's the hot path and f64 suffices there.
 fn ooc_cg_solve(
     gram_path: &Path,
     b: &[f64],
@@ -445,7 +449,8 @@ fn ooc_cg_solve(
     let chunk_rows = 4096; // rows per GPU upload
 
     println!("  ╔═══════════════════════════════════════════════════════════════╗");
-    println!("  ║  🎯 JACOBI-PRECONDITIONED CG SOLVER (mmap + GPU)            ║");
+    println!("  ║  🎯 JACOBI-PRECONDITIONED CG-DD SOLVER (mmap + GPU)         ║");
+    println!("  ║  DD-precision dot products · f64 GPU matvec                  ║");
     println!("  ╚═══════════════════════════════════════════════════════════════╝");
     println!("  dim = {dim}");
     println!("  tol = {tol:.2e}, max_iter = {max_iter}");
@@ -510,8 +515,9 @@ fn ooc_cg_solve(
     let mut z = vec![0.0f64; dim]; // preconditioned residual
     for i in 0..dim { z[i] = m_inv[i] * r[i]; }
     let mut p = z.clone();
-    let mut rz = dot(&r, &z); // r^T z (preconditioned inner product)
-    let b_norm = dot(&r, &r).sqrt();
+    let mut rz = dot_dd(&r, &z); // DD-precision r^T z
+    let b_norm_sq = dot_dd(b, b);
+    let b_norm = b_norm_sq.to_f64().sqrt();
 
     println!();
     println!("  ‖b‖ = {b_norm:.8e}");
@@ -521,35 +527,43 @@ fn ooc_cg_solve(
 
     let mut prev_d2 = 1.0f64;
     let mut y = vec![0.0f64; dim];
+    let mut stagnation_count = 0usize;
+    let mut prev_r_norm = f64::MAX;
 
     for iter in 0..max_iter {
         let t_iter = Instant::now();
 
-        // y = G · p (GPU-accelerated)
+        // y = G · p (GPU-accelerated, f64 — this is the hot path)
         match &gpu_state {
             Some(gs) => gpu_matvec(&gram, gs, &p, &mut y),
             None => cpu_matvec(&gram, &p, &mut y),
         }
 
-        let pap = dot(&p, &y);
-        if pap <= 0.0 {
-            eprintln!("  ⚠ pAp ≤ 0 at iter {iter}, matrix may not be positive definite");
+        // DD-precision pAp — prevents false non-PD detection
+        let pap = dot_dd(&p, &y);
+        if pap.hi <= 0.0 && pap.lo <= 0.0 {
+            eprintln!("  ⚠ pAp ≤ 0 at iter {iter} (DD: {:.6e}+{:.6e}), matrix not PD",
+                pap.hi, pap.lo);
             break;
         }
 
         let alpha = rz / pap;
+        let alpha_f64 = alpha.to_f64();
 
         // x += alpha * p; r -= alpha * y
-        for i in 0..dim { x[i] += alpha * p[i]; }
-        for i in 0..dim { r[i] -= alpha * y[i]; }
+        for i in 0..dim { x[i] += alpha_f64 * p[i]; }
+        for i in 0..dim { r[i] -= alpha_f64 * y[i]; }
 
         // Apply preconditioner: z = M^{-1} r
         for i in 0..dim { z[i] = m_inv[i] * r[i]; }
 
-        let rz_new = dot(&r, &z);
-        let residual = dot(&r, &r).sqrt() / b_norm; // true relative residual
+        let rz_new = dot_dd(&r, &z);
+        let r_norm_sq = dot_dd(&r, &r);
+        let r_norm = r_norm_sq.to_f64().sqrt();
+        let residual = r_norm / b_norm;
 
-        let d2_est = 1.0 - dot(b, &x);
+        let bx = dot_dd(b, &x);
+        let d2_est = 1.0 - bx.to_f64();
         let d2_delta = (d2_est - prev_d2).abs();
         prev_d2 = d2_est;
 
@@ -568,13 +582,37 @@ fn ooc_cg_solve(
             break;
         }
 
+        // Stagnation detection with residual recomputation
+        if r_norm >= prev_r_norm * 0.9999 {
+            stagnation_count += 1;
+            if stagnation_count >= 50 && stagnation_count % 100 == 0 {
+                // Recompute residual from scratch: r = b - Gx
+                match &gpu_state {
+                    Some(gs) => gpu_matvec(&gram, gs, &x, &mut y),
+                    None => cpu_matvec(&gram, &x, &mut y),
+                }
+                for i in 0..dim { r[i] = b[i] - y[i]; }
+                for i in 0..dim { z[i] = m_inv[i] * r[i]; }
+                rz = dot_dd(&r, &z);
+                p = z.clone();
+                eprintln!("  ↻ Residual refresh at iter {iter}, ‖r‖={:.3e}", r_norm);
+                prev_r_norm = r_norm;
+                continue;
+            }
+        } else {
+            stagnation_count = 0;
+        }
+        prev_r_norm = r_norm;
+
         // Update search direction (preconditioned)
         let beta = rz_new / rz;
-        for i in 0..dim { p[i] = z[i] + beta * p[i]; }
+        let beta_f64 = beta.to_f64();
+        for i in 0..dim { p[i] = z[i] + beta_f64 * p[i]; }
         rz = rz_new;
     }
 
-    let d2 = 1.0 - dot(b, &x);
+    let bx = dot_dd(b, &x);
+    let d2 = 1.0 - bx.to_f64();
     let total_time = t_total.elapsed().as_secs_f64();
 
     println!();
@@ -586,7 +624,41 @@ fn ooc_cg_solve(
     d2
 }
 
+/// DD-precision dot product for CG scalars.
+///
+/// For N=120k: summing 120k terms in f64 loses ~5 digits.
+/// DD accumulation (~31 digits) prevents CG breakdown.
+/// Overhead is ~1-2% since matvec (99% of cost) stays f64.
 #[inline]
+fn dot_dd(a: &[f64], b: &[f64]) -> DD {
+    const CHUNK: usize = 1024;
+    let n = a.len();
+    let n_chunks = (n + CHUNK - 1) / CHUNK;
+
+    let partials: Vec<DD> = (0..n_chunks).into_par_iter()
+        .map(|c| {
+            let start = c * CHUNK;
+            let end = (start + CHUNK).min(n);
+            let mut acc = DD::from_f64(0.0);
+            for i in start..end {
+                let p = a[i] * b[i];
+                let e = a[i].mul_add(b[i], -p);
+                acc += DD::new(p, e);
+            }
+            acc
+        })
+        .collect();
+
+    let mut total = DD::from_f64(0.0);
+    for p in &partials {
+        total += *p;
+    }
+    total
+}
+
+/// Legacy f64 dot product — only used where DD precision isn't needed.
+#[inline]
+#[allow(dead_code)]
 fn dot(a: &[f64], b: &[f64]) -> f64 {
     a.iter().zip(b.iter()).map(|(x, y)| x * y).sum()
 }
@@ -608,7 +680,7 @@ fn write_certificate(max_n: usize, dim: usize, d2: f64, max_iter: usize, tol: f6
   "tol": {:.2e},
   "elapsed_seconds": {:.1},
   "matrix_gb": {:.2},
-  "method": "Jacobi-Preconditioned CG (mmap + GPU cuBLAS)",
+  "method": "Jacobi-Preconditioned CG-DD (mmap + GPU cuBLAS, DD dot products)",
   "cache_path": "{}",
   "rh_consistent": {}
 }}"#,
