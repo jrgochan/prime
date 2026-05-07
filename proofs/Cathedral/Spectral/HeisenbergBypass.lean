@@ -1,5 +1,7 @@
 import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
+import Cathedral.Gram.L2Bridge
+import Cathedral.NymanBeurling.QuadFormBridge
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.Order.Basic
 
@@ -181,21 +183,51 @@ axiom infrared_safety (τ : ℕ → ℝ) (hτ : Tendsto τ atTop (𝓝 0)) :
 --
 -- Then: total = IR + UV, IR → 0 ⟹ UV → 1.
 
-/-- **Axiom: d²_N ≥ 0** (The Nyman-Beurling distance is nonneg).
+/-- **THEOREM: d²_N ≥ 0** (The Nyman-Beurling distance is nonneg).
 
-    This is true because d²_N = inf_{f ∈ span} ‖1 - f‖²_{L²(0,1)} ≥ 0,
-    i.e., it's the infimum of squared L² norms, which are always nonneg.
+    FORMERLY AN AXIOM — now fully proved.
 
-    Algebraically: d² = 1 - bᵀG⁻¹b, and the Schur complement argument
-    (augmented Gram matrix H_N PD) proves bᵀG⁻¹b < 1, hence d² > 0.
+    Proof: From l2_error_eq_quad_error (L2Bridge.lean):
+      ∫₀¹ (1 - nbLinComb N w x)² = 1 - 2·bᵀw + wᵀGw
 
-    This is proved in Cathedral.Vasyunin.Augmented.AugmentedGram
-    (nbDistSq_pos_from_augmented) for the Vasyunin basis. Bridging
-    to the HF basis (gramMatrix) requires the integral identity
-    gramEntry = vasyuninGramEntry, which is a future graduation target.
+    Since the LHS is ∫(something)² ≥ 0, we get:
+      1 - 2·bᵀw + wᵀGw ≥ 0  for ALL w.
 
-    Graduation path: import AugmentedGram + bridge identity. -/
-axiom nbDistSq_nonneg (N : ℕ) (hN : 2 ≤ N) : 0 ≤ nbDistSq' N
+    Setting w = G⁻¹b (the optimal vector):
+      bᵀw = bᵀG⁻¹b,  wᵀGw = bᵀG⁻¹GG⁻¹b = bᵀG⁻¹b
+    So: 1 - 2·bᵀG⁻¹b + bᵀG⁻¹b = 1 - bᵀG⁻¹b = nbDistSq' N ≥ 0.
+
+    This is the L² norm argument: d² = ‖1 - f_opt‖² ≥ 0. -/
+theorem nbDistSq_nonneg (N : ℕ) (hN : 2 ≤ N) : 0 ≤ nbDistSq' N := by
+  -- The L² error identity: ∫(1-f)² = 1 - 2bᵀw + wᵀGw
+  set c := (gramMatrix N)⁻¹.mulVec (basisInnerProd N)
+  have h_l2 := l2_error_eq_quad_error N hN c
+  -- LHS ≥ 0 since it's ∫(something)²
+  have h_nn : 0 ≤ ∫ x in (0:ℝ)..1, (1 - nbLinComb N c x) ^ 2 :=
+    intervalIntegral.integral_nonneg (by linarith : (0:ℝ) ≤ 1)
+      (fun x _ => sq_nonneg _)
+  -- Rewrite the RHS to nbDistSq' N
+  have h_unit : IsUnit (gramMatrix N).det := gramMatrix_isUnit_det N hN
+  have h_Gc : (gramMatrix N).mulVec c = basisInnerProd N := by
+    simp [c, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  -- bᵀc = bᵀG⁻¹b
+  have h_bc : dotProduct (basisInnerProd N) c =
+      dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) := rfl
+  -- cᵀGc = bᵀG⁻¹b (since Gc = b, so cᵀGc = cᵀb = bᵀc = bᵀG⁻¹b)
+  have h_qf : realQuadForm (gramMatrix N) c =
+      dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) := by
+    unfold realQuadForm
+    rw [h_Gc]
+    -- Goal: c ⬝ᵥ b = b ⬝ᵥ G⁻¹b. LHS = (G⁻¹b) ⬝ᵥ b and RHS = b ⬝ᵥ (G⁻¹b)
+    exact dotProduct_comm c (basisInnerProd N)
+  -- Combine: ∫(1-f)² = 1 - 2(bᵀG⁻¹b) + (bᵀG⁻¹b) = 1 - bᵀG⁻¹b = nbDistSq'
+  rw [h_bc, h_qf] at h_l2
+  -- h_l2: ∫... = 1 - 2·(bᵀG⁻¹b) + bᵀG⁻¹b = 1 - bᵀG⁻¹b
+  have h_simp : 1 - 2 * dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) +
+      dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) =
+      nbDistSq' N := by
+    unfold nbDistSq'; ring
+  linarith
 
 /-- **Spectral Energy Upper Bound**: totalSpectralEnergy N ≤ 1 for N ≥ 2.
 
