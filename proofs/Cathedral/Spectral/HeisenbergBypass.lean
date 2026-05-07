@@ -369,25 +369,24 @@ end
 -- ════════════════════════════════════════════════════════════
 --
 -- #print axioms heisenberg_implies_d_sq_zero
---   → [nbDistSq_nonneg, spectral_identity,
---      spectral_energy_witness_lower,
+--   → [spectral_identity, spectral_energy_witness_lower,
 --      propext, Classical.choice, Quot.sound]
 --
--- 3 custom axioms (spectral_energy_le_one is now a THEOREM):
+-- 2 custom axioms remain:
 --   1. spectral_identity: d² = 1 - Σ c_k²/λ_k (provable from Mathlib)
---   2. nbDistSq_nonneg: d² ≥ 0 (provable: L² norm is nonneg,
---      or from AugmentedGram.nbDistSq_pos_from_augmented + basis bridge)
---   3. spectral_energy_witness_lower: Σ c_k²/λ_k ≥ 1 - C/ln N
+--   2. spectral_energy_witness_lower: Σ c_k²/λ_k ≥ 1 - C/ln N
 --      (provable: from nbDistSq_le_test_vector + bd_witness_l2_error_decay)
 --
--- GRADUATED this session:
---   - spectral_energy_le_one: axiom → theorem (via spectral_identity + nbDistSq_nonneg)
---   - ultraviolet_completeness: axiom → theorem (via Rayleigh-Ritz squeeze)
+-- GRADUATED (this session):
+--   - nbDistSq_nonneg: axiom → THEOREM (L² norm ≥ 0, via l2_error_eq_quad_error)
+--   - spectral_energy_le_one: axiom → THEOREM (d² ≥ 0 + spectral_identity)
+--   - ultraviolet_completeness: axiom → THEOREM (Rayleigh-Ritz squeeze)
 --
 -- infrared_safety is NOT used by heisenberg_implies_d_sq_zero!
 -- It is only used by ultraviolet_completeness (which is now a theorem).
 
 #print axioms heisenberg_implies_d_sq_zero
+#print axioms nbDistSq_nonneg
 #print axioms spectral_energy_le_one
 #print axioms ultraviolet_completeness
 
