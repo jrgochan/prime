@@ -4,11 +4,9 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
--- PrimeNumberTheoremAnd: disabled for Mathlib v4.29 compatibility
--- PNTAnd is pinned to Lean 4.28.0; Fourier.lean breaks on v4.29 (integral_const_mul API)
--- When PNTAnd updates to v4.29+, re-enable to graduate pnt_mu_div_k axiom
--- require PrimeNumberTheoremAnd from git
---   "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
+-- PrimeNumberTheoremAnd: local clone with v4.29 fixes (Fourier.lean simp fix)
+-- Cloned from github.com/AlexKontorovich/PrimeNumberTheoremAnd, patched in-tree
+require PrimeNumberTheoremAnd from "./deps/PrimeNumberTheoremAnd"
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git" @ "v4.29.0"
@@ -73,6 +71,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.LambdaTrick,
     -- Witness numerator graduation (axiom → theorem via PNT, May 2026)
     `Cathedral.Vasyunin.Proof.WitnessNumeratorProved,
+    -- Witness numerator RATE graduation (Axiom B → theorem, Exploration 29)
+    `Cathedral.Vasyunin.Proof.WitnessNumeratorRate,
     `Cathedral.Vasyunin.Proof.WitnessAsymptotics,
     `Cathedral.Vasyunin.Proof.WitnessConditional,
     `Cathedral.Vasyunin.Proof.GramBoundReduction,
@@ -159,8 +159,8 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
-    -- PNT bridge (disabled: PNTAnd pinned to Lean 4.28, needs Fourier.lean fix)
-    -- `Cathedral.PNT.Bridge,
+    -- PNT bridge (re-enabled via local PNTAnd clone with v4.29 fix)
+    `Cathedral.PNT.Bridge,
     -- Mertens graduation (axiom → theorem via Perron)
     `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
@@ -174,6 +174,8 @@ lean_lib «Cathedral» where
     -- Gram form graduation (axiom → theorem via split-region L²)
     `Cathedral.Covariance.CovarianceBound,
     `Cathedral.Covariance.GramFormProof,
+    -- Euler product decomposition (Robin Resonance, Exploration 29)
+    `Cathedral.Covariance.EulerProduct,
     `Cathedral.Covariance.Direct,
     `Cathedral.Covariance.DotProductBound,
     -- White Singlet (physics-motivated axiom elimination)
@@ -236,8 +238,8 @@ lean_lib «Cathedral» where
     `Cathedral.IntegralBasis.BaezDuarte,
     `Cathedral.IntegralBasis.Quantitative,
     `Cathedral.Analysis.IntervalCalc,
-    -- PNT LogBridge (Dirichlet convolution identity, 1 sorry, needs PNTAnd)
-    -- `Cathedral.PNT.LogBridge,
+    -- PNT LogBridge (Dirichlet convolution identity, 1 sorry)
+    `Cathedral.PNT.LogBridge,
     -- Number theory (Dirichlet convolution identities, Exploration 13)
     `Cathedral.NumberTheory.DirichletConvolution,
     -- Covariance Abel engine (Exploration 13)
