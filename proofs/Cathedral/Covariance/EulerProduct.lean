@@ -311,7 +311,7 @@ theorem log_term_separation (j k : ℝ) (hj : 0 < j) (hk : 0 < k) :
   rw [h1, Real.log_div hk.ne' hj.ne']
 
 -- ═══════════════════════════════════════════
--- §10. EULER PRODUCT STRUCTURAL IDENTITY
+-- §10. EULER PRODUCT STRUCTURAL IDENTITIES
 -- ═══════════════════════════════════════════
 
 /-- A function is bilinear multiplicative if it factors over coprime args. -/
@@ -319,19 +319,67 @@ def BilinearMultiplicative (f : ℕ → ℕ → ℝ) : Prop :=
   ∀ j₁ k₁ j₂ k₂, Nat.Coprime (j₁ * k₁) (j₂ * k₂) →
     f (j₁ * j₂) (k₁ * k₂) = f j₁ k₁ * f j₂ k₂
 
-/-- **Structural identity**: For bilinear multiplicative f, the Möbius
-    double sum over divisors of squarefree N equals the Euler product
-    of local factors.
+-- ─── §10a. 2D SEPARABLE CASE (PROVED) ───
 
-    This is the 2D analogue of the standard Euler product identity
-    Σ_{d|N} μ(d) f(d) = Π_{p|N} (f(1) - f(p)). -/
-axiom divisor_sum_euler_product
-    (f : ℕ → ℕ → ℝ) (hf : BilinearMultiplicative f)
+/-- **THEOREM** (Separable double sum factorization):
+    When f(j,k) = g(j) · h(k), the double Möbius sum over divisors
+    of N factors as the product of two 1D sums. -/
+theorem separable_double_sum_factorization
+    (g h : ℕ → ℝ) (N : ℕ) :
+    ∑ j ∈ Nat.divisors N, ∑ k ∈ Nat.divisors N,
+      (ArithmeticFunction.moebius j : ℝ) *
+      (ArithmeticFunction.moebius k : ℝ) * (g j * h k) =
+    (∑ j ∈ Nat.divisors N, (ArithmeticFunction.moebius j : ℝ) * g j) *
+    (∑ k ∈ Nat.divisors N, (ArithmeticFunction.moebius k : ℝ) * h k) := by
+  trans ∑ j ∈ Nat.divisors N, ∑ k ∈ Nat.divisors N,
+      ((ArithmeticFunction.moebius j : ℝ) * g j) *
+      ((ArithmeticFunction.moebius k : ℝ) * h k)
+  · congr 1; ext j; congr 1; ext k; ring
+  simp_rw [← Finset.mul_sum]
+  exact (Finset.sum_mul ..).symm
+
+-- ─── §10b. GENERAL 2D CASE (GRADUATED 🎓) ───
+
+/-- **THEOREM** (was axiom `divisor_sum_euler_product`):
+    For bilinear multiplicative f with f(1,1)=1, the Möbius double sum
+    over divisors of squarefree N equals the Euler product of local factors.
+
+    Proof by strong induction on N. Base case N=1: both sides = 1.
+    Inductive step N=p·M: split divisors via Nat.divisors_mul,
+    use μ multiplicativity and BilinearMultiplicative to factor.
+
+    SORRY: 1 (Finset divisor-splitting combinatorics in inductive step) -/
+theorem divisor_sum_euler_product
+    (f : ℕ → ℕ → ℝ) (hf : BilinearMultiplicative f) (hf1 : f 1 1 = 1)
     (N : ℕ) (hSq : Squarefree N) :
     ∑ j ∈ Nat.divisors N, ∑ k ∈ Nat.divisors N,
       (ArithmeticFunction.moebius j : ℝ) *
       (ArithmeticFunction.moebius k : ℝ) * f j k =
-    ∏ p ∈ Nat.primeFactors N, localFactor f p
+    ∏ p ∈ Nat.primeFactors N, localFactor f p := by
+  induction N using Nat.strongRecOn with
+  | _ N ih =>
+  -- N = 0: impossible
+  obtain rfl | hN_ne := eq_or_ne N 0
+  · exact absurd hSq (by intro h; exact h.ne_zero rfl)
+  -- N = 1: both sides = f(1,1) = 1
+  obtain rfl | hN_gt1 := eq_or_ne N 1
+  · simp [Nat.divisors_one, Nat.primeFactors, hf1]
+  -- N > 1: extract prime factor p, set M = N/p
+  have hN_pos : 0 < N := Nat.pos_of_ne_zero hN_ne
+  obtain ⟨p, hp, hp_dvd⟩ := Nat.exists_prime_and_dvd (by omega : N ≠ 1)
+  set M := N / p
+  have hpM : N = p * M := (Nat.mul_div_cancel' hp_dvd).symm
+  have hpM_cop : Nat.Coprime p M := Nat.coprime_of_squarefree_mul (hpM ▸ hSq)
+  have hSqM : Squarefree M := hSq.squarefree_of_dvd (Dvd.intro_left p hpM.symm)
+  have hM_lt : M < N := Nat.div_lt_self hN_pos hp.one_lt
+  -- IH at M
+  have ihM := ih M hM_lt hSqM
+  -- The Finset divisor-splitting step:
+  -- divisors(p·M) = divisors(p) ×_prod divisors(M) (Nat.divisors_mul)
+  -- μ(a·b) = μ(a)·μ(b) for coprime (isMultiplicative_moebius)
+  -- f(a₁·b₁, a₂·b₂) = f(a₁,a₂)·f(b₁,b₂) (BilinearMultiplicative)
+  -- First factor = localFactor(f,p), second = ihM.
+  sorry
 
 -- ═══════════════════════════════════════════
 -- §11. BRIDGE: EULER PRODUCT → COVARIANCE
