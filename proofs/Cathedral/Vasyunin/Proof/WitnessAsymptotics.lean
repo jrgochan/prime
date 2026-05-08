@@ -2,15 +2,17 @@
   Cathedral/Vasyunin/Proof/WitnessAsymptotics.lean
 
   Decomposition of the log_cutoff_witness_bound axiom into:
-  1. witness_numerator_convergence: bᵀv → 1 (from PNT)
+  1. witness_numerator_convergence: bᵀv → 1 (from PNT) — GRADUATED 🎓
   2. witness_covariance_decay: vᵀCv ≤ C/ln(N) (the RH content)
 
   Combined: Q = (bᵀv)²/vᵀCv ≥ (1/4)/(C/ln N) = ln(N)/(4C)
 
-  Status: Zero sorry. Two axioms (one PNT-level, one RH-level).
+  Status: Zero sorry. One axiom (RH-level only).
+         witness_numerator_convergence proved from PNT (May 7, 2026).
 -/
 
 import Cathedral.Vasyunin.Augmented.Rayleigh
+import Cathedral.Vasyunin.Proof.WitnessNumeratorProved
 
 noncomputable section
 open Real Matrix Finset
@@ -21,30 +23,24 @@ namespace Cathedral.Vasyunin
 -- THE NUMERATOR: bᵀv → 1
 -- ════════════════════════════════════════════════
 
-/-- **The Witness Numerator Convergence (PNT consequence).**
+/-- **THEOREM** (GRADUATED 🎓 — was axiom, now proved from PNT).
 
     The dot product of the mean vector with the log-cutoff witness
     converges to 1 as N → ∞:
 
       bᵀv = Σ_k b_k · v_k → 1
 
-    Proof sketch (pure PNT — no RH needed):
-      bᵀv = -Σ_k [(ln(k) + 1 - γ)/k] · μ(k) · (1 - ln(k)/ln(N))
-          = -(1-γ) · Σ μ(k)/k · (1-ln(k)/ln(N))
-            - Σ μ(k)·ln(k)/k · (1-ln(k)/ln(N))
+    Proved in WitnessNumeratorProved.lean via:
+    1. Dot-product expansion: bᵀv = -((1-γ)·S₁) - S₂ + [(1-γ)·S₂ + S₃]/logN
+    2. Error shift: bᵀv - 1 = -(1-γ)·S₁ - (S₂+1) + [(1-γ)·(S₂+1) + (S₃+2γ) - (1+γ)]/logN
+    3. PNT limits: S₁→0, S₂+1→0, S₃+2γ→0
+    4. Conclusion: bᵀv - 1 → 0
 
-    By PNT (Mertens form): Σ μ(k)/k → 0 and Σ μ(k)·ln(k)/k → -1.
-    With the Bartlett taper: first sum → 0, second sum → -1.
-    Therefore bᵀv → -(1-γ)·0 - (-1) = 1.
-
-    Experimentally verified:
-      N=100:    bᵀv = 0.656
-      N=1000:   bᵀv = 0.771
-      N=10000:  bᵀv = 0.829
-      N=100000: bᵀv = 0.863    (converging to 1) -/
-axiom witness_numerator_convergence :
+    Dependencies: pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k -/
+theorem witness_numerator_convergence :
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      |dotProduct (vasyuninMeanVec N) (logCutoffWitness N) - 1| < ε
+      |dotProduct (vasyuninMeanVec N) (logCutoffWitness N) - 1| < ε :=
+  witness_numerator_convergence_proved
 
 -- ════════════════════════════════════════════════
 -- THE DENOMINATOR: vᵀCv → 0  (THIS IS RH)

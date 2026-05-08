@@ -23,7 +23,8 @@
 
 import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
--- Cathedral.PNT.Bridge import temporarily disabled for Mathlib v4.29 compatibility
+-- Cathedral.PNT.Bridge import disabled: PNTAnd incompatible with Mathlib v4.29
+-- (Fourier.lean integral_const_mul API break). Will re-enable when PNTAnd updates.
 -- import Cathedral.PNT.Bridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.NymanBeurling.BDBridge

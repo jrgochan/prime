@@ -5,7 +5,9 @@
 
   Provides the integration tools connecting the continuous L²(0,1)
   approximation distance to the discrete matrix quadratic form:
-    ∫₀¹ (1 - Σ wᵢ{(i+1)/x})² dx = 1 - 2·bᵀw + wᵀGw
+    ∫₀¹ (1 - Σ wᵢ{1/((i+1)x)})² dx = 1 - 2·bᵀw + wᵀGw
+
+  HISTORY: Migrated to BD basis {1/(kx)} on 2026-05-07.
 -/
 
 import Cathedral.Defs
@@ -15,18 +17,18 @@ import Cathedral.Structural.Independence
 noncomputable section
 open Complex Real
 
-/-- Each w_i * fract((i+1)/x) is integrable on [0,1]. -/
+/-- Each w_i * fract(1/((i+1)x)) is integrable on [0,1]. -/
 private lemma single_fract_integrable (k : ℕ) (c : ℝ) :
-    IntervalIntegrable (fun x : ℝ => c * Int.fract (↑k / x))
+    IntervalIntegrable (fun x : ℝ => c * Int.fract (1 / (↑k * x)))
       MeasureTheory.volume 0 1 := by
-  have hm : Measurable (fun x : ℝ => c * Int.fract (↑k / x)) :=
-    (measurable_const.div measurable_id).fract.const_mul c
+  have hm : Measurable (fun x : ℝ => c * Int.fract (1 / (↑k * x))) :=
+    (measurable_const.div (measurable_const.mul measurable_id)).fract.const_mul c
   exact IntervalIntegrable.mono_fun (intervalIntegrable_const (c := |c|))
     hm.aestronglyMeasurable.restrict
     (Filter.Eventually.of_forall (fun x => by
       simp only [Real.norm_eq_abs, abs_abs]
-      calc |c * Int.fract (↑k / x)|
-          = |c| * |Int.fract (↑k / x)| := abs_mul _ _
+      calc |c * Int.fract (1 / (↑k * x))|
+          = |c| * |Int.fract (1 / (↑k * x))| := abs_mul _ _
         _ ≤ |c| * 1 := by
             apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
             rw [abs_of_nonneg (Int.fract_nonneg _)]
@@ -37,8 +39,8 @@ private lemma single_fract_integrable (k : ℕ) (c : ℝ) :
 theorem nbLinComb_integrable (N : ℕ) (w : Fin (N - 1) → ℝ) :
     IntervalIntegrable (nbLinComb N w) MeasureTheory.volume 0 1 := by
   unfold nbLinComb
-  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
-    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) := by
+  have h_sum : (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+    (∑ i : Fin (N - 1), fun x : ℝ => w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) := by
     ext x; simp [Finset.sum_apply]
   rw [h_sum]
   apply IntervalIntegrable.sum; intro i _
@@ -50,8 +52,8 @@ theorem integral_nbLinComb_eq_dotProduct (N : ℕ) (w : Fin (N - 1) → ℝ) :
     dotProduct (basisInnerProd N) w := by
   unfold nbLinComb dotProduct basisInnerProd
   conv_lhs =>
-    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) =
-      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract ((↑(i.val + 1) : ℝ) / x)) i x) from by
+    rw [show (fun x : ℝ => ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) =
+      (fun x => ∑ i ∈ Finset.univ, (fun i x => w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) i x) from by
       ext x; simp]
   rw [intervalIntegral.integral_finset_sum]
   · congr 1; ext i

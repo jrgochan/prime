@@ -19,6 +19,7 @@ path = "src/main.rs"
 [features]
 default = []
 gpu = ["cathedral-utils/gpu", "libc"]
+hpdf = ["cathedral-utils/hpdf"]
 
 [dependencies]
 cathedral-utils = { path = "../cathedral-utils" }

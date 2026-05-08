@@ -1,0 +1,276 @@
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/siegel-walfisz/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/algebraic/quaternion-rh/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/baez-duarte/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/covariance-probe/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral-analyzer/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/g2-spectral/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/lambda-eff/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: profiles for the non root package will be ignored, specify profiles at the workspace root:
+package:   /Users/jrgochan/code/github.com/jrgochan/prime/experiments/archive/spectral/rank1-interference/Cargo.toml
+workspace: /Users/jrgochan/code/github.com/jrgochan/prime/Cargo.toml
+warning: unused import: `std::f64::consts::PI`
+  --> experiments/cathedral-utils/src/constants.rs:20:5
+   |
+20 | use std::f64::consts::PI;
+   |     ^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> experiments/cathedral-utils/src/rsvd.rs:109:9
+    |
+109 |     let mut omega: Vec<Vec<f64>> = (0..l)
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: `cathedral-utils` (lib) generated 2 warnings (run `cargo fix --lib -p cathedral-utils` to apply 2 suggestions)
+warning: field `max_n` is never read
+  --> experiments/covariance-decay/src/build.rs:25:9
+   |
+22 | pub struct FullGram {
+   |            -------- field in this struct
+...
+25 |     pub max_n: usize,  // = N
+   |         ^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `entry` is never used
+  --> experiments/covariance-decay/src/build.rs:46:12
+   |
+28 | impl FullGram {
+   | ------------- method in this implementation
+...
+46 |     pub fn entry(&self, j: usize, k: usize) -> f64 {
+   |            ^^^^^
+
+warning: field `eigenvalues` is never read
+  --> experiments/covariance-decay/src/panels.rs:38:9
+   |
+24 | pub struct NResult {
+   |            ------- field in this struct
+...
+38 |     pub eigenvalues: Vec<f64>,
+   |         ^^^^^^^^^^^
+   |
+   = note: `NResult` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: `covariance-decay` (bin "covariance-decay") generated 3 warnings
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/covariance-decay`
+
+[1m[36m═══════════════════════════════════════════════════════════════[0m
+[1m[36m  COVARIANCE DECAY EXPERIMENT[0m
+[1m[36m  witness_covariance_decay: vᵀCv ≤ C/ln(N)[0m
+[1m[36m  The last axiom ≡ The Riemann Hypothesis[0m
+[1m[36m═══════════════════════════════════════════════════════════════[0m
+
+  ▸ Sieving Möbius table up to N=40000...
+  ✓ Möbius table ready (40002 entries)
+  ▸ Found DD cache: /Users/jrgochan/code/github.com/jrgochan/prime/experiments/cache/dd_gram_N40000_mpfr256.bin (25.6 GB)
+  [32m✓[0m DD Gram loaded from cache (24412 MB, dim=39999)
+  ▸ Allocating 40000×40000 matrix (12.8 GB)...
+  ▸ Augmenting cached 39999×39999 matrix with k=1 row/column...
+  ✓ Cache data copied and freed
+  ▸ Computing k=1 row (40000 entries)...
+  ✓ Full Gram matrix ready: 40000×40000 (indices 1..40000)
+
+════════════════════════════════════════════════════════════
+  N = 10
+════════════════════════════════════════════════════════════
+    vᵀGv=0.1363860622  bᵀv=0.3252718092  vᵀCv=0.0305843124
+    d²_N=0.4858424439  Q=3.4593  vᵀCv·ln(N)=0.070423
+    λ_min=9.15693021e-3  λ_max=1.779377  κ=194.3
+    PR(v)=4.7  eff_rank_90=5  top_mode_energy=28.0%
+    coprime_frac=-0.4093
+  ✓ N=10 complete (0.00s)
+
+════════════════════════════════════════════════════════════
+  N = 20
+════════════════════════════════════════════════════════════
+    vᵀGv=0.2469989319  bᵀv=0.4740708760  vᵀCv=0.0222557364
+    d²_N=0.2988571798  Q=10.0982  vᵀCv·ln(N)=0.066672
+    λ_min=2.59499294e-3  λ_max=2.346019  κ=904.1
+    PR(v)=6.5  eff_rank_90=8  top_mode_energy=24.7%
+    coprime_frac=0.4193
+  ✓ N=20 complete (0.00s)
+
+════════════════════════════════════════════════════════════
+  N = 50
+════════════════════════════════════════════════════════════
+    vᵀGv=0.3725485826  bᵀv=0.5973201321  vᵀCv=0.0157572424
+    d²_N=0.1779083184  Q=22.6430  vᵀCv·ln(N)=0.061643
+    λ_min=4.34805189e-4  λ_max=3.057025  κ=7030.8
+    PR(v)=14.3  eff_rank_90=18  top_mode_energy=12.7%
+    coprime_frac=0.6055
+  ✓ N=50 complete (0.00s)
+
+════════════════════════════════════════════════════════════
+  N = 100
+════════════════════════════════════════════════════════════
+    vᵀGv=0.4439013988  bᵀv=0.6563384465  vᵀCv=0.0131212424
+    d²_N=0.1312245058  Q=32.8307  vᵀCv·ln(N)=0.060426
+    λ_min=1.20238769e-4  λ_max=3.546953  κ=29499.2
+    PR(v)=27.7  eff_rank_90=36  top_mode_energy=8.2%
+    coprime_frac=0.4381
+  ✓ N=100 complete (0.00s)
+
+════════════════════════════════════════════════════════════
+  N = 200
+════════════════════════════════════════════════════════════
+    vᵀGv=0.5053130145  bᵀv=0.7031013834  vᵀCv=0.0109614592
+    d²_N=0.0991102477  Q=45.0991  vᵀCv·ln(N)=0.058077
+    λ_min=3.12510002e-5  λ_max=3.990733  κ=127699.4
+    PR(v)=44.5  eff_rank_90=68  top_mode_energy=6.2%
+    coprime_frac=0.1944
+  ✓ N=200 complete (0.01s)
+
+════════════════════════════════════════════════════════════
+  N = 500
+════════════════════════════════════════════════════════════
+    vᵀGv=0.5666394772  bᵀv=0.7467496625  vᵀCv=0.0090044187
+    d²_N=0.0731401521  Q=61.9290  vᵀCv·ln(N)=0.055959
+    λ_min=5.47283329e-6  λ_max=4.508433  κ=823784.0
+    PR(v)=80.4  eff_rank_90=163  top_mode_energy=5.6%
+    coprime_frac=-0.1067
+  ✓ N=500 complete (0.07s)
+
+════════════════════════════════════════════════════════════
+  N = 1000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6028123267  bᵀv=0.7712408210  vᵀCv=0.0079999227
+    d²_N=0.0603306847  Q=74.3523  vᵀCv·ln(N)=0.055262
+    λ_min=1.43242920e-6  λ_max=4.852087  κ=3387313.9
+    PR(v)=177.7  eff_rank_90=330  top_mode_energy=2.7%
+    coprime_frac=-0.2598
+  ✓ N=1000 complete (0.50s)
+
+════════════════════════════════════════════════════════════
+  N = 2000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6355320538  bᵀv=0.7926951764  vᵀCv=0.0071664112
+    d²_N=0.0501417011  Q=87.6821  vᵀCv·ln(N)=0.054471
+    λ_min=6.41327928e-7  λ_max=5.158840  κ=8043997.5
+    PR(v)=151.7  eff_rank_90=668  top_mode_energy=6.4%
+    coprime_frac=-0.3190
+  ✓ N=2000 complete (4.01s)
+
+════════════════════════════════════════════════════════════
+  N = 3000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6521622380  bᵀv=0.8033428236  vᵀCv=0.0068025457
+    d²_N=0.0454765907  Q=94.8703  vᵀCv·ln(N)=0.054464
+    λ_min=4.77085819e-7  λ_max=5.322795  κ=11156892.9
+    PR(v)=448.9  eff_rank_90=1070  top_mode_energy=1.6%
+    coprime_frac=-0.3233
+  ✓ N=3000 complete (14.01s)
+
+════════════════════════════════════════════════════════════
+  N = 5000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6702743938  bᵀv=0.8148493933  vᵀCv=0.0062948600
+    d²_N=0.0405756071  Q=105.4796  vᵀCv·ln(N)=0.053615
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=7.19e-7 max=1.52e-5
+    λ_min=5.23857302e-7  λ_max=5.514552  κ=10526821.6
+    Bottom-20 energy capture: 1.49%
+    Top mode energy: 0.31%
+  ✓ N=5000 complete (7.63s)
+
+════════════════════════════════════════════════════════════
+  N = 7500
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6839036090  bᵀv=0.8233548825  vᵀCv=0.0059903464
+    d²_N=0.0371938439  Q=113.1676  vᵀCv·ln(N)=0.053450
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=9.54e-7 max=1.69e-5
+    λ_min=4.42969919e-7  λ_max=5.655907  κ=12768152.4
+    Bottom-20 energy capture: 0.97%
+    Top mode energy: 0.33%
+  ✓ N=7500 complete (17.40s)
+
+════════════════════════════════════════════════════════════
+  N = 10000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.6925869119  bᵀv=0.8287292525  vᵀCv=0.0057947379
+    d²_N=0.0351284069  Q=118.5200  vᵀCv·ln(N)=0.053372
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=1.12e-6 max=2.24e-5
+    λ_min=5.06606209e-7  λ_max=5.750791  κ=11351600.3
+    Bottom-20 energy capture: 1.11%
+    Top mode energy: 0.39%
+  ✓ N=10000 complete (30.06s)
+
+════════════════════════════════════════════════════════════
+  N = 15000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.7042452206  bᵀv=0.8358961525  vᵀCv=0.0055228428
+    d²_N=0.0324529155  Q=126.5150  vᵀCv·ln(N)=0.053107
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=1.20e-6 max=2.22e-5
+    λ_min=4.98646078e-7  λ_max=5.877397  κ=11786710.3
+    Bottom-20 energy capture: 0.80%
+    Top mode energy: 0.13%
+  ✓ N=15000 complete (66.60s)
+
+════════════════════════════════════════════════════════════
+  N = 20000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.7122125154  bᵀv=0.8407476592  vᵀCv=0.0053558889
+    d²_N=0.0307171969  Q=131.9775  vᵀCv·ln(N)=0.053042
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=1.56e-6 max=2.33e-5
+    λ_min=5.30734638e-7  λ_max=5.962461  κ=11234354.4
+    Bottom-20 energy capture: 0.62%
+    Top mode energy: 0.19%
+  ✓ N=20000 complete (117.28s)
+
+════════════════════════════════════════════════════════════
+  N = 30000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.7226189842  bᵀv=0.8470546615  vᵀCv=0.0051173846
+    d²_N=0.0285096612  Q=140.2087  vᵀCv·ln(N)=0.052755
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=1.52e-6 max=2.83e-5
+    λ_min=5.65888089e-7  λ_max=6.076061  κ=10737213.2
+    Bottom-20 energy capture: 0.50%
+    Top mode energy: 0.13%
+  ✓ N=30000 complete (262.75s)
+
+════════════════════════════════════════════════════════════
+  N = 40000
+════════════════════════════════════════════════════════════
+    vᵀGv=0.7294460891  bᵀv=0.8511642637  vᵀCv=0.0049654853
+    d²_N=0.0271175617  Q=145.9033  vᵀCv·ln(N)=0.052617
+    [Lanczos mode: k=20, m=200]
+    Lanczos bottom-20 converged in 200 iterations
+    Residual norms: min=1.51e-6 max=3.43e-5
+    λ_min=5.90221726e-7  λ_max=6.152498  κ=10424044.9
+    Bottom-20 energy capture: 0.15%
+    Top mode energy: 0.05%
+  ✓ N=40000 complete (463.06s)
+
+  Total elapsed: 998.2s

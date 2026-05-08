@@ -11,6 +11,8 @@ import Mathlib.MeasureTheory.Group.Arithmetic
   and convergence rate arguments.
 
   NOT on the v11 crown path.
+
+  HISTORY: Migrated to BD basis {1/(jx)} on 2026-05-07.
 -/
 
 /-! # SpectralRH.GramBounds
@@ -18,7 +20,7 @@ import Mathlib.MeasureTheory.Group.Arithmetic
     ## Purpose
 
     Basic bounds on Gram matrix entries. These are the foundational
-    analytic facts about `gramEntry j k = ∫₀¹ {j/x}{k/x} dx`.
+    analytic facts about `gramEntry j k = ∫₀¹ {1/(jx)}{1/(kx)} dx`.
 
     ## Results
 
@@ -45,17 +47,17 @@ open MeasureTheory
 
 /-- The integrand of gramEntry is pointwise nonneg. -/
 lemma gramEntry_integrand_nonneg (j k : ℕ) (x : ℝ) :
-    0 ≤ Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x) :=
+    0 ≤ Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)) :=
   mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
 
 /-- The integrand of gramEntry is pointwise ≤ 1. -/
 lemma gramEntry_integrand_le_one (j k : ℕ) (x : ℝ) :
-    Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x) ≤ 1 :=
+    Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)) ≤ 1 :=
   mul_le_one₀ (Int.fract_lt_one _).le (Int.fract_nonneg _) (Int.fract_lt_one _).le
 
 /-- **gramEntry_nonneg**: G_{j,k} ≥ 0.
 
-    Proof: The integrand {j/x}·{k/x} is nonneg for all x,
+    Proof: The integrand {1/(jx)}·{1/(kx)} is nonneg for all x,
     since fractional parts are nonneg. The integral of a
     nonneg function on [0,1] is nonneg.
 
@@ -73,27 +75,24 @@ theorem gramEntry_nonneg (j k : ℕ) : 0 ≤ gramEntry j k := by
 /-- The integrand of gramEntry is measurable.
 
     Proof chain:
-    - `fun x => (j : ℝ) / x` is measurable (const.div measurable_id,
-      via MeasurableDiv₂ for ℝ, derived from ContinuousMul + ContinuousInv₀)
+    - `fun x => 1 / ((j : ℝ) * x)` is measurable (const.div (const.mul id))
     - `Int.fract` is measurable (measurable_fract, from MeasureTheory.Function.Floor)
     - Composition is measurable (Measurable.fract)
     - Product of two measurable functions is measurable (Measurable.mul) -/
 lemma gramEntry_integrand_measurable (j k : ℕ) :
-    Measurable (fun x : ℝ => Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)) :=
-  (measurable_const.div measurable_id).fract.mul (measurable_const.div measurable_id).fract
+    Measurable (fun x : ℝ => Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))) :=
+  (measurable_const.div (measurable_const.mul measurable_id)).fract.mul
+    (measurable_const.div (measurable_const.mul measurable_id)).fract
 
 /-- The Gram entry integrand is interval-integrable on [0,1].
 
     This follows from boundedness + measurability:
     - The integrand is in [0,1) for all x (gramEntry_integrand_le_one)
     - The integrand is measurable (gramEntry_integrand_measurable)
-    - Therefore it is integrable on any finite interval
-
-    Uses `IntervalIntegrable.mono_fun'`: if g is integrable and ‖f‖ ≤ g a.e.,
-    then f is integrable (given f is AEStronglyMeasurable). -/
+    - Therefore it is integrable on any finite interval -/
 lemma gramEntry_integrable (j k : ℕ) :
     IntervalIntegrable
-      (fun x => Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x))
+      (fun x => Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x)))
       volume (0 : ℝ) 1 := by
   rw [intervalIntegrable_iff]
   apply MeasureTheory.Measure.integrableOn_of_bounded
@@ -109,19 +108,19 @@ lemma gramEntry_integrable (j k : ℕ) :
 
 /-- **gramEntry_le_one**: G_{j,k} ≤ 1.
 
-    Proof: The integrand {j/x}·{k/x} ≤ 1 for all x (since
+    Proof: The integrand {1/(jx)}·{1/(kx)} ≤ 1 for all x (since
     fractional parts are in [0,1)). Integrating over [0,1]:
-      G_{j,k} = ∫₀¹ {j/x}{k/x} dx ≤ ∫₀¹ 1 dx = 1. -/
+      G_{j,k} = ∫₀¹ {1/(jx)}{1/(kx)} dx ≤ ∫₀¹ 1 dx = 1. -/
 theorem gramEntry_le_one (j k : ℕ) : gramEntry j k ≤ 1 := by
   unfold gramEntry
-  have h1 : ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) * Int.fract ((k:ℝ) / x)
+  have h1 : ∫ x in (0:ℝ)..1, Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
       ≤ ∫ x in (0:ℝ)..1, (1 : ℝ) := by
     apply intervalIntegral.integral_mono_on (by norm_num : (0:ℝ) ≤ 1)
       (gramEntry_integrable j k)
       intervalIntegrable_const
     intro x _hx
     exact gramEntry_integrand_le_one j k x
-  calc ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) * Int.fract ((k:ℝ) / x)
+  calc ∫ x in (0:ℝ)..1, Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x))
       ≤ ∫ x in (0:ℝ)..1, (1 : ℝ) := h1
     _ = 1 := by simp
 

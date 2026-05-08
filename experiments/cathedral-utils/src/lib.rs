@@ -22,6 +22,7 @@
 //! - [`cache`] — Binary matrix serialization to/from disk
 //! - [`fmt`] — Terminal formatting constants
 //! - [`gpu`] — GPU acceleration via CUDA/cuSOLVER/cuBLAS (feature-gated)
+//! - [`hpdf`] — HDF5-based high-precision data format (feature-gated)
 //! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
 
 pub mod abel;
@@ -35,6 +36,9 @@ pub mod fitting;
 pub mod fmt;
 pub mod gram;
 pub mod gpu;
+#[cfg(feature = "hpdf")]
+pub mod hpdf;
+pub mod jacobi;
 pub mod lanczos;
 pub mod mertens;
 pub mod ooc;

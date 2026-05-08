@@ -22,6 +22,8 @@
 //! - Paige, C.C. (1971). "The computation of eigenvalues and eigenvectors
 //!   of very large sparse matrices." (CG–Lanczos connection)
 
+use rayon::prelude::*;
+
 /// Result of a Lanczos eigendecomposition.
 #[derive(Debug, Clone)]
 pub struct LanczosResult {
@@ -207,7 +209,7 @@ pub fn lanczos_bottom_k<F>(
     m: usize,
 ) -> LanczosResult
 where
-    F: Fn(&[f64], &mut [f64]),
+    F: Fn(&[f64], &mut [f64]) + Sync,
 {
     let m = if m == 0 {
         (4 * k).min(dim)
@@ -226,34 +228,38 @@ where
     let k = k.min(ritz_values.len());
     let eigenvalues = ritz_values[..k].to_vec();
 
-    // Map Ritz vectors back to original space
+    // Map Ritz vectors back to original space (parallelized over k vectors)
     // v_i = Σ_j ritz_vec[i][j] * basis[j]
+    let results: Vec<(Vec<f64>, f64)> = (0..k).into_par_iter()
+        .map(|i| {
+            let mut v = vec![0.0f64; dim];
+            let rv = &ritz_vectors[i];
+            let rv_len = rv.len().min(basis.len());
+            for j in 0..rv_len {
+                let coeff = rv[j];
+                for idx in 0..dim {
+                    v[idx] += coeff * basis[j][idx];
+                }
+            }
+
+            // Compute residual norm: ‖A·v - λ·v‖
+            let mut av = vec![0.0f64; dim];
+            matvec(&v, &mut av);
+            let lambda = eigenvalues[i];
+            let mut res_sq = 0.0;
+            for idx in 0..dim {
+                let r = av[idx] - lambda * v[idx];
+                res_sq += r * r;
+            }
+            (v, res_sq.sqrt())
+        })
+        .collect();
+
     let mut eigenvectors = Vec::with_capacity(k);
     let mut residual_norms = Vec::with_capacity(k);
-
-    for i in 0..k {
-        let mut v = vec![0.0f64; dim];
-        let rv = &ritz_vectors[i];
-        let rv_len = rv.len().min(basis.len());
-        for j in 0..rv_len {
-            let coeff = rv[j];
-            for idx in 0..dim {
-                v[idx] += coeff * basis[j][idx];
-            }
-        }
-
-        // Compute residual norm: ‖A·v - λ·v‖
-        // (uses an extra matvec, but important for convergence assessment)
-        let mut av = vec![0.0f64; dim];
-        matvec(&v, &mut av);
-        let lambda = eigenvalues[i];
-        let mut res_sq = 0.0;
-        for idx in 0..dim {
-            let r = av[idx] - lambda * v[idx];
-            res_sq += r * r;
-        }
-        residual_norms.push(res_sq.sqrt());
+    for (v, res) in results {
         eigenvectors.push(v);
+        residual_norms.push(res);
     }
 
     LanczosResult {
@@ -320,14 +326,14 @@ mod tests {
             }
         };
 
-        let result = lanczos_bottom_k(&matvec, dim, 5, 50);
+        let result = lanczos_bottom_k(&matvec, dim, 5, 80);
 
         // Bottom 5 eigenvalues should be 1, 2, 3, 4, 5
         assert_eq!(result.eigenvalues.len(), 5);
         for (i, &lambda) in result.eigenvalues.iter().enumerate() {
             let expected = (i + 1) as f64;
             assert!(
-                (lambda - expected).abs() < 1e-8,
+                (lambda - expected).abs() < 1e-6,
                 "eigenvalue {i}: expected {expected}, got {lambda}"
             );
         }

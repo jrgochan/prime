@@ -86,6 +86,20 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
         writeln!(f, "  {dd}\t{q:.8e}\t{sig:.6}\t{rb:.6}\t{:+.6}", rb - sig)?;
     }
 
+    writeln!(f, "\nGRAM BOUND AXIOM ANALYSIS")?;
+    writeln!(f, "  vᵀGv        = {:.15e}", d.total.value())?;
+    writeln!(f, "  (bᵀv)²      = {:.15e}", d.btv_sq)?;
+    writeln!(f, "  bᵀv         = {:.15e}", d.btv)?;
+    writeln!(f, "  vᵀCv        = {:.15e}", d.vtcv)?;
+    writeln!(f, "  d²_N        = {:.15e}", d.d2n)?;
+    writeln!(f, "  1 - vᵀGv    = {:.15e}", d.gap)?;
+    writeln!(f, "  gap·ln(N)   = {:.15e}", d.gap_times_ln)?;
+    writeln!(f, "  (bᵀv)²/vᵀGv = {:.15e}", d.ratio)?;
+    writeln!(f, "  vtCv·ln(N)  = {:.15e}", d.vtcv * (d.n as f64).ln())?;
+    writeln!(f, "  d²·ln(N)    = {:.15e}", d.d2n * (d.n as f64).ln())?;
+    writeln!(f, "  Precision   = {}", d.precision)?;
+    writeln!(f, "  Axiom sat?  = {} (vtGv < 1 + K/ln(N) for any K > 0)", if d.total.value() < 1.0 { "YES" } else { "CHECK" })?;
+
     eprintln!("  ✓ Summary → {p}");
     Ok(())
 }
@@ -136,7 +150,20 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
 
     let cert = serde_json::json!({
         "experiment": "moebius-microscope", "version": "2.0", "N": d.n, "dim": d.dim,
+        "precision": d.precision,
         "quadratic_form": {"total": d.total.value(), "diagonal": d.diagonal.value(), "off_diagonal": d.off_diagonal.value()},
+        "gram_bound": {
+            "vtGv": d.total.value(),
+            "btv": d.btv,
+            "btv_sq": d.btv_sq,
+            "vtCv": d.vtcv,
+            "d2N": d.d2n,
+            "ratio_btv2_vtGv": d.ratio,
+            "gap_1_minus_vtGv": d.gap,
+            "gap_times_lnN": d.gap_times_ln,
+            "vtCv_times_lnN": d.vtcv * (d.n as f64).ln(),
+            "d2_times_lnN": d.d2n * (d.n as f64).ln(),
+        },
         "vaughan": {"type_I": d.type_i.value(), "type_II": d.type_ii.value(), "type_III": d.type_iii.value()},
         "liouville": {"ee": d.ee.value(), "eo": d.eo.value(), "oe": d.oe.value(), "oo": d.oo.value(),
             "same": d.ee.value()+d.oo.value(), "cross": d.eo.value()+d.oe.value()},

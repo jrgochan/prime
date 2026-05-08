@@ -6,13 +6,13 @@
   Originally an axiom encoding the arithmetic renormalization discovery:
   the Nyman-Beurling distance d²_N decays as C / ln(N)^α for some α > 0.
 
-  ### Graduation (April 30, 2026)
+  ### Graduation (April 30, 2026; updated May 7, 2026)
 
   GRADUATED from axiom to theorem by setting α = 1 and deriving the
-  bound from the existing `bd_witness_l2_error_decay` axiom + the
-  proved `bd_l2_error_eq_quad_error` identity.
+  bound from the proved `bd_witness_l2_error_decay_proved` theorem +
+  the proved `bd_l2_error_eq_quad_error` identity.
 
-  The key insight: bd_witness_l2_error_decay gives
+  The key insight: bd_witness_l2_error_decay_proved gives
     ∃ v, 1 - 2·bᵀv + vᵀGv ≤ C/log N
   and bd_l2_error_eq_quad_error (PROVED) gives
     ∫(1-f_N)² = 1 - 2·bᵀv + vᵀGv
@@ -32,14 +32,15 @@
   ### Role in Architecture
 
   This was the SOLE axiom of PATH C (Renormalization).
-  Now GRADUATED — PATH C inherits bd_witness_l2_error_decay from the
-  main NB chain instead.
+  Now GRADUATED — PATH C inherits bd_witness_l2_error_decay_proved
+  from the main NB chain instead (via WitnessDecayProved.lean).
 
   Zero sorry. Zero PATH C-specific axioms.
 -/
 
 import Cathedral.NymanBeurling.BDMellin
 import Cathedral.NymanBeurling.BDBridge
+import Cathedral.NymanBeurling.WitnessDecayProved
 
 noncomputable section
 open Real
@@ -54,7 +55,7 @@ open Real
     a witness vector v exists with BD L² error ≤ C / ln(N)^α.
 
     PROOF (Graduation via α = 1):
-      1. bd_witness_l2_error_decay (axiom): ∃ v, 1-2bᵀv+vᵀGv ≤ C/log N
+      1. bd_witness_l2_error_decay_proved (THEOREM): ∃ v, 1-2bᵀv+vᵀGv ≤ C/log N
       2. bd_l2_error_eq_quad_error (PROVED): ∫(1-f)² = 1-2bᵀv+vᵀGv
       3. Combine: ∃ v, ∫(1-f)² ≤ C/log(N)^1
       4. Set α = 1, done.
@@ -76,10 +77,10 @@ theorem selberg_delange_decay :
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤ C / (Real.log N) ^ α := by
   -- Step 1: Use α = 1 (the mean-field / Möbius rate)
   refine ⟨1, one_pos, ?_⟩
-  -- Step 2: Get the unconditional witness decay from the BD chain
-  obtain ⟨C_err, hC_pos, N₀, h_decay⟩ := bd_witness_l2_error_decay
+  -- Step 2: Get the unconditional witness decay from the proved theorem
+  obtain ⟨C_err, hC_pos, N₀, h_decay⟩ := bd_witness_l2_error_decay_proved
   refine ⟨C_err, hC_pos, N₀, fun N hN₀ hN3 => ?_⟩
-  -- Step 3: Get the witness vector from the axiom
+  -- Step 3: Get the witness vector from the theorem
   obtain ⟨v, hv⟩ := h_decay N hN₀ hN3
   refine ⟨v, ?_⟩
   -- Step 4: Convert from matrix form to integral form

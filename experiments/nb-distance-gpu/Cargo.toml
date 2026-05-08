@@ -27,9 +27,19 @@ path = "src/gpu_spectral.rs"
 name = "ooc-probe"
 path = "src/ooc_probe.rs"
 
+[[bin]]
+name = "gpu-hpdf-build"
+path = "src/gpu_hpdf_build.rs"
+required-features = ["hpdf"]
+
+[features]
+default = []
+hpdf = ["cathedral-utils/hpdf"]
+
 [dependencies]
 cathedral-utils = { path = "../cathedral-utils" }
 nalgebra = "0.33"
 rayon = "1"
 rug = "1"
 libc = "0.2"
+sha2 = "0.10"

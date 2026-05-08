@@ -99,6 +99,8 @@ pub struct MatrixSource {
 /// Format of a cached matrix file.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum MatrixFormat {
+    /// HPDF format: HDF5 with upper-triangle packing and full metadata.
+    Hpdf,
     /// OOC format: row-major f64 with CATHOOC header.
     Ooc,
     /// DD cache format: hi + lo f64 arrays with custom header.
@@ -126,6 +128,19 @@ pub fn discover_matrices(search_paths: &[PathBuf]) -> Vec<MatrixSource> {
 
                 let name = path.file_name().unwrap_or_default().to_string_lossy();
                 let file_size = entry.metadata().map(|m| m.len()).unwrap_or(0);
+
+                // HPDF format: gram_N{n}.h5
+                if name.starts_with("gram_N") && name.ends_with(".h5") {
+                    if let Some(n) = parse_n_from_filename(&name, "gram_N", ".") {
+                        sources.push(MatrixSource {
+                            path: path.clone(),
+                            max_n: n,
+                            dim: n - 1,
+                            format: MatrixFormat::Hpdf,
+                            file_size,
+                        });
+                    }
+                }
 
                 // OOC format: ooc_gram_N{n}_p{p}.bin
                 if name.starts_with("ooc_gram_N") && name.ends_with(".bin") {
@@ -175,8 +190,10 @@ pub fn discover_matrices(search_paths: &[PathBuf]) -> Vec<MatrixSource> {
     // Deduplicate: prefer DD > OOC > Legacy for the same N
     sources.dedup_by(|b, a| {
         if a.max_n == b.max_n {
-            // Keep the higher-precision format
+            // Keep the highest-precision format: HPDF > DD > OOC > Legacy
             match (a.format, b.format) {
+                (MatrixFormat::Hpdf, _) => true, // keep a (HPDF)
+                (_, MatrixFormat::Hpdf) => { *a = b.clone(); true } // replace with b (HPDF)
                 (MatrixFormat::DdCache, _) => true, // keep a (DD)
                 (_, MatrixFormat::DdCache) => { *a = b.clone(); true } // replace with b (DD)
                 (MatrixFormat::Ooc, _) => true,

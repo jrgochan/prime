@@ -1166,6 +1166,12 @@ extern "C" {
         gram_hi: *mut f64, gram_lo: *mut f64, dim: c_int, t_max: c_int,
     ) -> c_int;
 
+    fn gpu_build_gram_dd_rows(
+        gram_hi: *mut f64, gram_lo: *mut f64,
+        dim: c_int, t_max: c_int,
+        row_start: c_int, n_rows: c_int,
+    ) -> c_int;
+
     fn gpu_upload_gram(gram_hi: *const f64, dim: c_int) -> c_int;
 
     fn gpu_cholesky_d2_resident(
@@ -1176,6 +1182,7 @@ extern "C" {
 
     fn gpu_has_resident_gram() -> c_int;
 }
+
 
 /// Build DD-f64 Gram matrix on GPU using the log1p bypass.
 ///
@@ -1211,7 +1218,43 @@ pub fn gpu_build_gram_dd_f64(
     Ok(GpuGramResult { gram_hi, gram_lo, dim, build_time_secs: build_time })
 }
 
+/// Build a chunk of rows of the Gram matrix on GPU using the log1p bypass.
+///
+/// Only computes rows [row_start..row_start+n_rows) of the full dim×dim matrix.
+/// GPU allocates only n_rows×dim on device — trivial VRAM usage.
+///
+/// Returns (hi_buffer, build_time_secs) where hi_buffer has n_rows*dim entries.
+pub fn gpu_build_gram_dd_rows_f64(
+    dim: usize,
+    t_max: usize,
+    row_start: usize,
+    n_rows: usize,
+) -> Result<(Vec<f64>, f64), String> {
+    let mut gram_hi = vec![0.0f64; n_rows * dim];
+
+    let start = std::time::Instant::now();
+
+    let ret = unsafe {
+        gpu_build_gram_dd_rows(
+            gram_hi.as_mut_ptr(),
+            std::ptr::null_mut(), // lo not needed for f64 output
+            dim as c_int,
+            t_max as c_int,
+            row_start as c_int,
+            n_rows as c_int,
+        )
+    };
+
+    if ret != 0 {
+        return Err(format!("GPU DD row-range build failed with code {}", ret));
+    }
+
+    let build_time = start.elapsed().as_secs_f64();
+    Ok((gram_hi, build_time))
+}
+
 /// Upload a host-side Gram matrix to GPU VRAM (for cached loads).
+
 /// After this, gpu_cholesky_resident() can run without PCIe matrix transfers.
 pub fn gpu_upload_gram_resident(gram_hi: &[f64], dim: usize) -> Result<(), String> {
     let ret = unsafe { gpu_upload_gram(gram_hi.as_ptr(), dim as c_int) };

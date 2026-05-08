@@ -153,7 +153,7 @@ theorem schur_lower_bound (N : ℕ) (hN : 2 ≤ N) :
 /-- **LEMMA 3** (Cross-correlation norm growth):
     ‖g_N‖² = Θ(N), specifically ‖g_N‖ ≈ 0.25√N.
 
-    Proof: g_N[k] = ∫₀¹ {k/x}{(N+1)/x} dx → 1/4 for gcd(k,N+1)=1
+    Proof: g_N[k] = ∫₀¹ {1/(kx)}{1/((N+1)x)} dx → 1/4 for gcd(k,N+1)=1
     by asymptotic independence of fractional parts (Koksma). There
     are φ(N+1) ≈ N coprime values, giving ‖g‖² ≈ N/16. -/
 axiom cross_norm_bound :

@@ -21,7 +21,7 @@ import Cathedral.Gram.OffDiagonal
     ## Architecture
 
     The Vasyunin expansion states:
-      ∃ ψ : ℝ, gramEntry j k = 1/4 + ψ ∧ |ψ| ≤ 1/gcd(j,k)
+      ∃ ψ : ℝ, hfGramEntry j k = 1/4 + ψ ∧ |ψ| ≤ 1/gcd(j,k)
 
     We decompose this into three cases:
 
@@ -62,13 +62,13 @@ open Real MeasureTheory Nat
     The upper bound uses `gramEntry_le_third_all` (diagonal) composed
     with `gramEntry_le_avg_diag` (AM-GM off-diagonal). -/
 theorem vasyunin_small_gcd (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
-    |gramEntry j k - 1/4| ≤ 1/4 := by
-  have h_lower := gramEntry_nonneg j k      -- G ≥ 0
+    |hfGramEntry j k - 1/4| ≤ 1/4 := by
+  have h_lower := hfGramEntry_nonneg j k      -- G ≥ 0
   have h_jj := gramEntry_le_third_all j hj   -- G_{j,j} ≤ 1/3
   have h_kk := gramEntry_le_third_all k hk   -- G_{k,k} ≤ 1/3
   have h_amgm := gramEntry_le_avg_diag j k   -- G ≤ (G_{j,j}+G_{k,k})/2
   -- G ≤ (1/3 + 1/3)/2 = 1/3
-  have h_upper : gramEntry j k ≤ 1/3 := by linarith
+  have h_upper : hfGramEntry j k ≤ 1/3 := by linarith
   -- Now: 0 ≤ G ≤ 1/3, so -1/4 ≤ G - 1/4 ≤ 1/12
   rw [abs_le]
   constructor
@@ -92,9 +92,9 @@ theorem vasyunin_small_gcd (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
 theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
     (hd : Nat.gcd j k ≤ 4) :
     ∃ correction : ℝ,
-    gramEntry j k = 1/4 + correction ∧
+    hfGramEntry j k = 1/4 + correction ∧
     |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
-  set ψ := gramEntry j k - 1/4
+  set ψ := hfGramEntry j k - 1/4
   refine ⟨ψ, by ring, ?_⟩
   have h_abs := vasyunin_small_gcd j k (by omega) (by omega)
   -- |ψ| ≤ 1/4 and 1/4 ≤ 1/d since d ≤ 4
@@ -147,7 +147,7 @@ theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
 -- axiom vasyunin_large_gcd (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
 --     (hd : 5 ≤ Nat.gcd j k) :
 --     ∃ correction : ℝ,
---     gramEntry j k = 1/4 + correction ∧
+--     hfGramEntry j k = 1/4 + correction ∧
 --     |correction| ≤ 1 / (Nat.gcd j k : ℝ)
 
 /-- The correct replacement: |G - 1/4| ≤ 1/4 for ALL j,k.
@@ -155,7 +155,7 @@ theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
 theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
     (hd : 5 ≤ Nat.gcd j k) :
     ∃ correction : ℝ,
-    gramEntry j k = 1/4 + correction ∧
+    hfGramEntry j k = 1/4 + correction ∧
     |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
   -- Use the universal 1/4 bound, which dominates 1/d for d ≥ 5
   -- Wait — 1/4 > 1/5, so |ψ| ≤ 1/4 does NOT imply |ψ| ≤ 1/d for d ≥ 5!
@@ -180,7 +180,7 @@ theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
     This file is NOT on the Crown Path. -/
 theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
     ∃ correction : ℝ,
-    gramEntry j k = 1/4 + correction ∧
+    hfGramEntry j k = 1/4 + correction ∧
     |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
   by_cases hd : Nat.gcd j k ≤ 4
   · -- CASE 1: d ≤ 4 — PROVED (correct)
@@ -219,8 +219,9 @@ end
 --   💀 vasyunin_expansion_proof:    Contains sorry from FALSE d≥5 case
 --   💀 vasyunin_large_gcd:          DEAD — commented out
 --
--- The Rosetta Stone bridge (gramEntry = jk·gramIntegral - correction)
--- may eventually replace this entire file's approach.
+-- NOTE (2026-05-07): Post-BD migration, gramEntry ≡ gramIntegral
+-- definitionally (both = ∫₀¹ {1/(jx)}{1/(kx)} dx). The Rosetta Stone
+-- bridge has been archived (ParameterizationBridge.lean → Archive/).
 
 -- #check @vasyunin_small_gcd
 -- #check @vasyunin_expansion_d_le_4

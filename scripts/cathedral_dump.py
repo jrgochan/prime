@@ -6,69 +6,33 @@ Usage:
   python3 scripts/cathedral_dump.py --mode rh|all [--parts N] [--outdir DIR]
 
 Modes:
-  rh   — Critical path only (files on the crown theorem's dependency chain)
+  rh   — Critical path only (files reachable via imports from the crown theorems)
   all  — All active .lean files (excludes Archive/ and Scratch/)
 
 The script uses a greedy bin-packing algorithm to balance file sizes evenly
 across the output files, so no single file gets too large.
+
+The RH mode traces the transitive import closure from three crown roots:
+  1. Assembly/MainChain.lean        — nyman_beurling_equivalence (1 axiom)
+  2. Spectral/HeisenbergBypass.lean — heisenberg_implies_d_sq_zero (2 axioms)
+  3. Vasyunin/Proof/WitnessConditional.lean — witness_covariance_decay ↔ RH
 """
 
 import argparse
 import os
+import re
 import sys
 from pathlib import Path
 from datetime import datetime
 
 CATHEDRAL_DIR = Path("proofs/Cathedral")
 
-# Files on the critical path to nyman_beurling_equivalence
-# These patterns are matched against the relative path from proofs/Cathedral/
-# Updated: April 26, 2026 (v11 — Mathlib-style restructuring)
-CRITICAL_PATH_PATTERNS = [
-    # Foundations
-    "Defs.lean",
-    "Axioms.lean",
-    # Linear algebra
-    "LinearAlgebra/",
-    # Gram matrix infrastructure
-    "Gram/",
-    # Vasyunin discrete formula
-    "Vasyunin/Defs.lean",
-    "Vasyunin/Witness.lean",
-    "Vasyunin/Matrix/",
-    "Vasyunin/Augmented/",
-    "Vasyunin/Cotangent/",
-    "Vasyunin/Proof/",
-    # Nyman-Beurling equivalence (converse direction)
-    "NymanBeurling/",
-    # Assembly (capstone crowns)
-    "Assembly/",
-    # Mellin bridge
-    "MellinBridge/",
-    # Structural
-    "Structural/",
-    # Perron formula chain (moved from White/Infrastructure/)
-    "Perron/",
-    # Zeta function bounds (moved from White/Infrastructure/)
-    "Zeta/",
-    # General analytic tools (moved from White/Infrastructure/)
-    "Analysis/",
-    # Physics-inspired (retained in White/)
-    "White/Kinematics.lean",
-    "White/Scattering.lean",
-    # Abel tail bounds
-    "AbelTail/",
-    # Covariance / Gram form bounds (moved from Assembly/)
-    "Covariance/",
-    # PNT bridges (moved from Assembly/)
-    "PNT/",
-    # Integral basis (resurrected from Archive)
-    "IntegralBasis/",
-    # Sieve (ParitySchur is imported)
-    "Sieve/ParitySchur.lean",
-    # Spectral (PTSymmetry, RayleighBridge are imported)
-    "Spectral/PTSymmetry.lean",
-    "Spectral/RayleighBridge.lean",
+# Root files for the RH critical path.
+# The script BFS-traverses all `import Cathedral.*` to find the full closure.
+RH_ROOTS = [
+    "Assembly/MainChain.lean",
+    "Spectral/HeisenbergBypass.lean",
+    "Vasyunin/Proof/WitnessConditional.lean",
 ]
 
 HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -79,32 +43,76 @@ HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
 # Lean 4 + Mathlib — {mode_desc}
 # Build: lake build — 0 errors, 0 sorry on crown path
-# Crown: nyman_beurling_equivalence (4 non-kernel axioms, #print axioms verified)
 #
-# Crown axioms (compiler-verified, v11 — April 2026):
-#   1. pnt_mu_log_div_k                         — Σ μ(k)log(k)/k → -1 (PNT derivative)
-#   2. covariance_bound_from_mertens_34          — vᵀCv ≤ C/logN (Abel summation)
-#   3. partial_integral_tends_to_formula         — Vasyunin convergence (Gram entries)
-#   4. rh_zeta_lower_bound_from_zero_counting    — |ζ(s)| ≥ c/|t|^A (Hadamard)
+# ═══ Two-Axiom Crown Architecture (May 2026) ═══
 #
-# Graduated axioms (now theorems):
-#   ✅ pnt_mu_div_k — via PrimeNumberTheoremAnd (v8)
-#   ✅ pnt_mu_log_sq_div_k — via Abel Bypass / S₃ uniform bound (v9)
-#   ✅ rh_implies_mertens_bound — via Perron chain (v7)
-#   ✅ abel_summation_covariance_bound — via Gram form + dot product (v7)
-#   ✅ gram_form_upper_bound_34 — via variance decomposition (v10)
+# Primary export: nyman_beurling_equivalence (MainChain.lean)
+#   RH ↔ d²_N → 0
+#   Axiom: baez_duarte_forward (Báez-Duarte, IMRN 2003)
+#   Converse: FULLY PROVED (0 custom axioms)
 #
-# Converse direction (d²→0 ⟹ RH): ZERO non-kernel axioms.
+# Heisenberg Bypass: heisenberg_implies_d_sq_zero (HeisenbergBypass.lean)
+#   d²_N → 0 via real spectral decomposition
+#   Axiom 1: witness_covariance_decay   — THE Riemann Hypothesis
+#   Axiom 2: witness_numerator_convergence — PNT-level (graduated)
+#
+# Crown Jewel: witness_covariance_decay ↔ RH (WitnessConditional.lean)
+#   Both directions proved. Zero sorry.
+#
+# Graduated theorems (formerly axioms):
+#   ✅ nbDistSq_nonneg                — L² norm ≥ 0
+#   ✅ spectral_identity              — Parseval + self-adjointness
+#   ✅ spectral_energy_le_one         — d² ≥ 0 corollary
+#   ✅ ultraviolet_completeness       — Rayleigh-Ritz squeeze
+#   ✅ bd_witness_l2_error_decay      — Vasyunin λ-trick
+#   ✅ spectral_energy_witness_lower  — variational principle
+#   ✅ witness_numerator_convergence  — PNT via Möbius sums
+#
 # Plus Lean kernel: propext, Classical.choice, Quot.sound
-# Plus 1 sorry: ZetaLowerBound.lean (thin-strip BC, experimentally validated)
 #
 # This is part {part} of {total}. {upload_hint}
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
 
 
+def trace_imports(roots: list[str]) -> set[str]:
+    """BFS over `import Cathedral.*` to find the transitive closure from roots."""
+    visited: set[str] = set()
+    queue = list(roots)
+
+    while queue:
+        f = queue.pop(0)
+        if f in visited:
+            continue
+        visited.add(f)
+        fullpath = CATHEDRAL_DIR / f
+        if not fullpath.exists():
+            continue
+        with open(fullpath) as fh:
+            for line in fh:
+                m = re.match(r"^import Cathedral\.(.+)", line.strip())
+                if m:
+                    imp = m.group(1).replace(".", "/") + ".lean"
+                    if (CATHEDRAL_DIR / imp).exists():
+                        queue.append(imp)
+
+    return {f for f in visited if (CATHEDRAL_DIR / f).exists()}
+
+
 def collect_files(mode: str) -> list[tuple[str, int]]:
     """Collect .lean files with their sizes. Returns [(relpath, line_count)]."""
+    if mode == "rh":
+        # Use import-graph tracing for the critical path
+        critical = trace_imports(RH_ROOTS)
+        files = []
+        for rel in sorted(critical):
+            fullpath = CATHEDRAL_DIR / rel
+            lines = fullpath.read_text().count('\n')
+            lean_path = str(Path("Cathedral") / rel)
+            files.append((lean_path, lines))
+        return files
+
+    # mode == "all"
     files = []
     for lean_file in sorted(CATHEDRAL_DIR.rglob("*.lean")):
         relpath = str(lean_file.relative_to(Path("proofs")))
@@ -112,13 +120,6 @@ def collect_files(mode: str) -> list[tuple[str, int]]:
         # Skip Archive, Scratch, .lake
         if any(skip in relpath for skip in ["Archive/", "Scratch/", ".lake/"]):
             continue
-
-        if mode == "rh":
-            # Only include files matching critical path patterns
-            # Match against the Cathedral-relative path
-            cat_relpath = str(lean_file.relative_to(CATHEDRAL_DIR))
-            if not any(pat in cat_relpath for pat in CRITICAL_PATH_PATTERNS):
-                continue
 
         lines = lean_file.read_text().count('\n')
         files.append((relpath, lines))
@@ -155,8 +156,8 @@ def write_dumps(bins: list[list[tuple[str, int]]], outdir: str, mode: str, prefi
     for old in Path(outdir).glob("*.txt"):
         old.unlink()
 
-    mode_desc = "Critical Path (RH chain)" if mode == "rh" else "Full Active Codebase"
-    upload_hint = "Upload all files." if len(bins) <= 10 else ""
+    mode_desc = "Critical Path (RH chain — import-graph traced)" if mode == "rh" else "Full Active Codebase"
+    upload_hint = "Upload all 10 files for complete coverage." if len(bins) <= 10 else ""
     total = len(bins)
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -176,6 +177,7 @@ def write_dumps(bins: list[list[tuple[str, int]]], outdir: str, mode: str, prefi
             f.write(header)
 
             for relpath, line_count in bin_files:
+                # Resolve the actual file path
                 fullpath = Path("proofs") / relpath
                 f.write(f"\n{'='*64}\n")
                 f.write(f"FILE: {relpath}\n")

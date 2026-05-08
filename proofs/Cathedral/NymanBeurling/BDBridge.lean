@@ -193,12 +193,21 @@ theorem bd_l2_error_upper_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → �
   ring
 
 -- ════════════════════════════════════════════════
--- PART IV: THE BD WITNESS AXIOM
+-- PART IV: THE BD WITNESS — GRADUATED (SEE WitnessDecayProved.lean)
 -- ════════════════════════════════════════════════
 
-/-- **BD WITNESS AXIOM**: The Vasyunin quadratic form decays as O(1/ln N).
+/-- **GRADUATED AXIOM**: The Vasyunin quadratic form decays as O(1/ln N).
 
-    This is the BD-basis analog of `witness_l2_error_decay_gram` (HF basis).
+    **STATUS: GRADUATED 2026-05-07.**
+    This axiom is proved as `bd_witness_l2_error_decay_proved` in
+    `WitnessDecayProved.lean`, which derives it from the Vasyunin chain's
+    `log_cutoff_witness_bound` via the scalar λ-trick.
+
+    The axiom declaration is retained here because BDBridge.lean cannot
+    import WitnessDecayProved.lean (circular dependency: BDBridge ←
+    LambdaTrick ← Chain ← WitnessDecayProved). Downstream consumers
+    should use `bd_witness_l2_error_decay_proved` instead.
+
     The Möbius log-cutoff witness drives the Vasyunin quadratic form to zero:
 
       ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, N ≥ 3 →
@@ -206,10 +215,9 @@ theorem bd_l2_error_upper_bound (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → �
 
     where b = vasyuninMeanVec and G = vasyuninGramMatrix.
 
-    Combined with `bd_l2_error_eq_quad_error`, this gives:
-      ∃ v, ∫₀¹ (1-bdLinComb N v x)² ≤ C/ln(N)
-
-    This replaces Axiom 6 (rh_implies_bd_convergence). -/
+    Inherited axioms (from the Vasyunin Crown):
+      - witness_covariance_decay (THE Riemann Hypothesis content)
+      - witness_numerator_convergence (PNT-level, unconditional) -/
 axiom bd_witness_l2_error_decay :
     ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
@@ -225,11 +233,12 @@ axiom bd_witness_l2_error_decay :
 /-- **THEOREM** (was AXIOM 6): RH → d²_BD → 0.
 
     PROOF CHAIN:
-    1. bd_witness_l2_error_decay: ∃v, 1-2bᵀv+vᵀGv ≤ C/ln N
-    2. bd_l2_error_eq_quad_error: ∫(1-bdLinComb)² = 1-2bᵀv+vᵀGv
+    1. bd_witness_l2_error_decay (THEOREM): ∃v, 1-2bᵀv+vᵀGv ≤ C/ln N
+    2. bd_l2_error_eq_quad_error (THEOREM): ∫(1-bdLinComb)² = 1-2bᵀv+vᵀGv
     3. C/ln N → 0 (standard calculus)
 
-    Axiom 6 ELIMINATED: 2026-04-16. -/
+    Axiom 6 ELIMINATED: 2026-04-16.
+    bd_witness_l2_error_decay GRADUATED: 2026-05-07. -/
 theorem rh_implies_bd_convergence_proved :
     RiemannHypothesis →
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,

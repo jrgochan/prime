@@ -19,6 +19,8 @@ members = [
     "experiments/littlewood-maneuver",
     "experiments/mellin-certificate",
     "experiments/moebius-microscope",
+    "experiments/ramanujan-dial",
+    "experiments/t-convergence",
     "experiments/nb-distance",
     "experiments/nb-distance-gpu",
     "experiments/nb-witness-scan",
@@ -38,6 +40,7 @@ members = [
     "experiments/van-hove-probe",
     "experiments/vasyunin",
     "experiments/vasyunin-convergence",
+    "experiments/covariance-decay",
     "experiments/vasyunin-integral",
 
     # ═══════════════════════════════════════════════

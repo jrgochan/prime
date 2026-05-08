@@ -1,0 +1,26 @@
+═══ POINTWISE PROFILE f_N(x) — N=500 ═══
+Grid: 50000 points on (0,1)
+Active weights: 306 (squarefree k=2..500)
+
+EXTREMA:
+  max f_N(x) = 3.608372003449004e0  at x = 0.0083500000
+  min f_N(x) = -1.670103172730248e0  at x = 0.0017900000
+  max overshoot (f_N - 1) = 2.608372003449004e0  at x = 0.0083500000
+
+INTEGRALS (midpoint rule, 50000 pts):
+  ∫ f_N(x) dx      = 4.991829978975326e-1  (= bᵀv)
+  ∫ f_N(x)² dx     = 5.013906081726371e-1  (= vᵀGv = ‖f_N‖²)
+  ∫ (f_N(x)-1)² dx = 5.030246123775720e-1  (= d²_N)
+  d²_N (1-2bv+vGv) = 5.030246123775720e-1
+
+GRAM BOUND:
+  vᵀGv         = 5.013906081726371e-1
+  1 - vᵀGv     = 4.986093918273629e-1
+  gap·ln(N)    = 3.098661964399693e0
+  Axiom sat?   = YES
+
+POINTWISE BOUND:
+  Points with f_N > 1: 11458 / 50000 (22.92%)
+  Points with f_N < 0: 1850 / 50000 (3.70%)
+  If f_N ≤ 1+ε: ε = 2.608372003449004e0
+  Then ‖f_N‖² ≤ (1+ε)² = 1.302034851527458e1

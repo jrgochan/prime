@@ -4,21 +4,27 @@ import Cathedral.Gram.FractIntegral
 /-!
   Cathedral/Gram/Diagonal.lean
 
-  Diagonal Gram matrix entries G(k,k) = ∫₀¹ {1/(kx)}² dx.
-  Computes the exact formula via Stirling numbers and proves
-  G(k,k) = 1 - (1 + 1/2 + ... + 1/k)/k + O(log²k/k²).
+  Diagonal bounds for the **High-Frequency basis** {j/x}.
+  These results bound hfGramDiag j = ∫₀¹ {j/x}² dx, NOT the
+  Cathedral gramEntry which uses the Báez-Duarte basis {1/(jx)}.
 
   NOT on the v11 crown path.
+  
+  HISTORY: Prior to 2026-05-07, gramEntry used the HF basis {j/x}.
+  After migration to the BD basis {1/(jx)}, this file's internal
+  definitions were decoupled from gramEntry to preserve the proofs.
 -/
 
 /-! # Cathedral.GramDiag
 
-## Diagonal Gram entry upper bound: `gramEntry j j ≤ 1/3 + 1/j²`
+## HF diagonal upper bound: `hfGramDiag j ≤ 1/3 + 1/j²`
+
+Where `hfGramDiag j = ∫₀¹ {j/x}² dx` (High-Frequency basis).
 
 ### Proof architecture
 ```
-gram_entry_diag_upper' (MAIN THEOREM)
-  ├── gramEntry_le_basis: gramEntry j j ≤ ∫₀¹ {j/x} dx
+hf_gram_diag_upper' (MAIN THEOREM)
+  ├── hfGramDiag_le_basis: hfGramDiag j ≤ ∫₀¹ {j/x} dx
   │     └── fract_mul_self_le: {a}·{a} ≤ {a} (pointwise)
   ├── basis_integral_upper: ∫₀¹ {j/x} dx ≤ 1/2
   │     └── correction_lower: k·Σ(1/n - log(1+1/n)) ≥ 1/2
@@ -26,13 +32,60 @@ gram_entry_diag_upper' (MAIN THEOREM)
   │           │     ├── log2_le (n=1): log(2) ≤ 3/4 via exp(3/20)⁵ ≥ 2
   │           │     └── per_term_nge2 (n≥2): via Taylor upper bound on log
   │           └── telescoping: Σ 1/(2n(n+1)) = 1/(2k)
-  └── gramEntry_le_third (j≥3): gramEntry j j ≤ 1/3
-        └── piece integral decomposition (TODO)
+  └── hfGramDiag_le_third (j≥3): hfGramDiag j ≤ 1/3
+        └── piece integral decomposition
 ```
 -/
 
 noncomputable section
 open Real MeasureTheory Set
+
+/-- The HF (High-Frequency) diagonal Gram entry: ∫₀¹ {j/x}² dx.
+    This is the diagonal inner product for the HF basis h_k(x) = {k/x},
+    which is NOT the Cathedral gramEntry (that uses the BD basis {1/(kx)}).
+    Preserved here because the piece integral decomposition and Taylor
+    bound infrastructure is fully formalized for this basis. -/
+noncomputable def hfGramDiag (j : ℕ) : ℝ :=
+  ∫ x in (0:ℝ)..1, Int.fract ((j : ℝ) / x) * Int.fract ((j : ℝ) / x)
+
+/-- The HF (High-Frequency) Gram entry: ∫₀¹ {j/x}·{k/x} dx.
+    General 2-argument version of the HF inner product.
+    NOT the same as Cathedral gramEntry (which uses {1/(jx)}).
+    Used by OffDiagonal.lean and VasyuninExpansion.lean. -/
+noncomputable def hfGramEntry (j k : ℕ) : ℝ :=
+  ∫ x in (0:ℝ)..1, Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)
+
+/-- hfGramDiag j = hfGramEntry j j (by definition). -/
+lemma hfGramDiag_eq_hfGramEntry (j : ℕ) : hfGramDiag j = hfGramEntry j j := rfl
+
+/-- Products of HF fractional parts {j/x}·{k/x} are integrable on any interval. -/
+lemma hf_fract_prod_intervalIntegrable (j k : ℕ) (a b : ℝ) :
+    IntervalIntegrable (fun x => Int.fract ((j:ℝ)/x) * Int.fract ((k:ℝ)/x)) volume a b := by
+  apply IntervalIntegrable.mono_fun
+    (intervalIntegral.intervalIntegrable_const (c := (1:ℝ)))
+  · have h1 : Measurable (fun x : ℝ => Int.fract ((j:ℝ) / x)) :=
+      measurable_fract_real.comp (measurable_const.div measurable_id)
+    have h2 : Measurable (fun x : ℝ => Int.fract ((k:ℝ) / x)) :=
+      measurable_fract_real.comp (measurable_const.div measurable_id)
+    exact (h1.mul h2).aestronglyMeasurable.restrict
+  · filter_upwards with x
+    rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)),
+        Real.norm_eq_abs, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1)]
+    calc Int.fract ((j:ℝ)/x) * Int.fract ((k:ℝ)/x)
+        ≤ 1 * 1 := by
+          apply mul_le_mul
+          · exact le_of_lt (Int.fract_lt_one _)
+          · exact le_of_lt (Int.fract_lt_one _)
+          · exact Int.fract_nonneg _
+          · linarith
+      _ = 1 := mul_one 1
+
+/-- hfGramEntry is non-negative (integrand is pointwise non-negative). -/
+lemma hfGramEntry_nonneg (j k : ℕ) : 0 ≤ hfGramEntry j k := by
+  unfold hfGramEntry
+  apply intervalIntegral.integral_nonneg (by norm_num : (0:ℝ) ≤ 1)
+  intro x _
+  exact mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
 
 -- ════════════════════════════════════════════════
 -- POINTWISE BOUND
@@ -204,10 +257,10 @@ theorem basis_integral_upper (k : ℕ) (hk : 1 ≤ k) :
 -- GRAMENTRY DIAGONAL BOUNDS
 -- ════════════════════════════════════════════════
 
-/-- gramEntry j j ≤ ∫₀¹ {j/x} dx via pointwise {u}² ≤ {u}. -/
-lemma gramEntry_le_basis (j : ℕ) :
-    gramEntry j j ≤ ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) := by
-  unfold gramEntry
+/-- hfGramDiag j ≤ ∫₀¹ {j/x} dx via pointwise {u}² ≤ {u}. -/
+lemma hfGramDiag_le_basis (j : ℕ) :
+    hfGramDiag j ≤ ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) := by
+  unfold hfGramDiag
   apply intervalIntegral.integral_mono_on (by norm_num : (0:ℝ) ≤ 1)
   · -- Integrability of {j/x}²
     apply IntervalIntegrable.mono_fun
@@ -414,19 +467,19 @@ lemma fract_sq_tail_bound (j : ℕ) (ε : ℝ) (hε : 0 ≤ ε) :
       ≤ 1 * |ε - 0| := intervalIntegral.norm_integral_le_of_norm_le_const h
     _ = ε := by rw [sub_zero, abs_of_nonneg hε, one_mul]
 
-/-- **gramEntry j j ≤ 1/3 for j ≥ 3**.
+/-- **hfGramDiag j ≤ 1/3 for j ≥ 3**.
     Proof by piece integral decomposition + Taylor bound.
-    For each M: gramEntry ≤ 1/3 + 2j/(3(j+M+1)), and taking M → ∞ gives ≤ 1/3. -/
-lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
-    gramEntry j j ≤ 1 / 3 := by
+    For each M: hfGramDiag ≤ 1/3 + 2j/(3(j+M+1)), and taking M → ∞ gives ≤ 1/3. -/
+lemma hfGramDiag_le_third (j : ℕ) (hj : 3 ≤ j) :
+    hfGramDiag j ≤ 1 / 3 := by
   have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
-  -- For each M, bound gramEntry by partial sum + tail
-  have hbound : ∀ M : ℕ, gramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by
+  -- For each M, bound hfGramDiag by partial sum + tail
+  have hbound : ∀ M : ℕ, hfGramDiag j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) := by
     intro M
     set ε := (j:ℝ) / ((j:ℝ) + (M:ℝ) + 1)
     have hε_pos : 0 < ε := by positivity
-    -- gramEntry = ∫₀^ε + ∫_ε^1
-    have hsplit : gramEntry j j =
+    -- hfGramDiag = ∫₀^ε + ∫_ε^1
+    have hsplit : hfGramDiag j =
       (∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) +
       (∫ x in ε..1, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x)) :=
       (intervalIntegral.integral_add_adjacent_intervals
@@ -497,13 +550,13 @@ lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
     linarith
   -- Now take the limit: for any ε > 0, choose M large enough.
   by_contra h_neg; push Not at h_neg
-  obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
+  obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(hfGramDiag j - 1/3)))
   have hM := hbound N₀
-  have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith
-  have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < gramEntry j j - 1/3 := by
+  have hδ_pos : 0 < hfGramDiag j - 1/3 := by linarith
+  have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < hfGramDiag j - 1/3 := by
     rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*((j:ℝ)+(N₀:ℝ)+1))]
-    have h1 : 2*(j:ℝ) < 3*(gramEntry j j - 1/3)*N₀ := by
-      rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(gramEntry j j - 1/3))] at hN₀; linarith
+    have h1 : 2*(j:ℝ) < 3*(hfGramDiag j - 1/3)*N₀ := by
+      rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(hfGramDiag j - 1/3))] at hN₀; linarith
     nlinarith [show (0:ℝ) ≤ (j:ℝ) from by positivity]
   linarith
 
@@ -511,20 +564,20 @@ lemma gramEntry_le_third (j : ℕ) (hj : 3 ≤ j) :
 -- MAIN THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM**: gramEntry j j ≤ 1/3 + 1/j² for all j ≥ 1.
-    - j ∈ {1, 2}: gramEntry ≤ 1/2 ≤ 1/3 + 1/j² (arithmetic).
-    - j ≥ 3: gramEntry ≤ 1/3 ≤ 1/3 + 1/j² (piece decomposition). -/
-theorem gram_entry_diag_upper' (j : ℕ) (hj : 1 ≤ j) :
-    gramEntry j j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2) := by
+/-- **THEOREM**: hfGramDiag j ≤ 1/3 + 1/j² for all j ≥ 1.
+    - j ∈ {1, 2}: hfGramDiag ≤ 1/2 ≤ 1/3 + 1/j² (arithmetic).
+    - j ≥ 3: hfGramDiag ≤ 1/3 ≤ 1/3 + 1/j² (piece decomposition). -/
+theorem hf_gram_diag_upper' (j : ℕ) (hj : 1 ≤ j) :
+    hfGramDiag j ≤ 1 / 3 + 1 / ((j : ℝ) ^ 2) := by
   by_cases hle : j ≤ 2
-  · -- j ∈ {1, 2}: gramEntry ≤ 1/2 ≤ 1/3 + 1/j²
-    have h_half := calc gramEntry j j
-        ≤ ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) := gramEntry_le_basis j
+  · -- j ∈ {1, 2}: hfGramDiag ≤ 1/2 ≤ 1/3 + 1/j²
+    have h_half := calc hfGramDiag j
+        ≤ ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ) / x) := hfGramDiag_le_basis j
       _ ≤ 1 / 2 := basis_integral_upper j hj
     interval_cases j <;> simp_all <;> norm_num <;> linarith
-  · -- j ≥ 3: gramEntry j j ≤ 1/3 suffices since 1/j² ≥ 0
+  · -- j ≥ 3: hfGramDiag j ≤ 1/3 suffices since 1/j² ≥ 0
     push Not at hle
-    have : gramEntry j j ≤ 1 / 3 := gramEntry_le_third j (by omega)
+    have : hfGramDiag j ≤ 1 / 3 := hfGramDiag_le_third j (by omega)
     linarith [show (0:ℝ) ≤ 1 / (j:ℝ)^2 from by positivity]
 
 end

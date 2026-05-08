@@ -32,27 +32,34 @@ open Complex Real
 /-- The fractional part {x} = x - ⌊x⌋, using Mathlib's Int.fract -/
 def fracPart' (x : ℝ) : ℝ := Int.fract x
 
-/-- **DEPRECATED**: This uses the original Nyman-Beurling basis h_k(x) = {k/x}
-    with θ = k > 1, which leads to the High-Frequency Divergence Trap.
-    The Periodicity Miracle causes these basis functions to span L²(0,1)
-    unconditionally, regardless of RH. Superseded by `bdLinComb` in
-    BDMellin.lean which uses the correct Báez-Duarte basis {1/(kx)}.
+/-- **ARCHIVED (HF basis)**: The original Nyman-Beurling basis h_k(x) = {k/x}
+    with θ = k > 1. This basis leads to the High-Frequency Divergence Trap:
+    the Periodicity Miracle causes these functions to span L²(0,1)
+    unconditionally, regardless of RH.
+
+    The Cathedral now uses the Báez-Duarte basis {1/(kx)} throughout.
     See: docs/ai/claude/exploration/The θ>1 Trap.md -/
 def nbBasis' (k : ℕ) (x : ℝ) : ℝ := Int.fract ((k : ℝ) / x)
 
-/-- Gram matrix entry G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx
-    This is the inner product of Báez-Duarte basis functions h_j, h_k
-    in L²(0,1). The Vasyunin cotangent formula computes this exactly. -/
-noncomputable def gramEntry (j k : ℕ) : ℝ :=
-  ∫ x in (0:ℝ)..1, Int.fract ((j : ℝ) / x) * Int.fract ((k : ℝ) / x)
+/-- Gram matrix entry G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx.
+    Inner product of Báez-Duarte basis functions h_j(x) = {1/(jx)},
+    h_k(x) = {1/(kx)} in L²(0,1).
 
-/-- The (N-1)×(N-1) Gram matrix with entries G[j,k] for j,k ∈ {2,...,N}.
-    This is the Gram matrix of the Nyman-Beurling basis functions. -/
+    The Vasyunin cotangent formula computes this exactly.
+
+    HISTORY: Prior to 2026-05-07, this used the High-Frequency basis {j/x}
+    (the "θ > 1 trap", aka The Original Sin). Migrated to the correct
+    Báez-Duarte basis to unify the Gram/Spectral and Vasyunin/Spatial paths. -/
+noncomputable def gramEntry (j k : ℕ) : ℝ :=
+  ∫ x in (0:ℝ)..1, Int.fract (1 / ((j : ℝ) * x)) * Int.fract (1 / ((k : ℝ) * x))
+
+/-- The (N-1)×(N-1) Gram matrix with entries G[j,k] for j,k ∈ {1,...,N-1}.
+    Báez-Duarte basis: G[i,j] = ∫₀¹ {1/((i+1)x)}{1/((j+1)x)} dx. -/
 noncomputable def gramMatrix (N : ℕ) : Matrix (Fin (N - 1)) (Fin (N - 1)) ℝ :=
   Matrix.of (fun i j => gramEntry (i.val + 1) (j.val + 1))
 
 /-- The Gram matrix is Hermitian (symmetric over ℝ), since
-    G[j,k] = ∫ {j/x}{k/x} dx = ∫ {k/x}{j/x} dx = G[k,j] -/
+    G[j,k] = ∫ {1/(jx)}{1/(kx)} dx = ∫ {1/(kx)}{1/(jx)} dx = G[k,j]. -/
 lemma gramMatrix_hermitian (N : ℕ) :
     (gramMatrix N).IsHermitian := by
   unfold Matrix.IsHermitian
@@ -62,7 +69,7 @@ lemma gramMatrix_hermitian (N : ℕ) :
 
 /-- **Gram entry commutativity**: G(j,k) = G(k,j).
     Direct corollary of the fact that multiplication is commutative
-    under the integral: ∫ {j/x}·{k/x} dx = ∫ {k/x}·{j/x} dx. -/
+    under the integral: ∫ {1/(jx)}·{1/(kx)} dx = ∫ {1/(kx)}·{1/(jx)} dx. -/
 theorem gramEntry_comm (j k : ℕ) : gramEntry j k = gramEntry k j := by
   unfold gramEntry; congr 1; ext x; ring
 
@@ -130,14 +137,17 @@ noncomputable def cosAlignment (N : ℕ) : ℝ :=
   else 0
 
 /-- The inner product vector b_i = ⟨1_{(0,1)}, h_{i+1}⟩ = ∫₀¹ {1/((i+1)x)} dx.
-    Used in the Nyman-Beurling distance formula. -/
+    Used in the Nyman-Beurling distance formula.
+
+    HISTORY: Prior to 2026-05-07, used {(i+1)/x} (HF basis). Now uses
+    the correct Báez-Duarte basis {1/((i+1)x)}. -/
 noncomputable def basisInnerProd (N : ℕ) : Fin (N - 1) → ℝ :=
-  fun i => ∫ x in (0:ℝ)..1, Int.fract (((i.val + 1 : ℕ) : ℝ) / x)
+  fun i => ∫ x in (0:ℝ)..1, Int.fract (1 / (((i.val + 1 : ℕ) : ℝ) * x))
 
 /-- Nyman-Beurling distance squared: d_N² = 1 - bᵀ G_N⁻¹ b.
-    This is the squared L²(0,1) distance from the indicator 1_{(0,1)}
-    to the span of Nyman-Beurling basis functions {2/x},...,{N/x}.
-    By the Nyman-Beurling theorem, d_N → 0 iff RH holds. -/
+    Squared L²(0,1) distance from 1_{(0,1)} to span{h_k : k=1,...,N-1}
+    where h_k(x) = {1/(kx)} (Báez-Duarte basis).
+    By the Nyman-Beurling-Báez-Duarte theorem, d_N → 0 iff RH holds. -/
 noncomputable def nbDistSq' (N : ℕ) : ℝ :=
   1 - dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N))
 
@@ -247,11 +257,12 @@ noncomputable def liouvilleProjection (N : ℕ) : ℝ :=
     Real.sqrt (∑ i ∈ min_idx, (dotProduct liouville_hat (herm.eigenvectorBasis i : Fin (N - 1) → ℝ))^2)
   else 0
 
-/-- **DEPRECATED**: This linear combination uses nbBasis' (the wrong basis {k/x}
-    with θ = k > 1). The crown theorem uses `bdLinComb` from BDMellin.lean
-    which uses the correct Báez-Duarte basis {1/(kx)} with θ = 1/k ≤ 1.
-    Retained only for Archive/ compilation compatibility. -/
+/-- Linear combination in the Báez-Duarte basis:
+    f(x) = Σ wᵢ · {1/((i+1)x)}.
+
+    HISTORY: Prior to 2026-05-07, used the HF basis {(i+1)/x}.
+    Migrated to the correct Báez-Duarte basis {1/((i+1)x)}. -/
 noncomputable def nbLinComb (N : ℕ) (w : Fin (N - 1) → ℝ) (x : ℝ) : ℝ :=
-  ∑ i : Fin (N - 1), w i * Int.fract ((↑(i.val + 1) : ℝ) / x)
+  ∑ i : Fin (N - 1), w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))
 
 end

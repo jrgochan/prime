@@ -1,0 +1,21 @@
+[package]
+name = "t-convergence"
+version = "0.1.0"
+edition = "2021"
+description = """
+T-Convergence Explorer: empirical analysis of the truncation horizon T for
+Gram matrix entries G[j,k] = ∫₀¹ {1/(jx)}{1/(kx)} dx.
+
+Confirms T⁻² convergence via the Euler-Maclaurin tail, proves T is independent
+of matrix dimension N, and calibrates precision requirements for DD builds.
+"""
+
+[[bin]]
+name = "t-convergence"
+path = "src/main.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+rug = { version = "1.26", features = ["float"] }
+serde_json = "1"

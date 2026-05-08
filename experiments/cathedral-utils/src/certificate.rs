@@ -5,7 +5,31 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+
+/// Get the results directory for the current crate.
+///
+/// Resolves to `<crate-root>/results/` using `CARGO_MANIFEST_DIR`.
+/// Creates the directory if it doesn't exist.
+pub fn results_dir() -> PathBuf {
+    let manifest = env!("CARGO_MANIFEST_DIR");
+    let dir = PathBuf::from(manifest).join("results");
+    fs::create_dir_all(&dir).ok();
+    dir
+}
+
+/// Get the results directory for a named experiment crate.
+///
+/// Resolves to `experiments/<name>/results/` relative to the workspace root.
+pub fn results_dir_for(name: &str) -> PathBuf {
+    let manifest = env!("CARGO_MANIFEST_DIR"); // e.g. .../experiments/cathedral-utils
+    let workspace = PathBuf::from(manifest)
+        .parent().unwrap_or(Path::new("."))  // .../experiments/
+        .to_path_buf();
+    let dir = workspace.join(name).join("results");
+    fs::create_dir_all(&dir).ok();
+    dir
+}
 
 /// Write a TSV file with headers and rows.
 pub fn write_tsv(path: &str, headers: &[&str], rows: &[Vec<String>]) {

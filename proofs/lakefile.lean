@@ -4,8 +4,9 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
--- PrimeNumberTheoremAnd temporarily disabled for Mathlib v4.29 compatibility
--- (only used by Cathedral.PNT.Bridge and Cathedral.PNT.LogBridge, both off-crown)
+-- PrimeNumberTheoremAnd: disabled for Mathlib v4.29 compatibility
+-- PNTAnd is pinned to Lean 4.28.0; Fourier.lean breaks on v4.29 (integral_const_mul API)
+-- When PNTAnd updates to v4.29+, re-enable to graduate pnt_mu_div_k axiom
 -- require PrimeNumberTheoremAnd from git
 --   "https://github.com/AlexKontorovich/PrimeNumberTheoremAnd.git" @ "main"
 
@@ -70,8 +71,12 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Augmented.DiagBound,
     `Cathedral.Vasyunin.Augmented.CovarianceAbel,
     `Cathedral.Vasyunin.Proof.LambdaTrick,
+    -- Witness numerator graduation (axiom → theorem via PNT, May 2026)
+    `Cathedral.Vasyunin.Proof.WitnessNumeratorProved,
     `Cathedral.Vasyunin.Proof.WitnessAsymptotics,
     `Cathedral.Vasyunin.Proof.WitnessConditional,
+    `Cathedral.Vasyunin.Proof.GramBoundReduction,
+    `Cathedral.Vasyunin.Proof.GramBoundDirect,
     `Cathedral.Vasyunin.Proof.Chain,
     -- Gram integral analysis
     `Cathedral.Gram.FractIntegral,
@@ -89,7 +94,9 @@ lean_lib «Cathedral» where
     -- Spectral exploration (Exploration 19, NOT on crown path)
     `Cathedral.Spectral.ResidueDecomposition,
     `Cathedral.Spectral.ParticipationRatio,
+    `Cathedral.Spectral.HeisenbergBypass,
     -- Structural layer
+    `Cathedral.Structural.BDFloorArithmetic,
     `Cathedral.Structural.Independence,
     `Cathedral.Structural.Eigenvalue,
     `Cathedral.Structural.Structural,
@@ -136,6 +143,7 @@ lean_lib «Cathedral» where
     -- GramWitness archived to Cathedral/Archive/Universe1/ (April 25, 2026)
     -- witness_l2_error_decay_gram axiom ELIMINATED
     `Cathedral.NymanBeurling.BDBridge,
+    `Cathedral.NymanBeurling.WitnessDecayProved,
     `Cathedral.NymanBeurling.BDBypass,
     `Cathedral.NymanBeurling.VasyuninBypass,
     `Cathedral.Assembly.DirectL2Crown,
@@ -151,8 +159,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
     `Cathedral.Assembly.Assembly,
-    -- PNT bridge (single axiom consolidation)
-    -- TEMPORARILY DISABLED: PrimeNumberTheoremAnd incompatible with Mathlib v4.29
+    -- PNT bridge (disabled: PNTAnd pinned to Lean 4.28, needs Fourier.lean fix)
     -- `Cathedral.PNT.Bridge,
     -- Mertens graduation (axiom → theorem via Perron)
     `Cathedral.Perron.MertensFromPerron,
@@ -229,8 +236,7 @@ lean_lib «Cathedral» where
     `Cathedral.IntegralBasis.BaezDuarte,
     `Cathedral.IntegralBasis.Quantitative,
     `Cathedral.Analysis.IntervalCalc,
-    -- PNT LogBridge (Dirichlet convolution identity, 1 sorry)
-    -- TEMPORARILY DISABLED: PrimeNumberTheoremAnd incompatible with Mathlib v4.29
+    -- PNT LogBridge (Dirichlet convolution identity, 1 sorry, needs PNTAnd)
     -- `Cathedral.PNT.LogBridge,
     -- Number theory (Dirichlet convolution identities, Exploration 13)
     `Cathedral.NumberTheory.DirichletConvolution,

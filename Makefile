@@ -174,12 +174,12 @@ setup-gmp: ## Install GMP + MPFR (for high-precision experiments)
 # 📦  EXPORT & UTILITIES
 # ────────────────────────────────────────────
 
-dump: ## Generate balanced 10-part cathedral dump (all files)
+dump: ## Generate balanced 10-part cathedral dump (all active files)
 	@$(ENV) require python3
-	python3 scripts/cathedral_dump.py proofs/Cathedral \
-		--parts 10 --output-dir docs/exports/full --prefix cathedral
+	python3 scripts/cathedral_dump.py --mode all \
+		--parts 10 --outdir docs/exports/full --prefix cathedral
 
-dump-rh: ## Generate RH-critical path dump (2 crown axioms, Mellin Crown)
+dump-rh: ## Generate RH-critical path dump (import-traced, 10 files for Gemini)
 	@$(ENV) require python3
 	python3 scripts/cathedral_dump.py --mode rh \
 		--parts 10 --outdir docs/exports/critical-path \

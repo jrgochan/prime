@@ -36,8 +36,9 @@ theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
   intro h_eq
   have h_zero : basisInnerProd N ⟨0, by omega⟩ = 0 := by rw [h_eq]; rfl
   simp only [basisInnerProd] at h_zero
-  set f := (fun x : ℝ => Int.fract (((0 + 1 : ℕ) : ℝ) / x)) with hf_def
-  have hf_meas : Measurable f := (measurable_const.div measurable_id).fract
+  set f := (fun x : ℝ => Int.fract (1 / (((0 + 1 : ℕ) : ℝ) * x))) with hf_def
+  have hf_meas : Measurable f :=
+    (measurable_const.div (measurable_const.mul measurable_id)).fract
   have hf_bound : ∀ x : ℝ, ‖f x‖ ≤ ‖(1 : ℝ)‖ := fun x => by
     simp only [f, Real.norm_eq_abs, abs_one,
       abs_of_nonneg (Int.fract_nonneg _)]
@@ -52,10 +53,21 @@ theorem basis_inner_prod_nonzero (N : ℕ) (hN : 2 ≤ N) :
   have hpos : ∀ x, x ∈ Set.Ioo c (1:ℝ) → 0 < f x := by
     intro x ⟨hx_lo, hx_hi⟩
     simp only [f]
-    have h12 : (↑(1:ℕ) : ℝ) / (↑(1:ℕ) + 1) < x := by norm_num; exact hx_lo
-    rw [fract_eq_sub (le_refl 1) (le_refl 1) h12 hx_hi]
+    -- {1/(1*x)} = {1/x} and for x ∈ (1/2, 1), 1/x ∈ (1, 2)
+    -- so fract(1/x) = 1/x - 1 > 0
     have hxp : 0 < x := by linarith
-    have : (1:ℝ) / x > 1 := by rw [gt_iff_lt, lt_div_iff₀ hxp]; linarith
+    -- Simplify: 1/((0+1:ℕ)*x) = 1/x  (since (0+1:ℕ) = 1)
+    have h_simp : (1 : ℝ) / (((0 + 1 : ℕ) : ℝ) * x) = 1 / x := by simp
+    rw [h_simp]
+    have h1x_gt1 : (1:ℝ) < 1 / x := by rw [one_div]; exact one_lt_inv_iff₀.mpr ⟨hxp, hx_hi⟩
+    have h1x_lt2 : 1 / x < 2 := by
+      rw [div_lt_iff₀ hxp]
+      have : (1:ℝ)/2 < x := hx_lo
+      linarith
+    have h_floor : ⌊(1:ℝ) / x⌋ = 1 := by
+      rw [Int.floor_eq_iff]
+      constructor <;> push_cast <;> linarith
+    rw [Int.fract, h_floor]; push_cast
     linarith
   have hi_sub : IntervalIntegrable f MeasureTheory.volume c 1 :=
     hf_01.mono_set (by

@@ -302,7 +302,7 @@ theorem weyl_inequality (N : ℕ) :
     The structural advantage of the Schur bridge: it's a statement
     about the weight matrix W = ⟨φ(j), φ(k)⟩ alone, not about the
     Gram matrix entries. The constant C depends only on the octonionic
-    partition structure, not on the arithmetic of {j/x}. -/
+    partition structure, not on the arithmetic of {1/(jx)}. -/
 axiom schur_bridge :
     ∃ C : ℝ, 0 < C ∧ ∀ N : ℕ, 10 ≤ N →
     C * lambdaMinOct N ≤ lambdaMin N

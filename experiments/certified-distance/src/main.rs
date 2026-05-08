@@ -89,6 +89,7 @@ fn main() {
                 "─".repeat(8), "─".repeat(8), "─".repeat(10), "─".repeat(10), "─".repeat(40));
             for s in &sources {
                 let format = match s.format {
+                    cathedral_utils::ooc::MatrixFormat::Hpdf => "HPDF",
                     cathedral_utils::ooc::MatrixFormat::Ooc => "OOC",
                     cathedral_utils::ooc::MatrixFormat::DdCache => "DD",
                     cathedral_utils::ooc::MatrixFormat::Legacy => "Legacy",
@@ -213,6 +214,11 @@ fn default_search_paths() -> Vec<PathBuf> {
         // Standard experiment cache
         PathBuf::from("../cache"),
         PathBuf::from("../../experiments/cache"),
+        // HPDF cache subdirectory
+        PathBuf::from("../cache/hpdf"),
+        PathBuf::from("../../experiments/cache/hpdf"),
+        // Cathedral-utils cache (where hpdf-verify writes)
+        PathBuf::from("../cathedral-utils/cache/hpdf"),
         // OOC cache on NVMe
         PathBuf::from("/mnt/d/cathedral-cache"),
         // Archive on HDD
@@ -222,6 +228,8 @@ fn default_search_paths() -> Vec<PathBuf> {
     // Add home-relative paths
     if let Ok(home) = std::env::var("HOME") {
         paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cache", home)));
+        paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cache/hpdf", home)));
+        paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cathedral-utils/cache/hpdf", home)));
     }
 
     // Environment override

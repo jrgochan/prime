@@ -36,25 +36,25 @@ lemma fract_prod_le_avg_sq (a b : ℝ) :
 
 /-- G_{j,k} ≤ (G_{j,j}+G_{k,k})/2 by pointwise AM-GM. -/
 theorem gramEntry_le_avg_diag (j k : ℕ) :
-    gramEntry j k ≤ (gramEntry j j + gramEntry k k) / 2 := by
-  have hjj := fract_prod_intervalIntegrable j j
-  have hkk := fract_prod_intervalIntegrable k k
-  have hjk := fract_prod_intervalIntegrable j k
+    hfGramEntry j k ≤ (hfGramEntry j j + hfGramEntry k k) / 2 := by
+  have hjj := hf_fract_prod_intervalIntegrable j j 0 1
+  have hkk := hf_fract_prod_intervalIntegrable k k 0 1
+  have hjk := hf_fract_prod_intervalIntegrable j k 0 1
   have hint := intervalIntegral.integral_mono_on zero_le_one hjk
     ((hjj.add hkk).div_const 2)
     (fun x _ => fract_prod_le_avg_sq ((j:ℝ)/x) ((k:ℝ)/x))
   have hlin : ∫ x in (0:ℝ)..1,
       (Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) +
        Int.fract ((k:ℝ)/x) * Int.fract ((k:ℝ)/x)) / 2 =
-      (gramEntry j j + gramEntry k k) / 2 := by
-    unfold gramEntry
+      (hfGramEntry j j + hfGramEntry k k) / 2 := by
+    unfold hfGramEntry
     rw [show ∀ f : ℝ → ℝ, (fun x => f x / 2) = fun x => (1/2 : ℝ) * f x from
           fun f => funext (fun x => by ring)]
     rw [intervalIntegral.integral_const_mul, show (1:ℝ)/2 = 2⁻¹ from by norm_num,
         inv_mul_eq_div]
     congr 1
     exact intervalIntegral.integral_add hjj hkk
-  rw [show gramEntry j k = ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ)/x) * Int.fract ((k:ℝ)/x) from rfl]
+  rw [show hfGramEntry j k = ∫ x in (0:ℝ)..1, Int.fract ((j:ℝ)/x) * Int.fract ((k:ℝ)/x) from rfl]
   linarith
 
 -- ════════════════════════════════════════════════
@@ -63,10 +63,10 @@ theorem gramEntry_le_avg_diag (j k : ℕ) :
 
 /-- For j,k ≥ 3: G_{j,k} ≤ 1/3. -/
 theorem gramEntry_le_third_offdiag (j k : ℕ) (hj : 3 ≤ j) (hk : 3 ≤ k) :
-    gramEntry j k ≤ 1 / 3 := by
+    hfGramEntry j k ≤ 1 / 3 := by
   have h3 := gramEntry_le_avg_diag j k
-  have h1 := gramEntry_le_third j hj
-  have h2 := gramEntry_le_third k hk
+  have h1 : hfGramEntry j j ≤ 1 / 3 := hfGramDiag_le_third j hj
+  have h2 : hfGramEntry k k ≤ 1 / 3 := hfGramDiag_le_third k hk
   linarith
 
 /-- Arithmetic: 1/3 ≤ 1/4 + 1/(jk) when jk ≤ 12. -/
@@ -84,7 +84,7 @@ private lemma third_le_quarter_plus_inv (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k
 /-- G_{j,k} ≤ 1/4+1/(jk) for j,k ≥ 3 with jk ≤ 12. -/
 theorem gram_entry_offdiag_upper_amgm (j k : ℕ) (hj : 3 ≤ j) (hk : 3 ≤ k)
     (hjk_le : j * k ≤ 12) :
-    gramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ)) :=
+    hfGramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ)) :=
   le_trans (gramEntry_le_third_offdiag j k hj hk)
     (third_le_quarter_plus_inv j k (by omega) (by omega) hjk_le)
 
@@ -192,25 +192,25 @@ private lemma tele_sum (j : ℕ) (hj : 1 ≤ j) (M : ℕ) :
 
 /-- **THEOREM**: G_{j,j} ≤ 1/3 for ALL j ≥ 1. -/
 theorem gramEntry_le_third_all (j : ℕ) (hj : 1 ≤ j) :
-    gramEntry j j ≤ 1 / 3 := by
+    hfGramEntry j j ≤ 1 / 3 := by
   by_cases hj3 : 3 ≤ j
-  · exact gramEntry_le_third j hj3
+  · exact (hfGramDiag_le_third j hj3 : hfGramDiag j ≤ 1/3)
   have hj_pos : (0:ℝ) < (j:ℝ) := Nat.cast_pos.mpr (by omega)
-  suffices hbound : ∀ M : ℕ, gramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) by
+  suffices hbound : ∀ M : ℕ, hfGramEntry j j ≤ 1/3 + 2*(j:ℝ)/(3*((j:ℝ)+(M:ℝ)+1)) by
     by_contra h_neg; push Not at h_neg
-    obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(gramEntry j j - 1/3)))
+    obtain ⟨N₀, hN₀⟩ := exists_nat_gt (2*(j:ℝ)/(3*(hfGramEntry j j - 1/3)))
     have hM := hbound N₀
-    have hδ_pos : 0 < gramEntry j j - 1/3 := by linarith
-    have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < gramEntry j j - 1/3 := by
+    have hδ_pos : 0 < hfGramEntry j j - 1/3 := by linarith
+    have key : 2*(j:ℝ)/(3*((j:ℝ)+(N₀:ℝ)+1)) < hfGramEntry j j - 1/3 := by
       rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*((j:ℝ)+(N₀:ℝ)+1))]
-      have h1 : 2*(j:ℝ) < 3*(gramEntry j j - 1/3)*N₀ := by
-        rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(gramEntry j j - 1/3))] at hN₀; linarith
+      have h1 : 2*(j:ℝ) < 3*(hfGramEntry j j - 1/3)*N₀ := by
+        rw [div_lt_iff₀ (by positivity : (0:ℝ) < 3*(hfGramEntry j j - 1/3))] at hN₀; linarith
       nlinarith [show (0:ℝ) ≤ (j:ℝ) from by positivity]
     linarith
   intro M
   set ε := (j:ℝ) / ((j:ℝ) + (M:ℝ) + 1)
   have hε_pos : 0 < ε := by positivity
-  unfold gramEntry
+  unfold hfGramEntry
   rw [(intervalIntegral.integral_add_adjacent_intervals
     (fract_sq_intervalIntegrable j 0 ε) (fract_sq_intervalIntegrable j ε 1)).symm]
   have htail : ∫ x in (0:ℝ)..ε, Int.fract ((j:ℝ)/x) * Int.fract ((j:ℝ)/x) ≤ ε := by
@@ -240,7 +240,7 @@ theorem gramEntry_le_third_all (j : ℕ) (hj : 1 ≤ j) :
 /-- **MAIN THEOREM**: G_{j,k} ≤ 1/4+1/(jk) for ALL j,k ≥ 1 with jk ≤ 12. -/
 theorem gram_entry_offdiag_upper_all (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k)
     (hjk_le : j * k ≤ 12) :
-    gramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ)) := by
+    hfGramEntry j k ≤ 1 / 4 + 1 / ((j : ℝ) * (k : ℝ)) := by
   have h1 := gramEntry_le_third_all j hj
   have h2 := gramEntry_le_third_all k hk
   have h3 := gramEntry_le_avg_diag j k
@@ -303,10 +303,10 @@ private lemma fract_sum_integrable (j k : ℕ) :
 
 /-- Integral split: G_{j,k} = ∫ centered_prod + ∫ (fract_sum - 1/4). -/
 private lemma gramEntry_integral_split (j k : ℕ) :
-    gramEntry j k =
+    hfGramEntry j k =
     (∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) - 1/2) * (Int.fract ((k:ℝ)/x) - 1/2)) +
     (∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) + Int.fract ((k:ℝ)/x)) / 2 - 1/4) := by
-  unfold gramEntry
+  unfold hfGramEntry
   rw [← intervalIntegral.integral_add (centered_prod_integrable j k) (fract_sum_integrable j k)]
   congr 1; ext x; rw [fract_prod_expand]; ring
 
@@ -345,7 +345,7 @@ private lemma sum_term_le_quarter (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     But actually: G = Cov + rest, rest ≤ 1/4,
     so G ≤ Cov + 1/4 = 1/4 + Cov. -/
 theorem gramEntry_le_quarter_plus_cov (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
-    gramEntry j k ≤ 1/4 +
+    hfGramEntry j k ≤ 1/4 +
     ∫ x in (0:ℝ)..1, (Int.fract ((j:ℝ)/x) - 1/2) * (Int.fract ((k:ℝ)/x) - 1/2) := by
   -- G_{j,k} = Cov + sum_term where sum_term = (I_j+I_k)/2 - 1/4 ≤ 1/4
   -- Wait, we need G ≤ 1/4 + Cov, i.e., sum_term ≤ 1/4

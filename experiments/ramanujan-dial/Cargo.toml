@@ -1,0 +1,21 @@
+[package]
+name = "ramanujan-dial"
+version = "0.1.0"
+edition = "2021"
+description = """
+Ramanujan Dial — The N-Analysis Experiment.
+
+Implements Ramanujan's 1915 thermodynamic construction of Superior Highly
+Composite Numbers to identify which values of N matter for the Nyman-Beurling
+distance d²_N. Features sieve-accelerated HCN discovery, incremental Cholesky
+updates, and bulk-parallel Gram matrix computation via rayon.
+"""
+
+[[bin]]
+name = "ramanujan-dial"
+path = "src/main.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+serde_json = "1"

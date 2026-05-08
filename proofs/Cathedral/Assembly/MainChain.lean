@@ -85,12 +85,12 @@ theorem rh_implies_distance_converges_to_zero :
   rh_implies_bd_convergence_perron
 
 -- ════════════════════════════════════════════════
--- SUPPLEMENTARY: Universe 1 ({k/x}) Helpers
+-- SUPPLEMENTARY: Witness → Infimum Bridge
 -- ════════════════════════════════════════════════
 
 /-- Existential Nyman-Beurling witness implies infimum bound.
 
-    Bridges `{k/x}` basis witnesses to `nbDistSq'` bounds.
+    Bridges `{1/(kx)}` basis witnesses to `nbDistSq'` bounds.
     Used by `CertifiedComputation.lean` for numerical cross-validation. -/
 theorem existential_implies_infimum (N : ℕ) (hN : 2 ≤ N) (ε : ℝ)
     (v : Fin (N - 1) → ℝ)

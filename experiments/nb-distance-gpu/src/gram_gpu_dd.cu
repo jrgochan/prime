@@ -141,37 +141,43 @@ DD dd_ln1p_small(DD x) {
     return dd_mul(x, result);
 }
 
-// DD ln(1+x) for general x > 0, using argument reduction if needed.
-// For x ≤ 0.5: use Taylor directly.
-// For x > 0.5: ln(1+x) = ln(2*(1+x)/2) = ln(2) + ln(1 + (x-1)/(x+1)*2)
-//   Actually simpler: repeatedly halve until small enough.
-//   ln(1+x) = k*ln(2) + ln(1+r) where (1+x) = 2^k * (1+r), |r| ≤ 0.5
+// DD ln(1+x) for general x > 0, using repeated sqrt reduction.
+// Strategy: ln(1+x) = 2^k * ln( (1+x)^{1/2^k} )
+//                    = 2^k * ln(1 + ((1+x)^{1/2^k} - 1))
+// Keep taking sqrt until the argument < 0.5, then use Taylor.
+// Each sqrt costs ~2 Newton iterations (cheap in DD), and we need
+// log2(log2(1+x)) ≈ 7 iterations for x up to 1000.
 __device__
 DD dd_ln1p(DD x) {
-    if (x.hi <= 0.5 && x.hi >= -0.5) {
+    if (x.hi <= 0.5 && x.hi >= -0.4) {
         return dd_ln1p_small(x);
     }
-    // For larger x (can happen when cnt is large relative to pos,
-    // e.g. first few blocks where pos=1 and cnt=j-1 or cnt=k-1):
-    // Use ln(1+x) = ln((1+x)) via repeated squaring reduction.
-    // ln(1+x) = 2 * ln(sqrt(1+x)) = 2 * ln(1 + (sqrt(1+x)-1))
-    // sqrt(1+x) - 1 = x / (sqrt(1+x) + 1) which is smaller than x.
-    DD one_plus_x = dd_add(dd_make(1.0), x);
-    DD sqrt_val = dd_make(sqrt(one_plus_x.hi)); // approximate sqrt
-    // Newton refinement: sqrt_val = 0.5*(sqrt_val + one_plus_x/sqrt_val)
-    sqrt_val = dd_mul(dd_make(0.5), dd_add(sqrt_val, dd_div(one_plus_x, sqrt_val)));
-    sqrt_val = dd_mul(dd_make(0.5), dd_add(sqrt_val, dd_div(one_plus_x, sqrt_val)));
-    // Now ln(1+x) = 2 * ln(sqrt_val) = 2 * ln(1 + (sqrt_val - 1))
-    DD reduced = dd_sub(sqrt_val, dd_make(1.0));
-    if (reduced.hi > 0.5) {
-        // One more reduction
-        DD sr2 = dd_make(sqrt(dd_add(dd_make(1.0), reduced).hi));
-        sr2 = dd_mul(dd_make(0.5), dd_add(sr2, dd_div(dd_add(dd_make(1.0), reduced), sr2)));
-        sr2 = dd_mul(dd_make(0.5), dd_add(sr2, dd_div(dd_add(dd_make(1.0), reduced), sr2)));
-        DD red2 = dd_sub(sr2, dd_make(1.0));
-        return dd_mul(dd_make(4.0), dd_ln1p_small(red2));
+
+    // Repeated sqrt reduction: keep computing sqrt(val) until val-1 < 0.5
+    DD val = dd_add(dd_make(1.0), x); // val = 1 + x
+    int k = 0; // number of sqrt reductions
+
+    // Reduce: val = val^{1/2} repeatedly until val - 1 < 0.5
+    // i.e., val < 1.5. We need sqrt until this is satisfied.
+    while (val.hi > 1.5 && k < 60) {
+        DD s = dd_make(sqrt(val.hi)); // initial approx
+        // Newton refinement: s = 0.5*(s + val/s), twice
+        s = dd_mul(dd_make(0.5), dd_add(s, dd_div(val, s)));
+        s = dd_mul(dd_make(0.5), dd_add(s, dd_div(val, s)));
+        val = s;
+        k++;
     }
-    return dd_mul(dd_make(2.0), dd_ln1p_small(reduced));
+
+    // Now val ≈ (1+x)^{1/2^k}, and val - 1 < 0.5
+    DD reduced = dd_sub(val, dd_make(1.0));
+    DD ln_reduced = dd_ln1p_small(reduced);
+
+    // ln(1+x) = 2^k * ln_reduced
+    DD scale = dd_make(1.0);
+    for (int i = 0; i < k; i++) {
+        scale = dd_add(scale, scale); // scale *= 2
+    }
+    return dd_mul(scale, ln_reduced);
 }
 
 /* ═══════ Gram entry kernel — log1p bypass, no ln table ═══════ */
@@ -279,6 +285,102 @@ void gram_build_dd_kernel(
     gram_lo[col * dim + row] = total.lo;
 }
 
+/* ═══════ Row-range Gram kernel — for OOC GPU-chunked builds ═══════ */
+//
+// Computes entries for rows [row_start..row_start+n_rows) of the full
+// dim×dim Gram matrix, storing into a dense n_rows×dim output buffer.
+//
+// For a chunk of 2000 rows with dim=55439:
+//   - Output: 2000 × 55439 × 8 × 2 = 1.77 GB of DD entries
+//   - GPU work: upper-triangle entries only, mirror to fill both sides
+//   - Each entry: same block-based O(T/j + T/k) with log1p bypass
+//
+// Thread mapping: one thread per unique (local_row, col) pair where
+// col >= local_row + row_start (upper triangle within this chunk's rows).
+// For entries where col < row_start + local_row, we still compute them
+// because we need the full row for matvec/solver later.
+
+__global__
+void gram_build_dd_rows_kernel(
+    double* __restrict__ out_hi,
+    double* __restrict__ out_lo,
+    int dim, int t_max, int row_start, int n_rows)
+{
+    long long tid = (long long)blockIdx.x * blockDim.x + threadIdx.x;
+    long long total = (long long)n_rows * dim;
+    if (tid >= total) return;
+
+    int local_row = (int)(tid / dim);
+    int col = (int)(tid % dim);
+    int row = row_start + local_row;
+
+    // Only compute upper triangle: if col < row, it's a mirror entry.
+    // We'll fill it from the (col, row) computation — BUT that row might
+    // not be in this chunk. So we compute ALL entries for correctness.
+    // The kernel is still O(T/j + T/k) per entry, so small entries are fast.
+
+    int j = row + 2;
+    int k = col + 2;
+
+    // ═══ Same block-based algorithm as gram_build_dd_kernel ═══
+    int g = gpu_gcd(j, k);
+    int t_direct = t_max;
+
+    DD dd_j = dd_from_int(j);
+    DD dd_k = dd_from_int(k);
+    DD inv_jk = dd_div(dd_make(1.0), dd_mul(dd_j, dd_k));
+    DD inv_j  = dd_div(dd_make(1.0), dd_j);
+    DD inv_k  = dd_div(dd_make(1.0), dd_k);
+    DD total_val = dd_zero();
+
+    int pos = 1, next_j = j, next_k = k, a = 0, b = 0;
+
+    while (pos <= t_direct) {
+        int next = (next_j < next_k) ? next_j : next_k;
+        if (next > t_direct + 1) next = t_direct + 1;
+        int cnt = next - pos;
+        if (cnt <= 0) {
+            if (pos >= next_j) { a++; next_j += j; }
+            if (pos >= next_k) { b++; next_k += k; }
+            continue;
+        }
+
+        total_val = dd_add(total_val, dd_mul(inv_jk, dd_from_int(cnt)));
+
+        if (a > 0 || b > 0) {
+            DD coeff = dd_add(dd_mul(dd_from_int(a), inv_k), dd_mul(dd_from_int(b), inv_j));
+            DD x = dd_div(dd_from_int(cnt), dd_from_int(pos));
+            total_val = dd_sub(total_val, dd_mul(coeff, dd_ln1p(x)));
+        }
+
+        if (a > 0 && b > 0) {
+            DD frac = dd_div(dd_div(dd_from_int(cnt), dd_from_int(pos)), dd_from_int(next));
+            total_val = dd_add(total_val, dd_mul(dd_from_ll((long long)a * b), frac));
+        }
+
+        pos = next;
+        if (pos >= next_j) { a++; next_j += j; }
+        if (pos >= next_k) { b++; next_k += k; }
+    }
+
+    // Euler-Maclaurin tail
+    {
+        DD d = dd_from_int(g);
+        DD jkf = dd_mul(dd_j, dd_k);
+        DD tm = dd_add(dd_make(0.25), dd_div(dd_mul(d, d), dd_mul(dd_make(12.0), jkf)));
+        DD inv_t = dd_div(dd_make(1.0), dd_from_int(t_direct));
+        DD inv_t2 = dd_mul(inv_t, inv_t);
+        DD inv_t3 = dd_mul(inv_t2, inv_t);
+        total_val = dd_add(total_val, dd_mul(tm, inv_t));
+        total_val = dd_add(total_val, dd_mul(dd_mul(tm, dd_make(0.5)), inv_t2));
+        total_val = dd_add(total_val, dd_mul(dd_mul(tm, dd_div(dd_make(1.0), dd_make(6.0))), inv_t3));
+    }
+
+    // Store in dense n_rows × dim buffer
+    out_hi[local_row * dim + col] = total_val.hi;
+    out_lo[local_row * dim + col] = total_val.lo;
+}
+
 /* ═══════ Submatrix extraction + transpose kernel ═══════ */
 // Extracts the upper-left sub_dim×sub_dim block from a row-major matrix
 // with leading dimension lda, and writes it as column-major (for cuSOLVER).
@@ -347,6 +449,62 @@ int gpu_build_gram_dd(
     g_gram_dim = dim;
 
     cudaFree(d_glo);  // lo[] not needed on GPU after copy
+    return 0;
+}
+
+// Build a chunk of rows [row_start..row_start+n_rows) of the dim×dim Gram matrix.
+// Only allocates n_rows×dim on GPU — enables OOC builds for matrices > VRAM.
+//
+// Output: gram_hi_host[n_rows×dim] receives the hi part (f64).
+//         gram_lo_host may be NULL if lo part is not needed.
+// Returns 0 on success, -1 on CUDA error.
+int gpu_build_gram_dd_rows(
+    double* gram_hi_host, double* gram_lo_host,
+    int dim, int t_max, int row_start, int n_rows)
+{
+    size_t chunk_bytes = (size_t)n_rows * dim * sizeof(double);
+
+    double *d_hi, *d_lo;
+    cudaError_t err;
+
+    err = cudaMalloc(&d_hi, chunk_bytes);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "gpu_build_gram_dd_rows: cudaMalloc hi failed: %s\n",
+                cudaGetErrorString(err));
+        return -1;
+    }
+    err = cudaMalloc(&d_lo, chunk_bytes);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "gpu_build_gram_dd_rows: cudaMalloc lo failed: %s\n",
+                cudaGetErrorString(err));
+        cudaFree(d_hi);
+        return -1;
+    }
+    cudaMemset(d_hi, 0, chunk_bytes);
+    cudaMemset(d_lo, 0, chunk_bytes);
+
+    long long total = (long long)n_rows * dim;
+    int threads = 64;
+    int blocks = (int)((total + threads - 1) / threads);
+
+    gram_build_dd_rows_kernel<<<blocks, threads>>>(
+        d_hi, d_lo, dim, t_max, row_start, n_rows);
+
+    err = cudaDeviceSynchronize();
+    if (err != cudaSuccess) {
+        fprintf(stderr, "gpu_build_gram_dd_rows: kernel error: %s\n",
+                cudaGetErrorString(err));
+        cudaFree(d_hi); cudaFree(d_lo);
+        return -1;
+    }
+
+    cudaMemcpy(gram_hi_host, d_hi, chunk_bytes, cudaMemcpyDeviceToHost);
+    if (gram_lo_host) {
+        cudaMemcpy(gram_lo_host, d_lo, chunk_bytes, cudaMemcpyDeviceToHost);
+    }
+
+    cudaFree(d_hi);
+    cudaFree(d_lo);
     return 0;
 }
 

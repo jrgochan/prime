@@ -6,9 +6,9 @@
 //! ║  2. Compute d² via Conjugate Gradient with disk-streamed matvec    ║
 //! ║                                                                     ║
 //! ║  Usage:                                                             ║
-//! ║    ooc-probe build <N> [--precision <bits>]                         ║
+//! ║    ooc-probe build <N> [--precision <bits>] [--t-max <T>]          ║
 //! ║    ooc-probe solve <N> [--tol <tol>] [--max-iter <n>]              ║
-//! ║    ooc-probe full  <N>                                              ║
+//! ║    ooc-probe full  <N> [--t-max <T>]                               ║
 //! ║                                                                     ║
 //! ║  Cathedral Core Team — May 2, 2026                                  ║
 //! ╚══════════════════════════════════════════════════════════════════════╝
@@ -116,7 +116,12 @@ fn read_ooc_header(f: &mut impl Read) -> std::io::Result<Option<OocHeader>> {
 ///
 /// For N=55,440: dim=55,439, matrix=24.6 GB
 /// With chunk_rows=128: peak RAM = 128 × 55,439 × 8 = 57 MB
-fn ooc_build_gram(max_n: usize, precision: u32) -> std::io::Result<PathBuf> {
+///
+/// # Uniform truncation
+/// Uses `gram_entry_fast_at_t` with a fixed `t_max` for ALL entries.
+/// This guarantees the resulting matrix is a true Gram matrix of a single
+/// inner product space, preserving positive-definiteness.
+fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result<PathBuf> {
     let dim = max_n - 1;
     let total_entries = dim as u64 * dim as u64;
     let total_bytes = total_entries * 8;
@@ -127,18 +132,19 @@ fn ooc_build_gram(max_n: usize, precision: u32) -> std::io::Result<PathBuf> {
     std::fs::create_dir_all(path.parent().unwrap())?;
 
     println!("  ╔═══════════════════════════════════════════════════════════════╗");
-    println!("  ║  🌊 OOC GRAM BUILDER                                        ║");
+    println!("  ║  🌊 OOC GRAM BUILDER (uniform T={t_max})                     ║");
     println!("  ╚═══════════════════════════════════════════════════════════════╝");
     println!("  N = {max_n}, dim = {dim}");
     println!("  Matrix: {dim}×{dim} = {total_gb:.1} GB");
+    println!("  Truncation: T_max = {t_max} (uniform — guarantees PD)");
     println!("  Chunk: {chunk_rows} rows = {:.0} MB per write",
         chunk_rows as f64 * dim as f64 * 8.0 / (1024.0 * 1024.0));
     println!("  Output: {}", path.display());
     println!();
 
-    // Build ln(n) table for the fast block-based algorithm
-    let table_size = (max_n * 5).max(10_000).min(500_000);
-    let ln_table = gram::LnNTable::new(table_size, precision);
+    // Build ln(n) table — must cover at least t_max+1
+    let table_size = t_max.max(max_n * 5).max(10_000).min(500_000);
+    let ln_table = gram::LnNTable::new(table_size + 1, precision);
 
     // Open output file with buffered writer
     let file = std::fs::File::create(&path)?;
@@ -154,29 +160,19 @@ fn ooc_build_gram(max_n: usize, precision: u32) -> std::io::Result<PathBuf> {
         let chunk_end = (chunk_start + chunk_rows).min(dim);
         let rows_in_chunk = chunk_end - chunk_start;
 
-        // Generate all (row, col) pairs for this chunk's upper triangle + mirror
-        let pairs: Vec<(usize, usize)> = (chunk_start..chunk_end)
-            .flat_map(|row| (0..dim).map(move |col| (row, col)))
-            .collect();
-
-        // Compute entries in parallel
-        // Only compute upper triangle; mirror for lower
-        let entries: Vec<(usize, usize, f64)> = pairs
-            .par_iter()
-            .map(|&(row, col)| {
-                let j = row + 2;
-                let k = col + 2;
-                // Use symmetry: only compute if j <= k, else we'll fill from the row data
-                let val = gram::gram_entry_fast(j, k, &ln_table).to_f64();
-                (row - chunk_start, col, val)
-            })
-            .collect();
-
-        // Assemble into row-major buffer
+        // Zero-allocation row-parallel build: each row computes its dim entries
+        // in-place (cache-friendly sequential access), parallelized across rows.
+        // Eliminates ~280 MB/chunk of temporary pairs + entries vectors.
         let mut buffer = vec![0.0f64; rows_in_chunk * dim];
-        for (local_row, col, val) in entries {
-            buffer[local_row * dim + col] = val;
-        }
+        buffer.par_chunks_mut(dim)
+            .enumerate()
+            .for_each(|(local_row, row_buf)| {
+                let j = chunk_start + local_row + 2;
+                for col in 0..dim {
+                    let k = col + 2;
+                    row_buf[col] = gram::gram_entry_fast_at_t(j, k, &ln_table, t_max).to_f64();
+                }
+            });
 
         // Save first entries for checksum
         if chunk_start == 0 {
@@ -883,6 +879,285 @@ fn import_dd_cache(max_n: usize) -> std::io::Result<Option<PathBuf>> {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// VERIFY — Rust-native spectral integrity certification
+// ═══════════════════════════════════════════════════════════════════
+
+/// Verify an OOC Gram matrix for spectral integrity:
+///   1. SHA-256 hash of the full matrix data
+///   2. Spot-check random entries against CPU MPFR-256 reference
+///   3. Diagonal positivity check
+///   4. Symmetry validation (random off-diagonal pairs)
+///   5. Leading submatrix Cholesky (PD test)
+///   6. d² computation for select sub-dimensions
+fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
+    let path = ooc_gram_path(max_n, precision);
+    if !path.exists() {
+        eprintln!("  ❌ OOC cache not found: {}", path.display());
+        std::process::exit(1);
+    }
+
+    let dim = max_n - 1;
+    let t0 = Instant::now();
+
+    println!("  ╔═══════════════════════════════════════════════════════════════╗");
+    println!("  ║  🔍 OOC VERIFY — Spectral Integrity Certification            ║");
+    println!("  ╚═══════════════════════════════════════════════════════════════╝");
+    println!("  N = {max_n}, dim = {dim}");
+    println!("  T_max = {t_max} (uniform truncation)");
+    println!("  Cache: {}", path.display());
+    println!();
+
+    // Open mmap
+    let gram = MmapGram::open(&path, dim).expect("Failed to open OOC matrix");
+
+    // ── Phase 1: SHA-256 integrity hash ──
+    print!("  ▸ Phase 1: SHA-256 hash...");
+    use sha2::{Sha256, Digest};
+    let mut hasher = Sha256::new();
+    // Hash in chunks to avoid loading entire matrix
+    let chunk_size = 64 * 1024; // 64K entries = 512 KB
+    let total_entries = dim * dim;
+    for start in (0..total_entries).step_by(chunk_size) {
+        let end = (start + chunk_size).min(total_entries);
+        let slice = unsafe {
+            std::slice::from_raw_parts(
+                gram.data.add(start),
+                end - start,
+            )
+        };
+        let bytes: &[u8] = unsafe {
+            std::slice::from_raw_parts(slice.as_ptr() as *const u8, slice.len() * 8)
+        };
+        hasher.update(bytes);
+    }
+    let hash = hasher.finalize();
+    let hash_hex: String = hash.iter().map(|b| format!("{:02x}", b)).collect();
+    println!(" {}", &hash_hex[..16]);
+
+    // ── Phase 2: Diagonal check ──
+    print!("  ▸ Phase 2: Diagonal positivity...");
+    let mut diag_min = f64::MAX;
+    let mut diag_max = f64::MIN;
+    let mut diag_negative = 0usize;
+    for i in 0..dim {
+        let val = gram.row(i)[i];
+        if val <= 0.0 { diag_negative += 1; }
+        diag_min = diag_min.min(val);
+        diag_max = diag_max.max(val);
+    }
+    if diag_negative == 0 {
+        println!(" ✓ all positive [{:.6e}, {:.6e}]", diag_min, diag_max);
+    } else {
+        println!(" ✗ {} NEGATIVE diagonal entries!", diag_negative);
+    }
+
+    // ── Phase 3: Symmetry check (random pairs) ──
+    print!("  ▸ Phase 3: Symmetry check...");
+    let n_sym_checks = 1000.min(dim * dim);
+    let mut sym_max_err = 0.0f64;
+    let mut sym_fails = 0usize;
+    // Deterministic "random" using simple hash
+    for k in 0..n_sym_checks {
+        let i = (k * 7919 + 13) % dim;
+        let j = (k * 6271 + 37) % dim;
+        let gij = gram.row(i)[j];
+        let gji = gram.row(j)[i];
+        let err = (gij - gji).abs();
+        if err > 0.0 { sym_fails += 1; }
+        sym_max_err = sym_max_err.max(err);
+    }
+    if sym_max_err == 0.0 {
+        println!(" ✓ exact (checked {} pairs)", n_sym_checks);
+    } else {
+        println!(" max |G[i,j]-G[j,i]| = {:.2e} ({} asymmetric)", sym_max_err, sym_fails);
+    }
+
+    // ── Phase 4: Spot-check against CPU MPFR reference ──
+    print!("  ▸ Phase 4: CPU MPFR cross-verification...");
+    let n_spot = 20;  // check 20 entries
+    let ln_table_size = t_max.max(max_n * 5).max(10_000).min(500_000);
+    let ln_table = gram::LnNTable::new(ln_table_size + 1, precision);
+    let mut max_rel_err = 0.0f64;
+    let mut max_abs_err = 0.0f64;
+    let mut spot_results: Vec<(usize, usize, f64, f64, f64)> = Vec::new();
+
+    for k in 0..n_spot {
+        // Pick entries that stress different regimes
+        let i = match k {
+            0 => 0,           // (2,2) - smallest
+            1 => 0,           // (2,3)
+            2 => dim/4,       // middle band
+            3 => dim/2,       // center
+            4 => dim - 1,     // (N, N) - largest
+            _ => (k * 4793 + 11) % dim,  // pseudo-random
+        };
+        let j = match k {
+            0 => 0,
+            1 => 1,
+            2 => dim/4 + 1,
+            3 => dim/2,
+            4 => dim - 1,
+            _ => (k * 3571 + 7) % dim,
+        };
+
+        let gpu_val = gram.row(i)[j];
+        let cpu_val = gram::gram_entry_fast_at_t(i + 2, j + 2, &ln_table, t_max).to_f64();
+
+        let abs_err = (gpu_val - cpu_val).abs();
+        let rel_err = if cpu_val.abs() > 1e-30 { abs_err / cpu_val.abs() } else { abs_err };
+        max_rel_err = max_rel_err.max(rel_err);
+        max_abs_err = max_abs_err.max(abs_err);
+        spot_results.push((i + 2, j + 2, gpu_val, cpu_val, rel_err));
+    }
+    if max_rel_err < 1e-12 {
+        println!(" ✓ max rel err = {:.2e}", max_rel_err);
+    } else if max_rel_err < 1e-8 {
+        println!(" ⚠ max rel err = {:.2e} (acceptable)", max_rel_err);
+    } else {
+        println!(" ✗ max rel err = {:.2e} (SUSPICIOUS!)", max_rel_err);
+    }
+
+    // Print worst spot-checks
+    spot_results.sort_by(|a, b| b.4.partial_cmp(&a.4).unwrap());
+    for (j, k, gv, cv, re) in spot_results.iter().take(5) {
+        println!("    G[{j},{k}]: cache={gv:.12e} cpu={cv:.12e} rel={re:.2e}");
+    }
+
+    // ── Phase 5: Submatrix Cholesky (PD test) ──
+    let sub_dim = 500.min(dim);
+    print!("  ▸ Phase 5: Cholesky PD test ({}×{})...", sub_dim, sub_dim);
+    let mut sub = vec![0.0f64; sub_dim * sub_dim];
+    for i in 0..sub_dim {
+        let row = gram.row(i);
+        sub[i * sub_dim..i * sub_dim + sub_dim].copy_from_slice(&row[..sub_dim]);
+    }
+    // In-place Cholesky
+    let mut chol_ok = true;
+    let mut chol_fail_col = 0;
+    for j in 0..sub_dim {
+        let mut s = sub[j * sub_dim + j];
+        for k in 0..j {
+            s -= sub[j * sub_dim + k] * sub[j * sub_dim + k];
+        }
+        if s <= 0.0 {
+            chol_ok = false;
+            chol_fail_col = j + 1;
+            break;
+        }
+        sub[j * sub_dim + j] = s.sqrt();
+        let ljj = sub[j * sub_dim + j];
+        for i in (j + 1)..sub_dim {
+            let mut s = sub[i * sub_dim + j];
+            for k in 0..j {
+                s -= sub[i * sub_dim + k] * sub[j * sub_dim + k];
+            }
+            sub[i * sub_dim + j] = s / ljj;
+        }
+    }
+    if chol_ok {
+        println!(" ✓ positive-definite");
+    } else {
+        println!(" ✗ FAILED at column {} — NOT positive-definite!", chol_fail_col);
+    }
+
+    // ── Phase 6: d² computation ──
+    let b = arith::b_vector(dim);
+    // Compute d² for the sub_dim submatrix using the Cholesky we just did
+    // (if it succeeded)
+    let d2_sub = if chol_ok {
+        // Forward solve: L y = b_sub
+        let b_sub: Vec<f64> = b[..sub_dim].to_vec();
+        let mut y = vec![0.0f64; sub_dim];
+        // Need to redo Cholesky since we overwrote sub[] with L
+        // Actually we have L in sub, so forward solve
+        for i in 0..sub_dim {
+            let mut s = b_sub[i];
+            for k in 0..i {
+                s -= sub[i * sub_dim + k] * y[k];
+            }
+            y[i] = s / sub[i * sub_dim + i];
+        }
+        // d² = 1 - b^T G^{-1} b = 1 - y^T y
+        let yty: f64 = y.iter().map(|v| v * v).sum();
+        Some(1.0 - yty)
+    } else {
+        None
+    };
+
+    if let Some(d2) = d2_sub {
+        println!("  ▸ Phase 6: d²_{} = {:.12}", sub_dim + 1, d2);
+        if d2 > 0.0 && d2 < 1.0 {
+            println!("    ✓ RH-consistent (0 < d² < 1)");
+        } else if d2 > 0.0 {
+            println!("    ✓ d² > 0 (positive — good for NB equivalence)");
+        } else {
+            println!("    ⚠ d² ≤ 0 — investigate!");
+        }
+    }
+
+    let total_time = t0.elapsed().as_secs_f64();
+
+    // ── Write verification certificate ──
+    let cert_path = ooc_cache_dir().join(format!("ooc_verify_N{max_n}.json"));
+    let matrix_gb = (dim as u64 * dim as u64 * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
+    let json = format!(
+        r#"{{
+  "tool": "ooc-probe verify",
+  "timestamp": "{}",
+  "N": {},
+  "dim": {},
+  "t_max": {},
+  "matrix_gb": {:.2},
+  "sha256": "{}",
+  "diagonal_min": {:.15e},
+  "diagonal_max": {:.15e},
+  "diagonal_all_positive": {},
+  "symmetry_max_error": {:.2e},
+  "symmetry_checks": {},
+  "spot_check_max_rel_error": {:.2e},
+  "spot_check_max_abs_error": {:.2e},
+  "spot_check_count": {},
+  "cholesky_pd": {},
+  "cholesky_sub_dim": {},
+  "cholesky_fail_col": {},
+  "d2_sub": {},
+  "elapsed_seconds": {:.1},
+  "verdict": "{}"
+}}"#,
+        chrono_now(),
+        max_n,
+        dim,
+        t_max,
+        matrix_gb,
+        hash_hex,
+        diag_min, diag_max,
+        diag_negative == 0,
+        sym_max_err,
+        n_sym_checks,
+        max_rel_err, max_abs_err,
+        n_spot,
+        chol_ok,
+        sub_dim,
+        chol_fail_col,
+        d2_sub.map_or("null".to_string(), |v| format!("{:.15e}", v)),
+        total_time,
+        if chol_ok && diag_negative == 0 && max_rel_err < 1e-8 { "PASS" } else { "FAIL" },
+    );
+
+    if let Ok(()) = std::fs::write(&cert_path, &json) {
+        println!("  📜 Verification certificate → {}", cert_path.display());
+    }
+
+    println!();
+    if chol_ok && diag_negative == 0 && max_rel_err < 1e-8 {
+        println!("  ✅ VERDICT: PASS — matrix verified for spectral integrity");
+    } else {
+        println!("  ❌ VERDICT: FAIL — matrix has integrity issues");
+    }
+    println!("  Total verification time: {:.1}s", total_time);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════════════════
 
@@ -898,11 +1173,15 @@ fn main() {
     if args.len() < 3 {
         eprintln!();
         eprintln!("Usage:");
-        eprintln!("  ooc-probe build  <N> [--precision <bits>]    Build OOC Gram matrix");
-        eprintln!("  ooc-probe solve  <N> [--tol <tol>]           CG solve for d²");
-        eprintln!("  ooc-probe full   <N>                         Build + solve");
-        eprintln!("  ooc-probe import <N>                         Import existing DD cache");
-        eprintln!("  ooc-probe info   <N>                         Show OOC cache info");
+        eprintln!("  ooc-probe build   <N> [--precision <bits>] [--t-max <T>]  Build OOC Gram matrix");
+        eprintln!("  ooc-probe solve   <N> [--tol <tol>]                       CG solve for d²");
+        eprintln!("  ooc-probe full    <N> [--t-max <T>]                       Build + solve");
+        eprintln!("  ooc-probe verify  <N> [--t-max <T>]                       Spectral integrity check");
+        eprintln!("  ooc-probe import  <N>                                     Import existing DD cache");
+        eprintln!("  ooc-probe info    <N>                                     Show OOC cache info");
+        eprintln!();
+        eprintln!("  --t-max <T>  Uniform truncation horizon (default: 200000)");
+        eprintln!("               Ensures positive-definiteness of the Gram matrix.");
         eprintln!();
         eprintln!("OOC cache dir: {}", ooc_cache_dir().display());
         eprintln!();
@@ -916,6 +1195,7 @@ fn main() {
     let precision: u32 = parse_flag(&args, "--precision").unwrap_or(256) as u32;
     let tol: f64 = parse_flag_f64(&args, "--tol").unwrap_or(1e-12);
     let max_iter: usize = parse_flag(&args, "--max-iter").unwrap_or(500);
+    let t_max: usize = parse_flag(&args, "--t-max").unwrap_or(200_000);
 
     // Check GPU
     if let Some(info) = gpu::detect_gpu() {
@@ -927,7 +1207,7 @@ fn main() {
 
     match cmd {
         "build" => {
-            ooc_build_gram(max_n, precision).expect("Build failed");
+            ooc_build_gram(max_n, precision, t_max).expect("Build failed");
         }
         "solve" => {
             let ooc_path = ooc_gram_path(max_n, precision);
@@ -961,7 +1241,7 @@ fn main() {
         }
         "full" => {
             let t0 = Instant::now();
-            let path = ooc_build_gram(max_n, precision).expect("Build failed");
+            let path = ooc_build_gram(max_n, precision, t_max).expect("Build failed");
             let build_time = t0.elapsed().as_secs_f64();
             println!();
 
@@ -983,6 +1263,9 @@ fn main() {
                 Ok(None) => eprintln!("  ❌ No DD cache found for N={max_n}"),
                 Err(e) => eprintln!("  ❌ Import failed: {e}"),
             }
+        }
+        "verify" => {
+            verify_ooc_matrix(max_n, precision, t_max);
         }
         "info" => {
             let path = ooc_gram_path(max_n, precision);
@@ -1015,7 +1298,7 @@ fn main() {
         }
         _ => {
             eprintln!("  Unknown command: {cmd}");
-            eprintln!("  Use: build, solve, full, import, info");
+            eprintln!("  Use: build, solve, full, verify, import, info");
             std::process::exit(1);
         }
     }

@@ -39,6 +39,16 @@ pub const MAX_STORABLE_DIM: usize = 30_000;
 /// Maximum series truncation point for ln table.
 pub const MAX_LN_TABLE: usize = 200_000;
 
+/// Uniform truncation horizon for all Gram entry computations.
+///
+/// All Gram entry functions use this same T so that the resulting matrix
+/// G_N(T) = <f_j, f_k>_T is a Gram matrix of a single inner product space,
+/// guaranteeing positive semi-definiteness by construction.
+///
+/// This matches the GPU kernel's uniform strategy. Setting different T per
+/// entry breaks the inner-product structure and can destroy PD.
+pub const DEFAULT_T_UNIFORM: usize = 200_000;
+
 // ═══════════════════════════════════════════════════════════════
 // PRECOMPUTED LN TABLE (ln(1+1/n) — used by original algorithm)
 // ═══════════════════════════════════════════════════════════════
@@ -147,7 +157,8 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
     let inv_jf = 1.0 / jf;
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
-    let t_direct = (lcm_jk * 3).max(2_000).min(50_000);
+    let t_direct = DEFAULT_T_UNIFORM;
+    let min_terms = (lcm_jk * 3).max(2_000);
 
     let (mut total, mut comp) = (0.0f64, 0.0f64);
     for n in 1..=t_direct {
@@ -161,6 +172,11 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
         } else { 0.0 };
         let term = inv_jk - ab_coeff * ln_term + ab_frac;
         let y = term - comp; let t = total + y; comp = (t - total) - y; total = t;
+
+        // Adaptive early-exit: series converged to working precision
+        if n > min_terms && n % 1000 == 0 {
+            if term.abs() < total.abs() * 1e-16 { break; }
+        }
     }
 
     let d = g as f64;
@@ -194,7 +210,7 @@ pub fn gram_entry_standalone(j: usize, k: usize, prec: u32) -> Float {
 
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
-    let t_direct = (lcm_jk * 3).max(2_000).min(200_000);
+    let t_direct = DEFAULT_T_UNIFORM;
 
     let mut total = Float::with_val(p, 0u32);
     let min_terms = (lcm_jk * 2).max(1_000);
@@ -261,6 +277,86 @@ pub fn gram_entry_standalone(j: usize, k: usize, prec: u32) -> Float {
     total
 }
 
+/// MPFR Gram entry with explicit truncation horizon `t_max`.
+///
+/// Same algorithm as [`gram_entry_standalone`] but forces `t_direct = t_max`
+/// for ALL entries, regardless of lcm(j,k). This matches the GPU kernel's
+/// uniform truncation strategy, enabling apples-to-apples verification.
+///
+/// The GPU uses uniform T to preserve positive-definiteness of the inner
+/// product space. For cross-verification, we must use the same T.
+pub fn gram_entry_at_t(j: usize, k: usize, prec: u32, t_max: usize) -> Float {
+    let p = prec;
+    let jf = Float::with_val(p, j as u64);
+    let kf = Float::with_val(p, k as u64);
+    let jk = Float::with_val(p, &jf * &kf);
+    let inv_jk = Float::with_val(p, Float::with_val(p, 1u32) / &jk);
+    let inv_jf = Float::with_val(p, Float::with_val(p, 1u32) / &jf);
+    let inv_kf = Float::with_val(p, Float::with_val(p, 1u32) / &kf);
+
+    let g = arith::gcd(j, k);
+    let lcm_jk = (j / g) * k;
+    let t_direct = t_max;
+
+    let mut total = Float::with_val(p, 0u32);
+    let min_terms = (lcm_jk * 2).max(1_000);
+
+    let mut scratch_ab = Float::with_val(p, 0);
+    let mut scratch_bj = Float::with_val(p, 0);
+    let mut scratch_term = Float::with_val(p, 0);
+
+    for n in 1..=t_direct {
+        let a_int = n / j;
+        let b_int = n / k;
+
+        let nf = Float::with_val(p, n as u64);
+        let inv_n = Float::with_val(p, Float::with_val(p, 1u32) / &nf);
+        let ln_term = Float::with_val(p, inv_n.ln_1p());
+
+        scratch_ab.assign(a_int as u64);
+        scratch_ab *= &inv_kf;
+        scratch_bj.assign(b_int as u64);
+        scratch_bj *= &inv_jf;
+        scratch_ab += &scratch_bj;
+        scratch_ab *= &ln_term;
+
+        scratch_term.assign(&inv_jk);
+        scratch_term -= &scratch_ab;
+
+        if a_int > 0 && b_int > 0 {
+            let mut frac = Float::with_val(p, (a_int * b_int) as u64);
+            let mut denom = Float::with_val(p, n as u64);
+            denom *= (n + 1) as u64;
+            frac /= &denom;
+            scratch_term += &frac;
+        }
+
+        total += &scratch_term;
+
+        if n > min_terms && n % 500 == 0 {
+            let ratio = scratch_term.to_f64().abs() / total.to_f64().abs();
+            if ratio < 1e-18 { break; }
+        }
+    }
+
+    // Euler-Maclaurin tail correction (3 terms)
+    let d = Float::with_val(p, g as u64);
+    let d_sq = Float::with_val(p, &d * &d);
+    let twelve_jk = Float::with_val(p, Float::with_val(p, 12u32) * &jk);
+    let tail_frac = Float::with_val(p, &d_sq / &twelve_jk);
+    let tail_mean = Float::with_val(p, Float::with_val(p, 0.25f64) + &tail_frac);
+    let t_f = Float::with_val(p, t_direct as u64);
+    let inv_t = Float::with_val(p, Float::with_val(p, 1u32) / &t_f);
+    let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
+    let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
+    total += Float::with_val(p, &tail_mean * &inv_t);
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
+
+    total
+}
+
 /// MPFR Gram entry using precomputed ln table — optimized.
 ///
 /// Precision is taken from the ln_table.
@@ -278,7 +374,7 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
 
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
-    let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n);
+    let t_direct = DEFAULT_T_UNIFORM.min(ln_table.max_n);
 
     // Pre-allocate scratch variables (reused every iteration)
     let mut total = Float::with_val(p, 0);
@@ -371,7 +467,7 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     let p = ln_table.precision;
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
-    let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n - 1);
+    let t_direct = DEFAULT_T_UNIFORM.min(ln_table.max_n - 1);
 
     let jf = Float::with_val(p, j as u64);
     let kf = Float::with_val(p, k as u64);
@@ -466,6 +562,117 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     total
 }
 
+/// Block-based fast Gram entry with **uniform** truncation horizon `t_max`.
+///
+/// Same O(T/j + T/k) block-based algorithm as [`gram_entry_fast`], but forces
+/// `t_direct = t_max` for ALL entries regardless of lcm(j,k). This matches
+/// the GPU kernel's uniform truncation strategy, preserving the inner-product
+/// space structure and guaranteeing positive-definiteness of the resulting
+/// Gram matrix.
+///
+/// # Why uniform T matters
+/// The Gram matrix G_N(T) is an inner product matrix for the truncated
+/// Nyman-Beurling functions at horizon T. When T varies per entry (adaptive),
+/// G_N is no longer a Gram matrix of any single inner product space, breaking
+/// positive-definiteness. With uniform T, G_N(T) = F^T F where F has columns
+/// from the same function space, guaranteeing PD.
+///
+/// # Performance
+/// For large j,k, block count ≈ T/j + T/k, so entries with j=k=27720
+/// and T=200K need only ~15 blocks. Much faster than the O(T) naive loop.
+pub fn gram_entry_fast_at_t(j: usize, k: usize, ln_table: &LnNTable, t_max: usize) -> Float {
+    let p = ln_table.precision;
+    let g = arith::gcd(j, k);
+    let t_direct = t_max.min(ln_table.max_n - 1);
+
+    let jf = Float::with_val(p, j as u64);
+    let kf = Float::with_val(p, k as u64);
+    let inv_jk = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, &jf * &kf));
+    let inv_j = Float::with_val(p, Float::with_val(p, 1u32) / &jf);
+    let inv_k = Float::with_val(p, Float::with_val(p, 1u32) / &kf);
+
+    // Collect breakpoints where ⌊n/j⌋ or ⌊n/k⌋ changes.
+    let mut breakpoints = Vec::with_capacity(t_direct / j + t_direct / k + 4);
+    breakpoints.push(1usize);
+    for m in 1..=(t_direct / j + 1) {
+        let bp = m * j;
+        if bp <= t_direct { breakpoints.push(bp); }
+    }
+    for m in 1..=(t_direct / k + 1) {
+        let bp = m * k;
+        if bp <= t_direct { breakpoints.push(bp); }
+    }
+    breakpoints.push(t_direct + 1);
+    breakpoints.sort_unstable();
+    breakpoints.dedup();
+
+    let mut total = Float::with_val(p, 0);
+    let mut scratch = Float::with_val(p, 0);
+
+    for w in 0..breakpoints.len() - 1 {
+        let n1 = breakpoints[w];
+        let n2 = breakpoints[w + 1];
+        if n1 > t_direct { break; }
+        let n2 = n2.min(t_direct + 1);
+        if n1 >= n2 { continue; }
+
+        let a = n1 / j;
+        let b = n1 / k;
+        let count = (n2 - n1) as u64;
+
+        // Term 1: count/(jk)
+        scratch.assign(&inv_jk);
+        scratch *= count;
+        total += &scratch;
+
+        // Term 2: -(a/k + b/j) * [ln(n2) - ln(n1)]
+        if a > 0 || b > 0 {
+            let coeff_val = (a as f64) / (k as f64) + (b as f64) / (j as f64);
+            if coeff_val > 0.0 {
+                let mut coeff = Float::with_val(p, a as u64);
+                coeff *= &inv_k;
+                let mut bj = Float::with_val(p, b as u64);
+                bj *= &inv_j;
+                coeff += &bj;
+                scratch.assign(ln_table.ln(n2));
+                scratch -= ln_table.ln(n1);
+                coeff *= &scratch;
+                total -= &coeff;
+            }
+        }
+
+        // Term 3: a*b * [1/n1 - 1/n2]
+        if a > 0 && b > 0 {
+            let ab = (a as u64) * (b as u64);
+            scratch.assign(n2 as u64);
+            let mut inv_n1 = Float::with_val(p, n1 as u64);
+            let diff = (n2 - n1) as u64;
+            scratch *= &inv_n1;
+            inv_n1.assign(diff);
+            inv_n1 /= &scratch;
+            inv_n1 *= ab;
+            total += &inv_n1;
+        }
+    }
+
+    // Euler-Maclaurin tail correction (3 terms)
+    let jk = Float::with_val(p, &jf * &kf);
+    let d = Float::with_val(p, g as u64);
+    let d_sq = Float::with_val(p, &d * &d);
+    let twelve_jk = Float::with_val(p, Float::with_val(p, 12u32) * &jk);
+    let tail_frac = Float::with_val(p, &d_sq / &twelve_jk);
+    let tail_mean = Float::with_val(p, Float::with_val(p, 0.25f64) + &tail_frac);
+    let t_f = Float::with_val(p, t_direct as u64);
+    let inv_t = Float::with_val(p, Float::with_val(p, 1u32) / &t_f);
+    let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
+    let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
+    total += Float::with_val(p, &tail_mean * &inv_t);
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
+    total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
+    total
+}
+
 // ═══════════════════════════════════════════════════════════════
 // DOUBLE-DOUBLE GRAM ENGINE (Pure Rust, ~31 decimal digits)
 // ~5-10x faster than MPFR for equivalent precision.
@@ -514,7 +721,7 @@ pub fn gram_entry_dd(j: usize, k: usize, ln_table: &DDLnTable) -> f64 {
 
     let g = arith::gcd(j, k);
     let lcm_jk = (j / g) * k;
-    let t_direct = (lcm_jk * 5).max(5_000).min(100_000).min(ln_table.max_n);
+    let t_direct = DEFAULT_T_UNIFORM.min(ln_table.max_n);
 
     let mut total = DD::from_f64(0.0);
     let min_terms = (lcm_jk * 3).max(2_000);

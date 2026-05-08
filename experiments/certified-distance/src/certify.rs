@@ -327,6 +327,12 @@ fn load_matrix(
 fn load_from_path(path: &Path, dim: usize) -> Option<(Vec<f64>, Option<Vec<f64>>)> {
     let name = path.file_name()?.to_string_lossy();
 
+    // HPDF format: gram_N{n}.h5 — integrity-verified HDF5 with upper-triangle packing
+    #[cfg(feature = "hpdf")]
+    if name.ends_with(".h5") {
+        return load_hpdf(path, dim);
+    }
+
     if name.starts_with("dd_gram_N") {
         // DD cache: load both hi and lo parts
         let (hi, lo, loaded_dim) = cache::load_dd_gram(path)?;
@@ -363,6 +369,55 @@ fn load_from_path(path: &Path, dim: usize) -> Option<(Vec<f64>, Option<Vec<f64>>
     }
 
     None
+}
+
+/// Load a Gram matrix from an HPDF (HDF5) file.
+///
+/// Verifies data integrity via embedded SHA-256 checksum,
+/// then unpacks the upper triangle into a full symmetric matrix.
+#[cfg(feature = "hpdf")]
+fn load_hpdf(path: &Path, dim: usize) -> Option<(Vec<f64>, Option<Vec<f64>>)> {
+    use cathedral_utils::hpdf::HpdfReader;
+
+    let reader = match HpdfReader::open(path) {
+        Ok(r) => r,
+        Err(e) => {
+            eprintln!("  ⚠ Failed to open HPDF: {}", e);
+            return None;
+        }
+    };
+
+    if reader.dim() != dim {
+        eprintln!("  ⚠ HPDF dimension mismatch: {} vs expected {}", reader.dim(), dim);
+        return None;
+    }
+
+    // Verify data integrity
+    match reader.verify_data_integrity() {
+        Ok(integrity) => {
+            if integrity.valid {
+                eprintln!("  ✓ HPDF SHA-256: {}... (verified)", &integrity.computed_sha256[..16]);
+            } else if integrity.stored_sha256.is_some() {
+                eprintln!("  ⚠ HPDF SHA-256 MISMATCH — data may be corrupted!");
+                return None;
+            }
+        }
+        Err(e) => {
+            eprintln!("  ⚠ HPDF integrity check error: {}", e);
+        }
+    }
+
+    // Load the full symmetric matrix
+    match reader.read_gram_full() {
+        Ok(data) => {
+            eprintln!("  ✓ HPDF loaded: {}×{}, v{}", reader.dim(), reader.dim(), reader.version());
+            Some((data, None))
+        }
+        Err(e) => {
+            eprintln!("  ⚠ HPDF read error: {}", e);
+            None
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════

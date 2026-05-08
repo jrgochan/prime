@@ -67,7 +67,7 @@ open Matrix Real Finset
 
 /-- 💀 **POISONED** (was Theorem): Vasyunin Expansion.
 
-    The Gram matrix entry G_{j,k} = ∫₀¹ {j/x}{k/x}dx admits a
+    The Gram matrix entry G_{j,k} = ∫₀¹ {1/(jx)}{1/(kx)}dx admits a
     decomposition into a "background" term and a "divisor correction":
 
       G_{j,k} = 1/4 + ψ(j,k)
@@ -329,7 +329,7 @@ end
 --   2026-04-06: type_II_sieve_bound corrected to asymptotic K_N² ≤ 1 - c/N
 --   2026-04-07: vasyunin_expansion axiom → theorem (d≤4 proved, d≥5 refined)
 --   2026-05-04: 💀 vasyunin_large_gcd PROVED FALSE — axiom excised
---              Rosetta Stone bridge discovered (gramEntry ↔ gramIntegral)
+--              Rosetta Stone bridge discovered (now obsolete: gramEntry ≡ gramIntegral post-BD)
 --
 -- STATUS: NOT ON CROWN PATH. The Mellin Crown architecture bypasses
 -- the entire Sieve Engine.

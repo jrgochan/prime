@@ -2,6 +2,8 @@ import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
 import Cathedral.Gram.L2Bridge
 import Cathedral.NymanBeurling.QuadFormBridge
+import Cathedral.NymanBeurling.BDBridge
+import Cathedral.NymanBeurling.WitnessDecayProved
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Topology.Order.Basic
 
@@ -131,17 +133,97 @@ theorem energy_partition (N : ℕ) (τ : ℝ) :
 -- PART III: THE SPECTRAL IDENTITY d² = 1 - totalEnergy
 -- ════════════════════════════════════════════════════════════
 
-/-- **The Spectral Identity**: d²_N = 1 - Σ c_k²/λ_k.
+/-- **THEOREM: The Spectral Identity** — d²_N = 1 - Σ c_k²/λ_k.
 
-    This connects the NB distance (defined via the quadratic form
-    1 - b^T G^{-1} b) to the spectral energy sum.
+    FORMERLY AN AXIOM — now fully proved.
 
-    The proof uses the spectral theorem: G = V Λ V^T, so
-    b^T G^{-1} b = b^T V Λ^{-1} V^T b = Σ (V^T b)_k² / λ_k.
+    This connects the NB distance (1 - bᵀG⁻¹b) to the spectral sum.
 
-    This is a fundamental identity in the Cathedral. -/
-axiom spectral_identity (N : ℕ) (hN : 2 ≤ N) :
-    nbDistSq' N = 1 - totalSpectralEnergy N
+    Proof:
+    1. Set c := G⁻¹b. Then Gc = b.
+    2. Parseval: bᵀc = Σ_k ⟨v_k, b⟩ · ⟨v_k, c⟩
+    3. Self-adjointness: ⟨v_k, b⟩ = ⟨v_k, Gc⟩ = λ_k · ⟨v_k, c⟩
+       So ⟨v_k, c⟩ = ⟨v_k, b⟩ / λ_k (using λ_k > 0 from PD)
+    4. Combine: bᵀc = Σ_k ⟨v_k, b⟩² / λ_k = totalSpectralEnergy N -/
+theorem spectral_identity (N : ℕ) (hN : 2 ≤ N) :
+    nbDistSq' N = 1 - totalSpectralEnergy N := by
+  -- Strategy: Show bᵀG⁻¹b = totalSpectralEnergy N, then nbDistSq' = 1 - that.
+  -- nbDistSq' N = 1 - bᵀG⁻¹b  and  totalSpectralEnergy = Σ c_k²/λ_k
+  -- So we need: bᵀG⁻¹b = Σ c_k²/λ_k
+  suffices h_main : dotProduct (basisInnerProd N) ((gramMatrix N)⁻¹.mulVec (basisInnerProd N)) =
+      totalSpectralEnergy N by
+    unfold nbDistSq'
+    linarith
+  set hH := gramMatrix_hermitian N
+  set G := gramMatrix N
+  set b := basisInnerProd N
+  set c := G⁻¹.mulVec b
+  set ev := hH.eigenvalues
+  set basis := hH.eigenvectorBasis
+  -- Step 1: Gc = b
+  have h_unit : IsUnit G.det := gramMatrix_isUnit_det N hN
+  have h_Gc : G.mulVec c = b := by
+    simp [c, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv _ h_unit, Matrix.one_mulVec]
+  -- Step 2: Parseval — bᵀc = Σ_k ⟨v_k, b⟩ · ⟨v_k, c⟩
+  set b' := WithLp.toLp (p := 2) b with hb'_def
+  set c' := WithLp.toLp (p := 2) c with hc'_def
+  have h_parseval : dotProduct b c =
+      ∑ k, dotProduct b (↑(basis k)) * dotProduct (↑(basis k)) c := by
+    -- dotProduct = inner (Parseval) = Σ inner * inner = Σ dotProduct * dotProduct
+    calc dotProduct b c
+        = @inner ℝ _ _ b' c' := (inner_eq_dotProduct b c).symm
+      _ = ∑ k, @inner ℝ _ _ b' (basis k) * @inner ℝ _ _ (basis k) c' :=
+          (basis.sum_inner_mul_inner b' c').symm
+      _ = ∑ k, dotProduct b (↑(basis k)) * dotProduct (↑(basis k)) c := by
+          congr 1; ext k; rw [inner_eq_dotProduct, inner_eq_dotProduct]
+  -- Step 3: Self-adjointness — ⟨v_k, b⟩ = λ_k · ⟨v_k, c⟩
+  have h_eig_coeff : ∀ k : Fin (N - 1),
+      dotProduct (↑(basis k)) b = ev k * dotProduct (↑(basis k)) c := by
+    intro k
+    rw [← h_Gc]
+    have h_gv : G.mulVec (↑(basis k)) = ev k • (↑(basis k)) := hH.mulVec_eigenvectorBasis k
+    rw [← inner_eq_dotProduct, ← inner_eq_dotProduct]
+    have hS := Matrix.isHermitian_iff_isSymmetric.mp hH
+    rw [show @inner ℝ _ _ (WithLp.toLp 2 ↑(basis k)) (WithLp.toLp 2 (G.mulVec c)) =
+        @inner ℝ _ _ (WithLp.toLp 2 ↑(basis k)) (Matrix.toEuclideanLin G c') from rfl]
+    rw [show @inner ℝ _ _ (WithLp.toLp 2 ↑(basis k)) (Matrix.toEuclideanLin G c') =
+        @inner ℝ _ _ (Matrix.toEuclideanLin G (WithLp.toLp 2 ↑(basis k))) c' from
+        (hS (WithLp.toLp 2 ↑(basis k)) c').symm]
+    rw [show Matrix.toEuclideanLin G (WithLp.toLp 2 ↑(basis k)) =
+        WithLp.toLp 2 (G.mulVec ↑(basis k)) from rfl]
+    rw [h_gv, WithLp.toLp_smul]
+    rw [inner_smul_left]
+    -- Goal: (starRingEnd ℝ) (ev k) * ⟪v_k, c'⟫ = ev k * ⟪v_k, c'⟫
+    -- For ℝ: starRingEnd ℝ = id, so congr closes both subgoals
+    congr 1
+  -- Step 4: Eigenvalues are positive (from PD)
+  have h_ev_pos : ∀ k : Fin (N - 1), 0 < ev k := by
+    intro k
+    have hpd := gram_pos_def N hN
+    show 0 < hH.eigenvalues k
+    rw [← quadForm_eigenvector hH k]
+    apply hpd
+    intro h_zero
+    have hv := basis.orthonormal.1 k
+    have : ‖basis k‖ = 0 := by
+      rw [EuclideanSpace.norm_eq]
+      simp [show (basis k).1 = (0 : Fin (N - 1) → ℝ) from h_zero]
+    linarith
+  -- Step 5: Each term simplifies to modeEnergy
+  rw [h_parseval]
+  unfold totalSpectralEnergy modeEnergy modeCoeffSq modeEigenvalue
+  simp only
+  congr 1; ext k
+  have h_ev_ne : ev k ≠ 0 := ne_of_gt (h_ev_pos k)
+  have h_coeff := h_eig_coeff k
+  -- ⟨v_k, c⟩ = ⟨v_k, b⟩ / λ_k
+  have h_vc : dotProduct (↑(basis k)) c = dotProduct (↑(basis k)) b / ev k := by
+    rw [h_coeff]; field_simp
+  rw [dotProduct_comm b (↑(basis k)), h_vc]
+  -- Goal: ⟨v,b⟩ * (⟨v,b⟩/λ) = ⟨v,b⟩²/λ  (with aliased eigenvalue on RHS)
+  -- The RHS eigenvalue is definitionally ev k. Unify via simp.
+  simp only [ev, basis] at h_ev_ne ⊢
+  field_simp
 
 -- ════════════════════════════════════════════════════════════
 -- PART IV: AXIOM A — INFRARED SAFETY
@@ -243,7 +325,31 @@ theorem spectral_energy_le_one (N : ℕ) (hN : 2 ≤ N) :
   have h_nn := nbDistSq_nonneg N hN
   linarith
 
+/-- **BRIDGE LEMMA**: The Vasyunin mean entry equals the Cathedral basisInnerProd.
+    Both are ∫₀¹ {1/((i+1)x)} dx, just via different paths:
+    - vasyuninMeanEntry computes (ln(i+1) + 1 - γ) / (i+1)
+    - basisInnerProd is the direct integral definition
+    Bridge: vasyunin_mean_eq_integral proves they're equal. -/
+private lemma vasyunin_mean_eq_basisInnerProd (N : ℕ) :
+    (fun i : Fin (N - 1) => Cathedral.Vasyunin.vasyuninMeanEntry (i.val + 1)) =
+    basisInnerProd N := by
+  ext i
+  simp only [basisInnerProd]
+  exact Cathedral.Vasyunin.vasyunin_mean_eq_integral (i.val + 1) (by omega)
+
+/-- **BRIDGE LEMMA**: The Vasyunin Gram matrix equals the Cathedral gramMatrix.
+    Both compute G[i,j] = ∫₀¹ {1/((i+1)x)}{1/((j+1)x)} dx.
+    Bridge: vasyunin_eq_integral proves vasyuninGramEntry = gramEntry. -/
+private lemma vasyunin_gram_eq_gramMatrix (N : ℕ) :
+    (Matrix.of fun i j : Fin (N - 1) =>
+      Cathedral.Vasyunin.vasyuninGramEntry (i.val + 1) (j.val + 1)) =
+    gramMatrix N := by
+  ext i j
+  simp only [gramMatrix, Matrix.of_apply, gramEntry]
+  exact Cathedral.Vasyunin.vasyunin_eq_integral (i.val + 1) (j.val + 1) (by omega) (by omega)
+
 /-- **Spectral Energy Lower Bound (The Rayleigh-Ritz Witness)**:
+    NOW A THEOREM — GRADUATED 2026-05-07 (Phase X).
 
     For any test vector v, the variational principle gives:
       totalSpectralEnergy N ≥ 2·bᵀv - vᵀGv
@@ -254,16 +360,39 @@ theorem spectral_energy_le_one (N : ℕ) (hN : 2 ≤ N) :
 
     Therefore: totalSpectralEnergy N ≥ 1 - C/ln N → 1.
 
-    This is the "floor" of the Rayleigh-Ritz sandwich.
-    It uses the existing Cathedral Spatial Path (Mertens + Abel + Vasyunin)
-    and does NOT require any new axioms beyond those already in the
-    Spatial engine.
-
-    NOTE: This axiom will be graduated once we bridge the spectral
-    identity to nbDistSq_le_test_vector + bd_witness_l2_error_decay. -/
-axiom spectral_energy_witness_lower :
+    PROOF CHAIN:
+    1. bd_witness_l2_error_decay: ∃v, 1-2·(vasyuninMean)ᵀv + vᵀ(vasyuninGram)v ≤ C/ln N
+    2. vasyunin_mean_eq_basisInnerProd: vasyuninMean = basisInnerProd (both = ∫{1/(kx)}dx)
+    3. vasyunin_gram_eq_gramMatrix: vasyuninGram = gramMatrix (both = ∫{1/(jx)}{1/(kx)}dx)
+    4. nbDistSq_le_test_vector: d² ≤ 1 - 2bᵀv + vᵀGv (variational principle)
+    5. spectral_identity: d² = 1 - totalEnergy
+    6. Therefore: totalEnergy ≥ 1 - C/ln N -/
+theorem spectral_energy_witness_lower :
     ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N ≥ N₀,
-      totalSpectralEnergy N ≥ 1 - C / Real.log ↑N
+      totalSpectralEnergy N ≥ 1 - C / Real.log ↑N := by
+  -- Step 1: Get the BD witness decay bound
+  obtain ⟨C_err, hC_pos, N₀, h_decay⟩ := bd_witness_l2_error_decay_proved
+  refine ⟨C_err, hC_pos, max N₀ 3, fun N hN => ?_⟩
+  have hN₀ : N ≥ N₀ := le_of_max_le_left hN
+  have hN3 : N ≥ 3 := le_of_max_le_right hN
+  have hN2 : 2 ≤ N := by omega
+  -- Step 2: Get the witness vector from the Spatial Path
+  obtain ⟨v, hv_bound⟩ := h_decay N hN₀ hN3
+  -- Step 3: Bridge Vasyunin → Cathedral definitions
+  -- hv_bound: 1 - 2·dotProduct(vasyuninMean) v + realQuadForm(vasyuninGram) v ≤ C/ln N
+  -- Rewrite using bridge lemmas
+  rw [vasyunin_mean_eq_basisInnerProd N, vasyunin_gram_eq_gramMatrix N] at hv_bound
+  -- hv_bound now: 1 - 2·dotProduct(basisInnerProd N) v + realQuadForm(gramMatrix N) v ≤ C/ln N
+  -- Step 4: Apply variational principle
+  have h_var := nbDistSq_le_test_vector N hN2 v
+  -- h_var: nbDistSq' N ≤ 1 - 2·bᵀv + vᵀGv
+  -- Step 5: Apply spectral identity
+  have h_id := spectral_identity N hN2
+  -- h_id: nbDistSq' N = 1 - totalSpectralEnergy N
+  -- Step 6: Chain the inequalities
+  -- From h_id: 1 - totalSpectralEnergy N = nbDistSq' N ≤ 1 - 2bᵀv + vᵀGv ≤ C/ln N
+  -- Therefore: totalSpectralEnergy N ≥ 1 - C/ln N
+  linarith
 
 /-- **Total Spectral Energy converges to 1** (The Rayleigh-Ritz Squeeze).
 
@@ -365,20 +494,28 @@ theorem heisenberg_implies_d_sq_zero :
 end
 
 -- ════════════════════════════════════════════════════════════
--- AXIOM AUDIT
+-- AXIOM AUDIT (updated 2026-05-07, Phase X complete)
 -- ════════════════════════════════════════════════════════════
 --
 -- #print axioms heisenberg_implies_d_sq_zero
---   → [spectral_identity, spectral_energy_witness_lower,
---      propext, Classical.choice, Quot.sound]
+--   → [propext, Classical.choice, Quot.sound,
+--      witness_covariance_decay, witness_numerator_convergence]
 --
--- 2 custom axioms remain:
---   1. spectral_identity: d² = 1 - Σ c_k²/λ_k (provable from Mathlib)
---   2. spectral_energy_witness_lower: Σ c_k²/λ_k ≥ 1 - C/ln N
---      (provable: from nbDistSq_le_test_vector + bd_witness_l2_error_decay)
+-- 0 custom axioms in HeisenbergBypass!
+-- The only non-standard axioms are the two Vasyunin Crown axioms:
+--   1. witness_covariance_decay (THE Riemann Hypothesis content)
+--   2. witness_numerator_convergence (PNT-level, unconditional)
 --
--- GRADUATED (this session):
---   - nbDistSq_nonneg: axiom → THEOREM (L² norm ≥ 0, via l2_error_eq_quad_error)
+-- GRADUATED (2026-05-07 Phase X):
+--   - bd_witness_l2_error_decay: axiom → THEOREM (bd_witness_l2_error_decay_proved)
+--     (via Vasyunin λ-trick + Rayleigh quotient + log-cutoff witness)
+--   - spectral_energy_witness_lower: axiom → THEOREM
+--     (via bd_witness_l2_error_decay_proved + vasyunin_gram_eq_gramMatrix +
+--      vasyunin_mean_eq_basisInnerProd + nbDistSq_le_test_vector +
+--      spectral_identity)
+--
+-- Previously graduated:
+--   - nbDistSq_nonneg: axiom → THEOREM (L² norm ≥ 0)
 --   - spectral_energy_le_one: axiom → THEOREM (d² ≥ 0 + spectral_identity)
 --   - ultraviolet_completeness: axiom → THEOREM (Rayleigh-Ritz squeeze)
 --
@@ -389,4 +526,4 @@ end
 #print axioms nbDistSq_nonneg
 #print axioms spectral_energy_le_one
 #print axioms ultraviolet_completeness
-
+#print axioms spectral_energy_witness_lower
