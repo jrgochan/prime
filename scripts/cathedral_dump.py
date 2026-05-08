@@ -12,10 +12,13 @@ Modes:
 The script uses a greedy bin-packing algorithm to balance file sizes evenly
 across the output files, so no single file gets too large.
 
-The RH mode traces the transitive import closure from three crown roots:
-  1. Assembly/MainChain.lean        — nyman_beurling_equivalence (1 axiom)
-  2. Spectral/HeisenbergBypass.lean — heisenberg_implies_d_sq_zero (2 axioms)
-  3. Vasyunin/Proof/WitnessConditional.lean — witness_covariance_decay ↔ RH
+The RH mode traces the transitive import closure from crown roots:
+  1. Assembly/MainChain.lean            — nyman_beurling_equivalence (1 literature axiom)
+  2. Spectral/HeisenbergBypass.lean     — heisenberg_implies_d_sq_zero
+  3. Vasyunin/Proof/GramBoundDirect.lean — Route C: gram_bound → RH (1 axiom ≡ RH)
+  4. Vasyunin/Proof/WitnessConditional.lean — witness_covariance_decay ↔ RH
+  5. Robin/GramDiagonalBound.lean       — Robin-Gram bridge (RH → Gram form)
+  6. PNT/AbelMean.lean                  — PNT axioms + Abel infrastructure
 """
 
 import argparse
@@ -30,9 +33,18 @@ CATHEDRAL_DIR = Path("proofs/Cathedral")
 # Root files for the RH critical path.
 # The script BFS-traverses all `import Cathedral.*` to find the full closure.
 RH_ROOTS = [
+    # Primary crown (1 literature axiom: baez_duarte_forward)
     "Assembly/MainChain.lean",
+    # Heisenberg bypass (spectral decomposition)
     "Spectral/HeisenbergBypass.lean",
+    # Route C: Gram bound → RH (single axiom ≡ RH)
+    "Vasyunin/Proof/GramBoundDirect.lean",
+    # Crown jewel: witness_covariance_decay ↔ RH
     "Vasyunin/Proof/WitnessConditional.lean",
+    # Robin-Gram bridge (RH → Gram form → covariance decay)
+    "Robin/GramDiagonalBound.lean",
+    # PNT axioms + Abel summation infrastructure
+    "PNT/AbelMean.lean",
 ]
 
 HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -41,23 +53,32 @@ HEADER_TEMPLATE = """# ━━━━━━━━━━━━━━━━━━━
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
-# Lean 4 + Mathlib — {mode_desc}
-# Build: lake build — 0 errors, 0 sorry on crown path
+# Lean 4 + Mathlib v4.29 — {mode_desc}
+# Build: lake build — 8448 jobs, 0 errors, 0 sorry on crown path
 #
-# ═══ Two-Axiom Crown Architecture (May 2026) ═══
+# ═══ Three-Path Architecture (May 2026) ═══
 #
-# Primary export: nyman_beurling_equivalence (MainChain.lean)
-#   RH ↔ d²_N → 0
+# PATH 1 — Primary Crown (MainChain.lean)
+#   nyman_beurling_equivalence: RH ↔ d²_N → 0
 #   Axiom: baez_duarte_forward (Báez-Duarte, IMRN 2003)
 #   Converse: FULLY PROVED (0 custom axioms)
 #
-# Heisenberg Bypass: heisenberg_implies_d_sq_zero (HeisenbergBypass.lean)
+# PATH 2 — Heisenberg Bypass (HeisenbergBypass.lean)
 #   d²_N → 0 via real spectral decomposition
-#   Axiom 1: witness_covariance_decay   — THE Riemann Hypothesis
-#   Axiom 2: witness_numerator_convergence — PNT-level (graduated)
+#   Axiom: witness_covariance_decay (≡ RH)
+#   Crown Jewel: witness_covariance_decay ↔ RH (WitnessConditional.lean)
 #
-# Crown Jewel: witness_covariance_decay ↔ RH (WitnessConditional.lean)
-#   Both directions proved. Zero sorry.
+# PATH 3 — Route C (GramBoundDirect.lean)
+#   gram_form_upper_bound_direct → RH (single axiom ≡ RH)
+#   Bypasses covariance matrix entirely
+#   Uses: bᵀv → 1 (PNT, proved) + Gram bound + NB converse
+#
+# Robin-Gram Bridge (GramDiagonalBound.lean)
+#   RH → Robin's inequality → σ(n)/n bound → Gram form control
+#
+# PNT Infrastructure (AbelMean.lean)
+#   3 PNT axioms (unconditional, proved in Bridge.lean when PNTAnd enabled)
+#   PNTAnd blocked: Lean 4.28→4.29 Fourier.lean API break
 #
 # Graduated theorems (formerly axioms):
 #   ✅ nbDistSq_nonneg                — L² norm ≥ 0

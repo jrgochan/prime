@@ -1,26 +1,35 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # Cathedral Source — Part 3 of 10
-# Generated: 2026-05-07 17:33:27
+# Generated: 2026-05-07 21:24:04
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #
 # THE CATHEDRAL — Formal Reduction of the Riemann Hypothesis
-# Lean 4 + Mathlib — Critical Path (RH chain — import-graph traced)
-# Build: lake build — 0 errors, 0 sorry on crown path
+# Lean 4 + Mathlib v4.29 — Critical Path (RH chain — import-graph traced)
+# Build: lake build — 8448 jobs, 0 errors, 0 sorry on crown path
 #
-# ═══ Two-Axiom Crown Architecture (May 2026) ═══
+# ═══ Three-Path Architecture (May 2026) ═══
 #
-# Primary export: nyman_beurling_equivalence (MainChain.lean)
-#   RH ↔ d²_N → 0
+# PATH 1 — Primary Crown (MainChain.lean)
+#   nyman_beurling_equivalence: RH ↔ d²_N → 0
 #   Axiom: baez_duarte_forward (Báez-Duarte, IMRN 2003)
 #   Converse: FULLY PROVED (0 custom axioms)
 #
-# Heisenberg Bypass: heisenberg_implies_d_sq_zero (HeisenbergBypass.lean)
+# PATH 2 — Heisenberg Bypass (HeisenbergBypass.lean)
 #   d²_N → 0 via real spectral decomposition
-#   Axiom 1: witness_covariance_decay   — THE Riemann Hypothesis
-#   Axiom 2: witness_numerator_convergence — PNT-level (graduated)
+#   Axiom: witness_covariance_decay (≡ RH)
+#   Crown Jewel: witness_covariance_decay ↔ RH (WitnessConditional.lean)
 #
-# Crown Jewel: witness_covariance_decay ↔ RH (WitnessConditional.lean)
-#   Both directions proved. Zero sorry.
+# PATH 3 — Route C (GramBoundDirect.lean)
+#   gram_form_upper_bound_direct → RH (single axiom ≡ RH)
+#   Bypasses covariance matrix entirely
+#   Uses: bᵀv → 1 (PNT, proved) + Gram bound + NB converse
+#
+# Robin-Gram Bridge (GramDiagonalBound.lean)
+#   RH → Robin's inequality → σ(n)/n bound → Gram form control
+#
+# PNT Infrastructure (AbelMean.lean)
+#   3 PNT axioms (unconditional, proved in Bridge.lean when PNTAnd enabled)
+#   PNTAnd blocked: Lean 4.28→4.29 Fourier.lean API break
 #
 # Graduated theorems (formerly axioms):
 #   ✅ nbDistSq_nonneg                — L² norm ≥ 0
@@ -37,812 +46,1131 @@
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 ================================================================
-FILE: Cathedral/AbelTail/RectangleBound.lean
+FILE: Cathedral/AbelTail/Engine.lean
 ================================================================
 
 /-
-  Cathedral/AbelTail/RectangleBound.lean
+  Cathedral/AbelTail/Engine.lean
 
-  ## Rectangle Bound and Finite Telescoping
+  ## THE ABEL ENGINE — Generic PNT Extraction Tools
 
-  The "Bypass A" (Theorist directive): the shifted rectangle trick.
-    k^{-5/4} ≤ ∫_{k-1}^{k} t^{-5/4} dt = 4·((k-1)^{-1/4} - k^{-1/4})
+  Converts Filter.Tendsto limits into quantitative bounds.
+  The key bridge between PNT axioms (eventual convergence)
+  and the FinalDragon (uniform bounds for all N ≥ 10).
 
-  Because t^{-5/4} is decreasing, k^{-5/4} is the MINIMUM on [k-1, k].
-
-  Then: Σ_{k=N+1}^M k^{-5/4} ≤ 4·N^{-1/4}  (by telescoping).
-
-  This is the engine that converts power-law decay into finite sums.
+  Created April 18, 2026 — The Abel Engine.
 -/
 
-import Cathedral.AbelTail.Antiderivative
+import Mathlib.Analysis.SpecificLimits.Normed
+import Mathlib.Analysis.SpecialFunctions.Log.Basic
 
 noncomputable section
-open Real Finset BigOperators MeasureTheory
+open Real Finset
 
 -- ════════════════════════════════════════════════
--- §1. RECTANGLE BOUND
+-- §1. FILTER EXTRACTION
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: k^{-5/4} ≤ 4·((k-1)^{-1/4} - k^{-1/4}) for k ≥ 2.
-    Because t^{-5/4} is decreasing, k^{-5/4} = min value on [k-1, k].
-    Uses: ∫_{k-1}^{k} t^{-5/4} dt = 4·((k-1)^{-1/4} - k^{-1/4}) [antiderivative]
-          k^{-5/4} ≤ ∫_{k-1}^{k} t^{-5/4} dt  [rectangle bound] -/
-theorem rpow_54_le_integral (k : ℕ) (hk : 2 ≤ k) :
-    (k : ℝ) ^ (-(5:ℝ)/4) ≤
-    4 * (((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4)) := by
-  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
-  have hkm1_pos : (0 : ℝ) < (k : ℝ) - 1 := by
-    have : (2 : ℝ) ≤ (k : ℝ) := Nat.ofNat_le_cast.mpr hk
-    linarith
-  have hle : (k : ℝ) - 1 ≤ (k : ℝ) := by linarith
-  -- Step 1: Evaluate the integral via antiderivative
-  have h_int := integral_rpow_54 ((k:ℝ) - 1) (k:ℝ) hkm1_pos hle
-  have h_int' : ∫ t in ((k:ℝ) - 1)..(k:ℝ), t ^ (-(5:ℝ)/4) =
-      4 * (((k:ℝ) - 1) ^ (-(1:ℝ)/4) - (k:ℝ) ^ (-(1:ℝ)/4)) := by
-    rw [h_int]; ring
-  -- Step 2: Rectangle bound: k^{-5/4} ≤ ∫_{k-1}^k t^{-5/4} dt
-  suffices h : (k : ℝ) ^ (-(5:ℝ)/4) ≤ ∫ t in ((k:ℝ) - 1)..(k:ℝ), t ^ (-(5:ℝ)/4) by
-    linarith [h_int']
-  have h_const_eq : ∫ t in ((k:ℝ) - 1)..(k:ℝ), (k : ℝ) ^ (-(5:ℝ)/4) =
-      (k : ℝ) ^ (-(5:ℝ)/4) := by
-    rw [intervalIntegral.integral_const]; simp [sub_sub_cancel]
-  rw [← h_const_eq]
-  have hint_rpow : IntervalIntegrable (fun t => t ^ (-(5:ℝ)/4)) MeasureTheory.volume
-      ((k:ℝ) - 1) (k:ℝ) := by
-    apply ContinuousOn.intervalIntegrable
-    apply ContinuousOn.rpow continuousOn_id continuousOn_const
-    intro t ht
-    left
-    rw [Set.uIcc_of_le hle] at ht
-    exact ne_of_gt (lt_of_lt_of_le hkm1_pos ht.1)
-  apply intervalIntegral.integral_mono_on (by linarith)
-    (intervalIntegrable_const) hint_rpow
-  intro t ht
-  have ht_pos : 0 < t := lt_of_lt_of_le hkm1_pos ht.1
-  exact Real.rpow_le_rpow_of_nonpos ht_pos ht.2 (by norm_num)
+/-- From Filter.Tendsto, extract a pointwise bound. -/
+lemma tendsto_extract_bound {f : ℕ → ℝ} {L : ℝ} {ε : ℝ} (hε : 0 < ε)
+    (hf : Filter.Tendsto f Filter.atTop (nhds L)) :
+    ∃ N₀ : ℕ, ∀ M : ℕ, N₀ ≤ M → |f M - L| ≤ ε := by
+  rw [Metric.tendsto_atTop] at hf
+  obtain ⟨N₀, hN₀⟩ := hf ε hε
+  exact ⟨N₀, fun M hM => le_of_lt (by simpa [Real.dist_eq] using hN₀ M hM)⟩
+
+/-- A universal bound: ∃ B ≥ 1, ∀ n, |f(n) - L| ≤ B. -/
+lemma tendsto_universal_bound {f : ℕ → ℝ} {L : ℝ}
+    (hf : Filter.Tendsto f Filter.atTop (nhds L)) :
+    ∃ B : ℝ, B ≥ 1 ∧ ∀ n : ℕ, |f n - L| ≤ B := by
+  obtain ⟨N₀, hN₀⟩ := tendsto_extract_bound one_pos hf
+  suffices h : ∃ B : ℝ, B ≥ 1 ∧ ∀ n, n < N₀ → |f n - L| ≤ B by
+    obtain ⟨B, hB1, hB⟩ := h
+    exact ⟨B, hB1, fun n => by
+      by_cases hn : n < N₀
+      · exact hB n hn
+      · linarith [hN₀ n (by omega)]⟩
+  clear hN₀; induction N₀ with
+  | zero => exact ⟨1, le_refl _, fun _ hn => absurd hn (by omega)⟩
+  | succ m ih =>
+    obtain ⟨B₀, hB₀_ge, hB₀⟩ := ih
+    refine ⟨max B₀ (|f m - L| + 1), ?_, fun n hn => ?_⟩
+    · simp only [ge_iff_le, le_max_iff]; left; exact hB₀_ge
+    · rcases Nat.lt_succ_iff_lt_or_eq.mp hn with h | h
+      · exact le_trans (hB₀ n h) (le_max_left _ _)
+      · subst h; linarith [le_max_right B₀ (|f n - L| + 1)]
 
 -- ════════════════════════════════════════════════
--- §2. FINITE TELESCOPING SUM
+-- §2. LOG SHIFT BOUND
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: Σ_{k=N+1}^{M} k^{-5/4} ≤ 4·N^{-1/4} for N ≥ 1.
-    Each term telescopes via rpow_54_le_integral, then the sum telescopes. -/
-theorem finite_rpow_54_tail_bound (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 ≤ M) :
-    (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4)) ≤
-    4 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  have hbridge : ∀ k : ℕ, N + 1 ≤ k → k ≤ M →
-      (k : ℝ) ^ (-(5:ℝ)/4) ≤
-      4 * (((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4)) := by
-    intro k hk _
-    exact rpow_54_le_integral k (by omega)
-  calc (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4))
-      ≤ (Icc (N+1) M).sum (fun k =>
-        4 * (((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4))) := by
-        apply Finset.sum_le_sum
-        intro k hk
-        rw [Finset.mem_Icc] at hk
-        exact hbridge k hk.1 hk.2
-    _ = 4 * (Icc (N+1) M).sum (fun k =>
-        ((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4)) := by
-        rw [← Finset.mul_sum]
-    _ ≤ 4 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-        apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 4)
-        suffices htel : (Icc (N+1) M).sum (fun k =>
-            ((k : ℝ) - 1) ^ (-(1:ℝ)/4) - (k : ℝ) ^ (-(1:ℝ)/4)) =
-            (N : ℝ) ^ (-(1:ℝ)/4) - (M : ℝ) ^ (-(1:ℝ)/4) by
-          rw [htel]
-          have : 0 ≤ (M : ℝ) ^ (-(1:ℝ)/4) := by positivity
-          linarith
-        have hle : N + 1 ≤ M := hNM
-        obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hle
-        induction d with
-        | zero =>
-          simp [Finset.Icc_self]
-        | succ n ih =>
-          rw [show N + 1 + (n + 1) = N + 1 + n + 1 from by omega]
-          rw [Finset.sum_Icc_succ_top (by omega : N + 1 ≤ N + 1 + n + 1)]
-          have ih' := ih (by omega) (fun k hk1 hk2 => hbridge k hk1 (by omega)) (by omega)
-          rw [ih']
-          push_cast; ring_nf
+/-- For N ≥ 10 (as ℕ): log(N) ≤ 2 · log(N-1).
+    Proof: For N ≥ 3 (Nat), (N-1)*(N-1) ≥ N, so N ≤ (N-1)^2. -/
+lemma log_shift_bound {N : ℕ} (hN : 10 ≤ N) :
+    Real.log (N : ℝ) ≤ 2 * Real.log ((N - 1 : ℕ) : ℝ) := by
+  have hNm1_pos : (0 : ℝ) < ((N - 1 : ℕ) : ℝ) := by
+    exact_mod_cast show 0 < N - 1 by omega
+  -- N ≤ (N-1)*(N-1) for N ≥ 3 (over ℕ)
+  have hN_sq : (N : ℕ) ≤ (N - 1) * (N - 1) := by
+    have hge : N - 1 ≥ 9 := by omega
+    -- (N-1) ≥ 9, so (N-1)*(N-1) ≥ 9*(N-1) = 9N-9 ≥ N for N ≥ 10
+    calc N ≤ 9 * (N - 1) := by omega
+      _ ≤ (N - 1) * (N - 1) := Nat.mul_le_mul_right _ hge
+  calc Real.log (N : ℝ)
+    _ ≤ Real.log (((N - 1 : ℕ) : ℝ) * ((N - 1 : ℕ) : ℝ)) := by
+        apply Real.log_le_log (by positivity)
+        exact_mod_cast hN_sq
+    _ = Real.log ((N - 1 : ℕ) : ℝ) + Real.log ((N - 1 : ℕ) : ℝ) :=
+        Real.log_mul (ne_of_gt hNm1_pos) (ne_of_gt hNm1_pos)
+    _ = 2 * Real.log ((N - 1 : ℕ) : ℝ) := by ring
+
+/-- Consequence: K/log(N-1) ≤ 2K/log(N) for N ≥ 10 and K > 0. -/
+lemma div_log_shift {K : ℝ} {N : ℕ} (hK : 0 < K) (hN : 10 ≤ N) :
+    K / Real.log ((N - 1 : ℕ) : ℝ) ≤ 2 * K / Real.log (N : ℝ) := by
+  have hlog_N1_pos : 0 < Real.log ((N - 1 : ℕ) : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N - 1 by omega)
+  have hlogN_pos : 0 < Real.log (N : ℝ) :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  rw [div_le_div_iff₀ hlog_N1_pos hlogN_pos]
+  nlinarith [log_shift_bound hN]
+
+-- ════════════════════════════════════════════════
+-- §3. INDEX BRIDGE: Fin(N-1) ↔ Icc 1 (N-1)
+-- ════════════════════════════════════════════════
+
+/-- Convert Fin(N-1) sum to Finset.Icc sum.
+    Σ_{i : Fin(N-1)} f(i.val+1) = Σ_{k ∈ Icc 1 (N-1)} f(k). -/
+lemma fin_sum_eq_icc_sum {N : ℕ} (_hN : 2 ≤ N) (f : ℕ → ℝ) :
+    ∑ i : Fin (N - 1), f (i.val + 1) =
+    ∑ k ∈ Finset.Icc 1 (N - 1), f k := by
+  -- Rewrite Icc 1 (N-1) as image of Fin(N-1) under (·+1)
+  have h_eq : Finset.Icc 1 (N - 1) = Finset.image (fun i : Fin (N - 1) => i.val + 1) Finset.univ := by
+    ext k
+    simp only [Finset.mem_Icc, Finset.mem_image, Finset.mem_univ, true_and]
+    constructor
+    · intro ⟨hk1, hkN⟩
+      refine ⟨⟨k - 1, ?_⟩, ?_⟩
+      · omega
+      · simp; omega
+    · rintro ⟨i, rfl⟩
+      exact ⟨by omega, by exact Nat.succ_le_of_lt i.isLt⟩
+  rw [h_eq, Finset.sum_image]
+  intro a _ b _ hab
+  simp only at hab
+  exact Fin.ext (by omega)
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- Tools provided:
+--   tendsto_extract_bound:    Filter.Tendsto → ∃ N₀, ∀ M ≥ N₀, |f M - L| ≤ ε
+--   tendsto_universal_bound:  Filter.Tendsto → ∃ B ≥ 1, ∀ n, |f(n)-L| ≤ B
+--   log_shift_bound:          log(N) ≤ 2·log(N-1) for N ≥ 10
+--   div_log_shift:            K/log(N-1) ≤ 2K/log(N) for N ≥ 10
+--   fin_sum_eq_icc_sum:       Fin(N-1) ↔ Icc 1 (N-1) index bridge
+--
+-- NO Cathedral imports. Pure Mathlib analysis.
 
 end
 
 
 ================================================================
-FILE: Cathedral/AbelTail/S1Decay.lean
+FILE: Cathedral/Analysis/CenteredFractBound.lean
 ================================================================
 
 /-
-  Cathedral/AbelTail/S1Decay.lean
+  Cathedral/Analysis/CenteredFractBound.lean
 
-  ## S₁ Decay: |S₁(N)| ≤ C·N^{-1/4}
+  ## BOUNDED PARTIAL SUMS OF CENTERED FRACTIONAL PARTS
 
-  The FULLY PROVED decay bound for the unweighted PNT sub-sum:
-    S₁(N) = Σ_{k=1}^N μ(k)/k
+  For coprime a, b with 1 ≤ a < b, the centered fractional parts
 
-  Strategy:
-  1. finite_abel_s1_diff: Abel summation on [N+1, M] gives
-     |S₁(M) - S₁(N)| ≤ C_m·(boundary + 5·N^{-1/4})
-  2. s1_decay: Choose M from PNT (S₁ → 0) to close the triangle
-     |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)|
+      f(m) = {am/b} - (b-1)/(2b)
 
-  This is the HARDEST section and it's COMPLETELY PROVED.
+  have bounded partial sums. This is the key number-theoretic input
+  that makes the Dirichlet test applicable to the Vasyunin residual.
+
+  Created: April 25, 2026
+  Status: COMPLETE — 8 lemmas/theorems, 0 sorry, 0 axiom
 -/
 
-import Cathedral.AbelTail.AbelInterior
-import Cathedral.AbelTail.RectangleBound
-import Cathedral.AbelTail.Telescoping
-import Cathedral.AbelTail.MertensBridge
-import Cathedral.AbelTail.Engine
-import Cathedral.MellinBridge.AbelSummation
+import Cathedral.Analysis.DirichletTest
+import Mathlib.Data.ZMod.Basic
+import Mathlib.Algebra.Order.Floor.Semifield
 
 noncomputable section
-open Real Finset BigOperators
+open Filter Finset BigOperators
+
+namespace Cathedral.Analysis.CenteredFractBound
 
 -- ════════════════════════════════════════════════
--- §1. PNT SUB-SUM DEFINITIONS
+-- §1. FRACTIONAL PART = MODULAR ARITHMETIC
 -- ════════════════════════════════════════════════
 
-/-- S₁(M) = Σ_{k=1}^M μ(k)/k (matching FinalDragon.lean). -/
-def S₁_at (M : ℕ) : ℝ :=
-  ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
+/-- The key identity: Int.fract(a*m/b) = (a*m % b) / b (for naturals). -/
+lemma fract_nat_div (a m b : ℕ) (hb : 0 < b) :
+    Int.fract ((a:ℝ) * (m:ℝ) / (b:ℝ)) = ((a * m % b : ℕ) : ℝ) / (b:ℝ) := by
+  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr hb
+  rw [show (a:ℝ) * (m:ℝ) = ((a * m : ℕ) : ℝ) from by push_cast; ring]
+  -- Decompose: (a*m : ℝ)/b = (a*m%b : ℝ)/b + (a*m/b : ℝ)
+  have hdecomp : ((a * m : ℕ) : ℝ) / (b:ℝ) =
+      ((a * m % b : ℕ) : ℝ) / (b:ℝ) + ((a * m / b : ℕ) : ℝ) := by
+    have h : (b * (a * m / b) + a * m % b : ℕ) = a * m := Nat.div_add_mod (a * m) b
+    have hreal : ((a * m : ℕ) : ℝ) =
+        ((a * m / b : ℕ) : ℝ) * (b:ℝ) + ((a * m % b : ℕ) : ℝ) := by
+      have : ((b * (a * m / b) + a * m % b : ℕ) : ℝ) = ((a * m : ℕ) : ℝ) := by
+        exact_mod_cast h
+      push_cast at this ⊢; linarith
+    rw [hreal]; field_simp; ring
+  rw [hdecomp]
+  have : ((a * m / b : ℕ) : ℝ) = (((a * m / b : ℕ) : ℤ) : ℝ) := by norm_cast
+  rw [this]
+  rw [Int.fract_add_intCast]
+  exact Int.fract_eq_self.mpr ⟨by positivity,
+    (div_lt_one hb_pos).mpr (Nat.cast_lt.mpr (Nat.mod_lt (a * m) hb))⟩
 
 -- ════════════════════════════════════════════════
--- §2. FINITE ABEL BOUND ON S₁ DIFFERENCE
+-- §2. THE PERMUTATION PROPERTY
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: For M ≥ N+1 ≥ 3, Abel summation on [N+1, M] gives:
-    |S₁(M) - S₁(N)| ≤ C_m·(M^{-1/4} + N^{3/4}/M) + C_m·5·N^{-1/4} -/
-theorem finite_abel_s1_diff
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) :
-    |S₁_at M - S₁_at N| ≤
-      C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
-      C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  -- ─── Step 0: Basic positivity ───
-  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
-  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
-  -- ─── Step 1: S₁(M) - S₁(N) = Σ_{k=N+1}^M μ(k)/k ───
-  have h_diff : S₁_at M - S₁_at N =
-      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) := by
-    unfold S₁_at
-    rw [show Icc 1 M = Icc 1 N ∪ Icc (N+1) M from by
-      ext k; simp [Finset.mem_Icc, Finset.mem_union]; omega]
-    rw [Finset.sum_union (by
-      rw [Finset.disjoint_left]; intro k hk1 hk2
-      simp [Finset.mem_Icc] at hk1 hk2; omega)]
-    ring
-  -- ─── Step 2: Rewrite as Σ a(k)·f(k) form ───
-  have h_mul : ∀ k : ℕ, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ) =
-      (↑(ArithmeticFunction.moebius k) : ℝ) * (1 / (k : ℝ)) := by
-    intro k; ring
-  rw [h_diff, show (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) =
-      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) * (1 / (k : ℝ))) from
-      Finset.sum_congr rfl (fun k _ => h_mul k)]
-  -- ─── Step 3: Apply abel_summation_abs_bound ───
-  set a := fun k => (↑(ArithmeticFunction.moebius k) : ℝ)
-  set f : ℕ → ℝ := fun k => 1 / (k : ℝ)
-  set C_bound : ℕ → ℝ := fun k => C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4))
-  set δ : ℕ → ℝ := fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))
-  have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
-    (fun k hk1 hk2 => by
-      simp only [a, C_bound]
-      unfold partialSum
-      rw [partial_sum_eq_mertens_diff N k (by omega) (by omega)]
-      have hMk := hMertens (k : ℝ) (by exact_mod_cast show 2 ≤ k by omega)
-      have hMN := hMertens (N : ℝ) (by exact_mod_cast hN)
-      calc |((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ)|
-          ≤ |((mertensFunction (k:ℝ) : ℤ) : ℝ)| + |((mertensFunction (N:ℝ) : ℤ) : ℝ)| :=
-            abs_sub _ _
-        _ ≤ C_m * (k : ℝ) ^ ((3:ℝ)/4) + C_m * (N : ℝ) ^ ((3:ℝ)/4) :=
-            add_le_add hMk hMN
-        _ = C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) := by ring)
-    (fun k hk1 hk2 => by
-      simp only [f]
-      have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
-      have hk1_cast : ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 := by push_cast; ring
-      rw [hk1_cast]
-      rw [show 1 / ((k : ℝ) + 1) - 1 / (k : ℝ) = -(1 / ((k : ℝ) * ((k : ℝ) + 1))) from by
-        field_simp; ring]
-      rw [abs_neg, abs_of_nonneg (by positivity)])
-  -- ─── Step 4: Bound the Abel output ───
-  calc |(Icc (N+1) M).sum (fun k => a k * f k)|
-      ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
-    _ ≤ C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
-        C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-      apply add_le_add
-      · -- Boundary: C_bound(M)*|f(M)| ≤ C_m*(M^{-1/4} + N^{3/4}/M)
-        simp only [C_bound, f]
-        rw [abs_of_nonneg (by positivity)]
-        have hM_pos' : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
-        rw [show C_m * ((M : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) * (1 / (M : ℝ)) =
-            C_m * ((M : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) from by ring]
-        gcongr
-        rw [rpow_34_div_eq M (by omega)]
-      · -- Interior sum ≤ C_m * 5 * N^{-1/4}
-        simp only [C_bound, δ]
-        have h_ico_icc : (Ico (N+1) M).sum (fun k =>
-            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
-            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) ≤
-          (Icc (N+1) M).sum (fun k =>
-            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
-            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) := by
-          apply Finset.sum_le_sum_of_subset_of_nonneg Finset.Ico_subset_Icc_self
-          intro k _ _
-          apply mul_nonneg (mul_nonneg (by linarith) (add_nonneg (by positivity) (by positivity)))
-          positivity
-        have h_split : (Icc (N+1) M).sum (fun k =>
-            C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
-            (1 / ((k : ℝ) * ((k : ℝ) + 1)))) ≤
-          C_m * (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4)) +
-          C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) := by
-          have h_eq : (Icc (N+1) M).sum (fun k =>
-              C_m * ((k : ℝ) ^ ((3:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4)) *
-              (1 / ((k : ℝ) * ((k : ℝ) + 1)))) =
-            (Icc (N+1) M).sum (fun k =>
-              C_m * (k : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) +
-            (Icc (N+1) M).sum (fun k =>
-              C_m * (N : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) := by
-            rw [← Finset.sum_add_distrib]
-            apply Finset.sum_congr rfl; intro k _; ring
-          rw [h_eq]
-          apply add_le_add
-          · rw [Finset.mul_sum]
-            apply Finset.sum_le_sum
-            intro k hk
-            rw [Finset.mem_Icc] at hk
-            have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
-            have hkk1_ge_k2 : (k : ℝ) ^ 2 ≤ (k : ℝ) * ((k : ℝ) + 1) := by nlinarith
-            have hk34_div : C_m * (k : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1)) ≤
-                C_m * (k : ℝ) ^ ((3:ℝ)/4) / (k : ℝ) ^ 2 := by
-              apply div_le_div_of_nonneg_left (by positivity) (by positivity) hkk1_ge_k2
-            have hk_rpow : C_m * (k : ℝ) ^ ((3:ℝ)/4) / (k : ℝ) ^ 2 =
-                C_m * (k : ℝ) ^ (-(5:ℝ)/4) := by
-              have h_k2 : (k : ℝ) ^ (2 : ℕ) = (k : ℝ) ^ (2 : ℝ) :=
-                (Real.rpow_natCast _ _).symm
-              rw [show (k : ℝ) ^ 2 = (k : ℝ) ^ (2 : ℕ) from by norm_num, h_k2]
-              rw [div_eq_mul_inv, ← Real.rpow_neg (le_of_lt hk_pos)]
-              rw [show C_m * (k : ℝ) ^ ((3:ℝ)/4) * (k : ℝ) ^ (-(2:ℝ)) =
-                  C_m * ((k : ℝ) ^ ((3:ℝ)/4) * (k : ℝ) ^ (-(2:ℝ))) from by ring]
-              rw [← Real.rpow_add hk_pos]
-              norm_num
-            linarith
-          · have h_factor : (Icc (N+1) M).sum (fun k =>
-                C_m * (N : ℝ) ^ ((3:ℝ)/4) / ((k : ℝ) * ((k : ℝ) + 1))) =
-              C_m * (N : ℝ) ^ ((3:ℝ)/4) * (Icc (N+1) M).sum (fun k =>
-                1 / ((k : ℝ) * ((k : ℝ) + 1))) := by
-              rw [Finset.mul_sum]
-              apply Finset.sum_congr rfl; intro k _; ring
-            rw [h_factor]
-            apply mul_le_mul_of_nonneg_left
-              (finite_inv_kk1_bound N M (by omega) (by omega)) (by positivity)
-        have h_rpow := finite_rpow_54_tail_bound N M (by omega : 1 ≤ N) (by omega : N + 1 ≤ M)
-        have h_N34 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) ≤
-            C_m * 1 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-          have hN_pos' : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
-          have h_inv : (1:ℝ) / ((N:ℝ) + 1) ≤ 1 / (N:ℝ) := by
-            apply one_div_le_one_div_of_le hN_pos' (by linarith)
-          have h_rpow_div : (N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ) = (N : ℝ) ^ (-(1:ℝ)/4) := by
-            have : (N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ) =
-                (N : ℝ) ^ ((3:ℝ)/4) * (N : ℝ) ^ (-(1:ℝ)) := by
-              rw [Real.rpow_neg (le_of_lt hN_pos'), Real.rpow_one, div_eq_mul_inv]
-            rw [this, ← Real.rpow_add hN_pos']
-            congr 1; ring
-          have h1 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / ((N : ℝ) + 1)) ≤
-              C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) :=
-            mul_le_mul_of_nonneg_left h_inv (by positivity)
-          have h2 : C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) =
-              C_m * 1 * (N : ℝ) ^ (-(1:ℝ)/4) := by
-            rw [show C_m * (N : ℝ) ^ ((3:ℝ)/4) * (1 / (N : ℝ)) =
-                C_m * ((N : ℝ) ^ ((3:ℝ)/4) / (N : ℝ)) from by ring]
-            rw [h_rpow_div]; ring
-          linarith
-        have h_cm4 : C_m * (Icc (N+1) M).sum (fun k => (k : ℝ) ^ (-(5:ℝ)/4)) ≤
-            C_m * (4 * (N : ℝ) ^ (-(1:ℝ)/4)) := by
-          apply mul_le_mul_of_nonneg_left h_rpow (by linarith)
-        linarith
+/-- For coprime a, b, the map m → a*m % b is injective on {0,...,b-1}.
+    Key fact: a*m₁ ≡ a*m₂ (mod b) and gcd(a,b) = 1 implies m₁ ≡ m₂ (mod b). -/
+lemma mul_mod_injective_range (a b : ℕ) (_hb : 0 < b) (hcop : Nat.Coprime a b) :
+    Set.InjOn (fun m => a * m % b) (Finset.range b : Set ℕ) := by
+  intro m₁ hm₁ m₂ hm₂ heq
+  simp only [Finset.coe_range, Set.mem_Iio] at hm₁ hm₂
+  have hmod : a * m₁ ≡ a * m₂ [MOD b] := heq
+  have hgcd : Nat.gcd b a = 1 := (Nat.Coprime.symm hcop)
+  have hcancel : m₁ ≡ m₂ [MOD b] :=
+    Nat.ModEq.cancel_left_of_coprime hgcd hmod
+  exact hcancel.eq_of_lt_of_lt hm₁ hm₂
+
+/-- For coprime a, b, mapping m → a*m % b bijects on {0,...,b-1}. -/
+lemma mul_mod_image_range (a b : ℕ) (hb : 0 < b) (hcop : Nat.Coprime a b) :
+    (Finset.range b).image (fun m => a * m % b) = Finset.range b := by
+  apply Finset.eq_of_subset_of_card_le
+  · intro x hx
+    simp only [Finset.mem_image] at hx
+    obtain ⟨m, _, rfl⟩ := hx
+    exact Finset.mem_range.mpr (Nat.mod_lt _ hb)
+  · have h := Finset.card_image_of_injOn (mul_mod_injective_range a b hb hcop)
+    simp only [Finset.card_range] at h ⊢
+    omega
 
 -- ════════════════════════════════════════════════
--- §3. S₁ DECAY VIA LIMIT ARGUMENT
+-- §3. SUM OVER ONE PERIOD
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: |S₁(N)| ≤ C · N^{-1/4} for N ≥ 2.
-
-    For each N ≥ 2:
-    1. From PNT (S₁ → 0), choose M ≥ N+1 with |S₁(M)| < N^{-1/4}
-    2. Triangle: |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)|
-    3. |S₁(M)| < N^{-1/4} (by choice of M)
-    4. |S₁(M)-S₁(N)| ≤ C_m·(M^{-1/4}+N^{3/4}/M+5N^{-1/4}) ≤ 7C_m·N^{-1/4}
-    5. Total: |S₁(N)| ≤ (1+7C_m)·N^{-1/4}
-
-    C = 1+7C_m is UNIFORM (independent of the choice of M). -/
-theorem s1_decay
-    (C_m : ℝ) (hC : 0 < C_m)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4))
-    (hPNT₁ : Filter.Tendsto (fun N =>
-      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-      Filter.atTop (nhds 0)) :
-    ∃ C₁ : ℝ, C₁ > 0 ∧ ∀ N : ℕ, 2 ≤ N →
-      |S₁_at N| ≤ C₁ * (N : ℝ) ^ (-(1:ℝ)/4) := by
-  use 1 + 7 * C_m
-  constructor
-  · linarith
-  intro N hN
-  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
-  have h_eps : (0 : ℝ) < (N : ℝ) ^ (-(1:ℝ)/4) := Real.rpow_pos_of_pos hN_pos _
-  -- Step 1: From PNT, get M₀ with |S₁(M)| < N^{-1/4} for M ≥ M₀
-  obtain ⟨M₀, hM₀⟩ := tendsto_extract_bound h_eps hPNT₁
-  -- Step 2: Choose M = max(N+1, M₀)
-  set M := max (N + 1) M₀
-  have hM_ge_N1 : N + 1 ≤ M := le_max_left _ _
-  have hM_ge_M0 : M₀ ≤ M := le_max_right _ _
-  -- Step 3: |S₁(M)| < N^{-1/4}
-  have hS1M : |S₁_at M| ≤ (N : ℝ) ^ (-(1:ℝ)/4) := by
-    have := hM₀ M hM_ge_M0; simp at this; exact this
-  -- Step 4: Abel bound
-  have hAbel := finite_abel_s1_diff C_m hC hMertens N M hN hM_ge_N1
-  -- Step 5: M^{-1/4} ≤ N^{-1/4} and N^{3/4}/M ≤ N^{-1/4}
-  have hM_ge_N : (N : ℝ) ≤ (M : ℝ) := by exact_mod_cast (show N ≤ M by omega)
-  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
-  have h1 : (M : ℝ) ^ (-(1:ℝ)/4) ≤ (N : ℝ) ^ (-(1:ℝ)/4) :=
-    Real.rpow_le_rpow_of_nonpos hN_pos hM_ge_N (show -(1:ℝ)/4 ≤ 0 by norm_num)
-  have h2 : (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ) ≤ (N : ℝ) ^ (-(1:ℝ)/4) := by
-    rw [div_le_iff₀ hM_pos]
-    have h34 : (N : ℝ) ^ ((3:ℝ)/4) = (N : ℝ) ^ (-(1:ℝ)/4) * (N : ℝ) ^ (1:ℝ) := by
-      rw [← Real.rpow_add hN_pos]; congr 1; norm_num
-    rw [h34, Real.rpow_one]
-    exact mul_le_mul_of_nonneg_left hM_ge_N (Real.rpow_nonneg hN_pos.le _)
-  -- Step 6: Triangle + combine
-  have h_tri : |S₁_at N| ≤ |S₁_at M| + |S₁_at M - S₁_at N| := by
-    calc |S₁_at N| = |S₁_at M + (S₁_at N - S₁_at M)| := by ring_nf
-      _ ≤ |S₁_at M| + |S₁_at N - S₁_at M| := abs_add_le _ _
-      _ = |S₁_at M| + |S₁_at M - S₁_at N| := by rw [abs_sub_comm]
-  calc |S₁_at N| ≤ |S₁_at M| + |S₁_at M - S₁_at N| := h_tri
-    _ ≤ (N : ℝ) ^ (-(1:ℝ)/4) +
-        (C_m * ((M : ℝ) ^ (-(1:ℝ)/4) + (N : ℝ) ^ ((3:ℝ)/4) / (M : ℝ)) +
-         C_m * 5 * (N : ℝ) ^ (-(1:ℝ)/4)) := by linarith
-    _ ≤ (1 + 7 * C_m) * (N : ℝ) ^ (-(1:ℝ)/4) := by nlinarith [h_eps]
-
-end
-
-
-================================================================
-FILE: Cathedral/AbelTail/Telescoping.lean
-================================================================
-
-/-
-  Cathedral/AbelTail/Telescoping.lean
-
-  ## Telescoping Sum Infrastructure
-
-  Provides finite telescoping identities used throughout the Abel tail:
-  - Σ (1/k - 1/(k+1)) = 1/a - 1/(a+d+1)  [partial fractions]
-  - Σ 1/(k(k+1)) ≤ 1/(N+1)  [consequence]
-
-  These are elementary but need careful Lean formalization
-  with cast normalization (ℕ → ℝ).
--/
-
-import Cathedral.Defs
-
-noncomputable section
-open Real Finset BigOperators
-
--- ════════════════════════════════════════════════
--- §1. BASIC TELESCOPING IDENTITY
--- ════════════════════════════════════════════════
-
-/-- **PROVED**: Telescoping identity for 1/k - 1/(k+1). -/
-theorem finset_sum_tele (a d : ℕ) :
-    (Icc a (a + d)).sum (fun k => 1 / (k : ℝ) - 1 / ((k : ℝ) + 1)) =
-    1 / (a : ℝ) - 1 / (((a + d : ℕ) : ℝ) + 1) := by
-  induction d with
-  | zero => simp [Finset.Icc_self]
+/-- Gauss sum: Σ_{k=0}^{b-1} k = b*(b-1)/2. -/
+lemma gauss_sum_range (b : ℕ) :
+    (∑ k ∈ Finset.range b, (k:ℝ)) = (b:ℝ) * ((b:ℝ) - 1) / 2 := by
+  induction b with
+  | zero => simp
   | succ n ih =>
-    rw [show a + (n + 1) = a + n + 1 from by omega,
-        Finset.sum_Icc_succ_top (by omega : a ≤ a + n + 1), ih]
+    rw [Finset.sum_range_succ, ih]
     push_cast; ring
 
+/-- The sum of modular residues over one period equals the Gauss sum. -/
+lemma sum_mul_mod_eq (a b : ℕ) (hb : 0 < b) (hcop : Nat.Coprime a b) :
+    ∑ m ∈ Finset.range b, ((a * m % b : ℕ) : ℝ) =
+    ∑ k ∈ Finset.range b, (k:ℝ) := by
+  conv_lhs =>
+    rw [show ∑ m ∈ Finset.range b, ((a * m % b : ℕ) : ℝ) =
+        ∑ m ∈ (Finset.range b).image (fun m => a * m % b), ((m : ℕ) : ℝ) from by
+      rw [Finset.sum_image]; intros m₁ hm₁ m₂ hm₂ heq
+      exact mul_mod_injective_range a b hb hcop hm₁ hm₂ heq]
+  rw [mul_mod_image_range a b hb hcop]
+
+/-- The centered fractional-part sum over one period is zero. -/
+theorem centered_period_sum_zero (a b : ℕ) (hb : 0 < b)
+    (hcop : Nat.Coprime a b) :
+    ∑ m ∈ Finset.range b,
+      (Int.fract ((a:ℝ) * (m:ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))) = 0 := by
+  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr hb
+  have hb_ne : (b:ℝ) ≠ 0 := ne_of_gt hb_pos
+  simp_rw [fract_nat_div a _ b hb]
+  rw [Finset.sum_sub_distrib]
+  -- LHS = (Σ (a*m%b)/b) - Σ (b-1)/(2b)
+  have h1 : ∑ x ∈ Finset.range b, ((a * x % b : ℕ) : ℝ) / (b:ℝ) =
+      (∑ x ∈ Finset.range b, ((a * x % b : ℕ) : ℝ)) / (b:ℝ) :=
+    (Finset.sum_div (Finset.range b) (fun x => ((a * x % b : ℕ) : ℝ)) (b:ℝ)).symm
+  rw [h1, sum_mul_mod_eq a b hb hcop, gauss_sum_range]
+  rw [Finset.sum_const, Finset.card_range]
+  -- b • ((b-1)/(2b)) where • is nsmul
+  rw [nsmul_eq_mul]
+  field_simp; ring
+
 -- ════════════════════════════════════════════════
--- §2. PARTIAL FRACTION TAIL BOUND
+-- §4. BOUNDED PARTIAL SUMS (THE CROWN)
 -- ════════════════════════════════════════════════
 
-/-- **PROVED**: Σ_{k=N+1}^{M} 1/(k(k+1)) ≤ 1/(N+1).
-    Uses partial fractions + finite telescoping. -/
-theorem finite_inv_kk1_bound (N M : ℕ) (hN : 1 ≤ N) (hNM : N + 1 ≤ M) :
-    (Icc (N+1) M).sum (fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))) ≤
-    1 / ((N : ℝ) + 1) := by
-  -- 1/(k(k+1)) = 1/k - 1/(k+1)
-  have hrw : (Icc (N+1) M).sum (fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))) =
-      (Icc (N+1) M).sum (fun k => 1 / (k : ℝ) - 1 / ((k : ℝ) + 1)) := by
-    apply Finset.sum_congr rfl
-    intro k hk; rw [Finset.mem_Icc] at hk
-    have : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
-    field_simp; ring
-  rw [hrw]
-  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hNM
-  rw [finset_sum_tele]
-  have h_cast : (1 : ℝ) / ((N + 1 : ℕ) : ℝ) = 1 / ((N : ℝ) + 1) := by push_cast; ring
-  rw [h_cast]
-  have h_nn : (0 : ℝ) ≤ 1 / (((N + 1 + d : ℕ) : ℝ) + 1) :=
-    div_nonneg one_pos.le (by positivity)
+/-- Each centered fractional part has absolute value < 1. -/
+lemma centered_fract_abs_lt_one (a m b : ℕ) (hb : 1 ≤ b) :
+    |Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))| < 1 := by
+  have hb_pos : (0:ℝ) < (b:ℝ) := Nat.cast_pos.mpr (by omega)
+  have h1 := Int.fract_nonneg ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ))
+  have h2 := Int.fract_lt_one ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ))
+  have h3 : 0 ≤ ((b:ℝ) - 1) / (2 * (b:ℝ)) := by
+    apply div_nonneg
+    · have hb1 : (1:ℝ) ≤ (b:ℝ) := by exact_mod_cast hb
+      linarith
+    · positivity
+  have h4 : ((b:ℝ) - 1) / (2 * (b:ℝ)) < 1 := by
+    rw [div_lt_one (show (0:ℝ) < 2 * (b:ℝ) from by positivity)]
+    have hb1 : (1:ℝ) ≤ (b:ℝ) := by exact_mod_cast hb
+    nlinarith
+  rw [abs_lt]; constructor <;> linarith
+
+/-- **THE THEOREM**: Centered fractional-part partial sums are bounded.
+
+    |Σ_{j=0}^{n-1} ({aj/b} - (b-1)/(2b))| ≤ b    for all n -/
+theorem centered_fract_partial_sums_bounded' (a b : ℕ)
+    (ha : 1 ≤ a) (hb : 2 ≤ b) (_hab : a < b) (hcop : Nat.Coprime a b) :
+    ∀ n : ℕ,
+      |DirichletTest.partialSum₀
+        (fun m => Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))) n| ≤ (b:ℝ) := by
+  intro n
+  simp only [DirichletTest.partialSum₀]
+  set f : ℕ → ℝ := fun m =>
+    Int.fract ((a:ℝ) * ((m:ℕ):ℝ) / (b:ℝ)) - ((b:ℝ) - 1) / (2 * (b:ℝ))
+  have hb_pos : 0 < b := by omega
+  -- ── Step 1: f has period b ──
+  -- {a(m+b)/b} = {am/b + a} = {am/b} since a ∈ ℤ
+  have hperiodic : ∀ m, f (m + b) = f m := by
+    intro m
+    -- f(m) = {a*m/b} - c, so need {a*(m+b)/b} - c = {a*m/b} - c
+    -- which reduces to showing {a*(m+b)/b} = {a*m/b}
+    have key : Int.fract ((a:ℝ) * ((↑(m + b) : ℝ)) / (b:ℝ)) =
+        Int.fract ((a:ℝ) * (↑m : ℝ) / (b:ℝ)) := by
+      have heq : (a:ℝ) * (↑(m + b) : ℝ) / (b:ℝ) = (a:ℝ) * (↑m : ℝ) / (b:ℝ) + ↑(a:ℤ) := by
+        push_cast; field_simp
+      rw [heq, Int.fract_add_intCast]
+    -- f = fract - const, so key implies f(m+b) = f(m)
+    exact congr_arg (· - ((b:ℝ) - 1) / (2 * (b:ℝ))) key
+  -- ── Step 2: f(k*b + j) = f(j) ──
+  have hperiodic_mul : ∀ k j, f (k * b + j) = f j := by
+    intro k; induction k with
+    | zero => simp
+    | succ k ih =>
+      intro j
+      rw [show (k + 1) * b + j = (k * b + j) + b from by ring]
+      rw [hperiodic, ih]
+  -- ── Step 3: Sum over one period = 0 ──
+  have hperiod_zero : ∑ j ∈ Finset.range b, f j = 0 :=
+    centered_period_sum_zero a b hb_pos hcop
+  -- ── Step 4: S(q*b) = 0 ──
+  have hsum_mult : ∀ k, ∑ j ∈ Finset.range (k * b), f j = 0 := by
+    intro k; induction k with
+    | zero => simp
+    | succ k ih =>
+      rw [show (k + 1) * b = k * b + b from by ring, Finset.sum_range_add]
+      rw [ih, zero_add]
+      have : ∀ j, f (k * b + j) = f j := hperiodic_mul k
+      simp_rw [this]
+      exact hperiod_zero
+  -- ── Step 5: Split n = (n/b)*b + n%b and bound ──
+  have hn_eq : n = (n / b) * b + n % b := by
+    have h := Nat.div_add_mod n b  -- b * (n / b) + n % b = n
+    linarith [mul_comm b (n / b)]
+  rw [show n = (n / b) * b + n % b from hn_eq]
+  rw [Finset.sum_range_add, hsum_mult (n / b), zero_add]
+  -- Bound the remaining n%b < b terms, each with |f| < 1
+  have hr_lt : n % b < b := Nat.mod_lt n hb_pos
+  calc |∑ j ∈ Finset.range (n % b), f ((n / b) * b + j)|
+      ≤ ∑ j ∈ Finset.range (n % b), |f ((n / b) * b + j)| := Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _j ∈ Finset.range (n % b), (1:ℝ) := by
+        apply Finset.sum_le_sum; intro j _
+        exact le_of_lt (centered_fract_abs_lt_one a ((n / b) * b + j) b (by omega))
+    _ = ((n % b : ℕ) : ℝ) := by
+        simp [Finset.card_range]
+    _ ≤ (b:ℝ) := by
+        exact_mod_cast (Nat.mod_lt n hb_pos).le
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+-- PROVED (zero sorry, zero axiom):
+--   ✅ fract_nat_div                — {am/b} = (am%b)/b
+--   ✅ mul_mod_injective_range     — coprime ⇒ injective on range
+--   ✅ mul_mod_image_range          — image = range (bijection)
+--   ✅ gauss_sum_range              — Σ k = b(b-1)/2
+--   ✅ sum_mul_mod_eq               — Σ (am%b) = Σ k
+--   ✅ centered_period_sum_zero     — Σ_period (centered fract) = 0
+--   ✅ centered_fract_abs_lt_one    — |each term| < 1
+--   ✅ centered_fract_partial_sums_bounded' — THE BOUNDED PARTIAL SUMS THEOREM
+--
+-- Architecture:
+--   fract_nat_div → mul_mod perm → Gauss sum → period=0 → |partial sums| ≤ b
+
+end Cathedral.Analysis.CenteredFractBound
+
+
+================================================================
+FILE: Cathedral/Analysis/StirlingBridge.lean
+================================================================
+
+/-
+  Cathedral/Vasyunin/Cotangent/StirlingBridge.lean
+
+  **THE STIRLING BRIDGE** (The Dawn Strike, April 12, 2026)
+
+  Proves the analytic identity underlying the diagonal Gram entry:
+
+    lim_{K→∞} Σ_{n=0}^{K-2} [-2(n+1)·log(1+1/(n+1)) + 2 - 1/(n+2)]
+    = ln(2π) - γ - 1
+
+  These are the partial sums of ∫₀¹ {1/u}² du decomposed via the
+  piecewise identity on each interval [1/(n+1), 1/n].
+
+  The proof uses:
+  - Stirling's formula: stirlingSeq K → √π (from Mathlib)
+  - Euler-Mascheroni: H_K - ln K → γ  (from Mathlib)
+  - Algebraic telescoping of Σ n·log((n+1)/n)
+  - Harmonic series shifting
+
+  Created: April 12, 2026, 4:30 AM MDT (The Dawn Strike)
+  Integrated into Cathedral: April 12, 2026, 4:49 AM MDT
+-/
+
+import Mathlib.Analysis.SpecialFunctions.Stirling
+import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+
+noncomputable section
+open Real Filter
+
+namespace Cathedral.Vasyunin.StirlingBridge
+
+-- ════════════════════════════════════════════════
+-- §1. THE STIRLING-EULER LIMIT
+-- ════════════════════════════════════════════════
+
+/-- The partial sum P(K) = 2·log(stirlingSeq K) + log(2) - 1 - (harmonic K - log K). -/
+def partialSum (K : ℕ) : ℝ :=
+  2 * Real.log (Stirling.stirlingSeq K) + Real.log 2 - 1 -
+  ((harmonic K : ℝ) - Real.log (K : ℝ))
+
+/-- P(K) → log(2π) - γ - 1 as K → ∞. -/
+theorem tendsto_partialSum :
+    Tendsto partialSum atTop (nhds (Real.log (2 * Real.pi) - eulerMascheroniConstant - 1)) := by
+  unfold partialSum
+  have htarget : Real.log (2 * Real.pi) - eulerMascheroniConstant - 1 =
+      (2 * Real.log (Real.sqrt Real.pi) + Real.log 2 - 1) - eulerMascheroniConstant := by
+    rw [show 2 * Real.log (Real.sqrt Real.pi) = Real.log Real.pi from by
+      rw [Real.log_sqrt (le_of_lt Real.pi_pos)]; ring]
+    rw [show Real.log Real.pi + Real.log 2 = Real.log (2 * Real.pi) from by
+      rw [← Real.log_mul (by positivity : (Real.pi : ℝ) ≠ 0) (by norm_num : (2:ℝ) ≠ 0)]
+      ring_nf]
+    ring
+  rw [htarget]
+  have h_stirling : Tendsto (fun K => 2 * Real.log (Stirling.stirlingSeq K))
+      atTop (nhds (2 * Real.log (Real.sqrt Real.pi))) := by
+    have hstir := Stirling.tendsto_stirlingSeq_sqrt_pi
+    exact (hstir.log (ne_of_gt (Real.sqrt_pos.mpr Real.pi_pos))).const_mul 2
+  have h_euler := Real.tendsto_harmonic_sub_log
+  have h_const : Tendsto (fun _ : ℕ => Real.log 2 - 1)
+      atTop (nhds (Real.log 2 - 1)) := tendsto_const_nhds
+  have h_combined := (h_stirling.add h_const).sub h_euler
+  convert h_combined using 1
+  · ext K; ring
+  · congr 1; ring
+
+-- ════════════════════════════════════════════════
+-- §2. ALGEBRAIC SUB-LEMMAS
+-- ════════════════════════════════════════════════
+
+/-- Σ_{m=0}^{N-1} log(m+1) = log(N!). -/
+private lemma sum_log_eq_log_factorial (N : ℕ) :
+    ∑ m ∈ Finset.range N, Real.log ((m : ℝ) + 1) = Real.log (Nat.factorial N : ℝ) := by
+  induction N with
+  | zero => simp
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ih]
+    have hn1 : ((n : ℝ) + 1) ≠ 0 := by positivity
+    have hfact : (Nat.factorial n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero n)
+    rw [show Nat.factorial (n + 1) = (n + 1) * Nat.factorial n from Nat.factorial_succ n]
+    push_cast
+    rw [Real.log_mul hn1 hfact]; ring
+
+/-- Key telescoping: Σ_{m=0}^{N-1} (m+1)·log((m+2)/(m+1)) = (N+1)·log(N+1) - log((N+1)!). -/
+private lemma sum_weighted_log_telescope (N : ℕ) :
+    ∑ m ∈ Finset.range N,
+      ((m : ℝ) + 1) * Real.log (((m : ℝ) + 2) / ((m : ℝ) + 1)) =
+    ((N : ℝ) + 1) * Real.log ((N : ℝ) + 1) - Real.log (Nat.factorial (N + 1) : ℝ) := by
+  induction N with
+  | zero =>
+    simp [Nat.factorial]
+  | succ n ih =>
+    rw [Finset.sum_range_succ, ih]
+    push_cast
+    have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+    have hn2 : (0 : ℝ) < (n : ℝ) + 2 := by positivity
+    rw [Real.log_div (ne_of_gt hn2) (ne_of_gt hn1)]
+    rw [show Nat.factorial (n + 2) = (n + 2) * Nat.factorial (n + 1) from
+      Nat.factorial_succ (n + 1)]
+    push_cast
+    rw [Real.log_mul (ne_of_gt hn2)
+      (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero (n + 1)))]
+    ring_nf
+
+/-- P(K) = 2·log(K!) - 2K·log(K) + 2K - 1 - H_K via Stirling expansion. -/
+private lemma partialSum_expand (K : ℕ) (hK : 1 ≤ K) :
+    partialSum K =
+    2 * Real.log (Nat.factorial K : ℝ) - 2 * (K : ℝ) * Real.log (K : ℝ) +
+    2 * (K : ℝ) - 1 - (harmonic K : ℝ) := by
+  unfold partialSum
+  rw [Stirling.log_stirlingSeq_formula]
+  have hK_pos : (0 : ℝ) < (K : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hK_ne : (K : ℝ) ≠ 0 := ne_of_gt hK_pos
+  rw [Real.log_div (ne_of_gt hK_pos) (ne_of_gt (Real.exp_pos 1))]
+  rw [show Real.log (2 * (K : ℝ)) = Real.log 2 + Real.log (K : ℝ) from
+    Real.log_mul (by norm_num) hK_ne]
+  rw [Real.log_exp]
+  ring
+
+-- ════════════════════════════════════════════════
+-- §3. HARMONIC SHIFT IDENTITY
+-- ════════════════════════════════════════════════
+
+/-- Σ_{n=0}^{M-1} 1/(n+2) = H_{M+1} - 1. -/
+private lemma harmonic_shift (M : ℕ) :
+    (∑ n ∈ Finset.range M, (1 / ((n : ℚ) + 2) : ℚ)) = harmonic (M + 1) - 1 := by
+  induction M with
+  | zero => simp [harmonic_succ, harmonic_zero]
+  | succ m ih =>
+    rw [Finset.sum_range_succ, ih]
+    rw [show m + 1 + 1 = m + 2 from by omega]
+    rw [harmonic_succ (m + 1), harmonic_succ m]
+    push_cast; ring
+
+/-- Real-valued harmonic shift. -/
+private lemma harmonic_shift_real (M : ℕ) :
+    ∑ n ∈ Finset.range M, (1 / ((n : ℝ) + 2)) = ((harmonic (M + 1) : ℚ) : ℝ) - 1 := by
+  have hq := harmonic_shift M
+  have := congr_arg (fun (q : ℚ) => (q : ℝ)) hq
+  simp only [Rat.cast_sum, Rat.cast_div, Rat.cast_one, Rat.cast_add,
+             Rat.cast_natCast, Rat.cast_sub] at this
   linarith
+
+-- ════════════════════════════════════════════════
+-- §4. THE SERIES BRIDGE (FINAL ASSEMBLY)
+-- ════════════════════════════════════════════════
+
+/-- P(M+2) = Σ_{n=0}^{M} [-2(n+1)·log(1+1/(n+1)) + 2 - 1/(n+2)]. -/
+theorem partialSum_eq_series_sum' (M : ℕ) :
+    partialSum (M + 2) =
+    ∑ n ∈ Finset.range (M + 1),
+      (-2 * ((n : ℝ) + 1) * Real.log (1 + 1 / ((n : ℝ) + 1)) + 2 - 1 / ((n : ℝ) + 2)) := by
+  rw [partialSum_expand (M + 2) (by omega)]
+  have hlog_rw : ∀ n : ℕ,
+      -2 * ((n : ℝ) + 1) * Real.log (1 + 1 / ((n : ℝ) + 1)) + 2 - 1 / ((n : ℝ) + 2) =
+      -2 * (((n : ℝ) + 1) * Real.log (((n : ℝ) + 2) / ((n : ℝ) + 1))) +
+      (2 - 1 / ((n : ℝ) + 2)) := by
+    intro n
+    have : ((n : ℝ) + 1) ≠ 0 := by positivity
+    rw [show 1 + 1 / ((n : ℝ) + 1) = ((n : ℝ) + 2) / ((n : ℝ) + 1) from by field_simp; ring]
+    ring
+  simp_rw [hlog_rw, Finset.sum_add_distrib]
+
+  have hlogsum : ∑ n ∈ Finset.range (M + 1),
+      (-2 * (((n : ℝ) + 1) * Real.log (((n : ℝ) + 2) / ((n : ℝ) + 1)))) =
+      -2 * (((M : ℝ) + 2) * Real.log ((M : ℝ) + 2) -
+            Real.log (Nat.factorial (M + 2) : ℝ)) := by
+    have : ∀ n ∈ Finset.range (M + 1),
+        (-2 * (((n : ℝ) + 1) * Real.log (((n : ℝ) + 2) / ((n : ℝ) + 1)))) =
+        -2 * (((n : ℝ) + 1) * Real.log (((n : ℝ) + 2) / ((n : ℝ) + 1))) := by
+      intros; ring
+    rw [Finset.sum_congr rfl this, ← Finset.mul_sum, sum_weighted_log_telescope (M + 1)]
+    rw [show M + 1 + 1 = M + 2 from by omega]
+    push_cast; ring_nf
+  rw [hlogsum]
+  have hconst : ∑ n ∈ Finset.range (M + 1), ((2 : ℝ) - 1 / ((n : ℝ) + 2)) =
+      2 * ((M : ℝ) + 1) - ∑ n ∈ Finset.range (M + 1), (1 / ((n : ℝ) + 2)) := by
+    rw [Finset.sum_sub_distrib, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
+    push_cast; ring
+  rw [hconst, harmonic_shift_real (M + 1)]
+  rw [show M + 1 + 1 = M + 2 from by omega]
+  push_cast; ring
+
+/-- P(K) = Σ piecewise terms for K ≥ 2. -/
+theorem partialSum_eq_series_sum (K : ℕ) (hK : K ≥ 2) :
+    partialSum K =
+    ∑ n ∈ Finset.range (K - 1),
+      (-2 * ((n : ℝ) + 1) * Real.log (1 + 1 / ((n : ℝ) + 1)) + 2 - 1 / ((n : ℝ) + 2)) := by
+  have hM : K = (K - 2) + 2 := by omega
+  rw [hM, show (K - 2) + 2 - 1 = (K - 2) + 1 from by omega]
+  exact partialSum_eq_series_sum' (K - 2)
+
+-- ════════════════════════════════════════════════
+-- SUMMARY: THE INTEGRAL VALUE
+-- ════════════════════════════════════════════════
+--
+-- With both theorems proved:
+-- 1. partialSum_eq_series_sum: P(K) = Σ piecewise terms
+-- 2. tendsto_partialSum: P(K) → log(2π) - γ - 1
+-- We conclude: ∫₀¹ {1/u}² du = log(2π) - γ - 1
+--
+-- This is the analytic substance of vasyunin_eq_integral
+-- for the diagonal case j = k.
+
+end Cathedral.Vasyunin.StirlingBridge
+
+
+================================================================
+FILE: Cathedral/Assembly/MellinVarianceProof.lean
+================================================================
+
+import Cathedral.White.Scattering
+import Cathedral.MellinBridge.PlancherelDefs
+import Cathedral.MellinBridge.BDWeights
+import Cathedral.Assembly.MellinPerronBridge
+
+/-!
+  # Critical Line Mellin Variance
+
+  Proves the critical-line Mellin variance bound under RH:
+    `(1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N`
+
+  ## Strategy
+
+  Uses the Perron chain to obtain `M(x) = O(x^{3/4})` under RH,
+  then the spatial L² decay bound, and finally the Parseval bridge
+  (`parseval_bridge_white`) to translate back to the Mellin integral.
+
+  ## Note on the Forward Direction
+
+  The L² convergence `∫(1-f_N)² → 0` under RH cannot be proved from
+  Mertens-type bounds alone. The spatial L² norm diverges under
+  real-variable bounds — convergence is strictly a frequency-domain
+  phenomenon requiring Parseval's identity. The correct architecture
+  encapsulates the forward direction via the `baez_duarte_forward` axiom.
+-/
+
+
+noncomputable section
+open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
+
+-- ═══════════════════════════════════════════════
+-- THE CROWN AXIOM
+-- ═══════════════════════════════════════════════
+
+/-- The Critical Line Mellin Variance under RH.
+
+    Under the Riemann Hypothesis, the L² norm of the Mellin-transformed
+    residual on the critical line decays as `O(1/log N)`:
+      `(1/2π) ∫ |M_{r_N}(1/2 + it)|² dt ≤ C/log N`
+
+    Proof chain:
+      RH → Mertens `x^{3/4}` (Perron)
+         → `∫₀¹(1-f_N)² ≤ C/logN`
+         → `(1/2π)∫|M|² ≤ C/logN` (Parseval bridge) -/
+theorem critical_line_mellin_variance_proved (hRH : RiemannHypothesis) :
+    ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+      N ≥ 3 →
+      (1 / (2 * Real.pi)) *
+      ∫ t : ℝ, ‖mellinBDResidual N (bdMoebiusWeight N)
+        ((1/2 : ℂ) + t * Complex.I)‖ ^ 2
+      ≤ C / Real.log ↑N :=
+  critical_line_mellin_variance_from_perron hRH
 
 end
 
 
 ================================================================
-FILE: Cathedral/Gram/NbLinComb.lean
+FILE: Cathedral/Covariance/DotProductBound.lean
 ================================================================
 
 /-
-  Cathedral/Structural/NbLinComb.lean
+  Cathedral/Covariance/DotProductBound.lean
 
-  ## NB linear combination and Gram L² identity.
+  ## Dot Product Bound from x^{3/4} Mertens
 
-  Defines nbLinComb and proves the core L² identity:
-    wᵀGw = ∫₀¹ (Σ wᵢ{1/((i+1)x)})² dx
+  Proves |1 - bᵀv| ≤ C_dot / log N under |M(x)| ≤ C·x^{3/4},
+  using s1_decay, s2_decay, and s3_uniform_bound_from_mertens.
 
-  HISTORY: Migrated to BD basis {1/(kx)} on 2026-05-07.
+  Extracted from PerronCrown.lean to avoid circular imports
+  when GramFormProof.lean needs the dot product bound.
+
+  ### Sorry: 0
+  ### Axioms: 0 (beyond kernel)
+
+  Created: April 25, 2026
 -/
 
 import Cathedral.Defs
-import Cathedral.Spectral.RayleighBridge
-import Mathlib.MeasureTheory.Function.Floor
+import Cathedral.NymanBeurling.BDBridge
+import Cathedral.AbelTail.S1Decay
+import Cathedral.AbelTail.S2Decay
+import Cathedral.AbelTail.S3UniformBound
+import Cathedral.Covariance.DotProductIdentity
+import Cathedral.Covariance.CalcBounds
 
 noncomputable section
-open Complex Real
+open Real Matrix Finset Filter Cathedral.Vasyunin ArithmeticFunction
 
--- Note: nbLinComb is defined in Cathedral/Defs.lean
+/-- **PROVED**: The dot product bᵀv ≈ 1 at rate O(1/log N), using x^{3/4} directly.
 
-/-- The function x ↦ Int.fract(1/(j*x)) * Int.fract(1/(k*x)) is measurable. -/
-private lemma fract_div_mul_measurable (j k : ℕ) :
-    Measurable (fun x : ℝ => Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))) :=
-  (measurable_const.div (measurable_const.mul measurable_id)).fract.mul
-    (measurable_const.div (measurable_const.mul measurable_id)).fract
+    Uses s1_decay, s2_decay (Abel tail rates from Mertens x^{3/4}),
+    and s3_uniform_bound_from_mertens (Abel Bypass — no PNT₃ needed).
 
-/-- Products of fractional parts are bounded by 1. -/
-private lemma fract_prod_le_one (j k : ℕ) (x : ℝ) :
-    ‖Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))‖ ≤ ‖(1 : ℝ)‖ := by
-  rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_one,
-      abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
-  calc Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))
-      ≤ 1 * 1 := by
-        apply mul_le_mul
-        · exact le_of_lt (Int.fract_lt_one _)
-        · exact le_of_lt (Int.fract_lt_one _)
-        · exact Int.fract_nonneg _
-        · linarith
-    _ = 1 := mul_one 1
-
-/-- Products of fractional parts are IntervalIntegrable on [0,1]. -/
-theorem fract_prod_intervalIntegrable (j k : ℕ) :
-    IntervalIntegrable
-      (fun x : ℝ => Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x)))
-      MeasureTheory.volume 0 1 :=
-  IntervalIntegrable.mono_fun
-    (intervalIntegrable_const (c := (1 : ℝ)))
-    ((fract_div_mul_measurable j k).aestronglyMeasurable.restrict)
-    (Filter.Eventually.of_forall (fract_prod_le_one j k))
-
-/-- Scaled products inherit integrability (const_mul). -/
-private lemma scaled_fract_intervalIntegrable (j k : ℕ) (a b : ℝ) :
-    IntervalIntegrable
-      (fun x : ℝ => a * Int.fract (1 / (↑j * x)) * (b * Int.fract (1 / (↑k * x))))
-      MeasureTheory.volume 0 1 := by
-  have : (fun x : ℝ => a * Int.fract (1 / (↑j * x)) * (b * Int.fract (1 / (↑k * x)))) =
-         (fun x : ℝ => (a * b) * (Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x)))) := by
-    ext x; ring
-  rw [this]
-  exact (fract_prod_intervalIntegrable j k).const_mul (a * b)
-
-/-- LHS = double sum over gramEntry (pure algebra). -/
-private lemma quadForm_as_double_sum (N : ℕ) (w : Fin (N - 1) → ℝ) :
-    realQuadForm (gramMatrix N) w =
-    ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-      w i * w j * gramEntry (i.val + 1) (j.val + 1) := by
-  unfold realQuadForm dotProduct
-  congr 1; ext i
-  simp only [Matrix.mulVec, dotProduct, gramMatrix, Matrix.of_apply]
-  rw [Finset.mul_sum]
-  congr 1; ext j; ring
-
-/-- Each weighted integral = weight × gramEntry (constant factor). -/
-private lemma integral_fract_prod_eq (j k : ℕ) (a b : ℝ) :
-    ∫ x in (0:ℝ)..1,
-      (a * Int.fract (1 / (↑j * x))) * (b * Int.fract (1 / (↑k * x))) =
-    a * b * gramEntry j k := by
-  unfold gramEntry
-  rw [show (fun x : ℝ => a * Int.fract (1 / (↑j * x)) * (b * Int.fract (1 / (↑k * x)))) =
-      (fun x : ℝ => (a * b) * (Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x)))) from
-    by ext x; ring]
-  exact intervalIntegral.integral_const_mul (a * b) _
-
-/-- RHS = double sum over gramEntry (sum-integral swap + algebra). -/
-private lemma integral_sq_as_double_sum (N : ℕ) (w : Fin (N - 1) → ℝ) :
-    ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 =
-    ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-      w i * w j * gramEntry (i.val + 1) (j.val + 1) := by
-  have h_sq : (fun x : ℝ => (nbLinComb N w x) ^ 2) =
-      (fun x => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) := by
-    ext x; unfold nbLinComb; rw [sq, Finset.sum_mul_sum]
-  rw [h_sq]
-  rw [show (fun x : ℝ => ∑ i : Fin (N - 1), ∑ j : Fin (N - 1),
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) =
-      (fun x => ∑ i ∈ Finset.univ, ∑ j ∈ Finset.univ,
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) from by
-    ext x; simp]
-  rw [intervalIntegral.integral_finset_sum]
-  congr 1; ext i
-  rw [show (fun x : ℝ => ∑ j ∈ Finset.univ,
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) =
-      (fun x => ∑ j ∈ Finset.univ,
-        (fun j x => (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) j x) from by
-    ext x; simp]
-  rw [intervalIntegral.integral_finset_sum]
-  congr 1; ext j
-  exact integral_fract_prod_eq (i.val + 1) (j.val + 1) (w i) (w j)
-  · intro j _
-    exact scaled_fract_intervalIntegrable (i.val + 1) (j.val + 1) (w i) (w j)
-  · intro i _
-    have : (fun x => ∑ j : Fin (N - 1),
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) =
-      (∑ j : Fin (N - 1), fun x =>
-        (w i * Int.fract (1 / ((↑(i.val + 1) : ℝ) * x))) *
-        (w j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x)))) := by
-      ext x; simp [Finset.sum_apply]
-    rw [this]
-    exact IntervalIntegrable.sum Finset.univ (fun j _ =>
-      scaled_fract_intervalIntegrable (i.val + 1) (j.val + 1) (w i) (w j))
-
-/-- **L² norm identity** (PROVEN): wᵀGw = ∫₀¹ (Σᵢ wᵢ fᵢ)² dx. -/
-theorem gram_l2_identity (N : ℕ) (_ : 2 ≤ N) (w : Fin (N - 1) → ℝ) :
-    realQuadForm (gramMatrix N) w =
-    ∫ x in (0:ℝ)..1, (nbLinComb N w x) ^ 2 := by
-  rw [quadForm_as_double_sum, integral_sq_as_double_sum]
+    Zero sorry, zero axioms. -/
+theorem moebius_dot_product_approx_one_uniform_34
+    (C_34 : ℝ) (hC : 0 < C_34)
+    (hMertens34 : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_34 * x ^ ((3:ℝ)/4))
+    (hPNT₁ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
+    (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+        (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1))) :
+    ∃ C_dot : ℝ, C_dot > 0 ∧ ∀ (N : ℕ), 10 ≤ N →
+    |1 - dotProduct (fun (i : Fin (N - 1)) =>
+        vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)| ≤
+    C_dot / Real.log ↑N := by
+  -- s1_decay and s2_decay take the x^{3/4} form directly
+  obtain ⟨C₁, hC₁_pos, h_s1⟩ := s1_decay C_34 hC hMertens34 hPNT₁
+  obtain ⟨C₂, hC₂_pos, h_s2⟩ := s2_decay C_34 hC hMertens34 hPNT₂
+  obtain ⟨B₂, _hB₂_ge, h_s2_univ⟩ := tendsto_universal_bound hPNT₂
+  -- THE ABEL BYPASS: use s3_uniform_bound_from_mertens instead of tendsto_universal_bound hPNT₃
+  obtain ⟨B₃, _hB₃_ge, h_s3_univ⟩ := s3_uniform_bound_from_mertens C_34 hC hMertens34
+  refine ⟨2 * C₁ + 10 * C₂ + B₂ + B₃ + 4, by linarith, fun N hN => ?_⟩
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN_ne : Real.log (↑N : ℝ) ≠ 0 := ne_of_gt hlogN_pos
+  have hN1_ge2 : 2 ≤ N - 1 := by omega
+  have h_identity := one_minus_dotProduct_identity N (by omega) hlogN_ne
+  have h_s1_N := h_s1 (N - 1) hN1_ge2
+  have h_s2_N := h_s2 (N - 1) hN1_ge2
+  have h_s2_abs : |S₂_at (N - 1)| ≤ B₂ + 1 := by
+    have h1 := h_s2_univ (N - 1)
+    unfold S₂_at
+    have h2 := abs_le.mp h1
+    exact abs_le.mpr ⟨by linarith, by linarith⟩
+  -- ABEL BYPASS: direct bound, no limit value needed
+  have h_s3_abs : |S₃_at (N - 1)| ≤ B₃ := h_s3_univ (N - 1)
+  rw [h_identity]
+  have h_calc1 := rpow_quarter_logN_le_two N hN
+  have h_calc2 := rpow_quarter_logsq_le_ten N hN
+  have h_s1_logN : |S₁_at (N - 1)| * Real.log ↑N ≤ 2 * C₁ := by
+    calc |S₁_at (N - 1)| * Real.log ↑N
+        ≤ C₁ * (↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h_s1_N (le_of_lt hlogN_pos)
+      _ = C₁ * ((↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log ↑N) := by ring
+      _ ≤ C₁ * 2 := mul_le_mul_of_nonneg_left h_calc1 hC₁_pos.le
+      _ = 2 * C₁ := by ring
+  have h_s2_logN : |S₂_at (N - 1) - (-1)| * Real.log ↑N ≤ 10 * C₂ := by
+    calc |S₂_at (N - 1) - (-1)| * Real.log ↑N
+        ≤ C₂ * (↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h_s2_N (le_of_lt hlogN_pos)
+      _ = C₂ * ((↑(N - 1) : ℝ) ^ (-(1:ℝ)/4) * Real.log (↑(N - 1) : ℝ) * Real.log ↑N) := by ring
+      _ ≤ C₂ * 10 := mul_le_mul_of_nonneg_left h_calc2 hC₂_pos.le
+      _ = 10 * C₂ := by ring
+  suffices h_main : |(1 - eulerMascheroniConstant) * S₁_at (N - 1) +
+      (S₂_at (N - 1) + 1) -
+      ((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+        Real.log ↑N| * Real.log ↑N ≤
+      2 * C₁ + 10 * C₂ + B₂ + B₃ + 4 by
+    rw [le_div_iff₀ hlogN_pos]
+    linarith
+  have h_s2_eq : S₂_at (N - 1) + 1 = S₂_at (N - 1) - (-1) := by ring
+  have h_num : |(1 - eulerMascheroniConstant) * S₂_at (N - 1) +
+      S₃_at (N - 1)| ≤ B₂ + B₃ + 3 := by
+    have hγ01 : 0 < 1 - eulerMascheroniConstant ∧
+        1 - eulerMascheroniConstant < 1 := by
+      constructor
+      · linarith [eulerMascheroniConstant_lt_two_thirds]
+      · linarith [one_half_lt_eulerMascheroniConstant]
+    have h_s2_bound : -(B₂ + 1) ≤ (1 - eulerMascheroniConstant) * S₂_at (N - 1) ∧
+        (1 - eulerMascheroniConstant) * S₂_at (N - 1) ≤ B₂ + 1 := by
+      constructor
+      · nlinarith [abs_le.mp h_s2_abs]
+      · nlinarith [abs_le.mp h_s2_abs]
+    -- ABEL BYPASS: h_s3_abs gives |S₃_at _| ≤ B₃ directly
+    have h_s3_bound := abs_le.mp h_s3_abs
+    exact abs_le.mpr ⟨by nlinarith, by nlinarith⟩
+  have h_div_logN : |((1 - eulerMascheroniConstant) * S₂_at (N - 1) +
+      S₃_at (N - 1)) / Real.log ↑N| * Real.log ↑N ≤ B₂ + B₃ + 3 := by
+    rw [abs_div, abs_of_pos hlogN_pos, div_mul_cancel₀ _ hlogN_ne]
+    exact h_num
+  have h_term1_logN : |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| *
+      Real.log ↑N ≤ 2 * C₁ := by
+    have hγ_bound : |1 - eulerMascheroniConstant| ≤ 1 := by
+      apply abs_le.mpr; constructor
+      · have := eulerMascheroniConstant_lt_two_thirds; linarith
+      · have := one_half_lt_eulerMascheroniConstant; linarith
+    have h1 : |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| ≤
+        |S₁_at (N - 1)| := by
+      rw [abs_mul]
+      exact le_trans (mul_le_mul_of_nonneg_right hγ_bound (abs_nonneg _))
+        (by rw [one_mul])
+    calc |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| * Real.log ↑N
+        ≤ |S₁_at (N - 1)| * Real.log ↑N :=
+          mul_le_mul_of_nonneg_right h1 (le_of_lt hlogN_pos)
+      _ ≤ 2 * C₁ := h_s1_logN
+  have h_tri1 : ∀ a b c : ℝ, |a + b - c| ≤ |a| + |b| + |c| := by
+    intro a b c
+    have hab : |a + b| ≤ |a| + |b| := by
+      rcases le_or_gt 0 (a + b) with h | h
+      · rw [abs_of_nonneg h]; linarith [le_abs_self a, le_abs_self b]
+      · rw [abs_of_neg h]; linarith [neg_abs_le a, neg_abs_le b]
+    have habc : |a + b - c| ≤ |a + b| + |c| := by
+      rcases le_or_gt 0 (a + b - c) with h | h
+      · rw [abs_of_nonneg h]; linarith [le_abs_self (a + b), neg_abs_le c]
+      · rw [abs_of_neg h]; linarith [neg_abs_le (a + b), le_abs_self c]
+    linarith
+  calc |(1 - eulerMascheroniConstant) * S₁_at (N - 1) +
+        (S₂_at (N - 1) + 1) -
+        ((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+          Real.log ↑N| * Real.log ↑N
+      ≤ (|(1 - eulerMascheroniConstant) * S₁_at (N - 1)| +
+         |S₂_at (N - 1) + 1| +
+         |((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+           Real.log ↑N|) * Real.log ↑N := by
+        apply mul_le_mul_of_nonneg_right _ (le_of_lt hlogN_pos)
+        exact h_tri1 _ _ _
+    _ = |(1 - eulerMascheroniConstant) * S₁_at (N - 1)| * Real.log ↑N +
+        |S₂_at (N - 1) + 1| * Real.log ↑N +
+        |((1 - eulerMascheroniConstant) * S₂_at (N - 1) + S₃_at (N - 1)) /
+          Real.log ↑N| * Real.log ↑N := by ring
+    _ ≤ 2 * C₁ + 10 * C₂ + (B₂ + B₃ + 3) := by
+        rw [h_s2_eq]
+        linarith [h_term1_logN, h_s2_logN, h_div_logN]
+    _ ≤ 2 * C₁ + 10 * C₂ + B₂ + B₃ + 4 := by linarith
 
 end
 
 
 ================================================================
-FILE: Cathedral/MellinBridge/IdentityBypass.lean
+FILE: Cathedral/MellinBridge/AbelSiegeProof.lean
 ================================================================
 
 /-
-  Cathedral/MellinBridge/IdentityBypass.lean
+  Cathedral/MellinBridge/AbelSiegeProof.lean
 
-  ## The Identity Theorem Bypass
+  ## The Abel Summation Siege: Closing abel_summation_bd_l2_bound
 
-  Proves `bd_mellin_base_case`: for Re(s) > 0, s ≠ 1,
-    ∫₀¹ {1/x} · x^{s-1} dx = 1/(s-1) - ζ(s)/s
+  [ON CROWN PATH — Abel summation proof infrastructure]
 
-  Strategy: Both sides are analytic on {Re(s) > 0} \ {1}.
-  They agree for Re(s) > 1 (FloorDivMellin.lean).
-  The Identity Theorem propagates equality to all of {Re(s) > 0} \ {1}.
+  Proves that the Mertens bound M(x) = O(x^{1/2} log²x) implies
+  the existence of BD weights with L² error O(1/log N).
 
-  Status: TARGET — zero sorry.
+  ### Proved (zero sorry):
+  - weighted_moebius_abel_bound: Abel + boundary kill via logWeight_self
+  - summand_bound: each term ≤ (C_m*log²k/k^{1/2}+1)/logN
+
+  ### Key dependencies (all zero-sorry):
+  - AbelSummation.lean: abel_summation, abel_summation_abs_bound
+  - MertensIntegral.lean: logWeight tools, convergent_log_series_bound
 -/
-import Cathedral.MellinBridge.FloorMellin
-import Cathedral.MellinBridge.FloorDivMellin
-import Cathedral.MellinBridge.DomainConnected
-import Mathlib.Analysis.Analytic.IsolatedZeros
-import Mathlib.Analysis.MellinTransform
-import Mathlib.NumberTheory.LSeries.RiemannZeta
+
+import Cathedral.MellinBridge.MertensBound
+import Cathedral.MellinBridge.BDWeights
+import Cathedral.MellinBridge.PlancherelBypass
+import Cathedral.Covariance.MoebiusL1Bound
+import Cathedral.NymanBeurling.BDMellin
+import Cathedral.MellinBridge.AbelSummation
+import Cathedral.MellinBridge.MertensIntegral
+import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 noncomputable section
-open Complex Real MeasureTheory Set Filter Asymptotics TopologicalSpace
+open Real MeasureTheory Finset BigOperators
 
--- ════════════════════════════════════════════════════
--- Section 1: The LHS function and its properties
--- ════════════════════════════════════════════════════
+-- ════════════════════════════════════════════════
+-- PART 1: THE WEIGHT CONSTRUCTION
+-- ════════════════════════════════════════════════
 
-/-- The function {1/x} · 1_{(0,1]}(x), extended by zero to all of ℝ.
-    This is the integrand's "coefficient" for the Mellin transform. -/
-private def fractInvIoc (x : ℝ) : ℂ :=
-  indicator (Ioc 0 1) (fun t => ((Int.fract (1 / t) : ℝ) : ℂ)) x
+-- bdMoebiusWeight is now defined in BDWeights.lean
+-- (extracted to break the import cycle with PlancherelBypass)
 
-/-- fractInvIoc is bounded by 1 everywhere. -/
-private lemma fractInvIoc_norm_le (x : ℝ) : ‖fractInvIoc x‖ ≤ 1 := by
-  unfold fractInvIoc
-  by_cases hx : x ∈ Ioc 0 1
-  · simp [indicator_of_mem hx, Complex.norm_real]
-    exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le
-  · simp [indicator_of_notMem hx]
+-- ════════════════════════════════════════════════
+-- PART 2: THE 1D ABEL BOUND (PROVED!)
+-- ════════════════════════════════════════════════
 
-/-- fractInvIoc vanishes on (1, ∞). -/
-private lemma fractInvIoc_eq_zero_of_gt_one {x : ℝ} (hx : 1 < x) : fractInvIoc x = 0 := by
-  unfold fractInvIoc
-  exact indicator_of_notMem (fun h => not_le.mpr hx h.2) _
+/-- **PROVED**: The Abel summation + boundary kill.
 
-/-- fractInvIoc is O(x^(-0)) = O(1) near 0. -/
-private lemma fractInvIoc_isBigO_zero :
-    fractInvIoc =O[nhdsWithin 0 (Ioi 0)] (fun x : ℝ => x ^ (-(0 : ℝ))) := by
-  simp only [neg_zero, rpow_zero]
-  exact isBigO_of_le _ (fun x => by simp [fractInvIoc_norm_le x])
+    Uses the proved tools:
+    - `abel_summation_abs_bound` (discrete summation by parts + triangle inequality)
+    - `logWeight_self` (f(N) = 0, kills the boundary term)
 
-/-- fractInvIoc is O(x^(-a)) at ∞ for any a (it vanishes for x > 1). -/
-private lemma fractInvIoc_isBigO_top (a : ℝ) :
-    fractInvIoc =O[atTop] (fun x : ℝ => x ^ (-a)) := by
-  apply IsBigO.of_bound 1
-  filter_upwards [eventually_ge_atTop (2 : ℝ)] with x hx
-  rw [one_mul, fractInvIoc_eq_zero_of_gt_one (by linarith), norm_zero]
-  exact norm_nonneg _
+    Result: |Σ μ(k)·logWeight(N,k)| ≤ Σ C_bound(k)·|Δ logWeight(k)|
+    where C_bound(k) = C_m·k^{1/2}·log²k + 1 (the Mertens bound + safety margin). -/
+theorem weighted_moebius_abel_bound
+    (C_m : ℝ) (_hC : 0 < C_m)
+    (N : ℕ) (hN : 10 ≤ N)
+    (hMertens : ∀ k, 1 ≤ k → k ≤ N →
+      |partialSum (fun j => (ArithmeticFunction.moebius j : ℝ)) 1 k| ≤
+        C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) :
+    |(Finset.Icc 1 N).sum
+      (fun k => (ArithmeticFunction.moebius k : ℝ) * logWeight N k)| ≤
+    (Finset.Ico 1 N).sum (fun k =>
+      (C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) *
+      |logWeight N (k + 1) - logWeight N k|) := by
+  have h_abel := abel_summation_abs_bound
+    (fun k => (ArithmeticFunction.moebius k : ℝ))
+    (logWeight N) 1 N (by omega)
+    (fun k => C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1)
+    (fun k => |logWeight N (k + 1) - logWeight N k|)
+    hMertens
+    (fun k _ _ => le_refl _)
+  rw [logWeight_self N (by omega), abs_zero, mul_zero, zero_add] at h_abel
+  exact h_abel
 
-/-- fractInvIoc is measurable. -/
-private lemma fractInvIoc_aestronglyMeasurable :
-    AEStronglyMeasurable fractInvIoc (volume : Measure ℝ) := by
-  unfold fractInvIoc
-  exact (Measurable.indicator
-    (Complex.continuous_ofReal.measurable.comp
-      ((measurable_const.div measurable_id).fract))
-    measurableSet_Ioc).aestronglyMeasurable
+-- ════════════════════════════════════════════════
+-- PART 3: SUMMAND BOUND (PROVED!)
+-- ════════════════════════════════════════════════
 
-/-- fractInvIoc is globally integrable (bounded on finite-measure support). -/
-private lemma fractInvIoc_integrable : Integrable fractInvIoc (volume : Measure ℝ) := by
-  apply IntegrableOn.integrable_of_forall_notMem_eq_zero (s := Ioc (0:ℝ) 1)
-  · apply Measure.integrableOn_of_bounded (show volume (Ioc (0:ℝ) 1) ≠ ⊤ from measure_Ioc_lt_top.ne)
-    · exact fractInvIoc_aestronglyMeasurable
-    · filter_upwards with x
-      unfold fractInvIoc
-      by_cases hx : x ∈ Ioc (0:ℝ) 1
-      · simp [indicator_of_mem hx, Complex.norm_real]
-        exact (abs_of_nonneg (Int.fract_nonneg _)).le.trans (Int.fract_lt_one _).le
-      · simp [indicator_of_notMem hx]
-  · intro x hx; unfold fractInvIoc; exact indicator_of_notMem hx _
+/-- **PROVED**: Each summand in the Abel bound is O(1/log N).
 
-/-- fractInvIoc is locally integrable on (0, ∞). -/
-private lemma fractInvIoc_locallyIntegrableOn :
-    LocallyIntegrableOn fractInvIoc (Ioi 0) :=
-  fractInvIoc_integrable.locallyIntegrable.locallyIntegrableOn (Ioi 0)
+    For k ≥ 2:
+    (C_m·k^{1/2}·log²k + 1) · |Δ logWeight(k)|
+    ≤ (C_m·k^{1/2}·log²k + 1) / (k · log N)     [by log_weight_derivative_bound]
+    = (C_m·log²k/k^{1/2} + 1/k) / log N          [algebra: k^{1/2}/k = 1/k^{1/2}]
+    ≤ (C_m·log²k/k^{1/2} + 1) / log N            [since 1/k ≤ 1]
 
-/-- The LHS integral over Ioo equals the integral over Ioc (measure-zero difference). -/
-private lemma integral_Ioo_eq_Ioc (s : ℂ) :
-    ∫ x in Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)  =
-    ∫ x in Ioc (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1)  :=
-  (integral_Ioc_eq_integral_Ioo).symm
+    Uses: `log_weight_derivative_bound` (proved) and rpow algebra. -/
+theorem summand_bound (C_m : ℝ) (_hC : 0 < C_m) (N k : ℕ) (hN : 3 ≤ N) (hk : 2 ≤ k) (hkN : k < N) :
+    (C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) *
+    |logWeight N (k + 1) - logWeight N k| ≤
+    (C_m * (Real.log (k : ℝ)) ^ 2 / (k : ℝ) ^ (1/2 : ℝ) + 1) / Real.log (N : ℝ) := by
+  have h_deriv := log_weight_derivative_bound k N hk hkN
+  have hk_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast (show 0 < k by omega)
+  have hlog_N : 0 < Real.log (N : ℝ) := Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hk_half_pos : (0 : ℝ) < (k : ℝ) ^ (1/2 : ℝ) := Real.rpow_pos_of_pos hk_pos _
+  have hkL_pos : 0 < (k : ℝ) * Real.log (N : ℝ) := mul_pos hk_pos hlog_N
+  -- Step 1: LHS ≤ (stuff+1)/(k*logN)
+  have h1 : (C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) *
+      |logWeight N (k + 1) - logWeight N k| ≤
+      (C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) /
+      ((k : ℝ) * Real.log (N : ℝ)) := by
+    rw [div_eq_mul_inv]
+    exact mul_le_mul_of_nonneg_left (by rwa [← one_div]) (by positivity)
+  -- Step 2: (stuff+1)/(k*logN) ≤ (stuff'/k^{1/2}+1)/logN
+  have h2 : (C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1) /
+      ((k : ℝ) * Real.log (N : ℝ)) ≤
+      (C_m * (Real.log (k : ℝ)) ^ 2 / (k : ℝ) ^ (1/2 : ℝ) + 1) / Real.log (N : ℝ) := by
+    rw [div_le_div_iff₀ hkL_pos hlog_N]
+    suffices h : C_m * (k : ℝ) ^ (1/2 : ℝ) * (Real.log (k : ℝ)) ^ 2 + 1 ≤
+        (C_m * (Real.log (k : ℝ)) ^ 2 / (k : ℝ) ^ (1/2 : ℝ) + 1) * (k : ℝ) by nlinarith
+    have h_rpow : (k : ℝ) / (k : ℝ) ^ (1/2 : ℝ) = (k : ℝ) ^ (1/2 : ℝ) := by
+      rw [eq_comm, eq_div_iff (ne_of_gt hk_half_pos)]
+      rw [← Real.rpow_add hk_pos]; norm_num
+    rw [add_mul, one_mul, div_mul_eq_mul_div]
+    rw [show C_m * Real.log (k : ℝ) ^ 2 * (k : ℝ) / (k : ℝ) ^ (1/2 : ℝ) =
+        C_m * Real.log (k : ℝ) ^ 2 * ((k : ℝ) / (k : ℝ) ^ (1/2 : ℝ)) from by ring]
+    rw [h_rpow]
+    nlinarith [show (1 : ℝ) ≤ (k : ℝ) from by exact_mod_cast show 1 ≤ k by omega,
+               mul_comm ((k : ℝ) ^ (1/2 : ℝ)) (Real.log (k : ℝ) ^ 2)]
+  linarith
 
-/-- The LHS integral equals the Mellin transform of fractInvIoc. -/
-private lemma lhs_eq_mellin (s : ℂ) :
-    ∫ x in Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    mellin fractInvIoc s := by
-  rw [integral_Ioo_eq_Ioc]
-  have h_comm : ∀ x : ℝ, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-      (x : ℂ) ^ (s - 1) * ((Int.fract (1 / x) : ℝ) : ℂ) := fun x => mul_comm _ _
-  simp_rw [h_comm]
-  unfold mellin
-  simp only [smul_eq_mul]
-  let g : ℝ → ℂ := fun t => (t : ℂ) ^ (s - 1) * ((Int.fract (1 / t) : ℝ) : ℂ)
-  show ∫ x in Ioc (0:ℝ) 1, g x = ∫ x in Ioi (0:ℝ), (x:ℂ)^(s-1) * fractInvIoc x
-  have h_key : (fun x : ℝ => (x:ℂ)^(s-1) * fractInvIoc x) = indicator (Ioc (0:ℝ) 1) g := by
-    ext x; unfold fractInvIoc g
-    by_cases hx : x ∈ Ioc (0:ℝ) 1
-    · simp [indicator_of_mem hx]
-    · simp [indicator_of_notMem hx, mul_zero]
-  rw [h_key, setIntegral_indicator measurableSet_Ioc]
-  show ∫ x in Ioc (0:ℝ) 1, g x = ∫ x in Ioi (0:ℝ) ∩ Ioc (0:ℝ) 1, g x
-  rw [inter_eq_right.mpr Ioc_subset_Ioi_self]
+-- ════════════════════════════════════════════════
+-- PART 4: THE L² BOUND (NOW PROVED VIA PARSEVAL BRIDGE!)
+-- ════════════════════════════════════════════════
 
-/-- The LHS is differentiable at every s with Re(s) > 0. -/
-private lemma lhs_differentiableAt {s : ℂ} (hs : 0 < s.re) :
-    DifferentiableAt ℂ (mellin fractInvIoc) s :=
-  mellin_differentiableAt_of_isBigO_rpow fractInvIoc_locallyIntegrableOn
-    (fractInvIoc_isBigO_top (s.re + 1)) (by linarith)
-    fractInvIoc_isBigO_zero (by linarith : (0 : ℝ) < s.re)
+/-- **THEOREM (formerly axiom)**: The Dirichlet Collapse to L².
 
-/-- The domain {Re > 0} \ {1} is open. -/
-private lemma domain_isOpen :
-    IsOpen {s : ℂ | 0 < s.re ∧ s ≠ 1} :=
-  (isOpen_lt continuous_const Complex.continuous_re).inter isOpen_ne
+    This was formerly an opaque axiom (`l2_from_pointwise_bound`).
+    It is now PROVED by composing the Parseval Bridge
+    (PlancherelBypass.lean) with the Critical Line Mellin Bound.
 
-/-- The LHS is analytic on {Re(s) > 0} \ {1}. -/
-private lemma lhs_analyticOnNhd :
-    AnalyticOnNhd ℂ (mellin fractInvIoc) {s : ℂ | 0 < s.re ∧ s ≠ 1} :=
-  (DifferentiableOn.analyticOnNhd
-    (fun _s hs => (lhs_differentiableAt hs.1).differentiableWithinAt) domain_isOpen)
+    The Parseval Bridge decomposes the L² norm into:
+      ‖1 - f_N‖² = (1/2π) ∫ |M̂_{r_N}(1/2+it)|² dt
+    using L¹ Fourier inversion (Mathlib backbone).
 
--- ════════════════════════════════════════════════════
--- Section 2: The RHS analyticity
--- ════════════════════════════════════════════════════
+    The Mellin Bound then gives the decay estimate. -/
+theorem l2_from_pointwise_bound
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2)
+    (N : ℕ) (hN : 10 ≤ N) :
+    ∃ C_l2 : ℝ, C_l2 > 0 ∧
+    ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
+      C_l2 / Real.log ↑N :=
+  l2_from_pointwise_bound_derived C_m hC hMertens N hN
 
-/-- The RHS function: s ↦ 1/(s-1) - ζ(s)/s. -/
-private def rhs (s : ℂ) : ℂ := 1 / (s - 1) - riemannZeta s / s
+-- ════════════════════════════════════════════════
+-- PART 5: THE MAIN THEOREM (PROVED!)
+-- ════════════════════════════════════════════════
 
-/-- The RHS is differentiable on {Re(s) > 0} \ {1}. -/
-private lemma rhs_differentiableOn :
-    DifferentiableOn ℂ rhs {s : ℂ | 0 < s.re ∧ s ≠ 1} := by
-  intro s ⟨hs_pos, hs_ne⟩
-  have hs_ne_zero : s ≠ 0 := by intro h; rw [h, zero_re] at hs_pos; linarith
-  have h_sub_ne : s - 1 ≠ 0 := sub_ne_zero.mpr hs_ne
-  unfold rhs
-  apply DifferentiableAt.differentiableWithinAt
-  apply DifferentiableAt.sub
-  · exact (differentiableAt_const (1 : ℂ)).div
-      (differentiableAt_id.sub (differentiableAt_const (1 : ℂ))) h_sub_ne
-  · exact (differentiableAt_riemannZeta hs_ne).div differentiableAt_id hs_ne_zero
+/-- **THEOREM**: The main result: Mertens bound ⟹ L² approximation.
+    This replaces the `abel_summation_bd_l2_bound` axiom in BDBypass.lean.
 
-/-- The RHS is analytic on {Re(s) > 0} \ {1}. -/
-private lemma rhs_analyticOnNhd :
-    AnalyticOnNhd ℂ rhs {s : ℂ | 0 < s.re ∧ s ≠ 1} :=
-  rhs_differentiableOn.analyticOnNhd domain_isOpen
+    Structure: witness = bdMoebiusWeight N, bound from l2_from_pointwise_bound. -/
+theorem abel_summation_bd_l2_bound_proved :
+    (∃ C_m : ℝ, C_m > 0 ∧ ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ (1/2 : ℝ) * (Real.log x) ^ 2) →
+    ∃ C_err : ℝ, C_err > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+      N ≥ 3 →
+      ∃ v : Fin (N - 1) → ℝ,
+        ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 ≤
+          C_err / Real.log ↑N := by
+  intro ⟨C_m, hC_pos, hMertens⟩
+  -- Get uniform L² bound from mertens_implies_l2_decay
+  obtain ⟨C_l2, hC_l2_pos, h_bound⟩ :=
+    mertens_implies_l2_decay C_m hC_pos (fun x hx => hMertens x hx)
+      pnt_mu_div_k pnt_mu_log_div_k pnt_mu_log_sq_div_k
+  exact ⟨C_l2, hC_l2_pos, 10, fun N hN _hN3 =>
+    ⟨bdMoebiusWeight N, h_bound N hN⟩⟩
 
--- ════════════════════════════════════════════════════
--- Section 3: Agreement for Re(s) > 1
--- ════════════════════════════════════════════════════
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
 
-/-- For Re(s) > 1, the fract integral equals 1/(s-1) - ζ(s)/s.
-    Uses FloorDivMellin.lean: mellin_fractBasis with k=1. -/
-private lemma lhs_eq_rhs_of_re_gt_one {s : ℂ} (hs : 1 < s.re) :
-    mellin fractInvIoc s = rhs s := by
-  -- Step 1: Unfold mellin fractInvIoc to ∫ Ioc, matching mellinRestricted
-  rw [← lhs_eq_mellin s, integral_Ioo_eq_Ioc]
-  -- Step 2: Commute factors to match mellinRestricted form
-  simp_rw [show ∀ x : ℝ, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-      (x : ℂ) ^ (s - 1) * ((Int.fract (1 / x) : ℝ) : ℂ) from fun x => mul_comm _ _]
-  -- Step 3: This IS mellinRestricted (fractBasisC 1) s
-  have h_mellin := mellin_fractBasis 1 (by omega) s hs
-  unfold mellinRestricted fractBasisC at h_mellin
-  -- Step 4: Cast alignment: Nat.cast 1 / x = 1 / x
-  have h_cast : ∀ x : ℝ, Int.fract ((1 : ℕ) / x) = Int.fract (1 / x) := by
-    intro x; norm_num
-  simp_rw [h_cast] at h_mellin
-  rw [h_mellin]
-  -- Step 5: Algebraic simplification
-  unfold rhs
-  have hs_ne : s ≠ 0 := by intro h; rw [h, zero_re] at hs; linarith
-  have hs1_ne : s - 1 ≠ 0 := by intro h; have := congr_arg re h; simp [sub_re, one_re] at this; linarith
-  have h_sum : (Finset.range 1).sum (fun m => ((↑(m + 1 : ℕ) : ℂ) ^ (-s))) = 1 := by
-    simp [one_cpow]
-  rw [h_sum]; simp only [Nat.cast_one, one_cpow]
-  field_simp; ring
+-- PROVED (zero sorry, ZERO axioms in this file!):
+--   ✅ weighted_moebius_abel_bound          — Abel + boundary kill
+--   ✅ summand_bound                        — Each term ≤ (C/k^{1/2}+1)/logN
+--   ✅ l2_from_pointwise_bound              — NOW PROVED via Parseval Bridge!
+--   ✅ abel_summation_bd_l2_bound_proved    — Main theorem
+--
+-- FORMERLY AXIOM (now PROVED via PlancherelBypass.lean):
+--   ✅ l2_from_pointwise_bound  — The Dirichlet Collapse to L²
+--      Was opaque axiom, now proved by composing:
+--        parseval_bridge + critical_line_mellin_bound
 
--- ════════════════════════════════════════════════════
--- Section 4: The Identity Theorem
--- ════════════════════════════════════════════════════
 
-/-- {Re(s) > 0} \ {1} is preconnected.
-    Proved in DomainConnected.lean via explicit path construction. -/
-private lemma domain_isPreconnected :
-    IsPreconnected {s : ℂ | 0 < s.re ∧ s ≠ 1} :=
-  domain_preconnected
+================================================================
+FILE: Cathedral/MellinBridge/AbelSummation.lean
+================================================================
 
-/-- 2 belongs to the domain. -/
-private lemma two_mem_domain : (2 : ℂ) ∈ {s : ℂ | 0 < s.re ∧ s ≠ 1} := by
-  refine ⟨?_, ?_⟩
-  · show 0 < (2 : ℂ).re; norm_num
-  · intro h; have := congr_arg Complex.re h; norm_num at this
+/-
+  Cathedral/MellinBridge/AbelSummation.lean
 
-/-- The main technical lemma: LHS agrees with RHS on all of {Re > 0} \ {1}. -/
-private lemma mellin_fractInvIoc_eq_rhs :
-    EqOn (mellin fractInvIoc) rhs {s : ℂ | 0 < s.re ∧ s ≠ 1} := by
-  apply AnalyticOnNhd.eqOn_of_preconnected_of_eventuallyEq
-    lhs_analyticOnNhd rhs_analyticOnNhd domain_isPreconnected two_mem_domain
-  apply Filter.eventually_of_mem
-    (isOpen_lt continuous_const Complex.continuous_re |>.mem_nhds
-      (show (1 : ℝ) < (2 : ℂ).re from by norm_num))
-  exact fun s hs => lhs_eq_rhs_of_re_gt_one hs
+  ## Discrete Summation by Parts (Abel's Lemma)
 
--- ════════════════════════════════════════════════════
--- Section 5: The theorem that replaces the axiom
--- ════════════════════════════════════════════════════
+  The algebraic core of Axiom 2 (abel_summation_l2_bound).
 
-/-- **THEOREM** (replaces axiom bd_mellin_base_case):
-    ∫₀¹ {1/x} · x^{s-1} dx = 1/(s-1) - ζ(s)/s for Re(s) > 0, s ≠ 1. -/
-theorem bd_mellin_base_case_proved (s : ℂ) (hs : 0 < s.re) (hs1 : s ≠ 1) :
-    ∫ x in Ioo (0:ℝ) 1, ((Int.fract (1 / x) : ℝ) : ℂ) * (x : ℂ) ^ (s - 1) =
-    1 / (s - 1) - riemannZeta s / s := by
-  rw [lhs_eq_mellin]
-  exact mellin_fractInvIoc_eq_rhs ⟨hs, hs1⟩
+  This file proves the discrete summation-by-parts identity:
+    Σ_{k=M}^N a(k)·f(k) = A(N)·f(N) - Σ_{k=M}^{N-1} A(k)·(f(k+1) - f(k))
+
+  where A(k) = Σ_{j=M}^k a(j).
+
+  Once proved, this is the engine that converts:
+    - a(k) = μ(k)/k  →  A(k) = partial Mertens function
+    - f(k) = 1 - log(k)/log(N)  →  f(k+1) - f(k) ≈ -1/(k·log N)
+    - Mertens bound |A(k)| ≤ C√k·log²k  →  L² error ≤ C/log(N)
+-/
+
+import Cathedral.Defs
+
+open Finset BigOperators
+
+noncomputable section
+
+-- ════════════════════════════════════════════════
+-- THE CORE IDENTITY
+-- ════════════════════════════════════════════════
+
+/-- The partial sum A(k) = Σ_{j=M}^k a(j). -/
+def partialSum (a : ℕ → ℝ) (M k : ℕ) : ℝ :=
+  (Finset.Icc M k).sum a
+
+/-- **THEOREM (Discrete Summation by Parts — Abel's Lemma)**
+
+    Σ_{k=M}^N a(k)·f(k) = A(N)·f(N) - Σ_{k=M}^{N-1} A(k)·(f(k+1) - f(k))
+
+    where A(k) = Σ_{j=M}^k a(j).
+
+    This is the discrete analogue of integration by parts.
+    Proof by induction on the difference N - M. -/
+theorem abel_summation (a f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N) :
+    (Icc M N).sum (fun k => a k * f k) =
+    partialSum a M N * f N -
+    (Ico M N).sum (fun k => partialSum a M k * (f (k + 1) - f k)) := by
+  unfold partialSum
+  -- Induction on the difference N - M
+  obtain ⟨d, rfl⟩ := Nat.exists_eq_add_of_le hMN
+  induction d with
+  | zero =>
+    simp [Finset.Icc_self]
+  | succ n ih =>
+    have hle : M ≤ M + n := Nat.le_add_right M n
+    -- Normalize: Lean sees M + (n + 1), we need M + n + 1
+    change (Icc M (M + n + 1)).sum (fun k => a k * f k) =
+      (Icc M (M + n + 1)).sum a * f (M + n + 1) -
+      (Ico M (M + n + 1)).sum (fun k => (Icc M k).sum a * (f (k + 1) - f k))
+    -- Split the intervals
+    have h_icc : Icc M (M + n + 1) = Icc M (M + n) ∪ {M + n + 1} := by
+      ext x; simp [Finset.mem_Icc]; omega
+    have h_disj_icc : Disjoint (Icc M (M + n)) {M + n + 1} := by
+      simp [Finset.disjoint_singleton_right, Finset.mem_Icc]
+    have h_ico : Ico M (M + n + 1) = Ico M (M + n) ∪ {M + n} := by
+      ext x; simp [Finset.mem_Ico]
+    have h_disj_ico : Disjoint (Ico M (M + n)) {M + n} := by
+      simp [Finset.disjoint_singleton_right, Finset.mem_Ico]
+    -- Expand the LHS
+    rw [h_icc, Finset.sum_union h_disj_icc, Finset.sum_singleton]
+    -- Expand the RHS sums
+    rw [h_ico, Finset.sum_union h_disj_ico, Finset.sum_singleton]
+    -- Apply IH to rewrite the Icc sum
+    rw [ih (by omega)]
+    -- Expand the union partial sum on the RHS
+    rw [Finset.sum_union h_disj_icc, Finset.sum_singleton]
+    -- The goal is now pure algebra over ℝ
+    ring
+
+-- ════════════════════════════════════════════════
+-- COROLLARIES FOR THE WEIGHT CONSTRUCTION
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: Abel summation with absolute value bound on the partial sums.
+    This strictly isolates the triangle inequality and monotonic bounding logic.
+
+    Given:
+    - |A(k)| ≤ C_bound(k) for all M ≤ k ≤ N
+    - |f(k+1) - f(k)| ≤ δ(k) for all M ≤ k < N
+
+    Produces:
+    - |Σ a(k)·f(k)| ≤ C_bound(N)·|f(N)| + Σ C_bound(k)·δ(k) -/
+theorem abel_summation_abs_bound (a f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N)
+    (C_bound : ℕ → ℝ) (δ : ℕ → ℝ)
+    (hA : ∀ k, M ≤ k → k ≤ N → |partialSum a M k| ≤ C_bound k)
+    (hf_mono : ∀ k, M ≤ k → k < N → |f (k + 1) - f k| ≤ δ k) :
+    |(Icc M N).sum (fun k => a k * f k)| ≤
+    C_bound N * |f N| +
+    (Ico M N).sum (fun k => C_bound k * δ k) := by
+  -- Step 1: Apply the exact Abel identity
+  rw [abel_summation a f M N hMN]
+  -- Step 2: Triangle inequality: |x - y| ≤ |x| + |y|
+  have h_tri : ∀ x y : ℝ, |x - y| ≤ |x| + |y| := fun x y => by
+    rcases le_or_gt 0 (x - y) with h | h
+    · rw [abs_of_nonneg h]
+      linarith [le_abs_self x, neg_abs_le y]
+    · rw [abs_of_neg h]
+      linarith [neg_abs_le x, abs_nonneg y, le_abs_self y]
+  -- Step 3: Bound the first term |A(N) * f(N)| ≤ C_bound(N) * |f(N)|
+  have h_first : |partialSum a M N * f N| ≤ C_bound N * |f N| := by
+    rw [abs_mul]
+    exact mul_le_mul_of_nonneg_right (hA N hMN le_rfl) (abs_nonneg _)
+  -- Step 4: Bound the sum term |Σ A(k)·Δf(k)| ≤ Σ C_bound(k)·δ(k)
+  have h_second : |(Ico M N).sum (fun k => partialSum a M k * (f (k + 1) - f k))| ≤
+      (Ico M N).sum (fun k => C_bound k * δ k) := by
+    calc |(Ico M N).sum (fun k => partialSum a M k * (f (k + 1) - f k))|
+      _ ≤ (Ico M N).sum (fun k => |partialSum a M k * (f (k + 1) - f k)|) :=
+            Finset.abs_sum_le_sum_abs _ _
+      _ = (Ico M N).sum (fun k => |partialSum a M k| * |f (k + 1) - f k|) := by
+            congr 1; ext k; exact abs_mul _ _
+      _ ≤ (Ico M N).sum (fun k => C_bound k * δ k) := by
+            apply Finset.sum_le_sum
+            intro k hk
+            rw [Finset.mem_Ico] at hk
+            exact mul_le_mul (hA k hk.1 (le_of_lt hk.2))
+              (hf_mono k hk.1 hk.2) (abs_nonneg _)
+              (le_trans (abs_nonneg _) (hA k hk.1 (le_of_lt hk.2)))
+  -- Step 5: Combine via linarith
+  linarith [h_tri (partialSum a M N * f N)
+    ((Ico M N).sum (fun k => partialSum a M k * (f (k + 1) - f k)))]
+
+-- ════════════════════════════════════════════════
+-- AUDIT
+-- ════════════════════════════════════════════════
+
+-- This file has:
+--   ✅ abel_summation              — The discrete identity (PROVED!)
+--   ✅ abel_summation_abs_bound    — Triangle inequality (PROVED!)
+--   0 sorry, 0 axiom
+--
+-- NEXT: Instantiate with Möbius weights to close Axiom 2.
+
+end
 
 
 ================================================================
@@ -1917,245 +2245,30 @@ end
 
 
 ================================================================
-FILE: Cathedral/NymanBeurling/Separation.lean
+FILE: Cathedral/Perron/KernelBound.lean
 ================================================================
 
-import Cathedral.Axioms
-import Cathedral.NymanBeurling.BDMellin
-import Mathlib.NumberTheory.LSeries.Nonvanishing
+import Cathedral.Perron.ResidueGtOne
+import Cathedral.Perron.ResidueLtOne
 
 /-!
-  Cathedral/NymanBeurling/Separation.lean
+  Cathedral/Perron/KernelBound.lean
 
-  The separation lemma: if ρ is a ζ-zero off the critical line,
-  then d²_N ≥ δ > 0 for all N. Combined with the Mellin identity
-  from BDMellin.lean to prove the converse direction.
-
-  **On the crown path. Zero custom axioms.**
--/
-
-/-!
-  Cathedral/NymanBeurling/Separation.lean
-
-  ## The Nyman-Beurling Converse: d²→0 ⟹ RH
-
-  Proves `nyman_beurling_converse` using the contrapositive:
-    ¬RH → ∃ ρ off critical line → zeta_zero_separates → d² ≥ δ > 0
-
-  Uses the CORRECT Báez-Duarte basis h_k(x) = {1/(kx)} via `bdLinComb`.
-
-  All intermediate theorems are proven from Mathlib.
-  The only axiom used is `zeta_zero_separates` (Tier 3).
-
-  ### Proof chain
-  ```
-  cos_pi_mul_succ               — cos(π(n+1)) = (-1)^{n+1}   [PROVED]
-  cos_int_mul_pi_ne_zero         — cos(πn) ≠ 0                [PROVED]
-  zeta_neg_odd_ne_zero           — ζ(-2k+1) ≠ 0               [PROVED]
-  zeta_nontrivial_zero_re_pos    — nontrivial ζ zeros have Re > 0 [PROVED]
-  rh_neg_gives_critical_strip_zero — ¬RH → ∃ ρ with 0<Re<1    [PROVED]
-  nyman_beurling_converse         — d²→0 → RH                  [PROVED]
-  ```
-
-  Status: Zero sorry. One axiom (zeta_zero_separates, Tier 3).
--/
-
-noncomputable section
-open Complex Real MeasureTheory Set Filter
-
--- ════════════════════════════════════════════════
--- PART I: COSINE IDENTITIES
--- ════════════════════════════════════════════════
-
-/-- cos(π·(n+1)) = (-1)^(n+1).
-    Proved by induction using Complex.cos_pi and Complex.cos_add_pi. -/
-private lemma cos_pi_mul_succ (n : ℕ) :
-    Complex.cos (↑Real.pi * ↑(n + 1)) = (-1) ^ (n + 1) := by
-  induction n with
-  | zero => simp [Complex.cos_pi]
-  | succ k ih =>
-    have h1 : (↑Real.pi : ℂ) * (↑(k + 1 + 1) : ℂ) =
-              (↑Real.pi : ℂ) * (↑(k + 1) : ℂ) + ↑Real.pi := by
-      push_cast; ring
-    rw [h1, Complex.cos_add_pi, ih]
-    ring
-
-/-- **THEOREM**: cos(πn) ≠ 0 for n ≥ 1.
-    Since cos(π(n+1)) = (-1)^{n+1} ≠ 0. -/
-theorem cos_int_mul_pi_ne_zero (n : ℕ) :
-    Complex.cos (↑Real.pi * ↑(n + 1)) ≠ 0 := by
-  rw [cos_pi_mul_succ]
-  exact pow_ne_zero _ (by norm_num : (-1 : ℂ) ≠ 0)
-
--- ════════════════════════════════════════════════
--- PART II: ZETA NONVANISHING AT NEGATIVE ODDS
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: ζ at negative odd integers is nonzero.
-
-    For k = 0: ζ(1) ≠ 0 by riemannZeta_ne_zero_of_one_le_re.
-    For k ≥ 1: Uses the functional equation (riemannZeta_one_sub):
-      ζ(1-2k) = 2·(2π)^{-2k}·Γ(2k)·cos(πk)·ζ(2k)
-    All five factors are nonzero. -/
-theorem zeta_neg_odd_ne_zero (k : ℕ) :
-    riemannZeta (↑(-(2 * (k : ℤ) - 1))) ≠ 0 := by
-  cases k with
-  | zero =>
-    norm_num
-    exact riemannZeta_ne_zero_of_one_le_re le_rfl
-  | succ n =>
-    have h_eq : (↑(-(2 * (↑(n + 1) : ℤ) - 1)) : ℂ) = 1 - ↑(2 * (n + 1) : ℕ) := by
-      push_cast; ring
-    rw [h_eq]
-    have hs : ∀ m : ℕ, (↑(2 * (n + 1) : ℕ) : ℂ) ≠ -↑m := by
-      intro m h; have := congr_arg Complex.re h; simp at this
-      linarith [Nat.cast_nonneg (α := ℝ) m]
-    have hs1 : (↑(2 * (n + 1) : ℕ) : ℂ) ≠ 1 := by
-      intro h; have := congr_arg Complex.re h; simp at this; linarith
-    rw [riemannZeta_one_sub hs hs1]
-    apply mul_ne_zero
-    apply mul_ne_zero
-    apply mul_ne_zero
-    apply mul_ne_zero
-    · exact two_ne_zero
-    · rw [Ne, Complex.cpow_eq_zero_iff]; push Not; intro h
-      exact absurd h (mul_ne_zero two_ne_zero (by exact_mod_cast Real.pi_ne_zero))
-    · apply Complex.Gamma_ne_zero
-      intro m h; have := congr_arg Complex.re h; simp at this
-      linarith [Nat.cast_nonneg (α := ℝ) m]
-    · have hcos : (↑Real.pi : ℂ) * ↑(2 * (n + 1) : ℕ) / 2 = ↑Real.pi * ↑(n + 1) := by
-        push_cast; ring
-      rw [hcos, cos_pi_mul_succ]
-      exact pow_ne_zero _ (by norm_num : (-1 : ℂ) ≠ 0)
-    · exact riemannZeta_ne_zero_of_one_le_re (by simp; linarith [Nat.zero_le n])
-
--- ════════════════════════════════════════════════
--- PART III: NONTRIVIAL ZEROS IN THE CRITICAL STRIP
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: Non-trivial zeros of ζ have positive real part.
-
-    Proof by contrapositive: Re(s) ≤ 0 leads to contradiction.
-    Case A (s not a non-positive integer): functional equation gives
-    ζ(1-s) = 0 with Re(1-s) ≥ 1, contradicting Mathlib.
-    Case B (s = -n): ζ(0) ≠ 0, trivial zeros excluded, odd zeros
-    nonzero by zeta_neg_odd_ne_zero. -/
-theorem zeta_nontrivial_zero_re_pos :
-    ∀ s : ℂ, riemannZeta s = 0 →
-    (¬∃ n : ℕ, s = -2 * (↑n + 1)) →
-    0 < s.re := by
-  intro s h_zero h_not_triv
-  by_contra h_not_pos
-  push Not at h_not_pos
-  by_cases h_int : ∃ n : ℕ, s = -(↑n : ℂ)
-  · obtain ⟨n, rfl⟩ := h_int
-    rcases n with _ | m
-    · simp at h_zero; rw [riemannZeta_zero] at h_zero; norm_num at h_zero
-    · rcases Nat.even_or_odd (m + 1) with ⟨j, hj⟩ | ⟨j, hj⟩
-      · have hj_pos : 1 ≤ j := by omega
-        exfalso; apply h_not_triv; refine ⟨j - 1, ?_⟩
-        have : (↑(j - 1) : ℂ) + 1 = ↑j := by
-          rw [Nat.cast_sub hj_pos]; push_cast; ring
-        rw [this]; push_cast [hj]; ring
-      · have := zeta_neg_odd_ne_zero (j + 1)
-        apply this
-        have key : (-(2 * (↑(j + 1) : ℤ) - 1)) = -(↑(m + 1) : ℤ) := by omega
-        rw [show (↑(-(2 * (↑(j + 1) : ℤ) - 1)) : ℂ) = (↑(-(↑(m + 1) : ℤ)) : ℂ) from
-          congr_arg _ key]
-        simp only [Int.cast_neg, Int.cast_natCast]
-        exact h_zero
-  · push Not at h_int
-    have hs1 : s ≠ 1 := by
-      intro heq; rw [heq] at h_not_pos; norm_num at h_not_pos
-    have h_func := riemannZeta_one_sub h_int hs1
-    have h_1s_zero : riemannZeta (1 - s) = 0 := by rw [h_func, h_zero, mul_zero]
-    have h_re : 1 ≤ (1 - s).re := by simp [Complex.sub_re]; linarith
-    exact absurd h_1s_zero (riemannZeta_ne_zero_of_one_le_re h_re)
-
--- ════════════════════════════════════════════════
--- PART IV: ¬RH → CRITICAL STRIP ZERO
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: ¬RH → ∃ zero in critical strip off critical line.
-
-    Uses functional equation (zeta_nontrivial_zero_re_pos) for Re > 0,
-    and Mathlib's riemannZeta_ne_zero_of_one_le_re for Re < 1. -/
-theorem rh_neg_gives_critical_strip_zero :
-    ¬ RiemannHypothesis →
-    ∃ ρ : ℂ, riemannZeta ρ = 0 ∧ 0 < ρ.re ∧ ρ.re < 1 ∧ ρ.re ≠ 1/2 := by
-  intro h
-  unfold RiemannHypothesis at h
-  push Not at h
-  obtain ⟨s, h_zero, h_not_triv, h_ne_1, h_re_ne_half⟩ := h
-  have h_not_triv' : ¬∃ n : ℕ, s = -2 * (↑n + 1) := by
-    push Not; exact h_not_triv
-  refine ⟨s, h_zero, ?_, ?_, h_re_ne_half⟩
-  · exact zeta_nontrivial_zero_re_pos s h_zero h_not_triv'
-  · by_contra h_ge
-    push Not at h_ge
-    exact absurd h_zero (riemannZeta_ne_zero_of_one_le_re h_ge)
-
--- ════════════════════════════════════════════════
--- PART V: THE CONVERSE THEOREM
--- ════════════════════════════════════════════════
-
-/-- **THEOREM**: The Nyman-Beurling converse: d²→0 ⟹ RH.
-
-    Proof (by contrapositive):
-    1. ¬RH → rh_neg_gives_critical_strip_zero: ∃ ρ off critical line
-    2. zeta_zero_separates: ρ creates defect δ > 0
-    3. ∫(1-f)² ≥ δ for all N, blocking convergence
-    4. Contrapositive: convergence → RH -/
-theorem nyman_beurling_converse :
-    (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) →
-    RiemannHypothesis := by
-  intro h_conv
-  by_contra h_not_rh
-  obtain ⟨ρ, h_zero, h_pos, h_lt1, h_ne_half⟩ :=
-    rh_neg_gives_critical_strip_zero h_not_rh
-  obtain ⟨δ, hδ_pos, h_defect⟩ :=
-    zeta_zero_separates ρ h_zero h_pos h_lt1 h_ne_half
-  obtain ⟨N₀, h_small⟩ := h_conv δ hδ_pos
-  have hN : N₀ ≤ max N₀ 2 := le_max_left _ _
-  have hN2 : 2 ≤ max N₀ 2 := le_max_right _ _
-  obtain ⟨v, hv⟩ := h_small (max N₀ 2) hN
-  have h_ge := h_defect (max N₀ 2) hN2 v
-  linarith
-
-end
-
-
-================================================================
-FILE: Cathedral/Perron/ResidueLtOne.lean
-================================================================
-
-import Cathedral.Perron.Defs
-import Cathedral.Perron.IntegralBounds
-import Cathedral.Perron.Rectangle
-
-/-!
-  Cathedral/Perron/ResidueLtOne.lean
-
-  Residue analysis for σ < 1 in the Perron contour.
-  Handles the contribution from ζ-zeros inside the contour.
+  Bounds on the Perron kernel 1/(2πi) · x^s/s.
 
   Zero sorry. Zero axioms.
 -/
 
 /-!
-# Perron Kernel for `y < 1` (No Residue)
+# The Unified Perron Kernel Bound
 
-This file proves that the Perron integral `(1/2π) ∫ y^s/s ds` is
-`O(y^c/(T·|log y|))` for `0 < y < 1`.
-
-The proof uses the **right-rectangle contour shift**: apply Cauchy-Goursat to `[c,R]×[-T,T]`
-(which encloses no poles since `c > 0`), bound the horizontal and right-vertical segments,
-then send `R → ∞`. The exponential decay `y^R → 0` for `0 < y < 1` kills the right vertical.
+This file combines the `y > 1` (residue = 1) and `y < 1` (residue = 0) cases
+into the unified Perron kernel theorem: for `y > 0`, `y ≠ 1`,
+`‖P(y,c,T) - 𝟙(y > 1)‖ ≤ y^c / (π·T·|log y|)`.
 
 ## Main results
 
-* `perron_kernel_lt_one` : for `0 < y < 1`, `‖P(y,c,T)‖ ≤ y^c/(π·T·|log y|)`
+* `perron_kernel_bound` : the unified Perron kernel approximation bound
 -/
 
 noncomputable section
@@ -2164,151 +2277,393 @@ open Complex Real MeasureTheory Set BigOperators ComplexConjugate
 namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
--- §7. The Perron Kernel for y < 1 (Residue = 0)
+-- §8. The Unified Perron Kernel Bound
 -- ═══════════════════════════════════════════
 
-/-- Horizontal segment bound: ‖∫_c^R f(σ ± TI) dσ‖ ≤ y^c / (T · |log y|) for 0 < y < 1.
-    Composes perronIntegrand_bound_on_horizontal with integral_rpow_le_of_lt_one. -/
-lemma horizontal_segment_bound {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
-    (hc : 0 < c) (hR : c ≤ R) (hT : 0 < T) (sign : ℝ) (hsign : |sign| = 1) :
-    ‖∫ σ in c..R, perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤
-      y ^ c / (T * |Real.log y|) := by
-  -- Pointwise bound: ‖f(σ + sign·T·I)‖ ≤ y^σ/T
-  have hle : ∀ σ, σ ∈ Set.Ioc c R → ‖perronIntegrand y (↑σ + ↑(sign * T) * I)‖ ≤ y ^ σ / T := by
-    intro σ hσ_mem
-    have hσ_pos : 0 < σ := lt_trans hc hσ_mem.1
-    have hre : (↑σ + ↑(sign * T) * I : ℂ).re = σ := by
-      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im]
-    have hs_ne : (↑σ : ℂ) + ↑(sign * T) * I ≠ 0 := by
-      intro h
-      have : (↑σ + ↑(sign * T) * I : ℂ).re = (0 : ℂ).re := congr_arg Complex.re h
-      simp [Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.I_re, Complex.I_im] at this
-      linarith
-    have him : |(↑σ + ↑(sign * T) * I : ℂ).im| = T := by
-      simp only [Complex.add_im, Complex.ofReal_im, Complex.mul_im, Complex.ofReal_re,
-                  Complex.ofReal_im, Complex.I_re, Complex.I_im]
-      ring_nf
-      rw [abs_mul, hsign, one_mul, abs_of_pos hT]
-    exact perronIntegrand_bound_on_horizontal hy_pos hT hre him hs_ne
-  have hint : IntervalIntegrable (fun σ => y ^ σ / T) MeasureTheory.volume c R :=
-    ((Continuous.rpow continuous_const continuous_id
-      (fun _ => Or.inl (ne_of_gt hy_pos))).div_const T).intervalIntegrable c R
-  calc ‖∫ σ in c..R, perronIntegrand y (↑σ + ↑(sign * T) * I)‖
-      ≤ ∫ σ in c..R, y ^ σ / T :=
-        intervalIntegral.norm_integral_le_of_norm_le hR
-          (Filter.Eventually.of_forall fun σ hσ => hle σ hσ)
-          hint
-    _ = (∫ σ in c..R, y ^ σ) / T := by
-        rw [intervalIntegral.integral_div]
-    _ ≤ (y ^ c / |Real.log y|) / T :=
-        div_le_div_of_nonneg_right (integral_rpow_le_of_lt_one hy_pos hy_lt hc.le hR) hT.le
-    _ = y ^ c / (T * |Real.log y|) := by ring
+/-- **UNIFIED PERRON KERNEL**: The Perron integral approximates the step function.
 
-/-- **Finite-R Perron bound**: For any R > c, composing the rectangle identity with
-    the horizontal and vertical bounds gives a two-term bound on the Perron integral.
-    This is the core composition of ALL our building-block lemmas. -/
-lemma perron_integral_bound_with_R {y c R T : ℝ} (hy_pos : 0 < y) (hy_lt : y < 1)
-    (hc : 0 < c) (hR : c < R) (hT : 0 < T) :
-    ‖perronIntegral y c T‖ ≤
-      y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ R / (Real.pi * R) := by
-  -- Abbreviate the four integrals
-  set bot := ∫ x in c..R, perronIntegrand y (↑x + -↑T * I) with hbot_def
-  set top := ∫ x in c..R, perronIntegrand y (↑x + ↑T * I) with htop_def
-  set rv := ∫ t in (-T)..T, perronIntegrand y (↑R + ↑t * I) with hrv_def
-  set lv := ∫ t in (-T)..T, perronIntegrand y (↑c + ↑t * I) with hlv_def
-  -- Step 1: From rect, extract lv
-  have rect := rectangle_integral_perron_vanishes hy_pos hc hR hT
-  have hlv_eq : I * lv = bot - top + I * rv := by linear_combination -rect
-  -- lv = -I * (bot - top) + rv
-  have hlv_eq2 : lv = -I * (bot - top) + rv := by
-    have hI_ne : (I : ℂ) ≠ 0 := Complex.I_ne_zero
-    have : lv = I⁻¹ * (I * lv) := by rw [inv_mul_cancel_left₀ hI_ne]
-    rw [this, hlv_eq, Complex.inv_I, mul_add, ← mul_assoc (-I) I rv]
-    simp [Complex.I_mul_I]
-  -- Step 2: Bound each segment
-  have hbot_bound := horizontal_segment_bound hy_pos hy_lt hc hR.le hT (-1) (by norm_num)
-  have htop_bound := horizontal_segment_bound hy_pos hy_lt hc hR.le hT 1 (by norm_num)
-  have hrv_bound := right_vertical_bound hy_pos hy_lt (lt_trans hc hR) hT
-  -- Match sign: (-1)*T = -T and 1*T = T, and ↑(-T) = -↑T
-  simp only [neg_one_mul, one_mul, Complex.ofReal_neg] at hbot_bound htop_bound
-  -- ‖lv‖ ≤ ‖bot‖ + ‖top‖ + ‖rv‖
-  have hlv_bound : ‖lv‖ ≤ ‖bot‖ + ‖top‖ + ‖rv‖ := by
-    rw [hlv_eq2]
-    calc ‖-I * (bot - top) + rv‖
-        ≤ ‖-I * (bot - top)‖ + ‖rv‖ := norm_add_le _ _
-      _ = ‖bot - top‖ + ‖rv‖ := by
-          rw [norm_mul, norm_neg, Complex.norm_I, one_mul]
-      _ ≤ (‖bot‖ + ‖top‖) + ‖rv‖ := by
-          gcongr; exact norm_sub_le _ _
-  -- Step 3: Unfold perronIntegral and compute norm
-  unfold perronIntegral
-  have hpi_pos : (0 : ℝ) < Real.pi := Real.pi_pos
-  have h2pi_norm : ‖(1 : ℂ) / (2 * ↑Real.pi)‖ = 1 / (2 * Real.pi) := by
-    rw [norm_div, norm_one, norm_mul, Complex.norm_ofNat, Complex.norm_real]
-    simp [abs_of_pos hpi_pos]
-  rw [norm_mul, h2pi_norm]
-  -- Final bound
-  have h2pi_pos : 0 < 2 * Real.pi := by positivity
-  calc 1 / (2 * Real.pi) * ‖lv‖
-      ≤ 1 / (2 * Real.pi) * (‖bot‖ + ‖top‖ + ‖rv‖) := by
-        gcongr
-    _ ≤ 1 / (2 * Real.pi) *
-        (y ^ c / (T * |Real.log y|) + y ^ c / (T * |Real.log y|) + 2 * T * y ^ R / R) := by
-        gcongr
-    _ = y ^ c / (Real.pi * T * |Real.log y|) + T * y ^ R / (Real.pi * R) := by
-        field_simp
-        ring
-
-/-- **KEY LEMMA**: For 0 < y < 1, Perron integral = 0 + O(y^c/(T|log y|)).
-
-    Proof: For any R > c, apply Cauchy-Goursat to the rectangle [c,R]×[-T,T].
-    The left side is our Perron integral × 2πi. The other three sides are bounded:
-    • horizontal: ≤ y^c/(T|log y|) each (by horizontal_segment_bound)
-    • right vertical: ≤ 2T·y^R/R (by right_vertical_bound, → 0 as R → ∞)
-    Since the bound holds for all R and the y^R/R term → 0, we get the result. -/
-theorem perron_kernel_lt_one (y c T : ℝ) (hy_pos : 0 < y) (hy_lt : y < 1)
+    For any y > 0, y ≠ 1:
+    |(1/2πi) ∫_{c-iT}^{c+iT} y^s/s ds - 𝟙(y > 1)| ≤ y^c / (π·T·|log y|) -/
+theorem perron_kernel_bound (y c T : ℝ) (hy : 0 < y) (hy_ne : y ≠ 1)
     (hc : 0 < c) (hT : 0 < T) :
-    ‖perronIntegral y c T‖ ≤ y ^ c / (Real.pi * T * |Real.log y|) := by
-  -- It suffices to show: for any ε > 0, ‖·‖ ≤ target + ε
-  -- This implies ‖·‖ ≤ target by contradiction.
-  by_contra hlt
-  push Not at hlt
-  set δ := ‖perronIntegral y c T‖ - y ^ c / (Real.pi * T * |Real.log y|) with hδ_def
-  have hδ : 0 < δ := by linarith
-  -- Choose R large enough that T/(πR) < δ
-  set R := max (c + 1) (T / (Real.pi * δ) + 1) with hR_def
-  have hR_gt_c : c < R := by
-    calc c < c + 1 := by linarith
-      _ ≤ R := le_max_left _ _
-  have hR_pos : 0 < R := lt_trans hc hR_gt_c
-  -- Apply our proved composition bound
-  have hbound := perron_integral_bound_with_R hy_pos hy_lt hc hR_gt_c hT
-  -- Bound y^R ≤ 1 since 0 < y < 1
-  have hyR_le : y ^ R ≤ 1 := rpow_le_one hy_pos.le hy_lt.le hR_pos.le
-  -- So: T * y^R / (πR) ≤ T * 1 / (πR) = T/(πR)
-  have herr_le : T * y ^ R / (Real.pi * R) ≤ T / (Real.pi * R) := by
-    apply div_le_div_of_nonneg_right _ (mul_pos Real.pi_pos hR_pos).le
-    calc T * y ^ R ≤ T * 1 := by gcongr
-      _ = T := mul_one T
-  -- And R > T/(πδ), so T/(πR) < δ
-  have hR_big : T / (Real.pi * δ) < R := by
-    calc T / (Real.pi * δ) < T / (Real.pi * δ) + 1 := by linarith
-      _ ≤ R := le_max_right _ _
-  have herr_lt : T / (Real.pi * R) < δ := by
-    rw [div_lt_iff₀ (mul_pos Real.pi_pos hR_pos)]
-    -- Need: T < δ * (π * R) = π * δ * R
-    -- From hR_big: T / (π * δ) < R, so T < (π * δ) * R
-    have hπδ_pos := mul_pos Real.pi_pos hδ
-    have := (div_lt_iff₀ hπδ_pos).mp hR_big
-    -- this : T < R * (π * δ)
-    linarith
-  -- Combine: ‖perronIntegral‖ ≤ target + Ty^R/(πR) ≤ target + T/(πR) < target + δ
-  -- But δ = ‖perronIntegral‖ - target
-  -- So target + δ = ‖perronIntegral‖, giving ‖perronIntegral‖ < ‖perronIntegral‖. Contradiction!
-  linarith
+    ‖perronIntegral y c T - (if 1 < y then 1 else 0)‖ ≤
+    y ^ c / (Real.pi * T * |Real.log y|) := by
+  by_cases h : 1 < y
+  · simp only [h, ↑ite_true]
+    exact perron_kernel_gt_one y c T h hc hT
+  · push Not at h
+    have hlt : y < 1 := lt_of_le_of_ne h hy_ne
+    simp only [show ¬(1 < y) from not_lt.mpr (le_of_lt hlt), ↑ite_false]
+    simp only [sub_zero]
+    exact perron_kernel_lt_one y c T hy hlt hc hT
 
 end Cathedral.Perron
 
+
+================================================================
+FILE: Cathedral/Structural/BDFloorArithmetic.lean
+================================================================
+
+/-
+  Cathedral/Structural/BDFloorArithmetic.lean
+
+  ## BD-basis floor arithmetic for linear independence.
+
+  Key result: on the open interval (1/(n+1), 1/n), the floor ⌊1/(mx)⌋
+  is CONSTANT for every positive integer m, equal to ⌊n/m⌋.
+
+  This is because 1/(mx) ∈ (n/m, (n+1)/m) on this interval,
+  and no integer lies strictly between n/m and (n+1)/m
+  (that would require an integer strictly between n and n+1).
+
+  Used by: Independence.lean to graduate bd_nyman_beurling_lin_indep.
+-/
+
+import Cathedral.Defs
+import Cathedral.Gram.NbLinComb
+
+noncomputable section
+open Complex Real MeasureTheory
+
+-- ════════════════════════════════════════════════
+-- PART I: FLOOR CONSTANCY ON (1/(n+1), 1/n)
+-- ════════════════════════════════════════════════
+
+/-- No integer lies strictly between n/m and (n+1)/m for positive integers n, m.
+    Proof: if q ∈ (n/m, (n+1)/m) then n < q*m < n+1, impossible for integers. -/
+private lemma no_int_between_div (n m : ℕ) (hm : 1 ≤ m) :
+    ∀ q : ℤ, ¬((n : ℝ) / m < q ∧ (q : ℝ) < (n + 1 : ℝ) / m) := by
+  intro q ⟨h1, h2⟩
+  have hm_pos : (0 : ℝ) < m := by exact_mod_cast show 0 < m by omega
+  have h1' : (n : ℝ) < q * m := by rwa [div_lt_iff₀ hm_pos] at h1
+  have h2' : (q : ℝ) * m < n + 1 := by rwa [lt_div_iff₀ hm_pos] at h2
+  have h_int : (n : ℤ) < q * m ∧ q * m < n + 1 := by
+    constructor
+    · exact_mod_cast h1'
+    · exact_mod_cast h2'
+  omega
+
+/-- On (1/(n+1), 1/n), ⌊1/(mx)⌋ = ⌊n/m⌋ for m ≥ 1, n ≥ 1. -/
+theorem bd_floor_constant {n m : ℕ} (hn : 1 ≤ n) (hm : 1 ≤ m)
+    {x : ℝ} (hx_lo : 1 / ((n : ℝ) + 1) < x) (hx_hi : x < 1 / (n : ℝ)) :
+    ⌊1 / ((m : ℝ) * x)⌋ = ⌊(n : ℝ) / m⌋ := by
+  have hm_pos : (0 : ℝ) < m := by exact_mod_cast show 0 < m by omega
+  have hn_pos : (0 : ℝ) < n := by exact_mod_cast show 0 < n by omega
+  have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+  have hx_pos : 0 < x := by
+    calc (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
+    _ < x := hx_lo
+  have hmx_pos : 0 < m * x := mul_pos hm_pos hx_pos
+  -- Key bounds: x > 1/(n+1) means (n+1)*x > 1, and x < 1/n means n*x < 1
+  have h_nx_lt : (n : ℝ) * x < 1 := by
+    have := hx_hi; rwa [lt_div_iff₀ hn_pos, mul_comm] at this
+  have h_n1x_gt : 1 < ((↑n : ℝ) + 1) * x := by
+    have := hx_lo; rwa [div_lt_iff₀ hn1_pos, mul_comm] at this
+  -- 1/(mx) ∈ (n/m, (n+1)/m)
+  have h_lo : (n : ℝ) / m < 1 / (m * x) := by
+    rw [div_lt_div_iff₀ hm_pos hmx_pos, one_mul]
+    nlinarith [mul_comm (m : ℝ) ((n : ℝ) * x), mul_comm (n : ℝ) x, mul_comm (m : ℝ) x]
+  have h_hi : 1 / ((m : ℝ) * x) < ((n : ℝ) + 1) / m := by
+    rw [div_lt_div_iff₀ hmx_pos hm_pos, one_mul]
+    nlinarith [mul_comm (m : ℝ) (((n : ℝ) + 1) * x), mul_comm ((n : ℝ) + 1) x, mul_comm (m : ℝ) x]
+  -- Floor is constant because no integer in (n/m, (n+1)/m)
+  rw [Int.floor_eq_iff]
+  constructor
+  · -- ⌊n/m⌋ ≤ 1/(mx)
+    exact le_of_lt (lt_of_le_of_lt (Int.floor_le _) h_lo)
+  · -- 1/(mx) < ⌊n/m⌋ + 1
+    by_contra h_not
+    simp only [not_lt] at h_not
+    -- h_not : ↑⌊↑n / ↑m⌋ + 1 ≤ 1 / (↑m * x)
+    -- Need: ↑(⌊↑n / ↑m⌋ + 1) ≤ 1 / (↑m * x)
+    have h_q : ((⌊(n : ℝ) / m⌋ + 1 : ℤ) : ℝ) ≤ 1 / (↑m * x) := by push_cast; exact h_not
+    have h_q' : (n : ℝ) / m < (⌊(n : ℝ) / m⌋ + 1 : ℤ) := by
+      exact_mod_cast Int.lt_floor_add_one ((n : ℝ) / m)
+    have h_q'' : ((⌊(n : ℝ) / m⌋ + 1 : ℤ) : ℝ) < ((n : ℝ) + 1) / m :=
+      lt_of_le_of_lt h_q h_hi
+    exact no_int_between_div n m hm (⌊(n : ℝ) / m⌋ + 1) ⟨h_q', h_q''⟩
+
+/-- Fractional part formula: on (1/(n+1), 1/n), {1/(mx)} = 1/(mx) - ⌊n/m⌋. -/
+theorem bd_fract_on_interval {n m : ℕ} (hn : 1 ≤ n) (hm : 1 ≤ m)
+    {x : ℝ} (hx_lo : 1 / ((n : ℝ) + 1) < x) (hx_hi : x < 1 / (n : ℝ)) :
+    Int.fract (1 / ((m : ℝ) * x)) = 1 / ((m : ℝ) * x) - ↑⌊(n : ℝ) / m⌋ := by
+  simp only [Int.fract, bd_floor_constant hn hm hx_lo hx_hi]
+
+-- ════════════════════════════════════════════════
+-- PART II: LINEAR COMBINATION ON (1/(n+1), 1/n)
+-- ════════════════════════════════════════════════
+
+/-- On (1/(n+1), 1/n), nbLinComb N w x = B/x - C_n where
+    B = Σ wᵢ/(i+1) and C_n = Σ wᵢ · ⌊n/(i+1)⌋. -/
+theorem bd_nbLinComb_affine (N : ℕ) (w : Fin (N - 1) → ℝ)
+    (n : ℕ) (hn : 1 ≤ n)
+    {x : ℝ} (hx_lo : 1 / ((n : ℝ) + 1) < x) (hx_hi : x < 1 / (n : ℝ)) :
+    nbLinComb N w x =
+    (∑ i : Fin (N - 1), w i / (↑(i.val + 1) : ℝ)) * (1 / x) -
+    (∑ i : Fin (N - 1), w i * ↑⌊(n : ℝ) / (↑(i.val + 1) : ℝ)⌋) := by
+  have hx_pos : 0 < x := by
+    calc (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
+    _ < x := hx_lo
+  unfold nbLinComb
+  -- Rewrite each fractional part using floor constancy
+  have h_fract : ∀ i : Fin (N - 1),
+      Int.fract (1 / ((↑(i.val + 1) : ℝ) * x)) =
+      1 / ((↑(i.val + 1) : ℝ) * x) - ↑⌊(n : ℝ) / (↑(i.val + 1) : ℝ)⌋ :=
+    fun i => bd_fract_on_interval hn (by omega : 1 ≤ i.val + 1) hx_lo hx_hi
+  simp_rw [h_fract, mul_sub, Finset.sum_sub_distrib]
+  congr 1
+  -- Need: Σ wᵢ * (1/(mᵢ*x)) = (Σ wᵢ/mᵢ) * (1/x)
+  have h_eq : ∀ i : Fin (N - 1),
+      w i * (1 / ((↑(i.val + 1) : ℝ) * x)) =
+      w i / (↑(i.val + 1) : ℝ) * (1 / x) := by
+    intro i
+    have hi_pos : (0 : ℝ) < ↑(i.val + 1) := by positivity
+    field_simp
+  simp_rw [h_eq, ← Finset.sum_mul]
+
+-- ════════════════════════════════════════════════
+-- PART III: INDUCTIVE EXTRACTION (B = 0 CASE)
+-- ════════════════════════════════════════════════
+
+/-- If C₁ = C₂ = ... = C_{k-1} = 0 and w₀ = w₁ = ... = w_{k-2} = 0,
+    then C_k = w_{k-1}. This is because ⌊k/k⌋ = 1 and all lower
+    terms vanish. -/
+private lemma C_extract (N : ℕ) (w : Fin (N - 1) → ℝ)
+    (k : ℕ) (hk : 1 ≤ k) (hkN : k ≤ N - 1)
+    (hw_zero : ∀ i : Fin (N - 1), i.val < k - 1 → w i = 0) :
+    (∑ i : Fin (N - 1), w i * ↑⌊(k : ℝ) / (↑(i.val + 1) : ℝ)⌋) =
+    w ⟨k - 1, by omega⟩ := by
+  have h_terms : ∀ i : Fin (N - 1),
+      w i * ↑⌊(k : ℝ) / (↑(i.val + 1) : ℝ)⌋ =
+      if i.val = k - 1 then w ⟨k - 1, by omega⟩ else 0 := by
+    intro ⟨i, hi⟩
+    by_cases heq : i = k - 1
+    · subst heq
+      simp only [ite_true]
+      have hkk : (k - 1 + 1 : ℕ) = k := by omega
+      have hk_pos : (0 : ℝ) < (k : ℝ) := by exact_mod_cast show 0 < k by omega
+      have h_floor : ⌊(k : ℝ) / (↑(k - 1 + 1) : ℝ)⌋ = 1 := by
+        rw [show (↑(k - 1 + 1 : ℕ) : ℝ) = (k : ℝ) from by exact_mod_cast hkk]
+        rw [div_self (ne_of_gt hk_pos)]
+        simp
+      rw [h_floor]; push_cast; ring
+    · by_cases hlt : i < k - 1
+      · rw [hw_zero ⟨i, hi⟩ hlt, zero_mul, if_neg heq]
+      · have hgt : i ≥ k := by omega
+        have h_floor : ⌊(k : ℝ) / (↑(i + 1) : ℝ)⌋ = 0 := by
+          rw [Int.floor_eq_zero_iff.mpr]
+          constructor
+          · positivity
+          · rw [div_lt_one (by positivity : (0 : ℝ) < ↑(i + 1))]
+            exact_mod_cast show (k : ℕ) < i + 1 by omega
+        rw [h_floor]; simp [if_neg heq]
+  simp_rw [h_terms]
+  -- Sum of if-then-else over Fin collapses to the matching term
+  -- The condition is on i.val = k - 1, so we transform to Fin comparison
+  have : ∀ i : Fin (N - 1),
+      (if i.val = k - 1 then w ⟨k - 1, by omega⟩ else 0) =
+      (if i = ⟨k - 1, by omega⟩ then w ⟨k - 1, by omega⟩ else 0) := by
+    intro i
+    simp only [Fin.ext_iff]
+  simp_rw [this]
+  simp [Finset.sum_ite_eq', Finset.mem_univ]
+
+/-- If w ≠ 0, there exists n such that C_n ≠ 0. -/
+theorem bd_exists_nonzero_C (N : ℕ) (hN : 2 ≤ N) (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    ∃ n : ℕ, 1 ≤ n ∧ n ≤ N - 1 ∧
+    (∑ i : Fin (N - 1), w i * ↑⌊(n : ℝ) / (↑(i.val + 1) : ℝ)⌋) ≠ 0 := by
+  -- w ≠ 0 means some w_j ≠ 0
+  have hw_exists : ∃ j : Fin (N - 1), w j ≠ 0 := by
+    by_contra h; simp only [not_exists, ne_eq, not_not] at h; exact hw (funext h)
+  -- Find the smallest index with w_{j₀} ≠ 0
+  let S := Finset.filter (fun i : Fin (N - 1) => w i ≠ 0) Finset.univ
+  have hS : S.Nonempty := by
+    obtain ⟨j₀, hj₀_ne⟩ := hw_exists
+    exact ⟨j₀, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hj₀_ne⟩⟩
+  set j_min := S.min' hS
+  have hj_min_ne : w j_min ≠ 0 := (Finset.mem_filter.mp (Finset.min'_mem S hS)).2
+  have hj_min_le : ∀ i : Fin (N - 1), w i ≠ 0 → j_min ≤ i :=
+    fun i hi => Finset.min'_le S i (Finset.mem_filter.mpr ⟨Finset.mem_univ _, hi⟩)
+  have hw_below : ∀ i : Fin (N - 1), i.val < j_min.val → w i = 0 := by
+    intro i hi
+    by_contra h_ne
+    exact absurd (hj_min_le i h_ne) (not_le.mpr (Fin.lt_def.mpr hi))
+  refine ⟨j_min.val + 1, by omega, by omega, ?_⟩
+  rw [C_extract N w (j_min.val + 1) (by omega) (by omega) (by intro i hi; exact hw_below i (by omega))]
+  exact hj_min_ne
+
+-- ════════════════════════════════════════════════
+-- PART IV: NONZERO SOMEWHERE
+-- ════════════════════════════════════════════════
+
+/-- If w ≠ 0, nbLinComb is nonzero on some open subinterval of (0,1). -/
+theorem bd_nbLinComb_nonzero_somewhere (N : ℕ) (hN : 2 ≤ N)
+    (w : Fin (N - 1) → ℝ) (hw : w ≠ 0) :
+    ∃ c d : ℝ, 0 ≤ c ∧ c < d ∧ d ≤ 1 ∧
+    (∀ x, x ∈ Set.Ioo c d → nbLinComb N w x ≠ 0) := by
+  -- Abbreviations for the leading coefficient and constant term
+  -- We use `set` so that `B` and its unfolding are interchangeable
+  set B := ∑ i : Fin (N - 1), w i / (↑(i.val + 1) : ℝ) with B_def
+  by_cases hB : B ≠ 0
+  · -- Case 1: B ≠ 0. On (1/2, 1), nbLinComb(x) = B*(1/x) - C₁.
+    set C₁ := ∑ i : Fin (N - 1), w i * ↑⌊(↑(1 : ℕ) : ℝ) / (↑(i.val + 1) : ℝ)⌋ with C₁_def
+    have h_eval : ∀ x : ℝ, 1/2 < x → x < 1 →
+        nbLinComb N w x = B * (1/x) - C₁ := by
+      intro x hlo hhi
+      have hlo' : 1 / ((↑(1 : ℕ) : ℝ) + 1) < x := by push_cast; linarith
+      have hhi' : x < 1 / (↑(1 : ℕ) : ℝ) := by push_cast; linarith
+      have h := bd_nbLinComb_affine N w 1 le_rfl hlo' hhi'
+      -- Fold the raw sum for B back; C₁ already matches since we used ↑(1:ℕ)
+      rw [← B_def] at h
+      exact h
+    -- Core lemma: if B*(1/x) = C₁ and B*(1/y) = C₁ with B ≠ 0, then x = y
+    have h_inj : ∀ x y : ℝ, 0 < x → 0 < y →
+        B * (1/x) = C₁ → B * (1/y) = C₁ → x = y := by
+      intro x y hx hy h1 h2
+      have : B * (1/x) = B * (1/y) := by linarith
+      have := mul_left_cancel₀ hB this
+      field_simp at this; linarith
+    -- Either ¬∃ zero in (1/2, 3/4), or ¬∃ zero in (3/4, 1)
+    by_cases h_lo : ∀ x, x ∈ Set.Ioo (1/2 : ℝ) (3/4) → B * (1/x) - C₁ ≠ 0
+    · refine ⟨1/2, 3/4, by linarith, by linarith, by linarith, ?_⟩
+      intro x hx
+      have hx1 : x < 1 := lt_trans hx.2 (by norm_num : (3:ℝ)/4 < 1)
+      rw [h_eval x hx.1 hx1]; exact h_lo x hx
+    · -- There exists x₀ ∈ (1/2, 3/4) with B*(1/x₀) = C₁
+      simp only [not_forall, not_not, exists_prop] at h_lo
+      obtain ⟨x₀, hx₀_mem, hx₀_eq⟩ := h_lo
+      have hx₀_eq : B * (1/x₀) = C₁ := by linarith
+      have hx₀_pos : (0:ℝ) < x₀ := by linarith [hx₀_mem.1]
+      -- Then for all y ∈ (3/4, 1), y ≠ x₀, so B*(1/y) ≠ C₁
+      refine ⟨3/4, 1, by linarith, by linarith, le_refl _, ?_⟩
+      intro y ⟨hy_lo, hy_hi⟩
+      rw [h_eval y (by linarith) hy_hi]
+      intro heq
+      have hy_pos : (0:ℝ) < y := by linarith
+      have : y = x₀ := h_inj y x₀ hy_pos hx₀_pos (by linarith) hx₀_eq
+      linarith [hx₀_mem.2]
+  · -- Case 2: B = 0. nbLinComb = -C_n on each (1/(n+1), 1/n)
+    simp only [ne_eq, not_not] at hB
+    obtain ⟨n, hn_pos, hn_le, hCn⟩ := bd_exists_nonzero_C N hN w hw
+    have hn_real_pos : (0 : ℝ) < n := by exact_mod_cast show 0 < n by omega
+    have hn1_real_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+    refine ⟨1 / ((n : ℝ) + 1), 1 / (n : ℝ),
+      by positivity,
+      by rw [div_lt_div_iff₀ hn1_real_pos hn_real_pos]; linarith,
+      ?_, ?_⟩
+    · rw [div_le_one hn_real_pos]; exact_mod_cast show 1 ≤ n by omega
+    · intro x ⟨hx_lo, hx_hi⟩
+      have h_affine := bd_nbLinComb_affine N w n (by omega) hx_lo hx_hi
+      -- Fold the leading coefficient sum back into B, then use hB : B = 0
+      rw [← B_def] at h_affine
+      rw [h_affine, hB, zero_mul, zero_sub]
+      exact neg_ne_zero.mpr hCn
+
+end
+
+
+================================================================
+FILE: Cathedral/Structural/Eigenvalue.lean
+================================================================
+
+/-
+  Cathedral/Structural/Eigenvalue.lean
+
+  ## Eigenvalue monotonicity and interlacing.
+
+  Core results:
+  - eigenvalue_interlacing (Cauchy interlacing)
+  - lambdaMin_shifted_antitone
+  - eigenDrop_nonneg
+  - telescoping identity
+  - drop_formula_bound (axiom)
+-/
+
+import Cathedral.Defs
+import Cathedral.Spectral.RayleighBridge
+
+noncomputable section
+open Complex Real
+
+/-- **Cauchy Interlacing** (PROVEN): λ_min(G_{N+1}) ≤ λ_min(G_N). -/
+theorem eigenvalue_interlacing (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin (N + 1) ≤ lambdaMin N := by
+  obtain ⟨n, rfl⟩ : ∃ n, N = n + 1 := ⟨N - 1, by omega⟩
+  have hn : 0 < n := by omega
+  unfold lambdaMin
+  simp only [show n + 1 ≥ 2 from by omega, show n + 2 ≥ 2 from by omega, dite_true]
+  set H_n := gramMatrix_hermitian (n + 1)
+  set H_n1 := gramMatrix_hermitian (n + 2)
+  apply Finset.le_inf'
+  intro j _
+  have h_in_range : H_n.eigenvalues₀ j ∈ Set.range H_n.eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) j,
+           congr_arg _ (Equiv.symm_apply_apply _ j)⟩
+  obtain ⟨i, hi⟩ := h_in_range
+  rw [← hi]
+  rw [← quadForm_eigenvector H_n i, ← quadForm_padVector]
+  exact min_eigenvalue_le_quadForm H_n1 _
+    (padVector_norm _ (H_n.eigenvectorBasis.orthonormal.1 i))
+    (by omega)
+
+theorem eigenvalue_antitone (N : ℕ) (hN : 2 ≤ N) :
+    lambdaMin (N + 1) ≤ lambdaMin N := eigenvalue_interlacing N hN
+
+/-- lambdaMin shifted to start at 0 is antitone on all of ℕ. -/
+lemma lambdaMin_shifted_antitone : Antitone (fun n => lambdaMin (n + 2)) := by
+  intro a b hab
+  induction hab with
+  | refl => exact le_refl _
+  | step h ih => exact le_trans (eigenvalue_antitone _ (by omega)) ih
+
+/-- lambdaMin is antitone for indices ≥ 2. -/
+lemma lambdaMin_antitone_ge2 (M N : ℕ) (hM : 2 ≤ M) (hN : M ≤ N) :
+    lambdaMin N ≤ lambdaMin M := by
+  have := lambdaMin_shifted_antitone (show M - 2 ≤ N - 2 by omega)
+  simp only at this
+  have hM2 : M - 2 + 2 = M := by omega
+  have hN2 : N - 2 + 2 = N := by omega
+  rwa [hM2, hN2] at this
+
+/-- The eigenvalue drop is non-negative (from Cauchy interlacing) -/
+theorem eigenDrop_nonneg (N : ℕ) (hN : 3 ≤ N) : 0 ≤ eigenDrop N := by
+  unfold eigenDrop
+  have h2 : 2 ≤ N - 1 := by omega
+  have := eigenvalue_antitone (N - 1) h2
+  have hsimp : N - 1 + 1 = N := by omega
+  rw [hsimp] at this
+  linarith
+
+/-- Telescoping: λ_min(G_N) = λ_min(G_{N₀}) - Σ_{k=N₀}^{N-1} δ_{k+1}. -/
+theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
+    lambdaMin N = lambdaMin N₀ -
+    ∑ k ∈ Finset.Ico N₀ N, eigenDrop (k + 1) := by
+  simp_rw [eigenDrop_succ]
+  induction N with
+  | zero => simp [Nat.le_zero.mp hN]
+  | succ n ih =>
+    by_cases h : N₀ ≤ n
+    · rw [Finset.sum_Ico_succ_top h]
+      have := ih h
+      linarith
+    · push Not at h
+      have : N₀ = n + 1 := by omega
+      subst this
+      simp
+
+/-- **Drop formula** (Schur complement perturbation) — AXIOM. -/
+axiom drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
+    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
+      schurComplement (N - 1)
+
+theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
+    eigenDrop N ≤ (cosAlignment (N - 1))^2 *
+      dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
+      schurComplement (N - 1) := drop_formula_bound N hN
+
+end
 
 
 ================================================================
@@ -3529,242 +3884,6 @@ theorem tsum_twoTileCorrection_eq_zero_a1 (b : ℕ) (hb : 2 ≤ b) :
 --     strip + Stirling/b + fractEval/a + ΔEval = vasyuninGramFormula
 
 end Cathedral.Vasyunin.TwoTileCorrection
-
-
-================================================================
-FILE: Cathedral/Vasyunin/Matrix/CovEntries.lean
-================================================================
-
-/-
-  Cathedral/Vasyunin/Matrix/CovEntries.lean
-
-  Closed-form evaluations of covariance matrix entries C(0,0), C(0,1), C(1,1)
-  and positivity of C(0,0).
--/
-
-import Cathedral.Vasyunin.Matrix.GramEntries
-
-noncomputable section
-open Real Matrix Finset
-
-namespace Cathedral.Vasyunin
-
-/-- Euler-Mascheroni constant γ ≈ 0.5772 -/
-local notation "γ" => Real.eulerMascheroniConstant
-
--- ════════════════════════════════════════════════
--- COVARIANCE MATRIX EVALUATIONS (N=3)
--- ════════════════════════════════════════════════
-
-/-- Covariance entry C(0,0) = G(1,1) - b₁². -/
-theorem covEntry_00 :
-    (vasyuninCovMatrix 3) 0 0 =
-    Real.log (2 * Real.pi) - γ - 1 - (1 - γ) ^ 2 := by
-  unfold vasyuninCovMatrix vasyuninGramMatrix vasyuninMeanVec
-  simp only [Matrix.sub_apply, Matrix.of_apply, vecMulVec, Matrix.of_apply, Fin.val_zero]
-  rw [vasyuninGramEntry_one_one, vasyuninMeanEntry_one]
-  ring
-
-/-- C₃(0,0) > 0. Margin ≈ 0.082. -/
-theorem covEntry_00_pos : (vasyuninCovMatrix 3) 0 0 > 0 := by
-  rw [covEntry_00]
-  have h_log2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
-  have h_gamma_lt : γ < 2 / 3 := Real.eulerMascheroniConstant_lt_two_thirds
-  have h_gamma_gt : 1 / 2 < γ := Real.one_half_lt_eulerMascheroniConstant
-  have h_log3 : 11 * Real.log 2 / 7 ≤ Real.log 3 := log_three_ge_11_log_two_div_7
-  have h_pi_gt : (3 : ℝ) < Real.pi := pi_gt_three
-  have h_logpi : Real.log 3 ≤ Real.log Real.pi :=
-    Real.log_le_log (by norm_num : (0 : ℝ) < 3) (le_of_lt h_pi_gt)
-  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi :=
-    Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (ne_of_gt Real.pi_pos)
-  rw [h_log2pi]
-  nlinarith [sq_nonneg (γ - 1/2), sq_nonneg (2/3 - γ)]
-
-/-- Closed form for C(0,1) = G(1,2) - b₁·b₂. -/
-theorem covEntry_01 :
-    (vasyuninCovMatrix 3) 0 1 =
-    3 / 4 * (Real.log (2 * Real.pi) - γ) -
-    Real.log 2 / 4 - 1 / 2 -
-    (1 - γ) * ((Real.log 2 + 1 - γ) / 2) := by
-  unfold vasyuninCovMatrix vasyuninGramMatrix vasyuninMeanVec
-  simp only [Matrix.sub_apply, Matrix.of_apply, vecMulVec, Matrix.of_apply,
-             Fin.val_zero, Fin.val_one]
-  show vasyuninGramEntry 1 2 - vasyuninMeanEntry 1 * vasyuninMeanEntry 2 = _
-  rw [vasyuninGramEntry_one_two, vasyuninMeanEntry_one, vasyuninMeanEntry_two]
-  ring
-
-/-- Closed form for C(1,1) = G(2,2) - b₂². -/
-theorem covEntry_11 :
-    (vasyuninCovMatrix 3) 1 1 =
-    (Real.log (2 * Real.pi) - γ) / 2 - 1 / 4 -
-    ((Real.log 2 + 1 - γ) / 2) ^ 2 := by
-  unfold vasyuninCovMatrix vasyuninGramMatrix vasyuninMeanVec
-  simp only [Matrix.sub_apply, Matrix.of_apply, vecMulVec, Matrix.of_apply, Fin.val_one]
-  show vasyuninGramEntry 2 2 - vasyuninMeanEntry 2 * vasyuninMeanEntry 2 = _
-  rw [vasyuninGramEntry_two_two, vasyuninMeanEntry_two]
-  ring
-
-end Cathedral.Vasyunin
-
-
-================================================================
-FILE: Cathedral/Vasyunin/Matrix/Structural.lean
-================================================================
-
-/-
-  Cathedral/Vasyunin/Matrix/Structural.lean
-
-  Structural properties of the Vasyunin Gram matrix:
-  symmetry, decomposition, diagonal positivity, mean vector positivity.
--/
-
-import Cathedral.Vasyunin.Defs
-
-noncomputable section
-open Real Matrix Finset
-
-namespace Cathedral.Vasyunin
-
-/-- Euler-Mascheroni constant γ ≈ 0.5772 -/
-local notation "γ" => Real.eulerMascheroniConstant
-
--- ════════════════════════════════════════════════
--- PART VI: STRUCTURAL PROPERTIES
--- ════════════════════════════════════════════════
-
-/-- The Gram entry is symmetric: G(j,k) = G(k,j).
-    Proof sketch:
-    - j = k case: trivial (same branch)
-    - j ≠ k case: gcd(j,k) = gcd(k,j), so d, jp, kp swap correctly
-      term1: (1/j + 1/k) = (1/k + 1/j) by add_comm
-      term2: (j-k)/(2jk)·ln(k/j) = (k-j)/(2kj)·ln(j/k) by neg·neg
-      term3: V(j',k') + V(k',j') = V(k',j') + V(j',k') by add_comm
-      term4: 1/(jk) = 1/(kj) by mul_comm -/
-theorem vasyuninGramEntry_comm (j k : ℕ) :
-    vasyuninGramEntry j k = vasyuninGramEntry k j := by
-  unfold vasyuninGramEntry
-  by_cases hjk : j = k
-  · subst hjk; rfl
-  · have hkj : k ≠ j := Ne.symm hjk
-    simp only [hjk, hkj, ↓reduceIte, Nat.gcd_comm]
-    by_cases hj0 : (j : ℕ) = 0
-    · subst hj0; simp
-    · by_cases hk0 : (k : ℕ) = 0
-      · subst hk0; simp
-      · have hj : (↑j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hj0
-        have hk : (↑k : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hk0
-        rw [Real.log_div (Nat.cast_ne_zero.mpr hk0) (Nat.cast_ne_zero.mpr hj0),
-            Real.log_div (Nat.cast_ne_zero.mpr hj0) (Nat.cast_ne_zero.mpr hk0)]
-        ring
-
-/-- The Vasyunin Gram matrix is symmetric. -/
-theorem vasyuninGramMatrix_symmetric (N : ℕ) :
-    (vasyuninGramMatrix N).IsHermitian := by
-  unfold IsHermitian
-  funext i j
-  simp only [conjTranspose_apply, star_trivial, vasyuninGramMatrix, of_apply]
-  exact vasyuninGramEntry_comm (j.val + 1) (i.val + 1)
-
-/-- G = C + bbᵀ (decomposition for Sherman-Morrison). -/
-theorem vasyuninGram_eq_cov_plus_mean (N : ℕ) :
-    vasyuninGramMatrix N =
-    vasyuninCovMatrix N + vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N) := by
-  unfold vasyuninCovMatrix
-  simp [sub_add_cancel]
-
-/-- The mean outer product bbᵀ is positive semidefinite (rank-1 PSD).
-    Direct application of vecMulVec_self_posSemidef. -/
-theorem vasyuninMeanOuterProduct_posSemidef (N : ℕ) :
-    (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).PosSemidef :=
-  Cathedral.Variational.vecMulVec_self_posSemidef _
-
-/-- The mean outer product bbᵀ is Hermitian (symmetric). -/
-theorem vasyuninMeanOuterProduct_hermitian (N : ℕ) :
-    (vecMulVec (vasyuninMeanVec N) (vasyuninMeanVec N)).IsHermitian :=
-  Cathedral.Variational.vecMulVec_self_hermitian _
-
--- ════════════════════════════════════════════════
--- PART VI-B: MEAN VECTOR POSITIVITY
--- ════════════════════════════════════════════════
-
-/-- The mean entry b_k is strictly positive for all k ≥ 1.
-    b_k = (ln(k) + 1 - γ) / k > 0 since:
-    - ln(k) ≥ 0 for k ≥ 1
-    - 1 - γ > 1 - 2/3 = 1/3 > 0
-    - k > 0 -/
-theorem vasyuninMeanEntry_pos (k : ℕ) (hk : k ≥ 1) :
-    vasyuninMeanEntry k > 0 := by
-  unfold vasyuninMeanEntry
-  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
-  apply div_pos _ hk_pos
-  have h_gamma : Real.eulerMascheroniConstant < 2 / 3 :=
-    Real.eulerMascheroniConstant_lt_two_thirds
-  have h_log_nn : Real.log (k : ℝ) ≥ 0 := Real.log_nonneg (by exact_mod_cast hk)
-  linarith
-
-/-- All entries of the mean vector are positive for N ≥ 1. -/
-theorem vasyuninMeanVec_pos (N : ℕ) (_hN : N ≥ 1) (i : Fin N) :
-    vasyuninMeanVec N i > 0 := by
-  unfold vasyuninMeanVec
-  exact vasyuninMeanEntry_pos (i.val + 1) (by omega)
-
--- ════════════════════════════════════════════════
--- PART VI-C: GRAM DIAGONAL POSITIVITY
--- ════════════════════════════════════════════════
-
-/-- Key constant bound: ln(2π) - γ > 1.
-    Proof chain: ln(2π) = ln(2) + ln(π) > 0.693 + 1 = 1.693,
-    and γ < 2/3 = 0.667, so ln(2π) - γ > 1.026 > 1. -/
-theorem log_two_pi_sub_euler_gt_one :
-    Real.log (2 * Real.pi) - Real.eulerMascheroniConstant > 1 := by
-  have h_log2 : (0.6931471803 : ℝ) < Real.log 2 := Real.log_two_gt_d9
-  have h_e_lt_3 : Real.exp 1 < 3 := Real.exp_one_lt_three
-  have h_pi_gt : (3 : ℝ) < Real.pi := pi_gt_three
-  have h_gamma : Real.eulerMascheroniConstant < 2 / 3 :=
-    Real.eulerMascheroniConstant_lt_two_thirds
-  have h_log3 : 1 < Real.log 3 := by
-    rw [show (1 : ℝ) = Real.log (Real.exp 1) from (Real.log_exp 1).symm]
-    exact Real.log_lt_log (Real.exp_pos 1) h_e_lt_3
-  have h_logpi : 1 < Real.log Real.pi := by
-    calc 1 < Real.log 3 := h_log3
-         _ < Real.log Real.pi := by
-           exact Real.log_lt_log (by norm_num : (0 : ℝ) < 3) h_pi_gt
-  have h_log2pi : Real.log (2 * Real.pi) = Real.log 2 + Real.log Real.pi := by
-    rw [Real.log_mul (by norm_num : (2 : ℝ) ≠ 0) (ne_of_gt Real.pi_pos)]
-  rw [h_log2pi]
-  linarith
-
-/-- **Gram Diagonal Positivity**: G(k,k) > 0 for all k ≥ 1. -/
-theorem vasyuninGramEntry_diag_pos (k : ℕ) (hk : k ≥ 1) :
-    vasyuninGramEntry k k > 0 := by
-  unfold vasyuninGramEntry
-  simp only [ite_true]
-  have hk_pos : (k : ℝ) > 0 := Nat.cast_pos.mpr (by omega)
-  have hk_ne : (k : ℝ) ≠ 0 := ne_of_gt hk_pos
-  have hk_sq_pos : (k : ℝ) ^ 2 > 0 := pow_pos hk_pos 2
-  have h_const := log_two_pi_sub_euler_gt_one
-  rw [show (log (2 * Real.pi) - γ) / (k : ℝ) -
-      1 / (k : ℝ) ^ 2 =
-      ((log (2 * Real.pi) - γ) * k - 1) /
-      (k : ℝ) ^ 2 by field_simp]
-  apply div_pos _ hk_sq_pos
-  have hk1 : (1 : ℝ) ≤ (k : ℝ) := by exact_mod_cast hk
-  nlinarith [mul_le_mul_of_nonneg_left hk1 (by linarith : (0 : ℝ) ≤ log (2 * Real.pi) - γ)]
-
-/-- Every diagonal entry of the Gram matrix is strictly positive. -/
-theorem vasyuninGramMatrix_diag_pos (N : ℕ) (i : Fin N) :
-    vasyuninGramMatrix N i i > 0 := by
-  unfold vasyuninGramMatrix
-  simp only [of_apply]
-  exact vasyuninGramEntry_diag_pos (i.val + 1) (by omega)
-
--- NOTE: The Gram diagonal G(k,k) = A/k - 1/k² is NOT monotone for all k.
--- In fact G(1,1) = A - 1 ≈ 0.026 < G(2,2) = A/2 - 1/4 ≈ 0.263.
--- The function f(x) = A/x - 1/x² has f'(x) = (-Ax+2)/x³, so it
--- INCREASES for x < 2/A ≈ 1.95 and decreases for x > 2/A.
--- Maximum is at x = 2/A, between k=1 and k=2.
-
-end Cathedral.Vasyunin
 
 
 ================================================================
