@@ -88,15 +88,37 @@ M(N)/√N          =  0.085            ✓
 
 ### 1.4 The Convergence Landscape
 
-Combining cathedral-rl (optimal) with microscope (log-cutoff witness):
+Cross-referencing cathedral-rl (CG optimal d² = infimum over all v) with microscope (log-cutoff Möbius witness d², vtCv) across the full HCN ladder:
 
-| N | Optimal d² | Log-cutoff d² | Gap | vtCv (log-cutoff) | vtCv·ln(N) |
-|------:|--------:|--------:|------:|--------:|--------:|
-| 120 | 0.0429 | 0.0665 | 0.0236 | — | — |
-| 5,040 | 0.0409 | 0.1241 | 0.0832 | — | — |
-| 55,440 | 0.0400 | 0.2815 | 0.2415 | 0.2041 | 2.23 |
+| N | Opt d² | d²opt·lnN | Log d² | vtCv | vtCv·lnN | Gap | vᵀGv |
+|------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
+| 120 | 0.04288 | 0.205 | 0.1613 | 0.1524 | 0.730 | 0.118 | 1.349 |
+| 180 | 0.04261 | 0.221 | — | — | — | — | — |
+| 240 | 0.04222 | 0.231 | — | — | — | — | — |
+| 360 | 0.04202 | 0.247 | 0.2621 | 0.2382 | 1.402 | 0.220 | 1.572 |
+| 720 | 0.04154 | 0.273 | 0.3796 | 0.3460 | 2.276 | 0.338 | 1.746 |
+| 840 | 0.04152 | 0.280 | 0.3246 | 0.2890 | 1.946 | 0.283 | 1.702 |
+| 1,260 | 0.04137 | 0.295 | 0.3917 | 0.3508 | 2.504 | 0.350 | 1.796 |
+| 1,680 | 0.04131 | 0.307 | 0.4337 | 0.3895 | 2.893 | 0.392 | 1.854 |
+| 2,520 | 0.04118 | 0.323 | 0.4097 | 0.3607 | 2.825 | 0.369 | 1.852 |
+| 5,040 | 0.04089 | 0.349 | 0.3052 | 0.2487 | 2.120 | 0.264 | 1.781 |
+| 7,560 | — | — | 0.4977 | 0.4370 | 3.903 | — | 1.990 |
+| 10,000 | — | — | 0.6382 | 0.5749 | 5.295 | — | 2.141 |
+| 20,000 | — | — | 0.5265 | 0.4570 | 4.526 | — | 2.054 |
+| 40,000 | — | — | 0.4686 | 0.3936 | 4.171 | — | 2.017 |
+| **55,440** | — | — | **0.2815** | **0.2041** | **2.229** | — | **1.838** |
 
-The gap between optimal and log-cutoff grows — the log-cutoff witness is increasingly sub-optimal at large N. But vtCv·ln(N) = 2.23 is **bounded**, confirming `witness_covariance_decay` empirically.
+**Key observations:**
+
+1. **Optimal d² decays monotonically** (0.0429 → 0.0409) with d²opt·lnN growing slowly (0.205 → 0.349). The Báez-Duarte constant C_BD ≈ 0.44.
+
+2. **Log-cutoff d² oscillates wildly** (0.16 → 0.64 → 0.28) because it's NOT the optimal witness — it's a specific arithmetically-defined vector that happens to be analyzable.
+
+3. **vtCv·lnN oscillates but stays bounded** (0.73 → 5.30 → 2.23). This is `witness_covariance_decay` in action. The oscillation tracks the HCN factorization structure: N=10,000 (not HCN, high vtCv) vs N=55,440 (HCN with 120 divisors, low vtCv).
+
+4. **The gap between optimal and log-cutoff grows**: at N=120 the gap is 0.12, at N=5040 it's 0.26. The log-cutoff witness becomes increasingly sub-optimal, but it's the one we can *analyze* because its weights have explicit arithmetic form.
+
+5. **vᵀGv oscillates around ~1.8**: NOT converging to 1. This is crucial — the log-cutoff witness does NOT satisfy vᵀGv → 1. Only the OPTIMAL witness (CG solution v* = G⁻¹b) gives optimal vᵀGv ≈ 0.959 → 1.
 
 ---
 
