@@ -158,9 +158,20 @@ theorem fourierCoeffOn_sawtooth_zero :
 /-- The sawtooth is square-integrable on (0,1]. -/
 theorem sawtooth_memLp :
     MeasureTheory.MemLp sawtoothFn 2 (MeasureTheory.volume.restrict (Set.Ioc 0 1)) := by
-  -- B₁ is bounded by 1/2, hence in L² on the finite measure space (0,1].
-  -- Standard: bounded + finite measure → L² (Mathlib: MemLp.of_bound or memLp_top.mono)
-  sorry -- Measurability + bounded argument
+  -- volume.restrict (Ioc 0 1) is a finite measure
+  haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (0:ℝ) 1)) := by
+    constructor
+    simp
+  -- sawtoothFn is AEStronglyMeasurable (it's measurable + separable range)
+  have h_aesm : AEStronglyMeasurable sawtoothFn (volume.restrict (Set.Ioc (0:ℝ) 1)) := by
+    rw [show sawtoothFn = fun x => ((sawtoothReal x : ℝ) : ℂ) from funext sawtoothFn_eq_ofReal]
+    exact (Complex.continuous_ofReal.measurable.comp sawtoothReal_measurable).aestronglyMeasurable
+  have h_bound : ∀ᵐ x ∂(volume.restrict (Set.Ioc (0:ℝ) 1)), ‖sawtoothFn x‖ ≤ 1/2 := by
+    apply Filter.Eventually.of_forall
+    intro x
+    rw [sawtoothFn_eq_ofReal, Complex.norm_real]
+    exact sawtoothReal_bound x
+  exact MemLp.of_bound h_aesm (1/2) h_bound
 
 /-- **Parseval's identity for the sawtooth**: The sum of |ĉₙ|² equals ∫₀¹|B₁|² = 1/12.
 
