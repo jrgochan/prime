@@ -178,8 +178,51 @@ theorem fourierCoeffOn_sawtooth (n : ℤ) (hn : n ≠ 0) :
 /-- The zeroth Fourier coefficient of B₁ vanishes (B₁ has mean zero). -/
 theorem fourierCoeffOn_sawtooth_zero :
     fourierCoeffOn zero_lt_one' sawtoothFn 0 = 0 := by
-  -- ĉ₀ = ∫₀¹ ({x}-1/2) dx = ∫₀¹ (x-1/2) dx = [x²/2 - x/2]₀¹ = 0
-  sorry -- Direct integral computation
+  -- Unfold fourierCoeffOn to an integral
+  rw [fourierCoeffOn_eq_integral]
+  -- fourier (-0) = fourier 0 = 1, so the integrand is just sawtoothFn
+  simp only [neg_zero, fourier_zero, one_smul]
+  -- (1/(1-0)) • ∫₀¹ sawtoothFn x = ∫₀¹ sawtoothFn x (since 1/(1-0) = 1)
+  simp only [sub_zero, one_div, inv_one, one_smul]
+  -- Now need: ∫₀¹ sawtoothFn x = 0, i.e., ∫₀¹ ({x}-1/2) dx = 0
+  -- First, replace sawtoothFn with ofReal(x-1/2) via ae congr
+  rw [show (0:ℝ) = (0:ℝ) from rfl, show (1:ℝ) = (1:ℝ) from rfl]
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- ae congr: sawtoothFn = ofReal(x-1/2) on (0,1]
+  have h_congr : (fun x => sawtoothFn x) =ᵐ[volume.restrict (Set.Ioc (0:ℝ) 1)]
+      (fun x => ((x - 1/2 : ℝ) : ℂ)) := by
+    -- The functions agree pointwise on (0,1) (open interval)
+    have h_ioo : ∀ x ∈ Set.Ioo (0:ℝ) 1,
+        sawtoothFn x = ((x - 1/2 : ℝ) : ℂ) := by
+      intro x ⟨hx0, hx1⟩
+      rw [sawtoothFn_eq_ofReal]; congr 1; unfold sawtoothReal
+      rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]
+    -- Ioo =ᵐ Ioc for NoAtoms measures, so restrict Ioc = restrict Ioo
+    have hset : Set.Ioc (0:ℝ) 1 =ᵐ[volume] Set.Ioo (0:ℝ) 1 :=
+      Ioo_ae_eq_Ioc.symm
+    have hrestr := Measure.restrict_congr_set hset
+    -- Rewrite the measure in the goal from restrict Ioc to restrict Ioo
+    show (fun x => sawtoothFn x) =ᵐ[volume.restrict (Set.Ioc (0:ℝ) 1)]
+      (fun x => ((x - 1/2 : ℝ) : ℂ))
+    rw [hrestr]
+    exact (ae_restrict_mem measurableSet_Ioo).mono (fun x hx => h_ioo x hx)
+  rw [MeasureTheory.integral_congr_ae h_congr]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- FTC: ∫₀¹ (x-1/2) dx with antiderivative F(x) = x²/2 - x/2
+  have hF : ∀ x ∈ Set.uIcc (0:ℝ) 1,
+      HasDerivAt (fun x => ((x ^ 2 / 2 - x / 2 : ℝ) : ℂ))
+        ((x - 1/2 : ℝ) : ℂ) x := by
+    intro x _
+    have := ((hasDerivAt_pow 2 x).div_const (2:ℝ)).sub
+      ((hasDerivAt_id x).div_const (2:ℝ))
+    apply HasDerivAt.ofReal_comp
+    convert this using 1; ring
+  have hint : IntervalIntegrable (fun x => ((x - 1/2 : ℝ) : ℂ)) volume (0:ℝ) 1 := by
+    apply ContinuousOn.intervalIntegrable
+    exact (Complex.continuous_ofReal.comp (continuous_id.sub continuous_const)).continuousOn
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
+  -- F(1) - F(0) = (1/2 - 1/2) - (0) = 0
+  push_cast; norm_num
 
 -- ════════════════════════════════════════════════
 -- §4. PARSEVAL IDENTITY FOR THE SAWTOOTH
