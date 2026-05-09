@@ -139,17 +139,52 @@ theorem mertens_exp_bound_from_pnt :
 private def S₁_pnt (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
 
-/-- **S₁ decay from exponential Mertens bound**.
+/-- **Abel difference bound**: |S₁(M) - S₁(N)| with exponential Mertens.
 
-    By discrete Abel summation:
-      S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k) · (1/k - 1/(k+1))
+    For M ≥ N+1, Abel summation on [N+1, M] gives:
+      |S₁(M) - S₁(N)| ≤ 2·C_M·E(N) + C_M·E(N)·log(M/N)
 
-    With |M(k)| ≤ C·k·E(k) where E(k) = exp(-c·(logk)^{1/10}):
-      |M(N)/N| ≤ C·E(N)
-      |M(k)·(1/k - 1/(k+1))| = |M(k)|/(k(k+1)) ≤ C·E(k)/(k+1)
+    where E(N) = exp(-c·(logN)^{1/10}).
+    The bound uses |M(k)| ≤ C_M·k·E(k) and E(k) ≤ E(N) for k ≥ N. -/
+private lemma abel_s1_diff_exp
+    (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤
+        C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10)))
+    (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) :
+    |S₁_pnt M - S₁_pnt N| ≤
+      C_M * (2 + Real.log ↑M - Real.log ↑N) *
+        Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+  sorry
 
-    The sum Σ C·E(k)/(k+1) converges (exponential dominates),
-    and the tail from k=N is O(E(N)). -/
+/-- **Log-times-exp domination**: (2 + log M) · exp(-c·(logN)^{1/10})
+    is bounded by C·exp(-c/2·(logN)^{1/10}) when log M ≤ exp(c/2·(logN)^{1/10}).
+
+    This holds because (2+t)·exp(-c·u) ≤ exp(-c/2·u) when 2+t ≤ exp(c/2·u). -/
+private lemma log_times_exp_bound (c : ℝ) (hc : 0 < c) :
+    ∃ C₀ : ℝ, C₀ > 0 ∧ ∀ N : ℕ, 3 ≤ N → ∀ a : ℝ, 0 ≤ a →
+      (2 + a) * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) ≤
+        C₀ * (1 + a) * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+  -- exp(-c·u) = exp(-c/2·u) · exp(-c/2·u)
+  -- So (2+a)·exp(-c·u) = (2+a)·exp(-c/2·u)·exp(-c/2·u)
+  -- ≤ (2+a)·exp(-c/2·u) for the last factor ≤ 1
+  -- Actually simpler: exp(-c·u) ≤ exp(-c/2·u) since -c·u ≤ -c/2·u for u ≥ 0
+  refine ⟨2, by norm_num, fun N hN a ha => ?_⟩
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hrpow_nn : 0 ≤ (Real.log ↑N) ^ ((1:ℝ)/10) := Real.rpow_nonneg hlogN_pos.le _
+  have h_exp_mono : Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) ≤
+      Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) :=
+    Real.exp_le_exp_of_le (by nlinarith)
+  calc (2 + a) * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10))
+      ≤ (2 + a) * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) :=
+        mul_le_mul_of_nonneg_left h_exp_mono (by linarith)
+    _ ≤ 2 * (1 + a) * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+        gcongr; linarith
+
+/-- **S₁ decay from exponential Mertens bound** (sorry #4).
+
+    Assembly: PNT (S₁ → 0) + Abel difference + domination. -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -157,21 +192,18 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- Strategy: Use qualitative PNT (S₁ → 0) + triangle inequality.
-  -- From PNTAnd: mu_pnt_alt gives S₁(M) → 0.
-  -- From Mertens bound: |S₁(M) - S₁(N)| is controlled.
-  -- Together: |S₁(N)| is bounded by an exponential.
-  --
-  -- More precisely: for any ε > 0, choose M large with |S₁(M)| < ε.
-  -- Then |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)|.
-  -- The difference |S₁(M) - S₁(N)| = |Σ_{k=N+1}^M μ(k)/k|
-  -- is bounded by Abel summation using the Mertens bound.
-  --
-  -- The Abel bound gives:
-  --   |S₁(M) - S₁(N)| ≤ C_M · E(N) · (1 + loglog term)
-  -- where E(N) = exp(-c·(logN)^{1/10}).
-  -- Since exp(-c·(logN)^{1/10}) ≤ exp(-c/2·(logN)^{1/10}) for all N ≥ 1
-  -- (the exponent is just more negative), we get the bound.
+  -- Step 1: From PNTAnd, S₁ → 0
+  have hPNT : Tendsto S₁_pnt atTop (nhds 0) := by
+    -- S₁_pnt is the same as the sum in pnt_moebius_sum_div_tendsto
+    exact pnt_moebius_sum_div_tendsto
+  -- Step 2: For any ε > 0, choose M₀ with |S₁(M)| < ε for M ≥ M₀
+  -- Step 3: Triangle inequality + Abel bound + domination
+  -- |S₁(N)| ≤ |S₁(M)| + |Abel diff|
+  --        ≤ ε + C_M·(2 + log(M/N))·E(N)
+  -- Choose ε = E'(N) = exp(-c/2·(logN)^{1/10})
+  -- Then need C_M·(2 + log(M/N))·E(N) ≤ C''·E'(N)
+  -- This holds since E(N)/E'(N) = exp(-c/2·(logN)^{1/10}) → 0
+  -- and the log(M/N) factor is absorbed by this decay
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
