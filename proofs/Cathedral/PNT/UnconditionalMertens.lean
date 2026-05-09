@@ -182,9 +182,35 @@ private lemma log_times_exp_bound (c : ℝ) (hc : 0 < c) :
     _ ≤ 2 * (1 + a) * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
         gcongr; linarith
 
+/-- **Tail sum bound**: The tail Σ_{k≥N} |M(k)|/(k(k+1)) ≤ C·exp(-c/2·(logN)^{1/10}).
+
+    The sum converges absolutely since |M(k)|/(k(k+1)) ≤ C·E(k)/(k+1)
+    and E(k) = exp(-c·(logk)^{1/10}) decays faster than 1/k^ε for any ε.
+    The tail bound follows from integral comparison:
+      Σ_{k≥N} E(k)/(k+1) ≈ ∫_{logN}^∞ exp(-c·u^{1/10}) du
+                            ≤ C'·exp(-c/2·(logN)^{1/10})  -/
+private lemma mertens_tail_bound
+    (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤
+        C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
+    ∃ C_T : ℝ, C_T > 0 ∧ ∀ N : ℕ, 3 ≤ N →
+      ∀ M : ℕ, N ≤ M →
+        (Finset.Icc N M).sum (fun k =>
+          |((mertensFunction ↑k : ℤ) : ℝ)| / ((k : ℝ) * ((k : ℝ) + 1))) ≤
+            C_T * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+  sorry
+
 /-- **S₁ decay from exponential Mertens bound** (sorry #4).
 
-    Assembly: PNT (S₁ → 0) + Abel difference + domination. -/
+    **Proof strategy (Abel identity + tail bound)**:
+
+    1. Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+    2. From PNT (mu_pnt_alt): S₁ → 0, so the full sum = -lim M(N)/N = 0
+    3. Therefore: S₁(N) = M(N)/N - Σ_{k=N}^∞ M(k)/(k(k+1))
+    4. |M(N)/N| ≤ C_M · E(N) (from Mertens bound)
+    5. |tail| ≤ C_T · exp(-c/2·(logN)^{1/10}) (from mertens_tail_bound)
+    6. Total: |S₁(N)| ≤ (C_M + C_T) · exp(-c/2·(logN)^{1/10}) -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -192,18 +218,19 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- Step 1: From PNTAnd, S₁ → 0
-  have hPNT : Tendsto S₁_pnt atTop (nhds 0) := by
-    -- S₁_pnt is the same as the sum in pnt_moebius_sum_div_tendsto
-    exact pnt_moebius_sum_div_tendsto
-  -- Step 2: For any ε > 0, choose M₀ with |S₁(M)| < ε for M ≥ M₀
-  -- Step 3: Triangle inequality + Abel bound + domination
-  -- |S₁(N)| ≤ |S₁(M)| + |Abel diff|
-  --        ≤ ε + C_M·(2 + log(M/N))·E(N)
-  -- Choose ε = E'(N) = exp(-c/2·(logN)^{1/10})
-  -- Then need C_M·(2 + log(M/N))·E(N) ≤ C''·E'(N)
-  -- This holds since E(N)/E'(N) = exp(-c/2·(logN)^{1/10}) → 0
-  -- and the log(M/N) factor is absorbed by this decay
+  -- Get the tail bound constant
+  obtain ⟨C_T, hCT_pos, hTail⟩ := mertens_tail_bound c C_M hc hC hMertens
+  -- The Mertens bound gives |M(N)/N| ≤ C_M · E(N) ≤ C_M · E'(N)
+  -- The tail gives ≤ C_T · E'(N)
+  -- So C' = C_M + C_T + 1 works
+  refine ⟨C_M + C_T + 1, by linarith, fun N hN => ?_⟩
+  -- For the bound, we use:
+  -- |S₁(N)| = |M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))| (Abel identity)
+  -- The full series converges to 0 (from PNT), so:
+  -- |S₁(N)| = |M(N)/N - tail(N)|
+  -- ≤ |M(N)/N| + |tail(N)|
+  -- ≤ C_M·E(N) + C_T·E'(N)
+  -- ≤ (C_M + C_T)·E'(N) since E(N) ≤ E'(N)
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
@@ -273,18 +300,21 @@ theorem unconditional_mean_bound :
 |---|-------|--------|:---:|
 | 1 | `exp_decay_times_t_tendsto_zero` | t·exp(-c·t^{1/10}) → 0 | ✅ PROVED |
 | 2 | `exp_decay_le_const_div_log` | exp(...) ≤ B/logN | ✅ PROVED |
+| — | `log_times_exp_bound` | (2+a)·E(N) ≤ 2(1+a)·E'(N) | ✅ PROVED |
 | 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | ❌ sorry |
-| 4 | `s1_exp_decay` | Abel summation with exp bound | ❌ sorry |
+| 4a | `abel_s1_diff_exp` | Abel difference bound | ❌ sorry |
+| 4b | `mertens_tail_bound` | Tail sum ≤ C·E'(N) | ❌ sorry |
+| 4c | `s1_exp_decay` | Assembly: M(N)/N + tail | ❌ sorry |
 
-**Total: 2 sorrys remaining, ~320 lines to close.**
+**Total: 4 sorrys remaining.**
 
 All are UNCONDITIONAL real analysis — no RH anywhere.
 #3 is classical ANT (Titchmarsh Ch. 12).
-#4 is discrete Abel summation (template in S1Decay.lean).
+#4a-c are discrete Abel summation + tail estimation.
 
 The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
-`s1_le_const_div_log`, and `unconditional_mean_bound` are all
-PROVED with zero sorry.
+`log_times_exp_bound`, `s1_le_const_div_log`, and
+`unconditional_mean_bound` are all PROVED with zero sorry.
 -/
 
 #check MediumPNT
