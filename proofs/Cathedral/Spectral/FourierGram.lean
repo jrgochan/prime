@@ -166,40 +166,31 @@ private lemma zero_lt_one' : (0 : ℝ) < 1 := by norm_num
 theorem fourierCoeffOn_sawtooth (n : ℤ) (hn : n ≠ 0) :
     fourierCoeffOn zero_lt_one' sawtoothFn n =
       -1 / (2 * ↑Real.pi * Complex.I * ↑n) := by
-  -- Step 1: Transfer from sawtoothFn to g(x) = ofReal(x-1/2) by ae congr
-  -- fourierCoeffOn depends only on the ae-equivalence class on (0,1]
+  -- Step 1: Define g(x) = ofReal(x) - 1/2, which is smooth and agrees with
+  -- sawtoothFn a.e. on (0,1]
   set g : ℝ → ℂ := fun x => ((x : ℝ) : ℂ) - 1/2 with hg_def
-  -- g is smooth, agrees with sawtoothFn ae on (0,1]
-  have h_ae : sawtoothFn =ᵐ[volume.restrict (Set.Ioc (0:ℝ) 1)] g := by
-    have hset : Set.Ioc (0:ℝ) 1 =ᵐ[volume] Set.Ioo (0:ℝ) 1 :=
-      Ioo_ae_eq_Ioc.symm
-    rw [Measure.restrict_congr_set hset]
-    apply (ae_restrict_mem measurableSet_Ioo).mono
-    intro x ⟨hx0, hx1⟩
-    show sawtoothFn x = ((x : ℝ) : ℂ) - 1/2
-    rw [sawtoothFn_eq_ofReal]
-    unfold sawtoothReal
-    rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]
-    push_cast; ring
-  -- Step 2: fourierCoeffOn agrees for ae-equal functions
-  -- (fourierCoeffOn is defined via an integral, which respects ae equality)
+  -- Step 2: Show fourierCoeffOn sawtoothFn = fourierCoeffOn g
+  -- Both are defined by the same integral (up to ae-null set {1})
   have h_coeff_eq : fourierCoeffOn zero_lt_one' sawtoothFn n =
       fourierCoeffOn zero_lt_one' g n := by
     simp only [fourierCoeffOn_eq_integral]
     congr 1
-    apply intervalIntegral.integral_congr_ae
+    -- The integrands agree ae on (0,1) ⊂ (0,1] (Ioo vs Ioc)
+    rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1),
+        intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+    apply MeasureTheory.integral_congr_ae
+    -- Transfer Ioc → Ioo via ae set equality
     have hset : Set.Ioc (0:ℝ) 1 =ᵐ[volume] Set.Ioo (0:ℝ) 1 :=
       Ioo_ae_eq_Ioc.symm
-    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1), Measure.restrict_congr_set hset]
-    apply (ae_restrict_mem measurableSet_Ioo).mono
-    intro x ⟨hx0, hx1⟩
-    show fourier (-n) (↑x) • sawtoothFn x = fourier (-n) (↑x) • g x
-    congr 1
-    rw [sawtoothFn_eq_ofReal]; unfold sawtoothReal
-    rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]; push_cast; ring
+    rw [Measure.restrict_congr_set hset]
+    exact (ae_restrict_mem measurableSet_Ioo).mono fun x ⟨hx0, hx1⟩ => by
+      show fourier (-n) (↑x) • sawtoothFn x = fourier (-n) (↑x) • g x
+      congr 1
+      rw [sawtoothFn_eq_ofReal]; unfold sawtoothReal
+      rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]; push_cast; ring
   rw [h_coeff_eq]
-  -- Step 3: Apply fourierCoeffOn_of_hasDerivAt to g
-  -- g(x) = x - 1/2, g'(x) = 1
+  -- Step 3: Apply integration by parts (Mathlib) to g
+  -- g(x) = ofReal(x) - 1/2, g'(x) = 1
   have h_ibp := fourierCoeffOn_of_hasDerivAt zero_lt_one' hn
     (f := g) (f' := fun _ => 1)
     (fun x _ => by
@@ -208,12 +199,39 @@ theorem fourierCoeffOn_sawtooth (n : ℤ) (hn : n ≠ 0) :
       simp)
     (by exact intervalIntegrable_const)
   rw [h_ibp]
-  -- Step 4: Simplify the result
-  -- g(1) - g(0) = (1-1/2) - (0-1/2) = 1
-  -- fourierCoeffOn (const 1) n = 0 for n ≠ 0
-  -- fourier(-n)(0 : AddCircle 1) = 1
-  -- So: 1/(-2πin) * (1 * 1 - 1 * 0) = -1/(2πin)
-  sorry -- Algebraic simplification of IBP formula
+  -- Step 4: Simplify the IBP result
+  -- Need: 1/(-2πin) * (fourier(-n)(0 : AC 1) * (g 1 - g 0) - 1 * fourierCoeffOn (const 1) n)
+  -- = -1/(2πin)
+  -- Ingredients:
+  --   g 1 - g 0 = (1-1/2) - (0-1/2) = 1
+  --   fourier(-n)(0 : AddCircle 1) = 1  (exp(0) = 1)
+  --   fourierCoeffOn zero_lt_one' (const 1) n = 0  (for n ≠ 0)
+  simp only [hg_def]
+  -- g(1) - g(0) = 1
+  have hg10 : (((1 : ℝ) : ℂ) - 1/2) - (((0 : ℝ) : ℂ) - 1/2) = 1 := by push_cast; ring
+  rw [hg10]
+  -- ↑1 - ↑0 = 1 (as ℂ coercions from ℝ)
+  have h10 : ((1:ℝ) : ℂ) - ((0:ℝ) : ℂ) = 1 := by push_cast; ring
+  rw [h10, one_mul]
+  -- fourierCoeffOn (const 1) n = 0 for n ≠ 0 (Fourier orthogonality)
+  have hconst : fourierCoeffOn zero_lt_one' (fun _ => (1 : ℂ)) n = 0 := by
+    -- Apply IBP to f(x) = 1, f'(x) = 0
+    have h_ibp' := fourierCoeffOn_of_hasDerivAt zero_lt_one' hn
+      (f := fun _ => (1 : ℂ)) (f' := fun _ => 0)
+      (fun x _ => by simp [hasDerivAt_const])
+      (by exact intervalIntegrable_const)
+    -- f(1) - f(0) = 0, so the formula gives: ĉₙ(1) = 1/(-2πin) * (fourier(-n)(0) * 0 - 1 * ĉₙ(0)) = 0
+    rw [h_ibp']
+    simp [sub_self, mul_zero, fourierCoeffOn_eq_integral]
+  rw [hconst, sub_zero]
+  -- Now: 1/(-2πin) * (fourier(-n)(↑0) * 1) = -1/(2πin)
+  -- fourier(-n)(↑0) = exp(2πi(-n)*0/1) = exp(0) = 1
+  simp only [mul_one]
+  have hfour : (fourier (-n)) ((0 : ℝ) : AddCircle (1 - (0:ℝ))) = 1 := by
+    simp [sub_zero, fourier_apply, Complex.exp_zero]
+  rw [hfour, mul_one]
+  -- 1/(-2πin) = -1/(2πin)
+  ring
 
 /-- The zeroth Fourier coefficient of B₁ vanishes (B₁ has mean zero). -/
 theorem fourierCoeffOn_sawtooth_zero :
