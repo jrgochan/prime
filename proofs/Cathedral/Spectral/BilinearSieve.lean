@@ -29,6 +29,7 @@
 -/
 
 import Cathedral.Spectral.FourierGram
+import Cathedral.Gram.FractIntegral
 
 set_option maxHeartbeats 800000
 
@@ -108,22 +109,37 @@ theorem bilinear_b1_decomposition (N : ℕ) (v : Fin (N - 1) → ℝ) :
           apply Finset.sum_le_sum; intro j _
           apply mul_le_mul_of_nonneg_left (FourierGram.sawtoothReal_bound _) (abs_nonneg _)
       _ = M_bound := by simp [M_bound, Finset.mul_sum, mul_comm]
-  -- Integrability lemmas: S(x) = Σ vⱼ·B₁(1/(jx)) is bounded by
-  -- M_bound = (1/2)·Σ|vⱼ| on all of ℝ (since |B₁| ≤ 1/2).
-  -- Therefore S² ≤ M_bound² and |c·S| ≤ |c|·M_bound are also bounded.
-  -- Bounded measurable functions on finite intervals are integrable.
-  -- TODO: Graduate via IntervalIntegrable.mono_fun' with hS_bound
+  -- Measurability of S(x) via measurable_fract_real (from Cathedral.Gram.FractIntegral)
+  have hsaw_meas : ∀ (c : ℝ), Measurable (fun x : ℝ => Int.fract (1 / (c * x))) :=
+    fun c => measurable_fract_real.comp (measurable_const.div (measurable_const.mul measurable_id))
+  have hS_meas : Measurable (fun x : ℝ =>
+      ∑ j : Fin (N - 1),
+        v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) := by
+    apply Finset.measurable_sum; intro j _
+    simp only [FourierGram.sawtoothReal]
+    exact ((hsaw_meas _).sub measurable_const).const_mul _
+  -- S² is integrable: IntegrableOn.of_bound with bound M_bound²
   have hS2 : IntervalIntegrable (fun x =>
       (∑ j : Fin (N - 1),
         v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2)
-      MeasureTheory.volume 0 1 := by
-    sorry -- S² bounded by M_bound² (see hS_bound)
+      MeasureTheory.volume 0 1 :=
+    (IntegrableOn.of_bound (by simp)
+      (hS_meas.pow_const 2).aestronglyMeasurable.restrict (M_bound ^ 2)
+      (ae_of_all _ (fun x => by
+        rw [Real.norm_eq_abs, abs_pow]
+        exact pow_le_pow_left₀ (abs_nonneg _) (hS_bound x) 2))).intervalIntegrable
+  -- c·S is integrable: IntegrableOn.of_bound with bound |c|·M_bound
   have hcS : IntervalIntegrable (fun x =>
       2 * (1 / 2 * ∑ j : Fin (N - 1), v j) *
         (∑ j : Fin (N - 1),
           v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))))
-      MeasureTheory.volume 0 1 := by
-    sorry -- const * S bounded by |const| * M_bound (see hS_bound)
+      MeasureTheory.volume 0 1 :=
+    (IntegrableOn.of_bound (by simp)
+      (hS_meas.const_mul _).aestronglyMeasurable.restrict
+      (|2 * (1 / 2 * ∑ j : Fin (N - 1), v j)| * M_bound)
+      (ae_of_all _ (fun x => by
+        rw [Real.norm_eq_abs, abs_mul]
+        exact mul_le_mul_of_nonneg_left (hS_bound x) (abs_nonneg _)))).intervalIntegrable
   -- Step 5: Split the integral (following BDMellin line 488-490)
   rw [intervalIntegral.integral_add (hS2.add hcS) intervalIntegrable_const,
       intervalIntegral.integral_add hS2 hcS,
