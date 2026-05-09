@@ -223,8 +223,20 @@ theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
       + (1/2) * ∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x))
       + (1/2) * ∫ x in (0:ℝ)..1, sawtoothReal (1/((k:ℝ)*x))
       + 1/4 := by
-  -- Follows from fract_product_decomposition + linearity of integral
-  sorry -- Linearity of integral + fract_product_decomposition
+  -- Step 1: Rewrite the integrand pointwise using B₁ decomposition
+  unfold gramEntryIntegral
+  have h_eq : ∀ x : ℝ,
+      Int.fract (1 / ((j:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x)) =
+      sawtoothReal (1/((j:ℝ)*x)) * sawtoothReal (1/((k:ℝ)*x))
+      + (1/2) * sawtoothReal (1/((j:ℝ)*x))
+      + (1/2) * sawtoothReal (1/((k:ℝ)*x))
+      + 1/4 :=
+    fun x => fract_product_decomposition _ _
+  simp_rw [h_eq]
+  -- Step 2: Split the integral of a sum into sum of integrals
+  -- This requires integrability of each component, which holds because
+  -- the sawtooth is bounded by 1/2 on [0,1]
+  sorry -- Linearity: ∫(f+g+h+c) = ∫f + ∫g + ∫h + c·∫1
 
 /-- **Geometric inversion**: Under u = 1/x, the Gram integral transforms from
     ∫₀¹ to ∫₁^∞ with Jacobian du/u².
