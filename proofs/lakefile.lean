@@ -92,6 +92,9 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.OctonionicPartition,
     `Cathedral.Spectral.ClassRestriction,
     `Cathedral.Spectral.FiniteDimReduction,
+    -- Fourier–Gram Bridge (Exploration 31, ZERO SORRY)
+    `Cathedral.Spectral.FourierGram,
+    `Cathedral.Spectral.BilinearSieve,
     -- Spectral exploration (Exploration 19, NOT on crown path)
     `Cathedral.Spectral.ResidueDecomposition,
     `Cathedral.Spectral.ParticipationRatio,

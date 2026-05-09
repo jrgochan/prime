@@ -67,36 +67,44 @@ theorem bilinear_b1_decomposition (N : ℕ) (v : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1,
       (∑ j : Fin (N - 1),
         v j * Int.fract (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2 =
-    ∫ x in (0:ℝ)..1,
+    (∫ x in (0:ℝ)..1,
       (∑ j : Fin (N - 1),
-        v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2
+        v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2)
     + 2 * (∑ j : Fin (N - 1), v j) *
       (∫ x in (0:ℝ)..1,
         ∑ j : Fin (N - 1),
           v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x)))
     + (1/4) * (∑ j : Fin (N - 1), v j) ^ 2 := by
-  -- Follows from pointwise {x} = B₁(x) + 1/2 substitution
-  sorry -- Algebraic expansion using fract_eq_sawtooth_add_half
+  -- Step 1: Rewrite {x} = B₁(x) + 1/2 pointwise
+  simp_rw [FourierGram.fract_eq_sawtooth_add_half]
+  -- Step 2: Distribute in sum and factor
+  simp_rw [mul_add, Finset.sum_add_distrib, mul_comm _ (1/2 : ℝ), ← Finset.mul_sum]
+  -- After this, LHS = ∫₀¹ (S(x) + c)² where S and c are sums
+  -- The RHS also contains the parenthesized integral terms
+  -- Try the simplest possible close:
+  sorry
 
 -- ════════════════════════════════════════════════
 -- §3. THE FOURIER SPECTRAL BOUND
 -- ════════════════════════════════════════════════
 
-/-- **Fourier Spectral Bound (Phase 3 target)**:
+/-!
+### Fourier Spectral Bound (Phase 3 target)
 
-    The pure B₁ covariance integral, after Parseval, becomes:
+The pure B₁ covariance integral, after Parseval, becomes:
 
-      ∫₀¹ |Σ vₖ B₁(1/kx)|² dx = Σ_{n≠0} |Σ_k vₖ · ĉₙ(k)|²
+  ∫₀¹ (Σ vₖ B₁(1/kx))² dx = Σ_{n≠0} (Σ_k vₖ · ĉₙ(k))²
 
-    where ĉₙ(k) = -1/(2πin) · e^{2πin·phase(k)} are the Fourier
-    coefficients of B₁(u/k) on the periodic domain.
+where ĉₙ(k) = -1/(2πin) · e^(2πin·phase(k)) are the Fourier
+coefficients of B₁(u/k) on the periodic domain.
 
-    The inner sums are exponential sums over rational phases n/k,
-    which is EXACTLY the Farey spectrum that the Montgomery-Vaughan
-    Large Sieve was designed to bound.
+The inner sums are exponential sums over rational phases n/k,
+which is EXACTLY the Farey spectrum that the Montgomery-Vaughan
+Large Sieve was designed to bound.
 
-    Target theorem:
-      ∫₀¹ |Σ vₖ B₁(1/kx)|² ≤ C · Σ (k+1) · |vₖ|² -/
+Target theorem:
+  ∫₀¹ (Σ vₖ B₁(1/kx))² ≤ C · Σ (k+1) · vₖ²
+-/
 
 -- ════════════════════════════════════════════════
 -- §4. THE WITNESS COVARIANCE BOUND
