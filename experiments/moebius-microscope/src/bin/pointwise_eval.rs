@@ -62,7 +62,7 @@ fn main() {
 
     // Compute weights
     let mu = arith::mobius_table(n);
-    let weights = mertens::log_cutoff_weights(n, &mu);
+    let weights = mertens::witness_vector(n, &mu);
     let dim = n - 1;
     let ln_n = (n as f64).ln();
 

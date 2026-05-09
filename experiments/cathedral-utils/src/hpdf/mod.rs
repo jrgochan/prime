@@ -66,14 +66,14 @@ pub const HPDF_MAGIC: &str = "CATHEDRAL_HPDF_V2";
 
 // ── Public re-exports ──
 
-pub use writer::{write_hpdf, write_hpdf_dd, HpdfWriterConfig};
+pub use writer::{write_hpdf, write_hpdf_dd, write_hpdf_from_triangle, write_hpdf_dd_from_triangle, HpdfWriterConfig};
 pub use reader::{
     HpdfReader, HpdfProvenance, StructuralScalars, DistanceScalars,
     DataIntegrity, NumberTheoryAttrs,
     LineageInfo as ReadLineageInfo,
 };
 pub use convert::{convert_ooc_to_hpdf, extract_submatrix_hpdf, extract_from_hpdf};
-pub use metadata::{DistanceResult, stamp_distance};
+pub use metadata::{DistanceResult, stamp_distance, MicroscopeResult, stamp_microscope};
 
 // ═══════════════════════════════════════════════════════════════
 // TESTS

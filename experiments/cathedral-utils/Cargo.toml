@@ -9,8 +9,19 @@ name = "gram-builder"
 path = "src/bin/gram_builder.rs"
 
 [[bin]]
+name = "hpdf"
+path = "src/bin/hpdf/main.rs"
+required-features = ["hpdf"]
+
+# Legacy binaries — kept for backward compatibility during migration
+[[bin]]
 name = "hpdf-verify"
 path = "src/bin/hpdf_verify.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "taper-analyzer"
+path = "src/bin/taper_analyzer.rs"
 required-features = ["hpdf"]
 
 [features]

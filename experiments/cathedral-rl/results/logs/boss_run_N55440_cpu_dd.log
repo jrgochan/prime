@@ -1,0 +1,21 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL RL — Gram Form Optimization Engine[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [2mThe Riemann Hypothesis, reduced to a matrix inequality:[0m
+  [1m[36m║[0m  [2m  Show that vᵀG_N v ≤ 1 + K/ln(N)[0m
+  [1m[36m║[0m  [2m  for the Möbius-weighted witness vector v.[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[35m§1[0m  [1mBuilding Environment (N=500)...[0m
+  [32m✓[0m HPDF gram read: 55439×55439 (36.2s)
+  ✓ Gram matrix loaded: HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N55440.h5 (23448.8 MB, 36.24s)
+  ✓ DD lo-words loaded (~31-digit precision available)
+    Baseline (log-cutoff witness):
+      d²    = 0.1480613938
+      vᵀGv  = 1.7047035148
+      bᵀv   = 1.2783210605
+
+  [1m[35m§2[0m  [1mRunning Agent: CG...[0m
+    [2mCG config: max_steps=5000, tol=1.00e-12, preconditioner=Jacobi[0m
+    CG step     0: ||r||/||r₀||=9.5088e-1  |δ|=2.2095e-2  [1 mv/s]          CG step    70: ||r||/||r₀||=7.2222e-3  |δ|=4.5796e-2  [2 mv/s]          CG step   140: ||r||/||r₀||=2.0900e-3  |δ|=1.0641e-1  [2 mv/s]          CG step   210: ||r||/||r₀||=7.7769e-4  |δ|=6.7717e-3  [2 mv/s]      

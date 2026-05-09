@@ -45,14 +45,15 @@ open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 -- §1b. PNT AXIOMS (19th Century — Unconditional)
 -- ════════════════════════════════════════════════
 
-/-- **PNT AXIOM 1**: The Möbius partial sums Σ μ(k)/k converge to 0.
+/-- **PNT THEOREM 1** (GRADUATED 🎓 — was axiom):
+    The Möbius partial sums Σ μ(k)/k converge to 0.
     Equivalent to the Prime Number Theorem.
-    Proof: In Cathedral.PNT.Bridge (disabled for Mathlib v4.29 compatibility).
-    Will be re-connected when PrimeNumberTheoremAnd upgrades to v4.29. -/
-axiom pnt_mu_div_k :
+    Proof: From PrimeNumberTheoremAnd.mu_pnt_alt via Cathedral.PNT.Bridge. -/
+theorem pnt_mu_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-    Filter.atTop (nhds 0)
+    Filter.atTop (nhds 0) :=
+  pnt_moebius_sum_div_tendsto
 
 /-- **PNT AXIOM 2**: The weighted sum Σ μ(k)·ln(k)/k converges to -1.
     From the derivative: -(1/ζ(s))' = ζ'(s)/ζ(s)² At s=1: ζ'(s)/ζ(s)² → 1.

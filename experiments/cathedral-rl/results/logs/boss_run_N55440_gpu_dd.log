@@ -1,0 +1,79 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL RL — Gram Form Optimization Engine[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [2mThe Riemann Hypothesis, reduced to a matrix inequality:[0m
+  [1m[36m║[0m  [2m  Show that vᵀG_N v ≤ 1 + K/ln(N)[0m
+  [1m[36m║[0m  [2m  for the Möbius-weighted witness vector v.[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[35m§1[0m  [1mBuilding Environment (N=500)...[0m
+  [32m✓[0m HPDF gram read: 55439×55439 (35.7s)
+  ✓ Gram matrix loaded: HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N55440.h5 (23448.8 MB, 35.71s)
+  ✓ DD lo-words loaded (~31-digit precision available)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 12.09s (24588 MB)
+  [32m✓[0m GPU BilinearEngine initialized (dim=55439)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.1480613938
+      vᵀGv  = 1.7047035148
+      bᵀv   = 1.2783210605
+
+  [1m[35m§2[0m  [1mRunning Agent: CG...[0m
+    [2mCG config: max_steps=5000, tol=1.00e-12, preconditioner=Jacobi[0m
+    CG step     0: ||r||/||r₀||=9.5088e-1  |δ|=2.2095e-2  [17 mv/s]          CG step    70: ||r||/||r₀||=6.6108e-3  |δ|=4.4069e-2  [22 mv/s]          CG step   140: ||r||/||r₀||=2.1967e-3  |δ|=4.2517e-2  [23 mv/s]          CG step   210: ||r||/||r₀||=8.9536e-4  |δ|=2.4916e-2  [23 mv/s]          CG step   280: ||r||/||r₀||=5.0609e-4  |δ|=9.5545e-3  [24 mv/s]          CG step   350: ||r||/||r₀||=9.6071e-4  |δ|=1.9367e-2  [24 mv/s]          CG step   420: ||r||/||r₀||=6.3047e-4  |δ|=2.6866e-3  [25 mv/s]          CG step   490: ||r||/||r₀||=1.9301e-4  |δ|=1.3126e-4  [25 mv/s]          CG step   560: ||r||/||r₀||=1.7013e-4  |δ|=1.1811e-4  [24 mv/s]          CG step   630: ||r||/||r₀||=1.2870e-4  |δ|=1.7364e-2  [25 mv/s]          CG step   700: ||r||/||r₀||=2.2801e-4  |δ|=3.0433e-3  [25 mv/s]          CG step   770: ||r||/||r₀||=2.5741e-4  |δ|=7.3468e-3  [25 mv/s]          CG step   840: ||r||/||r₀||=7.1438e-5  |δ|=1.5754e-3  [25 mv/s]          CG step   910: ||r||/||r₀||=6.2393e-5  |δ|=8.6104e-3  [25 mv/s]          CG step   980: ||r||/||r₀||=1.3661e-4  |δ|=6.6329e-4  [25 mv/s]          CG step  1050: ||r||/||r₀||=5.6650e-5  |δ|=2.2150e-3  [25 mv/s]          CG step  1120: ||r||/||r₀||=5.6388e-5  |δ|=2.0483e-2  [25 mv/s]          CG step  1190: ||r||/||r₀||=4.7635e-5  |δ|=1.3979e-3  [25 mv/s]          CG step  1260: ||r||/||r₀||=4.5238e-5  |δ|=5.8605e-4  [25 mv/s]          CG step  1330: ||r||/||r₀||=5.2654e-5  |δ|=5.2493e-3  [25 mv/s]          CG step  1400: ||r||/||r₀||=4.8760e-5  |δ|=4.6174e-3  [25 mv/s]          CG step  1470: ||r||/||r₀||=4.3376e-5  |δ|=1.9769e-3  [25 mv/s]          CG step  1540: ||r||/||r₀||=3.5552e-5  |δ|=3.9791e-3  [25 mv/s]          CG step  1610: ||r||/||r₀||=4.7632e-5  |δ|=2.4723e-4  [25 mv/s]          CG step  1680: ||r||/||r₀||=3.1496e-5  |δ|=4.7697e-3  [25 mv/s]          CG step  1750: ||r||/||r₀||=3.1489e-5  |δ|=3.8935e-4  [25 mv/s]          CG step  1820: ||r||/||r₀||=5.3783e-5  |δ|=6.5963e-4  [25 mv/s]          CG step  1890: ||r||/||r₀||=6.5660e-5  |δ|=6.3548e-4  [25 mv/s]          CG step  1960: ||r||/||r₀||=5.8218e-5  |δ|=2.2187e-3  [25 mv/s]          CG step  2030: ||r||/||r₀||=3.1084e-5  |δ|=8.1010e-3  [25 mv/s]          CG step  2100: ||r||/||r₀||=1.7919e-5  |δ|=2.7316e-5  [25 mv/s]          CG step  2170: ||r||/||r₀||=3.1327e-5  |δ|=3.1451e-3  [25 mv/s]          CG step  2240: ||r||/||r₀||=2.2437e-5  |δ|=1.0424e-3  [25 mv/s]          CG step  2310: ||r||/||r₀||=1.5703e-5  |δ|=1.6679e-3  [25 mv/s]          CG step  2380: ||r||/||r₀||=2.0637e-5  |δ|=5.4134e-4  [25 mv/s]          CG step  2450: ||r||/||r₀||=1.4450e-5  |δ|=1.4352e-3  [25 mv/s]          CG step  2520: ||r||/||r₀||=1.3692e-5  |δ|=4.5089e-3  [25 mv/s]          CG step  2590: ||r||/||r₀||=5.7860e-5  |δ|=1.0112e-3  [25 mv/s]          CG step  2660: ||r||/||r₀||=1.4893e-5  |δ|=1.5528e-3  [25 mv/s]          CG step  2730: ||r||/||r₀||=3.6163e-5  |δ|=2.1574e-3  [25 mv/s]          CG step  2800: ||r||/||r₀||=3.0815e-5  |δ|=3.0643e-4  [25 mv/s]          CG step  2870: ||r||/||r₀||=2.0069e-5  |δ|=5.3330e-4  [25 mv/s]          CG step  2940: ||r||/||r₀||=1.2098e-5  |δ|=1.0349e-4  [25 mv/s]          CG step  3010: ||r||/||r₀||=9.2481e-6  |δ|=1.5379e-3  [25 mv/s]          CG step  3080: ||r||/||r₀||=1.0047e-5  |δ|=1.9386e-4  [25 mv/s]          CG step  3150: ||r||/||r₀||=8.4458e-6  |δ|=3.9004e-5  [25 mv/s]          CG step  3220: ||r||/||r₀||=4.0174e-5  |δ|=1.9187e-3  [25 mv/s]          CG step  3290: ||r||/||r₀||=9.1420e-6  |δ|=2.5290e-3  [25 mv/s]          CG step  3360: ||r||/||r₀||=1.0463e-5  |δ|=2.2299e-3  [25 mv/s]          CG step  3430: ||r||/||r₀||=5.2710e-6  |δ|=1.4800e-3  [25 mv/s]          CG step  3500: ||r||/||r₀||=6.7595e-6  |δ|=3.8106e-3  [25 mv/s]          CG step  3570: ||r||/||r₀||=5.0695e-6  |δ|=4.2348e-4  [25 mv/s]          CG step  3640: ||r||/||r₀||=9.7653e-6  |δ|=2.4763e-5  [25 mv/s]          CG step  3710: ||r||/||r₀||=8.8427e-6  |δ|=1.0738e-3  [25 mv/s]          CG step  3780: ||r||/||r₀||=1.6531e-5  |δ|=2.8451e-4  [25 mv/s]          CG step  3850: ||r||/||r₀||=1.1238e-5  |δ|=2.9031e-5  [25 mv/s]          CG step  3920: ||r||/||r₀||=9.2898e-6  |δ|=2.4996e-3  [25 mv/s]          CG step  3990: ||r||/||r₀||=5.3017e-6  |δ|=1.3473e-4  [25 mv/s]          CG step  4060: ||r||/||r₀||=5.3852e-6  |δ|=5.6890e-4  [25 mv/s]          CG step  4130: ||r||/||r₀||=3.7078e-6  |δ|=1.1231e-3  [25 mv/s]          CG step  4200: ||r||/||r₀||=5.8247e-6  |δ|=8.2553e-4  [25 mv/s]          CG step  4270: ||r||/||r₀||=4.5915e-6  |δ|=2.6189e-4  [25 mv/s]          CG step  4340: ||r||/||r₀||=4.3812e-6  |δ|=1.6565e-6  [25 mv/s]          CG step  4410: ||r||/||r₀||=6.4658e-6  |δ|=3.6220e-4  [25 mv/s]          CG step  4480: ||r||/||r₀||=3.9514e-6  |δ|=5.5652e-4  [25 mv/s]          CG step  4550: ||r||/||r₀||=5.8232e-6  |δ|=8.1866e-4  [25 mv/s]          CG step  4620: ||r||/||r₀||=4.1472e-6  |δ|=1.2898e-3  [25 mv/s]          CG step  4690: ||r||/||r₀||=2.8945e-6  |δ|=4.5983e-4  [25 mv/s]          CG step  4760: ||r||/||r₀||=6.1969e-6  |δ|=2.1746e-4  [25 mv/s]          CG step  4830: ||r||/||r₀||=2.5312e-6  |δ|=1.4365e-4  [25 mv/s]          CG step  4900: ||r||/||r₀||=5.0723e-6  |δ|=3.6680e-4  [25 mv/s]          CG step  4970: ||r||/||r₀||=2.9894e-6  |δ|=2.5323e-4  [25 mv/s]          [33m⚠[0m CG exhausted budget (5000 steps): ||r||/||r₀||=2.84e-6, d²=4.0044553128e-2                     
+      [2mConsider increasing --cg-steps or relaxing --cg-tol[0m
+    [2mCG wall time: 197.86s (5000 matvecs, final d²=4.0044553128e-2)[0m
+
+  [1m[35m§3[0m  [1mPrecision Refinement: DD...[0m
+    DD CG: dim=55439, max_steps=5000, tol=1.00e-12
+    DD source: ~31-digit (hi+lo) matrix entries
+    DD vectors: full DD working vectors (v, r, z, p)
+    DD matvec: GPU-accelerated f64 (Mixed Precision Iterative Refinement)
+    DD CG step     0: ||r||/||r₀||=2.4316e0  [1 mv/s]          DD CG step    70: ||r||/||r₀||=1.8931e0  [16 mv/s]          DD CG step   140: ||r||/||r₀||=3.2501e0  [19 mv/s]          DD CG step   210: ||r||/||r₀||=2.9679e0  [21 mv/s]          DD CG step   280: ||r||/||r₀||=1.7149e0  [19 mv/s]          DD CG step   350: ||r||/||r₀||=1.0617e0  [21 mv/s]          DD CG step   420: ||r||/||r₀||=2.1403e0  [21 mv/s]          DD CG step   490: ||r||/||r₀||=1.5788e0  [20 mv/s]          DD CG step   560: ||r||/||r₀||=6.8896e-1  [21 mv/s]          DD CG step   630: ||r||/||r₀||=1.6749e0  [21 mv/s]          DD CG step   700: ||r||/||r₀||=1.3158e0  [21 mv/s]          DD CG step   770: ||r||/||r₀||=6.4723e-1  [21 mv/s]          DD CG step   840: ||r||/||r₀||=7.1721e-1  [21 mv/s]          DD CG step   910: ||r||/||r₀||=4.0547e-1  [21 mv/s]          DD CG step   980: ||r||/||r₀||=3.8495e-1  [21 mv/s]          DD CG step  1050: ||r||/||r₀||=4.4904e-1  [21 mv/s]          DD CG step  1120: ||r||/||r₀||=7.2698e-1  [21 mv/s]          DD CG step  1190: ||r||/||r₀||=1.1104e0  [21 mv/s]          DD CG step  1260: ||r||/||r₀||=4.2257e-1  [21 mv/s]          DD CG step  1330: ||r||/||r₀||=4.6944e-1  [21 mv/s]          DD CG step  1400: ||r||/||r₀||=2.4845e-1  [21 mv/s]          DD CG step  1470: ||r||/||r₀||=6.1825e-1  [21 mv/s]          DD CG step  1540: ||r||/||r₀||=3.5737e-1  [21 mv/s]          DD CG step  1610: ||r||/||r₀||=7.1024e-1  [21 mv/s]          DD CG step  1680: ||r||/||r₀||=6.0682e-1  [21 mv/s]          DD CG step  1750: ||r||/||r₀||=2.6955e-1  [21 mv/s]          DD CG step  1820: ||r||/||r₀||=4.0370e-1  [21 mv/s]          DD CG step  1890: ||r||/||r₀||=4.5261e-1  [21 mv/s]          DD CG step  1960: ||r||/||r₀||=4.5405e-1  [21 mv/s]          DD CG step  2030: ||r||/||r₀||=2.8335e-1  [21 mv/s]          DD CG step  2100: ||r||/||r₀||=5.2857e-1  [21 mv/s]          DD CG step  2170: ||r||/||r₀||=1.0941e0  [21 mv/s]          DD CG step  2240: ||r||/||r₀||=2.6341e-1  [21 mv/s]          DD CG step  2310: ||r||/||r₀||=2.5043e-1  [21 mv/s]          DD CG step  2380: ||r||/||r₀||=1.3664e-1  [21 mv/s]          DD CG step  2450: ||r||/||r₀||=2.1154e-1  [21 mv/s]          DD CG step  2520: ||r||/||r₀||=1.0475e0  [21 mv/s]          DD CG step  2590: ||r||/||r₀||=4.7759e-1  [21 mv/s]          DD CG step  2660: ||r||/||r₀||=2.6753e-1  [21 mv/s]          DD CG step  2730: ||r||/||r₀||=1.4870e-1  [21 mv/s]          DD CG step  2800: ||r||/||r₀||=1.1668e-1  [21 mv/s]          DD CG step  2870: ||r||/||r₀||=1.3429e-1  [21 mv/s]          DD CG step  2940: ||r||/||r₀||=2.2073e-1  [21 mv/s]          DD CG step  3010: ||r||/||r₀||=1.3889e-1  [21 mv/s]          DD CG step  3080: ||r||/||r₀||=1.8477e-1  [21 mv/s]          DD CG step  3150: ||r||/||r₀||=1.0867e-1  [21 mv/s]          DD CG step  3220: ||r||/||r₀||=1.1545e-1  [21 mv/s]          DD CG step  3290: ||r||/||r₀||=1.0554e-1  [21 mv/s]          DD CG step  3360: ||r||/||r₀||=1.1649e-1  [21 mv/s]          DD CG step  3430: ||r||/||r₀||=1.3731e-1  [21 mv/s]          DD CG step  3500: ||r||/||r₀||=1.5660e-1  [21 mv/s]          DD CG step  3570: ||r||/||r₀||=1.5234e-1  [21 mv/s]          DD CG step  3640: ||r||/||r₀||=1.2403e-1  [21 mv/s]          DD CG step  3710: ||r||/||r₀||=1.4327e-1  [21 mv/s]          DD CG step  3780: ||r||/||r₀||=1.2634e-1  [21 mv/s]          DD CG step  3850: ||r||/||r₀||=1.9385e-1  [21 mv/s]          DD CG step  3920: ||r||/||r₀||=1.1788e-1  [21 mv/s]          DD CG step  3990: ||r||/||r₀||=3.8265e-1  [21 mv/s]          DD CG step  4060: ||r||/||r₀||=1.1335e-1  [21 mv/s]          DD CG step  4130: ||r||/||r₀||=8.2793e-2  [21 mv/s]          DD CG step  4200: ||r||/||r₀||=8.2431e-2  [21 mv/s]          DD CG step  4270: ||r||/||r₀||=8.6229e-2  [21 mv/s]          DD CG step  4340: ||r||/||r₀||=1.5778e-1  [21 mv/s]          DD CG step  4410: ||r||/||r₀||=1.0753e-1  [21 mv/s]          DD CG step  4480: ||r||/||r₀||=7.2759e-2  [21 mv/s]          DD CG step  4550: ||r||/||r₀||=5.4967e-2  [21 mv/s]          DD CG step  4620: ||r||/||r₀||=6.4564e-2  [21 mv/s]          DD CG step  4690: ||r||/||r₀||=5.0297e-2  [21 mv/s]          DD CG step  4760: ||r||/||r₀||=5.6562e-2  [21 mv/s]          DD CG step  4830: ||r||/||r₀||=5.6542e-2  [21 mv/s]          DD CG step  4900: ||r||/||r₀||=4.9679e-2  [21 mv/s]          DD CG step  4970: ||r||/||r₀||=6.0550e-2  [21 mv/s]          DD Pythagorean: d²+vᵀGv = 9.999999211505504e-1  |res| = 7.88e-8
+    DD CG exhausted at step 5000: ||r||/||r₀||=4.61e-2, d²=4.0044523127e-2                     
+    DD CG wall time: 236.90s (5000 matvecs)
+
+  [1m[36m  ┌───────────────────────────────────────────────────────────────┐[0m
+  [1m[36m  │[0m  [1m[97mCATHEDRAL RL RESULT — N=500[0m
+  [1m[36m  ├───────────────────────────────────────────────────────────────┤[0m
+  [1m[36m  │[0m  Agent:          CG
+  [1m[36m  │[0m  Dimension:      55439 × 55439
+  [1m[36m  │[0m  Total steps:    10000
+  [1m[36m  │[0m  Wall time:      554.0s
+  [1m[36m  ├───────────────────────────────────────────────────────────────┤[0m
+  [1m[36m  │[0m  [1mBaseline (log-cutoff witness):[0m
+  [1m[36m  │[0m    d²    = 1.4806139376e-1
+  [1m[36m  │[0m    vᵀGv  = 1.7047035148
+  [1m[36m  │[0m    bᵀv   = 1.2783210605
+  [1m[36m  │[0m  [1mOptimized:[0m
+  [1m[36m  │[0m    d²    = 4.0044523127e-2
+  [1m[36m  │[0m    vᵀGv  = 0.9599553980
+  [1m[36m  │[0m    bᵀv   = 0.9599554374
+  [1m[36m  ├───────────────────────────────────────────────────────────────┤[0m
+  [1m[36m  │[0m  [32m✓ vᵀGv < 1 — GRAM BOUND TRIVIALLY SATISFIED[0m
+  [1m[36m  │[0m  [32m  K_eff = -0.2489 (negative — subcritical)[0m
+  [1m[36m  │[0m  Improvement:    1.080169e-1 (72.95%)
+  [1m[36m  │[0m  Matvec rate:    18 mv/s
+  [1m[36m  │[0m  ln(N):          6.2146
+  [1m[36m  └───────────────────────────────────────────────────────────────┘[0m
+
+
+  [1m[36m═══════════════════════════════════════════════════════════════[0m
+  [1m[36m  CATHEDRAL RL — CERTIFICATE[0m
+  [1m[36m═══════════════════════════════════════════════════════════════[0m
+  [1m[97mClaim:[0m     vᵀG_N v ≤ 1 + K/ln(N) for the optimal witness vector
+  [1m[97mIdentity:[0m  d²_opt + vᵀGv_opt = 1 (projection theorem in L²(0,1))
+  [1m[97mSchedule:[0m  [500]
+
+  [1mPythagorean identity verification:[0m
+    N=   500: d²+vᵀGv = 0.999999921151  |res| = 7.88e-8  [33m~[0m
+
+  [1mGram bound:[0m [32mALL vᵀGv < 1 (subcritical) ✓[0m
+  [1mMax Pythagorean residual:[0m 7.88e-8
+  [1mSHA-256:[0m  75a855482c70a5282a6b543561131e4736d77a7c1640be294c30ea01cf91b1ed
+  [1m[36m═══════════════════════════════════════════════════════════════[0m
+
+  [32m✓[0m Log written to /home/jrgochan/prime/experiments/cathedral-rl/results/logs/cathedral_rl_N500_1778304720.log
+  [32m✓[0m Results written to /home/jrgochan/prime/experiments/cathedral-rl/results/logs/cathedral_rl_N500_1778304720.json

@@ -282,6 +282,16 @@ impl HpdfReader {
             diag_max: s.attr("diagonal_max")?.read_scalar()?,
             gershgorin_lambda_min: read_scalar_opt::<f64>(&s, "gershgorin_lambda_min"),
             gershgorin_lambda_max: read_scalar_opt::<f64>(&s, "gershgorin_lambda_max"),
+            // New fields (graceful fallback for older HPDF files)
+            matrix_1_norm: read_scalar_opt::<f64>(&s, "matrix_1_norm"),
+            matrix_inf_norm: read_scalar_opt::<f64>(&s, "matrix_inf_norm"),
+            diagonal_dominance_ratio: read_scalar_opt::<f64>(&s, "diagonal_dominance_ratio"),
+            entry_min: read_scalar_opt::<f64>(&s, "entry_min"),
+            entry_max: read_scalar_opt::<f64>(&s, "entry_max"),
+            entry_mean: read_scalar_opt::<f64>(&s, "entry_mean"),
+            entry_variance: read_scalar_opt::<f64>(&s, "entry_variance"),
+            symmetry_residual: read_scalar_opt::<f64>(&s, "symmetry_residual"),
+            diag_sum_sq: read_scalar_opt::<f64>(&s, "diagonal_sum_sq"),
         })
     }
 
@@ -448,6 +458,16 @@ pub struct StructuralScalars {
     pub diag_max: f64,
     pub gershgorin_lambda_min: Option<f64>,
     pub gershgorin_lambda_max: Option<f64>,
+    // New fields (None for older HPDF files)
+    pub matrix_1_norm: Option<f64>,
+    pub matrix_inf_norm: Option<f64>,
+    pub diagonal_dominance_ratio: Option<f64>,
+    pub entry_min: Option<f64>,
+    pub entry_max: Option<f64>,
+    pub entry_mean: Option<f64>,
+    pub entry_variance: Option<f64>,
+    pub symmetry_residual: Option<f64>,
+    pub diag_sum_sq: Option<f64>,
 }
 
 /// Distance result from /distance group.

@@ -33,6 +33,7 @@ lean_lib «Cathedral» where
     `Cathedral.NymanBeurling.ThetaBound,
     `Cathedral.NymanBeurling.BDMellin,
     `Cathedral.NymanBeurling.NymanBeurling,
+    `Cathedral.NymanBeurling.Antitone,
     -- Vasyunin (the active proof chain)
     `Cathedral.Vasyunin.Defs,
     `Cathedral.Vasyunin.Witness,
@@ -139,6 +140,7 @@ lean_lib «Cathedral» where
     `Cathedral.AbelTail.Assembly,
     -- Assembly (the crown)
     `Cathedral.Assembly.CertifiedComputation,
+    `Cathedral.Assembly.SpectralObservatory,
     `Cathedral.NymanBeurling.QuadFormBridge,
     -- GramWitness archived to Cathedral/Archive/Universe1/ (April 25, 2026)
     -- witness_l2_error_decay_gram axiom ELIMINATED

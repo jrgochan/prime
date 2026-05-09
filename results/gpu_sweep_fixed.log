@@ -1,0 +1,770 @@
+═══ GPU SWEEP (witness-vector fix) Fri May  8 05:36:22 MDT 2026 ═══
+
+━━━ gram_N360.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=360 (dim=359) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N360.h5
+  Matrix: 359×359 = 0 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 7, II ≤ 50
+  Non-zero weights: 218/359
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 359×359 (0.0s)
+  ✓ HPDF load: 0.3s (128881 entries, 1.0 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 0.0s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.20s (1 MB)
+    GPU vᵀGv = 1.5716717550  (0.039s)
+    GPU U    = 3.1732649975  (0.039s)
+    GPU L    = 5.4425153957  (0.039s)
+    GPU Q    = 8.5812707224  (0.039s)
+    GPU taper total: 0.039s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 10/218 (5%) 0.5s ETA=11.1s      Rows: 20/218 (9%) 0.5s ETA=5.3s      Rows: 30/218 (14%) 0.5s ETA=3.4s      Rows: 40/218 (18%) 0.5s ETA=2.4s      Rows: 50/218 (23%) 0.5s ETA=1.8s      Rows: 60/218 (28%) 0.5s ETA=1.4s      Rows: 70/218 (32%) 0.5s ETA=1.1s      Rows: 80/218 (37%) 0.5s ETA=0.9s      Rows: 110/218 (50%) 0.5s ETA=0.5s      Rows: 120/218 (55%) 0.5s ETA=0.4s      Rows: 140/218 (64%) 0.5s ETA=0.3s      Rows: 170/218 (78%) 0.5s ETA=0.2s      Rows: 130/218 (60%) 0.5s ETA=0.4s      Rows: 190/218 (87%) 0.5s ETA=0.1s      Rows: 200/218 (92%) 0.5s ETA=0.0s      Rows: 100/218 (46%) 0.5s ETA=0.6s      Rows: 150/218 (69%) 0.5s ETA=0.2s      Rows: 90/218 (41%) 0.5s ETA=0.8s      Rows: 160/218 (73%) 0.5s ETA=0.2s      Rows: 180/218 (83%) 0.5s ETA=0.1s      Rows: 210/218 (96%) 0.5s ETA=0.0s      ✓ Done in 0.5s (218 active × 359 cols, GPU+HPDF)                      
+    GPU bilinear: 0.039s | CPU classify: 0.5s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N=   360)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     1.5716717550              │
+  │  (bᵀv)²      =     1.3335132947              │
+  │  vᵀCv        =     0.2381584603              │
+  │  d²_N        =     0.2621148324              │
+  │  bᵀv         =     1.1547784613              │
+  │  1 - vᵀGv    =    -0.5716717550              │
+  │  gap·ln(N)   =    -3.3649194215              │
+  │  (bᵀv)²/vᵀGv =     0.8484680662              │
+  │  vtCv·ln(N)  =     1.4018254732              │
+  │  d²·ln(N)    =     1.5428351715              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N=   360)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     3.1732649975                │
+  │  L(N)           =     5.4425153957                │
+  │  Q(N)           =     8.5812707224                │
+  │  R₂ = U-2L/lnN  =     1.3239890191                │
+  │  R₂ - 1         =     0.3239890191                │
+  │  (R₂-1)·lnN     =     1.9070330715  ← const?     │
+  │  Q/ln²N         =     0.2476827359                │
+  │  C_recon         =    -3.3649194215  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =     0.0028499281  → 0           │
+  │  S₂ = Σμlnk/k   =    -0.9832602230  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.0561791700  → -2γ         │
+  │  M(N)           =               -1                │
+  │  M(N)/√N        =    -0.0527046277                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     1.5716717550               │
+  │  vᵀGv (recon)    =     1.5716717550               │
+  │  U-2L/lnN+Q/ln²N =     1.5716717550               │
+  │  Δ runner↔recon  =         2.22e-16               │
+  │  Δ runner↔taper  =         6.66e-16               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.6394818964              │
+  │  gcd=2     vᵀGv_d =   0.2124522446              │
+  │  gcd=3     vᵀGv_d =   0.0815668798              │
+  │  gcd=5     vᵀGv_d =  -0.2286058347              │
+  │  gcd=6     vᵀGv_d =  -0.0464670273              │
+  │  gcd=7     vᵀGv_d =  -0.0808607542              │
+  │  gcd=10    vᵀGv_d =  -0.0072180532              │
+  │  gcd=11    vᵀGv_d =  -0.0166128486              │
+  │  gcd=13    vᵀGv_d =   0.0231637905              │
+  │  gcd=14    vᵀGv_d =  -0.0006460167              │
+  │  gcd=15    vᵀGv_d =  -0.0146214911              │
+  │  gcd=17    vᵀGv_d =   0.0048952860              │
+  │  gcd=19    vᵀGv_d =   0.0066145314              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N360.h5
+  ✓ Summary → results/summary_N360.txt
+  ✓ GCD → results/gcd_decomp_N360.tsv
+  ✓ Trace → results/trace_N360.tsv
+  ✓ Cert → results/certificate_N360.json
+  ✓ Dyadic → results/dyadic_N360.tsv
+  ✓ ω-class → results/omega_class_N360.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N1000.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=1000 (dim=999) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N1000.h5
+  Matrix: 999×999 = 7 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 9, II ≤ 99
+  Non-zero weights: 607/999
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 999×999 (0.0s)
+  ✓ HPDF load: 0.1s (998001 entries, 8.0 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 0.0s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.13s (8 MB)
+    GPU vᵀGv = 1.8559992829  (0.019s)
+    GPU U    = 5.8121653575  (0.019s)
+    GPU L    = 19.6129817402  (0.019s)
+    GPU Q    = 82.1866513815  (0.019s)
+    GPU taper total: 0.019s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 30/607 (5%) 0.2s ETA=3.9s      Rows: 60/607 (10%) 0.2s ETA=1.8s      Rows: 90/607 (15%) 0.2s ETA=1.2s      Rows: 120/607 (20%) 0.2s ETA=0.8s      Rows: 150/607 (25%) 0.2s ETA=0.6s      Rows: 180/607 (30%) 0.2s ETA=0.5s      Rows: 210/607 (35%) 0.2s ETA=0.4s      Rows: 240/607 (40%) 0.2s ETA=0.3s      Rows: 270/607 (44%) 0.2s ETA=0.3s      Rows: 300/607 (49%) 0.2s ETA=0.2s      Rows: 330/607 (54%) 0.2s ETA=0.2s      Rows: 360/607 (59%) 0.2s ETA=0.1s      Rows: 390/607 (64%) 0.2s ETA=0.1s      Rows: 420/607 (69%) 0.2s ETA=0.1s      Rows: 450/607 (74%) 0.2s ETA=0.1s      Rows: 480/607 (79%) 0.2s ETA=0.1s      Rows: 510/607 (84%) 0.2s ETA=0.0s      Rows: 540/607 (89%) 0.2s ETA=0.0s      Rows: 570/607 (94%) 0.2s ETA=0.0s      Rows: 600/607 (99%) 0.2s ETA=0.0s      ✓ Done in 0.2s (607 active × 999 cols, GPU+HPDF)                      
+    GPU bilinear: 0.019s | CPU classify: 0.2s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N=  1000)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     1.8559992829              │
+  │  (bᵀv)²      =     1.4256960734              │
+  │  vᵀCv        =     0.4303032095              │
+  │  d²_N        =     0.4679489707              │
+  │  bᵀv         =     1.1940251561              │
+  │  1 - vᵀGv    =    -0.8559992829              │
+  │  gap·ln(N)   =    -5.9130335651              │
+  │  (bᵀv)²/vᵀGv =     0.7681555088              │
+  │  vtCv·ln(N)  =     2.9724292667              │
+  │  d²·ln(N)    =     3.2324769724              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N=  1000)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     5.8121653575                │
+  │  L(N)           =    19.6129817402                │
+  │  Q(N)           =    82.1866513815                │
+  │  R₂ = U-2L/lnN  =     0.1336255286                │
+  │  R₂ - 1         =    -0.8663744714                │
+  │  (R₂-1)·lnN     =    -5.9847028286  ← const?     │
+  │  Q/ln²N         =     1.7223737543                │
+  │  C_recon         =    -5.9130335651  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =     0.0044118698  → 0           │
+  │  S₂ = Σμlnk/k   =    -0.9699308074  → -1          │
+  │  S₃ = Σμln²k/k  =    -0.9495454260  → -2γ         │
+  │  M(N)           =                2                │
+  │  M(N)/√N        =     0.0632455532                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     1.8559992829               │
+  │  vᵀGv (recon)    =     1.8559992829               │
+  │  U-2L/lnN+Q/ln²N =     1.8559992829               │
+  │  Δ runner↔recon  =         2.22e-16               │
+  │  Δ runner↔taper  =         1.11e-15               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.7915988250              │
+  │  gcd=2     vᵀGv_d =   0.3392104922              │
+  │  gcd=3     vᵀGv_d =   0.1212189480              │
+  │  gcd=5     vᵀGv_d =  -0.2328604500              │
+  │  gcd=6     vᵀGv_d =  -0.0578630245              │
+  │  gcd=7     vᵀGv_d =  -0.0794497274              │
+  │  gcd=10    vᵀGv_d =  -0.0117105745              │
+  │  gcd=11    vᵀGv_d =  -0.0404169880              │
+  │  gcd=13    vᵀGv_d =   0.0234399095              │
+  │  gcd=14    vᵀGv_d =  -0.0007135330              │
+  │  gcd=15    vᵀGv_d =  -0.0294038750              │
+  │  gcd=17    vᵀGv_d =  -0.0074964703              │
+  │  gcd=19    vᵀGv_d =   0.0098254367              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N1000.h5
+  ✓ Summary → results/summary_N1000.txt
+  ✓ GCD → results/gcd_decomp_N1000.tsv
+  ✓ Trace → results/trace_N1000.tsv
+  ✓ Cert → results/certificate_N1000.json
+  ✓ Dyadic → results/dyadic_N1000.tsv
+  ✓ ω-class → results/omega_class_N1000.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N2520.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=2520 (dim=2519) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N2520.h5
+  Matrix: 2519×2519 = 48 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 13, II ≤ 185
+  Non-zero weights: 1535/2519
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 2519×2519 (0.1s)
+  ✓ HPDF load: 0.1s (6345361 entries, 50.8 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 0.0s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.17s (51 MB)
+    GPU vᵀGv = 1.8523557516  (0.034s)
+    GPU U    = -2.6061502075  (0.034s)
+    GPU L    = -31.8565695330  (0.034s)
+    GPU Q    = -225.5154640742  (0.034s)
+    GPU taper total: 0.034s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 76/1535 (5%) 0.3s ETA=6.4s      Rows: 152/1535 (10%) 0.3s ETA=3.1s      Rows: 228/1535 (15%) 0.3s ETA=1.9s      Rows: 304/1535 (20%) 0.3s ETA=1.4s      Rows: 380/1535 (25%) 0.3s ETA=1.0s      Rows: 456/1535 (30%) 0.3s ETA=0.8s      Rows: 532/1535 (35%) 0.3s ETA=0.7s      Rows: 608/1535 (40%) 0.3s ETA=0.5s      Rows: 684/1535 (45%) 0.3s ETA=0.4s      Rows: 760/1535 (50%) 0.4s ETA=0.4s      Rows: 836/1535 (54%) 0.4s ETA=0.3s      Rows: 912/1535 (59%) 0.4s ETA=0.2s      Rows: 988/1535 (64%) 0.4s ETA=0.2s      Rows: 1064/1535 (69%) 0.4s ETA=0.2s      Rows: 1140/1535 (74%) 0.4s ETA=0.1s      Rows: 1216/1535 (79%) 0.4s ETA=0.1s      Rows: 1292/1535 (84%) 0.4s ETA=0.1s      Rows: 1368/1535 (89%) 0.4s ETA=0.0s      Rows: 1444/1535 (94%) 0.4s ETA=0.0s      Rows: 1520/1535 (99%) 0.4s ETA=0.0s      ✓ Done in 0.4s (1535 active × 2519 cols, GPU+HPDF)                      
+    GPU bilinear: 0.034s | CPU classify: 0.3s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N=  2520)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     1.8523557516              │
+  │  (bᵀv)²      =     1.4916464695              │
+  │  vᵀCv        =     0.3607092821              │
+  │  d²_N        =     0.4096961605              │
+  │  bᵀv         =     1.2213297955              │
+  │  1 - vᵀGv    =    -0.8523557516              │
+  │  gap·ln(N)   =    -6.6756623334              │
+  │  (bᵀv)²/vᵀGv =     0.8052699748              │
+  │  vtCv·ln(N)  =     2.8250802128              │
+  │  d²·ln(N)    =     3.2087461390              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N=  2520)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =    -2.6061502075                │
+  │  L(N)           =   -31.8565695330                │
+  │  Q(N)           =  -225.5154640742                │
+  │  R₂ = U-2L/lnN  =     5.5288119616                │
+  │  R₂ - 1         =     4.5288119616                │
+  │  (R₂-1)·lnN     =    35.4697195040  ← const?     │
+  │  Q/ln²N         =    -3.6764562100                │
+  │  C_recon         =    -6.6756623334  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =     0.0016535700  → 0           │
+  │  S₂ = Σμlnk/k   =    -0.9871203232  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.0541066010  → -2γ         │
+  │  M(N)           =                2                │
+  │  M(N)/√N        =     0.0398409536                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     1.8523557516               │
+  │  vᵀGv (recon)    =     1.8523557516               │
+  │  U-2L/lnN+Q/ln²N =     1.8523557516               │
+  │  Δ runner↔recon  =         4.44e-16               │
+  │  Δ runner↔taper  =         2.22e-16               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.6720037492              │
+  │  gcd=2     vᵀGv_d =   0.4658892308              │
+  │  gcd=3     vᵀGv_d =   0.1762921996              │
+  │  gcd=5     vᵀGv_d =  -0.2681536827              │
+  │  gcd=6     vᵀGv_d =  -0.0770639242              │
+  │  gcd=7     vᵀGv_d =  -0.0962723674              │
+  │  gcd=10    vᵀGv_d =  -0.0044148051              │
+  │  gcd=11    vᵀGv_d =  -0.0503226563              │
+  │  gcd=13    vᵀGv_d =   0.0190695611              │
+  │  gcd=14    vᵀGv_d =   0.0037314882              │
+  │  gcd=15    vᵀGv_d =  -0.0342408585              │
+  │  gcd=17    vᵀGv_d =  -0.0169763744              │
+  │  gcd=19    vᵀGv_d =   0.0061372886              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N2520.h5
+  ✓ Summary → results/summary_N2520.txt
+  ✓ GCD → results/gcd_decomp_N2520.tsv
+  ✓ Trace → results/trace_N2520.tsv
+  ✓ Cert → results/certificate_N2520.json
+  ✓ Dyadic → results/dyadic_N2520.tsv
+  ✓ ω-class → results/omega_class_N2520.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N5040.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=5040 (dim=5039) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N5040.h5
+  Matrix: 5039×5039 = 193 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 17, II ≤ 293
+  Non-zero weights: 3067/5039
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 5039×5039 (0.2s)
+  ✓ HPDF load: 0.3s (25391521 entries, 203.1 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 0.1s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.19s (203 MB)
+    GPU vᵀGv = 1.7808409565  (0.040s)
+    GPU U    = -4.9063514962  (0.040s)
+    GPU L    = -46.6593557040  (0.040s)
+    GPU Q    = -309.5427837454  (0.041s)
+    GPU taper total: 0.041s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 153/3067 (5%) 0.6s ETA=11.0s      Rows: 306/3067 (10%) 0.6s ETA=5.3s      Rows: 459/3067 (15%) 0.6s ETA=3.3s      Rows: 612/3067 (20%) 0.6s ETA=2.4s      Rows: 765/3067 (25%) 0.6s ETA=1.8s      Rows: 918/3067 (30%) 0.6s ETA=1.4s      Rows: 1071/3067 (35%) 0.6s ETA=1.1s      Rows: 1224/3067 (40%) 0.6s ETA=0.9s      Rows: 1377/3067 (45%) 0.6s ETA=0.8s      Rows: 1530/3067 (50%) 0.6s ETA=0.6s      Rows: 1683/3067 (55%) 0.6s ETA=0.5s      Rows: 1836/3067 (60%) 0.6s ETA=0.4s      Rows: 1989/3067 (65%) 0.6s ETA=0.3s      Rows: 2142/3067 (70%) 0.6s ETA=0.3s      Rows: 2295/3067 (75%) 0.6s ETA=0.2s      Rows: 2448/3067 (80%) 0.7s ETA=0.2s      Rows: 2601/3067 (85%) 0.7s ETA=0.1s      Rows: 2754/3067 (90%) 0.7s ETA=0.1s      Rows: 2907/3067 (95%) 0.7s ETA=0.0s      Rows: 3060/3067 (100%) 0.7s ETA=0.0s      ✓ Done in 0.7s (3067 active × 5039 cols, GPU+HPDF)                      
+    GPU bilinear: 0.041s | CPU classify: 0.6s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N=  5040)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     1.7808409565              │
+  │  (bᵀv)²      =     1.5321577796              │
+  │  vᵀCv        =     0.2486831769              │
+  │  d²_N        =     0.3052337344              │
+  │  bᵀv         =     1.2378036111              │
+  │  1 - vᵀGv    =    -0.7808409565              │
+  │  gap·ln(N)   =    -6.6567951515              │
+  │  (bᵀv)²/vᵀGv =     0.8603563243              │
+  │  vtCv·ln(N)  =     2.1200642112              │
+  │  d²·ln(N)    =     2.6021668384              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N=  5040)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =    -4.9063514962                │
+  │  L(N)           =   -46.6593557040                │
+  │  Q(N)           =  -309.5427837454                │
+  │  R₂ = U-2L/lnN  =     6.0399177245                │
+  │  R₂ - 1         =     5.0399177245                │
+  │  (R₂-1)·lnN     =    42.9661118477  ← const?     │
+  │  Q/ln²N         =    -4.2590767680                │
+  │  C_recon         =    -6.6567951515  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =    -0.0008122815  → 0           │
+  │  S₂ = Σμlnk/k   =    -1.0068979152  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.2130234057  → -2γ         │
+  │  M(N)           =               -6                │
+  │  M(N)/√N        =    -0.0845154255                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     1.7808409565               │
+  │  vᵀGv (recon)    =     1.7808409565               │
+  │  U-2L/lnN+Q/ln²N =     1.7808409565               │
+  │  Δ runner↔recon  =         6.66e-16               │
+  │  Δ runner↔taper  =         4.00e-15               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.5209906372              │
+  │  gcd=2     vᵀGv_d =   0.5408348531              │
+  │  gcd=3     vᵀGv_d =   0.1987550726              │
+  │  gcd=5     vᵀGv_d =  -0.2586358746              │
+  │  gcd=6     vᵀGv_d =  -0.0809950885              │
+  │  gcd=7     vᵀGv_d =  -0.0733027395              │
+  │  gcd=10    vᵀGv_d =  -0.0194378668              │
+  │  gcd=11    vᵀGv_d =  -0.0571707963              │
+  │  gcd=13    vᵀGv_d =   0.0281938026              │
+  │  gcd=14    vᵀGv_d =  -0.0098415016              │
+  │  gcd=15    vᵀGv_d =  -0.0386888986              │
+  │  gcd=17    vᵀGv_d =  -0.0236214751              │
+  │  gcd=19    vᵀGv_d =   0.0106344083              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N5040.h5
+  ✓ Summary → results/summary_N5040.txt
+  ✓ GCD → results/gcd_decomp_N5040.tsv
+  ✓ Trace → results/trace_N5040.tsv
+  ✓ Cert → results/certificate_N5040.json
+  ✓ Dyadic → results/dyadic_N5040.tsv
+  ✓ ω-class → results/omega_class_N5040.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N10000.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=10000 (dim=9999) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N10000.h5
+  Matrix: 9999×9999 = 762 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 21, II ≤ 464
+  Non-zero weights: 6082/9999
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 9999×9999 (1.0s)
+  ✓ HPDF load: 1.1s (99980001 entries, 799.8 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 0.3s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.22s (800 MB)
+    GPU vᵀGv = 2.1412340716  (0.040s)
+    GPU U    = 7.7960577434  (0.041s)
+    GPU L    = 43.2040707435  (0.042s)
+    GPU Q    = 316.1476109585  (0.043s)
+    GPU taper total: 0.043s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 304/6082 (5%) 1.7s ETA=31.4s      Rows: 608/6082 (10%) 1.7s ETA=15.0s      Rows: 912/6082 (15%) 1.7s ETA=9.5s      Rows: 1216/6082 (20%) 1.7s ETA=6.7s      Rows: 1520/6082 (25%) 1.7s ETA=5.1s      Rows: 1824/6082 (30%) 1.7s ETA=4.0s      Rows: 2128/6082 (35%) 1.7s ETA=3.2s      Rows: 2432/6082 (40%) 1.7s ETA=2.6s      Rows: 2736/6082 (45%) 1.7s ETA=2.1s      Rows: 3040/6082 (50%) 1.7s ETA=1.8s      Rows: 3344/6082 (55%) 1.8s ETA=1.4s      Rows: 3648/6082 (60%) 1.8s ETA=1.2s      Rows: 3952/6082 (65%) 1.8s ETA=1.0s      Rows: 4256/6082 (70%) 1.8s ETA=0.8s      Rows: 4560/6082 (75%) 1.8s ETA=0.6s      Rows: 4864/6082 (80%) 1.8s ETA=0.5s      Rows: 5168/6082 (85%) 1.8s ETA=0.3s      Rows: 5472/6082 (90%) 1.8s ETA=0.2s      Rows: 5776/6082 (95%) 1.8s ETA=0.1s      Rows: 6080/6082 (100%) 1.9s ETA=0.0s      ✓ Done in 1.9s (6082 active × 9999 cols, GPU+HPDF)                      
+    GPU bilinear: 0.043s | CPU classify: 1.8s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N= 10000)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     2.1412340716              │
+  │  (bᵀv)²      =     1.5662862599              │
+  │  vᵀCv        =     0.5749478117              │
+  │  d²_N        =     0.6382068964              │
+  │  bᵀv         =     1.2515135876              │
+  │  1 - vᵀGv    =    -1.1412340716              │
+  │  gap·ln(N)   =   -10.5111542434              │
+  │  (bᵀv)²/vᵀGv =     0.7314876410              │
+  │  vtCv·ln(N)  =     5.2954650415              │
+  │  d²·ln(N)    =     5.8781027436              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N= 10000)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     7.7960577434                │
+  │  L(N)           =    43.2040707435                │
+  │  Q(N)           =   316.1476109585                │
+  │  R₂ = U-2L/lnN  =    -1.5855870165                │
+  │  R₂ - 1         =    -2.5855870165                │
+  │  (R₂-1)·lnN     =   -23.8141364831  ← const?     │
+  │  Q/ln²N         =     3.7268210881                │
+  │  C_recon         =   -10.5111542434  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =    -0.0020826998  → 0           │
+  │  S₂ = Σμlnk/k   =    -1.0192100362  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.3315968215  → -2γ         │
+  │  M(N)           =              -23                │
+  │  M(N)/√N        =    -0.2300000000                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     2.1412340716               │
+  │  vᵀGv (recon)    =     2.1412340716               │
+  │  U-2L/lnN+Q/ln²N =     2.1412340716               │
+  │  Δ runner↔recon  =         1.33e-15               │
+  │  Δ runner↔taper  =         2.66e-15               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.6562707451              │
+  │  gcd=2     vᵀGv_d =   0.6222382437              │
+  │  gcd=3     vᵀGv_d =   0.2936515396              │
+  │  gcd=5     vᵀGv_d =  -0.2315741193              │
+  │  gcd=6     vᵀGv_d =  -0.0973947462              │
+  │  gcd=7     vᵀGv_d =  -0.0607495822              │
+  │  gcd=10    vᵀGv_d =  -0.0179442128              │
+  │  gcd=11    vᵀGv_d =  -0.0708128263              │
+  │  gcd=13    vᵀGv_d =   0.0248650536              │
+  │  gcd=14    vᵀGv_d =  -0.0019554465              │
+  │  gcd=15    vᵀGv_d =  -0.0444903012              │
+  │  gcd=17    vᵀGv_d =  -0.0031736495              │
+  │  gcd=19    vᵀGv_d =   0.0133873429              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N10000.h5
+  ✓ Summary → results/summary_N10000.txt
+  ✓ GCD → results/gcd_decomp_N10000.tsv
+  ✓ Trace → results/trace_N10000.tsv
+  ✓ Cert → results/certificate_N10000.json
+  ✓ Dyadic → results/dyadic_N10000.tsv
+  ✓ ω-class → results/omega_class_N10000.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N20000.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=20000 (dim=19999) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N20000.h5
+  Matrix: 19999×19999 = 3051 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 27, II ≤ 736
+  Non-zero weights: 12159/19999
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 19999×19999 (4.2s)
+  ✓ HPDF load: 4.2s (399960001 entries, 3199.7 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 1.3s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 0.50s (3200 MB)
+    GPU vᵀGv = 2.0535203709  (0.031s)
+    GPU U    = 3.8688424004  (0.034s)
+    GPU L    = 14.6326314201  (0.038s)
+    GPU Q    = 111.7830776626  (0.042s)
+    GPU taper total: 0.042s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 607/12159 (5%) 6.1s ETA=115.6s      Rows: 1214/12159 (10%) 6.1s ETA=55.0s      Rows: 1821/12159 (15%) 6.2s ETA=35.1s      Rows: 2428/12159 (20%) 6.2s ETA=24.9s      Rows: 3035/12159 (25%) 6.2s ETA=18.7s      Rows: 3642/12159 (30%) 6.3s ETA=14.6s      Rows: 4249/12159 (35%) 6.3s ETA=11.7s      Rows: 4856/12159 (40%) 6.3s ETA=9.5s      Rows: 5463/12159 (45%) 6.3s ETA=7.8s      Rows: 6070/12159 (50%) 6.4s ETA=6.4s      Rows: 6677/12159 (55%) 6.4s ETA=5.3s      Rows: 7284/12159 (60%) 6.4s ETA=4.3s      Rows: 7891/12159 (65%) 6.5s ETA=3.5s      Rows: 8498/12159 (70%) 6.5s ETA=2.8s      Rows: 9105/12159 (75%) 6.5s ETA=2.2s      Rows: 9712/12159 (80%) 6.5s ETA=1.6s      Rows: 10319/12159 (85%) 6.6s ETA=1.2s      Rows: 10926/12159 (90%) 6.6s ETA=0.7s      Rows: 11533/12159 (95%) 6.6s ETA=0.4s      Rows: 12140/12159 (100%) 6.7s ETA=0.0s      ✓ Done in 6.7s (12159 active × 19999 cols, GPU+HPDF)                      
+    GPU bilinear: 0.042s | CPU classify: 6.6s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N= 20000)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     2.0535203709              │
+  │  (bᵀv)²      =     1.5965131007              │
+  │  vᵀCv        =     0.4570072702              │
+  │  d²_N        =     0.5264563823              │
+  │  bᵀv         =     1.2635319943              │
+  │  1 - vᵀGv    =    -1.0535203709              │
+  │  gap·ln(N)   =   -10.4335258799              │
+  │  (bᵀv)²/vᵀGv =     0.7774517961              │
+  │  vtCv·ln(N)  =     4.5259658121              │
+  │  d²·ln(N)    =     5.2137542287              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N= 20000)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     3.8688424004                │
+  │  L(N)           =    14.6326314201                │
+  │  Q(N)           =   111.7830776626                │
+  │  R₂ = U-2L/lnN  =     0.9137962426                │
+  │  R₂ - 1         =    -0.0862037574                │
+  │  (R₂-1)·lnN     =    -0.8537178380  ← const?     │
+  │  Q/ln²N         =     1.1397241283                │
+  │  C_recon         =   -10.4335258799  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =     0.0014003096  → 0           │
+  │  S₂ = Σμlnk/k   =    -0.9861245314  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.0169568887  → -2γ         │
+  │  M(N)           =               26                │
+  │  M(N)/√N        =     0.1838477631                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     2.0535203709               │
+  │  vᵀGv (recon)    =     2.0535203709               │
+  │  U-2L/lnN+Q/ln²N =     2.0535203709               │
+  │  Δ runner↔recon  =         8.88e-16               │
+  │  Δ runner↔taper  =         8.88e-16               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.4609387529              │
+  │  gcd=2     vᵀGv_d =   0.7199342365              │
+  │  gcd=3     vᵀGv_d =   0.3610178633              │
+  │  gcd=5     vᵀGv_d =  -0.2382425999              │
+  │  gcd=6     vᵀGv_d =  -0.1277181562              │
+  │  gcd=7     vᵀGv_d =  -0.0483152646              │
+  │  gcd=10    vᵀGv_d =  -0.0238473629              │
+  │  gcd=11    vᵀGv_d =  -0.0731508112              │
+  │  gcd=13    vᵀGv_d =   0.0091675100              │
+  │  gcd=14    vᵀGv_d =  -0.0114566227              │
+  │  gcd=15    vᵀGv_d =  -0.0507886392              │
+  │  gcd=17    vᵀGv_d =  -0.0039253116              │
+  │  gcd=19    vᵀGv_d =   0.0171698997              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N20000.h5
+  ✓ Summary → results/summary_N20000.txt
+  ✓ GCD → results/gcd_decomp_N20000.tsv
+  ✓ Trace → results/trace_N20000.tsv
+  ✓ Cert → results/certificate_N20000.json
+  ✓ Dyadic → results/dyadic_N20000.tsv
+  ✓ ω-class → results/omega_class_N20000.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N40000.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=40000 (dim=39999) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N40000.h5
+  Matrix: 39999×39999 = 12206 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 34, II ≤ 1169
+  Non-zero weights: 24309/39999
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 39999×39999 (18.9s)
+  ✓ HPDF load: 19.0s (1599920001 entries, 12799.4 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 6.1s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 1.64s (12799 MB)
+    GPU vᵀGv = 2.0165256529  (0.044s)
+    GPU U    = 1.3830842167  (0.059s)
+    GPU L    = -3.5340685541  (0.075s)
+    GPU Q    = -3.7701722634  (0.091s)
+    GPU taper total: 0.091s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 1215/24309 (5%) 27.0s ETA=513.0s      Rows: 2430/24309 (10%) 27.1s ETA=244.2s      Rows: 3645/24309 (15%) 27.2s ETA=154.3s      Rows: 4860/24309 (20%) 27.3s ETA=109.4s      Rows: 6075/24309 (25%) 27.4s ETA=82.3s      Rows: 7290/24309 (30%) 27.5s ETA=64.3s      Rows: 8505/24309 (35%) 27.6s ETA=51.4s      Rows: 9720/24309 (40%) 27.8s ETA=41.7s      Rows: 10935/24309 (45%) 27.9s ETA=34.1s      Rows: 12150/24309 (50%) 28.0s ETA=28.0s      Rows: 13365/24309 (55%) 28.1s ETA=23.0s      Rows: 14580/24309 (60%) 28.2s ETA=18.8s      Rows: 15795/24309 (65%) 28.4s ETA=15.3s      Rows: 17010/24309 (70%) 28.5s ETA=12.2s      Rows: 18225/24309 (75%) 28.6s ETA=9.5s      Rows: 19440/24309 (80%) 28.7s ETA=7.2s      Rows: 20655/24309 (85%) 28.8s ETA=5.1s      Rows: 21870/24309 (90%) 28.9s ETA=3.2s      Rows: 23085/24309 (95%) 29.1s ETA=1.5s      Rows: 24300/24309 (100%) 29.2s ETA=0.0s      ✓ Done in 29.2s (24309 active × 39999 cols, GPU+HPDF)                      
+    GPU bilinear: 0.091s | CPU classify: 29.1s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N= 40000)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     2.0165256529              │
+  │  (bᵀv)²      =     1.6229450323              │
+  │  vᵀCv        =     0.3935806206              │
+  │  d²_N        =     0.4686284554              │
+  │  bᵀv         =     1.2739485988              │
+  │  1 - vᵀGv    =    -1.0165256529              │
+  │  gap·ln(N)   =   -10.7717510402              │
+  │  (bᵀv)²/vᵀGv =     0.8048224083              │
+  │  vtCv·ln(N)  =     4.1706300746              │
+  │  d²·ln(N)    =     4.9658845670              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N= 40000)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     1.3830842167                │
+  │  L(N)           =    -3.5340685541                │
+  │  Q(N)           =    -3.7701722634                │
+  │  R₂ = U-2L/lnN  =     2.0501013675                │
+  │  R₂ - 1         =     1.0501013675                │
+  │  (R₂-1)·lnN     =    11.1275406242  ← const?     │
+  │  Q/ln²N         =    -0.0335757146                │
+  │  C_recon         =   -10.7717510402  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =    -0.0002080207  → 0           │
+  │  S₂ = Σμlnk/k   =    -1.0021997100  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.1776850700  → -2γ         │
+  │  M(N)           =              -10                │
+  │  M(N)/√N        =    -0.0500000000                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     2.0165256529               │
+  │  vᵀGv (recon)    =     2.0165256529               │
+  │  U-2L/lnN+Q/ln²N =     2.0165256529               │
+  │  Δ runner↔recon  =         8.88e-16               │
+  │  Δ runner↔taper  =           0.00e0               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.3563108125              │
+  │  gcd=2     vᵀGv_d =   0.7565377066              │
+  │  gcd=3     vᵀGv_d =   0.4046930214              │
+  │  gcd=5     vᵀGv_d =  -0.2611393926              │
+  │  gcd=6     vᵀGv_d =  -0.1265651546              │
+  │  gcd=7     vᵀGv_d =  -0.0708673144              │
+  │  gcd=10    vᵀGv_d =  -0.0168700615              │
+  │  gcd=11    vᵀGv_d =  -0.0827599951              │
+  │  gcd=13    vᵀGv_d =   0.0169352312              │
+  │  gcd=14    vᵀGv_d =   0.0032181215              │
+  │  gcd=15    vᵀGv_d =  -0.0586957382              │
+  │  gcd=17    vᵀGv_d =   0.0017044281              │
+  │  gcd=19    vᵀGv_d =   0.0302736592              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N40000.h5
+  ✓ Summary → results/summary_N40000.txt
+  ✓ GCD → results/gcd_decomp_N40000.tsv
+  ✓ Trace → results/trace_N40000.tsv
+  ✓ Cert → results/certificate_N40000.json
+  ✓ Dyadic → results/dyadic_N40000.tsv
+  ✓ ω-class → results/omega_class_N40000.tsv
+
+═══ ALL COMPLETE ═══
+
+━━━ gram_N55440.h5 ━━━
+╔═══════════════════════════════════════════════════╗
+║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║
+║  12 decompositions · HPDF/DD · Taper Tracker · GPU ready ║
+╚═══════════════════════════════════════════════════╝
+  🎮 GPU: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+
+═══ MÖBIUS MICROSCOPE N=55440 (dim=55439) [GPU + HPDF DD (~31 digits)] ═══
+  File: experiments/cache/hpdf/gram_N55440.h5
+  Matrix: 55439×55439 = 23448 MB (fits in 7287940053715 MB VRAM)
+  Vaughan: I ≤ 38, II ≤ 1453
+  Non-zero weights: 33711/55439
+  Loading full Gram matrix from HPDF...
+  [32m✓[0m HPDF gram read: 55439×55439 (44.7s)
+  ✓ HPDF load: 44.8s (3073482721 entries, 24587.9 MB)
+  Expanding to full dense matrix...
+  ✓ Dense expand: 10.8s
+  Uploading Gram matrix to GPU...
+    GPU Gram upload: 3.13s (24588 MB)
+    GPU vᵀGv = 1.8381747698  (0.076s)
+    GPU U    = 1.7061292418  (0.115s)
+    GPU L    = 1.3582785863  (0.142s)
+    GPU Q    = 45.4278778733  (0.184s)
+    GPU taper total: 0.184s
+  Running CPU row classification (GCD/Vaughan/ω-class)...
+  Rows: 1685/33711 (5%) 59.1s ETA=1123.6s      Rows: 3370/33711 (10%) 59.3s ETA=534.2s      Rows: 5055/33711 (15%) 59.6s ETA=337.8s      Rows: 6740/33711 (20%) 59.8s ETA=239.3s      Rows: 8425/33711 (25%) 60.1s ETA=180.3s      Rows: 10110/33711 (30%) 60.3s ETA=140.7s      Rows: 11795/33711 (35%) 60.5s ETA=112.4s      Rows: 13480/33711 (40%) 60.7s ETA=91.1s      Rows: 15165/33711 (45%) 60.9s ETA=74.5s      Rows: 16850/33711 (50%) 61.2s ETA=61.2s      Rows: 18535/33711 (55%) 61.4s ETA=50.3s      Rows: 20220/33711 (60%) 61.6s ETA=41.1s      Rows: 21905/33711 (65%) 61.9s ETA=33.3s      Rows: 23590/33711 (70%) 62.1s ETA=26.6s      Rows: 25275/33711 (75%) 62.3s ETA=20.8s      Rows: 26960/33711 (80%) 62.6s ETA=15.7s      Rows: 28645/33711 (85%) 62.8s ETA=11.1s      Rows: 30330/33711 (90%) 63.0s ETA=7.0s      Rows: 32015/33711 (95%) 63.2s ETA=3.3s      Rows: 33700/33711 (100%) 63.4s ETA=0.0s      ✓ Done in 63.5s (33711 active × 55439 cols, GPU+HPDF)                      
+    GPU bilinear: 0.184s | CPU classify: 63.3s
+
+  ┌─────────────────────────────────────────────┐
+  │  GRAM BOUND ANALYSIS (N= 55440)              │
+  ├─────────────────────────────────────────────┤
+  │  vᵀGv        =     1.8381747698              │
+  │  (bᵀv)²      =     1.6341047338              │
+  │  vᵀCv        =     0.2040700360              │
+  │  d²_N        =     0.2815326487              │
+  │  bᵀv         =     1.2783210605              │
+  │  1 - vᵀGv    =    -0.8381747698              │
+  │  gap·ln(N)   =    -9.1554304798              │
+  │  (bᵀv)²/vᵀGv =     0.8889822451              │
+  │  vtCv·ln(N)  =     2.2290685603              │
+  │  d²·ln(N)    =     3.0751970663              │
+  │  Precision   =           GPU+DD              │
+  └─────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  §5 TAPER CANCELLATION (N= 55440)                │
+  ├─────────────────────────────────────────────────┤
+  │  U(N)           =     1.7061292418                │
+  │  L(N)           =     1.3582785863                │
+  │  Q(N)           =    45.4278778733                │
+  │  R₂ = U-2L/lnN  =     1.4574298838                │
+  │  R₂ - 1         =     0.4574298838                │
+  │  (R₂-1)·lnN     =     4.9965325270  ← const?     │
+  │  Q/ln²N         =     0.3807448860                │
+  │  C_recon         =    -9.1554304798  ← ≈2.87?     │
+  ├─────────────────────────────────────────────────┤
+  │  PNT SUB-SUMS                                  │
+  │  S₁ = Σμ/k      =     0.0004634915  → 0           │
+  │  S₂ = Σμlnk/k   =    -0.9950047657  → -1          │
+  │  S₃ = Σμln²k/k  =    -1.1006044253  → -2γ         │
+  │  M(N)           =               20                │
+  │  M(N)/√N        =     0.0849411986                │
+  ├─────────────────────────────────────────────────┤
+  │  CROSS-CHECK                                   │
+  │  vᵀGv (runner)   =     1.8381747698               │
+  │  vᵀGv (recon)    =     1.8381747698               │
+  │  U-2L/lnN+Q/ln²N =     1.8381747698               │
+  │  Δ runner↔recon  =         2.22e-16               │
+  │  Δ runner↔taper  =         4.44e-15               │
+  └─────────────────────────────────────────────────┘
+  ┌─────────────────────────────────────────────────┐
+  │  GCD-STRATIFIED vᵀGv                            │
+  │  gcd=1     vᵀGv_d =   1.1811768009              │
+  │  gcd=2     vᵀGv_d =   0.7532917046              │
+  │  gcd=3     vᵀGv_d =   0.4223558350              │
+  │  gcd=5     vᵀGv_d =  -0.2381772459              │
+  │  gcd=6     vᵀGv_d =  -0.1382077648              │
+  │  gcd=7     vᵀGv_d =  -0.0586922305              │
+  │  gcd=10    vᵀGv_d =  -0.0281633480              │
+  │  gcd=11    vᵀGv_d =  -0.0553856406              │
+  │  gcd=13    vᵀGv_d =   0.0262949652              │
+  │  gcd=14    vᵀGv_d =  -0.0015187163              │
+  │  gcd=15    vᵀGv_d =  -0.0588331205              │
+  │  gcd=17    vᵀGv_d =   0.0031110543              │
+  │  gcd=19    vᵀGv_d =   0.0366714692              │
+  └─────────────────────────────────────────────────┘
+  ✓ Stamped /microscope metadata → experiments/cache/hpdf/gram_N55440.h5
+  ✓ Summary → results/summary_N55440.txt
+  ✓ GCD → results/gcd_decomp_N55440.tsv
+  ✓ Trace → results/trace_N55440.tsv
+  ✓ Cert → results/certificate_N55440.json
+  ✓ Dyadic → results/dyadic_N55440.tsv
+  ✓ ω-class → results/omega_class_N55440.tsv
+
+═══ ALL COMPLETE ═══
+═══ SWEEP COMPLETE ═══

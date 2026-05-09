@@ -41,6 +41,7 @@ members = [
     "experiments/vasyunin",
     "experiments/vasyunin-convergence",
     "experiments/covariance-decay",
+    "experiments/cathedral-rl",
     "experiments/vasyunin-integral",
 
     # ═══════════════════════════════════════════════

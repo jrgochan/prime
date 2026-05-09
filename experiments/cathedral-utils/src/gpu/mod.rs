@@ -33,6 +33,9 @@ pub mod cholesky;
 #[cfg(feature = "gpu")]
 pub mod matvec;
 
+#[cfg(feature = "gpu")]
+pub mod bilinear;
+
 /// GPU device information.
 #[derive(Debug, Clone)]
 pub struct GpuInfo {

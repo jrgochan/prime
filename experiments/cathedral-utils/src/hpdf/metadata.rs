@@ -6,6 +6,7 @@
 
 use hdf5::Group;
 use ndarray::Array1;
+use rayon::prelude::*;
 
 use crate::arith;
 use super::helpers::{write_str_attr, write_scalar_attr};
@@ -25,76 +26,205 @@ pub struct StructuralStats {
     pub frobenius_norm: f64,
     pub condition_estimate: f64,
     pub off_diag_max: f64,
-    /// Gershgorin lower bound on λ_min: min_i (G[i,i] - Σ_{j≠i} |G[i,j]|)
+    /// Gershgorin lower bound on λ_min: min_i (G[i,i] − Σ_{j≠i} |G[i,j]|)
     pub gershgorin_lambda_min: f64,
     /// Gershgorin upper bound on λ_max: max_i (G[i,i] + Σ_{j≠i} |G[i,j]|)
     pub gershgorin_lambda_max: f64,
     /// Average off-diagonal magnitude per row — measures "diffuseness".
     pub off_diag_avg: f64,
+    // ---- NEW fields ----
+    /// ‖G‖₁ = max col sum of |G| (maximum absolute column sum norm).
+    pub matrix_1_norm: f64,
+    /// ‖G‖_∞ = max row sum of |G| (maximum absolute row sum norm).
+    pub matrix_inf_norm: f64,
+    /// min_i (G_ii / Σ_{j≠i} |G_ij|). Values > 1 certify diagonal dominance → PD.
+    pub diagonal_dominance_ratio: f64,
+    /// Minimum value across the entire matrix.
+    pub entry_min: f64,
+    /// Maximum value across the entire matrix.
+    pub entry_max: f64,
+    /// Mean of all unique upper-triangle entries (including diagonal).
+    pub entry_mean: f64,
+    /// Variance of all unique upper-triangle entries.
+    pub entry_variance: f64,
+    /// max|G_ij - G_ji| — verifies the matrix is symmetric (should be 0).
+    pub symmetry_residual: f64,
+    /// Σ G_ii² — second moment of the diagonal, used in spectral moment analysis.
+    pub diag_sum_sq: f64,
 }
 
 impl StructuralStats {
     /// Compute all structural statistics from a dim×dim row-major matrix.
+    ///
+    /// Uses rayon for row-parallel reduction on the O(N²) passes.
     pub fn compute(data: &[f64], dim: usize) -> Self {
-        let diagonal: Vec<f64> = (0..dim).map(|i| data[i * dim + i]).collect();
-        let diag_min = diagonal.iter().cloned().fold(f64::INFINITY, f64::min);
-        let diag_max = diagonal.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        let trace: f64 = diagonal.iter().sum();
+        // Per-row statistics computed in parallel
+        struct RowStats {
+            diag: f64,
+            row_sum: f64,
+            off_diag_abs_sum: f64,  // Σ_{j≠i} |G_ij| (Gershgorin radius)
+            frob_sq_contrib: f64,   // G_ii² + 2·Σ_{j>i} G_ij²
+            off_max: f64,
+            off_sum: f64,           // Σ_{j>i} |G_ij| for off-diag avg
+            off_count: usize,
+            gersh_min: f64,         // G_ii - R_i
+            gersh_max: f64,         // G_ii + R_i
+            col_abs_sums: Vec<f64>, // |G_ij| for each column j (for 1-norm)
+            col_sq_sums: Vec<f64>,  // G_ij² for each column j (for col norms)
+            entry_min: f64,
+            entry_max: f64,
+            entry_sum: f64,         // Σ_{j>=i} G_ij
+            entry_sq_sum: f64,      // Σ_{j>=i} G_ij²
+            entry_count: usize,     // count of unique entries in this row
+            sym_residual: f64,      // max|G_ij - G_ji|
+        }
 
-        let row_sums: Vec<f64> = (0..dim).map(|i| {
-            (0..dim).map(|j| data[i * dim + j]).sum()
-        }).collect();
+        let row_stats: Vec<RowStats> = (0..dim)
+            .into_par_iter()
+            .map(|i| {
+                let diag = data[i * dim + i];
+                let mut row_sum = 0.0f64;
+                let mut off_abs_sum = 0.0f64;
+                let mut frob_sq = diag * diag;  // diagonal contribution
+                let mut off_max = 0.0f64;
+                let mut off_sum = 0.0f64;
+                let mut off_count = 0usize;
+                let mut col_abs_sums = vec![0.0f64; dim];
+                let mut col_sq_sums = vec![0.0f64; dim];
+                let mut e_min = diag;
+                let mut e_max = diag;
+                let mut e_sum = diag;
+                let mut e_sq_sum = diag * diag;
+                let mut e_count = 1usize; // diagonal
+                let mut sym_res = 0.0f64;
 
-        // Column L2 norms
-        let col_norms: Vec<f64> = (0..dim).map(|j| {
-            let s: f64 = (0..dim).map(|i| {
-                let v = data[i * dim + j];
-                v * v
-            }).sum();
-            s.sqrt()
-        }).collect();
+                for j in 0..dim {
+                    let v = data[i * dim + j];
+                    row_sum += v;
+                    col_abs_sums[j] = v.abs();
+                    col_sq_sums[j] = v * v;
 
-        // Frobenius norm: sqrt(sum of all entries squared)
-        // Since symmetric, ‖G‖_F² = Σ_diag g²_ii + 2·Σ_{i<j} g²_ij
+                    if j != i {
+                        let a = v.abs();
+                        off_abs_sum += a;
+                    }
+
+                    if j > i {
+                        let a = v.abs();
+                        frob_sq += 2.0 * v * v;
+                        off_max = off_max.max(a);
+                        off_sum += a;
+                        off_count += 1;
+                        e_min = e_min.min(v);
+                        e_max = e_max.max(v);
+                        e_sum += v;
+                        e_sq_sum += v * v;
+                        e_count += 1;
+
+                        // Symmetry check
+                        let v_ji = data[j * dim + i];
+                        sym_res = sym_res.max((v - v_ji).abs());
+                    }
+                }
+
+                let gersh_min = diag - off_abs_sum;
+                let gersh_max = diag + off_abs_sum;
+
+                RowStats {
+                    diag, row_sum, off_diag_abs_sum: off_abs_sum,
+                    frob_sq_contrib: frob_sq, off_max, off_sum, off_count,
+                    gersh_min, gersh_max, col_abs_sums, col_sq_sums,
+                    entry_min: e_min, entry_max: e_max,
+                    entry_sum: e_sum, entry_sq_sum: e_sq_sum, entry_count: e_count,
+                    sym_residual: sym_res,
+                }
+            })
+            .collect();
+
+        // Reduce
+        let mut diagonal = Vec::with_capacity(dim);
+        let mut row_sums = Vec::with_capacity(dim);
+        let mut diag_min = f64::INFINITY;
+        let mut diag_max = f64::NEG_INFINITY;
+        let mut trace = 0.0f64;
         let mut frob_sq = 0.0f64;
-        for i in 0..dim {
-            frob_sq += data[i * dim + i] * data[i * dim + i];
-            for j in (i + 1)..dim {
-                frob_sq += 2.0 * data[i * dim + j] * data[i * dim + j];
-            }
-        }
-        let frobenius_norm = frob_sq.sqrt();
-
-        // Rough condition estimate from diagonal extremes
-        let condition_estimate = if diag_min > 0.0 { diag_max / diag_min } else { f64::INFINITY };
-
-        // Off-diagonal statistics
         let mut off_diag_max = 0.0f64;
-        let mut off_diag_sum = 0.0f64;
-        let mut off_diag_count = 0usize;
-        for i in 0..dim {
-            for j in (i + 1)..dim {
-                let v = data[i * dim + j].abs();
-                off_diag_max = off_diag_max.max(v);
-                off_diag_sum += v;
-                off_diag_count += 1;
-            }
-        }
-        let off_diag_avg = if off_diag_count > 0 { off_diag_sum / off_diag_count as f64 } else { 0.0 };
-
-        // Gershgorin disc bounds:
-        //   Each eigenvalue lies in at least one disc [G[i,i] - R_i, G[i,i] + R_i]
-        //   where R_i = Σ_{j≠i} |G[i,j]|
+        let mut off_sum_total = 0.0f64;
+        let mut off_count_total = 0usize;
         let mut gersh_min = f64::INFINITY;
         let mut gersh_max = f64::NEG_INFINITY;
-        for i in 0..dim {
-            let mut r_i = 0.0f64;
-            for j in 0..dim {
-                if j != i { r_i += data[i * dim + j].abs(); }
+        let mut inf_norm = 0.0f64;  // max row sum of |G|
+        let mut col_abs_sums = vec![0.0f64; dim];
+        let mut col_sq_sums = vec![0.0f64; dim];
+        let mut entry_min = f64::INFINITY;
+        let mut entry_max = f64::NEG_INFINITY;
+        let mut entry_sum = 0.0f64;
+        let mut entry_sq_sum = 0.0f64;
+        let mut entry_count = 0usize;
+        let mut sym_residual = 0.0f64;
+        let mut diag_sum_sq = 0.0f64;
+        let mut dd_ratio_min = f64::INFINITY;
+
+        for rs in &row_stats {
+            diagonal.push(rs.diag);
+            row_sums.push(rs.row_sum);
+            diag_min = diag_min.min(rs.diag);
+            diag_max = diag_max.max(rs.diag);
+            trace += rs.diag;
+            diag_sum_sq += rs.diag * rs.diag;
+
+            // Each row i contributes G_ii² + 2·Σ_{j>i} G_ij²
+            // Summing all rows gives exactly ‖G‖_F².
+            frob_sq += rs.frob_sq_contrib;
+            off_diag_max = off_diag_max.max(rs.off_max);
+            off_sum_total += rs.off_sum;
+            off_count_total += rs.off_count;
+            gersh_min = gersh_min.min(rs.gersh_min);
+            gersh_max = gersh_max.max(rs.gersh_max);
+
+            // ‖G‖_∞ = max_i Σ_j |G_ij|
+            let row_abs_sum: f64 = rs.col_abs_sums.iter().sum();
+            inf_norm = inf_norm.max(row_abs_sum);
+
+            // Accumulate column sums for ‖G‖₁
+            for (j, &v) in rs.col_abs_sums.iter().enumerate() {
+                col_abs_sums[j] += v;
             }
-            gersh_min = gersh_min.min(diagonal[i] - r_i);
-            gersh_max = gersh_max.max(diagonal[i] + r_i);
+            for (j, &v) in rs.col_sq_sums.iter().enumerate() {
+                col_sq_sums[j] += v;
+            }
+
+            entry_min = entry_min.min(rs.entry_min);
+            entry_max = entry_max.max(rs.entry_max);
+            entry_sum += rs.entry_sum;
+            entry_sq_sum += rs.entry_sq_sum;
+            entry_count += rs.entry_count;
+            sym_residual = sym_residual.max(rs.sym_residual);
+
+            // Diagonal dominance: G_ii / R_i where R_i = Σ_{j≠i} |G_ij|
+            if rs.off_diag_abs_sum > 0.0 {
+                dd_ratio_min = dd_ratio_min.min(rs.diag / rs.off_diag_abs_sum);
+            }
         }
+
+        //   row i contributes: G_ii²  (diagonal, counted once)
+        //                    + 2 * Σ_{j>i} G_ij²  (upper triangle, counted once)
+        //   Summing all i: Σ_i G_ii² + 2 * Σ_{i<j} G_ij² = ‖G‖_F²  ✔
+        let frobenius_norm = frob_sq.sqrt();
+
+        let condition_estimate = if diag_min > 0.0 { diag_max / diag_min } else { f64::INFINITY };
+        let off_diag_avg = if off_count_total > 0 { off_sum_total / off_count_total as f64 } else { 0.0 };
+
+        // ‖G‖₁ = max_j Σ_i |G_ij|
+        let matrix_1_norm = col_abs_sums.iter().cloned().fold(0.0f64, f64::max);
+
+        // Column L2 norms
+        let col_norms: Vec<f64> = col_sq_sums.iter().map(|s| s.sqrt()).collect();
+
+        let entry_mean = if entry_count > 0 { entry_sum / entry_count as f64 } else { 0.0 };
+        let entry_variance = if entry_count > 1 {
+            (entry_sq_sum / entry_count as f64) - entry_mean * entry_mean
+        } else { 0.0 };
 
         Self {
             diagonal, row_sums, col_norms,
@@ -103,6 +233,15 @@ impl StructuralStats {
             gershgorin_lambda_min: gersh_min,
             gershgorin_lambda_max: gersh_max,
             off_diag_avg,
+            matrix_1_norm,
+            matrix_inf_norm: inf_norm,
+            diagonal_dominance_ratio: dd_ratio_min,
+            entry_min,
+            entry_max,
+            entry_mean,
+            entry_variance,
+            symmetry_residual: sym_residual,
+            diag_sum_sq,
         }
     }
 
@@ -118,7 +257,7 @@ impl StructuralStats {
         let cn_arr = Array1::from(self.col_norms.clone());
         grp.new_dataset_builder().with_data(&cn_arr).create("col_norms")?;
 
-        // Scalar attributes
+        // Scalar attributes — original
         write_scalar_attr(grp, "diagonal_min", self.diag_min)?;
         write_scalar_attr(grp, "diagonal_max", self.diag_max)?;
         write_scalar_attr(grp, "trace", self.trace)?;
@@ -130,6 +269,17 @@ impl StructuralStats {
         // Gershgorin spectral bounds
         write_scalar_attr(grp, "gershgorin_lambda_min", self.gershgorin_lambda_min)?;
         write_scalar_attr(grp, "gershgorin_lambda_max", self.gershgorin_lambda_max)?;
+
+        // ---- NEW attributes ----
+        write_scalar_attr(grp, "matrix_1_norm", self.matrix_1_norm)?;
+        write_scalar_attr(grp, "matrix_inf_norm", self.matrix_inf_norm)?;
+        write_scalar_attr(grp, "diagonal_dominance_ratio", self.diagonal_dominance_ratio)?;
+        write_scalar_attr(grp, "entry_min", self.entry_min)?;
+        write_scalar_attr(grp, "entry_max", self.entry_max)?;
+        write_scalar_attr(grp, "entry_mean", self.entry_mean)?;
+        write_scalar_attr(grp, "entry_variance", self.entry_variance)?;
+        write_scalar_attr(grp, "symmetry_residual", self.symmetry_residual)?;
+        write_scalar_attr(grp, "diagonal_sum_sq", self.diag_sum_sq)?;
 
         Ok(())
     }
@@ -364,6 +514,108 @@ pub fn stamp_distance(path: &std::path::Path, result: &DistanceResult) -> hdf5::
             .create("convergence_history")?;
         write_scalar_attr(&dist_grp, "history_len", hist.len() as u64)?;
     }
+
+    Ok(())
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MICROSCOPE — /microscope group (post-analysis diagnostics)
+// ═══════════════════════════════════════════════════════════════
+
+/// Microscope diagnostic result to stamp into an HPDF file.
+///
+/// Contains the full taper decomposition identity, Gram bound analysis,
+/// PNT sub-sums, and cross-check residuals from the Möbius Microscope.
+pub struct MicroscopeResult {
+    /// N value analyzed
+    pub n: usize,
+    /// Precision label (e.g. "DD", "HPDF-f64", "f64")
+    pub precision: String,
+
+    // Gram bound analysis
+    pub vtgv: f64,
+    pub btv: f64,
+    pub btv_sq: f64,
+    pub vtcv: f64,
+    pub d2n: f64,
+    pub gap: f64,           // 1 - vᵀGv
+    pub gap_times_ln: f64,  // (1-vᵀGv)·lnN
+
+    // Taper decomposition: vᵀGv = U - 2L/lnN + Q/ln²N
+    pub u_sum: f64,
+    pub l_sum: f64,
+    pub q_sum: f64,
+    pub r2: f64,            // R₂ = U - 2L/lnN
+    pub r2_minus_1: f64,
+    pub r2_times_ln: f64,   // (R₂-1)·lnN → const
+    pub q_over_ln2: f64,    // Q/ln²N
+    pub c_recon: f64,       // (1-vᵀGv)·lnN
+
+    // Independent vᵀGv reconstruction from f64 Gram entries
+    pub vtgv_recon: f64,
+    // Cross-check: |U-2L/lnN+Q/ln²N - vᵀGv|
+    pub cross_check_delta: f64,
+
+    // PNT sub-sums
+    pub s1: f64,            // Σμ/k → 0
+    pub s2: f64,            // Σμlnk/k → -1
+    pub s3: f64,            // Σμln²k/k → -2γ
+    pub mertens: f64,       // M(N) = Σμ(k)
+    pub mertens_over_sqrt: f64,
+
+    /// Wall-clock time for the analysis (seconds)
+    pub elapsed_secs: f64,
+}
+
+/// Stamp microscope diagnostic results into an existing HPDF file.
+///
+/// Creates or replaces a `/microscope` group with the full taper
+/// decomposition, Gram bound analysis, and PNT sub-sums. Idempotent:
+/// if `/microscope` already exists it is deleted and recreated.
+pub fn stamp_microscope(path: &std::path::Path, result: &MicroscopeResult) -> hdf5::Result<()> {
+    let file = hdf5::File::open_rw(path)?;
+
+    // Idempotent: remove old group if it exists
+    if file.group("microscope").is_ok() {
+        file.unlink("microscope")?;
+    }
+
+    let grp = file.create_group("microscope")?;
+    write_str_attr(&grp, "timestamp", &super::helpers::unix_timestamp())?;
+    write_scalar_attr(&grp, "N", result.n as u64)?;
+    write_str_attr(&grp, "precision", &result.precision)?;
+    write_scalar_attr(&grp, "elapsed_secs", result.elapsed_secs)?;
+
+    // Gram bound analysis
+    let gram_grp = grp.create_group("gram_bound")?;
+    write_scalar_attr(&gram_grp, "vtGv", result.vtgv)?;
+    write_scalar_attr(&gram_grp, "btv", result.btv)?;
+    write_scalar_attr(&gram_grp, "btv_sq", result.btv_sq)?;
+    write_scalar_attr(&gram_grp, "vtCv", result.vtcv)?;
+    write_scalar_attr(&gram_grp, "d2N", result.d2n)?;
+    write_scalar_attr(&gram_grp, "gap_1_minus_vtGv", result.gap)?;
+    write_scalar_attr(&gram_grp, "gap_times_lnN", result.gap_times_ln)?;
+
+    // Taper decomposition
+    let taper_grp = grp.create_group("taper")?;
+    write_scalar_attr(&taper_grp, "U", result.u_sum)?;
+    write_scalar_attr(&taper_grp, "L", result.l_sum)?;
+    write_scalar_attr(&taper_grp, "Q", result.q_sum)?;
+    write_scalar_attr(&taper_grp, "R2", result.r2)?;
+    write_scalar_attr(&taper_grp, "R2_minus_1", result.r2_minus_1)?;
+    write_scalar_attr(&taper_grp, "R2_minus_1_times_lnN", result.r2_times_ln)?;
+    write_scalar_attr(&taper_grp, "Q_over_ln2N", result.q_over_ln2)?;
+    write_scalar_attr(&taper_grp, "C_recon", result.c_recon)?;
+    write_scalar_attr(&taper_grp, "vtGv_recon", result.vtgv_recon)?;
+    write_scalar_attr(&taper_grp, "cross_check_delta", result.cross_check_delta)?;
+
+    // PNT sub-sums
+    let pnt_grp = grp.create_group("pnt")?;
+    write_scalar_attr(&pnt_grp, "S1_mu_over_k", result.s1)?;
+    write_scalar_attr(&pnt_grp, "S2_mu_lnk_over_k", result.s2)?;
+    write_scalar_attr(&pnt_grp, "S3_mu_ln2k_over_k", result.s3)?;
+    write_scalar_attr(&pnt_grp, "mertens", result.mertens)?;
+    write_scalar_attr(&pnt_grp, "mertens_over_sqrt", result.mertens_over_sqrt)?;
 
     Ok(())
 }

@@ -116,6 +116,25 @@ pub fn witness_vector(n: usize, mu: &[i8]) -> Vec<f64> {
     }).collect()
 }
 
+/// Full witness vector v for k=1..N (Lean-aligned basis).
+///
+/// v[i] corresponds to index i+1 (k=1 has index 0).
+/// This matches the Lean definition of logCutoffWitness which sums k=1..N.
+///
+/// v_k = -μ(k) · (1 - ln(k)/ln(N))
+///
+/// For k=1: v_1 = -μ(1) · (1 - 0) = -1  (the critical stabilizer)
+pub fn witness_vector_full(n: usize, mu: &[i8]) -> Vec<f64> {
+    let ln_n = (n as f64).ln();
+    (0..n).map(|i| {
+        let k = i + 1;
+        if k >= mu.len() { return 0.0; }
+        let mu_k = mu[k] as f64;
+        let weight = 1.0 - (k as f64).ln() / ln_n;
+        -mu_k * weight
+    }).collect()
+}
+
 /// Chebyshev theta function: θ(x) = Σ_{p ≤ x, p prime} ln(p)
 pub fn chebyshev_theta(is_prime: &[bool], x: usize) -> f64 {
     let mut theta = 0.0f64;

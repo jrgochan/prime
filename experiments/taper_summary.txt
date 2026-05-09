@@ -1,0 +1,50 @@
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N2.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=2[0m  (0.0s total)
+  [1m[36m║[0m U(N)=0.09657359  L(N)=0.07494407  Q(N)=0.18273103
+  [1m[36m║[0m GCD bound: [32mPASS[0m (0 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N6.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=6[0m  (0.0s total)
+  [1m[36m║[0m U(N)=0.52324244  L(N)=0.69904162  Q(N)=1.03589063
+  [1m[36m║[0m GCD bound: [32mPASS[0m (10 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N12.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=12[0m  (0.0s total)
+  [1m[36m║[0m U(N)=1.03804102  L(N)=1.64676352  Q(N)=2.77427218
+  [1m[36m║[0m GCD bound: [32mPASS[0m (55 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N60.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=60[0m  (0.0s total)
+  [1m[36m║[0m U(N)=0.90660520  L(N)=1.34326928  Q(N)=2.39738017
+  [1m[36m║[0m GCD bound: [32mPASS[0m (1711 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N120.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=120[0m  (0.1s total)
+  [1m[36m║[0m U(N)=1.14212047  L(N)=2.09210140  Q(N)=4.46463887
+  [1m[36m║[0m GCD bound: [32mPASS[0m (7021 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N360.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=360[0m  (0.2s total)
+  [1m[36m║[0m U(N)=1.00745901  L(N)=1.67395051  Q(N)=3.69869606
+  [1m[36m║[0m GCD bound: [32mPASS[0m (64261 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N1000.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=1000[0m  (0.5s total)
+  [1m[36m║[0m U(N)=0.99028873  L(N)=1.64915646  Q(N)=4.29399734
+  [1m[36m║[0m GCD bound: [32mPASS[0m (498501 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N2520.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=2520[0m  (1.2s total)
+  [1m[36m║[0m U(N)=1.02152516  L(N)=1.79995215  Q(N)=5.07541325
+  [1m[36m║[0m GCD bound: [32mPASS[0m (3171421 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N5040.h5
+  [1m[36m═══ §4. GCD BOUND (0.0s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=5040[0m  (2.5s total)
+  [1m[36m║[0m U(N)=1.05742006  L(N)=1.99663383  Q(N)=5.92332765
+  [1m[36m║[0m GCD bound: [32mPASS[0m (12693241 pairs)
+  [1m[97mLoading: [0mexperiments/cache/hpdf/gram_N10000.h5
+  [1m[36m═══ §4. GCD BOUND (0.1s) ═══[0m
+  [1m[36m║[0m [1mCERTIFICATE N=10000[0m  (5.3s total)
+  [1m[36m║[0m U(N)=1.12602546  L(N)=2.56827993  Q(N)=10.53727951
+  [1m[36m║[0m GCD bound: [32mPASS[0m (49985001 pairs)

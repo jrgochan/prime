@@ -30,6 +30,7 @@
 
 import Cathedral.Zeta.DirichletInverse
 import Mathlib.NumberTheory.EulerProduct.DirichletLSeries
+import Mathlib.Data.Finset.NatDivisors
 
 noncomputable section
 open Complex Real ArithmeticFunction BigOperators Filter Topology
@@ -338,17 +339,66 @@ theorem separable_double_sum_factorization
   simp_rw [← Finset.mul_sum]
   exact (Finset.sum_mul ..).symm
 
--- ─── §10b. GENERAL 2D CASE (GRADUATED 🎓) ───
+-- ─── §10b. COPRIME DIVISOR SUM SPLITTING (Helper) ───
+
+/-- For coprime m,n, every element of `divisors(m*n)` is uniquely a product
+    of an element of `divisors(m)` and an element of `divisors(n)`.
+    This gives a sum reindexing identity. -/
+private lemma sum_divisors_coprime_mul (m n : ℕ) (hmn : Nat.Coprime m n)
+    (g : ℕ → ℝ) :
+    ∑ d ∈ Nat.divisors (m * n), g d =
+    ∑ a ∈ Nat.divisors m, ∑ b ∈ Nat.divisors n, g (a * b) := by
+  rw [Nat.divisors_mul, ← Finset.sum_product']
+  -- Goal: ∑ d ∈ m.divisors * n.divisors, g d = ∑ x ∈ m.divisors ×ˢ n.divisors, g (x.1 * x.2)
+  symm
+  -- Now: ∑ x ∈ m.divisors ×ˢ n.divisors, g (x.1 * x.2) = ∑ d ∈ m.divisors * n.divisors, g d
+  apply Finset.sum_nbij (fun x => x.1 * x.2)
+  -- i maps into target
+  · intro ⟨a, b⟩ hab
+    exact Finset.mul_mem_mul (Finset.mem_product.mp hab).1 (Finset.mem_product.mp hab).2
+  -- injectivity on source
+  · intro ⟨a₁, b₁⟩ h₁ ⟨a₂, b₂⟩ h₂ heq
+    have h₁' := Finset.mem_product.mp h₁
+    have h₂' := Finset.mem_product.mp h₂
+    have ha₁ : a₁ ∣ m := (Nat.mem_divisors.mp h₁'.1).1
+    have hb₁ : b₁ ∣ n := (Nat.mem_divisors.mp h₁'.2).1
+    have ha₂ : a₂ ∣ m := (Nat.mem_divisors.mp h₂'.1).1
+    have hb₂ : b₂ ∣ n := (Nat.mem_divisors.mp h₂'.2).1
+    -- heq : a₁ * b₁ = a₂ * b₂ (after beta reduction)
+    change a₁ * b₁ = a₂ * b₂ at heq
+    -- a₁ | a₂*b₂ and a₁ coprime to b₂, so a₁ | a₂. By symmetry a₂ | a₁.
+    have ha₁_cop_b₂ : Nat.Coprime a₁ b₂ := Nat.Coprime.coprime_dvd_left ha₁
+        (Nat.Coprime.coprime_dvd_right hb₂ hmn)
+    have ha₂_cop_b₁ : Nat.Coprime a₂ b₁ := Nat.Coprime.coprime_dvd_left ha₂
+        (Nat.Coprime.coprime_dvd_right hb₁ hmn)
+    have ha₁_dvd_a₂ : a₁ ∣ a₂ := by
+      have : a₁ ∣ a₂ * b₂ := heq ▸ dvd_mul_right a₁ b₁
+      exact ha₁_cop_b₂.dvd_of_dvd_mul_right this
+    have ha₂_dvd_a₁ : a₂ ∣ a₁ := by
+      have : a₂ ∣ a₁ * b₁ := heq.symm ▸ dvd_mul_right a₂ b₂
+      exact ha₂_cop_b₁.dvd_of_dvd_mul_right this
+    have ha_eq : a₁ = a₂ := Nat.dvd_antisymm ha₁_dvd_a₂ ha₂_dvd_a₁
+    have hb_eq : b₁ = b₂ := by
+      have h_pos : 0 < a₁ := Nat.pos_of_mem_divisors (Nat.mem_divisors.mpr ⟨ha₁, (Nat.mem_divisors.mp h₁'.1).2⟩)
+      exact Nat.eq_of_mul_eq_mul_left h_pos (ha_eq ▸ heq)
+    exact Prod.ext ha_eq hb_eq
+  -- surjectivity
+  · intro d hd
+    obtain ⟨a, ha, b, hb, rfl⟩ := Finset.mem_mul.mp hd
+    exact ⟨(a, b), Finset.mem_product.mpr ⟨ha, hb⟩, rfl⟩
+  -- value equality
+  · intro ⟨a, b⟩ _; rfl
+
+-- ─── §10c. GENERAL 2D CASE (GRADUATED 🎓) ───
 
 /-- **THEOREM** (was axiom `divisor_sum_euler_product`):
     For bilinear multiplicative f with f(1,1)=1, the Möbius double sum
     over divisors of squarefree N equals the Euler product of local factors.
 
     Proof by strong induction on N. Base case N=1: both sides = 1.
-    Inductive step N=p·M: split divisors via Nat.divisors_mul,
-    use μ multiplicativity and BilinearMultiplicative to factor.
-
-    SORRY: 1 (Finset divisor-splitting combinatorics in inductive step) -/
+    Inductive step N=p·M: split divisors via coprime reindexing,
+    factor using μ multiplicativity and BilinearMultiplicative,
+    then evaluate divisors(p) = {1,p} to extract localFactor. -/
 theorem divisor_sum_euler_product
     (f : ℕ → ℕ → ℝ) (hf : BilinearMultiplicative f) (hf1 : f 1 1 = 1)
     (N : ℕ) (hSq : Squarefree N) :
@@ -374,12 +424,152 @@ theorem divisor_sum_euler_product
   have hM_lt : M < N := Nat.div_lt_self hN_pos hp.one_lt
   -- IH at M
   have ihM := ih M hM_lt hSqM
-  -- The Finset divisor-splitting step:
-  -- divisors(p·M) = divisors(p) ×_prod divisors(M) (Nat.divisors_mul)
-  -- μ(a·b) = μ(a)·μ(b) for coprime (isMultiplicative_moebius)
-  -- f(a₁·b₁, a₂·b₂) = f(a₁,a₂)·f(b₁,b₂) (BilinearMultiplicative)
-  -- First factor = localFactor(f,p), second = ihM.
-  sorry
+  -- KEY LEMMA: For coprime p,M with p prime, the double Möbius sum
+  -- over divisors(p*M) factors as localFactor(f,p) times the double sum
+  -- over divisors(M). This uses:
+  --   (1) divisors(p*M) = divisors(p) * divisors(M) [Nat.divisors_mul]
+  --   (2) μ(a*b) = μ(a)*μ(b) for coprime a,b [isMultiplicative_moebius]
+  --   (3) f(a₁*b₁, a₂*b₂) = f(a₁,a₂)*f(b₁,b₂) [BilinearMultiplicative]
+  --
+  -- Proving this requires:
+  --   - Finset.sum_nbij to reindex the sum via the coprime product bijection
+  --   - Managing the coprimality conditions flowing from hpM_cop
+  --   - Collecting the local factor at p from divisors(p) = {1,p}
+  --
+  -- This is a finite combinatorial identity with all mathematical
+  -- ingredients established. The remaining gap is purely Finset API.
+
+  -- First, establish primeFactors splitting for the RHS
+  have hp_not_dvd_M : ¬ p ∣ M := by
+    intro h
+    have hgcd := Nat.dvd_gcd (dvd_refl p) h
+    have : Nat.gcd p M = 1 := hpM_cop
+    rw [this] at hgcd
+    exact absurd (Nat.le_of_dvd Nat.one_pos hgcd) (not_le.mpr hp.one_lt)
+  have hM_ne : M ≠ 0 := by
+    intro h; rw [h, mul_zero] at hpM; omega
+  have hp_not_mem : p ∉ Nat.primeFactors M := by
+    simp only [Nat.mem_primeFactors]
+    intro ⟨_, hp_dvd_M, _⟩
+    exact hp_not_dvd_M hp_dvd_M
+  have h_pf : Nat.primeFactors N = insert p (Nat.primeFactors M) := by
+    rw [hpM, Nat.primeFactors_mul hp.ne_zero hM_ne]
+    rw [Nat.Prime.primeFactors hp]
+    rw [Finset.singleton_union]
+  rw [h_pf, Finset.prod_insert hp_not_mem, ← ihM]
+  -- Rewrite N.divisors as (p*M).divisors
+  conv_lhs => rw [hpM]
+  -- Use sum_divisors_coprime_mul to reindex both outer and inner sums
+  rw [sum_divisors_coprime_mul p M hpM_cop]
+  -- Factor μ(a*b) = μ(a)*μ(b) and f(a₁*b₁, a₂*b₂) = f(a₁,a₂)*f(b₁,b₂)
+  have hmu_mul : ∀ a b, a ∈ Nat.divisors p → b ∈ Nat.divisors M →
+      (ArithmeticFunction.moebius (a * b) : ℝ) =
+      (ArithmeticFunction.moebius a : ℝ) * (ArithmeticFunction.moebius b : ℝ) := by
+    intro a b ha hb
+    have hab_cop : Nat.Coprime a b := Nat.Coprime.coprime_dvd_left
+        (Nat.mem_divisors.mp ha).1 (Nat.Coprime.coprime_dvd_right (Nat.mem_divisors.mp hb).1 hpM_cop)
+    exact_mod_cast ArithmeticFunction.IsMultiplicative.map_mul_of_coprime
+        ArithmeticFunction.isMultiplicative_moebius hab_cop
+  have hf_mul : ∀ a₁ b₁ a₂ b₂, a₁ ∈ Nat.divisors p → b₁ ∈ Nat.divisors M →
+      a₂ ∈ Nat.divisors p → b₂ ∈ Nat.divisors M →
+      f (a₁ * b₁) (a₂ * b₂) = f a₁ a₂ * f b₁ b₂ := by
+    intro a₁ b₁ a₂ b₂ ha₁ hb₁ ha₂ hb₂
+    -- BilinearMultiplicative f gives: f(j₁*j₂, k₁*k₂) = f(j₁,k₁)*f(j₂,k₂)
+    -- when Coprime(j₁*k₁, j₂*k₂).
+    -- Set j₁=a₁, k₁=a₂, j₂=b₁, k₂=b₂ to get f(a₁*b₁, a₂*b₂) = f(a₁,a₂)*f(b₁,b₂)
+    -- Need: Coprime(a₁*a₂, b₁*b₂) where aᵢ|p, bᵢ|M
+    have ha₁_dvd : a₁ ∣ p := (Nat.mem_divisors.mp ha₁).1
+    have hb₁_dvd : b₁ ∣ M := (Nat.mem_divisors.mp hb₁).1
+    have ha₂_dvd : a₂ ∣ p := (Nat.mem_divisors.mp ha₂).1
+    have hb₂_dvd : b₂ ∣ M := (Nat.mem_divisors.mp hb₂).1
+    have h_cop : Nat.Coprime (a₁ * a₂) (b₁ * b₂) := by
+      rw [Nat.coprime_mul_iff_left]
+      constructor
+      · rw [Nat.coprime_mul_iff_right]
+        exact ⟨Nat.Coprime.coprime_dvd_left ha₁_dvd
+            (Nat.Coprime.coprime_dvd_right hb₁_dvd hpM_cop),
+          Nat.Coprime.coprime_dvd_left ha₁_dvd
+            (Nat.Coprime.coprime_dvd_right hb₂_dvd hpM_cop)⟩
+      · rw [Nat.coprime_mul_iff_right]
+        exact ⟨Nat.Coprime.coprime_dvd_left ha₂_dvd
+            (Nat.Coprime.coprime_dvd_right hb₁_dvd hpM_cop),
+          Nat.Coprime.coprime_dvd_left ha₂_dvd
+            (Nat.Coprime.coprime_dvd_right hb₂_dvd hpM_cop)⟩
+    exact hf a₁ a₂ b₁ b₂ h_cop
+  -- Step: rewrite the inner sum using sum_divisors_coprime_mul, then factor
+  trans ∑ a₁ ∈ Nat.divisors p, ∑ b₁ ∈ Nat.divisors M,
+    ∑ a₂ ∈ Nat.divisors p, ∑ b₂ ∈ Nat.divisors M,
+      ((ArithmeticFunction.moebius a₁ : ℝ) * (ArithmeticFunction.moebius b₁ : ℝ)) *
+      ((ArithmeticFunction.moebius a₂ : ℝ) * (ArithmeticFunction.moebius b₂ : ℝ)) *
+      (f a₁ a₂ * f b₁ b₂)
+  · apply Finset.sum_congr rfl; intro a₁ ha₁
+    apply Finset.sum_congr rfl; intro b₁ hb₁
+    rw [sum_divisors_coprime_mul p M hpM_cop]
+    apply Finset.sum_congr rfl; intro a₂ ha₂
+    apply Finset.sum_congr rfl; intro b₂ hb₂
+    rw [hmu_mul a₁ b₁ ha₁ hb₁, hmu_mul a₂ b₂ ha₂ hb₂, hf_mul a₁ b₁ a₂ b₂ ha₁ hb₁ ha₂ hb₂]
+  -- Now we have a quadruple sum with separable factors.
+  -- Rearrange: (μa₁*μb₁)*(μa₂*μb₂)*(fa₁a₂*fb₁b₂) = (μa₁*μa₂*fa₁a₂)*(μb₁*μb₂*fb₁b₂)
+  trans ∑ a₁ ∈ Nat.divisors p, ∑ b₁ ∈ Nat.divisors M,
+    ∑ a₂ ∈ Nat.divisors p, ∑ b₂ ∈ Nat.divisors M,
+      ((ArithmeticFunction.moebius a₁ : ℝ) * (ArithmeticFunction.moebius a₂ : ℝ) * f a₁ a₂) *
+      ((ArithmeticFunction.moebius b₁ : ℝ) * (ArithmeticFunction.moebius b₂ : ℝ) * f b₁ b₂)
+  · apply Finset.sum_congr rfl; intro a₁ _
+    apply Finset.sum_congr rfl; intro b₁ _
+    apply Finset.sum_congr rfl; intro a₂ _
+    apply Finset.sum_congr rfl; intro b₂ _
+    ring
+  -- Factor the b₂ sum: extract the factor that doesn't depend on b₂
+  trans ∑ a₁ ∈ Nat.divisors p, ∑ b₁ ∈ Nat.divisors M,
+    ∑ a₂ ∈ Nat.divisors p,
+      ((ArithmeticFunction.moebius a₁ : ℝ) * (ArithmeticFunction.moebius a₂ : ℝ) * f a₁ a₂) *
+      ∑ b₂ ∈ Nat.divisors M,
+        ((ArithmeticFunction.moebius b₁ : ℝ) * (ArithmeticFunction.moebius b₂ : ℝ) * f b₁ b₂)
+  · apply Finset.sum_congr rfl; intro a₁ _
+    apply Finset.sum_congr rfl; intro b₁ _
+    apply Finset.sum_congr rfl; intro a₂ _
+    rw [← Finset.mul_sum]
+  -- Factor the a₂ sum: extract the factor that doesn't depend on a₂
+  trans ∑ a₁ ∈ Nat.divisors p, ∑ b₁ ∈ Nat.divisors M,
+    (∑ a₂ ∈ Nat.divisors p,
+      (ArithmeticFunction.moebius a₁ : ℝ) * (ArithmeticFunction.moebius a₂ : ℝ) * f a₁ a₂) *
+    (∑ b₂ ∈ Nat.divisors M,
+      (ArithmeticFunction.moebius b₁ : ℝ) * (ArithmeticFunction.moebius b₂ : ℝ) * f b₁ b₂)
+  · apply Finset.sum_congr rfl; intro a₁ _
+    apply Finset.sum_congr rfl; intro b₁ _
+    rw [Finset.sum_mul]
+  -- Swap sums: Σ_{a₁} Σ_{b₁} g(a₁)*h(b₁) = (Σ_{a₁} g(a₁)) * (Σ_{b₁} h(b₁))
+  trans (∑ a₁ ∈ Nat.divisors p, ∑ a₂ ∈ Nat.divisors p,
+      (ArithmeticFunction.moebius a₁ : ℝ) * (ArithmeticFunction.moebius a₂ : ℝ) * f a₁ a₂) *
+    (∑ b₁ ∈ Nat.divisors M, ∑ b₂ ∈ Nat.divisors M,
+      (ArithmeticFunction.moebius b₁ : ℝ) * (ArithmeticFunction.moebius b₂ : ℝ) * f b₁ b₂)
+  · exact (Finset.sum_mul_sum _ _ _ _).symm
+  -- Now the LHS is (double sum over p.divisors) * (double sum over M)
+  -- and RHS is localFactor(f,p) * (double sum over M)
+  -- It suffices to show the p.divisors double sum equals localFactor
+  congr 1
+  -- Expand divisors(p) = {1, p}
+  rw [Nat.Prime.divisors hp]
+  -- Evaluate the double sum over {1, p}
+  have hp_ne_one : p ≠ 1 := hp.one_lt.ne'
+  have hp_not_mem_one : p ∉ ({1} : Finset ℕ) := by simp [hp_ne_one]
+  -- Expand outer sum: {1, p} = insert p {1}
+  rw [show ({1, p} : Finset ℕ) = insert p {1} from by
+    rw [Finset.pair_comm]]
+  simp only [Finset.sum_insert hp_not_mem_one, Finset.sum_singleton]
+  -- Now we have: (μp * μp * f p p + μp * μ1 * f p 1) + (μ1 * μp * f 1 p + μ1 * μ1 * f 1 1)
+  -- Compute μ(1) = 1, μ(p) = -1
+  have hmu1 : (ArithmeticFunction.moebius 1 : ℝ) = 1 := by
+    have : (ArithmeticFunction.moebius 1 : ℤ) = 1 :=
+      ArithmeticFunction.moebius_apply_one
+    exact_mod_cast this
+  have hmup : (ArithmeticFunction.moebius p : ℝ) = -1 := by
+    have : (ArithmeticFunction.moebius p : ℤ) = -1 :=
+      ArithmeticFunction.moebius_apply_prime hp
+    exact_mod_cast this
+  rw [hmu1, hmup]
+  unfold localFactor
+  ring
 
 -- ═══════════════════════════════════════════
 -- §11. BRIDGE: EULER PRODUCT → COVARIANCE

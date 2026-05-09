@@ -1,0 +1,12 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL RL — Gram Form Optimization Engine[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [2mThe Riemann Hypothesis, reduced to a matrix inequality:[0m
+  [1m[36m║[0m  [2m  Show that vᵀG_N v ≤ 1 + K/ln(N)[0m
+  [1m[36m║[0m  [2m  for the Möbius-weighted witness vector v.[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[35m§1[0m  [1mBuilding Environment (N=500)...[0m
+  [32m✓[0m HPDF gram read: 55439×55439 (34.9s)
+  ✓ Gram matrix loaded: HPDF: experiments/cache/hpdf/gram_N55440.h5 (23448.8 MB, 35.23s)

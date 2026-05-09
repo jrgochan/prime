@@ -1,0 +1,38 @@
+[package]
+name = "cathedral-rl"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral RL Environment: Reinforcement learning for the Gram form inequality.
+
+The Cathedral has reduced the Riemann Hypothesis to a finite matrix optimization:
+  Given G_N (Gram matrix from GCDs and logarithms) and v (Möbius witness vector),
+  show that vᵀG_N v ≤ 1 + K/ln(N).
+
+This environment lets an RL agent iterate over weight perturbations to:
+  1. Minimize vᵀGv (the quadratic form)
+  2. Maximize bᵀv (the numerator — target: 1)
+  3. Minimize d² = 1 - 2bᵀv + vᵀGv (the NB distance)
+
+Runs on GPU via CUDA for fast Gram matrix evaluation at large N.
+"""
+
+[features]
+default = []
+gpu = ["cathedral-utils/gpu"]
+hpdf = ["cathedral-utils/hpdf"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rand = "0.8"
+rand_distr = "0.4"
+clap = { version = "4", features = ["derive"] }
+sha2 = "0.10"
+rug = "1.19"
+
+[[bin]]
+name = "cathedral-rl"
+path = "src/main.rs"

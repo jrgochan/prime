@@ -330,6 +330,21 @@ pub fn b_vector(dim: usize) -> Vec<f64> {
         .collect()
 }
 
+/// Nyman-Beurling b-vector for k=1..N (Lean-aligned basis).
+///
+/// b_k = (ln(k) + 1 - γ) / k
+///
+/// For k=1: b_1 = (0 + 1 - γ) / 1 = 1 - γ ≈ 0.4228
+/// This is the missing inner-product contribution when using k=2..N.
+pub fn b_vector_full(n: usize) -> Vec<f64> {
+    (0..n)
+        .map(|i| {
+            let k = (i + 1) as f64;
+            (k.ln() + 1.0 - EULER_GAMMA) / k
+        })
+        .collect()
+}
+
 /// Nyman-Beurling b-vector (discretization-consistent Vasyunin expansion).
 ///
 /// Uses the same ln(1+1/n) series as the Gram matrix computation,

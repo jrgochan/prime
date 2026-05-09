@@ -1,5 +1,5 @@
-//! Output writers for the Möbius Cancellation Microscope.
-//! Produces summary, GCD decomp, trace, certificate, dyadic, and ω-class files.
+//! Output writers for the Möbius Cancellation Microscope v3.
+//! Produces summary, GCD decomp, trace, certificate, dyadic, ω-class, and taper files.
 
 use std::io::Write;
 use cathedral_utils::arith;
@@ -13,7 +13,7 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let tot = d.total.value();
     let ta = tot.abs().max(1e-30);
 
-    writeln!(f, "═══ MÖBIUS CANCELLATION MICROSCOPE v2 — N={} ═══\nDim: {}\n", d.n, d.dim)?;
+    writeln!(f, "═══ MÖBIUS CANCELLATION MICROSCOPE v3 — N={} ═══\nDim: {}\n", d.n, d.dim)?;
 
     writeln!(f, "QUADRATIC FORM vᵀGv")?;
     writeln!(f, "  Total:        {tot:.15e}")?;
@@ -88,17 +88,38 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
 
     writeln!(f, "\nGRAM BOUND AXIOM ANALYSIS")?;
     writeln!(f, "  vᵀGv        = {:.15e}", d.total.value())?;
-    writeln!(f, "  (bᵀv)²      = {:.15e}", d.btv_sq)?;
-    writeln!(f, "  bᵀv         = {:.15e}", d.btv)?;
-    writeln!(f, "  vᵀCv        = {:.15e}", d.vtcv)?;
-    writeln!(f, "  d²_N        = {:.15e}", d.d2n)?;
-    writeln!(f, "  1 - vᵀGv    = {:.15e}", d.gap)?;
-    writeln!(f, "  gap·ln(N)   = {:.15e}", d.gap_times_ln)?;
-    writeln!(f, "  (bᵀv)²/vᵀGv = {:.15e}", d.ratio)?;
-    writeln!(f, "  vtCv·ln(N)  = {:.15e}", d.vtcv * (d.n as f64).ln())?;
-    writeln!(f, "  d²·ln(N)    = {:.15e}", d.d2n * (d.n as f64).ln())?;
+    writeln!(f, "  (bᵀv)²      = {:.15e}", d.gram.btv_sq)?;
+    writeln!(f, "  bᵀv         = {:.15e}", d.gram.btv)?;
+    writeln!(f, "  vᵀCv        = {:.15e}", d.gram.vtcv)?;
+    writeln!(f, "  d²_N        = {:.15e}", d.gram.d2n)?;
+    writeln!(f, "  1 - vᵀGv    = {:.15e}", d.gram.gap)?;
+    writeln!(f, "  gap·ln(N)   = {:.15e}", d.gram.gap_times_ln)?;
+    writeln!(f, "  (bᵀv)²/vᵀGv = {:.15e}", d.gram.ratio)?;
+    writeln!(f, "  vtCv·ln(N)  = {:.15e}", d.gram.vtcv * (d.n as f64).ln())?;
+    writeln!(f, "  d²·ln(N)    = {:.15e}", d.gram.d2n * (d.n as f64).ln())?;
     writeln!(f, "  Precision   = {}", d.precision)?;
     writeln!(f, "  Axiom sat?  = {} (vtGv < 1 + K/ln(N) for any K > 0)", if d.total.value() < 1.0 { "YES" } else { "CHECK" })?;
+
+    // §5 Taper Cancellation
+    let t = &d.taper;
+    let ln_n = (d.n as f64).ln();
+    writeln!(f, "\nTAPER CANCELLATION TRACKER")?;
+    writeln!(f, "  U(N)           = {:.15e}", t.u_sum.value())?;
+    writeln!(f, "  L(N)           = {:.15e}", t.l_sum.value())?;
+    writeln!(f, "  Q(N)           = {:.15e}", t.q_sum.value())?;
+    writeln!(f, "  R₂ = U-2L/lnN  = {:.15e}", t.r2)?;
+    writeln!(f, "  R₂ - 1         = {:.15e}", t.r2_minus_1)?;
+    writeln!(f, "  (R₂-1)·lnN     = {:.15e}  (→ const?)", t.r2_times_ln)?;
+    writeln!(f, "  Q/ln²N         = {:.15e}", t.q_over_ln2)?;
+    writeln!(f, "  C_recon         = {:.15e}  (≈ 2.87?)", t.c_recon)?;
+    writeln!(f, "  S₁ = Σμ/k      = {:.15e}  (→ 0)", t.s1)?;
+    writeln!(f, "  S₂ = Σμlnk/k   = {:.15e}  (→ -1)", t.s2)?;
+    writeln!(f, "  S₃ = Σμln²k/k  = {:.15e}  (→ -2γ)", t.s3)?;
+    writeln!(f, "  M(N)           = {:.0}", t.mertens)?;
+    writeln!(f, "  M(N)/√N        = {:.15e}", t.mertens_over_sqrt)?;
+    let recon = t.u_sum.value() - 2.0/ln_n * t.l_sum.value() + t.q_sum.value()/(ln_n*ln_n);
+    writeln!(f, "  Recon check    = {:.15e}  (should = vᵀGv)", recon)?;
+    writeln!(f, "  Δ              = {:.2e}", (recon - d.total.value()).abs())?;
 
     eprintln!("  ✓ Summary → {p}");
     Ok(())
@@ -124,9 +145,9 @@ pub fn write_trace(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let p = format!("{dir}/trace_N{}.tsv", d.n);
     let mut f = std::fs::File::create(&p)?;
     writeln!(f, "M\tS_M\tsum_abs\tcancel_ratio\tln_M")?;
-    for (m, s, sa) in &d.trace {
-        let r = if *sa > 0.0 { s.abs() / sa } else { 0.0 };
-        writeln!(f, "{m}\t{s:.15e}\t{sa:.15e}\t{r:.8}\t{:.6}", (*m as f64).ln())?;
+    for pt in &d.trace {
+        let r = if pt.running_abs > 0.0 { pt.running_sum.abs() / pt.running_abs } else { 0.0 };
+        writeln!(f, "{}\t{:.15e}\t{:.15e}\t{r:.8}\t{:.6}", pt.j, pt.running_sum, pt.running_abs, (pt.j as f64).ln())?;
     }
     eprintln!("  ✓ Trace → {p}");
     Ok(())
@@ -148,21 +169,37 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
         }
     }
 
+    let t = &d.taper;
     let cert = serde_json::json!({
-        "experiment": "moebius-microscope", "version": "2.0", "N": d.n, "dim": d.dim,
+        "experiment": "moebius-microscope", "version": "3.0", "N": d.n, "dim": d.dim,
         "precision": d.precision,
         "quadratic_form": {"total": d.total.value(), "diagonal": d.diagonal.value(), "off_diagonal": d.off_diagonal.value()},
         "gram_bound": {
             "vtGv": d.total.value(),
-            "btv": d.btv,
-            "btv_sq": d.btv_sq,
-            "vtCv": d.vtcv,
-            "d2N": d.d2n,
-            "ratio_btv2_vtGv": d.ratio,
-            "gap_1_minus_vtGv": d.gap,
-            "gap_times_lnN": d.gap_times_ln,
-            "vtCv_times_lnN": d.vtcv * (d.n as f64).ln(),
-            "d2_times_lnN": d.d2n * (d.n as f64).ln(),
+            "btv": d.gram.btv,
+            "btv_sq": d.gram.btv_sq,
+            "vtCv": d.gram.vtcv,
+            "d2N": d.gram.d2n,
+            "ratio_btv2_vtGv": d.gram.ratio,
+            "gap_1_minus_vtGv": d.gram.gap,
+            "gap_times_lnN": d.gram.gap_times_ln,
+            "vtCv_times_lnN": d.gram.vtcv * (d.n as f64).ln(),
+            "d2_times_lnN": d.gram.d2n * (d.n as f64).ln(),
+        },
+        "taper_cancellation": {
+            "U": t.u_sum.value(),
+            "L": t.l_sum.value(),
+            "Q": t.q_sum.value(),
+            "R2": t.r2,
+            "R2_minus_1": t.r2_minus_1,
+            "R2_minus_1_times_lnN": t.r2_times_ln,
+            "Q_over_ln2N": t.q_over_ln2,
+            "C_recon": t.c_recon,
+            "S1": t.s1,
+            "S2": t.s2,
+            "S3": t.s3,
+            "mertens": t.mertens,
+            "mertens_over_sqrt": t.mertens_over_sqrt,
         },
         "vaughan": {"type_I": d.type_i.value(), "type_II": d.type_ii.value(), "type_III": d.type_iii.value()},
         "liouville": {"ee": d.ee.value(), "eo": d.eo.value(), "oe": d.oe.value(), "oo": d.oo.value(),

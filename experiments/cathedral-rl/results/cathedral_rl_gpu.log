@@ -1,0 +1,222 @@
+
+  [1m[36m╔═══════════════════════════════════════════════════════════════════════╗[0m
+  [1m[36m║[0m  [1m[97mCATHEDRAL RL — Gram Form Optimization Engine[0m
+  [1m[36m║[0m
+  [1m[36m║[0m  [2mThe Riemann Hypothesis, reduced to a matrix inequality:[0m
+  [1m[36m║[0m  [2m  Show that vᵀG_N v ≤ 1 + K/ln(N)[0m
+  [1m[36m║[0m  [2m  for the Möbius-weighted witness vector v.[0m
+  [1m[36m╚═══════════════════════════════════════════════════════════════════════╝[0m
+
+  [1m[35mSWEEP[0m  [1mHC Number Sweep (max N=55440)...[0m
+
+  [2m  Schedule: [120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160, 25200, 27720, 45360, 50400, 55440][0m
+
+  [2m  ┌──────────┬────────┬──────────────────┬──────────────────┬──────────────────┬──────────┬────────┐[0m
+  [2m  │    N     │  dim   │   baseline d²    │   optimal d²     │      vᵀGv        │  K_eff   │ bound? │[0m
+  [2m  ├──────────┼────────┼──────────────────┼──────────────────┼──────────────────┼──────────┼────────┤[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=120)...[0m
+  Loading HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N120.h5...
+  [32m✓[0m HPDF gram read: 119×119 (0.0s)
+  ✓ Gram matrix loaded: HPDF(gram_N120.h5) (0.1 MB, 0.00s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.23s (0 MB)
+  ✓ GPU BilinearEngine initialized (dim=119)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0665373276
+      vᵀGv  = 1.2546166293
+      bᵀv   = 1.0940396509
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=5.3136728315e-2  vᵀGv=1.03519675  |δ|=6.4682e-2          CG step   10: d²=4.3001855194e-2  vᵀGv=0.95682610  |δ|=9.4881e-2          CG step   20: d²=4.2904217739e-2  vᵀGv=0.95697636  |δ|=1.4239e-2          CG step   30: d²=4.2882904548e-2  vᵀGv=0.95712906  |δ|=1.0025e-2          CG step   40: d²=4.2880307244e-2  vᵀGv=0.95711562  |δ|=5.3302e-3          CG step   50: d²=4.2879061658e-2  vᵀGv=0.95712347  |δ|=7.8221e-3          CG step   60: d²=4.2878974538e-2  vᵀGv=0.95713597  |δ|=5.1643e-5          CG step   70: d²=4.2878963972e-2  vᵀGv=0.95712087  |δ|=1.1804e-3          CG step   80: d²=4.2878963285e-2  vᵀGv=0.95712112  |δ|=5.7401e-5          CG step   90: d²=4.2878963203e-2  vᵀGv=0.95712092  |δ|=2.2731e-6          CG step  100: d²=4.2878963188e-2  vᵀGv=0.95712105  |δ|=9.8022e-6          CG step  110: d²=4.2878963187e-2  vᵀGv=0.95712111  |δ|=1.6622e-6          CG step  120: d²=4.2878963187e-2  vᵀGv=0.95712103  |δ|=3.4219e-7          CG step  130: d²=4.2878963186e-2  vᵀGv=0.95712103  |δ|=5.5786e-8          CG step  140: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=2.0708e-7          CG step  150: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=6.4815e-8          CG step  160: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=3.1905e-8          CG step  170: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=2.6818e-9          CG step  180: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=3.1652e-10          CG step  190: d²=4.2878963186e-2  vᵀGv=0.95712104  |δ|=2.4472e-10      
+    CG result: d²=4.2878963186e-2  vᵀGv=0.95712104  bᵀv=0.95712104
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.2878963186e-2  σ=0.009990          ES gen   10: best_d²=4.2878963186e-2  σ=0.009891          ES gen   20: best_d²=4.2878963186e-2  σ=0.009792          ES gen   30: best_d²=4.2878963186e-2  σ=0.009695          ES gen   40: best_d²=4.2878963186e-2  σ=0.009598          ES gen   50: best_d²=4.2878963186e-2  σ=0.009503          ES gen   60: best_d²=4.2878963186e-2  σ=0.009408          ES gen   70: best_d²=4.2878963186e-2  σ=0.009314          ES gen   80: best_d²=4.2878963186e-2  σ=0.009222          ES gen   90: best_d²=4.2878963186e-2  σ=0.009130          ES gen   99: best_d²=4.2878963186e-2  σ=0.009048      
+  [2m  │[0m      120 [2m│[0m    119 [2m│[0m  6.6537327552e-2 [2m│[0m  4.2950384431e-2 [2m│[0m     0.9578519700 [2m│[0m   -0.202 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=180)...[0m
+  Building Gram matrix G_180 (179×179) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=180) (0.2 MB, 1.26s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (0 MB)
+  ✓ GPU BilinearEngine initialized (dim=179)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0733225524
+      vᵀGv  = 1.3098144001
+      bᵀv   = 1.1182459239
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=5.5092937018e-2  vᵀGv=1.05478927  |δ|=7.3069e-2          CG step   10: d²=4.2763703730e-2  vᵀGv=0.95719828  |δ|=8.9875e-2          CG step   20: d²=4.2656477260e-2  vᵀGv=0.95734602  |δ|=3.9654e-2          CG step   30: d²=4.2628010967e-2  vᵀGv=0.95718704  |δ|=4.0440e-4          CG step   40: d²=4.2619169633e-2  vᵀGv=0.95740514  |δ|=5.0646e-2          CG step   50: d²=4.2614778774e-2  vᵀGv=0.95734460  |δ|=2.4466e-2          CG step   60: d²=4.2613713258e-2  vᵀGv=0.95737944  |δ|=9.6064e-5          CG step   70: d²=4.2613347132e-2  vᵀGv=0.95738579  |δ|=8.0425e-3          CG step   80: d²=4.2613283522e-2  vᵀGv=0.95740146  |δ|=2.5325e-3          CG step   90: d²=4.2613269819e-2  vᵀGv=0.95738717  |δ|=4.3432e-4          CG step  100: d²=4.2613265235e-2  vᵀGv=0.95738685  |δ|=1.3514e-3          CG step  110: d²=4.2613264172e-2  vᵀGv=0.95738619  |δ|=3.6938e-4          CG step  120: d²=4.2613263821e-2  vᵀGv=0.95738653  |δ|=1.5959e-5          CG step  130: d²=4.2613263694e-2  vᵀGv=0.95738671  |δ|=1.3588e-4          CG step  140: d²=4.2613263684e-2  vᵀGv=0.95738693  |δ|=1.4886e-5          CG step  150: d²=4.2613263682e-2  vᵀGv=0.95738672  |δ|=1.2852e-5          CG step  160: d²=4.2613263681e-2  vᵀGv=0.95738674  |δ|=1.4984e-5          CG step  170: d²=4.2613263681e-2  vᵀGv=0.95738673  |δ|=3.2833e-7          CG step  180: d²=4.2613263681e-2  vᵀGv=0.95738674  |δ|=7.0863e-7          CG step  190: d²=4.2613263681e-2  vᵀGv=0.95738674  |δ|=7.6954e-7      
+    CG result: d²=4.2613263681e-2  vᵀGv=0.95738674  bᵀv=0.95738674
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.2613263681e-2  σ=0.009990          ES gen   10: best_d²=4.2613263681e-2  σ=0.009891          ES gen   20: best_d²=4.2613263681e-2  σ=0.009792          ES gen   30: best_d²=4.2613263681e-2  σ=0.009695          ES gen   40: best_d²=4.2613263681e-2  σ=0.009598          ES gen   50: best_d²=4.2613263681e-2  σ=0.009503          ES gen   60: best_d²=4.2613263681e-2  σ=0.009408          ES gen   70: best_d²=4.2613263681e-2  σ=0.009314          ES gen   80: best_d²=4.2613263681e-2  σ=0.009222          ES gen   90: best_d²=4.2613263681e-2  σ=0.009130          ES gen   99: best_d²=4.2613263681e-2  σ=0.009048      
+  [2m  │[0m      180 [2m│[0m    179 [2m│[0m  7.3322552432e-2 [2m│[0m  4.2708468707e-2 [2m│[0m     0.9598281576 [2m│[0m   -0.209 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=240)...[0m
+  Building Gram matrix G_240 (239×239) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=240) (0.4 MB, 2.19s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (0 MB)
+  ✓ GPU BilinearEngine initialized (dim=239)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0784962590
+      vᵀGv  = 1.3473944395
+      bᵀv   = 1.1344490903
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=5.6507854040e-2  vᵀGv=1.06825540  |δ|=7.8574e-2          CG step   10: d²=4.2374963840e-2  vᵀGv=0.95751057  |δ|=4.8703e-2          CG step   20: d²=4.2280841845e-2  vᵀGv=0.95764642  |δ|=6.4457e-2          CG step   30: d²=4.2248924342e-2  vᵀGv=0.95688064  |δ|=6.1308e-3          CG step   40: d²=4.2231969961e-2  vᵀGv=0.95777830  |δ|=1.6335e-2          CG step   50: d²=4.2224192296e-2  vᵀGv=0.95780243  |δ|=2.0638e-2          CG step   60: d²=4.2221191969e-2  vᵀGv=0.95771429  |δ|=2.5371e-4          CG step   70: d²=4.2219463375e-2  vᵀGv=0.95778443  |δ|=2.2230e-2          CG step   80: d²=4.2218983556e-2  vᵀGv=0.95773396  |δ|=3.0780e-3          CG step   90: d²=4.2218825020e-2  vᵀGv=0.95778742  |δ|=1.4103e-3          CG step  100: d²=4.2218761319e-2  vᵀGv=0.95777997  |δ|=2.0947e-3          CG step  110: d²=4.2218741922e-2  vᵀGv=0.95777867  |δ|=2.1123e-3          CG step  120: d²=4.2218734839e-2  vᵀGv=0.95778078  |δ|=1.2470e-3          CG step  130: d²=4.2218731536e-2  vᵀGv=0.95778186  |δ|=5.3037e-4          CG step  140: d²=4.2218730299e-2  vᵀGv=0.95778289  |δ|=9.6837e-5          CG step  150: d²=4.2218729941e-2  vᵀGv=0.95778126  |δ|=4.1775e-4          CG step  160: d²=4.2218729848e-2  vᵀGv=0.95778109  |δ|=4.9851e-5          CG step  170: d²=4.2218729819e-2  vᵀGv=0.95778127  |δ|=2.6201e-5          CG step  180: d²=4.2218729806e-2  vᵀGv=0.95778131  |δ|=7.3161e-5          CG step  190: d²=4.2218729802e-2  vᵀGv=0.95778112  |δ|=6.3377e-7      
+    CG result: d²=4.2218729799e-2  vᵀGv=0.95778128  bᵀv=0.95778128
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.2218729799e-2  σ=0.009990          ES gen   10: best_d²=4.2218729799e-2  σ=0.009891          ES gen   20: best_d²=4.2218729799e-2  σ=0.009792          ES gen   30: best_d²=4.2218729799e-2  σ=0.009695          ES gen   40: best_d²=4.2218729799e-2  σ=0.009598          ES gen   50: best_d²=4.2218729799e-2  σ=0.009503          ES gen   60: best_d²=4.2218729799e-2  σ=0.009408          ES gen   70: best_d²=4.2218729799e-2  σ=0.009314          ES gen   80: best_d²=4.2218729799e-2  σ=0.009222          ES gen   90: best_d²=4.2218729799e-2  σ=0.009130          ES gen   99: best_d²=4.2218729799e-2  σ=0.009048      
+  [2m  │[0m      240 [2m│[0m    239 [2m│[0m  7.8496258952e-2 [2m│[0m  4.2317078087e-2 [2m│[0m     0.9597291166 [2m│[0m   -0.221 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=360)...[0m
+  Loading HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N360.h5...
+  [32m✓[0m HPDF gram read: 359×359 (0.0s)
+  ✓ Gram matrix loaded: HPDF(gram_N360.h5) (1.0 MB, 0.00s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (1 MB)
+  ✓ GPU BilinearEngine initialized (dim=359)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0856738559
+      vᵀGv  = 1.3952307785
+      bᵀv   = 1.1547784613
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=5.8520074684e-2  vᵀGv=1.08647376  |δ|=8.5140e-2          CG step   10: d²=4.2185015542e-2  vᵀGv=0.95807218  |δ|=7.8396e-2          CG step   20: d²=4.2080566326e-2  vᵀGv=0.95774632  |δ|=3.8556e-2          CG step   30: d²=4.2054110770e-2  vᵀGv=0.95794994  |δ|=5.6672e-2          CG step   40: d²=4.2042631072e-2  vᵀGv=0.95794031  |δ|=7.2746e-3          CG step   50: d²=4.2033271022e-2  vᵀGv=0.95794822  |δ|=5.7422e-2          CG step   60: d²=4.2028395999e-2  vᵀGv=0.95791129  |δ|=1.1158e-2          CG step   70: d²=4.2025414096e-2  vᵀGv=0.95796196  |δ|=4.7844e-2          CG step   80: d²=4.2023670642e-2  vᵀGv=0.95797238  |δ|=3.3711e-2          CG step   90: d²=4.2022648046e-2  vᵀGv=0.95799665  |δ|=1.3223e-3          CG step  100: d²=4.2022290431e-2  vᵀGv=0.95797334  |δ|=4.2319e-3          CG step  110: d²=4.2022044855e-2  vᵀGv=0.95798154  |δ|=3.8953e-3          CG step  120: d²=4.2021937484e-2  vᵀGv=0.95797509  |δ|=3.7973e-4          CG step  130: d²=4.2021857243e-2  vᵀGv=0.95797834  |δ|=8.9714e-3          CG step  140: d²=4.2021830737e-2  vᵀGv=0.95797876  |δ|=9.2383e-4          CG step  150: d²=4.2021810714e-2  vᵀGv=0.95797451  |δ|=2.4451e-3          CG step  160: d²=4.2021800707e-2  vᵀGv=0.95797853  |δ|=1.5104e-3          CG step  170: d²=4.2021796053e-2  vᵀGv=0.95797759  |δ|=2.8458e-4          CG step  180: d²=4.2021794163e-2  vᵀGv=0.95797491  |δ|=6.2295e-4          CG step  190: d²=4.2021793169e-2  vᵀGv=0.95797816  |δ|=2.7956e-4      
+    CG result: d²=4.2021792674e-2  vᵀGv=0.95797827  bᵀv=0.95797824
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.2021792674e-2  σ=0.009990          ES gen   10: best_d²=4.2021792674e-2  σ=0.009891          ES gen   20: best_d²=4.2021792674e-2  σ=0.009792          ES gen   30: best_d²=4.2021792674e-2  σ=0.009695          ES gen   40: best_d²=4.2021792674e-2  σ=0.009598          ES gen   50: best_d²=4.2021792674e-2  σ=0.009503          ES gen   60: best_d²=4.2021792674e-2  σ=0.009408          ES gen   70: best_d²=4.2021792674e-2  σ=0.009314          ES gen   80: best_d²=4.2021792674e-2  σ=0.009222          ES gen   90: best_d²=4.2021792674e-2  σ=0.009130          ES gen   99: best_d²=4.2021792674e-2  σ=0.009048      
+  [2m  │[0m      360 [2m│[0m    359 [2m│[0m  8.5673855913e-2 [2m│[0m  4.2142251660e-2 [2m│[0m     0.9591668904 [2m│[0m   -0.240 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=720)...[0m
+  Building Gram matrix G_720 (719×719) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=720) (3.9 MB, 18.93s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (4 MB)
+  ✓ GPU BilinearEngine initialized (dim=719)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0973203553
+      vᵀGv  = 1.4639963309
+      bᵀv   = 1.1833379878
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=6.2275623606e-2  vᵀGv=1.11544359  |δ|=9.3673e-2          CG step   10: d²=4.1754196577e-2  vᵀGv=0.95869448  |δ|=1.0450e-1          CG step   20: d²=4.1614297525e-2  vᵀGv=0.95821377  |δ|=5.6070e-2          CG step   30: d²=4.1586015783e-2  vᵀGv=0.95824859  |δ|=4.6108e-4          CG step   40: d²=4.1571720080e-2  vᵀGv=0.95836712  |δ|=4.5953e-2          CG step   50: d²=4.1563983451e-2  vᵀGv=0.95839131  |δ|=4.0030e-2          CG step   60: d²=4.1557980961e-2  vᵀGv=0.95841082  |δ|=4.5123e-3          CG step   70: d²=4.1554008038e-2  vᵀGv=0.95842745  |δ|=2.5135e-2          CG step   80: d²=4.1550288441e-2  vᵀGv=0.95844701  |δ|=2.1453e-2          CG step   90: d²=4.1547443573e-2  vᵀGv=0.95840912  |δ|=1.8069e-3          CG step  100: d²=4.1545032021e-2  vᵀGv=0.95846010  |δ|=3.9219e-2          CG step  110: d²=4.1543792318e-2  vᵀGv=0.95845783  |δ|=7.0439e-3          CG step  120: d²=4.1542923402e-2  vᵀGv=0.95846393  |δ|=2.4259e-2          CG step  130: d²=4.1542452092e-2  vᵀGv=0.95844819  |δ|=1.0606e-3          CG step  140: d²=4.1541983607e-2  vᵀGv=0.95845657  |δ|=1.6717e-2          CG step  150: d²=4.1541703884e-2  vᵀGv=0.95844991  |δ|=9.5383e-3          CG step  160: d²=4.1541397994e-2  vᵀGv=0.95846187  |δ|=4.5864e-5          CG step  170: d²=4.1541217013e-2  vᵀGv=0.95846258  |δ|=2.9000e-3          CG step  180: d²=4.1541059238e-2  vᵀGv=0.95846332  |δ|=3.9036e-3          CG step  190: d²=4.1540951061e-2  vᵀGv=0.95846060  |δ|=7.8694e-3      
+    CG result: d²=4.1540873280e-2  vᵀGv=0.95845841  bᵀv=0.95845877
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.1540873280e-2  σ=0.009990          ES gen   10: best_d²=4.1540873280e-2  σ=0.009891          ES gen   20: best_d²=4.1540873280e-2  σ=0.009792          ES gen   30: best_d²=4.1540873280e-2  σ=0.009695          ES gen   40: best_d²=4.1540873280e-2  σ=0.009598          ES gen   50: best_d²=4.1540873280e-2  σ=0.009503          ES gen   60: best_d²=4.1540873280e-2  σ=0.009408          ES gen   70: best_d²=4.1540873280e-2  σ=0.009314          ES gen   80: best_d²=4.1540873280e-2  σ=0.009222          ES gen   90: best_d²=4.1540873280e-2  σ=0.009130          ES gen   99: best_d²=4.1540873280e-2  σ=0.009048      
+  [2m  │[0m      720 [2m│[0m    719 [2m│[0m  9.7320355333e-2 [2m│[0m  4.1709478891e-2 [2m│[0m     0.9605934360 [2m│[0m   -0.259 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=840)...[0m
+  Building Gram matrix G_840 (839×839) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=840) (5.4 MB, 26.13s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (6 MB)
+  ✓ GPU BilinearEngine initialized (dim=839)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.0996853305
+      vᵀGv  = 1.4771634879
+      bᵀv   = 1.1887390787
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=6.3106994240e-2  vᵀGv=1.12136076  |δ|=9.5205e-2          CG step   10: d²=4.1745683900e-2  vᵀGv=0.95897358  |δ|=1.0178e-1          CG step   20: d²=4.1589411770e-2  vᵀGv=0.95828457  |δ|=4.2856e-2          CG step   30: d²=4.1560305090e-2  vᵀGv=0.95951573  |δ|=2.5608e-2          CG step   40: d²=4.1547566083e-2  vᵀGv=0.95839284  |δ|=4.9047e-2          CG step   50: d²=4.1540326900e-2  vᵀGv=0.95838573  |δ|=4.0589e-2          CG step   60: d²=4.1534123340e-2  vᵀGv=0.95841891  |δ|=1.8965e-2          CG step   70: d²=4.1530433354e-2  vᵀGv=0.95844651  |δ|=4.1409e-2          CG step   80: d²=4.1527312335e-2  vᵀGv=0.95848608  |δ|=1.5111e-2          CG step   90: d²=4.1524271478e-2  vᵀGv=0.95844655  |δ|=1.0012e-2          CG step  100: d²=4.1521895800e-2  vᵀGv=0.95849801  |δ|=3.0283e-3          CG step  110: d²=4.1520272410e-2  vᵀGv=0.95848750  |δ|=4.3175e-2          CG step  120: d²=4.1519446810e-2  vᵀGv=0.95846931  |δ|=2.1470e-3          CG step  130: d²=4.1518677290e-2  vᵀGv=0.95847500  |δ|=3.2145e-2          CG step  140: d²=4.1518140427e-2  vᵀGv=0.95852399  |δ|=1.9688e-3          CG step  150: d²=4.1517719928e-2  vᵀGv=0.95848579  |δ|=5.6117e-3          CG step  160: d²=4.1517272813e-2  vᵀGv=0.95847942  |δ|=2.3761e-2          CG step  170: d²=4.1517061243e-2  vᵀGv=0.95847384  |δ|=1.6617e-2          CG step  180: d²=4.1516836765e-2  vᵀGv=0.95841787  |δ|=4.0244e-3          CG step  190: d²=4.1516630434e-2  vᵀGv=0.95848737  |δ|=1.6050e-2      
+    CG result: d²=4.1516481120e-2  vᵀGv=0.95848610  bᵀv=0.95848481
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.1516481120e-2  σ=0.009990          ES gen   10: best_d²=4.1516481120e-2  σ=0.009891          ES gen   20: best_d²=4.1516481120e-2  σ=0.009792          ES gen   30: best_d²=4.1516481120e-2  σ=0.009695          ES gen   40: best_d²=4.1516481120e-2  σ=0.009598          ES gen   50: best_d²=4.1516481120e-2  σ=0.009503          ES gen   60: best_d²=4.1516481120e-2  σ=0.009408          ES gen   70: best_d²=4.1516481120e-2  σ=0.009314          ES gen   80: best_d²=4.1516481120e-2  σ=0.009222          ES gen   90: best_d²=4.1516481120e-2  σ=0.009130          ES gen   99: best_d²=4.1516481120e-2  σ=0.009048      
+  [2m  │[0m      840 [2m│[0m    839 [2m│[0m  9.9685330463e-2 [2m│[0m  4.1680556850e-2 [2m│[0m     0.9559272029 [2m│[0m   -0.297 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=1260)...[0m
+  Building Gram matrix G_1260 (1259×1259) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=1260) (12.1 MB, 58.75s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (13 MB)
+  ✓ GPU BilinearEngine initialized (dim=1259)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.1059239015
+      vᵀGv  = 1.5103710432
+      bᵀv   = 1.2022235708
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=6.5262862271e-2  vᵀGv=1.13630007  |δ|=9.9035e-2          CG step   10: d²=4.1605973405e-2  vᵀGv=0.95945000  |δ|=1.1026e-1          CG step   20: d²=4.1452673850e-2  vᵀGv=0.95885659  |δ|=4.9058e-2          CG step   30: d²=4.1422789379e-2  vᵀGv=0.95841539  |δ|=8.5584e-4          CG step   40: d²=4.1408704992e-2  vᵀGv=0.95812292  |δ|=3.1226e-2          CG step   50: d²=4.1400926305e-2  vᵀGv=0.95820745  |δ|=4.7850e-2          CG step   60: d²=4.1395404134e-2  vᵀGv=0.95860846  |δ|=2.8957e-3          CG step   70: d²=4.1391803997e-2  vᵀGv=0.95890482  |δ|=6.9088e-3          CG step   80: d²=4.1388998651e-2  vᵀGv=0.95864999  |δ|=1.0805e-3          CG step   90: d²=4.1386401746e-2  vᵀGv=0.95859172  |δ|=8.2715e-3          CG step  100: d²=4.1383853954e-2  vᵀGv=0.95859791  |δ|=5.2558e-2          CG step  110: d²=4.1382103401e-2  vᵀGv=0.95860699  |δ|=4.3422e-2          CG step  120: d²=4.1380664604e-2  vᵀGv=0.95864100  |δ|=1.2784e-2          CG step  130: d²=4.1379886606e-2  vᵀGv=0.95861506  |δ|=1.5229e-2          CG step  140: d²=4.1378779194e-2  vᵀGv=0.95862024  |δ|=2.6801e-2          CG step  150: d²=4.1378075607e-2  vᵀGv=0.95873704  |δ|=1.6994e-3          CG step  160: d²=4.1377418059e-2  vᵀGv=0.95863530  |δ|=2.2693e-2          CG step  170: d²=4.1376971106e-2  vᵀGv=0.95859441  |δ|=5.9628e-3          CG step  180: d²=4.1376551871e-2  vᵀGv=0.95861326  |δ|=2.6076e-3          CG step  190: d²=4.1376192627e-2  vᵀGv=0.95862179  |δ|=1.8498e-2      
+    CG result: d²=4.1375930368e-2  vᵀGv=0.95862376  bᵀv=0.95862391
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.1375930368e-2  σ=0.009990          ES gen   10: best_d²=4.1375930368e-2  σ=0.009891          ES gen   20: best_d²=4.1375930368e-2  σ=0.009792          ES gen   30: best_d²=4.1375930368e-2  σ=0.009695          ES gen   40: best_d²=4.1375930368e-2  σ=0.009598          ES gen   50: best_d²=4.1375930368e-2  σ=0.009503          ES gen   60: best_d²=4.1375930368e-2  σ=0.009408          ES gen   70: best_d²=4.1375930368e-2  σ=0.009314          ES gen   80: best_d²=4.1375930368e-2  σ=0.009222          ES gen   90: best_d²=4.1375930368e-2  σ=0.009130          ES gen   99: best_d²=4.1375930368e-2  σ=0.009048      
+  [2m  │[0m     1260 [2m│[0m   1259 [2m│[0m  1.0592390155e-1 [2m│[0m  4.1558363181e-2 [2m│[0m     0.9542192478 [2m│[0m   -0.327 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=1680)...[0m
+  Building Gram matrix G_1680 (1679×1679) from scratch...
+  ✓ Gram matrix loaded: recomputed(f64, N=1680) (21.5 MB, 105.27s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.00s (23 MB)
+  ✓ GPU BilinearEngine initialized (dim=1679)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.1098505922
+      vᵀGv  = 1.5304947027
+      bᵀv   = 1.2103220552
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=6.6836898873e-2  vᵀGv=1.14562506  |δ|=1.0133e-1          CG step   10: d²=4.1610850077e-2  vᵀGv=0.96028893  |δ|=9.0955e-2          CG step   20: d²=4.1385551701e-2  vᵀGv=0.95885175  |δ|=5.8122e-2          CG step   30: d²=4.1355229261e-2  vᵀGv=0.95899683  |δ|=5.0583e-2          CG step   40: d²=4.1340372136e-2  vᵀGv=0.95853698  |δ|=4.0925e-2          CG step   50: d²=4.1334280015e-2  vᵀGv=0.95861142  |δ|=2.1382e-2          CG step   60: d²=4.1329028919e-2  vᵀGv=0.95876476  |δ|=4.8602e-4          CG step   70: d²=4.1324769859e-2  vᵀGv=0.95887467  |δ|=2.7099e-2          CG step   80: d²=4.1322160214e-2  vᵀGv=0.95902096  |δ|=9.7649e-3          CG step   90: d²=4.1319619958e-2  vᵀGv=0.95869826  |δ|=1.7536e-4          CG step  100: d²=4.1317625518e-2  vᵀGv=0.95825669  |δ|=2.3896e-2          CG step  110: d²=4.1315660027e-2  vᵀGv=0.95869192  |δ|=7.2931e-3          CG step  120: d²=4.1314022406e-2  vᵀGv=0.95868138  |δ|=8.0765e-4          CG step  130: d²=4.1312930433e-2  vᵀGv=0.95868184  |δ|=5.3780e-3          CG step  140: d²=4.1311873794e-2  vᵀGv=0.95877314  |δ|=3.1172e-3          CG step  150: d²=4.1310994014e-2  vᵀGv=0.95865595  |δ|=7.1572e-4          CG step  160: d²=4.1310267096e-2  vᵀGv=0.95874253  |δ|=3.2768e-2          CG step  170: d²=4.1309624425e-2  vᵀGv=0.95876021  |δ|=1.6841e-3          CG step  180: d²=4.1309128294e-2  vᵀGv=0.95880730  |δ|=2.0670e-3          CG step  190: d²=4.1308662320e-2  vᵀGv=0.95868599  |δ|=1.6825e-3      
+    CG result: d²=4.1308215765e-2  vᵀGv=0.95868566  bᵀv=0.95868872
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.1308215765e-2  σ=0.009990          ES gen   10: best_d²=4.1308215765e-2  σ=0.009891          ES gen   20: best_d²=4.1308215765e-2  σ=0.009792          ES gen   30: best_d²=4.1308215765e-2  σ=0.009695          ES gen   40: best_d²=4.1308215765e-2  σ=0.009598          ES gen   50: best_d²=4.1308215765e-2  σ=0.009503          ES gen   60: best_d²=4.1308215765e-2  σ=0.009408          ES gen   70: best_d²=4.1308215765e-2  σ=0.009314          ES gen   80: best_d²=4.1308215765e-2  σ=0.009222          ES gen   90: best_d²=4.1308215765e-2  σ=0.009130          ES gen   99: best_d²=4.1308215765e-2  σ=0.009048      
+  [2m  │[0m     1680 [2m│[0m   1679 [2m│[0m  1.0985059218e-1 [2m│[0m  4.1514331718e-2 [2m│[0m     0.9593852816 [2m│[0m   -0.302 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=2520)...[0m
+  Loading HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N2520.h5...
+  [32m✓[0m HPDF gram read: 2519×2519 (0.0s)
+  ✓ Gram matrix loaded: HPDF(gram_N2520.h5) (48.4 MB, 0.04s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.01s (51 MB)
+  ✓ GPU BilinearEngine initialized (dim=2519)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.1154406978
+      vᵀGv  = 1.5581002889
+      bᵀv   = 1.2213297955
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=6.8905868910e-2  vᵀGv=1.15821988  |δ|=1.0449e-1          CG step   10: d²=4.1595487699e-2  vᵀGv=0.96089447  |δ|=9.9753e-2          CG step   20: d²=4.1282045733e-2  vᵀGv=0.95896879  |δ|=8.0194e-2          CG step   30: d²=4.1243629545e-2  vᵀGv=0.95766568  |δ|=3.1366e-2          CG step   40: d²=4.1222931098e-2  vᵀGv=0.95891594  |δ|=1.2336e-2          CG step   50: d²=4.1214325889e-2  vᵀGv=0.95879930  |δ|=2.3193e-2          CG step   60: d²=4.1208781279e-2  vᵀGv=0.95876811  |δ|=2.2268e-3          CG step   70: d²=4.1203751665e-2  vᵀGv=0.95856874  |δ|=3.2025e-2          CG step   80: d²=4.1200309321e-2  vᵀGv=0.95882930  |δ|=3.2542e-2          CG step   90: d²=4.1198348958e-2  vᵀGv=0.95876748  |δ|=2.5078e-2          CG step  100: d²=4.1196624201e-2  vᵀGv=0.95877964  |δ|=3.6457e-2          CG step  110: d²=4.1195039160e-2  vᵀGv=0.95892929  |δ|=1.9676e-3          CG step  120: d²=4.1192995772e-2  vᵀGv=0.95879566  |δ|=4.5075e-2          CG step  130: d²=4.1191813300e-2  vᵀGv=0.95884663  |δ|=1.1457e-2          CG step  140: d²=4.1190849595e-2  vᵀGv=0.95879770  |δ|=1.8733e-2          CG step  150: d²=4.1189991592e-2  vᵀGv=0.95877525  |δ|=4.1441e-3          CG step  160: d²=4.1189079049e-2  vᵀGv=0.95880322  |δ|=3.6280e-3          CG step  170: d²=4.1188388470e-2  vᵀGv=0.95891235  |δ|=3.6558e-3          CG step  180: d²=4.1187793182e-2  vᵀGv=0.95883822  |δ|=2.5448e-4          CG step  190: d²=4.1187064355e-2  vᵀGv=0.95880161  |δ|=2.7889e-3      
+    CG result: d²=4.1186517328e-2  vᵀGv=0.95880261  bᵀv=0.95880805
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.1186517328e-2  σ=0.009990          ES gen   10: best_d²=4.1186517328e-2  σ=0.009891          ES gen   20: best_d²=4.1186517328e-2  σ=0.009792          ES gen   30: best_d²=4.1186517328e-2  σ=0.009695          ES gen   40: best_d²=4.1186517328e-2  σ=0.009598          ES gen   50: best_d²=4.1186517328e-2  σ=0.009503          ES gen   60: best_d²=4.1186517328e-2  σ=0.009408          ES gen   70: best_d²=4.1186517328e-2  σ=0.009314          ES gen   80: best_d²=4.1186517328e-2  σ=0.009222          ES gen   90: best_d²=4.1186517328e-2  σ=0.009130          ES gen   99: best_d²=4.1186517328e-2  σ=0.009048      
+  [2m  │[0m     2520 [2m│[0m   2519 [2m│[0m  1.1544069780e-1 [2m│[0m  4.1457735018e-2 [2m│[0m     0.9562067058 [2m│[0m   -0.343 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=5040)...[0m
+  Loading HPDF: /home/jrgochan/prime/experiments/cache/hpdf/gram_N5040.h5...
+  [32m✓[0m HPDF gram read: 5039×5039 (0.2s)
+  ✓ Gram matrix loaded: HPDF(gram_N5040.h5) (193.7 MB, 0.23s)
+  GPU detected: NVIDIA GeForce RTX 4090 (7287940053715 MB VRAM)
+    GPU Gram upload: 0.03s (203 MB)
+  ✓ GPU BilinearEngine initialized (dim=5039)
+    [32m✓[0m GPU acceleration enabled
+    Baseline (log-cutoff witness):
+      d²    = 0.1241416307
+      vᵀGv  = 1.5997488528
+      bᵀv   = 1.2378036111
+
+  [1m[35m§2[0m  [1mRunning Agent: HYBRID...[0m
+    [1mPhase 1: Conjugate Gradient (analytical optimum)...[0m
+    CG step    0: d²=7.2033018669e-2  vᵀGv=1.17707729  |δ|=1.0928e-1          CG step   10: d²=4.1367031658e-2  vᵀGv=0.96153235  |δ|=1.0899e-1          CG step   20: d²=4.1032473904e-2  vᵀGv=0.95954899  |δ|=9.9545e-2          CG step   30: d²=4.0972753513e-2  vᵀGv=0.95936163  |δ|=1.7294e-2          CG step   40: d²=4.0947676516e-2  vᵀGv=0.95872992  |δ|=3.2495e-2          CG step   50: d²=4.0934155803e-2  vᵀGv=0.95868013  |δ|=4.2797e-2          CG step   60: d²=4.0927104893e-2  vᵀGv=0.95915714  |δ|=2.8234e-2          CG step   70: d²=4.0921002226e-2  vᵀGv=0.95906555  |δ|=5.2087e-3          CG step   80: d²=4.0917067528e-2  vᵀGv=0.95893142  |δ|=1.3405e-3          CG step   90: d²=4.0913930781e-2  vᵀGv=0.95906797  |δ|=5.0673e-3          CG step  100: d²=4.0910969188e-2  vᵀGv=0.95906433  |δ|=2.4001e-2          CG step  110: d²=4.0909568416e-2  vᵀGv=0.95903222  |δ|=3.5697e-4          CG step  120: d²=4.0907105062e-2  vᵀGv=0.95913507  |δ|=1.6131e-3          CG step  130: d²=4.0904852911e-2  vᵀGv=0.95901493  |δ|=2.0360e-2          CG step  140: d²=4.0903502534e-2  vᵀGv=0.95906657  |δ|=1.7661e-4          CG step  150: d²=4.0901937974e-2  vᵀGv=0.95911103  |δ|=2.0792e-3          CG step  160: d²=4.0900235875e-2  vᵀGv=0.95908443  |δ|=3.1154e-2          CG step  170: d²=4.0899288092e-2  vᵀGv=0.95912358  |δ|=5.0740e-3          CG step  180: d²=4.0898152190e-2  vᵀGv=0.95907527  |δ|=4.8386e-2          CG step  190: d²=4.0897335974e-2  vᵀGv=0.95909317  |δ|=5.7800e-2      
+    CG result: d²=4.0896798221e-2  vᵀGv=0.95908208  bᵀv=0.95909264
+
+    [1mPhase 2: Evolution Strategy (structural exploration)...[0m
+    ES gen    0: best_d²=4.0896798221e-2  σ=0.009990          ES gen   10: best_d²=4.0896798221e-2  σ=0.009891          ES gen   20: best_d²=4.0896798221e-2  σ=0.009792          ES gen   30: best_d²=4.0896798221e-2  σ=0.009695          ES gen   40: best_d²=4.0896798221e-2  σ=0.009598          ES gen   50: best_d²=4.0896798221e-2  σ=0.009503          ES gen   60: best_d²=4.0896798221e-2  σ=0.009408          ES gen   70: best_d²=4.0896798221e-2  σ=0.009314          ES gen   80: best_d²=4.0896798221e-2  σ=0.009222          ES gen   90: best_d²=4.0896798221e-2  σ=0.009130          ES gen   99: best_d²=4.0896798221e-2  σ=0.009048      
+  [2m  │[0m     5040 [2m│[0m   5039 [2m│[0m  1.2414163071e-1 [2m│[0m  4.1174747565e-2 [2m│[0m     0.9589882779 [2m│[0m   -0.350 [2m│[0m[32m  ✓  [0m[2m│[0m
+  [1m[35m§1[0m  [1mBuilding Environment (N=7560)...[0m
+  Building Gram matrix G_7560 (7559×7559) from scratch...

@@ -1086,6 +1086,141 @@ impl GramMatrix {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// STREAMING UPPER-TRIANGLE-ONLY BUILDERS
+//
+// For large N where the full dim×dim matrix exceeds available RAM,
+// these functions compute only the upper triangle directly.
+//
+// Memory comparison for N=83,160 (dim=83,159):
+//   Full matrix:    55.3 GB (dim² × 8)
+//   Upper triangle: 27.7 GB (dim(dim+1)/2 × 8)  ← half the RAM!
+//
+// For DD, upper triangle needs 55.4 GB (hi + lo) — tight but
+// feasible on 64 GB machines.
+// ═══════════════════════════════════════════════════════════════
+
+/// Build only the upper triangle at f64 precision.
+///
+/// Returns a flat Vec<f64> of length dim*(dim+1)/2 in row-major
+/// upper-triangle order: G[0,0], G[0,1], ..., G[0,dim-1], G[1,1], ...
+///
+/// This avoids the full dim×dim allocation, halving RAM usage.
+pub fn build_upper_triangle_f64(max_n: usize) -> Vec<f64> {
+    let dim = max_n - 1;
+    let tri_len = dim * (dim + 1) / 2;
+    let mem_mb = (tri_len * 8) / (1024 * 1024);
+    let t0 = std::time::Instant::now();
+
+    eprintln!("  \x1b[2m▸ Building upper triangle (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m");
+    eprintln!("  \x1b[2m  Method: f64 Kahan (streaming, no full matrix)\x1b[0m");
+
+    let mut upper_tri = vec![0.0f64; tri_len];
+    let done = std::sync::atomic::AtomicUsize::new(0);
+
+    // Process row by row; within each row, parallelize over columns
+    let mut offset = 0;
+    for row in 0..dim {
+        let len = dim - row;
+        let slice = &mut upper_tri[offset..offset + len];
+
+        slice.par_iter_mut().enumerate().for_each(|(i, val)| {
+            let col = row + i;
+            *val = gram_entry_f64(row + 2, col + 2);
+
+            let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            if count % (tri_len / 100).max(1) == 0 && count > 0 {
+                let elapsed = t0.elapsed().as_secs_f64();
+                let frac = count as f64 / tri_len as f64;
+                let eta = elapsed / frac * (1.0 - frac);
+                eprint!("\r  \x1b[2m  {count}/{tri_len} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+            }
+        });
+
+        offset += len;
+    }
+
+    eprintln!("\r  \x1b[32m✓\x1b[0m Upper triangle built in {:.1}s ({mem_mb} MB)          ",
+        t0.elapsed().as_secs_f64());
+    upper_tri
+}
+
+/// Build only the upper triangle using the FAST block-based algorithm.
+///
+/// Returns (upper_tri_hi, upper_tri_lo, dim) where each entry = hi + lo
+/// at ~31 digit accuracy. Uses O(T/j + T/k) per entry.
+///
+/// For N=83,160: uses ~55 GB (27.7 GB hi + 27.7 GB lo) instead of
+/// 110 GB for two full dim×dim matrices.
+pub fn build_upper_triangle_fast_dd(
+    max_n: usize,
+    ln_n_table: &LnNTable,
+) -> (Vec<f64>, Vec<f64>, usize) {
+    let dim = max_n - 1;
+    let tri_len = dim * (dim + 1) / 2;
+    let mem_mb = (tri_len * 16) / (1024 * 1024);
+    let prec = ln_n_table.precision;
+    let t0 = std::time::Instant::now();
+
+    eprintln!("  \x1b[2m▸ Building upper triangle DD (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m");
+    eprintln!("  \x1b[2m  Method: FAST block-based ({prec}-bit MPFR → DD, streaming)\x1b[0m");
+
+    let mut upper_tri_hi = vec![0.0f64; tri_len];
+    let mut upper_tri_lo = vec![0.0f64; tri_len];
+    let done = std::sync::atomic::AtomicUsize::new(0);
+
+    // Process in row bands for better Rayon utilization
+    let band_size = 256.min(dim);
+    let mut offset = 0;
+
+    for band_start in (0..dim).step_by(band_size) {
+        let band_end = (band_start + band_size).min(dim);
+
+        // Compute this band's entries in parallel
+        let band_entries: Vec<Vec<(f64, f64)>> = (band_start..band_end)
+            .into_par_iter()
+            .map(|row| {
+                (row..dim)
+                    .map(|col| {
+                        let mpfr_val = gram_entry_fast(row + 2, col + 2, ln_n_table);
+                        let hi = mpfr_val.to_f64();
+                        let lo = {
+                            let mut residual = mpfr_val;
+                            residual -= hi;
+                            residual.to_f64()
+                        };
+
+                        let count = done.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                        if count % (tri_len / 100).max(1) == 0 && count > 0 {
+                            let elapsed = t0.elapsed().as_secs_f64();
+                            let frac = count as f64 / tri_len as f64;
+                            let eta = elapsed / frac * (1.0 - frac);
+                            eprint!("\r  \x1b[2m  {count}/{tri_len} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                        }
+
+                        (hi, lo)
+                    })
+                    .collect()
+            })
+            .collect();
+
+        // Write band results to upper triangle arrays
+        for (local_row, row_entries) in band_entries.iter().enumerate() {
+            for (i, &(hi, lo)) in row_entries.iter().enumerate() {
+                upper_tri_hi[offset + i] = hi;
+                upper_tri_lo[offset + i] = lo;
+            }
+            let row = band_start + local_row;
+            offset += dim - row;
+        }
+    }
+
+    eprintln!("\r  \x1b[32m✓\x1b[0m Upper triangle DD built in {:.1}s ({mem_mb} MB)          ",
+        t0.elapsed().as_secs_f64());
+
+    (upper_tri_hi, upper_tri_lo, dim)
+}
+
+// ═══════════════════════════════════════════════════════════════
 // VALIDATION
 // ═══════════════════════════════════════════════════════════════
 
