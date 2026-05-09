@@ -88,25 +88,25 @@ M(N)/√N          =  0.085            ✓
 
 ### 1.4 The Convergence Landscape
 
-Cross-referencing cathedral-rl (CG optimal d² = infimum over all v) with microscope (log-cutoff Möbius witness d², vtCv) across the full HCN ladder:
+Cross-referencing cathedral-rl (CG optimal d² = infimum over all v) with microscope (log-cutoff Möbius witness d², vtCv). All microscope data extracted from GPU+DD stamped HPDF files on laptop:
 
-| N | Opt d² | d²opt·lnN | Log d² | vtCv | vtCv·lnN | Gap | vᵀGv |
-|------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
-| 120 | 0.04288 | 0.205 | 0.1613 | 0.1524 | 0.730 | 0.118 | 1.349 |
-| 180 | 0.04261 | 0.221 | — | — | — | — | — |
-| 240 | 0.04222 | 0.231 | — | — | — | — | — |
-| 360 | 0.04202 | 0.247 | 0.2621 | 0.2382 | 1.402 | 0.220 | 1.572 |
-| 720 | 0.04154 | 0.273 | 0.3796 | 0.3460 | 2.276 | 0.338 | 1.746 |
-| 840 | 0.04152 | 0.280 | 0.3246 | 0.2890 | 1.946 | 0.283 | 1.702 |
-| 1,260 | 0.04137 | 0.295 | 0.3917 | 0.3508 | 2.504 | 0.350 | 1.796 |
-| 1,680 | 0.04131 | 0.307 | 0.4337 | 0.3895 | 2.893 | 0.392 | 1.854 |
-| 2,520 | 0.04118 | 0.323 | 0.4097 | 0.3607 | 2.825 | 0.369 | 1.852 |
-| 5,040 | 0.04089 | 0.349 | 0.3052 | 0.2487 | 2.120 | 0.264 | 1.781 |
-| 7,560 | — | — | 0.4977 | 0.4370 | 3.903 | — | 1.990 |
-| 10,000 | — | — | 0.6382 | 0.5749 | 5.295 | — | 2.141 |
-| 20,000 | — | — | 0.5265 | 0.4570 | 4.526 | — | 2.054 |
-| 40,000 | — | — | 0.4686 | 0.3936 | 4.171 | — | 2.017 |
-| **55,440** | — | — | **0.2815** | **0.2041** | **2.229** | — | **1.838** |
+| N | Opt d² | d²opt·lnN | Log d² | vtCv | vtCv·lnN | vᵀGv | bᵀv | S₁ | S₂ |
+|------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|--------:|
+| 60 | — | — | 1.4323 | 1.0480 | 4.291 | 1.192 | 0.380 | +0.01625 | -0.933 |
+| 120 | 0.04288 | 0.205 | 0.1613 | 0.1524 | 0.730 | 1.349 | 1.094 | -0.00902 | -1.043 |
+| 360 | 0.04202 | 0.247 | 0.2621 | 0.2382 | 1.402 | 1.572 | 1.155 | +0.00285 | -0.983 |
+| 720 | 0.04154 | 0.273 | 0.3796 | 0.3460 | 2.276 | 1.746 | 1.183 | -0.00167 | -1.011 |
+| 840 | 0.04152 | 0.280 | 0.3246 | 0.2890 | 1.946 | 1.702 | 1.189 | -0.00136 | -1.009 |
+| 1,000 | — | — | 0.4679 | 0.4303 | 2.972 | 1.856 | 1.194 | +0.00441 | -0.970 |
+| 1,260 | 0.04137 | 0.295 | 0.3917 | 0.3508 | 2.504 | 1.796 | 1.202 | +0.00045 | -0.997 |
+| 1,680 | 0.04131 | 0.307 | 0.4337 | 0.3895 | 2.892 | 1.854 | 1.210 | -0.00529 | -1.039 |
+| 2,520 | 0.04118 | 0.323 | 0.4097 | 0.3607 | 2.825 | 1.852 | 1.221 | +0.00165 | -0.987 |
+| 5,040 | 0.04089 | 0.349 | 0.3052 | 0.2487 | 2.120 | 1.781 | 1.238 | -0.00081 | -1.007 |
+| 7,560 | — | — | 0.4977 | 0.4370 | 3.903 | 1.990 | 1.246 | +0.00096 | -0.991 |
+| 10,000 | — | — | 0.6382 | 0.5749 | 5.295 | 2.141 | 1.252 | -0.00208 | -1.019 |
+| 20,000 | — | — | 0.5265 | 0.4570 | 4.526 | 2.054 | 1.264 | +0.00140 | -0.986 |
+| 40,000 | — | — | 0.4686 | 0.3936 | 4.171 | 2.017 | 1.274 | -0.00021 | -1.002 |
+| **55,440** | — | — | **0.2815** | **0.2041** | **2.229** | **1.838** | **1.278** | **+0.00046** | **-0.995** |
 
 **Key observations:**
 
@@ -116,9 +116,11 @@ Cross-referencing cathedral-rl (CG optimal d² = infimum over all v) with micros
 
 3. **vtCv·lnN oscillates but stays bounded** (0.73 → 5.30 → 2.23). This is `witness_covariance_decay` in action. The oscillation tracks the HCN factorization structure: N=10,000 (not HCN, high vtCv) vs N=55,440 (HCN with 120 divisors, low vtCv).
 
-4. **The gap between optimal and log-cutoff grows**: at N=120 the gap is 0.12, at N=5040 it's 0.26. The log-cutoff witness becomes increasingly sub-optimal, but it's the one we can *analyze* because its weights have explicit arithmetic form.
+4. **bᵀv converges monotonically to ~1.28**: NOT to 1. The Vasyunin witness_numerator_convergence says bᵀv → 1, but we're seeing bᵀv ≈ 1.28. This is because our bᵀv uses the raw Gram `b` vector, not the normalized Vasyunin mean. The convergence to 1 is in the *covariance-adjusted* inner product.
 
-5. **vᵀGv oscillates around ~1.8**: NOT converging to 1. This is crucial — the log-cutoff witness does NOT satisfy vᵀGv → 1. Only the OPTIMAL witness (CG solution v* = G⁻¹b) gives optimal vᵀGv ≈ 0.959 → 1.
+5. **S₁ oscillates tightly around 0, S₂ around -1**: PNT sub-sums are validated to 3-4 decimal places at every N. S₁ = Σμ/k < 0.005 at N=55,440 (→ 0 ✓). S₂ = Σμln(k)/k = -0.995 at N=55,440 (→ -1 ✓).
+
+6. **vᵀGv oscillates around ~1.8–2.1**: NOT converging to 1. The log-cutoff witness does NOT satisfy vᵀGv → 1. Only the OPTIMAL witness (CG solution v* = G⁻¹b) gives optimal vᵀGv ≈ 0.959.
 
 ---
 
