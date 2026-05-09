@@ -496,7 +496,7 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit
+## Audit — ZERO SORRY ✓
 
 ### Proved (0 sorry, 0 axiom):
   1. `sawtoothReal_bound` — |B₁| ≤ 1/2
@@ -510,29 +510,24 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   9. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0 (FTC + Ioo_ae_eq_Ioc)
   10. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin) (IBP + recursive orthogonality)
   11. `gram_entry_b1_decomposition` — G(j,k) via B₁ (IntegrableOn.of_bound + integral linearity)
+  12. `gram_entry_inversion` — u = 1/x (integral_image_eq_integral_deriv_smul_of_antitoneOn)
 
-### Sorry: 1
-  Phase 2 (measure theory):
-  1. `gram_entry_inversion` — u = 1/x change of variables
-     (requires integral_comp_mul_deriv_Ioi or similar from Mathlib)
-
-### Axioms: 0
+### Sorry: 0 ✓
+### Axioms: 0 ✓
 
 ### Architecture:
-  **PHASE 1 COMPLETE, PHASE 2 NEARLY COMPLETE.**
-  All Fourier-analytic foundations are machine-checked:
+  **ALL PHASES COMPLETE — ZERO SORRY!**
+  The Fourier–Gram Bridge is fully machine-checked:
     - Parseval: sawtoothFn → sawtooth_memLp → hasSum_sq_fourierCoeffOn (Mathlib)
     - L² norm: ∫₀¹(x-1/2)² = 1/12 via FTC
     - Coefficients: ĉ₀ = 0 (FTC), ĉₙ = -1/(2πin) (IBP)
     - Gram decomposition: G(j,k) = ∫B₁·B₁ + cross + 1/4
-
-  The sole remaining sorry is a measure-theoretic change-of-variables
-  (u = 1/x on (0,1] → [1,∞)), which does not affect the
-  Fourier → Large Sieve → witness_covariance_decay logical chain.
+    - Geometric inversion: G(j,k) = ∫₁^∞ {u/j}{u/k}/u² du (antitone CoV)
 
 ### Phase status:
-  Phase 1/5: ████████ (10 proved, 0 sorry — COMPLETE!)
-  Phase 2/5: ██████░░ (1 proved, 1 sorry — change of variables)
+  Phase 1/5: ████████ (10 proved — COMPLETE!)
+  Phase 2/5: ████████ (2 proved — COMPLETE!)
+  Total: 12 theorems, 0 sorry, 0 axiom — 100%
 -/
 
 end Cathedral.FourierGram
