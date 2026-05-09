@@ -375,10 +375,12 @@ theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
       + 1/4 :=
     fun x => fract_product_decomposition _ _
   simp_rw [h_eq]
-  -- Step 2: Split the integral of a sum into sum of integrals
-  -- This requires integrability of each component, which holds because
-  -- the sawtooth is bounded by 1/2 on [0,1]
-  sorry -- Linearity: ∫(f+g+h+c) = ∫f + ∫g + ∫h + c·∫1
+  -- Step 2: Split ∫(f+g+h+c) = ∫f + ∫g + ∫h + c·|I|
+  -- The pointwise rewriting above is complete. What remains is:
+  -- (a) IntervalIntegrable for each component (bounded measurable on [0,1])
+  -- (b) Linearity of the interval integral: integral_add + integral_const
+  -- Both are standard Mathlib operations once integrability is established.
+  sorry -- Linearity of ∫ + integrability of composed sawtooth
 
 /-- **Geometric inversion**: Under u = 1/x, the Gram integral transforms from
     ∫₀¹ to ∫₁^∞ with Jacobian du/u².
@@ -408,30 +410,33 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   3. `sawtoothReal_measurable` — measurability
   4. `fract_eq_sawtooth_add_half` — {x} = B₁(x) + 1/2
   5. `fract_product_decomposition` — {a}·{b} = B₁(a)·B₁(b) + cross + 1/4
-  6. `sawtooth_parseval` — Parseval identity (CERTIFIED: memLp + Mathlib)
-  7. `sawtooth_memLp` — L² integrability on (0,1]
+  6. `sawtooth_memLp` — L² integrability on (0,1]
+  7. `sawtooth_parseval` — Parseval identity (CERTIFIED: memLp + Mathlib)
+  8. `sawtooth_l2_norm_sq` — ∫₀¹(x-1/2)² = 1/12 (FTC)
+  9. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0 (FTC)
+  10. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin) (IBP + Fourier orthogonality)
 
-### Sorry: 5
-  Phase 1 (FTC computations):
-  1. `sawtooth_l2_norm_sq` — ∫₀¹(x-1/2)² = 1/12
-  2. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin)
-  3. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0
-
+### Sorry: 2
   Phase 2 (measure theory):
-  4. `gram_entry_b1_decomposition` — G(j,k) decomposed via B₁ (linearity of ∫)
-  5. `gram_entry_inversion` — u = 1/x change of variables
+  1. `gram_entry_b1_decomposition` — linearity of ∫ + integrability of composed sawtooth
+     (pointwise rewriting via simp_rw COMPLETE; only integral splitting remains)
+  2. `gram_entry_inversion` — u = 1/x change of variables
 
 ### Axioms: 0
 
 ### Architecture:
-  **Parseval is FULLY CERTIFIED.** The chain:
-    sawtoothFn → sawtooth_memLp (PROVED) → hasSum_sq_fourierCoeffOn (Mathlib)
-  compiles with zero sorry, zero axiom. The remaining sorrys are either
-  standard FTC computations or measure-theoretic change-of-variables.
+  **PHASE 1 COMPLETE!** All Fourier-analytic foundations are machine-checked:
+    - Parseval: sawtoothFn → sawtooth_memLp → hasSum_sq_fourierCoeffOn (Mathlib)
+    - L² norm: ∫₀¹(x-1/2)² = 1/12 via FTC
+    - Coefficients: ĉ₀ = 0 (FTC), ĉₙ = -1/(2πin) (IBP via fourierCoeffOn_of_hasDerivAt)
+  
+  The remaining 2 sorrys are Phase 2 measure-theoretic operations:
+  integral linearity and change-of-variables. Neither affects the
+  Fourier → Large Sieve → witness_covariance_decay logical chain.
 
 ### Phase status:
-  Phase 1/5: ▓▓▓▓▓▓▓░ (7 proved, 3 sorry — FTC computations)
-  Phase 2/5: ▓▓░░░░░░ (2 theorems stated, 2 sorry — structural)
+  Phase 1/5: ████████ (10 proved, 0 sorry — COMPLETE!)
+  Phase 2/5: ▓▓▓▓░░░░ (2 theorems stated, 2 sorry — measure theory)
 -/
 
 end Cathedral.FourierGram
