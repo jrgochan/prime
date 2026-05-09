@@ -361,9 +361,9 @@ def gramEntryIntegral (j k : ℕ) : ℝ :=
     The constant = 1/4. -/
 theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     gramEntryIntegral j k =
-      ∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x)) * sawtoothReal (1/((k:ℝ)*x))
-      + (1/2) * ∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x))
-      + (1/2) * ∫ x in (0:ℝ)..1, sawtoothReal (1/((k:ℝ)*x))
+      (∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x)) * sawtoothReal (1/((k:ℝ)*x)))
+      + (1/2) * (∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x)))
+      + (1/2) * (∫ x in (0:ℝ)..1, sawtoothReal (1/((k:ℝ)*x)))
       + 1/4 := by
   -- Step 1: Rewrite the integrand pointwise using B₁ decomposition
   unfold gramEntryIntegral
@@ -375,12 +375,64 @@ theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
       + 1/4 :=
     fun x => fract_product_decomposition _ _
   simp_rw [h_eq]
-  -- Step 2: Split ∫(f+g+h+c) = ∫f + ∫g + ∫h + c·|I|
-  -- The pointwise rewriting above is complete. What remains is:
-  -- (a) IntervalIntegrable for each component (bounded measurable on [0,1])
-  -- (b) Linearity of the interval integral: integral_add + integral_const
-  -- Both are standard Mathlib operations once integrability is established.
-  sorry -- Linearity of ∫ + integrability of composed sawtooth
+  -- Step 2: Integrability of the components
+  -- sawtoothReal(1/(m·x)) = fract(1/(m·x)) - 1/2, bounded by 1/2
+  -- Following the pattern from Cathedral/Gram/FractIntegral.lean
+  have hint_fract : ∀ m : ℕ, IntervalIntegrable
+      (fun x => Int.fract (1 / ((m:ℝ) * x))) volume (0:ℝ) 1 := by
+    intro m
+    exact (IntegrableOn.of_bound (by simp)
+      (measurable_fract.comp (measurable_const.div
+        (measurable_const.mul measurable_id))).aestronglyMeasurable.restrict 1
+      (ae_of_all _ (fun x => by
+        simp only [Function.comp, Real.norm_eq_abs]
+        rw [abs_of_nonneg (Int.fract_nonneg _)]
+        exact le_of_lt (Int.fract_lt_one _)))).intervalIntegrable
+  have hint_saw : ∀ m : ℕ, IntervalIntegrable
+      (fun x => sawtoothReal (1/((m:ℝ)*x))) volume (0:ℝ) 1 := by
+    intro m
+    -- sawtoothReal = fract - 1/2
+    show IntervalIntegrable (fun x => Int.fract (1/((m:ℝ)*x)) - 1/2) volume 0 1
+    exact (hint_fract m).sub intervalIntegrable_const
+  have hint_prod : IntervalIntegrable
+      (fun x => sawtoothReal (1/((j:ℝ)*x)) * sawtoothReal (1/((k:ℝ)*x)))
+      volume (0:ℝ) 1 := by
+    -- Product of bounded integrable functions on finite interval
+    -- |f·g| ≤ (1/2)·(1/2) = 1/4 ≤ 1
+    exact (IntegrableOn.of_bound (by simp)
+      ((sawtoothReal_measurable.comp (measurable_const.div
+        (measurable_const.mul measurable_id))).mul
+        (sawtoothReal_measurable.comp (measurable_const.div
+        (measurable_const.mul measurable_id)))).aestronglyMeasurable.restrict 1
+      (ae_of_all _ (fun x => by
+        rw [Real.norm_eq_abs, abs_mul]
+        calc |sawtoothReal _| * |sawtoothReal _|
+            ≤ (1/2) * (1/2) := mul_le_mul (sawtoothReal_bound _)
+              (sawtoothReal_bound _) (abs_nonneg _) (by norm_num)
+          _ ≤ 1 := by norm_num))).intervalIntegrable
+  -- Step 3: Split ∫(((P + c₁g) + c₂h) + c₃) → ∫P + c₁∫g + c₂∫h + c₃
+  -- Left-associative: first peel off the constant, then the two cross terms
+  rw [intervalIntegral.integral_add
+    ((hint_prod.add ((hint_saw j).const_mul _)).add ((hint_saw k).const_mul _))
+    intervalIntegrable_const]
+  rw [intervalIntegral.integral_add
+    (hint_prod.add ((hint_saw j).const_mul _))
+    ((hint_saw k).const_mul _)]
+  rw [intervalIntegral.integral_add hint_prod ((hint_saw j).const_mul _)]
+  rw [intervalIntegral.integral_const]
+  -- Pull out the constant multipliers from ∫ c*f = c*∫f
+  rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
+  -- The integral arguments have mul_comm differences (j⁻¹*x⁻¹ vs x⁻¹*j⁻¹)
+  -- Use congr_arg to align, then ring for the outer arithmetic
+  simp only [sub_zero, one_smul, smul_eq_mul, mul_one]
+  -- Normalize: 1/(j*x) → j⁻¹*x⁻¹ on both sides
+  -- The RHS still has the original 1/((j:ℝ)*x) form
+  -- We need them to match. Use congr + rewriting under integrals.
+  have norm_arg : ∀ (m : ℕ) (x : ℝ),
+      1/((m:ℝ)*x) = (m:ℝ)⁻¹ * x⁻¹ := by intro m x; ring
+  -- Rewrite RHS integrals to match LHS
+  simp_rw [norm_arg] at *
+  ring
 
 /-- **Geometric inversion**: Under u = 1/x, the Gram integral transforms from
     ∫₀¹ to ∫₁^∞ with Jacobian du/u².
