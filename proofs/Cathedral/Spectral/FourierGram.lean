@@ -277,29 +277,29 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   3. `sawtoothReal_measurable` — measurability
   4. `fract_eq_sawtooth_add_half` — {x} = B₁(x) + 1/2
   5. `fract_product_decomposition` — {a}·{b} = B₁(a)·B₁(b) + cross + 1/4
-  6. `sawtooth_parseval` — Parseval identity (via Mathlib)
+  6. `sawtooth_parseval` — Parseval identity (CERTIFIED: memLp + Mathlib)
+  7. `sawtooth_memLp` — L² integrability on (0,1]
 
-### Sorry: 6
-  Phase 1 (computations):
-  1. `sawtooth_l2_norm_sq` — ∫₀¹(x-1/2)² = 1/12 (FTC)
-  2. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin) (integration by parts)
-  3. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0 (direct integral)
-  4. `sawtooth_memLp` — L² integrability (bounded argument)
+### Sorry: 5
+  Phase 1 (FTC computations):
+  1. `sawtooth_l2_norm_sq` — ∫₀¹(x-1/2)² = 1/12
+  2. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin)
+  3. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0
 
-  Phase 2 (structural):
-  5. `gram_entry_b1_decomposition` — G(j,k) decomposed via B₁ (linearity of ∫)
-  6. `gram_entry_inversion` — u = 1/x change of variables
+  Phase 2 (measure theory):
+  4. `gram_entry_b1_decomposition` — G(j,k) decomposed via B₁ (linearity of ∫)
+  5. `gram_entry_inversion` — u = 1/x change of variables
 
 ### Axioms: 0
 
 ### Architecture:
-  The key structural theorems (`sawtooth_parseval`, `fract_product_decomposition`)
-  are fully proved. The sorrys are either FTC computations (Phase 1) or
-  measure-theoretic change-of-variables (Phase 2). Neither affects the
-  logical chain from Fourier → Large Sieve → witness_covariance_decay.
+  **Parseval is FULLY CERTIFIED.** The chain:
+    sawtoothFn → sawtooth_memLp (PROVED) → hasSum_sq_fourierCoeffOn (Mathlib)
+  compiles with zero sorry, zero axiom. The remaining sorrys are either
+  standard FTC computations or measure-theoretic change-of-variables.
 
 ### Phase status:
-  Phase 1/5: ▓▓▓▓▓▓░░ (6 proved, 4 sorry — all computational)
+  Phase 1/5: ▓▓▓▓▓▓▓░ (7 proved, 3 sorry — FTC computations)
   Phase 2/5: ▓▓░░░░░░ (2 theorems stated, 2 sorry — structural)
 -/
 
