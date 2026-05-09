@@ -166,14 +166,54 @@ private lemma zero_lt_one' : (0 : ℝ) < 1 := by norm_num
 theorem fourierCoeffOn_sawtooth (n : ℤ) (hn : n ≠ 0) :
     fourierCoeffOn zero_lt_one' sawtoothFn n =
       -1 / (2 * ↑Real.pi * Complex.I * ↑n) := by
-  -- Strategy: Use Mathlib's fourierCoeffOn_of_hasDerivAt with f = sawtooth, f' = 1
-  -- on the interval (0, 1).
-  --
-  -- The identity function x ↦ x has Fourier coefficient:
-  --   fourierCoeffOn (0,1) (fun x => x) n = -1/(2πin) + 1/2·δ(n,0)
-  -- The constant 1/2 has coefficient 0 for n ≠ 0.
-  -- So fourierCoeffOn (0,1) sawtooth n = -1/(2πin).
-  sorry -- Phase 1 target: prove via integration by parts
+  -- Step 1: Transfer from sawtoothFn to g(x) = ofReal(x-1/2) by ae congr
+  -- fourierCoeffOn depends only on the ae-equivalence class on (0,1]
+  set g : ℝ → ℂ := fun x => ((x : ℝ) : ℂ) - 1/2 with hg_def
+  -- g is smooth, agrees with sawtoothFn ae on (0,1]
+  have h_ae : sawtoothFn =ᵐ[volume.restrict (Set.Ioc (0:ℝ) 1)] g := by
+    have hset : Set.Ioc (0:ℝ) 1 =ᵐ[volume] Set.Ioo (0:ℝ) 1 :=
+      Ioo_ae_eq_Ioc.symm
+    rw [Measure.restrict_congr_set hset]
+    apply (ae_restrict_mem measurableSet_Ioo).mono
+    intro x ⟨hx0, hx1⟩
+    show sawtoothFn x = ((x : ℝ) : ℂ) - 1/2
+    rw [sawtoothFn_eq_ofReal]
+    unfold sawtoothReal
+    rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]
+    push_cast; ring
+  -- Step 2: fourierCoeffOn agrees for ae-equal functions
+  -- (fourierCoeffOn is defined via an integral, which respects ae equality)
+  have h_coeff_eq : fourierCoeffOn zero_lt_one' sawtoothFn n =
+      fourierCoeffOn zero_lt_one' g n := by
+    simp only [fourierCoeffOn_eq_integral]
+    congr 1
+    apply intervalIntegral.integral_congr_ae
+    have hset : Set.Ioc (0:ℝ) 1 =ᵐ[volume] Set.Ioo (0:ℝ) 1 :=
+      Ioo_ae_eq_Ioc.symm
+    rw [Set.uIoc_of_le (by norm_num : (0:ℝ) ≤ 1), Measure.restrict_congr_set hset]
+    apply (ae_restrict_mem measurableSet_Ioo).mono
+    intro x ⟨hx0, hx1⟩
+    show fourier (-n) (↑x) • sawtoothFn x = fourier (-n) (↑x) • g x
+    congr 1
+    rw [sawtoothFn_eq_ofReal]; unfold sawtoothReal
+    rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx1⟩]; push_cast; ring
+  rw [h_coeff_eq]
+  -- Step 3: Apply fourierCoeffOn_of_hasDerivAt to g
+  -- g(x) = x - 1/2, g'(x) = 1
+  have h_ibp := fourierCoeffOn_of_hasDerivAt zero_lt_one' hn
+    (f := g) (f' := fun _ => 1)
+    (fun x _ => by
+      show HasDerivAt (fun x => ((x : ℝ) : ℂ) - 1/2) 1 x
+      convert Complex.ofRealCLM.hasDerivAt.sub (hasDerivAt_const x (1/2 : ℂ)) using 1
+      simp)
+    (by exact intervalIntegrable_const)
+  rw [h_ibp]
+  -- Step 4: Simplify the result
+  -- g(1) - g(0) = (1-1/2) - (0-1/2) = 1
+  -- fourierCoeffOn (const 1) n = 0 for n ≠ 0
+  -- fourier(-n)(0 : AddCircle 1) = 1
+  -- So: 1/(-2πin) * (1 * 1 - 1 * 0) = -1/(2πin)
+  sorry -- Algebraic simplification of IBP formula
 
 /-- The zeroth Fourier coefficient of B₁ vanishes (B₁ has mean zero). -/
 theorem fourierCoeffOn_sawtooth_zero :
