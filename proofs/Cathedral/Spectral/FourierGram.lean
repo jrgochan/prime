@@ -465,30 +465,32 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   6. `sawtooth_memLp` — L² integrability on (0,1]
   7. `sawtooth_parseval` — Parseval identity (CERTIFIED: memLp + Mathlib)
   8. `sawtooth_l2_norm_sq` — ∫₀¹(x-1/2)² = 1/12 (FTC)
-  9. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0 (FTC)
-  10. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin) (IBP + Fourier orthogonality)
+  9. `fourierCoeffOn_sawtooth_zero` — ĉ₀ = 0 (FTC + Ioo_ae_eq_Ioc)
+  10. `fourierCoeffOn_sawtooth` — ĉₙ = -1/(2πin) (IBP + recursive orthogonality)
+  11. `gram_entry_b1_decomposition` — G(j,k) via B₁ (IntegrableOn.of_bound + integral linearity)
 
-### Sorry: 2
+### Sorry: 1
   Phase 2 (measure theory):
-  1. `gram_entry_b1_decomposition` — linearity of ∫ + integrability of composed sawtooth
-     (pointwise rewriting via simp_rw COMPLETE; only integral splitting remains)
-  2. `gram_entry_inversion` — u = 1/x change of variables
+  1. `gram_entry_inversion` — u = 1/x change of variables
+     (requires integral_comp_mul_deriv_Ioi or similar from Mathlib)
 
 ### Axioms: 0
 
 ### Architecture:
-  **PHASE 1 COMPLETE!** All Fourier-analytic foundations are machine-checked:
+  **PHASE 1 COMPLETE, PHASE 2 NEARLY COMPLETE.**
+  All Fourier-analytic foundations are machine-checked:
     - Parseval: sawtoothFn → sawtooth_memLp → hasSum_sq_fourierCoeffOn (Mathlib)
     - L² norm: ∫₀¹(x-1/2)² = 1/12 via FTC
-    - Coefficients: ĉ₀ = 0 (FTC), ĉₙ = -1/(2πin) (IBP via fourierCoeffOn_of_hasDerivAt)
-  
-  The remaining 2 sorrys are Phase 2 measure-theoretic operations:
-  integral linearity and change-of-variables. Neither affects the
+    - Coefficients: ĉ₀ = 0 (FTC), ĉₙ = -1/(2πin) (IBP)
+    - Gram decomposition: G(j,k) = ∫B₁·B₁ + cross + 1/4
+
+  The sole remaining sorry is a measure-theoretic change-of-variables
+  (u = 1/x on (0,1] → [1,∞)), which does not affect the
   Fourier → Large Sieve → witness_covariance_decay logical chain.
 
 ### Phase status:
   Phase 1/5: ████████ (10 proved, 0 sorry — COMPLETE!)
-  Phase 2/5: ▓▓▓▓░░░░ (2 theorems stated, 2 sorry — measure theory)
+  Phase 2/5: ██████░░ (1 proved, 1 sorry — change of variables)
 -/
 
 end Cathedral.FourierGram
