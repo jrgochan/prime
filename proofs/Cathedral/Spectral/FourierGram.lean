@@ -41,6 +41,7 @@
 import Mathlib.Analysis.Fourier.AddCircle
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
+import Mathlib.Analysis.Calculus.Deriv.Pow
 
 set_option maxHeartbeats 400000
 
@@ -107,9 +108,38 @@ theorem sawtoothReal_measurable : Measurable sawtoothReal := by
            = [x³/3 - x²/2 + x/4]₀¹ = 1/3 - 1/2 + 1/4 = 1/12. -/
 theorem sawtooth_l2_norm_sq :
     ∫ x in (0:ℝ)..1, sawtoothReal x ^ 2 = 1/12 := by
-  -- On (0,1), Int.fract x = x, so sawtoothReal x = x - 1/2
-  -- ∫₀¹ (x - 1/2)² dx = [x³/3 - x²/2 + x/4]₀¹ = 1/3 - 1/2 + 1/4 = 1/12
-  sorry -- FTC computation
+  -- Step 1: On (0,1], sawtoothReal x = x - 1/2, so their squares match a.e.
+  have h_congr : (fun x => sawtoothReal x ^ 2) =ᵐ[volume.restrict (Set.Ioc (0:ℝ) 1)]
+      (fun x => (x - 1/2) ^ 2) := by
+    apply (ae_restrict_mem measurableSet_Ioc).mono
+    intro x hx
+    have hx0 : 0 < x := hx.1
+    have hx1 : x ≤ 1 := hx.2
+    show sawtoothReal x ^ 2 = (x - 1 / 2) ^ 2
+    rcases eq_or_lt_of_le hx1 with rfl | hx_lt
+    · simp [sawtoothReal, Int.fract_one]; norm_num
+    · unfold sawtoothReal
+      rw [Int.fract_eq_self.mpr ⟨le_of_lt hx0, hx_lt⟩]
+  -- Step 2: Replace integral via a.e. equality
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  rw [MeasureTheory.integral_congr_ae h_congr]
+  rw [← intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- Step 3: FTC with antiderivative F(x) = x³/3 - x²/2 + x/4
+  have hF : ∀ x ∈ Set.uIcc (0:ℝ) 1,
+      HasDerivAt (fun x => x ^ 3 / 3 - x ^ 2 / 2 + x / 4)
+        ((x - 1/2) ^ 2) x := by
+    intro x _
+    have h3 := (hasDerivAt_pow 3 x).div_const (3:ℝ)
+    have h2 := (hasDerivAt_pow 2 x).div_const (2:ℝ)
+    have h1 := (hasDerivAt_id x).div_const (4:ℝ)
+    convert h3.sub h2 |>.add h1 using 1
+    ring
+  have hint : IntervalIntegrable (fun x => (x - 1/2) ^ 2) volume (0:ℝ) 1 := by
+    apply ContinuousOn.intervalIntegrable
+    exact (continuous_id.sub continuous_const).pow 2 |>.continuousOn
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hF hint]
+  -- Step 4: Compute F(1) - F(0) = (1/3 - 1/2 + 1/4) - 0 = 1/12
+  norm_num
 
 -- ════════════════════════════════════════════════
 -- §3. FOURIER COEFFICIENTS OF THE SAWTOOTH
