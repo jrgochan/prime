@@ -42,6 +42,8 @@ import Mathlib.Analysis.Fourier.AddCircle
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.Analysis.Calculus.Deriv.Pow
+import Mathlib.Analysis.Calculus.Deriv.Inv
+import Mathlib.MeasureTheory.Function.JacobianOneDim
 
 set_option maxHeartbeats 400000
 
@@ -446,8 +448,48 @@ theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     gramEntryIntegral j k =
       ∫ u in Set.Ioi (1:ℝ),
         Int.fract ((u:ℝ) / j) * Int.fract ((u:ℝ) / k) / u ^ 2 := by
-  -- Change of variables u = 1/x, du = -dx/x², on (0,1] → [1,∞)
-  sorry -- MeasureTheory.integral_comp with u = 1/x
+  -- Strategy: Use integral_image_eq_integral_deriv_smul_of_antitoneOn
+  -- with f(u) = u⁻¹ on s = Ioi 1 (antitone, maps Ioi 1 → Ioo 0 1)
+  -- f'(u) = -(u²)⁻¹, so -f'(u) = (u²)⁻¹ = 1/u²
+  unfold gramEntryIntegral
+  -- Step 1: Convert interval integral ∫₀¹ to set integral ∫_{Ioc 0 1}
+  rw [intervalIntegral.integral_of_le (by norm_num : (0:ℝ) ≤ 1)]
+  -- Step 2: Ioc 0 1 =ᵐ Ioo 0 1
+  rw [setIntegral_congr_set Ioo_ae_eq_Ioc.symm]
+  -- Step 3: Ioo 0 1 = Inv.inv '' (Ioi 1)
+  have h_image : Inv.inv '' Set.Ioi (1:ℝ) = Set.Ioo 0 1 := by
+    ext x; simp only [Set.mem_image, Set.mem_Ioi, Set.mem_Ioo]
+    constructor
+    · rintro ⟨u, hu, rfl⟩
+      exact ⟨inv_pos.mpr (by linarith), inv_lt_one_of_one_lt₀ hu⟩
+    · intro ⟨hx0, hx1⟩
+      exact ⟨x⁻¹, (one_lt_inv₀ hx0).mpr hx1, inv_inv x⟩
+  rw [← h_image]
+  -- Step 4: Apply the antitone change of variables for f(u) = u⁻¹
+  rw [MeasureTheory.integral_image_eq_integral_deriv_smul_of_antitoneOn
+    measurableSet_Ioi
+    (f' := fun u => -(u ^ 2)⁻¹)
+    (fun u hu => by
+      have hu' : (u : ℝ) ≠ 0 := ne_of_gt (zero_lt_one.trans (Set.mem_Ioi.mp hu))
+      exact (hasDerivAt_inv hu').hasDerivWithinAt)
+    (fun u hu v hv huv => by
+      simp only [Set.mem_Ioi] at hu hv
+      exact inv_anti₀ (by positivity) huv)
+    _]
+  -- Step 5: Simplify: -(-(u²)⁻¹) • g(u⁻¹) = g(u⁻¹) / u²
+  -- g(u⁻¹) = fract(1/(j·u⁻¹)) * fract(1/(k·u⁻¹)) = fract(u/j) * fract(u/k)
+  congr 1; ext u
+  simp only [neg_neg, smul_eq_mul]
+  -- Now need: (u^2)⁻¹ * (fract((j*u⁻¹)⁻¹) * fract((k*u⁻¹)⁻¹))
+  --         = fract(u/j) * fract(u/k) / u^2
+  -- The key: (j * u⁻¹)⁻¹ = u / j
+  -- The fract arguments differ: (↑j * u⁻¹)⁻¹ vs u / ↑j
+  -- These are equal when u ≠ 0
+  -- First handle the multiplication structure
+  have key : ∀ (m : ℕ) (u : ℝ), 1 / (↑m * u⁻¹) = u / ↑m := by
+    intro m u; rw [one_div, mul_inv_rev, inv_inv, div_eq_mul_inv]
+  rw [key j, key k]
+  ring
 
 -- ════════════════════════════════════════════════
 -- §7. AUDIT
