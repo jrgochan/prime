@@ -30,7 +30,7 @@
 
 import Cathedral.Spectral.FourierGram
 
-set_option maxHeartbeats 400000
+set_option maxHeartbeats 800000
 
 noncomputable section
 open Real MeasureTheory Complex Filter Finset
@@ -70,19 +70,67 @@ theorem bilinear_b1_decomposition (N : ℕ) (v : Fin (N - 1) → ℝ) :
     (∫ x in (0:ℝ)..1,
       (∑ j : Fin (N - 1),
         v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2)
-    + 2 * (∑ j : Fin (N - 1), v j) *
+    + (∑ j : Fin (N - 1), v j) *
       (∫ x in (0:ℝ)..1,
         ∑ j : Fin (N - 1),
           v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x)))
     + (1/4) * (∑ j : Fin (N - 1), v j) ^ 2 := by
   -- Step 1: Rewrite {x} = B₁(x) + 1/2 pointwise
   simp_rw [FourierGram.fract_eq_sawtooth_add_half]
-  -- Step 2: Distribute in sum and factor
+  -- Step 2: Distribute in sum and factor: Σ vⱼ(B₁ + 1/2) = (Σ vⱼ B₁) + (1/2)(Σ vⱼ)
   simp_rw [mul_add, Finset.sum_add_distrib, mul_comm _ (1/2 : ℝ), ← Finset.mul_sum]
-  -- After this, LHS = ∫₀¹ (S(x) + c)² where S and c are sums
-  -- The RHS also contains the parenthesized integral terms
-  -- Try the simplest possible close:
-  sorry
+  -- Now LHS = ∫₀¹ (S(x) + c)² where S(x) = Σ vⱼ B₁(...), c = (1/2)(Σ vⱼ)
+  -- RHS = (∫₀¹ S²) + 2(Σvⱼ)·(∫₀¹ S) + ¼(Σvⱼ)²
+  -- Step 3: Expand integrand using (S + c)² = S² + 2cS + c²
+  -- Following BDMellin.lean pattern (line 486-490)
+  rw [show (fun x => ((∑ j : Fin (N - 1),
+      v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) +
+      1 / 2 * ∑ j : Fin (N - 1), v j) ^ 2) =
+    (fun x => (∑ j : Fin (N - 1),
+      v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2 +
+    2 * (1 / 2 * ∑ j : Fin (N - 1), v j) *
+      (∑ j : Fin (N - 1),
+        v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) +
+    (1 / 2 * ∑ j : Fin (N - 1), v j) ^ 2) from by ext x; ring]
+  -- Step 4: Establish integrability
+  -- S is integrable on [0,1] (bounded: each |sawtoothReal| ≤ 1/2)
+  set M_bound := (1/2 : ℝ) * ∑ j : Fin (N - 1), |v j|
+  -- S(x) is bounded by M_bound pointwise
+  have hS_bound : ∀ x : ℝ, |∑ j : Fin (N - 1),
+      v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))| ≤ M_bound := by
+    intro x
+    calc |∑ j : Fin (N - 1), v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))|
+        ≤ ∑ j : Fin (N - 1), |v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))| :=
+          Finset.abs_sum_le_sum_abs _ _
+      _ = ∑ j : Fin (N - 1), |v j| * |FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))| := by
+          congr 1; ext j; exact abs_mul _ _
+      _ ≤ ∑ j : Fin (N - 1), |v j| * (1/2) := by
+          apply Finset.sum_le_sum; intro j _
+          apply mul_le_mul_of_nonneg_left (FourierGram.sawtoothReal_bound _) (abs_nonneg _)
+      _ = M_bound := by simp [M_bound, Finset.mul_sum, mul_comm]
+  -- Integrability lemmas: S(x) = Σ vⱼ·B₁(1/(jx)) is bounded by
+  -- M_bound = (1/2)·Σ|vⱼ| on all of ℝ (since |B₁| ≤ 1/2).
+  -- Therefore S² ≤ M_bound² and |c·S| ≤ |c|·M_bound are also bounded.
+  -- Bounded measurable functions on finite intervals are integrable.
+  -- TODO: Graduate via IntervalIntegrable.mono_fun' with hS_bound
+  have hS2 : IntervalIntegrable (fun x =>
+      (∑ j : Fin (N - 1),
+        v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))) ^ 2)
+      MeasureTheory.volume 0 1 := by
+    sorry -- S² bounded by M_bound² (see hS_bound)
+  have hcS : IntervalIntegrable (fun x =>
+      2 * (1 / 2 * ∑ j : Fin (N - 1), v j) *
+        (∑ j : Fin (N - 1),
+          v j * FourierGram.sawtoothReal (1 / ((↑(j.val + 1) : ℝ) * x))))
+      MeasureTheory.volume 0 1 := by
+    sorry -- const * S bounded by |const| * M_bound (see hS_bound)
+  -- Step 5: Split the integral (following BDMellin line 488-490)
+  rw [intervalIntegral.integral_add (hS2.add hcS) intervalIntegrable_const,
+      intervalIntegral.integral_add hS2 hcS,
+      intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_const]
+  simp only [sub_zero, one_smul]
+  ring
 
 -- ════════════════════════════════════════════════
 -- §3. THE FOURIER SPECTRAL BOUND
