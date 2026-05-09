@@ -155,6 +155,19 @@ private lemma abel_s1_diff_exp
     |S₁_pnt M - S₁_pnt N| ≤
       C_M * (2 + Real.log ↑M - Real.log ↑N) *
         Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+  -- This mirrors S1Decay.finite_abel_s1_diff with exponential Mertens.
+  -- The proof uses abel_summation_abs_bound with:
+  --   C_bound(k) = 2·C_M·k·E(N)  (partial sum of μ from N+1 to k)
+  --   δ(k) = 1/(k(k+1))          (|1/(k+1) - 1/k|)
+  --
+  -- The key: |M(k) - M(N)| ≤ |M(k)| + |M(N)|
+  --   ≤ C_M·k·E(k) + C_M·N·E(N) ≤ 2·C_M·k·E(N)  (since E(k)≤E(N), N≤k)
+  --
+  -- Abel gives: ≤ C_bound(M)·|1/M| + Σ C_bound(k)·δ(k)
+  --   = 2·C_M·E(N) + Σ 2·C_M·k·E(N)/(k(k+1))
+  --   = 2·C_M·E(N) + 2·C_M·E(N)·Σ 1/(k+1)
+  --   ≤ 2·C_M·E(N)·(1 + log(M/N))
+  --   ≤ C_M·(2 + logM - logN)·E(N)
   sorry
 
 /-- **Log-times-exp domination**: (2 + log M) · exp(-c·(logN)^{1/10})
