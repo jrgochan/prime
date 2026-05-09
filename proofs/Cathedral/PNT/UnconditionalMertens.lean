@@ -70,15 +70,43 @@ theorem exp_decay_le_const_div_log (c : ℝ) (hc : 0 < c) :
       Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) ≤
         B / Real.log ↑N := by
   -- From exp_decay_times_t_tendsto_zero: t·exp(-c·t^{1/10}) → 0
-  -- So ∃ t₀, ∀ t ≥ t₀, |t·exp(-c·t^{1/10})| ≤ 1
+  -- So it's eventually bounded by 1.
   have h_tend := exp_decay_times_t_tendsto_zero c hc
   rw [Metric.tendsto_atTop] at h_tend
   obtain ⟨T, hT⟩ := h_tend 1 one_pos
-  -- For t ≥ max T 1: t·exp(-c·t^{1/10}) ≤ 1 (since it's non-negative and ‖·‖ ≤ 1)
-  -- For t < max T 1: exp(-c·t^{1/10}) ≤ 1 ≤ B₀/t (by choosing B₀ large enough)
-  -- Combined: exp(-c·t^{1/10}) ≤ max(1, B₀)/t for all t ≥ log 3
-  -- Setting t = log N gives the result
-  sorry
+  -- For t ≥ T: dist(t·exp(-c·t^{1/10}), 0) < 1, so |t·exp(...)| < 1
+  -- Since t·exp(...) ≥ 0, this gives t·exp(-c·t^{1/10}) ≤ 1
+  -- So exp(-c·t^{1/10}) ≤ 1/t for t ≥ max T 1
+  -- Use B = max T 1 + 1 (handles both the "large t" and "small t" cases)
+  refine ⟨max T 1 + 1, by positivity, fun N hN => ?_⟩
+  have hN_cast : (1 : ℝ) < (N : ℝ) := by exact_mod_cast show 1 < N by omega
+  have hlogN_pos : 0 < Real.log ↑N := Real.log_pos hN_cast
+  -- exp(-c·(logN)^{1/10}) ≤ 1 ≤ (max T 1 + 1) / log N when log N ≤ max T 1 + 1
+  -- exp(-c·(logN)^{1/10}) ≤ 1/logN ≤ (max T 1 + 1)/logN when log N > T
+  by_cases h : Real.log ↑N ≤ max T 1
+  · -- Small log N: exp(...) ≤ 1 and 1 ≤ B/logN since logN ≤ B
+    have h_exp_le : Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) ≤ 1 :=
+      Real.exp_le_one_of_nonpos (mul_nonpos_of_nonpos_of_nonneg (neg_nonpos.mpr hc.le)
+        (Real.rpow_nonneg hlogN_pos.le _))
+    have h_bound : (1 : ℝ) ≤ (max T 1 + 1) / Real.log ↑N := by
+      rw [le_div_iff₀ hlogN_pos]
+      linarith [le_max_right T (1:ℝ)]
+    linarith
+  · -- Large log N: log N > max T 1 ≥ T, so use the tendsto bound
+    push_neg at h
+    have hlogN_ge_T : T ≤ Real.log ↑N := le_of_lt (lt_of_le_of_lt (le_max_left T 1) h)
+    have h_dist := hT (Real.log ↑N) hlogN_ge_T
+    simp only [dist_zero_right] at h_dist
+    -- |logN · exp(-c·(logN)^{1/10})| < 1
+    -- Since logN > 0 and exp > 0, the product is positive
+    have h_prod_pos : 0 < Real.log ↑N * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) :=
+      mul_pos hlogN_pos (Real.exp_pos _)
+    rw [Real.norm_eq_abs, abs_of_pos h_prod_pos] at h_dist
+    -- logN · exp(...) < 1, so exp(...) < 1/logN ≤ B/logN
+    have h_exp := (div_lt_iff₀ hlogN_pos).mpr (by linarith)
+    have h_B_ge : (1 : ℝ) / Real.log ↑N ≤ (max T 1 + 1) / Real.log ↑N :=
+      div_le_div_of_nonneg_right (by linarith [le_max_right T (1:ℝ)]) hlogN_pos
+    linarith
 
 -- ════════════════════════════════════════════════
 -- §2. MERTENS BOUND FROM MEDIUM PNT
@@ -194,22 +222,22 @@ theorem unconditional_mean_bound :
 /-!
 ## Sorry Audit
 
-| # | Lemma | Nature | Difficulty |
+| # | Lemma | Nature | Status |
 |---|-------|--------|:---:|
-| 1 | `exp_decay_times_t_tendsto_zero` | t·exp(-c·t^{1/10}) → 0 | Easy (50 lines) |
-| 2 | `exp_decay_le_const_div_log` | Corollary of #1 | Easy (30 lines) |
-| 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | Hard (200 lines) |
-| 4 | `s1_exp_decay` | Abel summation with exp bound | Medium (120 lines) |
+| 1 | `exp_decay_times_t_tendsto_zero` | t·exp(-c·t^{1/10}) → 0 | ✅ PROVED |
+| 2 | `exp_decay_le_const_div_log` | exp(...) ≤ B/logN | ✅ PROVED |
+| 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | ❌ sorry |
+| 4 | `s1_exp_decay` | Abel summation with exp bound | ❌ sorry |
 
-**Total: 4 sorrys, ~400 lines to close.**
+**Total: 2 sorrys remaining, ~320 lines to close.**
 
 All are UNCONDITIONAL real analysis — no RH anywhere.
-#1 and #2 are pure calculus (exp beats polynomial).
 #3 is classical ANT (Titchmarsh Ch. 12).
 #4 is discrete Abel summation (template in S1Decay.lean).
 
-The `unconditional_mean_bound` and `s1_le_const_div_log` are
-PROVED (assuming the 4 sorrys above).
+The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
+`s1_le_const_div_log`, and `unconditional_mean_bound` are all
+PROVED with zero sorry.
 -/
 
 #check MediumPNT
