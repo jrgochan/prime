@@ -157,6 +157,21 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+  -- Strategy: Use qualitative PNT (S₁ → 0) + triangle inequality.
+  -- From PNTAnd: mu_pnt_alt gives S₁(M) → 0.
+  -- From Mertens bound: |S₁(M) - S₁(N)| is controlled.
+  -- Together: |S₁(N)| is bounded by an exponential.
+  --
+  -- More precisely: for any ε > 0, choose M large with |S₁(M)| < ε.
+  -- Then |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)|.
+  -- The difference |S₁(M) - S₁(N)| = |Σ_{k=N+1}^M μ(k)/k|
+  -- is bounded by Abel summation using the Mertens bound.
+  --
+  -- The Abel bound gives:
+  --   |S₁(M) - S₁(N)| ≤ C_M · E(N) · (1 + loglog term)
+  -- where E(N) = exp(-c·(logN)^{1/10}).
+  -- Since exp(-c·(logN)^{1/10}) ≤ exp(-c/2·(logN)^{1/10}) for all N ≥ 1
+  -- (the exponent is just more negative), we get the bound.
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
