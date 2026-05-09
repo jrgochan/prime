@@ -301,14 +301,17 @@ theorem s1_exp_decay
   -- The Mertens bound gives |M(N)/N| ≤ C_M · E(N) ≤ C_M · E'(N)
   -- The tail gives ≤ C_T · E'(N)
   -- So C' = C_M + C_T + 1 works
-  refine ⟨C_M + C_T + 1, by linarith, fun N hN => ?_⟩
-  -- For the bound, we use:
-  -- |S₁(N)| = |M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))| (Abel identity)
-  -- The full series converges to 0 (from PNT), so:
-  -- |S₁(N)| = |M(N)/N - tail(N)|
-  -- ≤ |M(N)/N| + |tail(N)|
-  -- ≤ C_M·E(N) + C_T·E'(N)
-  -- ≤ (C_M + C_T)·E'(N) since E(N) ≤ E'(N)
+  -- We need a quantitative rate for S₁ → 0.
+  -- Direct approach: |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)| for any M > N.
+  -- From PNT: S₁(M) → 0, so for any ε choose M₀ with |S₁(M)| < ε.
+  -- But the Abel difference |S₁(M) - S₁(N)| grows with M, so we can't just send M → ∞.
+  --
+  -- Instead, use that S₁(N) = -Σ_{k≥N+1} μ(k)/k (from PNT: the tail of the convergent series).
+  -- And bound the tail using Mertens + Abel summation:
+  -- |Σ_{k≥N+1} μ(k)/k| ≤ tail_bound(N) ≤ C_T · E'(N).
+  --
+  -- For now, the formal proof uses mertens_tail_bound as a black box.
+  -- The Abel identity + PNT limit formalization is left for future work.
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
@@ -380,15 +383,19 @@ theorem unconditional_mean_bound :
 | 2 | `exp_decay_le_const_div_log` | exp(...) ≤ B/logN | ✅ PROVED |
 | — | `log_times_exp_bound` | (2+a)·E(N) ≤ 2(1+a)·E'(N) | ✅ PROVED |
 | 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | ❌ sorry |
-| 4a | `abel_s1_diff_exp` | Abel difference bound | ❌ sorry |
-| 4b | `mertens_tail_bound` | Tail sum ≤ C·E'(N) | ❌ sorry |
-| 4c | `s1_exp_decay` | Assembly: M(N)/N + tail | ❌ sorry |
+| 4a | `abel_s1_diff_exp` | Abel difference ≤ 4·C_M·E(N) | 🔨 95% (1 arith sorry) |
+| 4b | `mertens_tail_bound` | Tail Σ E(k)/(k+1) ≤ C·E'(N) | ❌ sorry |
+| 4c | `s1_exp_decay` | S₁ rate via tail | ❌ sorry |
 
-**Total: 4 sorrys remaining.**
+**Architecture note**: `abel_s1_diff_exp` (4a) is NOT needed downstream.
+The main chain is: `mertens_exp_bound_from_pnt` (3) →
+`mertens_tail_bound` (4b) → `s1_exp_decay` (4c) →
+`s1_le_const_div_log` (✅) → `unconditional_mean_bound` (✅).
 
-All are UNCONDITIONAL real analysis — no RH anywhere.
-#3 is classical ANT (Titchmarsh Ch. 12).
-#4a-c are discrete Abel summation + tail estimation.
+**Bottleneck**: `mertens_tail_bound` requires showing
+Σ_{k≥N} exp(-c·(logk)^{1/10})/(k+1) ≤ C·exp(-c/2·(logN)^{1/10}).
+This needs integral comparison (∫ exp(-c·u^{1/10}) du) + the
+polynomial-times-exponential domination (already proved in #1).
 
 The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 `log_times_exp_bound`, `s1_le_const_div_log`, and
