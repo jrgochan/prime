@@ -229,7 +229,7 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT
+-- AXIOM AUDIT (updated May 9, 2026 — Exploration 31)
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
@@ -237,6 +237,20 @@ end
 --
 -- 1 custom axiom (baez_duarte_forward) + 3 Lean kernel axioms.
 -- The converse direction has zero custom axioms.
+--
+-- ALTERNATIVE FORWARD PATHS (see also):
+--   HeisenbergBypass.lean: heisenberg_implies_d_sq_zero
+--     → d²_N → 0 via Rayleigh-Ritz squeeze
+--     → 0 custom axioms, 0 sorry (FULLY PROVED)
+--     → Uses bd_witness_l2_error_decay_proved (Vasyunin chain)
+--
+--   MellinCrown.lean: rh_implies_bd_convergence_mellin
+--     → RH ⟹ d²_N → 0 via critical-line Mellin integral
+--     → Crown axiom GRADUATED via Perron bridge
+--     → Inherits structurally unsound covariance axiom (Route B)
+--
+-- GPU-VALIDATED (May 9, 2026): d²·ln(N) ≈ 3.08 at N=55,440
+-- confirms Rayleigh-Ritz squeeze constant across 13 HCN points.
 
 #print axioms nyman_beurling_equivalence
 

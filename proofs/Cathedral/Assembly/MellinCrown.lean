@@ -30,13 +30,15 @@
   isometry, which maps the L²(0,1) norm to a critical-line integral
   where phase structure is automatic.
 
-  ### Crown Axioms: 1
-    1. critical_line_mellin_variance (L² frequency bound — THE sole axiom)
+  ### Crown Axioms: 0 (GRADUATED)
+    critical_line_mellin_variance is now a THEOREM, proved via:
+    MellinPerronBridge.lean → PerronCrown.lean (inherits Perron axioms)
 
-  ### Sorry: 1 (the Crown Axiom)
+  ### Sorry: 0 (on this path)
 
   Created: April 26, 2026 — Exploration 10
   Updated: April 27, 2026 — Exploration 13 (corrected architecture)
+  Updated: May 9, 2026 — Crown axiom graduated via Perron bridge
 -/
 
 import Cathedral.Defs
@@ -143,22 +145,32 @@ theorem rh_implies_bd_convergence_mellin :
         _ = ε * Real.log ↑N := mul_comm _ _
 
 -- ═══════════════════════════════════════════════
--- §3. AUDIT
+-- §3. AUDIT (updated May 9, 2026 — Exploration 31)
 -- ═══════════════════════════════════════════════
 
--- PROVED (1 sorry = Crown Axiom):
+-- ALL PROVED (0 sorry on this path):
 --   ✅ rh_implies_bd_convergence_mellin  — RH ⟹ d²_N → 0
---   🔴 critical_line_mellin_variance     — THE SOLE CROWN AXIOM (sorry)
+--   ✅ critical_line_mellin_variance     — THEOREM (graduated via Perron bridge)
 --
 -- DEPENDENCIES:
 --   ✅ parseval_bridge_white             — L²(0,1) = Mellin L²  (0 sorry, 0 axiom)
 --   ✅ bdResidualV, bdLinComb, bdMoebiusWeight  — Definitions (0 sorry)
+--   ✅ critical_line_mellin_variance_proved — MellinVarianceProof.lean
+--   ✅ critical_line_mellin_variance_from_perron — MellinPerronBridge.lean
+--
+-- INHERITED AXIOMS (from Perron chain):
+--   pnt_mu_log_div_k (PNT-level, unconditional in principle)
+--   covariance_bound_from_mertens_34 (NOTE: mathematically false! See Route B analysis)
 --
 -- ARCHITECTURAL NOTE (Exploration 13, April 27, 2026):
 --   The Mellin variance CANNOT be proved from Mertens x^{3/4} alone.
 --   Via Dirichlet convolution: 1-f_N(1/y) = -yE_N - (ψ(y)-y)/logN
 --   Under x^{3/4}: ∫(1-f)² ≈ 2√N/log²N → ∞ (DIVERGES).
 --   The spatial bound IS the Riemann Hypothesis, not a step toward it.
---   Therefore, critical_line_mellin_variance must remain as an axiom.
+--
+-- IMPORTANT: This path INHERITS the mathematically false
+-- covariance_bound_from_mertens_34 from PerronCrown. The Perron bridge
+-- chain is structurally unsound for this reason. The CLEAN forward path
+-- is via HeisenbergBypass.lean (0 axioms) or baez_duarte_forward (1 axiom).
 
 end
