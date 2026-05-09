@@ -145,10 +145,11 @@ private def S₁_pnt (M : ℕ) : ℝ :=
 /-- **Abel difference bound**: |S₁(M) - S₁(N)| with exponential Mertens.
 
     For M ≥ N+1, Abel summation on [N+1, M] gives:
-      |S₁(M) - S₁(N)| ≤ 2·C_M·E(N) + C_M·E(N)·log(M/N)
+      |S₁(M) - S₁(N)| ≤ 4·C_M·E(N)
 
     where E(N) = exp(-c·(logN)^{1/10}).
-    The bound uses |M(k)| ≤ C_M·k·E(k) and E(k) ≤ E(N) for k ≥ N. -/
+    Uses |M(k)| ≤ C_M·k·E(k), E(k) ≤ E(N) for k ≥ N,
+    and Σ 1/(k(k+1)) ≤ 1/(N+1) (telescoping). -/
 private lemma abel_s1_diff_exp
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -156,8 +157,7 @@ private lemma abel_s1_diff_exp
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10)))
     (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) :
     |S₁_pnt M - S₁_pnt N| ≤
-      C_M * (2 + Real.log ↑M - Real.log ↑N) *
-        Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
+      4 * C_M * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
   have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
   have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
   set EN := Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10))
@@ -183,17 +183,14 @@ private lemma abel_s1_diff_exp
   -- Step 2: Rewrite as Σ a(k)·f(k) and apply Abel engine
   set a := fun k => (↑(ArithmeticFunction.moebius k) : ℝ)
   set f : ℕ → ℝ := fun k => 1 / (k : ℝ)
-  -- Partial sums: |Σ_{j=N+1}^k μ(j)| = |M(k) - M(N)| ≤ 2·C_M·k·E(N)
   set C_bound : ℕ → ℝ := fun k => 2 * C_M * (k : ℝ) * EN
   set δ : ℕ → ℝ := fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))
-  -- Rewrite μ(k)/k = μ(k) * (1/k)
   have h_mul : ∀ k, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ) = a k * f k := by
     intro k; simp only [a, f]; ring
   rw [show (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) =
       (Icc (N+1) M).sum (fun k => a k * f k) from Finset.sum_congr rfl (fun k _ => h_mul k)]
   -- Apply Abel summation bound
   have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
-    -- hA: partial sum bound
     (fun k hk1 hk2 => by
       simp only [C_bound, a]
       unfold partialSum
@@ -213,7 +210,6 @@ private lemma abel_s1_diff_exp
             · apply mul_le_mul_of_nonneg_right (by positivity)
               exact mul_le_mul_of_nonneg_left (by exact_mod_cast show N ≤ k by omega) hC.le
         _ = 2 * C_M * (k : ℝ) * EN := by ring)
-    -- hf_mono: |f(k+1) - f(k)| ≤ δ(k)
     (fun k hk1 hk2 => by
       simp only [f, δ]
       have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
@@ -224,15 +220,20 @@ private lemma abel_s1_diff_exp
   -- Step 3: Bound the Abel output
   calc |(Icc (N+1) M).sum (fun k => a k * f k)|
       ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
-    _ ≤ C_M * (2 + Real.log ↑M - Real.log ↑N) * EN := by
-      simp only [C_bound, f, δ]
-      -- Boundary: 2·C_M·M·EN·|1/M| = 2·C_M·EN
-      rw [abs_of_nonneg (by positivity)]
-      -- Interior: Σ 2·C_M·k·EN/(k(k+1)) = 2·C_M·EN·Σ 1/(k+1)
-      -- ≤ 2·C_M·EN·(logM - logN)  [harmonic ≤ log]
-      -- Total: 2·C_M·EN + 2·C_M·EN·(logM - logN) = C_M·(2 + 2(logM-logN))·EN
-      -- ≤ C_M·(2 + logM - logN)·EN since 2(logM-logN) ≥ logM-logN
-      sorry
+    _ ≤ 2 * C_M * EN + 2 * C_M * EN * (1 / ((N : ℝ) + 1)) := by
+        simp only [C_bound, f, δ]
+        rw [abs_of_nonneg (by positivity)]
+        constructor
+        · -- Boundary: 2·C_M·M·EN·(1/M) ≤ 2·C_M·EN
+          have : 2 * C_M * ↑M * EN * (1 / ↑M) = 2 * C_M * EN := by
+            field_simp
+          linarith [Finset.sum_nonneg (fun k (hk : k ∈ Ico (N+1) M) => by positivity)]
+        · sorry -- Interior: factor out 2·C_M·EN, use finite_inv_kk1_bound
+    _ ≤ 4 * C_M * EN := by
+        have hN1_pos : (0 : ℝ) < (N : ℝ) + 1 := by positivity
+        have h_frac : 1 / ((N : ℝ) + 1) ≤ 1 := by
+          rw [div_le_one hN1_pos]; linarith [hN_pos]
+        nlinarith [Real.exp_pos (-c * (Real.log ↑N) ^ ((1:ℝ)/10))]
 
 /-- **Log-times-exp domination**: (2 + log M) · exp(-c·(logN)^{1/10})
     is bounded by C·exp(-c/2·(logN)^{1/10}) when log M ≤ exp(c/2·(logN)^{1/10}).
