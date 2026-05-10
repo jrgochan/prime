@@ -267,31 +267,23 @@ private lemma mertens_tail_bound
 
 /-- **S₁ decay from exponential Mertens bound**.
 
-    **Proof**: Abel identity + √N split.
+    **Architecture** (parallels S1Decay.s1_decay):
 
-    Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+    The `x^{3/4}` Mertens bound gives |Σ k^{3/4}/(k(k+1))| ≤ |Σ k^{-5/4}|
+    which converges (p-series, p > 1). The Abel diff is O(N^{-1/4}).
 
-    Split at k₀ = ⌊√N⌋:
-    - |M(N)|/N ≤ C_M·E(N)
-    - Σ_{k=1}^{k₀} |M(k)|/(k(k+1)) ≤ C_M·Σ 1/(k+1) ≤ C_M·(1+log(√N))
-    - Σ_{k=k₀+1}^{N-1} |M(k)|/(k(k+1)) ≤ C_M·E(k₀)·Σ 1/(k+1)
-                                            ≤ C_M·E(√N)·log(N)
+    The exponential bound `C_M·k·E(k)` gives |Σ E(k)/(k+1)|
+    which converges (integral test: ∫ E(x)/x dx < ∞) but isn't a p-series.
 
-    Total: |S₁(N)| ≤ C_M·E(N) + C_M·(1+logN/2) + C_M·E(√N)·logN
+    **Proof chain**:
+    1. Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+    2. The series Σ M(k)/(k(k+1)) converges (absolute convergence from Mertens)
+    3. From PNT: S₁ → 0 and M(N)/N → 0, so the limit of the series = 0
+    4. Therefore: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
+    5. |S₁(N)| ≤ C_M·E(N) + Σ_{k≥N} C_M·E(k)/(k+1)
+    6. The tail Σ E(k)/(k+1) ≤ C·E'(N) (from mertens_tail_bound/integral)
 
-    All three terms are ≤ C·E'(N):
-    1. E(N) ≤ E'(N) trivially
-    2. (1+logN/2) ≤ B₁/E'(N) fails! (grows to ∞)
-
-    CORRECTION: The constant term logN/2 can NOT be absorbed into E'(N).
-    Instead, absorb it using the series convergence from PNT:
-    The partial sum Σ_{k=1}^{k₀} M(k)/(k(k+1)) converges to some L (from PNT).
-    So the residual from this partial sum is |partial - L| ≤ ε for k₀ large.
-    And L is absorbed into S₁'s limit (which is 0 from PNT).
-
-    Net: The SIGNED sum (not absolute values) from 1 to k₀ converges,
-    so it stays bounded. Combined with E(√N)·logN → 0 for the upper part
-    and M(N)/N → 0, we get S₁(N) → 0 with rate E'(N). -/
+    **Bottleneck**: Step 6 requires integral comparison. -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -299,33 +291,10 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- The correct approach uses the Abel identity for S₁ and the
-  -- SIGNED cancellation (not absolute values) from PNT.
-  --
-  -- Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
-  -- From PNT: S₁(N) → 0 and M(N)/N → 0, so the series Σ M(k)/(k(k+1)) → 0.
-  -- Therefore: S₁(N) = M(N)/N - Σ_{k=N}^∞ M(k)/(k(k+1))
-  --          = M(N)/N - [limit - partial_sum(N-1)]
-  --
-  -- For the tail Σ_{k≥N} M(k)/(k(k+1)):
-  -- This is a SIGNED sum (M(k) can be positive or negative).
-  -- By Abel summation on the tail: Σ_{k=N}^M μ(k)/k = S₁(M) - S₁(N)
-  -- And |S₁(M) - S₁(N)| → |0 - S₁(N)| = |S₁(N)| as M → ∞.
-  -- So we need a DIRECT bound, not circular.
-  --
-  -- ACTUAL PROOF: Use the Mertens bound on M(k) in the Abel identity.
-  -- The key is that |M(k)|/(k(k+1)) ≤ C_M·E(k)/(k+1),
-  -- and the TAIL (k ≥ √N to N) has E(k) ≤ E(√N) = E(N)^{something < 1}.
-  -- The BODY (k < √N) contributes a convergent series Σ c_k whose partial
-  -- sums are bounded (it's part of a convergent series from PNT).
-  --
-  -- For the Lean formalization:
-  -- 1. Use mu_pnt_alt: the series Σ μ(n)/n converges (to 0)
-  -- 2. The tail from N: |S₁(∞) - S₁(N)| = |S₁(N)| (since S₁(∞) = 0)
-  -- 3. Abel on the tail: S₁(N) = -Σ_{k>N} μ(k)/k (signed tail)
-  -- 4. Abel summation by parts on this tail gives the rate
-  --
-  -- This avoids absolute values and uses signed cancellation.
+  -- This requires mertens_tail_bound (integral comparison).
+  -- The tail Σ_{k≥N} E(k)/(k+1) ≈ ∫_{logN}^∞ exp(-c·u^{1/10}) du
+  -- ≤ C·(logN)^{9/10}·exp(-c·(logN)^{1/10}) ≤ C'·exp(-c/2·(logN)^{1/10})
+  -- using exp_decay_times_t_tendsto_zero (already proved!).
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
