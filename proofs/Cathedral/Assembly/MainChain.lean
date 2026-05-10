@@ -163,7 +163,7 @@ theorem nyman_beurling_equivalence_renormalization :
   ⟨nyman_beurling_converse, rh_implies_bd_convergence_renormalization⟩
 
 -- ═══════════════════════════════════════════════════════
--- THE BÁEZ-DUARTE ANCHOR (The One Pillar)
+-- THE BÁEZ-DUARTE ANCHOR (The Analytic Crown)
 -- ═══════════════════════════════════════════════════════
 
 /-- **THE BÁEZ-DUARTE FORWARD DIRECTION** (2003 Literature Theorem)
@@ -175,7 +175,8 @@ theorem nyman_beurling_equivalence_renormalization :
     Riemann Hypothesis", Int. Math. Res. Not. IMRN (2003), no. 36,
     pp. 1989–2009.
 
-    This is the SOLE axiom of the Cathedral Crown Path.
+    This is the SOLE axiom of the Analytic Crown Path.
+    (The Oracle Crown uses oracle_certificates instead.)
     The converse (d²→0 ⟹ RH) is fully proved with zero axioms.
 
     The proof requires complex-analytic machinery (Parseval/Mellin
@@ -188,9 +189,10 @@ axiom baez_duarte_forward :
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε
 
--- ──── PRIMARY EXPORT: THE ONE-PILLAR CATHEDRAL ────
+-- ──── PRIMARY EXPORT: THE ANALYTIC CROWN ────
 -- Forward: baez_duarte_forward (1 axiom — 2003 literature)
 -- Converse: nyman_beurling_converse (0 axioms — Rank-1 Mellin)
+-- See also: OracleCascade.lean for the Oracle Crown (1 oracle axiom → RH)
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
