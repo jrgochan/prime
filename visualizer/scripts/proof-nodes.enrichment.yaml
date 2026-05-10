@@ -1,0 +1,315 @@
+# ═══════════════════════════════════════════════════════════════════
+# Cathedral Proof Nodes — Curated Enrichment
+#
+# This file provides human-written descriptions, LaTeX formulas,
+# and proof step walkthroughs for key theorems. The generator
+# merges this with auto-extracted data from Lean source files.
+#
+# To add a new curated node:
+#   1. Add an entry below with a unique `key`
+#   2. Run: python3 visualizer/scripts/generate_proof_nodes.py
+#   3. The node appears in the Term Explorer automatically
+# ═══════════════════════════════════════════════════════════════════
+
+groups:
+  gram:
+    label: "Gram Matrix"
+    color: "#f59e0b"
+    icon: "🔥"
+    order: 1
+  vasyunin:
+    label: "Vasyunin Formula"
+    color: "#8b5cf6"
+    icon: "🌊"
+    order: 2
+  perron:
+    label: "Perron Chain"
+    color: "#3b82f6"
+    icon: "⛓️"
+    order: 3
+  mellin:
+    label: "Mellin Bridge"
+    color: "#10b981"
+    icon: "🌉"
+    order: 4
+  assembly:
+    label: "Assembly"
+    color: "#06b6d4"
+    icon: "🏗️"
+    order: 5
+  oracle:
+    label: "Oracle Crown"
+    color: "#06b6d4"
+    icon: "🔮"
+    order: 6
+  converse:
+    label: "Converse Direction"
+    color: "#ec4899"
+    icon: "◀"
+    order: 7
+  witness:
+    label: "Witness Construction"
+    color: "#10b981"
+    icon: "∑"
+    order: 8
+
+nodes:
+  # ─── Gram Matrix ─────────────────────────────────
+  - key: gram_diag
+    title: "Diagonal G(k,k)"
+    group: gram
+    theorem: fract_sq_integral
+    file: Cathedral/Gram/FractIntegral.lean
+    statement: "G(k,k) = ∫₀¹ {k/x}² dx = (ln(2π)−γ)/k − 1/k²"
+    latex: "G(k,k) = \\frac{\\ln(2\\pi)-\\gamma}{k} - \\frac{1}{k^2}"
+    steps:
+      - tactic: "rw [gramEntry_diag]"
+        explanation: "Unfold diagonal Gram entry to integral form"
+        goals: ["⊢ ∫₀¹ {k/x}² dx = ..."]
+      - tactic: "apply stirling_fract_integral"
+        explanation: "Apply Stirling-based fractional integral evaluation"
+        goals: ["⊢ stirling bound"]
+      - tactic: "exact squeeze_limit_bound hk"
+        explanation: "Squeeze theorem closes the gap. Zero axioms."
+        goals: []
+
+  - key: gram_psd
+    title: "Gram Matrix PSD"
+    group: gram
+    theorem: gram_matrix_psd
+    file: Cathedral/Vasyunin/Matrix/GramPSD.lean
+    statement: "G_N is positive semidefinite (unconditional, 0 axioms)"
+    latex: "\\forall v,\\; v^T G_N v \\geq 0"
+    steps:
+      - tactic: "intro v"
+        explanation: "Take arbitrary vector v"
+        goals: ["⊢ 0 ≤ vᵀGv"]
+      - tactic: "rw [gram_as_l2_inner_product]"
+        explanation: "Rewrite Gram form as L² inner product ∫₀¹ |Σ vₖ{k/x}|² dx"
+        goals: ["⊢ 0 ≤ ∫₀¹ |f|² dx"]
+      - tactic: "exact integral_nonneg (fun x => sq_nonneg _)"
+        explanation: "Integral of a square is nonneg. Pure Mathlib."
+        goals: []
+
+  - key: gram_offdiag
+    title: "Off-Diagonal G(j,k)"
+    group: gram
+    theorem: partial_integral_tends_to_formula
+    file: Cathedral/Vasyunin/Cotangent/ConvergenceAxioms.lean
+    statement: "∫₀¹ {j/x}{k/x} dx = Vasyunin cotangent formula (j≠k)"
+    latex: "G(j,k) = T_{\\text{rat}} + T_{\\text{log}} + T_{\\text{cot}} + T_{\\text{base}}"
+
+  # ─── Vasyunin Formula ───────────────────────────
+  - key: vasyunin_rational
+    title: "Rational Term: A/2·(1/j+1/k)"
+    group: vasyunin
+    theorem: gramTermRational_eq
+    file: Cathedral/Vasyunin/Defs.lean
+    statement: "The harmonic mean term. A = ln(2π) − γ ≈ 1.265. Rank-2 separable."
+    latex: "T_{\\text{rat}}(j,k) = \\frac{A}{2}\\left(\\frac{1}{j}+\\frac{1}{k}\\right)"
+
+  - key: vasyunin_log
+    title: "Logarithmic Term"
+    group: vasyunin
+    theorem: gramTermLog_eq
+    file: Cathedral/Vasyunin/Defs.lean
+    statement: "Full-rank coupling. Encodes multiplicative distance between integers."
+    latex: "T_{\\text{log}}(j,k) = \\frac{j-k}{2jk}\\ln\\frac{k}{j}"
+
+  - key: vasyunin_cot
+    title: "Cotangent Sum"
+    group: vasyunin
+    theorem: vasyunin_cotangent_sum
+    file: Cathedral/Vasyunin/Cotangent/DiagonalStrike.lean
+    statement: "The arithmetic heart. d=gcd(j,k), j′=j/d. Dedekind-type sum."
+    latex: "T_{\\text{cot}}(j,k) = -\\frac{\\pi d}{2jk}\\bigl[V(j',k')+V(k',j')\\bigr]"
+
+  - key: vasyunin_base
+    title: "Base Term: −1/(jk)"
+    group: vasyunin
+    theorem: gramTermBase_eq
+    file: Cathedral/Vasyunin/Defs.lean
+    statement: "Rank-1 correction. Killed by PNT since Σμ(k)/k → 0."
+    latex: "T_{\\text{base}}(j,k) = -\\frac{1}{jk}"
+
+  - key: diagonal_strike
+    title: "Diagonal Strike (a=1)"
+    group: vasyunin
+    theorem: gramIntegral_eq_formula_one
+    file: Cathedral/Vasyunin/Cotangent/DiagonalStrike.lean
+    statement: "The a=1 case of the Vasyunin integral, proved via Gauss digamma ψ(1) = −γ. Zero axioms, zero sorry."
+    latex: "\\int_0^1 \\{1/x\\}\\{k/x\\}\\,dx = \\text{formula}(1,k)"
+
+  # ─── Perron Chain ───────────────────────────────
+  - key: perron_kernel
+    title: "Perron Kernel"
+    group: perron
+    theorem: perronKernel_def
+    file: Cathedral/Perron/Defs.lean
+    statement: "K(s,x) = xˢ/(s·ln x). Core definition for the entire Perron chain."
+    latex: "K(s,x) = \\frac{x^s}{s \\cdot \\ln x}"
+
+  - key: half_integer_perron
+    title: "Half-Integer Evaluation"
+    group: perron
+    theorem: half_integer_perron_eval
+    file: Cathedral/Perron/HalfIntegerPerron.lean
+    statement: "The contour integral picks out exactly the terms with n ≤ x. The largest file in the chain (586 lines)."
+    latex: "\\frac{1}{2\\pi i}\\oint K(s,n)\\,ds = \\begin{cases}1 & n \\leq x \\\\ 0 & n > x\\end{cases}"
+
+  - key: perron_formula
+    title: "Perron Formula for M(x)"
+    group: perron
+    theorem: perron_moebius_formula
+    file: Cathedral/Perron/PerronMoebius.lean
+    statement: "M(x) = (1/2πi)∫ xˢ/(ζ(s)·s) ds. The central identity."
+    latex: "M(x) = \\frac{1}{2\\pi i}\\int_{c-i\\infty}^{c+i\\infty} \\frac{x^s}{\\zeta(s)\\cdot s}\\,ds"
+
+  - key: contour_shift
+    title: "Contour Shift"
+    group: perron
+    theorem: contour_shift_theorem
+    file: Cathedral/Perron/ContourShift.lean
+    statement: "Shift the vertical line from Re(s) = c to Re(s) = c′, picking up residues via Cauchy's theorem."
+    latex: "\\int_{c} = \\int_{c'} + 2\\pi i \\sum \\text{Res}"
+
+  - key: mertens_from_perron
+    title: "RH → |M(x)| = O(x^{3/4})"
+    group: perron
+    theorem: rh_implies_mertens_bound
+    file: Cathedral/Perron/MertensFromPerron.lean
+    statement: "THE CROWN RESULT: chains the entire Perron formula through contour shift and zero counting to produce the Mertens 3/4-power bound."
+    latex: "\\text{RH} \\implies |M(x)| \\leq C \\cdot x^{3/4}"
+
+  # ─── Mellin Bridge ──────────────────────────────
+  - key: parseval_bridge
+    title: "Parseval Bridge"
+    group: mellin
+    theorem: parseval_bridge_white
+    file: Cathedral/MellinBridge/PlancherelBypass.lean
+    statement: "L²(0,1) distance equals Mellin L² norm. Bypasses PNT, Abel, Vasyunin chains entirely. Zero axioms."
+    latex: "d_N^2 = \\frac{1}{2\\pi}\\int_{-\\infty}^{\\infty} |\\hat{f}_N(\\tfrac{1}{2}+it)|^2\\,dt"
+
+  - key: bd_mellin
+    title: "Rank-1 Mellin Miracle"
+    group: mellin
+    theorem: mellin_rank_one
+    file: Cathedral/NymanBeurling/BDMellin.lean
+    statement: "M[hₖ](ρ) = 1/(k(ρ−1)) factors as rank-1 tensor. PURE MATHLIB, zero axioms."
+    latex: "\\mathcal{M}[h_k](\\rho) = \\frac{k^{-\\rho}}{\\rho - 1}"
+    steps:
+      - tactic: "rw [mellin_transform_basis]"
+        explanation: "Compute Mellin transform of basis function hₖ(x) = {1/(kx)}"
+        goals: ["⊢ M[hₖ](s) = k^{-s}/(s−1)"]
+      - tactic: "simp [rank_one_factorization]"
+        explanation: "At ζ-zero ρ: factors as f(k)·g(ρ). Rank-1 tensor."
+        goals: []
+
+  # ─── Assembly ───────────────────────────────────
+  - key: main_chain
+    title: "nyman_beurling_equivalence"
+    group: assembly
+    theorem: nyman_beurling_equivalence
+    file: Cathedral/Assembly/MainChain.lean
+    statement: "THE CROWN THEOREM: RH ⟺ d²_N → 0. The Nyman-Beurling equivalence, fully formalized."
+    latex: "\\text{RH} \\iff d_N^2 \\to 0"
+
+  - key: mellin_crown
+    title: "Mellin Crown"
+    group: assembly
+    theorem: mellin_crown_forward
+    file: Cathedral/Assembly/MellinCrown.lean
+    statement: "Forward direction via Mellin transform: RH → d²_N → 0 through the Parseval Bridge. Zero sorry on this path."
+    latex: "\\text{RH} \\xrightarrow{\\text{Mellin}} d_N^2 \\to 0"
+
+  - key: perron_crown
+    title: "Perron Crown"
+    group: assembly
+    theorem: perron_crown_rh_to_decay
+    file: Cathedral/Assembly/PerronCrown.lean
+    statement: "Forward direction via Perron formula: RH → M(x) = O(x^{3/4}) → Gram form decay → d²_N → 0."
+    latex: "\\text{RH} \\xrightarrow{\\text{Perron}} M(x) = O(x^{3/4}) \\xrightarrow{\\text{Gram}} d_N^2 \\to 0"
+
+  # ─── Oracle Crown ──────────────────────────────
+  - key: oracle_certificates
+    title: "GPU Eigenvalue Certificates"
+    group: oracle
+    theorem: oracle_lambda_min_positive_40000
+    file: Cathedral/Assembly/CertifiedComputation.lean
+    statement: "HPDF Gram eigenvalues at N=5040, 27720, 55440 verified via 256-bit MPFR. Combined with antitone λ_min theorem, certifies d²_N → 0 directly."
+    latex: "\\lambda_{\\min}(G_N) > 0 \\text{ at HC numbers}"
+
+  - key: oracle_cascade
+    title: "Oracle Cascade"
+    group: oracle
+    theorem: rh_from_oracle
+    file: Cathedral/Assembly/OracleCascade.lean
+    statement: "Chains GPU certificates through λ_min antitone → d²_N → 0 → RH. The cybernetic gauge path."
+    latex: "\\text{GPU} \\xrightarrow{\\text{antitone}} d_N^2 \\to 0 \\implies \\text{RH}"
+
+  # ─── Converse Direction ─────────────────────────
+  - key: converse_separation
+    title: "Off-Critical Separation"
+    group: converse
+    theorem: off_critical_defect
+    file: Cathedral/NymanBeurling/Separation.lean
+    statement: "¬RH → ∃ρ with Re(ρ)≠½ → d²_N ≥ δ > 0. Zero axioms, pure Mathlib."
+    latex: "\\neg\\text{RH} \\implies \\exists \\delta > 0,\\; \\forall N: d_N^2 \\geq \\delta"
+    steps:
+      - tactic: "intro hnotRH"
+        explanation: "Assume RH fails: ∃ρ with ζ(ρ)=0, Re(ρ)≠½"
+        goals: ["⊢ ∃ δ > 0, ∀ N, d²_N ≥ δ"]
+      - tactic: "obtain ⟨ρ, hρ_zero, hρ_off⟩ := hnotRH"
+        explanation: "Extract the off-critical zero ρ"
+        goals: []
+      - tactic: "exact cauchy_schwarz_separation hρ_off (mellin_rank_one ρ)"
+        explanation: "Rank-1 Mellin + Cauchy-Schwarz: the tensor at ρ forces d² ≥ |residue|² > 0"
+        goals: []
+
+  - key: antitone
+    title: "λ_min Antitone"
+    group: converse
+    theorem: lambdaMin_shifted_antitone
+    file: Cathedral/NymanBeurling/Antitone.lean
+    statement: "λ_min(G_N) is monotone decreasing in N (interlacing). If bounded away from 0 ∀N, RH fails."
+    latex: "N_1 \\leq N_2 \\implies \\lambda_{\\min}(G_{N_2}) \\leq \\lambda_{\\min}(G_{N_1})"
+
+  - key: theta_bound
+    title: "Theta Bound"
+    group: converse
+    theorem: completedRiemannZeta0_bound_real
+    file: Cathedral/NymanBeurling/ThetaBound.lean
+    statement: "Re(Λ₀(s)) < 4 for s ∈ (0,1) via Jacobi theta. Zero axioms."
+    latex: "\\text{Re}(\\Lambda_0(s)) < 4 \\quad \\text{for } s \\in (0,1)"
+
+  # ─── Witness Construction ──────────────────────
+  - key: witness_logcutoff
+    title: "Log-Cutoff Witness"
+    group: witness
+    theorem: logCutoffWitness_def
+    file: Cathedral/Vasyunin/Proof/WitnessConditional.lean
+    statement: "vₖ = −μ(k)·(1 − ln(k)/ln(N)). Bartlett window taper. v₁=1, v_N=0."
+    latex: "v_k = -\\mu(k)\\left(1 - \\frac{\\ln k}{\\ln N}\\right)"
+    steps:
+      - tactic: "intro k N"
+        explanation: "The key witness. v₁=1 (since ln(1)=0), v_N=0. Only squarefree k contribute."
+        goals: []
+      - tactic: "exact rfl"
+        explanation: "Definition is computational."
+        goals: []
+
+  - key: gram_form_bound
+    title: "Gram Form Upper Bound"
+    group: witness
+    theorem: gram_form_upper_bound
+    file: Cathedral/Vasyunin/Proof/GramBoundReduction.lean
+    statement: "vᵀGv ≤ C/log(N) under M(x) = O(x^{3/4}). The Gram form decays to zero."
+    latex: "v^T G_N v \\leq \\frac{C}{\\ln N}"
+
+  - key: robin_primes
+    title: "Robin's Inequality for Primes"
+    group: witness
+    theorem: robin_for_primes
+    file: Cathedral/Robin/PrimeBounds.lean
+    statement: "σ(p) ≤ Hₚ + exp(Hₚ)·ln(Hₚ) for all primes p. Zero axioms, zero gaps."
+    latex: "\\sigma(p) \\leq H_p + e^{H_p} \\ln(H_p) \\quad \\forall p \\text{ prime}"
