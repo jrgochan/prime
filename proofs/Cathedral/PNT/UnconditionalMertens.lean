@@ -201,89 +201,37 @@ private lemma log_times_exp_bound (c : ℝ) (hc : 0 < c) :
     _ ≤ 2 * (1 + a) * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
         gcongr; linarith
 
-/-- **Tail sum bound**: The tail Σ_{k≥N} |M(k)|/(k(k+1)) ≤ C·exp(-c/2·(logN)^{1/10}).
+/-- **Exponential tail bound** (analysis lemma, the key bottleneck):
+    Σ_{k=N}^M exp(-c·(logk)^{1/10}) / (k+1) ≤ C · exp(-c/2·(logN)^{1/10}).
 
-    The sum converges absolutely since |M(k)|/(k(k+1)) ≤ C·E(k)/(k+1)
-    and E(k) = exp(-c·(logk)^{1/10}) decays faster than 1/k^ε for any ε.
-    The tail bound follows from integral comparison:
-      Σ_{k≥N} E(k)/(k+1) ≈ ∫_{logN}^∞ exp(-c·u^{1/10}) du
-                            ≤ C'·exp(-c/2·(logN)^{1/10})  -/
-private lemma mertens_tail_bound
-    (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤
-        C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
+    **Proof sketch** (integral comparison):
+    1. Σ f(k) ≤ f(N) + ∫_N^M f(x) dx for decreasing f
+    2. ∫_N^∞ exp(-c·(logx)^{1/10})/x dx = ∫_{logN}^∞ exp(-c·u^{1/10}) du
+    3. Substitution v = u^{1/10}: ∫ exp(-cv)·10v^9 dv
+    4. Integration by parts: ≤ C·v₀^9·exp(-cv₀) where v₀ = (logN)^{1/10}
+    5. v₀^9·exp(-cv₀) ≤ C'·exp(-cv₀/2) from `exp_decay_times_t_tendsto_zero`!
+
+    **Status**: sorry (requires Mathlib integration API). -/
+private lemma exp_tail_bound
+    (c : ℝ) (hc : 0 < c) :
     ∃ C_T : ℝ, C_T > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       ∀ M : ℕ, N ≤ M →
         (Finset.Icc N M).sum (fun k =>
-          |((mertensFunction ↑k : ℤ) : ℝ)| / ((k : ℝ) * ((k : ℝ) + 1))) ≤
+          Real.exp (-c * (Real.log ↑k) ^ ((1:ℝ)/10)) / ((k : ℝ) + 1)) ≤
             C_T * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- Strategy: Use the Mertens bound to reduce to Σ E(k)/(k+1),
-  -- then bound using E-monotonicity + finite_inv_kk1_bound + exp domination.
-  --
-  -- Step 1: |M(k)|/(k(k+1)) ≤ C_M · k · E(k) / (k(k+1)) = C_M · E(k)/(k+1)
-  -- Step 2: For k ≥ N: E(k) ≤ E(N) (E monotone decreasing)
-  -- Step 3: So Σ ≤ C_M · E(N) · Σ 1/(k+1)
-  --         But Σ 1/(k+1) over [N,M] ≈ log(M/N), unbounded in M!
-  --
-  -- FIX: Use the stronger bound |M(k)|/(k(k+1)) ≤ C_M · E(k) · k/(k(k+1))
-  --      = C_M · E(k)/(k+1). Split: E(k)/(k+1) = [E(k)/E(N)] · E(N)/(k+1)
-  --      ≤ E(N)/(k+1) (since E(k)/E(N) ≤ 1 for k ≥ N).
-  --      Σ E(N)/(k+1) ≈ E(N) · log(M/N) → needs tighter control.
-  --
-  -- ACTUAL FIX: Don't bound by E(N). Instead use:
-  --   Σ_{k=N}^M |M(k)|/(k(k+1)) ≤ C_M · Σ_{k=N}^M E(k)/(k+1)
-  --   ≤ C_M · Σ_{k=N}^M 1/(k · (logk)^2)  [for k large enough]
-  --   ≤ C_M · C/(logN)  [integral bound on tail of 1/(k·(logk)^2)]
-  --   ≤ C_M · C · B · E'(N)  [from exp_decay_le_const_div_log]
-  --
-  -- This chain requires: (a) E(k) ≤ (k+1)/(k·(logk)^2) eventually,
-  --   which follows from exp(-c·(logk)^{1/10}) ≤ 1/(logk)^2 eventually
-  --   (exponential beats polynomial), and (b) Σ 1/(k·(logk)^2) tail bound.
-  --
-  -- For the formal proof, we use a simpler but valid bound:
-  -- The entire sum is FINITE (over [N,M]), so it's bounded by SOME constant.
-  -- And the bound C_T·E'(N) works because:
-  -- - For N ≤ k ≤ M: the sum has at most M-N+1 terms
-  -- - Each term ≤ C_M · E(N) / (N+1) (using E-mono and 1/(k+1) ≤ 1/(N+1))
-  --   Wait, 1/(k+1) ≤ 1/(N+1) is WRONG for k > N!
-  --   1/(k+1) ≤ 1/(N+1) is only true for k ≥ N, which gives 1/(k+1) ≤ 1/(N+1)
-  --   NO: for k > N, k+1 > N+1, so 1/(k+1) < 1/(N+1). That's the RIGHT direction!
-  --   So E(k)/(k+1) ≤ E(N)/(N+1) for k ≥ N. But (M-N+1) · E(N)/(N+1) ≤ M·E(N)/N
-  --   which is unbounded in M.
-  --
-  -- The fundamental issue: for finite M, the sum IS finite, and we need C_T
-  -- independent of M. This requires the series to converge, which it does
-  -- (integral test), but proving convergence in Lean is the bottleneck.
-  --
-  -- PRACTICAL SOLUTION: Use the Abel difference bound.
-  -- From abel_s1_diff_exp: |S₁(M) - S₁(N)| ≤ 4·C_M·E(N).
-  -- This DOES give a bound independent of M, because Abel summation by parts
-  -- gives better cancellation than term-by-term absolute values.
-  --
-  -- The tail bound follows: the terms in |M(k)|/(k(k+1)) telescope with
-  -- partial sums of μ(k), and the Abel bound controls this.
   sorry
 
 /-- **S₁ decay from exponential Mertens bound**.
 
-    **Architecture** (parallels S1Decay.s1_decay):
+    **Proof chain**: Abel identity + exp_tail_bound.
 
-    The `x^{3/4}` Mertens bound gives |Σ k^{3/4}/(k(k+1))| ≤ |Σ k^{-5/4}|
-    which converges (p-series, p > 1). The Abel diff is O(N^{-1/4}).
-
-    The exponential bound `C_M·k·E(k)` gives |Σ E(k)/(k+1)|
-    which converges (integral test: ∫ E(x)/x dx < ∞) but isn't a p-series.
-
-    **Proof chain**:
     1. Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
-    2. The series Σ M(k)/(k(k+1)) converges (absolute convergence from Mertens)
-    3. From PNT: S₁ → 0 and M(N)/N → 0, so the limit of the series = 0
-    4. Therefore: S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
-    5. |S₁(N)| ≤ C_M·E(N) + Σ_{k≥N} C_M·E(k)/(k+1)
-    6. The tail Σ E(k)/(k+1) ≤ C·E'(N) (from mertens_tail_bound/integral)
-
-    **Bottleneck**: Step 6 requires integral comparison. -/
+    2. Series converges (from Mertens: |M(k)|/(k(k+1)) ≤ C_M·E(k)/(k+1))
+    3. Limit = 0 (from PNT: S₁ → 0 and M(N)/N → 0)
+    4. S₁(N) = M(N)/N - Σ_{k≥N} M(k)/(k(k+1))
+    5. |S₁(N)| ≤ C_M·E(N) + C_M·Σ E(k)/(k+1)
+    6. C_M·E(N) ≤ C_M·E'(N) (since c > c/2)
+    7. C_M·Σ E(k)/(k+1) ≤ C_M·C_T·E'(N) (from exp_tail_bound) -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -366,19 +314,19 @@ theorem unconditional_mean_bound :
 | 2 | `exp_decay_le_const_div_log` | exp(...) ≤ B/logN | ✅ PROVED |
 | — | `log_times_exp_bound` | (2+a)·E(N) ≤ 2(1+a)·E'(N) | ✅ PROVED |
 | 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | ❌ sorry |
-| 4a | `abel_s1_diff_exp` | Abel difference ≤ 4·C_M·E(N) | 🔨 95% (1 arith sorry) |
-| 4b | `mertens_tail_bound` | Tail Σ E(k)/(k+1) ≤ C·E'(N) | ❌ sorry |
-| 4c | `s1_exp_decay` | S₁ rate via tail | ❌ sorry |
+| 4 | `s1_direct_bound` | Abel identity bound | ❌ sorry |
+| 5 | `exp_tail_bound` | **BOTTLENECK**: Σ E(k)/(k+1) | ❌ sorry |
+| 6 | `s1_exp_decay` | S₁ rate via tail | ❌ sorry |
 
-**Architecture note**: `abel_s1_diff_exp` (4a) is NOT needed downstream.
-The main chain is: `mertens_exp_bound_from_pnt` (3) →
-`mertens_tail_bound` (4b) → `s1_exp_decay` (4c) →
+**Critical path**: `mertens_exp_bound_from_pnt` (3) →
+`exp_tail_bound` (5) → `s1_exp_decay` (6) →
 `s1_le_const_div_log` (✅) → `unconditional_mean_bound` (✅).
 
-**Bottleneck**: `mertens_tail_bound` requires showing
-Σ_{k≥N} exp(-c·(logk)^{1/10})/(k+1) ≤ C·exp(-c/2·(logN)^{1/10}).
-This needs integral comparison (∫ exp(-c·u^{1/10}) du) + the
-polynomial-times-exponential domination (already proved in #1).
+**Bottleneck**: `exp_tail_bound` requires integral comparison:
+  Σ exp(-c·(logk)^{1/10})/(k+1) ≤ C·exp(-c/2·(logN)^{1/10})
+Proof: ∫_{logN}^∞ exp(-c·u^{1/10}) du ≤ C·v₀^9·exp(-cv₀)
+  where v₀ = (logN)^{1/10}, and v₀^9·exp(-cv₀) ≤ C'·exp(-cv₀/2)
+  from `exp_decay_times_t_tendsto_zero` (PROVED!).
 
 The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 `log_times_exp_bound`, `s1_le_const_div_log`, and
