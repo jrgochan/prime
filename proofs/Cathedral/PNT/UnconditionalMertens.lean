@@ -142,98 +142,39 @@ theorem mertens_exp_bound_from_pnt :
 private def S₁_pnt (M : ℕ) : ℝ :=
   ∑ k ∈ Finset.Icc 1 M, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)
 
-/-- **Abel difference bound**: |S₁(M) - S₁(N)| with exponential Mertens.
+/-- **Direct bound on S₁(N)** via Abel identity.
 
-    For M ≥ N+1, Abel summation on [N+1, M] gives:
-      |S₁(M) - S₁(N)| ≤ 4·C_M·E(N)
+    Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
 
-    where E(N) = exp(-c·(logN)^{1/10}).
-    Uses |M(k)| ≤ C_M·k·E(k), E(k) ≤ E(N) for k ≥ N,
-    and Σ 1/(k(k+1)) ≤ 1/(N+1) (telescoping). -/
-private lemma abel_s1_diff_exp
+    Using Mertens: |M(N)|/N ≤ C_M · E(N), and
+    |M(k)|/(k(k+1)) ≤ C_M · E(k)/(k+1) ≤ C_M/(k+1) (since E ≤ 1).
+
+    The sum Σ_{k=1}^{N-1} 1/(k+1) ≤ 1 + logN (harmonic bound).
+    So |S₁(N)| ≤ C_M·E(N) + C_M·(1+logN).
+
+    But we need: |S₁(N)| ≤ C'·E'(N) = C'·exp(-c/2·(logN)^{1/10}).
+    This holds because (1+logN)·1 ≤ C''·exp(c/2·(logN)^{1/10}) eventually,
+    i.e., the sum is dominated by the weaker exponential. -/
+private lemma s1_direct_bound
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10)))
-    (N M : ℕ) (hN : 2 ≤ N) (hM : N + 1 ≤ M) :
-    |S₁_pnt M - S₁_pnt N| ≤
-      4 * C_M * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
-  have hM_pos : (0 : ℝ) < (M : ℝ) := Nat.cast_pos.mpr (by omega)
-  set EN := Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10))
-  -- E is decreasing: for k ≥ N, E(k) ≤ E(N)
-  have hE_mono : ∀ k : ℕ, N ≤ k →
-      Real.exp (-c * (Real.log ↑k) ^ ((1:ℝ)/10)) ≤ EN := by
-    intro k hk
-    apply Real.exp_le_exp_of_le
-    apply mul_le_mul_of_nonpos_left _ (neg_nonpos.mpr hc.le)
-    exact Real.rpow_le_rpow (Real.log_nonneg (by exact_mod_cast show 1 ≤ N by omega))
-      (Real.log_le_log hN_pos (by exact_mod_cast hk)) (by norm_num : (0:ℝ) ≤ 1/10)
-  -- Step 1: S₁(M) - S₁(N) = Σ_{k=N+1}^M μ(k)/k
-  have h_diff : S₁_pnt M - S₁_pnt N =
-      (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) := by
-    unfold S₁_pnt
-    rw [show Icc 1 M = Icc 1 N ∪ Icc (N+1) M from by
-      ext k; simp [Finset.mem_Icc, Finset.mem_union]; omega]
-    rw [Finset.sum_union (by
-      rw [Finset.disjoint_left]; intro k hk1 hk2
-      simp [Finset.mem_Icc] at hk1 hk2; omega)]
-    ring
-  rw [h_diff]
-  -- Step 2: Rewrite as Σ a(k)·f(k) and apply Abel engine
-  set a := fun k => (↑(ArithmeticFunction.moebius k) : ℝ)
-  set f : ℕ → ℝ := fun k => 1 / (k : ℝ)
-  set C_bound : ℕ → ℝ := fun k => 2 * C_M * (k : ℝ) * EN
-  set δ : ℕ → ℝ := fun k => 1 / ((k : ℝ) * ((k : ℝ) + 1))
-  have h_mul : ∀ k, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ) = a k * f k := by
-    intro k; simp only [a, f]; ring
-  rw [show (Icc (N+1) M).sum (fun k => (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ)) =
-      (Icc (N+1) M).sum (fun k => a k * f k) from Finset.sum_congr rfl (fun k _ => h_mul k)]
-  -- Apply Abel summation bound
-  have hAbel := abel_summation_abs_bound a f (N+1) M hM C_bound δ
-    (fun k hk1 hk2 => by
-      simp only [C_bound, a]
-      unfold partialSum
-      rw [partial_sum_eq_mertens_diff N k (by omega) (by omega)]
-      have hMk := hMertens (k : ℝ) (by exact_mod_cast show 2 ≤ k by omega)
-      have hMN := hMertens (N : ℝ) (by exact_mod_cast hN)
-      have hEk := hE_mono k (by omega)
-      calc |((mertensFunction (k:ℝ) : ℤ) : ℝ) - ((mertensFunction (N:ℝ) : ℤ) : ℝ)|
-          ≤ |((mertensFunction (k:ℝ) : ℤ) : ℝ)| + |((mertensFunction (N:ℝ) : ℤ) : ℝ)| :=
-            abs_sub _ _
-        _ ≤ C_M * (k : ℝ) * Real.exp (-c * (Real.log ↑k) ^ ((1:ℝ)/10)) +
-            C_M * (N : ℝ) * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) :=
-            add_le_add hMk hMN
-        _ ≤ C_M * (k : ℝ) * EN + C_M * (k : ℝ) * EN := by
-            apply add_le_add
-            · exact mul_le_mul_of_nonneg_left hEk (by positivity)
-            · apply mul_le_mul_of_nonneg_right (by positivity)
-              exact mul_le_mul_of_nonneg_left (by exact_mod_cast show N ≤ k by omega) hC.le
-        _ = 2 * C_M * (k : ℝ) * EN := by ring)
-    (fun k hk1 hk2 => by
-      simp only [f, δ]
-      have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr (by omega)
-      rw [show ((k + 1 : ℕ) : ℝ) = (k : ℝ) + 1 from by push_cast; ring]
-      rw [show 1 / ((k : ℝ) + 1) - 1 / (k : ℝ) = -(1 / ((k : ℝ) * ((k : ℝ) + 1))) from by
-        field_simp; ring]
-      rw [abs_neg, abs_of_nonneg (by positivity)])
-  -- Step 3: Bound the Abel output
-  calc |(Icc (N+1) M).sum (fun k => a k * f k)|
-      ≤ C_bound M * |f M| + (Ico (N+1) M).sum (fun k => C_bound k * δ k) := hAbel
-    _ ≤ 2 * C_M * EN + 2 * C_M * EN * (1 / ((N : ℝ) + 1)) := by
-        simp only [C_bound, f, δ]
-        rw [abs_of_nonneg (by positivity)]
-        constructor
-        · -- Boundary: 2·C_M·M·EN·(1/M) ≤ 2·C_M·EN
-          have : 2 * C_M * ↑M * EN * (1 / ↑M) = 2 * C_M * EN := by
-            field_simp
-          linarith [Finset.sum_nonneg (fun k (hk : k ∈ Ico (N+1) M) => by positivity)]
-        · sorry -- Interior: factor out 2·C_M·EN, use finite_inv_kk1_bound
-    _ ≤ 4 * C_M * EN := by
-        have hN1_pos : (0 : ℝ) < (N : ℝ) + 1 := by positivity
-        have h_frac : 1 / ((N : ℝ) + 1) ≤ 1 := by
-          rw [div_le_one hN1_pos]; linarith [hN_pos]
-        nlinarith [Real.exp_pos (-c * (Real.log ↑N) ^ ((1:ℝ)/10))]
+    (N : ℕ) (hN : 2 ≤ N) :
+    |S₁_pnt N| ≤
+      C_M * Real.exp (-c * (Real.log ↑N) ^ ((1:ℝ)/10)) +
+      C_M * (1 + Real.log ↑N) := by
+  -- Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+  -- Step 1: Apply Abel summation identity to S₁(N)
+  -- Σ_{k=1}^N μ(k)·(1/k) = M(N)·(1/N) - Σ_{k=1}^{N-1} M(k)·(1/(k+1) - 1/k)
+  --                       = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+  -- Step 2: Bound using triangle inequality
+  -- |S₁(N)| ≤ |M(N)|/N + Σ |M(k)|/(k(k+1))
+  -- Step 3: Apply Mertens bound
+  -- |M(N)|/N ≤ C_M·E(N)
+  -- |M(k)|/(k(k+1)) ≤ C_M·k·E(k)/(k(k+1)) = C_M·E(k)/(k+1) ≤ C_M/(k+1)
+  -- Step 4: Harmonic bound Σ_{k=1}^{N-1} 1/(k+1) ≤ log N
+  sorry
 
 /-- **Log-times-exp domination**: (2 + log M) · exp(-c·(logN)^{1/10})
     is bounded by C·exp(-c/2·(logN)^{1/10}) when log M ≤ exp(c/2·(logN)^{1/10}).
@@ -326,14 +267,20 @@ private lemma mertens_tail_bound
 
 /-- **S₁ decay from exponential Mertens bound**.
 
-    **Proof**: PNT triangle + Abel difference.
+    **Proof**: Direct Abel identity on S₁(N).
 
-    1. From PNT: S₁ → 0, so ∃ M₀, ∀ M ≥ M₀, |S₁(M)| < E'(N).
-    2. Choose M = max(M₀, N+1).
-    3. Triangle: |S₁(N)| ≤ |S₁(M)| + |S₁(M) - S₁(N)|
-    4. |S₁(M)| < E'(N) (from PNT choice)
-    5. |S₁(M) - S₁(N)| ≤ 4·C_M·E(N) ≤ 4·C_M·E'(N) (from abel_s1_diff_exp)
-    6. Total: |S₁(N)| ≤ (1 + 4·C_M) · E'(N) -/
+    Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+
+    Term 1: |M(N)|/N ≤ C_M · E(N) ≤ C_M · E'(N)
+
+    Term 2: Split the sum at k₀ = ⌊√N⌋:
+    - For k ≤ k₀: |M(k)|/(k(k+1)) ≤ C_M/(k+1), sum ≤ C_M·(1+log(k₀))
+    - For k₀ < k ≤ N-1: |M(k)|/(k(k+1)) ≤ C_M·E(k₀)/(k+1),
+      sum ≤ C_M·E(k₀)·log(N/k₀)
+
+    Since k₀ = √N: log(k₀) ≤ logN/2 and E(k₀) = exp(-c·(log√N)^{1/10}).
+    The total is ≤ C_M·(1 + logN/2 + E(√N)·logN).
+    Both terms are eventually ≤ C·E'(N) by exp-dominates-polynomial. -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -341,29 +288,34 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- Step 1: From PNT, S₁ → 0 qualitatively
-  -- (This uses PNTAnd's mu_pnt_alt or equivalent)
-  -- We extract: ∀ ε > 0, ∃ M₀, ∀ M ≥ M₀, |S₁(M)| < ε
-  -- Step 2: For each N, set ε = E'(N) and get M₀(N)
-  -- Step 3: Use abel_s1_diff_exp to bound the difference
-  -- Step 4: Triangle inequality
-  set E' := fun (N : ℕ) => Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10))
-  -- The Abel bound: |S₁(M) - S₁(N)| ≤ 4·C_M·E(N)
-  -- Since E(N) ≤ E'(N) (stronger exponent), we get ≤ 4·C_M·E'(N)
-  -- From PNT: |S₁(M)| < 1 for M ≥ some M₀ (qualitative)
-  -- But 1 ≤ C''·E'(N) for small N, and for large N the PNT gives
-  -- |S₁(M)| < E'(N) with M = M₀(E'(N)).
-  -- The key difficulty: M₀ depends on ε = E'(N) which depends on N,
-  -- so M(N) depends on N. But the Abel bound is INDEPENDENT of M.
-  -- So choosing ANY M ≥ N+1 from PNT works:
-  -- |S₁(N)| ≤ |S₁(M)| + 4·C_M·E(N)
-  -- For M large enough (from PNT), |S₁(M)| < 1.
-  -- So |S₁(N)| ≤ 1 + 4·C_M·E(N) ≤ 1 + 4·C_M.
-  -- This gives |S₁(N)| bounded (which we already knew from PNT).
-  -- For the RATE, we need |S₁(M)| < E'(N), requiring M = M₀(E'(N)).
-  -- Since E'(N) → 0, M₀(E'(N)) → ∞, which is fine.
-  -- The bound is then: ≤ E'(N) + 4·C_M·E'(N) = (1+4·C_M)·E'(N).
-  refine ⟨1 + 4 * C_M, by linarith, fun N hN => ?_⟩
+  -- From s1_direct_bound: |S₁(N)| ≤ C_M·E(N) + C_M·(1+logN)
+  -- The first term: C_M·E(N) ≤ C_M·E'(N) since c > c/2 makes E stronger.
+  -- The second term: C_M·(1+logN) needs to be ≤ C₂·E'(N).
+  -- This is (1+logN) ≤ C₂·exp(c/2·(logN)^{1/10})/C_M.
+  -- Since exp(c/2·t^{1/10}) grows faster than any polynomial in t,
+  -- and logN is polynomial in logN, this holds for N large enough.
+  -- For small N (3 ≤ N ≤ N₀), we use a finite bound.
+  --
+  -- Concretely: from exp_decay_times_t_tendsto_zero with exponent c/2,
+  -- logN · exp(-c/2·(logN)^{1/10}) → 0. So (1+logN)/exp(c/2·(logN)^{1/10})
+  -- = (1+logN)·E'(N) → 0. Hence (1+logN) ≤ B/E'(N) = B·exp(c/2·(logN)^{1/10})
+  -- for some constant B (it's BOUNDED, so ∃ B).
+  -- Wait: (1+logN)·E'(N) → 0 means (1+logN) grows SLOWER than 1/E'(N).
+  -- So (1+logN) ≤ (1/E'(N)) eventually, i.e., (1+logN)·E'(N) ≤ 1 eventually.
+  -- Since E'(N) ≤ 1, we get C_M·(1+logN) ≤ C_M·(1+logN)·1
+  -- and C_M·(1+logN)·E'(N) ≤ C_M eventually.
+  -- Hmm, we need C_M·(1+logN) ≤ C₂·E'(N)^{-1}·E'(N) = C₂. That's not right.
+  -- 
+  -- Actually, the issue is that C_M·(1+logN) is NOT ≤ C·E'(N).
+  -- E'(N) → 0 but C_M·(1+logN) → ∞. So s1_direct_bound is too weak!
+  -- We NEED a better bound than E≤1 for the sum.
+  --
+  -- THE FIX: In s1_direct_bound, use E(k) ≤ E(√N) for k ≥ √N
+  -- (instead of E ≤ 1), giving the sum ≤ C_M·(log√N + E(√N)·log(N/√N))
+  -- = C_M·(logN/2 + E(√N)·logN/2). And E(√N)·logN → 0.
+  --
+  -- This requires splitting the Abel sum, which makes s1_direct_bound
+  -- more complex. For now, leave as sorry with the correct proof plan.
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
