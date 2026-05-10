@@ -62,6 +62,23 @@ cascade: ## Audit the Oracle Cascade axiom footprint
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
+crown-audit: ## Show all classified axioms by class
+	@echo ""
+	@echo "  🏛️  Crown Axiom Audit"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@echo "  CROWN AXIOMS (on proof paths to RH):"
+	@grep -rn "AXIOM CLASS: CROWN" proofs/Cathedral/ --include="*.lean" | grep -v Archive
+	@echo ""
+	@echo "  CLASSICAL-PNT AXIOMS (will close with PNTAnd):"
+	@grep -rn "AXIOM CLASS: CLASSICAL" proofs/Cathedral/ --include="*.lean" | grep -v Archive
+	@echo ""
+	@echo "  OFF-CROWN AXIOMS (not on any crown path):"
+	@grep -rn "AXIOM CLASS: OFF-CROWN" proofs/Cathedral/ --include="*.lean" | grep -v Archive
+	@echo ""
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+
 # ────────────────────────────────────────────
 # 🔬  TIER 2: EXPERIMENTS & VISUALIZATION
 # ────────────────────────────────────────────
@@ -233,7 +250,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── TIER 1: THE CATHEDRAL ───────────────────────────────"
-	@grep -E '^(build|verify|axioms|cascade|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 2: EXPERIMENTS & VISUALIZATION ─────────────────"
 	@grep -E '^(dashboard|visualizer|proof-tree|audit|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

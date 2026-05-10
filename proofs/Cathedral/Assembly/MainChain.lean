@@ -187,6 +187,7 @@ theorem nyman_beurling_equivalence_renormalization :
     Abel summation cannot capture the phase interference of the
     fractional-part sawtooth waves — see Archive/TheMertensWall/
     for the documented impossibility (The Millennium Paradox). -/
+-- AXIOM CLASS: CROWN-ANALYTIC (1 of 1)
 axiom baez_duarte_forward :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,

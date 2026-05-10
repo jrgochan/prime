@@ -156,6 +156,7 @@ theorem hcBounds_below_one : ∀ m, hcBounds m < 1 := by
 -- ════════════════════════════════════════════════
 
 /-- Dispatch each subsequence index to its oracle certificate. -/
+-- AXIOM CLASS: CROWN-ORACLE (1 of 1)
 axiom oracle_certificates : ∀ m, GramBoundCertified (hcSubseq m) (hcBounds m)
 
 -- ════════════════════════════════════════════════

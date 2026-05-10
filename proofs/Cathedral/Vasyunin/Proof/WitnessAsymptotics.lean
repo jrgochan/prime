@@ -63,6 +63,7 @@ theorem witness_numerator_convergence :
     No functional equation. No critical strip.
     Just: the approximation error of a specific arithmetically-defined
     vector decays at rate 1/ln(N). -/
+-- AXIOM CLASS: OFF-CROWN (≡ RH, used by Heisenberg path only)
 axiom witness_covariance_decay :
     ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →

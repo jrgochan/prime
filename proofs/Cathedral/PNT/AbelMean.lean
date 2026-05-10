@@ -58,6 +58,7 @@ theorem pnt_mu_div_k :
 /-- **PNT AXIOM 2**: The weighted sum Σ μ(k)·ln(k)/k converges to -1.
     From the derivative: -(1/ζ(s))' = ζ'(s)/ζ(s)² At s=1: ζ'(s)/ζ(s)² → 1.
     So -Σ μ(k)·ln(k)/k^s|_{s=1} = 1, giving the limit -1. -/
+-- AXIOM CLASS: CLASSICAL-PNT (1 of 2) — will close when PNTAnd formalizes
 axiom pnt_mu_log_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
@@ -67,6 +68,7 @@ axiom pnt_mu_log_div_k :
 /-- **PNT AXIOM 3**: The weighted sum Σ μ(k)·ln²(k)/k converges to -2γ.
     From the second derivative of 1/ζ(s) at s=1.
     Uses the Laurent expansion of ζ(s) near s=1. -/
+-- AXIOM CLASS: CLASSICAL-PNT (2 of 2) — will close when PNTAnd formalizes
 axiom pnt_mu_log_sq_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
