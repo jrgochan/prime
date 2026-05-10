@@ -2,6 +2,7 @@
 
 \usepackage{../shared/cathedral-preamble}
 \usepackage{tikz}
+\usepackage{array}
 
 \title{%
   The Physics of the Primes:\\
@@ -1652,7 +1653,7 @@ Appendix~A (Section~\ref{app:phenomenon-map}).
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{@{}lll@{}}
+\begin{tabular}{@{}>{}p{4cm}>{}p{5cm}>{}p{4.5cm}@{}}
 \toprule
 \textbf{Cathedral Object} & \textbf{Physics Concept} & \textbf{Lean Module} \\
 \midrule
@@ -2096,7 +2097,7 @@ where it is discussed.
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2119,7 +2120,7 @@ Eigenvalue interlacing & Gluing axiom (TQFT) & \lean{Structural/Eigenvalue.lean}
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2150,7 +2151,7 @@ Conservation of Difficulty & Gauss--Bonnet obstruction & (conceptual, E15) & ---
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2195,7 +2196,7 @@ IPR$(v|_S) \leq \text{IPR}(v)$ & Masking decreases weight & \lean{ParticipationR
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2222,7 +2223,7 @@ GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{GCDReduction.lea
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2248,7 +2249,7 @@ $\Lambda(s) < 0$ on $(0,1)$ & Vacuum instability at real $s$ & \lean{BDMellin.le
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
@@ -2267,7 +2268,7 @@ $2\pi$ rescaling & Renormalization scale & \lean{White/Scattering.lean} & proved
 
 \begin{center}
 \small
-\begin{tabular}{@{}p{3.8cm}p{4cm}p{3.5cm}cp{1cm}@{}}
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
 \toprule
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
