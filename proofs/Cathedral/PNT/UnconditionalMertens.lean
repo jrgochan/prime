@@ -267,20 +267,31 @@ private lemma mertens_tail_bound
 
 /-- **S₁ decay from exponential Mertens bound**.
 
-    **Proof**: Direct Abel identity on S₁(N).
+    **Proof**: Abel identity + √N split.
 
     Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
 
-    Term 1: |M(N)|/N ≤ C_M · E(N) ≤ C_M · E'(N)
+    Split at k₀ = ⌊√N⌋:
+    - |M(N)|/N ≤ C_M·E(N)
+    - Σ_{k=1}^{k₀} |M(k)|/(k(k+1)) ≤ C_M·Σ 1/(k+1) ≤ C_M·(1+log(√N))
+    - Σ_{k=k₀+1}^{N-1} |M(k)|/(k(k+1)) ≤ C_M·E(k₀)·Σ 1/(k+1)
+                                            ≤ C_M·E(√N)·log(N)
 
-    Term 2: Split the sum at k₀ = ⌊√N⌋:
-    - For k ≤ k₀: |M(k)|/(k(k+1)) ≤ C_M/(k+1), sum ≤ C_M·(1+log(k₀))
-    - For k₀ < k ≤ N-1: |M(k)|/(k(k+1)) ≤ C_M·E(k₀)/(k+1),
-      sum ≤ C_M·E(k₀)·log(N/k₀)
+    Total: |S₁(N)| ≤ C_M·E(N) + C_M·(1+logN/2) + C_M·E(√N)·logN
 
-    Since k₀ = √N: log(k₀) ≤ logN/2 and E(k₀) = exp(-c·(log√N)^{1/10}).
-    The total is ≤ C_M·(1 + logN/2 + E(√N)·logN).
-    Both terms are eventually ≤ C·E'(N) by exp-dominates-polynomial. -/
+    All three terms are ≤ C·E'(N):
+    1. E(N) ≤ E'(N) trivially
+    2. (1+logN/2) ≤ B₁/E'(N) fails! (grows to ∞)
+
+    CORRECTION: The constant term logN/2 can NOT be absorbed into E'(N).
+    Instead, absorb it using the series convergence from PNT:
+    The partial sum Σ_{k=1}^{k₀} M(k)/(k(k+1)) converges to some L (from PNT).
+    So the residual from this partial sum is |partial - L| ≤ ε for k₀ large.
+    And L is absorbed into S₁'s limit (which is 0 from PNT).
+
+    Net: The SIGNED sum (not absolute values) from 1 to k₀ converges,
+    so it stays bounded. Combined with E(√N)·logN → 0 for the upper part
+    and M(N)/N → 0, we get S₁(N) → 0 with rate E'(N). -/
 theorem s1_exp_decay
     (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
     (hMertens : ∀ x : ℝ, x ≥ 2 →
@@ -288,34 +299,33 @@ theorem s1_exp_decay
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10))) :
     ∃ C' : ℝ, C' > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := by
-  -- From s1_direct_bound: |S₁(N)| ≤ C_M·E(N) + C_M·(1+logN)
-  -- The first term: C_M·E(N) ≤ C_M·E'(N) since c > c/2 makes E stronger.
-  -- The second term: C_M·(1+logN) needs to be ≤ C₂·E'(N).
-  -- This is (1+logN) ≤ C₂·exp(c/2·(logN)^{1/10})/C_M.
-  -- Since exp(c/2·t^{1/10}) grows faster than any polynomial in t,
-  -- and logN is polynomial in logN, this holds for N large enough.
-  -- For small N (3 ≤ N ≤ N₀), we use a finite bound.
+  -- The correct approach uses the Abel identity for S₁ and the
+  -- SIGNED cancellation (not absolute values) from PNT.
   --
-  -- Concretely: from exp_decay_times_t_tendsto_zero with exponent c/2,
-  -- logN · exp(-c/2·(logN)^{1/10}) → 0. So (1+logN)/exp(c/2·(logN)^{1/10})
-  -- = (1+logN)·E'(N) → 0. Hence (1+logN) ≤ B/E'(N) = B·exp(c/2·(logN)^{1/10})
-  -- for some constant B (it's BOUNDED, so ∃ B).
-  -- Wait: (1+logN)·E'(N) → 0 means (1+logN) grows SLOWER than 1/E'(N).
-  -- So (1+logN) ≤ (1/E'(N)) eventually, i.e., (1+logN)·E'(N) ≤ 1 eventually.
-  -- Since E'(N) ≤ 1, we get C_M·(1+logN) ≤ C_M·(1+logN)·1
-  -- and C_M·(1+logN)·E'(N) ≤ C_M eventually.
-  -- Hmm, we need C_M·(1+logN) ≤ C₂·E'(N)^{-1}·E'(N) = C₂. That's not right.
-  -- 
-  -- Actually, the issue is that C_M·(1+logN) is NOT ≤ C·E'(N).
-  -- E'(N) → 0 but C_M·(1+logN) → ∞. So s1_direct_bound is too weak!
-  -- We NEED a better bound than E≤1 for the sum.
+  -- Abel identity: S₁(N) = M(N)/N + Σ_{k=1}^{N-1} M(k)/(k(k+1))
+  -- From PNT: S₁(N) → 0 and M(N)/N → 0, so the series Σ M(k)/(k(k+1)) → 0.
+  -- Therefore: S₁(N) = M(N)/N - Σ_{k=N}^∞ M(k)/(k(k+1))
+  --          = M(N)/N - [limit - partial_sum(N-1)]
   --
-  -- THE FIX: In s1_direct_bound, use E(k) ≤ E(√N) for k ≥ √N
-  -- (instead of E ≤ 1), giving the sum ≤ C_M·(log√N + E(√N)·log(N/√N))
-  -- = C_M·(logN/2 + E(√N)·logN/2). And E(√N)·logN → 0.
+  -- For the tail Σ_{k≥N} M(k)/(k(k+1)):
+  -- This is a SIGNED sum (M(k) can be positive or negative).
+  -- By Abel summation on the tail: Σ_{k=N}^M μ(k)/k = S₁(M) - S₁(N)
+  -- And |S₁(M) - S₁(N)| → |0 - S₁(N)| = |S₁(N)| as M → ∞.
+  -- So we need a DIRECT bound, not circular.
   --
-  -- This requires splitting the Abel sum, which makes s1_direct_bound
-  -- more complex. For now, leave as sorry with the correct proof plan.
+  -- ACTUAL PROOF: Use the Mertens bound on M(k) in the Abel identity.
+  -- The key is that |M(k)|/(k(k+1)) ≤ C_M·E(k)/(k+1),
+  -- and the TAIL (k ≥ √N to N) has E(k) ≤ E(√N) = E(N)^{something < 1}.
+  -- The BODY (k < √N) contributes a convergent series Σ c_k whose partial
+  -- sums are bounded (it's part of a convergent series from PNT).
+  --
+  -- For the Lean formalization:
+  -- 1. Use mu_pnt_alt: the series Σ μ(n)/n converges (to 0)
+  -- 2. The tail from N: |S₁(∞) - S₁(N)| = |S₁(N)| (since S₁(∞) = 0)
+  -- 3. Abel on the tail: S₁(N) = -Σ_{k>N} μ(k)/k (signed tail)
+  -- 4. Abel summation by parts on this tail gives the rate
+  --
+  -- This avoids absolute values and uses signed cancellation.
   sorry
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
