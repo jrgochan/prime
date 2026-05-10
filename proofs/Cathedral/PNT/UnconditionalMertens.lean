@@ -399,19 +399,25 @@ theorem unconditional_mean_bound :
 | 2 | `exp_decay_le_const_div_log` | exp(...) ≤ B/logN | ✅ PROVED |
 | — | `log_times_exp_bound` | (2+a)·E(N) ≤ 2(1+a)·E'(N) | ✅ PROVED |
 | 3 | `mertens_exp_bound_from_pnt` | ψ error → M error | ❌ sorry |
-| 4 | `s1_direct_bound` | Abel identity bound | ❌ sorry |
-| 5 | `exp_tail_bound` | **BOTTLENECK**: Σ E(k)/(k+1) | ❌ sorry |
-| 6 | `s1_exp_decay` | S₁ rate via tail | ❌ sorry |
+| 4 | `s1_direct_bound` | Abel identity bound (off path) | ❌ sorry |
+| 5 | `exp_tail_bound` | Σ E(k)/(k+1) (off path) | ❌ sorry |
+| 6 | `rpow_le_exp_decay` | N^{-1/4} ≤ C·E'(N) | ❌ sorry |
+| 7 | `s1_exp_decay` | **BODY PROVED** via s1_decay chain | ✅ (modulo #6) |
+| 8 | `hMert34` in `s1_le_const_div_log` | x^{3/4} Mertens from PNT | ❌ sorry |
+| 9 | `hPNT₁` in `s1_le_const_div_log` | S₁ → 0 from PNT | ❌ sorry |
 
-**Critical path**: `mertens_exp_bound_from_pnt` (3) →
-`exp_tail_bound` (5) → `s1_exp_decay` (6) →
-`s1_le_const_div_log` (✅) → `unconditional_mean_bound` (✅).
+**Critical path** (updated):
+  `mertens_exp_bound_from_pnt` (#3)
+  + `hMert34` (#8, x^{3/4} Mertens)
+  + `hPNT₁` (#9, qualitative PNT)
+  → `rpow_le_exp_decay` (#6)
+  → `s1_exp_decay` (**BODY PROVED**)
+  → `s1_le_const_div_log` (✅)
+  → `unconditional_mean_bound` (✅)
 
-**Bottleneck**: `exp_tail_bound` requires integral comparison:
-  Σ exp(-c·(logk)^{1/10})/(k+1) ≤ C·exp(-c/2·(logN)^{1/10})
-Proof: ∫_{logN}^∞ exp(-c·u^{1/10}) du ≤ C·v₀^9·exp(-cv₀)
-  where v₀ = (logN)^{1/10}, and v₀^9·exp(-cv₀) ≤ C'·exp(-cv₀/2)
-  from `exp_decay_times_t_tendsto_zero` (PROVED!).
+**BREAKTHROUGH**: `s1_exp_decay` body uses the PROVED `s1_decay`
+from `S1Decay.lean`, chaining: s1_decay → rpow_le_exp_decay → result.
+This BYPASSES `exp_tail_bound` entirely (no integral comparison needed!).
 
 The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 `log_times_exp_bound`, `s1_le_const_div_log`, and
@@ -421,3 +427,4 @@ The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 #check MediumPNT
 
 end
+
