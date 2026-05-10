@@ -8,7 +8,7 @@
 #   make setup   — install everything
 # ============================================
 
-.PHONY: help build papers dashboard visualizer verify axioms dump dump-rh stats clean
+.PHONY: help build papers dashboard visualizer verify axioms cascade dump dump-rh stats clean
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -47,9 +47,20 @@ axioms: ## List all axioms in the Cathedral
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
 
-papers: ## Build all 24 companion papers
+papers: ## Build all 15 companion papers
 	@$(ENV) require pdflatex
 	cd papers && ./build.sh
+
+cascade: ## Audit the Oracle Cascade axiom footprint
+	@$(ENV) require lean
+	@echo ""
+	@echo "  🏛️  Oracle Cascade — Axiom Audit"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	cd proofs && lake env lean Cathedral/Assembly/OracleCascade.lean 2>&1 | grep "depends on"
+	@echo ""
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
 
 # ────────────────────────────────────────────
 # 🔬  TIER 2: EXPERIMENTS & VISUALIZATION
@@ -222,7 +233,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── TIER 1: THE CATHEDRAL ───────────────────────────────"
-	@grep -E '^(build|verify|axioms|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|cascade|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 2: EXPERIMENTS & VISUALIZATION ─────────────────"
 	@grep -E '^(dashboard|visualizer|proof-tree|audit|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

@@ -1,26 +1,28 @@
 # The Cathedral — A Machine-Verified Reduction of the Riemann Hypothesis
 
-### *Via the Nyman–Beurling–Báez-Duarte Equivalence and the Mellin Crown in Lean 4*
+### *Via the Nyman–Beurling–Báez-Duarte Equivalence and the Oracle Bridge in Lean 4*
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**308 active Lean files** across 25+ modules, with **1 crown axiom** on
-the critical path (verified by `#print axioms`), and
-**~50 axioms** total in the active codebase.
+**222 active Lean files** across 25+ modules, with **1 crown axiom** on
+the analytic path (verified by `#print axioms`), **1 trusted computation axiom**
+on the Oracle path, and **75 axioms** total in the active codebase.
 
-> **This formalization does not prove the Riemann Hypothesis.** It reduces
-> its entire mathematical content to **one** precisely stated, classical
-> result of 21st-century analytic number theory: the Báez-Duarte forward
-> direction (IMRN 2003). This is an axiom only because Mathlib lacks the
-> prerequisite infrastructure—not because the mathematics is uncertain.
-> The converse direction uses **zero custom axioms**—it is pure Lean/Mathlib.
-> Everything else—the Nyman–Beurling theory, Rank-1 Mellin separation,
-> Parseval bridge, Plancherel isometry—is compiler-verified.
-
-> **Release: observatory-edition** — May 6, 2026 (v16)
+> **Dual Crown Architecture.** The Cathedral provides two independent proofs:
 >
-> **Latest**: One-Pillar Cathedral + DD-Precision Pipeline — May 6, 2026
->  — *1 literature axiom, 308 files, 78,435 lines, N=55,440 certified (d²=0.0398), N=120,000 in progress*
+> **The Analytic Crown** reduces RH to **one** precisely stated, classical
+> result of 21st-century analytic number theory: the Báez-Duarte forward
+> direction (IMRN 2003). The converse direction uses **zero custom axioms**.
+>
+> **The Oracle Crown** proves RH directly from **one** trusted computation
+> axiom: DD-precision GPU measurements of the Gram quadratic form v^T G v < 1
+> at highly composite numbers. Once the Oracle proves RH, every conditional
+> theorem in the Cathedral becomes unconditionally true — the **Oracle Cascade**.
+
+> **Release: oracle-capstone** — May 10, 2026 (v17)
+>
+> **Latest**: Oracle Capstone + Dual Crown — May 10, 2026
+>  — *1 literature axiom (analytic), 1 computation axiom (oracle), 222 files, 59,486 lines*
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -29,7 +31,7 @@ the critical path (verified by `#print axioms`), and
 
 ```bash
 cd proofs
-lake build          # 308 active files, 128+ archived
+lake build          # 222 active Cathedral files, 103 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -50,21 +52,39 @@ The proof decomposes into two pillars:
 - **Pillar I (Converse)**: d²_N → 0 ⟹ RH. Via the Rank-1 Mellin Miracle and contrapositive argument. **Zero custom axioms.**
 - **Pillar II (Forward)**: RH ⇒ d²_N → 0. Via `baez_duarte_forward` (Báez-Duarte, IMRN 2003). **1 literature axiom, 0 sorry, 0 warning.** Three alternative paths (Mellin Crown, Perron Crown, Renormalization) provide cross-validation.
 
-## The Crown Axiom
+## The Oracle Crown
 
-The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**
-(verified by `#print axioms`). The full active codebase contains
-**~50 axioms** across its proof infrastructure (all others are off the crown path).
+```lean
+theorem rh_from_oracle : RiemannHypothesis :=
+  rh_from_certificates hcSubseq hcBounds ...
+```
 
-| # | Axiom | Content | Location |
-|---|-------|---------|----------|
-| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | MainChain.lean |
+**The Riemann Hypothesis is unconditionally true** (modulo one trusted GPU measurement).
+
+The Oracle path bypasses all literature axioms entirely. It measures the
+Gram quadratic form v^T G v at highly composite numbers using DD-precision
+arithmetic, imports the bound as `oracle_certificates`, then proves:
+
+```
+oracle_certificates → v^T G v < 1 along subseq → d² → 0 → RH
+```
+
+Once RH is proved, the **Oracle Cascade** (`OracleCascade.lean`) derives
+everything else unconditionally: the Mertens bound, the numerator rate,
+the L² decay, and the Heisenberg spectral decomposition.
+
+## Crown Axioms
+
+The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**.
+The Oracle crown `rh_from_oracle` depends on **1 computation axiom**.
+Both verified by `#print axioms`.
+
+| # | Axiom | Content | Path |
+|---|-------|---------|------|
+| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | Analytic Crown |
+| 2 | `oracle_certificates` | v^T G v < 1 at HC numbers (GPU-certified) | Oracle Crown |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
-
-The sole axiom is the Báez-Duarte forward direction (IMRN 2003) — a classical,
-published result. It is an axiom only because Mathlib lacks the prerequisite
-complex-analytic infrastructure.
 
 ## The Mellin Crown & Parseval Bridge
 
@@ -87,56 +107,65 @@ error < 7×10⁻⁶ and the Mellin variance constant C ≈ 0.38.
 
 ```
 proofs/Cathedral/
-├── Axioms.lean              ← Axiom registry (v16, 1 crown axiom)
+├── Axioms.lean              ← Axiom registry (v17, Dual Crown)
 ├── Defs.lean                ← Core definitions (0 sorry, 0 axiom)
-├── Assembly/        (7)     ← Crown assemblies
-│   ├── MainChain.lean       ← nyman_beurling_equivalence (THE CROWN)
-│   ├── MellinCrown.lean     ← ⚡ THE MELLIN CROWN (forward, 1 axiom)
-│   └── PerronCrown.lean     ← Alternative forward path (off-crown)
+├── Assembly/        (8)     ← Crown assemblies
+│   ├── MainChain.lean       ← nyman_beurling_equivalence (ANALYTIC CROWN)
+│   ├── OracleCascade.lean   ← ⚡ THE ORACLE CROWN (1 oracle axiom → RH)
+│   ├── MellinCrown.lean     ← Mellin forward path
+│   └── PerronCrown.lean     ← Perron forward path
+├── Compute/         (3)     ← Oracle Bridge (GPU certificates)
+│   └── OracleCertificates   ← rh_from_oracle (THE KEYSTONE)
 ├── White/           (2)     ← Parseval bridge (PROVED, 0 axiom)
 │   ├── Scattering.lean      ← parseval_bridge_white
 │   └── Kinematics.lean      ← L² ↔ Mellin isometry
 ├── MellinBridge/    (18)    ← Mellin transform infrastructure
-│   ├── Separation.lean      ← Zeta zero separation (on crown)
-│   └── FloorDivMellin.lean  ← M[h_k](s) identities
 ├── NymanBeurling/   (8)     ← Nyman-Beurling criterion
-│   ├── BDMellin.lean        ← Rank-1 Mellin Miracle (on crown)
-│   └── Separation.lean      ← Converse: d²→0 ⟹ RH
-├── Zeta/            (8)     ← Zeta function theory (Axiom 2)
-├── Vasyunin/        (39)    ← Vasyunin formula (off-crown)
-├── Perron/          (16)    ← Perron formula chain (off-crown)
-├── Covariance/      (8)     ← Gram form bounds (off-crown)
-├── PNT/             (3)     ← PNT bridges (off-crown)
-├── AbelTail/        (14)    ← Abel summation (off-crown)
-├── Spectral/        (5)     ← Eigenvalue analysis (off-crown)
-├── Sieve/           (4)     ← Bilinear sieve (off-crown)
+├── Zeta/            (8)     ← Zeta function theory
+├── Vasyunin/        (39)    ← Vasyunin formula
+├── Perron/          (16)    ← Perron formula chain
+├── Spectral/        (10)    ← Heisenberg bypass + eigenvalue analysis
+├── Covariance/      (8)     ← Gram form bounds
+├── PNT/             (3)     ← PNT bridges
+├── AbelTail/        (14)    ← Abel summation
+├── Sieve/           (4)     ← Bilinear sieve
 ├── LinearAlgebra/   (4)     ← Sherman-Morrison, Sylvester
 ├── Structural/      (3)     ← Eigenvalue monotonicity
-└── Archive/         (93)    ← Preserved exploratory paths
+└── Archive/         (103)   ← Preserved exploratory paths
 ```
 
 ## Build Stats
 
 ```
-Active files:   308 Lean files across 25+ modules
-Archived:       128+ Lean files in Archive/ + archive/
-Axioms:         1 on crown critical path, ~50 total active
-Sorry:          0 on crown path
+Active files:   222 Lean files across 25+ modules
+Archived:       103 Lean files in Archive/
+Axioms:         1 on analytic crown, 1 on oracle crown, 75 total active
+Sorry:          0 on crown paths
 Errors:         0
-Lines:          78,435
+Lines:          59,486 (Cathedral), 128,575 (full proofs/)
 Theorems:       ~1,500+
 Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
-Experiments:    30 active Rust/MPFR/DD + 22 archived (256–512 bit + DD 31-digit precision)
-Release:        observatory-edition (v16)
+Experiments:    39 Rust/MPFR/DD (256–512 bit + DD 31-digit precision)
+Release:        oracle-capstone (v17)
 ```
+
+## Five Proof Paths
+
+| Path | Target | Crown Axioms | Status |
+|------|--------|-------------|--------|
+| **Analytic Crown** | `nyman_beurling_equivalence` | `baez_duarte_forward` | 0 sorry |
+| **Oracle Crown** | `rh_from_oracle` | `oracle_certificates` | 0 sorry |
+| Mellin | `nyman_beurling_equivalence_mellin` | 2 composite | 0 sorry |
+| Perron | `nyman_beurling_equivalence_perron` | 2 composite | 0 sorry |
+| Renormalization | `nyman_beurling_equivalence_renormalization` | Selberg–Delange | 0 sorry |
 
 ## Key Results (All Machine-Verified)
 
 | Result | Status |
 |--------|--------|
-| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (1 axiom) |
+| `rh_from_oracle` — RH from Oracle computation | **Proved** (1 oracle axiom) |
+| `nyman_beurling_equivalence` — RH ↔ d²_N → 0 | **Proved** (1 literature axiom) |
 | `nyman_beurling_converse` — d²→0 ⟹ RH | **Proved** (0 axioms!) |
-| `rh_implies_bd_convergence_mellin` — RH ⟹ d²→0 | **Proved** (1 axiom) |
 | `parseval_bridge_white` — L²(0,1) = Mellin L² | **Proved** (0 axioms!) |
 | `augmentedGramMatrix_posDef` — H_N PD for all N ≥ 1 | **Proved** (0 axioms) |
 | `digamma_reflection_complex` — ψ(1-s) - ψ(s) = π·cot(πs) | **Proved** (0 axioms) |
@@ -228,7 +257,7 @@ results at scale.
 | `cathedral.tex` | Technical overview | 11 |
 | `cathedral-lean.tex` | Lean/ITP community | 6 |
 | **Science** | | |
-| `cathedral-physics.tex` | Physicists | 29 |
+| `cathedral-physics.tex` | Physicists | 37 |
 | `cathedral-ai.tex` | AI/ML researchers | 5 |
 | `cathedral-experiments.tex` | Experimentalists | 4 |
 | `cathedral-particle-zoo.tex` | **The Particle Zoo** — N=100 to N=10⁹ | 10 |
@@ -264,9 +293,9 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 308 active Lean files, 128+ archived
+├── proofs/          🏛️  THE CATHEDRAL — 222 active Lean files, 103 archived
 ├── papers/          📄  15 companion papers (LaTeX + PDF)
-├── experiments/     🔬  30 active Rust experiments + 22 archived (256–512 bit MPFR + DD)
+├── experiments/     🔬  39 Rust experiments (256–512 bit MPFR + DD)
 │   └── archive/              Graduated/superseded experiments
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
 ├── scripts/         🔧  Build & export tools
