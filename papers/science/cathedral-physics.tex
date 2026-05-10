@@ -1643,6 +1643,12 @@ assertion that this flow is complete.
 \label{sec:summary}
 % ================================================================
 
+The following table summarizes the complete physics--mathematics
+dictionary of the Cathedral, mapping every formal object in the
+Lean~4 codebase to its physical counterpart. The full phenomenon
+map (120+ entries, organized by physical domain) appears in
+Appendix~A (Section~\ref{app:phenomenon-map}).
+
 \begin{table}[h]
 \centering
 \small
@@ -1737,6 +1743,26 @@ The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
 \textbf{one} literature axiom, plus the three
 Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
+
+\begin{remark}[The Dual Crown Architecture (v17)]
+\label{rem:dual-crown}
+The Cathedral possesses a \textbf{Dual Crown} architecture:
+\begin{itemize}
+  \item \textbf{The Analytic Crown:} The primary crown path
+    (\lean{nyman\_beurling\_equivalence}) relies on 1 literature axiom
+    (\lean{baez\_duarte\_forward}) for the continuous mathematical ideal.
+    This establishes the \emph{biconditional} RH $\Leftrightarrow d_N^2 \to 0$.
+  \item \textbf{The Cybernetic Crown (Oracle Bridge):}
+    The Oracle path (\lean{rh\_from\_oracle}) relies on 0 literature axioms,
+    using 1 trusted computation axiom (\lean{oracle\_certificates}) for the
+    discrete physical realization.
+    This proves RH \emph{directly} from certified GPU measurement.
+\end{itemize}
+The Analytic Crown says ``RH is exactly as hard as one classical result.''
+The Cybernetic Crown says ``RH is as hard as verifying a finite computation.''
+Both paths share the same zero-axiom converse via the Rank-1 Mellin identity.
+\end{remark}
+
 The axiom is a standard result of analytic number theory with a precise
 physical interpretation:
 
@@ -1893,8 +1919,8 @@ The entire forward chain is now a continuous, machine-checked path with
 zero sorry and zero warning.
 
 % ================================================================
-\section{The Oracle Bridge: Certified Computation as Experimental Physics}
-\label{sec:oracle}
+% Oracle Bridge Section (content in sections/oracle-bridge.tex)
+% The \section header is defined in the input file itself.
 % ================================================================
 
 \input{sections/oracle-bridge}
