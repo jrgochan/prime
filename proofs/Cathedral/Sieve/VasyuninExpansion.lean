@@ -143,56 +143,10 @@ theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
     Verified numerically in 1024-bit MPFR (rosetta_stone.rs).
 -/
 
--- 💀 DEAD AXIOM — DO NOT USE — MATHEMATICALLY FALSE
--- axiom vasyunin_large_gcd (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
---     (hd : 5 ≤ Nat.gcd j k) :
---     ∃ correction : ℝ,
---     hfGramEntry j k = 1/4 + correction ∧
---     |correction| ≤ 1 / (Nat.gcd j k : ℝ)
-
-/-- The correct replacement: |G - 1/4| ≤ 1/4 for ALL j,k.
-    This is weaker but TRUE. Already proved as vasyunin_small_gcd. -/
-theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)
-    (hd : 5 ≤ Nat.gcd j k) :
-    ∃ correction : ℝ,
-    hfGramEntry j k = 1/4 + correction ∧
-    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
-  -- Use the universal 1/4 bound, which dominates 1/d for d ≥ 5
-  -- Wait — 1/4 > 1/5, so |ψ| ≤ 1/4 does NOT imply |ψ| ≤ 1/d for d ≥ 5!
-  -- This is precisely WHY the axiom was false: the true error is ~1/(12ab),
-  -- which CAN exceed 1/d when d is large relative to ab.
-  -- The correct approach requires the Rosetta Stone bridge, not this bound.
-  sorry  -- 💀 Cannot be proved — the statement is FALSE
-
--- ════════════════════════════════════════════════
--- STEP 4: FULL VASYUNIN EXPANSION (THEOREM)
--- ════════════════════════════════════════════════
-
-/-- 💀 **POISONED THEOREM**: The full Vasyunin Expansion.
-
-    ⚠️ WARNING: This theorem's conclusion is MATHEMATICALLY FALSE for d ≥ 5.
-    It dispatches to `vasyunin_large_gcd_replacement` which has a sorry
-    because the 1/d bound does not hold (see tombstone above).
-
-    The d ≤ 4 case remains valid.
-
-    DO NOT use this theorem in any proof chain.
-    This file is NOT on the Crown Path. -/
-theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :
-    ∃ correction : ℝ,
-    hfGramEntry j k = 1/4 + correction ∧
-    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by
-  by_cases hd : Nat.gcd j k ≤ 4
-  · -- CASE 1: d ≤ 4 — PROVED (correct)
-    exact vasyunin_expansion_d_le_4 j k hj hk hd
-  · -- CASE 2: d ≥ 5 — 💀 FALSE (see tombstone)
-    push Not at hd
-    exact vasyunin_large_gcd_replacement j k hj hk (by omega)
-
 end
 
 -- ════════════════════════════════════════════════
--- AUDIT (updated 2026-05-04)
+-- AUDIT (updated 2026-05-10)
 -- ════════════════════════════════════════════════
 
 -- 💀 PHANTOM AXIOM TOMBSTONE 💀
@@ -204,25 +158,20 @@ end
 --   Counterexample: (100,200), gcd=100, |G-1/4|=0.0407 > 0.01=1/100
 --   Root cause: error ~ 1/(12ab), constant for fixed coprime ratio
 --
--- The axiom has been commented out and replaced with a placeholder'd
--- theorem (vasyunin_large_gcd_replacement) to preserve build.
---
--- STATUS: NOT ON CROWN PATH. The Sieve Engine is speculative.
--- The main proof: BDBridge → Renormalization → ConvergenceProof → Cotangent
--- does NOT depend on this file.
+-- REMOVED 2026-05-10 (cleanup-v18):
+--   vasyunin_large_gcd_replacement — sorry'd theorem (statement is FALSE)
+--   vasyunin_expansion_proof — dispatched to the false d≥5 case
+--   Both were documented as mathematically false and off-crown-path.
 --
 -- PROVED (still valid):
 --   ✅ vasyunin_small_gcd:          |G - 1/4| ≤ 1/4 (universal, TRUE)
 --   ✅ vasyunin_expansion_d_le_4:   Full expansion for gcd ≤ 4 (TRUE)
 --
--- POISONED:
---   💀 vasyunin_expansion_proof:    Contains gap from FALSE d≥5 case
---   💀 vasyunin_large_gcd:          DEAD — commented out
---
--- NOTE (2026-05-07): Post-BD migration, gramEntry ≡ gramIntegral
--- definitionally (both = ∫₀¹ {1/(jx)}{1/(kx)} dx). The Rosetta Stone
--- bridge has been archived (ParameterizationBridge.lean → Archive/).
+-- STATUS: NOT ON CROWN PATH. The Sieve Engine is a speculative side module.
+-- The main proof: BDBridge → Renormalization → ConvergenceProof → Cotangent
+-- does NOT depend on this file. 0 sorry.
 
 -- #check @vasyunin_small_gcd
 -- #check @vasyunin_expansion_d_le_4
+
 

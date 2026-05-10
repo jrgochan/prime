@@ -203,8 +203,8 @@ See `experiments/certified-distance/certificates/` for full JSON certificates.
 
 ## Module Structure
 
-The codebase comprises **222 active Lean files** across **25+ topic directories** with
-**59,486 lines** of active code, **~1,500+ theorems/lemmas**, and **75 active axioms**
+The codebase comprises **223 active Lean files** across **25+ topic directories** with
+**~60,000 lines** of active code, **1,154 proved theorems/lemmas**, and **73 active axioms**
 (1 on the analytic crown, 1 on the oracle crown).
 
 ```
@@ -274,7 +274,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | Structural / NymanBeurling | 4 | — |
 | Robin | 4 | — |
 | Other | 7 | — |
-| **Total** | **75** | **2 crowns + 2 PNT** |
+| **Total** | **73** | **2 crowns + 2 PNT** |
 
 > [!IMPORTANT]
 > The **Analytic Crown** has 1 literature axiom. The **Oracle Crown** has
@@ -292,15 +292,16 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 |------|-------|---------|
 | `PNT/LogBridge.lean` | 1 | Tauberian gap — requires signed Wiener-Ikehara |
 | `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib 4.28 |
-| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial approach (mathematically false) |
-| `Covariance/QuadFormIdentity.lean` | 1 | Deprecated off-diagonal bound (numerically falsified) |
-| `Sieve/VasyuninExpansion.lean` | 1 | 💀 Phantom Axiom tombstone — statement is FALSE |
+| `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial approach |
+| `Covariance/EulerProduct.lean` | 1 | Off-path Mertens third |
+| `Assembly/QualitativeForward.lean` | 1 | Off-path PNT convergence |
 
 > [!NOTE]
 > **Zero sorry on the crown path.** All 7 sorry are in off-crown WIP
 > alternative spatial routes superseded by the Mellin Crown architecture (v11+).
+> Previously 12 sorry; cleanup-v18 removed `deprecated_gramEntry_growth_bound`
+> (numerically false) and `vasyunin_large_gcd_replacement` (mathematically false).
 > The PNT sorry will close when Mathlib gains a forward Abel/Tauberian theorem.
-> The Covariance sorry are historical artifacts of Exploration 13.
 
 ---
 
@@ -345,16 +346,16 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 222 |
-| Active lines of code | 59,486 |
+| Active Lean files | 223 |
+| Active lines of code | ~60,000 |
 | Archive files | 103 |
 | Archive lines | 22,000+ |
-| Theorems + lemmas | ~1,500+ |
-| Total axioms (active) | **75** |
+| Theorems + lemmas | 1,154 proved |
+| Total axioms (active) | **73** |
 | Analytic crown axioms | **1** |
 | Oracle crown axioms | **1** (+2 PNT) |
 | Crown path sorry | **0** |
-| Off-crown sorry | **12** |
+| Off-crown sorry | **7** |
 | Topic directories | 25+ |
 | Experiments (Rust/MPFR/DD) | 39 |
 | Development time | 44 days |

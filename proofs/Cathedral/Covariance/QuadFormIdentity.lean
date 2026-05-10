@@ -238,35 +238,21 @@ theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     was NUMERICALLY FALSIFIED by 512-bit MPFR Rust telemetry in
     Exploration 13 — Dedekind cotangent sums grow logarithmically.
 
-    This lemma is NOT required for the Crown Axiom graduation path.
-    The Abel summation approach (inner_sum_abel) handles the full sum
-    Σ_k v_k G(j,k) directly, without needing individual entry bounds.
-    The correct architecture uses MellinCrown.lean (frequency domain).
-
-    DO NOT attempt to prove the O(1/max(j,k)) version — it is FALSE.
-
-    Status: OFF-PATH. Superseded by MellinCrown + Abel summation. -/
-theorem deprecated_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
-    |vasyuninGramEntry j k| ≤
-    2 * Real.log (↑(max j k) + 1) / ↑(min j k) := by
-  -- WIP: Deprecated off-diagonal bound (see docstring above — NUMERICALLY FALSE
-  -- for the O(1/max) version). This approach is superseded by MellinCrown.lean.
-  -- Left for historical reference only.
-  sorry
-
 -- ═══════════════════════════════════════════════
 -- §6. STATUS
 -- ═══════════════════════════════════════════════
 
 -- This file has:
---   5 unproved declarations (scaffolding)
+--   0 sorry (deprecated_gramEntry_growth_bound removed 2026-05-10)
 --
 -- The key insight from Gemini: the Abel summation on the k-index
 -- of the discrete matrix produces boundary terms that cancel the
 -- diagonal divergence. The S₁/S₂/S₃ machinery then bounds
 -- the remaining terms.
 --
--- NEXT: Prove inner_sum_abel (direct from abel_summation),
--- then wire the boundary + remainder bounds.
+-- The off-diagonal entry bound approach is SUPERSEDED by MellinCrown.lean
+-- (frequency domain). The deprecated bound was numerically false for
+-- the O(1/max(j,k)) version. See exploration 13 notes.
+
 
 end

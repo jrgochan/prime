@@ -3951,7 +3951,7 @@
       "title": "Crossparitybilinear Eq",
       "group": "vasyunin",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 106,
+      "line": 108,
       "status": "proved",
       "theorem": "crossParityBilinear_eq",
       "statement": "theorem crossParityBilinear_eq (N : ℕ) (u v : Fin (N - 1) → ℝ) :\n    crossParityBilinear N u v =\n    dotProduct u ((parityBlockB N).mulVec v)",
@@ -4127,20 +4127,6 @@
       "steps": [],
       "source": "auto",
       "signature": "lemma delta_sep_ne_of_ne {N : ℕ} {lam : Fin N → ℝ} {δ : ℝ} (hδ : 0 < δ)\n    (h_sep : IsDeltaSeparated lam δ) {i j : Fin N} (hij : i ≠ j) :\n    lam i ≠ lam j := by"
-    },
-    {
-      "key": "auto_deprecated_gramEntry_growth_bound",
-      "title": "Deprecated Gramentry Growth Bound",
-      "group": "vasyunin",
-      "file": "Cathedral/Covariance/QuadFormIdentity.lean",
-      "line": 249,
-      "status": "sorry",
-      "theorem": "deprecated_gramEntry_growth_bound",
-      "statement": "theorem deprecated_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :\n    |vasyuninGramEntry j k| ≤\n    2 * Real.log (↑(max j k) + 1) / ↑(min j k)",
-      "latex": "",
-      "steps": [],
-      "source": "auto",
-      "signature": "theorem deprecated_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :\n    |vasyuninGramEntry j k| ≤\n    2 * Real.log (↑(max j k) + 1) / ↑(min j k) := by"
     },
     {
       "key": "auto_deriv_ofReal_cpow_eq",
@@ -7956,7 +7942,7 @@
       "group": "vasyunin",
       "file": "Cathedral/Covariance/QuadFormIdentity.lean",
       "line": 183,
-      "status": "sorry",
+      "status": "proved",
       "theorem": "gramEntry_diag_bound",
       "statement": "theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :\n    |vasyuninGramEntry k k| ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ)",
       "latex": "",
@@ -13387,7 +13373,7 @@
       "title": "Moebius Uncoupling",
       "group": "vasyunin",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 138,
+      "line": 140,
       "status": "axiom",
       "theorem": "moebius_uncoupling",
       "statement": "axiom moebius_uncoupling (N : ℕ) (hN : 10 ≤ N)\n    (u v : Fin (N - 1) → ℝ) :\n    ∃ main_term error : ℝ,\n    crossParityBilinear N u v = main_term + error ∧\n    |error| ≤ (1 / Real.sqrt (N : ℝ)) * Real.sqrt (dotProduct u u) *",
@@ -19323,7 +19309,7 @@
       "title": "Sieve Implies Stable Ratio Asymptotic",
       "group": "vasyunin",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 218,
+      "line": 220,
       "status": "proved",
       "theorem": "sieve_implies_stable_ratio_asymptotic",
       "statement": "theorem sieve_implies_stable_ratio_asymptotic\n    (h_sieve : ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →\n      ∃ K : ℝ, 0 ≤ K ∧ K ^ 2 ≤ 1 - c / (N : ℝ) ∧\n      ∀ u v : Fin (N - 1) → ℝ,\n      (crossParityBilinear N u v) ^ 2 ≤",
@@ -21969,7 +21955,7 @@
       "title": "Type Ii Implies Stable Ratio Asymptotic",
       "group": "vasyunin",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 298,
+      "line": 300,
       "status": "proved",
       "theorem": "type_II_implies_stable_ratio_asymptotic",
       "statement": "theorem type_II_implies_stable_ratio_asymptotic :\n    (∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →\n      ∃ K : ℝ, 0 ≤ K ∧ K ^ 2 ≤ 1 - c / (N : ℝ) ∧\n      ∀ u v : Fin (N - 1) → ℝ,\n      (crossParityBilinear N u v) ^ 2 ≤",
@@ -21983,7 +21969,7 @@
       "title": "Type Ii Sieve Bound",
       "group": "vasyunin",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 184,
+      "line": 186,
       "status": "axiom",
       "theorem": "type_II_sieve_bound",
       "statement": "axiom type_II_sieve_bound :\n    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →\n    ∃ K : ℝ, 0 ≤ K ∧ K ^ 2 ≤ 1 - c / (N : ℝ) ∧\n    ∀ u v : Fin (N - 1) → ℝ,\n    (crossParityBilinear N u v) ^ 2 ≤",
@@ -22922,27 +22908,13 @@
       "group": "vasyunin",
       "file": "Cathedral/Sieve/VasyuninExpansion.lean",
       "line": 92,
-      "status": "sorry",
+      "status": "proved",
       "theorem": "vasyunin_expansion_d_le_4",
       "statement": "theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)\n    (hd : Nat.gcd j k ≤ 4) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ)",
       "latex": "",
       "steps": [],
       "source": "auto",
       "signature": "theorem vasyunin_expansion_d_le_4 (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)\n    (hd : Nat.gcd j k ≤ 4) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by"
-    },
-    {
-      "key": "auto_vasyunin_expansion_proof",
-      "title": "Vasyunin Expansion Proof",
-      "group": "vasyunin",
-      "file": "Cathedral/Sieve/VasyuninExpansion.lean",
-      "line": 181,
-      "status": "proved",
-      "theorem": "vasyunin_expansion_proof",
-      "statement": "theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ)",
-      "latex": "",
-      "steps": [],
-      "source": "auto",
-      "signature": "theorem vasyunin_expansion_proof (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by"
     },
     {
       "key": "auto_vasyunin_gram_eq_gramMatrix",
@@ -22971,20 +22943,6 @@
       "steps": [],
       "source": "auto",
       "signature": "theorem vasyunin_integral_diag (k : ℕ) (hk : k ≥ 1) :\n    vasyuninGramEntry k k =\n    ∫ x in (0:ℝ)..1,\n      Int.fract (1 / ((k:ℝ) * x)) * Int.fract (1 / ((k:ℝ) * x)) := by"
-    },
-    {
-      "key": "auto_vasyunin_large_gcd_replacement",
-      "title": "Vasyunin Large Gcd Replacement",
-      "group": "vasyunin",
-      "file": "Cathedral/Sieve/VasyuninExpansion.lean",
-      "line": 155,
-      "status": "sorry",
-      "theorem": "vasyunin_large_gcd_replacement",
-      "statement": "theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)\n    (hd : 5 ≤ Nat.gcd j k) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ)",
-      "latex": "",
-      "steps": [],
-      "source": "auto",
-      "signature": "theorem vasyunin_large_gcd_replacement (j k : ℕ) (hj : 2 ≤ j) (hk : 2 ≤ k)\n    (hd : 5 ≤ Nat.gcd j k) :\n    ∃ correction : ℝ,\n    hfGramEntry j k = 1/4 + correction ∧\n    |correction| ≤ 1 / (Nat.gcd j k : ℝ) := by"
     },
     {
       "key": "auto_vasyunin_mean_eq_basisInnerProd",
@@ -24038,12 +23996,12 @@
     }
   ],
   "meta": {
-    "totalNodes": 1707,
+    "totalNodes": 1704,
     "curatedNodes": 26,
-    "autoNodes": 1681,
-    "proved": 1607,
+    "autoNodes": 1678,
+    "proved": 1608,
     "axioms": 72,
-    "sorry": 28,
-    "generatedAt": "2026-05-10T00:22:32.729122"
+    "sorry": 24,
+    "generatedAt": "2026-05-10T00:36:05.369979"
   }
 }

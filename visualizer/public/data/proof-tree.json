@@ -9121,16 +9121,6 @@
       "sorryCount": 0
     },
     {
-      "id": "deprecated_gramEntry_growth_bound",
-      "type": "theorem",
-      "category": "sorry",
-      "route": "variational",
-      "file": "Cathedral/Covariance/QuadFormIdentity.lean",
-      "line": 249,
-      "signature": "theorem deprecated_gramEntry_growth_bound (j k : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) : |vasyuninGramEntry j k| \u2264 2 * Real.log (\u2191(max j k) + 1) / \u2191(min j k)",
-      "sorryCount": 1
-    },
-    {
       "id": "untaperedSum",
       "type": "def",
       "category": "definition",
@@ -12001,22 +11991,12 @@
       "sorryCount": 0
     },
     {
-      "id": "vasyunin_expansion",
-      "type": "def",
-      "category": "definition",
-      "route": "variational",
-      "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 87,
-      "signature": "def vasyunin_expansion",
-      "sorryCount": 0
-    },
-    {
       "id": "crossParityBilinear",
       "type": "def",
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 102,
+      "line": 104,
       "signature": "def crossParityBilinear (N : \u2115) (u v : Fin (N - 1) \u2192 \u211d) : \u211d",
       "sorryCount": 0
     },
@@ -12026,7 +12006,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 106,
+      "line": 108,
       "signature": "theorem crossParityBilinear_eq (N : \u2115) (u v : Fin (N - 1) \u2192 \u211d) : crossParityBilinear N u v = dotProduct u ((parityBlockB N).mulVec v)",
       "sorryCount": 0
     },
@@ -12036,7 +12016,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 138,
+      "line": 140,
       "signature": "axiom moebius_uncoupling (N : \u2115) (hN : 10 \u2264 N) (u v : Fin (N - 1) \u2192 \u211d) : \u2203 main_term error : \u211d, crossParityBilinear N u v = main_term + error \u2227 |error| \u2264 (1 / Real.sqrt (N : \u211d)) * Real.sqrt (dotPro\u2026",
       "sorryCount": 0
     },
@@ -12046,7 +12026,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 184,
+      "line": 186,
       "signature": "axiom type_II_sieve_bound : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^ 2 * dotProduct u ((parityBlo\u2026",
       "sorryCount": 0
     },
@@ -12056,7 +12036,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 218,
+      "line": 220,
       "signature": "theorem sieve_implies_stable_ratio_asymptotic (h_sieve : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^\u2026",
       "sorryCount": 0
     },
@@ -12066,7 +12046,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 298,
+      "line": 300,
       "signature": "theorem type_II_implies_stable_ratio_asymptotic : (\u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^ 2 * d\u2026",
       "sorryCount": 0
     },
@@ -12408,26 +12388,6 @@
       "file": "Cathedral/Sieve/VasyuninExpansion.lean",
       "line": 92,
       "signature": "theorem vasyunin_expansion_d_le_4 (j k : \u2115) (hj : 2 \u2264 j) (hk : 2 \u2264 k) (hd : Nat.gcd j k \u2264 4) : \u2203 correction : \u211d, hfGramEntry j k = 1/4 + correction \u2227 |correction| \u2264 1 / (Nat.gcd j k : \u211d)",
-      "sorryCount": 0
-    },
-    {
-      "id": "vasyunin_large_gcd_replacement",
-      "type": "theorem",
-      "category": "sorry",
-      "route": "variational",
-      "file": "Cathedral/Sieve/VasyuninExpansion.lean",
-      "line": 155,
-      "signature": "theorem vasyunin_large_gcd_replacement (j k : \u2115) (hj : 2 \u2264 j) (hk : 2 \u2264 k) (hd : 5 \u2264 Nat.gcd j k) : \u2203 correction : \u211d, hfGramEntry j k = 1/4 + correction \u2227 |correction| \u2264 1 / (Nat.gcd j k : \u211d)",
-      "sorryCount": 1
-    },
-    {
-      "id": "vasyunin_expansion_proof",
-      "type": "theorem",
-      "category": "proved",
-      "route": "variational",
-      "file": "Cathedral/Sieve/VasyuninExpansion.lean",
-      "line": 181,
-      "signature": "theorem vasyunin_expansion_proof (j k : \u2115) (hj : 2 \u2264 j) (hk : 2 \u2264 k) : \u2203 correction : \u211d, hfGramEntry j k = 1/4 + correction \u2227 |correction| \u2264 1 / (Nat.gcd j k : \u211d)",
       "sorryCount": 0
     },
     {
@@ -53339,23 +53299,23 @@
       "target": "type_II_implies_stable_ratio_asymptotic"
     },
     {
-      "source": "vasyunin_expansion_proof",
+      "source": "vasyunin_expansion_d_le_4",
       "target": "crossParityBilinear_eq"
     },
     {
-      "source": "vasyunin_expansion_proof",
+      "source": "vasyunin_expansion_d_le_4",
       "target": "moebius_uncoupling"
     },
     {
-      "source": "vasyunin_expansion_proof",
+      "source": "vasyunin_expansion_d_le_4",
       "target": "type_II_sieve_bound"
     },
     {
-      "source": "vasyunin_expansion_proof",
+      "source": "vasyunin_expansion_d_le_4",
       "target": "sieve_implies_stable_ratio_asymptotic"
     },
     {
-      "source": "vasyunin_expansion_proof",
+      "source": "vasyunin_expansion_d_le_4",
       "target": "type_II_implies_stable_ratio_asymptotic"
     },
     {
@@ -53955,20 +53915,12 @@
       "target": "vasyunin_expansion_d_le_4"
     },
     {
-      "source": "gramEntry",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
       "source": "gramEntry_nonneg",
       "target": "vasyunin_small_gcd"
     },
     {
       "source": "gramEntry_nonneg",
       "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "gramEntry_nonneg",
-      "target": "vasyunin_expansion_proof"
     },
     {
       "source": "vasyunin_coprime_case",
@@ -53979,20 +53931,12 @@
       "target": "vasyunin_expansion_d_le_4"
     },
     {
-      "source": "vasyunin_coprime_case",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
       "source": "hfGramEntry",
       "target": "vasyunin_small_gcd"
     },
     {
       "source": "hfGramEntry",
       "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "hfGramEntry",
-      "target": "vasyunin_expansion_proof"
     },
     {
       "source": "hfGramEntry_nonneg",
@@ -54003,20 +53947,12 @@
       "target": "vasyunin_expansion_d_le_4"
     },
     {
-      "source": "hfGramEntry_nonneg",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
       "source": "gramEntry_le_avg_diag",
       "target": "vasyunin_small_gcd"
     },
     {
       "source": "gramEntry_le_avg_diag",
       "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "gramEntry_le_avg_diag",
-      "target": "vasyunin_expansion_proof"
     },
     {
       "source": "gramEntry_le_third_all",
@@ -54027,44 +53963,12 @@
       "target": "vasyunin_expansion_d_le_4"
     },
     {
-      "source": "gramEntry_le_third_all",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
       "source": "Cathedral",
       "target": "vasyunin_small_gcd"
     },
     {
       "source": "Cathedral",
       "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "Cathedral",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
-      "source": "gramIntegral",
-      "target": "vasyunin_small_gcd"
-    },
-    {
-      "source": "gramIntegral",
-      "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "gramIntegral",
-      "target": "vasyunin_expansion_proof"
-    },
-    {
-      "source": "vasyunin_expansion",
-      "target": "vasyunin_small_gcd"
-    },
-    {
-      "source": "vasyunin_expansion",
-      "target": "vasyunin_expansion_d_le_4"
-    },
-    {
-      "source": "vasyunin_expansion",
-      "target": "vasyunin_expansion_proof"
     },
     {
       "source": "Cathedral",
@@ -59096,15 +59000,15 @@
     }
   ],
   "meta": {
-    "totalNodes": 1468,
-    "totalEdges": 11103,
+    "totalNodes": 1464,
+    "totalEdges": 11089,
     "axiomCount": 73,
-    "theoremCount": 1155,
-    "sorryCount": 11,
-    "definitionCount": 229,
-    "provedTheorems": 1155,
+    "theoremCount": 1154,
+    "sorryCount": 9,
+    "definitionCount": 228,
+    "provedTheorems": 1154,
     "fileCount": 218,
-    "description": "Cathedral proof architecture: 73 axioms, 1155 proved, 11 sorry, 229 definitions across 218 files",
-    "generatedAt": "2026-05-10T00:02:51.339180"
+    "description": "Cathedral proof architecture: 73 axioms, 1154 proved, 9 sorry, 228 definitions across 218 files",
+    "generatedAt": "2026-05-10T00:36:03.741543"
   }
 }

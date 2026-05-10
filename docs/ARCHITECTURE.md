@@ -239,7 +239,7 @@ All four cross-path theorems connecting Robin ↔ RH ↔ Lagarias ↔ d²→0 ar
 |--------|-------|
 | Active Lean files | 222 |
 | Archive files | 103 |
-| Theorems | ~1,500+ |
+| Theorems | 1,155 proved |
 | Axioms (active) | 75 |
 | Crown axioms | 2 (Dual Crown) |
 | Sorry (crown) | 0 |

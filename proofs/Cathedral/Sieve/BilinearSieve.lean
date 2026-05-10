@@ -84,7 +84,9 @@ open Matrix Real Finset
     This entire file is NOT on the crown path.
 
     Original source: Báez-Duarte, Balazard, Landreau, Saias (2005). -/
-def vasyunin_expansion := @vasyunin_expansion_proof
+-- vasyunin_expansion was removed in cleanup-v18 (statement FALSE for d≥5).
+-- The d≤4 case remains valid as vasyunin_expansion_d_le_4.
+-- See VasyuninExpansion.lean tombstone for full history.
 
 -- ════════════════════════════════════════════════
 -- STEP 2: THE CROSS-PARITY BILINEAR FORM
