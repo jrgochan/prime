@@ -3,7 +3,7 @@
 
   ## Vasyunin Gram Entry Bounds for the BD Basis {1/(kx)}
 
-  ### Key Theorems (all zero sorry, zero axioms):
+  ### Key Theorems (all FULLY PROVED, zero axioms):
 
   1. `bd_fract_product_integrable` — {1/(jx)}·{1/(kx)} integrable on [0,1]
   2. `vasyuninGram_diag_nonneg` — G(k,k) ≥ 0
@@ -12,7 +12,7 @@
 
   These are used for bounding the quadratic form vᵀGv in the L² bound proof.
 
-  Status: Zero sorry, zero axioms.
+  Status: FULLY PROVED, zero axioms.
   Created: April 22, 2026.
 -/
 

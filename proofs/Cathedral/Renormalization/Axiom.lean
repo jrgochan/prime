@@ -35,7 +35,7 @@
   Now GRADUATED — PATH C inherits bd_witness_l2_error_decay_proved
   from the main NB chain instead (via WitnessDecayProved.lean).
 
-  Zero sorry. Zero PATH C-specific axioms.
+  FULLY PROVED. Zero PATH C-specific axioms.
 -/
 
 import Cathedral.NymanBeurling.BDMellin

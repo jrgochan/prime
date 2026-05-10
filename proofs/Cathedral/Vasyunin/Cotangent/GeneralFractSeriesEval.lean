@@ -261,7 +261,7 @@ theorem fractTarget_general_a1 (b : ℕ) (hb : 2 ≤ b) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ fractCorrection_general          — Definition
 --   ✅ fractCorrection_general_a1       — Recovers a=1 case
 --   ✅ rowTerm_decompose_general        — THE CORE IDENTITY (Phase 1)

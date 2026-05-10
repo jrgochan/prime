@@ -81,7 +81,7 @@ theorem perfect_496 : sumOfDivisors 496 = 2 * 496 := by
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   ZERO sorry
+--   FULLY PROVED
 --   ZERO axioms
 --   6 PROVED theorems:
 --     ✅ lagarias_base_case        — σ(1) ≤ H₁ + exp(H₁)·log(H₁)

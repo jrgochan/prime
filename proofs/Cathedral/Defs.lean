@@ -19,7 +19,7 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
   - Liouville function and parity operator
   - Spectral definitions: λ_min, eigenDrop, cosAlignment
 
-  Zero sorry. Zero axioms.
+  FULLY PROVED. Zero axioms.
 -/
 
 noncomputable section

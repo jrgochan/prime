@@ -674,7 +674,7 @@ theorem integral_eq_sum_actualRowIntegral (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤
     This is the key number-theoretic input that makes the Dirichlet
     test applicable to the Vasyunin residual series.
 
-    **PROVED** — via CenteredFractBound.lean (zero sorry). -/
+    **PROVED** — via CenteredFractBound.lean (FULLY PROVED). -/
 theorem centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     ∃ C : ℝ, ∀ n : ℕ,
@@ -747,7 +747,7 @@ theorem centered_fract_residual_converges_sketch (a b : ℕ) (ha : 1 ≤ a) (hb 
 --   The Stirling correction was incorrectly allocated between these two;
 --   only the FULL s_combined converges, not individual pieces.
 --
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ s_log_split                            — Log sum = Stirling + Digamma parts
 --   ✅ rational_plus_stirling                 — M/b cancellation with Stirling
 --   ✅ tileIndex_nonneg                       — Tile index ≥ 0

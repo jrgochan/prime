@@ -251,7 +251,7 @@ theorem tsum_twoTileCorrection_eq_zero_a1 (b : ℕ) (hb : 2 ≤ b) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ twoTileCorrection                               — Definition
 --   ✅ twoTileCorrection_zero_of_single_tile            — Δ = 0 for single-tile rows
 --   ✅ twoTileCorrection_abs_le                         — |Δ| ≤ C/m² triangle bound

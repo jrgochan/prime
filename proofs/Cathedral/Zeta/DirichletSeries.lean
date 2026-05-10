@@ -49,7 +49,7 @@ lemma deriv_ofReal_cpow_eq {r : ℂ} (hr : r ≠ 0) {t : ℝ} (ht : t ≠ 0) :
       L(f, s) = s · ∫₁^∞ (∑_{k ≤ t} f(k)) · t^{-(s+1)} dt
 
     This is `LSeries_eq_mul_integral` from Mathlib, re-exported here.
-    Zero sorry. Zero axioms.
+    FULLY PROVED. Zero axioms.
 
     Note: The original Cathedral version used a different signature with
     `A : ℝ → ℂ` and `∑' n, a(n)·n^{-s}`. Mathlib's version is more

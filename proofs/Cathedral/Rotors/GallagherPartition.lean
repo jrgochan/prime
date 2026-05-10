@@ -192,7 +192,7 @@ lemma dirichlet_eq_trigPoly_term (n : ℕ) (hn : 0 < n) (t : ℝ) :
 
     finiteDirichletSum N a t = trigPoly a (dirichletLogFreq N) t
 
-    Therefore by gallagher_mvt (PROVED, zero sorry):
+    Therefore by gallagher_mvt (PROVED, FULLY PROVED):
 
     ∫ |D_N(t)|² · δ·K(δt) dt = Σ |aₙ|²
 
@@ -288,7 +288,7 @@ theorem channel_equals_odd_energy {N : ℕ} (a : Fin N → ℂ) (i : Fin 4)
 -- §6. AUDIT (v12, April 27, 2026)
 -- ═══════════════════════════════════════════════
 
--- PROVED (zero sorry, zero axiom):
+-- PROVED (FULLY PROVED, zero axiom):
 --   ✅ χ₈ — definitions (4 characters mod 8)
 --   ✅ χ₈_orthogonality — native_decide over all 16 cases
 --   ✅ χ₈_multiplicative — mod-8 case split, 16 cases per character

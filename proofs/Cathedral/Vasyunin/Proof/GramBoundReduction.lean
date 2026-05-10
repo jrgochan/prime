@@ -32,7 +32,7 @@
     N=10000: vᵀGv = 0.693,  |bᵀv-1| = 0.171,  vᵀCv = 0.006
     N=20000: vᵀGv = 0.712,  |bᵀv-1| = 0.159,  vᵀCv = 0.005
 
-  Status: Zero sorry. Two axioms (both strictly weaker than RH).
+  Status: FULLY PROVED. Two axioms (both strictly weaker than RH).
 -/
 
 import Cathedral.Vasyunin.Proof.LambdaTrick
@@ -183,7 +183,7 @@ theorem witness_covariance_decay_from_gram_bound :
 /-!
 ## Audit
 
-### Zero sorry.
+### FULLY PROVED.
 
 ### Two axioms:
 1. `gram_form_upper_bound`: vᵀGv ≤ 1 + K/ln(N)

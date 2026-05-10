@@ -259,7 +259,7 @@ theorem witness_covariance_bound_from_sieve
      Graduation path: Formalize Parseval on L²([0,1]) for periodic B₁ sums,
      then apply Mathlib's large_sieve or formalize Montgomery-Vaughan directly.
 
-### Theorems proved (zero sorry):
+### Theorems proved (FULLY PROVED):
   1. `bilinear_b1_decomposition` — {x} = B₁(x) + ½ decomposition
      ∫₀¹(Σv{1/jx})² = (∫₀¹(ΣvB₁)²) + (Σv)·(∫₀¹ΣvB₁) + ¼(Σv)²
   2. `witness_covariance_bound_from_sieve` — master O(1/lnN) bound

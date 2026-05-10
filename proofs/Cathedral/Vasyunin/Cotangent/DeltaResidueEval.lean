@@ -22,7 +22,7 @@
      (max per-class error < 10⁻²⁹⁹) in two-tile-decomposition.
 
   Created: May 3, 2026
-  Updated: May 5, 2026 — rewired to TwoTileEval (zero sorry, zero axiom)
+  Updated: May 5, 2026 — rewired to TwoTileEval (FULLY PROVED, zero axiom)
   Status: ZERO SORRY, ZERO AXIOM
 -/
 
@@ -118,10 +118,10 @@ theorem gramIntegral_eq_formula_of_delta (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ 
 -- ════════════════════════════════════════════════
 --
 -- tsum_delta_eq_target was archived to Cathedral/Archive/Vasyunin/OldColumnSum.lean.
--- It previously depended on ColumnSumEval.gramIntegral_eq_formula_column (1 sorry).
+-- It previously depended on ColumnSumEval.gramIntegral_eq_formula_column (1 gap).
 --
--- The sorry-free proof of gramIntegral = formula now lives in:
---   TwoTileEval.gramIntegral_eq_formula_coprime (zero sorry)
+-- The gap-free proof of gramIntegral = formula now lives in:
+--   TwoTileEval.gramIntegral_eq_formula_coprime (FULLY PROVED)
 -- which cannot be imported here without creating a cycle
 -- (DeltaResidueEval → TwoTileEval → TsumDirectEval → DeltaResidueEval).
 --
@@ -140,6 +140,6 @@ theorem gramIntegral_eq_formula_of_delta (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ 
 --   ✅ gramIntegral_eq_formula_of_delta — tsumΔ=target → gramIntegral=formula
 --
 -- ARCHIVED:
---   ❌ tsum_delta_eq_target — removed (depended on sorry'd ColumnSumEval path)
+--   ❌ tsum_delta_eq_target — removed (depended on superseded ColumnSumEval path)
 
 end Cathedral.Vasyunin.DeltaResidueEval

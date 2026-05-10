@@ -356,7 +356,7 @@ theorem fract_correction_general_eq_target (a b : ℕ)
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ fract_coprime_ne_zero         — {ar/b} ≠ 0 for coprime a,b
 --   ✅ fract_coprime_complement      — {a(b-r)/b} = 1 - {ar/b}
 --   ✅ weighted_digamma_bij          — Bijection identity
@@ -365,7 +365,7 @@ theorem fract_correction_general_eq_target (a b : ℕ)
 --   ✅ weighted_loggamma_diff        — logΓ diff → two sums
 --   ✅ fract_perm_sum                — Σ {ar/b} = (b-1)/2
 --   ✅ weighted_digamma_piece_general — (1/b)·Σ{ar/b}·ψ(r/b) evaluated
---   ✅ fract_correction_general_eq_target (§6) — THE ASSEMBLY (zero sorry!)
+--   ✅ fract_correction_general_eq_target (§6) — THE ASSEMBLY (FULLY PROVED!)
 --
 -- ARCHITECTURE (CORRECTED May 3):
 --   fractTarget_general := finite residue sum (definitional, NOT via gramFormula)

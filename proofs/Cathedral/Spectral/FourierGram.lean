@@ -498,7 +498,7 @@ theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
 /-!
 ## Audit — ZERO SORRY ✓
 
-### Proved (0 sorry, 0 axiom):
+### Proved (FULLY PROVED, 0 axiom):
   1. `sawtoothReal_bound` — |B₁| ≤ 1/2
   2. `sawtoothReal_add_one` — periodicity
   3. `sawtoothReal_measurable` — measurability
@@ -527,7 +527,7 @@ theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
 ### Phase status:
   Phase 1/5: ████████ (10 proved — COMPLETE!)
   Phase 2/5: ████████ (2 proved — COMPLETE!)
-  Total: 12 theorems, 0 sorry, 0 axiom — 100%
+  Total: 12 theorems, FULLY PROVED, 0 axiom — 100%
 -/
 
 end Cathedral.FourierGram

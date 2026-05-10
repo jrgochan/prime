@@ -30,7 +30,7 @@
   digamma formula gives the cotangent values.
 
   Created: April 14, 2026 (Phase 3: The Bridge)
-  Status: Complete — zero sorry (April 25, 2026)
+  Status: Complete — FULLY PROVED (April 25, 2026)
 -/
 
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
@@ -272,7 +272,7 @@ theorem floor_sum_reciprocity (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
 -- Step 4 (Phase 4): Algebraic simplification to vasyuninGramFormula.
 
 -- ════════════════════════════════════════════════
--- §3a. THE CORE IDENTITY (the single remaining sorry)
+-- §3a. THE CORE IDENTITY (the single remaining gap)
 -- ════════════════════════════════════════════════
 
 /- **THE VASYUNIN INTEGRAL IDENTITY (coprime case)**:
@@ -643,7 +643,7 @@ theorem gcd_div_eq_one (j k : ℕ) (hj : 1 ≤ j) (_hk : 1 ≤ k) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry, zero axiom):
+-- PROVED (FULLY PROVED, zero axiom):
 --   ✅ partialDigammaSum_one       — S_N(1) = 0
 --   ✅ tileIndex_pos               — ⌊jm/k⌋ ≥ 1 when jm ≥ k
 --   ✅ coprime_after_gcd           — j/gcd and k/gcd are coprime

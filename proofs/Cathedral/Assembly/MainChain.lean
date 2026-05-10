@@ -247,7 +247,7 @@ end
 -- ALTERNATIVE FORWARD PATHS (see also):
 --   HeisenbergBypass.lean: heisenberg_implies_d_sq_zero
 --     → d²_N → 0 via Rayleigh-Ritz squeeze
---     → 0 custom axioms, 0 sorry (FULLY PROVED)
+--     → 0 custom axioms, FULLY PROVED (FULLY PROVED)
 --     → Uses bd_witness_l2_error_decay_proved (Vasyunin chain)
 --
 --   MellinCrown.lean: rh_implies_bd_convergence_mellin

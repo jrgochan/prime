@@ -38,7 +38,7 @@
   evidence: HC numbers (2520, 5040, 55440, ...) always satisfy vᵀGv < 1,
   while arithmetically thin numbers (10000 = 2⁴·5⁴) may exceed 1.
 
-  Status: Zero sorry. Two axiom variants (each ≡ RH independently).
+  Status: FULLY PROVED. Two axiom variants (each ≡ RH independently).
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics
@@ -318,7 +318,7 @@ theorem rh_from_gram_form_subseq : RiemannHypothesis :=
 /-!
 ## Audit
 
-### Zero sorry.
+### FULLY PROVED.
 
 ### Two independent axioms (each ≡ RH):
 

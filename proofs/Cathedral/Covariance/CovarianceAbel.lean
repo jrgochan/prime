@@ -379,7 +379,7 @@ theorem l2_residual_from_mertens
   --                       = 2C_dot/logN + C_m²/logN
   -- Need: 2C_dot + C_m² ≤ C_m²+4C_m+2
   -- i.e.: 2C_dot ≤ 4C_m+2. This depends on C_dot ≤ 2C_m+1.
-  -- For now, sorry the final assembly (C_dot bound needed).
+  -- For now, the final assembly has a gap (C_dot bound needed).
   -- WIP: Assembly step blocked by gram_form_bound_raw (above, deprecated).
   -- This path is superseded by the Mellin Crown architecture (v11+).
   -- Left for future exploration of alternative spatial routes.

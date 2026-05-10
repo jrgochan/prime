@@ -211,7 +211,7 @@ end
 --     📐 mellin_fourier_change             (change of variables — Calculus II)
 --     📐 fourier_inversion_autocorrelation  (L¹ Fourier inversion at a point)
 --     📐 gram_form_eq_l2_norm              (Gram matrix = L² norm of f_N)
---   0 sorry:
+--   FULLY PROVED:
 --     ✅ autocorrelation_zero_eq_l2_norm   (PROVED — definition unfolding)
 --     ✅ mellin_plancherel_gram_derived    (PROVED — composition of 3 axioms)
 --

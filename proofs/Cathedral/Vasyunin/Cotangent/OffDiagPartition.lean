@@ -185,7 +185,7 @@ theorem tile_integral_eq_ftc (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k)
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ row_nonempty           — row m nonempty for j ≥ 1, m ≥ 1
 --   ✅ rowLo_pos              — positive lower bound
 --   ✅ fract_eq_self_of_gt_inv — {1/(jx)} = 1/(jx) when x > 1/j

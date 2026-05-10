@@ -6,10 +6,10 @@
 
   Architecture:
     §1. (DELETED: truncated_perron_for_moebius — dead end, see exploration5)
-    §2. inner_integral_bound           (compact bound, ✅ no sorry)
-    §3a. right_outer_integral_bound    (rpow integration, ✅ no sorry)
-    §3b. left_outer_integral_bound     (symmetric via integral_comp_neg, ✅ no sorry)
-    §4. three_part_combine             (assembly, ✅ no sorry)
+    §2. inner_integral_bound           (compact bound, ✅ FULLY PROVED)
+    §3a. right_outer_integral_bound    (rpow integration, ✅ FULLY PROVED)
+    §3b. left_outer_integral_bound     (symmetric via integral_comp_neg, ✅ FULLY PROVED)
+    §4. three_part_combine             (assembly, ✅ FULLY PROVED)
     §5. perron_vertical_sigma0_bound   (main lemma, ✅ no new sorry)
 
   Uses production helpers from VerticalBounds.lean.
@@ -44,7 +44,7 @@ namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1b. rpow Helpers for T = X² Assembly
--- All PROVED — zero sorry.
+-- All PROVED — FULLY PROVED.
 -- ═══════════════════════════════════════════
 
 /-- (X²)^{-1/2} = X^{-1} for X > 0. -/
@@ -87,7 +87,7 @@ lemma rpow_le_mul_rpow {X x a α : ℝ} (hX : 0 < X) (hx : 0 < x) (ha : 0 < a)
 
 /-- On [-T₀, T₀], bound by the compact minimum of the denominator.
     ‖∫_{-T₀}^{T₀} f‖ ≤ x^σ · (1/g_min) · 2T₀.
-    No sorry — uses norm_perron_integrand_eq + compact min. -/
+    FULLY PROVED — uses norm_perron_integrand_eq + compact min. -/
 private lemma inner_integral_bound
     {x sigma0 T₀ g_min : ℝ} (hx_pos : 0 < x) (hT₀_pos : 0 < T₀)
     (hg_min_pos : 0 < g_min)
@@ -119,7 +119,7 @@ private lemma inner_integral_bound
 -- ═══════════════════════════════════════════
 
 /-- Right outer integral bound: ‖∫_{T₀}^T f‖ ≤ x^σ · C/ε₀ · T^{ε₀}.
-    Uses pointwise bound + integral_mono + rpow_integral_bound. Zero sorry. -/
+    Uses pointwise bound + integral_mono + rpow_integral_bound. FULLY PROVED. -/
 private lemma right_outer_integral_bound (hRH : RiemannHypothesis)
     {x sigma0 C T₀ ε₀ T : ℝ}
     (hx_pos : 0 < x) (hsigma0 : 1/2 < sigma0) (hsigma0_ne : sigma0 ≠ 1)
@@ -215,7 +215,7 @@ private lemma left_outer_integral_bound (hRH : RiemannHypothesis)
 -- ═══════════════════════════════════════════
 
 /-- Given bounds on the three parts, assemble the final bound.
-    Triangle inequality + exponent monotonicity. Zero sorry. -/
+    Triangle inequality + exponent monotonicity. FULLY PROVED. -/
 private lemma three_part_combine
     {x sigma0 T ε₀ eps' M C_bound T₀ : ℝ}
     (_hT_pos : 0 < T) (hT_ge_1 : 1 ≤ T) (hε₀_le : ε₀ ≤ eps') (heps' : 0 < eps')

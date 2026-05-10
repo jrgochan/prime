@@ -358,7 +358,7 @@ lemma inner_sum_limit_core (b : ℕ) (hb : 2 ≤ b) (r : ℕ) (hr1 : 1 ≤ r) (h
     (tendsto_comp_sub_one (BohrMollerup.tendsto_log_gamma hβ_pos)) |>.add
     ((tendsto_comp_sub_one (tendsto_digammaSeq _ hβ_pos hβ_le)).const_mul (1 / (b : ℝ)))
 
--- THE PER-RESIDUE INNER SUM LIMIT (zero sorry — fully certified)
+-- THE PER-RESIDUE INNER SUM LIMIT (FULLY PROVED — fully certified)
 -- For each r ∈ {1,...,b-1}, the inner sum
 --   Σ_{j=0}^{K-1} [log((jb+r+1)/(jb+r)) - 1/(jb+r+1)]
 -- converges as K→∞ to:
@@ -953,7 +953,7 @@ theorem gramIntegral_eq_formula_a1_axiomFree (b : ℕ) (hb : 2 ≤ b) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (20 theorems, zero sorry in §1-§3, §4a, §4c, §4d, §5):
+-- PROVED (20 theorems, FULLY PROVED in §1-§3, §4a, §4c, §4d, §5):
 --   ✅ tsum_rowTerm_decompose          — rowTerm = stirling/b + fract
 --   ✅ tsum_rowTerm_eq_stirling_plus_fract — explicit stirling limit
 --   ✅ formula_a1_simplified           — vasyuninGramFormula(1,b) expanded

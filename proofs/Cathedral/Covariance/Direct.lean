@@ -112,7 +112,7 @@ theorem covariance_bound_from_mertens_graduated
 -- §4. AUDIT
 -- ═══════════════════════════════════════════════
 
--- PROVED (zero sorry in THIS file):
+-- PROVED (FULLY PROVED in THIS file):
 --   ✅ l2_eq_bias_sq_plus_covariance        — The bias-variance identity
 --   ✅ covariance_from_l2_bound             — Pointwise reduction
 --   ✅ covariance_bound_from_l2_uniform     — Uniform assembler

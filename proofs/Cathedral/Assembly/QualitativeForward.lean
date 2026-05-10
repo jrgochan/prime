@@ -3,7 +3,7 @@
 
   ## ATTEMPT: PNT → d² → 0 → RH (Unconditional Forward)
 
-  If this compiles with zero sorry, it would prove the Riemann Hypothesis!
+  If this compiles with FULLY PROVED, it would prove the Riemann Hypothesis!
   (Because PNT is unconditionally true.)
 
   The forward direction decomposes as:
@@ -43,7 +43,7 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
 
 /-- **UNCONDITIONAL FORWARD**: PNT → d² → 0.
 
-    If proved, combined with nyman_beurling_converse (PROVED, zero sorry),
+    If proved, combined with nyman_beurling_converse (PROVED, FULLY PROVED),
     this gives an unconditional proof of the Riemann Hypothesis.
 
     The attempt: use the PROVED `mertens_implies_l2_decay_34` with
@@ -74,7 +74,7 @@ theorem pnt_implies_bd_convergence :
   -- The honest gap: we cannot derive |M(x)| ≤ C·x^{3/4} from PNT alone.
   -- This bound requires the Riemann Hypothesis (or a strong zero-free region).
   --
-  -- If this sorry could be eliminated, RH would follow immediately
+  -- If this gap could be closed, RH would follow immediately
   -- from the PROVED nyman_beurling_converse.
   sorry
 

@@ -172,7 +172,7 @@ end
 -- AUDIT (Post Parseval Reverse Bypass)
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry, zero problem-specific axioms IN THIS FILE):
+-- PROVED (FULLY PROVED, zero problem-specific axioms IN THIS FILE):
 --   ✅ bdLinComb_bound               — uniform bound on BD basis (PlancherelDefs)
 --   ✅ bdResidualV_bound             — uniform bound on residual (PlancherelDefs)
 --   ✅ flattenedResidualV_bound      — exponential decay of g_N (PlancherelDefs)

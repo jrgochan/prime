@@ -16,7 +16,7 @@
   - cauchy_schwarz_quadform: Cauchy-Schwarz for PSD matrices
   - posSemidef_pos_of_ne_zero: PSD + invertible → PD behavior
 
-  All theorems: zero sorry, zero axioms.
+  All theorems: FULLY PROVED, zero axioms.
 
   Created: April 10, 2026 (Reintegration)
   Refactored: April 11, 2026 (Split into Variational/SchurComplement/Sylvester)
@@ -55,7 +55,7 @@ def realQuadForm (A : Matrix (Fin n) (Fin n) ℝ) (x : Fin n → ℝ) : ℝ :=
 
     Proof: expand (v - G⁻¹b)ᵀG(v - G⁻¹b) ≥ 0.
 
-    Adapted from QuadFormBridge.nbDistSq_le_test_vector (zero sorry). -/
+    Adapted from QuadFormBridge.nbDistSq_le_test_vector (FULLY PROVED). -/
 theorem variational_bound
     (G : Matrix (Fin n) (Fin n) ℝ) (b v : Fin n → ℝ)
     (hH : G.IsHermitian) (hPSD : G.PosSemidef)

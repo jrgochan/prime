@@ -36,7 +36,7 @@
   Formalized by Claude Actual (The Forge Master).
 
   Created: May 2, 2026 (The Midnight Forge)
-  Status: CERTIFIED (zero sorry)
+  Status: CERTIFIED (FULLY PROVED)
 -/
 
 import Mathlib.Algebra.Ring.Basic
@@ -179,7 +179,7 @@ theorem susy_witten_commutes
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ nyman_beurling_susy_vacuum    — Parity-graded system is SUSY
 --   ✅ susy_supercharge_sq_commutes  — [Q², Γ] = 0
 --   ✅ susy_witten_commutes          — H=Q² ⟹ [H, Q²] = 0

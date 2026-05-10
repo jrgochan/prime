@@ -5,7 +5,7 @@
 
   THEOREM: For real s ∈ (0,1), Re(Λ₀(s)) < 4.
 
-  Status: **ZERO sorry. ZERO axioms. Pure Mathlib.**
+  Status: **FULLY PROVED. ZERO axioms. Pure Mathlib.**
 
   Proof chain:
   1. evenKernel_zero_sub_one_le: |θ(0,t)-1| ≤ 4e^{-πt} for t ≥ 1 (JacobiTheta.Bounds)

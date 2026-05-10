@@ -165,6 +165,6 @@ theorem norm_Gamma_lower_reflection {s : ℂ}
 -- §5. Strategic notes
 -- ════════════════════════════════════════════════════
 
--- Remaining sorry: norm_Gamma_le_Gamma_re (integral bound).
+-- Remaining gap: norm_Gamma_le_Gamma_re (integral bound).
 -- All other lemmas are fully proved or depend only on that.
 -- The reflection formula lower bound shows |Γ(s)| ≥ π/(cosh(πt)·Γ(1-σ)).

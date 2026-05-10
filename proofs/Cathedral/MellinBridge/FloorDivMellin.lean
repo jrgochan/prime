@@ -8,7 +8,7 @@ import Cathedral.MellinBridge.FloorMellin
   Establishes M[h_k](s) = ζ(s)/(k^s · s) - 1/(k^s · (s-1)) and
   related identities used in the separation argument.
 
-  Zero sorry. Zero axioms.
+  FULLY PROVED. Zero axioms.
 -/
 
 /-! # Cathedral.MellinBridge.FloorDivMellin

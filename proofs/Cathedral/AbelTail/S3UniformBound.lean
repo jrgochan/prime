@@ -19,7 +19,7 @@
   2. Large-case bound (n ≥ N₀): Abel summation + boundary vanishing
   3. Combine: universal bound = max of both
 
-  STATUS: 0 sorry. 0 axiom. Fully proved.
+  STATUS: FULLY PROVED. 0 axiom. Fully proved.
   Created: April 25, 2026 (The Abel Bypass — 4:00 AM)
 -/
 

@@ -345,7 +345,7 @@ private lemma riemannZeta_conj_re_gt {s : ℂ} (hs : 1 < s.re) :
 
 
 -- ═══════════════════════════════════════════
--- §2. The Contour Shift (assembly — zero new sorry)
+-- §2. The Contour Shift (assembly — no new gaps)
 -- ═══════════════════════════════════════════
 
 /-- **PROVED**: The contour shift under RH.

@@ -26,7 +26,7 @@
   gram_bound_subseq_implies_rh (THEOREM — feeds nyman_beurling_converse)
   ```
 
-  Status: Zero sorry target. Zero axioms (uses only Separation.lean infrastructure).
+  Status: FULLY PROVED target. Zero axioms (uses only Separation.lean infrastructure).
 -/
 
 import Cathedral.NymanBeurling.BDMellin

@@ -8,11 +8,11 @@
   Proves that the Mertens bound M(x) = O(x^{1/2} log²x) implies
   the existence of BD weights with L² error O(1/log N).
 
-  ### Proved (zero sorry):
+  ### Proved (FULLY PROVED):
   - weighted_moebius_abel_bound: Abel + boundary kill via logWeight_self
   - summand_bound: each term ≤ (C_m*log²k/k^{1/2}+1)/logN
 
-  ### Key dependencies (all zero-sorry):
+  ### Key dependencies (all FULLY PROVED):
   - AbelSummation.lean: abel_summation, abel_summation_abs_bound
   - MertensIntegral.lean: logWeight tools, convergent_log_series_bound
 -/
@@ -169,7 +169,7 @@ theorem abel_summation_bd_l2_bound_proved :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry, ZERO axioms in this file!):
+-- PROVED (FULLY PROVED, ZERO axioms in this file!):
 --   ✅ weighted_moebius_abel_bound          — Abel + boundary kill
 --   ✅ summand_bound                        — Each term ≤ (C/k^{1/2}+1)/logN
 --   ✅ l2_from_pointwise_bound              — NOW PROVED via Parseval Bridge!

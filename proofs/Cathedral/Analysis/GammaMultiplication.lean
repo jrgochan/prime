@@ -346,7 +346,7 @@ theorem sum_log_gamma_eq_target (q : ℕ) (hq : 1 ≤ q) :
   exact tendsto_nhds_unique (tendsto_sum_logGammaSeq q hq)
     (h_target.congr' (Filter.EventuallyEq.symm h_eq))
 
--- ── THE GAMMA PRODUCT AT ONE (zero sorry) ──
+-- ── THE GAMMA PRODUCT AT ONE (FULLY PROVED) ──
 
 /-- **Gamma product at s=1**: ∏_{k=0}^{q-1} Γ((1+k)/q) = (2π)^{(q-1)/2} / √q. -/
 theorem gamma_product_at_one (q : ℕ) (hq : 1 ≤ q) :
@@ -942,7 +942,7 @@ theorem digamma_sum_identity (q : ℕ) (hq : 2 ≤ q) :
 -- DEFINED:
 --   ✅ multiplicationGamma     — The q-multiplication auxiliary function
 --
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ prod_gamma_shift              — Product shift identity (combinatorial)
 --   ✅ multiplicationGamma_add_one   — Functional equation f(s+1) = s·f(s)
 --   ✅ multiplicationGamma_log_convex — log∘f convex on (0,∞)

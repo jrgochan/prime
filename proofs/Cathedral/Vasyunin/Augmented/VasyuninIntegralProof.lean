@@ -235,7 +235,7 @@ private theorem fract_simple (j : ℕ) (hj : 1 ≤ j) (x : ℝ)
     G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx for j ≠ k.
 
     PROVED via:
-    1. FormulaBridge: vasyuninGramEntry = vasyuninGramFormula [zero sorry]
+    1. FormulaBridge: vasyuninGramEntry = vasyuninGramFormula [FULLY PROVED]
     2. GCDReduction: vasyuninGramFormula = gramIntegral [from coprime case + GCD recurrence]
 
     This eliminates TWO axioms from the Cathedral:

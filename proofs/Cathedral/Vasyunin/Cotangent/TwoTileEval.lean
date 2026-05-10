@@ -27,7 +27,7 @@
 
   Created: May 3, 2026
   Updated: May 5, 2026 — AlgebraicLimit now imports TwoTileEval directly
-  Status: PROVED (zero sorry, zero axiom)
+  Status: PROVED (FULLY PROVED, zero axiom)
 -/
 
 import Cathedral.Vasyunin.Cotangent.TwoTileCorrection
@@ -96,10 +96,10 @@ private theorem tsum_actual_eq_stirling_target_delta (a b : ℕ)
 
     **Proof strategy**:
 
-    - a=1: From FractSeriesEval (zero sorry, zero axiom)
+    - a=1: From FractSeriesEval (FULLY PROVED, zero axiom)
     - a≥2: From TsumDirectEval.gramIntegral_eq_formula_independent
       which proves the identity via the four-way decomposition +
-      DeltaDirectEval (zero sorry).
+      DeltaDirectEval (FULLY PROVED).
 
     ZERO SORRY. Fully certified. -/
 theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
@@ -111,7 +111,7 @@ theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry, zero axiom):
+-- PROVED (FULLY PROVED, zero axiom):
 --   ✅ tsum_actual_eq_stirling_target_delta — Σ' actual = 3-way decomposition
 --   ✅ gramIntegral_eq_formula_coprime — Delegates to TsumDirectEval (ZERO SORRY)
 --

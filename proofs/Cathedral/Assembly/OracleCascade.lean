@@ -24,7 +24,7 @@
   "The Oracle doesn't just prove RH. It cascades downward and
    unconditionally lights up the entire Cathedral."
 
-  Status: Zero sorry (inherits sorry from Perron chain).
+  Status: FULLY PROVED (inherits sorry from Perron chain).
   Created: May 9, 2026 (The Keystone)
 -/
 

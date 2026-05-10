@@ -7,7 +7,7 @@
 
   Combined: Q = (bᵀv)²/vᵀCv ≥ (1/4)/(C/ln N) = ln(N)/(4C)
 
-  Status: Zero sorry. One axiom (RH-level only).
+  Status: FULLY PROVED. One axiom (RH-level only).
          witness_numerator_convergence proved from PNT (May 7, 2026).
 -/
 

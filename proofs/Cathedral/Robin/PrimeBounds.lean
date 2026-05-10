@@ -322,7 +322,7 @@ theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   ZERO sorry
+--   FULLY PROVED
 --   ZERO axioms
 --   ALL PROVED:
 --     ✅ geom_sum_le_two_pow           — Σ P^j ≤ 2·P^k

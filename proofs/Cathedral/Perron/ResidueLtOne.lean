@@ -8,7 +8,7 @@ import Cathedral.Perron.Rectangle
   Residue analysis for σ < 1 in the Perron contour.
   Handles the contribution from ζ-zeros inside the contour.
 
-  Zero sorry. Zero axioms.
+  FULLY PROVED. Zero axioms.
 -/
 
 /-!

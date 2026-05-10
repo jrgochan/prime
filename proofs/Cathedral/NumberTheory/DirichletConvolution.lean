@@ -166,7 +166,7 @@ theorem mobius_floor_sum_eq_one (n : ℕ) (hn : 1 ≤ n) :
     2. `mu_log_mul_zeta` — the convolution `μ·log * ζ = -Λ`
 
     This gives Σ μ(k)·log(k)·⌊N/k⌋ = -Σ_{n≤N} Λ(n) = -ψ(N).
-    Zero sorry, zero axiom.
+    FULLY PROVED, zero axiom.
 
     The identity is imported from `Cathedral.PNT.LogBridge.sum_mu_log_floor_icc`.
 
@@ -201,14 +201,14 @@ theorem nyman_beurling_residual_eq_pnt_error
 -- §5. AUDIT
 -- ═══════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ card_Icc_filter_dvd     — multiples counting
 --   ✅ filter_dvd_eq_divisors  — divisor filter equivalence
 --   ✅ divisor_sum_swap         — Dirichlet hyperbola identity
 --   ✅ moebius_divisor_sum     — Σ_{d|n} μ(d) = [n=1] (via μ*ζ=1)
 --   ✅ mobius_floor_sum_eq_one — IDENTITY 1: Σ μ(k)⌊n/k⌋ = 1
 --
--- IDENTITY 2 (imported from PNT/LogBridge.lean — zero sorry):
+-- IDENTITY 2 (imported from PNT/LogBridge.lean — FULLY PROVED):
 --   ✅ sum_mu_log_floor_icc    — Σ μ(k)·log(k)·⌊N/k⌋ = -ψ(N)
 --   (Uses Mathlib's ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum + mu_log_mul_zeta)
 --

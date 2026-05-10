@@ -335,7 +335,7 @@ theorem row_ftc_combined (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ f_eq_components           — F = rational + log + linear
 --   ✅ rational_telescope        — rational terms cancel at shared boundaries
 --   ✅ rational_sum_eq_endpoints — rational telescope to endpoints
@@ -354,7 +354,7 @@ theorem row_ftc_combined (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
 --   (none — all theorems in this file are fully proved!)
 --
 -- NOTE (April 17, 2026): log_sum_split and m_log_partial_sum_formula
--- were previously marked as sorry but have been fully proved.
+-- were previously previously incomplete but have been fully proved.
 -- The entire algebraic telescoping structure is verified.
 
 end Cathedral.Vasyunin.TelescopeSum

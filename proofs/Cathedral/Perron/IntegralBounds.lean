@@ -6,7 +6,7 @@ import Cathedral.Perron.Defs
   Bounds on the vertical and horizontal integrals appearing
   in the Perron formula contour.
 
-  Zero sorry. Zero axioms.
+  FULLY PROVED. Zero axioms.
 -/
 
 /-!

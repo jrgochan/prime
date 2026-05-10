@@ -8,7 +8,7 @@
   - sylvester_3x3: 3×3 Sylvester criterion via completing the square
   - bordered_matrix_posDef: (n+1)×(n+1) PD from n×n PD + Schur > 0
 
-  All theorems: zero sorry, zero axioms.
+  All theorems: FULLY PROVED, zero axioms.
 
   Extracted from Variational.lean (April 11, 2026).
   bordered_matrix_posDef proven April 11, 2026.

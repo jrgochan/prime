@@ -259,7 +259,7 @@ theorem deprecated_gramEntry_growth_bound (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤
 -- ═══════════════════════════════════════════════
 
 -- This file has:
---   5 sorry declarations (scaffolding)
+--   5 unproved declarations (scaffolding)
 --
 -- The key insight from Gemini: the Abel summation on the k-index
 -- of the discrete matrix produces boundary terms that cancel the

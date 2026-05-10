@@ -121,13 +121,39 @@ def find_body_end(lines: list[str], start_idx: int) -> int:
 
 
 def count_sorry_in_body(lines: list[str], start_idx: int, end_idx: int) -> int:
-    """Count actual sorry statements (not in comments) in the body."""
+    """Count actual sorry statements (not in comments or docstrings) in the body.
+    
+    Handles:
+    - Line comments: -- ...
+    - Block comments: /- ... -/ (including nested)
+    - Docstrings: /-- ... -/
+    """
     count = 0
+    in_block_comment = 0  # nesting depth
     for i in range(start_idx, end_idx):
         line = lines[i]
-        # Strip comments
-        comment_pos = line.find("--")
-        code_part = line[:comment_pos] if comment_pos >= 0 else line
+        # Process character by character to handle block comments
+        code_chars = []
+        j = 0
+        while j < len(line):
+            # Check for block comment start: /- or /--
+            if j + 1 < len(line) and line[j] == '/' and line[j+1] == '-':
+                in_block_comment += 1
+                j += 2
+                continue
+            # Check for block comment end: -/
+            if j + 1 < len(line) and line[j] == '-' and line[j+1] == '/' and in_block_comment > 0:
+                in_block_comment -= 1
+                j += 2
+                continue
+            # Check for line comment: --
+            if j + 1 < len(line) and line[j] == '-' and line[j+1] == '-' and in_block_comment == 0:
+                break  # rest of line is comment
+            # If not in any comment, collect code character
+            if in_block_comment == 0:
+                code_chars.append(line[j])
+            j += 1
+        code_part = ''.join(code_chars)
         if re.search(r'\bsorry\b', code_part):
             count += 1
     return count

@@ -11,7 +11,7 @@
   that makes the Dirichlet test applicable to the Vasyunin residual.
 
   Created: April 25, 2026
-  Status: COMPLETE — 8 lemmas/theorems, 0 sorry, 0 axiom
+  Status: COMPLETE — 8 lemmas/theorems, FULLY PROVED, 0 axiom
 -/
 
 import Cathedral.Analysis.DirichletTest
@@ -209,7 +209,7 @@ theorem centered_fract_partial_sums_bounded' (a b : ℕ)
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
--- PROVED (zero sorry, zero axiom):
+-- PROVED (FULLY PROVED, zero axiom):
 --   ✅ fract_nat_div                — {am/b} = (am%b)/b
 --   ✅ mul_mod_injective_range     — coprime ⇒ injective on range
 --   ✅ mul_mod_image_range          — image = range (bijection)

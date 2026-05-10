@@ -13,7 +13,7 @@ import Mathlib.Analysis.Real.Pi.Bounds
   Perron kernel, vertical integrals, rectangle contours, and
   the Dirichlet series cutoff machinery.
 
-  Zero sorry. Zero axioms.
+  FULLY PROVED. Zero axioms.
 -/
 
 /-!

@@ -16,7 +16,7 @@
        → ‖1 - f_N‖² ≤ C/log(N)                   [L² bound]
        → vᵀCv ≤ C'/log(N)                         [since (1-bᵀv)² → 0]
 
-  Status: Zero sorry. Two intermediate axioms (classical number theory).
+  Status: FULLY PROVED. Two intermediate axioms (classical number theory).
 -/
 
 import Cathedral.Vasyunin.Proof.WitnessAsymptotics

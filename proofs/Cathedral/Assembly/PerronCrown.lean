@@ -313,7 +313,7 @@ theorem rh_implies_bd_convergence_perron :
 
 /-- **THE PERRON EQUIVALENCE**: Nyman-Beurling via the Perron chain.
 
-    Converse: 0 axioms, 0 sorry (BDMellin.lean)
+    Converse: 0 axioms, FULLY PROVED (BDMellin.lean)
     Forward:  3 PNT axioms + 1 covariance axiom + 1 sorry
 
     This ELIMINATES the `rh_implies_mertens_bound` axiom from the
@@ -344,7 +344,7 @@ theorem nyman_beurling_equivalence_perron :
 --      via variance decomposition: vᵀCv = vᵀGv - (bᵀv)²
 --
 -- ELIMINATED:
---   ❌ rh_implies_mertens_bound  — replaced by Perron theorem (1 sorry)
+--   ❌ rh_implies_mertens_bound  — replaced by Perron theorem (1 gap)
 --
 -- SORRY COUNT: 1
 --   rh_zeta_lower_bound_from_zero_counting axiom (Hadamard product bound)

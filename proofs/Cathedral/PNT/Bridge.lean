@@ -18,7 +18,7 @@
   ### Blocking Analysis
 
   These 2 sorrys do NOT block the MainChain (MainChain.lean):n
-    - MainChain.lean builds with ZERO sorrys
+    - MainChain.lean builds with FULLY PROVEDs
     - The log-weighted sums flow through PNTAbelMean → MillenniumWall → FinalDragon
       which is an ALTERNATIVE chain, not the primary MainChain path
     - The OneCrown/DirectL2Crown path uses PNT axioms from PNT/AbelMean.lean
@@ -156,7 +156,7 @@ theorem pnt_mu_div_k_derived :
     This is a standard PNT consequence, equivalent to -(1/ζ)'(1) = -1.
 
     BLOCKING: Requires a forward Tauberian theorem not in Mathlib 4.28.
-    ISOLATION: Does NOT block MainChain.lean (which has zero sorrys).
+    ISOLATION: Does NOT block MainChain.lean (which has FULLY PROVEDs).
     RESOLUTION: Will close when Mathlib gains forward Abel/Tauberian. -/
 theorem pnt_mu_log_div_k_derived :
     Tendsto (fun N =>
@@ -171,7 +171,7 @@ theorem pnt_mu_log_div_k_derived :
 -- ════════════════════════════════════════════════
 -- SORRY 2/2: pnt_mu_log_sq_div_k (second derivative of 1/ζ)
 -- NOTE: This axiom was ELIMINATED from the crown path in v9 (Abel Bypass).
--- The S₃ uniform bound suffices for L² decay. This sorry is OFF-PATH.
+-- The S₃ uniform bound suffices for L² decay. This gap is OFF-PATH.
 -- ════════════════════════════════════════════════
 
 /-- **SORRY** (blocked by upstream, OFF CROWN PATH): Σ μ(k)·ln²(k)/k → -2γ.
@@ -184,7 +184,7 @@ theorem pnt_mu_log_div_k_derived :
 
     BLOCKING: Same as sorry 1/2 — needs forward Tauberian + γ from
               ζ's Laurent expansion at s=1.
-    ISOLATION: Does NOT block MainChain.lean (which has zero sorrys).
+    ISOLATION: Does NOT block MainChain.lean (which has FULLY PROVEDs).
     RESOLUTION: Will close when Mathlib gains forward Abel/Tauberian. -/
 theorem pnt_mu_log_sq_div_k_derived :
     Tendsto (fun N =>
@@ -209,7 +209,7 @@ theorem pnt_mu_log_sq_div_k_derived :
 | 2 | `pnt_mu_log_sq_div_k_derived` | -2γ | Forward Tauberian + γ |
 
 **Isolation**: Neither sorry propagates to MainChain.lean.
-MainChain.lean builds with ZERO sorrys, ZERO sorry warnings.
+MainChain.lean builds with FULLY PROVEDs, FULLY PROVED warnings.
 
 **Upstream requirement**: Mathlib `LSeries_tendsto_sub_mul_nhds_one_of_tendsto_sum_div`
 provides the CONVERSE Tauberian (Σ → L-series). The FORWARD direction

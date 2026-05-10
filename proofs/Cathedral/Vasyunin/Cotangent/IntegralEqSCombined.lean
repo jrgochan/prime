@@ -282,7 +282,7 @@ theorem row_integral_eq_rowTerm_single (a b m : ℕ)
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ single_tile_eq_rowTerm      — Single-tile row (n ≥ 1) = rowTerm
 --   ✅ n_zero_eq_rowTerm           — Single-tile row (n = 0) = rowTerm
 --   ✅ row_integral_eq_rowTerm_single — Universal single-tile row lemma

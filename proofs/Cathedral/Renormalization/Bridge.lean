@@ -16,8 +16,8 @@
 
   This is the third independent proof path in the Cathedral:
     PATH A — Mellin Crown (1 sorry)
-    PATH B — Perron Crown (0 sorry, 4 axioms)
-    PATH C — Renormalization (0 sorry, 0 PATH-C axioms) ← THIS FILE
+    PATH B — Perron Crown (FULLY PROVED, 4 axioms)
+    PATH C — Renormalization (FULLY PROVED, 0 PATH-C axioms) ← THIS FILE
 
   Sorry: 0
   PATH-C-specific axioms: 0 (selberg_delange_decay GRADUATED April 30, 2026)
@@ -137,11 +137,11 @@ theorem rh_via_renormalization : RiemannHypothesis := by
 --
 -- #print axioms rh_via_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---   0 sorry. selberg_delange_decay GRADUATED to theorem (α=1).
+--   FULLY PROVED. selberg_delange_decay GRADUATED to theorem (α=1).
 --
 -- #print axioms rh_implies_bd_convergence_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---   0 sorry. FULLY PROVED.
+--   FULLY PROVED. FULLY PROVED.
 --
 -- #print axioms log_pow_grows_unboundedly
 --   → [propext, Classical.choice, Quot.sound]

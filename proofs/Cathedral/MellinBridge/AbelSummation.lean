@@ -133,7 +133,7 @@ theorem abel_summation_abs_bound (a f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N)
 -- This file has:
 --   ✅ abel_summation              — The discrete identity (PROVED!)
 --   ✅ abel_summation_abs_bound    — Triangle inequality (PROVED!)
---   0 sorry, 0 axiom
+--   FULLY PROVED, 0 axiom
 --
 -- NEXT: Instantiate with Möbius weights to close Axiom 2.
 

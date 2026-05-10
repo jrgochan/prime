@@ -175,7 +175,7 @@ theorem sigma_delta_identity (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b) (hab : a 
   --   3. strip + stir/b + ft/a + deltaTarget = formula   [algebra]
   --
   -- This path is INDEPENDENT of the circular DeltaResidueEval chain.
-  -- When tsum_delta_eq_target_direct is proved, this becomes zero-sorry.
+  -- When tsum_delta_eq_target_direct is proved, this becomes FULLY PROVED.
   --
   -- CERTIFIED at 1024-bit MPFR, 127 coprime pairs, 108 off-diagonal.
   -- ═══════════════════════════════════════════════════════════════
@@ -209,10 +209,10 @@ theorem gramIntegral_eq_formula_independent (a b : ℕ) (ha : 1 ≤ a) (hb : 1 �
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (zero sorry):
+-- PROVED (FULLY PROVED):
 --   ✅ route_A                          — partialM → gramIntegral (self-contained)
 --
--- IN PROGRESS (1 sorry):
+-- IN PROGRESS (1 gap):
 --   ⚠  sigma_delta_identity            — Algebraic assembly approach:
 --      Step 1: gramIntegral = strip + tsum actual  [DONE - h_strip]
 --      Step 2: tsum actual = stir/b + ft/a + tsum Δ [DONE - h_master]

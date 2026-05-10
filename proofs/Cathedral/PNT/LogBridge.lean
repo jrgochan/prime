@@ -53,7 +53,7 @@ private lemma ioc_zero_eq_icc_one {N : ℕ} {f : ℕ → ℝ} :
     Σ_{n ∈ Icc 1 N} μ(n)·log(n)·(N/n) = -ψ(N)
 
     This is Dirichlet convolution `μ·log * ζ = -Λ` evaluated via
-    the hyperbola method. Zero sorry. -/
+    the hyperbola method. FULLY PROVED. -/
 lemma sum_mu_log_floor_icc (N : ℕ) :
     ∑ n ∈ Icc 1 N, (μ n : ℝ) * Real.log n * (N / n : ℕ) = -Psi N := by
   have h := ArithmeticFunction.sum_Ioc_mul_zeta_eq_sum mu_log N

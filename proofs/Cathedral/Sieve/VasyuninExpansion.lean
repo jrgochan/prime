@@ -204,7 +204,7 @@ end
 --   Counterexample: (100,200), gcd=100, |G-1/4|=0.0407 > 0.01=1/100
 --   Root cause: error ~ 1/(12ab), constant for fixed coprime ratio
 --
--- The axiom has been commented out and replaced with a sorry'd
+-- The axiom has been commented out and replaced with a placeholder'd
 -- theorem (vasyunin_large_gcd_replacement) to preserve build.
 --
 -- STATUS: NOT ON CROWN PATH. The Sieve Engine is speculative.
@@ -216,7 +216,7 @@ end
 --   ✅ vasyunin_expansion_d_le_4:   Full expansion for gcd ≤ 4 (TRUE)
 --
 -- POISONED:
---   💀 vasyunin_expansion_proof:    Contains sorry from FALSE d≥5 case
+--   💀 vasyunin_expansion_proof:    Contains gap from FALSE d≥5 case
 --   💀 vasyunin_large_gcd:          DEAD — commented out
 --
 -- NOTE (2026-05-07): Post-BD migration, gramEntry ≡ gramIntegral

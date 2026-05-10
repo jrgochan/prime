@@ -261,7 +261,7 @@ theorem holomorphic_log_exists_on_ball
 -- §4. Upper Bound on |ζ| on the Disk
 -- ═══════════════════════════════════════════
 
-/-- **Convexity bound** (from Cathedral.Zeta.ConvexityBound.lean, zero sorry):
+/-- **Convexity bound** (from Cathedral.Zeta.ConvexityBound.lean, FULLY PROVED):
     ‖ζ(s)‖ ≤ (2 + |Im(s)|)^2 for 1/2 < Re(s) ≤ 2, |Im(s)| ≥ 1/2. -/
 theorem zeta_norm_convexity_bound {s : ℂ}
     (hrs : 1/2 < s.re) (hrs2 : s.re ≤ 2) (him : 1/2 ≤ |s.im|) :

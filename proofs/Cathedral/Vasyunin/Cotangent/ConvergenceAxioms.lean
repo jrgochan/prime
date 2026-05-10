@@ -111,7 +111,7 @@ private theorem route_A (a b : ℕ) (ha : 1 ≤ a) :
     gramIntegral a b = vasyuninGramFormula a b
 
     PROVED via AlgebraicLimit.gramIntegral_eq_formula_axiom (now a THEOREM,
-    proved via TwoTileEval → TsumDirectEval → DeltaDirectEval, all zero-sorry).
+    proved via TwoTileEval → TsumDirectEval → DeltaDirectEval, all FULLY PROVED).
 
     NUMERICALLY CERTIFIED at 1024-bit MPFR precision across 12,032 coprime pairs. -/
 private theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
