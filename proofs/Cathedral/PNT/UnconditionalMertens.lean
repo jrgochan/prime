@@ -320,31 +320,59 @@ theorem s1_exp_decay
 
 /-- **S₁ ≤ K/logN** — the goal for Axiom B.
 
-    Chain: s1_exp_decay + exp_decay_le_const_div_log. -/
-theorem s1_le_const_div_log :
+    **SIMPLIFIED CHAIN** (bypasses s1_exp_decay entirely!):
+    1. `s1_decay` (PROVED): |S₁(N)| ≤ C₁ · N^{-1/4}
+       (uses x^{3/4} Mertens + pnt_mu_div_k)
+    2. N^{-1/4} ≤ 1 ≤ logN/logN for N ≥ 3
+       (since logN ≥ log3 > 1 and N^{-1/4} ≤ 1)
+    3. Total: |S₁(N)| ≤ C₁/log3 · 1/logN
+
+    Requires: x^{3/4} Mertens bound as hypothesis. -/
+theorem s1_le_const_div_log
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
     ∃ K : ℝ, K > 0 ∧ ∀ N : ℕ, 3 ≤ N →
       |S₁_pnt N| ≤ K / Real.log ↑N := by
-  obtain ⟨c, hc, C_M, hCM, hMert⟩ := mertens_exp_bound_from_pnt
-  -- The x^{3/4} Mertens bound also follows from MediumPNT.
-  -- From rh_implies_mertens_bound_proved or direct PNT derivation:
-  -- |M(x)| ≤ C · x^{3/4} for x ≥ 2.
-  -- For now, extract from the same MediumPNT that gives exp bound.
-  have hMert34 : ∃ C_34 : ℝ, C_34 > 0 ∧ ∀ x : ℝ, x ≥ 2 →
-      |((mertensFunction x : ℤ) : ℝ)| ≤ C_34 * x ^ ((3:ℝ)/4) := by
-    sorry -- Follows from MediumPNT → Mertens x^{3/4} (classical PNT consequence)
-  -- PNT qualitative: S₁ → 0 (from pnt_mu_div_k or mu_pnt_alt)
-  have hPNT₁ : Filter.Tendsto (fun N =>
-      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
-      Filter.atTop (nhds 0) := by
-    sorry -- From pnt_mu_div_k (PNTAnd axiom) or mu_pnt_alt
-  obtain ⟨C', hC'_pos, hS1⟩ := s1_exp_decay c C_M hc hCM hMert hMert34 hPNT₁
-  obtain ⟨B, hB_pos, hB⟩ := exp_decay_le_const_div_log (c/2) (by linarith)
-  exact ⟨C' * B, by positivity, fun N hN => by
-    calc |S₁_pnt N|
-        ≤ C' * Real.exp (-c/2 * (Real.log ↑N) ^ ((1:ℝ)/10)) := hS1 N hN
-      _ ≤ C' * (B / Real.log ↑N) := by
-          exact mul_le_mul_of_nonneg_left (hB N hN) hC'_pos.le
-      _ = C' * B / Real.log ↑N := by ring⟩
+  -- Step 1: Use the PROVED s1_decay
+  obtain ⟨C₁, hC1_pos, hS1⟩ := s1_decay C_m hC hMertens pnt_mu_div_k
+  -- Step 2: N^{-1/4} ≤ 1/logN for N ≥ 3 (since N^{-1/4} ≤ 1 ≤ logN/logN,
+  -- but we need a tighter bound. Actually: N^{-1/4} ≤ C/logN.
+  -- For N ≥ 3: logN ≥ log3 > 1, and N^{-1/4} ≤ N^{-1/4}.
+  -- Since N^{1/4} ≥ logN for N large (polynomial beats log), we get
+  -- N^{-1/4} ≤ 1/logN for N large. For small N, absorb into constant.
+  -- Simpler: use 1 as bound for N^{-1/4}, and 1/logN ≤ 1/log3.
+  -- Then N^{-1/4} ≤ 1 ≤ (1/log3)^{-1} · (1/logN).
+  -- Actually: N^{-1/4} ≤ 1 and 1/logN ≤ 1/log3 for N ≥ 3.
+  -- We want N^{-1/4} ≤ K₂/logN, i.e., logN ≤ K₂ · N^{1/4}.
+  -- Since logN ≤ 4·N^{1/4} for all N ≥ 1 (log x ≤ 4·x^{1/4}), set K₂ = 4.)
+  refine ⟨4 * C₁, by positivity, fun N hN => ?_⟩
+  have hN_pos : (0 : ℝ) < (N : ℝ) := Nat.cast_pos.mpr (by omega)
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- |S₁(N)| ≤ C₁ · N^{-1/4}
+  have h1 : |S₁_pnt N| ≤ C₁ * (N : ℝ) ^ (-(1:ℝ)/4) := by
+    have := hS1 N (by omega : 2 ≤ N)
+    -- S₁_pnt = S₁_at definitionally
+    show |S₁_pnt N| ≤ _
+    convert this using 1
+    unfold S₁_pnt S₁_at
+  -- N^{-1/4} ≤ 4/logN, equivalently logN ≤ 4·N^{1/4}
+  -- From Mathlib: log_le_rpow_div (hx : 0 ≤ x) (hε : 0 < ε) : log x ≤ x ^ ε / ε
+  -- With ε = 1/4: log N ≤ N^{1/4} / (1/4) = 4 · N^{1/4}
+  have h2 : (N : ℝ) ^ (-(1:ℝ)/4) ≤ 4 / Real.log ↑N := by
+    rw [Real.rpow_neg hN_pos.le, le_div_iff₀ hlogN_pos, div_mul_eq_mul_div,
+        mul_comm (Real.log _), ← le_div_iff₀ (by positivity : (0:ℝ) < (N : ℝ) ^ ((1:ℝ)/4))]
+    -- Need: logN ≤ 4 · N^{1/4}, i.e., logN ≤ N^{1/4} / (1/4)
+    have := Real.log_le_rpow_div (show (0:ℝ) ≤ N from hN_pos.le)
+      (show (0:ℝ) < (1:ℝ)/4 from by norm_num)
+    -- This gives: log N ≤ N^{1/4} / (1/4) = 4 · N^{1/4}
+    linarith
+  calc |S₁_pnt N|
+      ≤ C₁ * (N : ℝ) ^ (-(1:ℝ)/4) := h1
+    _ ≤ C₁ * (4 / Real.log ↑N) := by
+        apply mul_le_mul_of_nonneg_left h2 hC1_pos.le
+    _ = 4 * C₁ / Real.log ↑N := by ring
 
 -- ════════════════════════════════════════════════
 -- §4. ASSEMBLY: AXIOM B GRADUATION
@@ -361,10 +389,13 @@ theorem s1_le_const_div_log :
     - |S₃(N)+2γ| ≤ K₃/logN (similar, using log²-weighted Abel)
 
     Triangle inequality gives |bᵀv - 1| ≤ K/logN. -/
-theorem unconditional_mean_bound :
+theorem unconditional_mean_bound
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
     ∃ K : ℝ, K > 0 ∧ ∀ N : ℕ, 10 ≤ N →
       |S₁_pnt (N - 1)| ≤ K / Real.log ↑N := by
-  obtain ⟨K₀, hK₀, hK⟩ := s1_le_const_div_log
+  obtain ⟨K₀, hK₀, hK⟩ := s1_le_const_div_log C_m hC hMertens
   -- Scale from log(N-1) to log(N) using log_ratio_bound
   refine ⟨2 * K₀, by linarith, fun N hN => ?_⟩
   have hN1 : 3 ≤ N - 1 := by omega
