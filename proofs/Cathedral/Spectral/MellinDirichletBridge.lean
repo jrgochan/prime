@@ -233,7 +233,7 @@ private theorem integral_sq_le_of_sub
 
     where the corrections involve c_v and ∫ΣvB₁. -/
 theorem b1_integral_le_residual_plus_corrections
-    (N : ℕ) (hN : 3 ≤ N) (v : Fin (N - 1) → ℝ) :
+    (N : ℕ) (_hN : 3 ≤ N) (v : Fin (N - 1) → ℝ) :
     ∫ x in (0:ℝ)..1, (b1_sum v x) ^ 2
     ≤ (∫ x in (0:ℝ)..1, (bdResidualV N v x) ^ 2)
       + (c_v v) ^ 2

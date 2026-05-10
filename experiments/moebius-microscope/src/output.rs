@@ -170,8 +170,21 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
     }
 
     let t = &d.taper;
+    let ln_n = (d.n as f64).ln();
+    let gcd_taper_strata: Vec<serde_json::Value> = (1..=d.max_gcd)
+        .filter(|&dd| d.taper.u_by_gcd[dd].value().abs() > 1e-15 || d.taper.l_by_gcd[dd].value().abs() > 1e-15)
+        .take(50)
+        .map(|dd| {
+            let u_d = d.taper.u_by_gcd[dd].value();
+            let l_d = d.taper.l_by_gcd[dd].value();
+            let q_d = d.taper.q_by_gcd[dd].value();
+            let r2_d = u_d - 2.0 * l_d / ln_n;
+            serde_json::json!({"d": dd, "U_d": u_d, "L_d": l_d, "Q_d": q_d, "R2_d": r2_d})
+        })
+        .collect();
+
     let cert = serde_json::json!({
-        "experiment": "moebius-microscope", "version": "3.0", "N": d.n, "dim": d.dim,
+        "experiment": "moebius-microscope", "version": "3.1", "N": d.n, "dim": d.dim,
         "precision": d.precision,
         "quadratic_form": {"total": d.total.value(), "diagonal": d.diagonal.value(), "off_diagonal": d.off_diagonal.value()},
         "gram_bound": {
@@ -201,6 +214,7 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
             "mertens": t.mertens,
             "mertens_over_sqrt": t.mertens_over_sqrt,
         },
+        "gcd_taper_strata": gcd_taper_strata,
         "vaughan": {"type_I": d.type_i.value(), "type_II": d.type_ii.value(), "type_III": d.type_iii.value()},
         "liouville": {"ee": d.ee.value(), "eo": d.eo.value(), "oe": d.oe.value(), "oo": d.oo.value(),
             "same": d.ee.value()+d.oo.value(), "cross": d.eo.value()+d.oe.value()},

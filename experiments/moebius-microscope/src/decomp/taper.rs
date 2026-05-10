@@ -51,6 +51,8 @@ pub struct TaperMetrics {
 
     // GCD-stratified taper
     pub u_by_gcd: Vec<Kahan>,   // U_d: terms with gcd(j,k)=d
+    pub l_by_gcd: Vec<Kahan>,   // L_d: linear taper per GCD stratum
+    pub q_by_gcd: Vec<Kahan>,   // Q_d: quadratic taper per GCD stratum
 
     // PNT sub-sums
     pub s1: f64,                // Σ μ(k)/k → 0
@@ -59,7 +61,7 @@ pub struct TaperMetrics {
     pub mertens: f64,           // M(N) = Σ_{k≤N} μ(k)
     pub mertens_over_sqrt: f64, // M(N)/√N (bounded if RH)
 
-    // Running taper trajectory (TODO: populate in runners)
+    // Running taper trajectory
     #[allow(dead_code)]
     pub taper_trace: Vec<TaperTracePoint>,
 }
@@ -74,6 +76,8 @@ impl TaperMetrics {
             r2: 0.0, r2_minus_1: 0.0, r2_times_ln: 0.0,
             q_over_ln2: 0.0, c_recon: 0.0,
             u_by_gcd: vec![Kahan::default(); max_gcd + 1],
+            l_by_gcd: vec![Kahan::default(); max_gcd + 1],
+            q_by_gcd: vec![Kahan::default(); max_gcd + 1],
             s1: 0.0, s2: 0.0, s3: 0.0,
             mertens: 0.0, mertens_over_sqrt: 0.0,
             taper_trace: Vec::new(),
@@ -93,15 +97,24 @@ struct TaperAccum {
     l: Kahan,
     q: Kahan,
     vtgv_recon: Kahan,
+    // Per-GCD strata
+    u_gcd: Vec<Kahan>,
+    l_gcd: Vec<Kahan>,
+    q_gcd: Vec<Kahan>,
+    max_gcd: usize,
 }
 
 impl TaperAccum {
-    fn identity() -> Self {
+    fn identity(max_gcd: usize) -> Self {
         Self {
             u: Kahan::default(),
             l: Kahan::default(),
             q: Kahan::default(),
             vtgv_recon: Kahan::default(),
+            u_gcd: vec![Kahan::default(); max_gcd + 1],
+            l_gcd: vec![Kahan::default(); max_gcd + 1],
+            q_gcd: vec![Kahan::default(); max_gcd + 1],
+            max_gcd,
         }
     }
 
@@ -110,6 +123,11 @@ impl TaperAccum {
         self.l.add(other.l.value());
         self.q.add(other.q.value());
         self.vtgv_recon.add(other.vtgv_recon.value());
+        for d in 0..=self.max_gcd {
+            self.u_gcd[d].add(other.u_gcd[d].value());
+            self.l_gcd[d].add(other.l_gcd[d].value());
+            self.q_gcd[d].add(other.q_gcd[d].value());
+        }
         self
     }
 }
@@ -138,6 +156,7 @@ pub fn finalize_taper_metrics(decomp: &mut Decomp) {
     let ln_n = (n as f64).ln();
     let ln2_n = ln_n * ln_n;
     let vtgv = decomp.total.value();
+    let max_gcd = decomp.max_gcd;
 
     let mu = cathedral_utils::arith::mobius_table(n);
 
@@ -152,11 +171,11 @@ pub fn finalize_taper_metrics(decomp: &mut Decomp) {
         .map(|i| (i + 1, weights[i]))  // j = i+1, v_j = weights[i] = -μ(j)·(1-lnj/lnN)
         .collect();
 
-    // ═══ PARALLEL O(active²) taper + vtgv_recon computation ═══
+    // ═══ PARALLEL O(active²) taper + vtgv_recon + per-GCD strata ═══
     let result = active
         .par_iter()
         .fold(
-            TaperAccum::identity,
+            || TaperAccum::identity(max_gcd),
             |mut acc, &(j, v_j)| {
                 let mu_j = mu[j] as f64;
                 let ln_j = (j as f64).ln();
@@ -174,17 +193,32 @@ pub fn finalize_taper_metrics(decomp: &mut Decomp) {
                     acc.u.add(mm_g);
                     acc.l.add(mm_g * ln_j);
                     acc.q.add(mm_g * ln_j * ln_k);
+
+                    // Per-GCD strata
+                    let d = cathedral_utils::arith::gcd(j, k);
+                    if d <= max_gcd {
+                        acc.u_gcd[d].add(mm_g);
+                        acc.l_gcd[d].add(mm_g * ln_j);
+                        acc.q_gcd[d].add(mm_g * ln_j * ln_k);
+                    }
                 }
                 acc
             },
         )
-        .reduce(TaperAccum::identity, TaperAccum::merge);
+        .reduce(|| TaperAccum::identity(max_gcd), TaperAccum::merge);
 
     // Store the recomputed values
     decomp.taper.u_sum = result.u;
     decomp.taper.l_sum = result.l;
     decomp.taper.q_sum = result.q;
     decomp.taper.vtgv_recon = result.vtgv_recon.value();
+
+    // Store per-GCD strata
+    for d in 0..=max_gcd {
+        decomp.taper.u_by_gcd[d] = result.u_gcd[d];
+        decomp.taper.l_by_gcd[d] = result.l_gcd[d];
+        decomp.taper.q_by_gcd[d] = result.q_gcd[d];
+    }
 
     let u = result.u.value();
     let l = result.l.value();
@@ -257,14 +291,32 @@ pub fn print_taper_summary(d: &Decomp) {
     eprintln!("  │  Δ runner↔taper  = {:>16.2e}               │", (recon - vtgv).abs());
     eprintln!("  └─────────────────────────────────────────────────┘");
 
-    // GCD-stratified taper (top contributors)
-    eprintln!("  ┌─────────────────────────────────────────────────┐");
-    eprintln!("  │  GCD-STRATIFIED vᵀGv                            │");
-    for d_val in 1..=d.max_gcd.min(20) {
+    // GCD-stratified taper with per-stratum R₂
+    eprintln!("  ┌───────────────────────────────────────────────────────────────────────────┐");
+    eprintln!("  │  GCD-STRATIFIED TAPER DECOMPOSITION                                      │");
+    eprintln!("  │  gcd   U_d             L_d             Q_d             R₂_d              │");
+    eprintln!("  ├───────────────────────────────────────────────────────────────────────────┤");
+    for d_val in 1..=d.max_gcd.min(30) {
         let u_d = d.taper.u_by_gcd[d_val].value();
-        if u_d.abs() > 1e-15 {
-            eprintln!("  │  gcd={:<4}  vᵀGv_d = {:>14.10}              │", d_val, u_d);
+        let l_d = d.taper.l_by_gcd[d_val].value();
+        let q_d = d.taper.q_by_gcd[d_val].value();
+        if u_d.abs() > 1e-15 || l_d.abs() > 1e-15 {
+            let r2_d = u_d - 2.0 * l_d / ln_n;
+            eprintln!("  │  {:>3}  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
+                d_val, u_d, l_d, q_d, r2_d);
         }
     }
-    eprintln!("  └─────────────────────────────────────────────────┘");
+    // Show sum and verify it matches totals
+    let u_sum_gcd: f64 = (1..=d.max_gcd).map(|i| d.taper.u_by_gcd[i].value()).sum();
+    let l_sum_gcd: f64 = (1..=d.max_gcd).map(|i| d.taper.l_by_gcd[i].value()).sum();
+    let q_sum_gcd: f64 = (1..=d.max_gcd).map(|i| d.taper.q_by_gcd[i].value()).sum();
+    let r2_sum = u_sum_gcd - 2.0 * l_sum_gcd / ln_n;
+    eprintln!("  ├───────────────────────────────────────────────────────────────────────────┤");
+    eprintln!("  │  SUM  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
+        u_sum_gcd, l_sum_gcd, q_sum_gcd, r2_sum);
+    eprintln!("  │  Δ vs total: U={:.2e}  L={:.2e}  Q={:.2e}                      │",
+        (u_sum_gcd - t.u_sum.value()).abs(),
+        (l_sum_gcd - t.l_sum.value()).abs(),
+        (q_sum_gcd - t.q_sum.value()).abs());
+    eprintln!("  └───────────────────────────────────────────────────────────────────────────┘");
 }
