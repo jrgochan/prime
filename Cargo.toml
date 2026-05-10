@@ -43,6 +43,7 @@ members = [
     "experiments/covariance-decay",
     "experiments/cathedral-rl",
     "experiments/vasyunin-integral",
+    "experiments/hc-gram-oracle",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
