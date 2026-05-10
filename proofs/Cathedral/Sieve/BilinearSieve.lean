@@ -65,25 +65,22 @@ open Matrix Real Finset
 -- STEP 1: THE VASYUNIN EXPANSION
 -- ════════════════════════════════════════════════
 
-/-- 💀 **POISONED** (was Theorem): Vasyunin Expansion.
-
-    The Gram matrix entry G_{j,k} = ∫₀¹ {1/(jx)}{1/(kx)}dx admits a
-    decomposition into a "background" term and a "divisor correction":
-
-      G_{j,k} = 1/4 + ψ(j,k)
-
-    where |ψ(j,k)| is claimed to be controlled by 1/gcd(j,k).
-
-    ⚠️ WARNING (2026-05-04): The underlying axiom `vasyunin_large_gcd`
-    is MATHEMATICALLY FALSE. Counterexample: (100,200), gcd=100:
-      |gramEntry(100,200) - 1/4| ≈ 0.0407 > 0.01 = 1/gcd
-    The true error converges to 1/(12ab), not 0.
-    See VasyuninExpansion.lean for the full tombstone.
-
-    The d ≤ 4 case remains valid.
-    This entire file is NOT on the crown path.
-
-    Original source: Báez-Duarte, Balazard, Landreau, Saias (2005). -/
+-- 💀 **POISONED** (was Theorem): Vasyunin Expansion.
+--
+-- The Gram matrix entry G_{j,k} = ∫₀¹ {1/(jx)}{1/(kx)}dx admits a
+-- decomposition into a "background" term and a "divisor correction":
+--   G_{j,k} = 1/4 + ψ(j,k)
+-- where |ψ(j,k)| is claimed to be controlled by 1/gcd(j,k).
+--
+-- ⚠️ WARNING (2026-05-04): The underlying axiom `vasyunin_large_gcd`
+-- is MATHEMATICALLY FALSE. Counterexample: (100,200), gcd=100:
+--   |gramEntry(100,200) - 1/4| ≈ 0.0407 > 0.01 = 1/gcd
+-- The true error converges to 1/(12ab), not 0.
+-- See VasyuninExpansion.lean for the full tombstone.
+-- The d ≤ 4 case remains valid.
+-- This entire file is NOT on the crown path.
+-- Original source: Báez-Duarte, Balazard, Landreau, Saias (2005).
+--
 -- vasyunin_expansion was removed in cleanup-v18 (statement FALSE for d≥5).
 -- The d≤4 case remains valid as vasyunin_expansion_d_le_4.
 -- See VasyuninExpansion.lean tombstone for full history.

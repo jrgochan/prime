@@ -231,13 +231,13 @@ theorem gramEntry_diag_bound (k : ℕ) (hk : 1 ≤ k) :
     _ ≤ (Real.log (2 * Real.pi) + 1) / (k : ℝ) := by
         gcongr
 
-/-- ⚠️ DEPRECATED/NUMERICALLY-UNVERIFIED — Off-diagonal Gram entry growth bound.
-
-    The proposed bound |G(j,k)| ≤ C · log(max(j,k)+1) / min(j,k) is
-    plausible but unproved. The ORIGINAL bound |G(j,k)| ≤ C·(1/j + 1/k)
-    was NUMERICALLY FALSIFIED by 512-bit MPFR Rust telemetry in
-    Exploration 13 — Dedekind cotangent sums grow logarithmically.
-
+-- ⚠️ DEPRECATED/NUMERICALLY-UNVERIFIED — Off-diagonal Gram entry growth bound.
+--
+-- The proposed bound |G(j,k)| ≤ C · log(max(j,k)+1) / min(j,k) is
+-- plausible but unproved. The ORIGINAL bound |G(j,k)| ≤ C·(1/j + 1/k)
+-- was NUMERICALLY FALSIFIED by 512-bit MPFR Rust telemetry in
+-- Exploration 13 — Dedekind cotangent sums grow logarithmically.
+-- deprecated_gramEntry_growth_bound was removed in cleanup-v18 (2026-05-10).
 -- ═══════════════════════════════════════════════
 -- §6. STATUS
 -- ═══════════════════════════════════════════════
