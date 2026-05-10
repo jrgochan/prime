@@ -44,7 +44,7 @@ const NON_CROWN_GROUPS = [
       "critical_line_mellin_variance",
       "rh_zeta_lower_bound_from_zero_counting",
     ],
-    desc: "Were crown axioms in v11\u2013v15. Superseded by One-Pillar (v16). Retained as alternative forward path with 2 axioms.",
+    desc: "Were crown axioms in v11\u2013v15. Superseded by Dual Crown (v17). Retained as alternative forward path with 2 axioms.",
   },
   {
     name: "v10 Perron Crown (Alternative Path)",
@@ -427,7 +427,7 @@ export default function AxiomMapPage() {
           Forward: RH {"\u27F9"} d{"\u00B2"}_N {"\u2192"} 0
         </h2>
         <p className="text-xs text-slate-500 mb-4">
-          Click the axiom to learn more. This is the sole crown axiom.
+          Click an axiom to learn more. Two gauge-separated crown paths.
         </p>
         <div className="space-y-3">
           {CROWN_AXIOMS.map((axiom, i) => (

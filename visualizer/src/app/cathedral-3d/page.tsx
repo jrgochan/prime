@@ -389,8 +389,8 @@ export default function Cathedral3DPage() {
           The Cathedral &mdash; 3D Architecture
         </h2>
         <p className="text-sm text-slate-500 mt-1">
-          One pillar holds the golden roof: the Converse (pure Mathlib, 0 axioms)
-          is free; the Forward uses 1 crown axiom (baez_duarte_forward). 308 files, 78,435 lines.
+          The Dual Crown: the Converse (pure Mathlib, 0 axioms)
+          is free; the Forward has two gauge-separated paths. 223 files, ~60K lines.
         </p>
       </div>
 
@@ -434,11 +434,11 @@ export default function Cathedral3DPage() {
             />
             <Pillar
               position={[1.5, 0, 0]}
-              label="Forward"
+              label="Analytic Crown"
               color="#f59e0b"
               axioms={[
                 "baez_duarte_forward",
-                "(sole crown axiom)",
+                "(1 literature axiom)",
               ]}
             />
             <CathedralStructure onSelectBrick={setSelected} />
@@ -462,11 +462,11 @@ export default function Cathedral3DPage() {
         <div className="w-80 p-4 border-l border-[#1e2148] space-y-4 overflow-auto">
           <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500/10 to-transparent border border-amber-500/20">
             <div className="text-xs font-mono text-amber-400 mb-2">
-              STRUCTURE (v16 Observatory)
+              STRUCTURE (v17 Dual Crown)
             </div>
             <p className="text-sm text-slate-300">
-              308 Lean files. One-Pillar architecture: baez_duarte_forward
-              is the sole crown axiom. 1 axiom on the critical path.
+              223 Lean files. Dual Crown: Analytic (baez_duarte_forward)
+              + Oracle (oracle_certificates). 2 gauge-separated paths.
             </p>
           </div>
 
@@ -493,7 +493,8 @@ export default function Cathedral3DPage() {
                 color: "#10b981",
                 label: "Pillar 1: Converse (0 axioms)",
               },
-              { color: "#f59e0b", label: "Pillar 2: Forward (1 axiom)" },
+              { color: "#f59e0b", label: "Analytic Crown (1 literature axiom)" },
+              { color: "#06b6d4", label: "Oracle Crown (1 GPU computation)" },
               { color: "#4a8b3e", label: "Bricks: Topic directories" },
               { color: "#1e3a5f", label: "Foundation: Mathlib" },
             ].map((item) => (

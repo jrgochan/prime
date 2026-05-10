@@ -170,10 +170,24 @@ const MILESTONES: Milestone[] = [
       "DD-precision pipeline (Dekker\u2013Knuth) certifies N=55,440",
       "N=20,000 witness scan: d\u00B2\u00B7ln(N) = 0.305",
       "96% vacuum reconstruction from 55,439 prime-frequency waves",
-      "308 files, 78,435 lines, 15 papers, ~1,500+ theorems",
     ],
     graduated: ["critical_line_mellin_variance", "rh_zeta_lower_bound_from_zero_counting"],
     color: "#10b981",
+  },
+  {
+    version: "v17",
+    date: "May 9",
+    axiomCount: 2,
+    sorryCount: 0,
+    title: "Dual Crown",
+    changes: [
+      "Dual Crown: Analytic (baez_duarte_forward) + Oracle (oracle_certificates)",
+      "Gauge separation: pure math vs pure computation, two paths to RH",
+      "HPDF pipeline: 256-bit MPFR Gram matrix eigenvalues",
+      "Parseval Bridge proved (0 axioms). 8,480 build targets",
+      "223 files, ~60K lines, 1,155 proved theorems",
+    ],
+    color: "#f59e0b",
   },
 ];
 
@@ -338,7 +352,7 @@ export default function GraduationTimelinePage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          Watch axioms fall one by one. From 6 crown axioms to 1 in 42 days.
+          Watch axioms fall one by one. From 6 crown axioms to the Dual Crown in 33 days.
           {" "}<strong className="text-emerald-400">{totalGraduated} axioms graduated</strong> to theorems.
         </p>
       </motion.div>
@@ -359,16 +373,16 @@ export default function GraduationTimelinePage() {
           </div>
           <div className="flex gap-8 text-center">
             <div>
-              <div className="text-2xl font-bold text-blue-400">308</div>
+              <div className="text-2xl font-bold text-blue-400">223</div>
               <div className="text-[10px] text-slate-600">files</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-violet-400">~1,500+</div>
+              <div className="text-2xl font-bold text-violet-400">1,155</div>
               <div className="text-[10px] text-slate-600">theorems</div>
             </div>
             <div>
               <div className="text-2xl font-bold text-emerald-400">0</div>
-              <div className="text-[10px] text-slate-600">sorry</div>
+              <div className="text-[10px] text-slate-600">gaps on crown</div>
             </div>
           </div>
         </div>

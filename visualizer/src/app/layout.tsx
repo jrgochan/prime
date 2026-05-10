@@ -8,7 +8,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "Cathedral — Proof Visualizer",
-  description: "Interactive exploration of the formal reduction of the Riemann Hypothesis to one crown axiom in Lean 4 — 308 files, 78,435 lines, zero sorry on the crown path (v16 Observatory)",
+  description: "Interactive exploration of the formal reduction of the Riemann Hypothesis in Lean 4 — Dual Crown architecture, 223 files, ~60K lines, zero gaps on the crown path (v17 Dual Crown)",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

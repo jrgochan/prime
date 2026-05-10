@@ -312,7 +312,7 @@ export default function RobinLagariasPage() {
             </h3>
             <p className="text-xs text-slate-500 mt-1 leading-relaxed">
               σ(p) ≤ H_p + exp(H_p)·ln(H_p) for <strong>all</strong> primes p.
-              Zero sorry, zero axioms.
+              Zero gaps, zero axioms.
             </p>
           </div>
 
