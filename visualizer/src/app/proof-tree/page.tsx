@@ -44,10 +44,10 @@ const ROUTE_COLORS: Record<string, string> = {
 };
 
 const ROUTE_LABELS: Record<string, string> = {
-  variational: "Vasyunin · Spectral · Sieve",
-  crown: "Assembly (Crown Theorems)",
+  variational: "Vasyunin · Spectral · Covariance",
+  crown: "Assembly (Dual Crown)",
   infrastructure: "Infrastructure · Definitions",
-  mellin: "Mellin · NB · White",
+  mellin: "Mellin · NB · Perron · PNT",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -298,7 +298,10 @@ export default function ProofTreePage() {
               n.id === "robin_implies_nyman_beurling" ||
               n.id === "lagarias_implies_nyman_beurling" ||
               n.id === "baezDuarte_separates" ||
-              n.id === "rh_weight_construction_derived")
+              n.id === "rh_weight_construction_derived" ||
+              n.id === "rh_from_oracle" ||
+              n.id === "oracle_certificates" ||
+              n.id === "gram_bound_subseq_implies_rh")
         )
       )
       .join("text")

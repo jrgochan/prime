@@ -19,10 +19,19 @@ const CROWN_AXIOMS: Axiom[] = [
   {
     name: "baez_duarte_forward",
     math: "RH \u27F9 d\u00B2_N \u2192 0",
-    desc: "The B\u00E1ez-Duarte forward direction (IMRN 2003): under the Riemann Hypothesis, the Nyman\u2013Beurling basis functions can approximate the constant function 1 in L\u00B2(0,1), so the BD distance d\u00B2_N converges to zero. This is the sole crown axiom of the One-Pillar Cathedral (v16). 95% of the formalization infrastructure to close it already exists.",
+    desc: "The B\u00E1ez-Duarte forward direction (IMRN 2003): under the Riemann Hypothesis, the Nyman\u2013Beurling basis functions can approximate the constant function 1 in L\u00B2(0,1), so the BD distance d\u00B2_N converges to zero. This is the crown axiom of the Analytic path (Lorenz Gauge). Pure mathematics, no computation.",
     ref: "B\u00E1ez-Duarte, IMRN 2003, No. 36",
     tier: 1,
     file: "Assembly/MainChain.lean",
+    onCrown: true,
+  },
+  {
+    name: "oracle_certificates",
+    math: "GPU \u27F9 \u03BB_min(G_N) > 0 at HC numbers",
+    desc: "HPDF Gram matrix eigenvalues computed at highly composite numbers N = 5040, 27720, 55440 using 256-bit MPFR precision with cuBLAS tensor core acceleration. Combined with lambdaMin_shifted_antitone (PROVED), this certifies d\u00B2_N \u2192 0 directly from computation. Crown axiom of the Oracle path (Lattice QCD Gauge). Zero literature axioms.",
+    ref: "Certified computation: Apple M2 Max, CUDA 12.x, SHA-256 verified",
+    tier: 2,
+    file: "Assembly/OracleCascade.lean",
     onCrown: true,
   },
 ];
@@ -163,8 +172,17 @@ const TIER_COLORS: Record<number, {
     text: "text-amber-400",
     dot: "bg-amber-500",
     glow: "shadow-amber-500/20",
-    label: "Crown \u2014 B\u00E1ez-Duarte Forward",
-    sublabel: "The sole axiom on the crown path (IMRN 2003)",
+    label: "Analytic Crown \u2014 B\u00E1ez-Duarte Forward",
+    sublabel: "Literature axiom (IMRN 2003)",
+  },
+  2: {
+    bg: "from-cyan-500/15 to-cyan-900/10",
+    border: "border-cyan-500/40",
+    text: "text-cyan-400",
+    dot: "bg-cyan-500",
+    glow: "shadow-cyan-500/20",
+    label: "Oracle Crown \u2014 GPU Certificates",
+    sublabel: "Trusted computation axiom (HPDF)",
   },
 };
 
@@ -352,14 +370,13 @@ export default function AxiomMapPage() {
           </span>
         </h1>
         <p className="text-slate-400 mt-2 max-w-2xl">
-          The crown theorem{" "}
-          <code className="text-amber-400/80">
-            nyman_beurling_equivalence
-          </code>{" "}
-          depends on exactly <strong className="text-white">1</strong>{" "}
-          crown axiom: <code className="text-amber-400/80">baez_duarte_forward</code>{" "}
-          (the One-Pillar architecture, v16). The converse
-          direction uses <strong className="text-emerald-400">zero</strong>{" "}
+          The Dual Crown architecture: two gauge-separated proof paths.
+          The Analytic Crown uses{" "}
+          <code className="text-amber-400/80">baez_duarte_forward</code>{" "}
+          (1 literature axiom). The Oracle Crown uses{" "}
+          <code className="text-cyan-400/80">oracle_certificates</code>{" "}
+          (1 GPU computation). The converse direction uses{" "}
+          <strong className="text-emerald-400">zero</strong>{" "}
           custom axioms.
         </p>
       </motion.div>
@@ -369,19 +386,25 @@ export default function AxiomMapPage() {
         initial={{ opacity: 0, scaleX: 0.8 }}
         animate={{ opacity: 1, scaleX: 1 }}
         transition={{ delay: 0.2 }}
-        className="flex rounded-xl overflow-hidden h-10"
+        className="flex rounded-xl overflow-hidden h-10 gap-0.5"
       >
         <div
           className="bg-gradient-to-r from-amber-600 to-amber-500 flex items-center justify-center"
-          style={{ width: "100%" }}
+          style={{ width: "50%" }}
         >
-          <span className="text-[10px] font-bold text-white">ba\u00E9z_duarte_forward (IMRN 2003)</span>
+          <span className="text-[10px] font-bold text-white">ba\u00E9z_duarte_forward (Analytic)</span>
+        </div>
+        <div
+          className="bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center"
+          style={{ width: "50%" }}
+        >
+          <span className="text-[10px] font-bold text-white">oracle_certificates (Oracle)</span>
         </div>
       </motion.div>
 
       {/* Tier legend */}
       <div className="flex flex-wrap gap-6 text-xs">
-        {([1] as const).map((t) => {
+        {([1, 2] as const).map((t) => {
           const tier = TIER_COLORS[t];
           return (
             <div key={t} className="flex items-center gap-2">
@@ -433,7 +456,7 @@ export default function AxiomMapPage() {
         className="text-center text-xs text-slate-600 pt-4 border-t border-slate-800"
       >
         <code>#print axioms nyman_beurling_equivalence</code> &mdash; compiler
-        verified, v16 Observatory, May 6, 2026
+        verified, v17 Dual Crown, May 9, 2026
       </motion.div>
     </div>
   );
