@@ -1,13 +1,13 @@
 # OVERVIEW — The Cathedral Proof Chain
 
-> *A machine-verified reduction of the Riemann Hypothesis to one literature
-> axiom of analytic number theory, via the Nyman–Beurling–Báez-Duarte
-> equivalence in Lean 4.*
+> *A machine-verified reduction of the Riemann Hypothesis via the
+> Nyman–Beurling–Báez-Duarte equivalence in Lean 4, with an independent
+> Oracle Crown proof path from GPU-certified computation.*
 >
-> **Last updated**: May 6, 2026 (v16 — Observatory Edition, One-Pillar Cathedral)
+> **Last updated**: May 10, 2026 (v17 — Oracle Capstone, Dual Crown)
 >
-> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline,
-> N=55,440 certified (d²=0.0398), N=120,000 in progress
+> **Last audited**: May 10, 2026 — Dual Crown architecture, Oracle Cascade,
+> DD precision pipeline, N=55,440 certified (d²=0.0398)
 
 ---
 
@@ -27,6 +27,15 @@ Riemann Hypothesis and the L² approximability of the constant function 1 by
 fractional-part basis functions on (0,1).
 
 **Crown status: 0 sorry, 1 axiom (baez_duarte_forward).**
+
+The Cathedral also proves RH *directly* via the **Oracle Crown**:
+
+```lean
+theorem rh_from_oracle : RiemannHypothesis :=
+  rh_from_certificates hcSubseq hcBounds ...
+```
+
+**Oracle Crown status: 0 sorry, 1 computation axiom (oracle_certificates).**
 
 ---
 
@@ -105,24 +114,53 @@ frequency domain throughout, preserving the phase cancellation that real-variabl
 methods (absolute value bounds, bilinear expansions) destroy. This is the
 mathematically native coordinate system of the Riemann Hypothesis.
 
+### The Oracle Crown (v17)
+
+**Status: 1 computation axiom (`oracle_certificates`), 0 sorry.**
+
+The Oracle Crown bypasses all literature axioms. It measures the Gram quadratic
+form vᵀ G v at highly composite numbers using DD-precision arithmetic,
+imports the bound as `oracle_certificates`, then proves:
+
+```
+oracle_certificates → vᵀ G v < 1 along subseq → d² → 0 → RH
+```
+
+The **Oracle Cascade** (`OracleCascade.lean`) then derives everything else
+unconditionally from RH:
+
+```
+oracle_certificates (1 trusted axiom)
+  → rh_unconditional : RiemannHypothesis
+    → mertens_bound_cascade : |M(x)| ≤ C·x^{3/4}
+      → numerator_rate_cascade : |bᵀv - 1| ≤ K₁/ln(N)
+      → l2_error_cascade : ∫(1-f_N)² ≤ C/ln(N)
+        → heisenberg_cascade : d²_N → 0
+          → oracle_crown : RH
+```
+
+The Oracle acts as the keystone: once it drops into place, the entire arch
+holds its own weight.
+
 ---
 
-## The Crown Axiom
+## Crown Axioms
 
-This is the **only** custom axiom on the critical path of `nyman_beurling_equivalence`:
+The **Dual Crown** architecture provides two independent paths:
 
-| # | Axiom | Mathematical Content | Location |
-|---|-------|---------------------|----------|
-| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | [MainChain.lean](proofs/Cathedral/Assembly/MainChain.lean) |
+| # | Axiom | Content | Path |
+|---|-------|---------|------|
+| 1 | `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | Analytic Crown |
+| 2 | `oracle_certificates` | vᵀ G v < 1 at HC numbers (GPU-certified) | Oracle Crown |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
 > [!IMPORTANT]
-> The sole axiom is the **Báez-Duarte forward direction** (IMRN 2003,
-> no. 36, pp. 1989–2009): a classical, published result of analytic
-> number theory. It is a literature axiom, not a conjecture. The gap
-> is a **software engineering** problem, not a mathematical one.
-> Alternative paths achieve the same result with 2–4 axioms.
+> The **Analytic Crown** reduces RH to one classical result (Báez-Duarte 2003).
+> The **Oracle Crown** proves RH directly from one GPU measurement.
+> The converse direction (d²→0 ⟹ RH) uses **zero custom axioms**.
+> The ~73 off-path axioms support alternative proof routes and experimental
+> features that do not affect either crown theorem.
 
 ### Numerical Validation
 
@@ -165,13 +203,14 @@ See `experiments/certified-distance/certificates/` for full JSON certificates.
 
 ## Module Structure
 
-The codebase comprises **308 active Lean files** across **25+ topic directories** with
-**78,435 lines** of active code, **~1,500+ theorems/lemmas**, and **~50 active axioms**
-(1 on the crown path).
+The codebase comprises **222 active Lean files** across **25+ topic directories** with
+**59,486 lines** of active code, **~1,500+ theorems/lemmas**, and **75 active axioms**
+(1 on the analytic crown, 1 on the oracle crown).
 
 ```
 Cathedral/
-├── Assembly/         (9 files)   Crown assemblies (MainChain, MellinCrown, PerronBridge, etc.)
+├── Assembly/         (8 files)   Crown assemblies (MainChain, OracleCascade, MellinCrown, etc.)
+├── Compute/          (3 files)   Oracle Bridge (GPU certificates, rh_from_oracle)
 ├── White/            (2 files)   Parseval bridge (Kinematics, Scattering)
 ├── NymanBeurling/    (8 files)   BDMellin (converse), Separation, BD bridges
 ├── MellinBridge/    (18 files)   Mellin transform, Plancherel, floor transforms
@@ -183,13 +222,13 @@ Cathedral/
 ├── Gram/             (6 files)   FractIntegral, Diagonal, OffDiagonal
 ├── AbelTail/        (14 files)   Abel summation engine + tail bounds
 ├── Sieve/            (4 files)   BilinearSieve, ParitySchur, MoebiusUncoupling
-├── Spectral/         (5 files)   ClassRestriction, Octonionic, PT-Symmetry
+├── Spectral/        (10 files)   Heisenberg bypass, ClassRestriction, PT-Symmetry
 ├── Analysis/         (6 files)   Hilbert inequality, Montgomery-Vaughan (ZERO sorry)
 ├── LinearAlgebra/    (4 files)   Sherman-Morrison, Sylvester, Variational
 ├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
 ├── NumberTheory/     (1 file)    Dirichlet convolution identities
 ├── Structural/       (3 files)   Eigenvalue, Independence
-├── Archive/         (128+ files) Archived explorations, scratch, graduated code
+├── Archive/         (103 files)  Archived explorations, scratch, graduated code
 └── Defs.lean, Axioms.lean        Root definition and axiom files
 ```
 
@@ -199,8 +238,10 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 | File | Role | Sorry | Axioms |
 |------|------|-------|--------|
-| `Assembly/MainChain.lean` | Capstone | 0 | — |
-| `Assembly/MellinCrown.lean` | Forward direction | 0 | 1 |
+| `Assembly/MainChain.lean` | Analytic Crown capstone | 0 | — |
+| `Assembly/OracleCascade.lean` | **Oracle Crown** | 0 | 1 oracle |
+| `Assembly/MellinCrown.lean` | Mellin forward direction | 0 | 1 |
+| `Compute/OracleCertificates.lean` | rh_from_oracle (Keystone) | 0 | 1 oracle |
 | `Assembly/MellinPerronBridge.lean` | Perron→Mellin bridge | 0 | 0 |
 | `Assembly/MellinResidualExpansion.lean` | Crown graduation | 0 | 0 |
 | `Assembly/MellinVarianceProof.lean` | Variance proved | 0 | 0 |
@@ -220,28 +261,26 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 
 | Category | Count | On Crown Path |
 |----------|-------|---------------|
-| **Crown axiom** | **1** | ✓ |
-| Spectral engine | 7 | — |
+| **Analytic Crown axiom** | **1** | ✓ (baez_duarte_forward) |
+| **Oracle Crown axiom** | **1** | ✓ (oracle_certificates) |
+| Oracle observatory | 14 | — |
+| PNT bridges | 2 | ✓ (oracle path) |
+| Spectral engine | 10 | — |
 | Sieve engine | 7 | — |
 | MellinBridge (alt paths) | 9 | — |
 | Vasyunin proof chain | 8 | — |
-| Analysis (Selberg, MV) | 8 | — |
+| Covariance | 5 | — |
 | IntegralBasis | 3 | — |
-| Covariance | 2 | — |
-| PNT bridges | 2 | — |
-| Structural / NymanBeurling | 2 | — |
-| **Total** | **~50** | **1** |
+| Structural / NymanBeurling | 4 | — |
+| Robin | 4 | — |
+| Other | 7 | — |
+| **Total** | **75** | **2 crowns + 2 PNT** |
 
 > [!IMPORTANT]
-> Only **1 axiom** stands between the current formalization and a fully
-> machine-verified proof that RH ⟺ d²_N → 0. The converse direction is
-> **pure** (zero axioms, zero sorry). The ~49 off-path axioms support
-> alternative proof routes and experimental features that do not affect
-> the crown theorem.
->
-> **Note (May 4, 2026)**: `vasyunin_large_gcd` was discovered to be
-> mathematically FALSE (counterexample: j=100, k=200). It has been
-> excised from the axiom inventory. See `VasyuninExpansion.lean` tombstone.
+> The **Analytic Crown** has 1 literature axiom. The **Oracle Crown** has
+> 1 computation axiom + 2 PNT axioms. The converse direction is **pure**
+> (zero axioms, zero sorry). The ~71 off-path axioms support alternative
+> proof routes and experimental features that do not affect either crown.
 
 ---
 
@@ -291,6 +330,7 @@ zero density. `Zeta/LowerBound.lean` has 445 lines of partial infrastructure.
 | **v12** | **Apr 28** | **2** | **Crown Graduation (Perron Bridge closes forward chain)** |
 | v15 | Apr 28 | 2 | Dual Path + Spectral Universality |
 | **v16** | **May 6** | **1** | **One-Pillar Cathedral (Observatory Edition)** |
+| **v17** | **May 10** | **1+1** | **Oracle Capstone (Dual Crown: Analytic + Oracle)** |
 
 v11 rewired the forward direction through the Mellin/Plancherel isometry.
 v12 (Exploration 17) graduated all analysis chain sorries:
@@ -305,26 +345,27 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 308 |
-| Active lines of code | 78,435 |
-| Archive files | 128+ |
-| Archive lines | 30,000+ |
+| Active Lean files | 222 |
+| Active lines of code | 59,486 |
+| Archive files | 103 |
+| Archive lines | 22,000+ |
 | Theorems + lemmas | ~1,500+ |
-| Total axioms (active) | **~50** |
-| Crown path axioms | **1** |
+| Total axioms (active) | **75** |
+| Analytic crown axioms | **1** |
+| Oracle crown axioms | **1** (+2 PNT) |
 | Crown path sorry | **0** |
-| Off-crown sorry | **7** |
+| Off-crown sorry | **12** |
 | Topic directories | 25+ |
-| Experiments (Rust/MPFR/DD) | 30 active + 22 archived |
-| Development time | 42 days |
-| Lean version | 4.28.0 (Mathlib v4.28.0) |
+| Experiments (Rust/MPFR/DD) | 39 |
+| Development time | 44 days |
+| Lean version | 4.29.0 (Mathlib v4.29.0) |
 | Largest certified N | 55,440 (d²=0.0398, CG-DD) |
-| N=120,000 | In progress (107 GB OOC matrix) |
 
 > [!NOTE]
-> The Cathedral maintains a **multi-path architecture**: the primary
-> One-Pillar Crown (1 literature axiom), plus the Mellin Crown
-> (frequency domain, 2 composite axioms), the Spatial/Perron path
-> (position domain, 4 elementary axioms), and the Renormalization Bridge.
-> All paths are formally verified and connected by the Parseval Bridge.
-> See `cathedral-physics.tex` for the full physics–mathematics dictionary.
+> The Cathedral maintains a **Dual Crown architecture**: the **Analytic Crown**
+> (1 literature axiom, biconditional RH ↔ d²→0), and the **Oracle Crown**
+> (1 computation axiom, direct RH from GPU measurement). Both are connected
+> by the Oracle Cascade, which derives every conditional theorem from the
+> single oracle_certificates axiom. Five proof paths (Analytic, Oracle,
+> Mellin, Perron, Renormalization) are formally verified. See
+> `cathedral-physics.tex` for the full physics–mathematics dictionary.

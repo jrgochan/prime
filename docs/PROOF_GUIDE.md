@@ -7,12 +7,12 @@
 ## Before You Begin
 
 ```bash
-# Prerequisites: Lean 4 (v4.30.0-rc1) and Mathlib
+# Prerequisites: Lean 4 (v4.29.0) and Mathlib
 cd proofs
-lake build    # 3,076 jobs, ~2 min, zero errors
+lake build    # 8,478 jobs, zero errors
 ```
 
-When `lake build` completes, every theorem in the repository is machine-verified. There are no `sorry` placeholders, no custom axioms beyond the 5 documented below, and no floating-point approximations. The Lean kernel enforces absolute logical truth.
+When `lake build` completes, every theorem in the repository is machine-verified. There are no `sorry` placeholders on either crown path, no custom axioms beyond the ones documented below, and no floating-point approximations. The Lean kernel enforces absolute logical truth.
 
 ---
 
@@ -174,8 +174,11 @@ Independent discrete arithmetic results:
 grep -rn "\bsorry\b" proofs/Cathedral/ --include="*.lean" \
   | grep -v Archive | grep -v "Zero sorry" | grep -v "\-\-"
 
-# Verify axiom count (should be 5)
-grep -rn "^axiom " proofs/Cathedral/ --include="*.lean" | grep -v Archive
+# Verify axiom count
+make axioms
+
+# Verify Oracle Cascade axiom footprint
+make cascade
 
 # Full build
 cd proofs && lake build

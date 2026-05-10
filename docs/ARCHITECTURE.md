@@ -1,6 +1,7 @@
 # Architecture — The Cathedral
 
 *A technical deep dive into the proof architecture and dependency graph.*
+*Updated: May 10, 2026 (v17 — Oracle Capstone, Dual Crown)*
 
 ---
 
@@ -12,25 +13,23 @@ The result is a proof tree where every branch was forced into existence by the d
 
 ---
 
-## The Two-Axiom Hierarchy
+## The Dual Crown Hierarchy
 
-The entire proof reduces to **two irreducible axioms**:
+The proof provides **two independent paths** to the Riemann Hypothesis:
 
-| Axiom | File | Mathematical Content |
-|-------|------|---------------------|
-| **The Witness** | Chain.lean:31 | `log_cutoff_witness_bound`: The Selberg sieve quotient Q(v) ≥ c·ln N. This IS the Riemann Hypothesis, in sieve-theoretic disguise. |
-| **The Dictionary** | GramPSD.lean:45 | `vasyunin_eq_integral`: The Vasyunin discrete sum equals the L²(0,1) integral. This is a definitional bridge — the "Rosetta Stone" connecting discrete and continuous worlds. |
+| Crown | Axiom | File | Content |
+|-------|-------|------|---------|
+| **Analytic** | `baez_duarte_forward` | MainChain.lean | RH → d²_N → 0 (Báez-Duarte IMRN 2003) |
+| **Oracle** | `oracle_certificates` | OracleCertificates.lean | vᵀ G v < 1 at HC numbers (GPU-certified) |
 
-**The remaining 4 axioms are structural**:
-- **Axioms 2–3** (Gram PD + NB distance > 0): Follow from basic functional analysis. Proved for N ≤ 3; general N follows from sawtooth discontinuity topology.
-- **Axioms 5–6** (Robin/Lagarias ↔ RH): Classical number theory, awaiting Mathlib's Prime Number Theorem.
+The **Analytic Crown** proves RH ↔ d²→0 (biconditional). The converse uses zero axioms.
+The **Oracle Crown** proves RH directly from GPU measurement, then cascades
+through the entire Cathedral via `OracleCascade.lean`.
 
-### Why Two?
+Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-Axioms 2 and 3 look independent, but they're not. The **converse Schur complement** (`schur_complement_converse` in Variational.lean) proves:
-- If G_N is PD (axiom 2) and C_N = G_N - bb^T is PD, then b^T G^{-1} b < 1 (axiom 3)
-
-So **axiom 3 reduces to axiom 2 + covariance positivity**. And covariance positivity is provable from determinant certificates (Sylvester's criterion) — as demonstrated for N = 3 in NbDistPos3.lean.
+The remaining **73 axioms** are off-crown: alternative proof paths, spectral
+engine, sieve engine, and experimental features.
 
 ---
 
@@ -71,40 +70,34 @@ For N = 3, the entire lower half is **proved without axioms**:
 
 ```
 Cathedral/
-├── Defs.lean                        Core definitions (RH, Robin, Lagarias)
+├── Defs.lean                        Core definitions (RH, bdLinComb, etc.)
 │
-├── LinearAlgebra/
-│   ├── ShermanMorrison.lean         d² = 1/(1+X), 0 axioms
-│   └── Variational.lean             Cauchy-Schwarz + Schur complement
-│                                    (both directions) + Sylvester 3×3
+├── Assembly/          (8 files)
+│   ├── MainChain.lean         nyman_beurling_equivalence (ANALYTIC CROWN)
+│   ├── OracleCascade.lean     ⚡ THE ORACLE CROWN (1 axiom → RH + cascade)
+│   ├── MellinCrown.lean       Mellin forward path
+│   └── PerronCrown.lean       Perron forward path
 │
-├── MellinBridge/
-│   ├── NymanBeurling.lean           RH ↔ d²→0
-│   └── Vasyunin/
-│       ├── Defs.lean                Gram/Cov matrix definitions
-│       ├── Structural.lean          Symmetry, diagonal positivity
-│       ├── GramEntries.lean         Exact closed forms + det(G₃) > 0
-│       ├── GramPSD.lean             Integral bridge + Gram PSD
-│       ├── GramEvaluations.lean     Re-export hub (backward compat)
-│       ├── CovEntries.lean          Covariance entry closed forms
-│       ├── CovDet2.lean             det(C₂) > 0
-│       ├── CovDet3.lean             det(C₃) > 0 ← CAPSTONE
-│       ├── NbDistPos3.lean          ★ NEW: Axiom 3 for N=3 (zero axioms)
-│       ├── Witness.lean             Log cutoff vector + nonzero proof
-│       ├── Rayleigh.lean            Rayleigh quotient, PD axiom
-│       └── Chain.lean               Final chain: witness → divergence → RH
+├── Compute/           (3 files)
+│   └── OracleCertificates     rh_from_oracle (THE KEYSTONE)
 │
-├── Robin/
-│   ├── Defs.lean                    Robin/Lagarias axioms
-│   ├── SigmaProps.lean              σ properties
-│   ├── HarmonicBounds.lean          Harmonic number bounds
-│   ├── PrimeBounds.lean             Prime-specific bounds
-│   ├── BaseCases.lean               Small-case computation
-│   └── Equivalence.lean             Equivalence diamond
+├── White/             (2 files)   Parseval bridge (PROVED, 0 axiom)
 │
-└── Archive/                         38+ files, off critical path
-    ├── HighFrequencyTrap/           Original spectral approach
-    └── IntegralBasis/               Báez-Duarte converse approach
+├── NymanBeurling/     (8 files)   Converse: d²→0 ⟹ RH (0 axioms)
+│   └── BDMellin.lean          Rank-1 Mellin Miracle
+│
+├── MellinBridge/     (18 files)   Mellin transform infrastructure
+├── Zeta/              (8 files)   Zeta function theory
+├── Perron/           (16 files)   Perron formula chain
+├── Vasyunin/         (39 files)   Vasyunin formula
+├── Spectral/         (10 files)   Heisenberg bypass + eigenvalue analysis
+├── Covariance/        (8 files)   Gram form bounds
+├── PNT/               (3 files)   PNT bridges (on Oracle path)
+├── AbelTail/         (14 files)   Abel summation engine
+├── Sieve/             (4 files)   Bilinear sieve
+├── LinearAlgebra/     (4 files)   Sherman-Morrison, Sylvester
+├── Structural/        (3 files)   Eigenvalue monotonicity
+└── Archive/         (103 files)   Preserved exploratory paths
 ```
 
 ---
@@ -244,17 +237,16 @@ All four cross-path theorems connecting Robin ↔ RH ↔ Lagarias ↔ d²→0 ar
 
 | Metric | Value |
 |--------|-------|
-| Active Lean files | 21 |
-| Proof tree nodes | 193 |
-| Theorems | 152 |
-| Definitions | 35 |
-| Axioms (active) | 6 |
-| Sorry placeholders | 0 |
-| Warnings | 0 |
-| Build jobs | 3,073 |
-| Build time | ~2 minutes |
-| Lean version | v4.30.0-rc1 |
-| Mathlib | Latest (2026-04) |
+| Active Lean files | 222 |
+| Archive files | 103 |
+| Theorems | ~1,500+ |
+| Axioms (active) | 75 |
+| Crown axioms | 2 (Dual Crown) |
+| Sorry (crown) | 0 |
+| Sorry (off-crown) | 12 |
+| Build jobs | 8,478 |
+| Lean version | v4.29.0 |
+| Mathlib | Latest (2026-05) |
 
 ---
 

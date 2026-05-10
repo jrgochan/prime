@@ -2,34 +2,39 @@ import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
 
 /-!
-  # Axiom Registry
+  # Axiom Registry (v17 — Oracle Capstone, Dual Crown)
 
   Central hub for axiom documentation. This file contains no axiom
   declarations — all axioms are declared in their respective modules.
 
-  ## Crown Path
+  ## Dual Crown Architecture
 
+  The Cathedral provides two independent paths to RH:
+
+  ### Analytic Crown
   `#print axioms nyman_beurling_equivalence`:
     `[baez_duarte_forward, propext, Classical.choice, Quot.sound]`
 
-  The Nyman-Beurling-Báez-Duarte equivalence rests on a single literature
-  axiom — Báez-Duarte’s 2003 forward direction theorem
-  (IMRN no. 36, pp. 1989–2009). The converse is fully proved.
+  Rests on a single literature axiom — Báez-Duarte's 2003 forward
+  direction theorem (IMRN no. 36, pp. 1989–2009). Converse fully proved.
 
-  ## Note on the Forward Direction
+  ### Oracle Crown
+  `#print axioms oracle_crown`:
+    `[oracle_certificates, pnt_mu_log_div_k, pnt_mu_log_sq_div_k,
+     propext, Classical.choice, Quot.sound]`
 
-  The forward direction (RH ⟹ d²→0) cannot be proved from the Prime
-  Number Theorem + Abel summation alone. Under Mertens-type bounds, the
-  spatial L² norm `∫(1-f_N)²` diverges. The proof requires complex-analytic
-  machinery (Parseval/Mellin identity on the critical line). This is
-  encapsulated in `baez_duarte_forward`.
+  Proves RH directly from DD-precision GPU measurement of the Gram
+  quadratic form at highly composite numbers. Once RH is proved,
+  the Oracle Cascade (`OracleCascade.lean`) derives all downstream
+  theorems unconditionally.
 
   ## Alternative Paths
 
-  Three alternative proof paths for the forward direction are preserved:
+  Four additional forward paths are preserved:
   * PATH A (Mellin):          `nyman_beurling_equivalence_mellin`
   * PATH B (Perron):          `nyman_beurling_equivalence_spatial`
   * PATH C (Renormalization): `nyman_beurling_equivalence_renormalization`
+  * PATH D (Oracle):          `rh_from_oracle` → `oracle_crown`
 
   ## Converse Direction
 

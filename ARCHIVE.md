@@ -4,16 +4,16 @@
 > locations, documenting what was proved, what was superseded, and what
 > remains valuable for future work.*
 >
-> **Last updated**: May 6, 2026 (v16 — Observatory Edition)
+> **Last updated**: May 10, 2026 (v17 — Oracle Capstone)
 >
-> **Last audited**: May 6, 2026 — One-Pillar architecture, DD precision pipeline
+> **Last audited**: May 10, 2026 — Dual Crown architecture, Oracle Cascade
 
 ---
 
 ## Archive Overview
 
-The Cathedral maintains three archive locations containing **128 files**
-and **29,784 lines** of Lean 4 code:
+The Cathedral maintains three archive locations containing **103 Cathedral files**
+plus **34 pre-Cathedral files** of Lean 4 code:
 
 | Location | Files | Lines | Purpose |
 |----------|-------|-------|---------|
@@ -22,15 +22,18 @@ and **29,784 lines** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **308 files / 78,435 lines / ~1,500+ theorems**.
+For comparison, the active codebase is **222 files / 59,486 lines / ~1,500+ theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
 
-### Architecture Context (v16)
+### Architecture Context (v17)
 
-The Cathedral's crown path now uses the **One-Pillar** architecture (1 axiom:
-`baez_duarte_forward`), with three alternative forward paths (Mellin Crown 2 axioms,
+The Cathedral's crown path now uses the **Dual Crown** architecture:
+- **Analytic Crown**: 1 axiom (`baez_duarte_forward`)
+- **Oracle Crown**: 1 axiom (`oracle_certificates`) + Oracle Cascade
+
+Three alternative forward paths are preserved (Mellin Crown 2 axioms,
 Perron Crown 4 axioms, Renormalization graduated). The Parseval Bridge connects all
 paths. The following archived components are therefore multiply superseded:
 
@@ -261,10 +264,10 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 308 | 128 | 2.41× |
-| Lines | 78,435 | 29,784 | 2.63× |
+| Files | 222 | 103 | 2.16× |
+| Lines | 59,486 | 22,000+ | 2.70× |
 | Theorems | ~1,500+ | ~994 | 1.51× |
-| Crown axioms | **1** | — | — |
+| Crown axioms | **2** (Dual Crown) | — | — |
 
 ---
 
@@ -297,6 +300,7 @@ The project evolved through five major phases:
 6. **Cathedral v12** (1 day) — **Crown Graduation** — Perron Bridge closes forward path, MVT proved, 0 actionable sorry
 7. **Cathedral v15** (2 days) — **Spectral Universality** — Dual-path architecture, DD solver inception
 8. **Cathedral v16** (1 week) — **Observatory Edition** — One-Pillar Cathedral (1 axiom), DD-precision pipeline, N=55,440 certified
+9. **Cathedral v17** (4 days) — **Oracle Capstone** — Dual Crown (Analytic + Oracle), Oracle Cascade lights up entire Cathedral from 1 GPU measurement
 
 ---
 
