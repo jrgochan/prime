@@ -5,7 +5,7 @@
   "divisor_count": 2,
   "is_highly_composite": true,
   "witness": "log_cutoff_mobius",
-  "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N)) / k",
+  "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N))",
   "results": {
     "vtGv": 0.2606614015078126,
     "bt_v": -0.42278433509846713,
@@ -18,6 +18,6 @@
   },
   "precision": "DD",
   "source": "../cache/hpdf/gram_N2.h5",
-  "elapsed_secs": 0.001930917,
+  "elapsed_secs": 0.0029625,
   "lean_claim": "vtGv_log_cutoff 2 < 1.0000"
 }

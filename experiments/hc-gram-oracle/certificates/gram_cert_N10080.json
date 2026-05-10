@@ -5,19 +5,19 @@
   "divisor_count": 72,
   "is_highly_composite": true,
   "witness": "log_cutoff_mobius",
-  "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N)) / k",
+  "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N))",
   "results": {
-    "vtGv": 0.04282804566009277,
-    "bt_v": 0.0366750786720881,
-    "bt_v_squared": 0.0013450613956038514,
-    "vtCv": 0.04148298426448892,
-    "d_squared": 0.9694778883159166,
+    "vtGv": 0.692808676367842,
+    "bt_v": 0.8288914385891909,
+    "bt_v_squared": 0.6870610169664584,
+    "vtCv": 0.005747659401383665,
+    "d_squared": 0.03502579918946025,
     "below_one": true,
-    "margin": 0.9571719543399072,
-    "gap_times_ln_N": 8.823506402495806
+    "margin": 0.30719132363215795,
+    "gap_times_ln_N": 2.831784402551522
   },
   "precision": "f64",
   "source": "../cache/hpdf/gram_N10080.h5",
-  "elapsed_secs": 0.272666917,
+  "elapsed_secs": 0.272203791,
   "lean_claim": "vtGv_log_cutoff 10080 < 1.0000"
 }

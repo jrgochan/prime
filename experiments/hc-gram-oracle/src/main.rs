@@ -116,11 +116,12 @@ fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
         .unwrap_or_else(|| (1..=n).filter(|&d| n % d == 0).count());
     let is_hc = nt_attrs.as_ref().map(|a| a.is_highly_composite).unwrap_or(false);
 
-    // Build the log-cutoff witness: v_k = -μ(k)(1 - ln(k)/ln(N)) / k
+    // Build the log-cutoff witness: v_k = -μ(k)(1 - ln(k)/ln(N))
+    // This matches the Lean axiom `logCutoffWitness` EXACTLY (no /k!)
     // Index mapping: HPDF stores G[j,k] for j,k ∈ {2..N}, so dim = N-1
     // Witness covers k=1..N, but HPDF only has k=2..N
     let v: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n) / (k as f64)
+        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n)
     }).collect();
 
     // Mean vector b_k = (ln(k) + 1 - γ) / k
@@ -206,7 +207,7 @@ fn compute_on_fly(n: usize) -> HcResult {
     let mu = mobius_table(n);
 
     let v: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n) / (k as f64)
+        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n)
     }).collect();
 
     let b: Vec<f64> = (1..=n).map(mean_entry).collect();
@@ -266,7 +267,7 @@ fn write_certificate(results: &[HcResult], output_dir: &Path) {
             "divisor_count": r.ndiv,
             "is_highly_composite": r.is_hc,
             "witness": "log_cutoff_mobius",
-            "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N)) / k",
+            "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N))",
             "results": {
                 "vtGv": r.vtgv,
                 "bt_v": r.bt_v,
