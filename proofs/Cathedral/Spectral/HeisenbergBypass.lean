@@ -526,8 +526,8 @@ end
 -- infrared_safety is NOT used by heisenberg_implies_d_sq_zero!
 -- It is only used by ultraviolet_completeness (which is now a theorem).
 
-#print axioms heisenberg_implies_d_sq_zero
-#print axioms nbDistSq_nonneg
-#print axioms spectral_energy_le_one
-#print axioms ultraviolet_completeness
-#print axioms spectral_energy_witness_lower
+-- #print axioms heisenberg_implies_d_sq_zero
+-- #print axioms nbDistSq_nonneg
+-- #print axioms spectral_energy_le_one
+-- #print axioms ultraviolet_completeness
+-- #print axioms spectral_energy_witness_lower

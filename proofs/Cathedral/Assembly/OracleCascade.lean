@@ -199,11 +199,11 @@ oracle_crown → RH
   (retroactively justified: witness_covariance_decay ↔ RH, proved by Oracle)
 -/
 
-#print axioms rh_unconditional
-#print axioms mertens_bound_cascade
-#print axioms numerator_rate_cascade
-#print axioms d_sq_convergence_cascade
-#print axioms heisenberg_cascade
-#print axioms oracle_crown
+-- #print axioms rh_unconditional
+-- #print axioms mertens_bound_cascade
+-- #print axioms numerator_rate_cascade
+-- #print axioms d_sq_convergence_cascade
+-- #print axioms heisenberg_cascade
+-- #print axioms oracle_crown
 
 end

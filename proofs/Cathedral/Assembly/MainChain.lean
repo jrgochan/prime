@@ -258,5 +258,5 @@ end
 -- GPU-VALIDATED (May 9, 2026): d²·ln(N) ≈ 3.08 at N=55,440
 -- confirms Rayleigh-Ritz squeeze constant across 13 HCN points.
 
-#print axioms nyman_beurling_equivalence
+-- #print axioms nyman_beurling_equivalence
 
