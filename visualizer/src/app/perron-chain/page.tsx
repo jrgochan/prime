@@ -137,11 +137,11 @@ const CHAIN: ChainNode[] = [
   {
     file: "AssemblyHelpers.lean",
     dir: "Perron",
-    lines: 245,
+    lines: 356,
     theorems: 9,
     key: "rpow bounds + assembly glue",
-    desc: "Helper lemmas for combining Perron results: real power inequalities, monotonicity, and integral estimates for the final Mertens bound.",
-    status: "sorry",
+    desc: "Helper lemmas for combining Perron results: real power inequalities, monotonicity, and integral estimates for the final Mertens bound. Fully proved.",
+    status: "proved",
   },
   {
     file: "MertensConversion.lean",
