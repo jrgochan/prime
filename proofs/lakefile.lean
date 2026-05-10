@@ -295,4 +295,6 @@ lean_lib «Cathedral» where
     -- Zero-axiom forward direction (Exploration 27: The Millennium Strike)
     `Cathedral.ZeroAxiom.FiniteDirichlet,
     `Cathedral.ZeroAxiom.MellinAlgebra,
+    -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
+    `Cathedral.Compute.IntervalVerifier,
   ]
