@@ -230,7 +230,7 @@ theorem fourierCoeffOn_sawtooth (n : ℤ) (hn : n ≠ 0) :
   -- fourier(-n)(↑0) = exp(2πi(-n)*0/1) = exp(0) = 1
   simp only [mul_one]
   have hfour : (fourier (-n)) ((0 : ℝ) : AddCircle (1 - (0:ℝ))) = 1 := by
-    simp [sub_zero, fourier_apply, Complex.exp_zero]
+    simp [fourier_apply]
   rw [hfour, mul_one]
   -- 1/(-2πin) = -1/(2πin)
   ring
@@ -361,7 +361,7 @@ def gramEntryIntegral (j k : ℕ) : ℝ :=
     The first term is the pure covariance (Fourier target).
     The cross terms = ½(bⱼ - 1/2) + ½(bₖ - 1/2).
     The constant = 1/4. -/
-theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+theorem gram_entry_b1_decomposition (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
     gramEntryIntegral j k =
       (∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x)) * sawtoothReal (1/((k:ℝ)*x)))
       + (1/2) * (∫ x in (0:ℝ)..1, sawtoothReal (1/((j:ℝ)*x)))
@@ -426,7 +426,7 @@ theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
   rw [intervalIntegral.integral_const_mul, intervalIntegral.integral_const_mul]
   -- The integral arguments have mul_comm differences (j⁻¹*x⁻¹ vs x⁻¹*j⁻¹)
   -- Use congr_arg to align, then ring for the outer arithmetic
-  simp only [sub_zero, one_smul, smul_eq_mul, mul_one]
+  simp only [sub_zero, smul_eq_mul]
   -- Normalize: 1/(j*x) → j⁻¹*x⁻¹ on both sides
   -- The RHS still has the original 1/((j:ℝ)*x) form
   -- We need them to match. Use congr + rewriting under integrals.
@@ -444,7 +444,7 @@ theorem gram_entry_b1_decomposition (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
     This makes the fractional parts periodic sawtooths:
     {u/j} has period j, {u/k} has period k.
     Their product has period lcm(j,k). -/
-theorem gram_entry_inversion (j k : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) :
+theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
     gramEntryIntegral j k =
       ∫ u in Set.Ioi (1:ℝ),
         Int.fract ((u:ℝ) / j) * Int.fract ((u:ℝ) / k) / u ^ 2 := by

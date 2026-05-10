@@ -220,7 +220,7 @@ theorem witness_covariance_bound_from_sieve
     (N : ℕ) (hN : 3 ≤ N)
     (v : Fin (N - 1) → ℝ)
     -- Hypothesis: v are the Möbius log-taper weights
-    (hv : ∀ k : Fin (N - 1), |v k| ≤ 1 / Real.log N)
+    (_hv : ∀ k : Fin (N - 1), |v k| ≤ 1 / Real.log N)
     -- Hypothesis: PNT gives Σ|vₖ|²·(k+1) = O(1/ln N)
     (hweight : ∑ k : Fin (N - 1), (v k) ^ 2 * (↑(k.val + 1) + 1) ≤ 1 / Real.log N) :
     -- Conclusion: the covariance is bounded

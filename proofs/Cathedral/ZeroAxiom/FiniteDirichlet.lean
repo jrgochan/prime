@@ -2,7 +2,8 @@ import Cathedral.NymanBeurling.BDMellin
 import Cathedral.Perron.PerronMoebius
 import Cathedral.Zeta.LittlewoodManeuver
 import Cathedral.White.Scattering
-import Mathlib.NumberTheory.ArithmeticFunction
+import Mathlib.NumberTheory.ArithmeticFunction.Defs
+import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 
 /-!
   # Finite Dirichlet Polynomial Approximation
