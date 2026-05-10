@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaDiskBounds.lean
+  Cathedral/Zeta/DiskBounds.lean
 
   ## Zeta Disk Geometry & Upper Bounds
 

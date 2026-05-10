@@ -44,7 +44,7 @@ namespace Cathedral.Perron
 
 -- ═══════════════════════════════════════════
 -- §1b. rpow Helpers for T = X² Assembly
--- All PROVED — PROVED.
+-- All PROVED.
 -- ═══════════════════════════════════════════
 
 /-- (X²)^{-1/2} = X^{-1} for X > 0. -/

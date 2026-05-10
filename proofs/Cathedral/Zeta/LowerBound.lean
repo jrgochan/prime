@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaLowerBound.lean
+  Cathedral/Zeta/LowerBound.lean
 
   ## Polynomial Lower Bound on |ζ(s)| via Borel-Carathéodory
 

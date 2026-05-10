@@ -1,5 +1,5 @@
 /-
-  Cathedral/Assembly/IntervalCalc.lean
+  Cathedral/Analysis/IntervalCalc.lean
 
   ## The Interval Calculus: Proving the key integrals
 

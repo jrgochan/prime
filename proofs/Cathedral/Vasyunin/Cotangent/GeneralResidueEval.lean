@@ -17,7 +17,7 @@
   §5. tsum_fract_general_eq_residue_sum: tsum = finite logΓ + digamma sum
 
   Created: May 3, 2026 (Phase 3 — Generalized Residue Decomposition)
-  Status: PROVED — PROVED
+  Status: PROVED
 -/
 
 import Cathedral.Vasyunin.Cotangent.GeneralFractSeriesEval

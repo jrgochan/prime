@@ -1,5 +1,5 @@
 /-
-  Cathedral/Structural/L2Tools.lean
+  Cathedral/Gram/L2Bridge.lean
 
   ## The L² ↔ Matrix Bridge.
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/GramOffDiag.lean
+  Cathedral/Gram/OffDiagonal.lean
 
   ## Off-diagonal Gram entry upper bound
 

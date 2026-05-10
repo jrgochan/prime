@@ -210,7 +210,7 @@ lemma floor_step_sum_eq (a b : ℕ) (hb : 0 < b) :
   simp [Nat.mul_div_cancel _ hb]
 
 /-- Forward: isTwoTileClass → the floor step is positive.
-    PROVED — PROVED. -/
+    PROVED. -/
 lemma isTwoTile_imp_step (a b m₀ : ℕ) (hb : 0 < b)
     (h : isTwoTileClass a b m₀ = true) :
     a * (m₀ + 1) / b > a * m₀ / b := by
@@ -223,7 +223,7 @@ lemma isTwoTile_imp_step (a b m₀ : ℕ) (hb : 0 < b)
 
 /-- Backward: floor step positive AND ¬(b ∣ a*(m₀+1)) → isTwoTileClass.
     The non-divisibility condition excludes the s=0 boundary (m₀=b-1).
-    PROVED — PROVED. -/
+    PROVED. -/
 lemma step_imp_isTwoTile (a b m₀ : ℕ) (_hb : 0 < b)
     (h_step : a * (m₀ + 1) / b > a * m₀ / b)
     (h_ndvd : ¬ (b ∣ a * (m₀ + 1))) :

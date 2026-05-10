@@ -1,5 +1,5 @@
 /-
-  Cathedral/Vasyunin/Cotangent/FractIntegrable.lean
+  Cathedral/Analysis/FractIntegrable.lean
 
   ## INTEGRABILITY OF FRACTIONAL-PART PRODUCTS
 

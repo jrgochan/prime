@@ -1,5 +1,5 @@
 /-
-  Cathedral/Structural/NbLinComb.lean
+  Cathedral/Gram/NbLinComb.lean
 
   ## NB linear combination and Gram L² identity.
 

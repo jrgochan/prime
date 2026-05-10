@@ -178,7 +178,7 @@ private lemma rpow_tail_finite (N : ℕ) (hN : 0 < N) (σ : ℝ) (hσ : 1 < σ) 
       _ = _ := h_main
   exact le_trans step1 step2
 
-/-- **PROVED** (PROVED): The integral test for the Dirichlet series tail.
+/-- **PROVED**: The integral test for the Dirichlet series tail.
     ∑' n, (N + (n+1))^{-σ} ≤ N^{1-σ}/(σ-1) for σ > 1 and N ≥ 1.
 
     Uses: AntitoneOn.sum_le_integral + integral_rpow + Real.tsum_le_of_sum_range_le.
@@ -205,7 +205,7 @@ lemma rpow_shifted_summable (N : ℕ) (σ : ℝ) (hσ : 1 < σ) :
       (by linarith)))
 
 set_option maxHeartbeats 800000 in
-/-- **PROVED (PROVED!)**: Dirichlet polynomial identification.
+/-- **PROVED**: Dirichlet polynomial identification.
     For Re(s) > 1 and N ≥ 1,
     Σ_{n≤N} μ(n)/n^s approximates 1/ζ(s) with tail O(N^{1-Re(s)}).
 
@@ -214,7 +214,7 @@ set_option maxHeartbeats 800000 in
     2. partial_sum_minus_lseries: tail extraction (PROVED)
     3. abs_moebius_le_one: |μ(n)| ≤ 1 (Mathlib)
     4. norm_tsum_le_tsum_norm: ‖∑'f‖ ≤ ∑'‖f‖ (Mathlib)
-    5. rpow_tail_bound: integral test (PROVED — PROVED!) -/
+    5. rpow_tail_bound: integral test (PROVED) -/
 lemma moebius_partial_sum_approx (N : ℕ) (hN : 0 < N) (s : ℂ) (_hs : 1 < s.re) :
     ‖∑ n ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius n) : ℂ) / (↑n : ℂ) ^ s -
       (1 / riemannZeta s)‖ ≤ (↑N : ℝ) ^ (1 - s.re) / (s.re - 1) := by

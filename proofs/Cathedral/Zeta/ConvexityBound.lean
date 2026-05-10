@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaConvexityBound.lean
+  Cathedral/Zeta/ConvexityBound.lean
 
   ## Convexity Bound for |ζ(s)| in the Critical Strip
 

@@ -29,7 +29,7 @@
 
   Created: May 2, 2026
   Updated: May 3, 2026 — Removed AlgebraicLimit import for axiom graduation
-  Status: PROVED — PROVED, 0 axioms
+  Status: PROVED, 0 axioms
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence

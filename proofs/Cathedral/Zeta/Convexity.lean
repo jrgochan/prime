@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaConvexity.lean
+  Cathedral/Zeta/Convexity.lean
 
   ## Conditional Bounds on the Riemann Zeta Function
 

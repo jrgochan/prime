@@ -141,7 +141,7 @@ theorem rh_via_renormalization : RiemannHypothesis := by
 --
 -- #print axioms rh_implies_bd_convergence_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---   PROVED. PROVED.
+--   PROVED.
 --
 -- #print axioms log_pow_grows_unboundedly
 --   → [propext, Classical.choice, Quot.sound]

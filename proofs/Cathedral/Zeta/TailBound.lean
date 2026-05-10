@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaTailBound.lean
+  Cathedral/Zeta/TailBound.lean
 
   ## Zeta Tail Bound via Dirichlet Series
 

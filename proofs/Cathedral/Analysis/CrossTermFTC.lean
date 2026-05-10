@@ -1,5 +1,5 @@
 /-
-  Cathedral/Vasyunin/Cotangent/CrossTermFTC.lean
+  Cathedral/Analysis/CrossTermFTC.lean
 
   ## CROSS-TERM PIECEWISE FTC FOR THE OFF-DIAGONAL INTEGRAL
 

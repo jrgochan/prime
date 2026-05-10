@@ -1,5 +1,5 @@
 /-
-  Cathedral/Zeta/ZetaHadamard.lean
+  Cathedral/Zeta/Hadamard.lean
 
   ## Hadamard Three-Circles & Zeta Lower Bound on the Thin Strip
 

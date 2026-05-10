@@ -1,5 +1,5 @@
 /-
-  Cathedral/MellinBridge/BaezDuarte.lean
+  Cathedral/IntegralBasis/BaezDuarte.lean
 
   ## The True Báez-Duarte Basis
 

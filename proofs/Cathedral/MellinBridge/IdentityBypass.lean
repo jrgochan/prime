@@ -10,7 +10,7 @@
   They agree for Re(s) > 1 (FloorDivMellin.lean).
   The Identity Theorem propagates equality to all of {Re(s) > 0} \ {1}.
 
-  Status: TARGET — PROVED.
+  Status: PROVED.
 -/
 import Cathedral.MellinBridge.FloorMellin
 import Cathedral.MellinBridge.FloorDivMellin

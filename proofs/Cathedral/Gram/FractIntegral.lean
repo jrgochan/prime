@@ -1,5 +1,5 @@
 /-
-  Cathedral/FractIntegral.lean
+  Cathedral/Gram/FractIntegral.lean
 
   ## Per-entry Fractional Part Integral Analysis
 
