@@ -247,6 +247,10 @@ theorem spectral_identity (N : ℕ) (hN : 2 ≤ N) :
     Potential proof path: eigenvector localization (PR ~ O(1))
     + Cauchy-Schwarz on the localized support → c_k² ~ 1/N² →
     E_k ~ N^{-1.65} → sum vanishes. Pure real spectral theory. -/
+-- ARCHITECTURALLY DEAD (May 9, 2026 audit):
+-- This axiom is not consumed by any active proof path. Its only consumer
+-- (ultraviolet_completeness) was graduated to a theorem via Rayleigh-Ritz.
+-- Retained for future spectral theory exploration, not required for any crown.
 axiom infrared_safety (τ : ℕ → ℝ) (hτ : Tendsto τ atTop (𝓝 0)) :
     Tendsto (fun N => irEnergy N (τ N)) atTop (𝓝 0)
 

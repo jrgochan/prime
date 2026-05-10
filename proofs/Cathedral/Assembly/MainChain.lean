@@ -135,7 +135,10 @@ theorem log_grows_unboundedly (C : ℝ) (hC : 0 < C) (ε : ℝ) (hε : 0 < ε) :
     Three independent proof paths for the forward direction are preserved:
     * PATH A (Mellin): via critical-line Mellin variance
     * PATH B (Perron): via Perron contour integration and spatial covariance
-    * PATH C (Renormalization): via Selberg-Delange α-decay (graduated)
+    * PATH C (Renormalization): via Selberg-Delange α-decay
+      (selberg_delange_decay GRADUATED to theorem April 30, 2026;
+       inherits `witness_covariance_decay` ≡ RH from Vasyunin chain.
+       Once Oracle Crown proves RH, PATH C closes retroactively.)
 
     Each path has its own axiom footprint. The primary export
     `nyman_beurling_equivalence` uses `baez_duarte_forward` as a single
