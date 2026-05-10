@@ -297,4 +297,6 @@ lean_lib «Cathedral» where
     `Cathedral.ZeroAxiom.MellinAlgebra,
     -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
     `Cathedral.Compute.IntervalVerifier,
+    -- Compute: Trusted oracle certificates (GPU → Lean, Exploration 32)
+    `Cathedral.Compute.OracleCertificates,
   ]
