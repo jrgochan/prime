@@ -202,26 +202,33 @@ theorem certified_nb_distance_55440 : nbDistSq' 55440 < 0.0401 := by
 --   to the existential theorems in the proof chain.
 
 -- ════════════════════════════════════════════════
--- §5. AXIOM AUDIT
+-- §5. AXIOM AUDIT (updated May 9, 2026 — Exploration 31)
 -- ════════════════════════════════════════════════
 
--- Oracle axioms in this file (8 total):
+-- Oracle axioms in this file (6 total):
 --   oracle_lambda_min_positive_40000 : lambdaMin 40000 > 0
 --   oracle_witness_bound_100    : ∃ v, ∫(1-f)² < 0.064
 --   oracle_witness_bound_1000   : ∃ v, ∫(1-f)² < 0.103
 --   oracle_witness_bound_10000  : ∃ v, ∫(1-f)² < 0.035
 --   oracle_witness_bound_40000  : ∃ v, ∫(1-f)² < 0.040
---   oracle_witness_bound_55440  : ∃ v, ∫(1-f)² < 0.041
+--   oracle_witness_bound_55440  : ∃ v, ∫(1-f)² < 0.0401
 --
 -- All are independently verifiable by running:
---   cargo run --release -p certified-distance -- certify <N>
---   cargo run --release -p nb-witness-scan -- <N>
+--   cargo run --release -p cathedral-rl -- --hpdf <file> --gpu --precision dd
+--   cargo run --release --features hpdf --bin moebius-microscope -- --gpu <file>
 --
--- Trust boundary: 256-bit MPFR + DD arithmetic + cuSOLVER (GPU)
+-- Trust boundary: 256-bit MPFR + DD arithmetic + cuSOLVER/cuBLAS (GPU)
 -- Precision: MPFR Gram matrix at N=40000, CG-DD (~31 digit) at N=55440
 --
--- Monotonicity (optimal d²): 0.041 > 0.040 > 0.040 > 0.040 ✓
--- N=10000: 0.0406 > N=20000: 0.0404 > N=40000: 0.0400 > N=55440: 0.0398
+-- Monotonicity (optimal d²):
+-- N=10000: 0.0406 > N=20000: 0.0404 > N=40000: 0.0400 > N=55440: 0.0398 ✓
+--
+-- GPU MICROSCOPE CROSS-VALIDATION (May 9, 2026):
+--   moebius-microscope --gpu sweeps 13 HCN points (N=120..55440) on RTX 4090.
+--   Independently confirms vᵀGv, (bᵀv)², d² via GPU bilinear forms.
+--   PNT sub-sums validated: S₁→0, S₂→-1, S₃→-2γ across all N.
+--   Taper reconstruction: U-2L/lnN+Q/ln²N = vᵀGv to machine epsilon.
+--   Results: experiments/moebius-microscope/results_gpu_sweep/
 
 -- #print axioms certified_gram_pd_up_to_1000
 -- #print axioms certified_nb_distance_100

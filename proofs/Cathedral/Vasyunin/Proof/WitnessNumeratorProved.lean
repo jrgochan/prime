@@ -197,7 +197,7 @@ theorem witness_numerator_convergence_proved :
         atTop (nhds ((1 - G) * (-1 + 1) + (-2 * G + 2 * G) - (1 + G))) :=
       h3.sub tendsto_const_nhds
     convert h4 using 1
-    ring
+    ring_nf
   have hT3 : Tendsto
       (fun N : ℕ => ((1 - G) * (myS₂ (N - 1) + 1) + (myS₃ (N - 1) + 2 * G) - (1 + G)) /
         Real.log (N : ℝ))

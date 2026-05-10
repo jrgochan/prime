@@ -1,0 +1,19 @@
+[package]
+name = "hc-gram-oracle"
+version = "2.0.0"
+edition = "2024"
+description = "HC Gram Oracle — Spectral Bypass Certification for the Cathedral"
+
+[[bin]]
+name = "hc-gram-oracle"
+path = "src/main.rs"
+
+[features]
+default = []
+hpdf = ["cathedral-utils/hpdf"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
+serde = { version = "1", features = ["derive"] }

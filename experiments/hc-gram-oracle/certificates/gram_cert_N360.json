@@ -1,0 +1,23 @@
+{
+  "format": "cathedral-hc-gram-oracle-v1",
+  "N": 360,
+  "dim": 359,
+  "divisor_count": 24,
+  "is_highly_composite": true,
+  "witness": "log_cutoff_mobius",
+  "witness_formula": "v_k = -μ(k)(1 - ln(k)/ln(N))",
+  "results": {
+    "vtGv": 0.5454346614082701,
+    "bt_v": 0.7319941261974969,
+    "bt_v_squared": 0.535815400787637,
+    "vtCv": 0.009619260620633119,
+    "d_squared": 0.08144640901327627,
+    "below_one": true,
+    "margin": 0.4545653385917299,
+    "gap_times_ln_N": 2.6756188720422864
+  },
+  "precision": "DD",
+  "source": "../cache/hpdf/gram_N360.h5",
+  "elapsed_secs": 0.001048084,
+  "lean_claim": "vtGv_log_cutoff 360 < 1.0000"
+}

@@ -92,6 +92,9 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.OctonionicPartition,
     `Cathedral.Spectral.ClassRestriction,
     `Cathedral.Spectral.FiniteDimReduction,
+    -- Fourier–Gram Bridge (Exploration 31, ZERO SORRY)
+    `Cathedral.Spectral.FourierGram,
+    `Cathedral.Spectral.BilinearSieve,
     -- Spectral exploration (Exploration 19, NOT on crown path)
     `Cathedral.Spectral.ResidueDecomposition,
     `Cathedral.Spectral.ParticipationRatio,
@@ -292,4 +295,8 @@ lean_lib «Cathedral» where
     -- Zero-axiom forward direction (Exploration 27: The Millennium Strike)
     `Cathedral.ZeroAxiom.FiniteDirichlet,
     `Cathedral.ZeroAxiom.MellinAlgebra,
+    -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
+    `Cathedral.Compute.IntervalVerifier,
+    -- Compute: Trusted oracle certificates (GPU → Lean, Exploration 32)
+    `Cathedral.Compute.OracleCertificates,
   ]
