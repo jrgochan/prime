@@ -177,6 +177,7 @@ lean_lib «Cathedral» where
     -- Mellin residual expansion (Crown graduation path, Exploration 13)
     `Cathedral.Assembly.MellinResidualExpansion,
     -- Gram form graduation (axiom → theorem via split-region L²)
+    `Cathedral.Covariance.CovarianceAbel,
     `Cathedral.Covariance.CovarianceBound,
     `Cathedral.Covariance.GramFormProof,
     -- Euler product decomposition (Robin Resonance, Exploration 29)
@@ -250,6 +251,8 @@ lean_lib «Cathedral» where
     -- Covariance Abel engine (Exploration 13)
     `Cathedral.Covariance.QuadFormIdentity,
     `Cathedral.Covariance.BilinearAbel,
+    -- Abel covariance bound scaffold (closes witness_covariance_decay path)
+    `Cathedral.Covariance.AbelCovarianceBound,
     -- Gallagher MVT and frequency separation (Exploration 13-14, ZERO SORRY)
     `Cathedral.Analysis.GallagherMVT,
     `Cathedral.Analysis.FrequencySeparation,
