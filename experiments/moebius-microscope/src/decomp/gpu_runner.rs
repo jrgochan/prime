@@ -22,7 +22,7 @@ use super::state::Decomp;
 use super::classify::classify_term;
 use super::row::{RowResult, merge_results};
 use super::gram::{finalize_gram_metrics, print_gram_summary};
-use super::taper::print_taper_summary;
+use super::taper::{print_taper_summary, finalize_taper_metrics_with_matrix};
 
 /// Run the microscope using GPU acceleration.
 ///
@@ -239,6 +239,8 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
         eprintln!("\r  ✓ Done in {elapsed:.1}s ({n_active} active × {dim} cols, GPU+HPDF)                      ");
         eprintln!("    GPU bilinear: {:.3}s | CPU classify: {:.1}s",
             taper_result.gpu_secs, elapsed - taper_result.gpu_secs);
+        // Compute per-GCD taper strata using in-memory matrix (O(active²) lookups, ~10s)
+        finalize_taper_metrics_with_matrix(&mut decomp, Some(&gram_full));
         print_gram_summary(&decomp);
         print_taper_summary(&decomp);
 
