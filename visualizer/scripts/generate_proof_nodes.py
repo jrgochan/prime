@@ -131,6 +131,17 @@ def scan_lean_files() -> dict:
                     break
             sig = "\n".join(sig_lines).strip()
 
+            # If this name already exists, prefer proved/theorem over axiom
+            # (axiom may be a forward declaration, theorem is the actual proof)
+            if name in results:
+                existing = results[name]["category"]
+                if existing in ("proved", "sorry") and category == "axiom":
+                    continue  # keep the proved version
+                if existing == "axiom" and category in ("proved", "sorry"):
+                    pass  # overwrite axiom with proved version
+                elif existing == category:
+                    continue  # same status, keep first
+
             results[name] = {
                 "file": rel,
                 "line": line_no,
@@ -163,12 +174,14 @@ def merge_nodes(enrichment: dict, auto_scan: dict) -> list[dict]:
     """Merge curated enrichment with auto-scanned data."""
     nodes = []
     curated_keys = set()
+    curated_theorems = set()
 
     # Process curated nodes first
     for node in enrichment.get("nodes", []):
         key = node["key"]
         curated_keys.add(key)
         theorem = node.get("theorem", key)
+        curated_theorems.add(theorem)
 
         # Try to find auto-scan data for validation
         auto = auto_scan.get(theorem, {})
@@ -191,7 +204,7 @@ def merge_nodes(enrichment: dict, auto_scan: dict) -> list[dict]:
 
     # Add auto-scanned nodes that aren't curated
     for name, info in sorted(auto_scan.items()):
-        if name in curated_keys:
+        if name in curated_keys or name in curated_theorems:
             continue
         # Skip definitions and very short names
         if info["category"] == "definition" or len(name) < 4:
