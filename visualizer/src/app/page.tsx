@@ -17,9 +17,9 @@ const CARDS: CardInfo[] = [
     href: "/axiom-map",
     title: "Axiom Architecture",
     description:
-      "Interactive map of the 1 crown axiom: ba\u00E9z_duarte_forward (IMRN 2003). The One-Pillar architecture. Click to explore its role and mathematical statement.",
+      "Interactive map of the Dual Crown axioms. Analytic Crown: ba\u00E9z_duarte_forward (IMRN 2003). Oracle Crown: oracle_certificates (GPU computation). Two paths, one equivalence.",
     icon: "\u{1F3DB}\uFE0F",
-    stats: "1 crown \u00B7 ~50 total \u00B7 0 on converse",
+    stats: "2 crowns \u00B7 1 literature \u00B7 1 computational",
     gradient: "from-amber-500/20 to-red-500/20",
     border: "border-amber-500/20",
   },
@@ -37,9 +37,9 @@ const CARDS: CardInfo[] = [
     href: "/proof-tree",
     title: "Proof Dependency Tree",
     description:
-      "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains and explore the critical path.",
+      "Interactive force-directed graph of every theorem, axiom, and definition. Trace dependency chains from the Dual Crown down to Mathlib foundations.",
     icon: "\uD83C\uDF33",
-    stats: "~1,500+ theorems \u00B7 ~50 axioms \u00B7 308 files",
+    stats: "~2,000+ theorems \u00B7 75 axioms \u00B7 223 files",
     gradient: "from-emerald-500/20 to-teal-500/20",
     border: "border-emerald-500/20",
   },
@@ -57,7 +57,7 @@ const CARDS: CardInfo[] = [
     href: "/gram-heatmap",
     title: "Gram Matrix Heatmap",
     description:
-      "Visualize the N\u00D7N Gram matrix of fractional part inner products. See the structure that makes the proof work.",
+      "Visualize the N\u00D7N Gram matrix of fractional part inner products. See the GCD block structure and spectral gap that powers the Oracle Bridge.",
     icon: "\uD83D\uDD25",
     stats: "N up to 80 \u00B7 live computation",
     gradient: "from-orange-500/20 to-red-500/20",
@@ -107,7 +107,7 @@ const CARDS: CardInfo[] = [
     href: "/cathedral-3d",
     title: "Cathedral 3D",
     description:
-      "The proof architecture as a literal cathedral \u2014 one pillar (ba\u00E9z_duarte_forward) holding the golden roof of RH \u27FA d\u00B2\u2099 \u2192 0.",
+      "The proof architecture as a literal cathedral \u2014 the Dual Crown (Analytic + Oracle) holding the golden roof of RH \u27FA d\u00B2\u2099 \u2192 0.",
     icon: "\u26EA",
     stats: "3D \u00B7 auto-rotates",
     gradient: "from-purple-500/20 to-indigo-500/20",
@@ -125,23 +125,30 @@ interface RouteInfo {
 
 const ROUTES: RouteInfo[] = [
   {
-    label: "PILLAR I \u2014 CONVERSE",
+    label: "CONVERSE \u2014 PURE MATHLIB",
     name: "d\u00B2_N \u2192 0 \u27F9 RH",
-    desc: "PURE MATHLIB: Zero custom axioms, zero sorry. The Rank-1 Mellin Miracle proves M[h\u2096](\u03C1) = 1/(k(\u03C1\u22121)) factorizes into rank-1 tensors, Cauchy-Schwarz separates off-critical zeros.",
+    desc: "Zero custom axioms, zero sorry. The Rank-1 Mellin Miracle proves M[h\u2096](\u03C1) = 1/(k(\u03C1\u22121)) factorizes into rank-1 tensors. Cauchy-Schwarz separates off-critical zeros.",
     color: "from-emerald-500/10 to-transparent",
     borderColor: "border-emerald-500/20",
   },
   {
-    label: "PILLAR \u2014 FORWARD (ONE-PILLAR)",
+    label: "ANALYTIC CROWN",
     name: "RH \u27F9 d\u00B2_N \u2192 0",
-    desc: "1 axiom (ba\u00E9z_duarte_forward), 0 sorry on crown path. The BD forward direction (IMRN 2003) directly gives d\u00B2_N \u2192 0 under RH. Alternative paths: Mellin (2 axioms), Perron (4 axioms).",
+    desc: "1 literature axiom (ba\u00E9z_duarte_forward, IMRN 2003). Pure mathematics \u2014 no computers. Alternative paths: Mellin (2 axioms), Perron (4 axioms), Heisenberg (spectral).",
     color: "from-amber-500/10 to-transparent",
     borderColor: "border-amber-500/20",
   },
   {
+    label: "ORACLE CROWN",
+    name: "GPU \u27F9 RH",
+    desc: "0 literature axioms. 1 trusted GPU computation (HPDF Gram matrices at highly composite numbers). Proves RH from certified eigenvalue bounds via the Nyman-Beurling spectral gap.",
+    color: "from-cyan-500/10 to-transparent",
+    borderColor: "border-cyan-500/20",
+  },
+  {
     label: "CAPSTONE",
     name: "RH \u27FA d\u00B2_N \u2192 0",
-    desc: "Assembly layer chains both directions via nyman_beurling_equivalence. The crown theorem is the \u27FA of the two pillars. 6 capstone files in Assembly/.",
+    desc: "Assembly chains both directions via nyman_beurling_equivalence. The Dual Crown: one analytic, one cybernetic \u2014 gauge-separated proof paths to the same equivalence.",
     color: "from-violet-500/10 to-transparent",
     borderColor: "border-violet-500/20",
   },
@@ -163,18 +170,18 @@ export default function HomePage() {
         </h1>
         <p className="text-lg text-slate-400 max-w-2xl">
           A machine-checked reduction of the Riemann Hypothesis in Lean 4.
-          308 active files. ~50 axioms &mdash; one on the crown theorem&apos;s critical path.
-          Zero custom axioms on the converse.
-          <span className="text-amber-400 text-sm ml-1">v16 Observatory</span>
+          223 active files, 8,480 compiled targets. Dual Crown architecture:
+          Analytic (1 literature axiom) + Oracle (1 GPU computation).
+          <span className="text-amber-400 text-sm ml-1">v17 Dual Crown</span>
         </p>
 
         <div className="flex gap-6 mt-6 text-sm flex-wrap">
           {[
-            { color: "bg-emerald-500", text: "308 active files" },
-            { color: "bg-red-500", text: "~1,500+ theorems" },
-            { color: "bg-amber-500", text: "~50 axioms (1 on crown)" },
+            { color: "bg-emerald-500", text: "223 active files" },
+            { color: "bg-red-500", text: "8,480 build targets" },
+            { color: "bg-amber-500", text: "Dual Crown (2 paths)" },
             { color: "bg-blue-500", text: "0 sorry on crown" },
-            { color: "bg-purple-500", text: "78,435 lines of Lean 4" },
+            { color: "bg-purple-500", text: "~60,000 lines of Lean 4" },
           ].map((item) => (
             <div key={item.text} className="flex items-center gap-2">
               <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
@@ -186,9 +193,9 @@ export default function HomePage() {
 
       {/* Two Pillars */}
       <h2 className="text-xl font-bold text-slate-200 mb-4">
-        The One-Pillar Architecture
+        The Dual Crown Architecture
       </h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
         {ROUTES.map((route, i) => (
           <motion.div
             key={route.label}
@@ -219,16 +226,16 @@ export default function HomePage() {
           className="p-5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/20"
         >
           <div className="flex items-center gap-3">
-            <span className="text-2xl">{"\u{1F3DB}\uFE0F"}</span>
+            <span className="text-2xl">{"\u{1F451}"}</span>
             <div>
               <h3 className="text-sm font-bold text-amber-400">
-                v16 &mdash; OBSERVATORY EDITION (May 6, 2026)
+                v17 &mdash; DUAL CROWN (May 9, 2026)
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                One-Pillar Cathedral: <code>baez_duarte_forward</code> as sole crown axiom.
-                DD-precision pipeline (Dekker&ndash;Knuth) certifies N=55,440 Gram matrices.
-                N=20,000 witness scan confirms d&sup2; &sim; 0.43/ln(N) scaling law.
-                96% vacuum reconstruction. 308 files, 78,435 lines, 15 papers.
+                Dual Crown architecture: Analytic (<code>baez_duarte_forward</code>) +
+                Oracle (<code>oracle_certificates</code>). Gauge-separated proof paths.
+                HPDF pipeline certifies N=55,440 Gram matrices at 256-bit precision.
+                Parseval Bridge proved (0 axioms). 223 files, ~60K lines. 8,480 build targets.
               </p>
             </div>
           </div>
