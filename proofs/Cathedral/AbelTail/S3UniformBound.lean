@@ -19,7 +19,7 @@
   2. Large-case bound (n ≥ N₀): Abel summation + boundary vanishing
   3. Combine: universal bound = max of both
 
-  STATUS: FULLY PROVED. 0 axiom. Fully proved.
+  STATUS: PROVED. 0 axiom. Fully proved.
   Created: April 25, 2026 (The Abel Bypass — 4:00 AM)
 -/
 
@@ -68,7 +68,7 @@ private lemma s3_at_two_finite : |S₃_at 2| < |S₃_at 2| + 1 := lt_add_one _
     3. For n < max 3 M₁: finite_s3_bound gives the max
     4. Universal bound = max of both
 
-    STATUS: ZERO SORRY. ZERO AXIOM. -/
+    STATUS: 0 sorry. ZERO AXIOM. -/
 theorem s3_uniform_bound_from_mertens
     (C_m : ℝ) (hC : 0 < C_m)
     (hMertens : ∀ x : ℝ, x ≥ 2 →

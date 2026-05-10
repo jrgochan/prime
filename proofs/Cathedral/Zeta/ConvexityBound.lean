@@ -7,7 +7,7 @@
 
   ### Strategy
 
-  From `bd_mellin_base_case_proved` (PROVED in IdentityBypass.lean, FULLY PROVED):
+  From `bd_mellin_base_case_proved` (PROVED in IdentityBypass.lean):
     ∫₀¹ {1/x} · x^{s-1} dx = 1/(s-1) - ζ(s)/s   for Re(s) > 0, s ≠ 1
 
   Rearranging:
@@ -18,7 +18,7 @@
            ≤ (1 + 1/|t|) + (σ + |t|) · (1/σ)
            ≤ 3 + (σ + |t|) ≤ 5 + |t| ≤ (2 + |t|)²
 
-  ### Key dependencies (all FULLY PROVED):
+  ### Key dependencies (all PROVED):
   - IdentityBypass.lean: bd_mellin_base_case_proved (analytic continuation via identity theorem)
   - FloorMellin.lean: floor_mellin_eq_zeta (integral representation, Re > 1)
   - FloorDivMellin.lean: mellin_fractBasis (fract decomposition)
@@ -204,7 +204,7 @@ private lemma norm_zeta_le {s : ℂ}
 
 /-- **Convexity bound**: ‖ζ(s)‖ ≤ (2 + |s.im|)² for 1/2 < Re(s) ≤ 2, |Im(s)| ≥ 1/2.
 
-    Uses `bd_mellin_base_case_proved` from IdentityBypass.lean (FULLY PROVED)
+    Uses `bd_mellin_base_case_proved` from IdentityBypass.lean (PROVED)
     to decompose ζ(s) = s/(s-1) - s·∫₀¹ {1/t}·t^{s-1} dt.
     The formula is valid for ALL Re(s) > 0 (not just Re(s) > 1).
 

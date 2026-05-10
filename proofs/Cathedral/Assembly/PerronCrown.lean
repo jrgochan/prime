@@ -313,7 +313,7 @@ theorem rh_implies_bd_convergence_perron :
 
 /-- **THE PERRON EQUIVALENCE**: Nyman-Beurling via the Perron chain.
 
-    Converse: 0 axioms, FULLY PROVED (BDMellin.lean)
+    Converse: 0 axioms (BDMellin.lean)
     Forward:  3 PNT axioms + 1 covariance axiom + 1 sorry
 
     This ELIMINATES the `rh_implies_mertens_bound` axiom from the

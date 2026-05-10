@@ -27,7 +27,7 @@
 
   Created: May 3, 2026
   Updated: May 5, 2026 — AlgebraicLimit now imports TwoTileEval directly
-  Status: PROVED (FULLY PROVED, zero axiom)
+  Status: PROVED (0 axiom)
 -/
 
 import Cathedral.Vasyunin.Cotangent.TwoTileCorrection
@@ -96,12 +96,12 @@ private theorem tsum_actual_eq_stirling_target_delta (a b : ℕ)
 
     **Proof strategy**:
 
-    - a=1: From FractSeriesEval (FULLY PROVED, zero axiom)
+    - a=1: From FractSeriesEval (PROVED, 0 axiom)
     - a≥2: From TsumDirectEval.gramIntegral_eq_formula_independent
       which proves the identity via the four-way decomposition +
-      DeltaDirectEval (FULLY PROVED).
+      DeltaDirectEval (PROVED).
 
-    ZERO SORRY. Fully certified. -/
+    0 sorry. Fully certified. -/
 theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b :=
@@ -111,9 +111,9 @@ theorem gramIntegral_eq_formula_coprime (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero axiom):
+-- PROVED (0 axiom):
 --   ✅ tsum_actual_eq_stirling_target_delta — Σ' actual = 3-way decomposition
---   ✅ gramIntegral_eq_formula_coprime — Delegates to TsumDirectEval (ZERO SORRY)
+--   ✅ gramIntegral_eq_formula_coprime — Delegates to TsumDirectEval (0 sorry)
 --
 -- ARCHITECTURE:
 --   This file sits at the TOP of the Cotangent proof chain.

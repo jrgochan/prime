@@ -96,7 +96,7 @@ lemma integral_split (K : ℕ) (_hK : 1 ≤ K) :
 --   partialSum K = Σ_{n=0}^{K-2} [-2(n+1)·log(1+1/(n+1)) + 2 - 1/(n+2)]
 -- The GramDiag Archive proves:
 --   ∫_{1/(K)}^{1} {1/u}² = same piecewise sum
--- TODO: formalize this piecewise linkage
+-- NOTE: The piecewise linkage is proved in PiecewiseFTC.lean (imported above).
 
 -- AXIOM ELIMINATED: integral_eq_partialSum is now a THEOREM
 -- proved in PiecewiseFTC.lean via piecewise FTC + StirlingBridge matching.

@@ -30,7 +30,7 @@ noncomputable section
 open Real Matrix Finset MeasureTheory
 
 -- ═══════════════════════════════════════════════
--- THE CROWN: rh_implies_l2_convergence (PROVED!)
+-- THE CROWN: rh_implies_l2_convergence — PROVED
 -- ═══════════════════════════════════════════════
 
 /-- **THEOREM** (formerly axiom): RH ⟹ BD approximation converges in L².
@@ -53,7 +53,7 @@ theorem rh_implies_l2_convergence :
 -- THE CROWN: Nyman-Beurling Equivalence
 -- ═══════════════════════════════════════════════
 
--- Import the converse (FULLY PROVED, zero axioms except zeta_zero_separates)
+-- Import the converse (PROVED, 0 axioms except zeta_zero_separates)
 -- from Cathedral.NymanBeurling.Separation
 
 -- ═══════════════════════════════════════════════

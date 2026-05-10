@@ -131,10 +131,11 @@ theorem abel_summation_abs_bound (a f : ℕ → ℝ) (M N : ℕ) (hMN : M ≤ N)
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   ✅ abel_summation              — The discrete identity (PROVED!)
---   ✅ abel_summation_abs_bound    — Triangle inequality (PROVED!)
---   FULLY PROVED, 0 axiom
+--   ✅ abel_summation              — The discrete identity (PROVED)
+--   ✅ abel_summation_abs_bound    — Triangle inequality (PROVED)
+--   0 axiom, 0 sorry.
 --
--- NEXT: Instantiate with Möbius weights to close Axiom 2.
+-- Möbius weight instantiation realized downstream in MellinCrown.lean.
 
 end
+

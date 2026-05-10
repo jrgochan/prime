@@ -751,7 +751,7 @@ private lemma sinI_ofReal_integrableOn (w : ℝ) :
 /-- **Bridge convention matching**: The Mathlib Fourier transform of Λ_ℂ
     equals our fejerKernel (cast to ℂ).
 
-    Proven building blocks (all FULLY PROVED):
+    Proven building blocks (all PROVED):
     - `ft_Λ_ℂ_unfold`: 𝓕 Λ_ℂ(w) = ∫ exp(-2πivw) · Λ_ℂ(v) dv
     - `Λ_ℂ_outside`: Λ_ℂ(v) = 0 for |v| > 1
     - `ft_integrand_outside`: integrand = 0 outside [-1,1]

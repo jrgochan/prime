@@ -27,7 +27,7 @@
 
   Created: May 3, 2026
   Updated: May 5, 2026 — SORRY ELIMINATED (four_way_eq_formula archived to OldColumnSum.lean)
-  Status: ZERO SORRY, ZERO AXIOM
+  Status: 0 sorry, ZERO AXIOM
 -/
 
 import Cathedral.Vasyunin.Cotangent.GramIntegralProof
@@ -78,13 +78,13 @@ theorem gramIntegral_four_way (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
 --
 -- They contained the single remaining gap in the Cotangent directory,
 -- on the old cyclic proof path. The gap was superseded by
--- DeltaDirectEval.four_way_eq_formula_independent (ZERO SORRY)
+-- DeltaDirectEval.four_way_eq_formula_independent (0 sorry)
 -- via the Beta Bijection (symmetric weighted digamma reflection).
 --
 -- The crown path now uses:
---   TwoTileEval.gramIntegral_eq_formula_coprime (FULLY PROVED)
---     → TsumDirectEval.gramIntegral_eq_formula_independent (FULLY PROVED)
---       → DeltaDirectEval.four_way_eq_formula_independent (FULLY PROVED)
+--   TwoTileEval.gramIntegral_eq_formula_coprime (PROVED)
+--     → TsumDirectEval.gramIntegral_eq_formula_independent (PROVED)
+--       → DeltaDirectEval.four_way_eq_formula_independent (PROVED)
 
 -- gramIntegral_eq_formula_column: ARCHIVED to OldColumnSum.lean (see §2 above)
 
@@ -489,7 +489,7 @@ theorem delta_class_limit_core (a b m₀ s : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) 
 
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero axiom):
+-- PROVED (0 axiom):
 --   ✅ gramIntegral_four_way — gramIntegral = strip + stir/b + ft/a + tsum Δ
 --   ✅ twoTileCorrection_eq_deltaTermFormula — Δ(m) = closed-form for two-tile rows
 --   ✅ deltaTermFormula_decompose — Δ(m) = log piece + harmonic pieces
@@ -499,6 +499,6 @@ theorem delta_class_limit_core (a b m₀ s : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) 
 -- ARCHIVED (May 5, 2026):
 --   ❌ four_way_eq_formula — moved to Archive/Vasyunin/OldColumnSum.lean
 --   ❌ gramIntegral_eq_formula_column — moved to Archive/Vasyunin/OldColumnSum.lean
---   Both superseded by DeltaDirectEval.four_way_eq_formula_independent (ZERO SORRY)
+--   Both superseded by DeltaDirectEval.four_way_eq_formula_independent (0 sorry)
 
 end Cathedral.Vasyunin.ColumnSumEval

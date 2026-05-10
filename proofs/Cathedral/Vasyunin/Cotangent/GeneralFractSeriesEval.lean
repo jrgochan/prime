@@ -28,7 +28,7 @@
   §4. Tsum decomposition: tsum rowTerm = (1/b)·stirling_limit + tsum fract_general
 
   Created: May 2, 2026 (Phase 1 — The General Decomposition)
-  Status: BUILDING
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.DiagonalStrike
@@ -261,7 +261,7 @@ theorem fractTarget_general_a1 (b : ℕ) (hb : 2 ≤ b) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ fractCorrection_general          — Definition
 --   ✅ fractCorrection_general_a1       — Recovers a=1 case
 --   ✅ rowTerm_decompose_general        — THE CORE IDENTITY (Phase 1)

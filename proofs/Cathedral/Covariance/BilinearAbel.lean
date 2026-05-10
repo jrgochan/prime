@@ -10,7 +10,7 @@
   - Prove vᵀGv = diagonal_sum + off_diagonal_sum (bridge lemma)
   - Bound diagonal and off-diagonal in completely SEPARATE lemmas
 
-  SORRY STATUS: ✅ ZERO SORRY — ALL PROVED
+  SORRY STATUS: ✅ 0 sorry — ALL PROVED
   - Bridge lemma: ✅ PROVED
   - Diagonal bound (generic): ✅ PROVED
   - Diagonal bound (BD weights): ✅ PROVED

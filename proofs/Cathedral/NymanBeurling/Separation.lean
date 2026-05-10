@@ -35,7 +35,7 @@ import Mathlib.NumberTheory.LSeries.Nonvanishing
   nyman_beurling_converse         — d²→0 → RH                  [PROVED]
   ```
 
-  Status: FULLY PROVED. One axiom (zeta_zero_separates, Tier 3).
+  Status: PROVED. One axiom (zeta_zero_separates, Tier 3).
 -/
 
 noncomputable section

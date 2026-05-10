@@ -76,7 +76,7 @@ theorem nyman_beurling_implies_lagarias :
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   FULLY PROVED
+--   PROVED
 --   ZERO axioms
 --   4 PROVED theorems:
 --     ✅ robin_implies_nyman_beurling      — Robin → d²_N → 0

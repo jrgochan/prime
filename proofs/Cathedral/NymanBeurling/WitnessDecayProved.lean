@@ -30,7 +30,7 @@
   - witness_numerator_convergence (PNT-level, unconditional)
   - witness_covariance_decay (THE Riemann Hypothesis content)
 
-  ### Status: FULLY PROVED.
+  ### Status: PROVED.
 -/
 
 import Cathedral.Vasyunin.Proof.Chain

@@ -9,7 +9,7 @@
   the finite Dirichlet sum D_N(s) = Σ_{k=1}^N v_k k^{-s} IS a finite
   trigonometric polynomial with frequencies λ_k = log(k).
 
-  The Gallagher MVT (GallagherMVT.lean, ZERO SORRY) gives:
+  The Gallagher MVT (GallagherMVT.lean, 0 sorry) gives:
     ∫ |D_N(1/2+it)|² · δ·K(δt) dt = Σ |v_k|²/k
 
   Combined with the mod-8 character orthogonality (char_orthogonality,
@@ -17,9 +17,9 @@
   buckets, proving geometric frustration.
 
   ### Dependencies
-  - GallagherMVT.lean (ZERO SORRY)
-  - FrequencySeparation.lean (ZERO SORRY)
-  - HilbertInequality.lean (ZERO SORRY)
+  - GallagherMVT.lean (0 sorry)
+  - FrequencySeparation.lean (0 sorry)
+  - HilbertInequality.lean (0 sorry)
 
   ### Sorry Status
   Assembly file — connecting Gallagher to Dirichlet sums.
@@ -192,7 +192,7 @@ lemma dirichlet_eq_trigPoly_term (n : ℕ) (hn : 0 < n) (t : ℝ) :
 
     finiteDirichletSum N a t = trigPoly a (dirichletLogFreq N) t
 
-    Therefore by gallagher_mvt (PROVED, FULLY PROVED):
+    Therefore by gallagher_mvt (PROVED):
 
     ∫ |D_N(t)|² · δ·K(δt) dt = Σ |aₙ|²
 
@@ -288,7 +288,7 @@ theorem channel_equals_odd_energy {N : ℕ} (a : Fin N → ℂ) (i : Fin 4)
 -- §6. AUDIT (v12, April 27, 2026)
 -- ═══════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero axiom):
+-- PROVED (0 axiom):
 --   ✅ χ₈ — definitions (4 characters mod 8)
 --   ✅ χ₈_orthogonality — native_decide over all 16 cases
 --   ✅ χ₈_multiplicative — mod-8 case split, 16 cases per character

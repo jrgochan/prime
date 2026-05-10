@@ -14,11 +14,11 @@
 
   NOTE: The Abel summation proof was originally proved in
   Cathedral/Archive/HighFrequencyTrap/MellinBridge/AbelSummation.lean
-  (FULLY PROVED, zero axiom). It is inlined here since the Archive
+  (PROVED, 0 axiom). It is inlined here since the Archive
   is not part of the main Cathedral build target.
 
   Created: April 25, 2026
-  Status: COMPLETE — 6 theorems proved, FULLY PROVED, 0 axiom
+  Status: COMPLETE — 6 theorems proved, PROVED, 0 axiom
 -/
 
 import Cathedral.Defs
@@ -30,7 +30,7 @@ open Filter Finset
 namespace Cathedral.Analysis.DirichletTest
 
 -- ════════════════════════════════════════════════
--- §1. ABEL SUMMATION (from Archive, FULLY PROVED)
+-- §1. ABEL SUMMATION (from Archive)
 -- ════════════════════════════════════════════════
 
 /-- The partial sum A(k) = Σ_{j=0}^{k-1} a(j). -/
@@ -56,7 +56,7 @@ theorem abel_summation_range (a b : ℕ → ℝ) (n : ℕ) :
     ring
 
 -- ════════════════════════════════════════════════
--- §2. HELPER LEMMAS (all proved, FULLY PROVED)
+-- §2. HELPER LEMMAS (all proved)
 -- ════════════════════════════════════════════════
 
 /-- **BOUNDED × TENDS-TO-ZERO**: If |f(n)| ≤ C for all n and g(n) → 0,
@@ -250,13 +250,13 @@ theorem dirichlet_test (a b : ℕ → ℝ) (C : ℝ)
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero axiom):
+-- PROVED (0 axiom):
 --   ✅ abel_summation_range           — Discrete Abel summation (0-indexed)
 --   ✅ bounded_mul_tendsto_zero       — |f|≤C, g→0 ⟹ fg→0
 --   ✅ antitone_diff_nonneg           — b antitone ⟹ Δb ≥ 0
 --   ✅ telescope_antitone_sum         — Σ Δb = b(0) - b(n)
 --   ✅ abel_transform_abs_bound       — |Σ S·Δb| ≤ C·b(0)
---   ✅ dirichlet_test                 — THE DIRICHLET TEST (PROVED!)
+--   ✅ dirichlet_test                 — THE DIRICHLET TEST — PROVED
 --
 -- Proof architecture:
 --   Abel summation → absolute convergence (monotone bounded) →

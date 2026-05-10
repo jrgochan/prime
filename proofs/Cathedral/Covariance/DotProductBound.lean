@@ -31,7 +31,7 @@ open Real Matrix Finset Filter Cathedral.Vasyunin ArithmeticFunction
     Uses s1_decay, s2_decay (Abel tail rates from Mertens x^{3/4}),
     and s3_uniform_bound_from_mertens (Abel Bypass — no PNT₃ needed).
 
-    FULLY PROVED, zero axioms. -/
+    PROVED, 0 axioms. -/
 theorem moebius_dot_product_approx_one_uniform_34
     (C_34 : ℝ) (hC : 0 < C_34)
     (hMertens34 : ∀ x : ℝ, x ≥ 2 →

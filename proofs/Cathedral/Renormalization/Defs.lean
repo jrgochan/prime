@@ -24,7 +24,7 @@
   This α is the "fine-structure constant of the integers" — derivable
   from the microscopic Euler product over individual primes.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 import Cathedral.Defs

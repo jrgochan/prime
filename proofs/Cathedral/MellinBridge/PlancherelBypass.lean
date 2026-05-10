@@ -17,7 +17,7 @@
   theorem, utilizing only L¹ inversion and elementary integrals.
 
   ### Key Dependencies
-  - Mathlib.Analysis.Fourier.Inversion: L¹ Fourier inversion (PROVED!)
+  - Mathlib.Analysis.Fourier.Inversion: L¹ Fourier inversion — PROVED
   - BDMellin.lean: bdLinComb definition and integrability
   - MellinSieve.lean: mellinNBLinCombR for the critical-line transform
   - AbelSiegeProof.lean: bdMoebiusWeight and the target axiom
@@ -82,7 +82,7 @@ theorem mellin_fourier_scale (N : ℕ) (v : Fin (N - 1) → ℝ) :
   Cathedral.White.mellin_fourier_scale_proved N v
 
 -- ════════════════════════════════════════════════
--- §4. THE PARSEVAL BRIDGE THEOREM (PROVED!)
+-- §4. THE PARSEVAL BRIDGE THEOREM — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM (PROVED)**: The L² distance equals the Plancherel integral
@@ -112,7 +112,7 @@ theorem parseval_bridge (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §5. THE MELLIN BOUND (The Final Axiom)
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED!)**: The Critical Line Mellin Bound.
+/-- **THEOREM — PROVED**: The Critical Line Mellin Bound.
 
     Under the Mertens Hypothesis |M(x)| ≤ C_m x^{1/2} log² x,
     the Mellin transform of the BD residual on the critical line satisfies:
@@ -144,7 +144,7 @@ theorem critical_line_mellin_bound
   exact ⟨C_l2, hC_l2_pos, by rw [← h_parseval]; exact h_bound⟩
 
 -- ════════════════════════════════════════════════
--- §6. THE COMPOSITION THEOREM (PROVED!)
+-- §6. THE COMPOSITION THEOREM — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM**: Deriving the L² bound from the Parseval Bridge + Mellin Bound.
@@ -172,7 +172,7 @@ end
 -- AUDIT (Post Parseval Reverse Bypass)
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero problem-specific axioms IN THIS FILE):
+-- PROVED (PROVED, zero problem-specific axioms IN THIS FILE):
 --   ✅ bdLinComb_bound               — uniform bound on BD basis (PlancherelDefs)
 --   ✅ bdResidualV_bound             — uniform bound on residual (PlancherelDefs)
 --   ✅ flattenedResidualV_bound      — exponential decay of g_N (PlancherelDefs)

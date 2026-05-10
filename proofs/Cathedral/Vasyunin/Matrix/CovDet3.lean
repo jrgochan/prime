@@ -13,7 +13,7 @@
   3. g-interpolation: P quadratic in g with correction C(t) = t(1-8t)/48 > 0
   4. Bridge to vasyuninCovMatrix 3 definition
   
-  FULLY PROVED. Zero axioms. Pure Mathlib.
+  PROVED. Zero axioms. Pure Mathlib.
 -/
 import Cathedral.Vasyunin.Matrix.GramEvaluations
 

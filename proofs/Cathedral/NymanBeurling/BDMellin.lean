@@ -28,7 +28,7 @@
   1. `bd_mellin_base_case` — Identity Theorem: k=1 analytic continuation — **PROVED** (IdentityBypass.lean)
   2. `completedRiemannZeta₀_bound_real` — θ-integral bound (ThetaBound.lean, PROVED)
 
-  Status: FULLY PROVED. 0 axioms. ALL PROVED.
+  Status: PROVED. 0 axioms. ALL PROVED.
 -/
 
 import Cathedral.Defs
@@ -677,7 +677,7 @@ private lemma pole_terms_le_neg_four (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) 
 
     Proved in Cathedral/NymanBeurling/ThetaBound.lean via the Mellin transform
     representation and exponential decay of the Jacobi theta kernel.
-    FULLY PROVED, zero axioms — pure Mathlib. -/
+    PROVED, 0 axioms — pure Mathlib. -/
 private lemma completedRiemannZeta₀_bound_real (s : ℝ) (hs_pos : 0 < s) (hs_lt : s < 1) :
     (completedRiemannZeta₀ (s : ℂ)).re < 4 :=
   completedRiemannZeta₀_bound_real_proved s hs_pos hs_lt

@@ -8,14 +8,14 @@
 
   where b is the mean vector and G_N is the Gram matrix.
 
-  Key properties (all proven, FULLY PROVED):
+  Key properties (all proven):
   - H_N PD implies G_N PD (trailing principal submatrix, §6b)
   - H_N PD implies bᵀG⁻¹b < 1 (witness vector w=(1,-G⁻¹b), §7)
 
   This file directly proves augmentedGramMatrix_posDef from the L² identity,
   eliminating both gramSchurComplement_pos and vasyunin_nbDistSq_pos.
 
-  Status: Zero axioms, FULLY PROVED. All content fully proved.
+  Status: Zero axioms. All content fully proved.
 
   Created April 11, 2026.
 -/

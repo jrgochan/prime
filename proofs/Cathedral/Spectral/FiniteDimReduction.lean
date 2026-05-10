@@ -334,7 +334,7 @@ theorem rank_one_ratio_vanishes :
 
 /-- **Summary of what is proven vs axiomatized**:
 
-    PROVEN (FULLY PROVED, no axioms):
+    PROVEN (PROVED, no axioms):
     ┌─────────────────────────────────────────────────────┐
     │ r_lt_one_implies_positive:                          │
     │   R < 1 → λ_min(G) > 0                             │

@@ -254,7 +254,7 @@ end
 --   0 axioms (both original axioms excised — April 2026):
 --     📐 mellin_plancherel_gram    (EXCISED → ghost, proved in AutocorrelationBypass)
 --     📐 rh_weight_construction    (EXCISED → decomposed in MertensWeightBypass)
---   FULLY PROVED
+--   PROVED
 --   2 PROVED:
 --     ✅ nyman_beurling_forward_from_sieve (RH → d² → 0 — PROVED!)
 --     ✅ phase_3_chain                     (RH → d²≤C/logN — PROVED!)

@@ -16,8 +16,8 @@
 
   This is the third independent proof path in the Cathedral:
     PATH A — Mellin Crown (1 sorry)
-    PATH B — Perron Crown (FULLY PROVED, 4 axioms)
-    PATH C — Renormalization (FULLY PROVED, 0 PATH-C axioms) ← THIS FILE
+    PATH B — Perron Crown (PROVED, 4 axioms)
+    PATH C — Renormalization (PROVED, 0 PATH-C axioms) ← THIS FILE
 
   Sorry: 0
   PATH-C-specific axioms: 0 (selberg_delange_decay GRADUATED April 30, 2026)
@@ -132,20 +132,20 @@ theorem rh_via_renormalization : RiemannHypothesis := by
   exact ⟨v, lt_of_le_of_lt hv_bound (hN₂ N hN₂_le)⟩
 
 -- ════════════════════════════════════════════════
--- §3. AUDIT — ZERO SORRY, ZERO PATH-C AXIOMS
+-- §3. AUDIT — 0 sorry, ZERO PATH-C AXIOMS
 -- ════════════════════════════════════════════════
 --
 -- #print axioms rh_via_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---   FULLY PROVED. selberg_delange_decay GRADUATED to theorem (α=1).
+--   PROVED. selberg_delange_decay GRADUATED to theorem (α=1).
 --
 -- #print axioms rh_implies_bd_convergence_renormalization
 --   → [bd_witness_l2_error_decay, propext, Classical.choice, Quot.sound]
---   FULLY PROVED. FULLY PROVED.
+--   PROVED. PROVED.
 --
 -- #print axioms log_pow_grows_unboundedly
 --   → [propext, Classical.choice, Quot.sound]
---   FULLY PROVED — standard calculus via tendsto_rpow_atTop ∘ tendsto_log_atTop.
+--   PROVED — standard calculus via tendsto_rpow_atTop ∘ tendsto_log_atTop.
 --
 -- GRADUATION RECORD (April 30, 2026):
 --   selberg_delange_decay: AXIOM → THEOREM
@@ -154,7 +154,7 @@ theorem rh_via_renormalization : RiemannHypothesis := by
 --   Empirical α ≈ 0.111 (Euler product, N=40K GPU)
 --           retained as numerical prediction / beacon
 --
--- ZERO SORRY IN THIS FILE.
+-- 0 sorry IN THIS FILE.
 -- The entire PATH C proof chain is complete. The selberg_delange_decay
 -- axiom has been graduated. PATH C now inherits bd_witness_l2_error_decay
 -- from the main NB chain.

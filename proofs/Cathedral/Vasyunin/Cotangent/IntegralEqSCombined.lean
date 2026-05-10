@@ -6,7 +6,7 @@
   Proves: ∫_{1/(aM)}^1 {1/(ax)}{1/(bx)} dx = strip + s_combined a b M
 
   Created: April 25, 2026
-  Status: BUILDING — two-tile telescoping in progress
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -282,7 +282,7 @@ theorem row_integral_eq_rowTerm_single (a b m : ℕ)
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ single_tile_eq_rowTerm      — Single-tile row (n ≥ 1) = rowTerm
 --   ✅ n_zero_eq_rowTerm           — Single-tile row (n = 0) = rowTerm
 --   ✅ row_integral_eq_rowTerm_single — Universal single-tile row lemma

@@ -32,7 +32,7 @@
   - Precision-bounded (256-bit MPFR with explicit error)
   - Falsifiable (any discrepancy is a bug, not a conjecture)
 
-  Status: FULLY PROVED. Oracle axioms clearly labeled.
+  Status: PROVED. Oracle axioms clearly labeled.
   Created: April 22, 2026 — Direction 5.1.
 -/
 

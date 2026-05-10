@@ -418,7 +418,7 @@ theorem parityBlockC_psd (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) :
     **STATUS: PROVED** in BilinearSieve.lean as `type_II_implies_stable_ratio`.
     Kept as axiom here to avoid circular imports (BilinearSieve imports ParitySchur).
     The theorem `type_II_implies_stable_ratio` in BilinearSieve.lean proves this
-    from `type_II_sieve_bound` via `sieve_implies_stable_ratio` (FULLY PROVED).
+    from `type_II_sieve_bound` via `sieve_implies_stable_ratio` (PROVED).
 
     Computationally verified: R ≈ 0.924 for N = 100..1500.
     The coprimality density 6/π² suppresses cross-parity coupling. -/
@@ -437,7 +437,7 @@ axiom stable_ratio_parity :
       vᵀ H_eff v ≥ (1 - R) · vᵀAv
 
     Proof: vᵀ H_eff v = vᵀAv - vᵀ(BC⁻¹Bᵀ)v ≥ vᵀAv - R·vᵀAv = (1-R)·vᵀAv.
-    Pure linear algebra — FULLY PROVED, zero axioms. -/
+    Pure linear algebra — PROVED, 0 axioms. -/
 theorem schur_complement_lower_from_ratio (N : ℕ) (_hN : 10 ≤ N)
     (R : ℝ) (_hR_nn : 0 ≤ R) (_hR_lt : R < 1)
     (h_ratio : ∀ v : Fin (N - 1) → ℝ, v ≠ 0 →
@@ -544,4 +544,4 @@ theorem schur_to_distance_scaling_v2
 -- AXIOM: stable_ratio_parity (PROVED in BilinearSieve as type_II_implies_stable_ratio)
 -- AXIOM: gram_eigenvalue_log_scaling (eigenvalue log-scaling)
 -- AXIOM: eigenvalue_implies_distance_bound (eigenvalue → NB distance, spectral theory)
--- STATUS: ZERO SORRY ✓
+-- STATUS: 0 sorry ✓

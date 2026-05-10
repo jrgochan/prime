@@ -3,7 +3,7 @@
 
   ## ATTEMPT: PNT → d² → 0 → RH (Unconditional Forward)
 
-  If this compiles with FULLY PROVED, it would prove the Riemann Hypothesis!
+  If this compiles with PROVED, it would prove the Riemann Hypothesis!
   (Because PNT is unconditionally true.)
 
   The forward direction decomposes as:
@@ -43,7 +43,7 @@ open Real Matrix Finset MeasureTheory Filter Cathedral.Vasyunin ArithmeticFuncti
 
 /-- **UNCONDITIONAL FORWARD**: PNT → d² → 0.
 
-    If proved, combined with nyman_beurling_converse (PROVED, FULLY PROVED),
+    If proved, combined with nyman_beurling_converse (PROVED),
     this gives an unconditional proof of the Riemann Hypothesis.
 
     The attempt: use the PROVED `mertens_implies_l2_decay_34` with

@@ -34,7 +34,7 @@ import Mathlib.Algebra.Order.Chebyshev
   The ground state eigenvector scars onto large composites near
   the matrix boundary, with only 4-15% weight on prime indices.
 
-  Status: 3 theorems proved. FULLY PROVED. Zero axioms. NOT on crown path.
+  Status: 3 theorems proved. PROVED. Zero axioms. NOT on crown path.
   Created: April 28, 2026 — Exploration 19.
 -/
 

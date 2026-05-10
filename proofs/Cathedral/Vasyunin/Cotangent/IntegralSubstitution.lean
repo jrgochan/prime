@@ -10,7 +10,7 @@
   substitution u = dx, and integral_add_adjacent_intervals for splitting.
 
   Created: April 25, 2026 — The Weekend Assault
-  Status: FULLY PROVED
+  Status: PROVED
 -/
 
 import Cathedral.Vasyunin.Cotangent.LogDigammaBridge
@@ -180,7 +180,7 @@ theorem tail_integral_value (j' k' d : ℕ) (hj : 1 ≤ j') (hk : 1 ≤ k') (hd 
       intro u hu
       exfalso; linarith [hu.1, hu.2, show (1:ℝ) ≤ (d:ℝ) from by exact_mod_cast (by omega : 1 ≤ d)]
   rw [hrw]
-  -- Step 2: Elementary integral computation (PROVED!)
+  -- Step 2: Elementary integral computation — PROVED
   exact elementary_inv_sq_integral j' k' d hj hk hd
 
 end Cathedral.Vasyunin.IntegralSubstitution

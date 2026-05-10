@@ -18,11 +18,11 @@
 
   Both cases are now PROVED:
     - a=1: From FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
-    - a≥2: From TwoTileEval.gramIntegral_eq_formula_coprime (FULLY PROVED)
+    - a≥2: From TwoTileEval.gramIntegral_eq_formula_coprime (PROVED)
 
   Created: May 2, 2026
-  Updated: May 5, 2026 — AXIOM GRADUATED → THEOREM (FULLY PROVED, zero axiom)
-  Status: ZERO SORRY, ZERO AXIOM 🎓
+  Updated: May 5, 2026 — AXIOM GRADUATED → THEOREM (PROVED, 0 axiom)
+  Status: 0 sorry, ZERO AXIOM 🎓
 -/
 
 import Cathedral.Vasyunin.Cotangent.FractSeriesEval
@@ -45,7 +45,7 @@ namespace Cathedral.Vasyunin.AlgebraicLimit
 
     Previously an axiom (cycle-breaking stub). Now proved via:
       TwoTileEval.gramIntegral_eq_formula_coprime
-    which uses DeltaDirectEval (FULLY PROVED) → TsumDirectEval → TwoTileEval.
+    which uses DeltaDirectEval (PROVED) → TsumDirectEval → TwoTileEval.
 
     The import cycle was discovered to not exist: DeltaDirectEval does NOT
     import AlgebraicLimit or any file that depends on it. -/
@@ -56,8 +56,8 @@ theorem gramIntegral_eq_formula_ge2 (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b)
 
 /-- **THEOREM**: The Vasyunin-Gram integral identity for all coprime (a,b).
 
-    - a=1: PROVED from FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree (FULLY PROVED)
-    - a≥2: PROVED from TwoTileEval.gramIntegral_eq_formula_coprime (FULLY PROVED) -/
+    - a=1: PROVED from FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree (PROVED)
+    - a≥2: PROVED from TwoTileEval.gramIntegral_eq_formula_coprime (PROVED) -/
 theorem gramIntegral_eq_formula_axiom (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     Assembly.gramIntegral a b = DigammaReflection.vasyuninGramFormula a b := by
@@ -69,8 +69,8 @@ theorem gramIntegral_eq_formula_axiom (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤ b)
 -- AUDIT
 -- ════════════════════════════════════════════════
 -- STATUS (May 5, 2026):
---   a=1 case: FULLY PROVED (FULLY PROVED, zero axiom)
---   a≥2 case: FULLY PROVED (FULLY PROVED, zero axiom) 🎓
+--   a=1 case: PROVED (0 axiom)
+--   a≥2 case: PROVED (0 axiom) 🎓
 --
 -- GRADUATION HISTORY:
 --   May 2, 2026: Created as placeholder stub

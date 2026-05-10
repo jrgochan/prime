@@ -17,7 +17,7 @@
   lifts to equality in the general case.
 
   Created: April 25, 2026 — The Weekend Assault
-  Status: IN PROGRESS
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.LogDigammaBridge

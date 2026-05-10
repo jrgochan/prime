@@ -21,7 +21,7 @@ import Cathedral.Perron.MertensConversion
 noncomputable section
 open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 
-/-- **THEOREM (PROVED!)**: Assembly — the two sub-bounds imply the L² decay.
+/-- **THEOREM — PROVED**: Assembly — the two sub-bounds imply the L² decay.
 
     ∃ K > 0, ∀ N ≥ 10, ∫(1-f)² ≤ K/log(N)
 
@@ -107,7 +107,7 @@ theorem mertens_34_implies_convergence :
     _ = ε * Real.log (N:ℝ) := mul_comm _ _
 
 -- ════════════════════════════════════════════════
--- §4. THE CROWN: rh_implies_l2_convergence (PROVED!)
+-- §4. THE CROWN: rh_implies_l2_convergence — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM**: RH ⟹ d²_N → 0.

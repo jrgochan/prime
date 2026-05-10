@@ -8,7 +8,7 @@
   - schur_complement_posDef: G PD + bᵀG⁻¹b < 1 → C PD
   - schur_complement_converse: G PD + C PD → bᵀG⁻¹b < 1
 
-  All theorems: FULLY PROVED, zero axioms.
+  All theorems: PROVED, 0 axioms.
 
   Extracted from Variational.lean (April 11, 2026).
 -/

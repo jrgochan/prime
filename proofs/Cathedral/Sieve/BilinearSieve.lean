@@ -15,7 +15,7 @@ import Cathedral.Sieve.VasyuninExpansion
     ## Purpose
 
     A **typed interface** between the Discrete Lichnerowicz framework
-    (pure linear algebra, proved in ParitySchur.lean with FULLY PROVED)
+    (pure linear algebra, proved in ParitySchur.lean with PROVED)
     and the analytic number theory needed to prove the curvature bound R < 1.
 
     This file does NOT prove the number theory. Instead, it precisely

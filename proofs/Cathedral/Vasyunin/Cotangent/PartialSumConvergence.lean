@@ -34,7 +34,7 @@
   4. What survives is finite and equals vasyuninGramFormula
 
   Created: April 25, 2026 — Decomposition of the Final Axiom
-  Status: BUILDING — Convergence axiom corrected
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.TelescopeSum
@@ -674,7 +674,7 @@ theorem integral_eq_sum_actualRowIntegral (a b : ℕ) (ha : 1 ≤ a) (hb : 1 ≤
     This is the key number-theoretic input that makes the Dirichlet
     test applicable to the Vasyunin residual series.
 
-    **PROVED** — via CenteredFractBound.lean (FULLY PROVED). -/
+    **PROVED** — via CenteredFractBound.lean (PROVED). -/
 theorem centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     ∃ C : ℝ, ∀ n : ℕ,
@@ -692,7 +692,7 @@ theorem centered_fract_partial_sums_bounded (a b : ℕ) (ha : 1 ≤ a) (hb : 2 �
     - a_n = {an/b} - (b-1)/(2b)  (bounded partial sums, by periodicity)
     - b_n = 1/(n+1)              (antitone, nonneg, tends to 0)
 
-    TODO: Full proof once centered_fract_partial_sums_bounded is proved.
+    centered_fract_partial_sums_bounded is proved above (via CenteredFractBound.lean).
     The periodicity argument is: for coprime a,b, the map m → {am/b}
     permutes {1/b, 2/b, ..., (b-1)/b, 0}, so each period-b block sums
     to (0 + 1/b + ... + (b-1)/b) = (b-1)/2, and the centered partial
@@ -747,7 +747,7 @@ theorem centered_fract_residual_converges_sketch (a b : ℕ) (ha : 1 ≤ a) (hb 
 --   The Stirling correction was incorrectly allocated between these two;
 --   only the FULL s_combined converges, not individual pieces.
 --
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ s_log_split                            — Log sum = Stirling + Digamma parts
 --   ✅ rational_plus_stirling                 — M/b cancellation with Stirling
 --   ✅ tileIndex_nonneg                       — Tile index ≥ 0

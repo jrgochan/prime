@@ -30,7 +30,7 @@
   digamma formula gives the cotangent values.
 
   Created: April 14, 2026 (Phase 3: The Bridge)
-  Status: Complete — FULLY PROVED (April 25, 2026)
+  Status: Complete — PROVED (April 25, 2026)
 -/
 
 import Cathedral.Vasyunin.Cotangent.DigammaReflection
@@ -643,7 +643,7 @@ theorem gcd_div_eq_one (j k : ℕ) (hj : 1 ≤ j) (_hk : 1 ≤ k) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, zero axiom):
+-- PROVED (0 axiom):
 --   ✅ partialDigammaSum_one       — S_N(1) = 0
 --   ✅ tileIndex_pos               — ⌊jm/k⌋ ≥ 1 when jm ≥ k
 --   ✅ coprime_after_gcd           — j/gcd and k/gcd are coprime

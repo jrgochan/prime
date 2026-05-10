@@ -22,8 +22,8 @@
      (max per-class error < 10⁻²⁹⁹) in two-tile-decomposition.
 
   Created: May 3, 2026
-  Updated: May 5, 2026 — rewired to TwoTileEval (FULLY PROVED, zero axiom)
-  Status: ZERO SORRY, ZERO AXIOM
+  Updated: May 5, 2026 — rewired to TwoTileEval (PROVED, 0 axiom)
+  Status: 0 sorry, ZERO AXIOM
 -/
 
 import Cathedral.Vasyunin.Cotangent.TwoTileCorrection
@@ -121,7 +121,7 @@ theorem gramIntegral_eq_formula_of_delta (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ 
 -- It previously depended on ColumnSumEval.gramIntegral_eq_formula_column (1 gap).
 --
 -- The gap-free proof of gramIntegral = formula now lives in:
---   TwoTileEval.gramIntegral_eq_formula_coprime (FULLY PROVED)
+--   TwoTileEval.gramIntegral_eq_formula_coprime (PROVED)
 -- which cannot be imported here without creating a cycle
 -- (DeltaResidueEval → TwoTileEval → TsumDirectEval → DeltaResidueEval).
 --

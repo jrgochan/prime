@@ -280,7 +280,7 @@ def vasyuninGramFormula (j k : ℕ) : ℝ :=
 --   ✅ vasyuninGramFormula         — The target closed-form expression
 --   ✅ vasyuninCotSum_of_le_one    — V(a,b) = 0 when a ≤ 1
 --
--- PROVED (FULLY PROVED, zero axioms):
+-- PROVED (PROVED, 0 axioms):
 --   ✅ digamma_add_nat              — ψ(s+n) = ψ(s) + Σ 1/(s+k)
 --   ✅ digamma_reflection_complex   — ψ(1-s) - ψ(s) = π·cot(πs) ← WAS AXIOM
 --   ✅ rat_not_int                   — m/q ∉ ℤ for 1 ≤ m < q

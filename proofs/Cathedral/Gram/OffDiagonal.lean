@@ -3,7 +3,7 @@
 
   ## Off-diagonal Gram entry upper bound
 
-  ### Proven theorems (FULLY PROVED, zero axioms):
+  ### Proven theorems (PROVED, 0 axioms):
   - gramEntry_le_avg_diag: G_{j,k} ≤ (G_{j,j}+G_{k,k})/2 (AM-GM)
   - gramEntry_le_third_offdiag: G_{j,k} ≤ 1/3 for j,k ≥ 3
   - gram_entry_offdiag_upper_amgm: G_{j,k} ≤ 1/4+1/(jk) for j,k ≥ 3, jk ≤ 12

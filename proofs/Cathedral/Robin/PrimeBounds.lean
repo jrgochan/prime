@@ -1,7 +1,7 @@
 /-
   Cathedral/Robin/PrimeBounds.lean
 
-  ## Prime Power Bounds & Lagarias for All Primes (PROVED!)
+  ## Prime Power Bounds & Lagarias for All Primes — PROVED
 -/
 
 import Cathedral.Robin.Defs
@@ -288,7 +288,7 @@ private lemma lagarias_ge_11 {p : ℕ} (hp : 11 ≤ p) :
 -- PART VI: THE MASTER THEOREM
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED!)**: Lagarias holds for ALL primes. -/
+/-- **THEOREM — PROVED**: Lagarias holds for ALL primes. -/
 theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
     (sumOfDivisors p : ℝ) ≤
       harmonicR p + Real.exp (harmonicR p) * Real.log (harmonicR p) := by
@@ -322,7 +322,7 @@ theorem lagarias_for_primes {p : ℕ} (hp : p.Prime) :
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   FULLY PROVED
+--   PROVED
 --   ZERO axioms
 --   ALL PROVED:
 --     ✅ geom_sum_le_two_pow           — Σ P^j ≤ 2·P^k

@@ -6,7 +6,7 @@ import Cathedral.Perron.Defs
   Rectangle contour for the Perron formula: defines the
   rectangular path and proves Cauchy's theorem applies.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 /-!

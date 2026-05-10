@@ -362,9 +362,9 @@ end
 --   2 axioms:
 --     📐 vaughan_decomposition  (Vaughan's identity — Tier 2)
 --     📐 type_I_bound           (PNT/B-V for Type I sums — Tier 2)
---   FULLY PROVED
+--   PROVED
 --
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ gramBilinear_decomposition  (uᵀGv = bg + corr — PROVED!)
 --   ✅ correctionBilinear, backgroundBilinear, gramBilinear (definitions)
 --   ✅ correctionByDivisor, typeICoeff, typeIICoeff (definitions)

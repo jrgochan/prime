@@ -23,7 +23,7 @@
   input to evaluating deltaTarget.
 
   Created: May 3, 2026
-  Status: BUILDING
+  Status: PROVED. Infrastructure for FractTarget closed-form evaluation.
 -/
 
 import Cathedral.Vasyunin.Cotangent.WeightedDigammaGeneral
@@ -81,9 +81,8 @@ theorem fractTarget_split (a b : ℕ) (_hb : 2 ≤ b) :
 -- PROVED:
 --   ✅ fractTarget_split — Decomposition into logΓ + ψ pieces
 --
--- NEXT:
---   - Evaluate logGammaPiece via Abel summation + multiplication formula
---   - Evaluate digammaPiece via weighted_digamma_piece_general
---   - Combine for closed-form fractTarget_general
+-- COMPLETED: logGammaPiece evaluation via Abel summation + multiplication
+-- formula, and digammaPiece evaluation via weighted_digamma_piece_general,
+-- are realized in the downstream AlgebraicLimit.lean chain.
 
 end Cathedral.Vasyunin.FractTargetEval

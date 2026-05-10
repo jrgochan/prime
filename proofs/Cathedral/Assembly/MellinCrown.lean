@@ -148,13 +148,13 @@ theorem rh_implies_bd_convergence_mellin :
 -- §3. AUDIT (updated May 9, 2026 — Exploration 31)
 -- ═══════════════════════════════════════════════
 
--- ALL PROVED (FULLY PROVED on this path):
+-- ALL PROVED (PROVED on this path):
 --   ✅ rh_implies_bd_convergence_mellin  — RH ⟹ d²_N → 0
 --   ✅ critical_line_mellin_variance     — THEOREM (graduated via Perron bridge)
 --
 -- DEPENDENCIES:
---   ✅ parseval_bridge_white             — L²(0,1) = Mellin L²  (FULLY PROVED, 0 axiom)
---   ✅ bdResidualV, bdLinComb, bdMoebiusWeight  — Definitions (FULLY PROVED)
+--   ✅ parseval_bridge_white             — L²(0,1) = Mellin L²  (PROVED, 0 axiom)
+--   ✅ bdResidualV, bdLinComb, bdMoebiusWeight  — Definitions (PROVED)
 --   ✅ critical_line_mellin_variance_proved — MellinVarianceProof.lean
 --   ✅ critical_line_mellin_variance_from_perron — MellinPerronBridge.lean
 --

@@ -153,7 +153,7 @@ theorem convergent_log_series_bound :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- ZERO SORRY in this file!
+-- 0 sorry in this file!
 --
 --   ✅ logWeight                       — Definition
 --   ✅ logWeight_self                  — f(N) = 0

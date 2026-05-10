@@ -100,7 +100,7 @@ theorem l2_crude_upper_bound (N : ℕ) (v : Fin (N - 1) → ℝ) :
         rw [intervalIntegral.integral_const]; simp
     _ = _ := by ring
 
-/-- **THEOREM (PROVED!)**: The L² error decomposes as
+/-- **THEOREM — PROVED**: The L² error decomposes as
     ∫₀¹ (1-f)² = 1 - 2·∫₀¹ f + ∫₀¹ f².
 
     This uses integral linearity (sub, const_mul, add)
@@ -131,7 +131,7 @@ theorem l2_expansion (N : ℕ) (v : Fin (N - 1) → ℝ) :
 -- §1b. INTEGRAL-SUM SWAP: ∫ Σ vₖ·ρₖ = Σ vₖ · ∫ ρₖ
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED!)**: The integral of the BD linear combination
+/-- **THEOREM — PROVED**: The integral of the BD linear combination
     equals the sum of weighted basis integrals.
 
     ∫₀¹ Σ vₖ·{1/(kx)} dx = Σ vₖ · ∫₀¹ {1/(kx)} dx
@@ -166,7 +166,7 @@ theorem integral_bdLinComb_eq_sum (N : ℕ) (v : Fin (N - 1) → ℝ) :
   congr 1; ext i
   exact intervalIntegral.integral_const_mul (v i) _
 
-/-- **THEOREM** (PROVED!): For u > 1, {1/u} = 1/u.
+/-- **THEOREM** — PROVED: For u > 1, {1/u} = 1/u.
     Since 0 < 1/u < 1, the floor is 0. -/
 theorem fract_inv_eq_inv_of_gt_one (u : ℝ) (hu : 1 < u) :
     Int.fract (1 / u) = 1 / u := by
@@ -222,7 +222,7 @@ theorem abel_bound_34
 -- §2b. SUMMAND BOUND: k^{3/4} · |Δw(k)| = k^{-1/4}/log N
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED!)**: Each Abel summand with O(x^{3/4}) bound is O(k^{-1/4}/log N).
+/-- **THEOREM — PROVED**: Each Abel summand with O(x^{3/4}) bound is O(k^{-1/4}/log N).
 
     C_m · k^{3/4} · |Δ logWeight(k)|
     ≤ C_m · k^{3/4} · 1/(k · log N)     [by log_weight_derivative_bound]

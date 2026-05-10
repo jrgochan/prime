@@ -6,7 +6,7 @@ import Cathedral.Perron.ResidueLtOne
 
   Bounds on the Perron kernel 1/(2πi) · x^s/s.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 /-!

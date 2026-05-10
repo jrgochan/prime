@@ -14,7 +14,7 @@
   but handles the PRODUCT of two fractional parts.
 
   Created: April 20, 2026
-  Status: IN PROGRESS — the night assault
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Defs
@@ -235,7 +235,7 @@ private theorem fract_simple (j : ℕ) (hj : 1 ≤ j) (x : ℝ)
     G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx for j ≠ k.
 
     PROVED via:
-    1. FormulaBridge: vasyuninGramEntry = vasyuninGramFormula [FULLY PROVED]
+    1. FormulaBridge: vasyuninGramEntry = vasyuninGramFormula [PROVED]
     2. GCDReduction: vasyuninGramFormula = gramIntegral [from coprime case + GCD recurrence]
 
     This eliminates TWO axioms from the Cathedral:

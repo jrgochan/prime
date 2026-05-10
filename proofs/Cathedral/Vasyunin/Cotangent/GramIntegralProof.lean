@@ -8,7 +8,7 @@
 
   ### Proof Strategy
 
-  **Route A** (integral decomposition, FULLY PROVED, ZERO axioms):
+  **Route A** (integral decomposition, ZERO axioms):
     gramIntegral = strip + Σ∞ actualRowIntegral
     Route A: the tail ∫₀^{1/(aM)} → 0, so gramIntegral = lim partialM.
     The partial integral partialM equals strip + Σ_{m=1}^{M-1} actualRowIntegral(m).
@@ -29,7 +29,7 @@
 
   Created: May 2, 2026
   Updated: May 3, 2026 — Removed AlgebraicLimit import for axiom graduation
-  Status: PROVED — FULLY PROVED, zero axioms
+  Status: PROVED — PROVED, 0 axioms
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -351,7 +351,7 @@ theorem strip_integral_value (a b : ℕ) (ha : 2 ≤ a) (hb : 1 ≤ b) (hab : a 
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, ZERO axioms in this file):
+-- PROVED (PROVED, ZERO axioms in this file):
 --   ✅ tail_tends_to_zero               — ∫₀^{1/(aM)} → 0
 --   ✅ route_A                          — partialM → gramIntegral
 --   ✅ actualRowIntegral_summable       — Σ actualRowIntegral converges

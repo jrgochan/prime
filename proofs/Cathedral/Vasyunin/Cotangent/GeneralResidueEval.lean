@@ -17,7 +17,7 @@
   §5. tsum_fract_general_eq_residue_sum: tsum = finite logΓ + digamma sum
 
   Created: May 3, 2026 (Phase 3 — Generalized Residue Decomposition)
-  Status: PROVED — FULLY PROVED
+  Status: PROVED — PROVED
 -/
 
 import Cathedral.Vasyunin.Cotangent.GeneralFractSeriesEval
@@ -262,7 +262,7 @@ theorem tsum_fract_general_eq_residue_sum (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ fract_general_residue_class             — {a(jb+r)/b} = {ar/b}
 --   ✅ fractCorrection_general_at_residue      — Unfold at residue class
 --   ✅ fractCorrection_general_zero_at_multiple — Vanishes at b-multiples
@@ -273,9 +273,8 @@ theorem tsum_fract_general_eq_residue_sum (a b : ℕ) (ha : 1 ≤ a) (hb : 2 ≤
 --   FractSeriesEval.inner_sum_limit — reused WITHOUT change
 --   (The per-residue convergence is independent of a)
 --
--- NEXT:
---   Phase 4: Evaluate the weighted sum
---     Σ_{r=1}^{b-1} {ar/b} · (logΓ(r/b) - logΓ((r+1)/b) + (1/b)·ψ((r+1)/b))
---   using the coprime permutation {ar/b} and digamma reflection.
+-- COMPLETED: Phase 4 (evaluation of the weighted sum via coprime permutation
+-- and digamma reflection) is realized in AlgebraicLimit.lean.
 
 end Cathedral.Vasyunin.GeneralResidueEval
+

@@ -3,7 +3,7 @@
 
   ## S₁ Decay: |S₁(N)| ≤ C·N^{-1/4}
 
-  The FULLY PROVED decay bound for the unweighted PNT sub-sum:
+  The PROVED decay bound for the unweighted PNT sub-sum:
     S₁(N) = Σ_{k=1}^N μ(k)/k
 
   Strategy:

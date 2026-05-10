@@ -8,7 +8,7 @@ import Cathedral.Perron.Rectangle
   Residue computation for σ > 1 in the Perron formula.
   The dominant contribution from the pole of ζ(s)/s at s = 1.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 /-!

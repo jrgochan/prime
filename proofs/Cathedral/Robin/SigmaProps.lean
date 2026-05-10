@@ -87,7 +87,7 @@ theorem sigma_one_ge_succ (n : ℕ) (hn : 2 ≤ n) :
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   FULLY PROVED
+--   PROVED
 --   ZERO axioms
 --   4 PROVED theorems:
 --     ✅ sigma_one_prime              — σ(p) = p + 1

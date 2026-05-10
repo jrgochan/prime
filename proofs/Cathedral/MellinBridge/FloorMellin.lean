@@ -7,7 +7,7 @@ import Cathedral.MellinBridge.Basic
   Proves analytic properties of M[{1/x}](s) and related transforms
   needed for the frequency-domain analysis of Nyman-Beurling residuals.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 /-! # Cathedral.MellinBridge.FloorMellin
@@ -23,7 +23,7 @@ Helper lemmas for proving `floor_mellin_eq_zeta`:
 - `abel_sum'`: Abel summation by induction
 - `piece_setIntegral`: set integral for each piece
 - `integral_decomp`: inductive decomposition of the integral
-- `floor_mellin_eq_zeta`: the main theorem (FULLY PROVED)
+- `floor_mellin_eq_zeta`: the main theorem (PROVED)
 -/
 
 noncomputable section
@@ -86,7 +86,7 @@ lemma ofReal_div_cpow (k n : ℕ) (hk : 1 ≤ k) (hn : 1 ≤ n) (s : ℂ) :
   rw [Complex.log_inv _ hn_arg]; ring
 
 /-- Abel summation by induction: ∑ (n+1)(aₙ₊₁ - aₙ₊₂) = ∑ aₙ₊₁ - N·aₙ₊₁.
-    Pure linear algebra — FULLY PROVED, zero axioms. -/
+    Pure linear algebra — PROVED, 0 axioms. -/
 private lemma abel_sum' (a : ℕ → ℂ) : ∀ N : ℕ,
     ∑ n ∈ Finset.range N, (↑(n + 1) : ℂ) * (a (n + 1) - a (n + 2)) =
     ∑ n ∈ Finset.range N, a (n + 1) - (↑N : ℂ) * a (N + 1) := by
@@ -137,7 +137,7 @@ lemma rpow_neg_tendsto' (σ : ℝ) (hσ : 1 < σ) :
 open Topology in
 /-- N·(1/(N+1))^s → 0 as N → ∞ for Re(s) > 1.
     Proof: ‖N·(1/(N+1))^s‖ ≤ (N+1)^{1-Re(s)} → 0 by squeeze.
-    FULLY PROVED, zero axioms. -/
+    PROVED, 0 axioms. -/
 lemma tail_vanishes' (s : ℂ) (hs : 1 < s.re) :
     Tendsto (fun N : ℕ => (↑N : ℂ) * (↑(1/((N:ℝ)+1)) : ℂ) ^ s) atTop (nhds 0) := by
   rw [NormedAddGroup.tendsto_nhds_zero]

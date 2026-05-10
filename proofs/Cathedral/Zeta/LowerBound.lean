@@ -104,7 +104,7 @@ private lemma div_le_div_of_le_of_le
     ‖ζ(s)‖ ≥ (1/4) · exp(-C_ε · log(2+|t|)) where C_ε depends only on ε.
 
     Proof via Borel-Carathéodory on the holomorphic log of ζ.
-    ZERO SORRY — fully machine-checked. -/
+    0 sorry — fully machine-checked. -/
 private lemma bc_inner_bound (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2)
     (s : ℂ) (hs : 1/2 + ε ≤ s.re) (ht : 2 ≤ |s.im|) :
@@ -251,12 +251,12 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     This replaces the axiom `zeta_polynomial_lower_bound_rh` from
     ZetaConvexity.lean.
 
-    The BC inner bound (bc_inner_bound) is ZERO SORRY.
+    The BC inner bound (bc_inner_bound) is 0 sorry.
     The existential wrapper case-splits on A vs B_ε:
-    - A ≥ B_ε (= 20(3-2ε)/ε): FULLY PROVED (FULLY PROVED)
+    - A ≥ B_ε (= 20(3-2ε)/ε): PROVED
     - A < B_ε: delegated to Cathedral.Zeta.Hadamard.thin_strip_lower_bound_exists,
       which uses the zero-counting axiom (Hadamard product + N(T) = O(T log T)).
-      ZERO SORRY in this file — axiom is in Cathedral.Zeta.Hadamard.lean. -/
+      0 sorry in this file — axiom is in Cathedral.Zeta.Hadamard.lean. -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,

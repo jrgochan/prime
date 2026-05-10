@@ -340,7 +340,7 @@ private lemma norm_zeta_logderiv_le {s : ℂ} (hs : 2 ≤ s.re)
 
 /-- **G' = f'/f**: If f = c·exp(G) on a ball, then deriv G = deriv f / f.
     This is the algebraic derivative identity from the exponential representation,
-    proved by differentiating both sides and using `ring`. FULLY PROVED. -/
+    proved by differentiating both sides and using `ring`. PROVED. -/
 private lemma G_deriv_eq_logderiv_of_exp_eq
     {c : ℂ} {R : ℝ} (_hR : 0 < R)
     {f G : ℂ → ℂ}

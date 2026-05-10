@@ -185,7 +185,7 @@ as `sorry` targets to be filled as the technology matures.
 - `gram_subseq_from_certificates` — PROVED ✅ (the oracle bridge)
 - `rh_from_certificates` — PROVED ✅ (complete chain to RH)
 
-### FULLY PROVED. Zero axioms beyond GramBoundDirect.lean.
+### PROVED. Zero axioms beyond GramBoundDirect.lean.
 
 ### Roadmap:
 1. Build rational bound infrastructure for Real.log

@@ -452,7 +452,7 @@ This BYPASSES `exp_tail_bound` entirely (no integral comparison needed!).
 
 The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 `log_times_exp_bound`, `s1_le_const_div_log`, and
-`unconditional_mean_bound` are all PROVED with FULLY PROVED.
+`unconditional_mean_bound` are all PROVED with PROVED.
 -/
 
 #check MediumPNT

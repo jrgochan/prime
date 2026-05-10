@@ -6,7 +6,7 @@ import Cathedral.Perron.KernelBound
   Statement of Perron's formula connecting Dirichlet series
   to partial sums via contour integration.
 
-  FULLY PROVED. Zero axioms.
+  PROVED. Zero axioms.
 -/
 
 /-!

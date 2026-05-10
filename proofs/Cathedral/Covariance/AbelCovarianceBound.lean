@@ -42,7 +42,7 @@
   Given: |M(x)| ≤ C · x^{1/2} · log²(x)
   Prove: vᵀCv ≤ C_cov / log(N)
 
-  ### Available tools (all FULLY PROVED, no circularity)
+  ### Available tools (all PROVED, no circularity)
 
   ✅ abel_summation, abel_summation_abs_bound (AbelSummation.lean)
   ✅ bd_l2_error_eq_quad_error (VasyuninBypass.lean)
@@ -50,7 +50,7 @@
   ✅ moebius_dot_product_approx_one_uniform_34 (DotProductBound.lean)
   ✅ inner_sum_abel, quadForm_as_double_sum (QuadFormIdentity.lean)
   ✅ gram_form_direct_bound (BilinearAbel.lean) — but gives K=O(N), not 1+C/logN
-  ✅ S₁, S₂, S₃ tail decay (AbelTail/*.lean — FULLY PROVED)
+  ✅ S₁, S₂, S₃ tail decay (AbelTail/*.lean — PROVED)
   ✅ logsq_le_rpow_quarter, mertens_half_implies_three_quarter (THIS FILE)
 
   May 10, 2026 — cleanup-v17

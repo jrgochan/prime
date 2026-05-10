@@ -335,7 +335,7 @@ theorem row_ftc_combined (j k m n : ℕ) (hj : 1 ≤ j) (hk : 1 ≤ k) (hm : 1 �
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ f_eq_components           — F = rational + log + linear
 --   ✅ rational_telescope        — rational terms cancel at shared boundaries
 --   ✅ rational_sum_eq_endpoints — rational telescope to endpoints

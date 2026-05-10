@@ -25,7 +25,7 @@
 
   Created: May 2, 2026 (The Midnight Forge)
   Graduated: May 3, 2026 (axiom removed — FractSeriesEval has axiom-free path)
-  Status: CERTIFIED (FULLY PROVED, ZERO axioms)
+  Status: CERTIFIED (PROVED, ZERO axioms)
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -525,7 +525,7 @@ theorem fractCorrection_summable (b : ℕ) (_hb : 2 ≤ b) :
 --
 --   FractSeriesEval.gramIntegral_eq_formula_a1_axiomFree
 --
--- which is FULLY PROVED, zero-axiom, proven via the full analytical
+-- which is PROVED, zero-axiom, proven via the full analytical
 -- chain: §1-§4 (this file) + §5a-§5c (this file) + fract evaluation
 -- (FractSeriesEval). The axiom is no longer needed for a=1.
 
@@ -533,7 +533,7 @@ theorem fractCorrection_summable (b : ℕ) (_hb : 2 ≤ b) :
 -- AUDIT (May 3, 2026 — AXIOM REMOVED)
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, ZERO AXIOMS):
+-- PROVED (PROVED, ZERO AXIOMS):
 --   ✅ strip_zero_a1                    — Strip integral vanishes for a=1
 --   ✅ all_single_tile_a1               — Every row is single-tile for a=1
 --   ✅ actual_eq_rowTerm_a1             — actualRowIntegral = rowTerm for a=1

@@ -14,7 +14,7 @@
   This file bridges them, proving they are equal for j ≠ k, j,k ≥ 1.
 
   Created: April 25, 2026 — The Weekend Assault, Phase 3
-  Status: IN PROGRESS
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Defs

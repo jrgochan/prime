@@ -6,7 +6,7 @@
   Provides the critical missing infrastructure for converting between
   natural number floor division and real-valued fractional parts.
 
-  ### Key Results (ALL PROVED, ZERO SORRY)
+  ### Key Results (ALL PROVED, 0 sorry)
 
   1. **int_floor_eq_nat_div**: ⌊(a * m : ℝ) / b⌋ = (a * m / b : ℕ)
   2. **nat_div_cast_eq**: ↑(a*m/b : ℕ) = am/b - {am/b}
@@ -123,7 +123,7 @@ lemma int_fract_eq_zero_iff (a m b : ℕ) (hb : 0 < b) :
     rw [hk, Nat.mul_mod_right, Nat.cast_zero, zero_div]
 
 -- ════════════════════════════════════════════════
--- AUDIT — ALL PROVED, ZERO SORRY ✅
+-- AUDIT — ALL PROVED, 0 sorry ✅
 -- ════════════════════════════════════════════════
 -- ✅ int_floor_eq_nat_div — ⌊↑(am)/↑b⌋ = ↑(a*m/b : ℕ)
 -- ✅ int_floor_eq_nat_div' — version with (a:ℝ)*(m:ℝ)

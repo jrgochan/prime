@@ -117,10 +117,10 @@ theorem nbDistSq_decays :
 --  See: Cathedral.Vasyunin.Proof.LambdaTrick.forward_bridge_from_lambda_trick
 
 -- ════════════════════════════════════════════════
--- PART XIV: THE FORWARD DIRECTION (PROVED!)
+-- PART XIV: THE FORWARD DIRECTION — PROVED
 -- ════════════════════════════════════════════════
 
-/-- **THEOREM (PROVED!)**: RH ⟹ d²_N → 0.
+/-- **THEOREM — PROVED**: RH ⟹ d²_N → 0.
 
     The Nyman-Beurling forward direction: the Riemann Hypothesis
     implies convergence of the NB distance to zero.

@@ -132,7 +132,7 @@ theorem cov_bound_from_gram_and_mean
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit: ZERO SORRY, ZERO AXIOMS
+## Audit: 0 sorry, ZERO AXIOMS
 
 All four theorems in this file are fully proved:
 - `quadform_as_sum`: purely algebraic expansion ✅

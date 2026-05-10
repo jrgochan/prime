@@ -126,7 +126,7 @@ axiom mertens_bound_from_rh :
     |((mertensFunction x : ℤ) : ℝ)| ≤ C * x ^ (1/2 : ℝ) * (Real.log x) ^ 2
 
 -- ════════════════════════════════════════════════
--- STEP 2: POLE NEUTRALIZATION (PROVED!)
+-- STEP 2: POLE NEUTRALIZATION — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM (PROVED)**: The corrected weights neutralize the 1/x pole.
@@ -237,7 +237,7 @@ end
 --   2 axioms (elementary, independently verifiable):
 --     📐 mertens_bound_from_rh              (RH → M(x) = O(√x log²x) — classical NT)
 --     📐 abel_summation_l2_bound             (Mertens → L² bound — real analysis)
---   FULLY PROVED:
+--   PROVED:
 --     ✅ corrected_weights_pole_free         (Σ k·v_k = 0 — PROVED!)
 --     ✅ rh_weight_construction_derived      (PROVED — 2-step composition)
 --

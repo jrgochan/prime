@@ -270,7 +270,7 @@ private lemma pnt_mertens_tail_domination
     |S₃ N - (-2 * Real.eulerMascheroniConstant)| ≤ K / Real.log (N : ℝ) := by
   -- Step 1: Get raw Abel-Mertens tail bounds
   obtain ⟨C_raw, hC_raw_pos, hraw⟩ := abel_mertens_tail_raw C_m hC hMertens hPNT₁ hPNT₂ hPNT₃
-  -- Step 2: Get rpow domination bounds (PROVED!)
+  -- Step 2: Get rpow domination bounds — PROVED
   obtain ⟨B₁, hB₁_pos, hB₁⟩ := rpow_quarter_log_bounded  -- N^{-1/4}·logN ≤ B₁ for N ≥ 1
   -- Step 3: Assemble K
   -- |S₁(N)| ≤ C·N^{-1/4} = C·(N^{-1/4}·logN)/logN ≤ C·B₁/logN

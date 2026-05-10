@@ -9,7 +9,7 @@
   ### Status (April 25, 2026)
 
   THEOREM (proved from PrimeNumberTheoremAnd.mu_pnt_alt):
-    `pnt_moebius_sum_div_tendsto` — Σ μ(k)/k → 0  ✅ ZERO SORRY
+    `pnt_moebius_sum_div_tendsto` — Σ μ(k)/k → 0  ✅ 0 sorry
 
   KNOWN SORRYS (2):
     `pnt_mu_log_div_k_derived`   — Σ μ(k)·ln(k)/k → -1    (sorry)
@@ -18,7 +18,7 @@
   ### Blocking Analysis
 
   These 2 sorrys do NOT block the MainChain (MainChain.lean):n
-    - MainChain.lean builds with FULLY PROVEDs
+    - MainChain.lean builds with PROVEDs
     - The log-weighted sums flow through PNTAbelMean → MillenniumWall → FinalDragon
       which is an ALTERNATIVE chain, not the primary MainChain path
     - The OneCrown/DirectL2Crown path uses PNT axioms from PNT/AbelMean.lean
@@ -156,7 +156,7 @@ theorem pnt_mu_div_k_derived :
     This is a standard PNT consequence, equivalent to -(1/ζ)'(1) = -1.
 
     BLOCKING: Requires a forward Tauberian theorem not in Mathlib 4.28.
-    ISOLATION: Does NOT block MainChain.lean (which has FULLY PROVEDs).
+    ISOLATION: Does NOT block MainChain.lean (which has PROVEDs).
     RESOLUTION: Will close when Mathlib gains forward Abel/Tauberian. -/
 theorem pnt_mu_log_div_k_derived :
     Tendsto (fun N =>
@@ -184,7 +184,7 @@ theorem pnt_mu_log_div_k_derived :
 
     BLOCKING: Same as sorry 1/2 — needs forward Tauberian + γ from
               ζ's Laurent expansion at s=1.
-    ISOLATION: Does NOT block MainChain.lean (which has FULLY PROVEDs).
+    ISOLATION: Does NOT block MainChain.lean (which has PROVEDs).
     RESOLUTION: Will close when Mathlib gains forward Abel/Tauberian. -/
 theorem pnt_mu_log_sq_div_k_derived :
     Tendsto (fun N =>
@@ -209,7 +209,7 @@ theorem pnt_mu_log_sq_div_k_derived :
 | 2 | `pnt_mu_log_sq_div_k_derived` | -2γ | Forward Tauberian + γ |
 
 **Isolation**: Neither sorry propagates to MainChain.lean.
-MainChain.lean builds with FULLY PROVEDs, FULLY PROVED warnings.
+MainChain.lean builds with PROVEDs warnings.
 
 **Upstream requirement**: Mathlib `LSeries_tendsto_sub_mul_nhds_one_of_tendsto_sum_div`
 provides the CONVERSE Tauberian (Σ → L-series). The FORWARD direction

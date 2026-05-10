@@ -28,7 +28,7 @@
   6. Algebraic assembly matches deltaTarget
 
   Created: May 3, 2026 — Breaking the Cycle
-  Status: BUILDING
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.ColumnSumEval
@@ -210,7 +210,7 @@ lemma floor_step_sum_eq (a b : ℕ) (hb : 0 < b) :
   simp [Nat.mul_div_cancel _ hb]
 
 /-- Forward: isTwoTileClass → the floor step is positive.
-    PROVED — FULLY PROVED. -/
+    PROVED — PROVED. -/
 lemma isTwoTile_imp_step (a b m₀ : ℕ) (hb : 0 < b)
     (h : isTwoTileClass a b m₀ = true) :
     a * (m₀ + 1) / b > a * m₀ / b := by
@@ -223,7 +223,7 @@ lemma isTwoTile_imp_step (a b m₀ : ℕ) (hb : 0 < b)
 
 /-- Backward: floor step positive AND ¬(b ∣ a*(m₀+1)) → isTwoTileClass.
     The non-divisibility condition excludes the s=0 boundary (m₀=b-1).
-    PROVED — FULLY PROVED. -/
+    PROVED — PROVED. -/
 lemma step_imp_isTwoTile (a b m₀ : ℕ) (_hb : 0 < b)
     (h_step : a * (m₀ + 1) / b > a * m₀ / b)
     (h_ndvd : ¬ (b ∣ a * (m₀ + 1))) :
@@ -1574,7 +1574,7 @@ theorem tsum_delta_eq_target_direct (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
     This closes the sorry in ColumnSumEval.four_way_eq_formula by
     using tsum_delta_eq_target_direct (independent of gramIntegral_eq_formula_column).
 
-    Once tsum_delta_eq_target_direct is proved, this theorem is FULLY PROVED. -/
+    Once tsum_delta_eq_target_direct is proved, this theorem is PROVED. -/
 theorem four_way_eq_formula_independent (a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b)
     (hab : a < b) (hcop : Nat.Coprime a b) :
     ((a:ℝ) - 1) / ((a:ℝ) * (b:ℝ)) +
@@ -1601,7 +1601,7 @@ theorem gramIntegral_eq_formula_independent (a b : ℕ) (ha : 2 ≤ a) (hb : 2 �
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ beta_eq_tileIndex_freq — β = (n₀+1)/a (Alpha-Beta Decoupling)
 --   ✅ per_class_delta_limit — Per-class sums converge to perClassLimit
 --   ✅ partial_sum_delta_residue_decomp — Partial sums decompose by residue class

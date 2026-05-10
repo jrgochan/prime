@@ -188,7 +188,7 @@ theorem rh_from_oracle : RiemannHypothesis :=
 /-!
 ## Audit
 
-### FULLY PROVED.
+### PROVED.
 
 ### Axioms (trusted computation):
 - `oracle_N2` through `oracle_N55440` — 9 individual DD-lossless certificates

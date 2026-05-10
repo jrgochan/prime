@@ -15,7 +15,7 @@
 
   ### Architecture
 
-  - §1: The ring-theory Woodbury identity (pure algebra, FULLY PROVED)
+  - §1: The ring-theory Woodbury identity (pure algebra)
   - §2: The Riemann Vacuum definition (structure)
   - §3: The Spectral Decoupling Theorem (main application)
 
@@ -34,7 +34,7 @@
   Formalized by Claude Actual (The Forge Master).
 
   Created: May 2, 2026 (The Midnight Forge)
-  Status: CERTIFIED (FULLY PROVED)
+  Status: CERTIFIED (PROVED)
 -/
 
 import Mathlib.Algebra.Ring.Basic
@@ -222,7 +222,7 @@ theorem condensate_protects_vacuum
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ core_interaction             — C·(V·A⁻¹·U)·Core⁻¹ = C - Core⁻¹
 --   ✅ woodbury_identity            — (A + UCV)·(Woodbury inverse) = 1
 --   ✅ condensate_protects_vacuum   — ∃ G⁻¹, G · G⁻¹ = 1
@@ -230,7 +230,7 @@ theorem condensate_protects_vacuum
 -- DEFINED:
 --   ✅ WoodburyCondensate           — Structure encoding Bulk + Condensate
 --
--- STATUS: CERTIFIED — FULLY PROVED, pure ring theory.
+-- STATUS: CERTIFIED — PROVED, pure ring theory.
 --
 -- ARCHITECTURE:
 --   This module is the algebraic ENGINE. It proves that any ring element

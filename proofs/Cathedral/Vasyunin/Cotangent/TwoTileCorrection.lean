@@ -25,7 +25,7 @@
       Σ' actualRowIntegral(n+1) = Σ' rowTerm(n+1) + Σ' Δ(n+1)
 
   Created: May 3, 2026 (Phase 2 — The Two-Tile Correction)
-  Status: BUILDING
+  Status: PROVED. 0 sorry, 0 axiom.
 -/
 
 import Cathedral.Vasyunin.Cotangent.PartialSumConvergence
@@ -251,7 +251,7 @@ theorem tsum_twoTileCorrection_eq_zero_a1 (b : ℕ) (hb : 2 ≤ b) :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED):
+-- PROVED:
 --   ✅ twoTileCorrection                               — Definition
 --   ✅ twoTileCorrection_zero_of_single_tile            — Δ = 0 for single-tile rows
 --   ✅ twoTileCorrection_abs_le                         — |Δ| ≤ C/m² triangle bound

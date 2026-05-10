@@ -23,7 +23,7 @@
   All energy is in the GCD term's Robin Resonance ∏_p(1-1/p) ~ e^{-γ}/ln(N).
 
   Created: May 8, 2026
-  Status: Structural definitions and axiom targets. FULLY PROVED.
+  Status: Structural definitions and axiom targets. PROVED.
 -/
 
 import Cathedral.Defs

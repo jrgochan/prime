@@ -496,9 +496,9 @@ theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit — ZERO SORRY ✓
+## Audit — 0 sorry ✓
 
-### Proved (FULLY PROVED, 0 axiom):
+### Proved (PROVED, 0 axiom):
   1. `sawtoothReal_bound` — |B₁| ≤ 1/2
   2. `sawtoothReal_add_one` — periodicity
   3. `sawtoothReal_measurable` — measurability
@@ -516,7 +516,7 @@ theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
 ### Axioms: 0 ✓
 
 ### Architecture:
-  **ALL PHASES COMPLETE — ZERO SORRY!**
+  **ALL PHASES COMPLETE — 0 sorry!**
   The Fourier–Gram Bridge is fully machine-checked:
     - Parseval: sawtoothFn → sawtooth_memLp → hasSum_sq_fourierCoeffOn (Mathlib)
     - L² norm: ∫₀¹(x-1/2)² = 1/12 via FTC
@@ -527,7 +527,7 @@ theorem gram_entry_inversion (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
 ### Phase status:
   Phase 1/5: ████████ (10 proved — COMPLETE!)
   Phase 2/5: ████████ (2 proved — COMPLETE!)
-  Total: 12 theorems, FULLY PROVED, 0 axiom — 100%
+  Total: 12 theorems, PROVED, 0 axiom — 100%
 -/
 
 end Cathedral.FourierGram

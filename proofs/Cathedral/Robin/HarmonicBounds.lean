@@ -131,7 +131,7 @@ lemma log_lower_quartic (x : ℝ) (hx : 0 ≤ x) :
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   FULLY PROVED
+--   PROVED
 --   ZERO axioms
 --   10 PROVED theorems:
 --     ✅ harmonicR_pos          — H_n > 0

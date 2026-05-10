@@ -8,11 +8,11 @@
   Proves that the Mertens bound M(x) = O(x^{1/2} log²x) implies
   the existence of BD weights with L² error O(1/log N).
 
-  ### Proved (FULLY PROVED):
+  ### Proved (PROVED):
   - weighted_moebius_abel_bound: Abel + boundary kill via logWeight_self
   - summand_bound: each term ≤ (C_m*log²k/k^{1/2}+1)/logN
 
-  ### Key dependencies (all FULLY PROVED):
+  ### Key dependencies (all PROVED):
   - AbelSummation.lean: abel_summation, abel_summation_abs_bound
   - MertensIntegral.lean: logWeight tools, convergent_log_series_bound
 -/
@@ -37,7 +37,7 @@ open Real MeasureTheory Finset BigOperators
 -- (extracted to break the import cycle with PlancherelBypass)
 
 -- ════════════════════════════════════════════════
--- PART 2: THE 1D ABEL BOUND (PROVED!)
+-- PART 2: THE 1D ABEL BOUND — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: The Abel summation + boundary kill.
@@ -70,7 +70,7 @@ theorem weighted_moebius_abel_bound
   exact h_abel
 
 -- ════════════════════════════════════════════════
--- PART 3: SUMMAND BOUND (PROVED!)
+-- PART 3: SUMMAND BOUND — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: Each summand in the Abel bound is O(1/log N).
@@ -142,7 +142,7 @@ theorem l2_from_pointwise_bound
   l2_from_pointwise_bound_derived C_m hC hMertens N hN
 
 -- ════════════════════════════════════════════════
--- PART 5: THE MAIN THEOREM (PROVED!)
+-- PART 5: THE MAIN THEOREM — PROVED
 -- ════════════════════════════════════════════════
 
 /-- **THEOREM**: The main result: Mertens bound ⟹ L² approximation.
@@ -169,7 +169,7 @@ theorem abel_summation_bd_l2_bound_proved :
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- PROVED (FULLY PROVED, ZERO axioms in this file!):
+-- PROVED (PROVED, ZERO axioms in this file!):
 --   ✅ weighted_moebius_abel_bound          — Abel + boundary kill
 --   ✅ summand_bound                        — Each term ≤ (C/k^{1/2}+1)/logN
 --   ✅ l2_from_pointwise_bound              — NOW PROVED via Parseval Bridge!

@@ -137,7 +137,7 @@ theorem rh_implies_bd_convergence_direct :
   intro hRH ε hε
   -- Step 1: Get the Mertens bound from RH (ONE AXIOM)
   obtain ⟨C_m, hC_pos, hM⟩ := rh_implies_mertens_bound hRH
-  -- Step 2: Get the L² bound DIRECTLY from AbelSiegeProof (PROVED!)
+  -- Step 2: Get the L² bound DIRECTLY from AbelSiegeProof — PROVED
   obtain ⟨C_err, hC_err_pos, N₀, h_l2⟩ :=
     abel_summation_bd_l2_bound_proved ⟨C_m, hC_pos, hM⟩
   -- Step 3: Get N large enough that C_err/log(N) < ε

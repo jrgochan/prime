@@ -8,7 +8,7 @@
   matrix H_N is positive definite.
 
   Source: Theorist memo "The Minimum-Index Nuke" (April 11, 2026).
-  Adapted from Cathedral/Archive/Independence.lean (364 lines, FULLY PROVED).
+  Adapted from Cathedral/Archive/Independence.lean (364 lines).
 -/
 
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic

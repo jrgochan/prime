@@ -29,7 +29,7 @@
   - PlancherelDefs.lean (Plancherel, PROVED)
 
   ### Sorry Status
-  ZERO SORRY — All theorems fully proved.
+  0 sorry — All theorems fully proved.
   cross_term_integral ✅, fejer_orthogonality ✅, gallagher_mvt ✅
 -/
 
@@ -433,7 +433,7 @@ theorem gallagher_mvt
 -- and the rational part R is explicitly bounded.
 
 -- ═══════════════════════════════════════════════
--- §6. AUDIT — ZERO SORRY ✅
+-- §6. AUDIT — 0 sorry ✅
 -- ═══════════════════════════════════════════════
 
 -- ALL PROVED:

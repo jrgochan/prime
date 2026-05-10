@@ -175,7 +175,7 @@ theorem robin_implies_rh : RobinInequality → RiemannHypothesis :=
 -- ════════════════════════════════════════════════
 
 -- This file has:
---   FULLY PROVED
+--   PROVED
 --   1 axiom (arithmetic_rh_equivalences) — bundles Lagarias + Robin
 --   7 proved theorems:
 --     ✅ lagarias_iff_rh             — Lagarias ↔ RH (from bundled axiom)
