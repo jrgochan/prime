@@ -13,7 +13,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{May 10, 2026 --- Oracle Capstone Edition (v17)}
+\date{May 2026}
 
 \begin{document}
 
@@ -22,71 +22,32 @@
 \begin{abstract}
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
-Riemann Hypothesis in Lean~4---and their physical counterparts in
-quantum mechanics, statistical mechanics, signal processing, and
-quantum field theory. Every equation in the proof has a physics dual.
-The Gram matrix is the two-point correlation function of a 1D quantum
-field. The Nyman--Beurling distance is the vacuum energy. The Parseval
-Bridge is the unitarity of the S-matrix. The Mertens function is the
-magnetization of a spin system. The B\'aez-Duarte constant
-$C \approx 21.649$ is the inverse heat capacity of the prime number gas.
-The Abel summation engine implements a thermodynamic hierarchy:
-$S_1$ (magnetization), $S_2$ (susceptibility), $S_3$ (heat capacity)
-are the successive moments of the partition function $1/\zeta(s)$
-at $s=1$. The Perron contour integral---now assembled with a
-Born--Oppenheimer error decomposition and adaptive Archimedean UV
-regularization---is the inverse Laplace transform
-of the zeta scattering amplitude. The Borel--Carath\'eodory theorem---now
-available in Mathlib---provides the maximum principle for log-modular
-entropy that underpins the polynomial lower bound on~$|\zeta(s)|$.
-The Vasyunin cotangent tower---the lattice field theory that
-computes the off-diagonal Gram entries---is now structurally complete:
-a uniqueness-of-limits argument reduces the integral identity to a
-single convergence axiom, mirroring the ergodic hypothesis in
-statistical mechanics.
-The Stained Glass Rotors---a Gallagher MVT-based energy partition
-through Dirichlet characters mod~8---provide a quantum error-correcting
-code that decomposes the critical-line spectral energy into four
-orthogonal syndrome channels.
-The Hilbert spectral engine (512-bit MPFR, massively parallel) certifies
-the $\pi$ constant limit of the Montgomery--Vaughan Hilbert operator
-norm, validating the Schur test used in the Lean proof.
-The crown theorem \lean{nyman\_beurling\_equivalence}
-now depends on exactly \textbf{one literature axiom}---the
-B\'aez-Duarte forward direction (IMRN 2003, no.~36)---plus the
-three Lean kernel axioms.
-Alternative proof paths achieve the same result with different
-axiom footprints: the Mellin Crown (two composite axioms),
-the Perron Crown (four transparent axioms), the
-Renormalization Bridge (Selberg--Delange $\alpha$-decay), and the
-\emph{Oracle Bridge} (one trusted computation axiom).
-The Oracle Bridge (v17, Exploration~32) bypasses the literature axiom
-entirely: DD-precision GPU measurements of $v^T G v < 1$ at highly
-composite numbers, imported as trusted Lean axioms, combine with the
-zero-axiom converse to yield \lean{rh\_from\_oracle}---a direct proof
-of RH from certified computation, the number-theoretic realization of
-lattice QCD certification.
-All paths share the same zero-sorry, zero-axiom converse
-via the Rank-1 Mellin identity.
-An alternative spatial path achieves the same result via four more
-granular axioms: the covariance bound (virial theorem), the log-weighted
-M\"obius sum (magnetic susceptibility), the Vasyunin integral convergence
-(ergodic hypothesis), and the shared Hadamard bound (Weyl law).
-A dual proof path through the Mellin Crown (frequency domain)
-achieves the same result with two composite axioms; the
-\lean{MellinPerronBridge} proves their equivalence via the
-Parseval isometry---the formal realization of Bohr complementarity
-between position and momentum representations.
-The Crown Graduation (Exploration~17, April~28) closed the
-\lean{crown\_graduation\_target} sorry, proving the forward chain
-RH $\to$ Mertens $\to$ L\textsuperscript{2} decay $\to$ Parseval $\to$
-Mellin variance is a continuous, compiler-verified logical chain
-with zero sorry on the primary crown path
-across 227 active files ($\sim$60{,}500 lines) of formal logic
-(330 files and $\sim$85{,}000 lines including archived explorations).
-This correspondence is not metaphorical---it is structural, reflecting
-a deep identity between number theory and quantum physics that the
-formalization makes precise.
+Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
+in Lean~4 (227 active files, $\sim$60{,}500 lines)---and their physical
+counterparts in quantum mechanics, statistical mechanics, signal
+processing, and quantum field theory.
+The Gram matrix is the two-point correlator of a 1D quantum field.
+The Nyman--Beurling distance is the vacuum energy.
+The Parseval Bridge is S-matrix unitarity.
+The Mertens function is the magnetization of a spin system.
+The B\'aez-Duarte constant $C \approx 21.649$ is the inverse heat
+capacity of the prime number gas.
+The Vasyunin cotangent tower is a complete lattice field theory
+of the off-diagonal correlator, reduced to one convergence axiom
+via the ergodic hypothesis.
+The crown theorem depends on exactly \textbf{one literature axiom}
+(B\'aez-Duarte 2003); the converse direction is proved with
+\textbf{zero} custom axioms via the Rank-1 Mellin identity.
+An alternative Oracle Bridge bypasses the literature axiom entirely
+via DD-precision GPU certification at highly composite numbers.
+Over 120 physics correspondences are catalogued, spanning
+Feynman diagram decompositions, Abel summation as renormalization,
+eigenvalue interlacing as Weyl asymptotics, Gallagher MVT as a
+quantum error-correcting code, and Bohr complementarity between
+spatial and spectral proof paths.
+This correspondence is not metaphorical---it is structural,
+reflecting a deep identity between number theory and quantum physics
+that the formalization makes precise.
 \end{abstract}
 
 % ================================================================
