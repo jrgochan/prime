@@ -6,7 +6,7 @@ A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
 **227 active Lean files** across 25+ modules, with **1 crown axiom** on
 the analytic path (verified by `#print axioms`), **1 trusted computation axiom**
-on the Oracle path, and **80 axioms** total in the active codebase.
+on the Oracle path, and **82 axioms** total in the active codebase.
 
 > **Dual Crown Architecture.** The Cathedral provides two independent proofs:
 >
@@ -139,7 +139,7 @@ proofs/Cathedral/
 ```
 Active files:   227 Lean files across 25+ modules
 Archived:       103 Lean files in Archive/
-Axioms:         1 on analytic crown, 1 on oracle crown, 80 total active
+Axioms:         1 on analytic crown, 1 on oracle crown, 82 total active
 Sorry:          0 on crown paths (17 off-path)
 Errors:         0
 Lines:          ~60,500 (Cathedral), ~130K (full proofs/)

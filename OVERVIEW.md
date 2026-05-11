@@ -159,7 +159,7 @@ Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 > The **Analytic Crown** reduces RH to one classical result (Báez-Duarte 2003).
 > The **Oracle Crown** proves RH directly from one GPU measurement.
 > The converse direction (d²→0 ⟹ RH) uses **zero custom axioms**.
-> The ~78 off-path axioms support alternative proof routes and experimental
+> The ~80 off-path axioms support alternative proof routes and experimental
 > features that do not affect either crown theorem.
 
 ### Numerical Validation
@@ -204,7 +204,7 @@ See `experiments/certified-distance/certificates/` for full JSON certificates.
 ## Module Structure
 
 The codebase comprises **227 active Lean files** across **25+ topic directories** with
-**~60,500 lines** of active code, **1,757 proved theorems/lemmas**, and **80 active axioms**
+**~60,500 lines** of active code, **1,757 proved theorems/lemmas**, and **82 active axioms**
 (1 on the analytic crown, 1 on the oracle crown).
 
 ```
@@ -274,12 +274,12 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | Structural / NymanBeurling | 4 | — |
 | Robin | 4 | — |
 | Other | 7 | — |
-| **Total** | **80** | **2 crowns + 2 PNT** |
+| **Total** | **82** | **2 crowns + 2 PNT** |
 
 > [!IMPORTANT]
 > The **Analytic Crown** has 1 literature axiom. The **Oracle Crown** has
 > 1 computation axiom + 2 PNT axioms. The converse direction is **pure**
-> (zero axioms, zero sorry). The ~78 off-path axioms support alternative
+> (zero axioms, zero sorry). The ~80 off-path axioms support alternative
 > proof routes and experimental features that do not affect either crown.
 
 ---
@@ -354,7 +354,7 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 | Archive files | 103 |
 | Archive lines | 22,000+ |
 | Theorems + lemmas | 1,757 proved |
-| Total axioms (active) | **80** |
+| Total axioms (active) | **82** |
 | Analytic crown axioms | **1** |
 | Oracle crown axioms | **1** (+2 PNT) |
 | Crown path sorry | **0** |

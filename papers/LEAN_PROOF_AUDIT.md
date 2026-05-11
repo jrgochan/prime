@@ -1,6 +1,6 @@
 # Cathedral Lean Proof Audit
 
-**Date:** May 10, 2026 (Exploration 35, papers branch)  
+**Date:** May 11, 2026 (Oracle Capstone, v17)  
 **Purpose:** Canonical reference for papers — what is machine-checked, what is axiomatic, and what remains as sorry.
 
 ---
@@ -11,13 +11,14 @@
 |--------|-------|
 | Active `.lean` files | **227** |
 | Total lines (active) | **~60,500** |
-| Sorry-free files | **174** (77%) |
-| Files with sorry | **53** (23%) |
-| Total sorry instances | **~105** (including PNTA inherited) |
-| Total custom axioms | **75** |
+| Sorry-free files | **219** (96%) |
+| Files with sorry | **8** (4%) |
+| Total sorry instances | **17** (all off-crown) |
+| Total custom axioms | **82** |
 | — **On primary crown path** | **1** (`baez_duarte_forward`) |
 | — Oracle axioms (computational) | 24 |
-| — Mathematical axioms (off-path) | 50 |
+| — PNT bridge axioms | 3 |
+| — Mathematical axioms (off-path) | 54 |
 
 ---
 
@@ -97,7 +98,7 @@ RH → critical-line Mellin variance → Parseval → L² bound → d²→0
 GPU computation → oracle_certificates → d²→0 → RH
 ```
 
-- **Status:** 24 oracle axioms (numerical certificates).
+- **Status:** 1 oracle certificate axiom + 24 sub-axioms (numerical certificates).
 - **Files:** `Assembly/OracleCascade.lean`, `Compute/OracleCertificates.lean`
 - **Note:** These axioms are verifiable by deterministic computation at DD precision.
 
@@ -164,12 +165,13 @@ These encode GPU-computed numerical bounds at specific highly composite numbers.
 
 > All are deterministically verifiable by computation. The results directory contains JSON certificates (`certificate_N55440.json`, etc.) with the numerical data.
 
-### 5.3 PNT-Derived Axioms (2)
+### 5.3 PNT-Derived Axioms (3)
 
 | Axiom | File | Nature |
 |-------|------|--------|
 | `pnt_mu_log_div_k` | `PNT/AbelMean.lean` | Consequence of PNT |
 | `pnt_mu_log_sq_div_k` | `PNT/AbelMean.lean` | Consequence of PNT |
+| `mu_pnt_alt` | `PNT/Bridge.lean` | PNTA M(x)=o(x) restated |
 
 > These are consequences of the Prime Number Theorem. The PNTA dependency contains the PNT itself; these axioms exist because the full chain from PNTA → Cathedral isn't wired for these specific formulations.
 
@@ -220,42 +222,42 @@ These support the exploratory spectral analysis (Heisenberg bypass, octionionic 
 
 The primary export `nyman_beurling_equivalence` uses only `baez_duarte_forward` (axiom) and `nyman_beurling_converse` (proved). Neither contains sorry.
 
-### 6.2 On the Perron Path (PATH B)
+### 6.2 Perron Path / Mellin Crown
 
-| File | Sorry | Nature |
-|------|-------|--------|
-| `Assembly/PerronCrown.lean` | 5 | Perron contour assembly |
-| `Assembly/MellinPerronBridge.lean` | 4 | Mellin-Perron connection |
-| `Perron/MertensFromPerron.lean` | 4 | Mertens graduation |
-| `Perron/AssemblyHelpers.lean` | 1 | Assembly helpers |
+All Perron formula files (`Perron/*.lean`) and assembly files are now **sorry-free**.
+The Perron formula itself is fully proved. Remaining sorrys on these paths have been
+eliminated or moved to off-crown modules.
 
 ### 6.3 On the PNT Bridge
 
 | File | Sorry | Nature |
 |------|-------|--------|
-| `PNT/Bridge.lean` | 16 | PNTA ↔ Cathedral bridge |
-| `PNT/LogBridge.lean` | 4 | Log-sum conversions |
-| `PNT/UnconditionalMertens.lean` | 11 | Unconditional Mertens |
+| `PNT/Bridge.lean` | 2 | PNTA ↔ Cathedral bridge |
+| `PNT/LogBridge.lean` | 1 | Signed Wiener-Ikehara gap |
+| `PNT/UnconditionalMertens.lean` | 8 | Unconditional Mertens scaffold |
 
 ### 6.4 Vasyunin/Cotangent Tower
 
-| File | Sorry | Nature |
-|------|-------|--------|
-| `Cotangent/ColumnSumEval.lean` | 4 | Column sum evaluation |
-| Various eval files | ~10 | Partial fraction / series evals |
+All Vasyunin/Cotangent files are now **sorry-free**. The telescope convergence,
+digamma reflection, and floor coprime identities are fully proved.
 
 ### 6.5 Covariance / Möbius Stratum
 
 | File | Sorry | Nature |
 |------|-------|--------|
-| `Covariance/MertensBridge.lean` | 1* | PNTA bridge (off-by-one) |
-| `Covariance/EulerProduct.lean` | 1 | Mertens Third (bridged) |
-| `Covariance/CovarianceAbel.lean` | 4 | Abel summation bounds |
+| `Covariance/CovarianceAbel.lean` | 2 | Abel summation bounds (off-path) |
+| `Covariance/AbelCovarianceBound.lean` | 1 | Off-path Abel covariance |
+| `Covariance/MertensBridge.lean` | 1 | PNTA bridge (filter conversion) |
+| `Covariance/EulerProduct.lean` | 1 | Mertens Third (off-path) |
 | `Covariance/GCDSignLaw.lean` | 0 | GCD sign law **PROVED ★** |
 | `Covariance/GCDPartition.lean` | 0 | GCD partition **PROVED ★** |
 | `Covariance/GCDStratumBound.lean` | 0 | Stratum bounds **PROVED ★** |
 
-\* The MertensBridge sorry is a mechanical filter conversion (ℝ→ℕ), not a mathematical gap.
+### 6.6 Assembly
+
+| File | Sorry | Nature |
+|------|-------|--------|
+| `Assembly/QualitativeForward.lean` | 1 | Off-path PNT convergence |
 
 ---
 
@@ -354,7 +356,7 @@ Used for:
 
 2. ⚠️ **The Oracle Crown** relies on 24 computational axioms that are verifiable by deterministic DD-precision arithmetic.
 
-3. ⚠️ **The Mertens bridge** inherits 16 sorrys from the PNTA project (all classical, non-RH).
+3. ⚠️ **The Mertens bridge** uses 3 PNTA axioms (`mu_pnt_alt`, `R_isLittleO`, `mu_log_mul_zeta`) — these are classical results from the PrimeNumberTheoremAnd project.
 
 ### What should NOT be claimed:
 
@@ -379,5 +381,5 @@ Used for:
 
 ---
 
-*Generated by Claude (Antigravity), May 10, 2026.*  
-*Repository: github.com/jrgochan/prime, branch: papers*
+*Updated by Claude (Antigravity), May 11, 2026.*  
+*Repository: github.com/jrgochan/prime, branch: main*

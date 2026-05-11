@@ -843,7 +843,7 @@ Both axioms are **classical, established results** of 21st-century analytic
 number theory. They are axioms only because Mathlib lacks the prerequisite
 infrastructure. The gap is a software engineering problem, not a mathematical one.
 
-The ~79 remaining axioms support alternative proof paths
+The ~80 remaining axioms support alternative proof paths
 (Mellin Crown with 2 axioms, Perron Crown with 4, spectral engine, sieve engine,
 Vasyunin tower, Oracle observatory) that are formalized but not on the shortest
 path to the crown theorem.
