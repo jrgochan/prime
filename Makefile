@@ -207,7 +207,7 @@ test: ## Run all Rust tests
 	@echo ""
 	@echo "  🧪  Running cargo test..."
 	@echo ""
-	cargo test --workspace
+	cargo test
 	@echo ""
 	@echo "  ✅  All tests passed"
 
@@ -241,7 +241,7 @@ ci: ## Full CI pipeline: fmt → lint → test → build
 	@echo "  ✅  Clippy clean"
 	@echo ""
 	@echo "  [3/4] Rust tests..."
-	@cargo test --workspace --quiet
+	@cargo test --quiet
 	@echo "  ✅  Tests passed"
 	@echo ""
 	@echo "  [4/4] Lean build..."
