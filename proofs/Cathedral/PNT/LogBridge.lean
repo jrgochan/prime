@@ -90,7 +90,7 @@ lemma sum_mu_log_floor_icc (N : ℕ) :
   rw [ioc_zero_eq_icc_one]
   rw [show ∑ n ∈ Icc 1 N, (μ n : ℝ) * Real.log n * (↑(N / n) : ℝ) =
     ∑ n ∈ Icc 1 N, mu_log n * (↑(N / n) : ℝ) from
-    sum_congr rfl fun n _ => by simp [mu_log_apply, ArithmeticFunction.log_apply]]
+    sum_congr rfl fun n _ => by simp [mu_log_apply]]
   linarith
 
 -- ════════════════════════════════════════════════
