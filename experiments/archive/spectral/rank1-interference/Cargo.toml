@@ -26,8 +26,3 @@ path = "src/bin/eigenbasis_mod8.rs"
 name = "highprec"
 path = "src/bin/highprec.rs"
 
-[profile.release]
-opt-level = 3
-lto = true
-codegen-units = 1
-

@@ -106,7 +106,7 @@ where
     let mut total_matvecs = 0usize;
 
     // Step 1: Generate random Gaussian matrix Ω ∈ ℝ^{N × l}
-    let mut omega: Vec<Vec<f64>> = (0..l)
+    let omega: Vec<Vec<f64>> = (0..l)
         .map(|_| (0..dim).map(|_| rng.next_gaussian()).collect())
         .collect();
 

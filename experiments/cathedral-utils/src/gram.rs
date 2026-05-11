@@ -466,7 +466,7 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
 pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     let p = ln_table.precision;
     let g = arith::gcd(j, k);
-    let lcm_jk = (j / g) * k;
+    let _lcm_jk = (j / g) * k;
     let t_direct = DEFAULT_T_UNIFORM.min(ln_table.max_n - 1);
 
     let jf = Float::with_val(p, j as u64);

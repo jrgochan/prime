@@ -17,7 +17,7 @@
 //! - [`digamma_f64`] — ψ(x) digamma function (f64 precision)
 //! - [`integrate_01`] — Composite Simpson's rule on [0,1]
 
-use std::f64::consts::PI;
+
 
 // ═══════════════════════════════════════════════════════════════════
 // FUNDAMENTAL CONSTANTS (f64)
@@ -202,6 +202,7 @@ pub fn gauss_legendre<F: Fn(f64) -> f64>(f: F, a: f64, b: f64, n: usize) -> f64 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::f64::consts::PI;
 
     #[test]
     fn test_euler_gamma() {

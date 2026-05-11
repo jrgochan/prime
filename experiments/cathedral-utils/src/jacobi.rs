@@ -270,7 +270,7 @@ pub fn eigenvalues_only_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> Vec<f
                      Float::with_val(p, half_theta.sin_ref()))
                 };
 
-                let mut old_ip: Vec<Float> = (0..dim).map(|i| a[i * dim + pp].clone()).collect();
+                let old_ip: Vec<Float> = (0..dim).map(|i| a[i * dim + pp].clone()).collect();
                 let old_iq: Vec<Float> = (0..dim).map(|i| a[i * dim + qq].clone()).collect();
 
                 for i in 0..dim {
