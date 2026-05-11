@@ -8281,12 +8281,22 @@
       "sorryCount": 0
     },
     {
+      "id": "mu_pnt_alt",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/PNT/Bridge.lean",
+      "line": 65,
+      "signature": "axiom mu_pnt_alt : (fun x : \u211d \u21a6 \u2211 n \u2208 Finset.range \u230ax\u230b\u208a, (\u2191(ArithmeticFunction.moebius n) : \u211d) / n) =o[Filter.atTop] fun _ \u21a6 (1 : \u211d)  noncomputable section open Real Finset Filter ArithmeticFunctio\u2026",
+      "sorryCount": 0
+    },
+    {
       "id": "pnt_moebius_sum_div_tendsto",
       "type": "theorem",
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/PNT/Bridge.lean",
-      "line": 83,
+      "line": 94,
       "signature": "theorem pnt_moebius_sum_div_tendsto : Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(\u03bc k) : \u211d) / (k : \u211d)) atTop (nhds 0)",
       "sorryCount": 0
     },
@@ -8296,7 +8306,7 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/PNT/Bridge.lean",
-      "line": 144,
+      "line": 155,
       "signature": "theorem pnt_mu_div_k_derived : Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(\u03bc k) : \u211d) / (k : \u211d)) atTop (nhds 0)",
       "sorryCount": 0
     },
@@ -8306,7 +8316,7 @@
       "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/Bridge.lean",
-      "line": 161,
+      "line": 172,
       "signature": "theorem pnt_mu_log_div_k_derived : Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) * Real.log (k : \u211d) / (k : \u211d)) atTop (nhds (-1))",
       "sorryCount": 1
     },
@@ -8316,9 +8326,49 @@
       "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/Bridge.lean",
-      "line": 189,
+      "line": 200,
       "signature": "theorem pnt_mu_log_sq_div_k_derived : Tendsto (fun N => \u2211 k \u2208 Finset.Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) * (Real.log (k : \u211d)) ^ 2 / (k : \u211d)) atTop (nhds (-2 * eulerMascheroniConstant))",
       "sorryCount": 1
+    },
+    {
+      "id": "R",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/PNT/LogBridge.lean",
+      "line": 48,
+      "signature": "noncomputable def R (x : \u211d) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "mu_log",
+      "type": "def",
+      "category": "definition",
+      "route": "mellin",
+      "file": "Cathedral/PNT/LogBridge.lean",
+      "line": 51,
+      "signature": "noncomputable def mu_log : ArithmeticFunction \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "R_isLittleO",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/PNT/LogBridge.lean",
+      "line": 58,
+      "signature": "axiom R_isLittleO : R =o[Filter.atTop] _root_.id  /-- Dirichlet identity: \u03bc\u00b7log * \u03b6 = -\u039b. Axiom (was proved in PNTAnd). -/ axiom mu_log_mul_zeta : mu_log * ArithmeticFunction.zeta = -ArithmeticFunc\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "mu_log_mul_zeta",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/PNT/LogBridge.lean",
+      "line": 61,
+      "signature": "axiom mu_log_mul_zeta : mu_log * ArithmeticFunction.zeta = -ArithmeticFunction.vonMangoldt  noncomputable section open Real Finset Filter ArithmeticFunction ArithmeticFunction.Moebius Asymptotics  \u2026",
+      "sorryCount": 0
     },
     {
       "id": "sum_mu_log_floor_icc",
@@ -8326,7 +8376,7 @@
       "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/LogBridge.lean",
-      "line": 57,
+      "line": 82,
       "signature": "lemma sum_mu_log_floor_icc (N : \u2115) : \u2211 n \u2208 Icc 1 N, (\u03bc n : \u211d) * Real.log n * (N / n : \u2115) = -Psi N",
       "sorryCount": 1
     },
@@ -8336,29 +8386,39 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/PNT/LogBridge.lean",
-      "line": 143,
+      "line": 168,
       "signature": "theorem pnt_mu_log_div_k_proved : Tendsto (fun N => \u2211 k \u2208 Icc 1 N, (\u2191(ArithmeticFunction.moebius k) : \u211d) * Real.log (k : \u211d) / (k : \u211d)) atTop (nhds (-1))",
+      "sorryCount": 0
+    },
+    {
+      "id": "MediumPNT",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "mellin",
+      "file": "Cathedral/PNT/UnconditionalMertens.lean",
+      "line": 49,
+      "signature": "axiom MediumPNT : \u2203 c > 0, (fun x : \u211d \u21a6 \u03c8_local x - x) =O[Filter.atTop] fun (x : \u211d) \u21a6 x * Real.exp (-c * (Real.log x) ^ ((1 : \u211d) / 10))  noncomputable section open Real Finset Filter Asymptotics  -\u2026",
       "sorryCount": 0
     },
     {
       "id": "exp_decay_times_t_tendsto_zero",
       "type": "theorem",
-      "category": "proved",
+      "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 49,
-      "signature": "theorem exp_decay_times_t_tendsto_zero (c : \u211d) (hc : 0 < c) : Tendsto (fun t : \u211d => t * Real.exp (-c * t ^ ((1:\u211d)/10))) atTop (\ud835\udcdd 0)",
-      "sorryCount": 0
+      "line": 70,
+      "signature": "theorem exp_decay_times_t_tendsto_zero (c : \u211d) (hc : 0 < c) : Tendsto (fun t : \u211d => t * Real.exp (-c * t ^ ((1:\u211d)/10))) atTop (nhds 0)",
+      "sorryCount": 1
     },
     {
       "id": "exp_decay_le_const_div_log",
       "type": "theorem",
-      "category": "proved",
+      "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 71,
+      "line": 83,
       "signature": "theorem exp_decay_le_const_div_log (c : \u211d) (hc : 0 < c) : \u2203 B : \u211d, B > 0 \u2227 \u2200 N : \u2115, 3 \u2264 N \u2192 Real.exp (-c * (Real.log \u2191N) ^ ((1:\u211d)/10)) \u2264 B / Real.log \u2191N",
-      "sorryCount": 0
+      "sorryCount": 1
     },
     {
       "id": "mertens_exp_bound_from_pnt",
@@ -8366,7 +8426,7 @@
       "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 128,
+      "line": 106,
       "signature": "theorem mertens_exp_bound_from_pnt : \u2203 c : \u211d, c > 0 \u2227 \u2203 C : \u211d, C > 0 \u2227 \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C * x * Real.exp (-c * (Real.log x) ^ ((1:\u211d)/10))",
       "sorryCount": 4
     },
@@ -8376,29 +8436,29 @@
       "category": "proved",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 288,
-      "signature": "theorem s1_exp_decay (c C_M : \u211d) (hc : 0 < c) (hC : 0 < C_M) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_M * x * Real.exp (-c * (Real.log x) ^ ((1:\u211d)/10))) -- Also need x^{3/4}\u2026",
+      "line": 266,
+      "signature": "theorem s1_exp_decay (c C_M : \u211d) (hc : 0 < c) (_hC : 0 < C_M) (_hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_M * x * Real.exp (-c * (Real.log x) ^ ((1:\u211d)/10))) -- Also need x^{3/\u2026",
       "sorryCount": 0
     },
     {
       "id": "s1_le_const_div_log",
       "type": "theorem",
-      "category": "proved",
+      "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 331,
+      "line": 309,
       "signature": "theorem s1_le_const_div_log (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 N : \u2115, 3 \u2264 N \u2192 |S\u2081_pnt N| \u2264 K / Real.lo\u2026",
-      "sorryCount": 0
+      "sorryCount": 1
     },
     {
       "id": "unconditional_mean_bound",
       "type": "theorem",
-      "category": "proved",
+      "category": "sorry",
       "route": "mellin",
       "file": "Cathedral/PNT/UnconditionalMertens.lean",
-      "line": 392,
+      "line": 324,
       "signature": "theorem unconditional_mean_bound (C_m : \u211d) (hC : 0 < C_m) (hMertens : \u2200 x : \u211d, x \u2265 2 \u2192 |((mertensFunction x : \u2124) : \u211d)| \u2264 C_m * x ^ ((3:\u211d)/4)) : \u2203 K : \u211d, K > 0 \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 |S\u2081_pnt (N - 1)| \u2264\u2026",
-      "sorryCount": 0
+      "sorryCount": 1
     },
     {
       "id": "logsq_le_rpow_quarter",
@@ -8911,6 +8971,226 @@
       "sorryCount": 0
     },
     {
+      "id": "untaperedSum_gcd",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 48,
+      "signature": "def untaperedSum_gcd (N d : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "linearTaperSum_gcd",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 56,
+      "signature": "def linearTaperSum_gcd (N d : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "quadraticTaperSum_gcd",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 64,
+      "signature": "def quadraticTaperSum_gcd (N d : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "R\u2082_gcd",
+      "type": "def",
+      "category": "definition",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 75,
+      "signature": "def R\u2082_gcd (N d : \u2115) : \u211d",
+      "sorryCount": 0
+    },
+    {
+      "id": "sum_eq_sum_gcd",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 95,
+      "signature": "theorem sum_eq_sum_gcd (N : \u2115) (_hN : 2 \u2264 N) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : (\u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), f j k) = \u2211 d \u2208 Icc 1 (N - 1), \u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), if Nat.gcd j k = d \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "untaperedSum_partition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 127,
+      "signature": "theorem untaperedSum_partition (N : \u2115) (hN : 2 \u2264 N) : TaperDecomposition.untaperedSum N = \u2211 d \u2208 Icc 1 (N - 1), untaperedSum_gcd N d",
+      "sorryCount": 0
+    },
+    {
+      "id": "linearTaperSum_partition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 136,
+      "signature": "theorem linearTaperSum_partition (N : \u2115) (hN : 2 \u2264 N) : TaperDecomposition.linearTaperSum N = \u2211 d \u2208 Icc 1 (N - 1), linearTaperSum_gcd N d",
+      "sorryCount": 0
+    },
+    {
+      "id": "quadraticTaperSum_partition",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDPartition.lean",
+      "line": 145,
+      "signature": "theorem quadraticTaperSum_partition (N : \u2115) (hN : 2 \u2264 N) : TaperDecomposition.quadraticTaperSum N = \u2211 d \u2208 Icc 1 (N - 1), quadraticTaperSum_gcd N d",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_mul_coprime",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 24,
+      "signature": "theorem moebius_mul_coprime (a b : \u2115) (hab : Nat.Coprime a b) : (moebius (a * b) : \u2124) = (moebius a : \u2124) * (moebius b : \u2124)",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_coprime_mul_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 28,
+      "signature": "theorem moebius_coprime_mul_eq (d a : \u2115) (hcop : Nat.Coprime d a) : (moebius (d * a) : \u2124) = (moebius d : \u2124) * (moebius a : \u2124)",
+      "sorryCount": 0
+    },
+    {
+      "id": "moebius_sq_of_squarefree",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 32,
+      "signature": "theorem moebius_sq_of_squarefree (d : \u2115) (_hd : 1 \u2264 d) (hsq : Squarefree d) : ((moebius d : \u2124) : \u211d) ^ 2 = 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "inner_sum_zero_of_not_dvd",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 45,
+      "signature": "theorem inner_sum_zero_of_not_dvd (N d j : \u2115) (_hd : 1 \u2264 d) (hnd : \u00ac d \u2223 j) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : (\u2211 k \u2208 Icc 1 (N - 1), if Nat.gcd j k = d then f j k else 0) = 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_mul_left_eq",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 53,
+      "signature": "theorem gcd_mul_left_eq (d a b : \u2115) : Nat.gcd (d * a) (d * b) = d * Nat.gcd a b",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_mul_eq_d_iff",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 57,
+      "signature": "theorem gcd_mul_eq_d_iff (d a b : \u2115) (hd : 1 \u2264 d) : Nat.gcd (d * a) (d * b) = d \u2194 Nat.gcd a b = 1",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_stratum_reindex",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 128,
+      "signature": "theorem gcd_stratum_reindex (N d : \u2115) (hd : 1 \u2264 d) (f : \u2115 \u2192 \u2115 \u2192 \u211d) : (\u2211 j \u2208 Icc 1 (N - 1), \u2211 k \u2208 Icc 1 (N - 1), if Nat.gcd j k = d then f j k else 0) = \u2211 a \u2208 Icc 1 ((N - 1) / d), \u2211 b \u2208 Icc 1 ((N - \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "sign_extraction_simplified",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 175,
+      "signature": "theorem sign_extraction_simplified (N d : \u2115) (hd : 1 \u2264 d) (_hN : 2 \u2264 N) (_hsq : Squarefree d) : GCDPartition.untaperedSum_gcd N d = \u2211 a \u2208 Icc 1 ((N - 1) / d), \u2211 b \u2208 Icc 1 ((N - 1) / d), if Nat.gcd \u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "leading_term_local_factor_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 190,
+      "signature": "theorem leading_term_local_factor_pos (p : \u2115) (hp : Nat.Prime p) : localFactor (fun j k => 1 / ((j:\u211d) * (k:\u211d))) p > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_term_local_factor_pos",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDSignLaw.lean",
+      "line": 198,
+      "signature": "theorem gcd_term_local_factor_pos (p : \u2115) (hp : Nat.Prime p) : localFactor (fun j k => (Nat.gcd j k : \u211d) / ((j:\u211d) * (k:\u211d))) p > 0",
+      "sorryCount": 0
+    },
+    {
+      "id": "gcd_stratum_term_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDStratumBound.lean",
+      "line": 44,
+      "signature": "theorem gcd_stratum_term_bound (j k : \u2115) (hj : 1 \u2264 j) (hk : 1 \u2264 k) : |((moebius j : \u2124) : \u211d) * ((moebius k : \u2124) : \u211d) * Cathedral.Vasyunin.vasyuninGramEntry j k| \u2264 1 / 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "untaperedSum_gcd_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDStratumBound.lean",
+      "line": 77,
+      "signature": "theorem untaperedSum_gcd_bound (N d : \u2115) (hN : 2 \u2264 N) : |GCDPartition.untaperedSum_gcd N d| \u2264 (1 / 2) * ((N - 1 : \u2115) : \u211d) ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "linearTaperSum_gcd_bound",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDStratumBound.lean",
+      "line": 115,
+      "signature": "theorem linearTaperSum_gcd_bound (N d : \u2115) (hN : 3 \u2264 N) : |GCDPartition.linearTaperSum_gcd N d| \u2264 (1 / 2) * Real.log (N : \u211d) * ((N - 1 : \u2115) : \u211d) ^ 2",
+      "sorryCount": 0
+    },
+    {
+      "id": "untaperedSum_from_strata",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/GCDStratumBound.lean",
+      "line": 168,
+      "signature": "theorem untaperedSum_from_strata (N : \u2115) (hN : 2 \u2264 N) : |TaperDecomposition.untaperedSum N| \u2264 (1 / 2) * ((N - 1 : \u2115) : \u211d) ^ 3",
+      "sorryCount": 0
+    },
+    {
       "id": "gram_form_from_l2_and_dot",
       "type": "theorem",
       "category": "proved",
@@ -8968,6 +9248,76 @@
       "file": "Cathedral/Covariance/L2Convergence.lean",
       "line": 117,
       "signature": "theorem rh_implies_l2_convergence_proved : RiemannHypothesis \u2192 \u2200 \u03b5 > 0, \u2203 N\u2080 : \u2115, \u2200 N \u2265 N\u2080, \u2203 v : Fin (N - 1) \u2192 \u211d, \u222b x in (0:\u211d)..1, (1 - bdLinComb N v x) ^ 2 < \u03b5",
+      "sorryCount": 0
+    },
+    {
+      "id": "mertens_third_asymptotic",
+      "type": "axiom",
+      "category": "axiom",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 34,
+      "signature": "axiom mertens_third_asymptotic : Asymptotics.IsEquivalent Filter.atTop (fun x : \u211d \u21a6 \u220f p \u2208 (Finset.Ioc 0 \u230ax\u230b\u208a).filter Nat.Prime, (1 - (1 : \u211d) / p)) (fun x \u21a6 Real.exp (-eulerMascheroniConstant) / Rea\u2026",
+      "sorryCount": 0
+    },
+    {
+      "id": "pnta_mertens_third",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 50,
+      "signature": "theorem pnta_mertens_third : (fun x : \u211d => \u220f p \u2208 (Ioc 0 \u230ax\u230b\u208a).filter Nat.Prime, (1 - (1 : \u211d) / p)) ~[atTop] (fun x => exp (-eulerMascheroniConstant) / log x)",
+      "sorryCount": 0
+    },
+    {
+      "id": "mertens_tendsto_real",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 60,
+      "signature": "theorem mertens_tendsto_real : Tendsto (fun x : \u211d => log x * \u220f p \u2208 (Ioc 0 \u230ax\u230b\u208a).filter Nat.Prime, (1 - (1 : \u211d) / p)) atTop (nhds (exp (-eulerMascheroniConstant)))",
+      "sorryCount": 0
+    },
+    {
+      "id": "filter_prime_range_succ_eq_Ioc",
+      "type": "lemma",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 79,
+      "signature": "lemma filter_prime_range_succ_eq_Ioc (n : \u2115) : (range (n + 1)).filter Nat.Prime = (Ioc 0 n).filter Nat.Prime",
+      "sorryCount": 0
+    },
+    {
+      "id": "mertens_range_succ",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 90,
+      "signature": "theorem mertens_range_succ : Tendsto (fun X : \u2115 => log (X : \u211d) * \u220f p \u2208 (range (X + 1)).filter Nat.Prime, (1 - 1 / (p : \u211d))) atTop (nhds (exp (-eulerMascheroniConstant)))",
+      "sorryCount": 0
+    },
+    {
+      "id": "mertens_third_nat_tendsto",
+      "type": "theorem",
+      "category": "sorry",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 112,
+      "signature": "theorem mertens_third_nat_tendsto : Tendsto (fun X : \u2115 => Real.log \u2191X * \u220f p \u2208 (Finset.range X).filter Nat.Prime, (1 - 1 / (p : \u211d))) atTop (nhds (Real.exp (-eulerMascheroniConstant)))",
+      "sorryCount": 1
+    },
+    {
+      "id": "cathedral_mertens_third",
+      "type": "theorem",
+      "category": "proved",
+      "route": "variational",
+      "file": "Cathedral/Covariance/MertensBridge.lean",
+      "line": 124,
+      "signature": "theorem cathedral_mertens_third : Tendsto (fun X : \u2115 => Real.log \u2191X * \u220f p \u2208 (Finset.range X).filter Nat.Prime, (1 - 1 / (p : \u211d))) atTop (nhds (Real.exp (-eulerMascheroniConstant)))",
       "sorryCount": 0
     },
     {
@@ -10047,7 +10397,7 @@
       "route": "variational",
       "file": "Cathedral/Spectral/MellinDirichletBridge.lean",
       "line": 235,
-      "signature": "theorem b1_integral_le_residual_plus_corrections (N : \u2115) (hN : 3 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : \u222b x in (0:\u211d)..1, (b1_sum v x) ^ 2 \u2264 (\u222b x in (0:\u211d)..1, (bdResidualV N v x) ^ 2) + (c_v v) ^ 2 + 2 * |c_v\u2026",
+      "signature": "theorem b1_integral_le_residual_plus_corrections (N : \u2115) (_hN : 3 \u2264 N) (v : Fin (N - 1) \u2192 \u211d) : \u222b x in (0:\u211d)..1, (b1_sum v x) ^ 2 \u2264 (\u222b x in (0:\u211d)..1, (bdResidualV N v x) ^ 2) + (c_v v) ^ 2 + 2 * |c_\u2026",
       "sorryCount": 0
     },
     {
@@ -11996,7 +12346,7 @@
       "category": "definition",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 104,
+      "line": 101,
       "signature": "def crossParityBilinear (N : \u2115) (u v : Fin (N - 1) \u2192 \u211d) : \u211d",
       "sorryCount": 0
     },
@@ -12006,7 +12356,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 108,
+      "line": 105,
       "signature": "theorem crossParityBilinear_eq (N : \u2115) (u v : Fin (N - 1) \u2192 \u211d) : crossParityBilinear N u v = dotProduct u ((parityBlockB N).mulVec v)",
       "sorryCount": 0
     },
@@ -12016,7 +12366,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 140,
+      "line": 137,
       "signature": "axiom moebius_uncoupling (N : \u2115) (hN : 10 \u2264 N) (u v : Fin (N - 1) \u2192 \u211d) : \u2203 main_term error : \u211d, crossParityBilinear N u v = main_term + error \u2227 |error| \u2264 (1 / Real.sqrt (N : \u211d)) * Real.sqrt (dotPro\u2026",
       "sorryCount": 0
     },
@@ -12026,7 +12376,7 @@
       "category": "axiom",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 186,
+      "line": 183,
       "signature": "axiom type_II_sieve_bound : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^ 2 * dotProduct u ((parityBlo\u2026",
       "sorryCount": 0
     },
@@ -12036,7 +12386,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 220,
+      "line": 217,
       "signature": "theorem sieve_implies_stable_ratio_asymptotic (h_sieve : \u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^\u2026",
       "sorryCount": 0
     },
@@ -12046,7 +12396,7 @@
       "category": "proved",
       "route": "variational",
       "file": "Cathedral/Sieve/BilinearSieve.lean",
-      "line": 300,
+      "line": 297,
       "signature": "theorem type_II_implies_stable_ratio_asymptotic : (\u2203 c : \u211d, 0 < c \u2227 \u2200 N : \u2115, 10 \u2264 N \u2192 \u2203 K : \u211d, 0 \u2264 K \u2227 K ^ 2 \u2264 1 - c / (N : \u211d) \u2227 \u2200 u v : Fin (N - 1) \u2192 \u211d, (crossParityBilinear N u v) ^ 2 \u2264 K ^ 2 * d\u2026",
       "sorryCount": 0
     },
@@ -15119,6 +15469,38 @@
       "target": "zeta_norm_bound_on_disk"
     },
     {
+      "source": "R",
+      "target": "rh_zeta_ne_zero"
+    },
+    {
+      "source": "R",
+      "target": "zeta_sub_one_norm_le_three_fourths"
+    },
+    {
+      "source": "R",
+      "target": "zeta_mem_slitPlane_of_re_ge_two"
+    },
+    {
+      "source": "R",
+      "target": "s_ne_one_on_disk"
+    },
+    {
+      "source": "R",
+      "target": "re_gt_half_on_disk"
+    },
+    {
+      "source": "R",
+      "target": "holomorphic_log_exists_on_ball"
+    },
+    {
+      "source": "R",
+      "target": "zeta_norm_convexity_bound"
+    },
+    {
+      "source": "R",
+      "target": "zeta_norm_bound_on_disk"
+    },
+    {
       "source": "telescoping",
       "target": "rh_zeta_ne_zero"
     },
@@ -15175,6 +15557,18 @@
       "target": "thin_strip_lower_bound_exists"
     },
     {
+      "source": "R",
+      "target": "hadamard_three_circles"
+    },
+    {
+      "source": "R",
+      "target": "rh_zeta_lower_bound_from_zero_counting"
+    },
+    {
+      "source": "R",
+      "target": "thin_strip_lower_bound_exists"
+    },
+    {
       "source": "rh_zeta_ne_zero",
       "target": "re_ge_two_on_inner"
     },
@@ -15396,6 +15790,38 @@
     },
     {
       "source": "Cathedral",
+      "target": "rh_zeta_lower_bound_graduated"
+    },
+    {
+      "source": "R",
+      "target": "re_ge_two_on_inner"
+    },
+    {
+      "source": "R",
+      "target": "s_ne_one_on_ball_3"
+    },
+    {
+      "source": "R",
+      "target": "re_gt_half_on_ball_3"
+    },
+    {
+      "source": "R",
+      "target": "G_inner_bound_fixed"
+    },
+    {
+      "source": "R",
+      "target": "G_outer_bound_re_3"
+    },
+    {
+      "source": "R",
+      "target": "sub_logarithmic_bound"
+    },
+    {
+      "source": "R",
+      "target": "littlewood_maneuver"
+    },
+    {
+      "source": "R",
       "target": "rh_zeta_lower_bound_graduated"
     },
     {
@@ -15472,6 +15898,10 @@
     },
     {
       "source": "Cathedral",
+      "target": "zeta_polynomial_lower_bound_rh_proved"
+    },
+    {
+      "source": "R",
       "target": "zeta_polynomial_lower_bound_rh_proved"
     },
     {
@@ -19152,6 +19582,46 @@
     },
     {
       "source": "bdLinComb",
+      "target": "forward_bridge_from_lambda_trick"
+    },
+    {
+      "source": "R",
+      "target": "scalar_parabola_minimum"
+    },
+    {
+      "source": "R",
+      "target": "dotProduct_scale_right"
+    },
+    {
+      "source": "R",
+      "target": "quadForm_scale"
+    },
+    {
+      "source": "R",
+      "target": "lambda_trick_integral"
+    },
+    {
+      "source": "R",
+      "target": "gram_cov_decomposition"
+    },
+    {
+      "source": "R",
+      "target": "parabola_to_rayleigh"
+    },
+    {
+      "source": "R",
+      "target": "bd_gram_eq_vasyunin"
+    },
+    {
+      "source": "R",
+      "target": "bd_mean_eq_vasyunin"
+    },
+    {
+      "source": "R",
+      "target": "Cathedral"
+    },
+    {
+      "source": "R",
       "target": "forward_bridge_from_lambda_trick"
     },
     {
@@ -27387,22 +27857,6 @@
       "target": "row_integral_eq_rowTerm_single"
     },
     {
-      "source": "telescoping",
-      "target": "single_tile_eq_rowTerm"
-    },
-    {
-      "source": "telescoping",
-      "target": "n_zero_eq_rowTerm"
-    },
-    {
-      "source": "telescoping",
-      "target": "two_tile_ftc_eval"
-    },
-    {
-      "source": "telescoping",
-      "target": "row_integral_eq_rowTerm_single"
-    },
-    {
       "source": "Cathedral",
       "target": "fract_inv_mul_eq"
     },
@@ -28279,6 +28733,42 @@
       "target": "gcd_div_eq_one"
     },
     {
+      "source": "R",
+      "target": "tileIndex_pos"
+    },
+    {
+      "source": "R",
+      "target": "partialDigammaSum_one"
+    },
+    {
+      "source": "R",
+      "target": "floor_sum_single"
+    },
+    {
+      "source": "R",
+      "target": "floor_sum_reciprocity"
+    },
+    {
+      "source": "R",
+      "target": "partial_sum_tends_to_formula"
+    },
+    {
+      "source": "R",
+      "target": "telescope_limit_eq_vasyunin"
+    },
+    {
+      "source": "R",
+      "target": "integral_eq_vasyunin_coprime"
+    },
+    {
+      "source": "R",
+      "target": "coprime_after_gcd"
+    },
+    {
+      "source": "R",
+      "target": "gcd_div_eq_one"
+    },
+    {
       "source": "Cathedral",
       "target": "row_nonempty"
     },
@@ -29548,6 +30038,62 @@
     },
     {
       "source": "fract_lt_one",
+      "target": "centered_fract_residual_converges_sketch"
+    },
+    {
+      "source": "R",
+      "target": "tileIndex_nonneg"
+    },
+    {
+      "source": "R",
+      "target": "s_log_split"
+    },
+    {
+      "source": "R",
+      "target": "rational_plus_stirling"
+    },
+    {
+      "source": "R",
+      "target": "s_combined_eq_sum_rowTerm"
+    },
+    {
+      "source": "R",
+      "target": "rowTerm_nonneg"
+    },
+    {
+      "source": "R",
+      "target": "rowTerm_le_upper"
+    },
+    {
+      "source": "R",
+      "target": "s_combined_converges"
+    },
+    {
+      "source": "R",
+      "target": "s_combined_four_way"
+    },
+    {
+      "source": "R",
+      "target": "s_linear_decompose"
+    },
+    {
+      "source": "R",
+      "target": "actualRowIntegral_nonneg"
+    },
+    {
+      "source": "R",
+      "target": "actualRowIntegral_le"
+    },
+    {
+      "source": "R",
+      "target": "integral_eq_sum_actualRowIntegral"
+    },
+    {
+      "source": "R",
+      "target": "centered_fract_partial_sums_bounded"
+    },
+    {
+      "source": "R",
       "target": "centered_fract_residual_converges_sketch"
     },
     {
@@ -30472,6 +31018,34 @@
     },
     {
       "source": "gramIntegral",
+      "target": "tsum_twoTileCorrection_eq_zero_a1"
+    },
+    {
+      "source": "R",
+      "target": "twoTileCorrection_zero_of_single_tile"
+    },
+    {
+      "source": "R",
+      "target": "twoTileCorrection_abs_le"
+    },
+    {
+      "source": "R",
+      "target": "twoTileCorrection_summable"
+    },
+    {
+      "source": "R",
+      "target": "tsum_actualRowIntegral_eq_rowTerm_plus_correction"
+    },
+    {
+      "source": "R",
+      "target": "master_equation"
+    },
+    {
+      "source": "R",
+      "target": "twoTileCorrection_eq_zero_a1"
+    },
+    {
+      "source": "R",
       "target": "tsum_twoTileCorrection_eq_zero_a1"
     },
     {
@@ -36023,6 +36597,26 @@
       "target": "gallagher_mvt"
     },
     {
+      "source": "R",
+      "target": "cross_term_integral"
+    },
+    {
+      "source": "R",
+      "target": "triangle_kronecker"
+    },
+    {
+      "source": "R",
+      "target": "fejer_orthogonality"
+    },
+    {
+      "source": "R",
+      "target": "fejerWeightedL2_nonneg"
+    },
+    {
+      "source": "R",
+      "target": "gallagher_mvt"
+    },
+    {
       "source": "Cathedral",
       "target": "norm_Gamma_le_Gamma_re"
     },
@@ -36276,6 +36870,54 @@
     },
     {
       "source": "sum_arith_over_q",
+      "target": "digamma_sum_identity"
+    },
+    {
+      "source": "R",
+      "target": "multiplicationGamma_add_one"
+    },
+    {
+      "source": "R",
+      "target": "sum_log_gamma_eq_target"
+    },
+    {
+      "source": "R",
+      "target": "gamma_product_at_one"
+    },
+    {
+      "source": "R",
+      "target": "multiplicationGamma_one"
+    },
+    {
+      "source": "R",
+      "target": "multiplicationGamma_log_convex"
+    },
+    {
+      "source": "R",
+      "target": "multiplicationGamma_pos"
+    },
+    {
+      "source": "R",
+      "target": "multiplicationGamma_eq_Gamma"
+    },
+    {
+      "source": "R",
+      "target": "gamma_product_formula"
+    },
+    {
+      "source": "R",
+      "target": "digamma_ofReal"
+    },
+    {
+      "source": "R",
+      "target": "digamma_multiplication"
+    },
+    {
+      "source": "R",
+      "target": "digamma_sum_from_mult"
+    },
+    {
+      "source": "R",
       "target": "digamma_sum_identity"
     },
     {
@@ -38559,6 +39201,54 @@
       "target": "nyman_beurling_residual_eq_pnt_error"
     },
     {
+      "source": "mu_log",
+      "target": "card_Icc_filter_dvd"
+    },
+    {
+      "source": "mu_log",
+      "target": "filter_dvd_eq_divisors"
+    },
+    {
+      "source": "mu_log",
+      "target": "divisor_sum_swap"
+    },
+    {
+      "source": "mu_log",
+      "target": "moebius_divisor_sum"
+    },
+    {
+      "source": "mu_log",
+      "target": "mobius_floor_sum_eq_one"
+    },
+    {
+      "source": "mu_log",
+      "target": "nyman_beurling_residual_eq_pnt_error"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "card_Icc_filter_dvd"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "filter_dvd_eq_divisors"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "divisor_sum_swap"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "moebius_divisor_sum"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "mobius_floor_sum_eq_one"
+    },
+    {
+      "source": "mu_log_mul_zeta",
+      "target": "nyman_beurling_residual_eq_pnt_error"
+    },
+    {
       "source": "sum_mu_log_floor_icc",
       "target": "card_Icc_filter_dvd"
     },
@@ -40256,6 +40946,34 @@
     },
     {
       "source": "critical_line_mellin_variance_proved",
+      "target": "crown_graduation_target"
+    },
+    {
+      "source": "R",
+      "target": "mellin_residual_decomp"
+    },
+    {
+      "source": "R",
+      "target": "bdMellinBasis_explicit"
+    },
+    {
+      "source": "R",
+      "target": "mellin_residual_explicit"
+    },
+    {
+      "source": "R",
+      "target": "bdMellinBasis_simplified"
+    },
+    {
+      "source": "R",
+      "target": "mellin_residual_structural"
+    },
+    {
+      "source": "R",
+      "target": "mellin_residual_poly_form"
+    },
+    {
+      "source": "R",
       "target": "crown_graduation_target"
     },
     {
@@ -42183,6 +42901,38 @@
       "target": "boundary_vanishes_nat_logsq"
     },
     {
+      "source": "R",
+      "target": "rpow_34_div_sq"
+    },
+    {
+      "source": "R",
+      "target": "rpow_34_div_eq"
+    },
+    {
+      "source": "R",
+      "target": "rpow_cancel_34"
+    },
+    {
+      "source": "R",
+      "target": "log_two_ge_half"
+    },
+    {
+      "source": "R",
+      "target": "log_ge_half_of_two_le"
+    },
+    {
+      "source": "R",
+      "target": "interior_bound_weighted"
+    },
+    {
+      "source": "R",
+      "target": "boundary_vanishes_nat"
+    },
+    {
+      "source": "R",
+      "target": "boundary_vanishes_nat_logsq"
+    },
+    {
       "source": "Cathedral",
       "target": "hasDerivAt_neg4_rpow"
     },
@@ -43435,6 +44185,30 @@
       "target": "linear_mean_bound"
     },
     {
+      "source": "mu_pnt_alt",
+      "target": "pnt_mu_div_k"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "pnt_mu_log_div_k"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "pnt_mu_log_sq_div_k"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "abel_mertens_tail_raw"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "moebius_mean_finite_bound"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "linear_mean_bound"
+    },
+    {
       "source": "pnt_moebius_sum_div_tendsto",
       "target": "pnt_mu_div_k"
     },
@@ -43532,6 +44306,10 @@
     },
     {
       "source": "Cathedral",
+      "target": "mu_pnt_alt"
+    },
+    {
+      "source": "Cathedral",
       "target": "pnt_moebius_sum_div_tendsto"
     },
     {
@@ -43540,11 +44318,19 @@
     },
     {
       "source": "pnt_mu_div_k",
+      "target": "mu_pnt_alt"
+    },
+    {
+      "source": "pnt_mu_div_k",
       "target": "pnt_moebius_sum_div_tendsto"
     },
     {
       "source": "pnt_mu_div_k",
       "target": "pnt_mu_div_k_derived"
+    },
+    {
+      "source": "pnt_mu_log_div_k",
+      "target": "mu_pnt_alt"
     },
     {
       "source": "pnt_mu_log_div_k",
@@ -43556,6 +44342,10 @@
     },
     {
       "source": "pnt_mu_log_sq_div_k",
+      "target": "mu_pnt_alt"
+    },
+    {
+      "source": "pnt_mu_log_sq_div_k",
       "target": "pnt_moebius_sum_div_tendsto"
     },
     {
@@ -43564,111 +44354,79 @@
     },
     {
       "source": "Cathedral",
+      "target": "R_isLittleO"
+    },
+    {
+      "source": "Cathedral",
+      "target": "mu_log_mul_zeta"
+    },
+    {
+      "source": "Cathedral",
       "target": "pnt_mu_log_div_k_proved"
+    },
+    {
+      "source": "pnt_mu_log_div_k",
+      "target": "R_isLittleO"
+    },
+    {
+      "source": "pnt_mu_log_div_k",
+      "target": "mu_log_mul_zeta"
     },
     {
       "source": "pnt_mu_log_div_k",
       "target": "pnt_mu_log_div_k_proved"
     },
     {
-      "source": "Cathedral",
-      "target": "exp_decay_times_t_tendsto_zero"
+      "source": "mu_pnt_alt",
+      "target": "R_isLittleO"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "mu_log_mul_zeta"
+    },
+    {
+      "source": "mu_pnt_alt",
+      "target": "pnt_mu_log_div_k_proved"
     },
     {
       "source": "Cathedral",
-      "target": "exp_decay_le_const_div_log"
+      "target": "MediumPNT"
     },
     {
       "source": "Cathedral",
       "target": "s1_exp_decay"
     },
     {
-      "source": "Cathedral",
-      "target": "s1_le_const_div_log"
-    },
-    {
-      "source": "Cathedral",
-      "target": "unconditional_mean_bound"
-    },
-    {
       "source": "S\u2081_at",
-      "target": "exp_decay_times_t_tendsto_zero"
-    },
-    {
-      "source": "S\u2081_at",
-      "target": "exp_decay_le_const_div_log"
+      "target": "MediumPNT"
     },
     {
       "source": "S\u2081_at",
       "target": "s1_exp_decay"
     },
     {
-      "source": "S\u2081_at",
-      "target": "s1_le_const_div_log"
-    },
-    {
-      "source": "S\u2081_at",
-      "target": "unconditional_mean_bound"
-    },
-    {
       "source": "s1_decay",
-      "target": "exp_decay_times_t_tendsto_zero"
-    },
-    {
-      "source": "s1_decay",
-      "target": "exp_decay_le_const_div_log"
+      "target": "MediumPNT"
     },
     {
       "source": "s1_decay",
       "target": "s1_exp_decay"
     },
     {
-      "source": "s1_decay",
-      "target": "s1_le_const_div_log"
-    },
-    {
-      "source": "s1_decay",
-      "target": "unconditional_mean_bound"
-    },
-    {
       "source": "pnt_mu_div_k",
-      "target": "exp_decay_times_t_tendsto_zero"
-    },
-    {
-      "source": "pnt_mu_div_k",
-      "target": "exp_decay_le_const_div_log"
+      "target": "MediumPNT"
     },
     {
       "source": "pnt_mu_div_k",
       "target": "s1_exp_decay"
     },
     {
-      "source": "pnt_mu_div_k",
-      "target": "s1_le_const_div_log"
-    },
-    {
-      "source": "pnt_mu_div_k",
-      "target": "unconditional_mean_bound"
-    },
-    {
       "source": "mertensFunction",
-      "target": "exp_decay_times_t_tendsto_zero"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "exp_decay_le_const_div_log"
+      "target": "MediumPNT"
     },
     {
       "source": "mertensFunction",
       "target": "s1_exp_decay"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "s1_le_const_div_log"
-    },
-    {
-      "source": "mertensFunction",
-      "target": "unconditional_mean_bound"
     },
     {
       "source": "vasyuninCovMatrix",
@@ -44924,6 +45682,486 @@
     },
     {
       "source": "vasyuninGramEntry",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "gram_bound_implies_rh",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "gram_bound_implies_rh",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "gram_bound_implies_rh",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "gram_bound_implies_rh",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "Cathedral",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "Cathedral",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "Cathedral",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "Cathedral",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "linearTaperSum",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "linearTaperSum",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "linearTaperSum",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "linearTaperSum",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "quadraticTaperSum",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "quadraticTaperSum",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "quadraticTaperSum",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "quadraticTaperSum",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "gram_form_taper_decomposition",
+      "target": "sum_eq_sum_gcd"
+    },
+    {
+      "source": "gram_form_taper_decomposition",
+      "target": "untaperedSum_partition"
+    },
+    {
+      "source": "gram_form_taper_decomposition",
+      "target": "linearTaperSum_partition"
+    },
+    {
+      "source": "gram_form_taper_decomposition",
+      "target": "quadraticTaperSum_partition"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "Cathedral",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "Cathedral",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "Cathedral",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "Cathedral",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "Cathedral",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "Cathedral",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "localFactor",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "localFactor",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "localFactor",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "localFactor",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "localFactor",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "localFactor",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "localFactor",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "localFactor",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "localFactor",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "localFactor",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "trivial_local_factor",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "gcd_local_factor",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "moebius_mul_coprime"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "moebius_coprime_mul_eq"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "moebius_sq_of_squarefree"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "inner_sum_zero_of_not_dvd"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "gcd_mul_left_eq"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "gcd_mul_eq_d_iff"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "gcd_stratum_reindex"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "sign_extraction_simplified"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "leading_term_local_factor_pos"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "gcd_term_local_factor_pos"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGramEntry",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "Cathedral",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "Cathedral",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "Cathedral",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "Cathedral",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "vasyuninGram_nonneg",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "vasyuninGram_nonneg",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGram_nonneg",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGram_nonneg",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "vasyuninGram_lt_half",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "vasyuninGram_lt_half",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGram_lt_half",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "vasyuninGram_lt_half",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum_gcd",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "linearTaperSum_gcd",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "linearTaperSum_gcd",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "linearTaperSum_gcd",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "linearTaperSum_gcd",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "untaperedSum_partition",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "untaperedSum_partition",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum_partition",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum_partition",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "gcd_stratum_term_bound"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "untaperedSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "linearTaperSum_gcd_bound"
+    },
+    {
+      "source": "untaperedSum",
+      "target": "untaperedSum_from_strata"
+    },
+    {
+      "source": "vasyuninGramEntry",
       "target": "gram_form_from_l2_and_dot"
     },
     {
@@ -45211,6 +46449,54 @@
       "target": "rh_implies_l2_convergence_proved"
     },
     {
+      "source": "Cathedral",
+      "target": "mertens_third_asymptotic"
+    },
+    {
+      "source": "Cathedral",
+      "target": "pnta_mertens_third"
+    },
+    {
+      "source": "Cathedral",
+      "target": "mertens_tendsto_real"
+    },
+    {
+      "source": "Cathedral",
+      "target": "filter_prime_range_succ_eq_Ioc"
+    },
+    {
+      "source": "Cathedral",
+      "target": "mertens_range_succ"
+    },
+    {
+      "source": "Cathedral",
+      "target": "cathedral_mertens_third"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "mertens_third_asymptotic"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "pnta_mertens_third"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "mertens_tendsto_real"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "filter_prime_range_succ_eq_Ioc"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "mertens_range_succ"
+    },
+    {
+      "source": "mertens_third_statement",
+      "target": "cathedral_mertens_third"
+    },
+    {
       "source": "vasyuninGramEntry",
       "target": "gram_form_upper_bound"
     },
@@ -46956,6 +48242,90 @@
     },
     {
       "source": "Cathedral",
+      "target": "oct_gap_positive"
+    },
+    {
+      "source": "R",
+      "target": "gramMatrixBlockDiag_hermitian"
+    },
+    {
+      "source": "R",
+      "target": "block_min_eq_class_min"
+    },
+    {
+      "source": "R",
+      "target": "class_gap_strictly_larger"
+    },
+    {
+      "source": "R",
+      "target": "block_gap_larger"
+    },
+    {
+      "source": "R",
+      "target": "oct_equals_block"
+    },
+    {
+      "source": "R",
+      "target": "liouville_within_class_decorrelated"
+    },
+    {
+      "source": "R",
+      "target": "gram_decomposition"
+    },
+    {
+      "source": "R",
+      "target": "gramMatrixCross_hermitian"
+    },
+    {
+      "source": "R",
+      "target": "weyl_inequality"
+    },
+    {
+      "source": "R",
+      "target": "schur_bridge"
+    },
+    {
+      "source": "R",
+      "target": "rh_from_schur_bridge"
+    },
+    {
+      "source": "R",
+      "target": "interference_rank_one"
+    },
+    {
+      "source": "R",
+      "target": "large_sieve_ratio_bounded"
+    },
+    {
+      "source": "R",
+      "target": "rh_from_rank_one_interference"
+    },
+    {
+      "source": "R",
+      "target": "rh_from_octonionic_global"
+    },
+    {
+      "source": "R",
+      "target": "classRestrict_norm_partition"
+    },
+    {
+      "source": "R",
+      "target": "blockDiag_quadForm_decomp"
+    },
+    {
+      "source": "R",
+      "target": "min_eigenvalue_le_quadForm_scaled"
+    },
+    {
+      "source": "R",
+      "target": "oct_gap_dominates_proof"
+    },
+    {
+      "source": "R",
+      "target": "oct_gap_dominates_derived"
+    },
+    {
+      "source": "R",
       "target": "oct_gap_positive"
     },
     {
@@ -47928,6 +49298,50 @@
     },
     {
       "source": "Cathedral",
+      "target": "effective_eigenvalue_summary"
+    },
+    {
+      "source": "R",
+      "target": "r_lt_one_implies_positive"
+    },
+    {
+      "source": "R",
+      "target": "rank_one_interference_structure"
+    },
+    {
+      "source": "R",
+      "target": "rank_one_accuracy_increasing"
+    },
+    {
+      "source": "R",
+      "target": "coupling_eigenvalues"
+    },
+    {
+      "source": "R",
+      "target": "universal_coupling"
+    },
+    {
+      "source": "R",
+      "target": "stable_ratio"
+    },
+    {
+      "source": "R",
+      "target": "rh_from_finite_dim_bound"
+    },
+    {
+      "source": "R",
+      "target": "proof_chain_summary"
+    },
+    {
+      "source": "R",
+      "target": "alpha_bounded_by_eff"
+    },
+    {
+      "source": "R",
+      "target": "rank_one_ratio_vanishes"
+    },
+    {
+      "source": "R",
       "target": "effective_eigenvalue_summary"
     },
     {
@@ -51399,6 +52813,14 @@
       "target": "integral_rpow_le_of_gt_one"
     },
     {
+      "source": "R",
+      "target": "integral_rpow_le_of_lt_one"
+    },
+    {
+      "source": "R",
+      "target": "integral_rpow_le_of_gt_one"
+    },
+    {
       "source": "Cathedral",
       "target": "perron_kernel_bound"
     },
@@ -51575,6 +52997,14 @@
       "target": "right_vertical_bound"
     },
     {
+      "source": "R",
+      "target": "rectangle_integral_perron_vanishes"
+    },
+    {
+      "source": "R",
+      "target": "right_vertical_bound"
+    },
+    {
       "source": "perronIntegrand",
       "target": "rectangle_integral_perron_vanishes"
     },
@@ -51640,6 +53070,50 @@
     },
     {
       "source": "Cathedral",
+      "target": "perron_kernel_gt_one"
+    },
+    {
+      "source": "R",
+      "target": "perronIntegrand_eq_flattened_add_inv"
+    },
+    {
+      "source": "R",
+      "target": "right_vert_log_antideriv"
+    },
+    {
+      "source": "R",
+      "target": "left_vert_log_antideriv"
+    },
+    {
+      "source": "R",
+      "target": "horiz_log_antideriv"
+    },
+    {
+      "source": "R",
+      "target": "four_corner_log_sum"
+    },
+    {
+      "source": "R",
+      "target": "rectangle_integral_inv_eq_two_pi_I"
+    },
+    {
+      "source": "R",
+      "target": "left_vertical_bound"
+    },
+    {
+      "source": "R",
+      "target": "horizontal_segment_bound_gt_one"
+    },
+    {
+      "source": "R",
+      "target": "left_rectangle_perron_winding"
+    },
+    {
+      "source": "R",
+      "target": "perron_integral_bound_with_R_gt_one"
+    },
+    {
+      "source": "R",
       "target": "perron_kernel_gt_one"
     },
     {
@@ -51916,6 +53390,18 @@
     },
     {
       "source": "Cathedral",
+      "target": "perron_kernel_lt_one"
+    },
+    {
+      "source": "R",
+      "target": "horizontal_segment_bound"
+    },
+    {
+      "source": "R",
+      "target": "perron_integral_bound_with_R"
+    },
+    {
+      "source": "R",
       "target": "perron_kernel_lt_one"
     },
     {
@@ -52823,6 +54309,34 @@
       "target": "totalEnergy_eq_liouville_sum"
     },
     {
+      "source": "R",
+      "target": "smallOmega_one"
+    },
+    {
+      "source": "R",
+      "target": "smallOmega_prime"
+    },
+    {
+      "source": "R",
+      "target": "smallOmega_prime_pow"
+    },
+    {
+      "source": "R",
+      "target": "smallOmega_eq_zero"
+    },
+    {
+      "source": "R",
+      "target": "smallOmega_pos"
+    },
+    {
+      "source": "R",
+      "target": "totalEnergy_eq_sum_omegaClass"
+    },
+    {
+      "source": "R",
+      "target": "totalEnergy_eq_liouville_sum"
+    },
+    {
       "source": "nbBasis",
       "target": "bdGramMatrix_symmetric"
     },
@@ -53179,6 +54693,26 @@
       "target": "type_II_implies_stable_ratio_asymptotic"
     },
     {
+      "source": "R",
+      "target": "crossParityBilinear_eq"
+    },
+    {
+      "source": "R",
+      "target": "moebius_uncoupling"
+    },
+    {
+      "source": "R",
+      "target": "type_II_sieve_bound"
+    },
+    {
+      "source": "R",
+      "target": "sieve_implies_stable_ratio_asymptotic"
+    },
+    {
+      "source": "R",
+      "target": "type_II_implies_stable_ratio_asymptotic"
+    },
+    {
       "source": "parityBlockA",
       "target": "crossParityBilinear_eq"
     },
@@ -53664,6 +55198,54 @@
     },
     {
       "source": "Cathedral",
+      "target": "schur_to_distance_scaling_v2"
+    },
+    {
+      "source": "R",
+      "target": "parityProj_complete"
+    },
+    {
+      "source": "R",
+      "target": "parityProj_orthogonal"
+    },
+    {
+      "source": "R",
+      "target": "gram_block_decomposition"
+    },
+    {
+      "source": "R",
+      "target": "schur_complement_pos_of_gram_pos"
+    },
+    {
+      "source": "R",
+      "target": "gramMatrix_posSemidef"
+    },
+    {
+      "source": "R",
+      "target": "parityBlockA_psd"
+    },
+    {
+      "source": "R",
+      "target": "parityBlockC_psd"
+    },
+    {
+      "source": "R",
+      "target": "stable_ratio_parity"
+    },
+    {
+      "source": "R",
+      "target": "schur_complement_lower_from_ratio"
+    },
+    {
+      "source": "R",
+      "target": "gram_eigenvalue_log_scaling"
+    },
+    {
+      "source": "R",
+      "target": "eigenvalue_implies_distance_bound"
+    },
+    {
+      "source": "R",
       "target": "schur_to_distance_scaling_v2"
     },
     {
@@ -56883,6 +58465,14 @@
       "target": "condensate_protects_vacuum"
     },
     {
+      "source": "R",
+      "target": "woodbury_identity"
+    },
+    {
+      "source": "R",
+      "target": "condensate_protects_vacuum"
+    },
+    {
       "source": "Cathedral",
       "target": "exp_neg_strictAntiOn"
     },
@@ -59000,15 +60590,15 @@
     }
   ],
   "meta": {
-    "totalNodes": 1464,
-    "totalEdges": 11089,
-    "axiomCount": 73,
-    "theoremCount": 1154,
-    "sorryCount": 9,
-    "definitionCount": 228,
-    "provedTheorems": 1154,
-    "fileCount": 218,
-    "description": "Cathedral proof architecture: 73 axioms, 1154 proved, 9 sorry, 228 definitions across 218 files",
-    "generatedAt": "2026-05-10T00:36:03.741543"
+    "totalNodes": 1499,
+    "totalEdges": 11399,
+    "axiomCount": 78,
+    "theoremCount": 1173,
+    "sorryCount": 14,
+    "definitionCount": 234,
+    "provedTheorems": 1173,
+    "fileCount": 222,
+    "description": "Cathedral proof architecture: 78 axioms, 1173 proved, 14 sorry, 234 definitions across 222 files",
+    "generatedAt": "2026-05-11T00:20:40.031295"
   }
 }
