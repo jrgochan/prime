@@ -1,14 +1,14 @@
 # References — The Cathedral
 
-**Crown Graduation** — April 28, 2026 (v12)  
-**Particle Zoo** — April 29, 2026 (spectral probe to N = 10⁹)
+**Oracle Capstone** — May 10, 2026 (v17)  
+**Dual Crown** — Analytic (1 literature axiom) + Oracle (1 computation axiom)
 
 A complete bibliography of the mathematical results used in the formal
 verification and the companion papers. Every theorem, identity, and
 technique in the Cathedral traces back to published mathematics listed here.
 
-50+ mathematicians. 167 years of prior work. Two crown axioms.
-169 active files. ~1,459 theorems. 15 companion papers. 37 Rust/MPFR experiments.
+50+ mathematicians. 167 years of prior work. One crown axiom.
+227 active files. ~1,757 theorems. 2 core papers. 60 Rust/MPFR/DD experiments.
 
 ---
 
@@ -41,7 +41,7 @@ technique in the Cathedral traces back to published mathematics listed here.
 ### The Báez-Duarte Strengthening
 
 - **Luis Báez-Duarte**, "A strengthening of the Nyman–Beurling criterion
-  for the Riemann hypothesis," *J. Atti Accad. Naz. Lincei*, 14:5–11, 2003.
+  for the Riemann hypothesis," *Atti Accad. Naz. Lincei*, 14:5–11, 2003.
 
 - **Luis Báez-Duarte**, "A new necessary and sufficient condition for the
   Riemann hypothesis," 2003. [arXiv:math/0307215](https://arxiv.org/abs/math/0307215)
@@ -551,6 +551,16 @@ technique in the Cathedral traces back to published mathematics listed here.
   > N(T) = (T/2π) log(T/2πe) + O(log T). The asymptotic density of
   > zeta zeros, required for the Hadamard zero-counting axiom.
 
+### The Phragmén–Lindelöf Principle
+
+- **Lars Edvard Phragmén and Ernst Leonard Lindelöf**, "Sur une extension
+  d'un principe classique de l'analyse," *Acta Math.*, 31:381–406, 1908.
+
+  > Maximum modulus principle for unbounded domains. Imported from
+  > Mathlib (`Analysis.Complex.PhragmenLindelof`) and used in
+  > `Zeta/ConvexityBound.lean` for the convexity bound on ζ(s) in
+  > vertical strips.
+
 ---
 
 ## Inequalities and Mean Value Theorems
@@ -712,28 +722,84 @@ technique in the Cathedral traces back to published mathematics listed here.
   > `LinearAlgebra.Matrix.PosDef`, `MeasureTheory.Integral.IntervalIntegral`,
   > `NumberTheory.LSeries.RiemannZeta`.
 
+### The Flyspeck Project
+
+- **Thomas C. Hales et al.**, "A Formal Proof of the Kepler Conjecture,"
+  *Forum of Mathematics, Pi*, 5:e2, 2017.
+
+  > The Oracle Bridge follows the Flyspeck trust model: open-source code
+  > computes a numerical bound; SHA-256 provenance tracks input data;
+  > the result is imported as a trusted Lean axiom. The Oracle path uses
+  > `oracle_certificates` as its single trusted computation axiom.
+
+### The de Bruijn Criterion
+
+- **Nicolaas Govert de Bruijn**, "The Mathematical Language AUTOMATH,"
+  *Springer LNCS 125*, 1970.
+
+  > A proof system is trustworthy if its kernel is small enough for
+  > independent auditing. Lean's kernel (~5,000 LOC C++) satisfies this.
+  > The Cathedral's trust analysis in `cathedral-lean.tex` follows de Bruijn.
+
 ---
 
-## How Critical-Path Axioms Map to References (v12 Cathedral Audit)
+## Highly Composite Numbers
 
-The crown theorem `nyman_beurling_equivalence` depends on exactly **2 crown axioms**
+### Ramanujan's Highly Composite Numbers
+
+- **Srinivasa Ramanujan**, "Highly composite numbers," *Proc. London Math.
+  Soc.*, 2(14):347–409, 1915.
+
+  > A highly composite number N has more divisors than any smaller positive
+  > integer. The Oracle Bridge uses HC numbers (N ∈ {6, 12, 60, 120, 360,
+  > 2520, 5040, 55440}) as optimal measurement points because their rich
+  > GCD structure maximizes Möbius cancellation in the Gram quadratic form.
+  > Certified in `Compute/OracleCertificates.lean`.
+
+---
+
+## Numerical Libraries
+
+### GMP / MPFR
+
+- **Torbjörn Granlund et al.**, *The GNU Multiple Precision Arithmetic
+  Library (GMP)*, 1991–present. [gmplib.org](https://gmplib.org/)
+
+- **Laurent Fousse, Guillaume Hanrot, Vincent Lefèvre, Patrick Pélissier,
+  and Paul Zimmermann**, "MPFR: A Multiple-Precision Binary Floating-Point
+  Library with Correct Rounding," *ACM TOMS*, 33(2):13, 2007.
+
+  > The Cathedral's 60 Rust experiments use GMP/MPFR (via the `rug` crate)
+  > for 256–512 bit precision arithmetic. All certified distance computations
+  > and Parseval bridge validations use MPFR for reproducible, correctly-rounded
+  > results. The DD (double-double, ~31 digit) precision pipeline uses
+  > compensated summation for dot products at N = 55,440.
+
+
+
+## How the Crown Axiom Maps to References (v17 Dual Crown)
+
+The crown theorem `nyman_beurling_equivalence` depends on exactly **1 crown axiom**
 (verified by `#print axioms`):
 
 | Crown Axiom | Mathematical Content | References |
 |---|---|---|
-| `critical_line_mellin_variance` | RH → (1/2π)∫\|M(1/2+it)\|² ≤ C/logN | Hardy–Littlewood 1918, Plancherel 1910 |
-| `rh_zeta_lower_bound_from_zero_counting` | RH → \|ζ(s)\| ≥ c/\|t\|^A | Hadamard 1893, Riemann–von Mangoldt |
+| `baez_duarte_forward` | RH → ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε | Báez-Duarte 2003 (Atti Lincei) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 The converse direction uses **zero custom axioms** (pure Lean/Mathlib).
 
-Both axioms are **classical, established results** of 20th-century analytic
+The Oracle Crown `rh_from_oracle` depends on **1 computation axiom**
+(`oracle_certificates`) plus 2 PNT imports, bypassing the literature axiom.
+
+Both axioms are **classical, established results** of 21st-century analytic
 number theory. They are axioms only because Mathlib lacks the prerequisite
 infrastructure. The gap is a software engineering problem, not a mathematical one.
 
-The 43 remaining axioms support alternative proof paths
-(spatial chain with 4 axioms, spectral engine, sieve engine, Vasyunin tower)
-that are formalized but not on the shortest path to the crown theorem.
+The ~79 remaining axioms support alternative proof paths
+(Mellin Crown with 2 axioms, Perron Crown with 4, spectral engine, sieve engine,
+Vasyunin tower, Oracle observatory) that are formalized but not on the shortest
+path to the crown theorem.
 
 ### The Spatial Path (4 axioms, alternative)
 
@@ -806,4 +872,4 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ---
 
-*Last updated: April 29, 2026 — Crown Graduation (v12) + Particle Zoo (N = 10⁹)*
+*Last updated: May 11, 2026 — Oracle Capstone (v17), Dual Crown architecture*
