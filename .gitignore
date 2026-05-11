@@ -2,51 +2,104 @@
 # The Cathedral — .gitignore
 # ============================================
 
-# Lean 4 / Lake build artifacts
+# ── Lean 4 / Lake ──
 proofs/.lake/
 proofs/lake-packages/
 *.olean
+*.ilean
+*.trace
 
-# Rust build artifacts (experiments + tools)
+# ── Rust ──
 **/target/
+**/*.rs.bk
+Cargo.lock
+# Note: Cargo.lock in library crates should be ignored;
+# keep it for binary crates if desired
 
-# Node.js (visualizer + tools)
+# ── Node.js / Next.js ──
 **/node_modules/
 **/.next/
 **/.turbo/
+**/.vercel/
+**/dist/
+**/out/
 
-# Python
+# ── Python ──
 **/__pycache__/
 **/*.pyc
 **/*.pyo
 **/venv/
+**/.venv/
 **/.env
+*.egg-info/
 
-# macOS
-.DS_Store
-**/.DS_Store
+# ── WASM ──
+**/*.wasm
+!tools/hyperzeta-viewport/public/wasm/*.wasm
 
-# Editor artifacts
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
+# ── LaTeX build artifacts ──
+# (PDFs are excluded via papers/.gitignore;
+#  results/*.log files are experiment data, not build artifacts)
+**/*.aux
+**/*.log
+!experiments/**/*.log
+!results/**/*.log
+**/*.toc
+**/*.out
+**/*.fls
+**/*.fdb_latexmk
+**/*.synctex.gz
+**/*.bbl
+**/*.blg
+**/*.nav
+**/*.snm
+**/*.vrb
+**/*.idx
+**/*.ilg
+**/*.ind
 
-# Build logs
-npm-debug.log*
-yarn-debug.log*
+# ── Compiled objects / shared libraries ──
+*.o
+*.so
+*.dylib
+*.dll
+*.a
 
-# LaTeX build artifacts (PDFs are committed intentionally)
-papers/*.aux
-papers/*.log
-papers/*.out
-papers/*.toc
-papers/*.fls
-papers/*.fdb_latexmk
-papers/*.synctex.gz
-
-# Cached binary data (Gram matrices, etc.)
+# ── Binary data / caches ──
+**/*.bin
 experiments/cache/
 experiments/.cache/
-**/*.bin
+
+# ── macOS ──
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ── Linux ──
+*~
+*.swp
+*.swo
+
+# ── IDE / Editor ──
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# ── Debug / build logs ──
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Miscellaneous ──
+*.tmp
+*.bak
+*.orig
+.env.local
+.env.*.local

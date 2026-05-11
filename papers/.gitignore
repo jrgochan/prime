@@ -1,4 +1,4 @@
-# LaTeX build artifacts (direct — pre-latexmk era)
+# LaTeX build artifacts
 *.aux
 *.log
 *.toc
@@ -11,13 +11,19 @@
 *.nav
 *.snm
 *.vrb
+*.idx
+*.ilg
+*.ind
+*.lof
+*.lot
+*.run.xml
+*-blx.bib
 
-# latexmk build directories
+# latexmk / build directories
 build/
+
+# PDFs are NOT tracked — compile locally via ./build.sh
+*.pdf
 
 # OS files
 .DS_Store
-
-# Keep PDFs (they're tracked for distribution)
-# !*.pdf
-*.pdf
