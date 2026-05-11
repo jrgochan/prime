@@ -165,6 +165,21 @@ interactions). Highly composite integers share many divisors, giving
 strong coupling (analogous to fermions acquiring mass through
 Yukawa-type interactions).
 
+\begin{remark}[GCD Stratum Partition]
+The GCD coupling that drives the boson--fermion classification has been
+formalized in Lean~4~\cite{cathedral-physics}. The GCD Partition theorem
+(\texttt{Covariance/GCDPartition.lean}, zero sorry) decomposes the
+Gram quadratic form exactly into per-GCD strata:
+$d_N^2 = \sum_{d \mid N!} S_d$,
+where each stratum $S_d$ collects all pairs $(j,k)$ with $\gcd(j,k) = d$.
+The Sign Law theorem (\texttt{Covariance/GCDSignLaw.lean}, zero sorry)
+proves that the stratum reindexing preserves the sum, and GPU experiments
+at $N = 55{,}440$ reveal an 88\% correlation between
+$\operatorname{sgn}(S_d)$ and $\mu(d)$---suggesting that the
+boson--fermion duality observed here is a finite-$N$ shadow of the
+M\"obius function's sign structure on the divisor lattice.
+\end{remark}
+
 % ================================================================
 \section{Results: The Five Laws}
 \label{sec:results}
@@ -276,6 +291,23 @@ The Nyman--Beurling theory requires $\lambda_{\min} \to 0$ for
 $d_N^2 \to 0$. The rate $\lambda_{\min} \sim 1/N^2$ is consistent
 with the Vasyunin formula prediction for the case when RH holds.
 An exponent $\alpha < 2$ would indicate a violation of RH.
+
+\begin{remark}[Precision Caveat]
+The eigenvalues reported above were computed in 64-bit floating point.
+Subsequent DD-precision (MPFR-256) measurements at $N = 10{,}000$
+yield $\lambda_{\min} \approx 2.5 \times 10^{-7}$---approximately $24\times$
+larger than the f64 value of $1.06 \times 10^{-8}$.
+At these scales the condition number $\kappa(G_N) > 10^7$
+exceeds the resolving power of IEEE~754 double precision.
+The $\alpha \approx 2$ exponent may therefore be a pre-asymptotic
+artifact of floating-point contamination; the DD data are more
+consistent with logarithmic scaling $\lambda_{\min} \sim c/\ln N$.
+The \emph{eigenvector structure} (which components are large or small)
+is robust to precision---it depends on the dominant eigenvector,
+not the precise eigenvalue---so Laws~1--3 and~5--6 are unaffected.
+See~\cite{cathedral-physics}, \S9 for the high-precision spectral
+observatory analysis.
+\end{remark}
 
 \subsection{Law 5: The Arithmetic Higgs Mechanism}
 
@@ -667,6 +699,21 @@ The Riemann Hypothesis is the statement that this system is
 \emph{spectrally consistent}: $\lambda_{\min}(G_N) > 0$ for all $N$,
 meaning the integer vacuum is stable and the arithmetic particle physics
 is well-defined.
+
+\subsection{The Orthogonality Shield}
+
+The mechanism underlying Law~1 (prime weight decay) was subsequently
+identified in the spectral observatory analysis~\cite{cathedral-physics}.
+The \emph{decoupling exponent} $\beta$, defined by the power-law
+$c_k^2 \sim C \cdot \lambda_k^\beta$ over the bottom eigenmodes,
+satisfies $\beta > 1$ at all measured scales (rising as
+$\beta \approx 0.18 \ln N$). The condition $\beta > 1$ means the
+target vector $\mathbf{b}$ (representing the smooth vacuum function~$1$)
+has near-zero projection onto the ground-state eigenvectors---precisely
+because those eigenvectors are localized on composites (Law~3), which
+are structurally orthogonal to the smooth vacuum.
+This \emph{Orthogonality Shield} is the spectral mechanism that
+enforces the boson--fermion separation observed here.
 
 \subsection{Open Questions}
 
