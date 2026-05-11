@@ -87,7 +87,7 @@ fn main() {
 
         eprintln!("  Compiling {} → lib{}.so", source, lib_name);
         let status = Command::new(&nvcc)
-            .args(&[
+            .args([
                 &format!("-arch={}", arch),
                 "-O3",
                 "--shared",
@@ -158,7 +158,7 @@ fn find_nvcc() -> Option<PathBuf> {
 fn detect_gpu_arch() -> Option<String> {
     // Try to detect GPU compute capability
     let output = Command::new("nvidia-smi")
-        .args(&["--query-gpu=compute_cap", "--format=csv,noheader,nounits"])
+        .args(["--query-gpu=compute_cap", "--format=csv,noheader,nounits"])
         .output()
         .ok()?;
 

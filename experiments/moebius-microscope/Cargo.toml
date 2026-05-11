@@ -28,3 +28,6 @@ path = "src/octonion.rs"
 [[bin]]
 name = "pointwise-eval"
 path = "src/bin/pointwise_eval.rs"
+
+[lints]
+workspace = true

@@ -43,3 +43,6 @@ rayon = "1"
 rug = "1"
 libc = "0.2"
 sha2 = "0.10"
+
+[lints]
+workspace = true

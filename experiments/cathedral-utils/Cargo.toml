@@ -41,3 +41,6 @@ hdf5 = { version = "0.8", optional = true }
 hdf5-sys = { version = "0.8", features = ["static"], optional = true }
 ndarray = { version = "0.15", optional = true }
 sha2 = "0.10"
+
+[lints]
+workspace = true

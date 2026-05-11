@@ -9,3 +9,6 @@ cathedral-utils = { path = "../cathedral-utils" }
 rug = "1.24"
 rayon = "1.10"
 chrono = "0.4"
+
+[lints]
+workspace = true

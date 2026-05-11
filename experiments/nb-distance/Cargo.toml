@@ -16,3 +16,6 @@ path = "src/main.rs"
 cathedral-utils = { path = "../cathedral-utils" }
 nalgebra = "0.33"
 rayon = "1.10"
+
+[lints]
+workspace = true

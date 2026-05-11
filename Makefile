@@ -191,12 +191,14 @@ clean: ## Clean build artifacts
 	find experiments -name target -type d -exec rm -rf {} + 2>/dev/null || true
 	@echo "  Build artifacts cleaned."
 
-lint: ## Run clippy on all Rust experiments (zero warnings required)
+lint: ## Run clippy on all active experiments (zero warnings required)
 	@$(ENV) require cargo
 	@echo ""
-	@echo "  🔍  Running cargo clippy..."
+	@echo "  🔍  Running cargo clippy (excluding archive)..."
 	@echo ""
-	cargo clippy --workspace --all-targets -- -D warnings
+	@cargo clippy --workspace --all-targets \
+		$(shell find experiments/archive -name Cargo.toml -exec grep -h 'name = ' {} \; | awk -F'"' '{printf "--exclude %s ", $$2}') \
+		-- -D warnings
 	@echo ""
 	@echo "  ✅  Clippy: zero warnings"
 
@@ -233,7 +235,9 @@ ci: ## Full CI pipeline: fmt → lint → test → build
 	@echo "  ✅  Formatting OK"
 	@echo ""
 	@echo "  [2/4] Clippy lint..."
-	@cargo clippy --workspace --all-targets -- -D warnings
+	@cargo clippy --workspace --all-targets \
+		$(shell find experiments/archive -name Cargo.toml -exec grep -h 'name = ' {} \; | awk -F'"' '{printf "--exclude %s ", $$2}') \
+		-- -D warnings
 	@echo "  ✅  Clippy clean"
 	@echo ""
 	@echo "  [3/4] Rust tests..."

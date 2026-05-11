@@ -19,3 +19,6 @@ path = "src/main.rs"
 cathedral-utils = { path = "../cathedral-utils" }
 rayon = "1.10"
 serde_json = "1"
+
+[lints]
+workspace = true

@@ -42,3 +42,6 @@ rug = "1.26"
 rayon = "1.10"
 chrono = "0.4"
 nalgebra = "0.33"
+
+[lints]
+workspace = true

@@ -36,3 +36,6 @@ rug = "1.19"
 [[bin]]
 name = "cathedral-rl"
 path = "src/main.rs"
+
+[lints]
+workspace = true

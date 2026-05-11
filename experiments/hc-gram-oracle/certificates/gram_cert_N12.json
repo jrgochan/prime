@@ -18,6 +18,6 @@
   },
   "precision": "f64",
   "source": "on-the-fly",
-  "elapsed_secs": 0.000099292,
+  "elapsed_secs": 0.000050833,
   "lean_claim": "vtGv_log_cutoff 12 < 1.0000"
 }

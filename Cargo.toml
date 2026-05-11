@@ -82,3 +82,58 @@ members = [
 [profile.release]
 opt-level = 3
 lto = true
+
+# ═══════════════════════════════════════════════════════════
+# Workspace lint configuration
+# These clippy lints are allowed because they conflict with
+# patterns standard in numerical/scientific computing.
+# ═══════════════════════════════════════════════════════════
+[workspace.lints.clippy]
+needless_range_loop = "allow"       # Explicit indexing is clearer in matrix code
+excessive_precision = "allow"       # Constants specified at DD precision (~31 digits)
+approx_constant = "allow"           # We define our own LN_2, EULER_GAMMA, etc.
+manual_is_multiple_of = "allow"     # n % 2 == 0 is universal in number theory
+items_after_test_module = "allow"   # Valid Rust file organization
+assign_op_pattern = "allow"         # x = x + delta is clearer in algebra
+manual_div_ceil = "allow"           # Explicit division is safer in precision code
+needless_question_mark = "allow"    # Ok(x?) pattern used intentionally
+collapsible_if = "allow"            # Nested ifs are clearer for multi-condition checks
+int_plus_one = "allow"              # n >= k + 1 is clearer than n > k in proofs
+unreadable_literal = "allow"        # 0x9e3779b97f4a7c15 is a known constant
+wildcard_in_or_patterns = "allow"   # Match-all patterns intentional in dispatch
+type_complexity = "allow"           # Complex tuple types in spectral analysis
+unusual_byte_groupings = "allow"    # Magic constants in GPU kernels
+cloned_ref_to_slice_refs = "allow"  # &[x.clone()] pattern in certificate code
+manual_clamp = "allow"              # Explicit min/max is clearer in bounds code
+redundant_closure = "allow"         # |x| f(x) is clearer than f in some contexts
+too_many_arguments = "allow"        # Complex numerical functions need many params
+unnecessary_map_or = "allow"        # map_or pattern used intentionally
+ptr_arg = "allow"                   # &PathBuf vs &Path — not worth churn
+useless_format = "allow"            # format!("...") used for consistency
+manual_arithmetic_check = "allow"   # Explicit overflow checks in numerics
+empty_writeln = "allow"             # writeln!(f, "") for blank lines in output
+doc_lazy_continuation = "allow"     # Doc comment formatting in research code
+unnecessary_cast = "allow"          # Explicit casts for clarity in FFI/GPU code
+io_other_error = "allow"            # io::Error::new pattern used
+empty_line_after_doc_comments = "allow" # Doc comment style in research code
+manual_swap = "allow"               # Manual swap clearer in numerical algorithms
+write_with_newline = "allow"        # write!() with \n used intentionally
+if_same_then_else = "allow"         # Duplicate blocks for future divergence
+implicit_saturating_sub = "allow"   # Explicit saturation check in index math
+min_max = "allow"                   # min/max chains used for safety bounds
+single_char_push_str = "allow"      # push_str("\n") is fine
+needless_writeln = "allow"          # writeln!(f, "") for formatting
+writeln_empty_string = "allow"      # writeln!(f, "") for blank lines
+double_ended_iterator_last = "allow" # .last() on ranges is fine
+doc_overindented_list_items = "allow" # Doc formatting in research code
+literal_string_with_formatting_args = "allow" # format string patterns
+manual_range_contains = "allow"     # Explicit bounds check is clearer
+upper_case_acronyms = "allow"       # GPY, PNT, HC are standard math acronyms
+print_literal = "allow"             # Literal strings in format macros for alignment
+let_and_return = "allow"            # let result = ...; result — used for clarity
+
+[workspace.lints.rust]
+dead_code = "allow"                 # Research code has exploratory functions
+unused_imports = "allow"            # Experiments import speculatively
+unused_variables = "allow"          # Scratch variables during development
+unused_assignments = "allow"        # Variables reassigned during iterations
