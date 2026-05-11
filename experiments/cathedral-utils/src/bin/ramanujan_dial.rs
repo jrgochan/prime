@@ -13,20 +13,24 @@
 //!    cargo run --release --bin ramanujan-dial -- --compute-d2 --d2-max 2000
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use std::time::Instant;
-use std::collections::HashSet;
-use rayon::prelude::*;
 use cathedral_utils::arith;
+use rayon::prelude::*;
+use std::collections::HashSet;
+use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
-    let max_limit: u64 = args.iter().position(|a| a == "--max")
+    let max_limit: u64 = args
+        .iter()
+        .position(|a| a == "--max")
         .and_then(|i| args.get(i + 1)?.parse().ok())
         .unwrap_or(1_000_000);
 
     let compute_d2 = args.iter().any(|a| a == "--compute-d2");
-    let d2_max: usize = args.iter().position(|a| a == "--d2-max")
+    let d2_max: usize = args
+        .iter()
+        .position(|a| a == "--d2-max")
         .and_then(|i| args.get(i + 1)?.parse().ok())
         .unwrap_or(500);
 
@@ -35,9 +39,14 @@ fn main() {
     println!("║  🎛️  RAMANUJAN DIAL — N-Analysis (Massively Parallel)       ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
     println!("║  Max N: {:<52}║", format!("{}", max_limit));
-    println!("║  Compute d²: {:<47}║",
-        if compute_d2 { format!("yes (up to N={}) — PARALLEL", d2_max) }
-        else { "no (--compute-d2 to enable)".to_string() });
+    println!(
+        "║  Compute d²: {:<47}║",
+        if compute_d2 {
+            format!("yes (up to N={}) — PARALLEL", d2_max)
+        } else {
+            "no (--compute-d2 to enable)".to_string()
+        }
+    );
     println!("║  Threads: {:<50}║", rayon::current_num_threads());
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
@@ -58,10 +67,14 @@ fn main() {
     let mut prev_n: u64 = 0;
     let mut colossal_anchors: Vec<(f64, u64, String)> = Vec::new();
 
-    println!("  {:>8} {:>14} {:>6} {:>6} {:>30}",
-        "ε", "N(ε)", "d(N)", "ω(N)", "factorization");
-    println!("  {:>8} {:>14} {:>6} {:>6} {:>30}",
-        "────────", "──────────────", "──────", "──────", "──────────────────────────────");
+    println!(
+        "  {:>8} {:>14} {:>6} {:>6} {:>30}",
+        "ε", "N(ε)", "d(N)", "ω(N)", "factorization"
+    );
+    println!(
+        "  {:>8} {:>14} {:>6} {:>6} {:>30}",
+        "────────", "──────────────", "──────", "──────", "──────────────────────────────"
+    );
 
     while eps > 0.005 {
         let (n, facts) = ramanujan_n(eps, &primes);
@@ -71,8 +84,14 @@ fn main() {
             let distinct_primes = facts.len();
             let fact_str = format_factorization(&facts);
             colossal_anchors.push((eps, n, fact_str.clone()));
-            println!("  {:>8.4} {:>14} {:>6} {:>6} {:>30}",
-                eps, format_num(n), divs, distinct_primes, fact_str);
+            println!(
+                "  {:>8.4} {:>14} {:>6} {:>6} {:>30}",
+                eps,
+                format_num(n),
+                divs,
+                distinct_primes,
+                fact_str
+            );
         }
         eps -= 0.001;
     }
@@ -81,29 +100,46 @@ fn main() {
     // ═══════════════════════════════════════════════════════════
     // PART 2: THE COLOSSAL SEQUENCE
     // ═══════════════════════════════════════════════════════════
-    let colossal: Vec<u64> = vec![
-        2, 6, 12, 60, 120, 360, 2520, 5040, 55440, 720720,
-    ];
+    let colossal: Vec<u64> = vec![2, 6, 12, 60, 120, 360, 2520, 5040, 55440, 720720];
     let colossal_names = [
-        "", "", "", "", "", "",
-        "Plato's Number", "Robin Threshold", "Precision Wall", "Deep Sink",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "Plato's Number",
+        "Robin Threshold",
+        "Precision Wall",
+        "Deep Sink",
     ];
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("PART 2: THE COLOSSAL SEQUENCE (Superior Highly Composites)");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-        "N", "d(N)", "ω(N)", "factorization", "significance");
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-        "──────────", "──────", "──────", "──────────────────────────────", "────────────────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+        "N", "d(N)", "ω(N)", "factorization", "significance"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+        "──────────", "──────", "──────", "──────────────────────────────", "────────────────────"
+    );
 
     for (idx, &n) in colossal.iter().enumerate() {
-        if n > max_limit { break; }
+        if n > max_limit {
+            break;
+        }
         let nu = n as usize;
-        println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-            format_num(n), count_divisors_brute(nu), arith::small_omega(nu),
-            arith::factorize(nu), colossal_names.get(idx).unwrap_or(&""));
+        println!(
+            "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+            format_num(n),
+            count_divisors_brute(nu),
+            arith::small_omega(nu),
+            arith::factorize(nu),
+            colossal_names.get(idx).unwrap_or(&"")
+        );
     }
     println!();
 
@@ -114,27 +150,42 @@ fn main() {
     let hcn_limit = max_limit.min(200_000) as usize;
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("PART 3: HIGHLY COMPOSITE NUMBERS up to {} (sieve)", format_num(hcn_limit as u64));
+    println!(
+        "PART 3: HIGHLY COMPOSITE NUMBERS up to {} (sieve)",
+        format_num(hcn_limit as u64)
+    );
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
     // Sieve-based divisor count: O(N log N)
     let div_table = divisor_count_sieve(hcn_limit);
     let hcns = find_hcn_from_sieve(&div_table);
-    println!("  ✓ Sieve + HCN scan in {:.3}s ({} HCNs found)",
-        t0.elapsed().as_secs_f64(), hcns.len());
+    println!(
+        "  ✓ Sieve + HCN scan in {:.3}s ({} HCNs found)",
+        t0.elapsed().as_secs_f64(),
+        hcns.len()
+    );
     println!();
 
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-        "N", "d(N)", "ω(N)", "factorization", "type");
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-        "──────────", "──────", "──────", "──────────────────────────────", "──────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+        "N", "d(N)", "ω(N)", "factorization", "type"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+        "──────────", "──────", "──────", "──────────────────────────────", "──────────"
+    );
 
     for &n in &hcns {
         let is_col = colossal.contains(&(n as u64));
-        println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-            format_num(n as u64), div_table[n], arith::small_omega(n),
-            arith::factorize(n), if is_col { "COLOSSAL" } else { "HCN" });
+        println!(
+            "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+            format_num(n as u64),
+            div_table[n],
+            arith::small_omega(n),
+            arith::factorize(n),
+            if is_col { "COLOSSAL" } else { "HCN" }
+        );
     }
     println!();
 
@@ -146,27 +197,45 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    let colossal_under: Vec<u64> = colossal.iter().copied()
-        .filter(|&n| n <= max_limit).collect();
+    let colossal_under: Vec<u64> = colossal
+        .iter()
+        .copied()
+        .filter(|&n| n <= max_limit)
+        .collect();
     let sieve = arith::sieve_primes(hcn_limit);
 
     for pair in colossal_under.windows(2) {
         let (lo, hi) = (pair[0], pair[1]);
-        if hi > 200_000 { continue; }
+        if hi > 200_000 {
+            continue;
+        }
 
-        let hcns_between: Vec<usize> = hcns.iter().copied()
-            .filter(|&n| (n as u64) > lo && (n as u64) < hi).collect();
+        let hcns_between: Vec<usize> = hcns
+            .iter()
+            .copied()
+            .filter(|&n| (n as u64) > lo && (n as u64) < hi)
+            .collect();
         let primes_in_gap: usize = ((lo as usize + 1)..hi as usize)
-            .filter(|&n| n < sieve.len() && sieve[n]).count();
+            .filter(|&n| n < sieve.len() && sieve[n])
+            .count();
 
-        println!("  Gap [{} → {}]: size {}, {} HCNs, {} primes",
-            format_num(lo), format_num(hi), format_num(hi - lo),
-            hcns_between.len(), primes_in_gap);
+        println!(
+            "  Gap [{} → {}]: size {}, {} HCNs, {} primes",
+            format_num(lo),
+            format_num(hi),
+            format_num(hi - lo),
+            hcns_between.len(),
+            primes_in_gap
+        );
 
         for &h in &hcns_between {
-            println!("    HCN {:>8} = {:<20} d={:<4} ({:.1}× anchor)",
-                format_num(h as u64), arith::factorize(h),
-                div_table[h], h as f64 / lo as f64);
+            println!(
+                "    HCN {:>8} = {:<20} d={:<4} ({:.1}× anchor)",
+                format_num(h as u64),
+                arith::factorize(h),
+                div_table[h],
+                h as f64 / lo as f64
+            );
         }
         println!();
     }
@@ -194,17 +263,29 @@ fn main() {
         (720720, "Deep Sink (2⁴·3²·5·7·11·13)", "GPU weeks"),
     ];
 
-    println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-        "N", "d(N)", "ω(N)", "description", "compute");
-    println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-        "──────────", "──────", "──────",
-        "──────────────────────────────────────────", "────────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+        "N", "d(N)", "ω(N)", "description", "compute"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+        "──────────",
+        "──────",
+        "──────",
+        "──────────────────────────────────────────",
+        "────────────"
+    );
 
     for (n, desc, compute) in &recs {
         let nu = *n as usize;
-        println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-            format_num(*n), count_divisors_brute(nu),
-            arith::small_omega(nu), desc, compute);
+        println!(
+            "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+            format_num(*n),
+            count_divisors_brute(nu),
+            arith::small_omega(nu),
+            desc,
+            compute
+        );
     }
     println!();
 
@@ -218,8 +299,12 @@ fn main() {
         (104729, "10,000th prime (max silence)"),
     ] {
         let is_p = is_prime_simple(n as usize);
-        println!("    {:>10}  {}  {}", format_num(n), desc,
-            if is_p { "✓ prime" } else { "✗ NOT prime" });
+        println!(
+            "    {:>10}  {}  {}",
+            format_num(n),
+            desc,
+            if is_p { "✓ prime" } else { "✗ NOT prime" }
+        );
     }
     println!();
 
@@ -246,17 +331,26 @@ fn main() {
     println!("PART 7: PHASE TRANSITIONS — When Primes Freeze In");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>6} {:>10} {:>10} {:>14}",
-        "prime", "ε_entry", "N_before", "N_after");
-    println!("  {:>6} {:>10} {:>10} {:>14}",
-        "──────", "──────────", "──────────", "──────────────");
+    println!(
+        "  {:>6} {:>10} {:>10} {:>14}",
+        "prime", "ε_entry", "N_before", "N_after"
+    );
+    println!(
+        "  {:>6} {:>10} {:>10} {:>14}",
+        "──────", "──────────", "──────────", "──────────────"
+    );
 
     for &p in &primes[..primes.len().min(15)] {
         let eps_entry = 2.0f64.ln() / (p as f64).ln();
         let (n_above, _) = ramanujan_n(eps_entry + 0.001, &primes);
         let (n_below, _) = ramanujan_n(eps_entry - 0.001, &primes);
-        println!("  {:>6} {:>10.4} {:>10} {:>14}",
-            p, eps_entry, format_num(n_above), format_num(n_below));
+        println!(
+            "  {:>6} {:>10.4} {:>10} {:>14}",
+            p,
+            eps_entry,
+            format_num(n_above),
+            format_num(n_below)
+        );
     }
     println!();
 
@@ -288,15 +382,19 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
 
     // ── Step 1: Bulk parallel Gram matrix computation ──────────
     let t0 = Instant::now();
-    println!("  Phase 1: Bulk Gram matrix ({0}×{0} = {1} unique entries)...",
-        dim, dim * (dim + 1) / 2);
+    println!(
+        "  Phase 1: Bulk Gram matrix ({0}×{0} = {1} unique entries)...",
+        dim,
+        dim * (dim + 1) / 2
+    );
 
     // Compute upper triangle in parallel: flatten (i,j) pairs
     let pairs: Vec<(usize, usize)> = (0..dim)
         .flat_map(|i| (i..dim).map(move |j| (i, j)))
         .collect();
 
-    let gram_values: Vec<((usize, usize), f64)> = pairs.par_iter()
+    let gram_values: Vec<((usize, usize), f64)> = pairs
+        .par_iter()
         .map(|&(i, j)| ((i, j), gram::gram_entry_f64(i + 2, j + 2)))
         .collect();
 
@@ -308,8 +406,11 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     }
 
     let gram_time = t0.elapsed().as_secs_f64();
-    println!("  ✓ Gram matrix computed in {:.2}s ({} entries/sec)",
-        gram_time, (pairs.len() as f64 / gram_time) as u64);
+    println!(
+        "  ✓ Gram matrix computed in {:.2}s ({} entries/sec)",
+        gram_time,
+        (pairs.len() as f64 / gram_time) as u64
+    );
 
     // ── Step 2: b-vector ──────────────────────────────────────
     let b = arith::b_vector(dim);
@@ -318,11 +419,14 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     let t0 = Instant::now();
     println!("  Phase 2: Incremental Cholesky (N=2..{})...", max_n);
     println!();
-    println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
-        "N", "d²_N", "d(N)", "ω(N)", "type", "factorization", "");
-    println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
-        "──────", "──────────────", "──────", "──────",
-        "──────────", "────────────────────", "───");
+    println!(
+        "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
+        "N", "d²_N", "d(N)", "ω(N)", "type", "factorization", ""
+    );
+    println!(
+        "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
+        "──────", "──────────────", "──────", "──────", "──────────", "────────────────────", "───"
+    );
 
     // L is stored row-major, grows incrementally
     let mut l = vec![0.0f64; dim * dim];
@@ -356,9 +460,15 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
         let diag = gram[new_idx * dim + new_idx] - diag_sum;
         if diag <= 0.0 {
             let type_str = classify(n, &hcn_set);
-            println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20}",
-                n, "CHOL FAIL", count_divisors_brute(n), arith::small_omega(n),
-                type_str, arith::factorize(n));
+            println!(
+                "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20}",
+                n,
+                "CHOL FAIL",
+                count_divisors_brute(n),
+                arith::small_omega(n),
+                type_str,
+                arith::factorize(n)
+            );
             anomalies += 1;
             continue;
         }
@@ -380,17 +490,29 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
 
         let type_str = classify(n, &hcn_set);
         let descent = if d2 < prev_d2 { "↓" } else { "↑" };
-        if d2 > prev_d2 { anomalies += 1; }
+        if d2 > prev_d2 {
+            anomalies += 1;
+        }
 
         // Print strategy: always print notable N, sparse for large N
-        let is_notable = hcn_set.contains(&n) || is_prime_simple(n)
-            || n <= 60 || d2 > prev_d2 || n % 500 == 0
+        let is_notable = hcn_set.contains(&n)
+            || is_prime_simple(n)
+            || n <= 60
+            || d2 > prev_d2
+            || n % 500 == 0
             || colossal_set().contains(&(n as u64));
 
         if is_notable {
-            println!("  {:>6} {:>14.10} {:>6} {:>6} {:>10} {:>20} {}",
-                n, d2, count_divisors_brute(n), arith::small_omega(n),
-                type_str, arith::factorize(n), descent);
+            println!(
+                "  {:>6} {:>14.10} {:>6} {:>6} {:>10} {:>20} {}",
+                n,
+                d2,
+                count_divisors_brute(n),
+                arith::small_omega(n),
+                type_str,
+                arith::factorize(n),
+                descent
+            );
         }
 
         prev_d2 = d2;
@@ -399,10 +521,16 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     let chol_time = t0.elapsed().as_secs_f64();
     println!();
     println!("  ✓ Incremental Cholesky completed in {:.2}s", chol_time);
-    println!("  ✓ Total time: {:.2}s (Gram) + {:.2}s (Cholesky) = {:.2}s",
-        gram_time, chol_time, gram_time + chol_time);
-    println!("  ✓ Monotonicity anomalies: {} (expected 0 for exact arithmetic)",
-        anomalies);
+    println!(
+        "  ✓ Total time: {:.2}s (Gram) + {:.2}s (Cholesky) = {:.2}s",
+        gram_time,
+        chol_time,
+        gram_time + chol_time
+    );
+    println!(
+        "  ✓ Monotonicity anomalies: {} (expected 0 for exact arithmetic)",
+        anomalies
+    );
     println!();
 }
 
@@ -412,14 +540,21 @@ fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
 
 fn colossal_set() -> HashSet<u64> {
     [2u64, 6, 12, 60, 120, 360, 2520, 5040, 55440, 720720]
-        .iter().copied().collect()
+        .iter()
+        .copied()
+        .collect()
 }
 
 fn classify(n: usize, hcn_set: &HashSet<usize>) -> &'static str {
-    if colossal_set().contains(&(n as u64)) { "COLOSSAL" }
-    else if hcn_set.contains(&n) { "HCN" }
-    else if is_prime_simple(n) { "prime" }
-    else { "" }
+    if colossal_set().contains(&(n as u64)) {
+        "COLOSSAL"
+    } else if hcn_set.contains(&n) {
+        "HCN"
+    } else if is_prime_simple(n) {
+        "prime"
+    } else {
+        ""
+    }
 }
 
 /// Sieve-based divisor count table: d(n) for n=0..=limit.
@@ -454,12 +589,20 @@ fn ramanujan_n(eps: f64, primes: &[usize]) -> (u64, Vec<(usize, u32)>) {
     let mut factors = Vec::new();
     for &p in primes {
         let val = (p as f64).powf(eps) - 1.0;
-        if val <= 0.0 { break; }
+        if val <= 0.0 {
+            break;
+        }
         let a = (1.0 / val).floor() as u32;
-        if a == 0 { break; }
+        if a == 0 {
+            break;
+        }
         let mut pk: u64 = 1;
-        for _ in 0..a { pk = pk.saturating_mul(p as u64); }
-        if n > u64::MAX / pk { break; }
+        for _ in 0..a {
+            pk = pk.saturating_mul(p as u64);
+        }
+        if n > u64::MAX / pk {
+            break;
+        }
         n *= pk;
         factors.push((p, a));
     }
@@ -471,26 +614,55 @@ fn count_divisors_from_factorization(facts: &[(usize, u32)]) -> u64 {
 }
 
 fn count_divisors_brute(n: usize) -> usize {
-    if n <= 1 { return n; }
+    if n <= 1 {
+        return n;
+    }
     let mut c = 0;
     let mut d = 1;
-    while d * d <= n { if n % d == 0 { c += 1; if d != n/d { c += 1; } } d += 1; }
+    while d * d <= n {
+        if n % d == 0 {
+            c += 1;
+            if d != n / d {
+                c += 1;
+            }
+        }
+        d += 1;
+    }
     c
 }
 
 fn is_prime_simple(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
-    while i * i <= n { if n % i == 0 || n % (i+2) == 0 { return false; } i += 6; }
+    while i * i <= n {
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
+        i += 6;
+    }
     true
 }
 
 fn format_factorization(facts: &[(usize, u32)]) -> String {
-    facts.iter()
-        .map(|(p, a)| if *a == 1 { format!("{p}") } else { format!("{p}^{a}") })
-        .collect::<Vec<_>>().join("·")
+    facts
+        .iter()
+        .map(|(p, a)| {
+            if *a == 1 {
+                format!("{p}")
+            } else {
+                format!("{p}^{a}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("·")
 }
 
 fn small_primes(limit: usize) -> Vec<usize> {
@@ -502,7 +674,9 @@ fn format_num(n: u64) -> String {
     let s = n.to_string();
     let mut result = String::new();
     for (i, ch) in s.chars().rev().enumerate() {
-        if i > 0 && i % 3 == 0 { result.push(','); }
+        if i > 0 && i % 3 == 0 {
+            result.push(',');
+        }
         result.push(ch);
     }
     result.chars().rev().collect()

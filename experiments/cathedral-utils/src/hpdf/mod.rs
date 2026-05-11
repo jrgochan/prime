@@ -50,11 +50,11 @@
 //! cathedral-utils = { path = "../cathedral-utils", features = ["hpdf"] }
 //! ```
 
+pub mod convert;
 pub mod helpers;
 pub mod metadata;
-pub mod writer;
 pub mod reader;
-pub mod convert;
+pub mod writer;
 
 // ── Constants ──
 
@@ -66,14 +66,16 @@ pub const HPDF_MAGIC: &str = "CATHEDRAL_HPDF_V2";
 
 // ── Public re-exports ──
 
-pub use writer::{write_hpdf, write_hpdf_dd, write_hpdf_from_triangle, write_hpdf_dd_from_triangle, HpdfWriterConfig};
+pub use convert::{convert_ooc_to_hpdf, extract_from_hpdf, extract_submatrix_hpdf};
+pub use metadata::{stamp_distance, stamp_microscope, DistanceResult, MicroscopeResult};
 pub use reader::{
-    HpdfReader, HpdfProvenance, StructuralScalars, DistanceScalars,
-    DataIntegrity, NumberTheoryAttrs,
-    LineageInfo as ReadLineageInfo,
+    DataIntegrity, DistanceScalars, HpdfProvenance, HpdfReader, LineageInfo as ReadLineageInfo,
+    NumberTheoryAttrs, StructuralScalars,
 };
-pub use convert::{convert_ooc_to_hpdf, extract_submatrix_hpdf, extract_from_hpdf};
-pub use metadata::{DistanceResult, stamp_distance, MicroscopeResult, stamp_microscope};
+pub use writer::{
+    write_hpdf, write_hpdf_dd, write_hpdf_dd_from_triangle, write_hpdf_from_triangle,
+    HpdfWriterConfig,
+};
 
 // ═══════════════════════════════════════════════════════════════
 // TESTS
@@ -97,7 +99,8 @@ mod tests {
             }
         }
 
-        let dir = std::env::temp_dir().join(format!("cathedral_hpdf_roundtrip_{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("cathedral_hpdf_roundtrip_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("test_N20.h5");
 
@@ -119,14 +122,21 @@ mod tests {
         // Roundtrip fidelity
         let read_data = reader.read_gram_full().unwrap();
         for i in 0..dim * dim {
-            assert!((data[i] - read_data[i]).abs() < 1e-15,
-                "Mismatch at {i}: {} vs {}", data[i], read_data[i]);
+            assert!(
+                (data[i] - read_data[i]).abs() < 1e-15,
+                "Mismatch at {i}: {} vs {}",
+                data[i],
+                read_data[i]
+            );
         }
 
         // Data integrity checksum
         let integrity = reader.verify_data_integrity().unwrap();
-        assert!(integrity.valid, "Data checksum mismatch: stored={:?}, computed={}",
-            integrity.stored_sha256, integrity.computed_sha256);
+        assert!(
+            integrity.valid,
+            "Data checksum mismatch: stored={:?}, computed={}",
+            integrity.stored_sha256, integrity.computed_sha256
+        );
 
         // b-vector
         let b = reader.read_b_vector().unwrap();
@@ -141,7 +151,10 @@ mod tests {
         assert!(ss.gershgorin_lambda_max.is_some());
         let g_min = ss.gershgorin_lambda_min.unwrap();
         let g_max = ss.gershgorin_lambda_max.unwrap();
-        assert!(g_max > g_min, "Gershgorin: λ_max={g_max} should > λ_min={g_min}");
+        assert!(
+            g_max > g_min,
+            "Gershgorin: λ_max={g_max} should > λ_min={g_min}"
+        );
 
         // Column norms
         let cn = reader.read_col_norms().unwrap();
@@ -206,8 +219,10 @@ mod tests {
             for k in 2..=max_n {
                 let stored = reader.read_gram_entry(j, k).unwrap();
                 let expected = gram::gram_entry_f64(j, k);
-                assert!((stored - expected).abs() < 1e-15,
-                    "Point query G[{j},{k}]: stored={stored}, expected={expected}");
+                assert!(
+                    (stored - expected).abs() < 1e-15,
+                    "Point query G[{j},{k}]: stored={stored}, expected={expected}"
+                );
             }
         }
 
@@ -216,13 +231,15 @@ mod tests {
         assert_eq!(row.len(), dim);
         for (col, &v) in row.iter().enumerate() {
             let expected = gram::gram_entry_f64(2, col + 2);
-            assert!((v - expected).abs() < 1e-15,
-                "Row read [0,{col}]: got={v}, expected={expected}");
+            assert!(
+                (v - expected).abs() < 1e-15,
+                "Row read [0,{col}]: got={v}, expected={expected}"
+            );
         }
 
         // Submatrix read
         let sub = reader.read_gram_submatrix(0, 2, 0, 2).unwrap();
-        assert_eq!(sub.len(), 9);  // 3×3
+        assert_eq!(sub.len(), 9); // 3×3
         for i in 0..3 {
             for j_idx in 0..3 {
                 let expected = gram::gram_entry_f64(i + 2, j_idx + 2);
@@ -274,8 +291,12 @@ mod tests {
         // Read hi — same as normal
         let read_hi = reader.read_gram_full().unwrap();
         for i in 0..dim * dim {
-            assert!((hi[i] - read_hi[i]).abs() < 1e-15,
-                "Hi mismatch at {i}: {} vs {}", hi[i], read_hi[i]);
+            assert!(
+                (hi[i] - read_hi[i]).abs() < 1e-15,
+                "Hi mismatch at {i}: {} vs {}",
+                hi[i],
+                read_hi[i]
+            );
         }
 
         // Read lo
@@ -283,8 +304,12 @@ mod tests {
         assert!(read_lo.is_some(), "DD lo data should be present");
         let read_lo = read_lo.unwrap();
         for i in 0..dim * dim {
-            assert!((lo[i] - read_lo[i]).abs() < 1e-30,
-                "Lo mismatch at {i}: {} vs {}", lo[i], read_lo[i]);
+            assert!(
+                (lo[i] - read_lo[i]).abs() < 1e-30,
+                "Lo mismatch at {i}: {} vs {}",
+                lo[i],
+                read_lo[i]
+            );
         }
 
         // Combined read

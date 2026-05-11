@@ -8,8 +8,8 @@ use hdf5::Group;
 use ndarray::Array1;
 use rayon::prelude::*;
 
+use super::helpers::{write_scalar_attr, write_str_attr};
 use crate::arith;
-use super::helpers::{write_str_attr, write_scalar_attr};
 
 // ═══════════════════════════════════════════════════════════════
 // STRUCTURAL METADATA — /structure group
@@ -62,10 +62,10 @@ impl StructuralStats {
         struct RowStats {
             diag: f64,
             row_sum: f64,
-            off_diag_abs_sum: f64,  // Σ_{j≠i} |G_ij| (Gershgorin radius)
-            frob_sq_contrib: f64,   // G_ii² + 2·Σ_{j>i} G_ij²
+            off_diag_abs_sum: f64, // Σ_{j≠i} |G_ij| (Gershgorin radius)
+            frob_sq_contrib: f64,  // G_ii² + 2·Σ_{j>i} G_ij²
             off_max: f64,
-            off_sum: f64,           // Σ_{j>i} |G_ij| for off-diag avg
+            off_sum: f64, // Σ_{j>i} |G_ij| for off-diag avg
             off_count: usize,
             gersh_min: f64,         // G_ii - R_i
             gersh_max: f64,         // G_ii + R_i
@@ -73,10 +73,10 @@ impl StructuralStats {
             col_sq_sums: Vec<f64>,  // G_ij² for each column j (for col norms)
             entry_min: f64,
             entry_max: f64,
-            entry_sum: f64,         // Σ_{j>=i} G_ij
-            entry_sq_sum: f64,      // Σ_{j>=i} G_ij²
-            entry_count: usize,     // count of unique entries in this row
-            sym_residual: f64,      // max|G_ij - G_ji|
+            entry_sum: f64,     // Σ_{j>=i} G_ij
+            entry_sq_sum: f64,  // Σ_{j>=i} G_ij²
+            entry_count: usize, // count of unique entries in this row
+            sym_residual: f64,  // max|G_ij - G_ji|
         }
 
         let row_stats: Vec<RowStats> = (0..dim)
@@ -85,7 +85,7 @@ impl StructuralStats {
                 let diag = data[i * dim + i];
                 let mut row_sum = 0.0f64;
                 let mut off_abs_sum = 0.0f64;
-                let mut frob_sq = diag * diag;  // diagonal contribution
+                let mut frob_sq = diag * diag; // diagonal contribution
                 let mut off_max = 0.0f64;
                 let mut off_sum = 0.0f64;
                 let mut off_count = 0usize;
@@ -131,11 +131,22 @@ impl StructuralStats {
                 let gersh_max = diag + off_abs_sum;
 
                 RowStats {
-                    diag, row_sum, off_diag_abs_sum: off_abs_sum,
-                    frob_sq_contrib: frob_sq, off_max, off_sum, off_count,
-                    gersh_min, gersh_max, col_abs_sums, col_sq_sums,
-                    entry_min: e_min, entry_max: e_max,
-                    entry_sum: e_sum, entry_sq_sum: e_sq_sum, entry_count: e_count,
+                    diag,
+                    row_sum,
+                    off_diag_abs_sum: off_abs_sum,
+                    frob_sq_contrib: frob_sq,
+                    off_max,
+                    off_sum,
+                    off_count,
+                    gersh_min,
+                    gersh_max,
+                    col_abs_sums,
+                    col_sq_sums,
+                    entry_min: e_min,
+                    entry_max: e_max,
+                    entry_sum: e_sum,
+                    entry_sq_sum: e_sq_sum,
+                    entry_count: e_count,
                     sym_residual: sym_res,
                 }
             })
@@ -153,7 +164,7 @@ impl StructuralStats {
         let mut off_count_total = 0usize;
         let mut gersh_min = f64::INFINITY;
         let mut gersh_max = f64::NEG_INFINITY;
-        let mut inf_norm = 0.0f64;  // max row sum of |G|
+        let mut inf_norm = 0.0f64; // max row sum of |G|
         let mut col_abs_sums = vec![0.0f64; dim];
         let mut col_sq_sums = vec![0.0f64; dim];
         let mut entry_min = f64::INFINITY;
@@ -212,8 +223,16 @@ impl StructuralStats {
         //   Summing all i: Σ_i G_ii² + 2 * Σ_{i<j} G_ij² = ‖G‖_F²  ✔
         let frobenius_norm = frob_sq.sqrt();
 
-        let condition_estimate = if diag_min > 0.0 { diag_max / diag_min } else { f64::INFINITY };
-        let off_diag_avg = if off_count_total > 0 { off_sum_total / off_count_total as f64 } else { 0.0 };
+        let condition_estimate = if diag_min > 0.0 {
+            diag_max / diag_min
+        } else {
+            f64::INFINITY
+        };
+        let off_diag_avg = if off_count_total > 0 {
+            off_sum_total / off_count_total as f64
+        } else {
+            0.0
+        };
 
         // ‖G‖₁ = max_j Σ_i |G_ij|
         let matrix_1_norm = col_abs_sums.iter().cloned().fold(0.0f64, f64::max);
@@ -221,15 +240,27 @@ impl StructuralStats {
         // Column L2 norms
         let col_norms: Vec<f64> = col_sq_sums.iter().map(|s| s.sqrt()).collect();
 
-        let entry_mean = if entry_count > 0 { entry_sum / entry_count as f64 } else { 0.0 };
+        let entry_mean = if entry_count > 0 {
+            entry_sum / entry_count as f64
+        } else {
+            0.0
+        };
         let entry_variance = if entry_count > 1 {
             (entry_sq_sum / entry_count as f64) - entry_mean * entry_mean
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         Self {
-            diagonal, row_sums, col_norms,
-            diag_min, diag_max, trace,
-            frobenius_norm, condition_estimate, off_diag_max,
+            diagonal,
+            row_sums,
+            col_norms,
+            diag_min,
+            diag_max,
+            trace,
+            frobenius_norm,
+            condition_estimate,
+            off_diag_max,
             gershgorin_lambda_min: gersh_min,
             gershgorin_lambda_max: gersh_max,
             off_diag_avg,
@@ -249,13 +280,19 @@ impl StructuralStats {
     pub fn write_to_group(&self, grp: &Group) -> hdf5::Result<()> {
         // Datasets
         let diag_arr = Array1::from(self.diagonal.clone());
-        grp.new_dataset_builder().with_data(&diag_arr).create("diagonal")?;
+        grp.new_dataset_builder()
+            .with_data(&diag_arr)
+            .create("diagonal")?;
 
         let rs_arr = Array1::from(self.row_sums.clone());
-        grp.new_dataset_builder().with_data(&rs_arr).create("row_sums")?;
+        grp.new_dataset_builder()
+            .with_data(&rs_arr)
+            .create("row_sums")?;
 
         let cn_arr = Array1::from(self.col_norms.clone());
-        grp.new_dataset_builder().with_data(&cn_arr).create("col_norms")?;
+        grp.new_dataset_builder()
+            .with_data(&cn_arr)
+            .create("col_norms")?;
 
         // Scalar attributes — original
         write_scalar_attr(grp, "diagonal_min", self.diag_min)?;
@@ -273,7 +310,11 @@ impl StructuralStats {
         // ---- NEW attributes ----
         write_scalar_attr(grp, "matrix_1_norm", self.matrix_1_norm)?;
         write_scalar_attr(grp, "matrix_inf_norm", self.matrix_inf_norm)?;
-        write_scalar_attr(grp, "diagonal_dominance_ratio", self.diagonal_dominance_ratio)?;
+        write_scalar_attr(
+            grp,
+            "diagonal_dominance_ratio",
+            self.diagonal_dominance_ratio,
+        )?;
         write_scalar_attr(grp, "entry_min", self.entry_min)?;
         write_scalar_attr(grp, "entry_max", self.entry_max)?;
         write_scalar_attr(grp, "entry_mean", self.entry_mean)?;
@@ -319,7 +360,8 @@ impl BVectorStats {
     /// Write b-vector as a dataset with rich attributes.
     pub fn write_to_file(&self, file: &hdf5::File) -> hdf5::Result<()> {
         let b_arr = Array1::from(self.b.clone());
-        let ds = file.new_dataset_builder()
+        let ds = file
+            .new_dataset_builder()
             .with_data(&b_arr)
             .create("b_vector")?;
         write_scalar_attr(&ds, "norm", self.norm)?;
@@ -327,8 +369,11 @@ impl BVectorStats {
         write_scalar_attr(&ds, "sum", self.sum)?;
         write_scalar_attr(&ds, "max_entry", self.max_entry)?;
         write_scalar_attr(&ds, "min_entry", self.min_entry)?;
-        write_str_attr(&ds, "formula",
-            "b[k] = (ln(k+2) + 1 - gamma) / (k+2), k=0..dim-1")?;
+        write_str_attr(
+            &ds,
+            "formula",
+            "b[k] = (ln(k+2) + 1 - gamma) / (k+2), k=0..dim-1",
+        )?;
         Ok(())
     }
 }
@@ -345,20 +390,32 @@ pub fn write_number_theory(file: &hdf5::File, max_n: usize) -> hdf5::Result<()> 
     // Möbius function μ(n)
     let mu = arith::mobius_table(max_n);
     let mu_arr = Array1::from(mu);
-    nt_grp.new_dataset_builder().with_data(&mu_arr).create("mobius")?;
+    nt_grp
+        .new_dataset_builder()
+        .with_data(&mu_arr)
+        .create("mobius")?;
 
     // Euler totient φ(n)
     let phi = arith::euler_totient(max_n);
     let phi_u32: Vec<u32> = phi.iter().map(|&x| x as u32).collect();
     let phi_arr = Array1::from(phi_u32);
-    nt_grp.new_dataset_builder().with_data(&phi_arr).create("totient")?;
+    nt_grp
+        .new_dataset_builder()
+        .with_data(&phi_arr)
+        .create("totient")?;
 
     // Prime sieve
     let sieve = arith::sieve_primes(max_n);
-    let primes: Vec<u32> = (2..=max_n).filter(|&n| sieve[n]).map(|n| n as u32).collect();
+    let primes: Vec<u32> = (2..=max_n)
+        .filter(|&n| sieve[n])
+        .map(|n| n as u32)
+        .collect();
     write_scalar_attr(&nt_grp, "prime_count", primes.len() as u64)?;
     let p_arr = Array1::from(primes);
-    nt_grp.new_dataset_builder().with_data(&p_arr).create("primes")?;
+    nt_grp
+        .new_dataset_builder()
+        .with_data(&p_arr)
+        .create("primes")?;
 
     // N-specific properties
     let factorization = arith::factorize(max_n);
@@ -494,7 +551,8 @@ pub fn stamp_distance(path: &std::path::Path, result: &DistanceResult) -> hdf5::
     // Solution vector x = G⁻¹b (allows independent d² verification: d² = 1 - bᵀx)
     if let Some(ref x) = result.solution_vector {
         let x_arr = Array1::from(x.clone());
-        dist_grp.new_dataset_builder()
+        dist_grp
+            .new_dataset_builder()
             .with_data(&x_arr)
             .create("solution_vector")?;
         write_scalar_attr(&dist_grp, "solution_dim", x.len() as u64)?;
@@ -509,7 +567,8 @@ pub fn stamp_distance(path: &std::path::Path, result: &DistanceResult) -> hdf5::
     // Convergence history: residual norm at each iteration
     if let Some(ref hist) = result.convergence_history {
         let h_arr = Array1::from(hist.clone());
-        dist_grp.new_dataset_builder()
+        dist_grp
+            .new_dataset_builder()
             .with_data(&h_arr)
             .create("convergence_history")?;
         write_scalar_attr(&dist_grp, "history_len", hist.len() as u64)?;
@@ -538,18 +597,18 @@ pub struct MicroscopeResult {
     pub btv_sq: f64,
     pub vtcv: f64,
     pub d2n: f64,
-    pub gap: f64,           // 1 - vᵀGv
-    pub gap_times_ln: f64,  // (1-vᵀGv)·lnN
+    pub gap: f64,          // 1 - vᵀGv
+    pub gap_times_ln: f64, // (1-vᵀGv)·lnN
 
     // Taper decomposition: vᵀGv = U - 2L/lnN + Q/ln²N
     pub u_sum: f64,
     pub l_sum: f64,
     pub q_sum: f64,
-    pub r2: f64,            // R₂ = U - 2L/lnN
+    pub r2: f64, // R₂ = U - 2L/lnN
     pub r2_minus_1: f64,
-    pub r2_times_ln: f64,   // (R₂-1)·lnN → const
-    pub q_over_ln2: f64,    // Q/ln²N
-    pub c_recon: f64,       // (1-vᵀGv)·lnN
+    pub r2_times_ln: f64, // (R₂-1)·lnN → const
+    pub q_over_ln2: f64,  // Q/ln²N
+    pub c_recon: f64,     // (1-vᵀGv)·lnN
 
     // Independent vᵀGv reconstruction from f64 Gram entries
     pub vtgv_recon: f64,
@@ -557,10 +616,10 @@ pub struct MicroscopeResult {
     pub cross_check_delta: f64,
 
     // PNT sub-sums
-    pub s1: f64,            // Σμ/k → 0
-    pub s2: f64,            // Σμlnk/k → -1
-    pub s3: f64,            // Σμln²k/k → -2γ
-    pub mertens: f64,       // M(N) = Σμ(k)
+    pub s1: f64,      // Σμ/k → 0
+    pub s2: f64,      // Σμlnk/k → -1
+    pub s3: f64,      // Σμln²k/k → -2γ
+    pub mertens: f64, // M(N) = Σμ(k)
     pub mertens_over_sqrt: f64,
 
     /// Wall-clock time for the analysis (seconds)

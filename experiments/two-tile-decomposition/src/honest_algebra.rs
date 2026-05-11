@@ -21,9 +21,9 @@
 
 use rug::Float;
 
-use cathedral_utils::fmt;
 use crate::PREC;
 use crate::compute::fu;
+use cathedral_utils::fmt;
 
 // ────────────────────────────────────────────────
 // Helper functions for special function evaluation
@@ -78,8 +78,8 @@ fn per_class_limit(a: usize, b: usize, m0: usize) -> Float {
     let s = overshoot(a, b, m0);
     let af = fu(a);
     let bf = fu(b);
-    let alpha = Float::with_val(PREC, fu(m0 + 1) / &bf);  // (m₀+1)/b
-    let beta = Float::with_val(PREC, fu(n0 + 1) / &af);   // (n₀+1)/a
+    let alpha = Float::with_val(PREC, fu(m0 + 1) / &bf); // (m₀+1)/b
+    let beta = Float::with_val(PREC, fu(n0 + 1) / &af); // (n₀+1)/a
 
     let lg_beta = log_gamma(&beta);
     let lg_alpha = log_gamma(&alpha);
@@ -87,22 +87,26 @@ fn per_class_limit(a: usize, b: usize, m0: usize) -> Float {
     let psi_alpha = digamma(&alpha);
 
     // -(1/a)(logΓ(β) - logΓ(α))
-    let log_gamma_part = Float::with_val(PREC,
-        -Float::with_val(PREC, &lg_beta - &lg_alpha) / &af);
+    let log_gamma_part = Float::with_val(PREC, -Float::with_val(PREC, &lg_beta - &lg_alpha) / &af);
 
     // -((s-a)/(a²b))·ψ(β)
     let sf = fu(s);
     let s_minus_a = Float::with_val(PREC, &sf - &af);
     let a2b = Float::with_val(PREC, Float::with_val(PREC, &af * &af) * &bf);
-    let psi_beta_part = Float::with_val(PREC,
-        -Float::with_val(PREC, &s_minus_a / &a2b) * &psi_beta);
+    let psi_beta_part =
+        Float::with_val(PREC, -Float::with_val(PREC, &s_minus_a / &a2b) * &psi_beta);
 
     // -(1/(ab))·ψ(α)
     let ab = Float::with_val(PREC, &af * &bf);
-    let psi_alpha_part = Float::with_val(PREC,
-        -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha);
+    let psi_alpha_part = Float::with_val(
+        PREC,
+        -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha,
+    );
 
-    Float::with_val(PREC, &log_gamma_part + Float::with_val(PREC, &psi_beta_part + &psi_alpha_part))
+    Float::with_val(
+        PREC,
+        &log_gamma_part + Float::with_val(PREC, &psi_beta_part + &psi_alpha_part),
+    )
 }
 
 /// Vasyunin cotangent sum: V(a,b) = Σ_{m=1}^{a-1} {mb/a}·cot(πm/a)
@@ -133,15 +137,12 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
 fn delta_target(a: usize, b: usize) -> Float {
     let formula = crate::formula::vasyunin_gram_formula(a, b);
     let strip = crate::compute::strip_value(a, b);
-    let stir = Float::with_val(PREC,
-        crate::formula::stirling_const() / fu(b));
-    let ft = Float::with_val(PREC,
-        crate::formula::fract_target(a, b) / fu(a));
+    let stir = Float::with_val(PREC, crate::formula::stirling_const() / fu(b));
+    let ft = Float::with_val(PREC, crate::formula::fract_target(a, b) / fu(a));
 
-    Float::with_val(PREC,
-        Float::with_val(PREC,
-            Float::with_val(PREC, &formula - &strip) - &stir
-        ) - &ft
+    Float::with_val(
+        PREC,
+        Float::with_val(PREC, Float::with_val(PREC, &formula - &strip) - &stir) - &ft,
     )
 }
 
@@ -162,9 +163,10 @@ fn gauss_log_gamma_sum_value(a: usize) -> Float {
     // Piece 1 = -(1/a) Σ_{k=1}^{a} logΓ(k/a)
     // = -(1/a)[(a-1)/2 · log(2π) - (1/2)log(a)]
     let am1 = Float::with_val(PREC, &af - Float::with_val(PREC, 1));
-    let gauss_sum = Float::with_val(PREC,
-        Float::with_val(PREC, &am1 / Float::with_val(PREC, 2)) * &l2p -
-        Float::with_val(PREC, la / Float::with_val(PREC, 2))
+    let gauss_sum = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &am1 / Float::with_val(PREC, 2)) * &l2p
+            - Float::with_val(PREC, la / Float::with_val(PREC, 2)),
     );
     Float::with_val(PREC, -Float::with_val(PREC, gauss_sum / &af))
 }
@@ -200,16 +202,15 @@ pub struct HonestAlgebraResult {
 }
 
 pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
-    let two_tile_classes: Vec<usize> = (1..b)
-        .filter(|&m0| is_two_tile(a, b, m0))
-        .collect();
+    let two_tile_classes: Vec<usize> = (1..b).filter(|&m0| is_two_tile(a, b, m0)).collect();
 
     let n_two_tile = two_tile_classes.len();
 
     // ═══ STRUCTURAL CHECKS ═══
 
     // (A) β-values
-    let beta_nums: Vec<usize> = two_tile_classes.iter()
+    let beta_nums: Vec<usize> = two_tile_classes
+        .iter()
         .map(|&m0| tile_index(a, b, m0) + 1)
         .collect();
     let mut beta_sorted = beta_nums.clone();
@@ -219,7 +220,8 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
     let beta_each_once = beta_nums.len() == a;
 
     // (B) s-values permutation
-    let s_vals: Vec<usize> = two_tile_classes.iter()
+    let s_vals: Vec<usize> = two_tile_classes
+        .iter()
         .map(|&m0| overshoot(a, b, m0))
         .collect();
     let mut s_sorted = s_vals.clone();
@@ -228,9 +230,9 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
 
     // ═══ PIECE COMPUTATION ═══
 
-    let mut piece1 = Float::with_val(PREC, 0);  // -(1/a) Σ logΓ(β)
-    let mut piece2 = Float::with_val(PREC, 0);  // +(1/a) Σ logΓ(α)
-    let mut piece3 = Float::with_val(PREC, 0);  // digamma terms
+    let mut piece1 = Float::with_val(PREC, 0); // -(1/a) Σ logΓ(β)
+    let mut piece2 = Float::with_val(PREC, 0); // +(1/a) Σ logΓ(α)
+    let mut piece3 = Float::with_val(PREC, 0); // digamma terms
     let mut total = Float::with_val(PREC, 0);
 
     let af = fu(a);
@@ -259,23 +261,27 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
         let a2b = Float::with_val(PREC, Float::with_val(PREC, &af * &af) * &bf);
         let ab = Float::with_val(PREC, &af * &bf);
         piece3 -= Float::with_val(PREC, Float::with_val(PREC, &s_minus_a / &a2b) * &psi_beta);
-        piece3 -= Float::with_val(PREC, Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha);
+        piece3 -= Float::with_val(
+            PREC,
+            Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha,
+        );
 
         total += per_class_limit(a, b, m0);
     }
 
     // ═══ GAUSS COMPARISON ═══
     let gauss_closed = gauss_log_gamma_sum_value(a);
-    let piece1_vs_gauss = Float::with_val(PREC,
-        Float::with_val(PREC, &piece1 - &gauss_closed).abs());
+    let piece1_vs_gauss =
+        Float::with_val(PREC, Float::with_val(PREC, &piece1 - &gauss_closed).abs());
 
     // ═══ DELTA TARGET ═══
     let dt = delta_target(a, b);
-    let identity_err = Float::with_val(PREC,
-        Float::with_val(PREC, &total - &dt).abs());
+    let identity_err = Float::with_val(PREC, Float::with_val(PREC, &total - &dt).abs());
 
     HonestAlgebraResult {
-        a, b, n_two_tile,
+        a,
+        b,
+        n_two_tile,
         beta_covers_full_range,
         beta_each_once,
         s_is_permutation,
@@ -292,9 +298,7 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
 
 pub fn certify_all(pairs: &[(usize, usize)]) -> Vec<HonestAlgebraResult> {
     use rayon::prelude::*;
-    let mut results: Vec<_> = pairs.par_iter()
-        .map(|&(a, b)| certify_pair(a, b))
-        .collect();
+    let mut results: Vec<_> = pairs.par_iter().map(|&(a, b)| certify_pair(a, b)).collect();
     results.sort_by_key(|r| (r.a, r.b));
     results
 }
@@ -308,19 +312,38 @@ pub fn print_certification(results: &[HonestAlgebraResult]) {
     // ═══ Part 1: Structural invariants ═══
     println!("  {}§1. STRUCTURAL INVARIANTS{}", fmt::BOLD, fmt::RESET);
     println!();
-    println!("  {:>5} {:>5}  {:>6}  {:>12}  {:>12}  {:>12}",
-        "(a", "b)", "#2tile", "β=full?", "β_1each?", "s=perm?");
+    println!(
+        "  {:>5} {:>5}  {:>6}  {:>12}  {:>12}  {:>12}",
+        "(a", "b)", "#2tile", "β=full?", "β_1each?", "s=perm?"
+    );
     println!("  {}", "─".repeat(65));
 
     let mut all_structural = true;
     for r in results {
         let ok = r.beta_covers_full_range && r.beta_each_once && r.s_is_permutation;
-        if !ok { all_structural = false; }
-        println!("  ({:>2},{:>2})  {:>4}    {:>6}  {:>12}  {:>12}  {}",
-            r.a, r.b, r.n_two_tile,
-            if r.beta_covers_full_range { fmt::check(true) } else { fmt::check(false) },
-            if r.beta_each_once { fmt::check(true) } else { fmt::check(false) },
-            if r.s_is_permutation { fmt::check(true) } else { fmt::check(false) },
+        if !ok {
+            all_structural = false;
+        }
+        println!(
+            "  ({:>2},{:>2})  {:>4}    {:>6}  {:>12}  {:>12}  {}",
+            r.a,
+            r.b,
+            r.n_two_tile,
+            if r.beta_covers_full_range {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
+            if r.beta_each_once {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
+            if r.s_is_permutation {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
             if ok { "" } else { "⚠" },
         );
     }
@@ -335,15 +358,21 @@ pub fn print_certification(results: &[HonestAlgebraResult]) {
     // ═══ Part 2: Three-piece decomposition ═══
     println!("  {}§2. THREE-PIECE DECOMPOSITION{}", fmt::BOLD, fmt::RESET);
     println!();
-    println!("  {:>5} {:>5}  {:>16}  {:>16}  {:>16}  {:>14}",
-        "(a", "b)", "P1(logΓ β)", "P2(logΓ α)", "P3(ψ terms)", "|P1-Gauss|");
+    println!(
+        "  {:>5} {:>5}  {:>16}  {:>16}  {:>16}  {:>14}",
+        "(a", "b)", "P1(logΓ β)", "P2(logΓ α)", "P3(ψ terms)", "|P1-Gauss|"
+    );
     println!("  {}", "─".repeat(85));
 
     let mut max_gauss_err = 0.0_f64;
     for r in results {
-        if r.piece1_gauss_error > max_gauss_err { max_gauss_err = r.piece1_gauss_error; }
-        println!("  ({:>2},{:>2})  {:>16.10}  {:>16.10}  {:>16.10}  {:>14.4e}",
-            r.a, r.b,
+        if r.piece1_gauss_error > max_gauss_err {
+            max_gauss_err = r.piece1_gauss_error;
+        }
+        println!(
+            "  ({:>2},{:>2})  {:>16.10}  {:>16.10}  {:>16.10}  {:>14.4e}",
+            r.a,
+            r.b,
             r.piece1_log_gamma_beta,
             r.piece2_log_gamma_alpha,
             r.piece3_digamma,
@@ -351,38 +380,63 @@ pub fn print_certification(results: &[HonestAlgebraResult]) {
         );
     }
     println!();
-    println!("  {}Max |Piece1 - Gauss closed form|: {:.4e}{}",
-        fmt::DIM, max_gauss_err, fmt::RESET);
+    println!(
+        "  {}Max |Piece1 - Gauss closed form|: {:.4e}{}",
+        fmt::DIM,
+        max_gauss_err,
+        fmt::RESET
+    );
     if max_gauss_err < 1e-100 {
-        println!("  {} Piece 1 = Gauss Multiplication Formula (EXACT)", fmt::check(true));
+        println!(
+            "  {} Piece 1 = Gauss Multiplication Formula (EXACT)",
+            fmt::check(true)
+        );
     }
     println!();
 
     // ═══ Part 3: The identity ═══
-    println!("  {}§3. THE HONEST ALGEBRA IDENTITY{}", fmt::BOLD, fmt::RESET);
+    println!(
+        "  {}§3. THE HONEST ALGEBRA IDENTITY{}",
+        fmt::BOLD,
+        fmt::RESET
+    );
     println!();
-    println!("  {:>5} {:>5}  {:>20}  {:>20}  {:>14}",
-        "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|");
+    println!(
+        "  {:>5} {:>5}  {:>20}  {:>20}  {:>14}",
+        "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|"
+    );
     println!("  {}", "─".repeat(75));
 
     let mut max_err = 0.0_f64;
     let mut all_pass = true;
     for r in results {
         let pass = r.identity_error < 1e-100;
-        if !pass { all_pass = false; }
-        if r.identity_error > max_err { max_err = r.identity_error; }
-        println!("  ({:>2},{:>2})  {:>20.15}  {:>20.15}  {:>14.4e}  {}",
-            r.a, r.b,
+        if !pass {
+            all_pass = false;
+        }
+        if r.identity_error > max_err {
+            max_err = r.identity_error;
+        }
+        println!(
+            "  ({:>2},{:>2})  {:>20.15}  {:>20.15}  {:>14.4e}  {}",
+            r.a,
+            r.b,
             r.sum_per_class_limit,
             r.delta_target,
             r.identity_error,
-            if pass { fmt::check(true) } else { fmt::check(false) },
+            if pass {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
         );
     }
     println!();
     if all_pass {
-        println!("  {} ∑ perClassLimit = deltaTarget — CERTIFIED (DIRECT, NO BOOTSTRAP)",
-            fmt::check(true));
+        println!(
+            "  {} ∑ perClassLimit = deltaTarget — CERTIFIED (DIRECT, NO BOOTSTRAP)",
+            fmt::check(true)
+        );
     } else {
         println!("  {} IDENTITY CHECK FAILED", fmt::check(false));
     }

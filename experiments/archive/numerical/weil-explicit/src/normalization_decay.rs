@@ -14,7 +14,9 @@ use rayon::prelude::*;
 // 4. The precise decay exponent at each fixed k
 // ══════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 fn gram_entry(j: usize, k: usize, n_pts: usize) -> f64 {
     let jf = j as f64;
@@ -33,15 +35,24 @@ fn lu_decompose(a: &mut Vec<Vec<f64>>) -> Vec<usize> {
     let mut piv: Vec<usize> = (0..n).collect();
     for col in 0..n {
         let mut max_row = col;
-        for row in (col+1)..n {
-            if a[row][col].abs() > a[max_row][col].abs() { max_row = row; }
+        for row in (col + 1)..n {
+            if a[row][col].abs() > a[max_row][col].abs() {
+                max_row = row;
+            }
         }
-        if max_row != col { a.swap(col, max_row); piv.swap(col, max_row); }
-        if a[col][col].abs() < 1e-15 { continue; }
-        for row in (col+1)..n {
+        if max_row != col {
+            a.swap(col, max_row);
+            piv.swap(col, max_row);
+        }
+        if a[col][col].abs() < 1e-15 {
+            continue;
+        }
+        for row in (col + 1)..n {
             a[row][col] /= a[col][col];
             let f = a[row][col];
-            for j in (col+1)..n { a[row][j] -= f * a[col][j]; }
+            for j in (col + 1)..n {
+                a[row][j] -= f * a[col][j];
+            }
         }
     }
     piv
@@ -50,9 +61,16 @@ fn lu_decompose(a: &mut Vec<Vec<f64>>) -> Vec<usize> {
 fn lu_solve(lu: &[Vec<f64>], piv: &[usize], b: &[f64]) -> Vec<f64> {
     let n = b.len();
     let mut x: Vec<f64> = piv.iter().map(|&i| b[i]).collect();
-    for i in 1..n { for j in 0..i { let f = lu[i][j]; x[i] -= f * x[j]; } }
+    for i in 1..n {
+        for j in 0..i {
+            let f = lu[i][j];
+            x[i] -= f * x[j];
+        }
+    }
     for i in (0..n).rev() {
-        for j in (i+1)..n { x[i] -= lu[i][j] * x[j]; }
+        for j in (i + 1)..n {
+            x[i] -= lu[i][j] * x[j];
+        }
         x[i] /= lu[i][i];
     }
     x
@@ -60,21 +78,29 @@ fn lu_solve(lu: &[Vec<f64>], piv: &[usize], b: &[f64]) -> Vec<f64> {
 
 fn smallest_eigenvector(mat: &[Vec<f64>], n_iter: usize) -> (f64, Vec<f64>) {
     let n = mat.len();
-    if n == 1 { return (mat[0][0], vec![1.0]); }
+    if n == 1 {
+        return (mat[0][0], vec![1.0]);
+    }
     let mut lu = mat.to_vec();
     let piv = lu_decompose(&mut lu);
     let mut v = vec![1.0 / (n as f64).sqrt(); n];
     for _ in 0..n_iter {
         let w = lu_solve(&lu, &piv, &v);
-        let norm: f64 = w.iter().map(|x| x*x).sum::<f64>().sqrt();
-        if norm < 1e-15 { break; }
+        let norm: f64 = w.iter().map(|x| x * x).sum::<f64>().sqrt();
+        if norm < 1e-15 {
+            break;
+        }
         v = w.iter().map(|x| x / norm).collect();
     }
     // Ensure consistent sign
     let sign = if v[0] >= 0.0 { 1.0 } else { -1.0 };
     let v_signed: Vec<f64> = v.iter().map(|x| x * sign).collect();
     let mut w = vec![0.0; n];
-    for i in 0..n { for j in 0..n { w[i] += mat[i][j] * v_signed[j]; } }
+    for i in 0..n {
+        for j in 0..n {
+            w[i] += mat[i][j] * v_signed[j];
+        }
+    }
     let lam: f64 = v_signed.iter().zip(w.iter()).map(|(a, b)| a * b).sum();
     (lam, v_signed)
 }
@@ -90,13 +116,22 @@ fn main() {
     let start = std::time::Instant::now();
 
     // Phase 1: Compute Gram matrix
-    println!("\n[1/4] Computing {}×{} Gram matrix...", max_n-1, max_n-1);
+    println!(
+        "\n[1/4] Computing {}×{} Gram matrix...",
+        max_n - 1,
+        max_n - 1
+    );
     let dim = max_n - 1;
-    let gram_upper: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|j| {
-        let mut row = vec![0.0; dim];
-        for k in j..dim { row[k] = gram_entry(j + 2, k + 2, n_pts); }
-        row
-    }).collect();
+    let gram_upper: Vec<Vec<f64>> = (0..dim)
+        .into_par_iter()
+        .map(|j| {
+            let mut row = vec![0.0; dim];
+            for k in j..dim {
+                row[k] = gram_entry(j + 2, k + 2, n_pts);
+            }
+            row
+        })
+        .collect();
     let mut gram = vec![vec![0.0; dim]; dim];
     for j in 0..dim {
         for k in j..dim {
@@ -110,11 +145,16 @@ fn main() {
     println!("\n[2/4] Fixed-k tracking...\n");
 
     let fixed_ks: Vec<usize> = vec![2, 3, 5, 6, 10, 12, 20, 30, 60];
-    let n_values: Vec<usize> = (0..20).map(|i| 30 + i * 50).filter(|&n| n <= max_n).collect();
+    let n_values: Vec<usize> = (0..20)
+        .map(|i| 30 + i * 50)
+        .filter(|&n| n <= max_n)
+        .collect();
 
     // Print header
     print!("  {:>5}", "N");
-    for &k in &fixed_ks { print!(" {:>10}", format!("v[{}]", k)); }
+    for &k in &fixed_ks {
+        print!(" {:>10}", format!("v[{}]", k));
+    }
     println!(" {:>10} {:>10}", "λ_min", "||v||_eff");
     println!();
 
@@ -122,7 +162,9 @@ fn main() {
 
     for &n in &n_values {
         let d = n - 1;
-        if d < 2 { continue; }
+        if d < 2 {
+            continue;
+        }
         let sub: Vec<Vec<f64>> = gram[..d].iter().map(|r| r[..d].to_vec()).collect();
         let (lam, v) = smallest_eigenvector(&sub, 500);
 
@@ -148,10 +190,14 @@ fn main() {
 
     // Phase 3: Decay exponents for each fixed k
     println!("\n[3/4] Decay exponents at each fixed k...\n");
-    println!("  {:>5} {:>10} {:>10} {:>10}", "k", "exponent", "prefactor", "R²");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10}",
+        "k", "exponent", "prefactor", "R²"
+    );
 
     for (ki, &k) in fixed_ks.iter().enumerate() {
-        let data: Vec<(f64, f64)> = fixed_k_data.iter()
+        let data: Vec<(f64, f64)> = fixed_k_data
+            .iter()
             .filter(|(n, vals, _)| *n >= 50 && ki < vals.len() && vals[ki].abs() > 1e-10)
             .map(|(n, vals, _)| (*n as f64, vals[ki].abs()))
             .collect();
@@ -168,12 +214,19 @@ fn main() {
             // R² computation
             let mean_y = slny / nf;
             let ss_tot: f64 = data.iter().map(|(_, v)| (v.ln() - mean_y).powi(2)).sum();
-            let ss_res: f64 = data.iter()
-                .map(|(n, v)| (v.ln() - intercept - slope * n.ln()).powi(2)).sum();
+            let ss_res: f64 = data
+                .iter()
+                .map(|(n, v)| (v.ln() - intercept - slope * n.ln()).powi(2))
+                .sum();
             let r2 = 1.0 - ss_res / ss_tot;
 
-            println!("  {:5} {:10.4} {:10.6} {:10.6}",
-                k, slope, intercept.exp(), r2);
+            println!(
+                "  {:5} {:10.4} {:10.6} {:10.6}",
+                k,
+                slope,
+                intercept.exp(),
+                r2
+            );
         }
     }
 
@@ -181,20 +234,26 @@ fn main() {
     println!("\n[4/4] Energy distribution...\n");
     println!("  How does ||v||² distribute across index ranges?\n");
 
-    println!("  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "N", "k≤10", "k≤30", "k≤100", "k≤N/4", "k≤N/2", "k≤3N/4", "center");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "N", "k≤10", "k≤30", "k≤100", "k≤N/4", "k≤N/2", "k≤3N/4", "center"
+    );
 
     for &n in &n_values {
         let d = n - 1;
-        if d < 2 { continue; }
+        if d < 2 {
+            continue;
+        }
         let sub: Vec<Vec<f64>> = gram[..d].iter().map(|r| r[..d].to_vec()).collect();
         let (_, v) = smallest_eigenvector(&sub, 500);
 
         // Energy in ranges
         let energy = |lo: usize, hi: usize| -> f64 {
-            v.iter().enumerate()
+            v.iter()
+                .enumerate()
                 .filter(|(i, _)| *i + 2 >= lo && *i + 2 <= hi)
-                .map(|(_, x)| x * x).sum::<f64>()
+                .map(|(_, x)| x * x)
+                .sum::<f64>()
         };
 
         let e_10 = energy(2, 10);
@@ -205,11 +264,16 @@ fn main() {
         let e_q3 = energy(2, 3 * n / 4);
 
         // Center of mass (weighted by v²)
-        let com: f64 = v.iter().enumerate()
-            .map(|(i, x)| (i + 2) as f64 * x * x).sum::<f64>();
+        let com: f64 = v
+            .iter()
+            .enumerate()
+            .map(|(i, x)| (i + 2) as f64 * x * x)
+            .sum::<f64>();
 
-        println!("  {:5} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.2}",
-            n, e_10, e_30, e_100, e_q1, e_q2, e_q3, com);
+        println!(
+            "  {:5} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4} {:10.2}",
+            n, e_10, e_30, e_100, e_q1, e_q2, e_q3, com
+        );
     }
 
     // Phase 5: The g projection decomposition
@@ -221,19 +285,25 @@ fn main() {
         let sub: Vec<Vec<f64>> = gram[..d].iter().map(|r| r[..d].to_vec()).collect();
         let (_, v) = smallest_eigenvector(&sub, 500);
         // g for adding f_{n+1}
-        let g: Vec<f64> = (0..d).map(|k| gram[n-1][k]).collect();
-        let g_norm: f64 = g.iter().map(|x| x*x).sum::<f64>().sqrt();
-        let total: f64 = g.iter().zip(v.iter()).map(|(a,b)| a*b).sum();
+        let g: Vec<f64> = (0..d).map(|k| gram[n - 1][k]).collect();
+        let g_norm: f64 = g.iter().map(|x| x * x).sum::<f64>().sqrt();
+        let total: f64 = g.iter().zip(v.iter()).map(|(a, b)| a * b).sum();
 
         println!("  N = {}:", n);
-        let cutoffs = [10, 30, 50, 100, n/4, n/2];
+        let cutoffs = [10, 30, 50, 100, n / 4, n / 2];
         for &c in &cutoffs {
-            if c >= d { continue; }
-            let partial: f64 = g[..c].iter().zip(v[..c].iter())
-                .map(|(a,b)| a*b).sum();
+            if c >= d {
+                continue;
+            }
+            let partial: f64 = g[..c].iter().zip(v[..c].iter()).map(|(a, b)| a * b).sum();
             let tail: f64 = total - partial;
-            println!("    K={:5}: Σ_{{k≤K}} = {:10.6}, Σ_{{k>K}} = {:10.6}, total = {:10.6}",
-                c+2, partial, tail, total);
+            println!(
+                "    K={:5}: Σ_{{k≤K}} = {:10.6}, Σ_{{k>K}} = {:10.6}, total = {:10.6}",
+                c + 2,
+                partial,
+                tail,
+                total
+            );
         }
         println!("    cos θ = {:10.8}", total.abs() / g_norm);
         println!();
@@ -244,13 +314,15 @@ fn main() {
 
     let mut gv_data: Vec<(f64, f64)> = Vec::new();
     for &n in &n_values {
-        if n < 20 { continue; }
+        if n < 20 {
+            continue;
+        }
         let d = n - 1;
         let sub: Vec<Vec<f64>> = gram[..d].iter().map(|r| r[..d].to_vec()).collect();
         let (_, v) = smallest_eigenvector(&sub, 500);
-        let g: Vec<f64> = (0..d).map(|k| gram[n-1][k]).collect();
-        let g_norm: f64 = g.iter().map(|x| x*x).sum::<f64>().sqrt();
-        let gv: f64 = g.iter().zip(v.iter()).map(|(a,b)| a*b).sum();
+        let g: Vec<f64> = (0..d).map(|k| gram[n - 1][k]).collect();
+        let g_norm: f64 = g.iter().map(|x| x * x).sum::<f64>().sqrt();
+        let gv: f64 = g.iter().zip(v.iter()).map(|(a, b)| a * b).sum();
         let cos_theta = gv.abs() / g_norm;
 
         gv_data.push((n as f64, cos_theta));
@@ -274,12 +346,18 @@ fn main() {
         println!("  Prefactor: {:.6}", intercept.exp());
 
         if slope < -0.5 {
-            let drop_exp = 2.0 * slope + 1.0;  // δ = ||g||² cos²θ / S ~ N · N^{2·slope} / S
-            println!("\n  Therefore: δ_N ∝ N · N^{{2×{:.4}}} = N^({:.4})", slope, drop_exp);
+            let drop_exp = 2.0 * slope + 1.0; // δ = ||g||² cos²θ / S ~ N · N^{2·slope} / S
+            println!(
+                "\n  Therefore: δ_N ∝ N · N^{{2×{:.4}}} = N^({:.4})",
+                slope, drop_exp
+            );
             if drop_exp < -1.0 {
                 println!("  ✅ Σ δ_N CONVERGES! (exponent {:.4} < -1)", drop_exp);
             } else {
-                println!("  ⚠️  Σ δ_N may not converge (exponent {:.4} ≥ -1)", drop_exp);
+                println!(
+                    "  ⚠️  Σ δ_N may not converge (exponent {:.4} ≥ -1)",
+                    drop_exp
+                );
             }
         }
     }

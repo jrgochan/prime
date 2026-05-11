@@ -14,8 +14,8 @@ mod characters;
 mod gram;
 mod spectral;
 
-use characters::*;
 use cathedral_utils::fmt::*;
+use characters::*;
 use rayon::prelude::*;
 use std::fs;
 use std::io::Write;
@@ -106,9 +106,7 @@ fn main() {
 
     header(
         "CATHEDRAL FAST SPECTRAL PROBE (hybrid MPFR/f64)",
-        &format!(
-            "MPFR Gram (N≥500) + nalgebra eigensolve · max N = {max_n}"
-        ),
+        &format!("MPFR Gram (N≥500) + nalgebra eigensolve · max N = {max_n}"),
         128,
         threads,
     );
@@ -183,7 +181,12 @@ fn main() {
         let mut res_eigs: [Vec<f64>; 4] = [vec![], vec![], vec![], vec![]];
         let mut res_dims = [0usize; 4];
         for i in 0..4 {
-            print_eig_row(RESIDUE_NAMES[i], res_indices[i].len(), &res_results[i].0, res_results[i].1);
+            print_eig_row(
+                RESIDUE_NAMES[i],
+                res_indices[i].len(),
+                &res_results[i].0,
+                res_results[i].1,
+            );
             res_dims[i] = res_indices[i].len();
             res_eigs[i] = res_results[i].0.clone();
         }
@@ -264,10 +267,18 @@ fn main() {
     }
 
     // Summary table
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}FAST PROBE SUMMARY — PHASE TRANSITION MAP{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}N     │ Full     │ k≡1(8)   │ k≡3(8)   │ k≡5(8)   │ k≡7(8)   │ Dark{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}FAST PROBE SUMMARY — PHASE TRANSITION MAP{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}N     │ Full     │ k≡1(8)   │ k≡3(8)   │ k≡5(8)   │ k≡7(8)   │ Dark{RESET}"
+    );
     for r in &all_results {
         let fmt_class = |s: &'static str| -> &'static str {
             if s.contains("GOE") {
@@ -291,7 +302,9 @@ fn main() {
             fmt_class(r.dark_class)
         );
     }
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     println!(
         "\n  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads, f64/nalgebra)",

@@ -29,7 +29,7 @@
 
 use crate::output::RunResult;
 use serde::Serialize;
-use sha2::{Sha256, Digest};
+use sha2::{Digest, Sha256};
 use std::io::Write;
 use std::path::Path;
 use std::time::Duration;
@@ -141,9 +141,13 @@ pub fn write_certificate(
 
     let all_k1 = runs.iter().all(|r| r.gram_bound_k1);
     let all_sub = runs.iter().all(|r| r.vtgv_subcritical);
-    let max_k = runs.iter().map(|r| r.k_eff)
+    let max_k = runs
+        .iter()
+        .map(|r| r.k_eff)
         .fold(f64::NEG_INFINITY, f64::max);
-    let max_pyth_res = runs.iter().map(|r| r.pythagorean_residual)
+    let max_pyth_res = runs
+        .iter()
+        .map(|r| r.pythagorean_residual)
         .fold(0.0f64, f64::max);
 
     // Build the certificate without the hash first
@@ -164,16 +168,14 @@ pub fn write_certificate(
     };
 
     // Serialize, hash, then embed hash
-    let pre_hash_json = serde_json::to_string_pretty(&cert)
-        .map_err(std::io::Error::other)?;
+    let pre_hash_json = serde_json::to_string_pretty(&cert).map_err(std::io::Error::other)?;
     let mut hasher = Sha256::new();
     hasher.update(pre_hash_json.as_bytes());
     let hash = format!("{:x}", hasher.finalize());
     cert.sha256 = hash.clone();
 
     // Write final certificate
-    let cert_json = serde_json::to_string_pretty(&cert)
-        .map_err(std::io::Error::other)?;
+    let cert_json = serde_json::to_string_pretty(&cert).map_err(std::io::Error::other)?;
 
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
@@ -202,7 +204,10 @@ fn print_certificate_summary(cert: &Certificate) {
     println!("  {BOLD}{CYAN}  CATHEDRAL RL — CERTIFICATE{RESET}");
     println!("  {BOLD}{CYAN}{SEP}{RESET}");
     println!("  {BOLD}{WHITE}Claim:{RESET}     {}", cert.claim);
-    println!("  {BOLD}{WHITE}Identity:{RESET}  {}", cert.pythagorean_identity);
+    println!(
+        "  {BOLD}{WHITE}Identity:{RESET}  {}",
+        cert.pythagorean_identity
+    );
     println!("  {BOLD}{WHITE}Schedule:{RESET}  {:?}", cert.schedule);
     println!();
 
@@ -216,8 +221,10 @@ fn print_certificate_summary(cert: &Certificate) {
         } else {
             "✗".to_string()
         };
-        println!("    N={:>6}: d²+vᵀGv = {:.12}  |res| = {:.2e}  {check}",
-            run.n, run.pythagorean_sum, run.pythagorean_residual);
+        println!(
+            "    N={:>6}: d²+vᵀGv = {:.12}  |res| = {:.2e}  {check}",
+            run.n, run.pythagorean_sum, run.pythagorean_residual
+        );
     }
 
     println!();
@@ -231,7 +238,10 @@ fn print_certificate_summary(cert: &Certificate) {
         format!("{YELLOW}Max K_eff = {:.4}{RESET}", cert.max_k_eff)
     };
     println!("  {BOLD}Gram bound:{RESET} {subcrit_verdict}");
-    println!("  {BOLD}Max Pythagorean residual:{RESET} {:.2e}", cert.max_pythagorean_residual);
+    println!(
+        "  {BOLD}Max Pythagorean residual:{RESET} {:.2e}",
+        cert.max_pythagorean_residual
+    );
     println!("  {BOLD}SHA-256:{RESET}  {}", cert.sha256);
     println!("  {BOLD}{CYAN}{SEP}{RESET}");
     println!();

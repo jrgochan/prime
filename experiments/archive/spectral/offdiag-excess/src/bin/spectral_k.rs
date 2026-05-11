@@ -8,30 +8,41 @@
 //!
 //! Usage: cargo run --release --bin spectral_k [sizes...]
 
-use rayon::prelude::*;
-use rug::{Float, float::Round};
-use std::sync::Mutex;
 use nalgebra::{DMatrix, DVector, SVD};
+use rayon::prelude::*;
+use rug::{float::Round, Float};
+use std::sync::Mutex;
 
 const PREC: u32 = 128;
 
 fn big_omega(mut n: usize) -> usize {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0;
     let mut p = 2;
     while p * p <= n {
-        while n % p == 0 { count += 1; n /= p; }
+        while n % p == 0 {
+            count += 1;
+            n /= p;
+        }
         p += 1;
     }
-    if n > 1 { count += 1; }
+    if n > 1 {
+        count += 1;
+    }
     count
 }
 
-fn liouville_parity(k: usize) -> usize { big_omega(k) % 2 }
+fn liouville_parity(k: usize) -> usize {
+    big_omega(k) % 2
+}
 
 /// Compute gram_entry(j,k) with corrected integration (MPFR)
 fn gram_entry_hp(j: usize, k: usize) -> Float {
-    if j == 0 || k == 0 { return Float::with_val(PREC, 0); }
+    if j == 0 || k == 0 {
+        return Float::with_val(PREC, 0);
+    }
     let jf = j as f64;
     let kf = k as f64;
     let m_max = (j.max(k)) * 100 + 1000;
@@ -39,11 +50,15 @@ fn gram_entry_hp(j: usize, k: usize) -> Float {
     let mut breaks: Vec<f64> = Vec::with_capacity(2 * m_max);
     for m in j..=m_max {
         let x = jf / (m as f64);
-        if x > 0.0 && x <= 1.0 { breaks.push(x); }
+        if x > 0.0 && x <= 1.0 {
+            breaks.push(x);
+        }
     }
     for m in k..=m_max {
         let x = kf / (m as f64);
-        if x > 0.0 && x <= 1.0 { breaks.push(x); }
+        if x > 0.0 && x <= 1.0 {
+            breaks.push(x);
+        }
     }
     breaks.push(1.0);
     breaks.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -57,7 +72,9 @@ fn gram_entry_hp(j: usize, k: usize) -> Float {
     for i in 0..breaks.len() - 1 {
         let x_lo_f = breaks[i];
         let x_hi_f = breaks[i + 1];
-        if x_hi_f - x_lo_f < 1e-18 { continue; }
+        if x_hi_f - x_lo_f < 1e-18 {
+            continue;
+        }
         let x_mid_f = 0.5 * (x_lo_f + x_hi_f);
         let a = (jf / x_mid_f).floor();
         let b = (kf / x_mid_f).floor();
@@ -120,8 +137,10 @@ fn main() {
     eprintln!("  K_spectral = ‖A^{{-1/2}} B C^{{-1/2}}‖₂ = max singular value");
     eprintln!("══════════════════════════════════════════════════════════════════\n");
 
-    eprintln!("{:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
-        "N", "K_spectral", "K²_spect", "K_frob", "1-K²_s", "1-K²_f", "time");
+    eprintln!(
+        "{:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
+        "N", "K_spectral", "K²_spect", "K_frob", "1-K²_s", "1-K²_f", "time"
+    );
     eprintln!("{}", "-".repeat(70));
 
     for &n in &sizes {
@@ -135,35 +154,41 @@ fn main() {
         let n_odd = odd_idx.len();
 
         // Build full Gram matrix with MPFR, parallelized
-        let g_mutex: Vec<Vec<Mutex<Float>>> = (0..dim).map(|_| {
-            (0..dim).map(|_| Mutex::new(Float::with_val(PREC, 0))).collect()
-        }).collect();
+        let g_mutex: Vec<Vec<Mutex<Float>>> = (0..dim)
+            .map(|_| {
+                (0..dim)
+                    .map(|_| Mutex::new(Float::with_val(PREC, 0)))
+                    .collect()
+            })
+            .collect();
 
         (0..dim).into_par_iter().for_each(|i| {
             for j in i..dim {
                 let gij = gram_entry_hp(i + 2, j + 2);
-                { let mut v = g_mutex[i][j].lock().unwrap(); *v += &gij; }
+                {
+                    let mut v = g_mutex[i][j].lock().unwrap();
+                    *v += &gij;
+                }
                 if i != j {
-                    let mut v = g_mutex[j][i].lock().unwrap(); *v += &gij;
+                    let mut v = g_mutex[j][i].lock().unwrap();
+                    *v += &gij;
                 }
             }
         });
 
         // Convert to f64
-        let g: Vec<Vec<f64>> = (0..dim).map(|i| {
-            (0..dim).map(|j| g_mutex[i][j].lock().unwrap().to_f64_round(Round::Nearest)).collect()
-        }).collect();
+        let g: Vec<Vec<f64>> = (0..dim)
+            .map(|i| {
+                (0..dim)
+                    .map(|j| g_mutex[i][j].lock().unwrap().to_f64_round(Round::Nearest))
+                    .collect()
+            })
+            .collect();
 
         // Extract parity submatrices as nalgebra DMatrix
-        let a_mat = DMatrix::from_fn(n_even, n_even, |i, j| {
-            g[even_idx[i]][even_idx[j]]
-        });
-        let c_mat = DMatrix::from_fn(n_odd, n_odd, |i, j| {
-            g[odd_idx[i]][odd_idx[j]]
-        });
-        let b_mat = DMatrix::from_fn(n_even, n_odd, |i, j| {
-            g[even_idx[i]][odd_idx[j]]
-        });
+        let a_mat = DMatrix::from_fn(n_even, n_even, |i, j| g[even_idx[i]][even_idx[j]]);
+        let c_mat = DMatrix::from_fn(n_odd, n_odd, |i, j| g[odd_idx[i]][odd_idx[j]]);
+        let b_mat = DMatrix::from_fn(n_even, n_odd, |i, j| g[even_idx[i]][odd_idx[j]]);
 
         // Compute A^{-1/2} and C^{-1/2}
         let a_inv_sqrt = sym_inv_sqrt(&a_mat);
@@ -179,9 +204,7 @@ fn main() {
         let k_spectral_sq = k_spectral * k_spectral;
 
         // Also compute Frobenius K for comparison
-        let frob = |m: &DMatrix<f64>| -> f64 {
-            m.iter().map(|x| x * x).sum::<f64>().sqrt()
-        };
+        let frob = |m: &DMatrix<f64>| -> f64 { m.iter().map(|x| x * x).sum::<f64>().sqrt() };
         let frob_a = frob(&a_mat);
         let frob_c = frob(&c_mat);
         let frob_b = frob(&b_mat);
@@ -189,21 +212,32 @@ fn main() {
 
         let elapsed = start.elapsed();
 
-        eprintln!("{:5} {:10.6} {:10.6} {:10.6} {:10.2e} {:10.2e} {:8.1}s",
-            n, k_spectral, k_spectral_sq, k_frob,
-            1.0 - k_spectral_sq, 1.0 - k_frob * k_frob,
-            elapsed.as_secs_f64());
+        eprintln!(
+            "{:5} {:10.6} {:10.6} {:10.6} {:10.2e} {:10.2e} {:8.1}s",
+            n,
+            k_spectral,
+            k_spectral_sq,
+            k_frob,
+            1.0 - k_spectral_sq,
+            1.0 - k_frob * k_frob,
+            elapsed.as_secs_f64()
+        );
 
         // Detailed output
         let n_sv = singular_values.len().min(10);
         let mut sv_sorted: Vec<f64> = singular_values.iter().cloned().collect();
         sv_sorted.sort_by(|a, b| b.partial_cmp(a).unwrap());
-        eprintln!("        Top {} singular values: {:?}",
-            n_sv, &sv_sorted[..n_sv]);
-        eprintln!("        dim={}(even={}, odd={})",
-            dim, n_even, n_odd);
+        eprintln!(
+            "        Top {} singular values: {:?}",
+            n_sv,
+            &sv_sorted[..n_sv]
+        );
+        eprintln!("        dim={}(even={}, odd={})", dim, n_even, n_odd);
         if k_spectral < 1.0 {
-            eprintln!("        ✓✓✓ K_spectral = {:.8} < 1 — SELBERG BARRIER SHATTERED!", k_spectral);
+            eprintln!(
+                "        ✓✓✓ K_spectral = {:.8} < 1 — SELBERG BARRIER SHATTERED!",
+                k_spectral
+            );
         } else {
             eprintln!("        ⚠ K_spectral = {:.8} ≥ 1", k_spectral);
         }

@@ -101,15 +101,23 @@ impl PairResult {
 pub fn print_tail_convergence(results: &[PairResult], max_m: usize) {
     fmt::section("TAIL CONVERGENCE LAW");
     println!();
-    println!("  {}Predicted: tail(M) = -(4a+1)(a-1)/(12a²bM){}", fmt::DIM, fmt::RESET);
+    println!(
+        "  {}Predicted: tail(M) = -(4a+1)(a-1)/(12a²bM){}",
+        fmt::DIM,
+        fmt::RESET
+    );
     println!();
-    println!("  {:>8}  {:>14}  {:>14}  {:>10}  {:>6}",
-        "(a,b)", "tail_actual", "tail_predicted", "ratio", "pass");
+    println!(
+        "  {:>8}  {:>14}  {:>14}  {:>10}  {:>6}",
+        "(a,b)", "tail_actual", "tail_predicted", "ratio", "pass"
+    );
     println!("  {}", "─".repeat(66));
 
     let mut all_pass = true;
     for r in results {
-        if r.a == 1 { continue; } // a=1 has zero Σ'Δ
+        if r.a == 1 {
+            continue;
+        } // a=1 has zero Σ'Δ
 
         let tail_actual = r.tail_error();
         let tail_pred = r.predicted_tail(max_m);
@@ -119,31 +127,53 @@ pub fn print_tail_convergence(results: &[PairResult], max_m: usize) {
             f64::NAN
         };
         let pass = (ratio + 1.0).abs() < 0.01; // ratio should be ~-1.0
-        if !pass { all_pass = false; }
+        if !pass {
+            all_pass = false;
+        }
 
-        println!("  ({:>2},{:>2})  {:>14.6e}  {:>14.6e}  {:>10.4}  {}",
-            r.a, r.b, tail_actual, tail_pred, ratio, fmt::check(pass));
+        println!(
+            "  ({:>2},{:>2})  {:>14.6e}  {:>14.6e}  {:>10.4}  {}",
+            r.a,
+            r.b,
+            tail_actual,
+            tail_pred,
+            ratio,
+            fmt::check(pass)
+        );
     }
 
     println!();
     if all_pass {
-        println!("  {}{}All tail ratios = -1.0000 ± 0.01 ✓{}",
-            fmt::BOLD, fmt::GREEN, fmt::RESET);
+        println!(
+            "  {}{}All tail ratios = -1.0000 ± 0.01 ✓{}",
+            fmt::BOLD,
+            fmt::GREEN,
+            fmt::RESET
+        );
     } else {
-        println!("  {}{}WARNING: Some tail ratios deviate!{}",
-            fmt::BOLD, fmt::RED, fmt::RESET);
+        println!(
+            "  {}{}WARNING: Some tail ratios deviate!{}",
+            fmt::BOLD,
+            fmt::RED,
+            fmt::RESET
+        );
     }
     println!();
 }
 
 /// Generate tail convergence rows for TSV output.
 pub fn tail_convergence_rows(results: &[PairResult], max_m: usize) -> Vec<Vec<String>> {
-    results.iter()
+    results
+        .iter()
         .filter(|r| r.a > 1)
         .map(|r| {
             let tail = r.tail_error();
             let pred = r.predicted_tail(max_m);
-            let ratio = if pred.abs() > 1e-20 { tail / pred } else { f64::NAN };
+            let ratio = if pred.abs() > 1e-20 {
+                tail / pred
+            } else {
+                f64::NAN
+            };
             vec![
                 r.a.to_string(),
                 r.b.to_string(),
@@ -165,15 +195,23 @@ pub fn tail_convergence_rows(results: &[PairResult], max_m: usize) -> Vec<Vec<St
 pub fn print_sigma_delta_exact(results: &[PairResult]) {
     fmt::section("Σ'Δ EXACT VALUES (from formula)");
     println!();
-    println!("  {}SD_exact = formula - strip - stirling/b - fractTarget/a{}", fmt::DIM, fmt::RESET);
+    println!(
+        "  {}SD_exact = formula - strip - stirling/b - fractTarget/a{}",
+        fmt::DIM,
+        fmt::RESET
+    );
     println!();
 
     let mut last_a = 0;
     for r in results {
-        if r.a == 1 { continue; }
+        if r.a == 1 {
+            continue;
+        }
 
         if r.a != last_a {
-            if last_a != 0 { println!(); }
+            if last_a != 0 {
+                println!();
+            }
             println!("  {}a = {}:{}", fmt::BOLD, r.a, fmt::RESET);
             last_a = r.a;
         }

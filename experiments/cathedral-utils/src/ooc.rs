@@ -18,8 +18,8 @@
 //! [dim*dim*8 bytes] matrix data (row-major f64)
 //! ```
 
-use std::path::{Path, PathBuf};
 use std::io::{Read, Write};
+use std::path::{Path, PathBuf};
 
 /// File format magic number: "CATHOOC\0"
 pub const MAGIC: u64 = 0x434F4F4854_414300;
@@ -36,7 +36,13 @@ pub struct Header {
 }
 
 /// Write an OOC header to a writer.
-pub fn write_header(w: &mut impl Write, max_n: usize, dim: usize, precision: u32, checksum: u64) -> std::io::Result<()> {
+pub fn write_header(
+    w: &mut impl Write,
+    max_n: usize,
+    dim: usize,
+    precision: u32,
+    checksum: u64,
+) -> std::io::Result<()> {
     w.write_all(&MAGIC.to_le_bytes())?;
     w.write_all(&VERSION.to_le_bytes())?;
     w.write_all(&(max_n as u32).to_le_bytes())?;
@@ -53,10 +59,14 @@ pub fn read_header(r: &mut impl Read) -> std::io::Result<Option<Header>> {
     let mut buf4 = [0u8; 4];
 
     r.read_exact(&mut buf8)?;
-    if u64::from_le_bytes(buf8) != MAGIC { return Ok(None); }
+    if u64::from_le_bytes(buf8) != MAGIC {
+        return Ok(None);
+    }
 
     r.read_exact(&mut buf4)?;
-    if u32::from_le_bytes(buf4) != VERSION { return Ok(None); }
+    if u32::from_le_bytes(buf4) != VERSION {
+        return Ok(None);
+    }
 
     r.read_exact(&mut buf4)?;
     let max_n = u32::from_le_bytes(buf4) as usize;
@@ -73,7 +83,12 @@ pub fn read_header(r: &mut impl Read) -> std::io::Result<Option<Header>> {
     let mut pad = [0u8; 8];
     r.read_exact(&mut pad)?;
 
-    Ok(Some(Header { max_n, dim, precision, checksum }))
+    Ok(Some(Header {
+        max_n,
+        dim,
+        precision,
+        checksum,
+    }))
 }
 
 /// Get the standard OOC cache path for a given N and precision.
@@ -119,12 +134,16 @@ pub fn discover_matrices(search_paths: &[PathBuf]) -> Vec<MatrixSource> {
     let mut sources = Vec::new();
 
     for dir in search_paths {
-        if !dir.exists() { continue; }
+        if !dir.exists() {
+            continue;
+        }
 
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if !path.is_file() { continue; }
+                if !path.is_file() {
+                    continue;
+                }
 
                 let name = path.file_name().unwrap_or_default().to_string_lossy();
                 let file_size = entry.metadata().map(|m| m.len()).unwrap_or(0);
@@ -193,9 +212,15 @@ pub fn discover_matrices(search_paths: &[PathBuf]) -> Vec<MatrixSource> {
             // Keep the highest-precision format: HPDF > DD > OOC > Legacy
             match (a.format, b.format) {
                 (MatrixFormat::Hpdf, _) => true, // keep a (HPDF)
-                (_, MatrixFormat::Hpdf) => { *a = b.clone(); true } // replace with b (HPDF)
+                (_, MatrixFormat::Hpdf) => {
+                    *a = b.clone();
+                    true
+                } // replace with b (HPDF)
                 (MatrixFormat::DdCache, _) => true, // keep a (DD)
-                (_, MatrixFormat::DdCache) => { *a = b.clone(); true } // replace with b (DD)
+                (_, MatrixFormat::DdCache) => {
+                    *a = b.clone();
+                    true
+                } // replace with b (DD)
                 (MatrixFormat::Ooc, _) => true,
                 _ => true,
             }

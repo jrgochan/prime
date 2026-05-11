@@ -8,7 +8,9 @@ pub fn chebyshev_psi(y: usize, log_primes: &[(usize, f64)]) -> f64 {
         while pk <= y {
             sum += logp;
             // Check for overflow before multiplying
-            if pk > y / p + 1 { break; }
+            if pk > y / p + 1 {
+                break;
+            }
             pk *= p;
         }
     }
@@ -30,12 +32,20 @@ pub fn prime_log_table(n: usize, _mu: &[i8]) -> Vec<(usize, f64)> {
 }
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
         i += 6;
     }
     true
@@ -48,9 +58,9 @@ pub fn dirichlet_identity_1(y: usize, mu: &[i8]) -> i64 {
 
 /// Verify Identity 2: Σ_{k≤y} μ(k)·log(k)·⌊y/k⌋ = -ψ(y)
 pub fn dirichlet_identity_2(y: usize, mu: &[i8]) -> f64 {
-    (1..=y).map(|k| {
-        mu[k] as f64 * (k as f64).ln() * (y / k) as f64
-    }).sum()
+    (1..=y)
+        .map(|k| mu[k] as f64 * (k as f64).ln() * (y / k) as f64)
+        .sum()
 }
 
 /// Compute the Nyman-Beurling residual 1 - f_N(1/y) using Gemini's formula
@@ -62,9 +72,11 @@ pub fn residual_gemini(y: f64, e_n: f64, psi_y: f64, log_n: f64) -> f64 {
 /// Compute E_N = Σ v_k/k + 1/logN
 pub fn compute_e_n(mu: &[i8], n: usize) -> f64 {
     let log_n = (n as f64).ln();
-    let sum_vk_over_k: f64 = (1..n).map(|k| {
-        let vk = -(mu[k] as f64) * (1.0 - (k as f64).ln() / log_n);
-        vk / k as f64
-    }).sum();
+    let sum_vk_over_k: f64 = (1..n)
+        .map(|k| {
+            let vk = -(mu[k] as f64) * (1.0 - (k as f64).ln() / log_n);
+            vk / k as f64
+        })
+        .sum();
     sum_vk_over_k + 1.0 / log_n
 }

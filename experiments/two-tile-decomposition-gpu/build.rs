@@ -10,18 +10,24 @@ fn main() {
 
         let nvcc_status = std::process::Command::new("nvcc")
             .args(&[
-                "-c", cuda_src,
-                "-o", &cuda_out,
-                "--gpu-architecture=sm_89",  // Ada Lovelace (RTX 4090)
+                "-c",
+                cuda_src,
+                "-o",
+                &cuda_out,
+                "--gpu-architecture=sm_89", // Ada Lovelace (RTX 4090)
                 "-O3",
                 "--use_fast_math",
-                "-Xcompiler", "-fPIC",
+                "-Xcompiler",
+                "-fPIC",
             ])
             .status();
 
         match nvcc_status {
             Ok(s) if s.success() => {
-                println!("cargo:rustc-link-search=native={}", std::env::var("OUT_DIR").unwrap());
+                println!(
+                    "cargo:rustc-link-search=native={}",
+                    std::env::var("OUT_DIR").unwrap()
+                );
                 // Link the compiled object
                 let lib_dir = std::env::var("OUT_DIR").unwrap();
                 let lib_path = format!("{}/libskeleton_keys.a", lib_dir);

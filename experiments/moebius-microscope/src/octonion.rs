@@ -45,19 +45,22 @@ fn gram_entry_power(j: usize, k: usize, power: u32, n_pts: usize) -> f64 {
     let kf = k as f64;
     let dx = 1.0 / n_pts as f64;
     let n_chunks = n_pts.div_ceil(QUAD_CHUNK);
-    let partial: f64 = (0..n_chunks).into_par_iter().map(|chunk| {
-        let start = chunk * QUAD_CHUNK;
-        let end = (start + QUAD_CHUNK).min(n_pts);
-        let mut acc = Kahan::new();
-        for i in start..end {
-            let x = (i as f64 + 0.5) * dx;
-            let xp = x.powi(power as i32);
-            if xp > 1e-15 {
-                acc.add(frac_part(jf / xp) * frac_part(kf / xp));
+    let partial: f64 = (0..n_chunks)
+        .into_par_iter()
+        .map(|chunk| {
+            let start = chunk * QUAD_CHUNK;
+            let end = (start + QUAD_CHUNK).min(n_pts);
+            let mut acc = Kahan::new();
+            for i in start..end {
+                let x = (i as f64 + 0.5) * dx;
+                let xp = x.powi(power as i32);
+                if xp > 1e-15 {
+                    acc.add(frac_part(jf / xp) * frac_part(kf / xp));
+                }
             }
-        }
-        acc.value()
-    }).sum();
+            acc.value()
+        })
+        .sum();
     partial * dx
 }
 
@@ -68,20 +71,23 @@ fn gram_cross(j: usize, k: usize, p1: u32, p2: u32, n_pts: usize) -> f64 {
     let kf = k as f64;
     let dx = 1.0 / n_pts as f64;
     let n_chunks = n_pts.div_ceil(QUAD_CHUNK);
-    let partial: f64 = (0..n_chunks).into_par_iter().map(|chunk| {
-        let start = chunk * QUAD_CHUNK;
-        let end = (start + QUAD_CHUNK).min(n_pts);
-        let mut acc = Kahan::new();
-        for i in start..end {
-            let x = (i as f64 + 0.5) * dx;
-            let xp1 = x.powi(p1 as i32);
-            let xp2 = x.powi(p2 as i32);
-            if xp1 > 1e-15 && xp2 > 1e-15 {
-                acc.add(frac_part(jf / xp1) * frac_part(kf / xp2));
+    let partial: f64 = (0..n_chunks)
+        .into_par_iter()
+        .map(|chunk| {
+            let start = chunk * QUAD_CHUNK;
+            let end = (start + QUAD_CHUNK).min(n_pts);
+            let mut acc = Kahan::new();
+            for i in start..end {
+                let x = (i as f64 + 0.5) * dx;
+                let xp1 = x.powi(p1 as i32);
+                let xp2 = x.powi(p2 as i32);
+                if xp1 > 1e-15 && xp2 > 1e-15 {
+                    acc.add(frac_part(jf / xp1) * frac_part(kf / xp2));
+                }
             }
-        }
-        acc.value()
-    }).sum();
+            acc.value()
+        })
+        .sum();
     partial * dx
 }
 
@@ -111,20 +117,27 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
 
     // Parallel accumulation: partition by j, each thread builds its own 8×8
     // Kahan block, then reduce across threads.
-    let q_flat: Vec<[f64; 64]> = (0..dim).into_par_iter().map(|j_idx| {
-        let j = j_idx + 2;
-        let vj = weights[j_idx];
-        let mut local = [0.0f64; 64]; // flat 8×8
-        if vj.abs() < 1e-30 { return local; }
-        for k_idx in 0..dim {
-            let k = k_idx + 2;
-            let vk = weights[k_idx];
-            if vk.abs() < 1e-30 { continue; }
-            let g = gram::gram_entry_f64(j, k);
-            local[(j % 8) * 8 + (k % 8)] += vj * g * vk;
-        }
-        local
-    }).collect();
+    let q_flat: Vec<[f64; 64]> = (0..dim)
+        .into_par_iter()
+        .map(|j_idx| {
+            let j = j_idx + 2;
+            let vj = weights[j_idx];
+            let mut local = [0.0f64; 64]; // flat 8×8
+            if vj.abs() < 1e-30 {
+                return local;
+            }
+            for k_idx in 0..dim {
+                let k = k_idx + 2;
+                let vk = weights[k_idx];
+                if vk.abs() < 1e-30 {
+                    continue;
+                }
+                let g = gram::gram_entry_f64(j, k);
+                local[(j % 8) * 8 + (k % 8)] += vj * g * vk;
+            }
+            local
+        })
+        .collect();
 
     // Reduce thread-local blocks into final 8×8 with Kahan
     let mut q = [[Kahan::default(); 8]; 8];
@@ -139,14 +152,19 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     // Print full 8x8
     println!("  8×8 Residue Matrix Q(r₁,r₂):\n");
     print!("       ");
-    for r2 in 0..8 { print!("  r≡{r2:>2}     "); }
+    for r2 in 0..8 {
+        print!("  r≡{r2:>2}     ");
+    }
     println!();
     for r1 in 0..8 {
         print!("  r≡{r1} ");
         for r2 in 0..8 {
             let v = q[r1][r2].value();
-            if v.abs() > 1e-10 { print!(" {:>10.4e}", v); }
-            else { print!(" {:>10}", "—"); }
+            if v.abs() > 1e-10 {
+                print!(" {:>10.4e}", v);
+            } else {
+                print!(" {:>10}", "—");
+            }
         }
         println!();
     }
@@ -155,11 +173,15 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     let odd = [1usize, 3, 5, 7];
     println!("\n  4×4 ODD BLOCK (residues {{1,3,5,7}}):\n");
     print!("       ");
-    for &r2 in &odd { print!("  r≡{r2:>2}     "); }
+    for &r2 in &odd {
+        print!("  r≡{r2:>2}     ");
+    }
     println!();
     for &r1 in &odd {
         print!("  r≡{r1} ");
-        for &r2 in &odd { print!(" {:>10.4e}", q[r1][r2].value()); }
+        for &r2 in &odd {
+            print!(" {:>10.4e}", q[r1][r2].value());
+        }
         println!();
     }
 
@@ -168,20 +190,26 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     let mut chi_evals = [0.0f64; 4];
     for ch in 0..4 {
         let mut ev = Kahan::default();
-        for i in 0..4 { for j in 0..4 {
-            let ci = arith::chi8(ch, odd[i]) as f64;
-            let cj = arith::chi8(ch, odd[j]) as f64;
-            ev.add(ci * cj * q[odd[i]][odd[j]].value());
-        }}
+        for i in 0..4 {
+            for j in 0..4 {
+                let ci = arith::chi8(ch, odd[i]) as f64;
+                let cj = arith::chi8(ch, odd[j]) as f64;
+                ev.add(ci * cj * q[odd[i]][odd[j]].value());
+            }
+        }
         chi_evals[ch] = ev.value() / 4.0;
-        println!("    χ_{ch}: {:>14.10e}  (ratio: {:.4})",
-            chi_evals[ch], chi_evals[ch] / chi_evals[0].max(1e-30));
+        println!(
+            "    χ_{ch}: {:>14.10e}  (ratio: {:.4})",
+            chi_evals[ch],
+            chi_evals[ch] / chi_evals[0].max(1e-30)
+        );
     }
 
     // Checkerboard structure
-    let q_odd_flat: Vec<f64> = odd.iter().flat_map(|&r1|
-        odd.iter().map(move |&r2| q[r1][r2].value())
-    ).collect();
+    let q_odd_flat: Vec<f64> = odd
+        .iter()
+        .flat_map(|&r1| odd.iter().map(move |&r2| q[r1][r2].value()))
+        .collect();
     let trace: f64 = (0..4).map(|i| q_odd_flat[i * 4 + i]).sum();
     let total: f64 = q_odd_flat.iter().sum();
     println!("\n  ODD BLOCK STRUCTURE:");
@@ -193,7 +221,7 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     let (evals, _ground) = spectral::full_eigen(&q_odd_flat, 4);
     println!("\n  4×4 ODD BLOCK EIGENVALUES:");
     for (i, ev) in evals.iter().enumerate() {
-        println!("    λ_{} = {:>14.10e}", i+1, ev);
+        println!("    λ_{} = {:>14.10e}", i + 1, ev);
     }
     let neg = evals.iter().filter(|&&v| v < -1e-12).count();
     let cond = evals.last().unwrap() / evals[0].max(1e-30);
@@ -204,12 +232,13 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     println!("  Done in {elapsed:.1}s");
 
     // Build structured results
-    let residue_matrix: Vec<Vec<f64>> = (0..8).map(|r1|
-        (0..8).map(|r2| q[r1][r2].value()).collect()
-    ).collect();
-    let odd_block: Vec<Vec<f64>> = odd.iter().map(|&r1|
-        odd.iter().map(|&r2| q[r1][r2].value()).collect()
-    ).collect();
+    let residue_matrix: Vec<Vec<f64>> = (0..8)
+        .map(|r1| (0..8).map(|r2| q[r1][r2].value()).collect())
+        .collect();
+    let odd_block: Vec<Vec<f64>> = odd
+        .iter()
+        .map(|&r1| odd.iter().map(|&r2| q[r1][r2].value()).collect())
+        .collect();
 
     let result = Exp1Results {
         n,
@@ -263,16 +292,22 @@ fn experiment_2_bott_block_diagonal(n: usize, n_pts: usize) -> Exp2Results {
     let max_channels = 12;
     let mut channel_lmins = Vec::new();
 
-    println!("  {:>5} {:>14} {:>14} {:>10}",
-        "power", "λ_min(Gᵖ)", "ratio to G¹", "time");
+    println!(
+        "  {:>5} {:>14} {:>14} {:>10}",
+        "power", "λ_min(Gᵖ)", "ratio to G¹", "time"
+    );
     println!("  {}", "─".repeat(47));
 
     for p in 1..=(max_channels as u32) {
         let tc = Instant::now();
-        let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-            .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                ((i, j), gram_entry_power(i + 2, j + 2, p, n_pts))
-            })).collect();
+        let entries: Vec<((usize, usize), f64)> = (0..dim)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i..dim)
+                    .into_par_iter()
+                    .map(move |j| ((i, j), gram_entry_power(i + 2, j + 2, p, n_pts)))
+            })
+            .collect();
 
         // Build row-major flat matrix for spectral::full_eigen
         let mut flat = vec![0.0f64; dim * dim];
@@ -286,22 +321,34 @@ fn experiment_2_bott_block_diagonal(n: usize, n_pts: usize) -> Exp2Results {
         channel_lmins.push(lmin);
 
         let ratio = lmin / channel_lmins[0].max(1e-30);
-        println!("  x^{:<3} {:>14.10} {:>14.6} {:>8.1}s",
-            p, lmin, ratio, tc.elapsed().as_secs_f64());
+        println!(
+            "  x^{:<3} {:>14.10} {:>14.6} {:>8.1}s",
+            p,
+            lmin,
+            ratio,
+            tc.elapsed().as_secs_f64()
+        );
     }
 
     // Block diagonal λ_min = min over channels
     println!("\n  BLOCK DIAGONAL λ_min (min over channels):\n");
-    println!("  {:>10} {:>14} {:>14}",
-        "channels", "λ_min(⊕)", "ratio");
+    println!("  {:>10} {:>14} {:>14}", "channels", "λ_min(⊕)", "ratio");
     println!("  {}", "─".repeat(42));
 
     for c in [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] {
-        if c > max_channels { break; }
-        let lmin: f64 = channel_lmins[..c].iter().cloned()
+        if c > max_channels {
+            break;
+        }
+        let lmin: f64 = channel_lmins[..c]
+            .iter()
+            .cloned()
             .fold(f64::INFINITY, f64::min);
-        println!("  {:>10} {:>14.10} {:>14.6}",
-            c, lmin, lmin / channel_lmins[0].max(1e-30));
+        println!(
+            "  {:>10} {:>14.10} {:>14.6}",
+            c,
+            lmin,
+            lmin / channel_lmins[0].max(1e-30)
+        );
     }
 
     println!("\n  NOTE: Block diagonal = trivial extension. λ_min is just min");
@@ -311,8 +358,13 @@ fn experiment_2_bott_block_diagonal(n: usize, n_pts: usize) -> Exp2Results {
 
     let mut bd_lmins = Vec::new();
     for c in [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] {
-        if c > max_channels { break; }
-        let lm: f64 = channel_lmins[..c].iter().cloned().fold(f64::INFINITY, f64::min);
+        if c > max_channels {
+            break;
+        }
+        let lm: f64 = channel_lmins[..c]
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
         bd_lmins.push((c, lm));
     }
 
@@ -370,8 +422,10 @@ fn experiment_3_coupled_spectral_gap(n: usize, n_pts: usize) -> Exp3Results {
     // Test channel counts: 1, 2, 4, 8 (and 3, 5, 6, 7 for fine resolution)
     let channel_counts = [1, 2, 3, 4, 5, 6, 7, 8];
 
-    println!("  {:>6} {:>10} {:>14} {:>14} {:>14} {:>8}",
-        "C", "dim", "λ_min(coupled)", "λ_min(blkdiag)", "coupling boost", "time");
+    println!(
+        "  {:>6} {:>10} {:>14} {:>14} {:>14} {:>8}",
+        "C", "dim", "λ_min(coupled)", "λ_min(blkdiag)", "coupling boost", "time"
+    );
     println!("  {}", "─".repeat(72));
 
     let mut _lmin_c1 = 0.0f64;
@@ -391,18 +445,24 @@ fn experiment_3_coupled_spectral_gap(n: usize, n_pts: usize) -> Exp3Results {
             .collect();
 
         // For each channel pair, compute all (i,j) entries in parallel
-        let all_entries: Vec<Vec<((usize, usize, usize, usize), f64)>> = ch_pairs.par_iter()
+        let all_entries: Vec<Vec<((usize, usize, usize, usize), f64)>> = ch_pairs
+            .par_iter()
             .map(|&(p1, p2)| {
-                (0..dim).into_par_iter()
-                    .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                        let v = if p1 == p2 {
-                            gram_entry_power(i + 2, j + 2, (p1 + 1) as u32, n_pts)
-                        } else {
-                            gram_cross(i + 2, j + 2, (p1+1) as u32, (p2+1) as u32, n_pts)
-                        };
-                        ((p1, p2, i, j), v)
-                    })).collect()
-            }).collect();
+                (0..dim)
+                    .into_par_iter()
+                    .flat_map(|i| {
+                        (i..dim).into_par_iter().map(move |j| {
+                            let v = if p1 == p2 {
+                                gram_entry_power(i + 2, j + 2, (p1 + 1) as u32, n_pts)
+                            } else {
+                                gram_cross(i + 2, j + 2, (p1 + 1) as u32, (p2 + 1) as u32, n_pts)
+                            };
+                            ((p1, p2, i, j), v)
+                        })
+                    })
+                    .collect()
+            })
+            .collect();
 
         // Scatter into flat row-major matrix
         let mut flat = vec![0.0f64; cdim * cdim];
@@ -437,11 +497,20 @@ fn experiment_3_coupled_spectral_gap(n: usize, n_pts: usize) -> Exp3Results {
             lmin_block = lmin_block.min(block_evals[0]);
         }
 
-        if c == 1 { _lmin_c1 = lmin_coupled; }
+        if c == 1 {
+            _lmin_c1 = lmin_coupled;
+        }
         let boost = lmin_coupled / lmin_block.max(1e-30);
 
-        println!("  {:>6} {:>10} {:>14.10} {:>14.10} {:>12.4}× {:>6.1}s",
-            c, cdim, lmin_coupled, lmin_block, boost, tc.elapsed().as_secs_f64());
+        println!(
+            "  {:>6} {:>10} {:>14.10} {:>14.10} {:>12.4}× {:>6.1}s",
+            c,
+            cdim,
+            lmin_coupled,
+            lmin_block,
+            boost,
+            tc.elapsed().as_secs_f64()
+        );
 
         channel_results.push(Exp3ChannelResult {
             channels: c,
@@ -455,32 +524,42 @@ fn experiment_3_coupled_spectral_gap(n: usize, n_pts: usize) -> Exp3Results {
         if c == 8 {
             println!("\n    10 smallest eigenvalues of G^𝕆 (C=8, N={n}):");
             for i in 0..10.min(evals.len()) {
-                let kramers = if i + 1 < evals.len() &&
-                    (evals[i] - evals[i+1]).abs() < 1e-6 * evals[i].abs().max(1e-8) {
+                let kramers = if i + 1 < evals.len()
+                    && (evals[i] - evals[i + 1]).abs() < 1e-6 * evals[i].abs().max(1e-8)
+                {
                     " ← Kramers pair?"
-                } else if i > 0 &&
-                    (evals[i] - evals[i-1]).abs() < 1e-6 * evals[i].abs().max(1e-8) {
+                } else if i > 0 && (evals[i] - evals[i - 1]).abs() < 1e-6 * evals[i].abs().max(1e-8)
+                {
                     " ← Kramers pair?"
-                } else { "" };
-                println!("      λ_{:>2} = {:>14.10}{}", i+1, evals[i], kramers);
+                } else {
+                    ""
+                };
+                println!("      λ_{:>2} = {:>14.10}{}", i + 1, evals[i], kramers);
             }
 
             // Count Kramers pairs
             let mut pairs = 0;
             let mut idx = 0;
             while idx + 1 < evals.len() {
-                if (evals[idx] - evals[idx+1]).abs() <
-                    1e-4 * evals[idx].abs().max(1e-8) {
+                if (evals[idx] - evals[idx + 1]).abs() < 1e-4 * evals[idx].abs().max(1e-8) {
                     pairs += 1;
                     idx += 2;
-                } else { idx += 1; }
+                } else {
+                    idx += 1;
+                }
             }
-            println!("    Kramers pairs: {pairs}/{} (50% = perfect GSE)", evals.len()/2);
+            println!(
+                "    Kramers pairs: {pairs}/{} (50% = perfect GSE)",
+                evals.len() / 2
+            );
 
             // Negative eigenvalue count
             let neg = evals.iter().filter(|&&v| v < -1e-10).count();
             println!("    Negative eigenvalues: {neg}/{}", evals.len());
-            println!("    Is G^𝕆 positive definite? {}", if neg == 0 { "✅ YES" } else { "❌ NO" });
+            println!(
+                "    Is G^𝕆 positive definite? {}",
+                if neg == 0 { "✅ YES" } else { "❌ NO" }
+            );
 
             c8_eigenvalues = Some(evals[..10.min(evals.len())].to_vec());
             c8_kramers_pairs = Some(pairs);
@@ -497,13 +576,20 @@ fn experiment_3_coupled_spectral_gap(n: usize, n_pts: usize) -> Exp3Results {
 
     // Write TSV
     let dir = results_dir();
-    let mut tsv = fs::File::create(dir.join(format!("exp3_coupled_N{n}.tsv")))
-        .expect("Failed to create TSV");
-    writeln!(tsv, "channels\tdim\tlambda_min_coupled\tlambda_min_block\tcoupling_boost").unwrap();
+    let mut tsv =
+        fs::File::create(dir.join(format!("exp3_coupled_N{n}.tsv"))).expect("Failed to create TSV");
+    writeln!(
+        tsv,
+        "channels\tdim\tlambda_min_coupled\tlambda_min_block\tcoupling_boost"
+    )
+    .unwrap();
     for cr in &channel_results {
-        writeln!(tsv, "{}\t{}\t{:.15e}\t{:.15e}\t{:.10}",
-            cr.channels, cr.dim, cr.lambda_min_coupled,
-            cr.lambda_min_block_diag, cr.coupling_boost).unwrap();
+        writeln!(
+            tsv,
+            "{}\t{}\t{:.15e}\t{:.15e}\t{:.10}",
+            cr.channels, cr.dim, cr.lambda_min_coupled, cr.lambda_min_block_diag, cr.coupling_boost
+        )
+        .unwrap();
     }
 
     Exp3Results {
@@ -551,17 +637,22 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
         .filter(|(_, w)| w.abs() > 1e-30)
         .collect();
 
-    println!("  Active indices: {} (computing 8×8 contraction)", active.len());
+    println!(
+        "  Active indices: {} (computing 8×8 contraction)",
+        active.len()
+    );
 
     // Fully parallel contraction: all 36 upper-triangle (p,q) pairs at once
     let pq_pairs: Vec<(u32, u32)> = (0..8u32)
         .flat_map(|p| (p..8u32).map(move |q| (p, q)))
         .collect();
 
-    let pq_values: Vec<((u32, u32), f64)> = pq_pairs.par_iter()
+    let pq_values: Vec<((u32, u32), f64)> = pq_pairs
+        .par_iter()
         .map(|&(p, q_ch)| {
             // Inner double sum: Σ_j Σ_k v_j · G^{p,q}(j,k) · v_k
-            let val: f64 = active.iter()
+            let val: f64 = active
+                .iter()
                 .map(|&(j, vj)| {
                     let mut acc = Kahan::new();
                     for &(k, vk) in &active {
@@ -584,26 +675,35 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
         cross[p as usize][q_ch as usize] = val;
         cross[q_ch as usize][p as usize] = val;
     }
-    eprintln!("  All 36 pairs computed in {:.1}s", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  All 36 pairs computed in {:.1}s",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Display
     println!("\n  8×8 CROSS-CHANNEL CONTRACTION C(p,q):\n");
     print!("       ");
-    for q_ch in 1..=8 { print!("  p={q_ch:>2}      "); }
+    for q_ch in 1..=8 {
+        print!("  p={q_ch:>2}      ");
+    }
     println!();
     for p in 0..8 {
-        print!("  p={} ", p+1);
-        for q_ch in 0..8 { print!(" {:>10.4e}", cross[p][q_ch]); }
+        print!("  p={} ", p + 1);
+        for q_ch in 0..8 {
+            print!(" {:>10.4e}", cross[p][q_ch]);
+        }
         println!();
     }
 
     // Normalize: C_norm(p,q) = C(p,q) / sqrt(C(p,p)·C(q,q))
     println!("\n  NORMALIZED (correlation matrix):\n");
     print!("       ");
-    for q_ch in 1..=8 { print!("    p={q_ch:>2}   "); }
+    for q_ch in 1..=8 {
+        print!("    p={q_ch:>2}   ");
+    }
     println!();
     for p in 0..8 {
-        print!("  p={} ", p+1);
+        print!("  p={} ", p + 1);
         for q_ch in 0..8 {
             let norm = (cross[p][p] * cross[q_ch][q_ch]).sqrt().max(1e-30);
             print!(" {:>9.6}", cross[p][q_ch] / norm);
@@ -612,42 +712,69 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
     }
 
     // Eigenanalysis of 8×8 via spectral::full_eigen
-    let cross_flat: Vec<f64> = (0..8).flat_map(|i| (0..8).map(move |j| cross[i][j])).collect();
+    let cross_flat: Vec<f64> = (0..8)
+        .flat_map(|i| (0..8).map(move |j| cross[i][j]))
+        .collect();
     let (evals, _ground) = spectral::full_eigen(&cross_flat, 8);
 
     println!("\n  EIGENVALUES:");
     let total: f64 = evals.iter().map(|v| v.abs()).sum();
     for (i, ev) in evals.iter().enumerate() {
-        println!("    λ_{} = {:>14.8e}  ({:>5.1}%)", i+1, ev, 100.0 * ev.abs() / total);
+        println!(
+            "    λ_{} = {:>14.8e}  ({:>5.1}%)",
+            i + 1,
+            ev,
+            100.0 * ev.abs() / total
+        );
     }
 
     // Dominant eigenvector — need full eigenvectors for this, so use nalgebra
     let mat8 = nalgebra::DMatrix::from_row_slice(8, 8, &cross_flat);
     let eig = mat8.symmetric_eigen();
-    let max_idx = eig.eigenvalues.iter().enumerate()
+    let max_idx = eig
+        .eigenvalues
+        .iter()
+        .enumerate()
         .max_by(|(_, a), (_, b)| a.abs().partial_cmp(&b.abs()).unwrap())
-        .unwrap().0;
+        .unwrap()
+        .0;
     let dom_evec: Vec<f64> = eig.eigenvectors.column(max_idx).iter().cloned().collect();
     println!("\n  DOMINANT EIGENVECTOR (channel weights):");
     for (i, v) in dom_evec.iter().enumerate() {
-        let bar_len = (v.abs() / dom_evec.iter().map(|x| x.abs()).fold(0.0f64, f64::max) * 30.0) as usize;
-        println!("    p={}: {:>8.5} {}", i+1, v, "█".repeat(bar_len));
+        let bar_len =
+            (v.abs() / dom_evec.iter().map(|x| x.abs()).fold(0.0f64, f64::max) * 30.0) as usize;
+        println!("    p={}: {:>8.5} {}", i + 1, v, "█".repeat(bar_len));
     }
 
     // Channel decay
     println!("\n  DIAGONAL DECAY:");
     for p in 0..8 {
-        println!("    C({},{}) = {:>12.6e}  (×{:.4} of C(1,1))",
-            p+1, p+1, cross[p][p], cross[p][p] / cross[0][0].max(1e-30));
+        println!(
+            "    C({},{}) = {:>12.6e}  (×{:.4} of C(1,1))",
+            p + 1,
+            p + 1,
+            cross[p][p],
+            cross[p][p] / cross[0][0].max(1e-30)
+        );
     }
 
     // Quaternion vs Octonion sub-blocks
     let q4_trace: f64 = (0..4).map(|i| cross[i][i]).sum();
     let o8_trace: f64 = (0..8).map(|i| cross[i][i]).sum();
-    let q4_off: f64 = (0..4).flat_map(|p| (0..4).filter(move |&q_ch| q_ch != p)
-        .map(move |q_ch| cross[p][q_ch].abs())).sum();
-    let o8_off: f64 = (0..8).flat_map(|p| (0..8).filter(move |&q_ch| q_ch != p)
-        .map(move |q_ch| cross[p][q_ch].abs())).sum();
+    let q4_off: f64 = (0..4)
+        .flat_map(|p| {
+            (0..4)
+                .filter(move |&q_ch| q_ch != p)
+                .map(move |q_ch| cross[p][q_ch].abs())
+        })
+        .sum();
+    let o8_off: f64 = (0..8)
+        .flat_map(|p| {
+            (0..8)
+                .filter(move |&q_ch| q_ch != p)
+                .map(move |q_ch| cross[p][q_ch].abs())
+        })
+        .sum();
 
     println!("\n  QUATERNION vs OCTONION:");
     println!("    Trace(4×4): {q4_trace:.6e}  Off-diag: {q4_off:.6e}");
@@ -661,12 +788,16 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
     println!("\n  Total: {elapsed:.1}s");
 
     // Build normalized matrix
-    let normalized: Vec<Vec<f64>> = (0..8).map(|p|
-        (0..8).map(|q_ch| {
-            let norm = (cross[p][p] * cross[q_ch][q_ch]).sqrt().max(1e-30);
-            cross[p][q_ch] / norm
-        }).collect()
-    ).collect();
+    let normalized: Vec<Vec<f64>> = (0..8)
+        .map(|p| {
+            (0..8)
+                .map(|q_ch| {
+                    let norm = (cross[p][p] * cross[q_ch][q_ch]).sqrt().max(1e-30);
+                    cross[p][q_ch] / norm
+                })
+                .collect()
+        })
+        .collect();
 
     // Write TSV of cross matrix
     let dir = results_dir();
@@ -676,8 +807,15 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
     for p in 0..8 {
         for q_ch in 0..8 {
             let norm = (cross[p][p] * cross[q_ch][q_ch]).sqrt().max(1e-30);
-            writeln!(tsv, "{}\t{}\t{:.15e}\t{:.10}",
-                p + 1, q_ch + 1, cross[p][q_ch], cross[p][q_ch] / norm).unwrap();
+            writeln!(
+                tsv,
+                "{}\t{}\t{:.15e}\t{:.10}",
+                p + 1,
+                q_ch + 1,
+                cross[p][q_ch],
+                cross[p][q_ch] / norm
+            )
+            .unwrap();
         }
     }
 
@@ -686,13 +824,22 @@ fn experiment_4_cross_channel_contraction(n: usize, n_pts: usize) -> Exp4Results
         .expect("Failed to create eigenvalue TSV");
     writeln!(etsv, "index\teigenvalue\tpct_total").unwrap();
     for (i, ev) in evals.iter().enumerate() {
-        writeln!(etsv, "{}\t{:.15e}\t{:.6}", i + 1, ev, 100.0 * ev.abs() / total).unwrap();
+        writeln!(
+            etsv,
+            "{}\t{:.15e}\t{:.6}",
+            i + 1,
+            ev,
+            100.0 * ev.abs() / total
+        )
+        .unwrap();
     }
 
     Exp4Results {
         n,
         n_pts,
-        cross_matrix_8x8: (0..8).map(|p| (0..8).map(|q_ch| cross[p][q_ch]).collect()).collect(),
+        cross_matrix_8x8: (0..8)
+            .map(|p| (0..8).map(|q_ch| cross[p][q_ch]).collect())
+            .collect(),
         normalized_matrix_8x8: normalized,
         eigenvalues: evals.clone(),
         dominant_eigenvector: dom_evec,

@@ -21,12 +21,22 @@ impl Interval {
         Interval { lo, hi }
     }
 
-    fn point(x: f64) -> Self { Interval { lo: x, hi: x } }
+    fn point(x: f64) -> Self {
+        Interval { lo: x, hi: x }
+    }
 
-    fn contains_zero(&self) -> bool { self.lo <= 0.0 && self.hi >= 0.0 }
-    fn is_positive(&self) -> bool { self.lo > 0.0 }
-    fn midpoint(&self) -> f64 { (self.lo + self.hi) / 2.0 }
-    fn width(&self) -> f64 { self.hi - self.lo }
+    fn contains_zero(&self) -> bool {
+        self.lo <= 0.0 && self.hi >= 0.0
+    }
+    fn is_positive(&self) -> bool {
+        self.lo > 0.0
+    }
+    fn midpoint(&self) -> f64 {
+        (self.lo + self.hi) / 2.0
+    }
+    fn width(&self) -> f64 {
+        self.hi - self.lo
+    }
 }
 
 impl std::ops::Add for Interval {
@@ -50,10 +60,7 @@ impl std::ops::Mul for Interval {
         let b = self.lo * rhs.hi;
         let c = self.hi * rhs.lo;
         let d = self.hi * rhs.hi;
-        Interval::new(
-            a.min(b).min(c).min(d),
-            a.max(b).max(c).max(d),
-        )
+        Interval::new(a.min(b).min(c).min(d), a.max(b).max(c).max(d))
     }
 }
 
@@ -67,10 +74,14 @@ impl std::ops::Div for Interval {
 }
 
 impl std::ops::AddAssign for Interval {
-    fn add_assign(&mut self, rhs: Interval) { *self = *self + rhs; }
+    fn add_assign(&mut self, rhs: Interval) {
+        *self = *self + rhs;
+    }
 }
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 /// Compute interval enclosure of ∫₀¹ {j/x}·{k/x} dx
 /// using the trapezoidal rule with rigorous error bounds
@@ -145,19 +156,29 @@ fn main() {
     // ═══ Test 1: Interval arithmetic precision check ═══
     println!("\n[1/3] Precision check: interval widths\n");
     println!("  Testing G[j,k] interval enclosures...\n");
-    println!("  {:>4} {:>4} {:>14} {:>14} {:>14}",
-        "j", "k", "lower", "upper", "width");
+    println!(
+        "  {:>4} {:>4} {:>14} {:>14} {:>14}",
+        "j", "k", "lower", "upper", "width"
+    );
 
-    for &(j, k) in &[(2,2), (2,3), (3,3), (5,7), (10,10), (20,20)] {
+    for &(j, k) in &[(2, 2), (2, 3), (3, 3), (5, 7), (10, 10), (20, 20)] {
         let iv = gram_entry_interval(j, k, n_int_base);
-        println!("  {:4} {:4} {:14.10} {:14.10} {:14.2e}",
-            j, k, iv.lo, iv.hi, iv.width());
+        println!(
+            "  {:4} {:4} {:14.10} {:14.10} {:14.2e}",
+            j,
+            k,
+            iv.lo,
+            iv.hi,
+            iv.width()
+        );
     }
 
     // ═══ Test 2: Interval Cholesky for increasing N ═══
     println!("\n[2/3] Interval Cholesky decomposition\n");
-    println!("  {:>5}  {:>14}  {:>14}  {:>14}  {:>8}",
-        "N", "min L[i,i].lo", "certified λ_lb", "max width", "status");
+    println!(
+        "  {:>5}  {:>14}  {:>14}  {:>14}  {:>8}",
+        "N", "min L[i,i].lo", "certified λ_lb", "max width", "status"
+    );
 
     let checkpoints: Vec<usize> = {
         let mut v: Vec<usize> = (2..=30).collect();
@@ -174,13 +195,16 @@ fn main() {
         let n_int = n_int_base + dim * 1000;
 
         // Compute interval Gram matrix
-        let gram_rows: Vec<Vec<Interval>> = (0..dim).into_par_iter().map(|j| {
-            let mut row = vec![Interval::point(0.0); dim];
-            for k in j..dim {
-                row[k] = gram_entry_interval(j + 2, k + 2, n_int);
-            }
-            row
-        }).collect();
+        let gram_rows: Vec<Vec<Interval>> = (0..dim)
+            .into_par_iter()
+            .map(|j| {
+                let mut row = vec![Interval::point(0.0); dim];
+                for k in j..dim {
+                    row[k] = gram_entry_interval(j + 2, k + 2, n_int);
+                }
+                row
+            })
+            .collect();
 
         // Symmetrize
         let mut gram = vec![vec![Interval::point(0.0); dim]; dim];
@@ -198,13 +222,14 @@ fn main() {
                 let min_lo_sq = min_lo * min_lo; // λ_min ≥ min(L[i,i])²
                 let max_width = diags.iter().map(|d| d.width()).fold(0.0f64, f64::max);
 
-                println!("  {:5}  {:14.10}  {:14.10}  {:14.2e}  ✅ PD",
-                    n, min_lo, min_lo_sq, max_width);
+                println!(
+                    "  {:5}  {:14.10}  {:14.10}  {:14.2e}  ✅ PD",
+                    n, min_lo, min_lo_sq, max_width
+                );
                 last_success_n = n;
-            },
+            }
             Err(msg) => {
-                println!("  {:5}  {:>14}  {:>14}  {:>14}  ❌ FAIL",
-                    n, "—", "—", "—");
+                println!("  {:5}  {:>14}  {:>14}  {:>14}  ❌ FAIL", n, "—", "—", "—");
                 println!("         {}", msg);
                 println!("         (Need more integration points for N={})", n);
                 break;
@@ -216,10 +241,16 @@ fn main() {
     println!("\n[3/3] ═══ Certification Summary ═══\n");
     println!("  Largest N with CERTIFIED PD: N = {}", last_success_n);
     println!("  Method: Interval arithmetic Cholesky decomposition");
-    println!("  Integration: {} base points, adaptive per-N scaling", n_int_base);
+    println!(
+        "  Integration: {} base points, adaptive per-N scaling",
+        n_int_base
+    );
 
     if last_success_n > 0 {
-        println!("\n  ✅ G_N is PROVABLY positive definite for all N ≤ {}", last_success_n);
+        println!(
+            "\n  ✅ G_N is PROVABLY positive definite for all N ≤ {}",
+            last_success_n
+        );
         println!("     This is a RIGOROUS result, not floating-point.");
     }
 

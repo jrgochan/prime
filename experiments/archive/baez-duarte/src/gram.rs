@@ -79,7 +79,10 @@ pub fn precompute_ln1p_cache(max_n: usize) -> Vec<Float> {
     // Cap at 200,000 to match gram_entry_mpfr's cap
     let cache_size = (max_n * max_n).min(200_000).max(50_000);
 
-    eprint!("  Precomputing {} ln1p values ({}-bit)... ", cache_size, PREC);
+    eprint!(
+        "  Precomputing {} ln1p values ({}-bit)... ",
+        cache_size, PREC
+    );
 
     let cache: Vec<Float> = (0..=cache_size)
         .into_par_iter()
@@ -87,7 +90,10 @@ pub fn precompute_ln1p_cache(max_n: usize) -> Vec<Float> {
             if n == 0 {
                 Float::with_val(PREC, f64::INFINITY) // ln1p(1/0) — unused sentinel
             } else {
-                let inv_n = Float::with_val(PREC, Float::with_val(PREC, 1u32) / Float::with_val(PREC, n as u64));
+                let inv_n = Float::with_val(
+                    PREC,
+                    Float::with_val(PREC, 1u32) / Float::with_val(PREC, n as u64),
+                );
                 Float::with_val(PREC, inv_n.ln_1p())
             }
         })
@@ -142,8 +148,7 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_cache: &[Float]) -> Float {
         };
 
         // (⌊n/j⌋/k + ⌊n/k⌋/j) · ln(1+1/n)
-        let ab_coeff = Float::with_val(PREC, &a / &kf)
-            + Float::with_val(PREC, &b / &jf);
+        let ab_coeff = Float::with_val(PREC, &a / &kf) + Float::with_val(PREC, &b / &jf);
 
         // ⌊n/j⌋·⌊n/k⌋ / (n(n+1))
         let n_plus_1 = Float::with_val(PREC, &nf + 1u32);
@@ -154,8 +159,8 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_cache: &[Float]) -> Float {
         };
 
         // Piece(n) = 1/(jk) - coeff·ln(1+1/n) + ⌊n/j⌋⌊n/k⌋/(n(n+1))
-        let piece = Float::with_val(PREC, &inv_jk - Float::with_val(PREC, &ab_coeff * &ln_term))
-            + &ab_frac;
+        let piece =
+            Float::with_val(PREC, &inv_jk - Float::with_val(PREC, &ab_coeff * &ln_term)) + &ab_frac;
 
         total += piece;
     }
@@ -166,8 +171,7 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_cache: &[Float]) -> Float {
     // Remainder: M/T + M/(2T²)
     let d = Float::with_val(PREC, gcd(j, k) as u64);
     let twelve_jk = Float::with_val(PREC, 12u32) * &jk;
-    let tail_mean = Float::with_val(PREC, 0.25f64)
-        + Float::with_val(PREC, &d * &d) / &twelve_jk;
+    let tail_mean = Float::with_val(PREC, 0.25f64) + Float::with_val(PREC, &d * &d) / &twelve_jk;
     let t_f = Float::with_val(PREC, t_direct as u64);
 
     // First-order tail: M/T
@@ -194,9 +198,7 @@ pub fn build_gram_matrix(n: usize, ln_cache: &[Float]) -> Vec<Vec<Float>> {
     let t0 = Instant::now();
 
     // Generate all upper-triangle (i,j) pairs
-    let pairs: Vec<(usize, usize)> = (0..n)
-        .flat_map(|i| (i..n).map(move |j| (i, j)))
-        .collect();
+    let pairs: Vec<(usize, usize)> = (0..n).flat_map(|i| (i..n).map(move |j| (i, j))).collect();
     let total = pairs.len();
     let computed = AtomicUsize::new(0);
     let threads = rayon::current_num_threads();

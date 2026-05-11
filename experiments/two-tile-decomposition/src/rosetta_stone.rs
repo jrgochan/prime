@@ -21,9 +21,9 @@
 //!  Date: 2026-05-04
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
-use cathedral_utils::fmt;
 use crate::PREC;
+use cathedral_utils::fmt;
+use rug::Float;
 
 /// Compute gramEntry(j,k) = ∫₀¹ {j/x}{k/x} dx via high-precision quadrature.
 ///
@@ -47,14 +47,22 @@ fn gram_entry_quadrature(j: usize, k: usize, _num_intervals: usize) -> Float {
     // x = j/m for integer m, while j/m > 0 and j/m <= 1
     for m in j..=(j * 10000).min(1_000_000) {
         let bp = j as f64 / m as f64;
-        if bp < 1e-8 { break; }
-        if bp <= 1.0 { breakpoints.push(bp); }
+        if bp < 1e-8 {
+            break;
+        }
+        if bp <= 1.0 {
+            breakpoints.push(bp);
+        }
     }
     // x = k/m
     for m in k..=(k * 10000).min(1_000_000) {
         let bp = k as f64 / m as f64;
-        if bp < 1e-8 { break; }
-        if bp <= 1.0 { breakpoints.push(bp); }
+        if bp < 1e-8 {
+            break;
+        }
+        if bp <= 1.0 {
+            breakpoints.push(bp);
+        }
     }
 
     breakpoints.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -65,7 +73,9 @@ fn gram_entry_quadrature(j: usize, k: usize, _num_intervals: usize) -> Float {
     for w in breakpoints.windows(2) {
         let lo = w[0];
         let hi = w[1];
-        if hi - lo < 1e-18 { continue; }
+        if hi - lo < 1e-18 {
+            continue;
+        }
 
         // At midpoint, determine floor values (constant on this interval)
         let mid = (lo + hi) / 2.0;
@@ -80,19 +90,22 @@ fn gram_entry_quadrature(j: usize, k: usize, _num_intervals: usize) -> Float {
         // ∫_lo^hi (jk/x² - (j·mk + k·mj)/x + mj·mk) dx
         // = jk·(1/lo - 1/hi) - (j·mk + k·mj)·ln(hi/lo) + mj·mk·(hi - lo)
 
-        let term1 = Float::with_val(PREC, &jf * &kf) *
-            Float::with_val(PREC,
-                Float::with_val(PREC, 1.0) / &lo_f -
-                Float::with_val(PREC, 1.0) / &hi_f);
+        let term1 = Float::with_val(PREC, &jf * &kf)
+            * Float::with_val(
+                PREC,
+                Float::with_val(PREC, 1.0) / &lo_f - Float::with_val(PREC, 1.0) / &hi_f,
+            );
 
-        let coeff2 = Float::with_val(PREC,
-            Float::with_val(PREC, &jf * &mk_f) +
-            Float::with_val(PREC, &kf * &mj_f));
-        let term2 = Float::with_val(PREC, &coeff2 *
-            Float::with_val(PREC, Float::with_val(PREC, &hi_f / &lo_f).ln()));
+        let coeff2 = Float::with_val(
+            PREC,
+            Float::with_val(PREC, &jf * &mk_f) + Float::with_val(PREC, &kf * &mj_f),
+        );
+        let term2 = Float::with_val(
+            PREC,
+            &coeff2 * Float::with_val(PREC, Float::with_val(PREC, &hi_f / &lo_f).ln()),
+        );
 
-        let term3 = Float::with_val(PREC, &mj_f * &mk_f) *
-            Float::with_val(PREC, &hi_f - &lo_f);
+        let term3 = Float::with_val(PREC, &mj_f * &mk_f) * Float::with_val(PREC, &hi_f - &lo_f);
 
         let sub12 = Float::with_val(PREC, &term1 - &term2);
         total += Float::with_val(PREC, &sub12 + &term3);
@@ -139,7 +152,9 @@ fn finite_correction(j: usize, k: usize) -> Float {
     for w in breakpoints.windows(2) {
         let lo = w[0];
         let hi = w[1];
-        if hi - lo < 1e-15 { continue; }
+        if hi - lo < 1e-15 {
+            continue;
+        }
 
         // At midpoint, determine floor values
         let mid = (lo + hi) / 2.0;
@@ -152,17 +167,20 @@ fn finite_correction(j: usize, k: usize) -> Float {
         let mk_f = Float::with_val(PREC, mk);
 
         // Exact: ∫_lo^hi (jk/x² - (j·mk + k·mj)/x + mj·mk) dx
-        let term1 = Float::with_val(PREC, &jf * &kf) *
-            Float::with_val(PREC,
-                Float::with_val(PREC, 1.0) / &lo_f -
-                Float::with_val(PREC, 1.0) / &hi_f);
-        let coeff2 = Float::with_val(PREC,
-            Float::with_val(PREC, &jf * &mk_f) +
-            Float::with_val(PREC, &kf * &mj_f));
-        let term2 = Float::with_val(PREC, &coeff2 *
-            Float::with_val(PREC, Float::with_val(PREC, &hi_f / &lo_f).ln()));
-        let term3 = Float::with_val(PREC, &mj_f * &mk_f) *
-            Float::with_val(PREC, &hi_f - &lo_f);
+        let term1 = Float::with_val(PREC, &jf * &kf)
+            * Float::with_val(
+                PREC,
+                Float::with_val(PREC, 1.0) / &lo_f - Float::with_val(PREC, 1.0) / &hi_f,
+            );
+        let coeff2 = Float::with_val(
+            PREC,
+            Float::with_val(PREC, &jf * &mk_f) + Float::with_val(PREC, &kf * &mj_f),
+        );
+        let term2 = Float::with_val(
+            PREC,
+            &coeff2 * Float::with_val(PREC, Float::with_val(PREC, &hi_f / &lo_f).ln()),
+        );
+        let term3 = Float::with_val(PREC, &mj_f * &mk_f) * Float::with_val(PREC, &hi_f - &lo_f);
 
         let sub12 = Float::with_val(PREC, &term1 - &term2);
         total += Float::with_val(PREC, &sub12 + &term3);
@@ -176,16 +194,16 @@ fn finite_correction(j: usize, k: usize) -> Float {
 pub struct BridgeResult {
     pub j: usize,
     pub k: usize,
-    pub gram_entry: f64,           // ∫₀¹ {j/x}{k/x} dx
-    pub gram_integral: f64,         // ∫₀¹ {1/(jx)}{1/(kx)} dx (from series)
-    pub jk_gram_integral: f64,      // jk · gramIntegral
-    pub min_minus_1: f64,           // min(j,k) - 1
-    pub correction: f64,            // ∫₁^max {j/x}{k/x} dx
-    pub bridge_prediction: f64,     // jk·gramIntegral - (min-1) - correction
-    pub bridge_error: f64,          // |gramEntry - prediction|
-    pub phantom_dist: f64,          // |gramEntry - 1/4|
-    pub phantom_bound: f64,         // 1/gcd(j,k)
-    pub phantom_violated: bool,     // phantom_dist > phantom_bound?
+    pub gram_entry: f64,        // ∫₀¹ {j/x}{k/x} dx
+    pub gram_integral: f64,     // ∫₀¹ {1/(jx)}{1/(kx)} dx (from series)
+    pub jk_gram_integral: f64,  // jk · gramIntegral
+    pub min_minus_1: f64,       // min(j,k) - 1
+    pub correction: f64,        // ∫₁^max {j/x}{k/x} dx
+    pub bridge_prediction: f64, // jk·gramIntegral - (min-1) - correction
+    pub bridge_error: f64,      // |gramEntry - prediction|
+    pub phantom_dist: f64,      // |gramEntry - 1/4|
+    pub phantom_bound: f64,     // 1/gcd(j,k)
+    pub phantom_violated: bool, // phantom_dist > phantom_bound?
 }
 
 /// Run the Rosetta Stone bridge verification.
@@ -198,7 +216,8 @@ pub fn verify_bridge(max_n: usize) -> Vec<BridgeResult> {
         .filter(|&(j, k)| j != k)
         .collect();
 
-    let mut results: Vec<BridgeResult> = pairs.iter()
+    let mut results: Vec<BridgeResult> = pairs
+        .iter()
         .map(|&(j, k)| {
             // gramIntegral via series (proven to match formula)
             let gi = cathedral_utils::gram::gram_entry_mpfr(j, k, &ln_table);
@@ -223,7 +242,8 @@ pub fn verify_bridge(max_n: usize) -> Vec<BridgeResult> {
             let bound = 1.0 / g as f64;
 
             BridgeResult {
-                j, k,
+                j,
+                k,
                 gram_entry: ge_f64,
                 gram_integral: gi_f64,
                 jk_gram_integral: jk * gi_f64,
@@ -246,11 +266,15 @@ pub fn verify_bridge(max_n: usize) -> Vec<BridgeResult> {
 pub fn print_bridge(results: &[BridgeResult]) {
     fmt::section("THE ROSETTA STONE — gramEntry ↔ gramIntegral Bridge Verification");
     println!();
-    println!("  Formula: gramEntry(j,k) = jk·gramIntegral(j,k) - (min(j,k)-1) - ∫₁^max {{j/x}}{{k/x}} dx");
+    println!(
+        "  Formula: gramEntry(j,k) = jk·gramIntegral(j,k) - (min(j,k)-1) - ∫₁^max {{j/x}}{{k/x}} dx"
+    );
     println!();
 
-    println!("  {:>4} {:>4}  {:>18}  {:>18}  {:>14}  {:>10}",
-        "(j", "k)", "gramEntry", "PREDICTED", "|error|", "status");
+    println!(
+        "  {:>4} {:>4}  {:>18}  {:>18}  {:>14}  {:>10}",
+        "(j", "k)", "gramEntry", "PREDICTED", "|error|", "status"
+    );
     println!("  {}", "─".repeat(80));
 
     let mut max_err = 0.0_f64;
@@ -258,21 +282,40 @@ pub fn print_bridge(results: &[BridgeResult]) {
 
     for r in results {
         let pass = r.bridge_error < 1e-3;
-        if !pass { all_pass = false; }
-        if r.bridge_error > max_err { max_err = r.bridge_error; }
+        if !pass {
+            all_pass = false;
+        }
+        if r.bridge_error > max_err {
+            max_err = r.bridge_error;
+        }
 
-        println!("  ({:>2},{:>2})  {:>18.12}  {:>18.12}  {:>14.4e}  {}",
-            r.j, r.k, r.gram_entry, r.bridge_prediction, r.bridge_error,
-            if pass { "✅" } else { "❌" });
+        println!(
+            "  ({:>2},{:>2})  {:>18.12}  {:>18.12}  {:>14.4e}  {}",
+            r.j,
+            r.k,
+            r.gram_entry,
+            r.bridge_prediction,
+            r.bridge_error,
+            if pass { "✅" } else { "❌" }
+        );
     }
 
     println!();
     if all_pass {
-        println!("  {} ALL {} BRIDGE VERIFICATIONS PASS", fmt::check(true), results.len());
+        println!(
+            "  {} ALL {} BRIDGE VERIFICATIONS PASS",
+            fmt::check(true),
+            results.len()
+        );
     } else {
         println!("  {} SOME BRIDGE VERIFICATIONS FAILED", fmt::check(false));
     }
-    println!("  {}Max bridge error: {:.4e}{}", fmt::DIM, max_err, fmt::RESET);
+    println!(
+        "  {}Max bridge error: {:.4e}{}",
+        fmt::DIM,
+        max_err,
+        fmt::RESET
+    );
     println!();
 
     // Phantom Axiom audit
@@ -283,12 +326,17 @@ pub fn print_bridge(results: &[BridgeResult]) {
     if violated.is_empty() {
         println!("  No violations found in test range (gcd ≥ 5 cases may not be present)");
     } else {
-        println!("  {} VIOLATIONS FOUND (axiom vasyunin_large_gcd is FALSE):", violated.len());
+        println!(
+            "  {} VIOLATIONS FOUND (axiom vasyunin_large_gcd is FALSE):",
+            violated.len()
+        );
         println!();
         for r in &violated {
             let g = cathedral_utils::arith::gcd(r.j, r.k);
-            println!("  💀 ({},{}) gcd={}: |G-1/4| = {:.6} > 1/{} = {:.6}",
-                r.j, r.k, g, r.phantom_dist, g, r.phantom_bound);
+            println!(
+                "  💀 ({},{}) gcd={}: |G-1/4| = {:.6} > 1/{} = {:.6}",
+                r.j, r.k, g, r.phantom_dist, g, r.phantom_bound
+            );
         }
     }
     println!();

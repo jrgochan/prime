@@ -214,6 +214,3 @@ pub fn compare_witnesses(gram: &GramMatrix, n: usize) -> Vec<WitnessResult> {
     })
     .collect()
 }
-
-
-

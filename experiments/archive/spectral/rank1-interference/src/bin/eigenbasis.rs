@@ -19,10 +19,10 @@
 //!  Exact Vasyunin formula, rayon parallelism.
 //! ═══════════════════════════════════════════════════════════════════════
 
-use nalgebra::{DMatrix, DVector, SymmetricEigen, SVD};
+use nalgebra::{DMatrix, DVector, SVD, SymmetricEigen};
 use rayon::prelude::*;
-use std::sync::Mutex;
 use std::collections::HashMap;
+use std::sync::Mutex;
 use std::time::Instant;
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -31,29 +31,49 @@ use std::time::Instant;
 
 fn gcd(a: usize, b: usize) -> usize {
     let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
     a
 }
 
 fn big_omega(mut n: usize) -> usize {
-    let mut count = 0; let mut d = 2;
-    while d * d <= n { while n % d == 0 { count += 1; n /= d; } d += 1; }
-    if n > 1 { count += 1; }
+    let mut count = 0;
+    let mut d = 2;
+    while d * d <= n {
+        while n % d == 0 {
+            count += 1;
+            n /= d;
+        }
+        d += 1;
+    }
+    if n > 1 {
+        count += 1;
+    }
     count
 }
 
 fn mobius(mut n: usize) -> i32 {
-    if n <= 1 { return 1; }
-    let mut count = 0; let mut d = 2;
+    if n <= 1 {
+        return 1;
+    }
+    let mut count = 0;
+    let mut d = 2;
     while d * d <= n {
         if n % d == 0 {
             n /= d;
-            if n % d == 0 { return 0; } // squared factor
+            if n % d == 0 {
+                return 0;
+            } // squared factor
             count += 1;
         }
         d += 1;
     }
-    if n > 1 { count += 1; }
+    if n > 1 {
+        count += 1;
+    }
     if count % 2 == 0 { 1 } else { -1 }
 }
 
@@ -65,7 +85,9 @@ const EULER_GAMMA: f64 = 0.5772156649015328606;
 type VCache = Mutex<HashMap<(usize, usize), f64>>;
 
 fn vasyunin_sum(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let pi = std::f64::consts::PI;
     let af = a as f64;
     let mut total = 0.0;
@@ -74,16 +96,25 @@ fn vasyunin_sum(a: usize, b: usize) -> f64 {
         let frac = mb_mod_a as f64 / af;
         let angle = pi * m as f64 / af;
         let (sin_v, cos_v) = angle.sin_cos();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         total += frac * cos_v / sin_v;
     }
     total
 }
 
 fn vasyunin_cached(a: usize, b: usize, cache: &VCache) -> f64 {
-    { let g = cache.lock().unwrap(); if let Some(&v) = g.get(&(a, b)) { return v; } }
+    {
+        let g = cache.lock().unwrap();
+        if let Some(&v) = g.get(&(a, b)) {
+            return v;
+        }
+    }
     let val = vasyunin_sum(a, b);
-    { cache.lock().unwrap().insert((a, b), val); }
+    {
+        cache.lock().unwrap().insert((a, b), val);
+    }
     val
 }
 
@@ -91,10 +122,15 @@ fn gram_entry(j: usize, k: usize, cache: &VCache) -> f64 {
     let pi = std::f64::consts::PI;
     let ln2pi = (2.0 * pi).ln();
     let coeff = (ln2pi - EULER_GAMMA) / 2.0;
-    let jf = j as f64; let kf = k as f64; let jk = jf * kf;
-    if j == k { return (ln2pi - EULER_GAMMA) / jf - 1.0 / (jf * jf); }
+    let jf = j as f64;
+    let kf = k as f64;
+    let jk = jf * kf;
+    if j == k {
+        return (ln2pi - EULER_GAMMA) / jf - 1.0 / (jf * jf);
+    }
     let d = gcd(j, k);
-    let jp = j / d; let kp = k / d;
+    let jp = j / d;
+    let kp = k / d;
     let t1 = coeff * (1.0 / jf + 1.0 / kf);
     let t2 = (jf - kf) / (2.0 * jk) * (kf / jf).ln();
     let v1 = vasyunin_cached(jp, kp, cache);
@@ -116,11 +152,17 @@ fn mean_entry(k: usize) -> f64 {
 fn build_gram(n: usize, cache: &VCache) -> DMatrix<f64> {
     let dim = n - 1;
     let pairs: Vec<(usize, usize)> = (0..dim)
-        .flat_map(|i| (i..dim).map(move |j| (i, j))).collect();
-    let entries: Vec<(usize, usize, f64)> = pairs.par_iter()
-        .map(|&(i, j)| (i, j, gram_entry(i + 2, j + 2, cache))).collect();
+        .flat_map(|i| (i..dim).map(move |j| (i, j)))
+        .collect();
+    let entries: Vec<(usize, usize, f64)> = pairs
+        .par_iter()
+        .map(|&(i, j)| (i, j, gram_entry(i + 2, j + 2, cache)))
+        .collect();
     let mut g = DMatrix::zeros(dim, dim);
-    for (i, j, v) in entries { g[(i, j)] = v; g[(j, i)] = v; }
+    for (i, j, v) in entries {
+        g[(i, j)] = v;
+        g[(j, i)] = v;
+    }
     g
 }
 
@@ -235,9 +277,21 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
     let mut svs: Vec<f64> = svd.singular_values.iter().cloned().collect();
     svs.sort_by(|a, b| b.partial_cmp(a).unwrap());
 
-    let sigma1_sq = if !svs.is_empty() { svs[0] * svs[0] } else { 0.0 };
-    let rank1_acc_eigenbasis = if frob_sq > 0.0 { sigma1_sq / frob_sq } else { 1.0 };
-    let sv_gap_eigenbasis = if svs.len() >= 2 && svs[1] > 1e-15 { svs[0] / svs[1] } else { f64::INFINITY };
+    let sigma1_sq = if !svs.is_empty() {
+        svs[0] * svs[0]
+    } else {
+        0.0
+    };
+    let rank1_acc_eigenbasis = if frob_sq > 0.0 {
+        sigma1_sq / frob_sq
+    } else {
+        1.0
+    };
+    let sv_gap_eigenbasis = if svs.len() >= 2 && svs[1] > 1e-15 {
+        svs[0] / svs[1]
+    } else {
+        f64::INFINITY
+    };
 
     // ─── Also compute raw cross-block SVD for comparison ──────────
     let raw_cross = DMatrix::from_fn(classes[0].len(), classes[1].len(), |i, j| {
@@ -247,9 +301,21 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
     let raw_svd = SVD::new(raw_cross, false, false);
     let mut raw_svs: Vec<f64> = raw_svd.singular_values.iter().cloned().collect();
     raw_svs.sort_by(|a, b| b.partial_cmp(a).unwrap());
-    let raw_sigma1_sq = if !raw_svs.is_empty() { raw_svs[0] * raw_svs[0] } else { 0.0 };
-    let raw_rank1_acc = if raw_frob_sq > 0.0 { raw_sigma1_sq / raw_frob_sq } else { 1.0 };
-    let raw_sv_gap = if raw_svs.len() >= 2 && raw_svs[1] > 1e-15 { raw_svs[0] / raw_svs[1] } else { f64::INFINITY };
+    let raw_sigma1_sq = if !raw_svs.is_empty() {
+        raw_svs[0] * raw_svs[0]
+    } else {
+        0.0
+    };
+    let raw_rank1_acc = if raw_frob_sq > 0.0 {
+        raw_sigma1_sq / raw_frob_sq
+    } else {
+        1.0
+    };
+    let raw_sv_gap = if raw_svs.len() >= 2 && raw_svs[1] > 1e-15 {
+        raw_svs[0] / raw_svs[1]
+    } else {
+        f64::INFINITY
+    };
 
     // ─── Effective eigenvalue λ_eff ───────────────────────────────
     // λ_eff = (Σ u_j² / λ_j)^{-1} where u is the rank-1 direction
@@ -263,8 +329,14 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
                 resolvent_sum += u_col[local_i] * u_col[local_i] / lambda_i;
             }
         }
-        if resolvent_sum.abs() > 1e-30 { 1.0 / resolvent_sum } else { f64::NAN }
-    } else { f64::NAN };
+        if resolvent_sum.abs() > 1e-30 {
+            1.0 / resolvent_sum
+        } else {
+            f64::NAN
+        }
+    } else {
+        f64::NAN
+    };
 
     // ─── Eigenvalue stats ─────────────────────────────────────────
     let eig_g = SymmetricEigen::new(g.clone());
@@ -279,12 +351,18 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
     // ─── Min eigenvector analysis ─────────────────────────────────
     let mut min_idx = 0;
     for (i, &v) in eig_g.eigenvalues.iter().enumerate() {
-        if v < eig_g.eigenvalues[min_idx] { min_idx = i; }
+        if v < eig_g.eigenvalues[min_idx] {
+            min_idx = i;
+        }
     }
     let v_min = eig_g.eigenvectors.column(min_idx);
     let diag_form = v_min.dot(&(&g_block * &v_min));
     let cross_form = v_min.dot(&(&g_cross * &v_min));
-    let r_ratio = if diag_form.abs() > 1e-30 { cross_form.abs() / diag_form } else { f64::NAN };
+    let r_ratio = if diag_form.abs() > 1e-30 {
+        cross_form.abs() / diag_form
+    } else {
+        f64::NAN
+    };
 
     // ─── Möbius log-cutoff witness vector ─────────────────────────
     let log_witness: DVector<f64> = DVector::from_fn(dim, |i, _| {
@@ -314,24 +392,40 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
     let g_inv = g.clone().try_inverse();
     let d_sq = if let Some(gi) = &g_inv {
         1.0 - b_vec.dot(&(gi * &b_vec))
-    } else { f64::NAN };
+    } else {
+        f64::NAN
+    };
 
     let elapsed = t0.elapsed().as_secs_f64();
 
     // ─── Print ────────────────────────────────────────────────────
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
-    println!("║  N = {:5}  │  dim = {:4}  │  {:.1}s                           ║", n, dim, elapsed);
+    println!(
+        "║  N = {:5}  │  dim = {:4}  │  {:.1}s                           ║",
+        n, dim, elapsed
+    );
     println!("╠══════════════════════════════════════════════════════════════════╣");
-    println!("║  Class sizes: even-parity={}, odd-parity={}",
-        evec_by_class[0].len(), evec_by_class[1].len());
+    println!(
+        "║  Class sizes: even-parity={}, odd-parity={}",
+        evec_by_class[0].len(),
+        evec_by_class[1].len()
+    );
     println!("║");
     println!("║  ── RANK-1 ACCURACY COMPARISON ──");
-    println!("║  Raw basis:       {:.6}%  │  σ₁/σ₂ = {:.3}",
-        raw_rank1_acc * 100.0, raw_sv_gap);
-    println!("║  EIGENBASIS:      {:.6}%  │  σ₁/σ₂ = {:.3}   ◄◄◄",
-        rank1_acc_eigenbasis * 100.0, sv_gap_eigenbasis);
-    println!("║  Improvement:     {:+.4}%",
-        (rank1_acc_eigenbasis - raw_rank1_acc) * 100.0);
+    println!(
+        "║  Raw basis:       {:.6}%  │  σ₁/σ₂ = {:.3}",
+        raw_rank1_acc * 100.0,
+        raw_sv_gap
+    );
+    println!(
+        "║  EIGENBASIS:      {:.6}%  │  σ₁/σ₂ = {:.3}   ◄◄◄",
+        rank1_acc_eigenbasis * 100.0,
+        sv_gap_eigenbasis
+    );
+    println!(
+        "║  Improvement:     {:+.4}%",
+        (rank1_acc_eigenbasis - raw_rank1_acc) * 100.0
+    );
     println!("║");
     println!("║  ── EIGENVALUES ──");
     println!("║  λ_min(G)       = {:.10}", lmin_g);
@@ -341,21 +435,39 @@ fn run_eigenbasis_experiment(n: usize, cache: &VCache) {
     println!("║  R = |cross/diag| = {:.8}", r_ratio);
     println!("║");
     println!("║  ── EFFECTIVE EIGENVALUE λ_eff ──");
-    println!("║  λ_eff = {:.6}  │  λ_eff/λ_min(block) = {:.2}",
-        lambda_eff, lambda_eff / lmin_block);
-    println!("║  λ_eff / N = {:.6}  (linear growth?)", lambda_eff / n as f64);
+    println!(
+        "║  λ_eff = {:.6}  │  λ_eff/λ_min(block) = {:.2}",
+        lambda_eff,
+        lambda_eff / lmin_block
+    );
+    println!(
+        "║  λ_eff / N = {:.6}  (linear growth?)",
+        lambda_eff / n as f64
+    );
     println!("║");
     println!("║  ── MÖBIUS LOG-CUTOFF WITNESS ──");
-    println!("║  ‖v‖ = {:.4}  │  Rayleigh(v) = {:.8}", log_witness_norm, witness_vtgv);
+    println!(
+        "║  ‖v‖ = {:.4}  │  Rayleigh(v) = {:.8}",
+        log_witness_norm, witness_vtgv
+    );
     println!("║  |⟨v̂, v_min⟩| = {:.8}", witness_min_proj);
     println!("║  d²_N = {:.10}", d_sq);
     println!("║  log(N)·d²_N = {:.8}", ln_n * d_sq);
     println!("║");
     println!("║  ── TOP 5 SINGULAR VALUES (eigenbasis) ──");
     for (i, sv) in svs.iter().take(5).enumerate() {
-        let pct = if frob_sq > 0.0 { sv * sv / frob_sq * 100.0 } else { 0.0 };
-        println!("║    σ_{} = {:.6e}  ({:.4}% cumulative at {})",
-            i + 1, sv, pct, i + 1);
+        let pct = if frob_sq > 0.0 {
+            sv * sv / frob_sq * 100.0
+        } else {
+            0.0
+        };
+        println!(
+            "║    σ_{} = {:.6e}  ({:.4}% cumulative at {})",
+            i + 1,
+            sv,
+            pct,
+            i + 1
+        );
     }
     println!("╚══════════════════════════════════════════════════════════════════╝");
 }
@@ -367,8 +479,10 @@ fn main() {
     println!("║  EIGENBASIS RANK-1 EXPERIMENT                                  ║");
     println!("║  Parity (mod 2) · Eigenbasis of G^block · λ_eff tracking       ║");
     println!("║  Augmented Gram matrix · Möbius log-cutoff witness              ║");
-    println!("║  {} cores via rayon                                             ║",
-        rayon::current_num_threads());
+    println!(
+        "║  {} cores via rayon                                             ║",
+        rayon::current_num_threads()
+    );
     println!("╚══════════════════════════════════════════════════════════════════╝");
 
     let cache: VCache = Mutex::new(HashMap::new());

@@ -11,7 +11,6 @@
 ///
 /// where d = gcd(j,k), j' = j/d, k' = k/d,
 /// and V(a,b) = Σ_{m=1}^{a-1} frac(m·b/a) · cot(π·m/a)
-
 use std::f64::consts::PI;
 
 /// Euler-Mascheroni constant γ ≈ 0.5772156649...
@@ -68,8 +67,7 @@ pub fn gram_entry(j: usize, k: usize) -> f64 {
         let term2 = (jf - kf) / (2.0 * jf * kf) * (kf / jf).ln();
 
         // Term 3: πd/(2jk) · (V(j',k') + V(k',j'))
-        let term3 =
-            PI * df / (2.0 * jf * kf) * (vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp));
+        let term3 = PI * df / (2.0 * jf * kf) * (vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp));
 
         // Term 4: 1/(jk)
         let term4 = 1.0 / (jf * kf);

@@ -108,38 +108,47 @@ extern "C" {
     fn cublasDdot_v2(
         handle: CublasHandle,
         n: c_int,
-        x: *const f64, incx: c_int,
-        y: *const f64, incy: c_int,
+        x: *const f64,
+        incx: c_int,
+        y: *const f64,
+        incy: c_int,
         result: *mut f64,
     ) -> c_int;
     fn cublasDgemv_v2(
         handle: CublasHandle,
-        trans: c_int,  // 0=NoTrans, 1=Trans
+        trans: c_int, // 0=NoTrans, 1=Trans
         m: c_int,
         n: c_int,
         alpha: *const f64,
-        a: *const f64, lda: c_int,
-        x: *const f64, incx: c_int,
+        a: *const f64,
+        lda: c_int,
+        x: *const f64,
+        incx: c_int,
         beta: *const f64,
-        y: *mut f64, incy: c_int,
+        y: *mut f64,
+        incy: c_int,
     ) -> c_int;
     fn cublasDscal_v2(
         handle: CublasHandle,
         n: c_int,
         alpha: *const f64,
-        x: *mut f64, incx: c_int,
+        x: *mut f64,
+        incx: c_int,
     ) -> c_int;
     fn cublasDaxpy_v2(
         handle: CublasHandle,
         n: c_int,
         alpha: *const f64,
-        x: *const f64, incx: c_int,
-        y: *mut f64, incy: c_int,
+        x: *const f64,
+        incx: c_int,
+        y: *mut f64,
+        incy: c_int,
     ) -> c_int;
     fn cublasDnrm2_v2(
         handle: CublasHandle,
         n: c_int,
-        x: *const f64, incx: c_int,
+        x: *const f64,
+        incx: c_int,
         result: *mut f64,
     ) -> c_int;
 }
@@ -229,7 +238,12 @@ pub fn gpu_syevd(gram_data: &[f64], n: usize) -> Result<GpuEigenResult, String> 
         }
 
         // Copy matrix to device
-        cudaMemcpy(d_a, col_major.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            col_major.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
 
         // Query workspace size
         let mut lwork: c_int = 0;
@@ -275,8 +289,18 @@ pub fn gpu_syevd(gram_data: &[f64], n: usize) -> Result<GpuEigenResult, String> 
         // Copy results back
         let mut eigenvalues = vec![0.0f64; n];
         let mut eigenvectors = vec![0.0f64; n * n];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, n * 8, CUDA_MEMCPY_DEVICE_TO_HOST);
-        cudaMemcpy(eigenvectors.as_mut_ptr(), d_a, matrix_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            n * 8,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
+        cudaMemcpy(
+            eigenvectors.as_mut_ptr(),
+            d_a,
+            matrix_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -314,7 +338,9 @@ pub struct GpuSpectralResult {
 ///
 /// This avoids the 12.8 GB device→host transfer of the eigenvector matrix.
 pub fn gpu_spectral_projections(
-    gram_data: &[f64], n: usize, b: &[f64],
+    gram_data: &[f64],
+    n: usize,
+    b: &[f64],
 ) -> Result<GpuSpectralResult, String> {
     let n_i32 = n as c_int;
     let matrix_bytes = n * n * 8;
@@ -331,7 +357,9 @@ pub fn gpu_spectral_projections(
         let mut solver_handle: CusolverDnHandle = ptr::null_mut();
         let mut blas_handle: CublasHandle = ptr::null_mut();
         let s = cusolverDnCreate(&mut solver_handle);
-        if s != 0 { return Err(format!("cusolverDnCreate failed: {}", s)); }
+        if s != 0 {
+            return Err(format!("cusolverDnCreate failed: {}", s));
+        }
         let s = cublasCreate_v2(&mut blas_handle);
         if s != 0 {
             cusolverDnDestroy(solver_handle);
@@ -339,10 +367,10 @@ pub fn gpu_spectral_projections(
         }
 
         // Allocate GPU memory
-        let mut d_a: *mut f64 = ptr::null_mut();  // matrix → eigenvectors after dsyevd
-        let mut d_w: *mut f64 = ptr::null_mut();  // eigenvalues
-        let mut d_b: *mut f64 = ptr::null_mut();  // b vector
-        let mut d_c: *mut f64 = ptr::null_mut();  // c = V^T b (projections)
+        let mut d_a: *mut f64 = ptr::null_mut(); // matrix → eigenvectors after dsyevd
+        let mut d_w: *mut f64 = ptr::null_mut(); // eigenvalues
+        let mut d_b: *mut f64 = ptr::null_mut(); // b vector
+        let mut d_c: *mut f64 = ptr::null_mut(); // c = V^T b (projections)
         let mut d_info: *mut c_int = ptr::null_mut();
 
         let s1 = cudaMalloc(&mut d_a, matrix_bytes);
@@ -351,36 +379,69 @@ pub fn gpu_spectral_projections(
         let s4 = cudaMalloc(&mut d_c, vec_bytes);
         let s5 = cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
         if s1 != 0 || s2 != 0 || s3 != 0 || s4 != 0 || s5 != 0 {
-            return Err(format!("cudaMalloc failed: {},{},{},{},{}", s1, s2, s3, s4, s5));
+            return Err(format!(
+                "cudaMalloc failed: {},{},{},{},{}",
+                s1, s2, s3, s4, s5
+            ));
         }
 
         // Upload matrix and b vector
-        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
         cudaMemcpy(d_b, b.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         let t_upload = start.elapsed().as_secs_f64();
-        eprintln!("  GPU upload: {:.1}s ({:.0} MB)", t_upload, matrix_bytes as f64 / 1e6);
+        eprintln!(
+            "  GPU upload: {:.1}s ({:.0} MB)",
+            t_upload,
+            matrix_bytes as f64 / 1e6
+        );
 
         // Query workspace size
         let mut lwork: c_int = 0;
         cusolverDnDsyevd_bufferSize(
-            solver_handle, CusolverEigMode::Vec, CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            solver_handle,
+            CusolverEigMode::Vec,
+            CublasFillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
-        eprintln!("  cuSOLVER workspace: {} MB", (lwork as usize * 8) / (1024 * 1024));
+        eprintln!(
+            "  cuSOLVER workspace: {} MB",
+            (lwork as usize * 8) / (1024 * 1024)
+        );
 
         let mut d_work: *mut f64 = ptr::null_mut();
         let s = cudaMalloc(&mut d_work, lwork as usize * 8);
         if s != 0 {
-            return Err(format!("cudaMalloc workspace failed: {} ({} MB)", s, (lwork as usize * 8) / (1024*1024)));
+            return Err(format!(
+                "cudaMalloc workspace failed: {} ({} MB)",
+                s,
+                (lwork as usize * 8) / (1024 * 1024)
+            ));
         }
 
         // ═══ EIGENDECOMPOSITION ═══
         // After this, d_a contains eigenvectors (column-major) and d_w contains eigenvalues
         let t_eigen_start = std::time::Instant::now();
         let status = cusolverDnDsyevd(
-            solver_handle, CusolverEigMode::Vec, CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            solver_handle,
+            CusolverEigMode::Vec,
+            CublasFillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         cudaDeviceSynchronize();
         let t_eigen = t_eigen_start.elapsed().as_secs_f64();
@@ -390,9 +451,13 @@ pub fn gpu_spectral_projections(
         cudaFree(d_work);
 
         if status != 0 {
-            cudaFree(d_a); cudaFree(d_w); cudaFree(d_b); cudaFree(d_c);
+            cudaFree(d_a);
+            cudaFree(d_w);
+            cudaFree(d_b);
+            cudaFree(d_c);
             cudaFree(d_info as *mut f64);
-            cusolverDnDestroy(solver_handle); cublasDestroy_v2(blas_handle);
+            cusolverDnDestroy(solver_handle);
+            cublasDestroy_v2(blas_handle);
             return Err(format!("cusolverDnDsyevd failed: {}", status));
         }
 
@@ -406,12 +471,16 @@ pub fn gpu_spectral_projections(
         let s = cublasDgemv_v2(
             blas_handle,
             1, // CUBLAS_OP_T = transpose
-            n_i32, n_i32,
+            n_i32,
+            n_i32,
             &alpha,
-            d_a, n_i32,  // V (column-major eigenvectors)
-            d_b, 1,       // b vector
+            d_a,
+            n_i32, // V (column-major eigenvectors)
+            d_b,
+            1, // b vector
             &beta_val,
-            d_c, 1,       // c = V^T b output
+            d_c,
+            1, // c = V^T b output
         );
         cudaDeviceSynchronize();
         let t_proj = t_proj_start.elapsed().as_secs_f64();
@@ -424,13 +493,26 @@ pub fn gpu_spectral_projections(
         // Download eigenvalues and projections (tiny: 2 × N × 8 bytes)
         let mut eigenvalues = vec![0.0f64; n];
         let mut projections = vec![0.0f64; n];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
-        cudaMemcpy(projections.as_mut_ptr(), d_c, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
+        cudaMemcpy(
+            projections.as_mut_ptr(),
+            d_c,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 
         // Cleanup all GPU memory
-        cudaFree(d_a); cudaFree(d_w); cudaFree(d_b); cudaFree(d_c);
+        cudaFree(d_a);
+        cudaFree(d_w);
+        cudaFree(d_b);
+        cudaFree(d_c);
         cudaFree(d_info as *mut f64);
         cusolverDnDestroy(solver_handle);
         cublasDestroy_v2(blas_handle);
@@ -454,9 +536,7 @@ pub fn gpu_spectral_projections(
 ///
 /// After this, you can get d² from Cholesky and use the eigenvalue distribution
 /// for the spectral analysis.
-pub fn gpu_eigenvalues_only(
-    gram_data: &[f64], n: usize,
-) -> Result<(Vec<f64>, f64), String> {
+pub fn gpu_eigenvalues_only(gram_data: &[f64], n: usize) -> Result<(Vec<f64>, f64), String> {
     let n_i32 = n as c_int;
     let matrix_bytes = n * n * 8;
     let vec_bytes = n * 8;
@@ -466,7 +546,9 @@ pub fn gpu_eigenvalues_only(
 
         let mut handle: CusolverDnHandle = ptr::null_mut();
         let s = cusolverDnCreate(&mut handle);
-        if s != 0 { return Err(format!("cusolverDnCreate failed: {}", s)); }
+        if s != 0 {
+            return Err(format!("cusolverDnCreate failed: {}", s));
+        }
 
         let mut d_a: *mut f64 = ptr::null_mut();
         let mut d_w: *mut f64 = ptr::null_mut();
@@ -479,16 +561,31 @@ pub fn gpu_eigenvalues_only(
             return Err(format!("cudaMalloc failed: {},{},{}", s1, s2, s3));
         }
 
-        cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
 
         let t_upload = start.elapsed().as_secs_f64();
-        eprintln!("  GPU upload: {:.1}s ({:.0} MB)", t_upload, matrix_bytes as f64 / 1e6);
+        eprintln!(
+            "  GPU upload: {:.1}s ({:.0} MB)",
+            t_upload,
+            matrix_bytes as f64 / 1e6
+        );
 
         // NoVec mode — much smaller workspace
         let mut lwork: c_int = 0;
         cusolverDnDsyevd_bufferSize(
-            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            handle,
+            CusolverEigMode::NoVec,
+            CublasFillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
         let ws_mb = (lwork as usize * 8) / (1024 * 1024);
         eprintln!("  cuSOLVER workspace (NoVec): {} MB", ws_mb);
@@ -496,15 +593,25 @@ pub fn gpu_eigenvalues_only(
         let mut d_work: *mut f64 = ptr::null_mut();
         let s = cudaMalloc(&mut d_work, lwork as usize * 8);
         if s != 0 {
-            cudaFree(d_a); cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cudaFree(d_a);
+            cudaFree(d_w);
+            cudaFree(d_info as *mut f64);
             cusolverDnDestroy(handle);
             return Err(format!("workspace alloc failed: {} ({} MB)", s, ws_mb));
         }
 
         let t_eigen_start = std::time::Instant::now();
         let status = cusolverDnDsyevd(
-            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            handle,
+            CusolverEigMode::NoVec,
+            CublasFillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         cudaDeviceSynchronize();
         let t_eigen = t_eigen_start.elapsed().as_secs_f64();
@@ -514,16 +621,23 @@ pub fn gpu_eigenvalues_only(
         cudaFree(d_a);
 
         if status != 0 {
-            cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cudaFree(d_w);
+            cudaFree(d_info as *mut f64);
             cusolverDnDestroy(handle);
             return Err(format!("cusolverDnDsyevd NoVec failed: {}", status));
         }
 
         let mut eigenvalues = vec![0.0f64; n];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
-        cudaFree(d_w); cudaFree(d_info as *mut f64);
+        cudaFree(d_w);
+        cudaFree(d_info as *mut f64);
         cusolverDnDestroy(handle);
 
         eprintln!("  GPU eigenvalues total: {:.1}s", gpu_time);
@@ -571,10 +685,10 @@ pub struct GpuLanczosResult {
 /// (instant for m ≤ 1000), and the top-k Ritz values of (σI-G) give the
 /// bottom-k eigenvalues of G.
 pub fn gpu_lanczos_bottom_k(
-    d_gram: *const f64,  // GPU pointer — matrix already uploaded
+    d_gram: *const f64, // GPU pointer — matrix already uploaded
     dim: usize,
-    k: usize,           // number of bottom eigenvalues
-    m: usize,            // Lanczos subspace dimension (typically 15*k)
+    k: usize, // number of bottom eigenvalues
+    m: usize, // Lanczos subspace dimension (typically 15*k)
     blas_handle: CublasHandle,
 ) -> Result<GpuLanczosResult, String> {
     use cathedral_utils::lanczos;
@@ -617,18 +731,28 @@ pub fn gpu_lanczos_bottom_k(
         let seed = 0x12345678u64;
         for i in 0..dim {
             // Simple deterministic initialization
-            let x = ((seed.wrapping_mul(i as u64 + 1).wrapping_add(0x9E3779B97F4A7C15)) as f64)
-                / (u64::MAX as f64) - 0.5;
+            let x = ((seed
+                .wrapping_mul(i as u64 + 1)
+                .wrapping_add(0x9E3779B97F4A7C15)) as f64)
+                / (u64::MAX as f64)
+                - 0.5;
             v0[i] = x;
         }
         let norm: f64 = v0.iter().map(|x| x * x).sum::<f64>().sqrt();
-        for x in &mut v0 { *x /= norm; }
+        for x in &mut v0 {
+            *x /= norm;
+        }
 
         cudaMemcpy(d_v_curr, v0.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         // Zero v_prev
         let zeros = vec![0.0f64; dim];
-        cudaMemcpy(d_v_prev, zeros.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_v_prev,
+            zeros.as_ptr(),
+            vec_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
 
         // Lanczos tridiagonal coefficients
         let mut alphas = Vec::with_capacity(m_actual);
@@ -644,7 +768,12 @@ pub fn gpu_lanczos_bottom_k(
         for j in 0..m_actual {
             // Download current basis vector to host
             let mut v_host = vec![0.0f64; dim];
-            cudaMemcpy(v_host.as_mut_ptr(), d_v_curr, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+            cudaMemcpy(
+                v_host.as_mut_ptr(),
+                d_v_curr,
+                vec_bytes,
+                CUDA_MEMCPY_DEVICE_TO_HOST,
+            );
             basis.push(v_host);
 
             // w = G · v_curr  via cuBLAS dgemv
@@ -653,12 +782,16 @@ pub fn gpu_lanczos_bottom_k(
             cublasDgemv_v2(
                 blas_handle,
                 0, // CUBLAS_OP_N
-                n_i32, n_i32,
+                n_i32,
+                n_i32,
                 &alpha_one,
-                d_gram, n_i32,
-                d_v_curr, 1,
+                d_gram,
+                n_i32,
+                d_v_curr,
+                1,
                 &beta_zero,
-                d_w, 1,
+                d_w,
+                1,
             );
             cudaDeviceSynchronize();
 
@@ -689,7 +822,12 @@ pub fn gpu_lanczos_bottom_k(
             // Full reorthogonalization against all previous basis vectors
             for prev in 0..basis.len() {
                 // Upload basis[prev] to d_v_prev temporarily
-                cudaMemcpy(d_v_prev, basis[prev].as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+                cudaMemcpy(
+                    d_v_prev,
+                    basis[prev].as_ptr(),
+                    vec_bytes,
+                    CUDA_MEMCPY_HOST_TO_DEVICE,
+                );
                 let mut overlap = 0.0f64;
                 cublasDdot_v2(blas_handle, n_i32, d_w, 1, d_v_prev, 1, &mut overlap);
                 let neg_overlap = -overlap;
@@ -712,8 +850,8 @@ pub fn gpu_lanczos_bottom_k(
             // v_curr = w / β_j
             let inv_beta = 1.0 / beta_j;
             cudaMemcpy(d_v_curr, d_w as *const f64, vec_bytes, 2); // device-to-device? No, use scale
-            // Actually: copy w to v_curr, then scale
-            // cudaMemcpyDeviceToDevice = 3
+                                                                   // Actually: copy w to v_curr, then scale
+                                                                   // cudaMemcpyDeviceToDevice = 3
             let d2d: c_int = 3;
             cudaMemcpy(d_v_curr, d_w as *const f64, vec_bytes, d2d);
             cublasDscal_v2(blas_handle, n_i32, &inv_beta, d_v_curr, 1);
@@ -738,7 +876,8 @@ pub fn gpu_lanczos_bottom_k(
         // Top-k of (σI-G) = bottom-k of G
         let n_ritz = ritz_values.len();
         let top_start = n_ritz.saturating_sub(k);
-        let mut eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+        let mut eigenvalues: Vec<f64> = ritz_values[top_start..]
+            .iter()
             .map(|&lam| sigma - lam)
             .collect();
         eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -765,9 +904,7 @@ pub fn gpu_lanczos_bottom_k(
 /// This is ~100x faster than nalgebra for N > 2000.
 ///
 /// Uses dpotrf (Cholesky factorization) + dpotrs (triangular solve).
-pub fn gpu_cholesky_d2(
-    gram_data: &[f64], b: &[f64], dim: usize,
-) -> Result<f64, String> {
+pub fn gpu_cholesky_d2(gram_data: &[f64], b: &[f64], dim: usize) -> Result<f64, String> {
     let n = dim as c_int;
     let matrix_bytes = dim * dim * 8;
     let vec_bytes = dim * 8;
@@ -797,7 +934,12 @@ pub fn gpu_cholesky_d2(
         cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
         // Copy data to device
-        cudaMemcpy(d_a, col_major.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            col_major.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
         cudaMemcpy(d_b, b.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         // Query workspace size for Cholesky
@@ -808,7 +950,16 @@ pub fn gpu_cholesky_d2(
         cudaMalloc(&mut d_work, lwork as usize * 8);
 
         // Cholesky factorization: A = L L^T
-        let s = cusolverDnDpotrf(handle, CublasFillMode::Lower, n, d_a, n, d_work, lwork, d_info);
+        let s = cusolverDnDpotrf(
+            handle,
+            CublasFillMode::Lower,
+            n,
+            d_a,
+            n,
+            d_work,
+            lwork,
+            d_info,
+        );
         cudaDeviceSynchronize();
 
         // Check if Cholesky succeeded
@@ -821,8 +972,11 @@ pub fn gpu_cholesky_d2(
         );
 
         if s != 0 || info_val != 0 {
-            cudaFree(d_a); cudaFree(d_b); cudaFree(d_work);
-            cudaFree(d_info as *mut f64); cusolverDnDestroy(handle);
+            cudaFree(d_a);
+            cudaFree(d_b);
+            cudaFree(d_work);
+            cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
             return Err(format!("dpotrf failed: status={}, info={}", s, info_val));
         }
 
@@ -831,8 +985,11 @@ pub fn gpu_cholesky_d2(
         cudaDeviceSynchronize();
 
         if s != 0 {
-            cudaFree(d_a); cudaFree(d_b); cudaFree(d_work);
-            cudaFree(d_info as *mut f64); cusolverDnDestroy(handle);
+            cudaFree(d_a);
+            cudaFree(d_b);
+            cudaFree(d_work);
+            cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
             return Err(format!("dpotrs failed: status={}", s));
         }
 
@@ -856,8 +1013,11 @@ pub fn gpu_cholesky_d2(
         }
 
         // Cleanup
-        cudaFree(d_a); cudaFree(d_b); cudaFree(d_b_orig);
-        cudaFree(d_work); cudaFree(d_info as *mut f64);
+        cudaFree(d_a);
+        cudaFree(d_b);
+        cudaFree(d_b_orig);
+        cudaFree(d_work);
+        cudaFree(d_info as *mut f64);
         cusolverDnDestroy(handle);
 
         Ok(1.0 - dot_result)
@@ -868,7 +1028,10 @@ pub fn gpu_cholesky_d2(
 /// Extracts the dim×dim upper-left submatrix during row→column-major conversion.
 /// Avoids a separate submatrix allocation.
 pub fn gpu_cholesky_d2_strided(
-    full_data: &[f64], lda: usize, dim: usize, b: &[f64],
+    full_data: &[f64],
+    lda: usize,
+    dim: usize,
+    b: &[f64],
 ) -> Result<f64, String> {
     let n = dim as c_int;
     let matrix_bytes = dim * dim * 8;
@@ -896,7 +1059,12 @@ pub fn gpu_cholesky_d2_strided(
         cudaMalloc(&mut d_b, vec_bytes);
         cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
-        cudaMemcpy(d_a, col_major.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
+        cudaMemcpy(
+            d_a,
+            col_major.as_ptr(),
+            matrix_bytes,
+            CUDA_MEMCPY_HOST_TO_DEVICE,
+        );
         cudaMemcpy(d_b, b.as_ptr(), vec_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         let mut lwork: c_int = 0;
@@ -904,22 +1072,42 @@ pub fn gpu_cholesky_d2_strided(
         let mut d_work: *mut f64 = ptr::null_mut();
         cudaMalloc(&mut d_work, lwork as usize * 8);
 
-        let s = cusolverDnDpotrf(handle, CublasFillMode::Lower, n, d_a, n, d_work, lwork, d_info);
+        let s = cusolverDnDpotrf(
+            handle,
+            CublasFillMode::Lower,
+            n,
+            d_a,
+            n,
+            d_work,
+            lwork,
+            d_info,
+        );
         cudaDeviceSynchronize();
 
         let mut info_val: c_int = 0;
-        cudaMemcpy(&mut info_val as *mut c_int as *mut f64, d_info as *const f64, 4, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            &mut info_val as *mut c_int as *mut f64,
+            d_info as *const f64,
+            4,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
         if s != 0 || info_val != 0 {
-            cudaFree(d_a); cudaFree(d_b); cudaFree(d_work);
-            cudaFree(d_info as *mut f64); cusolverDnDestroy(handle);
+            cudaFree(d_a);
+            cudaFree(d_b);
+            cudaFree(d_work);
+            cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
             return Err(format!("dpotrf failed: status={}, info={}", s, info_val));
         }
 
         let s = cusolverDnDpotrs(handle, CublasFillMode::Lower, n, 1, d_a, n, d_b, n, d_info);
         cudaDeviceSynchronize();
         if s != 0 {
-            cudaFree(d_a); cudaFree(d_b); cudaFree(d_work);
-            cudaFree(d_info as *mut f64); cusolverDnDestroy(handle);
+            cudaFree(d_a);
+            cudaFree(d_b);
+            cudaFree(d_work);
+            cudaFree(d_info as *mut f64);
+            cusolverDnDestroy(handle);
             return Err(format!("dpotrs failed: status={}", s));
         }
 
@@ -938,8 +1126,11 @@ pub fn gpu_cholesky_d2_strided(
             dot_result = b.iter().zip(x.iter()).map(|(bi, xi)| bi * xi).sum();
         }
 
-        cudaFree(d_a); cudaFree(d_b); cudaFree(d_b_orig);
-        cudaFree(d_work); cudaFree(d_info as *mut f64);
+        cudaFree(d_a);
+        cudaFree(d_b);
+        cudaFree(d_b_orig);
+        cudaFree(d_work);
+        cudaFree(d_info as *mut f64);
         cusolverDnDestroy(handle);
 
         Ok(1.0 - dot_result)
@@ -963,7 +1154,7 @@ extern "C" {
 
 pub struct GpuCholeskyResult {
     pub d2: f64,
-    pub fail_col: i32,  // 0 = success, >0 = failed at this column
+    pub fail_col: i32, // 0 = success, >0 = failed at this column
     pub gpu_time_secs: f64,
 }
 
@@ -972,10 +1163,18 @@ pub struct GpuCholeskyResult {
 /// Input: DD Gram matrix (hi + lo), b vector
 /// Output: d² at ~31 digit precision, computed entirely on GPU
 pub fn gpu_dd_cholesky(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<GpuCholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
-        return Err(format!("Gram size mismatch: {} vs {}×{}", gram_hi.len(), dim, dim));
+        return Err(format!(
+            "Gram size mismatch: {} vs {}×{}",
+            gram_hi.len(),
+            dim,
+            dim
+        ));
     }
     if b.len() < dim {
         return Err(format!("b vector too short: {} < {}", b.len(), dim));
@@ -1021,10 +1220,18 @@ extern "C" {
 /// DS-f32 Cholesky on GPU: ~14 digits at f32 speed
 /// Input: f64 DD Gram (converted to f32 DS internally)
 pub fn gpu_ds_cholesky(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<GpuCholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
-        return Err(format!("Gram size mismatch: {} vs {}×{}", gram_hi.len(), dim, dim));
+        return Err(format!(
+            "Gram size mismatch: {} vs {}×{}",
+            gram_hi.len(),
+            dim,
+            dim
+        ));
     }
     if b.len() < dim {
         return Err(format!("b vector too short: {} < {}", b.len(), dim));
@@ -1033,11 +1240,18 @@ pub fn gpu_ds_cholesky(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = gpu_ds_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
-        Ok(GpuCholeskyResult { d2, fail_col: fail_col as i32, gpu_time_secs: gpu_time })
+        Ok(GpuCholeskyResult {
+            d2,
+            fail_col: fail_col as i32,
+            gpu_time_secs: gpu_time,
+        })
     }
 }
 
@@ -1059,10 +1273,18 @@ extern "C" {
 /// QS-f32 Cholesky on GPU: ~28 digits at f32 speed
 /// Input: f64 DD Gram (converted to QS-f32 internally)
 pub fn gpu_qs_cholesky(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<GpuCholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
-        return Err(format!("Gram size mismatch: {} vs {}×{}", gram_hi.len(), dim, dim));
+        return Err(format!(
+            "Gram size mismatch: {} vs {}×{}",
+            gram_hi.len(),
+            dim,
+            dim
+        ));
     }
     if b.len() < dim {
         return Err(format!("b vector too short: {} < {}", b.len(), dim));
@@ -1071,11 +1293,18 @@ pub fn gpu_qs_cholesky(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = gpu_qs_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
-        Ok(GpuCholeskyResult { d2, fail_col: fail_col as i32, gpu_time_secs: gpu_time })
+        Ok(GpuCholeskyResult {
+            d2,
+            fail_col: fail_col as i32,
+            gpu_time_secs: gpu_time,
+        })
     }
 }
 
@@ -1086,9 +1315,14 @@ pub fn gpu_qs_cholesky(
 #[link(name = "gramgpu")]
 extern "C" {
     fn gpu_build_gram_qs(
-        ln_v0: *const f32, ln_v1: *const f32,
-        ln_v2: *const f32, ln_v3: *const f32, ln_size: c_int,
-        gram_hi: *mut f64, gram_lo: *mut f64, dim: c_int,
+        ln_v0: *const f32,
+        ln_v1: *const f32,
+        ln_v2: *const f32,
+        ln_v3: *const f32,
+        ln_size: c_int,
+        gram_hi: *mut f64,
+        gram_lo: *mut f64,
+        dim: c_int,
     ) -> c_int;
 
     fn gpu_gram_max_n() -> c_int;
@@ -1105,10 +1339,7 @@ pub struct GpuGramResult {
 /// Input: ln(n) table as (hi, lo) f64 pairs from MPFR.
 /// The f64 pairs are split into 4 f32 components for QS.
 /// Output: DD Gram at ~28 digit precision.
-pub fn gpu_build_gram(
-    ln_table: &[(f64, f64)],
-    dim: usize,
-) -> Result<GpuGramResult, String> {
+pub fn gpu_build_gram(ln_table: &[(f64, f64)], dim: usize) -> Result<GpuGramResult, String> {
     let ln_size = ln_table.len();
 
     // Convert f64 DD pairs → QS-f32 (4 floats per value)
@@ -1135,9 +1366,14 @@ pub fn gpu_build_gram(
 
     let ret = unsafe {
         gpu_build_gram_qs(
-            v0.as_ptr(), v1.as_ptr(), v2.as_ptr(), v3.as_ptr(),
+            v0.as_ptr(),
+            v1.as_ptr(),
+            v2.as_ptr(),
+            v3.as_ptr(),
             (ln_size - 1) as c_int,
-            gram_hi.as_mut_ptr(), gram_lo.as_mut_ptr(), dim as c_int,
+            gram_hi.as_mut_ptr(),
+            gram_lo.as_mut_ptr(),
+            dim as c_int,
         )
     };
 
@@ -1146,7 +1382,12 @@ pub fn gpu_build_gram(
     }
 
     let build_time = start.elapsed().as_secs_f64();
-    Ok(GpuGramResult { gram_hi, gram_lo, dim, build_time_secs: build_time })
+    Ok(GpuGramResult {
+        gram_hi,
+        gram_lo,
+        dim,
+        build_time_secs: build_time,
+    })
 }
 
 /// Max N that fits in GPU VRAM for QS Gram build.
@@ -1160,27 +1401,25 @@ pub fn gpu_gram_max_dim() -> usize {
 
 #[link(name = "gramgpudd")]
 extern "C" {
-    fn gpu_build_gram_dd(
-        gram_hi: *mut f64, gram_lo: *mut f64, dim: c_int, t_max: c_int,
-    ) -> c_int;
+    fn gpu_build_gram_dd(gram_hi: *mut f64, gram_lo: *mut f64, dim: c_int, t_max: c_int) -> c_int;
 
     fn gpu_build_gram_dd_rows(
-        gram_hi: *mut f64, gram_lo: *mut f64,
-        dim: c_int, t_max: c_int,
-        row_start: c_int, n_rows: c_int,
+        gram_hi: *mut f64,
+        gram_lo: *mut f64,
+        dim: c_int,
+        t_max: c_int,
+        row_start: c_int,
+        n_rows: c_int,
     ) -> c_int;
 
     fn gpu_upload_gram(gram_hi: *const f64, dim: c_int) -> c_int;
 
-    fn gpu_cholesky_d2_resident(
-        sub_dim: c_int, b_host: *const f64, fail_col: *mut c_int,
-    ) -> f64;
+    fn gpu_cholesky_d2_resident(sub_dim: c_int, b_host: *const f64, fail_col: *mut c_int) -> f64;
 
     fn gpu_free_gram();
 
     fn gpu_has_resident_gram() -> c_int;
 }
-
 
 /// Build DD-f64 Gram matrix on GPU using the log1p bypass.
 ///
@@ -1192,10 +1431,7 @@ extern "C" {
 /// subsequent gpu_cholesky_resident() calls.
 ///
 /// t_max: maximum T_direct cutoff (typically 100000).
-pub fn gpu_build_gram_dd_f64(
-    dim: usize,
-    t_max: usize,
-) -> Result<GpuGramResult, String> {
+pub fn gpu_build_gram_dd_f64(dim: usize, t_max: usize) -> Result<GpuGramResult, String> {
     let mut gram_hi = vec![0.0f64; dim * dim];
     let mut gram_lo = vec![0.0f64; dim * dim];
 
@@ -1203,8 +1439,10 @@ pub fn gpu_build_gram_dd_f64(
 
     let ret = unsafe {
         gpu_build_gram_dd(
-            gram_hi.as_mut_ptr(), gram_lo.as_mut_ptr(),
-            dim as c_int, t_max as c_int,
+            gram_hi.as_mut_ptr(),
+            gram_lo.as_mut_ptr(),
+            dim as c_int,
+            t_max as c_int,
         )
     };
 
@@ -1213,7 +1451,12 @@ pub fn gpu_build_gram_dd_f64(
     }
 
     let build_time = start.elapsed().as_secs_f64();
-    Ok(GpuGramResult { gram_hi, gram_lo, dim, build_time_secs: build_time })
+    Ok(GpuGramResult {
+        gram_hi,
+        gram_lo,
+        dim,
+        build_time_secs: build_time,
+    })
 }
 
 /// Build a chunk of rows of the Gram matrix on GPU using the log1p bypass.
@@ -1273,13 +1516,9 @@ pub fn gpu_upload_gram_resident(gram_hi: &[f64], dim: usize) -> Result<(), Strin
 /// 3. Runs cuSOLVER dpotrf + dpotrs
 /// 4. Computes b^T x via cuBLAS ddot
 /// 5. Returns d² = 1 - b^T x
-pub fn gpu_cholesky_resident(
-    sub_dim: usize, b: &[f64],
-) -> Result<f64, String> {
+pub fn gpu_cholesky_resident(sub_dim: usize, b: &[f64]) -> Result<f64, String> {
     let mut fail_col: c_int = 0;
-    let d2 = unsafe {
-        gpu_cholesky_d2_resident(sub_dim as c_int, b.as_ptr(), &mut fail_col)
-    };
+    let d2 = unsafe { gpu_cholesky_d2_resident(sub_dim as c_int, b.as_ptr(), &mut fail_col) };
 
     if fail_col != 0 || d2.is_nan() {
         Err(format!("GPU resident Cholesky failed at col {}", fail_col))
@@ -1296,7 +1535,9 @@ pub fn gpu_resident_gram_dim() -> usize {
 
 /// Free the device-resident Gram matrix.
 pub fn gpu_free_resident_gram() {
-    unsafe { gpu_free_gram(); }
+    unsafe {
+        gpu_free_gram();
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1327,8 +1568,10 @@ pub mod ffi {
 
         // ── Async memory copy (requires pinned host memory or pageable with stream) ──
         pub fn cudaMemcpyAsync(
-            dst: *mut f64, src: *const f64,
-            count: usize, kind: c_int,
+            dst: *mut f64,
+            src: *const f64,
+            count: usize,
+            kind: c_int,
             stream: CudaStream,
         ) -> c_int;
 
@@ -1354,12 +1597,16 @@ pub mod ffi {
         pub fn cublasDgemv_v2(
             handle: CublasHandle,
             trans: c_int,
-            m: c_int, n: c_int,
+            m: c_int,
+            n: c_int,
             alpha: *const f64,
-            a: *const f64, lda: c_int,
-            x: *const f64, incx: c_int,
+            a: *const f64,
+            lda: c_int,
+            x: *const f64,
+            incx: c_int,
             beta: *const f64,
-            y: *mut f64, incy: c_int,
+            y: *mut f64,
+            incy: c_int,
         ) -> c_int;
     }
 }

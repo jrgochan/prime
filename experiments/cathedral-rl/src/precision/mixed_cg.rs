@@ -16,9 +16,9 @@
 //! By doing the accumulation in DD, we keep the residual clean while
 //! the matvec stays at hardware speed.
 
-use cathedral_utils::dd::DD;
-use crate::env::CathedralEnv;
 use super::PrecisionCgResult;
+use crate::env::CathedralEnv;
+use cathedral_utils::dd::DD;
 use std::time::Instant;
 
 /// DD dot product for internal accumulation.
@@ -45,11 +45,7 @@ fn dd_norm2(a: &[f64]) -> DD {
 ///
 /// The matvec uses `env.matvec_into()` which routes to GPU when available.
 /// All scalar products, residual updates, and convergence checks use DD.
-pub fn run_mixed_cg(
-    env: &mut CathedralEnv,
-    max_steps: usize,
-    tol: f64,
-) -> PrecisionCgResult {
+pub fn run_mixed_cg(env: &mut CathedralEnv, max_steps: usize, tol: f64) -> PrecisionCgResult {
     let t0 = Instant::now();
     let dim = env.dim;
 
@@ -58,7 +54,8 @@ pub fn run_mixed_cg(
 
     // Jacobi preconditioner
     let diag = env.gram_diagonal();
-    let precond_inv: Vec<f64> = diag.iter()
+    let precond_inv: Vec<f64> = diag
+        .iter()
         .map(|&d| if d.abs() > 1e-30 { 1.0 / d } else { 1.0 })
         .collect();
 
@@ -100,7 +97,9 @@ pub fn run_mixed_cg(
     let mut cached_rel_res = 1.0f64;
 
     for i in 0..max_steps {
-        if converged || stagnated { break; }
+        if converged || stagnated {
+            break;
+        }
 
         // Periodic DD residual reset: r = b - G·v (fresh computation)
         if i > 0 && i % reset_interval == 0 {
@@ -137,7 +136,9 @@ pub fn run_mixed_cg(
         let alpha = alpha_dd.to_f64();
 
         // v ← v + α·p (f64 update)
-        for j in 0..dim { env.v[j] += alpha * p[j]; }
+        for j in 0..dim {
+            env.v[j] += alpha * p[j];
+        }
 
         // r ← r - α·Gp (DD accumulation — the key innovation)
         for j in 0..dim {
@@ -163,20 +164,28 @@ pub fn run_mixed_cg(
         }
 
         // z = M⁻¹r
-        for j in 0..dim { z[j] = precond_inv[j] * r[j]; }
+        for j in 0..dim {
+            z[j] = precond_inv[j] * r[j];
+        }
 
         // β
         let r_new_dot_z_new = dd_dot(&r, &z);
         let beta = (r_new_dot_z_new / r_dot_z).to_f64();
 
         // p = z + β·p
-        for j in 0..dim { p[j] = z[j] + beta * p[j]; }
+        for j in 0..dim {
+            p[j] = z[j] + beta * p[j];
+        }
 
         steps = i + 1;
 
         if i % log_interval == 0 {
             let elapsed = t0.elapsed().as_secs_f64();
-            let rate = if elapsed > 0.0 { steps as f64 / elapsed } else { 0.0 };
+            let rate = if elapsed > 0.0 {
+                steps as f64 / elapsed
+            } else {
+                0.0
+            };
             eprint!("\r    Mixed CG step {i:>5}: ||r||/||r₀||={cached_rel_res:.4e}  [{rate:.0} mv/s]      ");
         }
     }
@@ -186,7 +195,13 @@ pub fn run_mixed_cg(
     let btv = env.compute_btv();
 
     let elapsed = t0.elapsed().as_secs_f64();
-    let status = if converged { "converged" } else if stagnated { "stagnated (DD floor)" } else { "exhausted" };
+    let status = if converged {
+        "converged"
+    } else if stagnated {
+        "stagnated (DD floor)"
+    } else {
+        "exhausted"
+    };
     eprintln!("\r    Mixed CG {status} at step {steps}: ||r||/||r₀||={cached_rel_res:.2e}, d²={d2:.10e}                     ");
     eprintln!("    Mixed CG wall time: {elapsed:.2}s ({steps} matvecs)");
 

@@ -3,8 +3,8 @@
 //! Computes y = G · x where G is memory-mapped from disk.
 //! The matrix is processed in chunks that fit GPU VRAM.
 
-use std::ffi::c_int;
 use super::ffi;
+use std::ffi::c_int;
 
 /// GPU state for chunk-based matrix-vector multiplication.
 /// Keeps the x vector resident on GPU across chunks.
@@ -30,7 +30,9 @@ impl MatvecState {
         unsafe {
             let mut blas_handle: ffi::CublasHandle = std::ptr::null_mut();
             let s = ffi::cublasCreate_v2(&mut blas_handle);
-            if s != 0 { return Err(format!("cublasCreate failed: {}", s)); }
+            if s != 0 {
+                return Err(format!("cublasCreate failed: {}", s));
+            }
 
             let mut d_x: *mut f64 = std::ptr::null_mut();
             let mut d_chunk: *mut f64 = std::ptr::null_mut();
@@ -45,8 +47,12 @@ impl MatvecState {
             }
 
             Ok(MatvecState {
-                blas_handle, d_x, d_chunk, d_y_chunk,
-                chunk_rows, dim,
+                blas_handle,
+                d_x,
+                d_chunk,
+                d_y_chunk,
+                chunk_rows,
+                dim,
             })
         }
     }
@@ -54,7 +60,12 @@ impl MatvecState {
     /// Upload x vector to GPU (call once per CG iteration).
     pub fn upload_x(&self, x: &[f64]) {
         unsafe {
-            ffi::cudaMemcpy(self.d_x, x.as_ptr(), x.len() * 8, ffi::MEMCPY_HOST_TO_DEVICE);
+            ffi::cudaMemcpy(
+                self.d_x,
+                x.as_ptr(),
+                x.len() * 8,
+                ffi::MEMCPY_HOST_TO_DEVICE,
+            );
         }
     }
 
@@ -69,23 +80,37 @@ impl MatvecState {
 
         unsafe {
             // Upload chunk
-            ffi::cudaMemcpy(self.d_chunk, chunk.as_ptr(), rows * self.dim * 8, ffi::MEMCPY_HOST_TO_DEVICE);
+            ffi::cudaMemcpy(
+                self.d_chunk,
+                chunk.as_ptr(),
+                rows * self.dim * 8,
+                ffi::MEMCPY_HOST_TO_DEVICE,
+            );
 
             // cuBLAS dgemv: row-major A → col-major A^T
             // y = A_rowmajor * x  ⟹  cuBLAS: y = (A_colmajor)^T * x
             ffi::cublasDgemv_v2(
                 self.blas_handle,
                 ffi::OP_T,
-                n, m,
+                n,
+                m,
                 &alpha,
-                self.d_chunk, n,
-                self.d_x, 1,
+                self.d_chunk,
+                n,
+                self.d_x,
+                1,
                 &beta_val,
-                self.d_y_chunk, 1,
+                self.d_y_chunk,
+                1,
             );
 
             // Download result
-            ffi::cudaMemcpy(y_out.as_mut_ptr(), self.d_y_chunk, rows * 8, ffi::MEMCPY_DEVICE_TO_HOST);
+            ffi::cudaMemcpy(
+                y_out.as_mut_ptr(),
+                self.d_y_chunk,
+                rows * 8,
+                ffi::MEMCPY_DEVICE_TO_HOST,
+            );
         }
     }
 }

@@ -25,13 +25,13 @@ pub struct TracePoint {
 /// Metrics derived from the Gram form vᵀGv.
 #[derive(Default)]
 pub struct GramMetrics {
-    pub btv: f64,           // bᵀv
-    pub btv_sq: f64,        // (bᵀv)²
-    pub vtcv: f64,          // vᵀCv = vᵀGv - (bᵀv)²
-    pub d2n: f64,           // d²_N = 1 - 2bᵀv + vᵀGv
-    pub ratio: f64,         // (bᵀv)²/vᵀGv
-    pub gap: f64,           // 1 - vᵀGv
-    pub gap_times_ln: f64,  // (1-vᵀGv) * ln(N)
+    pub btv: f64,          // bᵀv
+    pub btv_sq: f64,       // (bᵀv)²
+    pub vtcv: f64,         // vᵀCv = vᵀGv - (bᵀv)²
+    pub d2n: f64,          // d²_N = 1 - 2bᵀv + vᵀGv
+    pub ratio: f64,        // (bᵀv)²/vᵀGv
+    pub gap: f64,          // 1 - vᵀGv
+    pub gap_times_ln: f64, // (1-vᵀGv) * ln(N)
 }
 
 // ═══════════════════════════════════════════════
@@ -102,17 +102,31 @@ impl Decomp {
             robin_sigma[d] = arith::sigma1(d) as f64 / d as f64;
         }
         Self {
-            n, dim: n,  // Lean-aligned: k=1..N basis
+            n,
+            dim: n, // Lean-aligned: k=1..N basis
             precision: precision.to_string(),
-            total: Kahan::default(), diagonal: Kahan::default(), off_diagonal: Kahan::default(),
-            gcd_buckets: vec![Kahan::default(); max_gcd + 1], max_gcd,
+            total: Kahan::default(),
+            diagonal: Kahan::default(),
+            off_diagonal: Kahan::default(),
+            gcd_buckets: vec![Kahan::default(); max_gcd + 1],
+            max_gcd,
             robin_sigma,
             channels: [Kahan::default(); 4],
-            type_i: Kahan::default(), type_ii: Kahan::default(), type_iii: Kahan::default(),
-            ee: Kahan::default(), eo: Kahan::default(), oe: Kahan::default(), oo: Kahan::default(),
-            omega_buckets: vec![vec![Kahan::default(); max_omega + 1]; max_omega + 1], max_omega,
-            dyadic: vec![vec![Kahan::default(); max_band + 1]; max_band + 1], max_band,
-            n_pos: 0, n_neg: 0, sum_pos: Kahan::default(), sum_neg: Kahan::default(),
+            type_i: Kahan::default(),
+            type_ii: Kahan::default(),
+            type_iii: Kahan::default(),
+            ee: Kahan::default(),
+            eo: Kahan::default(),
+            oe: Kahan::default(),
+            oo: Kahan::default(),
+            omega_buckets: vec![vec![Kahan::default(); max_omega + 1]; max_omega + 1],
+            max_omega,
+            dyadic: vec![vec![Kahan::default(); max_band + 1]; max_band + 1],
+            max_band,
+            n_pos: 0,
+            n_neg: 0,
+            sum_pos: Kahan::default(),
+            sum_neg: Kahan::default(),
             gram: GramMetrics::default(),
             taper: TaperMetrics::new(max_gcd),
             trace: Vec::new(),

@@ -1,8 +1,7 @@
 //! Data integrity verification — SHA-256 checksums and roundtrip validation.
 
-use cathedral_utils::hpdf::HpdfReader;
 use crate::common::*;
-
+use cathedral_utils::hpdf::HpdfReader;
 
 /// Verify the data integrity checksum stored in the HPDF file.
 /// Returns (valid, computed_sha256).

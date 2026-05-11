@@ -11,13 +11,15 @@
 //!  where V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use crate::series::{fp, fu, PREC};
 use cathedral_utils::constants;
 use rug::Float;
-use crate::series::{PREC, fp, fu};
 
 /// V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return Float::with_val(PREC, 0); }
+    if a <= 1 {
+        return Float::with_val(PREC, 0);
+    }
     let af = fu(a);
     let bf = fu(b);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
@@ -31,7 +33,9 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(PREC, Float::with_val(PREC, &pi * &mf) / &af);
         let cos_v = Float::with_val(PREC, angle.clone().cos());
         let sin_v = Float::with_val(PREC, angle.sin());
-        if sin_v.is_zero() { continue; }
+        if sin_v.is_zero() {
+            continue;
+        }
         let cot_v = Float::with_val(PREC, &cos_v / &sin_v);
         sum += Float::with_val(PREC, &frac * &cot_v);
     }
@@ -49,23 +53,29 @@ pub fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
 
     // Term 1: (ln(2π) - γ)/2 · (1/a + 1/b)
     let c = Float::with_val(PREC, &l2p - &gamma);
-    let inv_sum = Float::with_val(PREC,
-        Float::with_val(PREC, fp(1) / &af) + Float::with_val(PREC, fp(1) / &bf));
+    let inv_sum = Float::with_val(
+        PREC,
+        Float::with_val(PREC, fp(1) / &af) + Float::with_val(PREC, fp(1) / &bf),
+    );
     let term1 = Float::with_val(PREC, Float::with_val(PREC, &c / fu(2)) * &inv_sum);
 
     // Term 2: (a-b)/(2ab) · ln(b/a)
     let ab = Float::with_val(PREC, &af * &bf);
     let diff = Float::with_val(PREC, &af - &bf);
     let log_ratio = Float::with_val(PREC, Float::with_val(PREC, &bf / &af).ln());
-    let term2 = Float::with_val(PREC,
-        Float::with_val(PREC, &diff * &log_ratio) / Float::with_val(PREC, &ab * fu(2)));
+    let term2 = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &diff * &log_ratio) / Float::with_val(PREC, &ab * fu(2)),
+    );
 
     // Term 3: -π/(2ab) · (V(a,b) + V(b,a))
     let v1 = vasyunin_cot_sum(a, b);
     let v2 = vasyunin_cot_sum(b, a);
     let v_sum = Float::with_val(PREC, &v1 + &v2);
-    let term3 = Float::with_val(PREC,
-        Float::with_val(PREC, &pi * &v_sum) / Float::with_val(PREC, &ab * fu(2)));
+    let term3 = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &pi * &v_sum) / Float::with_val(PREC, &ab * fu(2)),
+    );
 
     // Term 4: -1/(ab)
     let term4 = Float::with_val(PREC, fp(1) / &ab);

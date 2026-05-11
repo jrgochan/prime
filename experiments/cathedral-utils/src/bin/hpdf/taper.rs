@@ -111,12 +111,7 @@ pub fn analyze(ctx: &HpdfContext) -> TaperResult {
                 q += mm * ln_j * ln_k * g;
                 v += w_j * w_k * g;
             }
-            RowResult {
-                u,
-                l,
-                q,
-                vtgv: v,
-            }
+            RowResult { u, l, q, vtgv: v }
         })
         .collect();
 
@@ -139,10 +134,7 @@ pub fn analyze(ctx: &HpdfContext) -> TaperResult {
     println!("  L(N)       = {MAGENTA}{linear:.10}{RESET}");
     println!("  L+lnN/2    = {YELLOW}{:.10}{RESET}", linear + log_n / 2.0);
     println!("  Q(N)       = {MAGENTA}{quad:.10}{RESET}");
-    println!(
-        "  |Q|/lnN    = {YELLOW}{:.10}{RESET}",
-        quad.abs() / log_n
-    );
+    println!("  |Q|/lnN    = {YELLOW}{:.10}{RESET}", quad.abs() / log_n);
     println!("  Recon      = {MAGENTA}{reconstructed:.10}{RESET}");
     println!("  vᵀGv       = {MAGENTA}{vtgv:.10}{RESET}");
 
@@ -436,9 +428,7 @@ pub fn analyze(ctx: &HpdfContext) -> TaperResult {
     let one_minus_recon_ln_n = (1.0 - recon) * log_n;
 
     println!("\n  {BOLD}{CYAN}╔══════════════════════════════════════════════════════╗{RESET}");
-    println!(
-        "  {BOLD}{CYAN}║{RESET} {BOLD}CERTIFICATE N={max_n}{RESET}  ({total_secs:.1}s total)"
-    );
+    println!("  {BOLD}{CYAN}║{RESET} {BOLD}CERTIFICATE N={max_n}{RESET}  ({total_secs:.1}s total)");
     println!("  {BOLD}{CYAN}╠══════════════════════════════════════════════════════╣{RESET}");
     println!(
         "  {BOLD}{CYAN}║{RESET} U(N)={:.8}  L(N)={:.8}  Q(N)={:.8}",
@@ -448,9 +438,7 @@ pub fn analyze(ctx: &HpdfContext) -> TaperResult {
         "  {BOLD}{CYAN}║{RESET} |Q|/lnN={YELLOW}{:.6}{RESET}  Recon={MAGENTA}{recon:.8}{RESET}  vᵀGv={vtgv:.8}",
         quad.abs() / log_n
     );
-    println!(
-        "  {BOLD}{CYAN}║{RESET} (1-R)·lnN={YELLOW}{one_minus_recon_ln_n:.6}{RESET}"
-    );
+    println!("  {BOLD}{CYAN}║{RESET} (1-R)·lnN={YELLOW}{one_minus_recon_ln_n:.6}{RESET}");
     println!(
         "  {BOLD}{CYAN}║{RESET} GCD bound: {} ({total_checked} pairs)",
         if total_violations == 0 {
@@ -490,10 +478,7 @@ pub fn run(paths: &[&Path], emit_json: bool) {
     let mut all_results = Vec::new();
 
     for path in paths {
-        println!(
-            "\n  {BOLD}{WHITE}Loading: {RESET}{}",
-            path.display()
-        );
+        println!("\n  {BOLD}{WHITE}Loading: {RESET}{}", path.display());
 
         match HpdfContext::load(path) {
             Ok(ctx) => {
@@ -504,10 +489,7 @@ pub fn run(paths: &[&Path], emit_json: bool) {
                     cert.results = serde_json::to_value(&result).unwrap();
                     cert.runtime_secs = result.runtime_secs;
                     let out = cert.write("taper", ctx.max_n);
-                    println!(
-                        "\n  {GREEN}✓{RESET} Certificate: {}",
-                        out.display()
-                    );
+                    println!("\n  {GREEN}✓{RESET} Certificate: {}", out.display());
                 }
 
                 all_results.push(result);

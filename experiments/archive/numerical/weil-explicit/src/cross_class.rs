@@ -1,6 +1,6 @@
 #![allow(unused, dead_code, non_snake_case)]
-use rayon::prelude::*;
 use nalgebra::{DMatrix, SymmetricEigen};
+use rayon::prelude::*;
 
 // ══════════════════════════════════════════════════════════════════════
 // CROSS-CLASS DEEP DIVE
@@ -19,60 +19,155 @@ use nalgebra::{DMatrix, SymmetricEigen};
 // 5. Examines Liouville eigenvector in G^{cross}
 // ══════════════════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 #[derive(Clone)]
-struct Oct { c: [f64; 8] }
+struct Oct {
+    c: [f64; 8],
+}
 impl Oct {
-    fn basis(i: usize) -> Self { let mut c=[0.;8]; c[i]=1.; Self{c} }
-    fn real(a: f64) -> Self { Self{c:[a,0.,0.,0.,0.,0.,0.,0.]} }
-    fn norm(&self) -> f64 { self.c.iter().map(|x|x*x).sum::<f64>().sqrt() }
-    fn scale(&self, s: f64) -> Self { let mut c=self.c; for x in c.iter_mut(){*x*=s;} Self{c} }
-    fn mul(&self, o: &Self) -> Self {
-        let (a,b)=(&self.c,&o.c);
-        Self{c:[
-            a[0]*b[0]-a[1]*b[1]-a[2]*b[2]-a[3]*b[3]-a[4]*b[4]-a[5]*b[5]-a[6]*b[6]-a[7]*b[7],
-            a[0]*b[1]+a[1]*b[0]+a[2]*b[3]-a[3]*b[2]+a[4]*b[5]-a[5]*b[4]-a[6]*b[7]+a[7]*b[6],
-            a[0]*b[2]-a[1]*b[3]+a[2]*b[0]+a[3]*b[1]+a[4]*b[6]+a[5]*b[7]-a[6]*b[4]-a[7]*b[5],
-            a[0]*b[3]+a[1]*b[2]-a[2]*b[1]+a[3]*b[0]+a[4]*b[7]-a[5]*b[6]+a[6]*b[5]-a[7]*b[4],
-            a[0]*b[4]-a[1]*b[5]-a[2]*b[6]-a[3]*b[7]+a[4]*b[0]+a[5]*b[1]+a[6]*b[2]+a[7]*b[3],
-            a[0]*b[5]+a[1]*b[4]-a[2]*b[7]+a[3]*b[6]-a[4]*b[1]+a[5]*b[0]-a[6]*b[3]+a[7]*b[2],
-            a[0]*b[6]+a[1]*b[7]+a[2]*b[4]-a[3]*b[5]-a[4]*b[2]+a[5]*b[3]+a[6]*b[0]-a[7]*b[1],
-            a[0]*b[7]-a[1]*b[6]+a[2]*b[5]+a[3]*b[4]-a[4]*b[3]-a[5]*b[2]+a[6]*b[1]+a[7]*b[0],
-        ]}
+    fn basis(i: usize) -> Self {
+        let mut c = [0.; 8];
+        c[i] = 1.;
+        Self { c }
     }
-    fn inner(&self, o: &Self) -> f64 { self.c.iter().zip(o.c.iter()).map(|(a,b)|a*b).sum() }
+    fn real(a: f64) -> Self {
+        Self {
+            c: [a, 0., 0., 0., 0., 0., 0., 0.],
+        }
+    }
+    fn norm(&self) -> f64 {
+        self.c.iter().map(|x| x * x).sum::<f64>().sqrt()
+    }
+    fn scale(&self, s: f64) -> Self {
+        let mut c = self.c;
+        for x in c.iter_mut() {
+            *x *= s;
+        }
+        Self { c }
+    }
+    fn mul(&self, o: &Self) -> Self {
+        let (a, b) = (&self.c, &o.c);
+        Self {
+            c: [
+                a[0] * b[0]
+                    - a[1] * b[1]
+                    - a[2] * b[2]
+                    - a[3] * b[3]
+                    - a[4] * b[4]
+                    - a[5] * b[5]
+                    - a[6] * b[6]
+                    - a[7] * b[7],
+                a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2] + a[4] * b[5]
+                    - a[5] * b[4]
+                    - a[6] * b[7]
+                    + a[7] * b[6],
+                a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1] + a[4] * b[6] + a[5] * b[7]
+                    - a[6] * b[4]
+                    - a[7] * b[5],
+                a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0] + a[4] * b[7] - a[5] * b[6]
+                    + a[6] * b[5]
+                    - a[7] * b[4],
+                a[0] * b[4] - a[1] * b[5] - a[2] * b[6] - a[3] * b[7]
+                    + a[4] * b[0]
+                    + a[5] * b[1]
+                    + a[6] * b[2]
+                    + a[7] * b[3],
+                a[0] * b[5] + a[1] * b[4] - a[2] * b[7] + a[3] * b[6] - a[4] * b[1] + a[5] * b[0]
+                    - a[6] * b[3]
+                    + a[7] * b[2],
+                a[0] * b[6] + a[1] * b[7] + a[2] * b[4] - a[3] * b[5] - a[4] * b[2]
+                    + a[5] * b[3]
+                    + a[6] * b[0]
+                    - a[7] * b[1],
+                a[0] * b[7] - a[1] * b[6] + a[2] * b[5] + a[3] * b[4] - a[4] * b[3] - a[5] * b[2]
+                    + a[6] * b[1]
+                    + a[7] * b[0],
+            ],
+        }
+    }
+    fn inner(&self, o: &Self) -> f64 {
+        self.c.iter().zip(o.c.iter()).map(|(a, b)| a * b).sum()
+    }
     fn dominant_basis(&self) -> usize {
-        self.c.iter().enumerate()
-            .max_by(|(_,a),(_,b)| a.abs().partial_cmp(&b.abs()).unwrap())
-            .unwrap().0
+        self.c
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.abs().partial_cmp(&b.abs()).unwrap())
+            .unwrap()
+            .0
     }
 }
 
 fn prime_to_basis(p: usize) -> usize {
-    match p { 2=>1,3=>2,5=>3,7=>4,11=>5,13=>6,17=>7, _=>(p%7)+1 }
+    match p {
+        2 => 1,
+        3 => 2,
+        5 => 3,
+        7 => 4,
+        11 => 5,
+        13 => 6,
+        17 => 7,
+        _ => (p % 7) + 1,
+    }
 }
 fn int_to_octonion(k: usize) -> Oct {
-    if k<=1 { return Oct::real(1.0); }
-    let mut r=Oct::real(1.0); let mut n=k; let mut p=2;
-    while p*p<=n { while n%p==0 { r=r.mul(&Oct::basis(prime_to_basis(p))); n/=p; } p+=1; }
-    if n>1 { r=r.mul(&Oct::basis(prime_to_basis(n))); }
-    let nm=r.norm(); if nm>1e-10{r.scale(1./nm)}else{Oct::real(1.)}
+    if k <= 1 {
+        return Oct::real(1.0);
+    }
+    let mut r = Oct::real(1.0);
+    let mut n = k;
+    let mut p = 2;
+    while p * p <= n {
+        while n % p == 0 {
+            r = r.mul(&Oct::basis(prime_to_basis(p)));
+            n /= p;
+        }
+        p += 1;
+    }
+    if n > 1 {
+        r = r.mul(&Oct::basis(prime_to_basis(n)));
+    }
+    let nm = r.norm();
+    if nm > 1e-10 {
+        r.scale(1. / nm)
+    } else {
+        Oct::real(1.)
+    }
 }
 
 fn liouville(n: usize) -> i32 {
-    let mut v=n; let mut o=0; let mut p=2;
-    while p*p<=v { while v%p==0{o+=1;v/=p;} p+=1; }
-    if v>1{o+=1;}
-    if o%2==0{1}else{-1}
+    let mut v = n;
+    let mut o = 0;
+    let mut p = 2;
+    while p * p <= v {
+        while v % p == 0 {
+            o += 1;
+            v /= p;
+        }
+        p += 1;
+    }
+    if v > 1 {
+        o += 1;
+    }
+    if o % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 fn gram_entry(j: usize, k: usize, n_pts: usize) -> f64 {
-    let (jf,kf)=(j as f64,k as f64);
-    let dx=1.0/n_pts as f64;
-    let mut s=0.0f64;
-    for i in 0..n_pts { let x=(i as f64+0.5)*dx; s+=frac_part(jf/x)*frac_part(kf/x); }
-    s*dx
+    let (jf, kf) = (j as f64, k as f64);
+    let dx = 1.0 / n_pts as f64;
+    let mut s = 0.0f64;
+    for i in 0..n_pts {
+        let x = (i as f64 + 0.5) * dx;
+        s += frac_part(jf / x) * frac_part(kf / x);
+    }
+    s * dx
 }
 
 fn main() {
@@ -94,10 +189,14 @@ fn main() {
         let classes: Vec<usize> = phis.iter().map(|p| p.dominant_basis()).collect();
 
         // Build full Gram matrix
-        let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-            .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                ((i, j), gram_entry(i + 2, j + 2, n_pts))
-            })).collect();
+        let entries: Vec<((usize, usize), f64)> = (0..dim)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i..dim)
+                    .into_par_iter()
+                    .map(move |j| ((i, j), gram_entry(i + 2, j + 2, n_pts)))
+            })
+            .collect();
 
         let mut g_full = DMatrix::<f64>::zeros(dim, dim);
         for ((i, j), v) in &entries {
@@ -123,10 +222,26 @@ fn main() {
         let eig_block = SymmetricEigen::new(g_block.clone());
         let eig_cross = SymmetricEigen::new(g_cross.clone());
 
-        let lmin_full = eig_full.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lmin_block = eig_block.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lmin_cross = eig_cross.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lmax_cross = eig_cross.eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let lmin_full = eig_full
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
+        let lmin_block = eig_block
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
+        let lmin_cross = eig_cross
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
+        let lmax_cross = eig_cross
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
 
         // Operator norm of G^{cross}
         let op_norm_cross = lmin_cross.abs().max(lmax_cross.abs());
@@ -142,16 +257,33 @@ fn main() {
         // THE CRITICAL RATIO
         let weyl_ratio = op_norm_cross / lmin_block;
         let margin = lmin_block + lmin_cross;
-        println!("  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = {:.6}", weyl_ratio);
-        println!("     Weyl margin: λ_min(G^block) + λ_min(G^cross) = {:.10}", margin);
-        println!("     (Must be > 0 for RH, is {})",
-            if margin > 0.0 { "✅ POSITIVE" } else { "❌ NEGATIVE" });
-        println!("     Ratio < 1 means Weyl bound is useful: {}",
-            if weyl_ratio < 1.0 { "✅ YES" } else { "❌ NO (Weyl too loose)" });
+        println!(
+            "  ⭐ Critical ratio ||G^cross||_op / λ_min(G^block) = {:.6}",
+            weyl_ratio
+        );
+        println!(
+            "     Weyl margin: λ_min(G^block) + λ_min(G^cross) = {:.10}",
+            margin
+        );
+        println!(
+            "     (Must be > 0 for RH, is {})",
+            if margin > 0.0 {
+                "✅ POSITIVE"
+            } else {
+                "❌ NEGATIVE"
+            }
+        );
+        println!(
+            "     Ratio < 1 means Weyl bound is useful: {}",
+            if weyl_ratio < 1.0 {
+                "✅ YES"
+            } else {
+                "❌ NO (Weyl too loose)"
+            }
+        );
 
         // Rank structure of G^{cross}
-        let mut singular_vals: Vec<f64> = eig_cross.eigenvalues.iter()
-            .map(|v| v.abs()).collect();
+        let mut singular_vals: Vec<f64> = eig_cross.eigenvalues.iter().map(|v| v.abs()).collect();
         singular_vals.sort_by(|a, b| b.partial_cmp(a).unwrap());
 
         let total_spec_weight: f64 = singular_vals.iter().sum();
@@ -168,34 +300,77 @@ fn main() {
         println!("    Top 8 eigenvalues (absolute):");
         for i in 0..8.min(dim) {
             let pct = singular_vals[i] / total_spec_weight * 100.0;
-            println!("      σ_{}: {:12.8}  ({:.1}%)", i + 1, singular_vals[i], pct);
+            println!(
+                "      σ_{}: {:12.8}  ({:.1}%)",
+                i + 1,
+                singular_vals[i],
+                pct
+            );
         }
-        println!("    Effective rank (90% of spectral weight): {}/{}", effective_rank, dim);
-        println!("    σ₁/σ₂ = {:.4}", singular_vals[0] / singular_vals[1].max(1e-15));
+        println!(
+            "    Effective rank (90% of spectral weight): {}/{}",
+            effective_rank, dim
+        );
+        println!(
+            "    σ₁/σ₂ = {:.4}",
+            singular_vals[0] / singular_vals[1].max(1e-15)
+        );
 
         // Liouville eigenvector analysis
         // Find the minimum eigenvector of G^cross
-        let min_cross_idx = eig_cross.eigenvalues.iter().enumerate()
-            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).unwrap().0;
-        let cross_min_evec: Vec<f64> = eig_cross.eigenvectors.column(min_cross_idx).iter().cloned().collect();
+        let min_cross_idx = eig_cross
+            .eigenvalues
+            .iter()
+            .enumerate()
+            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .unwrap()
+            .0;
+        let cross_min_evec: Vec<f64> = eig_cross
+            .eigenvectors
+            .column(min_cross_idx)
+            .iter()
+            .cloned()
+            .collect();
 
         // Liouville vector (weighted)
-        let mut lio_vec: Vec<f64> = (0..dim).map(|i| {
-            let k = (i + 2) as f64;
-            liouville(i + 2) as f64 * k.ln() / k
-        }).collect();
-        let lio_norm: f64 = lio_vec.iter().map(|x| x*x).sum::<f64>().sqrt();
-        for v in lio_vec.iter_mut() { *v /= lio_norm; }
+        let mut lio_vec: Vec<f64> = (0..dim)
+            .map(|i| {
+                let k = (i + 2) as f64;
+                liouville(i + 2) as f64 * k.ln() / k
+            })
+            .collect();
+        let lio_norm: f64 = lio_vec.iter().map(|x| x * x).sum::<f64>().sqrt();
+        for v in lio_vec.iter_mut() {
+            *v /= lio_norm;
+        }
 
-        let cross_lio_corr: f64 = cross_min_evec.iter().zip(lio_vec.iter())
-            .map(|(a, b)| a * b).sum::<f64>().abs();
+        let cross_lio_corr: f64 = cross_min_evec
+            .iter()
+            .zip(lio_vec.iter())
+            .map(|(a, b)| a * b)
+            .sum::<f64>()
+            .abs();
 
         // Same for full G
-        let min_full_idx = eig_full.eigenvalues.iter().enumerate()
-            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap()).unwrap().0;
-        let full_min_evec: Vec<f64> = eig_full.eigenvectors.column(min_full_idx).iter().cloned().collect();
-        let full_lio_corr: f64 = full_min_evec.iter().zip(lio_vec.iter())
-            .map(|(a, b)| a * b).sum::<f64>().abs();
+        let min_full_idx = eig_full
+            .eigenvalues
+            .iter()
+            .enumerate()
+            .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
+            .unwrap()
+            .0;
+        let full_min_evec: Vec<f64> = eig_full
+            .eigenvectors
+            .column(min_full_idx)
+            .iter()
+            .cloned()
+            .collect();
+        let full_lio_corr: f64 = full_min_evec
+            .iter()
+            .zip(lio_vec.iter())
+            .map(|(a, b)| a * b)
+            .sum::<f64>()
+            .abs();
 
         println!("\n  Liouville correlation:");
         println!("    G full min-evec:   {:.6}", full_lio_corr);
@@ -205,7 +380,7 @@ fn main() {
         println!("\n  Cross-class pair analysis (||G^cross[Sm,Sm']||_F):");
         let mut pair_norms: Vec<(usize, usize, f64)> = Vec::new();
         for m1 in 0..8 {
-            for m2 in (m1+1)..8 {
+            for m2 in (m1 + 1)..8 {
                 let mut frob_sq = 0.0;
                 let mut count = 0;
                 for i in 0..dim {
@@ -224,27 +399,39 @@ fn main() {
         pair_norms.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap());
         let total_frob: f64 = pair_norms.iter().map(|x| x.2).sum();
         for &(m1, m2, norm) in pair_norms.iter().take(8) {
-            println!("    S_{} × S_{}: ||·||_F = {:10.6}  ({:.1}%)",
-                m1, m2, norm, norm / total_frob * 100.0);
+            println!(
+                "    S_{} × S_{}: ||·||_F = {:10.6}  ({:.1}%)",
+                m1,
+                m2,
+                norm,
+                norm / total_frob * 100.0
+            );
         }
 
         // GCD structure: are cross-class pairs mostly coprime?
         let mut coprime_count = 0;
         let mut total_cross = 0;
         for i in 0..dim {
-            for j in (i+1)..dim {
+            for j in (i + 1)..dim {
                 if classes[i] != classes[j] {
                     total_cross += 1;
                     let a = i + 2;
                     let b = j + 2;
                     let g = gcd(a, b);
-                    if g == 1 { coprime_count += 1; }
+                    if g == 1 {
+                        coprime_count += 1;
+                    }
                 }
             }
         }
         let coprime_frac = coprime_count as f64 / total_cross.max(1) as f64;
         println!("\n  GCD structure of cross-class pairs:");
-        println!("    Coprime: {}/{} ({:.1}%)", coprime_count, total_cross, coprime_frac * 100.0);
+        println!(
+            "    Coprime: {}/{} ({:.1}%)",
+            coprime_count,
+            total_cross,
+            coprime_frac * 100.0
+        );
 
         // Scaling predictions
         println!("\n  Scaling:");
@@ -257,8 +444,10 @@ fn main() {
 
     // Summary table
     println!("═══ SUMMARY TABLE ═══\n");
-    println!("  {:>6} {:>12} {:>12} {:>12} {:>10} {:>8} {:>8}",
-        "N", "λ_min(G)", "λ_min(block)", "λ_min(cross)", "WeylGap", "ratio", "rank90");
+    println!(
+        "  {:>6} {:>12} {:>12} {:>12} {:>10} {:>8} {:>8}",
+        "N", "λ_min(G)", "λ_min(block)", "λ_min(cross)", "WeylGap", "ratio", "rank90"
+    );
     println!("  {}", "─".repeat(80));
 
     for &n in &[50, 100, 200, 500, 800] {
@@ -266,10 +455,14 @@ fn main() {
         let phis: Vec<Oct> = (0..dim).map(|i| int_to_octonion(i + 2)).collect();
         let classes: Vec<usize> = phis.iter().map(|p| p.dominant_basis()).collect();
 
-        let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-            .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                ((i, j), gram_entry(i + 2, j + 2, n_pts))
-            })).collect();
+        let entries: Vec<((usize, usize), f64)> = (0..dim)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i..dim)
+                    .into_par_iter()
+                    .map(move |j| ((i, j), gram_entry(i + 2, j + 2, n_pts)))
+            })
+            .collect();
 
         let mut g_full = DMatrix::<f64>::zeros(dim, dim);
         let mut g_block = DMatrix::<f64>::zeros(dim, dim);
@@ -278,9 +471,11 @@ fn main() {
             g_full[(*i, *j)] = *v;
             g_full[(*j, *i)] = *v;
             if classes[*i] == classes[*j] {
-                g_block[(*i, *j)] = *v; g_block[(*j, *i)] = *v;
+                g_block[(*i, *j)] = *v;
+                g_block[(*j, *i)] = *v;
             } else {
-                g_cross[(*i, *j)] = *v; g_cross[(*j, *i)] = *v;
+                g_cross[(*i, *j)] = *v;
+                g_cross[(*j, *i)] = *v;
             }
         }
 
@@ -288,25 +483,48 @@ fn main() {
         let eig_block = SymmetricEigen::new(g_block);
         let eig_cross = SymmetricEigen::new(g_cross);
 
-        let lmin_full = eig_full.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lmin_block = eig_block.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lmin_cross = eig_cross.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+        let lmin_full = eig_full
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
+        let lmin_block = eig_block
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
+        let lmin_cross = eig_cross
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
         let margin = lmin_block + lmin_cross;
         let op_norm = lmin_cross.abs().max(
-            eig_cross.eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max).abs());
+            eig_cross
+                .eigenvalues
+                .iter()
+                .cloned()
+                .fold(f64::NEG_INFINITY, f64::max)
+                .abs(),
+        );
         let ratio = op_norm / lmin_block;
 
-        let mut sv: Vec<f64> = eig_cross.eigenvalues.iter().map(|v|v.abs()).collect();
-        sv.sort_by(|a,b| b.partial_cmp(a).unwrap());
+        let mut sv: Vec<f64> = eig_cross.eigenvalues.iter().map(|v| v.abs()).collect();
+        sv.sort_by(|a, b| b.partial_cmp(a).unwrap());
         let tot: f64 = sv.iter().sum();
         let mut cumul = 0.0;
         let mut r90 = dim;
         for (i, &s) in sv.iter().enumerate() {
-            cumul += s; if cumul/tot > 0.9 && r90 == dim { r90 = i+1; }
+            cumul += s;
+            if cumul / tot > 0.9 && r90 == dim {
+                r90 = i + 1;
+            }
         }
 
-        println!("  {:6} {:12.8} {:12.8} {:12.8} {:10.8} {:8.4} {:8}",
-            n, lmin_full, lmin_block, lmin_cross, margin, ratio, r90);
+        println!(
+            "  {:6} {:12.8} {:12.8} {:12.8} {:10.8} {:8.4} {:8}",
+            n, lmin_full, lmin_block, lmin_cross, margin, ratio, r90
+        );
     }
 
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
@@ -315,6 +533,10 @@ fn main() {
 }
 
 fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; }
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
     a
 }

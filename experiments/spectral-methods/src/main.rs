@@ -16,8 +16,8 @@
 use cathedral_utils::fmt;
 use cathedral_utils::gram::build_gram_matrix_f64;
 use cathedral_utils::lanczos;
-use cathedral_utils::rsvd;
 use cathedral_utils::linalg;
+use cathedral_utils::rsvd;
 use std::time::Instant;
 
 /// Build the Gram matrix G_N in f64 (dense, row-major).
@@ -50,9 +50,7 @@ fn main() {
 
     fmt::header(
         "SPECTRAL METHODS COMPARISON",
-        &format!(
-            "Lanczos vs RSVD vs Full · bottom-{k} eigenvalues · N_max = {max_n}"
-        ),
+        &format!("Lanczos vs RSVD vs Full · bottom-{k} eigenvalues · N_max = {max_n}"),
         64,
         threads,
     );
@@ -87,8 +85,12 @@ fn main() {
     let mut results: Vec<SizeResult> = Vec::new();
 
     for &n in &sizes {
-        println!("  {BOLD}{WHITE}═══ N = {n} ═══{RESET}",
-            BOLD = fmt::BOLD, WHITE = fmt::WHITE, RESET = fmt::RESET);
+        println!(
+            "  {BOLD}{WHITE}═══ N = {n} ═══{RESET}",
+            BOLD = fmt::BOLD,
+            WHITE = fmt::WHITE,
+            RESET = fmt::RESET
+        );
 
         // Build Gram matrix
         let t0 = Instant::now();
@@ -101,7 +103,10 @@ fn main() {
         let full_eigs = full_eigen(&mat, dim);
         let full_time = t0.elapsed().as_secs_f64();
         let full_bottom: Vec<f64> = full_eigs.iter().take(k).copied().collect();
-        println!("    §A Full:    λ_min = {:.8e}  ({full_time:.2}s)", full_bottom[0]);
+        println!(
+            "    §A Full:    λ_min = {:.8e}  ({full_time:.2}s)",
+            full_bottom[0]
+        );
 
         // ─── §B. Lanczos (with spectral shift for bottom eigenvalues) ───
         let sigma = linalg::estimate_sigma(&mat, dim);
@@ -116,7 +121,9 @@ fn main() {
             m_lanczos,
         );
         // Un-shift: λ_A = σ - λ_shifted (and reverse order since we want ascending)
-        let mut _lanczos_eigenvalues: Vec<f64> = lanczos_shifted.eigenvalues.iter()
+        let mut _lanczos_eigenvalues: Vec<f64> = lanczos_shifted
+            .eigenvalues
+            .iter()
             .map(|&lam| sigma - lam)
             .collect();
         // The shifted Lanczos finds the LARGEST eigenvalues of (σI-A),
@@ -136,7 +143,8 @@ fn main() {
         // Take the TOP k (largest of shifted = smallest of A)
         let n_ritz = ritz_values.len();
         let top_start = n_ritz.saturating_sub(k);
-        let mut lanczos_eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+        let mut lanczos_eigenvalues: Vec<f64> = ritz_values[top_start..]
+            .iter()
             .map(|&lam| sigma - lam)
             .collect();
         lanczos_eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -157,12 +165,20 @@ fn main() {
             let mut av = vec![0.0f64; dim];
             linalg::dense_matvec(mat_ref, dim, &v, &mut av);
             let lam = sigma - ritz_values[idx];
-            let res: f64 = (0..dim).map(|ii| { let r = av[ii] - lam * v[ii]; r * r }).sum::<f64>().sqrt();
+            let res: f64 = (0..dim)
+                .map(|ii| {
+                    let r = av[ii] - lam * v[ii];
+                    r * r
+                })
+                .sum::<f64>()
+                .sqrt();
             lanczos_residuals.push(res);
             lanczos_eigenvectors.push(v);
         }
         // Sort eigenvectors to match eigenvalue ordering
-        let mut pairs: Vec<(f64, Vec<f64>, f64)> = lanczos_eigenvalues.iter().copied()
+        let mut pairs: Vec<(f64, Vec<f64>, f64)> = lanczos_eigenvalues
+            .iter()
+            .copied()
             .zip(lanczos_eigenvectors.into_iter())
             .zip(lanczos_residuals.iter().copied())
             .map(|((e, v), r)| (e, v, r))
@@ -188,7 +204,11 @@ fn main() {
         }
         let lanczos_err_max = lanczos_errs.iter().cloned().fold(0.0f64, f64::max);
         let lanczos_err_mean = lanczos_errs.iter().sum::<f64>() / lanczos_k as f64;
-        let lanczos_res_max = lanczos_result.residual_norms.iter().cloned().fold(0.0f64, f64::max);
+        let lanczos_res_max = lanczos_result
+            .residual_norms
+            .iter()
+            .cloned()
+            .fold(0.0f64, f64::max);
 
         println!(
             "    §B Lanczos: λ_min = {:.8e}  ({lanczos_time:.2}s, m={}, err_max={:.2e}, res={:.2e})",
@@ -212,7 +232,8 @@ fn main() {
         // Un-shift: top-k of (σI-A) are now at the front (sorted descending)
         // These correspond to the smallest eigenvalues of A.
         let rsvd_k_actual = rsvd_shifted.eigenvalues.len().min(k);
-        let mut rsvd_eigenvalues: Vec<f64> = rsvd_shifted.eigenvalues[..rsvd_k_actual].iter()
+        let mut rsvd_eigenvalues: Vec<f64> = rsvd_shifted.eigenvalues[..rsvd_k_actual]
+            .iter()
             .map(|&lam| sigma - lam)
             .collect();
         rsvd_eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -234,9 +255,7 @@ fn main() {
 
         println!(
             "    §C RSVD:    λ_min = {:.8e}  ({rsvd_time:.2}s, {} matvecs, err_max={:.2e})",
-            rsvd_result.eigenvalues[0],
-            rsvd_result.matvecs,
-            rsvd_err_max,
+            rsvd_result.eigenvalues[0], rsvd_result.matvecs, rsvd_err_max,
         );
 
         // Detailed comparison of bottom-k
@@ -245,9 +264,21 @@ fn main() {
             DIM = fmt::DIM, RESET = fmt::RESET);
         for i in 0..k.min(10) {
             let full_val = full_bottom[i];
-            let lanczos_val = if i < lanczos_k { lanczos_result.eigenvalues[i] } else { f64::NAN };
-            let rsvd_val = if i < rsvd_k { rsvd_result.eigenvalues[i] } else { f64::NAN };
-            let l_err = if i < lanczos_k { lanczos_errs[i] } else { f64::NAN };
+            let lanczos_val = if i < lanczos_k {
+                lanczos_result.eigenvalues[i]
+            } else {
+                f64::NAN
+            };
+            let rsvd_val = if i < rsvd_k {
+                rsvd_result.eigenvalues[i]
+            } else {
+                f64::NAN
+            };
+            let l_err = if i < lanczos_k {
+                lanczos_errs[i]
+            } else {
+                f64::NAN
+            };
             let r_err = if i < rsvd_k { rsvd_errs[i] } else { f64::NAN };
             println!(
                 "    {:4} │ {:18.12e} │ {:15.12e} │ {:12.4e} │ {:14.12e} │ {:12.4e}",
@@ -255,8 +286,11 @@ fn main() {
             );
         }
         if k > 10 {
-            println!("    {DIM}  ... ({k} total, showing first 10){RESET}",
-                DIM = fmt::DIM, RESET = fmt::RESET);
+            println!(
+                "    {DIM}  ... ({k} total, showing first 10){RESET}",
+                DIM = fmt::DIM,
+                RESET = fmt::RESET
+            );
         }
 
         // Speedup
@@ -287,8 +321,13 @@ fn main() {
     // ═══════════════════════════════════════════════════════════
     println!("  {BOLD}{CYAN}╔════════════════════════════════════════════════════════════════════════════════════════╗{RESET}",
         BOLD = fmt::BOLD, CYAN = fmt::CYAN, RESET = fmt::RESET);
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}SPECTRAL METHODS COMPARISON — SUMMARY{RESET}",
-        BOLD = fmt::BOLD, CYAN = fmt::CYAN, WHITE = fmt::WHITE, RESET = fmt::RESET);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}SPECTRAL METHODS COMPARISON — SUMMARY{RESET}",
+        BOLD = fmt::BOLD,
+        CYAN = fmt::CYAN,
+        WHITE = fmt::WHITE,
+        RESET = fmt::RESET
+    );
     println!("  {BOLD}{CYAN}╠════════════════════════════════════════════════════════════════════════════════════════╣{RESET}",
         BOLD = fmt::BOLD, CYAN = fmt::CYAN, RESET = fmt::RESET);
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}   N   │  Full(s) │ Lanczos(s) │ RSVD(s) │  L_err_max │  R_err_max │ L_spd │ R_spd{RESET}",
@@ -338,13 +377,20 @@ fn main() {
     let cert_path = out_dir.join("certificate.json");
     if let Ok(f) = std::fs::File::create(&cert_path) {
         serde_json::to_writer_pretty(f, &cert).ok();
-        println!("\n  {GREEN}✓ Wrote {}{RESET}", cert_path.display(),
-            GREEN = fmt::GREEN, RESET = fmt::RESET);
+        println!(
+            "\n  {GREEN}✓ Wrote {}{RESET}",
+            cert_path.display(),
+            GREEN = fmt::GREEN,
+            RESET = fmt::RESET
+        );
     }
 
     println!(
         "\n  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads)\n",
         start.elapsed().as_secs_f64(),
-        BOLD = fmt::BOLD, WHITE = fmt::WHITE, GREEN = fmt::GREEN, RESET = fmt::RESET,
+        BOLD = fmt::BOLD,
+        WHITE = fmt::WHITE,
+        GREEN = fmt::GREEN,
+        RESET = fmt::RESET,
     );
 }

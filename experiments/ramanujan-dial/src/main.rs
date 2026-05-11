@@ -34,19 +34,23 @@ mod display;
 mod output;
 mod sieve;
 
-use std::time::Instant;
 use cathedral_utils::arith;
+use std::time::Instant;
 
 fn main() {
     let t_start = Instant::now();
     let args: Vec<String> = std::env::args().collect();
 
-    let max_limit: u64 = args.iter().position(|a| a == "--max")
+    let max_limit: u64 = args
+        .iter()
+        .position(|a| a == "--max")
         .and_then(|i| args.get(i + 1)?.parse().ok())
         .unwrap_or(1_000_000);
 
     let compute_d2 = args.iter().any(|a| a == "--compute-d2");
-    let d2_max: usize = args.iter().position(|a| a == "--d2-max")
+    let d2_max: usize = args
+        .iter()
+        .position(|a| a == "--d2-max")
         .and_then(|i| args.get(i + 1)?.parse().ok())
         .unwrap_or(500);
 
@@ -60,9 +64,14 @@ fn main() {
     let sieve_mb = max_limit as usize * 4 / (1024 * 1024);
     println!("║  Max N: {:<52}║", display::format_num(max_limit));
     println!("║  Sieve RAM: {:<48}║", format!("~{} MB", sieve_mb));
-    println!("║  Compute d²: {:<47}║",
-        if compute_d2 { format!("yes (up to N={}) — PARALLEL", d2_max) }
-        else { "no (--compute-d2 to enable)".to_string() });
+    println!(
+        "║  Compute d²: {:<47}║",
+        if compute_d2 {
+            format!("yes (up to N={}) — PARALLEL", d2_max)
+        } else {
+            "no (--compute-d2 to enable)".to_string()
+        }
+    );
     println!("║  Threads: {:<50}║", rayon::current_num_threads());
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
@@ -84,29 +93,41 @@ fn main() {
     let hcn_limit = max_limit as usize;
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("PART 3: HIGHLY COMPOSITE NUMBERS up to {} (sieve)",
-        display::format_num(hcn_limit as u64));
+    println!(
+        "PART 3: HIGHLY COMPOSITE NUMBERS up to {} (sieve)",
+        display::format_num(hcn_limit as u64)
+    );
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
     let div_table = sieve::divisor_count_sieve(hcn_limit);
     let hcns = sieve::find_hcn_from_sieve(&div_table);
-    println!("  ✓ Sieve + HCN scan in {:.3}s ({} HCNs found)",
-        t0.elapsed().as_secs_f64(), hcns.len());
+    println!(
+        "  ✓ Sieve + HCN scan in {:.3}s ({} HCNs found)",
+        t0.elapsed().as_secs_f64(),
+        hcns.len()
+    );
     println!();
 
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-        "N", "d(N)", "ω(N)", "factorization", "type");
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-        "──────────", "──────", "──────",
-        "──────────────────────────────", "──────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+        "N", "d(N)", "ω(N)", "factorization", "type"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+        "──────────", "──────", "──────", "──────────────────────────────", "──────────"
+    );
 
     for &n in &hcns {
         let is_col = dial::COLOSSAL.contains(&(n as u64));
-        println!("  {:>10} {:>6} {:>6} {:>30} {:>10}",
-            display::format_num(n as u64), div_table[n],
-            arith::small_omega(n), arith::factorize(n),
-            if is_col { "COLOSSAL" } else { "HCN" });
+        println!(
+            "  {:>10} {:>6} {:>6} {:>30} {:>10}",
+            display::format_num(n as u64),
+            div_table[n],
+            arith::small_omega(n),
+            arith::factorize(n),
+            if is_col { "COLOSSAL" } else { "HCN" }
+        );
     }
     println!();
 
@@ -118,28 +139,45 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!();
 
-    let colossal_under: Vec<u64> = dial::COLOSSAL.iter().copied()
-        .filter(|&n| n <= max_limit).collect();
+    let colossal_under: Vec<u64> = dial::COLOSSAL
+        .iter()
+        .copied()
+        .filter(|&n| n <= max_limit)
+        .collect();
     let prime_sieve = arith::sieve_primes(hcn_limit);
 
     for pair in colossal_under.windows(2) {
         let (lo, hi) = (pair[0], pair[1]);
-        if hi as usize > hcn_limit { continue; }
+        if hi as usize > hcn_limit {
+            continue;
+        }
 
-        let hcns_between: Vec<usize> = hcns.iter().copied()
-            .filter(|&n| (n as u64) > lo && (n as u64) < hi).collect();
+        let hcns_between: Vec<usize> = hcns
+            .iter()
+            .copied()
+            .filter(|&n| (n as u64) > lo && (n as u64) < hi)
+            .collect();
         let primes_in_gap: usize = ((lo as usize + 1)..hi as usize)
-            .filter(|&n| n < prime_sieve.len() && prime_sieve[n]).count();
+            .filter(|&n| n < prime_sieve.len() && prime_sieve[n])
+            .count();
 
-        println!("  Gap [{} → {}]: size {}, {} HCNs, {} primes",
-            display::format_num(lo), display::format_num(hi),
+        println!(
+            "  Gap [{} → {}]: size {}, {} HCNs, {} primes",
+            display::format_num(lo),
+            display::format_num(hi),
             display::format_num(hi - lo),
-            hcns_between.len(), primes_in_gap);
+            hcns_between.len(),
+            primes_in_gap
+        );
 
         for &h in &hcns_between {
-            println!("    HCN {:>8} = {:<20} d={:<4} ({:.1}× anchor)",
-                display::format_num(h as u64), arith::factorize(h),
-                div_table[h], h as f64 / lo as f64);
+            println!(
+                "    HCN {:>8} = {:<20} d={:<4} ({:.1}× anchor)",
+                display::format_num(h as u64),
+                arith::factorize(h),
+                div_table[h],
+                h as f64 / lo as f64
+            );
         }
         println!();
     }

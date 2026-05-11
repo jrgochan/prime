@@ -146,7 +146,9 @@ pub fn gpu_eigenvalues_only(data: &[f64], dim: usize) -> Result<(Vec<f64>, f64),
         // Create cuSOLVER handle
         let mut handle: CusolverDnHandle = ptr::null_mut();
         let s = cusolverDnCreate(&mut handle);
-        if s != 0 { return Err(format!("cusolverDnCreate failed: {}", s)); }
+        if s != 0 {
+            return Err(format!("cusolverDnCreate failed: {}", s));
+        }
 
         // Allocate device memory
         let mut d_a: *mut f64 = ptr::null_mut();
@@ -165,13 +167,23 @@ pub fn gpu_eigenvalues_only(data: &[f64], dim: usize) -> Result<(Vec<f64>, f64),
         cudaMemcpy(d_a, data.as_ptr(), matrix_bytes, CUDA_MEMCPY_HOST_TO_DEVICE);
 
         let t_upload = start.elapsed().as_secs_f64();
-        eprintln!("    GPU upload: {:.1}s ({:.0} MB)", t_upload, matrix_bytes as f64 / 1e6);
+        eprintln!(
+            "    GPU upload: {:.1}s ({:.0} MB)",
+            t_upload,
+            matrix_bytes as f64 / 1e6
+        );
 
         // Query workspace size (NoVec — much smaller than Vec)
         let mut lwork: c_int = 0;
         cusolverDnDsyevd_bufferSize(
-            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
-            n, d_a, n, d_w, &mut lwork,
+            handle,
+            CusolverEigMode::NoVec,
+            CublasFillMode::Lower,
+            n,
+            d_a,
+            n,
+            d_w,
+            &mut lwork,
         );
         let ws_mb = (lwork as usize * 8) / (1024 * 1024);
         eprintln!("    cuSOLVER workspace (NoVec): {} MB", ws_mb);
@@ -179,7 +191,9 @@ pub fn gpu_eigenvalues_only(data: &[f64], dim: usize) -> Result<(Vec<f64>, f64),
         let mut d_work: *mut f64 = ptr::null_mut();
         let s = cudaMalloc(&mut d_work, lwork as usize * 8);
         if s != 0 {
-            cudaFree(d_a); cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cudaFree(d_a);
+            cudaFree(d_w);
+            cudaFree(d_info as *mut f64);
             cusolverDnDestroy(handle);
             return Err(format!("workspace alloc failed: {} ({} MB)", s, ws_mb));
         }
@@ -187,8 +201,16 @@ pub fn gpu_eigenvalues_only(data: &[f64], dim: usize) -> Result<(Vec<f64>, f64),
         // ═══ RUN EIGENDECOMPOSITION ═══
         let t_eigen = Instant::now();
         let status = cusolverDnDsyevd(
-            handle, CusolverEigMode::NoVec, CublasFillMode::Lower,
-            n, d_a, n, d_w, d_work, lwork, d_info,
+            handle,
+            CusolverEigMode::NoVec,
+            CublasFillMode::Lower,
+            n,
+            d_a,
+            n,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         cudaDeviceSynchronize();
         let eigen_secs = t_eigen.elapsed().as_secs_f64();
@@ -199,17 +221,24 @@ pub fn gpu_eigenvalues_only(data: &[f64], dim: usize) -> Result<(Vec<f64>, f64),
         cudaFree(d_a);
 
         if status != 0 {
-            cudaFree(d_w); cudaFree(d_info as *mut f64);
+            cudaFree(d_w);
+            cudaFree(d_info as *mut f64);
             cusolverDnDestroy(handle);
             return Err(format!("cusolverDnDsyevd NoVec failed: {}", status));
         }
 
         // Download eigenvalues
         let mut eigenvalues = vec![0.0f64; dim];
-        cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, CUDA_MEMCPY_DEVICE_TO_HOST);
+        cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            CUDA_MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
-        cudaFree(d_w); cudaFree(d_info as *mut f64);
+        cudaFree(d_w);
+        cudaFree(d_info as *mut f64);
         cusolverDnDestroy(handle);
 
         eprintln!("    GPU total: {:.1}s", gpu_time);

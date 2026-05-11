@@ -2,7 +2,8 @@
 
 /// Write a string attribute to an HDF5 location.
 pub(crate) fn write_str_attr(loc: &hdf5::Location, name: &str, val: &str) -> hdf5::Result<()> {
-    let attr = loc.new_attr::<hdf5::types::VarLenUnicode>()
+    let attr = loc
+        .new_attr::<hdf5::types::VarLenUnicode>()
         .shape(())
         .create(name)?;
     let s: hdf5::types::VarLenUnicode = val.parse().unwrap();
@@ -55,7 +56,9 @@ pub(crate) fn git_commit_short() -> String {
         .ok()
         .and_then(|o| {
             if o.status.success() {
-                String::from_utf8(o.stdout).ok().map(|s| s.trim().to_string())
+                String::from_utf8(o.stdout)
+                    .ok()
+                    .map(|s| s.trim().to_string())
             } else {
                 None
             }
@@ -68,13 +71,17 @@ pub(crate) fn hostname() -> String {
     std::process::Command::new("hostname")
         .output()
         .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok().map(|s| s.trim().to_string()))
+        .and_then(|o| {
+            String::from_utf8(o.stdout)
+                .ok()
+                .map(|s| s.trim().to_string())
+        })
         .unwrap_or_else(|| "unknown".to_string())
 }
 
 /// SHA-256 of a byte slice, returned as hex string.
 pub(crate) fn sha256_hex(data: &[u8]) -> String {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     hasher.update(data);
     format!("{:x}", hasher.finalize())

@@ -24,19 +24,19 @@
 //!  this is equivalent to proving gramIntegral = formula.
 //!
 //!  For the Lean proof, we need the ALGEBRAIC identity:
-//!    ∑_{m₀∈TT} perClassLimit(a,b,m₀) 
-//!      = vasyuninGramFormula(a,b) - (a-1)/(ab) 
+//!    ∑_{m₀∈TT} perClassLimit(a,b,m₀)
+//!      = vasyuninGramFormula(a,b) - (a-1)/(ab)
 //!        - (log(2π)-γ-1)/b - fractTarget(a,b)/a
 //!
 //!  This module certifies it holds at 1024-bit precision for all
 //!  coprime (a,b) with 2 ≤ a < b ≤ 100.
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
-use cathedral_utils::fmt;
-use cathedral_utils::constants;
 use crate::PREC;
 use crate::compute::fu;
+use cathedral_utils::constants;
+use cathedral_utils::fmt;
+use rug::Float;
 
 // ────────────────────────────────────────────────
 // Helper functions
@@ -95,20 +95,26 @@ fn per_class_limit(a: usize, b: usize, m0: usize) -> Float {
     let psi_alpha = digamma_f(&alpha);
 
     let one_over_a = Float::with_val(PREC, Float::with_val(PREC, 1) / &af);
-    let lg_part = Float::with_val(PREC,
-        -Float::with_val(PREC, &lg_beta - &lg_alpha) * &one_over_a);
+    let lg_part = Float::with_val(
+        PREC,
+        -Float::with_val(PREC, &lg_beta - &lg_alpha) * &one_over_a,
+    );
 
     let sf = fu(s);
     let s_minus_a = Float::with_val(PREC, &sf - &af);
     let a2b = Float::with_val(PREC, Float::with_val(PREC, &af * &af) * &bf);
-    let psi_b_part = Float::with_val(PREC,
-        -Float::with_val(PREC, &s_minus_a / &a2b) * &psi_beta);
+    let psi_b_part = Float::with_val(PREC, -Float::with_val(PREC, &s_minus_a / &a2b) * &psi_beta);
 
     let ab = Float::with_val(PREC, &af * &bf);
-    let psi_a_part = Float::with_val(PREC,
-        -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha);
+    let psi_a_part = Float::with_val(
+        PREC,
+        -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &psi_alpha,
+    );
 
-    Float::with_val(PREC, &lg_part + Float::with_val(PREC, &psi_b_part + &psi_a_part))
+    Float::with_val(
+        PREC,
+        &lg_part + Float::with_val(PREC, &psi_b_part + &psi_a_part),
+    )
 }
 
 // ────────────────────────────────────────────────
@@ -120,10 +126,9 @@ fn delta_target_from_formula(a: usize, b: usize) -> Float {
     let strip = crate::compute::strip_value(a, b);
     let stir = Float::with_val(PREC, crate::formula::stirling_const() / fu(b));
     let ft = Float::with_val(PREC, crate::formula::fract_target(a, b) / fu(a));
-    Float::with_val(PREC,
-        Float::with_val(PREC,
-            Float::with_val(PREC, &formula - &strip) - &stir
-        ) - &ft
+    Float::with_val(
+        PREC,
+        Float::with_val(PREC, Float::with_val(PREC, &formula - &strip) - &stir) - &ft,
     )
 }
 
@@ -136,9 +141,10 @@ fn gauss_log_gamma_closed(a: usize) -> Float {
     let af = fu(a);
     let am1 = Float::with_val(PREC, &af - Float::with_val(PREC, 1));
     let half = Float::with_val(PREC, 0.5);
-    Float::with_val(PREC,
-        Float::with_val(PREC, &am1 * &half) * &log_2pi() -
-        Float::with_val(PREC, &half * Float::with_val(PREC, af.ln()))
+    Float::with_val(
+        PREC,
+        Float::with_val(PREC, &am1 * &half) * &log_2pi()
+            - Float::with_val(PREC, &half * Float::with_val(PREC, af.ln())),
     )
 }
 
@@ -159,8 +165,9 @@ fn gauss_digamma_closed(q: usize) -> Float {
     let qm1 = Float::with_val(PREC, &qf - Float::with_val(PREC, 1));
     let gamma = constants::euler_gamma_mpfr(PREC);
     let ln_q = Float::with_val(PREC, qf.clone().ln());
-    Float::with_val(PREC,
-        -Float::with_val(PREC, &qm1 * &gamma) - Float::with_val(PREC, &qf * &ln_q)
+    Float::with_val(
+        PREC,
+        -Float::with_val(PREC, &qm1 * &gamma) - Float::with_val(PREC, &qf * &ln_q),
     )
 }
 
@@ -218,10 +225,12 @@ fn staircase_rhs(a: usize, b: usize, f: &dyn Fn(usize) -> Float) -> Float {
     }
 
     // RHS = (a/b)·full_sum + abel_sum - f(b-1)
-    Float::with_val(PREC,
-        Float::with_val(PREC,
-            Float::with_val(PREC, &af / &bf) * &full_sum + &abel_sum
-        ) - f(b - 1)
+    Float::with_val(
+        PREC,
+        Float::with_val(
+            PREC,
+            Float::with_val(PREC, &af / &bf) * &full_sum + &abel_sum,
+        ) - f(b - 1),
     )
 }
 
@@ -292,7 +301,10 @@ fn certify_beta_duality(a: usize, b: usize) -> (bool, f64) {
         let psi_val = digamma_f(&Float::with_val(PREC, fu(r) / &af));
         rhs_sum += Float::with_val(PREC, &frac_val * &psi_val);
     }
-    let rhs = Float::with_val(PREC, -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &rhs_sum);
+    let rhs = Float::with_val(
+        PREC,
+        -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &rhs_sum,
+    );
 
     let err = Float::with_val(PREC, &lhs - &rhs).abs();
 
@@ -307,7 +319,10 @@ fn certify_beta_duality(a: usize, b: usize) -> (bool, f64) {
             let fl = Float::with_val(PREC, x.clone().floor());
             Float::with_val(PREC, &x - &fl)
         };
-        let coeff_rhs = Float::with_val(PREC, -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &frac_val);
+        let coeff_rhs = Float::with_val(
+            PREC,
+            -Float::with_val(PREC, Float::with_val(PREC, 1) / &ab) * &frac_val,
+        );
         let diff = Float::with_val(PREC, &coeff_lhs - &coeff_rhs).abs();
         diff.to_f64() < 1e-200
     });
@@ -360,14 +375,12 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
     // ═══ STRUCTURAL CHECKS ═══
 
     // Beta Bijection: tileIndex maps twoTileSet → {0,...,a-2}
-    let mut beta_vals: Vec<usize> = tt_classes.iter()
-        .map(|&m0| tile_index(a, b, m0)).collect();
+    let mut beta_vals: Vec<usize> = tt_classes.iter().map(|&m0| tile_index(a, b, m0)).collect();
     beta_vals.sort();
-    let beta_bijection = beta_vals == (0..a-1).collect::<Vec<_>>() && n_tt == a - 1;
+    let beta_bijection = beta_vals == (0..a - 1).collect::<Vec<_>>() && n_tt == a - 1;
 
     // Overshoot permutation: s values form {1,...,a-1}
-    let mut s_vals: Vec<usize> = tt_classes.iter()
-        .map(|&m0| overshoot(a, b, m0)).collect();
+    let mut s_vals: Vec<usize> = tt_classes.iter().map(|&m0| overshoot(a, b, m0)).collect();
     s_vals.sort();
     let s_permutation = s_vals == (1..a).collect::<Vec<_>>();
 
@@ -412,7 +425,9 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
     let dt = delta_target_from_formula(a, b);
     let id_err = Float::with_val(PREC, &sum_pcl - &dt).abs();
 
-    let certified = beta_bijection && s_permutation && overshoot_id
+    let certified = beta_bijection
+        && s_permutation
+        && overshoot_id
         && glg_a_err.to_f64() < 1e-100
         && glg_b_err.to_f64() < 1e-100
         && gd_a_err.to_f64() < 1e-100
@@ -424,8 +439,12 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
         && id_err.to_f64() < 1e-100;
 
     GraduationResult {
-        a, b, n_two_tile: n_tt,
-        beta_bijection, s_permutation, overshoot_identity: overshoot_id,
+        a,
+        b,
+        n_two_tile: n_tt,
+        beta_bijection,
+        s_permutation,
+        overshoot_identity: overshoot_id,
         gauss_loggamma_a_err: glg_a_err.to_f64(),
         gauss_loggamma_b_err: glg_b_err.to_f64(),
         gauss_digamma_a_err: gd_a_err.to_f64(),
@@ -443,7 +462,8 @@ pub fn certify_graduation(a: usize, b: usize) -> GraduationResult {
 
 pub fn certify_all(pairs: &[(usize, usize)]) -> Vec<GraduationResult> {
     use rayon::prelude::*;
-    let mut results: Vec<_> = pairs.par_iter()
+    let mut results: Vec<_> = pairs
+        .par_iter()
         .map(|&(a, b)| certify_graduation(a, b))
         .collect();
     results.sort_by_key(|r| (r.a, r.b));
@@ -454,51 +474,90 @@ pub fn print_certification(results: &[GraduationResult]) {
     fmt::section("AXIOM GRADUATION CERTIFIER — gramIntegral_eq_formula_ge2");
     println!();
     println!("  Certifying: ∑ perClassLimit(a,b,m₀) = deltaTarget");
-    println!("  at 1024-bit MPFR precision for {} coprime pairs", results.len());
+    println!(
+        "  at 1024-bit MPFR precision for {} coprime pairs",
+        results.len()
+    );
     println!();
 
     // §1. Structural invariants
     println!("  {}§1. STRUCTURAL INVARIANTS{}", fmt::BOLD, fmt::RESET);
     println!();
-    println!("  {:>5} {:>5}  {:>5}  {:>10}  {:>10}  {:>10}",
-        "(a", "b)", "#TT", "β-bij?", "s-perm?", "s-a=r-b?");
+    println!(
+        "  {:>5} {:>5}  {:>5}  {:>10}  {:>10}  {:>10}",
+        "(a", "b)", "#TT", "β-bij?", "s-perm?", "s-a=r-b?"
+    );
     println!("  {}", "─".repeat(60));
 
     for r in results {
-        println!("  ({:>2},{:>2})  {:>4}   {}  {}  {}",
-            r.a, r.b, r.n_two_tile,
-            if r.beta_bijection { fmt::check(true) } else { fmt::check(false) },
-            if r.s_permutation { fmt::check(true) } else { fmt::check(false) },
-            if r.overshoot_identity { fmt::check(true) } else { fmt::check(false) },
+        println!(
+            "  ({:>2},{:>2})  {:>4}   {}  {}  {}",
+            r.a,
+            r.b,
+            r.n_two_tile,
+            if r.beta_bijection {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
+            if r.s_permutation {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
+            if r.overshoot_identity {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
         );
     }
 
     // §2. Gauss formula verification
     println!();
-    println!("  {}§2. GAUSS FORMULA VERIFICATION{}", fmt::BOLD, fmt::RESET);
+    println!(
+        "  {}§2. GAUSS FORMULA VERIFICATION{}",
+        fmt::BOLD,
+        fmt::RESET
+    );
     println!();
 
-    let max_glg = results.iter()
+    let max_glg = results
+        .iter()
         .map(|r| r.gauss_loggamma_a_err.max(r.gauss_loggamma_b_err))
         .fold(0.0_f64, f64::max);
-    let max_gd = results.iter()
+    let max_gd = results
+        .iter()
         .map(|r| r.gauss_digamma_a_err.max(r.gauss_digamma_b_err))
         .fold(0.0_f64, f64::max);
 
     println!("  Max |logΓ direct - closed| : {:.4e}", max_glg);
     println!("  Max |ψ direct - closed|    : {:.4e}", max_gd);
     if max_glg < 1e-100 && max_gd < 1e-100 {
-        println!("  {} Gauss multiplication + digamma: EXACT", fmt::check(true));
+        println!(
+            "  {} Gauss multiplication + digamma: EXACT",
+            fmt::check(true)
+        );
     }
 
     // §3. Staircase Telescope (Gemini Key 1)
     println!();
-    println!("  {}§3. STAIRCASE TELESCOPE (Gemini Key 1){}", fmt::BOLD, fmt::RESET);
+    println!(
+        "  {}§3. STAIRCASE TELESCOPE (Gemini Key 1){}",
+        fmt::BOLD,
+        fmt::RESET
+    );
     println!("  Σ_{{TT}} f(m₀) = (a/b)·Σf(m) + Σ{{ar/b}}·(f(r)-f(r-1)) - f(b-1)");
     println!();
 
-    let max_tel_lg = results.iter().map(|r| r.telescope_loggamma_err).fold(0.0_f64, f64::max);
-    let max_tel_psi = results.iter().map(|r| r.telescope_digamma_err).fold(0.0_f64, f64::max);
+    let max_tel_lg = results
+        .iter()
+        .map(|r| r.telescope_loggamma_err)
+        .fold(0.0_f64, f64::max);
+    let max_tel_psi = results
+        .iter()
+        .map(|r| r.telescope_digamma_err)
+        .fold(0.0_f64, f64::max);
 
     println!("  Max |telescope logΓ error| : {:.4e}", max_tel_lg);
     println!("  Max |telescope ψ error|    : {:.4e}", max_tel_psi);
@@ -510,14 +569,28 @@ pub fn print_certification(results: &[GraduationResult]) {
 
     // §4. Beta Modulo Duality (Gemini Key 2)
     println!();
-    println!("  {}§4. BETA MODULO DUALITY (Gemini Key 2){}", fmt::BOLD, fmt::RESET);
+    println!(
+        "  {}§4. BETA MODULO DUALITY (Gemini Key 2){}",
+        fmt::BOLD,
+        fmt::RESET
+    );
     println!("  (s-a)/(a²b) = -(1/(ab))·{{b(k+1)/a}}");
     println!();
 
     let all_beta_pw = results.iter().all(|r| r.beta_duality_pointwise);
-    let max_beta_sum = results.iter().map(|r| r.beta_duality_sum_err).fold(0.0_f64, f64::max);
+    let max_beta_sum = results
+        .iter()
+        .map(|r| r.beta_duality_sum_err)
+        .fold(0.0_f64, f64::max);
 
-    println!("  Pointwise coefficient match : {}", if all_beta_pw { fmt::check(true) } else { fmt::check(false) });
+    println!(
+        "  Pointwise coefficient match : {}",
+        if all_beta_pw {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        }
+    );
     println!("  Max |sum LHS - sum RHS|     : {:.4e}", max_beta_sum);
     if all_beta_pw && max_beta_sum < 1e-100 {
         println!("  {} Beta modulo duality: CERTIFIED ★", fmt::check(true));
@@ -530,19 +603,33 @@ pub fn print_certification(results: &[GraduationResult]) {
     println!("  {}§5. THE GRADUATION IDENTITY{}", fmt::BOLD, fmt::RESET);
     println!("  ∑ perClassLimit(a,b,m₀) = vasyuninGramFormula - strip - stir/b - ft/a");
     println!();
-    println!("  {:>5} {:>5}  {:>22}  {:>22}  {:>14}",
-        "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|");
+    println!(
+        "  {:>5} {:>5}  {:>22}  {:>22}  {:>14}",
+        "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|"
+    );
     println!("  {}", "─".repeat(80));
 
     let mut max_err = 0.0_f64;
     let mut all_cert = true;
     for r in results {
-        if r.identity_err > max_err { max_err = r.identity_err; }
-        if !r.certified { all_cert = false; }
-        println!("  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>14.4e}  {}",
-            r.a, r.b,
-            r.sum_pcl, r.delta_target, r.identity_err,
-            if r.certified { fmt::check(true) } else { fmt::check(false) },
+        if r.identity_err > max_err {
+            max_err = r.identity_err;
+        }
+        if !r.certified {
+            all_cert = false;
+        }
+        println!(
+            "  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>14.4e}  {}",
+            r.a,
+            r.b,
+            r.sum_pcl,
+            r.delta_target,
+            r.identity_err,
+            if r.certified {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
         );
     }
 
@@ -550,8 +637,11 @@ pub fn print_certification(results: &[GraduationResult]) {
     println!("  Max |error|: {:.4e}", max_err);
     println!();
     if all_cert {
-        println!("  ★ {} ALL {} PAIRS CERTIFIED — SKELETON KEYS + GRADUATION READY ★",
-            fmt::check(true), results.len());
+        println!(
+            "  ★ {} ALL {} PAIRS CERTIFIED — SKELETON KEYS + GRADUATION READY ★",
+            fmt::check(true),
+            results.len()
+        );
     } else {
         println!("  {} SOME PAIRS FAILED", fmt::check(false));
     }

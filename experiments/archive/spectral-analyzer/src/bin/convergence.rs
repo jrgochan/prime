@@ -4,12 +4,11 @@
 /// Runs the spectral analyzer at multiple N values and measures
 /// the average Log/Flat energy ratio at the first 10 Riemann zeros.
 /// The Theorist predicts convergence to (1/2)² = 0.25.
-
 use std::time::Instant;
 
 const RIEMANN_ZEROS: &[f64] = &[
-    14.134725, 21.022040, 25.010858, 30.424876, 32.935062,
-    37.586178, 40.918719, 43.327073, 48.005151, 49.773832,
+    14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073,
+    48.005151, 49.773832,
 ];
 
 fn mobius_sieve(n: usize) -> Vec<i8> {
@@ -23,7 +22,9 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
             if i % p == 0 {
                 mu[i * p] = 0;
@@ -56,15 +57,16 @@ fn peak_near(coeffs: &[f64], ln_k: &[f64], zero: f64) -> f64 {
     for i in 0..=steps {
         let t = (zero - 0.5) + i as f64 / steps as f64;
         let e = energy_at(coeffs, ln_k, t);
-        if e > best { best = e; }
+        if e > best {
+            best = e;
+        }
     }
     best
 }
 
 fn main() {
     let n_values: Vec<usize> = vec![
-        1_000, 2_000, 5_000, 10_000, 20_000,
-        50_000, 100_000, 200_000, 500_000, 1_000_000,
+        1_000, 2_000, 5_000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000, 1_000_000,
     ];
 
     println!("{}", "=".repeat(85));
@@ -72,10 +74,14 @@ fn main() {
     println!("Theorist prediction: ratio = (L¹ norm of taper)² = (1/2)² = 0.25");
     println!("{}", "=".repeat(85));
 
-    println!("\n{:>10} {:>8} {:>12} {:>12} {:>10} {:>10} {:>10}",
-        "N", "ln(N)", "Log peak", "Flat peak", "Ratio", "|Δ| from", "1/ln(N)");
-    println!("{:>10} {:>8} {:>12} {:>12} {:>10} {:>10} {:>10}",
-        "", "", "(avg)", "(avg)", "(avg)", "0.25", "");
+    println!(
+        "\n{:>10} {:>8} {:>12} {:>12} {:>10} {:>10} {:>10}",
+        "N", "ln(N)", "Log peak", "Flat peak", "Ratio", "|Δ| from", "1/ln(N)"
+    );
+    println!(
+        "{:>10} {:>8} {:>12} {:>12} {:>10} {:>10} {:>10}",
+        "", "", "(avg)", "(avg)", "(avg)", "0.25", ""
+    );
     println!("{}", "-".repeat(85));
 
     for &n in &n_values {
@@ -93,16 +99,20 @@ fn main() {
         }
 
         // Log cutoff coefficients
-        let log_coeffs: Vec<f64> = (0..n).map(|i| {
-            let m = mu[i + 1] as f64;
-            -m * (1.0 - ln_k[i] / ln_n) * k_half[i]
-        }).collect();
+        let log_coeffs: Vec<f64> = (0..n)
+            .map(|i| {
+                let m = mu[i + 1] as f64;
+                -m * (1.0 - ln_k[i] / ln_n) * k_half[i]
+            })
+            .collect();
 
         // Flat Möbius coefficients
-        let flat_coeffs: Vec<f64> = (0..n).map(|i| {
-            let m = mu[i + 1] as f64;
-            -m * k_half[i]
-        }).collect();
+        let flat_coeffs: Vec<f64> = (0..n)
+            .map(|i| {
+                let m = mu[i + 1] as f64;
+                -m * k_half[i]
+            })
+            .collect();
 
         // Measure peak energy at each zero
         let mut ratios = Vec::new();
@@ -126,8 +136,10 @@ fn main() {
         let inv_ln_n = 1.0 / ln_n;
         let elapsed = t0.elapsed();
 
-        println!("{:>10} {:>8.3} {:>12.2} {:>12.2} {:>10.5} {:>10.5} {:>10.5}  ({:.1?})",
-            n, ln_n, avg_log, avg_flat, avg_ratio, delta, inv_ln_n, elapsed);
+        println!(
+            "{:>10} {:>8.3} {:>12.2} {:>12.2} {:>10.5} {:>10.5} {:>10.5}  ({:.1?})",
+            n, ln_n, avg_log, avg_flat, avg_ratio, delta, inv_ln_n, elapsed
+        );
     }
 
     println!("\n{}", "=".repeat(85));

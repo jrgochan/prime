@@ -20,25 +20,52 @@ pub fn c_new(re: f64, im: f64) -> C256 {
 }
 
 pub fn c_add(a: &C256, b: &C256) -> C256 {
-    (Float::with_val(P, &a.0 + &b.0), Float::with_val(P, &a.1 + &b.1))
+    (
+        Float::with_val(P, &a.0 + &b.0),
+        Float::with_val(P, &a.1 + &b.1),
+    )
 }
 
 pub fn c_sub(a: &C256, b: &C256) -> C256 {
-    (Float::with_val(P, &a.0 - &b.0), Float::with_val(P, &a.1 - &b.1))
+    (
+        Float::with_val(P, &a.0 - &b.0),
+        Float::with_val(P, &a.1 - &b.1),
+    )
 }
 
 pub fn c_mul(a: &C256, b: &C256) -> C256 {
     (
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1)),
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0)),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1),
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0),
+        ),
     )
 }
 
 pub fn c_div(a: &C256, b: &C256) -> C256 {
-    let d = Float::with_val(P, Float::with_val(P, &b.0 * &b.0) + Float::with_val(P, &b.1 * &b.1));
+    let d = Float::with_val(
+        P,
+        Float::with_val(P, &b.0 * &b.0) + Float::with_val(P, &b.1 * &b.1),
+    );
     (
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &a.0 * &b.0) + Float::with_val(P, &a.1 * &b.1)) / &d),
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &a.1 * &b.0) - Float::with_val(P, &a.0 * &b.1)) / &d),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &a.0 * &b.0) + Float::with_val(P, &a.1 * &b.1),
+            ) / &d,
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &a.1 * &b.0) - Float::with_val(P, &a.0 * &b.1),
+            ) / &d,
+        ),
     )
 }
 
@@ -47,11 +74,17 @@ pub fn c_scale(a: &C256, s: &Float) -> C256 {
 }
 
 pub fn c_abs(z: &C256) -> Float {
-    Float::with_val(P, (Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1)).sqrt())
+    Float::with_val(
+        P,
+        (Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1)).sqrt(),
+    )
 }
 
 pub fn c_to_f64(z: &C256) -> (f64, f64) {
-    (z.0.to_f64_round(Round::Nearest), z.1.to_f64_round(Round::Nearest))
+    (
+        z.0.to_f64_round(Round::Nearest),
+        z.1.to_f64_round(Round::Nearest),
+    )
 }
 
 fn c_pow_neg(n: usize, s: &C256) -> C256 {
@@ -61,7 +94,10 @@ fn c_pow_neg(n: usize, s: &C256) -> C256 {
     let mag = Float::with_val(P, re_exp.exp());
     let cos_v = Float::with_val(P, im_exp.clone().cos());
     let sin_v = Float::with_val(P, im_exp.sin());
-    (Float::with_val(P, &mag * &cos_v), Float::with_val(P, &mag * &sin_v))
+    (
+        Float::with_val(P, &mag * &cos_v),
+        Float::with_val(P, &mag * &sin_v),
+    )
 }
 
 fn c_pochhammer(s: &C256, k: usize) -> C256 {
@@ -92,8 +128,10 @@ pub fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     let re_1ms = Float::with_val(P, &one_minus_s.0 * &ln_n);
     let im_1ms = Float::with_val(P, &one_minus_s.1 * &ln_n);
     let mag = Float::with_val(P, re_1ms.exp());
-    let n_1ms = (Float::with_val(P, &mag * &Float::with_val(P, im_1ms.clone().cos())),
-                 Float::with_val(P, &mag * &Float::with_val(P, im_1ms.sin())));
+    let n_1ms = (
+        Float::with_val(P, &mag * &Float::with_val(P, im_1ms.clone().cos())),
+        Float::with_val(P, &mag * &Float::with_val(P, im_1ms.sin())),
+    );
     let integral = c_div(&n_1ms, &c_sub(s, &one));
 
     let midpoint = c_scale(&c_pow_neg(n_terms, s), &Float::with_val(P, 0.5));
@@ -102,12 +140,17 @@ pub fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     for j in 0..8 {
         let two_k = 2 * (j + 1);
         let mut fact: f64 = 1.0;
-        for i in 1..=two_k { fact *= i as f64; }
+        for i in 1..=two_k {
+            fact *= i as f64;
+        }
         let coeff = (BERNOULLI_NUM[j] as f64) / (BERNOULLI_DEN[j] as f64) / fact;
         let rising = c_pochhammer(s, two_k - 1);
         let shift = c_add(s, &c_new((two_k - 1) as f64, 0.0));
         let power = c_pow_neg(n_terms, &shift);
-        em = c_add(&em, &c_scale(&c_mul(&rising, &power), &Float::with_val(P, coeff)));
+        em = c_add(
+            &em,
+            &c_scale(&c_mul(&rising, &power), &Float::with_val(P, coeff)),
+        );
     }
 
     c_add(&c_add(&c_add(&sum, &integral), &midpoint), &em)

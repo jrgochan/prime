@@ -51,7 +51,11 @@ pub fn header(title: &str, subtitle: &str, precision: u32, threads: usize) {
 
 /// Format a duration in seconds as a human-readable string.
 pub fn elapsed(s: f64) -> String {
-    if s < 1.0 { format!("{:.0}ms", s * 1000.0) }
-    else if s < 60.0 { format!("{s:.1}s") }
-    else { format!("{:.0}m{:.0}s", s / 60.0, s % 60.0) }
+    if s < 1.0 {
+        format!("{:.0}ms", s * 1000.0)
+    } else if s < 60.0 {
+        format!("{s:.1}s")
+    } else {
+        format!("{:.0}m{:.0}s", s / 60.0, s % 60.0)
+    }
 }

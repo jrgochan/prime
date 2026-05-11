@@ -17,7 +17,11 @@ use std::io::Write;
 
 pub fn write_eigenvalue_tsv(results: &[EigenResult], path: &str) {
     let mut f = fs::File::create(path).unwrap();
-    writeln!(f, "N\tdim\tlambda_min\tlambda_2\tlambda_3\tgap_ratio\tmethod\telapsed_s").unwrap();
+    writeln!(
+        f,
+        "N\tdim\tlambda_min\tlambda_2\tlambda_3\tgap_ratio\tmethod\telapsed_s"
+    )
+    .unwrap();
     for r in results {
         writeln!(
             f,
@@ -85,7 +89,8 @@ pub fn write_certificate_json(
         .all(|w| w[1].lambda_min <= w[0].lambda_min + 1e-15);
     let max_n_tested = results.last().map_or(0, |r| r.n);
     let max_n_positive = results
-        .iter().rfind(|r| r.lambda_min > 0.0)
+        .iter()
+        .rfind(|r| r.lambda_min > 0.0)
         .map_or(0, |r| r.n);
 
     let precision_str = if mpfr_built {

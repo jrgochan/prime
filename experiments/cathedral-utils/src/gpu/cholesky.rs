@@ -11,8 +11,8 @@
 //! | 3 | DS Cholesky (CUDA kernel) | ~14 digits | Very fast | 2×N²×4 |
 //! | 4 | QS Cholesky (CUDA kernel) | ~28 digits | Fast | 4×N²×4 |
 
-use std::ffi::c_int;
 use super::ffi;
+use std::ffi::c_int;
 
 /// Result from any Cholesky-based d² computation.
 #[derive(Debug, Clone)]
@@ -64,7 +64,12 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
         ffi::cudaMalloc(&mut d_b, vec_bytes);
         ffi::cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
-        ffi::cudaMemcpy(d_a, col_major.as_ptr(), matrix_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
+        ffi::cudaMemcpy(
+            d_a,
+            col_major.as_ptr(),
+            matrix_bytes,
+            ffi::MEMCPY_HOST_TO_DEVICE,
+        );
         ffi::cudaMemcpy(d_b, b.as_ptr(), vec_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
 
         // Cholesky factorization
@@ -74,18 +79,31 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
         let mut d_work: *mut f64 = std::ptr::null_mut();
         ffi::cudaMalloc(&mut d_work, lwork as usize * 8);
 
-        let s = ffi::cusolverDnDpotrf(handle, ffi::FillMode::Lower, n, d_a, n, d_work, lwork, d_info);
+        let s = ffi::cusolverDnDpotrf(
+            handle,
+            ffi::FillMode::Lower,
+            n,
+            d_a,
+            n,
+            d_work,
+            lwork,
+            d_info,
+        );
         ffi::cudaDeviceSynchronize();
 
         let mut info_val: c_int = 0;
         ffi::cudaMemcpy(
             &mut info_val as *mut c_int as *mut f64,
-            d_info as *const f64, 4, ffi::MEMCPY_DEVICE_TO_HOST,
+            d_info as *const f64,
+            4,
+            ffi::MEMCPY_DEVICE_TO_HOST,
         );
 
         if s != 0 || info_val != 0 {
-            ffi::cudaFree(d_a); ffi::cudaFree(d_b);
-            ffi::cudaFree(d_work); ffi::cudaFree(d_info as *mut f64);
+            ffi::cudaFree(d_a);
+            ffi::cudaFree(d_b);
+            ffi::cudaFree(d_work);
+            ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(handle);
             return Err(format!("dpotrf failed: status={}, info={}", s, info_val));
         }
@@ -95,8 +113,10 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
         ffi::cudaDeviceSynchronize();
 
         if s != 0 {
-            ffi::cudaFree(d_a); ffi::cudaFree(d_b);
-            ffi::cudaFree(d_work); ffi::cudaFree(d_info as *mut f64);
+            ffi::cudaFree(d_a);
+            ffi::cudaFree(d_b);
+            ffi::cudaFree(d_work);
+            ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(handle);
             return Err(format!("dpotrs failed: {}", s));
         }
@@ -119,8 +139,11 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
 
         let gpu_time = start.elapsed().as_secs_f64();
 
-        ffi::cudaFree(d_a); ffi::cudaFree(d_b); ffi::cudaFree(d_b_orig);
-        ffi::cudaFree(d_work); ffi::cudaFree(d_info as *mut f64);
+        ffi::cudaFree(d_a);
+        ffi::cudaFree(d_b);
+        ffi::cudaFree(d_b_orig);
+        ffi::cudaFree(d_work);
+        ffi::cudaFree(d_info as *mut f64);
         ffi::cusolverDnDestroy(handle);
 
         Ok(CholeskyResult {
@@ -139,7 +162,10 @@ pub fn d_sq_f64(gram_data: &[f64], b: &[f64], dim: usize) -> Result<CholeskyResu
 /// Requires the `custom_kernels` feature and compiled CUDA libraries.
 #[cfg(has_cuda_kernels)]
 pub fn d_sq_dd(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<CholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
         return Err(format!("Gram size mismatch: {} vs {}²", gram_hi.len(), dim));
@@ -152,8 +178,11 @@ pub fn d_sq_dd(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = ffi::gpu_dd_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -170,7 +199,10 @@ pub fn d_sq_dd(
 /// Compute d² via QS Cholesky (~28 digit precision at f32 speed).
 #[cfg(has_cuda_kernels)]
 pub fn d_sq_qs(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<CholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
         return Err(format!("Gram size mismatch: {} vs {}²", gram_hi.len(), dim));
@@ -180,8 +212,11 @@ pub fn d_sq_qs(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = ffi::gpu_qs_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -198,7 +233,10 @@ pub fn d_sq_qs(
 /// Compute d² via DS Cholesky (~14 digit precision, fastest).
 #[cfg(has_cuda_kernels)]
 pub fn d_sq_ds(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<CholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
         return Err(format!("Gram size mismatch: {} vs {}²", gram_hi.len(), dim));
@@ -208,8 +246,11 @@ pub fn d_sq_ds(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = ffi::gpu_ds_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -230,7 +271,10 @@ pub fn d_sq_ds(
 /// Recommended: N ≤ 20,000.
 #[cfg(has_cuda_kernels)]
 pub fn d_sq_qq(
-    gram_hi: &[f64], gram_lo: &[f64], b: &[f64], dim: usize,
+    gram_hi: &[f64],
+    gram_lo: &[f64],
+    b: &[f64],
+    dim: usize,
 ) -> Result<CholeskyResult, String> {
     if gram_hi.len() != dim * dim || gram_lo.len() != dim * dim {
         return Err(format!("Gram size mismatch: {} vs {}²", gram_hi.len(), dim));
@@ -243,8 +287,11 @@ pub fn d_sq_qq(
         let start = std::time::Instant::now();
         let mut fail_col: c_int = 0;
         let d2 = ffi::gpu_qq_cholesky_d2(
-            gram_hi.as_ptr(), gram_lo.as_ptr(), b.as_ptr(),
-            dim as c_int, &mut fail_col,
+            gram_hi.as_ptr(),
+            gram_lo.as_ptr(),
+            b.as_ptr(),
+            dim as c_int,
+            &mut fail_col,
         );
         let gpu_time = start.elapsed().as_secs_f64();
 
@@ -257,4 +304,3 @@ pub fn d_sq_qq(
         })
     }
 }
-

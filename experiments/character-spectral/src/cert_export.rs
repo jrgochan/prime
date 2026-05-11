@@ -18,7 +18,7 @@ mod spectral;
 use std::io::Write;
 use std::time::Instant;
 
-use cathedral_utils::gram::{build_gram_matrix_f64};
+use cathedral_utils::gram::build_gram_matrix_f64;
 
 fn project_f64(full_mat: &[f64], full_dim: usize, indices: &[usize]) -> Vec<f64> {
     let sub_dim = indices.len();
@@ -34,7 +34,9 @@ fn project_f64(full_mat: &[f64], full_dim: usize, indices: &[usize]) -> Vec<f64>
 }
 
 fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
-    if dim == 0 { return vec![]; }
+    if dim == 0 {
+        return vec![];
+    }
     let m = nalgebra::DMatrix::from_row_slice(dim, dim, mat);
     let eigen = m.symmetric_eigen();
     let mut eigs: Vec<f64> = eigen.eigenvalues.iter().copied().collect();
@@ -49,7 +51,9 @@ fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
 fn export_residue_eigenvalues(max_n: usize) -> String {
     let moduli = [3, 5, 7, 8, 12];
     let test_ns: Vec<usize> = vec![50, 100, 200, 300, 500, 750, 1000]
-        .into_iter().filter(|&n| n <= max_n).collect();
+        .into_iter()
+        .filter(|&n| n <= max_n)
+        .collect();
 
     let mut json = String::from("{\n");
     json.push_str("  \"experiment\": \"residue-eigenvalues\",\n");
@@ -65,14 +69,21 @@ fn export_residue_eigenvalues(max_n: usize) -> String {
         let full_lambda_min = full_eigs[0];
 
         json.push_str(&format!("    \"{}\": {{\n", n));
-        json.push_str(&format!("      \"full_lambda_min\": {:.15e},\n", full_lambda_min));
+        json.push_str(&format!(
+            "      \"full_lambda_min\": {:.15e},\n",
+            full_lambda_min
+        ));
 
         for (mi, &m) in moduli.iter().enumerate() {
             json.push_str(&format!("      \"mod_{}\": {{\n", m));
             for r in 0..m {
                 let indices: Vec<usize> = (2..=n).filter(|&k| k % m == r).collect();
                 if indices.len() < 2 {
-                    json.push_str(&format!("        \"{}\": {{ \"dim\": {}, \"lambda_min\": null }}", r, indices.len()));
+                    json.push_str(&format!(
+                        "        \"{}\": {{ \"dim\": {}, \"lambda_min\": null }}",
+                        r,
+                        indices.len()
+                    ));
                 } else {
                     let sub = project_f64(&full_mat, full_dim, &indices);
                     let eigs = eigenvalues_nalgebra(&sub, indices.len());
@@ -82,15 +93,21 @@ fn export_residue_eigenvalues(max_n: usize) -> String {
                         r, indices.len(), eigs[0], sp.goe_fit, sp.best_class
                     ));
                 }
-                if r < m - 1 { json.push(','); }
+                if r < m - 1 {
+                    json.push(',');
+                }
                 json.push('\n');
             }
             json.push_str("      }");
-            if mi < moduli.len() - 1 { json.push(','); }
+            if mi < moduli.len() - 1 {
+                json.push(',');
+            }
             json.push('\n');
         }
         json.push_str("    }");
-        if ni < test_ns.len() - 1 { json.push(','); }
+        if ni < test_ns.len() - 1 {
+            json.push(',');
+        }
         json.push('\n');
     }
 
@@ -104,7 +121,9 @@ fn export_residue_eigenvalues(max_n: usize) -> String {
 
 fn export_eigenvector_localization(max_n: usize) -> String {
     let test_ns: Vec<usize> = vec![100, 200, 300, 500, 750, 1000]
-        .into_iter().filter(|&n| n <= max_n).collect();
+        .into_iter()
+        .filter(|&n| n <= max_n)
+        .collect();
 
     let mut json = String::from("{\n");
     json.push_str("  \"experiment\": \"eigenvector-localization\",\n");
@@ -119,8 +138,12 @@ fn export_eigenvector_localization(max_n: usize) -> String {
         let eigen = m.symmetric_eigen();
 
         // Sort eigenvalues
-        let mut indexed: Vec<(usize, f64)> = eigen.eigenvalues.iter()
-            .enumerate().map(|(i, &v)| (i, v)).collect();
+        let mut indexed: Vec<(usize, f64)> = eigen
+            .eigenvalues
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| (i, v))
+            .collect();
         indexed.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
         // Compute PR for all eigenvectors
@@ -143,9 +166,15 @@ fn export_eigenvector_localization(max_n: usize) -> String {
             .collect();
 
         let ground_ipr: f64 = ground_vec.iter().map(|v| v.powi(4)).sum();
-        let ground_pr = if ground_ipr > 1e-30 { 1.0 / ground_ipr } else { 0.0 };
+        let ground_pr = if ground_ipr > 1e-30 {
+            1.0 / ground_ipr
+        } else {
+            0.0
+        };
 
-        let prime_weight: f64 = ground_vec.iter().enumerate()
+        let prime_weight: f64 = ground_vec
+            .iter()
+            .enumerate()
             .filter(|(row, _)| is_prime_simple(row + 2))
             .map(|(_, v)| v * v)
             .sum();
@@ -155,11 +184,19 @@ fn export_eigenvector_localization(max_n: usize) -> String {
         json.push_str(&format!("      \"lambda_min\": {:.15e},\n", lambda_min));
         json.push_str(&format!("      \"mean_pr\": {:.4},\n", avg_pr));
         json.push_str(&format!("      \"goe_predicted_pr\": {:.4},\n", goe_pred));
-        json.push_str(&format!("      \"pr_goe_ratio\": {:.6},\n", avg_pr / goe_pred));
+        json.push_str(&format!(
+            "      \"pr_goe_ratio\": {:.6},\n",
+            avg_pr / goe_pred
+        ));
         json.push_str(&format!("      \"ground_state_pr\": {:.4},\n", ground_pr));
-        json.push_str(&format!("      \"ground_state_prime_weight\": {:.6}\n", prime_weight));
+        json.push_str(&format!(
+            "      \"ground_state_prime_weight\": {:.6}\n",
+            prime_weight
+        ));
         json.push_str("    }");
-        if ni < test_ns.len() - 1 { json.push(','); }
+        if ni < test_ns.len() - 1 {
+            json.push(',');
+        }
         json.push('\n');
     }
 
@@ -173,7 +210,9 @@ fn export_eigenvector_localization(max_n: usize) -> String {
 
 fn generate_lean_oracles(max_n: usize) -> String {
     let test_ns: Vec<usize> = vec![100, 200, 300, 500, 750, 1000]
-        .into_iter().filter(|&n| n <= max_n).collect();
+        .into_iter()
+        .filter(|&n| n <= max_n)
+        .collect();
     let moduli = [3usize, 5, 7, 8, 12];
 
     let mut lean = String::new();
@@ -228,10 +267,14 @@ fn generate_lean_oracles(max_n: usize) -> String {
 
             for r in 0..m {
                 let indices: Vec<usize> = (2..=n).filter(|&k| k % m == r).collect();
-                if indices.len() < 2 { continue; }
+                if indices.len() < 2 {
+                    continue;
+                }
                 let sub = project_f64(&full_mat, full_dim, &indices);
                 let eigs = eigenvalues_nalgebra(&sub, indices.len());
-                if eigs[0] <= 0.0 { all_positive = false; }
+                if eigs[0] <= 0.0 {
+                    all_positive = false;
+                }
                 min_class_eig = min_class_eig.min(eigs[0]);
             }
 
@@ -262,8 +305,12 @@ fn generate_lean_oracles(max_n: usize) -> String {
         let m = nalgebra::DMatrix::from_row_slice(full_dim, full_dim, &full_mat);
         let eigen = m.symmetric_eigen();
 
-        let mut indexed: Vec<(usize, f64)> = eigen.eigenvalues.iter()
-            .enumerate().map(|(i, &v)| (i, v)).collect();
+        let mut indexed: Vec<(usize, f64)> = eigen
+            .eigenvalues
+            .iter()
+            .enumerate()
+            .map(|(i, &v)| (i, v))
+            .collect();
         indexed.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
         let mut pr_values = Vec::with_capacity(full_dim);
@@ -298,12 +345,20 @@ fn chrono_timestamp() -> String {
 }
 
 fn is_prime_simple(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
         i += 6;
     }
     true
@@ -318,7 +373,11 @@ fn main() {
 
     eprintln!("╔═══════════════════════════════════════════════╗");
     eprintln!("║  CERTIFICATE EXPORTER — Exploration 19        ║");
-    eprintln!("║  max N = {:<5}  threads = {:<3}               ║", max_n, rayon::current_num_threads());
+    eprintln!(
+        "║  max N = {:<5}  threads = {:<3}               ║",
+        max_n,
+        rayon::current_num_threads()
+    );
     eprintln!("╚═══════════════════════════════════════════════╝");
 
     // Create output directories
@@ -334,7 +393,8 @@ fn main() {
     // Export Certificate 2: Eigenvector localization
     eprintln!("  [2/3] Exporting eigenvector localization certificates...");
     let cert2 = export_eigenvector_localization(max_n);
-    let mut f = std::fs::File::create("results/certificates/eigenvector-localization.json").unwrap();
+    let mut f =
+        std::fs::File::create("results/certificates/eigenvector-localization.json").unwrap();
     f.write_all(cert2.as_bytes()).unwrap();
     eprintln!("        → results/certificates/eigenvector-localization.json");
 

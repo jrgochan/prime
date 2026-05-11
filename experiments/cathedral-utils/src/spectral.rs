@@ -19,12 +19,7 @@ pub fn full_eigen(mat: &[f64], dim: usize) -> (Vec<f64>, Vec<f64>) {
         .collect();
     eigs.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
     let min_idx = eigs[0].1;
-    let v_min: Vec<f64> = eigen
-        .eigenvectors
-        .column(min_idx)
-        .iter()
-        .copied()
-        .collect();
+    let v_min: Vec<f64> = eigen.eigenvectors.column(min_idx).iter().copied().collect();
     (eigs.iter().map(|(v, _)| *v).collect(), v_min)
 }
 
@@ -40,8 +35,7 @@ pub fn inverse_power_iteration(
 ) -> (f64, Vec<f64>) {
     let g = nalgebra::DMatrix::from_row_slice(dim, dim, mat);
     let lu = g.clone().lu();
-    let mut v =
-        nalgebra::DVector::from_fn(dim, |i, _| ((i * 7 + 13) % 97) as f64 - 48.0);
+    let mut v = nalgebra::DVector::from_fn(dim, |i, _| ((i * 7 + 13) % 97) as f64 - 48.0);
     v /= v.norm();
     let mut lambda = 0.0f64;
 

@@ -56,12 +56,7 @@ pub struct DistanceResult {
 /// For spectral analysis (eigenvalues, delocalization):
 ///   - dim ≤ 5000: full eigendecomposition (nalgebra)
 ///   - dim > 5000: Lanczos with spectral shift for bottom-k eigenvalues
-pub fn compute_distance(
-    gram_data: &[f64],
-    dim: usize,
-    b: &[f64],
-    n: usize,
-) -> DistanceResult {
+pub fn compute_distance(gram_data: &[f64], dim: usize, b: &[f64], n: usize) -> DistanceResult {
     let g = DMatrix::from_fn(dim, dim, |i, j| gram_data[i * dim + j]);
     let bv = DVector::from_column_slice(&b[..dim]);
 
@@ -70,7 +65,10 @@ pub fn compute_distance(
         chol.solve(&bv)
     } else {
         // Fallback: LU decomposition
-        g.clone().lu().solve(&bv).unwrap_or_else(|| DVector::zeros(dim))
+        g.clone()
+            .lu()
+            .solve(&bv)
+            .unwrap_or_else(|| DVector::zeros(dim))
     };
 
     // d² = 1 - b^T c
@@ -87,11 +85,19 @@ pub fn compute_distance(
         let eig = g.symmetric_eigen();
         let eigenvalues = &eig.eigenvalues;
         let lambda_min = eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
-        let lambda_max = eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        let condition = if lambda_min > 1e-30 { lambda_max / lambda_min } else { f64::INFINITY };
+        let lambda_max = eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
+        let condition = if lambda_min > 1e-30 {
+            lambda_max / lambda_min
+        } else {
+            f64::INFINITY
+        };
 
         // Find ground-state eigenvector (v_min)
-        let min_idx = eigenvalues.iter()
+        let min_idx = eigenvalues
+            .iter()
             .enumerate()
             .min_by(|a, b| a.1.partial_cmp(b.1).unwrap())
             .map(|(i, _)| i)
@@ -100,17 +106,34 @@ pub fn compute_distance(
         let v_min = eig.eigenvectors.column(min_idx);
 
         // Delocalization metrics
-        let vmin_linf = v_min.iter().cloned().fold(0.0f64, |acc, x| acc.max(x.abs()));
+        let vmin_linf = v_min
+            .iter()
+            .cloned()
+            .fold(0.0f64, |acc, x| acc.max(x.abs()));
         let delocalization_ratio = vmin_linf * (dim as f64).sqrt();
         let v4_sum: f64 = v_min.iter().map(|x| x.powi(4)).sum();
         let v2_sum: f64 = v_min.iter().map(|x| x.powi(2)).sum();
-        let ipr = if v2_sum > 0.0 { v4_sum / (v2_sum * v2_sum) } else { 1.0 };
+        let ipr = if v2_sum > 0.0 {
+            v4_sum / (v2_sum * v2_sum)
+        } else {
+            1.0
+        };
         let b_vmin_proj: f64 = bv.dot(&DVector::from_column_slice(v_min.as_slice())).abs();
 
         DistanceResult {
-            n, d2, coeffs, lambda_min, lambda_max, condition,
-            coeff_energy, coeff_mass, projection,
-            vmin_linf, delocalization_ratio, ipr, b_vmin_proj,
+            n,
+            d2,
+            coeffs,
+            lambda_min,
+            lambda_max,
+            condition,
+            coeff_energy,
+            coeff_mass,
+            projection,
+            vmin_linf,
+            delocalization_ratio,
+            ipr,
+            b_vmin_proj,
         }
     } else {
         // Lanczos for large matrices: extract bottom-k eigenvalues + eigenvectors
@@ -125,14 +148,17 @@ pub fn compute_distance(
         // Run shifted Lanczos
         let (tri, basis) = lanczos::lanczos_tridiag(
             &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(gram_data, dim, sigma, v, out),
-            dim, m, None,
+            dim,
+            m,
+            None,
         );
         let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);
 
         // Top-k of (σI-G) = bottom-k of G
         let n_ritz = ritz_values.len();
         let top_start = n_ritz.saturating_sub(k);
-        let mut eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+        let mut eigenvalues: Vec<f64> = ritz_values[top_start..]
+            .iter()
             .map(|&lam| sigma - lam)
             .collect();
         eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -140,7 +166,11 @@ pub fn compute_distance(
         let lambda_min = eigenvalues[0];
         // λ_max estimate from bottom of shifted spectrum
         let lambda_max_est = sigma - ritz_values[0];
-        let condition = if lambda_min > 1e-30 { lambda_max_est / lambda_min } else { f64::INFINITY };
+        let condition = if lambda_min > 1e-30 {
+            lambda_max_est / lambda_min
+        } else {
+            f64::INFINITY
+        };
 
         // Reconstruct ground-state eigenvector for delocalization metrics
         let min_shifted_idx = n_ritz - 1; // largest of shifted = smallest of original
@@ -154,20 +184,41 @@ pub fn compute_distance(
         }
         let norm: f64 = v_min.iter().map(|x| x * x).sum::<f64>().sqrt();
         if norm > 1e-15 {
-            for x in &mut v_min { *x /= norm; }
+            for x in &mut v_min {
+                *x /= norm;
+            }
         }
 
         let vmin_linf = v_min.iter().fold(0.0f64, |acc, &x| acc.max(x.abs()));
         let delocalization_ratio = vmin_linf * (dim as f64).sqrt();
         let v4_sum: f64 = v_min.iter().map(|x| x.powi(4)).sum();
         let v2_sum: f64 = v_min.iter().map(|x| x.powi(2)).sum();
-        let ipr = if v2_sum > 0.0 { v4_sum / (v2_sum * v2_sum) } else { 1.0 };
-        let b_vmin_proj: f64 = b.iter().zip(v_min.iter()).map(|(bi, vi)| bi * vi).sum::<f64>().abs();
+        let ipr = if v2_sum > 0.0 {
+            v4_sum / (v2_sum * v2_sum)
+        } else {
+            1.0
+        };
+        let b_vmin_proj: f64 = b
+            .iter()
+            .zip(v_min.iter())
+            .map(|(bi, vi)| bi * vi)
+            .sum::<f64>()
+            .abs();
 
         DistanceResult {
-            n, d2, coeffs, lambda_min, lambda_max: lambda_max_est, condition,
-            coeff_energy, coeff_mass, projection,
-            vmin_linf, delocalization_ratio, ipr, b_vmin_proj,
+            n,
+            d2,
+            coeffs,
+            lambda_min,
+            lambda_max: lambda_max_est,
+            condition,
+            coeff_energy,
+            coeff_mass,
+            projection,
+            vmin_linf,
+            delocalization_ratio,
+            ipr,
+            b_vmin_proj,
         }
     }
 }

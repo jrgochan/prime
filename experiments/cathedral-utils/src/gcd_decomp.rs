@@ -17,8 +17,8 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use crate::arith::{gcd, mobius_table};
-use std::collections::BTreeMap;
 use rayon::prelude::*;
+use std::collections::BTreeMap;
 
 /// Result of GCD-class decomposition.
 pub struct GcdDecomposition {
@@ -65,7 +65,9 @@ pub fn decompose(n: usize) -> GcdDecomposition {
     let divisors: Vec<Vec<usize>> = (0..=n)
         .into_par_iter()
         .map(|j| {
-            if j == 0 { return vec![]; }
+            if j == 0 {
+                return vec![];
+            }
             (1..=j).filter(|d| j % d == 0).collect()
         })
         .collect();
@@ -79,7 +81,12 @@ pub fn decompose(n: usize) -> GcdDecomposition {
         }
     }
 
-    GcdDecomposition { classes, divisors, totient, mobius }
+    GcdDecomposition {
+        classes,
+        divisors,
+        totient,
+        mobius,
+    }
 }
 
 /// Extract the "coprime core" block: indices j ∈ {1,...,N} with gcd(j, d) = d
@@ -90,19 +97,14 @@ pub fn coprime_indices(n: usize, d: usize) -> Vec<usize> {
 
 /// For a GCD class d, extract the reduced indices j/d.
 pub fn reduced_indices(n: usize, d: usize) -> Vec<usize> {
-    (1..=n)
-        .filter(|&j| j % d == 0)
-        .map(|j| j / d)
-        .collect()
+    (1..=n).filter(|&j| j % d == 0).map(|j| j / d).collect()
 }
 
 /// Count the number of coprime pairs in {1,...,N}.
 pub fn coprime_pair_count(n: usize) -> usize {
     (1..=n)
         .into_par_iter()
-        .map(|j| {
-            (j+1..=n).filter(|&k| gcd(j, k) == 1).count()
-        })
+        .map(|j| (j + 1..=n).filter(|&k| gcd(j, k) == 1).count())
         .sum()
 }
 
@@ -124,9 +126,9 @@ mod tests {
         assert_eq!(mu[1], 1);
         assert_eq!(mu[2], -1);
         assert_eq!(mu[3], -1);
-        assert_eq!(mu[4], 0);  // 4 = 2²
+        assert_eq!(mu[4], 0); // 4 = 2²
         assert_eq!(mu[5], -1);
-        assert_eq!(mu[6], 1);  // 6 = 2·3
+        assert_eq!(mu[6], 1); // 6 = 2·3
     }
 
     #[test]

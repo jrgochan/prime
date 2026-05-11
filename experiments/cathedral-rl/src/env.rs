@@ -16,11 +16,11 @@
 //!   3. Recompute  — fallback, O(N²) time
 
 use cathedral_utils::arith;
-#[cfg(feature = "hpdf")]
-use cathedral_utils::hpdf;
 #[cfg(feature = "gpu")]
 use cathedral_utils::gpu;
 use cathedral_utils::gram;
+#[cfg(feature = "hpdf")]
+use cathedral_utils::hpdf;
 use cathedral_utils::mertens;
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "hpdf")]
@@ -157,14 +157,20 @@ impl CathedralEnv {
             if gpu::bilinear::BilinearEngine::can_fit(self.dim, info.vram_mb) {
                 let engine = gpu::bilinear::BilinearEngine::new(&self.gram_data, self.dim)?;
                 self.gpu_engine = Some(Arc::new(engine));
-                eprintln!("  \x1b[32m✓\x1b[0m GPU BilinearEngine initialized (dim={})", self.dim);
+                eprintln!(
+                    "  \x1b[32m✓\x1b[0m GPU BilinearEngine initialized (dim={})",
+                    self.dim
+                );
                 return Ok(());
             }
 
             // Matrix too large for full upload — use chunked MatvecState
             let matrix_gb = (self.dim * self.dim * 8) as f64 / 1e9;
             let vram_gb = info.vram_mb as f64 / 1024.0;
-            eprintln!("  Matrix {:.1} GB > {:.1} GB VRAM — using chunked GPU matvec", matrix_gb, vram_gb);
+            eprintln!(
+                "  Matrix {:.1} GB > {:.1} GB VRAM — using chunked GPU matvec",
+                matrix_gb, vram_gb
+            );
 
             // Calculate chunk size: use 80% of VRAM for the chunk buffer
             let usable_bytes = (info.vram_mb as usize * 1024 * 1024) * 80 / 100;
@@ -174,11 +180,17 @@ impl CathedralEnv {
             let chunk_rows = chunk_rows.min(self.dim).max(1);
             let n_chunks = (self.dim + chunk_rows - 1) / chunk_rows;
 
-            eprintln!("  Chunk config: {} rows/chunk, {} chunks per matvec", chunk_rows, n_chunks);
+            eprintln!(
+                "  Chunk config: {} rows/chunk, {} chunks per matvec",
+                chunk_rows, n_chunks
+            );
 
             let state = gpu::matvec::MatvecState::new(self.dim, chunk_rows)?;
             self.gpu_matvec = Some(state);
-            eprintln!("  \x1b[32m✓\x1b[0m GPU MatvecState initialized (dim={}, chunked)", self.dim);
+            eprintln!(
+                "  \x1b[32m✓\x1b[0m GPU MatvecState initialized (dim={}, chunked)",
+                self.dim
+            );
             Ok(())
         } else {
             Err("No GPU detected".to_string())
@@ -189,25 +201,28 @@ impl CathedralEnv {
     #[cfg(feature = "hpdf")]
     pub fn from_hpdf(path: &std::path::Path, max_steps: usize) -> Result<Self, String> {
         let t0 = std::time::Instant::now();
-        let reader = hpdf::HpdfReader::open(path)
-            .map_err(|e| format!("Failed to open HPDF: {e}"))?;
+        let reader =
+            hpdf::HpdfReader::open(path).map_err(|e| format!("Failed to open HPDF: {e}"))?;
 
         let n = reader.max_n();
         let dim = reader.dim();
-        let gram_data = reader.read_gram_full()
+        let gram_data = reader
+            .read_gram_full()
             .map_err(|e| format!("Failed to read Gram: {e}"))?;
 
-        let mu = reader.read_mobius()
+        let mu = reader
+            .read_mobius()
             .unwrap_or_else(|_| arith::mobius_table(n + 1));
 
-        let b_vec = reader.read_b_vector()
-            .unwrap_or_else(|_| {
-                let gamma = 0.5772156649015329;
-                (0..dim).map(|i| {
+        let b_vec = reader.read_b_vector().unwrap_or_else(|_| {
+            let gamma = 0.5772156649015329;
+            (0..dim)
+                .map(|i| {
                     let k = (i + 2) as f64;
                     (k.ln() + 1.0 - gamma) / k
-                }).collect()
-            });
+                })
+                .collect()
+        });
 
         let v = mertens::witness_vector(n, &mu);
         let source = format!("HPDF: {}", path.display());
@@ -216,16 +231,21 @@ impl CathedralEnv {
         eprintln!("  ✓ Gram matrix loaded: {source} ({mb:.1} MB, {load_secs:.2}s)");
 
         // Load DD lo-words if available
-        let gram_lo = reader.read_gram_lo_full()
-            .ok()
-            .flatten();
+        let gram_lo = reader.read_gram_lo_full().ok().flatten();
         if gram_lo.is_some() {
             eprintln!("  ✓ DD lo-words loaded (~31-digit precision available)");
         }
 
         let mut env = Self {
-            n, gram_data, gram_lo, b_vec, v, mu, dim,
-            step: 0, max_steps,
+            n,
+            gram_data,
+            gram_lo,
+            b_vec,
+            v,
+            mu,
+            dim,
+            step: 0,
+            max_steps,
             best_d2: f64::INFINITY,
             baseline_d2: 0.0,
             source,
@@ -266,8 +286,15 @@ impl CathedralEnv {
         eprintln!("  ✓ Gram matrix loaded: {source} ({mb:.1} MB)");
 
         let mut env = Self {
-            n, gram_data, gram_lo: None, b_vec, v, mu, dim,
-            step: 0, max_steps,
+            n,
+            gram_data,
+            gram_lo: None,
+            b_vec,
+            v,
+            mu,
+            dim,
+            step: 0,
+            max_steps,
             best_d2: f64::INFINITY,
             baseline_d2: 0.0,
             source,
@@ -495,7 +522,9 @@ impl CathedralEnv {
     /// Zero-allocation CPU matvec: y = Gx, writing into `out`.
     fn matvec_cpu_into(&self, x: &[f64], out: &mut [f64]) {
         // Zero the output buffer before accumulating
-        for v in out.iter_mut() { *v = 0.0; }
+        for v in out.iter_mut() {
+            *v = 0.0;
+        }
         self.matvec_cpu_kernel(x, out);
     }
 
@@ -583,7 +612,11 @@ fn load_gram_matrix(n: usize, _dim: usize) -> (Vec<f64>, Option<Vec<f64>>, Strin
             if let Ok(reader) = hpdf::HpdfReader::open(&hpdf_path) {
                 if let Ok(data) = reader.read_gram_full() {
                     let lo = reader.read_gram_lo_full().ok().flatten();
-                    return (data, lo, format!("HPDF({})", hpdf_path.file_name().unwrap().to_string_lossy()));
+                    return (
+                        data,
+                        lo,
+                        format!("HPDF({})", hpdf_path.file_name().unwrap().to_string_lossy()),
+                    );
                 }
             }
             eprintln!("  ⚠ HPDF load failed, trying binary cache...");

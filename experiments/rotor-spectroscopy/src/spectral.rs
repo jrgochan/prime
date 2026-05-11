@@ -5,8 +5,8 @@
 //!  Physics:   Completeness relation, dispersion relation, Van Hove
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
 use rayon::prelude::*;
+use rug::Float;
 
 use crate::weights::P;
 
@@ -16,10 +16,10 @@ const GL8: [(f64, f64); 8] = [
     (-0.79666647741362674, 0.22238103445337447),
     (-0.52553240991632899, 0.31370664587788729),
     (-0.18343464249564980, 0.36268378337836198),
-    ( 0.18343464249564980, 0.36268378337836198),
-    ( 0.52553240991632899, 0.31370664587788729),
-    ( 0.79666647741362674, 0.22238103445337447),
-    ( 0.96028985649753623, 0.10122853629037626),
+    (0.18343464249564980, 0.36268378337836198),
+    (0.52553240991632899, 0.31370664587788729),
+    (0.79666647741362674, 0.22238103445337447),
+    (0.96028985649753623, 0.10122853629037626),
 ];
 
 fn gl8_integrate<F: Fn(f64) -> f64>(f: &F, a: f64, b: f64) -> f64 {
@@ -40,7 +40,9 @@ pub fn dirichlet_poly_norm_sq_mpfr(weights: &[Float], t: f64) -> f64 {
     let mut im = Float::with_val(P, 0);
 
     for (i, vk) in weights.iter().enumerate() {
-        if *vk == 0.0 { continue; }
+        if *vk == 0.0 {
+            continue;
+        }
         let k = (i + 1) as f64;
         let k_mpfr = Float::with_val(P, k);
         // k^{-1/2} = 1/sqrt(k)
@@ -66,7 +68,9 @@ pub fn dirichlet_poly_norm_sq(weights: &[f64], t: f64) -> f64 {
     let mut re = 0.0f64;
     let mut im = 0.0f64;
     for (i, &vk) in weights.iter().enumerate() {
-        if vk == 0.0 { continue; }
+        if vk == 0.0 {
+            continue;
+        }
         let k = (i + 1) as f64;
         let amp = vk / k.sqrt();
         let phase = t * k.ln();
@@ -77,9 +81,7 @@ pub fn dirichlet_poly_norm_sq(weights: &[f64], t: f64) -> f64 {
 }
 
 /// Per-channel |D_N^{(chi)}(1/2+it)|² with 512-bit MPFR
-pub fn channel_dirichlet_norm_sq_mpfr(
-    weights: &[Float], chi_table: &[i8; 8], t: f64
-) -> f64 {
+pub fn channel_dirichlet_norm_sq_mpfr(weights: &[Float], chi_table: &[i8; 8], t: f64) -> f64 {
     let t_mpfr = Float::with_val(P, t);
     let mut re = Float::with_val(P, 0);
     let mut im = Float::with_val(P, 0);
@@ -87,7 +89,9 @@ pub fn channel_dirichlet_norm_sq_mpfr(
     for (i, vk) in weights.iter().enumerate() {
         let k = i + 1;
         let c = chi_table[k % 8];
-        if c == 0 || *vk == 0.0 { continue; }
+        if c == 0 || *vk == 0.0 {
+            continue;
+        }
         let k_mpfr = Float::with_val(P, k as f64);
         let k_sqrt = k_mpfr.clone().sqrt();
         let k_inv_sqrt = Float::with_val(P, k_sqrt.recip());
@@ -132,26 +136,40 @@ pub fn gallagher_validate(n: usize, weights_f64: &[f64], t_max: f64) -> Gallaghe
     let dt = 2.0 * t_max / n_panels as f64;
 
     // Massively parallel: each panel is independent
-    let integral: f64 = (0..n_panels).into_par_iter().map(|i| {
-        let a = -t_max + i as f64 * dt;
-        let b = a + dt;
-        gl8_integrate(&|t| {
-            dirichlet_poly_norm_sq(weights_f64, t) * fejer_kernel(t, delta)
-        }, a, b)
-    }).sum();
+    let integral: f64 = (0..n_panels)
+        .into_par_iter()
+        .map(|i| {
+            let a = -t_max + i as f64 * dt;
+            let b = a + dt;
+            gl8_integrate(
+                &|t| dirichlet_poly_norm_sq(weights_f64, t) * fejer_kernel(t, delta),
+                a,
+                b,
+            )
+        })
+        .sum();
 
     let relative_error = if sum_vk_sq > 0.0 {
         (integral - sum_vk_sq).abs() / sum_vk_sq
-    } else { 0.0 };
+    } else {
+        0.0
+    };
 
-    GallagherResult { n, sum_vk_sq, integral, relative_error, t_max, n_panels }
+    GallagherResult {
+        n,
+        sum_vk_sq,
+        integral,
+        relative_error,
+        t_max,
+        n_panels,
+    }
 }
 
 /// Dispersion relation: min |log(j) - log(k)| for 1 ≤ k < j ≤ N
 pub struct DispersionResult {
     pub n: usize,
     pub min_gap: f64,
-    pub min_gap_mpfr: f64,        // 512-bit verification
+    pub min_gap_mpfr: f64, // 512-bit verification
     pub theoretical_bound: f64,
     pub ratio: f64,
     pub pair: (usize, usize),
@@ -173,39 +191,45 @@ pub fn dispersion_relation(n: usize) -> DispersionResult {
     let ratio = min_gap / theoretical_bound;
 
     DispersionResult {
-        n, min_gap, min_gap_mpfr: gap_mpfr,
-        theoretical_bound, ratio, pair: (n, k),
+        n,
+        min_gap,
+        min_gap_mpfr: gap_mpfr,
+        theoretical_bound,
+        ratio,
+        pair: (n, k),
     }
 }
 
 /// Spectral profile — massively parallel over t values, 512-bit MPFR
-pub fn spectral_profile_mpfr(
-    weights: &[Float], t_values: &[f64]
-) -> Vec<(f64, f64, [f64; 4])> {
-    t_values.par_iter().map(|&t| {
-        let total = dirichlet_poly_norm_sq_mpfr(weights, t);
-        let mut channels = [0.0f64; 4];
-        for i in 0..4 {
-            channels[i] = channel_dirichlet_norm_sq_mpfr(
-                weights, &crate::characters::CHI_TABLE[i], t
-            );
-        }
-        (t, total, channels)
-    }).collect()
+pub fn spectral_profile_mpfr(weights: &[Float], t_values: &[f64]) -> Vec<(f64, f64, [f64; 4])> {
+    t_values
+        .par_iter()
+        .map(|&t| {
+            let total = dirichlet_poly_norm_sq_mpfr(weights, t);
+            let mut channels = [0.0f64; 4];
+            for i in 0..4 {
+                channels[i] =
+                    channel_dirichlet_norm_sq_mpfr(weights, &crate::characters::CHI_TABLE[i], t);
+            }
+            (t, total, channels)
+        })
+        .collect()
 }
 
 /// f64 fast path for spectral profile
 pub fn spectral_profile(weights: &[f64], t_values: &[f64]) -> Vec<(f64, f64, [f64; 4])> {
-    t_values.par_iter().map(|&t| {
-        let total = dirichlet_poly_norm_sq(weights, t);
-        let mut channels = [0.0f64; 4];
-        for i in 0..4 {
-            channels[i] = channel_dirichlet_norm_sq_f64(
-                weights, &crate::characters::CHI_TABLE[i], t
-            );
-        }
-        (t, total, channels)
-    }).collect()
+    t_values
+        .par_iter()
+        .map(|&t| {
+            let total = dirichlet_poly_norm_sq(weights, t);
+            let mut channels = [0.0f64; 4];
+            for i in 0..4 {
+                channels[i] =
+                    channel_dirichlet_norm_sq_f64(weights, &crate::characters::CHI_TABLE[i], t);
+            }
+            (t, total, channels)
+        })
+        .collect()
 }
 
 fn channel_dirichlet_norm_sq_f64(weights: &[f64], chi_table: &[i8; 8], t: f64) -> f64 {
@@ -215,7 +239,9 @@ fn channel_dirichlet_norm_sq_f64(weights: &[f64], chi_table: &[i8; 8], t: f64) -
         let k = i + 1;
         let c = chi_table[k % 8] as f64;
         let cvk = c * vk;
-        if cvk == 0.0 { continue; }
+        if cvk == 0.0 {
+            continue;
+        }
         let amp = cvk / (k as f64).sqrt();
         let phase = t * (k as f64).ln();
         re += amp * phase.cos();

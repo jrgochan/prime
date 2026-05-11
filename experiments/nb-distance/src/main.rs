@@ -21,11 +21,11 @@
 //!
 //! No envelope restriction, no sieve weights — pure L² projection.
 
-mod solver;
 mod certificate;
+mod solver;
 
 use cathedral_utils::{arith, cache, fitting, fmt};
-use fmt::{BOLD, WHITE, CYAN, GREEN, YELLOW, DIM, RESET};
+use fmt::{BOLD, CYAN, DIM, GREEN, RESET, WHITE, YELLOW};
 
 fn main() {
     let t0 = std::time::Instant::now();
@@ -38,11 +38,15 @@ fn main() {
 
     // ═══ HEADER ═══
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════╗{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════╗{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}NYMAN-BEURLING DISTANCE PROBE{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}d²_N = 1 - b^T G_N^{{-1}} b  ·  RH ⟺ d²_N → 0{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}Max N = {max_n}  ·  {threads} threads{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     // ═══ LOAD GRAM MATRIX ═══
@@ -74,13 +78,20 @@ fn main() {
         106 => "double-double".to_string(),
         p => format!("{p}-bit MPFR"),
     };
-    println!("  {GREEN}✓{RESET} Loaded {prec_str} Gram matrix (N={}, {} MB)", gram_matrix.max_n, gram_matrix.mem_mb());
+    println!(
+        "  {GREEN}✓{RESET} Loaded {prec_str} Gram matrix (N={}, {} MB)",
+        gram_matrix.max_n,
+        gram_matrix.mem_mb()
+    );
     println!();
 
     // ═══ BUILD TEST SCHEDULE ═══
     let test_ns = build_schedule(max_n);
     println!("  {BOLD}{WHITE}═══ §B. DISTANCE COMPUTATION ═══{RESET}");
-    println!("  {DIM}Computing d²_N = 1 - b^T G_N^{{-1}} b for {} values of N{RESET}", test_ns.len());
+    println!(
+        "  {DIM}Computing d²_N = 1 - b^T G_N^{{-1}} b for {} values of N{RESET}",
+        test_ns.len()
+    );
     println!();
 
     println!("  {DIM}     N  │ d²_N            │ λ_min          │ κ(G_N)     │ ||c*||₁      │ status{RESET}");
@@ -89,7 +100,9 @@ fn main() {
     let mut results: Vec<solver::DistanceResult> = Vec::new();
 
     for &n in &test_ns {
-        if n < 3 || n > gram_matrix.max_n { continue; }
+        if n < 3 || n > gram_matrix.max_n {
+            continue;
+        }
         let dim = n - 1;
         let (sub, _trace) = gram_matrix.extract_submatrix(n);
         let b = arith::b_vector(dim);
@@ -117,7 +130,8 @@ fn main() {
     println!("  {BOLD}{WHITE}═══ §C. DECAY ANALYSIS ═══{RESET}");
 
     // Power-law fit: d² ~ C · N^(-α)
-    let fit_data: Vec<(f64, f64)> = results.iter()
+    let fit_data: Vec<(f64, f64)> = results
+        .iter()
         .filter(|r| r.n >= 10 && r.d2 > 0.0)
         .map(|r| (r.n as f64, r.d2))
         .collect();
@@ -131,12 +145,16 @@ fn main() {
     };
 
     println!("  {DIM}Power-law fit (N ≥ 10):{RESET}");
-    println!("    d²_N ~ {:.6} · N^(-{:.4})   R² = {:.6}", fit_c, fit_alpha, fit_r2);
+    println!(
+        "    d²_N ~ {:.6} · N^(-{:.4})   R² = {:.6}",
+        fit_c, fit_alpha, fit_r2
+    );
     println!();
 
     // Log fit: d² ~ C / ln(N)
     let log_fit = if fit_data.len() >= 3 {
-        let inv_log_data: Vec<(f64, f64)> = fit_data.iter().map(|(n, d)| (1.0 / n.ln(), *d)).collect();
+        let inv_log_data: Vec<(f64, f64)> =
+            fit_data.iter().map(|(n, d)| (1.0 / n.ln(), *d)).collect();
         let (slope, intercept, r2) = fitting::linreg(&inv_log_data);
         (slope, intercept, r2)
     } else {
@@ -144,17 +162,30 @@ fn main() {
     };
 
     println!("  {DIM}Logarithmic fit (d² ~ a/ln(N) + b):{RESET}");
-    println!("    d²_N ~ {:.6}/ln(N) + {:.6}   R² = {:.6}", log_fit.0, log_fit.1, log_fit.2);
+    println!(
+        "    d²_N ~ {:.6}/ln(N) + {:.6}   R² = {:.6}",
+        log_fit.0, log_fit.1, log_fit.2
+    );
     println!();
 
     // Check: is d² monotonically decreasing after initial transient?
-    let monotone = results.windows(2)
+    let monotone = results
+        .windows(2)
         .filter(|w| w[0].n >= 10)
         .all(|w| w[1].d2 <= w[0].d2 + 1e-10);
     let all_positive = results.iter().all(|r| r.d2 > 0.0);
 
-    let check = |b: bool| if b { format!("{GREEN}✓{RESET}") } else { "\x1b[31m✗\x1b[0m".to_string() };
-    println!("  {} All d²_N > 0 (required by L² theory)", check(all_positive));
+    let check = |b: bool| {
+        if b {
+            format!("{GREEN}✓{RESET}")
+        } else {
+            "\x1b[31m✗\x1b[0m".to_string()
+        }
+    };
+    println!(
+        "  {} All d²_N > 0 (required by L² theory)",
+        check(all_positive)
+    );
     println!("  {} Monotonically decreasing for N ≥ 10", check(monotone));
 
     if fit_alpha > 0.0 {
@@ -175,11 +206,14 @@ fn main() {
     println!("  {DIM}     N  │ ||v_min||_∞  │ D(N)         │ IPR(v_min)   │ |⟨b,v_min⟩|{RESET}");
     println!("  {DIM}  ──────┼──────────────┼──────────────┼──────────────┼─────────────{RESET}");
 
-    let deloc_data: Vec<(f64, f64)> = results.iter()
+    let deloc_data: Vec<(f64, f64)> = results
+        .iter()
         .filter(|r| r.n >= 10)
         .map(|r| {
-            println!("  {:<6} │ {:.6e}  │ {:.6e}  │ {:.6e}  │ {:.6e}",
-                r.n, r.vmin_linf, r.delocalization_ratio, r.ipr, r.b_vmin_proj);
+            println!(
+                "  {:<6} │ {:.6e}  │ {:.6e}  │ {:.6e}  │ {:.6e}",
+                r.n, r.vmin_linf, r.delocalization_ratio, r.ipr, r.b_vmin_proj
+            );
             (r.n as f64, r.delocalization_ratio)
         })
         .collect();
@@ -188,7 +222,8 @@ fn main() {
 
     // Fit D(N) ~ A · N^β to see if it's bounded (β ≈ 0) or growing
     if deloc_data.len() >= 3 {
-        let log_deloc: Vec<(f64, f64)> = deloc_data.iter()
+        let log_deloc: Vec<(f64, f64)> = deloc_data
+            .iter()
             .filter(|(_, d)| *d > 0.0)
             .map(|(n, d)| (n.ln(), d.ln()))
             .collect();
@@ -200,23 +235,31 @@ fn main() {
             if slope.abs() < 0.1 {
                 println!("    {GREEN}✓ D(N) approximately BOUNDED → delocalization holds{RESET}");
             } else if slope > 0.0 {
-                println!("    {YELLOW}⚠ D(N) growing as N^{:.3} — needs more data{RESET}", slope);
+                println!(
+                    "    {YELLOW}⚠ D(N) growing as N^{:.3} — needs more data{RESET}",
+                    slope
+                );
             }
             println!();
         }
 
         // IPR scaling: IPR ~ A · N^β  (should be β ≈ -1 for uniform delocalization)
-        let ipr_data: Vec<(f64, f64)> = results.iter()
+        let ipr_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.ipr > 0.0)
             .map(|r| (r.n as f64, r.ipr))
             .collect();
         if ipr_data.len() >= 3 {
-            let log_ipr: Vec<(f64, f64)> = ipr_data.iter()
-                .map(|(n, ipr)| (n.ln(), ipr.ln()))
-                .collect();
+            let log_ipr: Vec<(f64, f64)> =
+                ipr_data.iter().map(|(n, ipr)| (n.ln(), ipr.ln())).collect();
             let (slope, intercept, r2) = fitting::linreg(&log_ipr);
             println!("  {DIM}IPR scaling fit:{RESET}");
-            println!("    IPR ~ {:.4} · N^({:.4})   R² = {:.4}", intercept.exp(), slope, r2);
+            println!(
+                "    IPR ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            );
             if slope < -0.5 {
                 println!("    {GREEN}✓ IPR decaying → eigenvector delocalized{RESET}");
             }
@@ -231,13 +274,32 @@ fn main() {
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}NYMAN-BEURLING DISTANCE CERTIFICATE{RESET}");
     println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Gram: {prec_str} ({} MB)  Threads: {threads}  Max N: {max_tested}", gram_matrix.mem_mb());
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Gram: {prec_str} ({} MB)  Threads: {threads}  Max N: {max_tested}",
+        gram_matrix.mem_mb()
+    );
     println!("  {BOLD}{CYAN}║{RESET}  b_k = (ln k + 1 - γ) / k");
-    println!("  {BOLD}{CYAN}║{RESET}  {} All d²_N > 0 for N ≤ {max_tested}", check(all_positive));
-    println!("  {BOLD}{CYAN}║{RESET}  {} Monotonically decreasing", check(monotone));
-    println!("  {BOLD}{CYAN}║{RESET}  Min d²_N = {:.10e} at N = {}", min_d2,
-        results.iter().min_by(|a, b| a.d2.partial_cmp(&b.d2).unwrap()).unwrap().n);
-    println!("  {BOLD}{CYAN}║{RESET}  Decay: d² ~ {:.4} · N^(-{:.4})  R²={:.4}", fit_c, fit_alpha, fit_r2);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {} All d²_N > 0 for N ≤ {max_tested}",
+        check(all_positive)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {} Monotonically decreasing",
+        check(monotone)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Min d²_N = {:.10e} at N = {}",
+        min_d2,
+        results
+            .iter()
+            .min_by(|a, b| a.d2.partial_cmp(&b.d2).unwrap())
+            .unwrap()
+            .n
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Decay: d² ~ {:.4} · N^(-{:.4})  R²={:.4}",
+        fit_c, fit_alpha, fit_r2
+    );
     if all_positive && fit_alpha > 0.0 {
         println!("  {BOLD}{CYAN}║{RESET}  {GREEN}{BOLD}CONSISTENT WITH RH{RESET}");
     }
@@ -246,16 +308,23 @@ fn main() {
 
     // ═══ WRITE OUTPUT ═══
     std::fs::create_dir_all("results").ok();
-    certificate::write_tsv(
-        std::path::Path::new("results/nb_distance.tsv"), &results
-    ).expect("Failed to write TSV");
+    certificate::write_tsv(std::path::Path::new("results/nb_distance.tsv"), &results)
+        .expect("Failed to write TSV");
 
     certificate::write_certificate(
         std::path::Path::new("results/nb_certificate.json"),
-        &results, precision, fit_alpha, fit_c, fit_r2,
-    ).expect("Failed to write certificate");
+        &results,
+        precision,
+        fit_alpha,
+        fit_c,
+        fit_r2,
+    )
+    .expect("Failed to write certificate");
 
-    println!("  Total: {:.1}s ({threads} threads)", t0.elapsed().as_secs_f64());
+    println!(
+        "  Total: {:.1}s ({threads} threads)",
+        t0.elapsed().as_secs_f64()
+    );
     println!("  Output: results/nb_distance.tsv");
     println!("           results/nb_certificate.json");
     println!();
@@ -265,17 +334,29 @@ fn main() {
 fn build_schedule(max_n: usize) -> Vec<usize> {
     let mut ns: Vec<usize> = Vec::new();
     // Dense: every integer from 3..30
-    for n in 3..=30.min(max_n) { ns.push(n); }
+    for n in 3..=30.min(max_n) {
+        ns.push(n);
+    }
     // Medium: every 5 from 35..100
-    for n in (35..=100.min(max_n)).step_by(5) { ns.push(n); }
+    for n in (35..=100.min(max_n)).step_by(5) {
+        ns.push(n);
+    }
     // Coarse: every 25 from 125..500
-    for n in (125..=500.min(max_n)).step_by(25) { ns.push(n); }
+    for n in (125..=500.min(max_n)).step_by(25) {
+        ns.push(n);
+    }
     // Sparse: every 50 from 550..1000
-    for n in (550..=1000.min(max_n)).step_by(50) { ns.push(n); }
+    for n in (550..=1000.min(max_n)).step_by(50) {
+        ns.push(n);
+    }
     // Wide: every 100 from 1100..2000
-    for n in (1100..=max_n).step_by(100) { ns.push(n); }
+    for n in (1100..=max_n).step_by(100) {
+        ns.push(n);
+    }
     // Always include max_n
-    if !ns.contains(&max_n) && max_n >= 3 { ns.push(max_n); }
+    if !ns.contains(&max_n) && max_n >= 3 {
+        ns.push(max_n);
+    }
     ns.sort();
     ns.dedup();
     ns

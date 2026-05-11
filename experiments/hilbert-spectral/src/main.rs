@@ -16,8 +16,8 @@
 
 mod hilbert;
 
-use cathedral_utils::fmt;
 use cathedral_utils::certificate;
+use cathedral_utils::fmt;
 use rayon::prelude::*;
 use std::time::Instant;
 
@@ -35,7 +35,10 @@ fn main() {
 
     fmt::header(
         "HILBERT MATRIX SPECTRAL ANALYSIS ENGINE",
-        &format!("π Constant Certification · Cathedral v16 · N_max = {}", max_n),
+        &format!(
+            "π Constant Certification · Cathedral v16 · N_max = {}",
+            max_n
+        ),
         512,
         threads,
     );
@@ -50,14 +53,19 @@ fn main() {
     println!("    Theory: ‖H_N‖_op → π = {:.50} (Schur 1911)", pi);
     println!("    Method: power iteration on H^T H, 512-bit precision");
     println!();
-    println!("    {:>6} │ {:>20} │ {:>14} │ {:>14} │ {:>8} │ {:>6}",
-             "N", "‖H_N‖ (512-bit)", "|‖H_N‖ - π|", "|err|×N", "iters", "time");
+    println!(
+        "    {:>6} │ {:>20} │ {:>14} │ {:>14} │ {:>8} │ {:>6}",
+        "N", "‖H_N‖ (512-bit)", "|‖H_N‖ - π|", "|err|×N", "iters", "time"
+    );
 
     // Matrix sizes capped at max_n for eigenvalue computation
     let eigen_sizes: Vec<usize> = vec![
-        10, 20, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000,
-        6000, 7000, 8000, 10000,
-    ].into_iter().filter(|&n| n <= max_n).collect();
+        10, 20, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000,
+        10000,
+    ]
+    .into_iter()
+    .filter(|&n| n <= max_n)
+    .collect();
 
     let mut norm_results: Vec<(usize, f64, usize)> = Vec::new();
 
@@ -71,8 +79,15 @@ fn main() {
         let err = (norm_f64 - pi_f64).abs();
         let err_n = err * (n as f64);
 
-        println!("    {:>6} │ {:>20.15} │ {:>14.6e} │ {:>14.4} │ {:>8} │ {:>5.1}s",
-                 n, norm_f64, err, err_n, iters, elapsed.as_secs_f64());
+        println!(
+            "    {:>6} │ {:>20.15} │ {:>14.6e} │ {:>14.4} │ {:>8} │ {:>5.1}s",
+            n,
+            norm_f64,
+            err,
+            err_n,
+            iters,
+            elapsed.as_secs_f64()
+        );
         norm_results.push((n, norm_f64, iters));
     }
 
@@ -87,31 +102,41 @@ fn main() {
 
     // Row sums can scale much higher
     let row_sum_cap = max_n.min(100_000);
-    let row_sum_sizes: Vec<usize> = vec![
-        100, 500, 1000, 5000, 10_000, 50_000, 100_000,
-    ].into_iter().filter(|&n| n <= row_sum_cap).collect();
+    let row_sum_sizes: Vec<usize> = vec![100, 500, 1000, 5000, 10_000, 50_000, 100_000]
+        .into_iter()
+        .filter(|&n| n <= row_sum_cap)
+        .collect();
 
     for &n_max in &row_sum_sizes {
         println!("    N = {}:", n_max);
-        println!("    {:>10} │ {:>18} │ {:>14} │ {:>14}",
-                 "n", "R_n", "R_n / n", "R_n / (πn)");
+        println!(
+            "    {:>10} │ {:>18} │ {:>14} │ {:>14}",
+            "n", "R_n", "R_n / n", "R_n / (πn)"
+        );
 
         // Sample specific rows, compute in parallel
-        let sample_rows: Vec<usize> = vec![
-            1, n_max/10, n_max/4, n_max/2, 3*n_max/4, n_max,
-        ].into_iter().filter(|&n| n >= 1 && n <= n_max).collect();
+        let sample_rows: Vec<usize> =
+            vec![1, n_max / 10, n_max / 4, n_max / 2, 3 * n_max / 4, n_max]
+                .into_iter()
+                .filter(|&n| n >= 1 && n <= n_max)
+                .collect();
 
-        let results: Vec<(usize, f64, f64)> = sample_rows.par_iter().map(|&n| {
-            let r = hilbert::mv_row_sum_mpfr(n, n_max);
-            let r_f64 = r.to_f64();
-            let ratio = r_f64 / (n as f64);
-            (n, r_f64, ratio)
-        }).collect();
+        let results: Vec<(usize, f64, f64)> = sample_rows
+            .par_iter()
+            .map(|&n| {
+                let r = hilbert::mv_row_sum_mpfr(n, n_max);
+                let r_f64 = r.to_f64();
+                let ratio = r_f64 / (n as f64);
+                (n, r_f64, ratio)
+            })
+            .collect();
 
         for (n, r, ratio) in &results {
             let pi_ratio = ratio / pi_f64;
-            println!("    {:>10} │ {:>18.6} │ {:>14.8} │ {:>14.8}",
-                     n, r, ratio, pi_ratio);
+            println!(
+                "    {:>10} │ {:>18.6} │ {:>14.8} │ {:>14.8}",
+                n, r, ratio, pi_ratio
+            );
         }
         println!();
     }
@@ -124,12 +149,16 @@ fn main() {
     println!("    Max at i = N/2: R_{{N/2}} = 2·H(N/2) ≈ 2·ln(N/2) + 2γ");
     println!("    Compare: ‖H_N‖ → π ≈ 3.14159... (Schur is O(log N) vs O(1)!)");
     println!();
-    println!("    {:>6} │ {:>18} │ {:>18} │ {:>12}",
-             "N", "Schur (max R_i)", "‖H_N‖ (exact)", "Schur/‖H‖");
+    println!(
+        "    {:>6} │ {:>18} │ {:>18} │ {:>12}",
+        "N", "Schur (max R_i)", "‖H_N‖ (exact)", "Schur/‖H‖"
+    );
 
     let schur_cap = max_n.min(1000);
     let schur_sizes: Vec<usize> = vec![10, 20, 50, 100, 200, 500, 1000]
-        .into_iter().filter(|&n| n <= schur_cap).collect();
+        .into_iter()
+        .filter(|&n| n <= schur_cap)
+        .collect();
 
     let mut schur_ok = true;
     let mut schur_results: Vec<(usize, f64, f64)> = Vec::new();
@@ -139,7 +168,8 @@ fn main() {
         let schur_f64 = schur.to_f64();
 
         // Get exact norm if we computed it
-        let norm_f64 = norm_results.iter()
+        let norm_f64 = norm_results
+            .iter()
             .find(|(sz, _, _)| *sz == n)
             .map(|(_, v, _)| *v)
             .unwrap_or_else(|| {
@@ -150,8 +180,14 @@ fn main() {
         let ratio = schur_f64 / norm_f64;
         let ok = schur_f64 >= norm_f64 * 0.999;
         schur_ok &= ok;
-        println!("    {:>6} │ {:>18.10} │ {:>18.10} │ {:>12.4} {}",
-                 n, schur_f64, norm_f64, ratio, fmt::check(ok));
+        println!(
+            "    {:>6} │ {:>18.10} │ {:>18.10} │ {:>12.4} {}",
+            n,
+            schur_f64,
+            norm_f64,
+            ratio,
+            fmt::check(ok)
+        );
         schur_results.push((n, schur_f64, norm_f64));
     }
 
@@ -162,13 +198,28 @@ fn main() {
     println!("    π/δ_n ≈ πn — this is the per-term MV bound");
     println!("    Our Lean proof uses Schur: max(R_n) ≈ 2·ln(N) (weaker by N/log(N))");
     println!();
-    println!("    {:>10} │ {:>20} │ {:>20} │ {:>18} │ {:>18}",
-             "n", "δ_n (512-bit)", "1/n", "π/δ_n", "πn");
+    println!(
+        "    {:>10} │ {:>20} │ {:>20} │ {:>18} │ {:>18}",
+        "n", "δ_n (512-bit)", "1/n", "π/δ_n", "πn"
+    );
 
     let sep_samples: Vec<usize> = vec![
-        2, 5, 10, 50, 100, 1000, 10_000, 100_000, 1_000_000,
-        10_000_000, 100_000_000, 1_000_000_000,
-    ].into_iter().filter(|&n| n <= max_n.max(1_000_000_000)).collect();
+        2,
+        5,
+        10,
+        50,
+        100,
+        1000,
+        10_000,
+        100_000,
+        1_000_000,
+        10_000_000,
+        100_000_000,
+        1_000_000_000,
+    ]
+    .into_iter()
+    .filter(|&n| n <= max_n.max(1_000_000_000))
+    .collect();
 
     for &n in &sep_samples {
         let delta = hilbert::log_separation_mpfr(n);
@@ -176,8 +227,10 @@ fn main() {
         let inv_n = 1.0 / (n as f64);
         let pi_delta = pi_f64 / delta_f64;
         let pi_n = pi_f64 * (n as f64);
-        println!("    {:>10} │ {:>20.15} │ {:>20.15} │ {:>18.4} │ {:>18.4}",
-                 n, delta_f64, inv_n, pi_delta, pi_n);
+        println!(
+            "    {:>10} │ {:>20.15} │ {:>20.15} │ {:>18.4} │ {:>18.4}",
+            n, delta_f64, inv_n, pi_delta, pi_n
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -186,8 +239,10 @@ fn main() {
     fmt::section("§E. CONVERGENCE RATE — |‖H_N‖ - π| = O(1/N)");
     println!("    If |err|×N is bounded: O(1/N) convergence confirmed");
     println!();
-    println!("    {:>6} │ {:>14} │ {:>14} │ {:>14}",
-             "N", "|err|", "|err| × N", "|err| × N²");
+    println!(
+        "    {:>6} │ {:>14} │ {:>14} │ {:>14}",
+        "N", "|err|", "|err| × N", "|err| × N²"
+    );
 
     let mut conv_ok = true;
     for (n, norm, _) in &norm_results {
@@ -195,8 +250,10 @@ fn main() {
         let err_n = err * (*n as f64);
         let err_n2 = err * (*n as f64) * (*n as f64);
         if *n >= 20 {
-            println!("    {:>6} │ {:>14.2e} │ {:>14.6} │ {:>14.2}",
-                     n, err, err_n, err_n2);
+            println!(
+                "    {:>6} │ {:>14.2e} │ {:>14.6} │ {:>14.2}",
+                n, err, err_n, err_n2
+            );
         }
         if *n >= 100 && err_n > 100.0 {
             conv_ok = false;
@@ -210,28 +267,38 @@ fn main() {
 
     // --- TSV: Operator norm convergence ---
     let norm_headers = &["N", "norm", "error", "error_times_N", "iters"];
-    let norm_rows: Vec<Vec<String>> = norm_results.iter().map(|(n, norm, iters)| {
-        let err = (norm - pi_f64).abs();
-        vec![
-            n.to_string(),
-            format!("{:.15e}", norm),
-            format!("{:.15e}", err),
-            format!("{:.15e}", err * (*n as f64)),
-            iters.to_string(),
-        ]
-    }).collect();
-    certificate::write_tsv("results/operator_norm_convergence.tsv", norm_headers, &norm_rows);
+    let norm_rows: Vec<Vec<String>> = norm_results
+        .iter()
+        .map(|(n, norm, iters)| {
+            let err = (norm - pi_f64).abs();
+            vec![
+                n.to_string(),
+                format!("{:.15e}", norm),
+                format!("{:.15e}", err),
+                format!("{:.15e}", err * (*n as f64)),
+                iters.to_string(),
+            ]
+        })
+        .collect();
+    certificate::write_tsv(
+        "results/operator_norm_convergence.tsv",
+        norm_headers,
+        &norm_rows,
+    );
 
     // --- TSV: Schur comparison ---
     let schur_headers = &["N", "schur_bound", "exact_norm", "ratio"];
-    let schur_rows: Vec<Vec<String>> = schur_results.iter().map(|(n, schur, norm)| {
-        vec![
-            n.to_string(),
-            format!("{:.15e}", schur),
-            format!("{:.15e}", norm),
-            format!("{:.15e}", schur / norm),
-        ]
-    }).collect();
+    let schur_rows: Vec<Vec<String>> = schur_results
+        .iter()
+        .map(|(n, schur, norm)| {
+            vec![
+                n.to_string(),
+                format!("{:.15e}", schur),
+                format!("{:.15e}", norm),
+                format!("{:.15e}", schur / norm),
+            ]
+        })
+        .collect();
     certificate::write_tsv("results/schur_comparison.tsv", schur_headers, &schur_rows);
 
     // --- JSON Certificate ---
@@ -273,21 +340,52 @@ fn main() {
     println!();
     certificate::cathedral_header(
         "HILBERT SPECTRAL ANALYSIS — CERTIFICATE",
-        &format!("512-bit MPFR · {} threads · N_max = {} · {:.1}s", threads, max_n, elapsed.as_secs_f64()),
+        &format!(
+            "512-bit MPFR · {} threads · N_max = {} · {:.1}s",
+            threads,
+            max_n,
+            elapsed.as_secs_f64()
+        ),
     );
     println!();
-    println!("    §A. {} ‖H_N‖ → π: best at N={}: {:.15} (err {:.2e})",
-             fmt::check(true), best_n, best_norm, best_err);
-    println!("    §C. {} Schur bound ≥ true norm for all N tested",
-             fmt::check(schur_ok));
-    println!("    §E. {} |‖H_N‖ - π| = O(1/N) confirmed", fmt::check(conv_ok));
+    println!(
+        "    §A. {} ‖H_N‖ → π: best at N={}: {:.15} (err {:.2e})",
+        fmt::check(true),
+        best_n,
+        best_norm,
+        best_err
+    );
+    println!(
+        "    §C. {} Schur bound ≥ true norm for all N tested",
+        fmt::check(schur_ok)
+    );
+    println!(
+        "    §E. {} |‖H_N‖ - π| = O(1/N) confirmed",
+        fmt::check(conv_ok)
+    );
     println!();
     if all_pass {
-        println!("    {}✓ π constant NUMERICALLY CERTIFIED (512-bit MPFR){}", fmt::GREEN, fmt::RESET);
-        println!("    {}✓ Schur test provides VALID upper bound (used in Lean proof){}", fmt::GREEN, fmt::RESET);
-        println!("    {}✓ Gap: Schur = O(log N) vs optimal = π ≈ 3.14159{}", fmt::GREEN, fmt::RESET);
+        println!(
+            "    {}✓ π constant NUMERICALLY CERTIFIED (512-bit MPFR){}",
+            fmt::GREEN,
+            fmt::RESET
+        );
+        println!(
+            "    {}✓ Schur test provides VALID upper bound (used in Lean proof){}",
+            fmt::GREEN,
+            fmt::RESET
+        );
+        println!(
+            "    {}✓ Gap: Schur = O(log N) vs optimal = π ≈ 3.14159{}",
+            fmt::GREEN,
+            fmt::RESET
+        );
     } else {
-        println!("    {}✗ Some checks failed — see details above{}", fmt::RED, fmt::RESET);
+        println!(
+            "    {}✗ Some checks failed — see details above{}",
+            fmt::RED,
+            fmt::RESET
+        );
     }
 
     println!();

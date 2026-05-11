@@ -93,19 +93,14 @@ fn triangle(xi: f64) -> f64 {
 /// Uses real coefficients — the bilinear form Σ_{i≠j} xᵢxⱼ/(λᵢ-λⱼ)
 /// is antisymmetric, so it equals zero for real x. We test with
 /// phase-rotated coefficients to get non-trivial values.
-fn test_mv_bound(
-    n: usize,
-    lambda: &[f64],
-    x_mags: &[f64],
-    delta: f64,
-) -> (f64, f64, bool) {
+fn test_mv_bound(n: usize, lambda: &[f64], x_mags: &[f64], delta: f64) -> (f64, f64, bool) {
     // Use complex coefficients: x_k = |x_k| · e^{i·k·π/n}
-    let x_re: Vec<f64> = (0..n).map(|k| {
-        x_mags[k] * (k as f64 * std::f64::consts::PI / n as f64).cos()
-    }).collect();
-    let x_im: Vec<f64> = (0..n).map(|k| {
-        x_mags[k] * (k as f64 * std::f64::consts::PI / n as f64).sin()
-    }).collect();
+    let x_re: Vec<f64> = (0..n)
+        .map(|k| x_mags[k] * (k as f64 * std::f64::consts::PI / n as f64).cos())
+        .collect();
+    let x_im: Vec<f64> = (0..n)
+        .map(|k| x_mags[k] * (k as f64 * std::f64::consts::PI / n as f64).sin())
+        .collect();
 
     // Compute Σ_{i≠j} xᵢ·conj(xⱼ) / (λᵢ-λⱼ)
     let mut sum_re = 0.0f64;
@@ -116,15 +111,15 @@ fn test_mv_bound(
                 let diff = lambda[i] - lambda[j];
                 if diff.abs() > 1e-15 {
                     // x_i * conj(x_j) = (a+bi)(c-di) = (ac+bd) + (bc-ad)i
-                    let prod_re = x_re[i]*x_re[j] + x_im[i]*x_im[j];
-                    let prod_im = x_im[i]*x_re[j] - x_re[i]*x_im[j];
+                    let prod_re = x_re[i] * x_re[j] + x_im[i] * x_im[j];
+                    let prod_im = x_im[i] * x_re[j] - x_re[i] * x_im[j];
                     sum_re += prod_re / diff;
                     sum_im += prod_im / diff;
                 }
             }
         }
     }
-    let lhs = (sum_re*sum_re + sum_im*sum_im).sqrt();
+    let lhs = (sum_re * sum_re + sum_im * sum_im).sqrt();
 
     // RHS: (π/δ) · Σ|xᵢ|²
     let sum_sq: f64 = x_mags.iter().map(|x| x * x).sum();
@@ -139,7 +134,10 @@ fn main() {
     println!("║  Cathedral Experiment: Fejér Kernel Validation              ║");
     println!("║  K(x) = sinc²(x) — the engine of Montgomery-Vaughan        ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  Precision: {} bits (MPFR)                                ║", PREC);
+    println!(
+        "║  Precision: {} bits (MPFR)                                ║",
+        PREC
+    );
     println!("║  Timestamp: {}                       ║", &timestamp[..19]);
     println!("╚══════════════════════════════════════════════════════════════╝\n");
 
@@ -164,21 +162,30 @@ fn main() {
         let err_f64 = error.to_f64();
         let int_f64 = integral.to_f64();
 
-        println!("  L={:>6.0}  N={:>9}  ∫sinc² = {:.15}  |error| = {:.2e}",
-            x_max, n_pts, int_f64, err_f64);
+        println!(
+            "  L={:>6.0}  N={:>9}  ∫sinc² = {:.15}  |error| = {:.2e}",
+            x_max, n_pts, int_f64, err_f64
+        );
 
-        fk3_tsv.push_str(&format!("{}\t{}\t{:.15}\t{:.2e}\n",
-            x_max, n_pts, int_f64, err_f64));
+        fk3_tsv.push_str(&format!(
+            "{}\t{}\t{:.15}\t{:.2e}\n",
+            x_max, n_pts, int_f64, err_f64
+        ));
         fk3_results.push((x_max, n_pts, int_f64, err_f64));
     }
 
-    let fk3_pass = fk3_results.last().map(|(l, _, v, _)| {
-        // Expected error is O(1/(πL)) from tail of sinc²
-        let expected_error = 1.0 / (std::f64::consts::PI * l);
-        (*v - 1.0).abs() < 2.0 * expected_error
-    }).unwrap_or(false);
-    println!("\n  FK3 CERTIFIED: {} (converging to 1, tail O(1/πL))\n",
-        if fk3_pass { "✅ PASS" } else { "❌ FAIL" });
+    let fk3_pass = fk3_results
+        .last()
+        .map(|(l, _, v, _)| {
+            // Expected error is O(1/(πL)) from tail of sinc²
+            let expected_error = 1.0 / (std::f64::consts::PI * l);
+            (*v - 1.0).abs() < 2.0 * expected_error
+        })
+        .unwrap_or(false);
+    println!(
+        "\n  FK3 CERTIFIED: {} (converging to 1, tail O(1/πL))\n",
+        if fk3_pass { "✅ PASS" } else { "❌ FAIL" }
+    );
 
     // ═══════════════════════════════════════════════════════
     // §2. FK4: K̂(ξ) = max(1-|ξ|, 0) — band-limitation
@@ -200,12 +207,20 @@ fn main() {
         let expected = triangle(xi);
         let error = (ft_f64 - expected).abs();
 
-        let marker = if xi > 1.0 + 1e-10 { " ← OUTSIDE [-1,1]" } else { "" };
-        println!("  ξ={:.1}  K̂(ξ)={:>12.8}  expected={:>6.3}  |error|={:.2e}{}",
-            xi, ft_f64, expected, error, marker);
+        let marker = if xi > 1.0 + 1e-10 {
+            " ← OUTSIDE [-1,1]"
+        } else {
+            ""
+        };
+        println!(
+            "  ξ={:.1}  K̂(ξ)={:>12.8}  expected={:>6.3}  |error|={:.2e}{}",
+            xi, ft_f64, expected, error, marker
+        );
 
-        fk4_tsv.push_str(&format!("{:.1}\t{:.10}\t{:.6}\t{:.2e}\n",
-            xi, ft_f64, expected, error));
+        fk4_tsv.push_str(&format!(
+            "{:.1}\t{:.10}\t{:.6}\t{:.2e}\n",
+            xi, ft_f64, expected, error
+        ));
 
         if xi > 1.05 {
             fk4_max_error_outside = fk4_max_error_outside.max(ft_f64.abs());
@@ -214,9 +229,14 @@ fn main() {
     }
 
     let fk4_pass = fk4_max_error_outside < 1e-3;
-    println!("\n  FK4 band-limitation: max |K̂(ξ)| for |ξ|>1.05 = {:.2e}", fk4_max_error_outside);
-    println!("  FK4 CERTIFIED: {} (max outside < 1e-3)\n",
-        if fk4_pass { "✅ PASS" } else { "❌ FAIL" });
+    println!(
+        "\n  FK4 band-limitation: max |K̂(ξ)| for |ξ|>1.05 = {:.2e}",
+        fk4_max_error_outside
+    );
+    println!(
+        "  FK4 CERTIFIED: {} (max outside < 1e-3)\n",
+        if fk4_pass { "✅ PASS" } else { "❌ FAIL" }
+    );
 
     // ═══════════════════════════════════════════════════════
     // §3. M-V Bound Validation
@@ -233,10 +253,22 @@ fn main() {
     let lambda: Vec<f64> = (0..n).map(|i| i as f64 * delta).collect();
     let (lhs, rhs, pass) = test_mv_bound(n, &lambda, &x_mags, delta);
     println!("  Test 1: N={}, δ={:.1}, uniform λ", n, delta);
-    println!("    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
-        lhs, rhs, lhs / rhs, if pass { "✅" } else { "❌" });
-    mv_tsv.push_str(&format!("uniform\t{}\t{}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
-        n, delta, lhs, rhs, lhs / rhs, pass));
+    println!(
+        "    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
+        lhs,
+        rhs,
+        lhs / rhs,
+        if pass { "✅" } else { "❌" }
+    );
+    mv_tsv.push_str(&format!(
+        "uniform\t{}\t{}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
+        n,
+        delta,
+        lhs,
+        rhs,
+        lhs / rhs,
+        pass
+    ));
     mv_all_pass &= pass;
 
     // Test 2: Log-spaced λ (like Dirichlet polynomials)
@@ -246,10 +278,22 @@ fn main() {
     let x_mags: Vec<f64> = (1..=n).map(|i| 1.0 / (i as f64).sqrt()).collect();
     let (lhs, rhs, pass) = test_mv_bound(n, &lambda, &x_mags, delta);
     println!("  Test 2: N={}, log-spaced λ, δ={:.6}", n, delta);
-    println!("    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
-        lhs, rhs, lhs / rhs, if pass { "✅" } else { "❌" });
-    mv_tsv.push_str(&format!("log_spaced\t{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
-        n, delta, lhs, rhs, lhs / rhs, pass));
+    println!(
+        "    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
+        lhs,
+        rhs,
+        lhs / rhs,
+        if pass { "✅" } else { "❌" }
+    );
+    mv_tsv.push_str(&format!(
+        "log_spaced\t{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
+        n,
+        delta,
+        lhs,
+        rhs,
+        lhs / rhs,
+        pass
+    ));
     mv_all_pass &= pass;
 
     // Test 3: Tight separation (stress test)
@@ -259,29 +303,68 @@ fn main() {
     let x_mags: Vec<f64> = (0..n).map(|i| 1.0 / (i as f64 + 1.0)).collect();
     let (lhs, rhs, pass) = test_mv_bound(n, &lambda, &x_mags, delta);
     println!("  Test 3: N={}, δ={:.3}, tight separation", n, delta);
-    println!("    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
-        lhs, rhs, lhs / rhs, if pass { "✅" } else { "❌" });
-    mv_tsv.push_str(&format!("tight\t{}\t{}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
-        n, delta, lhs, rhs, lhs / rhs, pass));
+    println!(
+        "    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
+        lhs,
+        rhs,
+        lhs / rhs,
+        if pass { "✅" } else { "❌" }
+    );
+    mv_tsv.push_str(&format!(
+        "tight\t{}\t{}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
+        n,
+        delta,
+        lhs,
+        rhs,
+        lhs / rhs,
+        pass
+    ));
     mv_all_pass &= pass;
 
     // Test 4: Quasi-random with non-uniform separation
     let n = 30;
-    let lambda: Vec<f64> = (0..n).map(|i| i as f64 * 0.5 + 0.1 * (i as f64).sin()).collect();
-    let x_mags: Vec<f64> = (0..n).map(|i| (i as f64 * 1.618).cos().abs() + 0.1).collect();
+    let lambda: Vec<f64> = (0..n)
+        .map(|i| i as f64 * 0.5 + 0.1 * (i as f64).sin())
+        .collect();
+    let x_mags: Vec<f64> = (0..n)
+        .map(|i| (i as f64 * 1.618).cos().abs() + 0.1)
+        .collect();
     let mut min_sep = f64::MAX;
-    for i in 0..n { for j in 0..n { if i != j {
-        min_sep = min_sep.min((lambda[i] - lambda[j]).abs());
-    }}}
+    for i in 0..n {
+        for j in 0..n {
+            if i != j {
+                min_sep = min_sep.min((lambda[i] - lambda[j]).abs());
+            }
+        }
+    }
     let (lhs, rhs, pass) = test_mv_bound(n, &lambda, &x_mags, min_sep);
     println!("  Test 4: N={}, quasi-random, δ_min={:.6}", n, min_sep);
-    println!("    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
-        lhs, rhs, lhs / rhs, if pass { "✅" } else { "❌" });
-    mv_tsv.push_str(&format!("quasi_random\t{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
-        n, min_sep, lhs, rhs, lhs / rhs, pass));
+    println!(
+        "    LHS = {:.6}  RHS = {:.6}  ratio = {:.6}  {}",
+        lhs,
+        rhs,
+        lhs / rhs,
+        if pass { "✅" } else { "❌" }
+    );
+    mv_tsv.push_str(&format!(
+        "quasi_random\t{}\t{:.6}\t{:.6}\t{:.6}\t{:.6}\t{}\n",
+        n,
+        min_sep,
+        lhs,
+        rhs,
+        lhs / rhs,
+        pass
+    ));
     mv_all_pass &= pass;
 
-    println!("\n  M-V CERTIFIED: {}\n", if mv_all_pass { "✅ ALL PASS" } else { "❌ SOME FAIL" });
+    println!(
+        "\n  M-V CERTIFIED: {}\n",
+        if mv_all_pass {
+            "✅ ALL PASS"
+        } else {
+            "❌ SOME FAIL"
+        }
+    );
 
     // ═══════════════════════════════════════════════════════
     // §4. Output
@@ -292,15 +375,23 @@ fn main() {
     println!("║  SUMMARY                                                    ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
     println!("║  FK1: K(x) ≥ 0              ✅ PROVED (sq_nonneg in Lean)   ║");
-    println!("║  FK2: K ∈ L¹(ℝ)             {} (∫ converges)            ║",
-        if fk3_pass { "✅ PASS" } else { "❌ FAIL" });
-    println!("║  FK3: ∫K = 1                {} (error < 1e-4)           ║",
-        if fk3_pass { "✅ PASS" } else { "❌ FAIL" });
-    println!("║  FK4: K̂(ξ)=0 for |ξ|>1     {} (max < 1e-3)            ║",
-        if fk4_pass { "✅ PASS" } else { "❌ FAIL" });
-    println!("║  M-V: ‖H‖ ≤ (π/δ)·Σ|x|²   {} ({}/4 tests)           ║",
+    println!(
+        "║  FK2: K ∈ L¹(ℝ)             {} (∫ converges)            ║",
+        if fk3_pass { "✅ PASS" } else { "❌ FAIL" }
+    );
+    println!(
+        "║  FK3: ∫K = 1                {} (error < 1e-4)           ║",
+        if fk3_pass { "✅ PASS" } else { "❌ FAIL" }
+    );
+    println!(
+        "║  FK4: K̂(ξ)=0 for |ξ|>1     {} (max < 1e-3)            ║",
+        if fk4_pass { "✅ PASS" } else { "❌ FAIL" }
+    );
+    println!(
+        "║  M-V: ‖H‖ ≤ (π/δ)·Σ|x|²   {} ({}/4 tests)           ║",
         if mv_all_pass { "✅ PASS" } else { "❌ FAIL" },
-        if mv_all_pass { "4" } else { "<4" });
+        if mv_all_pass { "4" } else { "<4" }
+    );
     println!("╚══════════════════════════════════════════════════════════════╝");
 
     // Write TSV files
@@ -309,7 +400,8 @@ fn main() {
     fs::write("mv_bound.tsv", &mv_tsv).expect("write mv");
 
     // Write certificate
-    let cert = format!(r#"{{
+    let cert = format!(
+        r#"{{
   "experiment": "fejer-kernel",
   "timestamp": "{}",
   "precision_bits": {},
@@ -332,15 +424,27 @@ fn main() {
   }},
   "certified": {}
 }}"#,
-        timestamp, PREC,
+        timestamp,
+        PREC,
         fk3_pass,
-        fk3_results.last().unwrap().2, fk3_results.last().unwrap().3, fk3_pass,
-        fk4_max_error_outside, fk4_pass,
-        if mv_all_pass { 4 } else { 0 }, mv_all_pass,
+        fk3_results.last().unwrap().2,
+        fk3_results.last().unwrap().3,
+        fk3_pass,
+        fk4_max_error_outside,
+        fk4_pass,
+        if mv_all_pass { 4 } else { 0 },
+        mv_all_pass,
         all_pass
     );
     fs::write("certificate.json", &cert).expect("write cert");
 
     println!("\n  Output: fk3_integral.tsv, fk4_fourier.tsv, mv_bound.tsv, certificate.json");
-    println!("  OVERALL: {}", if all_pass { "✅ ALL CERTIFIED" } else { "❌ INCOMPLETE" });
+    println!(
+        "  OVERALL: {}",
+        if all_pass {
+            "✅ ALL CERTIFIED"
+        } else {
+            "❌ INCOMPLETE"
+        }
+    );
 }

@@ -80,15 +80,18 @@ pub fn eigendecompose(matrix_data: &[f64], dim: usize) -> (Vec<f64>, DMatrix<f64
     let n = eigen.eigenvectors.ncols();
     let mut sorted_eigenvectors = DMatrix::zeros(dim, n);
     for (new_idx, &(old_idx, _)) in indexed_eigs.iter().enumerate() {
-        sorted_eigenvectors
-            .set_column(new_idx, &eigen.eigenvectors.column(old_idx));
+        sorted_eigenvectors.set_column(new_idx, &eigen.eigenvectors.column(old_idx));
     }
 
     (sorted_eigenvalues, sorted_eigenvectors)
 }
 
 /// Analyze a single block: compute eigendecomposition and basic stats.
-pub fn analyze_block(matrix_data: &[f64], dim: usize, class_idx: usize) -> (BlockSpectrum, Vec<f64>, DMatrix<f64>) {
+pub fn analyze_block(
+    matrix_data: &[f64],
+    dim: usize,
+    class_idx: usize,
+) -> (BlockSpectrum, Vec<f64>, DMatrix<f64>) {
     let (eigenvalues, eigenvectors) = eigendecompose(matrix_data, dim);
 
     let lambda_min = eigenvalues[0];

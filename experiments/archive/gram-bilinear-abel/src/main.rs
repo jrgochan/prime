@@ -35,7 +35,11 @@ const WHITE: &str = "\x1b[97m";
 const RESET: &str = "\x1b[0m";
 
 fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
+    if b {
+        "\x1b[32m✓\x1b[0m"
+    } else {
+        "\x1b[31m✗\x1b[0m"
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -47,10 +51,14 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
     let mut spf = vec![0usize; n + 1];
     mu[1] = 1;
     for p in 2..=n {
-        if spf[p] != 0 { continue; }
+        if spf[p] != 0 {
+            continue;
+        }
         spf[p] = p;
         for m in (2 * p..=n).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
+            if spf[m] == 0 {
+                spf[m] = p;
+            }
         }
     }
     for k in 2..=n {
@@ -60,13 +68,23 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
         while val > 1 {
             let p = spf[val];
             let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
+            while val % p == 0 {
+                val /= p;
+                c += 1;
+            }
+            if c > 1 {
+                sq = true;
+                break;
+            }
             nf += 1;
         }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
+        if sq {
+            mu[k] = 0;
+        } else if nf % 2 == 0 {
+            mu[k] = 1;
+        } else {
+            mu[k] = -1;
+        }
     }
     mu
 }
@@ -76,7 +94,7 @@ fn mertens_values(mu: &[i8]) -> Vec<i64> {
     let n = mu.len();
     let mut m = vec![0i64; n];
     for k in 1..n {
-        m[k] = m[k-1] + mu[k] as i64;
+        m[k] = m[k - 1] + mu[k] as i64;
     }
     m
 }
@@ -86,20 +104,30 @@ fn mertens_values(mu: &[i8]) -> Vec<i64> {
 // ═══════════════════════════════════════════════
 
 fn euler_gamma() -> Float {
-    Float::with_val(P, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467"
-    ).unwrap())
+    Float::with_val(
+        P,
+        Float::parse(
+            "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467",
+        )
+        .unwrap(),
+    )
 }
 
 fn gcd(a: usize, b: usize) -> usize {
     let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
     a
 }
 
 /// Vasyunin cotangent sum V(a,b) at 256-bit
 fn vasyunin_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return Float::with_val(P, 0); }
+    if a <= 1 {
+        return Float::with_val(P, 0);
+    }
     let af = Float::with_val(P, a as u64);
     let pi = Float::with_val(P, rug::float::Constant::Pi);
     let bf = Float::with_val(P, b as u64);
@@ -114,7 +142,9 @@ fn vasyunin_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(P, &pm / &af);
         let c = Float::with_val(P, angle.clone().cos());
         let s = Float::with_val(P, angle.sin());
-        if s.is_zero() { continue; }
+        if s.is_zero() {
+            continue;
+        }
         let cot = Float::with_val(P, &c / &s);
         sum += Float::with_val(P, &frac * &cot);
     }
@@ -181,7 +211,10 @@ fn log_cutoff_weight(k: usize, n: usize, mu: &[i8]) -> Float {
     let nf = Float::with_val(P, n as u64);
     let log_k = kf.ln();
     let log_n = nf.ln();
-    let taper = Float::with_val(P, Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n));
+    let taper = Float::with_val(
+        P,
+        Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n),
+    );
     Float::with_val(P, -(mu[k] as f64) * &taper)
 }
 
@@ -202,19 +235,26 @@ fn experiment_a(n: usize, mu: &[i8]) -> (f64, f64, f64, f64) {
     // Diagonal: Σ_k v_k² · G(k,k)
     let mut diag = Float::with_val(P, 0);
     for k in 0..dim {
-        if weights[k].is_zero() { continue; }
+        if weights[k].is_zero() {
+            continue;
+        }
         let g = gram_entry(k + 1, k + 1);
         let vk_sq = Float::with_val(P, &weights[k] * &weights[k]);
         diag += Float::with_val(P, &vk_sq * &g);
     }
 
     // Off-diagonal: 2·Σ_{j<k} v_j·v_k·G(j+1,k+1)
-    let offdiag_terms: Vec<Float> = (0..dim).into_par_iter()
+    let offdiag_terms: Vec<Float> = (0..dim)
+        .into_par_iter()
         .map(|j| {
             let mut row_sum = Float::with_val(P, 0);
-            if weights[j].is_zero() { return row_sum; }
-            for k in (j+1)..dim {
-                if weights[k].is_zero() { continue; }
+            if weights[j].is_zero() {
+                return row_sum;
+            }
+            for k in (j + 1)..dim {
+                if weights[k].is_zero() {
+                    continue;
+                }
                 let g = gram_entry(j + 1, k + 1);
                 let prod = Float::with_val(P, &weights[j] * &weights[k]);
                 row_sum += Float::with_val(P, &prod * &g);
@@ -230,7 +270,12 @@ fn experiment_a(n: usize, mu: &[i8]) -> (f64, f64, f64, f64) {
     offdiag *= 2;
 
     let vtgv = Float::with_val(P, &diag + &offdiag);
-    (vtgv.to_f64(), diag.to_f64(), offdiag.to_f64(), (n as f64).ln())
+    (
+        vtgv.to_f64(),
+        diag.to_f64(),
+        offdiag.to_f64(),
+        (n as f64).ln(),
+    )
 }
 
 // ═══════════════════════════════════════════════
@@ -250,9 +295,13 @@ fn experiment_b(n: usize, mu: &[i8]) -> (f64, f64, f64, f64) {
     let mut far = Float::with_val(P, 0);
 
     for j in 0..dim {
-        if weights[j].is_zero() { continue; }
-        for k in (j+1)..dim {
-            if weights[k].is_zero() { continue; }
+        if weights[j].is_zero() {
+            continue;
+        }
+        for k in (j + 1)..dim {
+            if weights[k].is_zero() {
+                continue;
+            }
             let g = gram_entry(j + 1, k + 1);
             let prod = Float::with_val(P, &weights[j] * &weights[k]);
             let term = Float::with_val(P, &prod * &g);
@@ -299,10 +348,14 @@ fn experiment_c(n: usize, mu: &[i8], mertens: &[i64]) -> (f64, f64, f64, f64) {
     // (C1) Bilinear sum: S = Σ_{j<k} v_j·v_k / max(j,k)
     let mut bilinear_sum = Float::with_val(P, 0);
     for k in 1..dim {
-        if weights[k].is_zero() { continue; }
+        if weights[k].is_zero() {
+            continue;
+        }
         let kf = Float::with_val(P, (k + 1) as u64);
         for j in 0..k {
-            if weights[j].is_zero() { continue; }
+            if weights[j].is_zero() {
+                continue;
+            }
             let prod = Float::with_val(P, &weights[j] * &weights[k]);
             bilinear_sum += Float::with_val(P, &prod / &kf);
         }
@@ -318,7 +371,9 @@ fn experiment_c(n: usize, mu: &[i8], mertens: &[i64]) -> (f64, f64, f64, f64) {
     // where A(k-1) = partial_sums[k-1] (sum of v_1..v_{k-1})
     let mut abel_sum = Float::with_val(P, 0);
     for k in 1..dim {
-        if weights[k].is_zero() { continue; }
+        if weights[k].is_zero() {
+            continue;
+        }
         let kf = Float::with_val(P, (k + 1) as u64);
         let term = Float::with_val(P, &partial_sums[k] * &weights[k]);
         abel_sum += Float::with_val(P, &term / &kf);
@@ -333,11 +388,17 @@ fn experiment_c(n: usize, mu: &[i8], mertens: &[i64]) -> (f64, f64, f64, f64) {
     for k in 1..dim {
         let ak = partial_sums[k + 1].to_f64();
         let dev = (ak - 1.0).abs();
-        if dev > max_dev { max_dev = dev; }
+        if dev > max_dev {
+            max_dev = dev;
+        }
         sum_dev += dev;
         count += 1;
     }
-    let avg_dev = if count > 0 { sum_dev / count as f64 } else { 0.0 };
+    let avg_dev = if count > 0 {
+        sum_dev / count as f64
+    } else {
+        0.0
+    };
 
     // (C5) Check Mertens bound: |M(k)| ≤? C · k^{3/4}
     let mut max_mertens_ratio = 0.0f64;
@@ -346,20 +407,35 @@ fn experiment_c(n: usize, mu: &[i8], mertens: &[i64]) -> (f64, f64, f64, f64) {
         let kf = k as f64;
         let bound = kf.powf(0.75);
         let ratio = mk / bound;
-        if ratio > max_mertens_ratio { max_mertens_ratio = ratio; }
+        if ratio > max_mertens_ratio {
+            max_mertens_ratio = ratio;
+        }
     }
 
     // Print partial sum profile
     let profile_points: Vec<usize> = vec![2, 5, 10, 20, 50, 100, 200, 500, 1000]
-        .into_iter().filter(|&k| k < dim).collect();
+        .into_iter()
+        .filter(|&k| k < dim)
+        .collect();
 
     println!("    {DIM}Partial sum profile A(k) = Σ_{{j≤k}} v_j:{RESET}");
     for &k in &profile_points {
         let ak = partial_sums[k + 1].to_f64();
-        println!("      A({:>5}) = {:.10}  (|A-1| = {:.6e})", k + 1, ak, (ak - 1.0).abs());
+        println!(
+            "      A({:>5}) = {:.10}  (|A-1| = {:.6e})",
+            k + 1,
+            ak,
+            (ak - 1.0).abs()
+        );
     }
-    println!("      max |A(k)-1| = {:.6e},  avg |A(k)-1| = {:.6e}", max_dev, avg_dev);
-    println!("      max |M(k)|/k^{{3/4}} = {:.6}  (Mertens ratio)", max_mertens_ratio);
+    println!(
+        "      max |A(k)-1| = {:.6e},  avg |A(k)-1| = {:.6e}",
+        max_dev, avg_dev
+    );
+    println!(
+        "      max |M(k)|/k^{{3/4}} = {:.6}  (Mertens ratio)",
+        max_mertens_ratio
+    );
 
     (bilinear_sum.to_f64(), abel_sum.to_f64(), max_dev, avg_dev)
 }
@@ -379,11 +455,14 @@ fn experiment_d(n: usize, mu: &[i8]) -> Vec<(usize, f64, f64, f64)> {
     let weights: Vec<Float> = (1..n).map(|k| log_cutoff_weight(k, n, mu)).collect();
     let means: Vec<Float> = (1..n).map(|k| mean_entry(k)).collect();
 
-    let gv: Vec<Float> = (0..dim).into_par_iter()
+    let gv: Vec<Float> = (0..dim)
+        .into_par_iter()
         .map(|j| {
             let mut row_sum = Float::with_val(P, 0);
             for k in 0..dim {
-                if weights[k].is_zero() { continue; }
+                if weights[k].is_zero() {
+                    continue;
+                }
                 let g = gram_entry(j + 1, k + 1);
                 row_sum += Float::with_val(P, &g * &weights[k]);
             }
@@ -431,8 +510,7 @@ fn experiment_e(n: usize, mu: &[i8]) -> (f64, f64, f64) {
     for k in 1..n {
         let mu_k = mu[k] as f64;
         let w_k = 1.0 - (k as f64).ln() / log_n;
-        m_tapered[k] = Float::with_val(P,
-            &m_tapered[k - 1] + Float::with_val(P, mu_k * w_k));
+        m_tapered[k] = Float::with_val(P, &m_tapered[k - 1] + Float::with_val(P, mu_k * w_k));
     }
 
     // B(N) = Σ_{k=2}^{N-1} (1/k) · M_tapered(k)²
@@ -478,11 +556,22 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL BILINEAR ABEL & OFF-DIAGONAL CANCELLATION VALIDATOR{RESET}  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Target: gram_form_upper_bound_34{RESET}                 {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit precision{RESET}                                     {BOLD}{CYAN}║{RESET}", n_threads, P);
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL BILINEAR ABEL & OFF-DIAGONAL CANCELLATION VALIDATOR{RESET}  {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Target: gram_form_upper_bound_34{RESET}                 {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit precision{RESET}                                     {BOLD}{CYAN}║{RESET}",
+        n_threads, P
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
@@ -500,13 +589,25 @@ fn main() {
     println!();
 
     let mut tsv_a = fs::File::create("results/diag_offdiag.tsv").unwrap();
-    writeln!(tsv_a, "N\tvtGv\tDIAG\tOFFDIAG\tln_N\tOFFDIAG_logN\tvtGv_minus_1\tC_G_eff").unwrap();
+    writeln!(
+        tsv_a,
+        "N\tvtGv\tDIAG\tOFFDIAG\tln_N\tOFFDIAG_logN\tvtGv_minus_1\tC_G_eff"
+    )
+    .unwrap();
 
     let mut tsv_b = fs::File::create("results/offdiag_range.tsv").unwrap();
-    writeln!(tsv_b, "N\tOFFDIAG\tNEAR\tFAR\tln_N\tOFFDIAG_logN\tNEAR_logN\tFAR_logN").unwrap();
+    writeln!(
+        tsv_b,
+        "N\tOFFDIAG\tNEAR\tFAR\tln_N\tOFFDIAG_logN\tNEAR_logN\tFAR_logN"
+    )
+    .unwrap();
 
     let mut tsv_c = fs::File::create("results/double_abel.tsv").unwrap();
-    writeln!(tsv_c, "N\tbilinear_sum\tabel_sum\tmax_A_dev\tavg_A_dev\tbilinear_logN\tabel_logN").unwrap();
+    writeln!(
+        tsv_c,
+        "N\tbilinear_sum\tabel_sum\tmax_A_dev\tavg_A_dev\tbilinear_logN\tabel_logN"
+    )
+    .unwrap();
 
     let mut tsv_e = fs::File::create("results/bilinear_mertens.tsv").unwrap();
     writeln!(tsv_e, "N\tB_N\tB_N_logN\tsingle_abel\tln_N").unwrap();
@@ -517,7 +618,9 @@ fn main() {
     println!("  {BOLD}{WHITE}═══ EXPERIMENT A: DIAGONAL vs OFF-DIAGONAL DECOMPOSITION ═══{RESET}");
     println!("  {DIM}  vᵀGv = DIAG + OFFDIAG, where DIAG = Σ v_k²·G(k,k){RESET}");
     println!();
-    println!("  {DIM}     N   │ vᵀGv         │ DIAG         │ OFFDIAG      │ OFFDIAG·logN │ C_G·eff{RESET}");
+    println!(
+        "  {DIM}     N   │ vᵀGv         │ DIAG         │ OFFDIAG      │ OFFDIAG·logN │ C_G·eff{RESET}"
+    );
 
     let mut a_results = Vec::new();
     for &n in &all_ns {
@@ -528,12 +631,18 @@ fn main() {
         let c_g_eff = vtgv_m1 * log_n;
         let elapsed = t.elapsed().as_secs_f64();
 
-        writeln!(tsv_a, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, vtgv, diag, offdiag, log_n, offdiag_logn, vtgv_m1, c_g_eff).unwrap();
+        writeln!(
+            tsv_a,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n, vtgv, diag, offdiag, log_n, offdiag_logn, vtgv_m1, c_g_eff
+        )
+        .unwrap();
 
         let offdiag_color = if offdiag.abs() < 0.5 { GREEN } else { YELLOW };
-        println!("    {:>5} │ {MAGENTA}{:>12.8}{RESET} │ {:>12.8} │ {offdiag_color}{:>12.8}{RESET} │ {:>12.6} │ {:>8.4}  ({:.2}s)",
-            n, vtgv, diag, offdiag, offdiag_logn, c_g_eff, elapsed);
+        println!(
+            "    {:>5} │ {MAGENTA}{:>12.8}{RESET} │ {:>12.8} │ {offdiag_color}{:>12.8}{RESET} │ {:>12.6} │ {:>8.4}  ({:.2}s)",
+            n, vtgv, diag, offdiag, offdiag_logn, c_g_eff, elapsed
+        );
 
         a_results.push((n, vtgv, diag, offdiag, offdiag_logn, c_g_eff));
     }
@@ -545,7 +654,9 @@ fn main() {
     println!("  {BOLD}{WHITE}═══ EXPERIMENT B: NEAR vs FAR OFF-DIAGONAL CANCELLATION ═══{RESET}");
     println!("  {DIM}  NEAR = |j-k| ≤ √N,  FAR = |j-k| > √N{RESET}");
     println!();
-    println!("  {DIM}     N   │ OFFDIAG      │ NEAR         │ FAR          │ NEAR·logN    │ FAR·logN{RESET}");
+    println!(
+        "  {DIM}     N   │ OFFDIAG      │ NEAR         │ FAR          │ NEAR·logN    │ FAR·logN{RESET}"
+    );
 
     let mut b_results = Vec::new();
     for &n in &small_ns {
@@ -553,11 +664,30 @@ fn main() {
         let (offdiag, near, far, log_n) = experiment_b(n, &mu);
         let elapsed = t.elapsed().as_secs_f64();
 
-        writeln!(tsv_b, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, offdiag, near, far, log_n, offdiag * log_n, near * log_n, far * log_n).unwrap();
+        writeln!(
+            tsv_b,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n,
+            offdiag,
+            near,
+            far,
+            log_n,
+            offdiag * log_n,
+            near * log_n,
+            far * log_n
+        )
+        .unwrap();
 
-        println!("    {:>5} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:>12.6} │ {:>12.6}  ({:.2}s)",
-            n, offdiag, near, far, near * log_n, far * log_n, elapsed);
+        println!(
+            "    {:>5} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:>12.6} │ {:>12.6}  ({:.2}s)",
+            n,
+            offdiag,
+            near,
+            far,
+            near * log_n,
+            far * log_n,
+            elapsed
+        );
 
         b_results.push((n, offdiag, near, far));
     }
@@ -567,7 +697,9 @@ fn main() {
     // ═════════════════════════════════════════════════════
     println!();
     println!("  {BOLD}{WHITE}═══ EXPERIMENT C: DOUBLE ABEL SUMMATION VALIDATION ═══{RESET}");
-    println!("  {DIM}  Bilinear sum Σ_{{j<k}} v_j·v_k/max(j,k)  vs  Abel form Σ_k (1/k)·A(k)·v_k{RESET}");
+    println!(
+        "  {DIM}  Bilinear sum Σ_{{j<k}} v_j·v_k/max(j,k)  vs  Abel form Σ_k (1/k)·A(k)·v_k{RESET}"
+    );
     println!();
 
     let mut c_results = Vec::new();
@@ -578,16 +710,39 @@ fn main() {
         let log_n = (n as f64).ln();
         let elapsed = t.elapsed().as_secs_f64();
 
-        writeln!(tsv_c, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, bilinear, abel, max_dev, avg_dev, bilinear * log_n, abel * log_n).unwrap();
+        writeln!(
+            tsv_c,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n,
+            bilinear,
+            abel,
+            max_dev,
+            avg_dev,
+            bilinear * log_n,
+            abel * log_n
+        )
+        .unwrap();
 
         let match_pct = if bilinear.abs() > 1e-20 {
             100.0 * (1.0 - (bilinear - abel).abs() / bilinear.abs())
-        } else { 100.0 };
+        } else {
+            100.0
+        };
 
-        println!("    bilinear = {:.10e}, abel = {:.10e}  (match: {:.4}%)", bilinear, abel, match_pct);
-        println!("    bilinear·logN = {:.8}, abel·logN = {:.8}", bilinear * log_n, abel * log_n);
-        println!("    {} bilinear ≈ abel  ({:.2}s)", check((match_pct - 100.0).abs() < 0.01), elapsed);
+        println!(
+            "    bilinear = {:.10e}, abel = {:.10e}  (match: {:.4}%)",
+            bilinear, abel, match_pct
+        );
+        println!(
+            "    bilinear·logN = {:.8}, abel·logN = {:.8}",
+            bilinear * log_n,
+            abel * log_n
+        );
+        println!(
+            "    {} bilinear ≈ abel  ({:.2}s)",
+            check((match_pct - 100.0).abs() < 0.01),
+            elapsed
+        );
         println!();
 
         c_results.push((n, bilinear, abel, max_dev, avg_dev));
@@ -601,7 +756,9 @@ fn main() {
     println!();
 
     for &n in &[20usize, 100] {
-        if n > sieve_max { continue; }
+        if n > sieve_max {
+            continue;
+        }
         let t = Instant::now();
         let profile = experiment_d(n, &mu);
         let elapsed = t.elapsed().as_secs_f64();
@@ -620,10 +777,16 @@ fn main() {
             // Only print non-zero rows and selected rows
             if vgv.abs() > 1e-15 && (k <= 10 || k % 10 == 0 || k == n - 1) {
                 let res_color = if res.abs() < 0.001 { GREEN } else { YELLOW };
-                println!("    {:>5} │ {:>14.10} │ {:>14.10} │ {res_color}{:>12.8}{RESET}", k, vgv, vb, res);
+                println!(
+                    "    {:>5} │ {:>14.10} │ {:>14.10} │ {res_color}{:>12.8}{RESET}",
+                    k, vgv, vb, res
+                );
             }
         }
-        println!("    {BOLD}Total residual: Σ(v·Gv - v·b) = {:.10e}{RESET}", total_residual);
+        println!(
+            "    {BOLD}Total residual: Σ(v·Gv - v·b) = {:.10e}{RESET}",
+            total_residual
+        );
         println!();
     }
 
@@ -643,12 +806,18 @@ fn main() {
         let log_n = (n as f64).ln();
         let elapsed = t.elapsed().as_secs_f64();
 
-        writeln!(tsv_e, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, b_val, b_logn, single, log_n).unwrap();
+        writeln!(
+            tsv_e,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n, b_val, b_logn, single, log_n
+        )
+        .unwrap();
 
         let b_color = if b_logn < 10.0 { GREEN } else { YELLOW };
-        println!("    {:>5} │ {:.10e}  │ {b_color}{:>14.8}{RESET}  │ {:>12.8}  ({:.2}s)",
-            n, b_val, b_logn, single, elapsed);
+        println!(
+            "    {:>5} │ {:.10e}  │ {b_color}{:>14.8}{RESET}  │ {:>12.8}  ({:.2}s)",
+            n, b_val, b_logn, single, elapsed
+        );
 
         e_results.push((n, b_val, b_logn, single));
         println!();
@@ -658,28 +827,66 @@ fn main() {
     // CERTIFICATE
     // ═════════════════════════════════════════════════════
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}BILINEAR ABEL & OFF-DIAGONAL — CERTIFICATE{RESET}                       {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}", P, n_threads);
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}BILINEAR ABEL & OFF-DIAGONAL — CERTIFICATE{RESET}                       {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}",
+        P, n_threads
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // A: Check if OFFDIAG·logN stabilizes
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. Off-diagonal dominance check{RESET}");
-    let offdiag_logn_vals: Vec<f64> = a_results.iter().filter(|r| r.0 >= 50).map(|r| r.4).collect();
-    let offdiag_logn_avg = if offdiag_logn_vals.is_empty() { 0.0 }
-        else { offdiag_logn_vals.iter().sum::<f64>() / offdiag_logn_vals.len() as f64 };
-    let offdiag_logn_max = offdiag_logn_vals.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    println!("  {BOLD}{CYAN}║{RESET}    OFFDIAG·logN avg = {:.6} (stabilizing → constant = proof OK)", offdiag_logn_avg);
-    println!("  {BOLD}{CYAN}║{RESET}    OFFDIAG·logN max = {:.6}", offdiag_logn_max);
+    let offdiag_logn_vals: Vec<f64> = a_results
+        .iter()
+        .filter(|r| r.0 >= 50)
+        .map(|r| r.4)
+        .collect();
+    let offdiag_logn_avg = if offdiag_logn_vals.is_empty() {
+        0.0
+    } else {
+        offdiag_logn_vals.iter().sum::<f64>() / offdiag_logn_vals.len() as f64
+    };
+    let offdiag_logn_max = offdiag_logn_vals
+        .iter()
+        .cloned()
+        .fold(f64::NEG_INFINITY, f64::max);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    OFFDIAG·logN avg = {:.6} (stabilizing → constant = proof OK)",
+        offdiag_logn_avg
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    OFFDIAG·logN max = {:.6}",
+        offdiag_logn_max
+    );
 
     // Check whether C_G_eff stabilizes (vᵀGv - 1)·logN
-    let cg_vals: Vec<f64> = a_results.iter().filter(|r| r.0 >= 50).map(|r| r.5).collect();
-    let cg_avg = if cg_vals.is_empty() { 0.0 }
-        else { cg_vals.iter().sum::<f64>() / cg_vals.len() as f64 };
+    let cg_vals: Vec<f64> = a_results
+        .iter()
+        .filter(|r| r.0 >= 50)
+        .map(|r| r.5)
+        .collect();
+    let cg_avg = if cg_vals.is_empty() {
+        0.0
+    } else {
+        cg_vals.iter().sum::<f64>() / cg_vals.len() as f64
+    };
     let cg_stabilizing = cg_vals.windows(2).all(|w| (w[1] - w[0]).abs() < 5.0);
-    println!("  {BOLD}{CYAN}║{RESET}    C_G·eff avg = {:.6} (vᵀGv-1)·logN", cg_avg);
-    println!("  {BOLD}{CYAN}║{RESET}    {} C_G·eff stabilizing (→ confirms vᵀGv ≤ 1 + C_G/logN)", check(cg_stabilizing));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    C_G·eff avg = {:.6} (vᵀGv-1)·logN",
+        cg_avg
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} C_G·eff stabilizing (→ confirms vᵀGv ≤ 1 + C_G/logN)",
+        check(cg_stabilizing)
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // C: Double Abel summation match
@@ -687,34 +894,67 @@ fn main() {
     for r in &c_results {
         let match_pct = if r.1.abs() > 1e-20 {
             100.0 * (1.0 - (r.1 - r.2).abs() / r.1.abs())
-        } else { 100.0 };
-        println!("  {BOLD}{CYAN}║{RESET}    N={:>5}: bilinear={:.6e}, abel={:.6e}  {} match={:.4}%",
-            r.0, r.1, r.2, check((match_pct - 100.0).abs() < 0.01), match_pct);
+        } else {
+            100.0
+        };
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    N={:>5}: bilinear={:.6e}, abel={:.6e}  {} match={:.4}%",
+            r.0,
+            r.1,
+            r.2,
+            check((match_pct - 100.0).abs() < 0.01),
+            match_pct
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // E: Bilinear Mertens
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§E. Bilinear Mertens B(N)·logN stabilization{RESET}");
-    let b_logn_vals: Vec<f64> = e_results.iter().filter(|r| r.0 >= 50).map(|r| r.2).collect();
-    let b_logn_avg = if b_logn_vals.is_empty() { 0.0 }
-        else { b_logn_vals.iter().sum::<f64>() / b_logn_vals.len() as f64 };
-    let b_stabilizing = b_logn_vals.windows(2).all(|w| (w[1] - w[0]).abs() < w[0].abs() * 0.5 + 1.0);
-    println!("  {BOLD}{CYAN}║{RESET}    B(N)·logN avg = {:.6}", b_logn_avg);
-    println!("  {BOLD}{CYAN}║{RESET}    {} B(N)·logN stabilizing (→ confirms B(N) = O(1/logN))", check(b_stabilizing));
+    let b_logn_vals: Vec<f64> = e_results
+        .iter()
+        .filter(|r| r.0 >= 50)
+        .map(|r| r.2)
+        .collect();
+    let b_logn_avg = if b_logn_vals.is_empty() {
+        0.0
+    } else {
+        b_logn_vals.iter().sum::<f64>() / b_logn_vals.len() as f64
+    };
+    let b_stabilizing = b_logn_vals
+        .windows(2)
+        .all(|w| (w[1] - w[0]).abs() < w[0].abs() * 0.5 + 1.0);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    B(N)·logN avg = {:.6}",
+        b_logn_avg
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} B(N)·logN stabilizing (→ confirms B(N) = O(1/logN))",
+        check(b_stabilizing)
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // Final verdict
     let all_pass = cg_stabilizing && b_stabilizing;
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}VERDICT{RESET}");
     if all_pass {
-        println!("  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ ALL EXPERIMENTS CONSISTENT WITH gram_form_upper_bound_34{RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {GREEN}  Numerical certificate supports axiom elimination{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ ALL EXPERIMENTS CONSISTENT WITH gram_form_upper_bound_34{RESET}"
+        );
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {GREEN}  Numerical certificate supports axiom elimination{RESET}"
+        );
     } else {
-        println!("  {BOLD}{CYAN}║{RESET}    {YELLOW}{BOLD}⚠ SOME EXPERIMENTS SHOW INSTABILITY{RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {YELLOW}  More data points or larger N may be needed{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {YELLOW}{BOLD}⚠ SOME EXPERIMENTS SHOW INSTABILITY{RESET}"
+        );
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {YELLOW}  More data points or larger N may be needed{RESET}"
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Summary JSON
     let summary = format!(r#"{{
@@ -761,7 +1001,13 @@ fn main() {
     fs::write("results/certificate.json", &summary).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", t_global.elapsed().as_secs_f64(), n_threads);
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{diag_offdiag.tsv, offdiag_range.tsv, double_abel.tsv, bilinear_mertens.tsv, row_profile_N*.tsv, certificate.json}}");
+    println!(
+        "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)",
+        t_global.elapsed().as_secs_f64(),
+        n_threads
+    );
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{diag_offdiag.tsv, offdiag_range.tsv, double_abel.tsv, bilinear_mertens.tsv, row_profile_N*.tsv, certificate.json}}"
+    );
     println!();
 }

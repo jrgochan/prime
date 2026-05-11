@@ -57,7 +57,9 @@ pub struct RunResult {
 pub fn print_banner() {
     println!();
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL RL — Gram Form Optimization Engine{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL RL — Gram Form Optimization Engine{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}The Riemann Hypothesis, reduced to a matrix inequality:{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}  Show that vᵀG_N v ≤ 1 + K/ln(N){RESET}");
@@ -69,39 +71,84 @@ pub fn print_banner() {
 /// Print the single-run result card.
 pub fn print_single_result(r: &RunResult) {
     println!();
-    println!("  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}CATHEDRAL RL RESULT — N={}{RESET}", r.n);
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  Agent:          {}", r.agent.to_uppercase());
-    println!("  {BOLD}{CYAN}  │{RESET}  Dimension:      {} × {}", r.dim, r.dim);
-    println!("  {BOLD}{CYAN}  │{RESET}  Total steps:    {}", r.total_steps);
-    println!("  {BOLD}{CYAN}  │{RESET}  Wall time:      {:.1}s", r.wall_time_s);
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}CATHEDRAL RL RESULT — N={}{RESET}",
+        r.n
+    );
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Agent:          {}",
+        r.agent.to_uppercase()
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Dimension:      {} × {}",
+        r.dim, r.dim
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Total steps:    {}",
+        r.total_steps
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Wall time:      {:.1}s",
+        r.wall_time_s
+    );
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}Baseline (log-cutoff witness):{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}    d²    = {:.10e}", r.baseline_d2);
-    println!("  {BOLD}{CYAN}  │{RESET}    vᵀGv  = {:.10}", r.baseline_vtgv);
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}    vᵀGv  = {:.10}",
+        r.baseline_vtgv
+    );
     println!("  {BOLD}{CYAN}  │{RESET}    bᵀv   = {:.10}", r.baseline_btv);
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}Optimized:{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}    d²    = {:.10e}", r.optimal_d2);
     println!("  {BOLD}{CYAN}  │{RESET}    vᵀGv  = {:.10}", r.optimal_vtgv);
     println!("  {BOLD}{CYAN}  │{RESET}    bᵀv   = {:.10}", r.optimal_btv);
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
 
     if r.optimal_vtgv < 1.0 {
-        println!("  {BOLD}{CYAN}  │{RESET}  {GREEN}✓ vᵀGv < 1 — GRAM BOUND TRIVIALLY SATISFIED{RESET}");
-        println!("  {BOLD}{CYAN}  │{RESET}  {GREEN}  K_eff = {:.4} (negative — subcritical){RESET}", r.k_eff);
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  {GREEN}✓ vᵀGv < 1 — GRAM BOUND TRIVIALLY SATISFIED{RESET}"
+        );
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  {GREEN}  K_eff = {:.4} (negative — subcritical){RESET}",
+            r.k_eff
+        );
     } else if r.gram_bound_satisfied {
         println!("  {BOLD}{CYAN}  │{RESET}  {GREEN}✓ GRAM BOUND SATISFIED (K=1){RESET}");
-        println!("  {BOLD}{CYAN}  │{RESET}  {GREEN}  K_eff = {:.4}{RESET}", r.k_eff);
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  {GREEN}  K_eff = {:.4}{RESET}",
+            r.k_eff
+        );
     } else {
         println!("  {BOLD}{CYAN}  │{RESET}  {YELLOW}⚠ vᵀGv > 1 + 1/ln(N){RESET}");
-        println!("  {BOLD}{CYAN}  │{RESET}  {YELLOW}  K_eff = {:.4} (needs K > {:.1} in axiom){RESET}", r.k_eff, r.k_eff);
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  {YELLOW}  K_eff = {:.4} (needs K > {:.1} in axiom){RESET}",
+            r.k_eff, r.k_eff
+        );
     }
 
-    println!("  {BOLD}{CYAN}  │{RESET}  Improvement:    {:.6e} ({:.2}%)", r.improvement, r.improvement_pct);
-    println!("  {BOLD}{CYAN}  │{RESET}  Matvec rate:    {:.0} mv/s", r.matvec_rate);
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Improvement:    {:.6e} ({:.2}%)",
+        r.improvement, r.improvement_pct
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Matvec rate:    {:.0} mv/s",
+        r.matvec_rate
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  ln(N):          {:.4}", r.ln_n);
-    println!("  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}"
+    );
     println!();
 }
 
@@ -136,30 +183,55 @@ pub fn print_sweep_summary(results: &[RunResult]) {
 
     let all_satisfied = results.iter().all(|r| r.gram_bound_satisfied);
     let all_vtgv_lt_1 = results.iter().all(|r| r.optimal_vtgv < 1.0);
-    let best = results.iter().min_by(|a, b| a.optimal_d2.partial_cmp(&b.optimal_d2).unwrap());
-    let worst = results.iter().max_by(|a, b| a.optimal_vtgv.partial_cmp(&b.optimal_vtgv).unwrap());
+    let best = results
+        .iter()
+        .min_by(|a, b| a.optimal_d2.partial_cmp(&b.optimal_d2).unwrap());
+    let worst = results
+        .iter()
+        .max_by(|a, b| a.optimal_vtgv.partial_cmp(&b.optimal_vtgv).unwrap());
 
-    println!("  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}"
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}CATHEDRAL RL SWEEP RESULTS{RESET}");
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  HC numbers tested:  {}", results.len());
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  HC numbers tested:  {}",
+        results.len()
+    );
     if let Some(best) = best {
-        println!("  {BOLD}{CYAN}  │{RESET}  Best d²:           {:.10e}  (N={})", best.optimal_d2, best.n);
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  Best d²:           {:.10e}  (N={})",
+            best.optimal_d2, best.n
+        );
     }
     if let Some(worst) = worst {
-        println!("  {BOLD}{CYAN}  │{RESET}  Worst vᵀGv:        {:.10}  (N={})", worst.optimal_vtgv, worst.n);
+        println!(
+            "  {BOLD}{CYAN}  │{RESET}  Worst vᵀGv:        {:.10}  (N={})",
+            worst.optimal_vtgv, worst.n
+        );
     }
-    println!("  {BOLD}{CYAN}  │{RESET}  All vᵀGv < 1:      {}", if all_vtgv_lt_1 {
-        format!("{GREEN}YES ✓{RESET}")
-    } else {
-        format!("{YELLOW}NO{RESET}")
-    });
-    println!("  {BOLD}{CYAN}  │{RESET}  Gram bound (K=1):  {}", if all_satisfied {
-        format!("{GREEN}ALL SATISFIED ✓{RESET}")
-    } else {
-        format!("{YELLOW}SOME VIOLATIONS{RESET}")
-    });
-    println!("  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  All vᵀGv < 1:      {}",
+        if all_vtgv_lt_1 {
+            format!("{GREEN}YES ✓{RESET}")
+        } else {
+            format!("{YELLOW}NO{RESET}")
+        }
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Gram bound (K=1):  {}",
+        if all_satisfied {
+            format!("{GREEN}ALL SATISFIED ✓{RESET}")
+        } else {
+            format!("{YELLOW}SOME VIOLATIONS{RESET}")
+        }
+    );
+    println!(
+        "  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}"
+    );
     println!();
 }
 

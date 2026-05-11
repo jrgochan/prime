@@ -30,11 +30,15 @@ use nalgebra::{DMatrix, DVector, SymmetricEigen};
 
 const NPTS: usize = 50_000;
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 /// Compute Ω(n) = number of prime factors with multiplicity
 fn big_omega(n: usize) -> u32 {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0u32;
     let mut m = n;
     let mut p = 2;
@@ -45,23 +49,32 @@ fn big_omega(n: usize) -> u32 {
         }
         p += 1;
     }
-    if m > 1 { count += 1; }
+    if m > 1 {
+        count += 1;
+    }
     count
 }
 
 /// Liouville function: λ(n) = (-1)^{Ω(n)}
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+    if big_omega(n) % 2 == 0 {
+        1.0
+    } else {
+        -1.0
+    }
 }
 
 /// Gram matrix entry: G[j,k] = ∫₀¹ {j/x}{k/x} dx
 fn gram_entry(j: usize, k: usize) -> f64 {
     let (jf, kf) = (j as f64, k as f64);
     let dx = 1.0 / NPTS as f64;
-    (0..NPTS).map(|i| {
-        let x = (i as f64 + 0.5) * dx;
-        frac_part(jf / x) * frac_part(kf / x)
-    }).sum::<f64>() * dx
+    (0..NPTS)
+        .map(|i| {
+            let x = (i as f64 + 0.5) * dx;
+            frac_part(jf / x) * frac_part(kf / x)
+        })
+        .sum::<f64>()
+        * dx
 }
 
 /// Build the (N-1)×(N-1) Gram matrix for basis {2/x, ..., N/x}
@@ -108,7 +121,9 @@ fn correlation(a: &DVector<f64>, b: &DVector<f64>) -> f64 {
         var_a += da * da;
         var_b += db * db;
     }
-    if var_a < 1e-30 || var_b < 1e-30 { return 0.0; }
+    if var_a < 1e-30 || var_b < 1e-30 {
+        return 0.0;
+    }
     cov / (var_a.sqrt() * var_b.sqrt())
 }
 
@@ -122,7 +137,11 @@ fn main() {
 
     for &n in &ns {
         println!("╔══════════════════════════════════════════════════════════╗");
-        println!("║  N = {:4}  (dim = {:3})                                 ║", n, n - 1);
+        println!(
+            "║  N = {:4}  (dim = {:3})                                 ║",
+            n,
+            n - 1
+        );
         println!("╚══════════════════════════════════════════════════════════╝");
 
         let g = build_gram(n);
@@ -144,10 +163,17 @@ fn main() {
         println!("     ‖G‖_F         = {:.6}", g_norm);
         println!("     ‖[G,P]‖_F     = {:.6}", comm_norm);
         println!("     ‖{{G,P}}‖_F    = {:.6}", anticomm_norm);
-        println!("     ‖[G,P]‖/‖G‖   = {:.6}  {}", relative_comm,
-            if relative_comm < 0.1 { "← NEARLY COMMUTES ✨" }
-            else if relative_comm < 0.5 { "← partially commutes" }
-            else { "← does NOT commute" });
+        println!(
+            "     ‖[G,P]‖/‖G‖   = {:.6}  {}",
+            relative_comm,
+            if relative_comm < 0.1 {
+                "← NEARLY COMMUTES ✨"
+            } else if relative_comm < 0.5 {
+                "← partially commutes"
+            } else {
+                "← does NOT commute"
+            }
+        );
         println!();
 
         // ═══════════ 2. DECOMPOSITION G = G_even + G_odd ═══════════
@@ -163,8 +189,16 @@ fn main() {
         let even_frac = even_norm / g_norm;
         let odd_frac = odd_norm / g_norm;
 
-        println!("     ‖G_even‖/‖G‖  = {:.6}  ({:.1}% of spectral weight)", even_frac, even_frac * 100.0);
-        println!("     ‖G_odd‖/‖G‖   = {:.6}  ({:.1}% of spectral weight)", odd_frac, odd_frac * 100.0);
+        println!(
+            "     ‖G_even‖/‖G‖  = {:.6}  ({:.1}% of spectral weight)",
+            even_frac,
+            even_frac * 100.0
+        );
+        println!(
+            "     ‖G_odd‖/‖G‖   = {:.6}  ({:.1}% of spectral weight)",
+            odd_frac,
+            odd_frac * 100.0
+        );
         println!();
 
         // ═══════════ 3. EIGENVALUE ANALYSIS ═══════════
@@ -184,11 +218,15 @@ fn main() {
         println!("     Spectrum comparison (5 smallest):");
         println!("     {:>12} {:>12} {:>12}", "λ(G)", "λ(PGP)", "λ(G_even)");
         for i in 0..5.min(dim) {
-            println!("     {:12.8} {:12.8} {:12.8}",
-                evals_g[i], evals_pgp[i], evals_even[i]);
+            println!(
+                "     {:12.8} {:12.8} {:12.8}",
+                evals_g[i], evals_pgp[i], evals_even[i]
+            );
         }
-        println!("     λ_min ratio: λ_min(PGP)/λ_min(G) = {:.4}",
-            evals_pgp[0] / evals_g[0]);
+        println!(
+            "     λ_min ratio: λ_min(PGP)/λ_min(G) = {:.4}",
+            evals_pgp[0] / evals_g[0]
+        );
         println!();
 
         // ═══════════ 4. EIGENVECTOR PARITY ═══════════
@@ -201,11 +239,15 @@ fn main() {
         // Sort eigenvectors by eigenvalue
         let mut indices: Vec<usize> = (0..dim).collect();
         indices.sort_by(|&a, &b| {
-            eig_g.eigenvalues[a].partial_cmp(&eig_g.eigenvalues[b]).unwrap()
+            eig_g.eigenvalues[a]
+                .partial_cmp(&eig_g.eigenvalues[b])
+                .unwrap()
         });
 
-        println!("     {:>5} {:>12} {:>10} {:>10} {:>12}",
-            "idx", "eigenvalue", "⟨v,Pv⟩", "|⟨v,Pv⟩|", "Liouville ρ");
+        println!(
+            "     {:>5} {:>12} {:>10} {:>10} {:>12}",
+            "idx", "eigenvalue", "⟨v,Pv⟩", "|⟨v,Pv⟩|", "Liouville ρ"
+        );
 
         let p_diag: DVector<f64> = DVector::from_fn(dim, |i, _| liouville(i + 2));
         let liou_template: DVector<f64> = DVector::from_fn(dim, |i, _| {
@@ -228,8 +270,14 @@ fn main() {
             // Correlation with Liouville template
             let liou_corr = correlation(&v_unit, &liou_unit);
 
-            println!("     {:5} {:12.8} {:10.6} {:10.6} {:12.6}",
-                rank, eig_g.eigenvalues[idx], parity, parity.abs(), liou_corr);
+            println!(
+                "     {:5} {:12.8} {:10.6} {:10.6} {:12.6}",
+                rank,
+                eig_g.eigenvalues[idx],
+                parity,
+                parity.abs(),
+                liou_corr
+            );
         }
         println!();
 
@@ -241,7 +289,9 @@ fn main() {
         // Actually, [G,P]ᵀ[G,P] is symmetric, so we can get singular values.
         let ctc = commutator.transpose() * &commutator;
         let eig_ctc = SymmetricEigen::new(ctc);
-        let mut svals: Vec<f64> = eig_ctc.eigenvalues.iter()
+        let mut svals: Vec<f64> = eig_ctc
+            .eigenvalues
+            .iter()
             .map(|v| v.max(0.0).sqrt())
             .collect();
         svals.sort_by(|a, b| b.partial_cmp(a).unwrap());
@@ -260,8 +310,14 @@ fn main() {
         let even_idx: Vec<usize> = (0..dim).filter(|&i| liouville(i + 2) > 0.0).collect();
         let odd_idx: Vec<usize> = (0..dim).filter(|&i| liouville(i + 2) < 0.0).collect();
 
-        println!("     Liouville-even indices (λ=+1): {} values", even_idx.len());
-        println!("     Liouville-odd  indices (λ=-1): {} values", odd_idx.len());
+        println!(
+            "     Liouville-even indices (λ=+1): {} values",
+            even_idx.len()
+        );
+        println!(
+            "     Liouville-odd  indices (λ=-1): {} values",
+            odd_idx.len()
+        );
 
         // Compute block norms: G_ee, G_eo, G_oe, G_oo
         let mut norm_ee = 0.0f64;
@@ -285,9 +341,21 @@ fn main() {
 
         let total_sq = g_norm * g_norm;
         println!("     Block-wise ‖·‖²/‖G‖²:");
-        println!("       G_ee (even×even): {:.4}  ({:.1}%)", norm_ee / total_sq, 100.0 * norm_ee / total_sq);
-        println!("       G_eo (even×odd):  {:.4}  ({:.1}%)", 2.0 * norm_eo / total_sq, 200.0 * norm_eo / total_sq);
-        println!("       G_oo (odd×odd):   {:.4}  ({:.1}%)", norm_oo / total_sq, 100.0 * norm_oo / total_sq);
+        println!(
+            "       G_ee (even×even): {:.4}  ({:.1}%)",
+            norm_ee / total_sq,
+            100.0 * norm_ee / total_sq
+        );
+        println!(
+            "       G_eo (even×odd):  {:.4}  ({:.1}%)",
+            2.0 * norm_eo / total_sq,
+            200.0 * norm_eo / total_sq
+        );
+        println!(
+            "       G_oo (odd×odd):   {:.4}  ({:.1}%)",
+            norm_oo / total_sq,
+            100.0 * norm_oo / total_sq
+        );
 
         // If G is approximately block-diagonal under Liouville parity,
         // then G_eo ≈ 0, and the commutator [G,P] ≈ 0.
@@ -302,8 +370,10 @@ fn main() {
         // ═══════════ 7. HIGHER EIGENVECTOR LIOUVILLE CORRELATIONS ═══════════
         println!("  ── 7. ALL EIGENVECTORS: LIOUVILLE SIGN AGREEMENT ──");
         // For each eigenvector, check if sign(v[k]) correlates with λ(k)
-        println!("     {:>5} {:>12} {:>10} {:>10}",
-            "rank", "eigenvalue", "sign_agree", "parity ⟨v,Pv⟩");
+        println!(
+            "     {:>5} {:>12} {:>10} {:>10}",
+            "rank", "eigenvalue", "sign_agree", "parity ⟨v,Pv⟩"
+        );
 
         for (rank, &idx) in indices.iter().enumerate().take(20.min(dim)) {
             let v: DVector<f64> = eig_g.eigenvectors.column(idx).into();
@@ -317,18 +387,26 @@ fn main() {
                 if v_unit[i].abs() > 1e-10 {
                     let v_sign = if v_unit[i] > 0.0 { 1.0 } else { -1.0 };
                     let expected = -liouville(i + 2); // v ∝ -λ(k)·...
-                    if v_sign * expected > 0.0 { agree += 1; }
+                    if v_sign * expected > 0.0 {
+                        agree += 1;
+                    }
                     total += 1;
                 }
             }
-            let agree_frac = if total > 0 { agree as f64 / total as f64 } else { 0.0 };
+            let agree_frac = if total > 0 {
+                agree as f64 / total as f64
+            } else {
+                0.0
+            };
 
             // Parity
             let pv = DVector::from_fn(dim, |i, _| p_diag[i] * v_unit[i]);
             let parity = v_unit.dot(&pv);
 
-            println!("     {:5} {:12.8} {:10.4} {:10.6}",
-                rank, eig_g.eigenvalues[idx], agree_frac, parity);
+            println!(
+                "     {:5} {:12.8} {:10.4} {:10.6}",
+                rank, eig_g.eigenvalues[idx], agree_frac, parity
+            );
         }
 
         println!();
@@ -343,8 +421,10 @@ fn main() {
     let scale_ns = vec![20, 30, 50, 75, 100, 150, 200, 300];
     let mut scale_data: Vec<(f64, f64)> = Vec::new();
 
-    println!("  {:>6} {:>12} {:>12} {:>12} {:>12}",
-        "N", "‖[G,P]‖/‖G‖", "‖G_eo‖/‖G‖", "min_parity", "liou_corr");
+    println!(
+        "  {:>6} {:>12} {:>12} {:>12} {:>12}",
+        "N", "‖[G,P]‖/‖G‖", "‖G_eo‖/‖G‖", "min_parity", "liou_corr"
+    );
     println!("  {}", "-".repeat(60));
 
     for &n in &scale_ns {
@@ -394,12 +474,15 @@ fn main() {
 
         scale_data.push((n as f64, comm_rel));
 
-        println!("  {:6} {:12.6} {:12.6} {:12.6} {:12.6}",
-            n, comm_rel, eo_rel, parity, liou_corr);
+        println!(
+            "  {:6} {:12.6} {:12.6} {:12.6} {:12.6}",
+            n, comm_rel, eo_rel, parity, liou_corr
+        );
     }
 
     // Power law fit
-    let valid: Vec<(f64, f64)> = scale_data.iter()
+    let valid: Vec<(f64, f64)> = scale_data
+        .iter()
         .filter(|(_, y)| *y > 0.0)
         .copied()
         .collect();
@@ -416,9 +499,15 @@ fn main() {
         let a = intercept.exp();
 
         println!();
-        println!("  Power law fit: ‖[G,P]‖/‖G‖ ≈ {:.4} · N^{{{:.3}}}", a, slope);
+        println!(
+            "  Power law fit: ‖[G,P]‖/‖G‖ ≈ {:.4} · N^{{{:.3}}}",
+            a, slope
+        );
         if slope < -0.1 {
-            println!("  → Commutator VANISHES as N → ∞  ✨ (rate: N^{{{:.3}}})", slope);
+            println!(
+                "  → Commutator VANISHES as N → ∞  ✨ (rate: N^{{{:.3}}})",
+                slope
+            );
             println!("  → G COMMUTES with Liouville parity in the large-N limit!");
         } else if slope.abs() < 0.1 {
             println!("  → Commutator is approximately CONSTANT (no scaling)");

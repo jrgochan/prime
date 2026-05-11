@@ -14,8 +14,7 @@ use std::time::Instant;
 /// Test schedule: N values to interrogate.
 /// Capped at 20K — our largest DD-lossless HPDF file.
 const SCHEDULE: &[usize] = &[
-    10, 20, 50, 100, 200, 500, 1000, 2000, 3000, 5000, 7500, 10000,
-    15000, 20000,
+    10, 20, 50, 100, 200, 500, 1000, 2000, 3000, 5000, 7500, 10000, 15000, 20000,
 ];
 
 /// Configuration parsed from CLI flags.
@@ -36,7 +35,8 @@ fn parse_config() -> Config {
 
     // --mpfr-eigen <bits>  : enable MPFR Jacobi eigensolver
     if let Some(idx) = args.iter().position(|a| a == "--mpfr-eigen") {
-        let prec: u32 = args.get(idx + 1)
+        let prec: u32 = args
+            .get(idx + 1)
             .and_then(|s| s.parse().ok())
             .unwrap_or(256);
         cfg.mpfr_eigen_prec = Some(prec);
@@ -45,7 +45,8 @@ fn parse_config() -> Config {
 
     // --mpfr-limit <N>  : max N for full MPFR eigen
     if let Some(idx) = args.iter().position(|a| a == "--mpfr-limit") {
-        let limit: usize = args.get(idx + 1)
+        let limit: usize = args
+            .get(idx + 1)
             .and_then(|s| s.parse().ok())
             .unwrap_or(3000);
         cfg.mpfr_eigen_limit = Some(limit);
@@ -70,7 +71,6 @@ fn parse_config() -> Config {
 
     cfg
 }
-
 
 fn main() {
     let cfg = parse_config();
@@ -103,7 +103,13 @@ fn main() {
         eprintln!("  N = {n}");
         eprintln!("{sep}");
 
-        let r = panels::analyze_n(n, &gram_full, &mu, cfg.mpfr_eigen_prec, cfg.mpfr_eigen_limit);
+        let r = panels::analyze_n(
+            n,
+            &gram_full,
+            &mu,
+            cfg.mpfr_eigen_prec,
+            cfg.mpfr_eigen_limit,
+        );
         eprintln!("  ✓ N={n} complete ({:.2}s)", tn.elapsed().as_secs_f64());
         results.push(r);
     }

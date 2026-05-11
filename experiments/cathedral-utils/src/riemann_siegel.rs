@@ -111,7 +111,11 @@ mod tests {
     fn test_find_zeros_large_t() {
         // For t > 40 (n_max >= 2), the RS formula is reliable
         let zeros = find_zeros(200.0);
-        assert!(zeros.len() >= 5, "Should find at least 5 zeros up to t=200, found {}", zeros.len());
+        assert!(
+            zeros.len() >= 5,
+            "Should find at least 5 zeros up to t=200, found {}",
+            zeros.len()
+        );
     }
 
     #[test]
@@ -129,7 +133,10 @@ mod tests {
             prev = curr;
             t += 0.1;
         }
-        assert!(found >= 1, "Expected at least 1 sign change of Z(t) in [100, 120]");
+        assert!(
+            found >= 1,
+            "Expected at least 1 sign change of Z(t) in [100, 120]"
+        );
     }
 
     #[test]
@@ -146,7 +153,10 @@ mod tests {
     fn test_rs_theta_known_value() {
         // θ(100) from the asymptotic expansion
         let theta = rs_theta(100.0);
-        assert!((theta - 87.972).abs() < 0.1,
-            "θ(100) = {}, expected ~87.972", theta);
+        assert!(
+            (theta - 87.972).abs() < 0.1,
+            "θ(100) = {}, expected ~87.972",
+            theta
+        );
     }
 }

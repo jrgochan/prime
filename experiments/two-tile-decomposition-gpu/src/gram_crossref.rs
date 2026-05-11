@@ -7,10 +7,10 @@
 //!  Three-way comparison: FTC, series, Vasyunin formula.
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
+use crate::compute;
 use cathedral_utils::fmt;
 use cathedral_utils::gram::gram_entry_f64;
-use crate::compute;
+use rayon::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct CrossRefResult {
@@ -28,13 +28,19 @@ pub struct CrossRefResult {
 
 pub fn cross_reference(max_n: usize, max_m: usize) -> Vec<CrossRefResult> {
     let pairs: Vec<(usize, usize)> = (1..=max_n)
-        .flat_map(|j| ((j+1)..=max_n).map(move |k| (j, k)))
+        .flat_map(|j| ((j + 1)..=max_n).map(move |k| (j, k)))
         .collect();
 
-    println!("  {}Cross-referencing {} pairs at M={}...{}",
-        fmt::DIM, pairs.len(), max_m, fmt::RESET);
+    println!(
+        "  {}Cross-referencing {} pairs at M={}...{}",
+        fmt::DIM,
+        pairs.len(),
+        max_m,
+        fmt::RESET
+    );
 
-    let mut results: Vec<CrossRefResult> = pairs.par_iter()
+    let mut results: Vec<CrossRefResult> = pairs
+        .par_iter()
         .map(|&(j, k)| {
             let g = cathedral_utils::arith::gcd(j, k);
             let a = j / g;
@@ -54,8 +60,14 @@ pub fn cross_reference(max_n: usize, max_m: usize) -> Vec<CrossRefResult> {
             let formula_value = compute::vasyunin_gram_formula(j, k);
 
             CrossRefResult {
-                j, k, a, b, gcd_val: g,
-                ftc_value, series_value, formula_value,
+                j,
+                k,
+                a,
+                b,
+                gcd_val: g,
+                ftc_value,
+                series_value,
+                formula_value,
                 err_ftc_series: (ftc_value - series_value).abs(),
                 err_ftc_formula: (ftc_value - formula_value).abs(),
             }
@@ -74,27 +86,48 @@ pub fn print_cross_reference(results: &[CrossRefResult]) {
     println!();
 
     if results.len() <= 200 {
-        println!("  {:>4} {:>4}  {:>22}  {:>22}  {:>14}  {:>14}",
-            "(j", "k)", "FTC (decomposition)", "Series (direct)",
-            "|FTC-series|", "|FTC-formula|");
+        println!(
+            "  {:>4} {:>4}  {:>22}  {:>22}  {:>14}  {:>14}",
+            "(j", "k)", "FTC (decomposition)", "Series (direct)", "|FTC-series|", "|FTC-formula|"
+        );
         println!("  {}", "─".repeat(100));
 
         for r in results {
             let pass = r.err_ftc_series < 1e-3;
-            println!("  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>14.4e}  {:>14.4e}  {}",
-                r.j, r.k, r.ftc_value, r.series_value,
-                r.err_ftc_series, r.err_ftc_formula,
-                if pass { fmt::check(true) } else { fmt::check(false) });
+            println!(
+                "  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>14.4e}  {:>14.4e}  {}",
+                r.j,
+                r.k,
+                r.ftc_value,
+                r.series_value,
+                r.err_ftc_series,
+                r.err_ftc_formula,
+                if pass {
+                    fmt::check(true)
+                } else {
+                    fmt::check(false)
+                }
+            );
         }
         println!();
     }
 
-    let max_err_series = results.iter().map(|r| r.err_ftc_series).fold(0.0_f64, f64::max);
-    let max_err_formula = results.iter().map(|r| r.err_ftc_formula).fold(0.0_f64, f64::max);
+    let max_err_series = results
+        .iter()
+        .map(|r| r.err_ftc_series)
+        .fold(0.0_f64, f64::max);
+    let max_err_formula = results
+        .iter()
+        .map(|r| r.err_ftc_formula)
+        .fold(0.0_f64, f64::max);
     let all_pass = max_err_series < 1e-3;
 
     if all_pass {
-        println!("  {} ALL {} CROSS-REFERENCES MATCH", fmt::check(true), results.len());
+        println!(
+            "  {} ALL {} CROSS-REFERENCES MATCH",
+            fmt::check(true),
+            results.len()
+        );
     } else {
         println!("  {} SOME CROSS-REFERENCES FAILED", fmt::check(false));
     }

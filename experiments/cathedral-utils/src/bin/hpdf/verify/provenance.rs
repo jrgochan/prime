@@ -1,7 +1,7 @@
 //! Provenance, lineage, number theory, and distance verification.
 
-use cathedral_utils::hpdf::HpdfReader;
 use crate::common::*;
+use cathedral_utils::hpdf::HpdfReader;
 
 /// Display provenance metadata.
 pub fn show_provenance(reader: &HpdfReader) {
@@ -68,11 +68,7 @@ pub fn show_distance(reader: &HpdfReader) {
             dist.solver, dist.iterations, dist.residual_norm, dist.converged
         );
         if let Some(bt_x) = dist.bt_x {
-            println!(
-                "    bᵀx={:.15e}  →  1-bᵀx={:.15e}",
-                bt_x,
-                1.0 - bt_x
-            );
+            println!("    bᵀx={:.15e}  →  1-bᵀx={:.15e}", bt_x, 1.0 - bt_x);
         }
         if let Ok(Some(hist)) = reader.read_convergence_history() {
             println!(

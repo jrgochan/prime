@@ -29,13 +29,9 @@ use crate::gram::PREC;
 pub fn write_certificate(results: &[BDResult]) {
     std::fs::create_dir_all("results").unwrap();
 
-    let x_monotone = results
-        .windows(2)
-        .all(|w| w[1].x_val > w[0].x_val);
+    let x_monotone = results.windows(2).all(|w| w[1].x_val > w[0].x_val);
     let d2_positive = results.iter().all(|r| r.d2_n > 0.0);
-    let d2_decreasing = results
-        .windows(2)
-        .all(|w| w[1].d2_n < w[0].d2_n);
+    let d2_decreasing = results.windows(2).all(|w| w[1].d2_n < w[0].d2_n);
 
     let max_n = results.last().map(|r| r.n).unwrap_or(0);
     let last_x_over_ln = results.last().map(|r| r.x_over_ln_n).unwrap_or(0.0);

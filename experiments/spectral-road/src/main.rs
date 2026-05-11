@@ -56,31 +56,36 @@ fn main() {
     let mpfr_cache = cathedral_utils::cache::gram_cache_path(max_n, gram::P);
     let f64_cache = cathedral_utils::cache::gram_cache_path(max_n, 0);
 
-    let (gram_matrix, ln_table) = if let Some(cached) = cathedral_utils::cache::load_gram(&mpfr_cache) {
-        // MPFR cache hit — no ln_table needed for analysis
-        (cached, None)
-    } else if let Some(cached) = cathedral_utils::cache::load_gram(&f64_cache) {
-        // f64 cache hit
-        (cached, None)
-    } else {
-        // Build from scratch — use MPFR if requested or max_n > 500
-        let needs_mpfr = max_n > 500;
-        let lt = if needs_mpfr {
-            let max_t = (max_n * 5).max(5_000).min(gram::MAX_LN_TABLE);
-            Some(gram::LnTable::new(max_t))
+    let (gram_matrix, ln_table) =
+        if let Some(cached) = cathedral_utils::cache::load_gram(&mpfr_cache) {
+            // MPFR cache hit — no ln_table needed for analysis
+            (cached, None)
+        } else if let Some(cached) = cathedral_utils::cache::load_gram(&f64_cache) {
+            // f64 cache hit
+            (cached, None)
         } else {
-            None
+            // Build from scratch — use MPFR if requested or max_n > 500
+            let needs_mpfr = max_n > 500;
+            let lt = if needs_mpfr {
+                let max_t = (max_n * 5).max(5_000).min(gram::MAX_LN_TABLE);
+                Some(gram::LnTable::new(max_t))
+            } else {
+                None
+            };
+            let matrix = gram::GramMatrix::build(max_n, lt.as_ref());
+
+            // Cache to disk for next time
+            let save_path = if matrix.mpfr_built {
+                &mpfr_cache
+            } else {
+                &f64_cache
+            };
+            if let Err(e) = cathedral_utils::cache::save_gram(save_path, &matrix) {
+                eprintln!("  \x1b[33m⚠\x1b[0m Failed to cache: {e}");
+            }
+
+            (matrix, lt)
         };
-        let matrix = gram::GramMatrix::build(max_n, lt.as_ref());
-
-        // Cache to disk for next time
-        let save_path = if matrix.mpfr_built { &mpfr_cache } else { &f64_cache };
-        if let Err(e) = cathedral_utils::cache::save_gram(save_path, &matrix) {
-            eprintln!("  \x1b[33m⚠\x1b[0m Failed to cache: {e}");
-        }
-
-        (matrix, lt)
-    };
     println!("  {DIM}Matrix memory: {} MB{RESET}", gram_matrix.mem_mb());
     println!();
 
@@ -109,8 +114,12 @@ fn main() {
         gram_matrix.max_dim
     );
     println!();
-    println!("  {DIM}     N  │ dim  │ λ_min           │ λ₂             │ gap λ₂/λ₁   │ time{RESET}");
-    println!("  {DIM}  ──────┼──────┼─────────────────┼────────────────┼─────────────┼──────{RESET}");
+    println!(
+        "  {DIM}     N  │ dim  │ λ_min           │ λ₂             │ gap λ₂/λ₁   │ time{RESET}"
+    );
+    println!(
+        "  {DIM}  ──────┼──────┼─────────────────┼────────────────┼─────────────┼──────{RESET}"
+    );
 
     let eigen_results = analysis::eigenvalue_sweep(&gram_matrix, &test_ns);
 
@@ -206,23 +215,14 @@ fn main() {
         }
         println!();
         println!("  Weight² on primes:     {CYAN}{:.2}%{RESET}", pw * 100.0);
-        println!(
-            "  Weight² on composites: {YELLOW}{:.2}%{RESET}",
-            cw * 100.0
-        );
+        println!("  Weight² on composites: {YELLOW}{:.2}%{RESET}", cw * 100.0);
 
         // Dipole analysis
         println!();
         println!("  {BOLD}{WHITE}Arithmetic Dipole Analysis:{RESET}");
         let dipole = analysis::dipole_analysis(&r.eigvec_min, 15);
-        println!(
-            "    Positive contributions: {:+.8e}",
-            dipole.pos_sum
-        );
-        println!(
-            "    Negative contributions: {:+.8e}",
-            dipole.neg_sum
-        );
+        println!("    Positive contributions: {:+.8e}", dipole.pos_sum);
+        println!("    Negative contributions: {:+.8e}", dipole.neg_sum);
         println!("    Net (15 terms):        {:+.8e}", dipole.net);
         println!(
             "    Cancellation ratio:    {:.4}%",
@@ -259,7 +259,9 @@ fn main() {
     println!("  {DIM}d²_N = ||1 - f_N||² using full Gram matrix{RESET}");
     println!();
     println!("  {DIM}     N  │ Selberg       │ GPY           │ Maynard       │ Liouville{RESET}");
-    println!("  {DIM}  ──────┼───────────────┼───────────────┼───────────────┼──────────────{RESET}");
+    println!(
+        "  {DIM}  ──────┼───────────────┼───────────────┼───────────────┼──────────────{RESET}"
+    );
 
     let mut all_witness_results: Vec<witness::WitnessResult> = Vec::new();
     for &n in &test_ns {
@@ -291,7 +293,11 @@ fn main() {
 
     let opt_theta = 0.9;
     let basis_counts = [4, 6, 8, 10, 12];
-    let opt_ns: Vec<usize> = test_ns.iter().copied().filter(|&n| (10..=1000).contains(&n)).collect();
+    let opt_ns: Vec<usize> = test_ns
+        .iter()
+        .copied()
+        .filter(|&n| (10..=1000).contains(&n))
+        .collect();
 
     // Run with default (4) for full output
     let opt_results = optimizer::sweep(&gram_matrix, &opt_ns, opt_theta, 4);
@@ -317,14 +323,24 @@ fn main() {
     println!("  {DIM}     N  │  K=4          │  K=6          │  K=8          │  K=10         │  K=12{RESET}");
     println!("  {DIM}  ──────┼───────────────┼───────────────┼───────────────┼───────────────┼──────────────{RESET}");
 
-    let sweep_ns: Vec<usize> = opt_ns.iter().copied()
-        .filter(|&n| n == 50 || n == 100 || n == 200 || n == 300 || n == 500 || n == 700 || n == 1000)
+    let sweep_ns: Vec<usize> = opt_ns
+        .iter()
+        .copied()
+        .filter(|&n| {
+            n == 50 || n == 100 || n == 200 || n == 300 || n == 500 || n == 700 || n == 1000
+        })
         .collect();
 
     for &n in &sweep_ns {
         print!("  {:<6}", n);
         for &k in &basis_counts {
-            let r = optimizer::optimize(&gram_matrix, n, opt_theta, optimizer::ArithCore::Liouville, k);
+            let r = optimizer::optimize(
+                &gram_matrix,
+                n,
+                opt_theta,
+                optimizer::ArithCore::Liouville,
+                k,
+            );
             let marker = if r.d2_min > 0.0 { GREEN } else { "\x1b[31m" };
             print!(" │ {marker}{:+.6e}{RESET}", r.d2_min);
         }
@@ -336,12 +352,27 @@ fn main() {
     {
         let mut f = std::fs::File::create("results/optimizer.tsv").unwrap();
         use std::io::Write;
-        writeln!(f, "N\tcore\ttheta\tD\tnum_basis\td2_min\td2_selberg\timprovement\tparams").unwrap();
+        writeln!(
+            f,
+            "N\tcore\ttheta\tD\tnum_basis\td2_min\td2_selberg\timprovement\tparams"
+        )
+        .unwrap();
         for r in &opt_results {
             let params_str: Vec<String> = r.params.iter().map(|p| format!("{:.10}", p)).collect();
-            writeln!(f, "{}\t{}\t{:.2}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.10}\t{}",
-                r.n, r.core, r.theta, r.d_level, r.num_basis, r.d2_min, r.d2_selberg, r.improvement,
-                params_str.join(",")).unwrap();
+            writeln!(
+                f,
+                "{}\t{}\t{:.2}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.10}\t{}",
+                r.n,
+                r.core,
+                r.theta,
+                r.d_level,
+                r.num_basis,
+                r.d2_min,
+                r.d2_selberg,
+                r.improvement,
+                params_str.join(",")
+            )
+            .unwrap();
         }
     }
 
@@ -353,7 +384,9 @@ fn main() {
     let max_n_tested = eigen_results.last().map_or(0, |r| r.n);
 
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}ROAD 2 CERTIFICATE — EIGENVALUE DECAY PROBE{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}ROAD 2 CERTIFICATE — EIGENVALUE DECAY PROBE{RESET}"
+    );
     println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
     println!(
         "  {BOLD}{CYAN}║{RESET}  Gram: {} ({} MB)  Threads: {threads}  Max N: {max_n_tested}",

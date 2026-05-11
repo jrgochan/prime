@@ -6,12 +6,12 @@
 //! - `void_analysis_N<max>.tsv` — Void gap structure between colossals
 //! - `run_N<max>.log`          — Full console log of the run
 
+use crate::dial;
+use cathedral_utils::arith;
+use serde_json::json;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use serde_json::json;
-use cathedral_utils::arith;
-use crate::dial;
 
 /// Get the results directory for ramanujan-dial.
 fn results_dir() -> PathBuf {
@@ -22,12 +22,7 @@ fn results_dir() -> PathBuf {
 }
 
 /// Write all output files after an analysis run.
-pub fn write_results(
-    max_limit: u64,
-    hcns: &[usize],
-    div_table: &[u32],
-    elapsed_secs: f64,
-) {
+pub fn write_results(max_limit: u64, hcns: &[usize], div_table: &[u32], elapsed_secs: f64) {
     let dir = results_dir();
     let tag = format!("N{}", max_limit);
 
@@ -44,22 +39,30 @@ pub fn write_results(
 
 /// Write the JSON certificate with structured experiment results.
 fn write_certificate(
-    dir: &PathBuf, tag: &str, max_limit: u64,
-    hcns: &[usize], div_table: &[u32], elapsed_secs: f64,
+    dir: &PathBuf,
+    tag: &str,
+    max_limit: u64,
+    hcns: &[usize],
+    div_table: &[u32],
+    elapsed_secs: f64,
 ) {
-    let hcn_records: Vec<_> = hcns.iter().map(|&n| {
-        let is_colossal = dial::COLOSSAL.contains(&(n as u64));
-        json!({
-            "n": n,
-            "divisors": div_table.get(n).copied().unwrap_or(0),
-            "omega": arith::small_omega(n),
-            "factorization": arith::factorize(n),
-            "type": if is_colossal { "colossal" } else { "hcn" },
+    let hcn_records: Vec<_> = hcns
+        .iter()
+        .map(|&n| {
+            let is_colossal = dial::COLOSSAL.contains(&(n as u64));
+            json!({
+                "n": n,
+                "divisors": div_table.get(n).copied().unwrap_or(0),
+                "omega": arith::small_omega(n),
+                "factorization": arith::factorize(n),
+                "type": if is_colossal { "colossal" } else { "hcn" },
+            })
         })
-    }).collect();
+        .collect();
 
     // Phase transitions
-    let phase_transitions: Vec<_> = small_primes(100).iter()
+    let phase_transitions: Vec<_> = small_primes(100)
+        .iter()
         .take(15)
         .map(|&p| {
             let eps = 2.0f64.ln() / (p as f64).ln();
@@ -71,14 +74,19 @@ fn write_certificate(
         .collect();
 
     // Void gaps
-    let colossal_under: Vec<u64> = dial::COLOSSAL.iter().copied()
-        .filter(|&n| n <= max_limit).collect();
+    let colossal_under: Vec<u64> = dial::COLOSSAL
+        .iter()
+        .copied()
+        .filter(|&n| n <= max_limit)
+        .collect();
 
-    let void_gaps: Vec<_> = colossal_under.windows(2)
+    let void_gaps: Vec<_> = colossal_under
+        .windows(2)
         .filter(|pair| (pair[1] as usize) < div_table.len())
         .map(|pair| {
             let (lo, hi) = (pair[0], pair[1]);
-            let hcns_between = hcns.iter()
+            let hcns_between = hcns
+                .iter()
                 .filter(|&&n| (n as u64) > lo && (n as u64) < hi)
                 .count();
             json!({
@@ -122,48 +130,66 @@ fn write_hcn_tsv(dir: &PathBuf, tag: &str, hcns: &[usize], div_table: &[u32]) {
 
     for &n in hcns {
         let is_colossal = dial::COLOSSAL.contains(&(n as u64));
-        writeln!(f, "{}\t{}\t{}\t{}\t{}",
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}\t{}",
             n,
             div_table.get(n).copied().unwrap_or(0),
             arith::small_omega(n),
             arith::factorize(n),
             if is_colossal { "colossal" } else { "hcn" },
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
 
 /// Write the void analysis (inter-colossal gaps) as TSV.
-fn write_void_tsv(
-    dir: &PathBuf, tag: &str, max_limit: u64,
-    hcns: &[usize], div_table: &[u32],
-) {
+fn write_void_tsv(dir: &PathBuf, tag: &str, max_limit: u64, hcns: &[usize], div_table: &[u32]) {
     let path = dir.join(format!("void_analysis_{}.tsv", tag));
     let mut f = fs::File::create(&path).expect("Failed to create void TSV");
 
     writeln!(f, "gap_from\tgap_to\tgap_size\thcn_count\thcns_in_gap").unwrap();
 
-    let colossal_under: Vec<u64> = dial::COLOSSAL.iter().copied()
-        .filter(|&n| n <= max_limit).collect();
+    let colossal_under: Vec<u64> = dial::COLOSSAL
+        .iter()
+        .copied()
+        .filter(|&n| n <= max_limit)
+        .collect();
 
     let prime_sieve = arith::sieve_primes(div_table.len() - 1);
 
     for pair in colossal_under.windows(2) {
         let (lo, hi) = (pair[0], pair[1]);
-        if hi as usize > div_table.len() - 1 { continue; }
+        if hi as usize > div_table.len() - 1 {
+            continue;
+        }
 
-        let hcns_between: Vec<usize> = hcns.iter().copied()
-            .filter(|&n| (n as u64) > lo && (n as u64) < hi).collect();
+        let hcns_between: Vec<usize> = hcns
+            .iter()
+            .copied()
+            .filter(|&n| (n as u64) > lo && (n as u64) < hi)
+            .collect();
         let primes_in_gap: usize = ((lo as usize + 1)..hi as usize)
-            .filter(|&n| n < prime_sieve.len() && prime_sieve[n]).count();
+            .filter(|&n| n < prime_sieve.len() && prime_sieve[n])
+            .count();
 
-        let hcn_list = hcns_between.iter()
+        let hcn_list = hcns_between
+            .iter()
             .map(|n| n.to_string())
             .collect::<Vec<_>>()
             .join(",");
 
-        writeln!(f, "{}\t{}\t{}\t{}\t{}\t{}",
-            lo, hi, hi - lo, hcns_between.len(), primes_in_gap, hcn_list,
-        ).unwrap();
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{}\t{}\t{}",
+            lo,
+            hi,
+            hi - lo,
+            hcns_between.len(),
+            primes_in_gap,
+            hcn_list,
+        )
+        .unwrap();
     }
 }
 

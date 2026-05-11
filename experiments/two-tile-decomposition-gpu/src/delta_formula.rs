@@ -8,9 +8,9 @@
 //!  Accumulates by residue class for structural analysis.
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
-use cathedral_utils::fmt;
 use crate::compute;
+use cathedral_utils::fmt;
+use rayon::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct ResidueClassResult {
@@ -43,7 +43,9 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> DeltaFormulaResult {
         let r = (a * m) % b;
         let n_hi = (a * m) / b;
         let n_lo = (a * (m + 1)) / b;
-        if n_hi == n_lo { continue; }
+        if n_hi == n_lo {
+            continue;
+        }
 
         n_classes_seen.insert(r);
 
@@ -53,14 +55,17 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> DeltaFormulaResult {
         let d_numerical = actual - rt;
 
         let err = (d_exact - d_numerical).abs();
-        if err > max_error { max_error = err; }
+        if err > max_error {
+            max_error = err;
+        }
 
         total_exact += d_exact;
         total_numerical += d_numerical;
     }
 
     DeltaFormulaResult {
-        a, b,
+        a,
+        b,
         max_pointwise_error: max_error,
         total_delta_exact: total_exact,
         total_delta_numerical: total_numerical,
@@ -70,7 +75,8 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> DeltaFormulaResult {
 }
 
 pub fn certify_all(pairs: &[(usize, usize)], max_m: usize) -> Vec<DeltaFormulaResult> {
-    let mut results: Vec<_> = pairs.par_iter()
+    let mut results: Vec<_> = pairs
+        .par_iter()
         .map(|&(a, b)| certify_pair(a, b, max_m))
         .collect();
     results.sort_by_key(|r| (r.a, r.b));
@@ -84,30 +90,49 @@ pub fn print_certification(results: &[DeltaFormulaResult]) {
     println!();
 
     if results.len() <= 200 {
-        println!("  {:>5} {:>5}  {:>16}  {:>16}  {:>14}  {:>6}",
-            "(a", "b)", "Σ'Δ (formula)", "Σ'Δ (FTC)", "|error|", "cls");
+        println!(
+            "  {:>5} {:>5}  {:>16}  {:>16}  {:>14}  {:>6}",
+            "(a", "b)", "Σ'Δ (formula)", "Σ'Δ (FTC)", "|error|", "cls"
+        );
         println!("  {}", "─".repeat(75));
 
         for r in results {
             let pass = r.max_pointwise_error < 1e-8;
-            println!("  ({:>2},{:>2})  {:>16.10e}  {:>16.10e}  {:>14.4e}  {:>4}  {}",
-                r.a, r.b,
-                r.total_delta_exact, r.total_delta_numerical,
-                r.max_pointwise_error, r.n_classes,
-                if pass { fmt::check(true) } else { fmt::check(false) },
+            println!(
+                "  ({:>2},{:>2})  {:>16.10e}  {:>16.10e}  {:>14.4e}  {:>4}  {}",
+                r.a,
+                r.b,
+                r.total_delta_exact,
+                r.total_delta_numerical,
+                r.max_pointwise_error,
+                r.n_classes,
+                if pass {
+                    fmt::check(true)
+                } else {
+                    fmt::check(false)
+                },
             );
         }
         println!();
     }
 
-    let max_err = results.iter().map(|r| r.max_pointwise_error).fold(0.0_f64, f64::max);
+    let max_err = results
+        .iter()
+        .map(|r| r.max_pointwise_error)
+        .fold(0.0_f64, f64::max);
     let all_pass = max_err < 1e-8;
 
     if all_pass {
-        println!("  {} ALL DELTA FORMULA IDENTITIES CERTIFIED across {} pairs",
-            fmt::check(true), results.len());
+        println!(
+            "  {} ALL DELTA FORMULA IDENTITIES CERTIFIED across {} pairs",
+            fmt::check(true),
+            results.len()
+        );
     } else {
-        let n_fail = results.iter().filter(|r| r.max_pointwise_error >= 1e-8).count();
+        let n_fail = results
+            .iter()
+            .filter(|r| r.max_pointwise_error >= 1e-8)
+            .count();
         println!("  {} {} failures", fmt::check(false), n_fail);
     }
     println!("  Max |Δ_formula - Δ_FTC|: {:.4e}", max_err);

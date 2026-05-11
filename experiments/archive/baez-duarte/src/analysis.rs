@@ -203,11 +203,7 @@ fn eigenvalue_bounds_f64(mat: &[Vec<Float>]) -> (f64, f64) {
 ///
 /// Returns a BDResult containing all quantities needed for the
 /// certificate: d²_N, X, X/ln(N), eigenvalue bounds.
-pub fn analyze(
-    n: usize,
-    g: &[Vec<Float>],
-    b: &[Float],
-) -> BDResult {
+pub fn analyze(n: usize, g: &[Vec<Float>], b: &[Float]) -> BDResult {
     let euler_gamma = 0.5772156649015328606_f64;
 
     // C = G - bbᵀ

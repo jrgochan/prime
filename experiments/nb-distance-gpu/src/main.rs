@@ -5,7 +5,7 @@
 
 mod gpu;
 
-use cathedral_utils::{cache, gram::GramMatrix, arith, fitting};
+use cathedral_utils::{arith, cache, fitting, gram::GramMatrix};
 use nalgebra::{DMatrix, DVector};
 
 fn main() {
@@ -23,7 +23,10 @@ fn main() {
     // Detect GPU
     match gpu::detect_gpu() {
         Some(info) => {
-            println!("  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m", info.name, info.vram_mb);
+            println!(
+                "  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m",
+                info.name, info.vram_mb
+            );
         }
         None => {
             eprintln!("  ✗ No CUDA GPU detected.");
@@ -45,7 +48,9 @@ fn main() {
     let mut results: Vec<NResult> = Vec::new();
 
     for &n in &test_ns {
-        if n < 3 || n > gram.max_n { continue; }
+        if n < 3 || n > gram.max_n {
+            continue;
+        }
         let dim = n - 1;
         let (sub, _) = gram.extract_submatrix(n);
         let b = arith::b_vector(dim);
@@ -84,9 +89,12 @@ fn main() {
                 );
 
                 results.push(NResult {
-                    n, d2, lambda_min,
+                    n,
+                    d2,
+                    lambda_min,
                     gpu_time: result.gpu_time_secs,
-                    deloc_ratio, b_vmin_proj,
+                    deloc_ratio,
+                    b_vmin_proj,
                 });
             }
             Err(e) => {
@@ -99,41 +107,60 @@ fn main() {
 
     // Scaling fits
     if results.len() >= 5 {
-        let d2_data: Vec<(f64, f64)> = results.iter()
+        let d2_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.d2 > 0.0)
             .map(|r| ((r.n as f64).ln(), r.d2.ln()))
             .collect();
         if d2_data.len() >= 3 {
             let (alpha, c_ln, r2) = fitting::linreg(&d2_data);
-            println!("  d² decay:  d² ~ {:.4} · N^({:.4})   R² = {:.4}",
-                c_ln.exp(), alpha, r2);
+            println!(
+                "  d² decay:  d² ~ {:.4} · N^({:.4})   R² = {:.4}",
+                c_ln.exp(),
+                alpha,
+                r2
+            );
         }
 
-        let deloc_data: Vec<(f64, f64)> = results.iter()
+        let deloc_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.deloc_ratio > 0.0)
             .map(|r| ((r.n as f64).ln(), r.deloc_ratio.ln()))
             .collect();
         if deloc_data.len() >= 3 {
             let (slope, intercept, r2) = fitting::linreg(&deloc_data);
-            println!("  D(N) scaling:  D(N) ~ {:.4} · N^({:.4})   R² = {:.4}",
-                intercept.exp(), slope, r2);
+            println!(
+                "  D(N) scaling:  D(N) ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            );
         }
 
-        let bproj_data: Vec<(f64, f64)> = results.iter()
+        let bproj_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.b_vmin_proj > 0.0)
             .map(|r| ((r.n as f64).ln(), r.b_vmin_proj.ln()))
             .collect();
         if bproj_data.len() >= 3 {
             let (slope, intercept, r2) = fitting::linreg(&bproj_data);
-            println!("  |⟨b,v_min⟩| scaling:  ~ {:.4} · N^({:.4})   R² = {:.4}",
-                intercept.exp(), slope, r2);
+            println!(
+                "  |⟨b,v_min⟩| scaling:  ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            );
         }
     }
 
     // Summary
     let total_gpu: f64 = results.iter().map(|r| r.gpu_time).sum();
     println!();
-    println!("  Total GPU time: {:.2}s for {} eigendecompositions", total_gpu, results.len());
+    println!(
+        "  Total GPU time: {:.2}s for {} eigendecompositions",
+        total_gpu,
+        results.len()
+    );
     println!();
 }
 
@@ -149,7 +176,10 @@ struct NResult {
 fn find_cached_gram(max_n: usize) -> GramMatrix {
     // Try various precision levels, largest matrix first
     let cache_dir = cache::cache_dir();
-    eprintln!("  \x1b[2mSearching for cached Gram matrices in {}\x1b[0m", cache_dir.display());
+    eprintln!(
+        "  \x1b[2mSearching for cached Gram matrices in {}\x1b[0m",
+        cache_dir.display()
+    );
 
     // Look for files matching gram_N*_*.bin
     let mut best: Option<GramMatrix> = None;
@@ -158,10 +188,9 @@ fn find_cached_gram(max_n: usize) -> GramMatrix {
             let name = entry.file_name().to_string_lossy().to_string();
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
-                    if g.max_n >= max_n
-                        && best.as_ref().is_none_or(|b| g.precision > b.precision) {
-                            best = Some(g);
-                        }
+                    if g.max_n >= max_n && best.as_ref().is_none_or(|b| g.precision > b.precision) {
+                        best = Some(g);
+                    }
                 }
             }
         }
@@ -169,8 +198,12 @@ fn find_cached_gram(max_n: usize) -> GramMatrix {
 
     match best {
         Some(g) => {
-            eprintln!("  \x1b[32m✓ Using cached Gram matrix (N={}, {}-bit, {} MB)\x1b[0m",
-                g.max_n, g.precision, g.data.len() * 8 / (1024 * 1024));
+            eprintln!(
+                "  \x1b[32m✓ Using cached Gram matrix (N={}, {}-bit, {} MB)\x1b[0m",
+                g.max_n,
+                g.precision,
+                g.data.len() * 8 / (1024 * 1024)
+            );
             g
         }
         None => {
@@ -183,14 +216,30 @@ fn find_cached_gram(max_n: usize) -> GramMatrix {
 
 fn build_schedule(max_n: usize) -> Vec<usize> {
     let mut ns = Vec::new();
-    for n in 3..=30.min(max_n) { ns.push(n); }
-    for n in (35..=100.min(max_n)).step_by(5) { ns.push(n); }
-    for n in (125..=500.min(max_n)).step_by(25) { ns.push(n); }
-    for n in (550..=1000.min(max_n)).step_by(50) { ns.push(n); }
-    for n in (1100..=2000.min(max_n)).step_by(100) { ns.push(n); }
-    for n in (2200..=5000.min(max_n)).step_by(200) { ns.push(n); }
-    for n in (5500..=max_n).step_by(500) { ns.push(n); }
-    if !ns.contains(&max_n) && max_n >= 3 { ns.push(max_n); }
+    for n in 3..=30.min(max_n) {
+        ns.push(n);
+    }
+    for n in (35..=100.min(max_n)).step_by(5) {
+        ns.push(n);
+    }
+    for n in (125..=500.min(max_n)).step_by(25) {
+        ns.push(n);
+    }
+    for n in (550..=1000.min(max_n)).step_by(50) {
+        ns.push(n);
+    }
+    for n in (1100..=2000.min(max_n)).step_by(100) {
+        ns.push(n);
+    }
+    for n in (2200..=5000.min(max_n)).step_by(200) {
+        ns.push(n);
+    }
+    for n in (5500..=max_n).step_by(500) {
+        ns.push(n);
+    }
+    if !ns.contains(&max_n) && max_n >= 3 {
+        ns.push(max_n);
+    }
     ns.sort();
     ns.dedup();
     ns

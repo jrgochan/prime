@@ -45,7 +45,9 @@ fn rs_theta(t: f64) -> f64 {
 
 fn hardy_z(t: f64) -> f64 {
     let n_max = ((t / (2.0 * PI)).sqrt()).floor() as usize;
-    if n_max == 0 { return 0.0; }
+    if n_max == 0 {
+        return 0.0;
+    }
     let theta = rs_theta(t);
     let mut sum = 0.0;
     for n in 1..=n_max {
@@ -54,8 +56,7 @@ fn hardy_z(t: f64) -> f64 {
     }
     sum *= 2.0;
     let p = ((t / (2.0 * PI)).sqrt()).fract();
-    let c0 = (PI / 8.0 * (2.0 * p - 1.0).powi(2)).cos()
-        / (PI * 0.5 * (2.0 * p - 1.0)).cos();
+    let c0 = (PI / 8.0 * (2.0 * p - 1.0).powi(2)).cos() / (PI * 0.5 * (2.0 * p - 1.0)).cos();
     let tau = (t / (2.0 * PI)).sqrt();
     sum += (-1i32).pow(n_max as u32 + 1) as f64 * tau.powf(-0.5) * c0;
     sum
@@ -76,7 +77,12 @@ fn find_zeros(t_end: f64) -> Vec<f64> {
             for _ in 0..64 {
                 let mid = (lo + hi) / 2.0;
                 let zm = hardy_z(mid);
-                if zlo * zm < 0.0 { hi = mid; } else { lo = mid; zlo = zm; }
+                if zlo * zm < 0.0 {
+                    hi = mid;
+                } else {
+                    lo = mid;
+                    zlo = zm;
+                }
             }
             zeros.push((lo + hi) / 2.0);
         }
@@ -103,7 +109,8 @@ fn frac_part(x: f64) -> f64 {
 fn inner_product(j: usize, k: usize, n_points: usize) -> f64 {
     let mut sum = 0.0;
     let dx = 1.0 / n_points as f64;
-    for i in 1..n_points { // skip x=0 (singularity)
+    for i in 1..n_points {
+        // skip x=0 (singularity)
         let x = i as f64 * dx;
         let fj = frac_part(j as f64 / x);
         let fk = frac_part(k as f64 / x);
@@ -126,22 +133,30 @@ fn inner_with_one(k: usize, n_points: usize) -> f64 {
 /// Solve Ax = b using Gaussian elimination
 fn solve_linear(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
     let n = b.len();
-    let mut aug: Vec<Vec<f64>> = a.iter().enumerate().map(|(i, row)| {
-        let mut r = row.clone();
-        r.push(b[i]);
-        r
-    }).collect();
+    let mut aug: Vec<Vec<f64>> = a
+        .iter()
+        .enumerate()
+        .map(|(i, row)| {
+            let mut r = row.clone();
+            r.push(b[i]);
+            r
+        })
+        .collect();
 
     for col in 0..n {
         // Pivot
         let mut max_row = col;
-        for row in (col+1)..n {
-            if aug[row][col].abs() > aug[max_row][col].abs() { max_row = row; }
+        for row in (col + 1)..n {
+            if aug[row][col].abs() > aug[max_row][col].abs() {
+                max_row = row;
+            }
         }
         aug.swap(col, max_row);
-        if aug[col][col].abs() < 1e-15 { return None; }
+        if aug[col][col].abs() < 1e-15 {
+            return None;
+        }
 
-        for row in (col+1)..n {
+        for row in (col + 1)..n {
             let factor = aug[row][col] / aug[col][col];
             for j in col..=n {
                 aug[row][j] -= factor * aug[col][j];
@@ -152,7 +167,7 @@ fn solve_linear(a: &[Vec<f64>], b: &[f64]) -> Option<Vec<f64>> {
     let mut x = vec![0.0; n];
     for i in (0..n).rev() {
         x[i] = aug[i][n];
-        for j in (i+1)..n {
+        for j in (i + 1)..n {
             x[i] -= aug[i][j] * x[j];
         }
         x[i] /= aug[i][i];
@@ -171,14 +186,20 @@ fn main() {
     println!("\n[1/4] Finding zeros up to t = {:.0}...", t_max);
     let start = std::time::Instant::now();
     let zeros = find_zeros(t_max);
-    println!("  Found {} zeros in {:.1}s", zeros.len(), start.elapsed().as_secs_f64());
+    println!(
+        "  Found {} zeros in {:.1}s",
+        zeros.len(),
+        start.elapsed().as_secs_f64()
+    );
 
     // Phase 2: Compute the "explicit formula" check
     // ψ(x) = x - Σ_ρ x^ρ/ρ - log(2π) - ...
     println!("\n[2/4] ═══ Explicit Formula Check ═══");
     println!("  How well do zeros predict prime distribution?\n");
-    println!("  {:>10}  {:>12}  {:>12}  {:>12}  {:>10}",
-        "x", "ψ(x)", "formula", "error", "rel_err%");
+    println!(
+        "  {:>10}  {:>12}  {:>12}  {:>12}  {:>10}",
+        "x", "ψ(x)", "formula", "error", "rel_err%"
+    );
 
     let test_points = [100.0, 500.0, 1000.0, 5000.0, 10000.0, 50000.0, 100000.0];
 
@@ -205,10 +226,16 @@ fn main() {
         psi_formula -= (2.0 * PI).ln();
 
         let error = (psi_formula - psi_actual).abs();
-        let rel_err = if psi_actual.abs() > 0.1 { error / psi_actual * 100.0 } else { 0.0 };
+        let rel_err = if psi_actual.abs() > 0.1 {
+            error / psi_actual * 100.0
+        } else {
+            0.0
+        };
 
-        println!("  {:10.0}  {:12.2}  {:12.2}  {:12.2}  {:9.3}%",
-            x, psi_actual, psi_formula, error, rel_err);
+        println!(
+            "  {:10.0}  {:12.2}  {:12.2}  {:12.2}  {:9.3}%",
+            x, psi_actual, psi_formula, error, rel_err
+        );
     }
 
     // Phase 3: Nyman-Beurling distance d_N
@@ -219,7 +246,10 @@ fn main() {
     let max_n = 30;
 
     // Precompute inner products
-    println!("  Computing Gram matrix (N_max = {}, {} integration points)...", max_n, n_int);
+    println!(
+        "  Computing Gram matrix (N_max = {}, {} integration points)...",
+        max_n, n_int
+    );
     let start = std::time::Instant::now();
 
     // ⟨ρ_j, ρ_k⟩ for j,k = 2..max_n
@@ -241,20 +271,29 @@ fn main() {
     // ⟨1, 1⟩ = 1
     let one_norm_sq = 1.0;
 
-    println!("\n  {:>4}  {:>14}  {:>14}  {:>12}", "N", "d_N²", "d_N", "converging?");
+    println!(
+        "\n  {:>4}  {:>14}  {:>14}  {:>12}",
+        "N", "d_N²", "d_N", "converging?"
+    );
 
     let mut prev_d = f64::MAX;
     for n in 2..=max_n {
         let dim_n = n - 1;
         // Extract sub-Gram matrix
-        let sub_gram: Vec<Vec<f64>> = gram[..dim_n].iter()
-            .map(|row| row[..dim_n].to_vec()).collect();
+        let sub_gram: Vec<Vec<f64>> = gram[..dim_n]
+            .iter()
+            .map(|row| row[..dim_n].to_vec())
+            .collect();
         let sub_rhs: Vec<f64> = rhs[..dim_n].to_vec();
 
         // d_N² = ⟨1,1⟩ - ⟨1,ρ⟩ᵀ G⁻¹ ⟨1,ρ⟩
         if let Some(coeffs) = solve_linear(&sub_gram, &sub_rhs) {
-            let d_sq = one_norm_sq - coeffs.iter().zip(sub_rhs.iter())
-                .map(|(c, r)| c * r).sum::<f64>();
+            let d_sq = one_norm_sq
+                - coeffs
+                    .iter()
+                    .zip(sub_rhs.iter())
+                    .map(|(c, r)| c * r)
+                    .sum::<f64>();
             let d = if d_sq > 0.0 { d_sq.sqrt() } else { 0.0 };
             let converging = if d < prev_d { "↓ yes" } else { "↑ no" };
             println!("  {:4}  {:14.10}  {:14.10}  {:>12}", n, d_sq, d, converging);
@@ -272,11 +311,15 @@ fn main() {
     let target = 2.0 + 0.5772156649 - (4.0 * PI).ln();
     println!("  Target value: {:.10}", target);
     println!();
-    println!("  {:>10}  {:>8}  {:>14}  {:>14}  {:>10}",
-        "T", "zeros", "V(T)", "|V(T)-target|", "converging?");
+    println!(
+        "  {:>10}  {:>8}  {:>14}  {:>14}  {:>10}",
+        "T", "zeros", "V(T)", "|V(T)-target|", "converging?"
+    );
 
     let mut prev_err = f64::MAX;
-    let checkpoints = [100.0, 500.0, 1000.0, 5000.0, 10000.0, 20000.0, 30000.0, 40000.0, 50000.0];
+    let checkpoints = [
+        100.0, 500.0, 1000.0, 5000.0, 10000.0, 20000.0, 30000.0, 40000.0, 50000.0,
+    ];
     let mut zero_idx = 0;
     let mut vasyunin = 0.0;
 
@@ -288,8 +331,10 @@ fn main() {
         }
         let err = (vasyunin - target).abs();
         let conv = if err < prev_err { "↓" } else { "↑" };
-        println!("  {:10.0}  {:8}  {:14.10}  {:14.10}  {:>10}",
-            t_check, zero_idx, vasyunin, err, conv);
+        println!(
+            "  {:10.0}  {:8}  {:14.10}  {:14.10}  {:>10}",
+            t_check, zero_idx, vasyunin, err, conv
+        );
         prev_err = err;
     }
 
@@ -301,15 +346,19 @@ fn main() {
 // --- Helper: compute ψ(x) = Σ_{p^k ≤ x} log(p) via sieve ---
 fn compute_psi(x: f64) -> f64 {
     let limit = x as usize;
-    if limit < 2 { return 0.0; }
+    if limit < 2 {
+        return 0.0;
+    }
 
     // Simple sieve of Eratosthenes
     let mut is_prime = vec![true; limit + 1];
     is_prime[0] = false;
-    if limit >= 1 { is_prime[1] = false; }
+    if limit >= 1 {
+        is_prime[1] = false;
+    }
     for i in 2..=((limit as f64).sqrt() as usize) {
         if is_prime[i] {
-            for j in (i*i..=limit).step_by(i) {
+            for j in (i * i..=limit).step_by(i) {
                 is_prime[j] = false;
             }
         }
@@ -322,7 +371,9 @@ fn compute_psi(x: f64) -> f64 {
             let mut pk = p;
             while pk <= limit {
                 psi += log_p;
-                if pk > limit / p { break; }
+                if pk > limit / p {
+                    break;
+                }
                 pk *= p;
             }
         }

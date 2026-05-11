@@ -13,10 +13,10 @@
 
 mod gpu;
 
-use cathedral_utils::{cache, gram, arith, dd::DD, fitting};
+use cathedral_utils::{arith, cache, dd::DD, fitting, gram};
 use nalgebra::{DMatrix, DVector};
-use rug::Float;
 use rayon::prelude::*;
+use rug::Float;
 use std::io::Write;
 use std::sync::Mutex;
 use std::time::Instant;
@@ -34,7 +34,10 @@ impl Logger {
     fn new(path: &str) -> Self {
         let file = std::fs::File::create(path)
             .unwrap_or_else(|e| panic!("Cannot create log: {}: {}", path, e));
-        Logger { file: Mutex::new(file), t0: Instant::now() }
+        Logger {
+            file: Mutex::new(file),
+            t0: Instant::now(),
+        }
     }
     fn log(&self, msg: &str) {
         let elapsed = self.t0.elapsed().as_secs_f64();
@@ -61,10 +64,7 @@ impl Logger {
 /// MPFR-precision Cholesky: d² = 1 - b^T G^{-1} b
 /// Uses rug::Float at `prec` bits. Parallelized with rayon.
 /// This is the fallback when DD (~31 digits) can't resolve d².
-fn mpfr_cholesky_d2(
-    gram: &[Float],
-    b: &[f64], dim: usize, prec: u32, log: &Logger,
-) -> f64 {
+fn mpfr_cholesky_d2(gram: &[Float], b: &[f64], dim: usize, prec: u32, log: &Logger) -> f64 {
     let t0 = Instant::now();
     let par_threshold = 128;
 
@@ -80,7 +80,12 @@ fn mpfr_cholesky_d2(
             sum -= Float::with_val(prec, ljk * ljk);
         }
         if sum <= 0.0 {
-            log.log(&format!("  MPFR Cholesky fail at j={}/{}: sum={:.6e}", j, dim, sum.to_f64()));
+            log.log(&format!(
+                "  MPFR Cholesky fail at j={}/{}: sum={:.6e}",
+                j,
+                dim,
+                sum.to_f64()
+            ));
             return f64::NAN;
         }
         let diag = sum.sqrt();
@@ -103,7 +108,9 @@ fn mpfr_cholesky_d2(
                 })
                 .collect();
             l[j * dim + j] = diag;
-            for (i, val) in offdiag { l[i * dim + j] = val; }
+            for (i, val) in offdiag {
+                l[i * dim + j] = val;
+            }
         } else {
             l[j * dim + j] = diag;
             for i in (j + 1)..dim {
@@ -120,8 +127,10 @@ fn mpfr_cholesky_d2(
             let pct = j * 100 / dim;
             let elapsed = t0.elapsed().as_secs_f64();
             let eta = elapsed / (j as f64) * ((dim - j) as f64);
-            log.log(&format!("  MPFR Cholesky: {}% ({}/{}) {:.1}s elapsed, ETA {:.0}s",
-                pct, j, dim, elapsed, eta));
+            log.log(&format!(
+                "  MPFR Cholesky: {}% ({}/{}) {:.1}s elapsed, ETA {:.0}s",
+                pct, j, dim, elapsed, eta
+            ));
         }
     }
 
@@ -129,7 +138,9 @@ fn mpfr_cholesky_d2(
     let mut y: Vec<Float> = vec![Float::with_val(prec, 0.0); dim];
     for i in 0..dim {
         let mut sum = Float::with_val(prec, b[i]);
-        for k in 0..i { sum -= Float::with_val(prec, &l[i * dim + k] * &y[k]); }
+        for k in 0..i {
+            sum -= Float::with_val(prec, &l[i * dim + k] * &y[k]);
+        }
         sum /= &l[i * dim + i];
         y[i] = sum;
     }
@@ -138,19 +149,29 @@ fn mpfr_cholesky_d2(
     let mut c: Vec<Float> = vec![Float::with_val(prec, 0.0); dim];
     for i in (0..dim).rev() {
         let mut sum = y[i].clone();
-        for k in (i + 1)..dim { sum -= Float::with_val(prec, &l[k * dim + i] * &c[k]); }
+        for k in (i + 1)..dim {
+            sum -= Float::with_val(prec, &l[k * dim + i] * &c[k]);
+        }
         sum /= &l[i * dim + i];
         c[i] = sum;
     }
 
     // d² = 1 - b·c
     let mut bc = Float::with_val(prec, 0.0);
-    for i in 0..dim { bc += Float::with_val(prec, b[i]) * &c[i]; }
+    for i in 0..dim {
+        bc += Float::with_val(prec, b[i]) * &c[i];
+    }
     let d2 = Float::with_val(prec, 1.0) - bc;
     let result = d2.to_f64();
 
-    log.log(&format!("  MPFR Cholesky dim={}: d²={:.10e} ({:.1}s, {}-bit, {} threads)",
-        dim, result, t0.elapsed().as_secs_f64(), prec, rayon::current_num_threads()));
+    log.log(&format!(
+        "  MPFR Cholesky dim={}: d²={:.10e} ({:.1}s, {}-bit, {} threads)",
+        dim,
+        result,
+        t0.elapsed().as_secs_f64(),
+        prec,
+        rayon::current_num_threads()
+    ));
     result
 }
 
@@ -168,17 +189,16 @@ fn dd_cholesky_d2_parallel(
     for j in 0..dim {
         // Diagonal element
         let idx_diag = j * dim + j;
-        let mut sum = DD::new(
-            gram_hi[idx_diag],
-            gram_lo.map_or(0.0, |lo| lo[idx_diag]),
-        );
+        let mut sum = DD::new(gram_hi[idx_diag], gram_lo.map_or(0.0, |lo| lo[idx_diag]));
         for k in 0..j {
             let ljk = l[j * dim + k];
             sum -= ljk * ljk;
         }
         if sum.hi <= 0.0 {
-            log.log(&format!("  DD Cholesky fail at j={}/{}: sum=({:.6e}, {:.6e})",
-                j, dim, sum.hi, sum.lo));
+            log.log(&format!(
+                "  DD Cholesky fail at j={}/{}: sum=({:.6e}, {:.6e})",
+                j, dim, sum.hi, sum.lo
+            ));
             return f64::NAN;
         }
         let mut x = DD::from_f64(sum.hi.sqrt());
@@ -195,10 +215,7 @@ fn dd_cholesky_d2_parallel(
                 .into_par_iter()
                 .map(|i| {
                     let idx = i * dim + j;
-                    let mut s = DD::new(
-                        gram_hi[idx],
-                        gram_lo.map_or(0.0, |lo| lo[idx]),
-                    );
+                    let mut s = DD::new(gram_hi[idx], gram_lo.map_or(0.0, |lo| lo[idx]));
                     for k in 0..j {
                         s -= l[i * dim + k] * l_row_j[k];
                     }
@@ -211,10 +228,7 @@ fn dd_cholesky_d2_parallel(
         } else {
             for i in (j + 1)..dim {
                 let idx = i * dim + j;
-                let mut s = DD::new(
-                    gram_hi[idx],
-                    gram_lo.map_or(0.0, |lo| lo[idx]),
-                );
+                let mut s = DD::new(gram_hi[idx], gram_lo.map_or(0.0, |lo| lo[idx]));
                 for k in 0..j {
                     s -= l[i * dim + k] * l[j * dim + k];
                 }
@@ -226,8 +240,10 @@ fn dd_cholesky_d2_parallel(
             let pct = j * 100 / dim;
             let elapsed = t0.elapsed().as_secs_f64();
             let eta = elapsed / (j as f64) * ((dim - j) as f64);
-            log.log(&format!("  DD Cholesky: {}% ({}/{}) {:.1}s elapsed, ETA {:.0}s",
-                pct, j, dim, elapsed, eta));
+            log.log(&format!(
+                "  DD Cholesky: {}% ({}/{}) {:.1}s elapsed, ETA {:.0}s",
+                pct, j, dim, elapsed, eta
+            ));
         }
     }
 
@@ -235,7 +251,9 @@ fn dd_cholesky_d2_parallel(
     let mut y = vec![DD::from_f64(0.0); dim];
     for i in 0..dim {
         let mut sum = DD::from_f64(b[i]);
-        for k in 0..i { sum -= l[i * dim + k] * y[k]; }
+        for k in 0..i {
+            sum -= l[i * dim + k] * y[k];
+        }
         y[i] = sum / l[i * dim + i];
     }
 
@@ -243,16 +261,25 @@ fn dd_cholesky_d2_parallel(
     let mut c = vec![DD::from_f64(0.0); dim];
     for i in (0..dim).rev() {
         let mut sum = y[i];
-        for k in (i + 1)..dim { sum -= l[k * dim + i] * c[k]; }
+        for k in (i + 1)..dim {
+            sum -= l[k * dim + i] * c[k];
+        }
         c[i] = sum / l[i * dim + i];
     }
 
     let mut bc = DD::from_f64(0.0);
-    for i in 0..dim { bc += DD::from_f64(b[i]) * c[i]; }
+    for i in 0..dim {
+        bc += DD::from_f64(b[i]) * c[i];
+    }
     let d2 = DD::from_f64(1.0) - bc;
 
-    log.log(&format!("  DD Cholesky dim={}: d²={:.10e} ({:.1}s, {} threads)",
-        dim, d2.to_f64(), t0.elapsed().as_secs_f64(), rayon::current_num_threads()));
+    log.log(&format!(
+        "  DD Cholesky dim={}: d²={:.10e} ({:.1}s, {} threads)",
+        dim,
+        d2.to_f64(),
+        t0.elapsed().as_secs_f64(),
+        rayon::current_num_threads()
+    ));
     d2.to_f64()
 }
 
@@ -276,10 +303,7 @@ fn dd_kondo_cholesky_d2(
 
     for j in 0..dim {
         let idx_diag = j * dim + j;
-        let mut sum = DD::new(
-            gram_hi[idx_diag],
-            gram_lo.map_or(0.0, |lo| lo[idx_diag]),
-        );
+        let mut sum = DD::new(gram_hi[idx_diag], gram_lo.map_or(0.0, |lo| lo[idx_diag]));
         for k in 0..j {
             let ljk = l[j * dim + k];
             sum -= ljk * ljk;
@@ -291,7 +315,9 @@ fn dd_kondo_cholesky_d2(
             let eps = (-sum.hi).max(1e-30);
             sum = DD::from_f64(1e-30);
             kondo_fixes += 1;
-            if eps > max_eps { max_eps = eps; }
+            if eps > max_eps {
+                max_eps = eps;
+            }
             // Set L(j,j) = tiny, and skip computing off-diagonal for this column
             let mut x = DD::from_f64(sum.hi.sqrt());
             x = (x + sum / x) * DD::from_f64(0.5);
@@ -303,8 +329,10 @@ fn dd_kondo_cholesky_d2(
             if dim >= 1000 && j % (dim / 10) == 0 && j > 0 {
                 let pct = j * 100 / dim;
                 let elapsed = t0.elapsed().as_secs_f64();
-                log.log(&format!("  Kondo Cholesky: {}% ({}/{}) {:.1}s [{} fixes]",
-                    pct, j, dim, elapsed, kondo_fixes));
+                log.log(&format!(
+                    "  Kondo Cholesky: {}% ({}/{}) {:.1}s [{} fixes]",
+                    pct, j, dim, elapsed, kondo_fixes
+                ));
             }
             continue;
         }
@@ -321,23 +349,23 @@ fn dd_kondo_cholesky_d2(
                 .into_par_iter()
                 .map(|i| {
                     let idx = i * dim + j;
-                    let mut s = DD::new(
-                        gram_hi[idx],
-                        gram_lo.map_or(0.0, |lo| lo[idx]),
-                    );
-                    for k in 0..j { s -= l[i * dim + k] * l_row_j[k]; }
+                    let mut s = DD::new(gram_hi[idx], gram_lo.map_or(0.0, |lo| lo[idx]));
+                    for k in 0..j {
+                        s -= l[i * dim + k] * l_row_j[k];
+                    }
                     (i, s * diag_inv)
                 })
                 .collect();
-            for (i, val) in offdiag { l[i * dim + j] = val; }
+            for (i, val) in offdiag {
+                l[i * dim + j] = val;
+            }
         } else {
             for i in (j + 1)..dim {
                 let idx = i * dim + j;
-                let mut s = DD::new(
-                    gram_hi[idx],
-                    gram_lo.map_or(0.0, |lo| lo[idx]),
-                );
-                for k in 0..j { s -= l[i * dim + k] * l[j * dim + k]; }
+                let mut s = DD::new(gram_hi[idx], gram_lo.map_or(0.0, |lo| lo[idx]));
+                for k in 0..j {
+                    s -= l[i * dim + k] * l[j * dim + k];
+                }
                 l[i * dim + j] = s * diag_inv;
             }
         }
@@ -345,8 +373,10 @@ fn dd_kondo_cholesky_d2(
         if dim >= 1000 && j % (dim / 10) == 0 && j > 0 {
             let pct = j * 100 / dim;
             let elapsed = t0.elapsed().as_secs_f64();
-            log.log(&format!("  Kondo Cholesky: {}% ({}/{}) {:.1}s [{} fixes]",
-                pct, j, dim, elapsed, kondo_fixes));
+            log.log(&format!(
+                "  Kondo Cholesky: {}% ({}/{}) {:.1}s [{} fixes]",
+                pct, j, dim, elapsed, kondo_fixes
+            ));
         }
     }
 
@@ -354,33 +384,49 @@ fn dd_kondo_cholesky_d2(
     let mut y = vec![DD::from_f64(0.0); dim];
     for i in 0..dim {
         let mut sum = DD::from_f64(b[i]);
-        for k in 0..i { sum -= l[i * dim + k] * y[k]; }
+        for k in 0..i {
+            sum -= l[i * dim + k] * y[k];
+        }
         y[i] = sum / l[i * dim + i];
     }
     let mut c = vec![DD::from_f64(0.0); dim];
     for i in (0..dim).rev() {
         let mut sum = y[i];
-        for k in (i + 1)..dim { sum -= l[k * dim + i] * c[k]; }
+        for k in (i + 1)..dim {
+            sum -= l[k * dim + i] * c[k];
+        }
         c[i] = sum / l[i * dim + i];
     }
 
     let mut bc = DD::from_f64(0.0);
-    for i in 0..dim { bc += DD::from_f64(b[i]) * c[i]; }
+    for i in 0..dim {
+        bc += DD::from_f64(b[i]) * c[i];
+    }
     let d2 = DD::from_f64(1.0) - bc;
 
-    log.log(&format!("  Kondo Cholesky dim={}: d²={:.10e} ({:.1}s) [{} dark-state fixes, max_ε={:.2e}]",
-        dim, d2.to_f64(), t0.elapsed().as_secs_f64(), kondo_fixes, max_eps));
+    log.log(&format!(
+        "  Kondo Cholesky dim={}: d²={:.10e} ({:.1}s) [{} dark-state fixes, max_ε={:.2e}]",
+        dim,
+        d2.to_f64(),
+        t0.elapsed().as_secs_f64(),
+        kondo_fixes,
+        max_eps
+    ));
     d2.to_f64()
 }
 
 /// Try DD Cholesky first (fast, ~31 digits). If it fails, fall back to MPFR Cholesky.
 /// Precision stack: GPU DD → CPU DD → MPFR
 fn compute_d2_highprec(
-    hi_data: &[f64], hi_dim: usize,
+    hi_data: &[f64],
+    hi_dim: usize,
     dd_lo: &Option<Vec<f64>>,
     mpfr_gram: &Option<(Vec<Float>, usize)>,
-    sub: &[f64], b: &[f64], dim: usize,
-    mpfr_bits: u32, log: &Logger,
+    sub: &[f64],
+    b: &[f64],
+    dim: usize,
+    mpfr_bits: u32,
+    log: &Logger,
 ) -> f64 {
     // Extract DD submatrix from separate hi/lo arrays
     let (sub_hi, sub_lo) = if let Some(ref lo) = dd_lo {
@@ -401,13 +447,17 @@ fn compute_d2_highprec(
     match gpu::gpu_ds_cholesky(&sub_hi, &sub_lo, b, dim) {
         Ok(result) => {
             if result.fail_col == 0 && !result.d2.is_nan() && result.d2 > 0.0 {
-                log.log(&format!("  GPU DS-f32 dim={}: d²={:.10e} ({:.3}s)",
-                    dim, result.d2, result.gpu_time_secs));
+                log.log(&format!(
+                    "  GPU DS-f32 dim={}: d²={:.10e} ({:.3}s)",
+                    dim, result.d2, result.gpu_time_secs
+                ));
                 return result.d2;
             }
             if result.fail_col > 0 {
-                log.log(&format!("  GPU DS-f32 failed at col {} (dim={}), escalating to DD-f64...",
-                    result.fail_col, dim));
+                log.log(&format!(
+                    "  GPU DS-f32 failed at col {} (dim={}), escalating to DD-f64...",
+                    result.fail_col, dim
+                ));
             }
         }
         Err(e) => {
@@ -419,13 +469,17 @@ fn compute_d2_highprec(
     match gpu::gpu_qs_cholesky(&sub_hi, &sub_lo, b, dim) {
         Ok(result) => {
             if result.fail_col == 0 && !result.d2.is_nan() && result.d2 > 0.0 {
-                log.log(&format!("  GPU QS-f32 dim={}: d²={:.10e} ({:.3}s)",
-                    dim, result.d2, result.gpu_time_secs));
+                log.log(&format!(
+                    "  GPU QS-f32 dim={}: d²={:.10e} ({:.3}s)",
+                    dim, result.d2, result.gpu_time_secs
+                ));
                 return result.d2;
             }
             if result.fail_col > 0 {
-                log.log(&format!("  GPU QS-f32 failed at col {} (dim={}), escalating to DD-f64...",
-                    result.fail_col, dim));
+                log.log(&format!(
+                    "  GPU QS-f32 failed at col {} (dim={}), escalating to DD-f64...",
+                    result.fail_col, dim
+                ));
             }
         }
         Err(e) => {
@@ -437,13 +491,17 @@ fn compute_d2_highprec(
     match gpu::gpu_dd_cholesky(&sub_hi, &sub_lo, b, dim) {
         Ok(result) => {
             if result.fail_col == 0 && !result.d2.is_nan() && result.d2 > 0.0 {
-                log.log(&format!("  GPU DD-f64 dim={}: d²={:.10e} ({:.3}s)",
-                    dim, result.d2, result.gpu_time_secs));
+                log.log(&format!(
+                    "  GPU DD-f64 dim={}: d²={:.10e} ({:.3}s)",
+                    dim, result.d2, result.gpu_time_secs
+                ));
                 return result.d2;
             }
             if result.fail_col > 0 {
-                log.log(&format!("  GPU DD-f64 failed at col {} (dim={}), trying CPU...",
-                    result.fail_col, dim));
+                log.log(&format!(
+                    "  GPU DD-f64 failed at col {} (dim={}), trying CPU...",
+                    result.fail_col, dim
+                ));
             }
         }
         Err(e) => {
@@ -467,7 +525,10 @@ fn compute_d2_highprec(
 
     // Level 3: MPFR Cholesky with full-precision Gram (unlimited precision)
     if let Some((ref mpfr_data, mpfr_dim)) = mpfr_gram {
-        log.log(&format!("  DD failed for dim={}, escalating to MPFR-{} Cholesky (full precision)...", dim, mpfr_bits));
+        log.log(&format!(
+            "  DD failed for dim={}, escalating to MPFR-{} Cholesky (full precision)...",
+            dim, mpfr_bits
+        ));
         let prec = mpfr_data[0].prec();
         let zero = Float::with_val(prec, 0.0);
         let mut sub_mpfr = vec![zero; dim * dim];
@@ -505,12 +566,22 @@ fn main() {
     log.data("");
     log.log(&format!("Log file: {}", log_path));
     log.log(&format!("Rayon threads: {}", rayon::current_num_threads()));
-    log.log(&format!("MPFR precision: {} bits ({} digits)", mpfr_bits, (mpfr_bits as f64 * 0.301).floor() as u32));
+    log.log(&format!(
+        "MPFR precision: {} bits ({} digits)",
+        mpfr_bits,
+        (mpfr_bits as f64 * 0.301).floor() as u32
+    ));
 
     // ═══ GPU Detection ═══
     let has_gpu = match gpu::detect_gpu() {
-        Some(info) => { log.log(&format!("GPU: {} (CUDA)", info.name)); true }
-        None => { log.log("WARNING: No CUDA GPU — eigendecomp disabled"); false }
+        Some(info) => {
+            log.log(&format!("GPU: {} (CUDA)", info.name));
+            true
+        }
+        None => {
+            log.log("WARNING: No CUDA GPU — eigendecomp disabled");
+            false
+        }
     };
 
     // ═══ PHASE 1: Unified Gram Matrix ═══
@@ -542,29 +613,55 @@ fn main() {
     let dd_cache_path = cache::dd_gram_cache_path(max_n, mpfr_bits);
 
     let (dd_hi, dd_lo, dd_dim) = if let Some(cached) = cache::load_dd_gram(&dd_cache_path) {
-        log.log(&format!("DD Gram loaded from cache: {}×{} ({} MB)",
-            cached.2, cached.2, (cached.2 * cached.2 * 16) / (1024 * 1024)));
+        log.log(&format!(
+            "DD Gram loaded from cache: {}×{} ({} MB)",
+            cached.2,
+            cached.2,
+            (cached.2 * cached.2 * 16) / (1024 * 1024)
+        ));
         cached
     } else if has_gpu {
         let t_max = table_size.min(100_000);
-        log.log(&format!("Building DD-f64 Gram on GPU ({dim}×{dim}, log1p bypass, T_max={t_max})..."));
+        log.log(&format!(
+            "Building DD-f64 Gram on GPU ({dim}×{dim}, log1p bypass, T_max={t_max})..."
+        ));
         match gpu::gpu_build_gram_dd_f64(dim, t_max) {
             Ok(result) => {
-                log.log(&format!("GPU DD-f64 Gram ready: {dim}×{dim} ({:.2}s, {} MB)",
-                    result.build_time_secs, (dim * dim * 16) / (1024 * 1024)));
-                if let Err(e) = cache::save_dd_gram(&dd_cache_path, &result.gram_hi, &result.gram_lo, dim, max_n, mpfr_bits) {
+                log.log(&format!(
+                    "GPU DD-f64 Gram ready: {dim}×{dim} ({:.2}s, {} MB)",
+                    result.build_time_secs,
+                    (dim * dim * 16) / (1024 * 1024)
+                ));
+                if let Err(e) = cache::save_dd_gram(
+                    &dd_cache_path,
+                    &result.gram_hi,
+                    &result.gram_lo,
+                    dim,
+                    max_n,
+                    mpfr_bits,
+                ) {
                     log.log(&format!("DD cache save failed: {}", e));
                 }
                 (result.gram_hi, result.gram_lo, dim)
             }
             Err(e) => {
-                log.log(&format!("GPU DD failed: {}, falling back to CPU MPFR...", e));
+                log.log(&format!(
+                    "GPU DD failed: {}, falling back to CPU MPFR...",
+                    e
+                ));
                 let ln_n_table = gram::LnNTable::new(table_size + 1, mpfr_bits);
                 let t0 = std::time::Instant::now();
                 let (hi, lo, dd_dim) = gram::GramMatrix::build_fast_dd(max_n, &ln_n_table);
-                log.log(&format!("CPU DD Gram ready: {}×{} ({} MB, {:.1}s)",
-                    dd_dim, dd_dim, (dd_dim * dd_dim * 16) / (1024 * 1024), t0.elapsed().as_secs_f64()));
-                if let Err(e) = cache::save_dd_gram(&dd_cache_path, &hi, &lo, dd_dim, max_n, mpfr_bits) {
+                log.log(&format!(
+                    "CPU DD Gram ready: {}×{} ({} MB, {:.1}s)",
+                    dd_dim,
+                    dd_dim,
+                    (dd_dim * dd_dim * 16) / (1024 * 1024),
+                    t0.elapsed().as_secs_f64()
+                ));
+                if let Err(e) =
+                    cache::save_dd_gram(&dd_cache_path, &hi, &lo, dd_dim, max_n, mpfr_bits)
+                {
                     log.log(&format!("DD cache save failed: {}", e));
                 }
                 (hi, lo, dd_dim)
@@ -575,8 +672,13 @@ fn main() {
         let ln_n_table = gram::LnNTable::new(table_size + 1, mpfr_bits);
         let t0 = std::time::Instant::now();
         let (hi, lo, dd_dim) = gram::GramMatrix::build_fast_dd(max_n, &ln_n_table);
-        log.log(&format!("DD Gram ready: {}×{} ({} MB, {:.1}s)",
-            dd_dim, dd_dim, (dd_dim * dd_dim * 16) / (1024 * 1024), t0.elapsed().as_secs_f64()));
+        log.log(&format!(
+            "DD Gram ready: {}×{} ({} MB, {:.1}s)",
+            dd_dim,
+            dd_dim,
+            (dd_dim * dd_dim * 16) / (1024 * 1024),
+            t0.elapsed().as_secs_f64()
+        ));
         if let Err(e) = cache::save_dd_gram(&dd_cache_path, &hi, &lo, dd_dim, max_n, mpfr_bits) {
             log.log(&format!("DD cache save failed: {}", e));
         }
@@ -592,8 +694,12 @@ fn main() {
         mpfr_built: true,
         precision: mpfr_bits,
     };
-    log.log(&format!("f64 Gram (downcast from DD): {}×{}, {} MB — unified Hilbert space",
-        gram_matrix.max_dim, gram_matrix.max_dim, gram_matrix.mem_mb()));
+    log.log(&format!(
+        "f64 Gram (downcast from DD): {}×{}, {} MB — unified Hilbert space",
+        gram_matrix.max_dim,
+        gram_matrix.max_dim,
+        gram_matrix.mem_mb()
+    ));
 
     // Step 2b: Ensure Gram is GPU-resident for Phase 2 cuSOLVER calls.
     // If we just built with GPU (gpu_build_gram_dd), it's already in VRAM.
@@ -601,18 +707,26 @@ fn main() {
     let has_resident_gram = if has_gpu {
         let resident_dim = gpu::gpu_resident_gram_dim();
         if resident_dim == gram_matrix.max_dim {
-            log.log(&format!("Gram already resident in GPU VRAM ({} dim)", resident_dim));
+            log.log(&format!(
+                "Gram already resident in GPU VRAM ({} dim)",
+                resident_dim
+            ));
             true
         } else {
             log.log("Uploading Gram to GPU VRAM for resident Cholesky...");
             match gpu::gpu_upload_gram_resident(&gram_matrix.data, gram_matrix.max_dim) {
                 Ok(()) => {
-                    log.log(&format!("Gram uploaded to GPU VRAM: {} MB",
-                        gram_matrix.mem_mb()));
+                    log.log(&format!(
+                        "Gram uploaded to GPU VRAM: {} MB",
+                        gram_matrix.mem_mb()
+                    ));
                     true
                 }
                 Err(e) => {
-                    log.log(&format!("GPU VRAM upload failed: {} — falling back to PCIe transfers", e));
+                    log.log(&format!(
+                        "GPU VRAM upload failed: {} — falling back to PCIe transfers",
+                        e
+                    ));
                     false
                 }
             }
@@ -624,11 +738,7 @@ fn main() {
     // Step 3: DD Gram pair for Cholesky fallback
     // The hi[] data lives inside gram_matrix.data; we reference it when needed.
     // Only dd_lo is kept separately.
-    let dd_lo: Option<Vec<f64>> = if max_n > 1000 {
-        Some(dd_lo)
-    } else {
-        None
-    };
+    let dd_lo: Option<Vec<f64>> = if max_n > 1000 { Some(dd_lo) } else { None };
 
     // No separate MPFR Gram needed — the unified DD Gram IS the ground truth.
     // If DD Cholesky fails, it's because the matrix genuinely isn't PD at that
@@ -667,7 +777,9 @@ fn main() {
     }
 
     for &n in &test_ns {
-        if n < 3 || n > gram_matrix.max_n { continue; }
+        if n < 3 || n > gram_matrix.max_n {
+            continue;
+        }
         let dim = n - 1;
         let (sub, _) = gram_matrix.extract_submatrix(n);
         let b = arith::b_vector(dim);
@@ -684,8 +796,12 @@ fn main() {
                         .unwrap_or_else(|_| {
                             let g_mat = DMatrix::from_fn(dim, dim, |i, j| sub[i * dim + j]);
                             let bv = DVector::from_column_slice(&b[..dim]);
-                            g_mat.cholesky()
-                                .map(|chol| { let c = chol.solve(&bv); 1.0 - bv.dot(&c) })
+                            g_mat
+                                .cholesky()
+                                .map(|chol| {
+                                    let c = chol.solve(&bv);
+                                    1.0 - bv.dot(&c)
+                                })
                                 .unwrap_or(f64::NAN)
                         })
                 }
@@ -697,16 +813,24 @@ fn main() {
                 Err(_) => {
                     let g_mat = DMatrix::from_fn(dim, dim, |i, j| sub[i * dim + j]);
                     let bv = DVector::from_column_slice(&b[..dim]);
-                    g_mat.cholesky()
-                        .map(|chol| { let c = chol.solve(&bv); 1.0 - bv.dot(&c) })
+                    g_mat
+                        .cholesky()
+                        .map(|chol| {
+                            let c = chol.solve(&bv);
+                            1.0 - bv.dot(&c)
+                        })
                         .unwrap_or(f64::NAN)
                 }
             }
         } else {
             let g_mat = DMatrix::from_fn(dim, dim, |i, j| sub[i * dim + j]);
             let bv = DVector::from_column_slice(&b[..dim]);
-            g_mat.cholesky()
-                .map(|chol| { let c = chol.solve(&bv); 1.0 - bv.dot(&c) })
+            g_mat
+                .cholesky()
+                .map(|chol| {
+                    let c = chol.solve(&bv);
+                    1.0 - bv.dot(&c)
+                })
                 .unwrap_or(f64::NAN)
         };
         let needs_dd = d2_f64.is_nan() || d2_f64 < 0.0;
@@ -720,7 +844,17 @@ fn main() {
             if skip_gpu {
                 // High-precision Cholesky only — no point running GPU
                 let dd_t0 = Instant::now();
-                let d2_val = compute_d2_highprec(&gram_matrix.data, gram_matrix.max_dim, &dd_lo, &mpfr_gram, &sub, &b, dim, mpfr_bits, &log);
+                let d2_val = compute_d2_highprec(
+                    &gram_matrix.data,
+                    gram_matrix.max_dim,
+                    &dd_lo,
+                    &mpfr_gram,
+                    &sub,
+                    &b,
+                    dim,
+                    mpfr_bits,
+                    &log,
+                );
                 let dd_elapsed = dd_t0.elapsed().as_secs_f64();
                 (d2_val, None, dd_elapsed)
             } else {
@@ -730,7 +864,17 @@ fn main() {
                     let gpu_handle = s.spawn(move || gpu::gpu_syevd(sub_ref, dim));
 
                     let dd_t0 = Instant::now();
-                    let d2_val = compute_d2_highprec(&gram_matrix.data, gram_matrix.max_dim, &dd_lo, &mpfr_gram, &sub, &b, dim, mpfr_bits, &log);
+                    let d2_val = compute_d2_highprec(
+                        &gram_matrix.data,
+                        gram_matrix.max_dim,
+                        &dd_lo,
+                        &mpfr_gram,
+                        &sub,
+                        &b,
+                        dim,
+                        mpfr_bits,
+                        &log,
+                    );
                     let dd_elapsed = dd_t0.elapsed().as_secs_f64();
 
                     let gpu_res = gpu_handle.join().unwrap();
@@ -753,7 +897,10 @@ fn main() {
                 // Track where GPU eigenvalues become useless
                 if lambda_min < 0.0 && gpu_eigen_useless_above == usize::MAX {
                     gpu_eigen_useless_above = n;
-                    log.log(&format!("GPU eigenvalues negative at N={} — skipping GPU for larger N", n));
+                    log.log(&format!(
+                        "GPU eigenvalues negative at N={} — skipping GPU for larger N",
+                        n
+                    ));
                 }
                 let mut vmin_linf = 0.0f64;
                 let mut bvp = 0.0f64;
@@ -762,8 +909,12 @@ fn main() {
                     vmin_linf = vmin_linf.max(v.abs());
                     bvp += b[i] * v;
                 }
-                (lambda_min, result.gpu_time_secs * 1000.0,
-                 vmin_linf * (dim as f64).sqrt(), bvp.abs())
+                (
+                    lambda_min,
+                    result.gpu_time_secs * 1000.0,
+                    vmin_linf * (dim as f64).sqrt(),
+                    bvp.abs(),
+                )
             }
             Some(Err(e)) => {
                 log.data(&format!("  {:<6} │ GPU ERROR: {}", n, e));
@@ -773,15 +924,27 @@ fn main() {
         };
 
         let status = if d2 > 0.0 && d2 < 1.0 { "✓" } else { "⚠" };
-        let lmin_str = if lambda_min.is_nan() { "     ---       ".to_string() }
-                       else { format!("{:.10e}", lambda_min) };
-        let gpu_str = if gpu_ms == 0.0 { "   ---".to_string() }
-                      else { format!("{:>6.1}", gpu_ms) };
+        let lmin_str = if lambda_min.is_nan() {
+            "     ---       ".to_string()
+        } else {
+            format!("{:.10e}", lambda_min)
+        };
+        let gpu_str = if gpu_ms == 0.0 {
+            "   ---".to_string()
+        } else {
+            format!("{:>6.1}", gpu_ms)
+        };
 
-        let deloc_str = if deloc_ratio.is_nan() { "    ---      ".to_string() }
-                        else { format!("{:.6e}", deloc_ratio) };
-        let bvmin_str = if b_vmin_proj.is_nan() { "    ---      ".to_string() }
-                        else { format!("{:.6e}", b_vmin_proj) };
+        let deloc_str = if deloc_ratio.is_nan() {
+            "    ---      ".to_string()
+        } else {
+            format!("{:.6e}", deloc_ratio)
+        };
+        let bvmin_str = if b_vmin_proj.is_nan() {
+            "    ---      ".to_string()
+        } else {
+            format!("{:.6e}", b_vmin_proj)
+        };
 
         log.data(&format!(
             "  {:<6} │ {:+.10e} │ {} │ {}  │ {:>6.1}  │ {}  │ {} {}",
@@ -789,15 +952,23 @@ fn main() {
         ));
 
         results.push(NResult {
-            n, d2, lambda_min, gpu_time: gpu_ms / 1000.0,
-            dd_time, deloc_ratio, b_vmin_proj,
+            n,
+            d2,
+            lambda_min,
+            gpu_time: gpu_ms / 1000.0,
+            dd_time,
+            deloc_ratio,
+            b_vmin_proj,
         });
 
         // Incremental TSV write (crash-safe)
         if let Some(ref mut f) = tsv_file {
             use std::io::Write;
-            let _ = writeln!(f, "{}\t{:.15e}\t{:.15e}\t{:.1}\t{:.2}\t{:.15e}\t{:.15e}",
-                n, d2, lambda_min, gpu_ms, dd_time, deloc_ratio, b_vmin_proj);
+            let _ = writeln!(
+                f,
+                "{}\t{:.15e}\t{:.15e}\t{:.1}\t{:.2}\t{:.15e}\t{:.15e}",
+                n, d2, lambda_min, gpu_ms, dd_time, deloc_ratio, b_vmin_proj
+            );
             let _ = f.flush();
         }
     }
@@ -814,37 +985,70 @@ fn main() {
     log.data("");
 
     if results.len() >= 5 {
-        let d2_data: Vec<(f64, f64)> = results.iter()
+        let d2_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.d2 > 0.0 && r.d2 < 1.0)
-            .map(|r| ((r.n as f64).ln(), r.d2.ln())).collect();
+            .map(|r| ((r.n as f64).ln(), r.d2.ln()))
+            .collect();
         if d2_data.len() >= 3 {
             let (alpha, c_ln, r2) = fitting::linreg(&d2_data);
-            let rh = if alpha < 0.0 { "✓ RH consistent" } else { "⚠" };
-            log.data(&format!("  d² ~ {:.4} · N^({:.4})   R² = {:.4}  {}", c_ln.exp(), alpha, r2, rh));
+            let rh = if alpha < 0.0 {
+                "✓ RH consistent"
+            } else {
+                "⚠"
+            };
+            log.data(&format!(
+                "  d² ~ {:.4} · N^({:.4})   R² = {:.4}  {}",
+                c_ln.exp(),
+                alpha,
+                r2,
+                rh
+            ));
         }
 
-        let lmin_data: Vec<(f64, f64)> = results.iter()
+        let lmin_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.lambda_min > 0.0)
-            .map(|r| ((r.n as f64).ln(), r.lambda_min.ln())).collect();
+            .map(|r| ((r.n as f64).ln(), r.lambda_min.ln()))
+            .collect();
         if lmin_data.len() >= 3 {
             let (slope, intercept, r2) = fitting::linreg(&lmin_data);
-            log.data(&format!("  λ_min ~ {:.4} · N^({:.4})   R² = {:.4}", intercept.exp(), slope, r2));
+            log.data(&format!(
+                "  λ_min ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            ));
         }
 
-        let deloc_data: Vec<(f64, f64)> = results.iter()
+        let deloc_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.deloc_ratio > 0.0)
-            .map(|r| ((r.n as f64).ln(), r.deloc_ratio.ln())).collect();
+            .map(|r| ((r.n as f64).ln(), r.deloc_ratio.ln()))
+            .collect();
         if deloc_data.len() >= 3 {
             let (slope, intercept, r2) = fitting::linreg(&deloc_data);
-            log.data(&format!("  D(N) ~ {:.4} · N^({:.4})   R² = {:.4}", intercept.exp(), slope, r2));
+            log.data(&format!(
+                "  D(N) ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            ));
         }
 
-        let bproj_data: Vec<(f64, f64)> = results.iter()
+        let bproj_data: Vec<(f64, f64)> = results
+            .iter()
             .filter(|r| r.n >= 10 && r.b_vmin_proj > 0.0)
-            .map(|r| ((r.n as f64).ln(), r.b_vmin_proj.ln())).collect();
+            .map(|r| ((r.n as f64).ln(), r.b_vmin_proj.ln()))
+            .collect();
         if bproj_data.len() >= 3 {
             let (slope, intercept, r2) = fitting::linreg(&bproj_data);
-            log.data(&format!("  |⟨b,v_min⟩| ~ {:.4} · N^({:.4})   R² = {:.4}", intercept.exp(), slope, r2));
+            log.data(&format!(
+                "  |⟨b,v_min⟩| ~ {:.4} · N^({:.4})   R² = {:.4}",
+                intercept.exp(),
+                slope,
+                r2
+            ));
         }
     }
 
@@ -856,13 +1060,23 @@ fn main() {
     log.data("");
     log.data(&format!("  MPFR precision:           {}-bit", mpfr_bits));
     log.data(&format!("  Phase 1 (Gram build):     {:.2}s", phase1_time));
-    log.data(&format!("  Phase 2 (Spectral):       {:.2}s ({} decompositions)", phase2_time, results.len()));
+    log.data(&format!(
+        "  Phase 2 (Spectral):       {:.2}s ({} decompositions)",
+        phase2_time,
+        results.len()
+    ));
     log.data(&format!("    GPU eigen time:          {:.2}s", total_gpu));
     log.data(&format!("    DD Cholesky time:        {:.2}s", total_dd));
-    log.data(&format!("  Total:                    {:.2}s", phase1_time + phase2_time));
+    log.data(&format!(
+        "  Total:                    {:.2}s",
+        phase1_time + phase2_time
+    ));
     if let Some(last_good) = results.iter().rev().find(|r| r.d2 > 0.0 && r.d2 < 1.0) {
         log.data("");
-        log.data(&format!("  LAST CERTIFIED: d²_{} = {:.15e}", last_good.n, last_good.d2));
+        log.data(&format!(
+            "  LAST CERTIFIED: d²_{} = {:.15e}",
+            last_good.n, last_good.d2
+        ));
     }
     if !results.is_empty() {
         let last = results.last().unwrap();
@@ -875,9 +1089,13 @@ fn main() {
 }
 
 struct NResult {
-    n: usize, d2: f64, lambda_min: f64,
-    gpu_time: f64, dd_time: f64,
-    deloc_ratio: f64, b_vmin_proj: f64,
+    n: usize,
+    d2: f64,
+    lambda_min: f64,
+    gpu_time: f64,
+    dd_time: f64,
+    deloc_ratio: f64,
+    b_vmin_proj: f64,
 }
 
 fn acquire_gram(max_n: usize, log: &Logger) -> gram::GramMatrix {
@@ -892,17 +1110,19 @@ fn acquire_gram(max_n: usize, log: &Logger) -> gram::GramMatrix {
             let name = entry.file_name().to_string_lossy().to_string();
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
-                    if g.max_n >= max_n
-                        && best.as_ref().is_none_or(|b| g.precision > b.precision) {
-                            best = Some(g);
-                        }
+                    if g.max_n >= max_n && best.as_ref().is_none_or(|b| g.precision > b.precision) {
+                        best = Some(g);
+                    }
                 }
             }
         }
     }
 
     if let Some(g) = best {
-        log.log(&format!("Using cached matrix (N={}, {}-bit)", g.max_n, g.precision));
+        log.log(&format!(
+            "Using cached matrix (N={}, {}-bit)",
+            g.max_n, g.precision
+        ));
         return g;
     }
 
@@ -913,19 +1133,39 @@ fn acquire_gram(max_n: usize, log: &Logger) -> gram::GramMatrix {
     let ln_n_table = gram::LnNTable::new(table_size + 1, 128);
     let g = gram::GramMatrix::build_fast(max_n, &ln_n_table);
     let path = cache::gram_cache_path(max_n, 128);
-    if let Err(e) = cache::save_gram(&path, &g) { log.log(&format!("Cache save failed: {}", e)); }
+    if let Err(e) = cache::save_gram(&path, &g) {
+        log.log(&format!("Cache save failed: {}", e));
+    }
     g
 }
 
 fn build_schedule(max_n: usize) -> Vec<usize> {
     let mut ns = Vec::new();
-    for n in 3..=30.min(max_n) { ns.push(n); }
-    for n in (35..=100.min(max_n)).step_by(5) { ns.push(n); }
-    for n in (125..=500.min(max_n)).step_by(25) { ns.push(n); }
-    for n in (550..=1000.min(max_n)).step_by(50) { ns.push(n); }
-    for n in (1100..=2000.min(max_n)).step_by(100) { ns.push(n); }
-    for n in (2200..=5000.min(max_n)).step_by(200) { ns.push(n); }
-    for n in (5500..=max_n).step_by(500) { ns.push(n); }
-    if !ns.contains(&max_n) && max_n >= 3 { ns.push(max_n); }
-    ns.sort(); ns.dedup(); ns
+    for n in 3..=30.min(max_n) {
+        ns.push(n);
+    }
+    for n in (35..=100.min(max_n)).step_by(5) {
+        ns.push(n);
+    }
+    for n in (125..=500.min(max_n)).step_by(25) {
+        ns.push(n);
+    }
+    for n in (550..=1000.min(max_n)).step_by(50) {
+        ns.push(n);
+    }
+    for n in (1100..=2000.min(max_n)).step_by(100) {
+        ns.push(n);
+    }
+    for n in (2200..=5000.min(max_n)).step_by(200) {
+        ns.push(n);
+    }
+    for n in (5500..=max_n).step_by(500) {
+        ns.push(n);
+    }
+    if !ns.contains(&max_n) && max_n >= 3 {
+        ns.push(max_n);
+    }
+    ns.sort();
+    ns.dedup();
+    ns
 }

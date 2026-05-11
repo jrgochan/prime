@@ -21,8 +21,8 @@
 use cathedral_utils::arith::b_vector;
 use cathedral_utils::cache::{self, load_gram};
 use cathedral_utils::lanczos;
-use cathedral_utils::ooc;
 use cathedral_utils::linalg;
+use cathedral_utils::ooc;
 use nalgebra::DMatrix;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -38,16 +38,19 @@ fn main() {
     // Parse CLI: sizes and optional --lanczos flag
     let args: Vec<String> = std::env::args().skip(1).collect();
     let use_lanczos = args.iter().any(|s| s == "--lanczos");
-    let lanczos_k: usize = args.iter()
+    let lanczos_k: usize = args
+        .iter()
         .find(|s| s.starts_with("--k="))
         .and_then(|s| s.strip_prefix("--k=").and_then(|v| v.parse().ok()))
         .unwrap_or(50);
     // OOC search directories (for N=55440+ where only OOC format exists)
-    let ooc_dirs: Vec<PathBuf> = args.iter()
+    let ooc_dirs: Vec<PathBuf> = args
+        .iter()
         .filter(|s| s.starts_with("--ooc-dir="))
         .filter_map(|s| s.strip_prefix("--ooc-dir=").map(PathBuf::from))
         .collect();
-    let sizes: Vec<usize> = args.iter()
+    let sizes: Vec<usize> = args
+        .iter()
         .filter(|s| !s.starts_with("--"))
         .filter_map(|s| s.parse().ok())
         .collect();
@@ -88,22 +91,40 @@ fn main() {
         println!("\n\n{}", "═".repeat(100));
         println!("  🔭 SCALING SUMMARY ACROSS ALL N");
         println!("{}", "═".repeat(100));
-        println!("  {:>6} {:>5} {:>14} {:>14} {:>14} {:>8} {:>14} {:>14}",
-            "N", "dim", "λ_min", "|⟨b,v_min⟩|²", "E_0", "β", "d²_N", "Σc²/λ");
-        println!("  {} {} {} {} {} {} {} {}",
-            "─".repeat(6), "─".repeat(5), "─".repeat(14), "─".repeat(14),
-            "─".repeat(14), "─".repeat(8), "─".repeat(14), "─".repeat(14));
+        println!(
+            "  {:>6} {:>5} {:>14} {:>14} {:>14} {:>8} {:>14} {:>14}",
+            "N", "dim", "λ_min", "|⟨b,v_min⟩|²", "E_0", "β", "d²_N", "Σc²/λ"
+        );
+        println!(
+            "  {} {} {} {} {} {} {} {}",
+            "─".repeat(6),
+            "─".repeat(5),
+            "─".repeat(14),
+            "─".repeat(14),
+            "─".repeat(14),
+            "─".repeat(8),
+            "─".repeat(14),
+            "─".repeat(14)
+        );
         for r in &all_results {
-            println!("  {:6} {:5} {:14.8e} {:14.8e} {:14.8e} {:8.4} {:14.10} {:14.10}",
-                r.n, r.dim, r.lambda_min, r.c_min_sq, r.e_0, r.beta, r.d_sq, r.s_total);
+            println!(
+                "  {:6} {:5} {:14.8e} {:14.8e} {:14.8e} {:8.4} {:14.10} {:14.10}",
+                r.n, r.dim, r.lambda_min, r.c_min_sq, r.e_0, r.beta, r.d_sq, r.s_total
+            );
         }
 
         // β trend
-        let betas: Vec<f64> = all_results.iter().map(|r| r.beta).filter(|b| b.is_finite()).collect();
+        let betas: Vec<f64> = all_results
+            .iter()
+            .map(|r| r.beta)
+            .filter(|b| b.is_finite())
+            .collect();
         if betas.len() >= 2 {
             print!("\n  β trend: ");
             for (i, b) in betas.iter().enumerate() {
-                if i > 0 { print!(" → "); }
+                if i > 0 {
+                    print!(" → ");
+                }
                 print!("{b:.4}");
             }
             println!();
@@ -120,7 +141,9 @@ fn main() {
         let e0s: Vec<f64> = all_results.iter().map(|r| r.e_0).collect();
         print!("\n  E_0 trend: ");
         for (i, e) in e0s.iter().enumerate() {
-            if i > 0 { print!(" → "); }
+            if i > 0 {
+                print!(" → ");
+            }
             print!("{e:.4e}");
         }
         println!();
@@ -129,7 +152,9 @@ fn main() {
         let d_sqs: Vec<f64> = all_results.iter().map(|r| r.d_sq).collect();
         print!("  d²  trend: ");
         for (i, d) in d_sqs.iter().enumerate() {
-            if i > 0 { print!(" → "); }
+            if i > 0 {
+                print!(" → ");
+            }
             print!("{d:.8}");
         }
         println!();
@@ -162,10 +187,10 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
 
     // Try standard Gram cache first, then DD cache (hi part only)
     let cache_candidates = [
-        cache::gram_cache_path(n, 106),  // MPFR-106 (quad precision)
-        cache::gram_cache_path(n, 128),  // MPFR-128
-        cache::gram_cache_path(n, 256),  // MPFR-256
-        cache::gram_cache_path(n, 0),    // plain f64
+        cache::gram_cache_path(n, 106), // MPFR-106 (quad precision)
+        cache::gram_cache_path(n, 128), // MPFR-128
+        cache::gram_cache_path(n, 256), // MPFR-256
+        cache::gram_cache_path(n, 0),   // plain f64
     ];
 
     let (data, dim) = if let Some(gram) = cache_candidates.iter().find_map(|path| {
@@ -225,7 +250,8 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
     println!(" done ({t_eig:.1}s)");
 
     // Sort eigenvalues ascending and keep track of original indices
-    let mut indexed_eigs: Vec<(f64, usize)> = eigen.eigenvalues
+    let mut indexed_eigs: Vec<(f64, usize)> = eigen
+        .eigenvalues
         .iter()
         .enumerate()
         .map(|(i, &v)| (v, i))
@@ -237,7 +263,11 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
 
     let lambda_min = eigenvalues[0];
     let lambda_max = eigenvalues[dim - 1];
-    let cond = if lambda_min > 0.0 { lambda_max / lambda_min } else { f64::INFINITY };
+    let cond = if lambda_min > 0.0 {
+        lambda_max / lambda_min
+    } else {
+        f64::INFINITY
+    };
     println!("  λ_min = {lambda_min:.8e}");
     println!("  λ_max = {lambda_max:.8e}");
     println!("  cond(G) = {cond:.4e}");
@@ -298,20 +328,32 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
     // QUANTUM DECOUPLING ANALYSIS
     // ═══════════════════════════════════════════════════════════════════
     println!("\n  ── QUANTUM DECOUPLING ANALYSIS ──");
-    println!("  {:>5} {:>14} {:>14} {:>14} {:>12} {:>12}",
-        "k", "λ_k", "c_k²", "E_k=c²/λ", "S_cum", "c²/λ² ratio");
-    println!("  {} {} {} {} {} {}",
-        "─".repeat(5), "─".repeat(14), "─".repeat(14),
-        "─".repeat(14), "─".repeat(12), "─".repeat(12));
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14} {:>12} {:>12}",
+        "k", "λ_k", "c_k²", "E_k=c²/λ", "S_cum", "c²/λ² ratio"
+    );
+    println!(
+        "  {} {} {} {} {} {}",
+        "─".repeat(5),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(12),
+        "─".repeat(12)
+    );
 
     // Show bottom 20 eigenvalues (the dangerous ones)
     let n_show_bottom = 20.min(dim);
     for k in 0..n_show_bottom {
         let c_lambda_ratio = if eigenvalues[k] > 1e-30 {
             c_sq[k] / (eigenvalues[k] * eigenvalues[k])
-        } else { f64::INFINITY };
-        println!("  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8} {:12.4e}",
-            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k], c_lambda_ratio);
+        } else {
+            f64::INFINITY
+        };
+        println!(
+            "  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8} {:12.4e}",
+            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k], c_lambda_ratio
+        );
     }
     println!("  {:>5}", "...");
 
@@ -320,9 +362,13 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
     for k in (dim - n_top)..dim {
         let c_lambda_ratio = if eigenvalues[k] > 1e-30 {
             c_sq[k] / (eigenvalues[k] * eigenvalues[k])
-        } else { f64::INFINITY };
-        println!("  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8} {:12.4e}",
-            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k], c_lambda_ratio);
+        } else {
+            f64::INFINITY
+        };
+        println!(
+            "  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8} {:12.4e}",
+            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k], c_lambda_ratio
+        );
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -347,11 +393,17 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
         let n_pts = log_lambda.len() as f64;
         let sum_x: f64 = log_lambda.iter().sum();
         let sum_y: f64 = log_c_sq.iter().sum();
-        let sum_xy: f64 = log_lambda.iter().zip(log_c_sq.iter()).map(|(x, y)| x * y).sum();
+        let sum_xy: f64 = log_lambda
+            .iter()
+            .zip(log_c_sq.iter())
+            .map(|(x, y)| x * y)
+            .sum();
         let sum_xx: f64 = log_lambda.iter().map(|x| x * x).sum();
         let b = (n_pts * sum_xy - sum_x * sum_y) / (n_pts * sum_xx - sum_x * sum_x);
-        println!("  β = {b:.6}  (fit over bottom {n_fit} modes, {}/{n_fit} valid)",
-            log_lambda.len());
+        println!(
+            "  β = {b:.6}  (fit over bottom {n_fit} modes, {}/{n_fit} valid)",
+            log_lambda.len()
+        );
         if b > 1.0 {
             println!("  ✅ β > 1: QUANTUM DECOUPLING CONFIRMED");
             println!("     c_k² decays faster than λ_k → E_k → 0 → sum converges");
@@ -373,7 +425,7 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
             let win = ((dim as f64 * window_frac) as usize).max(20);
             let mut lx = Vec::new();
             let mut ly = Vec::new();
-            for k in 0..win.min(dim/2) {
+            for k in 0..win.min(dim / 2) {
                 if eigenvalues[k] > 1e-30 && c_sq[k] > 1e-50 {
                     lx.push(eigenvalues[k].ln());
                     ly.push(c_sq[k].ln());
@@ -386,8 +438,18 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
                 let sxy: f64 = lx.iter().zip(ly.iter()).map(|(x, y)| x * y).sum();
                 let sxx: f64 = lx.iter().map(|x| x * x).sum();
                 let b = (np * sxy - sx * sy) / (np * sxx - sx * sx);
-                let marker = if b > 1.0 { "✅" } else if b > 0.0 { "⚠️ " } else { "❌" };
-                println!("  {marker} bottom {:.0}% ({} modes): β = {b:.4}", window_frac * 100.0, lx.len());
+                let marker = if b > 1.0 {
+                    "✅"
+                } else if b > 0.0 {
+                    "⚠️ "
+                } else {
+                    "❌"
+                };
+                println!(
+                    "  {marker} bottom {:.0}% ({} modes): β = {b:.4}",
+                    window_frac * 100.0,
+                    lx.len()
+                );
             }
         }
     }
@@ -412,9 +474,16 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
         let target = threshold * s_total;
         let idx = s_cumulative.partition_point(|&x| x < target);
         if idx < dim {
-            println!("  {:5.1}% of energy in modes 0..{idx} (λ > {:.4e})", threshold * 100.0, eigenvalues[idx]);
+            println!(
+                "  {:5.1}% of energy in modes 0..{idx} (λ > {:.4e})",
+                threshold * 100.0,
+                eigenvalues[idx]
+            );
         } else {
-            println!("  {:5.1}% of energy requires all {dim} modes", threshold * 100.0);
+            println!(
+                "  {:5.1}% of energy requires all {dim} modes",
+                threshold * 100.0
+            );
         }
     }
 
@@ -427,8 +496,10 @@ fn run_spectral_observatory(n: usize) -> Option<SpectralResult> {
     let mut tsv = String::new();
     tsv.push_str("k\tlambda_k\tc_k_sq\tE_k\tS_cumulative\n");
     for k in 0..dim {
-        tsv.push_str(&format!("{k}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-            eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]));
+        tsv.push_str(&format!(
+            "{k}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
+            eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]
+        ));
     }
     std::fs::write(&out_file, &tsv).ok();
     println!("\n  Data saved to: {}", out_file.display());
@@ -456,17 +527,25 @@ fn load_ooc_matrix(path: &std::path::Path, dim: usize) -> Option<Vec<f64>> {
     use std::io::Read;
     let mut file = std::fs::File::open(path).ok()?;
     let header = ooc::read_header(&mut file).ok()??;
-    eprintln!("  OOC header: N={}, dim={}, precision={}", header.max_n, header.dim, header.precision);
+    eprintln!(
+        "  OOC header: N={}, dim={}, precision={}",
+        header.max_n, header.dim, header.precision
+    );
     if header.dim != dim {
-        eprintln!("  ⚠ Dimension mismatch: OOC has dim={}, expected {}", header.dim, dim);
+        eprintln!(
+            "  ⚠ Dimension mismatch: OOC has dim={}, expected {}",
+            header.dim, dim
+        );
         return None;
     }
     let total = dim * dim;
     let mut data = vec![0.0f64; total];
-    let bytes: &mut [u8] = unsafe {
-        std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, total * 8)
-    };
-    eprintln!("  Reading {:.1} GB matrix data...", (total * 8) as f64 / 1e9);
+    let bytes: &mut [u8] =
+        unsafe { std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, total * 8) };
+    eprintln!(
+        "  Reading {:.1} GB matrix data...",
+        (total * 8) as f64 / 1e9
+    );
     file.read_exact(bytes).ok()?;
     Some(data)
 }
@@ -475,7 +554,11 @@ fn load_ooc_matrix(path: &std::path::Path, dim: usize) -> Option<Vec<f64>> {
 
 /// Shifted matvec: out = (σI - A)·v.
 
-fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathBuf]) -> Option<SpectralResult> {
+fn run_spectral_observatory_lanczos(
+    n: usize,
+    k_bottom: usize,
+    ooc_dirs: &[PathBuf],
+) -> Option<SpectralResult> {
     println!("\n{}", "═".repeat(72));
     println!("  🔭 SPECTRAL OBSERVATORY [LANCZOS] — N = {n}");
     println!("{}", "═".repeat(72));
@@ -493,7 +576,9 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
         if path.exists() {
             eprintln!("  Trying: {}", path.display());
             load_gram(path)
-        } else { None }
+        } else {
+            None
+        }
     }) {
         let dim = gram.max_dim;
         assert_eq!(dim, n - 1);
@@ -509,7 +594,9 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
             if path.exists() {
                 eprintln!("  Trying DD: {}", path.display());
                 cache::load_dd_gram(path)
-            } else { None }
+            } else {
+                None
+            }
         }) {
             assert_eq!(dim, n - 1);
             (hi, dim)
@@ -518,7 +605,10 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
             let mut search = ooc_dirs.to_vec();
             search.push(cache::cache_dir());
             let sources = ooc::discover_matrices(&search);
-            if let Some(source) = sources.iter().find(|s| s.max_n == n && s.format == ooc::MatrixFormat::Ooc) {
+            if let Some(source) = sources
+                .iter()
+                .find(|s| s.max_n == n && s.format == ooc::MatrixFormat::Ooc)
+            {
                 eprintln!("  Trying OOC: {}", source.path.display());
                 let dim = n - 1;
                 match load_ooc_matrix(&source.path, dim) {
@@ -557,7 +647,9 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
     let data_ref = &data;
     let (tri, basis) = lanczos::lanczos_tridiag(
         &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(data_ref, dim, sigma, v, out),
-        dim, m, None,
+        dim,
+        m,
+        None,
     );
     let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);
     let t_lanczos = t0.elapsed().as_secs_f64();
@@ -567,7 +659,8 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
     let top_start = n_ritz.saturating_sub(k);
 
     // Un-shift eigenvalues
-    let mut eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
+    let mut eigenvalues: Vec<f64> = ritz_values[top_start..]
+        .iter()
         .map(|&lam| sigma - lam)
         .collect();
     eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -577,7 +670,8 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
     let mut e_k_vals = Vec::with_capacity(k);
 
     // Collect sorted (eigenvalue, Ritz vector index) pairs
-    let mut eig_pairs: Vec<(f64, usize)> = ritz_values[top_start..].iter()
+    let mut eig_pairs: Vec<(f64, usize)> = ritz_values[top_start..]
+        .iter()
         .enumerate()
         .map(|(i, &lam)| (sigma - lam, top_start + i))
         .collect();
@@ -596,7 +690,9 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
         // Normalize
         let norm: f64 = v.iter().map(|x| x * x).sum::<f64>().sqrt();
         if norm > 1e-15 {
-            for x in &mut v { *x /= norm; }
+            for x in &mut v {
+                *x /= norm;
+            }
         }
         // c_k = ⟨b, v_k⟩
         let c_k: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
@@ -623,13 +719,22 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
 
     // Decoupling table
     println!("\n  ── QUANTUM DECOUPLING ANALYSIS ──");
-    println!("  {:>5} {:>14} {:>14} {:>14}",
-        "k", "λ_k", "c_k²", "E_k=c²/λ");
-    println!("  {} {} {} {}",
-        "─".repeat(5), "─".repeat(14), "─".repeat(14), "─".repeat(14));
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14}",
+        "k", "λ_k", "c_k²", "E_k=c²/λ"
+    );
+    println!(
+        "  {} {} {} {}",
+        "─".repeat(5),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(14)
+    );
     for i in 0..k.min(20) {
-        println!("  {:5} {:14.8e} {:14.8e} {:14.8e}",
-            i, eigenvalues[i], c_sq[i], e_k_vals[i]);
+        println!(
+            "  {:5} {:14.8e} {:14.8e} {:14.8e}",
+            i, eigenvalues[i], c_sq[i], e_k_vals[i]
+        );
     }
     if k > 20 {
         println!("  {:>5}", "...");
@@ -650,11 +755,18 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
         let n_pts = log_lambda.len() as f64;
         let sum_x: f64 = log_lambda.iter().sum();
         let sum_y: f64 = log_c_sq.iter().sum();
-        let sum_xy: f64 = log_lambda.iter().zip(log_c_sq.iter()).map(|(x, y)| x * y).sum();
+        let sum_xy: f64 = log_lambda
+            .iter()
+            .zip(log_c_sq.iter())
+            .map(|(x, y)| x * y)
+            .sum();
         let sum_xx: f64 = log_lambda.iter().map(|x| x * x).sum();
         let b = (n_pts * sum_xy - sum_x * sum_y) / (n_pts * sum_xx - sum_x * sum_x);
         println!("\n  ── DECOUPLING POWER LAW ──");
-        println!("  β = {b:.6}  (fit over {n_fit} modes, {}/{n_fit} valid)", log_lambda.len());
+        println!(
+            "  β = {b:.6}  (fit over {n_fit} modes, {}/{n_fit} valid)",
+            log_lambda.len()
+        );
         if b > 1.0 {
             println!("  ✅ β > 1: QUANTUM DECOUPLING CONFIRMED");
         } else if b > 0.0 {
@@ -674,8 +786,10 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
     let mut tsv = String::new();
     tsv.push_str("k\tlambda_k\tc_k_sq\tE_k\n");
     for i in 0..k {
-        tsv.push_str(&format!("{}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-            i, eigenvalues[i], c_sq[i], e_k_vals[i]));
+        tsv.push_str(&format!(
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\n",
+            i, eigenvalues[i], c_sq[i], e_k_vals[i]
+        ));
     }
     std::fs::write(&out_file, &tsv).ok();
     println!("\n  Data saved to: {}", out_file.display());

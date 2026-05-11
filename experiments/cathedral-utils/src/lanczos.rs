@@ -181,11 +181,7 @@ pub fn tridiag_eigen(tri: &TridiagMatrix) -> (Vec<f64>, Vec<Vec<f64>>) {
     let eigenvalues: Vec<f64> = indexed.iter().map(|(v, _)| *v).collect();
     let eigenvectors: Vec<Vec<f64>> = indexed
         .iter()
-        .map(|(_, idx)| {
-            (0..m)
-                .map(|row| eigen.eigenvectors[(row, *idx)])
-                .collect()
-        })
+        .map(|(_, idx)| (0..m).map(|row| eigen.eigenvectors[(row, *idx)]).collect())
         .collect();
 
     (eigenvalues, eigenvectors)
@@ -202,20 +198,11 @@ pub fn tridiag_eigen(tri: &TridiagMatrix) -> (Vec<f64>, Vec<Vec<f64>>) {
 ///
 /// # Returns
 /// A [`LanczosResult`] with the bottom-k eigenvalues and eigenvectors.
-pub fn lanczos_bottom_k<F>(
-    matvec: &F,
-    dim: usize,
-    k: usize,
-    m: usize,
-) -> LanczosResult
+pub fn lanczos_bottom_k<F>(matvec: &F, dim: usize, k: usize, m: usize) -> LanczosResult
 where
     F: Fn(&[f64], &mut [f64]) + Sync,
 {
-    let m = if m == 0 {
-        (4 * k).min(dim)
-    } else {
-        m.min(dim)
-    };
+    let m = if m == 0 { (4 * k).min(dim) } else { m.min(dim) };
 
     // Build Lanczos tridiagonal
     let (tri, basis) = lanczos_tridiag(matvec, dim, m, None);
@@ -230,7 +217,8 @@ where
 
     // Map Ritz vectors back to original space (parallelized over k vectors)
     // v_i = Σ_j ritz_vec[i][j] * basis[j]
-    let results: Vec<(Vec<f64>, f64)> = (0..k).into_par_iter()
+    let results: Vec<(Vec<f64>, f64)> = (0..k)
+        .into_par_iter()
         .map(|i| {
             let mut v = vec![0.0f64; dim];
             let rv = &ritz_vectors[i];

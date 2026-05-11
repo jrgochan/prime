@@ -14,18 +14,20 @@
 //    → vᵀGv ≤ 1 + K/logN along an unbounded HC subsequence
 // ═══════════════════════════════════════════════════════════════════════
 
-use std::path::{Path, PathBuf};
-use std::time::Instant;
 use rayon::prelude::*;
 use serde::Serialize;
+use std::path::{Path, PathBuf};
+use std::time::Instant;
 
-use cathedral_utils::arith::{gcd, EULER_GAMMA, mobius_table};
+use cathedral_utils::arith::{EULER_GAMMA, gcd, mobius_table};
 #[cfg(feature = "hpdf")]
 use cathedral_utils::hpdf::HpdfReader;
 
 // ─── Vasyunin sum (f64 fallback) ─────────────────────────────────
 fn vasyunin_sum_f64(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let pi = std::f64::consts::PI;
     let af = a as f64;
     let mut total = 0.0;
@@ -34,7 +36,9 @@ fn vasyunin_sum_f64(a: usize, b: usize) -> f64 {
         let frac = mb_mod_a as f64 / af;
         let angle = pi * m as f64 / af;
         let (sin_v, cos_v) = angle.sin_cos();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         total += frac * cos_v / sin_v;
     }
     total
@@ -84,8 +88,8 @@ struct HcResult {
     btv_sq: f64,
     vtcv: f64,
     ln_n: f64,
-    margin: f64,        // 1 - vᵀGv (positive = below 1)
-    gap_times_ln: f64,  // margin * ln(N) — should stabilize
+    margin: f64,       // 1 - vᵀGv (positive = below 1)
+    gap_times_ln: f64, // margin * ln(N) — should stabilize
     elapsed_secs: f64,
     precision: String,
     source: String,
@@ -96,33 +100,45 @@ struct HcResult {
 fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
     let t0 = Instant::now();
 
-    let reader = HpdfReader::open(path)
-        .map_err(|e| format!("Failed to open {}: {e}", path.display()))?;
+    let reader =
+        HpdfReader::open(path).map_err(|e| format!("Failed to open {}: {e}", path.display()))?;
 
     let n = reader.max_n();
     let dim = reader.dim();
     let ln_n = (n as f64).ln();
 
-    eprintln!("  ═══ N={} (dim={}, {}) ═══",
-        n, dim, if reader.has_dd() { "DD ~31 digits" } else { "f64" });
+    eprintln!(
+        "  ═══ N={} (dim={}, {}) ═══",
+        n,
+        dim,
+        if reader.has_dd() {
+            "DD ~31 digits"
+        } else {
+            "f64"
+        }
+    );
 
     // Read Möbius table from HPDF or compute
-    let mu: Vec<i8> = reader.read_mobius()
-        .unwrap_or_else(|_| mobius_table(n));
+    let mu: Vec<i8> = reader.read_mobius().unwrap_or_else(|_| mobius_table(n));
 
     // Read number theory metadata
     let nt_attrs = reader.read_number_theory_attrs().ok().flatten();
-    let ndiv = nt_attrs.as_ref().map(|a| a.divisor_count as usize)
+    let ndiv = nt_attrs
+        .as_ref()
+        .map(|a| a.divisor_count as usize)
         .unwrap_or_else(|| (1..=n).filter(|&d| n % d == 0).count());
-    let is_hc = nt_attrs.as_ref().map(|a| a.is_highly_composite).unwrap_or(false);
+    let is_hc = nt_attrs
+        .as_ref()
+        .map(|a| a.is_highly_composite)
+        .unwrap_or(false);
 
     // Build the log-cutoff witness: v_k = -μ(k)(1 - ln(k)/ln(N))
     // This matches the Lean axiom `logCutoffWitness` EXACTLY (no /k!)
     // Index mapping: HPDF stores G[j,k] for j,k ∈ {2..N}, so dim = N-1
     // Witness covers k=1..N, but HPDF only has k=2..N
-    let v: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n)
-    }).collect();
+    let v: Vec<f64> = (1..=n)
+        .map(|k| -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n))
+        .collect();
 
     // Mean vector b_k = (ln(k) + 1 - γ) / k
     let b: Vec<f64> = (1..=n).map(mean_entry).collect();
@@ -132,13 +148,17 @@ fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
 
     // Load full Gram matrix for vᵀGv computation
     eprintln!("  Loading HPDF matrix...");
-    let gram = reader.read_gram_full()
+    let gram = reader
+        .read_gram_full()
         .map_err(|e| format!("Failed to read gram: {e}"))?;
 
     // vᵀGv = Σᵢ Σⱼ v[i]·v[j]·G[i,j]
     // HPDF indices: row i corresponds to k=i+2, col j corresponds to k=j+2
     // So we need to handle k=1 separately (not in HPDF)
-    eprintln!("  Computing vᵀGv (parallel, {} threads)...", rayon::current_num_threads());
+    eprintln!(
+        "  Computing vᵀGv (parallel, {} threads)...",
+        rayon::current_num_threads()
+    );
 
     // k=1 contribution: v[0] * Σⱼ v[j] * G(1, j+1)
     // G(1,k) must be computed on-the-fly since HPDF starts at k=2
@@ -148,10 +168,13 @@ fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
         let diag = v[0] * v[0] * g11;
 
         // Off-diagonal: 2 * v[0] * Σ_{k=2..N} v[k-1] * G(1,k)
-        let offdiag: f64 = (2..=n).into_par_iter().map(|k| {
-            let g1k = gram_entry_f64_compute(1, k);
-            v[k - 1] * g1k
-        }).sum();
+        let offdiag: f64 = (2..=n)
+            .into_par_iter()
+            .map(|k| {
+                let g1k = gram_entry_f64_compute(1, k);
+                v[k - 1] * g1k
+            })
+            .sum();
 
         diag + 2.0 * v[0] * offdiag
     } else {
@@ -159,21 +182,28 @@ fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
     };
 
     // Main block: k,j ∈ {2..N} — use HPDF matrix
-    let main_vtgv: f64 = (0..dim).into_par_iter().map(|i| {
-        let vi = v[i + 1]; // v[k] where k = i+2, so v index = k-1 = i+1
-        if vi.abs() < 1e-30 { return 0.0; }
+    let main_vtgv: f64 = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let vi = v[i + 1]; // v[k] where k = i+2, so v index = k-1 = i+1
+            if vi.abs() < 1e-30 {
+                return 0.0;
+            }
 
-        // Diagonal
-        let mut row_sum = vi * vi * gram[i * dim + i];
+            // Diagonal
+            let mut row_sum = vi * vi * gram[i * dim + i];
 
-        // Off-diagonal (j > i)
-        for j in (i + 1)..dim {
-            let vj = v[j + 1]; // v[k'] where k' = j+2
-            if vj.abs() < 1e-30 { continue; }
-            row_sum += 2.0 * vi * vj * gram[i * dim + j];
-        }
-        row_sum
-    }).sum();
+            // Off-diagonal (j > i)
+            for j in (i + 1)..dim {
+                let vj = v[j + 1]; // v[k'] where k' = j+2
+                if vj.abs() < 1e-30 {
+                    continue;
+                }
+                row_sum += 2.0 * vi * vj * gram[i * dim + j];
+            }
+            row_sum
+        })
+        .sum();
 
     let vtgv = k1_contrib + main_vtgv;
     let btv_sq = bt_v * bt_v;
@@ -190,9 +220,24 @@ fn compute_from_hpdf(path: &Path) -> Result<HcResult, String> {
     eprintln!("    < 1? = {}", if vtgv < 1.0 { "✅ YES" } else { "❌ NO" });
 
     Ok(HcResult {
-        n, dim, ndiv, is_hc, bt_v, vtgv, d_sq, btv_sq, vtcv,
-        ln_n, margin, gap_times_ln, elapsed_secs: elapsed,
-        precision: if reader.has_dd() { "DD".into() } else { "f64".into() },
+        n,
+        dim,
+        ndiv,
+        is_hc,
+        bt_v,
+        vtgv,
+        d_sq,
+        btv_sq,
+        vtcv,
+        ln_n,
+        margin,
+        gap_times_ln,
+        elapsed_secs: elapsed,
+        precision: if reader.has_dd() {
+            "DD".into()
+        } else {
+            "f64".into()
+        },
         source: path.display().to_string(),
     })
 }
@@ -202,33 +247,47 @@ fn compute_on_fly(n: usize) -> HcResult {
     let t0 = Instant::now();
     let ln_n = (n as f64).ln();
 
-    eprintln!("  ═══ N={} (on-the-fly f64, {} threads) ═══", n, rayon::current_num_threads());
+    eprintln!(
+        "  ═══ N={} (on-the-fly f64, {} threads) ═══",
+        n,
+        rayon::current_num_threads()
+    );
 
     let mu = mobius_table(n);
 
-    let v: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n)
-    }).collect();
+    let v: Vec<f64> = (1..=n)
+        .map(|k| -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n))
+        .collect();
 
     let b: Vec<f64> = (1..=n).map(mean_entry).collect();
     let bt_v: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
 
     // vᵀGv parallel on-the-fly
-    let diag: f64 = (0..n).into_par_iter().map(|i| {
-        let g_ii = gram_entry_f64_compute(i + 1, i + 1);
-        v[i] * v[i] * g_ii
-    }).sum();
+    let diag: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| {
+            let g_ii = gram_entry_f64_compute(i + 1, i + 1);
+            v[i] * v[i] * g_ii
+        })
+        .sum();
 
-    let offdiag: f64 = (0..n).into_par_iter().map(|i| {
-        if v[i].abs() < 1e-30 { return 0.0; }
-        let mut row_sum = 0.0;
-        for j in (i + 1)..n {
-            if v[j].abs() < 1e-30 { continue; }
-            let g_ij = gram_entry_f64_compute(i + 1, j + 1);
-            row_sum += v[i] * v[j] * g_ij;
-        }
-        row_sum
-    }).sum();
+    let offdiag: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| {
+            if v[i].abs() < 1e-30 {
+                return 0.0;
+            }
+            let mut row_sum = 0.0;
+            for j in (i + 1)..n {
+                if v[j].abs() < 1e-30 {
+                    continue;
+                }
+                let g_ij = gram_entry_f64_compute(i + 1, j + 1);
+                row_sum += v[i] * v[j] * g_ij;
+            }
+            row_sum
+        })
+        .sum();
 
     let vtgv = diag + 2.0 * offdiag;
     let btv_sq = bt_v * bt_v;
@@ -240,14 +299,27 @@ fn compute_on_fly(n: usize) -> HcResult {
 
     let elapsed = t0.elapsed().as_secs_f64();
 
-    eprintln!("  ✓ Done in {:.1}s  vᵀGv={:.6}  {}", elapsed, vtgv,
-        if vtgv < 1.0 { "✅" } else { "❌" });
+    eprintln!(
+        "  ✓ Done in {:.1}s  vᵀGv={:.6}  {}",
+        elapsed,
+        vtgv,
+        if vtgv < 1.0 { "✅" } else { "❌" }
+    );
 
     HcResult {
-        n, dim: n, ndiv,
+        n,
+        dim: n,
+        ndiv,
         is_hc: false, // unknown in on-the-fly mode
-        bt_v, vtgv, d_sq, btv_sq, vtcv,
-        ln_n, margin, gap_times_ln, elapsed_secs: elapsed,
+        bt_v,
+        vtgv,
+        d_sq,
+        btv_sq,
+        vtcv,
+        ln_n,
+        margin,
+        gap_times_ln,
+        elapsed_secs: elapsed,
         precision: "f64".into(),
         source: "on-the-fly".into(),
     }
@@ -299,7 +371,11 @@ fn write_certificate(results: &[HcResult], output_dir: &Path) {
         "results": results,
     });
     let summary_path = output_dir.join("hc_gram_summary.json");
-    std::fs::write(&summary_path, serde_json::to_string_pretty(&summary).unwrap()).ok();
+    std::fs::write(
+        &summary_path,
+        serde_json::to_string_pretty(&summary).unwrap(),
+    )
+    .ok();
     eprintln!("  📁 Certificates written to {}", output_dir.display());
 }
 
@@ -308,21 +384,32 @@ fn print_results_table(results: &[HcResult]) {
     println!("\n{}", "═".repeat(110));
     println!("  🏛️  HC GRAM ORACLE — RESULTS");
     println!("{}", "═".repeat(110));
-    println!("\n  {:>6} {:>5} {:>3} {:>8} {:>12} {:>12} {:>12} {:>10} {:>10} {:>5} {:>6}",
-             "N", "d(N)", "HC", "ln(N)", "bᵀv", "vᵀGv", "d²", "margin", "gap·ln", "< 1?", "prec");
+    println!(
+        "\n  {:>6} {:>5} {:>3} {:>8} {:>12} {:>12} {:>12} {:>10} {:>10} {:>5} {:>6}",
+        "N", "d(N)", "HC", "ln(N)", "bᵀv", "vᵀGv", "d²", "margin", "gap·ln", "< 1?", "prec"
+    );
     println!("  {}", "─".repeat(104));
 
     let mut all_below = true;
     for r in results {
         let below = r.vtgv < 1.0;
-        if !below { all_below = false; }
-        println!("  {:>6} {:>5} {:>3} {:>8.3} {:>12.6} {:>12.6} {:>12.6} {:>+10.4} {:>10.4} {:>5} {:>6}",
-                 r.n, r.ndiv,
-                 if r.is_hc { "✓" } else { " " },
-                 r.ln_n, r.bt_v, r.vtgv, r.d_sq,
-                 r.margin, r.gap_times_ln,
-                 if below { "  ✅" } else { "  ❌" },
-                 r.precision);
+        if !below {
+            all_below = false;
+        }
+        println!(
+            "  {:>6} {:>5} {:>3} {:>8.3} {:>12.6} {:>12.6} {:>12.6} {:>+10.4} {:>10.4} {:>5} {:>6}",
+            r.n,
+            r.ndiv,
+            if r.is_hc { "✓" } else { " " },
+            r.ln_n,
+            r.bt_v,
+            r.vtgv,
+            r.d_sq,
+            r.margin,
+            r.gap_times_ln,
+            if below { "  ✅" } else { "  ❌" },
+            r.precision
+        );
     }
 
     println!("\n  {}", "─".repeat(104));
@@ -332,8 +419,15 @@ fn print_results_table(results: &[HcResult]) {
     } else {
         println!("  ⚠️  Some values have vᵀGv ≥ 1");
         // Check if vᵀGv ≤ 1 + K/logN for some reasonable K
-        let max_excess: f64 = results.iter()
-            .map(|r| if r.vtgv > 1.0 { (r.vtgv - 1.0) * r.ln_n } else { 0.0 })
+        let max_excess: f64 = results
+            .iter()
+            .map(|r| {
+                if r.vtgv > 1.0 {
+                    (r.vtgv - 1.0) * r.ln_n
+                } else {
+                    0.0
+                }
+            })
             .fold(0.0, f64::max);
         println!("  → max((vᵀGv - 1)·ln N) = {:.4}", max_excess);
         println!("  → Bound holds with K = {:.2}", max_excess + 0.01);
@@ -349,10 +443,12 @@ fn discover_hpdf_files(dir: &Path) -> Vec<PathBuf> {
         .filter_map(|e| e.ok())
         .map(|e| e.path())
         .filter(|p| p.extension().map(|x| x == "h5").unwrap_or(false))
-        .filter(|p| p.file_name()
-            .and_then(|f| f.to_str())
-            .map(|s| s.starts_with("gram_N"))
-            .unwrap_or(false))
+        .filter(|p| {
+            p.file_name()
+                .and_then(|f| f.to_str())
+                .map(|s| s.starts_with("gram_N"))
+                .unwrap_or(false)
+        })
         .collect();
     paths.sort_by_key(|p| {
         p.file_stem()
@@ -392,7 +488,11 @@ fn main() {
                 if dir.exists() {
                     let paths = discover_hpdf_files(dir);
                     if !paths.is_empty() {
-                        eprintln!("\n  Auto-discovered {} HPDF files in {}", paths.len(), dir.display());
+                        eprintln!(
+                            "\n  Auto-discovered {} HPDF files in {}",
+                            paths.len(),
+                            dir.display()
+                        );
                         for path in &paths {
                             match compute_from_hpdf(path) {
                                 Ok(r) => results.push(r),
@@ -411,7 +511,9 @@ fn main() {
         }
         #[cfg(not(feature = "hpdf"))]
         {
-            eprintln!("  HPDF support not compiled. Rebuild with: cargo build --release --features hpdf");
+            eprintln!(
+                "  HPDF support not compiled. Rebuild with: cargo build --release --features hpdf"
+            );
             eprintln!("  Or provide N values as arguments for on-the-fly computation.");
         }
     } else {
@@ -444,7 +546,11 @@ fn main() {
                         if i < args.len() {
                             let dir = PathBuf::from(&args[i]);
                             let paths = discover_hpdf_files(&dir);
-                            eprintln!("  Discovered {} HPDF files in {}", paths.len(), dir.display());
+                            eprintln!(
+                                "  Discovered {} HPDF files in {}",
+                                paths.len(),
+                                dir.display()
+                            );
                             for path in &paths {
                                 match compute_from_hpdf(path) {
                                     Ok(r) => results.push(r),
@@ -491,8 +597,13 @@ fn main() {
     // Trend analysis
     println!("\n  ─── TREND ANALYSIS ───");
     for r in &results {
-        println!("    N={:>6}: margin = {:+.6}, gap·ln(N) = {:+.4}, d²·ln(N) = {:.4}",
-                 r.n, r.margin, r.gap_times_ln, r.d_sq * r.ln_n);
+        println!(
+            "    N={:>6}: margin = {:+.6}, gap·ln(N) = {:+.4}, d²·ln(N) = {:.4}",
+            r.n,
+            r.margin,
+            r.gap_times_ln,
+            r.d_sq * r.ln_n
+        );
     }
 
     // Write certificates

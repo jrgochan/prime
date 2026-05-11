@@ -257,19 +257,26 @@ mod tests {
         assert_eq!(result.eigenvalues.len(), 5);
         // Sorted descending
         for i in 1..result.eigenvalues.len() {
-            assert!(result.eigenvalues[i] <= result.eigenvalues[i - 1],
+            assert!(
+                result.eigenvalues[i] <= result.eigenvalues[i - 1],
                 "eigenvalues not sorted descending: [{}]={} > [{}]={}",
-                i, result.eigenvalues[i], i-1, result.eigenvalues[i-1]);
+                i,
+                result.eigenvalues[i],
+                i - 1,
+                result.eigenvalues[i - 1]
+            );
         }
         // Top eigenvalue should be close to 50
         assert!(
             (result.eigenvalues[0] - 50.0).abs() < 1.0,
-            "top eigenvalue: expected ~50, got {}", result.eigenvalues[0]
+            "top eigenvalue: expected ~50, got {}",
+            result.eigenvalues[0]
         );
         // 5th should be close to 46 (RSVD is approximate at edges)
         assert!(
             (result.eigenvalues[4] - 46.0).abs() < 3.0,
-            "5th eigenvalue: expected ~46, got {}", result.eigenvalues[4]
+            "5th eigenvalue: expected ~46, got {}",
+            result.eigenvalues[4]
         );
     }
 
@@ -296,11 +303,17 @@ mod tests {
         // Check orthonormality
         for i in 0..l {
             let norm: f64 = cols[i].iter().map(|x| x * x).sum::<f64>().sqrt();
-            assert!((norm - 1.0).abs() < 1e-12, "column {i} not unit: norm = {norm}");
+            assert!(
+                (norm - 1.0).abs() < 1e-12,
+                "column {i} not unit: norm = {norm}"
+            );
 
             for j in (i + 1)..l {
                 let dot: f64 = cols[i].iter().zip(cols[j].iter()).map(|(a, b)| a * b).sum();
-                assert!(dot.abs() < 1e-12, "columns {i},{j} not orthogonal: dot = {dot}");
+                assert!(
+                    dot.abs() < 1e-12,
+                    "columns {i},{j} not orthogonal: dot = {dot}"
+                );
             }
         }
     }

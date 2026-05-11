@@ -1,8 +1,8 @@
 //! Gram bound metric finalization and display.
 
+use super::state::Decomp;
 use cathedral_utils::arith::{self, Kahan};
 use cathedral_utils::mertens;
-use super::state::Decomp;
 
 /// Compute derived Gram-bound metrics from total = vᵀGv.
 ///
@@ -23,7 +23,11 @@ pub fn finalize_gram_metrics(decomp: &mut Decomp) {
     decomp.gram.btv_sq = btv_val * btv_val;
     decomp.gram.vtcv = vtgv - decomp.gram.btv_sq;
     decomp.gram.d2n = 1.0 - 2.0 * btv_val + vtgv;
-    decomp.gram.ratio = if vtgv > 1e-15 { decomp.gram.btv_sq / vtgv } else { 0.0 };
+    decomp.gram.ratio = if vtgv > 1e-15 {
+        decomp.gram.btv_sq / vtgv
+    } else {
+        0.0
+    };
     decomp.gram.gap = 1.0 - vtgv;
     decomp.gram.gap_times_ln = decomp.gram.gap * (decomp.n as f64).ln();
 }
@@ -42,10 +46,19 @@ pub fn print_gram_summary(d: &Decomp) {
     eprintln!("  │  d²_N        = {:>16.10}              │", d.gram.d2n);
     eprintln!("  │  bᵀv         = {:>16.10}              │", d.gram.btv);
     eprintln!("  │  1 - vᵀGv    = {:>16.10}              │", d.gram.gap);
-    eprintln!("  │  gap·ln(N)   = {:>16.10}              │", d.gram.gap_times_ln);
+    eprintln!(
+        "  │  gap·ln(N)   = {:>16.10}              │",
+        d.gram.gap_times_ln
+    );
     eprintln!("  │  (bᵀv)²/vᵀGv = {:>16.10}              │", d.gram.ratio);
-    eprintln!("  │  vtCv·ln(N)  = {:>16.10}              │", d.gram.vtcv * ln_n);
-    eprintln!("  │  d²·ln(N)    = {:>16.10}              │", d.gram.d2n * ln_n);
+    eprintln!(
+        "  │  vtCv·ln(N)  = {:>16.10}              │",
+        d.gram.vtcv * ln_n
+    );
+    eprintln!(
+        "  │  d²·ln(N)    = {:>16.10}              │",
+        d.gram.d2n * ln_n
+    );
     eprintln!("  │  Precision   = {:>16}              │", d.precision);
     eprintln!("  └─────────────────────────────────────────────┘");
 }

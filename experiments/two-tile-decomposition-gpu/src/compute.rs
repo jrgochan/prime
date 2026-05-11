@@ -15,7 +15,9 @@ pub const LOG_2PI: f64 = 1.8378770664093453; // ln(2π)
 // ────────────────────────────────────────────────
 
 #[inline]
-pub fn tile_index(a: usize, b: usize, m0: usize) -> usize { (a * m0) / b }
+pub fn tile_index(a: usize, b: usize, m0: usize) -> usize {
+    (a * m0) / b
+}
 
 #[inline]
 pub fn is_two_tile(a: usize, b: usize, m0: usize) -> bool {
@@ -33,7 +35,11 @@ pub fn overshoot(a: usize, b: usize, m0: usize) -> usize {
 #[inline]
 pub fn row_overshoot(a: usize, b: usize, m: usize) -> Option<usize> {
     let r = (a * m) % b;
-    if r > 0 && r + a >= b { Some(r + a - b) } else { None }
+    if r > 0 && r + a >= b {
+        Some(r + a - b)
+    } else {
+        None
+    }
 }
 
 // ────────────────────────────────────────────────
@@ -60,8 +66,8 @@ pub fn exact_row_integral(a: usize, b: usize, m: usize) -> f64 {
     let x_hi = 1.0 / (af * mf);
 
     // Tile indices at endpoints
-    let n_hi = (a * m) / b;     // ⌊am/b⌋ — tile index at x_hi
-    let n_lo = (a * (m+1)) / b; // ⌊a(m+1)/b⌋ — tile index at x_lo
+    let n_hi = (a * m) / b; // ⌊am/b⌋ — tile index at x_hi
+    let n_lo = (a * (m + 1)) / b; // ⌊a(m+1)/b⌋ — tile index at x_lo
 
     if n_hi == n_lo {
         // Single-tile: {1/(bx)} = 1/(bx) - n on entire interval
@@ -95,10 +101,14 @@ fn single_tile_integral(a: f64, b: f64, m: f64, lo: f64, hi: f64, n: usize) -> f
 /// rowTerm(a,b,m): single-tile approximation using n₀ = ⌊am/b⌋
 pub fn row_term(a: usize, b: usize, m: usize) -> f64 {
     let n0 = (a * m) / b;
-    single_tile_integral(a as f64, b as f64, m as f64,
+    single_tile_integral(
+        a as f64,
+        b as f64,
+        m as f64,
         1.0 / (a as f64 * (m + 1) as f64),
         1.0 / (a as f64 * m as f64),
-        n0)
+        n0,
+    )
 }
 
 /// Delta formula: Δ(m) = -(1/a)·ln(a(m+1)/(a(m+1)-s)) + m·s/(a(m+1)·(a(m+1)-s))
@@ -131,36 +141,44 @@ pub fn vasyunin_gram_formula(a: usize, b: usize) -> f64 {
     let bf = b as f64;
 
     // Cotangent sums
-    let vab: f64 = (1..b).map(|m| {
-        let mf = m as f64;
-        frac(af * mf / bf) * (PI * mf / bf).cos() / (PI * mf / bf).sin()
-    }).sum();
-    let vba: f64 = (1..a).map(|m| {
-        let mf = m as f64;
-        frac(bf * mf / af) * (PI * mf / af).cos() / (PI * mf / af).sin()
-    }).sum();
+    let vab: f64 = (1..b)
+        .map(|m| {
+            let mf = m as f64;
+            frac(af * mf / bf) * (PI * mf / bf).cos() / (PI * mf / bf).sin()
+        })
+        .sum();
+    let vba: f64 = (1..a)
+        .map(|m| {
+            let mf = m as f64;
+            frac(bf * mf / af) * (PI * mf / af).cos() / (PI * mf / af).sin()
+        })
+        .sum();
 
-    (LOG_2PI - EULER_GAMMA) / 2.0 * (1.0/af + 1.0/bf)
-        + (af - bf) / (2.0*af*bf) * (bf / af).ln()
-        - PI / (2.0*af*bf) * (vab + vba)
-        - 1.0 / (af*bf)
+    (LOG_2PI - EULER_GAMMA) / 2.0 * (1.0 / af + 1.0 / bf)
+        + (af - bf) / (2.0 * af * bf) * (bf / af).ln()
+        - PI / (2.0 * af * bf) * (vab + vba)
+        - 1.0 / (af * bf)
 }
 
 /// Stirling constant: log(2π) - γ - 1
-pub fn stirling_const() -> f64 { LOG_2PI - EULER_GAMMA - 1.0 }
+pub fn stirling_const() -> f64 {
+    LOG_2PI - EULER_GAMMA - 1.0
+}
 
 /// Fractional target: Σ_{r=1}^{b-1} {ar/b}·(logΓ(r/b) - logΓ((r+1)/b) + (1/b)·ψ((r+1)/b))
 pub fn fract_target(a: usize, b: usize) -> f64 {
     let af = a as f64;
     let bf = b as f64;
-    (1..b).map(|r| {
-        let rf = r as f64;
-        let fv = frac(af * rf / bf);
-        let lg_r = libm::lgamma(rf / bf);
-        let lg_rp1 = libm::lgamma((rf + 1.0) / bf);
-        let psi_rp1 = digamma_f64((rf + 1.0) / bf);
-        fv * (lg_r - lg_rp1 + (1.0 / bf) * psi_rp1)
-    }).sum()
+    (1..b)
+        .map(|r| {
+            let rf = r as f64;
+            let fv = frac(af * rf / bf);
+            let lg_r = libm::lgamma(rf / bf);
+            let lg_rp1 = libm::lgamma((rf + 1.0) / bf);
+            let psi_rp1 = digamma_f64((rf + 1.0) / bf);
+            fv * (lg_r - lg_rp1 + (1.0 / bf) * psi_rp1)
+        })
+        .sum()
 }
 
 /// deltaTarget = formula - strip - stir/b - ft/a
@@ -177,21 +195,32 @@ pub fn delta_target(a: usize, b: usize) -> f64 {
 // ────────────────────────────────────────────────
 
 #[inline]
-pub fn frac(x: f64) -> f64 { x - x.floor() }
+pub fn frac(x: f64) -> f64 {
+    x - x.floor()
+}
 
 /// Digamma via asymptotic expansion + recurrence
 pub fn digamma_f64(mut x: f64) -> f64 {
-    if x <= 0.0 { return f64::NAN; }
+    if x <= 0.0 {
+        return f64::NAN;
+    }
     let mut result = 0.0;
-    while x < 10.0 { result -= 1.0 / x; x += 1.0; }
+    while x < 10.0 {
+        result -= 1.0 / x;
+        x += 1.0;
+    }
     let inv_x = 1.0 / x;
     let inv_x2 = inv_x * inv_x;
     result += x.ln() - 0.5 * inv_x;
     let mut x2k = inv_x2;
-    result -= x2k / 12.0;  x2k *= inv_x2;
-    result += x2k / 120.0; x2k *= inv_x2;
-    result -= x2k / 252.0; x2k *= inv_x2;
-    result += x2k / 240.0; x2k *= inv_x2;
+    result -= x2k / 12.0;
+    x2k *= inv_x2;
+    result += x2k / 120.0;
+    x2k *= inv_x2;
+    result -= x2k / 252.0;
+    x2k *= inv_x2;
+    result += x2k / 240.0;
+    x2k *= inv_x2;
     result -= x2k * 5.0 / 660.0;
     result
 }

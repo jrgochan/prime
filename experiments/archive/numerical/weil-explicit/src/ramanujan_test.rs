@@ -8,9 +8,17 @@ use rayon::prelude::*;
 // test eigenvalue predictions from Ramanujan-Fourier expansion.
 // ══════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
-fn gcd(a: usize, b: usize) -> usize { if b == 0 { a } else { gcd(b, a % b) } }
+fn gcd(a: usize, b: usize) -> usize {
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
+}
 
 fn euler_phi(n: usize) -> usize {
     let mut result = n;
@@ -18,17 +26,23 @@ fn euler_phi(n: usize) -> usize {
     let mut p = 2;
     while p * p <= m {
         if m % p == 0 {
-            while m % p == 0 { m /= p; }
+            while m % p == 0 {
+                m /= p;
+            }
             result -= result / p;
         }
         p += 1;
     }
-    if m > 1 { result -= result / m; }
+    if m > 1 {
+        result -= result / m;
+    }
     result
 }
 
 fn mobius(n: usize) -> i64 {
-    if n == 1 { return 1; }
+    if n == 1 {
+        return 1;
+    }
     let mut m = n;
     let mut num_factors = 0;
     let mut p = 2;
@@ -36,21 +50,33 @@ fn mobius(n: usize) -> i64 {
         if m % p == 0 {
             m /= p;
             num_factors += 1;
-            if m % p == 0 { return 0; } // p² | n
+            if m % p == 0 {
+                return 0;
+            } // p² | n
         }
         p += 1;
     }
-    if m > 1 { num_factors += 1; }
-    if num_factors % 2 == 0 { 1 } else { -1 }
+    if m > 1 {
+        num_factors += 1;
+    }
+    if num_factors % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 fn von_mangoldt(n: usize) -> f64 {
-    if n < 2 { return 0.0; }
+    if n < 2 {
+        return 0.0;
+    }
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
         if m % p == 0 {
-            while m % p == 0 { m /= p; }
+            while m % p == 0 {
+                m /= p;
+            }
             return if m == 1 { (p as f64).ln() } else { 0.0 };
         }
         p += 1;
@@ -109,14 +135,16 @@ fn main() {
 
     // ═══ Test 1: GCD decomposition ═══
     println!("\n[1/5] Verifying G[j,k] depends primarily on gcd(j,k)\n");
-    println!("  {:>4} {:>4} {:>4} {:>12} {:>12} {:>12}",
-        "j", "k", "gcd", "G[j,k]", "G_coprime", "G[j,k]-G_cp");
+    println!(
+        "  {:>4} {:>4} {:>4} {:>12} {:>12} {:>12}",
+        "j", "k", "gcd", "G[j,k]", "G_coprime", "G[j,k]-G_cp"
+    );
 
     // Compute a few entries and the "coprime baseline"
     let mut coprime_sum = 0.0;
     let mut coprime_count = 0;
     for j in 2..=20 {
-        for k in (j+1)..=20 {
+        for k in (j + 1)..=20 {
             if gcd(j, k) == 1 {
                 coprime_sum += inner_product(j, k, n_int);
                 coprime_count += 1;
@@ -130,15 +158,24 @@ fn main() {
         for k in j..=12 {
             let g = gcd(j, k);
             let val = inner_product(j, k, n_int);
-            println!("  {:4} {:4} {:4} {:12.8} {:12.8} {:12.8}",
-                j, k, g, val, c0, val - c0);
+            println!(
+                "  {:4} {:4} {:4} {:12.8} {:12.8} {:12.8}",
+                j,
+                k,
+                g,
+                val,
+                c0,
+                val - c0
+            );
         }
     }
 
     // ═══ Test 2: Ramanujan sums ═══
     println!("\n[2/5] Ramanujan sums c_q(n) for small q\n");
-    println!("  {:>3} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4}",
-        "q", "n=1", "2", "3", "4", "5", "6", "7", "8", "9", "10");
+    println!(
+        "  {:>3} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4} {:>4}",
+        "q", "n=1", "2", "3", "4", "5", "6", "7", "8", "9", "10"
+    );
 
     for q in 1..=12 {
         print!("  {:3}", q);
@@ -173,7 +210,8 @@ fn main() {
 
         // Smith product for the pure GCD part
         // First extract f(g) = average G[j,k] over pairs with gcd = g
-        let mut gcd_vals: std::collections::HashMap<usize, (f64, usize)> = std::collections::HashMap::new();
+        let mut gcd_vals: std::collections::HashMap<usize, (f64, usize)> =
+            std::collections::HashMap::new();
         for j in 0..dim {
             for k in 0..dim {
                 let g = gcd(j + 2, k + 2);
@@ -189,7 +227,12 @@ fn main() {
         gcd_keys.sort();
         for g in &gcd_keys[..gcd_keys.len().min(8)] {
             let (sum, count) = gcd_vals[g];
-            println!("           gcd={}: avg = {:.8} (count={})", g, sum / count as f64, count);
+            println!(
+                "           gcd={}: avg = {:.8} (count={})",
+                g,
+                sum / count as f64,
+                count
+            );
         }
         println!();
     }
@@ -199,17 +242,22 @@ fn main() {
 
     let dim = max_n - 1;
     // Compute correction matrix B[j,k] = G[j,k] - C₀
-    let gram: Vec<Vec<f64>> = (0..dim.min(60)).into_par_iter().map(|j| {
-        let mut row = vec![0.0; dim.min(60)];
-        for k in 0..dim.min(60) {
-            row[k] = inner_product(j + 2, k + 2, n_int) - c0;
-        }
-        row
-    }).collect();
+    let gram: Vec<Vec<f64>> = (0..dim.min(60))
+        .into_par_iter()
+        .map(|j| {
+            let mut row = vec![0.0; dim.min(60)];
+            for k in 0..dim.min(60) {
+                row[k] = inner_product(j + 2, k + 2, n_int) - c0;
+            }
+            row
+        })
+        .collect();
 
     // Compute α̂_q = (1/N²) Σ_{j,k} B[j,k] · c_q(j) · c_q(k) / φ(q)²
-    println!("  {:>4}  {:>14}  {:>14}  {:>14}  {:>8}",
-        "q", "α̂_q", "Λ(q)/q", "α̂_q·q", "φ(q)");
+    println!(
+        "  {:>4}  {:>14}  {:>14}  {:>14}  {:>8}",
+        "q", "α̂_q", "Λ(q)/q", "α̂_q·q", "φ(q)"
+    );
 
     let dim_s = dim.min(60);
     for q in 1..=30 {
@@ -224,8 +272,14 @@ fn main() {
         }
         let alpha_q = sum / ((dim_s * dim_s) as f64 * (phi_q as f64).powi(2));
         let lambda_q = von_mangoldt(q) / q as f64;
-        println!("  {:4}  {:14.8}  {:14.8}  {:14.8}  {:8}",
-            q, alpha_q, lambda_q, alpha_q * q as f64, phi_q);
+        println!(
+            "  {:4}  {:14.8}  {:14.8}  {:14.8}  {:8}",
+            q,
+            alpha_q,
+            lambda_q,
+            alpha_q * q as f64,
+            phi_q
+        );
     }
 
     // ═══ Test 5: Eigenvalue prediction ═══
@@ -264,13 +318,24 @@ fn lu_decompose(a: &mut [Vec<f64>]) -> Vec<usize> {
     let mut piv: Vec<usize> = (0..n).collect();
     for col in 0..n {
         let mut max_row = col;
-        for row in (col+1)..n { if a[row][col].abs() > a[max_row][col].abs() { max_row = row; } }
-        if max_row != col { a.swap(col, max_row); piv.swap(col, max_row); }
-        if a[col][col].abs() < 1e-15 { continue; }
-        for row in (col+1)..n {
+        for row in (col + 1)..n {
+            if a[row][col].abs() > a[max_row][col].abs() {
+                max_row = row;
+            }
+        }
+        if max_row != col {
+            a.swap(col, max_row);
+            piv.swap(col, max_row);
+        }
+        if a[col][col].abs() < 1e-15 {
+            continue;
+        }
+        for row in (col + 1)..n {
             a[row][col] /= a[col][col];
             let f = a[row][col];
-            for j in (col+1)..n { a[row][j] -= f * a[col][j]; }
+            for j in (col + 1)..n {
+                a[row][j] -= f * a[col][j];
+            }
         }
     }
     piv
@@ -281,13 +346,20 @@ fn eigenvalues_sorted(mat: &[Vec<f64>]) -> Vec<f64> {
     let mut a = mat.to_vec();
     for _ in 0..n * n * 10 {
         let mut max_val = 0.0f64;
-        let mut p = 0; let mut q = 1;
+        let mut p = 0;
+        let mut q = 1;
         for i in 0..n {
-            for j in (i+1)..n {
-                if a[i][j].abs() > max_val { max_val = a[i][j].abs(); p = i; q = j; }
+            for j in (i + 1)..n {
+                if a[i][j].abs() > max_val {
+                    max_val = a[i][j].abs();
+                    p = i;
+                    q = j;
+                }
             }
         }
-        if max_val < 1e-13 { break; }
+        if max_val < 1e-13 {
+            break;
+        }
         let theta = if (a[q][q] - a[p][p]).abs() < 1e-15 {
             std::f64::consts::PI / 4.0
         } else {
@@ -297,13 +369,16 @@ fn eigenvalues_sorted(mat: &[Vec<f64>]) -> Vec<f64> {
         let mut b = a.clone();
         for i in 0..n {
             if i != p && i != q {
-                b[i][p] = c*a[i][p] + s*a[i][q]; b[p][i] = b[i][p];
-                b[i][q] = -s*a[i][p] + c*a[i][q]; b[q][i] = b[i][q];
+                b[i][p] = c * a[i][p] + s * a[i][q];
+                b[p][i] = b[i][p];
+                b[i][q] = -s * a[i][p] + c * a[i][q];
+                b[q][i] = b[i][q];
             }
         }
-        b[p][p] = c*c*a[p][p] + 2.0*s*c*a[p][q] + s*s*a[q][q];
-        b[q][q] = s*s*a[p][p] - 2.0*s*c*a[p][q] + c*c*a[q][q];
-        b[p][q] = 0.0; b[q][p] = 0.0;
+        b[p][p] = c * c * a[p][p] + 2.0 * s * c * a[p][q] + s * s * a[q][q];
+        b[q][q] = s * s * a[p][p] - 2.0 * s * c * a[p][q] + c * c * a[q][q];
+        b[p][q] = 0.0;
+        b[q][p] = 0.0;
         a = b;
     }
     let mut eigs: Vec<f64> = (0..n).map(|i| a[i][i]).collect();

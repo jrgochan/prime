@@ -11,9 +11,9 @@
 //!   - At κ ≈ 10⁷: 31 - 7 = 24 clean digits in the solution
 //!   - Residual floor: ~10⁻²⁴ (vs 10⁻⁸ for f64)
 
-use cathedral_utils::dd::DD;
-use crate::env::CathedralEnv;
 use super::PrecisionCgResult;
+use crate::env::CathedralEnv;
+use cathedral_utils::dd::DD;
 use std::time::Instant;
 
 /// DD dot product: Σ a_hi[i]*b_hi[i] accumulated in DD,
@@ -55,13 +55,7 @@ fn dd_norm2(a: &[f64]) -> DD {
 ///
 /// If `gram_lo` is None, uses f64-only matrix data with DD accumulation.
 /// Parallelized via Rayon — each row's DD dot product is independent.
-fn dd_matvec(
-    gram_hi: &[f64],
-    gram_lo: Option<&[f64]>,
-    x: &[f64],
-    y: &mut [f64],
-    dim: usize,
-) {
+fn dd_matvec(gram_hi: &[f64], gram_lo: Option<&[f64]>, x: &[f64], y: &mut [f64], dim: usize) {
     use rayon::prelude::*;
 
     y.par_iter_mut().enumerate().for_each(|(i, yi)| {
@@ -121,11 +115,7 @@ fn dd_matvec_full(
 ///
 /// This is the "Full DD" tier — the Theorist's predicted 10⁻²⁴
 /// Pythagorean precision at κ ≈ 10⁷.
-pub fn run_dd_cg(
-    env: &mut CathedralEnv,
-    max_steps: usize,
-    tol: f64,
-) -> PrecisionCgResult {
+pub fn run_dd_cg(env: &mut CathedralEnv, max_steps: usize, tol: f64) -> PrecisionCgResult {
     // Check if GPU is available for accelerated matvec
     #[cfg(feature = "gpu")]
     let use_gpu = env.gpu_engine.is_some() || env.gpu_matvec.is_some();
@@ -162,8 +152,14 @@ fn run_dd_cg_inner(
     // Try to get DD lo-words from the environment
     let gram_lo: Option<&Vec<f64>> = env.gram_lo.as_ref();
     let has_dd = gram_lo.is_some();
-    eprintln!("    DD source: {} matrix entries",
-        if has_dd { "~31-digit (hi+lo)" } else { "f64-promoted (hi only)" });
+    eprintln!(
+        "    DD source: {} matrix entries",
+        if has_dd {
+            "~31-digit (hi+lo)"
+        } else {
+            "f64-promoted (hi only)"
+        }
+    );
     eprintln!("    DD vectors: full DD working vectors (v, r, z, p)");
     if use_gpu {
         eprintln!("    DD matvec: GPU-accelerated f64 (Mixed Precision Iterative Refinement)");
@@ -175,7 +171,11 @@ fn run_dd_cg_inner(
     let precond_inv: Vec<DD> = (0..dim)
         .map(|i| {
             let d = gram_hi[i * dim + i];
-            if d.abs() > 1e-30 { DD::from_f64(1.0) / DD::from_f64(d) } else { DD::from_f64(1.0) }
+            if d.abs() > 1e-30 {
+                DD::from_f64(1.0) / DD::from_f64(d)
+            } else {
+                DD::from_f64(1.0)
+            }
         })
         .collect();
 
@@ -222,7 +222,13 @@ fn run_dd_cg_inner(
 
     // r₀ = b - G·v₀ (DD-precision matvec + DD subtraction)
     extract_f64(&v_dd, &mut v_f64);
-    dd_matvec(gram_hi, gram_lo.map(|v| v.as_slice()), &v_f64, &mut gp_f64, dim);
+    dd_matvec(
+        gram_hi,
+        gram_lo.map(|v| v.as_slice()),
+        &v_f64,
+        &mut gp_f64,
+        dim,
+    );
     for i in 0..dim {
         r_dd[i] = b_dd[i] - DD::from_f64(gp_f64[i]);
     }
@@ -249,12 +255,20 @@ fn run_dd_cg_inner(
     let mut cached_rel_res = 1.0f64;
 
     for i in 0..max_steps {
-        if converged || stagnated { break; }
+        if converged || stagnated {
+            break;
+        }
 
         // Periodic residual reset: r = b - G·v (fresh DD computation)
         if i > 0 && i % reset_interval == 0 {
             extract_f64(&v_dd, &mut v_f64);
-            dd_matvec(gram_hi, gram_lo.map(|v| v.as_slice()), &v_f64, &mut gp_f64, dim);
+            dd_matvec(
+                gram_hi,
+                gram_lo.map(|v| v.as_slice()),
+                &v_f64,
+                &mut gp_f64,
+                dim,
+            );
             for j in 0..dim {
                 r_dd[j] = b_dd[j] - DD::from_f64(gp_f64[j]);
             }
@@ -275,12 +289,20 @@ fn run_dd_cg_inner(
         // G·p — use GPU if available, otherwise full DD matvec
         if use_gpu {
             // GPU path: extract f64 hi-words, GPU matvec, promote to DD
-            extract_f64(&p_dd, &mut v_f64);  // reuse v_f64 scratch as p_f64
+            extract_f64(&p_dd, &mut v_f64); // reuse v_f64 scratch as p_f64
             env.matvec_into(&v_f64, &mut gp_f64);
-            for j in 0..dim { gp_dd[j] = DD::from_f64(gp_f64[j]); }
+            for j in 0..dim {
+                gp_dd[j] = DD::from_f64(gp_f64[j]);
+            }
         } else {
             // CPU path: full DD matvec (DD matrix × DD vector → DD result)
-            dd_matvec_full(gram_hi, gram_lo.map(|v| v.as_slice()), &p_dd, &mut gp_dd, dim);
+            dd_matvec_full(
+                gram_hi,
+                gram_lo.map(|v| v.as_slice()),
+                &p_dd,
+                &mut gp_dd,
+                dim,
+            );
         }
 
         // pᵀGp in full DD
@@ -297,10 +319,14 @@ fn run_dd_cg_inner(
         let alpha_dd = r_dot_z / p_dot_gp;
 
         // v ← v + α·p  (FULL DD)
-        for j in 0..dim { v_dd[j] += alpha_dd * p_dd[j]; }
+        for j in 0..dim {
+            v_dd[j] += alpha_dd * p_dd[j];
+        }
 
         // r ← r - α·Gp  (FULL DD — Gp is DD now!)
-        for j in 0..dim { r_dd[j] -= alpha_dd * gp_dd[j]; }
+        for j in 0..dim {
+            r_dd[j] -= alpha_dd * gp_dd[j];
+        }
 
         // Convergence check (DD norm)
         let r_norm = dd_norm2_dd(&r_dd).to_f64().sqrt();
@@ -320,26 +346,36 @@ fn run_dd_cg_inner(
         }
 
         // z = M⁻¹r (DD)
-        for j in 0..dim { z_dd[j] = precond_inv[j] * r_dd[j]; }
+        for j in 0..dim {
+            z_dd[j] = precond_inv[j] * r_dd[j];
+        }
 
         // β = (r_new·z_new) / (r·z)  (DD)
         let r_new_dot_z_new = dd_dot_dd(&r_dd, &z_dd);
         let beta_dd = r_new_dot_z_new / r_dot_z;
 
         // p = z + β·p  (DD)
-        for j in 0..dim { p_dd[j] = z_dd[j] + beta_dd * p_dd[j]; }
+        for j in 0..dim {
+            p_dd[j] = z_dd[j] + beta_dd * p_dd[j];
+        }
 
         steps = i + 1;
 
         if i % log_interval == 0 {
             let elapsed = t0.elapsed().as_secs_f64();
-            let rate = if elapsed > 0.0 { steps as f64 / elapsed } else { 0.0 };
+            let rate = if elapsed > 0.0 {
+                steps as f64 / elapsed
+            } else {
+                0.0
+            };
             eprint!("\r    DD CG step {i:>5}: ||r||/||r₀||={cached_rel_res:.4e}  [{rate:.0} mv/s]      ");
         }
     }
 
     // Apply optimized v back to env (extract f64 from DD)
-    for j in 0..dim { env.v[j] = v_dd[j].to_f64(); }
+    for j in 0..dim {
+        env.v[j] = v_dd[j].to_f64();
+    }
 
     // Compute d², vᵀGv, bᵀv in FULL DD precision
     // bᵀv = Σ b_i · v_i (DD)
@@ -347,7 +383,13 @@ fn run_dd_cg_inner(
     let btv = btv_dd.to_f64();
 
     // vᵀGv = vᵀ · (G·v) — full DD matvec then DD dot
-    dd_matvec_full(gram_hi, gram_lo.map(|v| v.as_slice()), &v_dd, &mut gp_dd, dim);
+    dd_matvec_full(
+        gram_hi,
+        gram_lo.map(|v| v.as_slice()),
+        &v_dd,
+        &mut gp_dd,
+        dim,
+    );
     let vtgv_dd = dd_dot_dd(&v_dd, &gp_dd);
     let vtgv = vtgv_dd.to_f64();
 
@@ -358,11 +400,20 @@ fn run_dd_cg_inner(
     // DD Pythagorean check: d² + vᵀGv should = 1
     let pyth_dd = d2_dd + vtgv_dd;
     let pyth_res = (pyth_dd - DD::from_f64(1.0)).to_f64().abs();
-    eprintln!("    DD Pythagorean: d²+vᵀGv = {:.15e}  |res| = {:.2e}",
-        pyth_dd.to_f64(), pyth_res);
+    eprintln!(
+        "    DD Pythagorean: d²+vᵀGv = {:.15e}  |res| = {:.2e}",
+        pyth_dd.to_f64(),
+        pyth_res
+    );
 
     let elapsed = t0.elapsed().as_secs_f64();
-    let status = if converged { "converged" } else if stagnated { "stagnated (DD floor)" } else { "exhausted" };
+    let status = if converged {
+        "converged"
+    } else if stagnated {
+        "stagnated (DD floor)"
+    } else {
+        "exhausted"
+    };
     eprintln!("\r    DD CG {status} at step {steps}: ||r||/||r₀||={cached_rel_res:.2e}, d²={d2:.10e}                     ");
     eprintln!("    DD CG wall time: {elapsed:.2}s ({steps} matvecs)");
 
@@ -379,4 +430,3 @@ fn run_dd_cg_inner(
         wall_time_s: elapsed,
     }
 }
-

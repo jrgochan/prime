@@ -31,12 +31,12 @@
 //    Sherman-M: d²_N = 1/(1 + bᵀ C⁻¹ b),  C = G - bbᵀ
 // ═══════════════════════════════════════════════════════════════════════
 
-mod arithmetic;
-mod gram;
-mod gram_f64;
 mod analysis;
 mod analysis_f64;
+mod arithmetic;
 mod certificate;
+mod gram;
+mod gram_f64;
 
 use std::time::Instant;
 
@@ -58,7 +58,8 @@ fn main() {
 // ═══════════════════════════════════════════════════════════════════════
 
 fn run_fast_mode(args: &[String]) {
-    let max_n: usize = args.iter()
+    let max_n: usize = args
+        .iter()
         .filter(|a| a.as_str() != "--fast" && !a.contains('/'))
         .filter_map(|a| a.parse().ok())
         .last()
@@ -119,14 +120,21 @@ fn run_fast_mode(args: &[String]) {
         let sm_dist = 1.0 / (1.0 + res.x_val);
         let sm_match = (res.d2_n - sm_dist).abs();
 
-        println!("\n  d²_N = {:.14},  X = {:.8},  X/ln(N) = {:.6}", res.d2_n, res.x_val, res.x_over_ln_n);
+        println!(
+            "\n  d²_N = {:.14},  X = {:.8},  X/ln(N) = {:.6}",
+            res.d2_n, res.x_val, res.x_over_ln_n
+        );
         println!("  SM match = {:.2e},  κ(G) ≈ {:.2e}", sm_match, res.cond_g);
 
         if sm_match > 1e-8 {
             println!("  ⚠️  SM match degraded — f64 precision limit at this N");
         }
 
-        println!("  ⏱  N={} completed in {:.1}s", n, t0.elapsed().as_secs_f64());
+        println!(
+            "  ⏱  N={} completed in {:.1}s",
+            n,
+            t0.elapsed().as_secs_f64()
+        );
 
         results.push(res);
     }
@@ -141,7 +149,11 @@ fn run_fast_mode(args: &[String]) {
         "N", "d²_N", "BD predict", "ratio", "X", "X/ln(N)"
     );
     for r in &results {
-        let ratio = if r.bd_predicted > 0.0 { r.d2_n / r.bd_predicted } else { 0.0 };
+        let ratio = if r.bd_predicted > 0.0 {
+            r.d2_n / r.bd_predicted
+        } else {
+            0.0
+        };
         println!(
             "  {:5} {:14.10} {:14.10} {:10.6} {:14.8} {:10.6}",
             r.n, r.d2_n, r.bd_predicted, ratio, r.x_val, r.x_over_ln_n,
@@ -159,7 +171,10 @@ fn run_fast_mode(args: &[String]) {
     );
 
     let bd_target = 1.0 / (2.0 + 0.5772156649015328606 - (4.0 * std::f64::consts::PI).ln());
-    println!("  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)", bd_target);
+    println!(
+        "  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)",
+        bd_target
+    );
 
     // Verdicts
     let x_mono = results.windows(2).all(|w| w[1].x_val > w[0].x_val);
@@ -176,18 +191,28 @@ fn run_fast_mode(args: &[String]) {
     );
     println!(
         "  │  d²_N > 0 for all N:         {}                              │",
-        if results.iter().all(|r| r.d2_n > 0.0) { "✅ YES" } else { "❌ NO " }
+        if results.iter().all(|r| r.d2_n > 0.0) {
+            "✅ YES"
+        } else {
+            "❌ NO "
+        }
     );
     println!("  └{}┘", "─".repeat(57));
 
     // SM health check
-    let last_sm = results.last().map(|r| {
-        let sm_dist = 1.0 / (1.0 + r.x_val);
-        (r.d2_n - sm_dist).abs()
-    }).unwrap_or(0.0);
+    let last_sm = results
+        .last()
+        .map(|r| {
+            let sm_dist = 1.0 / (1.0 + r.x_val);
+            (r.d2_n - sm_dist).abs()
+        })
+        .unwrap_or(0.0);
 
     if last_sm > 1e-6 {
-        println!("\n  ⚠️  f64 precision exhausted at N={}. SM match = {:.2e}", max_n, last_sm);
+        println!(
+            "\n  ⚠️  f64 precision exhausted at N={}. SM match = {:.2e}",
+            max_n, last_sm
+        );
         println!("     Use 512-bit MPFR mode for certified results at this N:");
         println!("     cargo run --release {}", max_n);
     }
@@ -236,7 +261,9 @@ fn run_mpfr_mode(args: &[String]) {
     let _mu = arithmetic::mobius_sieve(max_n + 1);
     let ln_cache = gram::precompute_ln1p_cache(max_n);
 
-    let all_sizes = [10, 20, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000];
+    let all_sizes = [
+        10, 20, 50, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000,
+    ];
     let sizes: Vec<usize> = all_sizes.iter().copied().filter(|&s| s <= max_n).collect();
 
     let mut results = Vec::new();
@@ -245,7 +272,11 @@ fn run_mpfr_mode(args: &[String]) {
         println!("\n{}", "━".repeat(74));
         println!(
             "  N = {}  ({}×{}, {}-bit MPFR, {} threads)",
-            n, n, n, gram::PREC, threads
+            n,
+            n,
+            n,
+            gram::PREC,
+            threads
         );
         println!("{}", "━".repeat(74));
 
@@ -277,8 +308,14 @@ fn run_mpfr_mode(args: &[String]) {
         println!("  SM match    = {:.2e}", (res.d2_n - sm_dist).abs());
 
         println!("\n  ┌─ BÁEZ-DUARTE CERTIFICATION {}┐", "─".repeat(27));
-        println!("  │  d²_N (measured)    = {:.12}                    │", res.d2_n);
-        println!("  │  d²_N (BD predict)  = {:.12}  (C/lnN)          │", res.bd_predicted);
+        println!(
+            "  │  d²_N (measured)    = {:.12}                    │",
+            res.d2_n
+        );
+        println!(
+            "  │  d²_N (BD predict)  = {:.12}  (C/lnN)          │",
+            res.bd_predicted
+        );
         println!(
             "  │  Ratio meas/pred    = {:.6}                          │",
             if res.bd_predicted > 0.0 {
@@ -287,17 +324,27 @@ fn run_mpfr_mode(args: &[String]) {
                 0.0
             }
         );
-        println!("  │  X / ln(N)          = {:.8}  (target ≈ 21.64)   │", res.x_over_ln_n);
+        println!(
+            "  │  X / ln(N)          = {:.8}  (target ≈ 21.64)   │",
+            res.x_over_ln_n
+        );
         println!("  └{}┘", "─".repeat(57));
 
-        println!("  ⏱  N={} completed in {:.1}s", n, t0.elapsed().as_secs_f64());
+        println!(
+            "  ⏱  N={} completed in {:.1}s",
+            n,
+            t0.elapsed().as_secs_f64()
+        );
 
         results.push(res);
     }
 
     // Grand Summary
     println!("\n\n{}", "═".repeat(74));
-    println!("  GRAND SUMMARY — LEAN PROOF CERTIFICATION ({}-bit MPFR)", gram::PREC);
+    println!(
+        "  GRAND SUMMARY — LEAN PROOF CERTIFICATION ({}-bit MPFR)",
+        gram::PREC
+    );
     println!("{}", "═".repeat(74));
 
     println!(
@@ -330,7 +377,10 @@ fn run_mpfr_mode(args: &[String]) {
     );
 
     let bd_target = 1.0 / (2.0 + 0.5772156649015328606 - (4.0 * std::f64::consts::PI).ln());
-    println!("  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)", bd_target);
+    println!(
+        "  Lean target: X/ln(N) → {:.4} (IntegralBasis/BaezDuarte.lean)",
+        bd_target
+    );
 
     let x_mono = results.windows(2).all(|w| w[1].x_val > w[0].x_val);
     let d2_decay = results.windows(2).all(|w| w[1].d2_n < w[0].d2_n);

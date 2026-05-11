@@ -224,7 +224,8 @@ pub fn dipole_analysis(v: &[f64], num_components: usize) -> DipoleAnalysis {
     let b = arith::b_vector(v.len());
 
     // Sort by weight magnitude
-    let mut indexed: Vec<(usize, f64)> = v.iter().enumerate().map(|(i, &val)| (i + 2, val)).collect();
+    let mut indexed: Vec<(usize, f64)> =
+        v.iter().enumerate().map(|(i, &val)| (i + 2, val)).collect();
     indexed.sort_by(|a, b| b.1.abs().partial_cmp(&a.1.abs()).unwrap());
 
     let mut pos_sum = 0.0f64;

@@ -14,10 +14,10 @@
 //!  §F. TAPER ANALYSIS: effect of log-taper on convergence
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod sieve;
-mod gram;
-mod fmt;
 mod chebyshev;
+mod fmt;
+mod gram;
+mod sieve;
 
 use rayon::prelude::*;
 use std::fs;
@@ -31,9 +31,11 @@ use fmt::*;
 // ═══════════════════════════════════════════
 
 struct ConvergenceResult {
-    n: usize, vtgv: f64, btv: f64,
-    vtcv: f64,  // vᵀCv = vᵀGv - (bᵀv)²
-    l2_residual: f64,  // 1 - 2bᵀv + vᵀGv
+    n: usize,
+    vtgv: f64,
+    btv: f64,
+    vtcv: f64,        // vᵀCv = vᵀGv - (bᵀv)²
+    l2_residual: f64, // 1 - 2bᵀv + vᵀGv
 }
 
 fn convergence_scan(n: usize, mu: &[i8]) -> ConvergenceResult {
@@ -41,30 +43,52 @@ fn convergence_scan(n: usize, mu: &[i8]) -> ConvergenceResult {
     let log_n = (n as f64).ln();
 
     // Precompute weights
-    let weights: Vec<f64> = (0..=m).map(|k| {
-        if k == 0 { 0.0 } else { gram::bd_weight(mu[k], k as u64, log_n) }
-    }).collect();
+    let weights: Vec<f64> = (0..=m)
+        .map(|k| {
+            if k == 0 {
+                0.0
+            } else {
+                gram::bd_weight(mu[k], k as u64, log_n)
+            }
+        })
+        .collect();
 
     // Compute vᵀGv (parallelized over j)
-    let vtgv: f64 = (1..=m).into_par_iter().map(|j| {
-        let vj = weights[j];
-        if vj == 0.0 { return 0.0; }
-        (1..=m).map(|k| {
-            let vk = weights[k];
-            if vk == 0.0 { 0.0 }
-            else { vj * vk * gram::gram_entry(j as u64, k as u64) }
-        }).sum::<f64>()
-    }).sum();
+    let vtgv: f64 = (1..=m)
+        .into_par_iter()
+        .map(|j| {
+            let vj = weights[j];
+            if vj == 0.0 {
+                return 0.0;
+            }
+            (1..=m)
+                .map(|k| {
+                    let vk = weights[k];
+                    if vk == 0.0 {
+                        0.0
+                    } else {
+                        vj * vk * gram::gram_entry(j as u64, k as u64)
+                    }
+                })
+                .sum::<f64>()
+        })
+        .sum();
 
     // Compute bᵀv
-    let btv: f64 = (1..=m).map(|k| {
-        gram::mean_entry(k as u64) * weights[k]
-    }).sum();
+    let btv: f64 = (1..=m)
+        .map(|k| gram::mean_entry(k as u64) * weights[k])
+        .sum();
 
     let vtcv = vtgv - btv * btv;
     let l2_residual = 1.0 - 2.0 * btv + vtgv;
 
-    ConvergenceResult { n, vtgv, btv, vtcv, l2_residual }
+    ConvergenceResult {
+        n,
+        vtgv,
+        btv,
+        vtcv,
+        l2_residual,
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -72,7 +96,9 @@ fn convergence_scan(n: usize, mu: &[i8]) -> ConvergenceResult {
 // ═══════════════════════════════════════════
 
 struct DiagSplitResult {
-    n: usize, diag: f64, offdiag: f64,
+    n: usize,
+    diag: f64,
+    offdiag: f64,
     diag_frac: f64,
 }
 
@@ -80,28 +106,51 @@ fn diag_split(n: usize, mu: &[i8]) -> DiagSplitResult {
     let m = n - 1;
     let log_n = (n as f64).ln();
 
-    let weights: Vec<f64> = (0..=m).map(|k| {
-        if k == 0 { 0.0 } else { gram::bd_weight(mu[k], k as u64, log_n) }
-    }).collect();
+    let weights: Vec<f64> = (0..=m)
+        .map(|k| {
+            if k == 0 {
+                0.0
+            } else {
+                gram::bd_weight(mu[k], k as u64, log_n)
+            }
+        })
+        .collect();
 
-    let diag: f64 = (1..=m).map(|k| {
-        weights[k] * weights[k] * gram::gram_entry(k as u64, k as u64)
-    }).sum();
+    let diag: f64 = (1..=m)
+        .map(|k| weights[k] * weights[k] * gram::gram_entry(k as u64, k as u64))
+        .sum();
 
-    let offdiag: f64 = (1..=m).into_par_iter().map(|j| {
-        let vj = weights[j];
-        if vj == 0.0 { return 0.0; }
-        (1..=m).filter(|&k| k != j).map(|k| {
-            let vk = weights[k];
-            if vk == 0.0 { 0.0 }
-            else { vj * vk * gram::gram_entry(j as u64, k as u64) }
-        }).sum::<f64>()
-    }).sum();
+    let offdiag: f64 = (1..=m)
+        .into_par_iter()
+        .map(|j| {
+            let vj = weights[j];
+            if vj == 0.0 {
+                return 0.0;
+            }
+            (1..=m)
+                .filter(|&k| k != j)
+                .map(|k| {
+                    let vk = weights[k];
+                    if vk == 0.0 {
+                        0.0
+                    } else {
+                        vj * vk * gram::gram_entry(j as u64, k as u64)
+                    }
+                })
+                .sum::<f64>()
+        })
+        .sum();
 
     let total = diag + offdiag;
     DiagSplitResult {
-        n, diag, offdiag,
-        diag_frac: if total.abs() > 1e-15 { diag / total } else { 0.0 },
+        n,
+        diag,
+        offdiag,
+        diag_frac: if total.abs() > 1e-15 {
+            diag / total
+        } else {
+            0.0
+        },
     }
 }
 
@@ -113,7 +162,8 @@ fn main() {
     let t0 = Instant::now();
     let threads = rayon::current_num_threads();
 
-    let max_n: usize = std::env::args().nth(1)
+    let max_n: usize = std::env::args()
+        .nth(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(50000);
 
@@ -132,25 +182,37 @@ fn main() {
     // High N: integral-based computation (fast O(N·pts))
     let mut high_ns: Vec<usize> = Vec::new();
     for &step in &[5000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000] {
-        if step <= max_n { high_ns.push(step); }
+        if step <= max_n {
+            high_ns.push(step);
+        }
     }
-    if max_n > 2000 && !high_ns.contains(&max_n) { high_ns.push(max_n); }
+    if max_n > 2000 && !high_ns.contains(&max_n) {
+        high_ns.push(max_n);
+    }
 
-    let sieve_max = *test_ns.last().unwrap().max(
-        high_ns.last().unwrap_or(&0));
+    let sieve_max = *test_ns.last().unwrap().max(high_ns.last().unwrap_or(&0));
 
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {sieve_max}...{RESET}");
     let mu = sieve::mobius_sieve(sieve_max);
     let mertens = sieve::mertens_values(&mu);
-    eprintln!("  {GREEN}✓{RESET} Sieve complete ({:.3}s)", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  {GREEN}✓{RESET} Sieve complete ({:.3}s)",
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 
     // ═══ §A. CONVERGENCE ═══
     println!("  {BOLD}{WHITE}═══ §A. CONVERGENCE: vᵀGv → 1 ═══{RESET}");
-    println!("  {DIM}     N  │    vᵀGv    │  vᵀGv - 1  │    bᵀv     │  (vᵀGv-1)·L │   vᵀCv    │  ∫(1-f)²{RESET}");
+    println!(
+        "  {DIM}     N  │    vᵀGv    │  vᵀGv - 1  │    bᵀv     │  (vᵀGv-1)·L │   vᵀCv    │  ∫(1-f)²{RESET}"
+    );
 
     let mut tsv_a = fs::File::create("results/convergence.tsv").unwrap();
-    writeln!(tsv_a, "N\tvtGv\tvtGv_minus_1\tbtv\texcess_logN\tvtCv\tl2_residual").unwrap();
+    writeln!(
+        tsv_a,
+        "N\tvtGv\tvtGv_minus_1\tbtv\texcess_logN\tvtCv\tl2_residual"
+    )
+    .unwrap();
     let mut conv_results = Vec::new();
 
     for &n in &test_ns {
@@ -158,11 +220,29 @@ fn main() {
         let r = convergence_scan(n, &mu);
         let log_n = (n as f64).ln();
         let excess_l = (r.vtgv - 1.0) * log_n;
-        println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>11.6} │ {:>9.6} │ {:>8.6} ({:.1}s)",
-            n, r.vtgv, r.vtgv - 1.0, r.btv, excess_l, r.vtcv, r.l2_residual,
-            t.elapsed().as_secs_f64());
-        writeln!(tsv_a, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, r.vtgv, r.vtgv - 1.0, r.btv, excess_l, r.vtcv, r.l2_residual).unwrap();
+        println!(
+            "  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>11.6} │ {:>9.6} │ {:>8.6} ({:.1}s)",
+            n,
+            r.vtgv,
+            r.vtgv - 1.0,
+            r.btv,
+            excess_l,
+            r.vtcv,
+            r.l2_residual,
+            t.elapsed().as_secs_f64()
+        );
+        writeln!(
+            tsv_a,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n,
+            r.vtgv,
+            r.vtgv - 1.0,
+            r.btv,
+            excess_l,
+            r.vtcv,
+            r.l2_residual
+        )
+        .unwrap();
         conv_results.push(r);
     }
     println!();
@@ -178,12 +258,27 @@ fn main() {
         let t = Instant::now();
         let r = diag_split(n, &mu);
         let log_n = (n as f64).ln();
-        println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>7.4} │ {:>7.4} ({:.1}s)",
-            n, r.diag, r.offdiag, r.diag + r.offdiag, r.diag_frac,
-            r.diag * log_n, t.elapsed().as_secs_f64());
-        writeln!(tsv_b, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            n, r.diag, r.offdiag, r.diag + r.offdiag, r.diag_frac,
-            r.diag * log_n).unwrap();
+        println!(
+            "  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>7.4} │ {:>7.4} ({:.1}s)",
+            n,
+            r.diag,
+            r.offdiag,
+            r.diag + r.offdiag,
+            r.diag_frac,
+            r.diag * log_n,
+            t.elapsed().as_secs_f64()
+        );
+        writeln!(
+            tsv_b,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            n,
+            r.diag,
+            r.offdiag,
+            r.diag + r.offdiag,
+            r.diag_frac,
+            r.diag * log_n
+        )
+        .unwrap();
     }
     println!();
 
@@ -202,11 +297,28 @@ fn main() {
         let m_val = mertens[m];
         let m_ratio = (m_val as f64).abs() / (m as f64).powf(0.75);
 
-        println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>9} │ {:>7.4}",
-            n, s1_val, s2_val + 1.0, s3_val + 2.0 * gram::GAMMA, m_val, m_ratio);
-        writeln!(tsv_c, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}\t{:.15e}",
-            n, s1_val, s2_val, s3_val, s2_val + 1.0, s3_val + 2.0 * gram::GAMMA,
-            m_val, m_ratio).unwrap();
+        println!(
+            "  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>9} │ {:>7.4}",
+            n,
+            s1_val,
+            s2_val + 1.0,
+            s3_val + 2.0 * gram::GAMMA,
+            m_val,
+            m_ratio
+        );
+        writeln!(
+            tsv_c,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}\t{:.15e}",
+            n,
+            s1_val,
+            s2_val,
+            s3_val,
+            s2_val + 1.0,
+            s3_val + 2.0 * gram::GAMMA,
+            m_val,
+            m_ratio
+        )
+        .unwrap();
     }
     println!();
 
@@ -215,7 +327,11 @@ fn main() {
     println!("  {DIM}     N  │ (vᵀGv-1)·L │  2(1-bᵀv)·L │ ∫(1-f)²·L │ vᵀCv·L  │ (bᵀv)²-1{RESET}");
 
     let mut tsv_d = fs::File::create("results/bilinear_fit.tsv").unwrap();
-    writeln!(tsv_d, "N\texcess_logN\tdot_excess_logN\tl2_logN\tvtCv_logN\tbtv_sq_minus_1").unwrap();
+    writeln!(
+        tsv_d,
+        "N\texcess_logN\tdot_excess_logN\tl2_logN\tvtCv_logN\tbtv_sq_minus_1"
+    )
+    .unwrap();
 
     for r in &conv_results {
         let log_n = (r.n as f64).ln();
@@ -225,10 +341,16 @@ fn main() {
         let vtcv_l = r.vtcv * log_n;
         let btv_sq_m1 = r.btv * r.btv - 1.0;
 
-        println!("  {:>6} │ {:>11.6} │ {:>12.6} │ {:>9.6} │ {:>8.5} │ {:>9.6}",
-            r.n, excess_l, dot_excess_l, l2_l, vtcv_l, btv_sq_m1);
-        writeln!(tsv_d, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            r.n, excess_l, dot_excess_l, l2_l, vtcv_l, btv_sq_m1).unwrap();
+        println!(
+            "  {:>6} │ {:>11.6} │ {:>12.6} │ {:>9.6} │ {:>8.5} │ {:>9.6}",
+            r.n, excess_l, dot_excess_l, l2_l, vtcv_l, btv_sq_m1
+        );
+        writeln!(
+            tsv_d,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            r.n, excess_l, dot_excess_l, l2_l, vtcv_l, btv_sq_m1
+        )
+        .unwrap();
     }
     println!();
 
@@ -243,9 +365,16 @@ fn main() {
         let btv_sq_m1 = r.btv * r.btv - 1.0;
         let checksum = btv_sq_m1 + r.vtcv;
         let err = (vtgv_m1 - checksum).abs();
-        println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>9.6} │ {:>7.1e} {}",
-            r.n, vtgv_m1, btv_sq_m1, r.vtcv, checksum, err,
-            check(err < 1e-10));
+        println!(
+            "  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>9.6} │ {:>7.1e} {}",
+            r.n,
+            vtgv_m1,
+            btv_sq_m1,
+            r.vtcv,
+            checksum,
+            err,
+            check(err < 1e-10)
+        );
     }
     println!();
 
@@ -257,12 +386,14 @@ fn main() {
 
     for r in &conv_results {
         let log_n = (r.n as f64).ln();
-        println!("  {:>6} │ {:>11.6} │ {:>9.6} │ {:>8.5} │ {:>10.6}",
+        println!(
+            "  {:>6} │ {:>11.6} │ {:>9.6} │ {:>8.5} │ {:>10.6}",
             r.n,
             (r.vtgv - 1.0) * log_n,
             r.l2_residual * log_n,
             r.vtcv * log_n,
-            2.0 * (1.0 - r.btv) * log_n);
+            2.0 * (1.0 - r.btv) * log_n
+        );
     }
     println!();
 
@@ -270,45 +401,82 @@ fn main() {
     if !high_ns.is_empty() {
         println!("  {BOLD}{WHITE}═══ §G. HIGH-N SCAN (integral quadrature, O(N·pts)) ═══{RESET}");
         println!("  {DIM}  Using ∫₀¹ f_N(x)² dx instead of Gram matrix{RESET}");
-        println!("  {DIM}     N  │    vᵀGv    │  vᵀGv - 1  │    bᵀv     │  (vᵀGv-1)·L │  ∫(1-f)²  │  points{RESET}");
+        println!(
+            "  {DIM}     N  │    vᵀGv    │  vᵀGv - 1  │    bᵀv     │  (vᵀGv-1)·L │  ∫(1-f)²  │  points{RESET}"
+        );
 
         let mut tsv_g = fs::File::create("results/high_n.tsv").unwrap();
-        writeln!(tsv_g, "N\tvtGv\tvtGv_minus_1\tbtv\texcess_logN\tl2_residual\tn_pts").unwrap();
+        writeln!(
+            tsv_g,
+            "N\tvtGv\tvtGv_minus_1\tbtv\texcess_logN\tl2_residual\tn_pts"
+        )
+        .unwrap();
 
         for &n in &high_ns {
             let t = Instant::now();
             let weights = gram::precompute_weights(n, &mu);
             // Adaptive points: more for smaller N, fewer for huge N
-            let n_pts = if n <= 10_000 { 200_000 }
-                else if n <= 50_000 { 100_000 }
-                else if n <= 200_000 { 50_000 }
-                else { 20_000 };
+            let n_pts = if n <= 10_000 {
+                200_000
+            } else if n <= 50_000 {
+                100_000
+            } else if n <= 200_000 {
+                50_000
+            } else {
+                20_000
+            };
 
             // Parallel quadrature
             let dx = 1.0 / n_pts as f64;
-            let vtgv: f64 = (0..n_pts).into_par_iter().map(|i| {
-                let x = (i as f64 + 0.5) * dx;
-                let f = gram::f_n_at(x, &weights);
-                f * f * dx
-            }).sum();
+            let vtgv: f64 = (0..n_pts)
+                .into_par_iter()
+                .map(|i| {
+                    let x = (i as f64 + 0.5) * dx;
+                    let f = gram::f_n_at(x, &weights);
+                    f * f * dx
+                })
+                .sum();
 
-            let btv: f64 = (0..n_pts).into_par_iter().map(|i| {
-                let x = (i as f64 + 0.5) * dx;
-                gram::f_n_at(x, &weights) * dx
-            }).sum();
+            let btv: f64 = (0..n_pts)
+                .into_par_iter()
+                .map(|i| {
+                    let x = (i as f64 + 0.5) * dx;
+                    gram::f_n_at(x, &weights) * dx
+                })
+                .sum();
 
             let log_n = (n as f64).ln();
             let excess_l = (vtgv - 1.0) * log_n;
             let l2 = 1.0 - 2.0 * btv + vtgv;
 
-            println!("  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>11.6} │ {:>9.6} │ {:>7} ({:.1}s)",
-                n, vtgv, vtgv - 1.0, btv, excess_l, l2, n_pts,
-                t.elapsed().as_secs_f64());
-            writeln!(tsv_g, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
-                n, vtgv, vtgv - 1.0, btv, excess_l, l2, n_pts).unwrap();
+            println!(
+                "  {:>6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>11.6} │ {:>9.6} │ {:>7} ({:.1}s)",
+                n,
+                vtgv,
+                vtgv - 1.0,
+                btv,
+                excess_l,
+                l2,
+                n_pts,
+                t.elapsed().as_secs_f64()
+            );
+            writeln!(
+                tsv_g,
+                "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
+                n,
+                vtgv,
+                vtgv - 1.0,
+                btv,
+                excess_l,
+                l2,
+                n_pts
+            )
+            .unwrap();
 
             conv_results.push(ConvergenceResult {
-                n, vtgv, btv,
+                n,
+                vtgv,
+                btv,
                 vtcv: vtgv - btv * btv,
                 l2_residual: l2,
             });
@@ -331,22 +499,41 @@ fn main() {
     let mut id2_max_err = 0.0f64;
 
     for &y in &test_ys {
-        if y > sieve_max { break; }
+        if y > sieve_max {
+            break;
+        }
         let id1 = chebyshev::dirichlet_identity_1(y, &mu);
         let id2 = chebyshev::dirichlet_identity_2(y, &mu);
         let psi = chebyshev::chebyshev_psi(y, &primes);
         let err = (id2 + psi).abs();
-        if id1 != 1 { id1_all_pass = false; }
+        if id1 != 1 {
+            id1_all_pass = false;
+        }
         id2_max_err = id2_max_err.max(err);
 
-        println!("  {:>6} │ {:>9} │ {:>11.4} │ {:>11.4} │ {:>7.1e} │ {} {}",
-            y, id1, id2, -psi, err,
-            check(id1 == 1), check(err < 1e-8));
-        writeln!(tsv_h, "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}",
-            y, id1, id2, -psi, err).unwrap();
+        println!(
+            "  {:>6} │ {:>9} │ {:>11.4} │ {:>11.4} │ {:>7.1e} │ {} {}",
+            y,
+            id1,
+            id2,
+            -psi,
+            err,
+            check(id1 == 1),
+            check(err < 1e-8)
+        );
+        writeln!(
+            tsv_h,
+            "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}",
+            y, id1, id2, -psi, err
+        )
+        .unwrap();
     }
-    println!("  {DIM}  Identity 1: {} (all = 1)   Identity 2: max error = {:.1e} {}{RESET}",
-        check(id1_all_pass), id2_max_err, check(id2_max_err < 1e-6));
+    println!(
+        "  {DIM}  Identity 1: {} (all = 1)   Identity 2: max error = {:.1e} {}{RESET}",
+        check(id1_all_pass),
+        id2_max_err,
+        check(id2_max_err < 1e-6)
+    );
     println!();
 
     // ═══ §I. GEMINI'S ALGEBRAIC MIRACLE ═══
@@ -358,14 +545,18 @@ fn main() {
     writeln!(tsv_i, "N\tE_N\ty\tresid_actual\tresid_gemini\terror").unwrap();
 
     for &n in &[100usize, 500, 1000, 2000] {
-        if n > sieve_max { break; }
+        if n > sieve_max {
+            break;
+        }
         let log_n = (n as f64).ln();
         let weights = gram::precompute_weights(n, &mu);
         let e_n = chebyshev::compute_e_n(&mu, n);
 
         // Test at several y values
         for &y in &[2.0, 5.0, 10.0, 50.0, 100.0, (n as f64 / 2.0).floor()] {
-            if y < 1.0 || y >= n as f64 { continue; }
+            if y < 1.0 || y >= n as f64 {
+                continue;
+            }
             let yi = y as usize;
 
             // Actual: 1 - f_N(1/y)
@@ -378,30 +569,52 @@ fn main() {
             let resid_gemini = chebyshev::residual_gemini(y, e_n, psi_y, log_n);
 
             let err = (resid_actual - resid_gemini).abs();
-            println!("  {:>6} │ {:>10.6} │ {:>7.0} │ {:>11.6} │ {:>11.6} │ {:>7.1e} {}",
-                n, e_n, y, resid_actual, resid_gemini, err, check(err < 0.01));
-            writeln!(tsv_i, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-                n, e_n, y, resid_actual, resid_gemini, err).unwrap();
+            println!(
+                "  {:>6} │ {:>10.6} │ {:>7.0} │ {:>11.6} │ {:>11.6} │ {:>7.1e} {}",
+                n,
+                e_n,
+                y,
+                resid_actual,
+                resid_gemini,
+                err,
+                check(err < 0.01)
+            );
+            writeln!(
+                tsv_i,
+                "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+                n, e_n, y, resid_actual, resid_gemini, err
+            )
+            .unwrap();
         }
     }
     println!();
 
     // ═══ CERTIFICATE ═══
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}GRAM FORM IDENTITY EXPLORER — FINDINGS{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  Threads: {YELLOW}{threads}{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // Check: vᵀGv < 1 for all N (it IS < 1 since weights are small)
     let all_lt1 = conv_results.iter().all(|r| r.vtgv < 1.0);
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. Convergence{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {} vᵀGv < 1 for ALL tested N (bound is LOOSE)", check(all_lt1));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} vᵀGv < 1 for ALL tested N (bound is LOOSE)",
+        check(all_lt1)
+    );
 
     if let Some(last) = conv_results.last() {
         let log_n = (last.n as f64).ln();
-        println!("  {BOLD}{CYAN}║{RESET}    (vᵀGv-1)·logN → {MAGENTA}{:.4}{RESET} (at N={})",
-            (last.vtgv - 1.0) * log_n, last.n);
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    (vᵀGv-1)·logN → {MAGENTA}{:.4}{RESET} (at N={})",
+            (last.vtgv - 1.0) * log_n,
+            last.n
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
 
@@ -409,7 +622,9 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§E. Identity{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {GREEN}vᵀGv - 1 = (bᵀv)² - 1 + vᵀCv{RESET}  [VERIFIED]");
     println!("  {BOLD}{CYAN}║{RESET}    {DIM}= (bᵀv-1)(bᵀv+1) + vᵀCv{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {DIM}Both terms are O(1/logN), hence vᵀGv - 1 = O(1/logN){RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {DIM}Both terms are O(1/logN), hence vᵀGv - 1 = O(1/logN){RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // Key insight
@@ -418,9 +633,13 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}         ≤ (1 + C_dot/logN)² + C_cov/logN");
     println!("  {BOLD}{CYAN}║{RESET}         = 1 + 2C_dot/logN + C_dot²/log²N + C_cov/logN");
     println!("  {BOLD}{CYAN}║{RESET}         ≤ 1 + (2C_dot + C_cov + 1)/logN");
-    println!("  {BOLD}{CYAN}║{RESET}    {YELLOW}→ REQUIRES proving vᵀCv ≤ C_cov/logN independently{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {YELLOW}→ REQUIRES proving vᵀCv ≤ C_cov/logN independently{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // JSON certificate
     let cert = format!(r#"{{
@@ -446,8 +665,13 @@ fn main() {
     fs::write("results/certificate.json", &cert).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads)", t0.elapsed().as_secs_f64());
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{convergence,diag_split,s_sums,bilinear_fit}}.tsv");
+    println!(
+        "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads)",
+        t0.elapsed().as_secs_f64()
+    );
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{convergence,diag_split,s_sums,bilinear_fit}}.tsv"
+    );
     println!("  {BOLD}{WHITE}Certificate:{RESET} results/certificate.json");
     println!();
 }

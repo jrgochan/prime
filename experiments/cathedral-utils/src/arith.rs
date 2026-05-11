@@ -29,7 +29,11 @@ pub fn frac_part(x: f64) -> f64 {
 /// For table-based computation, use [`liouville_table`] instead.
 #[inline]
 pub fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+    if big_omega(n) % 2 == 0 {
+        1.0
+    } else {
+        -1.0
+    }
 }
 
 /// Least common multiple.
@@ -260,13 +264,17 @@ pub const EULER_GAMMA: f64 = 0.5772156649015328606;
 
 /// Sum-of-divisors σ₁(n) for a single n.
 pub fn sigma1(n: usize) -> usize {
-    if n <= 1 { return n; }
+    if n <= 1 {
+        return n;
+    }
     let mut s = 0usize;
     let mut d = 1;
     while d * d <= n {
         if n % d == 0 {
             s += d;
-            if d != n / d { s += n / d; }
+            if d != n / d {
+                s += n / d;
+            }
         }
         d += 1;
     }
@@ -291,12 +299,32 @@ pub fn sigma1_table(max_n: usize) -> Vec<usize> {
 ///   ch=2: (1,-1,1,-1) — Kronecker symbol (2/·)
 ///   ch=3: (1,1,-1,-1) — Kronecker symbol (-1/·)
 pub fn chi8(ch: usize, n: usize) -> i64 {
-    if n % 2 == 0 { return 0; }
+    if n % 2 == 0 {
+        return 0;
+    }
     match ch {
         0 => 1,
-        1 => match n % 8 { 1 => 1, 3 => -1, 5 => -1, 7 => 1, _ => 0 },
-        2 => match n % 8 { 1 => 1, 3 => -1, 5 => 1, 7 => -1, _ => 0 },
-        3 => match n % 8 { 1 => 1, 3 => 1, 5 => -1, 7 => -1, _ => 0 },
+        1 => match n % 8 {
+            1 => 1,
+            3 => -1,
+            5 => -1,
+            7 => 1,
+            _ => 0,
+        },
+        2 => match n % 8 {
+            1 => 1,
+            3 => -1,
+            5 => 1,
+            7 => -1,
+            _ => 0,
+        },
+        3 => match n % 8 {
+            1 => 1,
+            3 => 1,
+            5 => -1,
+            7 => -1,
+            _ => 0,
+        },
         _ => 0,
     }
 }
@@ -306,9 +334,9 @@ pub fn chi8(ch: usize, n: usize) -> i64 {
 pub fn mobius_weights(n: usize) -> Vec<f64> {
     let mu = mobius_table(n);
     let ln_n = (n as f64).ln();
-    (2..=n).map(|k| {
-        -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n)
-    }).collect()
+    (2..=n)
+        .map(|k| -(mu[k] as f64) * (1.0 - (k as f64).ln() / ln_n))
+        .collect()
 }
 
 /// Kahan compensated summation accumulator.
@@ -320,14 +348,18 @@ pub struct Kahan {
 }
 
 impl Kahan {
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
     pub fn add(&mut self, val: f64) {
         let y = val - self.comp;
         let t = self.sum + y;
         self.comp = (t - self.sum) - y;
         self.sum = t;
     }
-    pub fn value(&self) -> f64 { self.sum }
+    pub fn value(&self) -> f64 {
+        self.sum
+    }
 }
 
 /// Nyman-Beurling b-vector (analytic formula).
@@ -431,20 +463,20 @@ mod tests {
         let mu = mobius_table(10);
         assert_eq!(mu[1], 1);
         assert_eq!(mu[2], -1); // prime
-        assert_eq!(mu[4], 0);  // 2²
-        assert_eq!(mu[6], 1);  // 2·3 (2 distinct primes)
-        assert_eq!(mu[8], 0);  // 2³
+        assert_eq!(mu[4], 0); // 2²
+        assert_eq!(mu[6], 1); // 2·3 (2 distinct primes)
+        assert_eq!(mu[8], 0); // 2³
         assert_eq!(mu[10], 1); // 2·5
     }
 
     #[test]
     fn test_liouville() {
         let lv = liouville_table(10);
-        assert_eq!(lv[1], 1);   // Ω=0
-        assert_eq!(lv[2], -1);  // Ω=1
-        assert_eq!(lv[4], 1);   // Ω=2
-        assert_eq!(lv[6], 1);   // Ω=2
-        assert_eq!(lv[8], -1);  // Ω=3
+        assert_eq!(lv[1], 1); // Ω=0
+        assert_eq!(lv[2], -1); // Ω=1
+        assert_eq!(lv[4], 1); // Ω=2
+        assert_eq!(lv[6], 1); // Ω=2
+        assert_eq!(lv[8], -1); // Ω=3
     }
 
     #[test]
@@ -474,7 +506,7 @@ mod tests {
         let phi = euler_totient(12);
         assert_eq!(phi[1], 1);
         assert_eq!(phi[2], 1);
-        assert_eq!(phi[6], 2);  // {1, 5}
+        assert_eq!(phi[6], 2); // {1, 5}
         assert_eq!(phi[12], 4); // {1, 5, 7, 11}
     }
 }

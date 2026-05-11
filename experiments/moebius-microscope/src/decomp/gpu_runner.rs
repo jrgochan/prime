@@ -11,18 +11,18 @@
 //! ~15 minutes (CPU @ N=55K) to ~2 seconds (GPU).
 
 use cathedral_utils::arith::{self, Kahan};
-use cathedral_utils::mertens;
 use cathedral_utils::gpu;
 use cathedral_utils::gpu::bilinear::BilinearEngine;
-use cathedral_utils::hpdf::{HpdfReader, MicroscopeResult, stamp_microscope};
+use cathedral_utils::hpdf::{stamp_microscope, HpdfReader, MicroscopeResult};
+use cathedral_utils::mertens;
 use rayon::prelude::*;
 use std::time::Instant;
 
-use super::state::Decomp;
 use super::classify::classify_term;
-use super::row::{RowResult, merge_results};
 use super::gram::{finalize_gram_metrics, print_gram_summary};
-use super::taper::{print_taper_summary, finalize_taper_metrics_with_matrix};
+use super::row::{merge_results, RowResult};
+use super::state::Decomp;
+use super::taper::{finalize_taper_metrics_with_matrix, print_taper_summary};
 
 /// Run the microscope using GPU acceleration.
 ///
@@ -37,20 +37,23 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
     let t0 = Instant::now();
 
     // ═══ GPU DETECTION ═══
-    let gpu_info = gpu::detect()
-        .ok_or_else(|| "No CUDA GPU detected. Rebuild with --features gpu on a CUDA system.".to_string())?;
+    let gpu_info = gpu::detect().ok_or_else(|| {
+        "No CUDA GPU detected. Rebuild with --features gpu on a CUDA system.".to_string()
+    })?;
     eprintln!("  🎮 GPU: {} ({} MB VRAM)", gpu_info.name, gpu_info.vram_mb);
 
     // ═══ HPDF LOAD + k=1 AUGMENTATION + GPU UPLOAD ═══
     let (n, dim, decomp) = {
         let reader = HpdfReader::open(path).map_err(|e| format!("HPDF open: {e}"))?;
-        let hpdf_dim = reader.dim();  // N-1 (k=2..N stored in file)
+        let hpdf_dim = reader.dim(); // N-1 (k=2..N stored in file)
         let n = reader.max_n();
-        let dim = n;  // Lean-aligned: k=1..N
+        let dim = n; // Lean-aligned: k=1..N
         let has_dd = reader.has_dd();
         let prec_label = if has_dd { "DD (~31 digits)" } else { "f64" };
 
-        eprintln!("\n═══ MÖBIUS MICROSCOPE N={n} (dim={dim}) [GPU + HPDF {prec_label}, k=1..N] ═══");
+        eprintln!(
+            "\n═══ MÖBIUS MICROSCOPE N={n} (dim={dim}) [GPU + HPDF {prec_label}, k=1..N] ═══"
+        );
         eprintln!("  File: {}", path.display());
 
         // Check VRAM fit (augmented N×N matrix)
@@ -61,10 +64,13 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
                 gpu_info.vram_mb
             ));
         }
-        eprintln!("  Matrix: {dim}×{dim} = {matrix_mb} MB (fits in {} MB VRAM)", gpu_info.vram_mb);
+        eprintln!(
+            "  Matrix: {dim}×{dim} = {matrix_mb} MB (fits in {} MB VRAM)",
+            gpu_info.vram_mb
+        );
 
         let mu = arith::mobius_table(n);
-        let weights = mertens::witness_vector_full(n, &mu);  // k=1..N
+        let weights = mertens::witness_vector_full(n, &mu); // k=1..N
         let liouville = arith::liouville_table(n);
         let omega_tbl = arith::small_omega_table(n);
 
@@ -79,11 +85,16 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
 
         // ═══ LOAD HPDF (N-1)×(N-1) + AUGMENT to N×N ═══
         eprintln!("  Loading HPDF matrix ({hpdf_dim}×{hpdf_dim}) from file...");
-        let gram_upper = reader.read_gram_full()
+        let gram_upper = reader
+            .read_gram_full()
             .map_err(|e| format!("read_gram_full: {e}"))?;
         let t_load = t0.elapsed().as_secs_f64();
-        eprintln!("  ✓ HPDF load: {:.1}s ({} entries, {:.1} MB)",
-            t_load, gram_upper.len(), gram_upper.len() as f64 * 8.0 / 1e6);
+        eprintln!(
+            "  ✓ HPDF load: {:.1}s ({} entries, {:.1} MB)",
+            t_load,
+            gram_upper.len(),
+            gram_upper.len() as f64 * 8.0 / 1e6
+        );
 
         // Compute k=1 augmentation row on-the-fly
         eprintln!("  Computing k=1 augmentation row ({dim} entries)...");
@@ -101,8 +112,8 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
         let mut gram_full = vec![0.0f64; dim * dim];
         // Fill k=1 row and column (row 0 and col 0)
         for k_idx in 0..dim {
-            gram_full[0 * dim + k_idx] = k1_row[k_idx];  // row 0
-            gram_full[k_idx * dim + 0] = k1_row[k_idx];  // col 0
+            gram_full[0 * dim + k_idx] = k1_row[k_idx]; // row 0
+            gram_full[k_idx * dim + 0] = k1_row[k_idx]; // col 0
         }
         // Fill the (N-1)×(N-1) HPDF block into positions [1..N-1, 1..N-1]
         for i in 0..hpdf_dim {
@@ -114,7 +125,10 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
             }
         }
         let t_expand = t0.elapsed().as_secs_f64();
-        eprintln!("  ✓ Dense expand + k=1 augmentation: {:.1}s", t_expand - t_load);
+        eprintln!(
+            "  ✓ Dense expand + k=1 augmentation: {:.1}s",
+            t_expand - t_load
+        );
 
         // ═══ GPU UPLOAD + BILINEAR FORMS ═══
         eprintln!("  Uploading Gram matrix to GPU...");
@@ -130,7 +144,7 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
         // just O(dim × n_active) classification which is fast.
         eprintln!("  Running CPU row classification (GCD/Vaughan/ω-class)...");
         let active_rows: Vec<(usize, usize, f64)> = (0..dim)
-            .map(|j_idx| (j_idx, j_idx + 1, weights[j_idx]))  // k=1..N (Lean-aligned)
+            .map(|j_idx| (j_idx, j_idx + 1, weights[j_idx])) // k=1..N (Lean-aligned)
             .filter(|(_, _, w)| w.abs() > 1e-30)
             .collect();
         let n_active = active_rows.len();
@@ -146,9 +160,11 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
                 let ln_j = (j as f64).ln();
 
                 for k_idx in 0..dim {
-                    let k = k_idx + 1;  // k=1..N (Lean-aligned)
+                    let k = k_idx + 1; // k=1..N (Lean-aligned)
                     let v_k = weights[k_idx];
-                    if v_k.abs() < 1e-30 { continue; }
+                    if v_k.abs() < 1e-30 {
+                        continue;
+                    }
 
                     let g_jk = gram_full[j_idx * dim + k_idx];
                     let term = v_j * g_jk * v_k;
@@ -156,10 +172,21 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
                     let ln_k = (k as f64).ln();
 
                     classify_term(
-                        &mut r, j, k, term,
-                        mu_j, mu_k, ln_j, ln_k,
-                        &liouville, &omega_tbl, n13, n23,
-                        decomp.max_gcd, decomp.max_omega, decomp.max_band,
+                        &mut r,
+                        j,
+                        k,
+                        term,
+                        mu_j,
+                        mu_k,
+                        ln_j,
+                        ln_k,
+                        &liouville,
+                        &omega_tbl,
+                        n13,
+                        n23,
+                        decomp.max_gcd,
+                        decomp.max_omega,
+                        decomp.max_band,
                     );
 
                     if mu_j.abs() > 0.5 && mu_k.abs() > 0.5 {
@@ -186,10 +213,8 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
             })
             .collect();
 
-
-        let active_for_merge: Vec<(usize, f64)> = active_rows.iter()
-            .map(|&(_, j, v)| (j, v))
-            .collect();
+        let active_for_merge: Vec<(usize, f64)> =
+            active_rows.iter().map(|&(_, j, v)| (j, v)).collect();
         merge_results(&mut decomp, &row_results, &active_for_merge);
 
         // Finalize gram metrics (from CPU row classification)
@@ -237,8 +262,11 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
 
         let elapsed = t0.elapsed().as_secs_f64();
         eprintln!("\r  ✓ Done in {elapsed:.1}s ({n_active} active × {dim} cols, GPU+HPDF)                      ");
-        eprintln!("    GPU bilinear: {:.3}s | CPU classify: {:.1}s",
-            taper_result.gpu_secs, elapsed - taper_result.gpu_secs);
+        eprintln!(
+            "    GPU bilinear: {:.3}s | CPU classify: {:.1}s",
+            taper_result.gpu_secs,
+            elapsed - taper_result.gpu_secs
+        );
         // Compute per-GCD taper strata using in-memory matrix (O(active²) lookups, ~10s)
         finalize_taper_metrics_with_matrix(&mut decomp, Some(&gram_full));
         print_gram_summary(&decomp);
@@ -251,7 +279,7 @@ pub fn run_microscope_gpu(path: &std::path::Path) -> Result<Decomp, String> {
     let elapsed = t0.elapsed().as_secs_f64();
     let ln_n = (n as f64).ln();
     let t = &decomp.taper;
-    let recon = t.u_sum.value() - 2.0/ln_n * t.l_sum.value() + t.q_sum.value()/(ln_n*ln_n);
+    let recon = t.u_sum.value() - 2.0 / ln_n * t.l_sum.value() + t.q_sum.value() / (ln_n * ln_n);
     let result = MicroscopeResult {
         n,
         precision: format!("GPU+DD"),

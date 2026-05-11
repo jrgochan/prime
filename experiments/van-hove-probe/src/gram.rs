@@ -32,19 +32,19 @@ pub fn build_gram_matrix_mpfr(n: usize) -> Vec<Float> {
     let entries: Vec<((usize, usize), Float)> = (0..dim)
         .into_par_iter()
         .flat_map(|row| {
-            (row..dim).map(move |col| {
-                let j = row + 2;
-                let k = col + 2;
-                let val = gram_entry(j, k);
-                ((row, col), val)
-            }).collect::<Vec<_>>()
+            (row..dim)
+                .map(move |col| {
+                    let j = row + 2;
+                    let k = col + 2;
+                    let val = gram_entry(j, k);
+                    ((row, col), val)
+                })
+                .collect::<Vec<_>>()
         })
         .collect();
 
     // Assemble symmetric matrix (row-major, MPFR)
-    let mut mat: Vec<Float> = (0..dim * dim)
-        .map(|_| Float::with_val(PREC, 0.0))
-        .collect();
+    let mut mat: Vec<Float> = (0..dim * dim).map(|_| Float::with_val(PREC, 0.0)).collect();
 
     for ((r, c), v) in entries {
         mat[c * dim + r] = v.clone();
@@ -84,7 +84,9 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
             }
         }
 
-        if max_off < tol { break; }
+        if max_off < tol {
+            break;
+        }
 
         // Compute Jacobi rotation angle
         let app = a[p * dim + p].clone();
@@ -117,10 +119,10 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
 
         for i in 0..dim {
             if i != p && i != q {
-                let new_ip = Float::with_val(PREC, &c * &old_ip[i]) +
-                             Float::with_val(PREC, &s * &old_iq[i]);
-                let new_iq = Float::with_val(PREC, &c * &old_iq[i]) -
-                             Float::with_val(PREC, &s * &old_ip[i]);
+                let new_ip =
+                    Float::with_val(PREC, &c * &old_ip[i]) + Float::with_val(PREC, &s * &old_iq[i]);
+                let new_iq =
+                    Float::with_val(PREC, &c * &old_iq[i]) - Float::with_val(PREC, &s * &old_ip[i]);
                 a[i * dim + p] = new_ip.clone();
                 a[p * dim + i] = new_ip;
                 a[i * dim + q] = new_iq.clone();
@@ -133,8 +135,10 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
         let s2 = Float::with_val(PREC, &s * &s);
         let cs2 = Float::with_val(PREC, 2.0) * &c * &s * &apq;
 
-        a[p * dim + p] = Float::with_val(PREC, &c2 * &app) + &cs2 + Float::with_val(PREC, &s2 * &aqq);
-        a[q * dim + q] = Float::with_val(PREC, &s2 * &app) - &cs2 + Float::with_val(PREC, &c2 * &aqq);
+        a[p * dim + p] =
+            Float::with_val(PREC, &c2 * &app) + &cs2 + Float::with_val(PREC, &s2 * &aqq);
+        a[q * dim + q] =
+            Float::with_val(PREC, &s2 * &app) - &cs2 + Float::with_val(PREC, &c2 * &aqq);
         a[p * dim + q] = Float::with_val(PREC, 0.0);
         a[q * dim + p] = Float::with_val(PREC, 0.0);
     }

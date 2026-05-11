@@ -33,22 +33,22 @@
 //!    cargo run --release -- --max-b 30 -M 50000   # Custom: all pairs b≤30, M=50k
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod compute;
-mod formula;
-mod analysis;
-mod delta_formula;
 mod actual_eval;
-mod gram_crossref;
+mod analysis;
+mod axiom_graduation;
 mod class_eval;
+mod compute;
+mod delta_formula;
+mod formula;
+mod gram_crossref;
 mod honest_algebra;
 mod rosetta_stone;
-mod axiom_graduation;
 
-use std::time::Instant;
-use rayon::prelude::*;
-use cathedral_utils::fmt;
 use cathedral_utils::certificate;
 use cathedral_utils::coprime;
+use cathedral_utils::fmt;
+use rayon::prelude::*;
+use std::time::Instant;
 
 /// MPFR precision in bits.
 pub const PREC: u32 = 1024;
@@ -57,7 +57,12 @@ pub const PREC: u32 = 1024;
 pub const DEFAULT_MAX_M: usize = 250_000;
 
 /// Parse CLI arguments and return (pairs, max_m).
-fn parse_args() -> (Vec<coprime::CoprimePair>, usize, Option<usize>, Option<usize>) {
+fn parse_args() -> (
+    Vec<coprime::CoprimePair>,
+    usize,
+    Option<usize>,
+    Option<usize>,
+) {
     let args: Vec<String> = std::env::args().collect();
     let mut max_m = DEFAULT_MAX_M;
     let mut pair_set = "standard".to_string();
@@ -70,7 +75,9 @@ fn parse_args() -> (Vec<coprime::CoprimePair>, usize, Option<usize>, Option<usiz
         match args[i].as_str() {
             "--pairs" | "-p" => {
                 i += 1;
-                if i < args.len() { pair_set = args[i].clone(); }
+                if i < args.len() {
+                    pair_set = args[i].clone();
+                }
             }
             "--max-m" | "-M" => {
                 i += 1;
@@ -102,11 +109,17 @@ fn parse_args() -> (Vec<coprime::CoprimePair>, usize, Option<usize>, Option<usiz
                 println!("Usage: two-tile-decomposition [OPTIONS]");
                 println!();
                 println!("Options:");
-                println!("  --pairs, -p <SET>   Pair dataset: standard|extended|large|stress (default: standard)");
+                println!(
+                    "  --pairs, -p <SET>   Pair dataset: standard|extended|large|stress (default: standard)"
+                );
                 println!("  --max-b, -B <N>     Generate all coprime pairs with b ≤ N");
                 println!("  --max-m, -M <N>     Max row index (default: 250000)");
-                println!("  --crossref, -X <N>  Cross-reference FTC vs gram_entry_mpfr for j,k ≤ N");
-                println!("  --rosetta, -R <N>   Rosetta Stone bridge: gramEntry ↔ gramIntegral for j,k ≤ N");
+                println!(
+                    "  --crossref, -X <N>  Cross-reference FTC vs gram_entry_mpfr for j,k ≤ N"
+                );
+                println!(
+                    "  --rosetta, -R <N>   Rosetta Stone bridge: gramEntry ↔ gramIntegral for j,k ≤ N"
+                );
                 println!("  --help, -h          Show this help");
                 println!();
                 println!("Datasets:");
@@ -170,9 +183,17 @@ fn main() {
     fmt::section("FOUR-WAY DECOMPOSITION");
     println!();
 
-    println!("  {:>5} {:>5}  {:>22}  {:>22}  {:>22}  {:>14}  {:>14}  {:>14}",
-        "(a", "b)", "gramIntegral", "gramFormula", "strip+rowTerm+Δ",
-        "|GI - GF|", "|GI - decomp|", "Σ'Δ");
+    println!(
+        "  {:>5} {:>5}  {:>22}  {:>22}  {:>22}  {:>14}  {:>14}  {:>14}",
+        "(a",
+        "b)",
+        "gramIntegral",
+        "gramFormula",
+        "strip+rowTerm+Δ",
+        "|GI - GF|",
+        "|GI - decomp|",
+        "Σ'Δ"
+    );
     println!("  {}", "─".repeat(140));
 
     let n_pairs = pairs.len();
@@ -210,7 +231,9 @@ fn main() {
             sum_actual += actual;
             sum_rowterm += rt;
             sum_delta += delta;
-            if *is_two_tile { n_two_tile += 1; }
+            if *is_two_tile {
+                n_two_tile += 1;
+            }
         }
 
         // §3: gramIntegral = strip + sum_actual
@@ -226,30 +249,45 @@ fn main() {
         let gram_formula = formula::vasyunin_gram_formula(a, b);
 
         // §6: Decomposition check
-        let decomp = rug::Float::with_val(PREC,
-            rug::Float::with_val(PREC,
-                rug::Float::with_val(PREC, &strip + &stir_over_b) + &ft_over_a
-            ) + &sum_delta
+        let decomp = rug::Float::with_val(
+            PREC,
+            rug::Float::with_val(
+                PREC,
+                rug::Float::with_val(PREC, &strip + &stir_over_b) + &ft_over_a,
+            ) + &sum_delta,
         );
 
         // Errors
-        let err_gi_gf = rug::Float::with_val(PREC,
-            rug::Float::with_val(PREC, &gram_integral - &gram_formula).abs());
-        let err_gi_decomp = rug::Float::with_val(PREC,
-            rug::Float::with_val(PREC, &gram_integral - &decomp).abs());
+        let err_gi_gf = rug::Float::with_val(
+            PREC,
+            rug::Float::with_val(PREC, &gram_integral - &gram_formula).abs(),
+        );
+        let err_gi_decomp = rug::Float::with_val(
+            PREC,
+            rug::Float::with_val(PREC, &gram_integral - &decomp).abs(),
+        );
 
         let elapsed_ms = t.elapsed().as_secs_f64() * 1000.0;
 
-        println!("  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>22.15}  {:>14.4e}  {:>14.4e}  {:>14.10}  ({:.0}ms, {} 2-tile)  [{}/{}]",
-            a, b,
-            gram_integral.to_f64(), gram_formula.to_f64(), decomp.to_f64(),
-            err_gi_gf.to_f64(), err_gi_decomp.to_f64(),
+        println!(
+            "  ({:>2},{:>2})  {:>22.15}  {:>22.15}  {:>22.15}  {:>14.4e}  {:>14.4e}  {:>14.10}  ({:.0}ms, {} 2-tile)  [{}/{}]",
+            a,
+            b,
+            gram_integral.to_f64(),
+            gram_formula.to_f64(),
+            decomp.to_f64(),
+            err_gi_gf.to_f64(),
+            err_gi_decomp.to_f64(),
             sum_delta.to_f64(),
-            elapsed_ms, n_two_tile,
-            idx + 1, n_pairs);
+            elapsed_ms,
+            n_two_tile,
+            idx + 1,
+            n_pairs
+        );
 
         results.push(analysis::PairResult {
-            a, b,
+            a,
+            b,
             gram_integral: gram_integral.to_f64(),
             gram_formula: gram_formula.to_f64(),
             strip: strip.to_f64(),
@@ -281,7 +319,12 @@ fn main() {
     if results.len() <= 50 {
         analysis::print_sigma_delta_exact(&results);
     } else {
-        println!("  {}Skipping Σ'Δ detail ({}+ pairs — see TSV output){}", fmt::DIM, results.len(), fmt::RESET);
+        println!(
+            "  {}Skipping Σ'Δ detail ({}+ pairs — see TSV output){}",
+            fmt::DIM,
+            results.len(),
+            fmt::RESET
+        );
         println!();
     }
 
@@ -301,17 +344,34 @@ fn main() {
         delta_formula::print_certification(&cert_results);
 
         // Write delta certification TSV
-        let delta_headers = &["a", "b", "max_pointwise_err", "total_exact",
-            "total_numerical", "formula_err", "n_classes"];
-        let delta_rows: Vec<Vec<String>> = cert_results.iter().map(|r| vec![
-            r.a.to_string(), r.b.to_string(),
-            format!("{:.6e}", r.max_pointwise_error),
-            format!("{:.15e}", r.total_delta_exact),
-            format!("{:.15e}", r.total_delta_numerical),
-            format!("{:.6e}", r.formula_vs_numerical_error),
-            r.residue_classes.len().to_string(),
-        ]).collect();
-        certificate::write_tsv("results/delta_certification.tsv", delta_headers, &delta_rows);
+        let delta_headers = &[
+            "a",
+            "b",
+            "max_pointwise_err",
+            "total_exact",
+            "total_numerical",
+            "formula_err",
+            "n_classes",
+        ];
+        let delta_rows: Vec<Vec<String>> = cert_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.a.to_string(),
+                    r.b.to_string(),
+                    format!("{:.6e}", r.max_pointwise_error),
+                    format!("{:.15e}", r.total_delta_exact),
+                    format!("{:.15e}", r.total_delta_numerical),
+                    format!("{:.6e}", r.formula_vs_numerical_error),
+                    r.residue_classes.len().to_string(),
+                ]
+            })
+            .collect();
+        certificate::write_tsv(
+            "results/delta_certification.tsv",
+            delta_headers,
+            &delta_rows,
+        );
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -330,22 +390,39 @@ fn main() {
         actual_eval::print_certification(&eval_results);
 
         // Write algebraic identity TSV
-        let eval_headers = &["a", "b", "strip", "stirling_b", "ft_a",
-            "tsum_delta", "formula", "lhs", "identity_err",
-            "gap_algebraic", "gap_numerical", "gap_match"];
-        let eval_rows: Vec<Vec<String>> = eval_results.iter().map(|r| vec![
-            r.a.to_string(), r.b.to_string(),
-            format!("{:.15e}", r.strip),
-            format!("{:.15e}", r.stirling_over_b),
-            format!("{:.15e}", r.fract_target_over_a),
-            format!("{:.15e}", r.tsum_delta),
-            format!("{:.15e}", r.formula),
-            format!("{:.15e}", r.lhs),
-            format!("{:.6e}", r.identity_error),
-            format!("{:.15e}", r.gap_algebraic),
-            format!("{:.15e}", r.gap_numerical),
-            format!("{:.6e}", r.gap_match),
-        ]).collect();
+        let eval_headers = &[
+            "a",
+            "b",
+            "strip",
+            "stirling_b",
+            "ft_a",
+            "tsum_delta",
+            "formula",
+            "lhs",
+            "identity_err",
+            "gap_algebraic",
+            "gap_numerical",
+            "gap_match",
+        ];
+        let eval_rows: Vec<Vec<String>> = eval_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.a.to_string(),
+                    r.b.to_string(),
+                    format!("{:.15e}", r.strip),
+                    format!("{:.15e}", r.stirling_over_b),
+                    format!("{:.15e}", r.fract_target_over_a),
+                    format!("{:.15e}", r.tsum_delta),
+                    format!("{:.15e}", r.formula),
+                    format!("{:.15e}", r.lhs),
+                    format!("{:.6e}", r.identity_error),
+                    format!("{:.15e}", r.gap_algebraic),
+                    format!("{:.15e}", r.gap_numerical),
+                    format!("{:.6e}", r.gap_match),
+                ]
+            })
+            .collect();
         certificate::write_tsv("results/algebraic_identity.tsv", eval_headers, &eval_rows);
     }
 
@@ -353,9 +430,7 @@ fn main() {
     // §4. WRITE RESULTS
     // ═══════════════════════════════════════════════════════════════
 
-    let json_results: Vec<serde_json::Value> = results.iter()
-        .map(|r| r.to_json(max_m))
-        .collect();
+    let json_results: Vec<serde_json::Value> = results.iter().map(|r| r.to_json(max_m)).collect();
 
     let summary = serde_json::json!({
         "experiment": "Two-Tile Decomposition Validator v2",
@@ -371,23 +446,47 @@ fn main() {
     certificate::write_json("results/summary.json", &summary);
 
     // TSV output
-    let headers = &["a", "b", "gram_integral", "gram_formula", "strip",
-        "sum_actual", "sum_rowterm", "sum_delta", "stirling_over_b",
-        "fract_target_over_a", "err_vs_formula", "err_vs_decomp",
-        "n_two_tile", "time_ms"];
+    let headers = &[
+        "a",
+        "b",
+        "gram_integral",
+        "gram_formula",
+        "strip",
+        "sum_actual",
+        "sum_rowterm",
+        "sum_delta",
+        "stirling_over_b",
+        "fract_target_over_a",
+        "err_vs_formula",
+        "err_vs_decomp",
+        "n_two_tile",
+        "time_ms",
+    ];
     let rows: Vec<Vec<String>> = results.iter().map(|r| r.to_tsv_row()).collect();
     certificate::write_tsv("results/decomposition.tsv", headers, &rows);
 
     // Tail analysis TSV
-    let tail_headers = &["a", "b", "sd_numeric", "sd_exact", "tail_error",
-        "tail_predicted", "ratio"];
+    let tail_headers = &[
+        "a",
+        "b",
+        "sd_numeric",
+        "sd_exact",
+        "tail_error",
+        "tail_predicted",
+        "ratio",
+    ];
     let tail_rows: Vec<Vec<String>> = analysis::tail_convergence_rows(&results, max_m);
     certificate::write_tsv("results/tail_analysis.tsv", tail_headers, &tail_rows);
 
     println!();
     fmt::section("SUMMARY");
     println!();
-    println!("  {}Total time: {:.1}s{}", fmt::BOLD, t0.elapsed().as_secs_f64(), fmt::RESET);
+    println!(
+        "  {}Total time: {:.1}s{}",
+        fmt::BOLD,
+        t0.elapsed().as_secs_f64(),
+        fmt::RESET
+    );
     println!("  {}Pairs: {}{}", fmt::DIM, results.len(), fmt::RESET);
     println!("  {}Threads: {}{}", fmt::DIM, n_threads, fmt::RESET);
     println!("  {}Precision: {}-bit MPFR{}", fmt::DIM, PREC, fmt::RESET);
@@ -406,8 +505,7 @@ fn main() {
 
     if !cert_pairs.is_empty() {
         println!();
-        let class_input: Vec<(usize, usize)> = cert_pairs.iter()
-            .map(|p| (p.a, p.b)).collect();
+        let class_input: Vec<(usize, usize)> = cert_pairs.iter().map(|p| (p.a, p.b)).collect();
         let class_results = class_eval::certify_all(&class_input, max_m);
         class_eval::print_certification(&class_results);
     }
@@ -419,30 +517,46 @@ fn main() {
 
     if !cert_pairs.is_empty() {
         println!();
-        let ha_input: Vec<(usize, usize)> = cert_pairs.iter()
-            .map(|p| (p.a, p.b)).collect();
+        let ha_input: Vec<(usize, usize)> = cert_pairs.iter().map(|p| (p.a, p.b)).collect();
         let ha_results = honest_algebra::certify_all(&ha_input);
         honest_algebra::print_certification(&ha_results);
 
         // Write honest algebra TSV
-        let ha_headers = &["a", "b", "n_two_tile",
-            "beta_full", "beta_once", "s_perm",
-            "piece1_logG_beta", "piece2_logG_alpha", "piece3_digamma",
+        let ha_headers = &[
+            "a",
+            "b",
+            "n_two_tile",
+            "beta_full",
+            "beta_once",
+            "s_perm",
+            "piece1_logG_beta",
+            "piece2_logG_alpha",
+            "piece3_digamma",
             "piece1_gauss_err",
-            "sum_pcl", "delta_target", "identity_err"];
-        let ha_rows: Vec<Vec<String>> = ha_results.iter().map(|r| vec![
-            r.a.to_string(), r.b.to_string(), r.n_two_tile.to_string(),
-            r.beta_covers_full_range.to_string(),
-            r.beta_each_once.to_string(),
-            r.s_is_permutation.to_string(),
-            format!("{:.15e}", r.piece1_log_gamma_beta),
-            format!("{:.15e}", r.piece2_log_gamma_alpha),
-            format!("{:.15e}", r.piece3_digamma),
-            format!("{:.6e}", r.piece1_gauss_error),
-            format!("{:.15e}", r.sum_per_class_limit),
-            format!("{:.15e}", r.delta_target),
-            format!("{:.6e}", r.identity_error),
-        ]).collect();
+            "sum_pcl",
+            "delta_target",
+            "identity_err",
+        ];
+        let ha_rows: Vec<Vec<String>> = ha_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.a.to_string(),
+                    r.b.to_string(),
+                    r.n_two_tile.to_string(),
+                    r.beta_covers_full_range.to_string(),
+                    r.beta_each_once.to_string(),
+                    r.s_is_permutation.to_string(),
+                    format!("{:.15e}", r.piece1_log_gamma_beta),
+                    format!("{:.15e}", r.piece2_log_gamma_alpha),
+                    format!("{:.15e}", r.piece3_digamma),
+                    format!("{:.6e}", r.piece1_gauss_error),
+                    format!("{:.15e}", r.sum_per_class_limit),
+                    format!("{:.15e}", r.delta_target),
+                    format!("{:.6e}", r.identity_error),
+                ]
+            })
+            .collect();
         certificate::write_tsv("results/honest_algebra.tsv", ha_headers, &ha_rows);
         println!("    {} results/honest_algebra.tsv", fmt::check(true));
     }
@@ -459,18 +573,35 @@ fn main() {
         gram_crossref::print_cross_reference(&crossref_results);
 
         // Write cross-reference TSV
-        let xref_headers = &["j", "k", "gcd", "a", "b",
-            "ftc_value", "series_value", "formula_value",
-            "err_ftc_series", "err_ftc_formula"];
-        let xref_rows: Vec<Vec<String>> = crossref_results.iter().map(|r| vec![
-            r.j.to_string(), r.k.to_string(), r.gcd.to_string(),
-            r.a.to_string(), r.b.to_string(),
-            format!("{:.15e}", r.ftc_value),
-            format!("{:.15e}", r.series_value),
-            format!("{:.15e}", r.formula_value),
-            format!("{:.6e}", r.err_ftc_series),
-            format!("{:.6e}", r.err_ftc_formula),
-        ]).collect();
+        let xref_headers = &[
+            "j",
+            "k",
+            "gcd",
+            "a",
+            "b",
+            "ftc_value",
+            "series_value",
+            "formula_value",
+            "err_ftc_series",
+            "err_ftc_formula",
+        ];
+        let xref_rows: Vec<Vec<String>> = crossref_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.j.to_string(),
+                    r.k.to_string(),
+                    r.gcd.to_string(),
+                    r.a.to_string(),
+                    r.b.to_string(),
+                    format!("{:.15e}", r.ftc_value),
+                    format!("{:.15e}", r.series_value),
+                    format!("{:.15e}", r.formula_value),
+                    format!("{:.6e}", r.err_ftc_series),
+                    format!("{:.6e}", r.err_ftc_formula),
+                ]
+            })
+            .collect();
         certificate::write_tsv("results/gram_crossref.tsv", xref_headers, &xref_rows);
         println!("    {} results/gram_crossref.tsv", fmt::check(true));
     }
@@ -485,23 +616,39 @@ fn main() {
         rosetta_stone::print_bridge(&bridge_results);
 
         // Write bridge TSV
-        let bridge_headers = &["j", "k", "gramEntry", "gramIntegral",
-            "jk_gramIntegral", "min_minus_1", "correction",
-            "bridge_prediction", "bridge_error",
-            "phantom_dist", "phantom_bound", "phantom_violated"];
-        let bridge_rows: Vec<Vec<String>> = bridge_results.iter().map(|r| vec![
-            r.j.to_string(), r.k.to_string(),
-            format!("{:.15e}", r.gram_entry),
-            format!("{:.15e}", r.gram_integral),
-            format!("{:.15e}", r.jk_gram_integral),
-            format!("{:.6}", r.min_minus_1),
-            format!("{:.15e}", r.correction),
-            format!("{:.15e}", r.bridge_prediction),
-            format!("{:.6e}", r.bridge_error),
-            format!("{:.6e}", r.phantom_dist),
-            format!("{:.6e}", r.phantom_bound),
-            r.phantom_violated.to_string(),
-        ]).collect();
+        let bridge_headers = &[
+            "j",
+            "k",
+            "gramEntry",
+            "gramIntegral",
+            "jk_gramIntegral",
+            "min_minus_1",
+            "correction",
+            "bridge_prediction",
+            "bridge_error",
+            "phantom_dist",
+            "phantom_bound",
+            "phantom_violated",
+        ];
+        let bridge_rows: Vec<Vec<String>> = bridge_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.j.to_string(),
+                    r.k.to_string(),
+                    format!("{:.15e}", r.gram_entry),
+                    format!("{:.15e}", r.gram_integral),
+                    format!("{:.15e}", r.jk_gram_integral),
+                    format!("{:.6}", r.min_minus_1),
+                    format!("{:.15e}", r.correction),
+                    format!("{:.15e}", r.bridge_prediction),
+                    format!("{:.6e}", r.bridge_error),
+                    format!("{:.6e}", r.phantom_dist),
+                    format!("{:.6e}", r.phantom_bound),
+                    r.phantom_violated.to_string(),
+                ]
+            })
+            .collect();
         certificate::write_tsv("results/rosetta_stone.tsv", bridge_headers, &bridge_rows);
         println!("    {} results/rosetta_stone.tsv", fmt::check(true));
     }
@@ -513,36 +660,56 @@ fn main() {
 
     if !cert_pairs.is_empty() {
         println!();
-        let grad_input: Vec<(usize, usize)> = cert_pairs.iter()
-            .map(|p| (p.a, p.b)).collect();
+        let grad_input: Vec<(usize, usize)> = cert_pairs.iter().map(|p| (p.a, p.b)).collect();
         let grad_results = axiom_graduation::certify_all(&grad_input);
         axiom_graduation::print_certification(&grad_results);
 
         // Write graduation TSV
-        let grad_headers = &["a", "b", "n_two_tile",
-            "beta_bij", "s_perm", "overshoot_id",
-            "gauss_lgA_err", "gauss_lgB_err", "gauss_dA_err", "gauss_dB_err",
-            "telescope_lg_err", "telescope_psi_err",
-            "beta_duality_pw", "beta_duality_sum_err",
-            "sum_pcl", "delta_target", "identity_err", "certified"];
-        let grad_rows: Vec<Vec<String>> = grad_results.iter().map(|r| vec![
-            r.a.to_string(), r.b.to_string(), r.n_two_tile.to_string(),
-            r.beta_bijection.to_string(),
-            r.s_permutation.to_string(),
-            r.overshoot_identity.to_string(),
-            format!("{:.6e}", r.gauss_loggamma_a_err),
-            format!("{:.6e}", r.gauss_loggamma_b_err),
-            format!("{:.6e}", r.gauss_digamma_a_err),
-            format!("{:.6e}", r.gauss_digamma_b_err),
-            format!("{:.6e}", r.telescope_loggamma_err),
-            format!("{:.6e}", r.telescope_digamma_err),
-            r.beta_duality_pointwise.to_string(),
-            format!("{:.6e}", r.beta_duality_sum_err),
-            format!("{:.15e}", r.sum_pcl),
-            format!("{:.15e}", r.delta_target),
-            format!("{:.6e}", r.identity_err),
-            r.certified.to_string(),
-        ]).collect();
+        let grad_headers = &[
+            "a",
+            "b",
+            "n_two_tile",
+            "beta_bij",
+            "s_perm",
+            "overshoot_id",
+            "gauss_lgA_err",
+            "gauss_lgB_err",
+            "gauss_dA_err",
+            "gauss_dB_err",
+            "telescope_lg_err",
+            "telescope_psi_err",
+            "beta_duality_pw",
+            "beta_duality_sum_err",
+            "sum_pcl",
+            "delta_target",
+            "identity_err",
+            "certified",
+        ];
+        let grad_rows: Vec<Vec<String>> = grad_results
+            .iter()
+            .map(|r| {
+                vec![
+                    r.a.to_string(),
+                    r.b.to_string(),
+                    r.n_two_tile.to_string(),
+                    r.beta_bijection.to_string(),
+                    r.s_permutation.to_string(),
+                    r.overshoot_identity.to_string(),
+                    format!("{:.6e}", r.gauss_loggamma_a_err),
+                    format!("{:.6e}", r.gauss_loggamma_b_err),
+                    format!("{:.6e}", r.gauss_digamma_a_err),
+                    format!("{:.6e}", r.gauss_digamma_b_err),
+                    format!("{:.6e}", r.telescope_loggamma_err),
+                    format!("{:.6e}", r.telescope_digamma_err),
+                    r.beta_duality_pointwise.to_string(),
+                    format!("{:.6e}", r.beta_duality_sum_err),
+                    format!("{:.15e}", r.sum_pcl),
+                    format!("{:.15e}", r.delta_target),
+                    format!("{:.6e}", r.identity_err),
+                    r.certified.to_string(),
+                ]
+            })
+            .collect();
         certificate::write_tsv("results/axiom_graduation.tsv", grad_headers, &grad_rows);
         println!("    {} results/axiom_graduation.tsv", fmt::check(true));
     }

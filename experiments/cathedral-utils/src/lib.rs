@@ -40,8 +40,8 @@ pub mod dd;
 pub mod fitting;
 pub mod fmt;
 pub mod gcd_decomp;
-pub mod gram;
 pub mod gpu;
+pub mod gram;
 #[cfg(feature = "hpdf")]
 pub mod hpdf;
 pub mod jacobi;

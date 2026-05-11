@@ -6,8 +6,8 @@
 //!  Physics:   Quantum error-correcting code (stabilizer syndrome channels)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
 use rayon::prelude::*;
+use rug::Float;
 
 /// The 4 Dirichlet characters mod 8.
 ///   k mod 8:  0  1  2  3  4  5  6  7
@@ -34,9 +34,9 @@ pub fn verify_orthogonality() -> Vec<(usize, usize, i32, bool)> {
     let mut results = Vec::new();
     for i in 0..4 {
         for j in 0..4 {
-            let sum: i32 = (0..8).map(|k| {
-                CHI_TABLE[i][k] as i32 * CHI_TABLE[j][k] as i32
-            }).sum();
+            let sum: i32 = (0..8)
+                .map(|k| CHI_TABLE[i][k] as i32 * CHI_TABLE[j][k] as i32)
+                .sum();
             let expected = if i == j { 4 } else { 0 };
             results.push((i, j, sum, sum == expected));
         }
@@ -48,16 +48,22 @@ pub fn verify_orthogonality() -> Vec<(usize, usize, i32, bool)> {
 /// Parallel over chunks for large N
 pub fn channel_energy(chi_idx: usize, weights: &[f64]) -> f64 {
     let chunk_size = (weights.len() / rayon::current_num_threads()).max(256);
-    weights.par_chunks(chunk_size)
+    weights
+        .par_chunks(chunk_size)
         .enumerate()
         .map(|(ci, chunk)| {
             let base = ci * chunk_size;
-            chunk.iter().enumerate().map(|(i, &vk)| {
-                let k = base + i + 1;
-                let c = chi(chi_idx, k) as f64;
-                c * c * vk * vk
-            }).sum::<f64>()
-        }).sum()
+            chunk
+                .iter()
+                .enumerate()
+                .map(|(i, &vk)| {
+                    let k = base + i + 1;
+                    let c = chi(chi_idx, k) as f64;
+                    c * c * vk * vk
+                })
+                .sum::<f64>()
+        })
+        .sum()
 }
 
 /// Per-channel energy breakdown for all 4 channels
@@ -70,38 +76,57 @@ pub struct ChannelBreakdown {
     pub channel_fraction: [f64; 4],
     pub partition_sum: f64,
     pub partition_error: f64,
-    pub mpfr_partition_error: f64,  // 512-bit certified error
+    pub mpfr_partition_error: f64, // 512-bit certified error
 }
 
 pub fn channel_breakdown(n: usize, weights: &[f64], weights_mpfr: &[Float]) -> ChannelBreakdown {
     // f64 path (fast)
     let total_energy: f64 = weights.par_iter().map(|v| v * v).sum();
-    let odd_energy: f64 = weights.par_iter().enumerate()
-        .filter(|(i, _)| { let k = i + 1; k % 2 != 0 })
-        .map(|(_, v)| v * v).sum();
+    let odd_energy: f64 = weights
+        .par_iter()
+        .enumerate()
+        .filter(|(i, _)| {
+            let k = i + 1;
+            k % 2 != 0
+        })
+        .map(|(_, v)| v * v)
+        .sum();
     let even_energy = total_energy - odd_energy;
 
-    let ce: Vec<f64> = (0..4usize).into_par_iter()
+    let ce: Vec<f64> = (0..4usize)
+        .into_par_iter()
         .map(|i| channel_energy(i, weights))
         .collect();
     let mut channel_e = [0.0f64; 4];
     let mut channel_f = [0.0f64; 4];
     for i in 0..4 {
         channel_e[i] = ce[i];
-        channel_f[i] = if odd_energy > 0.0 { ce[i] / odd_energy } else { 0.0 };
+        channel_f[i] = if odd_energy > 0.0 {
+            ce[i] / odd_energy
+        } else {
+            0.0
+        };
     }
     let partition_sum = 0.25 * ce.iter().sum::<f64>();
     let partition_error = if odd_energy > 0.0 {
         (partition_sum - odd_energy).abs() / odd_energy
-    } else { 0.0 };
+    } else {
+        0.0
+    };
 
     // 512-bit MPFR path (certified)
     let mpfr_partition_error = mpfr_verify_partition(weights_mpfr);
 
     ChannelBreakdown {
-        n, total_energy, odd_energy, even_energy,
-        channel_energy: channel_e, channel_fraction: channel_f,
-        partition_sum, partition_error, mpfr_partition_error,
+        n,
+        total_energy,
+        odd_energy,
+        even_energy,
+        channel_energy: channel_e,
+        channel_fraction: channel_f,
+        partition_sum,
+        partition_error,
+        mpfr_partition_error,
     }
 }
 
@@ -142,7 +167,9 @@ fn mpfr_verify_partition(weights: &[Float]) -> f64 {
     let partition = Float::with_val(p, &channel_total / 4.0);
 
     // Relative error
-    if odd_sum == 0.0 { return 0.0; }
+    if odd_sum == 0.0 {
+        return 0.0;
+    }
     let diff = Float::with_val(p, &partition - &odd_sum).abs();
     let rel_err = Float::with_val(p, diff / &odd_sum);
     rel_err.to_f64()

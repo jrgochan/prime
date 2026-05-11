@@ -22,7 +22,9 @@ use std::time::{Instant, SystemTime};
 
 /// ISO-8601 UTC timestamp (no chrono dependency)
 fn utc_timestamp() -> String {
-    let d = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap();
+    let d = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap();
     let secs = d.as_secs();
     // Simple UTC decomposition
     let days = secs / 86400;
@@ -34,16 +36,38 @@ fn utc_timestamp() -> String {
     let mut y = 1970i64;
     let mut rem = days as i64;
     loop {
-        let ylen = if y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) { 366 } else { 365 };
-        if rem < ylen { break; }
+        let ylen = if y % 4 == 0 && (y % 100 != 0 || y % 400 == 0) {
+            366
+        } else {
+            365
+        };
+        if rem < ylen {
+            break;
+        }
         rem -= ylen;
         y += 1;
     }
     let leap = y % 4 == 0 && (y % 100 != 0 || y % 400 == 0);
-    let mdays = [31, if leap {29} else {28}, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let mdays = [
+        31,
+        if leap { 29 } else { 28 },
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31,
+    ];
     let mut mo = 0;
     for (i, &md) in mdays.iter().enumerate() {
-        if rem < md as i64 { mo = i + 1; break; }
+        if rem < md as i64 {
+            mo = i + 1;
+            break;
+        }
         rem -= md as i64;
     }
     format!("{y:04}-{mo:02}-{:02}T{h:02}:{m:02}:{s:02}Z", rem + 1)
@@ -88,9 +112,15 @@ fn main() {
     match &master_data {
         Some((data, loaded_dim)) => {
             let cache_gb = (*loaded_dim * *loaded_dim * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
-            println!("  ✓ Master cache loaded: dim={loaded_dim} ({cache_gb:.1} GB, {:.1}s)",
-                t_cache.elapsed().as_secs_f64());
-            println!("  Will truncate for {} N values: {:?}\n", sizes.len(), sizes);
+            println!(
+                "  ✓ Master cache loaded: dim={loaded_dim} ({cache_gb:.1} GB, {:.1}s)",
+                t_cache.elapsed().as_secs_f64()
+            );
+            println!(
+                "  Will truncate for {} N values: {:?}\n",
+                sizes.len(),
+                sizes
+            );
 
             for &n in &sizes {
                 let dim = n - 1;
@@ -111,7 +141,10 @@ fn main() {
                         small[dst_start..dst_start + dim]
                             .copy_from_slice(&data[src_start..src_start + dim]);
                     }
-                    println!("  ✂ Truncated {loaded_dim}→{dim} ({:.2}s)", t_trunc.elapsed().as_secs_f64());
+                    println!(
+                        "  ✂ Truncated {loaded_dim}→{dim} ({:.2}s)",
+                        t_trunc.elapsed().as_secs_f64()
+                    );
                     small
                 };
 
@@ -134,22 +167,41 @@ fn main() {
         println!("\n\n{}", "═".repeat(110));
         println!("  🔭 GPU SPECTRAL OBSERVATORY — SCALING SUMMARY");
         println!("{}", "═".repeat(110));
-        println!("  {:>6} {:>5} {:>14} {:>14} {:>14} {:>8} {:>14} {:>14} {:>8}",
-            "N", "dim", "λ_min", "|⟨b,v_min⟩|²", "E_0", "β", "d²_N", "Σc²/λ", "GPU(s)");
-        println!("  {} {} {} {} {} {} {} {} {}",
-            "─".repeat(6), "─".repeat(5), "─".repeat(14), "─".repeat(14),
-            "─".repeat(14), "─".repeat(8), "─".repeat(14), "─".repeat(14), "─".repeat(8));
+        println!(
+            "  {:>6} {:>5} {:>14} {:>14} {:>14} {:>8} {:>14} {:>14} {:>8}",
+            "N", "dim", "λ_min", "|⟨b,v_min⟩|²", "E_0", "β", "d²_N", "Σc²/λ", "GPU(s)"
+        );
+        println!(
+            "  {} {} {} {} {} {} {} {} {}",
+            "─".repeat(6),
+            "─".repeat(5),
+            "─".repeat(14),
+            "─".repeat(14),
+            "─".repeat(14),
+            "─".repeat(8),
+            "─".repeat(14),
+            "─".repeat(14),
+            "─".repeat(8)
+        );
         for r in &all_results {
-            println!("  {:6} {:5} {:14.8e} {:14.8e} {:14.8e} {:8.4} {:14.10} {:14.10} {:8.1}",
-                r.n, r.dim, r.lambda_min, r.c_min_sq, r.e_0, r.beta, r.d_sq, r.s_total, r.gpu_secs);
+            println!(
+                "  {:6} {:5} {:14.8e} {:14.8e} {:14.8e} {:8.4} {:14.10} {:14.10} {:8.1}",
+                r.n, r.dim, r.lambda_min, r.c_min_sq, r.e_0, r.beta, r.d_sq, r.s_total, r.gpu_secs
+            );
         }
 
         // β trend
-        let betas: Vec<f64> = all_results.iter().map(|r| r.beta).filter(|b| b.is_finite()).collect();
+        let betas: Vec<f64> = all_results
+            .iter()
+            .map(|r| r.beta)
+            .filter(|b| b.is_finite())
+            .collect();
         if betas.len() >= 2 {
             print!("\n  β trend: ");
             for (i, b) in betas.iter().enumerate() {
-                if i > 0 { print!(" → "); }
+                if i > 0 {
+                    print!(" → ");
+                }
                 print!("{b:.4}");
             }
             println!();
@@ -166,7 +218,9 @@ fn main() {
         let d_sqs: Vec<f64> = all_results.iter().map(|r| r.d_sq).collect();
         print!("  d²  trend: ");
         for (i, d) in d_sqs.iter().enumerate() {
-            if i > 0 { print!(" → "); }
+            if i > 0 {
+                print!(" → ");
+            }
             print!("{d:.10}");
         }
         println!();
@@ -194,7 +248,9 @@ fn main() {
     // MASTER SCALING CERTIFICATE
     // ═══════════════════════════════════════════════════════════════════
     if all_results.len() >= 2 {
-        let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("results").join("spectral-observatory");
+        let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("results")
+            .join("spectral-observatory");
         std::fs::create_dir_all(&out_dir).ok();
 
         let cert_file = out_dir.join("scaling_certificate.json");
@@ -203,7 +259,9 @@ fn main() {
         cert.push_str("  \"format\": \"cathedral-nb-spectral-scaling-v1\",\n");
         cert.push_str(&format!("  \"timestamp\": \"{}\",\n", utc_timestamp()));
         cert.push_str("  \"experiment\": \"Nyman-Beurling Spectral Observatory\",\n");
-        cert.push_str("  \"claim\": \"d²_N monotonically decreasing → 0 as N → ∞ (RH equivalent)\",\n");
+        cert.push_str(
+            "  \"claim\": \"d²_N monotonically decreasing → 0 as N → ∞ (RH equivalent)\",\n",
+        );
 
         // Hardware
         if let Some(info) = gpu::detect_gpu() {
@@ -225,10 +283,20 @@ fn main() {
             cert.push_str(&format!("      \"beta\": {:.8},\n", r.beta));
             cert.push_str(&format!("      \"c_min_sq\": {:.15e},\n", r.c_min_sq));
             cert.push_str(&format!("      \"e_0\": {:.15e},\n", r.e_0));
-            cert.push_str(&format!("      \"compute_time_secs\": {:.1},\n", r.gpu_secs));
-            cert.push_str(&format!("      \"compute_mode\": \"{}\",\n", r.compute_mode));
+            cert.push_str(&format!(
+                "      \"compute_time_secs\": {:.1},\n",
+                r.gpu_secs
+            ));
+            cert.push_str(&format!(
+                "      \"compute_mode\": \"{}\",\n",
+                r.compute_mode
+            ));
             cert.push_str(&format!("      \"timestamp\": \"{}\"\n", r.timestamp));
-            cert.push_str(if i < all_results.len() - 1 { "    },\n" } else { "    }\n" });
+            cert.push_str(if i < all_results.len() - 1 {
+                "    },\n"
+            } else {
+                "    }\n"
+            });
         }
         cert.push_str("  ],\n");
 
@@ -251,15 +319,24 @@ fn main() {
 
         // Monotonicity check
         let monotone = all_results.windows(2).all(|w| w[1].d_sq < w[0].d_sq);
-        cert.push_str(&format!("  \"d_sq_monotonically_decreasing\": {},\n", monotone));
+        cert.push_str(&format!(
+            "  \"d_sq_monotonically_decreasing\": {},\n",
+            monotone
+        ));
 
         // All eigenvalues positive?
         let all_positive = all_results.iter().all(|r| r.lambda_min > 0.0);
-        cert.push_str(&format!("  \"all_lambda_min_positive\": {},\n", all_positive));
+        cert.push_str(&format!(
+            "  \"all_lambda_min_positive\": {},\n",
+            all_positive
+        ));
 
         // Final verdict
         let decoupled = all_results.last().is_some_and(|r| r.beta > 1.0);
-        cert.push_str(&format!("  \"quantum_decoupling_confirmed\": {},\n", decoupled));
+        cert.push_str(&format!(
+            "  \"quantum_decoupling_confirmed\": {},\n",
+            decoupled
+        ));
 
         let n_max = all_results.last().map_or(0, |r| r.n);
         cert.push_str(&format!("  \"lean_claim\": \"For N ≤ {}, d²_N is monotonically decreasing with λ_min > 0, consistent with RH\"\n", n_max));
@@ -272,8 +349,13 @@ fn main() {
     // ═══════════════════════════════════════════════════════════════════
     // LOG FILE
     // ═══════════════════════════════════════════════════════════════════
-    let log_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("results").join("spectral-observatory");
-    let log_file = log_dir.join(format!("observatory_run_{}.log", utc_timestamp().replace(':', "-")));
+    let log_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("results")
+        .join("spectral-observatory");
+    let log_file = log_dir.join(format!(
+        "observatory_run_{}.log",
+        utc_timestamp().replace(':', "-")
+    ));
     // The log is captured by nohup/redirect, but we write a summary log
     if let Ok(mut f) = std::fs::File::create(&log_file) {
         writeln!(f, "GPU Spectral Observatory Run").ok();
@@ -281,8 +363,12 @@ fn main() {
         writeln!(f, "N values: {:?}", sizes).ok();
         writeln!(f).ok();
         for r in &all_results {
-            writeln!(f, "N={:6}  d²={:.12}  λ_min={:.8e}  λ_max={:.8e}  cond={:.4e}  β={:.4}  mode={}",
-                r.n, r.d_sq, r.lambda_min, r.lambda_max, r.cond, r.beta, r.compute_mode).ok();
+            writeln!(
+                f,
+                "N={:6}  d²={:.12}  λ_min={:.8e}  λ_max={:.8e}  cond={:.4e}  β={:.4}  mode={}",
+                r.n, r.d_sq, r.lambda_min, r.lambda_max, r.cond, r.beta, r.compute_mode
+            )
+            .ok();
         }
         println!("  📋 Log file → {}", log_file.display());
     }
@@ -318,7 +404,12 @@ fn load_gram_data(n: usize) -> Option<(Vec<f64>, usize)> {
     ];
 
     if let Some(gram) = std_paths.iter().find_map(|p| {
-        if p.exists() { eprintln!("  Trying: {}", p.display()); cache::load_gram(p) } else { None }
+        if p.exists() {
+            eprintln!("  Trying: {}", p.display());
+            cache::load_gram(p)
+        } else {
+            None
+        }
     }) {
         return Some((gram.data, gram.max_dim));
     }
@@ -329,7 +420,12 @@ fn load_gram_data(n: usize) -> Option<(Vec<f64>, usize)> {
         cache::dd_gram_cache_path(n, 128),
     ];
     if let Some((hi, _lo, dim)) = dd_paths.iter().find_map(|p| {
-        if p.exists() { eprintln!("  Trying DD: {}", p.display()); cache::load_dd_gram(p) } else { None }
+        if p.exists() {
+            eprintln!("  Trying DD: {}", p.display());
+            cache::load_dd_gram(p)
+        } else {
+            None
+        }
     }) {
         return Some((hi, dim));
     }
@@ -337,7 +433,9 @@ fn load_gram_data(n: usize) -> Option<(Vec<f64>, usize)> {
     // Try larger caches
     let larger_sizes: Vec<usize> = vec![40000, 50000, 60000, 80000, 100000];
     for &big_n in &larger_sizes {
-        if big_n <= n { continue; }
+        if big_n <= n {
+            continue;
+        }
         let big_paths = [
             cache::dd_gram_cache_path(big_n, 256),
             cache::dd_gram_cache_path(big_n, 128),
@@ -346,7 +444,9 @@ fn load_gram_data(n: usize) -> Option<(Vec<f64>, usize)> {
             if p.exists() {
                 eprintln!("  Trying larger DD (N={big_n}): {}", p.display());
                 cache::load_dd_gram(p)
-            } else { None }
+            } else {
+                None
+            }
         }) {
             return Some((hi, big_dim));
         }
@@ -382,7 +482,10 @@ fn run_spectral_from_data(n: usize, data: Vec<f64>) -> Option<SpectralResult> {
     if use_full {
         println!("  Mode: FULL eigendecomposition + projections (~{vram_needed_gb:.1} GB VRAM)");
     } else {
-        println!("  Mode: HYBRID — eigenvalues-only + Cholesky d² (~{:.1} GB VRAM)", mem_gb + 1.0);
+        println!(
+            "  Mode: HYBRID — eigenvalues-only + Cholesky d² (~{:.1} GB VRAM)",
+            mem_gb + 1.0
+        );
         println!("         (full eigen+vecs needs {vram_needed_gb:.1} GB, exceeds VRAM)");
     }
 
@@ -404,7 +507,11 @@ fn run_spectral_from_data(n: usize, data: Vec<f64>) -> Option<SpectralResult> {
 
         let lambda_min = eigenvalues[0];
         let lambda_max = eigenvalues[dim - 1];
-        let cond = if lambda_min > 0.0 { lambda_max / lambda_min } else { f64::INFINITY };
+        let cond = if lambda_min > 0.0 {
+            lambda_max / lambda_min
+        } else {
+            f64::INFINITY
+        };
         println!("  λ_min = {lambda_min:.8e}");
         println!("  λ_max = {lambda_max:.8e}");
         println!("  cond(G) = {cond:.4e}");
@@ -423,7 +530,12 @@ fn run_spectral_from_data(n: usize, data: Vec<f64>) -> Option<SpectralResult> {
 /// 2. Full eigendecomposition via CPU LAPACK (OpenBLAS, 16 threads)
 ///    - Try full eigen+vecs first (gives projections c_k)
 ///    - Fall back to eigenvalues-only if RAM is tight
-fn run_hybrid_spectral(n: usize, dim: usize, data: Vec<f64>, b: Vec<f64>) -> Option<SpectralResult> {
+fn run_hybrid_spectral(
+    n: usize,
+    dim: usize,
+    data: Vec<f64>,
+    b: Vec<f64>,
+) -> Option<SpectralResult> {
     // ── Phase 1: d² via GPU Cholesky (this always fits — just one matrix copy) ──
     println!("  Phase 1: Computing d² via GPU Cholesky...");
     let t_chol = Instant::now();
@@ -454,7 +566,11 @@ fn run_hybrid_spectral(n: usize, dim: usize, data: Vec<f64>, b: Vec<f64>) -> Opt
 
     let lambda_min = eigenvalues[0];
     let lambda_max = eigenvalues[dim - 1];
-    let cond = if lambda_min > 0.0 { lambda_max / lambda_min } else { f64::INFINITY };
+    let cond = if lambda_min > 0.0 {
+        lambda_max / lambda_min
+    } else {
+        f64::INFINITY
+    };
     println!("  λ_min = {lambda_min:.8e}");
     println!("  λ_max = {lambda_max:.8e}");
     println!("  cond(G) = {cond:.4e}");
@@ -464,7 +580,13 @@ fn run_hybrid_spectral(n: usize, dim: usize, data: Vec<f64>, b: Vec<f64>) -> Opt
 }
 
 /// Common analysis and reporting for the full eigenvector path.
-fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], gpu_secs: f64) -> Option<SpectralResult> {
+fn analyze_and_report(
+    n: usize,
+    dim: usize,
+    eigenvalues: &[f64],
+    c_sq: &[f64],
+    gpu_secs: f64,
+) -> Option<SpectralResult> {
     let lambda_min = eigenvalues[0];
 
     let mut e_k: Vec<f64> = vec![0.0; dim];
@@ -490,20 +612,32 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
 
     // ── QUANTUM DECOUPLING ANALYSIS ──
     println!("\n  ── QUANTUM DECOUPLING ANALYSIS ──");
-    println!("  {:>5} {:>14} {:>14} {:>14} {:>12}",
-        "k", "λ_k", "c_k²", "E_k=c²/λ", "S_cum");
-    println!("  {} {} {} {} {}",
-        "─".repeat(5), "─".repeat(14), "─".repeat(14), "─".repeat(14), "─".repeat(12));
+    println!(
+        "  {:>5} {:>14} {:>14} {:>14} {:>12}",
+        "k", "λ_k", "c_k²", "E_k=c²/λ", "S_cum"
+    );
+    println!(
+        "  {} {} {} {} {}",
+        "─".repeat(5),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(12)
+    );
 
     let n_show = 20.min(dim);
     for k in 0..n_show {
-        println!("  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8}",
-            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]);
+        println!(
+            "  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8}",
+            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]
+        );
     }
     println!("  {:>5}", "...");
     for k in (dim.saturating_sub(5))..dim {
-        println!("  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8}",
-            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]);
+        println!(
+            "  {:5} {:14.8e} {:14.8e} {:14.8e} {:12.8}",
+            k, eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]
+        );
     }
 
     // ── DECOUPLING POWER LAW ──
@@ -522,10 +656,17 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
         let np = log_lambda.len() as f64;
         let sx: f64 = log_lambda.iter().sum();
         let sy: f64 = log_c_sq.iter().sum();
-        let sxy: f64 = log_lambda.iter().zip(log_c_sq.iter()).map(|(x, y)| x * y).sum();
+        let sxy: f64 = log_lambda
+            .iter()
+            .zip(log_c_sq.iter())
+            .map(|(x, y)| x * y)
+            .sum();
         let sxx: f64 = log_lambda.iter().map(|x| x * x).sum();
         let b = (np * sxy - sx * sy) / (np * sxx - sx * sx);
-        println!("  β = {b:.6}  (fit over bottom {n_fit} modes, {}/{n_fit} valid)", log_lambda.len());
+        println!(
+            "  β = {b:.6}  (fit over bottom {n_fit} modes, {}/{n_fit} valid)",
+            log_lambda.len()
+        );
         if b > 1.0 {
             println!("  ✅ β > 1: QUANTUM DECOUPLING CONFIRMED");
         } else if b > 0.0 {
@@ -558,8 +699,18 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
                 let sxy: f64 = lx.iter().zip(ly.iter()).map(|(x, y)| x * y).sum();
                 let sxx: f64 = lx.iter().map(|x| x * x).sum();
                 let b = (np * sxy - sx * sy) / (np * sxx - sx * sx);
-                let marker = if b > 1.0 { "✅" } else if b > 0.0 { "⚠️ " } else { "❌" };
-                println!("  {marker} bottom {:.0}% ({} modes): β = {b:.4}", frac * 100.0, lx.len());
+                let marker = if b > 1.0 {
+                    "✅"
+                } else if b > 0.0 {
+                    "⚠️ "
+                } else {
+                    "❌"
+                };
+                println!(
+                    "  {marker} bottom {:.0}% ({} modes): β = {b:.4}",
+                    frac * 100.0,
+                    lx.len()
+                );
             }
         }
     }
@@ -574,22 +725,34 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
     }
 
     // ── Save TSV ──
-    let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("results").join("spectral-observatory");
+    let out_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("results")
+        .join("spectral-observatory");
     std::fs::create_dir_all(&out_dir).ok();
     let out_file = out_dir.join(format!("gpu_spectral_N{n}.tsv"));
     let mut tsv = String::new();
     tsv.push_str("k\tlambda_k\tc_k_sq\tE_k\tS_cumulative\n");
     for k in 0..dim {
-        tsv.push_str(&format!("{k}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-            eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]));
+        tsv.push_str(&format!(
+            "{k}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
+            eigenvalues[k], c_sq[k], e_k[k], s_cumulative[k]
+        ));
     }
     std::fs::write(&out_file, &tsv).ok();
     println!("\n  Data saved to: {}", out_file.display());
 
     let lambda_max = eigenvalues[dim - 1];
-    let cond = if lambda_min > 0.0 { lambda_max / lambda_min } else { f64::INFINITY };
+    let cond = if lambda_min > 0.0 {
+        lambda_max / lambda_min
+    } else {
+        f64::INFINITY
+    };
     let ts = utc_timestamp();
-    let mode = if gpu_secs < 100.0 && dim <= 20000 { "GPU_full" } else { "CPU_LAPACK" };
+    let mode = if gpu_secs < 100.0 && dim <= 20000 {
+        "GPU_full"
+    } else {
+        "CPU_LAPACK"
+    };
 
     // ── Per-N JSON Certificate ──
     let cert_file = out_dir.join(format!("certificate_N{n}.json"));
@@ -607,9 +770,15 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
     cert.push_str(&format!("  \"beta\": {beta:.8},\n"));
     cert.push_str(&format!("  \"c_min_sq\": {:.15e},\n", c_sq[0]));
     cert.push_str(&format!("  \"e_0\": {:.15e},\n", e_k[0]));
-    cert.push_str(&format!("  \"e_0_over_d_sq\": {:.15e},\n", if d_sq > 0.0 { e_k[0] / d_sq } else { f64::NAN }));
+    cert.push_str(&format!(
+        "  \"e_0_over_d_sq\": {:.15e},\n",
+        if d_sq > 0.0 { e_k[0] / d_sq } else { f64::NAN }
+    ));
     cert.push_str(&format!("  \"orthogonality_shield\": {:.15e},\n", c_sq[0]));
-    cert.push_str(&format!("  \"lambda_min_positive\": {},\n", lambda_min > 0.0));
+    cert.push_str(&format!(
+        "  \"lambda_min_positive\": {},\n",
+        lambda_min > 0.0
+    ));
     cert.push_str(&format!("  \"quantum_decoupling\": {},\n", beta > 1.0));
     cert.push_str(&format!("  \"compute_mode\": \"{mode}\",\n"));
     cert.push_str(&format!("  \"compute_time_secs\": {gpu_secs:.1},\n"));
@@ -620,10 +789,17 @@ fn analyze_and_report(n: usize, dim: usize, eigenvalues: &[f64], c_sq: &[f64], g
     println!("  📜 Certificate → {}", cert_file.display());
 
     Some(SpectralResult {
-        n, dim, lambda_min, lambda_max, cond,
+        n,
+        dim,
+        lambda_min,
+        lambda_max,
+        cond,
         c_min_sq: c_sq[0],
         e_0: e_k[0],
-        beta, d_sq, s_total, gpu_secs,
+        beta,
+        d_sq,
+        s_total,
+        gpu_secs,
         timestamp: ts,
         compute_mode: mode.to_string(),
     })
@@ -639,13 +815,13 @@ extern "C" {
     /// Uses all CPU cores via OpenBLAS threading.
     /// ⚠️ For jobz='V', lwork = 1 + 6N + 2N² which overflows i32 at N ≈ 32767.
     fn dsyevd_(
-        jobz: *const u8,   // 'N' = eigenvalues only, 'V' = eigenvalues + eigenvectors
-        uplo: *const u8,   // 'U' = upper, 'L' = lower
+        jobz: *const u8, // 'N' = eigenvalues only, 'V' = eigenvalues + eigenvectors
+        uplo: *const u8, // 'U' = upper, 'L' = lower
         n: *const c_int,
-        a: *mut f64,       // input matrix (overwritten), column-major
+        a: *mut f64, // input matrix (overwritten), column-major
         lda: *const c_int,
-        w: *mut f64,       // eigenvalues output (ascending)
-        work: *mut f64,    // workspace
+        w: *mut f64,    // eigenvalues output (ascending)
+        work: *mut f64, // workspace
         lwork: *const c_int,
         iwork: *mut c_int, // integer workspace
         liwork: *const c_int,
@@ -679,8 +855,12 @@ fn cpu_lapack_eigenvalues(data: &[f64], dim: usize) -> (Vec<f64>, f64) {
     let n = dim as c_int;
     let mem_gb = (dim * dim * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
     println!("  LAPACK dsyevd: dim={dim} ({mem_gb:.1} GB matrix)");
-    println!("  OpenBLAS threads: {}",
-        std::thread::available_parallelism().map(|p| p.get()).unwrap_or(1));
+    println!(
+        "  OpenBLAS threads: {}",
+        std::thread::available_parallelism()
+            .map(|p| p.get())
+            .unwrap_or(1)
+    );
 
     // LAPACK expects column-major. For symmetric matrices, row-major = column-major!
     let mut a = data.to_vec();
@@ -697,10 +877,14 @@ fn cpu_lapack_eigenvalues(data: &[f64], dim: usize) -> (Vec<f64>, f64) {
         dsyevd_(
             b"N" as *const u8, // eigenvalues only
             b"L" as *const u8, // lower triangle
-            &n, a.as_mut_ptr(), &n,
+            &n,
+            a.as_mut_ptr(),
+            &n,
             w.as_mut_ptr(),
-            work_query.as_mut_ptr(), &lwork_query,
-            iwork_query.as_mut_ptr(), &liwork_query,
+            work_query.as_mut_ptr(),
+            &lwork_query,
+            iwork_query.as_mut_ptr(),
+            &liwork_query,
             &mut info,
         );
     }
@@ -725,10 +909,14 @@ fn cpu_lapack_eigenvalues(data: &[f64], dim: usize) -> (Vec<f64>, f64) {
         dsyevd_(
             b"N" as *const u8,
             b"L" as *const u8,
-            &n, a.as_mut_ptr(), &n,
+            &n,
+            a.as_mut_ptr(),
+            &n,
             w.as_mut_ptr(),
-            work.as_mut_ptr(), &lwork,
-            iwork.as_mut_ptr(), &liwork,
+            work.as_mut_ptr(),
+            &lwork,
+            iwork.as_mut_ptr(),
+            &liwork,
             &mut info,
         );
     }
@@ -770,8 +958,12 @@ fn cpu_lapack_full_eigen(data: &[f64], b: &[f64], dim: usize) -> (Vec<f64>, Vec<
     } else {
         println!("  LAPACK dsyevd (FULL eigen+vecs): dim={dim} ({mem_gb:.1} GB matrix)");
     }
-    println!("  OpenBLAS threads: {}",
-        std::thread::available_parallelism().map(|p| p.get()).unwrap_or(1));
+    println!(
+        "  OpenBLAS threads: {}",
+        std::thread::available_parallelism()
+            .map(|p| p.get())
+            .unwrap_or(1)
+    );
 
     // LAPACK expects column-major. For symmetric matrices, row-major = column-major!
     // After dsyevd/dsyev with jobz='V', the matrix `a` is overwritten with eigenvectors
@@ -793,9 +985,12 @@ fn cpu_lapack_full_eigen(data: &[f64], b: &[f64], dim: usize) -> (Vec<f64>, Vec<
             dsyev_(
                 b"V" as *const u8,
                 b"L" as *const u8,
-                &n, a.as_mut_ptr(), &n,
+                &n,
+                a.as_mut_ptr(),
+                &n,
                 w.as_mut_ptr(),
-                work_query.as_mut_ptr(), &lwork_query,
+                work_query.as_mut_ptr(),
+                &lwork_query,
                 &mut info,
             );
         }
@@ -817,9 +1012,12 @@ fn cpu_lapack_full_eigen(data: &[f64], b: &[f64], dim: usize) -> (Vec<f64>, Vec<
             dsyev_(
                 b"V" as *const u8,
                 b"L" as *const u8,
-                &n, a.as_mut_ptr(), &n,
+                &n,
+                a.as_mut_ptr(),
+                &n,
                 w.as_mut_ptr(),
-                work.as_mut_ptr(), &lwork,
+                work.as_mut_ptr(),
+                &lwork,
                 &mut info,
             );
         }
@@ -847,10 +1045,14 @@ fn cpu_lapack_full_eigen(data: &[f64], b: &[f64], dim: usize) -> (Vec<f64>, Vec<
             dsyevd_(
                 b"V" as *const u8,
                 b"L" as *const u8,
-                &n, a.as_mut_ptr(), &n,
+                &n,
+                a.as_mut_ptr(),
+                &n,
                 w.as_mut_ptr(),
-                work_query.as_mut_ptr(), &lwork_query,
-                iwork_query.as_mut_ptr(), &liwork_query,
+                work_query.as_mut_ptr(),
+                &lwork_query,
+                iwork_query.as_mut_ptr(),
+                &liwork_query,
                 &mut info,
             );
         }
@@ -874,10 +1076,14 @@ fn cpu_lapack_full_eigen(data: &[f64], b: &[f64], dim: usize) -> (Vec<f64>, Vec<
             dsyevd_(
                 b"V" as *const u8,
                 b"L" as *const u8,
-                &n, a.as_mut_ptr(), &n,
+                &n,
+                a.as_mut_ptr(),
+                &n,
                 w.as_mut_ptr(),
-                work.as_mut_ptr(), &lwork,
-                iwork.as_mut_ptr(), &liwork,
+                work.as_mut_ptr(),
+                &lwork,
+                iwork.as_mut_ptr(),
+                &liwork,
                 &mut info,
             );
         }

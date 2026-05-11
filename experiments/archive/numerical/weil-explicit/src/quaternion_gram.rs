@@ -1,6 +1,6 @@
 #![allow(unused, dead_code, non_snake_case)]
-use rayon::prelude::*;
 use nalgebra::{DMatrix, SymmetricEigen};
+use rayon::prelude::*;
 
 // ══════════════════════════════════════════════════════════════════════
 // QUATERNIONIC GRAM MATRIX SPECTRAL GAP ANALYSIS
@@ -20,18 +20,29 @@ use nalgebra::{DMatrix, SymmetricEigen};
 // spectral gap could be provably positive even when the real one is hard.
 // ══════════════════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 fn liouville(n: usize) -> i32 {
     let mut val = n;
     let mut omega = 0;
     let mut p = 2;
     while p * p <= val {
-        while val % p == 0 { omega += 1; val /= p; }
+        while val % p == 0 {
+            omega += 1;
+            val /= p;
+        }
         p += 1;
     }
-    if val > 1 { omega += 1; }
-    if omega % 2 == 0 { 1 } else { -1 }
+    if val > 1 {
+        omega += 1;
+    }
+    if omega % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// Gram entry for power channel p: ∫₀¹ {j/x^p}{k/x^p} dx
@@ -81,8 +92,10 @@ fn main() {
     // SECTION 1: Individual power channel spectra
     // ═══════════════════════════════════════════════════════
     println!("═══ Section 1: Individual channel λ_min ═══\n");
-    println!("  {:>6} {:>14} {:>14} {:>14} {:>14}",
-        "N", "λ_min(x¹)", "λ_min(x²)", "λ_min(x³)", "λ_min(x⁴)");
+    println!(
+        "  {:>6} {:>14} {:>14} {:>14} {:>14}",
+        "N", "λ_min(x¹)", "λ_min(x²)", "λ_min(x³)", "λ_min(x⁴)"
+    );
     println!("  {}", "─".repeat(68));
 
     for &n in &[10, 20, 50, 100, 200] {
@@ -90,21 +103,34 @@ fn main() {
         let mut lmins = vec![];
 
         for power in 1..=4u32 {
-            let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-                .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                    ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts))
-                })).collect();
+            let entries: Vec<((usize, usize), f64)> = (0..dim)
+                .into_par_iter()
+                .flat_map(|i| {
+                    (i..dim)
+                        .into_par_iter()
+                        .map(move |j| ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts)))
+                })
+                .collect();
 
             let mut mat = DMatrix::<f64>::zeros(dim, dim);
-            for ((i, j), v) in entries { mat[(i, j)] = v; mat[(j, i)] = v; }
+            for ((i, j), v) in entries {
+                mat[(i, j)] = v;
+                mat[(j, i)] = v;
+            }
 
             let eig = SymmetricEigen::new(mat);
-            let lmin = eig.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+            let lmin = eig
+                .eigenvalues
+                .iter()
+                .cloned()
+                .fold(f64::INFINITY, f64::min);
             lmins.push(lmin);
         }
 
-        println!("  {:6} {:14.10} {:14.10} {:14.10} {:14.10}",
-            n, lmins[0], lmins[1], lmins[2], lmins[3]);
+        println!(
+            "  {:6} {:14.10} {:14.10} {:14.10} {:14.10}",
+            n, lmins[0], lmins[1], lmins[2], lmins[3]
+        );
     }
 
     // ═══════════════════════════════════════════════════════
@@ -116,26 +142,39 @@ fn main() {
 
     let mut evecs = vec![];
     for power in 1..=4u32 {
-        let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-            .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts))
-            })).collect();
+        let entries: Vec<((usize, usize), f64)> = (0..dim)
+            .into_par_iter()
+            .flat_map(|i| {
+                (i..dim)
+                    .into_par_iter()
+                    .map(move |j| ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts)))
+            })
+            .collect();
 
         let mut mat = DMatrix::<f64>::zeros(dim, dim);
-        for ((i, j), v) in entries { mat[(i, j)] = v; mat[(j, i)] = v; }
+        for ((i, j), v) in entries {
+            mat[(i, j)] = v;
+            mat[(j, i)] = v;
+        }
 
         let eig = SymmetricEigen::new(mat);
-        let min_idx = eig.eigenvalues.iter().enumerate()
+        let min_idx = eig
+            .eigenvalues
+            .iter()
+            .enumerate()
             .min_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap())
-            .unwrap().0;
+            .unwrap()
+            .0;
         let evec: Vec<f64> = eig.eigenvectors.column(min_idx).iter().cloned().collect();
         evecs.push(evec);
     }
 
     // Check Liouville correlation in each channel
     println!("  Liouville correlation of minimum eigenvector:\n");
-    println!("  {:>8} {:>12} {:>12} {:>12}",
-        "channel", "corr(v,λ)", "|corr|", "sign agree%");
+    println!(
+        "  {:>8} {:>12} {:>12} {:>12}",
+        "channel", "corr(v,λ)", "|corr|", "sign agree%"
+    );
     println!("  {}", "─".repeat(48));
 
     for (ch, evec) in evecs.iter().enumerate() {
@@ -170,13 +209,23 @@ fn main() {
             let l = liouville(k) as f64;
             if v.abs() > 1e-6 {
                 total += 1;
-                if v.signum() == l.signum() { sign_agree += 1; }
+                if v.signum() == l.signum() {
+                    sign_agree += 1;
+                }
             }
         }
 
-        println!("  x^{:<5} {:12.6} {:12.6} {:>10.1}%",
-            power, corr, corr.abs(),
-            if total > 0 { 100.0 * sign_agree as f64 / total as f64 } else { 0.0 });
+        println!(
+            "  x^{:<5} {:12.6} {:12.6} {:>10.1}%",
+            power,
+            corr,
+            corr.abs(),
+            if total > 0 {
+                100.0 * sign_agree as f64 / total as f64
+            } else {
+                0.0
+            }
+        );
     }
 
     // ═══════════════════════════════════════════════════════
@@ -184,8 +233,10 @@ fn main() {
     // ═══════════════════════════════════════════════════════
     println!("\n═══ Section 3: Direct sum vs real Gram matrix ═══\n");
     println!("  The 'quaternionic' Gram matrix as a block structure:\n");
-    println!("  {:>6} {:>14} {:>14} {:>14} {:>8}",
-        "N", "λ_min(G¹)", "λ_min(G¹⊕G²)", "λ_min(G¹⊕..⊕G⁴)", "boost?");
+    println!(
+        "  {:>6} {:>14} {:>14} {:>14} {:>8}",
+        "N", "λ_min(G¹)", "λ_min(G¹⊕G²)", "λ_min(G¹⊕..⊕G⁴)", "boost?"
+    );
     println!("  {}", "─".repeat(60));
 
     for &n in &[20, 50, 100, 200] {
@@ -194,19 +245,30 @@ fn main() {
         // Build all 4 channel matrices
         let mut channel_mats = vec![];
         for power in 1..=4u32 {
-            let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-                .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                    ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts))
-                })).collect();
+            let entries: Vec<((usize, usize), f64)> = (0..dim)
+                .into_par_iter()
+                .flat_map(|i| {
+                    (i..dim)
+                        .into_par_iter()
+                        .map(move |j| ((i, j), gram_entry_power(i + 2, j + 2, power, n_pts)))
+                })
+                .collect();
 
             let mut mat = DMatrix::<f64>::zeros(dim, dim);
-            for ((i, j), v) in entries { mat[(i, j)] = v; mat[(j, i)] = v; }
+            for ((i, j), v) in entries {
+                mat[(i, j)] = v;
+                mat[(j, i)] = v;
+            }
             channel_mats.push(mat);
         }
 
         // λ_min of channel 1 alone
         let eig1 = SymmetricEigen::new(channel_mats[0].clone());
-        let lmin1 = eig1.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+        let lmin1 = eig1
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
 
         // λ_min of direct sum G¹⊕G² (2×dim block diagonal)
         let d2 = 2 * dim;
@@ -218,7 +280,11 @@ fn main() {
             }
         }
         let eig2 = SymmetricEigen::new(block2);
-        let lmin2 = eig2.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+        let lmin2 = eig2
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
 
         // λ_min of direct sum G¹⊕G²⊕G³⊕G⁴ (4×dim block diagonal)
         let d4 = 4 * dim;
@@ -231,11 +297,21 @@ fn main() {
             }
         }
         let eig4 = SymmetricEigen::new(block4);
-        let lmin4 = eig4.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+        let lmin4 = eig4
+            .eigenvalues
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
 
         let boost = lmin4 > lmin1;
-        println!("  {:6} {:14.10} {:14.10} {:14.10} {:>8}",
-            n, lmin1, lmin2, lmin4, if boost { "✅ YES" } else { "❌ no" });
+        println!(
+            "  {:6} {:14.10} {:14.10} {:14.10} {:>8}",
+            n,
+            lmin1,
+            lmin2,
+            lmin4,
+            if boost { "✅ YES" } else { "❌ no" }
+        );
     }
 
     // ═══════════════════════════════════════════════════════
@@ -249,16 +325,23 @@ fn main() {
     let dim = n - 1;
     let qdim = 4 * dim; // Full quaternionic dimension
 
-    println!("  Building {}×{} full quaternionic Gram matrix...", qdim, qdim);
+    println!(
+        "  Building {}×{} full quaternionic Gram matrix...",
+        qdim, qdim
+    );
     let qstart = std::time::Instant::now();
 
     let mut qmat = DMatrix::<f64>::zeros(qdim, qdim);
     for p1 in 0..4u32 {
         for p2 in p1..4u32 {
-            let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-                .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-                    ((i, j), gram_cross(i + 2, j + 2, p1 + 1, p2 + 1, n_pts))
-                })).collect();
+            let entries: Vec<((usize, usize), f64)> = (0..dim)
+                .into_par_iter()
+                .flat_map(|i| {
+                    (i..dim)
+                        .into_par_iter()
+                        .map(move |j| ((i, j), gram_cross(i + 2, j + 2, p1 + 1, p2 + 1, n_pts)))
+                })
+                .collect();
 
             for ((i, j), v) in entries {
                 // Block (p1, p2) at position (p1*dim + i, p2*dim + j)
@@ -284,27 +367,51 @@ fn main() {
     let neg_count = qevals.iter().filter(|&&v| v < -1e-10).count();
 
     // Compare to channel-1 only
-    let entries1: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-        .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-            ((i, j), gram_entry_power(i + 2, j + 2, 1, n_pts))
-        })).collect();
+    let entries1: Vec<((usize, usize), f64)> = (0..dim)
+        .into_par_iter()
+        .flat_map(|i| {
+            (i..dim)
+                .into_par_iter()
+                .map(move |j| ((i, j), gram_entry_power(i + 2, j + 2, 1, n_pts)))
+        })
+        .collect();
     let mut mat1 = DMatrix::<f64>::zeros(dim, dim);
-    for ((i, j), v) in entries1 { mat1[(i, j)] = v; mat1[(j, i)] = v; }
+    for ((i, j), v) in entries1 {
+        mat1[(i, j)] = v;
+        mat1[(j, i)] = v;
+    }
     let eig1 = SymmetricEigen::new(mat1);
-    let lmin1 = eig1.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min);
+    let lmin1 = eig1
+        .eigenvalues
+        .iter()
+        .cloned()
+        .fold(f64::INFINITY, f64::min);
 
     println!("\n  Results:");
     println!("    λ_min(G¹) [real channel 1]:   {:.10}", lmin1);
     println!("    λ_min(G^ℍ) [full quaternionic]: {:.10}", qmin);
     println!("    λ_max(G^ℍ):                    {:.4}", qmax);
-    println!("    Negative eigenvalues:           {}/{}", neg_count, qevals.len());
-    println!("    Is G^ℍ positive definite?       {}", if neg_count == 0 { "✅ YES" } else { "❌ NO" });
+    println!(
+        "    Negative eigenvalues:           {}/{}",
+        neg_count,
+        qevals.len()
+    );
+    println!(
+        "    Is G^ℍ positive definite?       {}",
+        if neg_count == 0 { "✅ YES" } else { "❌ NO" }
+    );
 
     if qmin > lmin1 {
-        println!("\n    🎉 QUATERNIONIC GAP IS LARGER: {:.10} > {:.10}", qmin, lmin1);
+        println!(
+            "\n    🎉 QUATERNIONIC GAP IS LARGER: {:.10} > {:.10}",
+            qmin, lmin1
+        );
         println!("    Boost factor: {:.4}×", qmin / lmin1);
     } else {
-        println!("\n    ℹ️  Quaternionic gap not larger: {:.10} ≤ {:.10}", qmin, lmin1);
+        println!(
+            "\n    ℹ️  Quaternionic gap not larger: {:.10} ≤ {:.10}",
+            qmin, lmin1
+        );
     }
 
     // 10 smallest eigenvalues
@@ -315,7 +422,9 @@ fn main() {
             " ← Kramers pair"
         } else if i > 0 && (qevals[i] - qevals[i - 1]).abs() < 1e-6 {
             " ← Kramers pair"
-        } else { "" };
+        } else {
+            ""
+        };
         println!("    λ_{} = {:.10}{}", i + 1, qevals[i], kramers);
     }
 
@@ -330,10 +439,16 @@ fn main() {
             i += 1;
         }
     }
-    println!("\n  Kramers-degenerate pairs: {}/{} (expect ~50% for true GSE)",
-        kramers_pairs, qevals.len() / 2);
+    println!(
+        "\n  Kramers-degenerate pairs: {}/{} (expect ~50% for true GSE)",
+        kramers_pairs,
+        qevals.len() / 2
+    );
 
-    println!("\n  Total time: {:.1}s", total_start.elapsed().as_secs_f64());
+    println!(
+        "\n  Total time: {:.1}s",
+        total_start.elapsed().as_secs_f64()
+    );
     println!("╔══════════════════════════════════════════════════════════════════╗");
     println!("║  Quaternionic analysis complete.                               ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");

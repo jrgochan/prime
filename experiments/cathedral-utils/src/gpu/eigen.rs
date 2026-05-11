@@ -6,9 +6,9 @@
 //! - Spectral projections (eigenvalues + V^T b, no eigenvector download)
 //! - Eigenvalues only (minimal VRAM, ~2× faster)
 
+use super::ffi;
 use std::ffi::c_int;
 use std::ptr;
-use super::ffi;
 
 /// Result of full GPU eigendecomposition.
 pub struct EigenResult {
@@ -72,42 +72,79 @@ pub fn syevd(gram_data: &[f64], n: usize) -> Result<EigenResult, String> {
             return Err(format!("cudaMalloc failed: {},{},{}", s1, s2, s3));
         }
 
-        ffi::cudaMemcpy(d_a, col_major.as_ptr(), matrix_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
+        ffi::cudaMemcpy(
+            d_a,
+            col_major.as_ptr(),
+            matrix_bytes,
+            ffi::MEMCPY_HOST_TO_DEVICE,
+        );
 
         let mut lwork: c_int = 0;
         ffi::cusolverDnDsyevd_bufferSize(
-            handle, ffi::EigMode::Vec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            handle,
+            ffi::EigMode::Vec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
 
         let mut d_work: *mut f64 = ptr::null_mut();
         ffi::cudaMalloc(&mut d_work, lwork as usize * 8);
 
         let status = ffi::cusolverDnDsyevd(
-            handle, ffi::EigMode::Vec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            handle,
+            ffi::EigMode::Vec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         ffi::cudaDeviceSynchronize();
 
         if status != 0 {
-            ffi::cudaFree(d_a); ffi::cudaFree(d_w);
-            ffi::cudaFree(d_work); ffi::cudaFree(d_info as *mut f64);
+            ffi::cudaFree(d_a);
+            ffi::cudaFree(d_w);
+            ffi::cudaFree(d_work);
+            ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(handle);
             return Err(format!("cusolverDnDsyevd failed: {}", status));
         }
 
         let mut eigenvalues = vec![0.0f64; n];
         let mut eigenvectors = vec![0.0f64; n * n];
-        ffi::cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, ffi::MEMCPY_DEVICE_TO_HOST);
-        ffi::cudaMemcpy(eigenvectors.as_mut_ptr(), d_a, matrix_bytes, ffi::MEMCPY_DEVICE_TO_HOST);
+        ffi::cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            ffi::MEMCPY_DEVICE_TO_HOST,
+        );
+        ffi::cudaMemcpy(
+            eigenvectors.as_mut_ptr(),
+            d_a,
+            matrix_bytes,
+            ffi::MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 
-        ffi::cudaFree(d_a); ffi::cudaFree(d_w);
-        ffi::cudaFree(d_work); ffi::cudaFree(d_info as *mut f64);
+        ffi::cudaFree(d_a);
+        ffi::cudaFree(d_w);
+        ffi::cudaFree(d_work);
+        ffi::cudaFree(d_info as *mut f64);
         ffi::cusolverDnDestroy(handle);
 
-        Ok(EigenResult { eigenvalues, eigenvectors, gpu_time_secs: gpu_time })
+        Ok(EigenResult {
+            eigenvalues,
+            eigenvectors,
+            gpu_time_secs: gpu_time,
+        })
     }
 }
 
@@ -118,7 +155,9 @@ pub fn syevd(gram_data: &[f64], n: usize) -> Result<EigenResult, String> {
 ///
 /// VRAM: ~N² × 8 (matrix) + workspace + 3 vectors.
 pub fn spectral_projections(
-    gram_data: &[f64], n: usize, b: &[f64],
+    gram_data: &[f64],
+    n: usize,
+    b: &[f64],
 ) -> Result<SpectralResult, String> {
     let n_i32 = n as c_int;
     let matrix_bytes = n * n * 8;
@@ -151,29 +190,50 @@ pub fn spectral_projections(
         ffi::cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
         // For symmetric matrices, row-major = column-major
-        ffi::cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
+        ffi::cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            ffi::MEMCPY_HOST_TO_DEVICE,
+        );
         ffi::cudaMemcpy(d_b, b.as_ptr(), vec_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
 
         // Eigendecomposition
         let mut lwork: c_int = 0;
         ffi::cusolverDnDsyevd_bufferSize(
-            solver_handle, ffi::EigMode::Vec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            solver_handle,
+            ffi::EigMode::Vec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
 
         let mut d_work: *mut f64 = ptr::null_mut();
         ffi::cudaMalloc(&mut d_work, lwork as usize * 8);
 
         let status = ffi::cusolverDnDsyevd(
-            solver_handle, ffi::EigMode::Vec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            solver_handle,
+            ffi::EigMode::Vec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         ffi::cudaDeviceSynchronize();
         ffi::cudaFree(d_work);
 
         if status != 0 {
-            ffi::cudaFree(d_a); ffi::cudaFree(d_w);
-            ffi::cudaFree(d_b); ffi::cudaFree(d_c);
+            ffi::cudaFree(d_a);
+            ffi::cudaFree(d_w);
+            ffi::cudaFree(d_b);
+            ffi::cudaFree(d_c);
             ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(solver_handle);
             ffi::cublasDestroy_v2(blas_handle);
@@ -184,28 +244,52 @@ pub fn spectral_projections(
         let alpha = 1.0f64;
         let beta_val = 0.0f64;
         ffi::cublasDgemv_v2(
-            blas_handle, ffi::OP_T,
-            n_i32, n_i32,
-            &alpha, d_a, n_i32,
-            d_b, 1, &beta_val, d_c, 1,
+            blas_handle,
+            ffi::OP_T,
+            n_i32,
+            n_i32,
+            &alpha,
+            d_a,
+            n_i32,
+            d_b,
+            1,
+            &beta_val,
+            d_c,
+            1,
         );
         ffi::cudaDeviceSynchronize();
 
         // Download eigenvalues + projections (tiny: 2 × N × 8 bytes)
         let mut eigenvalues = vec![0.0f64; n];
         let mut projections = vec![0.0f64; n];
-        ffi::cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, ffi::MEMCPY_DEVICE_TO_HOST);
-        ffi::cudaMemcpy(projections.as_mut_ptr(), d_c, vec_bytes, ffi::MEMCPY_DEVICE_TO_HOST);
+        ffi::cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            ffi::MEMCPY_DEVICE_TO_HOST,
+        );
+        ffi::cudaMemcpy(
+            projections.as_mut_ptr(),
+            d_c,
+            vec_bytes,
+            ffi::MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
 
-        ffi::cudaFree(d_a); ffi::cudaFree(d_w);
-        ffi::cudaFree(d_b); ffi::cudaFree(d_c);
+        ffi::cudaFree(d_a);
+        ffi::cudaFree(d_w);
+        ffi::cudaFree(d_b);
+        ffi::cudaFree(d_c);
         ffi::cudaFree(d_info as *mut f64);
         ffi::cusolverDnDestroy(solver_handle);
         ffi::cublasDestroy_v2(blas_handle);
 
-        Ok(SpectralResult { eigenvalues, projections, gpu_time_secs: gpu_time })
+        Ok(SpectralResult {
+            eigenvalues,
+            projections,
+            gpu_time_secs: gpu_time,
+        })
     }
 }
 
@@ -234,26 +318,46 @@ pub fn eigenvalues_only(gram_data: &[f64], n: usize) -> Result<(Vec<f64>, f64), 
         ffi::cudaMalloc(&mut d_w, vec_bytes);
         ffi::cudaMalloc(&mut d_info as *mut *mut c_int as *mut *mut f64, 4);
 
-        ffi::cudaMemcpy(d_a, gram_data.as_ptr(), matrix_bytes, ffi::MEMCPY_HOST_TO_DEVICE);
+        ffi::cudaMemcpy(
+            d_a,
+            gram_data.as_ptr(),
+            matrix_bytes,
+            ffi::MEMCPY_HOST_TO_DEVICE,
+        );
 
         let mut lwork: c_int = 0;
         ffi::cusolverDnDsyevd_bufferSize(
-            handle, ffi::EigMode::NoVec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, &mut lwork,
+            handle,
+            ffi::EigMode::NoVec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            &mut lwork,
         );
 
         let mut d_work: *mut f64 = ptr::null_mut();
         let s = ffi::cudaMalloc(&mut d_work, lwork as usize * 8);
         if s != 0 {
-            ffi::cudaFree(d_a); ffi::cudaFree(d_w);
+            ffi::cudaFree(d_a);
+            ffi::cudaFree(d_w);
             ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(handle);
             return Err(format!("workspace alloc failed: {}", s));
         }
 
         let status = ffi::cusolverDnDsyevd(
-            handle, ffi::EigMode::NoVec, ffi::FillMode::Lower,
-            n_i32, d_a, n_i32, d_w, d_work, lwork, d_info,
+            handle,
+            ffi::EigMode::NoVec,
+            ffi::FillMode::Lower,
+            n_i32,
+            d_a,
+            n_i32,
+            d_w,
+            d_work,
+            lwork,
+            d_info,
         );
         ffi::cudaDeviceSynchronize();
 
@@ -261,16 +365,23 @@ pub fn eigenvalues_only(gram_data: &[f64], n: usize) -> Result<(Vec<f64>, f64), 
         ffi::cudaFree(d_a);
 
         if status != 0 {
-            ffi::cudaFree(d_w); ffi::cudaFree(d_info as *mut f64);
+            ffi::cudaFree(d_w);
+            ffi::cudaFree(d_info as *mut f64);
             ffi::cusolverDnDestroy(handle);
             return Err(format!("cusolverDnDsyevd NoVec failed: {}", status));
         }
 
         let mut eigenvalues = vec![0.0f64; n];
-        ffi::cudaMemcpy(eigenvalues.as_mut_ptr(), d_w, vec_bytes, ffi::MEMCPY_DEVICE_TO_HOST);
+        ffi::cudaMemcpy(
+            eigenvalues.as_mut_ptr(),
+            d_w,
+            vec_bytes,
+            ffi::MEMCPY_DEVICE_TO_HOST,
+        );
 
         let gpu_time = start.elapsed().as_secs_f64();
-        ffi::cudaFree(d_w); ffi::cudaFree(d_info as *mut f64);
+        ffi::cudaFree(d_w);
+        ffi::cudaFree(d_info as *mut f64);
         ffi::cusolverDnDestroy(handle);
 
         Ok((eigenvalues, gpu_time))

@@ -1,7 +1,7 @@
 #![allow(unused, dead_code)]
 //! G₂ Spectral Operator Experiment
 //! ================================
-//! 
+//!
 //! G₂ = Aut(𝕆) is the 14-dimensional exceptional Lie group that preserves
 //! octonionic multiplication. It acts naturally on im(𝕆) ≅ ℝ⁷.
 //!
@@ -71,39 +71,45 @@ fn left_mult_matrix(k: usize) -> [[f64; 7]; 7] {
 /// Known Riemann zeta zeros (imaginary parts) for correlation testing.
 /// First 30 zeros computed to high precision.
 const ZETA_ZEROS: [f64; 30] = [
-    14.134725, 21.022040, 25.010858, 30.424876, 32.935062,
-    37.586178, 40.918719, 43.327073, 48.005151, 49.773832,
-    52.970321, 56.446248, 59.347044, 60.831779, 65.112544,
-    67.079811, 69.546402, 72.067158, 75.704691, 77.144840,
-    79.337375, 82.910381, 84.735493, 87.425275, 88.809111,
-    92.491899, 94.651344, 95.870634, 98.831194, 101.317851,
+    14.134725, 21.022040, 25.010858, 30.424876, 32.935062, 37.586178, 40.918719, 43.327073,
+    48.005151, 49.773832, 52.970321, 56.446248, 59.347044, 60.831779, 65.112544, 67.079811,
+    69.546402, 72.067158, 75.704691, 77.144840, 79.337375, 82.910381, 84.735493, 87.425275,
+    88.809111, 92.491899, 94.651344, 95.870634, 98.831194, 101.317851,
 ];
 
 /// Primes for the operator construction
 const PRIMES: [usize; 100] = [
-    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47,
-    53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113,
-    127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197,
-    199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
-    283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379,
-    383, 389, 397, 401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463,
-    467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
+    2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+    101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193,
+    197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307,
+    311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409, 419, 421,
+    431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541,
 ];
 
 /// 7×7 matrix operations (stack-allocated for speed)
 type Mat7 = [[f64; 7]; 7];
 
-fn mat_zero() -> Mat7 { [[0.0; 7]; 7] }
+fn mat_zero() -> Mat7 {
+    [[0.0; 7]; 7]
+}
 
 fn mat_add(a: &Mat7, b: &Mat7) -> Mat7 {
     let mut r = mat_zero();
-    for i in 0..7 { for j in 0..7 { r[i][j] = a[i][j] + b[i][j]; } }
+    for i in 0..7 {
+        for j in 0..7 {
+            r[i][j] = a[i][j] + b[i][j];
+        }
+    }
     r
 }
 
 fn mat_scale(a: &Mat7, s: f64) -> Mat7 {
     let mut r = mat_zero();
-    for i in 0..7 { for j in 0..7 { r[i][j] = a[i][j] * s; } }
+    for i in 0..7 {
+        for j in 0..7 {
+            r[i][j] = a[i][j] * s;
+        }
+    }
     r
 }
 
@@ -112,7 +118,9 @@ fn mat_mul(a: &Mat7, b: &Mat7) -> Mat7 {
     for i in 0..7 {
         for j in 0..7 {
             let mut s = 0.0;
-            for k in 0..7 { s += a[i][k] * b[k][j]; }
+            for k in 0..7 {
+                s += a[i][k] * b[k][j];
+            }
             r[i][j] = s;
         }
     }
@@ -121,7 +129,11 @@ fn mat_mul(a: &Mat7, b: &Mat7) -> Mat7 {
 
 fn mat_transpose(a: &Mat7) -> Mat7 {
     let mut r = mat_zero();
-    for i in 0..7 { for j in 0..7 { r[i][j] = a[j][i]; } }
+    for i in 0..7 {
+        for j in 0..7 {
+            r[i][j] = a[j][i];
+        }
+    }
     r
 }
 
@@ -133,13 +145,19 @@ fn mat_symmetrize(a: &Mat7) -> Mat7 {
 
 fn mat_trace(a: &Mat7) -> f64 {
     let mut s = 0.0;
-    for i in 0..7 { s += a[i][i]; }
+    for i in 0..7 {
+        s += a[i][i];
+    }
     s
 }
 
 fn mat_frobenius(a: &Mat7) -> f64 {
     let mut s = 0.0;
-    for i in 0..7 { for j in 0..7 { s += a[i][j] * a[i][j]; } }
+    for i in 0..7 {
+        for j in 0..7 {
+            s += a[i][j] * a[i][j];
+        }
+    }
     s.sqrt()
 }
 
@@ -163,7 +181,9 @@ fn eigenvalues_jacobi(mat: &Mat7, max_iter: usize) -> Vec<f64> {
                 }
             }
         }
-        if max_val < 1e-14 { break; }
+        if max_val < 1e-14 {
+            break;
+        }
 
         // Compute rotation
         let theta = if (a[p][p] - a[q][q]).abs() < 1e-30 {
@@ -185,7 +205,8 @@ fn eigenvalues_jacobi(mat: &Mat7, max_iter: usize) -> Vec<f64> {
             a[q][j] = -s * new_a[p][j] + c * new_a[q][j];
         }
         // Fix diagonal
-        let app = c * c * mat_elem(&new_a, p, p) + 2.0 * s * c * mat_elem(&new_a, p, q)
+        let app = c * c * mat_elem(&new_a, p, p)
+            + 2.0 * s * c * mat_elem(&new_a, p, q)
             + s * s * mat_elem(&new_a, q, q);
         let aqq = s * s * mat_elem(&new_a, p, p) - 2.0 * s * c * mat_elem(&new_a, p, q)
             + c * c * mat_elem(&new_a, q, q);
@@ -200,7 +221,9 @@ fn eigenvalues_jacobi(mat: &Mat7, max_iter: usize) -> Vec<f64> {
     eigs
 }
 
-fn mat_elem(a: &Mat7, i: usize, j: usize) -> f64 { a[i][j] }
+fn mat_elem(a: &Mat7, i: usize, j: usize) -> f64 {
+    a[i][j]
+}
 
 // ═══════════════════════════════════════════════════════════
 // OPERATOR CONSTRUCTIONS
@@ -232,14 +255,20 @@ fn build_commutator_operator(sigma: f64, num_primes: usize) -> Mat7 {
         let p = PRIMES[idx] as f64;
         let a = PRIMES[idx] % 7;
         let b = PRIMES[idx + 1] % 7;
-        if a == b { continue; }
+        if a == b {
+            continue;
+        }
         let weight = p.ln() / p.powf(sigma);
         let la = left_mult_matrix(a);
         let lb = left_mult_matrix(b);
         let ab = mat_mul(&la, &lb);
         let ba = mat_mul(&lb, &la);
         let mut comm = mat_zero();
-        for i in 0..7 { for j in 0..7 { comm[i][j] = ab[i][j] - ba[i][j]; } }
+        for i in 0..7 {
+            for j in 0..7 {
+                comm[i][j] = ab[i][j] - ba[i][j];
+            }
+        }
         h = mat_add(&h, &mat_scale(&comm, weight));
     }
     mat_symmetrize(&h)
@@ -271,7 +300,9 @@ fn build_trace_operator(t: f64, max_n: usize, num_primes: usize) -> Mat7 {
     let mut h = mat_zero();
     for n in 2..=max_n {
         let lambda = von_mangoldt(n, num_primes);
-        if lambda == 0.0 { continue; }
+        if lambda == 0.0 {
+            continue;
+        }
         let nf = n as f64;
         let weight = lambda / nf.sqrt() * (t * nf.ln()).cos();
         // Map n to a G₂ direction using multiple imaginary units
@@ -295,10 +326,14 @@ fn build_trace_operator(t: f64, max_n: usize, num_primes: usize) -> Mat7 {
 fn von_mangoldt(n: usize, num_primes: usize) -> f64 {
     for idx in 0..num_primes.min(PRIMES.len()) {
         let p = PRIMES[idx];
-        if p > n { break; }
+        if p > n {
+            break;
+        }
         let mut power = p;
         while power <= n {
-            if power == n { return (p as f64).ln(); }
+            if power == n {
+                return (p as f64).ln();
+            }
             power = match power.checked_mul(p) {
                 Some(v) => v,
                 None => break,
@@ -321,8 +356,12 @@ fn spectral_signature(eigs: &[f64]) -> f64 {
 }
 
 /// Compute spectral flow: eigenvalues as function of parameter t
-fn spectral_flow(t_start: f64, t_end: f64, steps: usize, 
-                 builder: impl Fn(f64) -> Mat7) -> Vec<(f64, Vec<f64>, f64)> {
+fn spectral_flow(
+    t_start: f64,
+    t_end: f64,
+    steps: usize,
+    builder: impl Fn(f64) -> Mat7,
+) -> Vec<(f64, Vec<f64>, f64)> {
     let dt = (t_end - t_start) / steps as f64;
     let mut results = Vec::with_capacity(steps);
     for i in 0..=steps {
@@ -337,15 +376,15 @@ fn spectral_flow(t_start: f64, t_end: f64, steps: usize,
 
 fn main() {
     let total_start = Instant::now();
-    
+
     println!("╔════════════════════════════════════════════════════════════╗");
     println!("║  G₂ SPECTRAL OPERATOR EXPERIMENT                        ║");
     println!("║  Aut(𝕆) × Prime Data → Eigenvalue/Zero Correlation      ║");
     println!("╚════════════════════════════════════════════════════════════╝\n");
-    
+
     // ═══ PHASE 1: Verify G₂ structure ═══
     println!("▓▓▓ PHASE 1: Verifying octonionic structure constants ▓▓▓\n");
-    
+
     // Check antisymmetry of left-multiplication matrices
     let mut g2_ok = true;
     for k in 0..7 {
@@ -363,7 +402,7 @@ fn main() {
     if g2_ok {
         println!("  ✅ All 7 left-multiplication matrices are antisymmetric");
     }
-    
+
     // Verify Fano plane: eₐ·eₐ = -1 (structure constant trace)
     for k in 0..7 {
         let lk = left_mult_matrix(k);
@@ -371,7 +410,7 @@ fn main() {
         let tr = mat_trace(&lk2);
         // For division algebra: Lₖ² should have trace related to -dim
         let expected = -2.0; // each eₖ has exactly 2 Fano triples through it
-        // Actually Lₖ·Lₖᵀ should be related to identity
+                             // Actually Lₖ·Lₖᵀ should be related to identity
         let lkt = mat_transpose(&lk);
         let prod = mat_mul(&lk, &lkt);
         let diag: Vec<f64> = (0..7).map(|i| prod[i][i]).collect();
@@ -379,18 +418,22 @@ fn main() {
             println!("  L₀·L₀ᵀ diagonal: {:?}", diag);
         }
     }
-    
+
     // G₂ dimension check: count independent commutators [Lᵢ, Lⱼ]
     let mut independent_comms = 0;
     for i in 0..7 {
-        for j in (i+1)..7 {
+        for j in (i + 1)..7 {
             let li = left_mult_matrix(i);
             let lj = left_mult_matrix(j);
             let comm = {
                 let ij = mat_mul(&li, &lj);
                 let ji = mat_mul(&lj, &li);
                 let mut c = mat_zero();
-                for a in 0..7 { for b in 0..7 { c[a][b] = ij[a][b] - ji[a][b]; } }
+                for a in 0..7 {
+                    for b in 0..7 {
+                        c[a][b] = ij[a][b] - ji[a][b];
+                    }
+                }
                 c
             };
             if mat_frobenius(&comm) > 1e-10 {
@@ -398,98 +441,139 @@ fn main() {
             }
         }
     }
-    println!("  Non-zero commutators [Lᵢ,Lⱼ]: {} (expect 21 = C(7,2))", independent_comms);
+    println!(
+        "  Non-zero commutators [Lᵢ,Lⱼ]: {} (expect 21 = C(7,2))",
+        independent_comms
+    );
     println!("  dim(g₂) = 14 ⊂ so(7) of dim 21\n");
-    
+
     // ═══ PHASE 2: Static operator spectra ═══
     println!("▓▓▓ PHASE 2: Static operator eigenvalue spectra ▓▓▓\n");
-    
+
     for &sigma in &[0.5, 1.0, 2.0] {
         let h_cas = build_casimir_operator(sigma, 50);
         let eigs_cas = eigenvalues_jacobi(&h_cas, 500);
-        println!("  Casimir(σ={:.1}):  eigs = [{}]", sigma,
-            eigs_cas.iter().map(|e| format!("{:+.4}", e)).collect::<Vec<_>>().join(", "));
-        
+        println!(
+            "  Casimir(σ={:.1}):  eigs = [{}]",
+            sigma,
+            eigs_cas
+                .iter()
+                .map(|e| format!("{:+.4}", e))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
+
         let h_comm = build_commutator_operator(sigma, 50);
         let eigs_comm = eigenvalues_jacobi(&h_comm, 500);
-        println!("  Commutator(σ={:.1}): eigs = [{}]", sigma,
-            eigs_comm.iter().map(|e| format!("{:+.4}", e)).collect::<Vec<_>>().join(", "));
+        println!(
+            "  Commutator(σ={:.1}): eigs = [{}]",
+            sigma,
+            eigs_comm
+                .iter()
+                .map(|e| format!("{:+.4}", e))
+                .collect::<Vec<_>>()
+                .join(", ")
+        );
     }
-    
+
     // ═══ PHASE 3: Spectral flow vs zeta zeros ═══
     println!("\n▓▓▓ PHASE 3: Spectral flow — scanning for zeta zero resonances ▓▓▓\n");
-    
+
     let num_primes = 100;
     let max_n = 1000;
     let t_start = 10.0;
     let t_end = 55.0;
     let steps = 9000; // fine resolution: δt ≈ 0.005
-    
-    println!("  Scanning t ∈ [{:.1}, {:.1}] with {} steps ({} primes, Λ(n) for n ≤ {})",
-        t_start, t_end, steps, num_primes, max_n);
+
+    println!(
+        "  Scanning t ∈ [{:.1}, {:.1}] with {} steps ({} primes, Λ(n) for n ≤ {})",
+        t_start, t_end, steps, num_primes, max_n
+    );
     println!("  Looking for spectral anomalies near known zeta zeros...\n");
-    
+
     // Dirichlet-G₂ flow
     let start = Instant::now();
     let flow_dirichlet = spectral_flow(t_start, t_end, steps, |t| {
         build_dirichlet_operator(t, num_primes)
     });
-    println!("  Dirichlet flow computed in {:.2}s", start.elapsed().as_secs_f64());
-    
+    println!(
+        "  Dirichlet flow computed in {:.2}s",
+        start.elapsed().as_secs_f64()
+    );
+
     // Trace flow
     let start = Instant::now();
     let flow_trace = spectral_flow(t_start, t_end, steps, |t| {
         build_trace_operator(t, max_n, num_primes)
     });
-    println!("  Trace flow computed in {:.2}s\n", start.elapsed().as_secs_f64());
-    
+    println!(
+        "  Trace flow computed in {:.2}s\n",
+        start.elapsed().as_secs_f64()
+    );
+
     // ═══ PHASE 4: Correlate with zeta zeros ═══
     println!("▓▓▓ PHASE 4: Correlation analysis ▓▓▓\n");
-    
+
     // For each zeta zero, check the spectral signature nearby
-    println!("  {:>8}  {:>12}  {:>12}  {:>12}  {:>12}  {:>6}",
-        "Zero γₖ", "Dir.Sig", "Tr.Sig", "Dir.MinEig", "Tr.MinEig", "Anom?");
+    println!(
+        "  {:>8}  {:>12}  {:>12}  {:>12}  {:>12}  {:>6}",
+        "Zero γₖ", "Dir.Sig", "Tr.Sig", "Dir.MinEig", "Tr.MinEig", "Anom?"
+    );
     println!("  {}", "-".repeat(72));
-    
+
     let zeros_to_check: Vec<f64> = ZETA_ZEROS[..10].to_vec();
-    
+
     for &gamma in &zeros_to_check {
-        if gamma < t_start || gamma > t_end { continue; }
-        
+        if gamma < t_start || gamma > t_end {
+            continue;
+        }
+
         // Find the closest point in our flow
         let idx_d = ((gamma - t_start) / (t_end - t_start) * steps as f64) as usize;
         let idx_d = idx_d.min(flow_dirichlet.len() - 1);
-        
+
         let (t_d, ref eigs_d, sig_d) = flow_dirichlet[idx_d];
         let (t_t, ref eigs_t, sig_t) = flow_trace[idx_d.min(flow_trace.len() - 1)];
-        
+
         let min_eig_d = eigs_d.iter().cloned().fold(f64::INFINITY, f64::min).abs();
         let min_eig_t = eigs_t.iter().cloned().fold(f64::INFINITY, f64::min).abs();
-        
+
         // Check if signature at zero is anomalous vs neighbors
         let window = 50;
         let base_d: f64 = if idx_d > window && idx_d + window < flow_dirichlet.len() {
-            let sum: f64 = (idx_d-window..idx_d+window)
+            let sum: f64 = (idx_d - window..idx_d + window)
                 .map(|i| flow_dirichlet[i].2)
                 .sum();
             sum / (2.0 * window as f64)
-        } else { sig_d };
-        
-        let anomaly = if base_d > 0.0 { (sig_d - base_d).abs() / base_d } else { 0.0 };
+        } else {
+            sig_d
+        };
+
+        let anomaly = if base_d > 0.0 {
+            (sig_d - base_d).abs() / base_d
+        } else {
+            0.0
+        };
         let is_anomaly = anomaly > 0.3; // 30% deviation = anomalous
-        
-        println!("  {:>8.4}  {:>12.4e}  {:>12.4e}  {:>12.6}  {:>12.6}  {:>6}",
-            gamma, sig_d, sig_t, min_eig_d, min_eig_t,
-            if is_anomaly { "YES ◄" } else { "  no" });
+
+        println!(
+            "  {:>8.4}  {:>12.4e}  {:>12.4e}  {:>12.6}  {:>12.6}  {:>6}",
+            gamma,
+            sig_d,
+            sig_t,
+            min_eig_d,
+            min_eig_t,
+            if is_anomaly { "YES ◄" } else { "  no" }
+        );
     }
-    
+
     // ═══ PHASE 5: Derivative analysis (zero crossings) ═══
     println!("\n▓▓▓ PHASE 5: Eigenvalue zero crossings ▓▓▓\n");
     println!("  Scanning for t values where eigenvalues change sign...\n");
-    
+
     let mut crossings_dirichlet: Vec<(f64, usize)> = Vec::new();
     let mut crossings_trace: Vec<(f64, usize)> = Vec::new();
-    
+
     for i in 1..flow_dirichlet.len() {
         let (t, ref eigs, _) = flow_dirichlet[i];
         let (_, ref prev_eigs, _) = flow_dirichlet[i - 1];
@@ -499,7 +583,7 @@ fn main() {
             }
         }
     }
-    
+
     for i in 1..flow_trace.len() {
         let (t, ref eigs, _) = flow_trace[i];
         let (_, ref prev_eigs, _) = flow_trace[i - 1];
@@ -509,54 +593,75 @@ fn main() {
             }
         }
     }
-    
+
     println!("  Dirichlet crossings: {} total", crossings_dirichlet.len());
     println!("  Trace crossings:     {} total\n", crossings_trace.len());
-    
+
     // Check correlation: do crossings cluster near zeta zeros?
     println!("  {:>10}  {:>12}  {:>12}", "Zero γₖ", "Dir.Near", "Tr.Near");
     println!("  {}", "-".repeat(38));
-    
+
     for &gamma in &zeros_to_check {
-        if gamma < t_start || gamma > t_end { continue; }
+        if gamma < t_start || gamma > t_end {
+            continue;
+        }
         let epsilon = 0.5; // look within ±0.5 of each zero
-        let near_d = crossings_dirichlet.iter()
+        let near_d = crossings_dirichlet
+            .iter()
             .filter(|(t, _)| (t - gamma).abs() < epsilon)
             .count();
-        let near_t = crossings_trace.iter()
+        let near_t = crossings_trace
+            .iter()
             .filter(|(t, _)| (t - gamma).abs() < epsilon)
             .count();
         println!("  {:>10.4}  {:>12}  {:>12}", gamma, near_d, near_t);
     }
-    
+
     // Background rate
     let total_window = t_end - t_start;
     let bg_d_rate = crossings_dirichlet.len() as f64 / total_window;
     let bg_t_rate = crossings_trace.len() as f64 / total_window;
-    println!("\n  Background crossing rate: Dir={:.2}/unit, Tr={:.2}/unit", bg_d_rate, bg_t_rate);
-    println!("  Expected near each zero (±0.5): Dir={:.1}, Tr={:.1}", bg_d_rate, bg_t_rate);
-    
+    println!(
+        "\n  Background crossing rate: Dir={:.2}/unit, Tr={:.2}/unit",
+        bg_d_rate, bg_t_rate
+    );
+    println!(
+        "  Expected near each zero (±0.5): Dir={:.1}, Tr={:.1}",
+        bg_d_rate, bg_t_rate
+    );
+
     // ═══ PHASE 6: Spectral determinant ═══
     println!("\n▓▓▓ PHASE 6: Spectral determinant det(H(t)) near zeros ▓▓▓\n");
-    
+
     for &gamma in &zeros_to_check {
-        if gamma < t_start || gamma > t_end { continue; }
+        if gamma < t_start || gamma > t_end {
+            continue;
+        }
         let h = build_trace_operator(gamma, max_n, num_primes);
         let eigs = eigenvalues_jacobi(&h, 500);
         let det: f64 = eigs.iter().product();
-        
+
         // Also compute at slightly off-zero values
         let h_off = build_trace_operator(gamma + 0.5, max_n, num_primes);
         let eigs_off = eigenvalues_jacobi(&h_off, 500);
         let det_off: f64 = eigs_off.iter().product();
-        
-        let ratio = if det_off.abs() > 1e-30 { det / det_off } else { f64::NAN };
-        println!("  γ={:.4}:  det(H(γ))={:+.6e}  det(H(γ+½))={:+.6e}  ratio={:.4}",
-            gamma, det, det_off, ratio);
+
+        let ratio = if det_off.abs() > 1e-30 {
+            det / det_off
+        } else {
+            f64::NAN
+        };
+        println!(
+            "  γ={:.4}:  det(H(γ))={:+.6e}  det(H(γ+½))={:+.6e}  ratio={:.4}",
+            gamma, det, det_off, ratio
+        );
     }
-    
+
     let total_elapsed = total_start.elapsed();
     println!("\n╔════════════════════════════════════════════════════════════╗");
-    println!("║  EXPERIMENT COMPLETE  ({:.2}s on M2 Max)             ║", total_elapsed.as_secs_f64());
+    println!(
+        "║  EXPERIMENT COMPLETE  ({:.2}s on M2 Max)             ║",
+        total_elapsed.as_secs_f64()
+    );
     println!("╚════════════════════════════════════════════════════════════╝");
 }

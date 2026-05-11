@@ -10,8 +10,8 @@ use ndarray::Array1;
 use std::path::Path;
 use std::time::Instant;
 
-use super::helpers::{write_str_attr, write_scalar_attr, sha256_hex};
-use super::metadata::{StructuralStats, BVectorStats};
+use super::helpers::{sha256_hex, write_scalar_attr, write_str_attr};
+use super::metadata::{BVectorStats, StructuralStats};
 use super::{HPDF_MAGIC, HPDF_VERSION};
 
 /// Configuration for HPDF file generation.
@@ -32,11 +32,7 @@ pub struct HpdfWriterConfig {
 ///
 /// `data` is the full dim×dim row-major matrix (only upper triangle is stored).
 /// Returns the number of bytes written.
-pub fn write_hpdf(
-    path: &Path,
-    data: &[f64],
-    config: &HpdfWriterConfig,
-) -> hdf5::Result<u64> {
+pub fn write_hpdf(path: &Path, data: &[f64], config: &HpdfWriterConfig) -> hdf5::Result<u64> {
     write_hpdf_inner(path, data, None, config)
 }
 
@@ -103,8 +99,11 @@ fn write_hpdf_inner(
     let t0 = Instant::now();
 
     let has_dd = dd_lo.is_some();
-    eprintln!("  \x1b[2m▸ Writing HPDF{}: {} (dim={dim})\x1b[0m",
-        if has_dd { " [DD]" } else { "" }, path.display());
+    eprintln!(
+        "  \x1b[2m▸ Writing HPDF{}: {} (dim={dim})\x1b[0m",
+        if has_dd { " [DD]" } else { "" },
+        path.display()
+    );
 
     let file = H5File::create(path)?;
 
@@ -116,8 +115,11 @@ fn write_hpdf_inner(
 
     // ── /gram group — upper triangle storage ──
     let gram_grp = file.create_group("gram")?;
-    write_str_attr(&gram_grp, "entry_formula",
-        "G[j,k] = integral_0^1 {1/(jx)}{1/(kx)} dx")?;
+    write_str_attr(
+        &gram_grp,
+        "entry_formula",
+        "G[j,k] = integral_0^1 {1/(jx)}{1/(kx)} dx",
+    )?;
     write_scalar_attr(&gram_grp, "precision", config.precision)?;
     write_scalar_attr(&gram_grp, "max_n", config.max_n as u64)?;
     write_scalar_attr(&gram_grp, "dim", dim as u64)?;
@@ -131,20 +133,22 @@ fn write_hpdf_inner(
             upper_tri.push(data[row * dim + col]);
         }
     }
-    eprintln!("  \x1b[2m  Upper triangle (hi): {tri_len} entries ({} MB)\x1b[0m",
-        tri_len * 8 / (1024 * 1024));
+    eprintln!(
+        "  \x1b[2m  Upper triangle (hi): {tri_len} entries ({} MB)\x1b[0m",
+        tri_len * 8 / (1024 * 1024)
+    );
 
     // Compute SHA-256 of the raw triangle bytes for self-integrity verification.
     // This lets us detect corruption even after the file has been modified
     // (e.g., distance stamped) since it checksums only the matrix data.
-    let tri_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(upper_tri.as_ptr() as *const u8, tri_len * 8)
-    };
+    let tri_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(upper_tri.as_ptr() as *const u8, tri_len * 8) };
     let data_sha = sha256_hex(tri_bytes);
     write_str_attr(&gram_grp, "data_sha256", &data_sha)?;
 
     let tri_arr = Array1::from(upper_tri);
-    gram_grp.new_dataset_builder()
+    gram_grp
+        .new_dataset_builder()
         .with_data(&tri_arr)
         .create("upper_triangle")?;
 
@@ -156,17 +160,19 @@ fn write_hpdf_inner(
                 upper_tri_lo.push(lo_data[row * dim + col]);
             }
         }
-        eprintln!("  \x1b[2m  Upper triangle (lo): {tri_len} entries ({} MB)\x1b[0m",
-            tri_len * 8 / (1024 * 1024));
+        eprintln!(
+            "  \x1b[2m  Upper triangle (lo): {tri_len} entries ({} MB)\x1b[0m",
+            tri_len * 8 / (1024 * 1024)
+        );
 
-        let lo_bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts(upper_tri_lo.as_ptr() as *const u8, tri_len * 8)
-        };
+        let lo_bytes: &[u8] =
+            unsafe { std::slice::from_raw_parts(upper_tri_lo.as_ptr() as *const u8, tri_len * 8) };
         let lo_sha = sha256_hex(lo_bytes);
         write_str_attr(&gram_grp, "data_lo_sha256", &lo_sha)?;
 
         let lo_arr = Array1::from(upper_tri_lo);
-        gram_grp.new_dataset_builder()
+        gram_grp
+            .new_dataset_builder()
             .with_data(&lo_arr)
             .create("upper_triangle_lo")?;
     }
@@ -200,9 +206,13 @@ fn write_hpdf_inner(
 
     let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
     let elapsed = t0.elapsed().as_secs_f64();
-    eprintln!("  \x1b[32m✓\x1b[0m HPDF{} written: {} ({} MB, {:.1}s)",
+    eprintln!(
+        "  \x1b[32m✓\x1b[0m HPDF{} written: {} ({} MB, {:.1}s)",
         if has_dd { " [DD]" } else { "" },
-        path.display(), file_size / (1024 * 1024), elapsed);
+        path.display(),
+        file_size / (1024 * 1024),
+        elapsed
+    );
 
     Ok(file_size)
 }
@@ -219,17 +229,25 @@ fn write_hpdf_triangle_inner(
 ) -> hdf5::Result<u64> {
     let dim = config.max_n - 1;
     let tri_len = dim * (dim + 1) / 2;
-    assert_eq!(upper_tri.len(), tri_len,
+    assert_eq!(
+        upper_tri.len(),
+        tri_len,
         "upper_tri length {} != expected {} for dim={}",
-        upper_tri.len(), tri_len, dim);
+        upper_tri.len(),
+        tri_len,
+        dim
+    );
     if let Some(lo) = dd_lo_tri {
         assert_eq!(lo.len(), tri_len, "dd_lo_tri length must equal tri_len");
     }
     let t0 = Instant::now();
 
     let has_dd = dd_lo_tri.is_some();
-    eprintln!("  \x1b[2m▸ Writing HPDF{} (from triangle): {} (dim={dim})\x1b[0m",
-        if has_dd { " [DD]" } else { "" }, path.display());
+    eprintln!(
+        "  \x1b[2m▸ Writing HPDF{} (from triangle): {} (dim={dim})\x1b[0m",
+        if has_dd { " [DD]" } else { "" },
+        path.display()
+    );
 
     let file = H5File::create(path)?;
 
@@ -241,41 +259,48 @@ fn write_hpdf_triangle_inner(
 
     // ── /gram group ──
     let gram_grp = file.create_group("gram")?;
-    write_str_attr(&gram_grp, "entry_formula",
-        "G[j,k] = integral_0^1 {1/(jx)}{1/(kx)} dx")?;
+    write_str_attr(
+        &gram_grp,
+        "entry_formula",
+        "G[j,k] = integral_0^1 {1/(jx)}{1/(kx)} dx",
+    )?;
     write_scalar_attr(&gram_grp, "precision", config.precision)?;
     write_scalar_attr(&gram_grp, "max_n", config.max_n as u64)?;
     write_scalar_attr(&gram_grp, "dim", dim as u64)?;
     write_scalar_attr(&gram_grp, "dd_stored", if has_dd { 1u32 } else { 0u32 })?;
 
     // SHA-256 of upper triangle hi-words
-    let tri_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(upper_tri.as_ptr() as *const u8, tri_len * 8)
-    };
+    let tri_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(upper_tri.as_ptr() as *const u8, tri_len * 8) };
     let data_sha = sha256_hex(tri_bytes);
     write_str_attr(&gram_grp, "data_sha256", &data_sha)?;
 
-    eprintln!("  \x1b[2m  Upper triangle (hi): {tri_len} entries ({} MB)\x1b[0m",
-        tri_len * 8 / (1024 * 1024));
+    eprintln!(
+        "  \x1b[2m  Upper triangle (hi): {tri_len} entries ({} MB)\x1b[0m",
+        tri_len * 8 / (1024 * 1024)
+    );
 
     let tri_arr = Array1::from_vec(upper_tri.to_vec());
-    gram_grp.new_dataset_builder()
+    gram_grp
+        .new_dataset_builder()
         .with_data(&tri_arr)
         .create("upper_triangle")?;
 
     // ── DD lo-words ──
     if let Some(lo_tri) = dd_lo_tri {
-        let lo_bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts(lo_tri.as_ptr() as *const u8, tri_len * 8)
-        };
+        let lo_bytes: &[u8] =
+            unsafe { std::slice::from_raw_parts(lo_tri.as_ptr() as *const u8, tri_len * 8) };
         let lo_sha = sha256_hex(lo_bytes);
         write_str_attr(&gram_grp, "data_lo_sha256", &lo_sha)?;
 
-        eprintln!("  \x1b[2m  Upper triangle (lo): {tri_len} entries ({} MB)\x1b[0m",
-            tri_len * 8 / (1024 * 1024));
+        eprintln!(
+            "  \x1b[2m  Upper triangle (lo): {tri_len} entries ({} MB)\x1b[0m",
+            tri_len * 8 / (1024 * 1024)
+        );
 
         let lo_arr = Array1::from_vec(lo_tri.to_vec());
-        gram_grp.new_dataset_builder()
+        gram_grp
+            .new_dataset_builder()
             .with_data(&lo_arr)
             .create("upper_triangle_lo")?;
     }
@@ -314,8 +339,16 @@ fn write_hpdf_triangle_inner(
     write_scalar_attr(&struct_grp, "trace", trace)?;
     write_scalar_attr(&struct_grp, "frobenius_norm", frobenius)?;
     write_scalar_attr(&struct_grp, "dim", dim as u64)?;
-    write_scalar_attr(&struct_grp, "diagonal_min", diag.iter().cloned().fold(f64::INFINITY, f64::min))?;
-    write_scalar_attr(&struct_grp, "diagonal_max", diag.iter().cloned().fold(f64::NEG_INFINITY, f64::max))?;
+    write_scalar_attr(
+        &struct_grp,
+        "diagonal_min",
+        diag.iter().cloned().fold(f64::INFINITY, f64::min),
+    )?;
+    write_scalar_attr(
+        &struct_grp,
+        "diagonal_max",
+        diag.iter().cloned().fold(f64::NEG_INFINITY, f64::max),
+    )?;
 
     // ── /number_theory (optional) ──
     if config.include_number_theory {
@@ -336,9 +369,13 @@ fn write_hpdf_triangle_inner(
 
     let file_size = std::fs::metadata(path).map(|m| m.len()).unwrap_or(0);
     let elapsed = t0.elapsed().as_secs_f64();
-    eprintln!("  \x1b[32m✓\x1b[0m HPDF{} (triangle) written: {} ({} MB, {:.1}s)",
+    eprintln!(
+        "  \x1b[32m✓\x1b[0m HPDF{} (triangle) written: {} ({} MB, {:.1}s)",
         if has_dd { " [DD]" } else { "" },
-        path.display(), file_size / (1024 * 1024), elapsed);
+        path.display(),
+        file_size / (1024 * 1024),
+        elapsed
+    );
 
     Ok(file_size)
 }

@@ -15,8 +15,8 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use rayon::prelude::*;
-use rug::float::Round;
 use rug::Float;
+use rug::float::Round;
 use std::f64::consts::PI;
 use std::fs;
 use std::io::Write;
@@ -25,7 +25,6 @@ use std::time::Instant;
 use cathedral_utils::fmt::*;
 
 const P: u32 = 256;
-
 
 // ═══════════════════════════════════════════
 // §1. 256-BIT MPFR RIEMANN ZETA
@@ -62,8 +61,14 @@ fn c_sub(a: &C256, b: &C256) -> C256 {
 
 fn c_mul(a: &C256, b: &C256) -> C256 {
     (
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1)),
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0)),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1),
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0),
+        ),
     )
 }
 
@@ -72,8 +77,13 @@ fn c_scale(a: &C256, s: &Float) -> C256 {
 }
 
 fn c_abs(z: &C256) -> Float {
-    Float::with_val(P,
-        Float::with_val(P, Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1)).sqrt()
+    Float::with_val(
+        P,
+        Float::with_val(
+            P,
+            Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1),
+        )
+        .sqrt(),
     )
 }
 
@@ -85,7 +95,10 @@ fn c_pow_neg(n: usize, s: &C256) -> C256 {
     let mag = Float::with_val(P, re_exp.exp());
     let cos_v = Float::with_val(P, im_exp.clone().cos());
     let sin_v = Float::with_val(P, im_exp.sin());
-    (Float::with_val(P, &mag * &cos_v), Float::with_val(P, &mag * &sin_v))
+    (
+        Float::with_val(P, &mag * &cos_v),
+        Float::with_val(P, &mag * &sin_v),
+    )
 }
 
 /// Rising Pochhammer (s)_k = s(s+1)...(s+k-1)
@@ -120,12 +133,30 @@ fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     let mag = Float::with_val(P, re_1ms.exp());
     let cos_v = Float::with_val(P, im_1ms.clone().cos());
     let sin_v = Float::with_val(P, im_1ms.sin());
-    let n_1ms = (Float::with_val(P, &mag * &cos_v), Float::with_val(P, &mag * &sin_v));
+    let n_1ms = (
+        Float::with_val(P, &mag * &cos_v),
+        Float::with_val(P, &mag * &sin_v),
+    );
     let s_m1 = c_sub(s, &one);
-    let denom = Float::with_val(P, Float::with_val(P, &s_m1.0 * &s_m1.0) + Float::with_val(P, &s_m1.1 * &s_m1.1));
+    let denom = Float::with_val(
+        P,
+        Float::with_val(P, &s_m1.0 * &s_m1.0) + Float::with_val(P, &s_m1.1 * &s_m1.1),
+    );
     let integral = (
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &n_1ms.0 * &s_m1.0) + Float::with_val(P, &n_1ms.1 * &s_m1.1)) / &denom),
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &n_1ms.1 * &s_m1.0) - Float::with_val(P, &n_1ms.0 * &s_m1.1)) / &denom),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &n_1ms.0 * &s_m1.0) + Float::with_val(P, &n_1ms.1 * &s_m1.1),
+            ) / &denom,
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &n_1ms.1 * &s_m1.0) - Float::with_val(P, &n_1ms.0 * &s_m1.1),
+            ) / &denom,
+        ),
     );
 
     // Midpoint: N^{-s}/2
@@ -137,7 +168,9 @@ fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     for j in 0..8 {
         let two_k = 2 * (j + 1);
         let mut fact: f64 = 1.0;
-        for i in 1..=two_k { fact *= i as f64; }
+        for i in 1..=two_k {
+            fact *= i as f64;
+        }
         let coeff = (BERNOULLI_NUM[j] as f64) / (BERNOULLI_DEN[j] as f64) / fact;
         let rising = c_pochhammer(s, two_k - 1);
         let shift = c_add(s, &c_new((two_k - 1) as f64, 0.0));
@@ -205,9 +238,14 @@ fn scan_disk_norm(t_center: f64, radius: f64, n_radii: usize, n_angles: usize) -
     };
 
     DiskResult {
-        t: t_center, radius, max_norm,
-        max_at_re: max_re, max_at_im: max_im,
-        bound, ratio, tight_c,
+        t: t_center,
+        radius,
+        max_norm,
+        max_at_re: max_re,
+        max_at_im: max_im,
+        bound,
+        ratio,
+        tight_c,
     }
 }
 
@@ -217,8 +255,8 @@ fn scan_disk_norm(t_center: f64, radius: f64, n_radii: usize, n_angles: usize) -
 
 struct HalfResult {
     t: f64,
-    max_left: f64,   // max ‖ζ‖ for Re(s) < 2
-    max_right: f64,   // max ‖ζ‖ for Re(s) ≥ 2
+    max_left: f64,  // max ‖ζ‖ for Re(s) < 2
+    max_right: f64, // max ‖ζ‖ for Re(s) ≥ 2
     left_at_re: f64,
     left_at_im: f64,
 }
@@ -241,7 +279,9 @@ fn scan_halves(t_center: f64, radius: f64) -> HalfResult {
             let s_im = t_center + rr * theta.sin();
             let zn = zeta_norm_f64(s_re, s_im);
             if dre >= 0.0 {
-                if zn > max_right { max_right = zn; }
+                if zn > max_right {
+                    max_right = zn;
+                }
             } else {
                 if zn > max_left {
                     max_left = zn;
@@ -252,7 +292,13 @@ fn scan_halves(t_center: f64, radius: f64) -> HalfResult {
         }
     }
 
-    HalfResult { t: t_center, max_left, max_right, left_at_re: l_re, left_at_im: l_im }
+    HalfResult {
+        t: t_center,
+        max_left,
+        max_right,
+        left_at_re: l_re,
+        left_at_im: l_im,
+    }
 }
 
 // ═══════════════════════════════════════════
@@ -264,13 +310,28 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL NORM-BOUND VALIDATOR{RESET}                               {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · Certified Bounds{RESET}        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: zeta_norm_bound_on_disk (ZetaLowerBound.lean){RESET}        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Bound: ‖ζ(2+it+z)‖ ≤ (2+|t|)^10 for z ∈ ball(0,R){RESET}        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · MPFR {}-bit{RESET}                                   {BOLD}{CYAN}║{RESET}", n_threads, P);
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL NORM-BOUND VALIDATOR{RESET}                               {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · Certified Bounds{RESET}        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: zeta_norm_bound_on_disk (ZetaLowerBound.lean){RESET}        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Bound: ‖ζ(2+it+z)‖ ≤ (2+|t|)^10 for z ∈ ball(0,R){RESET}        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · MPFR {}-bit{RESET}                                   {BOLD}{CYAN}║{RESET}",
+        n_threads, P
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
@@ -280,8 +341,10 @@ fn main() {
     let z2 = zeta_hp(&c_new(2.0, 0.0), 500);
     let z2_re = z2.0.to_f64_round(Round::Nearest);
     let z2_theory = PI * PI / 6.0;
-    println!("  {GREEN}✓{RESET} ζ(2) = {MAGENTA}{z2_re:.15}{RESET}  (π²/6 = {z2_theory:.15}, err = {:.2e})",
-        (z2_re - z2_theory).abs());
+    println!(
+        "  {GREEN}✓{RESET} ζ(2) = {MAGENTA}{z2_re:.15}{RESET}  (π²/6 = {z2_theory:.15}, err = {:.2e})",
+        (z2_re - z2_theory).abs()
+    );
     println!();
 
     // ══════════════════════════════════════════════════════════════
@@ -296,12 +359,14 @@ fn main() {
     let radii: Vec<f64> = vec![1.0, 1.4, 1.49];
 
     // Build all (t, R) pairs for parallel execution
-    let pairs: Vec<(f64, f64)> = t_values.iter()
+    let pairs: Vec<(f64, f64)> = t_values
+        .iter()
         .flat_map(|&t| radii.iter().map(move |&r| (t, r)))
         .collect();
 
     let t0 = Instant::now();
-    let results: Vec<DiskResult> = pairs.par_iter()
+    let results: Vec<DiskResult> = pairs
+        .par_iter()
         .map(|&(t, r)| {
             let n_angles = if t >= 1000.0 { 200 } else { 120 };
             let n_radii = if t >= 1000.0 { 20 } else { 15 };
@@ -312,10 +377,18 @@ fn main() {
 
     // Write TSV
     let mut tsv = fs::File::create("results/norm_bound.tsv").unwrap();
-    writeln!(tsv, "t\tR\tmax_norm\tbound\tratio\ttight_C\tmax_at_re\tmax_at_im").unwrap();
+    writeln!(
+        tsv,
+        "t\tR\tmax_norm\tbound\tratio\ttight_C\tmax_at_re\tmax_at_im"
+    )
+    .unwrap();
 
-    println!("  {DIM}     t    │   R   │     max‖ζ‖   │ (2+|t|)^10   │    ratio    │  tight C  │ max at{RESET}");
-    println!("  {DIM}──────────┼───────┼──────────────┼──────────────┼─────────────┼───────────┼────────────────{RESET}");
+    println!(
+        "  {DIM}     t    │   R   │     max‖ζ‖   │ (2+|t|)^10   │    ratio    │  tight C  │ max at{RESET}"
+    );
+    println!(
+        "  {DIM}──────────┼───────┼──────────────┼──────────────┼─────────────┼───────────┼────────────────{RESET}"
+    );
 
     let mut max_c_overall = 0.0f64;
     let mut worst_t = 0.0f64;
@@ -323,11 +396,23 @@ fn main() {
     let mut all_valid = true;
 
     for res in &results {
-        writeln!(tsv, "{}\t{}\t{:.15e}\t{:.6e}\t{:.15e}\t{:.15e}\t{:.6}\t{:.6}",
-            res.t, res.radius, res.max_norm, res.bound, res.ratio, res.tight_c,
-            res.max_at_re, res.max_at_im).unwrap();
+        writeln!(
+            tsv,
+            "{}\t{}\t{:.15e}\t{:.6e}\t{:.15e}\t{:.15e}\t{:.6}\t{:.6}",
+            res.t,
+            res.radius,
+            res.max_norm,
+            res.bound,
+            res.ratio,
+            res.tight_c,
+            res.max_at_re,
+            res.max_at_im
+        )
+        .unwrap();
 
-        if res.ratio >= 1.0 { all_valid = false; }
+        if res.ratio >= 1.0 {
+            all_valid = false;
+        }
         if res.tight_c > max_c_overall {
             max_c_overall = res.tight_c;
             worst_t = res.t;
@@ -336,18 +421,32 @@ fn main() {
 
         // Print R=1.4 and R=1.49 for all t, and all R for t ≤ 20
         if res.radius >= 1.39 || res.t <= 20.0 {
-            println!("  {:>8.0} │ {:>5.2} │ {:>12.4} │ {:>12.2e} │ {:>11.2e} │ {:>9.4} │ ({:.2}, {:.1})",
-                res.t, res.radius, res.max_norm, res.bound, res.ratio, res.tight_c,
-                res.max_at_re, res.max_at_im);
+            println!(
+                "  {:>8.0} │ {:>5.2} │ {:>12.4} │ {:>12.2e} │ {:>11.2e} │ {:>9.4} │ ({:.2}, {:.1})",
+                res.t,
+                res.radius,
+                res.max_norm,
+                res.bound,
+                res.ratio,
+                res.tight_c,
+                res.max_at_re,
+                res.max_at_im
+            );
         }
     }
 
     println!();
-    println!("  {} ALL ratios < 1: bound {BOLD}‖ζ‖ ≤ (2+|t|)^10{RESET} holds everywhere",
-        check(all_valid));
-    println!("  {BOLD}Tightest C needed:{RESET} {YELLOW}{max_c_overall:.6}{RESET} at t={worst_t}, R={worst_r}");
-    println!("  {BOLD}Margin:{RESET} C=10 is {GREEN}{:.0}x{RESET} more than needed",
-        10.0 / max_c_overall.max(1e-10));
+    println!(
+        "  {} ALL ratios < 1: bound {BOLD}‖ζ‖ ≤ (2+|t|)^10{RESET} holds everywhere",
+        check(all_valid)
+    );
+    println!(
+        "  {BOLD}Tightest C needed:{RESET} {YELLOW}{max_c_overall:.6}{RESET} at t={worst_t}, R={worst_r}"
+    );
+    println!(
+        "  {BOLD}Margin:{RESET} C=10 is {GREEN}{:.0}x{RESET} more than needed",
+        10.0 / max_c_overall.max(1e-10)
+    );
     println!("  {DIM}Time: {scan_time:.1}s ({n_threads} threads){RESET}");
     println!();
 
@@ -361,24 +460,36 @@ fn main() {
     let half_ts: Vec<f64> = vec![10.0, 100.0, 500.0, 1000.0, 5000.0];
 
     let t0 = Instant::now();
-    let half_results: Vec<HalfResult> = half_ts.par_iter()
-        .map(|&t| scan_halves(t, 1.4))
-        .collect();
+    let half_results: Vec<HalfResult> = half_ts.par_iter().map(|&t| scan_halves(t, 1.4)).collect();
     let half_time = t0.elapsed().as_secs_f64();
 
     println!("  {DIM}      t   │  max left(Re<2)  │  max right(Re≥2) │ where max-left{RESET}");
     println!("  {DIM}──────────┼──────────────────┼──────────────────┼───────────────{RESET}");
     for hr in &half_results {
-        let which = if hr.max_left >= hr.max_right { "← LEFT" } else { "→ right" };
-        println!("  {:>8.0} │    {MAGENTA}{:>12.4}{RESET}    │    {:>12.4}    │ σ={:.2} {which}",
-            hr.t, hr.max_left, hr.max_right, hr.left_at_re);
+        let which = if hr.max_left >= hr.max_right {
+            "← LEFT"
+        } else {
+            "→ right"
+        };
+        println!(
+            "  {:>8.0} │    {MAGENTA}{:>12.4}{RESET}    │    {:>12.4}    │ σ={:.2} {which}",
+            hr.t, hr.max_left, hr.max_right, hr.left_at_re
+        );
     }
 
-    let left_dominates = half_results.iter().filter(|h| h.max_left >= h.max_right).count();
+    let left_dominates = half_results
+        .iter()
+        .filter(|h| h.max_left >= h.max_right)
+        .count();
     println!();
-    println!("  Max occurs on left half (Re<2) in {left_dominates}/{} cases", half_results.len());
-    println!("  {} Right half bounded by tail bound: ‖ζ‖ ≤ 7/4 for Re ≥ 2",
-        check(half_results.iter().all(|h| h.max_right < 1.76)));
+    println!(
+        "  Max occurs on left half (Re<2) in {left_dominates}/{} cases",
+        half_results.len()
+    );
+    println!(
+        "  {} Right half bounded by tail bound: ‖ζ‖ ≤ 7/4 for Re ≥ 2",
+        check(half_results.iter().all(|h| h.max_right < 1.76))
+    );
     println!("  {DIM}Time: {half_time:.1}s{RESET}");
     println!();
 
@@ -392,12 +503,14 @@ fn main() {
     let conv_ts: Vec<f64> = vec![50.0, 100.0, 500.0, 1000.0];
     let conv_sigmas: Vec<f64> = vec![0.6, 0.8, 1.0, 1.5, 2.0];
 
-    let conv_pairs: Vec<(f64, f64)> = conv_ts.iter()
+    let conv_pairs: Vec<(f64, f64)> = conv_ts
+        .iter()
         .flat_map(|&t| conv_sigmas.iter().map(move |&s| (t, s)))
         .collect();
 
     let t0 = Instant::now();
-    let conv_results: Vec<(f64, f64, f64)> = conv_pairs.par_iter()
+    let conv_results: Vec<(f64, f64, f64)> = conv_pairs
+        .par_iter()
         .map(|&(t, sigma)| {
             let zn = zeta_norm_f64(sigma, t);
             (t, sigma, zn)
@@ -408,31 +521,50 @@ fn main() {
     let mut conv_tsv = fs::File::create("results/convexity.tsv").unwrap();
     writeln!(conv_tsv, "t\tsigma\tzeta_norm\tconv_bound\tratio\texponent").unwrap();
 
-    println!("  {DIM}      t   │   σ   │     ‖ζ(σ+it)‖ │ |t|^(1-σ)/2 │    ratio   │ effective exp{RESET}");
-    println!("  {DIM}──────────┼───────┼────────────────┼─────────────┼────────────┼──────────────{RESET}");
+    println!(
+        "  {DIM}      t   │   σ   │     ‖ζ(σ+it)‖ │ |t|^(1-σ)/2 │    ratio   │ effective exp{RESET}"
+    );
+    println!(
+        "  {DIM}──────────┼───────┼────────────────┼─────────────┼────────────┼──────────────{RESET}"
+    );
 
     let mut max_conv_ratio = 0.0f64;
     for &(t, sigma, zn) in &conv_results {
         let conv_exp = ((1.0 - sigma) / 2.0).max(0.0);
         let conv_bound = t.powf(conv_exp);
         let ratio = zn / conv_bound;
-        let eff_exp = if zn > 0.0 && t > 1.0 { zn.ln() / t.ln() } else { 0.0 };
+        let eff_exp = if zn > 0.0 && t > 1.0 {
+            zn.ln() / t.ln()
+        } else {
+            0.0
+        };
 
-        writeln!(conv_tsv, "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
-            t, sigma, zn, conv_bound, ratio, eff_exp).unwrap();
+        writeln!(
+            conv_tsv,
+            "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+            t, sigma, zn, conv_bound, ratio, eff_exp
+        )
+        .unwrap();
 
-        if ratio > max_conv_ratio { max_conv_ratio = ratio; }
+        if ratio > max_conv_ratio {
+            max_conv_ratio = ratio;
+        }
 
         if sigma == 0.6 || sigma == 1.0 || sigma == 2.0 {
-            println!("  {:>8.0} │ {:>5.1} │ {MAGENTA}{:>14.6}{RESET} │ {:>11.4} │ {:>10.4} │ {:>12.6}",
-                t, sigma, zn, conv_bound, ratio, eff_exp);
+            println!(
+                "  {:>8.0} │ {:>5.1} │ {MAGENTA}{:>14.6}{RESET} │ {:>11.4} │ {:>10.4} │ {:>12.6}",
+                t, sigma, zn, conv_bound, ratio, eff_exp
+            );
         }
     }
 
     println!();
     println!("  Max convexity ratio: {YELLOW}{max_conv_ratio:.4}{RESET}");
-    println!("  {} Convexity bound ‖ζ‖ ≤ C·|t|^{{(1-σ)/2}} holds with constant C ≈ {:.1}",
-        check(max_conv_ratio < 100.0), max_conv_ratio);
+    println!(
+        "  {} Convexity bound ‖ζ‖ ≤ C·|t|^{{(1-σ)/2}} holds with constant C ≈ {:.1}",
+        check(max_conv_ratio < 100.0),
+        max_conv_ratio
+    );
     println!("  {DIM}Time: {conv_time:.1}s{RESET}");
     println!();
 
@@ -441,33 +573,55 @@ fn main() {
     // ══════════════════════════════════════════════════════════════
     let total_time = t_global.elapsed().as_secs_f64();
 
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}NORM-BOUND VALIDATOR — GRAND CERTIFICATE{RESET}                   {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}NORM-BOUND VALIDATOR — GRAND CERTIFICATE{RESET}                   {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{P}-bit MPFR{RESET}    Threads: {YELLOW}{n_threads}{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{P}-bit MPFR{RESET}    Threads: {YELLOW}{n_threads}{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  Runtime:   {YELLOW}{total_time:.1}s{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. Norm Bound ‖ζ(2+it+z)‖ ≤ (2+|t|)^10{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {} Bound holds for ALL {} (t, R) pairs tested",
-        check(all_valid), results.len());
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} Bound holds for ALL {} (t, R) pairs tested",
+        check(all_valid),
+        results.len()
+    );
     println!("  {BOLD}{CYAN}║{RESET}    Tightest C needed: {YELLOW}{max_c_overall:.6}{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {BOLD}{GREEN}★ C=10 is {:.0}x overkill — even C=1 suffices!{RESET}",
-        10.0 / max_c_overall.max(1e-10));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {BOLD}{GREEN}★ C=10 is {:.0}x overkill — even C=1 suffices!{RESET}",
+        10.0 / max_c_overall.max(1e-10)
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§B. Proof Strategy{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    For Re ≥ 2: tail bound gives ‖ζ‖ ≤ 7/4");
     println!("  {BOLD}{CYAN}║{RESET}    For Re < 2: convexity ‖ζ(σ+it)‖ ≤ C·|t|^{{(1-σ)/2}}");
     println!("  {BOLD}{CYAN}║{RESET}    Combined: ‖ζ‖ ≤ max(7/4, C·|t|^{{1/4}}) ≤ (2+|t|)^1");
-    println!("  {BOLD}{CYAN}║{RESET}    {BOLD}{GREEN}★ Exponent 10 has enormous margin — C=1 would work{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {BOLD}{GREEN}★ Exponent 10 has enormous margin — C=1 would work{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}VERDICT: zeta_norm_bound_on_disk is VALID{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}The sorry can be eliminated with convexity bound.{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}VERDICT: zeta_norm_bound_on_disk is VALID{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}The sorry can be eliminated with convexity bound.{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // JSON certificate
-    let summary = format!(r#"{{
+    let summary = format!(
+        r#"{{
   "experiment": "Cathedral Norm-Bound Validator",
   "target": "zeta_norm_bound_on_disk",
   "timestamp": "{}",
@@ -496,11 +650,13 @@ fn main() {
   "elapsed_seconds": {:.3}
 }}"#,
         chrono::Utc::now().to_rfc3339(),
-        P, n_threads,
+        P,
+        n_threads,
         all_valid,
         max_c_overall,
         10.0 / max_c_overall.max(1e-10),
-        worst_t, worst_r,
+        worst_t,
+        worst_r,
         results.len(),
         half_results.iter().all(|h| h.max_right < 1.76),
         left_dominates,
@@ -511,7 +667,9 @@ fn main() {
     fs::write("results/certificate.json", &summary).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{total_time:.1}s{RESET} ({n_threads} threads)");
+    println!(
+        "  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{total_time:.1}s{RESET} ({n_threads} threads)"
+    );
     println!("  {BOLD}{WHITE}Output:{RESET} results/{{norm_bound,convexity}}.tsv");
     println!("  {BOLD}{WHITE}Certificate:{RESET} results/certificate.json");
     println!();

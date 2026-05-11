@@ -1,6 +1,6 @@
 #![allow(unused, dead_code, non_snake_case)]
-use rayon::prelude::*;
 use nalgebra::{DMatrix, SymmetricEigen};
+use rayon::prelude::*;
 
 // ══════════════════════════════════════════════════════════════════════
 // GUE STATISTICS TEST FOR THE GRAM MATRIX SPECTRUM
@@ -22,7 +22,9 @@ use nalgebra::{DMatrix, SymmetricEigen};
 
 use std::f64::consts::PI;
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 /// Gram entry G[j,k] = ∫₀¹ {j/x}{k/x} dx
 fn gram_entry(j: usize, k: usize, n_pts: usize) -> f64 {
@@ -40,12 +42,19 @@ fn gram_entry(j: usize, k: usize, n_pts: usize) -> f64 {
 /// Build Gram matrix G_N (parallel)
 fn build_gram(n: usize, n_pts: usize) -> DMatrix<f64> {
     let dim = n - 1;
-    let entries: Vec<((usize, usize), f64)> = (0..dim).into_par_iter()
-        .flat_map(|i| (i..dim).into_par_iter().map(move |j| {
-            ((i, j), gram_entry(i + 2, j + 2, n_pts))
-        })).collect();
+    let entries: Vec<((usize, usize), f64)> = (0..dim)
+        .into_par_iter()
+        .flat_map(|i| {
+            (i..dim)
+                .into_par_iter()
+                .map(move |j| ((i, j), gram_entry(i + 2, j + 2, n_pts)))
+        })
+        .collect();
     let mut mat = DMatrix::<f64>::zeros(dim, dim);
-    for ((i, j), v) in entries { mat[(i, j)] = v; mat[(j, i)] = v; }
+    for ((i, j), v) in entries {
+        mat[(i, j)] = v;
+        mat[(j, i)] = v;
+    }
     mat
 }
 
@@ -77,24 +86,24 @@ fn unfold_eigenvalues(evals: &[f64]) -> Vec<f64> {
     // Simple unfolding: map eigenvalue index to uniform spacing
     // ξ_i = i / (N-1) * N = i * N / (N-1), so spacings ≈ 1
     // More sophisticated: use cumulative spectral density
-    
+
     // Staircase function approach: ξ_i = N(λ_i) where N is the
     // integrated density of states. For empirical unfolding,
     // use the rank: ξ_i = i (already sorted by rank).
     // Then spacings s_i = ξ_{i+1} - ξ_i are normalized.
-    
+
     // Better: polynomial fit to the cumulative distribution
     // For now, simple rank-based unfolding
     let mut sorted = evals.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    
+
     // Compute spacings in terms of eigenvalue differences,
     // then normalize by local mean spacing
     let mut spacings = Vec::with_capacity(n - 1);
     for i in 0..n - 1 {
         spacings.push(sorted[i + 1] - sorted[i]);
     }
-    
+
     // Normalize: divide by mean spacing
     let mean_spacing: f64 = spacings.iter().sum::<f64>() / spacings.len() as f64;
     if mean_spacing > 0.0 {
@@ -102,7 +111,7 @@ fn unfold_eigenvalues(evals: &[f64]) -> Vec<f64> {
             *s /= mean_spacing;
         }
     }
-    
+
     spacings
 }
 
@@ -111,16 +120,16 @@ fn unfold_local(evals: &[f64], window: usize) -> Vec<f64> {
     let n = evals.len();
     let mut sorted = evals.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    
+
     let mut spacings = Vec::with_capacity(n - 1);
     for i in 0..n - 1 {
         let raw = sorted[i + 1] - sorted[i];
-        
+
         // Local mean spacing from neighbors
         let lo = if i >= window { i - window } else { 0 };
         let hi = (i + window + 1).min(n - 1);
         let local_mean = (sorted[hi] - sorted[lo]) / (hi - lo) as f64;
-        
+
         if local_mean > 1e-15 {
             spacings.push(raw / local_mean);
         }
@@ -149,19 +158,21 @@ fn histogram(values: &[f64], n_bins: usize, max_val: f64) -> Vec<(f64, f64)> {
     let bin_width = max_val / n_bins as f64;
     let mut counts = vec![0usize; n_bins];
     let total = values.len() as f64;
-    
+
     for &v in values {
         let bin = (v / bin_width) as usize;
         if bin < n_bins {
             counts[bin] += 1;
         }
     }
-    
-    (0..n_bins).map(|i| {
-        let center = (i as f64 + 0.5) * bin_width;
-        let density = counts[i] as f64 / (total * bin_width);
-        (center, density)
-    }).collect()
+
+    (0..n_bins)
+        .map(|i| {
+            let center = (i as f64 + 0.5) * bin_width;
+            let density = counts[i] as f64 / (total * bin_width);
+            (center, density)
+        })
+        .collect()
 }
 
 /// Kolmogorov-Smirnov test statistic against a theoretical CDF
@@ -169,7 +180,7 @@ fn ks_statistic(spacings: &[f64], cdf: &dyn Fn(f64) -> f64) -> f64 {
     let n = spacings.len();
     let mut sorted = spacings.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-    
+
     let mut max_diff = 0.0f64;
     for (i, &s) in sorted.iter().enumerate() {
         let empirical = (i + 1) as f64 / n as f64;
@@ -232,8 +243,15 @@ fn main() {
         let mut sorted = evals.clone();
         sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-        println!("  Eigenvalue range: [{:.8}, {:.8}]", sorted[0], sorted[sorted.len()-1]);
-        println!("  Mean eigenvalue: {:.8}", sorted.iter().sum::<f64>() / sorted.len() as f64);
+        println!(
+            "  Eigenvalue range: [{:.8}, {:.8}]",
+            sorted[0],
+            sorted[sorted.len() - 1]
+        );
+        println!(
+            "  Mean eigenvalue: {:.8}",
+            sorted.iter().sum::<f64>() / sorted.len() as f64
+        );
 
         // ─── Unfolding ───
         let spacings_global = unfold_eigenvalues(&evals);
@@ -243,21 +261,32 @@ fn main() {
         let spacings = &spacings_local;
 
         println!("  Number of spacings: {}", spacings.len());
-        println!("  Mean spacing (normalized): {:.6}",
-            spacings.iter().sum::<f64>() / spacings.len() as f64);
+        println!(
+            "  Mean spacing (normalized): {:.6}",
+            spacings.iter().sum::<f64>() / spacings.len() as f64
+        );
 
         // ─── Spacing Distribution Histogram ───
         println!("\n  Spacing distribution p(s):\n");
-        println!("  {:>6} {:>10} {:>10} {:>10} {:>10} {:>10}",
-            "s", "observed", "GUE", "GOE", "Poisson", "GSE");
+        println!(
+            "  {:>6} {:>10} {:>10} {:>10} {:>10} {:>10}",
+            "s", "observed", "GUE", "GOE", "Poisson", "GSE"
+        );
         println!("  {}", "─".repeat(62));
 
         let hist = histogram(spacings, 20, 4.0);
         for (center, density) in &hist {
             let s = *center;
             if s < 3.5 {
-                println!("  {:6.2} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4}",
-                    s, density, gue_wigner(s), goe_wigner(s), poisson(s), gse_wigner(s));
+                println!(
+                    "  {:6.2} {:10.4} {:10.4} {:10.4} {:10.4} {:10.4}",
+                    s,
+                    density,
+                    gue_wigner(s),
+                    goe_wigner(s),
+                    poisson(s),
+                    gse_wigner(s)
+                );
             }
         }
 
@@ -271,9 +300,13 @@ fn main() {
         println!("    KS(GOE)     = {:.6}", ks_goe);
         println!("    KS(Poisson) = {:.6}", ks_poi);
 
-        let best = if ks_gue <= ks_goe && ks_gue <= ks_poi { "GUE" }
-            else if ks_goe <= ks_poi { "GOE" }
-            else { "Poisson" };
+        let best = if ks_gue <= ks_goe && ks_gue <= ks_poi {
+            "GUE"
+        } else if ks_goe <= ks_poi {
+            "GOE"
+        } else {
+            "Poisson"
+        };
         println!("    Best fit: {} ✨", best);
 
         // ─── Spacing Ratio Test ───
@@ -293,14 +326,16 @@ fn main() {
             ("GUE", (mean_ratio - 0.60270).abs()),
             ("GSE", (mean_ratio - 0.67620).abs()),
         ];
-        let best_ratio = ratio_diffs.iter()
+        let best_ratio = ratio_diffs
+            .iter()
             .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
             .unwrap();
         println!("    Closest: {} (Δ = {:.6}) ✨", best_ratio.0, best_ratio.1);
 
         // ─── Level Repulsion ───
         // s → 0 behavior: p(s) ~ s^β where β = 1 (GOE), 2 (GUE), 4 (GSE)
-        let small_spacings: Vec<f64> = spacings.iter()
+        let small_spacings: Vec<f64> = spacings
+            .iter()
             .filter(|&&s| s > 0.01 && s < 0.5)
             .cloned()
             .collect();
@@ -310,7 +345,7 @@ fn main() {
             let n_small = small_spacings.len() as f64;
             let sum_log_s: f64 = small_spacings.iter().map(|s| s.ln()).sum();
             let mean_log_s = sum_log_s / n_small;
-            
+
             // Estimate β from the density at small s
             let hist_small = histogram(&small_spacings, 5, 0.5);
             if hist_small.len() >= 2 {

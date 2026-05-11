@@ -45,8 +45,11 @@ impl CoprimePair {
     /// Strip value: (a-1)/(ab).
     #[inline]
     pub fn strip(&self) -> f64 {
-        if self.a <= 1 { 0.0 }
-        else { (self.a - 1) as f64 / (self.a * self.b) as f64 }
+        if self.a <= 1 {
+            0.0
+        } else {
+            (self.a - 1) as f64 / (self.a * self.b) as f64
+        }
     }
 
     /// Whether this is a "diagonal" pair (a=1).
@@ -73,13 +76,17 @@ impl std::fmt::Display for CoprimePair {
 
 /// Euler totient for a single value.
 fn euler_totient_single(n: usize) -> usize {
-    if n <= 1 { return n; }
+    if n <= 1 {
+        return n;
+    }
     let mut result = n;
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
         if m % p == 0 {
-            while m % p == 0 { m /= p; }
+            while m % p == 0 {
+                m /= p;
+            }
             result = result / p * (p - 1);
         }
         p += 1;
@@ -103,20 +110,32 @@ fn euler_totient_single(n: usize) -> usize {
 ///
 /// This set has been validated at 512-bit MPFR precision with M=250,000.
 pub fn standard_pairs() -> Vec<CoprimePair> {
-    STANDARD_PAIRS.iter()
+    STANDARD_PAIRS
+        .iter()
         .map(|&(a, b)| CoprimePair { a, b })
         .collect()
 }
 
 /// The raw standard pair data.
 const STANDARD_PAIRS: &[(usize, usize)] = &[
-    (1, 2), (1, 3), (1, 5), (1, 7),
-    (2, 3), (2, 5), (2, 7),
-    (3, 4), (3, 5), (3, 7),
-    (4, 5), (4, 7),
-    (5, 6), (5, 7), (5, 9),
+    (1, 2),
+    (1, 3),
+    (1, 5),
+    (1, 7),
+    (2, 3),
+    (2, 5),
+    (2, 7),
+    (3, 4),
+    (3, 5),
+    (3, 7),
+    (4, 5),
+    (4, 7),
+    (5, 6),
+    (5, 7),
+    (5, 9),
     (6, 7),
-    (7, 8), (7, 9),
+    (7, 8),
+    (7, 9),
 ];
 
 /// **Extended pair set** — all coprime pairs with a < b ≤ 20.
@@ -220,8 +239,13 @@ mod tests {
     #[test]
     fn test_all_standard_coprime() {
         for p in standard_pairs() {
-            assert_eq!(arith::gcd(p.a, p.b), 1,
-                "({}, {}) should be coprime", p.a, p.b);
+            assert_eq!(
+                arith::gcd(p.a, p.b),
+                1,
+                "({}, {}) should be coprime",
+                p.a,
+                p.b
+            );
             assert!(p.a < p.b, "({}, {}) should have a < b", p.a, p.b);
         }
     }
@@ -230,8 +254,15 @@ mod tests {
     fn test_generate_small() {
         let pairs = generate(5);
         let expected = vec![
-            (1,2), (1,3), (2,3), (1,4), (3,4),
-            (1,5), (2,5), (3,5), (4,5),
+            (1, 2),
+            (1, 3),
+            (2, 3),
+            (1, 4),
+            (3, 4),
+            (1, 5),
+            (2, 5),
+            (3, 5),
+            (4, 5),
         ];
         assert_eq!(pairs.len(), expected.len());
         for (p, &(a, b)) in pairs.iter().zip(&expected) {
@@ -259,10 +290,10 @@ mod tests {
         assert_eq!(p.strip(), 0.0);
 
         let p = CoprimePair { a: 2, b: 3 };
-        assert!((p.strip() - 1.0/6.0).abs() < 1e-15);
+        assert!((p.strip() - 1.0 / 6.0).abs() < 1e-15);
 
         let p = CoprimePair { a: 3, b: 5 };
-        assert!((p.strip() - 2.0/15.0).abs() < 1e-15);
+        assert!((p.strip() - 2.0 / 15.0).abs() < 1e-15);
     }
 
     #[test]
@@ -270,15 +301,21 @@ mod tests {
         // The number of coprime pairs with a < b ≤ 20
         // should be around 3/π² · 20² ≈ 121.6
         let pairs = extended_pairs();
-        assert!(pairs.len() > 100 && pairs.len() < 150,
-            "Expected ~127 pairs, got {}", pairs.len());
+        assert!(
+            pairs.len() > 100 && pairs.len() < 150,
+            "Expected ~127 pairs, got {}",
+            pairs.len()
+        );
     }
 
     #[test]
     fn test_large_count() {
         let pairs = large_pairs();
         // 3/π² · 50² ≈ 759.9
-        assert!(pairs.len() > 700 && pairs.len() < 850,
-            "Expected ~775 pairs, got {}", pairs.len());
+        assert!(
+            pairs.len() > 700 && pairs.len() < 850,
+            "Expected ~775 pairs, got {}",
+            pairs.len()
+        );
     }
 }

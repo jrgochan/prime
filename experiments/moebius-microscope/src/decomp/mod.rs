@@ -9,13 +9,13 @@
 //!   - `gram`:       Gram bound metric finalization and display
 //!   - `taper`:      §5 Taper Cancellation Tracker (U-2L/lnN → 1 analysis)
 
-pub mod state;
 pub mod classify;
-pub mod row;
-pub mod runners;
 #[cfg(feature = "gpu")]
 pub mod gpu_runner;
 pub mod gram;
+pub mod row;
+pub mod runners;
+pub mod state;
 pub mod taper;
 
 pub use state::Decomp;

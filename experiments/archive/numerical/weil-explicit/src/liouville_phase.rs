@@ -38,7 +38,9 @@ fn frac_part(x: f64) -> f64 {
 
 /// Count prime factors with multiplicity: Ω(n)
 fn big_omega(n: usize) -> usize {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0;
     let mut m = n;
     let mut p = 2;
@@ -49,13 +51,19 @@ fn big_omega(n: usize) -> usize {
         }
         p += 1;
     }
-    if m > 1 { count += 1; }
+    if m > 1 {
+        count += 1;
+    }
     count
 }
 
 /// Liouville function λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+    if big_omega(n) % 2 == 0 {
+        1.0
+    } else {
+        -1.0
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -118,8 +126,14 @@ fn gram_entry_log(j: usize, k: usize, alpha: f64, n_pts: usize) -> (f64, f64) {
 /// Complex Gram entry with Ω-phase (prime factor count phase):
 /// G^ℂ[j,k] = ∫₀¹ {j/x}·{k/x}·e^{iα(Ω(j)-Ω(k))·{j·k/x}} dx
 /// Returns (Re, Im)
-fn gram_entry_omega(j: usize, k: usize, omega_j: usize, omega_k: usize,
-                     alpha: f64, n_pts: usize) -> (f64, f64) {
+fn gram_entry_omega(
+    j: usize,
+    k: usize,
+    omega_j: usize,
+    omega_k: usize,
+    alpha: f64,
+    n_pts: usize,
+) -> (f64, f64) {
     let jf = j as f64;
     let kf = k as f64;
     let omega_diff = (omega_j as f64 - omega_k as f64) * alpha;
@@ -181,11 +195,15 @@ fn jacobi_eigenvalues_cyclic(mat: &[Vec<f64>], max_sweeps: usize, tol: f64) -> V
                 max_off = max_off.max(a[i][j].abs());
             }
         }
-        if max_off < tol { break; }
+        if max_off < tol {
+            break;
+        }
 
         for p in 0..n {
             for q in (p + 1)..n {
-                if a[p][q].abs() < tol * 0.01 { continue; }
+                if a[p][q].abs() < tol * 0.01 {
+                    continue;
+                }
 
                 let app = a[p][p];
                 let aqq = a[q][q];
@@ -246,7 +264,9 @@ fn extract_distinct(eigenvalues: &[f64], tol: f64) -> Vec<f64> {
 
 fn compute_ratios(eigenvalues: &[f64]) -> Vec<f64> {
     let n = eigenvalues.len();
-    if n < 3 { return vec![]; }
+    if n < 3 {
+        return vec![];
+    }
     let mut ratios = Vec::with_capacity(n - 2);
     for i in 0..(n - 2) {
         let s1 = eigenvalues[i + 1] - eigenvalues[i];
@@ -261,7 +281,9 @@ fn compute_ratios(eigenvalues: &[f64]) -> Vec<f64> {
 
 fn ratio_mean(eigenvalues: &[f64]) -> f64 {
     let ratios = compute_ratios(eigenvalues);
-    if ratios.is_empty() { return 0.0; }
+    if ratios.is_empty() {
+        return 0.0;
+    }
     ratios.iter().sum::<f64>() / ratios.len() as f64
 }
 
@@ -272,17 +294,28 @@ fn classify_beta(r_mean: f64) -> (&'static str, f64) {
         ("GUE (β=2)", 0.5996),
         ("GSE (β=4)", 0.6744),
     ];
-    let best = fits.iter()
-        .min_by(|a, b| (r_mean - a.1).abs().partial_cmp(&(r_mean - b.1).abs()).unwrap())
+    let best = fits
+        .iter()
+        .min_by(|a, b| {
+            (r_mean - a.1)
+                .abs()
+                .partial_cmp(&(r_mean - b.1).abs())
+                .unwrap()
+        })
         .unwrap();
     (best.0, (r_mean - best.1).abs())
 }
 
 fn estimate_beta(r_mean: f64) -> f64 {
-    if r_mean < 0.4 { 0.0 }
-    else if r_mean < 0.54 { (r_mean - 0.3863) / (0.5307 - 0.3863) }
-    else if r_mean < 0.64 { 1.0 + (r_mean - 0.5307) / (0.5996 - 0.5307) }
-    else { 2.0 + 2.0 * (r_mean - 0.5996) / (0.6744 - 0.5996) }
+    if r_mean < 0.4 {
+        0.0
+    } else if r_mean < 0.54 {
+        (r_mean - 0.3863) / (0.5307 - 0.3863)
+    } else if r_mean < 0.64 {
+        1.0 + (r_mean - 0.5307) / (0.5996 - 0.5307)
+    } else {
+        2.0 + 2.0 * (r_mean - 0.5996) / (0.6744 - 0.5996)
+    }
 }
 
 // ══════════════════════════════════════════════════════════════════════
@@ -316,16 +349,23 @@ fn main() {
 
     print!("  Computing {}×{} real Gram matrix... ", dim, dim);
     let start = std::time::Instant::now();
-    let gram_upper: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|j| {
-        let mut row = vec![0.0; dim];
-        for k in j..dim { row[k] = gram_entry_real(j + 2, k + 2, n_pts); }
-        row
-    }).collect();
+    let gram_upper: Vec<Vec<f64>> = (0..dim)
+        .into_par_iter()
+        .map(|j| {
+            let mut row = vec![0.0; dim];
+            for k in j..dim {
+                row[k] = gram_entry_real(j + 2, k + 2, n_pts);
+            }
+            row
+        })
+        .collect();
     let mut gram_real = vec![vec![0.0; dim]; dim];
-    for j in 0..dim { for k in j..dim {
-        gram_real[j][k] = gram_upper[j][k];
-        gram_real[k][j] = gram_upper[j][k];
-    }}
+    for j in 0..dim {
+        for k in j..dim {
+            gram_real[j][k] = gram_upper[j][k];
+            gram_real[k][j] = gram_upper[j][k];
+        }
+    }
     println!("{:.1}s", start.elapsed().as_secs_f64());
 
     print!("  Computing eigenvalues (Jacobi)... ");
@@ -336,7 +376,10 @@ fn main() {
     let r_real = ratio_mean(&eigs_real);
     let (class_real, delta_real) = classify_beta(r_real);
     let beta_real = estimate_beta(r_real);
-    println!("  ⟨r⟩ = {:.6} → {} (Δ = {:.6}, β ≈ {:.2})", r_real, class_real, delta_real, beta_real);
+    println!(
+        "  ⟨r⟩ = {:.6} → {} (Δ = {:.6}, β ≈ {:.2})",
+        r_real, class_real, delta_real, beta_real
+    );
 
     // ──── Phase 2: Fourier Phase Enrichment ────
     println!("\n═══════════════════════════════════════════════════════════════");
@@ -345,13 +388,21 @@ fn main() {
 
     let alphas = vec![0.01, 0.05, 0.1, 0.2, 0.5, 1.0, 2.0, PI];
 
-    println!("  {:>8} {:>10} {:>14} {:>10} {:>12}",
-        "α", "⟨r⟩", "Classification", "Δ from GOE", "β estimate");
+    println!(
+        "  {:>8} {:>10} {:>14} {:>10} {:>12}",
+        "α", "⟨r⟩", "Classification", "Δ from GOE", "β estimate"
+    );
     println!("  {}", "─".repeat(60));
 
     // Baseline
-    println!("  {:>8} {:>10.6} {:>14} {:>10.6} {:>12.3}",
-        "0 (real)", r_real, class_real, (r_real - 0.5307).abs(), beta_real);
+    println!(
+        "  {:>8} {:>10.6} {:>14} {:>10.6} {:>12.3}",
+        "0 (real)",
+        r_real,
+        class_real,
+        (r_real - 0.5307).abs(),
+        beta_real
+    );
 
     for &alpha in &alphas {
         print!("  Computing α = {:.2}... ", alpha);
@@ -375,9 +426,9 @@ fn main() {
 
         for ((j, k), (re, im)) in entries {
             gram_re[j][k] = re;
-            gram_re[k][j] = re;      // Hermitian: Re symmetric
+            gram_re[k][j] = re; // Hermitian: Re symmetric
             gram_im[j][k] = im;
-            gram_im[k][j] = -im;     // Hermitian: Im antisymmetric
+            gram_im[k][j] = -im; // Hermitian: Im antisymmetric
         }
 
         // Embed as 2n×2n real symmetric
@@ -392,8 +443,16 @@ fn main() {
         let beta = estimate_beta(r_val);
         let time = start.elapsed().as_secs_f64();
 
-        println!("\r  {:>8.3} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s, {} eigvals)",
-            alpha, r_val, class, delta, beta, time, eigs.len());
+        println!(
+            "\r  {:>8.3} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s, {} eigvals)",
+            alpha,
+            r_val,
+            class,
+            delta,
+            beta,
+            time,
+            eigs.len()
+        );
     }
 
     // ──── Phase 3: Log-Arithmetic Phase ────
@@ -404,8 +463,10 @@ fn main() {
 
     let log_alphas = vec![0.1, 0.5, 1.0, 2.0, 5.0, 10.0];
 
-    println!("  {:>8} {:>10} {:>14} {:>10} {:>12}",
-        "α", "⟨r⟩", "Classification", "Δ from GUE", "β estimate");
+    println!(
+        "  {:>8} {:>10} {:>14} {:>10} {:>12}",
+        "α", "⟨r⟩", "Classification", "Δ from GUE", "β estimate"
+    );
     println!("  {}", "─".repeat(60));
 
     for &alpha in &log_alphas {
@@ -441,8 +502,15 @@ fn main() {
         let beta = estimate_beta(r_val);
         let time = start.elapsed().as_secs_f64();
 
-        println!("\r  {:>8.1} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s)",
-            alpha, r_val, class, (r_val - 0.5996).abs(), beta, time);
+        println!(
+            "\r  {:>8.1} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s)",
+            alpha,
+            r_val,
+            class,
+            (r_val - 0.5996).abs(),
+            beta,
+            time
+        );
     }
 
     // ──── Phase 4: Ω-Phase (Prime Factor Count) ────
@@ -451,10 +519,12 @@ fn main() {
     println!("  (Liouville-connected: Ω encodes the sign structure)");
     println!("═══════════════════════════════════════════════════════════════\n");
 
-    let omega_alphas = vec![0.1, 0.5, 1.0, PI/2.0, PI, 2.0*PI];
+    let omega_alphas = vec![0.1, 0.5, 1.0, PI / 2.0, PI, 2.0 * PI];
 
-    println!("  {:>8} {:>10} {:>14} {:>10} {:>12}",
-        "α", "⟨r⟩", "Classification", "Δ from GUE", "β estimate");
+    println!(
+        "  {:>8} {:>10} {:>14} {:>10} {:>12}",
+        "α", "⟨r⟩", "Classification", "Δ from GUE", "β estimate"
+    );
     println!("  {}", "─".repeat(60));
 
     for &alpha in &omega_alphas {
@@ -493,8 +563,15 @@ fn main() {
         let beta = estimate_beta(r_val);
         let time = start.elapsed().as_secs_f64();
 
-        println!("\r  {:>8.3} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s)",
-            alpha, r_val, class, (r_val - 0.5996).abs(), beta, time);
+        println!(
+            "\r  {:>8.3} {:>10.6} {:>14} {:>10.6} {:>12.3}  ({:.1}s)",
+            alpha,
+            r_val,
+            class,
+            (r_val - 0.5996).abs(),
+            beta,
+            time
+        );
     }
 
     // ──── Phase 5: SPECTRAL GAP COMPARISON ────
@@ -503,15 +580,26 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════\n");
 
     println!("  Does phase enrichment preserve the spectral gap?\n");
-    println!("  {:>20} {:>12} {:>12} {:>12}",
-        "Scheme", "λ_min", "λ_max", "Gap ratio");
+    println!(
+        "  {:>20} {:>12} {:>12} {:>12}",
+        "Scheme", "λ_min", "λ_max", "Gap ratio"
+    );
     println!("  {}", "─".repeat(60));
 
-    println!("  {:>20} {:>12.8} {:>12.4} {:>12.6}",
-        "Real (baseline)", eigs_real[0], eigs_real[dim-1], eigs_real[0] / eigs_real[dim-1]);
+    println!(
+        "  {:>20} {:>12.8} {:>12.4} {:>12.6}",
+        "Real (baseline)",
+        eigs_real[0],
+        eigs_real[dim - 1],
+        eigs_real[0] / eigs_real[dim - 1]
+    );
 
     // Compute a representative enriched matrix for gap analysis
-    for &(name, alpha) in &[("Fourier α=0.1", 0.1f64), ("Fourier α=1.0", 1.0), ("Log α=1.0", -1.0)] {
+    for &(name, alpha) in &[
+        ("Fourier α=0.1", 0.1f64),
+        ("Fourier α=1.0", 1.0),
+        ("Log α=1.0", -1.0),
+    ] {
         let entries: Vec<((usize, usize), (f64, f64))> = (0..dim)
             .into_par_iter()
             .flat_map(|j| {
@@ -530,17 +618,23 @@ fn main() {
         let mut gre = vec![vec![0.0; dim]; dim];
         let mut gim = vec![vec![0.0; dim]; dim];
         for ((j, k), (re, im)) in entries {
-            gre[j][k] = re; gre[k][j] = re;
-            gim[j][k] = im; gim[k][j] = -im;
+            gre[j][k] = re;
+            gre[k][j] = re;
+            gim[j][k] = im;
+            gim[k][j] = -im;
         }
         let emb = embed_hermitian(&gre, &gim);
         let ev = jacobi_eigenvalues_cyclic(&emb, 200, 1e-12);
         let ev_d = extract_distinct(&ev, 1e-8);
 
         if !ev_d.is_empty() {
-            println!("  {:>20} {:>12.8} {:>12.4} {:>12.6}",
-                name, ev_d[0], ev_d[ev_d.len()-1],
-                ev_d[0] / ev_d[ev_d.len()-1]);
+            println!(
+                "  {:>20} {:>12.8} {:>12.4} {:>12.6}",
+                name,
+                ev_d[0],
+                ev_d[ev_d.len() - 1],
+                ev_d[0] / ev_d[ev_d.len() - 1]
+            );
         }
     }
 
@@ -561,5 +655,8 @@ fn main() {
     println!("║                                                                ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
 
-    println!("\n  Total computation time: {:.1}s\n", total_start.elapsed().as_secs_f64());
+    println!(
+        "\n  Total computation time: {:.1}s\n",
+        total_start.elapsed().as_secs_f64()
+    );
 }

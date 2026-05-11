@@ -1,7 +1,7 @@
 //! Structural scalar verification — trace, Frobenius norm, Gershgorin bounds.
 
-use cathedral_utils::hpdf::HpdfReader;
 use crate::common::*;
+use cathedral_utils::hpdf::HpdfReader;
 
 /// Verify and display structural scalars (trace, ‖G‖_F, κ, Gershgorin).
 /// Returns true if Gershgorin certifies positive definiteness.
@@ -19,9 +19,7 @@ pub fn verify_structural(reader: &HpdfReader) -> bool {
             ss.off_diag_max, ss.off_diag_avg
         );
         if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max) {
-            println!(
-                "  {GREEN}✓{RESET} Gershgorin: λ ∈ [{g_min:.10}, {g_max:.10}]"
-            );
+            println!("  {GREEN}✓{RESET} Gershgorin: λ ∈ [{g_min:.10}, {g_max:.10}]");
             if g_min > 0.0 {
                 println!("    → positive definite (by Gershgorin)");
                 pd = true;
@@ -32,7 +30,11 @@ pub fn verify_structural(reader: &HpdfReader) -> bool {
             println!("  {GREEN}✓{RESET} ‖G‖₁ = {n1:.10}, ‖G‖_∞ = {ni:.10}");
         }
         if let Some(ddr) = ss.diagonal_dominance_ratio {
-            let label = if ddr > 1.0 { "diag dominant ✓" } else { "NOT diag dominant" };
+            let label = if ddr > 1.0 {
+                "diag dominant ✓"
+            } else {
+                "NOT diag dominant"
+            };
             println!("  {GREEN}✓{RESET} diag dominance ratio = {ddr:.6} ({label})");
         }
         if let (Some(emin), Some(emax)) = (ss.entry_min, ss.entry_max) {

@@ -13,9 +13,9 @@
 //!    α = log(R₂) / log(R₃) ≈ 0.855  (for ε = 0.5)
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use crate::block_spectrum::BlockSpectralResult;
 use cathedral_utils::fitting;
 use cathedral_utils::fmt::*;
-use crate::block_spectrum::BlockSpectralResult;
 
 /// Results from α extraction.
 #[derive(Debug, Clone)]
@@ -40,10 +40,7 @@ pub struct AlphaResults {
 ///
 /// Strategy: use the coprime class (d=1) blocks at different effective N
 /// to track how λ_min scales. Also fit across all block sizes.
-pub fn extract_alpha(
-    block_results: &[BlockSpectralResult],
-    _max_n: usize,
-) -> AlphaResults {
+pub fn extract_alpha(block_results: &[BlockSpectralResult], _max_n: usize) -> AlphaResults {
     // Global λ_min is from the d=1 class (full matrix equivalent)
     let global_lambda_min = block_results
         .iter()
@@ -85,13 +82,25 @@ pub fn extract_alpha(
         .collect();
 
     println!("  {BOLD}  Scaling fits:{RESET}");
-    println!("    Power law:  λ_min ~ c · dim^(-{:.4})   R² = {:.4}", alpha_power, r2_power);
-    println!("    Log decay:  λ_min ~ c / (ln dim)^{:.4}  R² = {:.4}", alpha_log, r2_log);
+    println!(
+        "    Power law:  λ_min ~ c · dim^(-{:.4})   R² = {:.4}",
+        alpha_power, r2_power
+    );
+    println!(
+        "    Log decay:  λ_min ~ c / (ln dim)^{:.4}  R² = {:.4}",
+        alpha_log, r2_log
+    );
     println!("    Target α:   0.855 (Three-Circles prediction)");
     if r2_log > r2_power {
-        println!("    {GREEN}→ Log-decay model fits better (R² = {:.4} > {:.4}){RESET}", r2_log, r2_power);
+        println!(
+            "    {GREEN}→ Log-decay model fits better (R² = {:.4} > {:.4}){RESET}",
+            r2_log, r2_power
+        );
     } else {
-        println!("    {YELLOW}→ Power-law model fits better (R² = {:.4} > {:.4}){RESET}", r2_power, r2_log);
+        println!(
+            "    {YELLOW}→ Power-law model fits better (R² = {:.4} > {:.4}){RESET}",
+            r2_power, r2_log
+        );
     }
 
     AlphaResults {

@@ -9,7 +9,6 @@
 /// Usage:
 ///   cargo run --release
 ///   cargo run --release -- --max-n 500 --output results/
-
 mod covariance;
 mod gram;
 mod moebius;
@@ -72,7 +71,9 @@ fn main() {
     } else {
         // Default schedule: exponential growth
         let mut ns = vec![];
-        for &n in &[5, 10, 15, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000] {
+        for &n in &[
+            5, 10, 15, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000,
+        ] {
             if n <= args.max_n {
                 ns.push(n);
             }
@@ -104,11 +105,7 @@ fn main() {
     );
     println!(
         "  {:>6}  {:>18}  {:>12}  {:>14}  {:>10}",
-        "──────",
-        "──────────────────",
-        "────────────",
-        "──────────────",
-        "──────────"
+        "──────", "──────────────────", "────────────", "──────────────", "──────────"
     );
 
     let mut results = Vec::new();
@@ -137,7 +134,10 @@ fn main() {
     println!();
 
     // Step 3: Write outputs
-    println!("  [3/3] Writing output files to {} ...", args.output.display());
+    println!(
+        "  [3/3] Writing output files to {} ...",
+        args.output.display()
+    );
     output::write_all_outputs(&results, &args.output);
 
     // Write eigenvalue files for selected N values
@@ -177,11 +177,14 @@ fn main() {
         );
 
         // Check if d²·ln(N) is roughly constant (RH prediction)
-        let ratios: Vec<f64> = results.iter().filter(|r| r.n >= 10).map(|r| r.ratio).collect();
+        let ratios: Vec<f64> = results
+            .iter()
+            .filter(|r| r.n >= 10)
+            .map(|r| r.ratio)
+            .collect();
         if ratios.len() >= 2 {
             let avg = ratios.iter().sum::<f64>() / ratios.len() as f64;
-            let std = (ratios.iter().map(|r| (r - avg).powi(2)).sum::<f64>()
-                / ratios.len() as f64)
+            let std = (ratios.iter().map(|r| (r - avg).powi(2)).sum::<f64>() / ratios.len() as f64)
                 .sqrt();
             println!("  d²·ln(N) mean = {:.8}, std = {:.8}", avg, std);
             println!(
@@ -206,30 +209,55 @@ fn main() {
     use std::io::Write;
     writeln!(cert, "{{").unwrap();
     writeln!(cert, "  \"experiment\": \"Covariance Matrix Probe\",").unwrap();
-    writeln!(cert, "  \"precision\": \"f64 (see certified.rs for 256-bit)\",").unwrap();
+    writeln!(
+        cert,
+        "  \"precision\": \"f64 (see certified.rs for 256-bit)\","
+    )
+    .unwrap();
     writeln!(cert, "  \"lean_bridge\": {{").unwrap();
-    writeln!(cert, "    \"axiom\": \"millennium_covariance_cancellation\",").unwrap();
-    writeln!(cert, "    \"file\": \"Cathedral/Assembly/FinalDragon.lean\",").unwrap();
+    writeln!(
+        cert,
+        "    \"axiom\": \"millennium_covariance_cancellation\","
+    )
+    .unwrap();
+    writeln!(
+        cert,
+        "    \"file\": \"Cathedral/Assembly/FinalDragon.lean\","
+    )
+    .unwrap();
     writeln!(cert, "    \"claim\": \"vᵀCv ≤ K/logN for Möbius witness\"").unwrap();
     writeln!(cert, "  }},").unwrap();
     writeln!(cert, "  \"decay_data\": [").unwrap();
     for (i, r) in results.iter().enumerate() {
         let comma = if i + 1 < results.len() { "," } else { "" };
-        writeln!(cert, "    {{\"N\": {}, \"d_sq\": {:.15e}, \"inv_log_N\": {:.15e}, \"ratio\": {:.10}}}{}",
-            r.n, r.d_squared, r.inv_log_n, r.ratio, comma).unwrap();
+        writeln!(
+            cert,
+            "    {{\"N\": {}, \"d_sq\": {:.15e}, \"inv_log_N\": {:.15e}, \"ratio\": {:.10}}}{}",
+            r.n, r.d_squared, r.inv_log_n, r.ratio, comma
+        )
+        .unwrap();
     }
     writeln!(cert, "  ],").unwrap();
     writeln!(cert, "  \"verdicts\": {{").unwrap();
     let d_sq_decreasing = results.windows(2).all(|w| w[1].d_squared <= w[0].d_squared);
     let ratio_stable = {
-        let rats: Vec<f64> = results.iter().filter(|r| r.n >= 10).map(|r| r.ratio).collect();
+        let rats: Vec<f64> = results
+            .iter()
+            .filter(|r| r.n >= 10)
+            .map(|r| r.ratio)
+            .collect();
         let avg = rats.iter().sum::<f64>() / rats.len() as f64;
         let std = (rats.iter().map(|r| (r - avg).powi(2)).sum::<f64>() / rats.len() as f64).sqrt();
         std / avg.abs() < 0.1
     };
     writeln!(cert, "    \"d_sq_decreasing\": {},", d_sq_decreasing).unwrap();
     writeln!(cert, "    \"ratio_d_sq_logN_stable\": {},", ratio_stable).unwrap();
-    writeln!(cert, "    \"consistent_with_1_over_logN_decay\": {}", ratio_stable).unwrap();
+    writeln!(
+        cert,
+        "    \"consistent_with_1_over_logN_decay\": {}",
+        ratio_stable
+    )
+    .unwrap();
     writeln!(cert, "  }}").unwrap();
     writeln!(cert, "}}").unwrap();
     println!("    📜 {}", cert_path.display());

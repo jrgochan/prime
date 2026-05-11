@@ -31,7 +31,9 @@ fn mobius_sieve(n: usize) -> Vec<i32> {
     mu[1] = 1;
 
     for p in 2..=n {
-        if !is_prime[p] { continue; }
+        if !is_prime[p] {
+            continue;
+        }
         // p is prime
         for multiple in (p..=n).step_by(p) {
             is_prime[multiple] = multiple == p;
@@ -64,10 +66,12 @@ fn mobius_sieve(n: usize) -> Vec<i32> {
 /// v_k = -μ(k) · ln(N/k) / (k · ln(N))
 fn bd_weights(n: usize, mu: &[i32]) -> Vec<f64> {
     let ln_n = (n as f64).ln();
-    (1..n).map(|k| {
-        let mu_k = mu[k] as f64;
-        -mu_k * ((n as f64) / (k as f64)).ln() / ((k as f64) * ln_n)
-    }).collect()
+    (1..n)
+        .map(|k| {
+            let mu_k = mu[k] as f64;
+            -mu_k * ((n as f64) / (k as f64)).ln() / ((k as f64) * ln_n)
+        })
+        .collect()
 }
 
 // ═══════════════════════════════════════
@@ -75,7 +79,7 @@ fn bd_weights(n: usize, mu: &[i32]) -> Vec<f64> {
 // ═══════════════════════════════════════
 
 /// b_k = ∫₀¹ {1/(kx)} dx
-/// 
+///
 /// Using the exact formula: ∫₀¹ {θ/x} dx = 1 - γ + Σ_{n=1}^{⌊θ⌋} (1/n - ln((n+1)/n)·θ/n)
 /// For θ = 1/k:
 ///   When k ≥ 1: ∫₀¹ {1/(kx)} dx computed via substitution u = 1/(kx):
@@ -103,7 +107,7 @@ fn vasyunin_mean(k: usize) -> f64 {
 // ═══════════════════════════════════════
 
 /// G_{jk} = ∫₀¹ {1/(jx)} · {1/(kx)} dx
-/// 
+///
 /// The Vasyunin exact formula uses cotangent sums, but for numerical
 /// verification, high-precision quadrature suffices.
 fn vasyunin_gram_entry(j: usize, k: usize) -> f64 {
@@ -133,24 +137,32 @@ fn compute_error(n: usize) -> (f64, f64, f64, f64) {
     eprintln!("  N={}: Computing mean vector (dim={})...", n, dim);
 
     // Compute bᵀv
-    let bt_v: f64 = (0..dim).into_par_iter().map(|i| {
-        let k = i + 1;
-        vasyunin_mean(k) * v[i]
-    }).sum();
+    let bt_v: f64 = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let k = i + 1;
+            vasyunin_mean(k) * v[i]
+        })
+        .sum();
 
     eprintln!("  N={}: Computing Gram quadratic form...", n);
 
     // Compute vᵀGv using parallel rows
-    let vt_gv: f64 = (0..dim).into_par_iter().map(|i| {
-        let j = i + 1;
-        let mut row_sum = 0.0f64;
-        for q in 0..dim {
-            let k = q + 1;
-            if v[i].abs() < 1e-15 || v[q].abs() < 1e-15 { continue; }
-            row_sum += v[q] * vasyunin_gram_entry(j, k);
-        }
-        v[i] * row_sum
-    }).sum();
+    let vt_gv: f64 = (0..dim)
+        .into_par_iter()
+        .map(|i| {
+            let j = i + 1;
+            let mut row_sum = 0.0f64;
+            for q in 0..dim {
+                let k = q + 1;
+                if v[i].abs() < 1e-15 || v[q].abs() < 1e-15 {
+                    continue;
+                }
+                row_sum += v[q] * vasyunin_gram_entry(j, k);
+            }
+            v[i] * row_sum
+        })
+        .sum();
 
     let error = 1.0 - 2.0 * bt_v + vt_gv;
     let ln_n = (n as f64).ln();
@@ -184,17 +196,23 @@ fn main() {
         let m = mertens_function(n, &mu);
         let bound = (n as f64).sqrt() * ((n as f64).ln()).powi(2);
         let ratio = (m as f64).abs() / bound;
-        if ratio > max_mertens_ratio { max_mertens_ratio = ratio; }
-        println!("  M({:>5}) = {:>5}  |M|/√N·log²N = {:.6}  bound = {:.1}",
-                 n, m, ratio, bound);
+        if ratio > max_mertens_ratio {
+            max_mertens_ratio = ratio;
+        }
+        println!(
+            "  M({:>5}) = {:>5}  |M|/√N·log²N = {:.6}  bound = {:.1}",
+            n, m, ratio, bound
+        );
     }
     println!("  Max C_m ratio: {:.6}", max_mertens_ratio);
     println!();
 
     // Compute E(N) for various N
     println!("═══ Gram Form Error E(N) = 1 - 2bᵀv + vᵀGv ═══");
-    println!("{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
-             "N", "E(N)", "bᵀv", "vᵀGv", "1/ln(N)", "E·ln(N)");
+    println!(
+        "{:>6} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "N", "E(N)", "bᵀv", "vᵀGv", "1/ln(N)", "E·ln(N)"
+    );
     println!("{}", "-".repeat(78));
 
     let test_ns: Vec<usize> = vec![10, 20, 30, 50, 75, 100, 150, 200, 300, 500];
@@ -202,8 +220,10 @@ fn main() {
     for &n in &test_ns {
         let (error, bt_v, vt_gv, ratio) = compute_error(n);
         let inv_ln = 1.0 / (n as f64).ln();
-        println!("{:>6} {:>12.8} {:>12.8} {:>12.8} {:>12.8} {:>12.6}",
-                 n, error, bt_v, vt_gv, inv_ln, ratio);
+        println!(
+            "{:>6} {:>12.8} {:>12.8} {:>12.8} {:>12.8} {:>12.6}",
+            n, error, bt_v, vt_gv, inv_ln, ratio
+        );
     }
 
     println!();

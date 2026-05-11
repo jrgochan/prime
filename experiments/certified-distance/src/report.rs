@@ -21,32 +21,48 @@ pub fn generate_report(cert_dir: &str) {
     println!();
 
     // Table header
-    println!("  {:>8} {:>16} {:>12} {:>12} {:>12} {:>8}",
-        "N", "d²_N", "λ_min", "κ(G)", "Δd²", "method");
-    println!("  {} {} {} {} {} {}",
-        "─".repeat(8), "─".repeat(16), "─".repeat(12),
-        "─".repeat(12), "─".repeat(12), "─".repeat(8));
+    println!(
+        "  {:>8} {:>16} {:>12} {:>12} {:>12} {:>8}",
+        "N", "d²_N", "λ_min", "κ(G)", "Δd²", "method"
+    );
+    println!(
+        "  {} {} {} {} {} {}",
+        "─".repeat(8),
+        "─".repeat(16),
+        "─".repeat(12),
+        "─".repeat(12),
+        "─".repeat(12),
+        "─".repeat(8)
+    );
 
     let mut prev_d_sq: Option<f64> = None;
     for cert in &certs {
         let delta = prev_d_sq.map(|p| p - cert.distance.d_sq);
-        let lambda_min = cert.spectrum.as_ref()
+        let lambda_min = cert
+            .spectrum
+            .as_ref()
             .map(|s| format!("{:.4e}", s.lambda_min))
             .unwrap_or_else(|| "—".to_string());
-        let cond = cert.spectrum.as_ref()
+        let cond = cert
+            .spectrum
+            .as_ref()
             .map(|s| format!("{:.2e}", s.condition_number))
             .unwrap_or_else(|| "—".to_string());
         let delta_str = delta
             .map(|d| format!("{:.4e}", d))
             .unwrap_or_else(|| "—".to_string());
-        let method = cert.distance.method
+        let method = cert
+            .distance
+            .method
             .replace("GPU_Cholesky_f64", "GPU")
             .replace("CPU_Cholesky_nalgebra", "CPU")
             .replace("GPU_DD_Cholesky_31digit", "DD")
             .replace("GPU_QS_Cholesky_28digit", "QS");
 
-        println!("  {:>8} {:>16.12} {:>12} {:>12} {:>12} {:>8}",
-            cert.max_n, cert.distance.d_sq, lambda_min, cond, delta_str, method);
+        println!(
+            "  {:>8} {:>16.12} {:>12} {:>12} {:>12} {:>8}",
+            cert.max_n, cert.distance.d_sq, lambda_min, cond, delta_str, method
+        );
 
         prev_d_sq = Some(cert.distance.d_sq);
     }
@@ -54,17 +70,28 @@ pub fn generate_report(cert_dir: &str) {
     println!();
 
     // Summary statistics
-    let d_min = certs.iter().map(|c| c.distance.d_sq).fold(f64::MAX, f64::min);
+    let d_min = certs
+        .iter()
+        .map(|c| c.distance.d_sq)
+        .fold(f64::MAX, f64::min);
     let d_max = certs.iter().map(|c| c.distance.d_sq).fold(0.0f64, f64::max);
-    let all_monotone = certs.windows(2).all(|w| w[1].distance.d_sq <= w[0].distance.d_sq);
-    let all_positive = certs.iter().all(|c| {
-        c.spectrum.as_ref().is_none_or(|s| s.lambda_min_positive)
-    });
+    let all_monotone = certs
+        .windows(2)
+        .all(|w| w[1].distance.d_sq <= w[0].distance.d_sq);
+    let all_positive = certs
+        .iter()
+        .all(|c| c.spectrum.as_ref().is_none_or(|s| s.lambda_min_positive));
 
     println!("  Summary:");
     println!("    d² range: [{:.12}, {:.12}]", d_min, d_max);
-    println!("    Monotonically decreasing: {}", if all_monotone { "✓ YES" } else { "✗ NO" });
-    println!("    All λ_min > 0: {}", if all_positive { "✓ YES" } else { "✗ NO" });
+    println!(
+        "    Monotonically decreasing: {}",
+        if all_monotone { "✓ YES" } else { "✗ NO" }
+    );
+    println!(
+        "    All λ_min > 0: {}",
+        if all_positive { "✓ YES" } else { "✗ NO" }
+    );
     println!();
 }
 
@@ -97,16 +124,22 @@ pub fn lean_export(cert_dir: &str) {
     for cert in &certs {
         let bound = (cert.distance.d_sq * 10000.0).ceil() / 10000.0;
         lean.push_str(&format!("-- Certificate: cert_N{}.json\n", cert.max_n));
-        lean.push_str(&format!("-- d²_{} = {:.15} ({})\n",
-            cert.max_n, cert.distance.d_sq, cert.distance.method));
-        lean.push_str(&format!("axiom certified_d_sq_{} : nbDistSq' {} < {:.4}\n\n",
-            cert.max_n, cert.max_n, bound));
+        lean.push_str(&format!(
+            "-- d²_{} = {:.15} ({})\n",
+            cert.max_n, cert.distance.d_sq, cert.distance.method
+        ));
+        lean.push_str(&format!(
+            "axiom certified_d_sq_{} : nbDistSq' {} < {:.4}\n\n",
+            cert.max_n, cert.max_n, bound
+        ));
 
         if let Some(ref s) = cert.spectrum {
             if s.lambda_min_positive {
                 lean.push_str(&format!("-- λ_min = {:.6e}\n", s.lambda_min));
-                lean.push_str(&format!("axiom certified_lambda_min_{} : 0 < lambdaMin {}\n\n",
-                    cert.max_n, cert.max_n));
+                lean.push_str(&format!(
+                    "axiom certified_lambda_min_{} : 0 < lambdaMin {}\n\n",
+                    cert.max_n, cert.max_n
+                ));
             }
         }
     }
@@ -114,7 +147,11 @@ pub fn lean_export(cert_dir: &str) {
     lean.push_str("end Cathedral.CertifiedComputation\n");
 
     std::fs::write(&output_path, &lean).expect("Failed to write Lean file");
-    println!("  📝 Lean file → {} ({} axioms)", output_path, certs.len() * 2);
+    println!(
+        "  📝 Lean file → {} ({} axioms)",
+        output_path,
+        certs.len() * 2
+    );
 }
 
 /// Verify a single certificate by re-checking internal consistency.
@@ -158,7 +195,10 @@ pub fn verify_certificate(path: &str) {
     // Check monotonicity
     if let Some(ref m) = cert.monotonicity {
         if m.strictly_decreased {
-            println!("  ✓ d²_{} < d²_{} (Δ = {:.6e})", cert.max_n, m.previous_n, m.decrease_amount);
+            println!(
+                "  ✓ d²_{} < d²_{} (Δ = {:.6e})",
+                cert.max_n, m.previous_n, m.decrease_amount
+            );
         } else {
             println!("  ✗ Monotonicity violation!");
             ok = false;
@@ -167,7 +207,10 @@ pub fn verify_certificate(path: &str) {
 
     // Check cross-validation
     if let Some(ref cc) = cert.distance.cross_check {
-        println!("  ✓ Cross-check: {} digits agree ({})", cc.agreement_digits, cc.method);
+        println!(
+            "  ✓ Cross-check: {} digits agree ({})",
+            cc.agreement_digits, cc.method
+        );
     }
 
     println!();
@@ -187,7 +230,9 @@ fn load_certificates(cert_dir: &str) -> Vec<Certificate> {
     let dir = Path::new(cert_dir);
     let mut certs: Vec<Certificate> = Vec::new();
 
-    if !dir.exists() { return certs; }
+    if !dir.exists() {
+        return certs;
+    }
 
     if let Ok(entries) = std::fs::read_dir(dir) {
         for entry in entries.flatten() {

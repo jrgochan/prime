@@ -18,8 +18,8 @@
 //!    results/summary.json        — certificate with pass/fail verdicts
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod series;
 mod formula;
+mod series;
 
 use cathedral_utils::arith;
 use cathedral_utils::certificate;
@@ -82,8 +82,11 @@ fn main() {
 
     println!("  {} coprime pairs with b ≤ {MAX_B}", pairs.len());
     println!("  M values: {:?}", M_VALUES);
-    println!("  Max M = {} → {} total row evaluations", max_m,
-        pairs.len() * (max_m - 1));
+    println!(
+        "  Max M = {} → {} total row evaluations",
+        max_m,
+        pairs.len() * (max_m - 1)
+    );
     println!("  Using {} threads (flat rayon work-pool)", threads);
     println!();
 
@@ -92,7 +95,8 @@ fn main() {
     // ════════════════════════════════════════════════════════════════
     fmt::section("Phase 1: Formula Targets");
 
-    let formula_data: Vec<(f64, f64)> = pairs.par_iter()
+    let formula_data: Vec<(f64, f64)> = pairs
+        .par_iter()
         .map(|&(a, b)| {
             let g = formula::vasyunin_gram_formula(a, b).to_f64();
             let s = series::strip(a, b).to_f64();
@@ -105,8 +109,12 @@ fn main() {
             println!("    G({a},{b}) = {:.15}", formula_data[i].0);
         }
     }
-    println!("    {} {} formula targets computed in {:.2}s",
-        fmt::check(true), pairs.len(), t0.elapsed().as_secs_f64());
+    println!(
+        "    {} {} formula targets computed in {:.2}s",
+        fmt::check(true),
+        pairs.len(),
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 
     // ════════════════════════════════════════════════════════════════
@@ -116,7 +124,10 @@ fn main() {
 
     // Build work items: (pair_index, m) — total = pairs.len() * (max_m - 1)
     let total_work = pairs.len() * (max_m - 1);
-    println!("    Dispatching {} work items across {} threads...", total_work, threads);
+    println!(
+        "    Dispatching {} work items across {} threads...",
+        total_work, threads
+    );
 
     // Pre-allocate storage: [pair_idx][m] -> (rt, ftc, is_two_tile)
     // We use a flat Vec indexed by pair_idx * (max_m - 1) + (m - 1)
@@ -148,14 +159,23 @@ fn main() {
                 eprintln!("    [{done}/{total_work}] {pct:.0}% — {rate:.0} rows/s — {elapsed:.1}s");
             }
 
-            RowVal { rt, ftc, is_two_tile }
+            RowVal {
+                rt,
+                ftc,
+                is_two_tile,
+            }
         })
         .collect();
 
     let phase2_time = t0.elapsed().as_secs_f64();
     let rate = total_work as f64 / phase2_time;
-    println!("    {} {} rows computed in {:.2}s ({:.0} rows/s)",
-        fmt::check(true), total_work, phase2_time, rate);
+    println!(
+        "    {} {} rows computed in {:.2}s ({:.0} rows/s)",
+        fmt::check(true),
+        total_work,
+        phase2_time,
+        rate
+    );
     println!();
 
     // ════════════════════════════════════════════════════════════════
@@ -181,7 +201,9 @@ fn main() {
             rt_prefix[m] = rt_prefix[m - 1] + rv.rt;
             ftc_prefix[m] = ftc_prefix[m - 1] + rv.ftc;
             corr_prefix[m] = corr_prefix[m - 1] + corr;
-            if rv.is_two_tile { two_tile_count += 1; }
+            if rv.is_two_tile {
+                two_tile_count += 1;
+            }
         }
 
         // Sample at each M value
@@ -199,8 +221,13 @@ fn main() {
         let total_correction = corr_prefix[max_m - 1];
 
         results.push(PairResult {
-            a, b, formula_val, strip_val,
-            m_results, two_tile_count, total_correction,
+            a,
+            b,
+            formula_val,
+            strip_val,
+            m_results,
+            two_tile_count,
+            total_correction,
         });
     }
 
@@ -230,7 +257,9 @@ fn main() {
             let alg_scaled = alg_err.abs() * (r.a as f64) * (mr.big_m as f64);
 
             decomp_rows.push(vec![
-                r.a.to_string(), r.b.to_string(), mr.big_m.to_string(),
+                r.a.to_string(),
+                r.b.to_string(),
+                mr.big_m.to_string(),
                 format!("{:.15e}", mr.s_combined),
                 format!("{:.15e}", mr.ftc_sum),
                 format!("{:.15e}", mr.correction_sum),
@@ -251,13 +280,24 @@ fn main() {
         let ftc_scaled = ftc_err.abs() * (r.a as f64) * (last.big_m as f64);
         let alg_scaled = alg_err.abs() * (r.a as f64) * (last.big_m as f64);
 
-        if ftc_scaled > TAIL_BOUND_C { all_ftc_bounded = false; }
-        if alg_scaled > TAIL_BOUND_C { all_algebraic_bounded = false; }
-        if ftc_scaled > worst_ftc_tail { worst_ftc_tail = ftc_scaled; worst_ftc_pair = (r.a, r.b); }
-        if alg_scaled > worst_alg_tail { worst_alg_tail = alg_scaled; worst_alg_pair = (r.a, r.b); }
+        if ftc_scaled > TAIL_BOUND_C {
+            all_ftc_bounded = false;
+        }
+        if alg_scaled > TAIL_BOUND_C {
+            all_algebraic_bounded = false;
+        }
+        if ftc_scaled > worst_ftc_tail {
+            worst_ftc_tail = ftc_scaled;
+            worst_ftc_pair = (r.a, r.b);
+        }
+        if alg_scaled > worst_alg_tail {
+            worst_alg_tail = alg_scaled;
+            worst_alg_pair = (r.a, r.b);
+        }
 
         conv_rows.push(vec![
-            r.a.to_string(), r.b.to_string(),
+            r.a.to_string(),
+            r.b.to_string(),
             format!("{:.15e}", r.formula_val),
             format!("{:.15e}", target),
             format!("{:.6e}", ftc_err),
@@ -270,7 +310,8 @@ fn main() {
         ]);
 
         corr_rows.push(vec![
-            r.a.to_string(), r.b.to_string(),
+            r.a.to_string(),
+            r.b.to_string(),
             format!("{}", r.two_tile_count),
             format!("{:.15e}", r.total_correction),
             format!("{:.15e}", last.correction_sum),
@@ -280,10 +321,14 @@ fn main() {
 
     // Stats
     println!("    Total two-tile rows: {}", total_two_tile);
-    println!("    FTC path:       worst |err|·aM = {:.6} at ({},{})",
-        worst_ftc_tail, worst_ftc_pair.0, worst_ftc_pair.1);
-    println!("    Algebraic path: worst |err|·aM = {:.6} at ({},{})",
-        worst_alg_tail, worst_alg_pair.0, worst_alg_pair.1);
+    println!(
+        "    FTC path:       worst |err|·aM = {:.6} at ({},{})",
+        worst_ftc_tail, worst_ftc_pair.0, worst_ftc_pair.1
+    );
+    println!(
+        "    Algebraic path: worst |err|·aM = {:.6} at ({},{})",
+        worst_alg_tail, worst_alg_pair.0, worst_alg_pair.1
+    );
     println!();
 
     // ════════════════════════════════════════════════════════════════
@@ -292,30 +337,61 @@ fn main() {
     fmt::section("Phase 4: Certificates");
 
     let decomp_headers = &[
-        "a", "b", "M",
-        "s_combined", "ftc_sum", "correction_sum", "strip",
-        "formula", "target",
-        "ftc_error", "ftc_error_x_aM",
-        "alg_error", "alg_error_x_aM",
+        "a",
+        "b",
+        "M",
+        "s_combined",
+        "ftc_sum",
+        "correction_sum",
+        "strip",
+        "formula",
+        "target",
+        "ftc_error",
+        "ftc_error_x_aM",
+        "alg_error",
+        "alg_error_x_aM",
     ];
     certificate::write_tsv("results/decomposition.tsv", decomp_headers, &decomp_rows);
-    println!("    {} results/decomposition.tsv ({} rows)", fmt::check(true), decomp_rows.len());
+    println!(
+        "    {} results/decomposition.tsv ({} rows)",
+        fmt::check(true),
+        decomp_rows.len()
+    );
 
     let conv_headers = &[
-        "a", "b", "formula", "target",
-        "ftc_error", "ftc_error_x_aM",
-        "alg_error", "alg_error_x_aM",
-        "two_tile_rows", "total_correction", "ftc_bounded",
+        "a",
+        "b",
+        "formula",
+        "target",
+        "ftc_error",
+        "ftc_error_x_aM",
+        "alg_error",
+        "alg_error_x_aM",
+        "two_tile_rows",
+        "total_correction",
+        "ftc_bounded",
     ];
     certificate::write_tsv("results/convergence.tsv", conv_headers, &conv_rows);
-    println!("    {} results/convergence.tsv ({} rows)", fmt::check(true), conv_rows.len());
+    println!(
+        "    {} results/convergence.tsv ({} rows)",
+        fmt::check(true),
+        conv_rows.len()
+    );
 
     let corr_headers = &[
-        "a", "b", "two_tile_count", "total_correction",
-        "correction_at_max_M", "alg_minus_ftc_error",
+        "a",
+        "b",
+        "two_tile_count",
+        "total_correction",
+        "correction_at_max_M",
+        "alg_minus_ftc_error",
     ];
     certificate::write_tsv("results/corrections.tsv", corr_headers, &corr_rows);
-    println!("    {} results/corrections.tsv ({} rows)", fmt::check(true), corr_rows.len());
+    println!(
+        "    {} results/corrections.tsv ({} rows)",
+        fmt::check(true),
+        corr_rows.len()
+    );
 
     // Summary JSON
     let elapsed = t0.elapsed().as_secs_f64();
@@ -365,19 +441,29 @@ fn main() {
     if all_ftc_bounded {
         println!(
             "    {}{}  FTC PATH: ALL {} PAIRS CERTIFIED{} — |err|·aM < {TAIL_BOUND_C}",
-            fmt::BOLD, fmt::GREEN, pairs.len(), fmt::RESET,
+            fmt::BOLD,
+            fmt::GREEN,
+            pairs.len(),
+            fmt::RESET,
         );
     } else {
         println!(
             "    {}{}  FTC PATH: FAILED{} — worst |err|·aM = {worst_ftc_tail:.4} at ({},{})",
-            fmt::BOLD, fmt::RED, fmt::RESET, worst_ftc_pair.0, worst_ftc_pair.1,
+            fmt::BOLD,
+            fmt::RED,
+            fmt::RESET,
+            worst_ftc_pair.0,
+            worst_ftc_pair.1,
         );
     }
 
     if all_algebraic_bounded {
         println!(
             "    {}{}  ALG PATH: ALL {} PAIRS CERTIFIED{} — |err|·aM < {TAIL_BOUND_C}",
-            fmt::BOLD, fmt::GREEN, pairs.len(), fmt::RESET,
+            fmt::BOLD,
+            fmt::GREEN,
+            pairs.len(),
+            fmt::RESET,
         );
     } else {
         println!(
@@ -390,7 +476,12 @@ fn main() {
     println!();
     println!(
         "  {}Total: {:.2}s — {} rows at {:.0} rows/s across {} threads{}",
-        fmt::DIM, elapsed, total_work, rate, threads, fmt::RESET,
+        fmt::DIM,
+        elapsed,
+        total_work,
+        rate,
+        threads,
+        fmt::RESET,
     );
     println!();
 }

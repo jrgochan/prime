@@ -102,9 +102,12 @@ pub fn detect_gpu() -> Option<GpuInfo> {
     unsafe {
         let mut prop: CudaDeviceProp = std::mem::zeroed();
         let status = cudaGetDeviceProperties_v2(&mut prop, 0);
-        if status != 0 { return None; }
+        if status != 0 {
+            return None;
+        }
         let name = std::ffi::CStr::from_ptr(prop.name.as_ptr() as *const i8)
-            .to_string_lossy().to_string();
+            .to_string_lossy()
+            .to_string();
         let vram_mb = prop.total_global_mem / (1024 * 1024);
         return Some(GpuInfo { name, vram_mb });
     }
@@ -119,7 +122,8 @@ pub fn gpu_certify(pairs: &[(usize, usize)]) -> Vec<PairResult> {
     let _max_b = pairs.iter().map(|&(_, b)| b).max().unwrap_or(3);
 
     // Flatten pairs into c_int array
-    let _flat_pairs: Vec<c_int> = pairs.iter()
+    let _flat_pairs: Vec<c_int> = pairs
+        .iter()
         .flat_map(|&(a, b)| vec![a as c_int, b as c_int])
         .collect();
 

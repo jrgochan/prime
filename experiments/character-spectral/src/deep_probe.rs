@@ -17,7 +17,7 @@ mod spectral;
 use cathedral_utils::fmt::*;
 use std::time::Instant;
 
-use cathedral_utils::gram::{build_gram_matrix_f64};
+use cathedral_utils::gram::build_gram_matrix_f64;
 
 fn project_f64(full_mat: &[f64], full_dim: usize, indices: &[usize]) -> Vec<f64> {
     let sub_dim = indices.len();
@@ -37,12 +37,24 @@ fn project_f64(full_mat: &[f64], full_dim: usize, indices: &[usize]) -> Vec<f64>
 // ═══════════════════════════════════════════════════════════════════════
 
 fn experiment_b_dark_sector_sweep() {
-    println!("\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}EXPERIMENT B: DARK SECTOR CRITICAL SWEEP{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}N = 60..250 step 2 · tracking GOE fit of even-sector{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Question: smooth crossover or sharp phase transition?{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}N   │ dim(even)│ GOE_fit  │ Poi_fit  │ best     │ bar{RESET}");
+    println!(
+        "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}EXPERIMENT B: DARK SECTOR CRITICAL SWEEP{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}N = 60..250 step 2 · tracking GOE fit of even-sector{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Question: smooth crossover or sharp phase transition?{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}N   │ dim(even)│ GOE_fit  │ Poi_fit  │ best     │ bar{RESET}"
+    );
 
     let mut transition_data: Vec<(usize, f64, f64, &str)> = Vec::new();
     let t0 = Instant::now();
@@ -63,21 +75,28 @@ fn experiment_b_dark_sector_sweep() {
 
         println!(
             "  {BOLD}{CYAN}║{RESET}  {:<4}│ {:<8} │ {:.6} │ {:.6} │ {}{:<8}{RESET} │ {color}{bar}{RESET}",
-            n, even_idx.len(), sp.goe_fit, sp.poisson_fit,
-            color, if is_goe { "GOE" } else { "Poisson" },
+            n,
+            even_idx.len(),
+            sp.goe_fit,
+            sp.poisson_fit,
+            color,
+            if is_goe { "GOE" } else { "Poisson" },
         );
 
         transition_data.push((n, sp.goe_fit, sp.poisson_fit, sp.best_class));
     }
 
     let elapsed = t0.elapsed().as_secs_f64();
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Analyze the transition
     println!("\n  {BOLD}{WHITE}═══ TRANSITION ANALYSIS ═══{RESET}");
 
     // Find crossover point (where GOE first exceeds Poisson)
-    let crossover_n = transition_data.iter()
+    let crossover_n = transition_data
+        .iter()
         .find(|(_, goe, poi, _)| goe > poi)
         .map(|(n, _, _, _)| *n);
 
@@ -92,20 +111,28 @@ fn experiment_b_dark_sector_sweep() {
     let thresh_lo = goe_min + 0.2 * (goe_max - goe_min);
     let thresh_hi = goe_min + 0.8 * (goe_max - goe_min);
 
-    let n_lo = transition_data.iter()
+    let n_lo = transition_data
+        .iter()
         .find(|(_, g, _, _)| *g >= thresh_lo)
         .map(|(n, _, _, _)| *n);
-    let n_hi = transition_data.iter()
+    let n_hi = transition_data
+        .iter()
         .find(|(_, g, _, _)| *g >= thresh_hi)
         .map(|(n, _, _, _)| *n);
 
     if let (Some(lo), Some(hi)) = (n_lo, n_hi) {
         let width = hi - lo;
-        println!("  {CYAN}Transition width (20%→80%):{RESET} {BOLD}{WHITE}ΔN = {width} (N={lo}..{hi}){RESET}");
+        println!(
+            "  {CYAN}Transition width (20%→80%):{RESET} {BOLD}{WHITE}ΔN = {width} (N={lo}..{hi}){RESET}"
+        );
         if width <= 20 {
-            println!("  {RED}→ SHARP transition (ΔN ≤ 20): possible quantum phase transition{RESET}");
+            println!(
+                "  {RED}→ SHARP transition (ΔN ≤ 20): possible quantum phase transition{RESET}"
+            );
         } else if width <= 60 {
-            println!("  {YELLOW}→ MODERATE transition (ΔN ~ 20-60): crossover with finite-size effects{RESET}");
+            println!(
+                "  {YELLOW}→ MODERATE transition (ΔN ~ 20-60): crossover with finite-size effects{RESET}"
+            );
         } else {
             println!("  {GREEN}→ SMOOTH crossover (ΔN > 60): liquid-like boiling{RESET}");
         }
@@ -144,11 +171,21 @@ fn experiment_b_dark_sector_sweep() {
 // ═══════════════════════════════════════════════════════════════════════
 
 fn experiment_c_eigenvector_localization(max_n: usize) {
-    println!("\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}EXPERIMENT C: EIGENVECTOR LOCALIZATION / QUANTUM SCARRING{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Participation ratio of eigenvectors across mod-8 residue classes{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}PR = 1/Σ|v_i|⁴ (IPR⁻¹). PR=dim → delocalized, PR=1 → localized{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
+    println!(
+        "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}EXPERIMENT C: EIGENVECTOR LOCALIZATION / QUANTUM SCARRING{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Participation ratio of eigenvectors across mod-8 residue classes{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}PR = 1/Σ|v_i|⁴ (IPR⁻¹). PR=dim → delocalized, PR=1 → localized{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
 
     let test_ns: Vec<usize> = vec![100, 150, 200, 300, 400, 500, 750, 1000]
         .into_iter()
@@ -165,7 +202,9 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         let eigen = m.symmetric_eigen();
 
         // Sort eigenvalues and get permutation
-        let mut indexed: Vec<(usize, f64)> = eigen.eigenvalues.iter()
+        let mut indexed: Vec<(usize, f64)> = eigen
+            .eigenvalues
+            .iter()
             .enumerate()
             .map(|(i, &v)| (i, v))
             .collect();
@@ -178,7 +217,9 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         };
 
         println!("\n  {BOLD}{WHITE}═══ N={n} (dim={full_dim}) ═══{RESET}");
-        println!("  {DIM}eigenstate     │ eigenvalue      │  PR(full)│ k≡0(8) │ k≡1(8) │ k≡2(8) │ k≡3(8) │ k≡4(8) │ k≡5(8) │ k≡6(8) │ k≡7(8) │ scar?{RESET}");
+        println!(
+            "  {DIM}eigenstate     │ eigenvalue      │  PR(full)│ k≡0(8) │ k≡1(8) │ k≡2(8) │ k≡3(8) │ k≡4(8) │ k≡5(8) │ k≡6(8) │ k≡7(8) │ scar?{RESET}"
+        );
 
         // Analyze key eigenvectors: ground state, 25%, 50%, 75%, top
         let key_indices = vec![
@@ -191,7 +232,9 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         ];
 
         for &(sorted_idx, label) in &key_indices {
-            if sorted_idx >= full_dim { continue; }
+            if sorted_idx >= full_dim {
+                continue;
+            }
             let (orig_col, eigenvalue) = indexed[sorted_idx];
 
             // Extract eigenvector column
@@ -225,7 +268,9 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
             let mut scar_class = 0;
             let mut max_excess = 0.0f64;
             for c in 0..8 {
-                if class_counts[c] == 0 { continue; }
+                if class_counts[c] == 0 {
+                    continue;
+                }
                 let expected = class_counts[c] as f64 / full_dim as f64 * total_weight;
                 let excess = class_weight[c] / expected;
                 if excess > max_excess {
@@ -245,9 +290,17 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
 
             println!(
                 "  {:<14} │ {:>15.10} │ {:>8.1} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {:>6.3} │ {scar_label}",
-                label, eigenvalue, pr,
-                class_weight[0], class_weight[1], class_weight[2], class_weight[3],
-                class_weight[4], class_weight[5], class_weight[6], class_weight[7],
+                label,
+                eigenvalue,
+                pr,
+                class_weight[0],
+                class_weight[1],
+                class_weight[2],
+                class_weight[3],
+                class_weight[4],
+                class_weight[5],
+                class_weight[6],
+                class_weight[7],
             );
         }
 
@@ -269,14 +322,22 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         let max_pr = pr_values.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
         let goe_expected_pr = full_dim as f64 / 3.0; // GOE prediction: PR ≈ dim/3
 
-        println!("  PR range: [{min_pr:.1}, {max_pr:.1}]  mean={avg_pr:.1}  GOE_pred={goe_expected_pr:.1}");
+        println!(
+            "  PR range: [{min_pr:.1}, {max_pr:.1}]  mean={avg_pr:.1}  GOE_pred={goe_expected_pr:.1}"
+        );
         let ratio = avg_pr / goe_expected_pr;
         if ratio > 0.8 && ratio < 1.2 {
-            println!("  {GREEN}→ Mean PR consistent with GOE (ratio = {ratio:.3}): DELOCALIZED{RESET}");
+            println!(
+                "  {GREEN}→ Mean PR consistent with GOE (ratio = {ratio:.3}): DELOCALIZED{RESET}"
+            );
         } else if ratio < 0.5 {
-            println!("  {RED}→ Mean PR << GOE prediction (ratio = {ratio:.3}): LOCALIZED states present{RESET}");
+            println!(
+                "  {RED}→ Mean PR << GOE prediction (ratio = {ratio:.3}): LOCALIZED states present{RESET}"
+            );
         } else {
-            println!("  {YELLOW}→ Mean PR deviates from GOE (ratio = {ratio:.3}): partial localization{RESET}");
+            println!(
+                "  {YELLOW}→ Mean PR deviates from GOE (ratio = {ratio:.3}): partial localization{RESET}"
+            );
         }
 
         // Ground state special analysis
@@ -286,7 +347,8 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
             .collect();
 
         // Which indices carry the most weight in the ground state?
-        let mut weighted_indices: Vec<(usize, f64)> = ground_vec.iter()
+        let mut weighted_indices: Vec<(usize, f64)> = ground_vec
+            .iter()
             .enumerate()
             .map(|(row, &v)| (row + 2, v * v))
             .collect();
@@ -296,13 +358,18 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         print!("  ");
         for (k, w) in weighted_indices.iter().take(10) {
             let is_prime = is_prime_simple(*k);
-            let marker = if is_prime { format!("{CYAN}P{RESET}") } else { format!("{DIM}C{RESET}") };
+            let marker = if is_prime {
+                format!("{CYAN}P{RESET}")
+            } else {
+                format!("{DIM}C{RESET}")
+            };
             print!("k={k}({marker})={w:.4}  ");
         }
         println!();
 
         // Count prime vs composite weight
-        let prime_weight: f64 = ground_vec.iter()
+        let prime_weight: f64 = ground_vec
+            .iter()
             .enumerate()
             .filter(|(row, _)| is_prime_simple(row + 2))
             .map(|(_, &v)| v * v)
@@ -311,11 +378,16 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
         println!("  Prime weight: {prime_weight:.4}  Composite weight: {composite_weight:.4}");
     }
 
-    println!("\n  {DIM}Experiment C completed in {:.1}s{RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "\n  {DIM}Experiment C completed in {:.1}s{RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 }
 
 fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
-    if dim == 0 { return vec![]; }
+    if dim == 0 {
+        return vec![];
+    }
     let m = nalgebra::DMatrix::from_row_slice(dim, dim, mat);
     let eigen = m.symmetric_eigen();
     let mut eigs: Vec<f64> = eigen.eigenvalues.iter().copied().collect();
@@ -324,12 +396,20 @@ fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
 }
 
 fn is_prime_simple(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
         i += 6;
     }
     true

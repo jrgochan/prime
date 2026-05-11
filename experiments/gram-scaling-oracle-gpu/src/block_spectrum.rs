@@ -15,10 +15,10 @@
 //!    dim > max_gpu_dim: CPU OpenBLAS dsyevr (λ_min only)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
 use cathedral_utils::gram::gram_entry_f64;
-use std::time::Instant;
+use rayon::prelude::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Instant;
 
 /// Result of spectral analysis on a single GCD block.
 #[derive(Debug, Clone)]
@@ -38,7 +38,9 @@ pub struct BlockResult {
 /// Returns (flat row-major data, dimension).
 pub fn build_block_matrix(n: usize, d: usize) -> (Vec<f64>, usize) {
     let block_dim = n / d;
-    if block_dim < 2 { return (vec![], 0); }
+    if block_dim < 2 {
+        return (vec![], 0);
+    }
 
     let total = block_dim * (block_dim + 1) / 2;
     let t0 = Instant::now();
@@ -58,8 +60,11 @@ pub fn build_block_matrix(n: usize, d: usize) -> (Vec<f64>, usize) {
 
             let count = done.fetch_add(1, Ordering::Relaxed);
             if block_dim > 500 && count % (total / 20).max(1) == 0 && count > 0 {
-                eprint!("\r    d={d} dim={block_dim}: {count}/{total} ({:.0}%) {:.0}s    ",
-                    count as f64 / total as f64 * 100.0, t0.elapsed().as_secs_f64());
+                eprint!(
+                    "\r    d={d} dim={block_dim}: {count}/{total} ({:.0}%) {:.0}s    ",
+                    count as f64 / total as f64 * 100.0,
+                    t0.elapsed().as_secs_f64()
+                );
             }
 
             ((i, j), val)
@@ -73,8 +78,10 @@ pub fn build_block_matrix(n: usize, d: usize) -> (Vec<f64>, usize) {
     }
 
     if block_dim > 500 {
-        eprintln!("\r    d={d} dim={block_dim}: built in {:.1}s                              ",
-            t0.elapsed().as_secs_f64());
+        eprintln!(
+            "\r    d={d} dim={block_dim}: built in {:.1}s                              ",
+            t0.elapsed().as_secs_f64()
+        );
     }
 
     (data, block_dim)
@@ -89,18 +96,16 @@ pub fn build_block_matrix(n: usize, d: usize) -> (Vec<f64>, usize) {
 ///   - Small blocks: parallel via rayon (CPU eigenvalues_all)
 ///
 /// Returns sorted block results.
-pub fn analyze_all_blocks(
-    n: usize,
-    vram_mb: usize,
-    max_block_dim: usize,
-) -> Vec<BlockResult> {
+pub fn analyze_all_blocks(n: usize, vram_mb: usize, max_block_dim: usize) -> Vec<BlockResult> {
     let t0 = Instant::now();
 
     // Determine which d values to process
     let mut blocks_to_process: Vec<(usize, usize)> = Vec::new(); // (d, dim)
     for d in 1..=n {
         let dim = n / d;
-        if dim < 2 { break; } // all subsequent d values will also have dim < 2
+        if dim < 2 {
+            break;
+        } // all subsequent d values will also have dim < 2
         if dim > max_block_dim {
             eprintln!("    ⚠ Skipping d={d} (dim={dim} > max_block_dim={max_block_dim})");
             continue;
@@ -112,8 +117,10 @@ pub fn analyze_all_blocks(
     blocks_to_process.sort_by(|a, b| b.1.cmp(&a.1));
 
     let total_blocks = blocks_to_process.len();
-    eprintln!("    Processing {total_blocks} GCD blocks (max dim = {})",
-        blocks_to_process.first().map(|b| b.1).unwrap_or(0));
+    eprintln!(
+        "    Processing {total_blocks} GCD blocks (max dim = {})",
+        blocks_to_process.first().map(|b| b.1).unwrap_or(0)
+    );
 
     // Threshold for GPU vs CPU
     let max_gpu_dim = if vram_mb > 0 {
@@ -127,25 +134,34 @@ pub fn analyze_all_blocks(
     let sequential_threshold = 5000; // blocks above this run sequentially
 
     // Split into large (sequential) and small (parallel) groups
-    let (large, small): (Vec<_>, Vec<_>) = blocks_to_process.into_iter()
+    let (large, small): (Vec<_>, Vec<_>) = blocks_to_process
+        .into_iter()
         .partition(|&(_, dim)| dim > sequential_threshold);
 
     let mut results = Vec::with_capacity(total_blocks);
 
     // Process LARGE blocks sequentially
     for (i, (d, dim)) in large.iter().enumerate() {
-        eprintln!("    [{}/{}] d={d} dim={dim} → building submatrix...",
-            i + 1, large.len());
+        eprintln!(
+            "    [{}/{}] d={d} dim={dim} → building submatrix...",
+            i + 1,
+            large.len()
+        );
 
         let (data, actual_dim) = build_block_matrix(n, *d);
-        if actual_dim < 2 { continue; }
+        if actual_dim < 2 {
+            continue;
+        }
 
         let mem_gb = (actual_dim * actual_dim * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
 
         // Choose GPU or CPU
         let (lmin, secs, mode) = if actual_dim <= max_gpu_dim {
-            eprintln!("    [{}/{}] d={d} dim={actual_dim} ({mem_gb:.2} GB) → GPU cuSOLVER...",
-                i + 1, large.len());
+            eprintln!(
+                "    [{}/{}] d={d} dim={actual_dim} ({mem_gb:.2} GB) → GPU cuSOLVER...",
+                i + 1,
+                large.len()
+            );
             match crate::gpu::gpu_lambda_min(&data, actual_dim) {
                 Ok((lmin, time)) => (lmin, time, "GPU"),
                 Err(e) => {
@@ -155,18 +171,27 @@ pub fn analyze_all_blocks(
                 }
             }
         } else {
-            eprintln!("    [{}/{}] d={d} dim={actual_dim} ({mem_gb:.2} GB) → CPU dsyevr(λ_min)...",
-                i + 1, large.len());
+            eprintln!(
+                "    [{}/{}] d={d} dim={actual_dim} ({mem_gb:.2} GB) → CPU dsyevr(λ_min)...",
+                i + 1,
+                large.len()
+            );
             let (lmin, time) = crate::cpu::full_matrix_lambda_min(&data, actual_dim);
             (lmin, time, "CPU")
         };
 
-        eprintln!("    [{}/{}] d={d} dim={actual_dim} → λ_min = {lmin:.6e} ({secs:.1}s {mode})",
-            i + 1, large.len());
+        eprintln!(
+            "    [{}/{}] d={d} dim={actual_dim} → λ_min = {lmin:.6e} ({secs:.1}s {mode})",
+            i + 1,
+            large.len()
+        );
 
         results.push(BlockResult {
-            gcd_class: *d, dim: actual_dim, lambda_min: lmin,
-            compute_secs: secs, mode,
+            gcd_class: *d,
+            dim: actual_dim,
+            lambda_min: lmin,
+            compute_secs: secs,
+            mode,
         });
         drop(data);
     }
@@ -175,39 +200,58 @@ pub fn analyze_all_blocks(
     if !small.is_empty() {
         eprintln!("    Processing {} small blocks in parallel...", small.len());
         let done = AtomicUsize::new(0);
-        let small_results: Vec<BlockResult> = small.par_iter()
+        let small_results: Vec<BlockResult> = small
+            .par_iter()
             .filter_map(|&(d, _dim)| {
                 let (data, actual_dim) = build_block_matrix(n, d);
-                if actual_dim < 2 { return None; }
+                if actual_dim < 2 {
+                    return None;
+                }
 
                 let t = Instant::now();
                 let evals = crate::cpu::eigenvalues_all(&data, actual_dim);
                 let secs = t.elapsed().as_secs_f64();
-                if evals.is_empty() { return None; }
+                if evals.is_empty() {
+                    return None;
+                }
                 let lmin = evals[0];
 
                 let count = done.fetch_add(1, Ordering::Relaxed);
                 if small.len() > 100 && count % (small.len() / 10).max(1) == 0 {
-                    eprint!("\r    small blocks: {count}/{} ({:.0}%)    ",
-                        small.len(), count as f64 / small.len() as f64 * 100.0);
+                    eprint!(
+                        "\r    small blocks: {count}/{} ({:.0}%)    ",
+                        small.len(),
+                        count as f64 / small.len() as f64 * 100.0
+                    );
                 }
 
                 Some(BlockResult {
-                    gcd_class: d, dim: actual_dim, lambda_min: lmin,
-                    compute_secs: secs, mode: "CPU_parallel",
+                    gcd_class: d,
+                    dim: actual_dim,
+                    lambda_min: lmin,
+                    compute_secs: secs,
+                    mode: "CPU_parallel",
                 })
             })
             .collect();
 
-        if small.len() > 100 { eprintln!(); }
+        if small.len() > 100 {
+            eprintln!();
+        }
         results.extend(small_results);
     }
 
     results.sort_by_key(|r| r.gcd_class);
 
     let elapsed = t0.elapsed().as_secs_f64();
-    let global_lmin = results.iter().map(|r| r.lambda_min).fold(f64::INFINITY, f64::min);
-    eprintln!("    Block analysis complete: {} blocks in {elapsed:.1}s", results.len());
+    let global_lmin = results
+        .iter()
+        .map(|r| r.lambda_min)
+        .fold(f64::INFINITY, f64::min);
+    eprintln!(
+        "    Block analysis complete: {} blocks in {elapsed:.1}s",
+        results.len()
+    );
     eprintln!("    Global block λ_min = {global_lmin:.6e}");
 
     results

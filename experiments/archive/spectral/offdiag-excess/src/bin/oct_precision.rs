@@ -10,18 +10,24 @@
 //!
 //! Usage: cargo run --release --bin oct_precision [sizes...]
 
+use offdiag_excess::{fract_integral, gram_entry};
 use rayon::prelude::*;
-use offdiag_excess::{gram_entry, fract_integral};
-use rug::{Float, float::Round};
+use rug::{float::Round, Float};
 
 const PREC: u32 = 256; // 256-bit precision (~77 decimal digits)
 
 fn min_prime_factor(n: usize) -> usize {
-    if n <= 1 { return 1; }
-    if n % 2 == 0 { return 2; }
+    if n <= 1 {
+        return 1;
+    }
+    if n % 2 == 0 {
+        return 2;
+    }
     let mut p = 3;
     while p * p <= n {
-        if n % p == 0 { return p; }
+        if n % p == 0 {
+            return p;
+        }
         p += 2;
     }
     n
@@ -29,15 +35,27 @@ fn min_prime_factor(n: usize) -> usize {
 
 fn octonion_class(k: usize) -> usize {
     match min_prime_factor(k) {
-        2 => 0, 3 => 1, 5 => 2, 7 => 3,
-        11 => 4, 13 => 5, 17 => 6, _ => 7,
+        2 => 0,
+        3 => 1,
+        5 => 2,
+        7 => 3,
+        11 => 4,
+        13 => 5,
+        17 => 6,
+        _ => 7,
     }
 }
 
 fn class_label(cls: usize) -> &'static str {
     match cls {
-        0 => "even", 1 => "3|k", 2 => "5|k", 3 => "7|k",
-        4 => "11|k", 5 => "13|k", 6 => "17|k", 7 => "≥19",
+        0 => "even",
+        1 => "3|k",
+        2 => "5|k",
+        3 => "7|k",
+        4 => "11|k",
+        5 => "13|k",
+        6 => "17|k",
+        7 => "≥19",
         _ => "?",
     }
 }
@@ -46,11 +64,13 @@ fn class_label(cls: usize) -> &'static str {
 fn solve_mpfr(a: &[Vec<Float>], b: &[Float]) -> Vec<Float> {
     let n = b.len();
     // Build augmented matrix
-    let mut aug: Vec<Vec<Float>> = (0..n).map(|i| {
-        let mut row: Vec<Float> = a[i].iter().map(|x| x.clone()).collect();
-        row.push(b[i].clone());
-        row
-    }).collect();
+    let mut aug: Vec<Vec<Float>> = (0..n)
+        .map(|i| {
+            let mut row: Vec<Float> = a[i].iter().map(|x| x.clone()).collect();
+            row.push(b[i].clone());
+            row
+        })
+        .collect();
 
     let mut perm: Vec<usize> = (0..n).collect();
 
@@ -106,8 +126,10 @@ fn main() {
     eprintln!("  Gram entries: f64 | 8×8 aggregation+solve: MPFR");
     eprintln!("══════════════════════════════════════════════════════════════════\n");
 
-    eprintln!("{:>5} {:>12} {:>12} {:>14} {:>12} {:>8}",
-        "n", "d2(const)", "d2(8cls)", "btv_mpfr", "1-btv", "time");
+    eprintln!(
+        "{:>5} {:>12} {:>12} {:>14} {:>12} {:>8}",
+        "n", "d2(const)", "d2(8cls)", "btv_mpfr", "1-btv", "time"
+    );
     eprintln!("{}", "-".repeat(70));
 
     for &n in &sizes {
@@ -116,17 +138,24 @@ fn main() {
 
         // Build Gram matrix in f64 (sufficient precision per entry)
         let b_f64: Vec<f64> = (0..dim).map(|i| fract_integral(i + 2)).collect();
-        let g_f64: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|i| {
-            (0..dim).map(|j| gram_entry(i + 2, j + 2)).collect()
-        }).collect();
+        let g_f64: Vec<Vec<f64>> = (0..dim)
+            .into_par_iter()
+            .map(|i| (0..dim).map(|j| gram_entry(i + 2, j + 2)).collect())
+            .collect();
 
         let classes: Vec<usize> = (0..dim).map(|i| octonion_class(i + 2)).collect();
 
         // Find active classes
         let mut active_classes: Vec<usize> = Vec::new();
         let mut class_count = vec![0usize; 8];
-        for &c in &classes { class_count[c] += 1; }
-        for c in 0..8 { if class_count[c] > 0 { active_classes.push(c); } }
+        for &c in &classes {
+            class_count[c] += 1;
+        }
+        for c in 0..8 {
+            if class_count[c] > 0 {
+                active_classes.push(c);
+            }
+        }
         let nc = active_classes.len();
 
         let mut class_to_idx = vec![0usize; 8];
@@ -135,9 +164,9 @@ fn main() {
         }
 
         // ═══ Aggregate into 8×8 using MPFR precision ═══
-        let mut g_cls: Vec<Vec<Float>> = (0..nc).map(|_| {
-            (0..nc).map(|_| Float::with_val(PREC, 0)).collect()
-        }).collect();
+        let mut g_cls: Vec<Vec<Float>> = (0..nc)
+            .map(|_| (0..nc).map(|_| Float::with_val(PREC, 0)).collect())
+            .collect();
         let mut b_cls: Vec<Float> = (0..nc).map(|_| Float::with_val(PREC, 0)).collect();
 
         for i in 0..dim {
@@ -163,7 +192,10 @@ fn main() {
         let mut vtgv = Float::with_val(PREC, 0);
         for i in 0..nc {
             for j in 0..nc {
-                vtgv += Float::with_val(PREC, &c_cls[i] * &Float::with_val(PREC, &c_cls[j] * &g_cls[i][j]));
+                vtgv += Float::with_val(
+                    PREC,
+                    &c_cls[i] * &Float::with_val(PREC, &c_cls[j] * &g_cls[i][j]),
+                );
             }
         }
         // d²_direct = 1 - 2*btv + vtgv
@@ -181,10 +213,15 @@ fn main() {
         let btv_str = btv.to_string_radix(10, Some(20));
         let d2_str = d2_cls.to_string_radix(10, Some(15));
 
-        eprintln!("{:5} {:12.6} {:>12} {:>14} {:>12} {:8.1}s",
-            n, d2_const, d2_str, btv_str, 
+        eprintln!(
+            "{:5} {:12.6} {:>12} {:>14} {:>12} {:8.1}s",
+            n,
+            d2_const,
+            d2_str,
+            btv_str,
             format!("{:.10}", d2_cls.to_f64_round(Round::Nearest)),
-            elapsed.as_secs_f64());
+            elapsed.as_secs_f64()
+        );
 
         // Cross-check: d2_direct should equal d2_cls if c = G⁻¹b
         let crosscheck = Float::with_val(PREC, &d2_cls - &d2_direct);
@@ -192,12 +229,23 @@ fn main() {
 
         // Print coefficients
         if n >= 200 {
-            eprintln!("        d2_direct = {}", d2_direct.to_string_radix(10, Some(15)));
-            eprintln!("        crosscheck (d2_cls - d2_direct) = {}", crosscheck_str);
+            eprintln!(
+                "        d2_direct = {}",
+                d2_direct.to_string_radix(10, Some(15))
+            );
+            eprintln!(
+                "        crosscheck (d2_cls - d2_direct) = {}",
+                crosscheck_str
+            );
             for (idx, &cls) in active_classes.iter().enumerate() {
                 let c_str = c_cls[idx].to_string_radix(10, Some(15));
-                eprintln!("        c[{}] ({:>4}, n={:3}) = {}",
-                    cls, class_label(cls), class_count[cls], c_str);
+                eprintln!(
+                    "        c[{}] ({:>4}, n={:3}) = {}",
+                    cls,
+                    class_label(cls),
+                    class_count[cls],
+                    c_str
+                );
             }
             eprintln!();
         }

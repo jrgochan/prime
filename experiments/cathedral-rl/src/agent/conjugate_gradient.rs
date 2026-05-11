@@ -32,8 +32,8 @@
 //! one extra matvec but prevents CG from "wandering" after thousands
 //! of iterations.
 
-use crate::env::CathedralEnv;
 use super::numerics::{dot_kahan, norm_kahan};
+use crate::env::CathedralEnv;
 
 /// Preconditioned Conjugate Gradient solver for the Gram system Gv = b.
 pub struct ConjugateGradientAgent {
@@ -111,7 +111,8 @@ impl ConjugateGradientAgent {
     /// Call this before the first CG step.
     pub fn init_preconditioner(&mut self, env: &CathedralEnv) {
         let diag = env.gram_diagonal();
-        self.precond_inv = diag.iter()
+        self.precond_inv = diag
+            .iter()
             .map(|&d| {
                 if d.abs() > 1e-30 {
                     1.0 / d
@@ -149,7 +150,9 @@ impl ConjugateGradientAgent {
 
         // Check if already converged or stagnated — return zero delta
         if self.converged || self.stagnated {
-            for d in self.delta.iter_mut() { *d = 0.0; }
+            for d in self.delta.iter_mut() {
+                *d = 0.0;
+            }
             return &self.delta;
         }
 
@@ -180,7 +183,9 @@ impl ConjugateGradientAgent {
         if r_dot_z.abs() < 1e-30 {
             self.converged = true;
             self.converge_step = Some(self.step_count);
-            for d in self.delta.iter_mut() { *d = 0.0; }
+            for d in self.delta.iter_mut() {
+                *d = 0.0;
+            }
             return &self.delta;
         }
 
@@ -192,7 +197,9 @@ impl ConjugateGradientAgent {
         if p_dot_gp.abs() < 1e-30 {
             self.converged = true;
             self.converge_step = Some(self.step_count);
-            for d in self.delta.iter_mut() { *d = 0.0; }
+            for d in self.delta.iter_mut() {
+                *d = 0.0;
+            }
             return &self.delta;
         }
 

@@ -16,9 +16,9 @@
 //! For large N where the matrix doesn't fit in VRAM, we use chunk-based
 //! processing via the existing MatvecState infrastructure.
 
+use super::ffi;
 use std::ffi::c_int;
 use std::time::Instant;
-use super::ffi;
 
 /// Results from GPU bilinear form computation.
 #[derive(Debug, Clone)]
@@ -57,7 +57,9 @@ impl BilinearEngine {
     pub fn new(gram_data: &[f64], dim: usize) -> Result<Self, String> {
         if gram_data.len() != dim * dim {
             return Err(format!(
-                "gram_data length {} != dim²={}", gram_data.len(), dim * dim
+                "gram_data length {} != dim²={}",
+                gram_data.len(),
+                dim * dim
             ));
         }
 
@@ -85,15 +87,25 @@ impl BilinearEngine {
 
             // Upload Gram matrix
             ffi::cudaMemcpy(
-                d_gram, gram_data.as_ptr(),
-                matrix_bytes, ffi::MEMCPY_HOST_TO_DEVICE,
+                d_gram,
+                gram_data.as_ptr(),
+                matrix_bytes,
+                ffi::MEMCPY_HOST_TO_DEVICE,
             );
 
             let upload_secs = start.elapsed().as_secs_f64();
-            eprintln!("    GPU Gram upload: {:.2}s ({:.0} MB)",
-                upload_secs, matrix_bytes as f64 / 1e6);
+            eprintln!(
+                "    GPU Gram upload: {:.2}s ({:.0} MB)",
+                upload_secs,
+                matrix_bytes as f64 / 1e6
+            );
 
-            Ok(BilinearEngine { blas_handle, d_gram, d_y, dim })
+            Ok(BilinearEngine {
+                blas_handle,
+                d_gram,
+                d_y,
+                dim,
+            })
         }
     }
 
@@ -116,7 +128,9 @@ impl BilinearEngine {
             // Upload x vector
             let mut d_x: *mut f64 = std::ptr::null_mut();
             let s = ffi::cudaMalloc(&mut d_x, dim * 8);
-            if s != 0 { return Err(format!("cudaMalloc for x failed: {}", s)); }
+            if s != 0 {
+                return Err(format!("cudaMalloc for x failed: {}", s));
+            }
             ffi::cudaMemcpy(d_x, x.as_ptr(), dim * 8, ffi::MEMCPY_HOST_TO_DEVICE);
 
             // y = G @ x  (dsymv — symmetric, so row/col major doesn't matter)
@@ -125,23 +139,21 @@ impl BilinearEngine {
             ffi::cublasDgemv_v2(
                 self.blas_handle,
                 ffi::OP_N,
-                n, n,
+                n,
+                n,
                 &alpha,
-                self.d_gram, n,
-                d_x, 1,
+                self.d_gram,
+                n,
+                d_x,
+                1,
                 &beta,
-                self.d_y, 1,
+                self.d_y,
+                1,
             );
 
             // result = xᵀ · y
             let mut result = 0.0f64;
-            ffi::cublasDdot_v2(
-                self.blas_handle,
-                n,
-                d_x, 1,
-                self.d_y, 1,
-                &mut result,
-            );
+            ffi::cublasDdot_v2(self.blas_handle, n, d_x, 1, self.d_y, 1, &mut result);
 
             ffi::cudaFree(d_x);
             Ok(result)
@@ -163,8 +175,8 @@ impl BilinearEngine {
     /// On RTX 4090 at dim=55K, each matvec takes ~0.1s ⟹ total ~0.4s.
     pub fn compute_taper(
         &self,
-        weights: &[f64],      // v[i] = witness weight for index i+1 (k=1..N)
-        mu: &[i8],            // μ[k] for k=0..N, we use k=1..N
+        weights: &[f64], // v[i] = witness weight for index i+1 (k=1..N)
+        mu: &[i8],       // μ[k] for k=0..N, we use k=1..N
     ) -> Result<BilinearResult, String> {
         let dim = self.dim;
         let start = Instant::now();
@@ -175,10 +187,10 @@ impl BilinearEngine {
         // w_ml[i]  = μ(i+1) · ln(i+1)                    (log-weighted Möbius)
 
         let mut w_mu = vec![0.0f64; dim];
-        let mut w_ml = vec![0.0f64; dim];  // μ·ln
+        let mut w_ml = vec![0.0f64; dim]; // μ·ln
 
         for i in 0..dim {
-            let k = i + 1;  // k=1..N (Lean-aligned)
+            let k = i + 1; // k=1..N (Lean-aligned)
             if k < mu.len() {
                 let mu_k = mu[k] as f64;
                 let ln_k = (k as f64).ln();
@@ -189,11 +201,19 @@ impl BilinearEngine {
 
         // 1. vᵀGv
         let vtgv = self.bilinear(weights)?;
-        eprintln!("    GPU vᵀGv = {:.10}  ({:.3}s)", vtgv, start.elapsed().as_secs_f64());
+        eprintln!(
+            "    GPU vᵀGv = {:.10}  ({:.3}s)",
+            vtgv,
+            start.elapsed().as_secs_f64()
+        );
 
         // 2. U = μᵀGμ
         let u_sum = self.bilinear(&w_mu)?;
-        eprintln!("    GPU U    = {:.10}  ({:.3}s)", u_sum, start.elapsed().as_secs_f64());
+        eprintln!(
+            "    GPU U    = {:.10}  ({:.3}s)",
+            u_sum,
+            start.elapsed().as_secs_f64()
+        );
 
         // 3. L = (μ·ln)ᵀ G μ  — NOTE: L is asymmetric in j/k, but due to
         //    symmetry of G, we have Σ μj·μk·lnj·G(j,k) = (μ·ln)ᵀ·G·μ.
@@ -201,16 +221,30 @@ impl BilinearEngine {
         //    By symmetry of G, both give the same value (relabeling j↔k).
         //    So L = (μ·ln)ᵀ · G · μ = μᵀ · G · (μ·ln)
         let l_sum = self.bilinear_asymmetric(&w_ml, &w_mu)?;
-        eprintln!("    GPU L    = {:.10}  ({:.3}s)", l_sum, start.elapsed().as_secs_f64());
+        eprintln!(
+            "    GPU L    = {:.10}  ({:.3}s)",
+            l_sum,
+            start.elapsed().as_secs_f64()
+        );
 
         // 4. Q = (μ·ln)ᵀ G (μ·ln)
         let q_sum = self.bilinear(&w_ml)?;
-        eprintln!("    GPU Q    = {:.10}  ({:.3}s)", q_sum, start.elapsed().as_secs_f64());
+        eprintln!(
+            "    GPU Q    = {:.10}  ({:.3}s)",
+            q_sum,
+            start.elapsed().as_secs_f64()
+        );
 
         let gpu_secs = start.elapsed().as_secs_f64();
         eprintln!("    GPU taper total: {:.3}s", gpu_secs);
 
-        Ok(BilinearResult { vtgv, u_sum, l_sum, q_sum, gpu_secs })
+        Ok(BilinearResult {
+            vtgv,
+            u_sum,
+            l_sum,
+            q_sum,
+            gpu_secs,
+        })
     }
 
     /// Compute the asymmetric bilinear form xᵀGy.
@@ -242,23 +276,21 @@ impl BilinearEngine {
             ffi::cublasDgemv_v2(
                 self.blas_handle,
                 ffi::OP_N,
-                n, n,
+                n,
+                n,
                 &alpha,
-                self.d_gram, n,
-                d_y_vec, 1,
+                self.d_gram,
+                n,
+                d_y_vec,
+                1,
                 &beta,
-                self.d_y, 1,  // reuse scratch buffer
+                self.d_y,
+                1, // reuse scratch buffer
             );
 
             // result = xᵀ · temp
             let mut result = 0.0f64;
-            ffi::cublasDdot_v2(
-                self.blas_handle,
-                n,
-                d_x, 1,
-                self.d_y, 1,
-                &mut result,
-            );
+            ffi::cublasDdot_v2(self.blas_handle, n, d_x, 1, self.d_y, 1, &mut result);
 
             ffi::cudaFree(d_x);
             ffi::cudaFree(d_y_vec);
@@ -284,19 +316,25 @@ impl BilinearEngine {
             // Upload x vector
             let mut d_x: *mut f64 = std::ptr::null_mut();
             let s = ffi::cudaMalloc(&mut d_x, dim * 8);
-            if s != 0 { return Err(format!("cudaMalloc for x failed: {}", s)); }
+            if s != 0 {
+                return Err(format!("cudaMalloc for x failed: {}", s));
+            }
             ffi::cudaMemcpy(d_x, x.as_ptr(), dim * 8, ffi::MEMCPY_HOST_TO_DEVICE);
 
             // y = G @ x
             ffi::cublasDgemv_v2(
                 self.blas_handle,
                 ffi::OP_N,
-                n, n,
+                n,
+                n,
                 &alpha,
-                self.d_gram, n,
-                d_x, 1,
+                self.d_gram,
+                n,
+                d_x,
+                1,
                 &beta,
-                self.d_y, 1,
+                self.d_y,
+                1,
             );
 
             // Download result
@@ -318,7 +356,7 @@ impl BilinearEngine {
     pub fn can_fit(dim: usize, vram_mb: usize) -> bool {
         let matrix_mb = (dim * dim * 8) / (1024 * 1024);
         let vectors_mb = (3 * dim * 8) / (1024 * 1024);
-        matrix_mb + vectors_mb + 256 < vram_mb  // 256 MB headroom
+        matrix_mb + vectors_mb + 256 < vram_mb // 256 MB headroom
     }
 }
 

@@ -34,15 +34,21 @@ fn main() {
         .unwrap_or("dd");
 
     let use_dd = prec_str == "dd";
-    let precision: u32 = if use_dd { 106 } else { prec_str.parse().unwrap_or(512) };
+    let precision: u32 = if use_dd {
+        106
+    } else {
+        prec_str.parse().unwrap_or(512)
+    };
 
     let cache_path = cache::gram_cache_path(max_n, precision);
 
     // Check cache first
     if !force {
         if let Some(cached) = cache::load_gram(&cache_path) {
-            println!("  Gram matrix already cached (N={}, dim={}×{})",
-                cached.max_n, cached.max_dim, cached.max_dim);
+            println!(
+                "  Gram matrix already cached (N={}, dim={}×{})",
+                cached.max_n, cached.max_dim, cached.max_dim
+            );
             println!("  Use --force to rebuild.");
             return;
         }
@@ -68,7 +74,12 @@ fn main() {
         gram::GramMatrix::build(max_n, None)
     };
 
-    println!("  Matrix: {}×{}, {} MB", matrix.max_dim, matrix.max_dim, matrix.mem_mb());
+    println!(
+        "  Matrix: {}×{}, {} MB",
+        matrix.max_dim,
+        matrix.max_dim,
+        matrix.mem_mb()
+    );
 
     // Cache to disk
     cache::save_gram(&cache_path, &matrix).expect("Failed to save cache");

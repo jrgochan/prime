@@ -17,8 +17,6 @@
 //! - [`digamma_f64`] — ψ(x) digamma function (f64 precision)
 //! - [`integrate_01`] — Composite Simpson's rule on [0,1]
 
-
-
 // ═══════════════════════════════════════════════════════════════════
 // FUNDAMENTAL CONSTANTS (f64)
 // ═══════════════════════════════════════════════════════════════════
@@ -83,14 +81,14 @@ pub fn stirling_const_mpfr(prec: u32) -> rug::Float {
 ///
 /// For large n, H_n ≈ ln(n) + γ + 1/(2n) - 1/(12n²) + ...
 pub fn harmonic_number(n: usize) -> f64 {
-    if n == 0 { return 0.0; }
+    if n == 0 {
+        return 0.0;
+    }
     if n > 1000 {
         // Asymptotic expansion for large n
         let x = n as f64;
         let inv_x = 1.0 / x;
-        (x).ln() + EULER_GAMMA + 0.5 * inv_x
-            - inv_x * inv_x / 12.0
-            + inv_x.powi(4) / 120.0
+        (x).ln() + EULER_GAMMA + 0.5 * inv_x - inv_x * inv_x / 12.0 + inv_x.powi(4) / 120.0
     } else {
         (1..=n).map(|k| 1.0 / k as f64).sum()
     }
@@ -134,7 +132,9 @@ pub fn digamma_f64(mut x: f64) -> f64 {
 ///
 /// For precision, uses Euler-Maclaurin with Bernoulli correction.
 pub fn zeta_real(s: f64) -> f64 {
-    if s <= 1.0 { return f64::INFINITY; }
+    if s <= 1.0 {
+        return f64::INFINITY;
+    }
 
     // Direct sum up to N, then Euler-Maclaurin remainder
     let n_terms = 1000;
@@ -179,13 +179,25 @@ pub fn gauss_legendre<F: Fn(f64) -> f64>(f: F, a: f64, b: f64, n: usize) -> f64 
     let (nodes, weights): (&[f64], &[f64]) = match n.min(5) {
         1 => (&[0.0], &[2.0]),
         2 => (&[-0.5773502691896257, 0.5773502691896257], &[1.0, 1.0]),
-        3 => (&[-0.7745966692414834, 0.0, 0.7745966692414834],
-              &[0.5555555555555556, 0.8888888888888888, 0.5555555555555556]),
+        3 => (
+            &[-0.7745966692414834, 0.0, 0.7745966692414834],
+            &[0.5555555555555556, 0.8888888888888888, 0.5555555555555556],
+        ),
         5 | _ => (
-            &[-0.9061798459386640, -0.5384693101056831, 0.0,
-               0.5384693101056831,  0.9061798459386640],
-            &[0.2369268850561891, 0.4786286704993665, 0.5688888888888889,
-              0.4786286704993665, 0.2369268850561891],
+            &[
+                -0.9061798459386640,
+                -0.5384693101056831,
+                0.0,
+                0.5384693101056831,
+                0.9061798459386640,
+            ],
+            &[
+                0.2369268850561891,
+                0.4786286704993665,
+                0.5688888888888889,
+                0.4786286704993665,
+                0.2369268850561891,
+            ],
         ),
     };
 
@@ -213,7 +225,7 @@ mod tests {
     fn test_harmonic_numbers() {
         assert!((harmonic_number(1) - 1.0).abs() < 1e-15);
         assert!((harmonic_number(2) - 1.5).abs() < 1e-15);
-        assert!((harmonic_number(3) - 11.0/6.0).abs() < 1e-15);
+        assert!((harmonic_number(3) - 11.0 / 6.0).abs() < 1e-15);
         assert!((harmonic_number(10) - 2.928968).abs() < 1e-5);
     }
 

@@ -4,8 +4,8 @@
 //!   N(ε) = Π_p p^⌊1/(p^ε - 1)⌋
 //! and identifies phase transitions at ε = ln(2)/ln(p).
 
-use cathedral_utils::arith;
 use crate::display;
+use cathedral_utils::arith;
 
 /// The canonical sequence of Superior Highly Composite (colossal) numbers.
 ///
@@ -13,25 +13,45 @@ use crate::display;
 /// Each entry is the N value at a phase transition where an exponent
 /// increases or a new prime enters the factorization.
 pub const COLOSSAL: &[u64] = &[
-    2, 6, 12, 60, 120, 360, 2520, 5040, 55440, 720720,
+    2,
+    6,
+    12,
+    60,
+    120,
+    360,
+    2520,
+    5040,
+    55440,
+    720720,
     // Beyond 720720: exponent bumps and p=17 entry
-    1_441_440,      // 2^5·3^2·5·7·11·13
-    4_324_320,      // 2^5·3^3·5·7·11·13
-    21_621_600,     // 2^5·3^3·5^2·7·11·13
-    367_567_200,    // 2^5·3^3·5^2·7·11·13·17
+    1_441_440,   // 2^5·3^2·5·7·11·13
+    4_324_320,   // 2^5·3^3·5·7·11·13
+    21_621_600,  // 2^5·3^3·5^2·7·11·13
+    367_567_200, // 2^5·3^3·5^2·7·11·13·17
     // Beyond 367M: exponent bumps and p=19 entry
-    735_134_400,    // 2^6·3^3·5^2·7·11·13·17
-    2_205_403_200,  // 2^6·3^4·5^2·7·11·13·17
-    6_983_776_800,  // 2^6·3^4·5^2·7·11·13·17·19
+    735_134_400,   // 2^6·3^3·5^2·7·11·13·17
+    2_205_403_200, // 2^6·3^4·5^2·7·11·13·17
+    6_983_776_800, // 2^6·3^4·5^2·7·11·13·17·19
 ];
 
 /// Human-readable significance labels for the colossal sequence.
 const COLOSSAL_NAMES: &[&str] = &[
-    "", "", "", "", "", "",
-    "Plato's Number", "Robin Threshold", "Precision Wall", "Deep Sink",
-    "", "",
-    "Next Frontier", "17-Entry",
-    "", "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "Plato's Number",
+    "Robin Threshold",
+    "Precision Wall",
+    "Deep Sink",
+    "",
+    "",
+    "Next Frontier",
+    "17-Entry",
+    "",
+    "",
     "19-Entry",
 ];
 
@@ -44,12 +64,20 @@ fn ramanujan_n(eps: f64, primes: &[usize]) -> (u64, Vec<(usize, u32)>) {
     let mut factors = Vec::new();
     for &p in primes {
         let val = (p as f64).powf(eps) - 1.0;
-        if val <= 0.0 { break; }
+        if val <= 0.0 {
+            break;
+        }
         let a = (1.0 / val).floor() as u32;
-        if a == 0 { break; }
+        if a == 0 {
+            break;
+        }
         let mut pk: u64 = 1;
-        for _ in 0..a { pk = pk.saturating_mul(p as u64); }
-        if n > u64::MAX / pk { break; }
+        for _ in 0..a {
+            pk = pk.saturating_mul(p as u64);
+        }
+        if n > u64::MAX / pk {
+            break;
+        }
         n *= pk;
         factors.push((p, a));
     }
@@ -58,9 +86,17 @@ fn ramanujan_n(eps: f64, primes: &[usize]) -> (u64, Vec<(usize, u32)>) {
 
 /// Format a prime factorization as a human-readable string.
 fn format_factorization(facts: &[(usize, u32)]) -> String {
-    facts.iter()
-        .map(|(p, a)| if *a == 1 { format!("{p}") } else { format!("{p}^{a}") })
-        .collect::<Vec<_>>().join("·")
+    facts
+        .iter()
+        .map(|(p, a)| {
+            if *a == 1 {
+                format!("{p}")
+            } else {
+                format!("{p}^{a}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("·")
 }
 
 /// Count divisors from a known factorization: d(n) = Π(a_i + 1).
@@ -86,11 +122,14 @@ pub fn print_temperature_dial(max_limit: u64) {
     println!("  Phase transitions at ε = ln(2)/ln(p).");
     println!();
 
-    println!("  {:>8} {:>14} {:>6} {:>6} {:>30}",
-        "ε", "N(ε)", "d(N)", "ω(N)", "factorization");
-    println!("  {:>8} {:>14} {:>6} {:>6} {:>30}",
-        "────────", "──────────────", "──────", "──────",
-        "──────────────────────────────");
+    println!(
+        "  {:>8} {:>14} {:>6} {:>6} {:>30}",
+        "ε", "N(ε)", "d(N)", "ω(N)", "factorization"
+    );
+    println!(
+        "  {:>8} {:>14} {:>6} {:>6} {:>30}",
+        "────────", "──────────────", "──────", "──────", "──────────────────────────────"
+    );
 
     let mut eps = 1.0f64;
     let mut prev_n: u64 = 0;
@@ -102,8 +141,14 @@ pub fn print_temperature_dial(max_limit: u64) {
             let divs = count_divisors_from_factorization(&facts);
             let distinct_primes = facts.len();
             let fact_str = format_factorization(&facts);
-            println!("  {:>8.4} {:>14} {:>6} {:>6} {:>30}",
-                eps, display::format_num(n), divs, distinct_primes, fact_str);
+            println!(
+                "  {:>8.4} {:>14} {:>6} {:>6} {:>30}",
+                eps,
+                display::format_num(n),
+                divs,
+                distinct_primes,
+                fact_str
+            );
         }
         eps -= 0.001;
     }
@@ -116,19 +161,28 @@ pub fn print_colossal_sequence(max_limit: u64) {
     println!("PART 2: THE COLOSSAL SEQUENCE (Superior Highly Composites)");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-        "N", "d(N)", "ω(N)", "factorization", "significance");
-    println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-        "──────────", "──────", "──────",
-        "──────────────────────────────", "────────────────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+        "N", "d(N)", "ω(N)", "factorization", "significance"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+        "──────────", "──────", "──────", "──────────────────────────────", "────────────────────"
+    );
 
     for (idx, &n) in COLOSSAL.iter().enumerate() {
-        if n > max_limit { break; }
+        if n > max_limit {
+            break;
+        }
         let nu = n as usize;
-        println!("  {:>10} {:>6} {:>6} {:>30} {:>20}",
-            display::format_num(n), display::count_divisors(nu),
-            arith::small_omega(nu), arith::factorize(nu),
-            COLOSSAL_NAMES.get(idx).unwrap_or(&""));
+        println!(
+            "  {:>10} {:>6} {:>6} {:>30} {:>20}",
+            display::format_num(n),
+            display::count_divisors(nu),
+            arith::small_omega(nu),
+            arith::factorize(nu),
+            COLOSSAL_NAMES.get(idx).unwrap_or(&"")
+        );
     }
     println!();
 }
@@ -141,47 +195,62 @@ pub fn print_recommendations() {
     println!();
 
     let recs: Vec<(u64, &str, &str)> = vec![
-        (2,      "Minimal: G is 1×1",             "trivial"),
-        (6,      "First 2-prime anchor (2·3)",     "quick"),
-        (12,     "First exponent-2 anchor (2²·3)", "quick"),
-        (60,     "First 3-prime anchor (2²·3·5)",  "quick"),
-        (120,    "Half of 2-prime-chain (2³·3·5)",  "quick"),
-        (360,    "Peak exponent-2 (2³·3²·5)",      "seconds"),
-        (2520,   "Plato's Number (2³·3²·5·7)",     "minutes"),
-        (5040,   "Robin Threshold (2⁴·3²·5·7)",    "minutes"),
-        (55440,  "Precision Wall (2⁴·3²·5·7·11)",  "GPU hours"),
-        (110880, "2× Wall, 144 divisors",          "GPU day"),
-        (166320, "3× Wall, 160 divisors",          "GPU days"),
-        (720720, "Deep Sink (2⁴·3²·5·7·11·13)",   "GPU weeks"),
+        (2, "Minimal: G is 1×1", "trivial"),
+        (6, "First 2-prime anchor (2·3)", "quick"),
+        (12, "First exponent-2 anchor (2²·3)", "quick"),
+        (60, "First 3-prime anchor (2²·3·5)", "quick"),
+        (120, "Half of 2-prime-chain (2³·3·5)", "quick"),
+        (360, "Peak exponent-2 (2³·3²·5)", "seconds"),
+        (2520, "Plato's Number (2³·3²·5·7)", "minutes"),
+        (5040, "Robin Threshold (2⁴·3²·5·7)", "minutes"),
+        (55440, "Precision Wall (2⁴·3²·5·7·11)", "GPU hours"),
+        (110880, "2× Wall, 144 divisors", "GPU day"),
+        (166320, "3× Wall, 160 divisors", "GPU days"),
+        (720720, "Deep Sink (2⁴·3²·5·7·11·13)", "GPU weeks"),
     ];
 
-    println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-        "N", "d(N)", "ω(N)", "description", "compute");
-    println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-        "──────────", "──────", "──────",
-        "──────────────────────────────────────────", "────────────");
+    println!(
+        "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+        "N", "d(N)", "ω(N)", "description", "compute"
+    );
+    println!(
+        "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+        "──────────",
+        "──────",
+        "──────",
+        "──────────────────────────────────────────",
+        "────────────"
+    );
 
     for (n, desc, compute) in &recs {
         let nu = *n as usize;
-        println!("  {:>10} {:>6} {:>6} {:>42} {:>12}",
-            display::format_num(*n), display::count_divisors(nu),
-            arith::small_omega(nu), desc, compute);
+        println!(
+            "  {:>10} {:>6} {:>6} {:>42} {:>12}",
+            display::format_num(*n),
+            display::count_divisors(nu),
+            arith::small_omega(nu),
+            desc,
+            compute
+        );
     }
     println!();
 
     // Control groups
     println!("  CONTROL GROUPS (primes — minimal divisor structure):");
     for (n, desc) in [
-        (5039u64,  "Largest prime < 5040"),
-        (5051,     "Smallest prime > 5040"),
-        (55439,    "Largest prime < 55440"),
-        (55441,    "Smallest prime > 55440"),
-        (104729,   "10,000th prime (max silence)"),
+        (5039u64, "Largest prime < 5040"),
+        (5051, "Smallest prime > 5040"),
+        (55439, "Largest prime < 55440"),
+        (55441, "Smallest prime > 55440"),
+        (104729, "10,000th prime (max silence)"),
     ] {
         let is_p = display::is_prime(n as usize);
-        println!("    {:>10}  {}  {}",
-            display::format_num(n), desc,
-            if is_p { "✓ prime" } else { "✗ NOT prime" });
+        println!(
+            "    {:>10}  {}  {}",
+            display::format_num(n),
+            desc,
+            if is_p { "✓ prime" } else { "✗ NOT prime" }
+        );
     }
     println!();
 }
@@ -194,19 +263,26 @@ pub fn print_phase_transitions() {
     println!("PART 7: PHASE TRANSITIONS — When Primes Freeze In");
     println!("═══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>6} {:>10} {:>10} {:>14}",
-        "prime", "ε_entry", "N_before", "N_after");
-    println!("  {:>6} {:>10} {:>10} {:>14}",
-        "──────", "──────────", "──────────", "──────────────");
+    println!(
+        "  {:>6} {:>10} {:>10} {:>14}",
+        "prime", "ε_entry", "N_before", "N_after"
+    );
+    println!(
+        "  {:>6} {:>10} {:>10} {:>14}",
+        "──────", "──────────", "──────────", "──────────────"
+    );
 
     for &p in &primes[..primes.len().min(15)] {
         let eps_entry = 2.0f64.ln() / (p as f64).ln();
         let (n_above, _) = ramanujan_n(eps_entry + 0.001, &primes);
         let (n_below, _) = ramanujan_n(eps_entry - 0.001, &primes);
-        println!("  {:>6} {:>10.4} {:>10} {:>14}",
-            p, eps_entry,
+        println!(
+            "  {:>6} {:>10.4} {:>10} {:>14}",
+            p,
+            eps_entry,
             display::format_num(n_above),
-            display::format_num(n_below));
+            display::format_num(n_below)
+        );
     }
     println!();
 }

@@ -32,27 +32,54 @@ fn mobius_sieve(n: usize) -> Vec<i32> {
             mu[i] = -1;
         }
         for &p in &primes {
-            if i * p > n { break; }
+            if i * p > n {
+                break;
+            }
             is_prime[i * p] = false;
-            if i % p == 0 { mu[i * p] = 0; break; }
-            else { mu[i * p] = -mu[i]; }
+            if i % p == 0 {
+                mu[i * p] = 0;
+                break;
+            } else {
+                mu[i * p] = -mu[i];
+            }
         }
     }
     mu
 }
 
 fn omega(mut n: usize) -> usize {
-    let mut c = 0; let mut d = 2;
-    while d * d <= n { while n % d == 0 { c += 1; n /= d; } d += 1; }
-    if n > 1 { c += 1; } c
+    let mut c = 0;
+    let mut d = 2;
+    while d * d <= n {
+        while n % d == 0 {
+            c += 1;
+            n /= d;
+        }
+        d += 1;
+    }
+    if n > 1 {
+        c += 1;
+    }
+    c
 }
 
 fn is_prime_fn(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut d = 5;
-    while d * d <= n { if n % d == 0 || n % (d + 2) == 0 { return false; } d += 6; }
+    while d * d <= n {
+        if n % d == 0 || n % (d + 2) == 0 {
+            return false;
+        }
+        d += 6;
+    }
     true
 }
 
@@ -62,7 +89,7 @@ fn gram_entry_mpfr(j: usize, k: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
     let t_max: usize = 5000;
-    
+
     let mut total = Float::with_val(PREC, 0);
     let jmp = Float::with_val(PREC, jf);
     let kmp = Float::with_val(PREC, kf);
@@ -98,7 +125,9 @@ fn gram_entry_mpfr(j: usize, k: usize) -> f64 {
         for w in bps.windows(2) {
             let a = Float::with_val(PREC, w[0]);
             let b = Float::with_val(PREC, w[1]);
-            if Float::with_val(PREC, &b - &a) < 1e-15 { continue; }
+            if Float::with_val(PREC, &b - &a) < 1e-15 {
+                continue;
+            }
 
             let mid = (w[0] + w[1]) / 2.0;
             let fj = (jf * mid).floor();
@@ -110,8 +139,8 @@ fn gram_entry_mpfr(j: usize, k: usize) -> f64 {
             let coeff = Float::with_val(PREC, &jmp * &fk_mp) + Float::with_val(PREC, &kmp * &fj_mp);
             let ln_ratio = Float::with_val(PREC, &b / &a).ln();
             let term2 = coeff * ln_ratio;
-            let inv_diff = Float::with_val(PREC, Float::with_val(PREC, 1) / &a) 
-                         - Float::with_val(PREC, Float::with_val(PREC, 1) / &b);
+            let inv_diff = Float::with_val(PREC, Float::with_val(PREC, 1) / &a)
+                - Float::with_val(PREC, Float::with_val(PREC, 1) / &b);
             let term3 = Float::with_val(PREC, &fj_mp * &fk_mp) * inv_diff;
 
             total += term1 - term2 + term3;
@@ -127,7 +156,7 @@ fn gram_entry_mpfr(j: usize, k: usize) -> f64 {
 fn mean_entry_mpfr(k: usize) -> f64 {
     let kf = k as f64;
     let t_max: usize = 5000;
-    
+
     let mut total = Float::with_val(PREC, 0);
     let kmp = Float::with_val(PREC, kf);
 
@@ -156,7 +185,9 @@ fn mean_entry_mpfr(k: usize) -> f64 {
         for w in bps.windows(2) {
             let a = Float::with_val(PREC, w[0]);
             let b = Float::with_val(PREC, w[1]);
-            if Float::with_val(PREC, &b - &a) < 1e-15 { continue; }
+            if Float::with_val(PREC, &b - &a) < 1e-15 {
+                continue;
+            }
 
             let mid = (w[0] + w[1]) / 2.0;
             let fk = (kf * mid).floor();
@@ -164,9 +195,9 @@ fn mean_entry_mpfr(k: usize) -> f64 {
 
             // k·ln(b/a)
             let term1 = Float::with_val(PREC, &kmp * Float::with_val(PREC, &b / &a).ln());
-            // A·(1/b - 1/a) 
+            // A·(1/b - 1/a)
             let inv_diff = Float::with_val(PREC, Float::with_val(PREC, 1) / &b)
-                         - Float::with_val(PREC, Float::with_val(PREC, 1) / &a);
+                - Float::with_val(PREC, Float::with_val(PREC, 1) / &a);
             let term2 = Float::with_val(PREC, &fk_mp * inv_diff);
 
             total += term1 + term2;
@@ -189,29 +220,49 @@ fn build_gram_matrix(n: usize) -> DMatrix<f64> {
     let total = pairs.len();
     let computed = std::sync::atomic::AtomicUsize::new(0);
 
-    let entries: Vec<(usize, usize, f64)> = pairs.par_iter().map(|&(i, j)| {
-        let val = gram_entry_mpfr(i + 2, j + 2);
-        let c = computed.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
-        if c % 200 == 0 || c == total {
-            eprint!("\r    G: [{:5.1}%] {}/{}   ", c as f64/total as f64*100.0, c, total);
-        }
-        (i, j, val)
-    }).collect();
+    let entries: Vec<(usize, usize, f64)> = pairs
+        .par_iter()
+        .map(|&(i, j)| {
+            let val = gram_entry_mpfr(i + 2, j + 2);
+            let c = computed.fetch_add(1, std::sync::atomic::Ordering::Relaxed) + 1;
+            if c % 200 == 0 || c == total {
+                eprint!(
+                    "\r    G: [{:5.1}%] {}/{}   ",
+                    c as f64 / total as f64 * 100.0,
+                    c,
+                    total
+                );
+            }
+            (i, j, val)
+        })
+        .collect();
 
     let mut g = DMatrix::zeros(dim, dim);
-    for (i, j, val) in entries { g[(i, j)] = val; g[(j, i)] = val; }
-    eprintln!("\r    G: Done in {:.1}s ({} entries, {} cores)              ",
-        t0.elapsed().as_secs_f64(), total, rayon::current_num_threads());
+    for (i, j, val) in entries {
+        g[(i, j)] = val;
+        g[(j, i)] = val;
+    }
+    eprintln!(
+        "\r    G: Done in {:.1}s ({} entries, {} cores)              ",
+        t0.elapsed().as_secs_f64(),
+        total,
+        rayon::current_num_threads()
+    );
     g
 }
 
 fn build_mean_vector(n: usize) -> Vec<f64> {
     let dim = n - 1;
     let t0 = Instant::now();
-    let b: Vec<f64> = (0..dim).into_par_iter().map(|i| {
-        mean_entry_mpfr(i + 2)
-    }).collect();
-    eprintln!("    b: Done in {:.1}s ({} entries)", t0.elapsed().as_secs_f64(), dim);
+    let b: Vec<f64> = (0..dim)
+        .into_par_iter()
+        .map(|i| mean_entry_mpfr(i + 2))
+        .collect();
+    eprintln!(
+        "    b: Done in {:.1}s ({} entries)",
+        t0.elapsed().as_secs_f64(),
+        dim
+    );
     b
 }
 
@@ -221,7 +272,9 @@ fn build_mobius_matrix(n: usize, mu: &[i32]) -> DMatrix<f64> {
     for i in 0..dim {
         for j in 0..=i {
             let (ii, jj) = (i + 2, j + 2);
-            if ii % jj == 0 { m[(i, j)] = mu[ii / jj] as f64; }
+            if ii % jj == 0 {
+                m[(i, j)] = mu[ii / jj] as f64;
+            }
         }
     }
     m
@@ -229,31 +282,64 @@ fn build_mobius_matrix(n: usize, mu: &[i32]) -> DMatrix<f64> {
 
 // ─── Analysis ─────────────────────────────────────────────────────
 
-struct RowInfo { k: usize, kind: &'static str, mu: i32, om: usize,
-                 diag: f64, off: f64, ratio: f64, gersh: f64 }
+struct RowInfo {
+    k: usize,
+    kind: &'static str,
+    mu: i32,
+    om: usize,
+    diag: f64,
+    off: f64,
+    ratio: f64,
+    gersh: f64,
+}
 
 fn analyze(mat: &DMatrix<f64>, mu: &[i32]) -> Vec<RowInfo> {
     let dim = mat.nrows();
-    (0..dim).map(|i| {
-        let k = i + 2;
-        let diag = mat[(i, i)];
-        let off: f64 = (0..dim).filter(|&j| j != i).map(|j| mat[(i, j)].abs()).sum();
-        let ratio = if diag.abs() > 1e-15 { off / diag.abs() } else { f64::INFINITY };
-        RowInfo {
-            k, kind: if is_prime_fn(k) { "prime" } else if mu[k] != 0 { "sqf" } else { "sq!" },
-            mu: mu[k], om: omega(k), diag, off, ratio, gersh: diag - off,
-        }
-    }).collect()
+    (0..dim)
+        .map(|i| {
+            let k = i + 2;
+            let diag = mat[(i, i)];
+            let off: f64 = (0..dim)
+                .filter(|&j| j != i)
+                .map(|j| mat[(i, j)].abs())
+                .sum();
+            let ratio = if diag.abs() > 1e-15 {
+                off / diag.abs()
+            } else {
+                f64::INFINITY
+            };
+            RowInfo {
+                k,
+                kind: if is_prime_fn(k) {
+                    "prime"
+                } else if mu[k] != 0 {
+                    "sqf"
+                } else {
+                    "sq!"
+                },
+                mu: mu[k],
+                om: omega(k),
+                diag,
+                off,
+                ratio,
+                gersh: diag - off,
+            }
+        })
+        .collect()
 }
 
 fn show(rows: &[RowInfo], label: &str, n: usize) {
     println!("\n  {} ({}):", label, n);
-    println!("  {:>5} {:>6} {:>4} {:>3} {:>16} {:>16} {:>9}",
-             "k", "type", "μ", "Ω", "diagonal", "off-diag sum", "ratio");
+    println!(
+        "  {:>5} {:>6} {:>4} {:>3} {:>16} {:>16} {:>9}",
+        "k", "type", "μ", "Ω", "diagonal", "off-diag sum", "ratio"
+    );
     for r in rows.iter().take(n) {
         let s = if r.ratio < 1.0 { "✅" } else { "❌" };
-        println!("  {:5} {:>6} {:4} {:3} {:16.12} {:16.12} {:9.6} {}",
-                 r.k, r.kind, r.mu, r.om, r.diag, r.off, r.ratio, s);
+        println!(
+            "  {:5} {:>6} {:4} {:3} {:16.12} {:16.12} {:9.6} {}",
+            r.k, r.kind, r.mu, r.om, r.diag, r.off, r.ratio, s
+        );
     }
 }
 
@@ -261,20 +347,34 @@ fn show(rows: &[RowInfo], label: &str, n: usize) {
 struct Res {
     n: usize,
     // G stats
-    lmin_g: f64, cond_g: f64, g_max_ratio: f64,
+    lmin_g: f64,
+    cond_g: f64,
+    g_max_ratio: f64,
     // G̃ stats
-    lmin_gt: f64, cond_gt: f64, gt_max_ratio: f64,
+    lmin_gt: f64,
+    cond_gt: f64,
+    gt_max_ratio: f64,
     // C stats
-    lmin_c: f64, cond_c: f64, c_max_ratio: f64,
+    lmin_c: f64,
+    cond_c: f64,
+    c_max_ratio: f64,
     // C̃ stats
-    lmin_ct: f64, cond_ct: f64, ct_max_ratio: f64,
+    lmin_ct: f64,
+    cond_ct: f64,
+    ct_max_ratio: f64,
     // NB distance
     nb_dist_sq: f64,
     b_cinv_b: f64,
 }
 
 fn sorted_eigenvalues(mat: &DMatrix<f64>) -> Vec<f64> {
-    let mut ev: Vec<f64> = mat.clone().symmetric_eigen().eigenvalues.iter().copied().collect();
+    let mut ev: Vec<f64> = mat
+        .clone()
+        .symmetric_eigen()
+        .eigenvalues
+        .iter()
+        .copied()
+        .collect();
     ev.sort_by(|a, b| a.partial_cmp(b).unwrap());
     ev
 }
@@ -290,7 +390,13 @@ fn gershgorin_frac_dom(rows: &[RowInfo]) -> f64 {
 fn experiment(n: usize, mu: &[i32]) -> Res {
     let dim = n - 1;
     println!("\n{}", "━".repeat(74));
-    println!("  N = {}  ({}×{}, MPFR-128, {} threads)", n, dim, dim, rayon::current_num_threads());
+    println!(
+        "  N = {}  ({}×{}, MPFR-128, {} threads)",
+        n,
+        dim,
+        dim,
+        rayon::current_num_threads()
+    );
     println!("{}", "━".repeat(74));
 
     // Build G
@@ -300,9 +406,20 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
     // Build b
     println!("  Building mean vector b...");
     let b = build_mean_vector(n);
-    println!("  b[0..5] = [{:.8}, {:.8}, {:.8}, {:.8}, {:.8}]",
-             b[0], b[1], b[2], b.get(3).unwrap_or(&0.0), b.get(4).unwrap_or(&0.0));
-    println!("  b²[0..3] = [{:.8}, {:.8}, {:.8}]", b[0]*b[0], b[1]*b[1], b[2]*b[2]);
+    println!(
+        "  b[0..5] = [{:.8}, {:.8}, {:.8}, {:.8}, {:.8}]",
+        b[0],
+        b[1],
+        b[2],
+        b.get(3).unwrap_or(&0.0),
+        b.get(4).unwrap_or(&0.0)
+    );
+    println!(
+        "  b²[0..3] = [{:.8}, {:.8}, {:.8}]",
+        b[0] * b[0],
+        b[1] * b[1],
+        b[2] * b[2]
+    );
 
     // Build C = G - b bᵀ
     println!("  Building covariance C = G - bbᵀ...");
@@ -312,8 +429,18 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
             c[(i, j)] -= b[i] * b[j];
         }
     }
-    println!("  C(2,2) = {:.12}  (G={:.12}, b²={:.12})", c[(0,0)], g[(0,0)], b[0]*b[0]);
-    println!("  C(2,3) = {:.12}  (G={:.12}, bb={:.12})", c[(0,1)], g[(0,1)], b[0]*b[1]);
+    println!(
+        "  C(2,2) = {:.12}  (G={:.12}, b²={:.12})",
+        c[(0, 0)],
+        g[(0, 0)],
+        b[0] * b[0]
+    );
+    println!(
+        "  C(2,3) = {:.12}  (G={:.12}, bb={:.12})",
+        c[(0, 1)],
+        g[(0, 1)],
+        b[0] * b[1]
+    );
 
     // Build M
     let m = build_mobius_matrix(n, mu);
@@ -334,10 +461,10 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
     let ev_c = sorted_eigenvalues(&c);
     let ev_ct = sorted_eigenvalues(&ct);
 
-    let (lmin_g, lmax_g) = (ev_g[0], ev_g[dim-1]);
-    let (lmin_gt, lmax_gt) = (ev_gt[0], ev_gt[dim-1]);
-    let (lmin_c, lmax_c) = (ev_c[0], ev_c[dim-1]);
-    let (lmin_ct, lmax_ct) = (ev_ct[0], ev_ct[dim-1]);
+    let (lmin_g, lmax_g) = (ev_g[0], ev_g[dim - 1]);
+    let (lmin_gt, lmax_gt) = (ev_gt[0], ev_gt[dim - 1]);
+    let (lmin_c, lmax_c) = (ev_c[0], ev_c[dim - 1]);
+    let (lmin_ct, lmax_ct) = (ev_ct[0], ev_ct[dim - 1]);
 
     let cond = |lo: f64, hi: f64| if lo > 0.0 { hi / lo } else { f64::INFINITY };
 
@@ -380,15 +507,33 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
     println!("\n  ┌─ COMPARISON {}┐", "─".repeat(43));
     println!("  │{:>20} {:>14} {:>14}  │", "", "ORIGINAL", "MÖBIUS");
     println!("  │  G   λ_min    {:14.8e} {:14.8e}  │", lmin_g, lmin_gt);
-    println!("  │  G   κ        {:14.2} {:14.2}  │", cond(lmin_g, lmax_g), cond(lmin_gt, lmax_gt));
-    println!("  │  G   MaxRatio {:14.6} {:14.6}  │", gershgorin_max_ratio(&g_rows), gershgorin_max_ratio(&gt_rows));
+    println!(
+        "  │  G   κ        {:14.2} {:14.2}  │",
+        cond(lmin_g, lmax_g),
+        cond(lmin_gt, lmax_gt)
+    );
+    println!(
+        "  │  G   MaxRatio {:14.6} {:14.6}  │",
+        gershgorin_max_ratio(&g_rows),
+        gershgorin_max_ratio(&gt_rows)
+    );
     println!("  │                                                     │");
     println!("  │  C   λ_min    {:14.8e} {:14.8e}  │", lmin_c, lmin_ct);
-    println!("  │  C   κ        {:14.2} {:14.2}  │", cond(lmin_c, lmax_c), cond(lmin_ct, lmax_ct));
-    println!("  │  C   MaxRatio {:14.6} {:14.6}  │", gershgorin_max_ratio(&c_rows), gershgorin_max_ratio(&ct_rows));
+    println!(
+        "  │  C   κ        {:14.2} {:14.2}  │",
+        cond(lmin_c, lmax_c),
+        cond(lmin_ct, lmax_ct)
+    );
+    println!(
+        "  │  C   MaxRatio {:14.6} {:14.6}  │",
+        gershgorin_max_ratio(&c_rows),
+        gershgorin_max_ratio(&ct_rows)
+    );
     println!("  │                                                     │");
-    println!("  │  Ratio improvement (G̃ vs C̃): {:8.2}×             │", 
-             gershgorin_max_ratio(&gt_rows) / gershgorin_max_ratio(&ct_rows).max(1e-15));
+    println!(
+        "  │  Ratio improvement (G̃ vs C̃): {:8.2}×             │",
+        gershgorin_max_ratio(&gt_rows) / gershgorin_max_ratio(&ct_rows).max(1e-15)
+    );
     println!("  └{}┘", "─".repeat(57));
 
     let ct_dom = gershgorin_frac_dom(&ct_rows);
@@ -396,11 +541,17 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
         println!("\n  ✅✅✅ C̃ IS DIAGONALLY DOMINANT!");
         println!("  → The Covariance Breakthrough is REAL");
     } else if ct_dom > 0.5 {
-        println!("\n  ⚠️  C̃ is {:.0}% dominant (max ratio {:.4})",
-                 ct_dom * 100.0, gershgorin_max_ratio(&ct_rows));
+        println!(
+            "\n  ⚠️  C̃ is {:.0}% dominant (max ratio {:.4})",
+            ct_dom * 100.0,
+            gershgorin_max_ratio(&ct_rows)
+        );
     } else {
-        println!("\n  ❌ C̃ NOT dominant ({:.0}% fail, max ratio {:.4})",
-                 (1.0 - ct_dom) * 100.0, gershgorin_max_ratio(&ct_rows));
+        println!(
+            "\n  ❌ C̃ NOT dominant ({:.0}% fail, max ratio {:.4})",
+            (1.0 - ct_dom) * 100.0,
+            gershgorin_max_ratio(&ct_rows)
+        );
     }
 
     // Show C̃ worst/best
@@ -411,11 +562,20 @@ fn experiment(n: usize, mu: &[i32]) -> Res {
 
     Res {
         n,
-        lmin_g, cond_g: cond(lmin_g, lmax_g), g_max_ratio: gershgorin_max_ratio(&g_rows),
-        lmin_gt, cond_gt: cond(lmin_gt, lmax_gt), gt_max_ratio: gershgorin_max_ratio(&gt_rows),
-        lmin_c, cond_c: cond(lmin_c, lmax_c), c_max_ratio: gershgorin_max_ratio(&c_rows),
-        lmin_ct, cond_ct: cond(lmin_ct, lmax_ct), ct_max_ratio: gershgorin_max_ratio(&ct_rows),
-        nb_dist_sq, b_cinv_b,
+        lmin_g,
+        cond_g: cond(lmin_g, lmax_g),
+        g_max_ratio: gershgorin_max_ratio(&g_rows),
+        lmin_gt,
+        cond_gt: cond(lmin_gt, lmax_gt),
+        gt_max_ratio: gershgorin_max_ratio(&gt_rows),
+        lmin_c,
+        cond_c: cond(lmin_c, lmax_c),
+        c_max_ratio: gershgorin_max_ratio(&c_rows),
+        lmin_ct,
+        cond_ct: cond(lmin_ct, lmax_ct),
+        ct_max_ratio: gershgorin_max_ratio(&ct_rows),
+        nb_dist_sq,
+        b_cinv_b,
     }
 }
 
@@ -439,25 +599,53 @@ fn main() {
     println!("\n\n{}", "═".repeat(74));
     println!("  GRAND SUMMARY — G̃ vs C̃ GERSHGORIN RATIOS");
     println!("{}", "═".repeat(74));
-    println!("\n  {:>5} {:>10} {:>10} {:>10} {:>10} {:>14} {:>14}",
-             "N", "G̃ MaxR", "C̃ MaxR", "C̃ %dom", "κ(C̃)", "bᵀC⁻¹b", "d²_N");
+    println!(
+        "\n  {:>5} {:>10} {:>10} {:>10} {:>10} {:>14} {:>14}",
+        "N", "G̃ MaxR", "C̃ MaxR", "C̃ %dom", "κ(C̃)", "bᵀC⁻¹b", "d²_N"
+    );
     for r in &results {
-        println!("  {:5} {:10.4} {:10.4} {:9.1}% {:10.2} {:14.6} {:14.8e}",
-                 r.n, r.gt_max_ratio, r.ct_max_ratio,
-                 results.iter().find(|x| x.n == r.n).map(|_| {
-                     // recompute frac_dom inline
-                     if r.ct_max_ratio < 1.0 { 100.0 } else { 0.0 }
-                 }).unwrap_or(0.0),
-                 r.cond_ct, r.b_cinv_b, r.nb_dist_sq);
+        println!(
+            "  {:5} {:10.4} {:10.4} {:9.1}% {:10.2} {:14.6} {:14.8e}",
+            r.n,
+            r.gt_max_ratio,
+            r.ct_max_ratio,
+            results
+                .iter()
+                .find(|x| x.n == r.n)
+                .map(|_| {
+                    // recompute frac_dom inline
+                    if r.ct_max_ratio < 1.0 {
+                        100.0
+                    } else {
+                        0.0
+                    }
+                })
+                .unwrap_or(0.0),
+            r.cond_ct,
+            r.b_cinv_b,
+            r.nb_dist_sq
+        );
     }
 
     let ct_ratios: Vec<f64> = results.iter().map(|r| r.ct_max_ratio).collect();
-    println!("\n  C̃ ratio trend: {}",
-             ct_ratios.iter().map(|r| format!("{:.4}", r)).collect::<Vec<_>>().join(" → "));
+    println!(
+        "\n  C̃ ratio trend: {}",
+        ct_ratios
+            .iter()
+            .map(|r| format!("{:.4}", r))
+            .collect::<Vec<_>>()
+            .join(" → ")
+    );
 
     let gt_ratios: Vec<f64> = results.iter().map(|r| r.gt_max_ratio).collect();
-    println!("  G̃ ratio trend: {}",
-             gt_ratios.iter().map(|r| format!("{:.4}", r)).collect::<Vec<_>>().join(" → "));
+    println!(
+        "  G̃ ratio trend: {}",
+        gt_ratios
+            .iter()
+            .map(|r| format!("{:.4}", r))
+            .collect::<Vec<_>>()
+            .join(" → ")
+    );
 
     // Verdict
     println!("\n{}", "═".repeat(74));
@@ -469,8 +657,11 @@ fn main() {
         println!("  → THE RIEMANN HYPOTHESIS REDUCES TO bᵀC⁻¹b → ∞");
     } else if ct_ratios.last().unwrap() < gt_ratios.last().unwrap() {
         println!("  📉 Covariance deflation DRAMATICALLY improves ratios");
-        println!("  → G̃ max ratio: {:.4}  →  C̃ max ratio: {:.4}",
-                 gt_ratios.last().unwrap(), ct_ratios.last().unwrap());
+        println!(
+            "  → G̃ max ratio: {:.4}  →  C̃ max ratio: {:.4}",
+            gt_ratios.last().unwrap(),
+            ct_ratios.last().unwrap()
+        );
         if ct_ratios.windows(2).all(|w| w[1] <= w[0] * 1.1) {
             println!("  → C̃ ratios appear stable/decreasing — very promising!");
         } else {
@@ -482,16 +673,30 @@ fn main() {
     println!("{}", "═".repeat(74));
 
     // Write JSON
-    let json_entries: Vec<String> = results.iter().map(|r| {
-        format!(r#"    {{
+    let json_entries: Vec<String> = results
+        .iter()
+        .map(|r| {
+            format!(
+                r#"    {{
       "N": {}, "gt_max_ratio": {:.10}, "ct_max_ratio": {:.10},
       "cond_C_tilde": {}, "b_Cinv_b": {:.10}, "nb_dist_sq": {:.15e},
       "lambda_min_C": {:.15e}, "lambda_min_Ct": {:.15e}
     }}"#,
-            r.n, r.gt_max_ratio, r.ct_max_ratio,
-            if r.cond_ct.is_finite() { format!("{:.6}", r.cond_ct) } else { "null".into() },
-            r.b_cinv_b, r.nb_dist_sq, r.lmin_c, r.lmin_ct)
-    }).collect();
+                r.n,
+                r.gt_max_ratio,
+                r.ct_max_ratio,
+                if r.cond_ct.is_finite() {
+                    format!("{:.6}", r.cond_ct)
+                } else {
+                    "null".into()
+                },
+                r.b_cinv_b,
+                r.nb_dist_sq,
+                r.lmin_c,
+                r.lmin_ct
+            )
+        })
+        .collect();
 
     let json = format!("{{\n  \"experiment\": \"covariance_deflation_attack5\",\n  \"precision_bits\": {},\n  \"results\": [\n{}\n  ]\n}}\n",
         PREC, json_entries.join(",\n"));

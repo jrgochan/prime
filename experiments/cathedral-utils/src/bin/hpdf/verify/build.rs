@@ -128,9 +128,7 @@ fn build_f64(max_n: usize, dim: usize, out_dir: &PathBuf) {
         .collect();
     let entries: Vec<((usize, usize), f64)> = pairs
         .par_iter()
-        .map(|&(row, col)| {
-            ((row, col), gram::gram_entry_f64(row + 2, col + 2))
-        })
+        .map(|&(row, col)| ((row, col), gram::gram_entry_f64(row + 2, col + 2)))
         .collect();
 
     let mut data = vec![0.0f64; dim * dim];
@@ -179,9 +177,7 @@ pub fn build_ladder(sizes: &[usize]) {
         .collect();
     let entries: Vec<((usize, usize), f64)> = pairs
         .par_iter()
-        .map(|&(row, col)| {
-            ((row, col), gram::gram_entry_f64(row + 2, col + 2))
-        })
+        .map(|&(row, col)| ((row, col), gram::gram_entry_f64(row + 2, col + 2)))
         .collect();
 
     let mut data = vec![0.0f64; dim * dim];
@@ -189,7 +185,10 @@ pub fn build_ladder(sizes: &[usize]) {
         data[r * dim + c] = v;
         data[c * dim + r] = v;
     }
-    println!("  ✓ Master built in {:.2}s (parallel)\n", t0.elapsed().as_secs_f64());
+    println!(
+        "  ✓ Master built in {:.2}s (parallel)\n",
+        t0.elapsed().as_secs_f64()
+    );
 
     let mut sorted = sizes.to_vec();
     sorted.sort();
@@ -247,8 +246,7 @@ pub fn build_ladder(sizes: &[usize]) {
                 "  │  trace={:.6}, ‖G‖_F={:.6}, κ_est={:.2}",
                 ss.trace, ss.frobenius_norm, ss.condition_estimate
             );
-            if let (Some(g_min), Some(g_max)) =
-                (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max)
+            if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max)
             {
                 println!("  │  Gershgorin: λ∈[{g_min:.6}, {g_max:.6}]");
             }
@@ -323,7 +321,10 @@ fn build_streaming_f64(max_n: usize, dim: usize, out_dir: &PathBuf) {
     println!("  Step 1/2: Computing upper triangle (f64)...");
     let t0 = Instant::now();
     let upper_tri = gram::build_upper_triangle_f64(max_n);
-    println!("  ✓ Upper triangle computed in {:.2}s\n", t0.elapsed().as_secs_f64());
+    println!(
+        "  ✓ Upper triangle computed in {:.2}s\n",
+        t0.elapsed().as_secs_f64()
+    );
 
     let path = out_dir.join(format!("gram_N{max_n}.h5"));
     println!("  Step 2/2: Writing HPDF to {}...", path.display());
@@ -336,7 +337,11 @@ fn build_streaming_f64(max_n: usize, dim: usize, out_dir: &PathBuf) {
     };
 
     let size = hpdf::write_hpdf_from_triangle(&path, &upper_tri, &config).unwrap();
-    println!("  ✓ File: {} ({} MB)\n", path.display(), size / (1024 * 1024));
+    println!(
+        "  ✓ File: {} ({} MB)\n",
+        path.display(),
+        size / (1024 * 1024)
+    );
 
     // Spot-check against recomputed entries
     println!("  Verifying...");
@@ -356,13 +361,20 @@ fn build_streaming_dd(max_n: usize, precision: u32, dim: usize, out_dir: &PathBu
     println!("  Step 1/3: Building ln(n) table (n ≤ {table_size}, {precision}-bit)...");
     let t_table = Instant::now();
     let ln_n_table = gram::LnNTable::new(table_size, precision);
-    println!("  ✓ ln(n) table ready ({:.2}s)\n", t_table.elapsed().as_secs_f64());
+    println!(
+        "  ✓ ln(n) table ready ({:.2}s)\n",
+        t_table.elapsed().as_secs_f64()
+    );
 
     println!("  Step 2/3: Computing upper triangle DD ({precision}-bit MPFR)...");
     let t_build = Instant::now();
-    let (upper_tri_hi, upper_tri_lo, built_dim) = gram::build_upper_triangle_fast_dd(max_n, &ln_n_table);
+    let (upper_tri_hi, upper_tri_lo, built_dim) =
+        gram::build_upper_triangle_fast_dd(max_n, &ln_n_table);
     assert_eq!(built_dim, dim);
-    println!("  ✓ Upper triangle DD computed in {:.2}s\n", t_build.elapsed().as_secs_f64());
+    println!(
+        "  ✓ Upper triangle DD computed in {:.2}s\n",
+        t_build.elapsed().as_secs_f64()
+    );
 
     let path = out_dir.join(format!("gram_N{max_n}.h5"));
     println!("  Step 3/3: Writing HPDF [DD] to {}...", path.display());
@@ -374,8 +386,13 @@ fn build_streaming_dd(max_n: usize, precision: u32, dim: usize, out_dir: &PathBu
         include_number_theory: max_n <= 100_000,
     };
 
-    let size = hpdf::write_hpdf_dd_from_triangle(&path, &upper_tri_hi, &upper_tri_lo, &config).unwrap();
-    println!("  ✓ File: {} ({} MB)\n", path.display(), size / (1024 * 1024));
+    let size =
+        hpdf::write_hpdf_dd_from_triangle(&path, &upper_tri_hi, &upper_tri_lo, &config).unwrap();
+    println!(
+        "  ✓ File: {} ({} MB)\n",
+        path.display(),
+        size / (1024 * 1024)
+    );
 
     // Spot-check
     println!("  Verifying...");

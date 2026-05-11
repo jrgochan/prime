@@ -6,10 +6,10 @@
 //! - `t_scaling.tsv`         — Worst tₘ vs N (proves T independence)
 //! - `precision_table.tsv`   — Recommended T for each precision target
 
+use serde_json::json;
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
-use serde_json::json;
 
 /// Get the results directory for t-convergence.
 fn results_dir() -> PathBuf {
@@ -82,8 +82,15 @@ pub fn write_results(
     let dir = results_dir();
 
     write_certificate(
-        &dir, n_max, convergence_data, scaling_data,
-        calibration, gpu_tradeoffs, ref_comparisons, t_ref, elapsed_secs,
+        &dir,
+        n_max,
+        convergence_data,
+        scaling_data,
+        calibration,
+        gpu_tradeoffs,
+        ref_comparisons,
+        t_ref,
+        elapsed_secs,
     );
     write_convergence_tsv(&dir, convergence_data);
     write_scaling_tsv(&dir, scaling_data);
@@ -110,53 +117,67 @@ fn write_certificate(
     elapsed_secs: f64,
 ) {
     // Collect unique pairs
-    let mut pairs: Vec<(usize, usize)> = convergence_data.iter()
-        .map(|p| (p.j, p.k))
-        .collect();
+    let mut pairs: Vec<(usize, usize)> = convergence_data.iter().map(|p| (p.j, p.k)).collect();
     pairs.dedup();
 
-    let convergence_json: Vec<_> = convergence_data.iter()
-        .map(|p| json!({
-            "j": p.j, "k": p.k, "T": p.t,
-            "abs_error": p.error,
-            "rate": p.rate,
-            "digits": (p.digits * 10.0).round() / 10.0,
-        }))
+    let convergence_json: Vec<_> = convergence_data
+        .iter()
+        .map(|p| {
+            json!({
+                "j": p.j, "k": p.k, "T": p.t,
+                "abs_error": p.error,
+                "rate": p.rate,
+                "digits": (p.digits * 10.0).round() / 10.0,
+            })
+        })
         .collect();
 
-    let scaling_json: Vec<_> = scaling_data.iter()
-        .map(|r| json!({
-            "N": r.n,
-            "worst_tm": (r.worst_tm * 1_000_000.0).round() / 1_000_000.0,
-            "worst_pair": format!("({},{})", r.worst_pair.0, r.worst_pair.1),
-            "worst_lcm": r.worst_lcm,
-        }))
+    let scaling_json: Vec<_> = scaling_data
+        .iter()
+        .map(|r| {
+            json!({
+                "N": r.n,
+                "worst_tm": (r.worst_tm * 1_000_000.0).round() / 1_000_000.0,
+                "worst_pair": format!("({},{})", r.worst_pair.0, r.worst_pair.1),
+                "worst_lcm": r.worst_lcm,
+            })
+        })
         .collect();
 
-    let precision_json: Vec<_> = calibration.precision_targets.iter()
-        .map(|t| json!({
-            "label": t.label,
-            "digits": t.digits,
-            "t_needed": t.t_needed,
-        }))
+    let precision_json: Vec<_> = calibration
+        .precision_targets
+        .iter()
+        .map(|t| {
+            json!({
+                "label": t.label,
+                "digits": t.digits,
+                "t_needed": t.t_needed,
+            })
+        })
         .collect();
 
-    let gpu_json: Vec<_> = gpu_tradeoffs.iter()
-        .map(|g| json!({
-            "storage": g.storage,
-            "entry_digits": g.entry_digits,
-            "vram_gb": (g.vram_gb * 10.0).round() / 10.0,
-            "solve_digits": g.solve_digits,
-        }))
+    let gpu_json: Vec<_> = gpu_tradeoffs
+        .iter()
+        .map(|g| {
+            json!({
+                "storage": g.storage,
+                "entry_digits": g.entry_digits,
+                "vram_gb": (g.vram_gb * 10.0).round() / 10.0,
+                "solve_digits": g.solve_digits,
+            })
+        })
         .collect();
 
-    let ref_json: Vec<_> = ref_comparisons.iter()
-        .map(|r| json!({
-            "j": r.j, "k": r.k,
-            "value_T200K": r.value_200k,
-            "value_Tref": r.value_ref,
-            "error": r.error,
-        }))
+    let ref_json: Vec<_> = ref_comparisons
+        .iter()
+        .map(|r| {
+            json!({
+                "j": r.j, "k": r.k,
+                "value_T200K": r.value_200k,
+                "value_Tref": r.value_ref,
+                "error": r.error,
+            })
+        })
         .collect();
 
     let cert = json!({
@@ -197,9 +218,12 @@ fn write_convergence_tsv(dir: &Path, data: &[ConvergencePoint]) {
     writeln!(f, "j\tk\tT\tabs_error\trate\tdigits").unwrap();
 
     for p in data {
-        writeln!(f, "{}\t{}\t{}\t{:.6e}\t{}\t{:.1}",
+        writeln!(
+            f,
+            "{}\t{}\t{}\t{:.6e}\t{}\t{:.1}",
             p.j, p.k, p.t, p.error, p.rate, p.digits,
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
 
@@ -211,9 +235,12 @@ fn write_scaling_tsv(dir: &Path, data: &[ScalingRow]) {
     writeln!(f, "N\tworst_tm\tworst_pair\tworst_lcm").unwrap();
 
     for r in data {
-        writeln!(f, "{}\t{:.6}\t({},{})\t{}",
+        writeln!(
+            f,
+            "{}\t{:.6}\t({},{})\t{}",
             r.n, r.worst_tm, r.worst_pair.0, r.worst_pair.1, r.worst_lcm,
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
 

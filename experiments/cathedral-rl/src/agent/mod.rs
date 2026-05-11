@@ -23,18 +23,18 @@
 //! summation of ~55K terms loses ~4 decimal digits; Kahan summation
 //! recovers them with negligible overhead (~2 extra FLOPs per term).
 
-pub mod numerics;
-pub mod gradient;
 pub mod conjugate_gradient;
 pub mod evolution;
+pub mod gradient;
 pub mod hybrid;
+pub mod numerics;
 
 // Re-export the public API so callers can `use agent::*`
-#[allow(unused_imports)]
-pub use gradient::GradientAgent;
 #[allow(unused_imports)]
 pub use conjugate_gradient::ConjugateGradientAgent;
 #[allow(unused_imports)]
 pub use evolution::{EvolutionAgent, EvolutionResult};
 #[allow(unused_imports)]
-pub use hybrid::{HybridAgent, HybridStepResult, AgentPhase};
+pub use gradient::GradientAgent;
+#[allow(unused_imports)]
+pub use hybrid::{AgentPhase, HybridAgent, HybridStepResult};

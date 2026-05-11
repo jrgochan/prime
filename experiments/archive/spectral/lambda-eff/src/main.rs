@@ -7,12 +7,12 @@
 //!
 //! Hardware target: Apple M2 Max, 12 cores, 96 GB RAM
 
+mod analysis;
 mod gram;
 mod partition;
-mod analysis;
 
+use indicatif::{MultiProgress, ProgressBar, ProgressStyle};
 use std::time::Instant;
-use indicatif::{ProgressBar, ProgressStyle, MultiProgress};
 
 /// Full result for one value of N
 #[derive(Clone, Debug, serde::Serialize)]
@@ -69,7 +69,9 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
     let mut block_matrices: Vec<(usize, Vec<f64>, usize)> = Vec::new();
     for &(m, ref indices) in &non_empty {
         let dim = indices.len();
-        if dim < 2 { continue; }
+        if dim < 2 {
+            continue;
+        }
         println!("    Block {} ({} × {})", m, dim, dim);
         pb_gram.set_length((dim * (dim + 1) / 2) as u64);
         pb_gram.set_position(0);
@@ -85,11 +87,11 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
     println!("\n  Eigendecomposing blocks...");
 
     let mut block_results: Vec<(
-        usize,                          // class idx
+        usize, // class idx
         analysis::BlockSpectrum,
-        Vec<f64>,                       // eigenvalues
-        nalgebra::DMatrix<f64>,         // eigenvectors
-        Vec<usize>,                     // indices
+        Vec<f64>,               // eigenvalues
+        nalgebra::DMatrix<f64>, // eigenvectors
+        Vec<usize>,             // indices
     )> = Vec::new();
 
     for &(m, ref mat, dim) in &block_matrices {
@@ -120,7 +122,9 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
         let mut cross_matrices: Vec<(usize, Vec<f64>, usize, usize)> = Vec::new();
 
         for j in 0..block_results.len() {
-            if i == j { continue; }
+            if i == j {
+                continue;
+            }
             let (class_j, _, _, _, ref indices_j) = block_results[j];
 
             let cross = gram::compute_cross_matrix(indices_i, indices_j);
@@ -187,8 +191,14 @@ fn run_for_n(n: usize, multi: &MultiProgress) -> NResult {
     println!("\n  ── Summary for N={} ──────────────────────", n);
     println!("  Global λ_min(G^block) = {:.6}", global_lambda_min);
     println!("  Avg λ_eff             = {:.4}", avg_lambda_eff);
-    println!("  Avg λ_eff / N         = {:.6} (should be ~constant)", avg_lambda_eff_over_n);
-    println!("  ¼·Σ(1/λ_eff)         = {:.6} (rank-1 ratio bound)", rank1_ratio_bound);
+    println!(
+        "  Avg λ_eff / N         = {:.6} (should be ~constant)",
+        avg_lambda_eff_over_n
+    );
+    println!(
+        "  ¼·Σ(1/λ_eff)         = {:.6} (rank-1 ratio bound)",
+        rank1_ratio_bound
+    );
     println!("  Total time            = {:.1}s", total_time);
 
     NResult {
@@ -246,17 +256,27 @@ fn main() {
     }
 
     // Final summary table
-    println!("\n\n╔════════════════════════════════════════════════════════════════════════════════╗");
+    println!(
+        "\n\n╔════════════════════════════════════════════════════════════════════════════════╗"
+    );
     println!("║  RESULTS SUMMARY                                                             ║");
     println!("╠════════════════════════════════════════════════════════════════════════════════╣");
-    println!("║  {:<6} │ {:<10} │ {:<10} │ {:<10} │ {:<10} │ {:<8} ║",
-        "N", "λ_eff avg", "λ_eff/N", "R₁ bound", "λ_min", "Time(s)");
+    println!(
+        "║  {:<6} │ {:<10} │ {:<10} │ {:<10} │ {:<10} │ {:<8} ║",
+        "N", "λ_eff avg", "λ_eff/N", "R₁ bound", "λ_min", "Time(s)"
+    );
     println!("╠════════════════════════════════════════════════════════════════════════════════╣");
 
     for r in &results {
-        println!("║  {:<6} │ {:<10.4} │ {:<10.6} │ {:<10.6} │ {:<10.6} │ {:<8.1} ║",
-            r.n, r.avg_lambda_eff, r.avg_lambda_eff_over_n,
-            r.rank1_ratio_bound, r.global_lambda_min, r.total_time_secs);
+        println!(
+            "║  {:<6} │ {:<10.4} │ {:<10.6} │ {:<10.6} │ {:<10.6} │ {:<8.1} ║",
+            r.n,
+            r.avg_lambda_eff,
+            r.avg_lambda_eff_over_n,
+            r.rank1_ratio_bound,
+            r.global_lambda_min,
+            r.total_time_secs
+        );
     }
     println!("╚════════════════════════════════════════════════════════════════════════════════╝");
 
@@ -276,7 +296,9 @@ fn main() {
         // R² goodness of fit
         let y_mean = sum_y / n_pts;
         let ss_tot: f64 = ys.iter().map(|y| (y - y_mean).powi(2)).sum();
-        let ss_res: f64 = xs.iter().zip(ys.iter())
+        let ss_res: f64 = xs
+            .iter()
+            .zip(ys.iter())
             .map(|(x, y)| (y - (slope * x + intercept)).powi(2))
             .sum();
         let r_squared = 1.0 - ss_res / ss_tot;
@@ -286,25 +308,45 @@ fn main() {
         println!("  Implied axiom constant c = {:.6}", slope);
 
         if slope > 0.0 && r_squared > 0.99 {
-            println!("  ✅ LINEAR GROWTH CONFIRMED (c = {:.6}, R² = {:.4})", slope, r_squared);
+            println!(
+                "  ✅ LINEAR GROWTH CONFIRMED (c = {:.6}, R² = {:.4})",
+                slope, r_squared
+            );
         } else if slope > 0.0 && r_squared > 0.95 {
-            println!("  ⚠️  Linear growth plausible but R² = {:.4} < 0.99", r_squared);
+            println!(
+                "  ⚠️  Linear growth plausible but R² = {:.4} < 0.99",
+                r_squared
+            );
         } else {
-            println!("  ❌ Linear growth NOT confirmed: slope={:.6}, R²={:.4}", slope, r_squared);
+            println!(
+                "  ❌ Linear growth NOT confirmed: slope={:.6}, R²={:.4}",
+                slope, r_squared
+            );
         }
     }
 
     // Participation ratio trend
     println!("\n  PARTICIPATION RATIO TREND:");
     for r in &results {
-        let avg_pr: f64 = r.lambda_eff_results.iter()
+        let avg_pr: f64 = r
+            .lambda_eff_results
+            .iter()
             .map(|l| l.participation_ratio)
-            .sum::<f64>() / r.lambda_eff_results.len() as f64;
-        let block_size_avg: f64 = r.block_spectra.iter()
+            .sum::<f64>()
+            / r.lambda_eff_results.len() as f64;
+        let block_size_avg: f64 = r
+            .block_spectra
+            .iter()
             .map(|s| s.block_size as f64)
-            .sum::<f64>() / r.block_spectra.len() as f64;
-        println!("    N={:<6}: PR={:.1}, block_size={:.0}, PR/block_size={:.4}",
-            r.n, avg_pr, block_size_avg, avg_pr / block_size_avg);
+            .sum::<f64>()
+            / r.block_spectra.len() as f64;
+        println!(
+            "    N={:<6}: PR={:.1}, block_size={:.0}, PR/block_size={:.4}",
+            r.n,
+            avg_pr,
+            block_size_avg,
+            avg_pr / block_size_avg
+        );
     }
 
     // Save results to JSON
@@ -318,7 +360,9 @@ fn main() {
 
     let total_elapsed = start.elapsed();
     println!("\n╔════════════════════════════════════════════════════════════╗");
-    println!("║  EXPERIMENT COMPLETE ({:.1}s total)                     ║",
-        total_elapsed.as_secs_f64());
+    println!(
+        "║  EXPERIMENT COMPLETE ({:.1}s total)                     ║",
+        total_elapsed.as_secs_f64()
+    );
     println!("╚════════════════════════════════════════════════════════════╝");
 }

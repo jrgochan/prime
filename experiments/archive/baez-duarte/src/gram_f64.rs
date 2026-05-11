@@ -112,9 +112,7 @@ pub fn gram_entry_f64(j: usize, k: usize, ln_cache: &[f64]) -> f64 {
 pub fn build_gram_matrix_f64(n: usize, ln_cache: &[f64]) -> Vec<Vec<f64>> {
     let t0 = Instant::now();
 
-    let pairs: Vec<(usize, usize)> = (0..n)
-        .flat_map(|i| (i..n).map(move |j| (i, j)))
-        .collect();
+    let pairs: Vec<(usize, usize)> = (0..n).flat_map(|i| (i..n).map(move |j| (i, j))).collect();
     let total = pairs.len();
     let computed = AtomicUsize::new(0);
     let threads = rayon::current_num_threads();

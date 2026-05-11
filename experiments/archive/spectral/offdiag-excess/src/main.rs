@@ -13,7 +13,7 @@
 
 mod gram;
 
-use gram::{gram_entry, fract_integral};
+use gram::{fract_integral, gram_entry};
 use serde::Serialize;
 use std::collections::BTreeMap;
 
@@ -94,7 +94,11 @@ struct GcdResult {
 }
 
 fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
 }
 
 fn run_aggregate(n: usize) -> AggregateResult {
@@ -111,7 +115,9 @@ fn run_aggregate(n: usize) -> AggregateResult {
         let j = i + 1; // gramEntry index: i.val + 1
         diag_sum += gram_entry(j, j);
         for ii in 0..dim {
-            if ii == i { continue; }
+            if ii == i {
+                continue;
+            }
             let k = ii + 1;
             let g = gram_entry(j, k);
             offdiag_sum += g;
@@ -153,7 +159,9 @@ fn run_gap_decomposition(n: usize) -> GapDecomposition {
     for i in 0..dim {
         let j = i + 1;
         for ii in 0..dim {
-            if ii == i { continue; }
+            if ii == i {
+                continue;
+            }
             let k = ii + 1;
             let gap = if j > k { j - k } else { k - j };
             let excess = gram_entry(j, k) - 0.25;
@@ -169,7 +177,12 @@ fn run_gap_decomposition(n: usize) -> GapDecomposition {
         cumulative.insert(gap, running);
     }
 
-    GapDecomposition { n, by_gap, cumulative, pair_count }
+    GapDecomposition {
+        n,
+        by_gap,
+        cumulative,
+        pair_count,
+    }
 }
 
 fn run_variance_identity(n: usize) -> VarianceResult {
@@ -215,7 +228,9 @@ fn run_gcd_analysis(n: usize) -> GcdResult {
     for i in 0..dim {
         let j = i + 1;
         for ii in 0..dim {
-            if ii == i { continue; }
+            if ii == i {
+                continue;
+            }
             let k = ii + 1;
             let g = gcd(j, k);
             gcd_sum += (g * g) as f64 / (j as f64 * k as f64);
@@ -249,39 +264,57 @@ fn main() {
 
     // Experiment 1: Aggregate excess
     eprintln!("▸ Experiment 1: Aggregate excess ratios");
-    let aggregate: Vec<AggregateResult> = test_sizes.iter().map(|&n| {
-        eprint!("  N={:4}... ", n + 1);
-        let r = run_aggregate(n);
-        eprintln!("excess/n = {:.6}, d² = {:.6}, B = {:.4}, Q = {:.4}",
-            r.ratio_to_n, r.d_squared_upper, r.basis_sum, r.gram_sum);
-        r
-    }).collect();
+    let aggregate: Vec<AggregateResult> = test_sizes
+        .iter()
+        .map(|&n| {
+            eprint!("  N={:4}... ", n + 1);
+            let r = run_aggregate(n);
+            eprintln!(
+                "excess/n = {:.6}, d² = {:.6}, B = {:.4}, Q = {:.4}",
+                r.ratio_to_n, r.d_squared_upper, r.basis_sum, r.gram_sum
+            );
+            r
+        })
+        .collect();
 
     // Experiment 2: Gap decomposition
     eprintln!("\n▸ Experiment 2: Gap decomposition");
-    let gap_decomposition: Vec<GapDecomposition> = gap_sizes.iter().map(|&n| {
-        eprint!("  N={:4}... ", n + 1);
-        let r = run_gap_decomposition(n);
-        let total: f64 = r.by_gap.values().sum();
-        eprintln!("total excess = {:.4}, gaps = {}", total, r.by_gap.len());
-        // Print top 10 gaps
-        for (&gap, &excess) in r.by_gap.iter().take(8) {
-            let count = r.pair_count[&gap];
-            eprintln!("    gap={:3}: excess={:+.6}, pairs={:4}, per_pair={:+.8}",
-                gap, excess, count, excess / count as f64);
-        }
-        r
-    }).collect();
+    let gap_decomposition: Vec<GapDecomposition> = gap_sizes
+        .iter()
+        .map(|&n| {
+            eprint!("  N={:4}... ", n + 1);
+            let r = run_gap_decomposition(n);
+            let total: f64 = r.by_gap.values().sum();
+            eprintln!("total excess = {:.4}, gaps = {}", total, r.by_gap.len());
+            // Print top 10 gaps
+            for (&gap, &excess) in r.by_gap.iter().take(8) {
+                let count = r.pair_count[&gap];
+                eprintln!(
+                    "    gap={:3}: excess={:+.6}, pairs={:4}, per_pair={:+.8}",
+                    gap,
+                    excess,
+                    count,
+                    excess / count as f64
+                );
+            }
+            r
+        })
+        .collect();
 
     // Experiment 3: Variance identity
     eprintln!("\n▸ Experiment 3: L² variance identity");
-    let variance_identity: Vec<VarianceResult> = variance_sizes.iter().map(|&n| {
-        eprint!("  N={:4}... ", n + 1);
-        let r = run_variance_identity(n);
-        eprintln!("‖Σf‖² = {:.4}, ‖Σf‖²/n = {:.6}, excess = {:.4}",
-            r.l2_norm_sq, r.l2_ratio, r.excess_from_identity);
-        r
-    }).collect();
+    let variance_identity: Vec<VarianceResult> = variance_sizes
+        .iter()
+        .map(|&n| {
+            eprint!("  N={:4}... ", n + 1);
+            let r = run_variance_identity(n);
+            eprintln!(
+                "‖Σf‖² = {:.4}, ‖Σf‖²/n = {:.6}, excess = {:.4}",
+                r.l2_norm_sq, r.l2_ratio, r.excess_from_identity
+            );
+            r
+        })
+        .collect();
 
     // Experiment 4: Per-gap covariance convergence
     eprintln!("\n▸ Experiment 4: Per-gap covariance convergence");
@@ -292,7 +325,9 @@ fn main() {
         let mut by_n = Vec::new();
         for &n in &cov_sizes {
             let dim = n;
-            if gap >= dim { continue; }
+            if gap >= dim {
+                continue;
+            }
             let mut total = 0.0;
             let mut count = 0;
             for i in 0..dim {
@@ -309,7 +344,11 @@ fn main() {
                 by_n.push((n, total / count as f64));
             }
         }
-        let c_inf_est = if let Some(&(_, last)) = by_n.last() { last } else { 0.0 };
+        let c_inf_est = if let Some(&(_, last)) = by_n.last() {
+            last
+        } else {
+            0.0
+        };
         let theory = 1.0 / (12.0 * (gap as f64) * (gap as f64));
         gap_covariance.push(GapCovarianceResult {
             gap,
@@ -319,23 +358,39 @@ fn main() {
         });
     }
 
-    eprintln!("  {:>4} {:>12} {:>12} {:>8}", "gap", "C_∞(est)", "1/(12m²)", "ratio");
+    eprintln!(
+        "  {:>4} {:>12} {:>12} {:>8}",
+        "gap", "C_∞(est)", "1/(12m²)", "ratio"
+    );
     for gc in &gap_covariance {
-        eprintln!("  {:>4} {:>12.8} {:>12.8} {:>8.4}",
-            gc.gap, gc.c_inf_est, gc.theory_approx,
-            if gc.theory_approx > 0.0 { gc.c_inf_est / gc.theory_approx } else { 0.0 });
+        eprintln!(
+            "  {:>4} {:>12.8} {:>12.8} {:>8.4}",
+            gc.gap,
+            gc.c_inf_est,
+            gc.theory_approx,
+            if gc.theory_approx > 0.0 {
+                gc.c_inf_est / gc.theory_approx
+            } else {
+                0.0
+            }
+        );
     }
 
     // Experiment 5: GCD analysis
     eprintln!("\n▸ Experiment 5: GCD structure");
     let gcd_sizes = vec![50, 100, 200];
-    let gcd_analysis: Vec<GcdResult> = gcd_sizes.iter().map(|&n| {
-        eprint!("  N={:4}... ", n + 1);
-        let r = run_gcd_analysis(n);
-        eprintln!("gcd_sum/n = {:.6}, coprime_ex = {:.4}, noncoprime_ex = {:.4}",
-            r.gcd_ratio, r.coprime_excess, r.noncoprime_excess);
-        r
-    }).collect();
+    let gcd_analysis: Vec<GcdResult> = gcd_sizes
+        .iter()
+        .map(|&n| {
+            eprint!("  N={:4}... ", n + 1);
+            let r = run_gcd_analysis(n);
+            eprintln!(
+                "gcd_sum/n = {:.6}, coprime_ex = {:.4}, noncoprime_ex = {:.4}",
+                r.gcd_ratio, r.coprime_excess, r.noncoprime_excess
+            );
+            r
+        })
+        .collect();
 
     // Write results
     let results = ExperimentResults {

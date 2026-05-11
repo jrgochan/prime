@@ -1,7 +1,7 @@
 #![allow(unused, dead_code, non_snake_case, clippy::all)]
 use rayon::prelude::*;
 use std::f64::consts::PI;
-use std::sync::atomic::{AtomicU64, AtomicBool, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
@@ -132,30 +132,45 @@ fn main() {
     // since N(T) ~ T/(2π)·ln(T/(2π)) gives many zeros per unit T.
     // For n=100k:  t=120k  → 155k zeros (worked perfectly)
     // For n=1M:    t=500k  → ~300k zeros (sufficient)
-    let t_max = if n_target <= 100_000 { 120_000.0 }
-        else if n_target <= 500_000 { 300_000.0 }
-        else { 500_000.0 };
+    let t_max = if n_target <= 100_000 {
+        120_000.0
+    } else if n_target <= 500_000 {
+        300_000.0
+    } else {
+        500_000.0
+    };
     println!("\n[1/4] Finding zeros of ζ(s) up to t = {:.0}...", t_max);
     let start = std::time::Instant::now();
     let zeros = find_zeros(t_max);
     let zero_time = start.elapsed();
-    println!("  Found {} zeros in {:.1}s", zeros.len(), zero_time.as_secs_f64());
+    println!(
+        "  Found {} zeros in {:.1}s",
+        zeros.len(),
+        zero_time.as_secs_f64()
+    );
 
     let expected = t_max / (2.0 * PI) * (t_max / (2.0 * PI)).ln() - t_max / (2.0 * PI);
-    println!("  Expected (R-vM): ~{:.0} | Accuracy: {:.1}%",
-        expected, zeros.len() as f64 / expected * 100.0);
+    println!(
+        "  Expected (R-vM): ~{:.0} | Accuracy: {:.1}%",
+        expected,
+        zeros.len() as f64 / expected * 100.0
+    );
 
     // Phase 2: Precompute alphas (α_ρ = π - 2·arctan(2γ))
     println!("\n[2/4] Precomputing {} alpha values...", zeros.len());
-    let alphas: Vec<f64> = zeros.iter().map(|&gamma| {
-        PI - 2.0 * (2.0 * gamma).atan()
-    }).collect();
+    let alphas: Vec<f64> = zeros
+        .iter()
+        .map(|&gamma| PI - 2.0 * (2.0 * gamma).atan())
+        .collect();
     println!("  Done.");
 
     // Phase 3: Parallel batch verification
     let n_max = n_target.min(zeros.len());
-    println!("\n[3/4] Parallel verification: n = 1..{} ({} threads)",
-        n_max, rayon::current_num_threads());
+    println!(
+        "\n[3/4] Parallel verification: n = 1..{} ({} threads)",
+        n_max,
+        rayon::current_num_threads()
+    );
 
     let start = std::time::Instant::now();
     let violations = AtomicU64::new(0);
@@ -226,9 +241,16 @@ fn main() {
 
     // Print sample values
     println!("\n  Sample values:");
-    println!("  {:>8}  {:>16}  {:>16}  {:>10}", "n", "λ_n", "M(n)", "λ_n>0?");
-    for &n in &[1, 2, 5, 10, 20, 50, 100, 1000, 10000, 100000, 500000, 1000000] {
-        if n > n_max { continue; }
+    println!(
+        "  {:>8}  {:>16}  {:>16}  {:>10}",
+        "n", "λ_n", "M(n)", "λ_n>0?"
+    );
+    for &n in &[
+        1, 2, 5, 10, 20, 50, 100, 1000, 10000, 100000, 500000, 1000000,
+    ] {
+        if n > n_max {
+            continue;
+        }
         let (_, li, mn) = results[n - 1];
         let mark = if li > 0.0 { "✓" } else { "✗" };
         println!("  {:8}  {:16.6}  {:16.6}  {:>10}", n, li, mn, mark);
@@ -239,21 +261,43 @@ fn main() {
     println!("  Range verified:       n = 1..{}", n_max);
     println!("  Zeros used:           {}", zeros.len());
     println!("  Threads:              {}", rayon::current_num_threads());
-    println!("  Computation time:     {:.1}s (zeros) + {:.1}s (verify)",
-        zero_time.as_secs_f64(), batch_time.as_secs_f64());
-    println!("  Total time:           {:.1}s",
-        zero_time.as_secs_f64() + batch_time.as_secs_f64());
+    println!(
+        "  Computation time:     {:.1}s (zeros) + {:.1}s (verify)",
+        zero_time.as_secs_f64(),
+        batch_time.as_secs_f64()
+    );
+    println!(
+        "  Total time:           {:.1}s",
+        zero_time.as_secs_f64() + batch_time.as_secs_f64()
+    );
     println!("  ────────────────────────────────────────");
     println!("  λ_n > 0 violations:   {} / {}", total_violations, n_max);
     println!("  |R(n)|/M(n) ≥ 1:     {} (n ≥ 21)", bound_violations);
-    println!("  Smallest λ_n:         {:.12} at n = {}", smallest_li, smallest_li_n);
-    println!("  Worst |R|/M ratio:    {:.6} at n = {}", worst_ratio, worst_ratio_n);
-    println!("  ALL λ_n > 0:          {}", if all_positive { "✅ YES" } else { "❌ NO" });
+    println!(
+        "  Smallest λ_n:         {:.12} at n = {}",
+        smallest_li, smallest_li_n
+    );
+    println!(
+        "  Worst |R|/M ratio:    {:.6} at n = {}",
+        worst_ratio, worst_ratio_n
+    );
+    println!(
+        "  ALL λ_n > 0:          {}",
+        if all_positive { "✅ YES" } else { "❌ NO" }
+    );
 
     // Generate Lean file
     let lean_path = "../../proofs/LiPositivity_Verified.lean";
     println!("\n  Generating Lean axiom file...");
-    generate_lean_file(lean_path, n_max, &zeros, &alphas, all_positive, smallest_li, smallest_li_n);
+    generate_lean_file(
+        lean_path,
+        n_max,
+        &zeros,
+        &alphas,
+        all_positive,
+        smallest_li,
+        smallest_li_n,
+    );
     println!("  Written to: {}", lean_path);
 
     println!("\n═══════════════════════════════════════════════════════════════");
@@ -282,17 +326,39 @@ fn generate_lean_file(
     writeln!(f, "/-!").unwrap();
     writeln!(f, "# Li Positivity: Numerical Verification Results").unwrap();
     writeln!(f, "#").unwrap();
-    writeln!(f, "# AUTO-GENERATED by weil-explicit v2 (Project HYPERZETA)").unwrap();
+    writeln!(
+        f,
+        "# AUTO-GENERATED by weil-explicit v2 (Project HYPERZETA)"
+    )
+    .unwrap();
     writeln!(f, "# Date: 2026-03-28").unwrap();
     writeln!(f, "#").unwrap();
     writeln!(f, "# Verification range: n = 1..{}", n_max).unwrap();
     writeln!(f, "# Zeros used: {}", zeros.len()).unwrap();
-    writeln!(f, "# Zero range: t ∈ [14.13, {:.2}]", zeros.last().unwrap_or(&0.0)).unwrap();
-    writeln!(f, "# All λ_n > 0: {}", if all_positive { "YES" } else { "NO" }).unwrap();
+    writeln!(
+        f,
+        "# Zero range: t ∈ [14.13, {:.2}]",
+        zeros.last().unwrap_or(&0.0)
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "# All λ_n > 0: {}",
+        if all_positive { "YES" } else { "NO" }
+    )
+    .unwrap();
     writeln!(f, "# Smallest λ_n: {:.12} at n = {}", min_li, min_li_n).unwrap();
     writeln!(f, "#").unwrap();
-    writeln!(f, "# Computation: Riemann-Siegel formula + parallel verification").unwrap();
-    writeln!(f, "# Formula: λ_n = Σ_ρ 2·(1 - cos(n·α_ρ)),  α_ρ = π - 2·arctan(2·γ_ρ)").unwrap();
+    writeln!(
+        f,
+        "# Computation: Riemann-Siegel formula + parallel verification"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "# Formula: λ_n = Σ_ρ 2·(1 - cos(n·α_ρ)),  α_ρ = π - 2·arctan(2·γ_ρ)"
+    )
+    .unwrap();
     writeln!(f, "-/").unwrap();
     writeln!(f).unwrap();
     writeln!(f, "noncomputable section").unwrap();
@@ -301,25 +367,47 @@ fn generate_lean_file(
     writeln!(f, "axiom liCoefficient : ℕ → ℝ").unwrap();
     writeln!(f).unwrap();
     writeln!(f, "axiom li_criterion :").unwrap();
-    writeln!(f, "    RiemannHypothesis ↔ ∀ n : ℕ, 0 < n → 0 ≤ liCoefficient n").unwrap();
+    writeln!(
+        f,
+        "    RiemannHypothesis ↔ ∀ n : ℕ, 0 < n → 0 ≤ liCoefficient n"
+    )
+    .unwrap();
     writeln!(f).unwrap();
 
     // Individual small-n
     writeln!(f, "-- Individual verification (n = 1..20)").unwrap();
     for n in 1..=20 {
         let li = li_from_alphas(n, alphas);
-        writeln!(f, "axiom li_{}_pos : 0 < liCoefficient {}  -- λ_{} ≈ {:.10}", n, n, n, li).unwrap();
+        writeln!(
+            f,
+            "axiom li_{}_pos : 0 < liCoefficient {}  -- λ_{} ≈ {:.10}",
+            n, n, n, li
+        )
+        .unwrap();
     }
 
     writeln!(f).unwrap();
     writeln!(f, "-- Batch verification: n = 1..{}", n_max).unwrap();
-    writeln!(f, "axiom li_positivity_verified (n : ℕ) (hn : 1 ≤ n) (hn_max : n ≤ {}) :", n_max).unwrap();
+    writeln!(
+        f,
+        "axiom li_positivity_verified (n : ℕ) (hn : 1 ≤ n) (hn_max : n ≤ {}) :",
+        n_max
+    )
+    .unwrap();
     writeln!(f, "    0 < liCoefficient n").unwrap();
     writeln!(f).unwrap();
     writeln!(f, "-- The axiom gap (for ALL n)").unwrap();
-    writeln!(f, "axiom li_positivity (n : ℕ) (hn : 1 ≤ n) : 0 < liCoefficient n").unwrap();
+    writeln!(
+        f,
+        "axiom li_positivity (n : ℕ) (hn : 1 ≤ n) : 0 < liCoefficient n"
+    )
+    .unwrap();
     writeln!(f).unwrap();
-    writeln!(f, "theorem li_positive (n : ℕ) (hn : 0 < n) : 0 ≤ liCoefficient n :=").unwrap();
+    writeln!(
+        f,
+        "theorem li_positive (n : ℕ) (hn : 0 < n) : 0 ≤ liCoefficient n :="
+    )
+    .unwrap();
     writeln!(f, "  le_of_lt (li_positivity n hn)").unwrap();
     writeln!(f).unwrap();
     writeln!(f, "theorem riemann_hypothesis : RiemannHypothesis := by").unwrap();

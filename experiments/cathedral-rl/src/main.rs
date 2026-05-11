@@ -33,9 +33,9 @@
 mod agent;
 mod certificate;
 mod env;
+mod output;
 mod precision;
 mod runner;
-mod output;
 
 use clap::Parser;
 use env::CathedralEnv;
@@ -44,9 +44,8 @@ use std::time::Instant;
 
 /// Highly composite numbers — the Cathedral's preferred subsequence
 const HC_NUMBERS: &[usize] = &[
-    120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040,
-    7560, 10080, 15120, 20160, 25200, 27720, 45360, 50400,
-    55440, 83160,
+    120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160, 25200, 27720,
+    45360, 50400, 55440, 83160,
 ];
 
 #[derive(Parser, Debug)]
@@ -153,7 +152,8 @@ fn main() {
             &cert_path,
             std::slice::from_ref(&result),
             t_global.elapsed(),
-        ).ok();
+        )
+        .ok();
 
         // Emit timestamped log file with full results
         write_run_log(&args, &result, t_global.elapsed());
@@ -169,19 +169,25 @@ fn run_single(args: &Args, n: usize) -> RunResult {
     // Load from explicit path if provided, otherwise auto-detect
     #[cfg(feature = "hpdf")]
     let mut env = if let Some(ref path) = args.hpdf {
-        CathedralEnv::from_hpdf(std::path::Path::new(path), max_steps)
-            .unwrap_or_else(|e| { eprintln!("  {RED}✗{RESET} HPDF load failed: {e}"); std::process::exit(1); })
+        CathedralEnv::from_hpdf(std::path::Path::new(path), max_steps).unwrap_or_else(|e| {
+            eprintln!("  {RED}✗{RESET} HPDF load failed: {e}");
+            std::process::exit(1);
+        })
     } else if let Some(ref path) = args.cache {
-        CathedralEnv::from_cache(std::path::Path::new(path), max_steps)
-            .unwrap_or_else(|e| { eprintln!("  {RED}✗{RESET} Cache load failed: {e}"); std::process::exit(1); })
+        CathedralEnv::from_cache(std::path::Path::new(path), max_steps).unwrap_or_else(|e| {
+            eprintln!("  {RED}✗{RESET} Cache load failed: {e}");
+            std::process::exit(1);
+        })
     } else {
         CathedralEnv::new(n, max_steps)
     };
 
     #[cfg(not(feature = "hpdf"))]
     let mut env = if let Some(ref path) = args.cache {
-        CathedralEnv::from_cache(std::path::Path::new(path), max_steps)
-            .unwrap_or_else(|e| { eprintln!("  {RED}✗{RESET} Cache load failed: {e}"); std::process::exit(1); })
+        CathedralEnv::from_cache(std::path::Path::new(path), max_steps).unwrap_or_else(|e| {
+            eprintln!("  {RED}✗{RESET} Cache load failed: {e}");
+            std::process::exit(1);
+        })
     } else {
         CathedralEnv::new(n, max_steps)
     };
@@ -207,7 +213,10 @@ fn run_single(args: &Args, n: usize) -> RunResult {
     println!("      bᵀv   = {baseline_btv:.10}");
     println!();
 
-    println!("  {BOLD}{MAGENTA}§2{RESET}  {BOLD}Running Agent: {}...{RESET}", args.agent.to_uppercase());
+    println!(
+        "  {BOLD}{MAGENTA}§2{RESET}  {BOLD}Running Agent: {}...{RESET}",
+        args.agent.to_uppercase()
+    );
 
     let mut total_steps;
 
@@ -222,7 +231,14 @@ fn run_single(args: &Args, n: usize) -> RunResult {
             total_steps = runner::run_es(&mut env, args.generations, args.pop, args.sigma);
         }
         "hybrid" => {
-            total_steps = runner::run_hybrid(&mut env, args.cg_steps, args.cg_tol, args.generations, args.pop, args.sigma);
+            total_steps = runner::run_hybrid(
+                &mut env,
+                args.cg_steps,
+                args.cg_tol,
+                args.generations,
+                args.pop,
+                args.sigma,
+            );
         }
         _ => {
             eprintln!("  {RED}\u{2717}{RESET} Unknown agent: {}", args.agent);
@@ -233,30 +249,35 @@ fn run_single(args: &Args, n: usize) -> RunResult {
     // §3. Precision refinement (if requested)
     if args.precision != "f64" {
         println!();
-        println!("  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Precision Refinement: {}...{RESET}",
-            args.precision.to_uppercase());
+        println!(
+            "  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Precision Refinement: {}...{RESET}",
+            args.precision.to_uppercase()
+        );
 
         match args.precision.as_str() {
             "dd" => {
-                let result = precision::dd_cg::run_dd_cg(
-                    &mut env, args.cg_steps, args.cg_tol,
-                );
+                let result = precision::dd_cg::run_dd_cg(&mut env, args.cg_steps, args.cg_tol);
                 total_steps += result.steps;
             }
             "mixed" => {
-                let result = precision::mixed_cg::run_mixed_cg(
-                    &mut env, args.cg_steps, args.cg_tol,
-                );
+                let result =
+                    precision::mixed_cg::run_mixed_cg(&mut env, args.cg_steps, args.cg_tol);
                 total_steps += result.steps;
             }
             "mpfr" => {
                 let result = precision::mpfr_cg::run_mpfr_cg(
-                    &mut env, args.cg_steps, args.cg_tol, args.mpfr_bits,
+                    &mut env,
+                    args.cg_steps,
+                    args.cg_tol,
+                    args.mpfr_bits,
                 );
                 total_steps += result.steps;
             }
             _ => {
-                eprintln!("  {YELLOW}\u{26A0}{RESET} Unknown precision tier: {} (using f64)", args.precision);
+                eprintln!(
+                    "  {YELLOW}\u{26A0}{RESET} Unknown precision tier: {} (using f64)",
+                    args.precision
+                );
             }
         }
     }
@@ -265,14 +286,22 @@ fn run_single(args: &Args, n: usize) -> RunResult {
     let optimal_vtgv = env.compute_vtgv();
     let optimal_btv = env.compute_btv();
     let improvement = baseline_d2 - optimal_d2;
-    let improvement_pct = if baseline_d2 > 0.0 { improvement / baseline_d2 * 100.0 } else { 0.0 };
+    let improvement_pct = if baseline_d2 > 0.0 {
+        improvement / baseline_d2 * 100.0
+    } else {
+        0.0
+    };
     let ln_n = (n as f64).ln();
     // K=1 bound: vᵀGv ≤ 1 + 1/ln(N)
     let gram_bound_satisfied = optimal_vtgv <= 1.0 + 1.0 / ln_n;
 
     let wall_time_s = t0.elapsed().as_secs_f64();
     let k_eff = (optimal_vtgv - 1.0) * ln_n;
-    let matvec_rate = if wall_time_s > 0.0 { total_steps as f64 / wall_time_s } else { 0.0 };
+    let matvec_rate = if wall_time_s > 0.0 {
+        total_steps as f64 / wall_time_s
+    } else {
+        0.0
+    };
 
     RunResult {
         n,
@@ -296,10 +325,17 @@ fn run_single(args: &Args, n: usize) -> RunResult {
 }
 
 fn run_sweep(args: &Args, t_global: Instant) {
-    println!("  {BOLD}{MAGENTA}SWEEP{RESET}  {BOLD}HC Number Sweep (max N={})...{RESET}", args.sweep_max);
+    println!(
+        "  {BOLD}{MAGENTA}SWEEP{RESET}  {BOLD}HC Number Sweep (max N={})...{RESET}",
+        args.sweep_max
+    );
     println!();
 
-    let schedule: Vec<usize> = HC_NUMBERS.iter().filter(|&&n| n <= args.sweep_max).cloned().collect();
+    let schedule: Vec<usize> = HC_NUMBERS
+        .iter()
+        .filter(|&&n| n <= args.sweep_max)
+        .cloned()
+        .collect();
 
     println!("  {DIM}  Schedule: {:?}{RESET}", schedule);
     println!();
@@ -331,11 +367,7 @@ fn run_sweep(args: &Args, t_global: Instant) {
     let cert_dir = results_dir().join("certificates");
     std::fs::create_dir_all(&cert_dir).ok();
     let cert_path = cert_dir.join(format!("cathedral_rl_sweep_N{}.json", args.sweep_max));
-    certificate::write_certificate(
-        &cert_path,
-        &results,
-        t_global.elapsed(),
-    ).ok();
+    certificate::write_certificate(&cert_path, &results, t_global.elapsed()).ok();
 
     // Emit timestamped log
     write_sweep_log(args, &results, t_global.elapsed());
@@ -348,7 +380,10 @@ fn write_run_log(args: &Args, result: &RunResult, elapsed: std::time::Duration) 
 
     let log_dir = results_dir().join("logs");
     std::fs::create_dir_all(&log_dir).ok();
-    let secs = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default().as_secs();
+    let secs = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
     let log_path = log_dir.join(format!("cathedral_rl_N{}_{}.log", result.n, secs));
 
     let pyth_sum = result.optimal_d2 + result.optimal_vtgv;
@@ -388,16 +423,31 @@ DERIVED
 ═══════════════════════════════════════════════════════════════
 "#,
         secs,
-        result.n, result.dim, result.dim,
-        result.agent, args.precision,
-        args.cg_steps, args.cg_tol,
+        result.n,
+        result.dim,
+        result.dim,
+        result.agent,
+        args.precision,
+        args.cg_steps,
+        args.cg_tol,
         elapsed.as_secs_f64(),
-        result.baseline_d2, result.baseline_vtgv, result.baseline_btv,
-        result.optimal_d2, result.optimal_vtgv, result.optimal_btv,
-        pyth_sum, pyth_res,
-        result.k_eff, result.ln_n,
-        if result.optimal_vtgv < 1.0 { "YES ✓ (subcritical)" } else { "NO" },
-        result.improvement, result.improvement_pct,
+        result.baseline_d2,
+        result.baseline_vtgv,
+        result.baseline_btv,
+        result.optimal_d2,
+        result.optimal_vtgv,
+        result.optimal_btv,
+        pyth_sum,
+        pyth_res,
+        result.k_eff,
+        result.ln_n,
+        if result.optimal_vtgv < 1.0 {
+            "YES ✓ (subcritical)"
+        } else {
+            "NO"
+        },
+        result.improvement,
+        result.improvement_pct,
         result.matvec_rate,
     );
 
@@ -418,7 +468,10 @@ fn write_sweep_log(args: &Args, results: &[RunResult], elapsed: std::time::Durat
 
     let log_dir = results_dir().join("logs");
     std::fs::create_dir_all(&log_dir).ok();
-    let secs = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default().as_secs();
+    let secs = SystemTime::now()
+        .duration_since(SystemTime::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
     let max_n = results.last().map(|r| r.n).unwrap_or(0);
     let log_path = log_dir.join(format!("cathedral_rl_sweep_N{}_{}.log", max_n, secs));
 
@@ -438,11 +491,23 @@ HC Numbers:  {}
 {:-<8}-+-{:-<16}-+-{:-<16}-+-{:-<16}-+-{:-<8}-+-{:-<12}
 "#,
         secs,
-        args.precision, args.cg_steps, args.cg_tol,
+        args.precision,
+        args.cg_steps,
+        args.cg_tol,
         elapsed.as_secs_f64(),
         results.len(),
-        "N", "baseline_d2", "optimal_d2", "vtgv", "K_eff", "pyth_res",
-        "", "", "", "", "", "",
+        "N",
+        "baseline_d2",
+        "optimal_d2",
+        "vtgv",
+        "K_eff",
+        "pyth_res",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
     );
 
     for r in results {
@@ -457,16 +522,22 @@ HC Numbers:  {}
     let all_sub = results.iter().all(|r| r.optimal_vtgv < 1.0);
     log += &format!(
         "\nAll vᵀGv < 1: {}\n",
-        if all_sub { "YES ✓ (subcritical)" } else { "NO" },
+        if all_sub {
+            "YES ✓ (subcritical)"
+        } else {
+            "NO"
+        },
     );
 
     if let Ok(mut f) = std::fs::File::create(&log_path) {
         f.write_all(log.as_bytes()).ok();
-        eprintln!("  {GREEN}✓{RESET} Sweep log written to {}", log_path.display());
+        eprintln!(
+            "  {GREEN}✓{RESET} Sweep log written to {}",
+            log_path.display()
+        );
     }
 
     // Also write the JSON result alongside
     let json_path = log_dir.join(format!("cathedral_rl_sweep_N{}_{}.json", max_n, secs));
     write_json(&json_path.to_string_lossy(), &results.to_vec());
 }
-

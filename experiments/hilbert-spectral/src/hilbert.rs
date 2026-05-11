@@ -9,8 +9,8 @@
 // This is the fundamental constant underlying the Montgomery-Vaughan
 // Hilbert inequality used in the Cathedral proof.
 
-use rug::Float;
 use rayon::prelude::*;
+use rug::Float;
 
 const PREC: u32 = 512;
 
@@ -88,11 +88,14 @@ pub fn power_iteration_norm_mpfr(n: usize, max_iter: usize, tol: f64) -> (Float,
 
         // Normalize w -> v
         let inv_lambda = Float::with_val(PREC, 1.0) / &new_lambda;
-        let new_v: Vec<Float> = w.into_iter().map(|wi| {
-            let mut r = wi;
-            r *= &inv_lambda;
-            r
-        }).collect();
+        let new_v: Vec<Float> = w
+            .into_iter()
+            .map(|wi| {
+                let mut r = wi;
+                r *= &inv_lambda;
+                r
+            })
+            .collect();
 
         // Check convergence
         let rel_change = if new_lambda > 1e-15 {

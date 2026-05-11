@@ -28,17 +28,17 @@
 //!    --help, -h              Show this help
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod gpu;
-mod graduation;
+mod class_eval;
 mod compute;
 mod delta_formula;
-mod class_eval;
-mod honest_algebra;
+mod gpu;
+mod graduation;
 mod gram_crossref;
+mod honest_algebra;
 mod rosetta_stone;
 
-use std::time::Instant;
 use cathedral_utils::fmt;
+use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -126,20 +126,28 @@ fn main() {
     if let Some(info) = gpu::detect_gpu() {
         println!("  GPU:           {} ({} MB VRAM)", info.name, info.vram_mb);
     }
-    let mode = if force_cpu || !gpu_available { "CPU" } else { "GPU" };
-    println!("  Mode:          {} {}", mode,
-        if mode == "CPU" { format!("(rayon, {} threads)", n_threads) }
-        else { "(CUDA)".into() });
+    let mode = if force_cpu || !gpu_available {
+        "CPU"
+    } else {
+        "GPU"
+    };
+    println!(
+        "  Mode:          {} {}",
+        mode,
+        if mode == "CPU" {
+            format!("(rayon, {} threads)", n_threads)
+        } else {
+            "(CUDA)".into()
+        }
+    );
     println!();
 
     let t0 = Instant::now();
     std::fs::create_dir_all("results").ok();
 
     // For FTC-heavy sections, use a small pair subset (max_b ≤ 20 default)
-    let small_pairs: Vec<(usize, usize)> = pairs.iter()
-        .filter(|&&(_, b)| b <= 20)
-        .copied()
-        .collect();
+    let small_pairs: Vec<(usize, usize)> =
+        pairs.iter().filter(|&&(_, b)| b <= 20).copied().collect();
 
     // ═══════════════════════════════════════════════════════════════
     // §1-§5: FTC / DELTA / CLASS / HONEST / CROSSREF / ROSETTA
@@ -147,8 +155,11 @@ fn main() {
 
     if !graduation_only {
         println!("  ┌─────────────────────────────────────────────────────────────┐");
-        println!("  │  FTC-BASED CERTIFICATIONS (§1-§5) — {} pairs, M={}",
-            small_pairs.len(), max_m);
+        println!(
+            "  │  FTC-BASED CERTIFICATIONS (§1-§5) — {} pairs, M={}",
+            small_pairs.len(),
+            max_m
+        );
         println!("  └─────────────────────────────────────────────────────────────┘");
         println!();
 
@@ -156,24 +167,36 @@ fn main() {
         let t1 = Instant::now();
         let delta_results = delta_formula::certify_all(&small_pairs, max_m);
         delta_formula::print_certification(&delta_results);
-        println!("  {}(§1 completed in {:.2}s){}",
-            fmt::DIM, t1.elapsed().as_secs_f64(), fmt::RESET);
+        println!(
+            "  {}(§1 completed in {:.2}s){}",
+            fmt::DIM,
+            t1.elapsed().as_secs_f64(),
+            fmt::RESET
+        );
         println!();
 
         // §2. Per-Class Evaluation
         let t2 = Instant::now();
         let class_results = class_eval::certify_all(&small_pairs, max_m);
         class_eval::print_certification(&class_results);
-        println!("  {}(§2 completed in {:.2}s){}",
-            fmt::DIM, t2.elapsed().as_secs_f64(), fmt::RESET);
+        println!(
+            "  {}(§2 completed in {:.2}s){}",
+            fmt::DIM,
+            t2.elapsed().as_secs_f64(),
+            fmt::RESET
+        );
         println!();
 
         // §3. Honest Algebra
         let t3 = Instant::now();
         let honest_results = honest_algebra::certify_all(&small_pairs);
         honest_algebra::print_certification(&honest_results);
-        println!("  {}(§3 completed in {:.2}s){}",
-            fmt::DIM, t3.elapsed().as_secs_f64(), fmt::RESET);
+        println!(
+            "  {}(§3 completed in {:.2}s){}",
+            fmt::DIM,
+            t3.elapsed().as_secs_f64(),
+            fmt::RESET
+        );
         println!();
 
         // §4. Gram Cross-Reference
@@ -181,8 +204,12 @@ fn main() {
             let t4 = Instant::now();
             let crossref_results = gram_crossref::cross_reference(crossref_n, max_m);
             gram_crossref::print_cross_reference(&crossref_results);
-            println!("  {}(§4 completed in {:.2}s){}",
-                fmt::DIM, t4.elapsed().as_secs_f64(), fmt::RESET);
+            println!(
+                "  {}(§4 completed in {:.2}s){}",
+                fmt::DIM,
+                t4.elapsed().as_secs_f64(),
+                fmt::RESET
+            );
             println!();
         }
 
@@ -191,8 +218,12 @@ fn main() {
             let t5 = Instant::now();
             let rosetta_results = rosetta_stone::verify_bridge(rosetta_n);
             rosetta_stone::print_bridge(&rosetta_results);
-            println!("  {}(§5 completed in {:.2}s){}",
-                fmt::DIM, t5.elapsed().as_secs_f64(), fmt::RESET);
+            println!(
+                "  {}(§5 completed in {:.2}s){}",
+                fmt::DIM,
+                t5.elapsed().as_secs_f64(),
+                fmt::RESET
+            );
             println!();
         }
     }
@@ -202,8 +233,10 @@ fn main() {
     // ═══════════════════════════════════════════════════════════════
 
     println!("  ┌─────────────────────────────────────────────────────────────┐");
-    println!("  │  AXIOM GRADUATION (§6-§10) — {} pairs, B_max={}",
-        n_pairs, max_b);
+    println!(
+        "  │  AXIOM GRADUATION (§6-§10) — {} pairs, B_max={}",
+        n_pairs, max_b
+    );
     println!("  └─────────────────────────────────────────────────────────────┘");
     println!();
 
@@ -214,8 +247,11 @@ fn main() {
         graduation::cpu_certify(&pairs)
     };
     let g_elapsed = tg.elapsed().as_secs_f64();
-    println!("  Graduation completed in {:.2}s ({:.0} pairs/sec)",
-        g_elapsed, n_pairs as f64 / g_elapsed);
+    println!(
+        "  Graduation completed in {:.2}s ({:.0} pairs/sec)",
+        g_elapsed,
+        n_pairs as f64 / g_elapsed
+    );
     println!();
 
     // §6. Structural Invariants
@@ -226,25 +262,58 @@ fn main() {
     let all_s_perm = results.iter().all(|r| r.s_permutation != 0);
     let all_overshoot = results.iter().all(|r| r.overshoot_identity != 0);
 
-    println!("  Beta Bijection (tileIndex → {{0,...,a-2}}) : {} ({}/{})",
-        if all_beta_bij { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.beta_bijection != 0).count(), n_pairs);
-    println!("  S Permutation (overshoot → {{1,...,a-1}})  : {} ({}/{})",
-        if all_s_perm { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.s_permutation != 0).count(), n_pairs);
-    println!("  Overshoot Identity (s-a = am₀%b - b)     : {} ({}/{})",
-        if all_overshoot { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.overshoot_identity != 0).count(), n_pairs);
+    println!(
+        "  Beta Bijection (tileIndex → {{0,...,a-2}}) : {} ({}/{})",
+        if all_beta_bij {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results.iter().filter(|r| r.beta_bijection != 0).count(),
+        n_pairs
+    );
+    println!(
+        "  S Permutation (overshoot → {{1,...,a-1}})  : {} ({}/{})",
+        if all_s_perm {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results.iter().filter(|r| r.s_permutation != 0).count(),
+        n_pairs
+    );
+    println!(
+        "  Overshoot Identity (s-a = am₀%b - b)     : {} ({}/{})",
+        if all_overshoot {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results.iter().filter(|r| r.overshoot_identity != 0).count(),
+        n_pairs
+    );
     println!();
 
     // §7. Gauss Formula Verification
     fmt::section("§7. GAUSS FORMULA VERIFICATION");
     println!();
 
-    let max_glg_a = results.iter().map(|r| r.gauss_loggamma_a_err).fold(0.0_f64, f64::max);
-    let max_glg_b = results.iter().map(|r| r.gauss_loggamma_b_err).fold(0.0_f64, f64::max);
-    let max_gd_a = results.iter().map(|r| r.gauss_digamma_a_err).fold(0.0_f64, f64::max);
-    let max_gd_b = results.iter().map(|r| r.gauss_digamma_b_err).fold(0.0_f64, f64::max);
+    let max_glg_a = results
+        .iter()
+        .map(|r| r.gauss_loggamma_a_err)
+        .fold(0.0_f64, f64::max);
+    let max_glg_b = results
+        .iter()
+        .map(|r| r.gauss_loggamma_b_err)
+        .fold(0.0_f64, f64::max);
+    let max_gd_a = results
+        .iter()
+        .map(|r| r.gauss_digamma_a_err)
+        .fold(0.0_f64, f64::max);
+    let max_gd_b = results
+        .iter()
+        .map(|r| r.gauss_digamma_b_err)
+        .fold(0.0_f64, f64::max);
 
     println!("  Σ logΓ(k/a) vs closed form:");
     println!("    Max |error| (a-grid) : {:.4e}", max_glg_a);
@@ -253,10 +322,12 @@ fn main() {
     println!("    Max |error| (a-grid) : {:.4e}", max_gd_a);
     println!("    Max |error| (b-grid) : {:.4e}", max_gd_b);
 
-    let gauss_ok = max_glg_a < 1e-8 && max_glg_b < 1e-8
-        && max_gd_a < 1e-8 && max_gd_b < 1e-8;
+    let gauss_ok = max_glg_a < 1e-8 && max_glg_b < 1e-8 && max_gd_a < 1e-8 && max_gd_b < 1e-8;
     if gauss_ok {
-        println!("  {} Gauss multiplication + digamma: CERTIFIED ★", fmt::check(true));
+        println!(
+            "  {} Gauss multiplication + digamma: CERTIFIED ★",
+            fmt::check(true)
+        );
     } else {
         println!("  {} Gauss formula: FAILED", fmt::check(false));
     }
@@ -267,18 +338,29 @@ fn main() {
     println!("  Σ_{{TT}} f(m₀) = (a/b)·Σf(m) + Σ{{ar/b}}·(f(r)-f(r-1)) - f(b-1)");
     println!();
 
-    let max_tel_lg = results.iter().map(|r| r.telescope_lg_err).fold(0.0_f64, f64::max);
-    let max_tel_psi = results.iter().map(|r| r.telescope_psi_err).fold(0.0_f64, f64::max);
+    let max_tel_lg = results
+        .iter()
+        .map(|r| r.telescope_lg_err)
+        .fold(0.0_f64, f64::max);
+    let max_tel_psi = results
+        .iter()
+        .map(|r| r.telescope_psi_err)
+        .fold(0.0_f64, f64::max);
     let tel_ok = max_tel_lg < 1e-8 && max_tel_psi < 1e-8;
 
     println!("  Max |telescope logΓ error| : {:.4e}", max_tel_lg);
     println!("  Max |telescope ψ error|    : {:.4e}", max_tel_psi);
     if tel_ok {
-        println!("  {} Staircase telescope: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Staircase telescope: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
-        let n_fail = results.iter()
-            .filter(|r| r.telescope_lg_err > 1e-8 || r.telescope_psi_err > 1e-8).count();
+        let n_fail = results
+            .iter()
+            .filter(|r| r.telescope_lg_err > 1e-8 || r.telescope_psi_err > 1e-8)
+            .count();
         println!("  {} {} failures", fmt::check(false), n_fail);
     }
     println!();
@@ -289,16 +371,29 @@ fn main() {
     println!();
 
     let all_beta_pw = results.iter().all(|r| r.beta_duality_pw != 0);
-    let max_beta_sum = results.iter().map(|r| r.beta_duality_sum_err).fold(0.0_f64, f64::max);
+    let max_beta_sum = results
+        .iter()
+        .map(|r| r.beta_duality_sum_err)
+        .fold(0.0_f64, f64::max);
     let beta_ok = all_beta_pw && max_beta_sum < 1e-8;
 
-    println!("  Pointwise coefficient match : {} ({}/{} pairs)",
-        if all_beta_pw { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.beta_duality_pw != 0).count(), n_pairs);
+    println!(
+        "  Pointwise coefficient match : {} ({}/{} pairs)",
+        if all_beta_pw {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results.iter().filter(|r| r.beta_duality_pw != 0).count(),
+        n_pairs
+    );
     println!("  Max |sum LHS - sum RHS|     : {:.4e}", max_beta_sum);
     if beta_ok {
-        println!("  {} Beta modulo duality: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Beta modulo duality: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
         println!("  {} Beta duality: FAILED", fmt::check(false));
     }
@@ -309,13 +404,19 @@ fn main() {
     println!("  ∑ perClassLimit(a,b,m₀) = vasyuninGramFormula - strip - stir/b - ft/a");
     println!();
 
-    let max_id_err = results.iter().map(|r| r.identity_err).fold(0.0_f64, f64::max);
+    let max_id_err = results
+        .iter()
+        .map(|r| r.identity_err)
+        .fold(0.0_f64, f64::max);
     let id_ok = max_id_err < 1e-8;
 
     println!("  Max |Σ perClassLimit - deltaTarget| : {:.4e}", max_id_err);
     if id_ok {
-        println!("  {} Graduation identity: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Graduation identity: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
         let n_fail = results.iter().filter(|r| r.identity_err > 1e-8).count();
         println!("  {} {} failures", fmt::check(false), n_fail);
@@ -327,13 +428,19 @@ fn main() {
     println!("  S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{{ar/b}}·ψ((r+1)/b)");
     println!();
 
-    let max_abel_err = results.iter().map(|r| r.abel_cancel_err).fold(0.0_f64, f64::max);
+    let max_abel_err = results
+        .iter()
+        .map(|r| r.abel_cancel_err)
+        .fold(0.0_f64, f64::max);
     let abel_ok = max_abel_err < 1e-8;
 
     println!("  Max |Abel cancellation error| : {:.4e}", max_abel_err);
     if abel_ok {
-        println!("  {} Abel cancellation: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Abel cancellation: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
         let n_fail = results.iter().filter(|r| r.abel_cancel_err > 1e-8).count();
         println!("  {} {} failures", fmt::check(false), n_fail);
@@ -348,10 +455,16 @@ fn main() {
     let max_wdr_err = results.iter().map(|r| r.wdr_err).fold(0.0_f64, f64::max);
     let wdr_ok = max_wdr_err < 1e-8;
 
-    println!("  Max |weighted digamma reflection error| : {:.4e}", max_wdr_err);
+    println!(
+        "  Max |weighted digamma reflection error| : {:.4e}",
+        max_wdr_err
+    );
     if wdr_ok {
-        println!("  {} Weighted digamma reflection: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Weighted digamma reflection: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
         let n_fail = results.iter().filter(|r| r.wdr_err > 1e-8).count();
         println!("  {} {} failures", fmt::check(false), n_fail);
@@ -364,12 +477,25 @@ fn main() {
     println!();
 
     let all_coprime_comp = results.iter().all(|r| r.coprime_complement_ok != 0);
-    println!("  Pointwise verification : {} ({}/{} pairs)",
-        if all_coprime_comp { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.coprime_complement_ok != 0).count(), n_pairs);
+    println!(
+        "  Pointwise verification : {} ({}/{} pairs)",
+        if all_coprime_comp {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results
+            .iter()
+            .filter(|r| r.coprime_complement_ok != 0)
+            .count(),
+        n_pairs
+    );
     if all_coprime_comp {
-        println!("  {} Coprime complement: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Coprime complement: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     }
     println!();
 
@@ -378,13 +504,19 @@ fn main() {
     println!("  S₁(staircase) + S₂(Gauss_A) + S₃(beta) + S₄(staircase) = deltaTarget");
     println!();
 
-    let max_fourway_err = results.iter().map(|r| r.fourway_err).fold(0.0_f64, f64::max);
+    let max_fourway_err = results
+        .iter()
+        .map(|r| r.fourway_err)
+        .fold(0.0_f64, f64::max);
     let fourway_ok = max_fourway_err < 1e-8;
 
     println!("  Max |four-way assembly error| : {:.4e}", max_fourway_err);
     if fourway_ok {
-        println!("  {} Four-way assembly: CERTIFIED across ALL {} pairs ★",
-            fmt::check(true), n_pairs);
+        println!(
+            "  {} Four-way assembly: CERTIFIED across ALL {} pairs ★",
+            fmt::check(true),
+            n_pairs
+        );
     } else {
         let n_fail = results.iter().filter(|r| r.fourway_err > 1e-8).count();
         println!("  {} {} failures", fmt::check(false), n_fail);
@@ -397,7 +529,12 @@ fn main() {
 
     println!("  ═══════════════════════════════════════════════════════════════");
     if all_certified {
-        println!("  ★ {} ALL {} PAIRS CERTIFIED (B_max = {}) ★", fmt::check(true), n_pairs, max_b);
+        println!(
+            "  ★ {} ALL {} PAIRS CERTIFIED (B_max = {}) ★",
+            fmt::check(true),
+            n_pairs,
+            max_b
+        );
         println!("    §1.  Delta formula          : ✓");
         println!("    §2.  Per-class evaluation    : ✓");
         println!("    §3.  Honest algebra          : ✓");
@@ -416,10 +553,19 @@ fn main() {
         println!("    §14. Four-way assembly       : ✓ S₁+S₂+S₃+S₄ = deltaTarget");
         println!("    FULL CERTIFICATION — gramIntegral_eq_formula_ge2 GRADUATION READY");
     } else {
-        println!("  {} {}/{} pairs certified (B_max = {})",
-            fmt::check(false), n_certified, n_pairs, max_b);
+        println!(
+            "  {} {}/{} pairs certified (B_max = {})",
+            fmt::check(false),
+            n_certified,
+            n_pairs,
+            max_b
+        );
     }
-    println!("  Total time: {:.2}s ({} mode)", t0.elapsed().as_secs_f64(), mode);
+    println!(
+        "  Total time: {:.2}s ({} mode)",
+        t0.elapsed().as_secs_f64(),
+        mode
+    );
     println!("  ═══════════════════════════════════════════════════════════════");
     println!();
 
@@ -483,18 +629,38 @@ fn main() {
     tsv.push_str("beta_duality_pw\tbeta_duality_sum_err\t");
     tsv.push_str("sum_pcl\tdelta_target\tidentity_err\tcertified\n");
     for r in &results {
-        tsv.push_str(&format!("{}\t{}\t{}\t{}\t{}\t{}\t",
-            r.a, r.b, r.n_two_tile,
-            r.beta_bijection != 0, r.s_permutation != 0, r.overshoot_identity != 0));
-        tsv.push_str(&format!("{:.6e}\t{:.6e}\t{:.6e}\t{:.6e}\t",
-            r.gauss_loggamma_a_err, r.gauss_loggamma_b_err,
-            r.gauss_digamma_a_err, r.gauss_digamma_b_err));
-        tsv.push_str(&format!("{:.6e}\t{:.6e}\t",
-            r.telescope_lg_err, r.telescope_psi_err));
-        tsv.push_str(&format!("{}\t{:.6e}\t",
-            r.beta_duality_pw != 0, r.beta_duality_sum_err));
-        tsv.push_str(&format!("{:.15e}\t{:.15e}\t{:.6e}\t{}\n",
-            r.sum_pcl, r.delta_target, r.identity_err, r.certified != 0));
+        tsv.push_str(&format!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t",
+            r.a,
+            r.b,
+            r.n_two_tile,
+            r.beta_bijection != 0,
+            r.s_permutation != 0,
+            r.overshoot_identity != 0
+        ));
+        tsv.push_str(&format!(
+            "{:.6e}\t{:.6e}\t{:.6e}\t{:.6e}\t",
+            r.gauss_loggamma_a_err,
+            r.gauss_loggamma_b_err,
+            r.gauss_digamma_a_err,
+            r.gauss_digamma_b_err
+        ));
+        tsv.push_str(&format!(
+            "{:.6e}\t{:.6e}\t",
+            r.telescope_lg_err, r.telescope_psi_err
+        ));
+        tsv.push_str(&format!(
+            "{}\t{:.6e}\t",
+            r.beta_duality_pw != 0,
+            r.beta_duality_sum_err
+        ));
+        tsv.push_str(&format!(
+            "{:.15e}\t{:.15e}\t{:.6e}\t{}\n",
+            r.sum_pcl,
+            r.delta_target,
+            r.identity_err,
+            r.certified != 0
+        ));
     }
     std::fs::write(&tsv_path, tsv).unwrap();
     println!("  {} {}", fmt::check(true), tsv_path);

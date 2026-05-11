@@ -67,7 +67,9 @@ fn normalized_gram_bd(j: usize, k: usize) -> f64 {
 /// Compute the "autocorrelation function" by averaging M(j,k) over all
 /// pairs (j,k) with approximately the same log-distance τ = |ln j - ln k|
 fn compute_toeplitz_kernel<F: Fn(usize, usize) -> f64 + Sync>(
-    max_k: usize, n_bins: usize, norm_gram: F
+    max_k: usize,
+    n_bins: usize,
+    norm_gram: F,
 ) -> Vec<(f64, f64, f64, usize)> {
     let max_tau = (max_k as f64).ln();
     let bin_width = max_tau / n_bins as f64;
@@ -128,14 +130,14 @@ fn main() {
     println!();
 
     println!("  Log-ratio = ln(2) ≈ 0.693:");
-    let pairs_ln2: Vec<(usize, usize)> = vec![(1,2), (2,4), (3,6), (4,8), (5,10)];
+    let pairs_ln2: Vec<(usize, usize)> = vec![(1, 2), (2, 4), (3, 6), (4, 8), (5, 10)];
     for &(j, k) in &pairs_ln2 {
         let m = normalized_gram_hf(j, k);
         println!("    M_HF({},{}) = {:.8}", j, k, m);
     }
 
     println!("\n  Log-ratio = ln(3) ≈ 1.099:");
-    let pairs_ln3: Vec<(usize, usize)> = vec![(1,3), (2,6), (3,9), (4,12), (5,15)];
+    let pairs_ln3: Vec<(usize, usize)> = vec![(1, 3), (2, 6), (3, 9), (4, 12), (5, 15)];
     for &(j, k) in &pairs_ln3 {
         let m = normalized_gram_hf(j, k);
         println!("    M_HF({},{}) = {:.8}", j, k, m);
@@ -158,7 +160,7 @@ fn main() {
     }
 
     println!("\n  Log-ratio = ln(4) ≈ 1.386:");
-    let pairs_ln4: Vec<(usize, usize)> = vec![(1,4), (2,8), (3,12), (5,20)];
+    let pairs_ln4: Vec<(usize, usize)> = vec![(1, 4), (2, 8), (3, 12), (5, 20)];
     for &(j, k) in &pairs_ln4 {
         let m = normalized_gram_bd(j, k);
         println!("    M_BD({},{}) = {:.8}", j, k, m);
@@ -175,8 +177,11 @@ fn main() {
     let max_k = 50;
     let n_bins = 30;
 
-    println!("  Computing all M_BD(j,k) for j,k ∈ [1,{}] ({} pairs)...",
-        max_k, max_k * (max_k + 1) / 2);
+    println!(
+        "  Computing all M_BD(j,k) for j,k ∈ [1,{}] ({} pairs)...",
+        max_k,
+        max_k * (max_k + 1) / 2
+    );
 
     let kernel = compute_toeplitz_kernel(max_k, n_bins, |j, k| normalized_gram_bd(j, k));
 
@@ -203,8 +208,10 @@ fn main() {
         } else {
             "❌ NOT Toeplitz"
         };
-        println!("  {:.4}          | {:.6}  | {:.6}  | {:>5} | {}",
-            tau, mean, std, count, quality);
+        println!(
+            "  {:.4}          | {:.6}  | {:.6}  | {:>5} | {}",
+            tau, mean, std, count, quality
+        );
     }
 
     // ═══ Phase 3: Scatter plot data for visual inspection ═══
@@ -225,7 +232,10 @@ fn main() {
                 let m_bd = g_bd / ((j as f64) * (k as f64)).sqrt();
                 let g_hf = gram_entry_hf(j, k);
                 let m_hf = g_hf / ((j as f64) * (k as f64)).sqrt();
-                format!("{}\t{}\t{:.8}\t{:.10}\t{:.10}\t{:.10}\t{:.10}", j, k, tau, m_bd, g_bd, m_hf, g_hf)
+                format!(
+                    "{}\t{}\t{:.8}\t{:.10}\t{:.10}\t{:.10}\t{:.10}",
+                    j, k, tau, m_bd, g_bd, m_hf, g_hf
+                )
             })
             .collect();
 
@@ -242,12 +252,16 @@ fn main() {
     println!("╠══════════════════════════════════════════════════════════════╣");
 
     // Check if the low-tau bins have small std (good Toeplitz fit)
-    let good_bins: usize = kernel.iter()
+    let good_bins: usize = kernel
+        .iter()
         .filter(|&&(_, mean, std, count)| count > 2 && std / mean.abs().max(1e-10) < 0.15)
         .count();
     let total_bins = kernel.iter().filter(|&&(_, _, _, count)| count > 2).count();
 
-    println!("║  Bins with good Toeplitz fit: {}/{}", good_bins, total_bins);
+    println!(
+        "║  Bins with good Toeplitz fit: {}/{}",
+        good_bins, total_bins
+    );
     if good_bins as f64 / total_bins.max(1) as f64 > 0.7 {
         println!("║  ✅ STRONG TOEPLITZ STRUCTURE DETECTED!                    ║");
         println!("║  → Szegő's limit theorem is applicable                    ║");
@@ -259,6 +273,9 @@ fn main() {
         println!("║  ❌ Toeplitz structure WEAK or absent                      ║");
         println!("║  → Angle 1 may not be directly applicable                 ║");
     }
-    println!("║  Total time: {:.1}s                                        ║", total);
+    println!(
+        "║  Total time: {:.1}s                                        ║",
+        total
+    );
     println!("╚══════════════════════════════════════════════════════════════╝");
 }

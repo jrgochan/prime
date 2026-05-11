@@ -1,14 +1,17 @@
 //! GPU Gram matrix builder — DD precision with MPFR-128 ln table.
 
-use cathedral_utils::{cache, arith};
+use cathedral_utils::{arith, cache};
 use rug::Float;
 use std::time::Instant;
 
 #[link(name = "gramgpu", kind = "dylib")]
 extern "C" {
     fn gpu_gram_build_dd(
-        output: *mut f64, max_n: i32,
-        ln_hi: *const f64, ln_lo: *const f64, ln_count: i32,
+        output: *mut f64,
+        max_n: i32,
+        ln_hi: *const f64,
+        ln_lo: *const f64,
+        ln_count: i32,
     ) -> i32;
 }
 
@@ -20,7 +23,12 @@ fn main() {
     println!();
     println!("  ╔═══════════════════════════════════════════════════════════════╗");
     println!("  ║  GPU GRAM MATRIX — DD on CUDA (MPFR-128 ln table)");
-    println!("  ║  N = {}  ·  dim = {}  ·  {} entries", max_n, dim, dim*(dim+1)/2);
+    println!(
+        "  ║  N = {}  ·  dim = {}  ·  {} entries",
+        max_n,
+        dim,
+        dim * (dim + 1) / 2
+    );
     println!("  ╚═══════════════════════════════════════════════════════════════╝");
     println!();
 
@@ -49,7 +57,10 @@ fn main() {
     println!("    f64 ln(2) = {:.18e}", 2.0f64.ln());
     println!("    DD ln(2)  = {:.18e}", ln_hi[1] + ln_lo[1]);
     println!("    lo/hi     = {:.3e}", (ln_lo[1] / ln_hi[1]).abs());
-    println!("  \x1b[32m✓ MPFR-128 ln table ready in {:.3}s\x1b[0m", table_time);
+    println!(
+        "  \x1b[32m✓ MPFR-128 ln table ready in {:.3}s\x1b[0m",
+        table_time
+    );
 
     // Step 2: GPU DD Gram build
     println!();
@@ -57,13 +68,22 @@ fn main() {
     let t0 = Instant::now();
     let status = unsafe {
         gpu_gram_build_dd(
-            gpu_data.as_mut_ptr(), max_n as i32,
-            ln_hi.as_ptr(), ln_lo.as_ptr(), (ln_max + 1) as i32,
+            gpu_data.as_mut_ptr(),
+            max_n as i32,
+            ln_hi.as_ptr(),
+            ln_lo.as_ptr(),
+            (ln_max + 1) as i32,
         )
     };
     let gpu_time = t0.elapsed().as_secs_f64();
-    if status != 0 { eprintln!("  ✗ GPU kernel failed"); return; }
-    println!("  \x1b[32m✓ GPU DD Gram matrix built in {:.3}s\x1b[0m", gpu_time);
+    if status != 0 {
+        eprintln!("  ✗ GPU kernel failed");
+        return;
+    }
+    println!(
+        "  \x1b[32m✓ GPU DD Gram matrix built in {:.3}s\x1b[0m",
+        gpu_time
+    );
 
     // Step 3: Compare
     let cache_dir = cache::cache_dir();
@@ -74,9 +94,14 @@ fn main() {
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
                     if g.max_n >= max_n
-                        && cpu_ref.as_ref().is_none_or(|c: &cathedral_utils::gram::GramMatrix| g.precision > c.precision) {
-                            cpu_ref = Some(g);
-                        }
+                        && cpu_ref
+                            .as_ref()
+                            .is_none_or(|c: &cathedral_utils::gram::GramMatrix| {
+                                g.precision > c.precision
+                            })
+                    {
+                        cpu_ref = Some(g);
+                    }
                 }
             }
         }
@@ -94,16 +119,31 @@ fn main() {
                 let gv = gpu_data[i * dim + j];
                 if cv.abs() > 1e-30 {
                     let rel = ((gv - cv) / cv).abs();
-                    if rel > max_rel { max_rel = rel; worst_j = i+2; worst_k = j+2; }
-                    sum_rel += rel; count += 1;
+                    if rel > max_rel {
+                        max_rel = rel;
+                        worst_j = i + 2;
+                        worst_k = j + 2;
+                    }
+                    sum_rel += rel;
+                    count += 1;
                 }
             }
         }
         let mean_rel = sum_rel / count as f64;
-        let digits = if mean_rel > 0.0 { -mean_rel.log10() } else { 16.0 };
+        let digits = if mean_rel > 0.0 {
+            -mean_rel.log10()
+        } else {
+            16.0
+        };
         println!();
-        println!("  \x1b[1m═══ GPU DD vs CPU MPFR-{} ═══\x1b[0m", cpu.precision);
-        println!("    max rel error:  {:.3e} (G({},{}))", max_rel, worst_j, worst_k);
+        println!(
+            "  \x1b[1m═══ GPU DD vs CPU MPFR-{} ═══\x1b[0m",
+            cpu.precision
+        );
+        println!(
+            "    max rel error:  {:.3e} (G({},{}))",
+            max_rel, worst_j, worst_k
+        );
         println!("    mean rel error: {:.3e}", mean_rel);
         println!("    effective digits: \x1b[32m{:.1}\x1b[0m", digits);
         println!("    entries: {}", count);
@@ -125,13 +165,20 @@ fn main() {
                 let c2 = chol_cpu.solve(&bv);
                 let d2_cpu = 1.0 - bv.dot(&c2);
                 println!("  d²_{} (CPU)    = {:.15e}", max_n, d2_cpu);
-                println!("  agreement:     {:.3e}", (d2 - d2_cpu).abs() / d2_cpu.abs());
+                println!(
+                    "  agreement:     {:.3e}",
+                    (d2 - d2_cpu).abs() / d2_cpu.abs()
+                );
             }
         }
     }
 
     println!();
-    println!("  \x1b[1mTiming:\x1b[0m  MPFR ln table {:.3}s + GPU {:.3}s = {:.3}s total",
-        table_time, gpu_time, table_time + gpu_time);
+    println!(
+        "  \x1b[1mTiming:\x1b[0m  MPFR ln table {:.3}s + GPU {:.3}s = {:.3}s total",
+        table_time,
+        gpu_time,
+        table_time + gpu_time
+    );
     println!();
 }

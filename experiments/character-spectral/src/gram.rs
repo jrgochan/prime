@@ -4,9 +4,9 @@
 //! sum expansion in 256-bit MPFR. Projects to character sub-matrices and
 //! extracts eigenvalues via optimized cyclic Jacobi rotation.
 
+use cathedral_utils::gram;
 use rayon::prelude::*;
 use rug::Float;
-use cathedral_utils::gram;
 
 /// MPFR precision bits
 pub const PREC: u32 = 256;
@@ -24,9 +24,7 @@ pub fn build_gram_matrix_mpfr(n: usize) -> (Vec<Float>, usize) {
     let dim = n - 1;
     let total = dim * (dim + 1) / 2;
 
-    eprintln!(
-        "    Building {dim}×{dim} Gram matrix ({total} entries, {PREC}-bit MPFR)..."
-    );
+    eprintln!("    Building {dim}×{dim} Gram matrix ({total} entries, {PREC}-bit MPFR)...");
 
     // Compute upper triangle entries in parallel
     let entries: Vec<((usize, usize), Float)> = (0..dim)
@@ -44,9 +42,7 @@ pub fn build_gram_matrix_mpfr(n: usize) -> (Vec<Float>, usize) {
         .collect();
 
     // Assemble symmetric matrix (row-major, MPFR)
-    let mut mat: Vec<Float> = (0..dim * dim)
-        .map(|_| Float::with_val(PREC, 0.0))
-        .collect();
+    let mut mat: Vec<Float> = (0..dim * dim).map(|_| Float::with_val(PREC, 0.0)).collect();
 
     for ((r, c), v) in entries {
         mat[c * dim + r] = v.clone();
@@ -111,7 +107,6 @@ pub fn project_gram_weighted(
     sub
 }
 
-
 /// Optimized cyclic Jacobi eigenvalue algorithm in MPFR arithmetic.
 ///
 /// Uses cyclic sweeps over all (p,q) pairs instead of searching for the
@@ -158,19 +153,18 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
                 let apq = a[p * dim + q].clone();
 
                 let diff = Float::with_val(PREC, &app - &aqq);
-                let (c, s): (Float, Float) =
-                    if diff.clone().abs() < Float::with_val(PREC, 1e-80) {
-                        let half = Float::with_val(PREC, 0.5f64);
-                        let sqrt2_inv = Float::with_val(PREC, half.sqrt_ref());
-                        (sqrt2_inv.clone(), sqrt2_inv)
-                    } else {
-                        let tau = Float::with_val(PREC, 2.0) * &apq / &diff;
-                        let theta: Float = Float::with_val(PREC, tau.atan_ref());
-                        let half_theta: Float = theta / 2u32;
-                        let cos_t = Float::with_val(PREC, half_theta.cos_ref());
-                        let sin_t = Float::with_val(PREC, half_theta.sin_ref());
-                        (cos_t, sin_t)
-                    };
+                let (c, s): (Float, Float) = if diff.clone().abs() < Float::with_val(PREC, 1e-80) {
+                    let half = Float::with_val(PREC, 0.5f64);
+                    let sqrt2_inv = Float::with_val(PREC, half.sqrt_ref());
+                    (sqrt2_inv.clone(), sqrt2_inv)
+                } else {
+                    let tau = Float::with_val(PREC, 2.0) * &apq / &diff;
+                    let theta: Float = Float::with_val(PREC, tau.atan_ref());
+                    let half_theta: Float = theta / 2u32;
+                    let cos_t = Float::with_val(PREC, half_theta.cos_ref());
+                    let sin_t = Float::with_val(PREC, half_theta.sin_ref());
+                    (cos_t, sin_t)
+                };
 
                 // Apply rotation to rows/cols p and q
                 let mut old_ip: Vec<Float> = Vec::with_capacity(dim);
@@ -197,12 +191,10 @@ pub fn eigenvalues_jacobi_mpfr(mat: &[Float], dim: usize) -> Vec<f64> {
                 let s2 = Float::with_val(PREC, &s * &s);
                 let cs2 = Float::with_val(PREC, 2.0) * &c * &s * &apq;
 
-                a[p * dim + p] = Float::with_val(PREC, &c2 * &app)
-                    + &cs2
-                    + Float::with_val(PREC, &s2 * &aqq);
-                a[q * dim + q] = Float::with_val(PREC, &s2 * &app)
-                    - &cs2
-                    + Float::with_val(PREC, &c2 * &aqq);
+                a[p * dim + p] =
+                    Float::with_val(PREC, &c2 * &app) + &cs2 + Float::with_val(PREC, &s2 * &aqq);
+                a[q * dim + q] =
+                    Float::with_val(PREC, &s2 * &app) - &cs2 + Float::with_val(PREC, &c2 * &aqq);
                 a[p * dim + q] = Float::with_val(PREC, 0.0);
                 a[q * dim + p] = Float::with_val(PREC, 0.0);
             }

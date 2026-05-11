@@ -30,8 +30,7 @@ use std::time::Instant;
 
 /// Cross-N sweep schedule (ascending).
 const CROSS_N_SCHEDULE: &[usize] = &[
-    100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000,
-    60000, 80000, 100000, 120000,
+    100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000, 60000, 80000, 100000, 120000,
 ];
 
 /// Maximum block dimension for GCD-block analysis.
@@ -114,8 +113,16 @@ fn main() {
     let vram_mb = match &gpu_info {
         Some(info) => {
             // Clamp obviously wrong VRAM values (CudaDeviceProp padding issue)
-            let vram = if info.vram_mb > 100_000 { 24_576 } else { info.vram_mb };
-            println!("  {GREEN}✓{RESET} GPU: {} ({} MB VRAM)", info.name.trim(), vram);
+            let vram = if info.vram_mb > 100_000 {
+                24_576
+            } else {
+                info.vram_mb
+            };
+            println!(
+                "  {GREEN}✓{RESET} GPU: {} ({} MB VRAM)",
+                info.name.trim(),
+                vram
+            );
             vram
         }
         None => {
@@ -134,7 +141,8 @@ fn main() {
 
     // For cross-N sweep, cap at MAX_FULL_MATRIX_N
     let sweep_cap = if block_mode { MAX_FULL_MATRIX_N } else { max_n };
-    let sweep_ns: Vec<usize> = CROSS_N_SCHEDULE.iter()
+    let sweep_ns: Vec<usize> = CROSS_N_SCHEDULE
+        .iter()
         .filter(|&&n| n <= sweep_cap)
         .cloned()
         .collect();
@@ -169,11 +177,15 @@ fn main() {
 
     let (_, alpha_power, r2_power) = if cross_ns.len() >= 3 {
         cathedral_utils::fitting::power_law_fit(&cross_ns, &cross_lmins)
-    } else { (0.0, 0.0, 0.0) };
+    } else {
+        (0.0, 0.0, 0.0)
+    };
 
     let (_, alpha_log, r2_log) = if cross_ns.len() >= 3 {
         cathedral_utils::fitting::log_decay_fit(&cross_ns, &cross_lmins)
-    } else { (0.0, 0.0, 0.0) };
+    } else {
+        (0.0, 0.0, 0.0)
+    };
 
     println!("    Power law:  λ_min(G_N) ~ c · N^(-{alpha_power:.4})   R² = {r2_power:.6}");
     println!("    Log decay:  λ_min(G_N) ~ c / (ln N)^{alpha_log:.4}    R² = {r2_log:.6}");
@@ -186,14 +198,23 @@ fn main() {
     println!();
 
     // Print cross-N data table
-    print_cross_n_table(&cross_n_data, alpha_power, r2_power, alpha_log, r2_log, &sweep_ns);
+    print_cross_n_table(
+        &cross_n_data,
+        alpha_power,
+        r2_power,
+        alpha_log,
+        r2_log,
+        &sweep_ns,
+    );
 
     // ═══════════════════════════════════════════════════════════════
     // §2. GCD-BLOCK DECOMPOSITION (if --blocks)
     // ═══════════════════════════════════════════════════════════════
     let mut block_results = Vec::new();
     if block_mode {
-        println!("  {BOLD}{MAGENTA}§2{RESET}  {BOLD}GCD-Block Decomposition at N={max_n} ...{RESET}");
+        println!(
+            "  {BOLD}{MAGENTA}§2{RESET}  {BOLD}GCD-Block Decomposition at N={max_n} ...{RESET}"
+        );
         println!();
         println!("    Building GCD-class submatrices on-the-fly (gram_entry_f64)");
         println!("    Routing: GPU for dim ≤ ~50K, CPU dsyevr for larger blocks");
@@ -211,53 +232,95 @@ fn main() {
     // §3. CERTIFIED OUTPUT
     // ═══════════════════════════════════════════════════════════════
     println!("  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Writing Certified Results ...{RESET}");
-    write_certificate(max_n, &cross_n_data, alpha_power, r2_power, alpha_log, r2_log,
-                      &gpu_info, &block_results, block_mode);
+    write_certificate(
+        max_n,
+        &cross_n_data,
+        alpha_power,
+        r2_power,
+        alpha_log,
+        r2_log,
+        &gpu_info,
+        &block_results,
+        block_mode,
+    );
 
     let elapsed = t_total.elapsed().as_secs_f64();
     println!();
-    println!("  {BOLD}{GREEN}  ══════════════════════════════════════════════════════════════{RESET}");
+    println!(
+        "  {BOLD}{GREEN}  ══════════════════════════════════════════════════════════════{RESET}"
+    );
     println!("  {BOLD}{GREEN}  ORACLE COMPLETE{RESET}  ·  N = {max_n}  ·  {elapsed:.1}s total");
-    println!("  {BOLD}{GREEN}  ══════════════════════════════════════════════════════════════{RESET}");
+    println!(
+        "  {BOLD}{GREEN}  ══════════════════════════════════════════════════════════════{RESET}"
+    );
     println!();
 }
 
 fn print_cross_n_table(
     data: &[(usize, f64, f64, &str)],
-    alpha_power: f64, r2_power: f64,
-    alpha_log: f64, r2_log: f64,
+    alpha_power: f64,
+    r2_power: f64,
+    alpha_log: f64,
+    r2_log: f64,
     sweep_ns: &[usize],
 ) {
-    println!("  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}"
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}SCALING ORACLE GPU — MASTER RESULTS{RESET}                        {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  N range:         {:<20}{:<20}{BOLD}{CYAN}│{RESET}",
-             format!("{}..{}", sweep_ns.first().unwrap_or(&0), sweep_ns.last().unwrap_or(&0)), "");
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  N range:         {:<20}{:<20}{BOLD}{CYAN}│{RESET}",
+        format!(
+            "{}..{}",
+            sweep_ns.first().unwrap_or(&0),
+            sweep_ns.last().unwrap_or(&0)
+        ),
+        ""
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{YELLOW}α (power law):   {alpha_power:<12.6}{RESET}  R² = {r2_power:.6}          {BOLD}{CYAN}│{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{YELLOW}α (log decay):   {alpha_log:<12.6}{RESET}  R² = {r2_log:.6}          {BOLD}{CYAN}│{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}  TARGET:  α ≈ 0.855 (Three-Circles / Parseval Mirror)        {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}"
+    );
     println!();
 
     println!("  {BOLD}  Cross-N λ_min data:{RESET}");
-    println!("  {DIM}  ┌──────────┬──────────────────────┬────────────┬────────┬──────────────┐{RESET}");
-    println!("  {DIM}  │    N     │      λ_min(G_N)      │   ln(N)    │  mode  │   time (s)   │{RESET}");
-    println!("  {DIM}  ├──────────┼──────────────────────┼────────────┼────────┼──────────────┤{RESET}");
+    println!(
+        "  {DIM}  ┌──────────┬──────────────────────┬────────────┬────────┬──────────────┐{RESET}"
+    );
+    println!(
+        "  {DIM}  │    N     │      λ_min(G_N)      │   ln(N)    │  mode  │   time (s)   │{RESET}"
+    );
+    println!(
+        "  {DIM}  ├──────────┼──────────────────────┼────────────┼────────┼──────────────┤{RESET}"
+    );
     for &(n, lm, time, mode) in data {
         let mode_short = if mode.contains("GPU") { "GPU" } else { "CPU" };
         println!("  {DIM}  │{RESET} {n:>8} {DIM}│{RESET} {lm:>20.12e} {DIM}│{RESET} {:<10.4} {DIM}│{RESET} {mode_short:<6} {DIM}│{RESET} {time:>12.1} {DIM}│{RESET}",
                  (n as f64).ln());
     }
-    println!("  {DIM}  └──────────┴──────────────────────┴────────────┴────────┴──────────────┘{RESET}");
+    println!(
+        "  {DIM}  └──────────┴──────────────────────┴────────────┴────────┴──────────────┘{RESET}"
+    );
     println!();
 }
 
 fn print_block_table(results: &[block_spectrum::BlockResult], n: usize) {
-    let global_lmin = results.iter().map(|r| r.lambda_min).fold(f64::INFINITY, f64::min);
+    let global_lmin = results
+        .iter()
+        .map(|r| r.lambda_min)
+        .fold(f64::INFINITY, f64::min);
 
     println!("  {BOLD}{CYAN}  ┌─────────────────────────────────────────────────────────────────┐{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}GCD-BLOCK ANALYSIS AT N={n}{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}  Blocks analyzed: {}   Global block λ_min = {global_lmin:.6e}", results.len());
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}  Blocks analyzed: {}   Global block λ_min = {global_lmin:.6e}",
+        results.len()
+    );
     println!("  {BOLD}{CYAN}  └─────────────────────────────────────────────────────────────────┘{RESET}");
     println!();
 
@@ -271,12 +334,19 @@ fn print_block_table(results: &[block_spectrum::BlockResult], n: usize) {
     let mut sorted: Vec<_> = results.iter().collect();
     sorted.sort_by(|a, b| b.dim.cmp(&a.dim));
     for r in sorted.iter().take(30) {
-        let marker = if r.lambda_min == global_lmin { " ←MIN" } else { "" };
+        let marker = if r.lambda_min == global_lmin {
+            " ←MIN"
+        } else {
+            ""
+        };
         println!("  {DIM}  │{RESET} {:<6} {DIM}│{RESET} {:<10} {DIM}│{RESET} {:>20.12e} {DIM}│{RESET} {:<14} {DIM}│{RESET} {:>8.1} {DIM}│{RESET}{marker}",
                  r.gcd_class, r.dim, r.lambda_min, r.mode, r.compute_secs);
     }
     if results.len() > 30 {
-        println!("  {DIM}  │  ... {} more blocks ...{RESET}", results.len() - 30);
+        println!(
+            "  {DIM}  │  ... {} more blocks ...{RESET}",
+            results.len() - 30
+        );
     }
     println!("  {DIM}  └────────┴────────────┴──────────────────────┴────────────────┴──────────┘{RESET}");
     println!();
@@ -285,17 +355,29 @@ fn print_block_table(results: &[block_spectrum::BlockResult], n: usize) {
 fn write_certificate(
     max_n: usize,
     cross_n_data: &[(usize, f64, f64, &str)],
-    alpha_power: f64, r2_power: f64,
-    alpha_log: f64, r2_log: f64,
+    alpha_power: f64,
+    r2_power: f64,
+    alpha_log: f64,
+    r2_log: f64,
     gpu_info: &Option<gpu::GpuInfo>,
     block_results: &[block_spectrum::BlockResult],
     block_mode: bool,
 ) {
     std::fs::create_dir_all("results").ok();
-    let gpu_name = gpu_info.as_ref().map(|i| i.name.trim().to_string()).unwrap_or("none".into());
-    let vram = gpu_info.as_ref().map(|i| {
-        if i.vram_mb > 100_000 { 24_576 } else { i.vram_mb }
-    }).unwrap_or(0);
+    let gpu_name = gpu_info
+        .as_ref()
+        .map(|i| i.name.trim().to_string())
+        .unwrap_or("none".into());
+    let vram = gpu_info
+        .as_ref()
+        .map(|i| {
+            if i.vram_mb > 100_000 {
+                24_576
+            } else {
+                i.vram_mb
+            }
+        })
+        .unwrap_or(0);
 
     // Cross-N TSV
     let tsv_path = format!("results/cross_n_scaling_N{max_n}.tsv");
@@ -303,8 +385,18 @@ fn write_certificate(
         writeln!(f, "N\tdim\tlambda_min\tln_N\tln_lambda_min\tmode\ttime_s").ok();
         for &(n, lm, time, mode) in cross_n_data {
             let ln_lm = if lm > 0.0 { lm.ln() } else { f64::NEG_INFINITY };
-            writeln!(f, "{}\t{}\t{:.15e}\t{:.10}\t{:.10}\t{}\t{:.1}",
-                     n, n - 1, lm, (n as f64).ln(), ln_lm, mode, time).ok();
+            writeln!(
+                f,
+                "{}\t{}\t{:.15e}\t{:.10}\t{:.10}\t{}\t{:.1}",
+                n,
+                n - 1,
+                lm,
+                (n as f64).ln(),
+                ln_lm,
+                mode,
+                time
+            )
+            .ok();
         }
     }
 
@@ -331,8 +423,10 @@ fn write_certificate(
         writeln!(f, "  ]").ok();
 
         if block_mode && !block_results.is_empty() {
-            let global_lmin = block_results.iter()
-                .map(|r| r.lambda_min).fold(f64::INFINITY, f64::min);
+            let global_lmin = block_results
+                .iter()
+                .map(|r| r.lambda_min)
+                .fold(f64::INFINITY, f64::min);
             writeln!(f, "  ,\"block_analysis\": {{").ok();
             writeln!(f, "    \"N\": {max_n},").ok();
             writeln!(f, "    \"total_blocks\": {},", block_results.len()).ok();
@@ -356,8 +450,12 @@ fn write_certificate(
         if let Ok(mut f) = std::fs::File::create(&block_tsv) {
             writeln!(f, "d\tdim\tlambda_min\tmode\ttime_s").ok();
             for r in block_results {
-                writeln!(f, "{}\t{}\t{:.15e}\t{}\t{:.1}",
-                    r.gcd_class, r.dim, r.lambda_min, r.mode, r.compute_secs).ok();
+                writeln!(
+                    f,
+                    "{}\t{}\t{:.15e}\t{}\t{:.1}",
+                    r.gcd_class, r.dim, r.lambda_min, r.mode, r.compute_secs
+                )
+                .ok();
             }
         }
         println!("  {GREEN}✓{RESET} Block analysis written to results/block_analysis_N{max_n}.tsv");

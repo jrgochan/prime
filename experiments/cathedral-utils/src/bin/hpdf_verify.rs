@@ -38,7 +38,8 @@ fn main() {
         let n: usize = args[2].parse().expect("N must be a number");
         build_and_verify(n, precision);
     } else if args.len() > 2 && args[1] == "--ladder" {
-        let sizes: Vec<usize> = args[2].split(',')
+        let sizes: Vec<usize> = args[2]
+            .split(',')
             .map(|s| s.trim().parse().expect("each N must be a number"))
             .collect();
         build_ladder(&sizes);
@@ -55,7 +56,6 @@ fn main() {
     }
 }
 
-
 /// Build a fresh Gram matrix for the given N, write to HPDF, and verify.
 ///
 /// When `precision > 0`, uses MPFR at the specified bit width and stores
@@ -64,10 +64,17 @@ fn main() {
 fn build_and_verify(max_n: usize, precision: u32) {
     let dim = max_n - 1;
     let use_mpfr = precision > 0;
-    let prec_label = if use_mpfr { format!("{precision}-bit MPFR → DD") } else { "f64 (Kahan)".to_string() };
+    let prec_label = if use_mpfr {
+        format!("{precision}-bit MPFR → DD")
+    } else {
+        "f64 (Kahan)".to_string()
+    };
 
     println!("╔═══════════════════════════════════════════════════════════╗");
-    println!("║  🏛️  HPDF BUILD & VERIFY — N={:<6}  [{:<18}] ║", max_n, prec_label);
+    println!(
+        "║  🏛️  HPDF BUILD & VERIFY — N={:<6}  [{:<18}] ║",
+        max_n, prec_label
+    );
     println!("╚═══════════════════════════════════════════════════════════╝\n");
 
     let out_dir = PathBuf::from("cache/hpdf");
@@ -78,7 +85,10 @@ fn build_and_verify(max_n: usize, precision: u32) {
         let effective_digits = (precision as f64 * 0.30103).floor() as u32; // log10(2) * bits
         println!("  ── MPFR Build Configuration ──");
         println!("  MPFR precision  = {precision} bits (~{effective_digits} decimal digits)");
-        println!("  Matrix size     = {dim}×{dim} ({} unique entries)", dim * (dim + 1) / 2);
+        println!(
+            "  Matrix size     = {dim}×{dim} ({} unique entries)",
+            dim * (dim + 1) / 2
+        );
         println!("  Storage format  = DD (hi + lo words, ~31 digit roundtrip)");
         println!("  Method          = block-based fast algorithm (telescoping sums)\n");
 
@@ -87,14 +97,20 @@ fn build_and_verify(max_n: usize, precision: u32) {
         println!("  Step 1/4: Building ln(n) table (n ≤ {table_size}, {precision}-bit)...");
         let t_table = Instant::now();
         let ln_n_table = gram::LnNTable::new(table_size, precision);
-        println!("  ✓ ln(n) table ready ({:.2}s)\n", t_table.elapsed().as_secs_f64());
+        println!(
+            "  ✓ ln(n) table ready ({:.2}s)\n",
+            t_table.elapsed().as_secs_f64()
+        );
 
         // Step 2: Build Gram matrix → DD hi/lo split
         println!("  Step 2/4: Computing Gram matrix at {precision}-bit MPFR...");
         let t_build = Instant::now();
         let (data_hi, data_lo, built_dim) = gram::GramMatrix::build_fast_dd(max_n, &ln_n_table);
         assert_eq!(built_dim, dim);
-        println!("  ✓ Gram matrix built in {:.2}s\n", t_build.elapsed().as_secs_f64());
+        println!(
+            "  ✓ Gram matrix built in {:.2}s\n",
+            t_build.elapsed().as_secs_f64()
+        );
 
         // Step 3: Cross-validate MPFR vs f64 (spot-check)
         println!("  Step 3/4: Cross-validating MPFR vs f64...");
@@ -185,7 +201,10 @@ fn build_and_verify(max_n: usize, precision: u32) {
 /// Build a ladder of HPDF files at multiple sizes.
 fn build_ladder(sizes: &[usize]) {
     println!("╔═══════════════════════════════════════════════════╗");
-    println!("║  🏛️  HPDF LADDER — {} sizes                     ║", sizes.len());
+    println!(
+        "║  🏛️  HPDF LADDER — {} sizes                     ║",
+        sizes.len()
+    );
     println!("╚═══════════════════════════════════════════════════╝\n");
 
     let out_dir = PathBuf::from("cache/hpdf");
@@ -226,8 +245,14 @@ fn build_ladder(sizes: &[usize]) {
             println!("  │  Written: {} KB", size / 1024);
         } else {
             let size = hpdf::extract_submatrix_hpdf(
-                &data, dim, n, 0, &format!("extracted_from_N{max_n}"), &path,
-            ).unwrap();
+                &data,
+                dim,
+                n,
+                0,
+                &format!("extracted_from_N{max_n}"),
+                &path,
+            )
+            .unwrap();
             println!("  │  Extracted from N={max_n}: {} KB", size / 1024);
         }
 
@@ -242,7 +267,10 @@ fn build_ladder(sizes: &[usize]) {
             let mut max_err = 0.0f64;
             for row in 0..sub_dim {
                 for col in 0..sub_dim {
-                    max_err = f64::max(max_err, (data[row * dim + col] - sub_data[row * sub_dim + col]).abs());
+                    max_err = f64::max(
+                        max_err,
+                        (data[row * dim + col] - sub_data[row * sub_dim + col]).abs(),
+                    );
                 }
             }
             println!("  │  vs master: max_err={max_err:.2e}");
@@ -250,14 +278,21 @@ fn build_ladder(sizes: &[usize]) {
 
         // Show structural + spectral metadata
         if let Ok(ss) = reader.read_structural_scalars() {
-            println!("  │  trace={:.6}, ‖G‖_F={:.6}, κ_est={:.2}",
-                ss.trace, ss.frobenius_norm, ss.condition_estimate);
-            if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max) {
+            println!(
+                "  │  trace={:.6}, ‖G‖_F={:.6}, κ_est={:.2}",
+                ss.trace, ss.frobenius_norm, ss.condition_estimate
+            );
+            if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max)
+            {
                 println!("  │  Gershgorin: λ∈[{g_min:.6}, {g_max:.6}]");
             }
         }
 
-        let status = if abs < 1e-14 { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" };
+        let status = if abs < 1e-14 {
+            "\x1b[32m✓\x1b[0m"
+        } else {
+            "\x1b[31m✗\x1b[0m"
+        };
         println!("  └── {status} N={n} verified\n");
     }
 
@@ -278,7 +313,10 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     // Data integrity checksum
     let integrity = reader.verify_data_integrity().unwrap();
     if integrity.valid {
-        println!("  ✓ Data SHA-256: {}... (verified)", &integrity.computed_sha256[..16]);
+        println!(
+            "  ✓ Data SHA-256: {}... (verified)",
+            &integrity.computed_sha256[..16]
+        );
     } else if integrity.stored_sha256.is_none() {
         println!("  ⚠ No data checksum (v1 file)");
     } else {
@@ -298,8 +336,11 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     // b-vector
     let b = reader.read_b_vector().unwrap();
     let b_ref = arith::b_vector(dim);
-    let b_err: f64 = b.iter().zip(b_ref.iter())
-        .map(|(a, b)| (a - b).abs()).fold(0.0, f64::max);
+    let b_err: f64 = b
+        .iter()
+        .zip(b_ref.iter())
+        .map(|(a, b)| (a - b).abs())
+        .fold(0.0, f64::max);
     println!("  ✓ b-vector max error: {b_err:.2e}");
 
     // Structural scalars + Gershgorin
@@ -307,7 +348,10 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
         println!("  ✓ trace = {:.10}", ss.trace);
         println!("  ✓ ‖G‖_F = {:.10}", ss.frobenius_norm);
         println!("  ✓ κ_est = {:.4} (diag ratio)", ss.condition_estimate);
-        println!("  ✓ off-diag max = {:.10}, avg = {:.10}", ss.off_diag_max, ss.off_diag_avg);
+        println!(
+            "  ✓ off-diag max = {:.10}, avg = {:.10}",
+            ss.off_diag_max, ss.off_diag_avg
+        );
         if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max) {
             println!("  ✓ Gershgorin: λ ∈ [{g_min:.10}, {g_max:.10}]");
             if g_min > 0.0 {
@@ -318,37 +362,55 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
 
     // Column norms
     if let Ok(cn) = reader.read_col_norms() {
-        println!("  ✓ col_norms: {} entries, range [{:.6}, {:.6}]",
+        println!(
+            "  ✓ col_norms: {} entries, range [{:.6}, {:.6}]",
             cn.len(),
             cn.iter().cloned().fold(f64::INFINITY, f64::min),
-            cn.iter().cloned().fold(f64::NEG_INFINITY, f64::max));
+            cn.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
+        );
     }
 
     // Diagonal
     let diag = reader.read_diagonal().unwrap();
     if let Some(data) = original_data {
-        let d_err: f64 = diag.iter().enumerate()
-            .map(|(i, &d)| (d - data[i * dim + i]).abs()).fold(0.0, f64::max);
+        let d_err: f64 = diag
+            .iter()
+            .enumerate()
+            .map(|(i, &d)| (d - data[i * dim + i]).abs())
+            .fold(0.0, f64::max);
         println!("  ✓ diagonal max error: {d_err:.2e}");
     }
 
     // Number theory
     if let Ok(mu) = reader.read_mobius() {
-        println!("  ✓ μ table: {} entries, μ(1)={}, μ(2)={}, μ(4)={}",
-            mu.len(), mu[1], mu[2], mu[4]);
+        println!(
+            "  ✓ μ table: {} entries, μ(1)={}, μ(2)={}, μ(4)={}",
+            mu.len(),
+            mu[1],
+            mu[2],
+            mu[4]
+        );
     }
     if let Ok(primes) = reader.read_primes() {
         println!("  ✓ Primes: {} primes ≤ {}", primes.len(), reader.max_n());
     }
     if let Ok(Some(nt)) = reader.read_number_theory_attrs() {
-        println!("  ✓ N={}: {} (τ={}, σ={}, HC={})",
-            reader.max_n(), nt.factorization, nt.divisor_count,
-            nt.divisor_sum, nt.is_highly_composite);
+        println!(
+            "  ✓ N={}: {} (τ={}, σ={}, HC={})",
+            reader.max_n(),
+            nt.factorization,
+            nt.divisor_count,
+            nt.divisor_sum,
+            nt.is_highly_composite
+        );
     }
 
     // Lineage
     if let Ok(Some(lin)) = reader.read_lineage() {
-        println!("  ✓ Lineage: {} (from N={})", lin.derivation, lin.parent_max_n);
+        println!(
+            "  ✓ Lineage: {} (from N={})",
+            lin.derivation, lin.parent_max_n
+        );
     }
 
     // Provenance
@@ -356,7 +418,10 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     println!("  ✓ Provenance:");
     println!("    builder    = {}", prov.builder);
     println!("    precision  = {}", prov.precision);
-    println!("    sha256     = {}...", &prov.source_sha256[..16.min(prov.source_sha256.len())]);
+    println!(
+        "    sha256     = {}...",
+        &prov.source_sha256[..16.min(prov.source_sha256.len())]
+    );
     println!("    git_commit = {}", prov.git_commit);
     println!("    hostname   = {}", prov.hostname);
     println!("    build_time = {:.2}s", prov.build_time_secs);
@@ -364,14 +429,19 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     // Distance (if present)
     if let Ok(Some(dist)) = reader.read_distance() {
         println!("  ✓ Distance: d²={:.15e}", dist.d_squared);
-        println!("    solver={}, iters={}, residual={:.2e}, converged={}",
-            dist.solver, dist.iterations, dist.residual_norm, dist.converged);
+        println!(
+            "    solver={}, iters={}, residual={:.2e}, converged={}",
+            dist.solver, dist.iterations, dist.residual_norm, dist.converged
+        );
         if let Some(bt_x) = dist.bt_x {
             println!("    bᵀx={:.15e}  →  1-bᵀx={:.15e}", bt_x, 1.0 - bt_x);
         }
         if let Ok(Some(hist)) = reader.read_convergence_history() {
-            println!("    convergence: {} iters, final={:.2e}",
-                hist.len(), hist.last().unwrap_or(&0.0));
+            println!(
+                "    convergence: {} iters, final={:.2e}",
+                hist.len(),
+                hist.last().unwrap_or(&0.0)
+            );
         }
         if let Ok(Some(sol)) = reader.read_solution_vector() {
             println!("    solution_vector: {} entries stored", sol.len());
@@ -397,7 +467,9 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     let prov = reader.read_provenance().ok();
     let is_dd_built = prov.as_ref().is_some_and(|p| p.builder.contains("DD"));
     let spot_threshold = if stored_precision > 0 {
-        println!("    (note: file built at {stored_precision}-bit MPFR; f64 baseline is less accurate)");
+        println!(
+            "    (note: file built at {stored_precision}-bit MPFR; f64 baseline is less accurate)"
+        );
         // f64 Kahan summation error grows with N; for N≤100, ~1e-5 is typical
         1e-3
     } else if is_dd_built {
@@ -433,7 +505,10 @@ fn info_hpdf(path: &str) {
     println!("║  🏛️  HPDF INFO                                   ║");
     println!("╚═══════════════════════════════════════════════════╝\n");
     println!("  File:    {path}");
-    println!("  Size:    {} KB", std::fs::metadata(&pb).map(|m| m.len()).unwrap_or(0) / 1024);
+    println!(
+        "  Size:    {} KB",
+        std::fs::metadata(&pb).map(|m| m.len()).unwrap_or(0) / 1024
+    );
     println!("  Version: v{}", reader.version());
     println!("  N:       {}", reader.max_n());
     println!("  Dim:     {}×{}", reader.dim(), reader.dim());
@@ -445,12 +520,17 @@ fn info_hpdf(path: &str) {
         println!("  trace           = {:.10}", ss.trace);
         println!("  ‖G‖_F           = {:.10}", ss.frobenius_norm);
         println!("  κ_est (diag)    = {:.4}", ss.condition_estimate);
-        println!("  diag range      = [{:.10}, {:.10}]", ss.diag_min, ss.diag_max);
+        println!(
+            "  diag range      = [{:.10}, {:.10}]",
+            ss.diag_min, ss.diag_max
+        );
         println!("  off-diag max    = {:.10}", ss.off_diag_max);
         println!("  off-diag avg    = {:.10}", ss.off_diag_avg);
         if let (Some(g_min), Some(g_max)) = (ss.gershgorin_lambda_min, ss.gershgorin_lambda_max) {
             println!("  Gershgorin λ    ∈ [{g_min:.10}, {g_max:.10}]");
-            if g_min > 0.0 { println!("    → positive definite"); }
+            if g_min > 0.0 {
+                println!("    → positive definite");
+            }
         }
         println!();
     }
@@ -525,7 +605,12 @@ fn convert_ooc(path: &str) {
 fn verify_hpdf(path: &str) {
     let pb = PathBuf::from(path);
     let reader = HpdfReader::open(&pb).unwrap();
-    println!("  HPDF: dim={}, max_n={}, v{}", reader.dim(), reader.max_n(), reader.version());
+    println!(
+        "  HPDF: dim={}, max_n={}, v{}",
+        reader.dim(),
+        reader.max_n(),
+        reader.version()
+    );
     full_verify(&pb, None, reader.dim());
 }
 
@@ -551,7 +636,11 @@ fn query_entry(path: &str, jk: &str) {
 
     // ── Storage geometry ──
     let dim = reader.dim();
-    let (r, c) = if j <= k { (j - 2, k - 2) } else { (k - 2, j - 2) };
+    let (r, c) = if j <= k {
+        (j - 2, k - 2)
+    } else {
+        (k - 2, j - 2)
+    };
     let tri_offset = r * dim - r * r.wrapping_sub(1) / 2 + (c - r);
     let byte_offset = tri_offset * 8;
     let tri_len = dim * (dim + 1) / 2;
@@ -571,7 +660,11 @@ fn query_entry(path: &str, jk: &str) {
     // ── Recompute from analytic formula ──
     let recomputed = gram::gram_entry_f64(j, k);
     let abs_err = (stored - recomputed).abs();
-    let rel_err = if recomputed.abs() > 1e-30 { abs_err / recomputed.abs() } else { abs_err };
+    let rel_err = if recomputed.abs() > 1e-30 {
+        abs_err / recomputed.abs()
+    } else {
+        abs_err
+    };
 
     // ── IEEE 754 bit representation ──
     let bits = stored.to_bits();
@@ -589,7 +682,10 @@ fn query_entry(path: &str, jk: &str) {
     println!("  ── IEEE 754 ──");
     println!("  hex             = 0x{bits:016X}");
     println!("  sign            = {sign}");
-    println!("  exponent        = {exponent}  (biased: {})", exponent + 1023);
+    println!(
+        "  exponent        = {exponent}  (biased: {})",
+        exponent + 1023
+    );
     println!("  mantissa        = 0x{mantissa:013X}");
     println!("  binary          = {:064b}", bits);
     println!();
@@ -605,4 +701,3 @@ fn query_entry(path: &str, jk: &str) {
         println!("  \x1b[31m✗ Mismatch detected!\x1b[0m");
     }
 }
-

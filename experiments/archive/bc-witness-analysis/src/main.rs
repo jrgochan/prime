@@ -17,8 +17,8 @@
 //!  Runs in SECONDS (no expensive disk scanning).
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::float::Round;
 use rug::Float;
+use rug::float::Round;
 use std::f64::consts::PI;
 use std::fs;
 use std::io::Write;
@@ -40,7 +40,11 @@ const WHITE: &str = "\x1b[97m";
 const RESET: &str = "\x1b[0m";
 
 fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
+    if b {
+        "\x1b[32m✓\x1b[0m"
+    } else {
+        "\x1b[31m✗\x1b[0m"
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -73,16 +77,37 @@ fn c_sub(a: &C256, b: &C256) -> C256 {
 
 fn c_mul(a: &C256, b: &C256) -> C256 {
     (
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1)),
-        Float::with_val(P, Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0)),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.0) - Float::with_val(P, &a.1 * &b.1),
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(P, &a.0 * &b.1) + Float::with_val(P, &a.1 * &b.0),
+        ),
     )
 }
 
 fn c_div(a: &C256, b: &C256) -> C256 {
-    let denom = Float::with_val(P, Float::with_val(P, &b.0 * &b.0) + Float::with_val(P, &b.1 * &b.1));
+    let denom = Float::with_val(
+        P,
+        Float::with_val(P, &b.0 * &b.0) + Float::with_val(P, &b.1 * &b.1),
+    );
     (
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &a.0 * &b.0) + Float::with_val(P, &a.1 * &b.1)) / &denom),
-        Float::with_val(P, Float::with_val(P, Float::with_val(P, &a.1 * &b.0) - Float::with_val(P, &a.0 * &b.1)) / &denom),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &a.0 * &b.0) + Float::with_val(P, &a.1 * &b.1),
+            ) / &denom,
+        ),
+        Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &a.1 * &b.0) - Float::with_val(P, &a.0 * &b.1),
+            ) / &denom,
+        ),
     )
 }
 
@@ -91,12 +116,18 @@ fn c_scale(a: &C256, s: &Float) -> C256 {
 }
 
 fn c_abs(z: &C256) -> Float {
-    let ns = Float::with_val(P, Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1));
+    let ns = Float::with_val(
+        P,
+        Float::with_val(P, &z.0 * &z.0) + Float::with_val(P, &z.1 * &z.1),
+    );
     Float::with_val(P, ns.sqrt())
 }
 
 fn c_to_f64(z: &C256) -> (f64, f64) {
-    (z.0.to_f64_round(Round::Nearest), z.1.to_f64_round(Round::Nearest))
+    (
+        z.0.to_f64_round(Round::Nearest),
+        z.1.to_f64_round(Round::Nearest),
+    )
 }
 
 fn c_pow_neg(n: usize, s: &C256) -> C256 {
@@ -106,7 +137,10 @@ fn c_pow_neg(n: usize, s: &C256) -> C256 {
     let mag = Float::with_val(P, re_exp.exp());
     let cos_v = Float::with_val(P, im_exp.clone().cos());
     let sin_v = Float::with_val(P, im_exp.sin());
-    (Float::with_val(P, &mag * &cos_v), Float::with_val(P, &mag * &sin_v))
+    (
+        Float::with_val(P, &mag * &cos_v),
+        Float::with_val(P, &mag * &sin_v),
+    )
 }
 
 fn c_pochhammer(s: &C256, k: usize) -> C256 {
@@ -136,7 +170,10 @@ fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     let mag = Float::with_val(P, re_1ms.exp());
     let cos_v = Float::with_val(P, im_1ms.clone().cos());
     let sin_v = Float::with_val(P, im_1ms.sin());
-    let n_1ms = (Float::with_val(P, &mag * &cos_v), Float::with_val(P, &mag * &sin_v));
+    let n_1ms = (
+        Float::with_val(P, &mag * &cos_v),
+        Float::with_val(P, &mag * &sin_v),
+    );
     let s_m1 = c_sub(s, &one);
     let integral = c_div(&n_1ms, &s_m1);
 
@@ -147,7 +184,9 @@ fn zeta_hp(s: &C256, n_terms: usize) -> C256 {
     for j in 0..8 {
         let two_k = 2 * (j + 1);
         let mut fact: f64 = 1.0;
-        for i in 1..=two_k { fact *= i as f64; }
+        for i in 1..=two_k {
+            fact *= i as f64;
+        }
         let coeff = (BERNOULLI_NUM[j] as f64) / (BERNOULLI_DEN[j] as f64) / fact;
         let rising = c_pochhammer(s, two_k - 1);
         let shift = c_add(s, &c_new((two_k - 1) as f64, 0.0));
@@ -177,12 +216,24 @@ fn main() {
     let t_global = Instant::now();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL BC WITNESS ANALYSIS{RESET}                                {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Focused Existential Wrapper Analysis{RESET}        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: ZetaLowerBound.lean — last sorry{RESET}                    {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Goal: c_inner / |t|^A ≤ (1/4)·exp(-K(ε,|t|)){RESET}              {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL BC WITNESS ANALYSIS{RESET}                                {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Focused Existential Wrapper Analysis{RESET}        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: ZetaLowerBound.lean — last sorry{RESET}                    {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Goal: c_inner / |t|^A ≤ (1/4)·exp(-K(ε,|t|)){RESET}              {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
@@ -191,11 +242,18 @@ fn main() {
     let z2 = zeta_hp(&c_new(2.0, 0.0), 500);
     let z2_val = c_to_f64(&z2);
     let z2_theory = PI * PI / 6.0;
-    println!("  {GREEN}✓{RESET} ζ(2) = {:.15} (err = {:.2e})", z2_val.0, (z2_val.0 - z2_theory).abs());
+    println!(
+        "  {GREEN}✓{RESET} ζ(2) = {:.15} (err = {:.2e})",
+        z2_val.0,
+        (z2_val.0 - z2_theory).abs()
+    );
 
     let z_half = zeta_hp(&c_new(0.5, 14.134725), 1000);
     let z_half_abs = c_abs(&z_half).to_f64_round(Round::Nearest);
-    println!("  {GREEN}✓{RESET} |ζ(1/2+14.135i)| = {:.6e} (≈ 0)", z_half_abs);
+    println!(
+        "  {GREEN}✓{RESET} |ζ(1/2+14.135i)| = {:.6e} (≈ 0)",
+        z_half_abs
+    );
     println!();
 
     // ══════════════════════════════════════════════════════════════
@@ -208,8 +266,12 @@ fn main() {
     println!("  {DIM}  Effective polynomial exponent: B_ε = 10K = 20(3-2ε)/ε{RESET}");
     println!();
 
-    println!("  {DIM}     ε     │      K      │      B_ε     │   c₀ = (1/4)·4^{{-K}}   │  c_lean = (1/4)·2^{{-B_ε}}{RESET}");
-    println!("  {DIM}───────────┼─────────────┼──────────────┼────────────────────────┼──────────────────────────{RESET}");
+    println!(
+        "  {DIM}     ε     │      K      │      B_ε     │   c₀ = (1/4)·4^{{-K}}   │  c_lean = (1/4)·2^{{-B_ε}}{RESET}"
+    );
+    println!(
+        "  {DIM}───────────┼─────────────┼──────────────┼────────────────────────┼──────────────────────────{RESET}"
+    );
 
     let epsilons = [0.01_f64, 0.05, 0.1, 0.25, 0.5, 1.0, 1.4];
 
@@ -217,16 +279,25 @@ fn main() {
     writeln!(theory_tsv, "eps\tK\tB_eps\tc_0\tc_lean").unwrap();
 
     for &eps in &epsilons {
-        if eps >= 1.5 { continue; }
+        if eps >= 1.5 {
+            continue;
+        }
         let k = (6.0 - 4.0 * eps) / eps;
         let b_eps = 10.0 * k;
         let c_0 = 0.25 * (4.0_f64).powf(-k);
         let c_lean = 0.25 * (2.0_f64).powf(-b_eps);
 
-        writeln!(theory_tsv, "{:.4}\t{:.6}\t{:.6}\t{:.6e}\t{:.6e}", eps, k, b_eps, c_0, c_lean).unwrap();
+        writeln!(
+            theory_tsv,
+            "{:.4}\t{:.6}\t{:.6}\t{:.6e}\t{:.6e}",
+            eps, k, b_eps, c_0, c_lean
+        )
+        .unwrap();
 
-        println!("    {:.3}   │  {:>9.4}  │  {:>10.4}  │  {:>20.4e}  │  {:>20.4e}",
-            eps, k, b_eps, c_0, c_lean);
+        println!(
+            "    {:.3}   │  {:>9.4}  │  {:>10.4}  │  {:>20.4e}  │  {:>20.4e}",
+            eps, k, b_eps, c_0, c_lean
+        );
     }
     println!();
     println!("  {DIM}Key insight: For ε=0.1, B_ε = 560. The Lean proof handles A ≥ 560.{RESET}");
@@ -253,10 +324,17 @@ fn main() {
         let c_lean = 0.25 * (2.0_f64).powf(-b_eps);
         let _c_0 = 0.25 * (4.0_f64).powf(-k);
 
-        println!("  {BOLD}ε = {:.2}{RESET}, B_ε = {YELLOW}{:.0}{RESET}, c_lean = {:.4e}", eps, b_eps, c_lean);
+        println!(
+            "  {BOLD}ε = {:.2}{RESET}, B_ε = {YELLOW}{:.0}{RESET}, c_lean = {:.4e}",
+            eps, b_eps, c_lean
+        );
         println!();
-        println!("  {DIM}       t   │     A    │ c_lean/|t|^A │  actual |ζ|  │  BC lower   │ c/t^A ≤ |ζ|? │  ratio{RESET}");
-        println!("  {DIM}───────────┼──────────┼──────────────┼──────────────┼─────────────┼──────────────┼──────────{RESET}");
+        println!(
+            "  {DIM}       t   │     A    │ c_lean/|t|^A │  actual |ζ|  │  BC lower   │ c/t^A ≤ |ζ|? │  ratio{RESET}"
+        );
+        println!(
+            "  {DIM}───────────┼──────────┼──────────────┼──────────────┼─────────────┼──────────────┼──────────{RESET}"
+        );
 
         for &t in &test_ts {
             let actual = zeta_norm(0.5 + eps, t);
@@ -269,8 +347,16 @@ fn main() {
                 let lhs = c_lean / t.powf(a);
                 let pass_actual = lhs <= actual;
                 let pass_bc = lhs <= bc_lower;
-                let ratio_actual = if lhs > 0.0 { actual / lhs } else { f64::INFINITY };
-                let ratio_bc = if lhs > 0.0 { bc_lower / lhs } else { f64::INFINITY };
+                let ratio_actual = if lhs > 0.0 {
+                    actual / lhs
+                } else {
+                    f64::INFINITY
+                };
+                let ratio_bc = if lhs > 0.0 {
+                    bc_lower / lhs
+                } else {
+                    f64::INFINITY
+                };
 
                 writeln!(witness_tsv, "{:.4}\t{:.4}\t{:.1}\t{:.1}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}\t{}\t{:.6e}\t{:.6e}",
                     eps, b_eps, t, a, c_lean, lhs, actual, bc_lower,
@@ -281,8 +367,16 @@ fn main() {
                 // Only print key rows: A = 1, A ≈ B_ε, and A = 1000
                 if a == 1.0 || (a - b_eps).abs() < 50.0 || a == 1000.0 {
                     let color_a = if pass_actual { GREEN } else { RED };
-                    println!("    {:>7.0} │  {:>6.0} │  {:.4e}  │  {:.4e}   │  {:.4e} │  {color_a}{}{RESET}          │ {:.2e}",
-                        t, a, lhs, actual, bc_lower, check(pass_actual), ratio_actual);
+                    println!(
+                        "    {:>7.0} │  {:>6.0} │  {:.4e}  │  {:.4e}   │  {:.4e} │  {color_a}{}{RESET}          │ {:.2e}",
+                        t,
+                        a,
+                        lhs,
+                        actual,
+                        bc_lower,
+                        check(pass_actual),
+                        ratio_actual
+                    );
                 }
             }
         }
@@ -293,11 +387,17 @@ fn main() {
     // §4. GAP ANALYSIS — MAX A WHERE LEAN WITNESS WORKS
     // ══════════════════════════════════════════════════════════════
     println!("  {BOLD}{WHITE}═══ §4. GAP ANALYSIS ═══{RESET}");
-    println!("  {DIM}Binary search for the max A where c_lean/|t|^A ≤ |ζ(1/2+ε, t)| for all t{RESET}");
+    println!(
+        "  {DIM}Binary search for the max A where c_lean/|t|^A ≤ |ζ(1/2+ε, t)| for all t{RESET}"
+    );
     println!();
 
     let mut gap_tsv = fs::File::create("results/gap.tsv").unwrap();
-    writeln!(gap_tsv, "eps\tB_eps\tmax_A_vs_actual\tmax_A_vs_BC\ta_eff_at_1000").unwrap();
+    writeln!(
+        gap_tsv,
+        "eps\tB_eps\tmax_A_vs_actual\tmax_A_vs_BC\ta_eff_at_1000"
+    )
+    .unwrap();
 
     for &eps in &test_epsilons {
         let k = (6.0 - 4.0 * eps) / eps;
@@ -314,7 +414,11 @@ fn main() {
                 let actual = zeta_norm(0.5 + eps, t);
                 lhs <= actual
             });
-            if all_pass { a_lo = a_mid; } else { a_hi = a_mid; }
+            if all_pass {
+                a_lo = a_mid;
+            } else {
+                a_hi = a_mid;
+            }
         }
 
         // Same but against BC theoretical bound
@@ -328,23 +432,39 @@ fn main() {
                 let bc_lower = 0.25 * (-bc_exponent).exp();
                 lhs <= bc_lower
             });
-            if all_pass { bc_lo = a_mid; } else { bc_hi = a_mid; }
+            if all_pass {
+                bc_lo = a_mid;
+            } else {
+                bc_hi = a_mid;
+            }
         }
 
         // Effective exponent from actual |ζ| at t=1000
         let actual_1000 = zeta_norm(0.5 + eps, 1000.0);
         let a_eff = -(actual_1000.ln()) / 1000.0_f64.ln();
 
-        writeln!(gap_tsv, "{:.4}\t{:.4}\t{:.4}\t{:.4}\t{:.4}", eps, b_eps, a_lo, bc_lo, a_eff).unwrap();
+        writeln!(
+            gap_tsv,
+            "{:.4}\t{:.4}\t{:.4}\t{:.4}\t{:.4}",
+            eps, b_eps, a_lo, bc_lo, a_eff
+        )
+        .unwrap();
 
         println!("  ε = {:.2}:", eps);
         println!("    Theoretical B_ε         = {YELLOW}{:.2}{RESET}", b_eps);
         println!("    Max A (vs actual |ζ|)   = {GREEN}{:.2}{RESET}", a_lo);
         println!("    Max A (vs BC bound)     = {GREEN}{:.2}{RESET}", bc_lo);
         println!("    Actual eff. A at t=1000 = {GREEN}{:.4}{RESET}", a_eff);
-        println!("    |ζ(0.5+{:.2}, 1000)|      = {MAGENTA}{:.6e}{RESET}", eps, actual_1000);
-        println!("    {DIM}Lean proof covers A ≥ {:.0}, gap is A ∈ ({:.2}, {:.0}){RESET}",
-            b_eps.ceil(), a_eff, b_eps.ceil());
+        println!(
+            "    |ζ(0.5+{:.2}, 1000)|      = {MAGENTA}{:.6e}{RESET}",
+            eps, actual_1000
+        );
+        println!(
+            "    {DIM}Lean proof covers A ≥ {:.0}, gap is A ∈ ({:.2}, {:.0}){RESET}",
+            b_eps.ceil(),
+            a_eff,
+            b_eps.ceil()
+        );
         println!();
     }
 
@@ -384,16 +504,31 @@ fn main() {
                     let lhs = c_witness / t.powf(a);
                     let actual = zeta_norm(0.5 + eps, t);
                     let ratio = actual / lhs;
-                    if ratio < worst_ratio { worst_ratio = ratio; worst_t = t; }
+                    if ratio < worst_ratio {
+                        worst_ratio = ratio;
+                        worst_t = t;
+                    }
                     lhs <= actual
                 });
 
                 let status = if all_ok {
-                    format!("{GREEN}PASS{RESET} (worst ratio {:.2e} at t={:.0})", worst_ratio, worst_t)
+                    format!(
+                        "{GREEN}PASS{RESET} (worst ratio {:.2e} at t={:.0})",
+                        worst_ratio, worst_t
+                    )
                 } else {
-                    format!("{RED}FAIL{RESET} (worst ratio {:.2e} at t={:.0})", worst_ratio, worst_t)
+                    format!(
+                        "{RED}FAIL{RESET} (worst ratio {:.2e} at t={:.0})",
+                        worst_ratio, worst_t
+                    )
                 };
-                println!("      T₀={:>6.0}: c = {:.4e}, {} {}", t0, c_witness, check(all_ok), status);
+                println!(
+                    "      T₀={:>6.0}: c = {:.4e}, {} {}",
+                    t0,
+                    c_witness,
+                    check(all_ok),
+                    status
+                );
             }
             println!();
         }
@@ -401,13 +536,19 @@ fn main() {
         // Strategy 2: Adaptively shrink c to make it work
         println!("    {BOLD}Adaptive c (minimize c s.t. c/|t|^A ≤ |ζ| for all t ≥ T₀=2):{RESET}");
         for &a in &[1.0_f64, 5.0, 10.0, 50.0] {
-            let c_max = test_ts.iter()
+            let c_max = test_ts
+                .iter()
                 .filter(|&&t| t >= 2.0)
                 .map(|&t| zeta_norm(0.5 + eps, t) * t.powf(a))
                 .fold(f64::INFINITY, f64::min);
             let positive = c_max > 0.0 && c_max.is_finite();
-            println!("      A={:>4.0}: max c = {:.6e}  {} (c > 0: {})",
-                a, c_max, check(positive), check(positive));
+            println!(
+                "      A={:>4.0}: max c = {:.6e}  {} (c > 0: {})",
+                a,
+                c_max,
+                check(positive),
+                check(positive)
+            );
         }
         println!();
     }
@@ -417,32 +558,58 @@ fn main() {
     // ══════════════════════════════════════════════════════════════
     let total_time = t_global.elapsed().as_secs_f64();
 
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}BC WITNESS ANALYSIS — CERTIFICATE{RESET}                          {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}BC WITNESS ANALYSIS — CERTIFICATE{RESET}                          {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}", P);
-    println!("  {BOLD}{CYAN}║{RESET}  Runtime:   {YELLOW}{:.1}s{RESET}", total_time);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}",
+        P
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Runtime:   {YELLOW}{:.1}s{RESET}",
+        total_time
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Theoretical BC Exponents:{RESET}");
     for &eps in &test_epsilons {
         let b = 20.0 * (3.0 - 2.0 * eps) / eps;
-        println!("  {BOLD}{CYAN}║{RESET}    ε={:.2}: B_ε = {YELLOW}{:.0}{RESET}", eps, b);
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    ε={:.2}: B_ε = {YELLOW}{:.0}{RESET}",
+            eps, b
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Gap Analysis:{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {DIM}Lean proof handles A ≥ B_ε (large A){RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {DIM}For A < B_ε: need sharper argument{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {DIM}BUT: adaptive c (§5) works for any A at any ε!{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {DIM}BUT: adaptive c (§5) works for any A at any ε!{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}KEY INSIGHT: min_{{t≥2}} |ζ(1/2+ε, t)| · t^A > 0 always{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}→ The existential IS satisfiable for every (ε, A){RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}→ It just needs a DIFFERENT witness than c_lean{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}KEY INSIGHT: min_{{t≥2}} |ζ(1/2+ε, t)| · t^A > 0 always{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}→ The existential IS satisfiable for every (ε, A){RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{GREEN}→ It just needs a DIFFERENT witness than c_lean{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // JSON summary
-    let summary = format!(r#"{{
+    let summary = format!(
+        r#"{{
   "experiment": "Cathedral BC Witness Analysis",
   "precision_bits": {},
   "timestamp": "{}",
@@ -464,7 +631,10 @@ fn main() {
     fs::write("results/summary.json", &summary).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Runtime:{RESET} {GREEN}{:.1}s{RESET}", total_time);
+    println!(
+        "  {BOLD}{WHITE}Runtime:{RESET} {GREEN}{:.1}s{RESET}",
+        total_time
+    );
     println!("  {BOLD}{WHITE}Output:{RESET} results/{{theory,witness,gap}}.tsv + summary.json");
     println!();
 }

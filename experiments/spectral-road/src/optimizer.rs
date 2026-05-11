@@ -196,7 +196,13 @@ fn solve_linear(a: &mut Vec<Vec<f64>>, b: &mut Vec<f64>) -> Vec<f64> {
 /// The optimization reduces to a num_basis × num_basis linear system:
 ///   A · c = r
 /// where A_{ℓm} = φ_ℓ^T G φ_m  and  r_ℓ = φ_ℓ^T b.
-pub fn optimize(gram: &GramMatrix, n: usize, theta: f64, core: ArithCore, num_basis: usize) -> OptimResult {
+pub fn optimize(
+    gram: &GramMatrix,
+    n: usize,
+    theta: f64,
+    core: ArithCore,
+    num_basis: usize,
+) -> OptimResult {
     let dim = n - 1;
     let d_max = (n as f64).powf(theta) as usize;
     let log_d = (d_max.max(2) as f64).ln();

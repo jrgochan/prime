@@ -13,11 +13,11 @@
 //  the condition number growth gracefully.
 // ═══════════════════════════════════════════════════════════════════════
 
-use rug::Float;
 use crate::analysis::BDResult;
-use crate::gram_f64;
 use crate::arithmetic::gcd;
+use crate::gram_f64;
 use rayon::prelude::*;
+use rug::Float;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::Instant;
 
@@ -44,8 +44,7 @@ fn gram_entry_mpfr128(j: usize, k: usize, prec: u32) -> Float {
         let inv_n = Float::with_val(prec, Float::with_val(prec, 1u32) / &nf);
         let ln_term = Float::with_val(prec, inv_n.ln_1p());
 
-        let ab_coeff = Float::with_val(prec, &a / &kf)
-            + Float::with_val(prec, &b / &jf);
+        let ab_coeff = Float::with_val(prec, &a / &kf) + Float::with_val(prec, &b / &jf);
 
         let n_plus_1 = Float::with_val(prec, &nf + 1u32);
         let ab_frac = if a_int > 0 && b_int > 0 {
@@ -54,16 +53,15 @@ fn gram_entry_mpfr128(j: usize, k: usize, prec: u32) -> Float {
             Float::with_val(prec, 0u32)
         };
 
-        let piece = Float::with_val(prec, &inv_jk - Float::with_val(prec, &ab_coeff * &ln_term))
-            + &ab_frac;
+        let piece =
+            Float::with_val(prec, &inv_jk - Float::with_val(prec, &ab_coeff * &ln_term)) + &ab_frac;
         total += piece;
     }
 
     // Tail correction
     let d = Float::with_val(prec, gcd(j, k) as u64);
     let twelve_jk = Float::with_val(prec, 12u32) * &jk;
-    let tail_mean = Float::with_val(prec, 0.25f64)
-        + Float::with_val(prec, &d * &d) / &twelve_jk;
+    let tail_mean = Float::with_val(prec, 0.25f64) + Float::with_val(prec, &d * &d) / &twelve_jk;
     let t_f = Float::with_val(prec, t_direct as u64);
     let tail1 = Float::with_val(prec, &tail_mean / &t_f);
     let tail2 = Float::with_val(prec, &tail_mean / Float::with_val(prec, 2u32))
@@ -79,21 +77,21 @@ fn build_mean_vector_mpfr(n: usize, prec: u32) -> Vec<Float> {
         .map(|p| Float::with_val(prec, p))
         .unwrap();
 
-    (1..=n).map(|k| {
-        let kf = Float::with_val(prec, k as u64);
-        let one = Float::with_val(prec, 1u32);
-        let ln_k = Float::with_val(prec, kf.clone().ln());
-        let numer = ln_k + one - &gamma;
-        Float::with_val(prec, numer / kf)
-    }).collect()
+    (1..=n)
+        .map(|k| {
+            let kf = Float::with_val(prec, k as u64);
+            let one = Float::with_val(prec, 1u32);
+            let ln_k = Float::with_val(prec, kf.clone().ln());
+            let numer = ln_k + one - &gamma;
+            Float::with_val(prec, numer / kf)
+        })
+        .collect()
 }
 
 /// Build Gram matrix in MPFR with rayon parallelism.
 fn build_gram_matrix_mpfr(n: usize, prec: u32) -> Vec<Vec<Float>> {
     let t0 = Instant::now();
-    let pairs: Vec<(usize, usize)> = (0..n)
-        .flat_map(|i| (i..n).map(move |j| (i, j)))
-        .collect();
+    let pairs: Vec<(usize, usize)> = (0..n).flat_map(|i| (i..n).map(move |j| (i, j))).collect();
     let total = pairs.len();
     let computed = AtomicUsize::new(0);
     let threads = rayon::current_num_threads();
@@ -111,7 +109,9 @@ fn build_gram_matrix_mpfr(n: usize, prec: u32) -> Vec<Vec<Float>> {
             if c % 500 == 0 || c == total {
                 eprint!(
                     "\r    G: [{:5.1}%] {}/{}   ",
-                    c as f64 / total as f64 * 100.0, c, total
+                    c as f64 / total as f64 * 100.0,
+                    c,
+                    total
                 );
             }
             (i, j, val)
@@ -130,7 +130,10 @@ fn build_gram_matrix_mpfr(n: usize, prec: u32) -> Vec<Vec<Float>> {
 
     eprintln!(
         "\r    G: Done in {:.1}s ({} entries, {} cores, {}-bit)              ",
-        t0.elapsed().as_secs_f64(), total, threads, prec
+        t0.elapsed().as_secs_f64(),
+        total,
+        threads,
+        prec
     );
     g
 }
@@ -216,11 +219,15 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
     let t0 = Instant::now();
     let b = build_mean_vector_mpfr(n, prec);
     let g = build_gram_matrix_mpfr(n, prec);
-    eprintln!("    Gram + mean built in {:.1}s", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "    Gram + mean built in {:.1}s",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Build C = G - bbᵀ in MPFR (avoids catastrophic cancellation)
     let t0 = Instant::now();
-    let mut c: Vec<Vec<Float>> = g.iter()
+    let mut c: Vec<Vec<Float>> = g
+        .iter()
         .map(|row| row.iter().map(|x| Float::with_val(prec, x)).collect())
         .collect();
     for i in 0..n {
@@ -229,7 +236,10 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
             c[i][j] -= bb;
         }
     }
-    eprintln!("    C = G - bbᵀ built in {:.1}s", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "    C = G - bbᵀ built in {:.1}s",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Solve bᵀG⁻¹b
     let t0 = Instant::now();
@@ -241,7 +251,8 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
         let prec2 = 256u32;
         let b2 = build_mean_vector_mpfr(n, prec2);
         let g2 = build_gram_matrix_mpfr(n, prec2);
-        let mut c2: Vec<Vec<Float>> = g2.iter()
+        let mut c2: Vec<Vec<Float>> = g2
+            .iter()
             .map(|row| row.iter().map(|x| Float::with_val(prec2, x)).collect())
             .collect();
         for i in 0..n {
@@ -258,7 +269,11 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
         let cinv = quadratic_form_mpfr(&c, &b, prec).unwrap_or(f64::NAN);
         (ginv, cinv, prec)
     };
-    eprintln!("    Cholesky solve ({}-bit) in {:.1}s", used_prec, t0.elapsed().as_secs_f64());
+    eprintln!(
+        "    Cholesky solve ({}-bit) in {:.1}s",
+        used_prec,
+        t0.elapsed().as_secs_f64()
+    );
 
     let d2_n = 1.0 - bt_ginv_b;
     let ln_n = (n as f64).ln();
@@ -273,7 +288,7 @@ pub fn analyze_f64(n: usize, _g_f64: &[Vec<f64>], _b_f64: &[f64]) -> BDResult {
         x_val,
         x_over_ln_n,
         bd_predicted,
-        lambda_min_g: 0.0,  // Skip eigenvalue bounds for speed
+        lambda_min_g: 0.0, // Skip eigenvalue bounds for speed
         lambda_max_g: 0.0,
         cond_g: f64::INFINITY,
         lambda_min_c: 0.0,

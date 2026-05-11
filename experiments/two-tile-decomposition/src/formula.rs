@@ -2,11 +2,11 @@
 //!  Vasyunin closed-form formula and special function evaluation
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
 use crate::PREC;
 use crate::compute::{fp, fu};
 use cathedral_utils::arith::gcd;
 use cathedral_utils::constants;
+use rug::Float;
 
 // ─────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -31,7 +31,9 @@ pub fn stirling_const() -> Float {
 ///
 /// For a=1, V = 0 (empty sum).
 fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return Float::with_val(PREC, 0); }
+    if a <= 1 {
+        return Float::with_val(PREC, 0);
+    }
     let af = fu(a);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
     let mut sum = Float::with_val(PREC, 0);
@@ -41,7 +43,9 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(PREC, &pi * Float::with_val(PREC, m as u64) / &af);
         let cos_val = Float::with_val(PREC, angle.clone().cos());
         let sin_val = Float::with_val(PREC, angle.sin());
-        if sin_val.is_zero() { continue; }
+        if sin_val.is_zero() {
+            continue;
+        }
         let cot_val = Float::with_val(PREC, &cos_val / &sin_val);
         sum += Float::with_val(PREC, &frac * &cot_val);
     }
@@ -74,8 +78,10 @@ pub fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
 
     // Term 1: (log(2π)-γ)/2 · (1/a + 1/b)
     let half_coeff = Float::with_val(PREC, Float::with_val(PREC, &l2p - &gamma) / fu(2));
-    let inv_sum = Float::with_val(PREC,
-        Float::with_val(PREC, fp(1) / &af) + Float::with_val(PREC, fp(1) / &bf));
+    let inv_sum = Float::with_val(
+        PREC,
+        Float::with_val(PREC, fp(1) / &af) + Float::with_val(PREC, fp(1) / &bf),
+    );
     let term1 = Float::with_val(PREC, &half_coeff * &inv_sum);
 
     // Term 2: (a-b)/(2ab) · ln(b/a)

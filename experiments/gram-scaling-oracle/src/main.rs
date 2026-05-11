@@ -41,7 +41,6 @@ const MAX_EIGEN_DIM: usize = 5_000;
 /// Must have cached matrices available.
 const CROSS_N_SCHEDULE: &[usize] = &[100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000];
 
-
 #[allow(dead_code)]
 /// Try to load a cached Gram matrix. Returns (data, dim).
 fn load_cached_gram(max_n: usize) -> Option<(Vec<f64>, usize)> {
@@ -82,7 +81,10 @@ fn get_gram(max_n: usize) -> (Vec<f64>, usize) {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let max_n: usize = args.get(1).and_then(|s| s.parse().ok()).unwrap_or(200);
-    let max_eigen_dim: usize = args.get(2).and_then(|s| s.parse().ok()).unwrap_or(MAX_EIGEN_DIM);
+    let max_eigen_dim: usize = args
+        .get(2)
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(MAX_EIGEN_DIM);
 
     println!();
     println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
@@ -104,7 +106,8 @@ fn main() {
     println!("  {BOLD}{MAGENTA}§1{RESET}  {BOLD}Cross-N Sweep — True Global λ_min(G_N) ...{RESET}");
 
     // Determine which N values to sweep (up to our target N)
-    let sweep_ns: Vec<usize> = CROSS_N_SCHEDULE.iter()
+    let sweep_ns: Vec<usize> = CROSS_N_SCHEDULE
+        .iter()
         .filter(|&&n| n <= max_n)
         .cloned()
         .collect();
@@ -144,11 +147,15 @@ fn main() {
 
     let (_, alpha_power, r2_power) = if cross_ns.len() >= 3 {
         cathedral_utils::fitting::power_law_fit(&cross_ns, &cross_lmins)
-    } else { (0.0, 0.0, 0.0) };
+    } else {
+        (0.0, 0.0, 0.0)
+    };
 
     let (_, alpha_log, r2_log) = if cross_ns.len() >= 3 {
         cathedral_utils::fitting::log_decay_fit(&cross_ns, &cross_lmins)
-    } else { (0.0, 0.0, 0.0) };
+    } else {
+        (0.0, 0.0, 0.0)
+    };
 
     println!("    Power law:  λ_min(G_N) ~ c · N^(-{alpha_power:.4})   R² = {r2_power:.6}");
     println!("    Log decay:  λ_min(G_N) ~ c / (ln N)^{alpha_log:.4}    R² = {r2_log:.6}");
@@ -167,16 +174,28 @@ fn main() {
     let t0 = Instant::now();
     let (data, dim) = get_gram(max_n);
     let mem_gb = (data.len() * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
-    println!("  {DIM}     {dim}×{dim} ({mem_gb:.2} GB) in {:.2}s{RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "  {DIM}     {dim}×{dim} ({mem_gb:.2} GB) in {:.2}s{RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 
     let t0 = Instant::now();
     let decomp = gcd_decomp::decompose(max_n);
-    println!("  {DIM}     {}/{} GCD classes in {:.2}s{RESET}",
-             decomp.classes.len(), max_n, t0.elapsed().as_secs_f64());
+    println!(
+        "  {DIM}     {}/{} GCD classes in {:.2}s{RESET}",
+        decomp.classes.len(),
+        max_n,
+        t0.elapsed().as_secs_f64()
+    );
 
-    let eigen_eligible: usize = decomp.classes.values()
+    let eigen_eligible: usize = decomp
+        .classes
+        .values()
         .filter(|indices| {
-            let valid = indices.iter().filter(|&&j| j >= 2 && j <= max_n && (j-2) < dim).count();
+            let valid = indices
+                .iter()
+                .filter(|&&j| j >= 2 && j <= max_n && (j - 2) < dim)
+                .count();
             valid >= 2 && valid <= max_eigen_dim
         })
         .count();
@@ -186,11 +205,17 @@ fn main() {
     // ═══════════════════════════════════════════════════════════════
     // §3. BLOCK SPECTRAL ANALYSIS
     // ═══════════════════════════════════════════════════════════════
-    println!("  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Block Spectral Analysis (hybrid parallel) ...{RESET}");
+    println!(
+        "  {BOLD}{MAGENTA}§3{RESET}  {BOLD}Block Spectral Analysis (hybrid parallel) ...{RESET}"
+    );
     let t0 = Instant::now();
-    let block_results = block_spectrum::analyze_blocks_raw(&data, dim, &decomp, max_n, max_eigen_dim);
-    println!("  {DIM}     Analyzed {} blocks in {:.2}s{RESET}",
-             block_results.len(), t0.elapsed().as_secs_f64());
+    let block_results =
+        block_spectrum::analyze_blocks_raw(&data, dim, &decomp, max_n, max_eigen_dim);
+    println!(
+        "  {DIM}     Analyzed {} blocks in {:.2}s{RESET}",
+        block_results.len(),
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 
     // Display top blocks
@@ -199,7 +224,11 @@ fn main() {
     println!("  {DIM}  │ gcd  │ dim  │   λ_min      │   λ_max      │  condition   │{RESET}");
     println!("  {DIM}  ├──────┼──────┼──────────────┼──────────────┼──────────────┤{RESET}");
     for br in block_results.iter().take(20) {
-        let cond = if br.lambda_min > 1e-15 { br.lambda_max / br.lambda_min } else { f64::INFINITY };
+        let cond = if br.lambda_min > 1e-15 {
+            br.lambda_max / br.lambda_min
+        } else {
+            f64::INFINITY
+        };
         println!("  {DIM}  │{RESET} {:<4} {DIM}│{RESET} {:<4} {DIM}│{RESET} {:>12.6e} {DIM}│{RESET} {:>12.6e} {DIM}│{RESET} {:>12.2e} {DIM}│{RESET}",
                  br.gcd_class, br.dim, br.lambda_min, br.lambda_max, cond);
     }
@@ -219,12 +248,19 @@ fn main() {
     // §5. MASTER RESULTS
     // ═══════════════════════════════════════════════════════════════
     println!();
-    println!("  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ┌───────────────────────────────────────────────────────────────┐{RESET}"
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}{WHITE}SCALING ORACLE — MASTER RESULTS{RESET}                             {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  ├───────────────────────────────────────────────────────────────┤{RESET}"
+    );
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}CROSS-N SCALING (TRUE GLOBAL):{RESET}                              {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  │{RESET}    N range:         {:?}{:<20}{BOLD}{CYAN}│{RESET}",
-             *sweep_ns.first().unwrap_or(&0), format!("..{}", sweep_ns.last().unwrap_or(&0)));
+    println!(
+        "  {BOLD}{CYAN}  │{RESET}    N range:         {:?}{:<20}{BOLD}{CYAN}│{RESET}",
+        *sweep_ns.first().unwrap_or(&0),
+        format!("..{}", sweep_ns.last().unwrap_or(&0))
+    );
     println!("  {BOLD}{CYAN}  │{RESET}    {BOLD}{YELLOW}α (power law):   {alpha_power:<12.6}{RESET}  R² = {r2_power:.6}          {BOLD}{CYAN}│{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}    {BOLD}{YELLOW}α (log decay):   {alpha_log:<12.6}{RESET}  R² = {r2_log:.6}          {BOLD}{CYAN}│{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}                                                            {BOLD}{CYAN}│{RESET}");
@@ -236,7 +272,9 @@ fn main() {
              alpha_results.alpha_log, alpha_results.r2_log);
     println!("  {BOLD}{CYAN}  │{RESET}                                                            {BOLD}{CYAN}│{RESET}");
     println!("  {BOLD}{CYAN}  │{RESET}  {BOLD}TARGET:{RESET} α ≈ 0.855 (Three-Circles / Parseval Mirror)        {BOLD}{CYAN}│{RESET}");
-    println!("  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}");
+    println!(
+        "  {BOLD}{CYAN}  └───────────────────────────────────────────────────────────────┘{RESET}"
+    );
     println!();
 
     // Cross-N data table
@@ -258,7 +296,14 @@ fn main() {
     certificate::write_all(max_n, &decomp, &block_results, &alpha_results);
 
     // Write cross-N data
-    certificate::write_cross_n(max_n, &cross_n_data, alpha_power, r2_power, alpha_log, r2_log);
+    certificate::write_cross_n(
+        max_n,
+        &cross_n_data,
+        alpha_power,
+        r2_power,
+        alpha_log,
+        r2_log,
+    );
 
     let elapsed = t_total.elapsed().as_secs_f64();
     println!();

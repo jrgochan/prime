@@ -27,26 +27,31 @@ use std::time::Instant;
 
 struct SieveResult {
     n: usize,
-    is_prime: Vec<bool>,       // is_prime[k] for k = 0..=n
-    smallest_pf: Vec<u32>,     // smallest prime factor
-    num_divisors: Vec<u32>,    // d(k) = number of divisors
-    divisor_sum: Vec<u64>,     // σ(k) = sum of divisors
-    omega: Vec<u8>,            // ω(k) = distinct prime factors
-    big_omega: Vec<u8>,        // Ω(k) = total prime factors with multiplicity
+    is_prime: Vec<bool>,    // is_prime[k] for k = 0..=n
+    smallest_pf: Vec<u32>,  // smallest prime factor
+    num_divisors: Vec<u32>, // d(k) = number of divisors
+    divisor_sum: Vec<u64>,  // σ(k) = sum of divisors
+    omega: Vec<u8>,         // ω(k) = distinct prime factors
+    big_omega: Vec<u8>,     // Ω(k) = total prime factors with multiplicity
 }
 
 fn arithmetic_sieve(n: usize) -> SieveResult {
     let t0 = Instant::now();
 
     // ── Phase 0: Allocate arrays ──
-    eprintln!("  {DIM}  Allocating {:.1} GB...{RESET}",
-        (n + 1) as f64 * (1 + 4 + 8 + 1 + 1) as f64 / 1e9);
+    eprintln!(
+        "  {DIM}  Allocating {:.1} GB...{RESET}",
+        (n + 1) as f64 * (1 + 4 + 8 + 1 + 1) as f64 / 1e9
+    );
     let mut is_prime = vec![true; n + 1];
     let mut num_divisors = vec![0u32; n + 1];
     let mut divisor_sum = vec![0u64; n + 1];
     let mut omega = vec![0u8; n + 1];
     let mut big_omega = vec![0u8; n + 1];
-    eprintln!("  {DIM}  Allocated ({:.1}s){RESET}", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  {DIM}  Allocated ({:.1}s){RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 
     is_prime[0] = false;
     is_prime[1] = false;
@@ -58,7 +63,9 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
     let sqrt_n = (n as f64).sqrt() as usize + 1;
 
     for p in 2..=n {
-        if !is_prime[p] { continue; }
+        if !is_prime[p] {
+            continue;
+        }
 
         // p is prime: set its own ω and Ω
         omega[p] = 1;
@@ -84,9 +91,13 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
         let mut pk = p; // p^1, p^2, p^3, ...
         loop {
             // Check overflow before multiplication
-            if pk > n / p { break; } // pk * p would overflow or exceed n
+            if pk > n / p {
+                break;
+            } // pk * p would overflow or exceed n
             let next_pk = pk * p;
-            if next_pk > n { break; }
+            if next_pk > n {
+                break;
+            }
             pk = next_pk;
             let mut j = pk;
             while j <= n {
@@ -96,8 +107,12 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
         }
 
         if p % 10_000_000 == 1 && p > 1 {
-            eprint!("\r  {DIM}  Phase 1: p = {} ({:.0}%) {:.1}s{RESET}    ",
-                p, 100.0 * p as f64 / n as f64, t0.elapsed().as_secs_f64());
+            eprint!(
+                "\r  {DIM}  Phase 1: p = {} ({:.0}%) {:.1}s{RESET}    ",
+                p,
+                100.0 * p as f64 / n as f64,
+                t0.elapsed().as_secs_f64()
+            );
         }
     }
 
@@ -112,7 +127,10 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
         big_omega[k] += omega[k];
     }
 
-    eprintln!("\r  {DIM}  Phase 1 done ({:.1}s){RESET}                    ", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "\r  {DIM}  Phase 1 done ({:.1}s){RESET}                    ",
+        t0.elapsed().as_secs_f64()
+    );
 
     // ── Phase 2: Divisor sieve for d(k) and σ(k) ──
     // This is O(N log N) — the slowest phase at ~21B ops for N=1B.
@@ -131,16 +149,27 @@ fn arithmetic_sieve(n: usize) -> SieveResult {
             let frac = d as f64 / n as f64;
             let elapsed = phase2_start.elapsed().as_secs_f64();
             let eta = elapsed / frac * (1.0 - frac);
-            eprint!("\r  {DIM}  Phase 2: d = {} ({:.0}%) ETA {:.0}s{RESET}    ",
-                d, frac * 100.0, eta);
+            eprint!(
+                "\r  {DIM}  Phase 2: d = {} ({:.0}%) ETA {:.0}s{RESET}    ",
+                d,
+                frac * 100.0,
+                eta
+            );
         }
     }
-    eprintln!("\r  {DIM}  Phase 2 done ({:.1}s){RESET}                        ", t0.elapsed().as_secs_f64());
+    eprintln!(
+        "\r  {DIM}  Phase 2 done ({:.1}s){RESET}                        ",
+        t0.elapsed().as_secs_f64()
+    );
 
     SieveResult {
-        n, is_prime,
+        n,
+        is_prime,
         smallest_pf: Vec::new(), // not needed at large N
-        num_divisors, divisor_sum, omega, big_omega,
+        num_divisors,
+        divisor_sum,
+        omega,
+        big_omega,
     }
 }
 
@@ -167,19 +196,29 @@ fn find_highly_composite(sieve: &SieveResult) -> Vec<usize> {
 fn analyze(n: usize) {
     let t0 = Instant::now();
 
-    println!("\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
+    println!(
+        "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}PARTICLE SIEVE · N = {n}{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}Computing arithmetic functions via sieve...{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     let sieve = arithmetic_sieve(n);
-    println!("  {DIM}Sieve complete ({:.2}s){RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "  {DIM}Sieve complete ({:.2}s){RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Count primes
     let prime_count = (2..=n).filter(|&k| sieve.is_prime[k]).count();
     let composite_count = n - 1 - prime_count;
 
-    println!("  {DIM}Primes ≤ {n}: {prime_count} ({:.2}%){RESET}", 100.0 * prime_count as f64 / (n - 1) as f64);
+    println!(
+        "  {DIM}Primes ≤ {n}: {prime_count} ({:.2}%){RESET}",
+        100.0 * prime_count as f64 / (n - 1) as f64
+    );
 
     // Find highly composite numbers
     let hc = find_highly_composite(&sieve);
@@ -202,9 +241,14 @@ fn analyze(n: usize) {
     for w in 0..=max_omega {
         if omega_counts[w] > 0 {
             let comps = omega_counts[w] - omega_prime_counts[w];
-            println!("  {:<2} │ {:<8} │ {:<8} │ {:<10} │ {:.2}%",
-                w, omega_counts[w], omega_prime_counts[w], comps,
-                100.0 * omega_counts[w] as f64 / (n - 1) as f64);
+            println!(
+                "  {:<2} │ {:<8} │ {:<8} │ {:<10} │ {:.2}%",
+                w,
+                omega_counts[w],
+                omega_prime_counts[w],
+                comps,
+                100.0 * omega_counts[w] as f64 / (n - 1) as f64
+            );
         }
     }
 
@@ -225,7 +269,10 @@ fn analyze(n: usize) {
             _ => "higher gen",
         };
         println!("  {YELLOW}Generation {generation}{RESET}: ω={generation} composites → {name}");
-        println!("    Count: {}", omega_counts[generation] - omega_prime_counts[generation]);
+        println!(
+            "    Count: {}",
+            omega_counts[generation] - omega_prime_counts[generation]
+        );
     }
 
     // ─── HIGHLY COMPOSITE ANALYSIS ───
@@ -233,9 +280,16 @@ fn analyze(n: usize) {
     println!("  {DIM}rank │ k       │ d(k)  │ σ(k)    │ ω  │ Ω  │ factors{RESET}");
     println!("  {DIM}─────┼─────────┼───────┼─────────┼────┼────┼────────{RESET}");
     for (i, &k) in hc.iter().rev().take(30).enumerate() {
-        println!("  {:<4} │ {:<7} │ {:<5} │ {:<7} │ {:<2} │ {:<2} │ {}",
-            i + 1, k, sieve.num_divisors[k], sieve.divisor_sum[k],
-            sieve.omega[k], sieve.big_omega[k], factorize(k));
+        println!(
+            "  {:<4} │ {:<7} │ {:<5} │ {:<7} │ {:<2} │ {:<2} │ {}",
+            i + 1,
+            k,
+            sieve.num_divisors[k],
+            sieve.divisor_sum[k],
+            sieve.omega[k],
+            sieve.big_omega[k],
+            factorize(k)
+        );
     }
 
     // ─── SUPERABUNDANT NUMBERS ───
@@ -254,9 +308,15 @@ fn analyze(n: usize) {
     println!("  {DIM}rank │ k       │ σ(k)/k  │ d(k)  │ ω  │ factors{RESET}");
     println!("  {DIM}─────┼─────────┼─────────┼───────┼────┼────────{RESET}");
     for (i, &k) in superabundant.iter().rev().take(20).enumerate() {
-        println!("  {:<4} │ {:<7} │ {:<7.4} │ {:<5} │ {:<2} │ {}",
-            i + 1, k, sieve.divisor_sum[k] as f64 / k as f64,
-            sieve.num_divisors[k], sieve.omega[k], factorize(k));
+        println!(
+            "  {:<4} │ {:<7} │ {:<7.4} │ {:<5} │ {:<2} │ {}",
+            i + 1,
+            k,
+            sieve.divisor_sum[k] as f64 / k as f64,
+            sieve.num_divisors[k],
+            sieve.omega[k],
+            factorize(k)
+        );
     }
 
     // ─── PARTICLE FAMILY ANALYSIS ───
@@ -272,9 +332,15 @@ fn analyze(n: usize) {
             .map(|m| sieve.omega[m * base])
             .max()
             .unwrap_or(omega_min);
-        println!("  {:<4} │ {:<7} │ {:<13} │ {}-{}     │ {}",
-            base, sieve.num_divisors[base], mult_count,
-            omega_min, omega_max, factorize(base));
+        println!(
+            "  {:<4} │ {:<7} │ {:<13} │ {}-{}     │ {}",
+            base,
+            sieve.num_divisors[base],
+            mult_count,
+            omega_min,
+            omega_max,
+            factorize(base)
+        );
     }
 
     // ─── PRIME GAPS NEAR HC NUMBERS ───
@@ -283,14 +349,25 @@ fn analyze(n: usize) {
     for &hc_k in hc.iter().rev().take(10) {
         // Find nearest prime below and above
         let mut p_below = hc_k - 1;
-        while p_below > 1 && !sieve.is_prime[p_below] { p_below -= 1; }
+        while p_below > 1 && !sieve.is_prime[p_below] {
+            p_below -= 1;
+        }
         let mut p_above = hc_k + 1;
-        while p_above <= n && !sieve.is_prime[p_above] { p_above += 1; }
+        while p_above <= n && !sieve.is_prime[p_above] {
+            p_above += 1;
+        }
         let gap_below = hc_k - p_below;
         let gap_above = if p_above <= n { p_above - hc_k } else { 0 };
-        println!("  HC={:<7} d={:<4}  nearest primes: {:<7}(gap={}) and {:<7}(gap={})  {}",
-            hc_k, sieve.num_divisors[hc_k],
-            p_below, gap_below, p_above, gap_above, factorize(hc_k));
+        println!(
+            "  HC={:<7} d={:<4}  nearest primes: {:<7}(gap={}) and {:<7}(gap={})  {}",
+            hc_k,
+            sieve.num_divisors[hc_k],
+            p_below,
+            gap_below,
+            p_above,
+            gap_above,
+            factorize(hc_k)
+        );
     }
 
     // ─── OUTPUT FILES ───
@@ -301,12 +378,25 @@ fn analyze(n: usize) {
     let hc_path = results_dir.join(format!("highly_composite_N{n}.tsv"));
     if let Ok(mut f) = std::fs::File::create(&hc_path) {
         use std::io::Write;
-        writeln!(f, "rank\tk\td(k)\tsigma(k)\tsigma_over_k\tomega\tOmega\tfactors").ok();
+        writeln!(
+            f,
+            "rank\tk\td(k)\tsigma(k)\tsigma_over_k\tomega\tOmega\tfactors"
+        )
+        .ok();
         for (i, &k) in hc.iter().enumerate() {
-            writeln!(f, "{}\t{}\t{}\t{}\t{:.6}\t{}\t{}\t{}",
-                i + 1, k, sieve.num_divisors[k], sieve.divisor_sum[k],
+            writeln!(
+                f,
+                "{}\t{}\t{}\t{}\t{:.6}\t{}\t{}\t{}",
+                i + 1,
+                k,
+                sieve.num_divisors[k],
+                sieve.divisor_sum[k],
                 sieve.divisor_sum[k] as f64 / k as f64,
-                sieve.omega[k], sieve.big_omega[k], factorize(k)).ok();
+                sieve.omega[k],
+                sieve.big_omega[k],
+                factorize(k)
+            )
+            .ok();
         }
         println!("\n  {GREEN}✓ Wrote {hc_path:?}{RESET}");
     }
@@ -318,10 +408,16 @@ fn analyze(n: usize) {
         writeln!(f, "omega\tcount\tprimes\tcomposites\tpercent").ok();
         for w in 0..=max_omega {
             if omega_counts[w] > 0 {
-                writeln!(f, "{}\t{}\t{}\t{}\t{:.4}",
-                    w, omega_counts[w], omega_prime_counts[w],
+                writeln!(
+                    f,
+                    "{}\t{}\t{}\t{}\t{:.4}",
+                    w,
+                    omega_counts[w],
+                    omega_prime_counts[w],
                     omega_counts[w] - omega_prime_counts[w],
-                    100.0 * omega_counts[w] as f64 / (n - 1) as f64).ok();
+                    100.0 * omega_counts[w] as f64 / (n - 1) as f64
+                )
+                .ok();
             }
         }
         println!("  {GREEN}✓ Wrote {omega_path:?}{RESET}");
@@ -332,7 +428,9 @@ fn analyze(n: usize) {
     if let Ok(mut f) = std::fs::File::create(&json_path) {
         use std::io::Write;
         let top_hc = hc.last().copied().unwrap_or(0);
-        write!(f, r#"{{
+        write!(
+            f,
+            r#"{{
   "experiment": "particle-sieve",
   "N": {n},
   "prime_count": {prime_count},
@@ -359,27 +457,39 @@ fn analyze(n: usize) {
             sieve.divisor_sum[top_hc],
             sieve.omega[top_hc],
             factorize(top_hc),
-            omega_counts.iter().enumerate()
+            omega_counts
+                .iter()
+                .enumerate()
                 .filter(|(_, c)| **c > 0)
                 .map(|(w, c)| format!("{{\"omega\": {w}, \"count\": {c}}}"))
-                .collect::<Vec<_>>().join(", "),
+                .collect::<Vec<_>>()
+                .join(", "),
             t0.elapsed().as_secs_f64(),
-        ).ok();
+        )
+        .ok();
         println!("  {GREEN}✓ Wrote {json_path:?}{RESET}");
     }
 
-    println!("\n  {DIM}Total time: {:.2}s{RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "\n  {DIM}Total time: {:.2}s{RESET}",
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 }
 
 fn factorize(mut n: usize) -> String {
-    if n <= 1 { return n.to_string(); }
+    if n <= 1 {
+        return n.to_string();
+    }
     let mut factors = Vec::new();
     let mut p = 2;
     while p * p <= n {
         if n % p == 0 {
             let mut exp = 0;
-            while n % p == 0 { n /= p; exp += 1; }
+            while n % p == 0 {
+                n /= p;
+                exp += 1;
+            }
             if exp == 1 {
                 factors.push(format!("{p}"));
             } else {
@@ -388,27 +498,37 @@ fn factorize(mut n: usize) -> String {
         }
         p += 1;
     }
-    if n > 1 { factors.push(format!("{n}")); }
+    if n > 1 {
+        factors.push(format!("{n}"));
+    }
     factors.join("·")
 }
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let max_n: usize = args.get(1)
+    let max_n: usize = args
+        .get(1)
         .and_then(|s| s.parse().ok())
         .unwrap_or(1_000_000);
 
     let t0 = Instant::now();
     let threads = rayon::current_num_threads();
 
-    println!("\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
+    println!(
+        "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL PARTICLE SIEVE{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}Arithmetic classification · N = {max_n}{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}{threads} threads{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     analyze(max_n);
 
-    println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.2}s{RESET} ({threads} threads)", t0.elapsed().as_secs_f64());
+    println!(
+        "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.2}s{RESET} ({threads} threads)",
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 }

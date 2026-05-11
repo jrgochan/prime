@@ -47,11 +47,15 @@ fn jacobi_eigenvalues_cyclic(mat: &[Vec<f64>], max_sweeps: usize, tol: f64) -> V
                 max_off = max_off.max(a[i][j].abs());
             }
         }
-        if max_off < tol { break; }
+        if max_off < tol {
+            break;
+        }
 
         for p in 0..n {
             for q in (p + 1)..n {
-                if a[p][q].abs() < tol * 0.01 { continue; }
+                if a[p][q].abs() < tol * 0.01 {
+                    continue;
+                }
 
                 let app = a[p][p];
                 let aqq = a[q][q];
@@ -97,19 +101,22 @@ fn jacobi_eigenvalues_cyclic(mat: &[Vec<f64>], max_sweeps: usize, tol: f64) -> V
 /// Local unfolding using cumulative staircase with Gaussian smoothing
 fn unfold_local(eigenvalues: &[f64], sigma_frac: f64) -> Vec<f64> {
     let n = eigenvalues.len();
-    let range = eigenvalues[n-1] - eigenvalues[0];
+    let range = eigenvalues[n - 1] - eigenvalues[0];
     let sigma = range * sigma_frac; // smoothing bandwidth
 
-    let unfolded: Vec<f64> = eigenvalues.iter().map(|&e| {
-        // Smoothed staircase: N̄(E) = Σ_i Φ((E - E_i)/σ) where Φ is the normal CDF
-        let mut count = 0.0;
-        for &ei in eigenvalues {
-            let z = (e - ei) / sigma;
-            // Approximate normal CDF
-            count += 0.5 * (1.0 + erf_approx(z / std::f64::consts::SQRT_2));
-        }
-        count
-    }).collect();
+    let unfolded: Vec<f64> = eigenvalues
+        .iter()
+        .map(|&e| {
+            // Smoothed staircase: N̄(E) = Σ_i Φ((E - E_i)/σ) where Φ is the normal CDF
+            let mut count = 0.0;
+            for &ei in eigenvalues {
+                let z = (e - ei) / sigma;
+                // Approximate normal CDF
+                count += 0.5 * (1.0 + erf_approx(z / std::f64::consts::SQRT_2));
+            }
+            count
+        })
+        .collect();
 
     unfolded
 }
@@ -120,7 +127,9 @@ fn erf_approx(x: f64) -> f64 {
     let sign = if x >= 0.0 { 1.0 } else { -1.0 };
     let x = x.abs();
     let t = 1.0 / (1.0 + 0.3275911 * x);
-    let poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    let poly = t
+        * (0.254829592
+            + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
     sign * (1.0 - poly * (-x * x).exp())
 }
 
@@ -128,7 +137,9 @@ fn erf_approx(x: f64) -> f64 {
 /// Simplest unfolding: ξ_i = N(E_i) where N is interpolated staircase
 fn unfold_ecdf(eigenvalues: &[f64]) -> Vec<f64> {
     let n = eigenvalues.len() as f64;
-    eigenvalues.iter().enumerate()
+    eigenvalues
+        .iter()
+        .enumerate()
         .map(|(i, _)| (i as f64 + 0.5) / n * n)
         .collect()
 }
@@ -145,7 +156,9 @@ fn unfold_ecdf(eigenvalues: &[f64]) -> Vec<f64> {
 /// Poisson: <r> ≈ 0.3863
 fn compute_ratios(eigenvalues: &[f64]) -> Vec<f64> {
     let n = eigenvalues.len();
-    if n < 3 { return vec![]; }
+    if n < 3 {
+        return vec![];
+    }
 
     let mut ratios = Vec::with_capacity(n - 2);
     for i in 0..(n - 2) {
@@ -192,13 +205,17 @@ fn wigner_gse(s: f64) -> f64 {
     coeff * s.powi(4) * (-64.0 * s * s / (9.0 * PI)).exp()
 }
 
-fn poisson_pdf(s: f64) -> f64 { (-s).exp() }
+fn poisson_pdf(s: f64) -> f64 {
+    (-s).exp()
+}
 
 fn cdf_gue(s: f64) -> f64 {
     let n = 1000;
     let ds = s / n as f64;
     let mut v = 0.0;
-    for i in 0..n { v += wigner_gue((i as f64 + 0.5) * ds) * ds; }
+    for i in 0..n {
+        v += wigner_gue((i as f64 + 0.5) * ds) * ds;
+    }
     v.min(1.0)
 }
 
@@ -206,17 +223,23 @@ fn cdf_goe(s: f64) -> f64 {
     let n = 1000;
     let ds = s / n as f64;
     let mut v = 0.0;
-    for i in 0..n { v += wigner_goe((i as f64 + 0.5) * ds) * ds; }
+    for i in 0..n {
+        v += wigner_goe((i as f64 + 0.5) * ds) * ds;
+    }
     v.min(1.0)
 }
 
-fn cdf_poisson(s: f64) -> f64 { 1.0 - (-s).exp() }
+fn cdf_poisson(s: f64) -> f64 {
+    1.0 - (-s).exp()
+}
 
 fn cdf_gse(s: f64) -> f64 {
     let n = 1000;
     let ds = s / n as f64;
     let mut v = 0.0;
-    for i in 0..n { v += wigner_gse((i as f64 + 0.5) * ds) * ds; }
+    for i in 0..n {
+        v += wigner_gse((i as f64 + 0.5) * ds) * ds;
+    }
     v.min(1.0)
 }
 
@@ -258,11 +281,16 @@ fn main() {
         // Phase 1: Compute Gram matrix
         let phase_start = std::time::Instant::now();
         print!("  [1/7] Computing Gram matrix... ");
-        let gram_upper: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|j| {
-            let mut row = vec![0.0; dim];
-            for k in j..dim { row[k] = gram_entry(j + 2, k + 2, n_pts); }
-            row
-        }).collect();
+        let gram_upper: Vec<Vec<f64>> = (0..dim)
+            .into_par_iter()
+            .map(|j| {
+                let mut row = vec![0.0; dim];
+                for k in j..dim {
+                    row[k] = gram_entry(j + 2, k + 2, n_pts);
+                }
+                row
+            })
+            .collect();
 
         let mut gram = vec![vec![0.0; dim]; dim];
         for j in 0..dim {
@@ -281,8 +309,14 @@ fn main() {
 
         println!("        λ_min = {:.10}", eigenvalues[0]);
         println!("        λ_max = {:.10}", eigenvalues[dim - 1]);
-        println!("        λ_mean = {:.10}", eigenvalues.iter().sum::<f64>() / dim as f64);
-        println!("        Dynamic range: {:.1}×", eigenvalues[dim-1] / eigenvalues[0]);
+        println!(
+            "        λ_mean = {:.10}",
+            eigenvalues.iter().sum::<f64>() / dim as f64
+        );
+        println!(
+            "        Dynamic range: {:.1}×",
+            eigenvalues[dim - 1] / eigenvalues[0]
+        );
 
         // Phase 3: RATIO DISTRIBUTION (unfolding-independent!)
         println!("\n  [3/7] RATIO DISTRIBUTION (unfolding-independent, Atas et al. 2013)\n");
@@ -301,23 +335,33 @@ fn main() {
             ("GUE (β=2)", (r_mean - 0.5996).abs()),
             ("GOE (β=1)", (r_mean - 0.5307).abs()),
             ("GSE (β=4)", (r_mean - 0.6744).abs()),
-            ("Poisson",   (r_mean - 0.3863).abs()),
+            ("Poisson", (r_mean - 0.3863).abs()),
         ];
         let mut sorted_diffs = diffs.clone();
         sorted_diffs.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
-        println!("        🏆 Closest to: {} (Δ = {:.6})", sorted_diffs[0].0, sorted_diffs[0].1);
-        println!("           2nd best:   {} (Δ = {:.6})", sorted_diffs[1].0, sorted_diffs[1].1);
+        println!(
+            "        🏆 Closest to: {} (Δ = {:.6})",
+            sorted_diffs[0].0, sorted_diffs[0].1
+        );
+        println!(
+            "           2nd best:   {} (Δ = {:.6})",
+            sorted_diffs[1].0, sorted_diffs[1].1
+        );
 
         // Ratio histogram
         let n_bins = 20;
         let mut r_hist = vec![0usize; n_bins];
         for &r in &ratios {
             let bin = (r * n_bins as f64) as usize;
-            if bin < n_bins { r_hist[bin] += 1; }
+            if bin < n_bins {
+                r_hist[bin] += 1;
+            }
         }
 
-        println!("\n        {:>6} {:>8} {:>8} {:>8} {:>8} {:>30}",
-            "r", "Data", "GUE", "GOE", "Poisson", "Distribution");
+        println!(
+            "\n        {:>6} {:>8} {:>8} {:>8} {:>8} {:>30}",
+            "r", "Data", "GUE", "GOE", "Poisson", "Distribution"
+        );
         println!("        {}", "─".repeat(80));
 
         for i in 0..n_bins {
@@ -331,8 +375,10 @@ fn main() {
             let bar_len = (data_val * 15.0) as usize;
             let bar: String = "█".repeat(bar_len.min(30));
 
-            println!("        {:6.3} {:8.4} {:8.4} {:8.4} {:8.4}  {}",
-                r, data_val, gue, goe, poi, bar);
+            println!(
+                "        {:6.3} {:8.4} {:8.4} {:8.4} {:8.4}  {}",
+                r, data_val, gue, goe, poi, bar
+            );
         }
 
         // Phase 4: BULK analysis — drop 10% from each edge
@@ -342,29 +388,44 @@ fn main() {
         let lo = (dim as f64 * edge_frac) as usize;
         let hi = dim - lo;
         let bulk = &eigenvalues[lo..hi];
-        println!("        Bulk: eigenvalues [{} .. {}] out of {}", lo, hi, dim);
-        println!("        Bulk range: [{:.6}, {:.6}]", bulk[0], bulk[bulk.len()-1]);
+        println!(
+            "        Bulk: eigenvalues [{} .. {}] out of {}",
+            lo, hi, dim
+        );
+        println!(
+            "        Bulk range: [{:.6}, {:.6}]",
+            bulk[0],
+            bulk[bulk.len() - 1]
+        );
 
         // Unfold the bulk using local KDE
         let bulk_unfolded = unfold_local(bulk, 0.05);
         let mut bulk_spacings: Vec<f64> = Vec::new();
         for i in 0..(bulk_unfolded.len() - 1) {
-            let s = bulk_unfolded[i+1] - bulk_unfolded[i];
-            if s >= 0.0 { bulk_spacings.push(s); }
+            let s = bulk_unfolded[i + 1] - bulk_unfolded[i];
+            if s >= 0.0 {
+                bulk_spacings.push(s);
+            }
         }
         // Normalize
         let mean_s: f64 = bulk_spacings.iter().sum::<f64>() / bulk_spacings.len() as f64;
         if mean_s > 1e-15 {
-            for s in bulk_spacings.iter_mut() { *s /= mean_s; }
+            for s in bulk_spacings.iter_mut() {
+                *s /= mean_s;
+            }
         }
 
         let bulk_ratios = compute_ratios(bulk);
         let bulk_r_mean: f64 = if !bulk_ratios.is_empty() {
             bulk_ratios.iter().sum::<f64>() / bulk_ratios.len() as f64
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
-        println!("        Bulk ⟨r⟩ = {:.6} (GUE: 0.5996, GOE: 0.5307, Poisson: 0.3863)",
-            bulk_r_mean);
+        println!(
+            "        Bulk ⟨r⟩ = {:.6} (GUE: 0.5996, GOE: 0.5307, Poisson: 0.3863)",
+            bulk_r_mean
+        );
 
         // KS tests on bulk spacings
         let d_gue = ks_test(&bulk_spacings, cdf_gue);
@@ -375,16 +436,33 @@ fn main() {
         let d_crit = 1.36 / n_eff.sqrt();
 
         println!("\n        Bulk NNSD KS tests (D_crit = {:.4}):", d_crit);
-        println!("          GUE:     D = {:.6} {}", d_gue, if d_gue < d_crit {"✅"} else {"❌"});
-        println!("          GOE:     D = {:.6} {}", d_goe, if d_goe < d_crit {"✅"} else {"❌"});
-        println!("          GSE:     D = {:.6} {}", d_gse, if d_gse < d_crit {"✅"} else {"❌"});
-        println!("          Poisson: D = {:.6} {}", d_poi, if d_poi < d_crit {"✅"} else {"❌"});
+        println!(
+            "          GUE:     D = {:.6} {}",
+            d_gue,
+            if d_gue < d_crit { "✅" } else { "❌" }
+        );
+        println!(
+            "          GOE:     D = {:.6} {}",
+            d_goe,
+            if d_goe < d_crit { "✅" } else { "❌" }
+        );
+        println!(
+            "          GSE:     D = {:.6} {}",
+            d_gse,
+            if d_gse < d_crit { "✅" } else { "❌" }
+        );
+        println!(
+            "          Poisson: D = {:.6} {}",
+            d_poi,
+            if d_poi < d_crit { "✅" } else { "❌" }
+        );
 
         // Phase 5: LOG-EIGENVALUE analysis
         println!("\n  [5/7] LOG-EIGENVALUE ANALYSIS\n");
         println!("        (Natural for multiplicative structure — Dyson's Brownian motion)");
 
-        let log_eigenvalues: Vec<f64> = eigenvalues.iter()
+        let log_eigenvalues: Vec<f64> = eigenvalues
+            .iter()
             .filter(|&&e| e > 0.0)
             .map(|&e| e.ln())
             .collect();
@@ -392,7 +470,9 @@ fn main() {
         let log_ratios = compute_ratios(&log_eigenvalues);
         let log_r_mean: f64 = if !log_ratios.is_empty() {
             log_ratios.iter().sum::<f64>() / log_ratios.len() as f64
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         println!("        Log-eigenvalue ⟨r⟩ = {:.6}", log_r_mean);
         println!("        GUE: 0.5996, GOE: 0.5307, GSE: 0.6744, Poisson: 0.3863");
@@ -401,24 +481,29 @@ fn main() {
             ("GUE (β=2)", (log_r_mean - 0.5996).abs()),
             ("GOE (β=1)", (log_r_mean - 0.5307).abs()),
             ("GSE (β=4)", (log_r_mean - 0.6744).abs()),
-            ("Poisson",   (log_r_mean - 0.3863).abs()),
+            ("Poisson", (log_r_mean - 0.3863).abs()),
         ];
         let mut sorted_log = log_diffs.clone();
         sorted_log.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
-        println!("        🏆 Closest to: {} (Δ = {:.6})", sorted_log[0].0, sorted_log[0].1);
+        println!(
+            "        🏆 Closest to: {} (Δ = {:.6})",
+            sorted_log[0].0, sorted_log[0].1
+        );
 
         // Phase 6: DENSITY-OF-STATES analysis
         println!("\n  [6/7] EIGENVALUE DENSITY OF STATES\n");
 
         let n_dos_bins = 30;
         let e_min = eigenvalues[0];
-        let e_max = eigenvalues[dim-1].min(eigenvalues[0] * 50.0); // cap for visualization
+        let e_max = eigenvalues[dim - 1].min(eigenvalues[0] * 50.0); // cap for visualization
         let bw = (e_max - e_min) / n_dos_bins as f64;
         let mut dos_hist = vec![0usize; n_dos_bins];
         for &e in &eigenvalues {
             if e >= e_min && e <= e_max {
                 let bin = ((e - e_min) / bw) as usize;
-                if bin < n_dos_bins { dos_hist[bin] += 1; }
+                if bin < n_dos_bins {
+                    dos_hist[bin] += 1;
+                }
             }
         }
 
@@ -437,20 +522,26 @@ fn main() {
 
         let regions = [
             ("Bottom 25%", 0, dim / 4),
-            ("Lower mid",  dim / 4, dim / 2),
-            ("Upper mid",  dim / 2, 3 * dim / 4),
-            ("Top 25%",    3 * dim / 4, dim),
+            ("Lower mid", dim / 4, dim / 2),
+            ("Upper mid", dim / 2, 3 * dim / 4),
+            ("Top 25%", 3 * dim / 4, dim),
         ];
 
-        println!("        {:>12} {:>8} {:>10} {:>10} {:>12}",
-            "Region", "Size", "⟨r⟩", "Best fit", "β estimate");
+        println!(
+            "        {:>12} {:>8} {:>10} {:>10} {:>12}",
+            "Region", "Size", "⟨r⟩", "Best fit", "β estimate"
+        );
         println!("        {}", "─".repeat(60));
 
         for (name, lo, hi) in &regions {
-            if *hi <= *lo + 3 { continue; }
+            if *hi <= *lo + 3 {
+                continue;
+            }
             let region = &eigenvalues[*lo..*hi];
             let region_ratios = compute_ratios(region);
-            if region_ratios.is_empty() { continue; }
+            if region_ratios.is_empty() {
+                continue;
+            }
 
             let rm: f64 = region_ratios.iter().sum::<f64>() / region_ratios.len() as f64;
 
@@ -460,17 +551,31 @@ fn main() {
                 ("GSE", (rm - 0.6744).abs()),
                 ("Poisson", (rm - 0.3863).abs()),
             ];
-            let best = fits.iter().min_by(|a, b| a.1.partial_cmp(&b.1).unwrap()).unwrap();
+            let best = fits
+                .iter()
+                .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+                .unwrap();
 
             // Estimate β from <r>: β ≈ (2<r> - 1)/(1 - <r>) · 1.27 (rough interpolation)
             // Better: use the inverse of the Surmise relationship
-            let beta_est = if rm < 0.4 { 0.0 }
-                else if rm < 0.54 { (rm - 0.3863) / (0.5307 - 0.3863) }
-                else if rm < 0.64 { 1.0 + (rm - 0.5307) / (0.5996 - 0.5307) }
-                else { 2.0 + 2.0 * (rm - 0.5996) / (0.6744 - 0.5996) };
+            let beta_est = if rm < 0.4 {
+                0.0
+            } else if rm < 0.54 {
+                (rm - 0.3863) / (0.5307 - 0.3863)
+            } else if rm < 0.64 {
+                1.0 + (rm - 0.5307) / (0.5996 - 0.5307)
+            } else {
+                2.0 + 2.0 * (rm - 0.5996) / (0.6744 - 0.5996)
+            };
 
-            println!("        {:>12} {:>8} {:>10.6} {:>10} {:>12.3}",
-                name, hi - lo, rm, best.0, beta_est);
+            println!(
+                "        {:>12} {:>8} {:>10.6} {:>10} {:>12.3}",
+                name,
+                hi - lo,
+                rm,
+                best.0,
+                beta_est
+            );
         }
 
         // ═══ FULL NNSD HISTOGRAM (with improved unfolding) ═══
@@ -479,12 +584,16 @@ fn main() {
         let full_unfolded = unfold_local(&eigenvalues, 0.03);
         let mut full_spacings: Vec<f64> = Vec::new();
         for i in 0..(full_unfolded.len() - 1) {
-            let s = full_unfolded[i+1] - full_unfolded[i];
-            if s >= 0.0 { full_spacings.push(s); }
+            let s = full_unfolded[i + 1] - full_unfolded[i];
+            if s >= 0.0 {
+                full_spacings.push(s);
+            }
         }
         let mean_fs: f64 = full_spacings.iter().sum::<f64>() / full_spacings.len() as f64;
         if mean_fs > 1e-15 {
-            for s in full_spacings.iter_mut() { *s /= mean_fs; }
+            for s in full_spacings.iter_mut() {
+                *s /= mean_fs;
+            }
         }
 
         let n_bins = 25;
@@ -493,11 +602,15 @@ fn main() {
         let mut histogram = vec![0usize; n_bins];
         for &s in &full_spacings {
             let bin = (s / bin_width) as usize;
-            if bin < n_bins { histogram[bin] += 1; }
+            if bin < n_bins {
+                histogram[bin] += 1;
+            }
         }
 
-        println!("  {:>6} {:>8} {:>8} {:>8} {:>8} {:>30}",
-            "s", "Data", "GUE", "GOE", "Poisson", "");
+        println!(
+            "  {:>6} {:>8} {:>8} {:>8} {:>8} {:>30}",
+            "s", "Data", "GUE", "GOE", "Poisson", ""
+        );
         println!("  {}", "─".repeat(80));
 
         for i in 0..n_bins {
@@ -512,13 +625,19 @@ fn main() {
             let gue_pos = (gue_val * (bar_max as f64) / 1.1) as usize;
 
             let mut bars = vec![' '; bar_max];
-            for c in 0..bar_len.min(bar_max) { bars[c] = '█'; }
-            if gue_pos < bar_max { bars[gue_pos] = if gue_pos < bar_len { '◆' } else { '◇' }; }
+            for c in 0..bar_len.min(bar_max) {
+                bars[c] = '█';
+            }
+            if gue_pos < bar_max {
+                bars[gue_pos] = if gue_pos < bar_len { '◆' } else { '◇' };
+            }
 
             let bar_str: String = bars.iter().collect();
 
-            println!("  {:6.2} {:8.4} {:8.4} {:8.4} {:8.4}  {}",
-                s, data_density, gue_val, goe_val, poi_val, bar_str);
+            println!(
+                "  {:6.2} {:8.4} {:8.4} {:8.4} {:8.4}  {}",
+                s, data_density, gue_val, goe_val, poi_val, bar_str
+            );
         }
 
         // KS on full locally-unfolded spacings
@@ -533,20 +652,30 @@ fn main() {
             ("GUE (β=2)", fd_gue),
             ("GOE (β=1)", fd_goe),
             ("GSE (β=4)", fd_gse),
-            ("Poisson",   fd_poi),
+            ("Poisson", fd_poi),
         ];
         ks_results.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
         for (name, d) in &ks_results {
-            println!("    {:<12} D = {:.6} {}", name,  d,
-                if *d < fd_crit {"✅"} else {"❌"});
+            println!(
+                "    {:<12} D = {:.6} {}",
+                name,
+                d,
+                if *d < fd_crit { "✅" } else { "❌" }
+            );
         }
 
         println!("\n  ═══════════════════════════════════════════════");
         println!("  SUMMARY for N = {}", max_n);
         println!("  ═══════════════════════════════════════════════");
-        println!("  Full spectrum  ⟨r⟩ = {:.6} → {}", r_mean, sorted_diffs[0].0);
+        println!(
+            "  Full spectrum  ⟨r⟩ = {:.6} → {}",
+            r_mean, sorted_diffs[0].0
+        );
         println!("  Bulk (80%)     ⟨r⟩ = {:.6}", bulk_r_mean);
-        println!("  Log-eigenvalue ⟨r⟩ = {:.6} → {}", log_r_mean, sorted_log[0].0);
+        println!(
+            "  Log-eigenvalue ⟨r⟩ = {:.6} → {}",
+            log_r_mean, sorted_log[0].0
+        );
         println!("  Best NNSD fit: {}", ks_results[0].0);
         println!();
     }
@@ -569,5 +698,8 @@ fn main() {
     println!("║                                                                ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
 
-    println!("\n  Total computation time: {:.1}s\n", total_start.elapsed().as_secs_f64());
+    println!(
+        "\n  Total computation time: {:.1}s\n",
+        total_start.elapsed().as_secs_f64()
+    );
 }

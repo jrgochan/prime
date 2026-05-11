@@ -161,7 +161,11 @@ pub fn query_entry(path: &str, jk: &str) {
     println!("  Query: G[{j}, {k}]\n");
 
     let dim = reader.dim();
-    let (r, c) = if j <= k { (j - 2, k - 2) } else { (k - 2, j - 2) };
+    let (r, c) = if j <= k {
+        (j - 2, k - 2)
+    } else {
+        (k - 2, j - 2)
+    };
     let tri_offset = r * dim - r * r.wrapping_sub(1) / 2 + (c - r);
     let byte_offset = tri_offset * 8;
     let tri_len = dim * (dim + 1) / 2;

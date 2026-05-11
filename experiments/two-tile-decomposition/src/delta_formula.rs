@@ -17,9 +17,9 @@
 //!    Δ = -(1/a)·log(a(m+1)/(a(m+1)-s)) + m·s/(a(m+1)·(a(m+1)-s))
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rug::Float;
 use crate::PREC;
-use crate::compute::{fu};
+use crate::compute::fu;
+use rug::Float;
 
 /// Compute the overshoot s = (am mod b) + a - b for row m.
 /// Returns None if the row is single-tile (s ≤ 0).
@@ -110,8 +110,10 @@ pub fn certify_delta_formula(a: usize, b: usize, max_m: usize) -> DeltaFormulaRe
 
     // Residue class accumulators
     let mut class_exact: std::collections::HashMap<usize, Float> = std::collections::HashMap::new();
-    let mut class_numerical: std::collections::HashMap<usize, Float> = std::collections::HashMap::new();
-    let mut class_max_err: std::collections::HashMap<usize, Float> = std::collections::HashMap::new();
+    let mut class_numerical: std::collections::HashMap<usize, Float> =
+        std::collections::HashMap::new();
+    let mut class_max_err: std::collections::HashMap<usize, Float> =
+        std::collections::HashMap::new();
     let mut class_count: std::collections::HashMap<usize, usize> = std::collections::HashMap::new();
 
     for m in 1..=max_m {
@@ -120,7 +122,9 @@ pub fn certify_delta_formula(a: usize, b: usize, max_m: usize) -> DeltaFormulaRe
         let n_lo = (a * (m + 1)) / b;
         let is_two_tile = n_hi != n_lo;
 
-        if !is_two_tile { continue; }
+        if !is_two_tile {
+            continue;
+        }
 
         // Exact formula
         let d_exact = delta_exact(a, b, m);
@@ -132,21 +136,33 @@ pub fn certify_delta_formula(a: usize, b: usize, max_m: usize) -> DeltaFormulaRe
 
         // Error
         let err = Float::with_val(PREC, Float::with_val(PREC, &d_exact - &d_numerical).abs());
-        if err > max_error { max_error = err.clone(); }
+        if err > max_error {
+            max_error = err.clone();
+        }
 
         total_exact += &d_exact;
         total_numerical += &d_numerical;
 
         // Accumulate by residue class
-        *class_exact.entry(r).or_insert_with(|| Float::with_val(PREC, 0)) += &d_exact;
-        *class_numerical.entry(r).or_insert_with(|| Float::with_val(PREC, 0)) += &d_numerical;
-        let e = class_max_err.entry(r).or_insert_with(|| Float::with_val(PREC, 0));
-        if err > *e { *e = err; }
+        *class_exact
+            .entry(r)
+            .or_insert_with(|| Float::with_val(PREC, 0)) += &d_exact;
+        *class_numerical
+            .entry(r)
+            .or_insert_with(|| Float::with_val(PREC, 0)) += &d_numerical;
+        let e = class_max_err
+            .entry(r)
+            .or_insert_with(|| Float::with_val(PREC, 0));
+        if err > *e {
+            *e = err;
+        }
         *class_count.entry(r).or_default() += 1;
     }
 
-    let formula_err = Float::with_val(PREC,
-        Float::with_val(PREC, &total_exact - &total_numerical).abs());
+    let formula_err = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &total_exact - &total_numerical).abs(),
+    );
 
     let mut residue_classes: Vec<ResidueClassResult> = Vec::new();
     for r in 0..b {
@@ -165,7 +181,8 @@ pub fn certify_delta_formula(a: usize, b: usize, max_m: usize) -> DeltaFormulaRe
     }
 
     DeltaFormulaResult {
-        a, b,
+        a,
+        b,
         max_pointwise_error: max_error.to_f64(),
         total_delta_exact: total_exact.to_f64(),
         total_delta_numerical: total_numerical.to_f64(),
@@ -183,33 +200,59 @@ pub fn print_certification(results: &[DeltaFormulaResult]) {
     println!("  Verifying: Δ(m) = -(1/a)·log(a(m+1)/(a(m+1)-s)) + m·s/(a(m+1)·(a(m+1)-s))");
     println!();
 
-    println!("  {:>5} {:>5}  {:>16}  {:>16}  {:>14}  {:>8}",
-        "(a", "b)", "Σ'Δ (formula)", "Σ'Δ (FTC)", "|error|", "classes");
+    println!(
+        "  {:>5} {:>5}  {:>16}  {:>16}  {:>14}  {:>8}",
+        "(a", "b)", "Σ'Δ (formula)", "Σ'Δ (FTC)", "|error|", "classes"
+    );
     println!("  {}", "─".repeat(80));
 
     let mut all_pass = true;
     for r in results {
         let pass = r.max_pointwise_error < 1e-40;
-        if !pass { all_pass = false; }
-        println!("  ({:>2},{:>2})  {:>16.10e}  {:>16.10e}  {:>14.4e}  {:>4} cls  {}",
-            r.a, r.b,
-            r.total_delta_exact, r.total_delta_numerical,
+        if !pass {
+            all_pass = false;
+        }
+        println!(
+            "  ({:>2},{:>2})  {:>16.10e}  {:>16.10e}  {:>14.4e}  {:>4} cls  {}",
+            r.a,
+            r.b,
+            r.total_delta_exact,
+            r.total_delta_numerical,
             r.max_pointwise_error,
             r.residue_classes.len(),
-            if pass { fmt::check(true) } else { fmt::check(false) },
+            if pass {
+                fmt::check(true)
+            } else {
+                fmt::check(false)
+            },
         );
 
         // Print residue class detail
         for rc in &r.residue_classes {
-            println!("    {}r={}, s={}: Σ={:>14.10e}, count={}, max_err={:.2e}{}",
-                fmt::DIM, rc.r, rc.s, rc.sum_delta_exact, rc.count, rc.max_pointwise_error, fmt::RESET);
+            println!(
+                "    {}r={}, s={}: Σ={:>14.10e}, count={}, max_err={:.2e}{}",
+                fmt::DIM,
+                rc.r,
+                rc.s,
+                rc.sum_delta_exact,
+                rc.count,
+                rc.max_pointwise_error,
+                fmt::RESET
+            );
         }
     }
 
     println!();
     if all_pass {
-        println!("  {} ALL DELTA FORMULA IDENTITIES CERTIFIED", fmt::check(true));
-        println!("  {}Maximum pointwise |Δ_formula - Δ_FTC| < 10⁻⁴⁰{}", fmt::DIM, fmt::RESET);
+        println!(
+            "  {} ALL DELTA FORMULA IDENTITIES CERTIFIED",
+            fmt::check(true)
+        );
+        println!(
+            "  {}Maximum pointwise |Δ_formula - Δ_FTC| < 10⁻⁴⁰{}",
+            fmt::DIM,
+            fmt::RESET
+        );
     } else {
         println!("  {} SOME CERTIFICATIONS FAILED", fmt::check(false));
     }

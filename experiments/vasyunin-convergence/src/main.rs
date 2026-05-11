@@ -25,8 +25,8 @@
 //!  Target axiom: Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean:310
 //!  ═══════════════════════════════════════════════════════════════════════════
 
-use cathedral_utils::fmt::*;
 use cathedral_utils::constants;
+use cathedral_utils::fmt::*;
 use rug::Float;
 use std::fs;
 use std::io::Write;
@@ -37,13 +37,35 @@ const PREC: u32 = 512;
 
 /// Coprime pairs (a,b) to test. a < b, gcd(a,b) = 1.
 const PAIRS: &[(usize, usize)] = &[
-    (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10),
-    (2, 3), (2, 5), (2, 7), (2, 9),
-    (3, 4), (3, 5), (3, 7), (3, 8), (3, 10),
-    (4, 5), (4, 7), (4, 9),
-    (5, 6), (5, 7), (5, 8), (5, 9),
+    (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
+    (1, 6),
+    (1, 7),
+    (1, 8),
+    (1, 9),
+    (1, 10),
+    (2, 3),
+    (2, 5),
+    (2, 7),
+    (2, 9),
+    (3, 4),
+    (3, 5),
+    (3, 7),
+    (3, 8),
+    (3, 10),
+    (4, 5),
+    (4, 7),
+    (4, 9),
+    (5, 6),
+    (5, 7),
+    (5, 8),
+    (5, 9),
     (6, 7),
-    (7, 8), (7, 9), (7, 10),
+    (7, 8),
+    (7, 9),
+    (7, 10),
     (8, 9),
     (9, 10),
 ];
@@ -57,8 +79,12 @@ const M_VALUES: &[usize] = &[
 // §1. HIGH-PRECISION PRIMITIVES
 // ═══════════════════════════════════════════════════════════════════════════
 
-fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
-fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
+fn fp(x: i64) -> Float {
+    Float::with_val(PREC, x)
+}
+fn fu(x: usize) -> Float {
+    Float::with_val(PREC, x as u64)
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §2. VASYUNIN FORMULA EVALUATION
@@ -66,7 +92,9 @@ fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
 
 /// Vasyunin cotangent sum V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return Float::with_val(PREC, 0); }
+    if a <= 1 {
+        return Float::with_val(PREC, 0);
+    }
     let af = fu(a);
     let bf = fu(b);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
@@ -81,7 +109,9 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(PREC, &pm / &af);
         let cos_val = Float::with_val(PREC, angle.clone().cos());
         let sin_val = Float::with_val(PREC, angle.sin());
-        if sin_val.is_zero() { continue; }
+        if sin_val.is_zero() {
+            continue;
+        }
         let cot_val = Float::with_val(PREC, &cos_val / &sin_val);
         sum += Float::with_val(PREC, &frac * &cot_val);
     }
@@ -110,7 +140,7 @@ fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
 
     // Term 2: (a-b)/(2ab) · ln(b/a)
     let ab = Float::with_val(PREC, &af * &bf);
-    let diff = Float::with_val(PREC, &af - &bf);  // negative since a < b
+    let diff = Float::with_val(PREC, &af - &bf); // negative since a < b
     let ratio = Float::with_val(PREC, &bf / &af);
     let log_ratio = Float::with_val(PREC, ratio.ln());
     let two_ab = Float::with_val(PREC, &ab * fu(2));
@@ -189,8 +219,8 @@ fn partial_integral(a: usize, b: usize, max_m: usize) -> Float {
         // Determine tile index n and check for k-crossing
         // At x = row_hi = 1/(am): n_hi = ⌊1/(b·row_hi)⌋ = ⌊am/b⌋
         // At x = row_lo = 1/(a(m+1)): n_lo = ⌊1/(b·row_lo)⌋ = ⌊a(m+1)/b⌋
-        let n_hi = (a * m) / b;        // ⌊am/b⌋
-        let n_lo = (a * (m + 1)) / b;  // ⌊a(m+1)/b⌋  (potentially different)
+        let n_hi = (a * m) / b; // ⌊am/b⌋
+        let n_lo = (a * (m + 1)) / b; // ⌊a(m+1)/b⌋  (potentially different)
 
         if n_hi == n_lo {
             // Single tile: entire row has ⌊1/(bx)⌋ = n_hi
@@ -215,14 +245,14 @@ fn partial_integral(a: usize, b: usize, max_m: usize) -> Float {
             for n in n_hi..=n_lo {
                 // Tile boundaries for this (m,n) intersection
                 let tile_lo = if n == n_lo {
-                    row_lo.clone()  // leftmost tile extends to row boundary
+                    row_lo.clone() // leftmost tile extends to row boundary
                 } else {
                     // Crossing at x = 1/(b·(n+1))
                     let bn1 = Float::with_val(PREC, &bf * fu(n + 1));
                     Float::with_val(PREC, fp(1) / &bn1)
                 };
                 let tile_hi = if n == n_hi {
-                    row_hi.clone()  // rightmost tile extends to row boundary
+                    row_hi.clone() // rightmost tile extends to row boundary
                 } else {
                     // Crossing at x = 1/(b·n)
                     let bn = Float::with_val(PREC, &bf * fu(n));
@@ -230,7 +260,9 @@ fn partial_integral(a: usize, b: usize, max_m: usize) -> Float {
                 };
 
                 // Skip degenerate tiles
-                if tile_lo >= tile_hi { continue; }
+                if tile_lo >= tile_hi {
+                    continue;
+                }
 
                 let f_hi = eval_f(&tile_hi, m, n);
                 let f_lo = eval_f(&tile_lo, m, n);
@@ -281,13 +313,28 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL VASYUNIN CONVERGENCE VALIDATOR{RESET}                     {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}512-bit MPFR · Exact Piecewise FTC · Certified Bounds{RESET}       {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: partial_sum_tends_to_formula{RESET}                        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}File: Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean:310{RESET} {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · MPFR {}-bit{RESET}                                   {BOLD}{CYAN}║{RESET}", n_threads, PREC);
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL VASYUNIN CONVERGENCE VALIDATOR{RESET}                     {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}512-bit MPFR · Exact Piecewise FTC · Certified Bounds{RESET}       {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: partial_sum_tends_to_formula{RESET}                        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}File: Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean:310{RESET} {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · MPFR {}-bit{RESET}                                   {BOLD}{CYAN}║{RESET}",
+        n_threads, PREC
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
@@ -297,31 +344,51 @@ fn main() {
     println!();
     println!("  {DIM}  (a,b)    │  vasyuninGramFormula(a,b){RESET}");
 
-    let formula_values: Vec<(usize, usize, Float)> = PAIRS.iter().map(|&(a, b)| {
-        let t = Instant::now();
-        let val = vasyunin_gram_formula(a, b);
-        let elapsed = t.elapsed().as_secs_f64() * 1000.0;
-        println!("  ({:>2},{:>2})   │  {MAGENTA}{:.40}{RESET}  {DIM}({:.1}ms){RESET}",
-            a, b, val.to_f64(), elapsed);
-        (a, b, val)
-    }).collect();
+    let formula_values: Vec<(usize, usize, Float)> = PAIRS
+        .iter()
+        .map(|&(a, b)| {
+            let t = Instant::now();
+            let val = vasyunin_gram_formula(a, b);
+            let elapsed = t.elapsed().as_secs_f64() * 1000.0;
+            println!(
+                "  ({:>2},{:>2})   │  {MAGENTA}{:.40}{RESET}  {DIM}({:.1}ms){RESET}",
+                a,
+                b,
+                val.to_f64(),
+                elapsed
+            );
+            (a, b, val)
+        })
+        .collect();
     println!();
 
     // ─── §3. Convergence sweep ───
     println!("  {BOLD}{WHITE}═══ §2. CONVERGENCE SWEEP ═══{RESET}");
-    println!("  {DIM}For each (a,b), compute ∫_{{1/(aM)}}^1 at M = {:?}{RESET}", M_VALUES);
+    println!(
+        "  {DIM}For each (a,b), compute ∫_{{1/(aM)}}^1 at M = {:?}{RESET}",
+        M_VALUES
+    );
     println!();
 
     let mut all_results: Vec<ConvergencePoint> = Vec::new();
     let mut pair_summaries: Vec<(usize, usize, f64, bool)> = Vec::new();
 
     let mut tsv = fs::File::create("results/convergence.tsv").unwrap();
-    writeln!(tsv, "a\tb\tM\tintegral\tformula\terror\terror_abs\terror_times_aM\ttime_ms").unwrap();
+    writeln!(
+        tsv,
+        "a\tb\tM\tintegral\tformula\terror\terror_abs\terror_times_aM\ttime_ms"
+    )
+    .unwrap();
 
     for &(a, b, ref formula_val) in &formula_values {
         let formula_f64 = formula_val.to_f64();
-        println!("  {BOLD}{WHITE}── (a,b) = ({},{}) ── formula = {:.15}{RESET}", a, b, formula_f64);
-        println!("  {DIM}     M    │  ∫_{{1/(aM)}}^1              │  error              │  |error|·aM         │ time{RESET}");
+        println!(
+            "  {BOLD}{WHITE}── (a,b) = ({},{}) ── formula = {:.15}{RESET}",
+            a, b, formula_f64
+        );
+        println!(
+            "  {DIM}     M    │  ∫_{{1/(aM)}}^1              │  error              │  |error|·aM         │ time{RESET}"
+        );
 
         let mut pair_results: Vec<ConvergencePoint> = Vec::new();
         let mut max_error_am = 0.0f64;
@@ -347,27 +414,57 @@ fn main() {
             // and the remaining interval has length 1/(aM)).
             // So |error|·aM should be ≤ 1.
             let bounded = error_times_am <= 1.0 + 1e-10; // small tolerance for rounding
-            if !bounded { all_bounded = false; }
+            if !bounded {
+                all_bounded = false;
+            }
 
             let point = ConvergencePoint {
-                a, b, m: m_val, integral: integral_f64, formula: formula_f64,
-                error, error_abs, error_times_am, time_ms: elapsed_ms,
+                a,
+                b,
+                m: m_val,
+                integral: integral_f64,
+                formula: formula_f64,
+                error,
+                error_abs,
+                error_times_am,
+                time_ms: elapsed_ms,
             };
 
             let bound_marker = if bounded { GREEN } else { RED };
-            println!("  {:>7} │  {MAGENTA}{:>24.17e}{RESET} │  {:>18.12e}  │  {bound_marker}{:>18.12e}{RESET}  │ {:.1}ms",
-                m_val, integral_f64, error, error_times_am, elapsed_ms);
+            println!(
+                "  {:>7} │  {MAGENTA}{:>24.17e}{RESET} │  {:>18.12e}  │  {bound_marker}{:>18.12e}{RESET}  │ {:.1}ms",
+                m_val, integral_f64, error, error_times_am, elapsed_ms
+            );
 
-            writeln!(tsv, "{}\t{}\t{}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.1}",
-                a, b, m_val, integral_f64, formula_f64, error, error_abs, error_times_am, elapsed_ms).unwrap();
+            writeln!(
+                tsv,
+                "{}\t{}\t{}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.17e}\t{:.1}",
+                a,
+                b,
+                m_val,
+                integral_f64,
+                formula_f64,
+                error,
+                error_abs,
+                error_times_am,
+                elapsed_ms
+            )
+            .unwrap();
 
             pair_results.push(point.clone());
             all_results.push(point);
         }
 
         let tail_cert = max_error_am;
-        println!("  {BOLD}  sup |error|·aM = {}{:.12}{RESET}", if all_bounded { GREEN } else { RED }, tail_cert);
-        println!("  {} Tail bound |error| ≤ 1/(aM) certified for all M", check(all_bounded));
+        println!(
+            "  {BOLD}  sup |error|·aM = {}{:.12}{RESET}",
+            if all_bounded { GREEN } else { RED },
+            tail_cert
+        );
+        println!(
+            "  {} Tail bound |error| ≤ 1/(aM) certified for all M",
+            check(all_bounded)
+        );
         println!();
 
         pair_summaries.push((a, b, tail_cert, all_bounded));
@@ -375,47 +472,77 @@ fn main() {
 
     // ─── §4. GRAND CERTIFICATE ───
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}VASYUNIN CONVERGENCE VALIDATOR — CERTIFICATE{RESET}                {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}", PREC, n_threads);
-    println!("  {BOLD}{CYAN}║{RESET}  Pairs: {YELLOW}{}{RESET}               M range: {YELLOW}{}-{}{RESET}",
-        PAIRS.len(), M_VALUES.first().unwrap(), M_VALUES.last().unwrap());
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}VASYUNIN CONVERGENCE VALIDATOR — CERTIFICATE{RESET}                {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}",
+        PREC, n_threads
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Pairs: {YELLOW}{}{RESET}               M range: {YELLOW}{}-{}{RESET}",
+        PAIRS.len(),
+        M_VALUES.first().unwrap(),
+        M_VALUES.last().unwrap()
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. Formula Agreement{RESET}");
 
     let mut all_pairs_bounded = true;
     for &(a, b, tail_cert, bounded) in &pair_summaries {
-        if !bounded { all_pairs_bounded = false; }
-        println!("  {BOLD}{CYAN}║{RESET}    ({:>2},{:>2}): sup|err|·aM = {}{:.10}{RESET}  {}",
-            a, b,
+        if !bounded {
+            all_pairs_bounded = false;
+        }
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    ({:>2},{:>2}): sup|err|·aM = {}{:.10}{RESET}  {}",
+            a,
+            b,
             if bounded { GREEN } else { RED },
             tail_cert,
-            check(bounded));
+            check(bounded)
+        );
     }
 
     // Overall tail bound
-    let global_sup = pair_summaries.iter().map(|(_, _, t, _)| *t).fold(0.0f64, f64::max);
+    let global_sup = pair_summaries
+        .iter()
+        .map(|(_, _, t, _)| *t)
+        .fold(0.0f64, f64::max);
 
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§B. Tail Bound Certification{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    Global sup |error|·aM = {}{:.10}{RESET}", if global_sup <= 1.0 { GREEN } else { YELLOW }, global_sup);
-    println!("  {BOLD}{CYAN}║{RESET}    {} |∫_{{1/(aM)}}^1 - formula| ≤ 1/(aM) for ALL tested (a,b,M)",
-        check(all_pairs_bounded));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    Global sup |error|·aM = {}{:.10}{RESET}",
+        if global_sup <= 1.0 { GREEN } else { YELLOW },
+        global_sup
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} |∫_{{1/(aM)}}^1 - formula| ≤ 1/(aM) for ALL tested (a,b,M)",
+        check(all_pairs_bounded)
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§C. Convergence Rate{RESET}");
 
     // Check convergence: error should decrease as M increases
     let convergence_monotone = PAIRS.iter().all(|&(a, b)| {
-        let errors: Vec<f64> = all_results.iter()
+        let errors: Vec<f64> = all_results
+            .iter()
             .filter(|p| p.a == a && p.b == b && p.m >= 50)
             .map(|p| p.error_abs)
             .collect();
         errors.windows(2).all(|w| w[1] <= w[0] * 1.01) // allow 1% float noise
     });
 
-    println!("  {BOLD}{CYAN}║{RESET}    {} Error strictly decreasing with M for all pairs (M≥50)",
-        check(convergence_monotone));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} Error strictly decreasing with M for all pairs (M≥50)",
+        check(convergence_monotone)
+    );
 
     // Rate analysis: check error * (a*M) is bounded
     println!("  {BOLD}{CYAN}║{RESET}    Rate: O(1/(aM)) — tail bound matches squeeze theorem");
@@ -423,10 +550,19 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§D. Axiom Validation{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    Target: {DIM}partial_sum_tends_to_formula{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    File:   {DIM}LogDigammaBridge.lean:310{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    {} Integral → formula as M → ∞ (CONFIRMED)", check(all_pairs_bounded && convergence_monotone));
-    println!("  {BOLD}{CYAN}║{RESET}    {} Tail bound ≤ 1/(aM) (CERTIFIED at {}-bit)", check(all_pairs_bounded), PREC);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} Integral → formula as M → ∞ (CONFIRMED)",
+        check(all_pairs_bounded && convergence_monotone)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} Tail bound ≤ 1/(aM) (CERTIFIED at {}-bit)",
+        check(all_pairs_bounded),
+        PREC
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // ─── §5. Lean Oracle Certificates ───
     println!();
@@ -436,25 +572,48 @@ fn main() {
     let mut oracle = fs::File::create("results/oracle_axioms.lean").unwrap();
     writeln!(oracle, "/-").unwrap();
     writeln!(oracle, "  Vasyunin Convergence Oracle — Auto-generated").unwrap();
-    writeln!(oracle, "  {}-bit MPFR, {} threads, {}", PREC, n_threads, chrono::Utc::now().to_rfc3339()).unwrap();
+    writeln!(
+        oracle,
+        "  {}-bit MPFR, {} threads, {}",
+        PREC,
+        n_threads,
+        chrono::Utc::now().to_rfc3339()
+    )
+    .unwrap();
     writeln!(oracle).unwrap();
     writeln!(oracle, "  Certifies: For coprime (a,b) with a < b,").unwrap();
-    writeln!(oracle, "  |∫_{{1/(aM)}}^1 {{1/(ax)}}{{1/(bx)}} dx - formula(a,b)| ≤ 1/(a·M)").unwrap();
+    writeln!(
+        oracle,
+        "  |∫_{{1/(aM)}}^1 {{1/(ax)}}{{1/(bx)}} dx - formula(a,b)| ≤ 1/(a·M)"
+    )
+    .unwrap();
     writeln!(oracle, "  for all tested M values.").unwrap();
     writeln!(oracle, "-/").unwrap();
     writeln!(oracle).unwrap();
 
     // Write convergence data for representative pairs
     for &(a, b) in &[(1usize, 2usize), (1, 3), (2, 3), (3, 5), (5, 7)] {
-        let points: Vec<&ConvergencePoint> = all_results.iter()
+        let points: Vec<&ConvergencePoint> = all_results
+            .iter()
             .filter(|p| p.a == a && p.b == b)
             .collect();
-        if points.is_empty() { continue; }
+        if points.is_empty() {
+            continue;
+        }
 
-        writeln!(oracle, "-- (a,b) = ({},{}), formula = {:.15}", a, b, points[0].formula).unwrap();
+        writeln!(
+            oracle,
+            "-- (a,b) = ({},{}), formula = {:.15}",
+            a, b, points[0].formula
+        )
+        .unwrap();
         for p in &points {
-            writeln!(oracle, "--   M={:>6}: |error| = {:.6e}, |error|·aM = {:.10}",
-                p.m, p.error_abs, p.error_times_am).unwrap();
+            writeln!(
+                oracle,
+                "--   M={:>6}: |error| = {:.6e}, |error|·aM = {:.10}",
+                p.m, p.error_abs, p.error_times_am
+            )
+            .unwrap();
         }
         writeln!(oracle).unwrap();
         println!("  ({},{}): {} M-values certified", a, b, points.len());
@@ -487,10 +646,20 @@ fn main() {
     fs::write("results/summary.json", &summary_str).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", t_global.elapsed().as_secs_f64(), n_threads);
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{convergence.tsv, summary.json, oracle_axioms.lean}}");
+    println!(
+        "  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{:.1}s{RESET} ({} threads)",
+        t_global.elapsed().as_secs_f64(),
+        n_threads
+    );
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{convergence.tsv, summary.json, oracle_axioms.lean}}"
+    );
     println!();
-    println!("  {BOLD}{WHITE}The axiom is measured at {}-bit precision across {} pairs.{RESET}", PREC, PAIRS.len());
+    println!(
+        "  {BOLD}{WHITE}The axiom is measured at {}-bit precision across {} pairs.{RESET}",
+        PREC,
+        PAIRS.len()
+    );
     if all_pairs_bounded && convergence_monotone {
         println!("  {BOLD}{GREEN}★ partial_sum_tends_to_formula: NUMERICALLY CERTIFIED ★{RESET}");
     } else {

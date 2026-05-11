@@ -131,20 +131,26 @@ extern "C" {
     pub fn cublasDdot_v2(
         handle: CublasHandle,
         n: c_int,
-        x: *const f64, incx: c_int,
-        y: *const f64, incy: c_int,
+        x: *const f64,
+        incx: c_int,
+        y: *const f64,
+        incy: c_int,
         result: *mut f64,
     ) -> c_int;
 
     pub fn cublasDgemv_v2(
         handle: CublasHandle,
         trans: c_int,
-        m: c_int, n: c_int,
+        m: c_int,
+        n: c_int,
         alpha: *const f64,
-        a: *const f64, lda: c_int,
-        x: *const f64, incx: c_int,
+        a: *const f64,
+        lda: c_int,
+        x: *const f64,
+        incx: c_int,
         beta: *const f64,
-        y: *mut f64, incy: c_int,
+        y: *mut f64,
+        incy: c_int,
     ) -> c_int;
 }
 
@@ -194,10 +200,13 @@ extern "C" {
 #[link(name = "gramgpu")]
 extern "C" {
     pub fn gpu_build_gram_qs(
-        ln_v0: *const f32, ln_v1: *const f32,
-        ln_v2: *const f32, ln_v3: *const f32,
+        ln_v0: *const f32,
+        ln_v1: *const f32,
+        ln_v2: *const f32,
+        ln_v3: *const f32,
         ln_size: c_int,
-        gram_hi: *mut f64, gram_lo: *mut f64,
+        gram_hi: *mut f64,
+        gram_lo: *mut f64,
         dim: c_int,
     ) -> c_int;
 

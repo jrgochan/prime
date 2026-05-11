@@ -42,12 +42,16 @@ fn main() {
     }
 
     let n: usize = args[1].parse().expect("N must be a positive integer");
-    let grid: usize = args.iter().position(|a| a == "--grid")
-        .and_then(|i| args.get(i+1))
+    let grid: usize = args
+        .iter()
+        .position(|a| a == "--grid")
+        .and_then(|i| args.get(i + 1))
         .and_then(|s| s.parse().ok())
         .unwrap_or(10_000);
-    let output_dir = args.iter().position(|a| a == "--output")
-        .and_then(|i| args.get(i+1).map(|s| s.as_str()))
+    let output_dir = args
+        .iter()
+        .position(|a| a == "--output")
+        .and_then(|i| args.get(i + 1).map(|s| s.as_str()))
         .unwrap_or("results_pointwise");
 
     std::fs::create_dir_all(output_dir).ok();
@@ -82,7 +86,9 @@ fn main() {
 
             for k_idx in 0..dim {
                 let w = weights[k_idx];
-                if w.abs() < 1e-30 { continue; }
+                if w.abs() < 1e-30 {
+                    continue;
+                }
                 let k = (k_idx + 2) as f64;
                 let inv_kx = 1.0 / (k * x);
                 let frac = inv_kx - inv_kx.floor();
@@ -108,10 +114,19 @@ fn main() {
     let dx = 1.0 / grid as f64;
 
     for &(x, fx) in &grid_data {
-        if fx > max_fn { max_fn = fx; max_x = x; }
-        if fx < min_fn { min_fn = fx; min_x = x; }
+        if fx > max_fn {
+            max_fn = fx;
+            max_x = x;
+        }
+        if fx < min_fn {
+            min_fn = fx;
+            min_x = x;
+        }
         let overshoot = fx - 1.0;
-        if overshoot > max_overshoot { max_overshoot = overshoot; max_overshoot_x = x; }
+        if overshoot > max_overshoot {
+            max_overshoot = overshoot;
+            max_overshoot_x = x;
+        }
         l2_sum.add(fx * fx * dx);
         l2_err_sum.add((fx - 1.0).powi(2) * dx);
         mean_sum.add(fx * dx);
@@ -143,11 +158,24 @@ fn main() {
     println!("  │  ‖f_N‖²       = {l2_norm_sq:>12.8}  (= vᵀGv)               │");
     println!("  │  ‖f_N-1‖²     = {l2_error_sq:>12.8}  (= d²_N)                │");
     println!("  │  d²_N (check) = {d2n:>12.8}                             │");
-    println!("  │  max(f_N-1)   = {:>12.8}  at x = {max_overshoot_x:.6}          │", max_overshoot);
+    println!(
+        "  │  max(f_N-1)   = {:>12.8}  at x = {max_overshoot_x:.6}          │",
+        max_overshoot
+    );
     println!("  │  f_N > 1 at   = {n_over:>6} / {grid} pts ({overshoot_pct:.1}%)         │");
     println!("  │  f_N < 0 at   = {n_under:>6} / {grid} pts ({undershoot_pct:.1}%)         │");
-    println!("  │  vtGv < 1?    = {}                                      │", if l2_norm_sq < 1.0 { "YES ✓" } else { "NO  ✗" });
-    println!("  │  gap·ln(N)    = {:<12.8}                             │", (1.0 - l2_norm_sq) * ln_n);
+    println!(
+        "  │  vtGv < 1?    = {}                                      │",
+        if l2_norm_sq < 1.0 {
+            "YES ✓"
+        } else {
+            "NO  ✗"
+        }
+    );
+    println!(
+        "  │  gap·ln(N)    = {:<12.8}                             │",
+        (1.0 - l2_norm_sq) * ln_n
+    );
     println!("  └───────────────────────────────────────────────────────┘");
 
     // Write TSV
@@ -156,7 +184,13 @@ fn main() {
         let mut f = std::fs::File::create(&tsv_path).expect("create TSV");
         writeln!(f, "x\tf_N\tf_N_minus_1\tabs_dev").unwrap();
         for &(x, fx) in &grid_data {
-            writeln!(f, "{x:.8}\t{fx:.15e}\t{:.15e}\t{:.15e}", fx - 1.0, (fx - 1.0).abs()).unwrap();
+            writeln!(
+                f,
+                "{x:.8}\t{fx:.15e}\t{:.15e}\t{:.15e}",
+                fx - 1.0,
+                (fx - 1.0).abs()
+            )
+            .unwrap();
         }
     }
     eprintln!("  ✓ TSV → {tsv_path}");
@@ -172,11 +206,19 @@ fn main() {
         writeln!(f, "EXTREMA:").unwrap();
         writeln!(f, "  max f_N(x) = {max_fn:.15e}  at x = {max_x:.10}").unwrap();
         writeln!(f, "  min f_N(x) = {min_fn:.15e}  at x = {min_x:.10}").unwrap();
-        writeln!(f, "  max overshoot (f_N - 1) = {max_overshoot:.15e}  at x = {max_overshoot_x:.10}").unwrap();
+        writeln!(
+            f,
+            "  max overshoot (f_N - 1) = {max_overshoot:.15e}  at x = {max_overshoot_x:.10}"
+        )
+        .unwrap();
         writeln!(f).unwrap();
         writeln!(f, "INTEGRALS (midpoint rule, {grid} pts):").unwrap();
         writeln!(f, "  ∫ f_N(x) dx      = {mean_fn:.15e}  (= bᵀv)").unwrap();
-        writeln!(f, "  ∫ f_N(x)² dx     = {l2_norm_sq:.15e}  (= vᵀGv = ‖f_N‖²)").unwrap();
+        writeln!(
+            f,
+            "  ∫ f_N(x)² dx     = {l2_norm_sq:.15e}  (= vᵀGv = ‖f_N‖²)"
+        )
+        .unwrap();
         writeln!(f, "  ∫ (f_N(x)-1)² dx = {l2_error_sq:.15e}  (= d²_N)").unwrap();
         writeln!(f, "  d²_N (1-2bv+vGv) = {d2n:.15e}").unwrap();
         writeln!(f).unwrap();
@@ -184,13 +226,33 @@ fn main() {
         writeln!(f, "  vᵀGv         = {l2_norm_sq:.15e}").unwrap();
         writeln!(f, "  1 - vᵀGv     = {:.15e}", 1.0 - l2_norm_sq).unwrap();
         writeln!(f, "  gap·ln(N)    = {:.15e}", (1.0 - l2_norm_sq) * ln_n).unwrap();
-        writeln!(f, "  Axiom sat?   = {}", if l2_norm_sq < 1.0 { "YES" } else { "CHECK" }).unwrap();
+        writeln!(
+            f,
+            "  Axiom sat?   = {}",
+            if l2_norm_sq < 1.0 { "YES" } else { "CHECK" }
+        )
+        .unwrap();
         writeln!(f).unwrap();
         writeln!(f, "POINTWISE BOUND:").unwrap();
-        writeln!(f, "  Points with f_N > 1: {} / {} ({:.2}%)", n_over, grid, overshoot_pct).unwrap();
-        writeln!(f, "  Points with f_N < 0: {} / {} ({:.2}%)", n_under, grid, undershoot_pct).unwrap();
+        writeln!(
+            f,
+            "  Points with f_N > 1: {} / {} ({:.2}%)",
+            n_over, grid, overshoot_pct
+        )
+        .unwrap();
+        writeln!(
+            f,
+            "  Points with f_N < 0: {} / {} ({:.2}%)",
+            n_under, grid, undershoot_pct
+        )
+        .unwrap();
         writeln!(f, "  If f_N ≤ 1+ε: ε = {max_overshoot:.15e}").unwrap();
-        writeln!(f, "  Then ‖f_N‖² ≤ (1+ε)² = {:.15e}", (1.0 + max_overshoot).powi(2)).unwrap();
+        writeln!(
+            f,
+            "  Then ‖f_N‖² ≤ (1+ε)² = {:.15e}",
+            (1.0 + max_overshoot).powi(2)
+        )
+        .unwrap();
     }
     eprintln!("  ✓ Summary → {sum_path}");
 
@@ -198,11 +260,14 @@ fn main() {
     let cert_path = format!("{output_dir}/pointwise_cert_N{n}.json");
     {
         // Find the 10 points with largest |f_N(x) - 1|
-        let mut devs: Vec<(f64, f64, f64)> = grid_data.iter()
+        let mut devs: Vec<(f64, f64, f64)> = grid_data
+            .iter()
             .map(|&(x, fx)| (x, fx, (fx - 1.0).abs()))
             .collect();
         devs.sort_by(|a, b| b.2.partial_cmp(&a.2).unwrap());
-        let top_devs: Vec<serde_json::Value> = devs.iter().take(20)
+        let top_devs: Vec<serde_json::Value> = devs
+            .iter()
+            .take(20)
             .map(|&(x, fx, d)| serde_json::json!({"x": x, "f_N": fx, "dev": d}))
             .collect();
 
@@ -214,7 +279,9 @@ fn main() {
         let hist_width = (hist_max - hist_min) / n_bins as f64;
         for &(_, fx) in &grid_data {
             let bin = ((fx - hist_min) / hist_width).floor() as usize;
-            if bin < n_bins { hist[bin] += 1; }
+            if bin < n_bins {
+                hist[bin] += 1;
+            }
         }
         let hist_json: Vec<serde_json::Value> = (0..n_bins)
             .map(|i| {

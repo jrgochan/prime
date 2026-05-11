@@ -24,13 +24,13 @@
 
 use cathedral_utils::arith::gcd;
 use cathedral_utils::constants;
-use rug::Float;
-use rug::ops::Pow;
 use rayon::prelude::*;
+use rug::ops::Pow;
+use rug::Float;
 use serde::Serialize;
+use std::io::Write;
 use std::sync::Mutex;
 use std::time::Instant;
-use std::io::Write;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONFIGURATION
@@ -58,9 +58,15 @@ const CERT_THRESHOLD: i32 = 4;
 // HIGH-PRECISION PRIMITIVES
 // ═══════════════════════════════════════════════════════════════════════════
 
-fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
-fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
-fn pi() -> Float { Float::with_val(PREC, rug::float::Constant::Pi) }
+fn fp(x: i64) -> Float {
+    Float::with_val(PREC, x)
+}
+fn fu(x: usize) -> Float {
+    Float::with_val(PREC, x as u64)
+}
+fn pi() -> Float {
+    Float::with_val(PREC, rug::float::Constant::Pi)
+}
 
 /// Safe floor: Float → usize via MPFR floor.
 fn floor_to_usize(x: &Float) -> usize {
@@ -76,7 +82,9 @@ fn floor_to_usize(x: &Float) -> usize {
 // ═══════════════════════════════════════════════════════════════════════════
 
 fn vasyunin_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return fp(0); }
+    if a <= 1 {
+        return fp(0);
+    }
     let pi_val = pi();
     let af = fu(a);
     let mut total = fp(0);
@@ -86,7 +94,9 @@ fn vasyunin_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(PREC, &pi_val * Float::with_val(PREC, m as u64) / &af);
         let sin_v = Float::with_val(PREC, angle.clone().sin());
         let cos_v = Float::with_val(PREC, angle.cos());
-        if sin_v.is_zero() { continue; }
+        if sin_v.is_zero() {
+            continue;
+        }
         let cot_v = Float::with_val(PREC, cos_v / sin_v);
         total += Float::with_val(PREC, frac * cot_v);
     }
@@ -122,8 +132,10 @@ fn gram_entry(j: usize, k: usize) -> Float {
 
     // term1 = (ln(2π) - γ)/2 · (1/j + 1/k)
     let coeff = Float::with_val(PREC, Float::with_val(PREC, &l2p - &g) / fp(2));
-    let inv_sum = Float::with_val(PREC,
-        Float::with_val(PREC, fp(1) / &jf) + Float::with_val(PREC, fp(1) / &kf));
+    let inv_sum = Float::with_val(
+        PREC,
+        Float::with_val(PREC, fp(1) / &jf) + Float::with_val(PREC, fp(1) / &kf),
+    );
     let term1 = Float::with_val(PREC, &coeff * &inv_sum);
 
     // term2 = (j-k)/(2jk) · ln(k/j)
@@ -163,10 +175,14 @@ fn tail_correction_mpfr(j: usize, k: usize, m_start: usize, extra_rows: usize) -
     let m_end = m_start + extra_rows;
     for m in m_start..=m_end {
         let mf = fu(m);
-        let j_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
-            &jf * Float::with_val(PREC, &mf + fp(1))));
+        let j_lo = Float::with_val(
+            PREC,
+            fp(1) / Float::with_val(PREC, &jf * Float::with_val(PREC, &mf + fp(1))),
+        );
         let j_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &jf * &mf));
-        if j_lo >= j_hi { continue; }
+        if j_lo >= j_hi {
+            continue;
+        }
 
         let val_at_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_hi));
         let val_at_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_lo));
@@ -175,17 +191,31 @@ fn tail_correction_mpfr(j: usize, k: usize, m_start: usize, extra_rows: usize) -
 
         for n in n_min..=n_max {
             let nf = fu(n);
-            let k_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
-                &kf * Float::with_val(PREC, &nf + fp(1))));
+            let k_lo = Float::with_val(
+                PREC,
+                fp(1) / Float::with_val(PREC, &kf * Float::with_val(PREC, &nf + fp(1))),
+            );
             let k_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &nf));
 
-            let lo = if j_lo > k_lo { j_lo.clone() } else { k_lo.clone() };
-            let hi = if j_hi < k_hi { j_hi.clone() } else { k_hi.clone() };
-            if lo >= hi { continue; }
+            let lo = if j_lo > k_lo {
+                j_lo.clone()
+            } else {
+                k_lo.clone()
+            };
+            let hi = if j_hi < k_hi {
+                j_hi.clone()
+            } else {
+                k_hi.clone()
+            };
+            if lo >= hi {
+                continue;
+            }
 
             // Antiderivative: F(x) = -1/(jkx) - (n/j + m/k)·ln(x) + m·n·x
-            let coeff_log = Float::with_val(PREC,
-                Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf));
+            let coeff_log = Float::with_val(
+                PREC,
+                Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf),
+            );
             let coeff_const = Float::with_val(PREC, &mf * &nf);
 
             let eval = |x: &Float| -> Float {
@@ -219,14 +249,18 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
     // Phase 1: MPFR bulk rows
     for m in 0..=BULK_ROWS {
         let mf = fu(m);
-        let j_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
-            &jf * Float::with_val(PREC, &mf + fp(1))));
+        let j_lo = Float::with_val(
+            PREC,
+            fp(1) / Float::with_val(PREC, &jf * Float::with_val(PREC, &mf + fp(1))),
+        );
         let j_hi = if m == 0 {
             fp(1)
         } else {
             Float::with_val(PREC, fp(1) / Float::with_val(PREC, &jf * &mf))
         };
-        if j_lo >= j_hi { continue; }
+        if j_lo >= j_hi {
+            continue;
+        }
 
         let val_at_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_hi));
         let val_at_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &j_lo));
@@ -235,20 +269,34 @@ fn integral_piecewise(j: usize, k: usize) -> Float {
 
         for n in n_min..=n_max {
             let nf = fu(n);
-            let k_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC,
-                &kf * Float::with_val(PREC, &nf + fp(1))));
+            let k_lo = Float::with_val(
+                PREC,
+                fp(1) / Float::with_val(PREC, &kf * Float::with_val(PREC, &nf + fp(1))),
+            );
             let k_hi = if n == 0 {
                 fp(1)
             } else {
                 Float::with_val(PREC, fp(1) / Float::with_val(PREC, &kf * &nf))
             };
 
-            let lo = if j_lo > k_lo { j_lo.clone() } else { k_lo.clone() };
-            let hi = if j_hi < k_hi { j_hi.clone() } else { k_hi.clone() };
-            if lo >= hi { continue; }
+            let lo = if j_lo > k_lo {
+                j_lo.clone()
+            } else {
+                k_lo.clone()
+            };
+            let hi = if j_hi < k_hi {
+                j_hi.clone()
+            } else {
+                k_hi.clone()
+            };
+            if lo >= hi {
+                continue;
+            }
 
-            let coeff_log = Float::with_val(PREC,
-                Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf));
+            let coeff_log = Float::with_val(
+                PREC,
+                Float::with_val(PREC, &nf / &jf) + Float::with_val(PREC, &mf / &kf),
+            );
             let coeff_const = Float::with_val(PREC, &mf * &nf);
 
             let eval = |x: &Float| -> Float {
@@ -349,7 +397,8 @@ fn verify_pair(j: usize, k: usize) -> (EntryResult, Option<ShowcaseEntry>) {
     let time_ms = t.elapsed().as_secs_f64() * 1000.0;
 
     let entry = EntryResult {
-        j, k,
+        j,
+        k,
         gcd: gcd(j, k),
         formula: formula.to_f64(),
         integral: integral.to_f64(),
@@ -362,7 +411,8 @@ fn verify_pair(j: usize, k: usize) -> (EntryResult, Option<ShowcaseEntry>) {
     // Generate showcase for small pairs
     let showcase = if (j <= 7 && k <= 7) || j == k {
         Some(ShowcaseEntry {
-            j, k,
+            j,
+            k,
             formula_full: formula.to_string_radix(10, None),
             integral_full: integral.to_string_radix(10, None),
             error: error.to_f64(),
@@ -395,9 +445,13 @@ fn print_header() {
            Target:     All 1 ≤ j ≤ k ≤ {}\n\
          \n\
          ───────────────────────────────────────────────────────────────────────",
-        PREC, PREC * 3 / 10,
-        BULK_ROWS, TAIL_EXTRA, BULK_ROWS + TAIL_EXTRA,
-        rayon::current_num_threads(), MAX_K
+        PREC,
+        PREC * 3 / 10,
+        BULK_ROWS,
+        TAIL_EXTRA,
+        BULK_ROWS + TAIL_EXTRA,
+        rayon::current_num_threads(),
+        MAX_K
     );
     println!("{}", header);
 }
@@ -417,26 +471,38 @@ fn main() {
     print_header();
 
     // ─── Phase 1: Diagonal G(k,k) ───────────────────────────────────────
-    println!("\n  ━━━ PHASE 1: DIAGONAL G(k,k) for k = 1..{} ━━━", MAX_DIAG);
+    println!(
+        "\n  ━━━ PHASE 1: DIAGONAL G(k,k) for k = 1..{} ━━━",
+        MAX_DIAG
+    );
 
-    let diag_results: Vec<EntryResult> = (1..=MAX_DIAG)
-        .map(|k| verify_pair(k, k).0)
-        .collect();
+    let diag_results: Vec<EntryResult> = (1..=MAX_DIAG).map(|k| verify_pair(k, k).0).collect();
 
     for r in &diag_results {
         print_entry(r);
     }
 
-    let min_diag = diag_results.iter().map(|r| r.matching_digits).min().unwrap_or(0);
+    let min_diag = diag_results
+        .iter()
+        .map(|r| r.matching_digits)
+        .min()
+        .unwrap_or(0);
     let all_diag_cert = diag_results.iter().all(|r| r.certified);
-    println!("\n  Diagonal: min {} digits | {}",
-        min_diag, if all_diag_cert { "ALL CERTIFIED ✅" } else { "SOME FAILED ⚠️" });
+    println!(
+        "\n  Diagonal: min {} digits | {}",
+        min_diag,
+        if all_diag_cert {
+            "ALL CERTIFIED ✅"
+        } else {
+            "SOME FAILED ⚠️"
+        }
+    );
 
     // ─── Phase 2: Off-diagonal G(j,k) ───────────────────────────────────
     let pairs: Vec<(usize, usize)> = {
         let mut p = Vec::new();
         for j in 1..=MAX_K {
-            for k in (j+1)..=MAX_K {
+            for k in (j + 1)..=MAX_K {
                 p.push((j, k));
             }
         }
@@ -444,7 +510,10 @@ fn main() {
     };
     let n_pairs = pairs.len();
 
-    println!("\n  ━━━ PHASE 2: OFF-DIAGONAL G(j,k) — {} pairs ━━━", n_pairs);
+    println!(
+        "\n  ━━━ PHASE 2: OFF-DIAGONAL G(j,k) — {} pairs ━━━",
+        n_pairs
+    );
 
     let offdiag_mutex: Mutex<Vec<EntryResult>> = Mutex::new(Vec::new());
     let showcase_mutex: Mutex<Vec<ShowcaseEntry>> = Mutex::new(Vec::new());
@@ -456,8 +525,12 @@ fn main() {
             lock.push(entry);
             // Print progress every 100 pairs
             if lock.len() % 100 == 0 || lock.len() == n_pairs {
-                eprint!("\r  Progress: {}/{} pairs ({:.0}%)",
-                    lock.len(), n_pairs, 100.0 * lock.len() as f64 / n_pairs as f64);
+                eprint!(
+                    "\r  Progress: {}/{} pairs ({:.0}%)",
+                    lock.len(),
+                    n_pairs,
+                    100.0 * lock.len() as f64 / n_pairs as f64
+                );
                 std::io::stderr().flush().ok();
             }
         }
@@ -473,7 +546,8 @@ fn main() {
     let showcase_entries = showcase_mutex.into_inner().unwrap();
 
     // Print a representative sample
-    let sample: Vec<&EntryResult> = offdiag_results.iter()
+    let sample: Vec<&EntryResult> = offdiag_results
+        .iter()
         .filter(|r| r.j <= 5 || r.gcd > 1 || r.matching_digits < 6)
         .collect();
 
@@ -484,18 +558,34 @@ fn main() {
         println!("  ... ({} more pairs)", offdiag_results.len() - 40);
     }
 
-    let min_offdiag = offdiag_results.iter().map(|r| r.matching_digits).min().unwrap_or(0);
+    let min_offdiag = offdiag_results
+        .iter()
+        .map(|r| r.matching_digits)
+        .min()
+        .unwrap_or(0);
     let all_offdiag_cert = offdiag_results.iter().all(|r| r.certified);
-    let worst = offdiag_results.iter().min_by_key(|r| r.matching_digits).unwrap();
+    let worst = offdiag_results
+        .iter()
+        .min_by_key(|r| r.matching_digits)
+        .unwrap();
 
-    println!("\n  Off-diagonal: min {} digits (worst: G({},{})) | {}",
-        min_offdiag, worst.j, worst.k,
-        if all_offdiag_cert { "ALL CERTIFIED ✅" } else { "SOME FAILED ⚠️" });
+    println!(
+        "\n  Off-diagonal: min {} digits (worst: G({},{})) | {}",
+        min_offdiag,
+        worst.j,
+        worst.k,
+        if all_offdiag_cert {
+            "ALL CERTIFIED ✅"
+        } else {
+            "SOME FAILED ⚠️"
+        }
+    );
 
     // ─── Phase 3: GCD structure analysis ────────────────────────────────
     println!("\n  ━━━ PHASE 3: GCD STRUCTURE ANALYSIS ━━━");
 
-    let mut gcd_groups: std::collections::HashMap<usize, Vec<&EntryResult>> = std::collections::HashMap::new();
+    let mut gcd_groups: std::collections::HashMap<usize, Vec<&EntryResult>> =
+        std::collections::HashMap::new();
     for r in &offdiag_results {
         gcd_groups.entry(r.gcd).or_default().push(r);
     }
@@ -506,22 +596,32 @@ fn main() {
         let group = &gcd_groups[&g];
         let min_d = group.iter().map(|r| r.matching_digits).min().unwrap_or(0);
         let max_d = group.iter().map(|r| r.matching_digits).max().unwrap_or(0);
-        let avg_d: f64 = group.iter().map(|r| r.matching_digits as f64).sum::<f64>() / group.len() as f64;
-        println!("    gcd={:<3}  {} pairs  digits: min={}, avg={:.1}, max={}",
-            g, group.len(), min_d, avg_d, max_d);
+        let avg_d: f64 =
+            group.iter().map(|r| r.matching_digits as f64).sum::<f64>() / group.len() as f64;
+        println!(
+            "    gcd={:<3}  {} pairs  digits: min={}, avg={:.1}, max={}",
+            g,
+            group.len(),
+            min_d,
+            avg_d,
+            max_d
+        );
     }
 
     // ─── Phase 4: Full precision showcase ────────────────────────────────
     println!("\n  ━━━ PHASE 4: FULL PRECISION SHOWCASE (256-bit) ━━━");
 
-    let showcase_pairs = vec![(1,1), (1,2), (2,3), (3,5), (5,7), (7,11), (6,10)];
+    let showcase_pairs = vec![(1, 1), (1, 2), (2, 3), (3, 5), (5, 7), (7, 11), (6, 10)];
     for (j, k) in &showcase_pairs {
         let r = verify_pair(*j, *k);
         println!("\n  G({},{})  [gcd={}]:", j, k, gcd(*j, *k));
         if let Some(sc) = &r.1 {
             println!("    Formula:  {}", sc.formula_full);
             println!("    Integral: {}", sc.integral_full);
-            println!("    |Error|:  {:.5e}  ({} digits)", sc.error, sc.matching_digits);
+            println!(
+                "    |Error|:  {:.5e}  ({} digits)",
+                sc.error, sc.matching_digits
+            );
         }
     }
 
@@ -532,14 +632,33 @@ fn main() {
     let total_pairs = diag_results.len() + offdiag_results.len();
 
     println!("\n═══════════════════════════════════════════════════════════════════════");
-    println!("║  {}  VASYUNIN INTEGRAL IDENTITY {} TO {} DIGITS",
+    println!(
+        "║  {}  VASYUNIN INTEGRAL IDENTITY {} TO {} DIGITS",
         if all_certified { "✅" } else { "⚠️ " },
-        if all_certified { "CERTIFIED" } else { "PARTIAL" },
-        all_min);
+        if all_certified {
+            "CERTIFIED"
+        } else {
+            "PARTIAL"
+        },
+        all_min
+    );
     println!("║");
-    println!("║  G(j,k) = ∫₀¹ {{1/(jx)}} · {{1/(kx)}} dx   ∀ 1 ≤ j ≤ k ≤ {}", MAX_K);
-    println!("║  Pairs verified: {}  ({} diagonal + {} off-diagonal)", total_pairs, diag_results.len(), offdiag_results.len());
-    println!("║  Runtime: {:.2}s  |  Precision: {} bits  |  Threads: {}", elapsed, PREC, rayon::current_num_threads());
+    println!(
+        "║  G(j,k) = ∫₀¹ {{1/(jx)}} · {{1/(kx)}} dx   ∀ 1 ≤ j ≤ k ≤ {}",
+        MAX_K
+    );
+    println!(
+        "║  Pairs verified: {}  ({} diagonal + {} off-diagonal)",
+        total_pairs,
+        diag_results.len(),
+        offdiag_results.len()
+    );
+    println!(
+        "║  Runtime: {:.2}s  |  Precision: {} bits  |  Threads: {}",
+        elapsed,
+        PREC,
+        rayon::current_num_threads()
+    );
     println!("║");
     println!("║  Lean axiom: vasyunin_offdiag_integral");
     println!("║  File: Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean");
@@ -572,9 +691,16 @@ fn main() {
             file: "Cathedral/Vasyunin/Augmented/VasyuninIntegralProof.lean".into(),
             definition: "vasyuninGramEntry".into(),
             status: if all_certified {
-                format!("CERTIFIED — formula = integral to {} digits for all {} pairs", all_min, total_pairs)
+                format!(
+                    "CERTIFIED — formula = integral to {} digits for all {} pairs",
+                    all_min, total_pairs
+                )
             } else {
-                format!("PARTIAL — min {} digits, {} pairs below threshold", all_min, offdiag_results.iter().filter(|r| !r.certified).count())
+                format!(
+                    "PARTIAL — min {} digits, {} pairs below threshold",
+                    all_min,
+                    offdiag_results.iter().filter(|r| !r.certified).count()
+                )
             },
         },
         diagonal: diag_results.clone(),
@@ -583,17 +709,36 @@ fn main() {
     };
 
     let cert_json = serde_json::to_string_pretty(&cert).unwrap();
-    std::fs::write("results/certificates/vasyunin_integral_cert.json", &cert_json).unwrap();
+    std::fs::write(
+        "results/certificates/vasyunin_integral_cert.json",
+        &cert_json,
+    )
+    .unwrap();
     println!("\n  📁 Certificate: results/certificates/vasyunin_integral_cert.json");
 
     // TSV for quick analysis
     let tsv_path = "results/results.tsv";
     let mut tsv = std::fs::File::create(tsv_path).unwrap();
-    writeln!(tsv, "j\tk\tgcd\tformula\tintegral\terror\tdigits\tcertified\ttime_ms").unwrap();
+    writeln!(
+        tsv,
+        "j\tk\tgcd\tformula\tintegral\terror\tdigits\tcertified\ttime_ms"
+    )
+    .unwrap();
     for r in diag_results.iter().chain(offdiag_results.iter()) {
-        writeln!(tsv, "{}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.5e}\t{}\t{}\t{:.1}",
-            r.j, r.k, r.gcd, r.formula, r.integral, r.error,
-            r.matching_digits, r.certified, r.time_ms).unwrap();
+        writeln!(
+            tsv,
+            "{}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.5e}\t{}\t{}\t{:.1}",
+            r.j,
+            r.k,
+            r.gcd,
+            r.formula,
+            r.integral,
+            r.error,
+            r.matching_digits,
+            r.certified,
+            r.time_ms
+        )
+        .unwrap();
     }
     println!("  📁 TSV: {}", tsv_path);
 

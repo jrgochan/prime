@@ -69,16 +69,28 @@ impl LnTable {
         let values: Vec<Float> = (0..=cap)
             .into_par_iter()
             .map(|n| {
-                if n == 0 { Float::with_val(p, 0) }
-                else {
+                if n == 0 {
+                    Float::with_val(p, 0)
+                } else {
                     let nf = Float::with_val(p, n as u64);
-                    let ratio = Float::with_val(p, Float::with_val(p, 1u32) + Float::with_val(p, Float::with_val(p, 1u32) / &nf));
+                    let ratio = Float::with_val(
+                        p,
+                        Float::with_val(p, 1u32)
+                            + Float::with_val(p, Float::with_val(p, 1u32) / &nf),
+                    );
                     ratio.ln()
                 }
             })
             .collect();
-        eprintln!("  \x1b[32m✓\x1b[0m ln table ready ({cap} entries, {:.1}s)", t0.elapsed().as_secs_f64());
-        Self { values, max_n: cap, precision: p }
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m ln table ready ({cap} entries, {:.1}s)",
+            t0.elapsed().as_secs_f64()
+        );
+        Self {
+            values,
+            max_n: cap,
+            precision: p,
+        }
     }
 
     /// Create a new ln table at the default 512-bit precision.
@@ -110,18 +122,31 @@ impl LnNTable {
     /// Build ln(n) table for n = 0..=max_val at given MPFR precision.
     pub fn new(max_val: usize, precision: u32) -> Self {
         let p = precision;
-        eprintln!("  \x1b[2m▸ Precomputing ln(n) table for n ≤ {} at {p}-bit...\x1b[0m", max_val);
+        eprintln!(
+            "  \x1b[2m▸ Precomputing ln(n) table for n ≤ {} at {p}-bit...\x1b[0m",
+            max_val
+        );
         let t0 = std::time::Instant::now();
         let ln_n: Vec<Float> = (0..=max_val)
             .into_par_iter()
             .map(|n| {
-                if n == 0 { Float::with_val(p, 0) }
-                else { Float::with_val(p, n as u64).ln() }
+                if n == 0 {
+                    Float::with_val(p, 0)
+                } else {
+                    Float::with_val(p, n as u64).ln()
+                }
             })
             .collect();
-        eprintln!("  \x1b[32m✓\x1b[0m ln(n) table ready ({} entries, {:.2}s)",
-            max_val, t0.elapsed().as_secs_f64());
-        Self { ln_n, max_n: max_val, precision: p }
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m ln(n) table ready ({} entries, {:.2}s)",
+            max_val,
+            t0.elapsed().as_secs_f64()
+        );
+        Self {
+            ln_n,
+            max_n: max_val,
+            precision: p,
+        }
     }
 
     /// ln(n) at MPFR precision.
@@ -137,10 +162,11 @@ impl LnNTable {
 
 #[inline(always)]
 fn fast_ln1p_inv(n: f64) -> f64 {
-    if n < 32.0 { (1.0 + 1.0 / n).ln() }
-    else {
+    if n < 32.0 {
+        (1.0 + 1.0 / n).ln()
+    } else {
         let x = 1.0 / n;
-        x * (1.0 - x * (0.5 - x * (1.0/3.0 - x * (0.25 - x * (0.2 - x * (1.0/6.0))))))
+        x * (1.0 - x * (0.5 - x * (1.0 / 3.0 - x * (0.25 - x * (0.2 - x * (1.0 / 6.0))))))
     }
 }
 
@@ -169,19 +195,27 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
         let ab_coeff = (a_int as f64) * inv_kf + (b_int as f64) * inv_jf;
         let ab_frac = if a_int > 0 && b_int > 0 {
             (a_int as f64) * (b_int as f64) / (nf * (nf + 1.0))
-        } else { 0.0 };
+        } else {
+            0.0
+        };
         let term = inv_jk - ab_coeff * ln_term + ab_frac;
-        let y = term - comp; let t = total + y; comp = (t - total) - y; total = t;
+        let y = term - comp;
+        let t = total + y;
+        comp = (t - total) - y;
+        total = t;
 
         // Adaptive early-exit: series converged to working precision
-        if n > min_terms && n % 1000 == 0
-            && term.abs() < total.abs() * 1e-16 { break; }
+        if n > min_terms && n % 1000 == 0 && term.abs() < total.abs() * 1e-16 {
+            break;
+        }
     }
 
     let d = g as f64;
     let tail_mean = 0.25 + d * d / (12.0 * jf * kf);
     let inv_t = 1.0 / t_direct as f64;
-    total += tail_mean * inv_t + tail_mean * 0.5 * inv_t * inv_t + tail_mean * (1.0/6.0) * inv_t * inv_t * inv_t;
+    total += tail_mean * inv_t
+        + tail_mean * 0.5 * inv_t * inv_t
+        + tail_mean * (1.0 / 6.0) * inv_t * inv_t * inv_t;
     total
 }
 
@@ -254,7 +288,9 @@ pub fn gram_entry_standalone(j: usize, k: usize, prec: u32) -> Float {
         // Adaptive early-exit
         if n > min_terms && n % 500 == 0 {
             let ratio = scratch_term.to_f64().abs() / total.to_f64().abs();
-            if ratio < 1e-18 { break; }
+            if ratio < 1e-18 {
+                break;
+            }
         }
     }
 
@@ -269,7 +305,10 @@ pub fn gram_entry_standalone(j: usize, k: usize, prec: u32) -> Float {
     let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
     let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
     total += Float::with_val(p, &tail_mean * &inv_t);
-    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    total += Float::with_val(
+        p,
+        Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2,
+    );
     let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
     total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
 
@@ -334,7 +373,9 @@ pub fn gram_entry_at_t(j: usize, k: usize, prec: u32, t_max: usize) -> Float {
 
         if n > min_terms && n % 500 == 0 {
             let ratio = scratch_term.to_f64().abs() / total.to_f64().abs();
-            if ratio < 1e-18 { break; }
+            if ratio < 1e-18 {
+                break;
+            }
         }
     }
 
@@ -349,7 +390,10 @@ pub fn gram_entry_at_t(j: usize, k: usize, prec: u32, t_max: usize) -> Float {
     let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
     let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
     total += Float::with_val(p, &tail_mean * &inv_t);
-    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    total += Float::with_val(
+        p,
+        Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2,
+    );
     let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
     total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
 
@@ -441,7 +485,10 @@ pub fn gram_entry_mpfr(j: usize, k: usize, ln_table: &LnTable) -> Float {
     let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
     let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
     total += Float::with_val(p, &tail_mean * &inv_t);
-    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    total += Float::with_val(
+        p,
+        Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2,
+    );
     let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
     total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
     total
@@ -480,11 +527,15 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     breakpoints.push(1usize);
     for m in 1..=(t_direct / j + 1) {
         let bp = m * j;
-        if bp <= t_direct { breakpoints.push(bp); }
+        if bp <= t_direct {
+            breakpoints.push(bp);
+        }
     }
     for m in 1..=(t_direct / k + 1) {
         let bp = m * k;
-        if bp <= t_direct { breakpoints.push(bp); }
+        if bp <= t_direct {
+            breakpoints.push(bp);
+        }
     }
     breakpoints.push(t_direct + 1);
     breakpoints.sort_unstable();
@@ -496,9 +547,13 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     for w in 0..breakpoints.len() - 1 {
         let n1 = breakpoints[w];
         let n2 = breakpoints[w + 1]; // exclusive upper bound
-        if n1 > t_direct { break; }
+        if n1 > t_direct {
+            break;
+        }
         let n2 = n2.min(t_direct + 1);
-        if n1 >= n2 { continue; }
+        if n1 >= n2 {
+            continue;
+        }
 
         let a = n1 / j; // ⌊n/j⌋ constant in [n1, n2)
         let b = n1 / k; // ⌊n/k⌋ constant in [n1, n2)
@@ -537,7 +592,7 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
             let diff = (n2 - n1) as u64;
             scratch *= &inv_n1; // scratch = n1 * n2
             inv_n1.assign(diff); // reuse as numerator
-            inv_n1 /= &scratch;  // inv_n1 = (n2-n1)/(n1*n2)
+            inv_n1 /= &scratch; // inv_n1 = (n2-n1)/(n1*n2)
             inv_n1 *= ab;
             total += &inv_n1;
         }
@@ -555,7 +610,10 @@ pub fn gram_entry_fast(j: usize, k: usize, ln_table: &LnNTable) -> Float {
     let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
     let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
     total += Float::with_val(p, &tail_mean * &inv_t);
-    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    total += Float::with_val(
+        p,
+        Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2,
+    );
     let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
     total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
     total
@@ -595,11 +653,15 @@ pub fn gram_entry_fast_at_t(j: usize, k: usize, ln_table: &LnNTable, t_max: usiz
     breakpoints.push(1usize);
     for m in 1..=(t_direct / j + 1) {
         let bp = m * j;
-        if bp <= t_direct { breakpoints.push(bp); }
+        if bp <= t_direct {
+            breakpoints.push(bp);
+        }
     }
     for m in 1..=(t_direct / k + 1) {
         let bp = m * k;
-        if bp <= t_direct { breakpoints.push(bp); }
+        if bp <= t_direct {
+            breakpoints.push(bp);
+        }
     }
     breakpoints.push(t_direct + 1);
     breakpoints.sort_unstable();
@@ -611,9 +673,13 @@ pub fn gram_entry_fast_at_t(j: usize, k: usize, ln_table: &LnNTable, t_max: usiz
     for w in 0..breakpoints.len() - 1 {
         let n1 = breakpoints[w];
         let n2 = breakpoints[w + 1];
-        if n1 > t_direct { break; }
+        if n1 > t_direct {
+            break;
+        }
         let n2 = n2.min(t_direct + 1);
-        if n1 >= n2 { continue; }
+        if n1 >= n2 {
+            continue;
+        }
 
         let a = n1 / j;
         let b = n1 / k;
@@ -666,7 +732,10 @@ pub fn gram_entry_fast_at_t(j: usize, k: usize, ln_table: &LnNTable, t_max: usiz
     let inv_t2 = Float::with_val(p, &inv_t * &inv_t);
     let inv_t3 = Float::with_val(p, &inv_t2 * &inv_t);
     total += Float::with_val(p, &tail_mean * &inv_t);
-    total += Float::with_val(p, Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2);
+    total += Float::with_val(
+        p,
+        Float::with_val(p, &tail_mean * Float::with_val(p, 0.5f64)) * &inv_t2,
+    );
     let sixth = Float::with_val(p, Float::with_val(p, 1u32) / Float::with_val(p, 6u32));
     total += Float::with_val(p, Float::with_val(p, &tail_mean * &sixth) * &inv_t3);
     total
@@ -693,11 +762,17 @@ impl DDLnTable {
         let values: Vec<DD> = (0..=cap)
             .into_par_iter()
             .map(|n| {
-                if n == 0 { DD::from_f64(0.0) }
-                else { DD::ln1p_inv(n as u64) }
+                if n == 0 {
+                    DD::from_f64(0.0)
+                } else {
+                    DD::ln1p_inv(n as u64)
+                }
             })
             .collect();
-        eprintln!("  \x1b[32m✓\x1b[0m DD ln table ready ({cap} entries, {:.1}s)", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m DD ln table ready ({cap} entries, {:.1}s)",
+            t0.elapsed().as_secs_f64()
+        );
         Self { values, max_n: cap }
     }
 
@@ -761,8 +836,9 @@ pub fn gram_entry_dd(j: usize, k: usize, ln_table: &DDLnTable) -> f64 {
     let jkf = (j * k) as f64;
     let tail_mean = 0.25 + d * d / (12.0 * jkf);
     let inv_t = 1.0 / t_direct as f64;
-    let tail = tail_mean * inv_t + tail_mean * 0.5 * inv_t * inv_t
-        + tail_mean * (1.0/6.0) * inv_t * inv_t * inv_t;
+    let tail = tail_mean * inv_t
+        + tail_mean * 0.5 * inv_t * inv_t
+        + tail_mean * (1.0 / 6.0) * inv_t * inv_t * inv_t;
     total += DD::from_f64(tail);
 
     total.to_f64()
@@ -803,7 +879,14 @@ impl GramMatrix {
         let prec = ln_table.map(|t| t.precision).unwrap_or(0);
 
         eprintln!("  \x1b[2m▸ Building {dim}×{dim} Gram matrix ({total_entries} unique entries, ~{mem_mb} MB)\x1b[0m");
-        eprintln!("  \x1b[2m  Precision: {}\x1b[0m", if use_mpfr { format!("{prec}-bit MPFR (precomputed ln)") } else { "f64 (Kahan summation)".to_string() });
+        eprintln!(
+            "  \x1b[2m  Precision: {}\x1b[0m",
+            if use_mpfr {
+                format!("{prec}-bit MPFR (precomputed ln)")
+            } else {
+                "f64 (Kahan summation)".to_string()
+            }
+        );
 
         // Generate all upper-triangle (row, col) pairs for entry-level parallelism.
         // This gives much better load balance than row-level parallelism because
@@ -836,7 +919,9 @@ impl GramMatrix {
             })
             .collect();
 
-        if dim > 200 { eprintln!(); }
+        if dim > 200 {
+            eprintln!();
+        }
 
         let mut data = vec![0.0f64; dim * dim];
         for ((r, c), v) in entries {
@@ -844,9 +929,18 @@ impl GramMatrix {
             data[c * dim + r] = v;
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s",
+            t0.elapsed().as_secs_f64()
+        );
 
-        Self { data, max_dim: dim, max_n, mpfr_built: use_mpfr, precision: prec }
+        Self {
+            data,
+            max_dim: dim,
+            max_n,
+            mpfr_built: use_mpfr,
+            precision: prec,
+        }
     }
 
     /// Build using the FAST block-based algorithm — O(T/j+T/k) per entry.
@@ -885,7 +979,9 @@ impl GramMatrix {
             })
             .collect();
 
-        if dim > 200 { eprintln!(); }
+        if dim > 200 {
+            eprintln!();
+        }
 
         let mut data = vec![0.0f64; dim * dim];
         for ((r, c), v) in entries {
@@ -893,9 +989,18 @@ impl GramMatrix {
             data[c * dim + r] = v;
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s",
+            t0.elapsed().as_secs_f64()
+        );
 
-        Self { data, max_dim: dim, max_n, mpfr_built: true, precision: prec }
+        Self {
+            data,
+            max_dim: dim,
+            max_n,
+            mpfr_built: true,
+            precision: prec,
+        }
     }
 
     /// Build using the FAST block-based algorithm, storing in DD precision.
@@ -941,7 +1046,9 @@ impl GramMatrix {
             })
             .collect();
 
-        if dim > 200 { eprintln!(); }
+        if dim > 200 {
+            eprintln!();
+        }
 
         let mut data_hi = vec![0.0f64; dim * dim];
         let mut data_lo = vec![0.0f64; dim * dim];
@@ -952,7 +1059,10 @@ impl GramMatrix {
             data_lo[c * dim + r] = lo;
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix DD built in {:.1}s", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m Gram matrix DD built in {:.1}s",
+            t0.elapsed().as_secs_f64()
+        );
 
         (data_hi, data_lo, dim)
     }
@@ -994,7 +1104,9 @@ impl GramMatrix {
             })
             .collect();
 
-        if dim > 200 { eprintln!(); }
+        if dim > 200 {
+            eprintln!();
+        }
 
         let zero = Float::with_val(prec, 0.0);
         let mut data: Vec<Float> = vec![zero; dim * dim];
@@ -1003,7 +1115,10 @@ impl GramMatrix {
             data[r * dim + c] = val;
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m MPFR Gram matrix built in {:.1}s ({prec}-bit)", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m MPFR Gram matrix built in {:.1}s ({prec}-bit)",
+            t0.elapsed().as_secs_f64()
+        );
 
         (data, dim)
     }
@@ -1042,7 +1157,9 @@ impl GramMatrix {
             })
             .collect();
 
-        if dim > 200 { eprintln!(); }
+        if dim > 200 {
+            eprintln!();
+        }
 
         let mut data = vec![0.0f64; dim * dim];
         for ((r, c), v) in entries {
@@ -1050,15 +1167,28 @@ impl GramMatrix {
             data[c * dim + r] = v;
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s", t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m Gram matrix built in {:.1}s",
+            t0.elapsed().as_secs_f64()
+        );
 
-        Self { data, max_dim: dim, max_n, mpfr_built: false, precision: 106 }
+        Self {
+            data,
+            max_dim: dim,
+            max_n,
+            mpfr_built: false,
+            precision: 106,
+        }
     }
 
     /// Extract the (n-1)×(n-1) submatrix for G_n.
     /// This is FREE — just a view into the existing data.
     pub fn extract_submatrix(&self, n: usize) -> (Vec<f64>, usize) {
-        assert!(n <= self.max_n, "Cannot extract N={n} from matrix built for N={}", self.max_n);
+        assert!(
+            n <= self.max_n,
+            "Cannot extract N={n} from matrix built for N={}",
+            self.max_n
+        );
         let dim = n - 1;
         let mut sub = vec![0.0f64; dim * dim];
         for i in 0..dim {
@@ -1110,7 +1240,9 @@ pub fn build_upper_triangle_f64(max_n: usize) -> Vec<f64> {
     let mem_mb = (tri_len * 8) / (1024 * 1024);
     let t0 = std::time::Instant::now();
 
-    eprintln!("  \x1b[2m▸ Building upper triangle (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m");
+    eprintln!(
+        "  \x1b[2m▸ Building upper triangle (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m"
+    );
     eprintln!("  \x1b[2m  Method: f64 Kahan (streaming, no full matrix)\x1b[0m");
 
     let mut upper_tri = vec![0.0f64; tri_len];
@@ -1131,15 +1263,20 @@ pub fn build_upper_triangle_f64(max_n: usize) -> Vec<f64> {
                 let elapsed = t0.elapsed().as_secs_f64();
                 let frac = count as f64 / tri_len as f64;
                 let eta = elapsed / frac * (1.0 - frac);
-                eprint!("\r  \x1b[2m  {count}/{tri_len} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ", frac * 100.0);
+                eprint!(
+                    "\r  \x1b[2m  {count}/{tri_len} entries ({:.0}%) ETA {eta:.0}s\x1b[0m     ",
+                    frac * 100.0
+                );
             }
         });
 
         offset += len;
     }
 
-    eprintln!("\r  \x1b[32m✓\x1b[0m Upper triangle built in {:.1}s ({mem_mb} MB)          ",
-        t0.elapsed().as_secs_f64());
+    eprintln!(
+        "\r  \x1b[32m✓\x1b[0m Upper triangle built in {:.1}s ({mem_mb} MB)          ",
+        t0.elapsed().as_secs_f64()
+    );
     upper_tri
 }
 
@@ -1160,7 +1297,9 @@ pub fn build_upper_triangle_fast_dd(
     let prec = ln_n_table.precision;
     let t0 = std::time::Instant::now();
 
-    eprintln!("  \x1b[2m▸ Building upper triangle DD (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m");
+    eprintln!(
+        "  \x1b[2m▸ Building upper triangle DD (dim={dim}, {tri_len} entries, ~{mem_mb} MB)\x1b[0m"
+    );
     eprintln!("  \x1b[2m  Method: FAST block-based ({prec}-bit MPFR → DD, streaming)\x1b[0m");
 
     let mut upper_tri_hi = vec![0.0f64; tri_len];
@@ -1213,8 +1352,10 @@ pub fn build_upper_triangle_fast_dd(
         }
     }
 
-    eprintln!("\r  \x1b[32m✓\x1b[0m Upper triangle DD built in {:.1}s ({mem_mb} MB)          ",
-        t0.elapsed().as_secs_f64());
+    eprintln!(
+        "\r  \x1b[32m✓\x1b[0m Upper triangle DD built in {:.1}s ({mem_mb} MB)          ",
+        t0.elapsed().as_secs_f64()
+    );
 
     (upper_tri_hi, upper_tri_lo, dim)
 }
@@ -1228,10 +1369,17 @@ pub fn build_upper_triangle_fast_dd(
 pub fn validate_f64_vs_mpfr(n: usize, ln_table: &LnTable) -> (f64, f64) {
     let dim = n - 1;
     let mut pairs = Vec::new();
-    for i in 0..dim.min(5) { for j in i..dim.min(5) { pairs.push((i + 2, j + 2)); } }
+    for i in 0..dim.min(5) {
+        for j in i..dim.min(5) {
+            pairs.push((i + 2, j + 2));
+        }
+    }
     let mid = dim / 2 + 2;
-    pairs.push((mid, mid)); pairs.push((2, mid)); pairs.push((mid, n));
-    pairs.push((n - 1, n)); pairs.push((n, n));
+    pairs.push((mid, mid));
+    pairs.push((2, mid));
+    pairs.push((mid, n));
+    pairs.push((n - 1, n));
+    pairs.push((n, n));
     pairs.dedup();
 
     let (mut max_rel, mut sum_rel, mut count) = (0.0f64, 0.0f64, 0usize);
@@ -1240,10 +1388,19 @@ pub fn validate_f64_vs_mpfr(n: usize, ln_table: &LnTable) -> (f64, f64) {
         let mpfr_val = gram_entry_mpfr(*j, *k, ln_table).to_f64();
         if mpfr_val.abs() > 1e-30 {
             let rel = ((f64_val - mpfr_val) / mpfr_val).abs();
-            max_rel = max_rel.max(rel); sum_rel += rel; count += 1;
+            max_rel = max_rel.max(rel);
+            sum_rel += rel;
+            count += 1;
         }
     }
-    (max_rel, if count > 0 { sum_rel / count as f64 } else { 0.0 })
+    (
+        max_rel,
+        if count > 0 {
+            sum_rel / count as f64
+        } else {
+            0.0
+        },
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════

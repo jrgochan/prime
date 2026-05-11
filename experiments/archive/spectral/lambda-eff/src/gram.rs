@@ -141,7 +141,10 @@ pub fn compute_gram_matrix(n: usize, progress: Option<&indicatif::ProgressBar>) 
 
 /// Compute only the Gram entries needed for a specific block (indices within one residue class).
 /// Returns a dense square matrix for that block.
-pub fn compute_block_matrix(indices: &[usize], progress: Option<&indicatif::ProgressBar>) -> Vec<f64> {
+pub fn compute_block_matrix(
+    indices: &[usize],
+    progress: Option<&indicatif::ProgressBar>,
+) -> Vec<f64> {
     let dim = indices.len();
     let total_entries = dim * (dim + 1) / 2;
 
@@ -175,10 +178,7 @@ pub fn compute_block_matrix(indices: &[usize], progress: Option<&indicatif::Prog
 
 /// Compute the cross-block interaction matrix between two residue classes.
 /// Returns a (|class1| × |class2|) dense matrix.
-pub fn compute_cross_matrix(
-    indices1: &[usize],
-    indices2: &[usize],
-) -> Vec<f64> {
+pub fn compute_cross_matrix(indices1: &[usize], indices2: &[usize]) -> Vec<f64> {
     let rows = indices1.len();
     let cols = indices2.len();
 
@@ -216,22 +216,33 @@ mod tests {
         // G[2,2] converges to ~0.2939 (verified with scipy quad and
         // m_max = 100_000 convergence study).
         let g22 = gram_entry(2, 2);
-        assert!((g22 - 0.2939).abs() < 0.005,
-            "G[2,2] = {}, expected ~0.2939", g22);
+        assert!(
+            (g22 - 0.2939).abs() < 0.005,
+            "G[2,2] = {}, expected ~0.2939",
+            g22
+        );
     }
 
     #[test]
     fn test_gram_symmetry() {
         let g23 = gram_entry(2, 3);
         let g32 = gram_entry(3, 2);
-        assert!((g23 - g32).abs() < 1e-12, "G[2,3] ≠ G[3,2]: {} vs {}", g23, g32);
+        assert!(
+            (g23 - g32).abs() < 1e-12,
+            "G[2,3] ≠ G[3,2]: {} vs {}",
+            g23,
+            g32
+        );
     }
 
     #[test]
     fn test_gram_offdiag() {
         // G[2,3] = ∫₀¹ {2/x}{3/x} dx ≈ 0.2341 (converged)
         let g23 = gram_entry(2, 3);
-        assert!((g23 - 0.2341).abs() < 0.005,
-            "G[2,3] = {}, expected ~0.2341", g23);
+        assert!(
+            (g23 - 0.2341).abs() < 0.005,
+            "G[2,3] = {}, expected ~0.2341",
+            g23
+        );
     }
 }

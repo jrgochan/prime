@@ -28,14 +28,14 @@
 /// - `partial_sums`: precomputed F(n) = Σ_{k=a}^{n} f(k)
 ///
 /// Returns (direct_sum, abel_sum, difference) for verification.
-pub fn abel_transform(
-    f: &[f64],
-    g: &[f64],
-    partial_sums: &[f64],
-) -> AbelResult {
+pub fn abel_transform(f: &[f64], g: &[f64], partial_sums: &[f64]) -> AbelResult {
     let n = f.len().min(g.len());
     if n == 0 {
-        return AbelResult { direct: 0.0, abel: 0.0, error: 0.0 };
+        return AbelResult {
+            direct: 0.0,
+            abel: 0.0,
+            error: 0.0,
+        };
     }
 
     // Direct sum: Σ f(k) · g(k)
@@ -103,11 +103,15 @@ pub fn abel_mobius_witness(
         let idx = k - 2;
         let bk_wk = if idx < b.len() && idx < weights.len() {
             b[idx] * weights[idx]
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         let bk1_wk1 = if k < n && idx + 1 < b.len() && idx + 1 < weights.len() {
             b[idx + 1] * weights[idx + 1]
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         abel += mk * (bk_wk - bk1_wk1);
     }
@@ -143,10 +147,7 @@ pub struct AbelWitnessResult {
 ///   |tail| ≤ C² · K / ln(N)
 ///
 /// Returns the bound and its components.
-pub fn abel_tail_bound(
-    mertens_constant: f64,
-    n: usize,
-) -> AbelTailBound {
+pub fn abel_tail_bound(mertens_constant: f64, n: usize) -> AbelTailBound {
     let ln_n = (n as f64).ln();
     // The tail decay comes from the Mertens hypothesis:
     // The witness residual decays as 1/ln(N) when |M(x)| ≤ C·√x·(ln x)²
@@ -191,10 +192,17 @@ mod tests {
 
         // Direct: Σ 1·k = n(n-1)/2
         let expected = (n as f64) * (n as f64 - 1.0) / 2.0;
-        assert!((result.direct - expected).abs() < 1e-10,
-            "Direct sum = {}, expected {}", result.direct, expected);
-        assert!(result.error < 1e-10,
-            "Abel identity error = {}", result.error);
+        assert!(
+            (result.direct - expected).abs() < 1e-10,
+            "Direct sum = {}, expected {}",
+            result.direct,
+            expected
+        );
+        assert!(
+            result.error < 1e-10,
+            "Abel identity error = {}",
+            result.error
+        );
     }
 
     #[test]

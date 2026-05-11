@@ -22,17 +22,35 @@ const PREC: u32 = 256;
 
 // ── Arithmetic helpers (avoid Incomplete chaining) ──
 
-fn f(v: u64) -> Float { Float::with_val(PREC, v) }
-fn fr(v: f64) -> Float { Float::with_val(PREC, v) }
+fn f(v: u64) -> Float {
+    Float::with_val(PREC, v)
+}
+fn fr(v: f64) -> Float {
+    Float::with_val(PREC, v)
+}
 
-fn add(a: &Float, b: &Float) -> Float { Float::with_val(PREC, a + b) }
-fn sub(a: &Float, b: &Float) -> Float { Float::with_val(PREC, a - b) }
-fn mul(a: &Float, b: &Float) -> Float { Float::with_val(PREC, a * b) }
-fn div(a: &Float, b: &Float) -> Float { Float::with_val(PREC, a / b) }
-fn neg(a: &Float) -> Float { Float::with_val(PREC, -a) }
-fn ln(a: &Float) -> Float { a.clone().ln() }
+fn add(a: &Float, b: &Float) -> Float {
+    Float::with_val(PREC, a + b)
+}
+fn sub(a: &Float, b: &Float) -> Float {
+    Float::with_val(PREC, a - b)
+}
+fn mul(a: &Float, b: &Float) -> Float {
+    Float::with_val(PREC, a * b)
+}
+fn div(a: &Float, b: &Float) -> Float {
+    Float::with_val(PREC, a / b)
+}
+fn neg(a: &Float) -> Float {
+    Float::with_val(PREC, -a)
+}
+fn ln(a: &Float) -> Float {
+    a.clone().ln()
+}
 
-fn pi_val() -> Float { Float::with_val(PREC, Constant::Pi) }
+fn pi_val() -> Float {
+    Float::with_val(PREC, Constant::Pi)
+}
 
 fn cot(x: &Float) -> Float {
     let s = x.clone().sin();
@@ -47,7 +65,9 @@ fn gcd(a: u64, b: u64) -> u64 {
 // ── Vasyunin cotangent sum ──
 
 fn vasyunin_sum(a: u64, b: u64) -> Float {
-    if a <= 1 { return f(0); }
+    if a <= 1 {
+        return f(0);
+    }
     let af = f(a);
     let pi = pi_val();
     let mut sum = f(0);
@@ -122,7 +142,10 @@ struct Tile {
 /// Evaluate ∫_lo^hi (1/(jx) - m)(1/(kx) - n) dx via FTC
 /// = [-1/(jkx) - (n/j + m/k)·ln(x) + mn·x] from lo to hi
 fn tile_integral(j: u64, k: u64, m: u64, n: u64, lo: &Float, hi: &Float) -> (Float, Float, Float) {
-    let jf = f(j); let kf = f(k); let mf = f(m); let nf = f(n);
+    let jf = f(j);
+    let kf = f(k);
+    let mf = f(m);
+    let nf = f(n);
     let jk = mul(&jf, &kf);
     let log_coeff = add(&div(&nf, &jf), &div(&mf, &kf)); // n/j + m/k
     let mn = mul(&mf, &nf);
@@ -156,18 +179,20 @@ fn find_tiles(j: u64, k: u64) -> Vec<Tile> {
 
     for m in 0..=max_idx {
         let j_lo = if m == 0 {
-            div(&f(1), &f(j))    // 1/j
+            div(&f(1), &f(j)) // 1/j
         } else {
             div(&f(1), &f(j * (m + 1)))
         };
         let j_hi = if m == 0 {
-            one.clone()          // 1
+            one.clone() // 1
         } else {
             div(&f(1), &f(j * m))
         };
 
         // Early exit: if the j-interval is entirely below our tolerance
-        if j_hi < fr(1e-15) { break; }
+        if j_hi < fr(1e-15) {
+            break;
+        }
 
         for n in 0..=max_idx {
             let k_lo = if n == 0 {
@@ -182,17 +207,35 @@ fn find_tiles(j: u64, k: u64) -> Vec<Tile> {
             };
 
             // Tile: (max(j_lo, k_lo), min(j_hi, k_hi)]
-            let lo = if j_lo > k_lo { j_lo.clone() } else { k_lo.clone() };
-            let hi = if j_hi < k_hi { j_hi.clone() } else { k_hi.clone() };
+            let lo = if j_lo > k_lo {
+                j_lo.clone()
+            } else {
+                k_lo.clone()
+            };
+            let hi = if j_hi < k_hi {
+                j_hi.clone()
+            } else {
+                k_hi.clone()
+            };
 
             if lo < hi {
                 let (integral, log_term, rational_term) = tile_integral(j, k, m, n, &lo, &hi);
-                tiles.push(Tile { m, n, lo, hi, integral, log_term, rational_term });
+                tiles.push(Tile {
+                    m,
+                    n,
+                    lo,
+                    hi,
+                    integral,
+                    log_term,
+                    rational_term,
+                });
             }
 
             // Note: k_lo DECREASES as n grows, so we can't break early.
             // But we CAN break when k_hi < j_lo (tile guaranteed empty for all larger n)
-            if n > 0 && k_hi < j_lo { break; }
+            if n > 0 && k_hi < j_lo {
+                break;
+            }
         }
     }
     tiles
@@ -229,7 +272,9 @@ fn main() {
         let tiles = find_tiles(j, k);
         let tile_sum = tiles.iter().fold(f(0), |acc, t| add(&acc, &t.integral));
         let log_total = tiles.iter().fold(f(0), |acc, t| add(&acc, &t.log_term));
-        let rat_total = tiles.iter().fold(f(0), |acc, t| add(&acc, &t.rational_term));
+        let rat_total = tiles
+            .iter()
+            .fold(f(0), |acc, t| add(&acc, &t.rational_term));
 
         println!("  Piecewise sum:      {:.20}", tile_sum.to_f64());
         println!("    Log component:    {:.20}", log_total.to_f64());
@@ -242,8 +287,14 @@ fn main() {
         // Show first few tiles for small cases
         if tiles.len() <= 20 {
             for t in &tiles {
-                println!("    m={}, n={}: ({:.8}, {:.8}] → {:.15}",
-                    t.m, t.n, t.lo.to_f64(), t.hi.to_f64(), t.integral.to_f64());
+                println!(
+                    "    m={}, n={}: ({:.8}, {:.8}] → {:.15}",
+                    t.m,
+                    t.n,
+                    t.lo.to_f64(),
+                    t.hi.to_f64(),
+                    t.integral.to_f64()
+                );
             }
         }
 
@@ -256,14 +307,19 @@ fn main() {
             let v2 = vasyunin_sum(kp, jp);
             println!("  V({},{}) = {:.15}", jp, kp, v1.to_f64());
             println!("  V({},{}) = {:.15}", kp, jp, v2.to_f64());
-            let cot_contr = mul(&div(&mul(&pi_val(), &f(d)),
-                &mul(&f(2), &mul(&f(j), &f(k)))), &add(&v1, &v2));
+            let cot_contr = mul(
+                &div(&mul(&pi_val(), &f(d)), &mul(&f(2), &mul(&f(j), &f(k)))),
+                &add(&v1, &v2),
+            );
             println!("  πd/(2jk)·(V+V) = {:.15}", cot_contr.to_f64());
 
             // Tile ratio pattern
             let on_ratio = tiles.iter().filter(|t| t.m * k == t.n * j).count();
             let off_ratio = tiles.len() - on_ratio;
-            println!("  Tiles on-ratio (m/n=j/k): {}, off-ratio: {}", on_ratio, off_ratio);
+            println!(
+                "  Tiles on-ratio (m/n=j/k): {}, off-ratio: {}",
+                on_ratio, off_ratio
+            );
         }
 
         println!();
@@ -278,12 +334,18 @@ fn main() {
     println!("  Total tiles: {}, max_m: {}", tiles.len(), max_m);
     for m in 1..=15.min(max_m) {
         let mt: Vec<&Tile> = tiles.iter().filter(|t| t.m == m).collect();
-        if mt.is_empty() { continue; }
+        if mt.is_empty() {
+            continue;
+        }
         let ms = mt.iter().fold(f(0), |a, t| add(&a, &t.integral));
         println!("  m={}: {} tiles, sum = {:.15}", m, mt.len(), ms.to_f64());
         for t in &mt {
-            println!("      n={}: integral={:.12e}, log={:.10e}",
-                t.n, t.integral.to_f64(), t.log_term.to_f64());
+            println!(
+                "      n={}: integral={:.12e}, log={:.10e}",
+                t.n,
+                t.integral.to_f64(),
+                t.log_term.to_f64()
+            );
         }
     }
 
@@ -294,8 +356,13 @@ fn main() {
     println!(" Key question: how many n-values per m-row?");
     println!("═══════════════════════════════════════════════════════════════");
 
-    for &(j, k, desc) in &[(1u64, 2, "j=1,k=2"), (2, 3, "j=2,k=3"), (3, 5, "j=3,k=5"),
-                           (2, 4, "j=2,k=4"), (4, 6, "j=4,k=6")] {
+    for &(j, k, desc) in &[
+        (1u64, 2, "j=1,k=2"),
+        (2, 3, "j=2,k=3"),
+        (3, 5, "j=3,k=5"),
+        (2, 4, "j=2,k=4"),
+        (4, 6, "j=4,k=6"),
+    ] {
         let tiles = find_tiles(j, k);
         println!();
         println!("  G({},{}) — {}", j, k, desc);
@@ -306,11 +373,20 @@ fn main() {
         let mut total_multi = 0;
         for m in 0..=max_m {
             let n_vals: Vec<u64> = tiles.iter().filter(|t| t.m == m).map(|t| t.n).collect();
-            if n_vals.len() > 1 { total_multi += 1; }
-            if n_vals.len() > max_n_per_m { max_n_per_m = n_vals.len(); }
+            if n_vals.len() > 1 {
+                total_multi += 1;
+            }
+            if n_vals.len() > max_n_per_m {
+                max_n_per_m = n_vals.len();
+            }
         }
-        println!("    {} tiles total, max n-per-m = {}, rows with >1 n: {} / {}",
-            tiles.len(), max_n_per_m, total_multi, max_m + 1);
+        println!(
+            "    {} tiles total, max n-per-m = {}, rows with >1 n: {} / {}",
+            tiles.len(),
+            max_n_per_m,
+            total_multi,
+            max_m + 1
+        );
 
         // Show first 20 m rows with their n values
         println!("    m →  n mapping (first 30 rows):");
@@ -319,8 +395,12 @@ fn main() {
             if !n_vals.is_empty() {
                 let _expected_n = m * k / j; // approximate
                 let n_str: Vec<String> = n_vals.iter().map(|n| format!("{}", n)).collect();
-                println!("      m={:>2} → n=[{}]  (m·k/j={:.1})", m, n_str.join(", "),
-                    m as f64 * k as f64 / j as f64);
+                println!(
+                    "      m={:>2} → n=[{}]  (m·k/j={:.1})",
+                    m,
+                    n_str.join(", "),
+                    m as f64 * k as f64 / j as f64
+                );
             }
         }
 
@@ -346,13 +426,16 @@ fn main() {
             //   i.e. n ∈ (jm/k - 1, j(m+1)/k)
             let lo_n = (j * m) as f64 / k as f64 - 1.0;
             let hi_n = (j * (m + 1)) as f64 / k as f64;
-            let predicted: Vec<u64> = (0..=max_m).filter(|&n| {
-                (n as f64) > lo_n && (n as f64) < hi_n
-            }).collect();
+            let predicted: Vec<u64> = (0..=max_m)
+                .filter(|&n| (n as f64) > lo_n && (n as f64) < hi_n)
+                .collect();
             if n_vals != predicted {
                 mismatches += 1;
                 if mismatches <= 5 {
-                    println!("      m={}: actual={:?}, predicted={:?}", m, n_vals, predicted);
+                    println!(
+                        "      m={}: actual={:?}, predicted={:?}",
+                        m, n_vals, predicted
+                    );
                 }
             }
         }
@@ -371,8 +454,13 @@ fn main() {
         let d = gcd(j, k);
         let jp = j / d;
         let kp = k / d;
-        println!("    j'={}, k'={}, d={}, predicted avg ≈ {:.3}",
-            jp, kp, d, (jp + kp) as f64 / (2.0 * jp as f64));
+        println!(
+            "    j'={}, k'={}, d={}, predicted avg ≈ {:.3}",
+            jp,
+            kp,
+            d,
+            (jp + kp) as f64 / (2.0 * jp as f64)
+        );
     }
 
     // ── Convergence ──
@@ -385,12 +473,21 @@ fn main() {
         let formula = vasyunin_gram_entry(j, k);
         println!("  G({},{}):", j, k);
         for cutoff in &[5u64, 10, 20, 50, 100, 500] {
-            let partial = tiles.iter()
+            let partial = tiles
+                .iter()
                 .filter(|t| t.m <= *cutoff && t.n <= *cutoff)
                 .fold(f(0), |a, t| add(&a, &t.integral));
             let err = sub(&formula, &partial);
-            let cnt = tiles.iter().filter(|t| t.m <= *cutoff && t.n <= *cutoff).count();
-            println!("    M≤{:>3}: {:>4} tiles, error = {:.6e}", cutoff, cnt, err.to_f64());
+            let cnt = tiles
+                .iter()
+                .filter(|t| t.m <= *cutoff && t.n <= *cutoff)
+                .count();
+            println!(
+                "    M≤{:>3}: {:>4} tiles, error = {:.6e}",
+                cutoff,
+                cnt,
+                err.to_f64()
+            );
         }
         println!();
     }

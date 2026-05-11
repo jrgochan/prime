@@ -12,7 +12,10 @@ fn main() {
         .and_then(|s| s.parse().ok())
         .unwrap_or(500);
 
-    eprintln!("Computing aggregate off-diagonal excess for n={} (indices 1..={})", n, n);
+    eprintln!(
+        "Computing aggregate off-diagonal excess for n={} (indices 1..={})",
+        n, n
+    );
     eprintln!("Total entries: {} (parallelized)", n * (n - 1));
 
     let start = std::time::Instant::now();
@@ -39,7 +42,10 @@ fn main() {
             }
             let done = progress.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
             if done % 10 == 0 {
-                eprint!("\r  Progress: {}%", (done + 1) * 100 / (total_pairs / chunk_size + 1));
+                eprint!(
+                    "\r  Progress: {}%",
+                    (done + 1) * 100 / (total_pairs / chunk_size + 1)
+                );
             }
             (excess, offdiag)
         })
@@ -49,7 +55,10 @@ fn main() {
     let total_offdiag: f64 = results.iter().map(|r| r.1).sum();
 
     // Compute diagonal sum
-    let diag_sum: f64 = (0..n).into_par_iter().map(|i| gram_entry(i + 1, i + 1)).sum();
+    let diag_sum: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| gram_entry(i + 1, i + 1))
+        .sum();
 
     let elapsed = start.elapsed();
     let n_pairs = n * (n - 1);
@@ -57,14 +66,33 @@ fn main() {
 
     eprintln!("\n\n═══ Results for n={} ═══", n);
     eprintln!("  Total off-diagonal excess: {:.4}", total_excess);
-    eprintln!("  Excess / n:                {:.6}", total_excess / n as f64);
-    eprintln!("  Excess / n²:               {:.8}", total_excess / (n as f64 * n as f64));
+    eprintln!(
+        "  Excess / n:                {:.6}",
+        total_excess / n as f64
+    );
+    eprintln!(
+        "  Excess / n²:               {:.8}",
+        total_excess / (n as f64 * n as f64)
+    );
     eprintln!("  Avg off-diagonal entry:    {:.8}", avg_offdiag);
-    eprintln!("  Mean excess per pair:      {:.8}", total_excess / n_pairs as f64);
+    eprintln!(
+        "  Mean excess per pair:      {:.8}",
+        total_excess / n_pairs as f64
+    );
     eprintln!("  Diagonal sum:              {:.4}", diag_sum);
-    eprintln!("  Gram sum:                  {:.4}", diag_sum + total_offdiag);
+    eprintln!(
+        "  Gram sum:                  {:.4}",
+        diag_sum + total_offdiag
+    );
     eprintln!("  Bound 3n:                  {:.0}", 3.0 * n as f64);
-    eprintln!("  Excess > 3n?               {}", if total_excess > 3.0 * n as f64 { "YES ❌" } else { "NO ✅" });
+    eprintln!(
+        "  Excess > 3n?               {}",
+        if total_excess > 3.0 * n as f64 {
+            "YES ❌"
+        } else {
+            "NO ✅"
+        }
+    );
     eprintln!("  Time:                      {:.1}s", elapsed.as_secs_f64());
 
     // Also output as JSON for analysis
@@ -72,7 +100,10 @@ fn main() {
     println!("  \"n\": {},", n);
     println!("  \"total_excess\": {:.8},", total_excess);
     println!("  \"excess_per_n\": {:.8},", total_excess / n as f64);
-    println!("  \"excess_per_n2\": {:.10},", total_excess / (n as f64 * n as f64));
+    println!(
+        "  \"excess_per_n2\": {:.10},",
+        total_excess / (n as f64 * n as f64)
+    );
     println!("  \"avg_offdiag\": {:.10},", avg_offdiag);
     println!("  \"diag_sum\": {:.8},", diag_sum);
     println!("  \"gram_sum\": {:.8},", diag_sum + total_offdiag);

@@ -3,9 +3,9 @@
 // L-function computation: L(s, χ) = Σ χ(n)/n^s
 // 512-bit MPFR for critical computations
 
-use rug::Float;
-use rug::ops::Pow;
 use crate::characters::chi8;
+use rug::ops::Pow;
+use rug::Float;
 
 const PREC: u32 = 512;
 

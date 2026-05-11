@@ -52,7 +52,10 @@ fn main() {
 
     eprintln!("╔═══════════════════════════════════════════════════╗");
     eprintln!("║  MÖBIUS CANCELLATION MICROSCOPE v3.1              ║");
-    eprintln!("║  12 decompositions · HPDF/DD · Taper Tracker{:>5} ║", gpu_tag);
+    eprintln!(
+        "║  12 decompositions · HPDF/DD · Taper Tracker{:>5} ║",
+        gpu_tag
+    );
     eprintln!("╚═══════════════════════════════════════════════════╝");
 
     std::fs::create_dir_all(&cli.output).unwrap();
@@ -118,11 +121,12 @@ fn main() {
     }
 
     // Mode 2: On-the-fly computation (f64 precision)
-    let ns: Vec<usize> = if cli.ns.is_empty() && cli.hpdf_paths.is_empty() && cli.gpu_paths.is_empty() {
-        vec![100, 500]
-    } else {
-        cli.ns.clone()
-    };
+    let ns: Vec<usize> =
+        if cli.ns.is_empty() && cli.hpdf_paths.is_empty() && cli.gpu_paths.is_empty() {
+            vec![100, 500]
+        } else {
+            cli.ns.clone()
+        };
 
     for &n in &ns {
         if n < 10 {
@@ -135,4 +139,3 @@ fn main() {
 
     eprintln!("\n═══ ALL COMPLETE ═══");
 }
-

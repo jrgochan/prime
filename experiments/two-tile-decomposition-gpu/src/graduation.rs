@@ -10,8 +10,8 @@
 //!    §5. Graduation identity (Σ perClassLimit = deltaTarget)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use std::ffi::c_int;
 use rayon::prelude::*;
+use std::ffi::c_int;
 
 use crate::gpu::PairResult;
 
@@ -23,7 +23,9 @@ use cathedral_utils::arith::frac_part;
 
 /// Digamma via asymptotic expansion + recurrence (matches CUDA kernel)
 fn digamma_cpu(mut x: f64) -> f64 {
-    if x <= 0.0 { return f64::NAN; }
+    if x <= 0.0 {
+        return f64::NAN;
+    }
     let mut result = 0.0;
     while x < 10.0 {
         result -= 1.0 / x;
@@ -45,7 +47,9 @@ fn digamma_cpu(mut x: f64) -> f64 {
     result
 }
 
-fn tile_index(a: usize, b: usize, m0: usize) -> usize { (a * m0) / b }
+fn tile_index(a: usize, b: usize, m0: usize) -> usize {
+    (a * m0) / b
+}
 
 fn is_two_tile(a: usize, b: usize, m0: usize) -> bool {
     let n0 = tile_index(a, b, m0);
@@ -77,15 +81,13 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     // ═══════════════════════════════════════════════════
 
     // Beta Bijection: tileIndex maps twoTileSet → {0,...,a-2} bijectively
-    let mut beta_vals: Vec<usize> = tt_classes.iter()
-        .map(|&m0| tile_index(a, b, m0)).collect();
+    let mut beta_vals: Vec<usize> = tt_classes.iter().map(|&m0| tile_index(a, b, m0)).collect();
     beta_vals.sort();
-    let expected_betas: Vec<usize> = (0..a-1).collect();
+    let expected_betas: Vec<usize> = (0..a - 1).collect();
     let beta_bijection = beta_vals == expected_betas && n_tt == a - 1;
 
     // S Permutation: overshoot values form {1,...,a-1}
-    let mut s_vals: Vec<usize> = tt_classes.iter()
-        .map(|&m0| overshoot(a, b, m0)).collect();
+    let mut s_vals: Vec<usize> = tt_classes.iter().map(|&m0| overshoot(a, b, m0)).collect();
     s_vals.sort();
     let expected_s: Vec<usize> = (1..a).collect();
     let s_permutation = s_vals == expected_s;
@@ -133,12 +135,12 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let full_lg: f64 = (0..b).map(&f_lg).sum();
     let full_psi: f64 = (0..b).map(&f_psi).sum();
 
-    let abel_lg: f64 = (1..b).map(|r| {
-        frac_part(af * r as f64 / bf) * (f_lg(r) - f_lg(r - 1))
-    }).sum();
-    let abel_psi: f64 = (1..b).map(|r| {
-        frac_part(af * r as f64 / bf) * (f_psi(r) - f_psi(r - 1))
-    }).sum();
+    let abel_lg: f64 = (1..b)
+        .map(|r| frac_part(af * r as f64 / bf) * (f_lg(r) - f_lg(r - 1)))
+        .sum();
+    let abel_psi: f64 = (1..b)
+        .map(|r| frac_part(af * r as f64 / bf) * (f_psi(r) - f_psi(r - 1)))
+        .sum();
 
     let rhs_lg = (af / bf) * full_lg + abel_lg - f_lg(b - 1);
     let rhs_psi = (af / bf) * full_psi + abel_psi - f_psi(b - 1);
@@ -149,16 +151,19 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     // ═══════════════════════════════════════════════════
     // §4. BETA MODULO DUALITY (Gemini Key 2)
     // ═══════════════════════════════════════════════════
-    let beta_lhs: f64 = tt_classes.iter().map(|&m0| {
-        let n0 = tile_index(a, b, m0);
-        let s = overshoot(a, b, m0);
-        let coeff = (s as f64 - af) / (af * af * bf);
-        coeff * digamma_cpu((n0 + 1) as f64 / af)
-    }).sum();
+    let beta_lhs: f64 = tt_classes
+        .iter()
+        .map(|&m0| {
+            let n0 = tile_index(a, b, m0);
+            let s = overshoot(a, b, m0);
+            let coeff = (s as f64 - af) / (af * af * bf);
+            coeff * digamma_cpu((n0 + 1) as f64 / af)
+        })
+        .sum();
 
-    let beta_rhs_sum: f64 = (1..a).map(|r| {
-        frac_part(bf * r as f64 / af) * digamma_cpu(r as f64 / af)
-    }).sum();
+    let beta_rhs_sum: f64 = (1..a)
+        .map(|r| frac_part(bf * r as f64 / af) * digamma_cpu(r as f64 / af))
+        .sum();
     let beta_rhs = -(1.0 / (af * bf)) * beta_rhs_sum;
 
     let beta_pw = tt_classes.iter().all(|&m0| {
@@ -173,38 +178,45 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     // ═══════════════════════════════════════════════════
     // §5. GRADUATION IDENTITY
     // ═══════════════════════════════════════════════════
-    let sum_pcl: f64 = tt_classes.iter().map(|&m0| {
-        let n0 = tile_index(a, b, m0);
-        let s = overshoot(a, b, m0);
-        let alpha = (m0 + 1) as f64 / bf;
-        let beta = (n0 + 1) as f64 / af;
-        -(1.0 / af) * (libm::lgamma(beta) - libm::lgamma(alpha))
-            - ((s as f64 - af) / (af * af * bf)) * digamma_cpu(beta)
-            - (1.0 / (af * bf)) * digamma_cpu(alpha)
-    }).sum();
+    let sum_pcl: f64 = tt_classes
+        .iter()
+        .map(|&m0| {
+            let n0 = tile_index(a, b, m0);
+            let s = overshoot(a, b, m0);
+            let alpha = (m0 + 1) as f64 / bf;
+            let beta = (n0 + 1) as f64 / af;
+            -(1.0 / af) * (libm::lgamma(beta) - libm::lgamma(alpha))
+                - ((s as f64 - af) / (af * af * bf)) * digamma_cpu(beta)
+                - (1.0 / (af * bf)) * digamma_cpu(alpha)
+        })
+        .sum();
 
     // vasyuninGramFormula
-    let vab: f64 = (1..b).map(|m| {
-        frac_part(af * m as f64 / bf) * (pi * m as f64 / bf).cos()
-            / (pi * m as f64 / bf).sin()
-    }).sum();
-    let vba: f64 = (1..a).map(|m| {
-        frac_part(bf * m as f64 / af) * (pi * m as f64 / af).cos()
-            / (pi * m as f64 / af).sin()
-    }).sum();
+    let vab: f64 = (1..b)
+        .map(|m| {
+            frac_part(af * m as f64 / bf) * (pi * m as f64 / bf).cos() / (pi * m as f64 / bf).sin()
+        })
+        .sum();
+    let vba: f64 = (1..a)
+        .map(|m| {
+            frac_part(bf * m as f64 / af) * (pi * m as f64 / af).cos() / (pi * m as f64 / af).sin()
+        })
+        .sum();
 
-    let formula = (log_2pi - EULER_GAMMA) / 2.0 * (1.0/af + 1.0/bf)
-        + (af - bf) / (2.0*af*bf) * (bf / af).ln()
-        - pi / (2.0*af*bf) * (vab + vba)
-        - 1.0 / (af*bf);
+    let formula = (log_2pi - EULER_GAMMA) / 2.0 * (1.0 / af + 1.0 / bf)
+        + (af - bf) / (2.0 * af * bf) * (bf / af).ln()
+        - pi / (2.0 * af * bf) * (vab + vba)
+        - 1.0 / (af * bf);
 
-    let ft: f64 = (1..b).map(|r| {
-        let fv = frac_part(af * r as f64 / bf);
-        let lg_r = libm::lgamma(r as f64 / bf);
-        let lg_rp1 = libm::lgamma((r + 1) as f64 / bf);
-        let psi_rp1 = digamma_cpu((r + 1) as f64 / bf);
-        fv * (lg_r - lg_rp1 + (1.0 / bf) * psi_rp1)
-    }).sum();
+    let ft: f64 = (1..b)
+        .map(|r| {
+            let fv = frac_part(af * r as f64 / bf);
+            let lg_r = libm::lgamma(r as f64 / bf);
+            let lg_rp1 = libm::lgamma((r + 1) as f64 / bf);
+            let psi_rp1 = digamma_cpu((r + 1) as f64 / bf);
+            fv * (lg_r - lg_rp1 + (1.0 / bf) * psi_rp1)
+        })
+        .sum();
 
     let strip = (af - 1.0) / (af * bf);
     let stir = (1.0 / bf) * (log_2pi - EULER_GAMMA - 1.0);
@@ -226,10 +238,10 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     //
     // Sum: AbelLogΓ cancels! Leaving:
     //   S₁ + (1/a)·FT = (1/b)·GaussB + (1/(ab))·Σ{ar/b}·ψ((r+1)/b)
-    let s1 = (1.0 / af) * tt_lg;  // (1/a) · Σ_{TT} logΓ(α)
-    let frac_psi_r1: f64 = (1..b).map(|r| {
-        frac_part(af * r as f64 / bf) * digamma_cpu((r + 1) as f64 / bf)
-    }).sum();
+    let s1 = (1.0 / af) * tt_lg; // (1/a) · Σ_{TT} logΓ(α)
+    let frac_psi_r1: f64 = (1..b)
+        .map(|r| frac_part(af * r as f64 / bf) * digamma_cpu((r + 1) as f64 / bf))
+        .sum();
     let abel_lhs = s1 + ft / af;
     let abel_rhs = gauss_lg_b_closed / bf + frac_psi_r1 / (af * bf);
     let abel_cancel_err = (abel_lhs - abel_rhs).abs();
@@ -238,9 +250,9 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     // §7. WEIGHTED DIGAMMA REFLECTION (NEW — May 5, 2026)
     // ═══════════════════════════════════════════════════
     // Σ_{r=1}^{b-1} {ar/b}·ψ(r/b) = (1/2)·(Σψ(r/b) - π·V(b,a))
-    let wdr_lhs: f64 = (1..b).map(|r| {
-        frac_part(af * r as f64 / bf) * digamma_cpu(r as f64 / bf)
-    }).sum();
+    let wdr_lhs: f64 = (1..b)
+        .map(|r| frac_part(af * r as f64 / bf) * digamma_cpu(r as f64 / bf))
+        .sum();
     let sum_psi_icc: f64 = (1..b).map(|r| digamma_cpu(r as f64 / bf)).sum();
     let wdr_rhs = 0.5 * (sum_psi_icc - pi * vab);
     let wdr_err = (wdr_lhs - wdr_rhs).abs();
@@ -272,7 +284,7 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let s2_eval = -(1.0 / af) * gauss_lg_a_direct;
 
     // S₃ evaluated via beta duality
-    let s3_eval = -beta_lhs;  // beta_lhs = Σ (s-a)/(a²b)·ψ(β) from §4
+    let s3_eval = -beta_lhs; // beta_lhs = Σ (s-a)/(a²b)·ψ(β) from §4
 
     // S₄ evaluated via staircase
     let s4_eval = -(1.0 / (af * bf)) * ((af / bf) * full_psi + abel_psi - f_psi(b - 1));
@@ -281,11 +293,17 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let fourway_err = (fourway_sum - dt).abs();
 
     // ═══ CERTIFICATION ═══
-    let certified = beta_bijection && s_permutation && overshoot_id
-        && gauss_lg_a_err < 1e-8 && gauss_lg_b_err < 1e-8
-        && gauss_d_a_err < 1e-8 && gauss_d_b_err < 1e-8
-        && tel_lg_err < 1e-8 && tel_psi_err < 1e-8
-        && beta_pw && (beta_lhs - beta_rhs).abs() < 1e-8
+    let certified = beta_bijection
+        && s_permutation
+        && overshoot_id
+        && gauss_lg_a_err < 1e-8
+        && gauss_lg_b_err < 1e-8
+        && gauss_d_a_err < 1e-8
+        && gauss_d_b_err < 1e-8
+        && tel_lg_err < 1e-8
+        && tel_psi_err < 1e-8
+        && beta_pw
+        && (beta_lhs - beta_rhs).abs() < 1e-8
         && id_err < 1e-8
         && abel_cancel_err < 1e-8
         && wdr_err < 1e-8
@@ -293,7 +311,8 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
         && fourway_err < 1e-8;
 
     PairResult {
-        a: a as c_int, b: b as c_int,
+        a: a as c_int,
+        b: b as c_int,
         n_two_tile: n_tt as c_int,
         beta_bijection: if beta_bijection { 1 } else { 0 },
         s_permutation: if s_permutation { 1 } else { 0 },
@@ -306,7 +325,9 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
         telescope_psi_err: tel_psi_err,
         beta_duality_pw: if beta_pw { 1 } else { 0 },
         beta_duality_sum_err: (beta_lhs - beta_rhs).abs(),
-        sum_pcl, delta_target: dt, identity_err: id_err,
+        sum_pcl,
+        delta_target: dt,
+        identity_err: id_err,
         abel_cancel_err,
         wdr_err,
         coprime_complement_ok: if coprime_comp { 1 } else { 0 },
@@ -317,7 +338,8 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
 
 /// CPU certification of all pairs using rayon parallelism.
 pub fn cpu_certify(pairs: &[(usize, usize)]) -> Vec<PairResult> {
-    pairs.par_iter()
+    pairs
+        .par_iter()
         .map(|&(a, b)| certify_pair_cpu(a, b))
         .collect()
 }

@@ -4,9 +4,7 @@
 //! by ω-class (number of distinct prime factors), measures the Liouville
 //! cancellation, and tests the Hardy-Ramanujan envelope fit.
 
-use cathedral_utils::arith::{
-    self, b_vector, liouville_table, small_omega_table, von_mangoldt,
-};
+use cathedral_utils::arith::{self, b_vector, liouville_table, small_omega_table, von_mangoldt};
 use std::fs;
 
 /// Load a coefficient TSV file.
@@ -45,7 +43,11 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
     let lambda_ln_ln = (n_max as f64).ln().ln();
 
     // Energy decomposition by ω-class
-    let max_omega = coeffs.iter().map(|(n, _)| omega[*n] as usize).max().unwrap_or(0);
+    let max_omega = coeffs
+        .iter()
+        .map(|(n, _)| omega[*n] as usize)
+        .max()
+        .unwrap_or(0);
 
     let mut e_omega = vec![0.0f64; max_omega + 1];
     let mut count_omega = vec![0usize; max_omega + 1];
@@ -98,18 +100,28 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
         let above_below = if partial > 1.0 { "ABOVE" } else { "below" };
         println!(
             "  │ {} │ {}{:11.6} │ {:10.6} │ {:6} │ {:+12.6} │ {:+12.6} ({}) │",
-            w, sign, e_omega[w].abs(), mag, count_omega[w], partial, gap, above_below
+            w,
+            sign,
+            e_omega[w].abs(),
+            mag,
+            count_omega[w],
+            partial,
+            gap,
+            above_below
         );
     }
     println!("  └───┴──────────────┴────────────┴────────┴──────────────┴──────────────┘");
 
     // ── Leibniz Convergence ──
     println!("\n  Leibniz Test:");
-    let decreasing_after_1 = magnitudes
-        .windows(2)
-        .skip(1)
-        .all(|w| w[0] >= w[1]);
-    println!("    Magnitudes: {:?}", magnitudes.iter().map(|m| format!("{:.4}", m)).collect::<Vec<_>>());
+    let decreasing_after_1 = magnitudes.windows(2).skip(1).all(|w| w[0] >= w[1]);
+    println!(
+        "    Magnitudes: {:?}",
+        magnitudes
+            .iter()
+            .map(|m| format!("{:.4}", m))
+            .collect::<Vec<_>>()
+    );
     if magnitudes.len() > 2 {
         let ratios: Vec<String> = magnitudes
             .windows(2)
@@ -148,11 +160,20 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
             (magnitudes[i] - a_fit * hr).powi(2)
         })
         .sum();
-    let r2 = if ss_tot > 0.0 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let r2 = if ss_tot > 0.0 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
 
     let predicted_net = a_fit * (-lambda_ln_ln).exp();
     println!("    A = {:.4}, R² = {:.6}", a_fit, r2);
-    println!("    Predicted E_net = A·e^(-λ) = {:.4} · {:.6} = {:.6}", a_fit, (-lambda_ln_ln).exp(), predicted_net);
+    println!(
+        "    Predicted E_net = A·e^(-λ) = {:.4} · {:.6} = {:.6}",
+        a_fit,
+        (-lambda_ln_ln).exp(),
+        predicted_net
+    );
     println!("    Actual E_net = {:.6}", total_energy);
 
     // Per-ω comparison
@@ -161,7 +182,10 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
     for (i, &w) in fit_ws.iter().enumerate() {
         let hr = a_fit * lambda_ln_ln.powi((w - 1) as i32) / factorial(w - 1) as f64;
         let ratio = magnitudes[i] / hr;
-        println!("    {} │ {:9.4} │ {:21.4} │ {:9.4}", w, magnitudes[i], hr, ratio);
+        println!(
+            "    {} │ {:9.4} │ {:21.4} │ {:9.4}",
+            w, magnitudes[i], hr, ratio
+        );
     }
 
     // ── Liouville Cancellation ──
@@ -177,19 +201,42 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
     // ── Anti-multiplicative ratios ──
     println!("\n  Anti-Multiplicative Structure:");
     let coprime_pairs: &[(usize, usize)] = &[
-        (2, 3), (2, 5), (2, 7), (2, 11), (2, 13),
-        (3, 5), (3, 7), (3, 11), (3, 13),
-        (5, 7), (5, 11), (5, 13),
-        (7, 11), (7, 13), (11, 13),
+        (2, 3),
+        (2, 5),
+        (2, 7),
+        (2, 11),
+        (2, 13),
+        (3, 5),
+        (3, 7),
+        (3, 11),
+        (3, 13),
+        (5, 7),
+        (5, 11),
+        (5, 13),
+        (7, 11),
+        (7, 13),
+        (11, 13),
     ];
 
     let mut ratios_vec = Vec::new();
     for &(p, q) in coprime_pairs {
         let pq = p * q;
         if pq <= n_max {
-            let a_p = coeffs.iter().find(|(n, _)| *n == p).map(|(_, a)| *a).unwrap_or(0.0);
-            let a_q = coeffs.iter().find(|(n, _)| *n == q).map(|(_, a)| *a).unwrap_or(0.0);
-            let a_pq = coeffs.iter().find(|(n, _)| *n == pq).map(|(_, a)| *a).unwrap_or(0.0);
+            let a_p = coeffs
+                .iter()
+                .find(|(n, _)| *n == p)
+                .map(|(_, a)| *a)
+                .unwrap_or(0.0);
+            let a_q = coeffs
+                .iter()
+                .find(|(n, _)| *n == q)
+                .map(|(_, a)| *a)
+                .unwrap_or(0.0);
+            let a_pq = coeffs
+                .iter()
+                .find(|(n, _)| *n == pq)
+                .map(|(_, a)| *a)
+                .unwrap_or(0.0);
             if a_p.abs() > 1e-15 && a_q.abs() > 1e-15 {
                 let ratio = a_pq / (a_p * a_q);
                 ratios_vec.push(ratio);
@@ -214,12 +261,20 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
     // ── Prime energy decay ──
     println!("\n  Prime Coefficient Decay:");
     let _is_prime = arith::sieve_primes(n_max);
-    let primes_to_show = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 97, 101, 997, 1009];
+    let primes_to_show = [
+        2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 97, 101, 997, 1009,
+    ];
     for &p in &primes_to_show {
         if p <= n_max {
             if let Some(&(_, a_p)) = coeffs.iter().find(|(n, _)| *n == p) {
                 let lnp = (p as f64).ln();
-                println!("    a*({:5}) = {:+.6}   ln(p)/p = {:.6}   a*·p/ln(p) = {:.4}", p, a_p, lnp / p as f64, a_p * p as f64 / lnp);
+                println!(
+                    "    a*({:5}) = {:+.6}   ln(p)/p = {:.6}   a*·p/ln(p) = {:.4}",
+                    p,
+                    a_p,
+                    lnp / p as f64,
+                    a_p * p as f64 / lnp
+                );
             }
         }
     }
@@ -238,9 +293,13 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
         let frac = count as f64 / dim as f64;
         // Hardy-Ramanujan/Erdős-Kac: π_ω(N) ~ N/ln(N) · (ln ln N)^(ω-1) / (ω-1)!
         let n_f = n_max as f64;
-        let hr_pred = (n_f / n_f.ln()) * lambda_ln_ln.powi((w - 1) as i32) / factorial(w - 1) as f64;
+        let hr_pred =
+            (n_f / n_f.ln()) * lambda_ln_ln.powi((w - 1) as i32) / factorial(w - 1) as f64;
         let hr_frac = hr_pred / n_f;
-        println!("    ω={}: observed {:.4} ({:6})  HR predict {:.4} ({:.0})", w, frac, count, hr_frac, hr_pred);
+        println!(
+            "    ω={}: observed {:.4} ({:6})  HR predict {:.4} ({:.0})",
+            w, frac, count, hr_frac, hr_pred
+        );
     }
 }
 
@@ -255,7 +314,11 @@ fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
     let cov: f64 = x.iter().zip(y).map(|(a, b)| (a - mx) * (b - my)).sum();
     let sx: f64 = x.iter().map(|a| (a - mx).powi(2)).sum::<f64>().sqrt();
     let sy: f64 = y.iter().map(|b| (b - my).powi(2)).sum::<f64>().sqrt();
-    if sx * sy < 1e-30 { 0.0 } else { cov / (sx * sy) }
+    if sx * sy < 1e-30 {
+        0.0
+    } else {
+        cov / (sx * sy)
+    }
 }
 
 fn main() {
@@ -264,8 +327,14 @@ fn main() {
     println!("╚══════════════════════════════════════════════════════════════════════╝");
 
     let datasets = [
-        ("N=20,000", "experiments/cache/unconstrained_coeffs_N20000.tsv"),
-        ("N=40,000", "experiments/cache/unconstrained_coeffs_N40000.tsv"),
+        (
+            "N=20,000",
+            "experiments/cache/unconstrained_coeffs_N20000.tsv",
+        ),
+        (
+            "N=40,000",
+            "experiments/cache/unconstrained_coeffs_N40000.tsv",
+        ),
     ];
 
     for (label, path) in &datasets {
@@ -296,23 +365,46 @@ fn main() {
     ];
 
     println!("\n  From GPU Pipeline (DD precision):");
-    println!("    {:>7} │ {:>10} │ {:>10} │ {:>10} │ {:>10}", "N", "d²_N", "d²·ln(N)", "1/ln(N)", "C_fit");
-    println!("    {}┼{}┼{}┼{}┼{}", "─".repeat(7), "─".repeat(10), "─".repeat(10), "─".repeat(10), "─".repeat(10));
+    println!(
+        "    {:>7} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
+        "N", "d²_N", "d²·ln(N)", "1/ln(N)", "C_fit"
+    );
+    println!(
+        "    {}┼{}┼{}┼{}┼{}",
+        "─".repeat(7),
+        "─".repeat(10),
+        "─".repeat(10),
+        "─".repeat(10),
+        "─".repeat(10)
+    );
     for &(n, d2) in &gpu_data {
         let ln_n = (n as f64).ln();
-        println!("    {:>7} │ {:10.6} │ {:10.4} │ {:10.6} │ {:10.4}",
-            n, d2, d2 * ln_n, 1.0 / ln_n, d2 * ln_n);
+        println!(
+            "    {:>7} │ {:10.6} │ {:10.4} │ {:10.6} │ {:10.4}",
+            n,
+            d2,
+            d2 * ln_n,
+            1.0 / ln_n,
+            d2 * ln_n
+        );
     }
 
     // Fit d² = C / ln(N)^alpha
     let ln_d2: Vec<f64> = gpu_data.iter().map(|&(_, d)| d.ln()).collect();
-    let ln_ln: Vec<f64> = gpu_data.iter().map(|&(n, _)| (n as f64).ln().ln()).collect();
+    let ln_ln: Vec<f64> = gpu_data
+        .iter()
+        .map(|&(n, _)| (n as f64).ln().ln())
+        .collect();
 
     // Linear fit: ln(d²) = -α·ln(ln(N)) + ln(C)
     let n_pts = ln_d2.len() as f64;
     let mx = ln_ln.iter().sum::<f64>() / n_pts;
     let my = ln_d2.iter().sum::<f64>() / n_pts;
-    let cov: f64 = ln_ln.iter().zip(&ln_d2).map(|(x, y)| (x - mx) * (y - my)).sum();
+    let cov: f64 = ln_ln
+        .iter()
+        .zip(&ln_d2)
+        .map(|(x, y)| (x - mx) * (y - my))
+        .sum();
     let vx: f64 = ln_ln.iter().map(|x| (x - mx).powi(2)).sum();
     let alpha = -cov / vx;
     let ln_c = my + alpha * mx;

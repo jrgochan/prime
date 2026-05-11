@@ -30,11 +30,11 @@
 
 mod output;
 
-use std::time::Instant;
+use cathedral_utils::arith;
+use cathedral_utils::gram::{self, LnNTable};
 use rayon::prelude::*;
 use rug::Float;
-use cathedral_utils::gram::{self, LnNTable};
-use cathedral_utils::arith;
+use std::time::Instant;
 
 /// Precision (in bits) used for MPFR reference computations.
 const REFERENCE_PREC: u32 = 1024;
@@ -43,19 +43,20 @@ fn main() {
     let t_start = Instant::now();
     let args: Vec<String> = std::env::args().collect();
 
-    let n_max: usize = args.iter().position(|a| a == "--n-max")
+    let n_max: usize = args
+        .iter()
+        .position(|a| a == "--n-max")
         .and_then(|i| args.get(i + 1)?.parse().ok())
         .unwrap_or(1000);
 
     // Representative (j,k) pairs spanning diagonal, off-diagonal, coprime, etc.
-    let pairs: Vec<(usize, usize)> = vec![
-        (2, 2), (2, 3), (6, 10), (12, 12), (100, 100), (1000, 1000),
-    ];
+    let pairs: Vec<(usize, usize)> =
+        vec![(2, 2), (2, 3), (6, 10), (12, 12), (100, 100), (1000, 1000)];
 
     // T values for convergence sweep (logarithmically spaced)
     let t_values: Vec<usize> = vec![
-        500, 1_000, 2_000, 5_000, 10_000, 20_000, 50_000,
-        100_000, 200_000, 500_000, 1_000_000, 2_000_000,
+        500, 1_000, 2_000, 5_000, 10_000, 20_000, 50_000, 100_000, 200_000, 500_000, 1_000_000,
+        2_000_000,
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -66,8 +67,15 @@ fn main() {
     println!("║  🔬 T-CONVERGENCE EXPLORER — Truncation Horizon Analysis   ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
     println!("║  Threads: {:<49}║", rayon::current_num_threads());
-    println!("║  Pairs: {:?}{:<1}", &pairs[..pairs.len().min(4)],
-        if pairs.len() > 4 { format!(" (+{})", pairs.len() - 4) } else { String::new() });
+    println!(
+        "║  Pairs: {:?}{:<1}",
+        &pairs[..pairs.len().min(4)],
+        if pairs.len() > 4 {
+            format!(" (+{})", pairs.len() - 4)
+        } else {
+            String::new()
+        }
+    );
     println!("║  N_max for scaling: {:<39}║", n_max);
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
@@ -98,15 +106,22 @@ fn main() {
     let t_ref = *t_values.last().unwrap();
     let t0 = Instant::now();
     let ln_table = LnNTable::new(t_ref + 1, REFERENCE_PREC);
-    println!("  ✓ ln(n) table built in {:.1}s", t0.elapsed().as_secs_f64());
+    println!(
+        "  ✓ ln(n) table built in {:.1}s",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Reference values at maximum T — computed in parallel.
     let t0 = Instant::now();
-    let references: Vec<Float> = pairs.par_iter()
+    let references: Vec<Float> = pairs
+        .par_iter()
         .map(|&(j, k)| gram::gram_entry_fast_at_t(j, k, &ln_table, t_ref))
         .collect();
-    println!("  ✓ References (T={}) computed in {:.2}s (parallel)",
-        format_t(t_ref), t0.elapsed().as_secs_f64());
+    println!(
+        "  ✓ References (T={}) computed in {:.2}s (parallel)",
+        format_t(t_ref),
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 
     // Collect convergence data for output
@@ -120,17 +135,24 @@ fn main() {
 
         println!("  G[{},{}]: gcd={}, lcm={}, tₘ={:.6}", j, k, g, lcm, tm);
         println!("  Reference: {:.40}", ref_val.to_f64());
-        println!("  {:>10} {:>12} {:>12} {:>8}", "T", "abs_error", "rate", "digits");
-        println!("  {:>10} {:>12} {:>12} {:>8}",
-            "─────────", "────────────", "────────────", "────────");
+        println!(
+            "  {:>10} {:>12} {:>12} {:>8}",
+            "T", "abs_error", "rate", "digits"
+        );
+        println!(
+            "  {:>10} {:>12} {:>12} {:>8}",
+            "─────────", "────────────", "────────────", "────────"
+        );
 
         // All T values computed in parallel for this pair.
         let t_max_idx = t_values.len() - 1;
-        let results: Vec<(usize, f64)> = t_values[..t_max_idx].par_iter()
+        let results: Vec<(usize, f64)> = t_values[..t_max_idx]
+            .par_iter()
             .map(|&t| {
                 let val = gram::gram_entry_fast_at_t(j, k, &ln_table, t);
                 let err = Float::with_val(REFERENCE_PREC, &val - ref_val)
-                    .to_f64().abs();
+                    .to_f64()
+                    .abs();
                 (t, err)
             })
             .collect();
@@ -148,11 +170,21 @@ fn main() {
             };
 
             let digits = if err > 0.0 { -err.log10() } else { 50.0 };
-            println!("  {:>10} {:>12.3e} {:>12} {:>8.1}",
-                format_t(t), err, rate_str, digits);
+            println!(
+                "  {:>10} {:>12.3e} {:>12} {:>8.1}",
+                format_t(t),
+                err,
+                rate_str,
+                digits
+            );
 
             convergence_data.push(output::ConvergencePoint {
-                j, k, t, error: err, rate: rate_str.clone(), digits,
+                j,
+                k,
+                t,
+                error: err,
+                rate: rate_str.clone(),
+                digits,
             });
 
             prev_err = Some(err);
@@ -174,21 +206,31 @@ fn main() {
 
     let n_survey = build_n_survey(n_max);
 
-    println!("  {:>8} {:>10} {:>14} {:>12}",
-        "N", "worst_tₘ", "worst_pair", "lcm");
-    println!("  {:>8} {:>10} {:>14} {:>12}",
-        "────────", "──────────", "──────────────", "────────────");
+    println!(
+        "  {:>8} {:>10} {:>14} {:>12}",
+        "N", "worst_tₘ", "worst_pair", "lcm"
+    );
+    println!(
+        "  {:>8} {:>10} {:>14} {:>12}",
+        "────────", "──────────", "──────────────", "────────────"
+    );
 
     let mut scaling_data: Vec<output::ScalingRow> = Vec::new();
 
     for &n in &n_survey {
         let (worst_tm, worst_pair, worst_lcm) = find_worst_tm(n);
-        println!("  {:>8} {:>10.6} {:>14} {:>12}",
-            n, worst_tm,
+        println!(
+            "  {:>8} {:>10.6} {:>14} {:>12}",
+            n,
+            worst_tm,
             format!("({},{})", worst_pair.0, worst_pair.1),
-            worst_lcm);
+            worst_lcm
+        );
         scaling_data.push(output::ScalingRow {
-            n, worst_tm, worst_pair, worst_lcm,
+            n,
+            worst_tm,
+            worst_pair,
+            worst_lcm,
         });
     }
 
@@ -217,22 +259,33 @@ fn main() {
     let mut precision_targets: Vec<output::PrecisionTarget> = Vec::new();
 
     for (label, digits) in [
-        ("FP32", 7), ("FP64", 16), ("DD (solve)", 21), ("DD (full)", 31),
+        ("FP32", 7),
+        ("FP64", 16),
+        ("DD (solve)", 21),
+        ("DD (full)", 31),
     ] {
         let eps = 10.0f64.powi(-(digits as i32));
         let tm_worst = 1.0 / 3.0;
         let t_needed = ((cal_c * tm_worst / eps).powf(1.0 / alpha)) as u64;
-        println!("  │ {:<16} │ {:>6} │ {:>13} │",
-            label, digits, format_t(t_needed as usize));
+        println!(
+            "  │ {:<16} │ {:>6} │ {:>13} │",
+            label,
+            digits,
+            format_t(t_needed as usize)
+        );
         precision_targets.push(output::PrecisionTarget {
-            label: label.to_string(), digits, t_needed,
+            label: label.to_string(),
+            digits,
+            t_needed,
         });
     }
     println!("  └──────────────────┴────────┴───────────────┘");
     println!();
 
     let calibration = output::CalibrationResult {
-        alpha, c: cal_c, precision_targets,
+        alpha,
+        c: cal_c,
+        precision_targets,
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -248,14 +301,19 @@ fn main() {
     let kappa_log10 = 20.0;
 
     println!("  ┌──────────┬──────────────┬──────────────┬──────────────┐");
-    println!("  │ Storage  │ Entry digits │ VRAM (N={}) │ Solve digits │", n_target);
+    println!(
+        "  │ Storage  │ Entry digits │ VRAM (N={}) │ Solve digits │",
+        n_target
+    );
     println!("  ├──────────┼──────────────┼──────────────┼──────────────┤");
 
     let mut gpu_tradeoffs: Vec<output::GpuTradeoff> = Vec::new();
 
     for (storage, entry_digits, bytes_per) in [
-        ("FP16", 3.5f64, 2u64), ("FP32", 7.0, 4),
-        ("FP64", 16.0, 8),      ("DD",  31.0, 16),
+        ("FP16", 3.5f64, 2u64),
+        ("FP32", 7.0, 4),
+        ("FP64", 16.0, 8),
+        ("DD", 31.0, 16),
     ] {
         let vram_gb = (dim as f64 * dim as f64 * bytes_per as f64) / (1 << 30) as f64;
         let solve_digits = entry_digits - kappa_log10;
@@ -264,10 +322,15 @@ fn main() {
         } else {
             format!("{:.0} ✓", solve_digits)
         };
-        println!("  │ {:<8} │ {:>12.1} │ {:>9.1} GB │ {:>12} │",
-            storage, entry_digits, vram_gb, solve_str);
+        println!(
+            "  │ {:<8} │ {:>12.1} │ {:>9.1} GB │ {:>12} │",
+            storage, entry_digits, vram_gb, solve_str
+        );
         gpu_tradeoffs.push(output::GpuTradeoff {
-            storage: storage.to_string(), entry_digits, vram_gb, solve_digits,
+            storage: storage.to_string(),
+            entry_digits,
+            vram_gb,
+            solve_digits,
         });
     }
     println!("  └──────────┴──────────────┴──────────────┴──────────────┘");
@@ -284,16 +347,26 @@ fn main() {
     println!();
 
     let check_pairs = [(2, 2), (2, 3), (100, 100), (1000, 1000)];
-    println!("  {:>12} {:>18} {:>18} {:>12}",
-        "(j,k)", "G @ T=200K", format!("G @ T={}", format_t(t_ref)), "error");
-    println!("  {:>12} {:>18} {:>18} {:>12}",
-        "────────────", "──────────────────", "──────────────────", "────────────");
+    println!(
+        "  {:>12} {:>18} {:>18} {:>12}",
+        "(j,k)",
+        "G @ T=200K",
+        format!("G @ T={}", format_t(t_ref)),
+        "error"
+    );
+    println!(
+        "  {:>12} {:>18} {:>18} {:>12}",
+        "────────────", "──────────────────", "──────────────────", "────────────"
+    );
 
-    let ref_results: Vec<_> = check_pairs.par_iter()
+    let ref_results: Vec<_> = check_pairs
+        .par_iter()
         .map(|&(j, k)| {
             let v200k = gram::gram_entry_fast_at_t(j, k, &ln_table, 200_000);
-            let vref  = gram::gram_entry_fast_at_t(j, k, &ln_table, t_ref);
-            let err = Float::with_val(REFERENCE_PREC, &v200k - &vref).to_f64().abs();
+            let vref = gram::gram_entry_fast_at_t(j, k, &ln_table, t_ref);
+            let err = Float::with_val(REFERENCE_PREC, &v200k - &vref)
+                .to_f64()
+                .abs();
             (j, k, v200k.to_f64(), vref.to_f64(), err)
         })
         .collect();
@@ -301,10 +374,19 @@ fn main() {
     let mut ref_comparisons: Vec<output::ReferenceComparison> = Vec::new();
 
     for (j, k, v200k, vref, err) in ref_results {
-        println!("  {:>12} {:>18.16} {:>18.16} {:>12.3e}",
-            format!("({},{})", j, k), v200k, vref, err);
+        println!(
+            "  {:>12} {:>18.16} {:>18.16} {:>12.3e}",
+            format!("({},{})", j, k),
+            v200k,
+            vref,
+            err
+        );
         ref_comparisons.push(output::ReferenceComparison {
-            j, k, value_200k: v200k, value_ref: vref, error: err,
+            j,
+            k,
+            value_200k: v200k,
+            value_ref: vref,
+            error: err,
         });
     }
     println!();
@@ -314,9 +396,14 @@ fn main() {
     // ═══════════════════════════════════════════════════════════
     let total_elapsed = t_start.elapsed().as_secs_f64();
     output::write_results(
-        n_max, &convergence_data, &scaling_data,
-        &calibration, &gpu_tradeoffs, &ref_comparisons,
-        t_ref, total_elapsed,
+        n_max,
+        &convergence_data,
+        &scaling_data,
+        &calibration,
+        &gpu_tradeoffs,
+        &ref_comparisons,
+        t_ref,
+        total_elapsed,
     );
 
     // ═══════════════════════════════════════════════════════════
@@ -325,7 +412,10 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════╗");
     println!("║  SUMMARY                                                   ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  • Empirical decay: error ∝ T^{{-{:.1}}}                     ║", alpha);
+    println!(
+        "║  • Empirical decay: error ∝ T^{{-{:.1}}}                     ║",
+        alpha
+    );
     println!("║  • T does NOT scale with N (worst tₘ = 1/3 always)        ║");
     println!("║  • T=200K default: ~10–11 correct digits per entry        ║");
     println!("║  • Only DD (31-digit) build gives useful Cholesky digits   ║");
@@ -340,10 +430,18 @@ fn main() {
 /// Build a survey of N values for the scaling check.
 fn build_n_survey(n_max: usize) -> Vec<usize> {
     let mut ns = vec![10, 50, 100, 500];
-    if n_max >= 1_000  { ns.push(1_000); }
-    if n_max >= 5_000  { ns.push(5_000); }
-    if n_max >= 10_000 { ns.push(10_000); }
-    if n_max >= 55_440 { ns.push(55_440); }
+    if n_max >= 1_000 {
+        ns.push(1_000);
+    }
+    if n_max >= 5_000 {
+        ns.push(5_000);
+    }
+    if n_max >= 10_000 {
+        ns.push(10_000);
+    }
+    if n_max >= 55_440 {
+        ns.push(55_440);
+    }
     ns.retain(|&n| n <= n_max);
     ns
 }
@@ -370,7 +468,9 @@ fn find_worst_tm(n: usize) -> (f64, (usize, usize), usize) {
     }
     // Diagonal entries at the boundary
     for &j in &[n / 2, n - 1, n] {
-        if j < 2 { continue; }
+        if j < 2 {
+            continue;
+        }
         let tm = 0.25 + 1.0 / 12.0; // diagonal: gcd²/(j²) = 1
         if tm > worst_tm {
             worst_tm = tm;
@@ -394,8 +494,12 @@ fn calibrate_decay(ln_table: &LnNTable, ref_g22: &Float) -> (f64, f64) {
     let val1 = gram::gram_entry_fast_at_t(2, 2, ln_table, cal_t1);
     let val2 = gram::gram_entry_fast_at_t(2, 2, ln_table, cal_t2);
 
-    let err1 = Float::with_val(REFERENCE_PREC, &val1 - ref_g22).to_f64().abs();
-    let err2 = Float::with_val(REFERENCE_PREC, &val2 - ref_g22).to_f64().abs();
+    let err1 = Float::with_val(REFERENCE_PREC, &val1 - ref_g22)
+        .to_f64()
+        .abs();
+    let err2 = Float::with_val(REFERENCE_PREC, &val2 - ref_g22)
+        .to_f64()
+        .abs();
 
     let alpha = if err1 > 0.0 && err2 > 0.0 {
         (err1 / err2).ln() / (cal_t2 as f64 / cal_t1 as f64).ln()
@@ -406,8 +510,13 @@ fn calibrate_decay(ln_table: &LnNTable, ref_g22: &Float) -> (f64, f64) {
     let c = err1 * (cal_t1 as f64).powf(alpha) / tm_worst;
 
     println!("  Empirical calibration (G[2,2]):");
-    println!("    err@{} = {:.3e}, err@{} = {:.3e}",
-        format_t(cal_t1), err1, format_t(cal_t2), err2);
+    println!(
+        "    err@{} = {:.3e}, err@{} = {:.3e}",
+        format_t(cal_t1),
+        err1,
+        format_t(cal_t2),
+        err2
+    );
     println!("    Measured decay exponent α = {:.2}", alpha);
     println!("    Fitted C = {:.3e}", c);
 

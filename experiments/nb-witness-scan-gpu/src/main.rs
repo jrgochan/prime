@@ -33,10 +33,10 @@
 //! - `results/gpu_sweep.tsv` — N vs d² table
 //! - Per-N certificates in `certificates/`
 
-use cathedral_utils::{arith, gram, cache, dd::DD};
 #[cfg(feature = "gpu")]
 use cathedral_utils::gpu;
 use cathedral_utils::linalg;
+use cathedral_utils::{arith, cache, dd::DD, gram};
 use rayon::prelude::*;
 use serde::Serialize;
 use std::fs;
@@ -93,16 +93,21 @@ fn cg_solve(gram_data: &[f64], b: &[f64], dim: usize) -> (f64, String, f64) {
     let t = Instant::now();
 
     // Jacobi preconditioner
-    let m_inv: Vec<f64> = (0..dim).into_par_iter()
+    let m_inv: Vec<f64> = (0..dim)
+        .into_par_iter()
         .map(|i| {
             let diag = gram_data[i * dim + i];
-            if diag > 0.0 { 1.0 / diag } else { 1.0 }
-        }).collect();
+            if diag > 0.0 {
+                1.0 / diag
+            } else {
+                1.0
+            }
+        })
+        .collect();
 
     let mut x = vec![0.0f64; dim];
     let mut r = b.to_vec();
-    let mut z: Vec<f64> = r.iter().zip(m_inv.iter())
-        .map(|(ri, mi)| ri * mi).collect();
+    let mut z: Vec<f64> = r.iter().zip(m_inv.iter()).map(|(ri, mi)| ri * mi).collect();
     let mut p = z.clone();
     let mut ap = vec![0.0f64; dim];
 
@@ -116,35 +121,56 @@ fn cg_solve(gram_data: &[f64], b: &[f64], dim: usize) -> (f64, String, f64) {
         linalg::dense_matvec(gram_data, dim, &p, &mut ap);
 
         let pap = dd_dot(&p, &ap);
-        if pap.hi <= 0.0 && pap.lo <= 0.0 { break; }
+        if pap.hi <= 0.0 && pap.lo <= 0.0 {
+            break;
+        }
 
         let alpha = rz / pap;
         let af = alpha.to_f64();
 
-        x.par_iter_mut().zip(p.par_iter()).for_each(|(xi, pi)| *xi += af * pi);
-        r.par_iter_mut().zip(ap.par_iter()).for_each(|(ri, ai)| *ri -= af * ai);
+        x.par_iter_mut()
+            .zip(p.par_iter())
+            .for_each(|(xi, pi)| *xi += af * pi);
+        r.par_iter_mut()
+            .zip(ap.par_iter())
+            .for_each(|(ri, ai)| *ri -= af * ai);
 
         let r_norm = dd_dot(&r, &r).to_f64().sqrt();
         if iter % 500 == 0 {
             let d_sq = 1.0 - dd_dot(b, &x).to_f64();
-            eprint!("\r    CG-DD iter {:>5}: ‖r‖={:.3e}, d²≈{:.10}", iter, r_norm, d_sq);
+            eprint!(
+                "\r    CG-DD iter {:>5}: ‖r‖={:.3e}, d²≈{:.10}",
+                iter, r_norm, d_sq
+            );
         }
         if r_norm < tol {
             eprintln!();
             let d_sq = 1.0 - dd_dot(b, &x).to_f64();
-            return (d_sq, format!("CG_DD_{}_iters", iter + 1), t.elapsed().as_secs_f64());
+            return (
+                d_sq,
+                format!("CG_DD_{}_iters", iter + 1),
+                t.elapsed().as_secs_f64(),
+            );
         }
 
-        z.par_iter_mut().enumerate().for_each(|(i, zi)| *zi = m_inv[i] * r[i]);
+        z.par_iter_mut()
+            .enumerate()
+            .for_each(|(i, zi)| *zi = m_inv[i] * r[i]);
         let rz_new = dd_dot(&r, &z);
         let beta = (rz_new / rz).to_f64();
         rz = rz_new;
-        p.par_iter_mut().zip(z.par_iter()).for_each(|(pi, zi)| *pi = zi + beta * *pi);
+        p.par_iter_mut()
+            .zip(z.par_iter())
+            .for_each(|(pi, zi)| *pi = zi + beta * *pi);
     }
 
     eprintln!();
     let d_sq = 1.0 - dd_dot(b, &x).to_f64();
-    (d_sq, "CG_DD_max_iter".to_string(), t.elapsed().as_secs_f64())
+    (
+        d_sq,
+        "CG_DD_max_iter".to_string(),
+        t.elapsed().as_secs_f64(),
+    )
 }
 
 /// DD-accumulated dot product
@@ -152,7 +178,8 @@ fn dd_dot(a: &[f64], b: &[f64]) -> DD {
     const CHUNK: usize = 1024;
     let n = a.len();
     let n_chunks = n.div_ceil(CHUNK);
-    let partials: Vec<DD> = (0..n_chunks).into_par_iter()
+    let partials: Vec<DD> = (0..n_chunks)
+        .into_par_iter()
         .map(|c| {
             let start = c * CHUNK;
             let end = (start + CHUNK).min(n);
@@ -163,9 +190,12 @@ fn dd_dot(a: &[f64], b: &[f64]) -> DD {
                 acc += DD::new(p, e);
             }
             acc
-        }).collect();
+        })
+        .collect();
     let mut total = DD::from_f64(0.0);
-    for p in &partials { total += *p; }
+    for p in &partials {
+        total += *p;
+    }
     total
 }
 
@@ -204,7 +234,10 @@ fn build_or_load_gram(n: usize) -> (Vec<f64>, usize) {
         // MPFR for large N
         let ln_table = gram::LnNTable::new(n, 256);
         let g = gram::GramMatrix::build_fast(n, &ln_table);
-        eprintln!("    ✓ Built in {:.1}s (MPFR-256)", t.elapsed().as_secs_f64());
+        eprintln!(
+            "    ✓ Built in {:.1}s (MPFR-256)",
+            t.elapsed().as_secs_f64()
+        );
         g
     };
 
@@ -229,7 +262,10 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════════╗");
     println!("║  🏛️  NB WITNESS SCAN GPU — Cathedral d²_N Pipeline v1.0        ║");
     println!("║                                                                 ║");
-    println!("║  Mode: {:<10}  N_max: {:<8}                               ║", mode, n_max);
+    println!(
+        "║  Mode: {:<10}  N_max: {:<8}                               ║",
+        mode, n_max
+    );
     println!("║  Uses: Gram matrix + Cholesky/CG (exact d²_N)                  ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
     println!();
@@ -237,7 +273,11 @@ fn main() {
     #[cfg(feature = "gpu")]
     {
         if let Some(info) = gpu::detect() {
-            println!("  GPU: {} ({} MB VRAM)", info.name, info.vram_bytes / (1024 * 1024));
+            println!(
+                "  GPU: {} ({} MB VRAM)",
+                info.name,
+                info.vram_bytes / (1024 * 1024)
+            );
         } else {
             println!("  GPU: not detected, will use CPU CG");
         }
@@ -278,7 +318,9 @@ fn run_single(n: usize) {
             }
         }
         #[cfg(not(feature = "gpu"))]
-        { cg_solve(&gram_data, &b, dim) }
+        {
+            cg_solve(&gram_data, &b, dim)
+        }
     };
 
     let ln_n = (n as f64).ln();
@@ -286,9 +328,15 @@ fn run_single(n: usize) {
     println!("  ┌──────────────────────────────────────────────────┐");
     println!("  │  N = {:>8}  (dim = {:>8})                    │", n, dim);
     println!("  │  d²_N     = {:.12e}                   │", d_sq);
-    println!("  │  d²·ln(N) = {:.6}                             │", d_sq * ln_n);
+    println!(
+        "  │  d²·ln(N) = {:.6}                             │",
+        d_sq * ln_n
+    );
     println!("  │  Method   = {:40} │", method);
-    println!("  │  Time     = {:.1}s                                │", time);
+    println!(
+        "  │  Time     = {:.1}s                                │",
+        time
+    );
     println!("  └──────────────────────────────────────────────────┘");
 }
 
@@ -297,24 +345,43 @@ fn run_scan(n_max: usize) {
     let mut test_ns: Vec<usize> = Vec::new();
 
     // Every 10 up to 100
-    for n in (10..=100.min(n_max)).step_by(10) { test_ns.push(n); }
+    for n in (10..=100.min(n_max)).step_by(10) {
+        test_ns.push(n);
+    }
     // Every 50 up to 500
-    for n in (150..=500.min(n_max)).step_by(50) { test_ns.push(n); }
+    for n in (150..=500.min(n_max)).step_by(50) {
+        test_ns.push(n);
+    }
     // Every 100 up to 2000
-    for n in (600..=2000.min(n_max)).step_by(100) { test_ns.push(n); }
+    for n in (600..=2000.min(n_max)).step_by(100) {
+        test_ns.push(n);
+    }
     // Every 500 up to 10000
-    for n in (2500..=10000.min(n_max)).step_by(500) { test_ns.push(n); }
+    for n in (2500..=10000.min(n_max)).step_by(500) {
+        test_ns.push(n);
+    }
     // Every 2000 up to 50000
-    for n in (12000..=50000.min(n_max)).step_by(2000) { test_ns.push(n); }
+    for n in (12000..=50000.min(n_max)).step_by(2000) {
+        test_ns.push(n);
+    }
     // Every 10000 beyond
-    for n in (60000..=n_max).step_by(10000) { test_ns.push(n); }
+    for n in (60000..=n_max).step_by(10000) {
+        test_ns.push(n);
+    }
 
     // Always include n_max
-    if !test_ns.contains(&n_max) && n_max > 10 { test_ns.push(n_max); }
+    if !test_ns.contains(&n_max) && n_max > 10 {
+        test_ns.push(n_max);
+    }
     test_ns.sort();
     test_ns.dedup();
 
-    println!("  Schedule: {} test points from N={} to N={}", test_ns.len(), test_ns[0], test_ns.last().unwrap());
+    println!(
+        "  Schedule: {} test points from N={} to N={}",
+        test_ns.len(),
+        test_ns[0],
+        test_ns.last().unwrap()
+    );
     println!();
 
     let mut rows: Vec<ScanRow> = Vec::new();
@@ -338,15 +405,23 @@ fn run_scan(n_max: usize) {
                 }
             }
             #[cfg(not(feature = "gpu"))]
-            { cg_solve(&gram_data, &b, dim) }
+            {
+                cg_solve(&gram_data, &b, dim)
+            }
         };
 
         let ln_n = (n as f64).ln();
-        eprintln!("d²={:.8e}, d²·ln(N)={:.4}, method={}, {:.1}s",
-            d_sq, d_sq * ln_n, method, time);
+        eprintln!(
+            "d²={:.8e}, d²·ln(N)={:.4}, method={}, {:.1}s",
+            d_sq,
+            d_sq * ln_n,
+            method,
+            time
+        );
 
         rows.push(ScanRow {
-            n, dim,
+            n,
+            dim,
             d_sq,
             d_sq_times_ln_n: d_sq * ln_n,
             method,
@@ -363,14 +438,21 @@ fn run_scan(n_max: usize) {
         let mut f = fs::File::create("results/gpu_sweep.tsv").unwrap();
         writeln!(f, "N\td_sq\td_sq*ln(N)\tmethod\ttime_secs").unwrap();
         for row in &rows {
-            writeln!(f, "{}\t{:.12e}\t{:.6}\t{}\t{:.1}",
-                row.n, row.d_sq, row.d_sq_times_ln_n, row.method, row.time_secs).unwrap();
+            writeln!(
+                f,
+                "{}\t{:.12e}\t{:.6}\t{}\t{:.1}",
+                row.n, row.d_sq, row.d_sq_times_ln_n, row.method, row.time_secs
+            )
+            .unwrap();
         }
     }
     println!("  📄 results/gpu_sweep.tsv");
 
     // JSON
-    let best = rows.iter().min_by(|a, b| a.d_sq.partial_cmp(&b.d_sq).unwrap()).unwrap();
+    let best = rows
+        .iter()
+        .min_by(|a, b| a.d_sq.partial_cmp(&b.d_sq).unwrap())
+        .unwrap();
     let result = ScanResult {
         experiment: "NB Witness Scan GPU".to_string(),
         version: "1.0.0".to_string(),
@@ -392,8 +474,10 @@ fn run_scan(n_max: usize) {
     println!("  │   N    │      d²_N        │ d²·ln(N) │ Method                 │");
     println!("  ├────────┼──────────────────┼──────────┼────────────────────────┤");
     for row in &rows {
-        println!("  │ {:>6} │ {:>16.10e} │ {:>8.4} │ {:22} │",
-            row.n, row.d_sq, row.d_sq_times_ln_n, row.method);
+        println!(
+            "  │ {:>6} │ {:>16.10e} │ {:>8.4} │ {:22} │",
+            row.n, row.d_sq, row.d_sq_times_ln_n, row.method
+        );
     }
     println!("  └────────┴──────────────────┴──────────┴────────────────────────┘");
     println!();

@@ -28,7 +28,6 @@ use cathedral_utils::mertens::mertens_at;
 
 const P: u32 = 256;
 
-
 // ═══════════════════════════════════════════════
 // §1. MÖBIUS SIEVE — via cathedral-utils
 // ═══════════════════════════════════════════════
@@ -76,43 +75,48 @@ fn perron_integral(x: f64, c: f64, t_max: f64, n_steps: usize, n_zeta_terms: usi
     let pi = std::f64::consts::PI;
 
     // Parallel trapezoidal rule
-    let sum: f64 = (0..=n_steps).into_par_iter().map(|i| {
-        let t = -t_max + i as f64 * dt;
+    let sum: f64 = (0..=n_steps)
+        .into_par_iter()
+        .map(|i| {
+            let t = -t_max + i as f64 * dt;
 
-        // ζ(c+it)
-        let (zeta_re, zeta_im) = zeta_partial(c, t, n_zeta_terms);
-        let zeta_norm_sq = zeta_re * zeta_re + zeta_im * zeta_im;
-        if zeta_norm_sq < 1e-30 { return 0.0; }
+            // ζ(c+it)
+            let (zeta_re, zeta_im) = zeta_partial(c, t, n_zeta_terms);
+            let zeta_norm_sq = zeta_re * zeta_re + zeta_im * zeta_im;
+            if zeta_norm_sq < 1e-30 {
+                return 0.0;
+            }
 
-        // 1/ζ(c+it) = conj(ζ) / |ζ|²
-        let inv_zeta_re = zeta_re / zeta_norm_sq;
-        let inv_zeta_im = -zeta_im / zeta_norm_sq;
+            // 1/ζ(c+it) = conj(ζ) / |ζ|²
+            let inv_zeta_re = zeta_re / zeta_norm_sq;
+            let inv_zeta_im = -zeta_im / zeta_norm_sq;
 
-        // 1/(c+it) = (c - it) / (c²+t²)
-        let s_norm_sq = c * c + t * t;
-        let inv_s_re = c / s_norm_sq;
-        let inv_s_im = -t / s_norm_sq;
+            // 1/(c+it) = (c - it) / (c²+t²)
+            let s_norm_sq = c * c + t * t;
+            let inv_s_re = c / s_norm_sq;
+            let inv_s_im = -t / s_norm_sq;
 
-        // X^{c+it} = X^c · (cos(t·ln X) + i·sin(t·ln X))
-        let x_c = x.powf(c);
-        let phase = t * x.ln();
-        let x_re = x_c * phase.cos();
-        let x_im = x_c * phase.sin();
+            // X^{c+it} = X^c · (cos(t·ln X) + i·sin(t·ln X))
+            let x_c = x.powf(c);
+            let phase = t * x.ln();
+            let x_re = x_c * phase.cos();
+            let x_im = x_c * phase.sin();
 
-        // integrand = X^s / (s · ζ(s))
-        // = X^s · (1/s) · (1/ζ)
-        // First: (1/s) · (1/ζ)
-        let prod_re = inv_s_re * inv_zeta_re - inv_s_im * inv_zeta_im;
-        let prod_im = inv_s_re * inv_zeta_im + inv_s_im * inv_zeta_re;
+            // integrand = X^s / (s · ζ(s))
+            // = X^s · (1/s) · (1/ζ)
+            // First: (1/s) · (1/ζ)
+            let prod_re = inv_s_re * inv_zeta_re - inv_s_im * inv_zeta_im;
+            let prod_im = inv_s_re * inv_zeta_im + inv_s_im * inv_zeta_re;
 
-        // Then: X^s · prod
-        let integrand_re = x_re * prod_re - x_im * prod_im;
-        // We only need the real part of the integral
+            // Then: X^s · prod
+            let integrand_re = x_re * prod_re - x_im * prod_im;
+            // We only need the real part of the integral
 
-        // Trapezoidal weight
-        let weight = if i == 0 || i == n_steps { 0.5 } else { 1.0 };
-        weight * integrand_re * dt
-    }).sum();
+            // Trapezoidal weight
+            let weight = if i == 0 || i == n_steps { 0.5 } else { 1.0 };
+            weight * integrand_re * dt
+        })
+        .sum();
 
     sum / (2.0 * pi)
 }
@@ -122,12 +126,25 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL PERRON CONTOUR INTEGRAL VALIDATOR{RESET}                  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · End-to-End{RESET}              {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: Perron chain (13 files, 0 sorry){RESET}                    {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit MPFR{RESET}                                    {BOLD}{CYAN}║{RESET}", n_threads, P);
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL PERRON CONTOUR INTEGRAL VALIDATOR{RESET}                  {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · End-to-End{RESET}              {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: Perron chain (13 files, 0 sorry){RESET}                    {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit MPFR{RESET}                                    {BOLD}{CYAN}║{RESET}",
+        n_threads, P
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
@@ -152,9 +169,14 @@ fn main() {
     writeln!(tsv, "X\tT\tM_direct\tM_perron\terror\trel_error\ttime_s").unwrap();
 
     println!("  {BOLD}{WHITE}═══ PERRON CONTOUR INTEGRAL vs DIRECT SUMMATION ═══{RESET}");
-    println!("  {DIM}  c = {}, N_zeta = {}, n_steps = {}{RESET}", c, n_zeta_terms, n_steps);
+    println!(
+        "  {DIM}  c = {}, N_zeta = {}, n_steps = {}{RESET}",
+        c, n_zeta_terms, n_steps
+    );
     println!();
-    println!("  {DIM}      X    │    T    │  M_direct  │  M_perron          │  error             │  time{RESET}");
+    println!(
+        "  {DIM}      X    │    T    │  M_direct  │  M_perron          │  error             │  time{RESET}"
+    );
 
     let mut all_results = Vec::new();
 
@@ -173,12 +195,24 @@ fn main() {
                 error.abs()
             };
 
-            writeln!(tsv, "{}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.3}",
-                x, t_max, m_direct, m_perron, error, rel_error, elapsed).unwrap();
+            writeln!(
+                tsv,
+                "{}\t{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.3}",
+                x, t_max, m_direct, m_perron, error, rel_error, elapsed
+            )
+            .unwrap();
 
             let converging = error.abs() < 1.0;
-            println!("    {:>7.1} │  {:>5.0}  │  {:>8}   │  {MAGENTA}{:>18.10}{RESET} │  {YELLOW}{:>18.10e}{RESET} │ {:.2}s  {}",
-                x, t_max, m_direct, m_perron, error, elapsed, check(converging));
+            println!(
+                "    {:>7.1} │  {:>5.0}  │  {:>8}   │  {MAGENTA}{:>18.10}{RESET} │  {YELLOW}{:>18.10e}{RESET} │ {:.2}s  {}",
+                x,
+                t_max,
+                m_direct,
+                m_perron,
+                error,
+                elapsed,
+                check(converging)
+            );
 
             all_results.push((x, t_max, m_direct, m_perron, error, rel_error, elapsed));
         }
@@ -191,43 +225,81 @@ fn main() {
 
     let mut all_converging = true;
     for &x in &x_values {
-        let x_results: Vec<_> = all_results.iter()
+        let x_results: Vec<_> = all_results
+            .iter()
             .filter(|r| (r.0 - x).abs() < 0.01)
             .collect();
         let errors: Vec<f64> = x_results.iter().map(|r| r.4.abs()).collect();
         let monotone = errors.windows(2).all(|w| w[1] <= w[0] * 1.5);
         let last_good = *errors.last().unwrap_or(&999.0) < 1.0;
-        if !monotone || !last_good { all_converging = false; }
+        if !monotone || !last_good {
+            all_converging = false;
+        }
 
         let x_c = x.powf(c);
         let predicted_rate: Vec<f64> = x_results.iter().map(|r| x_c / r.1).collect();
 
-        println!("    X = {:.1}: errors = {:?}", x,
-            errors.iter().map(|e| format!("{:.4}", e)).collect::<Vec<_>>());
-        println!("    {DIM}predicted X^c/T: {:?}{RESET}",
-            predicted_rate.iter().map(|e| format!("{:.4}", e)).collect::<Vec<_>>());
-        println!("    {} error ~ X^c/T (Born-Oppenheimer bound)", check(monotone));
+        println!(
+            "    X = {:.1}: errors = {:?}",
+            x,
+            errors
+                .iter()
+                .map(|e| format!("{:.4}", e))
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "    {DIM}predicted X^c/T: {:?}{RESET}",
+            predicted_rate
+                .iter()
+                .map(|e| format!("{:.4}", e))
+                .collect::<Vec<_>>()
+        );
+        println!(
+            "    {} error ~ X^c/T (Born-Oppenheimer bound)",
+            check(monotone)
+        );
         println!();
     }
 
     // Certificate
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}PERRON CONTOUR VALIDATOR — CERTIFICATE{RESET}                     {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}", P, n_threads);
-    println!("  {BOLD}{CYAN}║{RESET}  c = {}      N_zeta = {}     n_steps = {}", c, n_zeta_terms, n_steps);
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}PERRON CONTOUR VALIDATOR — CERTIFICATE{RESET}                     {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}",
+        P, n_threads
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  c = {}      N_zeta = {}     n_steps = {}",
+        c, n_zeta_terms, n_steps
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {} M_perron → M_direct as T → ∞ for all tested X",
-        check(all_converging));
-    println!("  {BOLD}{CYAN}║{RESET}  {} Error scales as X^c/T (Born-Oppenheimer bound)",
-        check(all_converging));
-    println!("  {BOLD}{CYAN}║{RESET}  {} Perron chain end-to-end validated",
-        check(all_converging));
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {} M_perron → M_direct as T → ∞ for all tested X",
+        check(all_converging)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {} Error scales as X^c/T (Born-Oppenheimer bound)",
+        check(all_converging)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {} Perron chain end-to-end validated",
+        check(all_converging)
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Summary JSON
-    let summary = format!(r#"{{
+    let summary = format!(
+        r#"{{
   "experiment": "Cathedral Perron Contour Integral Validator",
   "precision_bits": {P},
   "threads": {n_threads},
@@ -238,7 +310,9 @@ fn main() {
   "all_converging": {},
   "elapsed_seconds": {:.3}
 }}"#,
-        c, n_zeta_terms, n_steps,
+        c,
+        n_zeta_terms,
+        n_steps,
         chrono::Utc::now().to_rfc3339(),
         all_converging,
         t_global.elapsed().as_secs_f64()
@@ -246,7 +320,11 @@ fn main() {
     fs::write("results/certificate.json", &summary).unwrap();
 
     println!();
-    println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", t_global.elapsed().as_secs_f64(), n_threads);
+    println!(
+        "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)",
+        t_global.elapsed().as_secs_f64(),
+        n_threads
+    );
     println!("  {BOLD}{WHITE}Output:{RESET} results/{{perron_comparison.tsv, certificate.json}}");
     println!();
 }

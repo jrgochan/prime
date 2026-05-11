@@ -18,9 +18,9 @@
 //! At dim=5000, prec=256: impractical (use DD or Mixed instead).
 //! Best used for small N certification runs (N ≤ 500).
 
-use rug::{Assign, Float};
-use crate::env::CathedralEnv;
 use super::PrecisionCgResult;
+use crate::env::CathedralEnv;
+use rug::{Assign, Float};
 use std::time::Instant;
 
 /// MPFR dot product: Σ a[i]·b[i] at p-bit precision.
@@ -85,7 +85,11 @@ pub fn run_mpfr_cg(
     let precond_inv: Vec<f64> = (0..dim)
         .map(|i| {
             let d = gram[i * dim + i];
-            if d.abs() > 1e-30 { 1.0 / d } else { 1.0 }
+            if d.abs() > 1e-30 {
+                1.0 / d
+            } else {
+                1.0
+            }
         })
         .collect();
 
@@ -103,7 +107,9 @@ pub fn run_mpfr_cg(
     }
 
     // z₀ = M⁻¹r₀, p₀ = z₀
-    for i in 0..dim { z[i] = precond_inv[i] * r[i]; }
+    for i in 0..dim {
+        z[i] = precond_inv[i] * r[i];
+    }
     pp.copy_from_slice(&z);
 
     let r0_norm = mpfr_norm2(&r, p).to_f64().sqrt().max(1e-30);
@@ -120,13 +126,19 @@ pub fn run_mpfr_cg(
     let mut cached_rel_res = 1.0f64;
 
     for i in 0..max_steps {
-        if converged || stagnated { break; }
+        if converged || stagnated {
+            break;
+        }
 
         // Periodic residual reset
         if i > 0 && i % reset_interval == 0 {
             mpfr_matvec(gram, &v, &mut gp, dim, p);
-            for j in 0..dim { r[j] = b[j] - gp[j]; }
-            for j in 0..dim { z[j] = precond_inv[j] * r[j]; }
+            for j in 0..dim {
+                r[j] = b[j] - gp[j];
+            }
+            for j in 0..dim {
+                z[j] = precond_inv[j] * r[j];
+            }
             pp.copy_from_slice(&z);
         }
 
@@ -150,10 +162,14 @@ pub fn run_mpfr_cg(
         let alpha = Float::with_val(p, &r_dot_z / &p_dot_gp).to_f64();
 
         // v ← v + α·p
-        for j in 0..dim { v[j] += alpha * pp[j]; }
+        for j in 0..dim {
+            v[j] += alpha * pp[j];
+        }
 
         // r ← r - α·Gp
-        for j in 0..dim { r[j] -= alpha * gp[j]; }
+        for j in 0..dim {
+            r[j] -= alpha * gp[j];
+        }
 
         // Convergence (MPFR norm)
         let r_norm = mpfr_norm2(&r, p).to_f64().sqrt();
@@ -173,16 +189,24 @@ pub fn run_mpfr_cg(
         }
 
         // z = M⁻¹r, β, p update
-        for j in 0..dim { z[j] = precond_inv[j] * r[j]; }
+        for j in 0..dim {
+            z[j] = precond_inv[j] * r[j];
+        }
         let r_new_z_new = mpfr_dot(&r, &z, p);
         let beta = Float::with_val(p, &r_new_z_new / &r_dot_z).to_f64();
-        for j in 0..dim { pp[j] = z[j] + beta * pp[j]; }
+        for j in 0..dim {
+            pp[j] = z[j] + beta * pp[j];
+        }
 
         steps = i + 1;
 
         if i % log_interval == 0 {
             let elapsed = t0.elapsed().as_secs_f64();
-            let rate = if elapsed > 0.0 { steps as f64 / elapsed } else { 0.0 };
+            let rate = if elapsed > 0.0 {
+                steps as f64 / elapsed
+            } else {
+                0.0
+            };
             eprint!("\r    MPFR CG step {i:>5}: ||r||/||r₀||={cached_rel_res:.4e}  [{rate:.0} mv/s]      ");
         }
     }
@@ -194,7 +218,13 @@ pub fn run_mpfr_cg(
     let btv = env.compute_btv();
 
     let elapsed = t0.elapsed().as_secs_f64();
-    let status = if converged { "converged" } else if stagnated { "stagnated (MPFR floor)" } else { "exhausted" };
+    let status = if converged {
+        "converged"
+    } else if stagnated {
+        "stagnated (MPFR floor)"
+    } else {
+        "exhausted"
+    };
     eprintln!("\r    MPFR CG {status} at step {steps}: ||r||/||r₀||={cached_rel_res:.2e}, d²={d2:.10e}                     ");
     eprintln!("    MPFR CG wall time: {elapsed:.2}s ({steps} matvecs, {p}-bit)");
 

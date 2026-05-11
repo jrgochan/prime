@@ -16,7 +16,7 @@ pub fn convert_ooc_to_hpdf(
     hpdf_path: &Path,
     include_number_theory: bool,
 ) -> hdf5::Result<u64> {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
     use std::io::{Read, Seek};
 
     eprintln!("  \x1b[2m▸ Converting OOC → HPDF\x1b[0m");
@@ -30,8 +30,10 @@ pub fn convert_ooc_to_hpdf(
         .expect("read header")
         .expect("valid CATHOOC magic");
 
-    eprintln!("  \x1b[2m  OOC: max_n={}, dim={}, prec={}\x1b[0m",
-        header.max_n, header.dim, header.precision);
+    eprintln!(
+        "  \x1b[2m  OOC: max_n={}, dim={}, prec={}\x1b[0m",
+        header.max_n, header.dim, header.precision
+    );
 
     // SHA-256
     let sha_t0 = Instant::now();
@@ -40,27 +42,38 @@ pub fn convert_ooc_to_hpdf(
     let mut buf = vec![0u8; 8 * 1024 * 1024];
     loop {
         let n = sha_file.read(&mut buf).expect("sha read");
-        if n == 0 { break; }
+        if n == 0 {
+            break;
+        }
         hasher.update(&buf[..n]);
     }
     let sha_hex = format!("{:x}", hasher.finalize());
-    eprintln!("  \x1b[2m  SHA-256: {}... ({:.1}s)\x1b[0m",
-        &sha_hex[..16], sha_t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  \x1b[2m  SHA-256: {}... ({:.1}s)\x1b[0m",
+        &sha_hex[..16],
+        sha_t0.elapsed().as_secs_f64()
+    );
 
     // Read matrix data
-    eprintln!("  \x1b[2m  Reading matrix ({} GB)...\x1b[0m",
-        header.dim * header.dim * 8 / 1_073_741_824);
+    eprintln!(
+        "  \x1b[2m  Reading matrix ({} GB)...\x1b[0m",
+        header.dim * header.dim * 8 / 1_073_741_824
+    );
     let data_t0 = Instant::now();
     let mut data_file = std::fs::File::open(ooc_path).expect("data open");
-    data_file.seek(std::io::SeekFrom::Start(crate::ooc::HEADER_SIZE)).expect("seek");
+    data_file
+        .seek(std::io::SeekFrom::Start(crate::ooc::HEADER_SIZE))
+        .expect("seek");
 
     let n_entries = header.dim * header.dim;
     let mut data = vec![0.0f64; n_entries];
-    let data_bytes = unsafe {
-        std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, n_entries * 8)
-    };
+    let data_bytes =
+        unsafe { std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, n_entries * 8) };
     data_file.read_exact(data_bytes).expect("read matrix data");
-    eprintln!("  \x1b[2m  Loaded ({:.1}s)\x1b[0m", data_t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  \x1b[2m  Loaded ({:.1}s)\x1b[0m",
+        data_t0.elapsed().as_secs_f64()
+    );
 
     let config = HpdfWriterConfig {
         max_n: header.max_n,
@@ -129,13 +142,15 @@ pub fn extract_from_hpdf(
 
     // Compute parent file SHA
     let parent_sha = {
-        use sha2::{Sha256, Digest};
+        use sha2::{Digest, Sha256};
         let mut hasher = Sha256::new();
         let mut f = std::fs::File::open(parent_path).expect("open parent");
         let mut buf = vec![0u8; 8 * 1024 * 1024];
         loop {
             let n = f.read(&mut buf).expect("sha read");
-            if n == 0 { break; }
+            if n == 0 {
+                break;
+            }
             hasher.update(&buf[..n]);
         }
         format!("{:x}", hasher.finalize())
@@ -157,9 +172,8 @@ pub fn extract_from_hpdf(
     }
 
     // Compute SHA of the sub-data for the source field
-    let sub_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(sub_data.as_ptr() as *const u8, sub_data.len() * 8)
-    };
+    let sub_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(sub_data.as_ptr() as *const u8, sub_data.len() * 8) };
     let sub_sha = sha256_hex(sub_bytes);
 
     let config = HpdfWriterConfig {

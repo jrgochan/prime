@@ -25,11 +25,11 @@ use std::process::Command;
 
 /// Kernel definition: (source_file, output_lib_name)
 const KERNELS: &[(&str, &str)] = &[
-    ("dd_cholesky.cu",   "ddcholesky"),
-    ("ds_cholesky.cu",   "dscholesky"),
-    ("qs_cholesky.cu",   "qscholesky"),
-    ("qq_cholesky.cu",   "qqcholesky"),
-    ("gram_build.cu",    "gramgpu"),
+    ("dd_cholesky.cu", "ddcholesky"),
+    ("ds_cholesky.cu", "dscholesky"),
+    ("qs_cholesky.cu", "qscholesky"),
+    ("qq_cholesky.cu", "qqcholesky"),
+    ("gram_build.cu", "gramgpu"),
     ("gram_build_dd.cu", "gramgpudd"),
 ];
 
@@ -91,8 +91,10 @@ fn main() {
                 &format!("-arch={}", arch),
                 "-O3",
                 "--shared",
-                "-Xcompiler", "-fPIC",
-                "-o", output_path.to_str().unwrap(),
+                "-Xcompiler",
+                "-fPIC",
+                "-o",
+                output_path.to_str().unwrap(),
                 source_path.to_str().unwrap(),
             ])
             .status();
@@ -128,7 +130,11 @@ fn main() {
         // Set the cfg flag so Rust code can detect compiled kernels
         println!("cargo:rustc-cfg=has_cuda_kernels");
 
-        eprintln!("cathedral-utils: Compiled {}/{} CUDA kernels", compiled, KERNELS.len());
+        eprintln!(
+            "cathedral-utils: Compiled {}/{} CUDA kernels",
+            compiled,
+            KERNELS.len()
+        );
     }
 
     // Rerun if any .cu file changes
@@ -140,11 +146,7 @@ fn main() {
 
 fn find_nvcc() -> Option<PathBuf> {
     // Check standard locations
-    let candidates = [
-        "nvcc",
-        "/usr/local/cuda/bin/nvcc",
-        "/usr/bin/nvcc",
-    ];
+    let candidates = ["nvcc", "/usr/local/cuda/bin/nvcc", "/usr/bin/nvcc"];
     for candidate in &candidates {
         if let Ok(output) = Command::new(candidate).arg("--version").output() {
             if output.status.success() {
@@ -172,19 +174,19 @@ fn detect_gpu_arch() -> Option<String> {
         .trim()
         .replace('.', "");
 
-    if cap.is_empty() { return None; }
+    if cap.is_empty() {
+        return None;
+    }
     Some(format!("sm_{}", cap))
 }
 
 fn needs_rebuild(source: &Path, output: &Path) -> bool {
-    if !output.exists() { return true; }
+    if !output.exists() {
+        return true;
+    }
 
-    let source_modified = source.metadata()
-        .and_then(|m| m.modified())
-        .ok();
-    let output_modified = output.metadata()
-        .and_then(|m| m.modified())
-        .ok();
+    let source_modified = source.metadata().and_then(|m| m.modified()).ok();
+    let output_modified = output.metadata().and_then(|m| m.modified()).ok();
 
     match (source_modified, output_modified) {
         (Some(s), Some(o)) => s > o,

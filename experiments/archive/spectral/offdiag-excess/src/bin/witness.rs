@@ -8,13 +8,17 @@
 //!
 //! For each witness, computes d² = 1 - 2·bᵀv + vᵀGv
 
+use offdiag_excess::{fract_integral, gram_entry};
 use rayon::prelude::*;
-use offdiag_excess::{gram_entry, fract_integral};
 
 /// Compute the Möbius function μ(n) via trial division.
 fn moebius(n: usize) -> i32 {
-    if n == 0 { return 0; }
-    if n == 1 { return 1; }
+    if n == 0 {
+        return 0;
+    }
+    if n == 1 {
+        return 1;
+    }
 
     let mut m = n;
     let mut num_factors = 0;
@@ -36,18 +40,26 @@ fn moebius(n: usize) -> i32 {
         num_factors += 1;
     }
 
-    if num_factors % 2 == 0 { 1 } else { -1 }
+    if num_factors % 2 == 0 {
+        1
+    } else {
+        -1
+    }
 }
 
 /// Solve Ax = b using Cholesky-like approach (simple Gaussian elimination for SPD)
 fn solve_spd(a: &[Vec<f64>], b: &[f64]) -> Vec<f64> {
     let n = b.len();
     // Augmented matrix
-    let mut aug: Vec<Vec<f64>> = a.iter().enumerate().map(|(i, row)| {
-        let mut r = row.clone();
-        r.push(b[i]);
-        r
-    }).collect();
+    let mut aug: Vec<Vec<f64>> = a
+        .iter()
+        .enumerate()
+        .map(|(i, row)| {
+            let mut r = row.clone();
+            r.push(b[i]);
+            r
+        })
+        .collect();
 
     // Forward elimination with partial pivoting
     for col in 0..n {
@@ -103,8 +115,10 @@ fn main() {
     eprintln!("  Comparing: Constant | Möbius (μ/k) | Optimal (G⁻¹b)");
     eprintln!("═══════════════════════════════════════════════════════\n");
 
-    eprintln!("{:>5} {:>12} {:>12} {:>12} {:>10} {:>10}",
-        "n", "d²(const)", "d²(möbius)", "d²(optimal)", "möb/const", "möb→0?");
+    eprintln!(
+        "{:>5} {:>12} {:>12} {:>12} {:>10} {:>10}",
+        "n", "d²(const)", "d²(möbius)", "d²(optimal)", "möb/const", "möb→0?"
+    );
     eprintln!("{}", "-".repeat(68));
 
     let mut results: Vec<serde_json::Value> = Vec::new();
@@ -120,9 +134,10 @@ fn main() {
         let b: Vec<f64> = (0..dim).map(|i| fract_integral(i + 1)).collect();
 
         // Build Gram matrix (parallelized by row)
-        let g: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|i| {
-            (0..dim).map(|j| gram_entry(i + 1, j + 1)).collect()
-        }).collect();
+        let g: Vec<Vec<f64>> = (0..dim)
+            .into_par_iter()
+            .map(|i| (0..dim).map(|j| gram_entry(i + 1, j + 1)).collect())
+            .collect();
 
         // ── Witness 1: Constant ──
         // Optimal constant: c = (Σ b_i) / (Σᵢⱼ G(i,j))
@@ -135,17 +150,21 @@ fn main() {
 
         // ── Witness 2: Möbius μ(k)/k ──
         // v_i = μ(i+1) / (i+1)
-        let v_mob: Vec<f64> = (0..dim).map(|i| {
-            let k = i + 1;
-            moebius(k) as f64 / k as f64
-        }).collect();
+        let v_mob: Vec<f64> = (0..dim)
+            .map(|i| {
+                let k = i + 1;
+                moebius(k) as f64 / k as f64
+            })
+            .collect();
 
         // d²(möb) = 1 - 2·bᵀv + vᵀGv
         let btv_mob: f64 = b.iter().zip(v_mob.iter()).map(|(bi, vi)| bi * vi).sum();
-        let vtgv_mob: f64 = (0..dim).map(|i| {
-            let gv_i: f64 = (0..dim).map(|j| g[i][j] * v_mob[j]).sum();
-            v_mob[i] * gv_i
-        }).sum();
+        let vtgv_mob: f64 = (0..dim)
+            .map(|i| {
+                let gv_i: f64 = (0..dim).map(|j| g[i][j] * v_mob[j]).sum();
+                v_mob[i] * gv_i
+            })
+            .sum();
         let d2_mob = 1.0 - 2.0 * btv_mob + vtgv_mob;
 
         // ── Witness 3: Optimal v = G⁻¹b ──
@@ -162,11 +181,20 @@ fn main() {
 
         let elapsed = start.elapsed();
 
-        eprintln!("{:5} {:12.6} {:12.6} {:12.6} {:10.4} {:>10}  ({:.1}s)",
-            n, d2_const, d2_mob_scaled, d2_opt,
+        eprintln!(
+            "{:5} {:12.6} {:12.6} {:12.6} {:10.4} {:>10}  ({:.1}s)",
+            n,
+            d2_const,
+            d2_mob_scaled,
+            d2_opt,
             d2_mob_scaled / d2_const,
-            if d2_mob_scaled < d2_const { "better" } else { "worse" },
-            elapsed.as_secs_f64());
+            if d2_mob_scaled < d2_const {
+                "better"
+            } else {
+                "worse"
+            },
+            elapsed.as_secs_f64()
+        );
 
         results.push(serde_json::json!({
             "n": n,
@@ -198,11 +226,20 @@ fn main() {
         let d2_mob_last = last["d2_mobius_scaled"].as_f64().unwrap();
         let d2_const_last = last["d2_constant"].as_f64().unwrap();
 
-        eprintln!("  d²(optimal) trend: {:.6} → {:.6} ({})",
-            d2_opt_prev, d2_opt_last,
-            if d2_opt_last < d2_opt_prev { "DECREASING ✓" } else { "INCREASING ✗" });
-        eprintln!("  d²(möbius)/d²(const) = {:.4} (< 1 means Möbius is better)",
-            d2_mob_last / d2_const_last);
+        eprintln!(
+            "  d²(optimal) trend: {:.6} → {:.6} ({})",
+            d2_opt_prev,
+            d2_opt_last,
+            if d2_opt_last < d2_opt_prev {
+                "DECREASING ✓"
+            } else {
+                "INCREASING ✗"
+            }
+        );
+        eprintln!(
+            "  d²(möbius)/d²(const) = {:.4} (< 1 means Möbius is better)",
+            d2_mob_last / d2_const_last
+        );
     }
 
     // Write JSON

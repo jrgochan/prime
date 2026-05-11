@@ -24,7 +24,8 @@ pub fn results_dir() -> PathBuf {
 pub fn results_dir_for(name: &str) -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR"); // e.g. .../experiments/cathedral-utils
     let workspace = PathBuf::from(manifest)
-        .parent().unwrap_or(Path::new("."))  // .../experiments/
+        .parent()
+        .unwrap_or(Path::new(".")) // .../experiments/
         .to_path_buf();
     let dir = workspace.join(name).join("results");
     fs::create_dir_all(&dir).ok();

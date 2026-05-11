@@ -17,7 +17,7 @@ pub fn sieve_moebius(max_n: usize) -> Vec<i32> {
         if is_prime[i] {
             smallest_prime[i] = i;
             mu[i] = -1; // prime => μ = -1
-            // Sieve composites
+                        // Sieve composites
             let mut j = 2 * i;
             while j <= max_n {
                 is_prime[j] = false;

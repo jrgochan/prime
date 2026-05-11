@@ -61,7 +61,11 @@ impl DD {
     }
 
     pub fn abs(self) -> Self {
-        if self.hi < 0.0 { -self } else { self }
+        if self.hi < 0.0 {
+            -self
+        } else {
+            self
+        }
     }
 }
 
@@ -98,7 +102,10 @@ impl std::ops::Neg for DD {
     type Output = DD;
     #[inline]
     fn neg(self) -> DD {
-        DD { hi: -self.hi, lo: -self.lo }
+        DD {
+            hi: -self.hi,
+            lo: -self.lo,
+        }
     }
 }
 
@@ -208,13 +215,12 @@ impl DD {
     /// ln(x) = ln(m·2^e) = e·ln(2) + ln(m) where m ∈ [1,2)
     /// For ln(m): use ln(1 + (m-1)) with Padé-accelerated Taylor.
     pub fn ln(self) -> Self {
-        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+        if self.hi <= 0.0 {
+            return DD::new(f64::NAN, 0.0);
+        }
 
         // ln(2) at DD precision
-        let ln2 = DD::new(
-            0.6931471805599453,
-            2.3190468138462996e-17,
-        );
+        let ln2 = DD::new(0.6931471805599453, 2.3190468138462996e-17);
 
         // Argument reduction: x = m · 2^e
         let (mantissa, exp) = frexp_dd(self);
@@ -242,7 +248,9 @@ impl DD {
             term *= v2;
             let contrib = term / DD::from_u64(2 * k + 1);
             sum += contrib;
-            if contrib.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+            if contrib.hi.abs() < 1e-32 * sum.hi.abs() {
+                break;
+            }
         }
         let ln_m = sum + sum; // 2·atanh
 
@@ -279,7 +287,9 @@ impl DD {
     /// Digamma function ψ(x) via recurrence + asymptotic expansion.
     /// Uses ψ(x+1) = ψ(x) + 1/x to shift x ≥ 20, then asymptotic.
     pub fn digamma(mut self) -> Self {
-        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+        if self.hi <= 0.0 {
+            return DD::new(f64::NAN, 0.0);
+        }
 
         let mut result = DD::from_f64(0.0);
 
@@ -320,7 +330,9 @@ impl DD {
 
     /// Log-gamma: ln|Γ(x)| via Stirling + recurrence.
     pub fn lgamma(mut self) -> Self {
-        if self.hi <= 0.0 { return DD::new(f64::NAN, 0.0); }
+        if self.hi <= 0.0 {
+            return DD::new(f64::NAN, 0.0);
+        }
 
         let mut prefix = DD::from_f64(0.0);
 
@@ -367,9 +379,11 @@ impl DD {
         let mut term = x;
         let mut sum = x;
         for n in 1..=35 {
-            term = term * (-x2) / DD::from_u64((2*n) * (2*n + 1));
+            term = term * (-x2) / DD::from_u64((2 * n) * (2 * n + 1));
             sum += term;
-            if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+            if term.hi.abs() < 1e-32 * sum.hi.abs() {
+                break;
+            }
         }
         sum
     }
@@ -386,9 +400,11 @@ impl DD {
         let mut term = DD::from_f64(1.0);
         let mut sum = DD::from_f64(1.0);
         for n in 1..=35 {
-            term = term * (-x2) / DD::from_u64((2*n - 1) * (2*n));
+            term = term * (-x2) / DD::from_u64((2 * n - 1) * (2 * n));
             sum += term;
-            if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
+            if term.hi.abs() < 1e-32 * sum.hi.abs() {
+                break;
+            }
         }
         sum
     }
@@ -413,7 +429,6 @@ impl From<(f64, f64)> for DD {
         DD { hi, lo }
     }
 }
-
 
 #[cfg(test)]
 mod tests {

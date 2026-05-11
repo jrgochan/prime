@@ -10,9 +10,9 @@
 //!    P3: -Σ [(s-a)/(a²b)·ψ(β) + (1/(ab))·ψ(α)] → digamma terms
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
-use cathedral_utils::fmt;
 use crate::compute::{self, LOG_2PI};
+use cathedral_utils::fmt;
+use rayon::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct HonestAlgebraResult {
@@ -50,7 +50,8 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
     let n_tt = tt_classes.len();
 
     // ═══ STRUCTURAL CHECKS ═══
-    let beta_nums: Vec<usize> = tt_classes.iter()
+    let beta_nums: Vec<usize> = tt_classes
+        .iter()
         .map(|&m0| compute::tile_index(a, b, m0) + 1)
         .collect();
     let mut beta_sorted = beta_nums.clone();
@@ -59,7 +60,8 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
     let beta_covers = beta_sorted == (1..=a).collect::<Vec<_>>();
     let beta_once = beta_nums.len() == a;
 
-    let s_vals: Vec<usize> = tt_classes.iter()
+    let s_vals: Vec<usize> = tt_classes
+        .iter()
         .map(|&m0| compute::overshoot(a, b, m0))
         .collect();
     let mut s_sorted = s_vals.clone();
@@ -67,9 +69,9 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
     let s_perm = s_sorted == (0..a).collect::<Vec<_>>();
 
     // ═══ THREE PIECES ═══
-    let mut p1 = 0.0_f64;  // -(1/a) Σ logΓ(β)
-    let mut p2 = 0.0_f64;  // +(1/a) Σ logΓ(α)
-    let mut p3 = 0.0_f64;  // digamma terms
+    let mut p1 = 0.0_f64; // -(1/a) Σ logΓ(β)
+    let mut p2 = 0.0_f64; // +(1/a) Σ logΓ(α)
+    let mut p3 = 0.0_f64; // digamma terms
     let mut total = 0.0_f64;
 
     for &m0 in &tt_classes {
@@ -101,7 +103,9 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
     let id_err = (total - dt).abs();
 
     HonestAlgebraResult {
-        a, b, n_two_tile: n_tt,
+        a,
+        b,
+        n_two_tile: n_tt,
         beta_covers_full_range: beta_covers,
         beta_each_once: beta_once,
         s_is_permutation: s_perm,
@@ -117,9 +121,7 @@ pub fn certify_pair(a: usize, b: usize) -> HonestAlgebraResult {
 }
 
 pub fn certify_all(pairs: &[(usize, usize)]) -> Vec<HonestAlgebraResult> {
-    let mut results: Vec<_> = pairs.par_iter()
-        .map(|&(a, b)| certify_pair(a, b))
-        .collect();
+    let mut results: Vec<_> = pairs.par_iter().map(|&(a, b)| certify_pair(a, b)).collect();
     results.sort_by_key(|r| (r.a, r.b));
     results
 }
@@ -131,47 +133,86 @@ pub fn print_certification(results: &[HonestAlgebraResult]) {
     println!();
 
     // Structural
-    let all_beta = results.iter().all(|r| r.beta_covers_full_range && r.beta_each_once);
+    let all_beta = results
+        .iter()
+        .all(|r| r.beta_covers_full_range && r.beta_each_once);
     let all_s = results.iter().all(|r| r.s_is_permutation);
-    println!("  β covers {{1/a,...,a/a}} exactly : {} ({}/{})",
-        if all_beta { fmt::check(true) } else { fmt::check(false) },
-        results.iter().filter(|r| r.beta_covers_full_range && r.beta_each_once).count(),
-        results.len());
-    println!("  s is permutation of {{0,...,a-1}} : {} ({}/{})",
-        if all_s { fmt::check(true) } else { fmt::check(false) },
+    println!(
+        "  β covers {{1/a,...,a/a}} exactly : {} ({}/{})",
+        if all_beta {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
+        results
+            .iter()
+            .filter(|r| r.beta_covers_full_range && r.beta_each_once)
+            .count(),
+        results.len()
+    );
+    println!(
+        "  s is permutation of {{0,...,a-1}} : {} ({}/{})",
+        if all_s {
+            fmt::check(true)
+        } else {
+            fmt::check(false)
+        },
         results.iter().filter(|r| r.s_is_permutation).count(),
-        results.len());
+        results.len()
+    );
     println!();
 
     // Three pieces
-    let max_gauss_err = results.iter().map(|r| r.piece1_gauss_error).fold(0.0_f64, f64::max);
+    let max_gauss_err = results
+        .iter()
+        .map(|r| r.piece1_gauss_error)
+        .fold(0.0_f64, f64::max);
     println!("  Max |Piece1 - Gauss closed form|: {:.4e}", max_gauss_err);
     if max_gauss_err < 1e-8 {
-        println!("  {} Piece 1 = Gauss Multiplication Formula", fmt::check(true));
+        println!(
+            "  {} Piece 1 = Gauss Multiplication Formula",
+            fmt::check(true)
+        );
     }
     println!();
 
     // Identity
-    let max_err = results.iter().map(|r| r.identity_error).fold(0.0_f64, f64::max);
+    let max_err = results
+        .iter()
+        .map(|r| r.identity_error)
+        .fold(0.0_f64, f64::max);
     let all_pass = max_err < 1e-8;
 
     if results.len() <= 200 {
-        println!("  {:>5} {:>5}  {:>20}  {:>20}  {:>14}",
-            "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|");
+        println!(
+            "  {:>5} {:>5}  {:>20}  {:>20}  {:>14}",
+            "(a", "b)", "∑ perClassLimit", "deltaTarget", "|error|"
+        );
         println!("  {}", "─".repeat(75));
         for r in results {
             let pass = r.identity_error < 1e-8;
-            println!("  ({:>2},{:>2})  {:>20.15}  {:>20.15}  {:>14.4e}  {}",
-                r.a, r.b, r.sum_per_class_limit, r.delta_target,
+            println!(
+                "  ({:>2},{:>2})  {:>20.15}  {:>20.15}  {:>14.4e}  {}",
+                r.a,
+                r.b,
+                r.sum_per_class_limit,
+                r.delta_target,
                 r.identity_error,
-                if pass { fmt::check(true) } else { fmt::check(false) });
+                if pass {
+                    fmt::check(true)
+                } else {
+                    fmt::check(false)
+                }
+            );
         }
         println!();
     }
 
     if all_pass {
-        println!("  {} ∑ perClassLimit = deltaTarget — CERTIFIED (DIRECT, NO BOOTSTRAP)",
-            fmt::check(true));
+        println!(
+            "  {} ∑ perClassLimit = deltaTarget — CERTIFIED (DIRECT, NO BOOTSTRAP)",
+            fmt::check(true)
+        );
     } else {
         println!("  {} IDENTITY CHECK FAILED", fmt::check(false));
     }

@@ -1,7 +1,7 @@
 //! Spot-check verification — compare stored entries against f64 recomputation.
 
-use cathedral_utils::hpdf::HpdfReader;
 use crate::common::*;
+use cathedral_utils::hpdf::HpdfReader;
 
 /// Run a spot-check of stored entries against live f64 recomputation.
 ///
@@ -12,16 +12,12 @@ pub fn verify_spot_check(reader: &HpdfReader) -> (f64, f64, bool) {
     let (abs, rel) = reader
         .verify_spot_check(n_checks)
         .expect("Spot-check failed");
-    println!(
-        "  {GREEN}✓{RESET} Spot-check ({n_checks} entries): abs={abs:.2e}, rel={rel:.2e}"
-    );
+    println!("  {GREEN}✓{RESET} Spot-check ({n_checks} entries): abs={abs:.2e}, rel={rel:.2e}");
 
     // Precision-aware pass/fail threshold
     let stored_precision = reader.precision().unwrap_or(0);
     let prov = reader.read_provenance().ok();
-    let is_dd_built = prov
-        .as_ref()
-        .is_some_and(|p| p.builder.contains("DD"));
+    let is_dd_built = prov.as_ref().is_some_and(|p| p.builder.contains("DD"));
 
     let spot_threshold = if stored_precision > 0 {
         println!(

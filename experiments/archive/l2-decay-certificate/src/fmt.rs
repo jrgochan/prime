@@ -11,7 +11,11 @@ pub const WHITE: &str = "\x1b[97m";
 pub const RESET: &str = "\x1b[0m";
 
 pub fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
+    if b {
+        "\x1b[32m✓\x1b[0m"
+    } else {
+        "\x1b[31m✗\x1b[0m"
+    }
 }
 
 pub fn header(title: &str, subtitle: &str, prec: u32, threads: usize) {
@@ -26,6 +30,9 @@ pub fn header(title: &str, subtitle: &str, prec: u32, threads: usize) {
 
 /// Format a duration nicely
 pub fn elapsed(secs: f64) -> String {
-    if secs < 60.0 { format!("{:.1}s", secs) }
-    else { format!("{}m{:.0}s", (secs / 60.0) as u64, secs % 60.0) }
+    if secs < 60.0 {
+        format!("{:.1}s", secs)
+    } else {
+        format!("{}m{:.0}s", (secs / 60.0) as u64, secs % 60.0)
+    }
 }

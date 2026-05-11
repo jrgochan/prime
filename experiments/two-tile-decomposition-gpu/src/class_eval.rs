@@ -6,9 +6,9 @@
 //!  Then checks: |strip + Σ_class actual - vasyuninFormula| < ε
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
-use cathedral_utils::fmt;
 use crate::compute;
+use cathedral_utils::fmt;
+use rayon::prelude::*;
 
 #[derive(Debug, Clone)]
 pub struct ClassResult {
@@ -47,7 +47,9 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> PairClassEval {
 
         let s = (r + a).saturating_sub(b);
         let is_tt = s > 0;
-        if is_tt { n_two_tile += 1; }
+        if is_tt {
+            n_two_tile += 1;
+        }
         n_classes += 1;
 
         let mut sum_actual = 0.0;
@@ -68,7 +70,9 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> PairClassEval {
 
         total_actual += sum_actual;
         let delta_err = (sum_delta_diff - sum_delta_formula).abs();
-        if delta_err > max_delta_err { max_delta_err = delta_err; }
+        if delta_err > max_delta_err {
+            max_delta_err = delta_err;
+        }
     }
 
     let strip = compute::strip_value(a, b);
@@ -77,15 +81,18 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> PairClassEval {
     let formula_err = (integral - formula).abs();
 
     PairClassEval {
-        a, b,
+        a,
+        b,
         max_delta_err,
         integral_vs_formula: formula_err,
-        n_two_tile, n_classes,
+        n_two_tile,
+        n_classes,
     }
 }
 
 pub fn certify_all(pairs: &[(usize, usize)], max_m: usize) -> Vec<PairClassEval> {
-    let mut results: Vec<_> = pairs.par_iter()
+    let mut results: Vec<_> = pairs
+        .par_iter()
         .map(|&(a, b)| certify_pair(a, b, max_m))
         .collect();
     results.sort_by_key(|r| (r.a, r.b));
@@ -100,27 +107,46 @@ pub fn print_certification(results: &[PairClassEval]) {
     println!();
 
     if results.len() <= 200 {
-        println!("  {:>5} {:>5}  {:>14}  {:>14}  {:>5}",
-            "(a", "b)", "max|δ-match|", "|GI - formula|", "2tile");
+        println!(
+            "  {:>5} {:>5}  {:>14}  {:>14}  {:>5}",
+            "(a", "b)", "max|δ-match|", "|GI - formula|", "2tile"
+        );
         println!("  {}", "─".repeat(60));
 
         for r in results {
             let pass = r.max_delta_err < 1e-8;
-            println!("  ({:>2},{:>2})  {:>14.4e}  {:>14.4e}  {:>3}    {}",
-                r.a, r.b, r.max_delta_err, r.integral_vs_formula,
+            println!(
+                "  ({:>2},{:>2})  {:>14.4e}  {:>14.4e}  {:>3}    {}",
+                r.a,
+                r.b,
+                r.max_delta_err,
+                r.integral_vs_formula,
                 r.n_two_tile,
-                if pass { fmt::check(true) } else { fmt::check(false) },
+                if pass {
+                    fmt::check(true)
+                } else {
+                    fmt::check(false)
+                },
             );
         }
         println!();
     }
 
-    let max_delta = results.iter().map(|r| r.max_delta_err).fold(0.0_f64, f64::max);
-    let max_formula = results.iter().map(|r| r.integral_vs_formula).fold(0.0_f64, f64::max);
+    let max_delta = results
+        .iter()
+        .map(|r| r.max_delta_err)
+        .fold(0.0_f64, f64::max);
+    let max_formula = results
+        .iter()
+        .map(|r| r.integral_vs_formula)
+        .fold(0.0_f64, f64::max);
     let all_pass = max_delta < 1e-8;
 
     if all_pass {
-        println!("  {} ALL PER-CLASS DELTA IDENTITIES CERTIFIED", fmt::check(true));
+        println!(
+            "  {} ALL PER-CLASS DELTA IDENTITIES CERTIFIED",
+            fmt::check(true)
+        );
     } else {
         println!("  {} SOME PER-CLASS CHECKS FAILED", fmt::check(false));
     }

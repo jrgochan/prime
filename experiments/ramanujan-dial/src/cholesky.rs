@@ -15,11 +15,11 @@
 //! due to the Gram matrix condition number κ(G_N) growing as ~N^4.
 //! Beyond this wall, DD-precision pre-computed files are required.
 
+use crate::display;
+use cathedral_utils::{arith, cache, gram};
+use rayon::prelude::*;
 use std::collections::HashSet;
 use std::time::Instant;
-use rayon::prelude::*;
-use cathedral_utils::{arith, cache, gram};
-use crate::display;
 
 /// Massively parallel d² computation using:
 ///   1. Pre-computed Gram cache (if available) or bulk parallel computation
@@ -31,8 +31,8 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     // ── Step 1: Load or compute Gram matrix ─────────────────────
     let t0 = Instant::now();
 
-    let gram_flat = try_load_cached_gram(max_n, dim)
-        .unwrap_or_else(|| compute_gram_parallel(max_n, dim));
+    let gram_flat =
+        try_load_cached_gram(max_n, dim).unwrap_or_else(|| compute_gram_parallel(max_n, dim));
 
     let gram_time = t0.elapsed().as_secs_f64();
 
@@ -43,11 +43,14 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     let t0 = Instant::now();
     println!("  Phase 2: Incremental Cholesky (N=2..{})...", max_n);
     println!();
-    println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
-        "N", "d²_N", "d(N)", "ω(N)", "type", "factorization", "");
-    println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
-        "──────", "──────────────", "──────", "──────",
-        "──────────", "────────────────────", "───");
+    println!(
+        "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
+        "N", "d²_N", "d(N)", "ω(N)", "type", "factorization", ""
+    );
+    println!(
+        "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20} {:>3}",
+        "──────", "──────────────", "──────", "──────", "──────────", "────────────────────", "───"
+    );
 
     let mut l = vec![0.0f64; dim * dim];
     let mut prev_d2 = f64::MAX;
@@ -74,9 +77,15 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
         let diag = gram_flat[new_idx * dim + new_idx] - diag_sum;
         if diag <= 0.0 {
             let type_str = display::classify(n, &hcn_set);
-            println!("  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20}",
-                n, "CHOL FAIL", display::count_divisors(n),
-                arith::small_omega(n), type_str, arith::factorize(n));
+            println!(
+                "  {:>6} {:>14} {:>6} {:>6} {:>10} {:>20}",
+                n,
+                "CHOL FAIL",
+                display::count_divisors(n),
+                arith::small_omega(n),
+                type_str,
+                arith::factorize(n)
+            );
             anomalies += 1;
             continue;
         }
@@ -98,7 +107,9 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
 
         let type_str = display::classify(n, &hcn_set);
         let descent = if d2 < prev_d2 { "↓" } else { "↑" };
-        if d2 > prev_d2 { anomalies += 1; }
+        if d2 > prev_d2 {
+            anomalies += 1;
+        }
 
         // Print notable N values; sparse for large N
         let is_notable = hcn_set.contains(&n)
@@ -109,10 +120,16 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
             || colossal_set.contains(&(n as u64));
 
         if is_notable {
-            println!("  {:>6} {:>14.10} {:>6} {:>6} {:>10} {:>20} {}",
-                n, d2, display::count_divisors(n),
-                arith::small_omega(n), type_str,
-                arith::factorize(n), descent);
+            println!(
+                "  {:>6} {:>14.10} {:>6} {:>6} {:>10} {:>20} {}",
+                n,
+                d2,
+                display::count_divisors(n),
+                arith::small_omega(n),
+                type_str,
+                arith::factorize(n),
+                descent
+            );
         }
 
         prev_d2 = d2;
@@ -121,10 +138,16 @@ pub fn compute_d2_parallel(max_n: usize, hcns: &[usize]) {
     let chol_time = t0.elapsed().as_secs_f64();
     println!();
     println!("  ✓ Incremental Cholesky completed in {:.2}s", chol_time);
-    println!("  ✓ Total time: {:.2}s (Gram) + {:.2}s (Cholesky) = {:.2}s",
-        gram_time, chol_time, gram_time + chol_time);
-    println!("  ✓ Monotonicity anomalies: {} (expected 0 for exact arithmetic)",
-        anomalies);
+    println!(
+        "  ✓ Total time: {:.2}s (Gram) + {:.2}s (Cholesky) = {:.2}s",
+        gram_time,
+        chol_time,
+        gram_time + chol_time
+    );
+    println!(
+        "  ✓ Monotonicity anomalies: {} (expected 0 for exact arithmetic)",
+        anomalies
+    );
     println!();
 }
 
@@ -143,8 +166,12 @@ fn try_load_cached_gram(max_n: usize, dim: usize) -> Option<Vec<f64>> {
                     106 => "double-double".to_string(),
                     p => format!("{p}-bit MPFR"),
                 };
-                println!("  ✓ Loaded cached {} Gram matrix (N={}, {} MB)",
-                    prec_str, g.max_n, g.mem_mb());
+                println!(
+                    "  ✓ Loaded cached {} Gram matrix (N={}, {} MB)",
+                    prec_str,
+                    g.max_n,
+                    g.mem_mb()
+                );
 
                 // Extract flat row-major submatrix for our dimension
                 let mut flat = vec![0.0f64; dim * dim];
@@ -162,14 +189,18 @@ fn try_load_cached_gram(max_n: usize, dim: usize) -> Option<Vec<f64>> {
 
 /// Compute the full Gram matrix in parallel using rayon.
 fn compute_gram_parallel(_max_n: usize, dim: usize) -> Vec<f64> {
-    println!("  Phase 1: Bulk Gram matrix ({0}×{0} = {1} unique entries)...",
-        dim, dim * (dim + 1) / 2);
+    println!(
+        "  Phase 1: Bulk Gram matrix ({0}×{0} = {1} unique entries)...",
+        dim,
+        dim * (dim + 1) / 2
+    );
 
     let pairs: Vec<(usize, usize)> = (0..dim)
         .flat_map(|i| (i..dim).map(move |j| (i, j)))
         .collect();
 
-    let gram_values: Vec<((usize, usize), f64)> = pairs.par_iter()
+    let gram_values: Vec<((usize, usize), f64)> = pairs
+        .par_iter()
         .map(|&(i, j)| ((i, j), gram::gram_entry_f64(i + 2, j + 2)))
         .collect();
 

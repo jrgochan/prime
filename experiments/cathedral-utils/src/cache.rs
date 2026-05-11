@@ -35,14 +35,18 @@ const VERSION: u32 = 1;
 pub fn cache_dir() -> PathBuf {
     let manifest = env!("CARGO_MANIFEST_DIR"); // e.g. .../experiments/cathedral-utils
     PathBuf::from(manifest)
-        .parent()                              // .../experiments/
+        .parent() // .../experiments/
         .unwrap_or(Path::new("."))
         .join("cache")
 }
 
 /// Compute the default cache file path for a Gram matrix.
 pub fn gram_cache_path(max_n: usize, precision: u32) -> PathBuf {
-    let prec_str = if precision == 0 { "f64".to_string() } else { format!("mpfr{precision}") };
+    let prec_str = if precision == 0 {
+        "f64".to_string()
+    } else {
+        format!("mpfr{precision}")
+    };
     cache_dir().join(format!("gram_N{max_n}_{prec_str}.bin"))
 }
 
@@ -71,16 +75,16 @@ pub fn save_gram(path: &Path, gram: &GramMatrix) -> std::io::Result<()> {
     f.write_all(&checksum(&gram.data).to_le_bytes())?;
 
     // Write f64 data as raw bytes
-    let bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(
-            gram.data.as_ptr() as *const u8,
-            gram.data.len() * 8,
-        )
-    };
+    let bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(gram.data.as_ptr() as *const u8, gram.data.len() * 8) };
     f.write_all(bytes)?;
 
     let mb = gram.data.len() * 8 / (1024 * 1024);
-    eprintln!("  \x1b[32m✓\x1b[0m Gram matrix cached to {} ({} MB)", path.display(), mb);
+    eprintln!(
+        "  \x1b[32m✓\x1b[0m Gram matrix cached to {} ({} MB)",
+        path.display(),
+        mb
+    );
     Ok(())
 }
 
@@ -122,12 +126,8 @@ pub fn load_gram(path: &Path) -> Option<GramMatrix> {
 
     // Read matrix data
     let mut data = vec![0.0f64; dim * dim];
-    let bytes: &mut [u8] = unsafe {
-        std::slice::from_raw_parts_mut(
-            data.as_mut_ptr() as *mut u8,
-            data.len() * 8,
-        )
-    };
+    let bytes: &mut [u8] =
+        unsafe { std::slice::from_raw_parts_mut(data.as_mut_ptr() as *mut u8, data.len() * 8) };
     f.read_exact(bytes).ok()?;
 
     // Validate checksum
@@ -141,7 +141,11 @@ pub fn load_gram(path: &Path) -> Option<GramMatrix> {
     eprintln!(
         "  \x1b[32m✓\x1b[0m Gram matrix loaded from cache ({} MB, N={max_n}, {})",
         mb,
-        if precision > 0 { format!("MPFR-{precision}") } else { "f64".to_string() }
+        if precision > 0 {
+            format!("MPFR-{precision}")
+        } else {
+            "f64".to_string()
+        }
     );
 
     Some(GramMatrix {
@@ -152,7 +156,6 @@ pub fn load_gram(path: &Path) -> Option<GramMatrix> {
         precision,
     })
 }
-
 
 const DD_MAGIC: u64 = 0x5F5F444448544143; // "CATHDD__"
 const DD_VERSION: u32 = 1;
@@ -175,7 +178,14 @@ pub fn dd_gram_cache_path(max_n: usize, precision: u32) -> PathBuf {
 /// [hi: f64×dim²]   — DD high part, row-major
 /// [lo: f64×dim²]   — DD low part, row-major
 /// ```
-pub fn save_dd_gram(path: &Path, hi: &[f64], lo: &[f64], dim: usize, max_n: usize, precision: u32) -> std::io::Result<()> {
+pub fn save_dd_gram(
+    path: &Path,
+    hi: &[f64],
+    lo: &[f64],
+    dim: usize,
+    max_n: usize,
+    precision: u32,
+) -> std::io::Result<()> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
@@ -190,17 +200,19 @@ pub fn save_dd_gram(path: &Path, hi: &[f64], lo: &[f64], dim: usize, max_n: usiz
     f.write_all(&checksum(hi).to_le_bytes())?;
 
     // Write hi and lo as raw bytes
-    let hi_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(hi.as_ptr() as *const u8, hi.len() * 8)
-    };
-    let lo_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(lo.as_ptr() as *const u8, lo.len() * 8)
-    };
+    let hi_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(hi.as_ptr() as *const u8, hi.len() * 8) };
+    let lo_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(lo.as_ptr() as *const u8, lo.len() * 8) };
     f.write_all(hi_bytes)?;
     f.write_all(lo_bytes)?;
 
     let mb = (hi.len() + lo.len()) * 8 / (1024 * 1024);
-    eprintln!("  \x1b[32m✓\x1b[0m DD Gram cached to {} ({} MB)", path.display(), mb);
+    eprintln!(
+        "  \x1b[32m✓\x1b[0m DD Gram cached to {} ({} MB)",
+        path.display(),
+        mb
+    );
     Ok(())
 }
 
@@ -216,10 +228,14 @@ pub fn load_dd_gram(path: &Path) -> Option<(Vec<f64>, Vec<f64>, usize)> {
 
     // Read and validate header
     f.read_exact(&mut buf8).ok()?;
-    if u64::from_le_bytes(buf8) != DD_MAGIC { return None; }
+    if u64::from_le_bytes(buf8) != DD_MAGIC {
+        return None;
+    }
 
     f.read_exact(&mut buf4).ok()?;
-    if u32::from_le_bytes(buf4) != DD_VERSION { return None; }
+    if u32::from_le_bytes(buf4) != DD_VERSION {
+        return None;
+    }
 
     f.read_exact(&mut buf4).ok()?;
     let _max_n = u32::from_le_bytes(buf4) as usize;
@@ -235,16 +251,14 @@ pub fn load_dd_gram(path: &Path) -> Option<(Vec<f64>, Vec<f64>, usize)> {
 
     // Read hi
     let mut hi = vec![0.0f64; dim * dim];
-    let hi_bytes: &mut [u8] = unsafe {
-        std::slice::from_raw_parts_mut(hi.as_mut_ptr() as *mut u8, hi.len() * 8)
-    };
+    let hi_bytes: &mut [u8] =
+        unsafe { std::slice::from_raw_parts_mut(hi.as_mut_ptr() as *mut u8, hi.len() * 8) };
     f.read_exact(hi_bytes).ok()?;
 
     // Read lo
     let mut lo = vec![0.0f64; dim * dim];
-    let lo_bytes: &mut [u8] = unsafe {
-        std::slice::from_raw_parts_mut(lo.as_mut_ptr() as *mut u8, lo.len() * 8)
-    };
+    let lo_bytes: &mut [u8] =
+        unsafe { std::slice::from_raw_parts_mut(lo.as_mut_ptr() as *mut u8, lo.len() * 8) };
     f.read_exact(lo_bytes).ok()?;
 
     // Validate checksum

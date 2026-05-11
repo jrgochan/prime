@@ -9,9 +9,9 @@
 
 #![allow(dead_code)]
 
-use crate::env::CathedralEnv;
 use super::conjugate_gradient::ConjugateGradientAgent;
 use super::evolution::{EvolutionAgent, EvolutionResult};
+use crate::env::CathedralEnv;
 use serde::{Deserialize, Serialize};
 
 /// Which phase the hybrid agent is currently in.
@@ -114,7 +114,11 @@ impl HybridStepResult {
                 AgentPhase::ConjugateGradient => "CG".to_string(),
                 AgentPhase::Evolution => "ES".to_string(),
             },
-            d2, vtgv, btv, step, extra,
+            d2,
+            vtgv,
+            btv,
+            step,
+            extra,
         }
     }
 }

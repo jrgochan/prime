@@ -16,13 +16,23 @@ pub struct DosResult {
 
 pub fn compute_dos(eigenvalues: &[f64], n_bins: usize) -> DosResult {
     if eigenvalues.len() < 2 {
-        return DosResult { bin_centers: vec![], counts: vec![], density: vec![], n_bins: 0 };
+        return DosResult {
+            bin_centers: vec![],
+            counts: vec![],
+            density: vec![],
+            n_bins: 0,
+        };
     }
     let min_e = eigenvalues[0];
     let max_e = eigenvalues[eigenvalues.len() - 1];
     let range = max_e - min_e;
     if range < 1e-30 {
-        return DosResult { bin_centers: vec![], counts: vec![], density: vec![], n_bins: 0 };
+        return DosResult {
+            bin_centers: vec![],
+            counts: vec![],
+            density: vec![],
+            n_bins: 0,
+        };
     }
     let bin_width = range / n_bins as f64;
     let mut counts = vec![0usize; n_bins];
@@ -36,11 +46,18 @@ pub fn compute_dos(eigenvalues: &[f64], n_bins: usize) -> DosResult {
     }
     let n = eigenvalues.len() as f64;
     let density: Vec<f64> = counts.iter().map(|&c| c as f64 / (n * bin_width)).collect();
-    DosResult { bin_centers, counts, density, n_bins }
+    DosResult {
+        bin_centers,
+        counts,
+        density,
+        n_bins,
+    }
 }
 
 pub fn compute_kde(eigenvalues: &[f64], n_pts: usize, bandwidth: f64) -> (Vec<f64>, Vec<f64>) {
-    if eigenvalues.len() < 2 { return (vec![], vec![]); }
+    if eigenvalues.len() < 2 {
+        return (vec![], vec![]);
+    }
     let min_e = eigenvalues[0];
     let max_e = eigenvalues[eigenvalues.len() - 1];
     let margin = (max_e - min_e) * 0.1;
@@ -50,14 +67,19 @@ pub fn compute_kde(eigenvalues: &[f64], n_pts: usize, bandwidth: f64) -> (Vec<f6
         .map(|i| lo + (hi - lo) * i as f64 / (n_pts - 1) as f64)
         .collect();
     let n = eigenvalues.len() as f64;
-    let density: Vec<f64> = energies.iter().map(|&e| {
-        eigenvalues.iter()
-            .map(|&ei| {
-                let z = (e - ei) / bandwidth;
-                (-0.5 * z * z).exp() / (bandwidth * (2.0 * PI).sqrt())
-            })
-            .sum::<f64>() / n
-    }).collect();
+    let density: Vec<f64> = energies
+        .iter()
+        .map(|&e| {
+            eigenvalues
+                .iter()
+                .map(|&ei| {
+                    let z = (e - ei) / bandwidth;
+                    (-0.5 * z * z).exp() / (bandwidth * (2.0 * PI).sqrt())
+                })
+                .sum::<f64>()
+                / n
+        })
+        .collect();
     (energies, density)
 }
 
@@ -67,7 +89,9 @@ pub fn compute_kde(eigenvalues: &[f64], n_pts: usize, bandwidth: f64) -> (Vec<f6
 
 /// Fit ρ(E) = A·ln|E - E₀| + B near the edge. Returns (A, E0, B, R²).
 pub fn fit_van_hove(eigenvalues: &[f64], fraction: f64) -> (f64, f64, f64, f64) {
-    if eigenvalues.len() < 5 { return (0.0, 0.0, 0.0, 0.0); }
+    if eigenvalues.len() < 5 {
+        return (0.0, 0.0, 0.0, 0.0);
+    }
     let n_fit = (eigenvalues.len() as f64 * fraction).ceil() as usize;
     let n_fit = n_fit.max(5).min(eigenvalues.len());
     let e0 = eigenvalues[0] * 0.99;
@@ -76,11 +100,15 @@ pub fn fit_van_hove(eigenvalues: &[f64], fraction: f64) -> (f64, f64, f64, f64) 
     let mut ys = Vec::new();
     for i in 0..n_fit {
         let e = eigenvalues[i];
-        if e - e0 <= 0.0 { continue; }
+        if e - e0 <= 0.0 {
+            continue;
+        }
         xs.push((e - e0).ln());
         ys.push((i as f64 + 0.5) / eigenvalues.len() as f64);
     }
-    if xs.len() < 3 { return (0.0, e0, 0.0, 0.0); }
+    if xs.len() < 3 {
+        return (0.0, e0, 0.0, 0.0);
+    }
 
     let n = xs.len() as f64;
     let sx: f64 = xs.iter().sum();
@@ -88,14 +116,24 @@ pub fn fit_van_hove(eigenvalues: &[f64], fraction: f64) -> (f64, f64, f64, f64) 
     let sxy: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| x * y).sum();
     let sx2: f64 = xs.iter().map(|x| x * x).sum();
     let denom = n * sx2 - sx * sx;
-    if denom.abs() < 1e-30 { return (0.0, e0, 0.0, 0.0); }
+    if denom.abs() < 1e-30 {
+        return (0.0, e0, 0.0, 0.0);
+    }
 
     let a = (n * sxy - sx * sy) / denom;
     let b = (sy - a * sx) / n;
     let y_mean = sy / n;
     let ss_tot: f64 = ys.iter().map(|y| (y - y_mean).powi(2)).sum();
-    let ss_res: f64 = xs.iter().zip(ys.iter()).map(|(x, y)| (y - (a * x + b)).powi(2)).sum();
-    let r2 = if ss_tot > 1e-30 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let ss_res: f64 = xs
+        .iter()
+        .zip(ys.iter())
+        .map(|(x, y)| (y - (a * x + b)).powi(2))
+        .sum();
+    let r2 = if ss_tot > 1e-30 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
     (a, e0, b, r2)
 }
 
@@ -116,11 +154,18 @@ pub struct SpacingResult {
 
 pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
     let empty = SpacingResult {
-        spacings: vec![], unfolded: vec![], mean_spacing: 0.0,
-        gue_fit: 0.0, goe_fit: 0.0, gse_fit: 0.0, poisson_fit: 0.0,
+        spacings: vec![],
+        unfolded: vec![],
+        mean_spacing: 0.0,
+        gue_fit: 0.0,
+        goe_fit: 0.0,
+        gse_fit: 0.0,
+        poisson_fit: 0.0,
         best_class: "N/A",
     };
-    if eigenvalues.len() < 4 { return empty; }
+    if eigenvalues.len() < 4 {
+        return empty;
+    }
 
     let n = eigenvalues.len();
     let mut spacings: Vec<f64> = Vec::with_capacity(n - 1);
@@ -131,12 +176,20 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
 
     // Unfolded spacings with local window
     let window = 5;
-    let unfolded: Vec<f64> = spacings.iter().enumerate().map(|(i, &s)| {
-        let lo = i.saturating_sub(window);
-        let hi = (i + window + 1).min(spacings.len());
-        let local_mean: f64 = spacings[lo..hi].iter().sum::<f64>() / (hi - lo) as f64;
-        if local_mean > 1e-30 { s / local_mean } else { 0.0 }
-    }).collect();
+    let unfolded: Vec<f64> = spacings
+        .iter()
+        .enumerate()
+        .map(|(i, &s)| {
+            let lo = i.saturating_sub(window);
+            let hi = (i + window + 1).min(spacings.len());
+            let local_mean: f64 = spacings[lo..hi].iter().sum::<f64>() / (hi - lo) as f64;
+            if local_mean > 1e-30 {
+                s / local_mean
+            } else {
+                0.0
+            }
+        })
+        .collect();
 
     // Histogram (20 bins from 0 to 4)
     let n_bins = 20;
@@ -145,7 +198,9 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
     let mut hist = vec![0usize; n_bins];
     for &s in &unfolded {
         let idx = (s / bin_w).floor() as usize;
-        if idx < n_bins { hist[idx] += 1; }
+        if idx < n_bins {
+            hist[idx] += 1;
+        }
     }
     let n_total = unfolded.len() as f64;
 
@@ -166,8 +221,8 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
         let p_goe = PI / 2.0 * s * (-PI * s * s / 4.0).exp();
 
         // GSE (β=4): P(s) = 2^18/(3^6·π³) · s⁴ · exp(-64s²/(9π))
-        let p_gse = 262144.0 / (729.0 * PI * PI * PI) * s.powi(4)
-            * (-64.0 * s * s / (9.0 * PI)).exp();
+        let p_gse =
+            262144.0 / (729.0 * PI * PI * PI) * s.powi(4) * (-64.0 * s * s / (9.0 * PI)).exp();
 
         // Poisson: P(s) = exp(-s)
         let p_poisson = (-s).exp();
@@ -194,8 +249,14 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
     };
 
     SpacingResult {
-        spacings, unfolded, mean_spacing: mean_s,
-        gue_fit, goe_fit, gse_fit, poisson_fit, best_class,
+        spacings,
+        unfolded,
+        mean_spacing: mean_s,
+        gue_fit,
+        goe_fit,
+        gse_fit,
+        poisson_fit,
+        best_class,
     }
 }
 
@@ -206,7 +267,9 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
 /// Compute Pearson correlation between two eigenvalue staircases.
 /// Both are interpolated to the same energy grid.
 pub fn staircase_correlation(eigs_a: &[f64], eigs_b: &[f64]) -> f64 {
-    if eigs_a.len() < 3 || eigs_b.len() < 3 { return 0.0; }
+    if eigs_a.len() < 3 || eigs_b.len() < 3 {
+        return 0.0;
+    }
 
     // Build common energy grid
     let e_min = eigs_a[0].min(eigs_b[0]);

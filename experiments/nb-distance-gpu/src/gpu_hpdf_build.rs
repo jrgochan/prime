@@ -29,12 +29,7 @@ extern "C" {
     /// Build DD-f64 Gram matrix on GPU using the block-based log1p bypass.
     /// Keeps the hi[] array in VRAM for subsequent cuSOLVER calls.
     /// Returns 0 on success, -1 on CUDA error.
-    fn gpu_build_gram_dd(
-        gram_hi: *mut f64,
-        gram_lo: *mut f64,
-        dim: i32,
-        t_max: i32,
-    ) -> i32;
+    fn gpu_build_gram_dd(gram_hi: *mut f64, gram_lo: *mut f64, dim: i32, t_max: i32) -> i32;
 
     /// Build a chunk of rows [row_start..row_start+n_rows) of the dim×dim Gram matrix.
     /// Only allocates n_rows×dim on GPU — enables OOC builds for matrices > VRAM.
@@ -58,13 +53,18 @@ fn detect_gpu_vram_mb() -> usize {
     let mut free: usize = 0;
     let mut total: usize = 0;
     let ret = unsafe { cudaMemGetInfo(&mut free as *mut usize, &mut total as *mut usize) };
-    if ret != 0 { return 0; }
+    if ret != 0 {
+        return 0;
+    }
     total / (1024 * 1024)
 }
 
 /// Build a chunk of rows on GPU. Returns (hi_buffer, lo_buffer, build_time_secs).
 fn gpu_build_rows_dd(
-    dim: usize, t_max: i32, row_start: usize, n_rows: usize,
+    dim: usize,
+    t_max: i32,
+    row_start: usize,
+    n_rows: usize,
 ) -> Result<(Vec<f64>, Vec<f64>, f64), String> {
     let mut hi = vec![0.0f64; n_rows * dim];
     let mut lo = vec![0.0f64; n_rows * dim];
@@ -73,8 +73,10 @@ fn gpu_build_rows_dd(
         gpu_build_gram_dd_rows(
             hi.as_mut_ptr(),
             lo.as_mut_ptr(),
-            dim as i32, t_max,
-            row_start as i32, n_rows as i32,
+            dim as i32,
+            t_max,
+            row_start as i32,
+            n_rows as i32,
         )
     };
     if ret != 0 {
@@ -87,7 +89,9 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 || args[1] == "--help" || args[1] == "-h" {
         eprintln!("Usage: gpu-hpdf-build <N> [--output <dir>] [--no-verify] [--no-number-theory]");
-        eprintln!("                         [--verify-count <n>] [--t-max <T>] [--verify-prec <bits>]");
+        eprintln!(
+            "                         [--verify-count <n>] [--t-max <T>] [--verify-prec <bits>]"
+        );
         eprintln!();
         eprintln!("Build a Gram matrix on GPU (DD block-based kernel) and save as HPDF (HDF5).");
         eprintln!();
@@ -96,9 +100,13 @@ fn main() {
         eprintln!("  --output <dir>      Output directory (default: cache/hpdf)");
         eprintln!("  --no-verify         Skip CPU cross-verification");
         eprintln!("  --no-number-theory  Don't include μ/φ/primes tables in HPDF");
-        eprintln!("  --skip-d2           Skip d² computation (Cholesky/LU — very slow for large N)");
+        eprintln!(
+            "  --skip-d2           Skip d² computation (Cholesky/LU — very slow for large N)"
+        );
         eprintln!("  --verify-count <n>  Number of CPU spot-check entries (default: 20)");
-        eprintln!("  --t-max <T>         Series truncation horizon (default: max(5*lcm_max, 100000))");
+        eprintln!(
+            "  --t-max <T>         Series truncation horizon (default: max(5*lcm_max, 100000))"
+        );
         eprintln!("  --verify-prec <bits> MPFR precision for CPU reference (default: 256)");
         eprintln!("                       Use 0 for precision ladder analysis (128→2048 bits)");
         std::process::exit(1);
@@ -107,8 +115,7 @@ fn main() {
     let max_n: usize = args[1].parse().expect("N must be a positive integer");
     let dim = max_n - 1;
 
-    let output_dir = parse_flag_str(&args, "--output")
-        .unwrap_or_else(|| "cache/hpdf".to_string());
+    let output_dir = parse_flag_str(&args, "--output").unwrap_or_else(|| "cache/hpdf".to_string());
     let no_verify = args.iter().any(|a| a == "--no-verify");
     let include_nt = !args.iter().any(|a| a == "--no-number-theory");
     let skip_d2 = args.iter().any(|a| a == "--skip-d2");
@@ -137,8 +144,14 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════╗");
     println!("║  🏛️  GPU HPDF BUILDER — Cathedral Gram Matrix Pipeline      ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  N = {:>6}  dim = {:>6}  entries = {:>12}            ║", max_n, dim, tri_entries);
-    println!("║  GPU memory: ~{:>5} MB   T_max = {:>8}                  ║", mem_mb, t_max);
+    println!(
+        "║  N = {:>6}  dim = {:>6}  entries = {:>12}            ║",
+        max_n, dim, tri_entries
+    );
+    println!(
+        "║  GPU memory: ~{:>5} MB   T_max = {:>8}                  ║",
+        mem_mb, t_max
+    );
     println!("║  Kernel: DD block-based (log1p bypass, no ln table)        ║");
     println!("║  HPDF output: {:<45} ║", &output_dir);
     println!("╚══════════════════════════════════════════════════════════════╝");
@@ -155,8 +168,11 @@ fn main() {
 
     println!("  GPU VRAM: {} MB", vram_mb);
     if use_chunked {
-        println!("  ⚡ CHUNKED GPU BUILD (matrix {}MB > {}MB VRAM threshold)",
-            matrix_mb, vram_mb * 85 / 100);
+        println!(
+            "  ⚡ CHUNKED GPU BUILD (matrix {}MB > {}MB VRAM threshold)",
+            matrix_mb,
+            vram_mb * 85 / 100
+        );
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -172,7 +188,10 @@ fn main() {
         let max_chunk_rows = (usable_vram / bytes_per_row) as usize;
         let chunk_rows = max_chunk_rows.min(2000).max(128);
 
-        println!("  ▸ Step 1: Chunked GPU DD build (T={}, {} rows/chunk)...", t_max, chunk_rows);
+        println!(
+            "  ▸ Step 1: Chunked GPU DD build (T={}, {} rows/chunk)...",
+            t_max, chunk_rows
+        );
 
         let mut gpu_hi = vec![0.0f64; dim * dim];
         let mut gpu_lo = vec![0.0f64; dim * dim];
@@ -182,46 +201,51 @@ fn main() {
         for chunk_start in (0..dim).step_by(chunk_rows) {
             let n_rows = chunk_rows.min(dim - chunk_start);
 
-            let (chunk_hi, chunk_lo, chunk_time) = gpu_build_rows_dd(
-                dim, t_max, chunk_start, n_rows,
-            ).unwrap_or_else(|e| {
-                eprintln!("  ✗ GPU chunk build failed at row {}: {}", chunk_start, e);
-                std::process::exit(1);
-            });
+            let (chunk_hi, chunk_lo, chunk_time) =
+                gpu_build_rows_dd(dim, t_max, chunk_start, n_rows).unwrap_or_else(|e| {
+                    eprintln!("  ✗ GPU chunk build failed at row {}: {}", chunk_start, e);
+                    std::process::exit(1);
+                });
             total_gpu_time += chunk_time;
 
             // Copy chunk into full matrix buffers (both hi and lo)
             let dest_offset = chunk_start * dim;
-            gpu_hi[dest_offset..dest_offset + n_rows * dim]
-                .copy_from_slice(&chunk_hi);
-            gpu_lo[dest_offset..dest_offset + n_rows * dim]
-                .copy_from_slice(&chunk_lo);
+            gpu_hi[dest_offset..dest_offset + n_rows * dim].copy_from_slice(&chunk_hi);
+            gpu_lo[dest_offset..dest_offset + n_rows * dim].copy_from_slice(&chunk_lo);
 
             // Progress
             let elapsed = t0.elapsed().as_secs_f64();
             let frac = (chunk_start + n_rows) as f64 / dim as f64;
-            let eta = if frac > 0.01 { elapsed / frac * (1.0 - frac) } else { 0.0 };
+            let eta = if frac > 0.01 {
+                elapsed / frac * (1.0 - frac)
+            } else {
+                0.0
+            };
             let entries_done = (chunk_start + n_rows) as f64 * dim as f64;
-            eprint!("\r  Row {}/{} ({:.1}%) | {:.0}s elapsed | ETA {:.0}s | {:.1} Mentry/s    ",
-                chunk_start + n_rows, dim, frac * 100.0,
-                elapsed, eta, entries_done / elapsed / 1e6);
+            eprint!(
+                "\r  Row {}/{} ({:.1}%) | {:.0}s elapsed | ETA {:.0}s | {:.1} Mentry/s    ",
+                chunk_start + n_rows,
+                dim,
+                frac * 100.0,
+                elapsed,
+                eta,
+                entries_done / elapsed / 1e6
+            );
         }
         eprintln!();
 
         (gpu_hi, gpu_lo, total_gpu_time)
     } else {
         // ── Full GPU build (fits in VRAM) ──
-        println!("  ▸ Step 1: Building Gram matrix on GPU (DD block-based, T={})...", t_max);
+        println!(
+            "  ▸ Step 1: Building Gram matrix on GPU (DD block-based, T={})...",
+            t_max
+        );
         let mut gpu_hi = vec![0.0f64; dim * dim];
         let mut gpu_lo = vec![0.0f64; dim * dim];
         let t0 = Instant::now();
         let status = unsafe {
-            gpu_build_gram_dd(
-                gpu_hi.as_mut_ptr(),
-                gpu_lo.as_mut_ptr(),
-                dim as i32,
-                t_max,
-            )
+            gpu_build_gram_dd(gpu_hi.as_mut_ptr(), gpu_lo.as_mut_ptr(), dim as i32, t_max)
         };
         let gpu_time = t0.elapsed().as_secs_f64();
         if status != 0 {
@@ -232,18 +256,32 @@ fn main() {
     };
 
     let lo_norm: f64 = gpu_lo.par_iter().map(|x| x * x).sum::<f64>().sqrt();
-    println!("  ✓ GPU DD matrix built in {:.2}s ({:.1} Mentry/s)",
-        gpu_time, tri_entries as f64 / gpu_time / 1e6);
-    println!("    DD lo-word ‖lo‖₂ = {:.6e} (hi/lo ratio ~{:.0})",
-        lo_norm, {
+    println!(
+        "  ✓ GPU DD matrix built in {:.2}s ({:.1} Mentry/s)",
+        gpu_time,
+        tri_entries as f64 / gpu_time / 1e6
+    );
+    println!(
+        "    DD lo-word ‖lo‖₂ = {:.6e} (hi/lo ratio ~{:.0})",
+        lo_norm,
+        {
             let hi_norm: f64 = gpu_hi.par_iter().map(|x| x * x).sum::<f64>().sqrt();
-            if lo_norm > 0.0 { hi_norm / lo_norm } else { f64::INFINITY }
-        });
+            if lo_norm > 0.0 {
+                hi_norm / lo_norm
+            } else {
+                f64::INFINITY
+            }
+        }
+    );
 
     // Quick sanity: diagonal must be positive
 
-    let diag_min = (0..dim).map(|i| gpu_hi[i * dim + i]).fold(f64::MAX, f64::min);
-    let diag_max = (0..dim).map(|i| gpu_hi[i * dim + i]).fold(f64::MIN, f64::max);
+    let diag_min = (0..dim)
+        .map(|i| gpu_hi[i * dim + i])
+        .fold(f64::MAX, f64::min);
+    let diag_max = (0..dim)
+        .map(|i| gpu_hi[i * dim + i])
+        .fold(f64::MIN, f64::max);
     println!("    Diagonal range: [{:.8e}, {:.8e}]", diag_min, diag_max);
     if diag_min <= 0.0 {
         eprintln!("  ⚠ WARNING: Non-positive diagonal entries detected!");
@@ -274,17 +312,35 @@ fn main() {
             // ── Precision ladder analysis ──
             // Run verification at multiple MPFR precisions to expose the
             // GPU DD kernel's precision ceiling.
-            println!("  ▸ Step 2: Precision ladder analysis ({} spot checks)...", verify_count);
+            println!(
+                "  ▸ Step 2: Precision ladder analysis ({} spot checks)...",
+                verify_count
+            );
             println!();
-            println!("    {:<12} {:>14} {:>14} {:>10}", "MPFR bits", "Mean rel err", "Max rel err", "Eff digits");
-            println!("    {} {} {} {}", "─".repeat(12), "─".repeat(14), "─".repeat(14), "─".repeat(10));
+            println!(
+                "    {:<12} {:>14} {:>14} {:>10}",
+                "MPFR bits", "Mean rel err", "Max rel err", "Eff digits"
+            );
+            println!(
+                "    {} {} {} {}",
+                "─".repeat(12),
+                "─".repeat(14),
+                "─".repeat(14),
+                "─".repeat(10)
+            );
 
             for &prec in &[128u32, 256, 512, 1024, 2048] {
                 let (mean_rel, max_rel, _worst_j, _worst_k, count, elapsed) =
                     run_spot_checks(&gpu_hi, dim, verify_count, prec, t_max as usize);
-                let digits = if mean_rel > 0.0 { -mean_rel.log10() } else { 16.0 };
-                println!("    MPFR-{:<6} {:14.3e} {:14.3e} {:10.1}   ({} checks, {:.1}s)",
-                    prec, mean_rel, max_rel, digits, count, elapsed);
+                let digits = if mean_rel > 0.0 {
+                    -mean_rel.log10()
+                } else {
+                    16.0
+                };
+                println!(
+                    "    MPFR-{:<6} {:14.3e} {:14.3e} {:10.1}   ({} checks, {:.1}s)",
+                    prec, mean_rel, max_rel, digits, count, elapsed
+                );
             }
 
             println!();
@@ -293,19 +349,32 @@ fn main() {
             println!();
         } else {
             // ── Single-precision verification ──
-            println!("  ▸ Step 2: CPU cross-verification ({} spot checks, MPFR-{})...", verify_count, verify_prec);
+            println!(
+                "  ▸ Step 2: CPU cross-verification ({} spot checks, MPFR-{})...",
+                verify_count, verify_prec
+            );
 
             let (mean_rel, max_rel, worst_j, worst_k, count, elapsed) =
                 run_spot_checks(&gpu_hi, dim, verify_count, verify_prec, t_max as usize);
-            let digits = if mean_rel > 0.0 { -mean_rel.log10() } else { 16.0 };
+            let digits = if mean_rel > 0.0 {
+                -mean_rel.log10()
+            } else {
+                16.0
+            };
 
             println!("  ✓ Verification ({:.1}s):", elapsed);
-            println!("    Max rel error:  {:.3e} (G[{},{}])", max_rel, worst_j, worst_k);
+            println!(
+                "    Max rel error:  {:.3e} (G[{},{}])",
+                max_rel, worst_j, worst_k
+            );
             println!("    Mean rel error: {:.3e}", mean_rel);
             println!("    Effective digits: {:.1}", digits);
             println!("    Entries checked: {}", count);
-            println!("    MPFR precision: {}-bit ({:.0} decimal digits)",
-                verify_prec, (verify_prec as f64) * 0.301);
+            println!(
+                "    MPFR precision: {}-bit ({:.0} decimal digits)",
+                verify_prec,
+                (verify_prec as f64) * 0.301
+            );
 
             if digits < 8.0 {
                 eprintln!("  ⚠ WARNING: Fewer than 8 digits of agreement!");
@@ -360,15 +429,13 @@ fn main() {
     let output_path = PathBuf::from(&output_dir).join(format!("gram_N{}.h5", max_n));
 
     // Compute SHA-256 of the GPU hi+lo data for provenance
-    let data_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(gpu_hi.as_ptr() as *const u8, gpu_hi.len() * 8)
-    };
-    use sha2::{Sha256, Digest};
+    let data_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(gpu_hi.as_ptr() as *const u8, gpu_hi.len() * 8) };
+    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     hasher.update(data_bytes);
-    let lo_bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(gpu_lo.as_ptr() as *const u8, gpu_lo.len() * 8)
-    };
+    let lo_bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(gpu_lo.as_ptr() as *const u8, gpu_lo.len() * 8) };
     hasher.update(lo_bytes);
     let source_sha = format!("{:x}", hasher.finalize());
 
@@ -376,14 +443,20 @@ fn main() {
         max_n,
         precision: 0, // DD precision (~31 digits), not MPFR
         source_sha256: source_sha.clone(),
-        builder: format!("gpu-hpdf-build DD-lossless (block-based kernel, log1p bypass, T={})", t_max),
+        builder: format!(
+            "gpu-hpdf-build DD-lossless (block-based kernel, log1p bypass, T={})",
+            t_max
+        ),
         include_number_theory: include_nt,
     };
 
     match hpdf::write_hpdf_dd(&output_path, &gpu_hi, &gpu_lo, &config) {
         Ok(file_size) => {
-            println!("  ✓ HPDF [DD] written: {} ({:.1} MB)",
-                output_path.display(), file_size as f64 / (1024.0 * 1024.0));
+            println!(
+                "  ✓ HPDF [DD] written: {} ({:.1} MB)",
+                output_path.display(),
+                file_size as f64 / (1024.0 * 1024.0)
+            );
         }
         Err(e) => {
             eprintln!("  ✗ HPDF write failed: {}", e);
@@ -402,9 +475,14 @@ fn main() {
     assert!(reader.has_dd(), "HPDF should have DD data");
 
     // SHA-256 integrity (both hi and lo)
-    let integrity = reader.verify_data_integrity().expect("Integrity check failed");
+    let integrity = reader
+        .verify_data_integrity()
+        .expect("Integrity check failed");
     if integrity.valid {
-        println!("  ✓ SHA-256 (hi): {}... ✓", &integrity.computed_sha256[..16]);
+        println!(
+            "  ✓ SHA-256 (hi): {}... ✓",
+            &integrity.computed_sha256[..16]
+        );
         if let Some(true) = integrity.dd_lo_valid {
             println!("  ✓ SHA-256 (lo): verified ✓");
         }
@@ -417,7 +495,9 @@ fn main() {
     }
 
     // Spot-check hi entries roundtrip
-    let read_data = reader.read_gram_full().expect("Failed to read back hi matrix");
+    let read_data = reader
+        .read_gram_full()
+        .expect("Failed to read back hi matrix");
     let mut max_roundtrip_err = 0.0f64;
     for idx in 0..100.min(dim * dim) {
         let hash = idx.wrapping_mul(2654435761) % (dim * dim);
@@ -431,7 +511,10 @@ fn main() {
     }
 
     // Spot-check lo entries roundtrip
-    if let Some(read_lo) = reader.read_gram_lo_full().expect("Failed to read lo matrix") {
+    if let Some(read_lo) = reader
+        .read_gram_lo_full()
+        .expect("Failed to read lo matrix")
+    {
         let mut max_lo_err = 0.0f64;
         for idx in 0..100.min(dim * dim) {
             let hash = idx.wrapping_mul(2654435761) % (dim * dim);
@@ -453,18 +536,27 @@ fn main() {
     println!("╔══════════════════════════════════════════════════════════════╗");
     println!("║  ✓ GPU HPDF DD BUILD COMPLETE — LOSSLESS                    ║");
     println!("╠══════════════════════════════════════════════════════════════╣");
-    println!("║  N = {:>6}  dim = {:>6}  T_max = {:>8}                ║", max_n, dim, t_max);
+    println!(
+        "║  N = {:>6}  dim = {:>6}  T_max = {:>8}                ║",
+        max_n, dim, t_max
+    );
     if let Some(d2) = d2_result {
         println!("║  d²_{} = {:.12e}                         ║", max_n, d2);
     }
-    println!("║  HPDF: {}                                    ║",
-        &output_path.file_name().unwrap().to_string_lossy());
+    println!(
+        "║  HPDF: {}                                    ║",
+        &output_path.file_name().unwrap().to_string_lossy()
+    );
     println!("║  DD: hi+lo stored (lossless ~31-digit precision)           ║");
-    println!("║  SHA-256: {}...                      ║",
-        &integrity.computed_sha256[..24]);
+    println!(
+        "║  SHA-256: {}...                      ║",
+        &integrity.computed_sha256[..24]
+    );
     println!("╠──────────────────────────────────────────────────────────────╣");
-    println!("║  Timing:  GPU {:.1}s + total {:.1}s                       ║",
-        gpu_time, total_time);
+    println!(
+        "║  Timing:  GPU {:.1}s + total {:.1}s                       ║",
+        gpu_time, total_time
+    );
     println!("╚══════════════════════════════════════════════════════════════╝");
     println!();
 
@@ -483,7 +575,12 @@ fn compare_with_cpu_cache(max_n: usize, dim: usize, gpu_data: &[f64]) {
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
                     if g.max_n >= max_n {
-                        if cpu_ref.as_ref().map_or(true, |c: &cathedral_utils::gram::GramMatrix| g.precision > c.precision) {
+                        if cpu_ref
+                            .as_ref()
+                            .map_or(true, |c: &cathedral_utils::gram::GramMatrix| {
+                                g.precision > c.precision
+                            })
+                        {
                             cpu_ref = Some(g);
                         }
                     }
@@ -509,7 +606,11 @@ fn compare_with_cpu_cache(max_n: usize, dim: usize, gpu_data: &[f64]) {
             }
         }
         let mean_rel = sum_rel / count as f64;
-        let digits = if mean_rel > 0.0 { -mean_rel.log10() } else { 16.0 };
+        let digits = if mean_rel > 0.0 {
+            -mean_rel.log10()
+        } else {
+            16.0
+        };
 
         println!("  ═══ GPU DD vs CPU cache (MPFR-{}) ═══", cpu.precision);
         println!("    max rel error:  {:.3e}", max_rel);
@@ -529,7 +630,11 @@ fn compare_with_cpu_cache(max_n: usize, dim: usize, gpu_data: &[f64]) {
 /// Parallelized with rayon — each MPFR spot check is independent and takes ~3s,
 /// so running them in parallel gives ~12-16× speedup on multi-core systems.
 fn run_spot_checks(
-    gpu_hi: &[f64], dim: usize, verify_count: usize, prec: u32, t_max: usize,
+    gpu_hi: &[f64],
+    dim: usize,
+    verify_count: usize,
+    prec: u32,
+    t_max: usize,
 ) -> (f64, f64, usize, usize, usize, f64) {
     let t0 = Instant::now();
 
@@ -574,12 +679,14 @@ fn run_spot_checks(
     }
 
     let elapsed = t0.elapsed().as_secs_f64();
-    let mean_rel = if count > 0 { sum_rel / count as f64 } else { 0.0 };
+    let mean_rel = if count > 0 {
+        sum_rel / count as f64
+    } else {
+        0.0
+    };
     (mean_rel, max_rel, worst_j, worst_k, count, elapsed)
 }
 
 fn parse_flag_str(args: &[String], flag: &str) -> Option<String> {
-    args.windows(2)
-        .find(|w| w[0] == flag)
-        .map(|w| w[1].clone())
+    args.windows(2).find(|w| w[0] == flag).map(|w| w[1].clone())
 }

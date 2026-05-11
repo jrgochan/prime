@@ -298,8 +298,7 @@ fn main() {
 
     // Configuration
     let test_ns: Vec<usize> = vec![
-        10, 20, 30, 50, 75, 100, 150, 200, 300, 400, 500,
-        750, 1000, 1500, 2000,
+        10, 20, 30, 50, 75, 100, 150, 200, 300, 400, 500, 750, 1000, 1500, 2000,
     ];
     let max_n = *test_ns.iter().max().unwrap();
     let sieve_n = max_n.max(10_000); // extra for Mertens profile
@@ -311,8 +310,10 @@ fn main() {
     println!("Step 1: Computing Möbius sieve up to {}...", sieve_n);
     let mu = mobius_sieve(sieve_n);
     let mertens_fn = mertens(&mu);
-    println!("  ✅ M(100)={}, M(1000)={}, M({})={}", 
-        mertens_fn[100], mertens_fn[1000], sieve_n, mertens_fn[sieve_n]);
+    println!(
+        "  ✅ M(100)={}, M(1000)={}, M({})={}",
+        mertens_fn[100], mertens_fn[1000], sieve_n, mertens_fn[sieve_n]
+    );
 
     // Step 2: Mertens profile
     println!("\nStep 2: Computing Mertens bound profile...");
@@ -333,15 +334,22 @@ fn main() {
             });
         }
     }
-    println!("  ✅ Max |M(x)|/(√x·(ln x)²) = {:.6} for x ∈ [10,{}]", max_mertens_c, sieve_n);
+    println!(
+        "  ✅ Max |M(x)|/(√x·(ln x)²) = {:.6} for x ∈ [10,{}]",
+        max_mertens_c, sieve_n
+    );
 
     // Write Mertens profile
     {
         let mut f = fs::File::create("results/mertens_profile.tsv").unwrap();
         writeln!(f, "x\tM(x)\t|M|/sqrt(x)\t|M|/(sqrt(x)*(ln_x)^2)").unwrap();
         for row in &mertens_rows {
-            writeln!(f, "{}\t{}\t{:.8}\t{:.8}", row.x, row.m_x,
-                row.abs_m_over_sqrt_x, row.abs_m_over_sqrt_x_ln_sq).unwrap();
+            writeln!(
+                f,
+                "{}\t{}\t{:.8}\t{:.8}",
+                row.x, row.m_x, row.abs_m_over_sqrt_x, row.abs_m_over_sqrt_x_ln_sq
+            )
+            .unwrap();
         }
     }
     println!("  📄 results/mertens_profile.tsv");
@@ -386,9 +394,19 @@ fn main() {
         let mut f = fs::File::create("results/quadratic_form.tsv").unwrap();
         writeln!(f, "N\tQ\tQ*ln(N)\tbt_v\tvt_G_v\tM(N)\t|M|_ratio\tln(N)").unwrap();
         for row in &q_rows {
-            writeln!(f, "{}\t{:.10}\t{:.6}\t{:.8}\t{:.8}\t{}\t{:.8}\t{:.6}",
-                row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v,
-                row.mertens_n, row.mertens_ratio, row.ln_n).unwrap();
+            writeln!(
+                f,
+                "{}\t{:.10}\t{:.6}\t{:.8}\t{:.8}\t{}\t{:.8}\t{:.6}",
+                row.n,
+                row.q,
+                row.q_times_ln_n,
+                row.bt_v,
+                row.vt_g_v,
+                row.mertens_n,
+                row.mertens_ratio,
+                row.ln_n
+            )
+            .unwrap();
         }
     }
     println!("  📄 results/quadratic_form.tsv");
@@ -398,8 +416,12 @@ fn main() {
         let mut f = fs::File::create("results/abel_decomposition.tsv").unwrap();
         writeln!(f, "N\tabel_linear\tdirect_linear\tdifference").unwrap();
         for row in &abel_rows {
-            writeln!(f, "{}\t{:.10}\t{:.10}\t{:.10}",
-                row.n, row.abel_linear, row.direct_linear, row.difference).unwrap();
+            writeln!(
+                f,
+                "{}\t{:.10}\t{:.10}\t{:.10}",
+                row.n, row.abel_linear, row.direct_linear, row.difference
+            )
+            .unwrap();
         }
     }
     println!("  📄 results/abel_decomposition.tsv");
@@ -428,12 +450,20 @@ fn main() {
     println!("║  N       Q           Q·ln(N)     bᵀv       vᵀGv           ║");
     println!("║  ─────   ─────────   ────────   ──────── ────────          ║");
     for row in &q_rows {
-        println!("║  {:>5}   {:>9.6}   {:>8.4}   {:.4}   {:.4}          ║",
-            row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v);
+        println!(
+            "║  {:>5}   {:>9.6}   {:>8.4}   {:.4}   {:.4}          ║",
+            row.n, row.q, row.q_times_ln_n, row.bt_v, row.vt_g_v
+        );
     }
     println!("║                                                            ║");
-    println!("║  Mertens constant C_M = {:.6}                         ║", max_mertens_c);
-    println!("║  Total time: {:.1}s                                       ║", total_time);
+    println!(
+        "║  Mertens constant C_M = {:.6}                         ║",
+        max_mertens_c
+    );
+    println!(
+        "║  Total time: {:.1}s                                       ║",
+        total_time
+    );
     println!("║                                                            ║");
 
     // Check convergence
@@ -458,11 +488,24 @@ fn main() {
         let mut f = fs::File::create("results/certificates/abel_tail_cert.json").unwrap();
         writeln!(f, "{{").unwrap();
         writeln!(f, "  \"experiment\": \"Abel Summation Bridge v2\",").unwrap();
-        writeln!(f, "  \"precision\": \"f64 ({} Simpson nodes)\",", QUAD_POINTS).unwrap();
+        writeln!(
+            f,
+            "  \"precision\": \"f64 ({} Simpson nodes)\",",
+            QUAD_POINTS
+        )
+        .unwrap();
         writeln!(f, "  \"lean_bridge\": {{").unwrap();
         writeln!(f, "    \"axiom\": \"abel_mertens_tail_raw\",").unwrap();
-        writeln!(f, "    \"file\": \"Cathedral/MellinBridge/AbelSieve.lean\",").unwrap();
-        writeln!(f, "    \"claim\": \"Mertens bound implies Q(N) ≤ K/log(N)\"").unwrap();
+        writeln!(
+            f,
+            "    \"file\": \"Cathedral/MellinBridge/AbelSieve.lean\","
+        )
+        .unwrap();
+        writeln!(
+            f,
+            "    \"claim\": \"Mertens bound implies Q(N) ≤ K/log(N)\""
+        )
+        .unwrap();
         writeln!(f, "  }},").unwrap();
         writeln!(f, "  \"mertens_bound_constant\": {:.10},", max_mertens_c).unwrap();
         writeln!(f, "  \"data\": [").unwrap();
@@ -473,14 +516,24 @@ fn main() {
         }
         writeln!(f, "  ],").unwrap();
         let q_stable = q_rows.len() >= 3 && {
-            let last = q_rows[q_rows.len()-1].q_times_ln_n;
-            let prev = q_rows[q_rows.len()-2].q_times_ln_n;
+            let last = q_rows[q_rows.len() - 1].q_times_ln_n;
+            let prev = q_rows[q_rows.len() - 2].q_times_ln_n;
             (last - prev).abs() < 0.5
         };
         writeln!(f, "  \"verdicts\": {{").unwrap();
-        writeln!(f, "    \"Q_positive\": {},", q_rows.iter().all(|r| r.q > 0.0)).unwrap();
+        writeln!(
+            f,
+            "    \"Q_positive\": {},",
+            q_rows.iter().all(|r| r.q > 0.0)
+        )
+        .unwrap();
         writeln!(f, "    \"Q_ln_N_stabilizing\": {},", q_stable).unwrap();
-        writeln!(f, "    \"abel_identity_verified\": {}", abel_rows.iter().all(|r| r.difference < 1e-4)).unwrap();
+        writeln!(
+            f,
+            "    \"abel_identity_verified\": {}",
+            abel_rows.iter().all(|r| r.difference < 1e-4)
+        )
+        .unwrap();
         writeln!(f, "  }}").unwrap();
         writeln!(f, "}}").unwrap();
     }

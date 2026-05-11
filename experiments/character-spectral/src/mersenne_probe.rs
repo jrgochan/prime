@@ -18,7 +18,6 @@
 //!  Usage: mersenne-probe [max_N]
 //! ═══════════════════════════════════════════════════════════════════════════
 
-
 use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use std::time::Instant;
@@ -30,12 +29,20 @@ use cathedral_utils::gram::gram_entry_f64;
 // ═══════════════════════════════════════════════════════════════════════
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
         i += 6;
     }
     true
@@ -63,10 +70,20 @@ fn factorize(mut n: usize) -> Vec<(usize, u32)> {
 
 fn format_factors(n: usize) -> String {
     let factors = factorize(n);
-    if factors.is_empty() { return "1".to_string(); }
-    factors.iter().map(|(p, e)| {
-        if *e == 1 { format!("{p}") } else { format!("{p}^{e}") }
-    }).collect::<Vec<_>>().join("·")
+    if factors.is_empty() {
+        return "1".to_string();
+    }
+    factors
+        .iter()
+        .map(|(p, e)| {
+            if *e == 1 {
+                format!("{p}")
+            } else {
+                format!("{p}^{e}")
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("·")
 }
 
 fn num_divisors(n: usize) -> usize {
@@ -91,12 +108,16 @@ fn select_candidates(n: usize) -> Vec<usize> {
     // 1. MERSENNE MULTIPLES: k = 2^a · M_p for small multipliers
     for &p in MERSENNE_EXPONENTS {
         let mp = (1u64 << p) - 1;
-        if mp as usize > n { break; }
+        if mp as usize > n {
+            break;
+        }
 
         // Base Mersenne prime multiples: 2^a * M_p
         for a in 0..=20 {
             let k = (1u64 << a) * mp;
-            if k as usize > n { break; }
+            if k as usize > n {
+                break;
+            }
             cands.insert(k as usize);
 
             // Small prime multipliers: 3, 5, 7, 11
@@ -121,25 +142,28 @@ fn select_candidates(n: usize) -> Vec<usize> {
             cands.insert(k);
         }
         // But limit total candidates from this zone
-        if cands.len() > 3000 { break; }
+        if cands.len() > 3000 {
+            break;
+        }
     }
 
     // 3. HIGHLY COMPOSITE NUMBERS (known up to 10^9)
-    let hc = [2, 4, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720,
-              840, 1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160,
-              25200, 27720, 45360, 50400, 55440, 83160, 110880, 166320,
-              221760, 277200, 332640, 498960, 554400, 665280, 720720,
-              1081080, 1441440, 2162160, 2882880, 3603600, 4324320,
-              6486480, 7207200, 8648640, 10810800, 14414400, 17297280,
-              21621600, 36756720, 43243200, 61261200, 73513440, 110270160,
-              122522400, 147026880, 183783600, 245044800, 294053760,
-              367567200, 551350800, 698377680, 735134400];
+    let hc = [
+        2, 4, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840, 1260, 1680, 2520, 5040, 7560,
+        10080, 15120, 20160, 25200, 27720, 45360, 50400, 55440, 83160, 110880, 166320, 221760,
+        277200, 332640, 498960, 554400, 665280, 720720, 1081080, 1441440, 2162160, 2882880,
+        3603600, 4324320, 6486480, 7207200, 8648640, 10810800, 14414400, 17297280, 21621600,
+        36756720, 43243200, 61261200, 73513440, 110270160, 122522400, 147026880, 183783600,
+        245044800, 294053760, 367567200, 551350800, 698377680, 735134400,
+    ];
     for &h in &hc {
         if h <= n {
             cands.insert(h);
             // Small multiples of HC numbers
             for m in 2..=5 {
-                if h * m <= n { cands.insert(h * m); }
+                if h * m <= n {
+                    cands.insert(h * m);
+                }
             }
         }
     }
@@ -164,7 +188,9 @@ fn select_candidates(n: usize) -> Vec<usize> {
 
     // 5. SMALL PRIMES (always important as gauge bosons)
     for p in 2..=100 {
-        if is_prime(p) { cands.insert(p); }
+        if is_prime(p) {
+            cands.insert(p);
+        }
     }
 
     // 6. PRIME POWERS up to N
@@ -172,7 +198,9 @@ fn select_candidates(n: usize) -> Vec<usize> {
         let mut pk: usize = p;
         while pk <= n {
             cands.insert(pk);
-            if pk > n / p { break; }
+            if pk > n / p {
+                break;
+            }
             pk *= p;
         }
     }
@@ -201,7 +229,10 @@ fn build_submatrix(candidates: &[usize]) -> Vec<f64> {
                 let elapsed = t_start.elapsed().as_secs_f64();
                 let frac = row as f64 / dim as f64;
                 let eta = elapsed / frac * (1.0 - frac);
-                eprint!("\r  {DIM}  submatrix row {row}/{dim} ({:.0}%) ETA {eta:.0}s{RESET}    ", frac * 100.0);
+                eprint!(
+                    "\r  {DIM}  submatrix row {row}/{dim} ({:.0}%) ETA {eta:.0}s{RESET}    ",
+                    frac * 100.0
+                );
             }
             result
         })
@@ -210,7 +241,12 @@ fn build_submatrix(candidates: &[usize]) -> Vec<f64> {
     if dim > 200 {
         eprintln!();
     }
-    eprintln!("  Submatrix: {}×{} ({:.1}s)", dim, dim, t_start.elapsed().as_secs_f64());
+    eprintln!(
+        "  Submatrix: {}×{} ({:.1}s)",
+        dim,
+        dim,
+        t_start.elapsed().as_secs_f64()
+    );
 
     let mut mat = vec![0.0f64; dim * dim];
     for ((r, c), v) in entries {
@@ -235,7 +271,9 @@ fn ground_state_inverse_iter(mat: &[f64], dim: usize) -> (f64, Vec<f64>) {
     for _iter in 0..max_iter {
         let w = lu.solve(&v).expect("LU solve failed");
         let norm = w.norm();
-        if norm < 1e-30 { break; }
+        if norm < 1e-30 {
+            break;
+        }
         v = w / norm;
     }
 
@@ -264,14 +302,20 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     let total_time = Instant::now();
 
     // Build info
-    let mut infos: Vec<CandidateInfo> = candidates.iter().zip(weights.iter())
+    let mut infos: Vec<CandidateInfo> = candidates
+        .iter()
+        .zip(weights.iter())
         .map(|(&k, &w)| CandidateInfo {
             k,
             weight: w,
             d_k: num_divisors(k),
             omega: omega(k),
             is_prime: is_prime(k),
-            factors: if is_prime(k) { format!("{k} (prime)") } else { format_factors(k) },
+            factors: if is_prime(k) {
+                format!("{k} (prime)")
+            } else {
+                format_factors(k)
+            },
         })
         .collect();
 
@@ -285,15 +329,30 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     let composite_count = infos.iter().filter(|i| !i.is_prime).count();
 
     eprintln!("\n  ═══ MERSENNE PROBE RESULTS · N = {n} ═══\n");
-    eprintln!("  Candidates analyzed: {} ({} primes, {} composites)",
-        infos.len(), prime_count, composite_count);
+    eprintln!(
+        "  Candidates analyzed: {} ({} primes, {} composites)",
+        infos.len(),
+        prime_count,
+        composite_count
+    );
     eprintln!("  λ_min (submatrix): {:.6e}", lambda_min);
     eprintln!();
     eprintln!("  Ground-state weight allocation:");
-    eprintln!("    Bosons (primes):     {:.4}% ({} primes)", prime_weight * 100.0, prime_count);
-    eprintln!("    Fermions (composites): {:.4}% ({} composites)", composite_weight * 100.0, composite_count);
+    eprintln!(
+        "    Bosons (primes):     {:.4}% ({} primes)",
+        prime_weight * 100.0,
+        prime_count
+    );
+    eprintln!(
+        "    Fermions (composites): {:.4}% ({} composites)",
+        composite_weight * 100.0,
+        composite_count
+    );
     if prime_weight > 0.0 {
-        eprintln!("    Ratio:               {:.1}×", composite_weight / prime_weight);
+        eprintln!(
+            "    Ratio:               {:.1}×",
+            composite_weight / prime_weight
+        );
     }
 
     // Top 30 by weight
@@ -302,44 +361,58 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     eprintln!("  ─────┼────────────┼──────────────┼──────┼───┼─────────┼────────");
     for (i, info) in infos.iter().take(30).enumerate() {
         let kind = if info.is_prime { "BOSON" } else { "fermion" };
-        eprintln!("  {:<4} │ {:<10} │ {:.8e} │ {:<4} │ {} │ {:<7} │ {}",
-            i + 1, info.k, info.weight, info.d_k, info.omega, kind, info.factors);
+        eprintln!(
+            "  {:<4} │ {:<10} │ {:.8e} │ {:<4} │ {} │ {:<7} │ {}",
+            i + 1,
+            info.k,
+            info.weight,
+            info.d_k,
+            info.omega,
+            kind,
+            info.factors
+        );
     }
 
     // Mersenne family analysis
     eprintln!("\n  ═══ MERSENNE PRIME FAMILIES ═══\n");
     for &p in MERSENNE_EXPONENTS {
         let mp = (1u64 << p) - 1;
-        if mp as usize > n { break; }
+        if mp as usize > n {
+            break;
+        }
 
-        let family_weight: f64 = infos.iter()
+        let family_weight: f64 = infos
+            .iter()
             .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
             .map(|i| i.weight)
             .sum();
 
-        let family_count = infos.iter()
+        let family_count = infos
+            .iter()
             .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
             .count();
 
         // Find the heaviest member
-        let best = infos.iter()
+        let best = infos
+            .iter()
             .filter(|i| !i.is_prime && i.k as u64 % mp == 0)
             .max_by(|a, b| a.weight.partial_cmp(&b.weight).unwrap());
 
         if let Some(b) = best {
-            eprintln!("  M_{p} = {mp} (2^{p}-1): {family_count} members, total weight = {:.4}%",
-                family_weight * 100.0);
-            eprintln!("    Champion: k = {} (weight {:.6e}, d={}, ω={}) = {}",
-                b.k, b.weight, b.d_k, b.omega, b.factors);
+            eprintln!(
+                "  M_{p} = {mp} (2^{p}-1): {family_count} members, total weight = {:.4}%",
+                family_weight * 100.0
+            );
+            eprintln!(
+                "    Champion: k = {} (weight {:.6e}, d={}, ω={}) = {}",
+                b.k, b.weight, b.d_k, b.omega, b.factors
+            );
         }
     }
 
     // Higgs adjacency check
     eprintln!("\n  ═══ HIGGS ADJACENCY (boson-fermion pairs at gap ≤ 2) ═══\n");
-    let top_fermions: Vec<&CandidateInfo> = infos.iter()
-        .filter(|i| !i.is_prime)
-        .take(10)
-        .collect();
+    let top_fermions: Vec<&CandidateInfo> = infos.iter().filter(|i| !i.is_prime).take(10).collect();
 
     for f in &top_fermions {
         // Check if adjacent integers are primes in our candidate set
@@ -347,16 +420,21 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
             if f.k > gap {
                 let neighbor = f.k - gap;
                 if let Some(boson) = infos.iter().find(|i| i.k == neighbor && i.is_prime) {
-                    eprintln!("  {} (fermion, wt={:.4e}) ← gap={} → {} (boson, wt={:.4e})",
-                        f.k, f.weight, gap, boson.k, boson.weight);
+                    eprintln!(
+                        "  {} (fermion, wt={:.4e}) ← gap={} → {} (boson, wt={:.4e})",
+                        f.k, f.weight, gap, boson.k, boson.weight
+                    );
                 }
             }
             let neighbor = f.k + gap;
             if neighbor <= n
-                && let Some(boson) = infos.iter().find(|i| i.k == neighbor && i.is_prime) {
-                    eprintln!("  {} (fermion, wt={:.4e}) ← gap={} → {} (boson, wt={:.4e})",
-                        f.k, f.weight, gap, boson.k, boson.weight);
-                }
+                && let Some(boson) = infos.iter().find(|i| i.k == neighbor && i.is_prime)
+            {
+                eprintln!(
+                    "  {} (fermion, wt={:.4e}) ← gap={} → {} (boson, wt={:.4e})",
+                    f.k, f.weight, gap, boson.k, boson.weight
+                );
+            }
         }
     }
 
@@ -364,9 +442,16 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     let out_path = format!("results/mersenne_probe_N{n}.tsv");
     let mut out = String::from("rank\tk\tweight\td_k\tomega\tis_prime\tfactors\n");
     for (i, info) in infos.iter().enumerate() {
-        out.push_str(&format!("{}\t{}\t{:.12e}\t{}\t{}\t{}\t{}\n",
-            i + 1, info.k, info.weight, info.d_k, info.omega,
-            if info.is_prime { "prime" } else { "composite" }, info.factors));
+        out.push_str(&format!(
+            "{}\t{}\t{:.12e}\t{}\t{}\t{}\t{}\n",
+            i + 1,
+            info.k,
+            info.weight,
+            info.d_k,
+            info.omega,
+            if info.is_prime { "prime" } else { "composite" },
+            info.factors
+        ));
     }
     std::fs::write(&out_path, out).unwrap();
     eprintln!("\n  ✓ Wrote \"{out_path}\"");
@@ -375,7 +460,8 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     let json_path = format!("results/mersenne_probe_N{n}.json");
     let top = &infos[0];
     let top_boson = infos.iter().find(|i| i.is_prime).unwrap();
-    let json = format!(r#"{{
+    let json = format!(
+        r#"{{
   "experiment": "mersenne-probe",
   "N": {n},
   "candidates": {},
@@ -394,14 +480,26 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
     "weight": {:.12e}
   }}
 }}
-"#, infos.len(), lambda_min,
-    prime_weight, composite_weight,
-    top.k, top.weight, top.d_k, top.omega, top.factors,
-    top_boson.k, top_boson.weight);
+"#,
+        infos.len(),
+        lambda_min,
+        prime_weight,
+        composite_weight,
+        top.k,
+        top.weight,
+        top.d_k,
+        top.omega,
+        top.factors,
+        top_boson.k,
+        top_boson.weight
+    );
     std::fs::write(&json_path, json).unwrap();
     eprintln!("  ✓ Wrote \"{json_path}\"");
 
-    eprintln!("\n  Total analysis: {:.1}s\n", total_time.elapsed().as_secs_f64());
+    eprintln!(
+        "\n  Total analysis: {:.1}s\n",
+        total_time.elapsed().as_secs_f64()
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -425,7 +523,11 @@ fn main() {
     // Step 1: Select candidates
     let t0 = Instant::now();
     let candidates = select_candidates(n);
-    eprintln!("  Selected {} candidate integers ({:.2}s)", candidates.len(), t0.elapsed().as_secs_f64());
+    eprintln!(
+        "  Selected {} candidate integers ({:.2}s)",
+        candidates.len(),
+        t0.elapsed().as_secs_f64()
+    );
     eprintln!("    Mersenne multiples, HC numbers, resonance zone semiprimes,");
     eprintln!("    adjacent primes, prime powers");
     eprintln!();
@@ -440,5 +542,8 @@ fn main() {
     // Step 4: Analysis
     analyze(&candidates, &weights, lambda_min, n);
 
-    eprintln!("  Total: {:.1}s ({threads} threads)\n", total.elapsed().as_secs_f64());
+    eprintln!(
+        "  Total: {:.1}s ({threads} threads)\n",
+        total.elapsed().as_secs_f64()
+    );
 }

@@ -62,9 +62,9 @@ pub fn l1_exact(i: usize) -> f64 {
     let pi = std::f64::consts::PI;
     let sqrt2 = std::f64::consts::SQRT_2;
     match i {
-        1 => (1.0 + sqrt2).ln() / sqrt2,     // L(1, χ₂) = ln(1+√2)/√2
-        2 => pi / (2.0 * sqrt2),              // L(1, χ₃) = π/(2√2)
-        3 => pi / 4.0,                        // L(1, χ₄) = π/4
-        _ => f64::INFINITY,                    // L(1, χ₁) = ∞ (pole)
+        1 => (1.0 + sqrt2).ln() / sqrt2, // L(1, χ₂) = ln(1+√2)/√2
+        2 => pi / (2.0 * sqrt2),         // L(1, χ₃) = π/(2√2)
+        3 => pi / 4.0,                   // L(1, χ₄) = π/4
+        _ => f64::INFINITY,              // L(1, χ₁) = ∞ (pole)
     }
 }

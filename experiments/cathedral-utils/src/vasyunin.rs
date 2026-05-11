@@ -106,7 +106,9 @@ mod tests {
 pub fn vasyunin_cot_sum_mpfr(a: usize, b: usize, prec: u32) -> rug::Float {
     use rug::Float;
     let p = prec;
-    if a <= 1 { return Float::with_val(p, 0); }
+    if a <= 1 {
+        return Float::with_val(p, 0);
+    }
     let pi = Float::with_val(p, rug::float::Constant::Pi);
     let af = Float::with_val(p, a as u64);
     let mut total = Float::with_val(p, 0);
@@ -116,7 +118,9 @@ pub fn vasyunin_cot_sum_mpfr(a: usize, b: usize, prec: u32) -> rug::Float {
         let frac = Float::with_val(p, mb_mod_a as u64) / &af;
         let angle = Float::with_val(p, &pi * m as u64) / &af;
         let (sin_v, cos_v) = angle.sin_cos(Float::new(p));
-        if sin_v.to_f64().abs() < 1e-30 { continue; }
+        if sin_v.to_f64().abs() < 1e-30 {
+            continue;
+        }
         let cot_v = Float::with_val(p, &cos_v / &sin_v);
         total += Float::with_val(p, &frac * &cot_v);
     }
@@ -167,9 +171,11 @@ pub fn gram_entry_vasyunin_mpfr(j: usize, k: usize, prec: u32) -> rug::Float {
 
     // Term 1: (ln(2π)-γ)/2 · (1/j + 1/k)
     let coeff = Float::with_val(p, Float::with_val(p, &l2p - &gamma) / 2u32);
-    let inv_sum = Float::with_val(p,
+    let inv_sum = Float::with_val(
+        p,
         Float::with_val(p, Float::with_val(p, 1u32) / &jf)
-        + Float::with_val(p, Float::with_val(p, 1u32) / &kf));
+            + Float::with_val(p, Float::with_val(p, 1u32) / &kf),
+    );
     let term1 = Float::with_val(p, &coeff * &inv_sum);
 
     // Term 2: (j-k)/(2jk) · ln(k/j)
@@ -194,4 +200,3 @@ pub fn gram_entry_vasyunin_mpfr(j: usize, k: usize, prec: u32) -> rug::Float {
     result -= &term4;
     result
 }
-

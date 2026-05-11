@@ -16,16 +16,16 @@
 //   §G. Siegel-Walfisz error normalization
 //   §H. Certificate
 
-mod sieve;
 mod characters;
-mod primes_in_ap;
+mod fmt;
 mod lfunctions;
 mod moebius_ap;
-mod fmt;
+mod primes_in_ap;
+mod sieve;
 
 use rayon::prelude::*;
-use std::time::Instant;
 use std::fs;
+use std::time::Instant;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -42,8 +42,11 @@ fn main() {
     println!("  ╔═══════════════════════════════════════════════════════════════════════╗");
     println!("  ║  SIEGEL-WALFISZ CERTIFICATION ENGINE                                ║");
     println!("  ║  PNT in Arithmetic Progressions mod 8                               ║");
-    println!("  ║  Cathedral v12 — 512-bit MPFR, {} threads{:>30}║",
-             threads, format!("N = {}", max_n));
+    println!(
+        "  ║  Cathedral v12 — 512-bit MPFR, {} threads{:>30}║",
+        threads,
+        format!("N = {}", max_n)
+    );
     println!("  ╚═══════════════════════════════════════════════════════════════════════╝");
 
     // ═══════════════════════════════════════════════
@@ -56,7 +59,10 @@ fn main() {
 
     // Validate sieve
     let prime_count: usize = is_prime.iter().filter(|&&p| p).count();
-    println!("\n  Sieve: {} primes ≤ {} ({}ms)", prime_count, max_n, sieve_ms);
+    println!(
+        "\n  Sieve: {} primes ≤ {} ({}ms)",
+        prime_count, max_n, sieve_ms
+    );
 
     // ═══════════════════════════════════════════════
     // §A. PRIME DISTRIBUTION IN APs mod 8
@@ -64,13 +70,27 @@ fn main() {
     fmt::section("§A. PRIME DISTRIBUTION — π(x; 8, a) for a ∈ {1,3,5,7}");
 
     let test_points: Vec<usize> = vec![
-        1_000, 10_000, 50_000, 100_000, 500_000, 1_000_000,
-        5_000_000, 10_000_000, 50_000_000, 100_000_000,
-        500_000_000, 1_000_000_000,
-    ].into_iter().filter(|&x| x <= max_n).collect();
+        1_000,
+        10_000,
+        50_000,
+        100_000,
+        500_000,
+        1_000_000,
+        5_000_000,
+        10_000_000,
+        50_000_000,
+        100_000_000,
+        500_000_000,
+        1_000_000_000,
+    ]
+    .into_iter()
+    .filter(|&x| x <= max_n)
+    .collect();
 
-    println!("    {:>10} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ bias",
-             "x", "π(x)", "a≡1", "a≡3", "a≡5", "a≡7");
+    println!(
+        "    {:>10} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ bias",
+        "x", "π(x)", "a≡1", "a≡3", "a≡5", "a≡7"
+    );
 
     for &x in &test_points {
         let counts = primes_in_ap::count_primes_in_ap(&is_prime, x);
@@ -82,9 +102,21 @@ fn main() {
         } else {
             "→ 1,5"
         };
-        println!("    {:>10} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {}{}",
-                 x, total_with_2, counts[0], counts[1], counts[2], counts[3],
-                 bias_arrow, if excess > 0 { format!(" (+{})", excess) } else { String::new() });
+        println!(
+            "    {:>10} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {:>8} │ {}{}",
+            x,
+            total_with_2,
+            counts[0],
+            counts[1],
+            counts[2],
+            counts[3],
+            bias_arrow,
+            if excess > 0 {
+                format!(" (+{})", excess)
+            } else {
+                String::new()
+            }
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -93,17 +125,21 @@ fn main() {
     fmt::section("§B. PNT ERROR — |π(x;8,a) - Li(x)/4| / (x·exp(-c√ln x))");
     println!("    Siegel-Walfisz prediction: normalized error bounded as N → ∞");
     println!();
-    println!("    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
-             "x", "Li(x)/4", "err(1)", "err(3)", "err(5)", "err(7)");
+    println!(
+        "    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
+        "x", "Li(x)/4", "err(1)", "err(3)", "err(5)", "err(7)"
+    );
 
     for &x in &test_points {
         let counts = primes_in_ap::count_primes_in_ap(&is_prime, x);
         let expected = primes_in_ap::li(x as f64) / 4.0;
-        let errs: Vec<f64> = (0..4).map(|i| {
-            primes_in_ap::sw_normalized_error(counts[i], x as f64)
-        }).collect();
-        println!("    {:>10} │ {:>10.2} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6}",
-                 x, expected, errs[0], errs[1], errs[2], errs[3]);
+        let errs: Vec<f64> = (0..4)
+            .map(|i| primes_in_ap::sw_normalized_error(counts[i], x as f64))
+            .collect();
+        println!(
+            "    {:>10} │ {:>10.2} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6}",
+            x, expected, errs[0], errs[1], errs[2], errs[3]
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -114,8 +150,10 @@ fn main() {
     let l_terms = max_n.min(100_000); // use up to 100k terms
     println!("    Computing L(1, χᵢ) with {} terms...", l_terms);
     println!();
-    println!("    {:>20} │ {:>14} │ {:>14} │ {:>10}",
-             "character", "computed", "exact", "rel error");
+    println!(
+        "    {:>20} │ {:>14} │ {:>14} │ {:>10}",
+        "character", "computed", "exact", "rel error"
+    );
 
     let mut l_values_ok = true;
     for i in 1..=3 {
@@ -124,8 +162,14 @@ fn main() {
         let rel_err = (computed - exact).abs() / exact;
         let ok = rel_err < 1e-4;
         l_values_ok &= ok;
-        println!("    {:>20} │ {:>14.10} │ {:>14.10} │ {:>10.2e} {}",
-                 characters::chi_name(i), computed, exact, rel_err, fmt::check(ok));
+        println!(
+            "    {:>20} │ {:>14.10} │ {:>14.10} │ {:>10.2e} {}",
+            characters::chi_name(i),
+            computed,
+            exact,
+            rel_err,
+            fmt::check(ok)
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -140,16 +184,29 @@ fn main() {
     println!();
 
     let moebius_test_points: Vec<usize> = vec![
-        100, 1_000, 10_000, 50_000, 100_000, 500_000, 1_000_000,
-        5_000_000, 10_000_000, 50_000_000, 100_000_000,
-        500_000_000, 1_000_000_000,
-    ].into_iter().filter(|&x| x <= max_n).collect();
+        100,
+        1_000,
+        10_000,
+        50_000,
+        100_000,
+        500_000,
+        1_000_000,
+        5_000_000,
+        10_000_000,
+        50_000_000,
+        100_000_000,
+        500_000_000,
+        1_000_000_000,
+    ]
+    .into_iter()
+    .filter(|&x| x <= max_n)
+    .collect();
 
     // Character-twisted Möbius sums — INCREMENTAL + parallel inner loops
     // Total work: O(4 × max_N) instead of O(4 × 13 × max_N)
-    let char_results: Vec<Vec<(f64, f64)>> = (0..4).map(|i| {
-        moebius_ap::character_moebius_incremental(i, &mu, &moebius_test_points)
-    }).collect();
+    let char_results: Vec<Vec<(f64, f64)>> = (0..4)
+        .map(|i| moebius_ap::character_moebius_incremental(i, &mu, &moebius_test_points))
+        .collect();
 
     for i in 0..4 {
         println!("    {} — S₁, S₂:", characters::chi_name(i));
@@ -168,8 +225,10 @@ fn main() {
     println!("    Character orthogonality: total → -1, parts determined by L-functions");
     println!("    Note: individual classes do NOT converge to -1/4 (only character-twisted do)");
     println!();
-    println!("    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
-             "N", "k≡1", "k≡3", "k≡5", "k≡7", "total");
+    println!(
+        "    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
+        "N", "k≡1", "k≡3", "k≡5", "k≡7", "total"
+    );
 
     let mut decomp_ok = true;
     let residue_results = moebius_ap::s2_residue_incremental(&mu, &moebius_test_points);
@@ -183,8 +242,10 @@ fn main() {
                 decomp_ok = false;
             }
         }
-        println!("    {:>10} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6}",
-                 n, parts[0], parts[1], parts[2], parts[3], total);
+        println!(
+            "    {:>10} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6} │ {:>10.6}",
+            n, parts[0], parts[1], parts[2], parts[3], total
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -197,18 +258,27 @@ fn main() {
     let t_samples: Vec<f64> = (0..50).map(|i| i as f64 * 2.0).collect();
     let zfr_n_terms = max_n.min(10_000); // limit for speed
 
-    let zfr_results: Vec<(bool, f64, f64, f64)> = (0..4).into_par_iter().map(|i| {
-        lfunctions::verify_zero_free_region(i, 0.1, &t_samples, zfr_n_terms)
-    }).collect();
+    let zfr_results: Vec<(bool, f64, f64, f64)> = (0..4)
+        .into_par_iter()
+        .map(|i| lfunctions::verify_zero_free_region(i, 0.1, &t_samples, zfr_n_terms))
+        .collect();
 
     let mut zfr_ok = true;
-    println!("    {:>20} │ {:>12} │ {:>12} │ {:>12} │ {:>6}",
-             "character", "min |L|", "at σ", "at t", "ok");
+    println!(
+        "    {:>20} │ {:>12} │ {:>12} │ {:>12} │ {:>6}",
+        "character", "min |L|", "at σ", "at t", "ok"
+    );
     for i in 0..4 {
         let (ok, min_val, sigma, t) = zfr_results[i];
         zfr_ok &= ok;
-        println!("    {:>20} │ {:>12.8} │ {:>12.6} │ {:>12.2} │ {:>6}",
-                 characters::chi_name(i), min_val, sigma, t, fmt::check(ok));
+        println!(
+            "    {:>20} │ {:>12.8} │ {:>12.6} │ {:>12.2} │ {:>6}",
+            characters::chi_name(i),
+            min_val,
+            sigma,
+            t,
+            fmt::check(ok)
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -219,13 +289,26 @@ fn main() {
     println!();
 
     let sw_points: Vec<usize> = vec![
-        10_000, 50_000, 100_000, 500_000, 1_000_000,
-        5_000_000, 10_000_000, 50_000_000, 100_000_000,
-        500_000_000, 1_000_000_000,
-    ].into_iter().filter(|&x| x <= max_n).collect();
+        10_000,
+        50_000,
+        100_000,
+        500_000,
+        1_000_000,
+        5_000_000,
+        10_000_000,
+        50_000_000,
+        100_000_000,
+        500_000_000,
+        1_000_000_000,
+    ]
+    .into_iter()
+    .filter(|&x| x <= max_n)
+    .collect();
 
-    println!("    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
-             "x", "max |err|", "max norm", "class", "x·e^{-c√}", "bounded?");
+    println!(
+        "    {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10} │ {:>10}",
+        "x", "max |err|", "max norm", "class", "x·e^{-c√}", "bounded?"
+    );
 
     let mut sw_ok = true;
     for &x in &sw_points {
@@ -248,8 +331,15 @@ fn main() {
         let sw_scale = x as f64 * (-0.5 * log_x.sqrt()).exp();
         let bounded = max_norm < 100.0; // generous bound
         sw_ok &= bounded;
-        println!("    {:>10} │ {:>10.2} │ {:>10.6} │ {:>10} │ {:>10.2} │ {:>10}",
-                 x, max_err, max_norm, max_class, sw_scale, fmt::check(bounded));
+        println!(
+            "    {:>10} │ {:>10.2} │ {:>10.6} │ {:>10} │ {:>10.2} │ {:>10}",
+            x,
+            max_err,
+            max_norm,
+            max_class,
+            sw_scale,
+            fmt::check(bounded)
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -259,15 +349,19 @@ fn main() {
 
     let euler_gamma = 0.5772156649015328606;
 
-    println!("    {:>10} │ {:>12} │ {:>12} │ {:>12} │ {:>14}",
-             "N", "S₁ (→0)", "S₂ (→-1)", "S₃ (→-2γ)", "S₃+2γ");
+    println!(
+        "    {:>10} │ {:>12} │ {:>12} │ {:>12} │ {:>14}",
+        "N", "S₁ (→0)", "S₂ (→-1)", "S₃ (→-2γ)", "S₃+2γ"
+    );
 
     let pnt_results = moebius_ap::pnt_moebius_incremental(&mu, &moebius_test_points);
     for (j, &n) in moebius_test_points.iter().enumerate() {
         let (s1, s2, s3) = pnt_results[j];
         let s3_err = s3 + 2.0 * euler_gamma;
-        println!("    {:>10} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:>14.10}",
-                 n, s1, s2, s3, s3_err);
+        println!(
+            "    {:>10} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:>14.10}",
+            n, s1, s2, s3, s3_err
+        );
     }
 
     // ═══════════════════════════════════════════════
@@ -281,8 +375,10 @@ fn main() {
     for &n in &moebius_test_points {
         let (s1, s2, s3) = moebius_ap::pnt_moebius_sums(&mu, n);
         let s3_err = s3 + 2.0 * euler_gamma;
-        pnt_tsv.push_str(&format!("{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-                                   n, s1, s2, s3, s3_err));
+        pnt_tsv.push_str(&format!(
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
+            n, s1, s2, s3, s3_err
+        ));
     }
     fs::write("results/pnt_axiom_convergence.tsv", &pnt_tsv).unwrap();
 
@@ -304,14 +400,17 @@ fn main() {
         let counts = primes_in_ap::count_primes_in_ap(&is_prime, x);
         let total: usize = counts.iter().sum::<usize>() + if x >= 2 { 1 } else { 0 };
         let expected = primes_in_ap::li(x as f64) / 4.0;
-        ap_tsv.push_str(&format!("{}\t{}\t{}\t{}\t{}\t{}\t{:.10e}\n",
-                                  x, total, counts[0], counts[1], counts[2], counts[3], expected));
+        ap_tsv.push_str(&format!(
+            "{}\t{}\t{}\t{}\t{}\t{}\t{:.10e}\n",
+            x, total, counts[0], counts[1], counts[2], counts[3], expected
+        ));
     }
     fs::write("results/primes_in_ap.tsv", &ap_tsv).unwrap();
 
     // --- TSV: SW error scaling ---
     let mut sw_tsv = String::from("# Siegel-Walfisz Error Scaling\n");
-    sw_tsv.push_str("# Columns: x\tmax_abs_error\tmax_normalized_error\tmax_error_class\tsw_scale\n");
+    sw_tsv
+        .push_str("# Columns: x\tmax_abs_error\tmax_normalized_error\tmax_error_class\tsw_scale\n");
     for &x in &sw_points {
         let counts = primes_in_ap::count_primes_in_ap(&is_prime, x);
         let expected = primes_in_ap::li(x as f64) / 4.0;
@@ -330,8 +429,10 @@ fn main() {
         }
         let log_x = (x as f64).ln();
         let sw_scale = x as f64 * (-0.5 * log_x.sqrt()).exp();
-        sw_tsv.push_str(&format!("{}\t{:.10e}\t{:.10e}\t{}\t{:.10e}\n",
-                                  x, max_err, max_norm, max_class, sw_scale));
+        sw_tsv.push_str(&format!(
+            "{}\t{:.10e}\t{:.10e}\t{}\t{:.10e}\n",
+            x, max_err, max_norm, max_class, sw_scale
+        ));
     }
     fs::write("results/sw_error_scaling.tsv", &sw_tsv).unwrap();
 
@@ -340,8 +441,10 @@ fn main() {
     res_tsv.push_str("# Columns: N\tS2_mod1\tS2_mod3\tS2_mod5\tS2_mod7\tS2_total\n");
     for &n in &moebius_test_points {
         let (parts, total) = moebius_ap::pnt_s2_by_residue(&mu, n);
-        res_tsv.push_str(&format!("{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
-                                   n, parts[0], parts[1], parts[2], parts[3], total));
+        res_tsv.push_str(&format!(
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\n",
+            n, parts[0], parts[1], parts[2], parts[3], total
+        ));
     }
     fs::write("results/s2_residue_decomposition.tsv", &res_tsv).unwrap();
 
@@ -367,7 +470,8 @@ fn main() {
 
     let (res_parts, res_total) = moebius_ap::pnt_s2_by_residue(&mu, max_n);
 
-    let cert = format!(r#"{{
+    let cert = format!(
+        r#"{{
   "experiment": "Siegel-Walfisz PNT-in-AP Certification for q=8",
   "cathedral_version": "v12",
   "precision_bits": 512,
@@ -500,27 +604,40 @@ fn main() {
     println!("  ╔═══════════════════════════════════════════════════════════════════════╗");
     println!("  ║  SIEGEL-WALFISZ — CERTIFICATE");
     println!("  ╠═══════════════════════════════════════════════════════════════════════╣");
-    println!("  ║  Precision: 512-bit MPFR    Threads: {}    Max N: {}", threads, max_n);
+    println!(
+        "  ║  Precision: 512-bit MPFR    Threads: {}    Max N: {}",
+        threads, max_n
+    );
     println!("  ║");
     println!("  ║  §A. Prime Distribution");
-    println!("  ║    {} Primes equidistributed mod 8 (Chebyshev bias observed)",
-             fmt::check(true));
+    println!(
+        "  ║    {} Primes equidistributed mod 8 (Chebyshev bias observed)",
+        fmt::check(true)
+    );
     println!("  ║");
     println!("  ║  §C. L-function Values");
-    println!("  ║    {} L(1,χ) verified for all 3 non-principal characters",
-             fmt::check(l_values_ok));
+    println!(
+        "  ║    {} L(1,χ) verified for all 3 non-principal characters",
+        fmt::check(l_values_ok)
+    );
     println!("  ║");
     println!("  ║  §E. PNT Axiom 2 Decomposition");
-    println!("  ║    {} S₂ total over odd k converges to -2 (= -1 × 2 sectors)",
-             fmt::check(decomp_ok));
+    println!(
+        "  ║    {} S₂ total over odd k converges to -2 (= -1 × 2 sectors)",
+        fmt::check(decomp_ok)
+    );
     println!("  ║");
     println!("  ║  §F. Zero-Free Region");
-    println!("  ║    {} All L(σ+it, χ) nonzero in classical region",
-             fmt::check(zfr_ok));
+    println!(
+        "  ║    {} All L(σ+it, χ) nonzero in classical region",
+        fmt::check(zfr_ok)
+    );
     println!("  ║");
     println!("  ║  §G. Siegel-Walfisz Scaling");
-    println!("  ║    {} Error bounded by x·exp(-c√ln x)",
-             fmt::check(sw_ok));
+    println!(
+        "  ║    {} Error bounded by x·exp(-c√ln x)",
+        fmt::check(sw_ok)
+    );
     println!("  ║");
     println!("  ║  VERDICT");
     if all_ok {
@@ -533,7 +650,11 @@ fn main() {
     println!("  ║");
     println!("  ╚═══════════════════════════════════════════════════════════════════════╝");
     println!();
-    println!("  Total: {:.1}s ({} threads)", elapsed.as_secs_f64(), threads);
+    println!(
+        "  Total: {:.1}s ({} threads)",
+        elapsed.as_secs_f64(),
+        threads
+    );
     println!("  Output: results/{{certificate.json, pnt_axiom_convergence.tsv,");
     println!("          character_moebius_sums.tsv, primes_in_ap.tsv,");
     println!("          sw_error_scaling.tsv, s2_residue_decomposition.tsv}}");

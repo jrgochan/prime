@@ -184,15 +184,9 @@ fn run_taper(rest: &[String], emit_json: bool) {
         println!(
             "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════╗{RESET}"
         );
-        println!(
-            "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL TAPER SUM ANALYZER{RESET}"
-        );
-        println!(
-            "  {BOLD}{CYAN}║{RESET}  {DIM}Exploration 30 · Taper Decomposition{RESET}"
-        );
-        println!(
-            "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════╝{RESET}"
-        );
+        println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL TAPER SUM ANALYZER{RESET}");
+        println!("  {BOLD}{CYAN}║{RESET}  {DIM}Exploration 30 · Taper Decomposition{RESET}");
+        println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════╝{RESET}");
         let path_refs: Vec<&Path> = paths.iter().map(|p| Path::new(*p)).collect();
         taper::run(&path_refs, emit_json);
     }

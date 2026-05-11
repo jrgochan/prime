@@ -17,7 +17,9 @@ use rayon::prelude::*;
 // 4. Can we decompose the drop into operator-theoretic quantities?
 // ══════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 fn gram_entry(j: usize, k: usize, n_pts: usize) -> f64 {
     let jf = j as f64;
@@ -36,15 +38,24 @@ fn lu_decompose(a: &mut Vec<Vec<f64>>) -> Vec<usize> {
     let mut piv: Vec<usize> = (0..n).collect();
     for col in 0..n {
         let mut max_row = col;
-        for row in (col+1)..n {
-            if a[row][col].abs() > a[max_row][col].abs() { max_row = row; }
+        for row in (col + 1)..n {
+            if a[row][col].abs() > a[max_row][col].abs() {
+                max_row = row;
+            }
         }
-        if max_row != col { a.swap(col, max_row); piv.swap(col, max_row); }
-        if a[col][col].abs() < 1e-15 { continue; }
-        for row in (col+1)..n {
+        if max_row != col {
+            a.swap(col, max_row);
+            piv.swap(col, max_row);
+        }
+        if a[col][col].abs() < 1e-15 {
+            continue;
+        }
+        for row in (col + 1)..n {
             a[row][col] /= a[col][col];
             let f = a[row][col];
-            for j in (col+1)..n { a[row][j] -= f * a[col][j]; }
+            for j in (col + 1)..n {
+                a[row][j] -= f * a[col][j];
+            }
         }
     }
     piv
@@ -53,9 +64,16 @@ fn lu_decompose(a: &mut Vec<Vec<f64>>) -> Vec<usize> {
 fn lu_solve(lu: &[Vec<f64>], piv: &[usize], b: &[f64]) -> Vec<f64> {
     let n = b.len();
     let mut x: Vec<f64> = piv.iter().map(|&i| b[i]).collect();
-    for i in 1..n { for j in 0..i { let f = lu[i][j]; x[i] -= f * x[j]; } }
+    for i in 1..n {
+        for j in 0..i {
+            let f = lu[i][j];
+            x[i] -= f * x[j];
+        }
+    }
     for i in (0..n).rev() {
-        for j in (i+1)..n { x[i] -= lu[i][j] * x[j]; }
+        for j in (i + 1)..n {
+            x[i] -= lu[i][j] * x[j];
+        }
         x[i] /= lu[i][i];
     }
     x
@@ -72,18 +90,28 @@ fn smallest_eigenpairs(mat: &[Vec<f64>], k: usize, n_iter: usize) -> Vec<(f64, V
         let piv = lu_decompose(&mut lu);
         let mut v = vec![1.0 / (n as f64).sqrt(); n];
         // Perturb to avoid converging to zero
-        for i in 0..n { v[i] += 0.001 * ((i * 7 + 3) % 11) as f64 / 11.0; }
-        let norm0: f64 = v.iter().map(|x| x*x).sum::<f64>().sqrt();
-        for x in v.iter_mut() { *x /= norm0; }
+        for i in 0..n {
+            v[i] += 0.001 * ((i * 7 + 3) % 11) as f64 / 11.0;
+        }
+        let norm0: f64 = v.iter().map(|x| x * x).sum::<f64>().sqrt();
+        for x in v.iter_mut() {
+            *x /= norm0;
+        }
 
         for _ in 0..n_iter {
             let w = lu_solve(&lu, &piv, &v);
-            let norm: f64 = w.iter().map(|x| x*x).sum::<f64>().sqrt();
-            if norm < 1e-15 { break; }
+            let norm: f64 = w.iter().map(|x| x * x).sum::<f64>().sqrt();
+            if norm < 1e-15 {
+                break;
+            }
             v = w.iter().map(|x| x / norm).collect();
         }
         let mut w = vec![0.0; n];
-        for i in 0..n { for j in 0..n { w[i] += mat[i][j] * v[j]; } }
+        for i in 0..n {
+            for j in 0..n {
+                w[i] += mat[i][j] * v[j];
+            }
+        }
         let lam: f64 = v.iter().zip(w.iter()).map(|(a, b)| a * b).sum();
         results.push((lam, v.clone()));
 
@@ -94,7 +122,7 @@ fn smallest_eigenpairs(mat: &[Vec<f64>], k: usize, n_iter: usize) -> Vec<(f64, V
             for j in 0..n {
                 deflated[i][j] = mat[i][j] - shift * v[i] * v[j];
                 // Also subtract previous eigenvectors
-                for prev in &results[..results.len()-1] {
+                for prev in &results[..results.len() - 1] {
                     deflated[i][j] -= prev.0 * 1.5 * prev.1[i] * prev.1[j];
                 }
             }
@@ -116,14 +144,23 @@ fn main() {
     // Phase 1: Compute large Gram matrix (N=1000)
     // ────────────────────────────────────────────────────────
     let max_n: usize = 1000;
-    println!("\n[1/5] Computing {}×{} Gram matrix ({} pts)...",
-        max_n-1, max_n-1, n_pts);
+    println!(
+        "\n[1/5] Computing {}×{} Gram matrix ({} pts)...",
+        max_n - 1,
+        max_n - 1,
+        n_pts
+    );
     let dim = max_n - 1;
-    let gram_upper: Vec<Vec<f64>> = (0..dim).into_par_iter().map(|j| {
-        let mut row = vec![0.0; dim];
-        for k in j..dim { row[k] = gram_entry(j + 2, k + 2, n_pts); }
-        row
-    }).collect();
+    let gram_upper: Vec<Vec<f64>> = (0..dim)
+        .into_par_iter()
+        .map(|j| {
+            let mut row = vec![0.0; dim];
+            for k in j..dim {
+                row[k] = gram_entry(j + 2, k + 2, n_pts);
+            }
+            row
+        })
+        .collect();
     let mut gram = vec![vec![0.0; dim]; dim];
     for j in 0..dim {
         for k in j..dim {
@@ -139,13 +176,17 @@ fn main() {
     // ────────────────────────────────────────────────────────
     println!("\n[2/5] Eigenvector evolution analysis...\n");
 
-    let checkpoints = [50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 999];
+    let checkpoints = [
+        50, 100, 150, 200, 250, 300, 400, 500, 600, 700, 800, 900, 999,
+    ];
     let mut prev_v: Option<Vec<f64>> = None;
     let mut prev_lam = 0.0;
     let mut eigvec_data: Vec<(usize, f64, Vec<f64>)> = Vec::new();
 
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>10} {:>10}",
-        "N", "λ_min", "||Δv||", "Σv_min", "v[2]", "v[N/2]");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>10} {:>10}",
+        "N", "λ_min", "||Δv||", "Σv_min", "v[2]", "v[N/2]"
+    );
 
     for &n in &checkpoints {
         let d = n - 1;
@@ -158,17 +199,31 @@ fn main() {
         let v_signed: Vec<f64> = v.iter().map(|x| x * sign).collect();
 
         let v_sum: f64 = v_signed.iter().sum();
-        let v_half = if d / 2 < v_signed.len() { v_signed[d / 2].abs() } else { 0.0 };
+        let v_half = if d / 2 < v_signed.len() {
+            v_signed[d / 2].abs()
+        } else {
+            0.0
+        };
 
         let delta_v = if let Some(ref pv) = prev_v {
             let min_len = pv.len().min(v_signed.len());
             let diff_sq: f64 = (0..min_len)
-                .map(|i| (pv[i] - v_signed[i]).powi(2)).sum::<f64>();
+                .map(|i| (pv[i] - v_signed[i]).powi(2))
+                .sum::<f64>();
             diff_sq.sqrt()
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
-        println!("  {:5} {:12.8} {:12.6} {:12.6} {:10.6} {:10.6}",
-            n, lam, delta_v, v_sum, v_signed[0].abs(), v_half);
+        println!(
+            "  {:5} {:12.8} {:12.6} {:12.6} {:10.6} {:10.6}",
+            n,
+            lam,
+            delta_v,
+            v_sum,
+            v_signed[0].abs(),
+            v_half
+        );
 
         eigvec_data.push((n, *lam, v_signed.clone()));
         prev_v = Some(v_signed);
@@ -181,8 +236,10 @@ fn main() {
     // ────────────────────────────────────────────────────────
     println!("\n[3/5] Universal eigenfunction test...\n");
     println!("  If v_min[k] = ψ(k/N), plotting at fixed k/N should collapse:");
-    println!("  {:>5} {:>8} {:>10} {:>10} {:>10} {:>10} {:>10}",
-        "k/N", "N=100", "N=200", "N=300", "N=500", "N=700", "N=999");
+    println!(
+        "  {:>5} {:>8} {:>10} {:>10} {:>10} {:>10} {:>10}",
+        "k/N", "N=100", "N=200", "N=300", "N=500", "N=700", "N=999"
+    );
 
     let ratios = [0.05, 0.10, 0.20, 0.30, 0.50, 0.70, 0.90];
     for &r in &ratios {
@@ -205,8 +262,10 @@ fn main() {
     // ────────────────────────────────────────────────────────
     println!("\n[4/5] Spectral gap analysis...\n");
 
-    println!("  {:>5} {:>12} {:>12} {:>12} {:>12}",
-        "N", "λ₁", "λ₂", "gap", "gap/λ₁");
+    println!(
+        "  {:>5} {:>12} {:>12} {:>12} {:>12}",
+        "N", "λ₁", "λ₂", "gap", "gap/λ₁"
+    );
 
     for &n in &[50, 100, 200, 300, 500, 700, 999] {
         let d = n - 1;
@@ -216,8 +275,14 @@ fn main() {
             let lam1 = pairs[0].0;
             let lam2 = pairs[1].0;
             let gap = lam2 - lam1;
-            println!("  {:5} {:12.8} {:12.8} {:12.8} {:12.6}",
-                n, lam1, lam2, gap, gap / lam1);
+            println!(
+                "  {:5} {:12.8} {:12.8} {:12.8} {:12.6}",
+                n,
+                lam1,
+                lam2,
+                gap,
+                gap / lam1
+            );
         }
     }
 
@@ -229,8 +294,10 @@ fn main() {
     println!("  For EVERY N from 2 to 999, compute:");
     println!("  δ_N, |gᵀv|, Schur, ||g - proj||, normalized projection\n");
 
-    println!("  {:>5} {:>10} {:>10} {:>10} {:>10} {:>12}",
-        "N", "δ_N", "|gᵀv|/||g||", "Schur", "||g||", "δ·N");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10} {:>10} {:>12}",
+        "N", "δ_N", "|gᵀv|/||g||", "Schur", "||g||", "δ·N"
+    );
 
     let mut drop_data: Vec<(usize, f64, f64, f64)> = Vec::new();
     let mut prev_lam_all = gram[0][0]; // G_2 = 1x1 matrix
@@ -245,32 +312,46 @@ fn main() {
         let mut v = vec![1.0 / (d as f64).sqrt(); d];
         for _ in 0..300 {
             let w = lu_solve(&lu, &piv, &v);
-            let norm: f64 = w.iter().map(|x| x*x).sum::<f64>().sqrt();
-            if norm < 1e-15 { break; }
+            let norm: f64 = w.iter().map(|x| x * x).sum::<f64>().sqrt();
+            if norm < 1e-15 {
+                break;
+            }
             v = w.iter().map(|x| x / norm).collect();
         }
         let mut w = vec![0.0; d];
-        for i in 0..d { for j in 0..d { w[i] += sub[i][j] * v[j]; } }
+        for i in 0..d {
+            for j in 0..d {
+                w[i] += sub[i][j] * v[j];
+            }
+        }
         let lam: f64 = v.iter().zip(w.iter()).map(|(a, b)| a * b).sum();
 
-        let drop = if n > 2 { (prev_lam_all - lam).max(0.0) } else { 0.0 };
+        let drop = if n > 2 {
+            (prev_lam_all - lam).max(0.0)
+        } else {
+            0.0
+        };
 
         if n > 3 {
             // Cross-correlation g for adding f_n to G_{n-1}
             let d_prev = n - 2;
-            let g: Vec<f64> = (0..d_prev).map(|k| gram[n-2][k]).collect();
-            let g_norm: f64 = g.iter().map(|x| x*x).sum::<f64>().sqrt();
+            let g: Vec<f64> = (0..d_prev).map(|k| gram[n - 2][k]).collect();
+            let g_norm: f64 = g.iter().map(|x| x * x).sum::<f64>().sqrt();
 
             // Quick v_min of G_{n-1}
-            let sub_prev: Vec<Vec<f64>> = gram[..d_prev].iter()
-                .map(|r| r[..d_prev].to_vec()).collect();
+            let sub_prev: Vec<Vec<f64>> = gram[..d_prev]
+                .iter()
+                .map(|r| r[..d_prev].to_vec())
+                .collect();
             let mut lu_p = sub_prev.clone();
             let piv_p = lu_decompose(&mut lu_p);
             let mut vp = vec![1.0 / (d_prev as f64).sqrt(); d_prev];
             for _ in 0..300 {
                 let w = lu_solve(&lu_p, &piv_p, &vp);
-                let norm: f64 = w.iter().map(|x| x*x).sum::<f64>().sqrt();
-                if norm < 1e-15 { break; }
+                let norm: f64 = w.iter().map(|x| x * x).sum::<f64>().sqrt();
+                if norm < 1e-15 {
+                    break;
+                }
                 vp = w.iter().map(|x| x / norm).collect();
             }
             let g_dot_v: f64 = g.iter().zip(vp.iter()).map(|(a, b)| a * b).sum();
@@ -278,16 +359,23 @@ fn main() {
 
             // Schur
             let x_sol = lu_solve(&lu_p, &piv_p, &g);
-            let gtx: f64 = g.iter().zip(x_sol.iter()).map(|(a,b)| a*b).sum();
-            let gamma = gram[n-2][n-2];
+            let gtx: f64 = g.iter().zip(x_sol.iter()).map(|(a, b)| a * b).sum();
+            let gamma = gram[n - 2][n - 2];
             let schur = gamma - gtx;
 
             drop_data.push((n, drop, cos_theta, schur));
 
             // Print selected N values
             if n <= 20 || n % 100 == 0 || (n >= 990) {
-                println!("  {:5} {:10.2e} {:10.6} {:10.6} {:10.6} {:12.6}",
-                    n, drop, cos_theta, schur, g_norm, drop * n as f64);
+                println!(
+                    "  {:5} {:10.2e} {:10.6} {:10.6} {:10.6} {:12.6}",
+                    n,
+                    drop,
+                    cos_theta,
+                    schur,
+                    g_norm,
+                    drop * n as f64
+                );
             }
         }
         prev_lam_all = lam;
@@ -295,7 +383,8 @@ fn main() {
 
     // Fit cos(θ) = |gᵀv|/||g|| scaling
     println!("\n  ═══ ALIGNMENT SCALING ═══\n");
-    let fit_data: Vec<(f64, f64)> = drop_data.iter()
+    let fit_data: Vec<(f64, f64)> = drop_data
+        .iter()
         .filter(|(n, _, cos, _)| *n >= 20 && *cos > 1e-10)
         .map(|(n, _, cos, _)| (*n as f64, *cos))
         .collect();
@@ -321,7 +410,8 @@ fn main() {
 
     // Fit drop · N scaling (should be ∝ N^{-α} for some α>0)
     println!("\n  ═══ DROP SCALING ═══\n");
-    let drop_fit: Vec<(f64, f64)> = drop_data.iter()
+    let drop_fit: Vec<(f64, f64)> = drop_data
+        .iter()
         .filter(|(n, d, _, _)| *n >= 20 && *d > 1e-15)
         .map(|(n, d, _, _)| (*n as f64, *d))
         .collect();
@@ -350,17 +440,22 @@ fn main() {
     let mut windows: Vec<(usize, f64)> = Vec::new();
     for window_start in (0..drop_data.len()).step_by(100) {
         let window_end = (window_start + 100).min(drop_data.len());
-        let sum_drop: f64 = drop_data[window_start..window_end].iter()
-            .map(|(_, d, _, _)| d).sum();
+        let sum_drop: f64 = drop_data[window_start..window_end]
+            .iter()
+            .map(|(_, d, _, _)| d)
+            .sum();
         let n_mid = drop_data[(window_start + window_end) / 2].0;
         windows.push((n_mid, sum_drop));
     }
 
     println!("  {:>5} {:>12} {:>12}", "N_mid", "Σ_window δ", "ratio");
     for i in 0..windows.len() {
-        let ratio = if i > 0 { windows[i].1 / windows[i-1].1 } else { 0.0 };
-        println!("  {:5} {:12.6} {:12.4}",
-            windows[i].0, windows[i].1, ratio);
+        let ratio = if i > 0 {
+            windows[i].1 / windows[i - 1].1
+        } else {
+            0.0
+        };
+        println!("  {:5} {:12.6} {:12.4}", windows[i].0, windows[i].1, ratio);
     }
 
     println!("\n  Total time: {:.1}s", start.elapsed().as_secs_f64());

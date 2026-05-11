@@ -3,7 +3,6 @@
 /// C = G - bb^T   (Schur complement — the skeleton of RH)
 /// d²_N = 1 - 2⟨b,w⟩ + w^T G w  (the Nyman-Beurling distance)
 ///      = (1 - w^T b)² + w^T C w   (variance decomposition)
-
 use crate::gram::{gram_entry, mean_entry};
 use nalgebra::{DMatrix, DVector};
 use rayon::prelude::*;
@@ -115,7 +114,10 @@ pub fn probe(n: usize, mu: &[i32]) -> ProbeResult {
     let eig = c.clone().symmetric_eigen();
     let eigenvalues = eig.eigenvalues;
     let lambda_min = eigenvalues.iter().copied().fold(f64::INFINITY, f64::min);
-    let lambda_max = eigenvalues.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+    let lambda_max = eigenvalues
+        .iter()
+        .copied()
+        .fold(f64::NEG_INFINITY, f64::max);
     let condition = if lambda_min.abs() > 1e-15 {
         (lambda_max / lambda_min).abs()
     } else {
@@ -127,8 +129,19 @@ pub fn probe(n: usize, mu: &[i32]) -> ProbeResult {
     let ratio = d_squared * ln_n;
 
     ProbeResult {
-        n, d_squared, cov_quad, mean_residual_sq, gram_quad, mean_projection,
-        inv_log_n, ratio, lambda_min, lambda_max, condition, frob_norm, trace_c,
+        n,
+        d_squared,
+        cov_quad,
+        mean_residual_sq,
+        gram_quad,
+        mean_projection,
+        inv_log_n,
+        ratio,
+        lambda_min,
+        lambda_max,
+        condition,
+        frob_norm,
+        trace_c,
     }
 }
 
@@ -161,11 +174,15 @@ pub fn probe_fast(n: usize, mu: &[i32]) -> ProbeResult {
         .into_par_iter()
         .map(|i| {
             let wi = w[i];
-            if wi.abs() < 1e-30 { return 0.0; }
+            if wi.abs() < 1e-30 {
+                return 0.0;
+            }
             let row_dot: f64 = (0..dim)
                 .map(|j| {
                     let wj = w[j];
-                    if wj.abs() < 1e-30 { return 0.0; }
+                    if wj.abs() < 1e-30 {
+                        return 0.0;
+                    }
                     gram_entry(i + 1, j + 1) * wj
                 })
                 .sum();
@@ -179,10 +196,19 @@ pub fn probe_fast(n: usize, mu: &[i32]) -> ProbeResult {
     let ratio = d_squared * ln_n;
 
     ProbeResult {
-        n, d_squared, cov_quad, mean_residual_sq, gram_quad, mean_projection,
-        inv_log_n, ratio,
-        lambda_min: f64::NAN, lambda_max: f64::NAN, condition: f64::NAN,
-        frob_norm: f64::NAN, trace_c: f64::NAN,
+        n,
+        d_squared,
+        cov_quad,
+        mean_residual_sq,
+        gram_quad,
+        mean_projection,
+        inv_log_n,
+        ratio,
+        lambda_min: f64::NAN,
+        lambda_max: f64::NAN,
+        condition: f64::NAN,
+        frob_norm: f64::NAN,
+        trace_c: f64::NAN,
     }
 }
 

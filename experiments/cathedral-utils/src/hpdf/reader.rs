@@ -5,7 +5,7 @@ use ndarray::Array1;
 use std::path::Path;
 use std::time::Instant;
 
-use super::helpers::{read_str_attr, read_str_opt, read_scalar_opt, sha256_hex};
+use super::helpers::{read_scalar_opt, read_str_attr, read_str_opt, sha256_hex};
 use super::HPDF_MAGIC;
 
 /// An opened HPDF file for reading.
@@ -31,14 +31,22 @@ impl HpdfReader {
         let dim: u64 = file.attr("dim")?.read_scalar()?;
         let max_n: u64 = file.attr("max_n")?.read_scalar()?;
 
-        Ok(Self { file, dim: dim as usize, max_n: max_n as usize })
+        Ok(Self {
+            file,
+            dim: dim as usize,
+            max_n: max_n as usize,
+        })
     }
 
     /// Matrix dimension (N-1).
-    pub fn dim(&self) -> usize { self.dim }
+    pub fn dim(&self) -> usize {
+        self.dim
+    }
 
     /// Maximum N parameter.
-    pub fn max_n(&self) -> usize { self.max_n }
+    pub fn max_n(&self) -> usize {
+        self.max_n
+    }
 
     /// HPDF format version stored in the file.
     pub fn version(&self) -> u32 {
@@ -56,10 +64,12 @@ impl HpdfReader {
     /// When true, the file stores both `/gram/upper_triangle` (hi) and
     /// `/gram/upper_triangle_lo` (lo), giving ~31-digit precision per entry.
     pub fn has_dd(&self) -> bool {
-        self.file.group("gram")
+        self.file
+            .group("gram")
             .ok()
             .and_then(|g| read_scalar_opt::<u32>(&g, "dd_stored"))
-            .unwrap_or(0) != 0
+            .unwrap_or(0)
+            != 0
     }
 
     /// Read the upper triangle back into a full symmetric dim×dim matrix.
@@ -81,8 +91,10 @@ impl HpdfReader {
             }
         }
 
-        eprintln!("  \x1b[32m✓\x1b[0m HPDF gram read: {dim}×{dim} ({:.1}s)",
-            t0.elapsed().as_secs_f64());
+        eprintln!(
+            "  \x1b[32m✓\x1b[0m HPDF gram read: {dim}×{dim} ({:.1}s)",
+            t0.elapsed().as_secs_f64()
+        );
         Ok(mat)
     }
 
@@ -117,7 +129,8 @@ impl HpdfReader {
     /// This is the preferred way to load DD Gram data for DD Cholesky.
     pub fn read_gram_full_dd(&self) -> hdf5::Result<(Vec<f64>, Vec<f64>)> {
         let hi = self.read_gram_full()?;
-        let lo = self.read_gram_lo_full()?
+        let lo = self
+            .read_gram_lo_full()?
             .unwrap_or_else(|| vec![0.0f64; self.dim * self.dim]);
         Ok((hi, lo))
     }
@@ -153,8 +166,16 @@ impl HpdfReader {
     /// reader.read_gram_entry(3, 5)  →  G[3,5] = ∫₀¹ {1/(3x)}{1/(5x)} dx
     /// ```
     pub fn read_gram_entry(&self, j: usize, k: usize) -> hdf5::Result<f64> {
-        assert!(j >= 2 && j <= self.max_n, "j={j} out of range [2, {}]", self.max_n);
-        assert!(k >= 2 && k <= self.max_n, "k={k} out of range [2, {}]", self.max_n);
+        assert!(
+            j >= 2 && j <= self.max_n,
+            "j={j} out of range [2, {}]",
+            self.max_n
+        );
+        assert!(
+            k >= 2 && k <= self.max_n,
+            "k={k} out of range [2, {}]",
+            self.max_n
+        );
 
         let row = j - 2;
         let col = k - 2;
@@ -170,8 +191,11 @@ impl HpdfReader {
     /// `row` and `col` are 0-indexed: G_mat[row, col] corresponds to
     /// Gram index G[row+2, col+2].
     pub fn read_entry_raw(&self, row: usize, col: usize) -> hdf5::Result<f64> {
-        assert!(row < self.dim && col < self.dim,
-            "({row},{col}) out of range for dim={}", self.dim);
+        assert!(
+            row < self.dim && col < self.dim,
+            "({row},{col}) out of range for dim={}",
+            self.dim
+        );
 
         let idx = self.tri_index(row, col);
         let ds = self.file.dataset("gram/upper_triangle")?;
@@ -214,8 +238,10 @@ impl HpdfReader {
     /// Returns a flat (r1-r0+1)×(c1-c0+1) row-major array.
     pub fn read_gram_submatrix(
         &self,
-        r0: usize, r1: usize,
-        c0: usize, c1: usize,
+        r0: usize,
+        r1: usize,
+        c0: usize,
+        c1: usize,
     ) -> hdf5::Result<Vec<f64>> {
         assert!(r1 < self.dim && c1 < self.dim && r0 <= r1 && c0 <= c1);
         let rows = r1 - r0 + 1;
@@ -237,22 +263,38 @@ impl HpdfReader {
 
     /// Read the diagonal of G.
     pub fn read_diagonal(&self) -> hdf5::Result<Vec<f64>> {
-        Ok(self.file.dataset("structure/diagonal")?.read_1d::<f64>()?.to_vec())
+        Ok(self
+            .file
+            .dataset("structure/diagonal")?
+            .read_1d::<f64>()?
+            .to_vec())
     }
 
     /// Read the column L2 norms.
     pub fn read_col_norms(&self) -> hdf5::Result<Vec<f64>> {
-        Ok(self.file.dataset("structure/col_norms")?.read_1d::<f64>()?.to_vec())
+        Ok(self
+            .file
+            .dataset("structure/col_norms")?
+            .read_1d::<f64>()?
+            .to_vec())
     }
 
     /// Read the Möbius table μ(n) for n=0..max_n.
     pub fn read_mobius(&self) -> hdf5::Result<Vec<i8>> {
-        Ok(self.file.dataset("number_theory/mobius")?.read_1d::<i8>()?.to_vec())
+        Ok(self
+            .file
+            .dataset("number_theory/mobius")?
+            .read_1d::<i8>()?
+            .to_vec())
     }
 
     /// Read the prime list.
     pub fn read_primes(&self) -> hdf5::Result<Vec<u32>> {
-        Ok(self.file.dataset("number_theory/primes")?.read_1d::<u32>()?.to_vec())
+        Ok(self
+            .file
+            .dataset("number_theory/primes")?
+            .read_1d::<u32>()?
+            .to_vec())
     }
 
     /// Read provenance metadata.
@@ -310,13 +352,15 @@ impl HpdfReader {
         let tri: Array1<f64> = ds.read_1d()?;
         let tri_vec = tri.to_vec();
 
-        let tri_bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts(tri_vec.as_ptr() as *const u8, tri_vec.len() * 8)
-        };
+        let tri_bytes: &[u8] =
+            unsafe { std::slice::from_raw_parts(tri_vec.as_ptr() as *const u8, tri_vec.len() * 8) };
         let computed_sha = sha256_hex(tri_bytes);
 
         let stored_sha = self.read_data_checksum();
-        let mut valid = stored_sha.as_ref().map(|s| s == &computed_sha).unwrap_or(false);
+        let mut valid = stored_sha
+            .as_ref()
+            .map(|s| s == &computed_sha)
+            .unwrap_or(false);
 
         // Also verify DD lo-word checksum if present
         let mut lo_valid = None;
@@ -330,7 +374,10 @@ impl HpdfReader {
                 let computed_lo = sha256_hex(lo_bytes);
                 let gram = self.file.group("gram")?;
                 let stored_lo = read_str_opt(&gram, "data_lo_sha256");
-                let lo_ok = stored_lo.as_ref().map(|s| s == &computed_lo).unwrap_or(false);
+                let lo_ok = stored_lo
+                    .as_ref()
+                    .map(|s| s == &computed_lo)
+                    .unwrap_or(false);
                 lo_valid = Some(lo_ok);
                 if !lo_ok {
                     valid = false;
@@ -398,7 +445,8 @@ impl HpdfReader {
                 divisor_count: read_scalar_opt::<u64>(&nt, "divisor_count").unwrap_or(0),
                 divisor_sum: read_scalar_opt::<u64>(&nt, "divisor_sum").unwrap_or(0),
                 is_highly_composite: read_scalar_opt::<u32>(&nt, "is_highly_composite")
-                    .map(|v| v != 0).unwrap_or(false),
+                    .map(|v| v != 0)
+                    .unwrap_or(false),
                 prime_count: read_scalar_opt::<u64>(&nt, "prime_count").unwrap_or(0),
             })),
             Err(_) => Ok(None),
@@ -422,7 +470,9 @@ impl HpdfReader {
             let abs_err = (stored - recomputed).abs();
             let rel_err = if recomputed.abs() > 1e-30 {
                 abs_err / recomputed.abs()
-            } else { abs_err };
+            } else {
+                abs_err
+            };
             max_abs = max_abs.max(abs_err);
             max_rel = max_rel.max(rel_err);
         }

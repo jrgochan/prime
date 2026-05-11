@@ -12,14 +12,16 @@
 //! Usage: cargo run --release --bin oct_parity [sizes...]
 
 use rayon::prelude::*;
-use rug::{Float, float::Round};
+use rug::{float::Round, Float};
 use std::sync::Mutex;
 
 const PREC: u32 = 128;
 
 /// Count prime factors with multiplicity (Ω function)
 fn big_omega(mut n: usize) -> usize {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0;
     let mut p = 2;
     while p * p <= n {
@@ -29,7 +31,9 @@ fn big_omega(mut n: usize) -> usize {
         }
         p += 1;
     }
-    if n > 1 { count += 1; }
+    if n > 1 {
+        count += 1;
+    }
     count
 }
 
@@ -40,7 +44,9 @@ fn liouville_parity(k: usize) -> usize {
 
 /// Compute gram_entry(j,k) with corrected integration (m_max=100*max)
 fn gram_entry_hp(j: usize, k: usize) -> Float {
-    if j == 0 || k == 0 { return Float::with_val(PREC, 0); }
+    if j == 0 || k == 0 {
+        return Float::with_val(PREC, 0);
+    }
     let jf = j as f64;
     let kf = k as f64;
     let m_max = (j.max(k)) * 100 + 1000;
@@ -48,11 +54,15 @@ fn gram_entry_hp(j: usize, k: usize) -> Float {
     let mut breaks: Vec<f64> = Vec::with_capacity(2 * m_max);
     for m in j..=m_max {
         let x = jf / (m as f64);
-        if x > 0.0 && x <= 1.0 { breaks.push(x); }
+        if x > 0.0 && x <= 1.0 {
+            breaks.push(x);
+        }
     }
     for m in k..=m_max {
         let x = kf / (m as f64);
-        if x > 0.0 && x <= 1.0 { breaks.push(x); }
+        if x > 0.0 && x <= 1.0 {
+            breaks.push(x);
+        }
     }
     breaks.push(1.0);
     breaks.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -66,7 +76,9 @@ fn gram_entry_hp(j: usize, k: usize) -> Float {
     for i in 0..breaks.len() - 1 {
         let x_lo_f = breaks[i];
         let x_hi_f = breaks[i + 1];
-        if x_hi_f - x_lo_f < 1e-18 { continue; }
+        if x_hi_f - x_lo_f < 1e-18 {
+            continue;
+        }
 
         let x_mid_f = 0.5 * (x_lo_f + x_hi_f);
         let a = (jf / x_mid_f).floor();
@@ -99,14 +111,18 @@ fn gram_entry_hp(j: usize, k: usize) -> Float {
 
 /// Compute fract_integral(j) with corrected integration
 fn fract_integral_hp(j: usize) -> Float {
-    if j == 0 { return Float::with_val(PREC, 0); }
+    if j == 0 {
+        return Float::with_val(PREC, 0);
+    }
     let jf = j as f64;
     let m_max = j * 100 + 1000;
 
     let mut breaks: Vec<f64> = Vec::with_capacity(m_max);
     for m in j..=m_max {
         let x = jf / (m as f64);
-        if x > 0.0 && x <= 1.0 { breaks.push(x); }
+        if x > 0.0 && x <= 1.0 {
+            breaks.push(x);
+        }
     }
     breaks.push(1.0);
     breaks.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -117,7 +133,9 @@ fn fract_integral_hp(j: usize) -> Float {
     for i in 0..breaks.len() - 1 {
         let x_lo_f = breaks[i];
         let x_hi_f = breaks[i + 1];
-        if x_hi_f - x_lo_f < 1e-18 { continue; }
+        if x_hi_f - x_lo_f < 1e-18 {
+            continue;
+        }
         let x_mid_f = 0.5 * (x_lo_f + x_hi_f);
         let a = (jf / x_mid_f).floor();
         let x_lo = Float::with_val(PREC, x_lo_f);
@@ -146,7 +164,10 @@ fn main() {
     };
 
     eprintln!("══════════════════════════════════════════════════════════════════");
-    eprintln!("  Parity Engine — Cross-Parity Coupling K² (MPFR {}-bit)", PREC);
+    eprintln!(
+        "  Parity Engine — Cross-Parity Coupling K² (MPFR {}-bit)",
+        PREC
+    );
     eprintln!("  Gram entries: f64 breaks + MPFR eval, m_max=100*max(j,k)");
     eprintln!("  Parity: Ω(k) mod 2 (Liouville)");
     eprintln!("══════════════════════════════════════════════════════════════════\n");
@@ -163,12 +184,19 @@ fn main() {
         let n_odd = odd_idx.len();
 
         eprintln!("  N={}: dim={}, even={}, odd={}", n + 1, dim, n_even, n_odd);
-        eprintln!("  Computing {} gram entries in MPFR...", dim * (dim + 1) / 2);
+        eprintln!(
+            "  Computing {} gram entries in MPFR...",
+            dim * (dim + 1) / 2
+        );
 
         // Build full Gram matrix (upper triangle) and b vector
-        let g_mutex: Vec<Vec<Mutex<Float>>> = (0..dim).map(|_| {
-            (0..dim).map(|_| Mutex::new(Float::with_val(PREC, 0))).collect()
-        }).collect();
+        let g_mutex: Vec<Vec<Mutex<Float>>> = (0..dim)
+            .map(|_| {
+                (0..dim)
+                    .map(|_| Mutex::new(Float::with_val(PREC, 0)))
+                    .collect()
+            })
+            .collect();
 
         (0..dim).into_par_iter().for_each(|i| {
             for j in i..dim {
@@ -185,29 +213,40 @@ fn main() {
         });
 
         // Extract matrices
-        let g: Vec<Vec<f64>> = (0..dim).map(|i| {
-            (0..dim).map(|j| g_mutex[i][j].lock().unwrap().to_f64_round(Round::Nearest)).collect()
-        }).collect();
+        let g: Vec<Vec<f64>> = (0..dim)
+            .map(|i| {
+                (0..dim)
+                    .map(|j| g_mutex[i][j].lock().unwrap().to_f64_round(Round::Nearest))
+                    .collect()
+            })
+            .collect();
 
-        let b: Vec<f64> = (0..dim).map(|i| {
-            fract_integral_hp(i + 2).to_f64_round(Round::Nearest)
-        }).collect();
+        let b: Vec<f64> = (0..dim)
+            .map(|i| fract_integral_hp(i + 2).to_f64_round(Round::Nearest))
+            .collect();
 
         // Extract parity submatrices (as f64 for eigenvalue computation)
         // A = G[even, even], C = G[odd, odd], B = G[even, odd]
-        let a_mat: Vec<Vec<f64>> = even_idx.iter().map(|&i| {
-            even_idx.iter().map(|&j| g[i][j]).collect()
-        }).collect();
-        let c_mat: Vec<Vec<f64>> = odd_idx.iter().map(|&i| {
-            odd_idx.iter().map(|&j| g[i][j]).collect()
-        }).collect();
-        let b_mat: Vec<Vec<f64>> = even_idx.iter().map(|&i| {
-            odd_idx.iter().map(|&j| g[i][j]).collect()
-        }).collect();
+        let a_mat: Vec<Vec<f64>> = even_idx
+            .iter()
+            .map(|&i| even_idx.iter().map(|&j| g[i][j]).collect())
+            .collect();
+        let c_mat: Vec<Vec<f64>> = odd_idx
+            .iter()
+            .map(|&i| odd_idx.iter().map(|&j| g[i][j]).collect())
+            .collect();
+        let b_mat: Vec<Vec<f64>> = even_idx
+            .iter()
+            .map(|&i| odd_idx.iter().map(|&j| g[i][j]).collect())
+            .collect();
 
         // Compute Frobenius norms for a quick coupling estimate
         let frob = |m: &Vec<Vec<f64>>| -> f64 {
-            m.iter().flat_map(|r| r.iter()).map(|x| x * x).sum::<f64>().sqrt()
+            m.iter()
+                .flat_map(|r| r.iter())
+                .map(|x| x * x)
+                .sum::<f64>()
+                .sqrt()
         };
         let frob_a = frob(&a_mat);
         let frob_c = frob(&c_mat);
@@ -258,7 +297,8 @@ fn main() {
         let c_plus = (g_oo * b_even - g_eo * b_odd) / det;
         let c_minus = (g_ee * b_odd - g_eo * b_even) / det;
         let d2_parity = 1.0 - 2.0 * (c_plus * b_even + c_minus * b_odd)
-            + c_plus * c_plus * g_ee + 2.0 * c_plus * c_minus * g_eo
+            + c_plus * c_plus * g_ee
+            + 2.0 * c_plus * c_minus * g_eo
             + c_minus * c_minus * g_oo;
 
         let elapsed = start.elapsed();
@@ -270,8 +310,10 @@ fn main() {
         eprintln!("    d²(const)  = {:.6}", d2_const);
         eprintln!("    d²(parity) = {:.6}  (2-param even/odd)", d2_parity);
         eprintln!("    c_even = {:.6}, c_odd = {:.6}", c_plus, c_minus);
-        eprintln!("    ‖A‖_F = {:.4}, ‖C‖_F = {:.4}, ‖B‖_F = {:.4}",
-            frob_a, frob_c, frob_b);
+        eprintln!(
+            "    ‖A‖_F = {:.4}, ‖C‖_F = {:.4}, ‖B‖_F = {:.4}",
+            frob_a, frob_c, frob_b
+        );
         if k_frob < 1.0 {
             eprintln!("    ✓ K_frob < 1 — Parity Sieve is ACTIVE!");
         } else {

@@ -17,20 +17,21 @@
 //  Direct quadratic form evaluation only.
 // ═══════════════════════════════════════════════════════════════════════
 
+use rayon::prelude::*;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::Instant;
-use rayon::prelude::*;
 
-use cathedral_utils::arith::{gcd, EULER_GAMMA, mobius_table};
-
+use cathedral_utils::arith::{EULER_GAMMA, gcd, mobius_table};
 
 // ─── Vasyunin sum with memoization ────────────────────────────────
 
 /// V(a, b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 /// Uses f64 trig (sufficient since we're not inverting any matrix)
 fn vasyunin_sum_f64(a: usize, b: usize) -> f64 {
-    if a <= 1 { return 0.0; }
+    if a <= 1 {
+        return 0.0;
+    }
     let pi = std::f64::consts::PI;
     let af = a as f64;
     let mut total = 0.0;
@@ -39,7 +40,9 @@ fn vasyunin_sum_f64(a: usize, b: usize) -> f64 {
         let frac = mb_mod_a as f64 / af;
         let angle = pi * m as f64 / af;
         let (sin_v, cos_v) = angle.sin_cos();
-        if sin_v.abs() < 1e-15 { continue; }
+        if sin_v.abs() < 1e-15 {
+            continue;
+        }
         total += frac * cos_v / sin_v;
     }
     total
@@ -50,17 +53,16 @@ type VCache = Mutex<HashMap<(usize, usize), f64>>;
 fn vasyunin_cached(a: usize, b: usize, cache: &VCache) -> f64 {
     // Check cache first
     if let Ok(guard) = cache.lock()
-        && let Some(&val) = guard.get(&(a, b)) {
-            return val;
-        }
+        && let Some(&val) = guard.get(&(a, b))
+    {
+        return val;
+    }
     let val = vasyunin_sum_f64(a, b);
     if let Ok(mut guard) = cache.lock() {
         guard.insert((a, b), val);
     }
     val
 }
-
-
 
 fn gram_entry_f64(j: usize, k: usize, cache: &VCache) -> f64 {
     let pi = std::f64::consts::PI;
@@ -101,20 +103,26 @@ fn mean_entry(k: usize) -> f64 {
 /// No matrix storage needed!
 fn quad_form_on_fly(v: &[f64], n: usize, cache: &VCache) -> f64 {
     // Diagonal terms
-    let diag: f64 = (0..n).into_par_iter().map(|i| {
-        let g_ii = gram_entry_f64(i + 1, i + 1, cache);
-        v[i] * v[i] * g_ii
-    }).sum();
+    let diag: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| {
+            let g_ii = gram_entry_f64(i + 1, i + 1, cache);
+            v[i] * v[i] * g_ii
+        })
+        .sum();
 
     // Off-diagonal terms (symmetric, count twice)
-    let offdiag: f64 = (0..n).into_par_iter().map(|i| {
-        let mut row_sum = 0.0;
-        for j in (i+1)..n {
-            let g_ij = gram_entry_f64(i + 1, j + 1, cache);
-            row_sum += v[i] * v[j] * g_ij;
-        }
-        row_sum
-    }).sum();
+    let offdiag: f64 = (0..n)
+        .into_par_iter()
+        .map(|i| {
+            let mut row_sum = 0.0;
+            for j in (i + 1)..n {
+                let g_ij = gram_entry_f64(i + 1, j + 1, cache);
+                row_sum += v[i] * v[j] * g_ij;
+            }
+            row_sum
+        })
+        .sum();
 
     diag + 2.0 * offdiag
 }
@@ -138,8 +146,16 @@ fn test_witness(name: &str, v: &[f64], b: &[f64], n: usize, cache: &VCache) -> (
     let ln_n = (n as f64).ln();
     let q_over_ln = if ln_n > 0.0 { q / ln_n } else { 0.0 };
 
-    eprintln!("    {} ({:.1}s): bᵀv={:.6}, S={:.6}, vᵀCv={:.6e}, Q={:.6}, Q/ln={:.6}",
-        name, t0.elapsed().as_secs_f64(), bt_v, s, vtcv, q, q_over_ln);
+    eprintln!(
+        "    {} ({:.1}s): bᵀv={:.6}, S={:.6}, vᵀCv={:.6e}, Q={:.6}, Q/ln={:.6}",
+        name,
+        t0.elapsed().as_secs_f64(),
+        bt_v,
+        s,
+        vtcv,
+        q,
+        q_over_ln
+    );
 
     (q, q_over_ln, vtcv)
 }
@@ -151,8 +167,13 @@ fn experiment(n: usize, mu: &[i32], cache: &VCache) -> (f64, f64, f64, f64, f64,
     let t_total = Instant::now();
 
     println!("\n{}", "━".repeat(78));
-    println!("  N = {:5}  │  ln(N) = {:.4}  │  ln(ln(N)) = {:.4}  │  {} threads",
-             n, ln_n, ln_n.ln(), rayon::current_num_threads());
+    println!(
+        "  N = {:5}  │  ln(N) = {:.4}  │  ln(ln(N)) = {:.4}  │  {} threads",
+        n,
+        ln_n,
+        ln_n.ln(),
+        rayon::current_num_threads()
+    );
     println!("{}", "━".repeat(78));
 
     // Mean vector
@@ -160,22 +181,30 @@ fn experiment(n: usize, mu: &[i32], cache: &VCache) -> (f64, f64, f64, f64, f64,
 
     // Count squarefree numbers (where μ(k) ≠ 0)
     let sqfree_count = (1..=n).filter(|&k| mu[k] != 0).count();
-    println!("  Squarefree: {}/{} ({:.1}%)", sqfree_count, n, 100.0 * sqfree_count as f64 / n as f64);
+    println!(
+        "  Squarefree: {}/{} ({:.1}%)",
+        sqfree_count,
+        n,
+        100.0 * sqfree_count as f64 / n as f64
+    );
 
     // Build three test vectors
     let v_raw: Vec<f64> = (1..=n).map(|k| -mu[k] as f64).collect();
-    let v_linear: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - k as f64 / n as f64)
-    }).collect();
-    let v_log: Vec<f64> = (1..=n).map(|k| {
-        -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n)
-    }).collect();
+    let v_linear: Vec<f64> = (1..=n)
+        .map(|k| -mu[k] as f64 * (1.0 - k as f64 / n as f64))
+        .collect();
+    let v_log: Vec<f64> = (1..=n)
+        .map(|k| -mu[k] as f64 * (1.0 - (k as f64).ln() / ln_n))
+        .collect();
 
     // Norms
     let norm_raw: f64 = v_raw.iter().map(|x| x * x).sum::<f64>().sqrt();
     let norm_lin: f64 = v_linear.iter().map(|x| x * x).sum::<f64>().sqrt();
     let norm_log: f64 = v_log.iter().map(|x| x * x).sum::<f64>().sqrt();
-    println!("  ‖v‖: raw={:.4} linear={:.4} log={:.4}", norm_raw, norm_lin, norm_log);
+    println!(
+        "  ‖v‖: raw={:.4} linear={:.4} log={:.4}",
+        norm_raw, norm_lin, norm_log
+    );
 
     // Test all three
     println!("  Computing Rayleigh quotients...");
@@ -190,13 +219,23 @@ fn experiment(n: usize, mu: &[i32], cache: &VCache) -> (f64, f64, f64, f64, f64,
 
     let elapsed = t_total.elapsed().as_secs_f64();
 
-    println!("\n  ┌─ VARIATIONAL WITNESS RESULTS (N={}) {}┐", n, "─".repeat(20));
-    println!("  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
-             "Raw Möbius", q1, ql1, btv_raw, vtcv1);
-    println!("  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
-             "Linear cutoff", q2, ql2, btv_lin, vtcv2);
-    println!("  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
-             "Log cutoff", q3, ql3, btv_log, vtcv3);
+    println!(
+        "\n  ┌─ VARIATIONAL WITNESS RESULTS (N={}) {}┐",
+        n,
+        "─".repeat(20)
+    );
+    println!(
+        "  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
+        "Raw Möbius", q1, ql1, btv_raw, vtcv1
+    );
+    println!(
+        "  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
+        "Linear cutoff", q2, ql2, btv_lin, vtcv2
+    );
+    println!(
+        "  │  {:20} Q = {:12.6}  Q/ln = {:10.6}  bᵀv = {:10.6}  vᵀCv = {:10.3e}  │",
+        "Log cutoff", q3, ql3, btv_log, vtcv3
+    );
     println!("  └─ Total: {:.1}s {}┘", elapsed, "─".repeat(50));
 
     (ql1, ql2, ql3, vtcv1, vtcv2, vtcv3)
@@ -230,13 +269,22 @@ fn main() {
     println!("\n\n{}", "═".repeat(78));
     println!("  GRAND SUMMARY — VARIATIONAL WITNESS");
     println!("{}", "═".repeat(78));
-    println!("\n  {:>6} {:>8} {:>8} {:>12} {:>12} {:>12}",
-             "N", "ln(N)", "lnln(N)", "Q/ln (Raw)", "Q/ln (Lin)", "Q/ln (Log)");
+    println!(
+        "\n  {:>6} {:>8} {:>8} {:>12} {:>12} {:>12}",
+        "N", "ln(N)", "lnln(N)", "Q/ln (Raw)", "Q/ln (Lin)", "Q/ln (Log)"
+    );
     println!("  {}", "─".repeat(68));
     for &(n, ql1, ql2, ql3, _, _, _) in &results {
         let ln_n = (n as f64).ln();
-        println!("  {:>6} {:>8.4} {:>8.4} {:>12.6} {:>12.6} {:>12.6}",
-                 n, ln_n, ln_n.ln(), ql1, ql2, ql3);
+        println!(
+            "  {:>6} {:>8.4} {:>8.4} {:>12.6} {:>12.6} {:>12.6}",
+            n,
+            ln_n,
+            ln_n.ln(),
+            ql1,
+            ql2,
+            ql3
+        );
     }
 
     // Trend analysis for log cutoff
@@ -248,29 +296,55 @@ fn main() {
         let ln_ln_last = (last.0 as f64).ln().ln();
         let slope = (last.3 - first.3) / (ln_ln_last - ln_ln_first);
         let intercept = first.3 - slope * ln_ln_first;
-        println!("  Fit: Q/ln(N) ≈ {:.2} · ln(ln(N)) + ({:.2})", slope, intercept);
-        println!("  Prediction N=100,000: Q/ln ≈ {:.2}", slope * (100_000f64).ln().ln() + intercept);
-        println!("  Prediction N=1,000,000: Q/ln ≈ {:.2}", slope * (1_000_000f64).ln().ln() + intercept);
+        println!(
+            "  Fit: Q/ln(N) ≈ {:.2} · ln(ln(N)) + ({:.2})",
+            slope, intercept
+        );
+        println!(
+            "  Prediction N=100,000: Q/ln ≈ {:.2}",
+            slope * (100_000f64).ln().ln() + intercept
+        );
+        println!(
+            "  Prediction N=1,000,000: Q/ln ≈ {:.2}",
+            slope * (1_000_000f64).ln().ln() + intercept
+        );
 
         // Delta between consecutive log cutoff values
         println!("\n  ─── LOG CUTOFF DELTAS ───");
         for i in 1..results.len() {
-            let prev = &results[i-1];
+            let prev = &results[i - 1];
             let curr = &results[i];
             let delta = curr.3 - prev.3;
-            println!("  N={:>5} → N={:>5}: Δ(Q/ln) = {:+.4}", prev.0, curr.0, delta);
+            println!(
+                "  N={:>5} → N={:>5}: Δ(Q/ln) = {:+.4}",
+                prev.0, curr.0, delta
+            );
         }
     }
 
     // Write JSON output
     let json_path = "results_attack8.json";
-    let mut json = String::from("{\n  \"experiment\": \"variational_witness_attack8\",\n  \"results\": [\n");
+    let mut json =
+        String::from("{\n  \"experiment\": \"variational_witness_attack8\",\n  \"results\": [\n");
     for (i, &(n, ql1, ql2, ql3, vtcv1, vtcv2, vtcv3)) in results.iter().enumerate() {
         let ln_n = (n as f64).ln();
-        json += &format!("    {{\"N\": {}, \"ln_N\": {:.6}, \"ln_ln_N\": {:.6}, ", n, ln_n, ln_n.ln());
-        json += &format!("\"Q_ln_raw\": {:.8}, \"Q_ln_linear\": {:.8}, \"Q_ln_log\": {:.8}, ", ql1, ql2, ql3);
-        json += &format!("\"vtCv_raw\": {:.8e}, \"vtCv_linear\": {:.8e}, \"vtCv_log\": {:.8e}}}", vtcv1, vtcv2, vtcv3);
-        if i + 1 < results.len() { json += ","; }
+        json += &format!(
+            "    {{\"N\": {}, \"ln_N\": {:.6}, \"ln_ln_N\": {:.6}, ",
+            n,
+            ln_n,
+            ln_n.ln()
+        );
+        json += &format!(
+            "\"Q_ln_raw\": {:.8}, \"Q_ln_linear\": {:.8}, \"Q_ln_log\": {:.8}, ",
+            ql1, ql2, ql3
+        );
+        json += &format!(
+            "\"vtCv_raw\": {:.8e}, \"vtCv_linear\": {:.8e}, \"vtCv_log\": {:.8e}}}",
+            vtcv1, vtcv2, vtcv3
+        );
+        if i + 1 < results.len() {
+            json += ",";
+        }
         json += "\n";
     }
     json += "  ]\n}\n";

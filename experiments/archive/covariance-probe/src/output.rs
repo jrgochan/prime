@@ -5,7 +5,6 @@
 ///   2. eigenvalues_N.tsv — Eigenvalue spectrum for each probed N
 ///   3. summary.json      — Machine-readable summary with fit parameters
 ///   4. report.txt        — Human-readable analysis report
-
 use crate::covariance::ProbeResult;
 use std::fs;
 use std::io::Write;
@@ -125,19 +124,56 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     let path = output_dir.join("report.txt");
     let mut f = fs::File::create(&path).expect("Failed to create report.txt");
 
-    writeln!(f, "╔══════════════════════════════════════════════════════════════════╗").unwrap();
-    writeln!(f, "║      COVARIANCE MATRIX PROBE — Riemann Hypothesis Decay        ║").unwrap();
-    writeln!(f, "║      Vasyunin-Báez-Duarte Nyman-Beurling Distance              ║").unwrap();
-    writeln!(f, "╚══════════════════════════════════════════════════════════════════╝").unwrap();
+    writeln!(
+        f,
+        "╔══════════════════════════════════════════════════════════════════╗"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "║      COVARIANCE MATRIX PROBE — Riemann Hypothesis Decay        ║"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "║      Vasyunin-Báez-Duarte Nyman-Beurling Distance              ║"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "╚══════════════════════════════════════════════════════════════════╝"
+    )
+    .unwrap();
     writeln!(f).unwrap();
-    writeln!(f, "  Cathedral Reference: proofs/Cathedral/Vasyunin/Defs.lean").unwrap();
-    writeln!(f, "  Axiom Under Test:    millennium_covariance_cancellation").unwrap();
-    writeln!(f, "  Timestamp:           {}", chrono::Utc::now().to_rfc3339()).unwrap();
+    writeln!(
+        f,
+        "  Cathedral Reference: proofs/Cathedral/Vasyunin/Defs.lean"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "  Axiom Under Test:    millennium_covariance_cancellation"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "  Timestamp:           {}",
+        chrono::Utc::now().to_rfc3339()
+    )
+    .unwrap();
     writeln!(f).unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f, "  THE SCHUR COMPLEMENT: C = G - bb^T").unwrap();
     writeln!(f, "  d²_N = w^T · C · w   (the Nyman-Beurling distance)").unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f).unwrap();
 
     // Decay table
@@ -164,9 +200,17 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     }
 
     writeln!(f).unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f, "  DECAY FIT: d²_N ≈ A / (ln N)^α").unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f).unwrap();
     writeln!(f, "  A     = {:.10e}", a).unwrap();
     writeln!(f, "  α     = {:.6}", alpha).unwrap();
@@ -185,9 +229,17 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     writeln!(f).unwrap();
 
     // Cancellation analysis
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f, "  CANCELLATION ANALYSIS: G vs bb^T").unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f).unwrap();
     writeln!(
         f,
@@ -212,9 +264,17 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     }
 
     writeln!(f).unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f, "  SPECTRAL STRUCTURE").unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f).unwrap();
     writeln!(
         f,
@@ -225,11 +285,7 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     writeln!(
         f,
         "  {:>6}  {:>14}  {:>14}  {:>14}  {:>14}",
-        "──────",
-        "──────────────",
-        "──────────────",
-        "──────────────",
-        "──────────────"
+        "──────", "──────────────", "──────────────", "──────────────", "──────────────"
     )
     .unwrap();
 
@@ -243,21 +299,29 @@ fn write_report(results: &[ProbeResult], output_dir: &Path) {
     }
 
     writeln!(f).unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
     writeln!(f, "  NOTE: d²_N = w^T·G·w - (w^T·b)² = w^T·C·w").unwrap();
-    writeln!(f, "  The gap between G and bb^T is exactly the Schur complement.").unwrap();
+    writeln!(
+        f,
+        "  The gap between G and bb^T is exactly the Schur complement."
+    )
+    .unwrap();
     writeln!(f, "  RH ⟺ this gap → 0 as N → ∞.").unwrap();
-    writeln!(f, "═══════════════════════════════════════════════════════════════════").unwrap();
+    writeln!(
+        f,
+        "═══════════════════════════════════════════════════════════════════"
+    )
+    .unwrap();
 
     eprintln!("  ✓ Wrote {}", path.display());
 }
 
 /// Write eigenvalue spectrum for a specific N.
-pub fn write_eigenvalue_spectrum(
-    n: usize,
-    eigenvalues: &[f64],
-    output_dir: &Path,
-) {
+pub fn write_eigenvalue_spectrum(n: usize, eigenvalues: &[f64], output_dir: &Path) {
     let path = output_dir.join(format!("eigenvalues_N{}.tsv", n));
     let mut f = fs::File::create(&path).expect("Failed to create eigenvalue file");
 

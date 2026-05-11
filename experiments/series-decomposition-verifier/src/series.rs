@@ -15,9 +15,13 @@ use rug::Float;
 pub const PREC: u32 = 512;
 
 #[inline]
-pub fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
+pub fn fp(x: i64) -> Float {
+    Float::with_val(PREC, x)
+}
 #[inline]
-pub fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
+pub fn fu(x: usize) -> Float {
+    Float::with_val(PREC, x as u64)
+}
 
 /// Tile index n(m) = ⌊am/b⌋
 #[inline]
@@ -41,8 +45,10 @@ pub fn row_term(a: usize, b: usize, m: usize) -> Float {
     let log_r = Float::with_val(PREC, ratio.ln());
     // 1/b - (n/a + m/b)·log((m+1)/m) + n/(a(m+1))
     let t1 = Float::with_val(PREC, fp(1) / &bf);
-    let coeff = Float::with_val(PREC,
-        Float::with_val(PREC, &nf / &af) + Float::with_val(PREC, &mf / &bf));
+    let coeff = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &nf / &af) + Float::with_val(PREC, &mf / &bf),
+    );
     let t2 = Float::with_val(PREC, &coeff * &log_r);
     let t3 = Float::with_val(PREC, &nf / Float::with_val(PREC, &af * &m1f));
     let mut r = Float::with_val(PREC, &t1 - &t2);
@@ -71,16 +77,17 @@ pub fn s_combined(a: usize, b: usize, big_m: usize) -> Float {
 /// f(x) = 1/(abx²) - m/(bx) - n/(ax) + mn
 /// Antiderivative: F(x) = -1/(abx) - (m/b)·ln(x) - (n/a)·ln(x) + mn·x
 ///                       = -1/(abx) - (m/b + n/a)·ln(x) + mn·x
-fn cross_piece_ftc(a: usize, b: usize, m: usize, n: usize,
-                   lo: &Float, hi: &Float) -> Float {
+fn cross_piece_ftc(a: usize, b: usize, m: usize, n: usize, lo: &Float, hi: &Float) -> Float {
     let af = fu(a);
     let bf = fu(b);
     let mf = fu(m);
     let nf = fu(n);
     let ab = Float::with_val(PREC, &af * &bf);
     let mn = Float::with_val(PREC, &mf * &nf);
-    let log_coeff = Float::with_val(PREC,
-        Float::with_val(PREC, &mf / &bf) + Float::with_val(PREC, &nf / &af));
+    let log_coeff = Float::with_val(
+        PREC,
+        Float::with_val(PREC, &mf / &bf) + Float::with_val(PREC, &nf / &af),
+    );
 
     // F(x) = -1/(ab·x) - log_coeff·ln(x) + mn·x
     let f = |x: &Float| -> Float {

@@ -46,7 +46,9 @@ pub const R_MEAN_POISSON: f64 = 0.3863;
 /// Input `eigenvalues` must be sorted in ascending order.
 pub fn spacing_ratios(eigenvalues: &[f64]) -> Vec<f64> {
     let n = eigenvalues.len();
-    if n < 3 { return vec![]; }
+    if n < 3 {
+        return vec![];
+    }
 
     let mut ratios = Vec::with_capacity(n - 2);
     for i in 0..(n - 2) {
@@ -68,9 +70,10 @@ pub fn classify_ensemble(r_mean: f64) -> (&'static str, f64) {
         ("GUE (β=2)", R_MEAN_GUE),
         ("GOE (β=1)", R_MEAN_GOE),
         ("GSE (β=4)", R_MEAN_GSE),
-        ("Poisson",   R_MEAN_POISSON),
+        ("Poisson", R_MEAN_POISSON),
     ];
-    candidates.iter()
+    candidates
+        .iter()
         .map(|(name, expected)| (*name, (r_mean - expected).abs()))
         .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
         .unwrap()
@@ -158,7 +161,9 @@ pub fn cdf_gse(s: f64) -> f64 {
     let n = 1000;
     let ds = s / n as f64;
     let mut v = 0.0;
-    for i in 0..n { v += wigner_gse((i as f64 + 0.5) * ds) * ds; }
+    for i in 0..n {
+        v += wigner_gse((i as f64 + 0.5) * ds) * ds;
+    }
     v.min(1.0)
 }
 
@@ -178,8 +183,9 @@ pub fn erf_approx(x: f64) -> f64 {
     let sign = if x >= 0.0 { 1.0 } else { -1.0 };
     let x = x.abs();
     let t = 1.0 / (1.0 + 0.3275911 * x);
-    let poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741
-        + t * (-1.453152027 + t * 1.061405429))));
+    let poly = t
+        * (0.254829592
+            + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
     sign * (1.0 - poly * (-x * x).exp())
 }
 
@@ -193,18 +199,23 @@ pub fn erf_approx(x: f64) -> f64 {
 /// nearest-neighbor spacing distribution (NNSD) analysis.
 pub fn unfold_local(eigenvalues: &[f64], sigma_frac: f64) -> Vec<f64> {
     let n = eigenvalues.len();
-    if n < 2 { return eigenvalues.to_vec(); }
+    if n < 2 {
+        return eigenvalues.to_vec();
+    }
     let range = eigenvalues[n - 1] - eigenvalues[0];
     let sigma = range * sigma_frac;
 
-    eigenvalues.iter().map(|&e| {
-        let mut count = 0.0;
-        for &ei in eigenvalues {
-            let z = (e - ei) / sigma;
-            count += 0.5 * (1.0 + erf_approx(z / std::f64::consts::SQRT_2));
-        }
-        count
-    }).collect()
+    eigenvalues
+        .iter()
+        .map(|&e| {
+            let mut count = 0.0;
+            for &ei in eigenvalues {
+                let z = (e - ei) / sigma;
+                count += 0.5 * (1.0 + erf_approx(z / std::f64::consts::SQRT_2));
+            }
+            count
+        })
+        .collect()
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -218,7 +229,9 @@ pub fn unfold_local(eigenvalues: &[f64], sigma_frac: f64) -> Vec<f64> {
 /// confidence is D_crit ≈ 1.36 / √n.
 pub fn ks_test(spacings: &[f64], cdf_fn: fn(f64) -> f64) -> f64 {
     let n = spacings.len();
-    if n == 0 { return 1.0; }
+    if n == 0 {
+        return 1.0;
+    }
     let mut sorted = spacings.to_vec();
     sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let mut d_max = 0.0f64;
@@ -243,8 +256,16 @@ mod tests {
         let ds = 5.0 / n as f64;
         let gue_integral: f64 = (0..n).map(|i| wigner_gue((i as f64 + 0.5) * ds) * ds).sum();
         let goe_integral: f64 = (0..n).map(|i| wigner_goe((i as f64 + 0.5) * ds) * ds).sum();
-        assert!((gue_integral - 1.0).abs() < 0.01, "GUE integral = {}", gue_integral);
-        assert!((goe_integral - 1.0).abs() < 0.01, "GOE integral = {}", goe_integral);
+        assert!(
+            (gue_integral - 1.0).abs() < 0.01,
+            "GUE integral = {}",
+            gue_integral
+        );
+        assert!(
+            (goe_integral - 1.0).abs() < 0.01,
+            "GOE integral = {}",
+            goe_integral
+        );
     }
 
     #[test]
@@ -253,9 +274,15 @@ mod tests {
         // But r = min(s,s')/max(s,s') ∈ [0, 1], so integrate [0, 1]
         let n = 10000;
         let dr = 1.0 / n as f64;
-        let gue: f64 = (0..n).map(|i| ratio_pdf_gue((i as f64 + 0.5) * dr) * dr).sum();
-        let goe: f64 = (0..n).map(|i| ratio_pdf_goe((i as f64 + 0.5) * dr) * dr).sum();
-        let poi: f64 = (0..n).map(|i| ratio_pdf_poisson((i as f64 + 0.5) * dr) * dr).sum();
+        let gue: f64 = (0..n)
+            .map(|i| ratio_pdf_gue((i as f64 + 0.5) * dr) * dr)
+            .sum();
+        let goe: f64 = (0..n)
+            .map(|i| ratio_pdf_goe((i as f64 + 0.5) * dr) * dr)
+            .sum();
+        let poi: f64 = (0..n)
+            .map(|i| ratio_pdf_poisson((i as f64 + 0.5) * dr) * dr)
+            .sum();
         // These integrate to 0.5 over [0,1] since P(r) for r and 1/r are related
         // The full normalization is ∫₀^∞ P(r) dr = 1, but domain is [0,1] by construction
         // The correct test: these should be finite and positive

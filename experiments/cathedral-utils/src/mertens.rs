@@ -36,7 +36,9 @@ pub fn mertens_values(mu: &[i8]) -> Vec<i64> {
 /// Mertens function at a single point: M(x) = Σ_{k=1}^{⌊x⌋} μ(k)
 pub fn mertens_at(mu: &[i8], x: f64) -> i64 {
     let n = x.floor() as usize;
-    if n >= mu.len() { return 0; }
+    if n >= mu.len() {
+        return 0;
+    }
     let mut s = 0i64;
     for k in 1..=n {
         s += mu[k] as i64;
@@ -94,11 +96,15 @@ pub fn mertens_profile(mu: &[i8], max_x: usize) -> (Vec<MertensProfile>, f64) {
 /// in the Cathedral's forward direction proof.
 pub fn log_cutoff_weights(n: usize, mu: &[i8]) -> Vec<f64> {
     let ln_n = (n as f64).ln();
-    (1..n).map(|k| {
-        if k >= mu.len() || mu[k] == 0 { return 0.0; }
-        let weight = 1.0 - (k as f64).ln() / ln_n;
-        -(mu[k] as f64) * weight
-    }).collect()
+    (1..n)
+        .map(|k| {
+            if k >= mu.len() || mu[k] == 0 {
+                return 0.0;
+            }
+            let weight = 1.0 - (k as f64).ln() / ln_n;
+            -(mu[k] as f64) * weight
+        })
+        .collect()
 }
 
 /// Full witness vector v for the d² = 1 - 2bᵀv + vᵀGv quadratic form.
@@ -107,13 +113,17 @@ pub fn log_cutoff_weights(n: usize, mu: &[i8]) -> Vec<f64> {
 pub fn witness_vector(n: usize, mu: &[i8]) -> Vec<f64> {
     let ln_n = (n as f64).ln();
     let dim = n - 1;
-    (0..dim).map(|i| {
-        let k = i + 2;
-        if k >= mu.len() { return 0.0; }
-        let mu_k = mu[k] as f64;
-        let weight = 1.0 - (k as f64).ln() / ln_n;
-        -mu_k * weight
-    }).collect()
+    (0..dim)
+        .map(|i| {
+            let k = i + 2;
+            if k >= mu.len() {
+                return 0.0;
+            }
+            let mu_k = mu[k] as f64;
+            let weight = 1.0 - (k as f64).ln() / ln_n;
+            -mu_k * weight
+        })
+        .collect()
 }
 
 /// Full witness vector v for k=1..N (Lean-aligned basis).
@@ -126,13 +136,17 @@ pub fn witness_vector(n: usize, mu: &[i8]) -> Vec<f64> {
 /// For k=1: v_1 = -μ(1) · (1 - 0) = -1  (the critical stabilizer)
 pub fn witness_vector_full(n: usize, mu: &[i8]) -> Vec<f64> {
     let ln_n = (n as f64).ln();
-    (0..n).map(|i| {
-        let k = i + 1;
-        if k >= mu.len() { return 0.0; }
-        let mu_k = mu[k] as f64;
-        let weight = 1.0 - (k as f64).ln() / ln_n;
-        -mu_k * weight
-    }).collect()
+    (0..n)
+        .map(|i| {
+            let k = i + 1;
+            if k >= mu.len() {
+                return 0.0;
+            }
+            let mu_k = mu[k] as f64;
+            let weight = 1.0 - (k as f64).ln() / ln_n;
+            -mu_k * weight
+        })
+        .collect()
 }
 
 /// Chebyshev theta function: θ(x) = Σ_{p ≤ x, p prime} ln(p)
@@ -152,12 +166,16 @@ pub fn chebyshev_theta(is_prime: &[bool], x: usize) -> f64 {
 pub fn chebyshev_psi(is_prime: &[bool], x: usize) -> f64 {
     let mut psi = 0.0f64;
     for p in 2..=x.min(is_prime.len() - 1) {
-        if !is_prime[p] { continue; }
+        if !is_prime[p] {
+            continue;
+        }
         let ln_p = (p as f64).ln();
         let mut pk = p;
         while pk <= x {
             psi += ln_p;
-            if pk > x / p { break; } // overflow protection
+            if pk > x / p {
+                break;
+            } // overflow protection
             pk *= p;
         }
     }
@@ -168,9 +186,7 @@ pub fn chebyshev_psi(is_prime: &[bool], x: usize) -> f64 {
 ///
 /// This is the key quantity in the Nyman-Beurling equivalence:
 /// RH ⟺ inf_N Q(N) = 0.
-pub fn quadratic_form(
-    gram: &[f64], b: &[f64], v: &[f64], dim: usize,
-) -> f64 {
+pub fn quadratic_form(gram: &[f64], b: &[f64], v: &[f64], dim: usize) -> f64 {
     // bᵀv
     let bt_v: f64 = b.iter().zip(v.iter()).map(|(bi, vi)| bi * vi).sum();
 
@@ -199,10 +215,14 @@ pub fn quadratic_form(
 /// on [0,1] gives d²_N. The witness weights w_k come from
 /// [`log_cutoff_weights`].
 pub fn f_n_at(x: f64, weights: &[f64]) -> f64 {
-    if x <= 0.0 { return 0.0; }
+    if x <= 0.0 {
+        return 0.0;
+    }
     let mut sum = 0.0;
     for (k_minus_1, &w) in weights.iter().enumerate() {
-        if w == 0.0 { continue; }
+        if w == 0.0 {
+            continue;
+        }
         let k = (k_minus_1 + 1) as f64;
         let y = 1.0 / (k * x);
         sum += w * (y - y.floor());
@@ -216,20 +236,24 @@ pub fn f_n_at(x: f64, weights: &[f64]) -> f64 {
 /// useful for cross-checking or when the full matrix isn't available.
 pub fn vtgv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
     let dx = 1.0 / n_pts as f64;
-    (0..n_pts).map(|i| {
-        let x = (i as f64 + 0.5) * dx;
-        let f = f_n_at(x, weights);
-        f * f * dx
-    }).sum()
+    (0..n_pts)
+        .map(|i| {
+            let x = (i as f64 + 0.5) * dx;
+            let f = f_n_at(x, weights);
+            f * f * dx
+        })
+        .sum()
 }
 
 /// Compute bᵀv = ∫₀¹ f_N(x) dx via midpoint quadrature.
 pub fn btv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
     let dx = 1.0 / n_pts as f64;
-    (0..n_pts).map(|i| {
-        let x = (i as f64 + 0.5) * dx;
-        f_n_at(x, weights) * dx
-    }).sum()
+    (0..n_pts)
+        .map(|i| {
+            let x = (i as f64 + 0.5) * dx;
+            f_n_at(x, weights) * dx
+        })
+        .sum()
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -240,26 +264,30 @@ pub fn btv_by_integral(weights: &[f64], n_pts: usize) -> f64 {
 ///
 /// PNT target: S₁(∞) = 0 (equivalent to PNT).
 pub fn pnt_s1(mu: &[i8], m: usize) -> f64 {
-    (1..=m.min(mu.len() - 1)).map(|k| mu[k] as f64 / k as f64).sum()
+    (1..=m.min(mu.len() - 1))
+        .map(|k| mu[k] as f64 / k as f64)
+        .sum()
 }
 
 /// S₂(M) = Σ_{k=1}^{M} μ(k)·ln(k)/k
 ///
 /// PNT target: S₂(∞) = -1.
 pub fn pnt_s2(mu: &[i8], m: usize) -> f64 {
-    (1..=m.min(mu.len() - 1)).map(|k| {
-        mu[k] as f64 * (k as f64).ln() / k as f64
-    }).sum()
+    (1..=m.min(mu.len() - 1))
+        .map(|k| mu[k] as f64 * (k as f64).ln() / k as f64)
+        .sum()
 }
 
 /// S₃(M) = Σ_{k=1}^{M} μ(k)·ln²(k)/k
 ///
 /// PNT target: S₃(∞) = -2γ (where γ is Euler-Mascheroni).
 pub fn pnt_s3(mu: &[i8], m: usize) -> f64 {
-    (1..=m.min(mu.len() - 1)).map(|k| {
-        let logk = (k as f64).ln();
-        mu[k] as f64 * logk * logk / k as f64
-    }).sum()
+    (1..=m.min(mu.len() - 1))
+        .map(|k| {
+            let logk = (k as f64).ln();
+            mu[k] as f64 * logk * logk / k as f64
+        })
+        .sum()
 }
 
 #[cfg(test)]
@@ -286,7 +314,7 @@ mod tests {
         let w = log_cutoff_weights(10, &mu);
         // w[0] corresponds to k=1, μ(1)=1
         assert!(w[0] < 0.0); // -μ(1) * (1 - 0/ln10) = -1
-        // k=4: μ(4)=0, so w[3]=0
+                             // k=4: μ(4)=0, so w[3]=0
         assert_eq!(w[3], 0.0);
     }
 

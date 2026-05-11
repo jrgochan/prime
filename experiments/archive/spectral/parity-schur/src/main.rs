@@ -45,7 +45,11 @@ fn big_omega(mut n: usize) -> usize {
 
 /// Liouville function: λ(n) = (-1)^Ω(n)
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+    if big_omega(n) % 2 == 0 {
+        1.0
+    } else {
+        -1.0
+    }
 }
 
 /// Build the (N-1)×(N-1) Gram matrix for indices 2..=N
@@ -67,7 +71,7 @@ fn build_b_vector(n: usize) -> DVector<f64> {
     let dim = n - 1;
     DVector::from_fn(dim, |i, _| {
         let j = (i + 2) as f64;
-        // b_j = ∫₀¹ {j/x} dx = j·ln(j) - j + 1 + j·(γ-1)/... 
+        // b_j = ∫₀¹ {j/x} dx = j·ln(j) - j + 1 + j·(γ-1)/...
         // Actually: b_j = 1 - (1 - 1/j) ≈ ...
         // More precisely: b_j = ∫₀¹ {j/x} dx
         // For the Gram entry formula, b_j = G_{j,1} but we defined G only for j≥2
@@ -114,13 +118,19 @@ fn subvec(v: &DVector<f64>, indices: &[usize]) -> DVector<f64> {
 /// Compute minimum eigenvalue of a symmetric matrix
 fn min_eigenvalue(m: &DMatrix<f64>) -> f64 {
     let eig = SymmetricEigen::new(m.clone());
-    eig.eigenvalues.iter().cloned().fold(f64::INFINITY, f64::min)
+    eig.eigenvalues
+        .iter()
+        .cloned()
+        .fold(f64::INFINITY, f64::min)
 }
 
 /// Compute maximum eigenvalue of a symmetric matrix
 fn max_eigenvalue(m: &DMatrix<f64>) -> f64 {
     let eig = SymmetricEigen::new(m.clone());
-    eig.eigenvalues.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
+    eig.eigenvalues
+        .iter()
+        .cloned()
+        .fold(f64::NEG_INFINITY, f64::max)
 }
 
 /// Compute all eigenvalues sorted ascending
@@ -157,8 +167,10 @@ fn main() {
     }
     let mut results: Vec<Row> = Vec::new();
 
-    println!("{:>5} {:>5} {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
-        "N", "|V+|", "|V-|", "λ_min(G)", "λ_min(A)", "λ_min(C)", "λ_min(Heff)", "R_ratio", "d²_N");
+    println!(
+        "{:>5} {:>5} {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
+        "N", "|V+|", "|V-|", "λ_min(G)", "λ_min(A)", "λ_min(C)", "λ_min(Heff)", "R_ratio", "d²_N"
+    );
     println!("{}", "-".repeat(85));
 
     for &n in &test_sizes {
@@ -188,15 +200,25 @@ fn main() {
         let norm_a = max_eigenvalue(&a_mat);
         let r_ratio = norm_interference / norm_a;
 
-        let g_inv = g.clone().try_inverse().unwrap_or_else(|| {
-            DMatrix::identity(g.nrows(), g.ncols())
-        });
+        let g_inv = g
+            .clone()
+            .try_inverse()
+            .unwrap_or_else(|| DMatrix::identity(g.nrows(), g.ncols()));
         let d_sq = 1.0 - b.dot(&(&g_inv * &b));
         let log_n = (n as f64).ln();
 
-        println!("{:>5} {:>5} {:>5} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>8.6}",
-            n, even_idx.len(), odd_idx.len(),
-            lmin_g, lmin_a, lmin_c, lmin_heff, r_ratio, d_sq);
+        println!(
+            "{:>5} {:>5} {:>5} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>10.6} {:>8.6}",
+            n,
+            even_idx.len(),
+            odd_idx.len(),
+            lmin_g,
+            lmin_a,
+            lmin_c,
+            lmin_heff,
+            r_ratio,
+            d_sq
+        );
 
         results.push(Row {
             n,
@@ -235,7 +257,12 @@ fn main() {
         let heff_eigs = eigenvalues_sorted(&h_eff);
         let a_eigs = eigenvalues_sorted(&a_mat);
 
-        println!("\nN = {} (|V+| = {}, |V-| = {})", n, even_idx.len(), odd_idx.len());
+        println!(
+            "\nN = {} (|V+| = {}, |V-| = {})",
+            n,
+            even_idx.len(),
+            odd_idx.len()
+        );
         println!("  H_eff bottom 5 eigenvalues:");
         for (i, e) in heff_eigs.iter().take(5).enumerate() {
             println!("    λ_{} = {:.8}", i + 1, e);
@@ -262,13 +289,21 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════");
     println!("  SCALING ANALYSIS: λ_min(H_eff) vs 1/log(N)");
     println!("═══════════════════════════════════════════════════════════");
-    println!("{:>5} {:>12} {:>12} {:>12} {:>12}",
-        "N", "λ_min(Heff)", "1/log(N)", "ratio", "log(N)·λ");
+    println!(
+        "{:>5} {:>12} {:>12} {:>12} {:>12}",
+        "N", "λ_min(Heff)", "1/log(N)", "ratio", "log(N)·λ"
+    );
 
     for r in &results {
         let log_n = (r.n as f64).ln();
-        println!("{:>5} {:>12.8} {:>12.8} {:>12.6} {:>12.8}",
-            r.n, r.lmin_heff, 1.0 / log_n, r.lmin_heff * log_n, r.log_n_times_lmin_heff);
+        println!(
+            "{:>5} {:>12.8} {:>12.8} {:>12.6} {:>12.8}",
+            r.n,
+            r.lmin_heff,
+            1.0 / log_n,
+            r.lmin_heff * log_n,
+            r.log_n_times_lmin_heff
+        );
     }
 
     // Coprimality check
@@ -276,8 +311,10 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════");
     println!("  COPRIMALITY CHECK: tr(BBᵀ) vs tr(A²)");
     println!("═══════════════════════════════════════════════════════════");
-    println!("{:>5} {:>12} {:>12} {:>12} {:>8}",
-        "N", "tr(BBᵀ)", "tr(A²)", "tr(CCᵀ)", "B/A");
+    println!(
+        "{:>5} {:>12} {:>12} {:>12} {:>8}",
+        "N", "tr(BBᵀ)", "tr(A²)", "tr(CCᵀ)", "B/A"
+    );
 
     let mut trace_ratios: Vec<(usize, f64)> = Vec::new();
     for &n in &test_sizes {
@@ -295,8 +332,10 @@ fn main() {
         let tr_c2 = c2.trace();
         let ratio = tr_bbt / tr_a2;
 
-        println!("{:>5} {:>12.4} {:>12.4} {:>12.4} {:>8.6}",
-            n, tr_bbt, tr_a2, tr_c2, ratio);
+        println!(
+            "{:>5} {:>12.4} {:>12.4} {:>12.4} {:>8.6}",
+            n, tr_bbt, tr_a2, tr_c2, ratio
+        );
         trace_ratios.push((n, ratio));
     }
 
@@ -308,7 +347,12 @@ fn main() {
     writeln!(f, "{{").unwrap();
     writeln!(f, "  \"experiment\": \"parity_schur_complement\",").unwrap();
     writeln!(f, "  \"description\": \"Discrete Lichnerowicz decomposition of the Nyman-Beurling Gram matrix\",").unwrap();
-    writeln!(f, "  \"six_over_pi_sq\": {:.10},", 6.0 / (std::f64::consts::PI * std::f64::consts::PI)).unwrap();
+    writeln!(
+        f,
+        "  \"six_over_pi_sq\": {:.10},",
+        6.0 / (std::f64::consts::PI * std::f64::consts::PI)
+    )
+    .unwrap();
     writeln!(f, "  \"results\": [").unwrap();
     for (idx, r) in results.iter().enumerate() {
         let comma = if idx < results.len() - 1 { "," } else { "" };
@@ -322,14 +366,23 @@ fn main() {
         writeln!(f, "      \"lambda_min_Heff\": {:.10},", r.lmin_heff).unwrap();
         writeln!(f, "      \"R_ratio_operator_norm\": {:.10},", r.r_ratio).unwrap();
         writeln!(f, "      \"d_squared_N\": {:.10},", r.d_sq).unwrap();
-        writeln!(f, "      \"log_N_times_lambda_min_Heff\": {:.10},", r.log_n_times_lmin_heff).unwrap();
+        writeln!(
+            f,
+            "      \"log_N_times_lambda_min_Heff\": {:.10},",
+            r.log_n_times_lmin_heff
+        )
+        .unwrap();
         writeln!(f, "      \"Heff_over_G_ratio\": {:.10}", r.heff_over_g).unwrap();
         writeln!(f, "    }}{}", comma).unwrap();
     }
     writeln!(f, "  ],").unwrap();
     writeln!(f, "  \"eigenvalue_ratios_Heff_over_A\": [").unwrap();
     for (idx, (n, ratios)) in eigenvalue_ratios.iter().enumerate() {
-        let comma = if idx < eigenvalue_ratios.len() - 1 { "," } else { "" };
+        let comma = if idx < eigenvalue_ratios.len() - 1 {
+            ","
+        } else {
+            ""
+        };
         write!(f, "    {{\"N\": {}, \"ratios\": [", n).unwrap();
         for (j, r) in ratios.iter().enumerate() {
             let c = if j < ratios.len() - 1 { ", " } else { "" };
@@ -340,7 +393,11 @@ fn main() {
     writeln!(f, "  ],").unwrap();
     writeln!(f, "  \"trace_ratios_BBt_over_A2\": [").unwrap();
     for (idx, (n, ratio)) in trace_ratios.iter().enumerate() {
-        let comma = if idx < trace_ratios.len() - 1 { "," } else { "" };
+        let comma = if idx < trace_ratios.len() - 1 {
+            ","
+        } else {
+            ""
+        };
         writeln!(f, "    {{\"N\": {}, \"ratio\": {:.8}}}{}", n, ratio, comma).unwrap();
     }
     writeln!(f, "  ]").unwrap();
@@ -355,15 +412,27 @@ fn main() {
     writeln!(f, "Parity Schur Complement: Discrete Lichnerowicz Verifier").unwrap();
     writeln!(f, "=======================================================").unwrap();
     writeln!(f, "Date: {}", chrono_stub()).unwrap();
-    writeln!(f, "Reference: 6/π² = {:.10}", 6.0 / (std::f64::consts::PI * std::f64::consts::PI)).unwrap();
+    writeln!(
+        f,
+        "Reference: 6/π² = {:.10}",
+        6.0 / (std::f64::consts::PI * std::f64::consts::PI)
+    )
+    .unwrap();
     writeln!(f, "").unwrap();
-    writeln!(f, "{:>5} {:>5} {:>5} {:>12} {:>12} {:>12} {:>12} {:>10} {:>10}",
-        "N", "|V+|", "|V-|", "λ_min(G)", "λ_min(A)", "λ_min(C)", "λ_min(Heff)", "R_ratio", "d²_N").unwrap();
+    writeln!(
+        f,
+        "{:>5} {:>5} {:>5} {:>12} {:>12} {:>12} {:>12} {:>10} {:>10}",
+        "N", "|V+|", "|V-|", "λ_min(G)", "λ_min(A)", "λ_min(C)", "λ_min(Heff)", "R_ratio", "d²_N"
+    )
+    .unwrap();
     writeln!(f, "{}", "-".repeat(100)).unwrap();
     for r in &results {
-        writeln!(f, "{:>5} {:>5} {:>5} {:>12.8} {:>12.8} {:>12.8} {:>12.8} {:>10.6} {:>10.6}",
-            r.n, r.v_plus, r.v_minus,
-            r.lmin_g, r.lmin_a, r.lmin_c, r.lmin_heff, r.r_ratio, r.d_sq).unwrap();
+        writeln!(
+            f,
+            "{:>5} {:>5} {:>5} {:>12.8} {:>12.8} {:>12.8} {:>12.8} {:>10.6} {:>10.6}",
+            r.n, r.v_plus, r.v_minus, r.lmin_g, r.lmin_a, r.lmin_c, r.lmin_heff, r.r_ratio, r.d_sq
+        )
+        .unwrap();
     }
     writeln!(f, "").unwrap();
     writeln!(f, "Scaling: log(N) · λ_min(H_eff)").unwrap();
@@ -373,15 +442,33 @@ fn main() {
     }
     writeln!(f, "").unwrap();
     writeln!(f, "Key findings:").unwrap();
-    writeln!(f, "  1. H_eff is strictly positive definite for all N tested").unwrap();
-    writeln!(f, "  2. λ_min(H_eff)/λ_min(A) ≈ 6/π² ≈ 0.608 (coprimality density)").unwrap();
-    writeln!(f, "  3. λ_min(H_eff) ~ C/log(N) with C ≈ {:.4}",
-        results.last().map(|r| r.log_n_times_lmin_heff).unwrap_or(0.0)).unwrap();
-    writeln!(f, "  4. R_ratio → 1 in operator norm (axiom needs eigenvalue reformulation)").unwrap();
+    writeln!(
+        f,
+        "  1. H_eff is strictly positive definite for all N tested"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "  2. λ_min(H_eff)/λ_min(A) ≈ 6/π² ≈ 0.608 (coprimality density)"
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "  3. λ_min(H_eff) ~ C/log(N) with C ≈ {:.4}",
+        results
+            .last()
+            .map(|r| r.log_n_times_lmin_heff)
+            .unwrap_or(0.0)
+    )
+    .unwrap();
+    writeln!(
+        f,
+        "  4. R_ratio → 1 in operator norm (axiom needs eigenvalue reformulation)"
+    )
+    .unwrap();
     println!("✅ TXT results written to: {}", txt_path);
 }
 
 fn chrono_stub() -> String {
     "2026-04-03".to_string()
 }
-

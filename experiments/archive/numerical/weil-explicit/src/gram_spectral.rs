@@ -11,7 +11,9 @@ use std::f64::consts::PI;
 // If λ_min ~ N^{-1+ε} → RH follows!
 // ══════════════════════════════════════════════════════════
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 /// High-precision inner product ⟨{j/x}, {k/x}⟩ in L²(0,1)
 /// Uses adaptive integration with more points near x = 0
@@ -67,14 +69,17 @@ fn eigenvalues(mat: &[Vec<f64>]) -> Vec<f64> {
         let mut p = 0;
         let mut q = 1;
         for i in 0..n {
-            for j in (i+1)..n {
+            for j in (i + 1)..n {
                 if a[i][j].abs() > max_val {
                     max_val = a[i][j].abs();
-                    p = i; q = j;
+                    p = i;
+                    q = j;
                 }
             }
         }
-        if max_val < 1e-14 { break; }
+        if max_val < 1e-14 {
+            break;
+        }
         let theta = if (a[q][q] - a[p][p]).abs() < 1e-15 {
             PI / 4.0
         } else {
@@ -91,9 +96,10 @@ fn eigenvalues(mat: &[Vec<f64>]) -> Vec<f64> {
                 new_a[q][i] = new_a[i][q];
             }
         }
-        new_a[p][p] = c*c*a[p][p] + 2.0*s*c*a[p][q] + s*s*a[q][q];
-        new_a[q][q] = s*s*a[p][p] - 2.0*s*c*a[p][q] + c*c*a[q][q];
-        new_a[p][q] = 0.0; new_a[q][p] = 0.0;
+        new_a[p][p] = c * c * a[p][p] + 2.0 * s * c * a[p][q] + s * s * a[q][q];
+        new_a[q][q] = s * s * a[p][p] - 2.0 * s * c * a[p][q] + c * c * a[q][q];
+        new_a[p][q] = 0.0;
+        new_a[q][p] = 0.0;
         a = new_a;
     }
     let mut eigs: Vec<f64> = (0..n).map(|i| a[i][i]).collect();
@@ -102,7 +108,11 @@ fn eigenvalues(mat: &[Vec<f64>]) -> Vec<f64> {
 }
 
 fn gcd(a: usize, b: usize) -> usize {
-    if b == 0 { a } else { gcd(b, a % b) }
+    if b == 0 {
+        a
+    } else {
+        gcd(b, a % b)
+    }
 }
 
 fn main() {
@@ -132,67 +142,101 @@ fn main() {
             gram[k][j] = val;
         }
         if (j + 1) % 20 == 0 {
-            println!("  Row {}/{} done ({:.1}s)", j + 1, dim, start.elapsed().as_secs_f64());
+            println!(
+                "  Row {}/{} done ({:.1}s)",
+                j + 1,
+                dim,
+                start.elapsed().as_secs_f64()
+            );
         }
     }
-    println!("  Full Gram matrix computed in {:.1}s", start.elapsed().as_secs_f64());
+    println!(
+        "  Full Gram matrix computed in {:.1}s",
+        start.elapsed().as_secs_f64()
+    );
 
     // Phase 2: Eigenvalue analysis at each size
     println!("\n[2/3] ═══ Eigenvalue Scaling Analysis ═══\n");
-    println!("  {:>4}  {:>14}  {:>14}  {:>14}  {:>14}  {:>8}",
-        "N", "λ_min", "λ₂", "λ_max", "κ (cond#)", "d_N²");
+    println!(
+        "  {:>4}  {:>14}  {:>14}  {:>14}  {:>14}  {:>8}",
+        "N", "λ_min", "λ₂", "λ_max", "κ (cond#)", "d_N²"
+    );
 
     let mut min_eigs = Vec::new();
     let mut sizes = Vec::new();
 
     for n in (2..=max_n).step_by(1) {
         let dim_n = n - 1;
-        if dim_n > dim { break; }
+        if dim_n > dim {
+            break;
+        }
 
-        let sub: Vec<Vec<f64>> = gram[..dim_n].iter()
-            .map(|row| row[..dim_n].to_vec()).collect();
+        let sub: Vec<Vec<f64>> = gram[..dim_n]
+            .iter()
+            .map(|row| row[..dim_n].to_vec())
+            .collect();
 
         let eigs = eigenvalues(&sub);
         let lambda_min = eigs[0];
         let lambda_2 = if eigs.len() > 1 { eigs[1] } else { eigs[0] };
         let lambda_max = eigs[eigs.len() - 1];
-        let cond = if lambda_min.abs() > 1e-15 { lambda_max / lambda_min } else { f64::INFINITY };
+        let cond = if lambda_min.abs() > 1e-15 {
+            lambda_max / lambda_min
+        } else {
+            f64::INFINITY
+        };
 
         // Compute d_N²
         let sub_rhs: Vec<f64> = rhs[..dim_n].to_vec();
         let d_sq = if lambda_min > 1e-15 {
             // d_N² = 1 - b^T G^{-1} b via solving Gx = b
-            let mut aug: Vec<Vec<f64>> = sub.iter().enumerate().map(|(i, row)| {
-                let mut r = row.clone();
-                r.push(sub_rhs[i]);
-                r
-            }).collect();
+            let mut aug: Vec<Vec<f64>> = sub
+                .iter()
+                .enumerate()
+                .map(|(i, row)| {
+                    let mut r = row.clone();
+                    r.push(sub_rhs[i]);
+                    r
+                })
+                .collect();
             // Gaussian elimination
             for col in 0..dim_n {
                 let mut max_row = col;
-                for row in (col+1)..dim_n {
-                    if aug[row][col].abs() > aug[max_row][col].abs() { max_row = row; }
+                for row in (col + 1)..dim_n {
+                    if aug[row][col].abs() > aug[max_row][col].abs() {
+                        max_row = row;
+                    }
                 }
                 aug.swap(col, max_row);
-                if aug[col][col].abs() < 1e-15 { break; }
-                for row in (col+1)..dim_n {
+                if aug[col][col].abs() < 1e-15 {
+                    break;
+                }
+                for row in (col + 1)..dim_n {
                     let f = aug[row][col] / aug[col][col];
-                    for j in col..=dim_n { aug[row][j] -= f * aug[col][j]; }
+                    for j in col..=dim_n {
+                        aug[row][j] -= f * aug[col][j];
+                    }
                 }
             }
             let mut x = vec![0.0; dim_n];
             for i in (0..dim_n).rev() {
                 x[i] = aug[i][dim_n];
-                for j in (i+1)..dim_n { x[i] -= aug[i][j] * x[j]; }
+                for j in (i + 1)..dim_n {
+                    x[i] -= aug[i][j] * x[j];
+                }
                 x[i] /= aug[i][i];
             }
-            let btginvb: f64 = x.iter().zip(sub_rhs.iter()).map(|(c,r)| c*r).sum();
+            let btginvb: f64 = x.iter().zip(sub_rhs.iter()).map(|(c, r)| c * r).sum();
             (1.0 - btginvb).max(0.0)
-        } else { f64::NAN };
+        } else {
+            f64::NAN
+        };
 
         if n <= 30 || n % 5 == 0 {
-            println!("  {:4}  {:14.10}  {:14.10}  {:14.6}  {:14.2}  {:8.6}",
-                n, lambda_min, lambda_2, lambda_max, cond, d_sq);
+            println!(
+                "  {:4}  {:14.10}  {:14.10}  {:14.6}  {:14.2}  {:8.6}",
+                n, lambda_min, lambda_2, lambda_max, cond, d_sq
+            );
         }
 
         if lambda_min > 0.0 {
@@ -232,11 +276,19 @@ fn main() {
         println!();
 
         // Check predictions
-        println!("  {:>6}  {:>14}  {:>14}  {:>10}", "N", "actual λ_min", "predicted", "ratio");
+        println!(
+            "  {:>6}  {:>14}  {:>14}  {:>10}",
+            "N", "actual λ_min", "predicted", "ratio"
+        );
         for i in (min_eigs.len().saturating_sub(10))..min_eigs.len() {
             let predicted = c * sizes[i].powf(-alpha);
-            println!("  {:6.0}  {:14.10}  {:14.10}  {:10.4}",
-                sizes[i], min_eigs[i], predicted, min_eigs[i] / predicted);
+            println!(
+                "  {:6.0}  {:14.10}  {:14.10}  {:10.4}",
+                sizes[i],
+                min_eigs[i],
+                predicted,
+                min_eigs[i] / predicted
+            );
         }
 
         println!("\n  ═══ INTERPRETATION ═══");
@@ -262,7 +314,7 @@ fn main() {
     for j in 2..=8 {
         for k in j..=8 {
             let g = gcd(j, k);
-            println!("  {:4} {:4} {:8} {:12.8}", j, k, g, gram[j-2][k-2]);
+            println!("  {:4} {:4} {:8} {:12.8}", j, k, g, gram[j - 2][k - 2]);
         }
     }
 

@@ -15,11 +15,11 @@
 
 mod gpu;
 
-use cathedral_utils::gram;
 use cathedral_utils::arith;
 use cathedral_utils::dd::DD;
+use cathedral_utils::gram;
 use rayon::prelude::*;
-use std::io::{Read, Write, Seek, SeekFrom, BufWriter};
+use std::io::{BufWriter, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
@@ -66,7 +66,13 @@ struct OocHeader {
     checksum: u64,
 }
 
-fn write_ooc_header(f: &mut impl Write, max_n: usize, dim: usize, precision: u32, checksum: u64) -> std::io::Result<()> {
+fn write_ooc_header(
+    f: &mut impl Write,
+    max_n: usize,
+    dim: usize,
+    precision: u32,
+    checksum: u64,
+) -> std::io::Result<()> {
     f.write_all(&OOC_MAGIC.to_le_bytes())?;
     f.write_all(&OOC_VERSION.to_le_bytes())?;
     f.write_all(&(max_n as u32).to_le_bytes())?;
@@ -83,10 +89,14 @@ fn read_ooc_header(f: &mut impl Read) -> std::io::Result<Option<OocHeader>> {
     let mut buf4 = [0u8; 4];
 
     f.read_exact(&mut buf8)?;
-    if u64::from_le_bytes(buf8) != OOC_MAGIC { return Ok(None); }
+    if u64::from_le_bytes(buf8) != OOC_MAGIC {
+        return Ok(None);
+    }
 
     f.read_exact(&mut buf4)?;
-    if u32::from_le_bytes(buf4) != OOC_VERSION { return Ok(None); }
+    if u32::from_le_bytes(buf4) != OOC_VERSION {
+        return Ok(None);
+    }
 
     f.read_exact(&mut buf4)?;
     let max_n = u32::from_le_bytes(buf4) as usize;
@@ -104,7 +114,12 @@ fn read_ooc_header(f: &mut impl Read) -> std::io::Result<Option<OocHeader>> {
     let mut pad = [0u8; 8];
     f.read_exact(&mut pad)?;
 
-    Ok(Some(OocHeader { max_n, dim, precision, checksum }))
+    Ok(Some(OocHeader {
+        max_n,
+        dim,
+        precision,
+        checksum,
+    }))
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -137,8 +152,10 @@ fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result
     println!("  N = {max_n}, dim = {dim}");
     println!("  Matrix: {dim}×{dim} = {total_gb:.1} GB");
     println!("  Truncation: T_max = {t_max} (uniform — guarantees PD)");
-    println!("  Chunk: {chunk_rows} rows = {:.0} MB per write",
-        chunk_rows as f64 * dim as f64 * 8.0 / (1024.0 * 1024.0));
+    println!(
+        "  Chunk: {chunk_rows} rows = {:.0} MB per write",
+        chunk_rows as f64 * dim as f64 * 8.0 / (1024.0 * 1024.0)
+    );
     println!("  Output: {}", path.display());
     println!();
 
@@ -164,7 +181,8 @@ fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result
         // in-place (cache-friendly sequential access), parallelized across rows.
         // Eliminates ~280 MB/chunk of temporary pairs + entries vectors.
         let mut buffer = vec![0.0f64; rows_in_chunk * dim];
-        buffer.par_chunks_mut(dim)
+        buffer
+            .par_chunks_mut(dim)
             .enumerate()
             .for_each(|(local_row, row_buf)| {
                 let j = chunk_start + local_row + 2;
@@ -180,24 +198,30 @@ fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result
         }
 
         // Write to disk
-        let bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts(buffer.as_ptr() as *const u8, buffer.len() * 8)
-        };
+        let bytes: &[u8] =
+            unsafe { std::slice::from_raw_parts(buffer.as_ptr() as *const u8, buffer.len() * 8) };
         writer.write_all(bytes)?;
 
         // Progress
         let elapsed = t0.elapsed().as_secs_f64();
         let frac = chunk_end as f64 / dim as f64;
-        let eta = if frac > 0.01 { elapsed / frac * (1.0 - frac) } else { 0.0 };
-        eprint!("\r  Row {chunk_end}/{dim} ({:.1}%) | {elapsed:.0}s elapsed | ETA {eta:.0}s     ",
-            frac * 100.0);
+        let eta = if frac > 0.01 {
+            elapsed / frac * (1.0 - frac)
+        } else {
+            0.0
+        };
+        eprint!(
+            "\r  Row {chunk_end}/{dim} ({:.1}%) | {elapsed:.0}s elapsed | ETA {eta:.0}s     ",
+            frac * 100.0
+        );
     }
 
     writer.flush()?;
     eprintln!();
 
     // Update header with checksum
-    let checksum: u64 = first_entries.iter()
+    let checksum: u64 = first_entries
+        .iter()
         .take(64)
         .map(|v| v.to_bits())
         .fold(0u64, |acc, b| acc.wrapping_add(b));
@@ -207,7 +231,10 @@ fn ooc_build_gram(max_n: usize, precision: u32, t_max: usize) -> std::io::Result
     write_ooc_header(&mut file, max_n, dim, precision, checksum)?;
 
     let total_time = t0.elapsed().as_secs_f64();
-    println!("  ✓ OOC Gram matrix built in {:.1}s ({total_gb:.1} GB)", total_time);
+    println!(
+        "  ✓ OOC Gram matrix built in {:.1}s ({total_gb:.1} GB)",
+        total_time
+    );
     println!("  ✓ Saved to: {}", path.display());
 
     Ok(path)
@@ -262,7 +289,9 @@ impl MmapGram {
         }
 
         // Advise sequential access for prefetching
-        unsafe { libc::madvise(ptr, file_len, libc::MADV_SEQUENTIAL); }
+        unsafe {
+            libc::madvise(ptr, file_len, libc::MADV_SEQUENTIAL);
+        }
 
         let data_ptr = unsafe { (ptr as *const u8).add(data_offset) as *const f64 };
 
@@ -280,17 +309,13 @@ impl MmapGram {
     /// Get a row slice (zero-copy from mmap)
     #[inline]
     fn row(&self, i: usize) -> &[f64] {
-        unsafe {
-            std::slice::from_raw_parts(self.data.add(i * self.dim), self.dim)
-        }
+        unsafe { std::slice::from_raw_parts(self.data.add(i * self.dim), self.dim) }
     }
 
     /// Get a chunk of rows as a contiguous slice
     #[inline]
     fn row_chunk(&self, start: usize, count: usize) -> &[f64] {
-        unsafe {
-            std::slice::from_raw_parts(self.data.add(start * self.dim), count * self.dim)
-        }
+        unsafe { std::slice::from_raw_parts(self.data.add(start * self.dim), count * self.dim) }
     }
 }
 
@@ -316,9 +341,9 @@ unsafe impl Sync for MmapGram {}
 /// For 108 GB (N=120k): ~60s/iter instead of ~90s/iter.
 struct GpuMatvecState {
     blas_handle: *mut std::ffi::c_void,
-    d_x: *mut f64,               // x vector (resident on GPU)
-    d_chunk: [*mut f64; 2],      // double chunk buffers on GPU
-    d_y_chunk: [*mut f64; 2],    // double y output buffers on GPU
+    d_x: *mut f64,            // x vector (resident on GPU)
+    d_chunk: [*mut f64; 2],   // double chunk buffers on GPU
+    d_y_chunk: [*mut f64; 2], // double y output buffers on GPU
     streams: [gpu::ffi::CudaStream; 2],
     chunk_rows: usize,
     dim: usize,
@@ -326,7 +351,6 @@ struct GpuMatvecState {
 
 impl GpuMatvecState {
     fn new(dim: usize, chunk_rows: usize) -> Result<Self, String> {
-        
         let vec_bytes = dim * 8;
         let chunk_bytes = chunk_rows * dim * 8;
         let chunk_y_bytes = chunk_rows * 8;
@@ -334,7 +358,9 @@ impl GpuMatvecState {
         unsafe {
             let mut blas_handle: *mut std::ffi::c_void = std::ptr::null_mut();
             let s = gpu::ffi::cublasCreate_v2(&mut blas_handle);
-            if s != 0 { return Err(format!("cublasCreate failed: {}", s)); }
+            if s != 0 {
+                return Err(format!("cublasCreate failed: {}", s));
+            }
 
             let mut d_x: *mut f64 = std::ptr::null_mut();
             let mut d_chunk0: *mut f64 = std::ptr::null_mut();
@@ -348,7 +374,10 @@ impl GpuMatvecState {
             let s4 = gpu::ffi::cudaMalloc(&mut d_y0, chunk_y_bytes);
             let s5 = gpu::ffi::cudaMalloc(&mut d_y1, chunk_y_bytes);
             if s1 != 0 || s2 != 0 || s3 != 0 || s4 != 0 || s5 != 0 {
-                return Err(format!("cudaMalloc failed: {},{},{},{},{}", s1, s2, s3, s4, s5));
+                return Err(format!(
+                    "cudaMalloc failed: {},{},{},{},{}",
+                    s1, s2, s3, s4, s5
+                ));
             }
 
             // Create two CUDA streams
@@ -361,15 +390,20 @@ impl GpuMatvecState {
             }
 
             let vram_mb = (vec_bytes + 2 * chunk_bytes + 2 * chunk_y_bytes) / (1024 * 1024);
-            eprintln!("  ✓ Double-buffered GPU matvec: 2×{:.0} MB chunks, {} MB total VRAM",
-                chunk_bytes as f64 / 1e6, vram_mb);
+            eprintln!(
+                "  ✓ Double-buffered GPU matvec: 2×{:.0} MB chunks, {} MB total VRAM",
+                chunk_bytes as f64 / 1e6,
+                vram_mb
+            );
 
             Ok(GpuMatvecState {
-                blas_handle, d_x,
+                blas_handle,
+                d_x,
                 d_chunk: [d_chunk0, d_chunk1],
                 d_y_chunk: [d_y0, d_y1],
                 streams: [stream0, stream1],
-                chunk_rows, dim,
+                chunk_rows,
+                dim,
             })
         }
     }
@@ -410,12 +444,16 @@ impl GpuMatvecState {
             gpu::ffi::cublasDgemv_v2(
                 self.blas_handle,
                 1, // CUBLAS_OP_T
-                n, m,
+                n,
+                m,
                 &alpha,
-                self.d_chunk[buf_idx], n,
-                self.d_x, 1,
+                self.d_chunk[buf_idx],
+                n,
+                self.d_x,
+                1,
                 &beta_val,
-                self.d_y_chunk[buf_idx], 1,
+                self.d_y_chunk[buf_idx],
+                1,
             );
         }
     }
@@ -426,7 +464,12 @@ impl GpuMatvecState {
             // Wait for this stream's compute to finish
             gpu::ffi::cudaStreamSynchronize(self.streams[buf_idx]);
             // Copy result back (D2H, synchronous)
-            gpu::ffi::cudaMemcpy(y_out.as_mut_ptr(), self.d_y_chunk[buf_idx] as *const f64, rows * 8, 2);
+            gpu::ffi::cudaMemcpy(
+                y_out.as_mut_ptr(),
+                self.d_y_chunk[buf_idx] as *const f64,
+                rows * 8,
+                2,
+            );
         }
     }
 
@@ -479,7 +522,9 @@ fn gpu_matvec(gram: &MmapGram, gpu: &GpuMatvecState, x: &[f64], y: &mut [f64]) {
         .collect();
 
     let n_chunks = chunks.len();
-    if n_chunks == 0 { return; }
+    if n_chunks == 0 {
+        return;
+    }
 
     // Prefetch first chunk
     let (start0, rows0) = chunks[0];
@@ -548,13 +593,7 @@ fn cpu_matvec(gram: &MmapGram, x: &[f64], y: &mut [f64]) {
 ///   - Slow/stalled convergence
 /// DD accumulation (~31 digits) eliminates this. The matvec stays
 /// f64 (GPU cuBLAS) since that's the hot path and f64 suffices there.
-fn ooc_cg_solve(
-    gram_path: &Path,
-    b: &[f64],
-    dim: usize,
-    tol: f64,
-    max_iter: usize,
-) -> f64 {
+fn ooc_cg_solve(gram_path: &Path, b: &[f64], dim: usize, tol: f64, max_iter: usize) -> f64 {
     let chunk_rows = 4096; // rows per GPU upload
 
     println!("  ╔═══════════════════════════════════════════════════════════════╗");
@@ -578,7 +617,10 @@ fn ooc_cg_solve(
             return f64::NAN;
         }
     };
-    println!("  ✓ Matrix mmap'd in {:.2}s", t_mmap.elapsed().as_secs_f64());
+    println!(
+        "  ✓ Matrix mmap'd in {:.2}s",
+        t_mmap.elapsed().as_secs_f64()
+    );
 
     // ── Extract Jacobi preconditioner: M_inv[i] = 1/G[i,i] ──
     let mut m_inv = vec![0.0f64; dim];
@@ -591,10 +633,18 @@ fn ooc_cg_solve(
         } else {
             m_inv[i] = 1.0; // fallback for near-zero diagonal
         }
-        if gii < diag_min { diag_min = gii; }
-        if gii > diag_max { diag_max = gii; }
+        if gii < diag_min {
+            diag_min = gii;
+        }
+        if gii > diag_max {
+            diag_max = gii;
+        }
     }
-    let diag_cond = if diag_min > 0.0 { diag_max / diag_min } else { f64::INFINITY };
+    let diag_cond = if diag_min > 0.0 {
+        diag_max / diag_min
+    } else {
+        f64::INFINITY
+    };
     println!("  ✓ Jacobi preconditioner: diag range [{diag_min:.4e}, {diag_max:.4e}], diag_cond = {diag_cond:.2e}");
 
     // Initialize GPU matvec state
@@ -622,7 +672,9 @@ fn ooc_cg_solve(
     let mut x = vec![0.0f64; dim];
     let mut r = b.to_vec();
     let mut z = vec![0.0f64; dim]; // preconditioned residual
-    for i in 0..dim { z[i] = m_inv[i] * r[i]; }
+    for i in 0..dim {
+        z[i] = m_inv[i] * r[i];
+    }
     let mut p = z.clone();
     let mut rz = dot_dd(&r, &z); // DD-precision r^T z
     let b_norm_sq = dot_dd(b, b);
@@ -630,9 +682,18 @@ fn ooc_cg_solve(
 
     println!();
     println!("  ‖b‖ = {b_norm:.8e}");
-    println!("  {:<6} {:>14} {:>14} {:>14} {:>10}", "iter", "residual", "|Δd²|", "d²_est", "time(s)");
-    println!("  {} {} {} {} {}",
-        "─".repeat(6), "─".repeat(14), "─".repeat(14), "─".repeat(14), "─".repeat(10));
+    println!(
+        "  {:<6} {:>14} {:>14} {:>14} {:>10}",
+        "iter", "residual", "|Δd²|", "d²_est", "time(s)"
+    );
+    println!(
+        "  {} {} {} {} {}",
+        "─".repeat(6),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(14),
+        "─".repeat(10)
+    );
 
     let mut prev_d2 = 1.0f64;
     let mut y = vec![0.0f64; dim];
@@ -651,8 +712,10 @@ fn ooc_cg_solve(
         // DD-precision pAp — prevents false non-PD detection
         let pap = dot_dd(&p, &y);
         if pap.hi <= 0.0 && pap.lo <= 0.0 {
-            eprintln!("  ⚠ pAp ≤ 0 at iter {iter} (DD: {:.6e}+{:.6e}), matrix not PD",
-                pap.hi, pap.lo);
+            eprintln!(
+                "  ⚠ pAp ≤ 0 at iter {iter} (DD: {:.6e}+{:.6e}), matrix not PD",
+                pap.hi, pap.lo
+            );
             break;
         }
 
@@ -660,11 +723,17 @@ fn ooc_cg_solve(
         let alpha_f64 = alpha.to_f64();
 
         // x += alpha * p; r -= alpha * y
-        for i in 0..dim { x[i] += alpha_f64 * p[i]; }
-        for i in 0..dim { r[i] -= alpha_f64 * y[i]; }
+        for i in 0..dim {
+            x[i] += alpha_f64 * p[i];
+        }
+        for i in 0..dim {
+            r[i] -= alpha_f64 * y[i];
+        }
 
         // Apply preconditioner: z = M^{-1} r
-        for i in 0..dim { z[i] = m_inv[i] * r[i]; }
+        for i in 0..dim {
+            z[i] = m_inv[i] * r[i];
+        }
 
         let rz_new = dot_dd(&r, &z);
         let r_norm_sq = dot_dd(&r, &r);
@@ -679,11 +748,13 @@ fn ooc_cg_solve(
         let iter_time = t_iter.elapsed().as_secs_f64();
 
         // Print every iteration for first 20, then every 10, then every 50
-        let should_print = iter < 20 || (iter < 100 && iter % 10 == 0)
-            || iter % 50 == 0 || residual < tol;
+        let should_print =
+            iter < 20 || (iter < 100 && iter % 10 == 0) || iter % 50 == 0 || residual < tol;
         if should_print {
-            println!("  {:6} {:14.8e} {:14.8e} {:14.10} {:10.2}",
-                iter, residual, d2_delta, d2_est, iter_time);
+            println!(
+                "  {:6} {:14.8e} {:14.8e} {:14.10} {:10.2}",
+                iter, residual, d2_delta, d2_est, iter_time
+            );
         }
 
         if residual < tol {
@@ -700,8 +771,12 @@ fn ooc_cg_solve(
                     Some(gs) => gpu_matvec(&gram, gs, &x, &mut y),
                     None => cpu_matvec(&gram, &x, &mut y),
                 }
-                for i in 0..dim { r[i] = b[i] - y[i]; }
-                for i in 0..dim { z[i] = m_inv[i] * r[i]; }
+                for i in 0..dim {
+                    r[i] = b[i] - y[i];
+                }
+                for i in 0..dim {
+                    z[i] = m_inv[i] * r[i];
+                }
                 rz = dot_dd(&r, &z);
                 p = z.clone();
                 eprintln!("  ↻ Residual refresh at iter {iter}, ‖r‖={:.3e}", r_norm);
@@ -716,7 +791,9 @@ fn ooc_cg_solve(
         // Update search direction (preconditioned)
         let beta = rz_new / rz;
         let beta_f64 = beta.to_f64();
-        for i in 0..dim { p[i] = z[i] + beta_f64 * p[i]; }
+        for i in 0..dim {
+            p[i] = z[i] + beta_f64 * p[i];
+        }
         rz = rz_new;
     }
 
@@ -744,7 +821,8 @@ fn dot_dd(a: &[f64], b: &[f64]) -> DD {
     let n = a.len();
     let n_chunks = n.div_ceil(CHUNK);
 
-    let partials: Vec<DD> = (0..n_chunks).into_par_iter()
+    let partials: Vec<DD> = (0..n_chunks)
+        .into_par_iter()
         .map(|c| {
             let start = c * CHUNK;
             let end = (start + CHUNK).min(n);
@@ -773,7 +851,15 @@ fn dot(a: &[f64], b: &[f64]) -> f64 {
 }
 
 /// Write a JSON certificate with the OOC probe results.
-fn write_certificate(max_n: usize, dim: usize, d2: f64, max_iter: usize, tol: f64, elapsed: f64, mode: &str) {
+fn write_certificate(
+    max_n: usize,
+    dim: usize,
+    d2: f64,
+    max_iter: usize,
+    tol: f64,
+    elapsed: f64,
+    mode: &str,
+) {
     let cert_path = ooc_cache_dir().join(format!("ooc_certificate_N{max_n}.json"));
     let matrix_gb = (dim as u64 * dim as u64 * 8) as f64 / (1024.0 * 1024.0 * 1024.0);
 
@@ -858,16 +944,16 @@ fn import_dd_cache(max_n: usize) -> std::io::Result<Option<PathBuf>> {
     let file = std::fs::File::create(&ooc_path)?;
     let mut writer = BufWriter::with_capacity(64 * 1024 * 1024, file);
 
-    let checksum: u64 = hi.iter()
+    let checksum: u64 = hi
+        .iter()
         .take(64)
         .map(|v| v.to_bits())
         .fold(0u64, |acc, b| acc.wrapping_add(b));
 
     write_ooc_header(&mut writer, max_n, dim, 256, checksum)?;
 
-    let bytes: &[u8] = unsafe {
-        std::slice::from_raw_parts(hi.as_ptr() as *const u8, hi.len() * 8)
-    };
+    let bytes: &[u8] =
+        unsafe { std::slice::from_raw_parts(hi.as_ptr() as *const u8, hi.len() * 8) };
     writer.write_all(bytes)?;
     writer.flush()?;
 
@@ -912,22 +998,16 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
 
     // ── Phase 1: SHA-256 integrity hash ──
     print!("  ▸ Phase 1: SHA-256 hash...");
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
     let mut hasher = Sha256::new();
     // Hash in chunks to avoid loading entire matrix
     let chunk_size = 64 * 1024; // 64K entries = 512 KB
     let total_entries = dim * dim;
     for start in (0..total_entries).step_by(chunk_size) {
         let end = (start + chunk_size).min(total_entries);
-        let slice = unsafe {
-            std::slice::from_raw_parts(
-                gram.data.add(start),
-                end - start,
-            )
-        };
-        let bytes: &[u8] = unsafe {
-            std::slice::from_raw_parts(slice.as_ptr() as *const u8, slice.len() * 8)
-        };
+        let slice = unsafe { std::slice::from_raw_parts(gram.data.add(start), end - start) };
+        let bytes: &[u8] =
+            unsafe { std::slice::from_raw_parts(slice.as_ptr() as *const u8, slice.len() * 8) };
         hasher.update(bytes);
     }
     let hash = hasher.finalize();
@@ -941,7 +1021,9 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
     let mut diag_negative = 0usize;
     for i in 0..dim {
         let val = gram.row(i)[i];
-        if val <= 0.0 { diag_negative += 1; }
+        if val <= 0.0 {
+            diag_negative += 1;
+        }
         diag_min = diag_min.min(val);
         diag_max = diag_max.max(val);
     }
@@ -963,18 +1045,23 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
         let gij = gram.row(i)[j];
         let gji = gram.row(j)[i];
         let err = (gij - gji).abs();
-        if err > 0.0 { sym_fails += 1; }
+        if err > 0.0 {
+            sym_fails += 1;
+        }
         sym_max_err = sym_max_err.max(err);
     }
     if sym_max_err == 0.0 {
         println!(" ✓ exact (checked {} pairs)", n_sym_checks);
     } else {
-        println!(" max |G[i,j]-G[j,i]| = {:.2e} ({} asymmetric)", sym_max_err, sym_fails);
+        println!(
+            " max |G[i,j]-G[j,i]| = {:.2e} ({} asymmetric)",
+            sym_max_err, sym_fails
+        );
     }
 
     // ── Phase 4: Spot-check against CPU MPFR reference ──
     print!("  ▸ Phase 4: CPU MPFR cross-verification...");
-    let n_spot = 20;  // check 20 entries
+    let n_spot = 20; // check 20 entries
     let ln_table_size = t_max.max(max_n * 5).max(10_000).min(500_000);
     let ln_table = gram::LnNTable::new(ln_table_size + 1, precision);
     let mut max_rel_err = 0.0f64;
@@ -984,18 +1071,18 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
     for k in 0..n_spot {
         // Pick entries that stress different regimes
         let i = match k {
-            0 => 0,           // (2,2) - smallest
-            1 => 0,           // (2,3)
-            2 => dim/4,       // middle band
-            3 => dim/2,       // center
-            4 => dim - 1,     // (N, N) - largest
-            _ => (k * 4793 + 11) % dim,  // pseudo-random
+            0 => 0,                     // (2,2) - smallest
+            1 => 0,                     // (2,3)
+            2 => dim / 4,               // middle band
+            3 => dim / 2,               // center
+            4 => dim - 1,               // (N, N) - largest
+            _ => (k * 4793 + 11) % dim, // pseudo-random
         };
         let j = match k {
             0 => 0,
             1 => 1,
-            2 => dim/4 + 1,
-            3 => dim/2,
+            2 => dim / 4 + 1,
+            3 => dim / 2,
             4 => dim - 1,
             _ => (k * 3571 + 7) % dim,
         };
@@ -1004,7 +1091,11 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
         let cpu_val = gram::gram_entry_fast_at_t(i + 2, j + 2, &ln_table, t_max).to_f64();
 
         let abs_err = (gpu_val - cpu_val).abs();
-        let rel_err = if cpu_val.abs() > 1e-30 { abs_err / cpu_val.abs() } else { abs_err };
+        let rel_err = if cpu_val.abs() > 1e-30 {
+            abs_err / cpu_val.abs()
+        } else {
+            abs_err
+        };
         max_rel_err = max_rel_err.max(rel_err);
         max_abs_err = max_abs_err.max(abs_err);
         spot_results.push((i + 2, j + 2, gpu_val, cpu_val, rel_err));
@@ -1057,7 +1148,10 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
     if chol_ok {
         println!(" ✓ positive-definite");
     } else {
-        println!(" ✗ FAILED at column {} — NOT positive-definite!", chol_fail_col);
+        println!(
+            " ✗ FAILED at column {} — NOT positive-definite!",
+            chol_fail_col
+        );
     }
 
     // ── Phase 6: d² computation ──
@@ -1130,18 +1224,24 @@ fn verify_ooc_matrix(max_n: usize, precision: u32, t_max: usize) {
         t_max,
         matrix_gb,
         hash_hex,
-        diag_min, diag_max,
+        diag_min,
+        diag_max,
         diag_negative == 0,
         sym_max_err,
         n_sym_checks,
-        max_rel_err, max_abs_err,
+        max_rel_err,
+        max_abs_err,
         n_spot,
         chol_ok,
         sub_dim,
         chol_fail_col,
         d2_sub.map_or("null".to_string(), |v| format!("{:.15e}", v)),
         total_time,
-        if chol_ok && diag_negative == 0 && max_rel_err < 1e-8 { "PASS" } else { "FAIL" },
+        if chol_ok && diag_negative == 0 && max_rel_err < 1e-8 {
+            "PASS"
+        } else {
+            "FAIL"
+        },
     );
 
     if let Ok(()) = std::fs::write(&cert_path, &json) {
@@ -1173,12 +1273,20 @@ fn main() {
     if args.len() < 3 {
         eprintln!();
         eprintln!("Usage:");
-        eprintln!("  ooc-probe build   <N> [--precision <bits>] [--t-max <T>]  Build OOC Gram matrix");
+        eprintln!(
+            "  ooc-probe build   <N> [--precision <bits>] [--t-max <T>]  Build OOC Gram matrix"
+        );
         eprintln!("  ooc-probe solve   <N> [--tol <tol>]                       CG solve for d²");
         eprintln!("  ooc-probe full    <N> [--t-max <T>]                       Build + solve");
-        eprintln!("  ooc-probe verify  <N> [--t-max <T>]                       Spectral integrity check");
-        eprintln!("  ooc-probe import  <N>                                     Import existing DD cache");
-        eprintln!("  ooc-probe info    <N>                                     Show OOC cache info");
+        eprintln!(
+            "  ooc-probe verify  <N> [--t-max <T>]                       Spectral integrity check"
+        );
+        eprintln!(
+            "  ooc-probe import  <N>                                     Import existing DD cache"
+        );
+        eprintln!(
+            "  ooc-probe info    <N>                                     Show OOC cache info"
+        );
         eprintln!();
         eprintln!("  --t-max <T>  Uniform truncation horizon (default: 200000)");
         eprintln!("               Ensures positive-definiteness of the Gram matrix.");
@@ -1220,7 +1328,9 @@ fn main() {
 
             // Verify header
             let mut f = std::fs::File::open(&ooc_path).unwrap();
-            let header = read_ooc_header(&mut f).unwrap().expect("Invalid OOC header");
+            let header = read_ooc_header(&mut f)
+                .unwrap()
+                .expect("Invalid OOC header");
             let dim = header.dim;
 
             println!("  OOC matrix: N={}, dim={dim}", header.max_n);
@@ -1253,17 +1363,17 @@ fn main() {
             let total_time = t0.elapsed().as_secs_f64();
 
             println!("\n  🎯 RESULT: d²_{} = {:.12}", max_n, d2);
-            println!("  Build: {build_time:.1}s | Solve: {solve_time:.1}s | Total: {total_time:.1}s");
+            println!(
+                "  Build: {build_time:.1}s | Solve: {solve_time:.1}s | Total: {total_time:.1}s"
+            );
 
             write_certificate(max_n, dim, d2, max_iter, tol, total_time, "full");
         }
-        "import" => {
-            match import_dd_cache(max_n) {
-                Ok(Some(path)) => println!("  ✓ OOC cache ready: {}", path.display()),
-                Ok(None) => eprintln!("  ❌ No DD cache found for N={max_n}"),
-                Err(e) => eprintln!("  ❌ Import failed: {e}"),
-            }
-        }
+        "import" => match import_dd_cache(max_n) {
+            Ok(Some(path)) => println!("  ✓ OOC cache ready: {}", path.display()),
+            Ok(None) => eprintln!("  ❌ No DD cache found for N={max_n}"),
+            Err(e) => eprintln!("  ❌ Import failed: {e}"),
+        },
         "verify" => {
             verify_ooc_matrix(max_n, precision, t_max);
         }
@@ -1278,7 +1388,9 @@ fn main() {
                         let name = entry.file_name().to_string_lossy().to_string();
                         if name.starts_with("ooc_gram_") {
                             let meta = entry.metadata().ok();
-                            let size_gb = meta.map(|m| m.len() as f64 / (1024.0*1024.0*1024.0)).unwrap_or(0.0);
+                            let size_gb = meta
+                                .map(|m| m.len() as f64 / (1024.0 * 1024.0 * 1024.0))
+                                .unwrap_or(0.0);
                             println!("    {name} ({size_gb:.1} GB)");
                         }
                     }

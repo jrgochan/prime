@@ -6,7 +6,7 @@ use std::f64::consts::PI;
 pub struct DosResult {
     pub bin_centers: Vec<f64>,
     pub counts: Vec<usize>,
-    pub density: Vec<f64>,  // normalized
+    pub density: Vec<f64>, // normalized
     pub n_bins: usize,
 }
 
@@ -32,7 +32,12 @@ pub fn compute_dos(eigenvalues: &[f64], n_bins: usize) -> DosResult {
     let n = eigenvalues.len() as f64;
     let density: Vec<f64> = counts.iter().map(|&c| c as f64 / (n * bin_width)).collect();
 
-    DosResult { bin_centers, counts, density, n_bins }
+    DosResult {
+        bin_centers,
+        counts,
+        density,
+        n_bins,
+    }
 }
 
 /// Gaussian kernel density estimate for smooth DOS.
@@ -107,21 +112,27 @@ pub fn fit_van_hove(eigenvalues: &[f64], fraction: f64) -> (f64, f64, f64, f64) 
     // R²
     let y_mean = sy / n;
     let ss_tot: f64 = ys.iter().map(|y| (y - y_mean).powi(2)).sum();
-    let ss_res: f64 = xs.iter().zip(ys.iter())
+    let ss_res: f64 = xs
+        .iter()
+        .zip(ys.iter())
         .map(|(x, y)| (y - (a * x + b)).powi(2))
         .sum();
-    let r2 = if ss_tot > 1e-30 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let r2 = if ss_tot > 1e-30 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
 
     (a, e0, b, r2)
 }
 
 /// Level spacing statistics.
 pub struct SpacingResult {
-    pub spacings: Vec<f64>,       // raw gaps
-    pub unfolded: Vec<f64>,       // unfolded spacings (normalized by local mean)
+    pub spacings: Vec<f64>, // raw gaps
+    pub unfolded: Vec<f64>, // unfolded spacings (normalized by local mean)
     pub mean_spacing: f64,
-    pub wigner_surmise_fit: f64,  // fit quality to P(s)=π/2·s·exp(-πs²/4)
-    pub poisson_fit: f64,         // fit quality to P(s)=exp(-s)
+    pub wigner_surmise_fit: f64, // fit quality to P(s)=π/2·s·exp(-πs²/4)
+    pub poisson_fit: f64,        // fit quality to P(s)=exp(-s)
 }
 
 pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
@@ -143,7 +154,11 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
             let lo = i.saturating_sub(window);
             let hi = (i + window + 1).min(spacings.len());
             let local_mean: f64 = spacings[lo..hi].iter().sum::<f64>() / (hi - lo) as f64;
-            if local_mean > 1e-30 { s / local_mean } else { 0.0 }
+            if local_mean > 1e-30 {
+                s / local_mean
+            } else {
+                0.0
+            }
         })
         .collect();
 
@@ -154,7 +169,9 @@ pub fn compute_spacing(eigenvalues: &[f64]) -> SpacingResult {
     let mut hist = vec![0usize; n_bins];
     for &s in &unfolded {
         let idx = (s / bin_w).floor() as usize;
-        if idx < n_bins { hist[idx] += 1; }
+        if idx < n_bins {
+            hist[idx] += 1;
+        }
     }
 
     let n_total = unfolded.len() as f64;
@@ -203,24 +220,32 @@ pub fn compute_thermo(eigenvalues: &[f64], beta_range: (f64, f64), n_pts: usize)
     for &beta in &betas {
         // Z = Σ exp(-β·λ_k)
         // Use log-sum-exp for numerical stability
-        let max_exp = eigenvalues.iter().map(|&e| -beta * e)
+        let max_exp = eigenvalues
+            .iter()
+            .map(|&e| -beta * e)
             .fold(f64::NEG_INFINITY, f64::max);
-        let log_z: f64 = max_exp + eigenvalues.iter()
-            .map(|&e| (-beta * e - max_exp).exp())
-            .sum::<f64>()
-            .ln();
+        let log_z: f64 = max_exp
+            + eigenvalues
+                .iter()
+                .map(|&e| (-beta * e - max_exp).exp())
+                .sum::<f64>()
+                .ln();
 
         let f = -log_z / beta;
 
         // <E> = -∂ln(Z)/∂β = Σ λ_k exp(-βλ_k) / Z
-        let mean_e: f64 = eigenvalues.iter()
+        let mean_e: f64 = eigenvalues
+            .iter()
             .map(|&e| e * (-beta * e - max_exp).exp())
-            .sum::<f64>() / (log_z - max_exp).exp();
+            .sum::<f64>()
+            / (log_z - max_exp).exp();
 
         // <E²> = Σ λ_k² exp(-βλ_k) / Z
-        let mean_e2: f64 = eigenvalues.iter()
+        let mean_e2: f64 = eigenvalues
+            .iter()
             .map(|&e| e * e * (-beta * e - max_exp).exp())
-            .sum::<f64>() / (log_z - max_exp).exp();
+            .sum::<f64>()
+            / (log_z - max_exp).exp();
 
         let cv = beta * beta * (mean_e2 - mean_e * mean_e);
         let s = beta * (mean_e - f);
@@ -230,5 +255,10 @@ pub fn compute_thermo(eigenvalues: &[f64], beta_range: (f64, f64), n_pts: usize)
         entropy.push(s);
     }
 
-    ThermoResult { betas, free_energy, specific_heat, entropy }
+    ThermoResult {
+        betas,
+        free_energy,
+        specific_heat,
+        entropy,
+    }
 }

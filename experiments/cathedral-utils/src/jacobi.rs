@@ -64,9 +64,7 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
 
     // ── Convert f64 matrix to MPFR ──────────────────────────────
     eprintln!("    [MPFR Jacobi] Converting {dim}×{dim} matrix to {p}-bit MPFR...");
-    let mut a: Vec<Float> = mat.iter()
-        .map(|&v| Float::with_val(p, v))
-        .collect();
+    let mut a: Vec<Float> = mat.iter().map(|&v| Float::with_val(p, v)).collect();
 
     // ── Initialize eigenvector accumulator as identity ───────────
     // V starts as I; each rotation R is accumulated: V ← V · R
@@ -74,7 +72,11 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
         .map(|idx| {
             let r = idx / dim;
             let c = idx % dim;
-            if r == c { Float::with_val(p, 1.0) } else { Float::with_val(p, 0.0) }
+            if r == c {
+                Float::with_val(p, 1.0)
+            } else {
+                Float::with_val(p, 0.0)
+            }
         })
         .collect();
 
@@ -124,7 +126,9 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
 
                 // ── Compute rotation (c, s) ─────────────────────
                 let diff = Float::with_val(p, &app - &aqq);
-                let (c, s) = if diff.clone().abs() < Float::with_val(p, Float::i_exp(1, -(p as i32 * 3 / 4))) {
+                let (c, s) = if diff.clone().abs()
+                    < Float::with_val(p, Float::i_exp(1, -(p as i32 * 3 / 4)))
+                {
                     // θ ≈ π/4
                     let half = Float::with_val(p, 0.5f64);
                     let sqrt2_inv = Float::with_val(p, half.sqrt_ref());
@@ -165,12 +169,10 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
                 let s2 = Float::with_val(p, &s * &s);
                 let cs2 = Float::with_val(p, 2.0) * &c * &s * &apq;
 
-                a[pp * dim + pp] = Float::with_val(p, &c2 * &app)
-                    + &cs2
-                    + Float::with_val(p, &s2 * &aqq);
-                a[qq * dim + qq] = Float::with_val(p, &s2 * &app)
-                    - &cs2
-                    + Float::with_val(p, &c2 * &aqq);
+                a[pp * dim + pp] =
+                    Float::with_val(p, &c2 * &app) + &cs2 + Float::with_val(p, &s2 * &aqq);
+                a[qq * dim + qq] =
+                    Float::with_val(p, &s2 * &app) - &cs2 + Float::with_val(p, &c2 * &aqq);
                 a[pp * dim + qq] = Float::with_val(p, 0.0);
                 a[qq * dim + pp] = Float::with_val(p, 0.0);
 
@@ -180,10 +182,10 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
                 for i in 0..dim {
                     let vp = eigvecs[i * dim + pp].clone();
                     let vq = eigvecs[i * dim + qq].clone();
-                    eigvecs[i * dim + pp] = Float::with_val(p, &c * &vp)
-                        + Float::with_val(p, &s * &vq);
-                    eigvecs[i * dim + qq] = Float::with_val(p, &c * &vq)
-                        - Float::with_val(p, &s * &vp);
+                    eigvecs[i * dim + pp] =
+                        Float::with_val(p, &c * &vp) + Float::with_val(p, &s * &vq);
+                    eigvecs[i * dim + qq] =
+                        Float::with_val(p, &c * &vq) - Float::with_val(p, &s * &vp);
                 }
             }
         }
@@ -192,20 +194,22 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
     }
 
     // ── Extract eigenvalues (diagonal) and eigenvectors ─────────
-    let mut indexed: Vec<(f64, usize)> = (0..dim)
-        .map(|i| (a[i * dim + i].to_f64(), i))
-        .collect();
+    let mut indexed: Vec<(f64, usize)> = (0..dim).map(|i| (a[i * dim + i].to_f64(), i)).collect();
     indexed.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
 
     let eigenvalues: Vec<f64> = indexed.iter().map(|(v, _)| *v).collect();
-    let eigenvectors: Vec<Vec<f64>> = indexed.iter()
-        .map(|(_, idx)| {
-            (0..dim).map(|i| eigvecs[i * dim + idx].to_f64()).collect()
-        })
+    let eigenvectors: Vec<Vec<f64>> = indexed
+        .iter()
+        .map(|(_, idx)| (0..dim).map(|i| eigvecs[i * dim + idx].to_f64()).collect())
         .collect();
 
-    eprintln!("    [MPFR Jacobi] Done: {} sweeps, off-diag = {:.3e}, λ_min = {:.6e}, λ_max = {:.6e}",
-        sweep_count, final_off_norm, eigenvalues[0], eigenvalues.last().unwrap_or(&0.0));
+    eprintln!(
+        "    [MPFR Jacobi] Done: {} sweeps, off-diag = {:.3e}, λ_min = {:.6e}, λ_max = {:.6e}",
+        sweep_count,
+        final_off_norm,
+        eigenvalues[0],
+        eigenvalues.last().unwrap_or(&0.0)
+    );
 
     JacobiResult {
         eigenvalues,
@@ -219,13 +223,15 @@ pub fn eigen_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> JacobiResult {
 ///
 /// Use this when you only need eigenvalues for λ_min certification.
 pub fn eigenvalues_only_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> Vec<f64> {
-    if dim == 0 { return vec![]; }
-    if dim == 1 { return vec![mat[0]]; }
+    if dim == 0 {
+        return vec![];
+    }
+    if dim == 1 {
+        return vec![mat[0]];
+    }
 
     let p = prec;
-    let mut a: Vec<Float> = mat.iter()
-        .map(|&v| Float::with_val(p, v))
-        .collect();
+    let mut a: Vec<Float> = mat.iter().map(|&v| Float::with_val(p, v)).collect();
 
     let max_sweeps = 200;
     let tol_sq = Float::with_val(p, Float::i_exp(1, -(p as i32)));
@@ -240,25 +246,34 @@ pub fn eigenvalues_only_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> Vec<f
             }
         }
 
-        if off_norm_sq < tol_sq { break; }
+        if off_norm_sq < tol_sq {
+            break;
+        }
 
         let thresh = Float::with_val(p, &off_norm_sq / (dim * dim) as u64).sqrt();
 
         if sweep % 10 == 0 {
-            eprintln!("    [Jacobi vals-only] Sweep {sweep}: off-diag = {:.6e}", off_norm_sq.to_f64().sqrt());
+            eprintln!(
+                "    [Jacobi vals-only] Sweep {sweep}: off-diag = {:.6e}",
+                off_norm_sq.to_f64().sqrt()
+            );
         }
 
         for pp in 0..dim {
             for qq in (pp + 1)..dim {
                 let apq_abs = a[pp * dim + qq].clone().abs();
-                if apq_abs < thresh { continue; }
+                if apq_abs < thresh {
+                    continue;
+                }
 
                 let app = a[pp * dim + pp].clone();
                 let aqq = a[qq * dim + qq].clone();
                 let apq = a[pp * dim + qq].clone();
 
                 let diff = Float::with_val(p, &app - &aqq);
-                let (c, s) = if diff.clone().abs() < Float::with_val(p, Float::i_exp(1, -(p as i32 * 3 / 4))) {
+                let (c, s) = if diff.clone().abs()
+                    < Float::with_val(p, Float::i_exp(1, -(p as i32 * 3 / 4)))
+                {
                     let half = Float::with_val(p, 0.5f64);
                     let sqrt2_inv = Float::with_val(p, half.sqrt_ref());
                     (sqrt2_inv.clone(), sqrt2_inv)
@@ -266,8 +281,10 @@ pub fn eigenvalues_only_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> Vec<f
                     let tau = Float::with_val(p, 2.0) * &apq / &diff;
                     let theta: Float = Float::with_val(p, tau.atan_ref());
                     let half_theta: Float = theta / 2u32;
-                    (Float::with_val(p, half_theta.cos_ref()),
-                     Float::with_val(p, half_theta.sin_ref()))
+                    (
+                        Float::with_val(p, half_theta.cos_ref()),
+                        Float::with_val(p, half_theta.sin_ref()),
+                    )
                 };
 
                 let old_ip: Vec<Float> = (0..dim).map(|i| a[i * dim + pp].clone()).collect();
@@ -290,8 +307,10 @@ pub fn eigenvalues_only_jacobi_mpfr(mat: &[f64], dim: usize, prec: u32) -> Vec<f
                 let s2 = Float::with_val(p, &s * &s);
                 let cs2 = Float::with_val(p, 2.0) * &c * &s * &apq;
 
-                a[pp * dim + pp] = Float::with_val(p, &c2 * &app) + &cs2 + Float::with_val(p, &s2 * &aqq);
-                a[qq * dim + qq] = Float::with_val(p, &s2 * &app) - &cs2 + Float::with_val(p, &c2 * &aqq);
+                a[pp * dim + pp] =
+                    Float::with_val(p, &c2 * &app) + &cs2 + Float::with_val(p, &s2 * &aqq);
+                a[qq * dim + qq] =
+                    Float::with_val(p, &s2 * &app) - &cs2 + Float::with_val(p, &c2 * &aqq);
                 a[pp * dim + qq] = Float::with_val(p, 0.0);
                 a[qq * dim + pp] = Float::with_val(p, 0.0);
             }

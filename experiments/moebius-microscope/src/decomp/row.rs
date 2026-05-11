@@ -3,8 +3,8 @@
 //! `RowResult` is the per-thread accumulator used in the parallel map phase.
 //! After all rows are computed, results are merged into the global `Decomp`.
 
-use cathedral_utils::arith::Kahan;
 use super::state::Decomp;
+use cathedral_utils::arith::Kahan;
 
 // ═══════════════════════════════════════════════
 // PER-ROW RESULT
@@ -19,33 +19,52 @@ pub struct RowResult {
     pub type_i: Kahan,
     pub type_ii: Kahan,
     pub type_iii: Kahan,
-    pub ee: Kahan, pub eo: Kahan, pub oe: Kahan, pub oo: Kahan,
+    pub ee: Kahan,
+    pub eo: Kahan,
+    pub oe: Kahan,
+    pub oo: Kahan,
     pub omega_buckets: Vec<Vec<Kahan>>,
     pub dyadic: Vec<Vec<Kahan>>,
-    pub n_pos: u64, pub n_neg: u64,
-    pub sum_pos: Kahan, pub sum_neg: Kahan,
-    pub row_sum: f64, pub row_abs: f64,
+    pub n_pos: u64,
+    pub n_neg: u64,
+    pub sum_pos: Kahan,
+    pub sum_neg: Kahan,
+    pub row_sum: f64,
+    pub row_abs: f64,
 
     // §10: Taper per-row accumulators
-    pub u_row: Kahan,   // Σ_k μ(j)·μ(k)·G(j,k)
-    pub l_row: Kahan,   // Σ_k μ(j)·μ(k)·ln(j)·G(j,k)
-    pub q_row: Kahan,   // Σ_k μ(j)·μ(k)·ln(j)·ln(k)·G(j,k)
+    pub u_row: Kahan,          // Σ_k μ(j)·μ(k)·G(j,k)
+    pub l_row: Kahan,          // Σ_k μ(j)·μ(k)·ln(j)·G(j,k)
+    pub q_row: Kahan,          // Σ_k μ(j)·μ(k)·ln(j)·ln(k)·G(j,k)
     pub taper_gcd: Vec<Kahan>, // per-gcd taper contribution (weighted term)
 }
 
 impl RowResult {
     pub fn new(max_gcd: usize, max_omega: usize, max_band: usize) -> Self {
         Self {
-            total: Kahan::default(), diagonal: Kahan::default(), off_diagonal: Kahan::default(),
+            total: Kahan::default(),
+            diagonal: Kahan::default(),
+            off_diagonal: Kahan::default(),
             gcd_buckets: vec![Kahan::default(); max_gcd + 1],
             channels: [Kahan::default(); 4],
-            type_i: Kahan::default(), type_ii: Kahan::default(), type_iii: Kahan::default(),
-            ee: Kahan::default(), eo: Kahan::default(), oe: Kahan::default(), oo: Kahan::default(),
+            type_i: Kahan::default(),
+            type_ii: Kahan::default(),
+            type_iii: Kahan::default(),
+            ee: Kahan::default(),
+            eo: Kahan::default(),
+            oe: Kahan::default(),
+            oo: Kahan::default(),
             omega_buckets: vec![vec![Kahan::default(); max_omega + 1]; max_omega + 1],
             dyadic: vec![vec![Kahan::default(); max_band + 1]; max_band + 1],
-            n_pos: 0, n_neg: 0, sum_pos: Kahan::default(), sum_neg: Kahan::default(),
-            row_sum: 0.0, row_abs: 0.0,
-            u_row: Kahan::default(), l_row: Kahan::default(), q_row: Kahan::default(),
+            n_pos: 0,
+            n_neg: 0,
+            sum_pos: Kahan::default(),
+            sum_neg: Kahan::default(),
+            row_sum: 0.0,
+            row_abs: 0.0,
+            u_row: Kahan::default(),
+            l_row: Kahan::default(),
+            q_row: Kahan::default(),
             taper_gcd: vec![Kahan::default(); max_gcd + 1],
         }
     }
@@ -95,7 +114,10 @@ pub fn merge_single_row(decomp: &mut Decomp, r: &RowResult) {
     decomp.taper.u_sum.add(r.u_row.value());
     decomp.taper.l_sum.add(r.l_row.value());
     decomp.taper.q_sum.add(r.q_row.value());
-    for d in 0..=decomp.max_gcd.min(decomp.taper.u_by_gcd.len().saturating_sub(1)) {
+    for d in 0..=decomp
+        .max_gcd
+        .min(decomp.taper.u_by_gcd.len().saturating_sub(1))
+    {
         decomp.taper.u_by_gcd[d].add(r.taper_gcd[d].value());
     }
 }

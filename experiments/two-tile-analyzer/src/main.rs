@@ -19,8 +19,8 @@
 //!  coprime pairs (a,b) with a < b ≤ 30, rows m = 1..100000.
 //! ═══════════════════════════════════════════════════════════════════════════
 
-use cathedral_utils::fmt::*;
 use cathedral_utils::arith::gcd;
+use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use rug::Float;
 use std::fs;
@@ -32,8 +32,12 @@ const MAX_M: usize = 100_000;
 
 // Terminal colors
 
-fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
-fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
+fn fp(x: i64) -> Float {
+    Float::with_val(PREC, x)
+}
+fn fu(x: usize) -> Float {
+    Float::with_val(PREC, x as u64)
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §1. CORE COMPUTATIONS
@@ -41,8 +45,10 @@ fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
 
 /// FTC antiderivative: F(x, m, n) = -1/(abx) - (n/a + m/b)·log(x) + mn·x
 fn eval_f(a: usize, b: usize, m: usize, n: usize, x: &Float) -> Float {
-    let af = fu(a); let bf = fu(b);
-    let mf = fu(m); let nf = fu(n);
+    let af = fu(a);
+    let bf = fu(b);
+    let mf = fu(m);
+    let nf = fu(n);
     let ab = Float::with_val(PREC, &af * &bf);
     let abx = Float::with_val(PREC, &ab * x);
     let t1 = Float::with_val(PREC, fp(-1) / &abx);
@@ -58,8 +64,10 @@ fn eval_f(a: usize, b: usize, m: usize, n: usize, x: &Float) -> Float {
 
 /// Exact row integral via tile-by-tile FTC (ground truth)
 fn row_integral_exact(a: usize, b: usize, m: usize) -> Float {
-    let af = fu(a); let bf = fu(b);
-    let mf = fu(m); let m1f = fu(m + 1);
+    let af = fu(a);
+    let bf = fu(b);
+    let mf = fu(m);
+    let m1f = fu(m + 1);
     let row_lo = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &af * &m1f));
     let row_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &af * &mf));
 
@@ -88,7 +96,9 @@ fn row_integral_exact(a: usize, b: usize, m: usize) -> Float {
                 let bn = Float::with_val(PREC, &bf * fu(n));
                 Float::with_val(PREC, fp(1) / &bn)
             };
-            if tile_lo >= tile_hi { continue; }
+            if tile_lo >= tile_hi {
+                continue;
+            }
             let f_hi = eval_f(a, b, m, n, &tile_hi);
             let f_lo = eval_f(a, b, m, n, &tile_lo);
             total += Float::with_val(PREC, &f_hi - &f_lo);
@@ -99,8 +109,10 @@ fn row_integral_exact(a: usize, b: usize, m: usize) -> Float {
 
 /// Old rowTerm (single-tile formula, currently in PartialSumConvergence.lean)
 fn row_term_old(a: usize, b: usize, m: usize) -> Float {
-    let af = fu(a); let bf = fu(b);
-    let mf = fu(m); let m1f = fu(m + 1);
+    let af = fu(a);
+    let bf = fu(b);
+    let mf = fu(m);
+    let m1f = fu(m + 1);
     let n = (a * m) / b;
     let nf = fu(n);
     let log_ratio = Float::with_val(PREC, Float::with_val(PREC, &m1f / &mf).ln());
@@ -123,9 +135,12 @@ fn row_term_old(a: usize, b: usize, m: usize) -> Float {
 fn row_term_corrected(a: usize, b: usize, m: usize) -> Float {
     let n = (a * m) / b;
     let n0 = n + 1;
-    let af = fu(a); let bf = fu(b);
-    let mf = fu(m); let m1f = fu(m + 1);
-    let nf = fu(n); let n0f = fu(n0);
+    let af = fu(a);
+    let bf = fu(b);
+    let mf = fu(m);
+    let m1f = fu(m + 1);
+    let nf = fu(n);
+    let n0f = fu(n0);
 
     let is_two_tile = b * n0 > a * m && b * n0 < a * (m + 1);
 
@@ -180,8 +195,8 @@ struct PairResult {
     max_corrected_error: f64, // max |rowTerm_corrected - exact| over ALL rows
     corrected_verified: bool,
     // Q2: Convergence bounds
-    max_exact_times_m2: f64,  // max(exact(m) · m²) — tight C for convergence
-    max_old_times_m2: f64,    // max(rowTerm_old(m) · m²)
+    max_exact_times_m2: f64, // max(exact(m) · m²) — tight C for convergence
+    max_old_times_m2: f64,   // max(rowTerm_old(m) · m²)
     all_exact_nonneg: bool,
     // Q3: Structural insight
     max_correction_times_m2: f64, // max(|Δ(m)| · m²) — is correction O(1/m²)?
@@ -214,31 +229,46 @@ fn analyze_pair(a: usize, b: usize) -> PairResult {
         let m_f64 = m as f64;
         let m2 = m_f64 * m_f64;
 
-        if exact_f64 < -1e-15 { all_nonneg = false; }
+        if exact_f64 < -1e-15 {
+            all_nonneg = false;
+        }
 
         let exact_m2 = exact_f64.abs() * m2;
         let old_m2 = old_f64.abs() * m2;
-        if exact_m2 > max_exact_m2 { max_exact_m2 = exact_m2; }
-        if old_m2 > max_old_m2 { max_old_m2 = old_m2; }
+        if exact_m2 > max_exact_m2 {
+            max_exact_m2 = exact_m2;
+        }
+        if old_m2 > max_old_m2 {
+            max_old_m2 = old_m2;
+        }
 
         let corrected_err = (corrected_f64 - exact_f64).abs();
-        if corrected_err > max_corrected_error { max_corrected_error = corrected_err; }
+        if corrected_err > max_corrected_error {
+            max_corrected_error = corrected_err;
+        }
 
         if is_two_tile {
             two_tile_count += 1;
             let old_err = (old_f64 - exact_f64).abs();
-            if old_err > max_old_error { max_old_error = old_err; }
+            if old_err > max_old_error {
+                max_old_error = old_err;
+            }
             let correction_m2 = old_err * m2;
-            if correction_m2 > max_correction_m2 { max_correction_m2 = correction_m2; }
+            if correction_m2 > max_correction_m2 {
+                max_correction_m2 = correction_m2;
+            }
         } else {
             // Single tile: old formula should match exactly
             let single_err = (old_f64 - exact_f64).abs();
-            if single_err > 1e-10 { single_verified = false; }
+            if single_err > 1e-10 {
+                single_verified = false;
+            }
         }
     }
 
     PairResult {
-        a, b,
+        a,
+        b,
         total_rows: MAX_M,
         two_tile_rows: two_tile_count,
         two_tile_fraction: two_tile_count as f64 / MAX_M as f64,
@@ -262,64 +292,105 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL TWO-TILE CORRECTION ANALYZER{RESET}                      {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}512-bit MPFR · Tile-by-Tile FTC · Certified Bounds{RESET}          {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: IntegralEqSCombined.lean two_tile_ftc_eq_rowTerm{RESET}   {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{n_threads} threads · MPFR {PREC}-bit · rows 1..{MAX_M}{RESET}                    {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL TWO-TILE CORRECTION ANALYZER{RESET}                      {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}512-bit MPFR · Tile-by-Tile FTC · Certified Bounds{RESET}          {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: IntegralEqSCombined.lean two_tile_ftc_eq_rowTerm{RESET}   {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{n_threads} threads · MPFR {PREC}-bit · rows 1..{MAX_M}{RESET}                    {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     // Generate coprime pairs with a < b ≤ 20
     let mut pairs: Vec<(usize, usize)> = Vec::new();
     for b in 2..=20 {
         for a in 1..b {
-            if gcd(a, b) == 1 { pairs.push((a, b)); }
+            if gcd(a, b) == 1 {
+                pairs.push((a, b));
+            }
         }
     }
-    println!("  {BOLD}{WHITE}Testing {} coprime pairs, {} rows each{RESET}", pairs.len(), MAX_M);
+    println!(
+        "  {BOLD}{WHITE}Testing {} coprime pairs, {} rows each{RESET}",
+        pairs.len(),
+        MAX_M
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
 
     // Parallel analysis
-    let results: Vec<PairResult> = pairs.par_iter().map(|&(a, b)| {
-        let t = Instant::now();
-        let r = analyze_pair(a, b);
-        let elapsed = t.elapsed().as_secs_f64();
-        let tt = if r.two_tile_rows > 0 { YELLOW } else { DIM };
-        let cv = if r.corrected_verified { GREEN } else { RED };
-        println!("  ({:>2},{:>2}): {tt}{:>5} two-tile rows ({:.1}%){RESET}  \
+    let results: Vec<PairResult> = pairs
+        .par_iter()
+        .map(|&(a, b)| {
+            let t = Instant::now();
+            let r = analyze_pair(a, b);
+            let elapsed = t.elapsed().as_secs_f64();
+            let tt = if r.two_tile_rows > 0 { YELLOW } else { DIM };
+            let cv = if r.corrected_verified { GREEN } else { RED };
+            println!(
+                "  ({:>2},{:>2}): {tt}{:>5} two-tile rows ({:.1}%){RESET}  \
                   corrected={cv}{:.1e}{RESET}  C_exact={MAGENTA}{:.4}{RESET}  \
                   Δ·m²={:.4}  {DIM}{:.1}s{RESET}",
-            a, b, r.two_tile_rows, r.two_tile_fraction * 100.0,
-            r.max_corrected_error, r.max_exact_times_m2,
-            r.max_correction_times_m2, elapsed);
-        r
-    }).collect();
+                a,
+                b,
+                r.two_tile_rows,
+                r.two_tile_fraction * 100.0,
+                r.max_corrected_error,
+                r.max_exact_times_m2,
+                r.max_correction_times_m2,
+                elapsed
+            );
+            r
+        })
+        .collect();
 
     // ─── CERTIFICATE ───
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}TWO-TILE ANALYZER — CERTIFICATE{RESET}                              {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}TWO-TILE ANALYZER — CERTIFICATE{RESET}                              {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
 
     // Q1: Formula verification
     let all_corrected = results.iter().all(|r| r.corrected_verified);
     let all_single = results.iter().all(|r| r.single_tile_verified);
-    let global_corrected_err: f64 = results.iter()
-        .map(|r| r.max_corrected_error).fold(0.0, f64::max);
+    let global_corrected_err: f64 = results
+        .iter()
+        .map(|r| r.max_corrected_error)
+        .fold(0.0, f64::max);
 
     let q1 = if all_corrected { GREEN } else { RED };
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Q1. FORMULA VERIFICATION{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    {q1}Corrected formula matches FTC: {all_corrected}{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}    Max |corrected - exact|: {:.2e}", global_corrected_err);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    Max |corrected - exact|: {:.2e}",
+        global_corrected_err
+    );
     println!("  {BOLD}{CYAN}║{RESET}    Single-tile rowTerm_old verified: {all_single}");
 
     // Q2: Convergence bounds
-    let global_c: f64 = results.iter()
-        .map(|r| r.max_exact_times_m2).fold(0.0, f64::max);
+    let global_c: f64 = results
+        .iter()
+        .map(|r| r.max_exact_times_m2)
+        .fold(0.0, f64::max);
     let all_nonneg = results.iter().all(|r| r.all_exact_nonneg);
     let q2 = if all_nonneg { GREEN } else { RED };
 
@@ -334,14 +405,18 @@ fn main() {
             let ab = (r.a * r.b) as f64;
             let classic = apb / ab;
             let ratio = r.max_exact_times_m2 / classic;
-            println!("  {BOLD}{CYAN}║{RESET}      ({:>2},{:>2}): C={:.4}  (a+b)/(ab)={:.4}  ratio={:.4}",
-                r.a, r.b, r.max_exact_times_m2, classic, ratio);
+            println!(
+                "  {BOLD}{CYAN}║{RESET}      ({:>2},{:>2}): C={:.4}  (a+b)/(ab)={:.4}  ratio={:.4}",
+                r.a, r.b, r.max_exact_times_m2, classic, ratio
+            );
         }
     }
 
     // Q3: Structural insight
-    let global_delta_m2: f64 = results.iter()
-        .map(|r| r.max_correction_times_m2).fold(0.0, f64::max);
+    let global_delta_m2: f64 = results
+        .iter()
+        .map(|r| r.max_correction_times_m2)
+        .fold(0.0, f64::max);
     let total_two_tile: usize = results.iter().map(|r| r.two_tile_rows).sum();
 
     println!("  {BOLD}{CYAN}║{RESET}");
@@ -355,15 +430,19 @@ fn main() {
     for r in &results {
         if r.two_tile_rows > 0 {
             let expected = (r.a as f64) / (r.b as f64);
-            println!("  {BOLD}{CYAN}║{RESET}      ({:>2},{:>2}): {:.4} (expected a/b = {:.4})",
-                r.a, r.b, r.two_tile_fraction, expected);
+            println!(
+                "  {BOLD}{CYAN}║{RESET}      ({:>2},{:>2}): {:.4} (expected a/b = {:.4})",
+                r.a, r.b, r.two_tile_fraction, expected
+            );
         }
     }
 
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}LEAN PROOF GUIDANCE{RESET}");
     if all_corrected && all_nonneg {
-        println!("  {BOLD}{CYAN}║{RESET}    {GREEN}✓ Corrected formula is certified correct{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {GREEN}✓ Corrected formula is certified correct{RESET}"
+        );
         println!("  {BOLD}{CYAN}║{RESET}    {GREEN}✓ 0 ≤ rowIntegral(m) ≤ C/m² holds{RESET}");
         println!("  {BOLD}{CYAN}║{RESET}    {GREEN}✓ Correction Δ is O(1/m²) — summable{RESET}");
         println!("  {BOLD}{CYAN}║{RESET}");
@@ -375,7 +454,9 @@ fn main() {
     }
 
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Write JSON
     let summary = serde_json::json!({
@@ -397,23 +478,43 @@ fn main() {
         "elapsed_seconds": t_global.elapsed().as_secs_f64(),
     });
 
-    fs::write("results/summary.json", serde_json::to_string_pretty(&summary).unwrap()).unwrap();
+    fs::write(
+        "results/summary.json",
+        serde_json::to_string_pretty(&summary).unwrap(),
+    )
+    .unwrap();
 
     // Write detailed TSV
     let mut tsv = fs::File::create("results/two_tile_analysis.tsv").unwrap();
-    writeln!(tsv, "a\tb\ttwo_tile_rows\tfraction\tmax_corrected_err\t\
-                   C_exact\tC_old\tdelta_m2\tsingle_ok\tcorrected_ok").unwrap();
+    writeln!(
+        tsv,
+        "a\tb\ttwo_tile_rows\tfraction\tmax_corrected_err\t\
+                   C_exact\tC_old\tdelta_m2\tsingle_ok\tcorrected_ok"
+    )
+    .unwrap();
     for r in &results {
-        writeln!(tsv, "{}\t{}\t{}\t{:.6}\t{:.2e}\t{:.6}\t{:.6}\t{:.6}\t{}\t{}",
-            r.a, r.b, r.two_tile_rows, r.two_tile_fraction,
-            r.max_corrected_error, r.max_exact_times_m2, r.max_old_times_m2,
-            r.max_correction_times_m2, r.single_tile_verified, r.corrected_verified
-        ).unwrap();
+        writeln!(
+            tsv,
+            "{}\t{}\t{}\t{:.6}\t{:.2e}\t{:.6}\t{:.6}\t{:.6}\t{}\t{}",
+            r.a,
+            r.b,
+            r.two_tile_rows,
+            r.two_tile_fraction,
+            r.max_corrected_error,
+            r.max_exact_times_m2,
+            r.max_old_times_m2,
+            r.max_correction_times_m2,
+            r.single_tile_verified,
+            r.corrected_verified
+        )
+        .unwrap();
     }
 
     println!();
-    println!("  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{:.1}s{RESET} ({n_threads} threads)",
-        t_global.elapsed().as_secs_f64());
+    println!(
+        "  {BOLD}{WHITE}Total runtime:{RESET} {GREEN}{:.1}s{RESET} ({n_threads} threads)",
+        t_global.elapsed().as_secs_f64()
+    );
     println!("  {BOLD}{WHITE}Output:{RESET} results/{{summary.json, two_tile_analysis.tsv}}");
     println!();
 }

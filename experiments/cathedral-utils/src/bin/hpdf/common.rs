@@ -92,8 +92,7 @@ impl HpdfContext {
         let file_sha256 = format!("{:x}", Sha256::digest(&file_bytes));
         drop(file_bytes); // free memory before loading the matrix
 
-        let reader =
-            HpdfReader::open(path).map_err(|e| format!("Failed to open HPDF: {e}"))?;
+        let reader = HpdfReader::open(path).map_err(|e| format!("Failed to open HPDF: {e}"))?;
         let dim = reader.dim();
         let max_n = reader.max_n();
         let precision = reader.precision().unwrap_or(0);
@@ -107,9 +106,7 @@ impl HpdfContext {
             .read_gram_full()
             .map_err(|e| format!("Failed to read Gram matrix: {e}"))?;
         let load_time = t0.elapsed().as_secs_f64();
-        println!(
-            "  {GREEN}✓{RESET} Gram loaded ({load_time:.1}s)"
-        );
+        println!("  {GREEN}✓{RESET} Gram loaded ({load_time:.1}s)");
 
         let mu = mobius_sieve(max_n);
         let log_n = (max_n as f64).ln();
@@ -184,10 +181,7 @@ impl Certificate {
 /// Get the results directory for certified HPDF output.
 fn results_dir() -> PathBuf {
     // Try workspace-relative path first
-    let candidates = [
-        "results/hpdf",
-        "../results/hpdf",
-    ];
+    let candidates = ["results/hpdf", "../results/hpdf"];
     for c in &candidates {
         let p = PathBuf::from(c);
         if p.parent().map(|pp| pp.exists()).unwrap_or(false) {
@@ -221,12 +215,7 @@ pub fn find_hpdf_files(dir: &Path) -> Vec<PathBuf> {
         .into_iter()
         .flatten()
         .filter_map(|e| e.ok())
-        .filter(|e| {
-            e.path()
-                .extension()
-                .map(|x| x == "h5")
-                .unwrap_or(false)
-        })
+        .filter(|e| e.path().extension().map(|x| x == "h5").unwrap_or(false))
         .map(|e| e.path())
         .collect();
 
@@ -244,11 +233,7 @@ pub fn find_hpdf_files(dir: &Path) -> Vec<PathBuf> {
 
 /// Find the HPDF cache directory.
 pub fn find_cache_dir() -> Option<PathBuf> {
-    let candidates = [
-        "cache/hpdf",
-        "../cache/hpdf",
-        "experiments/cache/hpdf",
-    ];
+    let candidates = ["cache/hpdf", "../cache/hpdf", "experiments/cache/hpdf"];
     for c in &candidates {
         let p = PathBuf::from(c);
         if p.exists() {
@@ -260,7 +245,5 @@ pub fn find_cache_dir() -> Option<PathBuf> {
 
 /// Print a standardized section header.
 pub fn section_header(num: u32, title: &str, elapsed_secs: f64) {
-    println!(
-        "\n  {BOLD}{CYAN}═══ §{num}. {title} ({elapsed_secs:.1}s) ═══{RESET}"
-    );
+    println!("\n  {BOLD}{CYAN}═══ §{num}. {title} ({elapsed_secs:.1}s) ═══{RESET}");
 }

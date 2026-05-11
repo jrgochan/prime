@@ -48,8 +48,8 @@ fn main() {
             }
             let max_n: usize = args[2].parse().expect("N must be a number");
             let explicit_source = parse_flag_str(&args, "--source");
-            let output_dir = parse_flag_str(&args, "--output")
-                .unwrap_or_else(|| "certificates".to_string());
+            let output_dir =
+                parse_flag_str(&args, "--output").unwrap_or_else(|| "certificates".to_string());
 
             certify::certify_single(max_n, explicit_source, &search_paths, &output_dir);
         }
@@ -68,8 +68,8 @@ fn main() {
         }
 
         "sweep" => {
-            let output_dir = parse_flag_str(&args, "--output")
-                .unwrap_or_else(|| "certificates".to_string());
+            let output_dir =
+                parse_flag_str(&args, "--output").unwrap_or_else(|| "certificates".to_string());
             certify::sweep_all(&search_paths, &output_dir);
         }
 
@@ -84,9 +84,18 @@ fn main() {
             }
             println!("  Found {} cached matrices:", sources.len());
             println!();
-            println!("  {:>8} {:>8} {:>10} {:>10}  path", "N", "dim", "format", "size");
-            println!("  {} {} {} {}  {}",
-                "─".repeat(8), "─".repeat(8), "─".repeat(10), "─".repeat(10), "─".repeat(40));
+            println!(
+                "  {:>8} {:>8} {:>10} {:>10}  path",
+                "N", "dim", "format", "size"
+            );
+            println!(
+                "  {} {} {} {}  {}",
+                "─".repeat(8),
+                "─".repeat(8),
+                "─".repeat(10),
+                "─".repeat(10),
+                "─".repeat(40)
+            );
             for s in &sources {
                 let format = match s.format {
                     cathedral_utils::ooc::MatrixFormat::Hpdf => "HPDF",
@@ -95,8 +104,14 @@ fn main() {
                     cathedral_utils::ooc::MatrixFormat::Legacy => "Legacy",
                 };
                 let size = format_bytes(s.file_size);
-                println!("  {:>8} {:>8} {:>10} {:>10}  {}",
-                    s.max_n, s.dim, format, size, s.path.display());
+                println!(
+                    "  {:>8} {:>8} {:>10} {:>10}  {}",
+                    s.max_n,
+                    s.dim,
+                    format,
+                    size,
+                    s.path.display()
+                );
             }
         }
 
@@ -148,15 +163,21 @@ fn print_usage() {
 /// that the matrix appears non-PD. DD entries (hi + lo, ~31 digits) preserve
 /// positive-definiteness for the CG solver.
 fn build_dd_matrix(max_n: usize, precision: u32) {
-    use cathedral_utils::{gram, cache};
+    use cathedral_utils::{cache, gram};
     use std::time::Instant;
 
     let dim = max_n - 1;
     let mem_gb = (dim as u64 * dim as u64 * 16) / (1024 * 1024 * 1024);
 
     println!("  ┌─────────────────────────────────────────────────────────────┐");
-    println!("  │  BUILDING DD GRAM MATRIX  N = {:>6}                        │", max_n);
-    println!("  │  dim = {:>6}  precision = {:>4}-bit  ~{:>3} GB               │", dim, precision, mem_gb);
+    println!(
+        "  │  BUILDING DD GRAM MATRIX  N = {:>6}                        │",
+        max_n
+    );
+    println!(
+        "  │  dim = {:>6}  precision = {:>4}-bit  ~{:>3} GB               │",
+        dim, precision, mem_gb
+    );
     println!("  └─────────────────────────────────────────────────────────────┘");
     println!();
 
@@ -164,8 +185,11 @@ fn build_dd_matrix(max_n: usize, precision: u32) {
     let cache_path = cache::dd_gram_cache_path(max_n, precision);
     if cache_path.exists() {
         let size = std::fs::metadata(&cache_path).map(|m| m.len()).unwrap_or(0);
-        println!("  ⚠ DD cache already exists: {} ({:.1} GB)",
-            cache_path.display(), size as f64 / 1_073_741_824.0);
+        println!(
+            "  ⚠ DD cache already exists: {} ({:.1} GB)",
+            cache_path.display(),
+            size as f64 / 1_073_741_824.0
+        );
         println!("  Delete the file to rebuild.");
         return;
     }
@@ -186,7 +210,10 @@ fn build_dd_matrix(max_n: usize, precision: u32) {
             println!();
             println!("  ✓ DD Gram matrix built and cached in {:.1}s", total);
             println!("  ✓ Path: {}", cache_path.display());
-            println!("  ✓ Size: {:.1} GB", (hi.len() + lo.len()) as f64 * 8.0 / 1_073_741_824.0);
+            println!(
+                "  ✓ Size: {:.1} GB",
+                (hi.len() + lo.len()) as f64 * 8.0 / 1_073_741_824.0
+            );
 
             // Validate: check diagonal is positive
             let mut min_diag = f64::MAX;
@@ -227,9 +254,18 @@ fn default_search_paths() -> Vec<PathBuf> {
 
     // Add home-relative paths
     if let Ok(home) = std::env::var("HOME") {
-        paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cache", home)));
-        paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cache/hpdf", home)));
-        paths.push(PathBuf::from(format!("{}/code/github.com/jrgochan/prime/experiments/cathedral-utils/cache/hpdf", home)));
+        paths.push(PathBuf::from(format!(
+            "{}/code/github.com/jrgochan/prime/experiments/cache",
+            home
+        )));
+        paths.push(PathBuf::from(format!(
+            "{}/code/github.com/jrgochan/prime/experiments/cache/hpdf",
+            home
+        )));
+        paths.push(PathBuf::from(format!(
+            "{}/code/github.com/jrgochan/prime/experiments/cathedral-utils/cache/hpdf",
+            home
+        )));
     }
 
     // Environment override
@@ -241,9 +277,7 @@ fn default_search_paths() -> Vec<PathBuf> {
 }
 
 fn parse_flag_str(args: &[String], flag: &str) -> Option<String> {
-    args.windows(2)
-        .find(|w| w[0] == flag)
-        .map(|w| w[1].clone())
+    args.windows(2).find(|w| w[0] == flag).map(|w| w[1].clone())
 }
 
 fn format_bytes(bytes: u64) -> String {

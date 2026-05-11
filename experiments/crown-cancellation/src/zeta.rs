@@ -109,17 +109,26 @@ pub fn zeta_critical_line_mpfr(t: f64) -> (f64, f64) {
     let num_im = Float::with_val(P, -Float::with_val(P, &amp1 * &sin_p1));
     let denom_re = Float::with_val(P, -0.5f64);
     let denom_im = t_mp.clone();
-    let denom_sq = Float::with_val(P,
-        Float::with_val(P, &denom_re * &denom_re) +
-        Float::with_val(P, &denom_im * &denom_im));
+    let denom_sq = Float::with_val(
+        P,
+        Float::with_val(P, &denom_re * &denom_re) + Float::with_val(P, &denom_im * &denom_im),
+    );
 
     if denom_sq > 1e-20 {
-        re_sum += Float::with_val(P,
-            Float::with_val(P, Float::with_val(P, &num_re * &denom_re) +
-                Float::with_val(P, &num_im * &denom_im)) / &denom_sq);
-        im_sum += Float::with_val(P,
-            Float::with_val(P, Float::with_val(P, &num_im * &denom_re) -
-                Float::with_val(P, &num_re * &denom_im)) / &denom_sq);
+        re_sum += Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &num_re * &denom_re) + Float::with_val(P, &num_im * &denom_im),
+            ) / &denom_sq,
+        );
+        im_sum += Float::with_val(
+            P,
+            Float::with_val(
+                P,
+                Float::with_val(P, &num_im * &denom_re) - Float::with_val(P, &num_re * &denom_im),
+            ) / &denom_sq,
+        );
     }
 
     // N^{-s}/2

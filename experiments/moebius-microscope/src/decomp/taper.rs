@@ -14,9 +14,9 @@
 //!
 //! If R₂ → 1, then vᵀGv → 1, which is the Riemann Hypothesis.
 
+use super::state::Decomp;
 use cathedral_utils::arith::Kahan;
 use rayon::prelude::*;
-use super::state::Decomp;
 
 // ═══════════════════════════════════════════════
 // TAPER METRICS STRUCT
@@ -35,24 +35,24 @@ pub struct TaperTracePoint {
 /// All taper cancellation metrics for a single N.
 pub struct TaperMetrics {
     // Raw taper sums (Kahan-compensated)
-    pub u_sum: Kahan,           // U(N) = Σ μ(j)μ(k) G(j,k)
-    pub l_sum: Kahan,           // L(N) = Σ μ(j)μ(k) ln(j) G(j,k)
-    pub q_sum: Kahan,           // Q(N) = Σ μ(j)μ(k) ln(j)ln(k) G(j,k)
+    pub u_sum: Kahan, // U(N) = Σ μ(j)μ(k) G(j,k)
+    pub l_sum: Kahan, // L(N) = Σ μ(j)μ(k) ln(j) G(j,k)
+    pub q_sum: Kahan, // Q(N) = Σ μ(j)μ(k) ln(j)ln(k) G(j,k)
 
     // Independent vᵀGv reconstruction from scratch (cross-check)
-    pub vtgv_recon: f64,        // Σ v_j · G(j,k) · v_k  (f64 recomputation)
+    pub vtgv_recon: f64, // Σ v_j · G(j,k) · v_k  (f64 recomputation)
 
     // Derived metrics (computed in finalize)
-    pub r2: f64,                // R₂ = U - 2L/lnN
-    pub r2_minus_1: f64,        // R₂ - 1
-    pub r2_times_ln: f64,       // (R₂ - 1) · lnN  ≈ -2.87
-    pub q_over_ln2: f64,        // Q / ln²N
-    pub c_recon: f64,           // (1 - vᵀGv) · lnN ≈ 2.87
+    pub r2: f64,          // R₂ = U - 2L/lnN
+    pub r2_minus_1: f64,  // R₂ - 1
+    pub r2_times_ln: f64, // (R₂ - 1) · lnN  ≈ -2.87
+    pub q_over_ln2: f64,  // Q / ln²N
+    pub c_recon: f64,     // (1 - vᵀGv) · lnN ≈ 2.87
 
     // GCD-stratified taper
-    pub u_by_gcd: Vec<Kahan>,   // U_d: terms with gcd(j,k)=d
-    pub l_by_gcd: Vec<Kahan>,   // L_d: linear taper per GCD stratum
-    pub q_by_gcd: Vec<Kahan>,   // Q_d: quadratic taper per GCD stratum
+    pub u_by_gcd: Vec<Kahan>, // U_d: terms with gcd(j,k)=d
+    pub l_by_gcd: Vec<Kahan>, // L_d: linear taper per GCD stratum
+    pub q_by_gcd: Vec<Kahan>, // Q_d: quadratic taper per GCD stratum
 
     // PNT sub-sums
     pub s1: f64,                // Σ μ(k)/k → 0
@@ -73,13 +73,19 @@ impl TaperMetrics {
             l_sum: Kahan::default(),
             q_sum: Kahan::default(),
             vtgv_recon: 0.0,
-            r2: 0.0, r2_minus_1: 0.0, r2_times_ln: 0.0,
-            q_over_ln2: 0.0, c_recon: 0.0,
+            r2: 0.0,
+            r2_minus_1: 0.0,
+            r2_times_ln: 0.0,
+            q_over_ln2: 0.0,
+            c_recon: 0.0,
             u_by_gcd: vec![Kahan::default(); max_gcd + 1],
             l_by_gcd: vec![Kahan::default(); max_gcd + 1],
             q_by_gcd: vec![Kahan::default(); max_gcd + 1],
-            s1: 0.0, s2: 0.0, s3: 0.0,
-            mertens: 0.0, mertens_over_sqrt: 0.0,
+            s1: 0.0,
+            s2: 0.0,
+            s3: 0.0,
+            mertens: 0.0,
+            mertens_over_sqrt: 0.0,
             taper_trace: Vec::new(),
         }
     }
@@ -163,7 +169,7 @@ pub fn finalize_taper_metrics(decomp: &mut Decomp) {
 /// The O(active²) double loop is parallelized with rayon fold+reduce.
 pub fn finalize_taper_metrics_with_matrix(decomp: &mut Decomp, gram_matrix: Option<&[f64]>) {
     let n = decomp.n;
-    let dim = n;  // k=1..N (Lean-aligned)
+    let dim = n; // k=1..N (Lean-aligned)
     let ln_n = (n as f64).ln();
     let ln2_n = ln_n * ln_n;
     let vtgv = decomp.total.value();
@@ -175,13 +181,19 @@ pub fn finalize_taper_metrics_with_matrix(decomp: &mut Decomp, gram_matrix: Opti
     // Collect active (j_idx, j, v_j) pairs for k=1..N
     let active: Vec<(usize, usize, f64)> = (0..dim)
         .filter(|&i| weights[i].abs() > 1e-30)
-        .map(|i| (i, i + 1, weights[i]))  // (j_idx=i, j=i+1, v_j)
+        .map(|i| (i, i + 1, weights[i])) // (j_idx=i, j=i+1, v_j)
         .collect();
 
     let n_active = active.len();
     let use_matrix = gram_matrix.is_some();
-    eprintln!("  Computing per-GCD taper strata ({n_active} active, {})...",
-        if use_matrix { "in-memory matrix" } else { "gram_entry_f64" });
+    eprintln!(
+        "  Computing per-GCD taper strata ({n_active} active, {})...",
+        if use_matrix {
+            "in-memory matrix"
+        } else {
+            "gram_entry_f64"
+        }
+    );
     let t0 = std::time::Instant::now();
 
     // ═══ PARALLEL O(active²) taper + vtgv_recon + per-GCD strata ═══
@@ -226,7 +238,10 @@ pub fn finalize_taper_metrics_with_matrix(decomp: &mut Decomp, gram_matrix: Opti
         .reduce(|| TaperAccum::identity(max_gcd), TaperAccum::merge);
 
     let elapsed = t0.elapsed().as_secs_f64();
-    eprintln!("  ✓ Per-GCD taper strata: {elapsed:.1}s ({} pairs)", n_active as u64 * n_active as u64);
+    eprintln!(
+        "  ✓ Per-GCD taper strata: {elapsed:.1}s ({} pairs)",
+        n_active as u64 * n_active as u64
+    );
 
     // Store the recomputed values
     decomp.taper.u_sum = result.u;
@@ -286,30 +301,63 @@ pub fn print_taper_summary(d: &Decomp) {
     eprintln!("  ┌─────────────────────────────────────────────────┐");
     eprintln!("  │  §5 TAPER CANCELLATION (N={:>6})                │", d.n);
     eprintln!("  ├─────────────────────────────────────────────────┤");
-    eprintln!("  │  U(N)           = {:>16.10}                │", t.u_sum.value());
-    eprintln!("  │  L(N)           = {:>16.10}                │", t.l_sum.value());
-    eprintln!("  │  Q(N)           = {:>16.10}                │", t.q_sum.value());
+    eprintln!(
+        "  │  U(N)           = {:>16.10}                │",
+        t.u_sum.value()
+    );
+    eprintln!(
+        "  │  L(N)           = {:>16.10}                │",
+        t.l_sum.value()
+    );
+    eprintln!(
+        "  │  Q(N)           = {:>16.10}                │",
+        t.q_sum.value()
+    );
     eprintln!("  │  R₂ = U-2L/lnN  = {:>16.10}                │", t.r2);
-    eprintln!("  │  R₂ - 1         = {:>16.10}                │", t.r2_minus_1);
-    eprintln!("  │  (R₂-1)·lnN     = {:>16.10}  ← const?     │", t.r2_times_ln);
-    eprintln!("  │  Q/ln²N         = {:>16.10}                │", t.q_over_ln2);
-    eprintln!("  │  C_recon         = {:>16.10}  ← ≈2.87?     │", t.c_recon);
+    eprintln!(
+        "  │  R₂ - 1         = {:>16.10}                │",
+        t.r2_minus_1
+    );
+    eprintln!(
+        "  │  (R₂-1)·lnN     = {:>16.10}  ← const?     │",
+        t.r2_times_ln
+    );
+    eprintln!(
+        "  │  Q/ln²N         = {:>16.10}                │",
+        t.q_over_ln2
+    );
+    eprintln!(
+        "  │  C_recon         = {:>16.10}  ← ≈2.87?     │",
+        t.c_recon
+    );
     eprintln!("  ├─────────────────────────────────────────────────┤");
     eprintln!("  │  PNT SUB-SUMS                                  │");
     eprintln!("  │  S₁ = Σμ/k      = {:>16.10}  → 0           │", t.s1);
     eprintln!("  │  S₂ = Σμlnk/k   = {:>16.10}  → -1          │", t.s2);
     eprintln!("  │  S₃ = Σμln²k/k  = {:>16.10}  → -2γ         │", t.s3);
     eprintln!("  │  M(N)           = {:>16.0}                │", t.mertens);
-    eprintln!("  │  M(N)/√N        = {:>16.10}                │", t.mertens_over_sqrt);
+    eprintln!(
+        "  │  M(N)/√N        = {:>16.10}                │",
+        t.mertens_over_sqrt
+    );
     eprintln!("  ├─────────────────────────────────────────────────┤");
     eprintln!("  │  CROSS-CHECK                                   │");
-    let recon = t.u_sum.value() - 2.0/ln_n * t.l_sum.value() + t.q_sum.value()/(ln_n*ln_n);
+    let recon = t.u_sum.value() - 2.0 / ln_n * t.l_sum.value() + t.q_sum.value() / (ln_n * ln_n);
     let vtgv = d.total.value();
     eprintln!("  │  vᵀGv (runner)   = {:>16.10}               │", vtgv);
-    eprintln!("  │  vᵀGv (recon)    = {:>16.10}               │", t.vtgv_recon);
+    eprintln!(
+        "  │  vᵀGv (recon)    = {:>16.10}               │",
+        t.vtgv_recon
+    );
     eprintln!("  │  U-2L/lnN+Q/ln²N = {:>16.10}               │", recon);
-    eprintln!("  │  Δ runner↔recon  = {:>16.2e}               │", (t.vtgv_recon - vtgv).abs());
-    eprintln!("  │  Δ runner↔taper  = {:>16.2e}               │", (recon - vtgv).abs());
+    eprintln!(
+        "  │  Δ runner↔recon  = {:>16.2e}               │",
+        (t.vtgv_recon - vtgv).abs()
+    );
+    eprintln!(
+        "  │  Δ runner↔taper  = {:>16.2e}               │",
+        (recon - vtgv).abs()
+    );
     eprintln!("  └─────────────────────────────────────────────────┘");
 
     // GCD-stratified taper with per-stratum R₂
@@ -323,8 +371,10 @@ pub fn print_taper_summary(d: &Decomp) {
         let q_d = d.taper.q_by_gcd[d_val].value();
         if u_d.abs() > 1e-15 || l_d.abs() > 1e-15 {
             let r2_d = u_d - 2.0 * l_d / ln_n;
-            eprintln!("  │  {:>3}  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
-                d_val, u_d, l_d, q_d, r2_d);
+            eprintln!(
+                "  │  {:>3}  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
+                d_val, u_d, l_d, q_d, r2_d
+            );
         }
     }
     // Show sum and verify it matches totals
@@ -333,11 +383,15 @@ pub fn print_taper_summary(d: &Decomp) {
     let q_sum_gcd: f64 = (1..=d.max_gcd).map(|i| d.taper.q_by_gcd[i].value()).sum();
     let r2_sum = u_sum_gcd - 2.0 * l_sum_gcd / ln_n;
     eprintln!("  ├───────────────────────────────────────────────────────────────────────────┤");
-    eprintln!("  │  SUM  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
-        u_sum_gcd, l_sum_gcd, q_sum_gcd, r2_sum);
-    eprintln!("  │  Δ vs total: U={:.2e}  L={:.2e}  Q={:.2e}                      │",
+    eprintln!(
+        "  │  SUM  {:>14.8}  {:>14.8}  {:>14.8}  {:>14.8}  │",
+        u_sum_gcd, l_sum_gcd, q_sum_gcd, r2_sum
+    );
+    eprintln!(
+        "  │  Δ vs total: U={:.2e}  L={:.2e}  Q={:.2e}                      │",
         (u_sum_gcd - t.u_sum.value()).abs(),
         (l_sum_gcd - t.l_sum.value()).abs(),
-        (q_sum_gcd - t.q_sum.value()).abs());
+        (q_sum_gcd - t.q_sum.value()).abs()
+    );
     eprintln!("  └───────────────────────────────────────────────────────────────────────────┘");
 }

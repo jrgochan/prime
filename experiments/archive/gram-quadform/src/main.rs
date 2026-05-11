@@ -33,7 +33,11 @@ const WHITE: &str = "\x1b[97m";
 const RESET: &str = "\x1b[0m";
 
 fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
+    if b {
+        "\x1b[32m✓\x1b[0m"
+    } else {
+        "\x1b[31m✗\x1b[0m"
+    }
 }
 
 // ═══════════════════════════════════════════════
@@ -45,10 +49,14 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
     let mut spf = vec![0usize; n + 1];
     mu[1] = 1;
     for p in 2..=n {
-        if spf[p] != 0 { continue; }
+        if spf[p] != 0 {
+            continue;
+        }
         spf[p] = p;
         for m in (2 * p..=n).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
+            if spf[m] == 0 {
+                spf[m] = p;
+            }
         }
     }
     for k in 2..=n {
@@ -58,13 +66,23 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
         while val > 1 {
             let p = spf[val];
             let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
+            while val % p == 0 {
+                val /= p;
+                c += 1;
+            }
+            if c > 1 {
+                sq = true;
+                break;
+            }
             nf += 1;
         }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
+        if sq {
+            mu[k] = 0;
+        } else if nf % 2 == 0 {
+            mu[k] = 1;
+        } else {
+            mu[k] = -1;
+        }
     }
     mu
 }
@@ -74,20 +92,30 @@ fn mobius_sieve(n: usize) -> Vec<i8> {
 // ═══════════════════════════════════════════════
 
 fn euler_gamma() -> Float {
-    Float::with_val(P, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467"
-    ).unwrap())
+    Float::with_val(
+        P,
+        Float::parse(
+            "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467",
+        )
+        .unwrap(),
+    )
 }
 
 fn gcd(a: usize, b: usize) -> usize {
     let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
+    while b != 0 {
+        let t = b;
+        b = a % b;
+        a = t;
+    }
     a
 }
 
 /// Vasyunin cotangent sum V(a,b) at 256-bit
 fn vasyunin_sum(a: usize, b: usize) -> Float {
-    if a <= 1 { return Float::with_val(P, 0); }
+    if a <= 1 {
+        return Float::with_val(P, 0);
+    }
     let af = Float::with_val(P, a as u64);
     let pi = Float::with_val(P, rug::float::Constant::Pi);
     let bf = Float::with_val(P, b as u64);
@@ -102,7 +130,9 @@ fn vasyunin_sum(a: usize, b: usize) -> Float {
         let angle = Float::with_val(P, &pm / &af);
         let c = Float::with_val(P, angle.clone().cos());
         let s = Float::with_val(P, angle.sin());
-        if s.is_zero() { continue; }
+        if s.is_zero() {
+            continue;
+        }
         let cot = Float::with_val(P, &c / &s);
         sum += Float::with_val(P, &frac * &cot);
     }
@@ -173,7 +203,10 @@ fn log_cutoff_weight(k: usize, n: usize, mu: &[i8]) -> Float {
     let nf = Float::with_val(P, n as u64);
     let log_k = kf.ln();
     let log_n = nf.ln();
-    let taper = Float::with_val(P, Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n));
+    let taper = Float::with_val(
+        P,
+        Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n),
+    );
     Float::with_val(P, -(mu[k] as f64) * &taper)
 }
 
@@ -182,18 +215,33 @@ fn main() {
     let n_threads = rayon::current_num_threads();
 
     println!();
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL GRAM QUADRATIC FORM VALIDATOR{RESET}                      {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · Certified Bounds{RESET}        {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Target: gram_form_upper_bound_34 (PerronCrown.lean:60){RESET}      {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit MPFR{RESET}                                    {BOLD}{CYAN}║{RESET}", n_threads, P);
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CATHEDRAL GRAM QUADRATIC FORM VALIDATOR{RESET}                      {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}256-bit MPFR · Massively Parallel · Certified Bounds{RESET}        {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Target: gram_form_upper_bound_34 (PerronCrown.lean:60){RESET}      {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}{} threads · {}-bit MPFR{RESET}                                    {BOLD}{CYAN}║{RESET}",
+        n_threads, P
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
     println!();
 
     fs::create_dir_all("results").unwrap();
 
     // Probe dimensions (N values)
-    let probe_ns: Vec<usize> = vec![10, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000];
+    let probe_ns: Vec<usize> = vec![
+        10, 20, 30, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000,
+    ];
 
     let sieve_max = *probe_ns.last().unwrap();
     eprintln!("  {DIM}▸ Sieving μ(k) for k ≤ {}...{RESET}", sieve_max);
@@ -204,12 +252,18 @@ fn main() {
     // Results storage
     let mut results = Vec::new();
     let mut tsv = fs::File::create("results/quadform.tsv").unwrap();
-    writeln!(tsv, "N\tvtGv\tbtv\td2_N\tvtGv_minus_1\tC_G_eff\td2_logN\ttime_s").unwrap();
+    writeln!(
+        tsv,
+        "N\tvtGv\tbtv\td2_N\tvtGv_minus_1\tC_G_eff\td2_logN\ttime_s"
+    )
+    .unwrap();
 
     println!("  {BOLD}{WHITE}═══ GRAM QUADRATIC FORM: vᵀGv, bᵀv, d²_N ═══{RESET}");
     println!("  {DIM}  v_k = -μ(k)·(1 - ln(k)/ln(N)) [log-cutoff Möbius witness]{RESET}");
     println!();
-    println!("  {DIM}     N   │  vᵀGv             │  bᵀv              │  d²_N              │  C_G·eff      │  d²·ln(N)     │ time{RESET}");
+    println!(
+        "  {DIM}     N   │  vᵀGv             │  bᵀv              │  d²_N              │  C_G·eff      │  d²·ln(N)     │ time{RESET}"
+    );
 
     for &n in &probe_ns {
         let dim = n - 1; // indices k=2..N, so dim = N-1 weights (0-indexed as k=2..N)
@@ -222,7 +276,8 @@ fn main() {
 
         // Compute Gram matrix entries in parallel
         // G(j,k) for j,k ∈ {2, ..., N}
-        let gram_entries: Vec<(usize, usize, Float)> = (0..dim).into_par_iter()
+        let gram_entries: Vec<(usize, usize, Float)> = (0..dim)
+            .into_par_iter()
             .flat_map(|ji| {
                 (ji..dim).into_par_iter().map(move |ki| {
                     let j = ji + 2; // 1-indexed, starting at 2
@@ -230,16 +285,15 @@ fn main() {
                     let g = gram_entry(j, k);
                     (ji, ki, g)
                 })
-            }).collect();
+            })
+            .collect();
 
         // Build full-precision Gram matrix storage
         // Store only upper triangle + diagonal
         let gram_hp: Vec<(usize, usize, Float)> = gram_entries;
 
         // Compute weights at full precision
-        let weights: Vec<Float> = (0..dim).map(|i| {
-            log_cutoff_weight(i + 2, n, &mu)
-        }).collect();
+        let weights: Vec<Float> = (0..dim).map(|i| log_cutoff_weight(i + 2, n, &mu)).collect();
 
         // Compute mean entries b_k = 1 - 1/k for k=2..N
         let means: Vec<Float> = (0..dim).map(|i| mean_entry(i + 2)).collect();
@@ -285,11 +339,17 @@ fn main() {
         let d2_logn = d2 * log_n;
         let elapsed = t.elapsed().as_secs_f64();
 
-        writeln!(tsv, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.3}",
-            n, vtgv, btv, d2, vtgv_m1, c_g_eff, d2_logn, elapsed).unwrap();
+        writeln!(
+            tsv,
+            "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.3}",
+            n, vtgv, btv, d2, vtgv_m1, c_g_eff, d2_logn, elapsed
+        )
+        .unwrap();
 
-        println!("    {:>5} │  {MAGENTA}{:>18.12e}{RESET} │  {:>18.12e} │  {YELLOW}{:>18.12e}{RESET} │  {:>12.6} │  {:>12.6} │ {:.2}s",
-            n, vtgv, btv, d2, c_g_eff, d2_logn, elapsed);
+        println!(
+            "    {:>5} │  {MAGENTA}{:>18.12e}{RESET} │  {:>18.12e} │  {YELLOW}{:>18.12e}{RESET} │  {:>12.6} │  {:>12.6} │ {:.2}s",
+            n, vtgv, btv, d2, c_g_eff, d2_logn, elapsed
+        );
 
         results.push((n, vtgv, btv, d2, c_g_eff, d2_logn, elapsed));
     }
@@ -298,28 +358,58 @@ fn main() {
     println!();
     let d2_decreasing = results.windows(2).all(|w| w[1].3 <= w[0].3 * 1.05);
     let d2_logn_vals: Vec<f64> = results.iter().filter(|r| r.0 >= 30).map(|r| r.5).collect();
-    let d2_logn_avg = if d2_logn_vals.is_empty() { 0.0 }
-        else { d2_logn_vals.iter().sum::<f64>() / d2_logn_vals.len() as f64 };
+    let d2_logn_avg = if d2_logn_vals.is_empty() {
+        0.0
+    } else {
+        d2_logn_vals.iter().sum::<f64>() / d2_logn_vals.len() as f64
+    };
 
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}GRAM QUADRATIC FORM VALIDATOR — CERTIFICATE{RESET}                {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}", P, n_threads);
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}GRAM QUADRATIC FORM VALIDATOR — CERTIFICATE{RESET}                {BOLD}{CYAN}║{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{}-bit MPFR{RESET}    Threads: {YELLOW}{}{RESET}",
+        P, n_threads
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§A. gram_form_upper_bound_34{RESET}  (vᵀGv ≤ 1 + C_G/ln(N))");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}§A. gram_form_upper_bound_34{RESET}  (vᵀGv ≤ 1 + C_G/ln(N))"
+    );
     for r in &results {
-        println!("  {BOLD}{CYAN}║{RESET}    N={:>5}: vᵀGv-1 = {:.8e}, C_G·eff = {:.6}  {}",
-            r.0, r.4, r.4, check(r.4 > 0.0));
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    N={:>5}: vᵀGv-1 = {:.8e}, C_G·eff = {:.6}  {}",
+            r.0,
+            r.4,
+            r.4,
+            check(r.4 > 0.0)
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§B. d²_N → 0 convergence{RESET}  (RH prediction)");
-    println!("  {BOLD}{CYAN}║{RESET}    {} d²_N approximately decreasing", check(d2_decreasing));
-    println!("  {BOLD}{CYAN}║{RESET}    d²·ln(N) ≈ {YELLOW}{:.6}{RESET} (should stabilize ≈ C ≈ 21.65)", d2_logn_avg);
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    {} d²_N approximately decreasing",
+        check(d2_decreasing)
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}    d²·ln(N) ≈ {YELLOW}{:.6}{RESET} (should stabilize ≈ C ≈ 21.65)",
+        d2_logn_avg
+    );
     for r in &results {
-        println!("  {BOLD}{CYAN}║{RESET}    N={:>5}: d²_N = {:.8e}, d²·ln(N) = {:.6}", r.0, r.3, r.5);
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    N={:>5}: d²_N = {:.8e}, d²·ln(N) = {:.6}",
+            r.0, r.3, r.5
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Summary JSON
     let summary = format!(r#"{{
@@ -351,7 +441,7 @@ fn main() {
     println!();
     let mut oracle_lean = String::new();
     for r in &results {
-        let d2_upper = (r.3 * 1.001 + 1e-15).max(r.3 + 1e-12);  // safety margin
+        let d2_upper = (r.3 * 1.001 + 1e-15).max(r.3 + 1e-12); // safety margin
         oracle_lean += &format!(
             "/-- Oracle: N={}, 256-bit MPFR, d² = {:.15e} --/\n\
              axiom oracle_witness_bound_{} :\n\
@@ -359,15 +449,23 @@ fn main() {
              \x20     ∫ x in (0:ℝ)..1, (1 - nbLinComb {} v x) ^ 2 < {:.6}\n\n",
             r.0, r.3, r.0, r.0, r.0, d2_upper
         );
-        println!("  {GREEN}✓{RESET} oracle_witness_bound_{}: d² < {:.6}",
-            r.0, d2_upper);
+        println!(
+            "  {GREEN}✓{RESET} oracle_witness_bound_{}: d² < {:.6}",
+            r.0, d2_upper
+        );
     }
     fs::write("results/oracle_axioms.lean", &oracle_lean).unwrap();
     println!();
     println!("  {BOLD}{WHITE}Oracle file:{RESET} results/oracle_axioms.lean");
 
     println!();
-    println!("  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)", t_global.elapsed().as_secs_f64(), n_threads);
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{quadform.tsv, certificate.json, oracle_axioms.lean}}");
+    println!(
+        "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({} threads)",
+        t_global.elapsed().as_secs_f64(),
+        n_threads
+    );
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{quadform.tsv, certificate.json, oracle_axioms.lean}}"
+    );
     println!();
 }

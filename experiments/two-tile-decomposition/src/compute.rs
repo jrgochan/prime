@@ -1,8 +1,8 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  Computational primitives — MPFR row integrals, strip, row terms
 //! ═══════════════════════════════════════════════════════════════════════════
-use rug::Float;
 use crate::PREC;
+use rug::Float;
 
 // ─────────────────────────────────────────────────────────────────────────
 // MPFR helpers
@@ -10,12 +10,15 @@ use crate::PREC;
 
 /// Signed integer → MPFR.
 #[inline]
-pub fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
+pub fn fp(x: i64) -> Float {
+    Float::with_val(PREC, x)
+}
 
 /// Unsigned → MPFR.
 #[inline]
-pub fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
-
+pub fn fu(x: usize) -> Float {
+    Float::with_val(PREC, x as u64)
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // §1. EXACT ROW INTEGRAL (piecewise FTC)
@@ -42,7 +45,7 @@ pub fn exact_row_integral(a: usize, b: usize, m: usize) -> Float {
     let row_hi = Float::with_val(PREC, fp(1) / Float::with_val(PREC, &af * &mf));
 
     // Range of ⌊1/(bx)⌋ on this row
-    let n_hi = (a * m) / b;       // at x = row_hi = 1/(am)
+    let n_hi = (a * m) / b; // at x = row_hi = 1/(am)
     let n_lo = (a * (m + 1)) / b; // at x = row_lo = 1/(a(m+1))
 
     // Antiderivative on tile (m, n)
@@ -84,7 +87,9 @@ pub fn exact_row_integral(a: usize, b: usize, m: usize) -> Float {
                 let bn = Float::with_val(PREC, &bf * fu(n));
                 Float::with_val(PREC, fp(1) / &bn)
             };
-            if tile_lo >= tile_hi { continue; }
+            if tile_lo >= tile_hi {
+                continue;
+            }
             let f_hi = eval_f(&tile_hi, n);
             let f_lo = eval_f(&tile_lo, n);
             total += Float::with_val(PREC, &f_hi - &f_lo);

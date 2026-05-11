@@ -27,7 +27,9 @@ pub fn run_cg_with_tol(env: &mut CathedralEnv, max_steps: usize, tol: f64) -> us
     cg.tolerance = tol;
     let mut steps = 0;
 
-    eprintln!("    {DIM}CG config: max_steps={max_steps}, tol={tol:.2e}, preconditioner=Jacobi{RESET}");
+    eprintln!(
+        "    {DIM}CG config: max_steps={max_steps}, tol={tol:.2e}, preconditioner=Jacobi{RESET}"
+    );
 
     let t0 = Instant::now();
 
@@ -55,7 +57,11 @@ pub fn run_cg_with_tol(env: &mut CathedralEnv, max_steps: usize, tol: f64) -> us
         if i % log_interval == 0 {
             let rel_res = cg.relative_residual();
             let elapsed = t0.elapsed().as_secs_f64();
-            let matvecs_per_sec = if elapsed > 0.0 { steps as f64 / elapsed } else { 0.0 };
+            let matvecs_per_sec = if elapsed > 0.0 {
+                steps as f64 / elapsed
+            } else {
+                0.0
+            };
             eprint!("\r    CG step {i:>5}: ||r||/||r₀||={rel_res:.4e}  |δ|={norm:.4e}  [{matvecs_per_sec:.0} mv/s]      ");
         }
 
@@ -89,7 +95,9 @@ pub fn run_cg_with_tol(env: &mut CathedralEnv, max_steps: usize, tol: f64) -> us
 
     let elapsed = t0.elapsed().as_secs_f64();
     let final_d2_str = last_d2.map_or("(not computed)".to_string(), |d| format!("{d:.10e}"));
-    eprintln!("    {DIM}CG wall time: {elapsed:.2}s ({steps} matvecs, final d²={final_d2_str}){RESET}");
+    eprintln!(
+        "    {DIM}CG wall time: {elapsed:.2}s ({steps} matvecs, final d²={final_d2_str}){RESET}"
+    );
     steps
 }
 
@@ -119,7 +127,10 @@ pub fn run_es(env: &mut CathedralEnv, generations: usize, pop_size: usize, sigma
         let result = es.evolve(env);
 
         if g % 10 == 0 || g == generations - 1 {
-            eprint!("\r    ES gen {g:>4}: best_d²={:.10e}  σ={:.6}      ", result.best_d2, result.sigma);
+            eprint!(
+                "\r    ES gen {g:>4}: best_d²={:.10e}  σ={:.6}      ",
+                result.best_d2, result.sigma
+            );
         }
     }
     eprintln!();

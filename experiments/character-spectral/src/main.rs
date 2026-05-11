@@ -19,8 +19,8 @@ mod characters;
 mod gram;
 mod spectral;
 
-use characters::*;
 use cathedral_utils::fmt::*;
+use characters::*;
 use gram::PREC;
 use std::fs;
 use std::io::Write;
@@ -37,9 +37,7 @@ fn main() {
 
     header(
         "CATHEDRAL CHARACTER-PROJECTED SPECTRAL PROBE",
-        &format!(
-            "G_χ(j,k) = χ(j)·G(j,k)·χ(k) weighted projections · max N = {max_n}"
-        ),
+        &format!("G_χ(j,k) = χ(j)·G(j,k)·χ(k) weighted projections · max N = {max_n}"),
         PREC,
         threads,
     );
@@ -74,7 +72,7 @@ fn main() {
     struct NResult {
         n: usize,
         full_eigs: Vec<f64>,
-        res_eigs: [Vec<f64>; 4],  // residue classes k≡1,3,5,7 mod 8
+        res_eigs: [Vec<f64>; 4], // residue classes k≡1,3,5,7 mod 8
         odd_eigs: Vec<f64>,
         even_eigs: Vec<f64>,
         res_dims: [usize; 4],
@@ -85,12 +83,15 @@ fn main() {
         let t_n = Instant::now();
 
         // ═══ §A. GRAM MATRIX & RESIDUE CLASS PROJECTION ═══
-        println!("  {BOLD}{WHITE}═══ §A. GRAM MATRIX & RESIDUE CLASS PROJECTION (N={n}) ═══{RESET}");
+        println!(
+            "  {BOLD}{WHITE}═══ §A. GRAM MATRIX & RESIDUE CLASS PROJECTION (N={n}) ═══{RESET}"
+        );
 
         let (full_mat, full_dim) = gram::build_gram_matrix_mpfr(n);
 
         // Residue class indices mod 8
-        let res_indices: Vec<Vec<usize>> = RESIDUE_CLASSES.iter()
+        let res_indices: Vec<Vec<usize>> = RESIDUE_CLASSES
+            .iter()
             .map(|&r| residue_indices(n, r))
             .collect();
         let odd_idx = odd_indices(n);
@@ -98,9 +99,12 @@ fn main() {
 
         println!(
             "    Full dim: {full_dim} | Odd: {} | Even: {} | k≡1: {} | k≡3: {} | k≡5: {} | k≡7: {}",
-            odd_idx.len(), even_idx.len(),
-            res_indices[0].len(), res_indices[1].len(),
-            res_indices[2].len(), res_indices[3].len()
+            odd_idx.len(),
+            even_idx.len(),
+            res_indices[0].len(),
+            res_indices[1].len(),
+            res_indices[2].len(),
+            res_indices[3].len()
         );
 
         // Dimension consistency checks
@@ -112,11 +116,13 @@ fn main() {
         );
         println!(
             "    {} Σ dim(k≡r) = {dim_res} = dim(odd) = {} (residues partition odd sector)",
-            check(dim_res == odd_idx.len()), odd_idx.len()
+            check(dim_res == odd_idx.len()),
+            odd_idx.len()
         );
 
         // Project sub-matrices — RESIDUE CLASSES (genuinely different!)
-        let res_mats: Vec<Vec<rug::Float>> = res_indices.iter()
+        let res_mats: Vec<Vec<rug::Float>> = res_indices
+            .iter()
             .map(|idx| gram::project_gram(&full_mat, full_dim, idx))
             .collect();
         let odd_mat = gram::project_gram(&full_mat, full_dim, &odd_idx);
@@ -125,7 +131,9 @@ fn main() {
         // ═══ §B. EIGENVALUE EXTRACTION ═══
         println!();
         println!("  {BOLD}{WHITE}═══ §B. EIGENVALUE EXTRACTION (N={n}) ═══{RESET}");
-        println!("  {DIM}  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time{RESET}");
+        println!(
+            "  {DIM}  channel    │  dim  │  λ_min         │  λ_max         │  κ(G)       │ time{RESET}"
+        );
 
         let full_eigs = gram::eigenvalues_jacobi_mpfr(&full_mat, full_dim);
         let full_t = t_n.elapsed().as_secs_f64();
@@ -150,12 +158,22 @@ fn main() {
 
         let t_odd = Instant::now();
         let odd_eigs = gram::eigenvalues_jacobi_mpfr(&odd_mat, odd_idx.len());
-        print_eig_row("Odd sector", odd_idx.len(), &odd_eigs, t_odd.elapsed().as_secs_f64());
+        print_eig_row(
+            "Odd sector",
+            odd_idx.len(),
+            &odd_eigs,
+            t_odd.elapsed().as_secs_f64(),
+        );
         save_eigenvalues(&format!("results/eigenvalues_odd_N{n}.tsv"), &odd_eigs);
 
         let t_even = Instant::now();
         let even_eigs = gram::eigenvalues_jacobi_mpfr(&even_mat, even_idx.len());
-        print_eig_row("Dark (even)", even_idx.len(), &even_eigs, t_even.elapsed().as_secs_f64());
+        print_eig_row(
+            "Dark (even)",
+            even_idx.len(),
+            &even_eigs,
+            t_even.elapsed().as_secs_f64(),
+        );
         save_eigenvalues(&format!("results/eigenvalues_even_N{n}.tsv"), &even_eigs);
 
         // Trace check
@@ -164,13 +182,18 @@ fn main() {
         let tr_err = (tr_full - tr_odd_even).abs() / tr_full.abs().max(1e-30);
         println!(
             "    {} Tr(full) = {:.6} ≈ Tr(odd)+Tr(even) = {:.6} (err={:.2e})",
-            check(tr_err < 0.01), tr_full, tr_odd_even, tr_err
+            check(tr_err < 0.01),
+            tr_full,
+            tr_odd_even,
+            tr_err
         );
         println!();
 
         // ═══ §C. LEVEL SPACING ═══
         println!("  {BOLD}{WHITE}═══ §C. LEVEL SPACING — UNIVERSALITY CLASS (N={n}) ═══{RESET}");
-        println!("  {DIM}  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class{RESET}");
+        println!(
+            "  {DIM}  channel    │ GUE(β=2) │ GOE(β=1) │ GSE(β=4) │ Poisson  │ best class{RESET}"
+        );
 
         let channels_to_test: Vec<(&str, &[f64])> = vec![
             ("Full G_N", &full_eigs),
@@ -183,7 +206,11 @@ fn main() {
         ];
 
         let mut tsv_sp = fs::File::create(format!("results/spacing_N{n}.tsv")).unwrap();
-        writeln!(tsv_sp, "channel\tgue_fit\tgoe_fit\tgse_fit\tpoisson_fit\tbest_class").unwrap();
+        writeln!(
+            tsv_sp,
+            "channel\tgue_fit\tgoe_fit\tgse_fit\tpoisson_fit\tbest_class"
+        )
+        .unwrap();
 
         for (name, eigs) in &channels_to_test {
             let sr = spectral::compute_spacing(eigs);
@@ -192,9 +219,11 @@ fn main() {
                 name, sr.gue_fit, sr.goe_fit, sr.gse_fit, sr.poisson_fit, sr.best_class
             );
             writeln!(
-                tsv_sp, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
+                tsv_sp,
+                "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{}",
                 name, sr.gue_fit, sr.goe_fit, sr.gse_fit, sr.poisson_fit, sr.best_class
-            ).unwrap();
+            )
+            .unwrap();
         }
         println!();
 
@@ -205,13 +234,25 @@ fn main() {
         writeln!(tsv_vh, "channel\tA\tE0\tB\tR2").unwrap();
 
         for (name, eigs) in &channels_to_test {
-            if eigs.len() < 5 { continue; }
+            if eigs.len() < 5 {
+                continue;
+            }
             let (a, e0, b, r2) = spectral::fit_van_hove(eigs, 0.20);
             println!(
                 "    {:<14}: A={:.6} E₀={:.6e} B={:.6} R²={:.4} {}",
-                name, a, e0, b, r2, check(r2 > 0.85)
+                name,
+                a,
+                e0,
+                b,
+                r2,
+                check(r2 > 0.85)
             );
-            writeln!(tsv_vh, "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}", name, a, e0, b, r2).unwrap();
+            writeln!(
+                tsv_vh,
+                "{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}",
+                name, a, e0, b, r2
+            )
+            .unwrap();
         }
         println!();
 
@@ -231,8 +272,11 @@ fn main() {
             println!(
                 "    {} Dark sector is {}",
                 check(is_poisson),
-                if is_poisson { "Poisson (uncorrelated)" }
-                else { "correlated — dark sector developed spectral rigidity" }
+                if is_poisson {
+                    "Poisson (uncorrelated)"
+                } else {
+                    "correlated — dark sector developed spectral rigidity"
+                }
             );
         } else {
             println!("    {DIM}Not enough eigenvalues for dark sector analysis{RESET}");
@@ -252,10 +296,21 @@ fn main() {
                 let independent = rho.abs() < 0.3;
                 println!(
                     "    {} vs {} : ρ = {:+.4} {}",
-                    RESIDUE_NAMES[i], RESIDUE_NAMES[j], rho,
-                    if independent { check(true) } else { check(false) }
+                    RESIDUE_NAMES[i],
+                    RESIDUE_NAMES[j],
+                    rho,
+                    if independent {
+                        check(true)
+                    } else {
+                        check(false)
+                    }
                 );
-                writeln!(tsv_cc, "{}\t{}\t{:.15e}", RESIDUE_NAMES[i], RESIDUE_NAMES[j], rho).unwrap();
+                writeln!(
+                    tsv_cc,
+                    "{}\t{}\t{:.15e}",
+                    RESIDUE_NAMES[i], RESIDUE_NAMES[j], rho
+                )
+                .unwrap();
             }
         }
         let rho_full_odd = spectral::staircase_correlation(&full_eigs, &odd_eigs);
@@ -269,16 +324,28 @@ fn main() {
         );
 
         all_results.push(NResult {
-            n, full_eigs, res_eigs: res_eigs_arr,
-            odd_eigs, even_eigs, res_dims,
+            n,
+            full_eigs,
+            res_eigs: res_eigs_arr,
+            odd_eigs,
+            even_eigs,
+            res_dims,
         });
     }
 
     // ═══ CERTIFICATE ═══
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CHARACTER-PROJECTED SPECTRAL PROBE — CERTIFICATE{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{PREC}-bit MPFR{RESET}    Threads: {YELLOW}{threads}{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}CHARACTER-PROJECTED SPECTRAL PROBE — CERTIFICATE{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{PREC}-bit MPFR{RESET}    Threads: {YELLOW}{threads}{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  Characters: {YELLOW}mod 8 (4 channels){RESET}");
     println!("  {BOLD}{CYAN}║{RESET}");
 
@@ -309,14 +376,22 @@ fn main() {
             && even_sp.poisson_fit > even_sp.gse_fit;
         println!("  {BOLD}{CYAN}║{RESET}  {BOLD}Dark Sector Hypothesis:{RESET}");
         if dark_poisson {
-            println!("  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ Dark sector (even) is Poisson — uncorrelated{RESET}");
-            println!("  {BOLD}{CYAN}║{RESET}    {GREEN}  Characters partition the quantum chaos{RESET}");
+            println!(
+                "  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ Dark sector (even) is Poisson — uncorrelated{RESET}"
+            );
+            println!(
+                "  {BOLD}{CYAN}║{RESET}    {GREEN}  Characters partition the quantum chaos{RESET}"
+            );
         } else {
-            println!("  {BOLD}{CYAN}║{RESET}    {RED}✗ Dark sector shows correlations — unexpected{RESET}");
+            println!(
+                "  {BOLD}{CYAN}║{RESET}    {RED}✗ Dark sector shows correlations — unexpected{RESET}"
+            );
         }
     }
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // JSON certificate
     let cert = format!(
@@ -356,20 +431,28 @@ fn main() {
         "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads)",
         t0.elapsed().as_secs_f64()
     );
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{eigenvalues_*,spacing_*,dos_*,van_hove_*,cross_corr_*}}.tsv");
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{eigenvalues_*,spacing_*,dos_*,van_hove_*,cross_corr_*}}.tsv"
+    );
     println!("  {BOLD}{WHITE}Certificate:{RESET} results/certificate.json");
     println!();
 }
 
 fn print_eig_row(name: &str, dim: usize, eigs: &[f64], elapsed: f64) {
     if eigs.is_empty() {
-        println!("  {:<14} │ {:>5} │ {:<14} │ {:<14} │ {:<11} │ {:.1}s",
-            name, dim, "N/A", "N/A", "N/A", elapsed);
+        println!(
+            "  {:<14} │ {:>5} │ {:<14} │ {:<14} │ {:<11} │ {:.1}s",
+            name, dim, "N/A", "N/A", "N/A", elapsed
+        );
         return;
     }
     let lmin = eigs[0];
     let lmax = eigs[eigs.len() - 1];
-    let kappa = if lmin.abs() > 1e-30 { lmax / lmin } else { f64::INFINITY };
+    let kappa = if lmin.abs() > 1e-30 {
+        lmax / lmin
+    } else {
+        f64::INFINITY
+    };
     println!(
         "  {:<14} │ {:>5} │ {:>14.10} │ {:>14.10} │ {:>11.3e} │ {:.1}s",
         name, dim, lmin, lmax, kappa, elapsed

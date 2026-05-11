@@ -22,7 +22,7 @@ use rayon::prelude::*;
 use std::time::Instant;
 
 use cathedral_utils::arith::gcd;
-use cathedral_utils::gram::{build_gram_matrix_f64};
+use cathedral_utils::gram::build_gram_matrix_f64;
 
 // ═══════════════════════════════════════════════════════════════════════
 // INVERSE POWER ITERATION (O(k·N²) instead of O(N³))
@@ -30,7 +30,12 @@ use cathedral_utils::gram::{build_gram_matrix_f64};
 // ═══════════════════════════════════════════════════════════════════════
 
 /// Solve Ax = b using Cholesky-like LU decomposition via nalgebra
-fn ground_state_inverse_iter(mat: &[f64], dim: usize, max_iter: usize, tol: f64) -> (f64, Vec<f64>) {
+fn ground_state_inverse_iter(
+    mat: &[f64],
+    dim: usize,
+    max_iter: usize,
+    tol: f64,
+) -> (f64, Vec<f64>) {
     // For the ground state, we use shift-and-invert:
     // We want the smallest eigenvalue λ_min of G.
     // Shift: (G - σI)^{-1} has largest eigenvalue 1/(λ_min - σ)
@@ -58,7 +63,7 @@ fn ground_state_inverse_iter(mat: &[f64], dim: usize, max_iter: usize, tol: f64)
         // w = G^{-1} v  (solve Gw = v)
         let w = match lu.solve(&v) {
             Some(w) => w,
-            None => break,  // Singular — shouldn't happen for PD matrix
+            None => break, // Singular — shouldn't happen for PD matrix
         };
 
         // Rayleigh quotient: λ^{-1} ≈ v^T w / v^T v
@@ -86,25 +91,37 @@ fn ground_state_inverse_iter(mat: &[f64], dim: usize, max_iter: usize, tol: f64)
 // ═══════════════════════════════════════════════════════════════════════
 
 fn is_prime(n: usize) -> bool {
-    if n < 2 { return false; }
-    if n < 4 { return true; }
-    if n % 2 == 0 || n % 3 == 0 { return false; }
+    if n < 2 {
+        return false;
+    }
+    if n < 4 {
+        return true;
+    }
+    if n % 2 == 0 || n % 3 == 0 {
+        return false;
+    }
     let mut i = 5;
     while i * i <= n {
-        if n % i == 0 || n % (i + 2) == 0 { return false; }
+        if n % i == 0 || n % (i + 2) == 0 {
+            return false;
+        }
         i += 6;
     }
     true
 }
 
 fn num_divisors(n: usize) -> usize {
-    if n == 0 { return 0; }
+    if n == 0 {
+        return 0;
+    }
     let mut count = 0;
     let mut i = 1;
     while i * i <= n {
         if n % i == 0 {
             count += 1;
-            if i != n / i { count += 1; }
+            if i != n / i {
+                count += 1;
+            }
         }
         i += 1;
     }
@@ -112,13 +129,17 @@ fn num_divisors(n: usize) -> usize {
 }
 
 fn divisor_sum(n: usize) -> usize {
-    if n == 0 { return 0; }
+    if n == 0 {
+        return 0;
+    }
     let mut total = 0;
     let mut i = 1;
     while i * i <= n {
         if n % i == 0 {
             total += i;
-            if i != n / i { total += n / i; }
+            if i != n / i {
+                total += n / i;
+            }
         }
         i += 1;
     }
@@ -127,24 +148,32 @@ fn divisor_sum(n: usize) -> usize {
 
 /// Prime factorization: number of distinct prime factors (omega)
 fn omega(n: usize) -> usize {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0;
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
         if m % p == 0 {
             count += 1;
-            while m % p == 0 { m /= p; }
+            while m % p == 0 {
+                m /= p;
+            }
         }
         p += 1;
     }
-    if m > 1 { count += 1; }
+    if m > 1 {
+        count += 1;
+    }
     count
 }
 
 /// Total prime factors with multiplicity (Omega)
 fn big_omega(n: usize) -> usize {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0;
     let mut m = n;
     let mut p = 2;
@@ -155,7 +184,9 @@ fn big_omega(n: usize) -> usize {
         }
         p += 1;
     }
-    if m > 1 { count += 1; }
+    if m > 1 {
+        count += 1;
+    }
     count
 }
 
@@ -163,7 +194,9 @@ fn big_omega(n: usize) -> usize {
 fn hub_connectivity(k: usize, n: usize) -> usize {
     let mut total = 0;
     for j in 2..=n {
-        if j != k { total += gcd(k, j); }
+        if j != k {
+            total += gcd(k, j);
+        }
     }
     total
 }
@@ -174,35 +207,35 @@ fn hub_connectivity(k: usize, n: usize) -> usize {
 
 #[derive(Debug)]
 struct Particle {
-    k: usize,                // The integer
-    weight: f64,             // |⟨k|ψ₀⟩|²
+    k: usize,    // The integer
+    weight: f64, // |⟨k|ψ₀⟩|²
     is_prime: bool,
-    divisor_count: usize,    // d(k)
-    divisor_sum: usize,      // σ(k)
-    omega: usize,            // distinct prime factors
-    big_omega: usize,        // total prime factors with multiplicity
-    hub_score: usize,        // Σ gcd(k,j) for j≠k
+    divisor_count: usize, // d(k)
+    divisor_sum: usize,   // σ(k)
+    omega: usize,         // distinct prime factors
+    big_omega: usize,     // total prime factors with multiplicity
+    hub_score: usize,     // Σ gcd(k,j) for j≠k
     classification: &'static str,
 }
 
 fn classify(weight: f64, median_weight: f64, is_prime: bool) -> &'static str {
     if is_prime {
         if weight < median_weight * 0.5 {
-            "gauge boson (light)"    // Very low weight prime — pure mediator
+            "gauge boson (light)" // Very low weight prime — pure mediator
         } else if weight < median_weight {
-            "gauge boson"            // Below-average prime
+            "gauge boson" // Below-average prime
         } else {
-            "excited boson"          // Rare: prime with significant weight
+            "excited boson" // Rare: prime with significant weight
         }
     } else {
         if weight > median_weight * 3.0 {
-            "heavy fermion"          // Very high weight composite — gravity well
+            "heavy fermion" // Very high weight composite — gravity well
         } else if weight > median_weight * 1.5 {
-            "fermion"               // Significant composite
+            "fermion" // Significant composite
         } else if weight > median_weight {
-            "light fermion"         // Moderate composite
+            "light fermion" // Moderate composite
         } else {
-            "spectator"             // Low-weight composite (neither boson nor fermion)
+            "spectator" // Low-weight composite (neither boson nor fermion)
         }
     }
 }
@@ -214,14 +247,23 @@ fn classify(weight: f64, median_weight: f64, is_prime: bool) -> &'static str {
 fn analyze(n: usize) {
     let t0 = Instant::now();
 
-    println!("\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
+    println!(
+        "\n  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}BOSON-FERMION CLASSIFICATION · N = {n}{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {DIM}Computing Gram matrix + ground state eigenvector...{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {DIM}Computing Gram matrix + ground state eigenvector...{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // Build Gram matrix
     let (mat, dim) = build_gram_matrix_f64(n);
-    println!("  {DIM}Gram matrix: {dim}×{dim} ({:.1}s){RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "  {DIM}Gram matrix: {dim}×{dim} ({:.1}s){RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Ground state via inverse power iteration (O(N² · k) instead of O(N³))
     let use_fast = dim > 500;
@@ -232,7 +274,9 @@ fn analyze(n: usize) {
         // For small matrices, full eigendecomposition is fine
         let m = nalgebra::DMatrix::from_row_slice(dim, dim, &mat);
         let eigen = m.symmetric_eigen();
-        let mut indexed: Vec<(usize, f64)> = eigen.eigenvalues.iter()
+        let mut indexed: Vec<(usize, f64)> = eigen
+            .eigenvalues
+            .iter()
             .enumerate()
             .map(|(i, &v)| (i, v))
             .collect();
@@ -243,14 +287,20 @@ fn analyze(n: usize) {
             .collect();
         (lmin, gv)
     };
-    println!("  {DIM}λ_min = {lambda_min:.10e} ({:.1}s){RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "  {DIM}λ_min = {lambda_min:.10e} ({:.1}s){RESET}",
+        t0.elapsed().as_secs_f64()
+    );
 
     // Compute hub connectivity — use divisor_sum as O(√k) proxy for large N
     // (divisor_sum is proportional to hub connectivity but O(√k) instead of O(N))
     let hub_scores: Vec<usize> = if n > 3000 {
         (2..=n).into_par_iter().map(divisor_sum).collect()
     } else {
-        (2..=n).into_par_iter().map(|k| hub_connectivity(k, n)).collect()
+        (2..=n)
+            .into_par_iter()
+            .map(|k| hub_connectivity(k, n))
+            .collect()
     };
 
     // Build particle table
@@ -267,7 +317,7 @@ fn analyze(n: usize) {
             omega: omega(k),
             big_omega: big_omega(k),
             hub_score: hub_scores[i],
-            classification: "",  // filled below
+            classification: "", // filled below
         });
     }
 
@@ -286,18 +336,34 @@ fn analyze(n: usize) {
     by_weight.sort_by(|a, b| b.weight.partial_cmp(&a.weight).unwrap());
 
     println!("\n  {BOLD}{WHITE}═══ TOP 20 HEAVY FERMIONS (highest ground-state weight) ═══{RESET}");
-    println!("  {DIM}rank │   k   │  |⟨k|ψ₀⟩|²  │ d(k) │  σ(k) │  ω  │  Ω  │    hub     │ factorization      │ class{RESET}");
-    println!("  {DIM}─────┼───────┼──────────────┼──────┼───────┼─────┼─────┼────────────┼────────────────────┼──────────────{RESET}");
+    println!(
+        "  {DIM}rank │   k   │  |⟨k|ψ₀⟩|²  │ d(k) │  σ(k) │  ω  │  Ω  │    hub     │ factorization      │ class{RESET}"
+    );
+    println!(
+        "  {DIM}─────┼───────┼──────────────┼──────┼───────┼─────┼─────┼────────────┼────────────────────┼──────────────{RESET}"
+    );
 
     for (rank, p) in by_weight.iter().take(20).enumerate() {
         let factors = factorize_display(p.k);
-        let color = if p.classification.contains("heavy") { RED }
-                   else if p.classification.contains("fermion") { YELLOW }
-                   else { WHITE };
+        let color = if p.classification.contains("heavy") {
+            RED
+        } else if p.classification.contains("fermion") {
+            YELLOW
+        } else {
+            WHITE
+        };
         println!(
             "  {:<4} │ {:<5} │ {:<12.8} │ {:<4} │ {:<5} │ {:<3} │ {:<3} │ {:<10} │ {:<18} │ {color}{}{RESET}",
-            rank + 1, p.k, p.weight, p.divisor_count, p.divisor_sum,
-            p.omega, p.big_omega, p.hub_score, factors, p.classification,
+            rank + 1,
+            p.k,
+            p.weight,
+            p.divisor_count,
+            p.divisor_sum,
+            p.omega,
+            p.big_omega,
+            p.hub_score,
+            factors,
+            p.classification,
         );
     }
 
@@ -310,33 +376,60 @@ fn analyze(n: usize) {
     println!("  {DIM}─────┼───────┼──────────────┼────────────┼──────────────{RESET}");
 
     for (rank, p) in primes.iter().enumerate() {
-        let color = if p.weight < median_weight * 0.5 { CYAN }
-                   else if p.weight < median_weight { GREEN }
-                   else { YELLOW };
+        let color = if p.weight < median_weight * 0.5 {
+            CYAN
+        } else if p.weight < median_weight {
+            GREEN
+        } else {
+            YELLOW
+        };
         println!(
             "  {:<4} │ {:<5} │ {color}{:<12.8}{RESET} │ {:<10} │ {color}{}{RESET}",
-            rank + 1, p.k, p.weight, p.hub_score, p.classification,
+            rank + 1,
+            p.k,
+            p.weight,
+            p.hub_score,
+            p.classification,
         );
     }
 
     // ─── STATISTICAL SUMMARY ───
     let prime_count = particles.iter().filter(|p| p.is_prime).count();
     let composite_count = dim - prime_count;
-    let prime_weight: f64 = particles.iter().filter(|p| p.is_prime).map(|p| p.weight).sum();
-    let composite_weight: f64 = particles.iter().filter(|p| !p.is_prime).map(|p| p.weight).sum();
+    let prime_weight: f64 = particles
+        .iter()
+        .filter(|p| p.is_prime)
+        .map(|p| p.weight)
+        .sum();
+    let composite_weight: f64 = particles
+        .iter()
+        .filter(|p| !p.is_prime)
+        .map(|p| p.weight)
+        .sum();
 
-    let heavy_fermions = particles.iter().filter(|p| p.classification.contains("heavy")).count();
-    let regular_fermions = particles.iter().filter(|p| p.classification == "fermion").count();
-    let light_bosons = particles.iter().filter(|p| p.classification.contains("light") && p.is_prime).count();
+    let heavy_fermions = particles
+        .iter()
+        .filter(|p| p.classification.contains("heavy"))
+        .count();
+    let regular_fermions = particles
+        .iter()
+        .filter(|p| p.classification == "fermion")
+        .count();
+    let light_bosons = particles
+        .iter()
+        .filter(|p| p.classification.contains("light") && p.is_prime)
+        .count();
 
     // Correlation: hub connectivity vs weight
-    let hub_weight_pairs: Vec<(f64, f64)> = particles.iter()
+    let hub_weight_pairs: Vec<(f64, f64)> = particles
+        .iter()
         .map(|p| (p.hub_score as f64, p.weight))
         .collect();
     let r_sq = pearson_r_squared(&hub_weight_pairs);
 
     // Correlation: divisor count vs weight
-    let div_weight_pairs: Vec<(f64, f64)> = particles.iter()
+    let div_weight_pairs: Vec<(f64, f64)> = particles
+        .iter()
         .map(|p| (p.divisor_count as f64, p.weight))
         .collect();
     let r_sq_div = pearson_r_squared(&div_weight_pairs);
@@ -344,13 +437,28 @@ fn analyze(n: usize) {
     println!("\n  {BOLD}{WHITE}═══ PARTICLE PHYSICS SUMMARY ═══{RESET}");
     println!();
     println!("  {BOLD}Population:{RESET}");
-    println!("    Primes (gauge bosons):    {CYAN}{prime_count}{RESET} ({:.1}% of integers)", 100.0 * prime_count as f64 / dim as f64);
-    println!("    Composites (fermions):    {YELLOW}{composite_count}{RESET} ({:.1}% of integers)", 100.0 * composite_count as f64 / dim as f64);
+    println!(
+        "    Primes (gauge bosons):    {CYAN}{prime_count}{RESET} ({:.1}% of integers)",
+        100.0 * prime_count as f64 / dim as f64
+    );
+    println!(
+        "    Composites (fermions):    {YELLOW}{composite_count}{RESET} ({:.1}% of integers)",
+        100.0 * composite_count as f64 / dim as f64
+    );
     println!();
     println!("  {BOLD}Ground-state spectral weight:{RESET}");
-    println!("    Prime weight (bosons):    {CYAN}{prime_weight:.6}{RESET} ({:.1}%)", 100.0 * prime_weight);
-    println!("    Composite weight (ferm):  {YELLOW}{composite_weight:.6}{RESET} ({:.1}%)", 100.0 * composite_weight);
-    println!("    Ratio composite/prime:    {BOLD}{WHITE}{:.1}×{RESET}", composite_weight / prime_weight);
+    println!(
+        "    Prime weight (bosons):    {CYAN}{prime_weight:.6}{RESET} ({:.1}%)",
+        100.0 * prime_weight
+    );
+    println!(
+        "    Composite weight (ferm):  {YELLOW}{composite_weight:.6}{RESET} ({:.1}%)",
+        100.0 * composite_weight
+    );
+    println!(
+        "    Ratio composite/prime:    {BOLD}{WHITE}{:.1}×{RESET}",
+        composite_weight / prime_weight
+    );
     println!();
     println!("  {BOLD}Classification breakdown:{RESET}");
     println!("    Heavy fermions (>3× median):   {RED}{heavy_fermions}{RESET}");
@@ -367,11 +475,17 @@ fn analyze(n: usize) {
     println!("  The ground state |ψ₀⟩ of the Gram matrix G_N encodes the vacuum");
     println!("  energy of the Nyman-Beurling approximation. Its structure reveals:");
     println!();
-    println!("  {CYAN}• GAUGE BOSONS{RESET} (primes): carry only {:.1}% of ground-state weight.", 100.0 * prime_weight);
+    println!(
+        "  {CYAN}• GAUGE BOSONS{RESET} (primes): carry only {:.1}% of ground-state weight.",
+        100.0 * prime_weight
+    );
     println!("    They share no divisors → weak coupling → thermalize the bulk spectrum");
     println!("    into GOE chaos. They are the force carriers of arithmetic randomness.");
     println!();
-    println!("  {YELLOW}• MASSIVE FERMIONS{RESET} (highly composite): carry {:.1}% of weight.", 100.0 * composite_weight);
+    println!(
+        "  {YELLOW}• MASSIVE FERMIONS{RESET} (highly composite): carry {:.1}% of weight.",
+        100.0 * composite_weight
+    );
     println!("    They share many divisors → strong coupling → create localized gravity");
     println!("    wells that trap the ground state. They are the matter of the prime gas.");
     println!();
@@ -392,16 +506,30 @@ fn analyze(n: usize) {
     let tsv_path = results_dir.join(format!("boson_fermion_N{n}.tsv"));
     if let Ok(mut f) = std::fs::File::create(&tsv_path) {
         use std::io::Write;
-        writeln!(f, "k\tweight\tis_prime\td(k)\tsigma(k)\tomega\tOmega\thub\tclass\tfactors").ok();
+        writeln!(
+            f,
+            "k\tweight\tis_prime\td(k)\tsigma(k)\tomega\tOmega\thub\tclass\tfactors"
+        )
+        .ok();
         // Sort particles by k for the TSV
         let mut sorted = particles.iter().collect::<Vec<_>>();
         sorted.sort_by_key(|p| p.k);
         for p in &sorted {
-            writeln!(f, "{}\t{:.12e}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
-                p.k, p.weight, p.is_prime as u8,
-                p.divisor_count, p.divisor_sum, p.omega, p.big_omega,
-                p.hub_score, p.classification, factorize_display(p.k)
-            ).ok();
+            writeln!(
+                f,
+                "{}\t{:.12e}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}",
+                p.k,
+                p.weight,
+                p.is_prime as u8,
+                p.divisor_count,
+                p.divisor_sum,
+                p.omega,
+                p.big_omega,
+                p.hub_score,
+                p.classification,
+                factorize_display(p.k)
+            )
+            .ok();
         }
         println!("\n  {GREEN}✓ Wrote {tsv_path:?}{RESET}");
     }
@@ -410,12 +538,26 @@ fn analyze(n: usize) {
     let top_path = results_dir.join(format!("top_fermions_N{n}.tsv"));
     if let Ok(mut f) = std::fs::File::create(&top_path) {
         use std::io::Write;
-        writeln!(f, "rank\tk\tweight\td(k)\tsigma(k)\tomega\tOmega\tclass\tfactors").ok();
+        writeln!(
+            f,
+            "rank\tk\tweight\td(k)\tsigma(k)\tomega\tOmega\tclass\tfactors"
+        )
+        .ok();
         for (rank, p) in by_weight.iter().take(50).enumerate() {
-            writeln!(f, "{}\t{}\t{:.12e}\t{}\t{}\t{}\t{}\t{}\t{}",
-                rank + 1, p.k, p.weight, p.divisor_count, p.divisor_sum,
-                p.omega, p.big_omega, p.classification, factorize_display(p.k)
-            ).ok();
+            writeln!(
+                f,
+                "{}\t{}\t{:.12e}\t{}\t{}\t{}\t{}\t{}\t{}",
+                rank + 1,
+                p.k,
+                p.weight,
+                p.divisor_count,
+                p.divisor_sum,
+                p.omega,
+                p.big_omega,
+                p.classification,
+                factorize_display(p.k)
+            )
+            .ok();
         }
         println!("  {GREEN}✓ Wrote {top_path:?}{RESET}");
     }
@@ -428,7 +570,9 @@ fn analyze(n: usize) {
         let top_boson = primes.last().unwrap();
         let massless_count = primes.iter().filter(|p| p.weight < 1e-7).count();
 
-        write!(f, r#"{{
+        write!(
+            f,
+            r#"{{
   "experiment": "boson-fermion-classifier",
   "N": {n},
   "dim": {dim},
@@ -464,21 +608,29 @@ fn analyze(n: usize) {
 "#,
             chrono::Local::now().format("%Y-%m-%dT%H:%M:%S"),
             composite_weight / prime_weight,
-            top_fermion.k, top_fermion.weight,
+            top_fermion.k,
+            top_fermion.weight,
             factorize_display(top_fermion.k),
-            top_fermion.omega, top_fermion.divisor_count,
-            top_boson.k, top_boson.weight,
-            primes.iter()
+            top_fermion.omega,
+            top_fermion.divisor_count,
+            top_boson.k,
+            top_boson.weight,
+            primes
+                .iter()
                 .filter(|p| p.weight < 1e-7)
                 .map(|p| p.k.to_string())
                 .collect::<Vec<_>>()
                 .join(", "),
             t0.elapsed().as_secs_f64(),
-        ).ok();
+        )
+        .ok();
         println!("  {GREEN}✓ Wrote {json_path:?}{RESET}");
     }
 
-    println!("\n  {DIM}Total time: {:.1}s{RESET}", t0.elapsed().as_secs_f64());
+    println!(
+        "\n  {DIM}Total time: {:.1}s{RESET}",
+        t0.elapsed().as_secs_f64()
+    );
     println!();
 }
 
@@ -493,15 +645,21 @@ fn pearson_r_squared(pairs: &[(f64, f64)]) -> f64 {
 
     let num = n * sxy - sx * sy;
     let den = ((n * sxx - sx * sx) * (n * syy - sy * sy)).sqrt();
-    if den < 1e-30 { return 0.0; }
+    if den < 1e-30 {
+        return 0.0;
+    }
     let r = num / den;
     r * r
 }
 
 /// Display factorization of k
 fn factorize_display(mut n: usize) -> String {
-    if n <= 1 { return n.to_string(); }
-    if is_prime(n) { return format!("{n} (prime)"); }
+    if n <= 1 {
+        return n.to_string();
+    }
+    if is_prime(n) {
+        return format!("{n} (prime)");
+    }
 
     let mut factors = Vec::new();
     let mut p = 2;
@@ -520,7 +678,9 @@ fn factorize_display(mut n: usize) -> String {
         }
         p += 1;
     }
-    if n > 1 { factors.push(format!("{n}")); }
+    if n > 1 {
+        factors.push(format!("{n}"));
+    }
     factors.join("·")
 }
 

@@ -11,10 +11,14 @@ pub fn mobius_sieve(limit: usize) -> Vec<i8> {
     let mut spf = vec![0usize; limit + 1];
     mu[1] = 1;
     for p in 2..=limit {
-        if spf[p] != 0 { continue; }
+        if spf[p] != 0 {
+            continue;
+        }
         spf[p] = p;
         for m in (2 * p..=limit).step_by(p) {
-            if spf[m] == 0 { spf[m] = p; }
+            if spf[m] == 0 {
+                spf[m] = p;
+            }
         }
     }
     for k in 2..=limit {
@@ -24,13 +28,23 @@ pub fn mobius_sieve(limit: usize) -> Vec<i8> {
         while val > 1 {
             let p = spf[val];
             let mut c = 0;
-            while val % p == 0 { val /= p; c += 1; }
-            if c > 1 { sq = true; break; }
+            while val % p == 0 {
+                val /= p;
+                c += 1;
+            }
+            if c > 1 {
+                sq = true;
+                break;
+            }
             nf += 1;
         }
-        if sq { mu[k] = 0; }
-        else if nf % 2 == 0 { mu[k] = 1; }
-        else { mu[k] = -1; }
+        if sq {
+            mu[k] = 0;
+        } else if nf % 2 == 0 {
+            mu[k] = 1;
+        } else {
+            mu[k] = -1;
+        }
     }
     mu
 }
@@ -48,12 +62,16 @@ pub fn mertens_values(mu: &[i8]) -> Vec<i64> {
 /// Matches Lean's `bdMoebiusWeight N i = -μ(i+1) · logWeight(N, i+1)`
 pub fn log_cutoff_weights(n: usize, mu: &[i8]) -> Vec<Float> {
     let log_n = Float::with_val(P, n as u64).ln();
-    (1..n).map(|k| {
-        if mu[k] == 0 { return Float::with_val(P, 0); }
-        let log_k = Float::with_val(P, k as u64).ln();
-        let taper = Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n);
-        Float::with_val(P, -(mu[k] as f64)) * &taper
-    }).collect()
+    (1..n)
+        .map(|k| {
+            if mu[k] == 0 {
+                return Float::with_val(P, 0);
+            }
+            let log_k = Float::with_val(P, k as u64).ln();
+            let taper = Float::with_val(P, 1u32) - Float::with_val(P, &log_k / &log_n);
+            Float::with_val(P, -(mu[k] as f64)) * &taper
+        })
+        .collect()
 }
 
 /// f_N(x) = Σ_{k=1}^{N-1} w_k · {1/(kx)}
@@ -61,7 +79,9 @@ pub fn log_cutoff_weights(n: usize, mu: &[i8]) -> Vec<Float> {
 pub fn f_n_at(x: &Float, w: &[Float]) -> Float {
     let mut sum = Float::with_val(P, 0);
     for (i, wk) in w.iter().enumerate() {
-        if wk.is_zero() { continue; }
+        if wk.is_zero() {
+            continue;
+        }
         let k = (i + 1) as u64;
         let kx = Float::with_val(P, k) * x;
         let inv = Float::with_val(P, 1u32) / &kx;

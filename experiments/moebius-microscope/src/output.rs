@@ -1,9 +1,9 @@
 //! Output writers for the Möbius Cancellation Microscope v3.
 //! Produces summary, GCD decomp, trace, certificate, dyadic, ω-class, and taper files.
 
-use std::io::Write;
-use cathedral_utils::arith;
 use crate::decomp::Decomp;
+use cathedral_utils::arith;
+use std::io::Write;
 
 const EULER_GAMMA: f64 = arith::EULER_GAMMA;
 
@@ -13,23 +13,47 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let tot = d.total.value();
     let ta = tot.abs().max(1e-30);
 
-    writeln!(f, "═══ MÖBIUS CANCELLATION MICROSCOPE v3 — N={} ═══\nDim: {}\n", d.n, d.dim)?;
+    writeln!(
+        f,
+        "═══ MÖBIUS CANCELLATION MICROSCOPE v3 — N={} ═══\nDim: {}\n",
+        d.n, d.dim
+    )?;
 
     writeln!(f, "QUADRATIC FORM vᵀGv")?;
     writeln!(f, "  Total:        {tot:.15e}")?;
     writeln!(f, "  Diagonal:     {:.15e}", d.diagonal.value())?;
     writeln!(f, "  Off-diagonal: {:.15e}", d.off_diagonal.value())?;
-    writeln!(f, "  |off|/|diag|: {:.6}\n", d.off_diagonal.value().abs() / d.diagonal.value().abs().max(1e-30))?;
+    writeln!(
+        f,
+        "  |off|/|diag|: {:.6}\n",
+        d.off_diagonal.value().abs() / d.diagonal.value().abs().max(1e-30)
+    )?;
 
     let chk = d.diagonal.value() + d.off_diagonal.value();
-    writeln!(f, "SANITY: diag+off={chk:.15e}  err={:.2e}\n", (chk - tot).abs())?;
+    writeln!(
+        f,
+        "SANITY: diag+off={chk:.15e}  err={:.2e}\n",
+        (chk - tot).abs()
+    )?;
 
     let (t1, t2, t3) = (d.type_i.value(), d.type_ii.value(), d.type_iii.value());
     writeln!(f, "VAUGHAN TYPE DECOMPOSITION")?;
-    writeln!(f, "  I  (min≤N^1/3):   {t1:.15e}  ({:.2}%)", 100.0*t1.abs()/ta)?;
-    writeln!(f, "  II (mid range):   {t2:.15e}  ({:.2}%)", 100.0*t2.abs()/ta)?;
-    writeln!(f, "  III(min>N^2/3):   {t3:.15e}  ({:.2}%)", 100.0*t3.abs()/ta)?;
-    writeln!(f, "  Sum check err: {:.2e}\n", (t1+t2+t3 - tot).abs())?;
+    writeln!(
+        f,
+        "  I  (min≤N^1/3):   {t1:.15e}  ({:.2}%)",
+        100.0 * t1.abs() / ta
+    )?;
+    writeln!(
+        f,
+        "  II (mid range):   {t2:.15e}  ({:.2}%)",
+        100.0 * t2.abs() / ta
+    )?;
+    writeln!(
+        f,
+        "  III(min>N^2/3):   {t3:.15e}  ({:.2}%)",
+        100.0 * t3.abs() / ta
+    )?;
+    writeln!(f, "  Sum check err: {:.2e}\n", (t1 + t2 + t3 - tot).abs())?;
 
     let (ee, eo, oe, oo) = (d.ee.value(), d.eo.value(), d.oe.value(), d.oo.value());
     let (same, cross) = (ee + oo, eo + oe);
@@ -37,32 +61,49 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     writeln!(f, "  (+,+): {ee:.15e}  (+,-): {eo:.15e}")?;
     writeln!(f, "  (-,+): {oe:.15e}  (-,-): {oo:.15e}")?;
     writeln!(f, "  Same:  {same:.15e}  Cross: {cross:.15e}")?;
-    writeln!(f, "  Cancel ratio: {:.6}\n", (same+cross).abs() / (same.abs()+cross.abs()).max(1e-30))?;
+    writeln!(
+        f,
+        "  Cancel ratio: {:.6}\n",
+        (same + cross).abs() / (same.abs() + cross.abs()).max(1e-30)
+    )?;
 
     writeln!(f, "ROTOR CHANNELS (mod-8)")?;
-    for ch in 0..4 { writeln!(f, "  χ_{ch}: {:.15e}", d.channels[ch].value())?; }
+    for ch in 0..4 {
+        writeln!(f, "  χ_{ch}: {:.15e}", d.channels[ch].value())?;
+    }
     writeln!(f)?;
 
     writeln!(f, "ω-CLASS MATRIX (rows=ω(j), cols=ω(k))")?;
     let mo = d.max_omega.min(5);
     write!(f, "     ")?;
-    for wk in 0..=mo { write!(f, "  ω={wk:>8}")?; } writeln!(f)?;
+    for wk in 0..=mo {
+        write!(f, "  ω={wk:>8}")?;
+    }
+    writeln!(f)?;
     for wj in 0..=mo {
         write!(f, "ω={wj} ")?;
-        for wk in 0..=mo { write!(f, " {:>11.4e}", d.omega_buckets[wj][wk].value())?; }
+        for wk in 0..=mo {
+            write!(f, " {:>11.4e}", d.omega_buckets[wj][wk].value())?;
+        }
         writeln!(f)?;
     }
     writeln!(f)?;
 
     writeln!(f, "DYADIC SCALE BANDS (rows=⌊log₂j⌋, cols=⌊log₂k⌋)")?;
     write!(f, "     ")?;
-    for bk in 1..=d.max_band { write!(f, " [{:>4},{:>5})", 1<<bk, 1<<(bk+1))?; } writeln!(f)?;
+    for bk in 1..=d.max_band {
+        write!(f, " [{:>4},{:>5})", 1 << bk, 1 << (bk + 1))?;
+    }
+    writeln!(f)?;
     for bj in 1..=d.max_band {
-        write!(f, "[{:>3},{})", 1<<bj, 1<<(bj+1))?;
+        write!(f, "[{:>3},{})", 1 << bj, 1 << (bj + 1))?;
         for bk in 1..=d.max_band {
             let v = d.dyadic[bj][bk].value();
-            if v.abs() > 1e-30 { write!(f, " {:>12.4e}", v)?; }
-            else { write!(f, " {:>12}", "—")?; }
+            if v.abs() > 1e-30 {
+                write!(f, " {:>12.4e}", v)?;
+            } else {
+                write!(f, " {:>12}", "—")?;
+            }
         }
         writeln!(f)?;
     }
@@ -71,18 +112,42 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let total_terms = d.n_pos + d.n_neg;
     let (sp, sn) = (d.sum_pos.value(), d.sum_neg.value());
     writeln!(f, "SIGN STATISTICS")?;
-    writeln!(f, "  Positive: {} ({:.1}%)  sum={sp:.8e}", d.n_pos, 100.0*d.n_pos as f64/total_terms.max(1) as f64)?;
-    writeln!(f, "  Negative: {} ({:.1}%)  sum={sn:.8e}", d.n_neg, 100.0*d.n_neg as f64/total_terms.max(1) as f64)?;
-    writeln!(f, "  |Σ|/Σ|·| = {:.8}", tot.abs() / (sp + sn.abs()).max(1e-30))?;
-    writeln!(f, "  Cancellation power: {:.2}x\n", (sp + sn.abs()) / tot.abs().max(1e-30))?;
+    writeln!(
+        f,
+        "  Positive: {} ({:.1}%)  sum={sp:.8e}",
+        d.n_pos,
+        100.0 * d.n_pos as f64 / total_terms.max(1) as f64
+    )?;
+    writeln!(
+        f,
+        "  Negative: {} ({:.1}%)  sum={sn:.8e}",
+        d.n_neg,
+        100.0 * d.n_neg as f64 / total_terms.max(1) as f64
+    )?;
+    writeln!(
+        f,
+        "  |Σ|/Σ|·| = {:.8}",
+        tot.abs() / (sp + sn.abs()).max(1e-30)
+    )?;
+    writeln!(
+        f,
+        "  Cancellation power: {:.2}x\n",
+        (sp + sn.abs()) / tot.abs().max(1e-30)
+    )?;
 
     writeln!(f, "ROBIN σ(d)/d CORRELATION")?;
     writeln!(f, "  d\tQ_d\t\t\tσ(d)/d\te^γ·ln(ln(d))\tmargin")?;
     for dd in 1..=d.max_gcd.min(30) {
         let q = d.gcd_buckets[dd].value();
-        if q.abs() < 1e-30 { continue; }
+        if q.abs() < 1e-30 {
+            continue;
+        }
         let sig = d.robin_sigma[dd];
-        let rb = if dd >= 3 { EULER_GAMMA.exp() * (dd as f64).ln().ln() } else { f64::INFINITY };
+        let rb = if dd >= 3 {
+            EULER_GAMMA.exp() * (dd as f64).ln().ln()
+        } else {
+            f64::INFINITY
+        };
         writeln!(f, "  {dd}\t{q:.8e}\t{sig:.6}\t{rb:.6}\t{:+.6}", rb - sig)?;
     }
 
@@ -95,10 +160,22 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     writeln!(f, "  1 - vᵀGv    = {:.15e}", d.gram.gap)?;
     writeln!(f, "  gap·ln(N)   = {:.15e}", d.gram.gap_times_ln)?;
     writeln!(f, "  (bᵀv)²/vᵀGv = {:.15e}", d.gram.ratio)?;
-    writeln!(f, "  vtCv·ln(N)  = {:.15e}", d.gram.vtcv * (d.n as f64).ln())?;
+    writeln!(
+        f,
+        "  vtCv·ln(N)  = {:.15e}",
+        d.gram.vtcv * (d.n as f64).ln()
+    )?;
     writeln!(f, "  d²·ln(N)    = {:.15e}", d.gram.d2n * (d.n as f64).ln())?;
     writeln!(f, "  Precision   = {}", d.precision)?;
-    writeln!(f, "  Axiom sat?  = {} (vtGv < 1 + K/ln(N) for any K > 0)", if d.total.value() < 1.0 { "YES" } else { "CHECK" })?;
+    writeln!(
+        f,
+        "  Axiom sat?  = {} (vtGv < 1 + K/ln(N) for any K > 0)",
+        if d.total.value() < 1.0 {
+            "YES"
+        } else {
+            "CHECK"
+        }
+    )?;
 
     // §5 Taper Cancellation
     let t = &d.taper;
@@ -117,9 +194,13 @@ pub fn write_summary(d: &Decomp, dir: &str) -> std::io::Result<()> {
     writeln!(f, "  S₃ = Σμln²k/k  = {:.15e}  (→ -2γ)", t.s3)?;
     writeln!(f, "  M(N)           = {:.0}", t.mertens)?;
     writeln!(f, "  M(N)/√N        = {:.15e}", t.mertens_over_sqrt)?;
-    let recon = t.u_sum.value() - 2.0/ln_n * t.l_sum.value() + t.q_sum.value()/(ln_n*ln_n);
+    let recon = t.u_sum.value() - 2.0 / ln_n * t.l_sum.value() + t.q_sum.value() / (ln_n * ln_n);
     writeln!(f, "  Recon check    = {:.15e}  (should = vᵀGv)", recon)?;
-    writeln!(f, "  Δ              = {:.2e}", (recon - d.total.value()).abs())?;
+    writeln!(
+        f,
+        "  Δ              = {:.2e}",
+        (recon - d.total.value()).abs()
+    )?;
 
     eprintln!("  ✓ Summary → {p}");
     Ok(())
@@ -133,9 +214,18 @@ pub fn write_gcd(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let mut cum = 0.0;
     for dd in 1..=d.max_gcd {
         let q = d.gcd_buckets[dd].value();
-        if q.abs() < 1e-30 { continue; }
+        if q.abs() < 1e-30 {
+            continue;
+        }
         cum += q.abs();
-        writeln!(f, "{dd}\t{q:.15e}\t{:.15e}\t{:.4}\t{:.6}\t{}", q.abs(), 100.0*cum/ta, d.robin_sigma[dd], arith::factorize(dd))?;
+        writeln!(
+            f,
+            "{dd}\t{q:.15e}\t{:.15e}\t{:.4}\t{:.6}\t{}",
+            q.abs(),
+            100.0 * cum / ta,
+            d.robin_sigma[dd],
+            arith::factorize(dd)
+        )?;
     }
     eprintln!("  ✓ GCD → {p}");
     Ok(())
@@ -146,8 +236,19 @@ pub fn write_trace(d: &Decomp, dir: &str) -> std::io::Result<()> {
     let mut f = std::fs::File::create(&p)?;
     writeln!(f, "M\tS_M\tsum_abs\tcancel_ratio\tln_M")?;
     for pt in &d.trace {
-        let r = if pt.running_abs > 0.0 { pt.running_sum.abs() / pt.running_abs } else { 0.0 };
-        writeln!(f, "{}\t{:.15e}\t{:.15e}\t{r:.8}\t{:.6}", pt.j, pt.running_sum, pt.running_abs, (pt.j as f64).ln())?;
+        let r = if pt.running_abs > 0.0 {
+            pt.running_sum.abs() / pt.running_abs
+        } else {
+            0.0
+        };
+        writeln!(
+            f,
+            "{}\t{:.15e}\t{:.15e}\t{r:.8}\t{:.6}",
+            pt.j,
+            pt.running_sum,
+            pt.running_abs,
+            (pt.j as f64).ln()
+        )?;
     }
     eprintln!("  ✓ Trace → {p}");
     Ok(())
@@ -165,14 +266,18 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
     for wj in 0..=d.max_omega.min(5) {
         for wk in 0..=d.max_omega.min(5) {
             let v = d.omega_buckets[wj][wk].value();
-            if v.abs() > 1e-30 { omega_data.push(serde_json::json!({"wj": wj, "wk": wk, "Q": v})); }
+            if v.abs() > 1e-30 {
+                omega_data.push(serde_json::json!({"wj": wj, "wk": wk, "Q": v}));
+            }
         }
     }
 
     let t = &d.taper;
     let ln_n = (d.n as f64).ln();
     let gcd_taper_strata: Vec<serde_json::Value> = (1..=d.max_gcd)
-        .filter(|&dd| d.taper.u_by_gcd[dd].value().abs() > 1e-15 || d.taper.l_by_gcd[dd].value().abs() > 1e-15)
+        .filter(|&dd| {
+            d.taper.u_by_gcd[dd].value().abs() > 1e-15 || d.taper.l_by_gcd[dd].value().abs() > 1e-15
+        })
         .take(50)
         .map(|dd| {
             let u_d = d.taper.u_by_gcd[dd].value();
@@ -239,7 +344,14 @@ pub fn write_dyadic(d: &Decomp, dir: &str) -> std::io::Result<()> {
         for bk in 1..=d.max_band {
             let v = d.dyadic[bj][bk].value();
             if v.abs() > 1e-30 {
-                writeln!(f, "{bj}\t{bk}\t[{},{})\t[{},{})\t{v:.15e}", 1<<bj, 1<<(bj+1), 1<<bk, 1<<(bk+1))?;
+                writeln!(
+                    f,
+                    "{bj}\t{bk}\t[{},{})\t[{},{})\t{v:.15e}",
+                    1 << bj,
+                    1 << (bj + 1),
+                    1 << bk,
+                    1 << (bk + 1)
+                )?;
             }
         }
     }
@@ -254,7 +366,9 @@ pub fn write_omega(d: &Decomp, dir: &str) -> std::io::Result<()> {
     for wj in 0..=d.max_omega.min(6) {
         for wk in 0..=d.max_omega.min(6) {
             let v = d.omega_buckets[wj][wk].value();
-            if v.abs() > 1e-30 { writeln!(f, "{wj}\t{wk}\t{v:.15e}")?; }
+            if v.abs() > 1e-30 {
+                writeln!(f, "{wj}\t{wk}\t{v:.15e}")?;
+            }
         }
     }
     eprintln!("  ✓ ω-class → {p}");

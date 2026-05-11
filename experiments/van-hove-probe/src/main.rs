@@ -58,11 +58,19 @@ fn main() {
 
     // ═══ §A. EIGENVALUE EXTRACTION ═══
     println!("  {BOLD}{WHITE}═══ §A. EIGENVALUE EXTRACTION ═══{RESET}");
-    println!("  {DIM}  Full spectrum of G_N via Jacobi rotation on {PREC}-bit MPFR Gram matrix{RESET}");
-    println!("  {DIM}     N  │   dim  │  λ_min         │  λ_max         │  κ(G)       │ time{RESET}");
+    println!(
+        "  {DIM}  Full spectrum of G_N via Jacobi rotation on {PREC}-bit MPFR Gram matrix{RESET}"
+    );
+    println!(
+        "  {DIM}     N  │   dim  │  λ_min         │  λ_max         │  κ(G)       │ time{RESET}"
+    );
 
     let mut tsv_a = fs::File::create("results/eigenvalues_summary.tsv").unwrap();
-    writeln!(tsv_a, "N\tdim\tlambda_min\tlambda_max\tcondition_number\ttime_s").unwrap();
+    writeln!(
+        tsv_a,
+        "N\tdim\tlambda_min\tlambda_max\tcondition_number\ttime_s"
+    )
+    .unwrap();
 
     struct EigData {
         n: usize,
@@ -83,7 +91,11 @@ fn main() {
 
         let lmin = eigs[0];
         let lmax = eigs[eigs.len() - 1];
-        let kappa = if lmin.abs() > 1e-30 { lmax / lmin } else { f64::INFINITY };
+        let kappa = if lmin.abs() > 1e-30 {
+            lmax / lmin
+        } else {
+            f64::INFINITY
+        };
 
         println!(
             "  {:>6} │ {:>5} │ {:>14.10} │ {:>14.10} │ {:>11.3e} │ {:.1}s",
@@ -104,7 +116,10 @@ fn main() {
             writeln!(ef, "{}\t{:.15e}", i, e).unwrap();
         }
 
-        all_eig_data.push(EigData { n, eigenvalues: eigs });
+        all_eig_data.push(EigData {
+            n,
+            eigenvalues: eigs,
+        });
     }
     println!();
 
@@ -116,7 +131,9 @@ fn main() {
     writeln!(tsv_dos, "N\tbin_center\tcount\tdensity").unwrap();
 
     for ed in &all_eig_data {
-        if ed.eigenvalues.len() < 10 { continue; }
+        if ed.eigenvalues.len() < 10 {
+            continue;
+        }
         let n_bins = (ed.eigenvalues.len() as f64).sqrt().ceil() as usize;
         let n_bins = n_bins.max(10).min(50);
 
@@ -126,7 +143,8 @@ fn main() {
             "    N={:>3}: {n_bins} bins, peak density = {:.6} at E = {:.6}",
             ed.n,
             dos.density.iter().cloned().fold(0.0f64, f64::max),
-            dos.bin_centers[dos.density
+            dos.bin_centers[dos
+                .density
                 .iter()
                 .enumerate()
                 .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
@@ -160,7 +178,9 @@ fn main() {
     // ═══ §C. VAN HOVE FIT ═══
     println!("  {BOLD}{WHITE}═══ §C. VAN HOVE SINGULARITY FIT ═══{RESET}");
     println!("  {DIM}  Fitting ρ(E) = A·ln|E - E₀| + B near λ_min{RESET}");
-    println!("  {DIM}     N  │      A       │      E₀      │      B       │    R²    │ van Hove?{RESET}");
+    println!(
+        "  {DIM}     N  │      A       │      E₀      │      B       │    R²    │ van Hove?{RESET}"
+    );
 
     let mut tsv_vh = fs::File::create("results/van_hove_fit.tsv").unwrap();
     writeln!(tsv_vh, "N\tA\tE0\tB\tR2\tvan_hove").unwrap();
@@ -168,7 +188,9 @@ fn main() {
     let mut vh_r2_values = Vec::new();
 
     for ed in &all_eig_data {
-        if ed.eigenvalues.len() < 20 { continue; }
+        if ed.eigenvalues.len() < 20 {
+            continue;
+        }
 
         // Fit bottom 20% of eigenvalues
         let (a, e0, b, r2) = spectral::fit_van_hove(&ed.eigenvalues, 0.20);
@@ -176,7 +198,12 @@ fn main() {
 
         println!(
             "  {:>6} │ {:>12.8} │ {:>12.8} │ {:>12.8} │ {:.4}  │ {}",
-            ed.n, a, e0, b, r2, check(is_vh)
+            ed.n,
+            a,
+            e0,
+            b,
+            r2,
+            check(is_vh)
         );
         writeln!(
             tsv_vh,
@@ -195,10 +222,16 @@ fn main() {
     println!("  {DIM}     N  │ mean spacing │  Wigner fit  │ Poisson fit │ statistics{RESET}");
 
     let mut tsv_sp = fs::File::create("results/level_spacing.tsv").unwrap();
-    writeln!(tsv_sp, "N\tmean_spacing\twigner_fit\tpoisson_fit\tstatistics").unwrap();
+    writeln!(
+        tsv_sp,
+        "N\tmean_spacing\twigner_fit\tpoisson_fit\tstatistics"
+    )
+    .unwrap();
 
     for ed in &all_eig_data {
-        if ed.eigenvalues.len() < 10 { continue; }
+        if ed.eigenvalues.len() < 10 {
+            continue;
+        }
 
         let sr = spectral::compute_spacing(&ed.eigenvalues);
 
@@ -238,17 +271,15 @@ fn main() {
     writeln!(tsv_th, "N\tbeta_c\tmax_cv\tcv_growth").unwrap();
 
     for ed in &all_eig_data {
-        if ed.eigenvalues.len() < 10 { continue; }
+        if ed.eigenvalues.len() < 10 {
+            continue;
+        }
 
         let beta_c = 1.0 / ed.eigenvalues[0].max(1e-15);
         let beta_max = beta_c * 10.0;
         let thermo = spectral::compute_thermo(&ed.eigenvalues, (0.01, beta_max.min(1e6)), 200);
 
-        let max_cv = thermo
-            .specific_heat
-            .iter()
-            .cloned()
-            .fold(0.0f64, f64::max);
+        let max_cv = thermo.specific_heat.iter().cloned().fold(0.0f64, f64::max);
 
         // Check for log divergence: fit C_V(β) = a·ln(β) + b near β_c
         let growth = if max_cv > 1.0 { "divergent" } else { "bounded" };
@@ -283,7 +314,9 @@ fn main() {
     println!("  {BOLD}{WHITE}═══ §F. SPECTRAL STAIRCASE: N(E) = #{{λ_k ≤ E}} ═══{RESET}");
 
     for ed in &all_eig_data {
-        if ed.eigenvalues.len() < 10 { continue; }
+        if ed.eigenvalues.len() < 10 {
+            continue;
+        }
 
         let stair_file = format!("results/staircase_N{}.tsv", ed.n);
         let mut sf = fs::File::create(&stair_file).unwrap();
@@ -292,19 +325,34 @@ fn main() {
         for (i, &e) in ed.eigenvalues.iter().enumerate() {
             writeln!(sf, "{:.15e}\t{}\t{:.15e}", e, i + 1, (i + 1) as f64 / n).unwrap();
         }
-        println!("    N={:>3}: staircase saved ({} steps)", ed.n, ed.eigenvalues.len());
+        println!(
+            "    N={:>3}: staircase saved ({} steps)",
+            ed.n,
+            ed.eigenvalues.len()
+        );
     }
     println!();
 
     // ═══ CERTIFICATE ═══
-    println!("  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}VAN HOVE SINGULARITY PROBE — CERTIFICATE{RESET}");
-    println!("  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}");
-    println!("  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{PREC}-bit MPFR{RESET}    Threads: {YELLOW}{threads}{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╔═══════════════════════════════════════════════════════════════════════╗{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  {BOLD}{WHITE}VAN HOVE SINGULARITY PROBE — CERTIFICATE{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}╠═══════════════════════════════════════════════════════════════════════╣{RESET}"
+    );
+    println!(
+        "  {BOLD}{CYAN}║{RESET}  Precision: {YELLOW}{PREC}-bit MPFR{RESET}    Threads: {YELLOW}{threads}{RESET}"
+    );
     println!("  {BOLD}{CYAN}║{RESET}");
 
     // Van Hove verdict
-    let vh_confirmed = vh_r2_values.iter().filter(|(n, _)| *n >= 50).all(|(_, r2)| *r2 > 0.80);
+    let vh_confirmed = vh_r2_values
+        .iter()
+        .filter(|(n, _)| *n >= 50)
+        .all(|(_, r2)| *r2 > 0.80);
     let avg_r2: f64 = if vh_r2_values.is_empty() {
         0.0
     } else {
@@ -314,11 +362,17 @@ fn main() {
     println!("  {BOLD}{CYAN}║{RESET}  {BOLD}§C. Van Hove singularity{RESET}");
     println!("  {BOLD}{CYAN}║{RESET}    Average R² = {YELLOW}{avg_r2:.4}{RESET}");
     if vh_confirmed {
-        println!("  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ Logarithmic singularity CONFIRMED (R² > 0.80 for N ≥ 50){RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {GREEN}  d²_N ~ C/ln(N) is consistent with 2D Van Hove saddle point{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {GREEN}{BOLD}✓ Logarithmic singularity CONFIRMED (R² > 0.80 for N ≥ 50){RESET}"
+        );
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {GREEN}  d²_N ~ C/ln(N) is consistent with 2D Van Hove saddle point{RESET}"
+        );
     } else {
         println!("  {BOLD}{CYAN}║{RESET}    {RED}✗ Van Hove fit inconclusive (R² < 0.80){RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {DIM}May require larger N or alternative edge model{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {DIM}May require larger N or alternative edge model{RESET}"
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
 
@@ -332,11 +386,17 @@ fn main() {
         println!("  {BOLD}{CYAN}║{RESET}    λ_min = {MAGENTA}{lmin:.10e}{RESET}");
         println!("  {BOLD}{CYAN}║{RESET}    λ_max = {MAGENTA}{lmax:.10e}{RESET}");
         println!("  {BOLD}{CYAN}║{RESET}    λ_min · ln(N) = {YELLOW}{lmin_logn:.8}{RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {DIM}Theory: λ_min · ln(N) → c_holes ≈ {C_HOLES:.5}{RESET}");
-        println!("  {BOLD}{CYAN}║{RESET}    {DIM}BD constant: C = 1/c_holes ≈ {BD_CONSTANT:.3}{RESET}");
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {DIM}Theory: λ_min · ln(N) → c_holes ≈ {C_HOLES:.5}{RESET}"
+        );
+        println!(
+            "  {BOLD}{CYAN}║{RESET}    {DIM}BD constant: C = 1/c_holes ≈ {BD_CONSTANT:.3}{RESET}"
+        );
     }
     println!("  {BOLD}{CYAN}║{RESET}");
-    println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
+    println!(
+        "  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}"
+    );
 
     // JSON certificate
     let cert = format!(
@@ -382,7 +442,9 @@ fn main() {
         "  {BOLD}{WHITE}Total:{RESET} {GREEN}{:.1}s{RESET} ({threads} threads)",
         t0.elapsed().as_secs_f64()
     );
-    println!("  {BOLD}{WHITE}Output:{RESET} results/{{eigenvalues_*,dos,kde_*,van_hove_fit,level_spacing,thermo_*,staircase_*}}.tsv");
+    println!(
+        "  {BOLD}{WHITE}Output:{RESET} results/{{eigenvalues_*,dos,kde_*,van_hove_fit,level_spacing,thermo_*,staircase_*}}.tsv"
+    );
     println!("  {BOLD}{WHITE}Certificate:{RESET} results/certificate.json");
     println!();
 }

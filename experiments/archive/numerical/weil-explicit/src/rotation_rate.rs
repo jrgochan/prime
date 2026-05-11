@@ -20,32 +20,48 @@ use std::time::Instant;
 
 const NPTS: usize = 50_000;
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
 
 fn big_omega(n: usize) -> u32 {
-    if n <= 1 { return 0; }
+    if n <= 1 {
+        return 0;
+    }
     let mut count = 0u32;
     let mut m = n;
     let mut p = 2;
     while p * p <= m {
-        while m % p == 0 { count += 1; m /= p; }
+        while m % p == 0 {
+            count += 1;
+            m /= p;
+        }
         p += 1;
     }
-    if m > 1 { count += 1; }
+    if m > 1 {
+        count += 1;
+    }
     count
 }
 
 fn liouville(n: usize) -> f64 {
-    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+    if big_omega(n) % 2 == 0 {
+        1.0
+    } else {
+        -1.0
+    }
 }
 
 fn gram_entry(j: usize, k: usize) -> f64 {
     let (jf, kf) = (j as f64, k as f64);
     let dx = 1.0 / NPTS as f64;
-    (0..NPTS).map(|i| {
-        let x = (i as f64 + 0.5) * dx;
-        frac_part(jf / x) * frac_part(kf / x)
-    }).sum::<f64>() * dx
+    (0..NPTS)
+        .map(|i| {
+            let x = (i as f64 + 0.5) * dx;
+            frac_part(jf / x) * frac_part(kf / x)
+        })
+        .sum::<f64>()
+        * dx
 }
 
 fn build_gram(n: usize) -> DMatrix<f64> {
@@ -64,11 +80,10 @@ fn build_gram(n: usize) -> DMatrix<f64> {
 /// Power law fit: y = A·x^α via log-log regression
 /// Returns (A, α, R²)
 fn power_law_fit(data: &[(f64, f64)]) -> (f64, f64, f64) {
-    let valid: Vec<(f64, f64)> = data.iter()
-        .filter(|(_, y)| *y > 0.0)
-        .copied()
-        .collect();
-    if valid.len() < 3 { return (0.0, 0.0, 0.0); }
+    let valid: Vec<(f64, f64)> = data.iter().filter(|(_, y)| *y > 0.0).copied().collect();
+    if valid.len() < 3 {
+        return (0.0, 0.0, 0.0);
+    }
 
     let n = valid.len() as f64;
     let sum_lnx: f64 = valid.iter().map(|(x, _)| x.ln()).sum();
@@ -76,7 +91,9 @@ fn power_law_fit(data: &[(f64, f64)]) -> (f64, f64, f64) {
     let sum_lnx2: f64 = valid.iter().map(|(x, _)| x.ln().powi(2)).sum();
     let sum_lnxy: f64 = valid.iter().map(|(x, y)| x.ln() * y.ln()).sum();
     let denom = n * sum_lnx2 - sum_lnx.powi(2);
-    if denom.abs() < 1e-30 { return (0.0, 0.0, 0.0); }
+    if denom.abs() < 1e-30 {
+        return (0.0, 0.0, 0.0);
+    }
     let slope = (n * sum_lnxy - sum_lnx * sum_lny) / denom;
     let intercept = (sum_lny - slope * sum_lnx) / n;
     let a = intercept.exp();
@@ -84,11 +101,18 @@ fn power_law_fit(data: &[(f64, f64)]) -> (f64, f64, f64) {
     // R²
     let mean_lny = sum_lny / n;
     let ss_tot: f64 = valid.iter().map(|(_, y)| (y.ln() - mean_lny).powi(2)).sum();
-    let ss_res: f64 = valid.iter().map(|(x, y)| {
-        let pred = intercept + slope * x.ln();
-        (y.ln() - pred).powi(2)
-    }).sum();
-    let r2 = if ss_tot > 1e-30 { 1.0 - ss_res / ss_tot } else { 0.0 };
+    let ss_res: f64 = valid
+        .iter()
+        .map(|(x, y)| {
+            let pred = intercept + slope * x.ln();
+            (y.ln() - pred).powi(2)
+        })
+        .sum();
+    let r2 = if ss_tot > 1e-30 {
+        1.0 - ss_res / ss_tot
+    } else {
+        0.0
+    };
 
     (a, slope, r2)
 }
@@ -108,8 +132,10 @@ fn main() {
     let mut eo_gap_data: Vec<(f64, f64)> = Vec::new();
     let mut liou_sum_data: Vec<(f64, f64)> = Vec::new();
 
-    println!("  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
-        "N", "|⟨v,λ̂⟩|", "cos θ_N", "σ₁/σ₂(eo)", "res/‖G‖", "λeven/λG", "L(N)/√N", "time");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10} {:>10} {:>10} {:>10} {:>8}",
+        "N", "|⟨v,λ̂⟩|", "cos θ_N", "σ₁/σ₂(eo)", "res/‖G‖", "λeven/λG", "L(N)/√N", "time"
+    );
     println!("  {}", "─".repeat(78));
 
     for &n in &ns {
@@ -140,7 +166,9 @@ fn main() {
 
         // ── PARITY OPERATOR ──
         let mut p_mat = DMatrix::zeros(dim, dim);
-        for i in 0..dim { p_mat[(i, i)] = liouville(i + 2); }
+        for i in 0..dim {
+            p_mat[(i, i)] = liouville(i + 2);
+        }
 
         // ── COMMUTATOR ──
         let comm = &g * &p_mat - &p_mat * &g;
@@ -149,7 +177,9 @@ fn main() {
         // SVD of commutator via CᵀC
         let ctc = comm.transpose() * &comm;
         let eig_ctc = SymmetricEigen::new(ctc);
-        let mut sv_vals: Vec<f64> = eig_ctc.eigenvalues.iter()
+        let mut sv_vals: Vec<f64> = eig_ctc
+            .eigenvalues
+            .iter()
             .map(|v| v.max(0.0).sqrt())
             .collect();
         sv_vals.sort_by(|a, b| b.partial_cmp(a).unwrap());
@@ -176,19 +206,26 @@ fn main() {
         // SVD of G_eo
         let gte = g_eo.transpose() * &g_eo;
         let eig_gte = SymmetricEigen::new(gte);
-        let mut sv_eo: Vec<f64> = eig_gte.eigenvalues.iter()
+        let mut sv_eo: Vec<f64> = eig_gte
+            .eigenvalues
+            .iter()
             .map(|v| v.max(0.0).sqrt())
             .collect();
         sv_eo.sort_by(|a, b| b.partial_cmp(a).unwrap());
         let eo_gap = if sv_eo.len() > 1 && sv_eo[1] > 1e-15 {
             sv_eo[0] / sv_eo[1]
-        } else { f64::INFINITY };
+        } else {
+            f64::INFINITY
+        };
 
         // ── G_even = (G + PGP) / 2 ──
         let pgp = &p_mat * &g * &p_mat;
         let g_even = (&g + &pgp) * 0.5;
         let eig_even = SymmetricEigen::new(g_even);
-        let lmin_even = eig_even.eigenvalues.iter().copied()
+        let lmin_even = eig_even
+            .eigenvalues
+            .iter()
+            .copied()
             .fold(f64::INFINITY, f64::min);
         let gap_ratio = lmin_even / min_val;
 
@@ -202,7 +239,9 @@ fn main() {
         let g_cross_norm = g_cross.norm();
         let cos_theta = if g_cross_norm > 1e-15 {
             vmin_unit.dot(&g_cross).abs() / g_cross_norm
-        } else { 0.0 };
+        } else {
+            0.0
+        };
 
         // ── LIOUVILLE PARTIAL SUMS ──
         let liou_sum: f64 = (2..=n).map(|k| liouville(k)).sum();
@@ -210,8 +249,10 @@ fn main() {
 
         let elapsed = t0.elapsed().as_secs_f64();
 
-        println!("  {:5} {:10.6} {:10.6} {:10.1} {:10.6} {:10.4} {:10.6} {:7.1}s",
-            n, proj_liou, cos_theta, eo_gap, res_rel, gap_ratio, liou_normalized, elapsed);
+        println!(
+            "  {:5} {:10.6} {:10.6} {:10.1} {:10.6} {:10.4} {:10.6} {:7.1}s",
+            n, proj_liou, cos_theta, eo_gap, res_rel, gap_ratio, liou_normalized, elapsed
+        );
 
         proj_data.push((n as f64, proj_liou));
         cos_data.push((n as f64, cos_theta));
@@ -248,8 +289,10 @@ fn main() {
 
     // Gap ratio fit
     let (a_gap, alpha_gap, r2_gap) = power_law_fit(&gap_ratio_data);
-    println!("  λ_min(G_even)/λ_min(G) ≈ {:.4} · N^{{{:.4}}}  (R² = {:.4})",
-        a_gap, alpha_gap, r2_gap);
+    println!(
+        "  λ_min(G_even)/λ_min(G) ≈ {:.4} · N^{{{:.4}}}  (R² = {:.4})",
+        a_gap, alpha_gap, r2_gap
+    );
     if alpha_gap > 0.01 {
         println!("    → Gap ratio GROWS — parity correction becomes MORE important");
     }
@@ -257,8 +300,10 @@ fn main() {
 
     // EO gap ratio fit
     let (a_eo, alpha_eo, r2_eo) = power_law_fit(&eo_gap_data);
-    println!("  σ₁/σ₂(G_eo) ≈ {:.4} · N^{{{:.4}}}  (R² = {:.4})",
-        a_eo, alpha_eo, r2_eo);
+    println!(
+        "  σ₁/σ₂(G_eo) ≈ {:.4} · N^{{{:.4}}}  (R² = {:.4})",
+        a_eo, alpha_eo, r2_eo
+    );
     if alpha_eo > 0.5 {
         println!("    → Rank-1 dominance GROWS ✨ — G_eo becomes more rank-1");
     }
@@ -271,13 +316,19 @@ fn main() {
     println!("  RELATIONSHIP: Liouville projection vs cos θ_N");
     println!("══════════════════════════════════════════════════════════════");
     println!();
-    println!("  {:>5} {:>10} {:>10} {:>10}", "N", "|⟨v,λ̂⟩|", "cos θ", "ratio");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10}",
+        "N", "|⟨v,λ̂⟩|", "cos θ", "ratio"
+    );
     println!("  {}", "─".repeat(45));
     for i in 0..proj_data.len() {
         let (n, proj) = proj_data[i];
         let (_, cos) = cos_data[i];
         let ratio = if cos > 1e-15 { proj / cos } else { 0.0 };
-        println!("  {:5} {:10.6} {:10.6} {:10.4}", n as usize, proj, cos, ratio);
+        println!(
+            "  {:5} {:10.6} {:10.6} {:10.4}",
+            n as usize, proj, cos, ratio
+        );
     }
     println!();
 
@@ -291,13 +342,21 @@ fn main() {
     println!("  If RH: L(N) = O(N^{{1/2+ε}})");
     println!("  So L(N)/√N should be bounded.");
     println!();
-    println!("  {:>5} {:>10} {:>10} {:>10}", "N", "L(N)", "L(N)/√N", "|⟨v,λ̂⟩|");
+    println!(
+        "  {:>5} {:>10} {:>10} {:>10}",
+        "N", "L(N)", "L(N)/√N", "|⟨v,λ̂⟩|"
+    );
     println!("  {}", "─".repeat(45));
     for i in 0..proj_data.len() {
         let (n, proj) = proj_data[i];
         let liou_sum: f64 = (2..=n as usize).map(|k| liouville(k)).sum();
-        println!("  {:5} {:10.0} {:10.6} {:10.6}",
-            n as usize, liou_sum, liou_sum.abs() / n.sqrt(), proj);
+        println!(
+            "  {:5} {:10.0} {:10.6} {:10.6}",
+            n as usize,
+            liou_sum,
+            liou_sum.abs() / n.sqrt(),
+            proj
+        );
     }
     println!();
 
@@ -328,21 +387,37 @@ fn main() {
     let (a_cos, alpha_cos, r2_cos) = power_law_fit(&cos_data);
     let (_, alpha_res, r2_res) = power_law_fit(&residual_data);
 
-    println!("  Liouville projection: |⟨v_min, λ̂⟩| ≈ {:.4} · N^{{{:.4}}}  (R²={:.4})",
-        a_proj, alpha_proj, r2_proj);
-    println!("  Cosine alignment:     cos θ_N      ≈ {:.4} · N^{{{:.4}}}  (R²={:.4})",
-        a_cos, alpha_cos, r2_cos);
-    println!("  Residual commutator:  ‖res‖/‖G‖    ∝ N^{{{:.4}}}              (R²={:.4})",
-        alpha_res, r2_res);
-    println!("  G_eo rank-1 gap:      σ₁/σ₂        ∝ N^{{{:.4}}}              (R²={:.4})",
-        alpha_eo, r2_eo);
+    println!(
+        "  Liouville projection: |⟨v_min, λ̂⟩| ≈ {:.4} · N^{{{:.4}}}  (R²={:.4})",
+        a_proj, alpha_proj, r2_proj
+    );
+    println!(
+        "  Cosine alignment:     cos θ_N      ≈ {:.4} · N^{{{:.4}}}  (R²={:.4})",
+        a_cos, alpha_cos, r2_cos
+    );
+    println!(
+        "  Residual commutator:  ‖res‖/‖G‖    ∝ N^{{{:.4}}}              (R²={:.4})",
+        alpha_res, r2_res
+    );
+    println!(
+        "  G_eo rank-1 gap:      σ₁/σ₂        ∝ N^{{{:.4}}}              (R²={:.4})",
+        alpha_eo, r2_eo
+    );
     println!();
     println!("  KEY INSIGHT:");
     if alpha_proj < -0.05 && alpha_cos < -0.5 {
-        println!("    Liouville projection decays at rate N^{{{:.3}}}", alpha_proj);
-        println!("    Cosine alignment decays FASTER at rate N^{{{:.3}}}", alpha_cos);
-        println!("    The DIFFERENCE in rates ({:.3}) is the cos θ / proj ratio growth",
-            alpha_cos - alpha_proj);
+        println!(
+            "    Liouville projection decays at rate N^{{{:.3}}}",
+            alpha_proj
+        );
+        println!(
+            "    Cosine alignment decays FASTER at rate N^{{{:.3}}}",
+            alpha_cos
+        );
+        println!(
+            "    The DIFFERENCE in rates ({:.3}) is the cos θ / proj ratio growth",
+            alpha_cos - alpha_proj
+        );
         println!("    → alignment_decay = Liouville projection decay × additional cancellation");
     }
     println!();

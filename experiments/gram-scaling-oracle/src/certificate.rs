@@ -34,11 +34,7 @@ pub fn write_all(
 }
 
 /// Write the master summary JSON certificate.
-fn write_summary_json(
-    max_n: usize,
-    decomp: &GcdDecomposition,
-    alpha: &AlphaResults,
-) {
+fn write_summary_json(max_n: usize, decomp: &GcdDecomposition, alpha: &AlphaResults) {
     let path = format!("{RESULTS_DIR}/oracle_summary_N{max_n}.json");
     let mut f = fs::File::create(&path).expect("Failed to create summary JSON");
 
@@ -49,7 +45,12 @@ fn write_summary_json(
     writeln!(f, "  \"timestamp\": \"{timestamp}\",").unwrap();
     writeln!(f, "  \"N\": {max_n},").unwrap();
     writeln!(f, "  \"gcd_classes\": {},", decomp.classes.len()).unwrap();
-    writeln!(f, "  \"global_lambda_min\": {:.15e},", alpha.global_lambda_min).unwrap();
+    writeln!(
+        f,
+        "  \"global_lambda_min\": {:.15e},",
+        alpha.global_lambda_min
+    )
+    .unwrap();
     writeln!(f, "  \"scaling\": {{").unwrap();
     writeln!(f, "    \"alpha_power_law\": {:.10},", alpha.alpha_power).unwrap();
     writeln!(f, "    \"r2_power_law\": {:.10},", alpha.r2_power).unwrap();
@@ -58,7 +59,11 @@ fn write_summary_json(
     writeln!(f, "  }},").unwrap();
     writeln!(f, "  \"three_circles_target\": {{").unwrap();
     writeln!(f, "    \"alpha\": 0.855,").unwrap();
-    writeln!(f, "    \"description\": \"Interpolation exponent from Hadamard Three-Circles (eps=0.5)\"").unwrap();
+    writeln!(
+        f,
+        "    \"description\": \"Interpolation exponent from Hadamard Three-Circles (eps=0.5)\""
+    )
+    .unwrap();
     writeln!(f, "  }},").unwrap();
     writeln!(f, "  \"block_count\": {},", alpha.block_scaling.len()).unwrap();
     writeln!(f, "  \"machine\": \"Apple M2 Max, 96 GB RAM\"").unwrap();
@@ -71,11 +76,23 @@ fn write_block_tsv(block_results: &[BlockSpectralResult]) {
     let path = format!("{RESULTS_DIR}/block_spectrum_N{n}.tsv");
     let mut f = fs::File::create(&path).expect("Failed to create block TSV");
 
-    writeln!(f, "gcd_class\tdim\tlambda_min\tlambda_max\ttrace\tfrobenius_norm\tcondition").unwrap();
+    writeln!(
+        f,
+        "gcd_class\tdim\tlambda_min\tlambda_max\ttrace\tfrobenius_norm\tcondition"
+    )
+    .unwrap();
     for r in block_results {
-        let cond = if r.lambda_min > 1e-15 { r.lambda_max / r.lambda_min } else { f64::INFINITY };
-        writeln!(f, "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.6e}",
-                 r.gcd_class, r.dim, r.lambda_min, r.lambda_max, r.trace, r.frobenius_norm, cond).unwrap();
+        let cond = if r.lambda_min > 1e-15 {
+            r.lambda_max / r.lambda_min
+        } else {
+            f64::INFINITY
+        };
+        writeln!(
+            f,
+            "{}\t{}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.6e}",
+            r.gcd_class, r.dim, r.lambda_min, r.lambda_max, r.trace, r.frobenius_norm, cond
+        )
+        .unwrap();
     }
 }
 
@@ -86,8 +103,16 @@ fn write_scaling_tsv(alpha: &AlphaResults) {
 
     writeln!(f, "gcd_class\tdim\tlambda_min\tln_dim\tln_lambda_min").unwrap();
     for &(d, dim, lm) in &alpha.block_scaling {
-        writeln!(f, "{}\t{}\t{:.15e}\t{:.10}\t{:.10}",
-                 d, dim, lm, (dim as f64).ln(), lm.ln()).unwrap();
+        writeln!(
+            f,
+            "{}\t{}\t{:.15e}\t{:.10}\t{:.10}",
+            d,
+            dim,
+            lm,
+            (dim as f64).ln(),
+            lm.ln()
+        )
+        .unwrap();
     }
 }
 
@@ -95,8 +120,10 @@ fn write_scaling_tsv(alpha: &AlphaResults) {
 pub fn write_cross_n(
     max_n: usize,
     cross_n_data: &[(usize, f64)],
-    alpha_power: f64, r2_power: f64,
-    alpha_log: f64, r2_log: f64,
+    alpha_power: f64,
+    r2_power: f64,
+    alpha_log: f64,
+    r2_log: f64,
 ) {
     fs::create_dir_all(RESULTS_DIR).ok();
 
@@ -105,8 +132,16 @@ pub fn write_cross_n(
     let mut f = fs::File::create(&path).expect("Failed to create cross-N TSV");
     writeln!(f, "N\tdim\tlambda_min\tln_N\tln_lambda_min").unwrap();
     for &(n, lm) in cross_n_data {
-        writeln!(f, "{}\t{}\t{:.15e}\t{:.10}\t{:.10}",
-                 n, n - 1, lm, (n as f64).ln(), lm.ln()).unwrap();
+        writeln!(
+            f,
+            "{}\t{}\t{:.15e}\t{:.10}\t{:.10}",
+            n,
+            n - 1,
+            lm,
+            (n as f64).ln(),
+            lm.ln()
+        )
+        .unwrap();
     }
 
     // JSON certificate

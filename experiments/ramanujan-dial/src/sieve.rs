@@ -42,9 +42,9 @@ mod tests {
     #[test]
     fn test_divisor_sieve_small() {
         let d = divisor_count_sieve(12);
-        assert_eq!(d[1], 1);   // 1 has 1 divisor
-        assert_eq!(d[6], 4);   // 6 has divisors 1,2,3,6
-        assert_eq!(d[12], 6);  // 12 has divisors 1,2,3,4,6,12
+        assert_eq!(d[1], 1); // 1 has 1 divisor
+        assert_eq!(d[6], 4); // 6 has divisors 1,2,3,6
+        assert_eq!(d[12], 6); // 12 has divisors 1,2,3,4,6,12
     }
 
     #[test]

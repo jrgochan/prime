@@ -67,21 +67,17 @@ use rayon::prelude::*;
 /// tiny eigenvalues.
 ///
 /// Parallelized over rows via rayon — each output element is independent.
-pub fn dense_matvec_dd(
-    a_hi: &[f64], a_lo: &[f64], x: &[f64], out: &mut [f64], dim: usize,
-) {
-    out[..dim].par_iter_mut()
-        .enumerate()
-        .for_each(|(i, yi)| {
-            let offset = i * dim;
-            let mut acc = DD::from_f64(0.0);
-            for j in 0..dim {
-                let a_dd = DD::new(a_hi[offset + j], a_lo[offset + j]);
-                let prod = a_dd * DD::from_f64(x[j]);
-                acc += prod;
-            }
-            *yi = acc.to_f64();
-        });
+pub fn dense_matvec_dd(a_hi: &[f64], a_lo: &[f64], x: &[f64], out: &mut [f64], dim: usize) {
+    out[..dim].par_iter_mut().enumerate().for_each(|(i, yi)| {
+        let offset = i * dim;
+        let mut acc = DD::from_f64(0.0);
+        for j in 0..dim {
+            let a_dd = DD::new(a_hi[offset + j], a_lo[offset + j]);
+            let prod = a_dd * DD::from_f64(x[j]);
+            acc += prod;
+        }
+        *yi = acc.to_f64();
+    });
 }
 
 #[cfg(test)]

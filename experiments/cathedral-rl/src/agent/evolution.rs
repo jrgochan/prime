@@ -85,7 +85,12 @@ impl EvolutionAgent {
             generation: self.generation,
             best_d2: self.best_d2,
             mean_d2,
-            elite_d2: population.iter().take(n_elite).map(|(_, d)| *d).sum::<f64>() / n_elite as f64,
+            elite_d2: population
+                .iter()
+                .take(n_elite)
+                .map(|(_, d)| *d)
+                .sum::<f64>()
+                / n_elite as f64,
             sigma: self.sigma,
         }
     }
