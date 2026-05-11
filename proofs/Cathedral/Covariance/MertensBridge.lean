@@ -16,10 +16,26 @@
   Created: May 10, 2026
 -/
 
-import PrimeNumberTheoremAnd.Mertens
 import Cathedral.Covariance.EulerProduct
 import Mathlib.Order.Filter.Basic
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
+import Mathlib.NumberTheory.Harmonic.EulerMascheroni
+
+-- ════════════════════════════════════════════════
+-- PNTAnd AXIOM REPLACEMENT
+-- Mertens' third theorem: ∏_{p≤x}(1-1/p) ~ e^{-γ}/log(x).
+-- Previously imported from PrimeNumberTheoremAnd.Mertens.
+-- Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024–2026).
+-- ════════════════════════════════════════════════
+
+/-- **Mertens' Third Theorem (asymptotic form).**
+    ∏_{p ≤ x, prime} (1-1/p) ~ e^{-γ}/log(x).
+    Axiom (was proved in PNTAnd/Mertens.lean as Mertens.E₃.bound''). -/
+axiom mertens_third_asymptotic :
+  Asymptotics.IsEquivalent Filter.atTop
+    (fun x : ℝ ↦ ∏ p ∈ (Finset.Ioc 0 ⌊x⌋₊).filter Nat.Prime,
+      (1 - (1 : ℝ) / p))
+    (fun x ↦ Real.exp (-eulerMascheroniConstant) / Real.log x)
 
 noncomputable section
 open Real Finset Filter Asymptotics
@@ -35,7 +51,7 @@ theorem pnta_mertens_third :
     (fun x : ℝ => ∏ p ∈ (Ioc 0 ⌊x⌋₊).filter Nat.Prime,
       (1 - (1 : ℝ) / p)) ~[atTop]
     (fun x => exp (-eulerMascheroniConstant) / log x) :=
-  Mertens.E₃.bound''
+  mertens_third_asymptotic
 
 /-- **log(x) * ∏_{p ≤ x} (1-1/p) → e^{-γ}** over ℝ. PROVED.
 

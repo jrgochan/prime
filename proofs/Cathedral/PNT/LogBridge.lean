@@ -34,7 +34,32 @@
 import Cathedral.Defs
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
 import Mathlib.NumberTheory.ArithmeticFunction.VonMangoldt
-import PrimeNumberTheoremAnd.Consequences
+
+-- ════════════════════════════════════════════════
+-- PNTAnd DEFINITIONS & AXIOMS (previously from Consequences.lean)
+-- Axiom-ified to remove PNTAnd dependency.
+-- ════════════════════════════════════════════════
+
+/-- Chebyshev's ψ function: ψ(x) = Σ_{n≤x} Λ(n). -/
+noncomputable abbrev Psi (x : ℝ) : ℝ :=
+  ∑ n ∈ Finset.Ioc 0 ⌊x⌋₊, ArithmeticFunction.vonMangoldt n
+
+/-- PNT remainder: R(x) = ψ(x) - x. -/
+noncomputable def R (x : ℝ) : ℝ := Psi x - x
+
+/-- μ·log arithmetic function. -/
+noncomputable def mu_log : ArithmeticFunction ℝ :=
+  ⟨fun n => (↑(ArithmeticFunction.moebius n) : ℝ) * Real.log n, by simp⟩
+
+private lemma mu_log_apply (n : ℕ) :
+    mu_log n = (↑(ArithmeticFunction.moebius n) : ℝ) * Real.log n := rfl
+
+/-- PNT: ψ(x) - x = o(x). Axiom (was proved in PNTAnd). -/
+axiom R_isLittleO : R =o[Filter.atTop] _root_.id
+
+/-- Dirichlet identity: μ·log * ζ = -Λ. Axiom (was proved in PNTAnd). -/
+axiom mu_log_mul_zeta :
+  mu_log * ArithmeticFunction.zeta = -ArithmeticFunction.vonMangoldt
 
 noncomputable section
 open Real Finset Filter ArithmeticFunction ArithmeticFunction.Moebius Asymptotics

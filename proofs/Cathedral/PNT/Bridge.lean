@@ -53,7 +53,18 @@ import Mathlib.NumberTheory.LSeries.Deriv
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 import Mathlib.NumberTheory.LSeries.SumCoeff
-import PrimeNumberTheoremAnd.Consequences
+
+-- ════════════════════════════════════════════════
+-- PNTAnd AXIOM REPLACEMENT
+-- The Prime Number Theorem (summatory Möbius form).
+-- This was previously imported from PrimeNumberTheoremAnd.Consequences.
+-- We axiom-ify it to remove the PNTAnd dependency, making the repo
+-- self-contained with only Lean 4 + Mathlib v4.29.
+-- Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024–2026).
+-- ════════════════════════════════════════════════
+axiom mu_pnt_alt :
+  (fun x : ℝ ↦ ∑ n ∈ Finset.range ⌊x⌋₊,
+    (↑(ArithmeticFunction.moebius n) : ℝ) / n) =o[Filter.atTop] fun _ ↦ (1 : ℝ)
 
 noncomputable section
 open Real Finset Filter ArithmeticFunction ArithmeticFunction.Moebius

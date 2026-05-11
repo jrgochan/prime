@@ -4,9 +4,10 @@ open Lake DSL
 package "hyperzeta_proofs" where
   -- Build constraints securely limiting memory limits
 
--- PrimeNumberTheoremAnd: local clone with v4.29 fixes (Fourier.lean simp fix)
--- Cloned from github.com/AlexKontorovich/PrimeNumberTheoremAnd, patched in-tree
-require PrimeNumberTheoremAnd from "./deps/PrimeNumberTheoremAnd"
+-- PrimeNumberTheoremAnd: REMOVED (axiom-ified, May 10 2026).
+-- All PNTAnd results used by the Cathedral are now stated as axioms
+-- in the individual files that previously imported PNTAnd.
+-- This makes the repo self-contained: only Lean 4 + Mathlib required.
 
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git" @ "v4.29.0"
