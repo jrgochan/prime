@@ -12,7 +12,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{May 6, 2026 --- v16, Observatory Edition}
+\date{May 2026}
 
 \begin{document}
 
@@ -38,7 +38,7 @@ where high-condition-number spectral injections cause
 defender software to hallucinate.
 Since the original version of this paper (April~20, 2026),
 the Cathedral has evolved from a single-path, single-axiom
-architecture (v5) to a \emph{dual-path} architecture (v15) with
+architecture (v5) to a \emph{one-pillar} architecture (v17) with
 two independent compiler-verified proof routes connected by the
 Parseval Bridge---a zero-axiom isometry between time and frequency
 domains. This architectural upgrade strengthens both the defensive
@@ -112,21 +112,21 @@ has undergone a fundamental architectural transformation:
     IMRN 2003). Three alternative proof paths (Mellin, Perron,
     Renormalization) are preserved with different axiom footprints,
     all connected by the Parseval Bridge (zero-axiom isometry).
-  \item \textbf{Scale}: 308 active Lean files, 78,435 lines of
-    formally verified logic, 48+ computational experiments,
+  \item \textbf{Scale}: 227 active Lean files, $\sim$60{,}500 lines of
+    formally verified logic, 50+ computational experiments,
     0 sorry placeholders on the critical path.
   \item \textbf{DD-precision certification}: A Dekker--Knuth
     Double-Double Conjugate Gradient engine certifies the
     B\'aez-Duarte distance at $N = 55{,}440$ ($\dim = 55{,}439$),
     the largest such computation in the literature. A 512-bit MPFR
     engine provides Sherman-Morrison cross-validation to $10^{-17}$.
-  \item \textbf{AI collaboration}: The entire v5 $\to$ v16 journey
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v17 journey
     was conducted through human-AI pair programming, demonstrating
     the feasibility of AI-assisted formal verification.
 \end{itemize}
 
 These changes affect the dual-use landscape. Each risk section
-below notes where the v15 architecture alters the assessment.
+below notes where the v17 architecture alters the assessment.
 
 % ================================================================
 \section{Risk 1: Precision Harmonic Injection Attacks on Power Grids}
@@ -554,7 +554,7 @@ Potential impact & Espionage, corporate/government intelligence \\
 The Cathedral was built through human-AI pair programming: a human
 computer scientist directing AI assistants (Claude, Gemini) to formalize,
 debug, and verify Lean~4 proofs. This collaboration model reduced the
-development time for the v5~$\to$~v15 evolution from an estimated
+development time for the v5~$\to$~v17 evolution from an estimated
 months of solo work to approximately two weeks.
 
 \subsection{The Dark Mirror}
@@ -951,12 +951,13 @@ Applications}, 2026.
 \bibitem{cathedral-v16}
 J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
 Architecture for the Riemann Hypothesis (v16, Observatory
-Edition)}, 2026.
+Architecture for the Riemann Hypothesis (v17, Oracle
+Capstone Edition)}, 2026.
 
 \bibitem{cathedral-physics}
 J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
 Between the Cathedral Proof and Quantum Mechanics (v16, Observatory
-Edition)}, 2026.
+Between the Cathedral Proof and Quantum Mechanics}, 2026.
 
 \bibitem{dekker1971}
 T.J.~Dekker, \emph{A floating-point technique for extending the
