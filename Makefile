@@ -12,7 +12,7 @@
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
-.PHONY: sedenion axiom-hunt spectral-engine viewport
+.PHONY: sedenion axiom-hunt spectral-engine viewport origin
 .PHONY: proof-tree audit
 .DEFAULT_GOAL := help
 
@@ -176,6 +176,14 @@ viewport: ## Launch the HyperZeta Viewport (3D visualizer)
 	fi
 	cd tools/hyperzeta-viewport && npm run dev
 
+origin: ## Launch the original HYPERZETA viewer (March 27, 2026)
+	@$(ENV) require node
+	@if [ ! -d tools/hyperzeta-origin/node_modules ]; then \
+		echo "  Installing origin viewer dependencies..."; \
+		cd tools/hyperzeta-origin && npm install; \
+	fi
+	cd tools/hyperzeta-origin && npm run dev -- --port 3001
+
 # ────────────────────────────────────────────
 # 🔍  ENVIRONMENT
 # ────────────────────────────────────────────
@@ -262,7 +270,7 @@ help: ## Show this help message
 	@grep -E '^(dashboard|visualizer|proof-tree|audit|experiment-[a-z]+):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── TIER 3: HISTORICAL TOOLS ────────────────────────────"
-	@grep -E '^(sedenion|axiom-hunt|spectral-engine|viewport):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(sedenion|axiom-hunt|spectral-engine|viewport|origin):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── ENVIRONMENT ─────────────────────────────────────────"
 	@grep -E '^(check|setup[a-z-]*):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

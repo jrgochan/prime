@@ -22,12 +22,76 @@ ZERO_HEIGHTS = [
     37.586178159, 40.918719012, 43.327073281, 48.005150881, 49.773832478,
 ]
 
-def get_zeta_operator(re, im, terms=100):
-    """Get the 16×16 operator matrix from the Rust engine."""
-    import core_engine
-    matrix_flat, components, norm = core_engine.zeta_operator(re, im, terms)
-    matrix = np.array(matrix_flat).reshape(16, 16)
-    components = np.array(components)
+def sedenion_multiply(a, b):
+    """Multiply two sedenions using the Cayley-Dickson construction.
+
+    A sedenion is represented as a 16-element numpy array.
+    Cayley-Dickson: if a = (p, q) and b = (r, s) where p,q,r,s are octonions,
+    then a·b = (p·r - s*·q, s·p + q·r*) where * is conjugation.
+    We recurse down: sedenion → octonion → quaternion → complex → real.
+    """
+    n = len(a)
+    if n == 1:
+        return a * b
+
+    half = n // 2
+    # Split into pairs (Cayley-Dickson)
+    p, q = a[:half], a[half:]
+    r, s = b[:half], b[half:]
+
+    # Conjugate: negate all imaginary parts (indices 1..n-1)
+    def conj(x):
+        c = x.copy()
+        c[1:] = -c[1:]
+        return c
+
+    # a·b = (p·r - conj(s)·q,  s·p + q·conj(r))
+    pr = sedenion_multiply(p, r)
+    sq = sedenion_multiply(conj(s), q)
+    sp = sedenion_multiply(s, p)
+    qr = sedenion_multiply(q, conj(r))
+
+    return np.concatenate([pr - sq, sp + qr])
+
+
+def sedenion_zeta(sigma, t, terms=100):
+    """Compute ζ_𝕊(s) = Σ_{n=1}^{N} n^{-s} in sedenion arithmetic.
+
+    For each n, n^{-s} = n^{-σ} · (cos(t·ln(n)) - i·sin(t·ln(n)))
+    where i is the sedenion e₁ basis element.
+    The result is a 16-component sedenion.
+    """
+    result = np.zeros(16)
+    for n in range(1, terms + 1):
+        mag = n ** (-sigma)
+        angle = -t * np.log(n)
+        # n^{-s} lives in the (e₀, e₁) plane (complex subspace)
+        term = np.zeros(16)
+        term[0] = mag * np.cos(angle)
+        term[1] = mag * np.sin(angle)
+        result += term
+    return result
+
+
+def left_multiplication_matrix(a):
+    """Build the 16×16 matrix for the operator L_a(x) = a·x.
+
+    Column j = a · e_j where e_j is the j-th basis sedenion.
+    """
+    n = len(a)
+    matrix = np.zeros((n, n))
+    for j in range(n):
+        e_j = np.zeros(n)
+        e_j[j] = 1.0
+        matrix[:, j] = sedenion_multiply(a, e_j)
+    return matrix
+
+
+def get_zeta_operator(sigma, t, terms=100):
+    """Get the 16×16 left-multiplication operator matrix for ζ_𝕊(s)."""
+    components = sedenion_zeta(sigma, t, terms)
+    norm = np.linalg.norm(components)
+    matrix = left_multiplication_matrix(components)
     return matrix, components, norm
 
 
