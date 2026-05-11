@@ -1,4 +1,0 @@
-═══ GPU SWEEP (witness-vector fix) — Fri May  8 05:36:05 MDT 2026 ═══
-error: invalid value 'experiments/cache/hpdf/gram_N1000.h5' for '[N]...': invalid digit found in string
-
-For more information, try '--help'.

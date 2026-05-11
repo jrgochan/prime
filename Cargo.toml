@@ -1,6 +1,5 @@
 [workspace]
 resolver = "2"
-exclude = ["tools/spectral-engine", "tools/hyperzeta-origin/core-engine"]
 members = [
     # ═══════════════════════════════════════════════
     # Shared library

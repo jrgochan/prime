@@ -33,13 +33,11 @@ proofs/lake-packages/
 
 # ── WASM ──
 **/*.wasm
-!tools/hyperzeta-viewport/public/wasm/*.wasm
 
 # ── LaTeX build artifacts ──
 **/*.aux
 **/*.log
 !experiments/**/*.log
-!results/**/*.log
 **/*.toc
 **/*.out
 **/*.fls
@@ -106,4 +104,18 @@ pnpm-debug.log*
 *.orig
 .env.local
 .env.*.local
-experiments/two-tile-decomposition-gpu/results/skeleton_keys_B1000.tsv
+
+# ── Development-only (see 'development' branch) ──
+docs/ai/
+docs/architecture/
+docs/exports/
+docs/mathematics/
+docs/physics/
+docs/paper/
+docs/hyperzeta-viewport/
+docs/GEMINI_BRIEFING.md
+docs/hypercomplex_srs.md
+papers/working_drafts/
+tools/
+visualizer/
+results/
