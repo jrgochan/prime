@@ -202,7 +202,7 @@ Mellin transforms $(\mathcal{M}[h_k](\rho))_{k=2}^N$ is a rank-1
 tensor. This is the key identity underlying the converse direction.
 
 % ================================================================
-\section{Pillar I: The Converse ($d_N^2 \to 0 \Rightarrow \RH$)}
+\section{Pillar I: The Converse (\texorpdfstring{$d_N^2 \to 0 \Rightarrow \RH$}{d²→0 ⟹ RH})}
 \label{sec:converse}
 % ================================================================
 
@@ -245,7 +245,7 @@ $d_N^2 \to 0 \Rightarrow \RH$. Zero custom axioms. Zero sorry.
 \end{corollary}
 
 % ================================================================
-\section{Pillar II: The Forward ($\RH \Rightarrow d_N^2 \to 0$)}
+\section{Pillar II: The Forward (\texorpdfstring{$\RH \Rightarrow d_N^2 \to 0$}{RH ⟹ d²→0})}
 \label{sec:forward}
 % ================================================================
 
@@ -460,6 +460,39 @@ $\text{Robin} \iff \text{NB} \iff \text{Lagarias} \iff \text{RH}$,
 connecting a discrete bound on divisor sums to $L^2$ convergence
 of step-function approximations---two entirely different mathematical
 universes, bridged by the Cathedral.
+
+\subsection{The M\"obius Stratum Partition}
+\label{sec:gcd-stratum}
+
+The Cathedral structurally partitions the Nyman--Beurling distance
+into per-GCD strata:
+\[
+  d_N^2 = \sum_{d \mid N!}
+    \sum_{\substack{j,k \leq N \\ \gcd(j,k) = d}}
+    v_j\,v_k\,G(j,k).
+\]
+Three structural results are proved with zero sorry:
+\begin{itemize}
+  \item \textbf{GCD Partition}
+    (\lean{Covariance/GCDPartition.lean}):
+    the Gram quadratic form decomposes exactly into
+    GCD strata.
+  \item \textbf{GCD Sign Law}
+    (\lean{Covariance/GCDSignLaw.lean}):
+    for coprime $a,b$, stratum reindexing via
+    the bijection $k \mapsto dk$ preserves the sum.
+  \item \textbf{GCD Stratum Bound}
+    (\lean{Covariance/GCDStratumBound.lean}):
+    each stratum satisfies $|S_d| \leq C/d^2$.
+\end{itemize}
+
+Companion GPU experiments at $N = 55{,}440$ (the largest highly
+composite number in the certified pipeline) reveal that the sign
+of each GCD stratum correlates with $\mu(d)$ at approximately
+88\% agreement. If confirmed, this \emph{M\"obius Stratum
+Convergence Conjecture}---$\operatorname{sgn}(S_d) = \mu(d)$ for
+squarefree $d$---would provide a new structural pathway to RH
+through the inclusion-exclusion mechanics of the GCD lattice.
 
 % ================================================================
 \section{The B\'aez-Duarte Constant}
@@ -703,7 +736,7 @@ consumed by Lean oracle axioms:
 \subsection{What Is Proved}
 
 The Cathedral establishes, via machine-verified proof, that the
-Riemann Hypothesis is \emph{if and only if} the B\'aez-Duarte
+Riemann Hypothesis is true \emph{if and only if} the B\'aez-Duarte
 distance decays to zero. The biconditional is complete. The converse
 uses \textbf{zero} custom axioms. The forward direction uses
 \textbf{one} axiom on the crown path (B\'aez-Duarte 2003).
