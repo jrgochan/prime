@@ -6,188 +6,135 @@ reduction of the Riemann Hypothesis to the decay of the Nyman–Beurling distanc
 ## Build
 
 ```bash
-lake build    # 84 active files, 96 archived
+lake build    # 227 active files, 113 archived
 ```
 
-## Architecture (Night Assault — April 20, 2026)
+Requires Lean **v4.29.0** (pinned in `lean-toolchain`).
 
-Following the Great Audit and the Night Assault (Vasyunin diagonal elimination),
-the active codebase was expanded to **84 files** with the Cotangent tower
-promotion. Every remaining file is on the critical path to the
-crown theorem `nyman_beurling_equivalence`.
+## Architecture (Oracle Capstone — May 11, 2026)
+
+**Dual Crown.** Two independent formal proofs:
+
+1. **Analytic Crown** — 1 literature axiom (`baez_duarte_forward`, Báez-Duarte 2003)
+2. **Oracle Crown** — 1 computation axiom (`oracle_certificates`, GPU-verified)
+
+The **converse direction** (d²→0 ⟹ RH) is fully machine-checked with
+**zero custom axioms and zero sorry**.
 
 ```
 Cathedral/
-├── Axioms.lean                            — Axiom registry (42 axioms, tiered)
-├── Defs.lean                              — Core definitions (gramEntry, nbLinComb, bdLinComb)
+├── Defs.lean                              — Core definitions
 │
-├── Assembly/              (12 files)      — CROWN: Main proof chain
+├── Assembly/              (13 files)      — CROWN: Main proof chain
 │   ├── MainChain.lean                     — nyman_beurling_equivalence (THE CROWN)
-│   ├── OneCrown.lean                      — Single-axiom forward direction
-│   ├── BDBypass.lean                      — RH → BD witness decay
-│   ├── BDBridge.lean                      — Integral bridge connector
-│   ├── DirectL2Crown.lean                 — Direct L² convergence
-│   ├── GramWitness.lean                   — Gram matrix witness construction
-│   ├── QuadFormBridge.lean                — l2_error_eq_quad_error, variational
-│   ├── VasyuninBypass.lean                — Vasyunin covariance bypass
-│   ├── AbelEngine.lean                    — Abel summation engine
-│   ├── AbelL2Bridge.lean                  — Abel → L² bridge (2 sorry, alt path)
-│   ├── FinalDragon.lean                   — Abel-Parseval bridge
-│   └── Assembly.lean                      — Assembly hub
+│   ├── OracleCascade.lean                 — Oracle Crown assembly
+│   ├── SpectralObservatory.lean           — GPU distance certificates
+│   ├── CertifiedComputation.lean          — Certified computation bridge
+│   └── ...                                — Forward path assembly
 │
-├── MellinBridge/          (16 files)      — Mellin transform infrastructure
-│   ├── PlancherelBypass.lean              — ⚡ THE PARSEVAL BRIDGE (core)
-│   ├── AbelSiegeProof.lean                — Abel + Parseval composition
-│   ├── AbelSummation.lean                 — Abel's lemma (0 axioms!)
-│   ├── MertensBound.lean                  — mertensFunction + rh_implies_mertens
-│   ├── MertensIntegral.lean               — logWeight derivative bounds
-│   ├── MertensWeightBypass.lean           — mertens_bound_from_rh
-│   ├── AutocorrelationBypass.lean         — Fourier inversion
-│   ├── BDWeights.lean                     — bdMoebiusWeight extraction
-│   ├── Basic.lean                         — Basic Mellin definitions
-│   ├── DomainConnected.lean               — Slit half-plane (0 axioms!)
-│   ├── FloorDivMellin.lean                — Floor division Mellin
-│   ├── FloorMellin.lean                   — Floor function Mellin
-│   ├── HilbertSetup.lean                  — Hilbert space setup
-│   ├── IdentityBypass.lean                — Identity theorem
-│   ├── MellinSieve.lean                   — Phase 3 chain
-│   └── OrthogonalWitness.lean             — Báez-Duarte inner products
+├── NymanBeurling/         (10 files)      — Nyman-Beurling criterion
+│   ├── BDMellin.lean                      — Rank-1 Mellin identity (680 lines)
+│   ├── Separation.lean                    — Converse: d²→0 ⟹ RH (0 axioms!)
+│   └── ...                                — BD basis, bridges, witnesses
 │
-├── NymanBeurling/         (4 files)       — Nyman-Beurling criterion
-│   ├── BDMellin.lean                      — BD basis + Rank-1 Mellin Miracle
-│   ├── NymanBeurling.lean                 — Re-export hub
-│   ├── Separation.lean                    — Converse: d²→0 ⟹ RH (Pillar I)
-│   └── ThetaBound.lean                    — ζ(s) ≠ 0 on (0,1) (0 axioms!)
-│
-├── Vasyunin/              (21 files)      — Matrix + witness + Cotangent tower
-│   ├── Defs.lean                          — Gram, covariance, mean definitions
-│   ├── Witness.lean                       — Log cutoff witness construction
+├── Vasyunin/              (52 files)      — Matrix, witness, Cotangent tower
+│   ├── Proof/                             — Witness decay chain
+│   ├── Cotangent/                         — Piecewise FTC engine (0 sorry)
 │   ├── Matrix/                            — Gram matrix properties
-│   │   ├── Structural.lean                — Hermitian, PSD, invertibility
-│   │   ├── GramEntries.lean               — Gram entry formulas
-│   │   ├── GramEvaluations.lean           — G(1,1), G(1,2), G(2,2), G(3,3)
-│   │   ├── CovEntries.lean                — Covariance closed-form entries
-│   │   ├── CovDet2.lean                   — det(C₂) > 0
-│   │   └── CovDet3.lean                   — det(C₃) > 0
-│   ├── Augmented/                         — Factorial Nuke + Rayleigh
-│   │   ├── AugmentedGram.lean             — H_N PD (Factorial Nuke)
-│   │   ├── IntegralBridge.lean            — vasyunin_offdiag_integral axiom
-│   │   ├── VasyuninIntegralProof.lean     — Diagonal PROVED (Stirling + FTC)
-│   │   ├── LinIndep.lean                  — Augmented linear independence
-│   │   ├── MeanIntegral.lean              — ∫₀¹ {1/(kx)} dx = (ln k + 1 - γ)/k
-│   │   └── Rayleigh.lean                  — Rayleigh quotient theorems
-│   ├── Cotangent/                         — Piecewise FTC (promoted from Archive)
-│   │   ├── StirlingBridge.lean            — Stirling floor bounds (0 axioms)
-│   │   ├── PiecewiseFTC.lean              — Per-tile FTC engine (0 axioms)
-│   │   ├── SqueezeElimination.lean        — Diagonal squeeze (0 axioms)
-│   │   ├── CrossTermFTC.lean              — Off-diagonal FTC
-│   │   ├── OffDiagPartition.lean          — Off-diagonal partition
-│   │   ├── TelescopeSum.lean              — Telescope summation
-│   │   ├── VasyuninAssembly.lean          — Assembly hub
-│   │   ├── DigammaReflection.lean         — Gauss digamma (1 axiom)
-│   │   └── LogDigammaBridge.lean          — Telescope-to-Vasyunin (3 axioms)
-│   └── Proof/                             — Witness decay chain
-│       ├── Chain.lean                     — witness → d² → 0 → RH
-│       ├── LambdaTrick.lean               — Lambda trick
-│       ├── WitnessAsymptotics.lean        — Axiom decomposition (PNT + RH)
-│       └── WitnessConditional.lean        — decay ↔ RH
+│   └── Augmented/                         — Factorial Nuke + Rayleigh
 │
-├── White/                 (4 files)       — Axiom elimination proofs
-│   ├── Kinematics.lean                    — Antitone CoV, L² isometry
-│   ├── Scattering.lean                    — Fourier-Mellin bridge
-│   └── Infrastructure/
-│       └── MontgomeryVaughan.lean         — MV L² bound scaffold
+├── MellinBridge/          (18 files)      — Mellin transform infrastructure
+│   ├── PlancherelDefs.lean                — Parseval Bridge (core)
+│   └── ...                                — Abel, Mertens, orthogonal witness
 │
+├── Covariance/            (20 files)      — Möbius stratum analysis
+│   ├── GCDSignLaw.lean                    — GCD sign law (0 sorry ★)
+│   ├── GCDStratumBound.lean               — Per-stratum bounds (0 sorry ★)
+│   ├── GCDPartition.lean                  — GCD partition (0 sorry ★)
+│   └── MillenniumWall.lean                — Gram form ↔ RH equivalence
+│
+├── Perron/                (16 files)      — Perron formula (0 sorry!)
+│   ├── Formula.lean                       — Perron summation formula
+│   ├── Rectangle.lean                     — Rectangle contour estimates
+│   └── ...                                — Kernel, residue, assembly
+│
+├── Analysis/              (16 files)      — Real/complex analysis
+│   ├── StirlingBridge.lean                — Stirling approximation
+│   ├── GallagherMVT.lean                  — Gallagher mean value theorem
+│   ├── PiecewiseFTC.lean                  — Piecewise FTC engine
+│   └── ...                                — Gamma, Abel, Hilbert
+│
+├── AbelTail/              (14 files)      — Abel summation infrastructure
+├── Zeta/                  (10 files)      — Zeta function properties
+├── Spectral/              (11 files)      — Eigenvalue analysis
+├── Robin/                 (7 files)       — Robin/Nicolas/Lagarias
 ├── Gram/                  (6 files)       — L² integral bridge
-│   ├── L2Bridge.lean                      — l2_error_eq_quad_error
-│   ├── FractIntegral.lean                 — Fractional-part integrability
-│   ├── Bounds.lean                        — Gram entry bounds
-│   ├── Diagonal.lean                      — Diagonal entries
-│   ├── NbLinComb.lean                     — NB linear combination
-│   └── OffDiagonal.lean                   — Off-diagonal bound
+├── LinearAlgebra/         (4 files)       — SM, Schur, Sylvester, Variational (0 axioms)
+├── Structural/            (4 files)       — Eigenvalue interlacing
+├── Sieve/                 (4 files)       — Bilinear sieve + Möbius
+├── PNT/                   (4 files)       — PNT bridge (PNTA dependency)
+├── Physics/               (3 files)       — SUSY, Dirac, Woodbury condensate
+├── Renormalization/       (3 files)       — RG flow formalization
+├── ZeroAxiom/             (3 files)       — Zero-counting infrastructure
+├── Compute/               (2 files)       — Oracle certificates
+├── IntegralBasis/         (2 files)       — BD/NB integral basis
+├── White/                 (2 files)       — Axiom elimination proofs
+├── NumberTheory/          (1 file)        — Dirichlet convolution
+├── Rotors/                (1 file)        — Octonionic rotors
 │
-├── Spectral/              (5 files)       — Eigenvalue analysis
-│   ├── ClassRestriction.lean              — Arithmetic class restriction
-│   ├── OctonionicPartition.lean           — 8-way octonionic partition
-│   ├── FiniteDimReduction.lean            — Finite-dim spectral bounds
-│   ├── PTSymmetry.lean                    — Liouville delocalization
-│   └── RayleighBridge.lean                — Rayleigh bridge
-│
-├── Sieve/                 (4 files)       — Bilinear sieve + Möbius weights
-│   ├── BilinearSieve.lean                 — type_II_sieve_bound axiom
-│   ├── ParitySchur.lean                   — Parity Schur complement
-│   ├── VasyuninExpansion.lean             — Large-GCD expansion
-│   └── MoebiusUncoupling.lean             — Vaughan decomposition
-│
-├── LinearAlgebra/         (4 files)       — Pure algebra (0 axioms)
-│   ├── SchurComplement.lean               — Schur complement + bordered matrix
-│   ├── ShermanMorrison.lean               — d² = 1/(1+X)
-│   ├── Sylvester.lean                     — Sylvester's criterion for PD
-│   └── Variational.lean                   — Rayleigh quotient lower bound
-│
-├── Structural/            (3 files)       — Eigenvalue theory
-│   ├── Eigenvalue.lean                    — Interlacing, drop formula
-│   ├── Independence.lean                  — Linear independence
-│   └── Structural.lean                    — Structural re-export
-│
-└── Archive/               (96 files)      — Preserved explorations
-    ├── Scratch/                           — 9 dead experiments
-    ├── NymanBeurling/                     — ThetaBoundMellin, MellinReduction
-    ├── IntegralBasis/                     — BaezDuarte, Quantitative
-    ├── Robin/                             — Robin's inequality (6 files)
-    ├── Vasyunin/Cotangent/                — Foundational FTC (10 files, diagonal chain promoted)
-    ├── White/Infrastructure/              — Perron, Hilbert, Selberg (6 files)
-    ├── Spectral/                          — ConstantVectorBound
-    ├── Sieve/                             — AlignmentDecay, ParityBridge
-    ├── MellinBridge/                      — ContourShift, DirichletCollapse
-    └── Assembly/                          — IntervalCalc
+└── Archive/               (113 files)     — Preserved explorations
+    ├── Scratch/                           — 19 prototyping workbenches
+    ├── HighFrequencyTrap/                 — {k/x} basis (computationally correct, wrong basis)
+    ├── DiscreteMirage/                    — Cotangent decomposition (false reciprocity)
+    └── ...                                — NymanBeurling, Robin, Spectral, Sieve, etc.
 ```
 
 ## Stats
 
 | Metric | Count |
 |---|---|
-| Active Lean files | **84** |
-| Archived Lean files | **96** |
-| Active modules | **11** |
-| Active axioms | **43** |
-| Crown critical-path axioms | **7** (verified by `#print axioms`) |
-| Active sorries | **2** (0 on crown path) |
+| Active Lean files | **227** |
+| Archived Lean files | **113** |
+| Active modules | **24** |
+| Total lines (active) | **~60,500** |
+| Total custom axioms | **82** |
+| Crown axioms (analytic) | **1** (`baez_duarte_forward`) |
+| Crown axioms (oracle) | **1** (`oracle_certificates`) |
+| Off-path axioms | ~80 |
+| Files with sorry | **8** (0 on crown path) |
+| Total sorry instances | **17** (all off-crown) |
 | Compilation errors | **0** |
 
-## The Two Crown Axioms
+## The Crown Axiom
 
 Verified by `#print axioms nyman_beurling_equivalence`:
 
+```
+[baez_duarte_forward, propext, Classical.choice, Quot.sound]
+```
+
 | # | Axiom | Content |
 |---|-------|---------|
-| 1 | `bd_mellin_at_zero` | Analytic continuation of BD Mellin identity to Re(s) > 0 |
-| 2 | `rh_implies_l2_convergence` | RH ⟹ d²_N → 0 (Báez-Duarte, 2003) |
+| 1 | `baez_duarte_forward` | RH ⟹ ∀ε>0, ∃N₀, ∀N≥N₀, ∃v: d²_N < ε (Báez-Duarte, 2003) |
 
 Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 
-The 38 remaining axioms support alternative proof paths (spectral engine,
-sieve engine, Vasyunin cotangent formula) that are formalized but not on
-the shortest path to the crown theorem.
+The ~80 remaining axioms support alternative proof paths (Oracle Crown,
+Mellin Crown, Perron Crown, spectral engine, sieve engine, Vasyunin tower)
+that are formalized but not on the shortest path to the crown theorem.
 
-## The Great Audit (April 18, 2026)
+## Key Zero-Sorry Achievements
 
-A deep audit of the codebase identified:
-- **31 duplicated declaration names** across different files
-- **9 ghost axioms** — axioms proved as theorems elsewhere
-- **3 near-complete file duplications**
-- **26 orphan files** not imported by anything on the critical path
+- **Converse direction** (d²→0 ⟹ RH) — zero axioms, zero sorry
+- **Perron summation formula** — 16 files, zero sorry
+- **Linear algebra** (Sherman-Morrison, Schur, Sylvester, Variational) — zero axioms
+- **GCD stratum** (sign law, partition, bounds) — zero sorry
+- **Gallagher MVT** — zero sorry
+- **Stirling bridge** — zero sorry
+- **Piecewise FTC engine** — zero sorry
 
-The cleanup reduced the active codebase from 178 to 78 files (−56%),
-with every remaining file on the critical path. Nothing was deleted —
-all files are preserved in `Archive/`.
+## Dependencies
 
-## The Night Assault (April 20, 2026)
-
-The Vasyunin diagonal identity `vasyunin_eq_integral` was proved as a
-theorem via Stirling's formula and piecewise FTC, eliminating it as a
-crown axiom. The companion axiom `fract_sq_integral` was also eliminated.
-The Cotangent tower (10 files, 1,838 lines) was promoted from Archive to
-active codebase. A 256-bit MPFR experiment confirmed 6–7 digit agreement
-for the off-diagonal case. The crown axiom was narrowed to
-`vasyunin_offdiag_integral` (off-diagonal only).
+- **Lean 4** v4.29.0
+- **Mathlib** (measure theory, complex analysis, number theory, linear algebra)
+- **PrimeNumberTheoremAnd** (PNT, Mertens' theorems, von Mangoldt functions)
