@@ -51,13 +51,24 @@ papers: ## Build all 15 companion papers
 	@$(ENV) require pdflatex
 	cd papers && ./build.sh
 
-cascade: ## Audit the Oracle Cascade axiom footprint
+cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
 	@$(ENV) require lean
 	@echo ""
 	@echo "  🏛️  Oracle Cascade — Axiom Audit"
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
-	cd proofs && lake env lean Cathedral/Assembly/OracleCascade.lean 2>&1 | grep "depends on"
+	@cd proofs && printf '%s\n' \
+		'import Cathedral.Assembly.OracleCascade' \
+		'#print axioms rh_unconditional' \
+		'#print axioms mertens_bound_cascade' \
+		'#print axioms l2_error_cascade' \
+		'#print axioms oracle_crown' \
+		| lake env lean --stdin 2>&1 \
+		| if grep -q "does not exist"; then \
+			echo "  ⚠  Build required first: run 'make build'"; \
+		else \
+			cat | grep -v "^warning:"; \
+		fi
 	@echo ""
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
