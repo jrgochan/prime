@@ -233,10 +233,15 @@ technique in the Cathedral traces back to published mathematics listed here.
 
 ### Eigenvalue Interlacing
 
+- **Hermann Weyl**, "Das asymptotische Verteilungsgesetz der Eigenwerte
+  linearer partieller Differentialgleichungen," *Math. Ann.*, 71:441–479, 1912.
+
 - **Ky Fan**, "On a theorem of Weyl concerning eigenvalues of linear
   transformations I," *Proc. Nat. Acad. Sci.*, 35:652–655, 1949.
 
-  > λ_min(G_{N+1}) ≤ λ_min(G_N). Proved as `eigenvalue_interlacing`
+  > λ_min(A+B) ≥ λ_min(A) + λ_min(B) for Hermitian matrices.
+  > Proved as `weyl_min_eigenvalue` (zero axioms) in `Spectral/RayleighBridge.lean`.
+  > Also: λ_min(G_{N+1}) ≤ λ_min(G_N). Proved as `eigenvalue_interlacing`
   > (zero axioms) in `Structural/Eigenvalue.lean`.
 
 ---
@@ -466,6 +471,26 @@ technique in the Cathedral traces back to published mathematics listed here.
   > bosons for mass stabilization, making twin primes a topological
   > necessity for vacuum stability.
 
+### The Heisenberg Uncertainty Principle
+
+- **Werner Heisenberg**, "Über den anschaulichen Inhalt der quantentheoretischen
+  Kinematik und Mechanik," *Z. Phys.*, 43:172–198, 1927.
+
+  > The spectral energy cannot be simultaneously localized in position and
+  > frequency. The **Heisenberg Bypass** (`Spectral/HeisenbergBypass.lean`)
+  > uses spectral decomposition to express d²_N → 0 in terms of eigenvalue
+  > decay, connecting the Oracle Cascade to the distance decay in
+  > `OracleCascade.lean`.
+
+### The Dirac Equation
+
+- **Paul A. M. Dirac**, "The quantum theory of the electron,"
+  *Proc. R. Soc. Lond. A*, 117(778):610–624, 1928.
+
+  > The Cathedral's `Physics/Dirac.lean` formalizes the 1+1D Clifford
+  > algebra (γ⁰, γ¹ satisfying {γᵘ, γᵛ} = 2ηᵘᵛ) and connects it to
+  > the SUSY vacuum structure in the spectral model of the Gram matrix.
+
 ---
 
 ## Dedekind Sums
@@ -608,6 +633,17 @@ technique in the Cathedral traces back to published mathematics listed here.
   > The Cathedral imports `mu_pnt_alt` (Σ μ(n)/n → 0).
   > `pnt_moebius_sum_div_tendsto` in `PNT/Bridge.lean` is proved
   > as a theorem (zero sorry) by bridging to ℕ-indexed sums.
+
+### Chebyshev's Prime-Counting Functions
+
+- **Pafnuty Lvovich Chebyshev**, "Mémoire sur les nombres premiers,"
+  *J. Math. Pures Appl.*, 17:366–390, 1852.
+
+  > ψ(x) = Σ_{n≤x} Λ(n) (the Chebyshev psi function) and θ(x) = Σ_{p≤x} log p.
+  > Defined in `PNT/LogBridge.lean` and `PNT/UnconditionalMertens.lean`.
+  > The relation Σ μ(k)log(k)⌊y/k⌋ = -ψ(y) via Möbius inversion
+  > (`NumberTheory/DirichletConvolution.lean`) is the algebraic engine
+  > connecting PNT to the Möbius-weighted sums.
 
 ### The Classical PNT
 
@@ -775,7 +811,18 @@ technique in the Cathedral traces back to published mathematics listed here.
   > results. The DD (double-double, ~31 digit) precision pipeline uses
   > compensated summation for dot products at N = 55,440.
 
+### Cholesky Factorization
 
+- **André-Louis Cholesky**, unpublished note, c. 1902–1910. (Published
+  posthumously by Commandant Benoit, *Bull. Géodésique*, 2:67–77, 1924.)
+
+  > A = LLᵀ factorization for positive-definite matrices. The GPU Cholesky
+  > solver (cuSOLVER dpotrf + dpotrs) is the primary algorithm for computing
+  > d²_N = 1 - bᵀG⁻¹b at N up to 55,440. Used in `Assembly/SpectralObservatory.lean`
+  > and `Assembly/CertifiedComputation.lean`. The DD-precision CG solver
+  > supplements Cholesky at extreme dimensions where GPU memory is the bottleneck.
+
+---
 
 ## How the Crown Axiom Maps to References (v17 Dual Crown)
 
