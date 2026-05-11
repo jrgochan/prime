@@ -309,9 +309,11 @@ impl DD {
         x2k *= inv_x2;
         result -= x2k * DD::from_f64(5.0) / DD::from_f64(660.0);
         x2k *= inv_x2;
-        result += x2k * DD::from_f64(691.0) / DD::from_f64(360360.0);
+        // B₁₂/(12) = -691/32760  (digamma: divide by 2k, NOT 2k(2k-1))
+        result += x2k * DD::from_f64(691.0) / DD::from_f64(32760.0);
         x2k *= inv_x2;
-        result -= x2k / DD::from_f64(12.0);  // B₁₄ term
+        // B₁₄/(14) = -7/12  → coefficient = 1/12
+        result -= x2k / DD::from_f64(12.0);
 
         result
     }
@@ -364,7 +366,7 @@ impl DD {
         let x2 = x * x;
         let mut term = x;
         let mut sum = x;
-        for n in 1..=20 {
+        for n in 1..=35 {
             term = term * (-x2) / DD::from_u64((2*n) * (2*n + 1));
             sum += term;
             if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
@@ -383,7 +385,7 @@ impl DD {
         let x2 = x * x;
         let mut term = DD::from_f64(1.0);
         let mut sum = DD::from_f64(1.0);
-        for n in 1..=20 {
+        for n in 1..=35 {
             term = term * (-x2) / DD::from_u64((2*n - 1) * (2*n));
             sum += term;
             if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }

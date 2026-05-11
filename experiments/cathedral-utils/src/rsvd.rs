@@ -79,18 +79,27 @@ impl Rng {
     }
 }
 
-/// Extract bottom-k eigenvalues via randomized eigendecomposition.
+/// Extract dominant (largest) eigenvalues via randomized eigendecomposition.
+///
+/// The Halko-Martinsson-Tropp algorithm naturally captures the **dominant**
+/// subspace of A, because Y = A·Ω amplifies the largest eigenvalues.
+///
+/// # Finding bottom eigenvalues (mass gap)
+/// To extract the **smallest** eigenvalues of A, pass a shifted/inverted
+/// operator instead: e.g., (σI - A) where σ > λ_max. The dominant modes
+/// of (σI - A) correspond to the smallest modes of A. Un-shift afterward:
+/// λ_A = σ - λ_shifted.
 ///
 /// # Arguments
 /// - `matvec`: closure computing A·v → result
 /// - `dim`: matrix dimension N
-/// - `k`: number of bottom eigenvalues desired
+/// - `k`: number of dominant eigenvalues desired
 /// - `oversampling`: extra columns for accuracy (typically 5-20, default 10)
 /// - `power_iterations`: extra passes for improved accuracy (0-2, default 1)
 ///
 /// # Returns
-/// An [`RsvdResult`] with the bottom-k eigenvalues and eigenvectors.
-pub fn rsvd_bottom_k<F>(
+/// An [`RsvdResult`] with the top-k eigenvalues (sorted descending) and eigenvectors.
+pub fn rsvd_dominant_k<F>(
     matvec: &F,
     dim: usize,
     k: usize,
@@ -167,16 +176,16 @@ where
     // Step 5: Eigendecompose B
     let eigen = b_mat.symmetric_eigen();
 
-    // Sort by eigenvalue ascending
+    // Sort by eigenvalue descending (RSVD captures dominant subspace)
     let mut indexed: Vec<(f64, usize)> = eigen
         .eigenvalues
         .iter()
         .enumerate()
         .map(|(i, &v)| (v, i))
         .collect();
-    indexed.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+    indexed.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap());
 
-    // Step 6: Take bottom k and map eigenvectors back
+    // Step 6: Take top k and map eigenvectors back
     let k = k.min(indexed.len());
     let eigenvalues: Vec<f64> = indexed[..k].iter().map(|(v, _)| *v).collect();
 
@@ -232,12 +241,7 @@ mod tests {
 
     #[test]
     fn test_rsvd_diagonal() {
-        // RSVD with random projection captures the dominant subspace.
-        // For bottom-k extraction of a diagonal matrix, the random projection
-        // mixes all eigenvalues. We verify structural properties instead:
-        // - returns the requested count
-        // - eigenvalues are sorted ascending
-        // - eigenvalues are positive (for a PD matrix)
+        // RSVD captures the dominant (largest) eigenvalue subspace.
         let dim = 50;
         let eigenvalues: Vec<f64> = (1..=dim).map(|i| i as f64).collect();
 
@@ -247,24 +251,26 @@ mod tests {
             }
         };
 
-        let result = rsvd_bottom_k(&matvec, dim, 5, 10, 0);
+        let result = rsvd_dominant_k(&matvec, dim, 5, 10, 1);
 
+        // Top 5 should be approximately 50, 49, 48, 47, 46
         assert_eq!(result.eigenvalues.len(), 5);
-        // Sorted ascending
+        // Sorted descending
         for i in 1..result.eigenvalues.len() {
-            assert!(result.eigenvalues[i] >= result.eigenvalues[i - 1],
-                "eigenvalues not sorted: [{}]={} < [{}]={}",
+            assert!(result.eigenvalues[i] <= result.eigenvalues[i - 1],
+                "eigenvalues not sorted descending: [{}]={} > [{}]={}",
                 i, result.eigenvalues[i], i-1, result.eigenvalues[i-1]);
         }
-        // All positive (PD input)
-        for (i, &v) in result.eigenvalues.iter().enumerate() {
-            assert!(v > 0.0, "eigenvalue {i} should be positive, got {v}");
-        }
-        // Eigenvectors have correct dimension
-        assert_eq!(result.eigenvectors.len(), 5);
-        for v in &result.eigenvectors {
-            assert_eq!(v.len(), dim);
-        }
+        // Top eigenvalue should be close to 50
+        assert!(
+            (result.eigenvalues[0] - 50.0).abs() < 1.0,
+            "top eigenvalue: expected ~50, got {}", result.eigenvalues[0]
+        );
+        // 5th should be close to 46 (RSVD is approximate at edges)
+        assert!(
+            (result.eigenvalues[4] - 46.0).abs() < 3.0,
+            "5th eigenvalue: expected ~46, got {}", result.eigenvalues[4]
+        );
     }
 
     #[test]

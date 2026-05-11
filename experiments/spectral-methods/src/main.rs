@@ -201,7 +201,7 @@ fn main() {
         // ─── §C. Randomized SVD (with spectral shift) ───
         let t0 = Instant::now();
         // RSVD on shifted matrix: finds largest of (σI-A) = smallest of A
-        let rsvd_shifted = rsvd::rsvd_bottom_k(
+        let rsvd_shifted = rsvd::rsvd_dominant_k(
             &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(mat_ref, dim, sigma, v, out),
             dim,
             dim.min(k + 20), // get more to pick from the top
@@ -209,10 +209,10 @@ fn main() {
             2,               // power iterations
         );
         let rsvd_time = t0.elapsed().as_secs_f64();
-        // Un-shift: take the TOP-k of (σI-A) = smallest of A
-        let n_rsvd = rsvd_shifted.eigenvalues.len();
-        let rsvd_top_start = n_rsvd.saturating_sub(k);
-        let mut rsvd_eigenvalues: Vec<f64> = rsvd_shifted.eigenvalues[rsvd_top_start..].iter()
+        // Un-shift: top-k of (σI-A) are now at the front (sorted descending)
+        // These correspond to the smallest eigenvalues of A.
+        let rsvd_k_actual = rsvd_shifted.eigenvalues.len().min(k);
+        let mut rsvd_eigenvalues: Vec<f64> = rsvd_shifted.eigenvalues[..rsvd_k_actual].iter()
             .map(|&lam| sigma - lam)
             .collect();
         rsvd_eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
