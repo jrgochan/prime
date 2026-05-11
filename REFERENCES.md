@@ -895,31 +895,6 @@ Two archived paths are preserved as monuments to the formalization process:
 
 ---
 
-## Speculative Connections
-
-The following work does not directly underpin the Cathedral's formal proof chain,
-but represents an intellectual horizon that the spectral discoveries point toward.
-
-### Geometric Unity
-
-- **Eric Weinstein**, "Geometric Unity," lecture at the University of Oxford,
-  May 2013; preprint, *A Portal Special Presentation*, 2021.
-
-  > Weinstein's Geometric Unity program proposes that the gauge groups and
-  > matter content of the Standard Model emerge from the intrinsic geometry
-  > of a 14-dimensional "observerse" — the metric bundle of a 4-manifold.
-  > The Cathedral's Particle Zoo independently discovered strikingly similar
-  > structure in the *discrete* spectral geometry of the Gram matrix:
-  > primes behave as massless gauge bosons, highly composite numbers as
-  > massive fermions, and the Mersenne Cascade resembles renormalization
-  > group flow reaching an infrared fixed point. A future formalization
-  > connecting the Cathedral's discrete spectral vacuum to continuous
-  > gauge-theoretic unification could make this correspondence precise.
-  > Whether the arithmetic spectral model and Geometric Unity are two
-  > projections of the same underlying structure remains an open question.
-
----
-
 ## Documentation Suite
 
 2 core papers (included in the public repository) + 13 working drafts

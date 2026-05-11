@@ -372,4 +372,5 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 > by the Oracle Cascade, which derives every conditional theorem from the
 > single oracle_certificates axiom. Five proof paths (Analytic, Oracle,
 > Mellin, Perron, Renormalization) are formally verified. See
-> `cathedral-physics.tex` for the full physics–mathematics dictionary.
+> the supplementary working drafts (available on request) for the full
+> physics–mathematics dictionary.
