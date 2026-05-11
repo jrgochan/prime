@@ -190,6 +190,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.GCDPartition,
     -- Per-stratum growth bounds (Layer 4, Exploration 35)
     `Cathedral.Covariance.GCDStratumBound,
+    -- GCD sign law (Layer 5, Möbius Stratum Conjecture, Exploration 35)
+    `Cathedral.Covariance.GCDSignLaw,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
