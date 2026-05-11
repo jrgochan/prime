@@ -22,7 +22,6 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use rug::Float;
-use rug::ops::Pow;
 use cathedral_utils::fmt;
 use crate::PREC;
 
@@ -219,7 +218,7 @@ pub fn verify_bridge(max_n: usize) -> Vec<BridgeResult> {
             let bridge_err = (ge_f64 - prediction).abs();
 
             // Phantom axiom check
-            let g = crate::compute::gcd(j, k);
+            let g = cathedral_utils::arith::gcd(j, k);
             let dist = (ge_f64 - 0.25).abs();
             let bound = 1.0 / g as f64;
 
@@ -287,7 +286,7 @@ pub fn print_bridge(results: &[BridgeResult]) {
         println!("  {} VIOLATIONS FOUND (axiom vasyunin_large_gcd is FALSE):", violated.len());
         println!();
         for r in &violated {
-            let g = crate::compute::gcd(r.j, r.k);
+            let g = cathedral_utils::arith::gcd(r.j, r.k);
             println!("  💀 ({},{}) gcd={}: |G-1/4| = {:.6} > 1/{} = {:.6}",
                 r.j, r.k, g, r.phantom_dist, g, r.phantom_bound);
         }

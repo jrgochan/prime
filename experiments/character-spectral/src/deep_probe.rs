@@ -12,33 +12,12 @@
 //!  Usage: deep-probe [max_N]
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
 mod spectral;
 
-use fmt::*;
-use rayon::prelude::*;
+use cathedral_utils::fmt::*;
 use std::time::Instant;
 
-use cathedral_utils::gram::gram_entry_f64;
-
-fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {
-    let dim = n - 1;
-    let entries: Vec<((usize, usize), f64)> = (0..dim)
-        .into_par_iter()
-        .flat_map(|row| {
-            (row..dim)
-                .map(move |col| ((row, col), gram_entry_f64(row + 2, col + 2)))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-
-    let mut mat = vec![0.0f64; dim * dim];
-    for ((r, c), v) in entries {
-        mat[r * dim + c] = v;
-        mat[c * dim + r] = v;
-    }
-    (mat, dim)
-}
+use cathedral_utils::gram::{build_gram_matrix_f64};
 
 fn project_f64(full_mat: &[f64], full_dim: usize, indices: &[usize]) -> Vec<f64> {
     let sub_dim = indices.len();
@@ -69,7 +48,7 @@ fn experiment_b_dark_sector_sweep() {
     let t0 = Instant::now();
 
     for n in (60..=250).step_by(2) {
-        let (full_mat, full_dim) = build_gram_f64(n);
+        let (full_mat, full_dim) = build_gram_matrix_f64(n);
 
         // Even sector (dark)
         let even_idx: Vec<usize> = (2..=n).filter(|&k| k % 2 == 0).collect();
@@ -137,7 +116,7 @@ fn experiment_b_dark_sector_sweep() {
     println!("  {DIM}N   │ Full_GOE │ Odd_GOE  │ Dark_GOE{RESET}");
 
     for n in (60..=200).step_by(10) {
-        let (full_mat, full_dim) = build_gram_f64(n);
+        let (full_mat, full_dim) = build_gram_matrix_f64(n);
         let full_eigs = eigenvalues_nalgebra(&full_mat, full_dim);
         let full_sp = spectral::compute_spacing(&full_eigs);
 
@@ -179,7 +158,7 @@ fn experiment_c_eigenvector_localization(max_n: usize) {
     let t0 = Instant::now();
 
     for &n in &test_ns {
-        let (full_mat, full_dim) = build_gram_f64(n);
+        let (full_mat, full_dim) = build_gram_matrix_f64(n);
 
         // Full eigendecomposition via nalgebra — eigenvectors + eigenvalues
         let m = nalgebra::DMatrix::from_row_slice(full_dim, full_dim, &full_mat);

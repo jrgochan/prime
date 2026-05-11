@@ -34,7 +34,7 @@
 
 use rug::Float;
 use crate::PREC;
-use crate::compute::{fp, fu};
+use crate::compute::fu;
 
 /// Per-pair result from the actual-row evaluation.
 #[derive(Debug, Clone)]
@@ -125,8 +125,8 @@ pub fn certify_actual_eval(a: usize, b: usize, max_m: usize) -> ActualEvalResult
     // gap = (L-γ)(b-a)/(2ab) + (a-b)/(2ab)·log(b/a) - π/(2ab)·(V+V')
     let af = fu(a);
     let bf = fu(b);
-    let l2p = crate::formula::ln_two_pi();
-    let gamma = crate::formula::euler_gamma();
+    let l2p = cathedral_utils::constants::ln2pi_mpfr(crate::PREC);
+    let gamma = cathedral_utils::constants::euler_gamma_mpfr(crate::PREC);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
     let ab2 = Float::with_val(PREC, Float::with_val(PREC, &af * &bf) * fu(2));
     
@@ -194,7 +194,7 @@ pub fn certify_actual_eval(a: usize, b: usize, max_m: usize) -> ActualEvalResult
 
 /// V(a,b) + V(b,a)
 fn vasyunin_cot_sum_pair(a: usize, b: usize) -> Float {
-    let g = crate::compute::gcd(a, b);
+    let g = cathedral_utils::arith::gcd(a, b);
     let a0 = a / g;
     let b0 = b / g;
     let v1 = vasyunin_cot_sum_single(a0, b0);

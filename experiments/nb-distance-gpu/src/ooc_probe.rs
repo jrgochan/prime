@@ -326,7 +326,7 @@ struct GpuMatvecState {
 
 impl GpuMatvecState {
     fn new(dim: usize, chunk_rows: usize) -> Result<Self, String> {
-        use std::ffi::c_int;
+        
         let vec_bytes = dim * 8;
         let chunk_bytes = chunk_rows * dim * 8;
         let chunk_y_bytes = chunk_rows * 8;
@@ -529,7 +529,7 @@ fn gpu_matvec(gram: &MmapGram, gpu: &GpuMatvecState, x: &[f64], y: &mut [f64]) {
 
 /// Fallback: CPU matvec using mmap (no GPU, rayon parallel)
 fn cpu_matvec(gram: &MmapGram, x: &[f64], y: &mut [f64]) {
-    let dim = gram.dim;
+    let _dim = gram.dim;
     y.par_iter_mut().enumerate().for_each(|(i, yi)| {
         let row = gram.row(i);
         *yi = row.iter().zip(x.iter()).map(|(a, b)| a * b).sum();
@@ -742,7 +742,7 @@ fn ooc_cg_solve(
 fn dot_dd(a: &[f64], b: &[f64]) -> DD {
     const CHUNK: usize = 1024;
     let n = a.len();
-    let n_chunks = (n + CHUNK - 1) / CHUNK;
+    let n_chunks = n.div_ceil(CHUNK);
 
     let partials: Vec<DD> = (0..n_chunks).into_par_iter()
         .map(|c| {
@@ -849,7 +849,7 @@ fn import_dd_cache(max_n: usize) -> std::io::Result<Option<PathBuf>> {
 
     // Load DD cache (reads both hi and lo)
     let (hi, _lo, loaded_dim) = cathedral_utils::cache::load_dd_gram(&dd_path)
-        .ok_or_else(|| std::io::Error::new(std::io::ErrorKind::Other, "Failed to load DD cache"))?;
+        .ok_or_else(|| std::io::Error::other("Failed to load DD cache"))?;
 
     assert_eq!(loaded_dim, dim, "Dimension mismatch");
 

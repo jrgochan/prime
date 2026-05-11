@@ -12,7 +12,7 @@
 
 use rayon::prelude::*;
 use cathedral_utils::fmt;
-use crate::compute::{self, EULER_GAMMA, LOG_2PI};
+use crate::compute::{self, LOG_2PI};
 
 #[derive(Debug, Clone)]
 pub struct HonestAlgebraResult {

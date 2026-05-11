@@ -75,7 +75,7 @@ fn write_certificate(
         .filter(|&n| n <= max_limit).collect();
 
     let void_gaps: Vec<_> = colossal_under.windows(2)
-        .filter(|pair| (pair[1] as usize) <= div_table.len() - 1)
+        .filter(|pair| (pair[1] as usize) < div_table.len())
         .map(|pair| {
             let (lo, hi) = (pair[0], pair[1]);
             let hcns_between = hcns.iter()

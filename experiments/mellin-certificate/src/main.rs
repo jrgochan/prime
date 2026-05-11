@@ -21,7 +21,6 @@
 //!  Target: Validate `critical_line_mellin_variance` (MellinCrown.lean)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
 mod sieve;
 
 use rayon::prelude::*;
@@ -31,7 +30,7 @@ use std::io::Write;
 use std::time::Instant;
 
 use sieve::P;
-use fmt::*;
+use cathedral_utils::fmt::*;
 
 // ═══════════════════════════════════════════════
 // GL8 quadrature

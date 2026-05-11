@@ -14,6 +14,8 @@
 //!  §E. GRH certificate
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::fmt::*;
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use std::f64::consts::PI;
 use std::fs;
@@ -21,16 +23,6 @@ use std::io::Write;
 use std::time::Instant;
 
 // ═══ Formatting (inlined) ═══
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const RED: &str = "\x1b[31m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
-fn check(b: bool) -> &'static str { if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" } }
 
 // ═══════════════════════════════════════════════════════════════
 // DIRICHLET CHARACTERS
@@ -44,10 +36,6 @@ struct DirichletChar {
     is_primitive: bool,
     is_even: bool,
     order: usize,
-}
-
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; } a
 }
 
 fn euler_totient(n: usize) -> usize {

@@ -10,11 +10,6 @@ use std::f64::consts::PI;
 pub const EULER_GAMMA: f64 = 0.57721566490153286;
 pub const LOG_2PI: f64 = 1.8378770664093453; // ln(2π)
 
-pub fn gcd(mut a: usize, mut b: usize) -> usize {
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
-
 // ────────────────────────────────────────────────
 // Two-tile geometry
 // ────────────────────────────────────────────────

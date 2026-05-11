@@ -18,12 +18,11 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 // mod sieve; — replaced by cathedral-utils
-mod fmt;
 pub mod characters;
 mod weights;
 mod spectral;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 use std::fs;
 use std::io::Write;
 use std::time::Instant;

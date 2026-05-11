@@ -14,62 +14,22 @@
 //! ╚══════════════════════════════════════════════════════════════════════╝
 
 use cathedral_utils::fmt;
-use cathedral_utils::gram::gram_entry_f64;
+use cathedral_utils::gram::build_gram_matrix_f64;
 use cathedral_utils::lanczos;
 use cathedral_utils::rsvd;
-use rayon::prelude::*;
+use cathedral_utils::linalg;
 use std::time::Instant;
 
 /// Build the Gram matrix G_N in f64 (dense, row-major).
-fn build_gram(n: usize) -> (Vec<f64>, usize) {
-    let dim = n - 1;
-    let entries: Vec<((usize, usize), f64)> = (0..dim)
-        .into_par_iter()
-        .flat_map(|row| {
-            (row..dim)
-                .map(move |col| ((row, col), gram_entry_f64(row + 2, col + 2)))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-
-    let mut mat = vec![0.0f64; dim * dim];
-    for ((r, c), v) in entries {
-        mat[r * dim + c] = v;
-        mat[c * dim + r] = v;
-    }
-    (mat, dim)
-}
 
 /// Dense matrix-vector product: out = mat · v.
-fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
-    for i in 0..dim {
-        let mut sum = 0.0f64;
-        let row_start = i * dim;
-        for j in 0..dim {
-            sum += mat[row_start + j] * v[j];
-        }
-        out[i] = sum;
-    }
-}
 
 /// Shifted matvec: out = (σI - A)·v.
 /// This flips the spectrum so the smallest eigenvalues of A become
 /// the largest eigenvalues of (σI - A), which Lanczos/RSVD find naturally.
-fn shifted_matvec(mat: &[f64], dim: usize, sigma: f64, v: &[f64], out: &mut [f64]) {
-    dense_matvec(mat, dim, v, out);
-    for i in 0..dim {
-        out[i] = sigma * v[i] - out[i];
-    }
-}
 
 /// Estimate a spectral shift σ > λ_max from the matrix diagonal.
 /// Uses the trace as a rough upper bound (sum of eigenvalues).
-fn estimate_sigma(mat: &[f64], dim: usize) -> f64 {
-    let trace: f64 = (0..dim).map(|i| mat[i * dim + i]).sum();
-    // σ = trace works as an upper bound since all eigenvalues are ≤ trace
-    // for a PSD matrix. Add small margin.
-    trace * 1.1
-}
 
 /// Full eigendecomposition via nalgebra (ground truth).
 fn full_eigen(mat: &[f64], dim: usize) -> Vec<f64> {
@@ -132,7 +92,7 @@ fn main() {
 
         // Build Gram matrix
         let t0 = Instant::now();
-        let (mat, dim) = build_gram(n);
+        let (mat, dim) = build_gram_matrix_f64(n);
         let build_time = t0.elapsed().as_secs_f64();
         println!("    Gram matrix: {dim}×{dim} ({build_time:.2}s)");
 
@@ -144,19 +104,19 @@ fn main() {
         println!("    §A Full:    λ_min = {:.8e}  ({full_time:.2}s)", full_bottom[0]);
 
         // ─── §B. Lanczos (with spectral shift for bottom eigenvalues) ───
-        let sigma = estimate_sigma(&mat, dim);
+        let sigma = linalg::estimate_sigma(&mat, dim);
         let m_lanczos = (15 * k).min(dim); // 15k subspace for tight clusters
         let mat_ref = &mat;
         let t0 = Instant::now();
         // Use shifted matrix (σI - A): largest eigenvalues of this = smallest of A
         let lanczos_shifted = lanczos::lanczos_bottom_k(
-            &|v: &[f64], out: &mut [f64]| shifted_matvec(mat_ref, dim, sigma, v, out),
+            &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(mat_ref, dim, sigma, v, out),
             dim,
             k,
             m_lanczos,
         );
         // Un-shift: λ_A = σ - λ_shifted (and reverse order since we want ascending)
-        let mut lanczos_eigenvalues: Vec<f64> = lanczos_shifted.eigenvalues.iter()
+        let mut _lanczos_eigenvalues: Vec<f64> = lanczos_shifted.eigenvalues.iter()
             .map(|&lam| sigma - lam)
             .collect();
         // The shifted Lanczos finds the LARGEST eigenvalues of (σI-A),
@@ -167,7 +127,7 @@ fn main() {
 
         // Re-run: get the TOP-k of the shifted matrix = BOTTOM-k of A
         let (tri, basis) = lanczos::lanczos_tridiag(
-            &|v: &[f64], out: &mut [f64]| shifted_matvec(mat_ref, dim, sigma, v, out),
+            &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(mat_ref, dim, sigma, v, out),
             dim,
             m_lanczos,
             None,
@@ -176,7 +136,7 @@ fn main() {
         // Take the TOP k (largest of shifted = smallest of A)
         let n_ritz = ritz_values.len();
         let top_start = n_ritz.saturating_sub(k);
-        lanczos_eigenvalues = ritz_values[top_start..].iter()
+        let mut lanczos_eigenvalues: Vec<f64> = ritz_values[top_start..].iter()
             .map(|&lam| sigma - lam)
             .collect();
         lanczos_eigenvalues.sort_by(|a, b| a.partial_cmp(b).unwrap());
@@ -195,7 +155,7 @@ fn main() {
             }
             // Residual: ‖A·v - λ·v‖
             let mut av = vec![0.0f64; dim];
-            dense_matvec(mat_ref, dim, &v, &mut av);
+            linalg::dense_matvec(mat_ref, dim, &v, &mut av);
             let lam = sigma - ritz_values[idx];
             let res: f64 = (0..dim).map(|ii| { let r = av[ii] - lam * v[ii]; r * r }).sum::<f64>().sqrt();
             lanczos_residuals.push(res);
@@ -242,7 +202,7 @@ fn main() {
         let t0 = Instant::now();
         // RSVD on shifted matrix: finds largest of (σI-A) = smallest of A
         let rsvd_shifted = rsvd::rsvd_bottom_k(
-            &|v: &[f64], out: &mut [f64]| shifted_matvec(mat_ref, dim, sigma, v, out),
+            &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(mat_ref, dim, sigma, v, out),
             dim,
             dim.min(k + 20), // get more to pick from the top
             20,              // oversampling

@@ -130,8 +130,8 @@ fn certify_pair_cpu(a: usize, b: usize) -> PairResult {
     let tt_lg: f64 = tt_classes.iter().map(|&m0| f_lg(m0)).sum();
     let tt_psi: f64 = tt_classes.iter().map(|&m0| f_psi(m0)).sum();
 
-    let full_lg: f64 = (0..b).map(|m| f_lg(m)).sum();
-    let full_psi: f64 = (0..b).map(|m| f_psi(m)).sum();
+    let full_lg: f64 = (0..b).map(&f_lg).sum();
+    let full_psi: f64 = (0..b).map(&f_psi).sum();
 
     let abel_lg: f64 = (1..b).map(|r| {
         frac_part(af * r as f64 / bf) * (f_lg(r) - f_lg(r - 1))

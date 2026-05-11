@@ -8,7 +8,7 @@
 
 use std::fs;
 use std::io::Write;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use serde_json::json;
 
 /// Get the results directory for t-convergence.
@@ -99,7 +99,7 @@ pub fn write_results(
 
 /// Write the JSON certificate with all structured results.
 fn write_certificate(
-    dir: &PathBuf,
+    dir: &Path,
     n_max: usize,
     convergence_data: &[ConvergencePoint],
     scaling_data: &[ScalingRow],
@@ -190,7 +190,7 @@ fn write_certificate(
 }
 
 /// Write the convergence rate data as TSV.
-fn write_convergence_tsv(dir: &PathBuf, data: &[ConvergencePoint]) {
+fn write_convergence_tsv(dir: &Path, data: &[ConvergencePoint]) {
     let path = dir.join("convergence_rate.tsv");
     let mut f = fs::File::create(&path).expect("Failed to create convergence TSV");
 
@@ -204,7 +204,7 @@ fn write_convergence_tsv(dir: &PathBuf, data: &[ConvergencePoint]) {
 }
 
 /// Write the T-scaling survey as TSV.
-fn write_scaling_tsv(dir: &PathBuf, data: &[ScalingRow]) {
+fn write_scaling_tsv(dir: &Path, data: &[ScalingRow]) {
     let path = dir.join("t_scaling.tsv");
     let mut f = fs::File::create(&path).expect("Failed to create scaling TSV");
 
@@ -218,7 +218,7 @@ fn write_scaling_tsv(dir: &PathBuf, data: &[ScalingRow]) {
 }
 
 /// Write the precision target table as TSV.
-fn write_precision_tsv(dir: &PathBuf, cal: &CalibrationResult) {
+fn write_precision_tsv(dir: &Path, cal: &CalibrationResult) {
     let path = dir.join("precision_table.tsv");
     let mut f = fs::File::create(&path).expect("Failed to create precision TSV");
 

@@ -12,6 +12,7 @@
 //!    4. Large matrices processed sequentially — LAPACK uses all cores
 //!       internally via Accelerate, so rayon parallelism hurts for dim > 1000
 //!    5. Works directly with raw Vec<f64> — no DMatrix copy
+//!
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use rayon::prelude::*;

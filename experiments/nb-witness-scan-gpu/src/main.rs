@@ -36,6 +36,7 @@
 use cathedral_utils::{arith, gram, cache, dd::DD};
 #[cfg(feature = "gpu")]
 use cathedral_utils::gpu;
+use cathedral_utils::linalg;
 use rayon::prelude::*;
 use serde::Serialize;
 use std::fs;
@@ -112,7 +113,7 @@ fn cg_solve(gram_data: &[f64], b: &[f64], dim: usize) -> (f64, String, f64) {
 
     for iter in 0..max_iter {
         // f64 matvec (fast, parallel)
-        matvec(gram_data, &p, &mut ap, dim);
+        linalg::dense_matvec(gram_data, dim, &p, &mut ap);
 
         let pap = dd_dot(&p, &ap);
         if pap.hi <= 0.0 && pap.lo <= 0.0 { break; }
@@ -150,7 +151,7 @@ fn cg_solve(gram_data: &[f64], b: &[f64], dim: usize) -> (f64, String, f64) {
 fn dd_dot(a: &[f64], b: &[f64]) -> DD {
     const CHUNK: usize = 1024;
     let n = a.len();
-    let n_chunks = (n + CHUNK - 1) / CHUNK;
+    let n_chunks = n.div_ceil(CHUNK);
     let partials: Vec<DD> = (0..n_chunks).into_par_iter()
         .map(|c| {
             let start = c * CHUNK;
@@ -169,18 +170,6 @@ fn dd_dot(a: &[f64], b: &[f64]) -> DD {
 }
 
 /// Parallel matvec with DD accumulation per row
-fn matvec(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
-    y.par_iter_mut().enumerate().for_each(|(i, yi)| {
-        let row = &a[i * dim..(i + 1) * dim];
-        let mut acc = DD::from_f64(0.0);
-        for j in 0..dim {
-            let p = row[j] * x[j];
-            let e = row[j].mul_add(x[j], -p);
-            acc += DD::new(p, e);
-        }
-        *yi = acc.to_f64();
-    });
-}
 
 // ═══════════════════════════════════════════════════════════════════
 // GRAM MATRIX BUILDING (with cache)

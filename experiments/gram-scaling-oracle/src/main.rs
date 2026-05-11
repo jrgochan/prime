@@ -26,6 +26,7 @@ mod certificate;
 mod gcd_decomp;
 
 use cathedral_utils::cache;
+use cathedral_utils::fmt::*;
 use cathedral_utils::gram::GramMatrix;
 use std::time::Instant;
 
@@ -40,21 +41,8 @@ const MAX_EIGEN_DIM: usize = 5_000;
 /// Must have cached matrices available.
 const CROSS_N_SCHEDULE: &[usize] = &[100, 200, 500, 1000, 2000, 5000, 10000, 20000, 40000];
 
-// ═══════════════════════════════════════════════════════════════
-// TERMINAL FORMATTING
-// ═══════════════════════════════════════════════════════════════
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-#[allow(dead_code)]
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-#[allow(dead_code)]
-const RED: &str = "\x1b[31m";
-const RESET: &str = "\x1b[0m";
 
+#[allow(dead_code)]
 /// Try to load a cached Gram matrix. Returns (data, dim).
 fn load_cached_gram(max_n: usize) -> Option<(Vec<f64>, usize)> {
     // Try DD cache first

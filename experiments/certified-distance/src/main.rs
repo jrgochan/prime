@@ -84,7 +84,7 @@ fn main() {
             }
             println!("  Found {} cached matrices:", sources.len());
             println!();
-            println!("  {:>8} {:>8} {:>10} {:>10}  {}", "N", "dim", "format", "size", "path");
+            println!("  {:>8} {:>8} {:>10} {:>10}  path", "N", "dim", "format", "size");
             println!("  {} {} {} {}  {}",
                 "─".repeat(8), "─".repeat(8), "─".repeat(10), "─".repeat(10), "─".repeat(40));
             for s in &sources {

@@ -14,6 +14,8 @@
 // Created: April 12, 2026 (The Dedekind Reconnaissance)
 // ═══════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith;
+use cathedral_utils::constants;
 use rug::{Float, float::Constant};
 
 const PREC: u32 = 256;
@@ -31,12 +33,6 @@ fn neg(a: &Float) -> Float { Float::with_val(PREC, -a) }
 fn ln(a: &Float) -> Float { a.clone().ln() }
 
 fn pi_val() -> Float { Float::with_val(PREC, Constant::Pi) }
-fn gamma_val() -> Float { Float::with_val(PREC, Constant::Euler) }
-fn ln2pi() -> Float {
-    let ln2 = Float::with_val(PREC, 2).ln();
-    let lnpi = pi_val().ln();
-    add(&ln2, &lnpi)
-}
 
 fn cot(x: &Float) -> Float {
     let s = x.clone().sin();
@@ -44,9 +40,8 @@ fn cot(x: &Float) -> Float {
     div(&c, &s)
 }
 
-fn gcd(mut a: u64, mut b: u64) -> u64 {
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
+fn gcd(a: u64, b: u64) -> u64 {
+    arith::gcd(a as usize, b as usize) as u64
 }
 
 // ── Vasyunin cotangent sum ──
@@ -71,8 +66,8 @@ fn vasyunin_sum(a: u64, b: u64) -> Float {
 // ── Closed-form Vasyunin Gram entry ──
 
 fn vasyunin_gram_entry(j: u64, k: u64) -> Float {
-    let l2p = ln2pi();
-    let gam = gamma_val();
+    let l2p = constants::ln2pi_mpfr(PREC);
+    let gam = constants::euler_gamma_mpfr(PREC);
     let jf = f(j);
     let kf = f(k);
 
@@ -322,7 +317,7 @@ fn main() {
         for m in 0..=30.min(max_m) {
             let n_vals: Vec<u64> = tiles.iter().filter(|t| t.m == m).map(|t| t.n).collect();
             if !n_vals.is_empty() {
-                let expected_n = m * k / j; // approximate
+                let _expected_n = m * k / j; // approximate
                 let n_str: Vec<String> = n_vals.iter().map(|n| format!("{}", n)).collect();
                 println!("      m={:>2} → n=[{}]  (m·k/j={:.1})", m, n_str.join(", "),
                     m as f64 * k as f64 / j as f64);

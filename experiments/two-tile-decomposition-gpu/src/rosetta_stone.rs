@@ -15,7 +15,6 @@
 
 use cathedral_utils::fmt;
 use cathedral_utils::gram::gram_entry_f64;
-use crate::compute;
 
 #[derive(Debug, Clone)]
 pub struct BridgeResult {
@@ -134,7 +133,7 @@ pub fn verify_bridge(max_n: usize) -> Vec<BridgeResult> {
             let prediction = jk * gi - min_1 - corr;
             let bridge_err = (ge - prediction).abs();
 
-            let g = compute::gcd(j, k);
+            let g = cathedral_utils::arith::gcd(j, k);
             let dist = (ge - 0.25).abs();
             let bound = 1.0 / g as f64;
 
@@ -198,7 +197,7 @@ pub fn print_bridge(results: &[BridgeResult]) {
     } else {
         println!("  {} VIOLATIONS FOUND:", violated.len());
         for r in &violated {
-            let g = compute::gcd(r.j, r.k);
+            let g = cathedral_utils::arith::gcd(r.j, r.k);
             println!("  💀 ({},{}) gcd={}: |G-1/4| = {:.6} > 1/{} = {:.6}",
                 r.j, r.k, g, r.phantom_dist, g, r.phantom_bound);
         }

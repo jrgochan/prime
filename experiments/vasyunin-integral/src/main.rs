@@ -22,6 +22,8 @@
 //!  Upgraded: April 25, 2026 — Production certification
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::arith::gcd;
+use cathedral_utils::constants;
 use rug::Float;
 use rug::ops::Pow;
 use rayon::prelude::*;
@@ -59,14 +61,6 @@ const CERT_THRESHOLD: i32 = 4;
 fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
 fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
 fn pi() -> Float { Float::with_val(PREC, rug::float::Constant::Pi) }
-fn euler_gamma() -> Float { Float::with_val(PREC, rug::float::Constant::Euler) }
-fn ln2pi() -> Float { Float::with_val(PREC, (fp(2) * pi()).ln()) }
-
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
 
 /// Safe floor: Float → usize via MPFR floor.
 fn floor_to_usize(x: &Float) -> usize {
@@ -106,8 +100,8 @@ fn vasyunin_sum(a: usize, b: usize) -> Float {
 /// Compute G(j,k) via the exact Vasyunin cotangent formula.
 /// NO INTEGRALS — pure discrete arithmetic at 256-bit precision.
 fn gram_entry(j: usize, k: usize) -> Float {
-    let g = euler_gamma();
-    let l2p = ln2pi();
+    let g = constants::euler_gamma_mpfr(PREC);
+    let l2p = constants::ln2pi_mpfr(PREC);
     let jf = fu(j);
     let kf = fu(k);
 

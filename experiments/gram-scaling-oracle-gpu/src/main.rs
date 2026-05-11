@@ -19,22 +19,14 @@
 
 mod block_spectrum;
 mod cpu;
-mod gcd_decomp;
+
 mod gpu;
 
 use cathedral_utils::cache;
+use cathedral_utils::fmt::*;
 use cathedral_utils::gram::GramMatrix;
 use std::io::Write;
 use std::time::Instant;
-
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
 
 /// Cross-N sweep schedule (ascending).
 const CROSS_N_SCHEDULE: &[usize] = &[

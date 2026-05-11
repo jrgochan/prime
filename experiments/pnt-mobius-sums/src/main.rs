@@ -18,25 +18,10 @@ use std::io::Write;
 use std::time::Instant;
 
 use cathedral_utils::arith::mobius_table;
+use cathedral_utils::fmt::*;
+use cathedral_utils::constants;
 
 const P: u32 = 256;
-
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
-
-fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
-}
-
-fn euler_gamma() -> Float {
-    Float::with_val(P, rug::float::Constant::Euler)
-}
 
 fn main() {
     let t_global = Instant::now();
@@ -60,7 +45,7 @@ fn main() {
     eprintln!("  {GREEN}✓{RESET} Sieve complete in {:.2}s", t.elapsed().as_secs_f64());
     println!();
 
-    let gamma = euler_gamma();
+    let gamma = constants::euler_gamma_mpfr(P);
     let two_gamma = Float::with_val(P, &gamma * 2u32);
 
     // Checkpoints to report at

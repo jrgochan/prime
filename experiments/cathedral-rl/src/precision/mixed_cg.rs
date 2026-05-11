@@ -18,7 +18,6 @@
 
 use cathedral_utils::dd::DD;
 use crate::env::CathedralEnv;
-use crate::agent::numerics::dot_kahan;
 use super::PrecisionCgResult;
 use std::time::Instant;
 

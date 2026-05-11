@@ -85,9 +85,7 @@ pub fn write_certificate_json(
         .all(|w| w[1].lambda_min <= w[0].lambda_min + 1e-15);
     let max_n_tested = results.last().map_or(0, |r| r.n);
     let max_n_positive = results
-        .iter()
-        .filter(|r| r.lambda_min > 0.0)
-        .last()
+        .iter().rfind(|r| r.lambda_min > 0.0)
         .map_or(0, |r| r.n);
 
     let precision_str = if mpfr_built {

@@ -17,7 +17,7 @@ pub const YELLOW: &str = "\x1b[33m";
 pub const BLUE: &str = "\x1b[34m";
 pub const MAGENTA: &str = "\x1b[35m";
 pub const CYAN: &str = "\x1b[36m";
-pub const WHITE: &str = "\x1b[37m";
+pub const WHITE: &str = "\x1b[97m";
 
 // ═══════════════════════════════════════════════════════════════
 // HELPERS
@@ -47,4 +47,11 @@ pub fn header(title: &str, subtitle: &str, precision: u32, threads: usize) {
     println!("  {BOLD}{CYAN}║{RESET}  {DIM}Precision: {precision}-bit MPFR  ·  Threads: {threads}{RESET}");
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
     println!();
+}
+
+/// Format a duration in seconds as a human-readable string.
+pub fn elapsed(s: f64) -> String {
+    if s < 1.0 { format!("{:.0}ms", s * 1000.0) }
+    else if s < 60.0 { format!("{s:.1}s") }
+    else { format!("{:.0}m{:.0}s", s / 60.0, s % 60.0) }
 }

@@ -1,5 +1,5 @@
 //! ═══════════════════════════════════════════════════════════════════════════
-//!  GCD-CLASS DECOMPOSITION
+//!  GCD-CLASS DECOMPOSITION (shared module)
 //!
 //!  The Gram matrix G_{jk} = ∫₀¹ {j/t}{k/t} dt has rich structure
 //!  arising from gcd(j,k). We decompose {1,...,N} into equivalence
@@ -16,6 +16,7 @@
 //!  This decomposition reveals the block structure that controls λ_min.
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use crate::arith::{gcd, mobius_table};
 use std::collections::BTreeMap;
 use rayon::prelude::*;
 
@@ -33,48 +34,9 @@ pub struct GcdDecomposition {
 }
 
 /// Compute gcd using binary GCD (efficient for large integers).
-fn gcd(mut a: usize, mut b: usize) -> usize {
-    if a == 0 { return b; }
-    if b == 0 { return a; }
-    let shift = (a | b).trailing_zeros();
-    a >>= a.trailing_zeros();
-    loop {
-        b >>= b.trailing_zeros();
-        if a > b { std::mem::swap(&mut a, &mut b); }
-        b -= a;
-        if b == 0 { return a << shift; }
-    }
-}
 
-/// Sieve the Möbius function for 1..=n.
-fn sieve_mobius(n: usize) -> Vec<i8> {
-    let mut mu = vec![0i8; n + 1];
-    let mut is_prime = vec![true; n + 1];
-    let mut primes = Vec::new();
-    mu[1] = 1;
-
-    for i in 2..=n {
-        if is_prime[i] {
-            primes.push(i);
-            mu[i] = -1; // prime → μ = -1
-        }
-        for &p in &primes {
-            let ip = i * p;
-            if ip > n { break; }
-            is_prime[ip] = false;
-            if i % p == 0 {
-                mu[ip] = 0; // p² | ip → μ = 0
-                break;
-            } else {
-                mu[ip] = -mu[i]; // squarefree: flip sign
-            }
-        }
-    }
-    mu
-}
-
-/// Compute Euler totient φ(n) for 1..=n.
-fn sieve_totient(n: usize) -> Vec<usize> {
+/// Compute Euler totient φ(n) for 1..=n via sieve.
+pub fn sieve_totient(n: usize) -> Vec<usize> {
     let mut phi: Vec<usize> = (0..=n).collect();
     for i in 2..=n {
         if phi[i] == i {
@@ -96,7 +58,7 @@ fn sieve_totient(n: usize) -> Vec<usize> {
 ///   Block_d = { j ∈ {1,...,N} : d | j }
 /// The Gram submatrix restricted to Block_d has special structure.
 pub fn decompose(n: usize) -> GcdDecomposition {
-    let mobius = sieve_mobius(n);
+    let mobius = mobius_table(n);
     let totient = sieve_totient(n);
 
     // Build divisor lists in parallel
@@ -158,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_mobius() {
-        let mu = sieve_mobius(10);
+        let mu = mobius_table(10);
         assert_eq!(mu[1], 1);
         assert_eq!(mu[2], -1);
         assert_eq!(mu[3], -1);

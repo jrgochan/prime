@@ -174,9 +174,8 @@ pub fn gram_entry_f64(j: usize, k: usize) -> f64 {
         let y = term - comp; let t = total + y; comp = (t - total) - y; total = t;
 
         // Adaptive early-exit: series converged to working precision
-        if n > min_terms && n % 1000 == 0 {
-            if term.abs() < total.abs() * 1e-16 { break; }
-        }
+        if n > min_terms && n % 1000 == 0
+            && term.abs() < total.abs() * 1e-16 { break; }
     }
 
     let d = g as f64;
@@ -965,7 +964,7 @@ impl GramMatrix {
         let dim = max_n - 1;
         let total_entries = dim * (dim + 1) / 2;
         let prec = ln_n_table.precision;
-        let bytes_per = (prec as usize + 7) / 8 + 16; // rough estimate
+        let bytes_per = (prec as usize).div_ceil(8) + 16; // rough estimate
         let mem_mb = (dim * dim * bytes_per) / (1024 * 1024);
         let t0 = std::time::Instant::now();
 
@@ -1245,4 +1244,44 @@ pub fn validate_f64_vs_mpfr(n: usize, ln_table: &LnTable) -> (f64, f64) {
         }
     }
     (max_rel, if count > 0 { sum_rel / count as f64 } else { 0.0 })
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONVENIENCE BUILDER: build_gram_matrix_f64
+//
+// Free function that builds a dense f64 Gram matrix in parallel.
+// Replaces the duplicated `build_gram_f64(n)` in 12+ experiments.
+// ═══════════════════════════════════════════════════════════════
+
+/// Build a dense f64 Gram matrix G_N as a flat `Vec<f64>` (row-major).
+///
+/// Returns `(data, dim)` where `dim = n - 1` and indices map as
+/// `data[i * dim + j] = G(i+2, j+2)`.
+///
+/// Uses rayon for parallel entry computation with Kahan-compensated
+/// summation via [`gram_entry_f64`].
+///
+/// # Example
+/// ```rust,no_run
+/// let (mat, dim) = cathedral_utils::gram::build_gram_matrix_f64(100);
+/// assert_eq!(dim, 99);
+/// assert_eq!(mat.len(), 99 * 99);
+/// ```
+pub fn build_gram_matrix_f64(n: usize) -> (Vec<f64>, usize) {
+    let dim = n - 1;
+    let entries: Vec<((usize, usize), f64)> = (0..dim)
+        .into_par_iter()
+        .flat_map(|row| {
+            (row..dim)
+                .map(move |col| ((row, col), gram_entry_f64(row + 2, col + 2)))
+                .collect::<Vec<_>>()
+        })
+        .collect();
+
+    let mut mat = vec![0.0f64; dim * dim];
+    for ((r, c), v) in entries {
+        mat[r * dim + c] = v;
+        mat[c * dim + r] = v;
+    }
+    (mat, dim)
 }

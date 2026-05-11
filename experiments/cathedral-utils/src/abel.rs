@@ -105,7 +105,7 @@ pub fn abel_mobius_witness(
             b[idx] * weights[idx]
         } else { 0.0 };
 
-        let bk1_wk1 = if k + 1 <= n && idx + 1 < b.len() && idx + 1 < weights.len() {
+        let bk1_wk1 = if k < n && idx + 1 < b.len() && idx + 1 < weights.len() {
             b[idx + 1] * weights[idx + 1]
         } else { 0.0 };
 

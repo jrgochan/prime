@@ -2,15 +2,10 @@
 
 use crate::panels::NResult;
 use cathedral_utils::fitting;
+use cathedral_utils::fmt::*;
 use sha2::{Sha256, Digest};
 use std::time::Duration;
 
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const RESET: &str = "\x1b[0m";
 const SEP: &str = "═══════════════════════════════════════════════════════════════";
 
 pub fn header() {
@@ -168,7 +163,7 @@ pub fn decay_fit(results: &[NResult]) {
     println!("    {}",
         if cv < 0.05 { format!("{GREEN}✓ Stabilizing — consistent with 1/ln(N) decay{RESET}") }
         else if cv < 0.15 { format!("{YELLOW}~ Approaching stability{RESET}") }
-        else { format!("✗ Not yet stable (need larger N range)") }
+        else { "✗ Not yet stable (need larger N range)".to_string() }
     );
 
     // Observed constant C_cov
@@ -186,7 +181,7 @@ fn decay_verdict(exponent: f64) -> String {
     } else if (exponent - 1.0).abs() < 0.3 {
         format!("{YELLOW}~ Near RH prediction{RESET}")
     } else {
-        format!("(deviation from β=1)")
+        "(deviation from β=1)".to_string()
     }
 }
 

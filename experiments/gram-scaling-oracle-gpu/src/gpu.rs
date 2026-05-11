@@ -11,6 +11,7 @@
 //!  On RTX 4090 (24 GB VRAM):
 //!    - NoVec fits up to N ≈ 54,000 (23 GB matrix + ~1 GB workspace)
 //!    - Vec fits up to N ≈ 39,000 (12 GB matrix + ~12 GB workspace)
+//!
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use std::ffi::c_int;

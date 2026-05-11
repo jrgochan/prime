@@ -21,14 +21,13 @@
 
 // mod sieve; — replaced by cathedral-utils
 mod zeta;
-mod fmt;
 
 use rayon::prelude::*;
 use std::fs;
 use std::io::Write;
 use std::time::Instant;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 
 // ═══════════════════════════════════════════════
 // BD WEIGHTS AND DIRICHLET POLYNOMIAL
@@ -206,7 +205,7 @@ fn cancellation_integral(n: usize, mu: &[i8], t_max: f64) -> IntegralResult {
             let (dr, di) = dirichlet_poly(&v, t);
             let (rr, ri) = rational_part(&v, t);
             // ζ/s · D: first compute ζ/s, then multiply by D
-            let s_sq = 0.25 + t * t;
+            let _s_sq = 0.25 + t * t;
             let (zs_r, zs_i) = cdiv(zr, zi, 0.5, t); // ζ/(1/2+it)
             let (prod_r, prod_i) = cmul(zs_r, zs_i, dr, di);
             cnorm2(rr + prod_r, ri + prod_i)

@@ -73,11 +73,10 @@ fn main() {
             let name = entry.file_name().to_string_lossy().to_string();
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
-                    if g.max_n >= max_n {
-                        if cpu_ref.as_ref().map_or(true, |c: &cathedral_utils::gram::GramMatrix| g.precision > c.precision) {
+                    if g.max_n >= max_n
+                        && cpu_ref.as_ref().is_none_or(|c: &cathedral_utils::gram::GramMatrix| g.precision > c.precision) {
                             cpu_ref = Some(g);
                         }
-                    }
                 }
             }
         }

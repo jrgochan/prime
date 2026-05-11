@@ -151,7 +151,7 @@ fn main() {
         let cert_path = cert_dir.join(format!("cathedral_rl_N{}.json", args.n));
         certificate::write_certificate(
             &cert_path,
-            &[result.clone()],
+            std::slice::from_ref(&result),
             t_global.elapsed(),
         ).ok();
 

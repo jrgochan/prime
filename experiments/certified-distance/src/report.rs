@@ -58,7 +58,7 @@ pub fn generate_report(cert_dir: &str) {
     let d_max = certs.iter().map(|c| c.distance.d_sq).fold(0.0f64, f64::max);
     let all_monotone = certs.windows(2).all(|w| w[1].distance.d_sq <= w[0].distance.d_sq);
     let all_positive = certs.iter().all(|c| {
-        c.spectrum.as_ref().map_or(true, |s| s.lambda_min_positive)
+        c.spectrum.as_ref().is_none_or(|s| s.lambda_min_positive)
     });
 
     println!("  Summary:");

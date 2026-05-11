@@ -158,11 +158,10 @@ fn find_cached_gram(max_n: usize) -> GramMatrix {
             let name = entry.file_name().to_string_lossy().to_string();
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
-                    if g.max_n >= max_n {
-                        if best.as_ref().map_or(true, |b| g.precision > b.precision) {
+                    if g.max_n >= max_n
+                        && best.as_ref().is_none_or(|b| g.precision > b.precision) {
                             best = Some(g);
                         }
-                    }
                 }
             }
         }

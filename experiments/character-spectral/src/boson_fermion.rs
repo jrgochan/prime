@@ -17,48 +17,12 @@
 //!  Usage: boson-fermion [max_N]
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
-
-use fmt::*;
+use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use std::time::Instant;
 
 use cathedral_utils::arith::gcd;
-use cathedral_utils::gram::gram_entry_f64;
-
-fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {
-    let dim = n - 1;
-    let t_start = Instant::now();
-
-    // Parallel construction with progress tracking
-    let entries: Vec<((usize, usize), f64)> = (0..dim)
-        .into_par_iter()
-        .flat_map(|row| {
-            let result: Vec<_> = (row..dim)
-                .map(move |col| ((row, col), gram_entry_f64(row + 2, col + 2)))
-                .collect();
-            // Print progress every 500 rows
-            if row % 500 == 0 && row > 0 {
-                let elapsed = t_start.elapsed().as_secs_f64();
-                let frac = row as f64 / dim as f64;
-                let eta = elapsed / frac * (1.0 - frac);
-                eprint!("\r  {DIM}  row {row}/{dim} ({:.0}%) ETA {eta:.0}s{RESET}    ", frac * 100.0);
-            }
-            result
-        })
-        .collect();
-
-    if dim > 500 {
-        eprintln!();
-    }
-
-    let mut mat = vec![0.0f64; dim * dim];
-    for ((r, c), v) in entries {
-        mat[r * dim + c] = v;
-        mat[c * dim + r] = v;
-    }
-    (mat, dim)
-}
+use cathedral_utils::gram::{build_gram_matrix_f64};
 
 // ═══════════════════════════════════════════════════════════════════════
 // INVERSE POWER ITERATION (O(k·N²) instead of O(N³))
@@ -256,7 +220,7 @@ fn analyze(n: usize) {
     println!("  {BOLD}{CYAN}╚═══════════════════════════════════════════════════════════════════════╝{RESET}");
 
     // Build Gram matrix
-    let (mat, dim) = build_gram_f64(n);
+    let (mat, dim) = build_gram_matrix_f64(n);
     println!("  {DIM}Gram matrix: {dim}×{dim} ({:.1}s){RESET}", t0.elapsed().as_secs_f64());
 
     // Ground state via inverse power iteration (O(N² · k) instead of O(N³))
@@ -284,7 +248,7 @@ fn analyze(n: usize) {
     // Compute hub connectivity — use divisor_sum as O(√k) proxy for large N
     // (divisor_sum is proportional to hub connectivity but O(√k) instead of O(N))
     let hub_scores: Vec<usize> = if n > 3000 {
-        (2..=n).into_par_iter().map(|k| divisor_sum(k)).collect()
+        (2..=n).into_par_iter().map(divisor_sum).collect()
     } else {
         (2..=n).into_par_iter().map(|k| hub_connectivity(k, n)).collect()
     };

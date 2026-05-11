@@ -14,11 +14,10 @@
 //!  §F. SPECTRAL STAIRCASE: N(E) = #{λ_k ≤ E} vs energy
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
 mod gram;
 mod spectral;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 use gram::PREC;
 use std::fs;
 use std::io::Write;

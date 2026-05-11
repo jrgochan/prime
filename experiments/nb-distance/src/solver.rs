@@ -9,6 +9,7 @@
 //! RH ⟺ d²_N → 0 as N → ∞.
 
 use cathedral_utils::lanczos;
+use cathedral_utils::linalg;
 use nalgebra::{DMatrix, DVector};
 
 /// Full result for a single N.
@@ -44,24 +45,8 @@ pub struct DistanceResult {
 }
 
 /// Dense matvec for Lanczos: out = mat · v.
-fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
-    for i in 0..dim {
-        let mut sum = 0.0f64;
-        let row_start = i * dim;
-        for j in 0..dim {
-            sum += mat[row_start + j] * v[j];
-        }
-        out[i] = sum;
-    }
-}
 
 /// Shifted matvec: out = (σI - A)·v.
-fn shifted_matvec(mat: &[f64], dim: usize, sigma: f64, v: &[f64], out: &mut [f64]) {
-    dense_matvec(mat, dim, v, out);
-    for i in 0..dim {
-        out[i] = sigma * v[i] - out[i];
-    }
-}
 
 /// Compute the unconstrained NB distance for a given N.
 ///
@@ -139,7 +124,7 @@ pub fn compute_distance(
 
         // Run shifted Lanczos
         let (tri, basis) = lanczos::lanczos_tridiag(
-            &|v: &[f64], out: &mut [f64]| shifted_matvec(gram_data, dim, sigma, v, out),
+            &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(gram_data, dim, sigma, v, out),
             dim, m, None,
         );
         let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);

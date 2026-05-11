@@ -21,7 +21,7 @@ pub fn verify_spot_check(reader: &HpdfReader) -> (f64, f64, bool) {
     let prov = reader.read_provenance().ok();
     let is_dd_built = prov
         .as_ref()
-        .map_or(false, |p| p.builder.contains("DD"));
+        .is_some_and(|p| p.builder.contains("DD"));
 
     let spot_threshold = if stored_precision > 0 {
         println!(

@@ -11,14 +11,9 @@
 //!  where V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::constants;
 use rug::Float;
 use crate::series::{PREC, fp, fu};
-
-fn euler_gamma() -> Float {
-    Float::with_val(PREC, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467093694706329174674951463144724980708248096002660994734781858523379167699675108317261469978709305302790384075517494058752865137988627021838402797693994305675900571875993107680741340424965261263658754861789629453447100513915661453"
-    ).unwrap())
-}
 
 /// V(a,b) = Σ_{m=1}^{a-1} {mb/a} · cot(πm/a)
 fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
@@ -47,7 +42,7 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
 pub fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
     let af = fu(a);
     let bf = fu(b);
-    let gamma = euler_gamma();
+    let gamma = constants::euler_gamma_mpfr(PREC);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
     let two_pi = Float::with_val(PREC, fp(2) * &pi);
     let l2p = Float::with_val(PREC, two_pi.ln());

@@ -12,34 +12,15 @@
 //!         modulus-probe 500 7         (runs mod-7 only)
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
 mod spectral;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use std::time::Instant;
 
-use cathedral_utils::gram::gram_entry_f64;
+use cathedral_utils::gram::{build_gram_matrix_f64};
 
 /// Build full Gram matrix in f64, parallel.
-fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {
-    let dim = n - 1;
-    let entries: Vec<((usize, usize), f64)> = (0..dim)
-        .into_par_iter()
-        .flat_map(|row| {
-            (row..dim)
-                .map(move |col| ((row, col), gram_entry_f64(row + 2, col + 2)))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-
-    let mut mat = vec![0.0f64; dim * dim];
-    for ((r, c), v) in entries {
-        mat[r * dim + c] = v;
-        mat[c * dim + r] = v;
-    }
-    (mat, dim)
-}
 
 /// Eigenvalues via nalgebra.
 fn eigenvalues_nalgebra(mat: &[f64], dim: usize) -> Vec<f64> {
@@ -115,7 +96,7 @@ fn run_modulus(
         if n > max_n { continue; }
 
         let t_n = Instant::now();
-        let (full_mat, full_dim) = build_gram_f64(n);
+        let (full_mat, full_dim) = build_gram_matrix_f64(n);
 
         // Full eigensolve
         let full_eigs = eigenvalues_nalgebra(&full_mat, full_dim);

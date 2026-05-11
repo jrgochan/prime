@@ -395,7 +395,7 @@ fn full_verify(path: &PathBuf, original_data: Option<&[f64]>, dim: usize) {
     // of a ~31-digit value.
     let stored_precision = reader.precision().unwrap_or(0);
     let prov = reader.read_provenance().ok();
-    let is_dd_built = prov.as_ref().map_or(false, |p| p.builder.contains("DD"));
+    let is_dd_built = prov.as_ref().is_some_and(|p| p.builder.contains("DD"));
     let spot_threshold = if stored_precision > 0 {
         println!("    (note: file built at {stored_precision}-bit MPFR; f64 baseline is less accurate)");
         // f64 Kahan summation error grows with N; for N≤100, ~1e-5 is typical

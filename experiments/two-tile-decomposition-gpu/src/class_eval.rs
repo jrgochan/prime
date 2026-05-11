@@ -45,7 +45,7 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> PairClassEval {
             _ => continue,
         };
 
-        let s = if r + a > b { r + a - b } else { 0 };
+        let s = (r + a).saturating_sub(b);
         let is_tt = s > 0;
         if is_tt { n_two_tile += 1; }
         n_classes += 1;

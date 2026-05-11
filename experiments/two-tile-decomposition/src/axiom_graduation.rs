@@ -34,6 +34,7 @@
 
 use rug::Float;
 use cathedral_utils::fmt;
+use cathedral_utils::constants;
 use crate::PREC;
 use crate::compute::fu;
 
@@ -48,10 +49,6 @@ fn log_gamma(x: &Float) -> Float {
 
 fn digamma_f(x: &Float) -> Float {
     x.clone().digamma()
-}
-
-fn euler_gamma() -> Float {
-    Float::with_val(PREC, rug::float::Constant::Euler)
 }
 
 fn pi_const() -> Float {
@@ -160,7 +157,7 @@ fn gauss_log_gamma_direct(a: usize) -> Float {
 fn gauss_digamma_closed(q: usize) -> Float {
     let qf = fu(q);
     let qm1 = Float::with_val(PREC, &qf - Float::with_val(PREC, 1));
-    let gamma = euler_gamma();
+    let gamma = constants::euler_gamma_mpfr(PREC);
     let ln_q = Float::with_val(PREC, qf.clone().ln());
     Float::with_val(PREC,
         -Float::with_val(PREC, &qm1 * &gamma) - Float::with_val(PREC, &qf * &ln_q)

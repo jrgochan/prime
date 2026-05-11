@@ -10,7 +10,6 @@
 //! For small |t| (< 10), we use a direct partial sum with many terms.
 
 use rug::Float;
-use rug::ops::Pow;
 
 pub const P: u32 = 512;
 
@@ -75,7 +74,7 @@ pub fn zeta_critical_line(t: f64) -> (f64, f64) {
 /// Returns (re, im) as f64 after high-precision computation.
 pub fn zeta_critical_line_mpfr(t: f64) -> (f64, f64) {
     let t_mp = Float::with_val(P, t);
-    let pi = Float::with_val(P, rug::float::Constant::Pi);
+    let _pi = Float::with_val(P, rug::float::Constant::Pi);
 
     // Number of terms
     let n_terms = if t.abs() < 50.0 {

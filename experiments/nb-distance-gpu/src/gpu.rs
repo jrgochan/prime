@@ -309,8 +309,8 @@ pub struct GpuSpectralResult {
 /// GPU spectral projections: eigendecomposition + V^T b entirely on GPU.
 ///
 /// For N=40,000 this uses ~12.8 GB VRAM (matrix) + ~320 KB (eigenvalues)
-/// + workspace. The eigenvector matrix stays on GPU — we compute
-/// c = V^T b via cuBLAS dgemv and only download eigenvalues + c.
+/// plus workspace. The eigenvector matrix stays on GPU — we compute
+/// `c = V^T b` via cuBLAS dgemv and only download eigenvalues + c.
 ///
 /// This avoids the 12.8 GB device→host transfer of the eigenvector matrix.
 pub fn gpu_spectral_projections(
@@ -708,9 +708,7 @@ pub fn gpu_lanczos_bottom_k(
 
             // v_prev = v_curr, v_curr = w / β_j
             // Swap pointers
-            let tmp = d_v_prev;
-            d_v_prev = d_v_curr;
-            d_v_curr = tmp;
+            std::mem::swap(&mut d_v_prev, &mut d_v_curr);
             // v_curr = w / β_j
             let inv_beta = 1.0 / beta_j;
             cudaMemcpy(d_v_curr, d_w as *const f64, vec_bytes, 2); // device-to-device? No, use scale

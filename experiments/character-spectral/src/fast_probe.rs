@@ -11,51 +11,17 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 mod characters;
-mod fmt;
 mod gram;
 mod spectral;
 
 use characters::*;
-use fmt::*;
+use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use std::fs;
 use std::io::Write;
 use std::time::Instant;
 
-use cathedral_utils::gram::gram_entry_f64;
-
-/// Build full Gram matrix in f64, indices 2..=n, fully parallel via rayon.
-fn build_gram_f64(n: usize) -> (Vec<f64>, usize) {
-    let dim = n - 1;
-    let total = dim * (dim + 1) / 2;
-
-    eprintln!(
-        "    Building {dim}×{dim} f64 Gram matrix ({total} entries, rayon parallel)..."
-    );
-
-    // Compute upper triangle in parallel
-    let entries: Vec<((usize, usize), f64)> = (0..dim)
-        .into_par_iter()
-        .flat_map(|row| {
-            (row..dim)
-                .map(move |col| {
-                    let j = row + 2;
-                    let k = col + 2;
-                    ((row, col), gram_entry_f64(j, k))
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect();
-
-    // Assemble symmetric matrix
-    let mut mat = vec![0.0f64; dim * dim];
-    for ((r, c), v) in entries {
-        mat[r * dim + c] = v;
-        mat[c * dim + r] = v;
-    }
-
-    (mat, dim)
-}
+use cathedral_utils::gram::build_gram_matrix_f64;
 
 /// Build Gram matrix using 128-bit MPFR, then convert to f64.
 /// Used for N ≥ 500 where f64 accumulation may lose accuracy.
@@ -70,7 +36,7 @@ fn build_gram_auto(n: usize) -> (Vec<f64>, usize) {
     if n >= 500 {
         build_gram_mpfr_to_f64(n)
     } else {
-        build_gram_f64(n)
+        build_gram_matrix_f64(n)
     }
 }
 

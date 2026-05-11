@@ -78,7 +78,7 @@ pub fn certify_pair(a: usize, b: usize, max_m: usize) -> PairClassEval {
         let m0 = (1..=b).find(|&m| (a * m) % b == r).unwrap_or(b);
         if m0 > max_m { continue; }
 
-        let s = if r + a > b { r + a - b } else { 0 };
+        let s = (r + a).saturating_sub(b);
         let is_two_tile = s > 0;
 
         let mut sum_actual = Float::with_val(PREC, 0);

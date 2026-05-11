@@ -25,7 +25,8 @@
 //!  Target axiom: Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean:310
 //!  ═══════════════════════════════════════════════════════════════════════════
 
-use rayon::prelude::*;
+use cathedral_utils::fmt::*;
+use cathedral_utils::constants;
 use rug::Float;
 use std::fs;
 use std::io::Write;
@@ -53,46 +54,11 @@ const M_VALUES: &[usize] = &[
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
-// TERMINAL COLORS
-// ═══════════════════════════════════════════════════════════════════════════
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const RED: &str = "\x1b[31m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
-
-fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
 // §1. HIGH-PRECISION PRIMITIVES
 // ═══════════════════════════════════════════════════════════════════════════
 
 fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
 fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
-
-fn euler_gamma() -> Float {
-    Float::with_val(PREC, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467093694706329174674951463144724980708248096002660994734781858523379167699675108317261469978709305302790384075517494058752865137988627021838402797693994305675900571875993107680741340424965261263658754861789629453447100513915661453"
-    ).unwrap())
-}
-
-fn ln_two_pi() -> Float {
-    let two = Float::with_val(PREC, 2u32);
-    let pi = Float::with_val(PREC, rug::float::Constant::Pi);
-    Float::with_val(PREC, &two * &pi).ln()
-}
-
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §2. VASYUNIN FORMULA EVALUATION
@@ -130,8 +96,8 @@ fn vasyunin_cot_sum(a: usize, b: usize) -> Float {
 fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
     let af = fu(a);
     let bf = fu(b);
-    let gamma = euler_gamma();
-    let l2p = ln_two_pi();
+    let gamma = constants::euler_gamma_mpfr(PREC);
+    let l2p = constants::ln2pi_mpfr(PREC);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
 
     // Term 1: (ln(2π)-γ)/2 · (1/a + 1/b)
@@ -471,12 +437,12 @@ fn main() {
     writeln!(oracle, "/-").unwrap();
     writeln!(oracle, "  Vasyunin Convergence Oracle — Auto-generated").unwrap();
     writeln!(oracle, "  {}-bit MPFR, {} threads, {}", PREC, n_threads, chrono::Utc::now().to_rfc3339()).unwrap();
-    writeln!(oracle, "").unwrap();
+    writeln!(oracle).unwrap();
     writeln!(oracle, "  Certifies: For coprime (a,b) with a < b,").unwrap();
     writeln!(oracle, "  |∫_{{1/(aM)}}^1 {{1/(ax)}}{{1/(bx)}} dx - formula(a,b)| ≤ 1/(a·M)").unwrap();
     writeln!(oracle, "  for all tested M values.").unwrap();
     writeln!(oracle, "-/").unwrap();
-    writeln!(oracle, "").unwrap();
+    writeln!(oracle).unwrap();
 
     // Write convergence data for representative pairs
     for &(a, b) in &[(1usize, 2usize), (1, 3), (2, 3), (3, 5), (5, 7)] {
@@ -490,7 +456,7 @@ fn main() {
             writeln!(oracle, "--   M={:>6}: |error| = {:.6e}, |error|·aM = {:.10}",
                 p.m, p.error_abs, p.error_times_am).unwrap();
         }
-        writeln!(oracle, "").unwrap();
+        writeln!(oracle).unwrap();
         println!("  ({},{}): {} M-values certified", a, b, points.len());
     }
 

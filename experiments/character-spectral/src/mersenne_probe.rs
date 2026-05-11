@@ -18,9 +18,8 @@
 //!  Usage: mersenne-probe [max_N]
 //! ═══════════════════════════════════════════════════════════════════════════
 
-mod fmt;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 use rayon::prelude::*;
 use std::time::Instant;
 
@@ -353,12 +352,11 @@ fn analyze(candidates: &[usize], weights: &[f64], lambda_min: f64, n: usize) {
                 }
             }
             let neighbor = f.k + gap;
-            if neighbor <= n {
-                if let Some(boson) = infos.iter().find(|i| i.k == neighbor && i.is_prime) {
+            if neighbor <= n
+                && let Some(boson) = infos.iter().find(|i| i.k == neighbor && i.is_prime) {
                     eprintln!("  {} (fermion, wt={:.4e}) ← gap={} → {} (boson, wt={:.4e})",
                         f.k, f.weight, gap, boson.k, boson.weight);
                 }
-            }
         }
     }
 

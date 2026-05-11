@@ -13,6 +13,7 @@
 //! - [`coprime`] — Coprime pair generation and standard test datasets
 //! - [`gram`] — Gram matrix engine (f64/MPFR, build-once, disk cache)
 //! - [`lanczos`] — Lanczos iteration for partial eigendecomposition
+//! - [`linalg`] — Dense linear algebra primitives (matvec, shifted matvec)
 //! - [`mertens`] — Mertens function, Chebyshev θ/ψ, witness vectors
 //! - [`rsvd`] — Randomized SVD (Halko-Martinsson-Tropp) for partial eigendecomp
 //! - [`spectral`] — Eigendecomposition and participation ratio
@@ -34,12 +35,14 @@ pub mod coprime;
 pub mod dd;
 pub mod fitting;
 pub mod fmt;
+pub mod gcd_decomp;
 pub mod gram;
 pub mod gpu;
 #[cfg(feature = "hpdf")]
 pub mod hpdf;
 pub mod jacobi;
 pub mod lanczos;
+pub mod linalg;
 pub mod mertens;
 pub mod ooc;
 pub mod rsvd;

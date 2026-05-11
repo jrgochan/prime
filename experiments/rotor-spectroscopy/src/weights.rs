@@ -20,8 +20,8 @@ pub fn bd_weights(n: usize, mu: &[i8]) -> Vec<f64> {
         let ratio = Float::with_val(P, &log_k / &log_n);
         let taper = Float::with_val(P, 1.0) - ratio;
         if taper <= 0.0 { return 0.0; }
-        let v = -(mu[k] as f64) * taper.to_f64();
-        v
+        
+        -(mu[k] as f64) * taper.to_f64()
     }).collect()
 }
 
@@ -48,7 +48,7 @@ pub struct ResidueStats {
     pub total_energy: f64,
 }
 
-pub fn residue_class_stats(n: usize, weights: &[f64]) -> ResidueStats {
+pub fn residue_class_stats(_n: usize, weights: &[f64]) -> ResidueStats {
     // Parallel accumulation over chunks
     let chunk_size = (weights.len() / rayon::current_num_threads()).max(256);
     let partial: Vec<([f64; 8], [usize; 8])> = weights.par_chunks(chunk_size)

@@ -48,7 +48,7 @@ impl HpdfReader {
     /// MPFR precision bits used for construction.
     pub fn precision(&self) -> hdf5::Result<u32> {
         let gram = self.file.group("gram")?;
-        Ok(gram.attr("precision")?.read_scalar()?)
+        gram.attr("precision")?.read_scalar()
     }
 
     /// Check whether this HPDF file contains DD (double-double) lo-word data.

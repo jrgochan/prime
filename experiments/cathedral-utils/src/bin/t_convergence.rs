@@ -222,7 +222,7 @@ fn main() {
     for (label, digits) in [
         ("FP32", 7), ("FP64", 16), ("DD (solve)", 21), ("DD (full)", 31),
     ] {
-        let eps = 10.0f64.powi(-(digits as i32));
+        let eps = 10.0f64.powi(-digits);
         let t_needed = ((cal_c * tm_worst / eps).powf(1.0 / alpha)) as u64;
         println!("  │ {:<16} │ {:>6} │ {:>13} │",
             label, digits, format_t(t_needed as usize));

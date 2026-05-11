@@ -8,7 +8,6 @@
 ///   5. Mean:      -(b^T v)^2
 ///
 /// Hypothesis: Rational and Base flatline (PNT); RH lives in Log × Cot × Mean.
-
 use std::f64::consts::PI;
 use rayon::prelude::*;
 

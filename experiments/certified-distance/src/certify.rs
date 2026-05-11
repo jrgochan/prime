@@ -8,7 +8,7 @@
 //! 5. Verifies monotonicity against previous certificates
 //! 6. Writes an independently verifiable JSON certificate
 
-use cathedral_utils::{arith, gram, cache, lanczos, ooc, dd::DD};
+use cathedral_utils::{arith, gram, cache, lanczos, linalg, ooc, dd::DD};
 #[cfg(feature = "gpu")]
 use cathedral_utils::gpu;
 use rayon::prelude::*;
@@ -565,7 +565,7 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
 
     for iter in 0..max_iter {
         // ap = G p  (parallel f64 matvec — the dominant cost, stays f64)
-        matvec_parallel(gram, &p, &mut ap, dim);
+        linalg::dense_matvec(gram, dim, &p, &mut ap);
 
         // DD-precision dot product for p^T A p — this is where f64 CG fails
         let pap = par_dot_dd(&p, &ap);
@@ -612,7 +612,7 @@ fn cg_solve_d_sq_dd(gram: &[f64], b: &[f64], dim: usize) -> (f64, &'static str, 
             stagnation_count += 1;
             if stagnation_count >= 50 && stagnation_count % 100 == 0 {
                 // Recompute residual from scratch: r = b - Gx
-                matvec_parallel(gram, &x, &mut ap, dim);
+                linalg::dense_matvec(gram, dim, &x, &mut ap);
                 r.par_iter_mut().enumerate()
                     .for_each(|(i, ri)| *ri = b[i] - ap[i]);
                 let _new_rz = par_dot_dd(&r, &z);
@@ -687,7 +687,7 @@ fn par_dot_dd(a: &[f64], b: &[f64]) -> DD {
     // Use chunk-based parallel reduction for cache efficiency
     const CHUNK: usize = 1024;
     let n = a.len();
-    let n_chunks = (n + CHUNK - 1) / CHUNK;
+    let n_chunks = n.div_ceil(CHUNK);
 
     // Each chunk computes a DD partial sum, then we reduce
     let partials: Vec<DD> = (0..n_chunks).into_par_iter()
@@ -721,42 +721,6 @@ fn dd_two_prod(a: f64, b: f64) -> (f64, f64) {
     (p, e)
 }
 
-/// Parallel matrix-vector product: y = A x (f64 matrix, DD accumulation)
-fn matvec_parallel(a: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
-    y.par_iter_mut()
-        .enumerate()
-        .for_each(|(i, yi)| {
-            let row = &a[i * dim..(i + 1) * dim];
-            let mut acc = DD::from_f64(0.0);
-            for j in 0..dim {
-                let (hi, lo) = dd_two_prod(row[j], x[j]);
-                acc += DD::new(hi, lo);
-            }
-            *yi = acc.to_f64();
-        });
-}
-
-/// Parallel DD-matrix-vector product: y = A x where A is stored as (hi, lo) pairs.
-///
-/// Each entry A[i,j] = hi[i*dim+j] + lo[i*dim+j] (~31 digits).
-/// The matvec accumulates in DD precision throughout.
-/// This is ~2x slower than f64 matvec but preserves positive-definiteness.
-fn matvec_dd(a_hi: &[f64], a_lo: &[f64], x: &[f64], y: &mut [f64], dim: usize) {
-    y.par_iter_mut()
-        .enumerate()
-        .for_each(|(i, yi)| {
-            let offset = i * dim;
-            let mut acc = DD::from_f64(0.0);
-            for j in 0..dim {
-                // A[i,j] as DD = (hi, lo)
-                let a_dd = DD::new(a_hi[offset + j], a_lo[offset + j]);
-                // a_dd * x[j], accumulated in DD
-                let prod = a_dd * DD::from_f64(x[j]);
-                acc += prod;
-            }
-            *yi = acc.to_f64();
-        });
-}
 
 /// DD-matrix-aware CG solver.
 ///
@@ -821,7 +785,7 @@ fn cg_solve_d_sq_dd_matrix(
 
     for iter in 0..max_iter {
         // ap = G p  using DD matvec — the key difference!
-        matvec_dd(gram_hi, gram_lo, &p, &mut ap, dim);
+        linalg::dense_matvec_dd(gram_hi, gram_lo, &p, &mut ap, dim);
 
         let pap = par_dot_dd(&p, &ap);
         if pap.hi <= 0.0 && pap.lo <= 0.0 {
@@ -858,7 +822,7 @@ fn cg_solve_d_sq_dd_matrix(
         if r_norm >= prev_r_norm * 0.9999 {
             stagnation_count += 1;
             if stagnation_count >= 50 && stagnation_count % 100 == 0 {
-                matvec_dd(gram_hi, gram_lo, &x, &mut ap, dim);
+                linalg::dense_matvec_dd(gram_hi, gram_lo, &x, &mut ap, dim);
                 r.par_iter_mut().enumerate()
                     .for_each(|(i, ri)| *ri = b[i] - ap[i]);
                 z.par_iter_mut().enumerate()
@@ -899,8 +863,6 @@ fn cg_solve_d_sq_dd_matrix(
     let precision = if converged { 15 } else { 12 };
     (d_sq, "CG_DD_Matrix_Jacobi", precision)
 }
-
-
 
 fn compute_cross_check(
     _gram: &[f64], _b: &[f64], dim: usize, primary_d_sq: f64,
@@ -1103,7 +1065,7 @@ fn write_master_certificate(cert_dir: &str) {
     }).collect();
 
     let all_positive = certs.iter().all(|c| {
-        c.spectrum.as_ref().map_or(true, |s| s.lambda_min_positive)
+        c.spectrum.as_ref().is_none_or(|s| s.lambda_min_positive)
     });
 
     let monotone = certs.windows(2).all(|w| w[1].distance.d_sq <= w[0].distance.d_sq);

@@ -18,12 +18,11 @@
 mod analysis;
 mod arith;
 mod certificate;
-mod fmt;
 mod gram;
 mod optimizer;
 mod witness;
 
-use fmt::*;
+use cathedral_utils::fmt::*;
 use std::fs;
 use std::time::Instant;
 
@@ -264,7 +263,7 @@ fn main() {
 
     let mut all_witness_results: Vec<witness::WitnessResult> = Vec::new();
     for &n in &test_ns {
-        if n < 10 || n > 500 {
+        if !(10..=500).contains(&n) {
             continue;
         }
         let results = witness::compare_witnesses(&gram_matrix, n);
@@ -292,7 +291,7 @@ fn main() {
 
     let opt_theta = 0.9;
     let basis_counts = [4, 6, 8, 10, 12];
-    let opt_ns: Vec<usize> = test_ns.iter().copied().filter(|&n| n >= 10 && n <= 1000).collect();
+    let opt_ns: Vec<usize> = test_ns.iter().copied().filter(|&n| (10..=1000).contains(&n)).collect();
 
     // Run with default (4) for full output
     let opt_results = optimizer::sweep(&gram_matrix, &opt_ns, opt_theta, 4);

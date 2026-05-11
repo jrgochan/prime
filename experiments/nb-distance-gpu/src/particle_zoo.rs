@@ -5,7 +5,7 @@
 //! cancellation, and tests the Hardy-Ramanujan envelope fit.
 
 use cathedral_utils::arith::{
-    self, b_vector, big_omega, liouville_table, small_omega_table, von_mangoldt, EULER_GAMMA,
+    self, b_vector, liouville_table, small_omega_table, von_mangoldt,
 };
 use std::fs;
 
@@ -213,7 +213,7 @@ fn analyze(label: &str, coeffs: &[(usize, f64)]) {
 
     // ── Prime energy decay ──
     println!("\n  Prime Coefficient Decay:");
-    let is_prime = arith::sieve_primes(n_max);
+    let _is_prime = arith::sieve_primes(n_max);
     let primes_to_show = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 97, 101, 997, 1009];
     for &p in &primes_to_show {
         if p <= n_max {

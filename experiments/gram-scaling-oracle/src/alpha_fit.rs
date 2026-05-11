@@ -14,6 +14,7 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 use cathedral_utils::fitting;
+use cathedral_utils::fmt::*;
 use crate::block_spectrum::BlockSpectralResult;
 
 /// Results from α extraction.
@@ -105,7 +106,3 @@ pub fn extract_alpha(
 }
 
 // Terminal colors (same as main.rs)
-const BOLD: &str = "\x1b[1m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const RESET: &str = "\x1b[0m";

@@ -49,11 +49,10 @@ type VCache = Mutex<HashMap<(usize, usize), f64>>;
 
 fn vasyunin_cached(a: usize, b: usize, cache: &VCache) -> f64 {
     // Check cache first
-    if let Ok(guard) = cache.lock() {
-        if let Some(&val) = guard.get(&(a, b)) {
+    if let Ok(guard) = cache.lock()
+        && let Some(&val) = guard.get(&(a, b)) {
             return val;
         }
-    }
     let val = vasyunin_sum_f64(a, b);
     if let Ok(mut guard) = cache.lock() {
         guard.insert((a, b), val);

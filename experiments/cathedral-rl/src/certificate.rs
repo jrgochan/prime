@@ -165,7 +165,7 @@ pub fn write_certificate(
 
     // Serialize, hash, then embed hash
     let pre_hash_json = serde_json::to_string_pretty(&cert)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+        .map_err(std::io::Error::other)?;
     let mut hasher = Sha256::new();
     hasher.update(pre_hash_json.as_bytes());
     let hash = format!("{:x}", hasher.finalize());
@@ -173,7 +173,7 @@ pub fn write_certificate(
 
     // Write final certificate
     let cert_json = serde_json::to_string_pretty(&cert)
-        .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
+        .map_err(std::io::Error::other)?;
 
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;

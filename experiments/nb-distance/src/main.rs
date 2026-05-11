@@ -24,7 +24,7 @@
 mod solver;
 mod certificate;
 
-use cathedral_utils::{arith, cache, gram, fitting, fmt};
+use cathedral_utils::{arith, cache, fitting, fmt};
 use fmt::{BOLD, WHITE, CYAN, GREEN, YELLOW, DIM, RESET};
 
 fn main() {
@@ -99,7 +99,7 @@ fn main() {
         let status = if r.d2 > 0.0 && r.d2 < 1.0 {
             format!("{GREEN}✓ valid{RESET}")
         } else if r.d2 <= 0.0 {
-            format!("\x1b[31m✗ d²≤0\x1b[0m")
+            "\x1b[31m✗ d²≤0\x1b[0m".to_string()
         } else {
             format!("{YELLOW}⚠ d²≥1{RESET}")
         };
@@ -153,7 +153,7 @@ fn main() {
         .all(|w| w[1].d2 <= w[0].d2 + 1e-10);
     let all_positive = results.iter().all(|r| r.d2 > 0.0);
 
-    let check = |b: bool| if b { format!("{GREEN}✓{RESET}") } else { format!("\x1b[31m✗\x1b[0m") };
+    let check = |b: bool| if b { format!("{GREEN}✓{RESET}") } else { "\x1b[31m✗\x1b[0m".to_string() };
     println!("  {} All d²_N > 0 (required by L² theory)", check(all_positive));
     println!("  {} Monotonically decreasing for N ≥ 10", check(monotone));
 

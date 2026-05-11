@@ -16,6 +16,7 @@
 //!    - pointwise_N<N>.tsv: full grid data (x, f_N(x), |f_N(x)-1|)
 //!    - pointwise_cert_N<N>.json: certificate with extrema & L² check
 //!    - pointwise_summary_N<N>.txt: human-readable report
+//!
 //! ═══════════════════════════════════════════════════════════════════════
 
 use cathedral_utils::arith;
@@ -167,24 +168,24 @@ fn main() {
         writeln!(f, "═══ POINTWISE PROFILE f_N(x) — N={n} ═══").unwrap();
         writeln!(f, "Grid: {grid} points on (0,1)").unwrap();
         writeln!(f, "Active weights: {n_active} (squarefree k=2..{n})").unwrap();
-        writeln!(f, "").unwrap();
+        writeln!(f).unwrap();
         writeln!(f, "EXTREMA:").unwrap();
         writeln!(f, "  max f_N(x) = {max_fn:.15e}  at x = {max_x:.10}").unwrap();
         writeln!(f, "  min f_N(x) = {min_fn:.15e}  at x = {min_x:.10}").unwrap();
         writeln!(f, "  max overshoot (f_N - 1) = {max_overshoot:.15e}  at x = {max_overshoot_x:.10}").unwrap();
-        writeln!(f, "").unwrap();
+        writeln!(f).unwrap();
         writeln!(f, "INTEGRALS (midpoint rule, {grid} pts):").unwrap();
         writeln!(f, "  ∫ f_N(x) dx      = {mean_fn:.15e}  (= bᵀv)").unwrap();
         writeln!(f, "  ∫ f_N(x)² dx     = {l2_norm_sq:.15e}  (= vᵀGv = ‖f_N‖²)").unwrap();
         writeln!(f, "  ∫ (f_N(x)-1)² dx = {l2_error_sq:.15e}  (= d²_N)").unwrap();
         writeln!(f, "  d²_N (1-2bv+vGv) = {d2n:.15e}").unwrap();
-        writeln!(f, "").unwrap();
+        writeln!(f).unwrap();
         writeln!(f, "GRAM BOUND:").unwrap();
         writeln!(f, "  vᵀGv         = {l2_norm_sq:.15e}").unwrap();
         writeln!(f, "  1 - vᵀGv     = {:.15e}", 1.0 - l2_norm_sq).unwrap();
         writeln!(f, "  gap·ln(N)    = {:.15e}", (1.0 - l2_norm_sq) * ln_n).unwrap();
         writeln!(f, "  Axiom sat?   = {}", if l2_norm_sq < 1.0 { "YES" } else { "CHECK" }).unwrap();
-        writeln!(f, "").unwrap();
+        writeln!(f).unwrap();
         writeln!(f, "POINTWISE BOUND:").unwrap();
         writeln!(f, "  Points with f_N > 1: {} / {} ({:.2}%)", n_over, grid, overshoot_pct).unwrap();
         writeln!(f, "  Points with f_N < 0: {} / {} ({:.2}%)", n_under, grid, undershoot_pct).unwrap();

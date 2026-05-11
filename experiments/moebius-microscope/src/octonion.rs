@@ -47,7 +47,7 @@ fn gram_entry_power(j: usize, k: usize, power: u32, n_pts: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
     let dx = 1.0 / n_pts as f64;
-    let n_chunks = (n_pts + QUAD_CHUNK - 1) / QUAD_CHUNK;
+    let n_chunks = n_pts.div_ceil(QUAD_CHUNK);
     let partial: f64 = (0..n_chunks).into_par_iter().map(|chunk| {
         let start = chunk * QUAD_CHUNK;
         let end = (start + QUAD_CHUNK).min(n_pts);
@@ -70,7 +70,7 @@ fn gram_cross(j: usize, k: usize, p1: u32, p2: u32, n_pts: usize) -> f64 {
     let jf = j as f64;
     let kf = k as f64;
     let dx = 1.0 / n_pts as f64;
-    let n_chunks = (n_pts + QUAD_CHUNK - 1) / QUAD_CHUNK;
+    let n_chunks = n_pts.div_ceil(QUAD_CHUNK);
     let partial: f64 = (0..n_chunks).into_par_iter().map(|chunk| {
         let start = chunk * QUAD_CHUNK;
         let end = (start + QUAD_CHUNK).min(n_pts);
@@ -231,7 +231,7 @@ fn experiment_1_mod8_residue(n: usize) -> Exp1Results {
     let dir = results_dir();
     let mut tsv = fs::File::create(dir.join(format!("exp1_residue_matrix_N{n}.tsv")))
         .expect("Failed to create TSV");
-    write!(tsv, "r1\tr2\tvalue\n").unwrap();
+    writeln!(tsv, "r1\tr2\tvalue").unwrap();
     for r1 in 0..8 {
         for r2 in 0..8 {
             writeln!(tsv, "{}\t{}\t{:.15e}", r1, r2, q[r1][r2].value()).unwrap();

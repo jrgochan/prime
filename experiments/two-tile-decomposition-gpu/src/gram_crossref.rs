@@ -36,7 +36,7 @@ pub fn cross_reference(max_n: usize, max_m: usize) -> Vec<CrossRefResult> {
 
     let mut results: Vec<CrossRefResult> = pairs.par_iter()
         .map(|&(j, k)| {
-            let g = compute::gcd(j, k);
+            let g = cathedral_utils::arith::gcd(j, k);
             let a = j / g;
             let b = k / g;
 

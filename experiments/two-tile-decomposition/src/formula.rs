@@ -4,30 +4,22 @@
 
 use rug::Float;
 use crate::PREC;
-use crate::compute::{fp, fu, gcd};
+use crate::compute::{fp, fu};
+use cathedral_utils::arith::gcd;
+use cathedral_utils::constants;
 
 // ─────────────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────
 
 /// Euler-Mascheroni constant γ at 512-bit precision (from precomputed digits).
-pub fn euler_gamma() -> Float {
-    Float::with_val(PREC, Float::parse(
-        "0.57721566490153286060651209008240243104215933593992359880576723488486772677766467093694706329174674951463144724980708248096002660994734781858523379167699675108317261469978709305302790384075517494058752865137988627021838402797693994305675900571875993107680741340424965261263658754861789629453447100513915661453"
-    ).unwrap())
-}
 
 /// log(2π) at MPFR precision.
-pub fn ln_two_pi() -> Float {
-    let two = Float::with_val(PREC, 2u32);
-    let pi = Float::with_val(PREC, rug::float::Constant::Pi);
-    Float::with_val(PREC, &two * &pi).ln()
-}
 
 /// Stirling constant: log(2π) - γ - 1.
 pub fn stirling_const() -> Float {
-    let l2p = ln_two_pi();
-    let g = euler_gamma();
+    let l2p = constants::ln2pi_mpfr(PREC);
+    let g = constants::euler_gamma_mpfr(PREC);
     Float::with_val(PREC, Float::with_val(PREC, &l2p - &g) - fp(1))
 }
 
@@ -76,8 +68,8 @@ pub fn vasyunin_gram_formula(a: usize, b: usize) -> Float {
     let af = fu(a);
     let bf = fu(b);
     let df = fu(g);
-    let gamma = euler_gamma();
-    let l2p = ln_two_pi();
+    let gamma = constants::euler_gamma_mpfr(PREC);
+    let l2p = constants::ln2pi_mpfr(PREC);
     let pi = Float::with_val(PREC, rug::float::Constant::Pi);
 
     // Term 1: (log(2π)-γ)/2 · (1/a + 1/b)

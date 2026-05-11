@@ -18,10 +18,11 @@
 //! ║  Cathedral Core Team — April 30, 2026                               ║
 //! ╚══════════════════════════════════════════════════════════════════════╝
 
-use cathedral_utils::arith::{b_vector, EULER_GAMMA};
+use cathedral_utils::arith::b_vector;
 use cathedral_utils::cache::{self, load_gram};
 use cathedral_utils::lanczos;
 use cathedral_utils::ooc;
+use cathedral_utils::linalg;
 use nalgebra::DMatrix;
 use std::path::PathBuf;
 use std::time::Instant;
@@ -136,7 +137,6 @@ fn main() {
 
     println!("\n  🔭 Observatory complete.");
 }
-
 
 struct SpectralResult {
     n: usize,
@@ -472,26 +472,8 @@ fn load_ooc_matrix(path: &std::path::Path, dim: usize) -> Option<Vec<f64>> {
 }
 
 /// Dense matvec for Lanczos: out = mat · v (row-major).
-fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
-    use rayon::prelude::*;
-    let chunk_dim = dim;
-    out.par_iter_mut().enumerate().for_each(|(i, o)| {
-        let row = &mat[i * chunk_dim..(i + 1) * chunk_dim];
-        let mut sum = 0.0f64;
-        for j in 0..chunk_dim {
-            sum += row[j] * v[j];
-        }
-        *o = sum;
-    });
-}
 
 /// Shifted matvec: out = (σI - A)·v.
-fn shifted_matvec(mat: &[f64], dim: usize, sigma: f64, v: &[f64], out: &mut [f64]) {
-    dense_matvec(mat, dim, v, out);
-    for i in 0..dim {
-        out[i] = sigma * v[i] - out[i];
-    }
-}
 
 fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathBuf]) -> Option<SpectralResult> {
     println!("\n{}", "═".repeat(72));
@@ -574,7 +556,7 @@ fn run_spectral_observatory_lanczos(n: usize, k_bottom: usize, ooc_dirs: &[PathB
     let t0 = Instant::now();
     let data_ref = &data;
     let (tri, basis) = lanczos::lanczos_tridiag(
-        &|v: &[f64], out: &mut [f64]| shifted_matvec(data_ref, dim, sigma, v, out),
+        &|v: &[f64], out: &mut [f64]| linalg::shifted_matvec(data_ref, dim, sigma, v, out),
         dim, m, None,
     );
     let (ritz_values, ritz_vectors) = lanczos::tridiag_eigen(&tri);

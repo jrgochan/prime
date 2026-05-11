@@ -1,7 +1,6 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  Computational primitives — MPFR row integrals, strip, row terms
 //! ═══════════════════════════════════════════════════════════════════════════
-
 use rug::Float;
 use crate::PREC;
 
@@ -17,13 +16,6 @@ pub fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
 #[inline]
 pub fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
 
-/// GCD (Euclidean).
-#[inline]
-pub fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // §1. EXACT ROW INTEGRAL (piecewise FTC)

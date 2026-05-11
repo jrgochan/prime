@@ -258,7 +258,7 @@ fn main() {
         cert.push_str(&format!("  \"all_lambda_min_positive\": {},\n", all_positive));
 
         // Final verdict
-        let decoupled = all_results.last().map_or(false, |r| r.beta > 1.0);
+        let decoupled = all_results.last().is_some_and(|r| r.beta > 1.0);
         cert.push_str(&format!("  \"quantum_decoupling_confirmed\": {},\n", decoupled));
 
         let n_max = all_results.last().map_or(0, |r| r.n);
@@ -279,7 +279,7 @@ fn main() {
         writeln!(f, "GPU Spectral Observatory Run").ok();
         writeln!(f, "Timestamp: {}", utc_timestamp()).ok();
         writeln!(f, "N values: {:?}", sizes).ok();
-        writeln!(f, "").ok();
+        writeln!(f).ok();
         for r in &all_results {
             writeln!(f, "N={:6}  d²={:.12}  λ_min={:.8e}  λ_max={:.8e}  cond={:.4e}  β={:.4}  mode={}",
                 r.n, r.d_sq, r.lambda_min, r.lambda_max, r.cond, r.beta, r.compute_mode).ok();
@@ -427,7 +427,7 @@ fn run_hybrid_spectral(n: usize, dim: usize, data: Vec<f64>, b: Vec<f64>) -> Opt
     // ── Phase 1: d² via GPU Cholesky (this always fits — just one matrix copy) ──
     println!("  Phase 1: Computing d² via GPU Cholesky...");
     let t_chol = Instant::now();
-    let d_sq = match gpu::gpu_cholesky_d2(&data, &b, dim) {
+    let _d_sq = match gpu::gpu_cholesky_d2(&data, &b, dim) {
         Ok(d2) => {
             println!("  d² = {d2:.12} ({:.1}s)", t_chol.elapsed().as_secs_f64());
             d2

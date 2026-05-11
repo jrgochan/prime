@@ -276,33 +276,33 @@ impl DD {
 
         // Recurrence: shift to large argument
         while self.hi < 20.0 {
-            result = result - DD::from_f64(1.0) / self;
-            self = self + DD::from_f64(1.0);
+            result -= DD::from_f64(1.0) / self;
+            self += DD::from_f64(1.0);
         }
 
         // Asymptotic: ψ(x) ≈ ln(x) - 1/(2x) - Σ B_{2k}/(2k·x^{2k})
-        result = result + self.ln();
+        result += self.ln();
         let inv_x = DD::from_f64(1.0) / self;
         let inv_x2 = inv_x * inv_x;
 
-        result = result - inv_x * DD::from_f64(0.5);
+        result -= inv_x * DD::from_f64(0.5);
 
         let mut x2k = inv_x2;
         // B₂/(2·1) = 1/12
-        result = result - x2k / DD::from_f64(12.0);
-        x2k = x2k * inv_x2;
+        result -= x2k / DD::from_f64(12.0);
+        x2k *= inv_x2;
         // -B₄/(4·2) = 1/120
-        result = result + x2k / DD::from_f64(120.0);
-        x2k = x2k * inv_x2;
-        result = result - x2k / DD::from_f64(252.0);
-        x2k = x2k * inv_x2;
-        result = result + x2k / DD::from_f64(240.0);
-        x2k = x2k * inv_x2;
-        result = result - x2k * DD::from_f64(5.0) / DD::from_f64(660.0);
-        x2k = x2k * inv_x2;
-        result = result + x2k * DD::from_f64(691.0) / DD::from_f64(360360.0);
-        x2k = x2k * inv_x2;
-        result = result - x2k / DD::from_f64(12.0);  // B₁₄ term
+        result += x2k / DD::from_f64(120.0);
+        x2k *= inv_x2;
+        result -= x2k / DD::from_f64(252.0);
+        x2k *= inv_x2;
+        result += x2k / DD::from_f64(240.0);
+        x2k *= inv_x2;
+        result -= x2k * DD::from_f64(5.0) / DD::from_f64(660.0);
+        x2k *= inv_x2;
+        result += x2k * DD::from_f64(691.0) / DD::from_f64(360360.0);
+        x2k *= inv_x2;
+        result -= x2k / DD::from_f64(12.0);  // B₁₄ term
 
         result
     }
@@ -315,8 +315,8 @@ impl DD {
 
         // Recurrence: Γ(x+1) = x·Γ(x) → logΓ(x) = logΓ(x+1) - ln(x)
         while self.hi < 20.0 {
-            prefix = prefix - self.ln();
-            self = self + DD::from_f64(1.0);
+            prefix -= self.ln();
+            self += DD::from_f64(1.0);
         }
 
         // Stirling: logΓ(x) ≈ (x-1/2)·ln(x) - x + (1/2)·ln(2π) + Σ B_{2k}/(2k(2k-1)x^{2k-1})
@@ -331,13 +331,13 @@ impl DD {
         let inv_x2 = inv_x * inv_x;
         let mut corr = inv_x / DD::from_f64(12.0);
         let mut x2k1 = inv_x * inv_x2;
-        corr = corr - x2k1 / DD::from_f64(360.0);
-        x2k1 = x2k1 * inv_x2;
-        corr = corr + x2k1 / DD::from_f64(1260.0);
-        x2k1 = x2k1 * inv_x2;
-        corr = corr - x2k1 / DD::from_f64(1680.0);
-        x2k1 = x2k1 * inv_x2;
-        corr = corr + x2k1 / DD::from_f64(1188.0);
+        corr -= x2k1 / DD::from_f64(360.0);
+        x2k1 *= inv_x2;
+        corr += x2k1 / DD::from_f64(1260.0);
+        x2k1 *= inv_x2;
+        corr -= x2k1 / DD::from_f64(1680.0);
+        x2k1 *= inv_x2;
+        corr += x2k1 / DD::from_f64(1188.0);
 
         prefix + result + corr
     }
@@ -357,7 +357,7 @@ impl DD {
         let mut sum = x;
         for n in 1..=20 {
             term = term * (-x2) / DD::from_u64((2*n) * (2*n + 1));
-            sum = sum + term;
+            sum += term;
             if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
         }
         sum
@@ -376,7 +376,7 @@ impl DD {
         let mut sum = DD::from_f64(1.0);
         for n in 1..=20 {
             term = term * (-x2) / DD::from_u64((2*n - 1) * (2*n));
-            sum = sum + term;
+            sum += term;
             if term.hi.abs() < 1e-32 * sum.hi.abs() { break; }
         }
         sum

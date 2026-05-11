@@ -16,12 +16,11 @@
 //! ═══════════════════════════════════════════════════════════════════════════
 
 mod characters;
-mod fmt;
 mod gram;
 mod spectral;
 
 use characters::*;
-use fmt::*;
+use cathedral_utils::fmt::*;
 use gram::PREC;
 use std::fs;
 use std::io::Write;

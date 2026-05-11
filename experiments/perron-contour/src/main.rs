@@ -23,22 +23,11 @@ use std::io::Write;
 use std::time::Instant;
 
 use cathedral_utils::arith::mobius_table;
+use cathedral_utils::fmt::*;
 use cathedral_utils::mertens::mertens_at;
 
 const P: u32 = 256;
 
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
-
-fn check(b: bool) -> &'static str {
-    if b { "\x1b[32m✓\x1b[0m" } else { "\x1b[31m✗\x1b[0m" }
-}
 
 // ═══════════════════════════════════════════════
 // §1. MÖBIUS SIEVE — via cathedral-utils

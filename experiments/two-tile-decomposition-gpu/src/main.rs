@@ -99,7 +99,7 @@ fn main() {
     let mut pairs: Vec<(usize, usize)> = Vec::new();
     for b in 3..=max_b {
         for a in 2..b {
-            if compute::gcd(a, b) == 1 {
+            if cathedral_utils::arith::gcd(a, b) == 1 {
                 pairs.push((a, b));
             }
         }

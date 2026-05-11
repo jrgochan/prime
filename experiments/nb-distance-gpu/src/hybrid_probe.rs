@@ -892,11 +892,10 @@ fn acquire_gram(max_n: usize, log: &Logger) -> gram::GramMatrix {
             let name = entry.file_name().to_string_lossy().to_string();
             if name.starts_with("gram_N") && name.ends_with(".bin") {
                 if let Some(g) = cache::load_gram(&entry.path()) {
-                    if g.max_n >= max_n {
-                        if best.as_ref().map_or(true, |b| g.precision > b.precision) {
+                    if g.max_n >= max_n
+                        && best.as_ref().is_none_or(|b| g.precision > b.precision) {
                             best = Some(g);
                         }
-                    }
                 }
             }
         }
@@ -909,7 +908,7 @@ fn acquire_gram(max_n: usize, log: &Logger) -> gram::GramMatrix {
 
     // Build fresh with build_fast — CRITICAL: use same table_size as DD Gram
     // so that T_direct is consistent across all matrix types.
-    log.log(&format!("No cache. Building f64 Gram with build_fast (MPFR-128)..."));
+    log.log("No cache. Building f64 Gram with build_fast (MPFR-128)...");
     let table_size = (max_n * 5).max(100_001).min(gram::MAX_LN_TABLE);
     let ln_n_table = gram::LnNTable::new(table_size + 1, 128);
     let g = gram::GramMatrix::build_fast(max_n, &ln_n_table);

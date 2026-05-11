@@ -19,6 +19,8 @@
 //!  coprime pairs (a,b) with a < b ≤ 30, rows m = 1..100000.
 //! ═══════════════════════════════════════════════════════════════════════════
 
+use cathedral_utils::fmt::*;
+use cathedral_utils::arith::gcd;
 use rayon::prelude::*;
 use rug::Float;
 use std::fs;
@@ -29,24 +31,9 @@ const PREC: u32 = 512;
 const MAX_M: usize = 100_000;
 
 // Terminal colors
-const BOLD: &str = "\x1b[1m";
-const DIM: &str = "\x1b[2m";
-const CYAN: &str = "\x1b[36m";
-const GREEN: &str = "\x1b[32m";
-const RED: &str = "\x1b[31m";
-const YELLOW: &str = "\x1b[33m";
-const MAGENTA: &str = "\x1b[35m";
-const WHITE: &str = "\x1b[97m";
-const RESET: &str = "\x1b[0m";
 
 fn fp(x: i64) -> Float { Float::with_val(PREC, x) }
 fn fu(x: usize) -> Float { Float::with_val(PREC, x as u64) }
-
-fn gcd(a: usize, b: usize) -> usize {
-    let (mut a, mut b) = (a, b);
-    while b != 0 { let t = b; b = a % b; a = t; }
-    a
-}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // §1. CORE COMPUTATIONS
