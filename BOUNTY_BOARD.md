@@ -1,8 +1,8 @@
 # 🏛️ Cathedral Open Problems — The Bounty Board
 
-> **Status**: Zero `sorryAx`, 1 crown axiom (One-Pillar), alternative paths: 2–4 axioms  
-> **Compiler**: Lean 4 / Mathlib v4.28  
-> **Last Audit**: May 6, 2026 (Observatory Edition, v16)
+> **Status**: Zero `sorryAx`, 1 crown axiom (Dual Crown), alternative paths: 2–4 axioms  
+> **Compiler**: Lean 4 / Mathlib v4.29  
+> **Last Audit**: May 10, 2026 (Oracle Capstone, v17)
 
 The Cathedral formally verifies:
 

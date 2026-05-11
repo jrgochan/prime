@@ -4,9 +4,9 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**223 active Lean files** across 25+ modules, with **1 crown axiom** on
+**227 active Lean files** across 25+ modules, with **1 crown axiom** on
 the analytic path (verified by `#print axioms`), **1 trusted computation axiom**
-on the Oracle path, and **73 axioms** total in the active codebase.
+on the Oracle path, and **75 axioms** total in the active codebase.
 
 > **Dual Crown Architecture.** The Cathedral provides two independent proofs:
 >
@@ -22,7 +22,7 @@ on the Oracle path, and **73 axioms** total in the active codebase.
 > **Release: oracle-capstone** — May 10, 2026 (v17)
 >
 > **Latest**: Oracle Capstone + Dual Crown — May 10, 2026
->  — *1 literature axiom (analytic), 1 computation axiom (oracle), 222 files, 59,486 lines*
+>  — *1 literature axiom (analytic), 1 computation axiom (oracle), 227 files, ~60,500 lines*
 >
 > 📖 *New here? Read the [Origin Story](ORIGIN-STORY.md) — how a blind eigensolver
 > spontaneously derived the Möbius function and collided with Selberg's Parity Barrier.*
@@ -31,7 +31,7 @@ on the Oracle path, and **73 axioms** total in the active codebase.
 
 ```bash
 cd proofs
-lake build          # 222 active Cathedral files, 103 archived
+lake build          # 227 active Cathedral files, 102 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -131,19 +131,19 @@ proofs/Cathedral/
 ├── Sieve/           (4)     ← Bilinear sieve
 ├── LinearAlgebra/   (4)     ← Sherman-Morrison, Sylvester
 ├── Structural/      (3)     ← Eigenvalue monotonicity
-└── Archive/         (103)   ← Preserved exploratory paths
+└── Archive/         (102)   ← Preserved exploratory paths
 ```
 
 ## Build Stats
 
 ```
-Active files:   223 Lean files across 25+ modules
-Archived:       103 Lean files in Archive/
-Axioms:         1 on analytic crown, 1 on oracle crown, 73 total active
-Sorry:          0 on crown paths (9 off-path)
+Active files:   227 Lean files across 25+ modules
+Archived:       102 Lean files in Archive/
+Axioms:         1 on analytic crown, 1 on oracle crown, 75 total active
+Sorry:          0 on crown paths (13 off-path)
 Errors:         0
-Lines:          ~60K (Cathedral), ~130K (full proofs/)
-Theorems:       1,154 proved (verified by generate_proof_tree.py)
+Lines:          ~60,500 (Cathedral), ~130K (full proofs/)
+Theorems:       1,757 proved (verified by grep)
 Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
 Experiments:    39 Rust/MPFR/DD (256–512 bit + DD 31-digit precision)
 Release:        oracle-capstone (v17, Dual Crown)
@@ -262,14 +262,14 @@ results at scale.
 | `cathedral-experiments.tex` | Experimentalists | 4 |
 | `cathedral-particle-zoo.tex` | **The Particle Zoo** — N=100 to N=10⁹ | 10 |
 | **Applications** | | |
-| `cathedral-dualuse.tex` | Dual-use risk assessment | 15 |
-| `cathedral-engineering.tex` | Practicing engineers | 4 |
-| `cathedral-frontiers.tex` | Engineering frontiers | 4 |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
+| `cathedral-engineering.tex` | Practicing engineers | 5 |
+| `cathedral-frontiers.tex` | Engineering frontiers | 5 |
 | **Humanities** | | |
 | `cathedral-fun.tex` | Primes, physics & numerology | 8 |
 | `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
 | **Public** | | |
-| `cathedral-claude.tex` | Anthropic/Claude reflections | 6 |
+| `cathedral-claude.tex` | Anthropic/Claude reflections | 8 |
 | `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
 | `cathedral-public.tex` | General public | 4 |
 | **Policy** | | |
@@ -293,7 +293,7 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 222 active Lean files, 103 archived
+├── proofs/          🏛️  THE CATHEDRAL — 227 active Lean files, 102 archived
 ├── papers/          📄  15 companion papers (LaTeX + PDF)
 ├── experiments/     🔬  39 Rust experiments (256–512 bit MPFR + DD)
 │   └── archive/              Graduated/superseded experiments

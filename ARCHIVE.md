@@ -12,7 +12,7 @@
 
 ## Archive Overview
 
-The Cathedral maintains three archive locations containing **103 Cathedral files**
+The Cathedral maintains three archive locations containing **102 Cathedral files**
 plus **34 pre-Cathedral files** of Lean 4 code:
 
 | Location | Files | Lines | Purpose |

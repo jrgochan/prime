@@ -3,7 +3,7 @@
 Thank you for your interest in contributing to the Cathedral — a machine-verified
 reduction of the Riemann Hypothesis in Lean 4.
 
-## Current Status (v16 — Observatory Edition)
+## Current Status (v17 — Oracle Capstone, Dual Crown)
 
 The crown theorem `nyman_beurling_equivalence` depends on **1 literature axiom**
 (verified by `#print axioms`). The forward chain from RH to d²_N → 0 is a
