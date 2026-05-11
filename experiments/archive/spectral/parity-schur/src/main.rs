@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Parity Schur Complement Experiment
 //!
 //! Computes the discrete Lichnerowicz decomposition of the Nyman-Beurling

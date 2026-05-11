@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL BC-ZETA-LOWER VALIDATOR
 //!  256-bit MPFR · Massively Parallel · Certified Bounds
@@ -565,7 +566,7 @@ fn main() {
         for &t in &bc_ts {
             let res = scan_disk(t, bc_r, bc_eps, 5000, 60);
             let actual_target = zeta_norm(0.5 + bc_eps, t);
-            let actual_log = actual_target.ln().abs();
+            let _actual_log = actual_target.ln().abs();
 
             writeln!(bc_tsv, "{}\t{}\t{:.6}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.15e}\t{:.6}",
                 bc_eps, t, bc_r, res.m_sup, res.log_zeta_center, res.bc_bound, res.a_bc, actual_target, gap).unwrap();

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! # Gram Oracle: Numerical Verification of bd_gram_form_bound
 //!
 //! Computes the Báez-Duarte L² error:

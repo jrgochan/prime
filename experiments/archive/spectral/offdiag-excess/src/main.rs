@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Off-Diagonal Excess Experiment
 //!
 //! Studies the aggregate off-diagonal excess: Σ_{i≠j} (G(i,j) - 1/4)
@@ -13,7 +14,6 @@
 mod gram;
 
 use gram::{gram_entry, fract_integral};
-use rayon::prelude::*;
 use serde::Serialize;
 use std::collections::BTreeMap;
 

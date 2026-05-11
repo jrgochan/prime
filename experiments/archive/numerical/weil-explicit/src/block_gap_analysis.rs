@@ -1,3 +1,4 @@
+#![allow(unused, dead_code, non_snake_case)]
 // block_gap_analysis.rs
 // Analyze the block-diagonal Gram matrix to understand its PD structure
 // and find the cleanest proof path for block_gap_positive.

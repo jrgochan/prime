@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 /// Covariance Matrix Probe — The Numerical Shadow of the Cathedral
 ///
 /// Computes the Vasyunin covariance matrix C = G - bb^T and measures

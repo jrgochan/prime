@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL BILINEAR ABEL SUMMATION & OFF-DIAGONAL CANCELLATION VALIDATOR
 //!  256-bit MPFR · Massively Parallel · Certified Bounds

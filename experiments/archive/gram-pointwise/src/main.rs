@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL GRAM FORM POINTWISE VALIDATOR
 //!  512-bit MPFR · Massively Parallel · Certified Bounds

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 /// Convergence Test: Does Log/Flat → 0.25 as N → ∞?
 ///
 /// Runs the spectral analyzer at multiple N values and measures

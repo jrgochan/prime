@@ -61,7 +61,7 @@ fn fit_decay(results: &[ProbeResult]) -> (f64, f64) {
     // ln(d²_N) = ln(A) - α · ln(ln(N))
     // Linear regression: y = c + m·x where y = ln(d²), x = ln(ln(N))
 
-    let n = results.len() as f64;
+    let _n = results.len() as f64;
     let mut sum_x = 0.0;
     let mut sum_y = 0.0;
     let mut sum_xx = 0.0;

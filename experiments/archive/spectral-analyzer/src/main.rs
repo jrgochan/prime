@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 /// Spectral Comparison — Ludicrously Parallel Edition 🦀
 ///
 /// Compares Log Cutoff vs Flat Möbius vs Sharp Cutoff witnesses

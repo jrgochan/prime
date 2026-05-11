@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Octonionic Witness Experiment (v2 - fixed)
 //!
 //! Tests whether the optimal witness v = G⁻¹b clusters by octonionic class.

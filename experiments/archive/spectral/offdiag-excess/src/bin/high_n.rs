@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Focused high-N aggregate excess computation with parallelism.
 //! Usage: cargo run --release --bin high_n -- <N>
 

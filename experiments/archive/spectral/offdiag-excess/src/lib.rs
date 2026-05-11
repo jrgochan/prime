@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Gram matrix entry computation — exact piecewise integration.
 //! Copied from lambda-eff/src/gram.rs for self-containment.
 

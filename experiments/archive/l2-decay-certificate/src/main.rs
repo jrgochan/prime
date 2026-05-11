@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL L² DECAY CERTIFICATE
 //!  256-bit MPFR · Massively Parallel · Certified Bounds

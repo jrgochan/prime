@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! G₂ Spectral Operator Experiment
 //! ================================
 //! 

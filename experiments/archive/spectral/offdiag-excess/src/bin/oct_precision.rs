@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! High-Precision Octonionic Witness Experiment
 //!
 //! Uses MPFR (256-bit) for the 8×8 class-level Gram matrix aggregation

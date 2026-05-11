@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Spectral K — True Spectral Coupling Constant (MPFR + nalgebra)
 //!
 //! Computes K_spectral = ‖A^{-1/2} B C^{-1/2}‖₂ (operator norm)

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════
 //!  EIGENBASIS RANK-1 EXPERIMENT
 //!  The Cathedral — Testing FiniteDimReduction.lean's Actual Claim

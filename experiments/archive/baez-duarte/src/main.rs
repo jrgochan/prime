@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 // ═══════════════════════════════════════════════════════════════════════
 //  BÁEZ-DUARTE DISTANCE CERTIFICATION ENGINE
 //  The Cathedral — Lean 4 Proof Infrastructure

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Witness v3: More robust optimal witness with condition number tracking
 //!
 //! Uses iterative refinement for better numerical stability.

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL HIGH-PRECISION SPECTRAL EXPERIMENT
 //!  256-bit MPFR Gram matrix · Rank-1 Interference · Full Analysis
@@ -15,7 +16,6 @@ use nalgebra::{DMatrix, DVector, SymmetricEigen, SVD};
 use rayon::prelude::*;
 use rug::Float;
 use std::fs;
-use std::io::Write;
 use std::time::Instant;
 
 const P: u32 = 256; // 256-bit MPFR precision (~77 decimal digits)

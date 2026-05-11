@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL ABEL TAIL VALIDATOR
 //!  High-Precision Certification of Log-Weighted Tail Bounds

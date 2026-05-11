@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Quaternion-Riemann Hypothesis Connection
 //! ==========================================
 //!

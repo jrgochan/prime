@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 /// ═══════════════════════════════════════════════════════════════════
 ///  Cross-Class Eigenvalue Verifier v3
 ///  Now computes G^𝕆 = W ∘ G and the Schur bridge ratio λ_min(G)/λ_min(G^𝕆)

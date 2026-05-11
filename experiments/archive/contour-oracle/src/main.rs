@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! # Contour Oracle v3: The Three-Term Decomposition (with file logging)
 //!
 //! Numerically verifies the interference pattern:

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 // ═══════════════════════════════════════════════════════════════════════
 //  ATTACK 5: COVARIANCE DEFLATION EXPERIMENT
 //  The Cathedral — Exploration Branch

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL MVT DECOMPOSITION EXPERIMENT
 //!  512-bit MPFR · Massively Parallel · Certified Results

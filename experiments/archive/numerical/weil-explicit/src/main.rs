@@ -1,3 +1,4 @@
+#![allow(unused, dead_code, non_snake_case, clippy::all)]
 use rayon::prelude::*;
 use std::f64::consts::PI;
 use std::sync::atomic::{AtomicU64, AtomicBool, Ordering};

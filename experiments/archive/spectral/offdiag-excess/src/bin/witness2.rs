@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Corrected Báez-Duarte Witness Experiment
 //!
 //! Uses the CORRECT NB basis indexing: {2/x}, {3/x}, ..., {(n+1)/x}

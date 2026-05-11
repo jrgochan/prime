@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Báez-Duarte Witness Experiment
 //!
 //! Compares three witnesses for the Nyman-Beurling distance:

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Full-Precision Octonionic Witness — Optimized MPFR
 //!
 //! Strategy: f64 breakpoints (fast) + MPFR antiderivatives (accurate)

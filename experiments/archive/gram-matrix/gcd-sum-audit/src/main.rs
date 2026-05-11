@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 use rayon::prelude::*;
 use std::io::Write;
 use std::sync::atomic::{AtomicU64, Ordering};

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 /// Quick verification: does the CONSTANT witness v_k = c achieve O(1/log N)?
 ///
 /// For v_k = c (constant), f(x) = c · Σ{k/x} = c·F(x).

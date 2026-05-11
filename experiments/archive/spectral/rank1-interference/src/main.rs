@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════
 //!  RANK-1 CROSS-CLASS INTERFERENCE EXPERIMENT
 //!  The Cathedral — Cayley-Dickson Partition Analysis

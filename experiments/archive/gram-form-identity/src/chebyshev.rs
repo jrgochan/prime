@@ -16,7 +16,7 @@ pub fn chebyshev_psi(y: usize, log_primes: &[(usize, f64)]) -> f64 {
 }
 
 /// Build a table of (prime, log(prime)) up to n
-pub fn prime_log_table(n: usize, mu: &[i8]) -> Vec<(usize, f64)> {
+pub fn prime_log_table(n: usize, _mu: &[i8]) -> Vec<(usize, f64)> {
     // A number p is prime if μ(p) ≠ 0 and p > 1
     // (squarefree with exactly 1 prime factor ⟹ μ = -1)
     // Actually, primes have μ(p) = -1. But for our sieve, let's just check

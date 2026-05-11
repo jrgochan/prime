@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL GRAM QUADRATIC FORM VALIDATOR
 //!  256-bit MPFR · Massively Parallel · Certified Bounds

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code, non_snake_case)]
 use rayon::prelude::*;
 use nalgebra::{DMatrix, DVector, SymmetricEigen};
 use std::f64::consts::PI;

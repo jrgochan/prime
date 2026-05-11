@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL BC-EXPONENT FRONTIER
 //!  Massively Parallel · Certified Results

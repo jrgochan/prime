@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL BC WITNESS ANALYSIS
 //!  256-bit MPFR · Focused on the Existential Wrapper

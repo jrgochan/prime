@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL CERTIFIED WITNESS ENGINE
 //!  Proof-Carrying Computation — Direction 5.1

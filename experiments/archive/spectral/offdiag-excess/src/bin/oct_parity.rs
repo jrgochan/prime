@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Parity Engine — Cross-Parity Bilinear Form with MPFR
 //!
 //! Splits the Gram matrix into even/odd parity blocks based on

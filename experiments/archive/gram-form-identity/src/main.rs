@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! ═══════════════════════════════════════════════════════════════════════════
 //!  CATHEDRAL GRAM FORM IDENTITY EXPLORER
 //!  Numerical Decomposition · Bilinear Analysis · Identity Discovery

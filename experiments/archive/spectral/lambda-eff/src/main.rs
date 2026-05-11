@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! λ_eff Linear Growth Experiment
 //! ================================
 //!

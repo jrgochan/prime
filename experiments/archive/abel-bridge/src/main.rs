@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! # Abel Summation Bridge Experiment v2
 //!
 //! Parallel, production-grade numerical verification that the Mertens bound

@@ -1,3 +1,4 @@
+#![allow(unused, dead_code)]
 //! Compare index-1 vs index-2 start for aggregate excess.
 //! Tests whether the 1/4 mean holds for the actual NB basis (k≥2).
 
