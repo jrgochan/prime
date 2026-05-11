@@ -264,8 +264,8 @@ private lemma rpow_le_exp_decay (c : ℝ) (hc : 0 < c) :
     2. `rpow_le_exp_decay`: N^{-1/4} ≤ C_p · E'(N)
     3. Total: |S₁(N)| ≤ C₁·C_p · E'(N) -/
 theorem s1_exp_decay
-    (c C_M : ℝ) (hc : 0 < c) (hC : 0 < C_M)
-    (hMertens : ∀ x : ℝ, x ≥ 2 →
+    (c C_M : ℝ) (hc : 0 < c) (_hC : 0 < C_M)
+    (_hMertens : ∀ x : ℝ, x ≥ 2 →
       |((mertensFunction x : ℤ) : ℝ)| ≤
         C_M * x * Real.exp (-c * (Real.log x) ^ ((1:ℝ)/10)))
     -- Also need x^{3/4} Mertens for s1_decay
@@ -371,4 +371,3 @@ The `exp_decay_times_t_tendsto_zero`, `exp_decay_le_const_div_log`,
 #check MediumPNT
 
 end
-
