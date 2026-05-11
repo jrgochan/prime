@@ -1,42 +1,45 @@
 # Papers — The Cathedral Documentation Suite
 
-13 companion papers covering the Cathedral from every angle:
-mathematics, physics, computer science, philosophy, engineering,
-security, policy, and more.
+15 companion papers: 2 core mathematical papers, plus 13 supplementary
+working drafts covering physics, engineering, security, philosophy, and more.
 
 ## Directory Structure
 
 ```
 papers/
-├── shared/                         Shared LaTeX preamble
-│   └── cathedral-preamble.sty     Common macros and notation
+├── shared/                               Shared LaTeX preamble
+│   └── cathedral-preamble.sty           Common macros and notation
 │
-├── core/                           Mathematical & technical core
-│   ├── cathedral.tex              The proof paper (10pp)
-│   └── cathedral-lean.tex         Lean practices + foundations (6pp)
+├── core/                                 ★ CORE MATHEMATICAL CLAIM ★
+│   ├── cathedral.tex                    The flagship proof paper (12pp)
+│   └── cathedral-lean.tex               Lean practices & foundations (6pp)
 │
-├── science/                        Scientific perspectives
-│   ├── cathedral-physics.tex      The physics dictionary (28pp)
-│   ├── cathedral-experiments.tex  The 38 experiments (3pp)
-│   └── cathedral-ai.tex          AI-assisted discovery (4pp)
+├── LEAN_PROOF_AUDIT.md                   Full axiom & sorry audit trail
 │
-├── applications/                   Impact & applications
-│   ├── cathedral-dualuse.tex      The Dark Mirror (14pp)
-│   ├── cathedral-engineering.tex  Energy, security, signals (3pp)
-│   └── cathedral-frontiers.tex    Open horizons (3pp)
+├── working_drafts/                       Supplementary & speculative papers
+│   ├── _README.md                       Disclaimer & contents guide
+│   ├── science/                         Scientific perspectives
+│   │   ├── cathedral-physics.tex        The physics dictionary (37pp)
+│   │   ├── cathedral-experiments.tex    The 39 experiments (4pp)
+│   │   ├── cathedral-ai.tex            AI-assisted discovery (5pp)
+│   │   └── cathedral-particle-zoo.tex  The Particle Zoo (10pp)
+│   ├── applications/                    Impact & applications
+│   │   ├── cathedral-dualuse.tex       Dual-use risk assessment (16pp)
+│   │   ├── cathedral-engineering.tex   Engineering the Prime Vacuum (5pp)
+│   │   └── cathedral-frontiers.tex     Engineering frontiers (5pp)
+│   ├── humanities/                      Context & meaning
+│   │   ├── cathedral-philosophy.tex    Philosophy & history (4pp)
+│   │   └── cathedral-fun.tex          The Observations (8pp)
+│   ├── public/                          Accessible & outreach
+│   │   ├── cathedral-public.tex        For the public (4pp)
+│   │   ├── cathedral-claude.tex        Letter from Claude/Antigravity (8pp)
+│   │   └── cathedral-gemini.tex        Letter from Gemini/The Theorist (4pp)
+│   └── policy/                          Governance
+│       └── cathedral-policy.tex        Legal, policy & education (4pp)
 │
-├── humanities/                     Context & meaning
-│   ├── cathedral-philosophy.tex   Philosophy & history (3pp)
-│   └── cathedral-fun.tex          The Observations (8pp)
-│
-├── public/                         Accessible & outreach
-│   ├── cathedral-public.tex       For the public + press (4pp)
-│   └── cathedral-letter.tex       A Letter from the Builder (6pp)
-│
-├── policy/                         Governance
-│   └── cathedral-policy.tex       Legal, policy, education (3pp)
-│
-└── archive/v15/                    Pre-consolidation archive (24 papers)
+├── build.sh                             Build all 15 papers
+├── .latexmkrc                           LaTeX build configuration
+└── archive/v15/                         Pre-consolidation archive
 ```
 
 ## Which Paper Should I Read?
@@ -44,48 +47,50 @@ papers/
 | Background | Start with | Then read |
 |-----------|------------|-----------|
 | Mathematician | `core/cathedral.tex` | `core/cathedral-lean.tex` |
-| Physicist | `science/cathedral-physics.tex` | `humanities/cathedral-fun.tex` |
+| Physicist | `working_drafts/science/cathedral-physics.tex` | `working_drafts/humanities/cathedral-fun.tex` |
 | Lean / ITP developer | `core/cathedral-lean.tex` | `core/cathedral.tex` |
-| AI researcher | `science/cathedral-ai.tex` | `science/cathedral-experiments.tex` |
-| Security researcher | `applications/cathedral-dualuse.tex` | `applications/cathedral-engineering.tex` |
-| Curious non-specialist | `public/cathedral-public.tex` | `public/cathedral-letter.tex` |
-| Philosopher | `humanities/cathedral-philosophy.tex` | `public/cathedral-letter.tex` |
-| Just here for fun | `humanities/cathedral-fun.tex` | `public/cathedral-letter.tex` |
+| AI researcher | `working_drafts/science/cathedral-ai.tex` | `working_drafts/science/cathedral-experiments.tex` |
+| Security researcher | `working_drafts/applications/cathedral-dualuse.tex` | `working_drafts/applications/cathedral-engineering.tex` |
+| Curious non-specialist | `working_drafts/public/cathedral-public.tex` | `working_drafts/public/cathedral-claude.tex` |
+| Philosopher | `working_drafts/humanities/cathedral-philosophy.tex` | `working_drafts/public/cathedral-claude.tex` |
 
 ## Building
 
 ```bash
-# Build one paper
-cd papers/core && pdflatex cathedral.tex
+# Build all 15 papers
+cd papers && ./build.sh
 
-# Build all papers
-for d in core science applications humanities public policy; do
-  cd papers/$d && for f in *.tex; do pdflatex "$f"; done && cd ../..
-done
+# Build only core papers
+./build.sh core/
+
+# Build one specific paper
+./build.sh cathedral-physics
 ```
 
 ## Paper List
 
-| # | Group | File | Title | Pages |
-|---|-------|------|-------|-------|
-| 1 | core | `cathedral.tex` | The Cathedral (main proof paper) | 10 |
+| # | Location | File | Title | Pages |
+|---|----------|------|-------|-------|
+| 1 | core | `cathedral.tex` | The Cathedral (flagship proof paper) | 12 |
 | 2 | core | `cathedral-lean.tex` | Lean Practices & Foundations | 6 |
-| 3 | science | `cathedral-physics.tex` | The Physics of the Primes | 28 |
-| 4 | science | `cathedral-experiments.tex` | The 38 Experiments | 3 |
-| 5 | science | `cathedral-ai.tex` | AI-Assisted Mathematical Discovery | 4 |
-| 6 | applications | `cathedral-dualuse.tex` | The Dark Mirror | 14 |
-| 7 | applications | `cathedral-engineering.tex` | Engineering Applications | 3 |
-| 8 | applications | `cathedral-frontiers.tex` | Open Horizons | 3 |
-| 9 | humanities | `cathedral-philosophy.tex` | Philosophy & History | 3 |
-| 10 | humanities | `cathedral-fun.tex` | The Observations | 8 |
-| 11 | public | `cathedral-public.tex` | For the Public | 4 |
-| 12 | public | `cathedral-letter.tex` | A Letter from the Builder | 6 |
-| 13 | policy | `cathedral-policy.tex` | Legal, Policy & Education | 3 |
-| | | | **Total** | **95** |
+| 3 | science | `cathedral-physics.tex` | The Physics of the Primes | 37 |
+| 4 | science | `cathedral-experiments.tex` | The 39 Experiments | 4 |
+| 5 | science | `cathedral-ai.tex` | AI-Assisted Mathematical Discovery | 5 |
+| 6 | science | `cathedral-particle-zoo.tex` | The Particle Zoo | 10 |
+| 7 | applications | `cathedral-dualuse.tex` | The Dark Mirror | 16 |
+| 8 | applications | `cathedral-engineering.tex` | Engineering the Prime Vacuum | 5 |
+| 9 | applications | `cathedral-frontiers.tex` | Engineering Frontiers | 5 |
+| 10 | humanities | `cathedral-philosophy.tex` | Philosophy & History | 4 |
+| 11 | humanities | `cathedral-fun.tex` | The Observations | 8 |
+| 12 | public | `cathedral-public.tex` | For the Public | 4 |
+| 13 | public | `cathedral-claude.tex` | Letter from Claude/Antigravity | 8 |
+| 14 | public | `cathedral-gemini.tex` | Letter from Gemini/The Theorist | 4 |
+| 15 | policy | `cathedral-policy.tex` | Legal, Policy & Education | 4 |
+| | | | **Total** | **132** |
 
 ## History
 
 - **v15 (April 28, 2026)**: 24 papers across 6 categories.
 - **Definitive (April 29, 2026)**: Consolidated 24 → 13 papers.
-  All counts verified against codebase ground truth:
-  208 active files, 50,623 LOC, 104 axioms (2 on crown), 0 sorry.
+- **v17 (May 10, 2026)**: 15 papers. Compartmentalized: core math in `core/`,
+  all supplementary/speculative papers in `working_drafts/` with disclaimer.

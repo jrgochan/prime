@@ -2,7 +2,7 @@
 # build.sh — Cathedral Paper Suite build script (latexmk wrapper)
 #
 # Usage:
-#   ./build.sh                       Build all 13 papers
+#   ./build.sh                       Build all 15 papers
 #   ./build.sh cathedral-physics     Build one paper (auto-finds directory)
 #   ./build.sh science/              Build all papers in a group
 #   ./build.sh clean                 Remove all build artifacts
@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-PAPER_GROUPS="core science applications humanities public policy"
+PAPER_GROUPS="core working_drafts/science working_drafts/applications working_drafts/humanities working_drafts/public working_drafts/policy"
 
 # Colors
 RED=$'\033[0;31m'

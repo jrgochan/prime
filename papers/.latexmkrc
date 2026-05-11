@@ -49,6 +49,7 @@ $warnings_as_errors = 0;     # don't treat warnings as fatal
 # (latexmk auto-detects \usepackage deps, but the relative path
 # ../shared/ needs explicit help)
 ensure_path('TEXINPUTS', '../shared//');
+ensure_path('TEXINPUTS', '../../shared//');
 
 # ═══════════════════════════════════════════════
 # §4. CLEANUP RULES

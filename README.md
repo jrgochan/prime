@@ -249,30 +249,31 @@ results at scale.
 
 ## Documentation Suite
 
-15 companion papers across 6 categories:
+2 core papers + 13 supplementary working drafts:
+
+**Core** (in `papers/core/` — the mathematical claim):
 
 | Paper | Audience | Pages |
 |-------|----------|-------|
-| **Core** | | |
-| `cathedral.tex` | Technical overview | 11 |
+| `cathedral.tex` | Technical overview | 12 |
 | `cathedral-lean.tex` | Lean/ITP community | 6 |
-| **Science** | | |
+
+**Working Drafts** (in `papers/working_drafts/` — speculative & supplementary):
+
+| Paper | Audience | Pages |
+|-------|----------|-------|
 | `cathedral-physics.tex` | Physicists | 37 |
-| `cathedral-ai.tex` | AI/ML researchers | 5 |
+| `cathedral-particle-zoo.tex` | Spectral phenomenology | 10 |
 | `cathedral-experiments.tex` | Experimentalists | 4 |
-| `cathedral-particle-zoo.tex` | **The Particle Zoo** — N=100 to N=10⁹ | 10 |
-| **Applications** | | |
+| `cathedral-ai.tex` | AI/ML researchers | 5 |
 | `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
 | `cathedral-engineering.tex` | Practicing engineers | 5 |
 | `cathedral-frontiers.tex` | Engineering frontiers | 5 |
-| **Humanities** | | |
 | `cathedral-fun.tex` | Primes, physics & numerology | 8 |
 | `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
-| **Public** | | |
 | `cathedral-claude.tex` | Anthropic/Claude reflections | 8 |
 | `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
 | `cathedral-public.tex` | General public | 4 |
-| **Policy** | | |
 | `cathedral-policy.tex` | Policy / governance | 4 |
 
 Build all PDFs:
@@ -294,7 +295,9 @@ All proofs are compiler-verified.
 ```
 prime/
 ├── proofs/          🏛️  THE CATHEDRAL — 227 active Lean files, 102 archived
-├── papers/          📄  15 companion papers (LaTeX + PDF)
+├── papers/          📄  Core proof paper + 13 working drafts
+│   ├── core/                 Flagship paper (cathedral.tex)
+│   └── working_drafts/       Supplementary & speculative papers
 ├── experiments/     🔬  39 Rust experiments (256–512 bit MPFR + DD)
 │   └── archive/              Graduated/superseded experiments
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
