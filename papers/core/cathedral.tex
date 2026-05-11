@@ -3,10 +3,9 @@
 \usepackage{../shared/cathedral-preamble}
 
 \title{%
-  The Cathedral: A Machine-Verified Reduction\\
-  of the Riemann Hypothesis to One Literature Axiom\\[4pt]
-  \large via the Nyman--Beurling Criterion in Lean~4\\[2pt]
-  \normalsize with an Oracle Bridge from Certified Computation%
+  A Formal Reduction of the Riemann Hypothesis\\
+  to One Literature Axiom via the\\
+  Nyman--Beurling Criterion in Lean~4%
 }
 \author{
   Jason Robert Gochanour
@@ -41,11 +40,12 @@ direction to a frequency-domain integral on the critical line,
 bypassing the Vasyunin cotangent formula entirely.
 Four alternative forward paths (Mellin Crown, Perron Crown,
 Renormalization Bridge, Oracle Bridge) provide a multi-path architecture.
-The \emph{Oracle Bridge} (v17) bypasses the literature axiom entirely:
-DD-precision GPU measurements of $v^T G v < 1$ at highly composite
-numbers, imported as trusted Lean axioms, combine with the zero-axiom
-converse to yield \lean{rh\_from\_oracle}: a direct proof of RH from
-certified computation.
+The \emph{Oracle Bridge} (v17) provides a conditional certificate
+that bypasses the literature axiom: DD-precision GPU measurements
+of $v^T G v < 1$ at highly composite numbers, imported as trusted
+Lean axioms, combine with the zero-axiom converse to yield
+\lean{rh\_from\_oracle}, a Flyspeck-style conditional result whose
+trust reduces to the correctness of open-source numerical code.
 Companion Rust experiments (50+ programs, f64--512-bit MPFR--DD
 precision) validate the spectral correspondence to $10^{-17}$
 precision, with the largest certified computation at $N = 55{,}440$.
@@ -108,7 +108,8 @@ The proof decomposes into two pillars:
       \item \textbf{Path D (Oracle Bridge)}: GPU-certified
         $v^T G v < 1$ along HC subsequence $\to$
         monotonicity $\to$ $d_N^2 \to 0$.
-        \textbf{Bypasses \texttt{baez\_duarte\_forward}} entirely.
+        Conditional certificate bypassing \texttt{baez\_duarte\_forward};
+        trust reduces to numerical code correctness.
         1 trusted computation axiom. 0 sorry.
     \end{itemize}
 \end{itemize}
@@ -127,8 +128,8 @@ The proof decomposes into two pillars:
   \item \textbf{A multi-path architecture}: five independent forward
     proofs providing cross-validation.
   \item \textbf{The Oracle Bridge} (Section~\ref{sec:oracle}):
-    a Flyspeck-style proof of RH from GPU-certified computation,
-    bypassing all classical literature axioms.
+    a Flyspeck-style conditional certificate from GPU-certified
+    computation, bypassing classical literature axioms.
   \item \textbf{Five formalization discoveries}
     (Section~\ref{sec:traps}): mathematical traps detected during
     machine verification that would be invisible to informal proof.
@@ -622,17 +623,19 @@ lake build    # 227 active files, 102 archived
 \end{verbatim}
 
 % ================================================================
-\section{The Oracle Bridge: Certified Computation as Proof}
+\section{The Oracle Bridge: A Conditional Certificate from Computation}
 \label{sec:oracle}
 % ================================================================
 
-The Oracle Bridge (v17, May~9, 2026) provides a fifth proof path that
-bypasses \lean{baez\_duarte\_forward} entirely by importing
-GPU-certified bounds as trusted Lean axioms.
+The Oracle Bridge (v17, May~9, 2026) provides a conditional
+certificate that bypasses \lean{baez\_duarte\_forward} by importing
+GPU-certified bounds as trusted Lean axioms. This is not a claim of
+an unconditional proof; it is a Flyspeck-style conditional result
+whose trust reduces to the correctness of open-source numerical code.
 
 \subsection{Architecture}
 
-The Oracle path proves \lean{rh\_from\_oracle} via the chain:
+The Oracle path derives \lean{rh\_from\_oracle} via the chain:
 \begin{center}
 \small
 \begin{tabular}{@{}llp{6cm}@{}}
@@ -741,10 +744,12 @@ distance decays to zero. The biconditional is complete. The converse
 uses \textbf{zero} custom axioms. The forward direction uses
 \textbf{one} axiom on the crown path (B\'aez-Duarte 2003).
 
-The Oracle Bridge provides a complementary result: \lean{rh\_from\_oracle}
-proves the Riemann Hypothesis from trusted GPU computation, bypassing
-the literature axiom entirely. The trust reduces to the correctness of
-open-source Rust code computing DD-precision Gram quadratic forms.
+The Oracle Bridge provides a complementary conditional certificate:
+\lean{rh\_from\_oracle} derives the Riemann Hypothesis from trusted
+GPU computation, bypassing the literature axiom. The trust reduces
+to the correctness of open-source Rust code computing DD-precision
+Gram quadratic forms; this is a Flyspeck-style result, not an
+unconditional proof.
 
 The formalization is not an unconditional proof of the Riemann Hypothesis.
 It is a proof that the Riemann Hypothesis is \emph{exactly as hard as}
