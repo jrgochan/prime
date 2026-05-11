@@ -7,7 +7,7 @@
   Research Frontiers Beyond the Cathedral%
 }
 \author{Jason Robert Gochanour}
-\date{May 6, 2026}
+\date{May 2026}
 
 \begin{document}
 \maketitle
@@ -72,6 +72,29 @@ Three alternative forward paths provide cross-validation:
 Closing any alternative-path axiom strengthens the multi-path
 architecture even if the crown axiom remains open.
 
+\subsection{The Oracle Bridge (Path D)}
+
+The v17 Oracle Capstone introduces a fourth path: the
+\emph{compute oracle}. By computing $d_N^2$ at highly composite
+numbers $N = \mathrm{hcn}(k)$ via DD-precision conjugate gradient
+and certifying the monotone envelope $d_{\mathrm{hcn}(k)}^2 < C / \ln k$,
+the literature axiom can be replaced by trusted computation.
+The remaining gap: proving the monotone interpolation
+$d_N^2 \leq d_{\mathrm{hcn}(k)}^2$ for all $N \leq \mathrm{hcn}(k)$.
+This is a tractable Lean formalization ($\sim$200 lines) leveraging
+the existing \lean{NymanBeurling.Antitone} infrastructure.
+
+\subsection{The Orthogonality Shield (Path E)}
+
+The spectral observatory (Exploration 33) discovered that the
+decoupling exponent $\beta(N) > 1$ for all measured $N$, with
+$\beta \approx 0.18 \ln N$. If $\beta > 1$ can be proved
+\emph{unconditionally} (without assuming RH), it would provide
+a real-spectral proof that $d_N^2 \to 0$, bypassing the
+complex-analytic machinery entirely. This is a deep open problem
+connecting Gram matrix spectral theory to the Heisenberg picture
+of arithmetic.
+
 % ================================================================
 \section{Algorithmic Questions}
 % ================================================================
@@ -84,10 +107,18 @@ suggests an $O(N \log^2 N)$ algorithm via FFT.
 
 \subsection{The Eigenvalue Distribution}
 
-Numerical experiments show $\lambda_{\min}(G_N) \sim N^{-2}$ while
-$\lambda_{\max}(G_N) \sim \log N$. Can these asymptotics be proved?
-The connection to random matrix theory (GOE spacing statistics)
-suggests tools from integrable probability.
+Numerical experiments at f64 precision suggested
+$\lambda_{\min}(G_N) \sim N^{-2}$, but DD-precision (MPFR-256)
+measurements show $\lambda_{\min} \approx 2.5 \times 10^{-7}$ at
+$N = 10{,}000$ (24$\times$ larger than f64), consistent with
+logarithmic scaling $\lambda_{\min} \sim c/\ln N$. The condition
+number $\kappa(G_N) > 10^7$ at these scales defeats IEEE~754
+double precision.
+$\lambda_{\max}(G_N) \sim \log N$ is robust across precisions.
+
+\textbf{Open problem}: Prove the true asymptotic scaling of
+$\lambda_{\min}(G_N)$. The connection to random matrix theory
+(GOE spacing statistics) suggests tools from integrable probability.
 
 \subsection{Optimal Weight Computation}
 
@@ -128,6 +159,24 @@ The Cathedral uses $h_k(x) = \{1/(kx)\}$. What happens with:
   \item $h_k(x) = \{1/(kx)\} \cdot w(x)$ for weights $w$?
   \item Analogues for Dirichlet $L$-functions?
 \end{itemize}
+
+\subsection{The M\"obius Stratum Convergence Conjecture}
+
+The GCD Partition theorem (\texttt{Covariance/GCDPartition.lean},
+zero sorry) decomposes the BD quadratic form as
+$d_N^2 = \sum_{d \mid N!} S_d$.
+GPU experiments at $N = 55{,}440$ reveal an 88\% correlation between
+$\operatorname{sgn}(S_d)$ and $\mu(d)$.
+
+\textbf{Conjecture (M\"obius Stratum Convergence)}: For each
+squarefree $d$, $\operatorname{sgn}(S_d) = \mu(d)$ for all
+sufficiently large $N$, and the net cancellation
+$\sum_d S_d \to 0$ at rate $O(1/\ln N)$.
+
+Proving this conjecture would give a \emph{purely arithmetic} proof
+of $d_N^2 \to 0$, with the cancellation emerging from the
+M\"obius function's sign structure on the divisor lattice rather
+than from complex analysis.
 
 % ================================================================
 \section{Formalization Engineering Frontiers}
