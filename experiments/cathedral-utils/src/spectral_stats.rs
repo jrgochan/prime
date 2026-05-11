@@ -139,22 +139,18 @@ pub fn ratio_pdf_poisson(r: f64) -> f64 {
 // CUMULATIVE DISTRIBUTION FUNCTIONS (numerical integration of surmises)
 // ═══════════════════════════════════════════════════════════════════════
 
-/// CDF of GUE Wigner surmise (numerical integration).
+/// CDF of GUE Wigner surmise (analytic closed-form).
+///
+/// ∫₀ˢ (32/π²) t² exp(-4t²/π) dt = erf(2s/√π) - (4s/π) exp(-4s²/π)
 pub fn cdf_gue(s: f64) -> f64 {
-    let n = 1000;
-    let ds = s / n as f64;
-    let mut v = 0.0;
-    for i in 0..n { v += wigner_gue((i as f64 + 0.5) * ds) * ds; }
-    v.min(1.0)
+    erf_approx(2.0 * s / PI.sqrt()) - (4.0 * s / PI) * (-4.0 * s * s / PI).exp()
 }
 
-/// CDF of GOE Wigner surmise (numerical integration).
+/// CDF of GOE Wigner surmise (analytic closed-form).
+///
+/// ∫₀ˢ (π/2) t exp(-πt²/4) dt = 1 - exp(-πs²/4)
 pub fn cdf_goe(s: f64) -> f64 {
-    let n = 1000;
-    let ds = s / n as f64;
-    let mut v = 0.0;
-    for i in 0..n { v += wigner_goe((i as f64 + 0.5) * ds) * ds; }
-    v.min(1.0)
+    1.0 - (-PI * s * s / 4.0).exp()
 }
 
 /// CDF of GSE Wigner surmise (numerical integration).
