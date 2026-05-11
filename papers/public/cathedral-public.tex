@@ -10,7 +10,7 @@
   \large Means for the Rest of Us%
 }
 \author{Jason Robert Gochanour}
-\date{May 6, 2026}
+\date{May 2026}
 
 \begin{document}
 \maketitle
@@ -75,8 +75,8 @@ of the computer itself.
 
 We used a program called \textbf{Lean~4}, developed at Microsoft
 Research, which has been used to verify proofs in algebra, geometry,
-and analysis. Our proof is 78{,}435 lines long and compiles without
-errors.
+and analysis. Our proof spans $\sim$60{,}500 lines across 227 active
+files and compiles without errors.
 
 % ================================================================
 \section{What Remains}
@@ -148,9 +148,9 @@ fact.
     distance measurement going to zero.
   \item \textbf{Who}: Jason Robert Gochanour with Google's Gemini
     and Anthropic's Claude.
-  \item \textbf{How long}: 42 days, March--May 2026.
-  \item \textbf{Size}: 78{,}435 lines of verified proof code,
-    48+ computational experiments.
+  \item \textbf{How long}: 45 days, March--May 2026.
+  \item \textbf{Size}: $\sim$60{,}500 lines of verified proof code
+    (227 active files), 50+ computational experiments.
   \item \textbf{What it is NOT}: A proof of the Riemann Hypothesis.
   \item \textbf{What it IS}: A machine-verified reduction to one
     standard analytic result.
@@ -180,7 +180,7 @@ The entire proof is open source. To check it yourself:
 \begin{enumerate}
   \item Install Lean~4 (\url{https://leanprover.github.io}).
   \item Clone the repository.
-  \item Run \texttt{cd proofs \&\& lake build}.
+  \item Run \texttt{cd proofs \&\& lake build Cathedral}.
   \item If it compiles: the proof is correct.
 \end{enumerate}
 
