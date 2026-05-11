@@ -8,7 +8,7 @@
   to Energy, Security, and Signal Processing%
 }
 \author{Jason Robert Gochanour}
-\date{May 6, 2026}
+\date{May 2026}
 
 \begin{document}
 \maketitle
@@ -172,11 +172,59 @@ computation pipeline:
 \end{enumerate}
 
 The DD-precision pipeline is the key engineering advance of
-the Observatory Edition (v16). At condition numbers exceeding
+the Oracle Capstone Edition (v17). At condition numbers exceeding
 $10^{15}$, f64 arithmetic produces non-physical results; the
 DD solver recovers 31 digits of precision at only $2\times$ cost.
 This has direct implications for industrial monitoring systems
 that must distinguish genuine instability from numerical artifacts.
+
+\subsection{The HPDF Pipeline}
+
+The High-Precision Dense Format (HPDF) pipeline, built for the Oracle
+Capstone (v17), is a reusable engineering pattern:
+\begin{enumerate}
+  \item \texttt{moebius-microscope} builds HPDF tensors on GPU (CUDA)
+    with MPFR-256 entries split into (hi, lo) f64 pairs.
+  \item \texttt{hc-gram-oracle} consumes HPDF tensors for DD-precision
+    matrix-vector products via the Dekker--Knuth error-free transform.
+  \item Results are exported as JSON certificates with SHA-256 provenance.
+\end{enumerate}
+
+This pipeline is applicable to any problem where f64 is insufficient
+but full arbitrary-precision is too slow: lattice reduction, quantum
+chemistry matrix diagonalization, and financial risk correlation
+matrices all encounter the same $\kappa > 10^6$ precision wall.
+
+\subsection{GCD-Stratified Computation}
+
+The GCD Partition theorem (\texttt{Covariance/GCDPartition.lean})
+decomposes the Gram quadratic form into per-GCD strata:
+$v^T G v = \sum_{d \mid N!} S_d$.
+This enables \emph{stratum-parallel} computation: each stratum
+collects pairs $(j,k)$ with $\gcd(j,k) = d$, and the strata are
+independent. For highly composite $N$, the stratum decomposition
+reduces an $O(N^2)$ dense matvec to $O(d(N) \cdot N)$ structured
+sums, where $d(N)$ is the divisor count.
+
+Engineering applications include any structured matrix with
+GCD coupling: lattice field theories, discrete Fourier analysis
+on non-uniform grids, and number-theoretic transform optimization.
+
+\subsection{The Flyspeck-Style Oracle Architecture}
+
+The \texttt{IntervalVerifier.lean} $\to$ \texttt{OracleCertificates.lean}
+pipeline provides a reusable pattern for bridging GPU computation to
+formal proof. The architecture cleanly separates:
+\begin{itemize}
+  \item \textbf{Heavy computation}: Rust/CUDA, heuristic, auditable.
+  \item \textbf{Formal logic}: Lean~4, machine-verified, axiomatic.
+  \item \textbf{Interface}: JSON certificates with explicit trust
+    boundaries.
+\end{itemize}
+This pattern is applicable wherever the cost of kernel-level
+verification exceeds the cost of trusted external computation:
+cryptographic parameter selection, safety-critical control systems,
+and certified numerical linear algebra.
 
 % ================================================================
 \section{Conclusion}
