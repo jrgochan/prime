@@ -2,6 +2,10 @@
  * Cathedral Proof Map — dependency graph data for the Crown Theorem
  * visualization. Each node is a theorem or axiom; edges represent
  * proof dependencies.
+ *
+ * Updated: v16 One-Pillar Cathedral (May 2026)
+ * Crown axiom: baez_duarte_forward (sole non-kernel axiom)
+ * Axiom footprint: [baez_duarte_forward, propext, Classical.choice, Quot.sound]
  */
 
 import type { VizGroup } from "../engine/types";
@@ -28,7 +32,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     leanFile: "Assembly/MainChain.lean",
     status: "proved",
     group: "crown",
-    description: "Nyman-Beurling equivalence: The Riemann Hypothesis is equivalent to the distance decay in L²(0,1).",
+    description: "Nyman-Beurling equivalence: The Riemann Hypothesis is equivalent to the distance decay in L²(0,1). Zero sorry.",
   },
   {
     id: "bd_fwd",
@@ -88,6 +92,14 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     group: "analysis",
     description: "Decomposition of b_N into rank-1 + remainder.",
   },
+  {
+    id: "vasyunin",
+    label: "Vasyunin Assembly",
+    leanFile: "Vasyunin/Cotangent/VasyuninAssembly.lean",
+    status: "proved",
+    group: "analysis",
+    description: "Vasyunin cotangent closed form via digamma. Zero axioms.",
+  },
 
   // ── Arithmetic ──
   {
@@ -96,7 +108,7 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     leanFile: "Perron/MertensFromPerron.lean",
     status: "proved",
     group: "arithmetic",
-    description: "RH → |M(x)| ≤ Cx^{3/4}. 16-file chain.",
+    description: "RH → |M(x)| ≤ Cx^{3/4}. 16-file chain. Zero sorry.",
   },
   {
     id: "abel_s1",
@@ -104,15 +116,15 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     leanFile: "AbelTail/Assembly.lean",
     status: "proved",
     group: "arithmetic",
-    description: "First PNT moment. Zero axioms.",
+    description: "First PNT moment. Proved via Abel summation engine.",
   },
   {
-    id: "pnt",
-    label: "PNT via Selberg",
-    leanFile: "PNT/Bridge.lean",
+    id: "mellin",
+    label: "Mellin Bridge",
+    leanFile: "MellinBridge/MertensBound.lean",
     status: "proved",
     group: "arithmetic",
-    description: "Prime Number Theorem via Selberg symmetry formula.",
+    description: "Connects Mertens x^{3/4} bound to L² decay via Mellin transform.",
   },
 
   // ── Kernel (Lean built-in axioms) ──
@@ -125,12 +137,12 @@ export const CATHEDRAL_NODES: ProofNode[] = [
     description: "Propositional extensionality (Lean kernel axiom).",
   },
   {
-    id: "quot_mk",
-    label: "Quot.mk",
+    id: "quot_sound",
+    label: "Quot.sound",
     leanFile: "Lean kernel",
     status: "kernel",
     group: "spectral",
-    description: "Quotient type constructor (Lean kernel axiom).",
+    description: "Quotient soundness (Lean kernel axiom).",
   },
   {
     id: "choice",
@@ -143,27 +155,28 @@ export const CATHEDRAL_NODES: ProofNode[] = [
 ];
 
 export const CATHEDRAL_EDGES: ProofEdge[] = [
-  // Crown depends on
+  // Crown depends on the single axiom + analysis chain
   { from: "nbe", to: "bd_fwd" },
   { from: "nbe", to: "parseval" },
   { from: "nbe", to: "rank1" },
   { from: "nbe", to: "spectral" },
+  { from: "nbe", to: "perron" },
 
   // Analysis chain
   { from: "parseval", to: "mvt" },
   { from: "mvt", to: "hilbert" },
   { from: "rank1", to: "gram" },
   { from: "spectral", to: "gram" },
+  { from: "gram", to: "vasyunin" },
 
   // Arithmetic chain
-  { from: "nbe", to: "perron" },
-  { from: "perron", to: "abel_s1" },
-  { from: "abel_s1", to: "pnt" },
+  { from: "perron", to: "mellin" },
+  { from: "mellin", to: "abel_s1" },
 
-  // Kernel dependencies
+  // Kernel dependencies (all modules depend on these)
   { from: "parseval", to: "propext" },
   { from: "gram", to: "choice" },
-  { from: "pnt", to: "quot_mk" },
+  { from: "abel_s1", to: "quot_sound" },
 ];
 
 /**
@@ -173,31 +186,32 @@ export const CATHEDRAL_EDGES: ProofEdge[] = [
 export function computeGraphLayout(): Map<string, { x: number; y: number }> {
   const positions = new Map<string, { x: number; y: number }>();
 
-  // Manual tree layout (root at top)
+  // Crown (root at top)
   positions.set("nbe", { x: 400, y: 40 });
 
-  // Crown axiom (single)
-  positions.set("bd_fwd", { x: 400, y: 140 });
+  // Crown axiom (single pillar)
+  positions.set("bd_fwd", { x: 200, y: 140 });
 
   // Analysis row
-  positions.set("parseval", { x: 120, y: 240 });
-  positions.set("rank1", { x: 320, y: 240 });
+  positions.set("parseval", { x: 100, y: 240 });
+  positions.set("rank1", { x: 300, y: 240 });
   positions.set("spectral", { x: 480, y: 240 });
   positions.set("perron", { x: 680, y: 240 });
 
   // Deep analysis
-  positions.set("mvt", { x: 80, y: 340 });
-  positions.set("hilbert", { x: 80, y: 420 });
-  positions.set("gram", { x: 400, y: 340 });
+  positions.set("mvt", { x: 60, y: 340 });
+  positions.set("hilbert", { x: 60, y: 420 });
+  positions.set("gram", { x: 390, y: 340 });
+  positions.set("vasyunin", { x: 390, y: 420 });
 
   // Arithmetic
-  positions.set("abel_s1", { x: 680, y: 340 });
-  positions.set("pnt", { x: 680, y: 420 });
+  positions.set("mellin", { x: 680, y: 340 });
+  positions.set("abel_s1", { x: 680, y: 420 });
 
   // Kernel
-  positions.set("propext", { x: 160, y: 500 });
-  positions.set("choice", { x: 400, y: 500 });
-  positions.set("quot_mk", { x: 640, y: 500 });
+  positions.set("propext", { x: 140, y: 520 });
+  positions.set("choice", { x: 390, y: 520 });
+  positions.set("quot_sound", { x: 640, y: 520 });
 
   return positions;
 }

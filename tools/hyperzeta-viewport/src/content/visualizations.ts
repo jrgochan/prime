@@ -655,14 +655,14 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     icon: "♨️",
     hotkey: "D",
     color: { core: "#ffaa00", edge: "#663300" },
-    equation: { main: "C = 1/(2+γ-ln4π) ≈ 21.65", sub: "inverse heat capacity of the prime gas" },
-    description: "The Báez-Duarte constant: spectral holes of ζ and the Rayleigh quotient convergence.",
+    equation: { main: "d²_N · ln(N) → C ≈ 0.30", sub: "Nyman-Beurling distance scaling" },
+    description: "The Báez-Duarte scaling product: d²_N · ln(N) converges to a constant, certifying the decay rate.",
     cards: [
-      { title: "The Constant", body: "Q_N/logN → C ≈ 21.65. This is the maximum information extraction rate from the prime number noise through the spectral holes of |ζ(1/2+it)|²." },
+      { title: "The Constant", body: "d²_N · ln(N) → C ≈ 0.30. The distance d²_N decays as C/logN under RH. This scaling product stabilizes, confirming the optimal convergence rate of the Nyman-Beurling basis approximation." },
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "arithmetic", renderer: "chart", dataTier: "precomputed",
-    experimentSource: "gram-oracle",
+    experimentSource: "l2-decay-certificate",
     showsParticleSlider: false,
   },
   {
@@ -679,7 +679,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "analysis", renderer: "surface", dataTier: "precomputed",
-    experimentSource: "gram-matrix",
+    experimentSource: "gram-pointwise",
     proof: { leanFile: "Vasyunin/Matrix/GramPSD.lean", status: "proved" },
     showsParticleSlider: false,
   },
@@ -733,8 +733,7 @@ export const VISUALIZATIONS: VisualizationMode[] = [
     ],
     wasmMode: 0, usesOutputBuffer: false,
     group: "arithmetic", renderer: "particles", dataTier: "live",
-    experimentSource: "rotor-spectroscopy",
-    proof: { leanFile: "Rotors/GallagherPartition.lean", status: "proved" },
+    proof: { leanFile: "Defs.lean", status: "proved" },
   },
 ];
 
