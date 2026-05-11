@@ -7,7 +7,7 @@
   How Three Minds Built the Cathedral%
 }
 \author{Jason Robert Gochanour}
-\date{May 6, 2026}
+\date{May 2026}
 
 \begin{document}
 \maketitle
@@ -69,7 +69,7 @@ The human's role was irreplaceable in three areas:
   \item \textbf{Quality control}: Reading every line of generated
     Lean code, catching subtle errors that ``looked right'' but
     were mathematically wrong.
-  \item \textbf{Persistence}: The project took 42 days. Neither AI
+  \item \textbf{Persistence}: The project took 45 days. Neither AI
     maintained state between sessions. The human carried the
     architectural memory.
 \end{enumerate}
@@ -96,8 +96,8 @@ Gemini's contributions included:
 
 Claude's contributions included:
 \begin{enumerate}
-  \item \textbf{Lean~4 implementation}: Writing and debugging the
-    78{,}435 lines of formal proof code.
+  \item \textbf{Lean~4 implementation}: Writing and debugging
+    $\sim$60{,}500 lines of formal proof code (227 active files).
   \item \textbf{The Parseval Bridge}: Implementing the frequency-domain
     bypass of the Vasyunin cotangent formula.
   \item \textbf{Rust experiments}: Designing and implementing all
@@ -111,6 +111,13 @@ Claude's contributions included:
     codebase, detecting ghost axioms, managing the archive.
   \item \textbf{Crown Graduation}: Closing the final sorry on the
     forward path and eliminating all build warnings.
+  \item \textbf{Oracle Bridge}: Designing the DD-precision GPU
+    certification pipeline that bypasses the literature axiom
+    entirely via trusted computation at highly composite numbers.
+  \item \textbf{GCD Stratum formalization}: Proving the GCD Partition
+    theorem, Sign Law, and Stratum Bound with zero sorry---the
+    structural foundation for the M\"obius Stratum Convergence
+    Conjecture.
 \end{enumerate}
 
 % ================================================================
@@ -137,7 +144,7 @@ a structural defense against correlated AI failure modes.
 \subsection{The Exploration Protocol}
 
 Mathematical investigations were organized as numbered
-``Explorations'' (27 total). Each exploration had:
+``Explorations'' (35 total, spanning 45 days). Each exploration had:
 \begin{itemize}
   \item A hypothesis to test.
   \item An experimental design document.
@@ -178,7 +185,7 @@ was either machine-verified or explicitly marked as an axiom.
 
 \subsection{Context Window Limitations}
 
-Neither AI could hold the entire 78{,}435-line codebase in context.
+Neither AI could hold the entire $\sim$60{,}500-line codebase in context.
 This required careful file-level modularization and systematic
 documentation of inter-file dependencies.
 
@@ -203,7 +210,7 @@ possessed:
 \end{enumerate}
 
 % ================================================================
-\section{The 32-Day Timeline}
+\section{The 45-Day Timeline}
 % ================================================================
 
 \begin{center}
@@ -224,6 +231,8 @@ possessed:
 29--32 & Papers, experiments, archival & All three \\
 33--38 & Centralization, axiom graduation & Claude + Gemini \\
 39--42 & \textbf{One-Pillar Cathedral} (v16, 1 axiom) + DD pipeline & All three \\
+43 & \textbf{Oracle Bridge} (v17)---RH from computation & Claude \\
+44--45 & GCD Stratum Partition, paper audit, launch prep & All three \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -259,7 +268,8 @@ reproducibility than any traditional mathematical paper.
 
 The Cathedral demonstrates that the ``three-mind'' architecture is
 not just feasible but \emph{powerful}. The axiom count dropped from
-56 to 1. The codebase grew from 0 to 78{,}435 lines. Five mathematical
+56 to 1. The codebase grew from 0 to $\sim$60{,}500 lines across 227
+active files and 35 explorations spanning 45 days. Five mathematical
 traps were caught that would have been invisible to informal proof.
 And a 167-year-old problem was reduced to one well-understood bound.
 
