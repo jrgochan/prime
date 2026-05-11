@@ -81,8 +81,9 @@ The Crown Graduation (Exploration~17, April~28) closed the
 \lean{crown\_graduation\_target} sorry, proving the forward chain
 RH $\to$ Mertens $\to$ L\textsuperscript{2} decay $\to$ Parseval $\to$
 Mellin variance is a continuous, compiler-verified logical chain
-with zero sorry, zero warning, and zero error across all 324 active files
-and 83,567 lines of formal logic.
+with zero sorry on the primary crown path
+across 227 active files ($\sim$60{,}500 lines) of formal logic
+(330 files and $\sim$85{,}000 lines including archived explorations).
 This correspondence is not metaphorical---it is structural, reflecting
 a deep identity between number theory and quantum physics that the
 formalization makes precise.
@@ -1305,12 +1306,12 @@ of the Riemann Hypothesis across the computational observatory.
 The Cathedral's Perron infrastructure---the deepest mechanized proof chain
 in the project---is now \textbf{fully complete (0 sorry, 0 axiom, April~24, 2026)}.
 The chain spans 16 files and is entirely certified:
-kernel bounds (\lean{PerronKernel.lean}), rectangle contour
+kernel bounds (\lean{Perron/KernelBound.lean}), rectangle contour
 (\lean{Perron/Rectangle.lean}), residue computation
 (\lean{Perron/ResidueGtOne.lean}), the Dirichlet series identity
-$1/\zeta(s) = \sum \mu(n)/n^s$ (\lean{DirichletZetaInverse.lean}),
-the half-integer assembly (\lean{HalfIntegerPerron.lean}), and the
-contour shift to $\re s = 1/2 + \varepsilon$ (\lean{PerronMoebius.lean}).
+$1/\zeta(s) = \sum \mu(n)/n^s$ (\lean{Zeta/DirichletInverse.lean}),
+the half-integer assembly (\lean{Perron/HalfIntegerPerron.lean}), and the
+contour shift to $\re s = 1/2 + \varepsilon$ (\lean{Perron/PerronMoebius.lean}).
 
 \begin{principle}[The Perron Formula as Inverse Laplace Transform]
 The Perron formula
@@ -1342,7 +1343,7 @@ lemma} for the zeta scattering amplitude.
 \subsection{The Quantitative Perron Assembly (Proved April~24)}
 
 The central theorem \lean{truncated\_perron\_half\_integer}
-(\\lean{HalfIntegerPerron.lean}) assembles the quantitative bound:
+(\lean{Perron/HalfIntegerPerron.lean}) assembles the quantitative bound:
 for a half-integer $X = m + 1/2$ with $m \geq 2$, $c > 1$, and $T > 0$,
 \[
   \left\| M(X) - \frac{1}{2\pi} \int_{-T}^{T}
@@ -1479,10 +1480,10 @@ The Cathedral theorem \lean{zeta\_polynomial\_lower\_bound\_rh} is now
 fully proved (April~24, 2026) via a two-layer architecture:
 \begin{itemize}
   \item \textbf{Large exponents} ($A \geq B_\varepsilon$): the BC inner bound
-    suffices directly. Proved in \lean{ZetaLowerBound.lean}.
+    suffices directly. Proved in \lean{Zeta/LowerBound.lean}.
   \item \textbf{Small exponents} ($A < B_\varepsilon$): delegated to the
     Hadamard Three-Circles theorem via a zero-counting argument
-    (\lean{ZetaHadamard.lean}).
+    (\lean{Zeta/Hadamard.lean}).
 \end{itemize}
 \end{principle}
 
@@ -1697,7 +1698,7 @@ $1 - b^Tv$ decomposition & Thermodynamic hierarchy & \lean{CalcBounds.lean} \tex
 \midrule
 \multicolumn{3}{@{}l@{}}{\emph{Perron Chain (Inverse Laplace, \S\ref{sec:perron})}} \\
 \midrule
-Perron contour integral & Inverse Laplace transform & \lean{PerronKernel.lean} \textbf{(proved)} \\
+Perron contour integral & Inverse Laplace transform & \lean{Perron/KernelBound.lean} \textbf{(proved)} \\
 Perron half-integer assembly & Quantitative inverse Laplace & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
 Born--Oppenheimer $\|M-A_N\|+\|A_N-B\|$ & Fast/slow mode separation & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
 Archimedean $N$ choice & Adaptive UV regularization & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
@@ -1707,8 +1708,8 @@ Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangl
 \multicolumn{3}{@{}l@{}}{\emph{Analytic Tools}} \\
 \midrule
 Borel--Carath\'eodory & Maximum entropy principle & \lean{(Mathlib)} \\
-Hadamard Three-Circles & Open-closed / conformal gauge & \lean{ZetaHadamard.lean} \textbf{(proved)} \\
-Zero-counting axiom & Weyl law / spectral density & \lean{ZetaHadamard.lean} \textbf{(axiom)} \\
+Hadamard Three-Circles & Open-closed / conformal gauge & \lean{Zeta/Hadamard.lean} \textbf{(proved)} \\
+Zero-counting axiom & Weyl law / spectral density & \lean{Zeta/Hadamard.lean} \textbf{(axiom)} \\
 $|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
 RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
 $C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} \\
@@ -1729,7 +1730,7 @@ Entries marked \textbf{(proved)} denote theorems with zero sorry;
 alternative paths achieve the same result with two to four axioms;
 the Oracle Bridge achieves RH with one trusted computation axiom.
 The forward chain from RH to $d_N^2 \to 0$ is now a continuous,
-compiler-verified logical chain with zero sorry and zero warning.
+compiler-verified logical chain with zero sorry on the crown path.
 Every mathematical equation in the proof corresponds to a physical
 concept, and this correspondence is not metaphorical but structural.}
 \label{tab:dictionary}
@@ -1917,7 +1918,8 @@ was closed by recognizing that \lean{critical\_line\_mellin\_variance\_proved}
 already provided the exact type signature. The HilbertInequality simp warning
 was resolved by removing an unused \texttt{Complex.ofReal\_re} argument.
 The entire forward chain is now a continuous, machine-checked path with
-zero sorry and zero warning.
+zero sorry on the crown path. Exploratory paths contain $\sim$105
+quarantined \texttt{sorry} placeholders that do not affect the crown theorem.
 
 % ================================================================
 % Oracle Bridge Section (content in sections/oracle-bridge.tex)
@@ -2302,9 +2304,9 @@ Proof paths to RH & \textbf{5} \\
 Physical domains covered & 9 \\
 Cathedral Lean modules referenced & 55+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 324 \\
-Active lines of code & 83,567 \\
-Theorem/lemma declarations & 1,500+ \\
+Active Lean files & 227 (330 incl.\ archive) \\
+Active lines of code & $\sim$60{,}500 ($\sim$85{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$2{,}000 \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\
