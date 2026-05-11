@@ -1699,10 +1699,10 @@ $1 - b^Tv$ decomposition & Thermodynamic hierarchy & \lean{CalcBounds.lean} \tex
 \multicolumn{3}{@{}l@{}}{\emph{Perron Chain (Inverse Laplace, \S\ref{sec:perron})}} \\
 \midrule
 Perron contour integral & Inverse Laplace transform & \lean{Perron/KernelBound.lean} \textbf{(proved)} \\
-Perron half-integer assembly & Quantitative inverse Laplace & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
-Born--Oppenheimer $\|M-A_N\|+\|A_N-B\|$ & Fast/slow mode separation & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
-Archimedean $N$ choice & Adaptive UV regularization & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
-$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{HalfIntegerPerron.lean} \textbf{(proved)} \\
+Perron half-integer assembly & Quantitative inverse Laplace & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
+Born--Oppenheimer $\|M-A_N\|+\|A_N-B\|$ & Fast/slow mode separation & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
+Archimedean $N$ choice & Adaptive UV regularization & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
+$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{Perron/HalfIntegerPerron.lean} \textbf{(proved)} \\
 Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangle.lean} \textbf{(proved)} \\
 \midrule
 \multicolumn{3}{@{}l@{}}{\emph{Analytic Tools}} \\
@@ -1710,8 +1710,8 @@ Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangl
 Borel--Carath\'eodory & Maximum entropy principle & \lean{(Mathlib)} \\
 Hadamard Three-Circles & Open-closed / conformal gauge & \lean{Zeta/Hadamard.lean} \textbf{(proved)} \\
 Zero-counting axiom & Weyl law / spectral density & \lean{Zeta/Hadamard.lean} \textbf{(axiom)} \\
-$|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
-RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{ZetaConvexity.lean} \textbf{(proved)} \\
+$|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{Zeta/Convexity.lean} \textbf{(proved)} \\
+RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{Zeta/Convexity.lean} \textbf{(proved)} \\
 $C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} \\
 $c_{\text{holes}} \approx 0.046$ & Casimir energy / sum rule & --- \\
 $\theta(t)$ functional equation & Modular invariance & \lean{ThetaBound.lean} \\
@@ -2216,7 +2216,10 @@ Convergence axiom & Ergodic hypothesis & \lean{ConvergenceAxioms.lean} & axiom &
 $V(a,b) = \sum\fract{mb/a}\cot(\pi m/a)$ & Scattering phase shift & \lean{FormulaBridge.lean} & proved & \ref{sec:vasyunin} \\
 Dedekind reciprocity & Time-reversal invariance & \lean{LogDigammaBridge.lean} & axiom & \ref{sec:vasyunin} \\
 Uniqueness of limits & Ergodic = thermodynamic & \lean{LogDigammaBridge.lean} & proved & \ref{sec:vasyunin} \\
-GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{GCDReduction.lean} & proved & \ref{sec:vasyunin} \\
+GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{Vasyunin/Cotangent/GCDReduction.lean} & proved & \ref{sec:vasyunin} \\
+GCD stratum partition & Inclusion-exclusion decomposition & \lean{Covariance/GCDPartition.lean} & proved & --- \\
+M\"obius sign law & Stratum sign $\to$ $\mu(d)$ & \lean{Covariance/GCDSignLaw.lean} & proved & --- \\
+GCD stratum bound $|S_d| \leq C/d^2$ & Per-sector vacuum bound & \lean{Covariance/GCDStratumBound.lean} & proved & --- \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -2230,9 +2233,9 @@ GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{GCDReduction.lea
 \textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
 \midrule
 Perron contour integral & Inverse Laplace transform & \lean{Perron/*.lean} & proved & \ref{sec:perron} \\
-Born--Oppenheimer split & Fast/slow mode separation & \lean{HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
-Archimedean $N$ choice & Adaptive UV regularization & \lean{HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
-$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+Born--Oppenheimer split & Fast/slow mode separation & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+Archimedean $N$ choice & Adaptive UV regularization & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
 Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangle.lean} & proved & \ref{sec:perron} \\
 Horizontal contour vanishing & Riemann--Lebesgue lemma & \lean{Perron/Rectangle.lean} & proved & \ref{sec:perron} \\
 Borel--Carath\'eodory & Maximum entropy principle & \lean{(Mathlib)} & proved & \ref{sec:bc} \\
