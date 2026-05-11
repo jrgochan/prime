@@ -19,7 +19,7 @@ use crate::gpu::PairResult;
 // Helper functions
 // ────────────────────────────────────────────────
 
-fn frac_part(x: f64) -> f64 { x - x.floor() }
+use cathedral_utils::arith::frac_part;
 
 /// Digamma via asymptotic expansion + recurrence (matches CUDA kernel)
 fn digamma_cpu(mut x: f64) -> f64 {

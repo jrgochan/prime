@@ -2,10 +2,12 @@
 //!  Octonion Encoding for Prime Factorizations
 //!
 //!  Maps integers to unit octonions via their prime factorization:
-//!    k → ∏ e_{basis(p)} for each prime factor p of k
+//!    k → ∏ e_{basis(p)} for each prime factor p of k (left-fold)
 //!
-//!  This encoding embeds the multiplicative structure of ℤ into the
-//!  8-dimensional normed division algebra 𝕆, enabling the Cathedral's
+//!  This encoding maps the multiplicative structure of ℤ into the
+//!  8-dimensional normed division algebra 𝕆. Because 𝕆 is non-associative,
+//!  the map is not a strict homomorphism but provides a deterministic,
+//!  unique point on S⁷ for each integer, enabling the Cathedral's
 //!  algebraic cross-class analysis and decorrelation studies.
 //! ═══════════════════════════════════════════════════════════════════════════
 
@@ -99,8 +101,13 @@ pub fn prime_factors(mut n: usize) -> Vec<usize> {
 /// Map a positive integer to a unit octonion via its prime factorization.
 ///
 /// `int_to_octonion(k)` = ∏ e_{basis(p)} for each prime factor p of k,
-/// then normalized to unit norm. This embeds the multiplicative structure
-/// of ℤ into the unit sphere S⁷ ⊂ 𝕆.
+/// evaluated strictly left-to-right in ascending prime order.
+///
+/// **Non-associativity note:** Because the octonions are non-associative,
+/// this mapping is not a homomorphism; `f(a·b) = f(a)·f(b)` holds only
+/// up to a sign (due to the alternating associator). However, the ordered
+/// left-fold over sorted prime factors ensures every integer maps to a
+/// deterministic, unique point on the unit sphere S⁷ ⊂ 𝕆.
 ///
 /// # Examples
 /// - `int_to_octonion(1) = (1, 0, 0, 0, 0, 0, 0, 0)` (identity)

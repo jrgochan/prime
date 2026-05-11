@@ -18,7 +18,7 @@
 //!  Created: May 2, 2026 (Exploration 24 — The Octonion Connection v2)
 //! ══════════════════════════════════════════════════════════════════════
 
-use cathedral_utils::arith::{self, Kahan};
+use cathedral_utils::arith::{self, frac_part, Kahan};
 use cathedral_utils::gram;
 use cathedral_utils::spectral;
 use rayon::prelude::*;
@@ -30,9 +30,6 @@ use std::time::Instant;
 
 /// Parallel chunk size for quadrature reduction.
 const QUAD_CHUNK: usize = 4096;
-
-#[inline(always)]
-fn frac_part(x: f64) -> f64 { x - x.floor() }
 
 /// Ensure the results directory exists and return its path.
 fn results_dir() -> PathBuf {
