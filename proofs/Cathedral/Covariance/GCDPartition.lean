@@ -25,7 +25,7 @@
   equal the sum of their GCD strata.
 
   Created: May 10, 2026
-  Status: Structural — PROVED (zero sorry).
+  Status: Structural — PROVED (zero admitted steps).
 -/
 
 import Cathedral.Defs

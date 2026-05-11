@@ -4,7 +4,7 @@
   ## The Möbius Sign Law for GCD Strata
 
   Created: May 10, 2026
-  Status: All theorems PROVED. Zero sorry in this file.
+  Status: All theorems PROVED. Zero admitted steps in this file.
 -/
 
 import Cathedral.Covariance.GCDPartition

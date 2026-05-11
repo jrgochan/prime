@@ -15,8 +15,9 @@
 | Files with sorry | **53** (23%) |
 | Total sorry instances | **~105** (including PNTA inherited) |
 | Total custom axioms | **75** |
+| — **On primary crown path** | **1** (`baez_duarte_forward`) |
 | — Oracle axioms (computational) | 24 |
-| — Mathematical axioms | 51 |
+| — Mathematical axioms (off-path) | 50 |
 
 ---
 
@@ -250,12 +251,11 @@ The primary export `nyman_beurling_equivalence` uses only `baez_duarte_forward` 
 | `Covariance/MertensBridge.lean` | 1* | PNTA bridge (off-by-one) |
 | `Covariance/EulerProduct.lean` | 1 | Mertens Third (bridged) |
 | `Covariance/CovarianceAbel.lean` | 4 | Abel summation bounds |
-| `Covariance/GCDSignLaw.lean` | 0** | GCD sign law **PROVED ★** |
-| `Covariance/GCDPartition.lean` | 0** | GCD partition **PROVED ★** |
-| `Covariance/GCDStratumBound.lean` | 0** | Stratum bounds **PROVED ★** |
+| `Covariance/GCDSignLaw.lean` | 0 | GCD sign law **PROVED ★** |
+| `Covariance/GCDPartition.lean` | 0 | GCD partition **PROVED ★** |
+| `Covariance/GCDStratumBound.lean` | 0 | Stratum bounds **PROVED ★** |
 
-\* The MertensBridge sorry is a mechanical filter conversion (ℝ→ℕ), not a mathematical gap.  
-\*\* Some of these files have `sorry` in comments but not in proofs; marked as structurally proved.
+\* The MertensBridge sorry is a mechanical filter conversion (ℝ→ℕ), not a mathematical gap.
 
 ---
 
