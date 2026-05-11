@@ -922,25 +922,37 @@ but represents an intellectual horizon that the spectral discoveries point towar
 
 ## Documentation Suite
 
-15 companion papers across 6 categories:
+2 core papers (included in the public repository) + 13 working drafts
+(available on request).
 
-| Paper | Directory | Audience |
-|-------|-----------|----------|
-| `cathedral.tex` | `core/` | Technical overview (11 pp) |
-| `cathedral-lean.tex` | `core/` | Lean/ITP community (6 pp) |
-| `cathedral-physics.tex` | `science/` | Physicists (29 pp) |
-| `cathedral-ai.tex` | `science/` | AI/ML researchers (5 pp) |
-| `cathedral-experiments.tex` | `science/` | Experimentalists (4 pp) |
-| `cathedral-particle-zoo.tex` | `science/` | **The Particle Zoo** (10 pp) |
-| `cathedral-dualuse.tex` | `applications/` | Dual-use risk assessment (15 pp) |
-| `cathedral-engineering.tex` | `applications/` | Practicing engineers (4 pp) |
-| `cathedral-frontiers.tex` | `applications/` | Engineering frontiers (4 pp) |
-| `cathedral-fun.tex` | `humanities/` | Primes, physics & numerology (8 pp) |
-| `cathedral-philosophy.tex` | `humanities/` | Philosophers of mathematics (4 pp) |
-| `cathedral-claude.tex` | `public/` | Anthropic/Claude reflections (6 pp) |
-| `cathedral-gemini.tex` | `public/` | DeepMind/Gemini reflections (4 pp) |
-| `cathedral-public.tex` | `public/` | General public (4 pp) |
-| `cathedral-policy.tex` | `policy/` | Policy / governance (4 pp) |
+### Core Papers (in `papers/core/`)
+
+| Paper | Audience | Pages |
+|-------|----------|-------|
+| `cathedral.tex` | Technical overview — the mathematical claim | 12 |
+| `cathedral-lean.tex` | Lean/ITP community — foundations & practice | 6 |
+
+### Working Drafts (available on request)
+
+The following supplementary papers explore speculative connections,
+experimental methodology, and broader implications. They are not
+included in the public repository but are available from the author.
+
+| Paper | Audience | Pages |
+|-------|----------|-------|
+| `cathedral-physics.tex` | Physicists | 29 |
+| `cathedral-particle-zoo.tex` | Spectral phenomenology | 10 |
+| `cathedral-experiments.tex` | Experimentalists | 4 |
+| `cathedral-ai.tex` | AI/ML researchers | 5 |
+| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
+| `cathedral-engineering.tex` | Practicing engineers | 5 |
+| `cathedral-frontiers.tex` | Engineering frontiers | 5 |
+| `cathedral-fun.tex` | Primes, physics & numerology | 8 |
+| `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
+| `cathedral-claude.tex` | Anthropic/Claude reflections | 8 |
+| `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
+| `cathedral-public.tex` | General public | 4 |
+| `cathedral-policy.tex` | Policy / governance | 4 |
 
 ---
 

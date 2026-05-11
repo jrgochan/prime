@@ -144,7 +144,7 @@ Sorry:          0 on crown paths (17 off-path)
 Errors:         0
 Lines:          ~60,500 (Cathedral), ~130K (full proofs/)
 Theorems:       1,757 proved (verified by grep)
-Papers:         15 LaTeX (core, science, applications, humanities, public, policy)
+Papers:         2 core (included) + 13 working drafts (on request)
 Experiments:    39 Rust/MPFR/DD (256–512 bit + DD 31-digit precision)
 Release:        oracle-capstone (v17, Dual Crown)
 ```
@@ -249,7 +249,7 @@ results at scale.
 
 ## Documentation Suite
 
-2 core papers + 13 supplementary working drafts:
+2 core papers (included) + 13 working drafts (available on request):
 
 **Core** (in `papers/core/` — the mathematical claim):
 
@@ -258,27 +258,15 @@ results at scale.
 | `cathedral.tex` | Technical overview | 12 |
 | `cathedral-lean.tex` | Lean/ITP community | 6 |
 
-**Working Drafts** (in `papers/working_drafts/` — speculative & supplementary):
+**Working Drafts** (available on request — speculative & supplementary):
 
-| Paper | Audience | Pages |
-|-------|----------|-------|
-| `cathedral-physics.tex` | Physicists | 37 |
-| `cathedral-particle-zoo.tex` | Spectral phenomenology | 10 |
-| `cathedral-experiments.tex` | Experimentalists | 4 |
-| `cathedral-ai.tex` | AI/ML researchers | 5 |
-| `cathedral-dualuse.tex` | Dual-use risk assessment | 16 |
-| `cathedral-engineering.tex` | Practicing engineers | 5 |
-| `cathedral-frontiers.tex` | Engineering frontiers | 5 |
-| `cathedral-fun.tex` | Primes, physics & numerology | 8 |
-| `cathedral-philosophy.tex` | Philosophers of mathematics | 4 |
-| `cathedral-claude.tex` | Anthropic/Claude reflections | 8 |
-| `cathedral-gemini.tex` | DeepMind/Gemini reflections | 4 |
-| `cathedral-public.tex` | General public | 4 |
-| `cathedral-policy.tex` | Policy / governance | 4 |
+13 supplementary papers covering physics, AI, engineering, philosophy,
+and policy perspectives. Not included in the public repository.
+See [REFERENCES.md](REFERENCES.md) for the complete list.
 
-Build all PDFs:
+Build core PDFs:
 ```bash
-cd papers && ./build.sh
+cd papers && make
 ```
 
 ## Methodology
@@ -295,9 +283,8 @@ All proofs are compiler-verified.
 ```
 prime/
 ├── proofs/          🏛️  THE CATHEDRAL — 227 active Lean files, 103 archived
-├── papers/          📄  Core proof paper + 13 working drafts
-│   ├── core/                 Flagship paper (cathedral.tex)
-│   └── working_drafts/       Supplementary & speculative papers
+├── papers/          📄  Core papers (cathedral.tex, cathedral-lean.tex)
+│   └── core/                 The mathematical claim
 ├── experiments/     🔬  39 Rust experiments (256–512 bit MPFR + DD)
 │   └── archive/              Graduated/superseded experiments
 ├── visualizer/      📊  Cathedral Dashboard (Next.js)
