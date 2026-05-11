@@ -188,6 +188,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.TaperDecomposition,
     -- GCD partition of the taper (Möbius Stratum Conjecture, Exploration 35)
     `Cathedral.Covariance.GCDPartition,
+    -- Per-stratum growth bounds (Layer 4, Exploration 35)
+    `Cathedral.Covariance.GCDStratumBound,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
