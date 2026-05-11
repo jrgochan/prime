@@ -38,7 +38,7 @@ pub fn gram_entry(j: usize, k: usize) -> f64 {
     // Sum from m=M to ∞ of j/(m(m+1)) ≈ j/M. So truncating at m = max(j,k)*10 + 100
     // gives error < 0.01/max(j,k), which is negligible.
 
-    let m_max = (j.max(k)) * 10 + 200;
+    let m_max = (j.max(k)) * 100 + 2000;
 
     // Gather all breakpoints in (0, 1]
     let mut breaks: Vec<f64> = Vec::with_capacity(2 * m_max);
@@ -208,10 +208,16 @@ mod tests {
 
     #[test]
     fn test_gram_diagonal() {
-        // G[k,k] = ∫₀¹ {k/x}² dx
-        // For k=2: known to be ≈ 0.3257 (from numerical computation)
+        // G[k,k] = ∫₀¹ {k/x}² dx  (piecewise-exact integration)
+        //
+        // NOTE: This integral converges slowly with m_max — the breakpoints
+        // x = j/m extend down to x ≈ j/m_max, so the contribution from
+        // x ∈ (0, j/m_max] is silently truncated. With m_max = 2200,
+        // G[2,2] converges to ~0.2939 (verified with scipy quad and
+        // m_max = 100_000 convergence study).
         let g22 = gram_entry(2, 2);
-        assert!((g22 - 0.3257).abs() < 0.01, "G[2,2] = {}, expected ~0.3257", g22);
+        assert!((g22 - 0.2939).abs() < 0.005,
+            "G[2,2] = {}, expected ~0.2939", g22);
     }
 
     #[test]
@@ -223,8 +229,9 @@ mod tests {
 
     #[test]
     fn test_gram_offdiag() {
-        // G[2,3] should be ≈ 0.2564 (from known computation)
+        // G[2,3] = ∫₀¹ {2/x}{3/x} dx ≈ 0.2341 (converged)
         let g23 = gram_entry(2, 3);
-        assert!((g23 - 0.2564).abs() < 0.01, "G[2,3] = {}, expected ~0.2564", g23);
+        assert!((g23 - 0.2341).abs() < 0.005,
+            "G[2,3] = {}, expected ~0.2341", g23);
     }
 }

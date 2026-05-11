@@ -252,7 +252,16 @@ impl DD {
     /// Compute ln(1 + 1/n) at double-double precision.
     /// Uses the series: ln(1+x) = x - x²/2 + x³/3 - x⁴/4 + ...
     /// where x = 1/n.
+    ///
+    /// For n < 4, falls back to the general ln() method since the
+    /// alternating Taylor series converges too slowly for large x.
     pub fn ln1p_inv(n: u64) -> Self {
+        if n < 4 {
+            // For small n, the Taylor series needs too many terms.
+            // Use the atanh-based ln() directly.
+            let one = DD::from_f64(1.0);
+            return (one + one / DD::from_u64(n)).ln();
+        }
         let x = DD::from_f64(1.0) / DD::from_u64(n);
         let mut term = x;
         let mut sum = x;
