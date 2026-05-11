@@ -233,7 +233,7 @@ $\|1 - f_{N,v}\|_2^2 \geq |\ell_\rho(1-f_{N,v})|^2/\|\ell_\rho\|^2$.
 The bound is uniform in $N$ and $v$.
 \end{proof}
 
-The full formal proof (\lean{BDMellin.lean}, 680 lines) uses
+The full formal proof (\lean{BDMellin.lean}, $\sim$1{,}000 lines) uses
 \textbf{zero custom axioms}---the analytic continuation is proved
 from Mathlib's holomorphic continuation infrastructure. This replaces
 the classical Hahn--Banach/Riesz argument with a direct computation:
@@ -351,7 +351,7 @@ transparent axioms. These are \textbf{not} on the primary crown path.
 
 The 227 active files contain 75 custom axioms; an additional
 59 axioms reside in archived explorations, totaling $\sim$134 across
-the full repository (1{,}500+ theorem/lemma declarations):
+the full repository ($\sim$2{,}000 theorem/lemma/def declarations):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
@@ -401,7 +401,7 @@ the full repository (1{,}500+ theorem/lemma declarations):
 % ================================================================
 
 Beyond the crown theorem, the Cathedral contains structural results
-of independent interest, all proved with zero axioms:
+of independent interest, most proved with zero axioms:
 
 \begin{center}
 \small
@@ -416,12 +416,16 @@ Rayleigh quotient bound & \lean{Spectral/RayleighBridge.lean} & 0 \\
 Eigenvalue interlacing & \lean{Structural/Eigenvalue.lean} & 0 \\
 Eigenvalue limit existence & \lean{Assembly/MainChain.lean} & 0 \\
 Theta bound ($\zeta(s) \neq 0$ on $(0,1)$) & \lean{NymanBeurling/ThetaBound.lean} & 0 \\
-Montgomery--Vaughan MVT & \lean{Assembly/CrownGraduation.lean} & 0 \\
-Cauchy distribution integral & \lean{White/PlancherelBypass.lean} & 0 \\
-Robin $\iff$ NB $\iff$ Lagarias & \lean{Archive/Robin/Equivalence.lean} & 0 \\
+Montgomery--Vaughan MVT & \lean{Analysis/MontgomeryVaughan.lean} & 0 \\
+Cauchy distribution integral & \lean{MellinBridge/PlancherelBypass.lean} & 0 \\
+Robin $\iff$ NB $\iff$ Lagarias & \lean{Robin/Equivalence.lean} & 1* \\
 \bottomrule
 \end{tabular}
 \end{center}
+
+\noindent
+*Uses \lean{arithmetic\_rh\_equivalences} (Robin/Lagarias $\Leftrightarrow$ RH,
+classical; not on the crown path).
 
 The Montgomery--Vaughan mean value theorem for Dirichlet polynomials
 is, to our knowledge, the first formalization of this result in any
@@ -441,7 +445,9 @@ characterizations of RH:
     for all $n \geq 1$.
 \end{itemize}
 
-Four theorems, all proved with zero sorry and zero axioms:
+Four theorems, all proved with zero sorry (1 off-path axiom
+\lean{arithmetic\_rh\_equivalences} bundles the Robin/Lagarias $\Leftrightarrow$ RH
+equivalences from classical analytic number theory):
 \begin{itemize}
   \item \lean{robin\_implies\_nyman\_beurling}: Robin $\implies$ $d_N^2 \to 0$.
   \item \lean{lagarias\_implies\_nyman\_beurling}: Lagarias $\implies$ $d_N^2 \to 0$.
@@ -746,11 +752,11 @@ The machine taught us to listen.}
 % ================================================================
 
 This project was built through AI-assisted formal verification using
-Lean~4 and Mathlib over 45 days (March--May 2026). The author
+Lean~4 and Mathlib over $\sim$45 days (March--May 2026). The author
 gratefully acknowledges Google DeepMind's Gemini for mathematical
 strategy, the Mellin Crown architecture, phase cancellation
 analysis, the Transit of the Primes correspondence, and the
-Flyspseck Singularity insight;
+Flyspeck Singularity insight;
 and Anthropic's Claude for Lean~4 proof engineering,
 the Parseval bridge implementation, the DD-precision pipeline,
 the Oracle Bridge architecture, and the One-Pillar consolidation.
