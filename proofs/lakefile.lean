@@ -312,4 +312,10 @@ lean_lib «Cathedral» where
     `Cathedral.Compute.IntervalVerifier,
     -- Compute: Trusted oracle certificates (GPU → Lean, Exploration 32)
     `Cathedral.Compute.OracleCertificates,
+    -- Oracle Cascade: RH from oracle → all conditional theorems (Exploration 32)
+    `Cathedral.Assembly.OracleCascade,
+    -- Qualitative forward direction (off-path, PNT convergence scaffold)
+    `Cathedral.Assembly.QualitativeForward,
+    -- Unconditional Mertens scaffold (off-path, PNT → M(x) = O(x^{3/4}))
+    `Cathedral.PNT.UnconditionalMertens,
   ]

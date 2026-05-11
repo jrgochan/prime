@@ -63,12 +63,7 @@ cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
 		'#print axioms mertens_bound_cascade' \
 		'#print axioms l2_error_cascade' \
 		'#print axioms oracle_crown' \
-		| lake env lean --stdin 2>&1 \
-		| if grep -q "does not exist"; then \
-			echo "  ⚠  Build required first: run 'make build'"; \
-		else \
-			cat | grep -v "^warning:"; \
-		fi
+		| lake env lean --stdin 2>&1 | grep -v "^warning:" | sed 's/^/  /' || true
 	@echo ""
 	@echo "  ═══════════════════════════════════════════"
 	@echo ""
