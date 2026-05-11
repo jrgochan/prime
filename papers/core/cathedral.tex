@@ -25,10 +25,10 @@ Nyman--Beurling distance:
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
 The formalization comprises 227 active Lean files ($\sim$60{,}500 lines;
-330 files and $\sim$85{,}000 lines including archived explorations) with
+330 files and $\sim$84{,}700 lines including archived explorations) with
 zero compilation errors. On the crown path, the theorem depends on
 exactly \textbf{one} literature axiom---the B\'aez-Duarte forward
-direction (IMRN 2003)---establishing that RH implies $d_N^2 \to 0$.
+direction (Atti Lincei, 2003)---establishing that RH implies $d_N^2 \to 0$.
 The converse direction uses \textbf{zero} custom axioms and
 \textbf{zero sorry}.
 
@@ -94,7 +94,7 @@ The proof decomposes into two pillars:
     \textbf{Zero custom axioms.} Zero sorry.
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
     The primary crown path uses \texttt{baez\_duarte\_forward}
-    (B\'aez-Duarte, IMRN 2003) as a single literature axiom.
+    (B\'aez-Duarte, Atti Lincei, 2003) as a single literature axiom.
     Three alternative paths are preserved:
     \begin{itemize}
       \item \textbf{Path A (Mellin Crown)}: RH $\to$ Mellin variance
@@ -172,7 +172,7 @@ The \emph{Nyman--Beurling distance} at truncation level $N$ is
 \]
 where $G_N \in \RR^{(N-1) \times (N-1)}$ is the Gram matrix with
 entries $G_N(j,k) = \int_0^1 h_j(x)\,h_k(x)\,dx$ and
-$b \in \RR^{N-1}$ with $b_k = \int_0^1 h_k(x)\,dx = 1 - 1/k$.
+$b \in \RR^{N-1}$ with $b_k = \int_0^1 h_k(x)\,dx = (\ln k + 1 - \gamma)/k$.
 \end{definition}
 
 The formula $d_N^2 = 1 - b^T G_N^{-1} b$ is proved formally
@@ -336,8 +336,8 @@ The crown theorem depends on exactly \textbf{1} Cathedral axiom:
 \end{tabular}
 \end{center}
 
-This is the B\'aez-Duarte forward direction (IMRN 2003, no.~36,
-pp.~1989--2009): a classical result stating that under RH, the BD
+This is the B\'aez-Duarte forward direction (Atti Accad. Naz. Lincei,
+2003, vol.~14, pp.~5--11): a classical result stating that under RH, the BD
 basis can approximate~$1$ in~$L^2(0,1)$. It is a literature axiom,
 not a conjecture. The converse uses \textbf{zero} custom axioms.
 
@@ -350,8 +350,8 @@ transparent axioms. These are \textbf{not} on the primary crown path.
 
 \subsection{The Full Axiom Registry}
 
-The 227 active files contain 75 custom axioms; an additional
-59 axioms reside in archived explorations, totaling $\sim$134 across
+The 227 active files contain 80 custom axioms; an additional
+59 axioms reside in archived explorations, totaling $\sim$139 across
 the full repository ($\sim$2{,}800 theorem/lemma/def declarations):
 
 \begin{center}
@@ -363,12 +363,12 @@ the full repository ($\sim$2{,}800 theorem/lemma/def declarations):
 1' & Oracle axioms (computation certificates) & 24 & 0 (Oracle path) \\
 2 & Spectral engine (off-path) & 7 & 0 \\
 3 & Sieve engine (off-path) & 8 & 0 \\
-4 & MellinBridge / alt paths / Vasyunin & 35 & 0 \\
+4 & MellinBridge / alt paths / Vasyunin & 40 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{75} & \textbf{1} \\
+& \textbf{Active subtotal} & \textbf{80} & \textbf{1} \\
 5 & Archive (inactive, superseded) & 59 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$134} & \textbf{1} \\
+& \textbf{Grand total} & \textbf{$\sim$139} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -587,10 +587,10 @@ The Cathedral is organized into 17 modules (227 active files):
 \end{tabular}
 \end{center}
 
-An additional 102 files are preserved in \lean{Archive/}.
-Of the 227 active files, \textbf{174} (77\%) are sorry-free.
+An additional 103 files are preserved in \lean{Archive/}.
+Of the 227 active files, \textbf{176} (78\%) are sorry-free.
 Exploratory paths and upstream PNTA dependencies contain
-$\sim$105 quarantined \lean{sorry} placeholders that do not
+17 quarantined \lean{sorry} placeholders that do not
 affect the crown theorem.
 
 \subsection{The Axiom Audit Protocol}
@@ -610,12 +610,12 @@ affect the crown theorem.
 The codebase compiles with \lean{lake build} with zero errors.
 The crown path has \textbf{zero sorry} and \textbf{zero custom axioms}
 (converse) or \textbf{one} custom axiom (forward).
-Exploratory paths produce $\sim$105 \lean{sorry} warnings;
+Exploratory paths produce 17 \lean{sorry} warnings;
 these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 227 active files, 102 archived
+lake build    # 227 active files, 103 archived
 
 #print axioms nyman_beurling_equivalence
 -- baez_duarte_forward
