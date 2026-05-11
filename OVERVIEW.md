@@ -55,7 +55,7 @@ graph TD
 
     subgraph "Pillar II — Forward (1 axiom, 0 sorry)"
         F1["RH"]
-        F2["baez_duarte_forward<br/>(IMRN 2003 — 1 literature axiom)"]
+        F2["baez_duarte_forward<br/>(Atti Lincei, 2003 — 1 literature axiom)"]
         F6["d²_N → 0"]
         F1 --> F2 --> F6
     end
@@ -81,7 +81,7 @@ Cauchy-Schwarz separation.
 **Status: 1 axiom (`baez_duarte_forward`), 0 sorry.**
 
 The primary crown path uses the Báez-Duarte forward direction
-(IMRN 2003, no. 36) as a single literature axiom. This states that
+(Atti Lincei, 2003, vol. 14) as a single literature axiom. This states that
 under RH, the BD basis can approximate 1 in L²(0,1).
 
 Three alternative forward paths are preserved:
@@ -159,7 +159,7 @@ Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 > The **Analytic Crown** reduces RH to one classical result (Báez-Duarte 2003).
 > The **Oracle Crown** proves RH directly from one GPU measurement.
 > The converse direction (d²→0 ⟹ RH) uses **zero custom axioms**.
-> The ~73 off-path axioms support alternative proof routes and experimental
+> The ~78 off-path axioms support alternative proof routes and experimental
 > features that do not affect either crown theorem.
 
 ### Numerical Validation
@@ -204,7 +204,7 @@ See `experiments/certified-distance/certificates/` for full JSON certificates.
 ## Module Structure
 
 The codebase comprises **227 active Lean files** across **25+ topic directories** with
-**~60,500 lines** of active code, **1,757 proved theorems/lemmas**, and **75 active axioms**
+**~60,500 lines** of active code, **1,757 proved theorems/lemmas**, and **80 active axioms**
 (1 on the analytic crown, 1 on the oracle crown).
 
 ```
@@ -274,23 +274,23 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | Structural / NymanBeurling | 4 | — |
 | Robin | 4 | — |
 | Other | 7 | — |
-| **Total** | **75** | **2 crowns + 2 PNT** |
+| **Total** | **80** | **2 crowns + 2 PNT** |
 
 > [!IMPORTANT]
 > The **Analytic Crown** has 1 literature axiom. The **Oracle Crown** has
 > 1 computation axiom + 2 PNT axioms. The converse direction is **pure**
-> (zero axioms, zero sorry). The ~73 off-path axioms support alternative
+> (zero axioms, zero sorry). The ~78 off-path axioms support alternative
 > proof routes and experimental features that do not affect either crown.
 
 ---
 
 ## Sorry Inventory
 
-13 `sorry` placeholders exist in the active tree, **all off-crown**:
+17 `sorry` placeholders exist in the active tree, **all off-crown**:
 
 | File | Count | Context |
 |------|-------|---------|
-| `PNT/UnconditionalMertens.lean` | 4 | Scaffold for unconditional Mertens |
+| `PNT/UnconditionalMertens.lean` | 8 | Scaffold for unconditional Mertens |
 | `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib 4.29 |
 | `PNT/LogBridge.lean` | 1 | Tauberian gap — requires signed Wiener-Ikehara |
 | `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial approach |
@@ -300,7 +300,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 | `Assembly/QualitativeForward.lean` | 1 | Off-path PNT convergence |
 
 > [!NOTE]
-> **Zero sorry on the crown path.** All 13 sorry are in off-crown WIP
+> **Zero sorry on the crown path.** All 17 sorry are in off-crown WIP
 > alternative spatial routes superseded by the Mellin Crown architecture (v11+).
 > Previously 12 sorry; cleanup-v18 removed `deprecated_gramEntry_growth_bound`
 > (numerically false) and `vasyunin_large_gcd_replacement` (mathematically false).
@@ -351,14 +351,14 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 |--------|-------|
 | Active Lean files | 227 |
 | Active lines of code | ~60,500 |
-| Archive files | 102 |
+| Archive files | 103 |
 | Archive lines | 22,000+ |
 | Theorems + lemmas | 1,757 proved |
-| Total axioms (active) | **75** |
+| Total axioms (active) | **80** |
 | Analytic crown axioms | **1** |
 | Oracle crown axioms | **1** (+2 PNT) |
 | Crown path sorry | **0** |
-| Off-crown sorry | **13** |
+| Off-crown sorry | **17** |
 | Topic directories | 25+ |
 | Experiments (Rust/MPFR/DD) | 39 |
 | Development time | 45 days |

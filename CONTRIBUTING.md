@@ -36,12 +36,16 @@ the alternative chains:
 
 ### 3. Close Off-Path Sorries
 
-6 `sorry` markers remain in the active tree, all off the crown path:
+17 `sorry` markers remain in the active tree, all off the crown path:
 
 - `PNT/Bridge.lean` (2) — Forward Tauberian gap (needs Mathlib)
 - `PNT/LogBridge.lean` (1) — Same Tauberian gap
+- `PNT/UnconditionalMertens.lean` (8) — Scaffold for unconditional Mertens
 - `Covariance/CovarianceAbel.lean` (2) — Deprecated spatial integrals
-- `Covariance/QuadFormIdentity.lean` (1) — Numerically falsified (deprecated)
+- `Covariance/AbelCovarianceBound.lean` (1) — Off-path Abel covariance
+- `Covariance/EulerProduct.lean` (1) — Off-path Mertens third
+- `Covariance/MertensBridge.lean` (1) — Off-path Mertens bridge
+- `Assembly/QualitativeForward.lean` (1) — Off-path PNT convergence
 
 ### 4. Contribute to Mathlib
 
@@ -75,7 +79,7 @@ cd papers && ./build.sh
 
 ## Requirements
 
-- **Lean 4**: v4.30.0-rc1 or later
+- **Lean 4**: v4.29.0 or later
 - **Mathlib**: via lakefile
 - **Rust**: 1.75+ (for experiments, with `rug` crate for MPFR)
 - **LaTeX**: pdflatex (for papers)

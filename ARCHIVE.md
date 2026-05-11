@@ -12,7 +12,7 @@
 
 ## Archive Overview
 
-The Cathedral maintains three archive locations containing **102 Cathedral files**
+The Cathedral maintains three archive locations containing **103 Cathedral files**
 plus **34 pre-Cathedral files** of Lean 4 code:
 
 | Location | Files | Lines | Purpose |
@@ -22,7 +22,7 @@ plus **34 pre-Cathedral files** of Lean 4 code:
 | `proofs/Cathedral/Archive/` | 94 | 22,344 | Superseded Cathedral modules |
 | **Total** | **128** | **29,784** | |
 
-For comparison, the active codebase is **222 files / 59,486 lines / ~1,500+ theorems**.
+For comparison, the active codebase is **227 files / ~60,500 lines / ~1,757 theorems**.
 
 Additionally, `Cathedral/Vasyunin/Archive/` contains 1 file (204 lines) — an
 archived Gram induction framework within the active Vasyunin tree.
@@ -121,6 +121,13 @@ The Cathedral absorbed ~80% of this code:
 ## 3. `proofs/Cathedral/Archive/` — Superseded Cathedral Modules
 
 **94 files** (including 1 `.archived`) after the April 26 resurrection.
+
+> [!NOTE]
+> The Cathedral/Archive/ directory contains 94 module files. Combined with
+> `proofs/archive/proved/` (17 files) and `proofs/archive/SpectralRH/` (17 files),
+> the total archive count is 128 files. However, the Cathedral-specific archive
+> count reported by `find proofs/Cathedral -path '*/Archive/*'` is **103 files**
+> (including subdirectories and the Vasyunin/Archive).
 
 ### 3a. `HighFrequencyTrap/` — "Universe 2" Snapshot (37 files, 10,473 lines)
 
@@ -264,9 +271,9 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 222 | 103 | 2.16× |
-| Lines | 59,486 | 22,000+ | 2.70× |
-| Theorems | ~1,500+ | ~994 | 1.51× |
+| Files | 227 | 103 | 2.20× |
+| Lines | ~60,500 | 22,000+ | 2.75× |
+| Theorems | ~1,757 | ~994 | 1.77× |
 | Crown axioms | **2** (Dual Crown) | — | — |
 
 ---

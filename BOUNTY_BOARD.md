@@ -10,7 +10,7 @@ The Cathedral formally verifies:
 RH ↔ d²_N → 0  (Nyman-Beurling-Báez-Duarte equivalence)
 ```
 
-via `baez_duarte_forward` (Báez-Duarte, IMRN 2003) as a single literature axiom,
+via `baez_duarte_forward` (Báez-Duarte, Atti Lincei, 2003) as a single literature axiom,
 with alternative paths through the Mellin Crown (2 axioms), Perron Crown (4 axioms),
 and Renormalization Bridge. The converse direction is **fully proved** with zero axioms.
 The forward direction depends on exactly **1 crown axiom** — a classical,
@@ -34,8 +34,8 @@ strengthens the overall architecture.
 **Dependencies**: See BOUNTY.md for detailed gap analysis
 
 The sole crown axiom is `baez_duarte_forward`: under RH, the BD basis can
-approximate 1 in L²(0,1). This is the Báez-Duarte forward direction (IMRN 2003,
-no. 36, pp. 1989–2009). See [BOUNTY.md](BOUNTY.md) for the detailed
+approximate 1 in L²(0,1). This is the Báez-Duarte forward direction (Atti Accad.
+Naz. Lincei, 2003, vol. 14, pp. 5–11). See [BOUNTY.md](BOUNTY.md) for the detailed
 infrastructure assessment and graduation strategy.
 
 ---
@@ -67,7 +67,7 @@ If the Mertens function satisfies |M(x)| ≤ C·x^{3/4}, then the Vasyunin covar
 
 The covariance matrix C_{jk} = G_{jk} - b_j·b_k, where:
 - G_{jk} = ∫₀¹ {1/(jx)}·{1/(kx)} dx (Vasyunin Gram entries)
-- b_j = ∫₀¹ {1/(jx)} dx = 1/(2j) + (γ + log j)/(2j²) + ... (mean vector)
+- b_j = ∫₀¹ {1/(jx)} dx = (ln j + 1 - γ)/j (mean vector)
 
 The proof requires:
 1. **Abel summation** to convert the Mertens bound |M(x)| ≤ Cx^{3/4} into bounds on the bilinear form Σᵢⱼ vᵢvⱼ·Cov(i,j)
