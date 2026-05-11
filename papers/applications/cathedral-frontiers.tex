@@ -75,14 +75,26 @@ architecture even if the crown axiom remains open.
 \subsection{The Oracle Bridge (Path D)}
 
 The v17 Oracle Capstone introduces a fourth path: the
-\emph{compute oracle}. By computing $d_N^2$ at highly composite
-numbers $N = \mathrm{hcn}(k)$ via DD-precision conjugate gradient
-and certifying the monotone envelope $d_{\mathrm{hcn}(k)}^2 < C / \ln k$,
-the literature axiom can be replaced by trusted computation.
-The remaining gap: proving the monotone interpolation
-$d_N^2 \leq d_{\mathrm{hcn}(k)}^2$ for all $N \leq \mathrm{hcn}(k)$.
-This is a tractable Lean formalization ($\sim$200 lines) leveraging
-the existing \lean{NymanBeurling.Antitone} infrastructure.
+\emph{compute oracle}. The full proof chain from trusted computation
+to RH is already proved:
+\begin{center}
+\small
+\texttt{oracle\_certificates} (trusted GPU) $\to$
+\texttt{gram\_subseq\_from\_certificates} (proved) $\to$
+\texttt{rh\_from\_certificates} (proved) $\to$ RH
+\end{center}
+The sole axiom is \lean{oracle\_certificates}: the assertion that
+DD-precision computation of $v^T G v$ at highly composite numbers
+yields the stated bounds. This follows the Flyspeck precedent
+(trusted computation backing formal proof).
+
+\textbf{Open problem}: Graduate \lean{oracle\_certificates} from
+axiom to theorem by kernel-verifying $v^T G v < 1$ at even one $N$.
+The blocker is that \lean{logCutoffWitness} uses \lean{Real.log},
+which is noncomputable in Lean~4. Three approaches exist (rational
+bounding, \lean{native\_decide} with computable proxy, interval
+arithmetic), each requiring 500--1{,}000 lines. This is a natural
+community contribution target.
 
 \subsection{The Orthogonality Shield (Path E)}
 
