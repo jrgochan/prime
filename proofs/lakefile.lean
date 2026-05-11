@@ -184,6 +184,10 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.EulerProduct,
     `Cathedral.Covariance.Direct,
     `Cathedral.Covariance.DotProductBound,
+    -- Taper decomposition (vᵀGv = U - 2L/lnN + Q/ln²N, Exploration 33)
+    `Cathedral.Covariance.TaperDecomposition,
+    -- GCD partition of the taper (Möbius Stratum Conjecture, Exploration 35)
+    `Cathedral.Covariance.GCDPartition,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
