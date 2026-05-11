@@ -184,6 +184,16 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.EulerProduct,
     `Cathedral.Covariance.Direct,
     `Cathedral.Covariance.DotProductBound,
+    -- Taper decomposition (vᵀGv = U - 2L/lnN + Q/ln²N, Exploration 33)
+    `Cathedral.Covariance.TaperDecomposition,
+    -- GCD partition of the taper (Möbius Stratum Conjecture, Exploration 35)
+    `Cathedral.Covariance.GCDPartition,
+    -- Per-stratum growth bounds (Layer 4, Exploration 35)
+    `Cathedral.Covariance.GCDStratumBound,
+    -- GCD sign law (Layer 5, Möbius Stratum Conjecture, Exploration 35)
+    `Cathedral.Covariance.GCDSignLaw,
+    -- Mertens bridge (PNTA → Cathedral, Exploration 35)
+    `Cathedral.Covariance.MertensBridge,
     -- White Singlet (physics-motivated axiom elimination)
     `Cathedral.White.Kinematics,
     `Cathedral.White.Scattering,
