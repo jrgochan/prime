@@ -57,7 +57,7 @@ the \emph{foundational} (what are we trusting?) and the
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (1 on crown path, $\sim$75 total) \\
+5 & Mathematical axioms (1 on crown path, 80 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -109,13 +109,13 @@ The crown theorem reports exactly 4 axioms via \lean{\#print axioms}
 1 & \lean{propext} & Lean kernel & --- \\
 2 & \lean{Classical.choice} & Lean kernel & --- \\
 3 & \lean{Quot.sound} & Lean kernel & --- \\
-4 & \lean{baez\_duarte\_forward} & Cathedral & BD (IMRN 2003) \\
+4 & \lean{baez\_duarte\_forward} & Cathedral & BD (Atti Lincei, 2003) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 The sole mathematical axiom is the B\'aez-Duarte forward direction
-(IMRN 2003, no.~36), provable in $\ZFC$ by standard methods.
+(Atti Accad. Naz. Lincei, 2003, vol.~14), provable in $\ZFC$ by standard methods.
 It is a formalization gap, not a foundational gap.
 
 \subsection{Constructivity Analysis}
@@ -154,7 +154,7 @@ The Cathedral introduces a foundational concept: the
 \begin{enumerate}
   \item \textbf{Kernel axioms}: Trusted by design. (3)
   \item \textbf{Crown axioms}: On the critical path. (1)
-  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$74)
+  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$79)
   \item \textbf{Theorems}: Machine-verified from Mathlib.
   \item \textbf{Archived axioms}: Previously active, now proved. (11)
 \end{enumerate}
