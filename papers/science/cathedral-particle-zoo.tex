@@ -11,7 +11,7 @@
 \author{
   Jason Robert Gochanour
 }
-\date{April 29, 2026}
+\date{May 2026}
 
 \begin{document}
 
@@ -582,6 +582,14 @@ At $N = 10^9$: $e^\gamma \ln\ln(10^9) = 1.781 \times 3.03 = 5.41$.
 Our champion satisfies $5.182 < 5.41$, confirming Robin's inequality
 for all integers below $10^9$.
 
+\begin{remark}[Lean Formalization]
+The Cathedral proof suite~\cite{cathedral-physics} formalizes the
+equivalence Robin $\iff$ Nyman--Beurling $\iff$ Lagarias $\iff$ RH
+in Lean~4 (\texttt{Robin/Equivalence.lean}), connecting this
+discrete divisor-sum criterion to the $L^2$ convergence of the
+Nyman--Beurling distance via the Gram matrix studied here.
+\end{remark}
+
 % ================================================================
 \section{The Highly Composite Numbers}
 \label{sec:hc}
@@ -690,6 +698,9 @@ The Gram matrix engine uses Taylor-series optimization and inverse
 power iteration implemented in Rust (\texttt{nalgebra}).
 The arithmetic sieve classifies $10^9$ integers in $O(N \log N)$ time
 and $O(N)$ space (15~GB).
+The author gratefully acknowledges Google DeepMind's Gemini for
+physics interpretation and Anthropic's Claude for experimental
+design and data analysis.
 
 \begin{thebibliography}{99}
 \bibitem{cathedral-physics} J.~R.~Gochanour, \emph{The Physics of the
