@@ -15,6 +15,23 @@ pub fn gcd(mut a: usize, mut b: usize) -> usize {
     a
 }
 
+/// Fractional part: {x} = x - ⌊x⌋.
+///
+/// The fundamental building block of the Nyman-Beurling inner product
+/// ⟨{j/·}, {k/·}⟩ = ∫₀¹ {j/t}{k/t} dt.
+#[inline(always)]
+pub fn frac_part(x: f64) -> f64 {
+    x - x.floor()
+}
+
+/// Liouville function: λ(n) = (-1)^{Ω(n)} for a single n.
+///
+/// For table-based computation, use [`liouville_table`] instead.
+#[inline]
+pub fn liouville(n: usize) -> f64 {
+    if big_omega(n) % 2 == 0 { 1.0 } else { -1.0 }
+}
+
 /// Least common multiple.
 #[inline(always)]
 pub fn lcm(a: usize, b: usize) -> usize {

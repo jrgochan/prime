@@ -22,9 +22,13 @@
 //! - [`certificate`] — JSON/TSV output generation
 //! - [`cache`] — Binary matrix serialization to/from disk
 //! - [`fmt`] — Terminal formatting constants
+//! - [`gcd_decomp`] — GCD-class decomposition for Gram block structure
 //! - [`gpu`] — GPU acceleration via CUDA/cuSOLVER/cuBLAS (feature-gated)
 //! - [`hpdf`] — HDF5-based high-precision data format (feature-gated)
+//! - [`octonion`] — Octonion algebra and prime-to-octonion encoding
 //! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
+//! - [`riemann_siegel`] — Riemann-Siegel theta, Hardy Z-function, zero finder
+//! - [`spectral_stats`] — Random matrix theory diagnostics (GUE/GOE/GSE)
 
 pub mod abel;
 pub mod arith;
@@ -44,7 +48,10 @@ pub mod jacobi;
 pub mod lanczos;
 pub mod linalg;
 pub mod mertens;
+pub mod octonion;
 pub mod ooc;
+pub mod riemann_siegel;
 pub mod rsvd;
 pub mod spectral;
+pub mod spectral_stats;
 pub mod vasyunin;
