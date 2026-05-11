@@ -79,6 +79,78 @@ members = [
     "experiments/archive/spectral/spectral-fourier",
 ]
 
+# ═══════════════════════════════════════════════════════════
+# Default build set — excludes GPU crates that require CUDA.
+# To build GPU crates: cargo build -p nb-distance-gpu
+# ═══════════════════════════════════════════════════════════
+default-members = [
+    "experiments/cathedral-utils",
+    "experiments/certified-distance",
+    "experiments/character-spectral",
+    "experiments/crown-cancellation",
+    "experiments/fejer-kernel",
+    "experiments/gram-scaling-oracle",
+    # "experiments/gram-scaling-oracle-gpu",   # requires CUDA
+    "experiments/hilbert-spectral",
+    "experiments/littlewood-maneuver",
+    "experiments/mellin-certificate",
+    "experiments/moebius-microscope",
+    "experiments/ramanujan-dial",
+    "experiments/t-convergence",
+    "experiments/nb-distance",
+    # "experiments/nb-distance-gpu",           # requires CUDA
+    "experiments/nb-witness-scan",
+    # "experiments/nb-witness-scan-gpu",       # requires CUDA
+    "experiments/norm-bound-validator",
+    "experiments/perron-contour",
+    "experiments/pnt-mobius-sums",
+    "experiments/rotor-spectroscopy",
+    "experiments/series-decomposition-verifier",
+    "experiments/siegel-walfisz",
+    "experiments/spectral-methods",
+    "experiments/spectral-observatory",
+    "experiments/spectral-road",
+    "experiments/two-tile-analyzer",
+    "experiments/two-tile-decomposition",
+    # "experiments/two-tile-decomposition-gpu", # requires CUDA
+    "experiments/van-hove-probe",
+    "experiments/vasyunin",
+    "experiments/vasyunin-convergence",
+    "experiments/covariance-decay",
+    "experiments/cathedral-rl",
+    "experiments/vasyunin-integral",
+    "experiments/hc-gram-oracle",
+    "experiments/archive/abel-bridge",
+    "experiments/archive/abel-tail-validator",
+    "experiments/archive/algebraic/cross-class-verifier",
+    "experiments/archive/algebraic/quaternion-rh",
+    "experiments/archive/baez-duarte",
+    "experiments/archive/bc-exponent-frontier",
+    "experiments/archive/bc-witness-analysis",
+    "experiments/archive/bc-zeta-lower",
+    "experiments/archive/contour-oracle",
+    "experiments/archive/covariance-probe",
+    "experiments/archive/gram-bilinear-abel",
+    "experiments/archive/gram-form-identity",
+    "experiments/archive/gram-matrix/gcd-sum-audit",
+    "experiments/archive/gram-matrix/selberg-validation",
+    "experiments/archive/gram-oracle",
+    "experiments/archive/gram-pointwise",
+    "experiments/archive/gram-quadform",
+    "experiments/archive/l2-decay-certificate",
+    "experiments/archive/millennium-wall",
+    "experiments/archive/mobius-basis",
+    "experiments/archive/mvt-decomposition",
+    "experiments/archive/numerical/weil-explicit",
+    "experiments/archive/spectral-analyzer",
+    "experiments/archive/spectral/g2-spectral",
+    "experiments/archive/spectral/lambda-eff",
+    "experiments/archive/spectral/offdiag-excess",
+    "experiments/archive/spectral/parity-schur",
+    "experiments/archive/spectral/rank1-interference",
+    "experiments/archive/spectral/spectral-fourier",
+]
+
 [profile.release]
 opt-level = 3
 lto = true
