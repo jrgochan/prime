@@ -13,6 +13,7 @@
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
 .PHONY: audit stats clean
+.PHONY: lint test fmt ci
 .DEFAULT_GOAL := help
 
 ENV := scripts/env.sh
@@ -190,6 +191,64 @@ clean: ## Clean build artifacts
 	find experiments -name target -type d -exec rm -rf {} + 2>/dev/null || true
 	@echo "  Build artifacts cleaned."
 
+lint: ## Run clippy on all Rust experiments (zero warnings required)
+	@$(ENV) require cargo
+	@echo ""
+	@echo "  🔍  Running cargo clippy..."
+	@echo ""
+	cargo clippy --workspace --all-targets -- -D warnings
+	@echo ""
+	@echo "  ✅  Clippy: zero warnings"
+
+test: ## Run all Rust tests
+	@$(ENV) require cargo
+	@echo ""
+	@echo "  🧪  Running cargo test..."
+	@echo ""
+	cargo test --workspace
+	@echo ""
+	@echo "  ✅  All tests passed"
+
+fmt: ## Check Rust formatting (use 'make fmt-fix' to apply)
+	@$(ENV) require cargo
+	@echo ""
+	@echo "  📐  Checking formatting..."
+	@echo ""
+	cargo fmt --all -- --check
+	@echo ""
+	@echo "  ✅  Formatting OK"
+
+fmt-fix: ## Auto-fix Rust formatting
+	@$(ENV) require cargo
+	cargo fmt --all
+	@echo "  ✅  Formatting applied"
+
+ci: ## Full CI pipeline: fmt → lint → test → build
+	@echo ""
+	@echo "  🏛️  Cathedral CI Pipeline"
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+	@echo "  [1/4] Format check..."
+	@cargo fmt --all -- --check
+	@echo "  ✅  Formatting OK"
+	@echo ""
+	@echo "  [2/4] Clippy lint..."
+	@cargo clippy --workspace --all-targets -- -D warnings
+	@echo "  ✅  Clippy clean"
+	@echo ""
+	@echo "  [3/4] Rust tests..."
+	@cargo test --workspace --quiet
+	@echo "  ✅  Tests passed"
+	@echo ""
+	@echo "  [4/4] Lean build..."
+	@cd proofs && lake build
+	@echo "  ✅  Lean build green"
+	@echo ""
+	@echo "  ═══════════════════════════════════════════"
+	@echo "  🏛️  All checks passed. Cathedral is sovereign."
+	@echo "  ═══════════════════════════════════════════"
+	@echo ""
+
 # ────────────────────────────────────────────
 # 📖  HELP
 # ────────────────────────────────────────────
@@ -212,5 +271,5 @@ help: ## Show this help message
 	@grep -E '^(check|setup[a-z-]*):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── UTILITIES ────────────────────────────────────────────"
-	@grep -E '^(clean):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(lint|test|fmt|fmt-fix|ci|clean|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
