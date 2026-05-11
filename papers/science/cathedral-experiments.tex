@@ -3,18 +3,18 @@
 \usepackage{../shared/cathedral-preamble}
 
 \title{%
-  The 48 Experiments:\\
+  The 50+ Experiments:\\
   Computational Validation of the Cathedral\\
   via Certified Rust/MPFR/DD Pipelines%
 }
 \author{Jason Robert Gochanour}
-\date{May 6, 2026}
+\date{May 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-We document the 48+ companion experiments that validate the Cathedral's
+We document the 50+ companion experiments that validate the Cathedral's
 formal proof architecture. Each experiment is implemented in Rust,
 using f64 through 512-bit MPFR and DD (31-digit Dekker--Knuth)
 arithmetic, and produces either
@@ -109,7 +109,10 @@ arithmetic.
 43 & two-tile-decomposition & Analysis & f64 \\
 44 & nb-witness-scan-gpu & BD (GPU) & f32/f64 \\
 45 & renormalization-bridge & Renorm & f64 \\
-46--48+ & (additional experiments) & Various & Mixed \\
+46 & moebius-microscope & Gram (GPU) & MPFR-256 + CUDA \\
+47 & hc-gram-oracle & DD cert & DD + HPDF \\
+48 & spectral-observatory & Spectral & DD MPFR-256 \\
+49--50+ & (additional experiments) & Various & Mixed \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -126,7 +129,7 @@ computation and formal proof. It:
   \item Computes eigenvalues, eigenvectors, and spectral statistics.
   \item Exports results as machine-readable JSON certificates.
   \item Generates Lean~4 oracle axiom files consumed by
-    \lean{Assembly/OracleAxioms.lean}.
+    \texttt{Compute/OracleCertificates.lean}.
 \end{enumerate}
 
 This architecture implements \emph{artifact-backed formal verification}:
@@ -182,15 +185,15 @@ $d_N^2 \approx C_{\mathrm{holes}}/\ln N$:
 \begin{center}
 \begin{tabular}{@{}rrrr@{}}
 \toprule
-$N$ & $d_N^2$ & $d_N^2 \cdot \ln N$ & PNT sum $S_1$ \\\\
+$N$ & $d_N^2$ & $d_N^2 \cdot \ln N$ & PNT sum $S_1$ \\
 \midrule
-100 & $1.331 \times 10^{-1}$ & 0.613 & 0.031 \\\\
-500 & $7.506 \times 10^{-2}$ & 0.467 & $-0.009$ \\\\
-1000 & $5.959 \times 10^{-2}$ & 0.412 & 0.004 \\\\
-2000 & $5.012 \times 10^{-2}$ & 0.381 & --- \\\\
-5000 & $4.003 \times 10^{-2}$ & 0.341 & --- \\\\
-10000 & $3.439 \times 10^{-2}$ & 0.317 & --- \\\\
-20000 & $3.073 \times 10^{-2}$ & 0.305 & 0.001 \\\\
+100 & $1.331 \times 10^{-1}$ & 0.613 & 0.031 \\
+500 & $7.506 \times 10^{-2}$ & 0.467 & $-0.009$ \\
+1000 & $5.959 \times 10^{-2}$ & 0.412 & 0.004 \\
+2000 & $5.012 \times 10^{-2}$ & 0.381 & --- \\
+5000 & $4.003 \times 10^{-2}$ & 0.341 & --- \\
+10000 & $3.439 \times 10^{-2}$ & 0.317 & --- \\
+20000 & $3.073 \times 10^{-2}$ & 0.305 & 0.001 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -227,7 +230,7 @@ number-theoretic order and random matrix chaos.
 \section{Conclusion}
 % ================================================================
 
-The 48+ experiments provide computational validation at every level
+The 50+ experiments provide computational validation at every level
 of the Cathedral's proof architecture, from the Gram matrix entries
 to the spectral gap to the Parseval bridge to the thermodynamic
 equation of state to the DD-precision Dekker--Knuth frontier.
@@ -235,6 +238,10 @@ The certified JSON pipeline ensures that
 computational discoveries are automatically available to the formal
 proof engine. The DD-precision pipeline extends certification to
 $N = 55{,}440$, beyond the reach of any standard eigensolver.
+
+The author gratefully acknowledges Google DeepMind's Gemini for
+experimental design strategy and Anthropic's Claude for Rust
+implementation, data analysis, and certification pipeline architecture.
 
 \begin{thebibliography}{99}
 \bibitem{cathedral}
