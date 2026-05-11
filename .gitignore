@@ -70,6 +70,32 @@ Cargo.lock
 experiments/cache/
 experiments/.cache/
 
+# ── Large data files ──
+# HDF5 Gram matrix caches (up to 400MB)
+**/*.h5
+**/*.hdf5
+
+# Large experiment results (TSV/CSV data dumps)
+experiments/**/results/**/*.tsv
+experiments/**/results_pointwise/**/*.tsv
+experiments/**/results/**/*.csv
+
+# Large JSON results (witness scans, certificates)
+experiments/**/results/**/*.json
+# Exception: small JSON config/certificate files are ok
+!experiments/**/results/**/*config*.json
+!experiments/cache/certificates/*.json
+
+# Legacy context dumps
+docs/exports/**/*.txt
+docs/exports/archive/
+
+# Large image renders
+docs/hyperzeta-viewport/*.png
+
+# Visualizer generated data (regenerable)
+visualizer/public/data/*.json
+
 # ── macOS ──
 .DS_Store
 **/.DS_Store
@@ -103,3 +129,9 @@ pnpm-debug.log*
 *.orig
 .env.local
 .env.*.local
+results/**/*.tsv
+results/**/*.json
+# Lock files (regenerable)
+**/package-lock.json
+docs/exports/parts-legacy/
+tools/**/results/**/*.jsonl
