@@ -1,0 +1,24 @@
+{
+  "experiment": "Cathedral Mellin Crown Certificate",
+  "precision_bits": 256,
+  "threads": 12,
+  "timestamp": "2026-04-26T11:07:28.437541+00:00",
+  "target_axiom": "critical_line_mellin_variance (MellinCrown.lean)",
+  "max_N_tested": 2000,
+  "parseval_bridge_validated": true,
+  "max_parseval_error": 8.139868756587378e-3,
+  "mellin_logN_bounded": true,
+  "mellin_results": [
+    {"N": 10, "channel_a": 4.823481999742843e-1, "channel_b": 4.784219489315175e-1, "ab_error": 8.139868756587378e-3, "mellin_logN": 1.110647774893298e0},
+    {"N": 20, "channel_a": 2.985430962122149e-1, "channel_b": 2.975407403662325e-1, "ab_error": 3.357491292546388e-3, "mellin_logN": 8.943551883696663e-1},
+    {"N": 50, "channel_a": 1.778431123392702e-1, "channel_b": 1.777436375128760e-1, "ab_error": 5.593403370296362e-4, "mellin_logN": 6.957263468281674e-1},
+    {"N": 100, "channel_a": 1.312350642968047e-1, "channel_b": 1.311850682179015e-1, "ab_error": 3.809658582567647e-4, "mellin_logN": 6.043598054558752e-1},
+    {"N": 200, "channel_a": 9.910503470241101e-2, "channel_b": 9.909646195871155e-2, "ab_error": 8.650159626302947e-5, "mellin_logN": 5.250899264761301e-1},
+    {"N": 300, "channel_a": 8.615871961217730e-2, "channel_b": 8.615574384825649e-2, "ab_error": 3.453816322030386e-5, "mellin_logN": 4.914305949627544e-1},
+    {"N": 500, "channel_a": 7.313258163683954e-2, "channel_b": 7.313153237352639e-2, "ab_error": 1.434741246196449e-5, "mellin_logN": 4.544903340988251e-1},
+    {"N": 750, "channel_a": 6.496914108168210e-2, "channel_b": 6.496748781488512e-2, "ab_error": 2.544695480734579e-5, "mellin_logN": 4.301004701261343e-1},
+    {"N": 1000, "channel_a": 6.031574755012290e-2, "channel_b": 6.031531275735423e-2, "ab_error": 7.208611122814706e-6, "mellin_logN": 4.166464235451154e-1},
+    {"N": 2000, "channel_a": 5.011883675700267e-2, "channel_b": 5.011850639863132e-2, "ab_error": 6.591501174596653e-6, "mellin_logN": 3.809483895756897e-1}
+  ],
+  "elapsed_seconds": 1497.363
+}

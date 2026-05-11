@@ -1,0 +1,45 @@
+{
+  "all_certified": true,
+  "beta_duality": {
+    "all_certified": true,
+    "all_pointwise": true,
+    "max_sum_err": 6.046200786193438e-17
+  },
+  "elapsed_secs": 100.544167863,
+  "experiment": "two-tile-decomposition-gpu",
+  "gauss_formulas": {
+    "all_certified": true,
+    "max_digamma_a_err": 6.548361852765083e-11,
+    "max_digamma_b_err": 6.548361852765083e-11,
+    "max_loggamma_a_err": 1.8189894035458565e-12,
+    "max_loggamma_b_err": 1.8189894035458565e-12
+  },
+  "graduation_identity": {
+    "all_certified": true,
+    "max_err": 2.1917671619294583e-13
+  },
+  "max_b": 5000,
+  "max_m": 1000,
+  "mode": "GPU",
+  "n_certified": 7595458,
+  "n_pairs": 7595458,
+  "precision": "f64",
+  "sections": {
+    "class_eval": false,
+    "delta_formula": false,
+    "gram_crossref": false,
+    "honest_algebra": false,
+    "rosetta_stone": false
+  },
+  "staircase_telescope": {
+    "all_certified": true,
+    "max_digamma_err": 2.1827872842550278e-11,
+    "max_loggamma_err": 1.8189894035458565e-12
+  },
+  "structural": {
+    "beta_bijection": true,
+    "overshoot_identity": true,
+    "s_permutation": true
+  },
+  "version": "2.0"
+}

@@ -1,0 +1,23 @@
+{
+  "experiment": "Cathedral Van Hove Singularity Probe",
+  "precision_bits": 128,
+  "threads": 12,
+  "timestamp": "2026-04-29T00:57:30.826315+00:00",
+  "question": "Is d²_N ~ C/ln(N) a 2D Van Hove logarithmic singularity?",
+  "max_N_tested": 200,
+  "van_hove_r2_avg": 7.827338802119014e-1,
+  "van_hove_confirmed": false,
+  "bd_constant_target": 21.649,
+  "c_holes_target": 0.04619,
+  "eigenvalue_data": [
+    {"N": 10, "dim": 9, "lambda_min": 9.180127260052866e-3, "lambda_max": 1.562705669802350e0, "lambda_min_logN": 2.113802418078601e-2},
+    {"N": 20, "dim": 19, "lambda_min": 2.596140794120375e-3, "lambda_max": 2.141496282288598e0, "lambda_min_logN": 7.777342763636494e-3},
+    {"N": 30, "dim": 29, "lambda_min": 1.237317884526059e-3, "lambda_max": 2.472404172231473e0, "lambda_min_logN": 4.208362349133790e-3},
+    {"N": 50, "dim": 49, "lambda_min": 4.345565567618690e-4, "lambda_max": 2.872653553587636e0, "lambda_min_logN": 1.699995247212073e-3},
+    {"N": 75, "dim": 74, "lambda_min": 2.043768527820094e-4, "lambda_max": 3.174250475710953e0, "lambda_min_logN": 8.823946325682859e-4},
+    {"N": 100, "dim": 99, "lambda_min": 1.203650110353248e-4, "lambda_max": 3.378823653795255e0, "lambda_min_logN": 5.543013602560055e-4},
+    {"N": 150, "dim": 149, "lambda_min": 5.625621821120166e-5, "lambda_max": 3.653437038214720e0, "lambda_min_logN": 2.818793924814275e-4},
+    {"N": 200, "dim": 199, "lambda_min": 3.166978476976659e-5, "lambda_max": 3.838552120101917e0, "lambda_min_logN": 1.677965706404928e-4}
+  ],
+  "elapsed_seconds": 887.454
+}

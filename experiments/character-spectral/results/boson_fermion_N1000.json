@@ -1,0 +1,33 @@
+{
+  "experiment": "boson-fermion-classifier",
+  "N": 1000,
+  "dim": 999,
+  "lambda_min": 1.952730154428e-8,
+  "timestamp": "2026-04-29T03:34:30",
+  "summary": {
+    "prime_count": 168,
+    "composite_count": 831,
+    "prime_weight": 0.1006344049,
+    "composite_weight": 0.8993655951,
+    "ratio_composite_over_prime": 8.9370,
+    "heavy_fermions": 315,
+    "regular_fermions": 102,
+    "light_bosons": 102,
+    "massless_bosons_lt_1e7": 19,
+    "hub_weight_r_sq": 0.002186,
+    "divisor_weight_r_sq": 0.002532
+  },
+  "top_fermion": {
+    "k": 470,
+    "weight": 6.142518903301e-2,
+    "factors": "2·5·47",
+    "omega": 3,
+    "divisor_count": 8
+  },
+  "top_boson": {
+    "p": 547,
+    "weight": 2.024450620956e-2
+  },
+  "massless_primes": [2, 3, 5, 11, 23, 19, 7, 487, 13, 631, 31, 73, 97, 83, 839, 109, 137, 17, 947],
+  "elapsed_secs": 6.5
+}

@@ -1,0 +1,21 @@
+{
+  "experiment": "Cathedral Character-Projected Spectral Probe",
+  "precision_bits": 256,
+  "threads": 12,
+  "timestamp": "2026-04-29T02:50:08.923044+00:00",
+  "character_modulus": 8,
+  "num_channels": 4,
+  "question": "Do residue classes mod 8 produce different spectral statistics?",
+  "max_N_tested": 300,
+  "character_orthogonality_verified": true,
+  "results": [
+    {"N": 30, "full_class": "Poisson", "dark_class": "Poisson", "res_dims": [3, 4, 4, 3]},
+    {"N": 50, "full_class": "Poisson", "dark_class": "Poisson", "res_dims": [6, 6, 6, 6]},
+    {"N": 75, "full_class": "GOE (β=1)", "dark_class": "Poisson", "res_dims": [9, 10, 9, 9]},
+    {"N": 100, "full_class": "GOE (β=1)", "dark_class": "Poisson", "res_dims": [12, 13, 12, 12]},
+    {"N": 150, "full_class": "GOE (β=1)", "dark_class": "GOE (β=1)", "res_dims": [18, 19, 19, 18]},
+    {"N": 200, "full_class": "GOE (β=1)", "dark_class": "GOE (β=1)", "res_dims": [24, 25, 25, 25]},
+    {"N": 300, "full_class": "GOE (β=1)", "dark_class": "GOE (β=1)", "res_dims": [37, 38, 37, 37]}
+  ],
+  "elapsed_seconds": 2483.161
+}

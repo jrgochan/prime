@@ -1,0 +1,39 @@
+{
+  "experiment": "cathedral-rl",
+  "description": "RL-optimized Gram form inequality for Nyman-Beurling distance",
+  "claim": "vᵀG_N v ≤ 1 + K/ln(N) for the optimal witness vector",
+  "pythagorean_identity": "d²_opt + vᵀGv_opt = 1 (projection theorem in L²(0,1))",
+  "equivalence": "RH ⟺ d²_N → 0 as N → ∞",
+  "schedule": [
+    500
+  ],
+  "elapsed_seconds": 144.949877632,
+  "all_gram_bound_k1": true,
+  "all_vtgv_subcritical": true,
+  "max_k_eff": -0.24976951123213528,
+  "max_pythagorean_residual": 2.937700030569701e-6,
+  "runs": [
+    {
+      "n": 500,
+      "dim": 39999,
+      "agent": "cg",
+      "baseline_d2": 0.14531664660354893,
+      "baseline_vtgv": 1.6932138441036215,
+      "baseline_btv": 1.2739485987500323,
+      "optimal_d2": 0.04019364760103761,
+      "optimal_vtgv": 0.959809290098993,
+      "optimal_btv": 0.9598078212489777,
+      "pythagorean_sum": 1.0000029377000306,
+      "pythagorean_residual": 2.937700030569701e-6,
+      "k_eff": -0.24976951123213528,
+      "ln_n": 6.214608098422191,
+      "gram_bound_k1": true,
+      "vtgv_subcritical": true,
+      "improvement_pct": 72.34064469524031,
+      "total_steps": 5000,
+      "wall_time_s": 143.104031739,
+      "matvec_rate": 34.939616579910485
+    }
+  ],
+  "sha256": "651343d7bbbdf2080bac009828fc9eaeb3b49fb53b43ee72aca73d4798047339"
+}

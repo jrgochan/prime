@@ -1,0 +1,22 @@
+{
+  "format": "cathedral-nb-spectral-certificate-v1",
+  "timestamp": "2026-05-01T04:56:48Z",
+  "N": 7500,
+  "dim": 7499,
+  "d_sq": 4.076437925356746e-2,
+  "s_total": 9.592356207464325e-1,
+  "lambda_min": 2.879018134931798e-7,
+  "lambda_max": 5.568804196247047e0,
+  "condition_number": 1.93427201e7,
+  "beta": 3.51905955,
+  "c_min_sq": 1.298885681172860e-16,
+  "e_0": 4.511557830821477e-10,
+  "e_0_over_d_sq": 1.106740226009121e-8,
+  "orthogonality_shield": 1.298885681172860e-16,
+  "lambda_min_positive": true,
+  "quantum_decoupling": true,
+  "compute_mode": "GPU_full",
+  "compute_time_secs": 2.6,
+  "data_file": "gpu_spectral_N7500.tsv",
+  "lean_claim": "At N=7500, d²_N = 0.040764379254, λ_min = 2.87901813e-7 > 0, β = 3.5191"
+}

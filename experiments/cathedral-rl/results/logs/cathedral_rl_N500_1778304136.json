@@ -1,0 +1,19 @@
+{
+  "n": 500,
+  "dim": 55439,
+  "agent": "cg",
+  "baseline_d2": 0.14806139375597138,
+  "baseline_vtgv": 1.7047035148487684,
+  "baseline_btv": 1.2783210605464062,
+  "optimal_d2": 0.04004455312773425,
+  "optimal_vtgv": 0.9599585743784167,
+  "optimal_btv": 0.9599570106253412,
+  "improvement": 0.10801684062823713,
+  "improvement_pct": 72.9540887655468,
+  "gram_bound_satisfied": true,
+  "total_steps": 5000,
+  "wall_time_s": 309.622357987,
+  "k_eff": -0.24884176794026144,
+  "ln_n": 6.214608098422191,
+  "matvec_rate": 16.148704610698474
+}

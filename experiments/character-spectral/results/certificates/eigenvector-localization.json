@@ -1,0 +1,62 @@
+{
+  "experiment": "eigenvector-localization",
+  "precision": "f64",
+  "timestamp": "2026-04-29T04:49:00Z",
+  "ns": [100, 200, 300, 500, 750, 1000],
+  "data": {
+    "100": {
+      "dim": 99,
+      "lambda_min": 1.203650110222051e-4,
+      "mean_pr": 18.1978,
+      "goe_predicted_pr": 33.0000,
+      "pr_goe_ratio": 0.551449,
+      "ground_state_pr": 4.0826,
+      "ground_state_prime_weight": 0.040460
+    },
+    "200": {
+      "dim": 199,
+      "lambda_min": 3.166978475593286e-5,
+      "mean_pr": 32.7027,
+      "goe_predicted_pr": 66.3333,
+      "pr_goe_ratio": 0.493006,
+      "ground_state_pr": 6.1350,
+      "ground_state_prime_weight": 0.085389
+    },
+    "300": {
+      "dim": 299,
+      "lambda_min": 1.444433647523572e-5,
+      "mean_pr": 47.3411,
+      "goe_predicted_pr": 99.6667,
+      "pr_goe_ratio": 0.474994,
+      "ground_state_pr": 3.4245,
+      "ground_state_prime_weight": 0.063761
+    },
+    "500": {
+      "dim": 499,
+      "lambda_min": 2.331457214973713e-6,
+      "mean_pr": 80.1851,
+      "goe_predicted_pr": 166.3333,
+      "pr_goe_ratio": 0.482075,
+      "ground_state_pr": 7.0666,
+      "ground_state_prime_weight": 0.061404
+    },
+    "750": {
+      "dim": 749,
+      "lambda_min": -3.318731639653130e-6,
+      "mean_pr": 118.5586,
+      "goe_predicted_pr": 249.6667,
+      "pr_goe_ratio": 0.474868,
+      "ground_state_pr": 22.4206,
+      "ground_state_prime_weight": 0.073509
+    },
+    "1000": {
+      "dim": 999,
+      "lambda_min": -3.865984867479035e-6,
+      "mean_pr": 154.9310,
+      "goe_predicted_pr": 333.0000,
+      "pr_goe_ratio": 0.465258,
+      "ground_state_pr": 16.6971,
+      "ground_state_prime_weight": 0.132051
+    }
+  }
+}

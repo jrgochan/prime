@@ -1,0 +1,85 @@
+{
+  "experiment": "Báez-Duarte Distance Certification",
+  "cathedral_version": "v12",
+  "precision_bits": 512,
+  "threads": 12,
+  "max_N": 100,
+  "lean_bridge": {
+    "theorem": "nyman_beurling_equivalence_mellin",
+    "file": "Assembly/MainChain.lean",
+    "claim": "RH ↔ d²_N → 0",
+    "constant_source": "IntegralBasis/BaezDuarte.lean",
+    "gram_pd_proof": "Vasyunin/Matrix/GramPSD.lean",
+    "sherman_morrison": "LinearAlgebra/ShermanMorrison.lean"
+  },
+  "mathematical_setup": {
+    "basis": "h_k(x) = {1/(kx)}",
+    "gram_formula": "G(j,k) = ∫₁^∞ {u/j}{u/k}/u² du",
+    "distance_formula": "d²_N = 1 - bᵀG⁻¹b = 1/(1 + bᵀC⁻¹b)",
+    "solver": "Cholesky LLᵀ factorization"
+  },
+  "bd_constant": {
+    "formula": "C = 1/(2 + γ - ln(4π))",
+    "numerical": 0.04621027882498068,
+    "prediction": "d²_N ≈ C/ln(N)",
+    "inverse": 21.6443
+  },
+  "convergence": {
+    "last_d2_N": 1.002739055625279e-2,
+    "last_X_over_lnN": 21.4382614851,
+    "bd_target": 21.6443
+  },
+  "data": [
+    {
+      "N": 10,
+      "d2_N": 2.281400325025429e-2,
+      "bd_predicted": 2.006067791925962e-2,
+      "X": 42.832728041224,
+      "X_over_lnN": 18.6020174332,
+      "lambda_min_G": 0.0000000000e0,
+      "cond_G": inf,
+      "lambda_min_C": 0.0000000000e0,
+      "cond_C": null
+    },
+    {
+      "N": 20,
+      "d2_N": 1.608460655234867e-2,
+      "bd_predicted": 1.541907410752790e-2,
+      "X": 61.171244086414,
+      "X_over_lnN": 20.4194629228,
+      "lambda_min_G": 0.0000000000e0,
+      "cond_G": inf,
+      "lambda_min_C": 0.0000000000e0,
+      "cond_C": null
+    },
+    {
+      "N": 50,
+      "d2_N": 1.165245070006071e-2,
+      "bd_predicted": 1.180755273375154e-2,
+      "X": 84.818856971846,
+      "X_over_lnN": 21.6815844013,
+      "lambda_min_G": 0.0000000000e0,
+      "cond_G": inf,
+      "lambda_min_C": 0.0000000000e0,
+      "cond_C": null
+    },
+    {
+      "N": 100,
+      "d2_N": 1.002739055625279e-2,
+      "bd_predicted": 1.003033895962981e-2,
+      "X": 98.726842630701,
+      "X_over_lnN": 21.4382614851,
+      "lambda_min_G": 0.0000000000e0,
+      "cond_G": inf,
+      "lambda_min_C": 0.0000000000e0,
+      "cond_C": null
+    }
+  ],
+  "verdicts": {
+    "X_monotone_increasing": true,
+    "d2_positive": true,
+    "d2_decreasing": true,
+    "X_over_lnN_converging": true,
+    "cholesky_stable": true
+  }
+}

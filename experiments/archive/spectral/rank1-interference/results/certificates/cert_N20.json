@@ -1,0 +1,76 @@
+{
+  "N": 20,
+  "dim": 19,
+  "precision_bits": 256,
+  "computation_time_s": 0.004,
+  "timestamp": "2026-04-22T06:07:41.021686+00:00",
+  "precision_audit": {
+    "max_f64_delta": 2.359224e-16,
+    "f64_sufficient": true
+  },
+  "eigenvalue_certificate": {
+    "lambda_min": 2.595613191693647e-3,
+    "lambda_max": 2.141493976587465e0,
+    "all_positive": true,
+    "condition_number": 8.250436e2,
+    "num_eigenvalues": 19,
+    "smallest_5": [2.595613191693647e-3, 3.007260229228732e-3, 3.337925963083188e-3, 4.063347170417388e-3, 5.176908779085094e-3],
+    "largest_5": [3.633358787474730e-2, 5.102529205939055e-2, 7.091324466296313e-2, 2.014882884131257e-1, 2.141493976587465e0]
+  },
+  "witness_certificate": {
+    "type": "moebius_log_cutoff",
+    "b_dot_v": 0.896855211117261,
+    "v_dot_Gv": 0.850018545264905,
+    "d_sq": 0.056308123030383,
+    "d_sq_positive": true,
+    "d_sq_formula": "1 - 2*b^T*v + v^T*G*v",
+    "lean_bridge": {
+      "theorem": "existential_implies_infimum",
+      "epsilon": 0.056308123031383,
+      "certified_bound": "nbDistSq' 20 < 0.0563081230"
+    }
+  },
+  "rayleigh_certificate": {
+    "S_squared": 0.804349269708186,
+    "v_dot_Cv": 0.045669275556718,
+    "S_sq_over_Q": 17.6124814748,
+    "c_times_logN": 5.8791907509,
+    "ln_N": 2.9957322736,
+    "lean_bridge": {
+      "theorem": "forward_bridge_from_lambda_trick",
+      "c_constant": 5.8791907509,
+      "log_N": 2.9957322736
+    }
+  },
+  "gram_sample": [
+    {"j": 2, "k": 2, "G_jk": 3.803307007539063e-1},
+    {"j": 2, "k": 3, "G_jk": 2.744368426127355e-1},
+    {"j": 2, "k": 4, "G_jk": 2.611046279954365e-1},
+    {"j": 3, "k": 2, "G_jk": 2.744368426127355e-1},
+    {"j": 3, "k": 3, "G_jk": 3.091093560581598e-1},
+    {"j": 3, "k": 4, "G_jk": 2.321146333077535e-1},
+    {"j": 4, "k": 2, "G_jk": 2.611046279954365e-1},
+    {"j": 4, "k": 3, "G_jk": 2.321146333077535e-1},
+    {"j": 4, "k": 4, "G_jk": 2.526653503769531e-1}
+  ],
+  "mean_sample": [
+    {"k": 2, "b_k": 5.579657578292063e-1},
+    {"k": 3, "b_k": 5.071322079221924e-1},
+    {"k": 4, "b_k": 4.522696740545895e-1},
+    {"k": 5, "b_k": 4.064444495065135e-1},
+    {"k": 6, "b_k": 3.690906340544204e-1}
+  ],
+  "witness_sample": [
+    {"k": 2, "v_k": 7.686217868402409e-1},
+    {"k": 3, "v_k": 6.332742086579153e-1},
+    {"k": 4, "v_k": -0.000000000000000e0},
+    {"k": 5, "v_k": 4.627564263195183e-1},
+    {"k": 6, "v_k": -4.018959954981561e-1}
+  ],
+  "verdicts": {
+    "gram_positive_definite": true,
+    "witness_valid": true,
+    "distance_positive": true,
+    "precision_sufficient": true
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "experiment": "Cathedral PNT Möbius Sum Validator",
+  "precision_bits": 256,
+  "N_max": 10000000,
+  "timestamp": "2026-04-25T03:20:23.163052+00:00",
+  "two_gamma": 1.154431329803066e0,
+  "S1_final": 2.006046853878282e-4,
+  "S2_final": -9.972146952246956e-1,
+  "S3_final": -1.115760372807806e0,
+  "S1_converging": true,
+  "S2_converging": true,
+  "S3_converging": true,
+  "S1_decay_bounded": true,
+  "S2_decay_bounded": true,
+  "elapsed_seconds": 28.057
+}

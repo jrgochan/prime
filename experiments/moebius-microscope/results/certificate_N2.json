@@ -1,0 +1,67 @@
+{
+  "N": 2,
+  "dim": 1,
+  "experiment": "moebius-microscope",
+  "gcd_top": [],
+  "gram_bound": {
+    "btv": 0.0,
+    "btv_sq": 0.0,
+    "d2N": 1.0,
+    "d2_times_lnN": 0.6931471805599453,
+    "gap_1_minus_vtGv": 1.0,
+    "gap_times_lnN": 0.6931471805599453,
+    "ratio_btv2_vtGv": 0.0,
+    "vtCv": 0.0,
+    "vtCv_times_lnN": 0.0,
+    "vtGv": 0.0
+  },
+  "liouville": {
+    "cross": 0.0,
+    "ee": 0.0,
+    "eo": 0.0,
+    "oe": 0.0,
+    "oo": 0.0,
+    "same": 0.0
+  },
+  "omega_class": [],
+  "precision": "GPU+DD",
+  "quadratic_form": {
+    "diagonal": 0.0,
+    "off_diagonal": 0.0,
+    "total": 0.0
+  },
+  "rotors": {
+    "chi0": 0.0,
+    "chi1": 0.0,
+    "chi2": 0.0,
+    "chi3": 0.0
+  },
+  "sign_stats": {
+    "cancel_ratio": 0.0,
+    "n_neg": 0,
+    "n_pos": 0,
+    "sum_neg": 0.0,
+    "sum_pos": 0.0
+  },
+  "taper_cancellation": {
+    "C_recon": 0.6931471805599453,
+    "L": 0.26362515237452167,
+    "Q": 0.18273103109308567,
+    "Q_over_ln2N": 0.3803306999843198,
+    "R2": -0.38033069998431973,
+    "R2_minus_1": -1.3803306999843197,
+    "R2_minus_1_times_lnN": -0.956772332934467,
+    "S1": 0.5,
+    "S2": -0.34657359027997264,
+    "S3": -0.2402265069591007,
+    "U": 0.38033069998431973,
+    "mertens": 0.0,
+    "mertens_over_sqrt": 0.0
+  },
+  "vaughan": {
+    "type_I": 0.0,
+    "type_II": 0.0,
+    "type_III": 0.0
+  },
+  "version": "3.0"
+}

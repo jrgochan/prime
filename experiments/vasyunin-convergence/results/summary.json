@@ -1,0 +1,215 @@
+{
+  "all_bounded": true,
+  "convergence_monotone": true,
+  "elapsed_seconds": 45.642514084,
+  "experiment": "Cathedral Vasyunin Convergence Validator",
+  "global_sup_error_times_aM": 0.29166416667669726,
+  "m_values": [
+    10,
+    20,
+    50,
+    100,
+    200,
+    500,
+    1000,
+    2000,
+    5000,
+    10000,
+    20000,
+    50000
+  ],
+  "pair_summaries": [
+    {
+      "a": 1,
+      "b": 2,
+      "bounded": true,
+      "sup_error_times_aM": 0.29166416667669726
+    },
+    {
+      "a": 1,
+      "b": 3,
+      "bounded": true,
+      "sup_error_times_aM": 0.27786461903259674
+    },
+    {
+      "a": 1,
+      "b": 4,
+      "bounded": true,
+      "sup_error_times_aM": 0.2745037203035447
+    },
+    {
+      "a": 1,
+      "b": 5,
+      "bounded": true,
+      "sup_error_times_aM": 0.26666166669381264
+    },
+    {
+      "a": 1,
+      "b": 6,
+      "bounded": true,
+      "sup_error_times_aM": 0.2693301102197046
+    },
+    {
+      "a": 1,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.26889635734812456
+    },
+    {
+      "a": 1,
+      "b": 8,
+      "bounded": true,
+      "sup_error_times_aM": 0.2663163925081058
+    },
+    {
+      "a": 1,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.26206560810789065
+    },
+    {
+      "a": 1,
+      "b": 10,
+      "bounded": true,
+      "sup_error_times_aM": 0.2583241667214464
+    },
+    {
+      "a": 2,
+      "b": 3,
+      "bounded": true,
+      "sup_error_times_aM": 0.26483675789606975
+    },
+    {
+      "a": 2,
+      "b": 5,
+      "bounded": true,
+      "sup_error_times_aM": 0.2583304166997591
+    },
+    {
+      "a": 2,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.2566871955636707
+    },
+    {
+      "a": 2,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.2555889957236168
+    },
+    {
+      "a": 3,
+      "b": 4,
+      "bounded": true,
+      "sup_error_times_aM": 0.25694250002650243
+    },
+    {
+      "a": 3,
+      "b": 5,
+      "bounded": true,
+      "sup_error_times_aM": 0.25555333336563235
+    },
+    {
+      "a": 3,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.2558574094377841
+    },
+    {
+      "a": 3,
+      "b": 8,
+      "bounded": true,
+      "sup_error_times_aM": 0.25401264060463835
+    },
+    {
+      "a": 3,
+      "b": 10,
+      "bounded": true,
+      "sup_error_times_aM": 0.25277416673546993
+    },
+    {
+      "a": 4,
+      "b": 5,
+      "bounded": true,
+      "sup_error_times_aM": 0.25416479170203843
+    },
+    {
+      "a": 4,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.254863682977855
+    },
+    {
+      "a": 4,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.2523925948258232
+    },
+    {
+      "a": 5,
+      "b": 6,
+      "bounded": true,
+      "sup_error_times_aM": 0.2548128485255374
+    },
+    {
+      "a": 5,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.2537707843926651
+    },
+    {
+      "a": 5,
+      "b": 8,
+      "bounded": true,
+      "sup_error_times_aM": 0.25208116670449865
+    },
+    {
+      "a": 5,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.2518506296012024
+    },
+    {
+      "a": 6,
+      "b": 7,
+      "bounded": true,
+      "sup_error_times_aM": 0.2528451419351607
+    },
+    {
+      "a": 7,
+      "b": 8,
+      "bounded": true,
+      "sup_error_times_aM": 0.25148630960203366
+    },
+    {
+      "a": 7,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.25132084656570575
+    },
+    {
+      "a": 7,
+      "b": 10,
+      "bounded": true,
+      "sup_error_times_aM": 0.2511884524256103
+    },
+    {
+      "a": 8,
+      "b": 9,
+      "bounded": true,
+      "sup_error_times_aM": 0.2512162128381179
+    },
+    {
+      "a": 9,
+      "b": 10,
+      "bounded": true,
+      "sup_error_times_aM": 0.2509241667884854
+    }
+  ],
+  "pairs_tested": 31,
+  "precision_bits": 512,
+  "target_axiom": "partial_sum_tends_to_formula",
+  "target_file": "Cathedral/Vasyunin/Cotangent/LogDigammaBridge.lean:310",
+  "threads": 12,
+  "timestamp": "2026-04-25T06:30:48.059715+00:00"
+}

@@ -1,0 +1,11 @@
+{
+  "experiment": "variational_witness_attack8",
+  "results": [
+    {"N": 1000, "ln_N": 6.907755, "ln_ln_N": 1.932645, "Q_ln_raw": 2.55309434, "Q_ln_linear": 9.81803284, "Q_ln_log": 10.78330964, "vtCv_raw": 5.31380623e-2, "vtCv_linear": 1.45230279e-2, "vtCv_log": 7.98529559e-3},
+    {"N": 2000, "ln_N": 7.600902, "ln_ln_N": 2.028267, "Q_ln_raw": 1.89246795, "Q_ln_linear": 8.70193005, "Q_ln_log": 11.57265903, "vtCv_raw": 6.58396482e-2, "vtCv_linear": 1.50936459e-2, "vtCv_log": 7.14355041e-3},
+    {"N": 5000, "ln_N": 8.517193, "ln_ln_N": 2.142087, "Q_ln_raw": 2.77114337, "Q_ln_linear": 8.36544272, "Q_ln_log": 12.44998160, "vtCv_raw": 4.17786337e-2, "vtCv_linear": 1.40146910e-2, "vtCv_log": 6.26166004e-3},
+    {"N": 10000, "ln_N": 9.210340, "ln_ln_N": 2.220327, "Q_ln_raw": 1.32167068, "Q_ln_linear": 7.17827840, "Q_ln_log": 12.95866115, "vtCv_raw": 8.54827589e-2, "vtCv_linear": 1.51072201e-2, "vtCv_log": 5.75426057e-3},
+    {"N": 20000, "ln_N": 9.903488, "ln_ln_N": 2.292887, "Q_ln_raw": 1.18248231, "Q_ln_linear": 6.52303761, "Q_ln_log": 13.44180647, "vtCv_raw": 8.29390565e-2, "vtCv_linear": 1.54720971e-2, "vtCv_log": 5.30989014e-3},
+    {"N": 50000, "ln_N": 10.819778, "ln_ln_N": 2.381376, "Q_ln_raw": 1.73642854, "Q_ln_linear": 5.95988449, "Q_ln_log": 14.01047352, "vtCv_raw": 5.25941063e-2, "vtCv_linear": 1.54933015e-2, "vtCv_log": 4.81334202e-3}
+  ]
+}
