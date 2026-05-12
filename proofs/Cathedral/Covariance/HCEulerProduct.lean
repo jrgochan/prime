@@ -137,21 +137,42 @@ theorem gcdWeighted_euler (N : ℕ) (hSq : Squarefree N) :
 -- §4. MERTENS PRODUCT BOUND AT HC NUMBERS
 -- ════════════════════════════════════════════════
 
-/-- The Mertens product Π_{p|N}(1−1/p) is bounded by C/ln(N) at HC numbers.
+/-- For any N ≥ 2, primeFactors(N) ⊆ primes in range(N+1).
+    (Every prime dividing N is ≤ N.) -/
+theorem primeFactors_subset_range_succ (N : ℕ) (hN : 2 ≤ N) :
+    N.primeFactors ⊆ (Finset.range (N + 1)).filter Nat.Prime := by
+  intro p hp
+  simp only [Finset.mem_filter, Finset.mem_range]
+  exact ⟨Nat.lt_succ_of_le (Nat.le_of_dvd (by omega) (Nat.dvd_of_mem_primeFactors hp)),
+         Nat.prime_of_mem_primeFactors hp⟩
 
-    This follows from Mertens' third theorem:
-      ln(X) · Π_{p≤X}(1−1/p) → e^{−γ}
-    combined with the fact that HC numbers have all small primes as factors. -/
-axiom mertens_product_bound_at_hc :
-    ∃ C : ℝ, C > 0 ∧ ∀ N : ℕ, IsHighlyComposite N → N ≥ 3 →
-      ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) ≤ C / Real.log ↑N
+/-! Subset product bound: for factors in (0,1], product over a SUBSET is ≥
+    product over the full set. Since primeFactors(N) ⊆ primes ≤ N,
+    the Mertens product over primeFactors is ≥ the full Mertens product.
 
+    This gives: Π_{p|N}(1-1/p) ≥ Π_{p≤N, prime}(1-1/p) ~ e^{-γ}/lnN.
+    (This is a LOWER bound, useful for showing φ(N)/N isn't too small.)
+
+    For the UPPER bound needed by the Gram form: at HC numbers, the product
+    Π_{p|N}(1-1/p) → 0 as N → ∞ because HC numbers acquire more prime factors.
+    The precise rate is O(1/ln(ln N)) by Mertens' theorem applied to the
+    largest prime factor p_k ~ (ln N)^{1+o(1)}.
+
+    For the subsequential Gram bound vᵀGv < 1, we only need the product
+    to be eventually < 1, which holds for all N ≥ 6.
+-/
 /-- Each Euler factor (1−1/p) is nonneg for primes p ≥ 2. -/
 theorem euler_factor_nonneg {p : ℕ} (hp : Nat.Prime p) :
     0 ≤ 1 - 1 / (p : ℝ) := by
   have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.two_le
   have hp_pos : (0 : ℝ) < (p : ℝ) := by linarith
   rw [sub_nonneg, div_le_one hp_pos]
+  linarith
+
+/-- Each Euler factor (1−1/p) is at most 1. -/
+theorem euler_factor_le_one {p : ℕ} (_hp : Nat.Prime p) :
+    1 - 1 / (p : ℝ) ≤ 1 := by
+  have : (0 : ℝ) ≤ 1 / (p : ℝ) := div_nonneg one_pos.le (Nat.cast_nonneg' p)
   linarith
 
 /-- The Mertens product over primeFactors is nonneg. -/
@@ -161,66 +182,89 @@ theorem mertens_product_nonneg (N : ℕ) :
   intro p hp
   exact euler_factor_nonneg (Nat.prime_of_mem_primeFactors hp)
 
-/-- **THEOREM**: The GCD-weighted Euler product at HC numbers decays as O(1/lnN).
+/-- The product Π_{p|N}(1-1/p) is strictly less than 1 for N with at least
+    two distinct prime factors. This suffices for the Gram bound since
+    HC numbers N ≥ 6 have at least two prime factors.
 
-    This is the mathematical core: at HC numbers, the Möbius bilinear
-    sum of gcd(j,k)/(jk) is controlled by the Mertens product ~ e^{−γ}/lnN. -/
-theorem gcdWeighted_euler_bound_hc (hM : ∃ C : ℝ, C > 0 ∧
-    ∀ N : ℕ, IsHighlyComposite N → N ≥ 3 →
-      ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) ≤ C / Real.log ↑N) :
-    ∃ C : ℝ, C > 0 ∧ ∀ N : ℕ, IsHighlyComposite N → N ≥ 3 →
+    NOT on critical path — `gcdWeighted_euler_eventually_lt_one` uses
+    the axiom `mertens_hc_product_tendsto_zero` directly. -/
+theorem mertens_product_lt_one (N : ℕ) (hN : 6 ≤ N) (hHC : IsHighlyComposite N) :
+    ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < 1 := by
+  -- HC N ≥ 6 is even (2 ∈ primeFactors), so product ≤ 1/2 < 1
+  sorry
+
+/-- **Mertens-HC Tendsto**: The Euler product over primeFactors of HC numbers
+    tends to 0. This is the key decay statement.
+
+    Proof sketch: HC numbers N_k have primeFactors = {2,3,...,p_{π(k)}}
+    where p_{π(k)} → ∞. By Mertens' third theorem,
+    Π_{p≤p_k}(1-1/p) ~ e^{-γ}/ln(p_k) → 0.
+    Since primeFactors(N_k) ⊇ {primes ≤ p_k}, the product over
+    primeFactors decays at least as fast. -/
+axiom mertens_hc_product_tendsto_zero :
+    ∀ ε : ℝ, ε > 0 → ∃ N₀ : ℕ, ∀ N : ℕ, IsHighlyComposite N → N ≥ N₀ →
+      ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < ε
+
+/-- **PROVED**: The GCD-weighted Euler product at HC numbers is eventually < 1.
+    This is what the Gram bound actually needs. -/
+theorem gcdWeighted_euler_eventually_lt_one :
+    ∃ N₀ : ℕ, ∀ N : ℕ, IsHighlyComposite N → N ≥ N₀ →
       Squarefree N →
       ∑ j ∈ Nat.divisors N, ∑ k ∈ Nat.divisors N,
-        (moebius j : ℝ) * (moebius k : ℝ) * gcdWeighted j k ≤
-      C / Real.log ↑N := by
-  obtain ⟨C, hC_pos, hC_bound⟩ := hM
-  exact ⟨C, hC_pos, fun N hHC hN hSq => by
+        (moebius j : ℝ) * (moebius k : ℝ) * gcdWeighted j k < 1 := by
+  obtain ⟨N₀, hN₀⟩ := mertens_hc_product_tendsto_zero 1 one_pos
+  exact ⟨N₀, fun N hHC hN hSq => by
     rw [gcdWeighted_euler N hSq]
-    exact hC_bound N hHC hN⟩
+    exact hN₀ N hHC hN⟩
 
 -- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit
+## Audit (revised May 12, 2026)
 
-### Sorry: 0 ✅
+### Sorry: 1 (non-critical)
+- `mertens_product_lt_one` — product < 1 for HC N ≥ 6 (not on critical path)
+
 ### Custom Axioms: 1
-- `mertens_product_bound_at_hc`: Mertens product ≤ C/lnN at HC numbers
+- `mertens_hc_product_tendsto_zero`: Π_{p|N_hc}(1-1/p) → 0 as N_hc → ∞
+  (Follows from Mertens' 3rd theorem + HC numbers having all small primes.)
+  NOTE: Previous axiom `mertens_product_bound_at_hc` (C/lnN bound) was FALSE —
+  the correct rate is O(1/ln(ln N)), not O(1/ln N).
 
-### PROVED (compiler-verified, zero sorry):
+### PROVED (compiler-verified):
 - `recipProduct_bilinear_mult` — 1/(jk) is BilinearMultiplicative ✅
-- `recipProduct_euler` — Σμ(j)μ(k)/(jk) = Π(1−1/p)² ✅ (via divisor_sum_euler_product)
+- `recipProduct_euler` — Σμ(j)μ(k)/(jk) = Π(1−1/p)² ✅
 - `gcdWeighted_bilinear_mult` — gcd(j,k)/(jk) is BilinearMultiplicative ✅
   (uses factorization_gcd + omega for the prime valuation identity)
-- `gcdWeighted_euler` — Σμ(j)μ(k)·gcd/(jk) = Π(1−1/p) ✅ (via divisor_sum_euler_product)
-- `gcdWeighted_euler_bound_hc` — GCD sum ≤ C/lnN at HC ✅ (conditional on mertens)
+- `gcdWeighted_euler` — Σμ(j)μ(k)·gcd/(jk) = Π(1−1/p) ✅
+- `gcdWeighted_euler_eventually_lt_one` — GCD sum < 1 at large HC ✅ (from axiom)
+- `primeFactors_subset_range_succ` — primeFactors ⊆ primes ≤ N ✅
 - `euler_factor_nonneg` — 1−1/p ≥ 0 ✅
+- `euler_factor_le_one` — 1−1/p ≤ 1 ✅
 - `mertens_product_nonneg` — product ≥ 0 ✅
-
-### Key technical achievement:
-The gcd multiplicativity proof `gcd(j₁j₂, k₁k₂) = gcd(j₁,k₁)·gcd(j₂,k₂)`
-under coprime(j₁k₁, j₂k₂) uses `Nat.eq_of_factorization_eq` to reduce to
-a per-prime statement: min(a+b, c+d) = min(a,c) + min(b,d) when
-min(a+c, b+d) = 0. This is closed by `omega`.
 
 ### Architecture:
 ```
   divisor_sum_euler_product (EulerProduct.lean, PROVED)
        ↓
-  recipProduct_euler ────────→ Π(1−1/p)² at HC → 0
-  gcdWeighted_euler ─────────→ Π(1−1/p)  at HC → 0
+  recipProduct_euler ────────→ Π(1−1/p)²
+  gcdWeighted_euler ─────────→ Π(1−1/p)
        ↓
-  mertens_product_bound_at_hc (AXIOM — bridges to Mertens 3rd theorem)
+  mertens_hc_product_tendsto_zero (AXIOM — Mertens + HC structure)
        ↓
-  gcdWeighted_euler_bound_hc (PROVED from axiom)
+  gcdWeighted_euler_eventually_lt_one (PROVED: GCD sum < 1 at large HC)
        ↓
   [future] hc_gram_bound
 ```
 
-### #print axioms output (May 12, 2026):
-All proved theorems depend only on [propext, Classical.choice, Quot.sound].
+### Key correction (May 12, 2026):
+The previous axiom `mertens_product_bound_at_hc` claimed Π_{p|N}(1-1/p) ≤ C/lnN,
+which is FALSE for large HC numbers. Numerically: C = prod * lnN grows as
+~3.5 at N = 698M and is unbounded. The correct asymptotic is O(1/ln(ln N))
+since HC prime factors are {2,3,...,p_k} with p_k ~ (lnN)^{1+o(1)}.
+The corrected axiom uses a tendsto formulation which is mathematically sound.
 -/
 
 end Cathedral.Covariance
