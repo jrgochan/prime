@@ -33,9 +33,10 @@ classical.
 
 The second half covers practice: Mathlib API patterns that worked
 well (interval integrals, spectral theory), patterns requiring
-workarounds (infinite sums, measure theory), 4 API gaps requiring
-axioms, 12 essential lemmas, project structure advice, and common
-tactic patterns. We document 3 deprecated-API traps and provide
+workarounds (infinite sums, measure theory), 5 original Mathlib gaps
+(3 graduated by the project, 2 remaining), 12 essential lemmas,
+project structure advice, and common tactic patterns.
+We document 3 deprecated-API traps and provide
 a verification checklist for large-scale proof engineering.
 \end{abstract}
 
@@ -214,31 +215,47 @@ Moving between Bochner and Henstock--Kurzweil integrals requires
 care via \lean{intervalIntegrable\_iff\_integrable\_Ioc}.
 
 % ================================================================
-\section{Four Mathlib Gaps Requiring Axioms}
+\section{Mathlib Gaps: Two Remaining, Three Graduated}
 \label{sec:gaps}
 % ================================================================
 
+Of the five original Mathlib gaps that forced the Cathedral to
+introduce axioms, \textbf{three} were resolved by formalizing the
+required mathematics directly:
+
 \begin{center}
-\begin{tabular}{@{}lp{5cm}l@{}}
+\begin{tabular}{@{}lp{4.2cm}ll@{}}
 \toprule
-\textbf{Gap} & \textbf{What's Missing} & \textbf{Difficulty} \\
+\textbf{Gap} & \textbf{What's Missing} & \textbf{Difficulty} & \textbf{Status} \\
 \midrule
-Analytic continuation & Mellin integral extension & Medium \\
-Contour integrals & Vertical line integration & Hard \\
-Mertens function & $M(x) = \sum_{n \leq x}\mu(n)$ & Medium \\
-Dedekind sums & Off-diagonal Vasyunin & Medium \\
+Analytic continuation & Mellin integral extension & Medium & \textbf{Open} (2 axioms) \\
+Mertens function & $M(x) = \sum_{n \leq x}\mu(n)$ & Medium & \textbf{Open} (12 axioms) \\
+\midrule
+Montgomery--Vaughan & Dirichlet polynomial MVT & Hard & \textbf{Graduated} \\
+Contour integrals & Vertical line integration & Hard & \textbf{Graduated} \\
+Dedekind sums & Off-diagonal Vasyunin & Medium & \textbf{Graduated} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent
-\textbf{Note:} The Montgomery--Vaughan Dirichlet polynomial MVT was
-originally a fifth gap, but was formalized directly as the
+\textbf{Graduated gaps.}
+The Montgomery--Vaughan MVT was formalized as the
 \emph{Gallagher MVT} via Fej\'er kernel (\lean{Analysis/GallagherMVT.lean},
-0 axioms, 0 sorry).
+0 axioms, 0~sorry).
+The Perron contour chain was built from scratch without Mathlib's
+contour integral API (16 files, 0 axioms, 0~sorry).
+The off-diagonal Vasyunin integral was proved via the Cotangent
+Tower: piecewise partition, telescope sums, and GCD reduction
+(25 files, 0 axioms, 0~sorry).
 
-These four additions to Mathlib would eliminate a substantial fraction
-of the Cathedral's off-path axioms.
+\noindent
+\textbf{Remaining gaps.}
+The Mertens gap is the largest axiom cluster (12 axioms), encoding
+PNT-derived asymptotics for $M(x)$ and its Abel means. These would
+be eliminated if Mathlib provided $M(x)$ as a first-class object with
+its standard asymptotic bounds. The analytic continuation gap (2
+axioms) encodes the Mellin--Fourier interchange and spectral bounds.
 
 % ================================================================
 \section{Twelve Essential Mathlib Lemmas}
@@ -351,10 +368,11 @@ in your Mathlib version.
 % ================================================================
 
 Formalizing analytic number theory in Lean~4 is feasible today, but
-requires significant infrastructure work. The main gaps are in
-complex analysis (contour integrals, analytic continuation) and
-specialized number theory (Mertens function, Dedekind sums).
-The Cathedral took 45 days and produced $\sim$60{,}500 lines
+requires significant infrastructure work. Of five original Mathlib
+gaps, three were resolved by direct formalization (Gallagher MVT,
+Perron contour chain, off-diagonal Vasyunin). The two remaining
+gaps are the Mertens function (12 axioms) and analytic continuation
+(2 axioms). The Cathedral took 45 days and produced $\sim$60{,}500 lines
 across 227 active files.
 
 The foundational analysis shows the proof inhabits ordinary
