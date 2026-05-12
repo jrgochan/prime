@@ -6,7 +6,7 @@ reduction of the Riemann Hypothesis to the decay of the Nyman–Beurling distanc
 ## Build
 
 ```bash
-lake build    # 227 active files, 113 archived
+lake build    # 227 active files, 112 archived
 ```
 
 Requires Lean **v4.29.0** (pinned in `lean-toolchain`).

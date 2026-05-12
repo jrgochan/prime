@@ -25,7 +25,7 @@ Nyman--Beurling distance:
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
 The formalization comprises 227 active Lean files ($\sim$60{,}500 lines;
-330 files and $\sim$84{,}700 lines including archived explorations) with
+339 files and $\sim$85{,}900 lines including archived explorations) with
 zero compilation errors. On the crown path, the theorem depends on
 exactly \textbf{one} literature axiom---the B\'aez-Duarte forward
 direction (Atti Lincei, 2003)---establishing that RH implies $d_N^2 \to 0$.
@@ -587,7 +587,7 @@ The Cathedral is organized into 24 modules (227 active files):
 \end{tabular}
 \end{center}
 
-An additional 113 files are preserved in \lean{Archive/}.
+An additional 112 files are preserved in \lean{Archive/}.
 Of the 227 active files, \textbf{219} (96\%) are sorry-free.
 Exploratory paths and upstream PNTA dependencies contain
 17 quarantined \lean{sorry} placeholders (across 8 files) that do not
@@ -615,7 +615,7 @@ these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 227 active files, 113 archived
+lake build    # 227 active files, 112 archived
 
 #print axioms nyman_beurling_equivalence
 -- baez_duarte_forward
