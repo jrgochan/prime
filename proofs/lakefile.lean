@@ -310,6 +310,7 @@ lean_lib «Cathedral» where
     `Cathedral.ZeroAxiom.FiniteDirichlet,
     `Cathedral.ZeroAxiom.MellinAlgebra,
     -- Zero-axiom forward direction (Exploration 36: The Road to Zero)
+    `Cathedral.ZeroAxiom.AbelEngine,
     `Cathedral.ZeroAxiom.TaperedAbel,
     -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
     `Cathedral.Compute.IntervalVerifier,
