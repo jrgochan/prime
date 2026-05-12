@@ -9,10 +9,15 @@
   2. HC numbers eventually contain all primes up to any bound
   3. Superset product inequality for [0,1]-valued functions
 
-  ### Axioms in this file: 1
+  ### Infrastructure proved in this file:
+  - `divisor_swap_ge`: d(N/p · q) ≥ d(N) when p | N, q prime, q ∤ N
+  - `hc_primes_consecutive`: HC prime factors are {2,3,...,p_max}
+  - `hc_two_dvd`: HC N > 1 → 2 | N
+
+  ### Axiom in this file: 1
   - `hc_primeFactors_eventually_contain`: HC numbers eventually contain
-    all primes up to any bound. This follows from the prime swap theorem
-    (if p | N_hc and q < p with q ∤ N_hc, then N/p·q has more divisors).
+    all primes up to any bound. This requires the consecutive prime
+    structure (proved) PLUS the max prime factor → ∞ (not yet proved).
 
   ### Proved in this file:
   - `mertens_product_tendsto_zero`: Π_{p<X}(1-1/p) → 0 (from Mertens 3rd)
@@ -32,7 +37,106 @@ open Real Finset Filter Cathedral.Covariance Cathedral.Covariance.MertensBridge
 namespace Cathedral.Covariance.HCPrimeStructure
 
 -- ════════════════════════════════════════════════
--- §1. HC PRIME STRUCTURE AXIOM
+-- §1. FACTORIZATION INFRASTRUCTURE (PROVED)
+-- ════════════════════════════════════════════════
+
+/-- p does not divide the p-free part N/p^v of N. -/
+private lemma prime_not_dvd_ordCompl (N p : ℕ) (hp : p.Prime) (hN : 0 < N) :
+    ¬(p ∣ (N / p ^ (N.factorization p))) := by
+  intro h
+  have : (N / p ^ (N.factorization p)).factorization p = 0 := by
+    rw [Nat.factorization_div (Nat.ordProj_dvd N p), Finsupp.tsub_apply,
+      Nat.factorization_pow, Finsupp.smul_apply, smul_eq_mul,
+      hp.factorization_self, mul_one, Nat.sub_self]
+  have hK_ne : N / p ^ (N.factorization p) ≠ 0 :=
+    Nat.ne_of_gt (Nat.div_pos (Nat.le_of_dvd (by omega) (Nat.ordProj_dvd N p))
+      (pow_pos hp.pos _))
+  exact absurd ((hp.dvd_iff_one_le_factorization hK_ne).mp h) (by omega)
+
+/-- d(p^k) = k + 1 -/
+private lemma card_div_pp (p k : ℕ) (hp : p.Prime) :
+    #(Nat.divisors (p ^ k)) = k + 1 := by
+  rw [Nat.divisors_prime_pow hp, Finset.card_map, Finset.card_range]
+
+/-- N/p = p^(v-1) · K where v = v_p(N) and K = N/p^v (the p-free part). -/
+private lemma div_prime_decomp (N p : ℕ) (hp : p.Prime) (hN : 0 < N) (hpN : p ∣ N) :
+    N / p = p ^ (N.factorization p - 1) * (N / p ^ (N.factorization p)) := by
+  set v := N.factorization p; set K := N / p ^ v
+  have hv : 0 < v := (hp.dvd_iff_one_le_factorization (by omega)).mp hpN
+  have : p ^ v * K = N := Nat.ordProj_mul_ordCompl_eq_self N p
+  have hpv : p ^ v = p * p ^ (v - 1) := by
+    conv_lhs => rw [← Nat.succ_pred_eq_of_pos hv]; simp [pow_succ, mul_comm]
+  rw [show N = p * (p ^ (v - 1) * K) from by rw [← mul_assoc, ← hpv, this],
+    Nat.mul_div_cancel_left _ hp.pos]
+
+-- ════════════════════════════════════════════════
+-- §2. DIVISOR SWAP INEQUALITY (PROVED)
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: The divisor count swap inequality.
+
+    If p | N and q is prime with q ∤ N, then M = N/p · q satisfies
+    d(M) ≥ d(N). This is the core engine of the prime swap theorem.
+
+    Key math: N = p^v · K (coprime), v = v_p(N) ≥ 1.
+    d(N) = (v+1) · d(K), d(M) = 2v · d(K). Since 2v ≥ v+1 for v ≥ 1. -/
+theorem divisor_swap_ge (N p q : ℕ) (hN : 0 < N)
+    (hp : p.Prime) (hq : q.Prime) (hpN : p ∣ N) (hqN : ¬(q ∣ N)) :
+    #(Nat.divisors (N / p * q)) ≥ #(Nat.divisors N) := by
+  set v := N.factorization p; set K := N / p ^ v
+  have hv : 0 < v := (hp.dvd_iff_one_le_factorization (by omega)).mp hpN
+  have hK_pos : 0 < K := Nat.div_pos (Nat.le_of_dvd (by omega) (Nat.ordProj_dvd N p))
+      (pow_pos hp.pos _)
+  have hnp := prime_not_dvd_ordCompl N p hp hN
+  have hcop : Nat.Coprime (p ^ v) K := .pow_left _ (hp.coprime_iff_not_dvd.mpr hnp)
+  have hcop1 : Nat.Coprime (p ^ (v - 1)) K := .pow_left _ (hp.coprime_iff_not_dvd.mpr hnp)
+  have hcop_q : Nat.Coprime q (N / p) :=
+    hq.coprime_iff_not_dvd.mpr (fun h => hqN (h.trans (Nat.div_dvd_of_dvd hpN)))
+  -- d(N) = (v+1) * d(K)
+  have hd_N : #(Nat.divisors N) = (v + 1) * #(Nat.divisors K) := by
+    conv_lhs => rw [(Nat.ordProj_mul_ordCompl_eq_self N p).symm]
+    rw [hcop.card_divisors_mul, card_div_pp p v hp]
+  -- d(N/p) = v * d(K)
+  have hd_Np : #(Nat.divisors (N / p)) = v * #(Nat.divisors K) := by
+    rw [div_prime_decomp N p hp hN hpN, hcop1.card_divisors_mul, card_div_pp p (v-1) hp,
+      Nat.sub_add_cancel hv]
+  -- d(N/p * q) = d(N/p) * 2
+  have hd_M : #(Nat.divisors (N / p * q)) = #(Nat.divisors (N / p)) * 2 := by
+    rw [hcop_q.symm.card_divisors_mul,
+      show #(Nat.divisors q) = 2 from by
+        rw [show q = q ^ 1 from (pow_one q).symm]; exact card_div_pp q 1 hq]
+  -- 2v * d(K) ≥ (v+1) * d(K) since v ≥ 1
+  have hdK_pos : 0 < #(Nat.divisors K) :=
+    Finset.card_pos.mpr ⟨1, Nat.one_mem_divisors.mpr (by omega)⟩
+  rw [hd_M, hd_Np, hd_N]; nlinarith
+
+-- ════════════════════════════════════════════════
+-- §3. HC CONSECUTIVE PRIMES (PROVED)
+-- ════════════════════════════════════════════════
+
+/-- **PROVED**: HC numbers have consecutive prime factors.
+    If p | N and q < p is prime, then q | N (else the swap gives d(M) ≥ d(N)
+    with M < N, contradicting HC). -/
+theorem hc_primes_consecutive {N p q : ℕ} (hHC : IsHighlyComposite N)
+    (hp : p.Prime) (hq : q.Prime) (hpN : p ∣ N) (hqp : q < p) :
+    q ∣ N := by
+  by_contra hqN
+  have hNp_pos : 0 < N / p := Nat.div_pos (Nat.le_of_dvd hHC.1 hpN) hp.pos
+  have hM_lt : N / p * q < N := calc
+    N / p * q < N / p * p := Nat.mul_lt_mul_of_pos_left hqp hNp_pos
+    _ ≤ N := Nat.div_mul_le_self N p
+  exact absurd (divisor_swap_ge N p q hHC.1 hp hq hpN hqN)
+    (not_le.mpr (hHC.2 _ (Nat.mul_pos hNp_pos hq.pos) hM_lt))
+
+/-- **PROVED**: HC N > 1 → 2 | N. -/
+theorem hc_two_dvd {N : ℕ} (hHC : IsHighlyComposite N) (hN : 1 < N) : 2 ∣ N := by
+  obtain ⟨p, hp, hpN⟩ := Nat.exists_prime_and_dvd (by omega : N ≠ 1)
+  rcases eq_or_lt_of_le hp.two_le with rfl | h2p
+  · exact hpN
+  · exact hc_primes_consecutive hHC hp Nat.prime_two hpN h2p
+
+-- ════════════════════════════════════════════════
+-- §4. HC PRIME STRUCTURE AXIOM
 -- ════════════════════════════════════════════════
 
 /-- **AXIOM**: HC numbers eventually contain all primes up to any bound.
@@ -40,18 +144,21 @@ namespace Cathedral.Covariance.HCPrimeStructure
     For any B, there exists N₀ such that for all HC numbers N ≥ N₀,
     every prime p ≤ B divides N.
 
-    This is a consequence of the **prime swap theorem**: if N is HC,
-    p | N, and q < p is a prime with q ∤ N, then M = N/p · q satisfies
-    M < N and d(M) ≥ d(N), contradicting HC.
+    This follows from two facts:
+    1. `hc_primes_consecutive` (PROVED above): primeFactors(N_hc) = {2,...,p_max}
+    2. max_prime(N_hc) → ∞ as N_hc → ∞ (NOT YET PROVED)
 
-    In particular, HC numbers have "consecutive" prime factors
-    {2, 3, 5, ..., p_k}, with no gaps. -/
+    Fact (2) requires showing that HC numbers with bounded prime support
+    cannot have unbounded divisor counts. This is a number-theoretic
+    compactness argument: if all primes ≤ C, then
+    d(N) ≤ (log₂ N + 1)^{π(C)}, which is sub-polynomial,
+    while HC d-values grow super-logarithmically. -/
 axiom hc_primeFactors_eventually_contain :
     ∀ B : ℕ, ∃ N₀ : ℕ, ∀ N : ℕ, IsHighlyComposite N → N ≥ N₀ →
       ∀ p : ℕ, p.Prime → p ≤ B → p ∈ N.primeFactors
 
 -- ════════════════════════════════════════════════
--- §2. SUPERSET PRODUCT INEQUALITY
+-- §5. SUPERSET PRODUCT INEQUALITY (PROVED)
 -- ════════════════════════════════════════════════
 
 /-- Product over a superset of [0,1] factors is ≤ product over subset.
@@ -69,16 +176,13 @@ private lemma prod_le_prod_of_superset (S T : Finset ℕ) (hST : T ⊆ S) (f : �
     _ = ∏ x ∈ T, f x := one_mul _
 
 -- ════════════════════════════════════════════════
--- §3. MERTENS PRODUCT → 0
+-- §6. MERTENS PRODUCT → 0 (PROVED)
 -- ════════════════════════════════════════════════
 
 /-- **PROVED**: The Mertens product Π_{p<X, prime}(1-1/p) → 0 as X → ∞.
 
     From cathedral_mertens_third: ln(X) · Π → e^{-γ} > 0.
-    Since ln(X) → ∞, we get Π → 0.
-
-    Proof: for any ε > 0, eventually ln(X) · Π < e^{-γ} + 1 = C,
-    so Π < C/ln(X). Since ln(X) → ∞, eventually C/ln(X) < ε. -/
+    Since ln(X) → ∞, we get Π → 0. -/
 theorem mertens_product_tendsto_zero :
     Tendsto (fun X : ℕ => ∏ p ∈ (range X).filter Nat.Prime, (1 - 1 / (p : ℝ)))
     atTop (nhds 0) := by
@@ -116,7 +220,7 @@ theorem mertens_product_tendsto_zero :
   linarith
 
 -- ════════════════════════════════════════════════
--- §4. THE GRADUATION
+-- §7. THE GRADUATION (PROVED from axiom)
 -- ════════════════════════════════════════════════
 
 /-- **PROVED (from axiom)**: The Mertens product over primeFactors of HC
@@ -124,30 +228,20 @@ theorem mertens_product_tendsto_zero :
 
     This GRADUATES the axiom `mertens_hc_product_tendsto_zero` from
     HCEulerProduct.lean, replacing it with the simpler axiom
-    `hc_primeFactors_eventually_contain`.
-
-    Proof chain:
-    1. mertens_product_tendsto_zero: Π_{p<X}(1-1/p) → 0  (from Mertens 3rd)
-    2. For large HC N, primeFactors(N) ⊇ {primes ≤ B}     (axiom)
-    3. Superset product: Π_{pf(N)} ≤ Π_{primes ≤ B}       (proved)
-    4. Combine: Π_{pf(N)} ≤ Π_{primes ≤ B} < ε            (for large B) -/
+    `hc_primeFactors_eventually_contain`. -/
 theorem mertens_hc_product_tendsto_zero_proved :
     ∀ ε : ℝ, ε > 0 → ∃ N₀ : ℕ, ∀ N : ℕ, IsHighlyComposite N → N ≥ N₀ →
       ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < ε := by
   intro ε hε
-  -- Step 1: Find B such that Π_{range(B+1) filter prime}(1-1/p) < ε
   have h_mz := mertens_product_tendsto_zero
   rw [Metric.tendsto_atTop] at h_mz
   obtain ⟨B, hB⟩ := h_mz ε hε
-  -- Step 2: Find N₁ such that HC N ≥ N₁ → primeFactors(N) ⊇ {primes ≤ B}
   obtain ⟨N₁, hN₁⟩ := hc_primeFactors_eventually_contain B
   refine ⟨max N₁ 6, fun N hHC hN => ?_⟩
-  -- Step 3: {primes ≤ B} = range(B+1) filter prime ⊆ primeFactors(N)
   have h_sub : (range (B + 1)).filter Nat.Prime ⊆ N.primeFactors := by
     intro p hp
     simp only [mem_filter, mem_range] at hp
     exact hN₁ N hHC (by omega) p hp.2 (by omega)
-  -- All Euler factors in [0,1]
   have hf0 : ∀ x ∈ N.primeFactors, 0 ≤ 1 - 1/(x:ℝ) := fun x hx => by
     have := (Nat.prime_of_mem_primeFactors hx).one_le
     linarith [show (0:ℝ) ≤ 1/(x:ℝ) from div_nonneg one_pos.le (Nat.cast_nonneg' x),
@@ -157,7 +251,6 @@ theorem mertens_hc_product_tendsto_zero_proved :
                 exact_mod_cast (Nat.prime_of_mem_primeFactors hx).one_le]
   have hf1 : ∀ x ∈ N.primeFactors, 1 - 1/(x:ℝ) ≤ 1 := fun x _ => by
     linarith [show (0:ℝ) ≤ 1/(x:ℝ) from div_nonneg one_pos.le (Nat.cast_nonneg' x)]
-  -- Step 4: Π_{pf(N)} ≤ Π_{range(B+1) filter prime} < ε
   have h_le := prod_le_prod_of_superset N.primeFactors
     ((range (B + 1)).filter Nat.Prime) h_sub (fun p => 1 - 1/(p:ℝ)) hf0 hf1
   have h_target := hB (B + 1) (by omega)
@@ -179,32 +272,38 @@ theorem mertens_hc_product_tendsto_zero_proved :
 ### Sorry: 0 ✅
 ### Axioms: 1
 - `hc_primeFactors_eventually_contain`: HC numbers eventually contain
-  all primes up to any bound. Follows from the prime swap theorem.
+  all primes up to any bound.
 
 ### Proved:
+- `prime_not_dvd_ordCompl` — p ∤ N/p^v ✅
+- `divisor_swap_ge` — d(N/p·q) ≥ d(N) ✅
+- `hc_primes_consecutive` — HC primes are {2,...,p_max} ✅
+- `hc_two_dvd` — HC N > 1 → 2 | N ✅
 - `mertens_product_tendsto_zero` — Π_{p<X}(1-1/p) → 0 ✅
 - `mertens_hc_product_tendsto_zero_proved` — Π_{p|N_hc}(1-1/p) → 0 ✅
 
 ### Architecture:
 ```
-  cathedral_mertens_third (MertensBridge, PROVED)
+  §1. Factorization infrastructure (PROVED)
        ↓
-  mertens_product_tendsto_zero (PROVED: Π → 0 from ln·Π → e^{-γ})
+  §2. divisor_swap_ge: d(N/p·q) ≥ d(N) (PROVED)
        ↓
-  hc_primeFactors_eventually_contain (AXIOM — prime swap)
+  §3. hc_primes_consecutive (PROVED: swap + HC contradiction)
        ↓
-  mertens_hc_product_tendsto_zero_proved (PROVED: Π_{pf(N_hc)} → 0)
+  §4. hc_primeFactors_eventually_contain (AXIOM — needs max_prime → ∞)
        ↓
-  [replaces mertens_hc_product_tendsto_zero in HCEulerProduct.lean]
+  §5-6. Superset product + Mertens → 0 (PROVED)
+       ↓
+  §7. mertens_hc_product_tendsto_zero_proved (PROVED from axiom)
 ```
 
-### Axiom graduation path:
-`hc_primeFactors_eventually_contain` can be graduated by proving the
-prime swap theorem: if p | N_hc and q < p prime with q ∤ N_hc, then
-M = N/p · q has d(M) ≥ d(N) and M < N. This requires:
-- Divisor count multiplicativity: d(a·b) = d(a)·d(b) for coprime a,b
-- Factorization arithmetic: v_p(N/p) = v_p(N) - 1
-- The key inequality: 2·v_p(N) ≥ v_p(N) + 1 for v_p(N) ≥ 1
+### Remaining axiom graduation path:
+The axiom reduces to: "max prime factor of HC numbers → ∞."
+This requires showing that HC numbers with bounded prime support
+cannot have arbitrarily large divisor counts:
+- d(N) ≤ (log₂ N + 1)^{π(C)} when all primes ≤ C
+- HC d-values grow super-logarithmically
+- Contradiction for large enough N
 -/
 
 end Cathedral.Covariance.HCPrimeStructure
