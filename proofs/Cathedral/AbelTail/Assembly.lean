@@ -6,13 +6,13 @@
   [ON CROWN PATH — abel_mertens_tail_raw GRADUATED to theorem 🎓]
 
   Combines s1_decay, s2_decay, s3_decay into a single uniform bound.
-  When all sorry are closed, this replaces the axiom
+  When remaining infrastructure is proved, this replaces the axiom
   `abel_mertens_tail_raw` in FinalDragon.lean.
 
   SORRY STATUS:
   - s1_decay: ✅ PROVED
-  - s2_decay: ❌ 2 sorry (S2Decay.lean)
-  - s3_decay: ❌ 1 sorry (S3Decay.lean)
+  - s2_decay: ✅ 0 sorry (S2Decay.lean)
+  - s3_decay: ✅ 0 sorry (S3Decay.lean)
 -/
 
 import Cathedral.AbelTail.S1Decay

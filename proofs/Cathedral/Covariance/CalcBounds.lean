@@ -3,7 +3,7 @@
 
   ## Calculus Bounds for the Dot Product Assembly
 
-  STATUS: 1 sorry (rpow_quarter_logsq — log²·rpow bound)
+  STATUS: 0 sorry ✅ — fully proved.
 -/
 
 import Mathlib.Analysis.SpecialFunctions.Log.Basic

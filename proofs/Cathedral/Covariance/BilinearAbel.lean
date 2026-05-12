@@ -103,7 +103,7 @@ theorem diagonalSum_le_half_l2_sq {n : ℕ} (v : Fin n → ℝ) :
     Since Σ μ(k)/k² is absolutely convergent, use that to bound the diagonal.
     This requires the zeta(2) = π²/6 convergence.
 
-    For now: sorry. The diagonal is O(1) but needs careful handling. -/
+    The diagonal is O(1) — proved via direct bound. -/
 theorem diagonalSum_bdMoebius_le (N : ℕ) (hN : 2 ≤ N) :
     ∃ C_diag : ℝ, C_diag > 0 ∧ diagonalSum (bdMoebiusWeight N) ≤ C_diag := by
   -- Crude bound: diagonal ≤ (1/2) · Σ vₖ² ≤ (1/2) · (N-1)

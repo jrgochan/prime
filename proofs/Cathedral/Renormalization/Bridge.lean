@@ -15,7 +15,7 @@
   ### Architecture
 
   This is the third independent proof path in the Cathedral:
-    PATH A — Mellin Crown (1 sorry)
+    PATH A — Mellin Crown (0 sorry ✅)
     PATH B — Perron Crown (PROVED, 4 axioms)
     PATH C — Renormalization (PROVED, 0 PATH-C axioms) ← THIS FILE
 

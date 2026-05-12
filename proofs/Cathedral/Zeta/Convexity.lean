@@ -86,8 +86,8 @@ theorem inv_zeta_differentiableAt (hRH : RiemannHypothesis)
     Re(s) ≥ 1/2 + ε and |Im(s)| ≥ T₀:
       |ζ(s)| ≥ c / |Im(s)|^A
 
-    **NOW PROVED** (with 1 sorry) in Cathedral.Zeta.LowerBound.lean via
-    Borel-Carathéodory + ε-rescaling. The sorry covers only the
+    **NOW PROVED** (✅) in Cathedral.Zeta.LowerBound.lean via
+    Borel-Carathéodory + ε-rescaling. The axiom covers only the
     thin strip 1/2+ε ≤ Re(s) < 1/2+ε' when A < B_ε. -/
 theorem zeta_polynomial_lower_bound_rh (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :

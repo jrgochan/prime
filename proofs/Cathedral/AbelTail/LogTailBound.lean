@@ -16,7 +16,7 @@
 
   CERTIFIED NUMERICALLY: all bounds at 256-bit MPFR, worst ratio 0.694.
 
-  STATUS: 1 sorry (HasDerivAt for antiderivative — available but not on critical path).
+  STATUS: 0 sorry ✅ — fully proved.
   The finite tail bound uses the PURELY DISCRETE sum-swap approach.
 -/
 

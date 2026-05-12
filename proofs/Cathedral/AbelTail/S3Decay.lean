@@ -11,7 +11,7 @@
   2. finite_abel_s3_diff: Abel bound with M-INDEPENDENT interior
   3. s3_decay: limit argument (boundary_vanishes_nat + ε-argument)
 
-  STATUS: 1 sorry (logsq_weighted_tail — log² tail arithmetic).
+  STATUS: 0 sorry ✅ — fully proved.
 -/
 
 import Cathedral.AbelTail.AbelInterior

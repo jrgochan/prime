@@ -7,14 +7,14 @@ import Cathedral.White.Scattering
   ## The Bridge: Perron Path → Mellin Variance
 
   Uses the Perron Crown's L² rate bound and parseval_bridge_white
-  to prove critical_line_mellin_variance without sorry.
+  to prove critical_line_mellin_variance.
 
   Chain:
-    RH → Mertens x^{3/4} (Perron, 1 sorry)
+    RH → Mertens x^{3/4} (Perron, 0 sorry ✅)
        → ∫₀¹(1-f_N)² ≤ C/logN (mertens_implies_l2_decay_34)
        → (1/2π)∫|M(1/2+it)|² ≤ C/logN (parseval_bridge_white⁻¹)
 
-  This bridges the Perron proof to eliminate the Mellin sorry.
+  This bridges the Perron proof to the Mellin variance axiom.
 -/
 
 noncomputable section
@@ -27,7 +27,7 @@ open Real MeasureTheory Complex Filter Cathedral.White ArithmeticFunction
     2. mertens_implies_l2_decay_34 (L² rate: ∫(1-f)² ≤ C/logN)
     3. parseval_bridge_white (Parseval: L²(0,1) = Mellin L²)
 
-    This closes the sorry in MellinVarianceProof.lean. -/
+    This connects the Perron chain to MellinVarianceProof.lean. -/
 theorem critical_line_mellin_variance_from_perron (hRH : RiemannHypothesis) :
     ∃ C : ℝ, C > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →

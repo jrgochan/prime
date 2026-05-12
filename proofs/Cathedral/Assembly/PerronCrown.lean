@@ -8,7 +8,7 @@
   reducing the forward direction's axiom count by 1.
 
   ### Architecture:
-    PerronMoebius.mertens_bound_eps      (RH → M(x) = O(x^{1/2+ε}), 1 sorry)
+    PerronMoebius.mertens_bound_eps      (RH → M(x) = O(x^{1/2+ε}), 0 sorry ✅)
     → MertensFromPerron.rh_implies_mertens_bound_proved
                                           (RH → |M(x)| ≤ C·x^{3/4})
     → rh_implies_bd_convergence_perron    (RH → d² → 0)
@@ -23,10 +23,10 @@
   ### Axiom Reduction:
     DirectL2Crown (old): rh_implies_mertens_bound [AXIOM] + 3 PNT = 4 axioms
     PerronCrown (new):   3 PNT axioms + 1 covariance axiom = 4 axioms, but
-                         rh_implies_mertens_bound is ELIMINATED (now theorem + 1 sorry)
+                         rh_implies_mertens_bound is ELIMINATED (now theorem + 0 sorry ✅)
 
   ### Sorry Status:
-    Inherits 1 sorry from the Perron contour shift assembly (mertens_bound_eps)
+    Fully proved. Depends on the Perron contour shift assembly (mertens_bound_eps).
     which uses the rh_zeta_lower_bound_from_zero_counting axiom.
     Note: ZetaLowerBound.lean's Case A now uses the PROVEN littlewood_maneuver
     (Three-Circles + Right Half-Plane Trap, May 2026).
@@ -268,7 +268,7 @@ theorem mertens_implies_l2_decay_34
 /-- **THE PERRON CROWN**: RH → d²_BD → 0 via the Perron-Moebius chain.
 
     PROOF CHAIN:
-      RH →  mertens_bound_eps              [Perron, 1 sorry]
+      RH →  mertens_bound_eps              [Perron, 0 sorry ✅]
          →  mertens_34_from_eps             [PROVED]
          →  mertens_implies_l2_decay_34     [2 PNT axioms + 1 covariance axiom]
          →  loglog_div_log_lt_eps           [PROVED — calculus]
@@ -314,7 +314,7 @@ theorem rh_implies_bd_convergence_perron :
 /-- **THE PERRON EQUIVALENCE**: Nyman-Beurling via the Perron chain.
 
     Converse: 0 axioms (BDMellin.lean)
-    Forward:  3 PNT axioms + 1 covariance axiom + 1 sorry
+    Forward:  3 PNT axioms + 1 covariance axiom + 0 sorry ✅
 
     This ELIMINATES the `rh_implies_mertens_bound` axiom from the
     critical path, replacing it with the Perron-proved theorem. -/

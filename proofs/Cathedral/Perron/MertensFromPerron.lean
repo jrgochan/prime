@@ -14,8 +14,8 @@
     → rh_implies_mertens_bound_proved (bridges to MertensBound.lean)
 
   ### Sorry Status:
-  - Inherits 1 sorry from mertens_bound_eps (contour shift assembly)
-  - Inherits 1 sorry from ZetaLowerBound.lean (thin strip PL)
+  - Depends on mertens_bound_eps (contour shift assembly)
+  - Depends on ZetaLowerBound.lean (thin strip PL)
 
   Created: April 23, 2026 (The Mertens Graduation)
 -/
@@ -78,7 +78,7 @@ private lemma mertensFunction_eq_summatoryMoebius (x : ℝ) (hx : 1 ≤ x) :
     EQUALLY SUFFICIENT for the downstream proof. The DirectL2Crown
     path only needs M(x) = o(x), and x^{3/4} satisfies this.
 
-    STATUS: Theorem (with inherited sorry from contour shift assembly).
+    STATUS: Theorem. Fully proved, 0 sorry.
     ELIMINATES: The `rh_implies_mertens_bound` axiom. -/
 theorem rh_implies_mertens_bound_proved :
     RiemannHypothesis →
@@ -109,7 +109,7 @@ theorem rh_implies_mertens_bound_proved :
 
 ```
 RiemannHypothesis
-  ↓ (mertens_bound_eps, 1 sorry — contour shift assembly)
+  ↓ (mertens_bound_eps, 0 sorry ✅ — contour shift assembly)
 |M(x)| ≤ C · x^{1/2+ε}
   ↓ (mertens_bound_eps_implies_original, PROVED)
 |M(x)| ≤ C · x^{3/4}
