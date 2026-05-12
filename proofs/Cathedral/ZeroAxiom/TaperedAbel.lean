@@ -88,11 +88,41 @@ lemma tapered_truncation_bound_above_34
       -- Tail bound: the sum beyond N contributes O(N^{3/4-σ}/logN)
       -- Taper correction: the (logk/logN) terms contribute O(N^{3/4-σ}/logN)
       -- Combined with the 1/ζ(s) remainder from moebius_partial_sum_approx
-      (if ‖riemannZeta (↑σ + ↑t * I)‖ = 0 then 0
-       else 42 * (N : ℝ) ^ ((3:ℝ)/4 - σ) / Real.log N) := by
-  -- This is the hard analytical content. Abel summation by parts
-  -- with the Fejér taper + Mertens bound gives the decay.
-  sorry
+    (if ‖riemannZeta (↑σ + ↑t * I)‖ = 0 then 0
+     else 42 * (N : ℝ) ^ ((3:ℝ)/4 - σ) / Real.log N) := by
+  -- Step 0: Handle the ζ(s) = 0 case via RH zero-free region
+  by_cases h_zeta : ‖riemannZeta (↑σ + ↑t * I)‖ = 0
+  · -- Under RH, ζ(s) ≠ 0 for Re(s) > 1/2 (except the pole s=1 where ‖ζ‖ = ∞ ≠ 0).
+    -- So ‖ζ(s)‖ = 0 means ζ(s) = 0 (norm zero ↔ element zero).
+    -- For σ > 3/4 > 1/2, under RH, this cannot happen.
+    -- Since ‖ζ(s)‖ = 0, ζ(s) = 0, so 1/ζ(s) = 0 in Lean (division by zero = 0).
+    -- taperedTruncationError = 0 - P_N(s) = -P_N(s).
+    -- We need ‖-P_N(s)‖ ≤ 0, but the bound when ζ(s)=0 is 0.
+    -- Under RH, this case is vacuously handled.
+    simp only [h_zeta, ite_true]
+    -- RH: ζ(s) ≠ 0 for Re(s) > 1/2, s ≠ 1
+    -- Combined with the pole at s=1 (‖ζ(1)‖ = ∞ ≠ 0), this covers all σ > 3/4.
+    exfalso
+    have h_norm_zero := norm_eq_zero.mp h_zeta
+    -- Need: (↑σ + ↑t * I) ≠ 1 ∨ ... handled by case analysis
+    have h_re : (↑σ + ↑t * I : ℂ).re = σ := by simp
+    have h_half : 1/2 < (↑σ + ↑t * I : ℂ).re := by rw [h_re]; linarith
+    -- s ≠ 1: either σ ≠ 1, or σ = 1 ∧ t ≠ 0, or σ = 1 ∧ t = 0 (pole)
+    by_cases h_eq1 : (↑σ + ↑t * I : ℂ) = 1
+    · -- s = 1: riemannZeta 1 ≠ 0 (Mathlib: riemannZeta_one_ne_zero)
+      rw [h_eq1] at h_norm_zero
+      exact absurd h_norm_zero riemannZeta_one_ne_zero
+    · -- s ≠ 1: apply rh_zeta_ne_zero directly
+      exact absurd h_norm_zero (Cathedral.Zeta.DiskBounds.rh_zeta_ne_zero hRH h_half h_eq1)
+  · -- Main case: ζ(s) ≠ 0
+    simp only [h_zeta, ite_false]
+    -- The truncation error is E_N(s) = 1/ζ(s) - P_N(s)
+    -- where P_N(s) = Σ_{k=1}^{N-1} μ(k)·(1-logk/logN)·k^{-s}
+    -- We bound ‖E_N(s)‖ ≤ 42·N^{3/4-σ}/logN using:
+    --   1. Abel summation for the partial Möbius sum
+    --   2. Mertens bound |M(x)| ≤ C·x^{3/4} under RH
+    --   3. Fejér taper difference bound |Δw(k)| ≤ 1/(k·logN)
+    sorry -- Abel summation + Mertens instantiation
 
 /-- Helper: C · N^{-α}/logN → 0 for α > 0.
     Since N^{-α} → 0 and logN ≥ 1, dividing by logN only helps.
