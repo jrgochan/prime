@@ -101,24 +101,105 @@ theorem mertens_range_succ :
 -- §4. THE BRIDGE (range X version)
 -- ════════════════════════════════════════════════
 
+/-- When X is not prime, the prime filters of range(X+1) and range(X) are equal. -/
+private lemma prod_filter_eq_of_not_prime {X : ℕ} (hX : ¬X.Prime) :
+    (range (X + 1)).filter Nat.Prime = (range X).filter Nat.Prime := by
+  ext p; constructor
+  · intro hp
+    simp only [mem_filter, mem_range] at hp ⊢
+    refine ⟨?_, hp.2⟩
+    rcases Nat.lt_succ_iff_lt_or_eq.mp hp.1 with h | h
+    · exact h
+    · exact absurd (h ▸ hp.2) hX
+  · intro hp
+    simp only [mem_filter, mem_range] at hp ⊢
+    exact ⟨by omega, hp.2⟩
+
+/-- The range(X+1) product factors as range(X) product × extraFactor. -/
+private lemma prod_range_succ_factor (X : ℕ) :
+    ∏ p ∈ (range (X + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ)) =
+    (∏ p ∈ (range X).filter Nat.Prime, (1 - 1 / (p : ℝ))) *
+      if X.Prime then (1 - 1 / (X : ℝ)) else 1 := by
+  split_ifs with hP
+  · have hfilt : (range (X + 1)).filter Nat.Prime =
+        insert X ((range X).filter Nat.Prime) := by
+      ext p; constructor
+      · intro hp
+        simp only [mem_filter, mem_range] at hp
+        simp only [mem_insert, mem_filter, mem_range]
+        rcases Nat.lt_succ_iff_lt_or_eq.mp hp.1 with h | h
+        · exact Or.inr ⟨h, hp.2⟩
+        · exact Or.inl h
+      · intro hp
+        simp only [mem_insert, mem_filter, mem_range] at hp ⊢
+        rcases hp with rfl | ⟨h1, h2⟩
+        · exact ⟨by omega, hP⟩
+        · exact ⟨by omega, h2⟩
+    rw [hfilt, prod_insert (by simp [mem_filter, mem_range]), mul_comm]
+  · rw [prod_filter_eq_of_not_prime hP, mul_one]
+
+/-- The extra factor (1-1/X when X prime, 1 otherwise) → 1. -/
+private lemma extraFactor_tendsto :
+    Tendsto (fun X : ℕ => if X.Prime then (1 - 1 / (X : ℝ)) else (1 : ℝ))
+    atTop (nhds 1) := by
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  refine ⟨max (⌈1/ε⌉₊ + 1) 1, fun X hX => ?_⟩
+  rw [Real.dist_eq]
+  have hX_pos : (0 : ℝ) < X := by exact_mod_cast show 0 < X from by omega
+  have h1ε : 1/ε < X := by
+    calc 1/ε ≤ (⌈1/ε⌉₊ : ℝ) := Nat.le_ceil _
+      _ < (⌈1/ε⌉₊ : ℝ) + 1 := lt_add_one _
+      _ = ((⌈1/ε⌉₊ + 1 : ℕ) : ℝ) := by push_cast; ring
+      _ ≤ X := by exact_mod_cast show ⌈1/ε⌉₊ + 1 ≤ X from by omega
+  split_ifs with h
+  · rw [show |1 - 1 / (X : ℝ) - 1| = 1 / X from by
+      rw [sub_sub_cancel_left, abs_neg, abs_of_pos (div_pos one_pos hX_pos)]]
+    have h1 := mul_lt_mul_of_pos_left h1ε hε
+    rw [mul_div_cancel₀ _ (ne_of_gt hε)] at h1
+    rwa [div_lt_iff₀ hX_pos]
+  · simp [hε]
+
 /-- **THE BRIDGE**: log(X) * ∏_{p < X, prime}(1-1/p) → e^{-γ}.
 
-    The one sorry: range(X) differs from range(X+1) by at most
-    the element X. When X is prime, the extra product factor is
-    (1-1/X), which → 1. When X is composite or 0/1, the products
-    are equal. Either way the limits agree.
-
-    This is a standard off-by-one argument, not a mathematical gap. -/
+    Proof: the range(X+1) product = range(X) product × g(X),
+    where g(X) = (1-1/X) if X prime, else 1. Since g → 1
+    and f·g → e^{-γ} (mertens_range_succ), we get f → e^{-γ}
+    by Tendsto.div. -/
 theorem mertens_third_nat_tendsto :
     Tendsto (fun X : ℕ =>
       Real.log ↑X * ∏ p ∈ (Finset.range X).filter Nat.Prime,
         (1 - 1 / (p : ℝ)))
     atTop (nhds (Real.exp (-eulerMascheroniConstant))) := by
-  -- mertens_range_succ: log(X) * ∏_{range(X+1)} → e^{-γ}
-  -- We want:            log(X) * ∏_{range(X)}   → e^{-γ}
-  -- The products differ by at most a factor (1-1/X) when X is prime.
-  -- Since (1-1/X)⁻¹ → 1 as X → ∞, the two limits agree.
-  sorry
+  set f : ℕ → ℝ := fun X => log ↑X * ∏ p ∈ (range X).filter Nat.Prime, (1 - 1 / (p : ℝ))
+  set g : ℕ → ℝ := fun X => if X.Prime then (1 - 1 / (X : ℝ)) else 1
+  -- f · g = the range(X+1) version (mertens_range_succ)
+  have hfg : ∀ X, f X * g X =
+      log ↑X * ∏ p ∈ (range (X + 1)).filter Nat.Prime, (1 - 1 / (p : ℝ)) := by
+    intro X; simp only [f, g, prod_range_succ_factor]; ring
+  have h_fg : Tendsto (fun X => f X * g X) atTop
+      (nhds (exp (-eulerMascheroniConstant))) :=
+    mertens_range_succ.congr (fun X => (hfg X).symm)
+  have h_g := extraFactor_tendsto
+  -- g ≠ 0 eventually (1-1/X > 0 for X ≥ 2)
+  have h_g_ne : ∀ᶠ X in atTop, g X ≠ 0 := by
+    filter_upwards [eventually_ge_atTop 2] with X hX
+    simp only [g]; split_ifs with h
+    · intro heq
+      have hXr : (0:ℝ) < X := by exact_mod_cast (show 0 < X from by omega)
+      have : (1:ℝ)/X < 1 := by
+        rw [div_lt_one hXr]; exact_mod_cast (show 1 < X from by omega)
+      linarith
+    · exact one_ne_zero
+  -- f = (f · g) / g eventually
+  have h_f_eq : ∀ᶠ X in atTop, f X = f X * g X / g X := by
+    filter_upwards [h_g_ne] with X hgX
+    rw [mul_div_cancel_right₀ (f X) hgX]
+  -- (f · g) / g → e^{-γ} / 1 = e^{-γ}
+  have h_div := h_fg.div h_g one_ne_zero
+  simp only [div_one] at h_div
+  -- f =ᶠ (f · g) / g, so f → e^{-γ}
+  exact h_div.congr' (h_f_eq.mono (fun X hX => hX.symm))
 
 /-- **THE BRIDGE**: Provides `mertens_third_statement` for the Cathedral. -/
 theorem cathedral_mertens_third :
@@ -133,17 +214,17 @@ theorem cathedral_mertens_third :
 -- ════════════════════════════════════════════════
 
 /-!
-## Bridge Sorry Audit
+## Bridge Sorry Audit (revised May 12, 2026)
 
-### This file: 1 sorry
-- `mertens_third_nat_tendsto`: Off-by-one correction between
-  range(X) and range(X+1). When X is prime, the extra factor is
-  (1-1/X) which → 1. Standard limit argument, not a mathematical gap.
+### This file: 0 sorry ✅
+All theorems in this file are fully proved.
 
-### Proved in this file (zero sorry):
-- `mertens_tendsto_real`: The core ℝ limit via IsEquivalent.mul
-- `mertens_range_succ`: ℝ → ℕ restriction with range(X+1)
-- `filter_prime_range_succ_eq_Ioc`: Finset reindexing
+### Proved in this file:
+- `mertens_tendsto_real`: The core ℝ limit via IsEquivalent.mul ✅
+- `mertens_range_succ`: ℝ → ℕ restriction with range(X+1) ✅
+- `filter_prime_range_succ_eq_Ioc`: Finset reindexing ✅
+- `mertens_third_nat_tendsto`: Off-by-one bridge (range X vs X+1) ✅
+- `cathedral_mertens_third`: Cathedral-facing alias ✅
 
 ### Inherited from PNTA/Mertens.lean: 16 sorrys (all CLASSICAL)
 All are classical analytic number theory results being actively
