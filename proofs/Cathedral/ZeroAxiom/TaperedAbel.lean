@@ -4,6 +4,7 @@ import Cathedral.Zeta.LittlewoodManeuver
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
+import Mathlib.Order.Filter.AtTopBot.Archimedean
 
 /-!
   # Tapered Abel Summation for the Fejér-Smoothed Dirichlet Polynomial
@@ -94,14 +95,44 @@ lemma tapered_truncation_bound_above_34
   sorry
 
 /-- Helper: C · N^{-α}/logN → 0 for α > 0.
-    Since N^{-α} → 0 and logN ≥ 1, dividing by logN only helps. -/
+    Since N^{-α} → 0 and logN ≥ 1, dividing by logN only helps.
+    Pattern: FloorMellin.lean:122 (Archive). -/
 lemma tendsto_rpow_neg_div_log (C : ℝ) (α : ℝ) (hα : 0 < α) :
     Filter.Tendsto
       (fun N : ℕ => C * (N : ℝ) ^ (-α) / Real.log N)
       Filter.atTop (nhds 0) := by
-  -- Since |C·N^{-α}/logN| ≤ |C|·N^{-α} for N ≥ 3 (where logN ≥ 1),
-  -- and N^{-α} → 0, the result follows by squeeze.
-  sorry
+  apply NormedAddGroup.tendsto_nhds_zero.mpr
+  intro ε hε
+  -- |C|·N^{-α} → 0
+  have h_rpow : Filter.Tendsto (fun N : ℕ => (N : ℝ) ^ (-α))
+      Filter.atTop (nhds 0) :=
+    (tendsto_rpow_neg_atTop hα).comp tendsto_natCast_atTop_atTop
+  have h_abs_C : Filter.Tendsto (fun N : ℕ => |C| * (N : ℝ) ^ (-α))
+      Filter.atTop (nhds 0) := by
+    have := (tendsto_const_nhds (x := |C|)).mul h_rpow
+    simpa [mul_zero] using this
+  -- Get eventually: ‖|C|·N^{-α}‖ < ε
+  have h_event := (NormedAddGroup.tendsto_nhds_zero.mp h_abs_C) ε hε
+  -- For N ≥ 3 AND in the eventual set: ‖f(N)‖ ≤ |C|·N^{-α} < ε
+  filter_upwards [h_event, Filter.eventually_ge_atTop 3] with N hN_eps hN3
+  have hN_pos : (0:ℝ) < (N:ℝ) := Nat.cast_pos.mpr (by omega)
+  have hN_gt1 : (1:ℝ) < (N:ℝ) := by exact_mod_cast (show 1 < N from by omega)
+  have hlogN_ge : 1 ≤ Real.log (N:ℝ) := by
+    rw [Real.le_log_iff_exp_le hN_pos]
+    calc Real.exp 1 ≤ 3 := by linarith [Real.exp_one_lt_d9]
+      _ ≤ (N : ℝ) := by exact_mod_cast hN3
+  -- ‖C·N^{-α}/logN‖ ≤ |C|·N^{-α} ≤ ‖|C|·N^{-α}‖ < ε
+  calc ‖C * (N : ℝ) ^ (-α) / Real.log N‖
+      = |C| * (N : ℝ) ^ (-α) / Real.log (N:ℝ) := by
+        rw [norm_div, norm_mul, Real.norm_eq_abs C,
+            Real.norm_eq_abs ((N:ℝ) ^ (-α)),
+            abs_of_nonneg (rpow_nonneg hN_pos.le _),
+            Real.norm_eq_abs (Real.log (N:ℝ)),
+            abs_of_pos (Real.log_pos hN_gt1)]
+    _ ≤ |C| * (N : ℝ) ^ (-α) :=
+        div_le_self (mul_nonneg (abs_nonneg C) (rpow_nonneg hN_pos.le _)) hlogN_ge
+    _ ≤ ‖|C| * (N : ℝ) ^ (-α)‖ := le_norm_self _
+    _ < ε := hN_eps
 
 /-- **COROLLARY**: Under RH, the truncation error → 0 as N → ∞
     for any fixed σ > 3/4. -/
