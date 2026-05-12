@@ -261,7 +261,29 @@ private theorem baez_duarte_forward_core
   --   fejer_residual_l2_bound : ∫(1-f_N)² ≤ 42·N^{-1/4}/logN
   --   tendsto_rpow_neg_div_log : 42·N^{-1/4}/logN → 0
   -- Then standard ε-δ extraction with moebiusWeightVec N as witness.
-  sorry
+  have h_conv := tendsto_rpow_neg_div_log 42 (1/4 : ℝ) (by norm_num : (0:ℝ) < 1/4)
+  -- Eventually: 42·N^{-1/4}/logN < ε
+  have h_event := (NormedAddGroup.tendsto_nhds_zero.mp h_conv) ε hε
+  -- Extract N₀ from the eventual set, also requiring N ≥ 3
+  rw [Filter.Eventually, Filter.mem_atTop_sets] at h_event
+  obtain ⟨N₀, hN₀⟩ := h_event
+  refine ⟨max N₀ 3, fun N hN => ?_⟩
+  have hN₀_le : N₀ ≤ N := le_of_max_le_left hN
+  have hN3 : 3 ≤ N := le_of_max_le_right hN
+  -- Witness: moebiusWeightVec N
+  refine ⟨moebiusWeightVec N, ?_⟩
+  -- Chain: ∫(1-f_N)² ≤ 42·N^{-1/4}/logN < ε
+  have h_bound := fejer_residual_l2_bound hRH N hN3
+  have h_eps : ‖42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N‖ < ε := by
+    have := hN₀ N hN₀_le
+    simp only [Set.mem_setOf_eq] at this
+    convert this using 3
+    norm_num
+  -- ‖x‖ < ε for x = 42·N^{-1/4}/logN, and the bound ≤ x, so bound < ε
+  calc ∫ x in (0:ℝ)..1, (1 - bdLinComb N (moebiusWeightVec N) x) ^ 2
+      ≤ 42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N := h_bound
+    _ ≤ ‖42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N‖ := le_norm_self _
+    _ < ε := h_eps
 
 theorem baez_duarte_forward_proved :
     RiemannHypothesis →
