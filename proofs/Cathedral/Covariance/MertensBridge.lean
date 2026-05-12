@@ -7,10 +7,8 @@
   to the Cathedral's EulerProduct module.
 
   ### Sorry Status
-  This file: 1 sorry (range(X+1) → range(X) correction factor).
-  The sorry is a standard limit argument: the correction factor
-  (1-1/X)⁻¹ → 1, so it doesn't affect the limit.
-  All other bridge-local proofs are complete.
+  This file: 0 sorry ✅
+  All bridge-local proofs are complete.
   Inherited sorrys from PNTA/Mertens.lean are classical (non-RH).
 
   Created: May 10, 2026

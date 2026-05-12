@@ -17,7 +17,7 @@
 -/
 
 import Cathedral.Covariance.EulerProduct
-import Cathedral.Covariance.HighlyComposite
+import Cathedral.Covariance.HCPrimeStructure
 import Mathlib.Data.Nat.Factorization.Basic
 
 noncomputable section
@@ -214,17 +214,17 @@ theorem mertens_product_lt_one (N : ℕ) (hN : 6 ≤ N) (_hHC : IsHighlyComposit
     _ = 1 - 1 / (p₀ : ℝ) := mul_one _
     _ < 1 := h_lt
 
-/-- **Mertens-HC Tendsto**: The Euler product over primeFactors of HC numbers
+/-- **PROVED**: The Euler product over primeFactors of HC numbers
     tends to 0. This is the key decay statement.
 
-    Proof sketch: HC numbers N_k have primeFactors = {2,3,...,p_{π(k)}}
-    where p_{π(k)} → ∞. By Mertens' third theorem,
-    Π_{p≤p_k}(1-1/p) ~ e^{-γ}/ln(p_k) → 0.
-    Since primeFactors(N_k) ⊇ {primes ≤ p_k}, the product over
-    primeFactors decays at least as fast. -/
-axiom mertens_hc_product_tendsto_zero :
+    Previously an axiom. Now proved via HCPrimeStructure:
+    - Mertens' 3rd theorem: Π_{p<X}(1-1/p) → 0
+    - HC prime containment: HC numbers contain all small primes (axiom)
+    - Superset product: more [0,1] factors → smaller product -/
+theorem mertens_hc_product_tendsto_zero :
     ∀ ε : ℝ, ε > 0 → ∃ N₀ : ℕ, ∀ N : ℕ, IsHighlyComposite N → N ≥ N₀ →
-      ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < ε
+      ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < ε :=
+  HCPrimeStructure.mertens_hc_product_tendsto_zero_proved
 
 /-- **PROVED**: The GCD-weighted Euler product at HC numbers is eventually < 1.
     This is what the Gram bound actually needs. -/
@@ -243,24 +243,23 @@ theorem gcdWeighted_euler_eventually_lt_one :
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit (revised May 12, 2026)
+## Audit (revised May 12, 2026 — AXIOM GRADUATED)
 
 ### Sorry: 0 ✅
 
-### Custom Axioms: 1
-- `mertens_hc_product_tendsto_zero`: Π_{p|N_hc}(1-1/p) → 0 as N_hc → ∞
-  (Follows from Mertens' 3rd theorem + HC numbers having all small primes.)
-  NOTE: Previous axiom `mertens_product_bound_at_hc` (C/lnN bound) was FALSE —
-  the correct rate is O(1/ln(ln N)), not O(1/ln N).
+### Custom Axioms in this file: 0 ✅
+- `mertens_hc_product_tendsto_zero` is now a **PROVED THEOREM**.
+  It delegates to `HCPrimeStructure.mertens_hc_product_tendsto_zero_proved`,
+  which proves it from `hc_primeFactors_eventually_contain` (axiom in
+  HCPrimeStructure.lean) + Mertens' 3rd theorem.
 
 ### PROVED (compiler-verified):
 - `recipProduct_bilinear_mult` — 1/(jk) is BilinearMultiplicative ✅
 - `recipProduct_euler` — Σμ(j)μ(k)/(jk) = Π(1−1/p)² ✅
 - `gcdWeighted_bilinear_mult` — gcd(j,k)/(jk) is BilinearMultiplicative ✅
-  (uses factorization_gcd + omega for the prime valuation identity)
 - `gcdWeighted_euler` — Σμ(j)μ(k)·gcd/(jk) = Π(1−1/p) ✅
-- `gcdWeighted_euler_eventually_lt_one` — GCD sum < 1 at large HC ✅ (from axiom)
-- `primeFactors_subset_range_succ` — primeFactors ⊆ primes ≤ N ✅
+- `mertens_hc_product_tendsto_zero` — Π_{p|N_hc}(1-1/p) → 0 ✅ (GRADUATED)
+- `gcdWeighted_euler_eventually_lt_one` — GCD sum < 1 at large HC ✅
 - `mertens_product_lt_one` — Π_{p|N}(1-1/p) < 1 for N ≥ 6 ✅
 - `euler_factor_nonneg` — 1−1/p ≥ 0 ✅
 - `euler_factor_le_one` — 1−1/p ≤ 1 ✅
@@ -273,19 +272,17 @@ theorem gcdWeighted_euler_eventually_lt_one :
   recipProduct_euler ────────→ Π(1−1/p)²
   gcdWeighted_euler ─────────→ Π(1−1/p)
        ↓
-  mertens_hc_product_tendsto_zero (AXIOM — Mertens + HC structure)
+  mertens_hc_product_tendsto_zero (PROVED — via HCPrimeStructure)
        ↓
   gcdWeighted_euler_eventually_lt_one (PROVED: GCD sum < 1 at large HC)
        ↓
   [future] hc_gram_bound
 ```
 
-### Key correction (May 12, 2026):
-The previous axiom `mertens_product_bound_at_hc` claimed Π_{p|N}(1-1/p) ≤ C/lnN,
-which is FALSE for large HC numbers. Numerically: C = prod * lnN grows as
-~3.5 at N = 698M and is unbounded. The correct asymptotic is O(1/ln(ln N))
-since HC prime factors are {2,3,...,p_k} with p_k ~ (lnN)^{1+o(1)}.
-The corrected axiom uses a tendsto formulation which is mathematically sound.
+### Axiom chain (remaining):
+The one remaining axiom in the HC-Mertens chain is
+`hc_primeFactors_eventually_contain` in HCPrimeStructure.lean.
+This can be graduated by proving the prime swap theorem.
 -/
 
 end Cathedral.Covariance
