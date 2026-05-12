@@ -3,7 +3,7 @@
 
   ## PROVING vasyunin_eq_integral — THE FULL ASSAULT
 
-  [ON CROWN PATH — diagonal proved, off-diagonal axiomatized]
+  [ON CROWN PATH — diagonal proved, off-diagonal proved via Cotangent Tower]
 
   Strategy: Prove G(j,k) = ∫₀¹ {1/(jx)}{1/(kx)} dx for ALL j,k ≥ 1.
 

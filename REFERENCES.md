@@ -61,7 +61,9 @@ technique in the Cathedral traces back to published mathematics listed here.
   > The Vasyunin cotangent sum formula gives G(j,k) as a finite, closed-form
   > expression involving gcd, log, and cotangent — eliminating all integrals.
   > The diagonal case G(k,k) has been **proved as a theorem** (Stirling + FTC).
-  > The off-diagonal case remains as axiom `vasyunin_offdiag_integral`.
+  > The off-diagonal case has also been **proved as a theorem** via the Cotangent
+  > Tower (25 files, 0 axioms, 0 sorry): piecewise partition, telescope sums,
+  > FormulaBridge, and GCD reduction.
 
 ---
 
