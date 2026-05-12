@@ -1,0 +1,32 @@
+{
+  "n": 2,
+  "dim": 1,
+  "k_primes": 1,
+  "primes": [
+    2
+  ],
+  "gp_eigenvalues": [
+    0.38033069998431973
+  ],
+  "matches": [
+    {
+      "gp_index": 0,
+      "gp_eigenvalue": 0.38033069998431973,
+      "gp_eigenvector": [
+        1.0
+      ],
+      "full_index": 0,
+      "full_eigenvalue": 0.38033069998431973,
+      "overlap": 1.0,
+      "eigenvalue_error": 0.0,
+      "full_purity": 1.0,
+      "full_prime_components": [
+        1.0
+      ]
+    }
+  ],
+  "sentinel_gp_eigenvalue": 0.38033069998431973,
+  "sentinel_full_eigenvalue": 0.38033069998431973,
+  "sentinel_overlap": 1.0,
+  "sentinel_full_purity": 1.0
+}
