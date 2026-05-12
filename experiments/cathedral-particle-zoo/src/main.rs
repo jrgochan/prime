@@ -18,8 +18,10 @@ mod coupling;
 mod seesaw;
 mod proof_tree;
 mod report;
+mod output;
 
 use cathedral_utils::arith;
+use cathedral_utils::fmt as cfmt;
 
 #[derive(Parser, Debug)]
 #[command(name = "cathedral-particle-zoo")]
@@ -47,7 +49,12 @@ struct Cli {
     /// (Antigravity's Liquid Argon Shield)
     #[arg(long, value_delimiter = ',')]
     shield: Vec<u64>,
+
+    /// Output directory for results [default: results]
+    #[arg(long, default_value = "results")]
+    output: String,
 }
+
 
 fn main() {
     let cli = Cli::parse();
@@ -89,7 +96,7 @@ fn main() {
     // ── HPDF H5 File Analysis ──
     #[cfg(feature = "hpdf")]
     for path in &cli.hpdf {
-        analyze_hpdf(path);
+        analyze_hpdf(path, &cli.output);
     }
 
     if cli.coeffs.is_empty() && cli.proof_tree && !cli.particles {
@@ -181,17 +188,20 @@ fn analyze_coefficients(label: &str, coeffs: &[(usize, f64)], n_max: usize, shie
 }
 
 #[cfg(feature = "hpdf")]
-fn analyze_hpdf(path: &str) {
+fn analyze_hpdf(path: &str, output_dir: &str) {
     use cathedral_utils::hpdf::reader::HpdfReader;
     use std::path::Path;
 
+    let t0 = std::time::Instant::now();
+
     println!();
-    println!("  ═══ HPDF SPECTRAL ANALYSIS: {} ═══", path);
+    cfmt::section(&format!("HPDF SPECTRAL ANALYSIS: {}", path));
 
     let reader = match HpdfReader::open(Path::new(path)) {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("  Error opening HPDF file: {}", e);
+            eprintln!("  {}Error opening HPDF file: {}", cfmt::RED, cfmt::RESET);
+            eprintln!("  {e}");
             return;
         }
     };
@@ -259,7 +269,7 @@ fn analyze_hpdf(path: &str) {
         if lambda_min > 1e-15 {
             let cal = particle_map::MassCalibration::from_spectral_gap(lambda_min);
             println!();
-            println!("  ═══ MASS CALIBRATION (W± anchor — Gemini) ═══");
+            cfmt::section("MASS CALIBRATION (W± anchor — Gemini)");
             println!("  λ_min (Gershgorin) = {:.8}  →  W± = 80,377 MeV", lambda_min);
             println!("  Scale factor = {:.2} MeV / eigenvalue unit", cal.scale_factor);
             println!("  λ_max = {:.8}  →  {:.2} MeV", lambda_max, cal.to_mev(lambda_max));
@@ -277,13 +287,13 @@ fn analyze_hpdf(path: &str) {
         sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
         println!();
-        println!("  ═══ RANDOM MATRIX THEORY (diagonal proxy, {} values) ═══", sorted.len());
+        cfmt::section(&format!("RANDOM MATRIX THEORY (diagonal proxy, {} values)", sorted.len()));
         let rmt = rmt_analysis::RmtAnalysis::analyze(&sorted);
         rmt.display();
     }
 
     // ── See-Saw Analysis ──
-    if let Ok(b_vec) = reader.read_b_vector() {
+    let seesaw_result = if let Ok(b_vec) = reader.read_b_vector() {
         let d2 = reader.read_distance()
             .ok()
             .flatten()
@@ -293,29 +303,33 @@ fn analyze_hpdf(path: &str) {
         // Use diagonal as eigenvalue proxy for see-saw
         if let Ok(diag) = reader.read_diagonal() {
             println!();
-            println!("  ═══ SEE-SAW MECHANISM (Gemini) ═══");
+            cfmt::section("SEE-SAW MECHANISM (Gemini)");
             let ss = seesaw::SeeSawAnalysis::compute(&diag, &b_vec, d2);
             ss.display();
+            Some(ss)
+        } else {
+            None
         }
-    }
+    } else {
+        None
+    };
 
     // ── DD Precision Report ──
     if has_dd {
         println!();
-        println!("  ═══ DOUBLE-DOUBLE PRECISION ═══");
+        cfmt::section("DOUBLE-DOUBLE PRECISION");
         println!("  This file contains DD (hi+lo) data (~31 significant digits)");
         println!("  Matrix size: {}×{} = {:.1} GB (hi) + {:.1} GB (lo)",
                  dim, dim,
                  dim as f64 * (dim as f64 + 1.0) / 2.0 * 8.0 / 1e9,
                  dim as f64 * (dim as f64 + 1.0) / 2.0 * 8.0 / 1e9);
         println!("  Total DD entries: {}", dim * (dim + 1) / 2);
-        println!("  Use GPU pipeline for DD eigendecomposition at this scale");
     }
 
     // ── Number Theory ──
     if let Ok(Some(nt)) = reader.read_number_theory_attrs() {
         println!();
-        println!("  ═══ NUMBER THEORY ═══");
+        cfmt::section("NUMBER THEORY");
         if !nt.factorization.is_empty() {
             println!("  Factorization: {}", nt.factorization);
         }
@@ -327,10 +341,24 @@ fn analyze_hpdf(path: &str) {
 
     // ── Coupling Constants ──
     println!();
-    println!("  ═══ COUPLING CONSTANTS (Gemini's Formula) ═══");
+    cfmt::section("COUPLING CONSTANTS (Gemini's Formula)");
     let couplings = coupling::ArithmeticCouplings::compute(n, &[]);
     couplings.display();
+
+    // ═══ WRITE OUTPUT FILES ═══
+    let result = output::ZooResult::from_hpdf(&reader, &couplings, seesaw_result.as_ref(), None);
+    match output::write_all(&result, output_dir) {
+        Ok(()) => {
+            println!();
+            println!("  {}{}═══ OUTPUT COMPLETE ({}) ═══{}", cfmt::BOLD, cfmt::GREEN, cfmt::elapsed(t0.elapsed().as_secs_f64()), cfmt::RESET);
+            println!("  {}All files → {}/{}", cfmt::DIM, output_dir, cfmt::RESET);
+        }
+        Err(e) => {
+            eprintln!("  {}Error writing output: {}{}", cfmt::RED, e, cfmt::RESET);
+        }
+    }
 }
+
 
 
 
