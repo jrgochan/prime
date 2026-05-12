@@ -196,6 +196,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.GCDSignLaw,
     -- HC number formalization (unbounded HC subsequence, Exploration 36)
     `Cathedral.Covariance.HighlyComposite,
+    -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)
+    `Cathedral.Covariance.HCGramBridge,
     -- Mertens bridge (PNTA → Cathedral, Exploration 35)
     `Cathedral.Covariance.MertensBridge,
     -- White Singlet (physics-motivated axiom elimination)
