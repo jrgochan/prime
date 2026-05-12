@@ -1,6 +1,7 @@
 import Cathedral.ZeroAxiom.MellinAlgebra
 import Cathedral.Perron.MertensFromPerron
 import Cathedral.Zeta.LittlewoodManeuver
+import Cathedral.NymanBeurling.BDBridge
 import Mathlib.Analysis.SpecialFunctions.Log.Deriv
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.NumberTheory.ArithmeticFunction.Moebius
@@ -201,7 +202,14 @@ lemma tapered_truncation_tendsto_zero
 -- §3. THE L² BOUND ON A VERTICAL LINE
 -- ════════════════════════════════════════════════
 
-/-- **KEY THEOREM**: Under RH, the L² integral of the Mellin transform
+/-- **DEPRECATED (ORPHANED)**: This lemma is not on the active proof path.
+    The forward direction `baez_duarte_forward_proved` is proved via
+    `rh_implies_bd_convergence_proved` (BDBridge.lean), which uses the
+    Vasyunin crown chain instead of the Mellin L² approach.
+
+    Retained for documentation of the alternative Mellin proof strategy.
+
+    Under RH, the L² integral of the Mellin transform
     of the BD residual on the shifted line σ = 1 tends to zero.
 
     ∫_{-T}^{T} |M[r_N](1+it)|² dt → 0 as N → ∞
@@ -230,67 +238,69 @@ lemma mellin_l2_integral_tendsto_zero
 -- §4. THE L²(0,1) BOUND VIA WEIGHT SUBSTITUTION
 -- ════════════════════════════════════════════════
 
-/-- The Fejér-Möbius weights produce a BD residual whose L² norm
-    is controlled by the Mellin L² norm at σ = 1.
+/-- **DEPRECATED (ORPHANED)**: This lemma is not on the active proof path.
+    The forward direction `baez_duarte_forward_proved` uses an existential
+    witness from the Vasyunin crown (via `rh_implies_bd_convergence_proved`)
+    instead of this specific-witness bound.
 
-    This connects the Fejér weights to the `bdLinComb` / `bdResidualV`
-    definitions used by the crown theorem. -/
+    Retained for documentation of the direct L² bound strategy.
+
+    The Fejér-Möbius weights produce a BD residual whose L² norm
+    is controlled at rate O(N^{-1/4}/logN).
+
+    Uses the PROVED identity:
+      ∫₀¹ (1 - bdLinComb N v x)² = 1 - 2·bᵀv + vᵀGv
+    from `bd_l2_error_eq_quad_error` (Cathedral/NymanBeurling/BDBridge.lean).
+
+    Reduces to bounding the quadratic error:
+      1 - 2·(Σ vₖ·bₖ) + vᵀGv ≤ 42·N^{-1/4}/logN
+
+    which requires:
+    - bᵀv ≈ 1 (PROVED: moebius_dot_product_approx_one_uniform_34)
+    - vᵀGv ≈ 1 (requires covariance bound + variance identity) -/
 lemma fejer_residual_l2_bound
     (hRH : RiemannHypothesis)
     (N : ℕ) (hN : 3 ≤ N) :
     ∫ x in (0:ℝ)..1, (1 - bdLinComb N (moebiusWeightVec N) x) ^ 2 ≤
-      -- The L²(0,1) norm equals the Mellin L² norm at σ = 1/2
-      -- which is bounded by the shifted Mellin L² norm at σ = 1
-      -- (with a correction factor from the shift).
-      -- The shifted norm → 0 by mellin_l2_integral_tendsto_zero.
       42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N := by
+  -- Step 1: Use the PROVED L² ↔ quadratic form identity
+  -- ∫(1-f)² = 1 - 2·bᵀv + vᵀGv
+  -- This identity is proved in BDBridge.lean via integral linearity
+  -- and the Vasyunin gram entry integrals.
+  --
+  -- The remaining analytical content is:
+  --   1 - 2·(Σ vₖ·bₖ) + vᵀGv ≤ 42·N^{-1/4}/logN
+  -- where:
+  --   |1 - bᵀv| ≤ C_dot/logN    (PROVED: moebius_dot_product_approx_one_uniform_34)
+  --   vᵀGv ≈ 1                   (needs covariance decomposition)
+  --
+  -- Under RH, the Mertens bound |M(x)| ≤ C·x^{3/4} gives:
+  --   bᵀv = 1 + O(N^{-1/4}/logN)  [Abel summation, PROVED]
+  --   vᵀGv = 1 + O(1/logN)         [covariance bound, Abel summation]
+  -- Combined: 1 - 2(1+ε₁) + (1+ε₂) = ε₂ - 2ε₁ = O(1/logN)
+  -- Since N^{-1/4}/logN ≤ 1/logN, the bound follows.
   sorry
 
 -- ════════════════════════════════════════════════
 -- §5. THE FORWARD DIRECTION — GRADUATING baez_duarte_forward
 -- ════════════════════════════════════════════════
 
-set_option maxHeartbeats 4000000 in
-/-- **THE THEOREM** (core): Under RH, the BD basis approximates 1 in L²(0,1).
+/-- **THE THEOREM**: Under RH, the BD basis approximates 1 in L²(0,1).
 
-    Architecture note: The proof is split into `_core` + wrapper to avoid
-    heartbeat death on integral type unification (Gemini Fracture pattern). -/
-private theorem baez_duarte_forward_core
-    (hRH : RiemannHypothesis) (ε : ℝ) (hε : ε > 0) :
-    ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε := by
-  -- The proof chains:
-  --   fejer_residual_l2_bound : ∫(1-f_N)² ≤ 42·N^{-1/4}/logN
-  --   tendsto_rpow_neg_div_log : 42·N^{-1/4}/logN → 0
-  -- Then standard ε-δ extraction with moebiusWeightVec N as witness.
-  have h_conv := tendsto_rpow_neg_div_log 42 (1/4 : ℝ) (by norm_num : (0:ℝ) < 1/4)
-  -- Eventually: 42·N^{-1/4}/logN < ε
-  have h_event := (NormedAddGroup.tendsto_nhds_zero.mp h_conv) ε hε
-  -- Extract N₀ from the eventual set, also requiring N ≥ 3
-  rw [Filter.Eventually, Filter.mem_atTop_sets] at h_event
-  obtain ⟨N₀, hN₀⟩ := h_event
-  refine ⟨max N₀ 3, fun N hN => ?_⟩
-  have hN₀_le : N₀ ≤ N := le_of_max_le_left hN
-  have hN3 : 3 ≤ N := le_of_max_le_right hN
-  -- Witness: moebiusWeightVec N
-  refine ⟨moebiusWeightVec N, ?_⟩
-  -- Chain: ∫(1-f_N)² ≤ 42·N^{-1/4}/logN < ε
-  have h_bound := fejer_residual_l2_bound hRH N hN3
-  have h_eps : ‖42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N‖ < ε := by
-    have := hN₀ N hN₀_le
-    simp only [Set.mem_setOf_eq] at this
-    convert this using 3
-    norm_num
-  -- ‖x‖ < ε for x = 42·N^{-1/4}/logN, and the bound ≤ x, so bound < ε
-  calc ∫ x in (0:ℝ)..1, (1 - bdLinComb N (moebiusWeightVec N) x) ^ 2
-      ≤ 42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N := h_bound
-    _ ≤ ‖42 * (N : ℝ) ^ (-(1:ℝ)/4) / Real.log N‖ := le_norm_self _
-    _ < ε := h_eps
+    PROVED via the Vasyunin crown chain:
+    1. `bd_witness_l2_error_decay_proved` (WitnessDecayProved.lean, PROVED):
+       ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, 1 - 2bᵀv + vᵀGv ≤ C/logN
+    2. `bd_l2_error_eq_quad_error` (BDBridge.lean, PROVED):
+       ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+    3. C/logN → 0 (standard calculus, PROVED)
 
+    This bypasses fejer_residual_l2_bound (sorry #5) and
+    mellin_l2_integral_tendsto_zero (sorry #4) entirely,
+    using the Vasyunin crown's existential witness instead. -/
 theorem baez_duarte_forward_proved :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε :=
-  fun hRH ε hε => baez_duarte_forward_core hRH ε hε
+  rh_implies_bd_convergence_proved
 
 end Cathedral.ZeroAxiom
