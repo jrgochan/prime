@@ -214,7 +214,7 @@ Moving between Bochner and Henstock--Kurzweil integrals requires
 care via \lean{intervalIntegrable\_iff\_integrable\_Ioc}.
 
 % ================================================================
-\section{Five Mathlib Gaps Requiring Axioms}
+\section{Four Mathlib Gaps Requiring Axioms}
 \label{sec:gaps}
 % ================================================================
 
@@ -226,13 +226,19 @@ care via \lean{intervalIntegrable\_iff\_integrable\_Ioc}.
 Analytic continuation & Mellin integral extension & Medium \\
 Contour integrals & Vertical line integration & Hard \\
 Mertens function & $M(x) = \sum_{n \leq x}\mu(n)$ & Medium \\
-Montgomery--Vaughan & Dirichlet polynomial MVT & Hard \\
 Dedekind sums & Off-diagonal Vasyunin & Medium \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-These five additions would eliminate 80\% of the Cathedral's axioms.
+\noindent
+\textbf{Note:} The Montgomery--Vaughan Dirichlet polynomial MVT was
+originally a fifth gap, but was formalized directly as the
+\emph{Gallagher MVT} via Fej\'er kernel (\lean{Analysis/GallagherMVT.lean},
+0 axioms, 0 sorry).
+
+These four additions to Mathlib would eliminate a substantial fraction
+of the Cathedral's off-path axioms.
 
 % ================================================================
 \section{Twelve Essential Mathlib Lemmas}
