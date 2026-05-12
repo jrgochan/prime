@@ -44,6 +44,7 @@ members = [
     "experiments/cathedral-rl",
     "experiments/vasyunin-integral",
     "experiments/hc-gram-oracle",
+    "experiments/cathedral-particle-zoo",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
@@ -120,6 +121,7 @@ default-members = [
     "experiments/cathedral-rl",
     "experiments/vasyunin-integral",
     "experiments/hc-gram-oracle",
+    "experiments/cathedral-particle-zoo",
     "experiments/archive/abel-bridge",
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",
