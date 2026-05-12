@@ -12,7 +12,7 @@
 
 ## Archive Overview
 
-The Cathedral maintains three archive locations containing **103 Cathedral files**
+The Cathedral maintains three archive locations containing **112 Cathedral files**
 plus **34 pre-Cathedral files** of Lean 4 code:
 
 | Location | Files | Lines | Purpose |
@@ -78,7 +78,7 @@ These prove RH conditional on 41 axioms via the Li coefficient ladder.
 > [!WARNING]
 > The "Proved_riemann_hypothesis" files do **not** constitute a proof of RH.
 > They prove RH conditional on 41 axioms. The Cathedral's current approach
-> via the Mellin Crown has only **2 axioms**.
+> via the Mellin Crown has only **1 axiom**.
 
 ---
 
@@ -126,7 +126,7 @@ The Cathedral absorbed ~80% of this code:
 > The Cathedral/Archive/ directory contains 94 module files. Combined with
 > `proofs/archive/proved/` (17 files) and `proofs/archive/SpectralRH/` (17 files),
 > the total archive count is 128 files. However, the Cathedral-specific archive
-> count reported by `find proofs/Cathedral -path '*/Archive/*'` is **103 files**
+> count reported by `find proofs/Cathedral -path '*/Archive/*'` is **112 files**
 > (including subdirectories and the Vasyunin/Archive).
 
 ### 3a. `HighFrequencyTrap/` — "Universe 2" Snapshot (37 files, 10,473 lines)
@@ -223,15 +223,18 @@ since v11. They remain as alternative proof routes and supporting infrastructure
 
 ### Off-Crown Sorry (Active Tree)
 
-16 `sorry` placeholders exist in the active tree, all off-crown:
+17 `sorry` placeholders exist in the active tree, all off-crown:
 
 | File | Sorry Count | Context |
 |------|-------------|---------|
-| `PNT/LogBridge.lean` | 1 | Tauberian gap (off-crown) |
-| `PNT/Bridge.lean` | 2 | Tauberian gaps (off-crown) |
+| `PNT/UnconditionalMertens.lean` | 8 | Scaffold for unconditional Mertens |
+| `PNT/Bridge.lean` | 2 | Forward Tauberian — blocked by Mathlib |
+| `PNT/LogBridge.lean` | 1 | Tauberian gap — requires signed Wiener-Ikehara |
 | `Covariance/CovarianceAbel.lean` | 2 | Deprecated spatial integrals |
-| `Covariance/QuadFormIdentity.lean` | 1 | DEPRECATED (numerically falsified) |
-| `Scratch/*` | 10 | Exploratory files |
+| `Covariance/AbelCovarianceBound.lean` | 1 | Off-path Abel covariance |
+| `Covariance/EulerProduct.lean` | 1 | Off-path Mertens third |
+| `Covariance/MertensBridge.lean` | 1 | Off-path Mertens bridge |
+| `Assembly/QualitativeForward.lean` | 1 | Off-path PNT convergence |
 
 ---
 
@@ -271,7 +274,7 @@ Pure duplicates/stubs:        ~27 files
 
 | Metric | Active | Archive | Ratio |
 |--------|--------|---------|-------|
-| Files | 227 | 103 | 2.20× |
+| Files | 227 | 112 | 2.03× |
 | Lines | ~60,500 | 22,000+ | 2.75× |
 | Theorems | ~1,757 | ~994 | 1.77× |
 | Crown axioms | **2** (Dual Crown) | — | — |

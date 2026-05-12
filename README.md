@@ -4,7 +4,7 @@
 
 A machine-checked proof architecture in **Lean 4** + **Mathlib** that reduces
 the Riemann Hypothesis to the decay of the Nyman–Beurling distance.
-**227 active Lean files** across 25+ modules, with **1 crown axiom** on
+**227 active Lean files** across 24 modules, with **1 crown axiom** on
 the analytic path (verified by `#print axioms`), **1 trusted computation axiom**
 on the Oracle path, and **82 axioms** total in the active codebase.
 
@@ -31,7 +31,7 @@ on the Oracle path, and **82 axioms** total in the active codebase.
 
 ```bash
 cd proofs
-lake build          # 227 active Cathedral files, 103 archived
+lake build          # 227 active Cathedral files, 112 archived
 ```
 
 Requires: [Lean v4.29.0](https://leanprover.github.io/lean4/doc/setup.html) and Mathlib.
@@ -131,14 +131,14 @@ proofs/Cathedral/
 ├── Sieve/           (4)     ← Bilinear sieve
 ├── LinearAlgebra/   (4)     ← Sherman-Morrison, Sylvester
 ├── Structural/      (3)     ← Eigenvalue monotonicity
-└── Archive/         (103)   ← Preserved exploratory paths
+└── Archive/         (112)   ← Preserved exploratory paths
 ```
 
 ## Build Stats
 
 ```
-Active files:   227 Lean files across 25+ modules
-Archived:       103 Lean files in Archive/
+Active files:   227 Lean files across 24 modules
+Archived:       112 Lean files in Archive/
 Axioms:         1 on analytic crown, 1 on oracle crown, 82 total active
 Sorry:          0 on crown paths (17 off-path)
 Errors:         0
@@ -282,7 +282,7 @@ All proofs are compiler-verified.
 
 ```
 prime/
-├── proofs/          🏛️  THE CATHEDRAL — 227 active Lean files, 103 archived
+├── proofs/          🏛️  THE CATHEDRAL — 227 active Lean files, 112 archived
 ├── papers/          📄  Core papers (cathedral.tex, cathedral-lean.tex)
 │   └── core/                 The mathematical claim
 ├── experiments/     🔬  39 Rust experiments (256–512 bit MPFR + DD)

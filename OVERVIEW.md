@@ -159,7 +159,7 @@ Plus Lean kernel axioms: `propext`, `Classical.choice`, `Quot.sound`.
 > The **Analytic Crown** reduces RH to one classical result (Báez-Duarte 2003).
 > The **Oracle Crown** proves RH directly from one GPU measurement.
 > The converse direction (d²→0 ⟹ RH) uses **zero custom axioms**.
-> The ~80 off-path axioms support alternative proof routes and experimental
+> The ~81 off-path axioms support alternative proof routes and experimental
 > features that do not affect either crown theorem.
 
 ### Numerical Validation
@@ -203,7 +203,7 @@ See `experiments/certified-distance/certificates/` for full JSON certificates.
 
 ## Module Structure
 
-The codebase comprises **227 active Lean files** across **25+ topic directories** with
+The codebase comprises **227 active Lean files** across **24 topic directories** with
 **~60,500 lines** of active code, **1,757 proved theorems/lemmas**, and **82 active axioms**
 (1 on the analytic crown, 1 on the oracle crown).
 
@@ -228,7 +228,7 @@ Cathedral/
 ├── IntegralBasis/    (2 files)   Báez-Duarte basis quantitative bounds
 ├── NumberTheory/     (1 file)    Dirichlet convolution identities
 ├── Structural/       (3 files)   Eigenvalue, Independence
-├── Archive/         (103 files)  Archived explorations, scratch, graduated code
+├── Archive/         (112 files)  Archived explorations, scratch, graduated code
 └── Defs.lean, Axioms.lean        Root definition and axiom files
 ```
 
@@ -279,7 +279,7 @@ These are the only files that contribute to `nyman_beurling_equivalence`:
 > [!IMPORTANT]
 > The **Analytic Crown** has 1 literature axiom. The **Oracle Crown** has
 > 1 computation axiom + 2 PNT axioms. The converse direction is **pure**
-> (zero axioms, zero sorry). The ~80 off-path axioms support alternative
+> (zero axioms, zero sorry). The ~81 off-path axioms support alternative
 > proof routes and experimental features that do not affect either crown.
 
 ---
@@ -351,7 +351,7 @@ v12 (Exploration 17) graduated all analysis chain sorries:
 |--------|-------|
 | Active Lean files | 227 |
 | Active lines of code | ~60,500 |
-| Archive files | 103 |
+| Archive files | 112 |
 | Archive lines | 22,000+ |
 | Theorems + lemmas | 1,757 proved |
 | Total axioms (active) | **82** |
