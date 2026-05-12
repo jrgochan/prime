@@ -182,93 +182,156 @@ fn analyze_coefficients(label: &str, coeffs: &[(usize, f64)], n_max: usize, shie
 
 #[cfg(feature = "hpdf")]
 fn analyze_hpdf(path: &str) {
-    use hdf5::File as H5File;
+    use cathedral_utils::hpdf::reader::HpdfReader;
+    use std::path::Path;
 
     println!();
     println!("  ═══ HPDF SPECTRAL ANALYSIS: {} ═══", path);
 
-    match H5File::open(path) {
-        Ok(file) => {
-            // Infer N from b_vector dimension (dim = N-1, so N = dim+1)
-            let n: usize = file.dataset("b_vector")
-                .map(|d| d.shape()[0] + 1)
-                .or_else(|_| file.group("gram")
-                    .and_then(|g| g.dataset("upper_triangle"))
-                    .map(|d| {
-                        // upper_triangle has dim*(dim+1)/2 entries, dim = N-1
-                        let len = d.shape()[0];
-                        // dim = (-1 + sqrt(1 + 8*len)) / 2
-                        let dim = ((-1.0 + (1.0 + 8.0 * len as f64).sqrt()) / 2.0) as usize;
-                        dim + 1
-                    }))
-                .unwrap_or(0);
-
-            if n == 0 {
-                eprintln!("  Cannot determine N from H5 file");
-                return;
-            }
-            report::banner(n);
-
-            // Try to read eigenvalues from various possible locations
-            let eigenvalues = file.dataset("eigenvalues")
-                .or_else(|_| file.dataset("spectral/eigenvalues"))
-                .and_then(|d| d.read_1d::<f64>())
-                .map(|a| a.to_vec())
-                .ok();
-
-            // Fall back to diagonal as spectral proxy
-            let diagonal = file.dataset("structure/diagonal")
-                .and_then(|d| d.read_1d::<f64>())
-                .map(|a| a.to_vec())
-                .ok();
-
-            let spectral_data = eigenvalues.or(diagonal);
-
-            if let Some(ref data) = spectral_data {
-                let mut sorted = data.clone();
-                sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-                // RMT Analysis
-                println!();
-                println!("  ═══ RANDOM MATRIX THEORY ═══");
-                let rmt = rmt_analysis::RmtAnalysis::analyze(&sorted);
-                rmt.display();
-
-                let lambda_min = sorted[0];
-                let lambda_max = sorted[sorted.len() - 1];
-
-                // Mertens product
-                let primes = arith::sieve_primes(n);
-                let mertens: f64 = (2..=n)
-                    .filter(|&p| primes[p])
-                    .map(|p| 1.0 - 1.0 / p as f64)
-                    .product();
-
-                report::spectral_header(lambda_min, lambda_max, 0.0, 0.0, mertens);
-
-                // Mass calibration (Gemini's W± anchor)
-                if lambda_min > 1e-15 {
-                    let cal = particle_map::MassCalibration::from_spectral_gap(lambda_min);
-                    println!();
-                    println!("  ═══ MASS CALIBRATION (W± anchor — Gemini) ═══");
-                    println!("  λ_min = {:.8}  →  W± = 80,377 MeV", lambda_min);
-                    println!("  Scale factor = {:.2} MeV / eigenvalue unit", cal.scale_factor);
-
-                    // What mass does the SECOND eigenvalue predict?
-                    if sorted.len() > 1 {
-                        println!("  λ₂ = {:.8}  →  {:.2} MeV", sorted[1], cal.to_mev(sorted[1]));
-                    }
-                }
-            } else {
-                println!("  No eigenvalues dataset in H5. Run eigendecomposition first.");
-                println!("  Matrix available: {}", file.dataset("gram_matrix").is_ok());
-            }
-        }
+    let reader = match HpdfReader::open(Path::new(path)) {
+        Ok(r) => r,
         Err(e) => {
-            eprintln!("  Error opening {}: {}", path, e);
+            eprintln!("  Error opening HPDF file: {}", e);
+            return;
+        }
+    };
+
+    let n = reader.max_n();
+    let dim = reader.dim();
+    report::banner(n);
+
+    // ── File Metadata ──
+    println!();
+    println!("  ┌─────────────────────────────────────────────────────────────────┐");
+    println!("  │ HPDF FILE METADATA                                             │");
+    println!("  ├─────────────────────────────────────────────────────────────────┤");
+    println!("  │ N (max_n)      = {:>10}                                     │", n);
+    println!("  │ dim (N-1)      = {:>10}                                     │", dim);
+    println!("  │ Version        = {:>10}                                     │", reader.version());
+    let has_dd = reader.has_dd();
+    let dd_str = if has_dd { "✅ DD (~31 digits)" } else { "f64 only (~16 digits)" };
+    println!("  │ Precision      = {}                       │", dd_str);
+    if let Ok(prec) = reader.precision() {
+        println!("  │ MPFR bits      = {:>10}                                     │", prec);
+    }
+    println!("  └─────────────────────────────────────────────────────────────────┘");
+
+    // ── Structural Scalars ──
+    if let Ok(ss) = reader.read_structural_scalars() {
+        println!();
+        println!("  ┌─────────────────────────────────────────────────────────────────┐");
+        println!("  │ STRUCTURAL INVARIANTS                                           │");
+        println!("  ├─────────────────────────────────────────────────────────────────┤");
+        println!("  │ Trace         = {:.10}                                  │", ss.trace);
+        println!("  │ Frobenius     = {:.10}                                  │", ss.frobenius_norm);
+        println!("  │ Condition est = {:.6e}                                  │", ss.condition_estimate);
+        println!("  │ Diag range    = [{:.8}, {:.8}]                  │", ss.diag_min, ss.diag_max);
+        println!("  │ Off-diag max  = {:.10}                                  │", ss.off_diag_max);
+        if let Some(g_min) = ss.gershgorin_lambda_min {
+            println!("  │ Gershgorin λ_min = {:.10}                               │", g_min);
+        }
+        if let Some(g_max) = ss.gershgorin_lambda_max {
+            println!("  │ Gershgorin λ_max = {:.10}                               │", g_max);
+        }
+        println!("  └─────────────────────────────────────────────────────────────────┘");
+
+        // Spectral bounds from Gershgorin (mass gap proxy)
+        let lambda_min = ss.gershgorin_lambda_min.unwrap_or(ss.diag_min);
+        let lambda_max = ss.gershgorin_lambda_max.unwrap_or(ss.diag_max);
+
+        // Mertens product
+        let primes = arith::sieve_primes(n);
+        let mertens: f64 = (2..=n)
+            .filter(|&p| primes[p])
+            .map(|p| 1.0 - 1.0 / p as f64)
+            .product();
+
+        // Distance result (d²_N)
+        let d2 = reader.read_distance()
+            .ok()
+            .flatten()
+            .map(|d| d.d_squared)
+            .unwrap_or(0.0);
+
+        report::spectral_header(lambda_min, lambda_max, d2, ss.trace, mertens);
+
+        // ── Mass Calibration (Gemini's W± anchor) ──
+        if lambda_min > 1e-15 {
+            let cal = particle_map::MassCalibration::from_spectral_gap(lambda_min);
+            println!();
+            println!("  ═══ MASS CALIBRATION (W± anchor — Gemini) ═══");
+            println!("  λ_min (Gershgorin) = {:.8}  →  W± = 80,377 MeV", lambda_min);
+            println!("  Scale factor = {:.2} MeV / eigenvalue unit", cal.scale_factor);
+            println!("  λ_max = {:.8}  →  {:.2} MeV", lambda_max, cal.to_mev(lambda_max));
+
+            // Predict electron mass from diagonal self-energy
+            let electron_pred = cal.to_mev(ss.diag_min);
+            println!("  Diag min (e⁻ proxy) = {:.8}  →  {:.2} MeV  (SM: 0.511 MeV)",
+                     ss.diag_min, electron_pred);
         }
     }
+
+    // ── RMT on Diagonal (spectral proxy) ──
+    if let Ok(diag) = reader.read_diagonal() {
+        let mut sorted = diag.clone();
+        sorted.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        println!();
+        println!("  ═══ RANDOM MATRIX THEORY (diagonal proxy, {} values) ═══", sorted.len());
+        let rmt = rmt_analysis::RmtAnalysis::analyze(&sorted);
+        rmt.display();
+    }
+
+    // ── See-Saw Analysis ──
+    if let Ok(b_vec) = reader.read_b_vector() {
+        let d2 = reader.read_distance()
+            .ok()
+            .flatten()
+            .map(|d| d.d_squared)
+            .unwrap_or(0.0);
+
+        // Use diagonal as eigenvalue proxy for see-saw
+        if let Ok(diag) = reader.read_diagonal() {
+            println!();
+            println!("  ═══ SEE-SAW MECHANISM (Gemini) ═══");
+            let ss = seesaw::SeeSawAnalysis::compute(&diag, &b_vec, d2);
+            ss.display();
+        }
+    }
+
+    // ── DD Precision Report ──
+    if has_dd {
+        println!();
+        println!("  ═══ DOUBLE-DOUBLE PRECISION ═══");
+        println!("  This file contains DD (hi+lo) data (~31 significant digits)");
+        println!("  Matrix size: {}×{} = {:.1} GB (hi) + {:.1} GB (lo)",
+                 dim, dim,
+                 dim as f64 * (dim as f64 + 1.0) / 2.0 * 8.0 / 1e9,
+                 dim as f64 * (dim as f64 + 1.0) / 2.0 * 8.0 / 1e9);
+        println!("  Total DD entries: {}", dim * (dim + 1) / 2);
+        println!("  Use GPU pipeline for DD eigendecomposition at this scale");
+    }
+
+    // ── Number Theory ──
+    if let Ok(Some(nt)) = reader.read_number_theory_attrs() {
+        println!();
+        println!("  ═══ NUMBER THEORY ═══");
+        if !nt.factorization.is_empty() {
+            println!("  Factorization: {}", nt.factorization);
+        }
+        println!("  Divisor count d(N) = {}", nt.divisor_count);
+        println!("  Divisor sum σ(N)   = {}", nt.divisor_sum);
+        println!("  Highly composite?  = {}", if nt.is_highly_composite { "✅ YES" } else { "no" });
+        println!("  Primes ≤ N         = {}", nt.prime_count);
+    }
+
+    // ── Coupling Constants ──
+    println!();
+    println!("  ═══ COUPLING CONSTANTS (Gemini's Formula) ═══");
+    let couplings = coupling::ArithmeticCouplings::compute(n, &[]);
+    couplings.display();
 }
+
 
 
 fn display_particle_table() {
