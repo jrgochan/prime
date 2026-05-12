@@ -135,15 +135,37 @@ lemma tendsto_rpow_neg_div_log (C : ℝ) (α : ℝ) (hα : 0 < α) :
     _ < ε := hN_eps
 
 /-- **COROLLARY**: Under RH, the truncation error → 0 as N → ∞
-    for any fixed σ > 3/4. -/
+    for any fixed σ > 3/4.
+    CLOSED: corollary of `tapered_truncation_bound_above_34` +
+    `tendsto_rpow_neg_div_log`. -/
 lemma tapered_truncation_tendsto_zero
     (hRH : RiemannHypothesis)
     (σ : ℝ) (hσ : 3/4 < σ) (hσ2 : σ < 2)
     (t : ℝ) :
     Filter.Tendsto (fun N : ℕ => ‖taperedTruncationError N σ t‖)
       Filter.atTop (nhds 0) := by
-  -- N^{3/4-σ}/logN → 0 since 3/4-σ < 0
-  sorry
+  -- Case split: is ζ(σ+it) = 0?
+  by_cases h : ‖riemannZeta (↑σ + ↑t * I)‖ = 0
+  · -- Case 1: ζ(s) = 0. Bound is 0 for all N ≥ 2, so ‖E_N‖ ≤ 0 → ‖E_N‖ = 0.
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds tendsto_const_nhds
+    · filter_upwards with N; exact norm_nonneg _
+    filter_upwards [Filter.eventually_ge_atTop 2] with N hN
+    have hbd := tapered_truncation_bound_above_34 hRH σ hσ hσ2 N hN t
+    simp only [h, ite_true] at hbd
+    exact le_antisymm hbd (norm_nonneg _) ▸ le_refl (0 : ℝ)
+  · -- Case 2: ζ(s) ≠ 0. Bound is 42·N^{3/4-σ}/logN → 0.
+    have hα : 0 < σ - 3/4 := by linarith
+    have h_conv : Filter.Tendsto (fun N : ℕ => 42 * (N : ℝ) ^ ((3:ℝ)/4 - σ) / Real.log N)
+        Filter.atTop (nhds 0) := by
+      have := tendsto_rpow_neg_div_log 42 (σ - 3/4) hα
+      convert this using 2
+      simp only [neg_sub]
+    apply tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds h_conv
+    · filter_upwards with N; exact norm_nonneg _
+    filter_upwards [Filter.eventually_ge_atTop 2] with N hN
+    have hbd := tapered_truncation_bound_above_34 hRH σ hσ hσ2 N hN t
+    simp [h] at hbd
+    exact hbd
 
 -- ════════════════════════════════════════════════
 -- §3. THE L² BOUND ON A VERTICAL LINE
