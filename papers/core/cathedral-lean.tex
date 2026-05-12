@@ -33,7 +33,7 @@ classical.
 
 The second half covers practice: Mathlib API patterns that worked
 well (interval integrals, spectral theory), patterns requiring
-workarounds (infinite sums, measure theory), 5 API gaps requiring
+workarounds (infinite sums, measure theory), 4 API gaps requiring
 axioms, 12 essential lemmas, project structure advice, and common
 tactic patterns. We document 3 deprecated-API traps and provide
 a verification checklist for large-scale proof engineering.
@@ -154,7 +154,7 @@ The Cathedral introduces a foundational concept: the
 \begin{enumerate}
   \item \textbf{Kernel axioms}: Trusted by design. (3)
   \item \textbf{Crown axioms}: On the critical path. (1)
-  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$80)
+  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$81)
   \item \textbf{Theorems}: Machine-verified from Mathlib.
   \item \textbf{Archived axioms}: Previously active, now proved. (11)
 \end{enumerate}
@@ -353,8 +353,8 @@ in your Mathlib version.
 Formalizing analytic number theory in Lean~4 is feasible today, but
 requires significant infrastructure work. The main gaps are in
 complex analysis (contour integrals, analytic continuation) and
-specialized number theory (Mertens function, Dirichlet polynomial
-bounds). The Cathedral took 45 days and produced $\sim$60{,}500 lines
+specialized number theory (Mertens function, Dedekind sums).
+The Cathedral took 45 days and produced $\sim$60{,}500 lines
 across 227 active files.
 
 The foundational analysis shows the proof inhabits ordinary
