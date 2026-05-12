@@ -16,6 +16,7 @@ mod rmt_analysis;
 mod generation_scan;
 mod coupling;
 mod seesaw;
+mod spectral_bands;
 mod proof_tree;
 mod report;
 mod output;
@@ -49,6 +50,19 @@ struct Cli {
     /// (Antigravity's Liquid Argon Shield)
     #[arg(long, value_delimiter = ',')]
     shield: Vec<u64>,
+
+    /// Run full eigendecomposition and Scenario B band analysis
+    #[arg(long)]
+    eigendecompose: bool,
+
+    /// MPFR precision in bits for Jacobi eigensolver [default: 128]
+    #[arg(long, default_value = "128")]
+    precision: u32,
+
+    /// Use Lanczos for partial eigendecomposition (bottom-k eigenvalues)
+    /// Set to 0 for full Jacobi decomposition
+    #[arg(long, default_value = "0")]
+    lanczos_k: usize,
 
     /// Output directory for results [default: results]
     #[arg(long, default_value = "results")]
@@ -96,7 +110,7 @@ fn main() {
     // ── HPDF H5 File Analysis ──
     #[cfg(feature = "hpdf")]
     for path in &cli.hpdf {
-        analyze_hpdf(path, &cli.output);
+        analyze_hpdf(path, &cli.output, cli.eigendecompose, cli.precision, cli.lanczos_k);
     }
 
     if cli.coeffs.is_empty() && cli.proof_tree && !cli.particles {
@@ -188,7 +202,7 @@ fn analyze_coefficients(label: &str, coeffs: &[(usize, f64)], n_max: usize, shie
 }
 
 #[cfg(feature = "hpdf")]
-fn analyze_hpdf(path: &str, output_dir: &str) {
+fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u32, lanczos_k: usize) {
     use cathedral_utils::hpdf::reader::HpdfReader;
     use std::path::Path;
 
@@ -357,7 +371,104 @@ fn analyze_hpdf(path: &str, output_dir: &str) {
             eprintln!("  {}Error writing output: {}{}", cfmt::RED, e, cfmt::RESET);
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    //  SCENARIO B: EIGENDECOMPOSITION + BAND ANALYSIS
+    // ═══════════════════════════════════════════════════════════════════════
+    if eigendecompose {
+        println!();
+        cfmt::section(&format!("SCENARIO B: EIGENDECOMPOSITION (dim={}, prec={}-bit)", dim, precision));
+
+        // Safety check: dim > 10000 with full Jacobi is very expensive
+        if dim > 10000 && lanczos_k == 0 {
+            eprintln!("  {}WARNING: Full Jacobi on dim={} will be very slow!{}", cfmt::YELLOW, dim, cfmt::RESET);
+            eprintln!("  Consider --lanczos-k 500 for partial decomposition.");
+        }
+
+        let t_eigen = std::time::Instant::now();
+
+        // Load the full Gram matrix
+        println!("  Loading full Gram matrix ({}×{})...", dim, dim);
+        let gram_flat = match reader.read_gram_full() {
+            Ok(g) => g,
+            Err(e) => {
+                eprintln!("  {}Error loading Gram matrix: {}{}", cfmt::RED, e, cfmt::RESET);
+                return;
+            }
+        };
+        let mem_mb = (gram_flat.len() * 8) as f64 / 1e6;
+        println!("  Loaded {:.1} MB ({} entries)", mem_mb, gram_flat.len());
+
+        let (eigenvalues, eigenvectors) = if lanczos_k > 0 {
+            // ── PARTIAL: Lanczos (matrix-free, Rayon-parallelized matvec) ──
+            println!("  Running Lanczos (bottom-{} eigenvalues, {} threads)...",
+                     lanczos_k, rayon::current_num_threads());
+            let matvec = |v: &[f64], out: &mut [f64]| {
+                use rayon::prelude::*;
+                out.par_iter_mut().enumerate().for_each(|(i, yi)| {
+                    let row = &gram_flat[i * dim..(i + 1) * dim];
+                    *yi = row.iter().zip(v.iter()).map(|(a, b)| a * b).sum();
+                });
+            };
+
+            let m = (4 * lanczos_k).min(dim);
+            let result = cathedral_utils::lanczos::lanczos_bottom_k(&matvec, dim, lanczos_k, m);
+            println!("  Lanczos: {} iterations, {} eigenvalues extracted",
+                     result.iterations, result.eigenvalues.len());
+            if !result.residual_norms.is_empty() {
+                let max_res = result.residual_norms.iter().cloned().fold(0.0f64, f64::max);
+                println!("  Max residual norm: {:.6e}", max_res);
+            }
+            (result.eigenvalues, result.eigenvectors)
+        } else if precision <= 64 {
+            // ── FAST PATH: Native f64 via nalgebra (3000× faster than MPFR) ──
+            println!("  Running native f64 eigendecomposition ({} threads)...",
+                     rayon::current_num_threads());
+            let result = cathedral_utils::eigen::eigen_f64(&gram_flat, dim);
+            println!("  λ range: [{:.10e}, {:.10e}]",
+                     result.eigenvalues[0],
+                     result.eigenvalues.last().unwrap_or(&0.0));
+            (result.eigenvalues, result.eigenvectors)
+        } else {
+            // ── HIGH PRECISION: MPFR Jacobi ──
+            println!("  Running MPFR Jacobi ({}-bit precision)...", precision);
+            let result = cathedral_utils::jacobi::eigen_jacobi_mpfr(&gram_flat, dim, precision);
+            println!("  Jacobi: {} sweeps, off-diag = {:.3e}",
+                     result.sweeps, result.final_off_norm);
+            println!("  λ range: [{:.10e}, {:.10e}]",
+                     result.eigenvalues[0],
+                     result.eigenvalues.last().unwrap_or(&0.0));
+            (result.eigenvalues, result.eigenvectors)
+        };
+
+
+        let eigen_time = t_eigen.elapsed().as_secs_f64();
+        println!("  Eigendecomposition: {} eigenvalues + eigenvectors in {}",
+                 eigenvalues.len(), cfmt::elapsed(eigen_time));
+
+        // ── Spectral Band Analysis ──
+        println!();
+        cfmt::section("ω-CLASS BAND ANALYSIS");
+        let band_analysis = spectral_bands::SpectralBandAnalysis::analyze(
+            &eigenvalues, &eigenvectors, n
+        );
+        band_analysis.display();
+
+        // Write band output files
+        match spectral_bands::write_bands_tsv(&band_analysis, output_dir) {
+            Ok(()) => {
+                println!();
+                println!("  {}{}═══ BAND ANALYSIS COMPLETE ({}) ═══{}",
+                         cfmt::BOLD, cfmt::GREEN,
+                         cfmt::elapsed(t0.elapsed().as_secs_f64()), cfmt::RESET);
+            }
+            Err(e) => {
+                eprintln!("  {}Error writing band data: {}{}", cfmt::RED, e, cfmt::RESET);
+            }
+        }
+    }
 }
+
 
 
 

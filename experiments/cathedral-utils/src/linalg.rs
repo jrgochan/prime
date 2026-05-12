@@ -23,6 +23,19 @@ pub fn dense_matvec(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
     }
 }
 
+/// Parallel dense symmetric matrix-vector product: `out = mat · v`.
+///
+/// Each row's dot product is computed independently via Rayon.
+/// Speedup is linear in the number of cores for dim > ~200.
+pub fn dense_matvec_par(mat: &[f64], dim: usize, v: &[f64], out: &mut [f64]) {
+    use rayon::prelude::*;
+    out[..dim].par_iter_mut().enumerate().for_each(|(i, yi)| {
+        let row = &mat[i * dim..(i + 1) * dim];
+        *yi = row.iter().zip(v.iter()).map(|(a, b)| a * b).sum();
+    });
+}
+
+
 /// Shifted matrix-vector product: `out = (σI - mat) · v`.
 ///
 /// Computes `out[i] = σ * v[i] - (mat · v)[i]`. Used by Lanczos iteration

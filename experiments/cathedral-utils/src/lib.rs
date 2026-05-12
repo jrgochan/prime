@@ -37,6 +37,7 @@ pub mod certificate;
 pub mod constants;
 pub mod coprime;
 pub mod dd;
+pub mod eigen;
 pub mod fitting;
 pub mod fmt;
 pub mod gcd_decomp;
