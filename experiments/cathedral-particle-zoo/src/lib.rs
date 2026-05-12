@@ -9,6 +9,7 @@
 //! - [`coupling`] — Arithmetic coupling constants (α_em, α_s, sin²θ_W)
 //! - [`seesaw`] — Neutrino mass via Schur complement (Gemini's See-Saw)
 //! - [`spectral_bands`] — Scenario B test: eigenvalue band ratios → SM mass ratios
+//! - [`prime_core`] — Prime core conjecture: G_P subblock convergence test
 //! - [`proof_tree`] — Cathedral theorem ↔ physics observable bridge
 //! - [`report`] — Rich terminal output formatting
 
@@ -18,6 +19,7 @@ pub mod generation_scan;
 pub mod coupling;
 pub mod seesaw;
 pub mod spectral_bands;
+pub mod prime_core;
 pub mod proof_tree;
 pub mod report;
 pub mod output;

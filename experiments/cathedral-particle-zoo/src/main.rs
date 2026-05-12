@@ -17,6 +17,7 @@ mod generation_scan;
 mod coupling;
 mod seesaw;
 mod spectral_bands;
+mod prime_core;
 mod proof_tree;
 mod report;
 mod output;
@@ -64,6 +65,15 @@ struct Cli {
     #[arg(long, default_value = "0")]
     lanczos_k: usize,
 
+    /// Use GPU (cuSOLVER dsyevd) for eigendecomposition.
+    /// Requires --features gpu and CUDA runtime.
+    #[arg(long)]
+    gpu: bool,
+
+    /// Batch mode: process all gram_N*.h5 files in this directory
+    #[arg(long)]
+    batch_dir: Option<String>,
+
     /// Output directory for results [default: results]
     #[arg(long, default_value = "results")]
     output: String,
@@ -109,8 +119,38 @@ fn main() {
 
     // ── HPDF H5 File Analysis ──
     #[cfg(feature = "hpdf")]
-    for path in &cli.hpdf {
-        analyze_hpdf(path, &cli.output, cli.eigendecompose, cli.precision, cli.lanczos_k);
+    {
+        let mut h5_files: Vec<String> = cli.hpdf.clone();
+
+        // Batch mode: glob gram_N*.h5 in batch_dir
+        if let Some(ref dir) = cli.batch_dir {
+            if let Ok(entries) = std::fs::read_dir(dir) {
+                let mut batch: Vec<String> = entries
+                    .filter_map(|e| e.ok())
+                    .filter_map(|e| {
+                        let name = e.file_name().to_string_lossy().to_string();
+                        if name.starts_with("gram_N") && name.ends_with(".h5") {
+                            Some(e.path().to_string_lossy().to_string())
+                        } else {
+                            None
+                        }
+                    })
+                    .collect();
+                // Sort by N value
+                batch.sort_by_key(|p| {
+                    p.split("gram_N").last()
+                        .and_then(|s| s.strip_suffix(".h5"))
+                        .and_then(|s| s.parse::<usize>().ok())
+                        .unwrap_or(0)
+                });
+                eprintln!("  [Batch] Found {} H5 files in {}", batch.len(), dir);
+                h5_files.extend(batch);
+            }
+        }
+
+        for path in &h5_files {
+            analyze_hpdf(path, &cli.output, cli.eigendecompose, cli.precision, cli.lanczos_k, cli.gpu);
+        }
     }
 
     if cli.coeffs.is_empty() && cli.proof_tree && !cli.particles {
@@ -202,7 +242,7 @@ fn analyze_coefficients(label: &str, coeffs: &[(usize, f64)], n_max: usize, shie
 }
 
 #[cfg(feature = "hpdf")]
-fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u32, lanczos_k: usize) {
+fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u32, lanczos_k: usize, use_gpu: bool) {
     use cathedral_utils::hpdf::reader::HpdfReader;
     use std::path::Path;
 
@@ -399,7 +439,36 @@ fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u
         let mem_mb = (gram_flat.len() * 8) as f64 / 1e6;
         println!("  Loaded {:.1} MB ({} entries)", mem_mb, gram_flat.len());
 
-        let (eigenvalues, eigenvectors) = if lanczos_k > 0 {
+        let (eigenvalues, eigenvectors) = if use_gpu {
+            // ── GPU: cuSOLVER dsyevd (fastest for dim > ~2000) ──
+            #[cfg(feature = "gpu")]
+            {
+                println!("  Running GPU eigendecomposition (cuSOLVER dsyevd)...");
+                match cathedral_utils::gpu::eigen::syevd(&gram_flat, dim) {
+                    Ok(result) => {
+                        println!("  GPU time: {:.3}s", result.gpu_time_secs);
+                        // Convert column-major eigenvectors to row-of-Vec format
+                        let evecs: Vec<Vec<f64>> = (0..dim).map(|k| {
+                            (0..dim).map(|i| result.eigenvectors[k * dim + i]).collect()
+                        }).collect();
+                        (result.eigenvalues, evecs)
+                    }
+                    Err(e) => {
+                        eprintln!("  {}GPU eigen failed: {}. Falling back to CPU.{}",
+                                  cfmt::YELLOW, e, cfmt::RESET);
+                        let result = cathedral_utils::eigen::eigen_f64(&gram_flat, dim);
+                        (result.eigenvalues, result.eigenvectors)
+                    }
+                }
+            }
+            #[cfg(not(feature = "gpu"))]
+            {
+                eprintln!("  {}GPU not compiled in. Falling back to f64 CPU.{}",
+                          cfmt::YELLOW, cfmt::RESET);
+                let result = cathedral_utils::eigen::eigen_f64(&gram_flat, dim);
+                (result.eigenvalues, result.eigenvectors)
+            }
+        } else if lanczos_k > 0 {
             // ── PARTIAL: Lanczos (matrix-free, Rayon-parallelized matvec) ──
             println!("  Running Lanczos (bottom-{} eigenvalues, {} threads)...",
                      lanczos_k, rayon::current_num_threads());
@@ -421,7 +490,7 @@ fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u
             }
             (result.eigenvalues, result.eigenvectors)
         } else if precision <= 64 {
-            // ── FAST PATH: Native f64 via nalgebra (3000× faster than MPFR) ──
+            // ── FAST PATH: Native f64 via nalgebra ──
             println!("  Running native f64 eigendecomposition ({} threads)...",
                      rayon::current_num_threads());
             let result = cathedral_utils::eigen::eigen_f64(&gram_flat, dim);
@@ -464,6 +533,22 @@ fn analyze_hpdf(path: &str, output_dir: &str, eigendecompose: bool, precision: u
             }
             Err(e) => {
                 eprintln!("  {}Error writing band data: {}{}", cfmt::RED, e, cfmt::RESET);
+            }
+        }
+
+        // ── Prime Core Conjecture Test ──
+        println!();
+        cfmt::section("PRIME CORE CONJECTURE TEST");
+        let pc_result = prime_core::PrimeCoreResult::test(
+            &gram_flat, &eigenvalues, &eigenvectors, n, 10
+        );
+        pc_result.display();
+
+        // Write prime core results
+        match prime_core::write_prime_core_json(&pc_result, output_dir) {
+            Ok(()) => {}
+            Err(e) => {
+                eprintln!("  {}Error writing prime core data: {}{}", cfmt::RED, e, cfmt::RESET);
             }
         }
     }
