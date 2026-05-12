@@ -309,6 +309,8 @@ lean_lib «Cathedral» where
     -- Zero-axiom forward direction (Exploration 27: The Millennium Strike)
     `Cathedral.ZeroAxiom.FiniteDirichlet,
     `Cathedral.ZeroAxiom.MellinAlgebra,
+    -- Zero-axiom forward direction (Exploration 36: The Road to Zero)
+    `Cathedral.ZeroAxiom.TaperedAbel,
     -- Compute: Interval arithmetic verifier (Oracle bridge, Exploration 32)
     `Cathedral.Compute.IntervalVerifier,
     -- Compute: Trusted oracle certificates (GPU → Lean, Exploration 32)
