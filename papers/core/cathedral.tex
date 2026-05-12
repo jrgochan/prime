@@ -350,8 +350,8 @@ transparent axioms. These are \textbf{not} on the primary crown path.
 
 \subsection{The Full Axiom Registry}
 
-The 227 active files contain 80 custom axioms; an additional
-59 axioms reside in archived explorations, totaling $\sim$139 across
+The 227 active files contain 82 custom axioms; an additional
+59 axioms reside in archived explorations, totaling $\sim$141 across
 the full repository ($\sim$2{,}800 theorem/lemma/def declarations):
 
 \begin{center}
@@ -363,12 +363,12 @@ the full repository ($\sim$2{,}800 theorem/lemma/def declarations):
 1' & Oracle axioms (computation certificates) & 24 & 0 (Oracle path) \\
 2 & Spectral engine (off-path) & 7 & 0 \\
 3 & Sieve engine (off-path) & 8 & 0 \\
-4 & MellinBridge / alt paths / Vasyunin & 40 & 0 \\
+4 & MellinBridge / alt paths / Vasyunin & 42 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{80} & \textbf{1} \\
+& \textbf{Active subtotal} & \textbf{82} & \textbf{1} \\
 5 & Archive (inactive, superseded) & 59 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$139} & \textbf{1} \\
+& \textbf{Grand total} & \textbf{$\sim$141} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -556,7 +556,7 @@ to informal proof:
 
 \subsection{Module Organization}
 
-The Cathedral is organized into 17 modules (227 active files):
+The Cathedral is organized into 24 modules (227 active files):
 
 \begin{center}
 \small
@@ -564,33 +564,33 @@ The Cathedral is organized into 17 modules (227 active files):
 \toprule
 \textbf{Module} & \textbf{Content} & \textbf{Files} & \textbf{Crown} \\
 \midrule
-\lean{NymanBeurling} & Converse (Rank-1 Mellin) & 6 & 0 \\
-\lean{Assembly} & Crown theorem + Mellin Crown & 18 & 2 \\
-\lean{White} & Parseval bridge, Kinematics & 5 & 0 \\
+\lean{NymanBeurling} & Converse (Rank-1 Mellin) & 10 & 0 \\
+\lean{Assembly} & Crown theorem + Oracle cascade & 13 & 1 + Oracle \\
+\lean{Vasyunin} & Cotangent formula, witness & 52 & 0 \\
+\lean{Covariance} & GCD strata, Euler product, taper & 20 & 0 \\
+\lean{MellinBridge} & Mellin transforms, Plancherel & 18 & 0 \\
 \lean{Perron} & Perron contour chain & 16 & 0 \\
-\lean{PNT} & PNT Abel means, tail bounds & 4 & 0 \\
-\lean{AbelTail} & Abel summation tail bounds & 10 & 0 \\
-\lean{Vasyunin} & Cotangent formula, witness & 30 & 0 \\
-\lean{MellinBridge} & Mellin transforms, Plancherel & 14 & 0 \\
-\lean{Gram} & Gram matrix bounds & 8 & 0 \\
+\lean{Analysis} & Real/complex analysis, Stirling & 16 & 0 \\
+\lean{AbelTail} & Abel summation tail bounds & 14 & 0 \\
+\lean{Spectral} & Rayleigh, class restriction & 11 & 0 \\
+\lean{Zeta} & Zeta bounds, Dirichlet inverse & 10 & 0 \\
+\lean{Robin} & Robin/Nicolas/Lagarias & 7 & 0 \\
+\lean{Gram} & Gram matrix bounds & 6 & 0 \\
 \lean{LinearAlgebra} & Sherman--Morrison, Schur & 4 & 0 \\
-\lean{Covariance} & GCD strata, Euler product, taper & 12 & 0 \\
-\lean{Spectral} & Rayleigh, class restriction & 9 & 0 \\
-\lean{Sieve} & Bilinear sieve (off-path) & 5 & 0 \\
-\lean{Structural} & Eigenvalue bounds & 3 & 0 \\
-\lean{Rotors} & Stained Glass (Gallagher) & 10 & 0 \\
-\lean{Zeta} & Zeta bounds, Borel--Carath. & 14 & 0 \\
-\lean{Compute} & Oracle Bridge (GPU$\to$Lean) & 2 & Oracle \\
+\lean{Structural} & Eigenvalue bounds & 4 & 0 \\
+\lean{Sieve} & Bilinear sieve (off-path) & 4 & 0 \\
+\lean{PNT} & PNT bridge (PNTA dependency) & 4 & 0 \\
+\lean{+ 8 others} & Physics, Renorm., Compute, etc. & 18 & 0 \\
 \midrule
 & \textbf{Active total} & \textbf{227} & \textbf{1 + Oracle} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-An additional 103 files are preserved in \lean{Archive/}.
-Of the 227 active files, \textbf{176} (78\%) are sorry-free.
+An additional 113 files are preserved in \lean{Archive/}.
+Of the 227 active files, \textbf{219} (96\%) are sorry-free.
 Exploratory paths and upstream PNTA dependencies contain
-17 quarantined \lean{sorry} placeholders that do not
+17 quarantined \lean{sorry} placeholders (across 8 files) that do not
 affect the crown theorem.
 
 \subsection{The Axiom Audit Protocol}
@@ -615,7 +615,7 @@ these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 227 active files, 103 archived
+lake build    # 227 active files, 113 archived
 
 #print axioms nyman_beurling_equivalence
 -- baez_duarte_forward
@@ -663,7 +663,7 @@ $d_M^2 \leq d_{N_k}^2 < \varepsilon$ for all $M \geq N_k$
 
 \subsection{Trust Model}
 
-The trust model follows the Flyspeck project (Hales, 2014):
+The trust model follows the Flyspeck project~\cite{hales2017}:
 open-source Rust code computes the bound; SHA-256 provenance tracks
 input data; the numerical result is imported as a Lean axiom.
 The Oracle path uses \textbf{1 trusted axiom} (\lean{oracle\_certificates})
@@ -857,6 +857,10 @@ A.~Kontorovich, H.~Macbeth, et al.,
 \bibitem{mathlib}
 The Mathlib Community, \emph{Mathlib4},
 \url{https://github.com/leanprover-community/mathlib4}.
+
+\bibitem{hales2017}
+T.C.~Hales et al., \emph{A Formal Proof of the Kepler Conjecture},
+Forum Math. Pi \textbf{5} (2017), e2.
 
 \bibitem{lean4}
 L.~de~Moura et al., \emph{The Lean~4 Theorem Prover}, CADE-28, 2021.
