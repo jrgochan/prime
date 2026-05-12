@@ -194,6 +194,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.GCDStratumBound,
     -- GCD sign law (Layer 5, Möbius Stratum Conjecture, Exploration 35)
     `Cathedral.Covariance.GCDSignLaw,
+    -- HC number formalization (unbounded HC subsequence, Exploration 36)
+    `Cathedral.Covariance.HighlyComposite,
     -- Mertens bridge (PNTA → Cathedral, Exploration 35)
     `Cathedral.Covariance.MertensBridge,
     -- White Singlet (physics-motivated axiom elimination)
