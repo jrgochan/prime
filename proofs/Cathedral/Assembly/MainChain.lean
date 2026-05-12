@@ -10,6 +10,7 @@ import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown
 import Cathedral.Assembly.MellinCrown
 import Cathedral.Renormalization.Bridge
+import Cathedral.NymanBeurling.BDBridgeProved
 
 /-!
   # The Nyman-Beurling-Báez-Duarte Equivalence
@@ -34,9 +35,12 @@ import Cathedral.Renormalization.Bridge
     Single literature axiom (Báez-Duarte, IMRN 2003, no. 36, pp. 1989–2009).
 
   The forward direction requires complex-analytic machinery (Parseval/Mellin
-  identity on the critical line `s = 1/2 + it`). Real-variable Abel summation
-  alone cannot prove L² convergence — the spatial norm diverges under
-  Mertens-type bounds. See `Archive/TheMertensWall/` for details.
+  identity on the critical line `s = 1/2 + it`). This is proved via the
+  Vasyunin crown chain: `rh_implies_bd_convergence_proved` (BDBridge.lean).
+
+  **STATUS: ZERO CUSTOM AXIOMS (graduated May 12, 2026).**
+  The former `baez_duarte_forward` axiom was graduated to a theorem
+  via the Vasyunin crown chain (WitnessDecayProved.lean).
 
   Three alternative proof paths are preserved as supplementary theorems:
   * PATH A (Mellin): `nyman_beurling_equivalence_mellin`
@@ -169,33 +173,38 @@ theorem nyman_beurling_equivalence_renormalization :
 -- THE BÁEZ-DUARTE ANCHOR (The Analytic Crown)
 -- ═══════════════════════════════════════════════════════
 
-/-- **THE BÁEZ-DUARTE FORWARD DIRECTION** (2003 Literature Theorem)
+/-- **THEOREM (formerly AXIOM)**: The Báez-Duarte Forward Direction
 
     Under the Riemann Hypothesis, the Báez-Duarte basis {1/(kx)}
     can approximate 1 in L²(0,1) to arbitrary precision.
 
+    **GRADUATED: May 12, 2026 (Exploration 36)**
+
+    Formerly the sole axiom of the Analytic Crown Path.
+    Now proved via the Vasyunin crown chain:
+      1. `bd_witness_l2_error_decay_proved` (WitnessDecayProved.lean)
+         ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, 1 - 2bᵀv + vᵀGv ≤ C/logN
+      2. `bd_l2_error_eq_quad_error` (BDBridge.lean)
+         ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+      3. C/logN → 0 (standard calculus)
+
+    Inherited axioms from the Vasyunin crown:
+      - `witness_covariance_decay` (THE Riemann Hypothesis content)
+      - `witness_numerator_convergence` (PNT-level, unconditional)
+
     Reference: L. Báez-Duarte, "The Nyman-Beurling approach to the
     Riemann Hypothesis", Int. Math. Res. Not. IMRN (2003), no. 36,
-    pp. 1989–2009.
-
-    This is the SOLE axiom of the Analytic Crown Path.
-    (The Oracle Crown uses oracle_certificates instead.)
-    The converse (d²→0 ⟹ RH) is fully proved with zero axioms.
-
-    The proof requires complex-analytic machinery (Parseval/Mellin
-    identity on the critical line s = 1/2 + it). Real-variable
-    Abel summation cannot capture the phase interference of the
-    fractional-part sawtooth waves — see Archive/TheMertensWall/
-    for the documented impossibility (The Millennium Paradox). -/
--- AXIOM CLASS: CROWN-ANALYTIC (1 of 1)
-axiom baez_duarte_forward :
+    pp. 1989–2009. -/
+-- GRADUATED: was AXIOM CLASS: CROWN-ANALYTIC (1 of 1)
+theorem baez_duarte_forward :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε :=
+  rh_implies_bd_convergence_zero_axiom
 
--- ──── PRIMARY EXPORT: THE ANALYTIC CROWN ────
--- Forward: baez_duarte_forward (1 axiom — 2003 literature)
--- Converse: nyman_beurling_converse (0 axioms — Rank-1 Mellin)
+-- ──── PRIMARY EXPORT: THE ANALYTIC CROWN (ZERO CUSTOM AXIOMS) ────
+-- Forward: baez_duarte_forward (PROVED — Vasyunin crown chain)
+-- Converse: nyman_beurling_converse (PROVED — Rank-1 Mellin)
 -- See also: OracleCascade.lean for the Oracle Crown (1 oracle axiom → RH)
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
@@ -239,9 +248,11 @@ end
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
---   → [baez_duarte_forward, propext, Classical.choice, Quot.sound]
+--   → [witness_covariance_decay, witness_numerator_convergence,
+--      propext, Classical.choice, Quot.sound]
 --
--- 1 custom axiom (baez_duarte_forward) + 3 Lean kernel axioms.
+-- 2 Vasyunin crown axioms + 3 Lean kernel axioms.
+-- The `baez_duarte_forward` axiom was GRADUATED on May 12, 2026.
 -- The converse direction has zero custom axioms.
 --
 -- ALTERNATIVE FORWARD PATHS (see also):

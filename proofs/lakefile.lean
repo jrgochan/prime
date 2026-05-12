@@ -150,6 +150,7 @@ lean_lib «Cathedral» where
     -- witness_l2_error_decay_gram axiom ELIMINATED
     `Cathedral.NymanBeurling.BDBridge,
     `Cathedral.NymanBeurling.WitnessDecayProved,
+    `Cathedral.NymanBeurling.BDBridgeProved,
     `Cathedral.NymanBeurling.BDBypass,
     `Cathedral.NymanBeurling.VasyuninBypass,
     `Cathedral.Assembly.DirectL2Crown,
