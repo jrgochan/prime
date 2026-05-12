@@ -182,16 +182,37 @@ theorem mertens_product_nonneg (N : ℕ) :
   intro p hp
   exact euler_factor_nonneg (Nat.prime_of_mem_primeFactors hp)
 
-/-- The product Π_{p|N}(1-1/p) is strictly less than 1 for N with at least
-    two distinct prime factors. This suffices for the Gram bound since
-    HC numbers N ≥ 6 have at least two prime factors.
+/-- The product Π_{p|N}(1-1/p) is strictly less than 1 for any N ≥ 2.
+    (In particular, for HC numbers N ≥ 6.)
 
-    NOT on critical path — `gcdWeighted_euler_eventually_lt_one` uses
-    the axiom `mertens_hc_product_tendsto_zero` directly. -/
-theorem mertens_product_lt_one (N : ℕ) (hN : 6 ≤ N) (hHC : IsHighlyComposite N) :
+    Proof: pick any p₀ ∈ primeFactors(N), split ∏ = (1−1/p₀)·∏_{rest},
+    then (1−1/p₀) < 1 and ∏_{rest} ≤ 1 (each factor ≤ 1) and
+    (1−1/p₀) ≥ 0, so ∏ ≤ (1−1/p₀)·1 < 1. -/
+theorem mertens_product_lt_one (N : ℕ) (hN : 6 ≤ N) (_hHC : IsHighlyComposite N) :
     ∏ p ∈ Nat.primeFactors N, (1 - 1 / (p : ℝ)) < 1 := by
-  -- HC N ≥ 6 is even (2 ∈ primeFactors), so product ≤ 1/2 < 1
-  sorry
+  -- N ≥ 6 ≥ 2 → primeFactors nonempty
+  have hne : N.primeFactors.Nonempty := by
+    rw [Finset.nonempty_iff_ne_empty, ne_eq, Nat.primeFactors_eq_empty]
+    omega
+  obtain ⟨p₀, hp₀⟩ := hne
+  have hp₀_prime := Nat.prime_of_mem_primeFactors hp₀
+  -- Split product: ∏ = (1-1/p₀) · ∏_{rest}
+  rw [← Finset.mul_prod_erase _ _ hp₀]
+  -- Factor bounds
+  have h_lt : 1 - 1 / (p₀ : ℝ) < 1 := by
+    have hp₀_pos : (0 : ℝ) < p₀ := Nat.cast_pos.mpr hp₀_prime.pos
+    linarith [div_pos one_pos hp₀_pos]
+  have h_nonneg : 0 ≤ 1 - 1 / (p₀ : ℝ) := euler_factor_nonneg hp₀_prime
+  have h_rest_le : ∏ p ∈ N.primeFactors.erase p₀, (1 - 1 / (p : ℝ)) ≤ 1 :=
+    Finset.prod_le_one
+      (fun p hp => euler_factor_nonneg (Nat.prime_of_mem_primeFactors (Finset.mem_of_mem_erase hp)))
+      (fun p hp => euler_factor_le_one (Nat.prime_of_mem_primeFactors (Finset.mem_of_mem_erase hp)))
+  -- Chain: (1-1/p₀) · ∏_{rest} ≤ (1-1/p₀) · 1 = (1-1/p₀) < 1
+  calc (1 - 1 / (p₀ : ℝ)) * ∏ p ∈ N.primeFactors.erase p₀, (1 - 1 / (p : ℝ))
+      ≤ (1 - 1 / (p₀ : ℝ)) * 1 :=
+        mul_le_mul_of_nonneg_left h_rest_le h_nonneg
+    _ = 1 - 1 / (p₀ : ℝ) := mul_one _
+    _ < 1 := h_lt
 
 /-- **Mertens-HC Tendsto**: The Euler product over primeFactors of HC numbers
     tends to 0. This is the key decay statement.
@@ -224,8 +245,7 @@ theorem gcdWeighted_euler_eventually_lt_one :
 /-!
 ## Audit (revised May 12, 2026)
 
-### Sorry: 1 (non-critical)
-- `mertens_product_lt_one` — product < 1 for HC N ≥ 6 (not on critical path)
+### Sorry: 0 ✅
 
 ### Custom Axioms: 1
 - `mertens_hc_product_tendsto_zero`: Π_{p|N_hc}(1-1/p) → 0 as N_hc → ∞
@@ -241,6 +261,7 @@ theorem gcdWeighted_euler_eventually_lt_one :
 - `gcdWeighted_euler` — Σμ(j)μ(k)·gcd/(jk) = Π(1−1/p) ✅
 - `gcdWeighted_euler_eventually_lt_one` — GCD sum < 1 at large HC ✅ (from axiom)
 - `primeFactors_subset_range_succ` — primeFactors ⊆ primes ≤ N ✅
+- `mertens_product_lt_one` — Π_{p|N}(1-1/p) < 1 for N ≥ 6 ✅
 - `euler_factor_nonneg` — 1−1/p ≥ 0 ✅
 - `euler_factor_le_one` — 1−1/p ≤ 1 ✅
 - `mertens_product_nonneg` — product ≥ 0 ✅
