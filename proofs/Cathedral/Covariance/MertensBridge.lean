@@ -20,20 +20,26 @@ import Mathlib.Topology.Algebra.Order.LiminfLimsup
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 -- ════════════════════════════════════════════════
--- PNTAnd AXIOM REPLACEMENT
+-- EXTERNAL THEOREM (proved in PrimeNumberTheoremAnd)
 -- Mertens' third theorem: ∏_{p≤x}(1-1/p) ~ e^{-γ}/log(x).
--- Previously imported from PrimeNumberTheoremAnd.Mertens.
--- Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024–2026).
+-- This is classical (Mertens, 1874) and does NOT assume RH.
+-- Formally verified: Kontorovich et al., PrimeNumberTheoremAnd (2024–2026).
+-- Stubbed as axiom here to avoid pulling in the full PNTA dependency tree.
+-- Reference: github.com/AlexKontorovich/PrimeNumberTheoremAnd
 -- ════════════════════════════════════════════════
 
 /-- **Mertens' Third Theorem (asymptotic form).**
     ∏_{p ≤ x, prime} (1-1/p) ~ e^{-γ}/log(x).
-    Axiom (was proved in PNTAnd/Mertens.lean as Mertens.E₃.bound''). -/
+
+    EXTERNAL THEOREM — proved in PrimeNumberTheoremAnd as `Mertens.E₃.bound''`.
+    Stubbed as axiom to keep the Cathedral self-contained (Mathlib-only).
+    This is unconditional classical analysis and does NOT assume RH. -/
 axiom mertens_third_asymptotic :
   Asymptotics.IsEquivalent Filter.atTop
     (fun x : ℝ ↦ ∏ p ∈ (Finset.Ioc 0 ⌊x⌋₊).filter Nat.Prime,
       (1 - (1 : ℝ) / p))
     (fun x ↦ Real.exp (-eulerMascheroniConstant) / Real.log x)
+
 
 noncomputable section
 open Real Finset Filter Asymptotics
