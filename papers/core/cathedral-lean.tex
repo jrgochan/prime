@@ -10,7 +10,7 @@
   from the Cathedral Project%
 }
 \author{
-  Jason Robert Gochanour
+  Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
 \date{May 2026}
 
@@ -57,7 +57,7 @@ the \emph{foundational} (what are we trusting?) and the
 \toprule
 \textbf{Layer} & \textbf{What Must Be Trusted} \\
 \midrule
-5 & Mathematical axioms (1 on crown path, 80 total) \\
+5 & Mathematical axioms (1 on crown path, 82 total) \\
 4 & Mathlib library ($\sim$1.4M LOC) \\
 3 & Lean kernel axioms (3: \lean{propext}, \lean{choice}, \lean{Quot.sound}) \\
 2 & Lean type-checker ($\sim$5{,}000 LOC of C++ kernel) \\
@@ -70,7 +70,7 @@ The Cathedral project encountered the challenge of using complex
 analysis, real analysis, combinatorics, and linear algebra
 \emph{together} in a single proof, with consistent type coercions
 and compatible assumptions. Over 45 days it produced 227 active
-Lean files (with 103 archived). This paper distills the lessons.
+Lean files (with 113 archived). This paper distills the lessons.
 
 % ================================================================
 \section{The Type-Theoretic Foundation}
@@ -154,7 +154,7 @@ The Cathedral introduces a foundational concept: the
 \begin{enumerate}
   \item \textbf{Kernel axioms}: Trusted by design. (3)
   \item \textbf{Crown axioms}: On the critical path. (1)
-  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$79)
+  \item \textbf{Off-path axioms}: Don't affect the crown. ($\sim$80)
   \item \textbf{Theorems}: Machine-verified from Mathlib.
   \item \textbf{Archived axioms}: Previously active, now proved. (11)
 \end{enumerate}
