@@ -218,10 +218,12 @@ lemma mellin_l2_integral_tendsto_zero
         ‖(riemannZeta (1 + ↑t * I) / (1 + ↑t * I)) *
           taperedTruncationError N 1 t‖ ^ 2)
       Filter.atTop (nhds 0) := by
-  -- The factored bound:
-  -- ‖(ζ/s)·E_N‖² ≤ ‖ζ/s‖² · ‖E_N‖²
-  --                ≤ C²·|t|^{2A} · (42·N^{-1/4}/logN)²
-  -- Integrate: ∫ C·|t|^{2A} dt / (N^{1/2}·log²N) → 0
+  -- Strategy: bound ‖(ζ/s)·E_N‖² ≤ ‖ζ/s‖² · ‖E_N‖²
+  -- Then ‖E_N(1,t)‖ ≤ 42·N^{-1/4}/logN (uniform in t, from #1 at σ=1)
+  -- So the integral ≤ (42·N^{-1/4}/logN)² · ∫‖ζ/s‖² dt
+  -- The integral ∫_{-N}^{N} ‖ζ/s‖² is O(N^{1+ε}) by Littlewood
+  -- Combined: O(N^{1+ε} · N^{-1/2}/log²N) → 0
+  -- This requires careful integration bounds.
   sorry
 
 -- ════════════════════════════════════════════════
