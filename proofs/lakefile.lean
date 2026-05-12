@@ -198,6 +198,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.HighlyComposite,
     -- HC-Gram bridge (HC bound → subseq bound → RH, Exploration 36)
     `Cathedral.Covariance.HCGramBridge,
+    -- HC-Euler product (recipProduct/gcdWeighted Euler evaluation, Exploration 36)
+    `Cathedral.Covariance.HCEulerProduct,
     -- Mertens bridge (PNTA → Cathedral, Exploration 35)
     `Cathedral.Covariance.MertensBridge,
     -- White Singlet (physics-motivated axiom elimination)
