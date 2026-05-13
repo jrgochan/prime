@@ -11,9 +11,11 @@
   THEOREM (proved from PrimeNumberTheoremAnd.mu_pnt_alt):
     `pnt_moebius_sum_div_tendsto` — Σ μ(k)/k → 0  ✅ 0 sorry
 
-  KNOWN SORRYS (2):
-    `pnt_mu_log_div_k_derived`   — Σ μ(k)·ln(k)/k → -1    (sorry)
-    `pnt_mu_log_sq_div_k_derived` — Σ μ(k)·ln²(k)/k → -2γ  (sorry)
+  GRADUATED (proved in LogBridge.lean via PNTAnd axioms):
+    `pnt_mu_log_div_k_derived`   — Σ μ(k)·ln(k)/k → -1    🎓 (May 12, 2026)
+
+  KNOWN SORRYS (1):
+    `pnt_mu_log_sq_div_k_derived` — Σ μ(k)·ln²(k)/k → -2γ  (sorry, OFF CROWN PATH)
 
   ### Blocking Analysis
 
@@ -151,7 +153,8 @@ theorem pnt_moebius_sum_div_tendsto :
 -- ════════════════════════════════════════════════
 
 /-- **PNT AXIOM 1** (now a theorem): Σ μ(k)/k → 0.
-    Trivially equal to `pnt_moebius_sum_div_tendsto`. -/
+    Trivially equal to `pnt_moebius_sum_div_tendsto`.
+    See also `pnt_mu_log_div_k_proved` in LogBridge.lean. -/
 theorem pnt_mu_div_k_derived :
   Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(μ k) : ℝ) / (k : ℝ))

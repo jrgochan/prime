@@ -7,7 +7,7 @@
    pnt_mu_log_sq_div_k is OFF crown path (eliminated v9, Abel Bypass)]
 
   Contains:
-  - PNT axioms (pnt_mu_div_k, pnt_mu_log_div_k, pnt_mu_log_sq_div_k)
+  - PNT theorems (pnt_mu_div_k 🎓, pnt_mu_log_div_k 🎓) and axiom (pnt_mu_log_sq_div_k)
   - Abel tail analysis (rpow_quarter_log_bounded/cube_bounded)
   - The graduated abel_mertens_tail_raw theorem 🎓
   - PNT sub-sum tail domination
@@ -25,6 +25,7 @@ import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
 -- Cathedral.PNT.Bridge: re-enabled via local PNTAnd clone (v4.29 patched)
 import Cathedral.PNT.Bridge
+import Cathedral.PNT.LogBridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.NymanBeurling.BDBridge
 import Cathedral.AbelTail.Engine
@@ -55,20 +56,25 @@ theorem pnt_mu_div_k :
     Filter.atTop (nhds 0) :=
   pnt_moebius_sum_div_tendsto
 
-/-- **PNT AXIOM 2**: The weighted sum Σ μ(k)·ln(k)/k converges to -1.
+/-- **PNT THEOREM 2** (GRADUATED 🎓 — was axiom):
+    The weighted sum Σ μ(k)·ln(k)/k converges to -1.
     From the derivative: -(1/ζ(s))' = ζ'(s)/ζ(s)² At s=1: ζ'(s)/ζ(s)² → 1.
-    So -Σ μ(k)·ln(k)/k^s|_{s=1} = 1, giving the limit -1. -/
--- AXIOM CLASS: CLASSICAL-PNT (1 of 2) — will close when PNTAnd formalizes
-axiom pnt_mu_log_div_k :
+    So -Σ μ(k)·ln(k)/k^s|_{s=1} = 1, giving the limit -1.
+    Proof: From PrimeNumberTheoremAnd via Cathedral.PNT.LogBridge.
+    Uses: μ·log * ζ = -Λ identity + ψ(x)/x → 1 + Abel summation. -/
+-- GRADUATED: May 12, 2026 (Exploration 36) — was AXIOM CLASS: CLASSICAL-PNT
+theorem pnt_mu_log_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *
       Real.log (k : ℝ) / (k : ℝ))
-    Filter.atTop (nhds (-1))
+    Filter.atTop (nhds (-1)) :=
+  pnt_mu_log_div_k_proved
 
-/-- **PNT AXIOM 3**: The weighted sum Σ μ(k)·ln²(k)/k converges to -2γ.
+/-- **PNT AXIOM 3** (the last PNT axiom): The weighted sum Σ μ(k)·ln²(k)/k converges to -2γ.
     From the second derivative of 1/ζ(s) at s=1.
-    Uses the Laurent expansion of ζ(s) near s=1. -/
--- AXIOM CLASS: CLASSICAL-PNT (2 of 2) — will close when PNTAnd formalizes
+    Uses the Laurent expansion of ζ(s) near s=1.
+    NOTE: This axiom is OFF CROWN PATH (eliminated in v9 via Abel Bypass). -/
+-- AXIOM CLASS: CLASSICAL-PNT (last 1 of original 3) — will close when PNTAnd formalizes
 axiom pnt_mu_log_sq_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) *

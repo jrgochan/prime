@@ -179,7 +179,7 @@ theorem gen_divisor_swap_ge (N p q s : ℕ) (hN : 0 < N)
     If q prime with q ∤ N and q < p^s, then v_p(N) < 2s. -/
 theorem hc_exponent_bound {N p q : ℕ} (hHC : IsHighlyComposite N)
     (hp : p.Prime) (hq : q.Prime)
-    (hpN : p ∣ N) (hqN : ¬(q ∣ N))
+    (_hpN : p ∣ N) (hqN : ¬(q ∣ N))
     {s : ℕ} (hs : 0 < s) (hqs : q < p ^ s) :
     N.factorization p < 2 * s := by
   by_contra h; push Not at h

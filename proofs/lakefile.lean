@@ -79,6 +79,8 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.WitnessConditional,
     `Cathedral.Vasyunin.Proof.GramBoundReduction,
     `Cathedral.Vasyunin.Proof.GramBoundDirect,
+    -- L² Bridge: Mertens L² rate → Gram bound → RH (Exploration 36)
+    `Cathedral.Vasyunin.Proof.GramL2Bridge,
     `Cathedral.Vasyunin.Proof.Chain,
     -- Gram integral analysis
     `Cathedral.Gram.FractIntegral,
@@ -87,6 +89,8 @@ lean_lib «Cathedral» where
     `Cathedral.Gram.OffDiagonal,
     `Cathedral.Gram.NbLinComb,
     `Cathedral.Gram.L2Bridge,
+    -- Prime/composite Gram entry bounds (Exploration 36, zero sorry modulo Mertens axiom)
+    `Cathedral.Gram.PrimeDecoupling,
     -- Spectral theory
     `Cathedral.Spectral.RayleighBridge,
     `Cathedral.Spectral.PTSymmetry,
@@ -100,6 +104,10 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.ResidueDecomposition,
     `Cathedral.Spectral.ParticipationRatio,
     `Cathedral.Spectral.HeisenbergBypass,
+    -- Davis-Kahan bridge (Prime Core → Covariance Decay, Exploration 36)
+    `Cathedral.Spectral.DavisKahan,
+    -- Witness concentration (Prime sector ℓ² mass bound, Exploration 36)
+    `Cathedral.Spectral.WitnessConcentration,
     -- Structural layer
     `Cathedral.Structural.BDFloorArithmetic,
     `Cathedral.Structural.Independence,
@@ -307,6 +315,20 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.TwoTileEval,
     -- Physics: 1+1D Dirac equation (conceptual beacon, NOT on proof chain)
     `Cathedral.Physics.Dirac,
+    -- Physics: Arithmetic Pauli Exclusion (Möbius = fermionic statistics, Exploration 36)
+    `Cathedral.Physics.ArithmeticPauli,
+    -- Physics: Arithmetic U(1) gauge (Liouville = charge conservation, Exploration 36)
+    `Cathedral.Physics.ArithmeticU1,
+    -- Physics: Arithmetic SU(2) gauge (parity breaking at p=2 = Higgs, Exploration 36)
+    `Cathedral.Physics.ArithmeticSU2,
+    -- Physics: Arithmetic SU(3) gauge (color confinement at p=3, Exploration 36)
+    `Cathedral.Physics.ArithmeticSU3,
+    -- Physics: Arithmetic Standard Model crown (U(1)×SU(2)×SU(3) assembly, Exploration 36)
+    `Cathedral.Physics.ArithmeticStandardModel,
+    -- Physics: Gauge Decomposition (bosonic/fermionic sector split, Exploration 36)
+    `Cathedral.Physics.ArithmeticGaugeDecomposition,
+    -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
+    `Cathedral.Physics.GaugeCancellation,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
