@@ -9,6 +9,7 @@ pub mod h3;
 pub mod h4;
 pub mod h5;
 pub mod h6;
+pub mod ssh_probe;
 
 // Re-export probe entry points
 pub use h1::h1_gcd_stratum_eigenvector;

@@ -203,8 +203,13 @@ pub struct ResultsWriter {
 impl ResultsWriter {
     /// Create a new results directory for this run.
     pub fn new(base_dir: &Path) -> Self {
+        Self::new_with_prefix(base_dir, "probe_gpu")
+    }
+
+    /// Create a new results directory with a custom prefix.
+    pub fn new_with_prefix(base_dir: &Path, prefix: &str) -> Self {
         let ts = chrono_compact_timestamp();
-        let dir = base_dir.join(format!("probe_gpu_{}", ts));
+        let dir = base_dir.join(format!("{}_{}", prefix, ts));
         fs::create_dir_all(&dir).expect("Failed to create results directory");
         eprintln!("  [Results] Output directory: {}", dir.display());
         ResultsWriter {
@@ -217,7 +222,7 @@ impl ResultsWriter {
     pub fn write_manifest(&self, gpu_name: &str, gpu_vram_mb: usize, classes: &[u32], total: usize) {
         let manifest = RunManifest {
             experiment: "spectral-factorization-probe-gpu".to_string(),
-            version: "0.2.0".to_string(),
+            version: "0.4.0".to_string(),
             timestamp: iso_timestamp(),
             gpu_name: gpu_name.to_string(),
             gpu_vram_mb,
@@ -237,6 +242,11 @@ impl ResultsWriter {
     /// Write the final analysis summary.
     pub fn write_analysis(&self, summary: &AnalysisSummary) {
         self.write_json("analysis_summary.json", summary);
+    }
+
+    /// Write any serializable data to a named JSON file.
+    pub fn write_json_pub<T: Serialize>(&self, filename: &str, data: &T) {
+        self.write_json(filename, data);
     }
 
     /// Elapsed time since writer creation.

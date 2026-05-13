@@ -6,6 +6,7 @@
 //! - HPDF Gram matrix cache (instant load from precomputed H5 files)
 //! - Shared GramCache eliminates redundant matrix builds across probes
 //! - Certified JSON results output with cross-class analysis
+//! - SSH key generation & spectral security audit mode
 //!
 //! HONEST DISCLAIMER: This is a research exploration, not a practical
 //! factoring algorithm. The Cathedral proof is about statistical prime
@@ -15,13 +16,39 @@ mod gpu;
 mod keygen;
 mod probes;
 mod results;
+mod ssh_keys;
 
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
+/// Resolve the results directory relative to the binary location.
+/// Falls back to CWD-relative if binary path cannot be determined.
+fn results_base_dir() -> PathBuf {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|d| d.to_path_buf()))
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("results")
+}
+
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let ssh_mode = args.iter().any(|a| a == "--ssh-keys" || a == "--ssh");
+
+    if ssh_mode {
+        run_ssh_mode();
+    } else {
+        run_standard_mode();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STANDARD MODE — random semiprimes (original pipeline)
+// ═══════════════════════════════════════════════════════════════
+
+fn run_standard_mode() {
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  CATHEDRAL SPECTRAL FACTORIZATION PROBE v0.3 — GPU EDITION");
+    println!("  CATHEDRAL SPECTRAL FACTORIZATION PROBE v0.4 — GPU EDITION");
     println!("  Testing 6 hypotheses with GPU + HPDF-cached spectral engine");
     println!("═══════════════════════════════════════════════════════════════\n");
 
@@ -40,20 +67,11 @@ fn main() {
     let t0 = Instant::now();
 
     // Initialize HPDF-backed Gram cache
-    // Try workspace-relative path first, then absolute fallback
-    let hpdf_candidates = [
-        PathBuf::from("../cache/hpdf"),
-        PathBuf::from("../../cache/hpdf"),
-        PathBuf::from(std::env::var("HOME").unwrap_or_default())
-            .join("prime/experiments/cache/hpdf"),
-    ];
-    let hpdf_dir: Option<&Path> = hpdf_candidates.iter()
-        .map(|p| p.as_path())
-        .find(|p| p.exists());
-    let cache = probes::GramCache::new(hpdf_dir);
+    let hpdf_dir = find_hpdf_dir();
+    let cache = probes::GramCache::new(hpdf_dir.as_deref());
 
-    // Initialize results writer — outputs to results/ beside the binary
-    let results_dir = PathBuf::from("results");
+    // Initialize results writer — outputs beside the binary
+    let results_dir = results_base_dir();
     let writer = results::ResultsWriter::new(&results_dir);
 
     // Phase 1: Generate test semiprimes
@@ -145,4 +163,99 @@ fn main() {
     println!("  Total time: {:.2}s (GPU + HPDF-accelerated)", total_time);
     println!("  Results:    {}", writer.output_dir.display());
     println!("═══════════════════════════════════════════════════════════════");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SSH KEY MODE — generate + probe SSH key material
+// ═══════════════════════════════════════════════════════════════
+
+fn run_ssh_mode() {
+    println!("═══════════════════════════════════════════════════════════════");
+    println!("  CATHEDRAL SSH KEY SPECTRAL SECURITY AUDIT v0.1");
+    println!("  Probing RSA + ECDSA keys with Cathedral spectral hypotheses");
+    println!("═══════════════════════════════════════════════════════════════\n");
+
+    // Detect GPU
+    let gpu_info = match gpu::detect_gpu() {
+        Some(info) => {
+            println!("  \x1b[32m✓ GPU detected: {} ({} MB VRAM)\x1b[0m\n", info.name, info.vram_mb);
+            info
+        }
+        None => {
+            eprintln!("  ✗ No CUDA GPU detected. This binary requires a GPU.");
+            std::process::exit(1);
+        }
+    };
+
+    let t0 = Instant::now();
+
+    // Initialize HPDF-backed Gram cache (for tractable small RSA keys)
+    let hpdf_dir = find_hpdf_dir();
+    let cache = probes::GramCache::new(hpdf_dir.as_deref());
+
+    // Results directory
+    let results_dir = results_base_dir();
+    let writer = results::ResultsWriter::new_with_prefix(&results_dir, "ssh_probe");
+
+    // Phase 1: Generate SSH key test suite
+    let key_set = ssh_keys::generate_ssh_test_suite(&writer.output_dir);
+
+    // Phase 2: Run probes against key material
+    println!("\n═══════════════════════════════════════════════════════════════");
+    println!("  RUNNING SPECTRAL PROBES ON SSH KEY MATERIAL");
+    println!("═══════════════════════════════════════════════════════════════\n");
+
+    let probe_results = probes::ssh_probe::run_ssh_probes(&key_set, &cache);
+
+    // Phase 3: Summary & output
+    probes::ssh_probe::print_ssh_summary(&probe_results);
+
+    // Write JSON results
+    writer.write_json_pub("ssh_key_suite.json", &key_set);
+    writer.write_json_pub("ssh_probe_results.json", &probe_results);
+
+    // Write individual results per key type
+    for result in &probe_results {
+        let filename = format!("ssh_probe_{}.json",
+            result.key_type.to_lowercase().replace('-', "_"));
+        writer.write_json_pub(&filename, result);
+    }
+
+    let total_time = t0.elapsed().as_secs_f64();
+
+    // Write summary manifest
+    let summary = serde_json::json!({
+        "experiment": "cathedral-ssh-key-audit",
+        "version": "0.1.0",
+        "gpu": gpu_info.name,
+        "total_time_s": total_time,
+        "rsa_keys_generated": key_set.rsa_keys.len(),
+        "ecdsa_keys_generated": key_set.ecdsa_keys.len(),
+        "tractable_semiprimes": key_set.tractable_semiprimes.len(),
+        "probe_results": probe_results.len(),
+        "any_signal_detected": probe_results.iter().any(|r|
+            r.large_key_vasyunin.as_ref().map(|v| v.factor_signal_detected).unwrap_or(false)
+        ),
+    });
+    writer.write_json_pub("manifest.json", &summary);
+
+    println!("═══════════════════════════════════════════════════════════════");
+    println!("  Total time: {:.2}s", total_time);
+    println!("  Results:    {}", writer.output_dir.display());
+    println!("═══════════════════════════════════════════════════════════════");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SHARED UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+/// Locate the HPDF cache directory.
+fn find_hpdf_dir() -> Option<PathBuf> {
+    let candidates = [
+        PathBuf::from("../cache/hpdf"),
+        PathBuf::from("../../cache/hpdf"),
+        PathBuf::from(std::env::var("HOME").unwrap_or_default())
+            .join("prime/experiments/cache/hpdf"),
+    ];
+    candidates.into_iter().find(|p| p.exists())
 }

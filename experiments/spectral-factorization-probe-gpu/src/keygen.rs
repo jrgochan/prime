@@ -1,9 +1,10 @@
 //! Key generation for test semiprimes at various bit widths.
 
 use rand::Rng;
+use serde::Serialize;
 
 /// A semiprime N = p * q with known factors.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct SemiprimeKey {
     pub n: u64,
     pub p: u64,
