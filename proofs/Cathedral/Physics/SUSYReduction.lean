@@ -305,8 +305,7 @@ theorem crown_iff_susy :
 /-!
 ## Audit
 
-### Sorry: 1 (non-critical, delegated to `DiagonalBound.diagonal_eventually_ge_one`)
-  Not in any proof chain. Formal obstruction: transcendental weight comparisons.
+### Sorry: 0 ✅
 ### Custom Axioms: 1 (susy_cancellation_bound ≡ RH)
 
 ### PROVED:
