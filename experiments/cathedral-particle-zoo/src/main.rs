@@ -21,6 +21,7 @@ mod prime_core;
 mod proof_tree;
 mod report;
 mod output;
+mod susy_sectors;
 
 use cathedral_utils::arith;
 use cathedral_utils::fmt as cfmt;
@@ -77,6 +78,12 @@ struct Cli {
     /// Output directory for results [default: results]
     #[arg(long, default_value = "results")]
     output: String,
+
+    /// Run SUSY sector decomposition at given N values.
+    /// Decomposes vᵀGv = D(N) + B_off(N) + F_off(N)
+    /// matching GaugeCancellation.lean definitions.
+    #[arg(long, value_delimiter = ',')]
+    susy: Vec<usize>,
 }
 
 
@@ -89,6 +96,42 @@ fn main() {
     println!("║     Gemini Upgrades: Axion · See-Saw · Coupling Constants           ║");
     println!("║     Antigravity: Matrix-Free · Liquid Argon · Dynamic Proof Tree    ║");
     println!("╚══════════════════════════════════════════════════════════════════════╝");
+
+    // ── SUSY Sector Decomposition ──
+    if !cli.susy.is_empty() {
+        println!();
+        println!("  ═══ SUSY SECTOR DECOMPOSITION (GaugeCancellation.lean) ═══");
+        println!();
+        println!("  Computing vᵀGv = D(N) + B_off(N) + F_off(N)");
+        println!("  (This may take a while for N > 200 due to O(N²) Gram entries)");
+
+        let mut results = Vec::new();
+        for &n in &cli.susy {
+            if n < 3 {
+                eprintln!("  Skipping N={} (need N ≥ 3)", n);
+                continue;
+            }
+            let t0 = std::time::Instant::now();
+            let sectors = susy_sectors::decompose(n);
+            let elapsed = t0.elapsed().as_secs_f64();
+            sectors.display();
+            println!("  Computed in {:.3}s", elapsed);
+            println!();
+            results.push(sectors);
+        }
+
+        // Summary table if multiple N values
+        if results.len() > 1 {
+            println!("  ┌────────┬──────────────┬──────────────┬──────────────┬──────────────┬──────────────┐");
+            println!("  │   N    │    vᵀGv      │     D(N)     │   B_off(N)   │   F_off(N)   │  gap·ln(N)   │");
+            println!("  ├────────┼──────────────┼──────────────┼──────────────┼──────────────┼──────────────┤");
+            for s in &results {
+                println!("  │ {:>6} │ {:>+12.8} │ {:>+12.8} │ {:>+12.8} │ {:>+12.8} │ {:>12.8} │",
+                         s.n, s.vtgv, s.diagonal, s.bosonic_off, s.fermionic_off, s.gap_times_ln);
+            }
+            println!("  └────────┴──────────────┴──────────────┴──────────────┴──────────────┴──────────────┘");
+        }
+    }
 
     // ── Proof Tree Display ──
     if cli.proof_tree {

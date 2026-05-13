@@ -30,5 +30,9 @@ ndarray = { version = "0.15", optional = true }
 name = "cathedral-particle-zoo"
 path = "src/main.rs"
 
+[[bin]]
+name = "susy-sweep"
+path = "src/bin/susy_sweep.rs"
+
 [lints]
 workspace = true
