@@ -45,6 +45,8 @@ members = [
     "experiments/vasyunin-integral",
     "experiments/hc-gram-oracle",
     "experiments/cathedral-particle-zoo",
+    "experiments/spectral-factorization-probe",
+    "experiments/spectral-factorization-probe-gpu",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
@@ -122,6 +124,8 @@ default-members = [
     "experiments/vasyunin-integral",
     "experiments/hc-gram-oracle",
     "experiments/cathedral-particle-zoo",
+    "experiments/spectral-factorization-probe",
+    # "experiments/spectral-factorization-probe-gpu", # requires CUDA
     "experiments/archive/abel-bridge",
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",

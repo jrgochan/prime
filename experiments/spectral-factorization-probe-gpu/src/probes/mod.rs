@@ -9,6 +9,12 @@ pub mod h3;
 pub mod h4;
 pub mod h5;
 pub mod h6;
+pub mod h7;
+pub mod h8;
+pub mod h9;
+pub mod h10;
+pub mod h11;
+pub mod h12;
 pub mod ssh_probe;
 
 // Re-export probe entry points
@@ -18,6 +24,12 @@ pub use h3::h3_vasyunin_cotangent_anomaly;
 pub use h4::h4_mobius_local_structure;
 pub use h5::h5_composite_anchoring;
 pub use h6::h6_quadratic_form_probe;
+pub use h7::h7_condition_number_fingerprint;
+pub use h8::h8_eigenvalue_interlacing;
+pub use h9::h9_participation_ratio_harmonics;
+pub use h10::h10_dark_sector_crossover;
+pub use h11::h11_sherman_morrison_sensitivity;
+pub use h12::h12_mellin_critical_line;
 
 use crate::gpu;
 use rayon::prelude::*;

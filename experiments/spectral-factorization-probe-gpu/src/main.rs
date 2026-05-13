@@ -18,7 +18,7 @@ mod probes;
 mod results;
 mod ssh_keys;
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::time::Instant;
 
 /// Resolve the results directory relative to the binary location.
@@ -48,8 +48,8 @@ fn main() {
 
 fn run_standard_mode() {
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  CATHEDRAL SPECTRAL FACTORIZATION PROBE v0.4 — GPU EDITION");
-    println!("  Testing 6 hypotheses with GPU + HPDF-cached spectral engine");
+    println!("  CATHEDRAL SPECTRAL FACTORIZATION PROBE v0.5 — GPU EDITION");
+    println!("  Testing 12 hypotheses with GPU + HPDF-cached spectral engine");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     // Detect GPU
@@ -113,6 +113,24 @@ fn run_standard_mode() {
         // H6: Quadratic form probe (HPDF cache, shares Gram with H5)
         let h6 = probes::h6_quadratic_form_probe(&class.keys, &cache);
 
+        // H7: Condition number fingerprint (GPU eigendecomp scan)
+        let h7 = probes::h7_condition_number_fingerprint(&class.keys, &cache);
+
+        // H8: Eigenvalue interlacing anomaly (GPU eigendecomp scan)
+        let h8 = probes::h8_eigenvalue_interlacing(&class.keys, &cache);
+
+        // H9: Participation ratio at factor harmonics (GPU)
+        let h9 = probes::h9_participation_ratio_harmonics(&class.keys, &cache);
+
+        // H10: Dark sector crossover timing (GPU + sublattice CPU eigen)
+        let h10 = probes::h10_dark_sector_crossover(&class.keys, &cache);
+
+        // H11: Sherman-Morrison factor sensitivity (Gram cache)
+        let h11 = probes::h11_sherman_morrison_sensitivity(&class.keys, &cache);
+
+        // H12: Mellin critical-line resonance (CPU-intensive frequency scan)
+        let h12 = probes::h12_mellin_critical_line(&class.keys);
+
         let class_time = t_class.elapsed().as_secs_f64();
         println!("  ▸ Class time: {:.2}s\n", class_time);
 
@@ -127,6 +145,12 @@ fn run_standard_mode() {
             h4_results: h4,
             h5_results: h5,
             h6_results: h6,
+            h7_results: h7,
+            h8_results: h8,
+            h9_results: h9,
+            h10_results: h10,
+            h11_results: h11,
+            h12_results: h12,
         };
 
         // Write per-class JSON immediately (crash-safe incremental output)

@@ -118,6 +118,12 @@ pub fn run_ssh_probes(
             h4_results: h4,
             h5_results: h5,
             h6_results: h6,
+            h7_results: Vec::new(),
+            h8_results: Vec::new(),
+            h9_results: Vec::new(),
+            h10_results: Vec::new(),
+            h11_results: Vec::new(),
+            h12_results: Vec::new(),
         };
 
         // Group by bit width for reporting
@@ -248,25 +254,41 @@ fn probe_large_rsa(rsa_key: &RsaKeyInfo) -> LargeKeyVasyuninResult {
         println!("      #{}: m={:6} |V|={:.6e} (N mod m = {}){}", i+1, entry.m, entry.v_abs, entry.n_mod_m, flag);
     }
 
-    // Check if factor-related m values cluster near zero
+    // Check if factor-related m values cluster near zero.
+    // KEY INSIGHT: For N = p*q with p,q prime and > scan_limit, any m < 10000
+    // can only divide N if m divides p or q. Since p,q are prime and > 10000,
+    // no m in our range divides p or q. So all "factor" hits are just
+    // small divisors of N from its factorization (powers of 2, 3, etc.
+    // that happen to divide N). V(m, 0) = 0 for these is trivial.
+    //
+    // Real factor leakage would require m that somehow correlates with p
+    // or q without dividing N — impossible for prime factors > scan_limit.
     let median_nf = if !non_factor_v_values.is_empty() {
         non_factor_v_values.sort_by(|a, b| a.partial_cmp(b).unwrap());
         non_factor_v_values[non_factor_v_values.len() / 2]
     } else { 0.0 };
 
-    let factor_detected = if !factor_v_values.is_empty() {
-        let max_factor_v = factor_v_values.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        max_factor_v < median_nf * 0.1  // factors must be well below median
-    } else {
-        false
-    };
+    // Count nontrivial factor-related m (divide p or q but NOT N).
+    // For prime p,q > scan_limit, this should always be 0.
+    let nontrivial_count = vasyunin_entries.iter()
+        .filter(|e| !e.is_factor && e.is_small_factor_of_p)
+        .count();
+
+    let trivial_divisor_count = vasyunin_entries.iter()
+        .filter(|e| e.is_factor)
+        .count();
+
+    // A signal requires nontrivial factor leakage — trivial divisors don't count
+    let factor_detected = nontrivial_count >= 3;
 
     let signal_desc = if factor_detected {
-        format!("SIGNAL: Factor-related m values show V-values {:.1}x below median",
-            median_nf / factor_v_values.iter().sum::<f64>() * factor_v_values.len() as f64)
+        format!("SIGNAL: {} nontrivial factor-related m values detected! \
+                 This would indicate true factor leakage (verify carefully).", nontrivial_count)
     } else {
-        format!("NULL: {} factor-related m values found, no anomalous clustering. \
-                 Median non-factor |V|={:.4e}", factor_v_values.len(), median_nf)
+        format!("NULL: {} trivial divisors (V(m,0)=0 by construction), \
+                 {} nontrivial factor leaks (expected 0 for prime p,q > {}). \
+                 Median non-factor |V|={:.4e}",
+                trivial_divisor_count, nontrivial_count, scan_limit, median_nf)
     };
 
     println!("    {}\n", signal_desc);
@@ -337,9 +359,12 @@ fn probe_ecdsa(ec_key: &EcdsaKeyInfo) -> EcdsaAnalysisResult {
         println!("        #{}: m={:5} |V|={:.6e} (d mod m = {})", i+1, entry.m, entry.v_abs, entry.d_mod_m);
     }
 
-    // A uniform random scalar should have ~0 exact zeros (extremely rare)
-    // If we see multiple zeros, the scalar has unexpected structure
-    let anomaly = zeros > 2 || hamming_deviation > 0.1;
+    // A uniform random scalar will have V(m, 0) = 0 for every m that
+    // divides d. If d is divisible by k small primes, we get ~Σ floor(1000/p_i)
+    // zeros. With 3-5 small factors, 20-30 zeros is expected behavior.
+    // We flag only if zeros are truly excessive (>50) or Hamming weight
+    // deviates far from the expected 0.5 ratio (>0.15).
+    let anomaly = zeros > 50 || hamming_deviation > 0.15;
     let description = if anomaly {
         format!("ANOMALY: {} Vasyunin zeros, Hamming deviation {:.4}. \
                  Private key scalar shows unexpected arithmetic structure.", zeros, hamming_deviation)

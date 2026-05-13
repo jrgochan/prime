@@ -133,6 +133,149 @@ pub struct H6Result {
     pub top_deltas: Vec<MaskDeltaEntry>,
 }
 
+// ── H7: Condition Number Fingerprint ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConditionEntry {
+    pub dim: usize,
+    pub kappa: f64,
+    pub lambda_min: f64,
+    pub lambda_max: f64,
+    pub is_factor_dim: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H7Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub probe_lo: usize,
+    pub probe_hi: usize,
+    pub kappa_at_factor_p: Option<f64>,
+    pub mean_factor_kappa: f64,
+    pub mean_nonfactor_kappa: f64,
+    pub kappa_ratio: f64,
+    pub entries: Vec<ConditionEntry>,
+}
+
+// ── H8: Eigenvalue Interlacing Anomaly ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InterlacingEntry {
+    pub m_from: usize,
+    pub m_to: usize,
+    pub lambda_min_from: f64,
+    pub lambda_min_to: f64,
+    pub delta_lambda: f64,
+    pub is_factor_crossing: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H8Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub scan_lo: usize,
+    pub scan_hi: usize,
+    pub mean_factor_delta: f64,
+    pub mean_nonfactor_delta: f64,
+    pub stutter_ratio: f64,
+    pub entries: Vec<InterlacingEntry>,
+}
+
+// ── H9: Participation Ratio at Factor Harmonics ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ParticipationEntry {
+    pub dim: usize,
+    pub participation_ratio: f64,
+    pub alpha_normalized: f64,
+    pub is_factor_harmonic: bool,
+    pub eigen_time_s: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H9Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub mean_harmonic_alpha: f64,
+    pub mean_nonharmonic_alpha: f64,
+    pub alpha_deviation: f64,
+    pub entries: Vec<ParticipationEntry>,
+}
+
+// ── H10: Dark Sector Crossover Timing ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CrossoverEntry {
+    pub dim: usize,
+    pub mean_spacing_ratio: f64,
+    pub goe_fraction: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H10Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub full_crossover_dim: Option<usize>,
+    pub restricted_crossover_dim: Option<usize>,
+    pub crossover_shift: Option<f64>,
+    pub full_entries: Vec<CrossoverEntry>,
+    pub restricted_entries: Vec<CrossoverEntry>,
+}
+
+// ── H11: Sherman-Morrison Factor Sensitivity ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SensitivityEntry {
+    pub prime: usize,
+    pub delta_d2: f64,
+    pub sensitivity: f64,
+    pub is_factor: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H11Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub dim: usize,
+    pub epsilon: f64,
+    pub d2_base: f64,
+    pub factor_p_rank: Option<usize>,
+    pub total_probes: usize,
+    pub mean_factor_sensitivity: f64,
+    pub mean_nonfactor_sensitivity: f64,
+    pub sensitivity_ratio: f64,
+    pub top_entries: Vec<SensitivityEntry>,
+}
+
+// ── H12: Mellin Transform Critical-Line Residue ──
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MellinPeakEntry {
+    pub frequency: f64,
+    pub amplitude: f64,
+    pub near_expected_resonance: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct H12Result {
+    pub n: u64,
+    pub p: u64,
+    pub q: u64,
+    pub dim: usize,
+    pub num_freq_samples: usize,
+    pub t_max: f64,
+    pub total_peaks: usize,
+    pub peaks_near_expected: usize,
+    pub resonance_fraction: f64,
+    pub expected_null_fraction: f64,
+    pub top_peaks: Vec<MellinPeakEntry>,
+}
+
 // ═══════════════════════════════════════════════════════════════
 // AGGREGATE CLASS RESULT
 // ═══════════════════════════════════════════════════════════════
@@ -148,6 +291,12 @@ pub struct ClassResult {
     pub h4_results: Vec<H4Result>,
     pub h5_results: Vec<H5Result>,
     pub h6_results: Vec<H6Result>,
+    pub h7_results: Vec<H7Result>,
+    pub h8_results: Vec<H8Result>,
+    pub h9_results: Vec<H9Result>,
+    pub h10_results: Vec<H10Result>,
+    pub h11_results: Vec<H11Result>,
+    pub h12_results: Vec<H12Result>,
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -452,6 +601,182 @@ pub fn compute_analysis(
             supporting_stats: serde_json::json!({
                 "mean_percentile_rank": mean_pct,
                 "samples": pct_ranks.len(),
+            }),
+        });
+    }
+
+    // ── H7 Analysis: Condition Number Fingerprint ──
+    {
+        let all_h7: Vec<&H7Result> = classes.iter().flat_map(|c| c.h7_results.iter()).collect();
+        let ratios: Vec<f64> = all_h7.iter().map(|r| r.kappa_ratio).collect();
+        let mean_ratio = if ratios.is_empty() { 1.0 }
+            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+
+        let signal = if (mean_ratio - 1.0).abs() > 0.5 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H7".to_string(),
+            description: "Condition number κ(G_M) resonance at factor dimensions".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Mean κ ratio (factor/non-factor) = {:.4}. {}.",
+                mean_ratio,
+                if (mean_ratio - 1.0).abs() > 0.5 { "Condition number shows weak factor-correlated variation" }
+                else { "No κ-resonance at factor dimensions — condition number is structurally universal" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_kappa_ratio": mean_ratio,
+                "samples": all_h7.len(),
+            }),
+        });
+    }
+
+    // ── H8 Analysis: Eigenvalue Interlacing ──
+    {
+        let all_h8: Vec<&H8Result> = classes.iter().flat_map(|c| c.h8_results.iter()).collect();
+        let ratios: Vec<f64> = all_h8.iter().map(|r| r.stutter_ratio).collect();
+        let mean_ratio = if ratios.is_empty() { 1.0 }
+            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+
+        let signal = if (mean_ratio - 1.0).abs() > 1.0 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H8".to_string(),
+            description: "Eigenvalue interlacing Δλ_min stuttering at factor crossings".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Mean stutter ratio = {:.4}. {}.",
+                mean_ratio,
+                if (mean_ratio - 1.0).abs() > 1.0 { "Interlacing shows anomalous step sizes near factors" }
+                else { "No interlacing anomaly — Cauchy universality holds across factor boundaries" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_stutter_ratio": mean_ratio,
+                "samples": all_h8.len(),
+            }),
+        });
+    }
+
+    // ── H9 Analysis: Participation Ratio Harmonics ──
+    {
+        let all_h9: Vec<&H9Result> = classes.iter().flat_map(|c| c.h9_results.iter()).collect();
+        let deviations: Vec<f64> = all_h9.iter().map(|r| r.alpha_deviation).collect();
+        let mean_dev = if deviations.is_empty() { 0.0 }
+            else { deviations.iter().sum::<f64>() / deviations.len() as f64 };
+
+        let signal = if mean_dev > 0.10 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H9".to_string(),
+            description: "Participation ratio α deviation at factor harmonics".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Mean α deviation = {:.4}. {}.",
+                mean_dev,
+                if mean_dev > 0.10 { "Weak localization anomaly at factor harmonics" }
+                else { "No α deviation — arithmetic-GOE universality (α ≈ 0.47) holds at factor harmonics" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_alpha_deviation": mean_dev,
+                "samples": all_h9.len(),
+            }),
+        });
+    }
+
+    // ── H10 Analysis: Dark Sector Crossover ──
+    {
+        let all_h10: Vec<&H10Result> = classes.iter().flat_map(|c| c.h10_results.iter()).collect();
+        let shifts: Vec<f64> = all_h10.iter().filter_map(|r| r.crossover_shift).collect();
+        let mean_shift = if shifts.is_empty() { 1.0 }
+            else { shifts.iter().sum::<f64>() / shifts.len() as f64 };
+
+        let signal = if !shifts.is_empty() && (mean_shift - 1.0).abs() > 0.3 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H10".to_string(),
+            description: "Poisson→GOE crossover shift on factor sublattice".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Mean crossover shift = {:.4} ({}/{} samples measured). {}.",
+                mean_shift, shifts.len(), all_h10.len(),
+                if (mean_shift - 1.0).abs() > 0.3 { "Crossover timing differs on factor sublattice" }
+                else { "No crossover shift — thermalization is universal across sublattice restrictions" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_crossover_shift": mean_shift,
+                "measured_samples": shifts.len(),
+                "total_samples": all_h10.len(),
+            }),
+        });
+    }
+
+    // ── H11 Analysis: Sherman-Morrison Sensitivity ──
+    {
+        let all_h11: Vec<&H11Result> = classes.iter().flat_map(|c| c.h11_results.iter()).collect();
+        let ratios: Vec<f64> = all_h11.iter().map(|r| r.sensitivity_ratio).collect();
+        let mean_ratio = if ratios.is_empty() { 1.0 }
+            else { ratios.iter().sum::<f64>() / ratios.len() as f64 };
+        let pct_ranks: Vec<f64> = all_h11.iter()
+            .filter_map(|r| r.factor_p_rank.map(|rank| (rank + 1) as f64 / r.total_probes as f64))
+            .collect();
+        let mean_pct = if pct_ranks.is_empty() { 0.5 }
+            else { pct_ranks.iter().sum::<f64>() / pct_ranks.len() as f64 };
+
+        let signal = if mean_ratio > 2.0 { "STRONG" }
+            else if mean_ratio > 1.3 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H11".to_string(),
+            description: "Sherman-Morrison b-vector sensitivity at factor positions".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Mean sensitivity ratio = {:.4}, factor at percentile {:.1}%. {}.",
+                mean_ratio, mean_pct * 100.0,
+                if mean_ratio > 1.3 { "Factor positions are more sensitive to b-vector perturbation" }
+                else { "No differential sensitivity — d² perturbation is uniform across positions" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_sensitivity_ratio": mean_ratio,
+                "mean_factor_percentile": mean_pct,
+                "samples": all_h11.len(),
+            }),
+        });
+    }
+
+    // ── H12 Analysis: Mellin Critical-Line Resonance ──
+    {
+        let all_h12: Vec<&H12Result> = classes.iter().flat_map(|c| c.h12_results.iter()).collect();
+        let fractions: Vec<f64> = all_h12.iter().map(|r| r.resonance_fraction).collect();
+        let expected: Vec<f64> = all_h12.iter().map(|r| r.expected_null_fraction).collect();
+        let mean_frac = if fractions.is_empty() { 0.0 }
+            else { fractions.iter().sum::<f64>() / fractions.len() as f64 };
+        let mean_expected = if expected.is_empty() { 0.0 }
+            else { expected.iter().sum::<f64>() / expected.len() as f64 };
+        let enrichment = if mean_expected > 0.0 { mean_frac / mean_expected } else { 1.0 };
+
+        let signal = if enrichment > 3.0 { "weak" }
+            else { "null" };
+
+        verdicts.push(HypothesisVerdict {
+            hypothesis: "H12".to_string(),
+            description: "Mellin transform critical-line resonance at factor frequencies".to_string(),
+            signal_strength: signal.to_string(),
+            verdict: format!(
+                "Peak enrichment = {:.2}× (observed {:.4} vs null {:.4}). {}.",
+                enrichment, mean_frac, mean_expected,
+                if enrichment > 3.0 { "Mellin spectrum shows enrichment near factor frequencies" }
+                else { "No Mellin resonance — Parseval isometry prevents frequency-domain factor leakage" }
+            ),
+            supporting_stats: serde_json::json!({
+                "mean_resonance_fraction": mean_frac,
+                "mean_null_fraction": mean_expected,
+                "enrichment": enrichment,
+                "samples": all_h12.len(),
             }),
         });
     }

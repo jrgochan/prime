@@ -16,7 +16,7 @@
 
 use crate::keygen::SemiprimeKey;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::process::Command;
 
 // ═══════════════════════════════════════════════════════════════
@@ -82,7 +82,9 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
     let mut tractable_semiprimes = Vec::new();
 
     // ── Small RSA keys (tractable for full Gram analysis) ──
-    // openssl genrsa doesn't enforce minimum sizes like ssh-keygen does
+    // OpenSSL 3.x rejects keys < 512 bits. For sub-512-bit "keys",
+    // we generate synthetic semiprimes using our keygen module to ensure
+    // the H1–H6 pipeline always has tractable material.
     for bits in [64u32, 128, 256, 512] {
         println!("  Generating RSA-{} key (small, for full probe analysis)...", bits);
         match generate_small_rsa(&key_dir, bits) {
@@ -96,7 +98,23 @@ pub fn generate_ssh_test_suite(output_dir: &Path) -> SshKeySet {
                 }
                 rsa_keys.push(info);
             }
-            Err(e) => println!("    ✗ Failed: {}", e),
+            Err(e) => {
+                println!("    ✗ OpenSSL refused: {}", e);
+                // Fallback: generate synthetic semiprimes once for probe analysis.
+                // OpenSSL 3.x rejects all keys < 512 bits, so we generate
+                // synthetic material on the first failure and skip the rest.
+                if tractable_semiprimes.is_empty() {
+                    println!("    → Generating synthetic semiprimes via keygen fallback...");
+                    let synth_keys = crate::keygen::generate_test_suite();
+                    for class in &synth_keys {
+                        for key in &class.keys {
+                            tractable_semiprimes.push(key.clone());
+                        }
+                    }
+                    println!("    ✓ Added {} synthetic semiprimes for H1–H6 probe analysis",
+                        tractable_semiprimes.len());
+                }
+            }
         }
     }
 
@@ -200,11 +218,12 @@ fn generate_ssh_rsa(key_dir: &Path, bits: u32, passphrase: &str) -> Result<RsaKe
 
 /// Extract RSA modulus and prime factors from a PEM key file.
 fn extract_rsa_params(key_path: &Path, bits: u32, passphrase: Option<&str>) -> Result<RsaKeyInfo, String> {
-    let mut args = vec!["rsa", "-in", &*key_path.to_string_lossy(), "-text", "-noout"];
+    let key_path_str = key_path.to_string_lossy().to_string();
+    let mut args = vec!["rsa", "-in", key_path_str.as_str(), "-text", "-noout"];
     let pass_arg;
     if let Some(pw) = passphrase {
         pass_arg = format!("pass:{}", pw);
-        args.extend(["-passin", &pass_arg]);
+        args.extend(["-passin", pass_arg.as_str()]);
     }
 
     let output = Command::new("openssl")
@@ -356,6 +375,13 @@ fn generate_ssh_ecdsa(
 ///     56:78:9a:bc:de:f0:...
 /// ```
 fn extract_hex_field(text: &str, field_name: &str) -> Option<String> {
+    // Known RSA field names from openssl rsa -text output.
+    // These MUST terminate hex continuation scanning.
+    const RSA_FIELDS: &[&str] = &[
+        "modulus:", "publicExponent:", "privateExponent:",
+        "prime1:", "prime2:", "exponent1:", "exponent2:", "coefficient:",
+    ];
+
     let lines: Vec<&str> = text.lines().collect();
     let start = lines.iter().position(|l| l.trim().starts_with(field_name))?;
 
@@ -378,16 +404,16 @@ fn extract_hex_field(text: &str, field_name: &str) -> Option<String> {
     // Collect continuation lines (indented, colon-separated hex)
     for line in lines.iter().skip(start + 1) {
         let trimmed = line.trim();
-        if trimmed.is_empty() || (!trimmed.contains(':') && !trimmed.chars().all(|c| c.is_ascii_hexdigit())) {
+        if trimmed.is_empty() {
             break;
         }
-        // Stop if we hit another field
-        if trimmed.ends_with(':') && !trimmed.contains("  ") && trimmed.len() < 30 {
-            // Might be a new field name — check if it has hex chars
-            let without_colon = trimmed.trim_end_matches(':');
-            if without_colon.chars().all(|c| c.is_ascii_alphabetic() || c == '_' || c == ' ') {
-                break;
-            }
+        // Stop if we hit another known RSA field
+        if RSA_FIELDS.iter().any(|&f| trimmed.starts_with(f)) {
+            break;
+        }
+        // Stop if the line doesn't look like hex data
+        if !trimmed.contains(':') && !trimmed.chars().all(|c| c.is_ascii_hexdigit()) {
+            break;
         }
         hex.push_str(trimmed);
     }
