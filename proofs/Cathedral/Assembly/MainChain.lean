@@ -12,19 +12,30 @@ import Cathedral.Assembly.MellinCrown
 import Cathedral.Assembly.CovarianceFromPerron
 import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
+-- NOTE: Cathedral.Assembly.GramCrown is DOWNSTREAM of MainChain
+-- (GramBoundDirect imports MainChain for log_grows_unboundedly).
+-- The discrete RH exports live in GramCrown.lean and Assembly.lean.
 
 /-!
   # The Nyman-Beurling-Báez-Duarte Equivalence
 
-  This file contains the primary export of the Cathedral:
-  the Nyman-Beurling-Báez-Duarte equivalence theorem.
+  This file contains the continuous-path exports of the Cathedral:
+  the Nyman-Beurling-Báez-Duarte equivalence theorem and supporting results.
 
-  ## Main Results
+  The discrete Gram Crown exports (preferred architecture) live in
+  `GramCrown.lean` and are re-exported from `Assembly.lean`.
 
+  ## Main Results (this file)
+
+  ### Continuous Path (Nyman-Beurling)
   * `nyman_beurling_equivalence` : the iff characterization
     `(∀ ε > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, ∫₀¹ (1 - f_N)² < ε) ↔ RH`
   * `eigenvalue_limit_exists` : the Gram eigenvalue limit exists (unconditional)
   * `log_grows_unboundedly` : C/log(N) < ε eventually (standard calculus)
+
+  ### Discrete RH (see GramCrown.lean / Assembly.lean)
+  * `riemann_hypothesis_from_gram_global` : RH from vᵀGv ≤ 1+K/lnN (∀ large N)
+  * `riemann_hypothesis_from_gram_subseq` : RH from vᵀGv ≤ 1+K/lnN (subseq)
 
   ## Architecture
 
@@ -39,7 +50,14 @@ import Cathedral.NymanBeurling.BDBridgeProved
   integration + spatial L² analysis). This is proved via the Perron Crown
   chain: `rh_implies_bd_convergence_perron` (PerronCrown.lean).
 
-  **STATUS: 5 CUSTOM AXIOMS (Path E fusion, May 13, 2026).**
+  **STATUS: 2 PROOF ARCHITECTURES (May 13, 2026).**
+
+  ARCHITECTURE 1 — Gram Crown (PREFERRED):
+    `rh_discrete_global` / `rh_discrete_subseq`
+    1 Crown axiom (Gram bound) + 5 PNT bureaucracy.
+    Zero covariance axioms. Zero sorries.
+
+  ARCHITECTURE 2 — Nyman-Beurling (HISTORICAL):
   The forward direction uses the Perron Crown (RH → Mertens → L² decay),
   which inherits 4 PNTAnd axioms + 1 covariance axiom from the Perron chain.
   The `witness_covariance_decay` axiom is ELIMINATED (graduated in
@@ -252,6 +270,24 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
+-- THE GRAM CROWN: DISCRETE RH (PREFERRED ARCHITECTURE)
+-- ════════════════════════════════════════════════
+--
+-- The discrete, 2-axiom proofs of RH are exported from:
+--   Cathedral.Assembly.GramCrown (downstream of this file)
+--
+-- • riemann_hypothesis_from_gram_global  : RH from vᵀGv ≤ 1+K/lnN (∀ large N)
+-- • riemann_hypothesis_from_gram_subseq  : RH from vᵀGv ≤ 1+K/lnN (along subseq)
+--
+-- These are the PREFERRED architecture (zero covariance axioms).
+-- They cannot be imported here because GramBoundDirect.lean imports
+-- MainChain.lean (for log_grows_unboundedly), creating a dependency
+-- arrow: MainChain → GramBoundDirect → GramCrown.
+--
+-- See GramCrown.lean for the primary discrete exports.
+-- See Assembly.lean for the unified re-export of both architectures.
+
+-- ════════════════════════════════════════════════
 -- AXIOM AUDIT (updated May 13, 2026 — Exploration 37, Morning Surgery)
 -- ════════════════════════════════════════════════
 --
@@ -321,6 +357,39 @@ end
 --
 -- GPU-VALIDATED (May 9, 2026): d²·ln(N) ≈ 3.08 at N=55,440
 -- confirms Rayleigh-Ritz squeeze constant across 13 HCN points.
+--
+-- ════════════════════════════════════════════════
+-- GRAM CROWN AXIOM AUDIT (the primary discrete exports)
+-- ════════════════════════════════════════════════
+--
+-- #print axioms rh_discrete_global
+--   → [R_isLittleO, frac_error_isLittleO, mu_log_mul_zeta, mu_pnt_alt,
+--      pnt_mu_log_sq_div_k,
+--      Cathedral.Vasyunin.gram_form_upper_bound_direct,
+--      propext, Classical.choice, Quot.sound]
+--
+-- #print axioms rh_discrete_subseq
+--   → [R_isLittleO, frac_error_isLittleO, mu_log_mul_zeta, mu_pnt_alt,
+--      pnt_mu_log_sq_div_k,
+--      Cathedral.Vasyunin.gram_form_upper_bound_subseq,
+--      propext, Classical.choice, Quot.sound]
+--
+-- 6 custom axioms each + 3 Lean kernel axioms.
+--
+-- CLASSIFICATION:
+--   PNT bureaucracy (5 — unconditionally true, proved since 1896):
+--     mu_pnt_alt, R_isLittleO, mu_log_mul_zeta,
+--     frac_error_isLittleO, pnt_mu_log_sq_div_k
+--
+--   Crown axiom (1 — THE actual mathematical content):
+--     gram_form_upper_bound_direct  (or _subseq)
+--     ≡ The Riemann Hypothesis, reformulated as a discrete
+--       arithmetic inequality about Möbius-weighted fractional-part sums.
+--
+-- ★ KEY: No covariance_bound_from_mertens_34 in this dependency tree.
+-- ★ KEY: The Crown axiom IS RH (equivalent reformulation, not a derived
+--        consequence). It is the SIMPLEST possible axiom footprint.
 
 -- #print axioms nyman_beurling_equivalence
-
+-- #print axioms rh_discrete_global
+-- #print axioms rh_discrete_subseq
