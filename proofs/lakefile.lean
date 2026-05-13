@@ -173,6 +173,8 @@ lean_lib «Cathedral» where
     `Cathedral.Covariance.L2Convergence,
     `Cathedral.Assembly.OneCrown,
     `Cathedral.Assembly.MainChain,
+    -- Gram Crown: discrete 2-axiom proof of RH (Exploration 37)
+    `Cathedral.Assembly.GramCrown,
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (re-enabled via local PNTAnd clone with v4.29 fix)
     `Cathedral.PNT.Bridge,
@@ -180,6 +182,8 @@ lean_lib «Cathedral» where
     `Cathedral.Perron.MertensFromPerron,
     -- Perron Crown (axiom elimination + covariance graduation)
     `Cathedral.Assembly.PerronCrown,
+    -- Path E: Mellin-Spectral Fusion (witness_covariance_decay graduation)
+    `Cathedral.Assembly.CovarianceFromPerron,
     -- Mellin Crown (frequency-domain forward direction, exploration10)
     `Cathedral.Assembly.MellinPerronBridge,
     `Cathedral.Assembly.MellinVarianceProof,
