@@ -331,6 +331,14 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
     `Cathedral.Physics.DiagonalBound,
+    -- Physics: SUSY Reduction (Crown ⟺ Off-Diagonal Cancellation, Exploration 36)
+    `Cathedral.Physics.SUSYReduction,
+    -- Physics: SUSY Vacuum (topological SUSY algebra, Exploration 36)
+    `Cathedral.Physics.SUSYVacuum,
+    -- Physics: Ward Identity (arithmetic Noether theorem, Exploration 36)
+    `Cathedral.Physics.WardIdentity,
+    -- Physics: Spectral Gap Bridge (Ward → eigenvalue bounds, Exploration 36)
+    `Cathedral.Physics.SpectralGap,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
