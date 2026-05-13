@@ -254,9 +254,9 @@ private lemma bc_inner_bound (hRH : RiemannHypothesis)
     The BC inner bound (bc_inner_bound) is 0 sorry.
     The existential wrapper case-splits on A vs B_ε:
     - A ≥ B_ε (= 20(3-2ε)/ε): PROVED
-    - A < B_ε: delegated to Cathedral.Zeta.Hadamard.thin_strip_lower_bound_exists,
-      which uses the zero-counting axiom (Hadamard product + N(T) = O(T log T)).
-      0 sorry in this file — axiom is in Cathedral.Zeta.Hadamard.lean. -/
+    - A < B_ε: PROVED via `littlewood_maneuver` (May 13, 2026).
+      Previously delegated to the zero-counting axiom.
+      0 sorry in this file, 0 axioms consumed. -/
 theorem zeta_polynomial_lower_bound_rh_proved (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (A : ℝ) (hA : 0 < A) :
     ∃ c > 0, ∃ T₀ > 0, ∀ s : ℂ,

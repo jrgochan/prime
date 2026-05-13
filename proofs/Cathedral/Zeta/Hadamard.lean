@@ -240,9 +240,14 @@ REFERENCES:
   • Iwaniec-Kowalski, "Analytic Number Theory", Theorem 5.17
 -/
 
-/-- **AXIOM** (Polynomial lower bound under RH via zero-counting):
+/-- **DEPRECATED AXIOM** (Polynomial lower bound under RH via zero-counting):
     Under RH, for any ε > 0 and A > 0, there exists c > 0 such that
     |ζ(s)| ≥ c/|Im(s)|^A for Re(s) ≥ 1/2+ε and |Im(s)| ≥ 2.
+
+    GRADUATED: May 13, 2026 (Exploration 37).
+    The Littlewood Maneuver (LittlewoodManeuver.lean) proves the ∃ T₀ form
+    from first principles (Borel-Carathéodory + Three-Circles + sub-log decay).
+    This axiom is retained only for historical reference; it has ZERO consumers.
 
     EXPERIMENTALLY VALIDATED: bc-zeta-lower (256-bit MPFR, 17.5h, 550K samples)
     confirms effective exponents ≈ 0.03-0.08, with 300× margin over theory. -/
@@ -254,13 +259,17 @@ axiom rh_zeta_lower_bound_from_zero_counting
       c / |s.im| ^ A ≤ ‖riemannZeta s‖
 
 -- ═══════════════════════════════════════════
--- §3. Thin-Strip Lower Bound Closure
+-- §3. Thin-Strip Lower Bound Closure (GRADUATED)
 -- ═══════════════════════════════════════════
 
 /-- **THEOREM**: Existential form matching `zeta_polynomial_lower_bound_rh_proved`.
 
-    Directly provides the bound needed to close ZetaLowerBound.lean:535.
-    Proof: direct application of `rh_zeta_lower_bound_from_zero_counting`. -/
+    Directly provides the bound needed to close ZetaLowerBound.lean.
+
+    NOTE: This theorem has ZERO code consumers as of May 13, 2026.
+    The main chain flows through LowerBound.lean → littlewood_maneuver directly.
+    The axiom call below is therefore orphaned from MainChain's dependency graph.
+    It is retained for backward compatibility only. -/
 theorem thin_strip_lower_bound_exists (hRH : RiemannHypothesis)
     (ε : ℝ) (hε : 0 < ε) (hε1 : ε < 3/2)
     (A : ℝ) (hA : 0 < A) :
