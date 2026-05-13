@@ -1,0 +1,24 @@
+[package]
+name = "spectral-factorization-probe-gpu"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "spectral-factorization-probe-gpu"
+path = "src/main.rs"
+
+[features]
+default = ["hpdf"]
+gpu = ["cathedral-utils/gpu"]
+hpdf = ["cathedral-utils/hpdf"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rand = "0.8"
+rayon = "1"
+nalgebra = "0.33"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[lints]
+workspace = true
