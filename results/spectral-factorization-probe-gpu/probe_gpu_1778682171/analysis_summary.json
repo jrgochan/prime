@@ -1,0 +1,146 @@
+{
+  "experiment": "spectral-factorization-probe-gpu",
+  "timestamp": "2026-05-13T14:24:25Z",
+  "gpu_name": "NVIDIA GeForce RTX 4090",
+  "total_semiprimes": 50,
+  "total_time_s": 98.95032369,
+  "bit_classes": [
+    16,
+    24,
+    32,
+    40
+  ],
+  "verdicts": [
+    {
+      "hypothesis": "H1",
+      "description": "GCD-Stratum eigenvector correlation with factor lattice",
+      "signal_strength": "STRONG",
+      "verdict": "Mean density ratio = inf. 26/35 samples > 1.0, 21/35 > 10.0. Factor lattice shows elevated ground-state density.",
+      "supporting_stats": {
+        "above_1": 26,
+        "above_10": 21,
+        "mean_ratio": null,
+        "median_ratio": 91.67797999600663,
+        "samples": 35
+      }
+    },
+    {
+      "hypothesis": "H2",
+      "description": "Optimal weight vector concentration at factor indices",
+      "signal_strength": "null",
+      "verdict": "Mean |w_p|/median ratio = 0.660. Factor p in top 20.7% of weights on average. No special weight concentration at factor.",
+      "supporting_stats": {
+        "mean_percentile_rank": 0.20712714663635312,
+        "mean_weight_ratio": 0.6601321736613608,
+        "samples": 35
+      }
+    },
+    {
+      "hypothesis": "H3",
+      "description": "Vasyunin cotangent sum V(m,N) vanishes at exact divisors",
+      "signal_strength": "null",
+      "verdict": "Perfect separation in 15/20 samples. Total false positives: 499995/705306. Near-perfect separation with rare edge cases.",
+      "supporting_stats": {
+        "perfect_separation_count": 15,
+        "total_false_positives": 499995,
+        "total_nonfactors": 705306,
+        "total_samples": 20
+      }
+    },
+    {
+      "hypothesis": "H4",
+      "description": "Möbius/Liouville local structure around N",
+      "signal_strength": "null",
+      "verdict": "Mean squarefree ratio = 1.0101 (expected 1.0). No anomalous arithmetic structure detected near semiprimes.",
+      "supporting_stats": {
+        "mean_sqfree_ratio": 1.0101470582052179,
+        "samples": 5
+      }
+    },
+    {
+      "hypothesis": "H5",
+      "description": "Factor shadow in ground-state density ranking",
+      "signal_strength": "null",
+      "verdict": "Factor p at mean percentile rank 67.7% (low = strongly avoided). No special avoidance pattern.",
+      "supporting_stats": {
+        "mean_percentile_rank": 0.677337852551316,
+        "samples": 10
+      }
+    },
+    {
+      "hypothesis": "H6",
+      "description": "Quadratic form d² perturbation when masking factor multiples",
+      "signal_strength": "null",
+      "verdict": "Factor p at mean |Δd²| percentile rank 51.3%. No special d² perturbation from factor masking.",
+      "supporting_stats": {
+        "mean_percentile_rank": 0.513269169816029,
+        "samples": 10
+      }
+    },
+    {
+      "hypothesis": "H7",
+      "description": "Condition number κ(G_M) resonance at factor dimensions",
+      "signal_strength": "null",
+      "verdict": "Mean κ ratio (factor/non-factor) = 1.0015. No κ-resonance at factor dimensions — condition number is structurally universal.",
+      "supporting_stats": {
+        "mean_kappa_ratio": 1.0014936935178027,
+        "samples": 10
+      }
+    },
+    {
+      "hypothesis": "H8",
+      "description": "Eigenvalue interlacing Δλ_min stuttering at factor crossings",
+      "signal_strength": "weak",
+      "verdict": "Mean stutter ratio = 3.4596. Interlacing shows anomalous step sizes near factors.",
+      "supporting_stats": {
+        "mean_stutter_ratio": 3.4595716342963647,
+        "samples": 10
+      }
+    },
+    {
+      "hypothesis": "H9",
+      "description": "Participation ratio α deviation at factor harmonics",
+      "signal_strength": "null",
+      "verdict": "Mean α deviation = 0.0357. No α deviation — arithmetic-GOE universality (α ≈ 0.47) holds at factor harmonics.",
+      "supporting_stats": {
+        "mean_alpha_deviation": 0.03571906688170216,
+        "samples": 9
+      }
+    },
+    {
+      "hypothesis": "H10",
+      "description": "Poisson→GOE crossover shift on factor sublattice",
+      "signal_strength": "weak",
+      "verdict": "Mean crossover shift = 20.0000 (1/3 samples measured). Crossover timing differs on factor sublattice.",
+      "supporting_stats": {
+        "mean_crossover_shift": 20.0,
+        "measured_samples": 1,
+        "total_samples": 3
+      }
+    },
+    {
+      "hypothesis": "H11",
+      "description": "Sherman-Morrison b-vector sensitivity at factor positions",
+      "signal_strength": "null",
+      "verdict": "Mean sensitivity ratio = 0.1706, factor at percentile 41.9%. No differential sensitivity — d² perturbation is uniform across positions.",
+      "supporting_stats": {
+        "mean_factor_percentile": 0.4192769223409719,
+        "mean_sensitivity_ratio": 0.1705776086866821,
+        "samples": 20
+      }
+    },
+    {
+      "hypothesis": "H12",
+      "description": "Mellin transform critical-line resonance at factor frequencies",
+      "signal_strength": "null",
+      "verdict": "Peak enrichment = 1.74× (observed 0.0260 vs null 0.0150). No Mellin resonance — Parseval isometry prevents frequency-domain factor leakage.",
+      "supporting_stats": {
+        "enrichment": 1.7364011881555736,
+        "mean_null_fraction": 0.015000000000000005,
+        "mean_resonance_fraction": 0.026046017822333612,
+        "samples": 12
+      }
+    }
+  ],
+  "conclusion": "INCONCLUSIVE: 3/12 hypotheses show signal (1 strong, 2 weak). Some spectral fingerprint of factors exists but is not reliably extractable."
+}

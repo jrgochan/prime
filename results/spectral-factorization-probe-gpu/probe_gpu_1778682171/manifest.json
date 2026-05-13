@@ -1,0 +1,15 @@
+{
+  "experiment": "spectral-factorization-probe-gpu",
+  "version": "0.4.0",
+  "timestamp": "2026-05-13T14:22:51Z",
+  "gpu_name": "NVIDIA GeForce RTX 4090",
+  "gpu_vram_mb": 7287940053715,
+  "rust_version": "0.1.0",
+  "bit_classes": [
+    16,
+    24,
+    32,
+    40
+  ],
+  "total_semiprimes": 50
+}

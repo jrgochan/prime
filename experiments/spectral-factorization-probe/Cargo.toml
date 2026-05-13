@@ -1,0 +1,21 @@
+[package]
+name = "spectral-factorization-probe"
+version = "0.1.0"
+edition = "2021"
+description = """
+Cathedral Spectral Factorization Probe — tests whether Gram matrix spectral
+structure, GCD-stratum decomposition, Vasyunin cotangent sums, and Arithmetic
+Standard Model observables can detect structural signatures of semiprime factors.
+
+Uses Cathedral-Utils infrastructure. CPU-only, f64 precision.
+Research tool, not a practical factoring algorithm.
+"""
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1.10"
+rand = "0.8"
+
+[[bin]]
+name = "spectral-factorization-probe"
+path = "src/main.rs"
