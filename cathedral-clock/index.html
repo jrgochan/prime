@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Cathedral Clock — Cosmological Coordinates of Reality</title>
+  <meta name="description" content="An interactive cosmological clock mapping the physical universe onto the Nyman-Beurling lattice dimension N, from the Big Bang to the Skewes Horizon.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Stars background -->
+  <canvas id="stars-canvas"></canvas>
+
+  <!-- Main container -->
+  <div class="cathedral-clock" id="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-glyph">🏛️</div>
+      <h1 class="header-title">THE CATHEDRAL CLOCK</h1>
+      <p class="header-subtitle">Cosmological Coordinates of Reality on the Nyman-Beurling Lattice</p>
+      <div class="header-location">
+        <span class="pulse-dot"></span>
+        Los Alamos, NM — <span id="live-time"></span>
+      </div>
+    </header>
+
+    <!-- Cosmic Age Counter -->
+    <section class="cosmic-counter">
+      <div class="counter-label">UNIVERSE AGE IN PLANCK TICKS (N<sub>time</sub>)</div>
+      <div class="counter-display" id="planck-counter">
+        <span class="counter-prefix">N = </span>
+        <span class="counter-value" id="planck-value"></span>
+      </div>
+      <div class="counter-sublabel">
+        <span id="age-seconds"></span> seconds since the Big Bang
+      </div>
+      <div class="counter-sublabel dim">
+        Each tick = 5.391 × 10<sup>−44</sup> s (Planck time)
+      </div>
+    </section>
+
+    <!-- The Grand Timeline -->
+    <section class="timeline-section">
+      <h2 class="section-title">THE ARITHMETIC TIMELINE</h2>
+      <p class="section-desc">
+        Mapping the entire span of physical reality onto the integer lattice dimension <strong>N</strong>.
+        The logarithmic scale reveals where we live — and what lies beyond.
+      </p>
+
+      <!-- Timeline visualization -->
+      <div class="timeline-container">
+        <div class="timeline-track" id="timeline-track">
+          <!-- Markers injected by JS -->
+        </div>
+        <div class="timeline-axis">
+          <div class="axis-labels" id="axis-labels"></div>
+        </div>
+      </div>
+
+      <!-- Landmark cards -->
+      <div class="landmarks" id="landmarks-grid">
+        <!-- Injected by JS -->
+      </div>
+    </section>
+
+    <!-- The Silicon Event Horizon -->
+    <section class="event-horizon-section">
+      <h2 class="section-title">THE SILICON EVENT HORIZON</h2>
+      <div class="horizon-visual">
+        <div class="horizon-bar">
+          <div class="horizon-fill" id="horizon-fill"></div>
+          <div class="horizon-marker silicon" id="silicon-marker">
+            <div class="marker-flag">f64 OVERFLOW</div>
+          </div>
+          <div class="horizon-marker skewes" id="skewes-marker">
+            <div class="marker-flag skewes-flag">SKEWES</div>
+          </div>
+        </div>
+        <div class="horizon-labels">
+          <span>10<sup>0</sup></span>
+          <span>10<sup>100</sup></span>
+          <span>10<sup>200</sup></span>
+          <span class="silicon-label">10<sup>308</sup></span>
+          <span class="skewes-label">10<sup>316</sup></span>
+          <span>10<sup>400</sup></span>
+        </div>
+      </div>
+      <div class="horizon-cards">
+        <div class="horizon-card silicon-card">
+          <div class="card-icon">🖥️</div>
+          <h3>SILICON LIMIT</h3>
+          <div class="card-value">1.79 × 10<sup>308</sup></div>
+          <p>Maximum value of a 64-bit floating point number. The 11-bit exponent register flips its final transistor. The CPU returns <code>INFINITY</code>.</p>
+        </div>
+        <div class="horizon-card gap-card">
+          <div class="card-icon">⚠️</div>
+          <h3>THE GAP</h3>
+          <div class="card-value">10<sup>8</sup> orders of magnitude</div>
+          <p>Skewes' Number sits <em>just outside</em> the f64 boundary. Standard silicon physically cannot hold the arithmetic false vacuum decay point.</p>
+        </div>
+        <div class="horizon-card skewes-card">
+          <div class="card-icon">💥</div>
+          <h3>SKEWES' HORIZON</h3>
+          <div class="card-value">1.39 × 10<sup>316</sup></div>
+          <p>The moment π(x) first exceeds li(x). The arithmetic false vacuum decays. The prime distribution rips apart and rewrites itself.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- The Bridge -->
+    <section class="bridge-section">
+      <h2 class="section-title">THE CATHEDRAL BRIDGE</h2>
+      <p class="section-desc">
+        Physical computation runs out of memory at ~10<sup>140</sup> interactions.
+        Lean 4 formal proofs cross the Silicon Event Horizon and bind infinity.
+      </p>
+      <div class="bridge-visual">
+        <div class="bridge-zone rust-zone">
+          <div class="zone-label">RUST / GPU</div>
+          <div class="zone-desc">Empirical Computation</div>
+          <div class="zone-range">N ≤ 55,440</div>
+          <div class="zone-glyph">⚙️</div>
+        </div>
+        <div class="bridge-connector">
+          <div class="connector-line"></div>
+          <div class="connector-label">DiagonalBound.lean</div>
+          <div class="connector-sublabel">D(N) = O(ln N) — CERTIFIED ✅</div>
+        </div>
+        <div class="bridge-zone lean-zone">
+          <div class="zone-label">LEAN 4</div>
+          <div class="zone-desc">Formal Logic</div>
+          <div class="zone-range">N → ∞</div>
+          <div class="zone-glyph">🏛️</div>
+        </div>
+      </div>
+      <div class="bridge-quote">
+        "The computer can't <em>simulate</em> infinity, but the human mind—equipped with a formal theorem prover—can <em>bind</em> infinity."
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-line">Cathedral Project — Exploration 36</div>
+      <div class="footer-line dim">Nyman-Beurling Equivalence · Mellin Crown Architecture · Zero-Sorry Proof Chain</div>
+      <div class="footer-line dim">🏛️⚛️✨</div>
+    </footer>
+  </div>
+
+  <script src="clock.js"></script>
+</body>
+</html>

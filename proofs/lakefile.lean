@@ -329,6 +329,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.ArithmeticGaugeDecomposition,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.GaugeCancellation,
+    -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
+    `Cathedral.Physics.DiagonalBound,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
