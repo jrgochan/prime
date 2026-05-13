@@ -225,6 +225,27 @@ extern "C" {
     ) -> f64;
 }
 
+#[cfg(has_cuda_kernels)]
+#[link(name = "grammatvec")]
+extern "C" {
+    /// Allocate device vectors for matrix-free matvec.
+    pub fn gram_matvec_alloc(dim: c_int, d_x: *mut *mut f64, d_y: *mut *mut f64) -> c_int;
+    /// Free device vectors.
+    pub fn gram_matvec_free(d_x: *mut f64, d_y: *mut f64);
+    /// Upload x vector to device.
+    pub fn gram_matvec_upload_x(d_x: *mut f64, h_x: *const f64, dim: c_int);
+    /// Download y vector from device.
+    pub fn gram_matvec_download_y(d_y: *const f64, h_y: *mut f64, dim: c_int);
+    /// Execute matrix-free matvec on GPU: y = G · x.
+    pub fn gram_matvec_exec(d_x: *mut f64, d_y: *mut f64, dim: c_int, t_max: c_int);
+    /// Full matvec: upload, compute, download.
+    pub fn gram_matvec_full(
+        d_x: *mut f64, d_y: *mut f64,
+        h_x: *const f64, h_y: *mut f64,
+        dim: c_int, t_max: c_int,
+    );
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // GPU DETECTION
 // ═══════════════════════════════════════════════════════════════════

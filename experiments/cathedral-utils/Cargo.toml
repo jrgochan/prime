@@ -24,6 +24,10 @@ name = "taper-analyzer"
 path = "src/bin/taper_analyzer.rs"
 required-features = ["hpdf"]
 
+[[bin]]
+name = "prime-core-probe"
+path = "src/bin/prime_core_probe.rs"
+
 [features]
 default = []
 gpu = ["libc"]

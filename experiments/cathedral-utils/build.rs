@@ -12,6 +12,7 @@
  *   - qq_cholesky.cu  → libqqcholesky.so   (QQ Cholesky, ~62 digits)
  *   - gram_build.cu   → libgramgpu.so      (GPU Gram matrix build)
  *   - gram_build_dd.cu → libgramgpudd.so   (DD Gram matrix build)
+ *   - gram_matvec.cu  → libgrammatvec.so   (Matrix-free GPU matvec)
  *
  * To add new kernels for other GPU frameworks:
  *   1. Drop a .cu file in src/gpu/cuda/
@@ -31,6 +32,7 @@ const KERNELS: &[(&str, &str)] = &[
     ("qq_cholesky.cu", "qqcholesky"),
     ("gram_build.cu", "gramgpu"),
     ("gram_build_dd.cu", "gramgpudd"),
+    ("gram_matvec.cu", "grammatvec"),
 ];
 
 fn main() {
