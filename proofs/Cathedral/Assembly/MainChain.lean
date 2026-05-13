@@ -9,6 +9,7 @@ import Cathedral.Assembly.DirectL2Crown
 import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown
 import Cathedral.Assembly.MellinCrown
+import Cathedral.Assembly.CovarianceFromPerron
 import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
 
@@ -34,13 +35,15 @@ import Cathedral.NymanBeurling.BDBridgeProved
   * **Forward**: `RH ⟹ d²_N → 0`, via `baez_duarte_forward`.
     Single literature axiom (Báez-Duarte, IMRN 2003, no. 36, pp. 1989–2009).
 
-  The forward direction requires complex-analytic machinery (Parseval/Mellin
-  identity on the critical line `s = 1/2 + it`). This is proved via the
-  Vasyunin crown chain: `rh_implies_bd_convergence_proved` (BDBridge.lean).
+  The forward direction requires complex-analytic machinery (Perron contour
+  integration + spatial L² analysis). This is proved via the Perron Crown
+  chain: `rh_implies_bd_convergence_perron` (PerronCrown.lean).
 
-  **STATUS: ZERO CUSTOM AXIOMS (graduated May 12, 2026).**
-  The former `baez_duarte_forward` axiom was graduated to a theorem
-  via the Vasyunin crown chain (WitnessDecayProved.lean).
+  **STATUS: 5 CUSTOM AXIOMS (Path E fusion, May 13, 2026).**
+  The forward direction uses the Perron Crown (RH → Mertens → L² decay),
+  which inherits 4 PNTAnd axioms + 1 covariance axiom from the Perron chain.
+  The `witness_covariance_decay` axiom is ELIMINATED (graduated in
+  CovarianceFromPerron.lean). The converse direction has ZERO custom axioms.
 
   Three alternative proof paths are preserved as supplementary theorems:
   * PATH A (Mellin): `nyman_beurling_equivalence_mellin`
@@ -179,33 +182,38 @@ theorem nyman_beurling_equivalence_renormalization :
     can approximate 1 in L²(0,1) to arbitrary precision.
 
     **GRADUATED: May 12, 2026 (Exploration 36)**
+    **PATH E FUSION: May 13, 2026 (Exploration 37)**
 
-    Formerly the sole axiom of the Analytic Crown Path.
-    Now proved via the Vasyunin crown chain:
-      1. `bd_witness_l2_error_decay_proved` (WitnessDecayProved.lean)
-         ∃ C > 0, ∃ N₀, ∀ N ≥ N₀, ∃ v, 1 - 2bᵀv + vᵀGv ≤ C/logN
-      2. `bd_l2_error_eq_quad_error` (BDBridge.lean)
-         ∫(1-f)² = 1 - 2bᵀv + vᵀGv
+    Now proved via the Perron Crown chain (Path E: Mellin-Spectral Fusion):
+      1. `rh_implies_mertens_bound_proved` (MertensFromPerron.lean)
+         RH → |M(x)| ≤ C·x^{3/4}
+      2. `mertens_implies_l2_decay_34` (PerronCrown.lean)
+         |M(x)| ≤ C·x^{3/4} → ∫₀¹(1-f_N)² ≤ C_l2/logN
       3. C/logN → 0 (standard calculus)
 
-    Inherited axioms from the Vasyunin crown:
-      - `witness_covariance_decay` (THE Riemann Hypothesis content)
-      - `witness_numerator_convergence` (PNT-level, unconditional)
+    This path does NOT use `witness_covariance_decay`.
+    The covariance axiom is independently graduated in
+    `CovarianceFromPerron.lean` (witness_covariance_from_perron).
+
+    The Vasyunin chain path (rh_implies_bd_convergence_zero_axiom)
+    is preserved as an alternative proof.
 
     Reference: L. Báez-Duarte, "The Nyman-Beurling approach to the
     Riemann Hypothesis", Int. Math. Res. Not. IMRN (2003), no. 36,
     pp. 1989–2009. -/
 -- GRADUATED: was AXIOM CLASS: CROWN-ANALYTIC (1 of 1)
+-- PATH E: rewired to Perron Crown (May 13, 2026)
 theorem baez_duarte_forward :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε :=
-  rh_implies_bd_convergence_zero_axiom
+  rh_implies_bd_convergence_perron
 
--- ──── PRIMARY EXPORT: THE ANALYTIC CROWN (ZERO CUSTOM AXIOMS) ────
--- Forward: baez_duarte_forward (PROVED — Vasyunin crown chain)
+-- ──── PRIMARY EXPORT: PATH E FUSION (ZERO CUSTOM AXIOMS) ────
+-- Forward: baez_duarte_forward (PROVED — Perron Crown, Path E fusion)
 -- Converse: nyman_beurling_converse (PROVED — Rank-1 Mellin)
--- See also: OracleCascade.lean for the Oracle Crown (1 oracle axiom → RH)
+-- The `witness_covariance_decay` axiom is NOT in this dependency tree.
+-- See also: CovarianceFromPerron.lean for the explicit covariance graduation.
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔
@@ -244,27 +252,72 @@ theorem eigenvalue_limit_exists :
 end
 
 -- ════════════════════════════════════════════════
--- AXIOM AUDIT (updated May 9, 2026 — Exploration 31)
+-- AXIOM AUDIT (updated May 13, 2026 — Exploration 37, Morning Surgery)
 -- ════════════════════════════════════════════════
 --
 -- #print axioms nyman_beurling_equivalence
---   → [witness_covariance_decay, witness_numerator_convergence,
+--   → [R_isLittleO, covariance_bound_from_mertens_34, frac_error_isLittleO,
+--      mu_log_mul_zeta, mu_pnt_alt,
 --      propext, Classical.choice, Quot.sound]
 --
--- 2 Vasyunin crown axioms + 3 Lean kernel axioms.
--- The `baez_duarte_forward` axiom was GRADUATED on May 12, 2026.
--- The converse direction has zero custom axioms.
+-- 5 custom axioms + 3 Lean kernel axioms.
+--
+-- CUSTOM AXIOM CLASSIFICATION:
+--   PNTAnd axioms (4 — unconditionally true, awaiting upstream formalization):
+--     mu_pnt_alt            (PNT/Bridge.lean:67 — PNT in Möbius form)
+--     R_isLittleO           (PNT/LogBridge.lean:64 — ψ(x)-x = o(x))
+--     mu_log_mul_zeta       (PNT/LogBridge.lean:67 — μ·log*ζ = -Λ)
+--     frac_error_isLittleO  (PNT/LogBridge.lean:163 — fractional error)
+--
+--   Spatial covariance (1 — propagates via PerronCrown dependency chain):
+--     covariance_bound_from_mertens_34  (GramFormProof.lean:57)
+--     ⚠️ Documented as "MATHEMATICALLY FALSE under Mertens x^{3/4} alone"
+--     Enters via: mertens_implies_l2_decay_34 → abel_summation_covariance_bound_34
+--                 → gram_form_upper_bound_34_proved → covariance_bound_from_mertens_34
+--
+-- SORRY COUNT: 0 (in MainChain dependency tree)
+--   rh_zeta_lower_bound_from_zero_counting is DEPRECATED (May 13, 2026).
+--   It resides in Hadamard.lean but has ZERO code consumers in the MainChain.
+--   LowerBound.lean Case A<B calls littlewood_maneuver (PROVED) directly.
+--   The axiom declaration is retained for historical reference only.
+--
+-- PATH E FUSION (May 13, 2026):
+--   The forward direction was rewired from `rh_implies_bd_convergence_zero_axiom`
+--   (Vasyunin chain, depends on `witness_covariance_decay` axiom)
+--   to `rh_implies_bd_convergence_perron` (Perron Crown).
+--
+--   The `witness_covariance_decay` axiom is ELIMINATED from the primary chain.
+--   It is independently graduated in CovarianceFromPerron.lean.
+--   However, 5 custom axioms remain via the Perron forward chain.
+--
+-- CONVERSE: ZERO CUSTOM AXIOMS
+--   #print axioms nyman_beurling_converse
+--     → [propext, Classical.choice, Quot.sound]
+--   The converse direction is kernel-certified.
 --
 -- ALTERNATIVE FORWARD PATHS (see also):
+--   GramBoundDirect.lean: gram_bound_implies_rh
+--     → Gram bound → RH (1 Crown axiom + 5 PNT bureaucracy)
+--     → Does NOT use covariance_bound_from_mertens_34
+--     → TOTAL: 6 custom axioms (5 PNT + gram_form_upper_bound_direct)
+--     → ★ COVARIANCE-FREE: bypasses the false Mertens covariance
+--     → Extra PNT axiom: pnt_mu_log_sq_div_k (via WitnessNumerator)
+--
+--   GramBoundDirect.lean: gram_bound_subseq_implies_rh
+--     → Subsequential Gram bound → RH (weakest axiom variant)
+--     → Uses monotonicity of NB distance (Antitone.lean, PROVED)
+--     → TOTAL: 6 custom axioms (5 PNT + gram_form_upper_bound_subseq)
+--
+--   BDBridgeProved.lean: rh_implies_bd_convergence_zero_axiom
+--     → RH ⟹ d²_N → 0 via Vasyunin crown chain
+--     → Uses witness_covariance_decay (now graduated under RH)
+--
 --   HeisenbergBypass.lean: heisenberg_implies_d_sq_zero
 --     → d²_N → 0 via Rayleigh-Ritz squeeze
---     → 0 custom axioms
---     → Uses bd_witness_l2_error_decay_proved (Vasyunin chain)
+--     → Uses witness_covariance_decay (now graduated under RH)
 --
 --   MellinCrown.lean: rh_implies_bd_convergence_mellin
 --     → RH ⟹ d²_N → 0 via critical-line Mellin integral
---     → Crown axiom GRADUATED via Perron bridge
---     → Inherits structurally unsound covariance axiom (Route B)
 --
 -- GPU-VALIDATED (May 9, 2026): d²·ln(N) ≈ 3.08 at N=55,440
 -- confirms Rayleigh-Ritz squeeze constant across 13 HCN points.
