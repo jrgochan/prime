@@ -316,8 +316,139 @@ document.addEventListener('DOMContentLoaded', () => {
   updateLiveTime();
   animateHorizonFill();
   initScrollAnimations();
+  initPhysicsDashboard();
 
   // Live updates
   setInterval(updatePlanckCounter, 100);  // Tick fast for visual drama
   setInterval(updateLiveTime, 1000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// THE ARITHMETIC VACUUM — Physics Dashboard (v4 sweep data)
+// ═══════════════════════════════════════════════════════════════
+
+// v4 sweep data points: [N, cosmo_ratio (Λ), excess, excess/lnN, marginal_per_dim]
+const V4_DATA = [
+  [6,     1.000000, -0.36544, -0.20392, 0.126885],
+  [12,    0.927648, -0.34108, -0.13729, 0.092924],
+  [24,    0.818455, -0.09195,  0.08194, 0.058605],
+  [36,    0.722644,  0.02134,  0.00596, 0.042854],
+  [48,    0.640704,  0.08268,  0.02136, 0.033707],
+  [60,    0.588716,  0.13160,  0.03215, 0.027952],
+  [120,   0.431509,  0.25462,  0.05317, 0.015199],
+  [180,   0.345483,  0.30981,  0.05965, 0.010481],
+  [240,   0.292202,  0.34739,  0.06343, 0.008036],
+  [360,   0.223045,  0.39523,  0.06712, 0.005503],
+  [720,   0.117940,  0.46400,  0.07047, 0.002850],
+  [840,   0.096427,  0.47716,  0.07089, 0.002458],
+  [1000,  0.072069,  0.49014,  0.07098, 0.002076],
+  [1260,  0.044024,  0.51037,  0.07148, 0.001664],
+  [1680,  0.008605,  0.53049,  0.07149, 0.001258],
+  [2520,  0.036681,  0.55810,  0.07117, 0.000848],
+  [5040,  0.105785,  0.59975,  0.07028, 0.000431],
+  [7560,  0.141945,  0.62145,  0.06953, 0.000290],
+  [10000, 0.165552,  0.63490,  0.06891, 0.000220],
+  [10080, 0.166183,  0.63532,  0.06889, 0.000218],
+  [15120, 0.198087,  0.65376,  0.06794, 0.000147],
+  [20000, 0.218589,  0.66602,  0.06722, 0.000111],
+  [20160, 0.219174,  0.66633,  0.06720, 0.000110],
+  [25200, 0.234820,  0.67559,  0.06662, 0.000089],
+  [27720, 0.241338,  0.67938,  0.06638, 0.000081],
+  [40000, 0.265527,  0.69321,  0.06543, 0.000056],
+  [45360, 0.273379,  0.69799,  0.06509, 0.000050],
+  [55440, 0.285865,  0.70470,  0.06457, 0.000041],
+];
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function interpolateV4(N) {
+  if (N <= V4_DATA[0][0]) return V4_DATA[0];
+  if (N >= V4_DATA[V4_DATA.length - 1][0]) return V4_DATA[V4_DATA.length - 1];
+  for (let i = 0; i < V4_DATA.length - 1; i++) {
+    if (N >= V4_DATA[i][0] && N <= V4_DATA[i + 1][0]) {
+      const t = (N - V4_DATA[i][0]) / (V4_DATA[i + 1][0] - V4_DATA[i][0]);
+      return [
+        N,
+        lerp(V4_DATA[i][1], V4_DATA[i + 1][1], t),
+        lerp(V4_DATA[i][2], V4_DATA[i + 1][2], t),
+        lerp(V4_DATA[i][3], V4_DATA[i + 1][3], t),
+        lerp(V4_DATA[i][4], V4_DATA[i + 1][4], t),
+      ];
+    }
+  }
+  return V4_DATA[V4_DATA.length - 1];
+}
+
+function sliderToN(val) {
+  // Exponential mapping: slider 0-100 → N 6-55440
+  const logMin = Math.log(6);
+  const logMax = Math.log(55440);
+  return Math.round(Math.exp(logMin + (val / 100) * (logMax - logMin)));
+}
+
+function updatePhysicsDashboard(N) {
+  const [_, lambda, excess, excessLn, marginal] = interpolateV4(N);
+  const cancel = 1 - lambda;
+
+  // Lambda
+  const lambdaEl = document.getElementById('lambda-value');
+  const lambdaBar = document.getElementById('lambda-bar');
+  if (lambdaEl) lambdaEl.textContent = lambda.toFixed(6);
+  if (lambdaBar) lambdaBar.style.width = `${Math.min(100, lambda * 100)}%`;
+
+  // Cancellation
+  const cancelEl = document.getElementById('cancel-value');
+  const cancelBar = document.getElementById('cancel-bar');
+  if (cancelEl) cancelEl.textContent = `${(cancel * 100).toFixed(4)}%`;
+  if (cancelBar) cancelBar.style.width = `${cancel * 100}%`;
+
+  // Epsilon
+  const epsilonEl = document.getElementById('epsilon-value');
+  const epsilonBar = document.getElementById('epsilon-bar');
+  if (epsilonEl) epsilonEl.textContent = excessLn.toFixed(6);
+  if (epsilonBar) epsilonBar.style.width = `${Math.min(100, Math.abs(excessLn) * 1000)}%`;
+
+  // Marginal
+  const marginalEl = document.getElementById('marginal-value');
+  const marginalBar = document.getElementById('marginal-bar');
+  if (marginalEl) marginalEl.textContent = marginal.toExponential(4);
+  if (marginalBar) marginalBar.style.width = `${Math.min(100, marginal * 5000)}%`;
+
+  // N display
+  const nValEl = document.getElementById('physics-n-value');
+  if (nValEl) nValEl.textContent = `N = ${N.toLocaleString()}`;
+
+  // Era display
+  const eraEl = document.getElementById('physics-era');
+  if (eraEl) {
+    if (N < 240) {
+      eraEl.textContent = '🔵 BOSONIC ERA — D(N) < 1, vacuum pressure expands';
+      eraEl.className = 'physics-era bosonic';
+    } else if (N < 1680) {
+      eraEl.textContent = '🟡 TRANSITION — approaching N ≈ 1680 critical point';
+      eraEl.className = 'physics-era transition';
+    } else {
+      eraEl.textContent = '🔴 FERMIONIC ERA — vacuum tension compensates D(N), Λ → 0';
+      eraEl.className = 'physics-era fermionic';
+    }
+  }
+}
+
+function initPhysicsDashboard() {
+  const slider = document.getElementById('physics-n-slider');
+  if (!slider) return;
+
+  // Animate: sweep from N=6 to current slider position
+  let animN = 6;
+  const targetN = sliderToN(50);
+  const animInterval = setInterval(() => {
+    animN = Math.min(animN * 1.08 + 1, targetN);
+    updatePhysicsDashboard(Math.round(animN));
+    if (animN >= targetN) clearInterval(animInterval);
+  }, 30);
+
+  slider.addEventListener('input', () => {
+    const N = sliderToN(parseInt(slider.value));
+    updatePhysicsDashboard(N);
+  });
+}
