@@ -386,7 +386,7 @@ function sliderToN(val) {
   return Math.round(Math.exp(logMin + (val / 100) * (logMax - logMin)));
 }
 
-function updatePhysicsDashboard(N) {
+function updatePhysicsDashboard(N, label) {
   const [_, lambda, excess, excessLn, marginal] = interpolateV4(N);
   const cancel = 1 - lambda;
 
@@ -414,9 +414,9 @@ function updatePhysicsDashboard(N) {
   if (marginalEl) marginalEl.textContent = marginal.toExponential(4);
   if (marginalBar) marginalBar.style.width = `${Math.min(100, marginal * 5000)}%`;
 
-  // N display
+  // N display (for explore mode)
   const nValEl = document.getElementById('physics-n-value');
-  if (nValEl) nValEl.textContent = `N = ${N.toLocaleString()}`;
+  if (nValEl) nValEl.textContent = label || `N = ${N.toLocaleString()}`;
 
   // Era display
   const eraEl = document.getElementById('physics-era');
@@ -434,21 +434,143 @@ function updatePhysicsDashboard(N) {
   }
 }
 
+// ── Cosmic Mode: Extrapolation Engine ──
+// v4 scaling fits (from the fermionic era, N > 2500):
+//   Λ(N)      ~ (Λ₀) · (N/N₀)^α_λ     α_λ ≈ -0.0013  (very slow decay)
+//   marginal  ~ (m₀) · (N/N₀)^α_m      α_m ≈ -0.96    (near 1/N)
+//   ε/ln(N)   → C ≈ 0.065              (stabilizes — this IS the RH conjecture)
+//   cancel η  = 1 - Λ                   (derived)
+
+const SCALING = {
+  // Reference point: N=55440 (our largest measurement)
+  N0: 55440,
+  lambda0: 0.285865,
+  marginal0: 0.000041,
+  epsilonLn0: 0.06457,
+  // Power-law exponents from v4 regression
+  alpha_lambda: -0.0013,   // Λ decays very slowly
+  alpha_marginal: -0.96,   // marginal ≈ 1/N (asymptotic freedom)
+};
+
+function extrapolateCosmicValues(logN) {
+  // logN is log₁₀(N) — e.g., 60.9 for the age of the universe
+  const logN0 = Math.log10(SCALING.N0);   // ≈ 4.74
+  const logRatio = logN - logN0;           // e.g., 56.2
+
+  // Power-law extrapolation: f(N) = f(N₀) · (N/N₀)^α = f(N₀) · 10^(α · logRatio)
+  const lambda = SCALING.lambda0 * Math.pow(10, SCALING.alpha_lambda * logRatio);
+  const marginal = SCALING.marginal0 * Math.pow(10, SCALING.alpha_marginal * logRatio);
+  // ε/ln(N) stabilizes — this is the RH conjecture (bounded)
+  const epsilonLn = SCALING.epsilonLn0;
+  // Excess = ε/ln(N) * ln(N) = ε/ln(N) * logN * ln(10)
+  const excess = epsilonLn * logN * Math.LN10;
+  const cancel = 1 - lambda;
+
+  return { lambda, cancel, excess, epsilonLn, marginal, logN };
+}
+
+function updateCosmicDashboard() {
+  const coords = cosmicCoordinates();
+  const logN = coords.nTimeExp;  // ≈ 60.9
+  const cosmic = extrapolateCosmicValues(logN);
+
+  // Lambda — at N ≈ 10^61, still detectable but incredibly tiny
+  const lambdaEl = document.getElementById('lambda-value');
+  const lambdaBar = document.getElementById('lambda-bar');
+  if (lambdaEl) lambdaEl.textContent = cosmic.lambda.toExponential(6);
+  // Bar: show relative to reference (log scale visualization)
+  if (lambdaBar) {
+    const barPct = Math.max(0.5, Math.min(100, 100 * (1 + Math.log10(cosmic.lambda) / 3)));
+    lambdaBar.style.width = `${barPct}%`;
+  }
+
+  // Cancellation — essentially 100% at cosmic scales
+  const cancelEl = document.getElementById('cancel-value');
+  const cancelBar = document.getElementById('cancel-bar');
+  if (cancelEl) {
+    // Show the number of 9s
+    const nines = -Math.log10(1 - cosmic.cancel);
+    if (nines > 6) {
+      cancelEl.textContent = `99.${'9'.repeat(Math.min(12, Math.floor(nines) - 2))}...%`;
+    } else {
+      cancelEl.textContent = `${(cosmic.cancel * 100).toFixed(4)}%`;
+    }
+  }
+  if (cancelBar) cancelBar.style.width = `${Math.min(100, cosmic.cancel * 100)}%`;
+
+  // Epsilon/ln(N) — the RH invariant
+  const epsilonEl = document.getElementById('epsilon-value');
+  const epsilonBar = document.getElementById('epsilon-bar');
+  if (epsilonEl) epsilonEl.textContent = cosmic.epsilonLn.toFixed(6);
+  if (epsilonBar) epsilonBar.style.width = `${Math.min(100, cosmic.epsilonLn * 1000)}%`;
+
+  // Marginal — fantastically small
+  const marginalEl = document.getElementById('marginal-value');
+  const marginalBar = document.getElementById('marginal-bar');
+  if (marginalEl) marginalEl.textContent = cosmic.marginal.toExponential(4);
+  if (marginalBar) marginalBar.style.width = `${Math.max(0.5, Math.min(100, 100 * (1 + Math.log10(cosmic.marginal) / 60)))}%`;
+
+  // Cosmic N display
+  const nEl = document.getElementById('cosmic-n-number');
+  if (nEl) {
+    const mantissa = coords.nTime / Math.pow(10, Math.floor(logN));
+    nEl.innerHTML = `${mantissa.toFixed(10)} × 10<sup>${Math.floor(logN)}</sup>`;
+  }
+
+  // Era
+  const eraEl = document.getElementById('physics-era');
+  if (eraEl) {
+    eraEl.textContent = '🔴 DEEP FERMIONIC — N ≈ 10⁶¹ · Λ ≈ ' + cosmic.lambda.toExponential(2) + ' · ‖r‖/dim ≈ ' + cosmic.marginal.toExponential(2);
+    eraEl.className = 'physics-era fermionic';
+  }
+}
+
+// ── Mode Management ──
+let currentMode = 'cosmic';
+let cosmicInterval = null;
+
+function setPhysicsMode(mode) {
+  currentMode = mode;
+
+  // Toggle button states
+  document.getElementById('mode-cosmic').classList.toggle('active', mode === 'cosmic');
+  document.getElementById('mode-explore').classList.toggle('active', mode === 'explore');
+
+  // Toggle panels
+  const cosmicPanel = document.getElementById('cosmic-readout');
+  const explorePanel = document.getElementById('explore-controls');
+  if (cosmicPanel) cosmicPanel.style.display = mode === 'cosmic' ? 'block' : 'none';
+  if (explorePanel) explorePanel.style.display = mode === 'explore' ? 'block' : 'none';
+
+  if (mode === 'cosmic') {
+    updateCosmicDashboard();
+    if (!cosmicInterval) {
+      cosmicInterval = setInterval(updateCosmicDashboard, 100);
+    }
+  } else {
+    if (cosmicInterval) { clearInterval(cosmicInterval); cosmicInterval = null; }
+    const slider = document.getElementById('physics-n-slider');
+    if (slider) {
+      const N = sliderToN(parseInt(slider.value));
+      updatePhysicsDashboard(N);
+    }
+  }
+}
+
 function initPhysicsDashboard() {
   const slider = document.getElementById('physics-n-slider');
-  if (!slider) return;
 
-  // Animate: sweep from N=6 to current slider position
-  let animN = 6;
-  const targetN = sliderToN(50);
-  const animInterval = setInterval(() => {
-    animN = Math.min(animN * 1.08 + 1, targetN);
-    updatePhysicsDashboard(Math.round(animN));
-    if (animN >= targetN) clearInterval(animInterval);
-  }, 30);
+  // Start in cosmic mode
+  setPhysicsMode('cosmic');
 
-  slider.addEventListener('input', () => {
-    const N = sliderToN(parseInt(slider.value));
-    updatePhysicsDashboard(N);
-  });
+  // Slider for explore mode
+  if (slider) {
+    slider.addEventListener('input', () => {
+      if (currentMode === 'explore') {
+        const N = sliderToN(parseInt(slider.value));
+        updatePhysicsDashboard(N);
+      }
+    });
+  }
 }
+

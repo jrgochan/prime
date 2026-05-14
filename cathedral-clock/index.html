@@ -88,7 +88,30 @@
           <div class="physics-sublabel">‖G·(λ⊙w)‖/dim — equidistribution</div>
         </div>
       </div>
-      <div class="physics-n-display">
+
+      <!-- Mode Toggle -->
+      <div class="physics-mode-toggle">
+        <button class="mode-btn active" id="mode-cosmic" onclick="setPhysicsMode('cosmic')">
+          <span class="mode-icon">🌌</span> COSMIC
+        </button>
+        <button class="mode-btn" id="mode-explore" onclick="setPhysicsMode('explore')">
+          <span class="mode-icon">🔬</span> EXPLORE
+        </button>
+      </div>
+
+      <!-- Cosmic Mode: Live Planck Tick readout -->
+      <div class="cosmic-readout" id="cosmic-readout">
+        <div class="cosmic-n-live">
+          <span class="cosmic-n-label">N<sub>time</sub> = AGE OF UNIVERSE IN PLANCK TICKS</span>
+          <span class="cosmic-n-number" id="cosmic-n-number">—</span>
+        </div>
+        <div class="cosmic-note">
+          Extrapolated from v4 scaling laws: Λ ~ N<sup>−0.0013</sup>, ‖r‖/dim ~ N<sup>−0.96</sup>, ε/ln(N) → const
+        </div>
+      </div>
+
+      <!-- Explorer Mode: Slider -->
+      <div class="physics-n-display" id="explore-controls" style="display: none;">
         <span class="physics-n-label">LATTICE DIMENSION</span>
         <span class="physics-n-value" id="physics-n-value">N = —</span>
         <input type="range" id="physics-n-slider" min="0" max="100" value="50" class="physics-slider">
