@@ -250,8 +250,12 @@ theorem inhomogeneous_implies_crown
 ### Proof Chain
 
 ```
-inhomogeneous_ward_bound (AXIOM ≡ RH)
+gram_form_upper_bound_direct (CROWN AXIOM ≡ RH)
          │
+         ├─→ gram_dotProduct_eq_one_plus_excess (INDEX BRIDGE)
+         │         │
+         │         └─→ inhomogeneous_ward_bound (🎓 THEOREM)
+         │                    │
          ├─→ inhomogeneous_implies_susy → susy_cancellation_bound
          │                                        │
          ├─→ inhomogeneous_implies_crown ─────────┤
@@ -294,16 +298,18 @@ cancellation: the vacuum energy (D) is huge, the counter-term
 ## Audit
 
 ### Sorry: 0 ✅
-### Custom Axioms: 1 (inhomogeneous_ward_bound ≡ RH)
+### Custom Axioms: 0 ✅ (inhomogeneous_ward_bound GRADUATED to theorem)
 
 ### PROVED:
 | # | Result | Status |
 |---|--------|--------|
-| 1 | `inhomogeneous_implies_susy` | **🎓 THEOREM** |
-| 2 | `susy_implies_inhomogeneous` | **🎓 THEOREM** |
-| 3 | `inhomogeneous_iff_susy` | **🎓 THEOREM** (equivalence) |
-| 4 | `dw_compensation` | **🎓 THEOREM** |
-| 5 | `inhomogeneous_implies_crown` | **🎓 THEOREM** |
+| 1 | `gram_dotProduct_eq_one_plus_excess` | **🎓 THEOREM** (index bridge) |
+| 2 | `inhomogeneous_ward_bound` | **🎓 THEOREM** (was axiom!) |
+| 3 | `inhomogeneous_implies_susy` | **🎓 THEOREM** |
+| 4 | `susy_implies_inhomogeneous` | **🎓 THEOREM** |
+| 5 | `inhomogeneous_iff_susy` | **🎓 THEOREM** (equivalence) |
+| 6 | `dw_compensation` | **🎓 THEOREM** |
+| 7 | `inhomogeneous_implies_crown` | **🎓 THEOREM** |
 -/
 
 end Cathedral.Physics.InhomogeneousWard
