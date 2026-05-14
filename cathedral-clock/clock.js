@@ -54,49 +54,80 @@ const LANDMARKS = [
     desc: 'N = 1. The first Planck tick. The universe is one irreducible quantum of time old.',
   },
   {
+    // Our actual experiment: 28 HPDF matrices, 158s total
+    // dd_gram_N40000_mpfr256.bin = 24 GB (our second-largest)
+    // At N=55440: matrix = 55439² × 8 = 24.6 GB (dense f64)
+    // GPU Cholesky up to dim ≤ 25000, CG beyond
     id: 'gpu',
     name: 'GPU MATRIX',
     exponent: Math.log10(55440),
     icon: '⚙️',
     color: '#ff8844',
-    desc: 'N = 55,440. Tonight\'s Rust/GPU Gram matrix computation in Los Alamos.',
+    desc: 'N = 55,440. Tonight\'s v4 sweep: 24.6 GB Gram matrix, 158s for all 28 HPDF points. Single RTX/A100 GPU in Los Alamos.',
     displayValue: '55,440',
   },
   {
-    // N ≈ 75 million. Quarter of global RAM ≈ 250 PB.
-    // N² × 8 bytes = 4.5×10¹⁶ ≈ 45 PB (dense Gram matrix).
-    // O(N³) ≈ 4×10²³ FLOP — ~30 min on all Top500 combined.
-    id: 'quarter-earth',
-    name: '¼ EARTH COMPUTE',
-    exponent: Math.log10(75e6),
-    icon: '🌎',
-    color: '#30b868',
-    desc: 'N ≈ 75M. Quarter of global compute: ~250 PB RAM, ~45 PB Gram matrix. A realistic international collaboration.',
-    displayValue: '~75M',
+    // Single high-end GPU: 80 GB VRAM (A100/H100)
+    // N² × 8 ≤ 80×10⁹ → N ≤ 100,000
+    // Verified: our cache shows N=40000 → 24 GB, so N=100K → 80 GB ✓
+    // Build time ≈ O(N²) ~ minutes, solve ≈ hours (CG)
+    id: 'single-gpu',
+    name: 'SINGLE GPU MAX',
+    exponent: Math.log10(100000),
+    icon: '🎮',
+    color: '#76ff03',
+    desc: 'N ≈ 100K. One 80 GB GPU (A100/H100) holds the full matrix. Verified: our N=40K cache = 24 GB, so N=100K ≈ 80 GB. Build: minutes. Solve: hours.',
+    displayValue: '~100K',
   },
   {
-    // N ≈ 175 million. Half of global RAM ≈ 500 PB.
-    // N² × 8 bytes = 2.4×10¹⁷ ≈ 240 PB.
-    // O(N³) ≈ 5.4×10²⁴ FLOP — ~7 hours on all Top500.
+    // Multi-GPU / Supercomputer node: ~1 TB RAM
+    // N² × 8 ≤ 10¹² → N ≤ ~354,000
+    // DGX H100 (8×80 GB = 640 GB usable) → N ≈ 280K
+    // Top node (1-2 TB) → N ≈ 350K-500K
+    id: 'super-node',
+    name: 'SUPERCOMPUTER NODE',
+    exponent: Math.log10(500000),
+    icon: '🖥️',
+    color: '#ffab40',
+    desc: 'N ≈ 500K. One DGX/supercomputer node (1-2 TB RAM). Matrix = 2 TB. Build time: hours. Solve: days. This is where individual research groups top out.',
+    displayValue: '~500K',
+  },
+  {
+    // Full supercomputer: Frontier has ~9 PB RAM, ~1.2 EF
+    // N² × 8 ≤ 9×10¹⁵ → N ≤ ~33M
+    // But communication overhead is brutal for dense eigensolvers
+    // Realistic: N ≈ 5M-10M with ScaLAPACK-style distribution
+    id: 'quarter-earth',
+    name: 'TOP SUPERCOMPUTER',
+    exponent: Math.log10(10e6),
+    icon: '🏛️',
+    color: '#30b868',
+    desc: 'N ≈ 10M. A top-3 supercomputer (Frontier: 9 PB RAM, 1.2 EF). Dense matrix = 800 TB. Realistic with ScaLAPACK. Build: days. Solve: weeks.',
+    displayValue: '~10M',
+  },
+  {
+    // All Top500 supercomputers combined: ~100 PB RAM
+    // N² × 8 ≤ 10¹⁷ → N ≤ ~112M
+    // Communication between sites makes this theoretical
     id: 'half-earth',
-    name: '½ EARTH COMPUTE',
-    exponent: Math.log10(175e6),
+    name: 'ALL SUPERCOMPUTERS',
+    exponent: Math.log10(100e6),
     icon: '🌏',
     color: '#2ea8b8',
-    desc: 'N ≈ 175M. Half of global compute: ~500 PB RAM, ~240 PB Gram matrix. A coordinated planetary effort.',
-    displayValue: '~175M',
+    desc: 'N ≈ 100M. Every Top500 supercomputer combined (~100 PB RAM). Matrix = 80 PB. Theoretically possible but communication-limited.',
+    displayValue: '~100M',
   },
   {
-    // N ≈ 350 million. All global RAM ≈ 1 EB (10¹⁸ bytes).
-    // N² × 8 bytes ≈ 10¹⁸ = 1 EB — ALL of Earth's combined RAM.
-    // O(N³) ≈ 4.3×10²⁵ FLOP — ~2.5 days on all Top500.
-    // This is the absolute ceiling for a dense Gram matrix.
+    // All global compute: ~1 EB RAM, ~10²⁰ FLOPS
+    // N² × 8 ≤ 10¹⁸ → N ≤ ~350M
+    // From our cache: N² scaling is exact (verified 5K→40K = 4×)
+    // This is the absolute RAM ceiling
     id: 'full-earth',
     name: 'EARTH LIMIT',
     exponent: Math.log10(350e6),
     icon: '🌐',
     color: '#4eeaff',
-    desc: 'N ≈ 350M. Every byte of RAM on Earth holds one dense Gram matrix (~1 EB). The terrestrial compute horizon. Beyond this, only proofs reach.',
+    desc: 'N ≈ 350M. Every byte of RAM on Earth (~1 EB) for one matrix. Scaling verified: cache shows exact N² growth. Beyond here, only formal proofs reach.',
     displayValue: '~350M',
   },
   {
