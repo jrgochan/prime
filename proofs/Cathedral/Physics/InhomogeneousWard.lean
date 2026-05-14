@@ -94,11 +94,22 @@ private theorem gram_dotProduct_eq_one_plus_excess (N : ℕ) (hN : 3 ≤ N) :
   simp only [hN1]
   -- Now match with vtGv_eq_one_plus_excess
   rw [← PhaseTransition.vtGv_eq_one_plus_excess N]
-  -- LHS: dotProduct (bdMoebiusWeight N) ((of G).mulVec (bdMoebiusWeight N))
-  -- RHS: Σ i Σ j witnessEntry(i+1,N) * gramEntry(i+1,j+1) * witnessEntry(j+1,N)
-  -- These are definitionally equal sums — bdMoebiusWeight = witnessEntry.
-  -- The sorry is a pure index congruence between dotProduct/mulVec vs Σ Σ.
-  sorry
+  -- LHS: bdMoebiusWeight N ⬝ᵥ (of G).mulVec (bdMoebiusWeight N)
+  --     = Σ_i bdMoebiusWeight(i) * Σ_j G(i,j) * bdMoebiusWeight(j)
+  -- RHS: Σ_i Σ_j witnessEntry(i+1) * gramEntry(i+1,j+1) * witnessEntry(j+1)
+  -- Since bdMoebiusWeight N i = witnessEntry (i+1) N (rfl),
+  -- and (of G) i j = gramEntry (i+1) (j+1) (rfl), these are the same.
+  -- The only mismatch is associativity: v*Σ(G*v) vs Σ(v*G*v).
+  -- Unfold both sides to raw sums and close by congruence
+  simp only [dotProduct, Matrix.mulVec, Matrix.of_apply, Finset.mul_sum]
+  apply Finset.sum_congr rfl; intro i _
+  apply Finset.sum_congr rfl; intro j _
+  -- bdMoebiusWeight (N-1+1) i = -(moebius (i+1):ℝ) * (1 - log(i+1)/log(N-1+1))
+  -- witnessEntry (i+1) N = -(μ(i+1):ℝ) * (1 - log(i+1)/log(N))
+  -- These differ by N-1+1 vs N. Apply hN1.
+  unfold bdMoebiusWeight logWeight GaugeCancellation.witnessEntry
+    GaugeCancellation.logCutoffWeight
+  simp only [hN1]; ring
 
 /-- **THE INHOMOGENEOUS WARD BOUND** — GRADUATED from axiom to theorem.
 
