@@ -343,6 +343,12 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.WardIdentity,
     -- Physics: Spectral Gap Bridge (Ward → eigenvalue bounds, Exploration 36)
     `Cathedral.Physics.SpectralGap,
+    -- Physics: Phase Transition (B+F sign flip, cosmological ratio, Exploration 36)
+    `Cathedral.Physics.PhaseTransition,
+    -- Physics: Cancellation Efficacy (algebraic engine of 99.96% cancellation, Exploration 36)
+    `Cathedral.Physics.CancellationEfficacy,
+    -- Physics: Inhomogeneous Ward Bound (GU-reframed crown axiom, Exploration 36)
+    `Cathedral.Physics.InhomogeneousWard,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,

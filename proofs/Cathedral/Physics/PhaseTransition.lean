@@ -112,9 +112,8 @@ noncomputable def cosmoRatio (N : ℕ) : ℝ :=
 /-- The cosmological ratio is nonneg. -/
 theorem cosmoRatio_nonneg (N : ℕ) : 0 ≤ cosmoRatio N := by
   unfold cosmoRatio
-  apply div_nonneg (abs_nonneg _)
-  linarith [abs_nonneg (GaugeCancellation.bosonicOffDiagonal N),
-            abs_nonneg (GaugeCancellation.fermionicOffDiagonal N)]
+  exact div_nonneg (abs_nonneg _)
+    (add_nonneg (abs_nonneg _) (abs_nonneg _))
 
 /-- The cosmological ratio is at most 1 (triangle inequality). -/
 theorem cosmoRatio_le_one (N : ℕ) : cosmoRatio N ≤ 1 := by
@@ -124,8 +123,8 @@ theorem cosmoRatio_le_one (N : ℕ) : cosmoRatio N ≤ 1 := by
   · -- Both zero → ratio = 0/0, which div_nonneg makes 0
     simp [h]
   · rw [div_le_one (by positivity)]
-    exact abs_add (GaugeCancellation.bosonicOffDiagonal N)
-                  (GaugeCancellation.fermionicOffDiagonal N)
+    exact abs_add_le (GaugeCancellation.bosonicOffDiagonal N)
+                     (GaugeCancellation.fermionicOffDiagonal N)
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE EXCESS FUNCTION

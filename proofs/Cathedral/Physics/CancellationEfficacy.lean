@@ -112,8 +112,11 @@ theorem sign_separability (j k : ℕ) :
     every "particle" is its own "antiparticle" under the charge. -/
 theorem charge_involution (n : ℕ) :
     (↑(Cathedral.Physics.liouville n) : ℝ) *
-    (↑(Cathedral.Physics.liouville n) : ℝ) = 1 :=
-  WardIdentity.parity_is_involution n
+    (↑(Cathedral.Physics.liouville n) : ℝ) = 1 := by
+  simp only [Cathedral.Physics.liouville]
+  push_cast
+  rw [← pow_add, show Ω n + Ω n = 2 * Ω n from by ring]
+  exact Even.neg_one_pow ⟨Ω n, by ring⟩
 
 /-- **THEOREM (Bosonic-Fermionic Pairing)**: For any index j,
     the set of k with even Ω(j)+Ω(k) has a natural bijection with
@@ -129,9 +132,9 @@ theorem parity_flip_by_prime (j k p : ℕ) (hp : Nat.Prime p)
     (hk : k ≠ 0) :
     (-1 : ℝ) ^ (Ω j + Ω (k * p)) =
     -((-1 : ℝ) ^ (Ω j + Ω k)) := by
-  rw [ArithmeticFunction.cardFactors_mul hk (Nat.Prime.ne_zero hp)]
-  rw [hp.prime.minFac_eq, Nat.Prime.cardFactors_eq_one hp]
-  rw [show Ω j + (Ω k + 1) = (Ω j + Ω k) + 1 from by ring]
+  rw [ArithmeticFunction.cardFactors_mul hk hp.ne_zero]
+  have hOp : Ω p = 1 := by simp [hp]
+  rw [show Ω j + (Ω k + Ω p) = (Ω j + Ω k) + Ω p from by ring, hOp]
   rw [pow_succ]; ring
 
 -- ════════════════════════════════════════════════════════════════
