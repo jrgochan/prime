@@ -353,6 +353,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.LiouvilleMarginal,
     -- Physics: Row Cancellation (per-row → global Ward bridge, Exploration 36)
     `Cathedral.Physics.RowCancellation,
+    -- Physics: Bilinear Mertens Bridge (PNT → excess bound → Ward, Exploration 36)
+    `Cathedral.Physics.BilinearMertens,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
