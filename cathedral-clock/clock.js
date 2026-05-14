@@ -262,6 +262,15 @@ function updatePlanckCounter() {
   if (ageEl) {
     ageEl.textContent = coords.ageSeconds.toExponential(6);
   }
+
+  // Years display
+  const yearsEl = document.getElementById('age-years');
+  if (yearsEl) {
+    const ageYears = coords.ageSeconds / CONSTANTS.SEC_PER_YEAR;
+    // Format as human-readable: "13,800,042,026.xx"
+    const billions = ageYears / 1e9;
+    yearsEl.textContent = `${billions.toFixed(10)} billion`;
+  }
 }
 
 // ── Live Clock ──

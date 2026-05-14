@@ -238,6 +238,20 @@ body {
   font-size: 0.72rem;
 }
 
+.counter-sublabel.years-line {
+  margin-top: 0.4rem;
+}
+
+.counter-sublabel.years-line #age-years {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.years-note {
+  opacity: 0.5;
+  font-size: 0.68rem;
+}
+
 /* ═══════════════════════════════════════
    VERTICAL JOURNEY TIMELINE
    ═══════════════════════════════════════ */
