@@ -212,8 +212,8 @@ function renderJourney() {
         <div class="void-line"></div>
         <div class="void-content">
           <div class="void-label">52 ORDERS OF MAGNITUDE</div>
-          <div class="void-message">No computer that will ever exist can cross this gap.</div>
-          <div class="void-message">Only a formal proof reaches the other side.</div>
+          <div class="void-message">Beyond all known computation.</div>
+          <div class="void-message">Today, only a formal proof crosses this void.</div>
           <div class="void-scale">
             <span class="void-from">10<sup>8.5</sup></span>
             <span class="void-arrow">⟶ ∞ ⟶</span>

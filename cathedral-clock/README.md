@@ -47,8 +47,8 @@ and computational landmarks** onto the N scale:
 
 ### 🕳️ The Proof Gap
 Between the **Earth Limit** (N ≈ 350M = 10⁸·⁵) and **You Are Here**
-(N ≈ 10⁶¹) lies a 52.5-order-of-magnitude void. No computer that will
-ever exist can cross this gap. Only a formal proof reaches the other side.
+(N ≈ 10⁶¹) lies a 52.5-order-of-magnitude void — beyond all known
+computation. Today, only a formal proof crosses this gap.
 
 This is why the Cathedral exists.
 
