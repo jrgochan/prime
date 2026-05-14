@@ -263,7 +263,7 @@ fn analyze_scaling(results: &[SusyResult], min_n: usize) -> ScalingAnalysis {
     // GU verdicts: does |B+F| grow slower than D?
     let bf_grows_slower = bf_power_alpha < d_power_alpha;
     let ratio_decays = ratio_power_alpha > 0.0;
-    let sublinear = excess_alpha < 1.0 && excess_alpha > 0.0;
+    let sublinear = excess_alpha < 1.0; // negative α = excess shrinks, even better
 
     ScalingAnalysis {
         bf_power_c, bf_power_alpha, bf_power_r2,
