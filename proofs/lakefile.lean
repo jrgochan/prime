@@ -351,6 +351,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.InhomogeneousWard,
     -- Physics: Liouville Marginal (equidistribution against Gram, v4 sweep, Exploration 36)
     `Cathedral.Physics.LiouvilleMarginal,
+    -- Physics: Row Cancellation (per-row → global Ward bridge, Exploration 36)
+    `Cathedral.Physics.RowCancellation,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
