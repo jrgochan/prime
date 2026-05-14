@@ -44,6 +44,7 @@ function cosmicCoordinates() {
 }
 
 // ── Timeline Landmarks ──
+// Time conversion: N Planck ticks × 5.391×10⁻⁴⁴ s = seconds since Big Bang
 const LANDMARKS = [
   {
     id: 'planck',
@@ -52,6 +53,8 @@ const LANDMARKS = [
     icon: '⚛️',
     color: '#4ef080',
     desc: 'N = 1. The first Planck tick. The universe is one irreducible quantum of time old.',
+    // 1 × 5.391e-44 s = 5.391e-44 s
+    humanTime: '5.4 × 10⁻⁴⁴ s — one Planck time',
   },
   {
     // Our actual experiment: 28 HPDF matrices, 158s total
@@ -65,12 +68,11 @@ const LANDMARKS = [
     color: '#ff8844',
     desc: 'N = 55,440. Tonight\'s v4 sweep: 24.6 GB Gram matrix, 158s for all 28 HPDF points. Single RTX/A100 GPU in Los Alamos.',
     displayValue: '55,440',
+    // 55440 × 5.391e-44 = 2.99e-39 s — deep in the Planck era
+    humanTime: '3.0 × 10⁻³⁹ s — deep Planck era, before quarks exist',
   },
   {
     // Single high-end GPU: 80 GB VRAM (A100/H100)
-    // N² × 8 ≤ 80×10⁹ → N ≤ 100,000
-    // Verified: our cache shows N=40000 → 24 GB, so N=100K → 80 GB ✓
-    // Build time ≈ O(N²) ~ minutes, solve ≈ hours (CG)
     id: 'single-gpu',
     name: 'SINGLE GPU MAX',
     exponent: Math.log10(100000),
@@ -78,12 +80,11 @@ const LANDMARKS = [
     color: '#76ff03',
     desc: 'N ≈ 100K. One 80 GB GPU (A100/H100) holds the full matrix. Verified: our N=40K cache = 24 GB, so N=100K ≈ 80 GB. Build: minutes. Solve: hours.',
     displayValue: '~100K',
+    // 1e5 × 5.391e-44 = 5.4e-39 s
+    humanTime: '5.4 × 10⁻³⁹ s — still in the Planck era',
   },
   {
     // Multi-GPU / Supercomputer node: ~1 TB RAM
-    // N² × 8 ≤ 10¹² → N ≤ ~354,000
-    // DGX H100 (8×80 GB = 640 GB usable) → N ≈ 280K
-    // Top node (1-2 TB) → N ≈ 350K-500K
     id: 'super-node',
     name: 'SUPERCOMPUTER NODE',
     exponent: Math.log10(500000),
@@ -91,12 +92,11 @@ const LANDMARKS = [
     color: '#ffab40',
     desc: 'N ≈ 500K. One DGX/supercomputer node (1-2 TB RAM). Matrix = 2 TB. Build time: hours. Solve: days. This is where individual research groups top out.',
     displayValue: '~500K',
+    // 5e5 × 5.391e-44 = 2.7e-38 s
+    humanTime: '2.7 × 10⁻³⁸ s — edge of the Planck era',
   },
   {
     // Full supercomputer: Frontier has ~9 PB RAM, ~1.2 EF
-    // N² × 8 ≤ 9×10¹⁵ → N ≤ ~33M
-    // But communication overhead is brutal for dense eigensolvers
-    // Realistic: N ≈ 5M-10M with ScaLAPACK-style distribution
     id: 'quarter-earth',
     name: 'TOP SUPERCOMPUTER',
     exponent: Math.log10(10e6),
@@ -104,11 +104,11 @@ const LANDMARKS = [
     color: '#30b868',
     desc: 'N ≈ 10M. A top-3 supercomputer (Frontier: 9 PB RAM, 1.2 EF). Dense matrix = 800 TB. Realistic with ScaLAPACK. Build: days. Solve: weeks.',
     displayValue: '~10M',
+    // 1e7 × 5.391e-44 = 5.4e-37 s
+    humanTime: '5.4 × 10⁻³⁷ s — Grand Unification epoch',
   },
   {
     // All Top500 supercomputers combined: ~100 PB RAM
-    // N² × 8 ≤ 10¹⁷ → N ≤ ~112M
-    // Communication between sites makes this theoretical
     id: 'half-earth',
     name: 'ALL SUPERCOMPUTERS',
     exponent: Math.log10(100e6),
@@ -116,12 +116,11 @@ const LANDMARKS = [
     color: '#2ea8b8',
     desc: 'N ≈ 100M. Every Top500 supercomputer combined (~100 PB RAM). Matrix = 80 PB. Theoretically possible but communication-limited.',
     displayValue: '~100M',
+    // 1e8 × 5.391e-44 = 5.4e-36 s — GUT symmetry breaking era
+    humanTime: '5.4 × 10⁻³⁶ s — GUT symmetry breaking begins',
   },
   {
     // All global compute: ~1 EB RAM, ~10²⁰ FLOPS
-    // N² × 8 ≤ 10¹⁸ → N ≤ ~350M
-    // From our cache: N² scaling is exact (verified 5K→40K = 4×)
-    // This is the absolute RAM ceiling
     id: 'full-earth',
     name: 'EARTH LIMIT',
     exponent: Math.log10(350e6),
@@ -129,19 +128,17 @@ const LANDMARKS = [
     color: '#4eeaff',
     desc: 'N ≈ 350M. Every byte of RAM on Earth (~1 EB) for one matrix. Scaling verified: cache shows exact N² growth. Beyond here, only formal proofs reach.',
     displayValue: '~350M',
+    // 3.5e8 × 5.391e-44 = 1.9e-35 s — electroweak era
+    humanTime: '1.9 × 10⁻³⁵ s — cosmic inflation is ending',
   },
   {
     id: 'the-void',
     name: 'THE PROOF GAP',
-    exponent: 30,  // midpoint visually
+    exponent: 30,
     icon: '🕳️',
     color: '#333355',
     desc: '',
     isVoid: true,
-    // 10^8.5 → 10^61 = 52.5 orders of magnitude
-    // If Earth doubled its compute every year, it would take
-    // 52.5 / log₁₀(2) ≈ 174 years just to gain one more order.
-    // This gap is not crossable by computation. Only by proof.
   },
   {
     id: 'cosmic-age',
@@ -151,6 +148,7 @@ const LANDMARKS = [
     color: '#4eeaff',
     desc: 'N ≈ 8.07 × 10⁶⁰. The age of our physical universe in Planck ticks. Only formal proofs cross this gap.',
     isYou: true,
+    humanTime: '13.8 billion years — now',
   },
   {
     id: 'googol',
@@ -159,6 +157,8 @@ const LANDMARKS = [
     icon: '🔢',
     color: '#a855f7',
     desc: 'N = 10¹⁰⁰. The classic large number. The universe hasn\'t reached this yet.',
+    // 10^100 × 5.391e-44 = 5.4e56 s ≈ 1.7e49 years
+    humanTime: '~10⁴⁹ years — long after all protons have decayed',
   },
   {
     id: 'holographic',
@@ -167,6 +167,8 @@ const LANDMARKS = [
     icon: '🌌',
     color: '#f0c040',
     desc: 'N ≈ 10¹²². The maximum information (Bekenstein-Hawking entropy) the observable universe can ever hold.',
+    // 10^122 × 5.391e-44 = 5.4e78 s ≈ 1.7e71 years
+    humanTime: '~10⁷¹ years — all black holes have evaporated',
   },
   {
     id: 'silicon',
@@ -175,6 +177,8 @@ const LANDMARKS = [
     icon: '🖥️',
     color: '#ff8844',
     desc: 'N = 1.79 × 10³⁰⁸. Maximum f64 value. Beyond this, the CPU returns INFINITY.',
+    // 10^308 × 5.391e-44 ≈ 10^264 s ≈ 10^257 years
+    humanTime: '~10²⁵⁷ years — heat death completed long ago',
   },
   {
     id: 'skewes',
@@ -183,6 +187,8 @@ const LANDMARKS = [
     icon: '💥',
     color: '#ff3344',
     desc: 'N ≈ 1.39 × 10³¹⁶. Where π(x) first exceeds li(x). The arithmetic false vacuum decays.',
+    // 10^316 × 5.391e-44 ≈ 10^272 s ≈ 10^265 years
+    humanTime: '~10²⁶⁵ years — pure mathematical eternity',
   },
 ];
 
@@ -226,6 +232,7 @@ function renderJourney() {
     node.style.setProperty('--node-color', lm.color);
 
     const displayVal = lm.displayValue || (lm.exponent === 0 ? '1' : `10<sup>${Math.round(lm.exponent)}</sup>`);
+    const timeHtml = lm.humanTime ? `<div class="journey-time">⏱ ${lm.humanTime}</div>` : '';
 
     node.innerHTML = `
       <div class="journey-dot"></div>
@@ -236,6 +243,7 @@ function renderJourney() {
         </div>
         <div class="journey-exponent">N = ${displayVal}</div>
         <div class="journey-desc">${lm.desc}</div>
+        ${timeHtml}
       </div>
     `;
     journey.appendChild(node);

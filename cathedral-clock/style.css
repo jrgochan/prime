@@ -411,6 +411,16 @@ body {
   line-height: 1.5;
 }
 
+.journey-time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  letter-spacing: 0.02em;
+}
 /* ── The Void: 52-order gap ── */
 .journey-void {
   position: relative;
