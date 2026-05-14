@@ -9,6 +9,7 @@
 # ============================================
 
 .PHONY: help build papers verify axioms cascade crown-audit clock
+.PHONY: hyperzeta hyperzeta-origin
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -62,6 +63,29 @@ clock: ## Open the Cathedral Clock — cosmological N dashboard
 		xdg-open cathedral-clock/index.html 2>/dev/null || \
 		echo "  Open cathedral-clock/index.html in your browser"
 	@echo "  ✓ cathedral-clock/index.html"
+
+hyperzeta: ## Launch HyperZeta Viewport — sedenion lattice visualizer (port 3000)
+	@echo ""
+	@echo "  ✦  Launching Project HyperZeta — Cathedral Viewport..."
+	@echo "     150K-particle sedenion lattice · Rust/WASM + Three.js"
+	@echo ""
+	@if [ -d tools/hyperzeta-viewport/.next ]; then \
+		echo "  Starting Next.js server on http://localhost:3000 ..." && \
+		cd tools/hyperzeta-viewport && npx next start -p 3000; \
+	else \
+		echo "  ⚠  No build found. Run: cd tools/hyperzeta-viewport && npm install && npm run build"; \
+	fi
+
+hyperzeta-origin: ## Launch HyperZeta Origin — proof-graph explorer (port 3001)
+	@echo ""
+	@echo "  ✦  Launching Project HyperZeta — Origin Explorer..."
+	@echo ""
+	@if [ -d tools/hyperzeta-origin/.next ]; then \
+		echo "  Starting Next.js server on http://localhost:3001 ..." && \
+		cd tools/hyperzeta-origin && npx next start -p 3001; \
+	else \
+		echo "  ⚠  No build found. Run: cd tools/hyperzeta-origin && npm install && npm run build"; \
+	fi
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
 	@$(ENV) require lean
@@ -275,7 +299,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers|clock):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers|clock|hyperzeta[a-z-]*):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

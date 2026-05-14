@@ -35,5 +35,13 @@ path = "src/main.rs"
 name = "susy-sweep"
 path = "src/bin/susy_sweep.rs"
 
+[[bin]]
+name = "susy-sweep-v5"
+path = "src/bin/susy_sweep_v5.rs"
+
+[[bin]]
+name = "susy-sweep-v6"
+path = "src/bin/susy_sweep_v6.rs"
+
 [lints]
 workspace = true

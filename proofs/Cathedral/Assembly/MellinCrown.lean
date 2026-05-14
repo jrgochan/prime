@@ -93,7 +93,7 @@ theorem critical_line_mellin_variance (hRH : RiemannHypothesis) :
 /-- **THEOREM: RH ⟹ d²_N → 0 via the Mellin Crown.**
 
     The forward direction proved by linking:
-    1. critical_line_mellin_variance (AXIOM): RH → Mellin integral ≤ C/logN
+    1. critical_line_mellin_variance (THEOREM): RH → Mellin integral ≤ C/logN
     2. parseval_bridge_white (PROVED): L²(0,1) = Mellin integral
     3. Standard calculus: C/logN → 0
 

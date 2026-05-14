@@ -43,7 +43,7 @@
 
   Note: ε/ln(N) is gently declining, consistent with ε = O(1).
 
-  Status: PROVED. Zero sorry. One axiom (≡ RH).
+  Status: PROVED. Zero sorry. Zero local axioms. Inherits crown axiom (≡ RH).
   Dependencies: GaugeCancellation, PhaseTransition
   Created: May 14, 2026 — Exploration 36 (The GU Session)
 -/

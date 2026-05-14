@@ -41,7 +41,7 @@
   Note: These are HPDF basis (k=2..N) values. In Lean basis (k=1..N-1),
   the k=1 anchor pulls vᵀGv below 1 at all tested scales.
 
-  Status: PROVED (reductions). One axiom (SUSY cancellation ≡ RH).
+  Status: PROVED (reductions). Zero local axioms. Inherits crown axiom (≡ RH).
   Created: May 13, 2026 — Exploration 36 (The SUSY Certification)
 -/
 

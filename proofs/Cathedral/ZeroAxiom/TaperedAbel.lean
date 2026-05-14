@@ -124,6 +124,14 @@ lemma tapered_truncation_bound_above_34
     --   2. Mertens bound |M(x)| ≤ C·x^{3/4} under RH
     --   3. Fejér taper difference bound |Δw(k)| ≤ 1/(k·logN)
     sorry -- Abel summation + Mertens instantiation
+    -- NOTE: This sorry is NOT on the active proof path.
+    -- The `baez_duarte_forward` theorem is proved via `rh_l2_decay_clean`
+    -- (DirectMellinBound.lean), which bypasses this entire ZeroAxiom chain.
+    -- Closing this sorry would require formalizing:
+    --   1. Abel summation for Fejér-tapered partial sums
+    --   2. Interval integral of x^α over [1,N] in Mathlib
+    --   3. Connecting mertensSum to Perron chain output
+    -- These are straightforward but not yet in Mathlib.
 
 /-- Helper: C · N^{-α}/logN → 0 for α > 0.
     Since N^{-α} → 0 and logN ≥ 1, dividing by logN only helps.
@@ -233,6 +241,14 @@ lemma mellin_l2_integral_tendsto_zero
   -- Combined: O(N^{1+ε} · N^{-1/2}/log²N) → 0
   -- This requires careful integration bounds.
   sorry
+  -- NOTE: This sorry is NOT on the active proof path (ORPHANED).
+  -- Superseded by `rh_implies_bd_convergence_mellin` (MellinCrown.lean, PROVED).
+  -- Closing this sorry would require:
+  --   1. Formalizing ∫|ζ(σ+it)/s|² dt as O(T^{1+ε}) (Littlewood growth)
+  --   2. Dominated convergence for products of L² and L∞ bounds
+  --   3. Formalizing the Mellin factorization M[r_N] = (ζ/s)·E_N
+  -- This is substantial (~500 lines) and not needed since MellinCrown.lean
+  -- provides the same result via a different approach.
 
 -- ════════════════════════════════════════════════
 -- §4. THE L²(0,1) BOUND VIA WEIGHT SUBSTITUTION
@@ -280,6 +296,12 @@ lemma fejer_residual_l2_bound
   -- Combined: 1 - 2(1+ε₁) + (1+ε₂) = ε₂ - 2ε₁ = O(1/logN)
   -- Since N^{-1/4}/logN ≤ 1/logN, the bound follows.
   sorry
+  -- NOTE: This sorry is NOT on the active proof path (ORPHANED).
+  -- Superseded by `rh_l2_decay_clean` (DirectMellinBound.lean, PROVED)
+  -- which gives ∫|1-f|² ≤ C_l2/logN using the same weights.
+  -- This lemma asks for the STRONGER rate O(N^{-1/4}/logN), which
+  -- would require formalizing the full covariance decomposition.
+  -- The 1/logN rate from rh_l2_decay_clean suffices for all exports.
 
 -- ════════════════════════════════════════════════
 -- §5. THE FORWARD DIRECTION — GRADUATING baez_duarte_forward

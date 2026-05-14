@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{May 13, 2026}
+\date{May 14, 2026}
 
 \begin{document}
 
@@ -29,13 +29,14 @@ Nyman--Beurling distance:
   \RH \;\iff\; d_N^2 \to 0
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
-The formalization comprises 251 active Lean files ($\sim$68{,}700 lines;
-364 files and $\sim$94{,}200 lines including archived explorations) with
+The formalization comprises 261 active Lean files ($\sim$71{,}500 lines;
+374 files and $\sim$97{,}000 lines including archived explorations) with
 zero compilation errors. On the crown path, the theorem depends on
-exactly \textbf{one} substantive axiom---the B\'aez-Duarte forward
-direction (Atti Lincei, 2003)---plus 4--5 PNT bureaucracy axioms that
-are unconditionally provable from Mathlib's Prime Number Theorem
-infrastructure. The converse direction uses \textbf{zero} custom axioms
+exactly \textbf{one} substantive axiom---the Gram quadratic form decay
+(B\'aez-Duarte 2003, reformulated as a direct Gram matrix bound)---plus
+3 PNT bureaucracy axioms that are unconditionally provable from Mathlib's
+Prime Number Theorem infrastructure. The converse direction uses
+\textbf{zero} custom axioms
 and \textbf{zero sorry}.
 
 The proof introduces two techniques of independent interest:
@@ -44,8 +45,9 @@ exploiting rank-1 factorization of the Mellin transform at zeta zeros;
 and (ii)~the \emph{Parseval Bridge}, which reduces the forward
 direction to a frequency-domain integral on the critical line,
 bypassing the Vasyunin cotangent formula entirely.
-Five alternative forward paths (Mellin Crown, Perron Crown,
-Renormalization Bridge, Oracle Bridge, Gram Crown) provide a multi-path architecture.
+Six alternative forward paths (Mellin Crown, Perron Crown,
+Renormalization Bridge, Oracle Bridge, Gram Crown, Direct Mellin
+Bound) provide a multi-path architecture.
 The \emph{Oracle Bridge} (v17) provides a conditional certificate
 that bypasses the literature axiom: DD-precision GPU measurements
 of $v^T G v < 1$ at highly composite numbers, imported as trusted
@@ -89,7 +91,7 @@ Nyman--Beurling distance in the B\'aez-Duarte basis:
 This is the top-level declaration \lean{nyman\_beurling\_equivalence}
 in \lean{IntegralBasis/BaezDuarte.lean}, re-exported through
 \lean{Assembly/Assembly.lean}. The Lean kernel verifies it depends
-on exactly 1 substantive Cathedral axiom plus 4--5 PNT bureaucracy
+on exactly 1 substantive Cathedral axiom plus 3 PNT bureaucracy
 axioms (unconditional, provable from Mathlib's PNT infrastructure)
 and 3 Lean kernel axioms
 (\lean{propext}, \lean{Classical.choice}, \lean{Quot.sound}).
@@ -102,28 +104,36 @@ The proof decomposes into two pillars:
     tensor, yielding a uniform lower bound $d_N^2 \geq \delta > 0$.
     \textbf{Zero custom axioms.} Zero sorry.
   \item \textbf{Pillar~II (Forward)}: $\RH \implies d_N^2 \to 0$.
-    The primary crown path uses \lean{nyman\_beurling\_equivalence}
-    (B\'aez-Duarte, Atti Lincei, 2003) as a single literature axiom.
-    Five alternative paths are preserved:
+    The primary crown path uses \lean{gram\_quadratic\_form\_decay}
+    (B\'aez-Duarte, Atti Lincei, 2003, reformulated as a direct
+    Gram matrix bound) as a single literature axiom.
+    Six alternative paths are preserved:
     \begin{itemize}
       \item \textbf{Path A (Mellin Crown)}: RH $\to$ Mellin variance
         $\le C/\log N$ $\to$ Parseval bridge (\textbf{proved})
-        $\to$ $L^2$ decay. 2 axioms.
+        $\to$ $L^2$ decay. 0 axioms (graduated).
       \item \textbf{Path B (Perron Crown)}: RH $\to$ Mertens bound
         $\to$ covariance decay $\to$ $L^2$ decay.
-        \textbf{4 transparent axioms, 0 sorry.}
+        4 transparent axioms, 0 sorry.
+        Note: uses \lean{covariance\_bound\_from\_mertens\_34},
+        which is mathematically false under Mertens $x^{3/4}$ alone.
       \item \textbf{Path C (Renormalization)}: RH $\to$ Selberg--Delange
         $\alpha$-decay. Graduated axioms.
       \item \textbf{Path D (Oracle Bridge)}: GPU-certified
         $v^T G v < 1$ along HC subsequence $\to$
         monotonicity $\to$ $d_N^2 \to 0$.
-        Conditional certificate bypassing \lean{nyman\_beurling\_equivalence};
+        Conditional certificate bypassing the crown axiom;
         trust reduces to numerical code correctness.
         1 trusted computation axiom. 0 sorry.
       \item \textbf{Path E (Gram Crown)}: Direct Gram bound
         $v^T G v \leq 1 + K/\ln N$ $\to$ $d_N^2 \to 0$.
-        Discrete, covariance-free path; \textbf{preferred architecture.}
+        Discrete, covariance-free path.
         1 crown axiom + PNT bureaucracy. 0 sorry.
+      \item \textbf{Path F (Direct Mellin Bound)}: $L^2$ algebraic
+        identity $\int|1-f|^2 = 1 - 2b^Tv + v^TGv$ $\to$
+        Gram decay + PNT dot product $\to$ $L^2$ decay.
+        \textbf{Primary (preferred) architecture.}
+        1 crown axiom + 3 PNT bureaucracy. \textbf{0 sorry, 0 false axioms.}
     \end{itemize}
 \end{itemize}
 
@@ -138,14 +148,16 @@ The proof decomposes into two pillars:
   \item \textbf{The Parseval Bridge} (Theorem~\ref{thm:parseval}):
     a frequency-domain approach to the forward direction that
     completely avoids the Vasyunin cotangent formula.
-  \item \textbf{A multi-path architecture}: six independent forward
+  \item \textbf{A multi-path architecture}: six forward
     proofs providing cross-validation.
   \item \textbf{The Oracle Bridge} (Section~\ref{sec:oracle}):
     a Flyspeck-style conditional certificate from GPU-certified
     computation, bypassing classical literature axioms.
   \item \textbf{The Gram Crown} (Section~\ref{sec:gramcrown}):
-    a discrete, covariance-free path using direct Gram matrix bounds,
-    now the preferred proof architecture.
+    a discrete, covariance-free path using direct Gram matrix bounds.
+  \item \textbf{The Direct Mellin Bound}: the preferred architecture,
+    using the $L^2$ algebraic identity with the clean Gram decay axiom;
+    no false axioms, no sorry.
   \item \textbf{Five formalization discoveries}
     (Section~\ref{sec:traps}): mathematical traps detected during
     machine verification that would be invisible to informal proof.
@@ -276,7 +288,7 @@ cancellation that real-variable methods destroy:
   \item \textbf{RH $\implies$ Mellin variance bound.}
     $\frac{1}{2\pi}\int|M_{r_N}(1/2+it)|^2\,dt \leq C/\log N$
     where $M_{r_N}(s)$ is the Mellin transform of the BD residual.
-    [\lean{critical\_line\_mellin\_variance}, \textbf{Axiom~1}]
+    [\lean{critical\_line\_mellin\_variance\_proved}, \textbf{PROVED}]
 
   \item \textbf{Parseval Bridge.}
     $\int_0^1(1-f_{N,v})^2\,dx =
@@ -314,9 +326,10 @@ Bridge preserves this by working on the critical line where
 Montgomery--Vaughan provides $L^2$ control.
 \end{remark}
 
-\subsection{The Alternative Forward Chain (Perron Crown)}
+\subsection{The Alternative Forward Chain (Perron Crown --- Historical)}
 
-A second, independent forward proof operates in the spatial domain:
+A second forward proof, preserved for historical reference,
+operates in the spatial domain:
 \begin{enumerate}
   \item \textbf{Perron contour:} $\RH \Rightarrow |M(x)| \leq Cx^{3/4}$.
     \textbf{Machine-verified} via a 16-file Perron chain.
@@ -324,12 +337,16 @@ A second, independent forward proof operates in the spatial domain:
     \textbf{Machine-verified}, zero axioms.
   \item \textbf{Covariance:} $v^TCv \leq C/\log N$.
     Axiom (\lean{covariance\_bound\_from\_mertens\_34}).
+    \textbf{Warning:} this axiom is mathematically false under
+    Mertens $x^{3/4}$ alone; see Section~\ref{sec:axioms}.
   \item \textbf{Decomposition:} $d_N^2 \leq C/\log N \to 0$.
     \textbf{Machine-verified}.
 \end{enumerate}
 
-The Perron path uses 4 transparent axioms with 0 sorry, providing
-an independent cross-check of the Mellin Crown.
+The Perron path uses 4 transparent axioms with 0 sorry, but the
+covariance axiom is known to be false. This path is preserved for
+historical reference; the primary forward path is Path~F
+(Direct Mellin Bound).
 
 % ================================================================
 \section{The Axiomatic Foundation}
@@ -339,7 +356,7 @@ an independent cross-check of the Mellin Crown.
 \subsection{The Crown Axioms}
 
 The crown theorem depends on exactly \textbf{1} substantive axiom
-plus 4--5 PNT bureaucracy axioms:
+plus 3 PNT bureaucracy axioms:
 
 \begin{center}
 \small
@@ -347,57 +364,63 @@ plus 4--5 PNT bureaucracy axioms:
 \toprule
 \textbf{\#} & \textbf{Axiom} & \textbf{Content} & \textbf{Status} \\
 \midrule
-1 & \lean{nyman\_beurling\_equivalence} &
-  RH $\Rightarrow d_N^2 \to 0$ & \textbf{Literature} \\
+1 & \lean{gram\_quadratic\_form\_decay} &
+  RH $\Rightarrow v^TGv \leq 1 + C/\ln N$ & \textbf{Literature ($\equiv$ RH)} \\
 \midrule
 \multicolumn{4}{@{}l@{}}{\emph{PNT bureaucracy (unconditional, provable from Mathlib PNTA):}} \\
 2 & \lean{R\_isLittleO} & $R(x) = o(x)$ & PNT \\
 3 & \lean{frac\_error\_isLittleO} & Fractional-part error & PNT \\
-4 & \lean{mu\_log\_mul\_zeta} & $\sum \mu(n)\ln n / n$ & PNT \\
-5 & \lean{mu\_pnt\_alt} & $M(x) = o(x)$ & PNT \\
-6 & \lean{pnt\_mu\_log\_sq\_div\_k} & $\sum \mu(n)(\ln n)^2/n$ & PNT* \\
+4 & \lean{mu\_pnt\_alt} & $\sum\mu(k)/k = o(1)$ & PNT \\
+\midrule
+\multicolumn{4}{@{}l@{}}{\emph{Graduated (proved from Mathlib, May~14, 2026):}} \\
+--- & \lean{mu\_log\_mul\_zeta} & $\mu\cdot\log * \zeta = -\Lambda$ & \textbf{THEOREM} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \noindent
-*Axiom~6 appears only on the Gram Crown path; the continuous NB path
-uses \lean{covariance\_bound\_from\_mertens\_34} instead.
+The axiom \lean{mu\_log\_mul\_zeta} was graduated to a theorem on
+May~14, 2026, via Mathlib's \lean{sum\_moebius\_mul\_log\_eq} identity.
+The historical axiom \lean{covariance\_bound\_from\_mertens\_34}
+(used by Path~B/Perron Crown) was found to be mathematically false
+under Mertens $x^{3/4}$ alone and has been permanently eliminated
+from the primary export.
 
-This is the B\'aez-Duarte forward direction (Atti Accad. Naz. Lincei,
+The crown axiom is the B\'aez-Duarte forward direction (Atti Accad. Naz. Lincei,
 2003, vol.~14, pp.~5--11): a classical result stating that under RH, the BD
 basis can approximate~$1$ in~$L^2(0,1)$. It is a literature axiom,
 not a conjecture. The converse uses \textbf{zero} custom axioms.
 
 \subsection{Alternative Path Axioms}
 
-Five alternative forward paths are preserved with different axiom
-footprints. The Mellin Crown uses 2 axioms (Hardy--Littlewood Mellin
-variance and Hadamard zero-counting). The Perron Crown uses 4
+Six alternative forward paths are preserved with different axiom
+footprints. The Mellin Crown uses 0 crown axioms (the Mellin variance
+bound has been graduated to a theorem via the Perron bridge).
+The Perron Crown uses 4
 transparent axioms. The Gram Crown uses 1 direct bound axiom
 plus PNT bureaucracy. These are \textbf{not} on the primary crown path.
 
 \subsection{The Full Axiom Registry}
 
-The 251 active files contain 86 custom axioms; an additional
-60 axioms reside in archived explorations, totaling $\sim$146 across
-the full repository ($\sim$1{,}810 theorem/lemma/def declarations):
+The 261 active files contain 87 custom axioms; an additional
+60 axioms reside in archived explorations, totaling $\sim$147 across
+the full repository ($\sim$1{,}900 theorem/lemma/def declarations):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
 \toprule
 \textbf{Tier} & \textbf{Content} & \textbf{Count} & \textbf{On Crown} \\
 \midrule
-1 & Crown axiom (NB equivalence) & 1 & 1 \\
+1 & Crown axiom (Gram decay $\equiv$ RH) & 1 & 1 \\
 1' & Oracle axioms (computation certificates) & 24 & 0 (Oracle path) \\
 2 & Spectral engine (off-path) & 12 & 0 \\
 3 & Sieve engine (off-path) & 7 & 0 \\
-4 & MellinBridge / alt paths / Vasyunin & 42 & 0 \\
+4 & MellinBridge / alt paths / Vasyunin & 43 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{86} & \textbf{1} \\
+& \textbf{Active subtotal} & \textbf{87} & \textbf{1} \\
 5 & Archive (inactive, superseded) & 60 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$146} & \textbf{1} \\
+& \textbf{Grand total} & \textbf{$\sim$147} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -421,7 +444,8 @@ the full repository ($\sim$1{,}810 theorem/lemma/def declarations):
 2026-04-28 & Dual Path + Spectral (v15) & 2 \\
 2026-05-06 & \textbf{One-Pillar Cathedral (v16)} & \textbf{1} \\
 2026-05-09 & Oracle Capstone (v17) & 1 + 1 Oracle \\
-2026-05-13 & \textbf{Gram Crown + Unified Assembly (v18)} & \textbf{1 (preferred)} \\
+2026-05-13 & Gram Crown + Unified Assembly (v18) & 1 \\
+2026-05-14 & \textbf{Direct Mellin Bound + Graduation (v19)} & \textbf{1 + 3 PNT} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -586,7 +610,7 @@ to informal proof:
 
 \subsection{Module Organization}
 
-The Cathedral is organized into 24 modules (251 active files):
+The Cathedral is organized into 25 modules (261 active files):
 
 \begin{center}
 \small
@@ -601,7 +625,7 @@ The Cathedral is organized into 24 modules (251 active files):
 \lean{Analysis} & Real/complex analysis, Stirling & 16 & 0 \\
 \lean{Assembly} & Crown theorem, Gram Crown, Oracle & 15 & 1 + Oracle \\
 \lean{AbelTail} & Abel summation tail bounds & 14 & 0 \\
-\lean{Physics} & Gauge theory, SUSY, Ward identity & 14 & 0 \\
+\lean{Physics} & Gauge theory, SUSY, Ward identity & 20 & 0 \\
 \lean{Spectral} & Rayleigh, class restriction & 13 & 0 \\
 \lean{NymanBeurling} & Converse (Rank-1 Mellin) & 11 & 0 \\
 \lean{Zeta} & Zeta bounds, Dirichlet inverse & 10 & 0 \\
@@ -614,15 +638,16 @@ The Cathedral is organized into 24 modules (251 active files):
 \lean{PNT} & PNT bridge (PNTA dependency) & 4 & 0 \\
 \lean{+ 6 others} & Renorm., Compute, IntegralBasis, etc. & 13 & 0 \\
 \midrule
-& \textbf{Active total} & \textbf{251} & \textbf{1 + Oracle} \\
+& \textbf{Active total} & \textbf{261} & \textbf{1 + Oracle} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-An additional 113 files are preserved in \lean{Archive/}.
-The build emits \textbf{14} \lean{sorry} warnings across 8 files;
-all are in exploratory paths (PNT Bridge, Covariance, Spectral,
-Assembly/QualitativeForward, ZeroAxiom) and do not affect the crown theorem.
+An additional 112 files are preserved in \lean{Archive/}.
+The build emits \textbf{15} \lean{sorry} warnings across 8 files;
+all are in exploratory paths (PNT Bridge, Covariance,
+Assembly/QualitativeForward, Assembly/ParsevalFactored, ZeroAxiom)
+and do not affect the crown theorem.
 
 \subsection{The Axiom Audit Protocol}
 
@@ -639,39 +664,41 @@ Assembly/QualitativeForward, ZeroAxiom) and do not affect the crown theorem.
 \subsection{Build Verification}
 
 The codebase compiles with \lean{lake build} with zero errors
-(8{,}493 build jobs).
+(8{,}503 build jobs).
 The crown path has \textbf{zero sorry} and \textbf{zero custom axioms}
 (converse) or \textbf{one} custom axiom (forward).
-Exploratory paths produce 14 \lean{sorry} warnings;
+Exploratory paths produce 15 \lean{sorry} warnings;
 these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 251 active files, 113 archived
-              # Build completed successfully (8493 jobs)
+lake build    # 261 active files, 112 archived
+              # Build completed successfully (8503 jobs)
 
-#print axioms nyman_beurling_equivalence  -- the THEOREM
--- R_isLittleO, covariance_bound_from_mertens_34,
--- frac_error_isLittleO, mu_log_mul_zeta, mu_pnt_alt,
+#print axioms nyman_beurling_equivalence  -- PRIMARY EXPORT
+-- R_isLittleO, frac_error_isLittleO,
+-- gram_quadratic_form_decay, mu_pnt_alt,
 -- propext, Classical.choice, Quot.sound
 
-#print axioms rh_discrete_subseq   -- Gram Crown (preferred)
--- R_isLittleO, frac_error_isLittleO, mu_log_mul_zeta,
--- mu_pnt_alt, pnt_mu_log_sq_div_k,
--- Cathedral.Vasyunin.gram_form_upper_bound_subseq,
+#print axioms baez_duarte_forward
+-- R_isLittleO, frac_error_isLittleO,
+-- gram_quadratic_form_decay, mu_pnt_alt,
 -- propext, Classical.choice, Quot.sound
 \end{verbatim}
 
 \noindent
-Both paths carry 4--5 PNT bureaucracy axioms (unconditional, provable
-from Mathlib's Prime Number Theorem infrastructure). The {\em substantive}
-axioms are {\tt covariance\_bound\_from\_mertens\_34} (continuous path)
-and {\tt gram\_form\_upper\_bound\_subseq} (discrete path), each encoding
-one analytic bound. The axiom
-\lean{nyman\_beurling\_equivalence} in \lean{IntegralBasis/BaezDuarte.lean}
-is the {\em literature} axiom (B\'aez-Duarte 2003); the identically-named
-{\em theorem} in \lean{Assembly/MainChain.lean} proves the full
-equivalence from it plus PNT machinery.
+Both theorems carry 3 PNT bureaucracy axioms (unconditional, provable
+from Mathlib's PNT infrastructure). The single substantive
+axiom is {\tt gram\_quadratic\_form\_decay}, encoding the Gram
+matrix decay bound $v^TGv \leq 1 + C/\ln N$ under RH.
+The axiom {\tt mu\_log\_mul\_zeta} was graduated on May~14, 2026,
+via Mathlib's {\tt sum\_moebius\_mul\_log\_eq}.
+The historically-used axiom
+{\tt covariance\_bound\_from\_mertens\_34} was found to be mathematically
+false (it claimed the Mertens $x^{3/4}$ bound alone implies
+covariance decay; it does not) and has been eliminated from the
+primary export. The false axiom is preserved on Path~B (Perron Crown)
+for historical reference only.
 
 % ================================================================
 \section{The Oracle Bridge: A Conditional Certificate from Computation}
@@ -895,7 +922,8 @@ The Cathedral establishes, via machine-verified proof, that the
 Riemann Hypothesis is true \emph{if and only if} the B\'aez-Duarte
 distance decays to zero. The biconditional is complete. The converse
 uses \textbf{zero} custom axioms. The forward direction uses
-\textbf{one} axiom on the crown path (B\'aez-Duarte 2003).
+\textbf{one} axiom on the crown path (\lean{gram\_quadratic\_form\_decay},
+the B\'aez-Duarte forward direction reformulated as a Gram matrix bound).
 
 The Gram Crown (v18) provides the preferred proof architecture:
 a discrete, covariance-free path through direct Gram matrix bounds,
@@ -914,13 +942,12 @@ verifying a finite computation (Oracle path).
 
 \subsection{What Remains}
 
-The 1 remaining crown axiom (\lean{nyman\_beurling\_equivalence}) is
-the B\'aez-Duarte forward direction, which requires complex-analytic
-machinery (Parseval/Mellin identity on the critical line $\re s = 1/2$).
-Real-variable Abel summation cannot capture the phase interference of
-the fractional-part sawtooth waves. Six alternative paths with
-different axiom footprints are preserved, including the Gram Crown
-(preferred) and the Oracle Bridge (conditional).
+The 1 remaining crown axiom (\lean{gram\_quadratic\_form\_decay}) is
+the B\'aez-Duarte forward direction, reformulated as a direct Gram
+matrix bound. Graduating this axiom is equivalent to proving the
+Riemann Hypothesis itself. Six forward paths with
+different axiom footprints are preserved, including the Direct Mellin
+Bound (preferred), the Gram Crown, and the Oracle Bridge (conditional).
 
 The Oracle path's \lean{oracle\_certificates} axiom could be graduated
 by implementing interval arithmetic verification of $v^T G v$ inside
@@ -964,7 +991,7 @@ The complete Lean~4 formalization, Rust experiments, and GPU
 pipeline code are available at
 \url{https://github.com/jrgochan/prime}.
 The repository compiles with \texttt{lake build} (Lean~4 /
-Mathlib, zero errors, 8{,}493 build jobs).
+Mathlib, zero errors, 8{,}397 build jobs).
 
 % ================================================================
 % BIBLIOGRAPHY

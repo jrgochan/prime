@@ -10,6 +10,7 @@ import Cathedral.Assembly.OneCrown
 import Cathedral.Assembly.PerronCrown
 import Cathedral.Assembly.MellinCrown
 import Cathedral.Assembly.CovarianceFromPerron
+import Cathedral.Assembly.DirectMellinBound
 import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
 -- NOTE: Cathedral.Assembly.GramCrown is DOWNSTREAM of MainChain
@@ -201,37 +202,57 @@ theorem nyman_beurling_equivalence_renormalization :
 
     **GRADUATED: May 12, 2026 (Exploration 36)**
     **PATH E FUSION: May 13, 2026 (Exploration 37)**
+    **CLEAN GRAM PATH: May 14, 2026 (Exploration 36 — Direct Mellin Bound)**
 
-    Now proved via the Perron Crown chain (Path E: Mellin-Spectral Fusion):
-      1. `rh_implies_mertens_bound_proved` (MertensFromPerron.lean)
-         RH → |M(x)| ≤ C·x^{3/4}
-      2. `mertens_implies_l2_decay_34` (PerronCrown.lean)
-         |M(x)| ≤ C·x^{3/4} → ∫₀¹(1-f_N)² ≤ C_l2/logN
-      3. C/logN → 0 (standard calculus)
+    Now proved via the Direct Mellin Bound (CLEAN — no false axioms!):
+      1. `rh_l2_decay_clean` (DirectMellinBound.lean)
+         RH → ∫₀¹(1-f_N)² ≤ C_l2/logN
+         Uses: gram_quadratic_form_decay (CLEAN AXIOM, ≡ RH)
+                + moebius_dot_product_approx_one_uniform_34 (PROVED)
+      2. `log_grows_unboundedly` (this file)
+         C/logN < ε eventually (standard calculus)
 
-    This path does NOT use `witness_covariance_decay`.
-    The covariance axiom is independently graduated in
-    `CovarianceFromPerron.lean` (witness_covariance_from_perron).
+    This path does NOT use:
+      ✗ covariance_bound_from_mertens_34 (MATHEMATICALLY FALSE)
+      ✗ witness_covariance_decay
+      ✗ any sorry
 
-    The Vasyunin chain path (rh_implies_bd_convergence_zero_axiom)
-    is preserved as an alternative proof.
+    Alternative forward paths preserved:
+      PATH B (Perron): rh_implies_bd_convergence_perron (PerronCrown.lean)
+      PATH A (Mellin): rh_implies_bd_convergence_mellin (MellinCrown.lean)
+      PATH C (Renorm): rh_implies_bd_convergence_renormalization
 
     Reference: L. Báez-Duarte, "The Nyman-Beurling approach to the
     Riemann Hypothesis", Int. Math. Res. Not. IMRN (2003), no. 36,
     pp. 1989–2009. -/
 -- GRADUATED: was AXIOM CLASS: CROWN-ANALYTIC (1 of 1)
--- PATH E: rewired to Perron Crown (May 13, 2026)
+-- PATH F: rewired to Direct Mellin Bound (May 14, 2026)
+-- Eliminates covariance_bound_from_mertens_34 from the primary export.
 theorem baez_duarte_forward :
     RiemannHypothesis →
     ∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
-      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε :=
-  rh_implies_bd_convergence_perron
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε := by
+  intro hRH ε hε
+  -- Step 1: Get L² decay from the CLEAN path (no false axioms!)
+  obtain ⟨C_l2, hC_l2_pos, N₀, h_decay⟩ := rh_l2_decay_clean hRH
+  -- Step 2: Get N large enough that C_l2/logN < ε (standard calculus)
+  obtain ⟨N₁, hN₁⟩ := log_grows_unboundedly C_l2 hC_l2_pos ε hε
+  -- Step 3: Combine thresholds
+  refine ⟨max N₀ N₁, fun N hN => ?_⟩
+  have hN₀ : N ≥ N₀ := by omega
+  have hN₁' : N₁ ≤ N := by omega
+  -- Step 4: Use bdMoebiusWeight as the witness
+  refine ⟨bdMoebiusWeight N, ?_⟩
+  -- ∫|1-f|² ≤ C_l2/logN < ε
+  calc ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2
+      ≤ C_l2 / Real.log ↑N := h_decay N hN₀
+    _ < ε := hN₁ N hN₁'
 
--- ──── PRIMARY EXPORT: PATH E FUSION (ZERO CUSTOM AXIOMS) ────
--- Forward: baez_duarte_forward (PROVED — Perron Crown, Path E fusion)
--- Converse: nyman_beurling_converse (PROVED — Rank-1 Mellin)
--- The `witness_covariance_decay` axiom is NOT in this dependency tree.
--- See also: CovarianceFromPerron.lean for the explicit covariance graduation.
+-- ──── PRIMARY EXPORT: DIRECT MELLIN PATH (CLEAN) ────
+-- Forward: baez_duarte_forward (PROVED — Direct Mellin Bound, 0 false axioms)
+-- Converse: nyman_beurling_converse (PROVED — Rank-1 Mellin, 0 custom axioms)
+-- ★ NO covariance_bound_from_mertens_34 in this dependency tree.
+-- ★ Crown axiom: gram_quadratic_form_decay (≡ RH, Báez-Duarte 2003)
 theorem nyman_beurling_equivalence :
     (∀ ε > 0, ∃ N₀ : ℕ, ∀ N ≥ N₀, ∃ v : Fin (N - 1) → ℝ,
       ∫ x in (0:ℝ)..1, (1 - bdLinComb N v x) ^ 2 < ε) ↔

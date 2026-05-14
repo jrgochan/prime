@@ -47,6 +47,7 @@ members = [
     "experiments/cathedral-particle-zoo",
     "experiments/spectral-factorization-probe",
     "experiments/spectral-factorization-probe-gpu",
+    "experiments/bilinear-probe",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
@@ -126,6 +127,7 @@ default-members = [
     "experiments/cathedral-particle-zoo",
     "experiments/spectral-factorization-probe",
     # "experiments/spectral-factorization-probe-gpu", # requires CUDA
+    "experiments/bilinear-probe",
     "experiments/archive/abel-bridge",
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",

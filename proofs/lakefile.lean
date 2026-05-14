@@ -379,4 +379,18 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.QualitativeForward,
     -- Unconditional Mertens scaffold (off-path, PNT → M(x) = O(x^{3/4}))
     `Cathedral.PNT.UnconditionalMertens,
+    -- Moment Method + Large Sieve (Exploration 36: clean forward path)
+    `Cathedral.Assembly.ParsevalFactored,
+    `Cathedral.Assembly.ZetaEnvelope,
+    `Cathedral.Assembly.MomentMethodCrown,
+    -- Direct Mellin Bound (Exploration 36: bypasses false covariance axiom)
+    `Cathedral.Assembly.DirectMellinBound,
+    -- Coprime Diagonal (Bilinear Probe v2: (6/π²)·logN + Chowla connection)
+    `Cathedral.Physics.CoprimeDiagonal,
+    -- Basel-Möbius (Squarefree graduation: Σ μ(d)/d² = 6/π²)
+    `Cathedral.NumberTheory.BaselMoebius,
+    -- Squarefree Reciprocal (graduation target: Σ_{sqfree} 1/k ≥ ½logN)
+    `Cathedral.NumberTheory.SquarefreeReciprocal,
+    -- Dark Gram Matrix (Bernoulli basis: the mirror universe, Exploration 36)
+    `Cathedral.Physics.DarkGramMatrix,
   ]

@@ -63,9 +63,15 @@ private lemma mu_log_apply (n : ℕ) :
 /-- PNT: ψ(x) - x = o(x). Axiom (proved in PNTAnd as `R_isLittleO`). -/
 axiom R_isLittleO : R =o[Filter.atTop] _root_.id
 
-/-- Dirichlet identity: μ·log * ζ = -Λ. Axiom (proved in PNTAnd). -/
-axiom mu_log_mul_zeta :
-  mu_log * ArithmeticFunction.zeta = -ArithmeticFunction.vonMangoldt
+/-- **THEOREM (GRADUATED 🎓)**: Dirichlet identity μ·log * ζ = -Λ.
+    Formerly an axiom, now proved directly from Mathlib's
+    `sum_moebius_mul_log_eq` via `coe_mul_zeta_apply`.
+    Graduated: May 14, 2026 (Exploration 36). -/
+theorem mu_log_mul_zeta :
+  mu_log * ArithmeticFunction.zeta = -ArithmeticFunction.vonMangoldt := by
+  ext n
+  rw [ArithmeticFunction.coe_mul_zeta_apply, ArithmeticFunction.neg_apply]
+  exact ArithmeticFunction.sum_moebius_mul_log_eq
 
 /-- PNT (Möbius form): M(x) = o(x). Axiom (proved in PNTAnd as `M_isLittleO`).
 
