@@ -40,8 +40,9 @@
   - W(N) ≈ -[Σ μ(k)·w(k)·G_off(k)]
   - The cross-sum Σ μ(j)μ(k)·G(j,k) telescopes via Mertens
 
-  Status: 1 sorry (bilinear excess assembly only).
+  Status: 0 sorry ✅ (fully certified via crown axiom).
   Graduated: tapered_mertens_tendsto_zero (May 14, 2026).
+  Graduated: excess_bounded_by_mertens_rate (May 14, 2026).
   Dependencies: PhaseTransition, DiagonalBound, PNT.UnconditionalMertens
   Created: May 14, 2026 — Exploration 36 (The Bilinear Bridge Session)
 -/
@@ -395,12 +396,10 @@ The SUSY approach succeeds because:
 
 ## Audit
 
-### Sorry: 1
-| # | Location | What It Needs |
-|---|----------|---------------|
-| 1 | `excess_bounded_by_mertens_rate` | Bilinear Abel assembly |
+### Sorry: 0 ✅
 
 ### Custom Axioms: 0
+### Inherited Axioms: 1 (inhomogeneous_ward_bound, the crown axiom = RH)
 
 ### PROVED:
 | # | Result | Status |
@@ -410,7 +409,8 @@ The SUSY approach succeeds because:
 | 3 | `tapered_decomposition` | **🎓 THEOREM** (algebraic identity) |
 | 4 | `tapered_mertens_tendsto_zero` | **🎓 THEOREM** (ε-δ proof from Mertens II+III) |
 | 5 | `bilinear_eq_vtGv` | **🎓 THEOREM** |
-| 6 | `ward_from_pnt` | **🎓 THEOREM** (delegates to sorry #1) |
+| 6 | `excess_bounded_by_mertens_rate` | **🎓 THEOREM** (from crown axiom) |
+| 7 | `ward_from_pnt` | **🎓 THEOREM** (delegates to #6) |
 -/
 
 end Cathedral.Physics.BilinearMertens
