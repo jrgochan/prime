@@ -63,12 +63,49 @@ const LANDMARKS = [
     displayValue: '55,440',
   },
   {
+    // N ≈ 75 million. Quarter of global RAM ≈ 250 PB.
+    // N² × 8 bytes = 4.5×10¹⁶ ≈ 45 PB (dense Gram matrix).
+    // O(N³) ≈ 4×10²³ FLOP — ~30 min on all Top500 combined.
+    id: 'quarter-earth',
+    name: '¼ EARTH COMPUTE',
+    exponent: Math.log10(75e6),
+    icon: '🌎',
+    color: '#30b868',
+    desc: 'N ≈ 75M. Quarter of global compute: ~250 PB RAM, ~45 PB Gram matrix. A realistic international collaboration.',
+    displayValue: '~75M',
+  },
+  {
+    // N ≈ 175 million. Half of global RAM ≈ 500 PB.
+    // N² × 8 bytes = 2.4×10¹⁷ ≈ 240 PB.
+    // O(N³) ≈ 5.4×10²⁴ FLOP — ~7 hours on all Top500.
+    id: 'half-earth',
+    name: '½ EARTH COMPUTE',
+    exponent: Math.log10(175e6),
+    icon: '🌏',
+    color: '#2ea8b8',
+    desc: 'N ≈ 175M. Half of global compute: ~500 PB RAM, ~240 PB Gram matrix. A coordinated planetary effort.',
+    displayValue: '~175M',
+  },
+  {
+    // N ≈ 350 million. All global RAM ≈ 1 EB (10¹⁸ bytes).
+    // N² × 8 bytes ≈ 10¹⁸ = 1 EB — ALL of Earth's combined RAM.
+    // O(N³) ≈ 4.3×10²⁵ FLOP — ~2.5 days on all Top500.
+    // This is the absolute ceiling for a dense Gram matrix.
+    id: 'full-earth',
+    name: 'EARTH LIMIT',
+    exponent: Math.log10(350e6),
+    icon: '🌐',
+    color: '#4eeaff',
+    desc: 'N ≈ 350M. Every byte of RAM on Earth holds one dense Gram matrix (~1 EB). The terrestrial compute horizon. Beyond this, only proofs reach.',
+    displayValue: '~350M',
+  },
+  {
     id: 'cosmic-age',
     name: 'YOU ARE HERE',
     exponent: 60.9,
     icon: '🌍',
     color: '#4eeaff',
-    desc: 'N ≈ 8.07 × 10⁶⁰. The age of our physical universe in Planck ticks.',
+    desc: 'N ≈ 8.07 × 10⁶⁰. The age of our physical universe in Planck ticks. Only formal proofs cross this gap.',
     isYou: true,
   },
   {
