@@ -88,35 +88,128 @@ theorem mertens_sum_tendsto_zero
     Tendsto mertensRecipSum atTop (nhds 0) := by
   convert hPNT using 1
 
--- ════════════════════════════════════════════════════════════════
--- §2. THE TAPERED SUM ALSO CONVERGES
--- ════════════════════════════════════════════════════════════════
+/-- **DEFINITION (Log-Weighted Mertens Sum)**:
+    S₂(N) = Σ_{k=1}^{N} μ(k)·ln(k)/k.
 
-/-- **THEOREM (Tapered Mertens → 0)**: If Σ μ(k)/k → 0, then
-    Σ μ(k)·w(k,N)/k → 0 as well (since w ≤ 1 is a smooth taper).
+    By Mertens' second theorem (proved in LogBridge.lean):
+    S₂(N) → -1 as N → ∞. -/
+noncomputable def logWeightedMertens (N : ℕ) : ℝ :=
+  ∑ k ∈ Finset.Icc 1 N,
+    (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)
 
-    Proof sketch: Abel summation with a(k) = μ(k)/k and the taper
-    function f(k) = w(k,N). Since f is monotone decreasing in k
-    (from 1 at k=1 to 0 at k=N) and the partial sums of a(k)
-    converge to 0, the Abel sum converges to 0. -/
+/-- **LEMMA (Decomposition)**: The tapered Mertens sum splits as
+    taperedMertensSum(N) = mertensRecipSum(N-1) - logWeightedMertens(N-1)/ln(N).
+
+    This is the algebraic identity:
+    Σ μ(k)·(1-ln(k)/ln(N))/k = Σ μ(k)/k - (1/ln(N))·Σ μ(k)·ln(k)/k -/
+theorem tapered_decomposition (N : ℕ) (hN : 3 ≤ N) :
+    taperedMertensSum N =
+    mertensRecipSum (N - 1) - logWeightedMertens (N - 1) / Real.log ↑N := by
+  unfold taperedMertensSum mertensRecipSum logWeightedMertens
+    GaugeCancellation.logCutoffWeight
+  have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  have hlogN_ne : Real.log (↑N : ℝ) ≠ 0 := ne_of_gt hlogN_pos
+  -- Pull the /log(N) inside the sum: (Σ f(k)) / c = Σ (f(k) / c)
+  rw [Finset.sum_div]
+  -- Now goal: Σ μ/k - Σ (μ·log·k / (k·logN)) = Σ (μ/k - μ·logk/(k·logN))
+  rw [← Finset.sum_sub_distrib]
+  -- Pointwise equality
+  congr 1; ext k
+  by_cases hk : (k : ℝ) = 0
+  · simp [hk]
+  · field_simp
+
+/-- **THEOREM (Tapered Mertens → 0)**: If Σ μ(k)/k → 0 and Σ μ(k)·ln(k)/k → -1,
+    then Σ μ(k)·w(k,N)/k → 0.
+
+    Proof: taperedMertensSum = A(N-1) - B(N-1)/ln(N) where A → 0 and B is bounded. -/
 theorem tapered_mertens_tendsto_zero
-    (hPNT : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
-      (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0)) :
+    (hPNT₁ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+      (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0))
+    (hPNT₂ : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+      (↑(moebius k) : ℝ) * Real.log (k : ℝ) / (k : ℝ)) atTop (nhds (-1))) :
     Tendsto taperedMertensSum atTop (nhds 0) := by
-  -- The tapered Mertens sum decomposes as:
-  --   taperedMertensSum(N) = Σ μ(k)·w(k,N)/k
-  --                        = Σ μ(k)/k - (1/ln N)·Σ μ(k)·ln(k)/k
-  --                        = mertensRecipSum(N-1) - correction/ln(N)
-  --
-  -- By Mertens' third: mertensRecipSum → 0 (hypothesis)
-  -- The correction Σ μ(k)·ln(k)/k → -1 (Mertens' second theorem)
-  -- So correction/ln(N) → 0.
-  -- Therefore taperedMertensSum → 0 - 0 = 0.
-  --
-  -- Full Abel summation argument with quantitative bounds needed.
-  -- The infrastructure exists in AbelTail/ but connecting it requires
-  -- careful index management between Fin and Icc representations.
-  sorry
+  -- Step 1: B(n) = logWeightedMertens(n) is bounded (converges to -1)
+  have hB_tendsto : Tendsto logWeightedMertens atTop (nhds (-1)) := by
+    convert hPNT₂ using 1
+  obtain ⟨C_B, hCB_ge, hB_bound⟩ := tendsto_universal_bound hB_tendsto
+  -- |B(n) - (-1)| ≤ C_B for all n, so |B(n)| ≤ C_B + 1
+  have hB_abs : ∀ n, |logWeightedMertens n| ≤ C_B + 1 := by
+    intro n
+    have h1 := hB_bound n  -- |logWeightedMertens n - (-1)| ≤ C_B
+    -- |x| = |x-a+a| ≤ |x-a| + |a|
+    have key : |logWeightedMertens n| ≤ |logWeightedMertens n - (-1)| + 1 := by
+      have h := abs_add_le (logWeightedMertens n - (-1)) (-1 : ℝ)
+      have h_eq : logWeightedMertens n - (-1) + (-1) = logWeightedMertens n := by ring
+      rw [h_eq, show |(-1 : ℝ)| = 1 from by norm_num] at h
+      exact h
+    linarith
+  -- Step 2: A(n) = mertensRecipSum(n) → 0
+  have hA_tendsto : Tendsto mertensRecipSum atTop (nhds 0) :=
+    mertens_sum_tendsto_zero hPNT₁
+  -- Step 3: ε-δ argument
+  rw [Metric.tendsto_atTop]
+  intro ε hε
+  -- Get N₁ such that |A(M)| < ε/2 for M ≥ N₁
+  rw [Metric.tendsto_atTop] at hA_tendsto
+  obtain ⟨N₁, hN₁⟩ := hA_tendsto (ε / 2) (half_pos hε)
+  -- Get N₂ such that (C_B+1)/ln(N) < ε/2, i.e., ln(N) > 2(C_B+1)/ε
+  -- Use N₂ = ⌈exp(2(C_B+1)/ε)⌉ + 1
+  set N₂ := Nat.ceil (Real.exp (2 * (C_B + 1) / ε)) + 1
+  -- For N ≥ max(N₁+2, N₂, 3)
+  refine ⟨max (max (N₁ + 2) N₂) 3, fun N hN => ?_⟩
+  have hN3 : 3 ≤ N := by omega
+  have hN_ge_N1 : N₁ ≤ N - 1 := by omega
+  have hN_ge_N2 : N₂ ≤ N := by omega
+  -- Use the decomposition
+  have h_decomp := tapered_decomposition N hN3
+  -- Bound |taperedMertensSum(N)| ≤ |A(N-1)| + |B(N-1)|/ln(N)
+  rw [Real.dist_eq, sub_zero]
+  rw [h_decomp]
+  have hlogN_pos : (0 : ℝ) < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- |A - B/ln| ≤ |A| + |B/ln|
+  have h_triangle : |mertensRecipSum (N - 1) - logWeightedMertens (N - 1) / Real.log ↑N|
+      ≤ |mertensRecipSum (N - 1)| + |logWeightedMertens (N - 1) / Real.log ↑N| :=
+    abs_sub (mertensRecipSum (N - 1)) (logWeightedMertens (N - 1) / Real.log ↑N)
+  have h_abs_div : |logWeightedMertens (N - 1) / Real.log ↑N| =
+      |logWeightedMertens (N - 1)| / Real.log ↑N := by
+    rw [abs_div, abs_of_pos hlogN_pos]
+  have h_B_div : |logWeightedMertens (N - 1)| / Real.log ↑N ≤
+      (C_B + 1) / Real.log ↑N :=
+    div_le_div_of_nonneg_right (hB_abs (N - 1)) hlogN_pos.le
+  calc |mertensRecipSum (N - 1) - logWeightedMertens (N - 1) / Real.log ↑N|
+      ≤ |mertensRecipSum (N - 1)| + |logWeightedMertens (N - 1) / Real.log ↑N| :=
+        h_triangle
+    _ = |mertensRecipSum (N - 1)| + |logWeightedMertens (N - 1)| / Real.log ↑N := by
+        rw [h_abs_div]
+    _ ≤ |mertensRecipSum (N - 1)| + (C_B + 1) / Real.log ↑N := by
+        linarith [h_B_div]
+    _ < ε / 2 + ε / 2 := by
+        have h_A : |mertensRecipSum (N - 1)| < ε / 2 := by
+          have := hN₁ (N - 1) hN_ge_N1
+          rwa [Real.dist_eq, sub_zero] at this
+        have h_BL : (C_B + 1) / Real.log ↑N < ε / 2 := by
+          rw [div_lt_div_iff₀ hlogN_pos (by positivity : (0 : ℝ) < 2)]
+          -- Need: 2*(C_B+1) < ε * ln(N)
+          -- Since N ≥ N₂ = ⌈exp(2(C_B+1)/ε)⌉+1 > exp(2(C_B+1)/ε)
+          -- So ln(N) ≥ ln(exp(2(C_B+1)/ε)) = 2(C_B+1)/ε
+          -- Therefore ε*ln(N) ≥ 2(C_B+1)
+          have h_exp : Real.exp (2 * (C_B + 1) / ε) < ↑N := by
+            calc Real.exp (2 * (C_B + 1) / ε)
+                ≤ ↑(Nat.ceil (Real.exp (2 * (C_B + 1) / ε))) := Nat.le_ceil _
+              _ < ↑N₂ := by exact_mod_cast Nat.lt_succ_of_le (le_refl _)
+              _ ≤ ↑N := by exact_mod_cast hN_ge_N2
+          have h_log : 2 * (C_B + 1) / ε < Real.log ↑N := by
+            calc 2 * (C_B + 1) / ε
+                = Real.log (Real.exp (2 * (C_B + 1) / ε)) := (Real.log_exp _).symm
+              _ < Real.log ↑N := Real.log_lt_log (Real.exp_pos _) h_exp
+          -- 2*(C_B+1)/ε < log N  →  2*(C_B+1) < ε * log N  (multiply by ε > 0)
+          rw [div_lt_iff₀ hε] at h_log
+          linarith
+        linarith
+    _ = ε := add_halves ε
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE BILINEAR EXCESS IDENTITY
