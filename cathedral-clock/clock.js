@@ -131,6 +131,19 @@ const LANDMARKS = [
     displayValue: '~350M',
   },
   {
+    id: 'the-void',
+    name: 'THE PROOF GAP',
+    exponent: 30,  // midpoint visually
+    icon: '🕳️',
+    color: '#333355',
+    desc: '',
+    isVoid: true,
+    // 10^8.5 → 10^61 = 52.5 orders of magnitude
+    // If Earth doubled its compute every year, it would take
+    // 52.5 / log₁₀(2) ≈ 174 years just to gain one more order.
+    // This gap is not crossable by computation. Only by proof.
+  },
+  {
     id: 'cosmic-age',
     name: 'YOU ARE HERE',
     exponent: 60.9,
@@ -185,6 +198,28 @@ function renderJourney() {
   if (!journey) return;
 
   LANDMARKS.forEach((lm, idx) => {
+    // Special rendering for THE VOID
+    if (lm.isVoid) {
+      const voidNode = document.createElement('div');
+      voidNode.className = 'journey-void';
+      voidNode.innerHTML = `
+        <div class="void-line"></div>
+        <div class="void-content">
+          <div class="void-label">52 ORDERS OF MAGNITUDE</div>
+          <div class="void-message">No computer that will ever exist can cross this gap.</div>
+          <div class="void-message">Only a formal proof reaches the other side.</div>
+          <div class="void-scale">
+            <span class="void-from">10<sup>8.5</sup></span>
+            <span class="void-arrow">⟶ ∞ ⟶</span>
+            <span class="void-to">10<sup>61</sup></span>
+          </div>
+        </div>
+        <div class="void-line"></div>
+      `;
+      journey.appendChild(voidNode);
+      return;
+    }
+
     const node = document.createElement('div');
     const side = idx % 2 === 0 ? 'left' : 'right';
     node.className = `journey-node ${side}${lm.isYou ? ' you-node' : ''}`;

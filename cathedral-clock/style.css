@@ -397,6 +397,100 @@ body {
   line-height: 1.5;
 }
 
+/* ── The Void: 52-order gap ── */
+.journey-void {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  margin: 0.5rem 0;
+}
+
+.void-line {
+  width: 2px;
+  height: 40px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(50, 50, 80, 0.6) 0px,
+    rgba(50, 50, 80, 0.6) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin: 0 auto;
+}
+
+.void-content {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  border: 1px dashed rgba(80, 80, 120, 0.3);
+  border-radius: 16px;
+  background: linear-gradient(135deg,
+    rgba(10, 8, 25, 0.9),
+    rgba(15, 12, 35, 0.8));
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+
+.void-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(78, 234, 255, 0.03) 0%,
+    transparent 70%);
+  pointer-events: none;
+}
+
+.void-label {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: rgba(200, 200, 240, 0.5);
+  margin-bottom: 0.75rem;
+  animation: void-breathe 4s ease-in-out infinite;
+}
+
+@keyframes void-breathe {
+  0%, 100% { opacity: 0.4; letter-spacing: 0.25em; }
+  50% { opacity: 0.7; letter-spacing: 0.35em; }
+}
+
+.void-message {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: rgba(180, 180, 220, 0.35);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.void-scale {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.void-from {
+  color: var(--green);
+  opacity: 0.6;
+}
+
+.void-arrow {
+  color: rgba(120, 120, 160, 0.25);
+  letter-spacing: 0.15em;
+  font-size: 0.7rem;
+}
+
+.void-to {
+  color: var(--cyan);
+  opacity: 0.6;
+}
 /* ═══════════════════════════════════════
    SILICON EVENT HORIZON
    ═══════════════════════════════════════ */
