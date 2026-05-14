@@ -1,13 +1,14 @@
 #!/usr/bin/env -S cargo +nightly -Zscript
-//! SUSY Sector Decomposition v3 — DD-precision HPDF sweep
+//! SUSY Sector Decomposition v4 — Liouville Equidistribution Audit
 //!
 //! Reads precomputed DD-lossless Gram matrices and decomposes:
 //!   vᵀGv = D(N) + B_off(N) + F_off(N)
 //!
-//! GU-reframed analysis (Inhomogeneous Gauge Theory):
+//! GU-reframed analysis (Inhomogeneous Gauge Theory) + Liouville audit:
 //!   Gap 1: |B+F| grows slower than D(N)  → "matter dilutes"
 //!   Gap 2: |B+F|/D(N) → 0               → cosmological constant vanishes
 //!   Gap 3: (vᵀGv - 1) ~ ln(N)^α, α < 1 → sub-linear excess
+//!   v4 NEW: Liouville marginal ‖G·(λ⊙w)‖, per-row cancellation, L(N)/√N
 //!
 //! Usage:
 //!   cargo run --release --bin susy-sweep -- --cache-dir experiments/cache/hpdf
@@ -86,6 +87,16 @@ struct SusyResult {
     cosmo_ratio: f64,      // |B+F|/(|B|+|F|) — arithmetic cosmological constant
     excess: f64,           // (vᵀGv - 1) — for ln(N)^α fitting
     excess_over_ln: f64,   // (vᵀGv - 1)/ln(N) — should → 0
+    // v4: Liouville equidistribution diagnostics
+    liouville_marginal_l2: f64,     // ‖G·(λ⊙w)‖₂
+    liouville_marginal_linf: f64,   // ‖G·(λ⊙w)‖∞
+    liouville_marginal_per_dim: f64, // ‖G·(λ⊙w)‖₂ / dim
+    liouville_weighted_sum: f64,    // Σ λ(k)·w(k) (weighted partial sum)
+    liouville_raw_sum: i64,         // Σ_{k=1}^{N} λ(k)
+    liouville_raw_over_sqrt: f64,   // |L(N)| / √N
+    per_row_cancel_mean: f64,       // mean per-row cancellation ratio
+    per_row_cancel_max: f64,        // worst-case row
+    per_row_cancel_median: f64,     // median row
     num_sqfree: usize,
     num_bosonic: usize,
     num_fermionic: usize,
@@ -155,7 +166,7 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
 
     let off_diagonal = bosonic_off + fermionic_off;
     let gap = 1.0 - vtgv;
-    let elapsed = t0.elapsed().as_secs_f64();
+    let elapsed_susy = t0.elapsed().as_secs_f64();
 
     let hc_vals = [2, 4, 6, 12, 24, 36, 48, 60, 120, 180, 240, 360, 720, 840,
                    1260, 1680, 2520, 5040, 7560, 10080, 15120, 20160, 25200,
@@ -166,6 +177,60 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
     let abs_f = fermionic_off.abs();
     let sector_sum = abs_b + abs_f;
     let excess = vtgv - 1.0;
+
+    // ═══ v4: LIOUVILLE EQUIDISTRIBUTION DIAGNOSTICS ═══
+
+    // Liouville signs: λ(k) = (-1)^Ω(k)
+    let lambda: Vec<f64> = (0..dim).map(|i| {
+        let k = i + 2;
+        if omega[k] % 2 == 0 { 1.0 } else { -1.0 }
+    }).collect();
+
+    // Liouville-weighted witness: λ(k) · |v(k)| = λ(k) · |μ(k)| · w(k)
+    // For squarefree k: |μ(k)| = 1, so this is λ(k)·w(k)
+    // For non-squarefree: μ(k) = 0, so v(k) = 0
+    let lw: Vec<f64> = (0..dim).map(|i| {
+        let k = i + 2;
+        let mu_k = mu[k] as f64;
+        let w = 1.0 - (k as f64).ln() / ln_n;
+        lambda[i] * mu_k.abs() * w
+    }).collect();
+
+    // Channel 1: Liouville marginal vector r(i) = Σ_j G(i,j) · λ(j) · |μ(j)| · w(j)
+    let marginal: Vec<f64> = (0..dim).map(|i| {
+        (0..dim).map(|j| gram[i * dim + j] * lw[j]).sum::<f64>()
+    }).collect();
+
+    let marginal_l2 = marginal.iter().map(|x| x * x).sum::<f64>().sqrt();
+    let marginal_linf = marginal.iter().map(|x| x.abs()).fold(0.0f64, f64::max);
+
+    // Channel 2: Weighted Liouville partial sum S = Σ λ(k)·|μ(k)|·w(k)
+    let liouville_weighted_sum: f64 = lw.iter().sum();
+
+    // Channel 2b: Raw Liouville partial sum L(N) = Σ_{k=1}^{N} λ(k)
+    let liouville_raw_sum: i64 = (1..=n).map(|k| {
+        if omega[k] % 2 == 0 { 1i64 } else { -1 }
+    }).sum();
+
+    // Channel 3: Per-row cancellation ratio c(i) = |Σ_{j≠i} lw(j)·G(i,j)| / Σ_{j≠i} |lw(j)·G(i,j)|
+    let mut row_cancels: Vec<f64> = (0..dim).map(|i| {
+        let num: f64 = (0..dim).filter(|&j| j != i)
+            .map(|j| lw[j] * gram[i * dim + j]).sum::<f64>().abs();
+        let den: f64 = (0..dim).filter(|&j| j != i)
+            .map(|j| (lw[j] * gram[i * dim + j]).abs()).sum::<f64>();
+        if den > 1e-15 { num / den } else { 0.0 }
+    }).collect();
+
+    let per_row_cancel_mean = if !row_cancels.is_empty() {
+        row_cancels.iter().sum::<f64>() / row_cancels.len() as f64
+    } else { 0.0 };
+    let per_row_cancel_max = row_cancels.iter().cloned().fold(0.0f64, f64::max);
+    row_cancels.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let per_row_cancel_median = if !row_cancels.is_empty() {
+        row_cancels[row_cancels.len() / 2]
+    } else { 0.0 };
+
+    let elapsed = t0.elapsed().as_secs_f64();
 
     Some(SusyResult {
         n, dim, vtgv, diagonal, bosonic_off, fermionic_off,
@@ -181,6 +246,16 @@ fn decompose_from_hpdf(path: &Path) -> Option<SusyResult> {
         cosmo_ratio: if sector_sum > 1e-15 { off_diagonal.abs() / sector_sum } else { 0.0 },
         excess,
         excess_over_ln: if ln_n > 1e-10 { excess / ln_n } else { 0.0 },
+        // v4 diagnostics
+        liouville_marginal_l2: marginal_l2,
+        liouville_marginal_linf: marginal_linf,
+        liouville_marginal_per_dim: marginal_l2 / (dim as f64),
+        liouville_weighted_sum,
+        liouville_raw_sum,
+        liouville_raw_over_sqrt: (liouville_raw_sum as f64).abs() / (n as f64).sqrt(),
+        per_row_cancel_mean,
+        per_row_cancel_max,
+        per_row_cancel_median,
         num_sqfree, num_bosonic, num_fermionic,
         elapsed_secs: elapsed,
         is_hc,
@@ -283,9 +358,9 @@ fn main() {
     let cli = Cli::parse();
 
     println!("╔══════════════════════════════════════════════════════════════════════╗");
-    println!("║     SUSY SECTOR SWEEP v3 — Inhomogeneous Gauge Theory              ║");
-    println!("║     vᵀGv = D(N) + B_off(N) + F_off(N)                             ║");
-    println!("║     GU Analysis: matter dilution · cosmo ratio · excess exponent   ║");
+    println!("║  SUSY SECTOR SWEEP v4 — Liouville Equidistribution Audit           ║");
+    println!("║  vᵀGv = D(N) + B_off(N) + F_off(N)  +  Liouville marginals        ║");
+    println!("║  GU gaps + per-row cancellation + L(N)/√N + regime fits            ║");
     println!("╚══════════════════════════════════════════════════════════════════════╝");
 
     let cache_dir = Path::new(&cli.cache_dir);
@@ -369,8 +444,24 @@ fn main() {
     }
     println!("  ╚════════╩════════════╩════════════╩════════════╩══════════╝");
 
+    // ═══ v4: LIOUVILLE EQUIDISTRIBUTION TABLE ═══
+    println!("\n  ╔════════╦════════════╦════════════╦════════════╦════════════╦════════════╗");
+    println!("  ║   N    ║ ‖G·(λw)‖/d ║ L(N)/√N    ║ Σλw        ║ row_cancel ║ row_max    ║");
+    println!("  ╠════════╬════════════╬════════════╬════════════╬════════════╬════════════╣");
+    for r in &results {
+        let hc_mark = if r.is_hc { "★" } else { " " };
+        println!("  ║{:>6}{} ║ {:>10.6} ║ {:>+10.6} ║ {:>+10.6} ║ {:>10.6} ║ {:>10.6} ║",
+                 r.n, hc_mark,
+                 r.liouville_marginal_per_dim,
+                 r.liouville_raw_over_sqrt * (r.liouville_raw_sum as f64).signum(),
+                 r.liouville_weighted_sum,
+                 r.per_row_cancel_mean,
+                 r.per_row_cancel_max);
+    }
+    println!("  ╚════════╩════════════╩════════════╩════════════╩════════════╩════════════╝");
+
     println!("\n  ╔══════════════════════════════════════════════════════════════════════╗");
-    println!("  ║  SCALING ANALYSIS v3 — GU Inhomogeneous Gauge Framing              ║");
+    println!("  ║  SCALING ANALYSIS v4 — GU Gauge Framing + Liouville Audit         ║");
     println!("  ╠══════════════════════════════════════════════════════════════════════╣");
     println!("  ║                                                                    ║");
     println!("  ║  GU-GAP 1: Matter dilutes (|B+F| grows slower than D)              ║");
@@ -391,31 +482,51 @@ fn main() {
     let g3 = if scaling.gu_gap3_sublinear { "✅ SUBLINEAR" } else { "❌ FAILS    " };
     println!("  ║    VERDICT: {}  (need α < 1)                          ║", g3);
     println!("  ║                                                                    ║");
-    println!("  ║  AUXILIARY: |B+F|·ln(N) stabilization                              ║");
-    println!("  ║    Range: [{:.6}, {:.6}]  span = {:.6}                   ║",
-             scaling.bf_ln_min, scaling.bf_ln_max, scaling.bf_ln_span);
-    let stable = scaling.bf_ln_span < 1.0;
-    let stab = if stable { "✅ STABLE" } else { "⚠  UNSTABLE" };
-    println!("  ║    VERDICT: {}                                              ║", stab);
+    println!("  ║  v4: LIOUVILLE EQUIDISTRIBUTION                                   ║");
+    // Compute trend for marginal_per_dim and per_row_cancel_mean
+    let first_large = results.iter().find(|r| r.n >= 120);
+    let last = results.last();
+    if let (Some(fl), Some(la)) = (first_large, last) {
+        println!("  ║    ‖G·(λw)‖/dim: {:.6} (N={}) → {:.6} (N={})        ║",
+                 fl.liouville_marginal_per_dim, fl.n,
+                 la.liouville_marginal_per_dim, la.n);
+        println!("  ║    row_cancel:    {:.6} (N={}) → {:.6} (N={})        ║",
+                 fl.per_row_cancel_mean, fl.n,
+                 la.per_row_cancel_mean, la.n);
+        println!("  ║    |L(N)|/√N:    {:.6} (N={}) → {:.6} (N={})        ║",
+                 fl.liouville_raw_over_sqrt, fl.n,
+                 la.liouville_raw_over_sqrt, la.n);
+        let marginal_decays = la.liouville_marginal_per_dim < fl.liouville_marginal_per_dim;
+        let row_decays = la.per_row_cancel_mean < fl.per_row_cancel_mean;
+        let raw_bounded = la.liouville_raw_over_sqrt < 2.0;
+        let mg = if marginal_decays { "✅ DECAYS" } else { "⚠  GROWS " };
+        let rg = if row_decays { "✅ DECAYS" } else { "⚠  GROWS " };
+        let lg = if raw_bounded { "✅ BOUNDED" } else { "⚠  LARGE  " };
+        println!("  ║    VERDICT marginal: {}   row: {}   L/√N: {} ║", mg, rg, lg);
+    }
     println!("  ╚══════════════════════════════════════════════════════════════════════╝");
 
     // ═══ WRITE TSV ═══
-    let mut tsv = String::from("N\tdim\tvtgv\tD\tB_off\tF_off\tB_plus_F\tabs_BF\tBF_over_D\tBF_times_ln\tgap\tgap_times_ln\tD_frac\tcancel_pct\tcosmo_ratio\texcess\texcess_over_ln\tsqfree\tbosonic_pairs\tfermionic_pairs\tis_hc\n");
+    let mut tsv = String::from("N\tdim\tvtgv\tD\tB_off\tF_off\tB_plus_F\tabs_BF\tBF_over_D\tBF_times_ln\tgap\tgap_times_ln\tD_frac\tcancel_pct\tcosmo_ratio\texcess\texcess_over_ln\tmarginal_l2\tmarginal_linf\tmarginal_per_dim\tliouville_weighted\tliouville_raw\tliouville_raw_sqrt\trow_cancel_mean\trow_cancel_max\trow_cancel_median\tsqfree\tbosonic_pairs\tfermionic_pairs\tis_hc\n");
     for r in &results {
-        tsv.push_str(&format!("{}\t{}\t{:.15}\t{:.15}\t{:.15}\t{:.15}\t{:.15}\t{:.15e}\t{:.15e}\t{:.15}\t{:.15}\t{:.15}\t{:.6}\t{:.10}\t{:.10}\t{:.15}\t{:.15}\t{}\t{}\t{}\t{}\n",
+        tsv.push_str(&format!("{}\t{}\t{:.15}\t{:.15}\t{:.15}\t{:.15}\t{:.15}\t{:.15e}\t{:.15e}\t{:.15}\t{:.15}\t{:.15}\t{:.6}\t{:.10}\t{:.10}\t{:.15}\t{:.15}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{}\t{:.10}\t{:.10}\t{:.10}\t{:.10}\t{}\t{}\t{}\t{}\n",
             r.n, r.dim, r.vtgv, r.diagonal, r.bosonic_off, r.fermionic_off,
             r.off_diagonal, r.susy_residual, r.bf_over_d, r.bf_times_ln,
             r.gap, r.gap_times_ln, r.d_fraction,
             r.cancel_pct, r.cosmo_ratio, r.excess, r.excess_over_ln,
+            r.liouville_marginal_l2, r.liouville_marginal_linf, r.liouville_marginal_per_dim,
+            r.liouville_weighted_sum, r.liouville_raw_sum, r.liouville_raw_over_sqrt,
+            r.per_row_cancel_mean, r.per_row_cancel_max, r.per_row_cancel_median,
             r.num_sqfree, r.num_bosonic, r.num_fermionic, r.is_hc));
     }
     std::fs::write(&cli.output, &tsv).expect("Failed to write TSV");
 
     // ═══ WRITE JSON CERTIFICATE ═══
     let max_tested = results.last().map(|r| r.n).unwrap_or(0);
+    let stable = scaling.bf_ln_span < 1.0;
     let cert = format!(r#"{{
-  "experiment": "SUSY Sector Cancellation Sweep v3 — GU Inhomogeneous",
-  "format": "cathedral-susy-sweep-v3",
+  "experiment": "SUSY Sector + Liouville Equidistribution Sweep v4",
+  "format": "cathedral-susy-sweep-v4",
   "timestamp": "{}",
   "max_N_tested": {},
   "files_processed": {},
@@ -449,8 +560,9 @@ fn main() {
         scaling.gu_gap1_matter_dilutes, scaling.gu_gap2_cosmo_vanishes,
         scaling.gu_gap3_sublinear, stable,
         results.iter().map(|r| {
-            format!("\n    {{\"N\": {}, \"D\": {:.15e}, \"B_off\": {:.15e}, \"F_off\": {:.15e}, \"signed_BF\": {:.15e}, \"abs_BF\": {:.15e}, \"BF_over_D\": {:.15e}, \"cancel_pct\": {:.10}, \"cosmo_ratio\": {:.10}, \"excess\": {:.10}, \"gap_ln\": {:.10}}}",
-                r.n, r.diagonal, r.bosonic_off, r.fermionic_off, r.signed_bf, r.susy_residual, r.bf_over_d, r.cancel_pct, r.cosmo_ratio, r.excess, r.gap_times_ln)
+            format!("\n    {{\"N\": {}, \"D\": {:.15e}, \"B_off\": {:.15e}, \"F_off\": {:.15e}, \"signed_BF\": {:.15e}, \"abs_BF\": {:.15e}, \"BF_over_D\": {:.15e}, \"cancel_pct\": {:.10}, \"cosmo_ratio\": {:.10}, \"excess\": {:.10}, \"gap_ln\": {:.10}, \"marginal_l2\": {:.10}, \"marginal_per_dim\": {:.10}, \"L_raw\": {}, \"L_over_sqrt\": {:.10}, \"row_cancel_mean\": {:.10}, \"row_cancel_max\": {:.10}}}",
+                r.n, r.diagonal, r.bosonic_off, r.fermionic_off, r.signed_bf, r.susy_residual, r.bf_over_d, r.cancel_pct, r.cosmo_ratio, r.excess, r.gap_times_ln,
+                r.liouville_marginal_l2, r.liouville_marginal_per_dim, r.liouville_raw_sum, r.liouville_raw_over_sqrt, r.per_row_cancel_mean, r.per_row_cancel_max)
         }).collect::<Vec<_>>().join(",")
     );
     std::fs::write(&cli.cert, &cert).expect("Failed to write JSON");
