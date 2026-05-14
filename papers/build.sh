@@ -117,6 +117,12 @@ cmd_build_group() {
   local errors=0
   local count=0
 
+  # Skip non-existent directories or those with no top-level .tex files
+  if [ ! -d "$dir" ]; then return 0; fi
+  local n_tex
+  n_tex=$(find "$dir" -maxdepth 1 -name '*.tex' -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$n_tex" -eq 0 ]; then return 0; fi
+
   echo -e "${YELLOW}── ${dir} ──${NC}"
   for tex in "$dir"/*.tex; do
     [ -f "$tex" ] || continue
@@ -137,7 +143,7 @@ cmd_build_all() {
     local group_errors=0
     cmd_build_group "$group" || group_errors=$?
     errors=$((errors + group_errors))
-    total=$((total + $(ls "$group"/*.tex 2>/dev/null | wc -l)))
+    total=$((total + $(find "$group" -maxdepth 1 -name '*.tex' -type f 2>/dev/null | wc -l | tr -d ' ')))
   done
 
   if [ $errors -eq 0 ]; then

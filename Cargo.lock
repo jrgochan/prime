@@ -182,6 +182,7 @@ name = "cathedral-particle-zoo"
 version = "2.0.0"
 dependencies = [
  "cathedral-utils",
+ "chrono",
  "clap",
  "hdf5",
  "hdf5-sys",
