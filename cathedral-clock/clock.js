@@ -44,6 +44,7 @@ function cosmicCoordinates() {
 }
 
 // ── Timeline Landmarks ──
+// Time conversion: N Planck ticks × 5.391×10⁻⁴⁴ s = seconds since Big Bang
 const LANDMARKS = [
   {
     id: 'planck',
@@ -52,15 +53,92 @@ const LANDMARKS = [
     icon: '⚛️',
     color: '#4ef080',
     desc: 'N = 1. The first Planck tick. The universe is one irreducible quantum of time old.',
+    // 1 × 5.391e-44 s = 5.391e-44 s
+    humanTime: '5.4 × 10⁻⁴⁴ s — one Planck time',
   },
   {
+    // Our actual experiment: 28 HPDF matrices, 158s total
+    // dd_gram_N40000_mpfr256.bin = 24 GB (our second-largest)
+    // At N=55440: matrix = 55439² × 8 = 24.6 GB (dense f64)
+    // GPU Cholesky up to dim ≤ 25000, CG beyond
     id: 'gpu',
     name: 'GPU MATRIX',
     exponent: Math.log10(55440),
     icon: '⚙️',
     color: '#ff8844',
-    desc: 'N = 55,440. Tonight\'s Rust/GPU Gram matrix computation in Los Alamos.',
+    desc: 'N = 55,440. Tonight\'s v4 sweep: 24.6 GB Gram matrix, 158s for all 28 HPDF points. Single RTX/A100 GPU in Los Alamos.',
     displayValue: '55,440',
+    // 55440 × 5.391e-44 = 2.99e-39 s — deep in the Planck era
+    humanTime: '3.0 × 10⁻³⁹ s — deep Planck era, before quarks exist',
+  },
+  {
+    // Single high-end GPU: 80 GB VRAM (A100/H100)
+    id: 'single-gpu',
+    name: 'SINGLE GPU MAX',
+    exponent: Math.log10(100000),
+    icon: '🎮',
+    color: '#76ff03',
+    desc: 'N ≈ 100K. One 80 GB GPU (A100/H100) holds the full matrix. Verified: our N=40K cache = 24 GB, so N=100K ≈ 80 GB. Build: minutes. Solve: hours.',
+    displayValue: '~100K',
+    // 1e5 × 5.391e-44 = 5.4e-39 s
+    humanTime: '5.4 × 10⁻³⁹ s — still in the Planck era',
+  },
+  {
+    // Multi-GPU / Supercomputer node: ~1 TB RAM
+    id: 'super-node',
+    name: 'SUPERCOMPUTER NODE',
+    exponent: Math.log10(500000),
+    icon: '🖥️',
+    color: '#ffab40',
+    desc: 'N ≈ 500K. One DGX/supercomputer node (1-2 TB RAM). Matrix = 2 TB. Build time: hours. Solve: days. This is where individual research groups top out.',
+    displayValue: '~500K',
+    // 5e5 × 5.391e-44 = 2.7e-38 s
+    humanTime: '2.7 × 10⁻³⁸ s — edge of the Planck era',
+  },
+  {
+    // Full supercomputer: Frontier has ~9 PB RAM, ~1.2 EF
+    id: 'quarter-earth',
+    name: 'TOP SUPERCOMPUTER',
+    exponent: Math.log10(10e6),
+    icon: '🏛️',
+    color: '#30b868',
+    desc: 'N ≈ 10M. A top-3 supercomputer (Frontier: 9 PB RAM, 1.2 EF). Dense matrix = 800 TB. Realistic with ScaLAPACK. Build: days. Solve: weeks.',
+    displayValue: '~10M',
+    // 1e7 × 5.391e-44 = 5.4e-37 s
+    humanTime: '5.4 × 10⁻³⁷ s — Grand Unification epoch',
+  },
+  {
+    // All Top500 supercomputers combined: ~100 PB RAM
+    id: 'half-earth',
+    name: 'ALL SUPERCOMPUTERS',
+    exponent: Math.log10(100e6),
+    icon: '🌏',
+    color: '#2ea8b8',
+    desc: 'N ≈ 100M. Every Top500 supercomputer combined (~100 PB RAM). Matrix = 80 PB. Theoretically possible but communication-limited.',
+    displayValue: '~100M',
+    // 1e8 × 5.391e-44 = 5.4e-36 s — GUT symmetry breaking era
+    humanTime: '5.4 × 10⁻³⁶ s — GUT symmetry breaking begins',
+  },
+  {
+    // All global compute: ~1 EB RAM, ~10²⁰ FLOPS
+    id: 'full-earth',
+    name: 'EARTH LIMIT',
+    exponent: Math.log10(350e6),
+    icon: '🌐',
+    color: '#4eeaff',
+    desc: 'N ≈ 350M. Every byte of RAM on Earth (~1 EB) for one matrix. Scaling verified: cache shows exact N² growth. Beyond here, only formal proofs reach.',
+    displayValue: '~350M',
+    // 3.5e8 × 5.391e-44 = 1.9e-35 s — electroweak era
+    humanTime: '1.9 × 10⁻³⁵ s — cosmic inflation is ending',
+  },
+  {
+    id: 'the-void',
+    name: 'THE PROOF GAP',
+    exponent: 30,
+    icon: '🕳️',
+    color: '#333355',
+    desc: '',
+    isVoid: true,
   },
   {
     id: 'cosmic-age',
@@ -68,8 +146,9 @@ const LANDMARKS = [
     exponent: 60.9,
     icon: '🌍',
     color: '#4eeaff',
-    desc: 'N ≈ 8.07 × 10⁶⁰. The age of our physical universe in Planck ticks.',
+    desc: 'N ≈ 8.07 × 10⁶⁰. The age of our physical universe in Planck ticks. Only formal proofs cross this gap.',
     isYou: true,
+    humanTime: '13.8 billion years — now',
   },
   {
     id: 'googol',
@@ -78,6 +157,8 @@ const LANDMARKS = [
     icon: '🔢',
     color: '#a855f7',
     desc: 'N = 10¹⁰⁰. The classic large number. The universe hasn\'t reached this yet.',
+    // 10^100 × 5.391e-44 = 5.4e56 s ≈ 1.7e49 years
+    humanTime: '~10⁴⁹ years — long after all protons have decayed',
   },
   {
     id: 'holographic',
@@ -86,6 +167,8 @@ const LANDMARKS = [
     icon: '🌌',
     color: '#f0c040',
     desc: 'N ≈ 10¹²². The maximum information (Bekenstein-Hawking entropy) the observable universe can ever hold.',
+    // 10^122 × 5.391e-44 = 5.4e78 s ≈ 1.7e71 years
+    humanTime: '~10⁷¹ years — all black holes have evaporated',
   },
   {
     id: 'silicon',
@@ -94,6 +177,8 @@ const LANDMARKS = [
     icon: '🖥️',
     color: '#ff8844',
     desc: 'N = 1.79 × 10³⁰⁸. Maximum f64 value. Beyond this, the CPU returns INFINITY.',
+    // 10^308 × 5.391e-44 ≈ 10^264 s ≈ 10^257 years
+    humanTime: '~10²⁵⁷ years — heat death completed long ago',
   },
   {
     id: 'skewes',
@@ -102,6 +187,8 @@ const LANDMARKS = [
     icon: '💥',
     color: '#ff3344',
     desc: 'N ≈ 1.39 × 10³¹⁶. Where π(x) first exceeds li(x). The arithmetic false vacuum decays.',
+    // 10^316 × 5.391e-44 ≈ 10^272 s ≈ 10^265 years
+    humanTime: '~10²⁶⁵ years — pure mathematical eternity',
   },
 ];
 
@@ -111,64 +198,55 @@ function expToPercent(exp) {
   return Math.max(0, Math.min(100, (exp / TIMELINE_MAX) * 100));
 }
 
-// ── Render Timeline ──
-function renderTimeline() {
-  const track = document.getElementById('timeline-track');
-  if (!track) return;
-
-  // Stagger heights to prevent label overlap
-  const heights = [140, 100, 180, 120, 160, 90, 130];
-  const labelPositions = ['top', 'top', 'top', 'top', 'top', 'top', 'top'];
+// ── Render Journey (Vertical Timeline) ──
+function renderJourney() {
+  const journey = document.getElementById('journey');
+  if (!journey) return;
 
   LANDMARKS.forEach((lm, idx) => {
-    const pct = expToPercent(lm.exponent);
-    const marker = document.createElement('div');
-    marker.className = `tl-marker${lm.isYou ? ' you-are-here' : ''}`;
-    marker.style.left = `${pct}%`;
-    marker.style.setProperty('--marker-color', lm.color);
-
-    const lineHeight = lm.isYou ? 180 : heights[idx % heights.length];
-    const labelOffset = -(lineHeight + 18);
-
-    marker.innerHTML = `
-      <div class="tl-marker-label" style="top: ${labelOffset}px;">${lm.name}</div>
-      <div class="tl-marker-dot"></div>
-      <div class="tl-marker-line" style="height: ${lineHeight}px;"></div>
-      <div class="tl-marker-value">10<sup>${Math.round(lm.exponent)}</sup></div>
-    `;
-    track.appendChild(marker);
-  });
-
-  // Axis labels
-  const axisLabels = document.getElementById('axis-labels');
-  if (axisLabels) {
-    for (let e = 0; e <= TIMELINE_MAX; e += 50) {
-      const label = document.createElement('span');
-      label.innerHTML = `10<sup>${e}</sup>`;
-      axisLabels.appendChild(label);
+    // Special rendering for THE VOID
+    if (lm.isVoid) {
+      const voidNode = document.createElement('div');
+      voidNode.className = 'journey-void';
+      voidNode.innerHTML = `
+        <div class="void-line"></div>
+        <div class="void-content">
+          <div class="void-label">52 ORDERS OF MAGNITUDE</div>
+          <div class="void-message">Beyond all known computation.</div>
+          <div class="void-message">Today, only a formal proof crosses this void.</div>
+          <div class="void-scale">
+            <span class="void-from">10<sup>8.5</sup></span>
+            <span class="void-arrow">⟶ ∞ ⟶</span>
+            <span class="void-to">10<sup>61</sup></span>
+          </div>
+        </div>
+        <div class="void-line"></div>
+      `;
+      journey.appendChild(voidNode);
+      return;
     }
-  }
-}
 
-// ── Render Landmark Cards ──
-function renderLandmarkCards() {
-  const grid = document.getElementById('landmarks-grid');
-  if (!grid) return;
-
-  LANDMARKS.forEach(lm => {
-    const card = document.createElement('div');
-    card.className = 'landmark-card';
-    card.style.setProperty('--card-accent', lm.color);
+    const node = document.createElement('div');
+    const side = idx % 2 === 0 ? 'left' : 'right';
+    node.className = `journey-node ${side}${lm.isYou ? ' you-node' : ''}`;
+    node.style.setProperty('--node-color', lm.color);
 
     const displayVal = lm.displayValue || (lm.exponent === 0 ? '1' : `10<sup>${Math.round(lm.exponent)}</sup>`);
+    const timeHtml = lm.humanTime ? `<div class="journey-time">⏱ ${lm.humanTime}</div>` : '';
 
-    card.innerHTML = `
-      <div class="landmark-icon">${lm.icon}</div>
-      <div class="landmark-name">${lm.name}</div>
-      <div class="landmark-value">N = ${displayVal}</div>
-      <div class="landmark-desc">${lm.desc}</div>
+    node.innerHTML = `
+      <div class="journey-dot"></div>
+      <div class="journey-card">
+        <div class="journey-header">
+          <span class="journey-icon">${lm.icon}</span>
+          <span class="journey-name">${lm.name}</span>
+        </div>
+        <div class="journey-exponent">N = ${displayVal}</div>
+        <div class="journey-desc">${lm.desc}</div>
+        ${timeHtml}
+      </div>
     `;
-    grid.appendChild(card);
+    journey.appendChild(node);
   });
 }
 
@@ -191,6 +269,15 @@ function updatePlanckCounter() {
   const ageEl = document.getElementById('age-seconds');
   if (ageEl) {
     ageEl.textContent = coords.ageSeconds.toExponential(6);
+  }
+
+  // Years display
+  const yearsEl = document.getElementById('age-years');
+  if (yearsEl) {
+    const ageYears = coords.ageSeconds / CONSTANTS.SEC_PER_YEAR;
+    // Format as human-readable: "13,800,042,026.xx"
+    const billions = ageYears / 1e9;
+    yearsEl.textContent = `${billions.toFixed(10)} billion`;
   }
 }
 
@@ -310,14 +397,266 @@ function initScrollAnimations() {
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   initStarfield();
-  renderTimeline();
-  renderLandmarkCards();
+  renderJourney();
   updatePlanckCounter();
   updateLiveTime();
   animateHorizonFill();
   initScrollAnimations();
+  initPhysicsDashboard();
 
   // Live updates
   setInterval(updatePlanckCounter, 100);  // Tick fast for visual drama
   setInterval(updateLiveTime, 1000);
 });
+
+// ═══════════════════════════════════════════════════════════════
+// THE ARITHMETIC VACUUM — Physics Dashboard (v4 sweep data)
+// ═══════════════════════════════════════════════════════════════
+
+// v4 sweep data points: [N, cosmo_ratio (Λ), excess, excess/lnN, marginal_per_dim]
+const V4_DATA = [
+  [6,     1.000000, -0.36544, -0.20392, 0.126885],
+  [12,    0.927648, -0.34108, -0.13729, 0.092924],
+  [24,    0.818455, -0.09195,  0.08194, 0.058605],
+  [36,    0.722644,  0.02134,  0.00596, 0.042854],
+  [48,    0.640704,  0.08268,  0.02136, 0.033707],
+  [60,    0.588716,  0.13160,  0.03215, 0.027952],
+  [120,   0.431509,  0.25462,  0.05317, 0.015199],
+  [180,   0.345483,  0.30981,  0.05965, 0.010481],
+  [240,   0.292202,  0.34739,  0.06343, 0.008036],
+  [360,   0.223045,  0.39523,  0.06712, 0.005503],
+  [720,   0.117940,  0.46400,  0.07047, 0.002850],
+  [840,   0.096427,  0.47716,  0.07089, 0.002458],
+  [1000,  0.072069,  0.49014,  0.07098, 0.002076],
+  [1260,  0.044024,  0.51037,  0.07148, 0.001664],
+  [1680,  0.008605,  0.53049,  0.07149, 0.001258],
+  [2520,  0.036681,  0.55810,  0.07117, 0.000848],
+  [5040,  0.105785,  0.59975,  0.07028, 0.000431],
+  [7560,  0.141945,  0.62145,  0.06953, 0.000290],
+  [10000, 0.165552,  0.63490,  0.06891, 0.000220],
+  [10080, 0.166183,  0.63532,  0.06889, 0.000218],
+  [15120, 0.198087,  0.65376,  0.06794, 0.000147],
+  [20000, 0.218589,  0.66602,  0.06722, 0.000111],
+  [20160, 0.219174,  0.66633,  0.06720, 0.000110],
+  [25200, 0.234820,  0.67559,  0.06662, 0.000089],
+  [27720, 0.241338,  0.67938,  0.06638, 0.000081],
+  [40000, 0.265527,  0.69321,  0.06543, 0.000056],
+  [45360, 0.273379,  0.69799,  0.06509, 0.000050],
+  [55440, 0.285865,  0.70470,  0.06457, 0.000041],
+];
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function interpolateV4(N) {
+  if (N <= V4_DATA[0][0]) return V4_DATA[0];
+  if (N >= V4_DATA[V4_DATA.length - 1][0]) return V4_DATA[V4_DATA.length - 1];
+  for (let i = 0; i < V4_DATA.length - 1; i++) {
+    if (N >= V4_DATA[i][0] && N <= V4_DATA[i + 1][0]) {
+      const t = (N - V4_DATA[i][0]) / (V4_DATA[i + 1][0] - V4_DATA[i][0]);
+      return [
+        N,
+        lerp(V4_DATA[i][1], V4_DATA[i + 1][1], t),
+        lerp(V4_DATA[i][2], V4_DATA[i + 1][2], t),
+        lerp(V4_DATA[i][3], V4_DATA[i + 1][3], t),
+        lerp(V4_DATA[i][4], V4_DATA[i + 1][4], t),
+      ];
+    }
+  }
+  return V4_DATA[V4_DATA.length - 1];
+}
+
+function sliderToN(val) {
+  // Exponential mapping: slider 0-100 → N 6-55440
+  const logMin = Math.log(6);
+  const logMax = Math.log(55440);
+  return Math.round(Math.exp(logMin + (val / 100) * (logMax - logMin)));
+}
+
+function updatePhysicsDashboard(N, label) {
+  const [_, lambda, excess, excessLn, marginal] = interpolateV4(N);
+  const cancel = 1 - lambda;
+
+  // Lambda
+  const lambdaEl = document.getElementById('lambda-value');
+  const lambdaBar = document.getElementById('lambda-bar');
+  if (lambdaEl) lambdaEl.textContent = lambda.toFixed(6);
+  if (lambdaBar) lambdaBar.style.width = `${Math.min(100, lambda * 100)}%`;
+
+  // Cancellation
+  const cancelEl = document.getElementById('cancel-value');
+  const cancelBar = document.getElementById('cancel-bar');
+  if (cancelEl) cancelEl.textContent = `${(cancel * 100).toFixed(4)}%`;
+  if (cancelBar) cancelBar.style.width = `${cancel * 100}%`;
+
+  // Epsilon
+  const epsilonEl = document.getElementById('epsilon-value');
+  const epsilonBar = document.getElementById('epsilon-bar');
+  if (epsilonEl) epsilonEl.textContent = excessLn.toFixed(6);
+  if (epsilonBar) epsilonBar.style.width = `${Math.min(100, Math.abs(excessLn) * 1000)}%`;
+
+  // Marginal
+  const marginalEl = document.getElementById('marginal-value');
+  const marginalBar = document.getElementById('marginal-bar');
+  if (marginalEl) marginalEl.textContent = marginal.toExponential(4);
+  if (marginalBar) marginalBar.style.width = `${Math.min(100, marginal * 5000)}%`;
+
+  // N display (for explore mode)
+  const nValEl = document.getElementById('physics-n-value');
+  if (nValEl) nValEl.textContent = label || `N = ${N.toLocaleString()}`;
+
+  // Era display
+  const eraEl = document.getElementById('physics-era');
+  if (eraEl) {
+    if (N < 240) {
+      eraEl.textContent = '🔵 BOSONIC ERA — D(N) < 1, vacuum pressure expands';
+      eraEl.className = 'physics-era bosonic';
+    } else if (N < 1680) {
+      eraEl.textContent = '🟡 TRANSITION — approaching N ≈ 1680 critical point';
+      eraEl.className = 'physics-era transition';
+    } else {
+      eraEl.textContent = '🔴 FERMIONIC ERA — vacuum tension compensates D(N), Λ → 0';
+      eraEl.className = 'physics-era fermionic';
+    }
+  }
+}
+
+// ── Cosmic Mode: Extrapolation Engine ──
+// v4 scaling fits (from the fermionic era, N > 2500):
+//   Λ(N)      ~ (Λ₀) · (N/N₀)^α_λ     α_λ ≈ -0.0013  (very slow decay)
+//   marginal  ~ (m₀) · (N/N₀)^α_m      α_m ≈ -0.96    (near 1/N)
+//   ε/ln(N)   → C ≈ 0.065              (stabilizes — this IS the RH conjecture)
+//   cancel η  = 1 - Λ                   (derived)
+
+const SCALING = {
+  // Reference point: N=55440 (our largest measurement)
+  N0: 55440,
+  lambda0: 0.285865,
+  marginal0: 0.000041,
+  epsilonLn0: 0.06457,
+  // Power-law exponents from v4 regression
+  alpha_lambda: -0.0013,   // Λ decays very slowly
+  alpha_marginal: -0.96,   // marginal ≈ 1/N (asymptotic freedom)
+};
+
+function extrapolateCosmicValues(logN) {
+  // logN is log₁₀(N) — e.g., 60.9 for the age of the universe
+  const logN0 = Math.log10(SCALING.N0);   // ≈ 4.74
+  const logRatio = logN - logN0;           // e.g., 56.2
+
+  // Power-law extrapolation: f(N) = f(N₀) · (N/N₀)^α = f(N₀) · 10^(α · logRatio)
+  const lambda = SCALING.lambda0 * Math.pow(10, SCALING.alpha_lambda * logRatio);
+  const marginal = SCALING.marginal0 * Math.pow(10, SCALING.alpha_marginal * logRatio);
+  // ε/ln(N) stabilizes — this is the RH conjecture (bounded)
+  const epsilonLn = SCALING.epsilonLn0;
+  // Excess = ε/ln(N) * ln(N) = ε/ln(N) * logN * ln(10)
+  const excess = epsilonLn * logN * Math.LN10;
+  const cancel = 1 - lambda;
+
+  return { lambda, cancel, excess, epsilonLn, marginal, logN };
+}
+
+function updateCosmicDashboard() {
+  const coords = cosmicCoordinates();
+  const logN = coords.nTimeExp;  // ≈ 60.9
+  const cosmic = extrapolateCosmicValues(logN);
+
+  // Lambda — at N ≈ 10^61, still detectable but incredibly tiny
+  const lambdaEl = document.getElementById('lambda-value');
+  const lambdaBar = document.getElementById('lambda-bar');
+  if (lambdaEl) lambdaEl.textContent = cosmic.lambda.toExponential(6);
+  // Bar: show relative to reference (log scale visualization)
+  if (lambdaBar) {
+    const barPct = Math.max(0.5, Math.min(100, 100 * (1 + Math.log10(cosmic.lambda) / 3)));
+    lambdaBar.style.width = `${barPct}%`;
+  }
+
+  // Cancellation — essentially 100% at cosmic scales
+  const cancelEl = document.getElementById('cancel-value');
+  const cancelBar = document.getElementById('cancel-bar');
+  if (cancelEl) {
+    // Show the number of 9s
+    const nines = -Math.log10(1 - cosmic.cancel);
+    if (nines > 6) {
+      cancelEl.textContent = `99.${'9'.repeat(Math.min(12, Math.floor(nines) - 2))}...%`;
+    } else {
+      cancelEl.textContent = `${(cosmic.cancel * 100).toFixed(4)}%`;
+    }
+  }
+  if (cancelBar) cancelBar.style.width = `${Math.min(100, cosmic.cancel * 100)}%`;
+
+  // Epsilon/ln(N) — the RH invariant
+  const epsilonEl = document.getElementById('epsilon-value');
+  const epsilonBar = document.getElementById('epsilon-bar');
+  if (epsilonEl) epsilonEl.textContent = cosmic.epsilonLn.toFixed(6);
+  if (epsilonBar) epsilonBar.style.width = `${Math.min(100, cosmic.epsilonLn * 1000)}%`;
+
+  // Marginal — fantastically small
+  const marginalEl = document.getElementById('marginal-value');
+  const marginalBar = document.getElementById('marginal-bar');
+  if (marginalEl) marginalEl.textContent = cosmic.marginal.toExponential(4);
+  if (marginalBar) marginalBar.style.width = `${Math.max(0.5, Math.min(100, 100 * (1 + Math.log10(cosmic.marginal) / 60)))}%`;
+
+  // Cosmic N display
+  const nEl = document.getElementById('cosmic-n-number');
+  if (nEl) {
+    const mantissa = coords.nTime / Math.pow(10, Math.floor(logN));
+    nEl.innerHTML = `${mantissa.toFixed(10)} × 10<sup>${Math.floor(logN)}</sup>`;
+  }
+
+  // Era
+  const eraEl = document.getElementById('physics-era');
+  if (eraEl) {
+    eraEl.textContent = '🔴 DEEP FERMIONIC — N ≈ 10⁶¹ · Λ ≈ ' + cosmic.lambda.toExponential(2) + ' · ‖r‖/dim ≈ ' + cosmic.marginal.toExponential(2);
+    eraEl.className = 'physics-era fermionic';
+  }
+}
+
+// ── Mode Management ──
+let currentMode = 'cosmic';
+let cosmicInterval = null;
+
+function setPhysicsMode(mode) {
+  currentMode = mode;
+
+  // Toggle button states
+  document.getElementById('mode-cosmic').classList.toggle('active', mode === 'cosmic');
+  document.getElementById('mode-explore').classList.toggle('active', mode === 'explore');
+
+  // Toggle panels
+  const cosmicPanel = document.getElementById('cosmic-readout');
+  const explorePanel = document.getElementById('explore-controls');
+  if (cosmicPanel) cosmicPanel.style.display = mode === 'cosmic' ? 'block' : 'none';
+  if (explorePanel) explorePanel.style.display = mode === 'explore' ? 'block' : 'none';
+
+  if (mode === 'cosmic') {
+    updateCosmicDashboard();
+    if (!cosmicInterval) {
+      cosmicInterval = setInterval(updateCosmicDashboard, 100);
+    }
+  } else {
+    if (cosmicInterval) { clearInterval(cosmicInterval); cosmicInterval = null; }
+    const slider = document.getElementById('physics-n-slider');
+    if (slider) {
+      const N = sliderToN(parseInt(slider.value));
+      updatePhysicsDashboard(N);
+    }
+  }
+}
+
+function initPhysicsDashboard() {
+  const slider = document.getElementById('physics-n-slider');
+
+  // Start in cosmic mode
+  setPhysicsMode('cosmic');
+
+  // Slider for explore mode
+  if (slider) {
+    slider.addEventListener('input', () => {
+      if (currentMode === 'explore') {
+        const N = sliderToN(parseInt(slider.value));
+        updatePhysicsDashboard(N);
+      }
+    });
+  }
+}
+

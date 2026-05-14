@@ -38,9 +38,92 @@
       <div class="counter-sublabel">
         <span id="age-seconds"></span> seconds since the Big Bang
       </div>
+      <div class="counter-sublabel years-line">
+        ≈ <span id="age-years"></span> years — <span class="years-note">that's N ÷ 5.855 × 10<sup>50</sup> ticks/year</span>
+      </div>
       <div class="counter-sublabel dim">
         Each tick = 5.391 × 10<sup>−44</sup> s (Planck time)
       </div>
+    </section>
+
+    <!-- Physics Dashboard -->
+    <section class="physics-dashboard">
+      <h2 class="section-title">THE ARITHMETIC VACUUM</h2>
+      <p class="section-desc">
+        Live physics from the <strong>SUSY Sweep v4</strong> — Liouville equidistribution of the primes,
+        interpolated from 28 GPU-certified HPDF matrices (N = 6 to 55,440).
+      </p>
+      <div class="physics-grid">
+        <div class="physics-card lambda-card" id="physics-lambda">
+          <div class="physics-icon">Λ</div>
+          <div class="physics-label">COSMOLOGICAL RATIO</div>
+          <div class="physics-value" id="lambda-value">—</div>
+          <div class="physics-bar-container">
+            <div class="physics-bar lambda-bar" id="lambda-bar"></div>
+          </div>
+          <div class="physics-sublabel">|B+F| / (|B|+|F|) — should → 0</div>
+        </div>
+        <div class="physics-card cancel-card" id="physics-cancel">
+          <div class="physics-icon">η</div>
+          <div class="physics-label">CANCELLATION EFFICACY</div>
+          <div class="physics-value" id="cancel-value">—</div>
+          <div class="physics-bar-container">
+            <div class="physics-bar cancel-bar" id="cancel-bar"></div>
+          </div>
+          <div class="physics-sublabel">1 − Λ — SUSY cancellation percentage</div>
+        </div>
+        <div class="physics-card epsilon-card" id="physics-epsilon">
+          <div class="physics-icon">ε</div>
+          <div class="physics-label">EXCESS / ln(N)</div>
+          <div class="physics-value" id="epsilon-value">—</div>
+          <div class="physics-bar-container">
+            <div class="physics-bar epsilon-bar" id="epsilon-bar"></div>
+          </div>
+          <div class="physics-sublabel">ε(N)/ln(N) — bounded ⟺ RH</div>
+        </div>
+        <div class="physics-card marginal-card" id="physics-marginal">
+          <div class="physics-icon">r</div>
+          <div class="physics-label">LIOUVILLE MARGINAL</div>
+          <div class="physics-value" id="marginal-value">—</div>
+          <div class="physics-bar-container">
+            <div class="physics-bar marginal-bar" id="marginal-bar"></div>
+          </div>
+          <div class="physics-sublabel">‖G·(λ⊙w)‖/dim — equidistribution</div>
+        </div>
+      </div>
+
+      <!-- Mode Toggle -->
+      <div class="physics-mode-toggle">
+        <button class="mode-btn active" id="mode-cosmic" onclick="setPhysicsMode('cosmic')">
+          <span class="mode-icon">🌌</span> COSMIC
+        </button>
+        <button class="mode-btn" id="mode-explore" onclick="setPhysicsMode('explore')">
+          <span class="mode-icon">🔬</span> EXPLORE
+        </button>
+      </div>
+
+      <!-- Cosmic Mode: Live Planck Tick readout -->
+      <div class="cosmic-readout" id="cosmic-readout">
+        <div class="cosmic-n-live">
+          <span class="cosmic-n-label">N<sub>time</sub> = AGE OF UNIVERSE IN PLANCK TICKS</span>
+          <span class="cosmic-n-number" id="cosmic-n-number">—</span>
+        </div>
+        <div class="cosmic-note">
+          Extrapolated from v4 scaling laws: Λ ~ N<sup>−0.0013</sup>, ‖r‖/dim ~ N<sup>−0.96</sup>, ε/ln(N) → const
+        </div>
+      </div>
+
+      <!-- Explorer Mode: Slider -->
+      <div class="physics-n-display" id="explore-controls" style="display: none;">
+        <span class="physics-n-label">LATTICE DIMENSION</span>
+        <span class="physics-n-value" id="physics-n-value">N = —</span>
+        <input type="range" id="physics-n-slider" min="0" max="100" value="50" class="physics-slider">
+        <div class="physics-n-range">
+          <span>N = 6</span>
+          <span>N = 55,440</span>
+        </div>
+      </div>
+      <div class="physics-era" id="physics-era">—</div>
     </section>
 
     <!-- The Grand Timeline -->
@@ -51,18 +134,8 @@
         The logarithmic scale reveals where we live — and what lies beyond.
       </p>
 
-      <!-- Timeline visualization -->
-      <div class="timeline-container">
-        <div class="timeline-track" id="timeline-track">
-          <!-- Markers injected by JS -->
-        </div>
-        <div class="timeline-axis">
-          <div class="axis-labels" id="axis-labels"></div>
-        </div>
-      </div>
-
-      <!-- Landmark cards -->
-      <div class="landmarks" id="landmarks-grid">
+      <!-- Vertical Journey -->
+      <div class="journey" id="journey">
         <!-- Injected by JS -->
       </div>
     </section>
@@ -144,8 +217,8 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <div class="footer-line">Cathedral Project — Exploration 36</div>
-      <div class="footer-line dim">Nyman-Beurling Equivalence · Mellin Crown Architecture · Zero-Sorry Proof Chain</div>
+      <div class="footer-line">Cathedral Project — Exploration 36 — The Liouville Session</div>
+      <div class="footer-line dim">SUSY Sweep v4 · Liouville Equidistribution · 20 Physics Files · Zero Sorry</div>
       <div class="footer-line dim">🏛️⚛️✨</div>
     </footer>
   </div>

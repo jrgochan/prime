@@ -8,7 +8,7 @@
 #   make setup   — install everything
 # ============================================
 
-.PHONY: help build papers verify axioms cascade crown-audit
+.PHONY: help build papers verify axioms cascade crown-audit clock
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -53,6 +53,15 @@ papers: ## Build the companion papers
 	cd papers/core && pdflatex -interaction=nonstopmode cathedral-lean.tex > /dev/null 2>&1
 	@echo "  ✓ papers/core/cathedral.pdf"
 	@echo "  ✓ papers/core/cathedral-lean.pdf"
+
+clock: ## Open the Cathedral Clock — cosmological N dashboard
+	@echo ""
+	@echo "  🏛️⏱  Opening The Cathedral Clock..."
+	@echo ""
+	@open cathedral-clock/index.html 2>/dev/null || \
+		xdg-open cathedral-clock/index.html 2>/dev/null || \
+		echo "  Open cathedral-clock/index.html in your browser"
+	@echo "  ✓ cathedral-clock/index.html"
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)
 	@$(ENV) require lean
@@ -266,7 +275,7 @@ help: ## Show this help message
 	@echo "  Usage: make <target>"
 	@echo ""
 	@echo "  ─── THE CATHEDRAL ────────────────────────────────────────"
-	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
+	@grep -E '^(build|verify|axioms|cascade|crown-audit|papers|clock):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'
 	@echo ""
 	@echo "  ─── EXPERIMENTS & AUDITING ───────────────────────────────"
 	@grep -E '^(audit|experiment-[a-z]+|stats):.*##' $(MAKEFILE_LIST) | awk -F ':.*## ' '{printf "  %-24s %s\n", $$1, $$2}'

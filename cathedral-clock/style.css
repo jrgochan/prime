@@ -238,166 +238,283 @@ body {
   font-size: 0.72rem;
 }
 
+.counter-sublabel.years-line {
+  margin-top: 0.4rem;
+}
+
+.counter-sublabel.years-line #age-years {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.years-note {
+  opacity: 0.5;
+  font-size: 0.68rem;
+}
+
 /* ═══════════════════════════════════════
-   TIMELINE
+   VERTICAL JOURNEY TIMELINE
    ═══════════════════════════════════════ */
 .timeline-section {
   margin-bottom: var(--section-gap);
 }
 
-.timeline-container {
+.journey {
   position: relative;
-  margin: 2rem 0 3rem;
-  padding: 0 1rem;
+  max-width: 800px;
+  margin: 2rem auto 0;
+  padding: 1rem 0;
 }
 
-.timeline-track {
-  position: relative;
-  height: 200px;
-  background: linear-gradient(90deg,
-    rgba(78, 240, 128, 0.08) 0%,
-    rgba(78, 234, 255, 0.08) 20%,
-    rgba(240, 192, 64, 0.06) 50%,
-    rgba(255, 78, 160, 0.06) 75%,
-    rgba(255, 51, 68, 0.1) 100%);
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  overflow: visible;
-}
-
-.timeline-axis {
-  margin-top: 0.5rem;
-}
-
-.axis-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  padding: 0 0.5rem;
-}
-
-/* Timeline markers */
-.tl-marker {
+/* Central spine */
+.journey::before {
+  content: '';
   position: absolute;
+  left: 50%;
+  top: 0;
   bottom: 0;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-}
-
-.tl-marker-line {
   width: 2px;
-  background: var(--marker-color, var(--cyan));
-  box-shadow: 0 0 8px var(--marker-color, var(--cyan));
-  border-radius: 1px;
+  background: linear-gradient(180deg,
+    var(--green) 0%,
+    var(--cyan) 20%,
+    var(--gold) 45%,
+    var(--purple) 60%,
+    var(--orange) 80%,
+    var(--red) 100%);
+  transform: translateX(-50%);
+  opacity: 0.4;
 }
 
-.tl-marker-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--marker-color, var(--cyan));
-  box-shadow: 0 0 12px var(--marker-color, var(--cyan));
-  margin-top: -5px;
+/* Each node */
+.journey-node {
   position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+/* Dot on the spine */
+.journey-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--node-color, var(--cyan));
+  box-shadow: 0 0 10px var(--node-color, var(--cyan)),
+              0 0 20px color-mix(in srgb, var(--node-color, var(--cyan)) 30%, transparent);
+  transform: translate(-50%, -50%);
   z-index: 3;
+  transition: all 0.3s ease;
 }
 
-.tl-marker-label {
-  position: absolute;
-  top: -22px;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  white-space: nowrap;
-  color: var(--marker-color, var(--cyan));
-  font-weight: 600;
+.journey-node:hover .journey-dot {
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 16px var(--node-color), 0 0 32px var(--node-color);
 }
 
-.tl-marker-value {
-  position: absolute;
-  bottom: -20px;
-  font-family: var(--font-mono);
-  font-size: 0.6rem;
-  white-space: nowrap;
-  color: var(--text-dim);
+/* Card positioning */
+.journey-node.left .journey-card {
+  margin-right: calc(50% + 24px);
+  margin-left: 0;
+  text-align: right;
 }
 
-/* Animated glow for "You Are Here" */
-.tl-marker.you-are-here .tl-marker-dot {
-  animation: glow-pulse 2s ease-in-out infinite;
+.journey-node.right .journey-card {
+  margin-left: calc(50% + 24px);
+  margin-right: 0;
+  text-align: left;
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 12px var(--marker-color); }
-  50% { box-shadow: 0 0 30px var(--marker-color), 0 0 60px var(--marker-color); }
-}
-
-/* ── Landmark Cards ── */
-.landmarks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-.landmark-card {
+/* The card */
+.journey-card {
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
-  padding: 1.25rem;
-  transition: all 0.3s ease;
+  padding: 1rem 1.25rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
 }
 
-.landmark-card::before {
+.journey-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0;
-  width: 4px; height: 100%;
-  background: var(--card-accent, var(--cyan));
-  border-radius: 12px 0 0 12px;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+  background: var(--node-color, var(--cyan));
+  opacity: 0.5;
 }
 
-.landmark-card:hover {
+.journey-node:hover .journey-card {
   background: var(--glass-hover);
-  border-color: var(--card-accent, var(--cyan));
+  border-color: var(--node-color, var(--cyan));
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.landmark-icon {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
+/* You Are Here — special glow */
+.journey-node.you-node .journey-dot {
+  width: 16px;
+  height: 16px;
+  animation: you-pulse 2s ease-in-out infinite;
 }
 
-.landmark-name {
+@keyframes you-pulse {
+  0%, 100% { box-shadow: 0 0 12px var(--node-color), 0 0 24px var(--node-color); }
+  50% { box-shadow: 0 0 20px var(--node-color), 0 0 40px var(--node-color), 0 0 60px var(--node-color); }
+}
+
+.journey-node.you-node .journey-card {
+  border-color: var(--node-color);
+  background: linear-gradient(135deg, rgba(78, 234, 255, 0.06), var(--glass));
+}
+
+/* Card content */
+.journey-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.journey-node.left .journey-header {
+  justify-content: flex-end;
+}
+
+.journey-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.journey-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--card-accent, var(--cyan));
-  letter-spacing: 0.06em;
-  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--node-color, var(--cyan));
 }
 
-.landmark-value {
+.journey-exponent {
   font-family: var(--font-mono);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-bright);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
-.landmark-desc {
+.journey-desc {
   font-size: 0.78rem;
   color: var(--text-dim);
   line-height: 1.5;
 }
 
+.journey-time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  letter-spacing: 0.02em;
+}
+/* ── The Void: 52-order gap ── */
+.journey-void {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+  margin: 0.5rem 0;
+}
+
+.void-line {
+  width: 2px;
+  height: 40px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(50, 50, 80, 0.6) 0px,
+    rgba(50, 50, 80, 0.6) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  margin: 0 auto;
+}
+
+.void-content {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  border: 1px dashed rgba(80, 80, 120, 0.3);
+  border-radius: 16px;
+  background: linear-gradient(135deg,
+    rgba(10, 8, 25, 0.9),
+    rgba(15, 12, 35, 0.8));
+  max-width: 420px;
+  position: relative;
+  overflow: hidden;
+}
+
+.void-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center,
+    rgba(78, 234, 255, 0.03) 0%,
+    transparent 70%);
+  pointer-events: none;
+}
+
+.void-label {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  color: rgba(200, 200, 240, 0.5);
+  margin-bottom: 0.75rem;
+  animation: void-breathe 4s ease-in-out infinite;
+}
+
+@keyframes void-breathe {
+  0%, 100% { opacity: 0.4; letter-spacing: 0.25em; }
+  50% { opacity: 0.7; letter-spacing: 0.35em; }
+}
+
+.void-message {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: rgba(180, 180, 220, 0.35);
+  line-height: 1.7;
+  font-style: italic;
+}
+
+.void-scale {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.void-from {
+  color: var(--green);
+  opacity: 0.6;
+}
+
+.void-arrow {
+  color: rgba(120, 120, 160, 0.25);
+  letter-spacing: 0.15em;
+  font-size: 0.7rem;
+}
+
+.void-to {
+  color: var(--cyan);
+  opacity: 0.6;
+}
 /* ═══════════════════════════════════════
    SILICON EVENT HORIZON
    ═══════════════════════════════════════ */
@@ -705,6 +822,380 @@ body {
 }
 
 /* ═══════════════════════════════════════
+   PHYSICS DASHBOARD — The Arithmetic Vacuum
+   ═══════════════════════════════════════ */
+.physics-dashboard {
+  margin-bottom: var(--section-gap);
+}
+
+.physics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.physics-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0;
+}
+
+.physics-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 16px 16px 0 0;
+}
+
+.lambda-card::before {
+  background: linear-gradient(90deg, var(--magenta), var(--red));
+}
+.cancel-card::before {
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+}
+.epsilon-card::before {
+  background: linear-gradient(90deg, var(--gold), var(--orange));
+}
+.marginal-card::before {
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+}
+
+.physics-card:hover {
+  background: var(--glass-hover);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.physics-icon {
+  font-family: var(--font-mono);
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.lambda-card .physics-icon {
+  background: linear-gradient(135deg, var(--magenta), var(--red));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cancel-card .physics-icon {
+  background: linear-gradient(135deg, var(--green), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.epsilon-card .physics-icon {
+  background: linear-gradient(135deg, var(--gold), var(--orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.marginal-card .physics-icon {
+  background: linear-gradient(135deg, var(--purple), var(--cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.physics-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.physics-value {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--text-bright);
+  margin-bottom: 0.6rem;
+  min-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.physics-bar-container {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.physics-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.lambda-bar {
+  background: linear-gradient(90deg, var(--magenta), var(--red));
+  box-shadow: 0 0 8px var(--magenta-glow);
+}
+.cancel-bar {
+  background: linear-gradient(90deg, var(--green), var(--cyan));
+  box-shadow: 0 0 8px var(--green-glow);
+}
+.epsilon-bar {
+  background: linear-gradient(90deg, var(--gold), var(--orange));
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+.marginal-bar {
+  background: linear-gradient(90deg, var(--purple), var(--cyan));
+  box-shadow: 0 0 8px rgba(168, 85, 247, 0.15);
+}
+
+.physics-sublabel {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+/* Mode toggle */
+.physics-mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.mode-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mode-btn:hover {
+  background: var(--glass-hover);
+  border-color: var(--cyan-dim);
+  color: var(--text);
+}
+
+.mode-btn.active {
+  background: linear-gradient(135deg, rgba(78, 234, 255, 0.1), rgba(240, 192, 64, 0.08));
+  border-color: var(--cyan);
+  color: var(--text-bright);
+  box-shadow: 0 0 20px var(--cyan-glow), inset 0 0 20px var(--cyan-glow);
+}
+
+.mode-icon {
+  font-size: 1rem;
+}
+
+/* Cosmic readout */
+.cosmic-readout {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, rgba(255, 78, 160, 0.04), rgba(78, 234, 255, 0.04));
+  border: 1px solid rgba(255, 78, 160, 0.15);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cosmic-readout::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 200%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--magenta), var(--cyan), transparent);
+  animation: scan 3s linear infinite;
+}
+
+.cosmic-n-live {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cosmic-n-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.cosmic-n-number {
+  font-family: var(--font-mono);
+  font-size: clamp(1rem, 3vw, 1.8rem);
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--magenta), var(--cyan), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: cosmic-glow 4s ease-in-out infinite;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+@keyframes cosmic-glow {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+.cosmic-note {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+
+/* N slider area */
+.physics-n-display {
+  text-align: center;
+  padding: 1.5rem 2rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+}
+
+.physics-n-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.physics-n-value {
+  font-family: var(--font-mono);
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, var(--cyan), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.physics-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  max-width: 500px;
+  height: 6px;
+  background: linear-gradient(90deg,
+    rgba(78, 240, 128, 0.3) 0%,
+    rgba(240, 192, 64, 0.3) 30%,
+    rgba(255, 78, 160, 0.3) 100%);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.physics-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan), 0 0 24px var(--cyan-glow);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.physics-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan-glow);
+}
+
+.physics-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan);
+  border: none;
+  cursor: pointer;
+}
+
+.physics-n-range {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  margin-top: 0.5rem;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Era display */
+.physics-era {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  transition: all 0.4s ease;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.physics-era.bosonic {
+  border-color: rgba(78, 234, 255, 0.2);
+  color: var(--cyan);
+  background: linear-gradient(135deg, rgba(78, 234, 255, 0.06), rgba(78, 240, 128, 0.04));
+}
+
+.physics-era.transition {
+  border-color: rgba(240, 192, 64, 0.2);
+  color: var(--gold);
+  background: linear-gradient(135deg, rgba(240, 192, 64, 0.06), rgba(255, 136, 68, 0.04));
+}
+
+.physics-era.fermionic {
+  border-color: rgba(255, 78, 160, 0.2);
+  color: var(--magenta);
+  background: linear-gradient(135deg, rgba(255, 78, 160, 0.06), rgba(255, 51, 68, 0.04));
+}
+
+/* ═══════════════════════════════════════
    FOOTER
    ═══════════════════════════════════════ */
 .footer {
@@ -728,10 +1219,26 @@ body {
 /* ═══════════════════════════════════════
    RESPONSIVE
    ═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .physics-grid { grid-template-columns: 1fr 1fr; }
+}
+
 @media (max-width: 768px) {
   .cathedral-clock { padding: 1rem 1rem 3rem; }
-  .timeline-track { height: 150px; }
-  .tl-marker-label { font-size: 0.5rem; }
+
+  /* Journey collapses to single-column */
+  .journey::before { left: 20px; }
+  .journey-dot { left: 20px; }
+  .journey-node.left .journey-card,
+  .journey-node.right .journey-card {
+    margin-left: 52px;
+    margin-right: 0;
+    text-align: left;
+  }
+  .journey-node.left .journey-header {
+    justify-content: flex-start;
+  }
+
   .bridge-visual { flex-direction: column; gap: 0; }
   .bridge-connector { flex: none; width: 100%; }
   .connector-line {
@@ -742,4 +1249,23 @@ body {
   .connector-line::before { top: -4px; left: 50%; transform: translateX(-50%); }
   .connector-line::after { top: auto; bottom: -4px; left: 50%; transform: translateX(-50%); }
   .bridge-zone { flex: none; width: 200px; }
+  .physics-card { padding: 1rem 0.75rem; }
+  .physics-icon { font-size: 1.6rem; }
+  .physics-sublabel { font-size: 0.5rem; }
+  .mode-btn { padding: 0.5rem 1rem; font-size: 0.65rem; }
+  .cosmic-n-number { font-size: 1rem; }
+  .cosmic-readout { padding: 1rem 1rem; }
+  .horizon-cards { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .physics-grid { grid-template-columns: 1fr; }
+  .physics-mode-toggle { flex-direction: column; align-items: center; }
+  .mode-btn { width: 100%; max-width: 200px; justify-content: center; }
+  .cosmic-note { font-size: 0.5rem; }
+  .physics-era { font-size: 0.6rem; }
+  .journey-card { padding: 0.75rem 1rem; }
+  .journey-name { font-size: 0.6rem; }
+  .journey-exponent { font-size: 0.9rem; }
+  .journey-desc { font-size: 0.7rem; }
 }
