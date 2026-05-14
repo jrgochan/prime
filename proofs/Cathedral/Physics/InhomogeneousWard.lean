@@ -81,9 +81,23 @@ private theorem gram_dotProduct_eq_one_plus_excess (N : ℕ) (hN : 3 ≤ N) :
       ((Cathedral.Vasyunin.vasyuninGramMatrix N).mulVec
         (Cathedral.Vasyunin.logCutoffWitness N)) =
     1 + PhaseTransition.excess N := by
-  -- The dotProduct over Fin N equals the double sum over Fin N
-  -- Since v(N-1) = 0 (logCutoffWitness_last), the last row/column vanish
-  -- The remaining Fin(N-1) sum = 1 + excess(N) (vtGv_eq_one_plus_excess)
+  -- Convert to Fin (N-1) using quadForm_bridge_aux
+  -- quadForm_bridge_aux m hm2 converts dotProduct v (G.mulVec v) [Fin (m+1)]
+  -- to realQuadForm G' (bdMoebiusWeight (m+1)) [Fin m]
+  have hN1 : N - 1 + 1 = N := Nat.sub_add_cancel (by omega)
+  have hN1_ge2 : 2 ≤ N - 1 := by omega
+  -- Rewrite N as (N-1) + 1 to match quadForm_bridge_aux
+  rw [← hN1, quadForm_bridge_aux (N - 1) hN1_ge2]
+  -- realQuadForm unfolds to dotProduct v (G.mulVec v)
+  unfold realQuadForm
+  -- Substitute (N-1)+1 = N back everywhere
+  simp only [hN1]
+  -- Now match with vtGv_eq_one_plus_excess
+  rw [← PhaseTransition.vtGv_eq_one_plus_excess N]
+  -- LHS: dotProduct (bdMoebiusWeight N) ((of G).mulVec (bdMoebiusWeight N))
+  -- RHS: Σ i Σ j witnessEntry(i+1,N) * gramEntry(i+1,j+1) * witnessEntry(j+1,N)
+  -- These are definitionally equal sums — bdMoebiusWeight = witnessEntry.
+  -- The sorry is a pure index congruence between dotProduct/mulVec vs Σ Σ.
   sorry
 
 /-- **THE INHOMOGENEOUS WARD BOUND** — GRADUATED from axiom to theorem.
