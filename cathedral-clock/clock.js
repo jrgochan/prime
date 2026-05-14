@@ -116,9 +116,11 @@ function renderTimeline() {
   const track = document.getElementById('timeline-track');
   if (!track) return;
 
-  // Stagger heights to prevent label overlap
-  const heights = [140, 100, 180, 120, 160, 90, 130];
-  const labelPositions = ['top', 'top', 'top', 'top', 'top', 'top', 'top'];
+  // Carefully tuned heights per landmark to avoid label collisions
+  // Planck(0%) GPU(1.2%) are close → stagger aggressively
+  const markerHeights = [80, 140, 210, 110, 170, 100, 150];
+  // Alternate label alignment: left-aligned vs right-aligned for nearby markers
+  const labelAligns = ['left', 'left', 'center', 'center', 'center', 'center', 'center'];
 
   LANDMARKS.forEach((lm, idx) => {
     const pct = expToPercent(lm.exponent);
@@ -127,11 +129,15 @@ function renderTimeline() {
     marker.style.left = `${pct}%`;
     marker.style.setProperty('--marker-color', lm.color);
 
-    const lineHeight = lm.isYou ? 180 : heights[idx % heights.length];
-    const labelOffset = -(lineHeight + 18);
+    const lineHeight = lm.isYou ? 210 : markerHeights[idx % markerHeights.length];
+    const labelOffset = -(lineHeight + 16);
+    const align = labelAligns[idx % labelAligns.length];
+    const alignStyle = align === 'left' ? 'left: 0; transform: none;'
+      : align === 'right' ? 'right: 0; transform: none;'
+      : 'left: 50%; transform: translateX(-50%);';
 
     marker.innerHTML = `
-      <div class="tl-marker-label" style="top: ${labelOffset}px;">${lm.name}</div>
+      <div class="tl-marker-label" style="top: ${labelOffset}px; ${alignStyle}">${lm.name}</div>
       <div class="tl-marker-dot"></div>
       <div class="tl-marker-line" style="height: ${lineHeight}px;"></div>
       <div class="tl-marker-value">10<sup>${Math.round(lm.exponent)}</sup></div>
