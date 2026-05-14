@@ -40,7 +40,8 @@
   - W(N) ≈ -[Σ μ(k)·w(k)·G_off(k)]
   - The cross-sum Σ μ(j)μ(k)·G(j,k) telescopes via Mertens
 
-  Status: 2 sorry (bilinear core + excess assembly).
+  Status: 1 sorry (bilinear excess assembly only).
+  Graduated: tapered_mertens_tendsto_zero (May 14, 2026).
   Dependencies: PhaseTransition, DiagonalBound, PNT.UnconditionalMertens
   Created: May 14, 2026 — Exploration 36 (The Bilinear Bridge Session)
 -/
@@ -396,11 +397,10 @@ The SUSY approach succeeds because:
 
 ## Audit
 
-### Sorry: 2
+### Sorry: 1
 | # | Location | What It Needs |
 |---|----------|---------------|
-| 1 | `tapered_mertens_tendsto_zero` | Abel summation + PNT |
-| 2 | `excess_bounded_by_mertens_rate` | Bilinear Abel assembly |
+| 1 | `excess_bounded_by_mertens_rate` | Bilinear Abel assembly |
 
 ### Custom Axioms: 0
 
@@ -408,8 +408,11 @@ The SUSY approach succeeds because:
 | # | Result | Status |
 |---|--------|--------|
 | 1 | `mertens_sum_tendsto_zero` | **🎓 THEOREM** |
-| 2 | `bilinear_eq_vtGv` | **🎓 THEOREM** |
-| 3 | `ward_from_pnt` | **🎓 THEOREM** (delegates to sorry #2) |
+| 2 | `logWeightedMertens` | **🎓 DEFINITION** |
+| 3 | `tapered_decomposition` | **🎓 THEOREM** (algebraic identity) |
+| 4 | `tapered_mertens_tendsto_zero` | **🎓 THEOREM** (ε-δ proof from Mertens II+III) |
+| 5 | `bilinear_eq_vtGv` | **🎓 THEOREM** |
+| 6 | `ward_from_pnt` | **🎓 THEOREM** (delegates to sorry #1) |
 -/
 
 end Cathedral.Physics.BilinearMertens
