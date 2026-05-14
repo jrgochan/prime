@@ -239,171 +239,159 @@ body {
 }
 
 /* ═══════════════════════════════════════
-   TIMELINE
+   VERTICAL JOURNEY TIMELINE
    ═══════════════════════════════════════ */
 .timeline-section {
   margin-bottom: var(--section-gap);
 }
 
-.timeline-container {
+.journey {
   position: relative;
-  margin: 2rem 0 3rem;
-  padding: 0 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  max-width: 800px;
+  margin: 2rem auto 0;
+  padding: 1rem 0;
 }
 
-.timeline-track {
-  position: relative;
-  height: 240px;
-  min-width: 700px;
-  background: linear-gradient(90deg,
-    rgba(78, 240, 128, 0.08) 0%,
-    rgba(78, 234, 255, 0.08) 20%,
-    rgba(240, 192, 64, 0.06) 50%,
-    rgba(255, 78, 160, 0.06) 75%,
-    rgba(255, 51, 68, 0.1) 100%);
-  border-radius: 12px;
-  border: 1px solid var(--glass-border);
-  overflow: visible;
-}
-
-.timeline-axis {
-  margin-top: 0.5rem;
-}
-
-.axis-labels {
-  display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  padding: 0 0.5rem;
-}
-
-/* Timeline markers */
-.tl-marker {
+/* Central spine */
+.journey::before {
+  content: '';
   position: absolute;
+  left: 50%;
+  top: 0;
   bottom: 0;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.tl-marker-line {
   width: 2px;
-  background: var(--marker-color, var(--cyan));
-  box-shadow: 0 0 6px var(--marker-color, var(--cyan));
-  border-radius: 1px;
-  opacity: 0.7;
+  background: linear-gradient(180deg,
+    var(--green) 0%,
+    var(--cyan) 20%,
+    var(--gold) 45%,
+    var(--purple) 60%,
+    var(--orange) 80%,
+    var(--red) 100%);
+  transform: translateX(-50%);
+  opacity: 0.4;
 }
 
-.tl-marker-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--marker-color, var(--cyan));
-  box-shadow: 0 0 10px var(--marker-color, var(--cyan));
-  margin-top: -4px;
+/* Each node */
+.journey-node {
   position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+/* Dot on the spine */
+.journey-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--node-color, var(--cyan));
+  box-shadow: 0 0 10px var(--node-color, var(--cyan)),
+              0 0 20px color-mix(in srgb, var(--node-color, var(--cyan)) 30%, transparent);
+  transform: translate(-50%, -50%);
   z-index: 3;
+  transition: all 0.3s ease;
 }
 
-.tl-marker-label {
-  position: absolute;
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  color: var(--marker-color, var(--cyan));
-  font-weight: 600;
-  text-shadow: 0 0 8px var(--void), 0 0 16px var(--void);
-  padding: 1px 4px;
-  background: rgba(5, 5, 16, 0.7);
-  border-radius: 3px;
+.journey-node:hover .journey-dot {
+  transform: translate(-50%, -50%) scale(1.5);
+  box-shadow: 0 0 16px var(--node-color), 0 0 32px var(--node-color);
 }
 
-.tl-marker-value {
-  position: absolute;
-  bottom: -18px;
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  white-space: nowrap;
-  color: var(--text-dim);
-  background: rgba(5, 5, 16, 0.7);
-  padding: 1px 3px;
-  border-radius: 2px;
+/* Card positioning */
+.journey-node.left .journey-card {
+  margin-right: calc(50% + 24px);
+  margin-left: 0;
+  text-align: right;
 }
 
-/* Animated glow for "You Are Here" */
-.tl-marker.you-are-here .tl-marker-dot {
-  animation: glow-pulse 2s ease-in-out infinite;
+.journey-node.right .journey-card {
+  margin-left: calc(50% + 24px);
+  margin-right: 0;
+  text-align: left;
 }
 
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 12px var(--marker-color); }
-  50% { box-shadow: 0 0 30px var(--marker-color), 0 0 60px var(--marker-color); }
-}
-
-/* ── Landmark Cards ── */
-.landmarks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-.landmark-card {
+/* The card */
+.journey-card {
   background: var(--glass);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
-  padding: 1.25rem;
-  transition: all 0.3s ease;
+  padding: 1rem 1.25rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
 }
 
-.landmark-card::before {
+.journey-card::before {
   content: '';
   position: absolute;
-  top: 0; left: 0;
-  width: 4px; height: 100%;
-  background: var(--card-accent, var(--cyan));
-  border-radius: 12px 0 0 12px;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+  background: var(--node-color, var(--cyan));
+  opacity: 0.5;
 }
 
-.landmark-card:hover {
+.journey-node:hover .journey-card {
   background: var(--glass-hover);
-  border-color: var(--card-accent, var(--cyan));
+  border-color: var(--node-color, var(--cyan));
   transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
-.landmark-icon {
-  font-size: 1.6rem;
-  margin-bottom: 0.5rem;
+/* You Are Here — special glow */
+.journey-node.you-node .journey-dot {
+  width: 16px;
+  height: 16px;
+  animation: you-pulse 2s ease-in-out infinite;
 }
 
-.landmark-name {
+@keyframes you-pulse {
+  0%, 100% { box-shadow: 0 0 12px var(--node-color), 0 0 24px var(--node-color); }
+  50% { box-shadow: 0 0 20px var(--node-color), 0 0 40px var(--node-color), 0 0 60px var(--node-color); }
+}
+
+.journey-node.you-node .journey-card {
+  border-color: var(--node-color);
+  background: linear-gradient(135deg, rgba(78, 234, 255, 0.06), var(--glass));
+}
+
+/* Card content */
+.journey-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.journey-node.left .journey-header {
+  justify-content: flex-end;
+}
+
+.journey-icon {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.journey-name {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--card-accent, var(--cyan));
-  letter-spacing: 0.06em;
-  margin-bottom: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--node-color, var(--cyan));
 }
 
-.landmark-value {
+.journey-exponent {
   font-family: var(--font-mono);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--text-bright);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
-.landmark-desc {
+.journey-desc {
   font-size: 0.78rem;
   color: var(--text-dim);
   line-height: 1.5;
@@ -1119,8 +1107,20 @@ body {
 
 @media (max-width: 768px) {
   .cathedral-clock { padding: 1rem 1rem 3rem; }
-  .timeline-track { height: 180px; min-width: 600px; }
-  .tl-marker-label { font-size: 0.45rem; padding: 1px 2px; }
+
+  /* Journey collapses to single-column */
+  .journey::before { left: 20px; }
+  .journey-dot { left: 20px; }
+  .journey-node.left .journey-card,
+  .journey-node.right .journey-card {
+    margin-left: 52px;
+    margin-right: 0;
+    text-align: left;
+  }
+  .journey-node.left .journey-header {
+    justify-content: flex-start;
+  }
+
   .bridge-visual { flex-direction: column; gap: 0; }
   .bridge-connector { flex: none; width: 100%; }
   .connector-line {
@@ -1146,5 +1146,8 @@ body {
   .mode-btn { width: 100%; max-width: 200px; justify-content: center; }
   .cosmic-note { font-size: 0.5rem; }
   .physics-era { font-size: 0.6rem; }
+  .journey-card { padding: 0.75rem 1rem; }
+  .journey-name { font-size: 0.6rem; }
+  .journey-exponent { font-size: 0.9rem; }
+  .journey-desc { font-size: 0.7rem; }
 }
-

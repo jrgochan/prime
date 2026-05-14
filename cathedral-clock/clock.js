@@ -111,70 +111,31 @@ function expToPercent(exp) {
   return Math.max(0, Math.min(100, (exp / TIMELINE_MAX) * 100));
 }
 
-// ── Render Timeline ──
-function renderTimeline() {
-  const track = document.getElementById('timeline-track');
-  if (!track) return;
-
-  // Carefully tuned heights per landmark to avoid label collisions
-  // Planck(0%) GPU(1.2%) are close → stagger aggressively
-  const markerHeights = [80, 140, 210, 110, 170, 100, 150];
-  // Alternate label alignment: left-aligned vs right-aligned for nearby markers
-  const labelAligns = ['left', 'left', 'center', 'center', 'center', 'center', 'center'];
+// ── Render Journey (Vertical Timeline) ──
+function renderJourney() {
+  const journey = document.getElementById('journey');
+  if (!journey) return;
 
   LANDMARKS.forEach((lm, idx) => {
-    const pct = expToPercent(lm.exponent);
-    const marker = document.createElement('div');
-    marker.className = `tl-marker${lm.isYou ? ' you-are-here' : ''}`;
-    marker.style.left = `${pct}%`;
-    marker.style.setProperty('--marker-color', lm.color);
-
-    const lineHeight = lm.isYou ? 210 : markerHeights[idx % markerHeights.length];
-    const labelOffset = -(lineHeight + 16);
-    const align = labelAligns[idx % labelAligns.length];
-    const alignStyle = align === 'left' ? 'left: 0; transform: none;'
-      : align === 'right' ? 'right: 0; transform: none;'
-      : 'left: 50%; transform: translateX(-50%);';
-
-    marker.innerHTML = `
-      <div class="tl-marker-label" style="top: ${labelOffset}px; ${alignStyle}">${lm.name}</div>
-      <div class="tl-marker-dot"></div>
-      <div class="tl-marker-line" style="height: ${lineHeight}px;"></div>
-      <div class="tl-marker-value">10<sup>${Math.round(lm.exponent)}</sup></div>
-    `;
-    track.appendChild(marker);
-  });
-
-  // Axis labels
-  const axisLabels = document.getElementById('axis-labels');
-  if (axisLabels) {
-    for (let e = 0; e <= TIMELINE_MAX; e += 50) {
-      const label = document.createElement('span');
-      label.innerHTML = `10<sup>${e}</sup>`;
-      axisLabels.appendChild(label);
-    }
-  }
-}
-
-// ── Render Landmark Cards ──
-function renderLandmarkCards() {
-  const grid = document.getElementById('landmarks-grid');
-  if (!grid) return;
-
-  LANDMARKS.forEach(lm => {
-    const card = document.createElement('div');
-    card.className = 'landmark-card';
-    card.style.setProperty('--card-accent', lm.color);
+    const node = document.createElement('div');
+    const side = idx % 2 === 0 ? 'left' : 'right';
+    node.className = `journey-node ${side}${lm.isYou ? ' you-node' : ''}`;
+    node.style.setProperty('--node-color', lm.color);
 
     const displayVal = lm.displayValue || (lm.exponent === 0 ? '1' : `10<sup>${Math.round(lm.exponent)}</sup>`);
 
-    card.innerHTML = `
-      <div class="landmark-icon">${lm.icon}</div>
-      <div class="landmark-name">${lm.name}</div>
-      <div class="landmark-value">N = ${displayVal}</div>
-      <div class="landmark-desc">${lm.desc}</div>
+    node.innerHTML = `
+      <div class="journey-dot"></div>
+      <div class="journey-card">
+        <div class="journey-header">
+          <span class="journey-icon">${lm.icon}</span>
+          <span class="journey-name">${lm.name}</span>
+        </div>
+        <div class="journey-exponent">N = ${displayVal}</div>
+        <div class="journey-desc">${lm.desc}</div>
+      </div>
     `;
-    grid.appendChild(card);
+    journey.appendChild(node);
   });
 }
 
@@ -316,8 +277,7 @@ function initScrollAnimations() {
 // ── Init ──
 document.addEventListener('DOMContentLoaded', () => {
   initStarfield();
-  renderTimeline();
-  renderLandmarkCards();
+  renderJourney();
   updatePlanckCounter();
   updateLiveTime();
   animateHorizonFill();
