@@ -103,14 +103,19 @@ theorem tapered_mertens_tendsto_zero
     (hPNT : Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
       (↑(moebius k) : ℝ) / (k : ℝ)) atTop (nhds 0)) :
     Tendsto taperedMertensSum atTop (nhds 0) := by
-  -- The tapered sum is bounded by the untapered sum in absolute value,
-  -- since |w(k,N)| ≤ 1 for all k ≤ N.
-  -- More precisely, Abel summation decomposes:
-  --   Σ μ(k)·w(k)/k = M_N · w(N) + Σ M(k) · (w(k) - w(k+1)) / k
-  -- where M_N = Σ_{j≤N} μ(j)/j → 0.
-  -- Each tail M(k) → 0 and the taper differences sum to ≤ 1.
-  -- Full formalization requires connecting AbelTail engine.
-  -- For now, we note this follows from Abel summation + PNT.
+  -- The tapered Mertens sum decomposes as:
+  --   taperedMertensSum(N) = Σ μ(k)·w(k,N)/k
+  --                        = Σ μ(k)/k - (1/ln N)·Σ μ(k)·ln(k)/k
+  --                        = mertensRecipSum(N-1) - correction/ln(N)
+  --
+  -- By Mertens' third: mertensRecipSum → 0 (hypothesis)
+  -- The correction Σ μ(k)·ln(k)/k → -1 (Mertens' second theorem)
+  -- So correction/ln(N) → 0.
+  -- Therefore taperedMertensSum → 0 - 0 = 0.
+  --
+  -- Full Abel summation argument with quantitative bounds needed.
+  -- The infrastructure exists in AbelTail/ but connecting it requires
+  -- careful index management between Fin and Icc representations.
   sorry
 
 -- ════════════════════════════════════════════════════════════════
