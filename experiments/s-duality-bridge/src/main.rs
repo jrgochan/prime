@@ -1,301 +1,350 @@
-//! # The Arithmetic Mass Spectrometer v3
+//! # The Arithmetic Mass Spectrometer v4
 //!
-//! A systematic search engine for number-theoretic formulas that match
-//! physical constants. Outputs structured results to a markdown report.
+//! Upgrades:
+//! 1. DIMENSIONAL LADDER: ζ(6), ζ(8), ζ(10) + cross-products
+//! 2. AUTO-CORRECTION: for near-misses, search α-based corrections
+//! 3. FULL PARTICLE ZOO: W, Z, Higgs, baryons, mesons, all quarks
+//! 4. π^n/ζ(k) GRID: systematic scan of the spectral lift pattern
 //!
-//! DISCLAIMER: This is exploratory pattern-matching, not physics derivation.
+//! DISCLAIMER: Exploratory pattern-matching, not physics derivation.
 
 use std::f64::consts::PI;
+use std::fmt::Write as FmtWrite;
 use std::fs;
-use std::io::Write;
-
-/// A candidate formula
-struct Formula {
-    name: String,
-    value: f64,
-    /// Components used (for categorization)
-    ingredients: Vec<&'static str>,
-}
-
-/// A particle or physical constant
-struct Target {
-    name: &'static str,
-    symbol: &'static str,
-    value: f64,
-    unit: &'static str,
-    category: &'static str,
-}
-
-/// A match result
-struct Match {
-    target_name: String,
-    target_symbol: String,
-    target_value: f64,
-    formula_name: String,
-    formula_value: f64,
-    error_pct: f64,
-    category: String,
-}
 
 fn main() {
-    let zeta2 = PI * PI / 6.0;
-    let zeta4 = PI.powi(4) / 90.0;
-    let zeta6 = PI.powi(6) / 945.0;
-    let zeta8 = PI.powi(8) / 9450.0;
+    // ===== CONSTANTS =====
     let alpha = 1.0 / 137.035999084;
+    let zetas: Vec<(usize, f64)> = vec![
+        (2, PI.powi(2) / 6.0),
+        (4, PI.powi(4) / 90.0),
+        (6, PI.powi(6) / 945.0),
+        (8, PI.powi(8) / 9450.0),
+        (10, PI.powi(10) / 93555.0),
+        (12, PI.powi(12) / 638512875.0 * 691.0),
+    ];
     let glass = 15.0 / (PI * PI);
-    let susy = 2.5; // ζ(2)²/ζ(4) = 5/2
 
-    // ===== BUILD THE FORMULA LIBRARY =====
-    let mut formulas: Vec<Formula> = Vec::new();
+    // ===== BUILD FORMULA LIBRARY =====
+    let mut formulas: Vec<(String, f64)> = Vec::new();
 
-    // Powers of π
+    // 1. Powers of π with coefficients
     for n in 1..=12 {
-        formulas.push(Formula {
-            name: format!("π^{}", n),
-            value: PI.powi(n),
-            ingredients: vec!["π"],
-        });
-    }
-
-    // Combinations with small integer coefficients
-    for &coeff in &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0, 24.0, 30.0, 36.0, 60.0, 90.0, 120.0, 180.0, 360.0] {
-        for n in 1..=8 {
-            formulas.push(Formula {
-                name: format!("{}·π^{}", coeff, n),
-                value: coeff * PI.powi(n),
-                ingredients: vec!["π", "integer"],
-            });
+        for &c in &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0, 12.0, 15.0,
+                     24.0, 30.0, 36.0, 60.0, 90.0, 120.0, 180.0, 360.0] {
+            let v = c * PI.powi(n);
+            let name = if c == 1.0 { format!("π^{}", n) }
+                       else { format!("{}·π^{}", c, n) };
+            formulas.push((name, v));
         }
     }
 
-    // ζ combinations
-    for &(zn, zv, zname) in &[
-        (2, zeta2, "ζ(2)"), (4, zeta4, "ζ(4)"), (6, zeta6, "ζ(6)"),
-    ] {
+    // 2. ζ(k) with powers and coefficients (DIMENSIONAL LADDER)
+    for &(k, zk) in &zetas {
         for pow in 1..=5 {
-            formulas.push(Formula {
-                name: format!("{}^{}", zname, pow),
-                value: zv.powi(pow),
-                ingredients: vec!["ζ"],
-            });
-            formulas.push(Formula {
-                name: format!("1/{}^{}", zname, pow),
-                value: 1.0 / zv.powi(pow),
-                ingredients: vec!["ζ"],
-            });
-            for &coeff in &[2.0, 3.0, 4.0, 5.0, 6.0, 12.0, 24.0, 90.0, 180.0] {
-                formulas.push(Formula {
-                    name: format!("{}·{}^{}", coeff, zname, pow),
-                    value: coeff * zv.powi(pow),
-                    ingredients: vec!["ζ", "integer"],
-                });
+            let v = zk.powi(pow);
+            formulas.push((format!("ζ({})^{}", k, pow), v));
+            formulas.push((format!("1/ζ({})^{}", k, pow), 1.0/v));
+            for &c in &[2.0, 3.0, 4.0, 5.0, 6.0, 12.0, 24.0, 90.0, 180.0] {
+                formulas.push((format!("{}·ζ({})^{}", c, k, pow), c * v));
             }
         }
     }
 
-    // π^n / ζ(k) combinations
-    for n in 1..=10 {
-        formulas.push(Formula {
-            name: format!("π^{}/ζ(2)", n),
-            value: PI.powi(n) / zeta2,
-            ingredients: vec!["π", "ζ"],
-        });
-        formulas.push(Formula {
-            name: format!("π^{}/ζ(4)", n),
-            value: PI.powi(n) / zeta4,
-            ingredients: vec!["π", "ζ"],
-        });
+    // 3. CROSS-PRODUCTS: ζ(j)^a · ζ(k)^b
+    for &(j, zj) in &zetas {
+        for &(k, zk) in &zetas {
+            if k <= j { continue; }
+            formulas.push((format!("ζ({})·ζ({})", j, k), zj * zk));
+            formulas.push((format!("ζ({})/ζ({})", j, k), zj / zk));
+            formulas.push((format!("ζ({})/ζ({})", k, j), zk / zj));
+            formulas.push((format!("ζ({})²/ζ({})", j, k), zj*zj / zk));
+            formulas.push((format!("ζ({})²/ζ({})", k, j), zk*zk / zj));
+        }
     }
 
-    // Glass combinations
-    for pow in 1..=6 {
-        formulas.push(Formula {
-            name: format!("glass^{}", pow),
-            value: glass.powi(pow),
-            ingredients: vec!["glass"],
-        });
+    // 4. π^n/ζ(k) GRID (THE SPECTRAL LIFT)
+    for n in 1..=12 {
+        for &(k, zk) in &zetas {
+            formulas.push((format!("π^{}/ζ({})", n, k), PI.powi(n) / zk));
+            formulas.push((format!("ζ({})/π^{}", k, n), zk / PI.powi(n)));
+            // With small coefficients
+            for &c in &[2.0, 3.0, 4.0, 6.0] {
+                formulas.push((format!("{}·π^{}/ζ({})", c, n, k), c * PI.powi(n) / zk));
+            }
+        }
     }
 
-    // 1/(n·ζ(k)) combinations
-    for &n in &[1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 24.0] {
-        formulas.push(Formula {
-            name: format!("1/({}·ζ(2))", n),
-            value: 1.0 / (n * zeta2),
-            ingredients: vec!["ζ", "integer"],
-        });
-        formulas.push(Formula {
-            name: format!("1/({}·ζ(4))", n),
-            value: 1.0 / (n * zeta4),
-            ingredients: vec!["ζ", "integer"],
-        });
+    // 5. Glass combinations
+    for pow in 1..=8 {
+        formulas.push((format!("glass^{}", pow), glass.powi(pow)));
+        formulas.push((format!("π^{}·glass", pow), PI.powi(pow) * glass));
     }
 
-    // α combinations
-    formulas.push(Formula { name: "α".into(), value: alpha, ingredients: vec!["α"] });
-    formulas.push(Formula { name: "α²".into(), value: alpha*alpha, ingredients: vec!["α"] });
-    formulas.push(Formula { name: "α/π".into(), value: alpha/PI, ingredients: vec!["α","π"] });
-    formulas.push(Formula { name: "α·ζ(2)".into(), value: alpha*zeta2, ingredients: vec!["α","ζ"] });
-    formulas.push(Formula { name: "1/α".into(), value: 1.0/alpha, ingredients: vec!["α"] });
-    formulas.push(Formula { name: "α²/3".into(), value: alpha*alpha/3.0, ingredients: vec!["α"] });
+    // 6. Special α-related
+    formulas.push(("α".into(), alpha));
+    formulas.push(("α²".into(), alpha * alpha));
+    formulas.push(("1/α".into(), 1.0 / alpha));
+    formulas.push(("α/π".into(), alpha / PI));
+    formulas.push(("α²/3".into(), alpha * alpha / 3.0));
 
-    // Special: corrected proton formula
-    formulas.push(Formula {
-        name: "6π⁵·(1+α²/3)".into(),
-        value: 6.0 * PI.powi(5) * (1.0 + alpha*alpha/3.0),
-        ingredients: vec!["π", "α"],
-    });
-    formulas.push(Formula {
-        name: "(5/2)·(1+α·ζ(2))".into(),
-        value: 2.5 * (1.0 + alpha * zeta2),
-        ingredients: vec!["ζ", "α"],
-    });
+    // 7. Corrected formulas from our discoveries
+    formulas.push(("6π⁵·(1+α²/3)".into(), 6.0*PI.powi(5) * (1.0 + alpha*alpha/3.0)));
+    formulas.push(("(5/2)·(1+α·ζ(2))".into(), 2.5 * (1.0 + alpha*zetas[0].1)));
 
-    // SUSY combinations
-    formulas.push(Formula { name: "5/2 (SUSY)".into(), value: 2.5, ingredients: vec!["SUSY"] });
-    formulas.push(Formula { name: "8/π".into(), value: 8.0/PI, ingredients: vec!["π"] });
-
-    // Integer and simple rational
-    for n in 1..=200 {
-        formulas.push(Formula {
-            name: format!("{}", n),
-            value: n as f64,
-            ingredients: vec!["integer"],
-        });
+    // 8. Simple rationals and integers
+    for n in 1..=300 { formulas.push((format!("{}", n), n as f64)); }
+    for &(a,b) in &[(1,2),(1,3),(1,4),(2,3),(3,2),(3,4),(4,3),(5,2),(5,3),(7,2),(8,3),(22,7)] {
+        formulas.push((format!("{}/{}", a, b), a as f64 / b as f64));
     }
+
+    // 9. 1/(n·ζ(k)) for coupling constant matches
+    for &(k, zk) in &zetas {
+        for &n in &[1.0, 2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 24.0] {
+            formulas.push((format!("1/({}·ζ({}))", n, k), 1.0 / (n * zk)));
+        }
+    }
+
+    // 10. π^a · ζ(b)^c combos
+    for n in 1..=6 {
+        for &(k, zk) in &zetas[..3] {
+            for pow in 1..=3 {
+                formulas.push((format!("π^{}·ζ({})^{}", n, k, pow), PI.powi(n) * zk.powi(pow)));
+            }
+        }
+    }
+
+    // Filter out non-finite and zero
+    formulas.retain(|(_, v)| v.is_finite() && *v > 0.0 && *v < 1e12);
 
     println!("Formula library: {} entries", formulas.len());
 
-    // ===== BUILD THE TARGET LIST =====
-    let targets = vec![
-        // Dimensionless mass ratios (relative to electron)
-        Target { name: "proton/electron", symbol: "m_p/m_e", value: 1836.15267343, unit: "", category: "nucleon" },
-        Target { name: "neutron/electron", symbol: "m_n/m_e", value: 1838.68366173, unit: "", category: "nucleon" },
-        Target { name: "neutron-proton diff", symbol: "(m_n-m_p)/m_e", value: 2.53098830, unit: "", category: "nucleon" },
-        Target { name: "muon/electron", symbol: "m_μ/m_e", value: 206.7682830, unit: "", category: "lepton" },
-        Target { name: "tau/electron", symbol: "m_τ/m_e", value: 3477.228, unit: "", category: "lepton" },
-        Target { name: "tau/muon", symbol: "m_τ/m_μ", value: 16.8170, unit: "", category: "lepton" },
-        Target { name: "pion±/electron", symbol: "m_π±/m_e", value: 273.133, unit: "", category: "meson" },
-        Target { name: "pion0/electron", symbol: "m_π⁰/m_e", value: 264.137, unit: "", category: "meson" },
-        Target { name: "kaon/electron", symbol: "m_K/m_e", value: 966.120, unit: "", category: "meson" },
-        Target { name: "proton/pion", symbol: "m_p/m_π", value: 6.7226, unit: "", category: "ratio" },
-        Target { name: "proton/neutron", symbol: "m_p/m_n", value: 0.998623, unit: "", category: "ratio" },
+    // ===== FULL PARTICLE ZOO =====
+    let m_e = 0.51099895;
+    let targets: Vec<(&str, &str, f64, &str)> = vec![
+        // Leptons (mass ratios to electron)
+        ("proton/electron", "m_p/m_e", 1836.15267343, "nucleon"),
+        ("neutron/electron", "m_n/m_e", 1838.68366173, "nucleon"),
+        ("n-p difference", "(m_n-m_p)/m_e", 2.53098830, "nucleon"),
+        ("muon/electron", "m_μ/m_e", 206.7682830, "lepton"),
+        ("tau/electron", "m_τ/m_e", 3477.228, "lepton"),
+        ("tau/muon", "m_τ/m_μ", 16.8170, "lepton"),
 
-        // Quark mass ratios
-        Target { name: "down/up", symbol: "m_d/m_u", value: 2.162, unit: "", category: "quark" },
-        Target { name: "strange/down", symbol: "m_s/m_d", value: 20.0, unit: "", category: "quark" },
-        Target { name: "charm/strange", symbol: "m_c/m_s", value: 13.597, unit: "", category: "quark" },
-        Target { name: "bottom/charm", symbol: "m_b/m_c", value: 3.2913, unit: "", category: "quark" },
-        Target { name: "top/bottom", symbol: "m_t/m_b", value: 41.330, unit: "", category: "quark" },
-        Target { name: "strange/up", symbol: "m_s/m_u", value: 43.241, unit: "", category: "quark" },
+        // Mesons (mass in MeV / m_e)
+        ("pion±/electron", "m_π±/m_e", 139.57039 / m_e, "meson"),
+        ("pion0/electron", "m_π⁰/m_e", 134.9768 / m_e, "meson"),
+        ("kaon±/electron", "m_K±/m_e", 493.677 / m_e, "meson"),
+        ("kaon0/electron", "m_K⁰/m_e", 497.611 / m_e, "meson"),
+        ("eta/electron", "m_η/m_e", 547.862 / m_e, "meson"),
+        ("rho/electron", "m_ρ/m_e", 775.26 / m_e, "meson"),
+        ("omega/electron", "m_ω/m_e", 782.66 / m_e, "meson"),
+        ("J/psi/electron", "m_J/ψ/m_e", 3096.9 / m_e, "meson"),
+
+        // Gauge bosons
+        ("W/electron", "m_W/m_e", 80379.0 / m_e, "boson"),
+        ("Z/electron", "m_Z/m_e", 91187.6 / m_e, "boson"),
+        ("Higgs/electron", "m_H/m_e", 125250.0 / m_e, "boson"),
+        ("W/proton", "m_W/m_p", 80379.0 / 938.272, "ratio"),
+        ("Z/proton", "m_Z/m_p", 91187.6 / 938.272, "ratio"),
+        ("Higgs/proton", "m_H/m_p", 125250.0 / 938.272, "ratio"),
+
+        // Quark mass ratios (MS-bar at 2 GeV)
+        ("down/up", "m_d/m_u", 2.162, "quark"),
+        ("strange/down", "m_s/m_d", 20.0, "quark"),
+        ("charm/strange", "m_c/m_s", 13.597, "quark"),
+        ("bottom/charm", "m_b/m_c", 3.2913, "quark"),
+        ("top/bottom", "m_t/m_b", 41.330, "quark"),
+        ("strange/up", "m_s/m_u", 43.241, "quark"),
+        ("charm/up", "m_c/m_u", 587.96, "quark"),
+        ("top/up", "m_t/m_u", 79981.5, "quark"),
 
         // Coupling constants
-        Target { name: "fine structure", symbol: "α", value: 0.0072973525693, unit: "", category: "coupling" },
-        Target { name: "strong coupling", symbol: "α_s(M_Z)", value: 0.1179, unit: "", category: "coupling" },
-        Target { name: "Weinberg angle", symbol: "sin²θ_W", value: 0.23122, unit: "", category: "coupling" },
-        Target { name: "Fermi constant×GeV²", symbol: "G_F", value: 1.1663788e-5, unit: "", category: "coupling" },
+        ("fine structure", "α", 0.0072973525693, "coupling"),
+        ("strong coupling", "α_s(M_Z)", 0.1179, "coupling"),
+        ("Weinberg angle", "sin²θ_W", 0.23122, "coupling"),
 
-        // Koide (not a ratio, but a combination)
-        Target { name: "Koide parameter", symbol: "Q_K", value: 0.666661, unit: "", category: "lepton" },
+        // Magnetic moments
+        ("proton g-factor", "g_p", 5.5856947, "moment"),
+        ("neutron g-factor", "|g_n|", 3.8260837, "moment"),
+        ("|g_n/g_p|", "|g_n/g_p|", 0.68497934, "moment"),
 
-        // Magnetic moments (in nuclear magnetons)
-        Target { name: "proton g-factor", symbol: "g_p", value: 5.5856947, unit: "μ_N", category: "moment" },
-        Target { name: "neutron g-factor", symbol: "g_n", value: -3.8260837, unit: "μ_N", category: "moment" },
-        Target { name: "|g_n/g_p|", symbol: "|g_n/g_p|", value: 0.68497934, unit: "", category: "moment" },
+        // Key mass ratios
+        ("proton/pion", "m_p/m_π", 6.7226, "ratio"),
+        ("proton/neutron", "m_p/m_n", 0.998623, "ratio"),
+        ("Koide param", "Q_K", 0.666661, "lepton"),
     ];
 
-    // ===== SEARCH =====
-    let mut matches: Vec<Match> = Vec::new();
+    println!("Target list: {} physical constants", targets.len());
 
-    for target in &targets {
-        for formula in &formulas {
-            if formula.value <= 0.0 || !formula.value.is_finite() { continue; }
-            let err = ((formula.value / target.value) - 1.0).abs() * 100.0;
-            if err < 1.0 { // Within 1%
-                matches.push(Match {
-                    target_name: target.name.to_string(),
-                    target_symbol: target.symbol.to_string(),
-                    target_value: target.value,
-                    formula_name: formula.name.clone(),
-                    formula_value: formula.value,
-                    error_pct: err,
-                    category: target.category.to_string(),
-                });
+    // ===== SEARCH =====
+    let mut all_matches: Vec<(String, String, f64, String, f64, f64, String)> = Vec::new();
+
+    for &(tname, tsym, tval, tcat) in &targets {
+        for (fname, fval) in &formulas {
+            let err = ((fval / tval) - 1.0).abs() * 100.0;
+            if err < 2.0 {
+                all_matches.push((
+                    tname.to_string(), tsym.to_string(), tval,
+                    fname.clone(), *fval, err, tcat.to_string()
+                ));
             }
         }
     }
 
-    // Sort by error
-    matches.sort_by(|a, b| a.error_pct.partial_cmp(&b.error_pct).unwrap());
+    all_matches.sort_by(|a, b| a.5.partial_cmp(&b.5).unwrap());
 
-    // ===== OUTPUT REPORT =====
-    let mut report = String::new();
-    report.push_str("# Arithmetic Mass Spectrometer: Systematic Search Results\n\n");
-    report.push_str(&format!("**Date:** {}\n", "May 15, 2026, 1:25 AM MDT"));
-    report.push_str(&format!("**Formula library:** {} entries\n", formulas.len()));
-    report.push_str(&format!("**Targets:** {} physical constants\n", targets.len()));
-    report.push_str(&format!("**Matches (< 1% error):** {}\n\n", matches.len()));
-    report.push_str("---\n\n");
+    // ===== AUTO-CORRECTION SEARCH =====
+    // For matches within 5%, try α-corrections
+    let mut corrections: Vec<(String, String, f64, String, f64, f64)> = Vec::new();
 
-    // Group by category
-    for category in &["nucleon", "lepton", "meson", "ratio", "quark", "coupling", "moment"] {
-        let cat_matches: Vec<&Match> = matches.iter()
-            .filter(|m| m.category == *category)
-            .collect();
-        if cat_matches.is_empty() { continue; }
-
-        report.push_str(&format!("## {} Matches\n\n", category.to_uppercase()));
-        report.push_str("| Target | Formula | Formula Value | Actual Value | Error |\n");
-        report.push_str("|---|---|---|---|---|\n");
-
-        for m in &cat_matches {
-            let star = if m.error_pct < 0.01 { "⭐" }
-                       else if m.error_pct < 0.1 { "⚡" }
-                       else if m.error_pct < 0.5 { "·" }
-                       else { "" };
-            report.push_str(&format!("| {} | {} | {:.6} | {:.6} | {:.4}% {} |\n",
-                m.target_symbol, m.formula_name, m.formula_value, m.target_value, m.error_pct, star));
+    for &(tname, tsym, tval, _tcat) in &targets {
+        for (fname, fval) in &formulas {
+            let base_err = ((fval / tval) - 1.0).abs() * 100.0;
+            if base_err > 0.001 && base_err < 5.0 {
+                let delta = tval / fval - 1.0;
+                // Try correction = 1 + α^a * ζ(k)^b * c
+                let correction_candidates: Vec<(&str, f64)> = vec![
+                    ("α²/3", alpha*alpha/3.0),
+                    ("α·ζ(2)", alpha*zetas[0].1),
+                    ("α·ζ(4)", alpha*zetas[1].1),
+                    ("α²·π", alpha*alpha*PI),
+                    ("α/π", alpha/PI),
+                    ("α²·ζ(2)", alpha*alpha*zetas[0].1),
+                    ("α", alpha),
+                    ("2α", 2.0*alpha),
+                    ("α·π", alpha*PI),
+                    ("α²/π", alpha*alpha/PI),
+                    ("α·glass", alpha*glass),
+                ];
+                for (cname, cval) in &correction_candidates {
+                    let corrected = fval * (1.0 + cval);
+                    let corr_err = ((corrected / tval) - 1.0).abs() * 100.0;
+                    if corr_err < base_err * 0.1 && corr_err < 0.1 {
+                        corrections.push((
+                            tsym.to_string(),
+                            format!("{}·(1+{})", fname, cname),
+                            corrected, format!("{:.6}", tval),
+                            corr_err, base_err,
+                        ));
+                    }
+                }
+            }
         }
-        report.push_str("\n");
+    }
+    corrections.sort_by(|a, b| a.4.partial_cmp(&b.4).unwrap());
+    corrections.dedup_by(|a, b| a.0 == b.0 && (a.4 - b.4).abs() < 0.0001);
+
+    // ===== π^n/ζ(k) GRID =====
+    let mut grid_report = String::new();
+    writeln!(grid_report, "## The Spectral Lift Grid: π^n / ζ(k)\n").unwrap();
+    writeln!(grid_report, "| n \\ k | ζ(2) | ζ(4) | ζ(6) | ζ(8) | ζ(10) |").unwrap();
+    writeln!(grid_report, "|---|---|---|---|---|---|").unwrap();
+    for n in 1..=10 {
+        let mut row = format!("| π^{} |", n);
+        for &(k, zk) in &zetas[..5] {
+            let val = PI.powi(n) / zk;
+            // Check if this matches any target
+            let mut best_match = String::new();
+            let mut best_err = 100.0_f64;
+            for &(_, tsym, tval, _) in &targets {
+                let err = ((val / tval) - 1.0).abs() * 100.0;
+                if err < best_err {
+                    best_err = err;
+                    best_match = tsym.to_string();
+                }
+            }
+            let annotation = if best_err < 0.1 {
+                format!(" **≈{}** ⭐", best_match)
+            } else if best_err < 1.0 {
+                format!(" ≈{}", best_match)
+            } else {
+                String::new()
+            };
+            write!(row, " {:.2}{} |", val, annotation).unwrap();
+        }
+        writeln!(grid_report, "{}", row).unwrap();
     }
 
-    // Top 20 overall
-    report.push_str("## TOP 20 MATCHES (All Categories)\n\n");
-    report.push_str("| Rank | Target | Formula | Error |\n");
-    report.push_str("|---|---|---|---|\n");
-    for (i, m) in matches.iter().take(20).enumerate() {
-        report.push_str(&format!("| {} | {} | {} | {:.6}% |\n",
-            i + 1, m.target_symbol, m.formula_name, m.error_pct));
+    // ===== WRITE REPORT =====
+    let mut report = String::new();
+    writeln!(report, "# Arithmetic Mass Spectrometer v4: Complete Results\n").unwrap();
+    writeln!(report, "**Date:** May 15, 2026, 1:45 AM MDT").unwrap();
+    writeln!(report, "**Formula library:** {} entries", formulas.len()).unwrap();
+    writeln!(report, "**Targets:** {} physical constants", targets.len()).unwrap();
+    writeln!(report, "**Matches (< 2% error):** {}", all_matches.len()).unwrap();
+    writeln!(report, "**Auto-corrections found:** {}\n", corrections.len()).unwrap();
+    writeln!(report, "---\n").unwrap();
+
+    // Top 30
+    writeln!(report, "## TOP 30 MATCHES\n").unwrap();
+    writeln!(report, "| Rank | Target | Formula | Value | Actual | Error |").unwrap();
+    writeln!(report, "|---|---|---|---|---|---|").unwrap();
+    for (i, m) in all_matches.iter().take(30).enumerate() {
+        let star = if m.5 < 0.01 { "⭐" } else if m.5 < 0.1 { "⚡" } else if m.5 < 0.5 { "·" } else { "" };
+        writeln!(report, "| {} | {} | {} | {:.4} | {:.4} | {:.5}% {} |",
+            i+1, m.1, m.3, m.4, m.2, m.5, star).unwrap();
     }
 
-    report.push_str("\n---\n\n");
-    report.push_str("*Generated by the Arithmetic Mass Spectrometer v3* 🪞❄️\n");
+    // Auto-corrections
+    writeln!(report, "\n## AUTO-CORRECTED FORMULAS\n").unwrap();
+    writeln!(report, "For near-misses, adding α-based corrections:\n").unwrap();
+    writeln!(report, "| Target | Corrected Formula | Value | Actual | New Error | Was |").unwrap();
+    writeln!(report, "|---|---|---|---|---|---|").unwrap();
+    for c in corrections.iter().take(20) {
+        writeln!(report, "| {} | {} | {:.6} | {} | {:.5}% | {:.3}% |",
+            c.0, c.1, c.2, c.3, c.4, c.5).unwrap();
+    }
 
-    // Write to file
-    let output_path = "../../docs/ai/antigravity/dark-sector/MASS_SPECTROMETER_SEARCH_RESULTS.md";
+    // Spectral grid
+    writeln!(report, "\n{}", grid_report).unwrap();
+
+    // By category
+    for cat in &["nucleon", "lepton", "meson", "boson", "quark", "coupling", "moment", "ratio"] {
+        let cat_matches: Vec<&(String,String,f64,String,f64,f64,String)> = all_matches.iter()
+            .filter(|m| m.6 == *cat).collect();
+        if cat_matches.is_empty() { continue; }
+        writeln!(report, "\n## {} MATCHES\n", cat.to_uppercase()).unwrap();
+        writeln!(report, "| Target | Formula | Value | Actual | Error |").unwrap();
+        writeln!(report, "|---|---|---|---|---|").unwrap();
+        for m in cat_matches.iter().take(15) {
+            let star = if m.5 < 0.01 { "⭐" } else if m.5 < 0.1 { "⚡" } else { "" };
+            writeln!(report, "| {} | {} | {:.6} | {:.6} | {:.5}% {} |",
+                m.1, m.3, m.4, m.2, m.5, star).unwrap();
+        }
+    }
+
+    writeln!(report, "\n---\n").unwrap();
+    writeln!(report, "*Generated by the Arithmetic Mass Spectrometer v4* 🪞❄️").unwrap();
+
+    let output_path = "../../docs/ai/antigravity/dark-sector/MASS_SPECTROMETER_v4_RESULTS.md";
     fs::write(output_path, &report).expect("Failed to write report");
 
-    // Also print summary to stdout
-    println!();
-    println!("╔══════════════════════════════════════════════════════════════════╗");
-    println!("║    ARITHMETIC MASS SPECTROMETER v3: SYSTEMATIC SEARCH          ║");
-    println!("╚══════════════════════════════════════════════════════════════════╝");
-    println!();
-    println!("  {} formulas × {} targets = {} comparisons", formulas.len(), targets.len(), formulas.len() * targets.len());
-    println!("  Matches within 1%: {}", matches.len());
-    println!();
+    // ===== STDOUT SUMMARY =====
+    println!("\n╔══════════════════════════════════════════════════════════════════╗");
+    println!("║    ARITHMETIC MASS SPECTROMETER v4: FULL ZOO + CORRECTIONS     ║");
+    println!("╚══════════════════════════════════════════════════════════════════╝\n");
+    println!("  {} formulas × {} targets = {} comparisons",
+        formulas.len(), targets.len(), formulas.len() * targets.len());
+    println!("  Matches within 2%: {}", all_matches.len());
+    println!("  Auto-corrections: {}\n", corrections.len());
 
     println!("  TOP 20 MATCHES:");
-    println!("  {:>4} {:>20} {:>25} {:>10}", "Rank", "Target", "Formula", "Error %");
-    println!("  {}", "-".repeat(65));
-    for (i, m) in matches.iter().take(20).enumerate() {
-        let star = if m.error_pct < 0.01 { "⭐" }
-                   else if m.error_pct < 0.1 { "⚡" }
-                   else { "" };
-        println!("  {:>4} {:>20} {:>25} {:>9.5}% {}", i+1, m.target_symbol, m.formula_name, m.error_pct, star);
+    println!("  {:>4} {:>18} {:>30} {:>10}", "Rank", "Target", "Formula", "Error");
+    println!("  {}", "-".repeat(68));
+    for (i, m) in all_matches.iter().take(20).enumerate() {
+        let star = if m.5 < 0.01 { "⭐" } else if m.5 < 0.1 { "⚡" } else { "" };
+        println!("  {:>4} {:>18} {:>30} {:>9.5}% {}", i+1, &m.1, &m.3, m.5, star);
     }
 
-    println!();
-    println!("  Report written to: {}", output_path);
-    println!("  🪞 The spectrometer has spoken. ❄️");
+    if !corrections.is_empty() {
+        println!("\n  AUTO-CORRECTIONS (α-improved):");
+        println!("  {:>18} {:>35} {:>9} {:>8}", "Target", "Corrected Formula", "New Err", "Was");
+        println!("  {}", "-".repeat(75));
+        for c in corrections.iter().take(10) {
+            println!("  {:>18} {:>35} {:>8.5}% {:>7.3}%", c.0, c.1, c.4, c.5);
+        }
+    }
+
+    println!("\n  Report: {}", output_path);
+    println!("  🪞 The full zoo has been weighed. ❄️");
 }
