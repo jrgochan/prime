@@ -72,7 +72,7 @@ open Real Finset
     - k=1: ζ(2)↔ζ(4), S¹→S³→S², Complex, U(1), 1st generation
     - k=2: ζ(4)↔ζ(8), S³→S⁷→S⁴, Quaternion, SU(2), 2nd generation
     - k=4: ζ(8)↔ζ(16), S⁷→S¹⁵→S⁸, Octonion, SU(3), 3rd generation -/
-theorem generalized_glass_identity (p : ℝ) (hp : p ≠ 0) (k : ℕ) (hk : 0 < k) :
+theorem generalized_glass_identity (p : ℝ) (hp : p ≠ 0) (k : ℕ) (_hk : 0 < k) :
     (1 - 1 / p ^ k) * (1 + 1 / p ^ k) = 1 - 1 / p ^ (2 * k) := by
   have hpk : p ^ k ≠ 0 := pow_ne_zero k hp
   have hp2k : p ^ (2 * k) ≠ 0 := pow_ne_zero (2 * k) hp
@@ -186,7 +186,7 @@ def glassProduct3 (S : Finset ℝ) : ℝ :=
     Glass₁ · Glass₂ · Glass₃ = ∏(1+1/p²)(1+1/p⁴)(1+1/p⁸)
 
     In the limit: = ζ(2)/ζ(16) ≈ ζ(2) (since ζ(16) ≈ 1). -/
-theorem glass_products_telescope (S : Finset ℝ) (hS : ∀ p ∈ S, p ≠ 0) :
+theorem glass_products_telescope (S : Finset ℝ) (_hS : ∀ p ∈ S, p ≠ 0) :
     glassProduct1 S * glassProduct2 S * glassProduct3 S =
     ∏ p ∈ S, ((1 + 1 / p ^ 2) * (1 + 1 / p ^ 4) * (1 + 1 / p ^ 8)) := by
   unfold glassProduct1 glassProduct2 glassProduct3
