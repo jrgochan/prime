@@ -1,0 +1,194 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../../shared/cathedral-preamble}
+\usepackage{setspace}
+\onehalfspacing
+
+\title{%
+  The Cathedral: A Guide for the Curious\\[4pt]
+  \large What a Computer Proof About Prime Numbers\\
+  \large Means for the Rest of Us%
+}
+\author{Jason Robert Gochanour}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper explains the Cathedral project---a computer-verified
+proof about the Riemann Hypothesis---for readers without a
+mathematics background. No equations are required. We explain what
+the Riemann Hypothesis is, why it matters, what the Cathedral
+actually proved, and why the answer is ``we reduced a 167-year-old
+mystery to one well-understood fact, and a computer checked
+our work.''
+\end{abstract}
+
+% ================================================================
+\section{The Oldest Open Problem}
+% ================================================================
+
+There is a question about prime numbers---2, 3, 5, 7, 11, 13,
+\ldots---that has been open since 1859. A German mathematician
+named Bernhard Riemann conjectured a pattern in how primes are
+distributed among the whole numbers. His conjecture, called the
+\emph{Riemann Hypothesis}, has never been proved or disproved.
+
+It is considered the most important unsolved problem in mathematics.
+A proof would have implications for cryptography, physics, and our
+understanding of the fundamental structure of numbers.
+
+% ================================================================
+\section{What We Did}
+% ================================================================
+
+We did \textbf{not} prove the Riemann Hypothesis.
+
+What we did is this: we built a formal proof---checked by a
+computer, line by line---that the Riemann Hypothesis is
+\emph{exactly equivalent} to a different mathematical statement.
+This other statement says that a certain distance measurement
+(called the Nyman--Beurling distance) gets closer and closer to
+zero.
+
+Think of it like this: imagine you want to know whether a mountain
+has gold inside it. You can't dig through the mountain. But you
+\emph{can} prove, with mathematical certainty, that the mountain
+has gold \emph{if and only if} a certain needle on a gauge points
+to zero. You haven't found the gold, but you've built a perfect
+measuring instrument.
+
+% ================================================================
+\section{What Does ``Computer-Verified'' Mean?}
+% ================================================================
+
+When a human writes a mathematical proof, other humans check it.
+Humans make mistakes. In 2012, a proof of a major conjecture was
+published, celebrated, and later found to contain an error.
+
+When a computer verifies a proof, it checks every logical step
+against the rules of mathematics, mechanically, without skipping
+anything. It cannot be fooled, bribed, or tired. If the computer
+says the proof is correct, it is correct---up to the correctness
+of the computer itself.
+
+We used a program called \textbf{Lean~4}, developed at Microsoft
+Research, which has been used to verify proofs in algebra, geometry,
+and analysis. Our proof spans $\sim$60{,}500 lines across 227 active
+files and compiles without errors.
+
+% ================================================================
+\section{What Remains}
+% ================================================================
+
+Our proof reduces the Riemann Hypothesis to \textbf{one} remaining
+fact. It is a well-known result that mathematicians have
+published and peer-reviewed:
+
+\begin{enumerate}
+  \item The forward direction of the B\'aez-Duarte criterion
+    (published in the International Mathematics Research Notices,
+    2003): under RH, a certain set of functions can approximate
+    the constant function 1 arbitrarily well.
+\end{enumerate}
+
+This is accepted mathematics. It is an ``axiom'' in our
+system only because the computer's math library doesn't yet contain
+the infrastructure to verify it mechanically. When it does, our
+proof will be complete.
+
+% ================================================================
+\section{The Three Builders}
+% ================================================================
+
+The Cathedral was built by three minds working together:
+
+\begin{enumerate}
+  \item A human mathematician (Jason Robert Gochanour), who provided
+    the vision, selected the approach, and checked every line.
+  \item Google's Gemini AI, which suggested mathematical strategies
+    and identified key architectural decisions.
+  \item Anthropic's Claude AI, which wrote the computer-verified
+    proofs and built the numerical experiments.
+\end{enumerate}
+
+This is, to our knowledge, the first time two AI systems and a
+human have collaborated to produce a formally verified mathematical
+result of this scale.
+
+% ================================================================
+\section{Why Does This Matter?}
+% ================================================================
+
+\begin{enumerate}
+  \item \textbf{For mathematics}: It shows that computer verification
+    can tackle the hardest open problems, not just textbook exercises.
+  \item \textbf{For AI}: It demonstrates a model where AI augments
+    human capability rather than replacing it.
+  \item \textbf{For everyone}: It means the logical structure of one
+    of humanity's deepest mathematical mysteries is now mapped,
+    verified, and publicly available for anyone to inspect.
+\end{enumerate}
+
+% ================================================================
+\section{For Journalists}
+% ================================================================
+
+\subsection{One-Sentence Summary}
+
+A human-AI team built a computer-verified proof that reduces the
+167-year-old Riemann Hypothesis to one well-understood mathematical
+fact.
+
+\subsection{Key Facts}
+
+\begin{itemize}
+  \item \textbf{What}: Formal proof that RH is equivalent to a
+    distance measurement going to zero.
+  \item \textbf{Who}: Jason Robert Gochanour with Google's Gemini
+    and Anthropic's Claude.
+  \item \textbf{How long}: 45 days, March--May 2026.
+  \item \textbf{Size}: $\sim$60{,}500 lines of verified proof code
+    (227 active files), 50+ computational experiments.
+  \item \textbf{What it is NOT}: A proof of the Riemann Hypothesis.
+  \item \textbf{What it IS}: A machine-verified reduction to one
+    standard analytic result.
+\end{itemize}
+
+\subsection{Suggested Headline}
+
+\emph{``Computer Proof Maps the Logical Structure of Math's Greatest
+Unsolved Problem''}
+
+\subsection{Common Misconceptions}
+
+\begin{enumerate}
+  \item \textbf{``They proved RH!''} --- No. We proved an equivalence.
+  \item \textbf{``AI solved a math problem.''} --- AI assisted; the
+    human directed and verified.
+  \item \textbf{``This is just a computer program.''} --- It is a
+    proof, checked by a theorem-proving compiler.
+\end{enumerate}
+
+% ================================================================
+\section{How to Verify}
+% ================================================================
+
+The entire proof is open source. To check it yourself:
+
+\begin{enumerate}
+  \item Install Lean~4 (\url{https://leanprover.github.io}).
+  \item Clone the repository.
+  \item Run \texttt{cd proofs \&\& lake build Cathedral}.
+  \item If it compiles: the proof is correct.
+\end{enumerate}
+
+No trust in the authors is required. The compiler is the arbiter.
+
+\begin{thebibliography}{99}
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
+\end{thebibliography}
+
+\end{document}

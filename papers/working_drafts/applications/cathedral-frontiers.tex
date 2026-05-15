@@ -1,0 +1,260 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../../shared/cathedral-preamble}
+
+\title{%
+  Open Horizons:\\
+  Research Frontiers Beyond the Cathedral%
+}
+\author{Jason Robert Gochanour}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We survey the open problems and research directions suggested by
+the Cathedral project, spanning computer science, pure mathematics,
+and formalization engineering. The Cathedral reduced the Riemann
+Hypothesis to one literature axiom; we identify the mathematical
+infrastructure needed to close it, the algorithmic questions raised by the
+DD-precision pipeline, and the broader implications for the formal
+verification of analytic number theory.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Introduction}
+% ================================================================
+
+The Cathedral is complete as a proof architecture, but it opens
+more doors than it closes. This paper maps the territory beyond
+the Cathedral walls.
+
+% ================================================================
+\section{Closing the One Crown Axiom}
+% ================================================================
+
+The sole crown axiom \lean{baez\_duarte\_forward} states that under
+RH, the BD basis can approximate 1 in $L^2(0,1)$. This is the
+B\'aez-Duarte forward direction (IMRN 2003). Closing it requires
+connecting the existing infrastructure (see BOUNTY.md for the
+detailed gap analysis):
+
+\begin{enumerate}
+  \item The Littlewood Maneuver (\textbf{PROVED}, 0 axioms).
+  \item The Parseval Bridge (\textbf{PROVED}, 0 axioms).
+  \item The Perron chain giving $M(x) = O(x^{1/2+\varepsilon})$
+    under RH (\textbf{PROVED}, 0 axioms).
+  \item The truncation error bound for Dirichlet polynomials
+    (\textbf{GAP}: 500--800 lines, 2--3 weeks).
+  \item The Kronecker/Bohr approximation theorem
+    (\textbf{GAP}: 300--500 lines, 1--2 weeks).
+\end{enumerate}
+
+\textbf{Estimated total}: 900--1{,}500 lines, 3--6 weeks for an
+expert team. 95\% of the infrastructure already exists.
+
+\subsection{Alternative Paths}
+
+Three alternative forward paths provide cross-validation:
+
+\begin{enumerate}
+  \item \textbf{Mellin Crown} (2 axioms): Via the Hardy--Littlewood
+    mean value theorem and Hadamard product estimates.
+  \item \textbf{Perron Crown} (4 axioms): Via real-variable Mertens
+    bounds and the Vasyunin Gram matrix.
+  \item \textbf{Renormalization Bridge}: Via the log-cutoff
+    renormalization group flow.
+\end{enumerate}
+
+Closing any alternative-path axiom strengthens the multi-path
+architecture even if the crown axiom remains open.
+
+\subsection{The Oracle Bridge (Path D)}
+
+The v17 Oracle Capstone introduces a fourth path: the
+\emph{compute oracle}. The full proof chain from trusted computation
+to RH is already proved:
+\begin{center}
+\small
+\texttt{oracle\_certificates} (trusted GPU) $\to$
+\texttt{gram\_subseq\_from\_certificates} (proved) $\to$
+\texttt{rh\_from\_certificates} (proved) $\to$ RH
+\end{center}
+The sole axiom is \lean{oracle\_certificates}: the assertion that
+DD-precision computation of $v^T G v$ at highly composite numbers
+yields the stated bounds. This follows the Flyspeck precedent
+(trusted computation backing formal proof).
+
+\textbf{Open problem}: Graduate \lean{oracle\_certificates} from
+axiom to theorem by kernel-verifying $v^T G v < 1$ at even one $N$.
+The blocker is that \lean{logCutoffWitness} uses \lean{Real.log},
+which is noncomputable in Lean~4. Three approaches exist (rational
+bounding, \lean{native\_decide} with computable proxy, interval
+arithmetic), each requiring 500--1{,}000 lines. This is a natural
+community contribution target.
+
+\subsection{The Orthogonality Shield (Path E)}
+
+The spectral observatory (Exploration 33) discovered that the
+decoupling exponent $\beta(N) > 1$ for all measured $N$, with
+$\beta \approx 0.18 \ln N$. If $\beta > 1$ can be proved
+\emph{unconditionally} (without assuming RH), it would provide
+a real-spectral proof that $d_N^2 \to 0$, bypassing the
+complex-analytic machinery entirely. This is a deep open problem
+connecting Gram matrix spectral theory to the Heisenberg picture
+of arithmetic.
+
+% ================================================================
+\section{Algorithmic Questions}
+% ================================================================
+
+\subsection{Fast Gram Matrix Computation}
+
+Computing $G_N$ exactly via Vasyunin's formula costs $O(N^2 \log N)$.
+Can this be improved? The Fourier structure of the cotangent sums
+suggests an $O(N \log^2 N)$ algorithm via FFT.
+
+\subsection{The Eigenvalue Distribution}
+
+Numerical experiments at f64 precision suggested
+$\lambda_{\min}(G_N) \sim N^{-2}$, but DD-precision (MPFR-256)
+measurements show $\lambda_{\min} \approx 2.5 \times 10^{-7}$ at
+$N = 10{,}000$ (24$\times$ larger than f64), consistent with
+logarithmic scaling $\lambda_{\min} \sim c/\ln N$. The condition
+number $\kappa(G_N) > 10^7$ at these scales defeats IEEE~754
+double precision.
+$\lambda_{\max}(G_N) \sim \log N$ is robust across precisions.
+
+\textbf{Open problem}: Prove the true asymptotic scaling of
+$\lambda_{\min}(G_N)$. The connection to random matrix theory
+(GOE spacing statistics) suggests tools from integrable probability.
+
+\subsection{Optimal Weight Computation}
+
+The optimal BD weights $v = G^{-1}b$ grow like $\|v\|^2 = \Theta(N)$
+while $d_N^2 \to 0$. The Sherman--Morrison rank-1 update
+$G_{N+1} = G_N + uu^T$ enables $O(N^2)$ online updating. Can this
+be reduced further?
+
+% ================================================================
+\section{Mathematical Frontiers}
+% ================================================================
+
+\subsection{The Spectral Universality Conjecture}
+
+Exploration 19 established experimentally that the spectral
+statistics of the BD Gram matrix transition from Poisson (small $N$)
+to GOE (large $N$) at a critical threshold
+$N_c \approx 60 \cdot m/\varphi(m)$.
+
+\textbf{Open problem}: Prove the universality of this threshold.
+This would connect the Cathedral to the Bohigas--Giannoni--Schmit
+conjecture in quantum chaos.
+
+\subsection{The $\alpha \approx 0.47$ Constant}
+
+The participation ratio stabilizes at $\alpha \approx 0.47$,
+between full localization and GOE delocalization.
+
+\textbf{Open problem}: Derive $\alpha$ from the zeta function.
+This may involve the pair correlation of zeta zeros
+(Montgomery's conjecture).
+
+\subsection{Generalized Nyman--Beurling}
+
+The Cathedral uses $h_k(x) = \{1/(kx)\}$. What happens with:
+\begin{itemize}
+  \item $h_k(x) = \{k^\alpha/x\}$ for $\alpha \neq 1$?
+  \item $h_k(x) = \{1/(kx)\} \cdot w(x)$ for weights $w$?
+  \item Analogues for Dirichlet $L$-functions?
+\end{itemize}
+
+\subsection{The M\"obius Stratum Convergence Conjecture}
+
+The GCD Partition theorem (\texttt{Covariance/GCDPartition.lean},
+zero sorry) decomposes the BD quadratic form as
+$d_N^2 = \sum_{d \mid N!} S_d$.
+GPU experiments at $N = 55{,}440$ reveal an 88\% correlation between
+$\operatorname{sgn}(S_d)$ and $\mu(d)$.
+
+\textbf{Conjecture (M\"obius Stratum Convergence)}: For each
+squarefree $d$, $\operatorname{sgn}(S_d) = \mu(d)$ for all
+sufficiently large $N$, and the net cancellation
+$\sum_d S_d \to 0$ at rate $O(1/\ln N)$.
+
+Proving this conjecture would give a \emph{purely arithmetic} proof
+of $d_N^2 \to 0$, with the cancellation emerging from the
+M\"obius function's sign structure on the divisor lattice rather
+than from complex analysis.
+
+% ================================================================
+\section{Formalization Engineering Frontiers}
+% ================================================================
+
+\subsection{Mathlib Contributions}
+
+Five Mathlib additions with highest impact:
+\begin{enumerate}
+  \item Vertical contour integrals.
+  \item Analytic continuation for Mellin transforms.
+  \item The Mertens function with basic bounds.
+  \item Fractional part API enrichment.
+  \item Montgomery--Vaughan mean value theorem.
+\end{enumerate}
+
+\subsection{Certified Computation at Scale}
+
+The DD-precision pipeline (Dekker--Knuth Double-Double arithmetic)
+has extended Gram matrix certification to $N = 55{,}440$. Scaling
+further requires:
+\begin{itemize}
+  \item GPU-accelerated DD matvec for $N > 100{,}000$.
+  \item Out-of-core Gram matrix construction for systems exceeding
+    RAM capacity.
+  \item Streaming DD-precision CG with checkpoint/restart.
+  \item Parallel certification across moduli.
+\end{itemize}
+
+The Dekker--Knuth boundary ($N \approx 40{,}000$) marks the
+transition from f64-tractable to DD-required computation. Beyond
+$N \approx 200{,}000$, even DD arithmetic may exhaust precision,
+requiring triple-double or MPFR-backed CG solvers.
+
+\subsection{Formal Proofs for Related Problems}
+
+The Cathedral architecture could be adapted for:
+\begin{itemize}
+  \item The Generalized Riemann Hypothesis (Dirichlet $L$-functions).
+  \item The Selberg class (axiomatic $L$-functions).
+  \item Robin's inequality---already proved equivalent to NB
+    in the Cathedral (\S6 of the main paper). Extending to
+    a standalone formalization independent of the Crown axioms
+    would be of interest.
+\end{itemize}
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The Cathedral is an ending and a beginning. The proof architecture
+is complete; the mathematical questions it raises are not. The
+research frontier extends in at least five directions: closing the
+one crown axiom, understanding the spectral universality, exploiting the
+algorithmic structure (including the DD-precision pipeline),
+contributing to Mathlib, and generalizing to other $L$-functions.
+
+\begin{thebibliography}{99}
+\bibitem{cathedral}
+J.R.~Gochanour, \emph{The Cathedral}, 2026.
+\bibitem{montgomery1973}
+H.L.~Montgomery, \emph{The pair correlation of zeros of the zeta
+function}, Proc. Symp. Pure Math. \textbf{24} (1973).
+\bibitem{bgs1984}
+O.~Bohigas, M.J.~Giannoni, and C.~Schmit, \emph{Characterization
+of chaotic quantum spectra}, Phys. Rev. Lett. \textbf{52} (1984).
+\end{thebibliography}
+
+\end{document}

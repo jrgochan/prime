@@ -1,0 +1,14 @@
+[package]
+name = "core-engine"
+version = "0.0.1"
+edition = "2021"
+description = "The original Project HYPERZETA sedenion engine — March 27, 2026"
+
+[lib]
+name = "core_engine"
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+getrandom = { version = "0.2", features = ["js"] }
+rand = "0.8"

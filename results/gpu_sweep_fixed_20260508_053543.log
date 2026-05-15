@@ -1,0 +1,41 @@
+═══ GPU SWEEP (witness-vector fix) ═══
+
+━━━ Processing experiments/cache/hpdf/gram_N360.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N1000.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N2520.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N5040.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N10000.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N20000.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N40000.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.
+
+━━━ Processing experiments/cache/hpdf/gram_N55440.h5 ━━━
+error: a value is required for '--gpu <PATH>' but none was supplied
+
+For more information, try '--help'.

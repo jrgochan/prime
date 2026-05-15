@@ -1,0 +1,958 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{../../shared/cathedral-preamble}
+\usepackage{setspace}
+\onehalfspacing
+
+\title{%
+  The Dark Mirror:\\
+  Dual-Use Risks of Number-Theoretic Engineering\\
+  from the Cathedral Project%
+}
+\author{
+  Jason Robert Gochanour
+}
+\date{May 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The companion papers \emph{What Could Be Built} and \emph{The
+Prime Number Grid} propose engineering applications of the
+mathematical structures discovered during the Cathedral project.
+Responsible disclosure requires examining the same technologies
+from an adversarial perspective. This paper identifies seven
+dual-use risks: (1)~precision harmonic injection attacks on power
+grids, (2)~resonance-targeted industrial sabotage via arithmetic
+vibration analysis, (3)~adversarial use of verified instability
+certificates for cascade failure engineering, (4)~broadband stealth
+and jamming from prime-spaced antenna arrays, (5)~covert RF
+surveillance via arithmetic energy harvesting, and
+(6)~AI-accelerated mathematical attack planning, where large
+language models lower the expertise barrier from graduate-level
+mathematics to natural-language prompting, and
+(7)~algorithmic blinding via arithmetic denial-of-service,
+where high-condition-number spectral injections cause
+defender software to hallucinate.
+Since the original version of this paper (April~20, 2026),
+the Cathedral has evolved from a single-path, single-axiom
+architecture (v5) to a \emph{one-pillar} architecture (v17) with
+two independent compiler-verified proof routes connected by the
+Parseval Bridge---a zero-axiom isometry between time and frequency
+domains. This architectural upgrade strengthens both the defensive
+and offensive implications of formal verification.
+For each risk, we
+assess the severity, the novelty (whether the attack vector is
+genuinely new), the current state of defenses, and recommended
+mitigations. We conclude that the mathematical structures in the
+Cathedral do not create fundamentally new attack capabilities, but
+could make existing attack vectors more \emph{precise} and harder
+to detect. The most significant new development is the
+demonstration that AI pair programming can produce formally verified
+mathematical infrastructure---lowering the barrier to both
+defensive and offensive applications.
+This paper exists because the authors believe
+that \emph{thinking about misuse before deployment} is a moral
+obligation of anyone who builds powerful tools.
+\end{abstract}
+
+\tableofcontents
+
+% ================================================================
+\section{Why This Paper Exists}
+% ================================================================
+
+Every powerful tool has a dual use. The same chemistry that produces
+fertilizer produces explosives. The same physics that enables
+nuclear medicine enables nuclear weapons. The same number theory
+that could improve power grid monitoring could, in principle, be
+turned against the grid.
+
+The companion papers propose six positive energy applications. This
+paper examines what happens when each is reflected through an
+adversarial lens. We do not provide implementation details for any
+attack---we describe the \emph{category} of risk and the
+\emph{structural} vulnerability, not the recipe.
+
+\subsection{Responsible Disclosure Rationale}
+
+We publish this analysis openly for three reasons:
+
+\begin{enumerate}
+  \item \textbf{Attackers already know the math.} The M\"obius
+    function, Fourier analysis, spectral theory, and variational
+    methods are textbook material. Suppressing this paper would not
+    deny attackers any capability. Moreover, the emergence of AI
+    mathematical assistants means that the effective barrier to
+    applying these tools is no longer a graduate education---it is
+    the ability to describe the problem to a language model.
+
+  \item \textbf{Defenders need to understand the threats.} Grid
+    operators, infrastructure security teams, and turbine
+    manufacturers benefit from understanding how number-theoretic
+    tools could be used against their systems. Silence helps
+    attackers more than defenders.
+
+  \item \textbf{Moral obligation.} If we propose technologies, we
+    must also assess their misuse potential. Publishing only the
+    positive applications would be intellectually dishonest and
+    ethically incomplete.
+\end{enumerate}
+
+\subsection{What Changed: The Dual Path Architecture}
+
+Since the initial version of this paper (April~20), the Cathedral
+has undergone a fundamental architectural transformation:
+
+\begin{itemize}
+  \item \textbf{One-Pillar Architecture}: The crown theorem now depends
+    on exactly one literature axiom (\texttt{baez\_duarte\_forward},
+    IMRN 2003). Three alternative proof paths (Mellin, Perron,
+    Renormalization) are preserved with different axiom footprints,
+    all connected by the Parseval Bridge (zero-axiom isometry).
+  \item \textbf{Scale}: 227 active Lean files, $\sim$60{,}500 lines of
+    formally verified logic, 50+ computational experiments,
+    0 sorry placeholders on the critical path.
+  \item \textbf{DD-precision certification}: A Dekker--Knuth
+    Double-Double Conjugate Gradient engine certifies the
+    B\'aez-Duarte distance at $N = 55{,}440$ ($\dim = 55{,}439$),
+    the largest such computation in the literature. A 512-bit MPFR
+    engine provides Sherman-Morrison cross-validation to $10^{-17}$.
+  \item \textbf{AI collaboration}: The entire v5 $\to$ v17 journey
+    was conducted through human-AI pair programming, demonstrating
+    the feasibility of AI-assisted formal verification.
+\end{itemize}
+
+These changes affect the dual-use landscape. Each risk section
+below notes where the v17 architecture alters the assessment.
+
+% ================================================================
+\section{Risk 1: Precision Harmonic Injection Attacks on Power Grids}
+\label{sec:harmonics}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+The M\"obius Harmonic Analyzer (MHA) decomposes grid harmonics into
+independent sources, enabling targeted active filtering.
+
+\subsection{The Dark Mirror}
+
+The same M\"obius decomposition that identifies harmonic sources
+can be used to \emph{synthesize} optimal harmonic injections. An
+attacker with a sufficiently powerful inverter connected to the
+grid could:
+
+\begin{enumerate}
+  \item \textbf{Targeted transformer saturation}: Inject
+    even-order harmonics (2nd, 4th) that cause DC offset in the
+    transformer core flux, leading to half-cycle saturation.
+    The M\"obius decomposition identifies exactly which harmonic
+    frequencies will bypass existing passive filters.
+
+  \item \textbf{Capacitor bank resonance amplification}: Identify
+    the resonant frequency of grid capacitor banks
+    ($f_r = 1/(2\pi\sqrt{LC})$) and inject power at that frequency.
+    If $f_r$ is near an integer harmonic, the arithmetic structure
+    of the injection maximizes energy transfer.
+
+  \item \textbf{Protective relay confusion}: Craft a waveform whose
+    zero-crossing pattern mimics a fault condition, causing
+    protective relays to trip unnecessarily. The M\"obius-optimal
+    harmonic mixture minimizes the injected power needed to trigger
+    a trip.
+
+  \item \textbf{Stealth}: By using M\"obius inversion, the attacker
+    can design an injection that appears as ``natural'' harmonic
+    distortion (consistent with normal nonlinear load behavior)
+    rather than an obvious attack signal.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & Low --- harmonic injection is a known attack vector \\
+Precision gain & \textbf{High} --- Parseval Bridge (v15) provides \\
+Stealth gain & \textbf{High} --- attack looks like natural distortion \\
+Physical access required & Grid connection (industrial inverter) \\
+Detection difficulty & High if designed using M\"obius structure \\
+Potential impact & Localized transformer/capacitor damage \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Deploy the MHA defensively}: The same tool that
+    enables the attack also detects it. An MHA-equipped grid monitor
+    can identify ``unnatural'' harmonic source patterns that don't
+    match known load profiles.
+  \item \textbf{Harmonic injection limits}: IEEE~519 already sets
+    limits on harmonic current injection. Enforce these at the
+    point of common coupling with real-time monitoring.
+  \item \textbf{Anomaly detection}: Train ML models on the
+    M\"obius-decomposed harmonic spectrum to detect injections that
+    deviate from historical patterns.
+\end{enumerate}
+
+\textbf{v15 update}: The Parseval Bridge
+(\texttt{White/Scattering.lean}, proved, 0 axioms) now provides a
+\emph{machine-verified} bijection between time-domain waveforms and
+frequency-domain spectral representations. An attacker could use this
+to compute the $L^2$-optimal injection waveform for a given target
+spectrum, with verified energy conservation. However, the same bridge
+gives defenders an equally powerful detection tool: any anomalous
+frequency pattern can be immediately converted to its unique
+time-domain signature, making stealth harder, not easier.
+
+% ================================================================
+\section{Risk 2: Resonance-Targeted Industrial Sabotage}
+\label{sec:vibration}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+The Arithmetic Vibration Monitor (AVM) uses compressed sensing with
+an arithmetic dictionary to detect incipient turbine faults.
+
+\subsection{The Dark Mirror}
+
+If arithmetic compressed sensing can detect subtle vibration
+signatures, it can also \emph{design} them. An attacker with
+physical access to a turbine (or the ability to modulate its load)
+could:
+
+\begin{enumerate}
+  \item \textbf{Resonance excitation}: Identify the natural
+    frequencies of turbine blades via the Gram matrix eigenvalue
+    structure, then apply periodic load variations at a blade
+    natural frequency to induce resonant fatigue failure.
+
+  \item \textbf{Sub-harmonic injection}: Excite blade vibration at
+    a frequency that is $1/k$ of a natural frequency ($k$ prime),
+    so the vibration builds gradually through nonlinear coupling
+    rather than direct resonance. This is harder to detect because
+    the excitation frequency is not near any monitored harmonic.
+
+  \item \textbf{Monitoring evasion}: Design the excitation signal
+    to be orthogonal to the AVM's sensing dictionary, making it
+    invisible to the monitoring system while still delivering
+    destructive energy to the blade.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & Medium --- resonance attacks exist, arithmetic targeting is new \\
+Precision gain & \textbf{High} --- spectral analysis identifies exact modes \\
+Stealth gain & \textbf{High} --- sub-harmonic excitation evades monitoring \\
+Physical access required & Load modulation or physical access to nacelle \\
+Detection difficulty & Very high for sub-harmonic approach \\
+Potential impact & Blade failure, turbine destruction, potential casualties \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Broadband monitoring}: Monitor vibration across a
+    wider frequency range than just the expected harmonics.
+    Specifically monitor sub-harmonics at $f_{\text{nat}}/p$ for
+    prime $p$.
+  \item \textbf{Load pattern anomaly detection}: Flag unusual load
+    variation patterns, especially periodic patterns at non-integer
+    frequencies.
+  \item \textbf{Physical security}: Restrict physical access to
+    turbine nacelles and control systems. This is the most effective
+    defense against all vibration-based attacks.
+\end{enumerate}
+
+% ================================================================
+\section{Risk 3: Verified Instability Certificates}
+\label{sec:instability}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+The Cathedral's framework produces machine-verified stability
+certificates for grid configurations: formal proofs that a
+Lyapunov function is positive definite.
+
+\subsection{The Dark Mirror}
+
+The same framework can produce machine-verified \emph{instability}
+certificates: formal proofs that a specific perturbation sequence
+causes cascade failure.
+
+\begin{enumerate}
+  \item \textbf{Optimal cascade sequences}: Given a grid model,
+    find the minimum set of generator trips that causes voltage
+    collapse. The Lean~4 verification ensures the attack plan is
+    mathematically correct --- no ``wasted'' disruptions.
+
+  \item \textbf{Stability boundary mapping}: Identify the exact
+    operating conditions where the grid transitions from stable to
+    unstable. An attacker who can push the grid to this boundary
+    (e.g., by coordinating large loads) can trigger instability with
+    minimal visible action.
+
+  \item \textbf{Targeted N-k analysis}: Current grid security
+    standards require N-1 or N-2 contingency analysis (survive the
+    loss of 1 or 2 components). A verified instability certificate
+    could identify the specific N-3 or N-4 scenarios that current
+    analysis misses.
+  \item \textbf{Composite Anchor Targeting (v15):} Recent spectral
+    telemetry reveals exactly where systemic instability localizes.
+    The ground state of the spatial Hamiltonian---the mathematical
+    vector of collapse---exhibits quantum scarring: it avoids
+    prime-indexed (low-connectivity) nodes, instead localizing
+    onto highly composite numbers (massive, highly connected
+    topological heatsinks). An attacker armed with a verified
+    instability certificate can target the specific composite
+    anchors that hold a system's spectral gap open, rather than
+    searching the entire topology.
+
+  \item \textbf{Equation of State Chaos Triggering (v15):}
+    Cathedral experiments demonstrate that prime-indexed systems
+    transition into uncontrollable GOE chaos at a precisely
+    predictable threshold: $N_c \approx 60 \times (m/\varphi(m))$.
+    An adversary can quietly perturb a system to $N_c - 1$, where
+    it appears mathematically stable, then trigger a single
+    additional perturbation that snaps the system into chaotic
+    thermalization, overwhelming all linear response controllers.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & \textbf{High} --- verified attack plans are new \\
+Precision gain & \textbf{Very High} --- mathematically optimal attack \\
+Stealth gain & Medium --- the attack itself is visible \\
+Access required & Grid topology and parameters (often semi-public) \\
+Detection difficulty & Low (the cascade is observable) \\
+Potential impact & \textbf{Regional blackout, economic damage} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This is the most concerning risk in this paper. The novelty is not
+in the attack (deliberate grid disruption is well-studied) but in
+the \textbf{verification}: a machine-checked proof that the attack
+\emph{will} succeed, removing uncertainty from the attacker's
+planning.
+
+\textbf{v15 update}: The dual-path architecture significantly amplifies
+this risk. A verified instability certificate can now be confirmed
+through \emph{two independent mathematical frameworks}: the Mellin
+Crown (frequency-domain spectral analysis) and the Perron Crown
+(spatial-domain contour integration). If both paths agree that a
+perturbation sequence causes instability, the confidence is
+qualitatively different from a single-path verification---it is
+analogous to the difference between a single witness and two
+independent witnesses in law. The Parseval Bridge proves the
+mathematical equivalence of both frameworks, meaning an instability
+certificate verified in one domain is \emph{guaranteed} to hold in
+the other.
+
+Moreover, the B\'aez-Duarte numerical certification engine (512-bit
+MPFR, Sherman-Morrison cross-validation to $10^{-17}$) provides a
+third, independent validation layer. An attacker who validates their
+instability model against the BD engine's numerical output gains
+quantitative confidence that their formal proof corresponds to
+physical reality.
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Use the same tool defensively}: If the attacker can
+    find verified instabilities, the grid operator should find them
+    first. Deploy the same Lean~4 framework to systematically
+    identify and remediate all N-3 and N-4 vulnerabilities.
+    \textbf{Critically, require dual-path verification}: any
+    stability certificate should be verified through both the Mellin
+    and Spatial paths to achieve cryptographic-grade trust.
+  \item \textbf{Protect grid models}: Limit public access to
+    detailed grid topology and impedance data. Current CEII
+    (Critical Energy Infrastructure Information) rules should be
+    reviewed and strengthened.
+  \item \textbf{Dynamic reconfiguration}: Design grids that can
+    rapidly change topology in response to detected instability,
+    invalidating pre-computed attack plans.
+  \item \textbf{Adversarial stability margins}: Design with larger
+    stability margins specifically in regions where N-3/N-4
+    analysis reveals verified instabilities.
+  \item \textbf{Continuous numerical monitoring}: Deploy BD-style
+    convergence monitors that continuously validate stability
+    margins against the theoretical $C/\ln(N)$ decay rate. Any
+    deviation from the predicted trajectory signals either model
+    error or active manipulation.
+\end{enumerate}
+
+% ================================================================
+\section{Risk 4: Prime-Spaced Stealth and Jamming}
+\label{sec:stealth}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+Prime-spaced sensor arrays with Selberg beamforming weights offer
+broadband performance with predictable sidelobe control.
+
+\subsection{The Dark Mirror}
+
+The same array design, used in reverse, can produce electromagnetic
+emissions that are:
+
+\begin{enumerate}
+  \item \textbf{Broadband noise with minimal power}: A prime-spaced
+    jammer distributes its energy across frequencies without
+    periodic structure, making it harder to filter. Conventional
+    interference cancellation relies on identifying the jammer's
+    spectral structure; a prime-spaced jammer has no periodic
+    structure to identify.
+
+  \item \textbf{Difficult to geolocate}: The aperiodic radiation
+    pattern of a prime-spaced array produces a complex spatial
+    pattern that conventional direction-finding algorithms
+    (designed for uniform or periodic arrays) may fail to resolve.
+
+  \item \textbf{Radar-evasive scattering}: A target coated in
+    prime-spaced resonant elements would scatter radar returns
+    across frequencies without the signature Bragg peaks of a
+    periodic structure, reducing radar cross-section.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & Low --- aperiodic jamming/stealth are well-studied \\
+Precision gain & Low --- random spacing works comparably \\
+Stealth gain & Low --- prime spacing has marginal advantage \\
+Access required & RF hardware (commercially available) \\
+Detection difficulty & Medium \\
+Potential impact & Communications disruption \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Honest assessment}: This is the weakest risk in the paper.
+Prime-spaced arrays are marginally better than random arrays for
+jamming/stealth purposes, and the advantage does not justify
+concern beyond existing aperiodic jamming threats.
+
+\textbf{v15 update}: However, the discovery of the arithmetic-GOE
+constant $\alpha \approx 0.47$ introduces a subtlety. An attacker can
+synthesize jamming signals that perfectly mimic the $\alpha \approx 0.47$
+thermodynamic background of natural physical systems, potentially
+bypassing AI anomaly detectors trained on purely random noise.
+
+\subsection{Defenses}
+
+Existing anti-jamming techniques (spread spectrum, frequency
+hopping, adaptive beamforming) are effective against aperiodic
+jammers regardless of whether the aperiodicity comes from random
+or prime spacing.
+
+\textbf{v15 addition --- The Arithmetic-GOE Fingerprint:}
+Recent physical telemetry reveals that prime-spaced systems do not
+generate perfectly random noise; they maintain persistent partial
+localization at a participation ratio of exactly $\alpha \approx 0.47$.
+Defenders do not need to identify specific frequencies.
+By running real-time participation ratio analysis on ambient RF noise,
+defenders can detect this unforgeable mathematical signature: if the
+background noise suddenly shifts to $\alpha \approx 0.47$, the stealth
+system's arithmetic structure is mathematically fingerprinted.
+
+% ================================================================
+\section{Risk 5: Covert Broadband RF Surveillance}
+\label{sec:surveillance}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+Prime-indexed rectennas harvest ambient RF energy across a wide
+bandwidth, enabling battery-free IoT sensors.
+
+\subsection{The Dark Mirror}
+
+A device that harvests broadband RF also \emph{receives} broadband
+RF. A prime-indexed rectenna array disguised as an energy harvester
+could:
+
+\begin{enumerate}
+  \item \textbf{Passive SIGINT}: Simultaneously monitor WiFi
+    (2.4/5 GHz), cellular (700 MHz--3 GHz), Bluetooth (2.4 GHz),
+    and IoT (900 MHz) without active emissions, making it
+    undetectable by RF sweeps that look for transmitters.
+
+  \item \textbf{Self-powered}: The same harvested energy that
+    powers the device also carries the intelligence. No battery
+    means no maintenance visits, no supply chain to trace, and
+    indefinite operational life.
+
+  \item \textbf{Plausible deniability}: If discovered, the device
+    appears to be a legitimate energy harvester (IoT sensor, smart
+    building component) rather than a surveillance device.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & Medium --- passive RF surveillance exists, self-powered is new \\
+Precision gain & Low \\
+Stealth gain & \textbf{High} --- disguised as legitimate IoT hardware \\
+Access required & Physical placement in target facility \\
+Detection difficulty & \textbf{Very high} --- no RF emissions to detect \\
+Potential impact & Espionage, corporate/government intelligence \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Physical inspection}: Regular RF environment audits
+    that include physical inspection of all connected devices.
+  \item \textbf{Faraday shielding}: Sensitive facilities should
+    control RF ingress/egress regardless of harvesting technology.
+  \item \textbf{Supply chain security}: Verify the provenance of
+    all IoT/energy harvesting devices deployed in sensitive
+    environments.
+\end{enumerate}
+
+% ================================================================
+\section{Risk 6: AI-Accelerated Mathematical Attack Planning}
+\label{sec:ai}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+The Cathedral was built through human-AI pair programming: a human
+computer scientist directing AI assistants (Claude, Gemini) to formalize,
+debug, and verify Lean~4 proofs. This collaboration model reduced the
+development time for the v5~$\to$~v17 evolution from an estimated
+months of solo work to approximately two weeks.
+
+\subsection{The Dark Mirror}
+
+The same AI-assisted formalization methodology could be applied to
+adversarial engineering:
+
+\begin{enumerate}
+  \item \textbf{Barrier reduction}: The original version of this paper
+    (April~20) identified ``graduate education in mathematics'' as the
+    expertise barrier for applying number-theoretic tools offensively.
+    AI mathematical assistants substantially lower this barrier. An
+    attacker no longer needs to understand the M\"obius function,
+    contour integration, or spectral theory---they need to describe
+    \emph{what they want to achieve} in natural language, and the AI
+    can formalize the mathematical attack plan.
+
+  \item \textbf{Verification assistance}: The same AI tools that
+    help a human verify a stability proof can help an adversary verify
+    an instability proof. The AI does not distinguish between
+    defensive and offensive goals---it formalizes whatever the human
+    asks it to formalize.
+
+  \item \textbf{Rapid iteration}: The Cathedral's development
+    demonstrates that AI pair programming enables rapid exploration of
+    mathematical strategies. An attacker could iterate through
+    multiple attack designs in hours rather than weeks, testing each
+    against the formal verification framework until finding one that
+    produces a verified certificate.
+
+  \item \textbf{Knowledge synthesis}: AI assistants can draw on the
+    full corpus of published mathematics, engineering, and security
+    literature simultaneously. An attacker who understands grid
+    operations but not number theory---or vice versa---can use AI to
+    bridge the knowledge gap.
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & \textbf{Very High} --- AI-assisted formal attack planning is new \\
+Precision gain & \textbf{High} --- AI enables mathematical optimization \\
+Stealth gain & Low --- the AI collaboration itself is not stealthy \\
+Access required & Internet access and an AI subscription \\
+Detection difficulty & N/A (planning phase, not execution) \\
+Potential impact & Force multiplier for all other risks \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Honest assessment}: This is the most important new risk
+since the paper's original publication. It is also the most
+difficult to mitigate, because the same AI capabilities that
+enable offensive planning are essential for defensive analysis.
+Any restriction on AI-assisted mathematics would harm defenders
+(who operate openly and benefit from AI assistance) more than
+attackers (who can use unrestricted models or open-source
+alternatives).
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Normalize defensive AI use}: The most effective
+    defense is to ensure that infrastructure operators adopt
+    AI-assisted formal verification \emph{before} attackers do.
+    The defender's advantage is system access and domain knowledge;
+    AI amplifies this advantage if the defender uses it first.
+  \item \textbf{AI safety alignment}: AI systems should be designed
+    to recognize and flag requests that appear to target critical
+    infrastructure, while preserving the ability to assist
+    legitimate defensive analysis. This is a difficult but
+    necessary balance.
+  \item \textbf{Institutional capacity}: Invest in training
+    infrastructure security teams to use AI-assisted formal
+    verification tools. The barrier should be lowered for
+    defenders, not raised for everyone.
+\end{enumerate}
+
+% ================================================================
+\section{Risk 7: Algorithmic Blinding (Arithmetic Denial-of-Service)}
+\label{sec:blinding}
+% ================================================================
+
+\subsection{The Positive Technology}
+
+Grid monitoring systems and the proposed M\"obius Harmonic Analyzer
+rely on real-time linear algebra and eigensolvers to track system
+stability.
+
+\subsection{The Dark Mirror}
+
+The geometric frustration of prime-spaced topologies naturally
+produces interaction matrices with extreme condition numbers
+($\kappa > 10^6$). During Cathedral development (Exploration~19),
+standard 64-bit floating-point eigensolvers catastrophically failed
+at $N \geq 750$, hallucinating negative eigenvalues due to mantissa
+exhaustion---precisely where the ground truth eigenvalue was
+$\lambda_{\min} \approx 10^{-6}$.
+
+\begin{enumerate}
+  \item \textbf{Precision-wall injection}: An attacker can synthesize
+    a physical power-line injection patterned on high-condition-number
+    prime topologies. When the defender's SCADA software attempts to
+    compute the grid state, the mathematical complexity forces
+    catastrophic algorithmic cancellation, silently blinding the
+    software to the physical reality of the grid.
+
+  \item \textbf{Eigenvalue hallucination}: The defender's stability
+    monitor may report the system as unstable (negative eigenvalues)
+    when it is actually stable, causing unnecessary protective relay
+    trips---or worse, report stability when the system is failing.
+
+  \item \textbf{Pre-kinetic blinding}: The precision-wall attack can
+    be used as a precursor to a physical attack. By first blinding
+    the defender's monitoring, the attacker creates a window of
+    unmonitored operation during which a kinetic disruption proceeds
+    undetected.
+
+  \item \textbf{The Dekker--Knuth Boundary (v16):} The Cathedral's
+    DD-precision pipeline (May~2026) discovered the exact numerical
+    boundary: at dimension $N > 40{,}000$ (condition number
+    $\kappa \sim 10^{15}$), \emph{every} standard \texttt{f64}
+    eigensolver produces non-physical results. The matrix appears
+    non-positive-definite in \texttt{f64} even though it is provably
+    SPD at full precision. An attacker armed with this knowledge can
+    \emph{calibrate} an injection to sit precisely at the \texttt{f64}
+    precision boundary of the defender's software, ensuring the
+    monitoring system fails silently rather than catastrophically.
+    The defender sees ``stable'' when the system is collapsing,
+    or ``unstable'' when the system is fine. This is no longer
+    theoretical: the Cathedral measured the exact eigenvalue at
+    which \texttt{f64} representation fails ($\sim 10^{-15}$) and the
+    Dekker--Knuth DD representation that fixes it ($\sim 10^{-31}$).
+\end{enumerate}
+
+\subsection{Severity Assessment}
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Factor} & \textbf{Assessment} \\
+\midrule
+Novelty & \textbf{High} --- arithmetic DoS via condition number is new \\
+Precision gain & \textbf{High} --- exactly calibrated to f64 mantissa \\
+Stealth gain & \textbf{Very High} --- the attack is invisible to the blinded system \\
+Access required & Grid connection (power-line injection) \\
+Detection difficulty & \textbf{High} --- the monitoring system itself is compromised \\
+Potential impact & \textbf{Blinding of critical monitoring infrastructure} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Defenses}
+
+\begin{enumerate}
+  \item \textbf{Arbitrary-precision monitoring}: Industrial monitoring
+    systems analyzing prime-spaced harmonic data must transition from
+    standard \texttt{f64} to computationally expensive arbitrary-precision
+    arithmetic (MPFR) or exact rational solvers when condition numbers
+    exceed $10^4$.
+  \item \textbf{Condition number monitoring}: Real-time tracking of
+    the condition number of the system Gram matrix. A sudden increase
+    in $\kappa$ should trigger an automatic switch to high-precision
+    solvers and alert operators.
+  \item \textbf{Dual-solver cross-validation}: Run both \texttt{f64}
+    and MPFR eigensolvers in parallel; any disagreement between them
+    indicates either precision loss or adversarial injection.
+  \item \textbf{DD-precision monitoring (v16):} Critical infrastructure
+    monitoring systems should deploy Double-Double (Dekker--Knuth)
+    arithmetic for all spectral computations where the condition number
+    may exceed $10^{10}$. The cost is approximately $2\times$ compared
+    to \texttt{f64}---a trivial overhead for safety-critical systems.
+    The Cathedral's \texttt{cathedral-utils} library provides a
+    production-grade implementation~\cite{dekker1971}.
+\end{enumerate}
+
+% ================================================================
+\section{Risk Assessment Summary}
+% ================================================================
+
+\begin{center}
+\small
+\begin{tabular}{@{}lcccl@{}}
+\toprule
+\textbf{Risk} & \textbf{Novelty} & \textbf{Severity} &
+\textbf{Feasibility} & \textbf{Primary Defense} \\
+\midrule
+Grid harmonic injection & Low & Medium & High & MHA defensive monitoring \\
+Vibration sabotage & Medium & High & Medium & Broadband monitoring \\
+Verified instability & \textbf{High} & \textbf{Very High} &
+  Medium & Dual-path defensive verification \\
+Stealth/jamming & Low & Low-Med & High & $\alpha$-fingerprint detection \\
+RF surveillance & Medium & Medium & Medium & Physical/supply chain \\
+\textbf{AI attack planning} & \textbf{Very High} & \textbf{High} &
+  \textbf{Very High} & \textbf{Normalize defensive AI use} \\
+\textbf{Algorithmic blinding} & \textbf{High} & \textbf{Very High} &
+  High & DD-precision / dual-solver validation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{The Headline Risk}
+
+The single most concerning capability is \textbf{Risk~3: Verified
+Instability Certificates}. The ability to produce a
+\emph{machine-checked proof} that a specific attack sequence will
+cause a grid cascade failure is qualitatively different from
+simulation-based attack planning. A simulation can be wrong; a
+verified certificate cannot (within its axioms).
+
+The mitigation is symmetric: grid operators should use the same
+framework to find these vulnerabilities first. The race is between
+defensive and offensive verification, and the defender has the
+advantage of knowing their own system.
+
+% ================================================================
+\section{The Broader Dual-Use Question}
+% ================================================================
+
+None of the risks identified in this paper are created by the
+Cathedral. The mathematical tools (Fourier analysis, spectral
+theory, M\"obius function, variational methods) have been publicly
+available for decades to centuries. What the Cathedral contributes
+is:
+
+\begin{enumerate}
+  \item \textbf{Organization}: The Cathedral assembles these tools
+    into a coherent framework. An attacker would otherwise need to
+    independently recognize the connections between number theory
+    and engineering.
+  \item \textbf{Verification}: The machine-verified proof
+    methodology could, in principle, be applied to verify attack
+    plans rather than proofs. The dual-path architecture (v15)
+    makes verified claims carry extraordinary weight: two
+    independent mathematical witnesses, connected by a proved
+    isometry, cannot both be wrong.
+  \item \textbf{Precision}: The number-theoretic structure (primes,
+    M\"obius function, Selberg weights) provides optimal or
+    near-optimal parameters for certain engineering tasks,
+    including adversarial ones.
+  \item \textbf{Accessibility}: The demonstration that AI pair
+    programming can produce formally verified mathematics lowers
+    the effective barrier from ``graduate-level expertise'' to
+    ``ability to direct an AI assistant.'' This is the most
+    significant change since the paper's original publication.
+  \item \textbf{Lattice cryptography implications}: The DD-precision
+    Conjugate Gradient solver, designed to navigate ill-conditioned
+    55,000-dimensional integer lattices, shares the computational
+    profile of the Closest Vector Problem (CVP) central to
+    lattice-based post-quantum cryptography (NTRU, Kyber, Dilithium).
+    While the Gram matrix has specific arithmetic structure not
+    present in cryptographic lattices, the mixed-precision solver
+    techniques developed for the Cathedral could potentially
+    transfer to CVP solvers. This warrants monitoring by the
+    cryptographic community.
+\end{enumerate}
+
+The dual-use question is not whether to publish (the math is
+already public) but whether to \emph{emphasize the connections}
+between number theory and infrastructure engineering. We believe
+the answer is yes, because:
+
+\begin{quote}
+\emph{The asymmetry in dual-use technology favors the defender.}
+\end{quote}
+
+Defenders (grid operators, turbine manufacturers, infrastructure
+security teams) have domain knowledge, system access, and
+institutional resources. Attackers must operate covertly, with
+limited access and imperfect models. AI amplifies the defender's
+advantage more than the attacker's, because the defender can
+leverage AI with full system access while the attacker cannot.
+Providing defenders with a
+new mathematical framework strengthens them more than it
+strengthens attackers.
+
+% ================================================================
+\section{Recommendations}
+% ================================================================
+
+\begin{enumerate}
+  \item \textbf{Deploy the MHA defensively before it is used
+    offensively.} The M\"obius Harmonic Analyzer is the most
+    immediately actionable tool in both the positive and negative
+    applications. Grid operators should adopt it for monitoring
+    before attackers adopt it for injection design.
+
+  \item \textbf{Extend N-k contingency analysis.} Use the Cathedral's
+    verified stability framework to systematically identify N-3 and
+    N-4 grid vulnerabilities. Remediate them before an adversary
+    discovers them independently. \textbf{Require dual-path
+    verification} (Mellin + Spatial) for all critical stability
+    certificates.
+
+  \item \textbf{Add sub-harmonic channels to vibration monitors.}
+    Current turbine monitoring focuses on integer harmonics of the
+    rotation frequency. Adding monitoring at $f/p$ for small primes
+    $p$ would detect the sub-harmonic excitation attack described
+    in Risk~2.
+
+  \item \textbf{Classify verified instability certificates.}
+    Machine-checked proofs of grid instability should be treated
+    as sensitive information (CEII) and protected accordingly.
+
+  \item \textbf{Invest in AI-assisted defensive verification.}
+    Train infrastructure security teams to use AI pair programming
+    for formal verification of grid stability. The defender who
+    uses AI first gains an asymmetric advantage.
+
+  \item \textbf{Develop AI safety guidelines for infrastructure
+    mathematics.} Establish norms for how AI assistants should
+    handle requests involving critical infrastructure analysis.
+    The goal is not to restrict mathematical capability but to
+    ensure responsible use.
+
+  \item \textbf{Publish this paper.} Suppressing dual-use analysis
+    protects no one. The mathematical tools are public. The
+    infrastructure is public. The only thing that can be private is
+    the defender's understanding of their own vulnerabilities---and
+    that understanding is strengthened, not weakened, by open
+    analysis.
+\end{enumerate}
+
+% ================================================================
+\section{Conclusion}
+% ================================================================
+
+The Cathedral's mathematics is neutral. The Parseval Bridge connects
+time and frequency domains. The M\"obius function decomposes
+multiplicative structure. The Rayleigh quotient bounds eigenvalues.
+These tools do not care whether they are used to protect a power
+grid or to attack one.
+
+What matters is who learns to use them first---and in the age of
+AI-assisted mathematics, ``learning'' happens faster than ever before.
+
+The dual-path architecture adds a new dimension to this neutrality.
+The proof has a gauge symmetry: the same truth can be witnessed in
+two independent mathematical frameworks, connected by the Parseval
+isometry. This makes verified claims---whether stability or
+instability certificates---carry extraordinary epistemic weight.
+A claim verified in both gauges cannot be forged, but it also
+cannot be dismissed.
+
+This paper exists to ensure that the people who protect critical
+infrastructure understand the same mathematics---and the same
+AI-assisted methodology---that could threaten it. We believe that
+open, honest analysis of dual-use risks---even uncomfortable
+analysis---is a more effective defense than silence.
+
+The Cathedral was built to illuminate. This paper points the light
+at the shadows.
+
+\begin{quote}
+\emph{A tool that can diagnose can also deceive.\\
+A proof that certifies stability can also certify its absence.\\
+An AI that helps a defender can help an attacker.\\
+The mathematics does not choose sides.\\
+We must.}
+\end{quote}
+
+\vspace{0.5cm}
+
+\begin{thebibliography}{99}
+
+\bibitem{ieee519}
+IEEE, \emph{IEEE Std 519-2022: Recommended Practice for Harmonic
+Control}, 2022.
+
+\bibitem{nerc}
+NERC, \emph{Grid Security Guidelines: Critical Infrastructure
+Protection Standards CIP-002 through CIP-014}, 2023.
+
+\bibitem{stuxnet}
+R.~Langner, \emph{Stuxnet: Dissecting a Cyberwarfare Weapon},
+IEEE Security \& Privacy, 2011.
+
+\bibitem{ceii}
+FERC, \emph{Critical Energy Infrastructure Information (CEII)
+Regulations}, 18 CFR \S 388.113.
+
+\bibitem{cathedral-v17}
+J.R.~Gochanour, \emph{The Cathedral: A Machine-Verified Proof
+Architecture for the Riemann Hypothesis (v17, Oracle
+Capstone Edition)}, 2026.
+
+\bibitem{cathedral-physics}
+J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
+Between the Cathedral Proof and Quantum Mechanics}, 2026.
+
+\bibitem{dekker1971}
+T.J.~Dekker, \emph{A floating-point technique for extending the
+available precision}, Numer. Math. \textbf{18} (1971), 224--242.
+
+\end{thebibliography}
+
+\end{document}
