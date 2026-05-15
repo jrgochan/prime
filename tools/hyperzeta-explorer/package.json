@@ -1,0 +1,30 @@
+{
+  "name": "hyperzeta-explorer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HYPERZETA Explorer — Cayley-Dickson Tower Visualization. 4 modes: Origin (sedenion sweep), Teardrop Sphere (Riemann stereographic), Glass Staircase (ℝ→ℂ→ℍ→𝕆→𝕊 decomposition), Division by Zero (Möbius inverse 1/ζ).",
+  "scripts": {
+    "dev": "next dev --port 3002",
+    "build": "next build",
+    "start": "next start --port 3002"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
+    "@types/three": "^0.183.1",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

@@ -9,7 +9,7 @@
 # ============================================
 
 .PHONY: help build papers verify axioms cascade crown-audit clock
-.PHONY: hyperzeta hyperzeta-origin
+.PHONY: hyperzeta hyperzeta-origin hyperzeta-explorer
 .PHONY: check setup setup-lean setup-rust setup-node setup-python setup-latex setup-gmp
 .PHONY: experiment-vasyunin experiment-covariance experiment-bd
 .PHONY: experiment-gram experiment-abel experiment-all
@@ -85,6 +85,19 @@ hyperzeta-origin: ## Launch HyperZeta Origin — proof-graph explorer (port 3001
 		cd tools/hyperzeta-origin && npx next start -p 3001; \
 	else \
 		echo "  ⚠  No build found. Run: cd tools/hyperzeta-origin && npm install && npm run build"; \
+	fi
+
+hyperzeta-explorer: ## Launch HyperZeta Explorer — Cayley-Dickson tower visualizer (port 3002)
+	@echo ""
+	@echo "  ✦  Launching HYPERZETA Explorer — Cayley-Dickson Tower..."
+	@echo "     4 modes: Origin · Teardrop · Glass Staircase · Division by Zero"
+	@echo ""
+	@if [ -d tools/hyperzeta-explorer/node_modules ]; then \
+		echo "  Starting Next.js dev server on http://localhost:3002 ..." && \
+		cd tools/hyperzeta-explorer && npm run dev; \
+	else \
+		echo "  Installing dependencies..." && \
+		cd tools/hyperzeta-explorer && npm install && npm run dev; \
 	fi
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)

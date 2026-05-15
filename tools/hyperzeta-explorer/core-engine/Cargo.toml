@@ -1,0 +1,17 @@
+[package]
+name = "core-engine-explorer"
+version = "0.1.0"
+edition = "2021"
+description = "HYPERZETA Explorer — Cayley-Dickson Tower sedenion engine with 4 view modes"
+
+[lib]
+name = "core_engine"
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+getrandom = { version = "0.2", features = ["js"] }
+rand = "0.8"
+
+# Standalone WASM crate — not part of the main workspace
+[workspace]
