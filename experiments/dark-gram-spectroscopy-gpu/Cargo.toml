@@ -1,0 +1,19 @@
+[package]
+name = "dark-gram-spectroscopy-gpu"
+version = "0.1.0"
+edition = "2021"
+description = "Dark Gram Matrix spectral analysis — GPU accelerated (RTX 4090 / cuSOLVER)"
+
+[[bin]]
+name = "dark-gram-spectroscopy-gpu"
+path = "src/main.rs"
+
+[dependencies]
+rayon = "1.10"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+faer = "0.24"
+
+[lints]
+workspace = true

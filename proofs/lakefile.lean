@@ -393,4 +393,8 @@ lean_lib «Cathedral» where
     `Cathedral.NumberTheory.SquarefreeReciprocal,
     -- Dark Gram Matrix (Bernoulli basis: the mirror universe, Exploration 36)
     `Cathedral.Physics.DarkGramMatrix,
+    -- HC-Dark Spectral Anchor (connects dark PSD to HC optimality)
+    `Cathedral.Physics.HCDarkAnchor,
+    -- S-Duality Glass (the mirror's conversion factor: ζ(2)↔ζ(4))
+    `Cathedral.Physics.SDualityGlass,
   ]

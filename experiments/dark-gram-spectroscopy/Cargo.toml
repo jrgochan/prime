@@ -1,0 +1,31 @@
+[package]
+name = "dark-gram-spectroscopy"
+version = "0.1.0"
+edition = "2021"
+description = "Dark Gram Matrix spectral analysis — Bernoulli basis spectroscopy"
+
+[[bin]]
+name = "dark-gram-spectroscopy"
+path = "src/main.rs"
+
+[[bin]]
+name = "heegner-probe"
+path = "src/heegner_probe.rs"
+
+[[bin]]
+name = "bernoulli-tower"
+path = "src/bin/bernoulli_tower.rs"
+
+[[bin]]
+name = "gershgorin-spectroscope"
+path = "src/bin/gershgorin_spectroscope.rs"
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+faer = "0.24"
+clap = { version = "4", features = ["derive"] }
+rayon = "1.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+

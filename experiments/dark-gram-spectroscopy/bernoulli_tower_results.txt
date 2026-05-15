@@ -1,0 +1,201 @@
+warning: unused variable: `x3`
+  --> experiments/dark-gram-spectroscopy/src/bernoulli.rs:76:9
+   |
+76 |     let x3 = x2 * x;
+   |         ^^ help: if this is intentional, prefix it with an underscore: `_x3`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: `dark-gram-spectroscopy` (lib) generated 1 warning (run `cargo fix --lib -p dark-gram-spectroscopy` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.08s
+     Running `/Users/jrgochan/code/github.com/jrgochan/prime/target/release/bernoulli-tower`
+═══════════════════════════════════════════════════════════════
+  🏗️  BERNOULLI TOWER EXPERIMENT — Smoothing Tower Prediction
+═══════════════════════════════════════════════════════════════
+
+order	dim	lambda_min	lambda_max	kappa	trace	build_s	eigen_s
+  ── G^(2), dim=50 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=50×50...[0m
+  [32m✓[0m Dark Gram G^(2) built: 50×50 (0.00s)
+    λ_min = 3.068581e-3, λ_max = 9.555211e-3, κ = 3.1139, trace = 2.777778e-1
+2	50	3.068581e-3	9.555211e-3	3.1139e0	2.777778e-1	0.00	0.00
+  ── G^(4), dim=50 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=50×50...[0m
+  [32m✓[0m Dark Gram G^(4) built: 50×50 (0.00s)
+    λ_min = 2.106863e-4, λ_max = 2.683477e-4, κ = 1.2737, trace = 1.190476e-2
+4	50	2.106863e-4	2.683477e-4	1.2737e0	1.190476e-2	0.00	0.00
+  ── G^(6), dim=50 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=50×50...[0m
+  [32m✓[0m Dark Gram G^(6) built: 50×50 (0.00s)
+    λ_min = 1.331244e-4, λ_max = 1.408960e-4, κ = 1.0584, trace = 6.848310e-3
+6	50	1.331244e-4	1.408960e-4	1.0584e0	6.848310e-3	0.00	0.00
+  ── G^(8), dim=50 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=50×50...[0m
+  [32m✓[0m Dark Gram G^(8) built: 50×50 (0.00s)
+    λ_min = 2.736334e-4, λ_max = 2.774381e-4, κ = 1.0139, trace = 1.377653e-2
+8	50	2.736334e-4	2.774381e-4	1.0139e0	1.377653e-2	0.00	0.00
+  ── G^(10), dim=50 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=50×50...[0m
+  [32m✓[0m Dark Gram G^(10) built: 50×50 (0.00s)
+    λ_min = 1.429512e-3, λ_max = 1.434399e-3, κ = 1.0034, trace = 7.159771e-2
+10	50	1.429512e-3	1.434399e-3	1.0034e0	7.159771e-2	0.00	0.00
+
+  ── G^(2), dim=100 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=100×100...[0m
+  [32m✓[0m Dark Gram G^(2) built: 100×100 (0.00s)
+    λ_min = 2.962694e-3, λ_max = 9.932160e-3, κ = 3.3524, trace = 5.555556e-1
+2	100	2.962694e-3	9.932160e-3	3.3524e0	5.555556e-1	0.00	0.00
+  ── G^(4), dim=100 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=100×100...[0m
+  [32m✓[0m Dark Gram G^(4) built: 100×100 (0.00s)
+    λ_min = 2.095218e-4, λ_max = 2.699467e-4, κ = 1.2884, trace = 2.380952e-2
+4	100	2.095218e-4	2.699467e-4	1.2884e0	2.380952e-2	0.00	0.00
+  ── G^(6), dim=100 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=100×100...[0m
+  [32m✓[0m Dark Gram G^(6) built: 100×100 (0.00s)
+    λ_min = 1.329651e-4, λ_max = 1.410688e-4, κ = 1.0609, trace = 1.369662e-2
+6	100	1.329651e-4	1.410688e-4	1.0609e0	1.369662e-2	0.00	0.00
+  ── G^(8), dim=100 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=100×100...[0m
+  [32m✓[0m Dark Gram G^(8) built: 100×100 (0.00s)
+    λ_min = 2.735562e-4, λ_max = 2.775169e-4, κ = 1.0145, trace = 2.755306e-2
+8	100	2.735562e-4	2.775169e-4	1.0145e0	2.755306e-2	0.00	0.00
+  ── G^(10), dim=100 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=100×100...[0m
+  [32m✓[0m Dark Gram G^(10) built: 100×100 (0.00s)
+    λ_min = 1.429414e-3, λ_max = 1.434499e-3, κ = 1.0036, trace = 1.431954e-1
+10	100	1.429414e-3	1.434499e-3	1.0036e0	1.431954e-1	0.00	0.00
+
+  ── G^(2), dim=200 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=200×200...[0m
+  [32m✓[0m Dark Gram G^(2) built: 200×200 (0.00s)
+    λ_min = 2.876677e-3, λ_max = 1.024934e-2, κ = 3.5629, trace = 1.111111e0
+2	200	2.876677e-3	1.024934e-2	3.5629e0	1.111111e0	0.00	0.00
+  ── G^(4), dim=200 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=200×200...[0m
+  [32m✓[0m Dark Gram G^(4) built: 200×200 (0.00s)
+    λ_min = 2.086949e-4, λ_max = 2.710999e-4, κ = 1.2990, trace = 4.761905e-2
+4	200	2.086949e-4	2.710999e-4	1.2990e0	4.761905e-2	0.00	0.00
+  ── G^(6), dim=200 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=200×200...[0m
+  [32m✓[0m Dark Gram G^(6) built: 200×200 (0.00s)
+    λ_min = 1.328565e-4, λ_max = 1.411872e-4, κ = 1.0627, trace = 2.739324e-2
+6	200	1.328565e-4	1.411872e-4	1.0627e0	2.739324e-2	0.00	0.00
+  ── G^(8), dim=200 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=200×200...[0m
+  [32m✓[0m Dark Gram G^(8) built: 200×200 (0.00s)
+    λ_min = 2.735049e-4, λ_max = 2.775693e-4, κ = 1.0149, trace = 5.510611e-2
+8	200	2.735049e-4	2.775693e-4	1.0149e0	5.510611e-2	0.00	0.00
+  ── G^(10), dim=200 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=200×200...[0m
+  [32m✓[0m Dark Gram G^(10) built: 200×200 (0.00s)
+    λ_min = 1.429349e-3, λ_max = 1.434564e-3, κ = 1.0036, trace = 2.863908e-1
+10	200	1.429349e-3	1.434564e-3	1.0036e0	2.863908e-1	0.00	0.00
+
+  ── G^(2), dim=500 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=500×500...[0m
+  [32m✓[0m Dark Gram G^(2) built: 500×500 (0.00s)
+    λ_min = 2.791991e-3, λ_max = 1.059751e-2, κ = 3.7957, trace = 2.777778e0
+2	500	2.791991e-3	1.059751e-2	3.7957e0	2.777778e0	0.00	0.02
+  ── G^(4), dim=500 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=500×500...[0m
+  [32m✓[0m Dark Gram G^(4) built: 500×500 (0.02s)
+    λ_min = 2.079350e-4, λ_max = 2.721419e-4, κ = 1.3088, trace = 1.190476e-1
+4	500	2.079350e-4	2.721419e-4	1.3088e0	1.190476e-1	0.02	0.02
+  ── G^(6), dim=500 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=500×500...[0m
+  [32m✓[0m Dark Gram G^(6) built: 500×500 (0.00s)
+    λ_min = 1.327742e-4, λ_max = 1.412769e-4, κ = 1.0640, trace = 6.848310e-2
+6	500	1.327742e-4	1.412769e-4	1.0640e0	6.848310e-2	0.00	0.02
+  ── G^(8), dim=500 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=500×500...[0m
+  [32m✓[0m Dark Gram G^(8) built: 500×500 (0.00s)
+    λ_min = 2.734686e-4, λ_max = 2.776065e-4, κ = 1.0151, trace = 1.377653e-1
+8	500	2.734686e-4	2.776065e-4	1.0151e0	1.377653e-1	0.00	0.02
+  ── G^(10), dim=500 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=500×500...[0m
+  [32m✓[0m Dark Gram G^(10) built: 500×500 (0.00s)
+    λ_min = 1.429303e-3, λ_max = 1.434609e-3, κ = 1.0037, trace = 7.159771e-1
+10	500	1.429303e-3	1.434609e-3	1.0037e0	7.159771e-1	0.00	0.02
+
+  ── G^(2), dim=1000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=1000×1000...[0m
+  [32m✓[0m Dark Gram G^(2) built: 1000×1000 (0.00s)
+    λ_min = 2.743174e-3, λ_max = 1.081572e-2, κ = 3.9428, trace = 5.555556e0
+2	1000	2.743174e-3	1.081572e-2	3.9428e0	5.555556e0	0.00	0.08
+  ── G^(4), dim=1000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=1000×1000...[0m
+  [32m✓[0m Dark Gram G^(4) built: 1000×1000 (0.07s)
+    λ_min = 2.074402e-4, λ_max = 2.728473e-4, κ = 1.3153, trace = 2.380952e-1
+4	1000	2.074402e-4	2.728473e-4	1.3153e0	2.380952e-1	0.07	0.08
+  ── G^(6), dim=1000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=1000×1000...[0m
+  [32m✓[0m Dark Gram G^(6) built: 1000×1000 (0.02s)
+    λ_min = 1.327135e-4, λ_max = 1.413433e-4, κ = 1.0650, trace = 1.369662e-1
+6	1000	1.327135e-4	1.413433e-4	1.0650e0	1.369662e-1	0.02	0.08
+  ── G^(8), dim=1000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=1000×1000...[0m
+  [32m✓[0m Dark Gram G^(8) built: 1000×1000 (0.01s)
+    λ_min = 2.734418e-4, λ_max = 2.776339e-4, κ = 1.0153, trace = 2.755306e-1
+8	1000	2.734418e-4	2.776339e-4	1.0153e0	2.755306e-1	0.01	0.07
+  ── G^(10), dim=1000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=1000×1000...[0m
+  [32m✓[0m Dark Gram G^(10) built: 1000×1000 (0.01s)
+    λ_min = 1.429271e-3, λ_max = 1.434642e-3, κ = 1.0038, trace = 1.431954e0
+10	1000	1.429271e-3	1.434642e-3	1.0038e0	1.431954e0	0.01	0.07
+
+  ── G^(2), dim=2000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=2000×2000...[0m
+  [32m✓[0m Dark Gram G^(2) built: 2000×2000 (0.02s)
+    λ_min = 2.701686e-3, λ_max = 1.100577e-2, κ = 4.0737, trace = 1.111111e1
+2	2000	2.701686e-3	1.100577e-2	4.0737e0	1.111111e1	0.02	0.38
+  ── G^(4), dim=2000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=2000×2000...[0m
+  [32m✓[0m Dark Gram G^(4) built: 2000×2000 (0.26s)
+    λ_min = 2.070510e-4, λ_max = 2.734074e-4, κ = 1.3205, trace = 4.761905e-1
+4	2000	2.070510e-4	2.734074e-4	1.3205e0	4.761905e-1	0.26	0.38
+  ── G^(6), dim=2000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=2000×2000...[0m
+  [32m✓[0m Dark Gram G^(6) built: 2000×2000 (0.07s)
+    λ_min = 1.326662e-4, λ_max = 1.413951e-4, κ = 1.0658, trace = 2.739324e-1
+6	2000	1.326662e-4	1.413951e-4	1.0658e0	2.739324e-1	0.07	0.38
+  ── G^(8), dim=2000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=2000×2000...[0m
+  [32m✓[0m Dark Gram G^(8) built: 2000×2000 (0.04s)
+    λ_min = 2.734213e-4, λ_max = 2.776549e-4, κ = 1.0155, trace = 5.510611e-1
+8	2000	2.734213e-4	2.776549e-4	1.0155e0	5.510611e-1	0.04	0.37
+  ── G^(10), dim=2000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=2000×2000...[0m
+  [32m✓[0m Dark Gram G^(10) built: 2000×2000 (0.05s)
+    λ_min = 1.429246e-3, λ_max = 1.434667e-3, κ = 1.0038, trace = 2.863908e0
+10	2000	1.429246e-3	1.434667e-3	1.0038e0	2.863908e0	0.05	0.37
+
+  ── G^(2), dim=5000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=2, dim=5000×5000...[0m
+  [32m✓[0m Dark Gram G^(2) built: 5000×5000 (0.14s)
+    λ_min = 2.657262e-3, λ_max = 1.122039e-2, κ = 4.2225, trace = 2.777778e1
+2	5000	2.657262e-3	1.122039e-2	4.2225e0	2.777778e1	0.14	3.75
+  ── G^(4), dim=5000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=4, dim=5000×5000...[0m
+  [32m✓[0m Dark Gram G^(4) built: 5000×5000 (1.44s)
+    λ_min = 2.066558e-4, λ_max = 2.739860e-4, κ = 1.3258, trace = 1.190476e0
+4	5000	2.066558e-4	2.739860e-4	1.3258e0	1.190476e0	1.44	3.80
+  ── G^(6), dim=5000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=6, dim=5000×5000...[0m
+  [32m✓[0m Dark Gram G^(6) built: 5000×5000 (0.47s)
+    λ_min = 1.326150e-4, λ_max = 1.414515e-4, κ = 1.0666, trace = 6.848310e-1
+6	5000	1.326150e-4	1.414515e-4	1.0666e0	6.848310e-1	0.47	3.64
+  ── G^(8), dim=5000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=8, dim=5000×5000...[0m
+  [32m✓[0m Dark Gram G^(8) built: 5000×5000 (0.30s)
+    λ_min = 2.733987e-4, λ_max = 2.776781e-4, κ = 1.0157, trace = 1.377653e0
+8	5000	2.733987e-4	2.776781e-4	1.0157e0	1.377653e0	0.30	3.68
+  ── G^(10), dim=5000 ────────────
+  [2m▸ Building Dark Gram matrix: order n=10, dim=5000×5000...[0m
+  [32m✓[0m Dark Gram G^(10) built: 5000×5000 (0.27s)
+    λ_min = 1.429219e-3, λ_max = 1.434694e-3, κ = 1.0038, trace = 7.159771e0
+10	5000	1.429219e-3	1.434694e-3	1.0038e0	7.159771e0	0.27	3.82
+
+═══════════════════════════════════════════════════════════════
+  🏗️  Bernoulli Tower complete! 🪞✨
+═══════════════════════════════════════════════════════════════

@@ -48,6 +48,8 @@ members = [
     "experiments/spectral-factorization-probe",
     "experiments/spectral-factorization-probe-gpu",
     "experiments/bilinear-probe",
+    "experiments/dark-gram-spectroscopy",
+    "experiments/dark-gram-spectroscopy-gpu",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
@@ -80,7 +82,7 @@ members = [
     "experiments/archive/spectral/offdiag-excess",
     "experiments/archive/spectral/parity-schur",
     "experiments/archive/spectral/rank1-interference",
-    "experiments/archive/spectral/spectral-fourier",
+    "experiments/archive/spectral/spectral-fourier", "experiments/s-duality-mirror", "experiments/s-duality-bridge",
 ]
 
 # ═══════════════════════════════════════════════════════════
@@ -128,6 +130,8 @@ default-members = [
     "experiments/spectral-factorization-probe",
     # "experiments/spectral-factorization-probe-gpu", # requires CUDA
     "experiments/bilinear-probe",
+    "experiments/dark-gram-spectroscopy",
+    # "experiments/dark-gram-spectroscopy-gpu", # requires CUDA
     "experiments/archive/abel-bridge",
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",
