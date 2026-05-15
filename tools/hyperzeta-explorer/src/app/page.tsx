@@ -1,13 +1,14 @@
 "use client";
 
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Html } from "@react-three/drei";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import * as THREE from "three";
 
 import init, { HyperEngine } from "../wasm/core_engine.js";
+import { ZETA_ARGS, PI_POWERS, gridValue, MATCHES, CATEGORY_COLORS, getGridMatches } from "./spectrometer-data";
 
-const DEFAULT_PARTICLE_COUNT = 150_000;
+const DEFAULT_PARTICLE_COUNT = 25_000;
 
 const KNOWN_ZEROS = [
   14.134725, 21.022040, 25.010858, 30.424876, 32.935062,
@@ -86,6 +87,15 @@ const VIEW_MODES: ViewMode[] = [
     edgeColor: "#440011",
     hotkey: "4",
   },
+  {
+    id: 4,
+    name: "SPECTROMETER",
+    subtitle: "Spectral Lift Grid · π^n / ζ(k)",
+    formula: "m_p/m_e = π⁷/ζ(2) = 6π⁵",
+    coreColor: "#ffd700",
+    edgeColor: "#664400",
+    hotkey: "5",
+  },
 ];
 
 // Layer colors for the Glass Staircase
@@ -98,6 +108,476 @@ const LAYER_COLORS = [
 ];
 
 const LAYER_NAMES = ["ℝ", "ℂ", "ℍ", "𝕆", "𝕊"];
+
+// ═══════════════════════════════════════════════════════
+// SPECTROMETER GRID COMPONENT
+// ═══════════════════════════════════════════════════════
+
+const TIER_SCALE = { Star: 0.7, Lightning: 0.5, Dot: 0.3 };
+
+function SpectrometerGrid() {
+  const groupRef = useRef<THREE.Group>(null);
+  const timeRef = useRef(0);
+
+  const matchMap = useMemo(() => getGridMatches(), []);
+
+  // Build grid points
+  const gridPoints = useMemo(() => {
+    const pts: { n: number; k: number; val: number; x: number; y: number; z: number; matches: typeof MATCHES }[] = [];
+    for (const n of PI_POWERS) {
+      for (const k of ZETA_ARGS) {
+        const val = gridValue(n, k);
+        const x = (n - 5.5) * 2.5;
+        const z = (ZETA_ARGS.indexOf(k) - 2.5) * 3;
+        const y = Math.log10(Math.max(val, 0.01)) * 2.5 - 5;
+        const key = `${n},${k}`;
+        pts.push({ n, k, val, x, y, z, matches: matchMap.get(key) || [] });
+      }
+    }
+    return pts;
+  }, [matchMap]);
+
+  // Non-grid matches (pure zeta, integers, etc.)
+  const offGridMatches = useMemo(() => {
+    return MATCHES.filter(m => m.n == null || m.k == null);
+  }, []);
+
+  useFrame((_, delta) => {
+    timeRef.current += delta;
+    if (groupRef.current) {
+      groupRef.current.rotation.y = timeRef.current * 0.1;
+    }
+  });
+
+  // Build grid line objects (avoid <line> SVG type conflicts)
+  const gridLines = useMemo(() => {
+    const lines: THREE.Line[] = [];
+    const mat1 = new THREE.LineBasicMaterial({ color: "#333333", opacity: 0.4, transparent: true });
+    const mat2 = new THREE.LineBasicMaterial({ color: "#222222", opacity: 0.3, transparent: true });
+
+    // Lines along π axis
+    for (const k of ZETA_ARGS) {
+      const kIdx = ZETA_ARGS.indexOf(k);
+      const z = (kIdx - 2.5) * 3;
+      const pts = PI_POWERS.map(n => {
+        const x = (n - 5.5) * 2.5;
+        const val = gridValue(n, k);
+        const y = Math.log10(Math.max(val, 0.01)) * 2.5 - 5;
+        return new THREE.Vector3(x, y, z);
+      });
+      lines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat1));
+    }
+
+    // Lines along ζ axis
+    for (const n of PI_POWERS) {
+      const x = (n - 5.5) * 2.5;
+      const pts = ZETA_ARGS.map(k => {
+        const val = gridValue(n, k);
+        const y = Math.log10(Math.max(val, 0.01)) * 2.5 - 5;
+        const z = (ZETA_ARGS.indexOf(k) - 2.5) * 3;
+        return new THREE.Vector3(x, y, z);
+      });
+      lines.push(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat2));
+    }
+
+    return lines;
+  }, []);
+
+  return (
+    <group ref={groupRef}>
+      {/* Grid wireframe */}
+      {gridLines.map((ln, i) => (
+        <primitive key={`gl-${i}`} object={ln} />
+      ))}
+
+      {/* Grid spheres */}
+      {gridPoints.map((pt, i) => {
+        const hasMatch = pt.matches.length > 0;
+        const bestMatch = pt.matches[0];
+        const scale = hasMatch ? TIER_SCALE[bestMatch.tier] || 0.3 : 0.08;
+        const color = hasMatch ? (CATEGORY_COLORS[bestMatch.category] || "#ffffff") : "#444444";
+        const pulse = hasMatch && bestMatch.tier === "Star" ? Math.sin(timeRef.current * 3) * 0.15 + 1 : 1;
+
+        return (
+          <group key={i} position={[pt.x, pt.y, pt.z]}>
+            <mesh scale={scale * pulse}>
+              <sphereGeometry args={[1, hasMatch ? 16 : 6, hasMatch ? 16 : 6]} />
+              <meshBasicMaterial
+                color={color}
+                opacity={hasMatch ? 0.9 : 0.15}
+                transparent
+              />
+            </mesh>
+            {/* Glow halo for matches */}
+            {hasMatch && (
+              <mesh scale={scale * 2.5}>
+                <sphereGeometry args={[1, 12, 12]} />
+                <meshBasicMaterial color={color} opacity={0.08} transparent depthWrite={false} />
+              </mesh>
+            )}
+            {/* Label for top-tier matches */}
+            {hasMatch && (bestMatch.tier === "Star" || bestMatch.tier === "Lightning") && (
+              <Html distanceFactor={40} style={{ pointerEvents: "none" }}>
+                <div style={{
+                  color,
+                  fontSize: "10px",
+                  fontFamily: "monospace",
+                  whiteSpace: "nowrap",
+                  textShadow: "0 0 8px rgba(0,0,0,0.9)",
+                  background: "rgba(0,0,0,0.6)",
+                  padding: "2px 6px",
+                  borderRadius: "3px",
+                  border: `1px solid ${color}33`,
+                }}>
+                  <div style={{ fontWeight: "bold" }}>{bestMatch.symbol}</div>
+                  <div style={{ opacity: 0.7, fontSize: "8px" }}>
+                    {bestMatch.formula} ≈ {pt.val.toFixed(1)}
+                  </div>
+                  <div style={{ opacity: 0.5, fontSize: "8px" }}>
+                    err: {bestMatch.error.toFixed(4)}%
+                  </div>
+                </div>
+              </Html>
+            )}
+          </group>
+        );
+      })}
+
+      {/* Axis labels */}
+      {PI_POWERS.map(n => (
+        <Html key={`pi-${n}`} position={[(n - 5.5) * 2.5, -8, -10]} distanceFactor={50} style={{ pointerEvents: "none" }}>
+          <span style={{ color: "#666", fontSize: "9px", fontFamily: "monospace" }}>π^{n}</span>
+        </Html>
+      ))}
+      {ZETA_ARGS.map((k, i) => (
+        <Html key={`z-${k}`} position={[-15, -8, (i - 2.5) * 3]} distanceFactor={50} style={{ pointerEvents: "none" }}>
+          <span style={{ color: "#666", fontSize: "9px", fontFamily: "monospace" }}>ζ({k})</span>
+        </Html>
+      ))}
+
+      {/* Off-grid matches floating nearby */}
+      {offGridMatches.map((m, i) => {
+        const angle = (i / offGridMatches.length) * Math.PI * 2;
+        const r = 18;
+        const x = Math.cos(angle) * r;
+        const z = Math.sin(angle) * r;
+        const y = Math.log10(Math.max(m.actual, 0.01)) * 2.5 - 5;
+        const color = CATEGORY_COLORS[m.category] || "#aaaaaa";
+        const scale = TIER_SCALE[m.tier] || 0.3;
+        return (
+          <group key={`off-${i}`} position={[x, y, z]}>
+            <mesh scale={scale * 0.7}>
+              <octahedronGeometry args={[1]} />
+              <meshBasicMaterial color={color} opacity={0.7} transparent />
+            </mesh>
+            {(m.tier === "Star" || m.tier === "Lightning") && (
+              <Html distanceFactor={45} style={{ pointerEvents: "none" }}>
+                <div style={{
+                  color, fontSize: "9px", fontFamily: "monospace",
+                  whiteSpace: "nowrap", textShadow: "0 0 6px #000",
+                  background: "rgba(0,0,0,0.5)", padding: "1px 4px",
+                  borderRadius: "2px",
+                }}>
+                  {m.symbol}: {m.formula}
+                </div>
+              </Html>
+            )}
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
+// JET DETECTION
+// ═══════════════════════════════════════════════════════
+
+interface JetInfo {
+  count: number;
+  jets: { phi: number; theta: number; energy: number; particles: number }[];
+  timestamp: number;
+}
+
+const JET_SAMPLE_COUNT = 5000;
+const JET_ANGULAR_BINS = 12; // 12 phi × 6 theta = 72 cells
+const JET_THETA_BINS = 6;
+const JET_THRESHOLD = 3.0; // bin must have 3× average occupancy
+const JET_MIN_SPEED = 0.3; // minimum avg radial speed for a jet
+
+function detectJets(
+  current: Float32Array,
+  previous: Float32Array,
+  count: number,
+): JetInfo {
+  const step = Math.max(1, Math.floor(count / JET_SAMPLE_COUNT));
+  const bins: { count: number; speed: number }[][] = [];
+  for (let p = 0; p < JET_ANGULAR_BINS; p++) {
+    bins[p] = [];
+    for (let t = 0; t < JET_THETA_BINS; t++) {
+      bins[p][t] = { count: 0, speed: 0 };
+    }
+  }
+
+  let sampled = 0;
+  for (let i = 0; i < count; i += step) {
+    const idx = i * 3;
+    const dx = current[idx] - previous[idx];
+    const dy = current[idx + 1] - previous[idx + 1];
+    const dz = current[idx + 2] - previous[idx + 2];
+    const spd = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (spd < 0.001) continue;
+
+    const phi = Math.atan2(dy, dx); // -π to π
+    const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const theta = Math.acos(Math.max(-1, Math.min(1, dz / r))); // 0 to π
+
+    const pi = Math.floor(((phi + Math.PI) / (2 * Math.PI)) * JET_ANGULAR_BINS) % JET_ANGULAR_BINS;
+    const ti = Math.min(Math.floor((theta / Math.PI) * JET_THETA_BINS), JET_THETA_BINS - 1);
+
+    bins[pi][ti].count++;
+    bins[pi][ti].speed += spd;
+    sampled++;
+  }
+
+  if (sampled === 0) return { count: 0, jets: [], timestamp: Date.now() };
+
+  const avgPerBin = sampled / (JET_ANGULAR_BINS * JET_THETA_BINS);
+  const jets: JetInfo["jets"] = [];
+
+  for (let p = 0; p < JET_ANGULAR_BINS; p++) {
+    for (let t = 0; t < JET_THETA_BINS; t++) {
+      const b = bins[p][t];
+      if (b.count > avgPerBin * JET_THRESHOLD) {
+        const avgSpd = b.speed / b.count;
+        if (avgSpd > JET_MIN_SPEED) {
+          jets.push({
+            phi: ((p + 0.5) / JET_ANGULAR_BINS) * 360 - 180,
+            theta: ((t + 0.5) / JET_THETA_BINS) * 180,
+            energy: b.speed,
+            particles: b.count,
+          });
+        }
+      }
+    }
+  }
+
+  return { count: jets.length, jets, timestamp: Date.now() };
+}
+
+// ═══════════════════════════════════════════════════════
+// SHAPE / MORPHOLOGY DETECTION (PCA + VOID + ANGULAR)
+// ═══════════════════════════════════════════════════════
+
+type ShapeType = "sphere" | "disc" | "line" | "ring" | "torus" | "cross" | "bipolar" | "unknown";
+
+interface ShapeInfo {
+  shape: ShapeType;
+  eigenvalues: [number, number, number]; // sorted descending
+  flatness: number;    // λ1/λ3 — how far from sphere
+  elongation: number;  // λ1/λ2 — line-like
+  ringScore: number;   // peak of radial distribution away from center
+  voidScore: number;   // center hollowness (0=filled, 1=empty center)
+  confidence: number;
+}
+
+interface MorphologyInterval {
+  zeroIndex: number;      // 0 = before first zero
+  tStart: number;
+  tEnd: number;
+  frames: number;
+  shapes: Record<ShapeType, number>;
+  jetEvents: number;
+  maxJets: number;
+  peakFlatness: number;
+}
+
+const SHAPE_SAMPLE = 5000;
+
+// Analytical eigenvalues of 3x3 symmetric matrix using Cardano's method
+function eigenvalues3x3(
+  a: number, b: number, c: number,
+  d: number, e: number, f: number,
+): [number, number, number] {
+  // Matrix: [[a,d,f],[d,b,e],[f,e,c]]
+  const p1 = d * d + f * f + e * e;
+  if (p1 < 1e-12) {
+    // Already diagonal
+    const vals = [a, b, c].sort((x, y) => y - x) as [number, number, number];
+    return vals;
+  }
+  const q = (a + b + c) / 3;
+  const p2 = (a - q) ** 2 + (b - q) ** 2 + (c - q) ** 2 + 2 * p1;
+  const p = Math.sqrt(p2 / 6);
+  // B = (1/p) * (A - qI)
+  const ba = (a - q) / p, bb = (b - q) / p, bc = (c - q) / p;
+  const bd = d / p, be = e / p, bf = f / p;
+  const detB = ba * (bb * bc - be * be) - bd * (bd * bc - be * bf) + bf * (bd * be - bb * bf);
+  let r = detB / 2;
+  r = Math.max(-1, Math.min(1, r));
+  const phi = Math.acos(r) / 3;
+  const e1 = q + 2 * p * Math.cos(phi);
+  const e3 = q + 2 * p * Math.cos(phi + 2 * Math.PI / 3);
+  const e2 = 3 * q - e1 - e3;
+  const vals = [e1, e2, e3].sort((x, y) => y - x) as [number, number, number];
+  return vals;
+}
+
+function detectShape(positions: Float32Array, count: number): ShapeInfo {
+  const step = Math.max(1, Math.floor(count / SHAPE_SAMPLE));
+  let cx = 0, cy = 0, cz = 0, n = 0;
+
+  // Pass 1: center of mass
+  for (let i = 0; i < count; i += step) {
+    const idx = i * 3;
+    cx += positions[idx]; cy += positions[idx + 1]; cz += positions[idx + 2];
+    n++;
+  }
+  if (n < 10) return { shape: "unknown", eigenvalues: [0, 0, 0], flatness: 1, elongation: 1, ringScore: 0, voidScore: 0, confidence: 0 };
+  cx /= n; cy /= n; cz /= n;
+
+  // Pass 2: covariance matrix + radial histogram + angular histogram
+  let cxx = 0, cyy = 0, czz = 0, cxy = 0, cxz = 0, cyz = 0;
+  const RADIAL_BINS = 20;
+  const radialHist = new Float32Array(RADIAL_BINS);
+  // Angular histogram for cross/bipolar detection (8 azimuthal sectors)
+  const ANGULAR_BINS = 8;
+  const angularHist = new Float32Array(ANGULAR_BINS);
+  let maxR = 0;
+
+  for (let i = 0; i < count; i += step) {
+    const idx = i * 3;
+    const dx = positions[idx] - cx, dy = positions[idx + 1] - cy, dz = positions[idx + 2] - cz;
+    cxx += dx * dx; cyy += dy * dy; czz += dz * dz;
+    cxy += dx * dy; cxz += dx * dz; cyz += dy * dz;
+    const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    if (r > maxR) maxR = r;
+  }
+  cxx /= n; cyy /= n; czz /= n; cxy /= n; cxz /= n; cyz /= n;
+
+  // Radial + angular distribution
+  if (maxR > 0.01) {
+    for (let i = 0; i < count; i += step) {
+      const idx = i * 3;
+      const dx = positions[idx] - cx, dy = positions[idx + 1] - cy, dz = positions[idx + 2] - cz;
+      const r = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const bin = Math.min(Math.floor((r / maxR) * RADIAL_BINS), RADIAL_BINS - 1);
+      radialHist[bin]++;
+      // Azimuthal angle for cross detection
+      const phi = Math.atan2(dy, dx); // -π to π
+      const ai = Math.floor(((phi + Math.PI) / (2 * Math.PI)) * ANGULAR_BINS) % ANGULAR_BINS;
+      angularHist[ai]++;
+    }
+  }
+
+  const eigs = eigenvalues3x3(cxx, cyy, czz, cxy, cyz, cxz);
+  const [l1, l2, l3] = eigs;
+  const safeL3 = Math.max(l3, 0.001);
+  const safeL2 = Math.max(l2, 0.001);
+  const flatness = l1 / safeL3;
+  const elongation = l1 / safeL2;
+
+  // ── Void score: how hollow is the center? ──
+  // Compare inner 25% vs outer 75% density (volume-corrected)
+  const innerBins = Math.max(1, Math.floor(RADIAL_BINS * 0.25));
+  let innerCount = 0, outerCount = 0;
+  for (let i = 0; i < RADIAL_BINS; i++) {
+    if (i < innerBins) innerCount += radialHist[i];
+    else outerCount += radialHist[i];
+  }
+  // Volume-correct: inner 25% of radius = 1.5% of volume in 3D
+  // So if uniform, inner should have ~1.5% of particles
+  // If inner has LESS than expected, it's hollow
+  const innerFraction = innerCount / (innerCount + outerCount + 1);
+  const expectedInnerFraction = 0.016; // (0.25)^3
+  const voidScore = Math.max(0, 1 - innerFraction / Math.max(expectedInnerFraction, 0.001));
+  // Clamp: if center has < 50% of expected, voidScore > 0.5
+  const isHollow = voidScore > 0.3 && innerFraction < 0.05;
+
+  // ── Ring score: peak of radial distribution away from center ──
+  let peakBin = 0, peakVal = 0;
+  for (let i = 1; i < RADIAL_BINS; i++) {
+    if (radialHist[i] > peakVal) { peakVal = radialHist[i]; peakBin = i; }
+  }
+  const centerMass = radialHist[0] + (radialHist[1] || 0);
+  const ringScore = peakVal > 0 ? (peakBin / RADIAL_BINS) * (peakVal / (centerMass + 1)) : 0;
+
+  // ── Cross/bipolar score: angular bimodality ──
+  // Cross = particles concentrated in 2-4 opposing angular sectors
+  let angMax = 0, angMin = Infinity, angTotal = 0;
+  for (let i = 0; i < ANGULAR_BINS; i++) {
+    if (angularHist[i] > angMax) angMax = angularHist[i];
+    if (angularHist[i] < angMin) angMin = angularHist[i];
+    angTotal += angularHist[i];
+  }
+  const angAvg = angTotal / ANGULAR_BINS;
+  const angContrast = angAvg > 0 ? (angMax - angMin) / angAvg : 0;
+  // Count how many sectors are "hot" (above average)
+  let hotSectors = 0;
+  for (let i = 0; i < ANGULAR_BINS; i++) {
+    if (angularHist[i] > angAvg * 1.3) hotSectors++;
+  }
+
+  // ══════════════════════════════════════
+  // CLASSIFICATION — order matters!
+  // Check structural signatures first, then fall through to PCA
+  // ══════════════════════════════════════
+  let shape: ShapeType = "sphere";
+  let confidence = 0;
+
+  // 1. TORUS: hollow center + roughly isotropic (ring viewed from any angle)
+  if (isHollow && flatness < 3 && ringScore > 0.1) {
+    shape = "torus";
+    confidence = Math.min(voidScore * 1.5, 1);
+  }
+  // 2. RING: flat structure with hollow center OR strong radial peak
+  else if ((isHollow && flatness > 2) || (ringScore > 0.3 && flatness > 2)) {
+    shape = "ring";
+    confidence = Math.min((voidScore + ringScore) * 0.8, 1);
+  }
+  // 3. CROSS: high angular contrast with 2-4 hot sectors, not too flat
+  else if (angContrast > 1.5 && hotSectors >= 2 && hotSectors <= 4 && flatness < 3) {
+    shape = "cross";
+    confidence = Math.min(angContrast / 3, 1);
+  }
+  // 4. LINE: one eigenvalue dominates
+  else if (elongation > 3.5) {
+    shape = "line";
+    confidence = Math.min(elongation / 8, 1);
+  }
+  // 5. DISC: two eigenvalues >> third, filled center
+  else if (flatness > 3 && elongation < 2.5 && !isHollow) {
+    shape = "disc";
+    confidence = Math.min(flatness / 8, 1);
+  }
+  // 6. BIPOLAR: disc + some elongation (accretion disk + jets)
+  else if (flatness > 2 && elongation > 1.5 && angContrast > 0.8) {
+    shape = "bipolar";
+    confidence = Math.min((flatness * elongation) / 12, 1);
+  }
+  // 7. Default: sphere
+  else {
+    shape = "sphere";
+    confidence = 1 - Math.min(flatness / 3, 0.9);
+  }
+
+  return { shape, eigenvalues: eigs, flatness, elongation, ringScore, voidScore, confidence };
+}
+
+const SHAPE_LABELS: Record<ShapeType, { icon: string; color: string }> = {
+  sphere:  { icon: "◉", color: "#888888" },
+  disc:    { icon: "◎", color: "#44aaff" },
+  line:    { icon: "│", color: "#ff8844" },
+  ring:    { icon: "◯", color: "#44ffaa" },
+  torus:   { icon: "⊙", color: "#00ffcc" },
+  cross:   { icon: "✕", color: "#ffaa00" },
+  bipolar: { icon: "⊥", color: "#ff44aa" },
+  unknown: { icon: "?", color: "#444444" },
+};
+
+function emptyShapeCounts(): Record<ShapeType, number> {
+  return { sphere: 0, disc: 0, line: 0, ring: 0, torus: 0, cross: 0, bipolar: 0, unknown: 0 };
+}
 
 // ═══════════════════════════════════════════════════════
 // PARTICLE CLOUD COMPONENT
@@ -113,7 +593,11 @@ function ExplorerCloud({
   particleCount,
   mode,
   speed,
+  paused,
+  stepRef,
   onMetrics,
+  onJets,
+  onShape,
 }: {
   wasmEngine: HyperEngine;
   memoryArray: Float32Array;
@@ -121,7 +605,11 @@ function ExplorerCloud({
   particleCount: number;
   mode: ViewMode;
   speed: number;
+  paused: boolean;
+  stepRef: React.MutableRefObject<boolean>;
   onMetrics: (c: number, h: number) => void;
+  onJets: (j: JetInfo) => void;
+  onShape: (s: ShapeInfo) => void;
 }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -135,19 +623,28 @@ function ExplorerCloud({
   const coreColor = useMemo(() => new THREE.Color(), []);
   const edgeColor = useMemo(() => new THREE.Color(), []);
 
+  // Previous positions for velocity computation (jet detection)
+  const prevPositions = useRef<Float32Array | null>(null);
+
   useFrame(() => {
     if (!meshRef.current) return;
 
-    // Speed control: multiple ticks for fast, skip frames for slow
-    if (speed >= 1) {
-      const ticks = Math.round(speed);
-      for (let s = 0; s < ticks; s++) {
-        wasmEngine.tick_physics();
-      }
-    } else {
-      const skipFrames = Math.round(1 / speed);
-      if (frameCount.current % skipFrames === 0) {
-        wasmEngine.tick_physics();
+    // Pause/step logic
+    const doStep = stepRef.current;
+    if (doStep) stepRef.current = false;
+
+    if (!paused || doStep) {
+      // Speed control: multiple ticks for fast, skip frames for slow
+      if (speed >= 1) {
+        const ticks = Math.round(speed);
+        for (let s = 0; s < ticks; s++) {
+          wasmEngine.tick_physics();
+        }
+      } else {
+        const skipFrames = Math.round(1 / speed);
+        if (frameCount.current % skipFrames === 0) {
+          wasmEngine.tick_physics();
+        }
       }
     }
 
@@ -159,6 +656,24 @@ function ExplorerCloud({
       const lambda = wasmEngine.get_lambda();
       const t = 10.0 + lambda * 2.0;
       onMetrics(c, t);
+
+      // Jet detection in Division by Zero mode (~10Hz, cheap)
+      if (mode.id === 3 && prevPositions.current) {
+        const jetInfo = detectJets(memoryArray, prevPositions.current, particleCount);
+        if (jetInfo.count > 0) onJets(jetInfo);
+      }
+      // Shape detection (~10Hz, runs on positions directly)
+      if (mode.id === 3) {
+        const shapeInfo = detectShape(memoryArray, particleCount);
+        onShape(shapeInfo);
+      }
+      // Snapshot positions for next velocity computation
+      if (mode.id === 3) {
+        if (!prevPositions.current || prevPositions.current.length !== particleCount * 3) {
+          prevPositions.current = new Float32Array(particleCount * 3);
+        }
+        prevPositions.current.set(memoryArray);
+      }
     }
 
     // Initialize instance colors on first frame or mode change
@@ -269,6 +784,23 @@ export default function Home() {
   const [speed, setSpeed] = useState(1);
   const [detectedZeros, setDetectedZeros] = useState<DetectedZero[]>([]);
   const [layerEnergies, setLayerEnergies] = useState([0, 0, 0, 0, 0]);
+  const [paused, setPaused] = useState(false);
+  const stepRef = useRef(false);
+  const [jetInfo, setJetInfo] = useState<JetInfo | null>(null);
+  const [jetLog, setJetLog] = useState<{ t: number; jets: number; height: number }[]>([]);
+  // L1 Trigger system
+  const [triggerArmed, setTriggerArmed] = useState(true);
+  const [triggerThreshold, setTriggerThreshold] = useState(3);
+  const [triggerEvents, setTriggerEvents] = useState<{ height: number; jets: number; time: number }[]>([]);
+  const [triggerFlash, setTriggerFlash] = useState(false);
+  const triggerCooldownRef = useRef(0);
+  // Shape / Morphology detection
+  const [shapeInfo, setShapeInfo] = useState<ShapeInfo | null>(null);
+  const [morphologyLog, setMorphologyLog] = useState<MorphologyInterval[]>([]);
+  const currentIntervalRef = useRef<MorphologyInterval>({
+    zeroIndex: 0, tStart: 10, tEnd: 10, frames: 0,
+    shapes: emptyShapeCounts(), jetEvents: 0, maxJets: 0, peakFlatness: 0,
+  });
   const inZeroRef = useRef(false);
   const minCollapseRef = useRef(Infinity);
   const minHeightRef = useRef(0);
@@ -343,8 +875,21 @@ export default function Home() {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
 
       const num = parseInt(e.key);
-      if (num >= 1 && num <= 4) {
+      if (num >= 1 && num <= 5) {
         setModeIdx(num - 1);
+        return;
+      }
+
+      // Pause/step controls
+      if (e.key === " ") {
+        e.preventDefault();
+        setPaused((p) => !p);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setPaused(true);
+        stepRef.current = true;
         return;
       }
 
@@ -403,6 +948,15 @@ export default function Home() {
           },
         ]);
         minCollapseRef.current = Infinity;
+
+        // Finalize morphology interval and start new one
+        const finalized = { ...currentIntervalRef.current, tEnd: t };
+        setMorphologyLog((prev) => [...prev, finalized]);
+        currentIntervalRef.current = {
+          zeroIndex: finalized.zeroIndex + 1,
+          tStart: t, tEnd: t, frames: 0,
+          shapes: emptyShapeCounts(), jetEvents: 0, maxJets: 0, peakFlatness: 0,
+        };
       }
     }, 50);
     return () => clearInterval(interval);
@@ -413,11 +967,78 @@ export default function Home() {
     setHeight(h);
   }, []);
 
+  const handleJets = useCallback((j: JetInfo) => {
+    setJetInfo(j);
+    setJetLog((prev) => [
+      ...prev.slice(-19),
+      { t: Date.now(), jets: j.count, height },
+    ]);
+
+    // L1 Trigger: auto-pause when jet count meets threshold
+    const now = Date.now();
+    if (triggerArmed && j.count >= triggerThreshold && now - triggerCooldownRef.current > 2000) {
+      triggerCooldownRef.current = now;
+      setPaused(true);
+      setTriggerFlash(true);
+      setTriggerEvents((prev) => [
+        ...prev.slice(-49),
+        { height, jets: j.count, time: now },
+      ]);
+      setTimeout(() => setTriggerFlash(false), 1500);
+    }
+  }, [height, triggerArmed, triggerThreshold]);
+
+  const handleShape = useCallback((s: ShapeInfo) => {
+    setShapeInfo(s);
+    // Accumulate into current interval
+    const interval = currentIntervalRef.current;
+    interval.frames++;
+    interval.tEnd = height;
+    interval.shapes[s.shape]++;
+    if (s.flatness > interval.peakFlatness) interval.peakFlatness = s.flatness;
+  }, [height]);
+
+  // Also track jet events in morphology interval
+  const handleJetsWithMorphology = useCallback((j: JetInfo) => {
+    handleJets(j);
+    const interval = currentIntervalRef.current;
+    interval.jetEvents++;
+    if (j.count > interval.maxJets) interval.maxJets = j.count;
+  }, [handleJets]);
+
+  // Download morphology log as JSON
+  const downloadMorphologyLog = useCallback(() => {
+    const finalLog = [
+      ...morphologyLog,
+      { ...currentIntervalRef.current, tEnd: height },
+    ];
+    const blob = new Blob([JSON.stringify(finalLog, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `morphology_log_t${height.toFixed(1)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [morphologyLog, height]);
+
   const nextZero = KNOWN_ZEROS.find((z) => z > height);
   const speedLabel = SPEED_PRESETS.find((p) => p.value === speed)?.label || `${speed}×`;
 
   return (
     <main className="w-screen h-screen flex flex-col items-center justify-center bg-[#050505] text-[#00ff88] font-mono overflow-hidden">
+      {/* TRIGGER FLASH overlay */}
+      {triggerFlash && (
+        <div className="absolute inset-0 z-50 pointer-events-none animate-pulse" style={{
+          background: "radial-gradient(circle, rgba(255,0,68,0.15) 0%, transparent 70%)",
+          border: "2px solid #ff0044",
+        }}>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+            <p className="text-3xl font-black text-red-500 tracking-[0.3em] animate-pulse">☢ L1 TRIGGERED ☢</p>
+            <p className="text-sm text-red-400 mt-2 opacity-80">t = {height.toFixed(3)} · {jetInfo?.count || 0} jets detected</p>
+          </div>
+        </div>
+      )}
+
       {/* Left HUD */}
       <div className="absolute top-8 left-8 z-10 pointer-events-none flex flex-col gap-1 drop-shadow-xl max-w-lg">
         <h1 className="text-4xl font-black tracking-widest" style={{ color: mode.coreColor }}>
@@ -456,7 +1077,10 @@ export default function Home() {
         </p>
         <p className="text-sm opacity-50 font-mono">{mode.formula}</p>
         <p className="text-xs opacity-40 mt-2 italic">
-          {particleCount.toLocaleString()} sedenion lattice points · Rust/WASM · {speedLabel}
+          {paused && <span className="text-yellow-400"> ⏸ PAUSED </span>}
+          {modeIdx === 4
+            ? `${MATCHES.length} formula matches · Spectral Lift Grid`
+            : `${particleCount.toLocaleString()} sedenion lattice points · Rust/WASM · ${speedLabel}`}
         </p>
         <p className="text-lg mt-4 font-bold">
           Collapse:{" "}
@@ -505,7 +1129,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Division by Zero: Möbius legend */}
+        {/* Division by Zero: Möbius legend + jet detector */}
         {modeIdx === 3 && (
           <div className="mt-4 text-xs opacity-60">
             <p className="border-b border-white/10 pb-1 mb-2">MÖBIUS FIELD</p>
@@ -518,6 +1142,103 @@ export default function Home() {
               </span>
             </div>
             <p className="mt-1 opacity-50">μ(n) = 0 particles excluded (non-squarefree)</p>
+
+            {/* Jet detector readout */}
+            <div className="mt-3 border-t border-white/10 pt-2">
+              <p className="font-bold opacity-80" style={{ color: jetInfo && jetInfo.count > 0 ? "#ff4444" : "#666" }}>
+                JET DETECTOR: {jetInfo && jetInfo.count > 0 ? `${jetInfo.count} JET${jetInfo.count > 1 ? "S" : ""} ✦` : "scanning..."}
+              </p>
+              {jetInfo && jetInfo.jets.length > 0 && (
+                <div className="mt-1 space-y-0.5">
+                  {jetInfo.jets.slice(0, 4).map((j, i) => (
+                    <p key={i} className="opacity-50">
+                      jet {i+1}: φ={j.phi.toFixed(0)}° θ={j.theta.toFixed(0)}° E={j.energy.toFixed(2)} n={j.particles}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {/* Trigger status */}
+              <div className="mt-2 border-t border-white/10 pt-2 pointer-events-auto">
+                <div className="flex items-center gap-2">
+                  <span className={`inline-block w-2 h-2 rounded-full ${triggerArmed ? 'bg-red-500 animate-pulse' : 'bg-gray-600'}`} />
+                  <span className="font-bold" style={{ color: triggerArmed ? '#ff4444' : '#666' }}>
+                    L1 TRIGGER: {triggerArmed ? 'ARMED' : 'DISARMED'}
+                  </span>
+                </div>
+                <p className="opacity-40 mt-1">threshold: ≥{triggerThreshold} jets → auto-pause</p>
+                {triggerEvents.length > 0 && (
+                  <div className="mt-1">
+                    <p className="opacity-30">{triggerEvents.length} trigger event{triggerEvents.length > 1 ? 's' : ''}</p>
+                    {triggerEvents.slice(-3).map((ev, i) => (
+                      <p key={i} className="opacity-40 text-red-400">
+                        ✦ t={ev.height.toFixed(2)} · {ev.jets} jets
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {jetLog.length > 0 && (
+                <p className="mt-1 opacity-30">
+                  {jetLog.length} jet event{jetLog.length > 1 ? "s" : ""} logged
+                </p>
+              )}
+            </div>
+
+            {/* Shape classifier readout */}
+            <div className="mt-3 border-t border-white/10 pt-2">
+              <div className="flex items-center gap-2">
+                <span className="font-bold" style={{ color: shapeInfo ? SHAPE_LABELS[shapeInfo.shape].color : '#666' }}>
+                  {shapeInfo ? SHAPE_LABELS[shapeInfo.shape].icon : '?'} SHAPE: {shapeInfo ? shapeInfo.shape.toUpperCase() : 'detecting...'}
+                </span>
+                {shapeInfo && (
+                  <span className="opacity-30 text-[10px]">
+                    ({(shapeInfo.confidence * 100).toFixed(0)}%)
+                  </span>
+                )}
+              </div>
+              {shapeInfo && (
+                <div className="mt-1 opacity-40 space-y-0.5">
+                  <p>λ: [{shapeInfo.eigenvalues.map(v => v.toFixed(2)).join(', ')}]</p>
+                  <p>flat: {shapeInfo.flatness.toFixed(1)} · elong: {shapeInfo.elongation.toFixed(1)} · ring: {shapeInfo.ringScore.toFixed(2)} · void: {shapeInfo.voidScore.toFixed(2)}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Morphology interval summary */}
+            {morphologyLog.length > 0 && (
+              <div className="mt-3 border-t border-white/10 pt-2">
+                <div className="flex items-center gap-2">
+                  <p className="font-bold opacity-60">MORPHOLOGY LOG</p>
+                  <button
+                    className="text-[10px] px-1.5 py-0.5 border border-white/20 text-white/50 hover:text-white/80 hover:border-white/40 transition-all pointer-events-auto"
+                    onClick={downloadMorphologyLog}
+                  >
+                    ⤓ Export JSON
+                  </button>
+                </div>
+                <div className="mt-1 max-h-32 overflow-y-auto space-y-1">
+                  {morphologyLog.slice(-5).map((interval, i) => {
+                    const dominant = (Object.entries(interval.shapes) as [ShapeType, number][])
+                      .sort((a, b) => b[1] - a[1])[0];
+                    return (
+                      <div key={i} className="opacity-40 flex gap-2 items-center">
+                        <span className="w-4" style={{ color: SHAPE_LABELS[dominant[0]].color }}>
+                          {SHAPE_LABELS[dominant[0]].icon}
+                        </span>
+                        <span>zero {interval.zeroIndex}:</span>
+                        <span className="tabular-nums">t=[{interval.tStart.toFixed(1)},{interval.tEnd.toFixed(1)}]</span>
+                        <span style={{ color: SHAPE_LABELS[dominant[0]].color }}>
+                          {dominant[0]}×{dominant[1]}
+                        </span>
+                        {interval.jetEvents > 0 && (
+                          <span className="text-red-400">{interval.jetEvents}☢</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -601,9 +1322,32 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Playback control */}
+          <div>
+            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">PLAYBACK [Space] [→]</p>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setPaused((p) => !p)}
+                className={`px-2 py-0.5 border transition-all duration-150 ${
+                  paused
+                    ? "border-yellow-400 bg-yellow-400/10 text-yellow-400"
+                    : "border-[#00ff88] bg-[#00ff88]/10 text-[#00ff88]"
+                }`}
+              >
+                {paused ? "▶ Play" : "⏸ Pause"}
+              </button>
+              <button
+                onClick={() => { setPaused(true); stepRef.current = true; }}
+                className="px-2 py-0.5 border border-white/15 text-white/40 hover:border-white/40 hover:text-white/70 transition-all duration-150"
+              >
+                →| Step
+              </button>
+            </div>
+          </div>
+
           {/* Speed control */}
           <div>
-            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">SWEEP SPEED [  ] [ ]</p>
+            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">SWEEP SPEED [ ] [ ]</p>
             <div className="flex gap-1">
               {SPEED_PRESETS.map((p) => (
                 <button
@@ -618,6 +1362,38 @@ export default function Home() {
                   {p.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* L1 Trigger control */}
+          <div className="border-t border-white/10 pt-3 mt-1">
+            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">L1 JET TRIGGER</p>
+            <div className="flex gap-1 items-center">
+              <button
+                onClick={() => setTriggerArmed((a) => !a)}
+                className={`px-2 py-0.5 border transition-all duration-150 ${
+                  triggerArmed
+                    ? "border-red-500 bg-red-500/10 text-red-400"
+                    : "border-white/15 text-white/40 hover:border-white/40"
+                }`}
+              >
+                {triggerArmed ? "☢ Armed" : "○ Disarmed"}
+              </button>
+              <span className="text-white/30 mx-1">≥</span>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setTriggerThreshold(n)}
+                  className={`px-1.5 py-0.5 border transition-all duration-150 ${
+                    triggerThreshold === n
+                      ? "border-red-500 bg-red-500/10 text-red-400"
+                      : "border-white/15 text-white/40 hover:border-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+              <span className="text-white/30 ml-1 text-[10px]">jets</span>
             </div>
           </div>
         </div>
@@ -639,7 +1415,9 @@ export default function Home() {
       >
         <ambientLight intensity={0.5} />
         <OrbitControls autoRotate autoRotateSpeed={2.0} />
-        {hyperSystem && (
+        {modeIdx === 4 ? (
+          <SpectrometerGrid />
+        ) : hyperSystem ? (
           <ExplorerCloud
             wasmEngine={hyperSystem.engine}
             memoryArray={hyperSystem.memory}
@@ -647,9 +1425,13 @@ export default function Home() {
             particleCount={particleCount}
             mode={mode}
             speed={speed}
+            paused={paused}
+            stepRef={stepRef}
             onMetrics={handleMetrics}
+            onJets={handleJetsWithMorphology}
+            onShape={handleShape}
           />
-        )}
+        ) : null}
       </Canvas>
     </main>
   );

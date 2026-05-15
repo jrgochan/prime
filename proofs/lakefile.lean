@@ -397,4 +397,12 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.HCDarkAnchor,
     -- S-Duality Glass (the mirror's conversion factor: ζ(2)↔ζ(4))
     `Cathedral.Physics.SDualityGlass,
+    -- Hopf Glass Cycle (Cayley-Dickson tower ζ(2)↔ζ(16), Exploration 36)
+    `Cathedral.Physics.HopfGlassCycle,
+    -- Woodbury Condensate (rank-1 perturbation of Gram matrix)
+    `Cathedral.Physics.WoodburyCondensate,
+    -- Geometric Mertens Bridge (scan ↔ sign oscillation, Exploration 38)
+    `Cathedral.Physics.GeometricMertens,
+    -- Morphology Bridge (shape ↔ Gram eigenstructure, Exploration 38)
+    `Cathedral.Physics.MorphologyBridge,
   ]
