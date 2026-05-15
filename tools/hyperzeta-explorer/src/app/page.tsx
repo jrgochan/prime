@@ -2,16 +2,37 @@
 
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import * as THREE from "three";
 
 import init, { HyperEngine } from "../wasm/core_engine.js";
 
-const PARTICLE_COUNT = 150_000;
+const DEFAULT_PARTICLE_COUNT = 150_000;
 
 const KNOWN_ZEROS = [
   14.134725, 21.022040, 25.010858, 30.424876, 32.935062,
   37.586178, 40.918719, 43.327073, 48.005151, 49.773832,
+];
+
+// ═══════════════════════════════════════════════════════
+// PRESETS
+// ═══════════════════════════════════════════════════════
+
+const N_PRESETS = [
+  { label: "25K", value: 25_000 },
+  { label: "50K", value: 50_000 },
+  { label: "100K", value: 100_000 },
+  { label: "150K", value: 150_000 },
+  { label: "250K", value: 250_000 },
+];
+
+const SPEED_PRESETS = [
+  { label: "¼×", value: 0.25 },
+  { label: "½×", value: 0.5 },
+  { label: "1×", value: 1 },
+  { label: "2×", value: 2 },
+  { label: "4×", value: 4 },
+  { label: "8×", value: 8 },
 ];
 
 // ═══════════════════════════════════════════════════════
@@ -82,29 +103,54 @@ const LAYER_NAMES = ["ℝ", "ℂ", "ℍ", "𝕆", "𝕊"];
 // PARTICLE CLOUD COMPONENT
 // ═══════════════════════════════════════════════════════
 
+// Pre-computed layer color objects (avoid allocation in hot loop)
+const LAYER_COLOR_OBJS = LAYER_COLORS.map((c) => new THREE.Color(c));
+
 function ExplorerCloud({
   wasmEngine,
   memoryArray,
   layerArray,
+  particleCount,
   mode,
+  speed,
   onMetrics,
 }: {
   wasmEngine: HyperEngine;
   memoryArray: Float32Array;
   layerArray: Float32Array;
+  particleCount: number;
   mode: ViewMode;
+  speed: number;
   onMetrics: (c: number, h: number) => void;
 }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
   const frameCount = useRef(0);
+  const colorsInitialized = useRef(false);
+  const lastModeId = useRef(-1);
 
   const matrix = useMemo(() => new THREE.Matrix4(), []);
   const position = useMemo(() => new THREE.Vector3(), []);
   const color = useMemo(() => new THREE.Color(), []);
+  const coreColor = useMemo(() => new THREE.Color(), []);
+  const edgeColor = useMemo(() => new THREE.Color(), []);
 
   useFrame(() => {
     if (!meshRef.current) return;
-    wasmEngine.tick_physics();
+
+    // Speed control: multiple ticks for fast, skip frames for slow
+    if (speed >= 1) {
+      const ticks = Math.round(speed);
+      for (let s = 0; s < ticks; s++) {
+        wasmEngine.tick_physics();
+      }
+    } else {
+      const skipFrames = Math.round(1 / speed);
+      if (frameCount.current % skipFrames === 0) {
+        wasmEngine.tick_physics();
+      }
+    }
+
     frameCount.current += 1;
 
     // Update metrics at ~10Hz
@@ -115,7 +161,28 @@ function ExplorerCloud({
       onMetrics(c, t);
     }
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
+    // Initialize instance colors on first frame or mode change
+    const needsColorInit = !colorsInitialized.current || lastModeId.current !== mode.id;
+    if (needsColorInit) {
+      // Pre-initialize all instance colors so the buffer exists
+      color.set(mode.coreColor);
+      for (let i = 0; i < particleCount; i++) {
+        meshRef.current.setColorAt(i, color);
+      }
+      if (meshRef.current.instanceColor) {
+        meshRef.current.instanceColor.needsUpdate = true;
+      }
+      colorsInitialized.current = true;
+      lastModeId.current = mode.id;
+    }
+
+    // Update material color to match mode
+    if (materialRef.current) {
+      materialRef.current.color.set("#ffffff");
+    }
+
+    // Update positions every frame (this is the core rendering)
+    for (let i = 0; i < particleCount; i++) {
       const idx = i * 3;
       position.set(
         memoryArray[idx],
@@ -124,47 +191,51 @@ function ExplorerCloud({
       );
       matrix.setPosition(position);
       meshRef.current.setMatrixAt(i, matrix);
-
-      // Mode-specific coloring
-      if (mode.id === 2) {
-        // Glass Staircase: color by CD layer
-        const layerIdx = Math.round(layerArray[idx]);
-        const layerColor = LAYER_COLORS[Math.min(layerIdx, 4)];
-        color.set(layerColor);
-        meshRef.current.setColorAt(i, color);
-      } else if (mode.id === 3) {
-        // Division by Zero: color by Möbius sign
-        const sign = layerArray[idx];
-        const magnitude = layerArray[idx + 1];
-        const brightness = Math.min(magnitude * 0.5, 1.0);
-        if (sign > 0) {
-          color.setRGB(brightness * 0.2, brightness * 0.5, brightness); // blue = +1
-        } else {
-          color.setRGB(brightness, brightness * 0.1, brightness * 0.2); // red = -1
-        }
-        meshRef.current.setColorAt(i, color);
-      } else {
-        // Origin / Teardrop: use mode color
-        const dist = position.length();
-        const t = Math.min(dist / 30, 1);
-        const core = new THREE.Color(mode.coreColor);
-        const edge = new THREE.Color(mode.edgeColor);
-        color.lerpColors(core, edge, t);
-        meshRef.current.setColorAt(i, color);
-      }
     }
-
     meshRef.current.instanceMatrix.needsUpdate = true;
-    if (meshRef.current.instanceColor) {
+
+    // Update colors at ~10Hz (every 6 frames) — too expensive for 60fps
+    if (frameCount.current % 6 === 0 && meshRef.current.instanceColor) {
+      coreColor.set(mode.coreColor);
+      edgeColor.set(mode.edgeColor);
+
+      for (let i = 0; i < particleCount; i++) {
+        const idx = i * 3;
+
+        if (mode.id === 2) {
+          // Glass Staircase: color by dominant CD layer
+          const layerIdx = Math.min(Math.max(Math.round(layerArray[idx]), 0), 4);
+          color.copy(LAYER_COLOR_OBJS[layerIdx]);
+        } else if (mode.id === 3) {
+          // Division by Zero: color by Möbius sign
+          const sign = layerArray[idx];
+          const magnitude = layerArray[idx + 1];
+          const brightness = Math.min(Math.max(magnitude * 0.3, 0.15), 1.0);
+          if (sign > 0) {
+            color.setRGB(brightness * 0.3, brightness * 0.6, brightness); // blue = μ=+1
+          } else {
+            color.setRGB(brightness, brightness * 0.15, brightness * 0.25); // red = μ=-1
+          }
+        } else {
+          // Origin / Teardrop: gradient from core to edge based on distance
+          const x = memoryArray[idx], y = memoryArray[idx + 1], z = memoryArray[idx + 2];
+          const dist = Math.sqrt(x * x + y * y + z * z);
+          const t = Math.min(dist / 30, 1);
+          color.lerpColors(coreColor, edgeColor, t);
+        }
+
+        meshRef.current!.setColorAt(i, color);
+      }
       meshRef.current.instanceColor.needsUpdate = true;
     }
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, PARTICLE_COUNT]}>
+    <instancedMesh ref={meshRef} args={[undefined, undefined, particleCount]}>
       <sphereGeometry args={[0.08, 4, 4]} />
       <meshBasicMaterial
-        vertexColors
+        ref={materialRef}
+        color="#00ff88"
         opacity={0.6}
         transparent
         depthWrite={false}
@@ -185,6 +256,7 @@ interface DetectedZero {
 
 export default function Home() {
   const [engineStatus, setEngineStatus] = useState("Compiling...");
+  const [wasmModule, setWasmModule] = useState<{ memory: WebAssembly.Memory } | null>(null);
   const [hyperSystem, setHyperSystem] = useState<{
     engine: HyperEngine;
     memory: Float32Array;
@@ -193,6 +265,8 @@ export default function Home() {
   const [collapse, setCollapse] = useState(0);
   const [height, setHeight] = useState(10.0);
   const [modeIdx, setModeIdx] = useState(0);
+  const [particleCount, setParticleCount] = useState(DEFAULT_PARTICLE_COUNT);
+  const [speed, setSpeed] = useState(1);
   const [detectedZeros, setDetectedZeros] = useState<DetectedZero[]>([]);
   const [layerEnergies, setLayerEnergies] = useState([0, 0, 0, 0, 0]);
   const inZeroRef = useRef(false);
@@ -201,38 +275,59 @@ export default function Home() {
 
   const mode = VIEW_MODES[modeIdx];
 
-  // Boot WASM engine
+  // Init WASM module once
   useEffect(() => {
-    const bootEngine = async () => {
-      try {
-        const wasmModule = await init();
-        setEngineStatus("Allocating 16D Geometry RAM...");
-
-        const engine = new HyperEngine(PARTICLE_COUNT);
-        const ptr = engine.get_buffer_pointer();
-        const memoryArray = new Float32Array(
-          wasmModule.memory.buffer,
-          ptr,
-          PARTICLE_COUNT * 3
-        );
-
-        // Layer buffer for auxiliary data
-        const layerPtr = engine.get_layer_buffer_pointer();
-        const layerArray = new Float32Array(
-          wasmModule.memory.buffer,
-          layerPtr,
-          PARTICLE_COUNT * 3
-        );
-
-        setHyperSystem({ engine, memory: memoryArray, layers: layerArray });
-        setEngineStatus("WASM Core Locked — True Zero-Copy");
-      } catch (e) {
-        console.error(e);
-        setEngineStatus("CRITICAL WASM CORE FAILURE");
-      }
-    };
-    bootEngine();
+    init().then((mod) => {
+      setWasmModule(mod);
+    }).catch((e) => {
+      console.error(e);
+      setEngineStatus("CRITICAL WASM CORE FAILURE");
+    });
   }, []);
+
+  // Create/recreate engine when module is ready or N changes
+  useEffect(() => {
+    if (!wasmModule) return;
+    setEngineStatus("Allocating 16D Geometry RAM...");
+
+    // Clean up old engine
+    if (hyperSystem) {
+      try { hyperSystem.engine.free(); } catch { /* already freed */ }
+    }
+
+    const engine = new HyperEngine(particleCount);
+    const ptr = engine.get_buffer_pointer();
+    const memoryArray = new Float32Array(
+      wasmModule.memory.buffer,
+      ptr,
+      particleCount * 3
+    );
+
+    const layerPtr = engine.get_layer_buffer_pointer();
+    const layerArray = new Float32Array(
+      wasmModule.memory.buffer,
+      layerPtr,
+      particleCount * 3
+    );
+
+    // Sync mode
+    engine.set_view_mode(modeIdx);
+
+    setHyperSystem({ engine, memory: memoryArray, layers: layerArray });
+    setEngineStatus("WASM Core Locked — True Zero-Copy");
+
+    // Reset zero detection on engine reset
+    setDetectedZeros([]);
+    setHeight(10.0);
+    setCollapse(0);
+    inZeroRef.current = false;
+    minCollapseRef.current = Infinity;
+
+    return () => {
+      try { engine.free(); } catch { /* cleanup */ }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wasmModule, particleCount]);
 
   // Sync view mode to engine
   useEffect(() => {
@@ -244,9 +339,26 @@ export default function Home() {
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      // Ignore if typing in an input
+      if ((e.target as HTMLElement).tagName === "INPUT") return;
+
       const num = parseInt(e.key);
       if (num >= 1 && num <= 4) {
         setModeIdx(num - 1);
+        return;
+      }
+
+      // Speed controls: [ and ] to decrease/increase
+      if (e.key === "[" || e.key === "-") {
+        setSpeed((s) => {
+          const idx = SPEED_PRESETS.findIndex((p) => p.value === s);
+          return idx > 0 ? SPEED_PRESETS[idx - 1].value : s;
+        });
+      } else if (e.key === "]" || e.key === "=") {
+        setSpeed((s) => {
+          const idx = SPEED_PRESETS.findIndex((p) => p.value === s);
+          return idx < SPEED_PRESETS.length - 1 ? SPEED_PRESETS[idx + 1].value : s;
+        });
       }
     };
     window.addEventListener("keydown", handler);
@@ -296,12 +408,13 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [hyperSystem, modeIdx]);
 
-  const handleMetrics = (c: number, h: number) => {
+  const handleMetrics = useCallback((c: number, h: number) => {
     setCollapse(c);
     setHeight(h);
-  };
+  }, []);
 
   const nextZero = KNOWN_ZEROS.find((z) => z > height);
+  const speedLabel = SPEED_PRESETS.find((p) => p.value === speed)?.label || `${speed}×`;
 
   return (
     <main className="w-screen h-screen flex flex-col items-center justify-center bg-[#050505] text-[#00ff88] font-mono overflow-hidden">
@@ -343,7 +456,7 @@ export default function Home() {
         </p>
         <p className="text-sm opacity-50 font-mono">{mode.formula}</p>
         <p className="text-xs opacity-40 mt-2 italic">
-          {PARTICLE_COUNT.toLocaleString()} sedenion lattice points · Rust/WASM
+          {particleCount.toLocaleString()} sedenion lattice points · Rust/WASM · {speedLabel}
         </p>
         <p className="text-lg mt-4 font-bold">
           Collapse:{" "}
@@ -409,8 +522,8 @@ export default function Home() {
         )}
       </div>
 
-      {/* Right HUD — Critical Line Tracker */}
-      <div className="absolute top-8 right-8 z-10 pointer-events-none text-right drop-shadow-xl">
+      {/* Right HUD — Critical Line Tracker + Zeros */}
+      <div className="absolute top-8 right-8 z-10 pointer-events-none text-right drop-shadow-xl max-w-xs">
         <p className="text-xs opacity-50 mb-1">CRITICAL LINE σ = ½</p>
         <p className="text-3xl font-black tabular-nums">
           t = <span style={{ color: mode.coreColor }}>{height.toFixed(2)}</span>
@@ -421,31 +534,93 @@ export default function Home() {
           </p>
         )}
 
-        {detectedZeros.length > 0 && (
-          <div className="mt-6 text-left">
-            <p className="text-xs opacity-50 border-b border-white/10 pb-1 mb-2">
-              ZEROS DETECTED — {detectedZeros.length}
+        {/* Zeros log — always visible */}
+        <div className="mt-6 text-left">
+          <p className="text-xs opacity-50 border-b border-white/10 pb-1 mb-2">
+            ZEROS DETECTED — {detectedZeros.length}
+          </p>
+          {detectedZeros.length === 0 ? (
+            <p className="text-xs opacity-25 italic">
+              Sweeping... first zero at t ≈ 14.13
             </p>
-            <div className="max-h-64 overflow-hidden">
-              {detectedZeros.slice(-10).map((z) => (
-                <div
-                  key={z.index}
-                  className="flex items-center gap-2 text-sm leading-relaxed"
+          ) : (
+            <div className="max-h-80 overflow-y-auto">
+              {detectedZeros.map((z) => {
+                // Compare with known zeros
+                const nearest = KNOWN_ZEROS.reduce((best, kz) =>
+                  Math.abs(kz - z.height) < Math.abs(best - z.height) ? kz : best
+                , KNOWN_ZEROS[0]);
+                const error = Math.abs(nearest - z.height);
+                const isAccurate = error < 0.5;
+
+                return (
+                  <div
+                    key={z.index}
+                    className="flex items-center gap-2 text-sm leading-relaxed"
+                  >
+                    <span className="opacity-60 w-6 text-right" style={{ color: mode.coreColor }}>
+                      #{z.index}
+                    </span>
+                    <span className="font-bold tabular-nums" style={{ color: mode.coreColor }}>
+                      t = {z.height.toFixed(3)}
+                    </span>
+                    <span className="text-xs opacity-30">
+                      |ζ| ≈ {z.minCollapse.toFixed(4)}
+                    </span>
+                    {isAccurate && (
+                      <span className="text-xs text-green-500 opacity-60">✓</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Right — Controls */}
+      <div className="absolute bottom-8 right-8 z-10 pointer-events-auto drop-shadow-xl">
+        <div className="flex flex-col gap-3 text-xs border border-white/10 bg-black/60 backdrop-blur-sm rounded px-4 py-3">
+          {/* Particle count */}
+          <div>
+            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">PARTICLES (N)</p>
+            <div className="flex gap-1">
+              {N_PRESETS.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => setParticleCount(p.value)}
+                  className={`px-2 py-0.5 border transition-all duration-150 ${
+                    particleCount === p.value
+                      ? "border-[#00ff88] bg-[#00ff88]/10 text-[#00ff88]"
+                      : "border-white/15 text-white/40 hover:border-white/40 hover:text-white/70"
+                  }`}
                 >
-                  <span className="opacity-60 w-6 text-right" style={{ color: mode.coreColor }}>
-                    #{z.index}
-                  </span>
-                  <span className="font-bold tabular-nums" style={{ color: mode.coreColor }}>
-                    t = {z.height.toFixed(3)}
-                  </span>
-                  <span className="text-xs opacity-30">
-                    |ζ| ≈ {z.minCollapse.toFixed(4)}
-                  </span>
-                </div>
+                  {p.label}
+                </button>
               ))}
             </div>
           </div>
-        )}
+
+          {/* Speed control */}
+          <div>
+            <p className="opacity-50 mb-1.5 text-[10px] tracking-wider">SWEEP SPEED [  ] [ ]</p>
+            <div className="flex gap-1">
+              {SPEED_PRESETS.map((p) => (
+                <button
+                  key={p.value}
+                  onClick={() => setSpeed(p.value)}
+                  className={`px-2 py-0.5 border transition-all duration-150 ${
+                    speed === p.value
+                      ? "border-[#00ff88] bg-[#00ff88]/10 text-[#00ff88]"
+                      : "border-white/15 text-white/40 hover:border-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Left — Watermark */}
@@ -469,7 +644,9 @@ export default function Home() {
             wasmEngine={hyperSystem.engine}
             memoryArray={hyperSystem.memory}
             layerArray={hyperSystem.layers}
+            particleCount={particleCount}
             mode={mode}
+            speed={speed}
             onMetrics={handleMetrics}
           />
         )}
