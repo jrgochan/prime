@@ -1,0 +1,51 @@
+% ================================================================
+\section{The Jacobi Theta Bypass: Modular Invariance}
+\label{sec:theta}
+% ================================================================
+
+The Cathedral proves that $\zeta(s) \neq 0$ for real $s \in (0,1)$
+using the \emph{Jacobi Theta Bypass} (\lean{BDMellin.lean}, lines 660--730):
+
+\[
+  \Lambda(s) = \Lambda_0(s) - \frac{1}{s} - \frac{1}{1-s}
+\]
+where $\Lambda_0(s) = \int_1^\infty (\theta(t) - 1)(t^{s/2} + t^{(1-s)/2})\frac{dt}{t}$
+is entire, and $\Lambda(s) = \pi^{-s/2}\Gamma(s/2)\zeta(s)$ is the
+completed zeta function.
+
+\begin{principle}[Modular Invariance]
+The functional equation $\Lambda(s) = \Lambda(1-s)$ is the
+\emph{modular invariance} of the Jacobi theta function
+$\theta(t) = \sum_{n \in \ZZ} e^{-\pi n^2 t}$ under the
+$S$-transformation $t \mapsto 1/t$:
+\[
+  \theta(1/t) = \sqrt{t}\,\theta(t).
+\]
+In string theory, modular invariance of the partition function is a
+consistency condition (anomaly cancellation). Here, it is the
+symmetry that forces the completed zeta function to satisfy
+$\Lambda(s) = \Lambda(1-s)$, and the proof exploits this to show
+$\re\Lambda(s) < 0$ for real $s \in (0,1)$ by bounding
+$\re\Lambda_0(s) < 4$ and using $-1/s - 1/(1-s) \leq -4$.
+\end{principle}
+
+The bound $\re\Lambda_0(s) < 4$ uses the exponential decay of the
+theta kernel for $t > 1$ and is proved from pure Mathlib in
+\lean{ThetaBound.lean} with zero axioms.
+
+\subsection{The RH Zero-Free Region (Proved)}
+
+A key consequence now fully proved in the Cathedral:
+
+\begin{theorem}[\lean{rh\_zeta\_ne\_zero}, April~22]
+Under RH, $\zeta(s) \neq 0$ for $\re s > 1/2$ and $s \neq 1$.
+\end{theorem}
+
+In physics: \emph{under RH, the scattering amplitude $\zeta(s)$ has
+no resonances off the mass shell}. The proof splits into two cases:
+$\re s \geq 1$ (Mathlib's unconditional nonvanishing) and
+$1/2 < \re s < 1$ (RH forces the zero onto the critical line,
+contradiction). This also yields \lean{inv\_zeta\_differentiableAt}:
+$1/\zeta(s)$ is differentiable for $\re s > 1/2$ under RH---the
+scattering amplitude has no poles in the physical region.
+

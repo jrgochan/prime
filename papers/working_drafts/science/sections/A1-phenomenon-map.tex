@@ -1,0 +1,262 @@
+\section{Complete Physics Phenomenon Map}
+\label{app:phenomenon-map}
+% ================================================================
+
+The following table provides a comprehensive map of every physics phenomenon
+discovered in the Cathedral proof chain, organized by physical domain.
+Each entry lists the mathematical object, the physics dual, the Cathedral
+module where it appears, its proof status, and the section of this paper
+where it is discussed.
+
+\subsection{Quantum Mechanics}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+$L^2(0,1)$ Hilbert space & Fock space & \lean{Defs.lean} & proved & \ref{sec:vacuum} \\
+$\mathbf{1} \in L^2$ & Vacuum state $\ket{0}$ & --- & def & \ref{sec:vacuum} \\
+$h_k(x) = \fract{1/(kx)}$ & Single-particle state $a_k^\dagger\ket{0}$ & \lean{Defs.lean} & def & \ref{sec:vacuum} \\
+$f_{N,v} = \sum v_k h_k$ & Trial wavefunction & \lean{BDMellin.lean} & proved & \ref{sec:vacuum} \\
+$d_N^2 = \inf_v \|1 - f_v\|^2$ & Ground state energy & \lean{MainChain.lean} & proved & \ref{sec:vacuum} \\
+$d_N^2 \to 0$ (RH) & Vacuum energy $\to 0$ & \lean{MellinCrown.lean} & 2 ax. & \ref{sec:vacuum} \\
+$v_{\mathrm{opt}} = G^{-1}b$ & Normal mode amplitudes & \lean{Vasyunin/*.lean} & proved & \ref{sec:vacuum} \\
+Rayleigh quotient $v^TGv/v^Tv$ & Variational energy & \lean{Spectral/*.lean} & proved & \ref{sec:spectral} \\
+$\lambda_{\min}(G_N) > 0$ & Mass gap exists & \lean{Gram/Bounds.lean} & proved & \ref{sec:spectral} \\
+$\lambda_{\min} \sim c/\ln N$ & Mass gap closing & \lean{Sieve/ParitySchur.lean} & axiom & \ref{sec:spectral} \\
+Eigenvalue interlacing & Gluing axiom (TQFT) & \lean{Structural/Eigenvalue.lean} & proved & \ref{sec:tqft} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Quantum Field Theory}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+$G(j,k) = \langle h_j, h_k \rangle$ & Two-point correlator & \lean{Gram/*.lean} & proved & 3 \\
+$G > 0$ (positive definite) & Reflection positivity (OS) & \lean{Gram/Bounds.lean} & proved & 3 \\
+$G(k,k)$ diagonal & Self-energy & \lean{Gram/Diagonal.lean} & proved & 3 \\
+$G(j,k)$ off-diagonal & Interaction term & \lean{Vasyunin/*.lean} & 1 ax. & \ref{sec:vasyunin} \\
+Parseval bridge & Unitarity / optical theorem & \lean{White/Scattering.lean} & proved & \ref{sec:parseval} \\
+$1/|s|^2$ integral $= 1$ & Breit-Wigner resonance & \lean{PlancherelBypass.lean} & proved & \ref{sec:parseval} \\
+Three-term decomposition & Tree + loop + self-energy & \lean{PlancherelBypass.lean} & proved & \ref{sec:parseval} \\
+$x = e^{-u}$ substitution & Wick rotation $t \to -iu$ & \lean{White/Kinematics.lean} & proved & 3 \\
+$\mathcal{M}[h_k](\rho) = \frac{1}{k(\rho-1)}$ & Factorizable scattering & \lean{BDMellin.lean} & proved & 2 \\
+Sherman--Morrison & Rank-1 scattering update & \lean{ShermanMorrison.lean} & proved & --- \\
+Schur complement & Supersymmetric localization & \lean{Structural/*.lean} & proved & \ref{sec:spectral} \\
+Mod-8 decomposition & Wigner--Eckart / Bott periodicity & \lean{Spectral/ClassRestriction.lean} & axiom & \ref{sec:spectral} \\
+$N \to \infty$ limit & IR fixed point (RG flow) & \lean{MellinCrown.lean} & 2 ax. & \ref{sec:tqft} \\
+Mellin--Perron Bridge & Bohr complementarity & \lean{MellinPerronBridge.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Gauge choice (spatial/Mellin) & Lorenz / unitary gauge & \lean{MainChain.lean} & \textbf{proved} & \ref{sec:axiom-audit} \\
+Gallagher MVT & Completeness relation & \lean{GallagherMVT.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Character energy partition & Stabilizer QEC code & \lean{GallagherPartition.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Log-frequency separation & Dispersion relation & \lean{FrequencySeparation.lean} & \textbf{proved} & \ref{sec:parseval} \\
+Conservation of Difficulty & Gauss--Bonnet obstruction & (conceptual, E15) & --- & \ref{sec:axiom-audit} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Statistical Mechanics \& Thermodynamics}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+$\mu(n) \in \{-1,0,+1\}$ & Spin variable $\sigma_n$ & --- & def & \ref{sec:mertens} \\
+$M(x) = \sum \mu(n)$ & Magnetization & \lean{MertensBound.lean} & axiom & \ref{sec:mertens} \\
+$|M(x)| = O(\sqrt{x})$ (RH) & Critical exponent $\beta = 1/2$ & \lean{MertensBound.lean} & axiom & \ref{sec:mertens} \\
+$S_1 = \sum \mu(k)/k \to 0$ & Zero net magnetization (PNT) & \lean{AbelTail/*.lean} & proved & \ref{sec:thermo} \\
+$S_2 = \sum \mu(k)\ln k/k \to -1$ & Magnetic susceptibility & \lean{PNT/AbelMean.lean} & axiom & \ref{sec:thermo} \\
+$S_3 = \sum \mu(k)\ln^2 k/k \to -2\gamma$ & Heat capacity & \lean{AbelTail/*.lean} & proved & \ref{sec:thermo} \\
+$1 - b^Tv$ decomposition & Thermodynamic hierarchy & \lean{CalcBounds.lean} & proved & \ref{sec:thermo} \\
+$C \approx 21.649$ & $1/c_v$ (inverse heat capacity) & \lean{(Rust oracle, 512-bit)} & num. & \ref{sec:constant} \\
+$c_{\text{holes}} \approx 0.046$ & Casimir energy / sum rule & --- & num. & \ref{sec:constant} \\
+$\zeta(s) = \prod_p (1-p^{-s})^{-1}$ & Partition function & --- & def & --- \\
+Log-cutoff Bartlett window & Finite-$T$ regularization & \lean{MertensIntegral.lean} & proved & \ref{sec:mertens} \\
+Triangle inequality trap & Failed renormalization & \lean{MoebiusL1Bound.lean} & proved & \ref{sec:mertens} \\
+Finite-size scaling $\sim 1/\ln N$ & RG finite-size corrections & \lean{CalcBounds.lean} & proved & \ref{sec:thermo} \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Exploration~19 discoveries (April~28, 2026):}} \\
+\midrule
+GOE spacing (all mod $m$) & Eigenstate thermalization (ETH) & \lean{ResidueDecomposition.lean} & num. & \ref{sec:universality} \\
+$N_c(m) = 60\,m/\varphi(m)$ & Equation of state & \lean{(Rust cert, f64)} & num. & \ref{sec:universality} \\
+$\alpha \approx 0.47$ & Arithmetic-GOE constant & \lean{ParticipationRatio.lean} & num. & \ref{sec:localization} \\
+IPR bounds $1/n \leq \text{IPR} \leq 1$ & Localization bounds & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+Ground state PR $= \mathcal{O}(1)$ & Quantum scarring & \lean{(Rust cert, f64)} & num. & \ref{sec:localization} \\
+Prime weight $\sim 1/\log N$ & Composite dominance & \lean{ParticipationRatio.lean} & conj. & \ref{sec:localization} \\
+Dark sector crossover & KT-like topological transition & \lean{(Rust cert, f64)} & num. & \ref{sec:dark-sector} \\
+\midrule
+\multicolumn{5}{@{}l}{\emph{Exploration~20 certified theorems (April~29, 2026):}} \\
+\midrule
+$\langle v_{r_1}, v_{r_2} \rangle = 0$ & Eigenspace orthogonality & \lean{ResidueDecomposition.lean} & proved & \ref{sec:universality} \\
+$\mathrm{Tr}(G^{\mathrm{block}}_m) = \mathrm{Tr}(G)$ & Spectral weight conservation & \lean{ResidueDecomposition.lean} & proved & \ref{sec:universality} \\
+$G(j,k) = G(k,j)$ & Time-reversal symmetry & \lean{Defs.lean} & proved & \ref{sec:spectral} \\
+IPR$(e_k) = 1$ & Maximally localized state & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(u) = 1/n$ & Maximally delocalized state & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(v) \geq 0$ & Non-negative localization & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+IPR$(v|_S) \leq \text{IPR}(v)$ & Masking decreases weight & \lean{ParticipationRatio.lean} & proved & \ref{sec:localization} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Lattice Field Theory (Vasyunin Tower)}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+Per-tile FTC & Per-site Lagrangian & \lean{CrossTermFTC.lean} & proved & \ref{sec:vasyunin} \\
+$1/(jkx^2)$ kinetic term & Inverse-square interaction & \lean{CrossTermFTC.lean} & proved & \ref{sec:vasyunin} \\
+$(n/j + m/k)/x$ potential & Logarithmic coupling & \lean{CrossTermFTC.lean} & proved & \ref{sec:vasyunin} \\
+$mn$ mass term & Constant background field & \lean{CrossTermFTC.lean} & proved & \ref{sec:vasyunin} \\
+Row partition (Beatty bound) & Kadanoff block-spin grouping & \lean{OffDiagPartition.lean} & proved & \ref{sec:vasyunin} \\
+At most 2 tiles per row & Nearest-neighbor interaction & \lean{CrossTermFTC.lean} & proved & \ref{sec:vasyunin} \\
+Telescoping sum & Transfer matrix propagation & \lean{TelescopeSum.lean} & proved & \ref{sec:vasyunin} \\
+Stirling approximation & Saddle-point / steepest descent & \lean{StirlingBridge.lean} & proved & \ref{sec:vasyunin} \\
+$\ln(2\pi)$ contribution & One-loop determinantal correction & \lean{StirlingBridge.lean} & proved & \ref{sec:vasyunin} \\
+Gauss digamma formula & Bloch decomposition ($\mathbb{Z}/q\mathbb{Z}$) & \lean{DigammaReflection.lean} & axiom & \ref{sec:vasyunin} \\
+Convergence axiom & Ergodic hypothesis & \lean{ConvergenceAxioms.lean} & axiom & \ref{sec:vasyunin} \\
+$V(a,b) = \sum\fract{mb/a}\cot(\pi m/a)$ & Scattering phase shift & \lean{FormulaBridge.lean} & proved & \ref{sec:vasyunin} \\
+Dedekind reciprocity & Time-reversal invariance & \lean{LogDigammaBridge.lean} & axiom & \ref{sec:vasyunin} \\
+Uniqueness of limits & Ergodic = thermodynamic & \lean{LogDigammaBridge.lean} & proved & \ref{sec:vasyunin} \\
+GCD reduction $G(j,k) = G(j/d,k/d)$ & Gauge equivalence & \lean{Vasyunin/Cotangent/GCDReduction.lean} & proved & \ref{sec:vasyunin} \\
+GCD stratum partition & Inclusion-exclusion decomposition & \lean{Covariance/GCDPartition.lean} & proved & --- \\
+M\"obius sign law & Stratum sign $\to$ $\mu(d)$ & \lean{Covariance/GCDSignLaw.lean} & proved & --- \\
+GCD stratum bound $|S_d| \leq C/d^2$ & Per-sector vacuum bound & \lean{Covariance/GCDStratumBound.lean} & proved & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Scattering Theory \& Complex Analysis}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+Perron contour integral & Inverse Laplace transform & \lean{Perron/*.lean} & proved & \ref{sec:perron} \\
+Born--Oppenheimer split & Fast/slow mode separation & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+Archimedean $N$ choice & Adaptive UV regularization & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+$h_{\mathrm{tail\_crushed}}$ & Asymptotic freedom & \lean{Perron/HalfIntegerPerron.lean} & proved & \ref{sec:perron} \\
+Contour shift $\sigma \to 1/2$ & Crossing phase boundary & \lean{Perron/Rectangle.lean} & proved & \ref{sec:perron} \\
+Horizontal contour vanishing & Riemann--Lebesgue lemma & \lean{Perron/Rectangle.lean} & proved & \ref{sec:perron} \\
+Borel--Carath\'eodory & Maximum entropy principle & \lean{(Mathlib)} & proved & \ref{sec:bc} \\
+Hadamard three-circles & Conformal gauge transformation & \lean{Zeta/Hadamard.lean} & proved & \ref{sec:bc} \\
+$\exp$ map (strip $\to$ annulus) & Open-closed string duality & \lean{Zeta/Hadamard.lean} & proved & \ref{sec:bc} \\
+Zero-counting axiom & Weyl law / spectral density & \lean{Zeta/Hadamard.lean} & axiom & \ref{sec:bc} \\
+$|\zeta(s)| \geq c/|t|^A$ & Free energy lower bound & \lean{Zeta/LowerBound.lean} & proved & \ref{sec:bc} \\
+RH $\Rightarrow \zeta(s) \neq 0$ & No off-shell resonances & \lean{Zeta/Convexity.lean} & proved & \ref{sec:theta} \\
+$\theta(t)$ functional equation & Modular invariance & \lean{ThetaBound.lean} & proved & \ref{sec:theta} \\
+$\Lambda(s) < 0$ on $(0,1)$ & Vacuum instability at real $s$ & \lean{BDMellin.lean} & proved & \ref{sec:theta} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Signal Processing}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+Log-cutoff taper $1 - \ln k/\ln N$ & Bartlett window (apodization) & \lean{MertensIntegral.lean} & proved & \ref{sec:mertens} \\
+Parseval identity & Energy conservation (freq.~domain) & \lean{White/Scattering.lean} & proved & \ref{sec:parseval} \\
+Mellin transform on $\re s = 1/2$ & Critical-line spectral analysis & \lean{MellinCrown.lean} & axiom & --- \\
+$C/\ln N$ decay rate & Logarithmic SNR decay & \lean{MellinCrown.lean} & axiom & --- \\
+Autocorrelation at zero lag & L\textsuperscript{2} energy & \lean{White/Kinematics.lean} & proved & \ref{sec:parseval} \\
+Fourier--Mellin connection & Position $\to$ momentum & \lean{White/Scattering.lean} & proved & \ref{sec:parseval} \\
+$2\pi$ rescaling & Renormalization scale & \lean{White/Scattering.lean} & proved & \ref{sec:parseval} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Stained Glass Rotors (v12)}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+Gallagher MVT & Completeness relation & \lean{GallagherMVT.lean} & proved & \ref{sec:parseval} \\
+Fej\'er kernel convolution & Spectral window function & \lean{GallagherMVT.lean} & proved & \ref{sec:parseval} \\
+Dirichlet characters mod 8 & Syndrome channels (QEC) & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+$\chi_8$ orthogonality & Perfect decoupling & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+Discrete energy partition & Fourfold energy split & \lean{GallagherPartition.lean} & proved & \ref{sec:parseval} \\
+Log-frequency $\lambda_n = \log n$ & Lattice dispersion relation & \lean{FrequencySeparation.lean} & proved & \ref{sec:parseval} \\
+$|\lambda_i - \lambda_j| \geq 1/(N+1)$ & Spectral gap / Van Hove & \lean{FrequencySeparation.lean} & proved & \ref{sec:parseval} \\
+Mellin--Perron Bridge & Bohr complementarity & \lean{MellinPerronBridge.lean} & proved & \ref{sec:parseval} \\
+Spatial vs.~Mellin path & Lorenz vs.~unitary gauge & \lean{MainChain.lean} & proved & \ref{sec:axiom-audit} \\
+Conservation of Difficulty & Gauss--Bonnet obstruction & (E15, conceptual) & --- & \ref{sec:axiom-audit} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Arithmetic Standard Model (v18)}
+\label{app:arithmetic-sm}
+
+\begin{center}
+\small
+\begin{tabular}{@{}>{}p{3.5cm}>{}p{3.5cm}>{}p{3.8cm}cp{1cm}@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physics Phenomenon} & \textbf{Cathedral Module} & \textbf{Status} & \textbf{\S} \\
+\midrule
+$\mu(n) = 0$ for $n$ not sqfree & Pauli exclusion principle & \lean{ArithmeticPauli.lean} & proved & \ref{sec:mertens} \\
+$\sum_{d|n} \mu(d) = \delta_{n,1}$ & Vacuum identity & \lean{ArithmeticPauli.lean} & proved & \ref{sec:mertens} \\
+$\lambda(n) = (-1)^{\Omega(n)}$ & U(1) charge (Liouville) & \lean{ArithmeticU1.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\lambda(mn) = \lambda(m)\lambda(n)$ & Charge conservation & \lean{ArithmeticU1.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\lambda(n) \cdot \mu^2(n) = \mu(n)$ & Charge conjugation & \lean{ArithmeticU1.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$|L(x)| = O(x^{1/2+\varepsilon})$ (RH) & Vacuum polarization & \lean{ArithmeticU1.lean} & def & \ref{sec:arithmetic-standard-model} \\
+$p=2$ unique even prime & Higgs mechanism (SU(2)) & \lean{ArithmeticSU2.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\mu(2n) = -\mu(n)$ & W$^\pm$ boson (sign flip) & \lean{ArithmeticSU2.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$G(2,2)$ spectral anchor & Higgs VEV & \lean{ArithmeticSU2.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+Primes $\geq 5$ never HC & Quark confinement (SU(3)) & \lean{ArithmeticSU3.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\sigma(6) = 12 = 2 \cdot 6$ & Proton stability (perfect $n$) & \lean{ArithmeticSU3.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\gcd(2,3) = 1$ & Gauge independence & \lean{StandardModel.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+$\lambda|_{\text{sqfree}} = \mu$ & Fermion-boson duality & \lean{StandardModel.lean} & proved & \ref{sec:arithmetic-standard-model} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Summary Statistics}
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Metric} & \textbf{Count} \\
+\midrule
+Total physics phenomena mapped & 135+ \\
+Proved (zero sorry, zero axiom) & 95+ \\
+Axiom (off-crown) & $\sim$20 \\
+Crown axiom (One-Pillar, Analytic) & \textbf{1} \\
+Crown axiom (Gram Crown) & \textbf{1} + 5 PNT \\
+Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
+Proof paths to RH & \textbf{6} \\
+Physical domains covered & 10 \\
+Cathedral Lean modules referenced & 60+ \\
+Numerical experiments & \textbf{50+} \\
+Active Lean files & 251 (364 incl.\ archive) \\
+Active lines of code & $\sim$68{,}500 ($\sim$95{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$2{,}200 \\
+Crown path sorry & \textbf{0} \\
+Oracle path sorry & \textbf{0} \\
+Gram Crown sorry & \textbf{0} \\
+Largest certified $N$ & \textbf{55,440} (DD precision) \\
+New constants identified & \textbf{$\alpha \approx 0.47$} \\
+Arithmetic Standard Model theorems & \textbf{88} (0 sorry, 0 axioms) \\
+\bottomrule
+\end{tabular}
+\end{center}
+

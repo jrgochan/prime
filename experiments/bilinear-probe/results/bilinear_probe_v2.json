@@ -1,0 +1,4820 @@
+{
+  "experiment": "Bilinear Probe v2 — HPDF-Accelerated Gram Decomposition",
+  "timestamp": "unix:1778780046",
+  "max_n": 55440,
+  "total_time_secs": 252.154135875,
+  "decompositions": [
+    {
+      "n": 12,
+      "dim": 11,
+      "vtgv_total": 0.43720626611030944,
+      "excess": -0.5627937338896906,
+      "diagonal": 0.3954648388854127,
+      "near_offdiag": -0.0014988400100297392,
+      "far_offdiag": 0.04324026723492619,
+      "near_bandwidth": 3,
+      "offdiag_positive_sum": 0.19574766843687996,
+      "offdiag_negative_sum": -0.1540062412119835,
+      "offdiag_cancellation_ratio": 0.7867590068468364,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -0.14176077695089942,
+          "pair_count": 31
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 0.3085920099834625,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.004090637095741209,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.0313622213454485,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.0138795269663697,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.00857858612287972,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 9,
+          "contribution": 0.0006876086793578561,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.00014231067156215656,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 11,
+          "contribution": 0.0,
+          "pair_count": 1
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.029433437536951115,
+          "pair_count": 25
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": 0.028588843285774757,
+          "pair_count": 11
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": 0.04941283475570219,
+          "pair_count": 5
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": -0.012540360569830234,
+          "pair_count": 2
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": 0.005713547290200846,
+          "pair_count": 2
+        }
+      ],
+      "both_squarefree_contribution": 0.10989575735474481,
+      "has_square_contribution": 0.10749509236769493,
+      "fejer_vtgv": 1.089778056121401,
+      "flat_vtgv": 2.14612345278848,
+      "s1_mertens": -0.0004329004329004238,
+      "s1_tapered": 0.4027041047608142,
+      "btv": 0.7303417693381864,
+      "load_time_secs": 0.001855792,
+      "compute_time_secs": 5.834e-6
+    },
+    {
+      "n": 24,
+      "dim": 23,
+      "vtgv_total": 0.6155680429022193,
+      "excess": -0.38443195709778066,
+      "diagonal": 0.5768473521626144,
+      "near_offdiag": 0.07156702040719248,
+      "far_offdiag": -0.03284632966758756,
+      "near_bandwidth": 4,
+      "offdiag_positive_sum": 0.6877908079901544,
+      "offdiag_negative_sum": -0.6490701172505493,
+      "offdiag_cancellation_ratio": 0.9437028086304996,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -0.4119832524254467,
+          "pair_count": 149
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 0.6264290857738535,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.03909929851075914,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.09368047633697861,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.014609605309957533,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.05147053325997121,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.0004827572845812885,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 9,
+          "contribution": 0.006467794560081629,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.005504542833016874,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 11,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.0036514278433665095,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.0026191583107449757,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.001857884788870734,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 15,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 16,
+          "contribution": 0.0008816766554755014,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.00036176878061823205,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.00016007124538039308,
+          "pair_count": 4
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.0671816689574397,
+          "pair_count": 121
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": 0.016786773272164005,
+          "pair_count": 47
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": 0.07950320523336607,
+          "pair_count": 23
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": -0.033864632099915214,
+          "pair_count": 13
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": 0.04227026668494849,
+          "pair_count": 9
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.005893525756605161,
+          "pair_count": 5
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.022433844165013477,
+          "pair_count": 5
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": 0.014973074704502714,
+          "pair_count": 2
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.009321136460258946,
+          "pair_count": 2
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.008014233377417274,
+          "pair_count": 2
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.001467087227545208,
+          "pair_count": 2
+        }
+      ],
+      "both_squarefree_contribution": 0.14963679857028722,
+      "has_square_contribution": 0.20745743347640394,
+      "fejer_vtgv": 1.5672071211865775,
+      "flat_vtgv": 2.1556616870161753,
+      "s1_mertens": -0.001120515415844528,
+      "s1_tapered": 0.31432334679620694,
+      "btv": 0.8724606363919722,
+      "load_time_secs": 0.000471875,
+      "compute_time_secs": 9.375e-6
+    },
+    {
+      "n": 36,
+      "dim": 35,
+      "vtgv_total": 0.7017462544893666,
+      "excess": -0.29825374551063344,
+      "diagonal": 0.683570439031593,
+      "near_offdiag": 0.0646281643092082,
+      "far_offdiag": -0.0464523488514352,
+      "near_bandwidth": 6,
+      "offdiag_positive_sum": 1.203010922641566,
+      "offdiag_negative_sum": -1.1848351071837913,
+      "offdiag_cancellation_ratio": 0.9848913961497006,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -0.6218870674427704,
+          "pair_count": 349
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 0.8369943985548248,
+          "pair_count": 96
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.07468742959245109,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.1282883066637267,
+          "pair_count": 22
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.022283659622217476,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.09311765817255607,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.003283804015150002,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 9,
+          "contribution": 0.006167793518436951,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.006480039906004645,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.00015444032494662773,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.007926441306685867,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.006325015096774542,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.003518975293961863,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 15,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 16,
+          "contribution": 0.002811991575585568,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.002129333457180224,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0,
+          "pair_count": 1
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.004100789053696898,
+          "pair_count": 16
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.09118026502137892,
+          "pair_count": 289
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": 0.00712140229173272,
+          "pair_count": 107
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": 0.0688704663846745,
+          "pair_count": 53
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": -0.02055188700081314,
+          "pair_count": 31
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": 0.05067037152280178,
+          "pair_count": 21
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": -0.00008594283932029825,
+          "pair_count": 14
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.028326240358812385,
+          "pair_count": 10
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": 0.027473983383331523,
+          "pair_count": 9
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.023965697298570194,
+          "pair_count": 5
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.03510125485392422,
+          "pair_count": 5
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.01531948465091132,
+          "pair_count": 17
+        }
+      ],
+      "both_squarefree_contribution": 0.1667181387865182,
+      "has_square_contribution": 0.2599811300901151,
+      "fejer_vtgv": 1.7591219786381014,
+      "flat_vtgv": 1.8621745885572385,
+      "s1_mertens": 0.02555309015588315,
+      "s1_tapered": 0.27843139976692616,
+      "btv": 0.9307720392291194,
+      "load_time_secs": 0.000347166,
+      "compute_time_secs": 0.000018834
+    },
+    {
+      "n": 48,
+      "dim": 47,
+      "vtgv_total": 0.7510255763431574,
+      "excess": -0.24897442365684264,
+      "diagonal": 0.7592464599352882,
+      "near_offdiag": 0.05777095905687869,
+      "far_offdiag": -0.06599184264901024,
+      "near_bandwidth": 6,
+      "offdiag_positive_sum": 1.7438788010213502,
+      "offdiag_negative_sum": -1.7520996846134815,
+      "offdiag_cancellation_ratio": 1.0047141370072947,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -0.760543159235484,
+          "pair_count": 649
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 0.9618086168464928,
+          "pair_count": 172
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.11089691472521254,
+          "pair_count": 72
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.15754823466260398,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.022271720465282877,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.13513479058494673,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.004944347902019981,
+          "pair_count": 12
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0005919201681035988,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 9,
+          "contribution": 0.0030275800033422937,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.00932576551992223,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0013110810423385653,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.013239823820443912,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.009224516662302198,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.003108213543941334,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.00007118682474630206,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 16,
+          "contribution": 0.0029800870110976664,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.0051684412485253,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0,
+          "pair_count": 2
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.010536142466380098,
+          "pair_count": 32
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.10660155072420137,
+          "pair_count": 529
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.0014122915138577202,
+          "pair_count": 191
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": 0.05353557729450697,
+          "pair_count": 95
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": -0.005647557546959093,
+          "pair_count": 56
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": 0.043909812071198685,
+          "pair_count": 38
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.004455979365225789,
+          "pair_count": 26
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.0187375628900345,
+          "pair_count": 20
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": 0.016679942282117232,
+          "pair_count": 14
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.030757630912472928,
+          "pair_count": 12
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.046197207640655005,
+          "pair_count": 9
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.02103634479805458,
+          "pair_count": 45
+        }
+      ],
+      "both_squarefree_contribution": 0.17233891608990642,
+      "has_square_contribution": 0.2937489429877175,
+      "fejer_vtgv": 1.8239920194385675,
+      "flat_vtgv": 2.4270168132645757,
+      "s1_mertens": -0.02051016873178348,
+      "s1_tapered": 0.25843341664209557,
+      "btv": 0.960991055596047,
+      "load_time_secs": 0.000376875,
+      "compute_time_secs": 0.00002775
+    },
+    {
+      "n": 60,
+      "dim": 59,
+      "vtgv_total": 0.7897630629789668,
+      "excess": -0.2102369370210332,
+      "diagonal": 0.817994795060964,
+      "near_offdiag": -0.139410679151368,
+      "far_offdiag": 0.1111789470693723,
+      "near_bandwidth": 7,
+      "offdiag_positive_sum": 2.26480370376277,
+      "offdiag_negative_sum": -2.2930354358447693,
+      "offdiag_cancellation_ratio": 1.0124654211908497,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -0.8719198266828376,
+          "pair_count": 1027
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.0592772405945847,
+          "pair_count": 270
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.14437075382358655,
+          "pair_count": 120
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.18402853054946067,
+          "pair_count": 64
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.02402696530608306,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.1707342134947687,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.0062896850679730505,
+          "pair_count": 22
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0011619805958808826,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 9,
+          "contribution": 0.0012914461198101322,
+          "pair_count": 12
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.011495035138004967,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.002516031938592478,
+          "pair_count": 10
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.01771198569399246,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.010766227030908748,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.0023544556977811645,
+          "pair_count": 6
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.0006000763177289232,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 16,
+          "contribution": 0.0029391122462516604,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.007534335518986518,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.00003964629663624081,
+          "pair_count": 4
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.01776693173468097,
+          "pair_count": 50
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.11943156379530921,
+          "pair_count": 841
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.007435550003566225,
+          "pair_count": 299
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": 0.038692951220854324,
+          "pair_count": 149
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.005978819602929181,
+          "pair_count": 89
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": 0.03707463350291996,
+          "pair_count": 59
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.010787517772917478,
+          "pair_count": 41
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.008277640876377043,
+          "pair_count": 31
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": 0.0030710285922427314,
+          "pair_count": 24
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.03257335557580437,
+          "pair_count": 20
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.04718779265358832,
+          "pair_count": 14
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.025922508979176837,
+          "pair_count": 86
+        }
+      ],
+      "both_squarefree_contribution": 0.1811245839654573,
+      "has_square_contribution": 0.3168865183576016,
+      "fejer_vtgv": 1.8888034612356588,
+      "flat_vtgv": 1.9415036286731797,
+      "s1_mertens": 0.01624765447608247,
+      "s1_tapered": 0.24411686824009968,
+      "btv": 0.9845086680877295,
+      "load_time_secs": 0.000605458,
+      "compute_time_secs": 0.000039166
+    },
+    {
+      "n": 120,
+      "dim": 119,
+      "vtgv_total": 0.8904539304114862,
+      "excess": -0.10954606958851376,
+      "diagonal": 0.999924881988495,
+      "near_offdiag": -0.11696320676097098,
+      "far_offdiag": 0.007492255183960689,
+      "near_bandwidth": 10,
+      "offdiag_positive_sum": 4.791114138734709,
+      "offdiag_negative_sum": -4.90058509031174,
+      "offdiag_cancellation_ratio": 1.0228487463264528,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.1823552045904013,
+          "pair_count": 4235
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.3258517487806933,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.2789413120508836,
+          "pair_count": 474
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.24670535440667996,
+          "pair_count": 270
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.015363253686212872,
+          "pair_count": 172
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.30728264602739597,
+          "pair_count": 120
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.008663402264197257,
+          "pair_count": 96
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0016831826792528205,
+          "pair_count": 64
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.004022316680682897,
+          "pair_count": 58
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.022562607734975818,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.006592004939346568,
+          "pair_count": 32
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.03934278505474019,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.008606876765054146,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.002192345466448954,
+          "pair_count": 22
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.004566931269611148,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 16,
+          "contribution": 0.00015824569225397767,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0008327427745923356,
+          "pair_count": 18
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.012309316723275057,
+          "pair_count": 12
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.002083319269216468,
+          "pair_count": 12
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.06407101584709146,
+          "pair_count": 216
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.16884274249038347,
+          "pair_count": 3481
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.0186752035153649,
+          "pair_count": 1199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.021566618338765154,
+          "pair_count": 599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.05454042067566153,
+          "pair_count": 359
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.00842964629063387,
+          "pair_count": 239
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.05427933147795857,
+          "pair_count": 170
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": 0.011567926707206392,
+          "pair_count": 128
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.04005037829654835,
+          "pair_count": 98
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.028682879139514155,
+          "pair_count": 80
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.037134267848873685,
+          "pair_count": 64
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.03615734720321886,
+          "pair_count": 486
+        }
+      ],
+      "both_squarefree_contribution": 0.21982771604855378,
+      "has_square_contribution": 0.3614033575925996,
+      "fejer_vtgv": 2.0120188832031256,
+      "flat_vtgv": 2.293300792336297,
+      "s1_mertens": -0.009021867220367406,
+      "s1_tapered": 0.2087491078173469,
+      "btv": 1.0413250508197502,
+      "load_time_secs": 0.000600167,
+      "compute_time_secs": 0.00016425
+    },
+    {
+      "n": 180,
+      "dim": 179,
+      "vtgv_total": 0.9375816937328401,
+      "excess": -0.06241830626715994,
+      "diagonal": 1.1061136431821565,
+      "near_offdiag": -0.15995613607036097,
+      "far_offdiag": -0.00857581337895009,
+      "near_bandwidth": 13,
+      "offdiag_positive_sum": 7.1475425674988955,
+      "offdiag_negative_sum": -7.316074516948224,
+      "offdiag_cancellation_ratio": 1.0235790060510688,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.3426161337873963,
+          "pair_count": 9653
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.4419517705237066,
+          "pair_count": 2456
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.3746063242614634,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.28277105599209523,
+          "pair_count": 604
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.01400228445936301,
+          "pair_count": 384
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.40128104535000086,
+          "pair_count": 270
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.010091881055847924,
+          "pair_count": 200
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.004132683958955944,
+          "pair_count": 150
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.010029629505188736,
+          "pair_count": 120
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.028907870347750185,
+          "pair_count": 96
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.009465351425707874,
+          "pair_count": 80
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.052414369555601484,
+          "pair_count": 64
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.004758144851140098,
+          "pair_count": 58
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.0019814134690695345,
+          "pair_count": 46
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.008276337388736956,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.002096854566567526,
+          "pair_count": 42
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0014913037604890218,
+          "pair_count": 32
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.015614345733708564,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.005092213144786975,
+          "pair_count": 28
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.10273017533148737,
+          "pair_count": 492
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.20213943444881077,
+          "pair_count": 7921
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.024905663539709456,
+          "pair_count": 2699
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.05552411032136698,
+          "pair_count": 1349
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.08472964389031007,
+          "pair_count": 809
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.045749630276675855,
+          "pair_count": 539
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.09055786184592343,
+          "pair_count": 384
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": 0.0072990734657229295,
+          "pair_count": 288
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.06164784797926268,
+          "pair_count": 225
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.026174027431334308,
+          "pair_count": 179
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": -0.015812268114777053,
+          "pair_count": 145
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.028486398598000524,
+          "pair_count": 1215
+        }
+      ],
+      "both_squarefree_contribution": 0.2379140643697348,
+      "has_square_contribution": 0.3822158622292063,
+      "fejer_vtgv": 2.0298296291212354,
+      "flat_vtgv": 2.232371918179741,
+      "s1_mertens": -0.004831990248514439,
+      "s1_tapered": 0.19271683563949915,
+      "btv": 1.0659208233595951,
+      "load_time_secs": 0.000570416,
+      "compute_time_secs": 0.000379458
+    },
+    {
+      "n": 240,
+      "dim": 239,
+      "vtgv_total": 0.9694034402519678,
+      "excess": -0.030596559748032215,
+      "diagonal": 1.1813055812671196,
+      "near_offdiag": -0.24113348228228101,
+      "far_offdiag": 0.02923134126712595,
+      "near_bandwidth": 15,
+      "offdiag_positive_sum": 9.39171813247015,
+      "offdiag_negative_sum": -9.603620273485388,
+      "offdiag_cancellation_ratio": 1.022562659784542,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.4436237950718251,
+          "pair_count": 17241
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.5142743304714836,
+          "pair_count": 4354
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.4488893218965706,
+          "pair_count": 1934
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.30445742187016,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.012472414139829899,
+          "pair_count": 696
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.4761657804477774,
+          "pair_count": 474
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.01204909956398499,
+          "pair_count": 360
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.004397830292732714,
+          "pair_count": 270
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.01701951863389372,
+          "pair_count": 212
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.03335158615942864,
+          "pair_count": 172
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.011447528360924383,
+          "pair_count": 140
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.06218644409309937,
+          "pair_count": 120
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.0022754190986233984,
+          "pair_count": 102
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.0017786724407566554,
+          "pair_count": 96
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.011859620492789404,
+          "pair_count": 72
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.004059298891579813,
+          "pair_count": 64
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0013225598684505897,
+          "pair_count": 64
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.019353345368151916,
+          "pair_count": 58
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.008069869672719134,
+          "pair_count": 46
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.13154164493737172,
+          "pair_count": 880
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.22588264062963684,
+          "pair_count": 14161
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.0292575404828102,
+          "pair_count": 4799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.08245985850212054,
+          "pair_count": 2399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.10844148484149944,
+          "pair_count": 1439
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.0756362567748264,
+          "pair_count": 959
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.11979942211183112,
+          "pair_count": 684
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": 0.0003657161359620113,
+          "pair_count": 514
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.0760379983184806,
+          "pair_count": 398
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.020631699938369764,
+          "pair_count": 320
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.008089931157056734,
+          "pair_count": 260
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.02004389950800018,
+          "pair_count": 2270
+        }
+      ],
+      "both_squarefree_contribution": 0.24583431118543064,
+      "has_square_contribution": 0.40096302389156036,
+      "fejer_vtgv": 2.051142550760921,
+      "flat_vtgv": 2.0666837604058554,
+      "s1_mertens": 0.0047158257515144035,
+      "s1_tapered": 0.18255135475264597,
+      "btv": 1.0823728337998368,
+      "load_time_secs": 0.000601667,
+      "compute_time_secs": 0.000682625
+    },
+    {
+      "n": 360,
+      "dim": 359,
+      "vtgv_total": 1.0102795024992108,
+      "excess": 0.010279502499210835,
+      "diagonal": 1.2871472246652516,
+      "near_offdiag": -0.23303501597132625,
+      "far_offdiag": -0.04383270619470847,
+      "near_bandwidth": 18,
+      "offdiag_positive_sum": 13.621691047638837,
+      "offdiag_negative_sum": -13.898558769804879,
+      "offdiag_cancellation_ratio": 1.0203255029935534,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.5695304147920537,
+          "pair_count": 38999
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.6085477276632543,
+          "pair_count": 9832
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.5563977594701816,
+          "pair_count": 4354
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.33143624795097604,
+          "pair_count": 2456
+        },
+        {
+          "gcd_value": 5,
+          "contribution": 0.003185106284658734,
+          "pair_count": 1564
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.5787553282197448,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.014462104259309484,
+          "pair_count": 806
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.004736836150556274,
+          "pair_count": 604
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.02496087542286475,
+          "pair_count": 474
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04122741985828373,
+          "pair_count": 384
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.013224890611681984,
+          "pair_count": 324
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.07591439714087428,
+          "pair_count": 270
+        },
+        {
+          "gcd_value": 13,
+          "contribution": 0.00019340403449557078,
+          "pair_count": 230
+        },
+        {
+          "gcd_value": 14,
+          "contribution": 0.0014692686904178819,
+          "pair_count": 200
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.018736733721298623,
+          "pair_count": 172
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.006083543476883974,
+          "pair_count": 150
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.00020217151556052162,
+          "pair_count": 140
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.024519334824681306,
+          "pair_count": 120
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.013055551469519736,
+          "pair_count": 102
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.1724356719855032,
+          "pair_count": 1994
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.26243753433721034,
+          "pair_count": 32041
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.03343942995294787,
+          "pair_count": 10799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.11902592599897689,
+          "pair_count": 5399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.13916631536794663,
+          "pair_count": 3239
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.11668039037107147,
+          "pair_count": 2159
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.1645598952796564,
+          "pair_count": 1541
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.02070121329362603,
+          "pair_count": 1157
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.08962283991270262,
+          "pair_count": 899
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.011319165869553862,
+          "pair_count": 719
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.04797544033128673,
+          "pair_count": 587
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": 0.002018794852056448,
+          "pair_count": 5363
+        }
+      ],
+      "both_squarefree_contribution": 0.25687277763163574,
+      "has_square_contribution": 0.424333574921228,
+      "fejer_vtgv": 2.0785710475488304,
+      "flat_vtgv": 2.096204268923794,
+      "s1_mertens": 0.002849928061849728,
+      "s1_tapered": 0.1698976420951676,
+      "btv": 1.1030100126742375,
+      "load_time_secs": 0.000721041,
+      "compute_time_secs": 0.001647958
+    },
+    {
+      "n": 720,
+      "dim": 719,
+      "vtgv_total": 1.0701565728307179,
+      "excess": 0.07015657283071786,
+      "diagonal": 1.4676553741483214,
+      "near_offdiag": -0.2854066294974307,
+      "far_offdiag": -0.11209217182014353,
+      "near_bandwidth": 26,
+      "offdiag_positive_sum": 25.037057113606114,
+      "offdiag_negative_sum": -25.434555914923774,
+      "offdiag_cancellation_ratio": 1.0158764186826752,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.7607760432323043,
+          "pair_count": 156783
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.732280433743254,
+          "pair_count": 39358
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.750546215152193,
+          "pair_count": 17480
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.37031055638621213,
+          "pair_count": 9832
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.005454448065492307,
+          "pair_count": 6282
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.7595924270289947,
+          "pair_count": 4354
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.022748260642875696,
+          "pair_count": 3176
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.005905485537353372,
+          "pair_count": 2456
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.04240464050984417,
+          "pair_count": 1934
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.0483569176021705,
+          "pair_count": 1564
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.013911584807217362,
+          "pair_count": 1308
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.10693025493426285,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.0013625423424009561,
+          "pair_count": 940
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.0017714165996071222,
+          "pair_count": 806
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.03093484904661418,
+          "pair_count": 696
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.009717765201651681,
+          "pair_count": 604
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0013201498432425897,
+          "pair_count": 542
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.03572090902653059,
+          "pair_count": 474
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.022535096565093494,
+          "pair_count": 432
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.24558253880880448,
+          "pair_count": 8014
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.3331924607171313,
+          "pair_count": 128881
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.03516922805755922,
+          "pair_count": 43199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.18268515444647976,
+          "pair_count": 21599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.1885419607346409,
+          "pair_count": 12959
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.18605165518509442,
+          "pair_count": 8639
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.24559934918927032,
+          "pair_count": 6170
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.07018896997220382,
+          "pair_count": 4628
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.10601085635977253,
+          "pair_count": 3599
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.0005523050639719653,
+          "pair_count": 2879
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.11523430748365639,
+          "pair_count": 2354
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.034128399050870416,
+          "pair_count": 22496
+        }
+      ],
+      "both_squarefree_contribution": 0.27173975582564297,
+      "has_square_contribution": 0.46002346964931434,
+      "fejer_vtgv": 2.106677068906451,
+      "flat_vtgv": 2.1749861384148472,
+      "s1_mertens": -0.001670483653675708,
+      "s1_tapered": 0.1519542832534207,
+      "btv": 1.1320058084906277,
+      "load_time_secs": 0.001495,
+      "compute_time_secs": 0.006497208
+    },
+    {
+      "n": 840,
+      "dim": 839,
+      "vtgv_total": 1.0818227978548238,
+      "excess": 0.08182279785482383,
+      "diagonal": 1.5077370360836357,
+      "near_offdiag": -0.4546426270725314,
+      "far_offdiag": 0.028728388843654813,
+      "near_bandwidth": 28,
+      "offdiag_positive_sum": 28.57638737333352,
+      "offdiag_negative_sum": -29.002301611562586,
+      "offdiag_cancellation_ratio": 1.0149044115571626,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.796280165887436,
+          "pair_count": 213557
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.7542338697082545,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.7938199509017415,
+          "pair_count": 23764
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.3770361708186719,
+          "pair_count": 13366
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.006886965495216696,
+          "pair_count": 8562
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.8007070701956531,
+          "pair_count": 5952
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.0240300536764903,
+          "pair_count": 4354
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006177193111724512,
+          "pair_count": 3326
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.046239680378504386,
+          "pair_count": 2656
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04926389862000551,
+          "pair_count": 2142
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.013906948546476136,
+          "pair_count": 1772
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.11360576396779096,
+          "pair_count": 1470
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.0017597993696103695,
+          "pair_count": 1260
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.003104992649041065,
+          "pair_count": 1086
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.034288973308282414,
+          "pair_count": 940
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.010211272200385715,
+          "pair_count": 830
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0015652211197494845,
+          "pair_count": 754
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.038061245062535116,
+          "pair_count": 650
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0241982980299506,
+          "pair_count": 604
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.2623528288974599,
+          "pair_count": 10936
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.35024544788569684,
+          "pair_count": 175561
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.03526301706478216,
+          "pair_count": 58799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.19567840091904135,
+          "pair_count": 29399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.19838559416043203,
+          "pair_count": 17639
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.20091042621905147,
+          "pair_count": 11759
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.2632171316351914,
+          "pair_count": 8399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.08377211205733535,
+          "pair_count": 6299
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.10777659468089779,
+          "pair_count": 4898
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": -0.0006444726865265949,
+          "pair_count": 3920
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.1296582048051462,
+          "pair_count": 3205
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.04288469731631984,
+          "pair_count": 30825
+        }
+      ],
+      "both_squarefree_contribution": 0.2751887236494553,
+      "has_square_contribution": 0.46641369858268744,
+      "fejer_vtgv": 2.1064792882847656,
+      "flat_vtgv": 2.171269030532095,
+      "s1_mertens": -0.0013604731852891985,
+      "s1_tapered": 0.1484859130394812,
+      "btv": 1.1374916317890333,
+      "load_time_secs": 0.002203959,
+      "compute_time_secs": 0.008754125
+    },
+    {
+      "n": 1000,
+      "dim": 999,
+      "vtgv_total": 1.093694278430634,
+      "excess": 0.09369427843063405,
+      "diagonal": 1.55304569511491,
+      "near_offdiag": -0.3699927289642514,
+      "far_offdiag": -0.08935868771988248,
+      "near_bandwidth": 31,
+      "offdiag_positive_sum": 33.14027602275604,
+      "offdiag_negative_sum": -33.59962743943872,
+      "offdiag_cancellation_ratio": 1.013860820482221,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.8336209297382142,
+          "pair_count": 302793
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.7755142809314564,
+          "pair_count": 75916
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.8428171383386626,
+          "pair_count": 33816
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.3846978696829302,
+          "pair_count": 18924
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.008563655515211252,
+          "pair_count": 12152
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.8468837888274225,
+          "pair_count": 8396
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.025263125933906977,
+          "pair_count": 6162
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0064543406588475115,
+          "pair_count": 4696
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.05082886775734523,
+          "pair_count": 3788
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04987074459583645,
+          "pair_count": 3004
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.013711482523554284,
+          "pair_count": 2480
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.12129003264262186,
+          "pair_count": 2142
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.0022516952112608332,
+          "pair_count": 1772
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.004775426509315027,
+          "pair_count": 1564
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.037951346076647755,
+          "pair_count": 1328
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.010640082520764347,
+          "pair_count": 1192
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0019149097517925414,
+          "pair_count": 1028
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.04096261066445236,
+          "pair_count": 940
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.02606149607191382,
+          "pair_count": 830
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.28157744071710766,
+          "pair_count": 15578
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.36996910005265804,
+          "pair_count": 249001
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.035406518220970296,
+          "pair_count": 83332
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.20980034621755744,
+          "pair_count": 41666
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.20907305235319304,
+          "pair_count": 24999
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.21777287038504975,
+          "pair_count": 16665
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.2831943842506569,
+          "pair_count": 11904
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.09945974847043154,
+          "pair_count": 8928
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.10966271525855444,
+          "pair_count": 6943
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": -0.002049835148158956,
+          "pair_count": 5555
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.14623861699586646,
+          "pair_count": 4544
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.053736336530470434,
+          "pair_count": 43966
+        }
+      ],
+      "both_squarefree_contribution": 0.278567593033666,
+      "has_square_contribution": 0.4729326037500573,
+      "fejer_vtgv": 2.097185640448452,
+      "flat_vtgv": 2.065298258797647,
+      "s1_mertens": 0.004411869771791756,
+      "s1_tapered": 0.14482373559648204,
+      "btv": 1.1428684520156702,
+      "load_time_secs": 0.002414167,
+      "compute_time_secs": 0.013929291
+    },
+    {
+      "n": 1260,
+      "dim": 1259,
+      "vtgv_total": 1.1111693045101863,
+      "excess": 0.11116930451018625,
+      "diagonal": 1.6130610826035208,
+      "near_offdiag": -0.6408411454336325,
+      "far_offdiag": 0.13894936734028476,
+      "near_bandwidth": 35,
+      "offdiag_positive_sum": 40.2721901452501,
+      "offdiag_negative_sum": -40.774081923345484,
+      "offdiag_cancellation_ratio": 1.0124624902764217,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.8789417934207606,
+          "pair_count": 481221
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.8004821545045657,
+          "pair_count": 120544
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.9084431432314303,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.3958826968315916,
+          "pair_count": 30104
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.012298481920116983,
+          "pair_count": 19274
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.9075950152343081,
+          "pair_count": 13366
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.02690948071798193,
+          "pair_count": 9832
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.007311708115960027,
+          "pair_count": 7560
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.05714909215248136,
+          "pair_count": 5952
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.05110309934694037,
+          "pair_count": 4796
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.013553148934522972,
+          "pair_count": 3984
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.1322096046646868,
+          "pair_count": 3326
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.0026751689964351483,
+          "pair_count": 2806
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.007471067489796215,
+          "pair_count": 2456
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.04289014931520938,
+          "pair_count": 2142
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.011584189242060013,
+          "pair_count": 1856
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0022866916929976467,
+          "pair_count": 1696
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.044720720776968995,
+          "pair_count": 1470
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.028782937023345764,
+          "pair_count": 1328
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.30879507628928843,
+          "pair_count": 24638
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.3970263441791788,
+          "pair_count": 395641
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.03478578813182681,
+          "pair_count": 132299
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.2283118935546288,
+          "pair_count": 66149
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2218407709235204,
+          "pair_count": 39689
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.23896454990670377,
+          "pair_count": 26459
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.30937427462776856,
+          "pair_count": 18899
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.12040693248966151,
+          "pair_count": 14173
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.11351948306703644,
+          "pair_count": 11025
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": -0.00196241222354587,
+          "pair_count": 8819
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.16883575059588393,
+          "pair_count": 7214
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.06696517068793786,
+          "pair_count": 70286
+        }
+      ],
+      "both_squarefree_contribution": 0.2831809849673745,
+      "has_square_contribution": 0.4833185821424118,
+      "fejer_vtgv": 2.117044589060411,
+      "flat_vtgv": 2.1274218912788334,
+      "s1_mertens": 0.00044462498659959273,
+      "s1_tapered": 0.14002888624487045,
+      "btv": 1.1511816600576716,
+      "load_time_secs": 0.00571675,
+      "compute_time_secs": 0.022237292
+    },
+    {
+      "n": 1680,
+      "dim": 1679,
+      "vtgv_total": 1.1294291110278776,
+      "excess": 0.12942911102787757,
+      "diagonal": 1.6877063989671581,
+      "near_offdiag": -0.4804831435392787,
+      "far_offdiag": -0.0777941443998731,
+      "near_bandwidth": 40,
+      "offdiag_positive_sum": 51.24844541648154,
+      "offdiag_negative_sum": -51.806722704418476,
+      "offdiag_cancellation_ratio": 1.010893545811975,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.9331626337264742,
+          "pair_count": 856031
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.8289439504595735,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -0.9873735102034814,
+          "pair_count": 95250
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4075781159780031,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.017874934464842687,
+          "pair_count": 34246
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 0.9785440901770907,
+          "pair_count": 23764
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.02980217859750647,
+          "pair_count": 17480
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.008325247733821888,
+          "pair_count": 13366
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.06407048353340228,
+          "pair_count": 10544
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.05301057182076978,
+          "pair_count": 8562
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.012640767342407815,
+          "pair_count": 7080
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.14544794093233615,
+          "pair_count": 5952
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.003309445400282697,
+          "pair_count": 5106
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.010581820601697496,
+          "pair_count": 4354
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.04972407715426854,
+          "pair_count": 3788
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.012672603434580241,
+          "pair_count": 3326
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0024344053848963697,
+          "pair_count": 2944
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.04865712195578379,
+          "pair_count": 2656
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0322632965552147,
+          "pair_count": 2368
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.3431540326470356,
+          "pair_count": 43908
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.43172143381662925,
+          "pair_count": 703921
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.03341125169806027,
+          "pair_count": 235199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.2509271754439505,
+          "pair_count": 117599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2356671920436946,
+          "pair_count": 70559
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.2636061266050927,
+          "pair_count": 47039
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.3419190079274457,
+          "pair_count": 33599
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.14800381230126514,
+          "pair_count": 25199
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.11759574098952144,
+          "pair_count": 19598
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 7.256308726974706e-6,
+          "pair_count": 15680
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.19601111450519793,
+          "pair_count": 12827
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.08661631786967898,
+          "pair_count": 125783
+        }
+      ],
+      "both_squarefree_contribution": 0.28847128051100535,
+      "has_square_contribution": 0.4934105850997922,
+      "fejer_vtgv": 2.1108205168227387,
+      "flat_vtgv": 2.3244352252161,
+      "s1_mertens": -0.005292150228709587,
+      "s1_tapered": 0.134663889461261,
+      "btv": 1.1594120172425086,
+      "load_time_secs": 0.007536834,
+      "compute_time_secs": 0.043310625
+    },
+    {
+      "n": 2520,
+      "dim": 2519,
+      "vtgv_total": 1.1542207747528443,
+      "excess": 0.15422077475284435,
+      "diagonal": 1.792809530820256,
+      "near_offdiag": -0.5644372447323518,
+      "far_offdiag": -0.07415151133511512,
+      "near_bandwidth": 50,
+      "offdiag_positive_sum": 71.73086585645433,
+      "offdiag_negative_sum": -72.36945461252121,
+      "offdiag_cancellation_ratio": 1.008902565840273,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -1.9997727689492624,
+          "pair_count": 1927359
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.8634349506700747,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.102679051843811,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4175910797544906,
+          "pair_count": 120544
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02316161450444104,
+          "pair_count": 77200
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.0829338907156636,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.03408584388003062,
+          "pair_count": 39358
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.00831180166714296,
+          "pair_count": 30104
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.07500930330204515,
+          "pair_count": 23764
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.054221146990260705,
+          "pair_count": 19274
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.010546487800280474,
+          "pair_count": 16066
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.16565901657131232,
+          "pair_count": 13366
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004048187344803146,
+          "pair_count": 11422
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.014552463070916385,
+          "pair_count": 9832
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.060007710964282646,
+          "pair_count": 8562
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.014660794678350523,
+          "pair_count": 7560
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.002299223337370296,
+          "pair_count": 6670
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.05434815668782653,
+          "pair_count": 5952
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.036452036169435695,
+          "pair_count": 5324
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.3926589674405619,
+          "pair_count": 98628
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.48188562891163617,
+          "pair_count": 1585081
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.032010985014809194,
+          "pair_count": 529199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.28036448086050625,
+          "pair_count": 264599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2500814519695902,
+          "pair_count": 158759
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.29419544361215694,
+          "pair_count": 105839
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.388103313026507,
+          "pair_count": 75599
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.19329112737251156,
+          "pair_count": 56699
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.11734422651283483,
+          "pair_count": 44099
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.005282826982566063,
+          "pair_count": 35279
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.23060201460309268,
+          "pair_count": 28864
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.11356647036479049,
+          "pair_count": 284886
+        }
+      ],
+      "both_squarefree_contribution": 0.29644834764159617,
+      "has_square_contribution": 0.5065109371095414,
+      "fejer_vtgv": 2.1147467177413866,
+      "flat_vtgv": 2.1144443296891917,
+      "s1_mertens": 0.0016535700293382244,
+      "s1_tapered": 0.1276901553091099,
+      "btv": 1.170589630059326,
+      "load_time_secs": 0.017789375,
+      "compute_time_secs": 0.094453042
+    },
+    {
+      "n": 5040,
+      "dim": 5039,
+      "vtgv_total": 1.1918750558283795,
+      "excess": 0.1918750558283795,
+      "diagonal": 1.9722273149320637,
+      "near_offdiag": -0.706125488440911,
+      "far_offdiag": -0.07422677066309447,
+      "near_bandwidth": 70,
+      "offdiag_positive_sum": 126.87436342685923,
+      "offdiag_negative_sum": -127.65471568596216,
+      "offdiag_cancellation_ratio": 1.0061505905371717,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.099530487706181,
+          "pair_count": 7715465
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9044770164399125,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.2844145875758968,
+          "pair_count": 857710
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.43598634438687733,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.026707682024882495,
+          "pair_count": 308638
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.2426494675025013,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.04029482379527852,
+          "pair_count": 157502
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.008100421482872374,
+          "pair_count": 120544
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.0989254096140462,
+          "pair_count": 95250
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.052080680992125844,
+          "pair_count": 77200
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.009207083391495098,
+          "pair_count": 63900
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.1987590171554723,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.005709337502717758,
+          "pair_count": 45624
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.020943491692511827,
+          "pair_count": 39358
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.0808228512287825,
+          "pair_count": 34246
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.017736123484985378,
+          "pair_count": 30104
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.001532953043001138,
+          "pair_count": 26726
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.06576929674944645,
+          "pair_count": 23764
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.04435764032927549,
+          "pair_count": 21448
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.4881009770290445,
+          "pair_count": 395448
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.5703095417129379,
+          "pair_count": 6345361
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.029644842834987636,
+          "pair_count": 2116799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.3302136905652622,
+          "pair_count": 1058399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.27222891364910634,
+          "pair_count": 635039
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.3450799754647099,
+          "pair_count": 423359
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.4693992661214651,
+          "pair_count": 302399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.2766303233429948,
+          "pair_count": 226799
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.11220091056936518,
+          "pair_count": 176399
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.019459248396088577,
+          "pair_count": 141119
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.2835974373998598,
+          "pair_count": 115460
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.16095784018018278,
+          "pair_count": 1147070
+        }
+      ],
+      "both_squarefree_contribution": 0.30866867918988067,
+      "has_square_contribution": 0.5263769994081543,
+      "fejer_vtgv": 2.1177949426369578,
+      "flat_vtgv": 2.1707599231806425,
+      "s1_mertens": -0.0008122815288424993,
+      "s1_tapered": 0.11729667530443158,
+      "btv": 1.1873163965627902,
+      "load_time_secs": 0.08778075,
+      "compute_time_secs": 0.413422958
+    },
+    {
+      "n": 7560,
+      "dim": 7559,
+      "vtgv_total": 1.2116224289477204,
+      "excess": 0.21162242894772043,
+      "diagonal": 2.0770485929348457,
+      "near_offdiag": -0.7281887138760875,
+      "far_offdiag": -0.13723745011024133,
+      "near_bandwidth": 86,
+      "offdiag_positive_sum": 176.8611647399249,
+      "offdiag_negative_sum": -177.72659090393586,
+      "offdiag_cancellation_ratio": 1.0048932515246272,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.148896891538372,
+          "pair_count": 17364533
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.917277525953444,
+          "pair_count": 4342908
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.3863865496071237,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4449733234193176,
+          "pair_count": 1085580
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02890130020882334,
+          "pair_count": 694722
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.3343621757792015,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.04468593172169311,
+          "pair_count": 354356
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.008116393079587867,
+          "pair_count": 271240
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.11269373742472966,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.051873169608291955,
+          "pair_count": 173572
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.008226630390801558,
+          "pair_count": 143674
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.2151645269607981,
+          "pair_count": 120544
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.005670837525620635,
+          "pair_count": 102844
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.024935657679992965,
+          "pair_count": 88498
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.09384376218880751,
+          "pair_count": 77200
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.01965677782541584,
+          "pair_count": 67836
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0010853376421131617,
+          "pair_count": 60004
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.07185872355461961,
+          "pair_count": 53560
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.04977284063511038,
+          "pair_count": 48104
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.5441325910639147,
+          "pair_count": 889532
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.6235484010313117,
+          "pair_count": 14280841
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.02852149569018602,
+          "pair_count": 4762799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.3581004662137213,
+          "pair_count": 2381399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2832991960820151,
+          "pair_count": 1428839
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.37362280235007234,
+          "pair_count": 952559
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.5178708460002,
+          "pair_count": 680399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.3297099852162708,
+          "pair_count": 510299
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.1057920236416532,
+          "pair_count": 396899
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.02942076009492802,
+          "pair_count": 317519
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.313028170253641,
+          "pair_count": 259787
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.1897499622740452,
+          "pair_count": 2586563
+        }
+      ],
+      "both_squarefree_contribution": 0.31588960212860323,
+      "has_square_contribution": 0.5360301176161383,
+      "fejer_vtgv": 2.122343852294615,
+      "flat_vtgv": 2.1227149325093624,
+      "s1_mertens": 0.0009597041732293545,
+      "s1_tapered": 0.11196284454499628,
+      "btv": 1.195925285872437,
+      "load_time_secs": 0.624000166,
+      "compute_time_secs": 0.965920083
+    },
+    {
+      "n": 10000,
+      "dim": 9999,
+      "vtgv_total": 1.224043463796727,
+      "excess": 0.22404346379672702,
+      "diagonal": 2.1493100145424937,
+      "near_offdiag": -0.8180283464147096,
+      "far_offdiag": -0.10723820433010366,
+      "near_bandwidth": 100,
+      "offdiag_positive_sum": 222.40609131394788,
+      "offdiag_negative_sum": -223.3313578646514,
+      "offdiag_cancellation_ratio": 1.004160257235929,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.181199757056,
+          "pair_count": 30383487
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.92286554867998,
+          "pair_count": 7598458
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.4540922284538553,
+          "pair_count": 3377882
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.451201593844561,
+          "pair_count": 1898878
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.028816576340950112,
+          "pair_count": 1215788
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.3930762385588535,
+          "pair_count": 843774
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.04703186819330715,
+          "pair_count": 619956
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.007806413906849298,
+          "pair_count": 474806
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.12219936682238774,
+          "pair_count": 375712
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.050202825630186305,
+          "pair_count": 303792
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.007596499699324871,
+          "pair_count": 251488
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.22771137804124816,
+          "pair_count": 211300
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.005222001738945499,
+          "pair_count": 180176
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.027503660646054022,
+          "pair_count": 155114
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.10297424488392198,
+          "pair_count": 134870
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.020978634854507024,
+          "pair_count": 118484
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.0006506725951464599,
+          "pair_count": 105178
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.07561220070256137,
+          "pair_count": 93734
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.053561402941222885,
+          "pair_count": 84192
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.5846641646773267,
+          "pair_count": 1557932
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.6607143683048685,
+          "pair_count": 24990001
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.027186675995202195,
+          "pair_count": 8333332
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.377800592099604,
+          "pair_count": 4166666
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2900324247768469,
+          "pair_count": 2499999
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.3929307414401035,
+          "pair_count": 1666665
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.5516922624301861,
+          "pair_count": 1190475
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.36710510555789955,
+          "pair_count": 892857
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.10171391148899438,
+          "pair_count": 694443
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.03761644048524025,
+          "pair_count": 555555
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.3336082276981476,
+          "pair_count": 454544
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.2107645112485189,
+          "pair_count": 4530466
+        }
+      ],
+      "both_squarefree_contribution": 0.32135918987179535,
+      "has_square_contribution": 0.5411408022139904,
+      "fejer_vtgv": 2.119450935856798,
+      "flat_vtgv": 2.252008051659408,
+      "s1_mertens": -0.002082699767482251,
+      "s1_tapered": 0.10857662388284488,
+      "btv": 1.2012389562637067,
+      "load_time_secs": 0.451089334,
+      "compute_time_secs": 1.721295167
+    },
+    {
+      "n": 10080,
+      "dim": 10079,
+      "vtgv_total": 1.2244169174453179,
+      "excess": 0.2244169174453179,
+      "diagonal": 2.1513679598878,
+      "near_offdiag": -0.8191535906785707,
+      "far_offdiag": -0.1077974517635322,
+      "near_bandwidth": 100,
+      "offdiag_positive_sum": 223.8629402342269,
+      "offdiag_negative_sum": -224.78989127646673,
+      "offdiag_cancellation_ratio": 1.0041407078870221,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.1820587624219416,
+          "pair_count": 30873435
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9229931466394588,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.4560547596094189,
+          "pair_count": 3431286
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.45137266796357806,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.028820908926803585,
+          "pair_count": 1234864
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.394787892069969,
+          "pair_count": 857710
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.04708340676895709,
+          "pair_count": 630208
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.007786742932105548,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.12247977508620805,
+          "pair_count": 381056
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.05015568131309185,
+          "pair_count": 308638
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.007582418830766593,
+          "pair_count": 255186
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.2280761361020559,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.005207832710388639,
+          "pair_count": 182936
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.027574978014753185,
+          "pair_count": 157502
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.10324771204303339,
+          "pair_count": 137126
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.021017026796099375,
+          "pair_count": 120544
+        },
+        {
+          "gcd_value": 17,
+          "contribution": -0.000634899706733501,
+          "pair_count": 106630
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.0757232597463208,
+          "pair_count": 95250
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.0536696300490104,
+          "pair_count": 85546
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.5858530885971311,
+          "pair_count": 1582906
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.6617718747222191,
+          "pair_count": 25391521
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.027158298569540593,
+          "pair_count": 8467199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.3783655926312703,
+          "pair_count": 4233599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.29022121039418625,
+          "pair_count": 2540159
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.39347898728797,
+          "pair_count": 1693439
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.5526641816538749,
+          "pair_count": 1209599
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.3681922203204524,
+          "pair_count": 907199
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.10157035574354605,
+          "pair_count": 705599
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.03785162758025724,
+          "pair_count": 564479
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.334186003795446,
+          "pair_count": 461845
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.21133673659100174,
+          "pair_count": 4603365
+        }
+      ],
+      "both_squarefree_contribution": 0.32151355455144126,
+      "has_square_contribution": 0.5413090234836772,
+      "fejer_vtgv": 2.1198252999715974,
+      "flat_vtgv": 2.1966524611687612,
+      "s1_mertens": -0.0012859726879721005,
+      "s1_tapered": 0.10848130615516,
+      "btv": 1.2014034300346499,
+      "load_time_secs": 0.332952167,
+      "compute_time_secs": 1.823270667
+    },
+    {
+      "n": 15120,
+      "dim": 15119,
+      "vtgv_total": 1.241437173795841,
+      "excess": 0.24143717379584095,
+      "diagonal": 2.2560480684965616,
+      "near_offdiag": -0.9387482885648076,
+      "far_offdiag": -0.07586260613689283,
+      "near_bandwidth": 122,
+      "offdiag_positive_sum": 312.10571663831104,
+      "offdiag_negative_sum": -313.12032753318033,
+      "offdiag_cancellation_ratio": 1.003250856491184,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.2264573666566134,
+          "pair_count": 69473277
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9308949025770978,
+          "pair_count": 17372092
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.551942270875282,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.456669354957579,
+          "pair_count": 4342908
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.027636029938960915,
+          "pair_count": 2779508
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.4771236780405066,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.04954083100931332,
+          "pair_count": 1417908
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006681518645725911,
+          "pair_count": 1085580
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.1348697505684353,
+          "pair_count": 857710
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04696033959113638,
+          "pair_count": 694722
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.006414729674227874,
+          "pair_count": 574228
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.24570608028172625,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004563290268190565,
+          "pair_count": 411726
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.031531345782967166,
+          "pair_count": 354356
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.11649987789681371,
+          "pair_count": 308638
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.022659299116099076,
+          "pair_count": 271240
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.00033642248840434253,
+          "pair_count": 240714
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.07990042418070953,
+          "pair_count": 214396
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.059921083834555904,
+          "pair_count": 192286
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.646200593882617,
+          "pair_count": 3560370
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.716182905783626,
+          "pair_count": 57138481
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.0254081001278278,
+          "pair_count": 19051199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.4063549996970864,
+          "pair_count": 9525599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.2982983445486891,
+          "pair_count": 5715359
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.42083877528027946,
+          "pair_count": 3810239
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.602329733227136,
+          "pair_count": 2721599
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.4249830128855849,
+          "pair_count": 2041199
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.09296764664960523,
+          "pair_count": 1587599
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.05065753352683728,
+          "pair_count": 1270079
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.36237572177271443,
+          "pair_count": 1039154
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.2415367873535401,
+          "pair_count": 10368896
+        }
+      ],
+      "both_squarefree_contribution": 0.3287968145996355,
+      "has_square_contribution": 0.5485644541112381,
+      "fejer_vtgv": 2.1178395216725074,
+      "flat_vtgv": 2.1316629113992325,
+      "s1_mertens": 0.0006707065939318445,
+      "s1_tapered": 0.10391748742106702,
+      "btv": 1.2086545964584623,
+      "load_time_secs": 0.983015041,
+      "compute_time_secs": 4.227066833
+    },
+    {
+      "n": 20000,
+      "dim": 19999,
+      "vtgv_total": 1.2526967023140514,
+      "excess": 0.2526967023140514,
+      "diagonal": 2.3282197922960037,
+      "near_offdiag": -1.1331296349737354,
+      "far_offdiag": 0.057606544992639806,
+      "near_bandwidth": 141,
+      "offdiag_positive_sum": 392.68308410344923,
+      "offdiag_negative_sum": -393.7586071932682,
+      "offdiag_cancellation_ratio": 1.0027389086348717,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.2560612997195455,
+          "pair_count": 121562397
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9359192302245685,
+          "pair_count": 30393486
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.615997028541508,
+          "pair_count": 13507436
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4584365270967594,
+          "pair_count": 7598458
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.0269074739526165,
+          "pair_count": 4862002
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.532099235027443,
+          "pair_count": 3377882
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.05136324120717806,
+          "pair_count": 2482416
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006609625762806496,
+          "pair_count": 1898878
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.14303671880672064,
+          "pair_count": 1501572
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.044641020073575455,
+          "pair_count": 1215788
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.00543753621105142,
+          "pair_count": 1004950
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.2571775612112084,
+          "pair_count": 843774
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004560627993461637,
+          "pair_count": 719514
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.03451015035320524,
+          "pair_count": 619956
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.1255181961450251,
+          "pair_count": 540852
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.02391401982571869,
+          "pair_count": 474806
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0012145882349252313,
+          "pair_count": 420494
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.08254766139837563,
+          "pair_count": 375712
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.06446478334714831,
+          "pair_count": 336832
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.6884924107216723,
+          "pair_count": 6232796
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.7540101748252228,
+          "pair_count": 99980001
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.02368772166300075,
+          "pair_count": 33333332
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.42627069116297994,
+          "pair_count": 16666666
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.3030776537816014,
+          "pair_count": 9999999
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.43956314612361674,
+          "pair_count": 6666665
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.6376093563965599,
+          "pair_count": 4761904
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.4651977196868113,
+          "pair_count": 3571428
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.08709925143557218,
+          "pair_count": 2777776
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.06049461026430721,
+          "pair_count": 2222222
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.38139701237035556,
+          "pair_count": 1818180
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.26227301789663154,
+          "pair_count": 18151830
+        }
+      ],
+      "both_squarefree_contribution": 0.33359074487658197,
+      "has_square_contribution": 0.5534320878799615,
+      "fejer_vtgv": 2.1208841590851106,
+      "flat_vtgv": 2.1455338561807613,
+      "s1_mertens": 0.00140030956390227,
+      "s1_tapered": 0.1009737705510356,
+      "btv": 1.2134425030746732,
+      "load_time_secs": 2.324615417,
+      "compute_time_secs": 7.420601459
+    },
+    {
+      "n": 20160,
+      "dim": 20159,
+      "vtgv_total": 1.2529867035772368,
+      "excess": 0.25298670357723685,
+      "diagonal": 2.3302752621017837,
+      "near_offdiag": -1.1346476667532384,
+      "far_offdiag": 0.05735910822849449,
+      "near_bandwidth": 141,
+      "offdiag_positive_sum": 395.2628826096211,
+      "offdiag_negative_sum": -396.34017116804654,
+      "offdiag_cancellation_ratio": 1.0027254989168548,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.256800994043435,
+          "pair_count": 123517401
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.935934426195748,
+          "pair_count": 30883514
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.6178101070501925,
+          "pair_count": 13726310
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4584875993115982,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.0269040593998173,
+          "pair_count": 4940906
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.5336494218298007,
+          "pair_count": 3431286
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.05141425932973472,
+          "pair_count": 2520848
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006601725215867687,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.1432755332448699,
+          "pair_count": 1524958
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04458271886284413,
+          "pair_count": 1234864
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0054088911459107955,
+          "pair_count": 1020884
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.25750901776559243,
+          "pair_count": 857710
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004568897401800477,
+          "pair_count": 730632
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.034595985420976735,
+          "pair_count": 630208
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.12577794966846323,
+          "pair_count": 548908
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.023946830046622097,
+          "pair_count": 482480
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0012424587270817406,
+          "pair_count": 427046
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.08262080438435351,
+          "pair_count": 381056
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.06460139372495002,
+          "pair_count": 342706
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.6897140066331215,
+          "pair_count": 6330462
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.7550923413670773,
+          "pair_count": 101586241
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.023631447782769953,
+          "pair_count": 33868799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.42684355504417,
+          "pair_count": 16934399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.30320709542151547,
+          "pair_count": 10160639
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.44009137965969036,
+          "pair_count": 6773759
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.6386000362581679,
+          "pair_count": 4838399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.466336260617201,
+          "pair_count": 3628799
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.08693372796405908,
+          "pair_count": 2822399
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.06079323978578093,
+          "pair_count": 2257919
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.381938739045853,
+          "pair_count": 1847387
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.262898956601162,
+          "pair_count": 18443663
+        }
+      ],
+      "both_squarefree_contribution": 0.3337434350736486,
+      "has_square_contribution": 0.5535251494848934,
+      "fejer_vtgv": 2.120574430880129,
+      "flat_vtgv": 2.143793099732811,
+      "s1_mertens": 0.0013497988887858445,
+      "s1_tapered": 0.10089362801157647,
+      "btv": 1.2135618270998962,
+      "load_time_secs": 1.495672375,
+      "compute_time_secs": 7.88111725
+    },
+    {
+      "n": 25200,
+      "dim": 25199,
+      "vtgv_total": 1.261523772859403,
+      "excess": 0.2615237728594031,
+      "diagonal": 2.3878269110131605,
+      "near_offdiag": -1.1449854013899277,
+      "far_offdiag": 0.018682263235621558,
+      "near_bandwidth": 158,
+      "offdiag_positive_sum": 474.88601390290734,
+      "offdiag_negative_sum": -476.01231704138837,
+      "offdiag_cancellation_ratio": 1.0023717336487221,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.2777994379767725,
+          "pair_count": 193002455
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9368087550877164,
+          "pair_count": 48255066
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.668092333204298,
+          "pair_count": 21446370
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4599064842304205,
+          "pair_count": 12063810
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02678324383121558,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.5768972820873224,
+          "pair_count": 5361102
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.05298313713619852,
+          "pair_count": 3938900
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006424961504359841,
+          "pair_count": 3015648
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.15002596122949724,
+          "pair_count": 2382352
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04285287117083289,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0046360918718283016,
+          "pair_count": 1594228
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.26634717465037644,
+          "pair_count": 1340342
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004733805629009678,
+          "pair_count": 1141986
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.03688688156813932,
+          "pair_count": 984578
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.1332027285995975,
+          "pair_count": 857710
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.024815943145775954,
+          "pair_count": 753644
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0018949334928668083,
+          "pair_count": 667774
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.08474875049884167,
+          "pair_count": 595608
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.06851846214098574,
+          "pair_count": 534652
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.7241873102239347,
+          "pair_count": 9895594
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.7854600033380983,
+          "pair_count": 158734801
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.021977100157487127,
+          "pair_count": 52919999
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.44277188364054915,
+          "pair_count": 26459999
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.30640090734743675,
+          "pair_count": 15875999
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.454908306278464,
+          "pair_count": 10583999
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.6668359716643242,
+          "pair_count": 7559999
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.4988188322156448,
+          "pair_count": 5669999
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.08230566331505872,
+          "pair_count": 4409999
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.06949857295679733,
+          "pair_count": 3527999
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.39719221927587856,
+          "pair_count": 2886544
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.27998902045284524,
+          "pair_count": 28827666
+        }
+      ],
+      "both_squarefree_contribution": 0.3377523188652077,
+      "has_square_contribution": 0.556841376303389,
+      "fejer_vtgv": 2.1222525703362587,
+      "flat_vtgv": 2.147256631921599,
+      "s1_mertens": -0.0001293656775318129,
+      "s1_tapered": 0.09866745874642228,
+      "btv": 1.217171853689379,
+      "load_time_secs": 2.296852667,
+      "compute_time_secs": 12.356723042
+    },
+    {
+      "n": 27720,
+      "dim": 27719,
+      "vtgv_total": 1.2650420815237229,
+      "excess": 0.2650420815237229,
+      "diagonal": 2.412402678165799,
+      "near_offdiag": -1.221190301048657,
+      "far_offdiag": 0.07382970440812722,
+      "near_bandwidth": 166,
+      "offdiag_positive_sum": 513.6570705324011,
+      "offdiag_negative_sum": -514.8044311292988,
+      "offdiag_cancellation_ratio": 1.0022337093417373,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.28750607961494,
+          "pair_count": 233533565
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9373278969693974,
+          "pair_count": 58389754
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.6886219815214825,
+          "pair_count": 25951102
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.460899060701803,
+          "pair_count": 14596886
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02658623139502511,
+          "pair_count": 9342372
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.5942721541547211,
+          "pair_count": 6487246
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.053762745149704826,
+          "pair_count": 4766324
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.006313422187089982,
+          "pair_count": 3648826
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.1530507195031483,
+          "pair_count": 2883288
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.04201083859386575,
+          "pair_count": 2335232
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.004321714137654847,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.2699385383787927,
+          "pair_count": 1621806
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004767750848568293,
+          "pair_count": 1382378
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.03794712403867835,
+          "pair_count": 1191386
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.13639778574384767,
+          "pair_count": 1037792
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.025175482047483932,
+          "pair_count": 912078
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0021845527261668786,
+          "pair_count": 807948
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.08575000403727995,
+          "pair_count": 720486
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.07026147679942286,
+          "pair_count": 646416
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.7392640532083518,
+          "pair_count": 11972858
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.7984896330264563,
+          "pair_count": 192071881
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.021370333594286164,
+          "pair_count": 64033199
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.44936310007517705,
+          "pair_count": 32016599
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.30745790999852807,
+          "pair_count": 19209959
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.4610173665737417,
+          "pair_count": 12806639
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.6788822850465543,
+          "pair_count": 9147599
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.5129584770262107,
+          "pair_count": 6860699
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.07985743933570416,
+          "pair_count": 5336099
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.07305218948077792,
+          "pair_count": 4268879
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.4034862396782811,
+          "pair_count": 3492719
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.28718287121329206,
+          "pair_count": 34885631
+        }
+      ],
+      "both_squarefree_contribution": 0.3396440405930147,
+      "has_square_contribution": 0.5579658334628944,
+      "fejer_vtgv": 2.122132495773988,
+      "flat_vtgv": 2.1379547214197947,
+      "s1_mertens": 0.000597270016064479,
+      "s1_tapered": 0.0977474888806386,
+      "btv": 1.2186507119701802,
+      "load_time_secs": 2.000516084,
+      "compute_time_secs": 15.067147208
+    },
+    {
+      "n": 40000,
+      "dim": 39999,
+      "vtgv_total": 1.2779386850686252,
+      "excess": 0.2779386850686252,
+      "diagonal": 2.5069312833278103,
+      "near_offdiag": -1.117316303278048,
+      "far_offdiag": -0.11167629497722024,
+      "near_bandwidth": 200,
+      "offdiag_positive_sum": 695.1524724659462,
+      "offdiag_negative_sum": -696.3814650661046,
+      "offdiag_cancellation_ratio": 1.0017679468157523,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.322647236801855,
+          "pair_count": 486289717
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9381307090617101,
+          "pair_count": 121582396
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.7652989585014742,
+          "pair_count": 54042208
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.4630688450517241,
+          "pair_count": 30393486
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02625248639394434,
+          "pair_count": 19452582
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.6593826561479175,
+          "pair_count": 13507436
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.05751026095075768,
+          "pair_count": 9926492
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0055684753944181525,
+          "pair_count": 7598458
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.16494716240867963,
+          "pair_count": 6004002
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.038748499890948584,
+          "pair_count": 4862002
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0030982274574262543,
+          "pair_count": 4018860
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.28299587294697137,
+          "pair_count": 3377882
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.0049249587081642565,
+          "pair_count": 2876358
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.04250866772852858,
+          "pair_count": 2482416
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.14843580043715335,
+          "pair_count": 2161148
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.026562188887011506,
+          "pair_count": 1898878
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.0035305931635376342,
+          "pair_count": 1681950
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.08987544558320298,
+          "pair_count": 1501572
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.07678800397745342,
+          "pair_count": 1347900
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.7977320412328861,
+          "pair_count": 24934258
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.8490809476076324,
+          "pair_count": 399960001
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.018446575151636255,
+          "pair_count": 133333332
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.4746952754162066,
+          "pair_count": 66666666
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.31060882747185853,
+          "pair_count": 39999999
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.4842900762103317,
+          "pair_count": 26666665
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.7256363082866399,
+          "pair_count": 19047618
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.567845317018738,
+          "pair_count": 14285714
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.07102720733771754,
+          "pair_count": 11111109
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.08875371583780522,
+          "pair_count": 8888889
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.4262080256722396,
+          "pair_count": 7272725
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.31481407678184575,
+          "pair_count": 72667285
+        }
+      ],
+      "both_squarefree_contribution": 0.34656715359414825,
+      "has_square_contribution": 0.5620885624842086,
+      "fejer_vtgv": 2.1208749564873632,
+      "flat_vtgv": 2.151864122597192,
+      "s1_mertens": -0.00020802065132519032,
+      "s1_tapered": 0.0943691479713299,
+      "btv": 1.2240200212435295,
+      "load_time_secs": 8.650661208,
+      "compute_time_secs": 33.769339333
+    },
+    {
+      "n": 45360,
+      "dim": 45359,
+      "vtgv_total": 1.2823364236580959,
+      "excess": 0.28233642365809586,
+      "diagonal": 2.539334310068853,
+      "near_offdiag": -1.0777440757334684,
+      "far_offdiag": -0.1792538106799017,
+      "near_bandwidth": 212,
+      "offdiag_positive_sum": 771.3368167444175,
+      "offdiag_negative_sum": -772.5938146299325,
+      "offdiag_cancellation_ratio": 1.0016296355343446,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.334410805869393,
+          "pair_count": 625362051
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9381783282038638,
+          "pair_count": 156350388
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.7914906044991863,
+          "pair_count": 69488396
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.46315245132928595,
+          "pair_count": 39087090
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02605226488108267,
+          "pair_count": 25015454
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.6819498852248413,
+          "pair_count": 17372092
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.05880494657888218,
+          "pair_count": 12762244
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.005255217684805543,
+          "pair_count": 9771608
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.16900641155561646,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.037453665017860155,
+          "pair_count": 6253498
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0027523338144114116,
+          "pair_count": 5168664
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.28751998183455524,
+          "pair_count": 4342908
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.004967590831525093,
+          "pair_count": 3701150
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.044189158987937585,
+          "pair_count": 3190634
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.1523206880322791,
+          "pair_count": 2779508
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.02712587288629499,
+          "pair_count": 2442300
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.004029259320129838,
+          "pair_count": 2163892
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.09132373178616959,
+          "pair_count": 1929878
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.07896880985408573,
+          "pair_count": 1732816
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.8181264165893704,
+          "pair_count": 32061686
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.8666317194575861,
+          "pair_count": 514337041
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.017207842917803886,
+          "pair_count": 171460799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.48333170776139467,
+          "pair_count": 85730399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.31148950470216213,
+          "pair_count": 51438239
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.49233086483053,
+          "pair_count": 34292159
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.7417387168773338,
+          "pair_count": 24494399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.5869033137042416,
+          "pair_count": 18370799
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.06802576417284328,
+          "pair_count": 14288399
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.09462596931542733,
+          "pair_count": 11430719
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.43360080275597795,
+          "pair_count": 9352405
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.3240216672200268,
+          "pair_count": 93456045
+        }
+      ],
+      "both_squarefree_contribution": 0.3487133737214109,
+      "has_square_contribution": 0.5637335883422265,
+      "fejer_vtgv": 2.1236436547353383,
+      "flat_vtgv": 2.1413820912266033,
+      "s1_mertens": -0.000027321762165595127,
+      "s1_tapered": 0.09325602009015856,
+      "btv": 1.225862739065403,
+      "load_time_secs": 11.350792208,
+      "compute_time_secs": 44.283683958
+    },
+    {
+      "n": 55440,
+      "dim": 55439,
+      "vtgv_total": 1.288719196891012,
+      "excess": 0.2887191968910121,
+      "diagonal": 2.5910312002452094,
+      "near_offdiag": -1.297669097685245,
+      "far_offdiag": -0.004642905671070843,
+      "near_bandwidth": 235,
+      "offdiag_positive_sum": 910.8424623274392,
+      "offdiag_negative_sum": -912.1447743318623,
+      "offdiag_cancellation_ratio": 1.0014297884192789,
+      "gcd_contributions": [
+        {
+          "gcd_value": 1,
+          "contribution": -2.352038985680397,
+          "pair_count": 934200225
+        },
+        {
+          "gcd_value": 2,
+          "contribution": 1.9375620166416512,
+          "pair_count": 233561284
+        },
+        {
+          "gcd_value": 3,
+          "contribution": -1.8322193261041575,
+          "pair_count": 103804470
+        },
+        {
+          "gcd_value": 4,
+          "contribution": 0.46319792007278504,
+          "pair_count": 58389754
+        },
+        {
+          "gcd_value": 5,
+          "contribution": -0.02555806676708791,
+          "pair_count": 37369266
+        },
+        {
+          "gcd_value": 6,
+          "contribution": 1.7163925510641418,
+          "pair_count": 25951102
+        },
+        {
+          "gcd_value": 7,
+          "contribution": 0.060643234617821534,
+          "pair_count": 19065482
+        },
+        {
+          "gcd_value": 8,
+          "contribution": 0.0045476921039278514,
+          "pair_count": 14596886
+        },
+        {
+          "gcd_value": 9,
+          "contribution": -0.17492638484382822,
+          "pair_count": 11532566
+        },
+        {
+          "gcd_value": 10,
+          "contribution": 0.035161503417323256,
+          "pair_count": 9342372
+        },
+        {
+          "gcd_value": 11,
+          "contribution": -0.0022307485324283634,
+          "pair_count": 7720504
+        },
+        {
+          "gcd_value": 12,
+          "contribution": 0.2946356164559232,
+          "pair_count": 6487246
+        },
+        {
+          "gcd_value": 13,
+          "contribution": -0.005024976308255741,
+          "pair_count": 5527416
+        },
+        {
+          "gcd_value": 14,
+          "contribution": -0.046664673158730664,
+          "pair_count": 4766324
+        },
+        {
+          "gcd_value": 15,
+          "contribution": -0.1586710749238002,
+          "pair_count": 4151506
+        },
+        {
+          "gcd_value": 16,
+          "contribution": -0.028011204175461345,
+          "pair_count": 3648826
+        },
+        {
+          "gcd_value": 17,
+          "contribution": 0.004801320347944111,
+          "pair_count": 3233720
+        },
+        {
+          "gcd_value": 18,
+          "contribution": 0.09333647367203651,
+          "pair_count": 2883288
+        },
+        {
+          "gcd_value": 19,
+          "contribution": 0.08235253787171068,
+          "pair_count": 2587780
+        },
+        {
+          "gcd_value": 20,
+          "contribution": 0.8506044242712751,
+          "pair_count": 47893624
+        }
+      ],
+      "ratio_contributions": [
+        {
+          "ratio_floor": 1,
+          "contribution": -0.8945912667748296,
+          "pair_count": 768342961
+        },
+        {
+          "ratio_floor": 2,
+          "contribution": -0.015366305933801254,
+          "pair_count": 256132799
+        },
+        {
+          "ratio_floor": 3,
+          "contribution": -0.4972966357054338,
+          "pair_count": 128066399
+        },
+        {
+          "ratio_floor": 4,
+          "contribution": 0.31264169771884615,
+          "pair_count": 76839839
+        },
+        {
+          "ratio_floor": 5,
+          "contribution": -0.5049856946687251,
+          "pair_count": 51226559
+        },
+        {
+          "ratio_floor": 6,
+          "contribution": 0.7678738311101815,
+          "pair_count": 36590399
+        },
+        {
+          "ratio_floor": 7,
+          "contribution": -0.6178983896586341,
+          "pair_count": 27442799
+        },
+        {
+          "ratio_floor": 8,
+          "contribution": -0.06317499500673443,
+          "pair_count": 21344399
+        },
+        {
+          "ratio_floor": 9,
+          "contribution": 0.10441992117091407,
+          "pair_count": 17075519
+        },
+        {
+          "ratio_floor": 10,
+          "contribution": 0.4455876432142531,
+          "pair_count": 13970879
+        },
+        {
+          "ratio_floor": 11,
+          "contribution": -0.33952180882301564,
+          "pair_count": 139625651
+        }
+      ],
+      "both_squarefree_contribution": 0.35230143634910505,
+      "has_square_contribution": 0.5655884136925989,
+      "fejer_vtgv": 2.1189940509103877,
+      "flat_vtgv": 2.1386004971855623,
+      "s1_mertens": 0.00046349147819684753,
+      "s1_tapered": 0.09155564627116257,
+      "btv": 1.2284611877782983,
+      "load_time_secs": 23.126141833,
+      "compute_time_secs": 67.226535917
+    }
+  ]
+}

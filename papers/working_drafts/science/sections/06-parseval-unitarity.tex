@@ -1,0 +1,156 @@
+% ================================================================
+\section{The Parseval Bridge as Unitarity}
+\label{sec:parseval}
+% ================================================================
+
+The key technical innovation of the Cathedral is the \emph{Parseval Bridge},
+which rewrites the position-space $L^2$ norm as a frequency-space integral:
+
+\[
+  \underbrace{\int_0^1 |1 - f_{N,v}(x)|^2\,dx}_{\text{position space (vacuum energy)}}
+  = \frac{1}{2\pi}\underbrace{\int_{-\infty}^{\infty}
+  \left|\frac{1}{1/2+it} - \sum_k \frac{v_k}{k^{1/2+it}(1/2+it)}\right|^2\,dt}_{\text{frequency space (critical line)}}
+\]
+
+\begin{principle}[Unitarity of the S-Matrix]
+The Parseval equality is the \emph{optical theorem} of the prime number
+quantum field. In particle physics, the optical theorem states
+\[
+  2\,\im\,\mathcal{A}(\theta=0) = \sigma_{\mathrm{tot}}
+\]
+relating the forward scattering amplitude to the total cross section.
+Both are consequences of unitarity: probability is conserved.
+
+The Parseval Bridge says that the ``probability'' (squared norm) in
+position space \emph{exactly} equals the ``probability'' in frequency
+space. This is not approximate---it is an identity. The frequencies
+are the values on the critical line $\re s = 1/2$, which is the
+``mass shell'' of the Riemann zeta function.
+\end{principle}
+
+\subsection{The Three-Term Decomposition as Feynman Diagrams}
+
+The integrand on the critical line decomposes as:
+\[
+  |1 - \zeta(s)W_N(s)|^2 / |s|^2
+  = \underbrace{1/|s|^2}_{\text{free propagator}}
+  - \underbrace{2\re(\zeta W_N)/|s|^2}_{\text{interaction}}
+  + \underbrace{|\zeta W_N|^2/|s|^2}_{\text{self-energy}}
+\]
+
+\begin{correspondence}[Feynman Diagram Decomposition]
+\begin{itemize}
+  \item \textbf{Term 1} ($1/|s|^2$): The \emph{free propagator} of the
+    massless field. Evaluates to exactly $1$ via the Cauchy distribution
+    integral $\frac{1}{2\pi}\int_{-\infty}^\infty \frac{dt}{1/4+t^2} = 1$.
+    This is the \emph{Cauchy resonance}---a Breit-Wigner peak at $t=0$
+    with width $\Gamma = 1/2$, corresponding to the decay rate of
+    the zeta function's pole at $s=1$.
+
+    \emph{Cathedral code:} \lean{term1\_exact} in \lean{PlancherelBypass.lean}.
+
+  \item \textbf{Term 2} ($-2\re(\zeta W_N)/|s|^2$): The \emph{interference}
+    between the free field and the scattered wave. This is the analogue of
+    the Born approximation in scattering theory. It requires contour shifting
+    from $\re s = 1/2$ to $\re s = 2$, crossing the pole at $s=1$---a
+    \emph{resonance crossing} that produces the $\ln\ln N$ correction.
+
+  \item \textbf{Term 3} ($|\zeta W_N|^2/|s|^2$): The \emph{self-energy}
+    of the scattered wave. Bounded by the Montgomery--Vaughan mean value
+    theorem, which is the number-theoretic analogue of the \emph{Dyson
+    equation} for the dressed propagator.
+\end{itemize}
+\end{correspondence}
+
+\subsection{The Mellin--Perron Bridge as Bohr Complementarity}
+
+The Cathedral's dual-path architecture---Mellin (frequency domain) and
+spatial/Perron (position domain)---independently proves $d_N^2 \to 0$.
+The theorem \lean{critical\_line\_mellin\_variance\_from\_perron}
+(\lean{MellinPerronBridge.lean}, proved April~27, 2026) makes their
+equivalence explicit via the Parseval isometry.
+
+\begin{principle}[Bohr Complementarity]
+The Mellin--Perron Bridge realizes Bohr's complementarity principle:
+the vacuum energy $d_N^2$ is a \emph{basis-independent observable},
+measurable equally well in position coordinates
+($\int_0^1 |r_N(x)|^2\,dx$) or momentum coordinates
+($\frac{1}{2\pi}\int_{-\infty}^{\infty} |M_{r_N}(1/2+it)|^2\,dt$).
+The Bridge is the formal proof that the prime number quantum field
+theory is self-consistent across representations.
+
+In quantum mechanics, complementarity asserts that position and
+momentum measurements are related by the Fourier transform.
+Here, the spatial path (Perron contour integration, Mertens bound,
+Abel summation) and the spectral path (Mellin transform, critical-line
+variance) are the position and momentum representations of the same
+physical system, and the Parseval isometry guarantees they yield
+identical vacuum energies.
+
+The two paths correspond to different \emph{gauge choices}:
+\begin{center}
+\begin{tabular}{@{}lllc@{}}
+\toprule
+\textbf{Path} & \textbf{Domain} & \textbf{Gauge} & \textbf{Axioms} \\
+\midrule
+Mellin (\lean{\_mellin}) & Frequency & Unitary (compact) & 2 \\
+Spatial (\lean{\_spatial}) & Position & Lorenz (transparent) & 4 \\
+Bridge (\lean{MellinPerronBridge}) & --- & Gauge transformation & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+The unitary gauge (Mellin) uses fewer variables but the axioms are
+composite. The Lorenz gauge (spatial) uses more variables but each
+axiom maps to a single classical theorem. The Bridge proves the
+gauge transformation with zero axioms.
+\end{principle}
+
+\subsection{The Stained Glass Rotors: Spectral Energy Partition}
+
+The Stained Glass Rotors (\lean{GallagherPartition.lean},
+\lean{GallagherMVT.lean}, \lean{FrequencySeparation.lean}, all
+proved with zero sorry) provide a character-based decomposition of the
+critical-line spectral energy.
+
+\begin{correspondence}[Quantum Error-Correcting Code]
+The discrete energy partition (\lean{discrete\_energy\_partition}, proved):
+\[
+  \sum_n |a_n|^2 = \frac{1}{4}\sum_{i=1}^{4}
+  \sum_{n} |\chi_i(n)|^2 \cdot |a_n|^2
+\]
+decomposes the total Dirichlet polynomial energy into four orthogonal
+channels indexed by Dirichlet characters $\chi_i$ modulo~8. This is a
+\emph{stabilizer code}: the characters act as syndrome measurements,
+and the fourfold energy split asserts that the prime lattice distributes
+its energy uniformly across all syndrome sectors---\emph{geometric
+frustration} at the arithmetic level.
+
+The orthogonality of the four channels ($\sum_n \chi_i(n)\overline{\chi_j(n)}
+= 0$ for $i \neq j$) is verified by \lean{native\_decide}---the Lean kernel
+performs an exhaustive computation over all $8 \times 8$ character values.
+\end{correspondence}
+
+\begin{correspondence}[Gallagher MVT as Spectral Isolation]
+The Gallagher Mean Value Theorem (\lean{gallagher\_mvt}, proved):
+\[
+  \int_{-\infty}^{\infty} \left|\sum_n a_n\, e^{i\lambda_n t}\right|^2
+  \cdot K_\delta(t)\,dt = \sum_n |a_n|^2
+\]
+where $K_\delta$ is the Fej\'er kernel with width $\delta$, states that
+the energy of a trigonometric polynomial equals the sum of squared
+amplitudes---the number-theoretic \emph{completeness relation}. The
+Dirichlet modes form a quasi-orthogonal set on the critical line.
+\end{correspondence}
+
+\begin{correspondence}[Log-Frequency Separation as Dispersion Relation]
+The frequencies $\lambda_n = -\log(n)/(2\pi)$ of the Dirichlet
+polynomial form a non-uniform lattice. The separation bound
+$|\lambda_i - \lambda_j| \geq 1/(N+1)$ for $i \neq j$
+(\lean{log\_frequencies\_separated}, proved) is the
+\emph{dispersion relation} of the prime lattice: the energy levels
+$(\log n)$ grow logarithmically, ensuring the spectral resolution
+$\delta = 1/(N+1)$ suffices for mode decomposition. This mirrors
+the Van Hove singularity in solid-state physics---the density of
+states peaks where the dispersion relation flattens.
+\end{correspondence}
+

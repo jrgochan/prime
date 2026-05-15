@@ -1,0 +1,38 @@
+% ================================================================
+\section{The Cathedral as a Topological Quantum Field Theory}
+\label{sec:tqft}
+% ================================================================
+
+At the highest level of abstraction, the Cathedral has the structure
+of a \emph{topological quantum field theory} (TQFT) in the sense
+of Atiyah:
+
+\begin{enumerate}
+  \item \textbf{Hilbert space assignment}: To each truncation level $N$,
+    the Cathedral assigns the Hilbert space
+    $\HH_N = \operatorname{span}\{h_2, \ldots, h_N\} \subset L^2(0,1)$.
+
+  \item \textbf{Propagator}: The Gram matrix $G_N$ encodes the inner
+    product on $\HH_N$---the two-point function of the theory.
+
+  \item \textbf{Partition function}: The NB distance $d_N^2 = 1 - b^T G_N^{-1} b$
+    is the ``partition function'' of the theory---it measures the total
+    energy of the vacuum state projected onto $\HH_N$.
+
+  \item \textbf{Gluing}: The eigenvalue interlacing theorem
+    ($\lambda_{\min}(G_{N+1}) \leq \lambda_{\min}(G_N)$, proved in
+    \lean{Structural/Eigenvalue.lean}) corresponds to the \emph{gluing
+    axiom}: enlarging the Hilbert space can only decrease the energy.
+
+  \item \textbf{Topological invariance}: The final result $d_N^2 \to 0$
+    is independent of the choice of basis (any complete set of $h_k$
+    suffices), reflecting topological invariance.
+\end{enumerate}
+
+The key insight: the Riemann Hypothesis is the statement that this
+TQFT is \emph{trivial in the infrared}---the vacuum energy flows to
+zero under the renormalization group flow $N \to \infty$. The prime
+number quantum field theory has a UV fixed point (finite $N$, massive)
+and flows to an IR fixed point (infinite $N$, massless), and RH is the
+assertion that this flow is complete.
+

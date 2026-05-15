@@ -1,0 +1,56 @@
+% ================================================================
+\section{The Vacuum: $L^2(0,1)$ as a Hilbert Space}
+% ================================================================
+
+The proof lives in the Hilbert space $\HH = L^2(0,1)$ with the standard
+inner product $\braket{f}{g} = \int_0^1 f(x)\overline{g(x)}\,dx$.
+
+\begin{principle}[The Vacuum State]
+The constant function $\mathbf{1}(x) = 1$ on $(0,1)$ plays the role of
+the \emph{vacuum state} $\ket{0}$ in the physical theory. The Riemann
+Hypothesis is equivalent to the statement that this vacuum can be
+\emph{perfectly screened}---approximated to arbitrary precision---by
+linear combinations of the basis functions $h_k$.
+\end{principle}
+
+In quantum field theory, \emph{vacuum screening} occurs when virtual
+particle-antiparticle pairs can completely neutralize a test charge.
+In the Cathedral, the ``charge'' is the constant function $1$, and the
+``virtual pairs'' are the fractional-part oscillations $\fract{1/(kx)}$
+which encode the distribution of primes.
+
+The physical content of RH is therefore:
+\begin{quote}
+\emph{The prime number vacuum is perfectly screening.}
+\end{quote}
+
+\subsection{The Basis Functions as Quantum States}
+
+Each $h_k(x) = \fract{1/(kx)}$ has a sawtooth waveform with $k$ teeth
+in the interval $(0,1)$. The Mellin transform
+\[
+  \mathcal{M}[h_k](s) = \int_0^1 h_k(x) \, x^{s-1}\,dx = \frac{1}{k \cdot (s-1)}
+  - \frac{k^{-s}}{s-1} + k^{-s}\mathcal{M}[h_1](s)
+\]
+reveals a \emph{rank-1 structure}: at any zero $\rho$ of $\zeta$,
+\[
+  \mathcal{M}[h_k](\rho) = \frac{1}{k(\rho - 1)}.
+\]
+The $k$-dependence and $\rho$-dependence factorize completely:
+$\mathcal{M}[h_k](\rho) = \phi_k \cdot \psi(\rho)$ where
+$\phi_k = 1/k$ and $\psi(\rho) = 1/(\rho-1)$.
+
+\begin{correspondence}[Rank-1 = Factorizable Scattering]
+The rank-1 factorization $\mathcal{M}[h_k](\rho) = \phi_k \cdot \psi(\rho)$
+is the number-theoretic analogue of \emph{factorizable scattering amplitudes}
+in integrable quantum field theories. In such theories, the $n$-particle
+$S$-matrix decomposes into a product of two-particle amplitudes. Here,
+the ``scattering'' of the $k$-th basis function off the zero $\rho$ is
+determined entirely by two independent factors: the ``momentum'' $1/k$
+and the ``resonance'' $1/(\rho-1)$.
+\end{correspondence}
+
+This is proved in the Cathedral as \lean{bd\_mellin\_at\_zero} (BDMellin.lean),
+and it is the key lemma in the \emph{Rank-1 Mellin Miracle} that proves
+the converse direction of the Nyman--Beurling equivalence.
+

@@ -1,0 +1,49 @@
+═══ CATHEDRAL PARTICLE ZOO v2 — N=10000 ═══
+Standard Model ↔ Arithmetic Mapping
+Gemini Upgrades: Axion · See-Saw · Coupling Constants
+Antigravity: HpdfReader · Liquid Argon · Proof Tree
+
+FILE METADATA
+  N           = 10000
+  dim         = 9999
+  Precision   = DD (~31 digits)
+  Has DD      = true
+  Factorizn   = 2^4·5^4
+  d(N)        = 25
+  HC?         = false
+  π(N)        = 1229
+
+STRUCTURAL INVARIANTS
+  Trace         = 1.043336218666658e1
+  Frobenius     = 6.131319710477083e0
+  Condition     = 3.016656e3
+  Diag range    = [0.0001260769, 0.3803307000]
+  Gershgorin λ  = [-23.0059807936, 23.7666421935]
+
+MERTENS SCREENING
+  Π(1-1/p)    = 6.088469245583836e-2
+  e^(-γ)/lnN  = 6.095968888133693e-2
+
+COUPLING CONSTANTS (Gemini's Formula)
+  α_s         = 5.9505127013  (H_N/ζ₂_N → asymptotic freedom)
+  H_N         = 9.7876060360  (harmonic sum)
+  ζ₂(N)       = 1.6448340718  (Basel partial)
+  α_em        = 0.0000000000  (prime energy fraction)
+  SM α_em     = 0.0072973525  (1/137.036)
+
+SEE-SAW MECHANISM (Gemini)
+  d²_N        = 0.000000000000000e0  (vacuum energy = neutrino mass sum)
+  ‖b‖²        = 2.8859155626  (Dirac mass²)
+  λ_max(diag) = 0.3803307000  (right-handed mass M_R)
+  λ_min(diag) = 0.0001260769  (mass gap)
+  κ           = 3016.66  (condition number)
+  See-Saw pred = 2.189807090229821e1  (‖b‖⁴/λ_max)
+  Ratio       = 0.0000000000
+
+GENERATION DECOMPOSITION
+  ω	E_ω			|E_ω|			count	mass_ratio	SM_gen
+
+MASS CALIBRATION (W± anchor — Gemini)
+  λ_min = 0.0001260769 → W± = 80377 MeV
+  Scale = 637523591.97 MeV/unit
+  λ_max = 0.3803307000 → 242469793.99 MeV

@@ -1,0 +1,19 @@
+name	symbol	mass_mev	category	generation	cathedral_dual	observable
+Up	u	2.160000	Quark	1	Prime contribution to E₁ (ω=1)	prime_energy_fraction
+Down	d	4.700000	Quark	1	Prime contribution to E₁ (ω=1), heavier isospin	prime_energy_split
+Charm	c	1273.000000	Quark	2	Semiprime contribution to E₂ (ω=2)	semiprime_energy_fraction
+Strange	s	93.500000	Quark	2	Semiprime contribution to E₂ (ω=2), lighter isospin	semiprime_energy_split
+Top	t	172570.000000	Quark	3	3-almost-prime contribution to E₃ (ω=3)	three_ap_energy_fraction
+Bottom	b	4183.000000	Quark	3	3-almost-prime contribution to E₃ (ω=3), lighter isospin	three_ap_energy_split
+Electron	e⁻	0.510999	Lepton	1	Diagonal self-energy G(2,2) (lightest prime mode)	diagonal_self_energy_p2
+Electron Neutrino	νₑ	0.000001	Lepton	1	See-Saw: d²_N via Schur complement C = G - bbᵀ	seesaw_vacuum_energy
+Muon	μ⁻	105.658000	Lepton	2	Off-diagonal correlator G(p,q) at semiprimes	off_diagonal_semiprime
+Muon Neutrino	νμ	0.170000	Lepton	2	See-Saw: 2nd covariance eigenvalue (tiny, nonzero)	seesaw_cov_eigenvalue_2
+Tau	τ⁻	1776.930000	Lepton	3	Cotangent sum amplitude V(a,b) at 3-AP	cotangent_three_ap
+Tau Neutrino	ντ	18.200000	Lepton	3	See-Saw: 3rd covariance eigenvalue (tiny, nonzero)	seesaw_cov_eigenvalue_3
+Photon	γ	0.000000	Gauge Boson	0	1/(jk) Coulomb kernel — massless, long-range	reciprocal_product_trace
+Gluon	g	0.000000	Gauge Boson	0	gcd(j,k)/(jk) color factor — confined, short-range	gcd_weighted_trace
+W Boson	W±	80377.000000	Gauge Boson	0	Spectral gap λ_min(G) — MASS ANCHOR (Gemini)	spectral_gap
+Z Boson	Z⁰	91188.000000	Gauge Boson	0	Covariance matrix dominant mode (variance peak)	covariance_dominant_mode
+Higgs	H⁰	125200.000000	Scalar Boson	0	γ-renormalization: Euler-Mascheroni mass subtraction	euler_mascheroni_scale
+Axion	a⁰	0.000001	Hypothetical	0	Dirichlet characters χ(n) — restore fract-part parity	dirichlet_character_energy

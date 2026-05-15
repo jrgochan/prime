@@ -1,0 +1,56 @@
+% ================================================================
+\section{Introduction: The Unreasonable Effectiveness of Physics in Number Theory}
+% ================================================================
+
+The Hilbert--P\'olya conjecture (circa 1914) proposes that the non-trivial
+zeros of the Riemann zeta function are eigenvalues of a self-adjoint operator
+$\HH$ acting on some Hilbert space. If such an operator exists, the Riemann
+Hypothesis follows from the spectral theorem: self-adjoint operators have
+real eigenvalues, and the zeros $\rho = 1/2 + i\gamma$ have real part $1/2$
+precisely when $\gamma$ is real.
+
+The Cathedral proof does not construct such an operator. Instead, it does
+something arguably more revealing: it reduces the Riemann Hypothesis to
+the \emph{decay of an $L^2$ distance} in a concrete function space, and
+every step of this reduction has a precise physical interpretation. The proof
+is, in effect, a proof \emph{about} a physical system---a quantum field
+theory of the primes---even though it never invokes physics explicitly.
+
+This paper provides the dictionary.
+
+\subsection{The Central Correspondence}
+
+The crown theorem of the Cathedral states:
+\[
+  \RH \;\iff\;
+  d_N^2 = \inf_v \int_0^1 \bigl(1 - f_{N,v}(x)\bigr)^2\,dx \to 0
+  \quad\text{as } N \to \infty
+\]
+where $f_{N,v}(x) = \sum_{k=2}^N v_k \fract{1/(kx)}$.
+
+\begin{correspondence}[The Master Dictionary]
+\label{corr:master}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Cathedral (Mathematics)} & \textbf{Physics Dual} \\
+\midrule
+Constant function $1 \in L^2(0,1)$ & Vacuum state $\ket{0}$ \\
+$h_k(x) = \fract{1/(kx)}$ & Creation operator $a_k^\dagger \ket{0}$ \\
+Linear combination $f_{N,v}$ & Trial wavefunction $\ket{\psi_N}$ \\
+$d_N^2$ (NB distance) & Vacuum energy / ground state energy \\
+Gram matrix $G(j,k)$ & Two-point correlator $\braket{j}{k}$ \\
+Rayleigh quotient $v^T G v / v^T v$ & Variational energy \\
+Spectral gap $\lambda_{\min}(G)$ & Mass gap \\
+Mertens function $M(x)$ & Magnetization (Ising model) \\
+M\"obius function $\mu(n)$ & Spin variable $\sigma_n = \pm 1, 0$ \\
+Zeta zeros $\rho = 1/2 + i\gamma$ & Energy eigenvalues $E_\gamma$ \\
+Parseval Bridge & Unitarity of the S-matrix \\
+Abel summation & Renormalization \\
+$C \approx 21.649$ (BD constant) & $1/c_{\text{heat}}$ (inverse heat capacity) \\
+Decoupling exponent $\beta$ & Orthogonality shield strength \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{correspondence}
+

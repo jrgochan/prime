@@ -1,0 +1,108 @@
+\subsubsection{Layer 5: Gauss Digamma = Bloch Decomposition}
+
+The Gauss digamma formula
+\[
+  \psi(p/q) = -\gamma - \ln(2q) - \frac{\pi}{2}\cot\left(\frac{\pi p}{q}\right)
+  + 2\sum_{r=1}^{\lfloor(q-1)/2\rfloor} \cos\left(\frac{2\pi rp}{q}\right)
+  \ln\sin\left(\frac{\pi r}{q}\right)
+\]
+connects the logarithmic series (arising from the telescope) to the
+cotangent sums that appear in the Vasyunin formula.
+
+\begin{correspondence}[Bloch Theorem on the Prime Lattice]
+The Gauss digamma formula is the \emph{Bloch decomposition} of the
+digamma function on the cyclic group $\ZZ/q\ZZ$: the wavefunctions on
+a periodic lattice with $q$ sites decompose into discrete Fourier
+modes $e^{2\pi irp/q}$, and the digamma at the rational point $p/q$
+is the sum over these modes weighted by $\ln\sin(\pi r/q)$---the
+\emph{Bloch energies} of the lattice.
+
+In solid-state physics, the Bloch theorem says that eigenstates of
+a periodic Hamiltonian can be labelled by crystal momentum $k$,
+and the energy $E(k)$ is a periodic function of $k$. Here,
+$r$ plays the role of crystal momentum and $\ln\sin(\pi r/q)$
+is the dispersion relation.
+
+This is currently an axiom (\lean{gauss\_digamma\_formula} in
+\lean{DigammaReflection.lean}), provable from Mathlib's digamma
+infrastructure and the Fourier expansion of $\ln\Gamma$.
+\end{correspondence}
+
+\subsubsection{Layer 6: The Convergence Axiom as Ergodic Hypothesis}
+
+The final axiom (\lean{partial\_integral\_tends\_to\_formula} in
+\lean{ConvergenceAxioms.lean}) states that the partial row-sum
+$\int_{1/(aM)}^1 \fract{1/(ax)}\fract{1/(bx)}\,dx$ converges
+to the Vasyunin formula as $M \to \infty$.
+
+\begin{principle}[The Ergodic Hypothesis]
+The convergence axiom is the number-theoretic \emph{ergodic hypothesis}:
+the time average (partial lattice sum as $M \to \infty$) equals the
+ensemble average (closed-form Vasyunin formula).
+
+The Cathedral proves one half of this hypothesis mechanically:
+\begin{itemize}
+  \item \textbf{Route A (proved):} The partial integral converges to
+    \lean{gramIntegral}~$= \int_0^1 \fract{1/(ax)}\fract{1/(bx)}\,dx$
+    because the tail $\int_0^{1/(aM)}$ is squeezed to zero.
+    This is the \emph{thermodynamic limit}: as the lattice size
+    $M \to \infty$, the finite-volume partition function converges
+    to the infinite-volume limit.
+  \item \textbf{Route B (axiom):} The partial integral also converges
+    to the Vasyunin formula. This is the \emph{ergodic hypothesis proper}:
+    the raw partition function agrees with the closed-form evaluation.
+\end{itemize}
+The \lean{tendsto\_nhds\_unique} lemma (uniqueness of limits in
+Hausdorff spaces) then forces \lean{gramIntegral} = Vasyunin formula.
+This is the statement that the system is ergodic: since both limits
+exist and sequences in Hausdorff spaces have unique limits, the
+thermodynamic limit must equal the ensemble average.
+\end{principle}
+
+\subsection{The Cotangent Sum as Scattering Phase}
+
+The Vasyunin cotangent sum
+\[
+  V(a,b) = \sum_{m=1}^{a-1} \fract{mb/a} \cdot \cot(\pi m/a)
+\]
+encodes the interaction between modes $a$ and $b$ through the
+\emph{modular structure} of their ratio $b/a$.
+
+\begin{correspondence}[Scattering Phase Shift]
+$V(a,b)$ is the \emph{scattering phase shift} between modes
+$a$ and $b$ on the prime lattice. The fractional part
+$\fract{mb/a}$ encodes the relative displacement (the modular
+position of mode $b$ at lattice site $m$ of mode $a$), and the
+cotangent $\cot(\pi m/a)$ is the Hilbert kernel---the boundary
+value of the Cauchy kernel on the unit circle.
+
+The off-diagonal Gram entry decomposes as:
+\begin{align}
+  G(a,b) &= \underbrace{\frac{\ln 2\pi - \gamma}{2}\left(\frac{1}{a}+\frac{1}{b}\right)}_{\text{vacuum (zero-point energy)}}
+  + \underbrace{\frac{a-b}{2ab}\ln\frac{b}{a}}_{\text{Born approximation}}
+  \nonumber \\
+  &\quad - \underbrace{\frac{\pi}{2ab}\bigl(V(a,b) + V(b,a)\bigr)}_{\text{scattering phases}}
+  - \underbrace{\frac{1}{ab}}_{\text{contact term}}
+\end{align}
+for coprime $a < b$.
+Each term has a precise physical meaning:
+\begin{itemize}
+  \item \textbf{Vacuum}: The $\ln 2\pi - \gamma$ terms are the
+    one-loop entropy and Euler--Mascheroni bare mass, independent of
+    the specific modes.
+  \item \textbf{Born approximation}: The $\ln(b/a)$ term is the
+    tree-level scattering amplitude, depending only on the ratio of
+    ``momenta'' $a$ and $b$.
+  \item \textbf{Scattering phases}: $V(a,b) + V(b,a)$ encodes the
+    full interaction via modular arithmetic---the ``non-perturbative''
+    contribution.
+  \item \textbf{Contact term}: $1/(ab)$ is the delta-function
+    interaction at zero separation.
+\end{itemize}
+\end{correspondence}
+
+The Dedekind reciprocity axiom (\lean{harmonicTileSum\_reciprocity}),
+which states a reciprocity law for harmonic tile sums, is the number-theoretic
+incarnation of \emph{time-reversal invariance}: the scattering amplitude
+for $a \to b$ is related to $b \to a$ by a universal kinematic factor.
+

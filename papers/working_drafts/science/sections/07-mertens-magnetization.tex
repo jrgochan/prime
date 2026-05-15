@@ -1,0 +1,112 @@
+% ================================================================
+\section{The Mertens Function as Magnetization}
+\label{sec:mertens}
+% ================================================================
+
+The Mertens function $M(x) = \sum_{n \leq x} \mu(n)$ plays a central
+role in the forward direction of the proof.
+
+\begin{correspondence}[Ising Model]
+The M\"obius function $\mu(n) \in \{-1, 0, +1\}$ behaves like a
+\emph{spin variable} in the Ising model:
+\begin{itemize}
+  \item $\mu(n) = +1$: spin up (squarefree, even number of prime factors)
+  \item $\mu(n) = -1$: spin down (squarefree, odd number of prime factors)
+  \item $\mu(n) = 0$: vacancy (contains a squared prime factor)
+\end{itemize}
+The Mertens function $M(x) = \sum_{n \leq x} \mu(n)$ is the net
+\emph{magnetization} up to $x$.
+
+The Riemann Hypothesis is equivalent to $M(x) = O(x^{1/2+\varepsilon})$---the
+magnetization fluctuates like $\sqrt{x}$, which is the \emph{central limit
+theorem} behavior expected for a system with short-range correlations at
+its critical point.
+\end{correspondence}
+
+The Cathedral axiom \lean{rh\_implies\_mertens\_bound} states:
+\[
+  \RH \implies |M(x)| \leq C \cdot x^{1/2} \log^2 x
+\]
+This is the physics statement that \emph{under RH, the prime spin system
+is at its critical temperature}---the fluctuations are exactly
+$\Theta(\sqrt{x})$, neither ordered (like $O(1)$, which would give PNT
+with power-saving error) nor disordered (like $O(x^{3/4})$, which would
+violate RH).
+
+The weaker bound $|M(x)| \leq 64\, C \cdot x^{3/4}$ is a \emph{proved
+corollary} (\lean{rh\_implies\_mertens\_34}, April 22, 2026)---the Mertens
+magnetization is bounded in any sub-critical regime.
+
+\subsection{Abel Summation as Renormalization}
+
+The Abel summation step in the forward proof---converting the Mertens
+bound into an $L^2$ bound on the M\"obius weights---is the
+\emph{renormalization} procedure:
+
+\[
+  v_k = -\mu(k)\left(1 - \frac{\ln k}{\ln N}\right)
+\]
+
+The log-linear taper $1 - \ln k / \ln N$ is a \emph{UV cutoff}: it
+smoothly suppresses the contribution of high-$k$ modes (analogous to
+high-momentum states in QFT). Without this cutoff, the weight norm
+$\|v\|^2 = \Theta(N)$ diverges---a UV divergence that the taper
+renormalizes away.
+
+\begin{observation}[The Triangle Inequality Trap as Failed Renormalization]
+The Cathedral's Discovery~5 (the Triangle Inequality Trap) identifies
+a situation where naive bounds destroy the cancellation needed for
+$d_N^2 \to 0$. In physics language: applying the triangle inequality
+to $E = 1 - 2b^Tv + v^TGv$ is like computing the energy without
+accounting for interference---it gives $E \geq 4$ for a quantity
+approaching $0$. This is precisely the problem that renormalization
+was invented to solve: divergent intermediate quantities that cancel
+in the final answer.
+
+The Cathedral resolves this trap in \lean{MoebiusL1Bound.lean} by
+decomposing $1 - b^T v$ into the thermodynamic hierarchy (\S\ref{sec:thermo}),
+avoiding the triangle inequality entirely.
+\end{observation}
+
+\subsection{The Thermodynamic Hierarchy}
+\label{sec:thermo}
+
+The proved identity (\lean{CalcBounds.lean}, zero sorry):
+\[
+  1 - b^T v
+  = (1 - \gamma)\, S_1 + (S_2 + 1)
+  - \frac{(1 - \gamma)\,S_2 + S_3}{\ln N}
+\]
+where $S_m = \sum_{k=1}^{N-1} \mu(k)(\ln k)^{m-1}/k$ are the Abel
+partial sums, is a \emph{moment expansion} of the grand partition function
+$1/\zeta(s)$ near $s = 1$.
+
+\begin{correspondence}[Thermodynamic Moments]
+  Each Abel sum $S_m$ corresponds to a response function of the prime
+  spin system:
+  \begin{center}
+  \begin{tabular}{@{}lll@{}}
+  \toprule
+  \textbf{Abel Sum} & \textbf{Thermodynamic Dual} & \textbf{Limiting Value} \\
+  \midrule
+  $S_1 = \sum \mu(k)/k$ & Magnetization (PNT) & $\to 0$ \\
+  $S_2 = \sum \mu(k)\ln k / k$ & Magnetic susceptibility & $\to -1$ \\
+  $S_3 = \sum \mu(k)\ln^2 k / k$ & Heat capacity & $\to -2\gamma$ \\
+  \bottomrule
+  \end{tabular}
+  \end{center}
+  The correction term $[(1-\gamma)S_2 + S_3]/\ln N$ is the
+  \emph{finite-size scaling} contribution---the deviation from the
+  thermodynamic limit due to the cutoff at $N$.
+\end{correspondence}
+
+The Cathedral proves each $S_m$ decays with explicit rates
+(\lean{AbelTail/*.lean}, zero sorry):
+$|S_1| \leq C_1 \cdot N^{-1/4}$,
+$|S_2 + 1| \leq C_2 \cdot N^{-1/4} \ln N$,
+$|S_3 + 2\gamma|$ bounded universally.
+These are the \emph{critical exponents} of the prime number gas.
+Numerical validation (256-bit MPFR, \texttt{millennium-wall} experiment)
+confirms $|1 - b^T v| \cdot \ln N \to \gamma + 1 \approx 1.577$---the
+\emph{Euler--Mascheroni amplitude} governs the rate of vacuum screening.
+

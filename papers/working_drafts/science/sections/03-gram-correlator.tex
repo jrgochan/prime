@@ -1,0 +1,88 @@
+% ================================================================
+\section{The Gram Matrix as a Quantum Correlator}
+% ================================================================
+
+\subsection{The Two-Point Function}
+
+The Gram matrix $G \in \RR^{(N-1) \times (N-1)}$ with entries
+\[
+  G(j,k) = \int_0^1 \fract{1/(jx)}\,\fract{1/(kx)}\,dx
+  = \braket{h_j}{h_k}
+\]
+is the \emph{two-point correlation function} (propagator) of the
+prime number quantum field. In condensed matter physics, this is the
+Green's function $G(j,k) = \expect{a_j^\dagger a_k}$ measuring the
+amplitude for a particle created at site $k$ to propagate to site $j$.
+
+\begin{observation}[Diagonal = Self-Energy (Proved)]
+The diagonal entries $G(k,k) = \int_0^1 \fract{1/(kx)}^2\,dx$ are
+the \emph{self-energy} of the $k$-th mode. The Cathedral proves
+this identity as a \emph{theorem} (April 20, 2026) via a three-step
+argument that mirrors the self-energy computation in lattice QFT:
+\begin{enumerate}
+  \item \textbf{Lattice discretization.} Partition $(0,1)$ into intervals
+    where $\lfloor 1/(kx) \rfloor = m$ is constant. On each interval,
+    the integrand $\fract{1/(kx)}^2 = (1/(kx) - m)^2$ is a rational
+    polynomial whose antiderivative is computed exactly via FTC.
+    This is the number-theoretic analogue of a lattice field theory
+    with sites indexed by $m$.
+  \item \textbf{Thermodynamic limit.} The sum over lattice sites is
+    identified with Stirling's partial sum $P(K)$, using the identity
+    $P(K) = 2\log K! - 2K\log K + 2K - 1 - H_K$.
+    Mathlib's Stirling approximation ($\sqrt{2\pi K}(K/e)^K \to K!$)
+    provides the $\ln(2\pi)$ contribution---the thermodynamic
+    entropy of the lattice.
+  \item \textbf{Mass renormalization.} The Euler--Mascheroni constant
+    $\gamma = \lim_{K\to\infty}(H_K - \ln K)$ appears as the ``bare
+    mass'' subtraction. A squeeze theorem argument takes the lattice
+    spacing to zero: $\int_0^{1/K} \fract{1/u}^2\,du \to 0$.
+\end{enumerate}
+The result, $G(k,k) = k^{-2}(\ln 2\pi - \gamma - 1)$, is proved from
+Mathlib's Stirling and harmonic number infrastructure with \emph{zero
+axioms}. The self-energy saturates at $1 - 1/k + O(\ln k / k)$ for
+large $k$, consistent with asymptotic freedom.
+\end{observation}
+
+\begin{observation}[Off-Diagonal = Interaction (Structurally Proved)]
+The off-diagonal entries $G(j,k)$ for $j \neq k$ encode the
+\emph{interaction} between modes. The Vasyunin formula expresses these
+as cotangent sums---number-theoretic analogues of scattering phases.
+The interaction depends on $\gcd(j,k)$, reflecting the
+\emph{arithmetic structure} of the coupling: modes interact strongly
+precisely when they share prime factors.
+
+The identity $G(j,k) = \text{vasyuninGramFormula}(j,k)$ is now
+\textbf{structurally proved} (April~25, 2026) via a
+\emph{uniqueness-of-limits} argument: the partial integral
+$\int_{1/(jM)}^1$ converges to both the Gram integral (by tail
+squeeze, fully proved) and the Vasyunin formula (by row FTC
+decomposition, one convergence axiom), forcing equality. The proof
+factors through GCD reduction: $G(j,k) = G(j/d, k/d)$ where
+$d = \gcd(j,k)$, so only coprime pairs require the analytic argument.
+
+The per-tile FTC evaluation (\lean{CrossTermFTC.lean}),
+the Beatty sequence bound (at most 2 tiles per row for $j \leq k$),
+and the Dedekind reciprocity of harmonic tile sums are all
+fully proved, establishing that the interaction is
+\emph{bounded-range} in the dual lattice.
+\end{observation}
+
+\subsection{Positive Definiteness = Reflection Positivity}
+
+The Cathedral proves that $G$ is positive definite for all $N$
+(\lean{gram\_positive\_definite} in \lean{Gram/Bounds.lean}).
+
+\begin{principle}[Reflection Positivity]
+In quantum field theory, reflection positivity (Osterwalder--Schrader
+axiom RP) ensures that the Hilbert space has positive-definite norm.
+The positive definiteness of $G$ is the number-theoretic incarnation
+of this axiom: the prime number quantum field satisfies reflection
+positivity.
+
+The Cathedral module \lean{White/Kinematics.lean} makes this connection
+explicit: it proves the change-of-variables identity
+$\int_0^\infty g_N(u)^2\,du = \int_0^1 r_N(x)^2\,dx$
+using the diffeomorphism $x = e^{-u}$, which is precisely the
+Wick rotation $t \to -iu$ from Minkowski to Euclidean signature.
+\end{principle}
+

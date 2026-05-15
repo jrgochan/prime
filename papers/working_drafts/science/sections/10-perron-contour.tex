@@ -1,0 +1,144 @@
+% ================================================================
+\section{The Perron Contour as Inverse Laplace Transform}
+\label{sec:perron}
+% ================================================================
+
+The Cathedral's Perron infrastructure---the deepest mechanized proof chain
+in the project---is now \textbf{fully complete (0 sorry, 0 axiom, April~24, 2026)}.
+The chain spans 16 files and is entirely certified:
+kernel bounds (\lean{Perron/KernelBound.lean}), rectangle contour
+(\lean{Perron/Rectangle.lean}), residue computation
+(\lean{Perron/ResidueGtOne.lean}), the Dirichlet series identity
+$1/\zeta(s) = \sum \mu(n)/n^s$ (\lean{Zeta/DirichletInverse.lean}),
+the half-integer assembly (\lean{Perron/HalfIntegerPerron.lean}), and the
+contour shift to $\re s = 1/2 + \varepsilon$ (\lean{Perron/PerronMoebius.lean}).
+
+\begin{principle}[The Perron Formula as Inverse Laplace Transform]
+The Perron formula
+\[
+  M(x) = \frac{1}{2\pi i}
+  \int_{c - i\infty}^{c + i\infty}
+  \frac{x^s}{s\,\zeta(s)}\,ds,
+  \qquad c > 1,
+\]
+is the \emph{inverse Laplace transform} of the scattering amplitude
+$1/(s\,\zeta(s))$. The Mertens function $M(x)$---the magnetization---is
+extracted from the frequency domain (the Dirichlet series) by contour
+integration over the Bromwich path.
+
+The contour shift from $\re s = c > 1$ to $\re s = 1/2 + \varepsilon$
+is \emph{analytic continuation across a phase boundary}: the pole at $s = 1$
+(the critical temperature) produces a residue that contributes the
+leading-order asymptotic $M(x) \sim x \cdot \mathrm{Res}_{s=1}$. Under RH,
+the zero-free region extends to $\re s > 1/2$, so the contour can be
+pushed all the way to the critical line---the ``mass shell''---yielding
+the optimal bound $M(x) = O(x^{1/2+\varepsilon})$.
+
+The horizontal contour vanishing theorem (\lean{perron\_horizontal\_contour\_vanishes},
+proved April~22, 2026) certifies that the ``lid'' of the Perron rectangle
+contributes zero in the limit---a reflection of the \emph{Riemann--Lebesgue
+lemma} for the zeta scattering amplitude.
+\end{principle}
+
+\subsection{The Quantitative Perron Assembly (Proved April~24)}
+
+The central theorem \lean{truncated\_perron\_half\_integer}
+(\lean{Perron/HalfIntegerPerron.lean}) assembles the quantitative bound:
+for a half-integer $X = m + 1/2$ with $m \geq 2$, $c > 1$, and $T > 0$,
+\[
+  \left\| M(X) - \frac{1}{2\pi} \int_{-T}^{T}
+  \frac{X^{c+it}}{(c+it)\,\zeta(c+it)}\,dt \right\|
+  \leq K \cdot \frac{X^{c+1}}{T},
+\]
+where $K = C_{\mathrm{sum}}/\pi + C_{\mathrm{tail}} + 1$ absorbs
+both the kernel and tail constants.
+
+The proof decomposes into a \emph{Born--Oppenheimer separation}:
+
+\begin{correspondence}[Born--Oppenheimer for the Perron Integral]
+\label{corr:born-oppenheimer}
+Define $A_N = \sum_{n=1}^{N} \mu(n) \cdot P(X/n, c, T)$ (the finite
+Perron sum using $N$ partial waves) and $B = (1/2\pi)\int X^s/(s\zeta(s))\,dt$
+(the exact contour integral). The triangle inequality gives:
+\[
+  \|M - B\| \leq \underbrace{\|M - A_N\|}_{\text{kernel error (fast modes)}}
+  + \underbrace{\|A_N - B\|}_{\text{tail error (slow modes)}}
+\]
+\begin{itemize}
+  \item \textbf{Kernel error} (\lean{perron\_formula\_error\_bound\_full},
+    proved): This is the error from truncating the Bromwich integral at
+    height $T$. Bounded by $C_{\mathrm{sum}}/(\pi T) \cdot X^{c+1}$.
+    Physically: the contribution of \emph{high-frequency scattering}---UV
+    modes above frequency $T$---to the inverse Laplace transform. The
+    Riemann--Lebesgue lemma ensures these decay as $1/T$.
+
+  \item \textbf{Tail error} (\lean{dirichlet\_tail\_integral\_bound},
+    proved): This is the error from approximating $1/\zeta(s)$ by
+    the finite Dirichlet polynomial $D_N(s) = \sum_{n=1}^{N} \mu(n)/n^s$.
+    Bounded by $C_{\mathrm{tail}} \cdot N^{1-c} \cdot X^c \cdot T$.
+    Physically: the contribution of \emph{higher partial waves}---the
+    scattering off primes $p > N$---to the total amplitude.
+\end{itemize}
+This separation mirrors the Born--Oppenheimer approximation in molecular
+physics: the fast electronic degrees of freedom (high-frequency scattering)
+are separated from the slow nuclear degrees of freedom (partial wave convergence),
+and each is bounded independently.
+\end{correspondence}
+
+\subsection{Archimedean UV Regularization (Proved)}
+
+The key innovation in the assembly is the \emph{dynamic choice of $N$}
+via the Archimedean property of the reals. Rather than fixing $N$ in
+advance, the proof chooses $N_0$ satisfying
+\[
+  N_0 > (C_{\mathrm{tail}} \cdot T^2 \cdot X)^{1/(c-1)}
+\]
+and sets $N = \max(m, N_0 + 1)$. This ensures the tail error dominates
+the kernel error in the right way.
+
+\begin{principle}[Adaptive UV Regularization]
+The Archimedean $N$-choice is the number-theoretic analogue of
+\emph{Wilsonian renormalization group} optimization: the UV cutoff $N$
+(the number of partial waves retained) is chosen dynamically to match
+the IR cutoff $T$ (the frequency truncation height), ensuring both
+errors converge simultaneously.
+
+The crucial algebraic step is the \emph{asymptotic freedom calculation}
+(\\lean{h\_tail\_crushed}, proved April~24):
+\begin{align}
+  C_{\mathrm{tail}} \cdot N^{1-c} \cdot X^c \cdot T
+  &\leq \frac{1}{T^2 X} \cdot X^c \cdot T
+  = \frac{X^{c-1}}{T}
+  \leq \frac{X^{c+1}}{T}
+\end{align}
+The first step uses $N^{c-1} > C_{\mathrm{tail}} T^2 X$ (from the
+Archimedean choice$)$, so $N^{1-c} < 1/(C_{\mathrm{tail}} T^2 X)$.
+The final step uses $X^{c-1} \leq X^{c+1}$ since $X > 1$
+(\\lean{rpow\_le\_rpow\_of\_exponent\_le}).
+
+In physics language: the ``coupling constant'' $g_N = C_{\mathrm{tail}} \cdot N^{1-c}$
+decreases as the energy scale $N$ increases, precisely as in
+asymptotically free gauge theories. The tail becomes negligible as
+$N \to \infty$, and the Archimedean property guarantees that such an
+$N$ always exists---this is what it means for~$\RR$ to be Archimedean.
+\end{principle}
+
+\subsection{The Integral Connection (Proved)}
+
+The integral connection---showing that the difference $A_N - B$ between
+the finite Perron sum and the contour integral equals the tail integrand---is
+now \textbf{fully proved} (April~24, 2026). The proof composes three certified steps:
+\begin{enumerate}
+  \item \lean{finite\_sum\_integral\_swap} (proved): rewrites $A_N$ as a
+    single integral $A_N = (1/2\pi) \int \sum \mu(n)(X/n)^s/s\,dt$.
+  \item Algebraic factoring: $(X/n)^s = X^s/n^s$, hence
+    $\sum \mu(n)(X/n)^s/s = D_N(s) \cdot X^s/s$. This is the factorization
+    of the scattering amplitude into partial wave coefficients times the
+    free propagator.
+  \item \lean{integral\_sub} + \lean{perron\_zeta\_integrable} (proved): forms
+    the difference $A_N - B = (1/2\pi)\int [D_N(s) - 1/\zeta(s)] \cdot X^s/s\,dt$,
+    which is exactly the expression bounded by \S4.
+\end{enumerate}
+The entire Perron chain is now zero-sorry---the causal structure of the
+scattering theory (inverse Laplace transform) is fully certified.
+

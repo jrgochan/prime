@@ -1,0 +1,56 @@
+{
+  "N": 36,
+  "R21_deviation_pct": 99.8453540262204,
+  "R21_measured": 0.31975838706459614,
+  "R31_deviation_pct": 100.0,
+  "R31_measured": 0.0,
+  "R32_deviation_pct": 100.0,
+  "R32_measured": 0.0,
+  "SM_R21_target": 206.768,
+  "SM_R31_target": 3477.2,
+  "SM_R32_target": 16.82,
+  "bands": [
+    {
+      "count": 19,
+      "eigenvalue_mean": 0.16758712145600554,
+      "eigenvalue_median": 0.011495997035621094,
+      "eigenvalue_std": 0.5813388047535583,
+      "energy_weighted_center": 0.11007708655436965,
+      "mean_purity": 0.6435529882497036,
+      "omega": 1
+    },
+    {
+      "count": 15,
+      "eigenvalue_mean": 0.0077148065281862025,
+      "eigenvalue_median": 0.0036759414698095795,
+      "eigenvalue_std": 0.008811119957842265,
+      "energy_weighted_center": 0.06554410363310738,
+      "mean_purity": 0.608970350391888,
+      "omega": 2
+    },
+    {
+      "count": 0,
+      "eigenvalue_mean": 0.0,
+      "eigenvalue_median": 0.0,
+      "eigenvalue_std": 0.0,
+      "energy_weighted_center": 0.0,
+      "mean_purity": 0.0,
+      "omega": 3
+    },
+    {
+      "count": 0,
+      "eigenvalue_mean": 0.0,
+      "eigenvalue_median": 0.0,
+      "eigenvalue_std": 0.0,
+      "energy_weighted_center": 0.0,
+      "mean_purity": 0.0,
+      "omega": 4
+    }
+  ],
+  "dim": 35,
+  "eigenvectors_localized": true,
+  "ipr_mean": 0.5328557798916201,
+  "localization_fraction": 0.9142857142857143,
+  "mean_purity": 0.6242201807724138,
+  "n_eigenvalues": 35
+}

@@ -105,18 +105,3 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
-# ── Development-only (see 'development' branch) ──
-docs/ai/
-docs/architecture/
-docs/exports/
-docs/mathematics/
-docs/physics/
-docs/paper/
-docs/hyperzeta-viewport/
-docs/GEMINI_BRIEFING.md
-docs/hypercomplex_srs.md
-papers/working_drafts/
-tools/
-visualizer/
-results/
-papers/archive/

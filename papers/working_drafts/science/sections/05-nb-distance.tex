@@ -1,0 +1,54 @@
+% ================================================================
+\section{The Nyman--Beurling Distance as Vacuum Energy}
+\label{sec:vacuum}
+% ================================================================
+
+\subsection{The Variational Principle}
+
+The NB distance
+\[
+  d_N^2 = \inf_{v \in \RR^{N-1}} \int_0^1 (1 - f_{N,v})^2\,dx
+  = 1 - b^T G^{-1} b
+\]
+where $b_k = \int_0^1 \fract{1/(kx)}\,dx = 1 - 1/k$ is the inner product
+$\braket{h_k}{1}$, is obtained by minimizing over the weight vector $v$.
+
+\begin{principle}[The Rayleigh--Ritz Principle]
+This minimization is the \emph{Rayleigh--Ritz variational principle}:
+we approximate the ground state energy by optimizing over a finite
+trial space. The optimal weights $v_{\mathrm{opt}} = G^{-1}b$ are the
+\emph{normal mode amplitudes} of the best approximation.
+
+In the Cathedral, this is proved as \lean{nbDistSq\_formula}:
+$d_N^2 = 1 - b^T G^{-1} b$. The physics: the vacuum energy is the
+difference between the ``bare'' energy ($1$) and the energy extracted
+by the optimal trial wavefunction ($b^T G^{-1} b$).
+\end{principle}
+
+The log-cutoff M\"obius witness $v_k = -\mu(k)(1 - \ln k / \ln N)$ used
+in the forward direction is a \emph{Bartlett window}---a sub-optimal
+trial wavefunction that extracts less energy than the exact minimizer.
+In signal processing, this is the triangular apodization function.
+In physics, it is a finite-temperature regularization of the
+zero-temperature ground state.
+
+\subsection{The Covariance Decomposition}
+
+The Cathedral's Vasyunin tower decomposes the NB distance as:
+\[
+  d_N^2 = (1 - b^T v)^2 + v^T C v
+\]
+where $C = G - b b^T$ is the \emph{covariance matrix}.
+
+\begin{correspondence}[Variance Decomposition]
+This is the bias-variance decomposition in statistical learning:
+\begin{itemize}
+  \item $(1 - b^T v)^2$ is the \textbf{bias}---the squared distance
+    from the mean. In physics: the \emph{mass term}.
+  \item $v^T C v$ is the \textbf{variance}---the fluctuation energy.
+    In physics: the \emph{kinetic energy} of quantum fluctuations.
+\end{itemize}
+RH is equivalent to both terms decaying to zero simultaneously:
+the vacuum has zero bias \emph{and} zero fluctuation energy.
+\end{correspondence}
+
