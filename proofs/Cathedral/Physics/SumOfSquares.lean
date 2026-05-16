@@ -165,7 +165,7 @@ theorem sosTerm_one (N_val : ℕ) (μ : ℕ → ℤ) :
 
 /-- For d > N/2 (with d ≤ N), ⌊N/d⌋ = 1. -/
 theorem floor_div_eq_one (N_val d : ℕ) (hd_gt : N_val / 2 < d) (hd_le : d ≤ N_val)
-    (hd_pos : 0 < d) :
+    (_hd_pos : 0 < d) :
     N_val / d = 1 := by
   have h1 : d ≤ N_val := hd_le
   have h2 : N_val < 2 * d := by omega
@@ -177,12 +177,39 @@ theorem weightedMertens_one_eq (μ : ℕ → ℤ) (hmu : μ 1 = 1) :
   unfold weightedMertens
   simp [hmu]
 
+/-- J₂(d) ≤ d² for all d > 0.
+    Proof: J₂(d) is one term in Σ_{e|d} J₂(e) = d², and all terms are positive. -/
+theorem jordan2_le_sq (d : ℕ) (hd : 0 < d) :
+    RamanujanBridge.jordanTotient2 d ≤ (d : ℝ) ^ 2 := by
+  rw [← RamanujanBridge.jordan2_dirichlet_identity d hd]
+  exact Finset.single_le_sum
+    (fun e he => le_of_lt (RamanujanBridge.jordan2_pos e (Nat.pos_of_mem_divisors he)))
+    (Nat.mem_divisors.mpr ⟨dvd_refl d, hd.ne'⟩)
+
+/-- d²/J₂(d) ≥ 1 for d > 0.
+    Follows directly from J₂(d) ≤ d² and J₂(d) > 0. -/
+theorem sq_div_jordan2_ge_one (d : ℕ) (hd : 0 < d) :
+    1 ≤ (d : ℝ) ^ 2 / RamanujanBridge.jordanTotient2 d := by
+  have hJ := RamanujanBridge.jordan2_pos d hd
+  have hle := jordan2_le_sq d hd
+  rwa [le_div_iff₀ hJ, one_mul]
+
+/-- Each tail SOS term (with M₁ = 1) is ≥ 1.
+    When ⌊N/d⌋ = 1 and μ(1) = 1: sosTerm(d) = d²/J₂(d) ≥ 1. -/
+theorem sosTerm_tail_ge_one (d N_val : ℕ) (μ : ℕ → ℤ)
+    (hd : 0 < d) (hmu : μ 1 = 1)
+    (hfloor : N_val / d = 1) :
+    1 ≤ sosTerm d N_val μ := by
+  unfold sosTerm
+  rw [hfloor, weightedMertens_one_eq μ hmu, one_pow, mul_one]
+  exact sq_div_jordan2_ge_one d hd
+
 /-- **THE TAIL BOUND**: σ_SOS ≥ 12 · |{d : N/2 < d ≤ N}| when μ(1) = 1.
 
     For each d > N/2 with d ≤ N:
     - ⌊N/d⌋ = 1
     - M₁(1) = 1 (since μ(1) = 1)
-    - sosTerm(d) = d²/J₂(d) = 1/∏_{p|d}(1-1/p²) ≥ 1
+    - sosTerm(d) = d²/J₂(d) ≥ 1
 
     There are ⌈N/2⌉ such terms.
     Therefore σ ≥ 12·⌈N/2⌉ ≥ 6N.
@@ -191,7 +218,39 @@ theorem weightedMertens_one_eq (μ : ℕ → ℤ) (hmu : μ 1 = 1) :
 theorem sigmaSOS_ge_linear (N_val : ℕ) (hN : 2 ≤ N_val) (μ : ℕ → ℤ)
     (hmu : μ 1 = 1) :
     6 * (N_val : ℝ) ≤ sigmaSOS N_val μ := by
-  sorry -- Proof: tail sum decomposition + sosTerm ≥ 1 for d > N/2
+  unfold sigmaSOS
+  -- We show: 6*N ≤ 12 * card(tail), and card(tail) ≤ Σ
+  -- Tail = Ico (N/2) N, subset of range N
+  set S := Finset.Ico (N_val / 2) N_val
+  have hS_sub : S ⊆ Finset.range N_val := by
+    intro x hx; exact Finset.mem_range.mpr (Finset.mem_Ico.mp hx).2
+  -- Each tail term ≥ 1
+  have hge1 : ∀ d ∈ S, (1 : ℝ) ≤ sosTerm (d + 1) N_val μ := by
+    intro d hd
+    have ⟨hlo, hhi⟩ := Finset.mem_Ico.mp hd
+    exact sosTerm_tail_ge_one _ _ _ (Nat.succ_pos d) hmu
+      (floor_div_eq_one N_val (d + 1) (by omega) (by omega) (by omega))
+  -- card S = N - N/2
+  have hcard : S.card = N_val - N_val / 2 := Nat.card_Ico _ _
+  -- 6*N ≤ 12 * card(S)
+  have h6 : 6 * N_val ≤ 12 * S.card := by rw [hcard]; omega
+  -- card(S) ≤ Σ_{d ∈ S} sosTerm(d+1)  [since each ≥ 1]
+  have hsum_ge_card : (S.card : ℝ) ≤
+      ∑ d ∈ S, sosTerm (d + 1) N_val μ := by
+    calc (S.card : ℝ) = ∑ _d ∈ S, (1 : ℝ) := by simp
+      _ ≤ ∑ d ∈ S, sosTerm (d + 1) N_val μ := Finset.sum_le_sum hge1
+  -- Σ_{d ∈ S} ≤ Σ_{d ∈ range N} [subset, non-negative]
+  have hsum_sub : ∑ d ∈ S, sosTerm (d + 1) N_val μ ≤
+      ∑ d ∈ Finset.range N_val, sosTerm (d + 1) N_val μ :=
+    Finset.sum_le_sum_of_subset_of_nonneg hS_sub
+      (fun d _ _ => sosTerm_nonneg (d + 1) N_val μ (Nat.succ_pos d))
+  -- Chain: 6N ≤ 12*card ≤ 12*Σ_S ≤ 12*Σ_all = σ
+  have key : (S.card : ℝ) ≤
+      ∑ d ∈ Finset.range N_val, sosTerm (d + 1) N_val μ :=
+    le_trans hsum_ge_card hsum_sub
+  calc 6 * (N_val : ℝ) ≤ 12 * (S.card : ℝ) := by exact_mod_cast h6
+    _ ≤ 12 * ∑ d ∈ Finset.range N_val, sosTerm (d + 1) N_val μ :=
+        mul_le_mul_of_nonneg_left key (by norm_num)
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
