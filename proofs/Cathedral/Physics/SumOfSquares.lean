@@ -160,6 +160,40 @@ theorem sosTerm_one (N_val : ℕ) (μ : ℕ → ℤ) :
   simp [Nat.div_one]
 
 -- ════════════════════════════════════════════════════════════════
+-- §6. THE σ ≥ 6N LOWER BOUND (THE KEY)
+-- ════════════════════════════════════════════════════════════════
+
+/-- For d > N/2 (with d ≤ N), ⌊N/d⌋ = 1. -/
+theorem floor_div_eq_one (N_val d : ℕ) (hd_gt : N_val / 2 < d) (hd_le : d ≤ N_val)
+    (hd_pos : 0 < d) :
+    N_val / d = 1 := by
+  have h1 : d ≤ N_val := hd_le
+  have h2 : N_val < 2 * d := by omega
+  exact Nat.div_eq_of_lt_le (by omega) h2
+
+/-- M₁(1) = μ(1) when μ(1) = 1. -/
+theorem weightedMertens_one_eq (μ : ℕ → ℤ) (hmu : μ 1 = 1) :
+    weightedMertens 1 μ = 1 := by
+  unfold weightedMertens
+  simp [hmu]
+
+/-- **THE TAIL BOUND**: σ_SOS ≥ 12 · |{d : N/2 < d ≤ N}| when μ(1) = 1.
+
+    For each d > N/2 with d ≤ N:
+    - ⌊N/d⌋ = 1
+    - M₁(1) = 1 (since μ(1) = 1)
+    - sosTerm(d) = d²/J₂(d) = 1/∏_{p|d}(1-1/p²) ≥ 1
+
+    There are ⌈N/2⌉ such terms.
+    Therefore σ ≥ 12·⌈N/2⌉ ≥ 6N.
+
+    This bound uses ONLY the fact that μ(1) = 1. -/
+theorem sigmaSOS_ge_linear (N_val : ℕ) (hN : 2 ≤ N_val) (μ : ℕ → ℤ)
+    (hmu : μ 1 = 1) :
+    6 * (N_val : ℝ) ≤ sigmaSOS N_val μ := by
+  sorry -- Proof: tail sum decomposition + sosTerm ≥ 1 for d > N/2
+
+-- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
 

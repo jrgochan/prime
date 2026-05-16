@@ -39,10 +39,11 @@ namespace Cathedral.Physics.SmithWitness
 /-- The Möbius function μ. We use ArithmeticFunction.moebius from Mathlib. -/
 noncomputable def mu (n : ℕ) : ℤ := ArithmeticFunction.moebius n
 
-/-- The fundamental Möbius identity: Σ_{d|n} μ(d) = [n=1]. -/
+/-- The fundamental Möbius identity: Σ_{d|n} μ(d) = [n=1].
+    This is ζ * μ = 1 in the Dirichlet ring (Mathlib). -/
 theorem moebius_sum_eq_ite (n : ℕ) (hn : 0 < n) :
     ∑ d ∈ n.divisors, mu d = if n = 1 then 1 else 0 := by
-  sorry -- Standard Mathlib fact, used in smith_solve
+  sorry -- Mathlib: ArithmeticFunction.moebius left-inverse of ζ
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE SMITH WITNESS VECTOR
