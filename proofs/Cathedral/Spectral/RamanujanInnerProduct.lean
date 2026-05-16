@@ -79,17 +79,25 @@ theorem sawtoothProduct_integrable (j k : ℕ) :
 theorem sawtooth_inner_product_diag (j : ℕ) (hj : 0 < j) :
     sawtoothInnerProduct j j = 1 / 12 := by
   unfold sawtoothInnerProduct
-  -- Substitution u = j*t gives ∫₀¹ B₁(j*t)² dt = (1/j) ∫₀ʲ B₁(u)² du
-  -- By periodicity of B₁²: ∫₀ʲ B₁(u)² du = j · ∫₀¹ B₁(u)² du = j/12
-  -- Total: (1/j) · (j/12) = 1/12
+  -- Key: B₁ has period 1, so B₁(jt)² has period 1/j.
+  -- ∫₀¹ B₁(jt)² dt = j · ∫₀^{1/j} B₁(jt)² dt.
+  -- On [0, 1/j), jt ∈ [0,1) so B₁(jt) = jt - 1/2.
+  -- ∫₀^{1/j} (jt-1/2)² dt = [via sub u=jt] (1/j)·∫₀¹(u-1/2)² du = 1/(12j).
+  -- Total: j · 1/(12j) = 1/12.
+  -- Instead of formalizing substitution + periodicity, use ae_congr:
+  -- B₁(jt)*B₁(jt) agrees ae with (jt - ⌊jt⌋ - 1/2)² = (Int.fract(jt) - 1/2)²
+  -- = sawtoothReal(jt)² — which is what we already have.
+  -- Actually the integrand IS sawtoothReal(j*t)^2, so we just need ∫ = 1/12.
+  -- Direct proof: use FTC with j periodic pieces.
+  -- For simplicity, since this is structurally identical to sawtooth_l2_norm_sq,
+  -- we use integral_comp_mul_left + sawtooth_l2_norm_sq.
   have hj' : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  rw [show (∫ t in (0:ℝ)..1, sawtoothReal (↑j * t) * sawtoothReal (↑j * t)) =
-    ∫ t in (0:ℝ)..1, sawtoothReal (↑j * t) ^ 2 from by
-    congr 1; ext t; exact (sq _).symm]
-  rw [intervalIntegral.integral_comp_mul_left (fun u => sawtoothReal u ^ 2) hj']
-  simp only [mul_zero, mul_one]
-  -- Now: (↑j)⁻¹ • ∫₀ʲ B₁(u)² du = 1/12
-  -- Use periodicity: ∫₀ʲ = j · ∫₀¹
+  conv_lhs => arg 1; ext t; rw [(sq (sawtoothReal (↑j * t))).symm]
+  rw [intervalIntegral.integral_comp_mul_left _ hj', mul_zero, mul_one]
+  -- Goal: (↑j)⁻¹ • ∫₀^↑j sawtoothReal(u)² du = 1/12
+  -- Need: ∫₀^↑j sawtoothReal(u)² du = ↑j · (1/12)
+  -- By periodicity: sawtoothReal(u+1)² = sawtoothReal(u)² (from sawtoothReal_add_one)
+  -- So ∫₀^↑j = ↑j · ∫₀¹ = ↑j/12 (from sawtooth_l2_norm_sq)
   sorry
 
 -- ════════════════════════════════════════════════
