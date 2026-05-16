@@ -418,4 +418,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GlassComparison,
     -- Smith Spectral Gap (Dark PD via Smith decomposition, triangular injectivity)
     `Cathedral.Physics.SmithSpectralGap,
+    -- Glass Distance (d² = 4/(4+σ) via Sherman-Morrison, Exploration 39)
+    `Cathedral.Physics.GlassDistance,
   ]
