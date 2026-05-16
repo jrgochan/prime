@@ -184,7 +184,76 @@ private theorem sawtooth_scaled_integrable (m : ℕ) :
 theorem sawtooth_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
     sawtoothInnerProduct j k =
     (Nat.gcd j k : ℝ) ^ 2 / (12 * (j : ℝ) * (k : ℝ)) := by
-  sorry -- Main proof: GCD reduction + coprime piecewise integration
+  -- Let d = gcd(j,k), j' = j/d, k' = k/d
+  set d := Nat.gcd j k with hd_def
+  have hd_pos : 0 < d := Nat.gcd_pos_of_pos_left k hj
+  have hj_div : d ∣ j := Nat.gcd_dvd_left j k
+  have hk_div : d ∣ k := Nat.gcd_dvd_right j k
+  set j' := j / d with hj'_def
+  set k' := k / d with hk'_def
+  have hj_eq : j = d * j' := by
+    rw [mul_comm]; exact (Nat.div_mul_cancel hj_div).symm
+  have hk_eq : k = d * k' := by
+    rw [mul_comm]; exact (Nat.div_mul_cancel hk_div).symm
+  have hj'_pos : 0 < j' := Nat.div_pos (Nat.le_of_dvd hj hj_div) hd_pos
+  have hk'_pos : 0 < k' := Nat.div_pos (Nat.le_of_dvd hk hk_div) hd_pos
+  have hcop : Nat.Coprime j' k' := Nat.coprime_div_gcd_div_gcd hd_pos
+  -- Step 1: GCD reduction
+  -- sawtoothInnerProduct (d*j') (d*k') = sawtoothInnerProduct j' k'
+  -- by substitution u = d*t and periodicity
+  unfold sawtoothInnerProduct
+  -- Rewrite j, k in terms of d, j', k' and reorganize for substitution
+  simp_rw [show (↑j : ℝ) = ↑d * ↑j' by push_cast [hj_eq]; ring,
+           show (↑k : ℝ) = ↑d * ↑k' by push_cast [hk_eq]; ring,
+           show ∀ t : ℝ, ↑d * ↑j' * t = ↑j' * (↑d * t) from fun t => by ring,
+           show ∀ t : ℝ, ↑d * ↑k' * t = ↑k' * (↑d * t) from fun t => by ring]
+  -- Now integrand is B₁(j'·(d·t)) · B₁(k'·(d·t))
+  -- Substitution u = d*t: ∫₀¹ g(d·t) dt = d⁻¹ · ∫₀^d g(u) du
+  have hd_ne : (d : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  -- Define g to prevent beta reduction
+  have hsub := intervalIntegral.integral_comp_mul_left
+    (fun u => sawtoothReal (↑j' * u) * sawtoothReal (↑k' * u)) hd_ne (a := 0) (b := 1)
+  simp only [mul_zero, mul_one] at hsub
+  rw [hsub]
+  -- Periodicity: ∫₀^d = d · ∫₀¹ (product has period 1)
+  have hper : Function.Periodic
+      (fun u => sawtoothReal (↑j' * u) * sawtoothReal (↑k' * u)) 1 := fun u => by
+    show sawtoothReal (↑j' * (u + 1)) * sawtoothReal (↑k' * (u + 1)) =
+         sawtoothReal (↑j' * u) * sawtoothReal (↑k' * u)
+    simp only [mul_add, mul_one]
+    have hsaw_per : Function.Periodic sawtoothReal 1 := sawtoothReal_add_one
+    congr 1
+    · -- sawtoothReal(j'*u + j') = sawtoothReal(j'*u)
+      -- = sawtoothReal(j'*u + j'*1) by nat_mul
+      have h := (hsaw_per.nat_mul j') (↑j' * u)
+      simp only [mul_one] at h; exact h
+    · have h := (hsaw_per.nat_mul k') (↑k' * u)
+      simp only [mul_one] at h; exact h
+  have hint := sawtoothProduct_integrable j' k'
+  have hint_all : ∀ t₁ t₂, IntervalIntegrable
+      (fun u => sawtoothReal (↑j' * u) * sawtoothReal (↑k' * u)) volume t₁ t₂ :=
+    hper.intervalIntegrable₀ one_ne_zero hint
+  rw [show (↑d : ℝ) = 0 + (↑d : ℤ) • (1 : ℝ) from by simp]
+  rw [hper.intervalIntegral_add_zsmul_eq _ 0 hint_all]
+  simp only [zero_add, smul_eq_mul, zsmul_eq_mul, Int.cast_natCast]
+  -- Now: d⁻¹ • (d * ∫₀¹ B₁(j'u)·B₁(k'u) du) = gcd²/(12jk)
+  -- = ∫₀¹ B₁(j'u)·B₁(k'u) du (d cancels)
+  -- Step 2: Coprime formula (the core identity)
+  -- For coprime j', k': ∫₀¹ B₁(j't)·B₁(k't) dt = 1/(12·j'·k')
+  suffices h_cop : ∫ t in (0:ℝ)..1, sawtoothReal (↑j' * t) * sawtoothReal (↑k' * t) =
+      1 / (12 * ↑j' * ↑k') by
+    rw [h_cop]
+    -- Goal is now: (↑d*1)⁻¹ * (↑d * (1/(12*↑j'*↑k'))) = (↑d*1)²/(12*(↑d*1*↑j')*(↑d*1*↑k'))
+    have hj'_ne : (j' : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    have hk'_ne : (k' : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    field_simp
+  -- Coprime inner product: ∫₀¹ B₁(j't)·B₁(k't) dt = 1/(12j'k')
+  -- This follows from the Fourier expansion:
+  -- ĉₙ(B₁∘j') = -1/(2πi·n/j') when j'|n, else 0
+  -- Cross-Parseval: ∫ (B₁∘j')·(B₁∘k') = Σ ĉₙ(B₁∘j')·conj(ĉₙ(B₁∘k'))
+  -- For coprime j',k': n must be divisible by lcm(j',k')=j'k'
+  -- Each term contributes 1/(4π²(n/(j'k'))²·j'k'), sum = 1/(4π²j'k')·ζ(2) = 1/(12j'k')
+  sorry
 
 -- ════════════════════════════════════════════════
 -- §5. COROLLARIES FOR STRATEGY C
