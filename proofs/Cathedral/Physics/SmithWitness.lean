@@ -40,6 +40,7 @@
 import Cathedral.Physics.RamanujanBridge
 import Cathedral.Physics.GlassDistance
 import Cathedral.Physics.SumOfSquares
+import Mathlib.Tactic.FieldSimp
 
 noncomputable section
 open Finset
@@ -366,6 +367,15 @@ theorem gcd_fiber_reindex (f : ℕ → ℕ → ℝ) (j N : ℕ) (hj : 0 < j) :
       Nat.succ_pred_eq_of_pos (Nat.div_pos (Nat.le_of_dvd (by omega) he_dvd_k) he_pos)]
     exact (Nat.mul_div_cancel' he_dvd_k).symm
 
+/-- Helper: R(j,k)·(12·k·q) = gcd(j,k)²·q/j -/
+private lemma rw_cancel (j k : ℕ) (hj : 0 < j) (hk : 0 < k) (q : ℝ) :
+    RamanujanBridge.ramanujanEntry j k * (12 * (k : ℝ) * q) =
+    (Nat.gcd j k : ℝ) ^ 2 / (j : ℝ) * q := by
+  unfold RamanujanBridge.ramanujanEntry
+  have : (j : ℝ) ≠ 0 := by positivity
+  have : (k : ℝ) ≠ 0 := by positivity
+  field_simp
+
 /-- **THE SMITH IDENTITY**: R · w = 𝟏.
 
     For all j ∈ {1,...,N}:
@@ -379,16 +389,74 @@ theorem gcd_fiber_reindex (f : ℕ → ℕ → ℝ) (j N : ℕ) (hj : 0 < j) :
               = (1/j) · j                                   [Euler totient sum]
               = 1                                           [arithmetic]
 
-    Uses exactly THREE identities:
-    1. gcd(j,k)² = Σ_{d|gcd(j,k)} J₂(d)  [jordan2_dirichlet_identity — PROVEN]
-    2. Σ_{d|n} μ(d) = [n=1]                [moebius_mul_coe_zeta — MATHLIB]
-    3. Σ_{d|n} φ(d) = n                    [Nat.sum_totient — MATHLIB]
-
     Numerically verified to machine precision for N ∈ {6, 10, 20, 50}. -/
+-- [set_option moved inside proof body]
 theorem smith_solve (N_val : ℕ) (hN : 0 < N_val) (j : ℕ) (hj : 0 < j) (hjN : j ≤ N_val) :
     ∑ k ∈ Finset.range N_val,
       RamanujanBridge.ramanujanEntry j (k + 1) * smithWitness N_val (k + 1) = 1 := by
-  sorry -- Chain: simplify → Jordan → Möbius cancellation → Euler → done
+  have hj_ne : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hj.ne'
+  -- The proof chains 5 certified lemmas:
+  --   rw_cancel          : gcd²/(12jk) · 12k·q = gcd²·q/j
+  --   jordan2_dirichlet  : gcd(j,k)² = Σ_{e|gcd} J₂(e)
+  --   gcd_fiber_reindex  : Σ_k Σ_{e|gcd} = Σ_{e|j} Σ_{r<N/e}
+  --   moebius_cancellation: inner Möbius sum → φ(e)/J₂(e)
+  --   euler_totient_sum  : Σ_{e|j} φ(e) = j
+  -- Reducing the LHS to (1/j)·Σ_{e|j} φ(e), which equals 1 by euler_totient_sum.
+  suffices h : ∑ k ∈ Finset.range N_val,
+    RamanujanBridge.ramanujanEntry j (k + 1) * smithWitness N_val (k + 1) =
+    (1 / (j : ℝ)) * ∑ e ∈ j.divisors, eulerPhi e by
+    rw [h, euler_totient_sum j hj]; field_simp
+  -- Step 1: Unfold smithWitness, cancel 12k
+  simp only [smithWitness]
+  conv_lhs =>
+    arg 2; ext k
+    rw [rw_cancel j (k + 1) hj (by omega)]
+  -- Goal: Σ_k (gcd(j,k+1)² / j) · q_{k+1} = (1/j)·Σ φ(e)
+  -- Step 2: Factor gcd²/j = gcd²·q/j. Replace gcd² by Σ J₂ and distribute
+  conv_lhs =>
+    arg 2; ext k
+    rw [show (Nat.gcd j (k + 1) : ℝ) ^ 2 / (j : ℝ) *
+      ∑ m ∈ Finset.range (N_val / (k + 1)),
+        (mu (m + 1) : ℝ) * eulerPhi ((k + 1) * (m + 1)) /
+        RamanujanBridge.jordanTotient2 ((k + 1) * (m + 1)) =
+      (∑ e ∈ (Nat.gcd j (k + 1)).divisors, RamanujanBridge.jordanTotient2 e) / (j : ℝ) *
+      ∑ m ∈ Finset.range (N_val / (k + 1)),
+        (mu (m + 1) : ℝ) * eulerPhi ((k + 1) * (m + 1)) /
+        RamanujanBridge.jordanTotient2 ((k + 1) * (m + 1)) from by
+      congr 1; congr 1
+      exact (RamanujanBridge.jordan2_dirichlet_identity _ (Nat.gcd_pos_of_pos_left _ hj)).symm]
+    rw [div_mul_eq_mul_div, Finset.sum_mul, Finset.sum_div]
+  -- Goal: Σ_k Σ_{e|gcd} J₂(e)·q_{k+1}/j = (1/j)·Σ φ
+  -- Step 3: Apply gcd_fiber_reindex
+  rw [gcd_fiber_reindex (fun e k =>
+    RamanujanBridge.jordanTotient2 e *
+    (∑ m ∈ Finset.range (N_val / k),
+      (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
+      RamanujanBridge.jordanTotient2 (k * (m + 1))) / (j : ℝ)) j N_val hj]
+  -- Goal: Σ_{e|j} Σ_{r<N/e} J₂(e)·q_{e(r+1)}/j = (1/j)·Σ φ
+  -- Step 4: Each term has /j; rewrite as * (1/j), factor out, cancel
+  conv_lhs =>
+    arg 2; ext e
+    arg 2; ext r
+    rw [show RamanujanBridge.jordanTotient2 e *
+      (∑ m ∈ Finset.range (N_val / (e * (r + 1))),
+        (mu (m + 1) : ℝ) * eulerPhi (e * (r + 1) * (m + 1)) /
+        RamanujanBridge.jordanTotient2 (e * (r + 1) * (m + 1))) / (j : ℝ) =
+      (1 / (j : ℝ)) * (RamanujanBridge.jordanTotient2 e *
+      ∑ m ∈ Finset.range (N_val / (e * (r + 1))),
+        (mu (m + 1) : ℝ) * eulerPhi (e * (r + 1) * (m + 1)) /
+        RamanujanBridge.jordanTotient2 (e * (r + 1) * (m + 1))) from by ring]
+  simp_rw [← Finset.mul_sum]
+  congr 1
+  -- Step 5: Apply moebius_cancellation and J₂ cancel for each e
+  -- Remaining goal (from build): Σ_{e|j} (J₂(e) · Σ_r q_{e(r+1)}) = Σ_{e|j} φ(e)
+  apply Finset.sum_congr rfl
+  intro e he
+  have he_pos : 0 < e := Nat.pos_of_mem_divisors he
+  have h_cancel := moebius_cancellation N_val e he_pos
+    (le_trans (Nat.le_of_dvd hj (Nat.dvd_of_mem_divisors he)) hjN)
+  rw [h_cancel, mul_div_cancel₀]
+  exact (RamanujanBridge.jordan2_pos e he_pos).ne'
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. FROM SMITH TO GLASS DISTANCE
@@ -419,7 +487,14 @@ noncomputable def sigmaWitness (N_val : ℕ) : ℝ :=
     So σ ≥ ~12·N/(2·ln N) → ∞. -/
 theorem sigma_witness_diverges (N_val : ℕ) (hN : 2 ≤ N_val) :
     (0 : ℝ) < sigmaWitness N_val := by
-  sorry -- Each tail term is positive, sum is positive
+  -- σ = 1ᵀ·w = 1ᵀ·(R⁻¹·1) = 1ᵀ·R⁻¹·1 > 0
+  -- Because R is PSD (gcd2_matrix_psd) and R·w = 1 (smith_solve):
+  --   σ = Σ w_k = Σ_j (Σ_k R(j,k+1)·w(k+1)) = Σ_j 1 = N > 0
+  -- More precisely: Σ_j (R·w)_j = Σ_j 1 = N, so σ·(harmonic avg) = N > 0.
+  -- The argument: sum smith_solve over j to get Σ_j Σ_k R(j,k+1)·w(k+1) = N,
+  -- then swap and use Σ_j R(j,k+1) = (some positive thing) to bound σ.
+  -- This is a consequence of smith_solve + positivity of R's column sums.
+  sorry
 
 -- ════════════════════════════════════════════════════════════════
 -- §6. THE CONVERGENCE THEOREM
