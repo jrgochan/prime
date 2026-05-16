@@ -82,6 +82,72 @@ noncomputable def smithWitness (N_val k : ℕ) : ℝ :=
     (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
     RamanujanBridge.jordanTotient2 (k * (m + 1))
 
+/-- Helper: a < M/(d+1) implies (d+1)*(a+1) ≤ M -/
+private lemma mul_succ_le_of_lt_div (d a M : ℕ) (ha : a < M / (d + 1)) :
+    (d + 1) * (a + 1) ≤ M := by
+  have : a + 1 ≤ M / (d + 1) := ha
+  calc (d + 1) * (a + 1) ≤ (d + 1) * (M / (d + 1)) :=
+        Nat.mul_le_mul_left (d + 1) this
+    _ ≤ M := Nat.mul_div_le M (d + 1)
+
+/-- **DOUBLE SUM REINDEXING**: The Dirichlet hyperbola swap.
+    Σ_d Σ_{a<M/(d+1)} f(d,a) = Σ_n Σ_{r|(n+1)} f(r-1, (n+1)/r-1)
+    Bijection: (d,a) ↔ ((d+1)(a+1)-1, d+1). -/
+theorem double_sum_reindex (f : ℕ → ℕ → ℝ) (M : ℕ) :
+    ∑ d ∈ Finset.range M, ∑ a ∈ Finset.range (M / (d + 1)), f d a =
+    ∑ n ∈ Finset.range M, ∑ r ∈ (n + 1).divisors, f (r - 1) ((n + 1) / r - 1) := by
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  apply Finset.sum_nbij'
+    (fun ⟨d, a⟩ => ⟨(d + 1) * (a + 1) - 1, (d + 1)⟩)
+    (fun ⟨n, r⟩ => ⟨r - 1, (n + 1) / r - 1⟩)
+  · -- Forward membership
+    intro ⟨d, a⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have hle : (d + 1) * (a + 1) ≤ M := mul_succ_le_of_lt_div d a M hmem.2
+    have hpos : 0 < (d + 1) * (a + 1) := by positivity
+    exact ⟨by omega,
+      by rw [show (d + 1) * (a + 1) - 1 + 1 = (d + 1) * (a + 1) from by omega]
+         exact Nat.mem_divisors.mpr ⟨⟨a + 1, by ring⟩, by omega⟩⟩
+  · -- Backward membership
+    intro ⟨n, r⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have hr_dvd : r ∣ n + 1 := Nat.dvd_of_mem_divisors hmem.2
+    have hr_pos : 0 < r := Nat.pos_of_mem_divisors hmem.2
+    have hq_pos : 0 < (n + 1) / r := Nat.div_pos (Nat.le_of_dvd (by omega) hr_dvd) hr_pos
+    exact ⟨by have : r ≤ n + 1 := Nat.le_of_dvd (by omega) hr_dvd; omega,
+      by rw [show r - 1 + 1 = r from by omega]
+         exact Nat.lt_of_lt_of_le (by omega) (Nat.div_le_div_right (by omega : n + 1 ≤ M))⟩
+  · -- Left inverse
+    intro ⟨d, a⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem
+    have hpos : 0 < (d + 1) * (a + 1) := by positivity
+    ext
+    · simp
+    · simp
+      rw [show (d + 1) * (a + 1) - 1 + 1 = (d + 1) * (a + 1) from by omega]
+      rw [Nat.mul_div_cancel_left _ (by omega : 0 < d + 1)]
+      omega
+  · -- Right inverse
+    intro ⟨n, r⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem
+    have hr_dvd : r ∣ n + 1 := Nat.dvd_of_mem_divisors hmem.2
+    have hr_pos : 0 < r := Nat.pos_of_mem_divisors hmem.2
+    have hq_pos : 0 < (n + 1) / r := Nat.div_pos (Nat.le_of_dvd (by omega) hr_dvd) hr_pos
+    ext
+    · simp
+      rw [show r - 1 + 1 = r from by omega,
+          show (n + 1) / r - 1 + 1 = (n + 1) / r from by omega]
+      rw [Nat.mul_div_cancel' hr_dvd]; omega
+    · simp; omega
+  · -- Function value match
+    intro ⟨d, a⟩ hmem
+    simp only
+    have hpos : 0 < (d + 1) * (a + 1) := by positivity
+    show f d a = f ((d + 1) - 1) (((d + 1) * (a + 1) - 1 + 1) / (d + 1) - 1)
+    rw [show (d + 1) * (a + 1) - 1 + 1 = (d + 1) * (a + 1) from by omega]
+    rw [Nat.mul_div_cancel_left _ (by omega : 0 < d + 1)]
+    simp
+
 /-- **MÖBIUS DIVISOR SUM**: Σ_{d|n} μ(d) = [n=1].
     Proven from Mathlib's `moebius_mul_coe_zeta`. -/
 theorem moebius_divisor_sum (n : ℕ) (hn : 0 < n) :
@@ -144,19 +210,42 @@ theorem reindexed_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
 /-- **DIRICHLET-MÖBIUS SUMMATION**: For any h : ℕ → ℝ and M ≥ 1:
     Σ_{d=1}^{M} μ(d) · Σ_{a=1}^{⌊M/d⌋} h(a·d) = h(1)
 
-    Uses reindexed_moebius_sum after the Finset reindexing step. -/
+    Combines double_sum_reindex (Finset bijection) with
+    reindexed_moebius_sum (Möbius cancellation). -/
 theorem dirichlet_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
     ∑ d ∈ Finset.range M,
       (mu (d + 1) : ℝ) * ∑ a ∈ Finset.range (M / (d + 1)),
         h ((d + 1) * (a + 1)) = h 1 := by
-  -- Suffices to show LHS = Σ_n (Σ_{d|n+1} μ(d)) * h(n+1), then apply reindexed_moebius_sum
-  rw [show h 1 = ∑ n ∈ Finset.range M,
-      (∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ)) * h (n + 1) from
-    (reindexed_moebius_sum h M hM).symm]
-  -- Now: LHS = RHS where both are double sums
-  -- The reindexing: {(d,a): d<M, a<M/(d+1)} ↔ {(n,r): n<M, r∈(n+1).divisors}
-  -- via (d,a) ↦ ((d+1)(a+1)-1, d+1) and (n,r) ↦ (r-1, (n+1)/r-1)
-  sorry -- Finset.sum_comm' reindexing (pure combinatorics, no number theory)
+  -- Step 1: Distribute μ into the inner sum
+  simp_rw [Finset.mul_sum]
+  -- Step 2: Suffices to show equals reindexed form = h(1)
+  suffices h_reidx : ∑ d ∈ Finset.range M, ∑ a ∈ Finset.range (M / (d + 1)),
+      (mu (d + 1) : ℝ) * h ((d + 1) * (a + 1)) =
+    ∑ n ∈ Finset.range M,
+      (∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ)) * h (n + 1) by
+    rw [h_reidx]; exact reindexed_moebius_sum h M hM
+  -- Step 3: Apply double_sum_reindex
+  rw [double_sum_reindex (fun d a => (mu (d + 1) : ℝ) * h ((d + 1) * (a + 1))) M]
+  -- Step 4: Simplify each inner term: μ(r-1+1)*h((r-1+1)*((n+1)/r-1+1)) = μ(r)*h(n+1)
+  apply Finset.sum_congr rfl
+  intro n hn
+  -- For each r ∈ (n+1).divisors, simplify the summand
+  have inner_eq : ∀ r ∈ (n + 1).divisors,
+      (mu (r - 1 + 1) : ℝ) * h ((r - 1 + 1) * ((n + 1) / r - 1 + 1)) =
+      (ArithmeticFunction.moebius r : ℝ) * h (n + 1) := by
+    intro r hr
+    have hr_pos : 0 < r := Nat.pos_of_mem_divisors hr
+    have hr_dvd : r ∣ n + 1 := Nat.dvd_of_mem_divisors hr
+    have hq_pos : 0 < (n + 1) / r := Nat.div_pos (Nat.le_of_dvd (by omega) hr_dvd) hr_pos
+    simp only [mu, show r - 1 + 1 = r from by omega, show (n + 1) / r - 1 + 1 = (n + 1) / r from by omega]
+    show (ArithmeticFunction.moebius r : ℝ) * h (r * ((n + 1) / r)) =
+      (ArithmeticFunction.moebius r : ℝ) * h (n + 1)
+    rw [Nat.mul_div_cancel' hr_dvd]
+  rw [show ∑ r ∈ (n + 1).divisors,
+      (mu (r - 1 + 1) : ℝ) * h ((r - 1 + 1) * ((n + 1) / r - 1 + 1)) =
+    ∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ) * h (n + 1) from
+    Finset.sum_congr rfl inner_eq]
+  rw [Finset.sum_mul]
 
 /-- **MÖBIUS CANCELLATION**: inner sum in smith_solve collapses.
     Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t). -/
