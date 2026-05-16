@@ -167,6 +167,20 @@ private theorem sawtooth_scaled_integrable (m : ℕ) :
 -- §4. THE RAMANUJAN FORMULA (Main Theorem)
 -- ════════════════════════════════════════════════
 
+/-- **Coprime Ramanujan inner product**: For coprime j, k ≥ 1,
+    ∫₀¹ B₁(jt)·B₁(kt) dt = 1/(12jk).
+
+    This is the irreducible kernel of the Ramanujan formula.
+    **Proof path**: Fourier cross-Parseval. The scaled Fourier coefficients
+    of B₁∘j are supported on multiples of j. For coprime j,k,
+    the only common support is at multiples of lcm(j,k) = jk.
+    The resulting sum is (1/jk)·Σₘ₌₁^∞ 1/(4π²m²) = 1/(12jk). -/
+theorem sawtooth_coprime_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k)
+    (hcop : Nat.Coprime j k) :
+    ∫ t in (0:ℝ)..1, sawtoothReal (↑j * t) * sawtoothReal (↑k * t) =
+    1 / (12 * (j : ℝ) * (k : ℝ)) := by
+  sorry
+
 /-- **THEOREM (Ramanujan B₁ Inner Product Formula)**:
 
     For j, k ≥ 1:
@@ -247,13 +261,7 @@ theorem sawtooth_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
     have hj'_ne : (j' : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     have hk'_ne : (k' : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
     field_simp
-  -- Coprime inner product: ∫₀¹ B₁(j't)·B₁(k't) dt = 1/(12j'k')
-  -- This follows from the Fourier expansion:
-  -- ĉₙ(B₁∘j') = -1/(2πi·n/j') when j'|n, else 0
-  -- Cross-Parseval: ∫ (B₁∘j')·(B₁∘k') = Σ ĉₙ(B₁∘j')·conj(ĉₙ(B₁∘k'))
-  -- For coprime j',k': n must be divisible by lcm(j',k')=j'k'
-  -- Each term contributes 1/(4π²(n/(j'k'))²·j'k'), sum = 1/(4π²j'k')·ζ(2) = 1/(12j'k')
-  sorry
+  exact sawtooth_coprime_inner_product j' k' hj'_pos hk'_pos hcop
 
 -- ════════════════════════════════════════════════
 -- §5. COROLLARIES FOR STRATEGY C
@@ -337,24 +345,26 @@ theorem fract_squared_integral (j : ℕ) (hj : 0 < j) :
 /-!
 ## Audit
 
-### Status: IN PROGRESS (3 sorry — working toward full proof)
+### Status: 1 sorry remaining — coprime inner product kernel
 
 | Theorem | Status |
 |---------|--------|
 | `sawtoothProduct_integrable` | ✅ PROVED |
-| `sawtooth_inner_product_diag` | 🔨 sorry (diagonal case) |
-| `sawtooth_inner_product` | 🔨 sorry (main Ramanujan formula) |
-| `fract_inner_product` | 🔨 sorry (corollary) |
-| `fract_squared_integral` | 🔨 sorry (corollary) |
+| `sawtooth_inner_product_diag` | ✅ PROVED (substitution + periodicity + L² norm) |
+| `sawtooth_mean_zero_base` | ✅ PROVED (ae-congr + FTC) |
+| `sawtooth_mean_zero` | ✅ PROVED (substitution + periodicity + base case) |
+| `sawtooth_coprime_inner_product` | 🔨 sorry (coprime case — Fourier cross-Parseval) |
+| `sawtooth_inner_product` | ✅ PROVED (modulo coprime case — GCD reduction) |
+| `fract_inner_product` | ✅ PROVED (modulo coprime case — B₁ decomposition) |
+| `fract_squared_integral` | ✅ PROVED (no sorry dependency) |
 
 ### Architecture:
   sawtooth_inner_product (MAIN — Ramanujan B₁ formula)
-    ↓ GCD reduction
-    coprime_sawtooth_inner_product (coprime case)
-    ↓ piecewise FTC on j'k' sub-intervals
-    ↓ periodicity + summation
-  fract_inner_product (corollary via B₁ decomposition)
-  fract_squared_integral (corollary: ∫{jt}² = 1/3)
+    ↓ GCD reduction (d = gcd(j,k), substitution u=dt, periodicity)
+    sawtooth_coprime_inner_product (coprime kernel — sole sorry)
+    ↓ Fourier cross-Parseval (planned proof path)
+  fract_inner_product (corollary via B₁ decomposition + mean-zero)
+  fract_squared_integral (corollary: ∫{jt}² = 1/3, independent of sorry)
 -/
 
 end Cathedral.RamanujanInnerProduct
