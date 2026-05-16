@@ -91,23 +91,31 @@ theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
   push_cast
   exact_mod_cast Nat.sum_totient n
 
-/-- **MÖBIUS CANCELLATION**: The Dirichlet hyperbola reindexing.
+/-- **DIRICHLET-MÖBIUS SUMMATION**: For any h : ℕ → ℝ and M ≥ 1:
+    Σ_{d=1}^{M} μ(d) · Σ_{a=1}^{⌊M/d⌋} h(a·d) = h(1)
+    Proof: swap sums via Finset.sum_comm', then Σ_{d|n} μ(d) = [n=1]. -/
+theorem dirichlet_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
+    ∑ d ∈ Finset.range M,
+      (mu (d + 1) : ℝ) * ∑ a ∈ Finset.range (M / (d + 1)),
+        h ((d + 1) * (a + 1)) = h 1 := by
+  -- Step 1: Distribute μ into the inner sum
+  simp_rw [Finset.mul_sum]
+  -- Step 2: The set of pairs {(d,a) : (d+1)(a+1) ≤ M} bijects to
+  --         {(n,d) : d+1 | n+1, n < M} via n = (d+1)(a+1)-1
+  -- For now, we use the direct Möbius cancellation approach
+  sorry
 
-    For any e with 1 ≤ e ≤ N:
-    Σ_{k: e|k, k≤N} q_k = φ(e)/J₂(e)
-
-    where q_k = Σ_{m≤N/k} μ(m)·φ(km)/J₂(km).
-
-    Proof: Set k = er, expand q_k, reindex (r,m) → t = rm.
-    Then Σ_{s|t} μ(s) = [t=1] kills all terms except t=1,
-    leaving φ(e·1)/J₂(e·1) = φ(e)/J₂(e). -/
+/-- **MÖBIUS CANCELLATION**: inner sum in smith_solve collapses.
+    Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t). -/
 theorem moebius_cancellation (N_val e : ℕ) (he : 0 < e) (heN : e ≤ N_val) :
     ∑ r ∈ Finset.range (N_val / e),
       (∑ m ∈ Finset.range (N_val / (e * (r + 1))),
         (mu (m + 1) : ℝ) * eulerPhi (e * (r + 1) * (m + 1)) /
         RamanujanBridge.jordanTotient2 (e * (r + 1) * (m + 1))) =
     eulerPhi e / RamanujanBridge.jordanTotient2 e := by
-  sorry -- Dirichlet hyperbola: reindex (r,m) → t = (r+1)(m+1), apply Σ μ = [n=1]
+  -- Apply dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t), M = N/e
+  have hM : 0 < N_val / e := Nat.div_pos heN he
+  sorry -- Factor μ out, apply dirichlet_moebius_sum, simplify
 
 /-- **THE SMITH IDENTITY**: R · w = 𝟏.
 
