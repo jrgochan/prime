@@ -99,6 +99,8 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.FiniteDimReduction,
     -- Fourier–Gram Bridge (Exploration 31, ZERO SORRY)
     `Cathedral.Spectral.FourierGram,
+    -- Ramanujan B₁ Inner Product (∫B₁({jt})·B₁({kt}) = gcd²/(12jk), ZERO SORRY)
+    `Cathedral.Spectral.RamanujanInnerProduct,
     `Cathedral.Spectral.BilinearSieve,
     -- Spectral exploration (Exploration 19, NOT on crown path)
     `Cathedral.Spectral.ResidueDecomposition,

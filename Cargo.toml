@@ -83,6 +83,7 @@ members = [
     "experiments/archive/spectral/parity-schur",
     "experiments/archive/spectral/rank1-interference",
     "experiments/archive/spectral/spectral-fourier", "experiments/s-duality-mirror", "experiments/s-duality-bridge",
+    "experiments/glass-bridge",
     "experiments/arithmetic-spectrometer",
 ]
 
@@ -164,6 +165,7 @@ default-members = [
     "experiments/archive/spectral/spectral-fourier",
     "experiments/s-duality-mirror",
     "experiments/s-duality-bridge",
+    "experiments/glass-bridge",
     "experiments/arithmetic-spectrometer",
 ]
 
