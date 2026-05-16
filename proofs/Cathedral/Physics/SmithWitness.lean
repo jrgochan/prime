@@ -487,13 +487,36 @@ noncomputable def sigmaWitness (N_val : ℕ) : ℝ :=
     So σ ≥ ~12·N/(2·ln N) → ∞. -/
 theorem sigma_witness_diverges (N_val : ℕ) (hN : 2 ≤ N_val) :
     (0 : ℝ) < sigmaWitness N_val := by
-  -- σ = 1ᵀ·w = 1ᵀ·(R⁻¹·1) = 1ᵀ·R⁻¹·1 > 0
-  -- Because R is PSD (gcd2_matrix_psd) and R·w = 1 (smith_solve):
-  --   σ = Σ w_k = Σ_j (Σ_k R(j,k+1)·w(k+1)) = Σ_j 1 = N > 0
-  -- More precisely: Σ_j (R·w)_j = Σ_j 1 = N, so σ·(harmonic avg) = N > 0.
-  -- The argument: sum smith_solve over j to get Σ_j Σ_k R(j,k+1)·w(k+1) = N,
-  -- then swap and use Σ_j R(j,k+1) = (some positive thing) to bound σ.
-  -- This is a consequence of smith_solve + positivity of R's column sums.
+  -- σ = 1ᵀ·w. From smith_solve: (R·w)_j = 1 for all j.
+  -- Sum over j: Σ_j (R·w)_j = N.
+  -- Swap: Σ_k w_k · (Σ_j R_{jk}) = N > 0.
+  -- Key: each column sum Σ_j R_{jk} > 0, so the positive w's dominate.
+  --
+  -- But the formal argument requires that all column sums are EQUAL
+  -- (i.e., R is doubly stochastic up to a constant), which isn't true.
+  --
+  -- Alternative direct argument:
+  -- Σ_j (R·w)_j = Σ_j 1 = N (sum smith_solve over j)
+  -- = Σ_j Σ_k R(j,k+1)·w(k+1)
+  -- = Σ_k w(k+1)·(Σ_j R(j,k+1))
+  -- For k=0: Σ_j R(j,1) = Σ_j 1/(12j) = H_N/12 > 0
+  -- So: w(1)·H_N/12 + Σ_{k≥1} w(k+1)·c_k = N
+  --
+  -- Since R is PSD, σ = wᵀ·1 = wᵀ·(R·w) = wᵀ·R·w ≥ 0
+  -- Equality σ = 0 would require w = 0 (by PSD strict on nonzero),
+  -- but R·w = 1 ≠ 0, contradiction.
+  -- Hence σ > 0.
+  --
+  -- Formal PSD argument:
+  -- gcd2_matrix_psd gives: Σ_i Σ_j gcd(i+1,j+1)²·x_i·x_j ≥ 0
+  -- Instantiate x_i = w(i+1): Σ_i Σ_j gcd²·w_i·w_j ≥ 0
+  -- = 12·Σ_j j·(Σ_i R(i+1,j+1)·w(i+1))·w(j+1)
+  -- = 12·Σ_j j·1·w(j+1) = 12·Σ_j j·w(j+1)
+  -- This gives Σ j·w(j) ≥ 0, not Σ w(j) ≥ 0.
+  --
+  -- The PSD argument gives a weighted positivity, not the unweighted one.
+  -- For the unweighted σ > 0, we need the Schur complement argument
+  -- or a direct computation.
   sorry
 
 -- ════════════════════════════════════════════════════════════════
