@@ -111,13 +111,8 @@ noncomputable def gcdDivisorSum (n k : ℕ) : ℝ :=
     We document it here for the structural connection. -/
 theorem gcd_divisor_sum_eq_gcd4 (n k : ℕ) (hn : 0 < n) (_hk : 0 < k) :
     gcdDivisorSum n k = (Nat.gcd n k : ℝ) ^ 4 := by
-  unfold gcdDivisorSum jordanTotient4
-  -- The Dirichlet series identity Σ_{d|m} J₄(d) = m⁴ is a standard
-  -- multiplicative function identity. It follows from multiplicativity
-  -- of J₄ and the geometric sum at prime powers.
-  -- The proof is formalized inside DarkGramMatrix's smith_gcd_matrix_psd
-  -- chain; we state it separately here for documentation.
-  sorry
+  unfold gcdDivisorSum
+  exact jordan_dirichlet_identity (Nat.gcd n k) (Nat.gcd_pos_of_pos_left k hn)
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. HC NUMBERS HAVE MAXIMAL DIVISOR COUPLING

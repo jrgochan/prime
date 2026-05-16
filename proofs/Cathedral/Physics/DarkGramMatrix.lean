@@ -984,7 +984,7 @@ theorem dark_gram_jordan_decomposition (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
   field_simp
 
 /-- Auxiliary: for d ∈ divisors(gcd(j,k)), d divides both j and k. -/
-private theorem mem_gcd_divisors_iff {d j k : ℕ} (hj : 0 < j) (_hk : 0 < k) :
+theorem mem_gcd_divisors_iff {d j k : ℕ} (hj : 0 < j) (_hk : 0 < k) :
     d ∈ (Nat.gcd j k).divisors ↔ d ∣ j ∧ d ∣ k := by
   rw [Nat.mem_divisors]
   constructor
@@ -996,7 +996,7 @@ private theorem mem_gcd_divisors_iff {d j k : ℕ} (hj : 0 < j) (_hk : 0 < k) :
 
 /-- Auxiliary: the divisor sum of J₄ over gcd(j,k) equals a filtered sum
     over any superset, using the indicator function d|j ∧ d|k. -/
-private theorem jordan_sum_as_filter (j k : ℕ) (hj : 0 < j) (hk : 0 < k) (S : Finset ℕ)
+theorem jordan_sum_as_filter (j k : ℕ) (hj : 0 < j) (hk : 0 < k) (S : Finset ℕ)
     (hS : ∀ d ∈ (Nat.gcd j k).divisors, d ∈ S) :
     ∑ d ∈ (Nat.gcd j k).divisors, jordanTotient4 d =
       ∑ d ∈ S, if d ∣ j ∧ d ∣ k then jordanTotient4 d else 0 := by

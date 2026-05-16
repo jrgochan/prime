@@ -401,8 +401,19 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.HopfGlassCycle,
     -- Woodbury Condensate (rank-1 perturbation of Gram matrix)
     `Cathedral.Physics.WoodburyCondensate,
+    -- Critical Line Phase (1D Collapse: ξ(½+it) ∈ ℝ, Schwarz reflection, Exploration 38)
+    `Cathedral.Physics.CriticalLinePhase,
     -- Geometric Mertens Bridge (scan ↔ sign oscillation, Exploration 38)
     `Cathedral.Physics.GeometricMertens,
     -- Morphology Bridge (shape ↔ Gram eigenstructure, Exploration 38)
     `Cathedral.Physics.MorphologyBridge,
+    -- Zeta-Mertens Bridge (Z-function ↔ truncated Mertens, NB integration)
+    `Cathedral.Physics.ZetaMertensBridge,
+    -- Comparison Operator — ARCHIVED to Physics/Archive/ (superseded by SmithSpectralGap)
+    -- Ramanujan Bridge (gcd²/(12jk) matrix, Jordan J₂, PSD, Exploration 39)
+    `Cathedral.Physics.RamanujanBridge,
+    -- Glass Comparison (π⁴/3 bound, Ramanujan↔Dark transport, Exploration 39)
+    `Cathedral.Physics.GlassComparison,
+    -- Smith Spectral Gap (Dark PD via Smith decomposition, triangular injectivity)
+    `Cathedral.Physics.SmithSpectralGap,
   ]

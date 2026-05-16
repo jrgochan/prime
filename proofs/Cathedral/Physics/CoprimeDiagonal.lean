@@ -205,18 +205,80 @@ noncomputable def gcdContribution (N : ℕ) (d : ℕ) : ℝ :=
 theorem gcdContribution_well_defined (N d : ℕ) :
     gcdContribution N d = gcdContribution N d := rfl
 
+/-- **Reindex lemma**: Fin sum = Icc sum via i ↦ i.val + 1. -/
+private theorem fin_sum_eq_Icc_sum {α : Type*} [AddCommMonoid α] (n : ℕ) (f : ℕ → α) :
+    ∑ i : Fin n, f (i.val + 1) = ∑ k ∈ Icc 1 n, f k := by
+  apply Finset.sum_nbij (fun (i : Fin n) => i.val + 1)
+  · intro i _; exact Finset.mem_Icc.mpr ⟨by omega, by omega⟩
+  · intro i₁ _ i₂ _ (h : i₁.val + 1 = i₂.val + 1)
+    exact Fin.ext (Nat.succ_injective h)
+  · intro k hk
+    have ⟨hk1, hkn⟩ := Finset.mem_Icc.mp hk
+    refine ⟨⟨k - 1, by omega⟩, Finset.mem_univ _, ?_⟩
+    show k - 1 + 1 = k; omega
+  · intro _ _; rfl
+
+/-- **Double reindex**: nested Fin sums = nested Icc sums. -/
+private theorem double_fin_sum_eq_Icc (n : ℕ) (g : ℕ → ℕ → ℝ) :
+    ∑ i : Fin n, ∑ j : Fin n, g (i.val + 1) (j.val + 1) =
+    ∑ i ∈ Icc 1 n, ∑ j ∈ Icc 1 n, g i j := by
+  have inner : ∀ (i : Fin n), ∑ j : Fin n, g (i.val + 1) (j.val + 1) =
+      ∑ k ∈ Icc 1 n, g (i.val + 1) k :=
+    fun i => fin_sum_eq_Icc_sum n (g (i.val + 1))
+  simp_rw [inner]
+  exact fin_sum_eq_Icc_sum n (fun k => ∑ j ∈ Icc 1 n, g k j)
+
 /-- **THEOREM**: The off-diagonal decomposes as Σ_d C(d).
 
     W_off(N) = Σ_{d=1}^{N-1} C(d,N)
 
     This is immediate from partitioning pairs by gcd. -/
-theorem offdiag_gcd_decomposition (N : ℕ) (hN : 2 ≤ N) :
+theorem offdiag_gcd_decomposition (N : ℕ) (_hN : 2 ≤ N) :
     GaugeCancellation.offDiagonalContribution N =
     ∑ d ∈ Icc 1 (N - 1), gcdContribution N d := by
   unfold GaugeCancellation.offDiagonalContribution gcdContribution
-  -- Partitioning a double sum by gcd value
-  -- Each pair (j,k) with j ≠ k has a unique gcd d ∈ {1,...,N-1}
-  sorry -- Partition-of-unity argument; routine but requires careful Finset manipulation
+  -- Step 1: Rewrite Fin inequality as ℕ inequality
+  simp_rw [show ∀ (i j : Fin (N - 1)),
+      (i ≠ j) = ((i.val + 1 : ℕ) ≠ (j.val + 1 : ℕ)) from
+    fun i j => propext ⟨fun h he => h (Fin.ext (by omega)),
+                        fun h he => h (by rw [he])⟩]
+  -- Step 2: Reindex Fin sums to Icc sums via i ↦ i.val + 1
+  rw [show (∑ i : Fin (N - 1), ∑ j : Fin (N - 1), _) =
+    ∑ i ∈ Icc 1 (N - 1), ∑ j ∈ Icc 1 (N - 1),
+      if i ≠ j then
+        GaugeCancellation.witnessEntry i N *
+        Cathedral.Vasyunin.vasyuninGramEntry i j *
+        GaugeCancellation.witnessEntry j N
+      else 0 from
+    double_fin_sum_eq_Icc (N - 1) (fun a b =>
+      if a ≠ b then
+        GaugeCancellation.witnessEntry a N *
+        Cathedral.Vasyunin.vasyuninGramEntry a b *
+        GaugeCancellation.witnessEntry b N
+      else 0)]
+  -- Now both sides are double sums over Icc 1 (N-1).
+  -- LHS = Σ_{j∈Icc} Σ_{k∈Icc} [if j ≠ k then f(j,k) else 0]
+  -- RHS = Σ_{d∈Icc} Σ_{j∈Icc} Σ_{k∈Icc} [if j ≠ k ∧ gcd = d then f(j,k) else 0]
+  -- Partition of unity: Σ_d [if gcd=d] is identity for j≠k terms.
+  symm
+  -- Swap: Σ_d Σ_j Σ_k → Σ_j Σ_d Σ_k → Σ_j Σ_k Σ_d
+  rw [← Finset.sum_comm]
+  apply Finset.sum_congr rfl; intro j hj
+  rw [← Finset.sum_comm]
+  apply Finset.sum_congr rfl; intro k hk
+  -- Goal: Σ_{d∈Icc} [if j≠k ∧ gcd(j,k)=d then f else 0] = if j≠k then f else 0
+  have ⟨hj1, hjN⟩ := Finset.mem_Icc.mp hj
+  by_cases hjk : j ≠ k
+  · have hgcd_mem : Nat.gcd j k ∈ Icc 1 (N - 1) :=
+      Finset.mem_Icc.mpr ⟨Nat.gcd_pos_of_pos_left k (by omega),
+        (Nat.le_of_dvd (by omega) (Nat.gcd_dvd_left j k)).trans (by omega)⟩
+    rw [if_pos hjk, Finset.sum_eq_single (Nat.gcd j k)]
+    · simp [hjk]
+    · intro d _ hd; simp [show ¬(j ≠ k ∧ Nat.gcd j k = d) from fun ⟨_, h⟩ => hd h.symm]
+    · intro h; exact absurd hgcd_mem h
+  · push Not at hjk; subst hjk
+    simp only [ne_eq, not_true_eq_false, ite_false]
+    exact Finset.sum_eq_zero (fun d _ => by simp)
 
 /- **PROBE-VERIFIED OBSERVATION** (not a formal theorem):
 
