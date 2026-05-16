@@ -1,0 +1,22 @@
+[package]
+name = "ramanujan-oracle"
+version = "0.1.0"
+edition = "2024"
+description = "Ramanujan Oracle — R⁻¹ spectral analysis via Smith/Möbius inversion"
+
+[[bin]]
+name = "ramanujan-oracle"
+path = "src/main.rs"
+
+[features]
+default = []
+hpdf = ["cathedral-utils/hpdf"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+rayon = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
+serde = { version = "1", features = ["derive"] }
+
+[lints]
+workspace = true

@@ -85,6 +85,7 @@ members = [
     "experiments/archive/spectral/spectral-fourier", "experiments/s-duality-mirror", "experiments/s-duality-bridge",
     "experiments/glass-bridge",
     "experiments/arithmetic-spectrometer",
+    "experiments/ramanujan-oracle",
 ]
 
 # ═══════════════════════════════════════════════════════════
@@ -167,6 +168,7 @@ default-members = [
     "experiments/s-duality-bridge",
     "experiments/glass-bridge",
     "experiments/arithmetic-spectrometer",
+    "experiments/ramanujan-oracle",
 ]
 
 [profile.release]
