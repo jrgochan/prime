@@ -239,9 +239,27 @@ theorem fract_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
     This is the "comparison operator" at the diagonal level. -/
 theorem fract_squared_integral (j : ℕ) (hj : 0 < j) :
     ∫ t in (0:ℝ)..1, Int.fract (j * t) ^ 2 = 1 / 3 := by
-  -- {jt}² = (B₁({jt}) + 1/2)² = B₁² + B₁ + 1/4
-  -- ∫ = 1/12 + 0 + 1/4 = 1/3
-  sorry
+  -- {jt}² = B₁²+B₁+1/4, use fract_product_decomposition
+  simp_rw [show ∀ t : ℝ, Int.fract (↑j * t) ^ 2 =
+    sawtoothReal (↑j * t) * sawtoothReal (↑j * t)
+    + (1/2) * sawtoothReal (↑j * t) + (1/2) * sawtoothReal (↑j * t) + 1/4
+    from fun t => by rw [sq]; exact fract_product_decomposition _ _]
+  -- Split integral by linearity
+  have h_sq := sawtoothProduct_integrable j j
+  have h_j := sawtooth_scaled_integrable j
+  rw [intervalIntegral.integral_add
+    ((h_sq.add (h_j.const_mul _)).add (h_j.const_mul _))
+    intervalIntegrable_const,
+    intervalIntegral.integral_add
+    (h_sq.add (h_j.const_mul _)) (h_j.const_mul _),
+    intervalIntegral.integral_add h_sq (h_j.const_mul _)]
+  -- ∫ (1/2)·B₁(jt) = 0 (both cross terms)
+  rw [intervalIntegral.integral_const_mul, sawtooth_mean_zero j hj, mul_zero]
+  -- ∫ B₁(jt)² = 1/12, ∫ 1/4 = 1/4
+  have h1 : ∫ (x : ℝ) in (0:ℝ)..1, sawtoothReal (↑j * x) * sawtoothReal (↑j * x) = 1 / 12 :=
+    sawtooth_inner_product_diag j hj
+  simp only [h1, add_zero, intervalIntegral.integral_const, sub_zero, smul_eq_mul]
+  norm_num
 
 -- ════════════════════════════════════════════════
 -- §5. AUDIT
