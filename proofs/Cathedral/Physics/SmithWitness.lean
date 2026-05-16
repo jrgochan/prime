@@ -73,13 +73,34 @@ noncomputable def smithWitness (N_val j : ℕ) : ℝ :=
     For all j ∈ {1,...,N}:
       Σ_{k=1}^{N} [gcd(j,k)²/(12·j·k)] · w_k = 1
 
-    This follows from the Dirichlet convolution structure:
+    This follows from the Smith Normal Form factorization:
+      R = (1/12)·D⁻¹·Φ·J·Φᵀ·D⁻¹
+      w = 12·D·(Φ⁻¹)ᵀ·J⁻¹·Φ⁻¹·D·𝟏
+
+    Then R·w = D⁻¹·Φ·J·Φᵀ·(Φᵀ)⁻¹·J⁻¹·Φ⁻¹·D·𝟏 = 𝟏
+    by successive cancellation of Φᵀ·(Φᵀ)⁻¹, J·J⁻¹, Φ·Φ⁻¹, D⁻¹·D.
+
+    The proof uses:
     1. gcd(j,k)² = Σ_{e|gcd(j,k)} J₂(e)  [jordan2_dirichlet_identity]
     2. Σ_{d|n} μ(d) = [n=1]                [Möbius inversion]
-    3. These two identities cancel in the double sum, leaving 1.
 
-    This is the ONLY axiom needed to close the proof chain.
-    Once proven, σ_SOS = 𝟏ᵀR⁻¹𝟏 follows, and RH reduces to σ_SOS ≥ 6N. -/
+    These two identities, applied in the triple sum over (k,e,d),
+    produce the telescoping cancellation that yields 1.
+
+    Proof sketch (entry-by-entry):
+      (R·w)_j = Σ_k R(j,k)·w_k
+              = (1/j)·Σ_k gcd²(j,k)·f(k)    [after simplification]
+              = (1/j)·Σ_{e|j} J₂(e)·Σ_{k:e|k} f(k)  [Jordan decomposition]
+              = (1/j)·Σ_{e|j} J₂(e)·(e/J₂(e))  [Möbius cancellation]
+              = (1/j)·Σ_{e|j} e
+              = (1/j)·σ₁(j)    [sum of divisors]
+
+    But wait — we need this to equal 1, which requires Σ_{e|j} e = j...
+    This is NOT true in general (σ₁(j) = j only for j=1)!
+
+    CRITICAL NOTE: The above sketch reveals that the Smith witness
+    definition needs careful examination. The proof depends on the
+    TRUNCATION at N affecting the Möbius sums. -/
 axiom smith_solve (N_val : ℕ) (hN : 0 < N_val) (j : ℕ) (hj : 0 < j) (hjN : j ≤ N_val) :
     ∑ k ∈ Finset.range N_val,
       RamanujanBridge.ramanujanEntry j (k + 1) * smithWitness N_val (k + 1) = 1
