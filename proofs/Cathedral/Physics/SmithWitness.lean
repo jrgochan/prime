@@ -665,7 +665,39 @@ theorem sigma_witness_growth (B : ℝ) :
   -- For any M, find N with at least M primes in Icc 1 N.
   have heuclid : ∀ M : ℕ, ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N, N₀ ≤ N → M ≤ ((Finset.Icc 1 N).filter Nat.Prime).card := by
-    sorry -- Iterated application of Nat.exists_infinite_primes
+    intro M
+    -- Induction: find M distinct primes below some bound
+    induction M with
+    | zero => exact ⟨2, le_refl 2, fun _ _ => Nat.zero_le _⟩
+    | succ m ih =>
+      obtain ⟨N₀, hN₀_ge, hN₀_primes⟩ := ih
+      -- Find a new prime ≥ N₀ + 1
+      obtain ⟨p, hp_ge, hp_prime⟩ := Nat.exists_infinite_primes (N₀ + 1)
+      refine ⟨p, le_trans hN₀_ge (by omega), fun N hN => ?_⟩
+      -- p is a new prime in Icc 1 N (since p ≤ N and p ≥ N₀+1 > N₀)
+      have hp_in : p ∈ (Finset.Icc 1 N).filter Nat.Prime := by
+        simp [Finset.mem_filter, Finset.mem_Icc]
+        exact ⟨⟨hp_prime.pos, hN⟩, hp_prime⟩
+      -- p ∉ Icc 1 N₀ (since p ≥ N₀ + 1 > N₀)
+      have hp_notin : p ∉ (Finset.Icc 1 N₀).filter Nat.Prime := by
+        simp [Finset.mem_filter, Finset.mem_Icc]; omega
+      -- The old primes are still in the bigger interval
+      have hN₀_le_N : N₀ ≤ N := le_trans (by omega : N₀ ≤ p) hN
+      have hsub : (Finset.Icc 1 N₀).filter Nat.Prime ⊆
+        (Finset.Icc 1 N).filter Nat.Prime := by
+        intro x hx
+        simp [Finset.mem_filter, Finset.mem_Icc] at hx ⊢
+        exact ⟨⟨hx.1.1, le_trans hx.1.2 hN₀_le_N⟩, hx.2⟩
+      -- Card of bigger set ≥ card of smaller set + 1 (the new prime p)
+      have hinsert : ((Finset.Icc 1 N₀).filter Nat.Prime).card + 1 ≤
+        ((Finset.Icc 1 N).filter Nat.Prime).card := by
+        calc ((Finset.Icc 1 N₀).filter Nat.Prime).card + 1
+            = (insert p ((Finset.Icc 1 N₀).filter Nat.Prime)).card :=
+              (Finset.card_insert_of_notMem hp_notin).symm
+          _ ≤ ((Finset.Icc 1 N).filter Nat.Prime).card :=
+              Finset.card_le_card (Finset.insert_subset hp_in hsub)
+      have hm_bound := hN₀_primes N₀ (le_refl N₀)
+      omega
   -- Step 3: Combine.
   obtain ⟨M, hM⟩ := exists_nat_gt (B / 4)
   obtain ⟨N₀, hN₀_ge, hN₀_primes⟩ := heuclid M
