@@ -247,17 +247,65 @@ theorem dirichlet_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
     Finset.sum_congr rfl inner_eq]
   rw [Finset.sum_mul]
 
+/-- **SUM SWAP FOR DEPENDENT RANGES**: Swap summation order when both ranges
+    depend symmetrically on the index: {(r,m): (r+1)(m+1) ≤ M}. -/
+theorem sum_swap_div_range (f : ℕ → ℕ → ℝ) (M : ℕ) :
+    ∑ r ∈ Finset.range M, ∑ m ∈ Finset.range (M / (r + 1)), f r m =
+    ∑ m ∈ Finset.range M, ∑ r ∈ Finset.range (M / (m + 1)), f r m := by
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  apply Finset.sum_nbij' (fun ⟨r, m⟩ => ⟨m, r⟩) (fun ⟨m, r⟩ => ⟨r, m⟩)
+  · intro ⟨r, m⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have hle : (m + 1) * (r + 1) ≤ M := by
+      calc (m + 1) * (r + 1) ≤ M / (r + 1) * (r + 1) := Nat.mul_le_mul_right _ hmem.2
+        _ ≤ M := Nat.div_mul_le_self M (r + 1)
+    constructor
+    · have : m + 1 ≤ M := le_trans (Nat.le_mul_of_pos_right _ (by omega)) hle; omega
+    · have : (r + 1) * (m + 1) ≤ M := by rw [Nat.mul_comm]; exact hle
+      have : r + 1 ≤ M / (m + 1) := (Nat.le_div_iff_mul_le (by omega)).mpr this; omega
+  · intro ⟨m, r⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have hle : (r + 1) * (m + 1) ≤ M := by
+      calc (r + 1) * (m + 1) ≤ M / (m + 1) * (m + 1) := Nat.mul_le_mul_right _ hmem.2
+        _ ≤ M := Nat.div_mul_le_self M (m + 1)
+    constructor
+    · have : r + 1 ≤ M := le_trans (Nat.le_mul_of_pos_right _ (by omega)) hle; omega
+    · have : (m + 1) * (r + 1) ≤ M := by rw [Nat.mul_comm]; exact hle
+      have : m + 1 ≤ M / (r + 1) := (Nat.le_div_iff_mul_le (by omega)).mpr this; omega
+  · intro ⟨r, m⟩ _; rfl
+  · intro ⟨m, r⟩ _; rfl
+  · intro ⟨r, m⟩ _; rfl
+
 /-- **MÖBIUS CANCELLATION**: inner sum in smith_solve collapses.
-    Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t). -/
+    Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t).
+    Proof: convert ranges, swap sums, factor μ, apply dirichlet_moebius_sum. -/
 theorem moebius_cancellation (N_val e : ℕ) (he : 0 < e) (heN : e ≤ N_val) :
     ∑ r ∈ Finset.range (N_val / e),
       (∑ m ∈ Finset.range (N_val / (e * (r + 1))),
         (mu (m + 1) : ℝ) * eulerPhi (e * (r + 1) * (m + 1)) /
         RamanujanBridge.jordanTotient2 (e * (r + 1) * (m + 1))) =
     eulerPhi e / RamanujanBridge.jordanTotient2 e := by
-  -- Apply dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t), M = N/e
   have hM : 0 < N_val / e := Nat.div_pos heN he
-  sorry -- Factor μ out, apply dirichlet_moebius_sum, simplify
+  -- Step 1: Convert N/(e*(r+1)) to (N/e)/(r+1)
+  simp_rw [show ∀ r, N_val / (e * (r + 1)) = N_val / e / (r + 1) from
+    fun r => (Nat.div_div_eq_div_mul N_val e (r + 1)).symm]
+  -- Step 2: Set M = N/e, h(t) = φ(et)/J₂(et)
+  set M := N_val / e
+  -- Step 3: Swap r ↔ m
+  rw [sum_swap_div_range (fun r m =>
+    (mu (m + 1) : ℝ) * eulerPhi (e * (r + 1) * (m + 1)) /
+    RamanujanBridge.jordanTotient2 (e * (r + 1) * (m + 1))) M]
+  -- Step 4: Rewrite μ*φ/J₂ as μ*(φ/J₂) so we can factor μ out
+  simp_rw [mul_div_assoc]
+  simp_rw [← Finset.mul_sum]
+  -- Step 5: Commute: e*(r+1)*(m+1) = e*((m+1)*(r+1))
+  simp_rw [show ∀ r m, e * (r + 1) * (m + 1) = e * ((m + 1) * (r + 1)) from
+    fun r m => by ring]
+  -- Now: Σ_m μ(m+1) * Σ_r (φ(e*((m+1)*(r+1)))/J₂(e*((m+1)*(r+1)))) = φ(e)/J₂(e)
+  -- This is dirichlet_moebius_sum with h(t) = φ(e*t)/J₂(e*t)
+  have := dirichlet_moebius_sum (fun t => eulerPhi (e * t) / RamanujanBridge.jordanTotient2 (e * t)) M hM
+  simp only [mul_one] at this
+  exact this
 
 /-- **THE SMITH IDENTITY**: R · w = 𝟏.
 
