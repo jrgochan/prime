@@ -124,23 +124,39 @@ theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
   push_cast
   exact_mod_cast Nat.sum_totient n
 
+/-- **REINDEXED MÖBIUS SUM**: Σ_n (Σ_{d|n+1} μ(d)) · h(n+1) = h(1).
+    After reindexing, the Möbius identity Σ μ = [n=1] kills all terms except n=0. -/
+theorem reindexed_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
+    ∑ n ∈ Finset.range M,
+      (∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ)) * h (n + 1) = h 1 := by
+  have hmob : ∀ n, (∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ)) =
+      if n = 0 then (1 : ℝ) else 0 := by
+    intro n
+    have h1 := moebius_divisor_sum (n + 1) (by omega)
+    have h1' : (∑ d ∈ (n + 1).divisors, ArithmeticFunction.moebius d : ℤ) =
+        if n = 0 then 1 else 0 := by convert h1 using 2; omega
+    exact_mod_cast h1'
+  simp_rw [hmob]
+  simp only [ite_mul, one_mul, zero_mul]
+  rw [Finset.sum_ite_eq' (Finset.range M) 0]
+  simp [show 0 ∈ Finset.range M from Finset.mem_range.mpr hM]
+
 /-- **DIRICHLET-MÖBIUS SUMMATION**: For any h : ℕ → ℝ and M ≥ 1:
     Σ_{d=1}^{M} μ(d) · Σ_{a=1}^{⌊M/d⌋} h(a·d) = h(1)
 
-    Proof structure:
-    1. Reindex: the double sum equals Σ_n h(n+1)·(Σ_{d|n+1} μ(d))
-    2. Apply moebius_divisor_sum: Σ μ = [n+1=1]
-    3. Only n=0 survives: result is h(1) -/
+    Uses reindexed_moebius_sum after the Finset reindexing step. -/
 theorem dirichlet_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
     ∑ d ∈ Finset.range M,
       (mu (d + 1) : ℝ) * ∑ a ∈ Finset.range (M / (d + 1)),
         h ((d + 1) * (a + 1)) = h 1 := by
-  -- The proof factors through the reindexed form:
-  -- Step 1: Σ_d μ(d+1) * Σ_a h((d+1)*(a+1)) = Σ_n (Σ_{d|n+1} μ(d)) * h(n+1)
-  -- Step 2: Σ_{d|n+1} μ(d) = [n=0], so only n=0 survives
-  -- Step 3: Result = h(1)
-  -- The reindexing in Step 1 is: {(d,a): (d+1)(a+1) ≤ M} ↔ {(n,d): d+1|(n+1), n<M}
-  sorry -- Finset.sum_comm' reindexing + moebius_divisor_sum + sum_ite_eq'
+  -- Suffices to show LHS = Σ_n (Σ_{d|n+1} μ(d)) * h(n+1), then apply reindexed_moebius_sum
+  rw [show h 1 = ∑ n ∈ Finset.range M,
+      (∑ r ∈ (n + 1).divisors, (ArithmeticFunction.moebius r : ℝ)) * h (n + 1) from
+    (reindexed_moebius_sum h M hM).symm]
+  -- Now: LHS = RHS where both are double sums
+  -- The reindexing: {(d,a): d<M, a<M/(d+1)} ↔ {(n,r): n<M, r∈(n+1).divisors}
+  -- via (d,a) ↦ ((d+1)(a+1)-1, d+1) and (n,r) ↦ (r-1, (n+1)/r-1)
+  sorry -- Finset.sum_comm' reindexing (pure combinatorics, no number theory)
 
 /-- **MÖBIUS CANCELLATION**: inner sum in smith_solve collapses.
     Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t). -/
