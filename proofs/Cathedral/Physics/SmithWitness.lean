@@ -307,6 +307,65 @@ theorem moebius_cancellation (N_val e : ℕ) (he : 0 < e) (heN : e ≤ N_val) :
   simp only [mul_one] at this
   exact this
 
+/-- **GCD FIBER REINDEXING**: Fiberize a double sum by gcd divisors.
+    Σ_{k<N} Σ_{e|gcd(j,k+1)} f(e,k+1) = Σ_{e|j} Σ_{r<N/e} f(e, e*(r+1)) -/
+theorem gcd_fiber_reindex (f : ℕ → ℕ → ℝ) (j N : ℕ) (hj : 0 < j) :
+    ∑ k ∈ Finset.range N, ∑ e ∈ (Nat.gcd j (k + 1)).divisors, f e (k + 1) =
+    ∑ e ∈ j.divisors, ∑ r ∈ Finset.range (N / e), f e (e * (r + 1)) := by
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  apply Finset.sum_nbij'
+    (fun ⟨k, e⟩ => ⟨e, (k + 1) / e - 1⟩)
+    (fun ⟨e, r⟩ => ⟨e * (r + 1) - 1, e⟩)
+  · intro ⟨k, e⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have he_dvd_g : e ∣ Nat.gcd j (k + 1) := Nat.dvd_of_mem_divisors hmem.2
+    have he_dvd_j : e ∣ j := dvd_trans he_dvd_g (Nat.gcd_dvd_left j (k + 1))
+    have he_dvd_k : e ∣ (k + 1) := dvd_trans he_dvd_g (Nat.gcd_dvd_right j (k + 1))
+    have he_pos : 0 < e := Nat.pos_of_mem_divisors hmem.2
+    exact ⟨Nat.mem_divisors.mpr ⟨he_dvd_j, hj.ne'⟩, by
+      have : (k + 1) / e ≤ N / e := Nat.div_le_div_right (by omega)
+      have : 0 < (k + 1) / e := Nat.div_pos (Nat.le_of_dvd (by omega) he_dvd_k) he_pos; omega⟩
+  · intro ⟨e, r⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem ⊢
+    have he_dvd_j : e ∣ j := Nat.dvd_of_mem_divisors hmem.1
+    have he_pos : 0 < e := Nat.pos_of_mem_divisors hmem.1
+    have h_prod_le : e * (r + 1) ≤ N := by
+      calc e * (r + 1) ≤ e * (N / e) := Nat.mul_le_mul_left e hmem.2
+        _ ≤ N := Nat.mul_div_le N e
+    have he_prod_pos : 0 < e * (r + 1) := by positivity
+    exact ⟨by omega, by
+      rw [show e * (r + 1) - 1 + 1 = e * (r + 1) from by omega]
+      exact Nat.mem_divisors.mpr ⟨Nat.dvd_gcd he_dvd_j (dvd_mul_right e _),
+        (Nat.gcd_pos_of_pos_left _ hj).ne'⟩⟩
+  · intro ⟨k, e⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem
+    have he_dvd_g : e ∣ Nat.gcd j (k + 1) := Nat.dvd_of_mem_divisors hmem.2
+    have he_dvd_k : e ∣ (k + 1) := dvd_trans he_dvd_g (Nat.gcd_dvd_right j (k + 1))
+    have he_pos : 0 < e := Nat.pos_of_mem_divisors hmem.2
+    ext
+    · simp
+      rw [show (k + 1) / e - 1 + 1 = (k + 1) / e from
+        Nat.succ_pred_eq_of_pos (Nat.div_pos (Nat.le_of_dvd (by omega) he_dvd_k) he_pos)]
+      rw [Nat.mul_div_cancel' he_dvd_k]; omega
+    · simp
+  · intro ⟨e, r⟩ hmem
+    simp only [Finset.mem_sigma, Finset.mem_range] at hmem
+    have he_pos : 0 < e := Nat.pos_of_mem_divisors hmem.1
+    have he_prod_pos : 0 < e * (r + 1) := by positivity
+    ext
+    · simp
+    · simp; rw [show e * (r + 1) - 1 + 1 = e * (r + 1) from by omega]
+      rw [Nat.mul_div_cancel_left _ he_pos]; omega
+  · intro ⟨k, e⟩ hmem
+    simp only
+    have he_dvd_g : e ∣ Nat.gcd j (k + 1) := Nat.dvd_of_mem_divisors (Finset.mem_sigma.mp hmem).2
+    have he_dvd_k : e ∣ (k + 1) := dvd_trans he_dvd_g (Nat.gcd_dvd_right j (k + 1))
+    have he_pos : 0 < e := Nat.pos_of_mem_divisors (Finset.mem_sigma.mp hmem).2
+    congr 1
+    rw [show (k + 1) / e - 1 + 1 = (k + 1) / e from
+      Nat.succ_pred_eq_of_pos (Nat.div_pos (Nat.le_of_dvd (by omega) he_dvd_k) he_pos)]
+    exact (Nat.mul_div_cancel' he_dvd_k).symm
+
 /-- **THE SMITH IDENTITY**: R · w = 𝟏.
 
     For all j ∈ {1,...,N}:
