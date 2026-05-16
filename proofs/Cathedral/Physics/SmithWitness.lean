@@ -82,7 +82,40 @@ noncomputable def smithWitness (N_val k : ℕ) : ℝ :=
     (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
     RamanujanBridge.jordanTotient2 (k * (m + 1))
 
--- ════════════════════════════════════════════════════════════════
+/-- **MÖBIUS DIVISOR SUM**: Σ_{d|n} μ(d) = [n=1].
+    Proven from Mathlib's `moebius_mul_coe_zeta`. -/
+theorem moebius_divisor_sum (n : ℕ) (hn : 0 < n) :
+    ∑ d ∈ n.divisors, (ArithmeticFunction.moebius d : ℤ) =
+    if n = 1 then 1 else 0 := by
+  have h2 := congr_fun (congr_arg DFunLike.coe ArithmeticFunction.moebius_mul_coe_zeta) n
+  simp only [ArithmeticFunction.mul_apply, ArithmeticFunction.one_apply] at h2
+  have h3 : ∀ x ∈ n.divisorsAntidiagonal,
+      ArithmeticFunction.moebius x.1 *
+      ((↑ArithmeticFunction.zeta : ArithmeticFunction ℤ) x.2) =
+      ArithmeticFunction.moebius x.1 := by
+    intro x hx
+    have : x.2 ≠ 0 :=
+      (Nat.pos_of_mem_divisors (Nat.snd_mem_divisors_of_mem_antidiagonal hx)).ne'
+    simp [ArithmeticFunction.zeta_apply, this]
+  rw [Finset.sum_congr rfl h3] at h2
+  have antidiag_to_div : ∑ x ∈ n.divisorsAntidiagonal, ArithmeticFunction.moebius x.1 =
+      ∑ d ∈ n.divisors, ArithmeticFunction.moebius d := by
+    apply Finset.sum_nbij' (fun x => x.1) (fun d => (d, n / d))
+    · intro x hx; exact Nat.fst_mem_divisors_of_mem_antidiagonal hx
+    · intro d hd; exact Nat.mem_divisorsAntidiagonal.mpr
+        ⟨Nat.mul_div_cancel' (Nat.dvd_of_mem_divisors hd), hn.ne'⟩
+    · intro x hx
+      have hab : x.1 * x.2 = n := (Nat.mem_divisorsAntidiagonal.mp hx).1
+      ext
+      · rfl
+      · simp; rw [show n / x.1 = x.2 from by
+          rw [← hab]; exact Nat.mul_div_cancel_left x.2 (by
+            rcases x with ⟨a, b⟩; simp at hab ⊢
+            exact Nat.pos_of_ne_zero (by intro h; simp [h] at hab; omega))]
+    · intro d _; rfl
+    · intro x _; rfl
+  rw [← antidiag_to_div]; exact h2
+
 /-- **EULER TOTIENT SUM**: Σ_{d|n} φ(d) = n.
     Direct from Mathlib's `Nat.sum_totient`. -/
 theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
@@ -93,17 +126,21 @@ theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
 
 /-- **DIRICHLET-MÖBIUS SUMMATION**: For any h : ℕ → ℝ and M ≥ 1:
     Σ_{d=1}^{M} μ(d) · Σ_{a=1}^{⌊M/d⌋} h(a·d) = h(1)
-    Proof: swap sums via Finset.sum_comm', then Σ_{d|n} μ(d) = [n=1]. -/
+
+    Proof structure:
+    1. Reindex: the double sum equals Σ_n h(n+1)·(Σ_{d|n+1} μ(d))
+    2. Apply moebius_divisor_sum: Σ μ = [n+1=1]
+    3. Only n=0 survives: result is h(1) -/
 theorem dirichlet_moebius_sum (h : ℕ → ℝ) (M : ℕ) (hM : 0 < M) :
     ∑ d ∈ Finset.range M,
       (mu (d + 1) : ℝ) * ∑ a ∈ Finset.range (M / (d + 1)),
         h ((d + 1) * (a + 1)) = h 1 := by
-  -- Step 1: Distribute μ into the inner sum
-  simp_rw [Finset.mul_sum]
-  -- Step 2: The set of pairs {(d,a) : (d+1)(a+1) ≤ M} bijects to
-  --         {(n,d) : d+1 | n+1, n < M} via n = (d+1)(a+1)-1
-  -- For now, we use the direct Möbius cancellation approach
-  sorry
+  -- The proof factors through the reindexed form:
+  -- Step 1: Σ_d μ(d+1) * Σ_a h((d+1)*(a+1)) = Σ_n (Σ_{d|n+1} μ(d)) * h(n+1)
+  -- Step 2: Σ_{d|n+1} μ(d) = [n=0], so only n=0 survives
+  -- Step 3: Result = h(1)
+  -- The reindexing in Step 1 is: {(d,a): (d+1)(a+1) ≤ M} ↔ {(n,d): d+1|(n+1), n<M}
+  sorry -- Finset.sum_comm' reindexing + moebius_divisor_sum + sum_ite_eq'
 
 /-- **MÖBIUS CANCELLATION**: inner sum in smith_solve collapses.
     Application of dirichlet_moebius_sum with h(t) = φ(e·t)/J₂(e·t). -/
