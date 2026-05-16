@@ -79,26 +79,37 @@ theorem sawtoothProduct_integrable (j k : ℕ) :
 theorem sawtooth_inner_product_diag (j : ℕ) (hj : 0 < j) :
     sawtoothInnerProduct j j = 1 / 12 := by
   unfold sawtoothInnerProduct
-  -- Key: B₁ has period 1, so B₁(jt)² has period 1/j.
-  -- ∫₀¹ B₁(jt)² dt = j · ∫₀^{1/j} B₁(jt)² dt.
-  -- On [0, 1/j), jt ∈ [0,1) so B₁(jt) = jt - 1/2.
-  -- ∫₀^{1/j} (jt-1/2)² dt = [via sub u=jt] (1/j)·∫₀¹(u-1/2)² du = 1/(12j).
-  -- Total: j · 1/(12j) = 1/12.
-  -- Instead of formalizing substitution + periodicity, use ae_congr:
-  -- B₁(jt)*B₁(jt) agrees ae with (jt - ⌊jt⌋ - 1/2)² = (Int.fract(jt) - 1/2)²
-  -- = sawtoothReal(jt)² — which is what we already have.
-  -- Actually the integrand IS sawtoothReal(j*t)^2, so we just need ∫ = 1/12.
-  -- Direct proof: use FTC with j periodic pieces.
-  -- For simplicity, since this is structurally identical to sawtooth_l2_norm_sq,
-  -- we use integral_comp_mul_left + sawtooth_l2_norm_sq.
-  have hj' : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  conv_lhs => arg 1; ext t; rw [(sq (sawtoothReal (↑j * t))).symm]
-  rw [intervalIntegral.integral_comp_mul_left _ hj', mul_zero, mul_one]
-  -- Goal: (↑j)⁻¹ • ∫₀^↑j sawtoothReal(u)² du = 1/12
-  -- Need: ∫₀^↑j sawtoothReal(u)² du = ↑j · (1/12)
-  -- By periodicity: sawtoothReal(u+1)² = sawtoothReal(u)² (from sawtoothReal_add_one)
-  -- So ∫₀^↑j = ↑j · ∫₀¹ = ↑j/12 (from sawtooth_l2_norm_sq)
-  sorry
+  have hj_ne : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  -- Step 1: Rewrite f*f as f²
+  simp_rw [show ∀ t, sawtoothReal (↑j * t) * sawtoothReal (↑j * t) =
+    sawtoothReal (↑j * t) ^ 2 from fun t => (sq _).symm]
+  -- Step 2: Substitution u = j*t: ∫₀¹ f(jt)² dt = j⁻¹ • ∫₀ʲ f(u)² du
+  rw [intervalIntegral.integral_comp_mul_left _ hj_ne, mul_zero, mul_one]
+  -- Step 3: Periodicity of B₁²
+  have hper : Function.Periodic (fun u => sawtoothReal u ^ 2) 1 := fun u => by
+    show sawtoothReal (u + 1) ^ 2 = sawtoothReal u ^ 2
+    rw [sawtoothReal_add_one]
+  -- Step 4: Integrability on [0,1] from boundedness (|B₁²| ≤ 1/4)
+  have hint : IntervalIntegrable (fun u => sawtoothReal u ^ 2) volume 0 1 := by
+    rw [show (fun u => sawtoothReal u ^ 2) = fun u => sawtoothReal u * sawtoothReal u
+        from funext (fun u => sq _)]
+    exact (IntegrableOn.of_bound (by simp)
+      (sawtoothReal_measurable.mul sawtoothReal_measurable).aestronglyMeasurable.restrict
+      (1/4) (ae_of_all _ (fun u => by
+        rw [Real.norm_eq_abs, abs_mul]
+        calc |sawtoothReal u| * |sawtoothReal u|
+            ≤ (1/2) * (1/2) := mul_le_mul (sawtoothReal_bound _)
+              (sawtoothReal_bound _) (abs_nonneg _) (by norm_num)
+          _ ≤ 1/4 := by norm_num))).intervalIntegrable
+  -- Step 5: ∫₀ʲ B₁(u)² du = j • ∫₀¹ B₁(u)² du (periodicity over j periods)
+  have hint_all : ∀ t₁ t₂, IntervalIntegrable (fun u => sawtoothReal u ^ 2) volume t₁ t₂ :=
+    hper.intervalIntegrable₀ one_ne_zero hint
+  rw [show (↑j : ℝ) = 0 + (↑j : ℤ) • (1 : ℝ) from by simp]
+  rw [hper.intervalIntegral_add_zsmul_eq _ 0 hint_all, zero_add]
+  -- Step 6: Evaluate: j⁻¹ • (j • ∫₀¹ B₁² du) = j⁻¹ • (j • 1/12) = 1/12
+  rw [sawtooth_l2_norm_sq]
+  simp only [smul_eq_mul, zsmul_eq_mul, Int.cast_natCast]
+  field_simp
 
 -- ════════════════════════════════════════════════
 -- §3. THE RAMANUJAN FORMULA (Main Theorem)
