@@ -420,4 +420,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SmithSpectralGap,
     -- Glass Distance (d² = 4/(4+σ) via Sherman-Morrison, Exploration 39)
     `Cathedral.Physics.GlassDistance,
+    -- Sum of Squares (σ = 12·Σ d²·M₁²/J₂, manifestly non-negative)
+    `Cathedral.Physics.SumOfSquares,
   ]
