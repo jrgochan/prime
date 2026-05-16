@@ -53,15 +53,15 @@ namespace Cathedral.Physics.SmithWitness
 /-- The Möbius function μ. We use ArithmeticFunction.moebius from Mathlib. -/
 noncomputable def mu (n : ℕ) : ℤ := ArithmeticFunction.moebius n
 
-/-- Euler's totient function φ(d) = Σ_{k|d} μ(d/k)·k.
-    This is the correct Step 2 of the Smith decomposition:
-    v = Φ⁻¹·D·𝟏, where (Φ⁻¹)_{d,k} = μ(d/k)·[k|d]. -/
-noncomputable def eulerPhi (d : ℕ) : ℝ :=
-  ∑ k ∈ d.divisors, (mu (d / k) : ℝ) * (k : ℝ)
+/-- Euler's totient function φ(d).
+    We use Mathlib's Nat.totient, which counts {k ≤ d : gcd(k,d) = 1}.
+    This equals Σ_{k|d} μ(d/k)·k by Möbius inversion of Σ_{d|n} φ(d) = n.
+    Using Mathlib's definition gives direct access to Nat.sum_totient. -/
+def eulerPhi (d : ℕ) : ℝ := (Nat.totient d : ℝ)
 
-/-- φ(1) = 1 (since the only divisor of 1 is 1, and μ(1) = 1). -/
+/-- φ(1) = 1. -/
 theorem eulerPhi_one : eulerPhi 1 = 1 := by
-  simp [eulerPhi, mu, ArithmeticFunction.moebius_apply_one]
+  simp [eulerPhi, Nat.totient_one]
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE SMITH WITNESS VECTOR (CORRECTED)
@@ -84,10 +84,12 @@ noncomputable def smithWitness (N_val k : ℕ) : ℝ :=
 
 -- ════════════════════════════════════════════════════════════════
 /-- **EULER TOTIENT SUM**: Σ_{d|n} φ(d) = n.
-    This is Mathlib's `Nat.sum_totient`, but we need the real-valued version. -/
+    Direct from Mathlib's `Nat.sum_totient`. -/
 theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
     ∑ d ∈ n.divisors, eulerPhi d = (n : ℝ) := by
-  sorry -- Bridge from Nat.sum_totient to our eulerPhi definition
+  simp only [eulerPhi]
+  push_cast
+  exact_mod_cast Nat.sum_totient n
 
 /-- **MÖBIUS CANCELLATION**: The Dirichlet hyperbola reindexing.
 
