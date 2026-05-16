@@ -248,7 +248,7 @@ private theorem isMultiplicative_jordanTotient2AF :
                jordanTotient2AF_apply (mul_ne_zero hm hn)]
     exact jordanTotient2_mul_coprime hmn
 
-private theorem jordanTotient2_prime_pow (p k : ℕ) (hp : p.Prime) (hk : 0 < k) :
+theorem jordanTotient2_prime_pow (p k : ℕ) (hp : p.Prime) (hk : 0 < k) :
     jordanTotient2 (p ^ k) =
       (p : ℝ) ^ (2 * k) - (p : ℝ) ^ (2 * (k - 1)) := by
   unfold jordanTotient2
@@ -259,6 +259,12 @@ private theorem jordanTotient2_prime_pow (p k : ℕ) (hp : p.Prime) (hk : 0 < k)
   subst hm
   simp only [Nat.succ_sub_one, pow_succ]
   field_simp
+
+/-- J₂(p) = p² - 1 for prime p. -/
+theorem jordan2_prime (p : ℕ) (hp : p.Prime) :
+    jordanTotient2 p = (p : ℝ) ^ 2 - 1 := by
+  rw [show p = p ^ 1 from (pow_one p).symm, jordanTotient2_prime_pow p 1 hp (by omega)]
+  simp
 
 private theorem jordan2_sum_prime_pow (p k : ℕ) (hp : p.Prime) (hk : 0 < k) :
     ∑ d ∈ (p ^ k).divisors, jordanTotient2 d = (p : ℝ) ^ (2 * k) := by
