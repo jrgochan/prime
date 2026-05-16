@@ -142,6 +142,61 @@ fn compute_sigma(n: usize, mu: &[i8]) -> f64 {
     sigma
 }
 
+/// ═══════════════════════════════════════════════════════════════
+/// THE SUM-OF-SQUARES FORMULA
+///
+/// σ_N = 12 · Σ_{d=1}^{N} d² · M₁(⌊N/d⌋)² / J₂(d)
+///
+/// where M₁(x) = Σ_{m=1}^{x} m·μ(m) is the weighted Mertens function.
+///
+/// This is MANIFESTLY NON-NEGATIVE: every term is a square divided
+/// by a positive quantity. This structural insight means σ_N → ∞
+/// iff the squared Mertens terms don't collapse.
+/// ═══════════════════════════════════════════════════════════════
+
+/// Compute M₁(x) = Σ_{m=1}^{x} m·μ(m) (weighted Mertens function)
+fn weighted_mertens(x: usize, mu: &[i8]) -> f64 {
+    let mut sum = 0.0f64;
+    for m in 1..=x {
+        sum += m as f64 * mu[m] as f64;
+    }
+    sum
+}
+
+/// Compute σ via the sum-of-squares formula:
+///   σ_N = 12 · Σ_{d=1}^{N} d² · M₁(⌊N/d⌋)² / J₂(d)
+///
+/// Returns (σ, Vec of (d, M₁(N/d), term) for analysis)
+fn compute_sigma_sos(n: usize, mu: &[i8]) -> (f64, Vec<(usize, f64, f64)>) {
+    // Precompute M₁(x) for x = 0..N via prefix sums
+    let mut m1 = vec![0.0f64; n + 1];
+    for x in 1..=n {
+        m1[x] = m1[x - 1] + x as f64 * mu[x] as f64;
+    }
+
+    let mut sigma = 0.0;
+    let mut terms = Vec::new();
+    for d in 1..=n {
+        let x = n / d; // ⌊N/d⌋
+        let m1_val = m1[x];
+        let j2 = jordan2(d);
+        let term = (d * d) as f64 * m1_val * m1_val / j2;
+        sigma += term;
+
+        // Record top contributions
+        if d <= 20 || term > 1e6 {
+            terms.push((d, m1_val, term));
+        }
+    }
+    sigma *= 12.0;
+
+    // Scale terms for display
+    let terms: Vec<_> = terms.into_iter()
+        .map(|(d, m1v, t)| (d, m1v, 12.0 * t))
+        .collect();
+
+    (sigma, terms)
+}
 /// Compute R⁻¹b for arbitrary b vector, return (R⁻¹b, bᵀR⁻¹b)
 fn compute_r_inv_b(n: usize, mu: &[i8], b: &[f64]) -> (Vec<f64>, f64) {
     // Step 1: u = D·b, i.e. u_j = j·b_j
@@ -295,7 +350,25 @@ fn compute_at_n(n: usize) -> RamanujanResult {
     // §3: The main event: 𝟏ᵀR⁻¹𝟏
     let sigma = compute_sigma(n, &mu);
     let d_sq = 4.0 / (4.0 + sigma);
-    eprintln!("    𝟏ᵀR⁻¹𝟏 = {sigma:.6e}");
+    eprintln!("    𝟏ᵀR⁻¹𝟏 (sieve) = {sigma:.6e}");
+
+    // §4: SUM-OF-SQUARES verification
+    let (sigma_sos, terms) = compute_sigma_sos(n, &mu);
+    let sos_err = ((sigma - sigma_sos) / sigma.max(1.0)).abs();
+    eprintln!("    𝟏ᵀR⁻¹𝟏 (SOS)   = {sigma_sos:.6e}");
+    eprintln!("    SOS relative error: {sos_err:.2e} {}",
+        if sos_err < 1e-6 { "✅" } else { "❌" });
+
+    // Show top SOS contributions
+    if !terms.is_empty() && n <= 200_000 {
+        eprintln!("    Top SOS terms (d, M₁(N/d), 12·d²·M₁²/J₂):");
+        for &(d, m1v, term) in terms.iter().take(10) {
+            let pct = 100.0 * term / sigma_sos.max(1.0);
+            eprintln!("      d={d:>6}: M₁({:>6}) = {m1v:>12.1}, term = {term:>14.2e} ({pct:>5.1}%)",
+                n / d);
+        }
+    }
+
     eprintln!("    d²(frac) = 4/(4+σ) = {d_sq:.6e}");
 
     let elapsed = t0.elapsed().as_secs_f64();
