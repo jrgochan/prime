@@ -371,6 +371,19 @@ fn compute_at_n(n: usize) -> RamanujanResult {
 
     eprintln!("    d²(frac) = 4/(4+σ) = {d_sq:.6e}");
 
+    // §5: THE 6N LOWER BOUND
+    // For d > N/2: ⌊N/d⌋ = 1, M₁(1) = 1, sosTerm ≥ 1
+    // ⌈N/2⌉ such terms → σ ≥ 12·⌈N/2⌉ ≥ 6N
+    let tail_count = n - n / 2; // = ⌈N/2⌉
+    let bound_6n = 6.0 * n as f64;
+    let sigma_exceeds = sigma_sos >= bound_6n;
+    eprintln!("    ─── σ ≥ 6N CHECK ───");
+    eprintln!("    6N = {bound_6n:.0}");
+    eprintln!("    σ/6N = {:.4e}", sigma_sos / bound_6n);
+    eprintln!("    Tail terms (d > N/2): {tail_count}");
+    eprintln!("    σ ≥ 6N: {} {}", sigma_exceeds,
+        if sigma_exceeds { "✅" } else { "❌" });
+
     let elapsed = t0.elapsed().as_secs_f64();
     eprintln!("    ✓ Done in {elapsed:.1}s\n");
 
