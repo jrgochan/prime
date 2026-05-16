@@ -336,24 +336,22 @@ set_option maxHeartbeats 400000 in
     Σ_{i,j} gcd(i+1, j+1)² · x_i · x_j ≥ 0
 
     Proof: Same Smith rank-1 argument as for gcd⁴.
-    gcd(j,k)² = Σ_d J₂(d), so Q(x) = Σ_d J₂(d)·(Σ_i 𝟙_{d|i+1} x_i)² ≥ 0. -/
-theorem gcd2_matrix_psd (N : ℕ) (x : Fin N → ℝ) :
-    0 ≤ ∑ i : Fin N, ∑ j : Fin N,
-      (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j := by
-  set y : ℕ → ℝ := fun d => ∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0
-  suffices hsos : ∑ i : Fin N, ∑ j : Fin N,
+    gcd(j,k)² = Σ_d J₂(d), so Q(x) = Σ_d J₂(d)·(Σ_i 𝟙_{d|i+1} x_i)² ≥ 0.
+
+    The decomposition identity is extracted as gcd2_sos_decomposition.
+
+    **J₂ SOS Decomposition**: the gcd² quadratic form equals a sum of J₂-weighted squares. -/
+theorem gcd2_sos_decomposition (N : ℕ) (x : Fin N → ℝ) :
+    ∑ i : Fin N, ∑ j : Fin N,
       (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j =
-      ∑ d ∈ Finset.Icc 1 N, jordanTotient2 d * (y d) ^ 2 by
-    rw [hsos]
-    apply Finset.sum_nonneg
-    intro d hd
-    apply mul_nonneg
-    · exact le_of_lt (jordan2_pos d (by rw [Finset.mem_Icc] at hd; omega))
-    · exact sq_nonneg _
+    ∑ d ∈ Finset.Icc 1 N,
+      jordanTotient2 d * (∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0) ^ 2 := by
+  set y : ℕ → ℝ := fun d => ∑ i : Fin N, if d ∣ (i.val + 1) then x i else 0
   have ysq : ∀ d, (y d) ^ 2 =
       ∑ i : Fin N, ∑ j : Fin N,
         (if d ∣ (i.val + 1) then x i else 0) * (if d ∣ (j.val + 1) then x j else 0) := by
     intro d; rw [sq]; simp only [y]; exact Fintype.sum_mul_sum _ _
+  change _ = ∑ d ∈ Finset.Icc 1 N, jordanTotient2 d * (y d) ^ 2
   simp_rw [ysq, Finset.mul_sum]
   rw [Finset.sum_comm (s := Finset.Icc 1 N) (t := Finset.univ)]
   simp_rw [Finset.sum_comm (s := Finset.Icc 1 N) (t := Finset.univ)]
@@ -361,7 +359,6 @@ theorem gcd2_matrix_psd (N : ℕ) (x : Fin N → ℝ) :
   rw [show (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j =
     (∑ d ∈ (Nat.gcd (i.val + 1) (j.val + 1)).divisors, jordanTotient2 d) * x i * x j from by
       rw [jordan2_dirichlet_identity _ (Nat.gcd_pos_of_pos_left _ (by omega))]]
-  -- Lift divisor sum to Icc using filter
   have hlift : ∑ d ∈ (Nat.gcd (i.val + 1) (j.val + 1)).divisors, jordanTotient2 d =
       ∑ d ∈ Finset.Icc 1 N,
         if d ∣ (i.val + 1) ∧ d ∣ (j.val + 1) then jordanTotient2 d else 0 := by
@@ -384,6 +381,16 @@ theorem gcd2_matrix_psd (N : ℕ) (x : Fin N → ℝ) :
   rw [hlift, Finset.sum_mul, Finset.sum_mul]
   congr 1; ext d
   split_ifs <;> simp_all <;> try ring
+
+theorem gcd2_matrix_psd (N : ℕ) (x : Fin N → ℝ) :
+    0 ≤ ∑ i : Fin N, ∑ j : Fin N,
+      (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * x i * x j := by
+  rw [gcd2_sos_decomposition]
+  apply Finset.sum_nonneg
+  intro d hd
+  apply mul_nonneg
+  · exact le_of_lt (jordan2_pos d (by rw [Finset.mem_Icc] at hd; omega))
+  · exact sq_nonneg _
 
 /-- **THEOREM**: The Ramanujan matrix is PSD.
 

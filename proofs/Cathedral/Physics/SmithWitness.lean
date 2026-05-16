@@ -531,16 +531,107 @@ theorem sigma_witness_diverges (N_val : ℕ) (hN : 2 ≤ N_val) :
     (0 : ℝ) < sigmaWitness N_val := by
   have hN_pos : 0 < N_val := by omega
   unfold sigmaWitness; simp only [smithWitness]
-  -- Goal: 0 < Σ_k 12·(k+1)·q(k+1)
-  -- From smith_numerator at j=1: Σ q(k+1) = 1
-  -- From smith_numerator at j: Σ gcd(j,k+1)²·q(k+1) = j
-  -- So: Σ (k+1)·q(k+1) = Σ gcd²·q·q (bilinear identity via smith_numerator)
-  --   = Σ_d J₂(d)·(Σ_{d|k+1} q(k+1))² ≥ J₂(1)·(Σ q)² = 1·1² = 1 > 0
-  -- Hence σ = 12·Σ(k+1)·q ≥ 12 > 0.
+  -- Goal: 0 < Σ_k 12·(k+1)·q(k+1) where q(k) = Σ_m μ·φ/J₂
   --
-  -- The conversion between ℕ-indexed and Fin-indexed sums is the formalization
-  -- bottleneck. The mathematical argument is certified.
-  sorry
+  -- Strategy: show σ ≥ 12 by using the J₂ sum-of-squares decomposition.
+  -- From gcd2_matrix_psd applied to x_i = q(i+1):
+  --   Σ_{i,j} gcd(i+1,j+1)²·q(i+1)·q(j+1)
+  --   = Σ_d J₂(d)·(Σ_{d|k+1} q(k+1))²
+  --   ≥ J₂(1)·(Σ q(k+1))²   [just the d=1 term]
+  --   = 1·1² = 1             [from smith_numerator at j=1]
+  --
+  -- And from smith_numerator:
+  --   Σ_{i,j} gcd²·q·q = Σ_j (j+1)·q(j+1) = σ/12
+  --
+  -- So σ/12 ≥ 1, hence σ ≥ 12 > 0.
+  --
+  -- This uses gcd2_matrix_psd + smith_numerator + jordan2_pos.
+  -- All proven. The only formalization work is the Fin ↔ range conversion.
+
+  -- Define q and x for readability
+  set q : ℕ → ℝ := fun k =>
+    ∑ m ∈ Finset.range (N_val / k),
+      (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
+      RamanujanBridge.jordanTotient2 (k * (m + 1))
+  -- Key fact: Σ q(k+1) = 1 from smith_numerator at j=1
+  have hq_sum : ∑ k ∈ Finset.range N_val, q (k + 1) = 1 := by
+    have h := smith_numerator N_val hN_pos 1 (by omega) (by omega)
+    simp [Nat.gcd_one_left] at h
+    exact_mod_cast h
+  -- σ/12 = Σ (k+1)·q(k+1) = Σ gcd²·q·q ≥ J₂(1)·(Σ q)² = 1
+  -- For the formal proof, we use gcd2_matrix_psd with x : Fin N → ℝ
+  set xf : Fin N_val → ℝ := fun i => q (i.val + 1)
+  -- The PSD form applied to xf
+  have hpsd := RamanujanBridge.gcd2_matrix_psd N_val xf
+  -- hpsd : 0 ≤ Σ_{i,j} gcd(i+1,j+1)² · xf_i · xf_j
+  -- And from smith_numerator, this equals Σ_j (j+1)·q(j+1) = σ/12:
+  have h_psd_eq : ∑ i : Fin N_val, ∑ j : Fin N_val,
+    (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * xf i * xf j =
+    ∑ j : Fin N_val, (↑(j.val) + 1 : ℝ) * xf j := by
+    -- Rewrite: gcd²·xf_i·xf_j = xf_j·gcd²·xf_i  (pull xf_j out)
+    simp_rw [show ∀ (i j : Fin N_val),
+      (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * xf i * xf j =
+      xf j * ((Nat.gcd (j.val + 1) (i.val + 1) : ℝ) ^ 2 * xf i) from fun i j => by
+      have : (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) = (Nat.gcd (j.val + 1) (i.val + 1) : ℝ) := by
+        exact_mod_cast Nat.gcd_comm (i.val + 1) (j.val + 1)
+      rw [this]; ring]
+    -- Now: Σ_i Σ_j xf_j · (gcd(j+1,i+1)²·xf_i) = Σ_j (j+1)·xf_j
+    -- Swap: Σ_j Σ_i xf_j · (gcd(j+1,i+1)²·xf_i) = Σ_j xf_j · (Σ_i gcd²·xf_i)
+    rw [Finset.sum_comm]
+    simp_rw [← Finset.mul_sum]
+    apply Finset.sum_congr rfl
+    intro j _
+    -- Goal: xf_j · Σ_i gcd(j+1,i+1)²·xf_i = (j+1)·xf_j
+    rw [mul_comm]
+    congr 1
+    -- Need: Σ_i gcd(j+1,i+1)²·xf_i = j+1
+    have h := smith_numerator N_val hN_pos (j.val + 1) (by omega) (by omega)
+    rw [show (↑(j.val) + 1 : ℝ) = ((j.val + 1 : ℕ) : ℝ) from by push_cast; ring]
+    rw [← h, ← Fin.sum_univ_eq_sum_range]
+  -- Convert goal from range to Fin form
+  suffices h_pos : (0 : ℝ) < ∑ j : Fin N_val, (↑(j.val) + 1 : ℝ) * xf j by
+    have h_convert : ∑ k ∈ Finset.range N_val,
+      12 * (↑(k + 1) : ℝ) * (∑ m ∈ Finset.range (N_val / (k + 1)),
+        (mu (m + 1) : ℝ) * eulerPhi ((k + 1) * (m + 1)) /
+        RamanujanBridge.jordanTotient2 ((k + 1) * (m + 1))) =
+      12 * ∑ j : Fin N_val, (↑(j.val) + 1 : ℝ) * xf j := by
+      rw [Finset.mul_sum, ← Fin.sum_univ_eq_sum_range]
+      congr 1; ext i
+      simp only [xf, q]; push_cast; ring
+    rw [h_convert]
+    exact mul_pos (by norm_num) h_pos
+  -- Goal: 0 < Σ_{j : Fin N} (j+1)·xf_j
+  -- This equals Σ gcd²·xf·xf by h_psd_eq
+  rw [← h_psd_eq, RamanujanBridge.gcd2_sos_decomposition]
+  -- Goal: 0 < Σ_d J₂(d) · (Σ_i 𝟙_{d|i+1}·xf_i)²
+  -- The d=1 term: J₂(1)·(Σ xf_i)² = 1·1² = 1 > 0
+  -- All other terms ≥ 0, so sum ≥ 1 > 0.
+  -- Show d=1 term is positive:
+  have hd1_pos : (0 : ℝ) < RamanujanBridge.jordanTotient2 1 *
+    (∑ i : Fin N_val, if 1 ∣ (i.val + 1) then xf i else 0) ^ 2 := by
+    simp only [one_dvd, ite_true]
+    rw [show ∑ i : Fin N_val, xf i = 1 from by
+      rw [show ∑ i : Fin N_val, xf i = ∑ k ∈ Finset.range N_val, q (k + 1) from by
+        rw [← Fin.sum_univ_eq_sum_range]]
+      exact hq_sum]
+    simp [RamanujanBridge.jordanTotient2]
+  -- Show d=1 is in Icc 1 N:
+  have hd1_mem : 1 ∈ Finset.Icc 1 N_val := Finset.mem_Icc.mpr ⟨le_refl 1, by omega⟩
+  -- Bound: d=1 term ≤ full sum (since all terms nonneg)
+  calc (0 : ℝ)
+      < RamanujanBridge.jordanTotient2 1 *
+        (∑ i : Fin N_val, if 1 ∣ (i.val + 1) then xf i else 0) ^ 2 := hd1_pos
+    _ ≤ ∑ d ∈ Finset.Icc 1 N_val,
+        RamanujanBridge.jordanTotient2 d *
+        (∑ i : Fin N_val, if d ∣ (i.val + 1) then xf i else 0) ^ 2 := by
+        apply Finset.single_le_sum (f := fun d =>
+          RamanujanBridge.jordanTotient2 d *
+          (∑ i : Fin N_val, if d ∣ (i.val + 1) then xf i else 0) ^ 2)
+        · intro d hd
+          apply mul_nonneg
+          · exact le_of_lt (RamanujanBridge.jordan2_pos d (by rw [Finset.mem_Icc] at hd; omega))
+          · exact sq_nonneg _
+        · exact hd1_mem
 
 -- ════════════════════════════════════════════════════════════════
 -- §6. THE CONVERGENCE THEOREM
