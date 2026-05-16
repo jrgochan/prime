@@ -167,18 +167,42 @@ private theorem sawtooth_scaled_integrable (m : ℕ) :
 -- §4. THE RAMANUJAN FORMULA (Main Theorem)
 -- ════════════════════════════════════════════════
 
-/-- **Coprime Ramanujan inner product**: For coprime j, k ≥ 1,
-    ∫₀¹ B₁(jt)·B₁(kt) dt = 1/(12jk).
+-- Coprime Ramanujan inner product: ∫₀¹ B₁(jt)·B₁(kt) dt = 1/(12jk) for coprime j,k.
+-- Proof: Bernoulli distribution formula Σ B₁(x+r/j) = B₁(jx)
+--   + CRT permutation + j=1 base case via ∫₀¹ t·B₁(kt) = 1/(12k).
 
-    This is the irreducible kernel of the Ramanujan formula.
-    **Proof path**: Fourier cross-Parseval. The scaled Fourier coefficients
-    of B₁∘j are supported on multiples of j. For coprime j,k,
-    the only common support is at multiples of lcm(j,k) = jk.
-    The resulting sum is (1/jk)·Σₘ₌₁^∞ 1/(4π²m²) = 1/(12jk). -/
+/-- Helper: ∫₀¹ u·B₁(ku) du = 1/(12k).
+    On each [m, m+1), B₁(u) = u - m - 1/2.
+    ∫_m^{m+1} u·(u-m-1/2) du = 1/12 (independent of m).
+    Sum: k · (1/12k²) = 1/(12k). -/
+private theorem id_sawtooth_integral (k : ℕ) (hk : 0 < k) :
+    ∫ t in (0:ℝ)..1, t * sawtoothReal (↑k * t) = 1 / (12 * (k : ℝ)) := by
+  sorry -- Piecewise FTC: partition [0,1] into k intervals, linear integrand
+
+/-- Base case j=1: ∫₀¹ B₁(t)·B₁(kt) dt = 1/(12k).
+    Since B₁(t) = t - 1/2 a.e. on [0,1], this equals
+    ∫₀¹ t·B₁(kt) - (1/2)·∫₀¹ B₁(kt) = 1/(12k) - 0. -/
+private theorem sawtooth_base_inner_product (k : ℕ) (hk : 0 < k) :
+    ∫ t in (0:ℝ)..1, sawtoothReal (1 * t) * sawtoothReal (↑k * t) =
+    1 / (12 * (k : ℝ)) := by
+  sorry -- Use B₁(t) = t - 1/2 a.e., id_sawtooth_integral, sawtooth_mean_zero
+
+/-- Bernoulli distribution formula: Σ_{r=0}^{n-1} B₁(x + r/n) = B₁(nx).
+    This is the multiplicative formula for Bernoulli polynomials at degree 1. -/
+private theorem bernoulli_distribution (n : ℕ) (hn : 0 < n) (x : ℝ) :
+    ∑ r ∈ Finset.range n, sawtoothReal (x + ↑r / ↑n) = sawtoothReal (↑n * x) := by
+  sorry -- Induction or direct computation from fract arithmetic
+
 theorem sawtooth_coprime_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k)
     (hcop : Nat.Coprime j k) :
     ∫ t in (0:ℝ)..1, sawtoothReal (↑j * t) * sawtoothReal (↑k * t) =
     1 / (12 * (j : ℝ) * (k : ℝ)) := by
+  -- Step 1: Partition [0,1] into j intervals and substitute s = jt - m
+  -- ∫₀¹ B₁(jt)B₁(kt) dt = (1/j) Σ_{m=0}^{j-1} ∫₀¹ B₁(s)·B₁(k(s+m)/j) ds
+  -- Step 2: CRT permutation (coprimality): as m → km mod j permutes residues
+  -- Σ_{m=0}^{j-1} B₁(ks/j + km/j) = Σ_{r=0}^{j-1} B₁(ks/j + r/j)
+  -- Step 3: Bernoulli distribution: Σ B₁(ks/j + r/j) = B₁(j·ks/j) = B₁(ks)
+  -- Step 4: Result: (1/j) ∫₀¹ B₁(s)·B₁(ks) ds = (1/j)·1/(12k) = 1/(12jk)
   sorry
 
 /-- **THEOREM (Ramanujan B₁ Inner Product Formula)**:
