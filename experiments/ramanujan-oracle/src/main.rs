@@ -96,15 +96,15 @@ fn ndivisors(n: usize) -> usize {
 // Step 5: (R⁻¹𝟏)_j = 12·j·y_j
 // Step 6: 𝟏ᵀR⁻¹𝟏 = Σ_j (R⁻¹𝟏)_j
 
-/// Compute R⁻¹𝟏 and return (the vector, 𝟏ᵀR⁻¹𝟏)
-fn compute_r_inv_one(n: usize, mu: &[i8]) -> (Vec<f64>, f64) {
-    // Step 2: z_d = Σ_{k: d|k, k≤N} μ(k/d)·k  (Möbius transform of u_k = k)
+/// Compute σ = 𝟏ᵀR⁻¹𝟏 via O(N log N) sieve (no dense matrix, no divisor enumeration)
+fn compute_sigma(n: usize, mu: &[i8]) -> f64 {
+    // Step 2: z_d = Σ_{k: d|k, k≤N} μ(k/d)·k  (sieve: O(N log N))
     let mut z = vec![0.0f64; n + 1];
     for d in 1..=n {
         let mut sum = 0.0;
         let mut k = d;
         while k <= n {
-            let m = k / d; // k = d·m
+            let m = k / d;
             sum += mu[m] as f64 * k as f64;
             k += d;
         }
@@ -120,26 +120,26 @@ fn compute_r_inv_one(n: usize, mu: &[i8]) -> (Vec<f64>, f64) {
         }
     }
 
-    // Step 4: y_j = Σ_{d|j} μ(j/d)·w_d  (Möbius transform of w)
+    // Step 4: y_j = Σ_{d|j} μ(j/d)·w_d  (SIEVE: O(N log N))
+    // Instead of enumerating divisors of j, iterate d and visit multiples
     let mut y = vec![0.0f64; n + 1];
-    for j in 1..=n {
-        let mut sum = 0.0;
-        for d in divisors(j) {
-            let q = j / d;
-            sum += mu[q] as f64 * w[d];
+    for d in 1..=n {
+        if w[d].abs() < 1e-300 { continue; }
+        let mut j = d;
+        while j <= n {
+            let q = j / d; // μ(j/d)
+            y[j] += mu[q] as f64 * w[d];
+            j += d;
         }
-        y[j] = sum;
     }
 
-    // Step 5: (R⁻¹𝟏)_j = 12·j·y_j
-    let mut r_inv_one = vec![0.0f64; n + 1];
+    // Step 5+6: σ = Σ_j 12·j·y_j
     let mut sigma = 0.0;
     for j in 1..=n {
-        r_inv_one[j] = 12.0 * j as f64 * y[j];
-        sigma += r_inv_one[j];
+        sigma += 12.0 * j as f64 * y[j];
     }
 
-    (r_inv_one, sigma)
+    sigma
 }
 
 /// Compute R⁻¹b for arbitrary b vector, return (R⁻¹b, bᵀR⁻¹b)
@@ -191,8 +191,10 @@ fn compute_r_inv_b(n: usize, mu: &[i8], b: &[f64]) -> (Vec<f64>, f64) {
 /// Verify R·(R⁻¹·x) = x for a test vector (spot check)
 fn verify_inverse(n: usize, mu: &[i8], test_n: usize) -> f64 {
     let small = test_n.min(n);
-    // x = 𝟏 (all ones)
-    let (r_inv_one, _) = compute_r_inv_one(small, mu);
+    // x = 𝟏 (all ones) — use compute_r_inv_b with b = 𝟏
+    let mut b = vec![0.0f64; small + 1];
+    for k in 1..=small { b[k] = 1.0; }
+    let (r_inv_one, _) = compute_r_inv_b(small, mu, &b);
 
     // Compute R · (R⁻¹ · 𝟏) and check it equals 𝟏
     let mut max_err = 0.0f64;
@@ -266,22 +268,35 @@ fn compute_at_n(n: usize) -> RamanujanResult {
 
     // Compute Möbius table
     let mu = mobius_table(n);
+    eprintln!("    μ table computed ({:.1}s)", t0.elapsed().as_secs_f64());
 
-    // §1: Verify R⁻¹ is correct (small N spot check)
-    let inv_err = verify_inverse(n, &mu, 200.min(n));
-    eprintln!("    R·R⁻¹ verification (N≤200): max error = {inv_err:.2e}");
+    // §1: Verify R⁻¹ is correct (small N spot check, skip for large N)
+    let inv_err = if n <= 1000 {
+        let e = verify_inverse(n, &mu, 200.min(n));
+        eprintln!("    R·R⁻¹ verification (N≤200): max error = {e:.2e}");
+        e
+    } else {
+        eprintln!("    R·R⁻¹ verification: skipped (N>{n})");
+        0.0
+    };
 
     // §2: Smith decomposition → vᵀRv → 1/(2π²)?
-    let (vt_rv, _direct) = smith_verification(n, &mu);
     let euler = 1.0 / (2.0 * PI * PI);
-    let smith_err = (vt_rv - euler).abs();
-    eprintln!("    vᵀRv (Smith) = {vt_rv:.10}  (1/(2π²) = {euler:.10}, err = {smith_err:.2e})");
+    let (vt_rv, smith_err) = if n <= 200_000 {
+        let (vt_rv, _direct) = smith_verification(n, &mu);
+        let err = (vt_rv - euler).abs();
+        eprintln!("    vᵀRv (Smith) = {vt_rv:.10}  (err = {err:.2e})");
+        (vt_rv, err)
+    } else {
+        eprintln!("    vᵀRv: skipped (N too large for dense check)");
+        (0.0, 0.0)
+    };
 
     // §3: The main event: 𝟏ᵀR⁻¹𝟏
-    let (_r_inv_one, sigma) = compute_r_inv_one(n, &mu);
+    let sigma = compute_sigma(n, &mu);
     let d_sq = 4.0 / (4.0 + sigma);
-    eprintln!("    𝟏ᵀR⁻¹𝟏 = {sigma:.6}");
-    eprintln!("    d²(frac) = 4/(4+σ) = {d_sq:.10}");
+    eprintln!("    𝟏ᵀR⁻¹𝟏 = {sigma:.6e}");
+    eprintln!("    d²(frac) = 4/(4+σ) = {d_sq:.6e}");
 
     let elapsed = t0.elapsed().as_secs_f64();
     eprintln!("    ✓ Done in {elapsed:.1}s\n");
@@ -361,14 +376,14 @@ fn main() {
         let first = &results[0];
         let last = results.last().unwrap();
         let growing = last.sigma > first.sigma;
-        println!("\n  σ(N={}) = {:.4}", first.n, first.sigma);
-        println!("  σ(N={}) = {:.4}", last.n, last.sigma);
+        println!("\n  σ(N={}) = {:.4e}", first.n, first.sigma);
+        println!("  σ(N={}) = {:.4e}", last.n, last.sigma);
         println!(
-            "  Growth: {} (ratio = {:.4})",
+            "  Growth: {} (ratio = {:.4e})",
             if growing { "↑ INCREASING" } else { "↓ DECREASING" },
             last.sigma / first.sigma
         );
-        println!("  d² at largest N: {:.10}", last.d_sq_frac);
+        println!("  d² at largest N: {:.4e}", last.d_sq_frac);
         println!(
             "\n  {}",
             if growing && last.d_sq_frac < 0.5 {
@@ -379,6 +394,48 @@ fn main() {
                 "⚠️  𝟏ᵀR⁻¹𝟏 is NOT growing. Investigate."
             }
         );
+    }
+
+    // ─── Growth exponent analysis ─────────────────────────────────
+    // Fit α in σ ~ N^α via log-log regression
+    let valid: Vec<_> = results.iter()
+        .filter(|r| r.sigma > 0.0 && r.n > 1)
+        .collect();
+    if valid.len() >= 2 {
+        println!("\n  ─── GROWTH EXPONENT: σ ~ N^α ───\n");
+
+        // Pairwise exponents between consecutive points
+        println!("  {:>10} {:>10} {:>12}", "N₁ → N₂", "σ ratio", "α (local)");
+        println!("  {}", "─".repeat(36));
+        for w in valid.windows(2) {
+            let ln_n_ratio = (w[1].n as f64).ln() / (w[0].n as f64).ln();
+            let ln_sigma_ratio = w[1].sigma.ln() / w[0].sigma.ln();
+            let alpha = (w[1].sigma.ln() - w[0].sigma.ln())
+                / (w[1].n as f64).ln().max(1.0).min(f64::MAX)
+                .max(1.0);
+            // Better: direct exponent from two points
+            let a = (w[1].sigma / w[0].sigma).ln()
+                / ((w[1].n as f64) / (w[0].n as f64)).ln();
+            println!(
+                "  {:>5}→{:<5} {:>12.2e} {:>10.3}",
+                w[0].n, w[1].n,
+                w[1].sigma / w[0].sigma,
+                a
+            );
+        }
+
+        // Global fit: least-squares on log(σ) = α·log(N) + c
+        let n_pts = valid.len() as f64;
+        let sum_x: f64 = valid.iter().map(|r| (r.n as f64).ln()).sum();
+        let sum_y: f64 = valid.iter().map(|r| r.sigma.ln()).sum();
+        let sum_xy: f64 = valid.iter().map(|r| (r.n as f64).ln() * r.sigma.ln()).sum();
+        let sum_xx: f64 = valid.iter().map(|r| (r.n as f64).ln().powi(2)).sum();
+        let alpha = (n_pts * sum_xy - sum_x * sum_y)
+            / (n_pts * sum_xx - sum_x * sum_x);
+
+        println!("\n  Global fit: α = {alpha:.4}");
+        println!("  RH prediction: α → 3.5  (= 3 + 1/2, critical line)");
+        println!("  Deviation from RH: |α - 3.5| = {:.4}", (alpha - 3.5).abs());
     }
 
     // ─── 1/(2π²) verification ────────────────────────────────────

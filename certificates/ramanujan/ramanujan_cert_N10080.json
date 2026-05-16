@@ -1,0 +1,21 @@
+{
+  "format": "cathedral-ramanujan-oracle-v1",
+  "N": 10080,
+  "divisor_count": 72,
+  "matrix": "R(j,k) = gcd(j,k)²/(12jk)",
+  "decomposition": "R = (1/12)·D⁻¹·Φ·diag(J₂)·Φᵀ·D⁻¹",
+  "inversion": "R⁻¹ = 12·D·Φ⁻ᵀ·diag(1/J₂)·Φ⁻¹·D",
+  "results": {
+    "sigma": 267332591010.57593,
+    "d_squared_frac": 1.496263506375811e-11,
+    "formula": "d² = 4/(4 + 𝟏ᵀR⁻¹𝟏)",
+    "vtRv_smith": 0.050663327898303266,
+    "euler_target": 0.05066059182116889,
+    "smith_error": 2.7360771343784562e-6,
+    "rh_consistent": true
+  },
+  "glass_identity": "G⁽¹⁾(j,k) = R(j,k) + 1/4",
+  "lean_theorem": "glass_quadratic_form",
+  "lean_file": "Cathedral/Physics/RamanujanBridge.lean",
+  "elapsed_secs": 0.035273042
+}
