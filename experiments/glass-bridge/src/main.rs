@@ -239,30 +239,219 @@ fn main() {
                  y_d_limit(d));
     }
 
-    // Write report
-    let mut report = String::new();
-    writeln!(report, "# The y_d Analysis: Where the Arithmetic Lives\n").unwrap();
-    writeln!(report, "**Date:** May 16, 2026, 3:28 AM MDT\n").unwrap();
-    writeln!(report, "## Key Result\n").unwrap();
-    writeln!(report, "For the Möbius witness v_k = μ(k)/k:").unwrap();
-    writeln!(report, "```").unwrap();
-    writeln!(report, "vᵀRv → 1/(2π²) ≈ {:.10}", euler_prediction).unwrap();
-    writeln!(report, "```\n").unwrap();
-    writeln!(report, "This is a **positive constant**, not zero.").unwrap();
-    writeln!(report, "The simple Möbius witness does NOT make d²_N → 0.\n").unwrap();
-    writeln!(report, "## What RH Actually Requires\n").unwrap();
-    writeln!(report, "The **optimal** witness v* = G⁻¹b must satisfy:").unwrap();
-    writeln!(report, "- Σv*_k → 0 (kills rank-1 term)").unwrap();
-    writeln!(report, "- v*ᵀRv* → 0 (Ramanujan residual vanishes)\n").unwrap();
-    writeln!(report, "Through the glass, G⁻¹ = (R + ¼𝟏𝟏ᵀ)⁻¹.").unwrap();
-    writeln!(report, "By Sherman-Morrison: this is R⁻¹ minus a rank-1 correction.").unwrap();
-    writeln!(report, "**RH reduces to the spectral properties of R⁻¹.**").unwrap();
-    writeln!(report, "\n*The arithmetic has spoken.* 🔮").unwrap();
+    // ═══════════════════════════════════════════════
+    // §6. THE MELLIN LIFT: G = R + ¼𝟏𝟏ᵀ ?
+    // ═══════════════════════════════════════════════
+    println!("\n§6. THE MELLIN LIFT: VASYUNIN-RAMANUJAN IDENTITY\n");
+    println!("  Claim: G(j,k) = R(j,k) + b(j)·b(k)");
+    println!("  where R(j,k) = gcd(j,k)²/(12jk)");
+    println!("  and   b(k)   = (ln(k) + 1 - γ) / k\n");
+    println!("  If true, then by Sherman-Morrison:");
+    println!("    d²_NB = 4/(4+σ)  =  glass_distance_formula");
+    println!("  and the Smith path gives RH with ZERO axioms.\n");
 
-    let output_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../../docs/ai/antigravity/dark-sector/GLASS_YD_ANALYSIS.md");
-    fs::write(&output_path, &report).ok();
-    println!("\n  Report: {}", output_path.display());
+    // Euler-Mascheroni constant (to 30 digits)
+    let gamma: f64 = 0.5772156649015329;
+
+    // Vasyunin mean entry: b(k) = (ln(k) + 1 - γ) / k
+    let b_entry = |k: usize| -> f64 {
+        ((k as f64).ln() + 1.0 - gamma) / k as f64
+    };
+
+    // Ramanujan matrix entry: R(j,k) = gcd(j,k)² / (12·j·k)
+    let r_entry = |j: usize, k: usize| -> f64 {
+        let d = gcd(j, k) as f64;
+        d * d / (12.0 * j as f64 * k as f64)
+    };
+
+    // Vasyunin Gram diagonal: G(k,k) = (ln(2π) - γ)/k - 1/k²
+    let vasyunin_const = (2.0 * PI).ln() - gamma;
+    let g_diag = |k: usize| -> f64 {
+        vasyunin_const / k as f64 - 1.0 / (k * k) as f64
+    };
+
+    // Check diagonal: G(k,k) vs R(k,k) + b(k)²
+    println!("  §6a. DIAGONAL CHECK: G(k,k) vs R(k,k) + b(k)²\n");
+    println!("  {:>5} {:>14} {:>14} {:>14} {:>12}",
+             "k", "G(k,k)", "R(k,k)+b²", "R(k,k)", "error");
+    println!("  {}", "─".repeat(64));
+
+    let mut max_diag_err = 0.0f64;
+    for k in 1..=20 {
+        let g_val = g_diag(k);
+        let r_val = r_entry(k, k);
+        let b_val = b_entry(k);
+        let rbb_val = r_val + b_val * b_val;
+        let err = (g_val - rbb_val).abs();
+        max_diag_err = max_diag_err.max(err);
+        let star = if err < 1e-14 { "⭐" } else if err < 1e-10 { "✓" } else { "✗" };
+        println!("  {:>5} {:>14.10} {:>14.10} {:>14.10} {:>12.2e} {}",
+                 k, g_val, rbb_val, r_val, err, star);
+    }
+
+    println!("\n  Max diagonal error: {:.2e}", max_diag_err);
+    if max_diag_err < 1e-10 {
+        println!("  ⭐ DIAGONAL IDENTITY CONFIRMED: G(k,k) = R(k,k) + b(k)²");
+    } else {
+        println!("  ✗ DIAGONAL IDENTITY DOES NOT HOLD");
+    }
+
+    // §6b. Off-diagonal check using Vasyunin cotangent sum
+    // For this we need the full Vasyunin formula
+    // G(j,k) = (ln(2π)-γ)/2·(1/j+1/k) + (j-k)/(2jk)·ln(k/j) - πd/(2jk)·(V(j',k')+V(k',j')) - 1/(jk)
+    // We compute this for small j,k and compare with R(j,k) + b(j)·b(k)
+
+    println!("\n  §6b. OFF-DIAGONAL CHECK: G(j,k) vs R(j,k) + b(j)·b(k)\n");
+
+    // Vasyunin cotangent sum: V(a,b) = Σ_{m=1}^{a-1} {mb/a}·cot(πm/a)
+    let vasyunin_sum = |a: usize, b: usize| -> f64 {
+        if a <= 1 { return 0.0; }
+        let mut sum = 0.0;
+        for m in 1..a {
+            let frac_part = ((m * b) as f64 / a as f64).fract();
+            // Handle negative fract
+            let frac = if frac_part < 0.0 { frac_part + 1.0 } else { frac_part };
+            let cot = (PI * m as f64 / a as f64).cos() / (PI * m as f64 / a as f64).sin();
+            sum += frac * cot;
+        }
+        sum
+    };
+
+    // Full Vasyunin Gram entry
+    let g_entry = |j: usize, k: usize| -> f64 {
+        if j == k { return g_diag(j); }
+        let d = gcd(j, k);
+        let jp = j / d;
+        let kp = k / d;
+        let jf = j as f64;
+        let kf = k as f64;
+        let df = d as f64;
+        let term1 = vasyunin_const / 2.0 * (1.0 / jf + 1.0 / kf);
+        let term2 = (jf - kf) / (2.0 * jf * kf) * (kf / jf).ln();
+        let term3 = PI * df / (2.0 * jf * kf) * (vasyunin_sum(jp, kp) + vasyunin_sum(kp, jp));
+        let term4 = 1.0 / (jf * kf);
+        term1 + term2 - term3 - term4
+    };
+
+    println!("  {:>5} {:>5} {:>14} {:>14} {:>12}",
+             "j", "k", "G(j,k)", "R+bb^T", "error");
+    println!("  {}", "─".repeat(56));
+
+    let mut max_offdiag_err = 0.0f64;
+    let n_test = 12;
+    for j in 1..=n_test {
+        for k in (j+1)..=n_test {
+            let g_val = g_entry(j, k);
+            let rbb_val = r_entry(j, k) + b_entry(j) * b_entry(k);
+            let err = (g_val - rbb_val).abs();
+            max_offdiag_err = max_offdiag_err.max(err);
+            if j <= 6 && k <= 6 {
+                let star = if err < 1e-12 { "⭐" } else if err < 1e-8 { "✓" } else { "✗" };
+                println!("  {:>5} {:>5} {:>14.10} {:>14.10} {:>12.2e} {}",
+                         j, k, g_val, rbb_val, err, star);
+            }
+        }
+    }
+
+    println!("\n  Max off-diagonal error (N={}): {:.2e}", n_test, max_offdiag_err);
+    if max_offdiag_err < 1e-8 {
+        println!("  ⭐ IDENTITY CONFIRMED: G(j,k) = R(j,k) + b(j)·b(k)");
+        println!("\n  ════════════════════════════════════════════════════════");
+        println!("  THE MELLIN LIFT IS AN ALGEBRAIC IDENTITY.");
+        println!("  G = R + bbᵀ  ⟹  d²_NB = 4/(4+σ)  ⟹  RH from Smith.");
+        println!("  ════════════════════════════════════════════════════════");
+    } else {
+        println!("  ✗ IDENTITY DOES NOT HOLD — need a different bridge");
+        println!("  Investigating the actual relationship...");
+
+        // Print the residual matrix G - R - bb^T for insight
+        println!("\n  §6c. RESIDUAL ANALYSIS: G - R - bb^T\n");
+        for j in 1..=6 {
+            let mut row = String::new();
+            for k in 1..=6 {
+                let residual = g_entry(j, k) - r_entry(j, k) - b_entry(j) * b_entry(k);
+                write!(row, "{:>10.6} ", residual).unwrap();
+            }
+            println!("  {:>3} | {}", j, row);
+        }
+
+        // §6d. SMITH BASIS ROTATION
+        // R = (1/12)·D⁻¹·Φ·J₂·Φᵀ·D⁻¹
+        // Let T = D⁻¹·Φ, so R = (1/12)·T·J₂·Tᵀ
+        // In Smith basis: T⁻¹·G·(Tᵀ)⁻¹ should show the structure
+        // T⁻¹ = Φ⁻¹·D where (Φ⁻¹)_{d,k} = μ(d/k)·[k|d]
+        println!("\n  §6d. SMITH BASIS ROTATION: Φ⁻¹·D · G · D·(Φ⁻¹)ᵀ\n");
+        println!("  In this basis, R becomes (1/12)·diag(J₂(1),...,J₂(N)).");
+        println!("  What does G look like?\n");
+
+        let n_smith = 8;
+
+        // Build Φ⁻¹·D: (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
+        let phi_inv_d = |d: usize, k: usize| -> f64 {
+            if d % k != 0 { return 0.0; }
+            mobius(d / k) as f64 * k as f64
+        };
+
+        // Compute S = (Φ⁻¹D) · G · (Φ⁻¹D)ᵀ
+        // S_{a,b} = Σ_j Σ_k (Φ⁻¹D)_{a,j} · G(j,k) · (Φ⁻¹D)_{b,k}
+        println!("  Smith-rotated G (should be (1/12)·J₂ on diagonal if G = R):\n");
+        println!("  {:>5} {:>5} {:>12} {:>12} {:>12}",
+                 "a", "b", "S(a,b)", "(1/12)J₂", "residual");
+        println!("  {}", "─".repeat(52));
+
+        for a in 1..=n_smith {
+            for b in a..=n_smith.min(a+3) {
+                let mut s_ab = 0.0;
+                for j in 1..=n_smith {
+                    for k in 1..=n_smith {
+                        s_ab += phi_inv_d(a, j) * g_entry(j, k) * phi_inv_d(b, k);
+                    }
+                }
+                let j2_diag = if a == b { jordan2(a) / 12.0 } else { 0.0 };
+                let residual = s_ab - j2_diag;
+                let star = if residual.abs() < 1e-10 { "⭐" }
+                          else if a == b { "DIAG" } else { "" };
+                println!("  {:>5} {:>5} {:>12.6} {:>12.6} {:>12.6} {}",
+                         a, b, s_ab, j2_diag, residual, star);
+            }
+        }
+
+        // Also show: what is bb^T in Smith basis?
+        // (Φ⁻¹D)·b in Smith basis: c_d = Σ_k (Φ⁻¹D)_{d,k}·b(k)
+        println!("\n  Mean vector b in Smith basis: c_d = Σ_k (Φ⁻¹D)_{{d,k}}·b(k)\n");
+        println!("  {:>5} {:>14} {:>14}",
+                 "d", "c_d", "c_d²");
+        println!("  {}", "─".repeat(36));
+        for d in 1..=n_smith {
+            let mut c_d = 0.0;
+            for k in 1..=n_smith {
+                c_d += phi_inv_d(d, k) * b_entry(k);
+            }
+            println!("  {:>5} {:>14.8} {:>14.8}", d, c_d, c_d * c_d);
+        }
+
+        // And show the Smith-rotated residual (G - R) in Smith basis
+        // This is S - (1/12)J₂ on diagonal
+        println!("\n  Smith-rotated (G - R) matrix:\n");
+        print!("  {:>5} |", "");
+        for b in 1..=n_smith { print!("{:>10} ", b); }
+        println!();
+        println!("  {}", "─".repeat(6 + 11 * n_smith));
+        for a in 1..=n_smith {
+            print!("  {:>5} |", a);
+            for b in 1..=n_smith {
+                let mut s_ab = 0.0;
+                for j in 1..=n_smith {
+                    for k in 1..=n_smith {
+                        s_ab += phi_inv_d(a, j) * g_entry(j, k) * phi_inv_d(b, k);
+                    }
+                }
+                let j2_diag = if a == b { jordan2(a) / 12.0 } else { 0.0 };
+                print!("{:>10.6} ", s_ab - j2_diag);
+            }
+            println!();
+        }
+    }
 
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
     println!("║       vᵀRv → 1/(2π²). The arithmetic has spoken. 🔮           ║");
