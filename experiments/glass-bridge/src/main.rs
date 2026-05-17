@@ -782,7 +782,357 @@ fn main() {
                  k, g_kk, r_kk, g_kk / r_kk);
     }
 
+    // ═══════════════════════════════════════════════════════════
+    // §9. VON MANGOLDT SPECTROSCOPY: c_d = Λ(d) + (1-γ)·[d=1]
+    // ═══════════════════════════════════════════════════════════
+    // The Lean-proved bridge identity:
+    //   c_d = Σ_{k|d} μ(d/k) · (ln(k) + 1 - γ) = Λ(d) + (1-γ)·[d=1]
+    //
+    // Now verified to ZERO SORRY in VonMangoldtBridge.lean.
+    // This section provides numerical confirmation at scale.
+    println!("\n═══════════════════════════════════════════════════════════════");
+    println!("§9. VON MANGOLDT SPECTROSCOPY: c_d = Λ(d) + (1-γ)·[d=1]");
+    println!("═══════════════════════════════════════════════════════════════\n");
+    println!("  The bridge identity is PROVED in Lean (zero sorry).");
+    println!("  Now we explore its numerical and spectral consequences.\n");
+
+    // Von Mangoldt function
+    let von_mangoldt = |n: usize| -> f64 {
+        if n <= 1 { return 0.0; }
+        let mut m = n;
+        let mut p = 2;
+        while p * p <= m {
+            if m % p == 0 {
+                // Check if n = p^k
+                while m % p == 0 { m /= p; }
+                return if m == 1 { (p as f64).ln() } else { 0.0 };
+            }
+            p += 1;
+        }
+        // n itself is prime
+        (n as f64).ln()
+    };
+
+    // Is n a prime power? Returns (p, k) if n = p^k, None otherwise
+    let prime_power_decomp = |n: usize| -> Option<(usize, usize)> {
+        if n <= 1 { return None; }
+        let mut m = n;
+        let mut p = 2;
+        while p * p <= m {
+            if m % p == 0 {
+                let mut k = 0;
+                while m % p == 0 { m /= p; k += 1; }
+                return if m == 1 { Some((p, k)) } else { None };
+            }
+            p += 1;
+        }
+        Some((n, 1)) // n is prime
+    };
+
+    // Divisors of d
+    let divisors = |d: usize| -> Vec<usize> {
+        let mut divs = Vec::new();
+        let mut i = 1;
+        while i * i <= d {
+            if d % i == 0 {
+                divs.push(i);
+                if i != d / i { divs.push(d / i); }
+            }
+            i += 1;
+        }
+        divs.sort();
+        divs
+    };
+
+    // §9a. VERIFY THE BRIDGE IDENTITY AT SCALE
+    println!("  §9a. BRIDGE IDENTITY VERIFICATION: c_d vs Λ(d) + (1-γ)·[d=1]\n");
+    println!("  {:<5} {:>12} {:>14} {:>14} {:>10} {:>12}",
+             "d", "c_d", "Λ(d)+(1-γ)δ", "error", "Λ(d)", "type");
+    println!("  {}", "─".repeat(72));
+
+    let n_verify = 30;
+    let mut max_bridge_err = 0.0f64;
+    let mut lambda_sum = 0.0f64;
+    let mut pnt_sum = 0.0f64;
+
+    for d in 1..=n_verify {
+        // Compute c_d = Σ_{k|d} μ(d/k) · (ln(k) + 1 - γ)
+        let mut c_d = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 {
+                c_d += mu as f64 * ((k as f64).ln() + 1.0 - gamma);
+            }
+        }
+
+        // Theoretical value: Λ(d) + (1-γ)·[d=1]
+        let lambda_d = von_mangoldt(d);
+        let shift = if d == 1 { 1.0 - gamma } else { 0.0 };
+        let theoretical = lambda_d + shift;
+
+        let err = (c_d - theoretical).abs();
+        max_bridge_err = max_bridge_err.max(err);
+
+        // Classify
+        let dtype = match prime_power_decomp(d) {
+            Some((p, 1)) => format!("prime={}", p),
+            Some((p, k)) => format!("{}^{}", p, k),
+            None => if d == 1 { "unit".to_string() } else { "composite".to_string() }
+        };
+
+        let star = if err < 1e-12 { "✓" } else { "✗" };
+        println!("  {:<5} {:>12.8} {:>14.8} {:>14.2e} {:>10.6} {:>12} {}",
+                 d, c_d, theoretical, err, lambda_d, dtype, star);
+
+        lambda_sum += lambda_d;
+        if d >= 2 { pnt_sum += lambda_d / d as f64; }
+    }
+
+    println!("\n  Max bridge error: {:.2e}", max_bridge_err);
+    if max_bridge_err < 1e-10 {
+        println!("  ⭐ BRIDGE IDENTITY CONFIRMED: c_d = Λ(d) + (1-γ)·δ_{{d,1}}");
+    }
+    println!("  Σ Λ(d) for d≤{}: {:.6} (cf. Chebyshev ψ({}) ~ {})",
+             n_verify, lambda_sum, n_verify, n_verify);
+    println!("  Σ Λ(d)/d for d≤{}: {:.6} (cf. PNT: ~ ln({}) = {:.4})",
+             n_verify, pnt_sum, n_verify, (n_verify as f64).ln());
+
+    // §9b. PRIME-POWER ANATOMY
+    println!("\n  §9b. PRIME-POWER ANATOMY: Where Λ(d) lives\n");
+    println!("  The von Mangoldt function has support ONLY on prime powers.");
+    println!("  For d = p^k: Λ(d) = ln(p). For all other d: Λ(d) = 0.\n");
+
+    let n_anatomy = 60;
+    let mut prime_power_count = 0usize;
+    let mut non_prime_power_count = 0usize;
+    let mut lambda_by_prime: std::collections::BTreeMap<usize, Vec<(usize, f64)>> =
+        std::collections::BTreeMap::new();
+
+    for d in 2..=n_anatomy {
+        let lam = von_mangoldt(d);
+        if lam > 0.0 {
+            prime_power_count += 1;
+            if let Some((p, k)) = prime_power_decomp(d) {
+                lambda_by_prime.entry(p).or_default().push((k, lam));
+            }
+        } else {
+            non_prime_power_count += 1;
+        }
+    }
+
+    println!("  Among d = 2..{}: {} prime powers, {} non-prime-powers",
+             n_anatomy, prime_power_count, non_prime_power_count);
+    println!("\n  Prime power hierarchy:\n");
+    println!("  {:<8} {:<30} {:>10}", "prime p", "powers p^k ≤ 60", "ln(p)");
+    println!("  {}", "─".repeat(52));
+
+    for (p, powers) in &lambda_by_prime {
+        let powers_str: Vec<String> = powers.iter()
+            .map(|(k, _)| format!("{}^{}={}", p, k, p.pow(*k as u32)))
+            .collect();
+        println!("  {:<8} {:<30} {:>10.6}",
+                 p, powers_str.join(", "), (*p as f64).ln());
+    }
+
+    // §9c. THE SPECTRAL DRIVE: Why σ → ∞
+    println!("\n  §9c. THE SPECTRAL DRIVE: What pushes σ → ∞?\n");
+    println!("  σ(N) = Σ_{{d≤N}} J₂(d)·c_d² / (J₂(d)/12) = 12·Σ c_d²");
+    println!("  Since c_d ≈ Λ(d) for d ≥ 2, we have c_d² ≈ (ln p)² on p^k.");
+    println!("  The sum diverges because there are infinitely many primes.\n");
+
+    // Compute cumulative σ drive
+    println!("  {:<5} {:>10} {:>12} {:>12} {:>14} {:>12}",
+             "N", "c_N²", "Σ c_d²", "12·Σ c_d²", "prime sum", "ratio");
+    println!("  {}", "─".repeat(68));
+
+    let n_drive = 100;
+    let mut cum_c2 = 0.0f64;
+    let mut cum_prime_lnp2 = 0.0f64;
+
+    for d in 1..=n_drive {
+        // Compute c_d
+        let mut c_d = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 {
+                c_d += mu as f64 * ((k as f64).ln() + 1.0 - gamma);
+            }
+        }
+
+        cum_c2 += c_d * c_d;
+
+        // Track prime contribution
+        if let Some((p, _)) = prime_power_decomp(d) {
+            if d >= 2 {
+                let lnp = (p as f64).ln();
+                cum_prime_lnp2 += lnp * lnp;
+            }
+        }
+
+        // Print at select values
+        if d <= 10 || d % 10 == 0 {
+            let ratio = if cum_prime_lnp2 > 0.0 { cum_c2 / cum_prime_lnp2 } else { 0.0 };
+            println!("  {:<5} {:>10.6} {:>12.6} {:>12.4} {:>14.6} {:>12.4}",
+                     d, c_d * c_d, cum_c2, 12.0 * cum_c2, cum_prime_lnp2, ratio);
+        }
+    }
+
+    // §9d. GROWTH RATE COMPARISON
+    println!("\n  §9d. GROWTH RATE: σ(N) vs Mertens-class bounds\n");
+    println!("  The PNT gives Σ_{{p≤N}} ln²(p)/p ~ ½ ln²(N),");
+    println!("  so σ(N) ~ 6·ln²(N) (since prime powers p^k with k≥2 contribute O(1)).\n");
+
+    println!("  {:<8} {:>12} {:>12} {:>12} {:>12}",
+             "N", "12·Σ c_d²", "6·ln²(N)", "ratio", "π(N)");
+    println!("  {}", "─".repeat(60));
+
+    let mut cum_c2_full = 0.0f64;
+    let mut prime_count = 0usize;
+
+    for d in 1..=200 {
+        let mut c_d = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 {
+                c_d += mu as f64 * ((k as f64).ln() + 1.0 - gamma);
+            }
+        }
+        cum_c2_full += c_d * c_d;
+
+        // Count primes
+        if d >= 2 && prime_power_decomp(d).map_or(false, |(_, k)| k == 1) {
+            prime_count += 1;
+        }
+
+        if d == 10 || d == 20 || d == 50 || d == 100 || d == 200 {
+            let ln_n = (d as f64).ln();
+            let mertens_est = 6.0 * ln_n * ln_n;
+            let sigma_val = 12.0 * cum_c2_full;
+            let ratio = sigma_val / mertens_est;
+            println!("  {:<8} {:>12.4} {:>12.4} {:>12.4} {:>12}",
+                     d, sigma_val, mertens_est, ratio, prime_count);
+        }
+    }
+
+    // §9e. THE SPECTRAL FILTER: Λ(d) vs optimal NB witness
+    println!("\n  §9e. SPECTRAL FILTER: Comparing Λ-weighted vs optimal witness\n");
+    println!("  The Λ-weighted witness uses c_d ~ Λ(d) (from Smith physics).");
+    println!("  The optimal NB witness uses Möbius cancellation (alternating signs).");
+    println!("  RH lives in the gap between these two spectral signatures.\n");
+
+    let n_filter = 20;
+    // Compute optimal NB coefficients in Smith basis via G⁻¹·1
+    // For small N, solve the system G·v = 1
+    let mut g_mat: Vec<Vec<f64>> = Vec::new();
+    for j in 1..=n_filter {
+        let mut row = Vec::new();
+        for k in 1..=n_filter {
+            row.push(g_entry(j, k));
+        }
+        g_mat.push(row);
+    }
+
+    // Solve G·v = 1 by Gaussian elimination
+    let n = n_filter;
+    let mut aug: Vec<Vec<f64>> = Vec::new();
+    for i in 0..n {
+        let mut row = g_mat[i].clone();
+        row.push(1.0); // augmented column = 1
+        aug.push(row);
+    }
+
+    // Forward elimination
+    for col in 0..n {
+        // Partial pivoting
+        let mut max_row = col;
+        let mut max_val = aug[col][col].abs();
+        for row in (col+1)..n {
+            if aug[row][col].abs() > max_val {
+                max_val = aug[row][col].abs();
+                max_row = row;
+            }
+        }
+        aug.swap(col, max_row);
+
+        let pivot = aug[col][col];
+        if pivot.abs() < 1e-15 { continue; }
+
+        for row in (col+1)..n {
+            let factor = aug[row][col] / pivot;
+            for c in col..=n {
+                aug[row][c] -= factor * aug[col][c];
+            }
+        }
+    }
+
+    // Back substitution
+    let mut v_opt = vec![0.0f64; n];
+    for i in (0..n).rev() {
+        let mut sum = aug[i][n];
+        for j in (i+1)..n {
+            sum -= aug[i][j] * v_opt[j];
+        }
+        v_opt[i] = sum / aug[i][i];
+    }
+
+    // Rotate both the Λ-witness and the optimal witness into Smith basis
+    println!("  {:<5} {:>12} {:>12} {:>12} {:>12}",
+             "d", "Λ(d)", "c_d(mean)", "v*_d(opt)", "v*/c ratio");
+    println!("  {}", "─".repeat(56));
+
+    for d in 1..=n_filter {
+        let lambda_d = von_mangoldt(d);
+
+        // c_d from Smith rotation
+        let mut c_d = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 {
+                c_d += mu as f64 * ((k as f64).ln() + 1.0 - gamma);
+            }
+        }
+
+        // Rotate v_opt into Smith basis
+        let mut v_smith = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 && k <= n_filter {
+                v_smith += mu as f64 * k as f64 * v_opt[k - 1];
+            }
+        }
+
+        let ratio = if c_d.abs() > 1e-15 { v_smith / c_d } else { f64::NAN };
+        println!("  {:<5} {:>12.6} {:>12.6} {:>12.6} {:>12.4}",
+                 d, lambda_d, c_d, v_smith, ratio);
+    }
+
+    // Final summary
+    let mut sigma_est = 0.0f64;
+    for d in 1..=n_filter {
+        let mut c_d = 0.0;
+        for k in divisors(d) {
+            let mu = mobius(d / k);
+            if mu != 0 {
+                c_d += mu as f64 * ((k as f64).ln() + 1.0 - gamma);
+            }
+        }
+        sigma_est += c_d * c_d;
+    }
+    let d2_smith = 4.0 / (4.0 + 12.0 * sigma_est);
+    // Optimal BD distance: d² = 1 / (1ᵀ G⁻¹ 1) where v_opt = G⁻¹·1
+    let one_t_ginv_one: f64 = v_opt.iter().sum();
+    let d2_opt = if one_t_ginv_one > 0.0 { 1.0 / one_t_ginv_one } else { f64::INFINITY };
+
+    println!("\n  ─── Summary ───");
+    println!("  σ(N={}) ≈ {:.4} (from 12·Σ c_d²)", n_filter, 12.0 * sigma_est);
+    println!("  d²_smith(N={}) ≈ {:.6} (Smith witness → d²=4/(4+σ))", n_filter, d2_smith);
+    println!("  d²_opt(N={})   ≈ {:.6} (optimal NB: d²=1/1ᵀG⁻¹1)", n_filter, d2_opt);
+    println!("  1ᵀG⁻¹1         = {:.6}", one_t_ginv_one);
+    println!("\n  Key: d²_opt < d²_smith because the optimal witness uses Möbius");
+    println!("  cancellation to suppress L² error far better than the raw");
+    println!("  Smith/Λ witness. Both → 0 as N → ∞ iff RH holds.");
+
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
-    println!("║       vᵀRv → 1/(2π²). The arithmetic has spoken. 🔮           ║");
+    println!("║   The von Mangoldt bridge is PROVED. The arithmetic speaks. 🏛️  ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
 }
