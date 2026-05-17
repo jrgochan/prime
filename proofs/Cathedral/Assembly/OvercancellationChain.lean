@@ -1,12 +1,50 @@
-/-
-  Cathedral/Assembly/OvercancellationChain.lean
+import Cathedral.Assembly.MainChain
 
+/-!
   # The Overcancellation Path: vᵀGv ≤ 1 → RH (Crown-free!)
+
+  ## Overview
+
+  This module proves that if the Gram matrix quadratic form `vᵀGv ≤ 1`
+  for all sufficiently large N, then the Riemann Hypothesis holds.
+  This is the **simplest axiom footprint** in the Cathedral.
+
+  ## Main Results
+
+  * `dot_product_tends_to_zero` : |1 - bᵀv| → 0 from PNT alone.
+    PROVED. Zero sorry. Uses only Σμ/k→0 and Σμlogk/k→-1.
+
+  * `overcancellation_implies_rh` : vᵀGv ≤ 1 → RH.
+    PROVED. Zero sorry. Uses the algebraic identity
+      d² = (vᵀGv - 1) + 2(1 - bᵀv)
+    Overcancellation makes the first term ≤ 0. PNT makes the second → 0.
+
+  ## Architecture
+
+  The proof avoids the entire Crown path:
+  * No `gram_quadratic_form_decay` (Crown axiom — SUPERSEDED)
+  * No Mertens x^{3/4} bound
+  * No Perron contour axioms (R_isLittleO, frac_error_isLittleO)
+
+  It relies on:
+  * PNT sums (pnt_mu_div_k ✅, pnt_mu_log_div_k ✅, pnt_mu_log_sq_div_k 📐)
+  * The Nyman-Beurling converse (nyman_beurling_converse ✅, via BDMellin.lean)
+  * The overcancellation hypothesis: vᵀGv ≤ 1
+
+  ## Custom Axioms: 1
+
+  * `pnt_mu_log_sq_div_k` : Σμ(k)·log²(k)/k → -2γ
+    Status: unconditionally true (PNT consequence, known since 1896).
+    Awaiting PrimeNumberTheoremAnd upgrade to Mathlib 4.29.
+
+  ## Numerical Evidence
+
+  The overcancellation hypothesis is supported by GPU computation:
+  for all N ∈ [10, 100], vᵀGv < 1. The Möbius function overcancels.
+  See: experiments/glass-bridge/
 
   Created: May 17, 2026 — The Overcancellation Path
 -/
-
-import Cathedral.Assembly.MainChain
 
 noncomputable section
 open Real MeasureTheory Complex Filter Finset Cathedral.Vasyunin ArithmeticFunction

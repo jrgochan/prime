@@ -3,8 +3,9 @@
 
   ## ATTEMPT: PNT → d² → 0 → RH (Unconditional Forward)
 
-  If this compiles with PROVED, it would prove the Riemann Hypothesis!
-  (Because PNT is unconditionally true.)
+  **NOTE**: This file is SUPERSEDED by `OvercancellationChain.lean`,
+  which proves RH from overcancellation (vᵀGv ≤ 1) + PNT with zero sorry.
+  This file is preserved as documentation of the Mertens gap analysis.
 
   The forward direction decomposes as:
     d² = (1 - bᵀw)² + wᵀCw
@@ -14,7 +15,8 @@
   From PNT: bᵀw → 1, so (1-bᵀw)² → 0.
   The gap: does wᵀCw → 0 from PNT alone?
 
-  This file explores what's provable unconditionally.
+  ANSWER: No — this requires |M(x)| ≤ C·x^{3/4}, which is RH-strength.
+  The overcancellation path bypasses this gap entirely.
 -/
 
 import Cathedral.Defs
