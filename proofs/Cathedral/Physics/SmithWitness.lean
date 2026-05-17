@@ -715,7 +715,114 @@ theorem sigma_witness_growth (B : ℝ) :
     -- (from smith_numerator: y_p = 1/(p+1), J₂(p) = p²-1)
     have hprime_bound : ∀ p ∈ (Finset.Icc 1 N).filter Nat.Prime,
       1/3 ≤ RamanujanBridge.jordanTotient2 p * yd p ^ 2 := by
-      sorry -- Prime y_p computation via smith_numerator
+      intro p hp
+      rw [Finset.mem_filter] at hp
+      obtain ⟨hp_icc, hp_prime⟩ := hp
+      rw [Finset.mem_Icc] at hp_icc
+      have hp_pos : 0 < p := hp_prime.pos
+      have hN_pos : 0 < N := by omega
+      -- y_1 = Σ xf = 1 from smith_numerator at j=1
+      have hy1 : yd 1 = 1 := by
+        simp only [yd, one_dvd, ite_true]
+        rw [show ∑ i : Fin N, xf i = ∑ k ∈ Finset.range N, q (k + 1) from by
+          rw [← Fin.sum_univ_eq_sum_range]]
+        have h := smith_numerator N hN_pos 1 (by omega) (by omega)
+        simp [Nat.gcd_one_left] at h; exact_mod_cast h
+      -- From smith_numerator at j=p:
+      -- Σ_k gcd(p,k+1)² · q(k+1) = p
+      have hsn := smith_numerator N hN_pos p hp_pos hp_icc.2
+      -- Convert to Fin sum
+      have hsn_fin : ∑ i : Fin N,
+        (Nat.gcd p (i.val + 1) : ℝ) ^ 2 * xf i = (p : ℝ) := by
+        rw [← Fin.sum_univ_eq_sum_range] at hsn; exact hsn
+      -- For prime p: gcd(p, k+1) = p if p|k+1, else 1
+      -- So: Σ gcd²·xf = p²·y_p + 1·(Σ xf - y_p) = (p²-1)·y_p + 1
+      have hsum_split : ∑ i : Fin N,
+        (Nat.gcd p (i.val + 1) : ℝ) ^ 2 * xf i =
+        ((p : ℝ) ^ 2 - 1) * yd p + 1 := by
+        -- Step 1: Replace gcd(p,k+1)² with p² or 1
+        have hgcd_cases : ∀ i : Fin N,
+          (Nat.gcd p (i.val + 1) : ℝ) ^ 2 * xf i =
+          (if p ∣ (i.val + 1) then (p : ℝ) ^ 2 * xf i else xf i) := by
+          intro i; split_ifs with h
+          · -- p | k+1 ⟹ gcd(p,k+1) = p
+            congr 1; push_cast
+            exact_mod_cast congrArg (· ^ 2) (Nat.gcd_eq_left h)
+          · -- p ∤ k+1 ⟹ gcd(p,k+1) = 1 (since p is prime)
+            have hcop : Nat.Coprime p (i.val + 1) :=
+              (Nat.Prime.coprime_iff_not_dvd hp_prime).mpr h
+            have : Nat.gcd p (i.val + 1) = 1 := hcop
+            have : (Nat.gcd p (i.val + 1) : ℝ) = 1 := by
+              rw [this]; simp
+            rw [this]; simp
+        simp_rw [hgcd_cases]
+        -- Step 2: Split into divisible/not-divisible
+        -- Σ (if p|k+1 then p²·xf else xf) = p²·y_p + (y_1 - y_p)
+        have hsplit : ∑ i : Fin N,
+          (if p ∣ (i.val + 1) then (p : ℝ) ^ 2 * xf i else xf i) =
+          (p : ℝ) ^ 2 * yd p + (yd 1 - yd p) := by
+          simp only [yd]
+          -- Factor out: each term is either p²·xf or xf
+          -- = p²·(Σ_{p|} xf) + (Σ_{¬p|} xf)
+          -- = p²·y_p + (Σ xf - y_p)
+          -- = p²·y_p + y_1 - y_p
+          have key : ∑ i : Fin N,
+            (if p ∣ (i.val + 1) then (p : ℝ) ^ 2 * xf i else xf i) =
+            (p : ℝ) ^ 2 * (∑ i : Fin N, if p ∣ (i.val + 1) then xf i else 0) +
+            ∑ i : Fin N, (if ¬(p ∣ (i.val + 1)) then xf i else 0) := by
+            simp_rw [show ∀ i : Fin N,
+              (if p ∣ (i.val + 1) then (p : ℝ) ^ 2 * xf i else xf i) =
+              (p : ℝ) ^ 2 * (if p ∣ (i.val + 1) then xf i else 0) +
+              (if ¬(p ∣ (i.val + 1)) then xf i else 0) from by
+              intro i; split_ifs <;> simp [*]]
+            rw [Finset.sum_add_distrib, Finset.mul_sum]
+          rw [key]
+          congr 1
+          -- Σ_{¬p|} xf = Σ xf - Σ_{p|} xf = y_1 - y_p
+          rw [show ∑ i : Fin N, (if ¬(p ∣ (i.val + 1)) then xf i else 0) =
+            ∑ i : Fin N, xf i - ∑ i : Fin N, (if p ∣ (i.val + 1) then xf i else 0) from by
+            have : ∀ i : Fin N, xf i =
+              (if p ∣ (i.val + 1) then xf i else 0) +
+              (if ¬(p ∣ (i.val + 1)) then xf i else 0) := by
+              intro i; split_ifs <;> simp [*]
+            rw [show ∑ i : Fin N, xf i =
+              ∑ i : Fin N, ((if p ∣ (i.val + 1) then xf i else 0) +
+              (if ¬(p ∣ (i.val + 1)) then xf i else 0)) from by
+              congr 1; ext i; exact this i]
+            rw [Finset.sum_add_distrib]; ring]
+          simp only [one_dvd, ite_true]
+        rw [hsplit, hy1]; ring
+      -- From hsn_fin and hsum_split: (p²-1)·y_p + 1 = p
+      have hyp_eq : ((p : ℝ) ^ 2 - 1) * yd p = (p : ℝ) - 1 := by linarith [hsn_fin]
+      -- y_p = 1/(p+1) since (p²-1)·y_p = p-1 and p²-1 = (p-1)(p+1)
+      have hp_ge2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp_prime.two_le
+      have hp1_pos : (0 : ℝ) < (p : ℝ) + 1 := by linarith
+      have hp1_ne : (p : ℝ) + 1 ≠ 0 := hp1_pos.ne'
+      have hpm1_ne : (p : ℝ) - 1 ≠ 0 := by nlinarith
+      have hp2m1 : (p : ℝ) ^ 2 - 1 = ((p : ℝ) - 1) * ((p : ℝ) + 1) := by ring
+      have hyp_val : yd p = 1 / ((p : ℝ) + 1) := by
+        have h1 : ((p : ℝ) + 1) * yd p = 1 := by
+          -- From (p²-1)·y_p = p-1 and p²-1 = (p-1)(p+1):
+          -- (p-1)(p+1)·y_p = p-1
+          -- Since p-1 ≠ 0: (p+1)·y_p = 1
+          have h := hyp_eq; rw [hp2m1] at h
+          -- h : (p-1) * (p+1) * yd p = p - 1
+          have h2 : (p : ℝ) - 1 ≠ 0 := hpm1_ne
+          have h3 := h -- (p-1) * ((p+1) * y_p) = (p-1) * 1
+          nlinarith [mul_comm ((p:ℝ) + 1) (yd p)]
+        rw [eq_comm, div_eq_iff hp1_ne]; linarith
+      -- J₂(p)·y_p² = (p²-1)/(p+1)² = (p-1)/(p+1)
+      rw [RamanujanBridge.jordan2_prime p hp_prime, hyp_val]
+      rw [div_pow, one_pow]
+      rw [show ((p : ℝ) ^ 2 - 1) * (1 / ((p : ℝ) + 1) ^ 2) =
+        ((p : ℝ) - 1) / ((p : ℝ) + 1) from by
+        rw [hp2m1, sq, one_div, mul_inv, ← mul_assoc,
+            mul_assoc ((p:ℝ) - 1) ((p:ℝ) + 1) ((p:ℝ) + 1)⁻¹,
+            mul_inv_cancel₀ hp1_ne, mul_one]
+        rfl]
+      -- (p-1)/(p+1) ≥ 1/3 for p ≥ 2
+      rw [le_div_iff₀ hp1_pos]
+      nlinarith
     -- σ/12 ≥ Σ_{prime} 1/3 = π(N)/3
     have hsos' : sigmaWitness N = 12 * ∑ d ∈ Finset.Icc 1 N,
       RamanujanBridge.jordanTotient2 d * yd d ^ 2 := hsos
