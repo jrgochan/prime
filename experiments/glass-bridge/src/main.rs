@@ -1132,6 +1132,155 @@ fn main() {
     println!("  cancellation to suppress L² error far better than the raw");
     println!("  Smith/Λ witness. Both → 0 as N → ∞ iff RH holds.");
 
+    // ═══════════════════════════════════════════════════════════
+    // §10. GRAM ↔ SMITH BRIDGE: The Last Axiom
+    // ═══════════════════════════════════════════════════════════
+    //
+    // gram_quadratic_form_decay says: vᵀGv ≤ 1 + C/logN under RH.
+    // We proved: σ(N) → ∞ (unconditional, via Euclid + Λ(d)).
+    //
+    // Question: Does σ → ∞ IMPLY vᵀGv → 1?
+    //
+    // Experiment: For the SAME Möbius-Fejér weights v_k = -μ(k)(1-logk/logN)/k,
+    // compute BOTH:
+    //   (a) vᵀGv  (Vasyunin Gram matrix, continuous L²(0,1))
+    //   (b) vᵀRv  (Ramanujan matrix, discrete gcd²/(12jk))
+    //   (c) σ(N) = 12·Σ J₂(d)·y_d²  (Smith spectral sum)
+    //   (d) d² = 1 - 2bᵀv + vᵀGv  (the actual L² error)
+    //
+    // If (a) and (b) have a clean relationship, the bridge is identifiable.
+    println!("\n\n═══════════════════════════════════════════════════════════════");
+    println!("  §10. GRAM ↔ SMITH BRIDGE: Probing the Last Axiom");
+    println!("═══════════════════════════════════════════════════════════════\n");
+
+    println!("  For Möbius-Fejér weights v_k = -μ(k)·(1-logk/logN)/k:");
+    println!("  Comparing vᵀGv (Gram, continuous) vs vᵀRv (Ramanujan, discrete)\n");
+
+    // Vasyunin Gram entry: G_{jk} = ln(gcd(j,k)²/(jk)) + 2(1-γ)
+    // Actually the Gram entry is:
+    //   G_{jk} = 1/(max(j,k)) for the Nyman-Beurling inner product
+    // No wait — the actual formula from our proofs:
+    //   G_{jk} = ln(gcd²/(jk)) + 2(1-γ)  [Vasyunin formula]
+    // Let's use both and compare.
+
+    let euler_gamma = 0.5772156649015329;
+
+    // Actual NB Gram entry: G(j,k) = ∫₀¹ {1/(jx)}·{1/(kx)} dx
+    // Computed via numerical quadrature (trapezoidal, 10000 points)
+    let gram_entry = |j: usize, k: usize| -> f64 {
+        let n_quad = 10000;
+        let mut sum = 0.0;
+        for i in 1..n_quad {
+            let x = i as f64 / n_quad as f64;
+            let fj = (1.0 / (j as f64 * x)).fract();
+            let fk = (1.0 / (k as f64 * x)).fract();
+            sum += fj * fk;
+        }
+        sum / n_quad as f64
+    };
+
+    // Ramanujan matrix: R(j,k) = gcd(j,k)²/(12jk)
+    let ramanujan_entry = |j: usize, k: usize| -> f64 {
+        let g = gcd(j, k) as f64;
+        g * g / (12.0 * j as f64 * k as f64)
+    };
+
+    // Mean vector entry: b_k = ∫₀¹ {1/(kx)} dx
+    // Closed form: (ln(k) + 1 - γ) / k
+    let mean_entry = |k: usize| -> f64 {
+        ((k as f64).ln() + 1.0 - euler_gamma) / k as f64
+    };
+
+    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12} {:>10}",
+             "N", "vᵀGv", "vᵀRv", "bᵀv", "d²_Gram", "σ(N)", "vᵀGv-1");
+
+    for &n in &[10, 20, 30, 50, 80, 100] {
+        let log_n = (n as f64).ln();
+
+        // Möbius-Fejér weights: v_k = -μ(k)·(1-logk/logN) for k = 1..N-1
+        let weights: Vec<f64> = (1..n).map(|k| {
+            let mu = mobius(k);
+            if mu == 0 { return 0.0; }
+            let log_weight = 1.0 - (k as f64).ln() / log_n;
+            -(mu as f64) * log_weight
+        }).collect();
+
+        // Compute vᵀGv (Vasyunin)
+        let mut vtgv = 0.0;
+        for i in 0..weights.len() {
+            for j in 0..weights.len() {
+                vtgv += weights[i] * weights[j] * gram_entry(i + 1, j + 1);
+            }
+        }
+
+        // Compute vᵀRv (Ramanujan)
+        let mut vtrv = 0.0;
+        for i in 0..weights.len() {
+            for j in 0..weights.len() {
+                vtrv += weights[i] * weights[j] * ramanujan_entry(i + 1, j + 1);
+            }
+        }
+
+        // Compute bᵀv
+        let mut btv = 0.0;
+        for i in 0..weights.len() {
+            btv += mean_entry(i + 1) * weights[i];
+        }
+
+        // d² = 1 - 2bᵀv + vᵀGv
+        let d2_gram = 1.0 - 2.0 * btv + vtgv;
+
+        // σ(N) from Smith spectral sum
+        let mut sigma = 0.0;
+        for d in 1..=n {
+            let yd = y_d_numerical(d, n);
+            sigma += jordan2(d) * yd * yd;
+        }
+        sigma *= 12.0;
+
+        println!("  {:>5} {:>12.6} {:>12.6} {:>12.6} {:>12.6} {:>12.4} {:>10.6}",
+                 n, vtgv, vtrv, btv, d2_gram, sigma, vtgv - 1.0);
+    }
+
+    println!("\n  Key observations:");
+    println!("  • vᵀGv should → 1 as N → ∞ (if gram_quadratic_form_decay holds)");
+    println!("  • vᵀRv captures the discrete Ramanujan structure");
+    println!("  • The ratio (vᵀGv - 1) / (1/logN) should stabilize (= C in the axiom)");
+    println!("  • If vᵀGv = 1 + 12·vᵀRv + o(1), then Gram ↔ Ramanujan bridge exists");
+
+    println!("\n  ─── Checking (vᵀGv - 1)·logN ───");
+    println!("  (Should converge to the axiom constant C)\n");
+    println!("  {:>5} {:>12} {:>12}", "N", "(vᵀGv-1)·logN", "1/logN");
+
+    for &n in &[10, 20, 30, 50, 80, 100] {
+        let log_n = (n as f64).ln();
+        let weights: Vec<f64> = (1..n).map(|k| {
+            let mu = mobius(k);
+            if mu == 0 { return 0.0; }
+            let log_weight = 1.0 - (k as f64).ln() / log_n;
+            -(mu as f64) * log_weight
+        }).collect();
+
+        let mut vtgv = 0.0;
+        for i in 0..weights.len() {
+            for j in 0..weights.len() {
+                vtgv += weights[i] * weights[j] * gram_entry(i + 1, j + 1);
+            }
+        }
+
+        let excess = vtgv - 1.0;
+        println!("  {:>5} {:>12.6} {:>12.6}", n, excess * log_n, 1.0 / log_n);
+    }
+
+    println!("\n  If (vᵀGv-1)·logN → C (finite), then gram_quadratic_form_decay");
+    println!("  follows with that constant. The bridge to close is:");
+    println!("  ┌───────────────────────────────────────────────────────────┐");
+    println!("  │  vᵀGv = 1 + (vᵀGv - 1)                                  │");
+    println!("  │       = 1 + 12·vᵀRv · correction(N)                     │");
+    println!("  │       = 1 + f(Σ Λ(d)², σ(N)) / logN                     │");
+    println!("  │  where f encodes the R↔G transport                      │");
+    println!("  └───────────────────────────────────────────────────────────┘");
+
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
     println!("║   The von Mangoldt bridge is PROVED. The arithmetic speaks. 🏛️  ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
