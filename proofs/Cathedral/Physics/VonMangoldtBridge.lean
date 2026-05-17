@@ -62,6 +62,11 @@ theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
     (∑ k ∈ d.divisors,
       (ArithmeticFunction.moebius (d / k) : ℝ) * Real.log (k : ℝ)) =
     ArithmeticFunction.vonMangoldt d := by
+  -- μ * log = Λ, proven via:
+  --   calc μ * log = μ * (Λ * ζ) = Λ * (μ * ζ) = Λ * 1 = Λ
+  -- Evaluating (μ * log)(d) gives a sum over divisorsAntidiagonal.
+  -- Our sum is over divisors with μ(d/k)·log(k), which is the same
+  -- sum reindexed. Need Nat.sum_divisorsAntidiagonal' to convert.
   sorry
 
 -- ════════════════════════════════════════════════════════════════
@@ -77,6 +82,11 @@ theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
 theorem moebius_sum_indicator (d : ℕ) (hd : d ≠ 0) :
     (∑ k ∈ d.divisors, (ArithmeticFunction.moebius (d / k) : ℝ)) =
     if d = 1 then 1 else 0 := by
+  -- From coe_moebius_mul_coe_zeta: (μ * ζ)(d) = [d=1].
+  -- (μ * ζ)(d) = Σ_{(a,b) ∈ antidiag(d)} μ(a)·ζ(b)
+  --            = Σ_{k|d} μ(d/k)·ζ(k)
+  --            = Σ_{k|d} μ(d/k)·1
+  -- Need: antidiagonal ↔ divisors conversion for this Mathlib version.
   sorry
 
 /-- **The Full Bridge Identity: c_d = Λ(d) + (1-γ)·[d=1]**
