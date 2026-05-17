@@ -476,5 +476,14 @@ end
 --        consequence). It is the SIMPLEST possible axiom footprint.
 
 -- #print axioms nyman_beurling_equivalence
+--   → LIVE OUTPUT (May 17, 2026):
+--     [R_isLittleO, frac_error_isLittleO,
+--      gram_quadratic_form_decay, mu_pnt_alt,
+--      propext, Classical.choice, Quot.sound]
+--
+--   4 custom axioms + 3 Lean kernel axioms.
+--   ★ covariance_bound_from_mertens_34: ELIMINATED
+--   ★ mu_log_mul_zeta: ELIMINATED
+--
 -- #print axioms rh_discrete_global
 -- #print axioms rh_discrete_subseq
