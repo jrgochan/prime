@@ -172,7 +172,46 @@ theorem overcancellation_implies_rh
   intro ε hε
   obtain ⟨N_dot, h_dot_bound⟩ := h_dot (ε / 2) (by linarith)
   obtain ⟨N_oc, h_oc_bound⟩ := h_oc
-  sorry -- Index bridge: connect ∫(1-f)² to 1-2bᵀv+vᵀGv
+  -- Set N_min so everything applies
+  set N_min := max (max N_dot N_oc) 10 with hN_min_def
+  refine ⟨N_min, fun N hN => ?_⟩
+  -- Use bdMoebiusWeight N as the witness
+  refine ⟨bdMoebiusWeight N, ?_⟩
+  have hN3 : N ≥ 3 := by omega
+  have hN10 : 10 ≤ N := by omega
+  have hN2 : 2 ≤ N := by omega
+  -- Step 1: ∫|1-f|² = 1 - 2bᵀv + vᵀGv (PROVED identity)
+  have h_eq := bd_l2_error_eq_quad_error N hN2 (bdMoebiusWeight N)
+  -- Step 2: Index bridge — connect logCutoffWitness form to realQuadForm
+  have h_N_sub : (N-1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_qf : dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) =
+      realQuadForm (Matrix.of fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1))
+        (bdMoebiusWeight N) :=
+    h_N_sub ▸ quadForm_bridge_aux (N-1) (by omega : 2 ≤ N-1)
+  -- Step 3: Algebraic rewrite: 1 - 2bᵀv + vᵀGv = (vᵀGv - 1) + 2(1 - bᵀv)
+  have h_rewrite : 1 - 2 * dotProduct (fun i => vasyuninMeanEntry (i.val + 1))
+      (bdMoebiusWeight N) +
+    realQuadForm (Matrix.of fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1))
+      (bdMoebiusWeight N) =
+    (dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) - 1) +
+    2 * (1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N)) := by
+    rw [h_qf]; ring
+  rw [h_eq, h_rewrite]
+  -- Step 4: Overcancellation bound: vᵀGv - 1 ≤ 0
+  have h_gram_le : dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) - 1 ≤ 0 := by
+    linarith [h_oc_bound N (by omega : N ≥ N_oc) hN3]
+  -- Step 5: Dot product convergence: |1 - bᵀv| < ε/2
+  have h_dot_small := h_dot_bound N (by omega : N ≥ N_dot) hN3
+  -- Step 6: Combine
+  -- (vᵀGv - 1) + 2(1 - bᵀv) ≤ 0 + 2|1 - bᵀv| < 2 · ε/2 = ε
+  have h_le_abs : 1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1))
+      (bdMoebiusWeight N) ≤
+    |1 - dotProduct (fun i => vasyuninMeanEntry (i.val + 1))
+      (bdMoebiusWeight N)| := le_abs_self _
+  linarith
 
 -- ════════════════════════════════════════════════
 -- AUDIT
