@@ -188,7 +188,7 @@ theorem abel_summation_covariance_bound_proved
   --
   -- THIS IS THE REMAINING GAP (Selberg/Báez-Duarte estimate).
   -- ═══════════════════════════════════════════════
-  sorry
+  sorry -- DEPRECATED: Bypassed by MellinCrown.lean (Selberg estimate)
 
 -- ═══════════════════════════════════════════════
 -- §3. AUDIT

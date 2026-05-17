@@ -180,7 +180,7 @@ theorem pnt_mu_log_div_k_derived :
   -- WIP: Incomplete alternative spatial route. This path is superseded by
   -- the Mellin Crown architecture (v11+). Requires forward Tauberian theorem
   -- not available in Mathlib 4.28. Left for future exploration.
-  sorry
+  sorry -- UPSTREAM-BLOCKED: Needs forward Tauberian theorem (not in Mathlib 4.29)
 
 -- ════════════════════════════════════════════════
 -- SORRY 2/2: pnt_mu_log_sq_div_k (second derivative of 1/ζ)
@@ -208,7 +208,7 @@ theorem pnt_mu_log_sq_div_k_derived :
   -- WIP: Incomplete alternative spatial route, OFF CROWN PATH since v9.
   -- Superseded by Abel Bypass + S₃ uniform bound. Requires forward Tauberian
   -- theorem + Euler-Mascheroni from ζ Laurent expansion. Left for future.
-  sorry
+  sorry -- UPSTREAM-BLOCKED: Needs forward Tauberian + γ (not in Mathlib 4.29)
 
 -- ════════════════════════════════════════════════
 -- SORRY SUMMARY

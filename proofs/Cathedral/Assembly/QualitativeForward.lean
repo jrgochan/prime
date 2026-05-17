@@ -76,7 +76,7 @@ theorem pnt_implies_bd_convergence :
   --
   -- If this gap could be closed, RH would follow immediately
   -- from the PROVED nyman_beurling_converse.
-  sorry
+  sorry -- THE RH GAP: Requires |M(x)| ≤ C·x^{3/4}, which IS the RH
 
 /-- **THE DREAM**: If pnt_implies_bd_convergence were proved,
     RH would follow unconditionally. -/

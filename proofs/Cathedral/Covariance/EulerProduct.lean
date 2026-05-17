@@ -174,7 +174,7 @@ theorem mertens_third_statement :
     atTop (nhds (Real.exp (-eulerMascheroniConstant))) := by
   -- Deep theorem from analytic number theory.
   -- Proof requires: Mertens' first theorem + partial summation.
-  sorry
+  sorry -- OFF-PATH: Deep ANT (Mertens' third theorem)
 
 -- ═══════════════════════════════════════════
 -- §5. SQUAREFREE SUMMATORY BOUNDS

@@ -341,7 +341,7 @@ private theorem gram_form_bound_raw
   -- WIP: Deprecated spatial approach — MATHEMATICALLY FALSE (see docstring above).
   -- The correct approach runs through MellinCrown.lean (frequency domain).
   -- Kept as historical artifact of Exploration 13. Left for future reference.
-  sorry
+  sorry -- DEPRECATED: MATHEMATICALLY FALSE from x^{3/4} alone (see docstring)
 
 /-- **CORE ESTIMATE**: Under Mertens x^{3/4}, the L² residual satisfies:
     ∫₀¹ (1 - f_N(x))² dx ≤ C/logN.
@@ -383,7 +383,7 @@ theorem l2_residual_from_mertens
   -- WIP: Assembly step blocked by gram_form_bound_raw (above, deprecated).
   -- This path is superseded by the Mellin Crown architecture (v11+).
   -- Left for future exploration of alternative spatial routes.
-  sorry
+  sorry -- DEPRECATED: Blocked by gram_form_bound_raw (above, mathematically false)
 
 -- ═══════════════════════════════════════════════
 -- §5. THE COVARIANCE BOUND (THE AXIOM REPLACEMENT)

@@ -148,7 +148,7 @@ theorem mertens_exp_bound_from_pnt :
   obtain ⟨c₀, hc₀, hψ⟩ := MediumPNT
   -- From ψ error bound, derive M error bound via Möbius inversion
   -- Standard ANT: Chapter 12 of Titchmarsh
-  sorry
+  sorry -- OFF-PATH: Deep ANT (Möbius inversion from ψ), bypassed by s1_le_const_div_log
 
 -- ════════════════════════════════════════════════
 -- §3. ABEL SUMMATION: S₁ BOUND
@@ -190,7 +190,7 @@ private lemma s1_direct_bound
   -- |M(N)|/N ≤ C_M·E(N)
   -- |M(k)|/(k(k+1)) ≤ C_M·k·E(k)/(k(k+1)) = C_M·E(k)/(k+1) ≤ C_M/(k+1)
   -- Step 4: Harmonic bound Σ_{k=1}^{N-1} 1/(k+1) ≤ log N
-  sorry
+  sorry -- OFF-PATH: Bypassed by simplified s1_le_const_div_log chain
 
 /-- **Log-times-exp domination**: (2 + log M) · exp(-c·(logN)^{1/10})
     is bounded by C·exp(-c/2·(logN)^{1/10}) when log M ≤ exp(c/2·(logN)^{1/10}).
@@ -261,7 +261,7 @@ private lemma exp_tail_bound
   -- The formal proof uses Summable.of_nonneg_of_le + comparison with
   -- summable_condensed_iff to establish convergence, then
   -- tendsto + eventually_le for the tail rate.
-  sorry
+  sorry -- OFF-PATH: Bypassed by simplified s1_le_const_div_log chain
 
 /-- **Power-to-exponential comparison**: N^{-1/4} ≤ E'(N) for all N ≥ 3.
     E'(N) = exp(-c/2·(logN)^{1/10}). Since (logN)^{1/10} ≤ logN,
@@ -293,7 +293,7 @@ private lemma rpow_le_exp_decay (c : ℝ) (hc : 0 < c) :
   -- a) rpow_le_rpow for (logN)^{1/10} ≤ logN
   -- b) Real.exp_le_exp for the exponent comparison
   -- c) Nat.ceil/finite case split for small N
-  sorry
+  sorry -- OFF-PATH: Bypassed by isLittleO_log_rpow_atTop in s1_le_const_div_log
 
 /-- **S₁ decay from Mertens bound**.
 

@@ -123,7 +123,7 @@ lemma tapered_truncation_bound_above_34
     --   1. Abel summation for the partial Möbius sum
     --   2. Mertens bound |M(x)| ≤ C·x^{3/4} under RH
     --   3. Fejér taper difference bound |Δw(k)| ≤ 1/(k·logN)
-    sorry -- Abel summation + Mertens instantiation
+    sorry -- DEPRECATED: Orphaned, bypassed by MellinCrown.lean
     -- NOTE: This sorry is NOT on the active proof path.
     -- The `baez_duarte_forward` theorem is proved via `rh_l2_decay_clean`
     -- (DirectMellinBound.lean), which bypasses this entire ZeroAxiom chain.
@@ -240,7 +240,7 @@ lemma mellin_l2_integral_tendsto_zero
   -- The integral ∫_{-N}^{N} ‖ζ/s‖² is O(N^{1+ε}) by Littlewood
   -- Combined: O(N^{1+ε} · N^{-1/2}/log²N) → 0
   -- This requires careful integration bounds.
-  sorry
+  sorry -- DEPRECATED: Orphaned, bypassed by MellinCrown.lean
   -- NOTE: This sorry is NOT on the active proof path (ORPHANED).
   -- Superseded by `rh_implies_bd_convergence_mellin` (MellinCrown.lean, PROVED).
   -- Closing this sorry would require:
@@ -295,7 +295,7 @@ lemma fejer_residual_l2_bound
   --   vᵀGv = 1 + O(1/logN)         [covariance bound, Abel summation]
   -- Combined: 1 - 2(1+ε₁) + (1+ε₂) = ε₂ - 2ε₁ = O(1/logN)
   -- Since N^{-1/4}/logN ≤ 1/logN, the bound follows.
-  sorry
+  sorry -- DEPRECATED: Orphaned, bypassed by DirectMellinBound.lean
   -- NOTE: This sorry is NOT on the active proof path (ORPHANED).
   -- Superseded by `rh_l2_decay_clean` (DirectMellinBound.lean, PROVED)
   -- which gives ∫|1-f|² ≤ C_l2/logN using the same weights.
