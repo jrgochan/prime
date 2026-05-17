@@ -453,6 +453,159 @@ fn main() {
         }
     }
 
+    // ═══════════════════════════════════════════════
+    // §7. THE DIRECT BYPASS: Smith witness → L² error
+    // ═══════════════════════════════════════════════
+    println!("\n§7. DIRECT BYPASS: Smith witness in BD L²(0,1)\n");
+    println!("  Bypass the G-R bridge entirely.");
+    println!("  Compute d² = 1 - 2·bᵀw + wᵀGw");
+    println!("  where w = R⁻¹·𝟏 (Smith witness)");
+    println!("  and G = Vasyunin Gram matrix, b = mean vector.\n");
+    println!("  If d² → 0 with Smith witness, the lift is free.\n");
+
+    // We need matrix operations for small N
+    // Simple Gaussian elimination for matrix inverse
+    fn mat_inverse(a: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
+        let n = a.len();
+        let mut aug: Vec<Vec<f64>> = Vec::new();
+        for i in 0..n {
+            let mut row = a[i].clone();
+            for j in 0..n {
+                row.push(if i == j { 1.0 } else { 0.0 });
+            }
+            aug.push(row);
+        }
+        for col in 0..n {
+            // Find pivot
+            let mut max_row = col;
+            let mut max_val = aug[col][col].abs();
+            for row in (col+1)..n {
+                if aug[row][col].abs() > max_val {
+                    max_val = aug[row][col].abs();
+                    max_row = row;
+                }
+            }
+            if max_val < 1e-15 { return None; }
+            aug.swap(col, max_row);
+            let pivot = aug[col][col];
+            for j in 0..2*n { aug[col][j] /= pivot; }
+            for row in 0..n {
+                if row == col { continue; }
+                let factor = aug[row][col];
+                for j in 0..2*n { aug[row][j] -= factor * aug[col][j]; }
+            }
+        }
+        Some(aug.iter().map(|row| row[n..].to_vec()).collect())
+    }
+
+    fn mat_vec_mul(a: &[Vec<f64>], v: &[f64]) -> Vec<f64> {
+        a.iter().map(|row| row.iter().zip(v).map(|(a,b)| a*b).sum()).collect()
+    }
+
+    fn dot(a: &[f64], b: &[f64]) -> f64 {
+        a.iter().zip(b).map(|(x,y)| x*y).sum()
+    }
+
+    println!("  {:>5} {:>12} {:>12} {:>12} {:>12} {:>12}",
+             "N", "σ=𝟏ᵀR⁻¹𝟏", "bᵀw", "wᵀGw", "d²_smith", "d²_opt");
+    println!("  {}", "─".repeat(72));
+
+    for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
+        // Build N×N Ramanujan matrix R
+        let mut r_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size {
+            let mut row = Vec::new();
+            for k in 1..=n_size {
+                let d = gcd(j, k) as f64;
+                row.push(d * d / (12.0 * j as f64 * k as f64));
+            }
+            r_mat.push(row);
+        }
+
+        // Build N×N Vasyunin Gram matrix G
+        let mut g_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size {
+            let mut row = Vec::new();
+            for k in 1..=n_size {
+                row.push(g_entry(j, k));
+            }
+            g_mat.push(row);
+        }
+
+        // Mean vector b
+        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+
+        // Ones vector
+        let ones: Vec<f64> = vec![1.0; n_size];
+
+        // Compute R⁻¹
+        let r_inv = match mat_inverse(&r_mat) {
+            Some(inv) => inv,
+            None => { println!("  {:>5} SINGULAR", n_size); continue; }
+        };
+
+        // Smith witness: w = R⁻¹·𝟏
+        let w = mat_vec_mul(&r_inv, &ones);
+
+        // σ = 𝟏ᵀ·w = Σ w_k
+        let sigma: f64 = w.iter().sum();
+
+        // bᵀw
+        let bt_w = dot(&b_vec, &w);
+
+        // wᵀGw
+        let gw = mat_vec_mul(&g_mat, &w);
+        let wt_gw = dot(&w, &gw);
+
+        // d²_smith = 1 - 2·bᵀw + wᵀGw
+        let d_sq_smith = 1.0 - 2.0 * bt_w + wt_gw;
+
+        // Optimal d² = 1 - bᵀG⁻¹b (for comparison)
+        let g_inv = match mat_inverse(&g_mat) {
+            Some(inv) => inv,
+            None => { println!("  {:>5} G SINGULAR", n_size); continue; }
+        };
+        let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
+        let d_sq_opt = 1.0 - dot(&b_vec, &g_inv_b);
+
+        let star = if d_sq_smith < 0.01 { "⭐" }
+                  else if d_sq_smith < 0.1 { "✓" } else { "" };
+
+        println!("  {:>5} {:>12.4} {:>12.6} {:>12.4} {:>12.8} {:>12.8} {}",
+                 n_size, sigma, bt_w, wt_gw, d_sq_smith, d_sq_opt, star);
+    }
+
+    // Also check: does d²_smith / d²_opt have a pattern?
+    println!("\n  RATIO ANALYSIS: d²_smith / d²_opt\n");
+    println!("  {:>5} {:>12} {:>12} {:>12}",
+             "N", "d²_smith", "d²_opt", "ratio");
+    println!("  {}", "─".repeat(44));
+
+    for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
+        let mut r_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size { let mut row = Vec::new();
+            for k in 1..=n_size { let d = gcd(j, k) as f64;
+                row.push(d * d / (12.0 * j as f64 * k as f64)); } r_mat.push(row); }
+        let mut g_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size { let mut row = Vec::new();
+            for k in 1..=n_size { row.push(g_entry(j, k)); } g_mat.push(row); }
+        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+        let ones: Vec<f64> = vec![1.0; n_size];
+        let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
+        let w = mat_vec_mul(&r_inv, &ones);
+        let bt_w = dot(&b_vec, &w);
+        let gw = mat_vec_mul(&g_mat, &w);
+        let wt_gw = dot(&w, &gw);
+        let d_sq_smith = 1.0 - 2.0 * bt_w + wt_gw;
+        let g_inv = match mat_inverse(&g_mat) { Some(inv) => inv, None => continue };
+        let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
+        let d_sq_opt = 1.0 - dot(&b_vec, &g_inv_b);
+        if d_sq_opt.abs() > 1e-15 {
+            println!("  {:>5} {:>12.8} {:>12.8} {:>12.4}",
+                     n_size, d_sq_smith, d_sq_opt, d_sq_smith / d_sq_opt);
+        }
+    }
+
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
     println!("║       vᵀRv → 1/(2π²). The arithmetic has spoken. 🔮           ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
