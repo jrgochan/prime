@@ -476,7 +476,7 @@ end
 --        consequence). It is the SIMPLEST possible axiom footprint.
 
 -- #print axioms nyman_beurling_equivalence
---   → LIVE OUTPUT (May 17, 2026):
+--   → LIVE OUTPUT (May 17, 2026 — post GramBridge):
 --     [R_isLittleO, frac_error_isLittleO,
 --      gram_quadratic_form_decay, mu_pnt_alt,
 --      propext, Classical.choice, Quot.sound]
@@ -485,5 +485,13 @@ end
 --   ★ covariance_bound_from_mertens_34: ELIMINATED
 --   ★ mu_log_mul_zeta: ELIMINATED
 --
--- #print axioms rh_discrete_global
--- #print axioms rh_discrete_subseq
+--   CLASSIFICATION:
+--     PNT (3):  mu_pnt_alt, R_isLittleO, frac_error_isLittleO
+--     Crown (1): gram_quadratic_form_decay (≡ RH)
+--
+--   NEW (GramBridge.lean, Exploration 39 — May 17, 2026):
+--     ✅ {t}² ≤ {t}              → G_{kk} ≤ b_k (diagonal domination)
+--     ✅ G_{jk}² ≤ G_{jj}·G_{kk} → Cauchy-Schwarz (discriminant argument)
+--     ✅ G_{jk}² ≤ b_j·b_k        → entire Gram controlled by mean vector
+--     These are UNCONDITIONAL (no RH needed).
+--     They structurally constrain the Crown axiom.
