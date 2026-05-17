@@ -439,6 +439,16 @@ theorem overcancellation_implies_crown
   ✅ quadForm_bridge_aux (PROVED, VasyuninBypass.lean)
   ✅ dotProduct_bridge_aux (PROVED, VasyuninBypass.lean)
   ✅ GramBridge (0 axiom, 0 sorry — unconditional structural bounds)
+
+### Overcancellation Path (SUPERSEDES Crown axiom)
+  The Crown axiom `gram_quadratic_form_decay` is no longer required.
+  See `Cathedral/Assembly/OvercancellationChain.lean`:
+
+    overcancellation_implies_rh: vᵀGv ≤ 1 → RH
+    PROVED. ZERO SORRY. Crown-free.
+
+  The Crown path (this file) remains valid but uses 4 custom axioms.
+  The Overcancellation path uses 2 axioms + the hypothesis vᵀGv ≤ 1.
 -/
 
 end

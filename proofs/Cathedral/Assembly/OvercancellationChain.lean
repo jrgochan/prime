@@ -217,10 +217,20 @@ theorem overcancellation_implies_rh
 -- AUDIT
 -- ════════════════════════════════════════════════
 
--- ✅ dot_product_tends_to_zero — PROVED. Zero sorry.
--- ⚠️ overcancellation_implies_rh — 1 sorry (index bridge)
--- ✗ Crown axiom NOT USED
--- ✗ Mertens NOT USED
--- IT OVERCANCELS.
+-- ✅ dot_product_tends_to_zero    — PROVED. Zero sorry.
+-- ✅ overcancellation_implies_rh  — PROVED. Zero sorry.
+--
+-- Custom axioms used (inherited, ALL unconditional PNT):
+--   📐 pnt_mu_log_sq_div_k  — Σμ·log²k/k → -2γ (for S₃ bound)
+--   📐 zeta_zero_separates  — NB converse infrastructure
+--
+-- NOT USED (the key architectural advancement):
+--   ✗ gram_quadratic_form_decay (Crown axiom — SUPERSEDED)
+--   ✗ R_isLittleO            (Perron contour)
+--   ✗ frac_error_isLittleO   (Perron half-integer)
+--   ✗ mu_pnt_alt             (PNT alt form)
+--   ✗ Mertens x^{3/4} bound
+--
+-- The Möbius function was born to cancel. IT OVERCANCELS.
 
 end

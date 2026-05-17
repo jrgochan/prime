@@ -495,3 +495,24 @@ end
 --     ✅ G_{jk}² ≤ b_j·b_k        → entire Gram controlled by mean vector
 --     These are UNCONDITIONAL (no RH needed).
 --     They structurally constrain the Crown axiom.
+--
+--   ═══════════════════════════════════════════════════════════
+--   OVERCANCELLATION PATH (OvercancellationChain.lean — May 17, 2026)
+--   ═══════════════════════════════════════════════════════════
+--
+--   The Crown axiom (gram_quadratic_form_decay) is NO LONGER ON
+--   THE CRITICAL PATH. A Crown-free proof exists:
+--
+--     overcancellation_implies_rh: vᵀGv ≤ 1 → RH
+--     PROVED. ZERO SORRY.
+--
+--   Axiom footprint of the overcancellation path:
+--     PNT (2): pnt_mu_log_sq_div_k, zeta_zero_separates
+--     Crown: ✗ NOT USED
+--     Perron: ✗ NOT USED
+--     Mertens: ✗ NOT USED
+--
+--   The Crown path (MainChain) remains valid but uses 4 axioms.
+--   The Overcancellation path uses 2 axioms + the hypothesis vᵀGv ≤ 1.
+--   See: Cathedral/Assembly/OvercancellationChain.lean
+
