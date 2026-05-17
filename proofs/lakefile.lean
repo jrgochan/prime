@@ -424,4 +424,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SumOfSquares,
     -- Smith Witness (R·w = 𝟏 → d² ≤ 4/(4+6N) → 0)
     `Cathedral.Physics.SmithWitness,
+    -- Von Mangoldt Bridge (c_d = Λ(d) in Smith basis, Exploration 38)
+    `Cathedral.Physics.VonMangoldtBridge,
   ]
