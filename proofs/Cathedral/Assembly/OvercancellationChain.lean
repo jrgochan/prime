@@ -44,7 +44,7 @@ theorem dot_product_tends_to_zero
   -- N₃ where logN > 3K/ε (so the 1/logN term < ε/3)
   obtain ⟨m, hm⟩ := exists_nat_gt (Real.exp (3 * K / ε))
   have hm_pos : 0 < m := by
-    by_contra h; push_neg at h; interval_cases m
+    by_contra h; simp only [not_lt, Nat.le_zero] at h; subst h
     simp at hm; linarith [Real.exp_pos (3 * K / ε)]
   have hm_log : 3 * K / ε < Real.log ↑m := by
     have h1 : Real.exp (3 * K / ε) < ↑m := by exact_mod_cast hm
