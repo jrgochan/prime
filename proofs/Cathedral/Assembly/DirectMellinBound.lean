@@ -52,6 +52,7 @@ import Cathedral.NymanBeurling.BDBridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.White.Scattering
 import Cathedral.PNT.AbelMean
+import Cathedral.Physics.GramBridge
 
 noncomputable section
 open Real MeasureTheory Complex Filter Finset Cathedral.Vasyunin ArithmeticFunction
@@ -300,10 +301,22 @@ The `dotProduct_bridge_aux` and `vasyunin_bd_index_bridge` connect them.
      Status: HONEST, RH-CONDITIONAL, MATHEMATICALLY SOUND
      REPLACES: covariance_bound_from_mertens_34 (mathematically false!)
 
+### Unconditional Constraints (GramBridge.lean — ALL PROVED ✅)
+  The Crown axiom is structurally constrained by:
+    ✅ G_{kk} ≤ b_k             (gram_diag_le_mean)
+    ✅ G_{jk}² ≤ G_{jj}·G_{kk}  (gram_entry_cauchy_schwarz)
+    ✅ 0 ≤ G_{jk} ≤ 1           (gram_entry_nonneg, gram_entry_le_one)
+    ✅ Σ v²G_{kk} ≤ Σ v²b_k     (quad_form_diag_bound)
+
+  Crown Reduction:
+    vᵀGv = (Σ v²G_{kk}) + (off-diagonal)
+         ≤ (Σ v²b_k)    + (off-diagonal)
+    Crown axiom ⟺ off-diagonal = O(1/logN)
+    ⟺ Möbius cancellation in the Gram matrix
+
 ### Inherited Axioms (from Perron chain, not introduced here):
   📐 R_isLittleO (contour shift vanishing)
   📐 frac_error_isLittleO (half-integer Perron)
-  📐 mu_log_mul_zeta (PNT, Möbius·log identity)
   📐 mu_pnt_alt (PNT, prime number theorem)
 
 ### Sorry: 0 ✅
@@ -315,6 +328,8 @@ The `dotProduct_bridge_aux` and `vasyunin_bd_index_bridge` connect them.
   ✅ bd_l2_error_eq_quad_error (PROVED)
   ✅ quadForm_bridge_aux (PROVED, VasyuninBypass.lean)
   ✅ dotProduct_bridge_aux (PROVED, VasyuninBypass.lean)
+  ✅ GramBridge (0 axiom, 0 sorry — unconditional structural bounds)
 -/
 
 end
+

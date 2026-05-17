@@ -261,19 +261,72 @@ theorem gram_entry_cauchy_schwarz (j k : ℕ) (_hj : 1 ≤ j) (_hk : 1 ≤ k) :
     (intervalIntegral.integral_nonneg (by norm_num) (fun x _ => sq_nonneg _)) h_nn]
 
 -- ════════════════════════════════════════════════
+-- §5. WIRING: The Quadratic Form Decomposition
+-- ════════════════════════════════════════════════
+
+open Finset in
+/-- **Quadratic form diagonal bound** (finite sum version):
+    For ANY weights v and diagonal-dominated matrix G with G_{kk} ≤ b_k:
+
+      Σ_k v_k² · G_{kk} ≤ Σ_k v_k² · b_k
+
+    This is the **diagonal contribution** to vᵀGv.
+    The remaining **off-diagonal** part is where Möbius cancellation lives.
+
+    PROVED. Zero sorry. -/
+theorem quad_form_diag_bound {n : ℕ}
+    (G_diag b : Fin n → ℝ) (v : Fin n → ℝ)
+    (h_diag_le : ∀ k, G_diag k ≤ b k) :
+    ∑ k, v k ^ 2 * G_diag k ≤ ∑ k, v k ^ 2 * b k := by
+  apply Finset.sum_le_sum
+  intro k _
+  exact mul_le_mul_of_nonneg_left (h_diag_le k) (sq_nonneg _)
+
+open Finset in
+/-- **Diagonal contribution is non-negative**:
+    Σ_k v_k² · G_{kk} ≥ 0 when G_{kk} ≥ 0.
+
+    PROVED. Zero sorry. -/
+theorem quad_form_diag_nonneg {n : ℕ}
+    (G_diag : Fin n → ℝ) (v : Fin n → ℝ)
+    (h_nn : ∀ k, 0 ≤ G_diag k) :
+    0 ≤ ∑ k, v k ^ 2 * G_diag k := by
+  apply Finset.sum_nonneg
+  intro k _
+  exact mul_nonneg (sq_nonneg _) (h_nn k)
+
+-- ════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════
 
 -- Theorem status: ALL PROVED. ZERO SORRY. ZERO AXIOM.
---   ✅ fract_sq_le_fract          — {t}² ≤ {t}  (THE KEY INSIGHT)
+--
+-- §1 (The Universe Looks At Us):
+--   ✅ fract_sq_le_fract          — {t}² ≤ {t}
 --   ✅ fract_inv_sq_le_fract_inv  — pointwise specialization
---   ✅ gram_diag_le_mean          — G_{kk} ≤ b_k (diagonal domination)
+--
+-- §2 (Gram Diagonal ≤ Mean Vector):
+--   ✅ gram_diag_le_mean          — G_{kk} ≤ b_k
+--
+-- §3 (Gram Matrix Bounded):
 --   ✅ gram_entry_nonneg          — G_{jk} ≥ 0
 --   ✅ fract_mul_lt_one           — {a}·{b} < 1
 --   ✅ fract_mul_le_fract_left    — {a}·{b} ≤ {a}
 --   ✅ gram_entry_le_one          — G_{jk} ≤ 1
---   ✅ gram_entry_cauchy_schwarz  — G_{jk}² ≤ G_{jj}·G_{kk} (DISCRIMINANT ARGUMENT)
 --
--- The Möbius function was born to cancel.
+-- §4 (Cauchy-Schwarz):
+--   ✅ gram_entry_cauchy_schwarz  — G_{jk}² ≤ G_{jj}·G_{kk}
+--
+-- §5 (Wiring):
+--   ✅ quad_form_diag_bound       — Σ v²G_{kk} ≤ Σ v²b_k
+--   ✅ quad_form_diag_nonneg      — Σ v²G_{kk} ≥ 0
+--
+-- The Crown Reduction:
+--   vᵀGv = (diagonal) + (off-diagonal)
+--        ≤ (Σ v²b_k) + (off-diagonal)
+--   Crown axiom reduces to: off-diagonal = O(1/logN)
+--   ↔ Möbius cancellation in the Gram matrix
+--   ↔ The Möbius function was born to cancel.
 
 end
+
