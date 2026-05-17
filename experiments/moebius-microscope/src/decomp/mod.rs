@@ -13,6 +13,7 @@ pub mod classify;
 #[cfg(feature = "gpu")]
 pub mod gpu_runner;
 pub mod gram;
+pub mod physics;
 pub mod row;
 pub mod runners;
 pub mod state;

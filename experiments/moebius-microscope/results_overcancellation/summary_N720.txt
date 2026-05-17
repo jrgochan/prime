@@ -103,5 +103,5 @@ TAPER CANCELLATION TRACKER
   S₃ = Σμln²k/k  = -1.223335381587804e0  (→ -2γ)
   M(N)           = -3
   M(N)/√N        = -1.118033988749895e-1
-  Recon check    = 5.868669620847452e-1  (should = vᵀGv)
+  Recon check    = 5.868669620847451e-1  (should = vᵀGv)
   Δ              = 2.82e-1

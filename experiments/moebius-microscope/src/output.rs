@@ -328,6 +328,42 @@ pub fn write_cert(d: &Decomp, dir: &str) -> std::io::Result<()> {
         "sign_stats": {"n_pos": d.n_pos, "n_neg": d.n_neg, "sum_pos": d.sum_pos.value(), "sum_neg": d.sum_neg.value(),
             "cancel_ratio": d.total.value().abs() / (d.sum_pos.value()+d.sum_neg.value().abs()).max(1e-30)},
         "gcd_top": gcd_top, "omega_class": omega_data,
+        "physics": {
+            "glass_bridge": {
+                "vtRv": d.physics.vt_rv,
+                "rank1_term": d.physics.rank1_term,
+                "sum_v": d.physics.sum_v,
+                "vtRv_plus_rank1": d.physics.vt_rv + d.physics.rank1_term,
+                "vtRv_target": 1.0 / (2.0 * std::f64::consts::PI * std::f64::consts::PI),
+            },
+            "dark_gram": {
+                "vtG2v": d.physics.vt_dark_v,
+            },
+            "coprime_diagonal": {
+                "coprime_pairs": d.physics.coprime_pairs,
+                "total_pairs": d.physics.total_pairs,
+                "coprime_fraction": d.physics.coprime_pairs as f64 / d.physics.total_pairs.max(1) as f64,
+                "coprime_energy": d.physics.coprime_energy,
+                "non_coprime_energy": d.physics.non_coprime_energy,
+                "sqfree_density_target": 6.0 / (std::f64::consts::PI * std::f64::consts::PI),
+            },
+            "ward_identity": {
+                "max_row_residual": d.physics.max_row_residual,
+                "mean_row_residual": d.physics.mean_row_residual,
+                "ward_violation_L2": d.physics.ward_violation.sqrt(),
+            },
+            "gauge_decomposition": {
+                "U1_odd_gcd": d.physics.gauge_u1,
+                "SU2_even_gcd": d.physics.gauge_su2,
+                "SU3_triple_gcd": d.physics.gauge_su3,
+                "other": d.physics.gauge_other,
+            },
+            "s_duality": {
+                "positive_energy": d.physics.positive_energy,
+                "dark_energy": d.physics.dark_energy,
+                "comparison_ratio": d.physics.comparison_ratio,
+            },
+        },
     });
 
     let mut f = std::fs::File::create(&p)?;

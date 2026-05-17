@@ -95,8 +95,8 @@ GRAM BOUND AXIOM ANALYSIS
   Axiom sat?  = YES (vtGv < 1 + K/ln(N) for any K > 0)
 
 TAPER CANCELLATION TRACKER
-  U(N)           = 1.057420074648086e0
-  L(N)           = 1.996633859804920e0
+  U(N)           = 1.057420074648087e0
+  L(N)           = 1.996633859804921e0
   Q(N)           = 5.923327821849451e0
   R₂ = U-2L/lnN  = 5.890104398642599e-1
   R₂ - 1         = -4.109895601357401e-1

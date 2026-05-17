@@ -15,6 +15,7 @@ use super::gram::{finalize_gram_metrics, print_gram_summary};
 #[cfg(feature = "hpdf")]
 use super::row::merge_single_row;
 use super::row::{merge_results, RowResult};
+use super::physics::{self, PhysicsRow};
 use super::state::Decomp;
 #[cfg(feature = "hpdf")]
 use super::state::TracePoint;
@@ -39,8 +40,9 @@ fn compute_row_f64(
     max_gcd: usize,
     max_omega: usize,
     max_band: usize,
-) -> RowResult {
+) -> (RowResult, PhysicsRow) {
     let mut r = RowResult::new(max_gcd, max_omega, max_band);
+    let mut pr = PhysicsRow::new();
     let mut row_sum = Kahan::default();
     let mut row_abs = Kahan::default();
 
@@ -65,6 +67,9 @@ fn compute_row_f64(
             max_omega, max_band,
         );
 
+        // §11-§16: Physics classification
+        physics::classify_physics(&mut pr, j, k, term, v_j, v_k, g_jk);
+
         // §10: Taper accumulation (raw Möbius-Gram terms)
         if mu_j.abs() > 0.5 && mu_k.abs() > 0.5 {
             let mm_g = mu_j * mu_k * g_jk;
@@ -78,7 +83,7 @@ fn compute_row_f64(
     }
     r.row_sum = row_sum.value();
     r.row_abs = row_abs.value();
-    r
+    (r, pr)
 }
 
 /// Run the full parallel microscope for a given N using on-the-fly f64 computation.
@@ -111,10 +116,10 @@ pub fn run_microscope(n: usize) -> Decomp {
 
     // PARALLEL: compute all rows
     let done = std::sync::atomic::AtomicUsize::new(0);
-    let row_results: Vec<RowResult> = active_rows
+    let row_results: Vec<(RowResult, PhysicsRow)> = active_rows
         .par_iter()
         .map(|&(j, v_j)| {
-            let r = compute_row_f64(
+            let result = compute_row_f64(
                 j,
                 v_j,
                 dim,
@@ -137,11 +142,18 @@ pub fn run_microscope(n: usize) -> Decomp {
                     el / (cnt as f64 / n_active as f64) * (1.0 - cnt as f64 / n_active as f64);
                 eprint!("\r  Rows: {cnt}/{n_active} ({pct:.0}%) {el:.1}s ETA={eta:.1}s    ");
             }
-            r
+            result
         })
         .collect();
 
-    merge_results(&mut decomp, &row_results, &active_rows);
+    // Split and merge
+    let (rr, pr): (Vec<_>, Vec<_>) = row_results.into_iter().unzip();
+    merge_results(&mut decomp, &rr, &active_rows);
+    for (i, p) in pr.iter().enumerate() {
+        physics::merge_physics_row(&mut decomp.physics, p, active_rows[i].1);
+    }
+    let sum_v: f64 = weights.iter().sum();
+    physics::finalize_physics(&mut decomp.physics, n_active, sum_v);
 
     // Finalize all metrics
     finalize_gram_metrics(&mut decomp);
@@ -374,10 +386,11 @@ fn run_hpdf_full_parallel(
     };
 
     let done = std::sync::atomic::AtomicUsize::new(0);
-    let row_results: Vec<RowResult> = active_rows
+    let row_results: Vec<(RowResult, PhysicsRow)> = active_rows
         .par_iter()
         .map(|&(j_idx, j, v_j)| {
             let mut r = RowResult::new(decomp.max_gcd, decomp.max_omega, decomp.max_band);
+            let mut pr = PhysicsRow::new();
             let mut row_kahan = Kahan::default();
             let mut row_abs_kahan = Kahan::default();
             let mu_j = mu[j] as f64;
@@ -413,6 +426,9 @@ fn run_hpdf_full_parallel(
                     decomp.max_band,
                 );
 
+                // §11-§16: Physics classification
+                physics::classify_physics(&mut pr, j, k, term, v_j, v_k, g_jk);
+
                 // §10: Taper
                 if mu_j.abs() > 0.5 && mu_k.abs() > 0.5 {
                     let mm_g = mu_j * mu_k * g_jk;
@@ -434,12 +450,19 @@ fn run_hpdf_full_parallel(
                 let eta = el / (pct / 100.0) * (1.0 - pct / 100.0);
                 eprint!("\r  Rows: {cnt}/{n_active} ({pct:.0}%) {el:.1}s ETA={eta:.1}s    ");
             }
-            r
+            (r, pr)
         })
         .collect();
 
+    // Split and merge
+    let (rr, pr_vec): (Vec<_>, Vec<_>) = row_results.into_iter().unzip();
     let active_for_merge: Vec<(usize, f64)> = active_rows.iter().map(|&(_, j, v)| (j, v)).collect();
-    merge_results(decomp, &row_results, &active_for_merge);
+    merge_results(decomp, &rr, &active_for_merge);
+    for (i, p) in pr_vec.iter().enumerate() {
+        physics::merge_physics_row(&mut decomp.physics, p, active_rows[i].2);
+    }
+    let sum_v: f64 = weights.iter().sum();
+    physics::finalize_physics(&mut decomp.physics, active_rows.len(), sum_v);
     Ok(())
 }
 
@@ -500,7 +523,7 @@ fn run_hpdf_batched(
             })
             .collect();
 
-        let batch_results: Vec<RowResult> = batch_rows
+        let batch_results: Vec<(RowResult, PhysicsRow)> = batch_rows
             .par_iter()
             .map(|(_, j, v_j, row)| {
                 let j = *j;
@@ -508,6 +531,7 @@ fn run_hpdf_batched(
                 let mu_j = mu[j] as f64;
                 let ln_j = (j as f64).ln();
                 let mut r = RowResult::new(decomp.max_gcd, decomp.max_omega, decomp.max_band);
+                let mut pr = PhysicsRow::new();
                 let mut row_kahan = Kahan::default();
                 let mut row_abs_kahan = Kahan::default();
 
@@ -541,6 +565,9 @@ fn run_hpdf_batched(
                         decomp.max_band,
                     );
 
+                    // §11-§16: Physics classification
+                    physics::classify_physics(&mut pr, j, k, term, v_j, v_k, g_jk);
+
                     if mu_j.abs() > 0.5 && mu_k.abs() > 0.5 {
                         let mm_g = mu_j * mu_k * g_jk;
                         r.u_row.add(mm_g);
@@ -553,12 +580,13 @@ fn run_hpdf_batched(
                 }
                 r.row_sum = row_kahan.value();
                 r.row_abs = row_abs_kahan.value();
-                r
+                (r, pr)
             })
             .collect();
 
-        for r in &batch_results {
+        for (idx, (r, pr)) in batch_results.iter().enumerate() {
             merge_single_row(decomp, r);
+            physics::merge_physics_row(&mut decomp.physics, pr, batch[idx].2);
             running_sum.add(r.row_sum);
             running_abs.add(r.row_abs);
 
@@ -584,5 +612,7 @@ fn run_hpdf_batched(
             eprint!("\r  Rows: {progress}/{n_active} ({pct:.0}%) {el:.1}s ETA={eta:.1}s    ");
         }
     }
+    let sum_v: f64 = weights.iter().sum();
+    physics::finalize_physics(&mut decomp.physics, n_active, sum_v);
     Ok(())
 }

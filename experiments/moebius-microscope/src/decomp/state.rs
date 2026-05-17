@@ -5,6 +5,7 @@
 
 use cathedral_utils::arith::{self, Kahan};
 
+use super::physics::PhysicsMetrics;
 use super::taper::TaperMetrics;
 
 // ═══════════════════════════════════════════════
@@ -88,6 +89,9 @@ pub struct Decomp {
     // §10: Taper cancellation tracker
     pub taper: TaperMetrics,
 
+    // §11-§16: Physics metadata (dark sector discoveries)
+    pub physics: PhysicsMetrics,
+
     // Convergence trace
     pub trace: Vec<TracePoint>,
 }
@@ -129,6 +133,7 @@ impl Decomp {
             sum_neg: Kahan::default(),
             gram: GramMetrics::default(),
             taper: TaperMetrics::new(max_gcd),
+            physics: PhysicsMetrics::default(),
             trace: Vec::new(),
         }
     }

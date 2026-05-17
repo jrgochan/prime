@@ -204,6 +204,42 @@
       "wk": 3
     }
   ],
+  "physics": {
+    "coprime_diagonal": {
+      "coprime_energy": 0.6245878563301693,
+      "coprime_fraction": 0.7646222222222222,
+      "coprime_pairs": 4301,
+      "non_coprime_energy": -0.06151658169860441,
+      "sqfree_density_target": 0.6079271018540267,
+      "total_pairs": 5625
+    },
+    "dark_gram": {
+      "vtG2v": 0.025132177078283184
+    },
+    "gauge_decomposition": {
+      "SU2_even_gcd": 0.10494444677724334,
+      "SU3_triple_gcd": 0.0,
+      "U1_odd_gcd": 0.45272201650874694,
+      "other": 0.0
+    },
+    "glass_bridge": {
+      "rank1_term": 0.391435486442206,
+      "sum_v": 1.2512961063508605,
+      "vtRv": 0.17163578818935898,
+      "vtRv_plus_rank1": 0.5630712746315649,
+      "vtRv_target": 0.05066059182116889
+    },
+    "s_duality": {
+      "comparison_ratio": 31.047846726761733,
+      "dark_energy": 0.025132177078283184,
+      "positive_energy": 0.7802999818363708
+    },
+    "ward_identity": {
+      "max_row_residual": 0.32210627686165366,
+      "mean_row_residual": 0.013075318068716032,
+      "ward_violation_L2": 0.9806488551537024
+    }
+  },
   "precision": "DD",
   "quadratic_form": {
     "diagonal": 0.826695245313245,
