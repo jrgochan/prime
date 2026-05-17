@@ -426,4 +426,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SmithWitness,
     -- Von Mangoldt Bridge (c_d = Λ(d) in Smith basis, Exploration 38)
     `Cathedral.Physics.VonMangoldtBridge,
+    -- Spectral Divergence (Σ Λ(d)² → ∞ via Euclid, Exploration 39)
+    `Cathedral.Physics.SpectralDivergence,
   ]

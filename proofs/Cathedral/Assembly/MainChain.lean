@@ -15,6 +15,7 @@ import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
 import Cathedral.Physics.SmithWitness
 import Cathedral.Physics.VonMangoldtBridge
+import Cathedral.Physics.SpectralDivergence
 -- NOTE: Cathedral.Assembly.GramCrown is DOWNSTREAM of MainChain
 -- (GramBoundDirect imports MainChain for log_grows_unboundedly).
 -- The discrete RH exports live in GramCrown.lean and Assembly.lean.
@@ -237,6 +238,22 @@ theorem smith_witness_forward_direction :
   · linarith [le_max_left B 12]
   · exact Cathedral.Physics.SmithWitness.glass_distance_formula N hN2
       (by linarith [le_max_right B 12])
+
+/-- **Spectral Energy Divergence** (zero sorry, zero axioms).
+
+    The von Mangoldt spectral energy Σ Λ(d)² diverges to infinity.
+    This provides the ARITHMETIC explanation for σ(N) → ∞:
+
+    • VonMangoldtBridge: c_d = Λ(d) + (1-γ)·[d=1]
+    • SpectralDivergence: Σ Λ(d)² → ∞ because each prime p
+      contributes (ln p)² ≥ (ln 2)² > 0 (Euclid)
+
+    ★ The Smith witness literally counts primes. -/
+theorem spectral_energy_divergence :
+    ∀ B : ℝ, ∃ N : ℕ,
+      B < ∑ d ∈ Finset.Icc 1 N,
+        (ArithmeticFunction.vonMangoldt d) ^ 2 :=
+  Cathedral.Physics.vonMangoldt_sq_sum_unbounded
 
 -- ═══════════════════════════════════════════════════════
 -- THE BÁEZ-DUARTE ANCHOR (The Analytic Crown)
