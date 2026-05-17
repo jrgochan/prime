@@ -35,7 +35,7 @@ import Mathlib.Analysis.SpecialFunctions.Log.Basic
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 
 noncomputable section
-open Real Finset
+open Real Finset Nat
 open scoped ArithmeticFunction
 
 namespace Cathedral.Physics.VonMangoldtBridge
@@ -62,12 +62,35 @@ theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
     (∑ k ∈ d.divisors,
       (ArithmeticFunction.moebius (d / k) : ℝ) * Real.log (k : ℝ)) =
     ArithmeticFunction.vonMangoldt d := by
-  -- μ * log = Λ, proven via:
-  --   calc μ * log = μ * (Λ * ζ) = Λ * (μ * ζ) = Λ * 1 = Λ
-  -- Evaluating (μ * log)(d) gives a sum over divisorsAntidiagonal.
-  -- Our sum is over divisors with μ(d/k)·log(k), which is the same
-  -- sum reindexed. Need Nat.sum_divisorsAntidiagonal' to convert.
-  sorry
+  -- Step 1: log * μ = Λ (Dirichlet convolution via commutativity)
+  have h_swap : (ArithmeticFunction.log * ↑ArithmeticFunction.moebius : ArithmeticFunction ℝ) =
+      ArithmeticFunction.vonMangoldt := by
+    rw [mul_comm]
+    calc (↑ArithmeticFunction.moebius * ArithmeticFunction.log : ArithmeticFunction ℝ)
+        = ↑ArithmeticFunction.moebius * (ArithmeticFunction.vonMangoldt *
+            ↑ArithmeticFunction.zeta) := by rw [ArithmeticFunction.vonMangoldt_mul_zeta]
+      _ = ArithmeticFunction.vonMangoldt * (↑ArithmeticFunction.moebius *
+            ↑ArithmeticFunction.zeta) := by
+              rw [← mul_assoc, mul_comm (↑ArithmeticFunction.moebius : ArithmeticFunction ℝ)
+                ArithmeticFunction.vonMangoldt, mul_assoc]
+      _ = ArithmeticFunction.vonMangoldt * 1 := by
+              rw [ArithmeticFunction.coe_moebius_mul_coe_zeta]
+      _ = ArithmeticFunction.vonMangoldt := mul_one _
+  -- Step 2: Evaluate (log * μ)(d) = Λ(d)
+  have h_eval := congr_fun (congr_arg DFunLike.coe h_swap) d
+  simp only [ArithmeticFunction.mul_apply, ArithmeticFunction.log_apply,
+    ArithmeticFunction.intCoe_apply] at h_eval
+  -- Step 3: Convert antidiagonal → divisors using sum_divisorsAntidiagonal
+  rw [show (∑ x ∈ d.divisorsAntidiagonal,
+      Real.log ↑x.1 * ↑(ArithmeticFunction.moebius x.2) =
+      ∑ i ∈ d.divisors,
+      Real.log ↑i * ↑(ArithmeticFunction.moebius (d / i))) from
+    sum_divisorsAntidiagonal (f := fun a b =>
+      Real.log ↑a * ↑(ArithmeticFunction.moebius b))] at h_eval
+  -- Step 4: Commute each term: log(k) * μ(d/k) = μ(d/k) * log(k)
+  convert h_eval using 1
+  apply Finset.sum_congr rfl
+  intro k _; ring
 
 -- ════════════════════════════════════════════════════════════════
 -- PART III: The full Smith basis rotation identity
@@ -82,12 +105,27 @@ theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
 theorem moebius_sum_indicator (d : ℕ) (hd : d ≠ 0) :
     (∑ k ∈ d.divisors, (ArithmeticFunction.moebius (d / k) : ℝ)) =
     if d = 1 then 1 else 0 := by
-  -- From coe_moebius_mul_coe_zeta: (μ * ζ)(d) = [d=1].
-  -- (μ * ζ)(d) = Σ_{(a,b) ∈ antidiag(d)} μ(a)·ζ(b)
-  --            = Σ_{k|d} μ(d/k)·ζ(k)
-  --            = Σ_{k|d} μ(d/k)·1
-  -- Need: antidiagonal ↔ divisors conversion for this Mathlib version.
-  sorry
+  -- ζ * μ = 1 (Dirichlet convolution identity)
+  have h_one : (↑ArithmeticFunction.zeta * ↑ArithmeticFunction.moebius :
+      ArithmeticFunction ℝ) = 1 := ArithmeticFunction.coe_zeta_mul_coe_moebius
+  have h_eval := congr_fun (congr_arg DFunLike.coe h_one) d
+  simp only [ArithmeticFunction.mul_apply, ArithmeticFunction.natCoe_apply,
+    ArithmeticFunction.intCoe_apply, ArithmeticFunction.one_apply] at h_eval
+  -- Convert antidiagonal → divisors
+  have h_reindex : ∑ x ∈ d.divisorsAntidiagonal,
+      (↑(ArithmeticFunction.zeta x.1) : ℝ) * ↑(ArithmeticFunction.moebius x.2) =
+      ∑ i ∈ d.divisors,
+      (↑(ArithmeticFunction.zeta i) : ℝ) * ↑(ArithmeticFunction.moebius (d / i)) :=
+    sum_divisorsAntidiagonal (f := fun a b =>
+      (↑(ArithmeticFunction.zeta a) : ℝ) * ↑(ArithmeticFunction.moebius b))
+  rw [h_reindex] at h_eval
+  -- ζ(i) = 1 for i > 0 (all divisors of d are positive)
+  -- h_eval has ↑(ζ(i)) * μ(d/i), we need just μ(d/k) = 1 * μ(d/k)
+  convert h_eval using 1
+  apply Finset.sum_congr rfl
+  intro k hk
+  have hk_pos := pos_of_mem_divisors hk
+  simp [ArithmeticFunction.zeta_apply, hk_pos.ne']
 
 /-- **The Full Bridge Identity: c_d = Λ(d) + (1-γ)·[d=1]**
 
@@ -166,14 +204,17 @@ theorem vonMangoldt_six :
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
--- 2 sorry remaining:
---   1. vonMangoldt_eq_moebius_log_sum (Möbius inversion of log)
---   2. moebius_sum_indicator (μ * ζ = ε pointwise)
---
--- smith_basis_rotation: PROVEN modulo the 2 lemmas above.
--- Concrete values (Λ(1)=0, Λ(2)=ln2, Λ(3)=ln3, Λ(4)=ln2, Λ(6)=0): ALL PROVEN.
---
--- The 2 sorry are clean combinatorial identities from Mathlib's
--- Dirichlet convolution algebra. No deep analysis needed.
+-- ╔══════════════════════════════════════════════════════════════╗
+-- ║  AUDIT: ZERO SORRY ✅                                      ║
+-- ╠══════════════════════════════════════════════════════════════╣
+-- ║  vonMangoldt_eq_moebius_log_sum : PROVEN (log * μ = Λ)     ║
+-- ║  moebius_sum_indicator          : PROVEN (ζ * μ = 1)       ║
+-- ║  smith_basis_rotation           : PROVEN (c_d = Λ(d)+...)  ║
+-- ║  vonMangoldt_{one,two,three,four,six} : PROVEN             ║
+-- ║                                                             ║
+-- ║  All proofs use only Mathlib's Dirichlet convolution        ║
+-- ║  algebra: vonMangoldt_mul_zeta, coe_moebius_mul_coe_zeta,  ║
+-- ║  coe_zeta_mul_coe_moebius, sum_divisorsAntidiagonal.        ║
+-- ╚══════════════════════════════════════════════════════════════╝
 
 end Cathedral.Physics.VonMangoldtBridge
