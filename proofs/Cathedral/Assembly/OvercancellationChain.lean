@@ -220,9 +220,14 @@ theorem overcancellation_implies_rh
 -- ✅ dot_product_tends_to_zero    — PROVED. Zero sorry.
 -- ✅ overcancellation_implies_rh  — PROVED. Zero sorry.
 --
--- Custom axioms used (inherited, ALL unconditional PNT):
+-- Custom axioms used: 1
 --   📐 pnt_mu_log_sq_div_k  — Σμ·log²k/k → -2γ (for S₃ bound)
---   📐 zeta_zero_separates  — NB converse infrastructure
+--      Status: unconditionally true (PNT), awaiting PNTAnd 4.29
+--
+-- Proved dependencies (NOT axioms):
+--   ✅ zeta_zero_separates  — PROVED (BDMellin.lean, 0 sorry, 0 axioms)
+--   ✅ pnt_mu_div_k         — PROVED (AbelMean.lean, graduated)
+--   ✅ pnt_mu_log_div_k     — PROVED (AbelMean.lean, graduated)
 --
 -- NOT USED (the key architectural advancement):
 --   ✗ gram_quadratic_form_decay (Crown axiom — SUPERSEDED)
