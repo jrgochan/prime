@@ -86,6 +86,7 @@ members = [
     "experiments/glass-bridge",
     "experiments/arithmetic-spectrometer",
     "experiments/ramanujan-oracle",
+    "experiments/overcancellation-scan",
 ]
 
 # ═══════════════════════════════════════════════════════════
