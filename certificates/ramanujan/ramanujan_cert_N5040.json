@@ -17,5 +17,5 @@
   "glass_identity": "G⁽¹⁾(j,k) = R(j,k) + 1/4",
   "lean_theorem": "glass_quadratic_form",
   "lean_file": "Cathedral/Physics/RamanujanBridge.lean",
-  "elapsed_secs": 0.043969292
+  "elapsed_secs": 0.040662791
 }
