@@ -185,10 +185,9 @@ theorem moebius_divisor_sum (n : ℕ) (hn : 0 < n) :
 
 /-- **EULER TOTIENT SUM**: Σ_{d|n} φ(d) = n.
     Direct from Mathlib's `Nat.sum_totient`. -/
-theorem euler_totient_sum (n : ℕ) (hn : 0 < n) :
+theorem euler_totient_sum (n : ℕ) (_hn : 0 < n) :
     ∑ d ∈ n.divisors, eulerPhi d = (n : ℝ) := by
   simp only [eulerPhi]
-  push_cast
   exact_mod_cast Nat.sum_totient n
 
 /-- **REINDEXED MÖBIUS SUM**: Σ_n (Σ_{d|n+1} μ(d)) · h(n+1) = h(1).
@@ -746,7 +745,7 @@ theorem sigma_witness_growth (B : ℝ) :
           (if p ∣ (i.val + 1) then (p : ℝ) ^ 2 * xf i else xf i) := by
           intro i; split_ifs with h
           · -- p | k+1 ⟹ gcd(p,k+1) = p
-            congr 1; push_cast
+            congr 1
             exact_mod_cast congrArg (· ^ 2) (Nat.gcd_eq_left h)
           · -- p ∤ k+1 ⟹ gcd(p,k+1) = 1 (since p is prime)
             have hcop : Nat.Coprime p (i.val + 1) :=

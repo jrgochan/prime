@@ -562,7 +562,7 @@ theorem sawtooth_coprime_inner_product (j k : ℕ) (hj : 0 < j) (hk : 0 < k)
       have hper_v : sawtoothReal (v + ↑↑m) = sawtoothReal v := by
         have h := (hper.zsmul m) v; simp [zsmul_eq_mul, mul_one] at h; exact h
       rw [hper_v]
-      congr 1; ring
+      congr 1; ring_nf
     have h_rewrite : ∑ m ∈ Finset.range j,
         ∫ u in (↑m:ℝ)..(↑m + 1), sawtoothReal u * sawtoothReal (↑k * u / ↑j) =
         ∑ m ∈ Finset.range j,

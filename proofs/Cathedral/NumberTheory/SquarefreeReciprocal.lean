@@ -48,7 +48,7 @@ def sqfreeCount (N : ℕ) : ℕ :=
 /-- Q(1) = 1 (1 is squarefree). -/
 theorem sqfreeCount_one : sqfreeCount 1 = 1 := by
   unfold sqfreeCount
-  simp [Finset.filter_singleton, squarefree_one]
+  simp [Finset.filter_singleton]
 
 /-- **THEOREM**: Q(N) ≤ N (trivially). -/
 theorem sqfreeCount_le (N : ℕ) : sqfreeCount N ≤ N := by

@@ -491,6 +491,4 @@ theorem unconditional_mean_bound
   → `unconditional_mean_bound` ✅ (NEW: log(N) ≤ 2·log(N-1) bridge)
 -/
 
-#check MediumPNT
-
 end
