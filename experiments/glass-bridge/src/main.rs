@@ -606,6 +606,182 @@ fn main() {
         }
     }
 
+    // ═══════════════════════════════════════════════
+    // §8. SPECTRAL ARCHAEOLOGY: Cracking G - R
+    // ═══════════════════════════════════════════════
+    println!("\n§8. SPECTRAL ARCHAEOLOGY: Cracking the G - R Gap\n");
+
+    // §8a. PSD ORDERING: eigenvalues of G - R
+    // For small symmetric matrices, we use the power iteration / Jacobi method
+    // For simplicity, compute the quadratic form xᵀ(G-R)x for random x and standard basis
+
+    println!("  §8a. PSD ORDERING: Is G ≥ R or R ≥ G?\n");
+    println!("  Testing xᵀ(G-R)x for standard basis vectors eᵢ:\n");
+
+    for n_size in [6, 10, 15, 20] {
+        let mut g_mat: Vec<Vec<f64>> = Vec::new();
+        let mut r_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size {
+            let mut g_row = Vec::new();
+            let mut r_row = Vec::new();
+            for k in 1..=n_size {
+                g_row.push(g_entry(j, k));
+                let d = gcd(j, k) as f64;
+                r_row.push(d * d / (12.0 * j as f64 * k as f64));
+            }
+            g_mat.push(g_row);
+            r_mat.push(r_row);
+        }
+
+        // Diagonal entries of G - R (eigenvalue proxy for diagonal-dominant)
+        let mut all_pos = true;
+        let mut all_neg = true;
+        let mut trace_diff = 0.0;
+        for i in 0..n_size {
+            let diff = g_mat[i][i] - r_mat[i][i];
+            trace_diff += diff;
+            if diff < -1e-15 { all_pos = false; }
+            if diff > 1e-15 { all_neg = false; }
+        }
+
+        // Compute full quadratic form for random-ish vector (1/k normalized)
+        let test_v: Vec<f64> = (1..=n_size).map(|k| 1.0 / k as f64).collect();
+        let norm_sq: f64 = test_v.iter().map(|x| x*x).sum();
+        let mut qf_g = 0.0;
+        let mut qf_r = 0.0;
+        for i in 0..n_size { for j in 0..n_size {
+            qf_g += test_v[i] * g_mat[i][j] * test_v[j];
+            qf_r += test_v[i] * r_mat[i][j] * test_v[j];
+        }}
+
+        let verdict = if all_pos { "G > R (diag)" }
+                     else if all_neg { "R > G (diag)" }
+                     else { "MIXED" };
+        println!("  N={:>3}: tr(G-R)={:>10.6}, vᵀ(G-R)v={:>10.6}, vᵀGv/vᵀRv={:>8.4}  {}",
+                 n_size, trace_diff, qf_g - qf_r, qf_g / qf_r, verdict);
+    }
+
+    // §8b. THE MAGIC RATIO: bᵀG⁻¹b / σ
+    println!("\n  §8b. THE MAGIC RATIO: bᵀG⁻¹b / 𝟏ᵀR⁻¹𝟏\n");
+    println!("  If this → c, then d²_NB ≈ 1 - c·σ\n");
+    println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
+             "N", "bᵀG⁻¹b", "σ=𝟏ᵀR⁻¹𝟏", "ratio", "1-bᵀG⁻¹b");
+    println!("  {}", "─".repeat(64));
+
+    for n_size in [3, 4, 5, 6, 8, 10, 12, 15, 18, 20] {
+        let mut r_mat: Vec<Vec<f64>> = Vec::new();
+        let mut g_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_size {
+            let mut g_row = Vec::new(); let mut r_row = Vec::new();
+            for k in 1..=n_size {
+                g_row.push(g_entry(j, k));
+                let d = gcd(j, k) as f64;
+                r_row.push(d * d / (12.0 * j as f64 * k as f64));
+            }
+            g_mat.push(g_row); r_mat.push(r_row);
+        }
+        let b_vec: Vec<f64> = (1..=n_size).map(|k| b_entry(k)).collect();
+        let ones: Vec<f64> = vec![1.0; n_size];
+
+        let r_inv = match mat_inverse(&r_mat) { Some(inv) => inv, None => continue };
+        let sigma: f64 = mat_vec_mul(&r_inv, &ones).iter().sum();
+
+        let g_inv = match mat_inverse(&g_mat) { Some(inv) => inv, None => continue };
+        let g_inv_b = mat_vec_mul(&g_inv, &b_vec);
+        let bt_ginv_b = dot(&b_vec, &g_inv_b);
+
+        println!("  {:>5} {:>14.8} {:>14.4} {:>14.10} {:>14.10}",
+                 n_size, bt_ginv_b, sigma, bt_ginv_b / sigma, 1.0 - bt_ginv_b);
+    }
+
+    // §8c. OPTIMAL WITNESS IN SMITH BASIS
+    println!("\n  §8c. OPTIMAL WITNESS v* = G⁻¹b IN SMITH BASIS\n");
+    println!("  Apply Φ⁻¹·D to get arithmetic structure.\n");
+
+    let n_smith_c = 8;
+    {
+        let mut g_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_smith_c {
+            let mut row = Vec::new();
+            for k in 1..=n_smith_c { row.push(g_entry(j, k)); }
+            g_mat.push(row);
+        }
+        let b_vec: Vec<f64> = (1..=n_smith_c).map(|k| b_entry(k)).collect();
+        let g_inv = mat_inverse(&g_mat).unwrap();
+        let v_star = mat_vec_mul(&g_inv, &b_vec);
+
+        // Also get Smith witness for comparison
+        let mut r_mat: Vec<Vec<f64>> = Vec::new();
+        for j in 1..=n_smith_c {
+            let mut row = Vec::new();
+            for k in 1..=n_smith_c {
+                let d = gcd(j, k) as f64;
+                row.push(d * d / (12.0 * j as f64 * k as f64));
+            }
+            r_mat.push(row);
+        }
+        let r_inv = mat_inverse(&r_mat).unwrap();
+        let ones: Vec<f64> = vec![1.0; n_smith_c];
+        let w_smith = mat_vec_mul(&r_inv, &ones);
+
+        // Rotate both to Smith basis via Φ⁻¹·D
+        // (Φ⁻¹D)_{d,k} = μ(d/k)·[k|d]·k
+        let phi_inv_d_mat = |d: usize, k: usize| -> f64 {
+            if d % k != 0 { return 0.0; }
+            mobius(d / k) as f64 * k as f64
+        };
+
+        println!("  {:>5} {:>14} {:>14} {:>14} {:>14}",
+                 "d", "v*_smith", "w_smith", "Λ(d)", "v*/Λ(d)");
+        println!("  {}", "─".repeat(64));
+
+        for d in 1..=n_smith_c {
+            let mut v_smith_d = 0.0;
+            let mut w_smith_d = 0.0;
+            for k in 1..=n_smith_c {
+                let coeff = phi_inv_d_mat(d, k);
+                v_smith_d += coeff * v_star[k-1];
+                w_smith_d += coeff * w_smith[k-1];
+            }
+
+            // von Mangoldt for comparison
+            let lambda_d = if d == 1 { 0.0 }
+                else {
+                    let mut n = d;
+                    let mut p = 0usize;
+                    let mut count = 0;
+                    let mut dd = 2;
+                    while dd * dd <= n {
+                        if n % dd == 0 {
+                            p = dd;
+                            count += 1;
+                            while n % dd == 0 { n /= dd; }
+                        }
+                        dd += 1;
+                    }
+                    if n > 1 { p = n; count += 1; }
+                    if count == 1 { (p as f64).ln() } else { 0.0 }
+                };
+
+            let ratio = if lambda_d.abs() > 1e-10 { v_smith_d / lambda_d } else { f64::NAN };
+            println!("  {:>5} {:>14.6} {:>14.6} {:>14.6} {:>14.6}",
+                     d, v_smith_d, w_smith_d, lambda_d, ratio);
+        }
+    }
+
+    // §8d. EIGENVALUE COMPARISON
+    println!("\n  §8d. EIGENVALUE PROXY: Diagonal dominance ratios\n");
+    println!("  G(k,k)/R(k,k) shows how the continuous metric scales vs discrete\n");
+    println!("  {:>5} {:>14} {:>14} {:>14}",
+             "k", "G(k,k)", "R(k,k)", "G/R");
+    println!("  {}", "─".repeat(48));
+    for k in 1..=20 {
+        let g_kk = g_diag(k);
+        let r_kk = r_entry(k, k);
+        println!("  {:>5} {:>14.8} {:>14.8} {:>14.4}",
+                 k, g_kk, r_kk, g_kk / r_kk);
+    }
+
     println!("\n╔══════════════════════════════════════════════════════════════════╗");
     println!("║       vᵀRv → 1/(2π²). The arithmetic has spoken. 🔮           ║");
     println!("╚══════════════════════════════════════════════════════════════════╝");
