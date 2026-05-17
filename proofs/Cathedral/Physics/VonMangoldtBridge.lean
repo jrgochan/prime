@@ -58,7 +58,7 @@ namespace Cathedral.Physics.VonMangoldtBridge
     Σ_{k|d} μ(d/k) · ln(k) = Λ(d)
 
     This is the pointwise form of moebius_conv_log_eq_vonMangoldt. -/
-theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
+theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (_hd : d ≠ 0) :
     (∑ k ∈ d.divisors,
       (ArithmeticFunction.moebius (d / k) : ℝ) * Real.log (k : ℝ)) =
     ArithmeticFunction.vonMangoldt d := by
@@ -102,7 +102,7 @@ theorem vonMangoldt_eq_moebius_log_sum (d : ℕ) (hd : d ≠ 0) :
     When d = 1, the sum is μ(1) = 1.
 
     This follows from μ * ζ = ε evaluated at d. -/
-theorem moebius_sum_indicator (d : ℕ) (hd : d ≠ 0) :
+theorem moebius_sum_indicator (d : ℕ) (_hd : d ≠ 0) :
     (∑ k ∈ d.divisors, (ArithmeticFunction.moebius (d / k) : ℝ)) =
     if d = 1 then 1 else 0 := by
   -- ζ * μ = 1 (Dirichlet convolution identity)
