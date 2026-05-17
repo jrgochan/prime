@@ -521,12 +521,47 @@ private lemma smith_numerator (N_val : ℕ) (_hN : 0 < N_val) (j : ℕ) (hj : 0 
   rw [h_cancel, mul_div_cancel₀]
   exact (RamanujanBridge.jordan2_pos e he_pos).ne'
 
-/-- **σ > 0**: The witness sum is strictly positive.
+/-- **SOS Equality**: σ(N) = 12·Σ_d J₂(d)·y_d² where y_d = Σ_{d|k+1} q(k+1).
 
-    Proof via PSD + smith_numerator:
-    - σ/12 = Σ_j (j+1)·q_{j+1} = Σ_{i,j} gcd²·q_i·q_j ≥ 0 (PSD)
-    - Strict: if = 0, J₂ decomposition forces Σ q = 0,
-      contradicting smith_numerator at j=1 which gives Σ q = 1. -/
+    This is the reusable form of the SOS decomposition. Used by both
+    sigma_witness_diverges (for σ > 0) and sigma_witness_growth (for σ → ∞). -/
+private lemma sigma_sos_eq (N_val : ℕ) (hN : 2 ≤ N_val) :
+    let q : ℕ → ℝ := fun k =>
+      ∑ m ∈ Finset.range (N_val / k),
+        (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
+        RamanujanBridge.jordanTotient2 (k * (m + 1))
+    let xf : Fin N_val → ℝ := fun i => q (i.val + 1)
+    sigmaWitness N_val =
+    12 * ∑ d ∈ Finset.Icc 1 N_val,
+      RamanujanBridge.jordanTotient2 d *
+      (∑ i : Fin N_val, if d ∣ (i.val + 1) then xf i else 0) ^ 2 := by
+  have hN_pos : 0 < N_val := by omega
+  intro q xf
+  unfold sigmaWitness; simp only [smithWitness]
+  have h_convert : ∑ k ∈ Finset.range N_val,
+    12 * (↑(k + 1) : ℝ) * q (k + 1) =
+    12 * ∑ j : Fin N_val, (↑(j.val) + 1 : ℝ) * xf j := by
+    rw [Finset.mul_sum, ← Fin.sum_univ_eq_sum_range]
+    congr 1; ext i; simp only [xf, q]; push_cast; ring
+  rw [h_convert]; congr 1
+  have h_psd_eq : ∑ i : Fin N_val, ∑ j : Fin N_val,
+    (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * xf i * xf j =
+    ∑ j : Fin N_val, (↑(j.val) + 1 : ℝ) * xf j := by
+    simp_rw [show ∀ (i j : Fin N_val),
+      (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * xf i * xf j =
+      xf j * ((Nat.gcd (j.val + 1) (i.val + 1) : ℝ) ^ 2 * xf i) from fun i j => by
+      have : (Nat.gcd (i.val + 1) (j.val + 1) : ℝ) = (Nat.gcd (j.val + 1) (i.val + 1) : ℝ) := by
+        exact_mod_cast Nat.gcd_comm (i.val + 1) (j.val + 1)
+      rw [this]; ring]
+    rw [Finset.sum_comm]; simp_rw [← Finset.mul_sum]
+    apply Finset.sum_congr rfl; intro j _
+    rw [mul_comm]; congr 1
+    have h := smith_numerator N_val hN_pos (j.val + 1) (by omega) (by omega)
+    rw [show (↑(j.val) + 1 : ℝ) = ((j.val + 1 : ℕ) : ℝ) from by push_cast; ring]
+    rw [← h, ← Fin.sum_univ_eq_sum_range]
+  rw [← h_psd_eq, RamanujanBridge.gcd2_sos_decomposition]
+
+/-- **σ > 0**: The witness sum is strictly positive (σ ≥ 12). -/
 theorem sigma_witness_diverges (N_val : ℕ) (hN : 2 ≤ N_val) :
     (0 : ℝ) < sigmaWitness N_val := by
   have hN_pos : 0 < N_val := by omega
@@ -660,7 +695,46 @@ theorem sigma_witness_growth (B : ℝ) :
   -- (From the SOS decomposition: each prime contributes ≥ 1/3 to σ/12.)
   have hbound : ∀ N : ℕ, 2 ≤ N →
     (4 : ℝ) * ((Finset.Icc 1 N).filter Nat.Prime).card ≤ sigmaWitness N := by
-    sorry -- SOS + prime y_p computation
+    intro N hN
+    -- Use sigma_sos_eq: σ = 12 · Σ_d J₂(d)·y_d²
+    set q : ℕ → ℝ := fun k =>
+      ∑ m ∈ Finset.range (N / k),
+        (mu (m + 1) : ℝ) * eulerPhi (k * (m + 1)) /
+        RamanujanBridge.jordanTotient2 (k * (m + 1))
+    set xf : Fin N → ℝ := fun i => q (i.val + 1)
+    set yd : ℕ → ℝ := fun d =>
+      ∑ i : Fin N, if d ∣ (i.val + 1) then xf i else 0
+    have hsos := sigma_sos_eq N hN
+    -- All SOS terms are nonneg
+    have hterms_nonneg : ∀ d ∈ Finset.Icc 1 N,
+      0 ≤ RamanujanBridge.jordanTotient2 d * yd d ^ 2 := by
+      intro d hd; apply mul_nonneg
+      · exact le_of_lt (RamanujanBridge.jordan2_pos d (by rw [Finset.mem_Icc] at hd; omega))
+      · exact sq_nonneg _
+    -- For each prime p ≤ N: J₂(p)·y_p² ≥ 1/3
+    -- (from smith_numerator: y_p = 1/(p+1), J₂(p) = p²-1)
+    have hprime_bound : ∀ p ∈ (Finset.Icc 1 N).filter Nat.Prime,
+      1/3 ≤ RamanujanBridge.jordanTotient2 p * yd p ^ 2 := by
+      sorry -- Prime y_p computation via smith_numerator
+    -- σ/12 ≥ Σ_{prime} 1/3 = π(N)/3
+    have hsos' : sigmaWitness N = 12 * ∑ d ∈ Finset.Icc 1 N,
+      RamanujanBridge.jordanTotient2 d * yd d ^ 2 := hsos
+    calc (4 : ℝ) * ((Finset.Icc 1 N).filter Nat.Prime).card
+        = 12 * (1/3 * ((Finset.Icc 1 N).filter Nat.Prime).card) := by ring
+      _ = 12 * ∑ _p ∈ (Finset.Icc 1 N).filter Nat.Prime,
+          (1 : ℝ)/3 := by
+          congr 1; rw [Finset.sum_const, nsmul_eq_mul]; ring
+      _ ≤ 12 * ∑ p ∈ (Finset.Icc 1 N).filter Nat.Prime,
+          RamanujanBridge.jordanTotient2 p * yd p ^ 2 := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 12)
+          exact Finset.sum_le_sum hprime_bound
+      _ ≤ 12 * ∑ d ∈ Finset.Icc 1 N,
+          RamanujanBridge.jordanTotient2 d * yd d ^ 2 := by
+          apply mul_le_mul_of_nonneg_left _ (by norm_num : (0:ℝ) ≤ 12)
+          apply Finset.sum_le_sum_of_subset_of_nonneg
+          · exact Finset.filter_subset _ _
+          · intro d hd _; exact hterms_nonneg d hd
+      _ = sigmaWitness N := hsos'.symm
   -- Step 2: #{primes ≤ N} → ∞ (Euclid's theorem)
   -- For any M, find N with at least M primes in Icc 1 N.
   have heuclid : ∀ M : ℕ, ∃ N₀ : ℕ, 2 ≤ N₀ ∧
