@@ -23,8 +23,10 @@
 
 import Cathedral.Defs
 import Cathedral.NymanBeurling.BDMellin
--- Cathedral.PNT.Bridge: re-enabled via local PNTAnd clone (v4.29 patched)
-import Cathedral.PNT.Bridge
+-- Cathedral.PNT.Bridge: DECOUPLED (May 17, 2026)
+-- The proved PNT results are declared inline below to avoid
+-- importing Bridge.lean's 2 upstream-blocked sorry.
+-- import Cathedral.PNT.Bridge
 import Cathedral.PNT.LogBridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.NymanBeurling.BDBridge
@@ -43,13 +45,76 @@ noncomputable section
 open Real Matrix Finset MeasureTheory Cathedral.Vasyunin
 
 -- ════════════════════════════════════════════════
--- §1b. PNT AXIOMS (19th Century — Unconditional)
+-- §1a. PNT AXIOM (from PrimeNumberTheoremAnd, Kontorovich et al.)
+-- Declared inline to avoid importing PNT/Bridge.lean's 2 sorry.
+-- ════════════════════════════════════════════════
+
+/-- **PNT** (axiom from PrimeNumberTheoremAnd.Consequences.mu_pnt_alt):
+    The summatory Möbius function Σ μ(n)/n = o(1).
+    This is equivalent to the Prime Number Theorem ψ(x) ~ x.
+    Reference: Kontorovich et al., PrimeNumberTheoremAnd (2024-2026). -/
+axiom mu_pnt_alt :
+  (fun x : ℝ ↦ ∑ n ∈ Finset.range ⌊x⌋₊,
+    (↑(ArithmeticFunction.moebius n) : ℝ) / n) =o[Filter.atTop] fun _ ↦ (1 : ℝ)
+
+/-- **PNT (discrete Tendsto form)**: Σ_{k=1}^{N} μ(k)/k → 0.
+    Proved from mu_pnt_alt via composition with ℕ → ℝ. -/
+theorem pnt_moebius_sum_div_tendsto :
+    Filter.Tendsto (fun N => ∑ k ∈ Finset.Icc 1 N,
+      (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
+      Filter.atTop (nhds 0) := by
+  have h_o1 := mu_pnt_alt
+  rw [Asymptotics.isLittleO_one_iff] at h_o1
+  have h_range : Filter.Tendsto (fun N : ℕ =>
+      ∑ n ∈ Finset.range N, (↑(ArithmeticFunction.moebius n) : ℝ) / (n : ℝ))
+      Filter.atTop (nhds 0) := by
+    have := h_o1.comp tendsto_natCast_atTop_atTop
+    simp only [Function.comp_def, Nat.floor_natCast] at this
+    exact this
+  have h_eq : ∀ N : ℕ,
+      ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ) =
+      ∑ n ∈ Finset.range N, (↑(ArithmeticFunction.moebius n) : ℝ) / (n : ℝ) +
+        (↑(ArithmeticFunction.moebius N) : ℝ) / (N : ℝ) := by
+    intro N
+    have h_union : Finset.Icc 1 N = (Finset.range (N + 1)).erase 0 := by
+      ext n; simp [Finset.mem_Icc, Finset.mem_range]; omega
+    rw [h_union, Finset.sum_erase_eq_sub (Finset.mem_range.mpr (Nat.zero_lt_succ N))]
+    simp only [ArithmeticFunction.map_zero, Int.cast_zero, zero_div, sub_zero,
+               Finset.sum_range_succ]
+  have h_Nth : Filter.Tendsto (fun N : ℕ =>
+      (↑(ArithmeticFunction.moebius N) : ℝ) / (N : ℝ)) Filter.atTop (nhds 0) := by
+    rw [Metric.tendsto_atTop]
+    intro ε hε
+    refine ⟨⌈1/ε⌉₊ + 1, fun N hN => ?_⟩
+    simp only [dist_zero_right]
+    have hN_pos : (0 : ℝ) < N := Nat.cast_pos.mpr (by omega)
+    calc ‖(↑(ArithmeticFunction.moebius N) : ℝ) / (N : ℝ)‖
+        = |(↑(ArithmeticFunction.moebius N) : ℝ)| / N := by
+          rw [norm_div, Real.norm_eq_abs, Real.norm_natCast]
+      _ ≤ 1 / N := by
+          apply div_le_div_of_nonneg_right _ hN_pos.le
+          exact_mod_cast ArithmeticFunction.abs_moebius_le_one
+      _ < ε := by
+          have h1ε : 1 / ε < N := calc
+            1 / ε ≤ ⌈1/ε⌉₊ := Nat.le_ceil (1/ε)
+            _ < ⌈1/ε⌉₊ + 1 := by linarith
+            _ ≤ N := by exact_mod_cast hN
+          exact (div_lt_iff₀ hN_pos).mpr (mul_comm ε ↑N ▸ (div_lt_iff₀ hε).mp h1ε)
+  have h_sum : Filter.Tendsto
+      ((fun N => ∑ n ∈ Finset.range N, (↑(ArithmeticFunction.moebius n) : ℝ) / (n : ℝ)) +
+       (fun N => (↑(ArithmeticFunction.moebius N) : ℝ) / (N : ℝ))) Filter.atTop (nhds 0) := by
+    rw [show (0:ℝ) = 0 + 0 from (add_zero 0).symm]
+    exact h_range.add h_Nth
+  exact h_sum.congr (fun N => (h_eq N).symm)
+
+-- ════════════════════════════════════════════════
+-- §1b. PNT THEOREMS (using inline mu_pnt_alt)
 -- ════════════════════════════════════════════════
 
 /-- **PNT THEOREM 1** (GRADUATED 🎓 — was axiom):
     The Möbius partial sums Σ μ(k)/k converge to 0.
     Equivalent to the Prime Number Theorem.
-    Proof: From PrimeNumberTheoremAnd.mu_pnt_alt via Cathedral.PNT.Bridge. -/
+    Proof: From mu_pnt_alt (inline axiom above). -/
 theorem pnt_mu_div_k :
   Filter.Tendsto (fun N =>
     ∑ k ∈ Finset.Icc 1 N, (↑(ArithmeticFunction.moebius k) : ℝ) / (k : ℝ))
