@@ -14,6 +14,7 @@ import Cathedral.Assembly.DirectMellinBound
 import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
 import Cathedral.Physics.SmithWitness
+import Cathedral.Physics.VonMangoldtBridge
 -- NOTE: Cathedral.Assembly.GramCrown is DOWNSTREAM of MainChain
 -- (GramBoundDirect imports MainChain for log_grows_unboundedly).
 -- The discrete RH exports live in GramCrown.lean and Assembly.lean.
@@ -219,6 +220,8 @@ theorem nyman_beurling_equivalence_renormalization :
     approximants whose L² error vanishes, but the connection to the
     standard NB L²(0,1) norm requires additional bridging (the
     discrete-to-continuous Mellin lift in the Crown architecture).
+    The von Mangoldt bridge (`VonMangoldtBridge.smith_basis_rotation`,
+    ZERO SORRY) shows that this lift passes through Λ(d) = -ζ'/ζ.
     The statement below packages the growth and distance results. -/
 theorem smith_witness_forward_direction :
     ∀ B : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
