@@ -428,4 +428,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.VonMangoldtBridge,
     -- Spectral Divergence (Σ Λ(d)² → ∞ via Euclid, Exploration 39)
     `Cathedral.Physics.SpectralDivergence,
+    -- Gram Bridge ({t}² ≤ {t} → G_{kk} ≤ b_k, Exploration 39)
+    `Cathedral.Physics.GramBridge,
   ]
