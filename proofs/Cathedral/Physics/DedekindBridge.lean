@@ -275,13 +275,21 @@ theorem dedekind_reciprocity (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
     ((a : ℝ) ^ 2 + (b : ℝ) ^ 2 + 1) / (12 * (a : ℝ) * (b : ℝ)) - 1 / 4 := by
   -- Handle edge cases a=1 or b=1
   by_cases ha2 : a = 1
-  · -- a = 1: s(1,b) = 0, s(b,1) = 0
-    subst ha2; simp [dedekindSum_one, dedekindSum]
-    sorry -- algebra for the 1-case
+  · -- a = 1: dedekindSum 1 b + dedekindSum b 1 = ...
+    -- dedekindSum b 1 = 0 (by if-clause), dedekindSum 1 b depends on b
+    subst ha2
+    by_cases hb1 : b = 1
+    · subst hb1; simp [dedekindSum]; norm_num
+    · -- b ≥ 2: dedekindSum 1 b requires computing Σ((m/b))²
+      simp [dedekindSum_one, dedekindSum]
+      sorry -- requires Σm² formula
   by_cases hb2 : b = 1
   · -- b = 1: symmetric
-    subst hb2; simp [dedekindSum_one, dedekindSum]
-    sorry -- algebra for the 1-case
+    subst hb2
+    by_cases ha1 : a = 1
+    · subst ha1; simp [dedekindSum]; norm_num
+    · simp [dedekindSum_one, dedekindSum]
+      sorry -- requires Σm² formula
   -- Main case: a,b ≥ 2
   have ha_ge2 : 1 < a := by omega
   have hb_ge2 : 1 < b := by omega
