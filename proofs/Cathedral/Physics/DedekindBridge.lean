@@ -199,8 +199,42 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
     (hcop : Nat.Coprime a b) :
     (∑ m ∈ Ico 1 a, (⌊(m * b : ℤ) / (a : ℤ)⌋ : ℝ)) =
     ((a : ℝ) - 1) * ((b : ℝ) - 1) / 2 := by
-  -- From fract_sum_coprime (Σ{mb/a} = (a-1)/2)
-  -- and Σ(mb/a) = b(a-1)/2, derive Σ⌊mb/a⌋ = (a-1)(b-1)/2
+  -- Step 1: The coprime bijection gives Σ(m*b%a) = Σm
+  have h_bij_sum : ∑ m ∈ Ico 1 a, (m * b % a) = ∑ m ∈ Ico 1 a, m := by
+    apply Finset.sum_bij (fun m _ => m * b % a)
+    · -- Maps Ico 1 a → Ico 1 a
+      intro m hm; apply Finset.mem_Ico.mpr
+      exact ⟨Nat.pos_of_ne_zero (coprime_mul_mod_ne_zero a b m ha hm hcop),
+             Nat.mod_lt _ (by omega)⟩
+    · -- Injective
+      intro m₁ hm₁ m₂ hm₂ heq
+      exact coprime_mul_mod_injective a b ha hcop m₁ hm₁ m₂ hm₂ heq
+    · -- Surjective: injective endomorphism on finite set → surjective
+      intro k hk
+      -- The image has same cardinality as the source (injective)
+      -- and is a subset of the source, so they're equal
+      have h_sub : (Ico 1 a).image (fun m => m * b % a) ⊆ Ico 1 a := by
+        intro x hx
+        simp only [Finset.mem_image] at hx
+        rcases hx with ⟨m, hm, rfl⟩
+        exact Finset.mem_Ico.mpr ⟨Nat.pos_of_ne_zero (coprime_mul_mod_ne_zero a b m ha hm hcop),
+                                  Nat.mod_lt _ (by omega)⟩
+      have h_card : ((Ico 1 a).image (fun m => m * b % a)).card = (Ico 1 a).card := by
+        rw [Finset.card_image_of_injOn]
+        intro m₁ hm₁ m₂ hm₂ h
+        exact coprime_mul_mod_injective a b ha hcop m₁ hm₁ m₂ hm₂ h
+      have h_eq : (Ico 1 a).image (fun m => m * b % a) = Ico 1 a := by
+        apply Finset.eq_of_subset_of_card_le h_sub
+        omega
+      -- k ∈ Ico 1 a = image, so k ∈ image
+      have hk_in_image : k ∈ (Ico 1 a).image (fun m => m * b % a) := h_eq.symm ▸ hk
+      simp only [Finset.mem_image] at hk_in_image
+      rcases hk_in_image with ⟨m, hm, hm_eq⟩
+      exact ⟨m, hm, hm_eq⟩
+    · -- Each term: value is the same
+      intro m _; rfl
+  -- Step 2: Use the bijection sum to compute the floor sum
+  -- For now, derive the result from the bijection
   sorry
 
 /-- **LEMMA**: The Dedekind sum s(b,a) expands as:
