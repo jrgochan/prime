@@ -395,6 +395,78 @@ theorem overcancellation_implies_crown
 -- TO BE WIRED IN MainChain.lean (needs log_grows_unboundedly)
 
 -- ════════════════════════════════════════════════
+-- §5½. CROWN REDUCTION: L² rate → vᵀGv bound
+-- ════════════════════════════════════════════════
+
+/-- **CROWN REDUCTION**: The Crown axiom follows from a simpler L² axiom.
+
+    If we can show: RH → ∫₀¹|1-f_N|² ≤ C/logN  (spatial L² decay)
+    then:           RH → vᵀGv ≤ 1 + C'/logN     (Crown axiom)
+
+    **Proof**: From the PROVED identity
+      ∫|1-f_N|² = 1 - 2·bᵀv + vᵀGv
+    we get:
+      vᵀGv = ∫|1-f_N|² + 2·bᵀv - 1
+           ≤ C_l2/logN + 2·(1 + C_dot/logN) - 1
+           = 1 + (C_l2 + 2·C_dot)/logN
+
+    The dot product bound bᵀv ≤ 1 + C_dot/logN is PROVED from PNT.
+    The L² identity is PROVED algebraically.
+    The only new content is the spatial L² rate.
+
+    PROVED. Zero sorry. -/
+theorem spatial_l2_implies_crown
+    (hRH : RiemannHypothesis)
+    (h_l2 : ∃ C_l2 : ℝ, C_l2 > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+      ∫ x in (0:ℝ)..1, (1 - bdLinComb N (bdMoebiusWeight N) x) ^ 2 ≤
+      C_l2 / Real.log ↑N) :
+    ∃ C_G : ℝ, C_G > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
+    N ≥ 3 →
+    dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec
+        (logCutoffWitness N)) ≤ 1 + C_G / Real.log ↑N := by
+  -- Get the L² rate
+  obtain ⟨C_l2, hC_l2_pos, N_l2, h_l2_bound⟩ := h_l2
+  -- Get RH → Mertens (for dot product)
+  obtain ⟨C_m, hC_m_pos, hM⟩ := rh_implies_mertens_bound_proved hRH
+  -- Get dot product bound
+  obtain ⟨C_dot, hC_dot_pos, h_dot⟩ :=
+    moebius_dot_product_approx_one_uniform_34 C_m hC_m_pos hM pnt_mu_div_k pnt_mu_log_div_k
+  -- Choose the Crown constant
+  set C_G := C_l2 + 2 * C_dot + 1
+  refine ⟨C_G, by positivity, max (max N_l2 10) 3, fun N hN hN3 => ?_⟩
+  have hN_l2 : N ≥ N_l2 := by omega
+  have hN10 : 10 ≤ N := by omega
+  have hN2 : 2 ≤ N := by omega
+  have hlogN_pos : 0 < Real.log ↑N :=
+    Real.log_pos (by exact_mod_cast show 1 < N by omega)
+  -- Step 1: The L² identity (PROVED)
+  have h_eq := bd_l2_error_eq_quad_error N hN2 (bdMoebiusWeight N)
+  -- Step 2: Index bridge
+  have h_N_sub : (N-1) + 1 = N := Nat.sub_add_cancel (by omega : 1 ≤ N)
+  have h_qf : dotProduct (logCutoffWitness N)
+      ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) =
+      realQuadForm (Matrix.of fun i j => vasyuninGramEntry (i.val + 1) (j.val + 1))
+        (bdMoebiusWeight N) :=
+    h_N_sub ▸ quadForm_bridge_aux (N-1) (by omega : 2 ≤ N-1)
+  -- Step 3: From the identity: vᵀGv = ∫|1-f|² + 2bᵀv - 1
+  rw [h_qf]
+  have h_l2_N := h_l2_bound N hN_l2
+  have h_dot_N := h_dot N hN10
+  have h_bv_upper : dotProduct (fun i => vasyuninMeanEntry (i.val + 1))
+      (bdMoebiusWeight N) ≤ 1 + C_dot / Real.log ↑N := by
+    have h_neg := neg_abs_le (1 - dotProduct (fun i =>
+        vasyuninMeanEntry (i.val + 1)) (bdMoebiusWeight N))
+    linarith [h_dot_N]
+  have h_2cd : 2 * (C_dot / Real.log ↑N) = 2 * C_dot / Real.log ↑N := by ring
+  have hle : C_l2 / Real.log ↑N + 2 * C_dot / Real.log ↑N ≤ C_G / Real.log ↑N := by
+    rw [← add_div]; exact div_le_div_of_nonneg_right (by simp [C_G]) hlogN_pos.le
+  -- vᵀGv = ∫ + 2bᵀv - 1  (from h_eq: ∫ = 1 - 2bᵀv + vᵀGv)
+  -- ≤ C_l2/logN + 2(1 + C_dot/logN) - 1 = 1 + (C_l2 + 2C_dot)/logN ≤ 1 + C_G/logN
+  linarith [h_eq, h_2cd]
+
+
+-- ════════════════════════════════════════════════
 -- §5. AUDIT
 -- ════════════════════════════════════════════════
 
