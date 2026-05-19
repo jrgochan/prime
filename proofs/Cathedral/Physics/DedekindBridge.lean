@@ -156,12 +156,34 @@ private lemma coprime_mul_mod_injective (a b : ℕ) (ha : 1 < a)
   have h1_lt : m₁ < a := (Finset.mem_Ico.mp hm₁).2
   have h2_pos : 0 < m₂ := by have := (Finset.mem_Ico.mp hm₂).1; omega
   have h2_lt : m₂ < a := (Finset.mem_Ico.mp hm₂).2
-  -- In ℤ: m₁*b ≡ m₂*b (mod a), so a | b*(m₁-m₂), so a | (m₁-m₂)
-  -- Since 0 < m₁, m₂ < a, |m₁-m₂| < a, so m₁ = m₂
-  by_contra h_ne
-  -- m₁ ≠ m₂ and both in {1,...,a-1}: |m₁-m₂| ∈ {1,...,a-1}
-  -- But a | (m₁-m₂) [in ℤ], contradicting |m₁-m₂| < a
-  sorry
+  -- Lift to ℤ: m₁*b and m₂*b have the same remainder mod a
+  have h_int : ((m₁ * b : ℕ) : ℤ) % (a : ℤ) = ((m₂ * b : ℕ) : ℤ) % (a : ℤ) := by
+    exact_mod_cast heq
+  -- So a | (m₁*b - m₂*b) = (m₁ - m₂)*b in ℤ
+  have h_dvd_prod : (a : ℤ) ∣ ((m₁ : ℤ) - m₂) * b := by
+    rw [show ((m₁ : ℤ) - m₂) * b = (↑(m₁ * b) : ℤ) - (↑(m₂ * b) : ℤ) from by push_cast; ring]
+    rw [Int.dvd_iff_emod_eq_zero, Int.sub_emod, h_int, sub_self, Int.zero_emod]
+  -- Since gcd(a,b)=1, a | (m₁ - m₂)
+  have h_dvd : (a : ℤ) ∣ ((m₁ : ℤ) - m₂) := by
+    have : IsCoprime (a : ℤ) (b : ℤ) := by
+      rw [Int.isCoprime_iff_gcd_eq_one, Int.gcd_natCast_natCast]; exact hcop
+    exact this.dvd_of_dvd_mul_right h_dvd_prod
+  -- But |m₁ - m₂| < a (since 0 < m₁, m₂ < a), so m₁ - m₂ = 0
+  have h_bound : |((m₁ : ℤ) - m₂)| < a := by
+    have : -(a : ℤ) < (m₁ : ℤ) - m₂ := by omega
+    have : (m₁ : ℤ) - m₂ < a := by omega
+    exact abs_lt.mpr ⟨by omega, by omega⟩
+  rcases h_dvd with ⟨c, hc⟩
+  -- |m₁ - m₂| = |a * c| = a * |c| ≥ a if c ≠ 0
+  -- But |m₁ - m₂| < a, so c = 0, hence m₁ = m₂
+  have hc0 : c = 0 := by
+    by_contra hc_ne
+    have : (a : ℤ) ≤ |((m₁ : ℤ) - m₂)| := by
+      rw [hc, abs_mul, Int.abs_natCast]
+      have : 1 ≤ |c| := Int.one_le_abs hc_ne
+      nlinarith [show (0 : ℤ) ≤ a from by omega]
+    linarith
+  simp [hc0] at hc; omega
 
 /-- **LEMMA (Coprime Floor Sum)**: For coprime a,b:
 
