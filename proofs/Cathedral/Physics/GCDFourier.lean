@@ -107,8 +107,8 @@ theorem moebius_prime_mul_zero (p m : ℕ) (hp : Nat.Prime p) (hdvd : p ∣ m) :
     f(p) = Σ_{m: p·m ≤ N} v_{pm} / (pm)
 
     which, by the multiplicativity of μ, involves only m coprime to p. -/
-theorem gcd_fourier_prime_sum (N : ℕ) (v : Fin N → ℝ) (p : ℕ) (hp : Nat.Prime p)
-    (hpN : p ≤ N) :
+theorem gcd_fourier_prime_sum (N : ℕ) (v : Fin N → ℝ) (p : ℕ) (_hp : Nat.Prime p)
+    (_hpN : p ≤ N) :
     gcdFourierCoeff N v p =
     ∑ i : Fin N, if p ∣ (i.val + 1)
       then v i / (i.val + 1 : ℝ)
@@ -140,12 +140,29 @@ theorem ramanujan_sos_fourier (N : ℕ) (v : Fin N → ℝ) :
       RamanujanBridge.ramanujanEntry (i.val + 1) (j.val + 1) * v i * v j =
     1 / 12 * ∑ d ∈ Icc 1 N,
       RamanujanBridge.jordanTotient2 d * (gcdFourierCoeff N v d) ^ 2 := by
-  -- The proof follows from gcd2_sos_decomposition with z_i = v_i/(i+1).
-  -- The key step: ramanujanEntry(i+1,j+1) * v_i * v_j
-  --   = (1/12) * gcd(i+1,j+1)² * (v_i/(i+1)) * (v_j/(j+1))
-  -- Then gcd2_sos_decomposition gives the J₂-weighted sum of squares.
-  -- The inner sum Σ_{d|i+1} v_i/(i+1) is exactly gcdFourierCoeff.
-  sorry
+  -- Step 1: Convert R(i+1,j+1)*v_i*v_j = (1/12)*gcd²*z_i*z_j
+  set z : Fin N → ℝ := fun i => v i / (i.val + 1 : ℝ) with hz_def
+  have hconv : ∀ (i j : Fin N),
+      RamanujanBridge.ramanujanEntry (i.val + 1) (j.val + 1) * v i * v j =
+      1 / 12 * ((Nat.gcd (i.val + 1) (j.val + 1) : ℝ) ^ 2 * z i * z j) := by
+    intro i j
+    unfold RamanujanBridge.ramanujanEntry; simp only [z]
+    have hi_ne : ((i.val + 1 : ℕ) : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    have hj_ne : ((j.val + 1 : ℕ) : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+    rw [show (i.val + 1 : ℝ) = ((i.val + 1 : ℕ) : ℝ) from by push_cast; ring]
+    rw [show (j.val + 1 : ℝ) = ((j.val + 1 : ℕ) : ℝ) from by push_cast; ring]
+    field_simp
+  -- Step 2: Factor out 1/12 from both nested sums
+  simp_rw [hconv]
+  -- Now LHS: Σ_i (Σ_j (1/12 * (gcd² * z_i * z_j)))
+  -- Rewrite inner: Σ_j (1/12 * f(j)) = 1/12 * Σ_j f(j)
+  conv_lhs => arg 2; ext i; rw [← Finset.mul_sum]
+  -- Now LHS: Σ_i (1/12 * Σ_j (gcd² * z_i * z_j))
+  rw [← Finset.mul_sum]
+  -- Now LHS: 1/12 * Σ_i Σ_j (gcd² * z_i * z_j)
+  congr 1
+  -- Step 3: gcd2_sos_decomposition + congr closes — z_i ≡ gcdFourierCoeff
+  rw [RamanujanBridge.gcd2_sos_decomposition]; congr 1
 
 -- ════════════════════════════════════════════════
 -- §5. NONNEGATIVITY FROM FOURIER
