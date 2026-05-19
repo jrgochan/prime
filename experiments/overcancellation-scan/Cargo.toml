@@ -1,10 +1,11 @@
 [package]
 name = "overcancellation-scan"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
 rayon = "1.10"
+cathedral-utils = { path = "../cathedral-utils" }
 
 [profile.release]
 opt-level = 3
