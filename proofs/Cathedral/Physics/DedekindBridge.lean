@@ -285,12 +285,21 @@ theorem ramanujan_entry_via_dedekind (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
     1 / (12 * (j / Nat.gcd j k : ℝ) * (k / Nat.gcd j k : ℝ)) := by
   unfold RamanujanBridge.ramanujanEntry
   have hd := Nat.gcd_pos_of_pos_left k hj
-  have hj_ne : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  have hk_ne : (k : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
   have hd_ne : (Nat.gcd j k : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  -- This is a straightforward algebraic identity:
-  -- gcd²/(12jk) = 1/(12·(j/gcd)·(k/gcd))
-  sorry
+  have hj_d : j / Nat.gcd j k * Nat.gcd j k = j := Nat.div_mul_cancel (Nat.gcd_dvd_left j k)
+  have hk_d : k / Nat.gcd j k * Nat.gcd j k = k := Nat.div_mul_cancel (Nat.gcd_dvd_right j k)
+  -- Cast to ℝ: j = (j/d) * d, k = (k/d) * d
+  have hj_r : (j : ℝ) = (j / Nat.gcd j k : ℕ) * (Nat.gcd j k : ℕ) := by
+    exact_mod_cast hj_d.symm
+  have hk_r : (k : ℝ) = (k / Nat.gcd j k : ℕ) * (Nat.gcd j k : ℕ) := by
+    exact_mod_cast hk_d.symm
+  -- Substitute j = (j/d)*d, k = (k/d)*d into gcd²/(12jk)
+  rw [hj_r, hk_r]
+  have hjd_pos : 0 < j / Nat.gcd j k := Nat.div_pos (Nat.le_of_dvd hj (Nat.gcd_dvd_left j k)) hd
+  have hkd_pos : 0 < k / Nat.gcd j k := Nat.div_pos (Nat.le_of_dvd hk (Nat.gcd_dvd_right j k)) hd
+  have hjd_ne : (j / Nat.gcd j k : ℝ) ≠ 0 := by positivity
+  have hkd_ne : (k / Nat.gcd j k : ℝ) ≠ 0 := by positivity
+  field_simp
 
 -- ════════════════════════════════════════════════
 -- AUDIT
