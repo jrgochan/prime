@@ -95,18 +95,13 @@ theorem dedekindSum_one (b : ℕ) : dedekindSum b 1 = 0 := by
 theorem dedekindSum_zero (b : ℕ) : dedekindSum b 0 = 0 := by
   unfold dedekindSum; simp [show (0 : ℕ) ≤ 1 from by omega]
 
-/-- s(0, a) = 0: all terms are ((0)) = 0. -/
-theorem dedekindSum_zero_left (a : ℕ) : dedekindSum 0 a = 0 := by
-  unfold dedekindSum
-  split_ifs with h
-  · rfl
-  · apply Finset.sum_eq_zero
-    intro m _
-    -- m * 0 = 0, so sawtooth(0/a) = sawtooth(0) = -1/2
-    -- But we just need the product to be 0... actually it's not 0.
-    -- With our simplified sawtooth, ((0)) = -1/2, not 0.
-    -- So s(0, a) ≠ 0 with this definition. Use sorry for now.
-    sorry
+/-- s(0, a) with our sawtooth: each term has factor sawtooth(0) = -1/2.
+    Note: with the classical convention ((n)) = 0 at integers, we'd get s(0,a) = 0.
+    With our simplified sawtooth(x) = {x} - 1/2, sawtooth(0) = -1/2,
+    so the sum is non-trivially -1/2 · Σ sawtooth(m/a).
+    This case never arises in the reciprocity law (b ≥ 1, coprime). -/
+theorem dedekindSum_zero_left (a : ℕ) (ha : a ≤ 1) : dedekindSum 0 a = 0 := by
+  unfold dedekindSum; simp [ha]
 
 -- ════════════════════════════════════════════════
 -- §3. CONNECTION TO FRACTIONAL PARTS
