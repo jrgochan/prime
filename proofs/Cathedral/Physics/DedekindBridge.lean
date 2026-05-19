@@ -236,15 +236,20 @@ theorem dedekind_contains_ramanujan (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
     dedekindSum a b + dedekindSum b a + 1 / 4 =
     (a : ℝ) / (12 * b) + (b : ℝ) / (12 * a) + 1 / (12 * (a : ℝ) * (b : ℝ)) := by
   have hrecip := dedekind_reciprocity a b ha hb hcop
-  have ha_ne : (a : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  have hb_ne : (b : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
-  have ha_pos : (0 : ℝ) < a := by exact_mod_cast ha
-  have hb_pos : (0 : ℝ) < b := by exact_mod_cast hb
+  have h12a_ne : (12 : ℝ) * a ≠ 0 := by positivity
+  have h12b_ne : (12 : ℝ) * b ≠ 0 := by positivity
+  have h12ab_ne : (12 : ℝ) * a * b ≠ 0 := by positivity
   -- (a² + b² + 1)/(12ab) = a/(12b) + b/(12a) + 1/(12ab)
   have hdecomp : ((a : ℝ) ^ 2 + (b : ℝ) ^ 2 + 1) / (12 * (a : ℝ) * (b : ℝ)) =
       (a : ℝ) / (12 * b) + (b : ℝ) / (12 * a) + 1 / (12 * (a : ℝ) * (b : ℝ)) := by
-    -- Pure algebra: (a²+b²+1)/(12ab) = a/(12b) + b/(12a) + 1/(12ab)
-    sorry
+    have ha_pos : (0 : ℝ) < a := by exact_mod_cast ha
+    have hb_pos : (0 : ℝ) < b := by exact_mod_cast hb
+    -- Rewrite a/(12b) = a²/(12ab) and b/(12a) = b²/(12ab)
+    have h1 : (a : ℝ) / (12 * b) = (a : ℝ) ^ 2 / (12 * a * b) := by
+      rw [sq]; field_simp
+    have h2 : (b : ℝ) / (12 * a) = (b : ℝ) ^ 2 / (12 * a * b) := by
+      rw [sq]; field_simp
+    rw [h1, h2, ← add_div, ← add_div]
   linarith
 
 /-- **COROLLARY**: Extract the Ramanujan entry from Dedekind reciprocity.
