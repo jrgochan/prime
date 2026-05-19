@@ -233,8 +233,10 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
       exact ⟨m, hm, hm_eq⟩
     · -- Each term: value is the same
       intro m _; rfl
-  -- Step 2: Use the bijection sum to compute the floor sum
-  -- For now, derive the result from the bijection
+  -- Step 2: Connect ℤ floor division to the bijection sum
+  -- ⌊(m*b : ℤ)/(a : ℤ)⌋ = (m*b/a : ℕ) for positive a
+  -- Then Σ(m*b/a) = (Σmb - Σ(mb%a))/a = (b*Σm - Σm)/a
+  -- = (b-1)*a(a-1)/2 / a = (a-1)(b-1)/2
   sorry
 
 /-- **LEMMA**: The Dedekind sum s(b,a) expands as:
