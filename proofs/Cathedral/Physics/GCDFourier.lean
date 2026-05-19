@@ -73,7 +73,7 @@ theorem moebius_prime_mul (p m : ℕ) (hp : Nat.Prime p) (hcop : Nat.Coprime m p
     (ArithmeticFunction.moebius (p * m) : ℤ) =
     -(ArithmeticFunction.moebius m : ℤ) := by
   have hcop' : Nat.Coprime p m := Nat.Coprime.symm hcop
-  rw [GCDSignLaw.moebius_coprime_mul_eq p m hcop']
+  rw [Cathedral.Covariance.GCDSignLaw.moebius_coprime_mul_eq p m hcop']
   rw [ArithmeticFunction.moebius_apply_prime hp]
   ring
 
