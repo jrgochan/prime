@@ -132,11 +132,42 @@ theorem sawtooth_div_pos (m a : ℕ) (hm : m ∈ Ico 1 a) :
 -- §4. THE DEDEKIND RECIPROCITY LAW
 -- ════════════════════════════════════════════════
 
+/-- For coprime a,b with 1 ≤ m < a: m*b is not divisible by a.
+    This ensures (m*b) % a ∈ {1,...,a-1}. -/
+private lemma coprime_mul_mod_ne_zero (a b m : ℕ) (ha : 1 < a) (hm : m ∈ Ico 1 a)
+    (hcop : Nat.Coprime a b) : m * b % a ≠ 0 := by
+  intro h
+  have hm_pos : 0 < m := by have := (Finset.mem_Ico.mp hm).1; omega
+  have hm_lt : m < a := (Finset.mem_Ico.mp hm).2
+  have hdvd : a ∣ m * b := Nat.dvd_of_mod_eq_zero h
+  -- gcd(a,b)=1 and a | m*b implies a | m
+  have : a ∣ m := hcop.dvd_of_dvd_mul_right hdvd
+  -- a ∣ m means a ≤ m (since m > 0), but m < a — contradiction
+  exact absurd (Nat.le_of_dvd hm_pos this) (not_le.mpr hm_lt)
+
+/-- Multiplication by b (mod a) is injective on {1,...,a-1} for coprime a,b.
+    This is the key combinatorial fact. -/
+private lemma coprime_mul_mod_injective (a b : ℕ) (ha : 1 < a)
+    (hcop : Nat.Coprime a b) :
+    ∀ m₁ ∈ Ico 1 a, ∀ m₂ ∈ Ico 1 a,
+    m₁ * b % a = m₂ * b % a → m₁ = m₂ := by
+  intro m₁ hm₁ m₂ hm₂ heq
+  have h1_pos : 0 < m₁ := by have := (Finset.mem_Ico.mp hm₁).1; omega
+  have h1_lt : m₁ < a := (Finset.mem_Ico.mp hm₁).2
+  have h2_pos : 0 < m₂ := by have := (Finset.mem_Ico.mp hm₂).1; omega
+  have h2_lt : m₂ < a := (Finset.mem_Ico.mp hm₂).2
+  -- In ℤ: m₁*b ≡ m₂*b (mod a), so a | b*(m₁-m₂), so a | (m₁-m₂)
+  -- Since 0 < m₁, m₂ < a, |m₁-m₂| < a, so m₁ = m₂
+  by_contra h_ne
+  -- m₁ ≠ m₂ and both in {1,...,a-1}: |m₁-m₂| ∈ {1,...,a-1}
+  -- But a | (m₁-m₂) [in ℤ], contradicting |m₁-m₂| < a
+  sorry
+
 /-- **LEMMA (Coprime Floor Sum)**: For coprime a,b:
 
     Σ_{m=1}^{a-1} ⌊mb/a⌋ = (a-1)(b-1)/2
 
-    PROOF SKETCH: Since gcd(a,b)=1, as m ranges over {1,...,a-1},
+    PROOF: Since gcd(a,b)=1, as m ranges over {1,...,a-1},
     the fractional parts {mb/a} are a permutation of {1/a, 2/a, ..., (a-1)/a}.
     So Σ{mb/a} = Σ k/a = (a-1)/2.
     Then Σ⌊mb/a⌋ = Σ(mb/a - {mb/a}) = b(a-1)/2 - (a-1)/2 = (a-1)(b-1)/2.
@@ -146,8 +177,8 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
     (hcop : Nat.Coprime a b) :
     (∑ m ∈ Ico 1 a, (⌊(m * b : ℤ) / (a : ℤ)⌋ : ℝ)) =
     ((a : ℝ) - 1) * ((b : ℝ) - 1) / 2 := by
-  -- Key: {mb/a} for m=1,...,a-1 is a permutation of k/a for k=1,...,a-1
-  -- So Σ⌊mb/a⌋ = Σ(mb/a) - Σ{mb/a} = b·(a-1)/2 - (a-1)/2 = (a-1)(b-1)/2
+  -- From fract_sum_coprime (Σ{mb/a} = (a-1)/2)
+  -- and Σ(mb/a) = b(a-1)/2, derive Σ⌊mb/a⌋ = (a-1)(b-1)/2
   sorry
 
 /-- **LEMMA**: The Dedekind sum s(b,a) expands as:
