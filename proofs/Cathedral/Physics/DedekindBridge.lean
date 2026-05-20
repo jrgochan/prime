@@ -301,9 +301,17 @@ private lemma dedekind_sum_expand (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
     (hcop : Nat.Coprime a b) :
     12 * (a : ℝ) * b * (dedekindSum a b + dedekindSum b a) =
     (a : ℝ) ^ 2 + (b : ℝ) ^ 2 + 1 - 3 * a * b := by
-  -- Expand both Dedekind sums using sawtooth = {·} - 1/2
-  -- Use floor_sum_coprime and standard sum formulas Σm, Σm²
-  -- The cross-terms T(b,a)/a + T(a,b)/b cancel by symmetry
+  -- The proof uses the lattice point identity:
+  -- For coprime a,b: Σ_{m=1}^{a-1}⌊mb/a⌋ + Σ_{n=1}^{b-1}⌊na/b⌋ = (a-1)(b-1)
+  -- Together with floor_sum_coprime (each sum = (a-1)(b-1)/2), this is
+  -- just consistency. The hard part is expanding the product of sawtooths.
+  --
+  -- s(b,a) = Σ_{m=1}^{a-1} ((m/a))·((mb/a))
+  --        = Σ (m/a - 1/2)(mb/a - ⌊mb/a⌋ - 1/2)
+  --
+  -- The expansion of 12ab·(s(a,b) + s(b,a)) is a polynomial identity
+  -- in Σm, Σm², Σ⌊mb/a⌋, and Σm·⌊mb/a⌋.
+  -- The cross-terms cancel by the lattice point symmetry.
   sorry
 
 /-- **THE DEDEKIND RECIPROCITY LAW** (GRADUATED):
