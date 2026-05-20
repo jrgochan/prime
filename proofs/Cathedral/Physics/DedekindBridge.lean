@@ -256,7 +256,10 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
     rw [← Finset.mul_sum]
   have ha_pos : (0 : ℝ) < a := by positivity
   have h_gauss : (∑ m ∈ Ico 1 a, m : ℕ) = a * (a - 1) / 2 := by
-    sorry -- Standard Gauss sum (Σ_{m=1}^{a-1} m = a(a-1)/2)
+    have h1 : Finset.range a = insert 0 (Ico 1 a) := by
+      ext x; simp [Finset.mem_range, Finset.mem_Ico]; omega
+    have h2 : 0 ∉ Ico 1 a := by simp
+    rw [← Finset.sum_range_id, h1, Finset.sum_insert h2]; simp
   -- Combine decomposition: b*Σm = a*Σ(m*b/a) + Σm
   rw [h_factor, h_bij_sum] at h_decomp
   rw [h_sum_factor] at h_decomp
@@ -278,7 +281,9 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
   -- Now: (b-1) * (a*(a-1)/2) / a = (a-1)*(b-1)/2
   rw [show (↑(∑ m ∈ Ico 1 a, m) : ℝ) = ((a : ℝ) * ((a : ℝ) - 1)) / 2 from by
     -- 2 ∣ a*(a-1): one of a, a-1 is even
-    have h2 : 2 ∣ a * (a - 1) := sorry
+    have h2 : 2 ∣ a * (a - 1) := by
+      have h_eq : a - 1 + 1 = a := by omega
+      rw [mul_comm, ← h_eq]; exact (Nat.even_mul_succ_self (a - 1)).two_dvd
     rw [h_gauss, Nat.cast_div h2 (Nat.cast_ne_zero.mpr (by omega))]
     rw [Nat.cast_mul, Nat.cast_sub (by omega : 1 ≤ a)]
     push_cast; ring]
