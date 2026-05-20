@@ -145,6 +145,18 @@ private lemma sum_sq_Ico_int (n : ℕ) (hn : 1 < n) :
   have h2 : 0 ∉ Ico 1 n := by simp
   rw [← sum_sq_range_int, h1, Finset.sum_insert h2]; simp
 
+/-- Fractional part of n/a equals (n%a)/a for natural numbers. -/
+private lemma fract_nat_div (n a : ℕ) (ha : 0 < a) :
+    Int.fract ((n : ℝ) / (a : ℝ)) = ((n % a : ℕ) : ℝ) / (a : ℝ) := by
+  have ha_R : (0 : ℝ) < a := Nat.cast_pos.mpr ha
+  have ha_ne : (a : ℝ) ≠ 0 := ne_of_gt ha_R
+  have key : (n : ℝ) = (a : ℝ) * (n / a : ℕ) + (n % a : ℕ) := by
+    exact_mod_cast (Nat.div_add_mod n a).symm
+  rw [show (n : ℝ) / a = (n % a : ℕ) / a + (n / a : ℕ) from by
+    rw [key]; field_simp; ring]
+  rw [Int.fract_add_natCast, Int.fract_eq_self]
+  exact ⟨by positivity, by rw [div_lt_one ha_R]; exact_mod_cast Nat.mod_lt _ ha⟩
+
 -- ════════════════════════════════════════════════
 -- §4. THE DEDEKIND RECIPROCITY LAW
 -- ════════════════════════════════════════════════
@@ -323,17 +335,21 @@ private lemma dedekind_sum_expand (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
     (hcop : Nat.Coprime a b) :
     12 * (a : ℝ) * b * (dedekindSum a b + dedekindSum b a) =
     (a : ℝ) ^ 2 + (b : ℝ) ^ 2 + 1 - 3 * a * b := by
-  -- The proof uses the lattice point identity:
-  -- For coprime a,b: Σ_{m=1}^{a-1}⌊mb/a⌋ + Σ_{n=1}^{b-1}⌊na/b⌋ = (a-1)(b-1)
-  -- Together with floor_sum_coprime (each sum = (a-1)(b-1)/2), this is
-  -- just consistency. The hard part is expanding the product of sawtooths.
+  -- ══════════════════════════════════════════
+  -- PROOF STRATEGY: Expand each Dedekind sum using sawtooth → fract → mod,
+  -- simplify each term using div_add_mod, sum using coprime bijection
+  -- and known formulas (Σm, Σm², floor_sum_coprime).
   --
-  -- s(b,a) = Σ_{m=1}^{a-1} ((m/a))·((mb/a))
-  --        = Σ (m/a - 1/2)(mb/a - ⌊mb/a⌋ - 1/2)
+  -- The expansion reduces to the CROSS-SUM IDENTITY:
+  --   12b²·Σm·(mb%a) + 12a²·Σn·(na%b) = ab(3a²b+3ab²-9ab+a²+b²+1)
+  -- which is equivalent to the reciprocity law itself.
   --
-  -- The expansion of 12ab·(s(a,b) + s(b,a)) is a polynomial identity
-  -- in Σm, Σm², Σ⌊mb/a⌋, and Σm·⌊mb/a⌋.
-  -- The cross-terms cancel by the lattice point symmetry.
+  -- VERIFIED numerically for (a,b) ∈ {(2,3),(3,4),(3,5),(2,5),...}
+  -- The cross-sum identity is the irreducible core of Dedekind reciprocity.
+  -- Classical proofs use Rademacher's contour integral or Barkan's
+  -- continued fraction approach; both require significant infrastructure
+  -- beyond what is currently available in Mathlib.
+  -- ══════════════════════════════════════════
   sorry
 
 /-- **HELPER**: For b ≥ 2, dedekindSum 1 b = (b²+2)/(12b) - 1/4.
