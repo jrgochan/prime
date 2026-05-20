@@ -151,7 +151,7 @@ private lemma sum_sq_Ico_int (n : ℕ) (hn : 1 < n) :
 
 /-- For coprime a,b with 1 ≤ m < a: m*b is not divisible by a.
     This ensures (m*b) % a ∈ {1,...,a-1}. -/
-private lemma coprime_mul_mod_ne_zero (a b m : ℕ) (ha : 1 < a) (hm : m ∈ Ico 1 a)
+private lemma coprime_mul_mod_ne_zero (a b m : ℕ) (_ha : 1 < a) (hm : m ∈ Ico 1 a)
     (hcop : Nat.Coprime a b) : m * b % a ≠ 0 := by
   intro h
   have hm_pos : 0 < m := by have := (Finset.mem_Ico.mp hm).1; omega
@@ -164,7 +164,7 @@ private lemma coprime_mul_mod_ne_zero (a b m : ℕ) (ha : 1 < a) (hm : m ∈ Ico
 
 /-- Multiplication by b (mod a) is injective on {1,...,a-1} for coprime a,b.
     This is the key combinatorial fact. -/
-private lemma coprime_mul_mod_injective (a b : ℕ) (ha : 1 < a)
+private lemma coprime_mul_mod_injective (a b : ℕ) (_ha : 1 < a)
     (hcop : Nat.Coprime a b) :
     ∀ m₁ ∈ Ico 1 a, ∀ m₂ ∈ Ico 1 a,
     m₁ * b % a = m₂ * b % a → m₁ = m₂ := by
@@ -212,7 +212,7 @@ private lemma coprime_mul_mod_injective (a b : ℕ) (ha : 1 < a)
     Then Σ⌊mb/a⌋ = Σ(mb/a - {mb/a}) = b(a-1)/2 - (a-1)/2 = (a-1)(b-1)/2.
 
     This is the combinatorial heart of the reciprocity law. -/
-lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
+lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (_hb : 0 < b)
     (hcop : Nat.Coprime a b) :
     (∑ m ∈ Ico 1 a, (⌊(m * b : ℤ) / (a : ℤ)⌋ : ℝ)) =
     ((a : ℝ) - 1) * ((b : ℝ) - 1) / 2 := by
@@ -336,6 +336,18 @@ private lemma dedekind_sum_expand (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
   -- The cross-terms cancel by the lattice point symmetry.
   sorry
 
+/-- **HELPER**: For b ≥ 2, dedekindSum 1 b = (b²+2)/(12b) - 1/4.
+    This is the edge case where one argument is 1. Since sawtooth(m/b) = m/b - 1/2
+    for 1 ≤ m < b, the sum reduces to Σ(m/b - 1/2)² which uses Σm and Σm². -/
+private lemma dedekindSum_one_right (b : ℕ) (hb : 1 < b) :
+    dedekindSum 1 b = ((b : ℝ) ^ 2 + 2) / (12 * b) - 1 / 4 := by
+  -- Expand: dedekindSum 1 b = Σ sawtooth(m/b)²
+  -- = Σ(m/b-1/2)² = Σm²/b² - Σm/b + (b-1)/4
+  -- Using Σm = b(b-1)/2 and Σm² = b(b-1)(2b-1)/6:
+  -- = (b-1)(2b-1)/(6b) - (b-1)/2 + (b-1)/4 = (b²+2)/(12b) - 1/4
+  sorry
+
+
 /-- **THE DEDEKIND RECIPROCITY LAW** (GRADUATED):
 
     s(a, b) + s(b, a) = (a² + b² + 1) / (12ab) - 1/4
@@ -365,16 +377,17 @@ theorem dedekind_reciprocity (a b : ℕ) (ha : 0 < a) (hb : 0 < b)
     subst ha2
     by_cases hb1 : b = 1
     · subst hb1; simp [dedekindSum]; norm_num
-    · -- b ≥ 2: dedekindSum 1 b requires computing Σ((m/b))²
-      simp [dedekindSum_one, dedekindSum]
-      sorry -- requires Σm² formula
+    · -- b ≥ 2: use dedekindSum_one_right
+      rw [dedekindSum_one, dedekindSum_one_right b (by omega)]
+      simp; ring
   by_cases hb2 : b = 1
   · -- b = 1: symmetric
     subst hb2
     by_cases ha1 : a = 1
     · subst ha1; simp [dedekindSum]; norm_num
-    · simp [dedekindSum_one, dedekindSum]
-      sorry -- requires Σm² formula
+    · -- a ≥ 2: use dedekindSum_one_right
+      rw [dedekindSum_one, dedekindSum_one_right a (by omega)]
+      simp; ring
   -- Main case: a,b ≥ 2
   have ha_ge2 : 1 < a := by omega
   have hb_ge2 : 1 < b := by omega
