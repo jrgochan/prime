@@ -323,6 +323,21 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (_hb : 0 < b)
     push_cast; ring]
   field_simp
 
+/-- **PERIODICITY**: s(b,a) = s(b mod a, a). The sawtooth function is periodic
+    with period 1, so sawtooth(mb/a) = sawtooth(m(b%a)/a) since they differ
+    by the integer m·⌊b/a⌋. -/
+private lemma dedekindSum_mod (b a : ℕ) (ha : 1 < a) :
+    dedekindSum b a = dedekindSum (b % a) a := by
+  unfold dedekindSum; simp only [show ¬(a ≤ 1) from by omega, if_false]
+  apply Finset.sum_congr rfl; intro m _
+  congr 1; unfold sawtooth; congr 1
+  have ha_ne : (a : ℝ) ≠ 0 := by positivity
+  have key : (m : ℝ) * b / a = (m : ℝ) * (b % a : ℕ) / a + ↑(m * (b / a)) := by
+    have hd : (b : ℝ) = (a : ℝ) * (b / a : ℕ) + (b % a : ℕ) := by
+      exact_mod_cast (Nat.div_add_mod b a).symm
+    push_cast; rw [hd]; field_simp; ring
+  rw [key, Int.fract_add_natCast]
+
 /-- **LEMMA**: The Dedekind sum s(b,a) expands as:
 
     s(b,a) = b(a-1)(2a-1)/(6a) - b(a-1)/4 + (a-1)(b-1)/4 - T(b,a)/a
