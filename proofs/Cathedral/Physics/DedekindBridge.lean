@@ -341,11 +341,53 @@ private lemma dedekind_sum_expand (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
     for 1 ≤ m < b, the sum reduces to Σ(m/b - 1/2)² which uses Σm and Σm². -/
 private lemma dedekindSum_one_right (b : ℕ) (hb : 1 < b) :
     dedekindSum 1 b = ((b : ℝ) ^ 2 + 2) / (12 * b) - 1 / 4 := by
-  -- Expand: dedekindSum 1 b = Σ sawtooth(m/b)²
-  -- = Σ(m/b-1/2)² = Σm²/b² - Σm/b + (b-1)/4
-  -- Using Σm = b(b-1)/2 and Σm² = b(b-1)(2b-1)/6:
-  -- = (b-1)(2b-1)/(6b) - (b-1)/2 + (b-1)/4 = (b²+2)/(12b) - 1/4
-  sorry
+  unfold dedekindSum; simp only [show ¬(b ≤ 1) from by omega, if_false, Nat.cast_one, mul_one]
+  have hb_pos : (0 : ℝ) < b := by positivity
+  have h_ins : range b = insert 0 (Ico 1 b) := by
+    ext x; simp [Finset.mem_range, Finset.mem_Ico]; omega
+  have h_not : 0 ∉ Ico 1 b := by simp
+  -- Step 1: Each term = polynomial / (12b²)
+  have h_eq : ∀ m ∈ Ico 1 b,
+      sawtooth (↑m / ↑b) * sawtooth (↑m / ↑b) =
+      (12 * (m : ℝ)^2 - 12 * b * m + 3 * b^2) / (12 * (b : ℝ)^2) := by
+    intro m hm
+    have hm_bounds := Finset.mem_Ico.mp hm
+    have hm_pos : (0 : ℝ) < m := by exact_mod_cast (show 0 < m by omega)
+    have h01 : (0 : ℝ) < (m : ℝ) / b := div_pos hm_pos hb_pos
+    have h02 : (m : ℝ) / b < 1 := by rw [div_lt_one hb_pos]; exact_mod_cast hm_bounds.2
+    unfold sawtooth; rw [Int.fract_eq_self.mpr ⟨le_of_lt h01, h02⟩]; field_simp; ring
+  -- Step 2: ℤ polynomial sum: Σ(12m²-12bm+3b²) = b(b-1)(b-2)
+  have h_Z : (∑ m ∈ Ico 1 b, ((12 : ℤ) * (m : ℤ)^2 - 12 * (b : ℤ) * (m : ℤ) + 3 * (b : ℤ)^2)) =
+      (b : ℤ) * ((b : ℤ) - 1) * ((b : ℤ) - 2) := by
+    have h_expand : ∑ m ∈ Ico 1 b, ((12 : ℤ) * (m : ℤ)^2 - 12 * (b : ℤ) * (m : ℤ) + 3 * (b : ℤ)^2) =
+        12 * ∑ m ∈ Ico 1 b, (m : ℤ)^2 - 12 * (b : ℤ) * ∑ m ∈ Ico 1 b, (m : ℤ) +
+        3 * (b : ℤ)^2 * ((b : ℤ) - 1) := by
+      simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum,
+                 Finset.sum_const, Nat.card_Ico, nsmul_eq_mul]
+      have : (↑(b - 1) : ℤ) = (b : ℤ) - 1 := by omega
+      push_cast; rw [this]; ring
+    rw [h_expand]
+    have hsq : 12 * ∑ m ∈ Ico 1 b, (m : ℤ)^2 =
+        2 * (b : ℤ) * ((b : ℤ) - 1) * (2 * (b : ℤ) - 1) := by
+      have : 6 * ∑ m ∈ Ico 1 b, (m : ℤ)^2 = (b : ℤ) * ((b : ℤ) - 1) * (2 * (b : ℤ) - 1) := by
+        rw [← sum_sq_range_int, h_ins, Finset.sum_insert h_not]; simp
+      linarith
+    have hlin : 12 * (b : ℤ) * ∑ m ∈ Ico 1 b, (m : ℤ) = 6 * (b : ℤ)^2 * ((b : ℤ) - 1) := by
+      have h1 : (∑ m ∈ Ico 1 b, (m : ℤ)) = (∑ m ∈ range b, (m : ℤ)) := by
+        rw [h_ins, Finset.sum_insert h_not]; simp
+      rw [h1]
+      have hN : (∑ m ∈ range b, m) * 2 = b * (b - 1) := Finset.sum_range_id_mul_two b
+      zify [show 1 ≤ b by omega] at hN; nlinarith
+    rw [hsq, hlin]; ring
+  -- Step 3: Cast ℤ sum to ℝ
+  have h_R : (∑ m ∈ Ico 1 b, (12 * (m : ℝ)^2 - 12 * (b : ℝ) * m + 3 * (b : ℝ)^2)) =
+      (b : ℝ) * ((b : ℝ) - 1) * ((b : ℝ) - 2) := by
+    have hcast : (∑ m ∈ Ico 1 b, (12 * (m : ℝ)^2 - 12 * (b : ℝ) * m + 3 * (b : ℝ)^2)) =
+        ((∑ m ∈ Ico 1 b, ((12 : ℤ) * (m : ℤ)^2 - 12 * (b : ℤ) * (m : ℤ) + 3 * (b : ℤ)^2) : ℤ) : ℝ) := by
+      simp only [Int.cast_sum]; congr 1; ext m; push_cast; ring
+    rw [hcast, h_Z]; push_cast; ring
+  -- Step 4: Close
+  rw [Finset.sum_congr rfl h_eq, ← Finset.sum_div, h_R]; field_simp; ring
 
 
 /-- **THE DEDEKIND RECIPROCITY LAW** (GRADUATED):
