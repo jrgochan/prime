@@ -228,11 +228,61 @@ lemma floor_sum_coprime (a b : ℕ) (ha : 1 < a) (hb : 0 < b)
       exact ⟨m, hm, hm_eq⟩
     · -- Each term: value is the same
       intro m _; rfl
-  -- Step 2: Connect ℤ floor division to the bijection sum
-  -- ⌊(m*b : ℤ)/(a : ℤ)⌋ = (m*b/a : ℕ) for positive a
-  -- Then Σ(m*b/a) = (Σmb - Σ(mb%a))/a = (b*Σm - Σm)/a
-  -- = (b-1)*a(a-1)/2 / a = (a-1)(b-1)/2
-  sorry
+  -- Step 2: Connect ⌊(m*b : ℤ)/(a : ℤ)⌋ to (m*b/a : ℕ)
+  -- For natural m,b,a with a > 0: ℤ-division of nat casts = nat division
+  have h_nat_eq : ∀ m ∈ Ico 1 a,
+      (⌊(m * b : ℤ) / (a : ℤ)⌋ : ℝ) = ((m * b / a : ℕ) : ℝ) := by
+    intro m _; congr 1
+  -- Step 3: The algebra
+  -- We have: Σ(m*b) = b * Σm and Σ(m*b%a) = Σm [bijection]
+  -- From div_add_mod: Σmb = a*Σ(m*b/a) + Σ(m*b%a)
+  -- So: b*Σm = a*Σ(m*b/a) + Σm → Σ(m*b/a) = (b-1)*Σm/a
+  -- Σm for {1,...,a-1} = a*(a-1)/2
+  -- So Σ(m*b/a) = (b-1)*(a-1)/2 ✓
+  -- Factor out b from sum
+  have h_sum_factor : (∑ m ∈ Ico 1 a, m * b : ℕ) = b * ∑ m ∈ Ico 1 a, m := by
+    rw [Finset.mul_sum]; congr 1; ext m; ring
+  have h_decomp : (∑ m ∈ Ico 1 a, m * b : ℕ) =
+      ∑ m ∈ Ico 1 a, (a * (m * b / a)) + ∑ m ∈ Ico 1 a, (m * b % a) := by
+    have h_eq : ∀ m ∈ Ico 1 a, m * b = a * (m * b / a) + m * b % a :=
+      fun m _ => (Nat.div_add_mod (m * b) a).symm
+    calc ∑ m ∈ Ico 1 a, m * b
+        = ∑ m ∈ Ico 1 a, (a * (m * b / a) + m * b % a) := Finset.sum_congr rfl h_eq
+      _ = ∑ m ∈ Ico 1 a, (a * (m * b / a)) + ∑ m ∈ Ico 1 a, (m * b % a) :=
+          Finset.sum_add_distrib
+  -- Factor out a: Σ(a * (m*b/a)) = a * Σ(m*b/a)
+  have h_factor : ∑ m ∈ Ico 1 a, (a * (m * b / a)) =
+      a * ∑ m ∈ Ico 1 a, (m * b / a) := by
+    rw [← Finset.mul_sum]
+  have ha_pos : (0 : ℝ) < a := by positivity
+  have h_gauss : (∑ m ∈ Ico 1 a, m : ℕ) = a * (a - 1) / 2 := by
+    sorry -- Standard Gauss sum (Σ_{m=1}^{a-1} m = a(a-1)/2)
+  -- Combine decomposition: b*Σm = a*Σ(m*b/a) + Σm
+  rw [h_factor, h_bij_sum] at h_decomp
+  rw [h_sum_factor] at h_decomp
+  -- h_decomp: b * Σm = a * Σ(m*b/a) + Σm in ℕ
+  -- Cast to ℝ and solve for Σ(m*b/a)
+  have h_decomp_R : (b : ℝ) * ↑(∑ m ∈ Ico 1 a, m) =
+      (a : ℝ) * ↑(∑ m ∈ Ico 1 a, (m * b / a)) + ↑(∑ m ∈ Ico 1 a, m) := by
+    exact_mod_cast h_decomp
+  rw [Finset.sum_congr rfl h_nat_eq]
+  rw [show ∑ m ∈ Ico 1 a, ((m * b / a : ℕ) : ℝ) =
+    ↑(∑ m ∈ Ico 1 a, (m * b / a)) from by push_cast; rfl]
+  -- Now goal: ↑Σ(m*b/a) = (a-1)*(b-1)/2
+  -- From h_decomp_R: a * ↑Σ(m*b/a) = (b-1) * ↑Σm
+  have ha_ne : (a : ℝ) ≠ 0 := ne_of_gt ha_pos
+  have h_solve : ↑(∑ m ∈ Ico 1 a, (m * b / a)) =
+      ((b : ℝ) - 1) * ↑(∑ m ∈ Ico 1 a, m) / a := by
+    rw [eq_div_iff ha_ne]; linarith
+  rw [h_solve]
+  -- Now: (b-1) * (a*(a-1)/2) / a = (a-1)*(b-1)/2
+  rw [show (↑(∑ m ∈ Ico 1 a, m) : ℝ) = ((a : ℝ) * ((a : ℝ) - 1)) / 2 from by
+    -- 2 ∣ a*(a-1): one of a, a-1 is even
+    have h2 : 2 ∣ a * (a - 1) := sorry
+    rw [h_gauss, Nat.cast_div h2 (Nat.cast_ne_zero.mpr (by omega))]
+    rw [Nat.cast_mul, Nat.cast_sub (by omega : 1 ≤ a)]
+    push_cast; ring]
+  field_simp
 
 /-- **LEMMA**: The Dedekind sum s(b,a) expands as:
 
