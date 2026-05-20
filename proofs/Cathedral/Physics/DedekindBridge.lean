@@ -124,6 +124,28 @@ theorem sawtooth_div_pos (m a : ℕ) (hm : m ∈ Ico 1 a) :
   rw [Int.fract_eq_self.mpr ⟨le_of_lt h01, h02⟩]
 
 -- ════════════════════════════════════════════════
+-- §3.5 SUM FORMULAS (Gauss, sum of squares)
+-- ════════════════════════════════════════════════
+
+/-- **Sum of squares**: 6 · Σ_{i=0}^{n-1} i² = n(n-1)(2n-1).
+    Working in ℤ to avoid ℕ subtraction issues. -/
+private lemma sum_sq_range_int (n : ℕ) :
+    6 * (∑ i ∈ Finset.range n, (i : ℤ) ^ 2) =
+    ↑n * (↑n - 1) * (2 * ↑n - 1) := by
+  induction n with
+  | zero => simp
+  | succ k ih => rw [Finset.sum_range_succ]; push_cast; ring_nf; linarith
+
+/-- Sum of squares over {1,...,n-1} in ℤ. Same as over {0,...,n-1} since 0²=0. -/
+private lemma sum_sq_Ico_int (n : ℕ) (hn : 1 < n) :
+    6 * (∑ m ∈ Ico 1 n, (m : ℤ) ^ 2) =
+    ↑n * (↑n - 1) * (2 * ↑n - 1) := by
+  have h1 : Finset.range n = insert 0 (Ico 1 n) := by
+    ext x; simp [Finset.mem_range, Finset.mem_Ico]; omega
+  have h2 : 0 ∉ Ico 1 n := by simp
+  rw [← sum_sq_range_int, h1, Finset.sum_insert h2]; simp
+
+-- ════════════════════════════════════════════════
 -- §4. THE DEDEKIND RECIPROCITY LAW
 -- ════════════════════════════════════════════════
 
