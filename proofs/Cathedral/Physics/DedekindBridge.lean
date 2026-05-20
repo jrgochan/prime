@@ -89,7 +89,7 @@ def dedekindSum (b a : ℕ) : ℝ :=
 
 /-- s(b, 1) = 0: the sum over an empty range. -/
 theorem dedekindSum_one (b : ℕ) : dedekindSum b 1 = 0 := by
-  unfold dedekindSum; simp [show (1 : ℕ) ≤ 1 from le_refl 1]
+  unfold dedekindSum; simp
 
 /-- s(b, 0) = 0 by convention. -/
 theorem dedekindSum_zero (b : ℕ) : dedekindSum b 0 = 0 := by
@@ -396,7 +396,7 @@ private lemma dedekindSum_one_right (b : ℕ) (hb : 1 < b) :
       simp only [Finset.sum_sub_distrib, Finset.sum_add_distrib, ← Finset.mul_sum,
                  Finset.sum_const, Nat.card_Ico, nsmul_eq_mul]
       have : (↑(b - 1) : ℤ) = (b : ℤ) - 1 := by omega
-      push_cast; rw [this]; ring
+      rw [this]; ring
     rw [h_expand]
     have hsq : 12 * ∑ m ∈ Ico 1 b, (m : ℤ)^2 =
         2 * (b : ℤ) * ((b : ℤ) - 1) * (2 * (b : ℤ) - 1) := by
