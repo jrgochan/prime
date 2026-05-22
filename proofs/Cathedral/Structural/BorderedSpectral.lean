@@ -474,6 +474,31 @@ theorem secular_drop_bound
     -- ... by at least the min-eigenspace projection divided by the drop
     (dotProduct g (⇑(hA.eigenvectorBasis ⟨0, hn⟩)))^2 /
     (hA.eigenvalues ⟨0, hn⟩ - μ) := by
+  -- Strategy: use the Cauchy-Schwarz inequality for PD quadratic forms.
+  --
+  -- For any PD matrix M and vectors x, y:
+  --   (xᵀy)² ≤ (xᵀMx)(yᵀM⁻¹y)
+  --
+  -- Setting M = A' = A-μI, x = v₀ (eigenvector), y = g:
+  --   (v₀ᵀg)² ≤ (v₀ᵀA'v₀)(gᵀA'⁻¹g)
+  --   gᵀA'⁻¹g ≥ (v₀ᵀg)² / (v₀ᵀA'v₀)
+  --
+  -- And v₀ᵀA'v₀ = v₀ᵀ(A-μI)v₀ = λ₀-μ since v₀ is eigenvector of A.
+  --
+  -- The Cauchy-Schwarz for PD forms follows from writing w = M^{1/2}x:
+  --   (xᵀy) = (M^{-1/2}w)ᵀy = wᵀ(M^{-1/2}y)
+  --   |(xᵀy)|² ≤ ‖w‖²·‖M^{-1/2}y‖² = (xᵀMx)(yᵀM⁻¹y)
+  --
+  -- In Lean, this requires:
+  --   • The PD decomposition of A' (we have posDef_iff_eigenvalues_pos)
+  --   • Matrix square roots (not directly available)
+  --   • Or: the spectral expansion Σⱼ |⟨g,vⱼ⟩|²/(λⱼ-μ) ≥ single term
+  --
+  -- For now, we leave this as the key remaining sorry.
+  -- The spectral decomposition approach requires connecting:
+  --   OrthonormalBasis.sum_inner_mul_inner (Parseval)
+  --   with Matrix.mulVec_eigenvectorBasis (eigenvalue action)
+  --   through the EuclideanSpace ↔ (Fin n → ℝ) bridge.
   sorry
 
 end SecularEquation
