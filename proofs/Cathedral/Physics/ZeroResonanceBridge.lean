@@ -36,6 +36,7 @@
 
 import Cathedral.Defs
 import Cathedral.Structural.Eigenvalue
+import Cathedral.Perron.SummabilityHelpers
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Topology.Algebra.InfiniteSum.Basic
 
@@ -102,17 +103,6 @@ The zero-frequency oscillations contribute to the CONSTANT
 of the convergent series but do not affect convergence itself.
 -/
 
-/-- Helper: the shifted p-series Σ C/(n+4)^α converges for α > 1.
-
-    **SORRY REASON**: rpow typeclass synthesis in `Real.summable_nat_rpow`
-    exceeds even 1.6M heartbeats. Mathematically trivial: (n+4)^{-α}
-    is a tail of the convergent p-series. Can be graduated by
-    pre-compiling in a SummabilityHelpers-style file. -/
-private theorem shifted_pseries_summable (C α : ℝ) (_hC : 0 < C) (_hα : 1 < α) :
-    Summable (fun n : ℕ => C / ((n : ℝ) + 4) ^ α) := by
-  sorry
-
-
 /-- Eigenvalue drops bounded by C/N^α are summable for α > 1.
     This is the core quantitative content of the zero resonance
     bridge: the trend exponent α ≈ 3.1 > 1 guarantees convergence.
@@ -120,7 +110,7 @@ private theorem shifted_pseries_summable (C α : ℝ) (_hC : 0 < C) (_hα : 1 < 
     The proof chains:
     1. Drops are nonneg (eigenDrop_nonneg, PROVED)
     2. Each drop is bounded by C/N^α (hypothesis)
-    3. Σ C/(N+4)^α converges for α > 1 (shifted_pseries_summable) -/
+    3. Σ C/(N+4)^α converges for α > 1 (SummabilityHelpers.shifted_pseries_summable) -/
 theorem summable_drops_from_trend
     (C α : ℝ) (hC : 0 < C) (hα : 1 < α)
     (h_bound : ∀ N : ℕ, 4 ≤ N → eigenDrop N ≤ C / (N : ℝ) ^ α) :
@@ -132,8 +122,9 @@ theorem summable_drops_from_trend
     convert this using 2
     push_cast; ring
   -- Step 2: The comparison series C / (n+4)^α is summable
-  -- Uses shifted_pseries_summable (proved below with generous heartbeats)
-  have h_comp_summ := shifted_pseries_summable C α hC hα
+  -- Uses pre-compiled shifted_pseries_summable from SummabilityHelpers
+  open Cathedral.Perron.SummabilityHelpers in
+  have h_comp_summ := shifted_pseries_summable hC hα 4
   -- Step 3: Apply comparison test
   exact Summable.of_nonneg_of_le
     (fun n => eigenDrop_nonneg (n + 4) (by omega))
@@ -213,7 +204,7 @@ theorem drop_tsum_finite
 /-!
 ## Audit
 
-### Sorry: 1 (rpow elaboration timeout — shifted p-series convergence)
+### Sorry: 0 ✅
 
 ### Axioms: 2
 1. `cosAlignment_sq_trend_bound`: cos²θ ≤ C/N^α (experimentally verified, α ≈ 3.1)
@@ -231,7 +222,7 @@ positions — the zeros control the fine structure but not the convergence.
 |---|--------|--------|
 | 1 | `cosAlignment_sq_trend_bound` | 📐 AXIOM (experimental) |
 | 2 | `oscillation_bounded` | 📐 AXIOM (experimental) |
-| 3 | `summable_drops_from_trend` | ⚠️ 1 sorry (rpow heartbeat timeout) |
+| 3 | `summable_drops_from_trend` | 🎓 PROVED (via SummabilityHelpers) |
 | 4 | `drop_tsum_nonneg` | 🎓 PROVED |
 | 5 | `drop_tsum_finite` | 🎓 PROVED (chains summable_drops_from_trend) |
 -/

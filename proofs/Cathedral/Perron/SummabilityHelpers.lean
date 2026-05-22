@@ -69,4 +69,27 @@ lemma mul_rpow_eq_rpow_succ {X : ℝ} (hX : 0 < X) (c : ℝ) :
   have := rpow_add hX c 1
   rw [rpow_one] at this; linarith
 
+-- ═══════════════════════════════════════════
+-- §3. Shifted p-series (for ZeroResonanceBridge)
+-- ═══════════════════════════════════════════
+
+/-- `∑_{n=0}^∞ (((n+k):ℕ)^c)⁻¹` converges for `c > 1` and any shift `k`.
+    Uses comp_injective: a subseries of a summable nonneg series is summable. -/
+theorem shifted_rpow_inv_summable {c : ℝ} (hc : 1 < c) (k : ℕ) :
+    Summable (fun n : ℕ => (((n : ℝ) + (k : ℝ)) ^ c)⁻¹) := by
+  have h_inj : Function.Injective (· + k : ℕ → ℕ) := fun a b h => Nat.add_right_cancel h
+  have h_sub := (rpow_inv_summable hc).comp_injective h_inj
+  -- h_sub : Summable ((fun n => (↑n ^ c)⁻¹) ∘ (· + k))
+  -- Need: Summable (fun n => ((↑n + ↑k) ^ c)⁻¹)
+  exact h_sub.congr (fun n => by simp only [Function.comp, Nat.cast_add])
+
+/-- `∑_{n=0}^∞ C / ((n+k)^α)` converges for `α > 1`, `C > 0`, `k ≥ 1`.
+    Direct corollary used by ZeroResonanceBridge.summable_drops_from_trend. -/
+theorem shifted_pseries_summable {C α : ℝ} (_hC : 0 < C) (hα : 1 < α)
+    (k : ℕ) :
+    Summable (fun n : ℕ => C / ((n : ℝ) + (k : ℝ)) ^ α) := by
+  -- C / x^α = C * (x^α)⁻¹
+  have h := shifted_rpow_inv_summable hα k
+  exact (h.mul_left C).congr (fun n => by rw [div_eq_mul_inv])
+
 end Cathedral.Perron.SummabilityHelpers
