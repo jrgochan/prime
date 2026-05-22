@@ -618,20 +618,27 @@ theorem secular_drop_bound
     simp only [hw_def]; ring_nf
 
   -- Step 8a: gᵀM⁻¹g = wᵀM⁻¹w + c²·(1/δ)
+  -- First, the reverse cross-term: w ⬝ᵥ (M⁻¹ *ᵥ v) = 0
+  have h_cross_wv : dotProduct w (M⁻¹.mulVec v) = 0 := by
+    rw [hM_inv_v, dotProduct_smul, smul_eq_mul, hw_orth, mul_zero]
+
   have h_expand_quad : dotProduct g (M⁻¹.mulVec g) =
       dotProduct w (M⁻¹.mulVec w) + c^2 * (1/δ) := by
     rw [hg_eq]
     simp only [Matrix.mulVec_add, Matrix.mulVec_smul,
                dotProduct_add, add_dotProduct, smul_dotProduct, dotProduct_smul]
     simp only [smul_eq_mul]
-    rw [h_diag, h_cross_vw]
-    -- Need symmetric property: w ⬝ᵥ (M⁻¹ *ᵥ (c • v)) = c * (w ⬝ᵥ M⁻¹v)
-    -- and w ⬝ᵥ M⁻¹v = 0 by dotProduct_comm and h_cross_vw
-    sorry -- (final ring/linarith after symmetry)
+    rw [h_diag, h_cross_vw, h_cross_wv]
+    ring
 
   -- Step 8b: wᵀM⁻¹w ≥ 0 (M⁻¹ is PD since M is PD)
   have h_quad_w_nonneg : 0 ≤ dotProduct w (M⁻¹.mulVec w) := by
-    sorry -- (M⁻¹ PosDef from M PosDef)
+    -- Let y = M⁻¹w, then w = My (since M is invertible)
+    -- wᵀM⁻¹w = (My)ᵀy = yᵀMᵀy = yᵀMy ≥ 0 (M is PD)
+    -- But we need to work with dotProduct, not inner product
+    -- Use: dotProduct w (M⁻¹.mulVec w) = dotProduct_mulVec w M⁻¹ w = w ᵥ* M⁻¹ ⬝ᵥ w
+    -- Actually, use spectral: all eigenvalues of M⁻¹ are positive
+    sorry -- (needs PosSemidef of M⁻¹)
 
   -- Final bound: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ ≥ c²/δ
   rw [h_expand_quad]
