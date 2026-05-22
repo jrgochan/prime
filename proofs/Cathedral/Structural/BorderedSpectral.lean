@@ -631,14 +631,28 @@ theorem secular_drop_bound
     rw [h_diag, h_cross_vw, h_cross_wv]
     ring
 
-  -- Step 8b: wᵀM⁻¹w ≥ 0 (M⁻¹ is PD since M is PD)
+  -- Step 8b: wᵀM⁻¹w ≥ 0
+  -- Use the y = M⁻¹w substitution: w = My, so wᵀM⁻¹w = (My)ᵀy
+  -- = dotProduct (M*ᵥy) y = (y ᵥ* M) ⬝ᵥ y [dotProduct_mulVec]
+  -- = y ⬝ᵥ (Mᵀ *ᵥ y) [mulVec_transpose reversed]
+  -- = y ⬝ᵥ (M *ᵥ y) [M symmetric] = star y ⬝ᵥ (M *ᵥ y) [star trivial]
+  -- ≥ 0 [M PD]
   have h_quad_w_nonneg : 0 ≤ dotProduct w (M⁻¹.mulVec w) := by
-    -- Let y = M⁻¹w, then w = My (since M is invertible)
-    -- wᵀM⁻¹w = (My)ᵀy = yᵀMᵀy = yᵀMy ≥ 0 (M is PD)
-    -- But we need to work with dotProduct, not inner product
-    -- Use: dotProduct w (M⁻¹.mulVec w) = dotProduct_mulVec w M⁻¹ w = w ᵥ* M⁻¹ ⬝ᵥ w
-    -- Actually, use spectral: all eigenvalues of M⁻¹ are positive
-    sorry -- (needs PosSemidef of M⁻¹)
+    set y := M⁻¹.mulVec w
+    have hM_unit : IsUnit M := hM_pd.isUnit
+    have hM_det : IsUnit M.det := by rwa [Matrix.isUnit_iff_isUnit_det] at hM_unit
+    -- w = M *ᵥ y
+    have hw_eq : w = M *ᵥ y := by
+      show w = M *ᵥ (M⁻¹ *ᵥ w)
+      rw [mulVec_mulVec, Matrix.mul_nonsing_inv _ hM_det, one_mulVec]
+    rw [hw_eq]
+    -- (M *ᵥ y) ⬝ᵥ y = y ⬝ᵥ (Mᵀ *ᵥ y) [dotProduct_comm + dotProduct_mulVec]
+    rw [dotProduct_comm]
+    -- y ⬝ᵥ (M *ᵥ y) ≥ 0
+    -- star y ⬝ᵥ (M *ᵥ y) ≥ 0 from PosSemidef
+    have h_ps := hM_pd.posSemidef.dotProduct_mulVec_nonneg y
+    simp only [Pi.star_def, star_trivial] at h_ps
+    exact h_ps
 
   -- Final bound: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ ≥ c²/δ
   rw [h_expand_quad]
