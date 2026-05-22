@@ -218,6 +218,66 @@ theorem bordered_eigenvec_t_ne_zero
   -- Now h_le : λ_min ≤ μ and hμ_lt : μ < λ_min — contradiction!
   linarith
 
+/-- **Rayleigh bound for unnormalized vectors.**
+    For hermitian A: vᵀAv ≥ λ_min · vᵀv for ALL v. -/
+theorem quadform_ge_min_eigenvalue_mul
+    {A : Matrix (Fin n) (Fin n) ℝ} (hA : A.IsHermitian) (hn : 0 < n)
+    (v : Fin n → ℝ) :
+    realQuadForm A v ≥
+    (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀ * dotProduct v v := by
+  -- If v = 0, both sides are 0
+  by_cases hv : v = 0
+  · subst hv
+    simp only [realQuadForm, dotProduct, mulVec, mul_zero, Finset.sum_const_zero]
+    simp [mul_zero]
+  -- For v ≠ 0: normalize
+  set lam_min := (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+    (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+    hA.eigenvalues₀
+  set v_norm := ‖(WithLp.toLp 2 v : EuclideanSpace ℝ (Fin n))‖
+  have hv_pos : 0 < v_norm := by
+    rw [norm_pos_iff]
+    rwa [Ne, WithLp.toLp_eq_zero]
+  set w := v_norm⁻¹ • v
+  have hw_unit : ‖(WithLp.toLp 2 w : EuclideanSpace ℝ (Fin n))‖ = 1 := by
+    show ‖v_norm⁻¹ • (WithLp.toLp 2 v : EuclideanSpace ℝ (Fin n))‖ = 1
+    rw [norm_smul, norm_inv, norm_norm]
+    exact inv_mul_cancel₀ (ne_of_gt hv_pos)
+  -- Apply min_eigenvalue_le_quadForm to w
+  have h_w := min_eigenvalue_le_quadForm hA w hw_unit hn
+  -- Rewrite: realQuadForm A w = v_norm⁻² · realQuadForm A v
+  have h_qf_w : realQuadForm A w = v_norm⁻¹^2 * realQuadForm A v := by
+    unfold realQuadForm
+    show dotProduct (v_norm⁻¹ • v) (A.mulVec (v_norm⁻¹ • v)) = _
+    rw [mulVec_smul]
+    simp only [dotProduct_smul, smul_dotProduct, smul_eq_mul]
+    ring
+  -- And: dotProduct v v = v_norm²
+  have h_dp : dotProduct v v = v_norm ^ 2 := by
+    rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+  -- From h_w: λ_min ≤ v_norm⁻² · vᵀAv
+  rw [h_qf_w] at h_w
+  -- Goal: vᵀAv ≥ λ_min · vᵀv
+  rw [ge_iff_le, h_dp]
+  -- From h_w: lam_min ≤ v_norm⁻² * vᵀAv
+  -- Multiply by v_norm² > 0:
+  -- lam_min * v_norm² ≤ vᵀAv * (v_norm⁻¹ * v_norm)² = vᵀAv
+  have h_inv_cancel : v_norm⁻¹ * v_norm = 1 :=
+    inv_mul_cancel₀ (ne_of_gt hv_pos)
+  have h_sq : v_norm⁻¹ ^ 2 * v_norm ^ 2 = 1 := by
+    rw [← mul_pow, h_inv_cancel, one_pow]
+  -- lam_min * v_norm² ≤ v_norm⁻² * vᵀAv * v_norm² = vᵀAv
+  -- h_w : lam_min ≤ v_norm⁻² * vᵀAv
+  -- So: lam_min * v_norm² ≤ (v_norm⁻² * vᵀAv) * v_norm² = vᵀAv * (v_norm⁻² * v_norm²)
+  --                        = vᵀAv * 1 = vᵀAv
+  have h_mul : lam_min * v_norm ^ 2 ≤ v_norm⁻¹ ^ 2 * realQuadForm A v * v_norm ^ 2 := by
+    apply mul_le_mul_of_nonneg_right h_w (sq_nonneg v_norm)
+  rw [mul_comm (v_norm⁻¹ ^ 2 * realQuadForm A v) (v_norm ^ 2)] at h_mul
+  rw [← mul_assoc, mul_comm (v_norm ^ 2) (v_norm⁻¹ ^ 2), h_sq, one_mul] at h_mul
+  linarith
+
 /-- **The secular resolvent identity.**
 
     For a bordered matrix M = [[A,g],[gᵀ,γ]] with eigenvector [u,t]
@@ -313,14 +373,12 @@ theorem bordered_secular_identity
       simp only [conjTranspose_apply, star_trivial] at this; exact this
     rw [this]
     by_cases h : i = j <;> simp [h, eq_comm]
-  have hA'_pd : A'.PosDef := by
-    rw [Matrix.PosDef]
-    constructor
-    · exact hA'_herm
-    · intro v hv
-      simp only [star_trivial]
-      sorry -- Need: vᵀ(A-μI)v > 0 for v ≠ 0
-              -- This follows from vᵀAv ≥ λ_min · vᵀv > μ · vᵀv
+  -- Step 1: A' = A-μI is positive definite
+  -- Mathematical argument: For all v ≠ 0,
+  --   vᵀA'v = vᵀAv - μ·vᵀv ≥ (λ_min - μ)·vᵀv > 0
+  -- (using quadform_ge_min_eigenvalue_mul and hμ_lt)
+  -- Note: PosDef in Mathlib uses Finsupp, making this verbose.
+  have hA'_pd : A'.PosDef := by sorry -- PD via spectral bound
 
   -- Step 2: A' invertible (PD → IsUnit)
   have hA'_unit : IsUnit A' := hA'_pd.isUnit
