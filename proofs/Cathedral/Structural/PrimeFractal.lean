@@ -193,6 +193,83 @@ theorem primeGramEntry_selfsimilarity_bound (p : ℕ) (hp : 1 < p) (j k : ℕ)
       ≤ |(↑p : ℝ) - 1| := h_integral
     _ = (↑p : ℝ) - 1 := abs_of_nonneg (by linarith)
 
+/-- Fractional part is bounded by the argument for nonneg values.
+    {x} = x - ⌊x⌋ ≤ x since ⌊x⌋ ≥ 0 when x ≥ 0. -/
+private lemma fract_le_of_nonneg (x : ℝ) (hx : 0 ≤ x) : Int.fract x ≤ x := by
+  have : (0 : ℝ) ≤ ↑⌊x⌋ := by exact_mod_cast Int.floor_nonneg.mpr hx
+  unfold Int.fract; linarith
+
+/-- **Tighter Error Decay Bound.**
+
+    The error |G_{jp,kp} - (1/p)·G_{jk}| decays as 1/(jk):
+
+    |G_{jp,kp} - (1/p)·G_{jk}| ≤ (p-1) / (j·k·p)
+
+    This improves primeGramEntry_selfsimilarity_bound by a factor of 1/(jk).
+    The key insight: for u ∈ [1,p] and j ≥ 1, we have {1/(ju)} ≤ 1/(ju) ≤ 1/j
+    (since Int.fract x ≤ x for x ≥ 0), making the integrand ≤ 1/(jk). -/
+theorem primeGramEntry_error_decay (p : ℕ) (hp : 1 < p) (j k : ℕ)
+    (hj : 0 < j) (hk : 0 < k) :
+    |primeGramEntry p j k - (1 / (p : ℝ)) * gramEntry j k| ≤
+      ((p : ℝ) - 1) / ((j : ℝ) * k * p) := by
+  -- From the split: error = (1/p) * ∫₁ᵖ {1/(ju)} · {1/(ku)} du
+  rw [primeGramEntry_split p hp j k hj hk, add_sub_cancel_left]
+  rw [abs_mul, abs_of_nonneg (by positivity)]
+  have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
+  have hj_pos : (0 : ℝ) < (j : ℝ) := Nat.cast_pos.mpr hj
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr hk
+  -- Goal: (1/p) * |∫₁ᵖ f| ≤ (p-1)/(j·k·p)
+  -- Suffices: |∫₁ᵖ f| ≤ (p-1)/(j·k)
+  suffices h : |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ ((p : ℝ) - 1) / ((j : ℝ) * k) by
+    calc _ = |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))| / ↑p :=
+            by rw [div_mul_eq_mul_div, one_mul]
+      _ ≤ ((↑p - 1) / (↑j * ↑k)) / ↑p := div_le_div_of_nonneg_right h hp_pos.le
+      _ = (↑p - 1) / (↑j * ↑k * ↑p) := by ring
+  -- Goal: |∫₁ᵖ f| ≤ (p-1) / (j * k)
+  -- Tighter bound: |f(u)| ≤ 1/(jk) for u ∈ [1,p]
+  -- since {1/(ju)} ≤ 1/j and {1/(ku)} ≤ 1/k
+  have h_bound : ∀ x ∈ Set.uIoc (1 : ℝ) (p : ℝ),
+      ‖Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))‖ ≤ 1 / ((j : ℝ) * k) := by
+    intro u hu
+    rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+    have h1u : 1 ≤ u := by
+      rw [Set.mem_uIoc] at hu
+      rcases hu with ⟨h, _⟩ | ⟨h, h2⟩
+      · exact h.le
+      · exfalso; have : (↑p : ℝ) < 1 := lt_of_lt_of_le h h2
+        linarith [show (1 : ℝ) ≤ ↑p from by exact_mod_cast hp.le]
+    -- 1/(ju) ≥ 0
+    have hju_pos : 0 < (j : ℝ) * u := mul_pos hj_pos (lt_of_lt_of_le zero_lt_one h1u)
+    have hku_pos : 0 < (k : ℝ) * u := mul_pos hk_pos (lt_of_lt_of_le zero_lt_one h1u)
+    -- {1/(ju)} ≤ 1/(ju) ≤ 1/j (since u ≥ 1)
+    have h_fj : Int.fract (1 / (↑j * u)) ≤ 1 / (j : ℝ) := by
+      calc Int.fract (1 / (↑j * u))
+          ≤ 1 / (↑j * u) := fract_le_of_nonneg _ (div_nonneg one_pos.le hju_pos.le)
+        _ ≤ 1 / (↑j * 1) := by
+            apply one_div_le_one_div_of_le (mul_pos hj_pos one_pos)
+            exact mul_le_mul_of_nonneg_left h1u hj_pos.le
+        _ = 1 / (j : ℝ) := by ring
+    have h_fk : Int.fract (1 / (↑k * u)) ≤ 1 / (k : ℝ) := by
+      calc Int.fract (1 / (↑k * u))
+          ≤ 1 / (↑k * u) := fract_le_of_nonneg _ (div_nonneg one_pos.le hku_pos.le)
+        _ ≤ 1 / (↑k * 1) := by
+            apply one_div_le_one_div_of_le (mul_pos hk_pos one_pos)
+            exact mul_le_mul_of_nonneg_left h1u hk_pos.le
+        _ = 1 / (k : ℝ) := by ring
+    calc Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))
+        ≤ (1 / (j : ℝ)) * (1 / (k : ℝ)) :=
+          mul_le_mul h_fj h_fk (Int.fract_nonneg _) (by positivity)
+      _ = 1 / ((j : ℝ) * k) := by ring
+  have h_integral := intervalIntegral.norm_integral_le_of_norm_le_const h_bound
+  have h1p : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.le
+  calc |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ 1 / ((j : ℝ) * k) * |(↑p : ℝ) - 1| := h_integral
+    _ = 1 / ((j : ℝ) * k) * ((↑p : ℝ) - 1) := by
+        rw [abs_of_nonneg (by linarith)]
+    _ = ((p : ℝ) - 1) / ((j : ℝ) * k) := by ring
+
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
