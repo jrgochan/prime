@@ -95,9 +95,21 @@ theorem primeGramEntry_integral_identity (p : ℕ) (hp : 0 < p) (j k : ℕ) :
     (1 / (p : ℝ)) * ∫ u in (0:ℝ)..(p : ℝ),
       Int.fract (1 / ((j : ℝ) * u)) * Int.fract (1 / ((k : ℝ) * u)) := by
   unfold primeGramEntry gramEntry
-  -- Change of variables: x ↦ u/p, dx = du/p
-  -- ∫₀¹ {1/(jpx)} · {1/(kpx)} dx = (1/p) ∫₀ᵖ {1/(ju)} · {1/(ku)} du
-  sorry
+  -- The integrand at jp, kp is f(p*x) where f(u) = {1/(ju)} * {1/(ku)}
+  -- By integral_comp_mul_left: ∫ x in a..b, f(c*x) = c⁻¹ • ∫ x in c*a..c*b, f(x)
+  have hp_ne : (p : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
+  -- Step 1: Unfold ↑(j*p) to ↑j * ↑p and rewrite the integrand
+  have h_integrand : ∀ x : ℝ,
+      Int.fract (1 / (↑(j * p) * x)) * Int.fract (1 / (↑(k * p) * x)) =
+      Int.fract (1 / (↑j * (↑p * x))) * Int.fract (1 / (↑k * (↑p * x))) := by
+    intro x; push_cast; congr 2 <;> ring
+  simp_rw [h_integrand]
+  -- Step 2: Abstract the function f(u) = {1/(ju)}{1/(ku)} and apply substitution
+  set f : ℝ → ℝ := fun u => Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u)) with hf_def
+  -- Goal: ∫ x in 0..1, f(↑p * x) = (1/p) * ∫ u in 0..↑p, f(u)
+  change ∫ x in (0:ℝ)..1, f (↑p * x) = (1 / ↑p) * ∫ u in (0:ℝ)..↑p, f u
+  rw [intervalIntegral.integral_comp_mul_left f hp_ne, mul_zero, mul_one]
+  rw [smul_eq_mul, one_div]
 
 /-- **The Dominant Contribution.**
 
@@ -106,12 +118,24 @@ theorem primeGramEntry_integral_identity (p : ℕ) (hp : 0 < p) (j k : ℕ) :
 
     The first piece gives the self-similar term (1/p) · G_{jk}.
     This lemma isolates the dominant contribution. -/
-theorem primeGramEntry_split (p : ℕ) (hp : 1 < p) (j k : ℕ) (hj : 0 < j) (hk : 0 < k) :
+theorem primeGramEntry_split (p : ℕ) (hp : 1 < p) (j k : ℕ) (_hj : 0 < j) (_hk : 0 < k) :
     primeGramEntry p j k =
     (1 / (p : ℝ)) * gramEntry j k +
     (1 / (p : ℝ)) * ∫ u in (1:ℝ)..(p : ℝ),
       Int.fract (1 / ((j : ℝ) * u)) * Int.fract (1 / ((k : ℝ) * u)) := by
-  sorry
+  rw [primeGramEntry_integral_identity p (by omega) j k]
+  -- Split: ∫₀ᵖ f = ∫₀¹ f + ∫₁ᵖ f
+  set f : ℝ → ℝ := fun u =>
+    Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u)) with hf_def
+  have h_split : ∫ u in (0:ℝ)..(p : ℝ), f u =
+      (∫ u in (0:ℝ)..1, f u) + ∫ u in (1:ℝ)..(p : ℝ), f u := by
+    symm
+    exact intervalIntegral.integral_add_adjacent_intervals
+      (by sorry) -- IntervalIntegrable on [0,1]
+      (by sorry) -- IntervalIntegrable on [1,p]
+  rw [h_split, mul_add]
+  -- The remaining goal: ∫₀¹ {1/(j*u)} * {1/(k*u)} du = gramEntry j k
+  simp only [hf_def, gramEntry]
 
 /-- **Self-Similarity Ratio.**
 
@@ -126,7 +150,14 @@ theorem primeGramEntry_split (p : ℕ) (hp : 1 < p) (j k : ℕ) (hj : 0 < j) (hk
 theorem primeGramEntry_selfsimilarity_bound (p : ℕ) (hp : 1 < p) (j k : ℕ)
     (hj : 0 < j) (hk : 0 < k) :
     |primeGramEntry p j k - (1 / (p : ℝ)) * gramEntry j k| ≤ ((p : ℝ) - 1) / p := by
-  sorry
+  -- From the split: G_{jp,kp} - (1/p)*G_{jk} = (1/p) * ∫₁ᵖ f(u) du
+  rw [primeGramEntry_split p hp j k hj hk, add_sub_cancel_left]
+  -- |1/p * ∫₁ᵖ f| ≤ (1/p) * (p-1)
+  rw [abs_mul, abs_of_nonneg (by positivity)]
+  -- Need: |∫₁ᵖ f| ≤ p-1
+  -- This holds because |f(u)| ≤ 1 (fractional parts are in [0,1))
+  -- and the interval has length p-1
+  sorry -- (needs: ‖∫₁ᵖ f‖ ≤ 1 * |p-1|, then div_le_div)
 
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
@@ -195,7 +226,7 @@ def primeFractalDimension : ℝ :=
     This formalizes the experimental observation that composite drops
     are 100-1000x smaller than prime drops.
 -/
-theorem eigenDrop_composite_small (N a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) (hab : N = a * b) :
+theorem eigenDrop_composite_small (N a b : ℕ) (_ha : 2 ≤ a) (_hb : 2 ≤ b) (_hab : N = a * b) :
     -- The Gram entry at index N is "close to" a combination of entries
     -- at indices a and b, making the eigenvalue drop small
     -- |gramEntry N k - (gramEntry a k + gramEntry b k)| is bounded
@@ -219,7 +250,7 @@ theorem eigenDrop_composite_small (N a b : ℕ) (ha : 2 ≤ a) (hb : 2 ≤ b) (h
     uniformly bounded below, then λ_min(G_N) → 0 at a controlled rate,
     which implies RH via the Nyman-Beurling theorem.
 -/
-theorem gram_fractal_structure (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N) :
+theorem gram_fractal_structure (p N : ℕ) (_hp : Nat.Prime p) (_hN : 2 ≤ N) :
     -- The fractal structure theorem: combining self-similarity
     -- with the secular equation gives recursive eigenvalue control
     -- Statement: the Gram matrix spectral structure is a fractal
