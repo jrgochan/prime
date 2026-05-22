@@ -39,8 +39,9 @@ Prime Zeta equation: P(D) = Σ_p p⁻ᴰ = 1, giving D ≈ 1.66.
 
 ### Status
 - Definitions: ✅ proven
-- Integral identity: ✅ proven
-- Self-similarity bound: sorry (requires Gram entry asymptotics)
+- Integral identity: ✅ proven (integral_comp_mul_left)
+- Interval split: ✅ proven (integral_add_adjacent_intervals + Measurable.fract)
+- Self-similarity bound: ✅ proven (norm_integral_le_of_norm_le_const)
 - Spectral consequence: sorry (requires eigenvalue perturbation theory)
 
 ### References
