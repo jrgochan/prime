@@ -1,11 +1,118 @@
 [package]
 name = "overcancellation-scan"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2021"
+
+[features]
+default = []
+hpdf = ["cathedral-utils/hpdf"]
 
 [dependencies]
 rayon = "1.10"
 cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+
+[[bin]]
+name = "overcancellation-scan"
+path = "src/main.rs"
+
+[[bin]]
+name = "error-xray"
+path = "src/error_xray.rs"
+
+[[bin]]
+name = "euler-deep"
+path = "src/euler_deep.rs"
+
+[[bin]]
+name = "eigenvalue-probe"
+path = "src/bin/eigenvalue_probe.rs"
+
+[[bin]]
+name = "b-projection"
+path = "src/bin/b_projection.rs"
+
+[[bin]]
+name = "drop-profile"
+path = "src/bin/drop_profile.rs"
+
+[[bin]]
+name = "schur-decomp"
+path = "src/bin/schur_decomp.rs"
+
+[[bin]]
+name = "smith-probe"
+path = "src/bin/smith_probe.rs"
+
+[[bin]]
+name = "bernoulli-vs-vasyunin"
+path = "src/bin/bernoulli_vs_vasyunin.rs"
+
+[[bin]]
+name = "cotangent-bound-probe"
+path = "src/bin/cotangent_bound_probe.rs"
+
+[[bin]]
+name = "overcancellation-anatomy"
+path = "src/bin/overcancellation_anatomy.rs"
+
+[[bin]]
+name = "overcancellation-hpdf"
+path = "src/bin/overcancellation_hpdf.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "cotres-spectral"
+path = "src/bin/cotres_spectral.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "glass-fiber-probe"
+path = "src/bin/glass_fiber_probe.rs"
+
+[[bin]]
+name = "smith-head-tail"
+path = "src/bin/smith_head_tail.rs"
+
+[[bin]]
+name = "bd-convergence-probe"
+path = "src/bin/bd_convergence_probe.rs"
+
+[[bin]]
+name = "mertens-l2-probe"
+path = "src/bin/mertens_l2_probe.rs"
+
+[[bin]]
+name = "cathedral-constant-probe"
+path = "src/bin/cathedral_constant_probe.rs"
+
+[[bin]]
+name = "l1-decomposition-probe"
+path = "src/bin/l1_decomposition_probe.rs"
+
+[[bin]]
+name = "harmonic-projection-probe"
+path = "src/bin/harmonic_projection_probe.rs"
+
+[[bin]]
+name = "harmonic-normalized-probe"
+path = "src/bin/harmonic_normalized_probe.rs"
+
+[[bin]]
+name = "path3-b1-sieve-probe"
+path = "src/bin/path3_b1_sieve_probe.rs"
+
+[[bin]]
+name = "ramanujan-spectral-probe"
+path = "src/bin/ramanujan_spectral_probe.rs"
+
+[[bin]]
+name = "mellin-parseval-probe"
+path = "src/bin/mellin_parseval_probe.rs"
+
+[[bin]]
+name = "contour-height-probe"
+path = "src/bin/contour_height_probe.rs"
 
 [profile.release]
 opt-level = 3
