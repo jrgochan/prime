@@ -113,7 +113,10 @@ lean_lib «Cathedral» where
     -- Structural layer
     `Cathedral.Structural.BDFloorArithmetic,
     `Cathedral.Structural.Independence,
+    `Cathedral.Structural.BorderedSpectral,
     `Cathedral.Structural.Eigenvalue,
+    `Cathedral.Structural.DivisorDropBound,
+    `Cathedral.Structural.TailSumBound,
     `Cathedral.Structural.Structural,
     -- Mellin bridge
     `Cathedral.MellinBridge.Basic,
@@ -403,7 +406,20 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SDualityGlass,
     -- Hopf Glass Cycle (Cayley-Dickson tower ζ(2)↔ζ(16), Exploration 36)
     `Cathedral.Physics.HopfGlassCycle,
-    -- Woodbury Condensate (rank-1 perturbation of Gram matrix)
+    -- Möbius Shadow Crown (glass-layered factorization → crown bound)
+    `Cathedral.Physics.MoebiusShadowCrown,
+    -- Mertens Third (∏(1-1/p) ~ e^{-γ}/ln(N), shadow rate)
+    `Cathedral.Physics.MertensThird,
+    -- Glass-Fiber CotRes decomposition (sym/anti splitting, dissolution lemma)
+    `Cathedral.Physics.GlassFiberCotRes,
+    -- Glass Euler Convergence (Glass₁ product → 0 via Mertens)
+    `Cathedral.Physics.GlassEulerConvergence,
+    -- Zeta2 Product Bound (graduation of zeta2Product_lower_bound axiom)
+    `Cathedral.Physics.Zeta2ProductBound,
+    -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
+    `Cathedral.Physics.CotResQuadBridge,
+    -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
+    `Cathedral.Physics.MoebiusSmithBridge,
     `Cathedral.Physics.WoodburyCondensate,
     -- Critical Line Phase (1D Collapse: ξ(½+it) ∈ ℝ, Schwarz reflection, Exploration 38)
     `Cathedral.Physics.CriticalLinePhase,
@@ -432,4 +448,58 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SpectralDivergence,
     -- Gram Bridge ({t}² ≤ {t} → G_{kk} ≤ b_k, Exploration 39)
     `Cathedral.Physics.GramBridge,
+    -- Ramanujan Form Bound (Smith decomposition → crown reduction, Strategy C Phase 2)
+    `Cathedral.Physics.RamanujanFormBound,
+    -- Strategy C Audit (infrastructure compilation check, Phase 1)
+    `Cathedral.Physics.StrategyCAudit,
+    -- Mertens-Ramanujan Bridge (divisor coefficient bound, Strategy C Phase 3)
+    `Cathedral.Physics.MertensRamanujan,
+    -- Strategy C Crown (assembly + overcancellation framework, Phase 4)
+    `Cathedral.Physics.StrategyCCrown,
+    -- Smith-Franel Bridge (d²_{kt} → 0 unconditionally, East Wing)
+    `Cathedral.Physics.SmithFranelBridge,
+    -- Entanglement Brake (S² brake, σ·S factorization, Thulium Session)
+    `Cathedral.Physics.EntanglementBrake,
+    -- Diagonal Decomposition (G_diag = C·Σv²/k − Σv²/k², Thulium Session)
+    `Cathedral.Physics.DiagonalDecomposition,
+    -- Cotangent Symmetry (Σcot(πm/a) = 0, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.CotSymmetry,
+    -- Vasyunin Reflection (V(a,a−b) = −V(a,b) algebraic core, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.VasyuninReflection,
+    -- Fract Reflection (graduated: {m(a−b)/a} = 1 − {mb/a}, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.FractReflection,
+    -- Reflection Wiring (V(a,a−b) = −V(a,b) COMPLETE, zero axiom, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.VasyuninReflectionWiring,
+    -- Vasyunin Bound (|V(a,b)| ≤ Σ|cot|, zero sorry, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.VasyuninBound,
+    -- Gershgorin Bound (eigenvalue localization, zero sorry, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.GershgorinBound,
+    -- Spectral Bound (Gershgorin → Gram wiring, 1 axiom, Thulium Session)
+    `Cathedral.Vasyunin.Cotangent.SpectralBound,
+    -- Diagonal Shift (C < 4/3, Δ(k) < 0 for k≥3, 12 theorems, Thulium Plumbing)
+    `Cathedral.Physics.DiagonalShift,
+    -- Abel Hammer (perfect square completion CσS-S²=-(S-Cσ/2)²+C²σ²/4, 13 theorems, Thulium Plumbing)
+    `Cathedral.Physics.AbelHammer,
+    -- Cotangent Dedekind Dissolution (closed-form V+V reciprocity, Thulium Session)
+    `Cathedral.Physics.CotDedekindDissolution,
+    -- Overcancellation Assembly (master bound + convergence, 5 theorems, Thulium Plumbing)
+    `Cathedral.Physics.OvercancellationAssembly,
+    -- Log Correction Form (Master Decomposition: vᵀGv = AbelHammer + LogCorr − CotRes, Thulium Plumbing)
+    `Cathedral.Physics.LogCorrectionForm,
+    -- Mertens Harmony (Three-Part Harmony: ratio identity + CotRes sign, Osmium Core)
+    `Cathedral.Physics.MertensHarmony,
+    -- Mertens Bridge (Physics ↔ PNT connection: σ,S decomposition, Path 4.5 Step 1)
+    `Cathedral.Physics.MertensBridge,
+    -- Abel Asymptotics (Abel→−S² via PNT, Crown chain, Path 4.5 Step 2)
+    `Cathedral.Physics.AbelAsymptotics,
+    -- LogCorr Asymptotics (Abel+LogCorr→−S(S+T₂), Iridium Crown, Path 4.5 Step 3)
+    `Cathedral.Physics.LogCorrAsymptotics,
+    -- Iridium Crown (THE CAPSTONE: RH axiom + Crown theorem, Path 4.5 Step 4)
+    `Cathedral.Physics.IridiumCrown,
+    -- B₁ Arithmetic Skeleton (Path 6: Spectral Gap Attack — gcd²/12jk decomposition)
+    `Cathedral.Physics.BernoulliSkeleton,
+    -- Bridge Gap (G_Vasyunin = R_Ramanujan + Δ decomposition, Bridge Gap Session)
+    `Cathedral.Physics.BridgeGap,
+    -- Time-Domain Bridge (G = 2M - 1/(3jk) + 2∫E/t³, IBP maneuver, Bridge Session)
+    `Cathedral.Physics.TimeDomainBridge,
   ]
