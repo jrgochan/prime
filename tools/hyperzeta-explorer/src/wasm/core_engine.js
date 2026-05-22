@@ -19,10 +19,74 @@ export class HyperEngine {
         return ret >>> 0;
     }
     /**
+     * Centroid X of output cloud
+     * @returns {number}
+     */
+    get_centroid_x() {
+        const ret = wasm.hyperengine_get_centroid_x(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Centroid Y of output cloud
+     * @returns {number}
+     */
+    get_centroid_y() {
+        const ret = wasm.hyperengine_get_centroid_y(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Centroid Z of output cloud
+     * @returns {number}
+     */
+    get_centroid_z() {
+        const ret = wasm.hyperengine_get_centroid_z(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Running mean of collapse metric
+     * @returns {number}
+     */
+    get_collapse_mean() {
+        const ret = wasm.hyperengine_get_collapse_mean(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * @returns {number}
      */
     get_collapse_metric() {
         const ret = wasm.hyperengine_get_collapse_metric(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Elongation ratio λ₁/λ₂ — spikes when particles form a line
+     * @returns {number}
+     */
+    get_elongation() {
+        const ret = wasm.hyperengine_get_elongation(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Flatness ratio λ₁/λ₃ — spikes when particles form a disc or line
+     * @returns {number}
+     */
+    get_flatness() {
+        const ret = wasm.hyperengine_get_flatness(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Fluctuation energy E_S(t) — the TimeDomainBridge primitive
+     * @returns {number}
+     */
+    get_fluctuation_energy() {
+        const ret = wasm.hyperengine_get_fluctuation_energy(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Gram form bound: |vᵀGv - asymptotic| ≤ this value
+     * @returns {number}
+     */
+    get_gram_bound() {
+        const ret = wasm.hyperengine_get_gram_bound(this.__wbg_ptr);
         return ret;
     }
     /**
@@ -46,6 +110,38 @@ export class HyperEngine {
      */
     get_layer_energy(level) {
         const ret = wasm.hyperengine_get_layer_energy(this.__wbg_ptr, level);
+        return ret;
+    }
+    /**
+     * PCA eigenvalue λ₁ (largest — dominant direction)
+     * @returns {number}
+     */
+    get_pca_lambda1() {
+        const ret = wasm.hyperengine_get_pca_lambda1(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * PCA eigenvalue λ₂ (second)
+     * @returns {number}
+     */
+    get_pca_lambda2() {
+        const ret = wasm.hyperengine_get_pca_lambda2(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * PCA eigenvalue λ₃ (smallest)
+     * @returns {number}
+     */
+    get_pca_lambda3() {
+        const ret = wasm.hyperengine_get_pca_lambda3(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * Peak |E_S| seen so far
+     * @returns {number}
+     */
+    get_peak_fluctuation() {
+        const ret = wasm.hyperengine_get_peak_fluctuation(this.__wbg_ptr);
         return ret;
     }
     /**

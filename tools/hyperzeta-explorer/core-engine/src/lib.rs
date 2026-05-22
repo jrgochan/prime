@@ -51,6 +51,25 @@ pub struct HyperEngine {
     view_mode: u32,
     /// Layer energies: [ℝ, ℂ, ℍ, 𝕆, 𝕊] accumulated per frame
     layer_energies: [f64; 5],
+
+    // ═══════════════════════════════════════════════
+    // TimeDomainBridge: PCA + Geometric Detection
+    // ═══════════════════════════════════════════════
+
+    /// PCA eigenvalues of the 3D output cloud (sorted descending)
+    pca_eigenvalues: [f64; 3],
+    /// Centroid of output cloud
+    centroid: [f64; 3],
+    /// Cumulative fluctuation energy E_S = Σ(collapse - mean_collapse)
+    fluctuation_energy: f64,
+    /// Running mean of collapse_metric for fluctuation computation
+    collapse_mean: f64,
+    /// Frame count for running mean
+    total_frames: u64,
+    /// Peak |E_S| seen so far (for bound computation)
+    peak_fluctuation: f64,
+    /// The Gram form bound: |vᵀGv - asymptotic| ≤ peak_E_S / T²
+    gram_bound: f64,
 }
 
 #[wasm_bindgen]
@@ -95,6 +114,14 @@ impl HyperEngine {
             collapse_metric: 10.0,
             view_mode: 0,
             layer_energies: [0.0; 5],
+            // TimeDomainBridge fields
+            pca_eigenvalues: [1.0, 1.0, 1.0],
+            centroid: [0.0; 3],
+            fluctuation_energy: 0.0,
+            collapse_mean: 0.0,
+            total_frames: 0,
+            peak_fluctuation: 0.0,
+            gram_bound: f64::INFINITY,
         }
     }
 
@@ -322,5 +349,197 @@ impl HyperEngine {
 
         self.collapse_metric = total_magnitude / (self.particle_count as f64);
         self.layer_energies = layer_e.map(|e| e / self.particle_count as f64);
+
+        // ═══════════════════════════════════════════════
+        // TimeDomainBridge: PCA Eigenvalue Computation
+        // ═══════════════════════════════════════════════
+        // Compute covariance matrix of the 3D output cloud, then
+        // extract eigenvalues via Cardano's closed-form solution.
+        // This runs at full f64 precision in Rust (not f32 JS).
+
+        let n = self.particle_count;
+        if n > 10 {
+            // Step size for sampling (sample up to 5000 particles)
+            let step = if n > 5000 { n / 5000 } else { 1 };
+            let mut cx: f64 = 0.0;
+            let mut cy: f64 = 0.0;
+            let mut cz: f64 = 0.0;
+            let mut count: usize = 0;
+
+            // Pass 1: centroid
+            let mut i = 0;
+            while i < n {
+                let idx = i * 3;
+                cx += self.geometry_buffer[idx] as f64;
+                cy += self.geometry_buffer[idx + 1] as f64;
+                cz += self.geometry_buffer[idx + 2] as f64;
+                count += 1;
+                i += step;
+            }
+            let cf = count as f64;
+            cx /= cf; cy /= cf; cz /= cf;
+            self.centroid = [cx, cy, cz];
+
+            // Pass 2: covariance matrix (upper triangle)
+            let mut sxx: f64 = 0.0;
+            let mut syy: f64 = 0.0;
+            let mut szz: f64 = 0.0;
+            let mut sxy: f64 = 0.0;
+            let mut sxz: f64 = 0.0;
+            let mut syz: f64 = 0.0;
+
+            i = 0;
+            while i < n {
+                let idx = i * 3;
+                let dx = self.geometry_buffer[idx] as f64 - cx;
+                let dy = self.geometry_buffer[idx + 1] as f64 - cy;
+                let dz = self.geometry_buffer[idx + 2] as f64 - cz;
+                sxx += dx * dx;
+                syy += dy * dy;
+                szz += dz * dz;
+                sxy += dx * dy;
+                sxz += dx * dz;
+                syz += dy * dz;
+                i += step;
+            }
+            sxx /= cf; syy /= cf; szz /= cf;
+            sxy /= cf; sxz /= cf; syz /= cf;
+
+            // Cardano's method for eigenvalues of 3x3 symmetric matrix
+            // Matrix: [[sxx, sxy, sxz], [sxy, syy, syz], [sxz, syz, szz]]
+            let p1 = sxy * sxy + sxz * sxz + syz * syz;
+            if p1 < 1e-12 {
+                // Already diagonal
+                let mut vals = [sxx, syy, szz];
+                vals.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
+                self.pca_eigenvalues = vals;
+            } else {
+                let q = (sxx + syy + szz) / 3.0;
+                let p2 = (sxx - q).powi(2) + (syy - q).powi(2) + (szz - q).powi(2) + 2.0 * p1;
+                let p = (p2 / 6.0).sqrt();
+
+                // B = (1/p) * (A - qI)
+                let ba = (sxx - q) / p;
+                let bb = (syy - q) / p;
+                let bc = (szz - q) / p;
+                let bd = sxy / p;
+                let be = syz / p;
+                let bf = sxz / p;
+
+                let det_b = ba * (bb * bc - be * be)
+                          - bd * (bd * bc - be * bf)
+                          + bf * (bd * be - bb * bf);
+                let r = (det_b / 2.0).clamp(-1.0, 1.0);
+                let phi = r.acos() / 3.0;
+
+                let e1 = q + 2.0 * p * phi.cos();
+                let e3 = q + 2.0 * p * (phi + 2.0 * std::f64::consts::PI / 3.0).cos();
+                let e2 = 3.0 * q - e1 - e3;
+
+                let mut vals = [e1, e2, e3];
+                vals.sort_by(|a, b| b.partial_cmp(a).unwrap_or(std::cmp::Ordering::Equal));
+                self.pca_eigenvalues = vals;
+            }
+
+            // ─── TimeDomainBridge: Fluctuation Energy ───
+            // E_S(t) ≈ cumulative (collapse - mean) weighted by dt
+            self.total_frames += 1;
+            let tf = self.total_frames as f64;
+            // Update running mean: μ_n = μ_{n-1} + (x - μ_{n-1})/n
+            self.collapse_mean += (self.collapse_metric - self.collapse_mean) / tf;
+            // Accumulate fluctuation: E_S += (collapse - mean) * dt
+            let dt = 0.005; // matches frame increment
+            self.fluctuation_energy += (self.collapse_metric - self.collapse_mean) * dt;
+            // Track peak |E_S|
+            let abs_e = self.fluctuation_energy.abs();
+            if abs_e > self.peak_fluctuation {
+                self.peak_fluctuation = abs_e;
+            }
+            // Gram bound: ‖E_S‖∞ / T² where T = current height
+            let t = 10.0 + (self.frame as f64) * 2.0;
+            self.gram_bound = if t > 1.0 {
+                self.peak_fluctuation / (t * t)
+            } else {
+                f64::INFINITY
+            };
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // TimeDomainBridge Getters
+    // ═══════════════════════════════════════════════════════
+
+    /// PCA eigenvalue λ₁ (largest — dominant direction)
+    #[wasm_bindgen]
+    pub fn get_pca_lambda1(&self) -> f64 {
+        self.pca_eigenvalues[0]
+    }
+
+    /// PCA eigenvalue λ₂ (second)
+    #[wasm_bindgen]
+    pub fn get_pca_lambda2(&self) -> f64 {
+        self.pca_eigenvalues[1]
+    }
+
+    /// PCA eigenvalue λ₃ (smallest)
+    #[wasm_bindgen]
+    pub fn get_pca_lambda3(&self) -> f64 {
+        self.pca_eigenvalues[2]
+    }
+
+    /// Elongation ratio λ₁/λ₂ — spikes when particles form a line
+    #[wasm_bindgen]
+    pub fn get_elongation(&self) -> f64 {
+        let l2 = self.pca_eigenvalues[1].max(1e-10);
+        self.pca_eigenvalues[0] / l2
+    }
+
+    /// Flatness ratio λ₁/λ₃ — spikes when particles form a disc or line
+    #[wasm_bindgen]
+    pub fn get_flatness(&self) -> f64 {
+        let l3 = self.pca_eigenvalues[2].max(1e-10);
+        self.pca_eigenvalues[0] / l3
+    }
+
+    /// Fluctuation energy E_S(t) — the TimeDomainBridge primitive
+    #[wasm_bindgen]
+    pub fn get_fluctuation_energy(&self) -> f64 {
+        self.fluctuation_energy
+    }
+
+    /// Peak |E_S| seen so far
+    #[wasm_bindgen]
+    pub fn get_peak_fluctuation(&self) -> f64 {
+        self.peak_fluctuation
+    }
+
+    /// Gram form bound: |vᵀGv - asymptotic| ≤ this value
+    #[wasm_bindgen]
+    pub fn get_gram_bound(&self) -> f64 {
+        self.gram_bound
+    }
+
+    /// Running mean of collapse metric
+    #[wasm_bindgen]
+    pub fn get_collapse_mean(&self) -> f64 {
+        self.collapse_mean
+    }
+
+    /// Centroid X of output cloud
+    #[wasm_bindgen]
+    pub fn get_centroid_x(&self) -> f64 {
+        self.centroid[0]
+    }
+
+    /// Centroid Y of output cloud
+    #[wasm_bindgen]
+    pub fn get_centroid_y(&self) -> f64 {
+        self.centroid[1]
+    }
+
+    /// Centroid Z of output cloud
+    #[wasm_bindgen]
+    pub fn get_centroid_z(&self) -> f64 {
+        self.centroid[2]
     }
 }

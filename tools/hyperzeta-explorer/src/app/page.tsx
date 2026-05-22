@@ -580,6 +580,126 @@ function emptyShapeCounts(): Record<ShapeType, number> {
 }
 
 // ═══════════════════════════════════════════════════════
+// TIMEDOMAIN BRIDGE DATA
+// ═══════════════════════════════════════════════════════
+
+interface BridgeData {
+  elongation: number;
+  flatness: number;
+  lambdas: [number, number, number];
+  fluctuationEnergy: number;
+  peakFluctuation: number;
+  gramBound: number;
+  collapseMean: number;
+}
+
+interface PCAHistoryPoint {
+  t: number;
+  elongation: number;
+  collapse: number;
+  fluctuation: number;
+}
+
+const PCA_HISTORY_MAX = 200;
+
+// PCA Ratio Sparkline — SVG component showing elongation over time
+function PCASparkline({
+  history,
+  detectedZeros,
+  currentHeight,
+}: {
+  history: PCAHistoryPoint[];
+  detectedZeros: DetectedZero[];
+  currentHeight: number;
+}) {
+  if (history.length < 2) return null;
+
+  const W = 280;
+  const H = 50;
+  const tMin = history[0].t;
+  const tMax = history[history.length - 1].t;
+  const tRange = Math.max(tMax - tMin, 0.1);
+
+  // Elongation line (clamped to display range)
+  const maxElong = Math.min(
+    Math.max(...history.map((p) => p.elongation), 2),
+    20
+  );
+
+  const elongPath = history
+    .map((p, i) => {
+      const x = ((p.t - tMin) / tRange) * W;
+      const y = H - (Math.min(p.elongation, maxElong) / maxElong) * H;
+      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  // Collapse line (normalized)
+  const maxCollapse = Math.max(...history.map((p) => p.collapse), 0.01);
+  const collapsePath = history
+    .map((p, i) => {
+      const x = ((p.t - tMin) / tRange) * W;
+      const y = H - (Math.min(p.collapse / maxCollapse, 1) * H);
+      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+
+  return (
+    <svg width={W} height={H + 12} style={{ display: "block" }}>
+      {/* Background */}
+      <rect x={0} y={0} width={W} height={H} fill="rgba(255,255,255,0.03)" rx={3} />
+
+      {/* Zero markers */}
+      {detectedZeros
+        .filter((z) => z.height >= tMin && z.height <= tMax)
+        .map((z, i) => {
+          const x = ((z.height - tMin) / tRange) * W;
+          return (
+            <line
+              key={`z-${i}`}
+              x1={x}
+              y1={0}
+              x2={x}
+              y2={H}
+              stroke="#ff004444"
+              strokeWidth={1.5}
+              strokeDasharray="2,2"
+            />
+          );
+        })}
+
+      {/* Collapse metric line (dim cyan) */}
+      <path d={collapsePath} fill="none" stroke="#00ffff33" strokeWidth={1} />
+
+      {/* Elongation line (bright) */}
+      <path d={elongPath} fill="none" stroke="#ff8844" strokeWidth={1.5} />
+
+      {/* λ₁/λ₂ threshold line at 3.5 (line detection) */}
+      <line
+        x1={0}
+        y1={H - (3.5 / maxElong) * H}
+        x2={W}
+        y2={H - (3.5 / maxElong) * H}
+        stroke="#ff884422"
+        strokeWidth={0.5}
+        strokeDasharray="4,4"
+      />
+
+      {/* Labels */}
+      <text x={2} y={H + 10} fill="#ff8844" fontSize={8} fontFamily="monospace">
+        λ₁/λ₂
+      </text>
+      <text x={40} y={H + 10} fill="#00ffff55" fontSize={8} fontFamily="monospace">
+        collapse
+      </text>
+      <text x={W - 45} y={H + 10} fill="#666" fontSize={7} fontFamily="monospace">
+        t={currentHeight.toFixed(1)}
+      </text>
+    </svg>
+  );
+}
+
+// ═══════════════════════════════════════════════════════
 // PARTICLE CLOUD COMPONENT
 // ═══════════════════════════════════════════════════════
 
@@ -598,6 +718,7 @@ function ExplorerCloud({
   onMetrics,
   onJets,
   onShape,
+  onBridge,
 }: {
   wasmEngine: HyperEngine;
   memoryArray: Float32Array;
@@ -610,6 +731,7 @@ function ExplorerCloud({
   onMetrics: (c: number, h: number) => void;
   onJets: (j: JetInfo) => void;
   onShape: (s: ShapeInfo) => void;
+  onBridge: (data: BridgeData) => void;
 }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const materialRef = useRef<THREE.MeshBasicMaterial>(null);
@@ -657,23 +779,35 @@ function ExplorerCloud({
       const t = 10.0 + lambda * 2.0;
       onMetrics(c, t);
 
-      // Jet detection in Division by Zero mode (~10Hz, cheap)
-      if (mode.id === 3 && prevPositions.current) {
+      // Jet detection on ALL modes (~10Hz, cheap)
+      if (prevPositions.current) {
         const jetInfo = detectJets(memoryArray, prevPositions.current, particleCount);
         if (jetInfo.count > 0) onJets(jetInfo);
       }
-      // Shape detection (~10Hz, runs on positions directly)
-      if (mode.id === 3) {
-        const shapeInfo = detectShape(memoryArray, particleCount);
-        onShape(shapeInfo);
-      }
+      // Shape detection on ALL modes (~10Hz, runs on positions directly)
+      const shapeInfo = detectShape(memoryArray, particleCount);
+      onShape(shapeInfo);
+
+      // TimeDomainBridge: read Rust-computed PCA + fluctuation data
+      onBridge({
+        elongation: wasmEngine.get_elongation(),
+        flatness: wasmEngine.get_flatness(),
+        lambdas: [
+          wasmEngine.get_pca_lambda1(),
+          wasmEngine.get_pca_lambda2(),
+          wasmEngine.get_pca_lambda3(),
+        ],
+        fluctuationEnergy: wasmEngine.get_fluctuation_energy(),
+        peakFluctuation: wasmEngine.get_peak_fluctuation(),
+        gramBound: wasmEngine.get_gram_bound(),
+        collapseMean: wasmEngine.get_collapse_mean(),
+      });
+
       // Snapshot positions for next velocity computation
-      if (mode.id === 3) {
-        if (!prevPositions.current || prevPositions.current.length !== particleCount * 3) {
-          prevPositions.current = new Float32Array(particleCount * 3);
-        }
-        prevPositions.current.set(memoryArray);
+      if (!prevPositions.current || prevPositions.current.length !== particleCount * 3) {
+        prevPositions.current = new Float32Array(particleCount * 3);
       }
+      prevPositions.current.set(memoryArray);
     }
 
     // Initialize instance colors on first frame or mode change
@@ -796,6 +930,8 @@ export default function Home() {
   const triggerCooldownRef = useRef(0);
   // Shape / Morphology detection
   const [shapeInfo, setShapeInfo] = useState<ShapeInfo | null>(null);
+  const [bridgeData, setBridgeData] = useState<BridgeData | null>(null);
+  const [pcaHistory, setPcaHistory] = useState<PCAHistoryPoint[]>([]);
   const [morphologyLog, setMorphologyLog] = useState<MorphologyInterval[]>([]);
   const currentIntervalRef = useRef<MorphologyInterval>({
     zeroIndex: 0, tStart: 10, tEnd: 10, frames: 0,
@@ -998,6 +1134,23 @@ export default function Home() {
     if (s.flatness > interval.peakFlatness) interval.peakFlatness = s.flatness;
   }, [height]);
 
+  const handleBridge = useCallback((data: BridgeData) => {
+    setBridgeData(data);
+    // Track PCA history for sparkline
+    setPcaHistory((prev) => {
+      const next = [
+        ...prev.slice(-(PCA_HISTORY_MAX - 1)),
+        {
+          t: height,
+          elongation: data.elongation,
+          collapse: data.collapseMean,
+          fluctuation: data.fluctuationEnergy,
+        },
+      ];
+      return next;
+    });
+  }, [height]);
+
   // Also track jet events in morphology interval
   const handleJetsWithMorphology = useCallback((j: JetInfo) => {
     handleJets(j);
@@ -1095,6 +1248,115 @@ export default function Home() {
             {collapse.toFixed(4)}
           </span>
         </p>
+
+        {/* ═══════════════════════════════════════════ */}
+        {/* TimeDomainBridge Panel — All Modes         */}
+        {/* ═══════════════════════════════════════════ */}
+        <div className="mt-4 border border-white/10 bg-black/40 backdrop-blur-sm rounded px-3 py-2">
+          <p className="text-[10px] opacity-50 tracking-wider border-b border-white/10 pb-1 mb-2">
+            TIMEDOMAIN BRIDGE — PCA GEOMETRIC DETECTION
+          </p>
+
+          {/* PCA Sparkline */}
+          <PCASparkline
+            history={pcaHistory}
+            detectedZeros={detectedZeros}
+            currentHeight={height}
+          />
+
+          {/* Shape + Eigenvalues */}
+          <div className="flex items-center gap-3 mt-2">
+            {shapeInfo && (
+              <>
+                <span
+                  className="text-lg"
+                  style={{ color: SHAPE_LABELS[shapeInfo.shape].color }}
+                >
+                  {SHAPE_LABELS[shapeInfo.shape].icon}
+                </span>
+                <span
+                  className="text-xs font-bold"
+                  style={{ color: SHAPE_LABELS[shapeInfo.shape].color }}
+                >
+                  {shapeInfo.shape.toUpperCase()}
+                </span>
+                <span className="text-[10px] opacity-30">
+                  ({(shapeInfo.confidence * 100).toFixed(0)}%)
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* PCA Eigenvalues from Rust (f64 precision) */}
+          {bridgeData && (
+            <div className="mt-1.5 text-[10px] opacity-50 space-y-0.5">
+              <div className="flex gap-4">
+                <span>
+                  λ₁/λ₂:{" "}
+                  <span style={{ color: bridgeData.elongation > 3.5 ? "#ff8844" : "#888" }}>
+                    {bridgeData.elongation.toFixed(2)}
+                  </span>
+                </span>
+                <span>
+                  λ₁/λ₃:{" "}
+                  <span style={{ color: bridgeData.flatness > 5 ? "#44aaff" : "#888" }}>
+                    {bridgeData.flatness.toFixed(2)}
+                  </span>
+                </span>
+              </div>
+              <p className="opacity-60">
+                λ: [{bridgeData.lambdas.map((v) => v.toFixed(1)).join(", ")}]
+              </p>
+            </div>
+          )}
+
+          {/* TimeDomainBridge Quantities */}
+          {bridgeData && (
+            <div className="mt-2 border-t border-white/10 pt-2 text-[10px]">
+              <div className="flex gap-3 items-center">
+                <span className="opacity-50">E_S(t):</span>
+                <span
+                  className="font-bold tabular-nums"
+                  style={{
+                    color:
+                      Math.abs(bridgeData.fluctuationEnergy) < 0.01
+                        ? "#00ff88"
+                        : "#ff8844",
+                  }}
+                >
+                  {bridgeData.fluctuationEnergy.toFixed(4)}
+                </span>
+              </div>
+              <div className="flex gap-3 items-center mt-0.5">
+                <span className="opacity-50">‖E_S‖∞:</span>
+                <span className="tabular-nums opacity-70">
+                  {bridgeData.peakFluctuation.toFixed(4)}
+                </span>
+              </div>
+              <div className="flex gap-3 items-center mt-0.5">
+                <span className="opacity-50">Gram bound:</span>
+                <span
+                  className="tabular-nums font-bold"
+                  style={{
+                    color:
+                      bridgeData.gramBound < 0.001
+                        ? "#00ff88"
+                        : bridgeData.gramBound < 0.01
+                        ? "#ffaa00"
+                        : "#ff4444",
+                  }}
+                >
+                  {bridgeData.gramBound < 0.0001
+                    ? bridgeData.gramBound.toExponential(2)
+                    : bridgeData.gramBound.toFixed(6)}
+                </span>
+              </div>
+              <p className="opacity-30 mt-1 italic text-[9px]">
+                |vᵀGv − asymptotic| ≤ ‖E_S‖∞/T²
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* Glass Staircase: Layer energy bars */}
         {modeIdx === 2 && (
@@ -1401,11 +1663,11 @@ export default function Home() {
 
       {/* Bottom Left — Watermark */}
       <div className="absolute bottom-8 left-8 z-10 pointer-events-none text-xs opacity-40">
-        <p>Project HYPERZETA Explorer — The Cayley-Dickson Tower</p>
+        <p>Project HYPERZETA Explorer — The Cayley-Dickson Tower × TimeDomainBridge</p>
         <p>
           {mode.id === 3
             ? "1/ζ(s) = Σ μ(n)/nˢ  ·  Division by zero = the Möbius function"
-            : "ζ_𝕊(s) = Σ n⁻ˢ  ·  s ∈ 𝕊₁₆  ·  Re(s) = ½"}
+            : "ζ_𝕊(s) = Σ n⁻ˢ  ·  s ∈ 𝕊₁₆  ·  Re(s) = ½  ·  PCA → Gram bound"}
         </p>
       </div>
 
@@ -1430,6 +1692,7 @@ export default function Home() {
             onMetrics={handleMetrics}
             onJets={handleJetsWithMorphology}
             onShape={handleShape}
+            onBridge={handleBridge}
           />
         ) : null}
       </Canvas>
