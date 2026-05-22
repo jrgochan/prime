@@ -285,17 +285,26 @@ theorem primeGramEntry_error_decay (p : ℕ) (hp : 1 < p) (j k : ℕ)
     (those going to 0 as N → ∞), this correction is eventually dominated.
 
     **Proof Strategy** (partially formalized):
-    1. Write G_p = (1/p)·G + E  where  E(j,k) = primeGramEntry - (1/p)·gramEntry
-    2. Entry-wise: |E(j,k)| ≤ (p-1)/p  [primeGramEntry_selfsimilarity_bound]
-    3. Weyl: λ_min(G_p) ≤ λ_min((1/p)G) + λ_max(E)
-    4. λ_min((1/p)G) = (1/p)·λ_min(G)
-    5. λ_max(E) ≤ (p-1)/p  [needs: Gershgorin or PSD structure of E]
 
-    Step 5 requires showing the error matrix has bounded spectral radius.
-    For diagonal-dominant E, Gershgorin gives λ_max ≤ N·(p-1)/p, so the
-    current bound holds when (p-1)/p ≥ N·(p-1)/p, i.e. always for N ≤ 1.
-    The asymptotically correct version uses the fact that E's entries decay
-    as 1/(jkp) for large j,k, giving λ_max(E) → 0. -/
+    Let v = min eigenvector of G (unit vector). Then:
+    1. λ_min(G_p) ≤ vᵀG_pv         [Rayleigh: min_eigenvalue_le_quadForm]
+    2. vᵀG_pv = (1/p)·vᵀGv + vᵀEv  [primeGramEntry_split]
+    3. vᵀGv = λ_min(G)              [quadForm_eigenvector]
+    4. vᵀEv ≤ (p-1)/p               [REMAINING GAP]
+
+    For step 4, using primeGramEntry_error_decay (|E(j,k)| ≤ (p-1)/(jkp)):
+    |vᵀEv| ≤ Σ |v_j||v_k|·(p-1)/(jkp) = (p-1)/p · (Σ|v_j|/j)²
+    By Cauchy-Schwarz: (Σ|v_j|/j)² ≤ Σv_j²·Σ1/j² = Σ1/j²
+    So |vᵀEv| ≤ (p-1)/p · Σ1/j²
+
+    To close, we need Σ_{j=1}^{N-1} 1/j² ≤ 1, which is FALSE (π²/6 ≈ 1.645).
+    The TRUE proof needs the TIGHTER bound (p-1)/(jkp²) from ∫₁ᵖ 1/u² du = (p-1)/p:
+    |vᵀEv| ≤ (p-1)/p² · Σ1/j² < 2(p-1)/p² ≤ (p-1)/p for p ≥ 2. ✓
+
+    Closing this sorry requires:
+    - Computing ∫₁ᵖ 1/u² du via FTC (integral_eq_sub_of_hasDerivAt)
+    - Cauchy-Schwarz for Finset sums
+    - The telescoping bound Σ 1/j² < 2 -/
 theorem spectral_selfsimilarity_upper (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N) :
     let G_p := primeGramMatrix p N
     let G   := gramMatrix N
