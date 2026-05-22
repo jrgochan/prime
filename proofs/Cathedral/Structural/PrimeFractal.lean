@@ -1,5 +1,6 @@
 import Cathedral.Defs
 import Mathlib.Data.Nat.Prime.Basic
+import Mathlib.MeasureTheory.Function.Floor
 
 /-!
 # Cathedral/Structural/PrimeFractal.lean
@@ -129,10 +130,25 @@ theorem primeGramEntry_split (p : ℕ) (hp : 1 < p) (j k : ℕ) (_hj : 0 < j) (_
     Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u)) with hf_def
   have h_split : ∫ u in (0:ℝ)..(p : ℝ), f u =
       (∫ u in (0:ℝ)..1, f u) + ∫ u in (1:ℝ)..(p : ℝ), f u := by
+    -- f is bounded by 1 (fract ∈ [0,1) ⟹ |product| ≤ 1)
+    have hf_bound : ∀ u : ℝ, |f u| ≤ 1 := by
+      intro u; simp only [hf_def]
+      rw [abs_of_nonneg (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+      calc Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))
+          ≤ 1 * 1 := mul_le_mul (Int.fract_lt_one _).le (Int.fract_lt_one _).le
+              (Int.fract_nonneg _) zero_le_one
+        _ = 1 := one_mul 1
+    -- Bounded functions on compact intervals are IntervalIntegrable
+    have hf_int : ∀ a b : ℝ, IntervalIntegrable f volume a b := by
+      intro a b
+      rw [intervalIntegrable_iff]
+      apply Measure.integrableOn_of_bounded (measure_Ioc_lt_top).ne
+      · exact (((measurable_const.div (measurable_const.mul measurable_id)).fract.mul
+            (measurable_const.div (measurable_const.mul measurable_id)).fract).stronglyMeasurable
+          ).aestronglyMeasurable
+      · exact ae_of_all _ (fun u => by rw [Real.norm_eq_abs]; exact hf_bound u)
     symm
-    exact intervalIntegral.integral_add_adjacent_intervals
-      (by sorry) -- IntervalIntegrable on [0,1]
-      (by sorry) -- IntervalIntegrable on [1,p]
+    exact intervalIntegral.integral_add_adjacent_intervals (hf_int 0 1) (hf_int 1 ↑p)
   rw [h_split, mul_add]
   -- The remaining goal: ∫₀¹ {1/(j*u)} * {1/(k*u)} du = gramEntry j k
   simp only [hf_def, gramEntry]
@@ -152,12 +168,29 @@ theorem primeGramEntry_selfsimilarity_bound (p : ℕ) (hp : 1 < p) (j k : ℕ)
     |primeGramEntry p j k - (1 / (p : ℝ)) * gramEntry j k| ≤ ((p : ℝ) - 1) / p := by
   -- From the split: G_{jp,kp} - (1/p)*G_{jk} = (1/p) * ∫₁ᵖ f(u) du
   rw [primeGramEntry_split p hp j k hj hk, add_sub_cancel_left]
-  -- |1/p * ∫₁ᵖ f| ≤ (1/p) * (p-1)
+  -- |1/p * ∫₁ᵖ f| = 1/p * |∫₁ᵖ f|
   rw [abs_mul, abs_of_nonneg (by positivity)]
-  -- Need: |∫₁ᵖ f| ≤ p-1
-  -- This holds because |f(u)| ≤ 1 (fractional parts are in [0,1))
-  -- and the interval has length p-1
-  sorry -- (needs: ‖∫₁ᵖ f‖ ≤ 1 * |p-1|, then div_le_div)
+  -- Goal: 1/p * |∫₁ᵖ f| ≤ (p-1)/p
+  -- Rewrite 1/p * x ≤ (p-1)/p  ↔  x ≤ p-1  (dividing by 1/p > 0)
+  have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
+  rw [div_mul_eq_mul_div, one_mul]
+  apply div_le_div_of_nonneg_right _ hp_pos.le
+  -- |∫₁ᵖ f| ≤ p - 1 (since |f| ≤ 1 and interval has length p-1)
+  have h_bound : ∀ x ∈ Set.uIoc (1 : ℝ) (p : ℝ),
+      ‖Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))‖ ≤ 1 := by
+    intro x _; rw [Real.norm_eq_abs, abs_of_nonneg
+      (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+    have h1 := (Int.fract_lt_one (1 / (↑j * x))).le
+    have h2 := (Int.fract_lt_one (1 / (↑k * x))).le
+    calc Int.fract (1 / (↑j * x)) * Int.fract (1 / (↑k * x))
+        ≤ 1 * 1 := mul_le_mul h1 h2 (Int.fract_nonneg _) zero_le_one
+      _ = 1 := one_mul 1
+  have h_integral := intervalIntegral.norm_integral_le_of_norm_le_const h_bound
+  rw [one_mul] at h_integral
+  have h1p : (1 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp.le
+  calc |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ |(↑p : ℝ) - 1| := h_integral
+    _ = (↑p : ℝ) - 1 := abs_of_nonneg (by linarith)
 
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
