@@ -218,6 +218,127 @@ theorem bordered_eigenvec_t_ne_zero
   -- Now h_le : λ_min ≤ μ and hμ_lt : μ < λ_min — contradiction!
   linarith
 
+/-- **The secular resolvent identity.**
+
+    For a bordered matrix M = [[A,g],[gᵀ,γ]] with eigenvector [u,t]
+    at eigenvalue μ, and t ≠ 0:
+
+      γ - μ = gᵀ(A - μI)⁻¹g
+
+    Proof:
+    - Top block: Au + tg = μu → (A-μI)u = -tg
+    - Bottom block: gᵀu + γt = μt → gᵀu = (μ-γ)t
+    - From top: u = -t(A-μI)⁻¹g (A-μI invertible since μ < λ_min(A))
+    - Substituting into bottom: -t·gᵀ(A-μI)⁻¹g = (μ-γ)t
+    - Dividing by t ≠ 0: γ - μ = gᵀ(A-μI)⁻¹g -/
+theorem bordered_secular_identity
+    (M : Matrix (Fin (n+1)) (Fin (n+1)) ℝ)
+    (hH : M.IsHermitian)
+    (A : Matrix (Fin n) (Fin n) ℝ)
+    (hA : A.IsHermitian)
+    (hA_eq : ∀ i j : Fin n, M (Fin.castSucc i) (Fin.castSucc j) = A i j)
+    (g : Fin n → ℝ)
+    (hg_eq : ∀ i : Fin n, M (Fin.castSucc i) (Fin.last n) = g i)
+    (γ : ℝ)
+    (hγ_eq : M (Fin.last n) (Fin.last n) = γ)
+    (x : Fin (n+1) → ℝ)
+    (hx_eig : M.mulVec x = μ • x)
+    (hx_ne : x ≠ 0)
+    (hn : 0 < n)
+    (hμ_lt : μ < (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀) :
+    γ - μ = dotProduct g ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ))⁻¹.mulVec g) := by
+  -- Abbreviate A-μI
+  set A' := A - μ • (1 : Matrix (Fin n) (Fin n) ℝ) with hA'_def
+  set u := x ∘ Fin.castSucc
+  set t := x (Fin.last n)
+  -- t ≠ 0 by bordered_eigenvec_t_ne_zero
+  have ht_ne := bordered_eigenvec_t_ne_zero M hH A hA hA_eq g hg_eq x hx_eig hx_ne hn hμ_lt
+  -- Top block equation: (A *ᵥ u)(i) + g(i) * t = μ * u(i)
+  have h_top : ∀ i : Fin n, (A.mulVec u) i + g i * t = μ * u i := by
+    intro i
+    have h1 : (M.mulVec x) (Fin.castSucc i) = μ * x (Fin.castSucc i) := by
+      have := congr_fun hx_eig (Fin.castSucc i)
+      simp only [Pi.smul_apply, smul_eq_mul] at this; exact this
+    have h2 := bordered_mulVec_top M A g hA_eq hg_eq x i
+    -- Show (A *ᵥ u) i + g i * t = μ * u i
+    -- unfold u, t to x ∘ castSucc, x (last n)
+    show (A.mulVec (x ∘ Fin.castSucc)) i + g i * x (Fin.last n) =
+         μ * (x ∘ Fin.castSucc) i
+    -- h2 and h1 now match after unfolding Function.comp
+    simp only [Function.comp] at h2 ⊢
+    linarith
+  -- This gives: (A-μI)u = -tg
+  -- (A-μI)*u = A*u - μ*u = (μ*u - g*t) - μ*u = -t*g (from h_top)
+  have h_Apu : A'.mulVec u = (-t) • g := by
+    -- A' = A - μI, so A' *ᵥ u = A *ᵥ u - μ • u
+    have hsub : A'.mulVec u = A.mulVec u - μ • u := by
+      ext i
+      show ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)).mulVec u) i =
+           (A.mulVec u) i - μ * u i
+      simp only [mulVec, dotProduct, sub_apply, smul_apply, one_apply,
+                 mul_ite, mul_one, mul_zero, Finset.sum_sub_distrib]
+      ring_nf
+      congr 1
+      simp [Finset.sum_ite]
+    -- A *ᵥ u - μ • u = (μ • u - t • g) - μ • u = -t • g
+    rw [hsub]
+    -- From h_top: A *ᵥ u = μ • u - t • g (rearranging)
+    have h_Au : A.mulVec u = μ • u + (-t) • g := by
+      ext i; simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul, neg_mul]
+      linarith [h_top i]
+    rw [h_Au]
+    ext i; simp only [Pi.sub_apply, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+    ring
+  -- Bottom block: gᵀu + γt = μt → gᵀu = (μ-γ)t
+  have h_bot : dotProduct g u + γ * t = μ * t := by
+    have h3 := bordered_mulVec_bot M hH g γ hg_eq hγ_eq x
+    have h4 : (M.mulVec x) (Fin.last n) = μ * x (Fin.last n) := by
+      have := congr_fun hx_eig (Fin.last n)
+      simp only [Pi.smul_apply, smul_eq_mul] at this; exact this
+    linarith
+  -- From h_bot: gᵀu = (μ-γ)t
+  have h_gu : dotProduct g u = (μ - γ) * t := by linarith
+  -- Now derive γ - μ = gᵀ(A-μI)⁻¹g
+  -- The key algebraic steps are proved above:
+  -- h_Apu: (A-μI)*u = -t*g
+  -- h_gu: gᵀu = (μ-γ)*t
+  -- From these, the secular identity follows by:
+  -- gᵀu = gᵀ(A-μI)⁻¹((A-μI)u) = gᵀ(A-μI)⁻¹(-tg) = -t · gᵀ(A-μI)⁻¹g
+  -- And h_gu gives gᵀu = (μ-γ)t
+  -- So -t · gᵀ(A-μI)⁻¹g = (μ-γ)t, dividing by -t: gᵀ(A-μI)⁻¹g = γ-μ
+  --
+  -- The remaining difficulty is showing A-μI is invertible (PD),
+  -- which requires the spectral lower bound vᵀAv ≥ λ_min · vᵀv.
+  sorry
+
+/-- **The secular drop bound.**
+
+    For the minimum eigenvalue drop δ = λ_min(A) - μ:
+      γ - μ ≥ |⟨g, v_min⟩|² / δ
+
+    (where v_min is the min eigenvector of A).
+    Therefore: δ ≤ |⟨g, v_min⟩|² / (γ - μ)
+
+    This follows from the spectral decomposition of the resolvent:
+      gᵀ(A-μI)⁻¹g = Σ |⟨g,vⱼ⟩|²/(λⱼ-μ) ≥ |⟨g,v_min⟩|²/δ -/
+theorem secular_drop_bound
+    (A : Matrix (Fin n) (Fin n) ℝ)
+    (hA : A.IsHermitian)
+    (g : Fin n → ℝ)
+    (hn : 0 < n)
+    (μ : ℝ)
+    (hμ_lt : μ < (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+      (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+      hA.eigenvalues₀) :
+    -- The resolvent quadratic form bounds the drop
+    dotProduct g ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ))⁻¹.mulVec g) ≥
+    -- ... by at least the min-eigenspace projection divided by the drop
+    (dotProduct g (⇑(hA.eigenvectorBasis ⟨0, hn⟩)))^2 /
+    (hA.eigenvalues ⟨0, hn⟩ - μ) := by
+  sorry
+
 end SecularEquation
 
 -- ════════════════════════════════════════════════
