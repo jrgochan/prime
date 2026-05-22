@@ -270,6 +270,118 @@ theorem primeGramEntry_error_decay (p : ℕ) (hp : 1 < p) (j k : ℕ)
         rw [abs_of_nonneg (by linarith)]
     _ = ((p : ℝ) - 1) / ((j : ℝ) * k) := by ring
 
+/-- **FTC computation**: ∫₁ᵖ u⁻² du = 1 - 1/p.
+
+    Antiderivative: f(u) = -u⁻¹, so f'(u) = (u²)⁻¹.
+    By FTC: ∫₁ᵖ (u²)⁻¹ du = f(p) - f(1) = -p⁻¹ - (-1) = 1 - p⁻¹. -/
+private lemma integral_inv_sq (p : ℕ) (hp : 1 < p) :
+    ∫ u in (1:ℝ)..(↑p), (u ^ 2)⁻¹ = 1 - (↑p : ℝ)⁻¹ := by
+  have hp_pos : (0 : ℝ) < ↑p := by positivity
+  have h1p : (1 : ℝ) ≤ (↑p : ℝ) := by exact_mod_cast hp.le
+  -- HasDerivAt: d/du(-u⁻¹) = (u²)⁻¹ for u ∈ [[1,p]]
+  have hderiv : ∀ x ∈ Set.uIcc (1 : ℝ) (↑p : ℝ), HasDerivAt (fun u => -(u⁻¹)) ((x ^ 2)⁻¹) x := by
+    intro x hx
+    rw [Set.uIcc_of_le h1p, Set.mem_Icc] at hx
+    have hx_pos : (0 : ℝ) < x := by linarith
+    have := (hasDerivAt_inv hx_pos.ne').neg
+    convert this using 1
+    simp
+  -- IntervalIntegrable
+  have hint : IntervalIntegrable (fun u => (u ^ 2)⁻¹) MeasureTheory.volume 1 (↑p) := by
+    apply ContinuousOn.intervalIntegrable
+    apply ContinuousOn.inv₀
+    · exact continuousOn_pow 2
+    · intro x hx
+      rw [Set.uIcc_of_le h1p, Set.mem_Icc] at hx
+      exact pow_ne_zero 2 (ne_of_gt (by linarith))
+  -- Apply FTC-2
+  have := intervalIntegral.integral_eq_sub_of_hasDerivAt hderiv hint
+  rw [this]
+  simp [inv_one]; ring
+
+/-- **Ultra-Tight Error Decay Bound.**
+
+    |G_{jp,kp} - (1/p)·G_{jk}| ≤ (p-1) / (j·k·p²)
+
+    Improves primeGramEntry_error_decay by a factor of 1/p.
+    Uses ∫₁ᵖ 1/u² du = 1 - 1/p = (p-1)/p instead of the crude
+    bound ∫₁ᵖ 1 du = p - 1. -/
+theorem primeGramEntry_error_decay_tight (p : ℕ) (hp : 1 < p) (j k : ℕ)
+    (hj : 0 < j) (hk : 0 < k) :
+    |primeGramEntry p j k - (1 / (p : ℝ)) * gramEntry j k| ≤
+      ((p : ℝ) - 1) / ((j : ℝ) * k * p ^ 2) := by
+  rw [primeGramEntry_split p hp j k hj hk, add_sub_cancel_left]
+  rw [abs_mul, abs_of_nonneg (by positivity)]
+  have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
+  have hj_pos : (0 : ℝ) < (j : ℝ) := Nat.cast_pos.mpr hj
+  have hk_pos : (0 : ℝ) < (k : ℝ) := Nat.cast_pos.mpr hk
+  have h1p : (1 : ℝ) ≤ (↑p : ℝ) := by exact_mod_cast hp.le
+  -- Suffices: |∫₁ᵖ f| ≤ (p-1)/(j·k·p)
+  suffices h : |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ ((p : ℝ) - 1) / ((j : ℝ) * k * p) by
+    calc _ = |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))| / ↑p :=
+            by rw [div_mul_eq_mul_div, one_mul]
+      _ ≤ (((↑p : ℝ) - 1) / (↑j * ↑k * ↑p)) / ↑p := div_le_div_of_nonneg_right h hp_pos.le
+      _ = (↑p - 1) / (↑j * ↑k * ↑p ^ 2) := by ring
+  -- Bound: |∫₁ᵖ f| ≤ ∫₁ᵖ |f| ≤ (1/(jk)) · ∫₁ᵖ u⁻² du = (1/(jk)) · (1 - 1/p) = (p-1)/(jkp)
+  -- First, bound the absolute value
+  have h_abs_le : |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ ∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u)) := by
+    rw [abs_of_nonneg]
+    apply intervalIntegral.integral_nonneg h1p
+    intro u _
+    exact mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _)
+  -- Next, bound pointwise: {1/(ju)} · {1/(ku)} ≤ 1/(jku²)
+  have h_mono : ∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))
+      ≤ ∫ u in (1:ℝ)..↑p, (1 / ((j : ℝ) * k)) * (u ^ 2)⁻¹ := by
+    apply intervalIntegral.integral_mono_on h1p
+    · apply IntervalIntegrable.mono_fun'
+        (g := fun _ => (1 : ℝ))
+        (intervalIntegral.intervalIntegrable_const)
+      · exact ((measurable_fract.comp
+          (measurable_const.div (measurable_const.mul measurable_id'))).mul
+          (measurable_fract.comp
+          (measurable_const.div (measurable_const.mul measurable_id')))).aestronglyMeasurable.restrict
+      · apply ae_of_all; intro x; simp only
+        rw [Real.norm_eq_abs, abs_of_nonneg
+          (mul_nonneg (Int.fract_nonneg _) (Int.fract_nonneg _))]
+        exact mul_le_one₀ (Int.fract_lt_one _).le (Int.fract_nonneg _) (Int.fract_lt_one _).le
+    · apply ContinuousOn.intervalIntegrable
+      apply ContinuousOn.const_mul
+      apply ContinuousOn.inv₀
+      · exact continuousOn_pow 2
+      · intro x hx; rw [Set.uIcc_of_le h1p, Set.mem_Icc] at hx
+        exact pow_ne_zero 2 (ne_of_gt (by linarith))
+    · intro u hu
+      rw [Set.mem_Icc] at hu
+      have hu_pos : 0 < u := by linarith
+      have hju_pos : 0 < (j : ℝ) * u := mul_pos hj_pos hu_pos
+      have hku_pos : 0 < (k : ℝ) * u := mul_pos hk_pos hu_pos
+      calc Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))
+          ≤ (1 / (↑j * u)) * (1 / (↑k * u)) :=
+            mul_le_mul
+              (fract_le_of_nonneg _ (div_nonneg one_pos.le hju_pos.le))
+              (fract_le_of_nonneg _ (div_nonneg one_pos.le hku_pos.le))
+              (Int.fract_nonneg _) (div_nonneg one_pos.le hju_pos.le)
+        _ = 1 / ((↑j : ℝ) * ↑k) * (u ^ 2)⁻¹ := by
+            have : (↑j : ℝ) * u ≠ 0 := ne_of_gt hju_pos
+            have : (↑k : ℝ) * u ≠ 0 := ne_of_gt hku_pos
+            have : (↑j : ℝ) * ↑k ≠ 0 := mul_ne_zero (ne_of_gt hj_pos) (ne_of_gt hk_pos)
+            have : u ^ 2 ≠ 0 := pow_ne_zero 2 (ne_of_gt hu_pos)
+            field_simp
+  -- Combine with FTC computation
+  have h_ftc : ∫ u in (1:ℝ)..↑p, (1 / ((j : ℝ) * k)) * (u ^ 2)⁻¹
+      = 1 / ((j : ℝ) * k) * (1 - (↑p : ℝ)⁻¹) := by
+    rw [intervalIntegral.integral_const_mul, integral_inv_sq p hp]
+  calc |∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u))|
+      ≤ ∫ u in (1:ℝ)..↑p, Int.fract (1 / (↑j * u)) * Int.fract (1 / (↑k * u)) := h_abs_le
+    _ ≤ ∫ u in (1:ℝ)..↑p, (1 / ((j : ℝ) * k)) * (u ^ 2)⁻¹ := h_mono
+    _ = 1 / ((j : ℝ) * k) * (1 - (↑p : ℝ)⁻¹) := h_ftc
+    _ = ((↑p : ℝ) - 1) / ((↑j : ℝ) * ↑k * ↑p) := by
+        have : (↑j : ℝ) * ↑k ≠ 0 := mul_ne_zero (ne_of_gt hj_pos) (ne_of_gt hk_pos)
+        have : (↑p : ℝ) ≠ 0 := ne_of_gt hp_pos
+        field_simp
+
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
