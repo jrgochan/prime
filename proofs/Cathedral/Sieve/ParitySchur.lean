@@ -8,8 +8,10 @@ import Cathedral.Spectral.PTSymmetry
   Parity-Schur complement analysis of the Gram matrix.
   Uses the Liouville parity decomposition (PT-Symmetry discovery)
   to relate spectral gap to parity-breaking coupling.
-  Axioms: stable_ratio_parity, gram_eigenvalue_log_scaling,
-  eigenvalue_implies_distance_bound.
+
+  Active axioms (Thulium Session, 2026-05-20):
+    - gram_eigenvalue_polynomial_scaling : λ_min ≥ c/N²
+    - spectral_concentration            : d²_N ≤ C/log(N) [≈ RH]
 
   NOT on the v11 crown path (part of Spectral Engine).
 -/
@@ -413,22 +415,10 @@ theorem parityBlockC_psd (N : ℕ) (hN : 2 ≤ N) (v : Fin (N - 1) → ℝ) :
 -- STEP 5: THE CURVATURE BOUND
 -- ════════════════════════════════════════════════
 
-/-- **stable_ratio_parity**: The stable interference ratio R < 1.
-
-    **STATUS: PROVED** in BilinearSieve.lean as `type_II_implies_stable_ratio`.
-    Kept as axiom here to avoid circular imports (BilinearSieve imports ParitySchur).
-    The theorem `type_II_implies_stable_ratio` in BilinearSieve.lean proves this
-    from `type_II_sieve_bound` via `sieve_implies_stable_ratio` (PROVED).
-
-    Computationally verified: R ≈ 0.924 for N = 100..1500.
-    The coprimality density 6/π² suppresses cross-parity coupling. -/
-axiom stable_ratio_parity :
-    ∃ R : ℝ, 0 ≤ R ∧ R < 1 ∧
-    ∀ N : ℕ, 10 ≤ N →
-    ∀ v : Fin (N - 1) → ℝ, v ≠ 0 →
-    dotProduct v ((parityBlockB N * (parityBlockC N)⁻¹ *
-      (parityBlockB N)ᵀ).mulVec v) ≤
-    R * dotProduct v ((parityBlockA N).mulVec v)
+-- NOTE: stable_ratio_parity (uniform R < 1) was REMOVED in the Thulium Session
+-- (2026-05-20). The uniform version is mathematically impossible (R_N → 1).
+-- BilinearSieve.lean proves the ASYMPTOTIC version: R_N = 1 - c/N.
+-- The V3 bridge bypasses this entirely via spectral_concentration.
 
 /-- **PROVED**: The Schur complement lower bound from stable ratio.
 
@@ -465,83 +455,106 @@ theorem schur_complement_lower_from_ratio (N : ℕ) (_hN : 10 ≤ N)
 end
 
 -- ════════════════════════════════════════════════
--- BRIDGE V2: DECOMPOSED INTO TWO CLEANER AXIOMS
+-- THE TWO ACTIVE AXIOMS (Thulium Session, 2026-05-20)
 -- ════════════════════════════════════════════════
 
-/-- **Axiom A (Analytic Number Theory)**:
-    The minimum eigenvalue of the Gram matrix has logarithmic decay:
-    λ_min(G_N) ≥ c / log(N) for some c > 0.
+/-- **Axiom 1 (Spectral Scaling)**:
+    The minimum eigenvalue of the Gram matrix has polynomial decay:
+    λ_min(G_N) ≥ c / N² for some c > 0.
 
-    **NOTE (2026-04-03)**: This axiom was originally derivable via ParityBridge.lean
-    (now archived after The Great Audit). Retained as an axiom in the active chain.
+    **HISTORY**: Originally claimed λ_min ≥ c/log(N) based on
+    pre-BD-migration data (HF basis). The Thulium Session (2026-05-20)
+    established the correct BD-basis scaling via eigenvalue-probe v2:
+
+    Computational verification (BD basis, cathedral-utils, N ≤ 1000):
+    | N    | λ_min        | N²·λ_min     |
+    |------|-------------|:------------:|
+    | 100  | 1.2024e-4   | 1.2024       |
+    | 300  | 1.4543e-5   | 1.3089       |
+    | 500  | 5.5244e-6   | 1.3811       |
+    | 1000 | 1.2648e-6   | 1.2648       |
+
+    Power law fit: λ_min ≈ 0.908 · N^(-1.94), R² = 0.9998.
+
+    **GRADUATION PATH**: Prove via Rayleigh quotient lower bound.
+    Need: construct explicit v with vᵀGv/vᵀv ≥ c/N².
+    The inner product structure G = FᵀF where F is the BD function
+    evaluation matrix gives σ_min(F)² = λ_min(G). This connects
+    to approximation theory: how linearly independent are the
+    functions {1/(kx)} on L²(0,1)? Existing `gramMatrix_posSemidef`
+    gives λ_min ≥ 0; the quantitative c/N² bound requires
+    explicit Rayleigh quotient or interlacing arguments.
+
+    NOTE: This axiom alone does NOT prove d²→0.
+    The proof requires spectral_concentration. -/
+axiom gram_eigenvalue_polynomial_scaling :
+    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →
+    lambdaMin N ≥ c / (N : ℝ) ^ 2
+
+/-- **Axiom 2 (Spectral Concentration / Distance Decay)**:
+    The Nyman-Beurling distance satisfies d²_N ≤ C/log(N).
+
+    **KEY INSIGHT (Thulium Session, 2026-05-20)**: This does NOT follow
+    from a λ_min lower bound. Instead, it follows from the fact that
+    the inner product vector b = (⟨1, h_k⟩) is spectrally concentrated
+    on the TOP eigenspace of G_N:
+
+    b-projection analysis (b-projection probe, cathedral-utils):
+    - At N=500: the top eigenvector captures 88.5% of ‖b‖²
+    - The bottom 50% of eigenvectors capture ~0% of ‖b‖²
+    - |b·v_min|²/λ_min → 0 as N → ∞
+
+    So even though λ_min → 0 (as 1/N²), the contribution of small
+    eigenvalues to bᵀG⁻¹b = Σ |b·vᵢ|²/λᵢ is negligible because
+    |b·vᵢ|² ≈ 0 for the small-eigenvalue eigenvectors.
 
     Computational verification:
-    | N    | λ_min      | log(N)·λ_min |
-    |------|-----------|:------------:|
-    | 100  | 0.01556   | 0.0717       |
-    | 500  | 0.01239   | 0.0770       |
-    | 1000 | 0.01146   | 0.0791       |
-    | 1500 | 0.01099   | 0.0804       | -/
-axiom gram_eigenvalue_log_scaling :
-    ∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →
-    lambdaMin N ≥ c / Real.log (N : ℝ)
+    | N    | d²_N        |
+    |------|------------|
+    | 50   | 0.01168    |
+    | 200  | 0.00877    |
+    | 500  | 0.00652    |
 
-/-- **Axiom B (Spectral Theory)**:
-    If the Gram matrix eigenvalues decay as c/log(N), then the
-    Nyman-Beurling distance d²_N ≤ C/log(N).
-
-    The connection is:
-    d²_N = 1 - bᵀG⁻¹b
-    where b_i = ∫₀¹ {(i+2)/x} dx ≈ 1 - ln(i+2)/(i+2).
-
-    When λ_min(G) ≥ c/log(N), the inverse G⁻¹ has bounded
-    condition number relative to the b-projection, giving
-    bᵀG⁻¹b ≥ 1 - C/log(N) and hence d²_N ≤ C/log(N).
-
-    This separates the spectral structure of the NB distance
-    from the analytic number theory of eigenvalue scaling. -/
-axiom eigenvalue_implies_distance_bound :
-    (∃ c : ℝ, 0 < c ∧ ∀ N : ℕ, 10 ≤ N →
-      lambdaMin N ≥ c / Real.log (N : ℝ)) →
+    **GRADUATION**: This axiom is equivalent to RH (Báez-Duarte, 2003).
+    d² → 0 iff RH. So graduating this axiom = proving RH.
+    The spectral concentration mechanism (b concentrating on top eigenspace)
+    provides the EXPLANATION of why d²→0, but formalizing it requires
+    proving bounds on ⟨b, v_i⟩ for eigenvectors v_i — which in turn
+    requires understanding the asymptotic distribution of eigenvalues
+    and eigenvectors of the Gram matrix in the large-N limit.
+    This connects to random matrix theory (GOE statistics, confirmed
+    in the Cathedral spectral universality experiments). -/
+axiom spectral_concentration :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ)
 
-open Matrix Real in
-/-- **The V2 Bridge Theorem** (derived from the two axioms above).
-    R < 1 → d²_N ≤ C/log(N).
-
-    **UPDATE (2026-04-03, V3 Parity Bridge)**:
-    The stable_ratio_parity hypothesis `_hR` is logically connected
-    to the eigenvalue scaling:
-      type_II_sieve_bound → stable_ratio (this `_hR`)
-    The `_hR` parameter remains structurally present here but the
-    actual proof term routes through the axioms directly. -/
-theorem schur_to_distance_scaling_v2
-    (_hR : ∃ R : ℝ, 0 ≤ R ∧ R < 1 ∧
-      ∀ N : ℕ, 10 ≤ N →
-      ∀ v : Fin (N - 1) → ℝ, v ≠ 0 →
-      dotProduct v ((parityBlockB N * (parityBlockC N)⁻¹ *
-        (parityBlockB N)ᵀ).mulVec v) ≤
-      R * dotProduct v ((parityBlockA N).mulVec v)) :
+/-- **The Distance Scaling Theorem** (from spectral concentration).
+    d²_N ≤ C/log(N). This is the final output of the Spectral Engine. -/
+theorem distance_scaling :
     ∃ C : ℝ, 0 < C ∧ ∃ N₀ : ℕ, 2 ≤ N₀ ∧
     ∀ N : ℕ, N₀ ≤ N → nbDistSq' N ≤ C / Real.log (N : ℝ) :=
-  eigenvalue_implies_distance_bound gram_eigenvalue_log_scaling
+  spectral_concentration
 
 -- ════════════════════════════════════════════════
--- STATUS
+-- STATUS (Thulium Session, 2026-05-20)
 -- ════════════════════════════════════════════════
 -- PROVED: parityProj_complete, parityProj_orthogonal, parityProj_orthogonal'
 -- PROVED: one_add_P_mul_one_sub_P, one_sub_P_mul_one_add_P (private helpers)
 -- PROVED: gram_block_decomposition (G = A + B + Bᵀ + C)
 -- PROVED: schur_complement_pos_of_gram_pos (BOTH cases!)
---   Case 1 (C invertible): injective idempotent ⟹ π₋ = I ⟹ π₊ = 0 ⟹ H_eff = 0
---   Case 2 (C singular): C⁻¹ = 0 ⟹ H_eff = π₊Gπ₊ ⟹ PSD by conjugation
 -- PROVED: gramMatrix_posSemidef (bridges gram_pos_def → PosSemidef)
--- PROVED: parityBlockA_psd (A = π₊Gπ₊ is PSD)
--- PROVED: parityBlockC_psd (C = π₋Gπ₋ is PSD)
+-- PROVED: parityBlockA_psd, parityBlockC_psd
 -- PROVED: schur_complement_lower_from_ratio (H_eff ≥ (1-R)·A)
--- PROVED: schur_to_distance_scaling_v2 (from Axioms A+B, local to this file)
--- AXIOM: stable_ratio_parity (PROVED in BilinearSieve as type_II_implies_stable_ratio)
--- AXIOM: gram_eigenvalue_log_scaling (eigenvalue log-scaling)
--- AXIOM: eigenvalue_implies_distance_bound (eigenvalue → NB distance, spectral theory)
--- STATUS: 0 sorry ✓
+-- PROVED: distance_scaling (from spectral_concentration)
+--
+-- AXIOM: gram_eigenvalue_polynomial_scaling (λ_min ≥ c/N²)
+--        → GRADUATION: Rayleigh quotient lower bound
+-- AXIOM: spectral_concentration (d²_N ≤ C/log(N))
+--        → GRADUATION: Equivalent to RH (Báez-Duarte)
+--
+-- REMOVED (Thulium Session):
+--   stable_ratio_parity (uniform R < 1 is impossible, R_N → 1)
+--   gram_eigenvalue_log_scaling (FALSE for BD basis, was HF-era)
+--   eigenvalue_implies_distance_bound (hypothesis false)
+--   schur_to_distance_scaling_v2 (used deprecated axioms)
+-- STATUS: 0 sorry, 2 axioms ✓

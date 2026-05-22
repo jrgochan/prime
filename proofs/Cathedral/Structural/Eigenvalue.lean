@@ -8,11 +8,12 @@
   - lambdaMin_shifted_antitone
   - eigenDrop_nonneg
   - telescoping identity
-  - drop_formula_bound (axiom)
+  - drop_formula (bordered matrix perturbation — GRADUATED from axiom)
 -/
 
 import Cathedral.Defs
 import Cathedral.Spectral.RayleighBridge
+import Cathedral.Structural.BorderedSpectral
 
 noncomputable section
 open Complex Real
@@ -84,11 +85,22 @@ theorem telescoping (N₀ N : ℕ) (h₀ : 2 ≤ N₀) (hN : N₀ ≤ N) :
       subst this
       simp
 
-/-- **Drop formula** (Schur complement perturbation) — AXIOM. -/
-axiom drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
+/-- **Drop formula** (Schur complement perturbation) — GRADUATED.
+
+    Previously an axiom; now a theorem via bordered matrix secular equation
+    (see Cathedral.Structural.BorderedSpectral for the proof structure).
+
+    The bound says: δ_N ≤ cos²θ · ‖g‖² / S  where
+    - cos²θ = projection of g onto min-eigenspace / ‖g‖²
+    - S = Schur complement (new basis function's residual after projection)
+
+    This follows from the secular equation for bordered matrices:
+    γ - μ = Σ |⟨g, vⱼ⟩|² / (λⱼ - μ) ≥ |⟨g, v_min⟩|² / δ -/
+theorem drop_formula_bound (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
       dotProduct (crossCorrVec (N - 1)) (crossCorrVec (N - 1)) /
-      schurComplement (N - 1)
+      schurComplement (N - 1) :=
+  eigenDrop_le_projection_over_schur N hN
 
 theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
     eigenDrop N ≤ (cosAlignment (N - 1))^2 *
@@ -96,3 +108,4 @@ theorem drop_formula (N : ℕ) (hN : 3 ≤ N) :
       schurComplement (N - 1) := drop_formula_bound N hN
 
 end
+

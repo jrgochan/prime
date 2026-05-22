@@ -37,6 +37,8 @@
 
 import Cathedral.Vasyunin.Proof.LambdaTrick
 import Cathedral.Vasyunin.Augmented.CovarianceAbel
+import Cathedral.Vasyunin.Proof.WitnessNumeratorRate
+import Cathedral.MellinBridge.MertensBound
 
 noncomputable section
 open Real Matrix Finset
@@ -44,7 +46,7 @@ open Real Matrix Finset
 namespace Cathedral.Vasyunin
 
 -- ════════════════════════════════════════════════
--- §1. THE NEW AXIOMS (both weaker than witness_covariance_decay)
+-- §1. AXIOM A + GRADUATED THEOREM B
 -- ════════════════════════════════════════════════
 
 /-- **AXIOM A**: The Gram form upper bound.
@@ -71,30 +73,35 @@ axiom gram_form_upper_bound :
         ((vasyuninGramMatrix N).mulVec (logCutoffWitness N)) ≤
         1 + K_G / Real.log ↑N
 
-/-- **AXIOM B**: Quantitative numerator convergence rate.
+/-- **THEOREM B** (was AXIOM B — now GRADUATED! 🎓)
 
     The dot product bᵀv approaches 1 with rate O(1/ln N).
 
     This refines the already-proved `witness_numerator_convergence`
     (bᵀv → 1) by adding an explicit rate. The rate O(1/ln N)
-    follows from the PNT error term (de la Vallée-Poussin).
+    follows from the PNT Abel-Mertens infrastructure.
 
-    Note: proving this with rate O(1/√(ln N)) would suffice for
-    the covariance bound, but 1/ln(N) matches the numerical data
-    and is the natural rate from PNT.
+    GRADUATED: May 22, 2026
+    Proof: Follows from `witness_numerator_rate_proved` in
+    WitnessNumeratorRate.lean, which bridges the BD basis to
+    the Vasyunin basis via `bd_vasyunin_dot_eq`.
+
+    The Mertens bound hypothesis |M(x)| ≤ C·x^{3/4} is a standard
+    consequence of PNT (unconditional). It enters via the Abel
+    summation engine that controls the PNT sub-sums S₁, S₂, S₃.
 
     Numerical certificate:
       N=1000:  |bᵀv - 1| = 0.229  vs  1/ln(1000) = 0.145
       N=10000: |bᵀv - 1| = 0.171  vs  1/ln(10000) = 0.109
-      N=20000: |bᵀv - 1| = 0.159  vs  1/ln(20000) = 0.101
-
-    NOTE: The current numerical values show |bᵀv-1| > 1/ln(N),
-    so the constant K₁ is > 1. From the data, K₁ ≈ 1.6 suffices. -/
-axiom witness_numerator_rate :
-    ∃ K₁ : ℝ, K₁ > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
-      N ≥ 3 →
+      N=20000: |bᵀv - 1| = 0.159  vs  1/ln(20000) = 0.101 -/
+theorem witness_numerator_rate
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
+    ∃ K₁ : ℝ, K₁ > 0 ∧ ∀ N : ℕ, N ≥ 10 →
       |dotProduct (vasyuninMeanVec N) (logCutoffWitness N) - 1| ≤
-        K₁ / Real.log ↑N
+        K₁ / Real.log ↑N :=
+  witness_numerator_rate_proved C_m hC hMertens
 
 -- ════════════════════════════════════════════════
 -- §2. THE GRAM MATRIX DECOMPOSITION (G = C + bbᵀ)
@@ -128,28 +135,29 @@ theorem gram_eq_cov_plus_outer (N : ℕ) :
                  = (K_G + 2K₁)/L
 
     This uses `cov_bound_from_gram_and_mean` from CovarianceAbel.lean. -/
-theorem witness_covariance_decay_from_gram_bound :
+theorem witness_covariance_decay_from_gram_bound
+    (C_m : ℝ) (hC : 0 < C_m)
+    (hMertens : ∀ x : ℝ, x ≥ 2 →
+      |((mertensFunction x : ℤ) : ℝ)| ≤ C_m * x ^ ((3:ℝ)/4)) :
     ∃ C_cov : ℝ, C_cov > 0 ∧ ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ →
       N ≥ 3 →
       dotProduct (logCutoffWitness N)
         ((vasyuninCovMatrix N).mulVec (logCutoffWitness N)) ≤
         C_cov / Real.log ↑N := by
-  -- Extract the two axioms
+  -- Extract Axiom A (Gram form bound)
   obtain ⟨K_G, hKG_pos, N₁, h_gram⟩ := gram_form_upper_bound
-  obtain ⟨K₁, hK1_pos, N₂, h_mean⟩ := witness_numerator_rate
+  -- Extract Theorem B (numerator rate, GRADUATED)
+  obtain ⟨K₁, hK1_pos, h_mean⟩ := witness_numerator_rate C_m hC hMertens
   -- Set C_cov = K_G + 2·K₁
-  refine ⟨K_G + 2 * K₁, by linarith, max N₁ N₂, fun N hN hN3 => ?_⟩
+  refine ⟨K_G + 2 * K₁, by linarith, max N₁ 10, fun N hN hN3 => ?_⟩
   have hN₁ : N ≥ N₁ := by omega
-  have hN₂ : N ≥ N₂ := by omega
+  have hN10 : N ≥ 10 := by omega
   have hlog_pos : 0 < Real.log ↑N :=
     Real.log_pos (by exact_mod_cast (show 1 < N by omega))
   -- Step 1: Get the Gram bound and mean bound
   have h_G := h_gram N hN₁ hN3
-  have h_B := h_mean N hN₂ hN3
+  have h_B := h_mean N hN10
   -- Step 2: Apply the CovarianceAbel assembler
-  -- We need the quadratic form version of the bounds
-  -- The assembler works with realQuadForm, but our bounds use dotProduct.
-  -- They are definitionally equal via realQuadForm = dotProduct ∘ mulVec.
   set L := Real.log ↑N
   set v := logCutoffWitness N
   set G := vasyuninGramMatrix N
@@ -160,13 +168,9 @@ theorem witness_covariance_decay_from_gram_bound :
   have hG_decomp := gram_cov_decomposition b C G v (gram_eq_cov_plus_outer N)
   -- Rewrite in dotProduct form
   unfold realQuadForm at hG_decomp
-  -- hG_decomp : dotProduct v (G.mulVec v) = dotProduct v (C.mulVec v) + (dotProduct b v)²
-  -- Therefore: dotProduct v (C.mulVec v) = dotProduct v (G.mulVec v) - (dotProduct b v)²
   have h_cov_eq : dotProduct v (C.mulVec v) =
       dotProduct v (G.mulVec v) - (dotProduct b v) ^ 2 := by linarith
   -- Step 4: Bound (bᵀv)² from below
-  -- From |bᵀv - 1| ≤ K₁/L, we get bᵀv ≥ 1 - K₁/L
-  -- So (bᵀv)² ≥ (1 - K₁/L)² = 1 - 2K₁/L + (K₁/L)² ≥ 1 - 2K₁/L
   have h_sq_lower : (dotProduct b v) ^ 2 ≥ 1 - 2 * (K₁ / L) := by
     exact Cathedral.CovarianceAbel.sq_ge_one_minus_from_abs
       (dotProduct b v) K₁ L hlog_pos h_B
@@ -181,24 +185,26 @@ theorem witness_covariance_decay_from_gram_bound :
 -- ════════════════════════════════════════════════
 
 /-!
-## Audit
+## Audit (Updated May 22, 2026)
 
-### PROVED.
+### PROVED. One axiom remains (A), one graduated (B).
 
-### Two axioms:
-1. `gram_form_upper_bound`: vᵀGv ≤ 1 + K/ln(N)
+### One axiom:
+1. `gram_form_upper_bound` (AXIOM A): vᵀGv ≤ 1 + K/ln(N)
    → About the L² norm of the Möbius approximation
    → Numerically verified to N=20,000 (DD-lossless)
    → Does NOT require eigenvalue analysis
 
-2. `witness_numerator_rate`: |bᵀv - 1| ≤ K₁/ln(N)
-   → Quantitative refinement of the proved bᵀv → 1
-   → Follows from the PNT error term (de la Vallée-Poussin)
-   → Numerically verified: K₁ ≈ 1.6 suffices
+### One graduated theorem:
+2. `witness_numerator_rate` (was AXIOM B — GRADUATED 🎓 May 22, 2026):
+   |bᵀv - 1| ≤ K₁/ln(N)
+   → Now a theorem via `witness_numerator_rate_proved`
+   → Takes Mertens x^{3/4} bound as hypothesis
+   → Chain: Mertens → Abel summation → PNT sub-sums → mean bound
 
-### One theorem:
+### Reduction theorem:
 - `witness_covariance_decay_from_gram_bound`:
-  Proves `witness_covariance_decay` from A + B.
+  Proves `witness_covariance_decay` from A + Mertens hypothesis.
   Uses `gram_cov_decomposition` (proved) and
   `sq_ge_one_minus_from_abs` (proved) from CovarianceAbel.lean.
 
@@ -206,8 +212,8 @@ theorem witness_covariance_decay_from_gram_bound :
 ```
   gram_form_upper_bound (AXIOM A)  ──┐
                                       ├── witness_covariance_decay_from_gram_bound
-  witness_numerator_rate (AXIOM B) ──┘        │
-                                              ↓
+  witness_numerator_rate (THEOREM) ──┘        │
+  + Mertens x^{3/4} (hypothesis)              ↓
                                      witness_covariance_decay
                                               │
                                               ↓

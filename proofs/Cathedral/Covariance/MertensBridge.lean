@@ -15,6 +15,7 @@
 -/
 
 import Cathedral.Covariance.EulerProduct
+import Cathedral.Physics.MertensThird
 import Mathlib.Order.Filter.Basic
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
@@ -28,17 +29,14 @@ import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 -- Reference: github.com/AlexKontorovich/PrimeNumberTheoremAnd
 -- ════════════════════════════════════════════════
 
-/-- **Mertens' Third Theorem (asymptotic form).**
-    ∏_{p ≤ x, prime} (1-1/p) ~ e^{-γ}/log(x).
-
-    EXTERNAL THEOREM — proved in PrimeNumberTheoremAnd as `Mertens.E₃.bound''`.
-    Stubbed as axiom to keep the Cathedral self-contained (Mathlib-only).
-    This is unconditional classical analysis and does NOT assume RH. -/
-axiom mertens_third_asymptotic :
-  Asymptotics.IsEquivalent Filter.atTop
-    (fun x : ℝ ↦ ∏ p ∈ (Finset.Ioc 0 ⌊x⌋₊).filter Nat.Prime,
-      (1 - (1 : ℝ) / p))
-    (fun x ↦ Real.exp (-eulerMascheroniConstant) / Real.log x)
+-- ════════════════════════════════════════════════
+-- AXIOM SOURCE: Cathedral.Physics.MertensThird
+--
+-- The Mertens axiom was previously duplicated here as
+-- `mertens_third_asymptotic`. Now unified: MertensThird.lean
+-- holds the PNTAnd axiom bridge (4 axioms), and this file
+-- derives all Covariance-layer results from it.
+-- ════════════════════════════════════════════════
 
 
 noncomputable section
@@ -47,33 +45,21 @@ open Real Finset Filter Asymptotics
 namespace Cathedral.Covariance.MertensBridge
 
 -- ════════════════════════════════════════════════
--- §1. PNTA IMPORT + CORE ℝ LIMIT
+-- §1. CORE ℝ LIMIT (from MertensThird axiom bridge)
 -- ════════════════════════════════════════════════
-
-/-- PNTA Mertens Third: ∏_{p ≤ x} (1-1/p) ~ e^{-γ}/log(x) -/
-theorem pnta_mertens_third :
-    (fun x : ℝ => ∏ p ∈ (Ioc 0 ⌊x⌋₊).filter Nat.Prime,
-      (1 - (1 : ℝ) / p)) ~[atTop]
-    (fun x => exp (-eulerMascheroniConstant) / log x) :=
-  mertens_third_asymptotic
 
 /-- **log(x) * ∏_{p ≤ x} (1-1/p) → e^{-γ}** over ℝ. PROVED.
 
-    Proof: Multiply PNTA asymptotic by log (reflexive ~),
-    simplify log * e^{-γ}/log = e^{-γ}, apply tendsto_const. -/
+    Directly from `mertens_third_ioc` (PNTAnd axiom in MertensThird.lean).
+    Previously derived from a duplicate `mertens_third_asymptotic` axiom
+    via IsEquivalent.mul; now unified to a single axiom source. -/
 theorem mertens_tendsto_real :
     Tendsto (fun x : ℝ =>
       log x * ∏ p ∈ (Ioc 0 ⌊x⌋₊).filter Nat.Prime,
         (1 - (1 : ℝ) / p))
-    atTop (nhds (exp (-eulerMascheroniConstant))) := by
-  have h_mul := IsEquivalent.mul
-    (show (fun x : ℝ => log x) ~[atTop] (fun x => log x) from IsEquivalent.refl)
-    pnta_mertens_third
-  have h_simp : (fun x : ℝ => log x * (exp (-eulerMascheroniConstant) / log x))
-      =ᶠ[atTop] (fun _ => exp (-eulerMascheroniConstant)) := by
-    filter_upwards [eventually_gt_atTop (1 : ℝ)] with x hx
-    field_simp [ne_of_gt (log_pos hx)]
-  exact (h_mul.congr_right h_simp).tendsto_const
+    atTop (nhds (exp (-eulerMascheroniConstant))) :=
+  Cathedral.MertensThird.mertens_third_ioc
+
 
 -- ════════════════════════════════════════════════
 -- §2. FINSET REINDEXING
@@ -218,21 +204,23 @@ theorem cathedral_mertens_third :
 -- ════════════════════════════════════════════════
 
 /-!
-## Bridge Sorry Audit (revised May 12, 2026)
+## Bridge Sorry Audit (revised May 21, 2026)
 
-### This file: 0 sorry ✅
+### This file: 0 sorry, 0 axioms ✅
 All theorems in this file are fully proved.
+Axiom source unified to `Cathedral.Physics.MertensThird`
+(previously had duplicate `mertens_third_asymptotic` axiom).
 
 ### Proved in this file:
-- `mertens_tendsto_real`: The core ℝ limit via IsEquivalent.mul ✅
+- `mertens_tendsto_real`: Core ℝ limit (= `mertens_third_ioc` from MertensThird) ✅
 - `mertens_range_succ`: ℝ → ℕ restriction with range(X+1) ✅
 - `filter_prime_range_succ_eq_Ioc`: Finset reindexing ✅
 - `mertens_third_nat_tendsto`: Off-by-one bridge (range X vs X+1) ✅
 - `cathedral_mertens_third`: Cathedral-facing alias ✅
 
-### Inherited from PNTA/Mertens.lean: 16 sorrys (all CLASSICAL)
-All are classical analytic number theory results being actively
-formalized by the PrimeNumberTheoremAnd team. None require RH.
+### Axiom source: `Cathedral.Physics.MertensThird` (4 PNTAnd axioms)
+All inherited axioms are classical analytic number theory results
+being actively formalized by the PrimeNumberTheoremAnd team. None require RH.
 -/
 
 end Cathedral.Covariance.MertensBridge
