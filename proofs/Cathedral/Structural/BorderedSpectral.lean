@@ -374,11 +374,41 @@ theorem bordered_secular_identity
     rw [this]
     by_cases h : i = j <;> simp [h, eq_comm]
   -- Step 1: A' = A-μI is positive definite
-  -- Mathematical argument: For all v ≠ 0,
-  --   vᵀA'v = vᵀAv - μ·vᵀv ≥ (λ_min - μ)·vᵀv > 0
-  -- (using quadform_ge_min_eigenvalue_mul and hμ_lt)
-  -- Note: PosDef in Mathlib uses Finsupp, making this verbose.
-  have hA'_pd : A'.PosDef := by sorry -- PD via spectral bound
+  -- Use: A'.PosDef ↔ ∀ i, 0 < eigenvalues A' i
+  -- Each eigenvalue of A' equals vᵢᵀA'vᵢ for the eigenvector vᵢ
+  -- = vᵢᵀAvᵢ - μ ≥ λ_min(A) - μ > 0
+  have hA'_pd : A'.PosDef := by
+    rw [hA'_herm.posDef_iff_eigenvalues_pos]
+    intro i
+    -- eigenvalue i = Re(vᵢ* ⬝ᵥ A' *ᵥ vᵢ) where vᵢ is unit eigenvector
+    rw [hA'_herm.eigenvalues_eq i]
+    simp only [star_trivial, RCLike.re_to_real]
+    -- Now goal: 0 < vᵢ ⬝ᵥ A' *ᵥ vᵢ
+    -- Decompose: A' *ᵥ vᵢ = A *ᵥ vᵢ - μ • vᵢ
+    set vᵢ := (⇑(hA'_herm.eigenvectorBasis i) : Fin n → ℝ)
+    have h_sub : A'.mulVec vᵢ = A.mulVec vᵢ - μ • vᵢ := by
+      ext k
+      show ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)).mulVec vᵢ) k =
+           (A.mulVec vᵢ) k - μ * vᵢ k
+      simp only [sub_mulVec, smul_mulVec, one_mulVec, Pi.sub_apply,
+                 Pi.smul_apply, smul_eq_mul]
+    rw [h_sub, dotProduct_sub, dotProduct_smul]
+    simp only [smul_eq_mul]
+    -- Goal: 0 < vᵢ ⬝ᵥ A *ᵥ vᵢ - μ * (vᵢ ⬝ᵥ vᵢ)
+    -- vᵢ has unit norm: vᵢ ⬝ᵥ vᵢ = ‖vᵢ‖² = 1² = 1
+    have h_unit : dotProduct vᵢ vᵢ = 1 := by
+      rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+      have h_norm : ‖(hA'_herm.eigenvectorBasis i : EuclideanSpace ℝ (Fin n))‖ = 1 :=
+        hA'_herm.eigenvectorBasis.orthonormal.1 i
+      rw [h_norm, one_pow]
+    rw [h_unit, mul_one]
+    -- Goal: 0 < vᵢ ⬝ᵥ A *ᵥ vᵢ - μ
+    -- From quadform_ge_min_eigenvalue_mul: vᵢᵀAvᵢ ≥ λ_min · vᵢᵀvᵢ = λ_min
+    have h_rayleigh := quadform_ge_min_eigenvalue_mul hA hn vᵢ
+    unfold realQuadForm at h_rayleigh
+    rw [h_unit] at h_rayleigh
+    simp only [mul_one] at h_rayleigh
+    linarith
 
   -- Step 2: A' invertible (PD → IsUnit)
   have hA'_unit : IsUnit A' := hA'_pd.isUnit
