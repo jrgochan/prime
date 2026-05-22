@@ -474,32 +474,120 @@ theorem secular_drop_bound
     -- ... by at least the min-eigenspace projection divided by the drop
     (dotProduct g (⇑(hA.eigenvectorBasis ⟨0, hn⟩)))^2 /
     (hA.eigenvalues ⟨0, hn⟩ - μ) := by
-  -- Strategy: use the Cauchy-Schwarz inequality for PD quadratic forms.
+  -- ═══════════════════════════════════════════════════════════════
+  -- PROOF BY ORTHOGONAL DECOMPOSITION
   --
-  -- For any PD matrix M and vectors x, y:
-  --   (xᵀy)² ≤ (xᵀMx)(yᵀM⁻¹y)
-  --
-  -- Setting M = A' = A-μI, x = v₀ (eigenvector), y = g:
-  --   (v₀ᵀg)² ≤ (v₀ᵀA'v₀)(gᵀA'⁻¹g)
-  --   gᵀA'⁻¹g ≥ (v₀ᵀg)² / (v₀ᵀA'v₀)
-  --
-  -- And v₀ᵀA'v₀ = v₀ᵀ(A-μI)v₀ = λ₀-μ since v₀ is eigenvector of A.
-  --
-  -- The Cauchy-Schwarz for PD forms follows from writing w = M^{1/2}x:
-  --   (xᵀy) = (M^{-1/2}w)ᵀy = wᵀ(M^{-1/2}y)
-  --   |(xᵀy)|² ≤ ‖w‖²·‖M^{-1/2}y‖² = (xᵀMx)(yᵀM⁻¹y)
-  --
-  -- In Lean, this requires:
-  --   • The PD decomposition of A' (we have posDef_iff_eigenvalues_pos)
-  --   • Matrix square roots (not directly available)
-  --   • Or: the spectral expansion Σⱼ |⟨g,vⱼ⟩|²/(λⱼ-μ) ≥ single term
-  --
-  -- For now, we leave this as the key remaining sorry.
-  -- The spectral decomposition approach requires connecting:
-  --   OrthonormalBasis.sum_inner_mul_inner (Parseval)
-  --   with Matrix.mulVec_eigenvectorBasis (eigenvalue action)
-  --   through the EuclideanSpace ↔ (Fin n → ℝ) bridge.
-  sorry
+  -- Key idea: decompose g = c·v + w where w ⊥ v, then
+  --   gᵀM⁻¹g = c²/δ + wᵀM⁻¹w ≥ c²/δ
+  -- ═══════════════════════════════════════════════════════════════
+
+  set M := A - μ • (1 : Matrix (Fin n) (Fin n) ℝ) with hM_def
+  set v := ⇑(hA.eigenvectorBasis ⟨0, hn⟩) with hv_def
+  set c := dotProduct g v with hc_def
+  set δ := hA.eigenvalues ⟨0, hn⟩ - μ with hδ_def
+
+  -- Step 1: δ > 0 (eigenvalue is above μ)
+  have hδ_pos : 0 < δ := by
+    simp only [hδ_def]
+    -- eigenvalues ⟨0, hn⟩ = eigenvalues₀ at some reindexed position
+    -- eigenvalues₀ at any index ≥ inf' eigenvalues₀ > μ
+    have h_ge_inf : hA.eigenvalues ⟨0, hn⟩ ≥
+        (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
+          (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
+          hA.eigenvalues₀ := by
+      unfold Matrix.IsHermitian.eigenvalues
+      apply Finset.inf'_le
+      exact Finset.mem_univ _
+    linarith
+
+  -- Step 2: M is Hermitian (A - μI is Hermitian when A is Hermitian)
+  have hM_herm : M.IsHermitian := by
+    simp only [hM_def, Matrix.IsHermitian]
+    funext i j
+    simp only [conjTranspose_apply, star_trivial, sub_apply, smul_apply, one_apply]
+    have : A j i = A i j := by
+      have := congr_fun (congr_fun hA i) j
+      simp only [conjTranspose_apply, star_trivial] at this; exact this
+    rw [this]
+    by_cases h : i = j <;> simp [h, eq_comm]
+
+  -- Step 3: M is positive definite (all eigenvalues of M are > 0)
+  -- (Reuse the exact same approach as in bordered_secular_identity)
+  have hM_pd : M.PosDef := by
+    rw [hM_herm.posDef_iff_eigenvalues_pos]
+    intro i
+    rw [hM_herm.eigenvalues_eq i]
+    simp only [star_trivial, RCLike.re_to_real]
+    set vi := (⇑(hM_herm.eigenvectorBasis i) : Fin n → ℝ)
+    have h_sub : M *ᵥ vi = A *ᵥ vi - μ • vi := by
+      ext k
+      show ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)) *ᵥ vi) k =
+           (A *ᵥ vi) k - μ * vi k
+      simp only [sub_mulVec, smul_mulVec, one_mulVec, Pi.sub_apply,
+                 Pi.smul_apply, smul_eq_mul]
+    rw [h_sub, dotProduct_sub, dotProduct_smul]
+    simp only [smul_eq_mul]
+    have h_unit : dotProduct vi vi = 1 := by
+      rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+      have h_norm : ‖(hM_herm.eigenvectorBasis i : EuclideanSpace ℝ (Fin n))‖ = 1 :=
+        hM_herm.eigenvectorBasis.orthonormal.1 i
+      rw [h_norm, one_pow]
+    rw [h_unit, mul_one]
+    have h_rayleigh := quadform_ge_min_eigenvalue_mul hA hn vi
+    unfold realQuadForm at h_rayleigh
+    rw [h_unit] at h_rayleigh
+    simp only [mul_one] at h_rayleigh
+    linarith
+
+  -- Step 4: Av = λv, so Mv = (λ-μ)v = δv
+  have hAv : A *ᵥ v = (hA.eigenvalues ⟨0, hn⟩) • v :=
+    hA.mulVec_eigenvectorBasis ⟨0, hn⟩
+
+  have hMv : M *ᵥ v = δ • v := by
+    have h_sub : M *ᵥ v = A *ᵥ v - μ • v := by
+      ext k
+      show ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)) *ᵥ v) k =
+           (A *ᵥ v) k - μ * v k
+      simp only [sub_mulVec, smul_mulVec, one_mulVec, Pi.sub_apply,
+                 Pi.smul_apply, smul_eq_mul]
+    rw [h_sub, hAv]
+    ext k
+    simp only [Pi.sub_apply, Pi.smul_apply, smul_eq_mul]
+    ring
+
+  -- Step 5: v is unit (from orthonormal basis)
+  have hv_unit : dotProduct v v = 1 := by
+    rw [← inner_eq_dotProduct, real_inner_self_eq_norm_sq]
+    have h_norm : ‖(hA.eigenvectorBasis ⟨0, hn⟩ : EuclideanSpace ℝ (Fin n))‖ = 1 :=
+      hA.eigenvectorBasis.orthonormal.1 ⟨0, hn⟩
+    rw [h_norm, one_pow]
+
+  -- Step 6: Decompose g = c·v + w where w ⊥ v
+  set w := g - c • v with hw_def
+  have hw_orth : dotProduct w v = 0 := by
+    simp only [hw_def, sub_dotProduct, smul_dotProduct, smul_eq_mul, hc_def]
+    rw [hv_unit, mul_one, sub_self]
+
+  -- Step 7: Express gᵀM⁻¹g using the decomposition
+  -- g = w + c·v, so M⁻¹g = M⁻¹w + c·M⁻¹v
+  -- M⁻¹v = (1/δ)·v because Mv = δv
+
+  -- Step 7a: M⁻¹v = (1/δ)·v
+  have hM_inv_v : M⁻¹.mulVec v = (1/δ) • v := by
+    -- From Mv = δv: M(M⁻¹v) = v, and M((1/δ)v) = (1/δ)(Mv) = (1/δ)(δv) = v
+    -- Since M is invertible (PD), this gives M⁻¹v = (1/δ)v
+    sorry -- (needs IsUnit M.det from PosDef + mulVec algebra)
+
+  -- Step 7b: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ
+  -- This uses g = w + cv and the cross-term vanishes:
+  --   vᵀM⁻¹w = (M⁻¹v)ᵀw = ((1/δ)v)ᵀw = (1/δ)(vᵀw) = 0
+  -- (since w ⊥ v and M⁻¹ preserves the eigenvector direction)
+
+  -- Step 8: Final bound: gᵀM⁻¹g ≥ c²/δ (since wᵀM⁻¹w ≥ 0)
+  -- wᵀM⁻¹w ≥ 0 because M⁻¹ is PD (inverse of PD is PD)
+
+  -- Assemble the pieces
+  sorry -- Final assembly: expand gᵀM⁻¹g, use orthogonality, drop non-negative wᵀM⁻¹w term
 
 end SecularEquation
 
