@@ -134,15 +134,17 @@ fn main() {
     println!("Phase 2: Multiplicative self-similarity");
     println!("─────────────────────────────────────────────────");
 
-    let primes_to_test = [2, 3, 5, 7, 11];
+    let primes_to_test = [2, 3, 5, 7, 11, 13, 17, 19, 23];
 
     for &p in &primes_to_test {
         println!("\n  Prime p = {}:", p);
         println!("  {:>6} {:>14} {:>14} {:>10} {:>10}",
                  "N", "λ_sub", "λ_ref", "ratio", "1/p");
 
-        // Test at various N
-        for &n in &[6*p, 8*p, 10*p, 12*p, 15*p, 20*p] {
+        // Dynamic test schedule based on N_max
+        let multipliers = [6, 8, 10, 12, 15, 20, 25, 30, 40, 50];
+        for &m in &multipliers {
+            let n = m * p;
             if n > n_max { continue; }
             let n_ref = n / p;
             if n_ref < 3 { continue; }
