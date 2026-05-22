@@ -119,7 +119,7 @@ lemma bordered_mulVec_bot
     But then uᵀAu = μ, contradicting μ < λ_min(A) via Rayleigh. -/
 theorem bordered_eigenvec_t_ne_zero
     (M : Matrix (Fin (n+1)) (Fin (n+1)) ℝ)
-    (hH : M.IsHermitian)
+    (_hH : M.IsHermitian)
     (A : Matrix (Fin n) (Fin n) ℝ)
     (hA : A.IsHermitian)
     (hA_eq : ∀ i j : Fin n, M (Fin.castSucc i) (Fin.castSucc j) = A i j)
@@ -230,7 +230,7 @@ theorem quadform_ge_min_eigenvalue_mul
   -- If v = 0, both sides are 0
   by_cases hv : v = 0
   · subst hv
-    simp only [realQuadForm, dotProduct, mulVec, mul_zero, Finset.sum_const_zero]
+    simp only [realQuadForm, dotProduct, mulVec]
     simp [mul_zero]
   -- For v ≠ 0: normalize
   set lam_min := (Finset.univ : Finset (Fin (Fintype.card (Fin n)))).inf'
@@ -337,11 +337,9 @@ theorem bordered_secular_identity
       ext i
       show ((A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)).mulVec u) i =
            (A.mulVec u) i - μ * u i
-      simp only [mulVec, dotProduct, sub_apply, smul_apply, one_apply,
-                 mul_ite, mul_one, mul_zero, Finset.sum_sub_distrib]
+      simp only [mulVec, dotProduct, sub_apply, smul_apply, one_apply]
       ring_nf
-      congr 1
-      simp [Finset.sum_ite]
+      simp
     -- A *ᵥ u - μ • u = (μ • u - t • g) - μ • u = -t • g
     rw [hsub]
     -- From h_top: A *ᵥ u = μ • u - t • g (rearranging)
@@ -651,7 +649,7 @@ theorem secular_drop_bound
     -- y ⬝ᵥ (M *ᵥ y) ≥ 0
     -- star y ⬝ᵥ (M *ᵥ y) ≥ 0 from PosSemidef
     have h_ps := hM_pd.posSemidef.dotProduct_mulVec_nonneg y
-    simp only [Pi.star_def, star_trivial] at h_ps
+    simp only [star_trivial] at h_ps
     exact h_ps
 
   -- Final bound: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ ≥ c²/δ
