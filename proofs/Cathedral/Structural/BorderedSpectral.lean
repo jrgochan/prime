@@ -301,17 +301,66 @@ theorem bordered_secular_identity
   -- From h_bot: gᵀu = (μ-γ)t
   have h_gu : dotProduct g u = (μ - γ) * t := by linarith
   -- Now derive γ - μ = gᵀ(A-μI)⁻¹g
-  -- The key algebraic steps are proved above:
-  -- h_Apu: (A-μI)*u = -t*g
-  -- h_gu: gᵀu = (μ-γ)*t
-  -- From these, the secular identity follows by:
-  -- gᵀu = gᵀ(A-μI)⁻¹((A-μI)u) = gᵀ(A-μI)⁻¹(-tg) = -t · gᵀ(A-μI)⁻¹g
-  -- And h_gu gives gᵀu = (μ-γ)t
-  -- So -t · gᵀ(A-μI)⁻¹g = (μ-γ)t, dividing by -t: gᵀ(A-μI)⁻¹g = γ-μ
-  --
-  -- The remaining difficulty is showing A-μI is invertible (PD),
-  -- which requires the spectral lower bound vᵀAv ≥ λ_min · vᵀv.
-  sorry
+  -- Step 1: Show A' = A-μI is PD
+  -- Need: ∀ v ≠ 0, vᵀA'v > 0
+  -- vᵀA'v = vᵀAv - μ·vᵀv ≥ λ_min·vᵀv - μ·vᵀv = (λ_min-μ)·vᵀv > 0
+  have hA'_herm : A'.IsHermitian := by
+    show (A - μ • (1 : Matrix (Fin n) (Fin n) ℝ)).IsHermitian
+    ext i j
+    simp only [conjTranspose_apply, star_trivial, sub_apply, smul_apply, one_apply]
+    have : A j i = A i j := by
+      have := congr_fun (congr_fun hA i) j
+      simp only [conjTranspose_apply, star_trivial] at this; exact this
+    rw [this]
+    by_cases h : i = j <;> simp [h, eq_comm]
+  have hA'_pd : A'.PosDef := by
+    rw [Matrix.PosDef]
+    constructor
+    · exact hA'_herm
+    · intro v hv
+      simp only [star_trivial]
+      sorry -- Need: vᵀ(A-μI)v > 0 for v ≠ 0
+              -- This follows from vᵀAv ≥ λ_min · vᵀv > μ · vᵀv
+
+  -- Step 2: A' invertible (PD → IsUnit)
+  have hA'_unit : IsUnit A' := hA'_pd.isUnit
+  have hA'_det : IsUnit A'.det := by
+    rwa [Matrix.isUnit_iff_isUnit_det] at hA'_unit
+
+  -- Step 3: A' *ᵥ (A'⁻¹ *ᵥ g) = g
+  have h_inv_g : A'.mulVec (A'⁻¹.mulVec g) = g := by
+    rw [mulVec_mulVec, Matrix.mul_nonsing_inv _ hA'_det, one_mulVec]
+
+  -- Step 4: u = -t · A'⁻¹ *ᵥ g (from A'u = -tg and A' injective)
+  have h_u_eq : u = (-t) • A'⁻¹.mulVec g := by
+    have h_inj : Function.Injective A'.mulVec := by
+      rwa [mulVec_injective_iff_isUnit]
+    apply h_inj
+    rw [mulVec_smul, h_inv_g, h_Apu]
+
+  -- Step 5: gᵀu = (-t) * gᵀ(A'⁻¹g)
+  have h_dp : dotProduct g u = (-t) * dotProduct g (A'⁻¹.mulVec g) := by
+    rw [h_u_eq]
+    unfold dotProduct
+    simp only [Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
+    congr 1; ext j; ring
+
+  -- Step 6: combine to get γ - μ = gᵀ(A'⁻¹g)
+  -- h_gu: gᵀu = (μ-γ)t
+  -- h_dp: gᵀu = -t · gᵀ(A'⁻¹g)
+  -- So: -t · gᵀ(A'⁻¹g) = (μ-γ)t
+  -- Since t ≠ 0: gᵀ(A'⁻¹g) = γ-μ
+  have h_combined : (-t) * dotProduct g (A'⁻¹.mulVec g) = (μ - γ) * t := by
+    linarith
+  -- Divide by (-t) ≠ 0
+  have h_result : dotProduct g (A'⁻¹.mulVec g) = γ - μ := by
+    have h_neg_t_ne : (-t : ℝ) ≠ 0 := neg_ne_zero.mpr ht_ne
+    -- h_combined : -t * gⵍ A'⁻¹ *ᵥ g = (μ - γ) * t
+    -- (μ - γ) * t = -(t) * (γ - μ) = -t * (γ - μ)
+    have h2 : (-t) * dotProduct g (A'⁻¹.mulVec g) = (-t) * (γ - μ) := by
+      rw [h_combined]; ring
+    exact mul_left_cancel₀ h_neg_t_ne h2
+  linarith
 
 /-- **The secular drop bound.**
 
