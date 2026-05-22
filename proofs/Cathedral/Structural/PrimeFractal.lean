@@ -206,7 +206,19 @@ theorem primeGramEntry_selfsimilarity_bound (p : ℕ) (hp : 1 < p) (j k : ℕ)
     The correction term (p-1)/p arises from the integral over [1,p]
     in the fractal identity. For the eigenvalues that matter
     (those going to 0 as N → ∞), this correction is eventually dominated.
--/
+
+    **Proof Strategy** (partially formalized):
+    1. Write G_p = (1/p)·G + E  where  E(j,k) = primeGramEntry - (1/p)·gramEntry
+    2. Entry-wise: |E(j,k)| ≤ (p-1)/p  [primeGramEntry_selfsimilarity_bound]
+    3. Weyl: λ_min(G_p) ≤ λ_min((1/p)G) + λ_max(E)
+    4. λ_min((1/p)G) = (1/p)·λ_min(G)
+    5. λ_max(E) ≤ (p-1)/p  [needs: Gershgorin or PSD structure of E]
+
+    Step 5 requires showing the error matrix has bounded spectral radius.
+    For diagonal-dominant E, Gershgorin gives λ_max ≤ N·(p-1)/p, so the
+    current bound holds when (p-1)/p ≥ N·(p-1)/p, i.e. always for N ≤ 1.
+    The asymptotically correct version uses the fact that E's entries decay
+    as 1/(jkp) for large j,k, giving λ_max(E) → 0. -/
 theorem spectral_selfsimilarity_upper (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N) :
     let G_p := primeGramMatrix p N
     let G   := gramMatrix N
