@@ -574,20 +574,70 @@ theorem secular_drop_bound
 
   -- Step 7a: M⁻¹v = (1/δ)·v
   have hM_inv_v : M⁻¹.mulVec v = (1/δ) • v := by
-    -- From Mv = δv: M(M⁻¹v) = v, and M((1/δ)v) = (1/δ)(Mv) = (1/δ)(δv) = v
-    -- Since M is invertible (PD), this gives M⁻¹v = (1/δ)v
-    sorry -- (needs IsUnit M.det from PosDef + mulVec algebra)
+    -- Strategy: show M *ᵥ ((1/δ) • v) = v, then use M invertible to get M⁻¹v = (1/δ)v
+    have hM_unit : IsUnit M := hM_pd.isUnit
+    have hM_det : IsUnit M.det := by rwa [Matrix.isUnit_iff_isUnit_det] at hM_unit
+    -- M *ᵥ ((1/δ) • v) = (1/δ) • (M *ᵥ v) = (1/δ) • (δ • v) = v
+    have h_action : M *ᵥ ((1/δ) • v) = v := by
+      rw [Matrix.mulVec_smul, hMv, smul_smul]
+      simp [ne_of_gt hδ_pos]
+    -- M is invertible, so M⁻¹ (Mx) = x for all x
+    -- Applying M⁻¹ to both sides: M⁻¹ *ᵥ (M *ᵥ ((1/δ) • v)) = M⁻¹ *ᵥ v
+    -- LHS = (M⁻¹ * M) *ᵥ ((1/δ) • v) = (1/δ) • v
+    calc M⁻¹.mulVec v
+        = M⁻¹.mulVec (M.mulVec ((1/δ) • v)) := by rw [h_action]
+      _ = (M⁻¹ * M).mulVec ((1/δ) • v) := by rw [mulVec_mulVec]
+      _ = (1 : Matrix (Fin n) (Fin n) ℝ).mulVec ((1/δ) • v) := by
+            rw [Matrix.nonsing_inv_mul _ hM_det]
+      _ = (1/δ) • v := by rw [Matrix.one_mulVec]
 
-  -- Step 7b: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ
-  -- This uses g = w + cv and the cross-term vanishes:
-  --   vᵀM⁻¹w = (M⁻¹v)ᵀw = ((1/δ)v)ᵀw = (1/δ)(vᵀw) = 0
-  -- (since w ⊥ v and M⁻¹ preserves the eigenvector direction)
+  have h_cross_vw : dotProduct v (M⁻¹.mulVec w) = 0 := by
+    -- v ⬝ᵥ (M⁻¹ *ᵥ w) = (v ᵥ* M⁻¹) ⬝ᵥ w  [dotProduct_mulVec]
+    rw [dotProduct_mulVec]
+    -- v ᵥ* M⁻¹ = (M⁻¹)ᵀ *ᵥ v = M⁻¹ *ᵥ v (since M is symmetric)
+    have hM_sym : Mᵀ = M := by
+      ext i j
+      -- Mᵀ i j = M j i = M i j (from Hermitian)
+      show M j i = M i j
+      have h := congr_fun (congr_fun hM_herm i) j
+      simp only [conjTranspose_apply, star_trivial] at h
+      exact h
+    have hMinv_sym : (M⁻¹)ᵀ = M⁻¹ := by
+      rw [transpose_nonsing_inv, hM_sym]
+    -- v ᵥ* M⁻¹ = (M⁻¹)ᵀ *ᵥ v = M⁻¹ *ᵥ v
+    rw [← mulVec_transpose, hMinv_sym]
+    -- (M⁻¹ *ᵥ v) ⬝ᵥ w = ((1/δ) • v) ⬝ᵥ w = (1/δ) * (v ⬝ᵥ w) = 0
+    rw [hM_inv_v, smul_dotProduct, smul_eq_mul, dotProduct_comm, hw_orth, mul_zero]
 
-  -- Step 8: Final bound: gᵀM⁻¹g ≥ c²/δ (since wᵀM⁻¹w ≥ 0)
-  -- wᵀM⁻¹w ≥ 0 because M⁻¹ is PD (inverse of PD is PD)
+  -- Step 7c: vᵀM⁻¹v = 1/δ
+  have h_diag : dotProduct v (M⁻¹.mulVec v) = 1/δ := by
+    rw [hM_inv_v, dotProduct_smul, hv_unit, smul_eq_mul, mul_one]
 
-  -- Assemble the pieces
-  sorry -- Final assembly: expand gᵀM⁻¹g, use orthogonality, drop non-negative wᵀM⁻¹w term
+  -- Step 8: g = w + c·v, so expand gᵀM⁻¹g
+  have hg_eq : g = w + c • v := by
+    simp only [hw_def]; ring_nf
+
+  -- Step 8a: gᵀM⁻¹g = wᵀM⁻¹w + c²·(1/δ)
+  have h_expand_quad : dotProduct g (M⁻¹.mulVec g) =
+      dotProduct w (M⁻¹.mulVec w) + c^2 * (1/δ) := by
+    rw [hg_eq]
+    simp only [Matrix.mulVec_add, Matrix.mulVec_smul,
+               dotProduct_add, add_dotProduct, smul_dotProduct, dotProduct_smul]
+    simp only [smul_eq_mul]
+    rw [h_diag, h_cross_vw]
+    -- Need symmetric property: w ⬝ᵥ (M⁻¹ *ᵥ (c • v)) = c * (w ⬝ᵥ M⁻¹v)
+    -- and w ⬝ᵥ M⁻¹v = 0 by dotProduct_comm and h_cross_vw
+    sorry -- (final ring/linarith after symmetry)
+
+  -- Step 8b: wᵀM⁻¹w ≥ 0 (M⁻¹ is PD since M is PD)
+  have h_quad_w_nonneg : 0 ≤ dotProduct w (M⁻¹.mulVec w) := by
+    sorry -- (M⁻¹ PosDef from M PosDef)
+
+  -- Final bound: gᵀM⁻¹g = wᵀM⁻¹w + c²/δ ≥ c²/δ
+  rw [h_expand_quad]
+  have h_c2_div : c^2 * (1/δ) = c^2 / δ := by ring
+  rw [h_c2_div]
+  linarith
 
 end SecularEquation
 
