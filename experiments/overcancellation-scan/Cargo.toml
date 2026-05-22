@@ -114,6 +114,22 @@ path = "src/bin/mellin_parseval_probe.rs"
 name = "contour-height-probe"
 path = "src/bin/contour_height_probe.rs"
 
+[[bin]]
+name = "cos2-theta-spectral"
+path = "src/bin/cos2_theta_spectral.rs"
+
+[[bin]]
+name = "d6-anomaly-probe"
+path = "src/bin/d6_anomaly_probe.rs"
+
+[[bin]]
+name = "alignment-deep-probe"
+path = "src/bin/alignment_deep_probe.rs"
+
+[[bin]]
+name = "zero-resonance-probe"
+path = "src/bin/zero_resonance_probe.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
