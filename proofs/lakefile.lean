@@ -421,6 +421,8 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.Zeta2ProductBound,
     -- Mirror Geometry: the three realities of the zeta function
     `Cathedral.Zeta.MirrorGeometry,
+    -- Glass Critical Line: the 4-step chain Glass → RH (3 axioms, down from 6)
+    `Cathedral.Physics.Glass.GlassCriticalLine,
     -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
     `Cathedral.Physics.Glass.CotResQuadBridge,
     -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
