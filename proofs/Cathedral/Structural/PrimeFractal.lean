@@ -418,6 +418,28 @@ theorem sum_inv_sq_lt_two (N : ℕ) (hN : 1 ≤ N) :
       simp only [Fin.val_castSucc, Fin.val_last]
       push_cast
       linarith
+
+/-- **Cauchy-Schwarz corollary**: for a unit vector v,
+    (Σ |v_j| / (j+1))² < 2.
+
+    Uses the discrete Cauchy-Schwarz inequality
+    (Σ f·g)² ≤ (Σ f²)(Σ g²) with f_j = |v_j|, g_j = 1/(j+1),
+    combined with ||v|| = 1 and Σ 1/(j+1)² < 2. -/
+theorem sq_sum_abs_div_lt_two (N : ℕ) (hN : 1 ≤ N) (v : Fin N → ℝ)
+    (hv : ∑ j : Fin N, v j ^ 2 = 1) :
+    (∑ j : Fin N, |v j| * (1 / ((↑j : ℝ) + 1))) ^ 2 < 2 := by
+  have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
+    (fun j : Fin N => |v j|) (fun j : Fin N => 1 / ((↑j : ℝ) + 1))
+  -- Convert |v j|² = v j²
+  have h_abs_sq : ∑ j : Fin N, |v j| ^ 2 = ∑ j : Fin N, v j ^ 2 := by
+    congr 1; ext j; rw [sq_abs]
+  rw [h_abs_sq, hv, one_mul] at hcs
+  -- Normalize (1/(j+1))² = 1/(j+1)²
+  have h_sq_div : ∀ j : Fin N, (1 / ((↑j : ℝ) + 1)) ^ 2 = 1 / ((↑j : ℝ) + 1) ^ 2 := by
+    intro j; rw [div_pow, one_pow]
+  simp_rw [h_sq_div] at hcs
+  exact lt_of_le_of_lt hcs (sum_inv_sq_lt_two N hN)
+
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
