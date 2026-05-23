@@ -15,7 +15,7 @@
 -/
 
 import Cathedral.Covariance.EulerProduct
-import Cathedral.Physics.MertensThird
+import Cathedral.NumberTheory.MertensThird
 import Mathlib.Order.Filter.Basic
 import Mathlib.Topology.Algebra.Order.LiminfLimsup
 import Mathlib.NumberTheory.Harmonic.EulerMascheroni
@@ -30,7 +30,7 @@ import Mathlib.NumberTheory.Harmonic.EulerMascheroni
 -- ════════════════════════════════════════════════
 
 -- ════════════════════════════════════════════════
--- AXIOM SOURCE: Cathedral.Physics.MertensThird
+-- AXIOM SOURCE: Cathedral.NumberTheory.MertensThird
 --
 -- The Mertens axiom was previously duplicated here as
 -- `mertens_third_asymptotic`. Now unified: MertensThird.lean
@@ -208,7 +208,7 @@ theorem cathedral_mertens_third :
 
 ### This file: 0 sorry, 0 axioms ✅
 All theorems in this file are fully proved.
-Axiom source unified to `Cathedral.Physics.MertensThird`
+Axiom source unified to `Cathedral.NumberTheory.MertensThird`
 (previously had duplicate `mertens_third_asymptotic` axiom).
 
 ### Proved in this file:
@@ -218,7 +218,7 @@ Axiom source unified to `Cathedral.Physics.MertensThird`
 - `mertens_third_nat_tendsto`: Off-by-one bridge (range X vs X+1) ✅
 - `cathedral_mertens_third`: Cathedral-facing alias ✅
 
-### Axiom source: `Cathedral.Physics.MertensThird` (4 PNTAnd axioms)
+### Axiom source: `Cathedral.NumberTheory.MertensThird` (4 PNTAnd axioms)
 All inherited axioms are classical analytic number theory results
 being actively formalized by the PrimeNumberTheoremAnd team. None require RH.
 -/

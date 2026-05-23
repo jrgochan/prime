@@ -52,7 +52,7 @@ import Cathedral.NymanBeurling.BDBridge
 import Cathedral.AbelTail.L2Bridge
 import Cathedral.White.Scattering
 import Cathedral.PNT.AbelMean
-import Cathedral.Physics.GramBridge
+import Cathedral.Gram.GramBridge
 
 noncomputable section
 open Real MeasureTheory Complex Filter Finset Cathedral.Vasyunin ArithmeticFunction

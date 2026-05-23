@@ -325,43 +325,43 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Cotangent.TsumDirectEval,
     `Cathedral.Vasyunin.Cotangent.TwoTileEval,
     -- Physics: 1+1D Dirac equation (conceptual beacon, NOT on proof chain)
-    `Cathedral.Physics.Dirac,
+    `Cathedral.Physics.GaugeTheory.Dirac,
     -- Physics: Arithmetic Pauli Exclusion (Möbius = fermionic statistics, Exploration 36)
-    `Cathedral.Physics.ArithmeticPauli,
+    `Cathedral.Physics.GaugeTheory.ArithmeticPauli,
     -- Physics: Arithmetic U(1) gauge (Liouville = charge conservation, Exploration 36)
-    `Cathedral.Physics.ArithmeticU1,
+    `Cathedral.Physics.GaugeTheory.ArithmeticU1,
     -- Physics: Arithmetic SU(2) gauge (parity breaking at p=2 = Higgs, Exploration 36)
-    `Cathedral.Physics.ArithmeticSU2,
+    `Cathedral.Physics.GaugeTheory.ArithmeticSU2,
     -- Physics: Arithmetic SU(3) gauge (color confinement at p=3, Exploration 36)
-    `Cathedral.Physics.ArithmeticSU3,
+    `Cathedral.Physics.GaugeTheory.ArithmeticSU3,
     -- Physics: Arithmetic Standard Model crown (U(1)×SU(2)×SU(3) assembly, Exploration 36)
-    `Cathedral.Physics.ArithmeticStandardModel,
+    `Cathedral.Physics.GaugeTheory.ArithmeticStandardModel,
     -- Physics: Gauge Decomposition (bosonic/fermionic sector split, Exploration 36)
-    `Cathedral.Physics.ArithmeticGaugeDecomposition,
+    `Cathedral.Physics.GaugeTheory.ArithmeticGaugeDecomposition,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
-    `Cathedral.Physics.GaugeCancellation,
+    `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
-    `Cathedral.Physics.DiagonalBound,
+    `Cathedral.Physics.GramWiring.DiagonalBound,
     -- Physics: SUSY Reduction (Crown ⟺ Off-Diagonal Cancellation, Exploration 36)
-    `Cathedral.Physics.SUSYReduction,
+    `Cathedral.Physics.Cancellation.SUSYReduction,
     -- Physics: SUSY Vacuum (topological SUSY algebra, Exploration 36)
-    `Cathedral.Physics.SUSYVacuum,
+    `Cathedral.Physics.Cancellation.SUSYVacuum,
     -- Physics: Ward Identity (arithmetic Noether theorem, Exploration 36)
-    `Cathedral.Physics.WardIdentity,
+    `Cathedral.Physics.Cancellation.WardIdentity,
     -- Physics: Spectral Gap Bridge (Ward → eigenvalue bounds, Exploration 36)
-    `Cathedral.Physics.SpectralGap,
+    `Cathedral.Physics.Strategy.SpectralGap,
     -- Physics: Phase Transition (B+F sign flip, cosmological ratio, Exploration 36)
-    `Cathedral.Physics.PhaseTransition,
+    `Cathedral.Physics.Bridges.PhaseTransition,
     -- Physics: Cancellation Efficacy (algebraic engine of 99.96% cancellation, Exploration 36)
-    `Cathedral.Physics.CancellationEfficacy,
+    `Cathedral.Physics.Cancellation.CancellationEfficacy,
     -- Physics: Inhomogeneous Ward Bound (GU-reframed crown axiom, Exploration 36)
-    `Cathedral.Physics.InhomogeneousWard,
+    `Cathedral.Physics.Cancellation.InhomogeneousWard,
     -- Physics: Liouville Marginal (equidistribution against Gram, v4 sweep, Exploration 36)
-    `Cathedral.Physics.LiouvilleMarginal,
+    `Cathedral.Physics.Bridges.LiouvilleMarginal,
     -- Physics: Row Cancellation (per-row → global Ward bridge, Exploration 36)
-    `Cathedral.Physics.RowCancellation,
+    `Cathedral.Physics.Cancellation.RowCancellation,
     -- Physics: Bilinear Mertens Bridge (PNT → excess bound → Ward, Exploration 36)
-    `Cathedral.Physics.BilinearMertens,
+    `Cathedral.Physics.Mertens.BilinearMertens,
     -- Robin's inequality (discrete arithmetic path, un-archived May 2, 2026)
     `Cathedral.Robin.Defs,
     `Cathedral.Robin.SigmaProps,
@@ -393,77 +393,77 @@ lean_lib «Cathedral» where
     -- Direct Mellin Bound (Exploration 36: bypasses false covariance axiom)
     `Cathedral.Assembly.DirectMellinBound,
     -- Coprime Diagonal (Bilinear Probe v2: (6/π²)·logN + Chowla connection)
-    `Cathedral.Physics.CoprimeDiagonal,
+    `Cathedral.Physics.GramWiring.CoprimeDiagonal,
     -- Basel-Möbius (Squarefree graduation: Σ μ(d)/d² = 6/π²)
     `Cathedral.NumberTheory.BaselMoebius,
     -- Squarefree Reciprocal (graduation target: Σ_{sqfree} 1/k ≥ ½logN)
     `Cathedral.NumberTheory.SquarefreeReciprocal,
     -- Dark Gram Matrix (Bernoulli basis: the mirror universe, Exploration 36)
-    `Cathedral.Physics.DarkGramMatrix,
+    `Cathedral.Gram.DarkGramMatrix,
     -- HC-Dark Spectral Anchor (connects dark PSD to HC optimality)
-    `Cathedral.Physics.HCDarkAnchor,
+    `Cathedral.Physics.Bridges.HCDarkAnchor,
     -- S-Duality Glass (the mirror's conversion factor: ζ(2)↔ζ(4))
-    `Cathedral.Physics.SDualityGlass,
+    `Cathedral.Physics.Glass.SDualityGlass,
     -- Hopf Glass Cycle (Cayley-Dickson tower ζ(2)↔ζ(16), Exploration 36)
-    `Cathedral.Physics.HopfGlassCycle,
+    `Cathedral.Physics.Glass.HopfGlassCycle,
     -- Trigintaduonion Glass (32D/64D Prime Democracy, tower convergence, Exploration 36)
-    `Cathedral.Physics.TrigintaduonionGlass,
+    `Cathedral.Physics.Glass.TrigintaduonionGlass,
     -- Möbius Shadow Crown (glass-layered factorization → crown bound)
-    `Cathedral.Physics.MoebiusShadowCrown,
+    `Cathedral.Physics.Glass.MoebiusShadowCrown,
     -- Mertens Third (∏(1-1/p) ~ e^{-γ}/ln(N), shadow rate)
-    `Cathedral.Physics.MertensThird,
+    `Cathedral.NumberTheory.MertensThird,
     -- Glass-Fiber CotRes decomposition (sym/anti splitting, dissolution lemma)
-    `Cathedral.Physics.GlassFiberCotRes,
+    `Cathedral.Physics.Glass.GlassFiberCotRes,
     -- Glass Euler Convergence (Glass₁ product → 0 via Mertens)
-    `Cathedral.Physics.GlassEulerConvergence,
+    `Cathedral.Physics.Glass.GlassEulerConvergence,
     -- Zeta2 Product Bound (graduation of zeta2Product_lower_bound axiom)
-    `Cathedral.Physics.Zeta2ProductBound,
+    `Cathedral.Zeta.Zeta2ProductBound,
     -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
-    `Cathedral.Physics.CotResQuadBridge,
+    `Cathedral.Physics.Glass.CotResQuadBridge,
     -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
-    `Cathedral.Physics.MoebiusSmithBridge,
-    `Cathedral.Physics.WoodburyCondensate,
+    `Cathedral.Physics.GramWiring.MoebiusSmithBridge,
+    `Cathedral.Physics.Cancellation.WoodburyCondensate,
     -- Critical Line Phase (1D Collapse: ξ(½+it) ∈ ℝ, Schwarz reflection, Exploration 38)
-    `Cathedral.Physics.CriticalLinePhase,
+    `Cathedral.Physics.Bridges.CriticalLinePhase,
     -- Geometric Mertens Bridge (scan ↔ sign oscillation, Exploration 38)
-    `Cathedral.Physics.GeometricMertens,
+    `Cathedral.Physics.Mertens.GeometricMertens,
     -- Morphology Bridge (shape ↔ Gram eigenstructure, Exploration 38)
-    `Cathedral.Physics.MorphologyBridge,
+    `Cathedral.Physics.Bridges.MorphologyBridge,
     -- Zeta-Mertens Bridge (Z-function ↔ truncated Mertens, NB integration)
-    `Cathedral.Physics.ZetaMertensBridge,
+    `Cathedral.Physics.Mertens.ZetaMertensBridge,
     -- Comparison Operator — ARCHIVED to Physics/Archive/ (superseded by SmithSpectralGap)
     -- Ramanujan Bridge (gcd²/(12jk) matrix, Jordan J₂, PSD, Exploration 39)
-    `Cathedral.Physics.RamanujanBridge,
+    `Cathedral.Physics.Mertens.RamanujanBridge,
     -- Glass Comparison (π⁴/3 bound, Ramanujan↔Dark transport, Exploration 39)
-    `Cathedral.Physics.GlassComparison,
+    `Cathedral.Physics.Glass.GlassComparison,
     -- Smith Spectral Gap (Dark PD via Smith decomposition, triangular injectivity)
-    `Cathedral.Physics.SmithSpectralGap,
+    `Cathedral.Physics.GramWiring.SmithSpectralGap,
     -- Glass Distance (d² = 4/(4+σ) via Sherman-Morrison, Exploration 39)
-    `Cathedral.Physics.GlassDistance,
+    `Cathedral.Physics.Glass.GlassDistance,
     -- Sum of Squares (σ = 12·Σ d²·M₁²/J₂, manifestly non-negative)
-    `Cathedral.Physics.SumOfSquares,
+    `Cathedral.Physics.Cancellation.SumOfSquares,
     -- Smith Witness (R·w = 𝟏 → d² ≤ 4/(4+6N) → 0)
-    `Cathedral.Physics.SmithWitness,
+    `Cathedral.Physics.GramWiring.SmithWitness,
     -- Von Mangoldt Bridge (c_d = Λ(d) in Smith basis, Exploration 38)
-    `Cathedral.Physics.VonMangoldtBridge,
+    `Cathedral.NumberTheory.VonMangoldtBridge,
     -- Spectral Divergence (Σ Λ(d)² → ∞ via Euclid, Exploration 39)
-    `Cathedral.Physics.SpectralDivergence,
+    `Cathedral.Physics.Bridges.SpectralDivergence,
     -- Gram Bridge ({t}² ≤ {t} → G_{kk} ≤ b_k, Exploration 39)
-    `Cathedral.Physics.GramBridge,
+    `Cathedral.Gram.GramBridge,
     -- Ramanujan Form Bound (Smith decomposition → crown reduction, Strategy C Phase 2)
-    `Cathedral.Physics.RamanujanFormBound,
+    `Cathedral.Physics.Mertens.RamanujanFormBound,
     -- Strategy C Audit (infrastructure compilation check, Phase 1)
-    `Cathedral.Physics.StrategyCAudit,
+    `Cathedral.Physics.Strategy.StrategyCAudit,
     -- Mertens-Ramanujan Bridge (divisor coefficient bound, Strategy C Phase 3)
-    `Cathedral.Physics.MertensRamanujan,
+    `Cathedral.Physics.Mertens.MertensRamanujan,
     -- Strategy C Crown (assembly + overcancellation framework, Phase 4)
-    `Cathedral.Physics.StrategyCCrown,
+    `Cathedral.Physics.Strategy.StrategyCCrown,
     -- Smith-Franel Bridge (d²_{kt} → 0 unconditionally, East Wing)
-    `Cathedral.Physics.SmithFranelBridge,
+    `Cathedral.Physics.GramWiring.SmithFranelBridge,
     -- Entanglement Brake (S² brake, σ·S factorization, Thulium Session)
-    `Cathedral.Physics.EntanglementBrake,
+    `Cathedral.Physics.Cancellation.EntanglementBrake,
     -- Diagonal Decomposition (G_diag = C·Σv²/k − Σv²/k², Thulium Session)
-    `Cathedral.Physics.DiagonalDecomposition,
+    `Cathedral.Physics.GramWiring.DiagonalDecomposition,
     -- Cotangent Symmetry (Σcot(πm/a) = 0, Thulium Session)
     `Cathedral.Vasyunin.Cotangent.CotSymmetry,
     -- Vasyunin Reflection (V(a,a−b) = −V(a,b) algebraic core, Thulium Session)
@@ -479,29 +479,29 @@ lean_lib «Cathedral» where
     -- Spectral Bound (Gershgorin → Gram wiring, 1 axiom, Thulium Session)
     `Cathedral.Vasyunin.Cotangent.SpectralBound,
     -- Diagonal Shift (C < 4/3, Δ(k) < 0 for k≥3, 12 theorems, Thulium Plumbing)
-    `Cathedral.Physics.DiagonalShift,
+    `Cathedral.Physics.GramWiring.DiagonalShift,
     -- Abel Hammer (perfect square completion CσS-S²=-(S-Cσ/2)²+C²σ²/4, 13 theorems, Thulium Plumbing)
-    `Cathedral.Physics.AbelHammer,
+    `Cathedral.AbelTail.AbelHammer,
     -- Cotangent Dedekind Dissolution (closed-form V+V reciprocity, Thulium Session)
-    `Cathedral.Physics.CotDedekindDissolution,
+    `Cathedral.Physics.Bridges.CotDedekindDissolution,
     -- Overcancellation Assembly (master bound + convergence, 5 theorems, Thulium Plumbing)
-    `Cathedral.Physics.OvercancellationAssembly,
+    `Cathedral.Physics.Cancellation.OvercancellationAssembly,
     -- Log Correction Form (Master Decomposition: vᵀGv = AbelHammer + LogCorr − CotRes, Thulium Plumbing)
-    `Cathedral.Physics.LogCorrectionForm,
+    `Cathedral.Physics.Mertens.LogCorrectionForm,
     -- Mertens Harmony (Three-Part Harmony: ratio identity + CotRes sign, Osmium Core)
-    `Cathedral.Physics.MertensHarmony,
+    `Cathedral.Physics.Mertens.MertensHarmony,
     -- Mertens Bridge (Physics ↔ PNT connection: σ,S decomposition, Path 4.5 Step 1)
-    `Cathedral.Physics.MertensBridge,
+    `Cathedral.Physics.Mertens.MertensBridge,
     -- Abel Asymptotics (Abel→−S² via PNT, Crown chain, Path 4.5 Step 2)
-    `Cathedral.Physics.AbelAsymptotics,
+    `Cathedral.AbelTail.AbelAsymptotics,
     -- LogCorr Asymptotics (Abel+LogCorr→−S(S+T₂), Iridium Crown, Path 4.5 Step 3)
-    `Cathedral.Physics.LogCorrAsymptotics,
+    `Cathedral.Physics.Mertens.LogCorrAsymptotics,
     -- Iridium Crown (THE CAPSTONE: RH axiom + Crown theorem, Path 4.5 Step 4)
-    `Cathedral.Physics.IridiumCrown,
+    `Cathedral.Physics.Bridges.IridiumCrown,
     -- B₁ Arithmetic Skeleton (Path 6: Spectral Gap Attack — gcd²/12jk decomposition)
-    `Cathedral.Physics.BernoulliSkeleton,
+    `Cathedral.Physics.Bridges.BernoulliSkeleton,
     -- Bridge Gap (G_Vasyunin = R_Ramanujan + Δ decomposition, Bridge Gap Session)
-    `Cathedral.Physics.BridgeGap,
+    `Cathedral.Physics.Bridges.BridgeGap,
     -- Time-Domain Bridge (G = 2M - 1/(3jk) + 2∫E/t³, IBP maneuver, Bridge Session)
-    `Cathedral.Physics.TimeDomainBridge,
+    `Cathedral.Physics.Bridges.TimeDomainBridge,
   ]

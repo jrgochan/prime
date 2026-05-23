@@ -43,10 +43,10 @@
   Created: May 15, 2026 — The Comparison Operator Session
 -/
 
-import Cathedral.Physics.DarkGramMatrix
-import Cathedral.Physics.DiagonalBound
-import Cathedral.Physics.GaugeCancellation
-import Cathedral.Physics.WardIdentity
+import Cathedral.Gram.DarkGramMatrix
+import Cathedral.Physics.GramWiring.DiagonalBound
+import Cathedral.Physics.Cancellation.GaugeCancellation
+import Cathedral.Physics.Cancellation.WardIdentity
 
 noncomputable section
 open Real Finset

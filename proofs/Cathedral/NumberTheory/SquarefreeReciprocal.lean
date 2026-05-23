@@ -1,5 +1,5 @@
 import Cathedral.NumberTheory.BaselMoebius
-import Cathedral.Physics.CoprimeDiagonal
+import Cathedral.Physics.GramWiring.CoprimeDiagonal
 import Cathedral.Analysis.DirichletTest
 
 /-!
@@ -473,8 +473,8 @@ theorem sqfreeReciprocal_lower_bound (N : ℕ) (hN : 3 ≤ N) :
 /-- The definitions match between this file and CoprimeDiagonal. -/
 theorem definitions_agree (N : ℕ) :
     sqfreeReciprocalSum N =
-    Cathedral.Physics.CoprimeDiagonal.squarefreeReciprocalSum N := by
-  unfold sqfreeReciprocalSum Cathedral.Physics.CoprimeDiagonal.squarefreeReciprocalSum
+    Cathedral.Physics.GramWiring.CoprimeDiagonal.squarefreeReciprocalSum N := by
+  unfold sqfreeReciprocalSum Cathedral.Physics.GramWiring.CoprimeDiagonal.squarefreeReciprocalSum
   rfl
 
 -- ════════════════════════════════════════════════════════════════

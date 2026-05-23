@@ -13,9 +13,9 @@ import Cathedral.Assembly.CovarianceFromPerron
 import Cathedral.Assembly.DirectMellinBound
 import Cathedral.Renormalization.Bridge
 import Cathedral.NymanBeurling.BDBridgeProved
-import Cathedral.Physics.SmithWitness
-import Cathedral.Physics.VonMangoldtBridge
-import Cathedral.Physics.SpectralDivergence
+import Cathedral.Physics.GramWiring.SmithWitness
+import Cathedral.NumberTheory.VonMangoldtBridge
+import Cathedral.Physics.Bridges.SpectralDivergence
 -- NOTE: Cathedral.Assembly.GramCrown is DOWNSTREAM of MainChain
 -- (GramBoundDirect imports MainChain for log_grows_unboundedly).
 -- The discrete RH exports live in GramCrown.lean and Assembly.lean.
@@ -232,17 +232,17 @@ theorem nyman_beurling_equivalence_renormalization :
     The statement below packages the σ-growth and sawtooth distance. -/
 theorem smith_witness_forward_direction :
     ∀ B : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
-      B < Cathedral.Physics.SmithWitness.sigmaWitness N ∧
-      4 / (4 + Cathedral.Physics.SmithWitness.sigmaWitness N) < 1 := by
+      B < Cathedral.Physics.GramWiring.SmithWitness.sigmaWitness N ∧
+      4 / (4 + Cathedral.Physics.GramWiring.SmithWitness.sigmaWitness N) < 1 := by
   intro B
-  obtain ⟨N₀, hN₀⟩ := Cathedral.Physics.SmithWitness.sigma_witness_growth (max B 12)
+  obtain ⟨N₀, hN₀⟩ := Cathedral.Physics.GramWiring.SmithWitness.sigma_witness_growth (max B 12)
   refine ⟨max N₀ 2, fun N hN => ?_⟩
   have hN₀' : N₀ ≤ N := by omega
   have hN2 : 2 ≤ N := by omega
   have hσ := hN₀ N hN₀'
   constructor
   · linarith [le_max_left B 12]
-  · exact Cathedral.Physics.SmithWitness.glass_distance_formula N hN2
+  · exact Cathedral.Physics.GramWiring.SmithWitness.glass_distance_formula N hN2
       (by linarith [le_max_right B 12])
 
 /-- **Spectral Energy Divergence** (zero sorry, zero axioms).
