@@ -11,6 +11,7 @@ hpdf = ["cathedral-utils/hpdf"]
 rayon = "1.10"
 cathedral-utils = { path = "../cathedral-utils" }
 nalgebra = "0.33"
+rug = { version = "1.26", features = ["float"] }
 
 [[bin]]
 name = "overcancellation-scan"
@@ -129,6 +130,14 @@ path = "src/bin/alignment_deep_probe.rs"
 [[bin]]
 name = "zero-resonance-probe"
 path = "src/bin/zero_resonance_probe.rs"
+
+[[bin]]
+name = "glass-convergence-probe"
+path = "src/bin/glass_convergence_probe.rs"
+
+[[bin]]
+name = "glass-tower-mpfr-probe"
+path = "src/bin/glass_tower_mpfr_probe.rs"
 
 [profile.release]
 opt-level = 3
