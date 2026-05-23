@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GCDFourier.lean
+  Cathedral/Physics/Bridges/GCDFourier.lean
 
   ## GCD FOURIER COEFFICIENTS OF THE RAMANUJAN QUADRATIC FORM
 
@@ -36,7 +36,7 @@ import Cathedral.Physics.Mertens.RamanujanBridge
 noncomputable section
 open Real Finset ArithmeticFunction
 
-namespace Cathedral.Physics.Bridges.GCDFourier
+namespace Cathedral.Physics.GCDFourier
 
 -- ════════════════════════════════════════════════
 -- §1. GCD FOURIER COEFFICIENT DEFINITION
@@ -262,6 +262,6 @@ the f(d) terms have sufficient cancellation to keep this ≤ C/logN.
 Without RH, the sum diverges (empirically as ~logN·log(logN)).
 -/
 
-end Cathedral.Physics.Bridges.GCDFourier
+end Cathedral.Physics.GCDFourier
 
 end

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SUSYVacuum.lean
+  Cathedral/Physics/Cancellation/SUSYVacuum.lean
 
   ## THE SUSY VACUUM — Supersymmetric Quantum Mechanics of the Riemann Vacuum
 

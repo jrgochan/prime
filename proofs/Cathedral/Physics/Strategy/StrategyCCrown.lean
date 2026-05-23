@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/StrategyCCrown.lean
+  Cathedral/Physics/Strategy/StrategyCCrown.lean
 
   ## PHASE 4: STRATEGY C CROWN ASSEMBLY
 
@@ -43,7 +43,7 @@ import Cathedral.Physics.Mertens.MertensRamanujan
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Strategy.StrategyCCrown
+namespace Cathedral.Physics.StrategyCCrown
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE STRATEGY C STATUS THEOREM
@@ -155,6 +155,6 @@ theorem strategy_c_overcancellation_framework
 **TOTAL: 0 sorry, 2 axioms (both ~100-150 lines to prove)**
 -/
 
-end Cathedral.Physics.Strategy.StrategyCCrown
+end Cathedral.Physics.StrategyCCrown
 
 end

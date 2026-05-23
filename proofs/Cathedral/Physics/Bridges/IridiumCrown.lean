@@ -1,5 +1,5 @@
 /-
-  Cathedral.Physics.Bridges.IridiumCrown
+  Cathedral.Physics.IridiumCrown
   ================================
 
   THE CAPSTONE: Path 4.5 Complete Assembly

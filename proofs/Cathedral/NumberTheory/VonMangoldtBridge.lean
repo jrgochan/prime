@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/VonMangoldtBridge.lean
+  Cathedral/NumberTheory/VonMangoldtBridge.lean
 
   ## The von Mangoldt Bridge: c_d = Λ(d)
 

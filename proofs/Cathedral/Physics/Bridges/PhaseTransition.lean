@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/PhaseTransition.lean
+  Cathedral/Physics/Bridges/PhaseTransition.lean
 
   ## THE BOSONIC-FERMIONIC PHASE TRANSITION
 
@@ -51,7 +51,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Bridges.PhaseTransition
+namespace Cathedral.Physics.PhaseTransition
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE SIGNED WARD CURRENT
@@ -253,6 +253,6 @@ D grows in tandem to absorb it.
 | 5 | `excess` | ε(N) = vᵀGv - 1 |
 -/
 
-end Cathedral.Physics.Bridges.PhaseTransition
+end Cathedral.Physics.PhaseTransition
 
 end

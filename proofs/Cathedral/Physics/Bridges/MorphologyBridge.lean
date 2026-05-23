@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/MorphologyBridge.lean
+  Cathedral/Physics/Bridges/MorphologyBridge.lean
 
   ## THE MORPHOLOGY BRIDGE: Gram Eigenstructure and Geometric Shape
 
@@ -49,7 +49,7 @@ noncomputable section
 open Real Finset ArithmeticFunction Filter
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Bridges.MorphologyBridge
+namespace Cathedral.Physics.MorphologyBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. COVARIANCE SHAPE PARAMETERS
@@ -353,6 +353,6 @@ InhomogeneousWard.lean (Crown Axiom ≡ RH)
 ```
 -/
 
-end Cathedral.Physics.Bridges.MorphologyBridge
+end Cathedral.Physics.MorphologyBridge
 
 end

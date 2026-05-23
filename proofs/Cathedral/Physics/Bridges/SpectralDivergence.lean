@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SpectralDivergence.lean
+  Cathedral/Physics/Bridges/SpectralDivergence.lean
 
   ## The Spectral Divergence: σ(N) via Λ(d)
 

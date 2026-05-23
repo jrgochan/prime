@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/DiagonalBound.lean
+  Cathedral/Physics/GramWiring/DiagonalBound.lean
 
   ## Bounding the Diagonal Contribution D(N) of the Gram Form
 
@@ -35,7 +35,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Physics.GramWiring.DiagonalBound
+namespace Cathedral.Physics.DiagonalBound
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. WEIGHT PROPERTIES
@@ -666,7 +666,7 @@ is essential. In Lean basis (k≥1), the k=1 contribution pulls
 the total below 1 via a negative pressure term of order -ln(N).
 -/
 
-end Cathedral.Physics.GramWiring.DiagonalBound
+end Cathedral.Physics.DiagonalBound
 
 end
 

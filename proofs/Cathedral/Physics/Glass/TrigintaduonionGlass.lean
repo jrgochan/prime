@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/TrigintaduonionGlass.lean
+  Cathedral/Physics/Glass/TrigintaduonionGlass.lean
 
   ## The Trigintaduonion Glass: 32D Prime Democracy
 
@@ -42,7 +42,7 @@ import Cathedral.Physics.Glass.HopfGlassCycle
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Glass.TrigintaduonionGlass
+namespace Cathedral.Physics.TrigintaduonionGlass
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE CAYLEY-DICKSON TOWER (Dimension Arithmetic)
@@ -399,6 +399,6 @@ theorem glass_critical_line_is_boundary :
     ∃ n : ℕ, 1 / p ^ (2 ^ n * σ) < ε :=
   fun σ hσ p hp ε hε => glass_critical_strip_vanishes p hp σ hσ ε hε
 
-end Cathedral.Physics.Glass.TrigintaduonionGlass
+end Cathedral.Physics.TrigintaduonionGlass
 
 end

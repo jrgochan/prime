@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/DedekindBridge.lean
+  Cathedral/Physics/Bridges/DedekindBridge.lean
 
   # Dedekind Sums and the Vasyunin-Ramanujan Bridge
 
@@ -41,7 +41,7 @@ import Cathedral.Physics.Mertens.RamanujanBridge
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Bridges.DedekindBridge
+namespace Cathedral.Physics.DedekindBridge
 
 -- ════════════════════════════════════════════════
 -- §1. THE SAWTOOTH FUNCTION ((x))
@@ -685,6 +685,6 @@ lattice point argument (counting points in a triangle). The proof is
 ~100 lines of combinatorics and is standard (Rademacher & Grosswald 1972).
 -/
 
-end Cathedral.Physics.Bridges.DedekindBridge
+end Cathedral.Physics.DedekindBridge
 
 end

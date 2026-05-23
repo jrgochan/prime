@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticU1.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticU1.lean
 
   ## U(1) Gauge Symmetry: The Liouville Function
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GlassDistance.lean
+  Cathedral/Physics/Glass/GlassDistance.lean
 
   ## THE GLASS DISTANCE FORMULA
 
@@ -44,7 +44,7 @@ import Cathedral.LinearAlgebra.ShermanMorrison
 noncomputable section
 open Matrix Finset
 
-namespace Cathedral.Physics.Glass.GlassDistance
+namespace Cathedral.Physics.GlassDistance
 
 variable {N : ℕ}
 
@@ -278,4 +278,4 @@ theorem distance_decreasing (σ₁ σ₂ : ℝ) (h₁ : 0 < σ₁) (h : σ₁ �
 - RamanujanBridge.lean (the Glass identity G = R + 1/4)
 -/
 
-end Cathedral.Physics.Glass.GlassDistance
+end Cathedral.Physics.GlassDistance

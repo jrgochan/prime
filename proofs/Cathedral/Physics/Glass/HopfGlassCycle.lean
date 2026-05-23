@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/HopfGlassCycle.lean
+  Cathedral/Physics/Glass/HopfGlassCycle.lean
 
   ## The Hopf-Glass Cycle: Division Algebras and the ζ-Ladder
 

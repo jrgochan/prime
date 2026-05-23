@@ -1,5 +1,5 @@
 /-
-  Cathedral.Physics.Mertens.MertensBridge
+  Cathedral.Physics.MertensBridge
   ================================
 
   THE BRIDGE: Physics Layer ↔ PNT Layer

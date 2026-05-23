@@ -1,5 +1,5 @@
 /-
-  Cathedral.Physics.Mertens.MertensHarmony
+  Cathedral.Physics.MertensHarmony
   ================================
 
   The Three-Part Harmony of the Mertens Weights.

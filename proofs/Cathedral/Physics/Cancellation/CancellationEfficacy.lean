@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/CancellationEfficacy.lean
+  Cathedral/Physics/Cancellation/CancellationEfficacy.lean
 
   ## CANCELLATION EFFICACY: Why 99.96% Is Not An Accident
 
@@ -44,7 +44,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Cancellation.CancellationEfficacy
+namespace Cathedral.Physics.CancellationEfficacy
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. CANCELLATION EFFICACY
@@ -308,6 +308,6 @@ InhomogeneousWard:    ε(N) = D + W - 1 ≤ K/ln(N)     (RH)
 | 1 | `cancellationEfficacy` | η(N) = 1 - Λ(N) ∈ [0,1] |
 -/
 
-end Cathedral.Physics.Cancellation.CancellationEfficacy
+end Cathedral.Physics.CancellationEfficacy
 
 end

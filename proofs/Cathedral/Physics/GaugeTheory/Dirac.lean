@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/Dirac.lean
+  Cathedral/Physics/GaugeTheory/Dirac.lean
 
   ## THE 1+1D DIRAC EQUATION — The Scattering Sea
 

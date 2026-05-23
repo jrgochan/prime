@@ -69,7 +69,7 @@ noncomputable section
 open Real Polynomial Finset
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Gram.DarkGramMatrix
+namespace DarkGramMatrix
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE BERNOULLI-ZETA BRIDGE
@@ -1199,6 +1199,6 @@ Smith's 1876 Theorem formally certified in Lean 4 from atomic logic.
 ### Tier 5 Status: COMPLETE ✅ (May 14, 2026 — Smith's 1876 Theorem / 150-Year Echo)
 -/
 
-end Cathedral.Gram.DarkGramMatrix
+end DarkGramMatrix
 
 end

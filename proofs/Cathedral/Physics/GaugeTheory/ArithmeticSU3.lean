@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticSU3.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticSU3.lean
 
   ## SU(3) Gauge Symmetry: Color Confinement at p = 3
 

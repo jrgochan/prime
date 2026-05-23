@@ -473,8 +473,8 @@ theorem sqfreeReciprocal_lower_bound (N : ℕ) (hN : 3 ≤ N) :
 /-- The definitions match between this file and CoprimeDiagonal. -/
 theorem definitions_agree (N : ℕ) :
     sqfreeReciprocalSum N =
-    Cathedral.Physics.GramWiring.CoprimeDiagonal.squarefreeReciprocalSum N := by
-  unfold sqfreeReciprocalSum Cathedral.Physics.GramWiring.CoprimeDiagonal.squarefreeReciprocalSum
+    Cathedral.Physics.CoprimeDiagonal.squarefreeReciprocalSum N := by
+  unfold sqfreeReciprocalSum Cathedral.Physics.CoprimeDiagonal.squarefreeReciprocalSum
   rfl
 
 -- ════════════════════════════════════════════════════════════════

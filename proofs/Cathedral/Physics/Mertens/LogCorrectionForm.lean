@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/LogCorrectionForm.lean
+  Cathedral/Physics/Mertens/LogCorrectionForm.lean
 
   ## The Log Correction Quadratic Form (Term 2)
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SDualityGlass.lean
+  Cathedral/Physics/Glass/SDualityGlass.lean
 
   ## The S-Duality Glass: (1 - 1/p²)(1 + 1/p²) = 1 - 1/p⁴
 

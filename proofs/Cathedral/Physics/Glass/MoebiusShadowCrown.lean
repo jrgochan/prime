@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/MoebiusShadowCrown.lean
+  Cathedral/Physics/Glass/MoebiusShadowCrown.lean
 
   ## The Shadow Crown: Glass-Layered Möbius Factorization
 

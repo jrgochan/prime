@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ZetaMertensBridge.lean
+  Cathedral/Physics/Mertens/ZetaMertensBridge.lean
 
   ## THE ZETA-MERTENS BRIDGE: From Exact Zeros to Truncated Oscillation
 
@@ -54,7 +54,7 @@ noncomputable section
 open Complex Real Finset ArithmeticFunction Filter
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega ComplexConjugate
 
-namespace Cathedral.Physics.Mertens.ZetaMertensBridge
+namespace Cathedral.Physics.ZetaMertensBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE TRUNCATED DIRICHLET SUM AS A COMPLEX FUNCTION
@@ -504,6 +504,6 @@ decomposition (cpow_neg_half_it_re / cpow_neg_half_it_im), achieving
 full certification with zero sorry and zero axioms.
 -/
 
-end Cathedral.Physics.Mertens.ZetaMertensBridge
+end Cathedral.Physics.ZetaMertensBridge
 
 end

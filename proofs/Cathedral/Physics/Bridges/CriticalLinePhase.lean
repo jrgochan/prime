@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/CriticalLinePhase.lean
+  Cathedral/Physics/Bridges/CriticalLinePhase.lean
 
   ## THE 1D COLLAPSE: ξ(½+it) IS REAL
 
@@ -52,7 +52,7 @@ noncomputable section
 open Complex Real MeasureTheory Set HurwitzZeta
 open scoped ComplexConjugate
 
-namespace Cathedral.Physics.Bridges.CriticalLinePhase
+namespace Cathedral.Physics.CriticalLinePhase
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. SCHWARZ REFLECTION FOR completedRiemannZeta₀
@@ -392,6 +392,6 @@ zero axioms, zero sorry. The proof routes through:
 - `setIntegral_congr_fun` (integrand conjugation pointwise)
 -/
 
-end Cathedral.Physics.Bridges.CriticalLinePhase
+end Cathedral.Physics.CriticalLinePhase
 
 end

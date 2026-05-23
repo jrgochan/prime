@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/CoprimeDiagonal.lean
+  Cathedral/Physics/GramWiring/CoprimeDiagonal.lean
 
   ## The Squarefree Diagonal and Coprime Near-Neighbor Decomposition
 
@@ -53,7 +53,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Physics.GramWiring.CoprimeDiagonal
+namespace Cathedral.Physics.CoprimeDiagonal
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE SQUAREFREE RECIPROCAL SUM
@@ -564,6 +564,6 @@ The two axioms reference:
 - The **off-diagonal cancellation** theorem proves W ≤ K when D+W ≤ 1+K
 -/
 
-end Cathedral.Physics.GramWiring.CoprimeDiagonal
+end Cathedral.Physics.CoprimeDiagonal
 
 end

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticStandardModel.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticStandardModel.lean
 
   ## THE ARITHMETIC STANDARD MODEL: U(1) × SU(2) × SU(3)
 
@@ -88,7 +88,7 @@ noncomputable section
 open ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.GaugeTheory.StandardModel
+namespace Cathedral.Physics.StandardModel
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE COMPLETE GAUGE DICTIONARY
@@ -307,6 +307,6 @@ is consistent.
 - Team: Claude (Antigravity) · Gemini (The Theorist) · Jason (The Architect)
 -/
 
-end Cathedral.Physics.GaugeTheory.StandardModel
+end Cathedral.Physics.StandardModel
 
 end

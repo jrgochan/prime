@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/StrategyCAudit.lean
+  Cathedral/Physics/Strategy/StrategyCAudit.lean
 
   ## STRATEGY C INFRASTRUCTURE AUDIT
 
@@ -37,7 +37,7 @@ import Cathedral.Perron.MertensFromPerron
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Strategy.StrategyCAudit
+namespace Cathedral.Physics.StrategyCAudit
 
 -- ════════════════════════════════════════════════
 -- §1. INFRASTRUCTURE COMPILATION CHECK
@@ -126,6 +126,6 @@ Using:
 ### Estimated Lines: ~700 total (Phases 2-4)
 -/
 
-end Cathedral.Physics.Strategy.StrategyCAudit
+end Cathedral.Physics.StrategyCAudit
 
 end

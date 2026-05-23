@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/CotResQuadBridge.lean
+  Cathedral/Physics/Glass/CotResQuadBridge.lean
 
   ## The CotRes ↔ vᵀGv Bridge
 

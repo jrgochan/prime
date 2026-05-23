@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/InhomogeneousWard.lean
+  Cathedral/Physics/Cancellation/InhomogeneousWard.lean
 
   ## THE INHOMOGENEOUS WARD BOUND
 
@@ -56,7 +56,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Physics.Cancellation.InhomogeneousWard
+namespace Cathedral.Physics.InhomogeneousWard
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE INHOMOGENEOUS WARD BOUND (AXIOM ≡ RH)
@@ -312,6 +312,6 @@ cancellation: the vacuum energy (D) is huge, the counter-term
 | 7 | `inhomogeneous_implies_crown` | **🎓 THEOREM** |
 -/
 
-end Cathedral.Physics.Cancellation.InhomogeneousWard
+end Cathedral.Physics.InhomogeneousWard
 
 end

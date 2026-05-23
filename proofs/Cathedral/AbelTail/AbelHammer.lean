@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/AbelHammer.lean
+  Cathedral/AbelTail/AbelHammer.lean
 
   ## ABEL'S HAMMER — The Structural Overcancellation Theorem
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GramBridge.lean
+  Cathedral/Gram/GramBridge.lean
 
   ## The Gram↔Smith Bridge: Diagonal Domination
 

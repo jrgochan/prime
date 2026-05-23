@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/MoebiusSmithBridge.lean
+  Cathedral/Physics/GramWiring/MoebiusSmithBridge.lean
 
   ## The Möbius-Smith Bridge: Three Paths United
 
@@ -32,7 +32,7 @@ open Finset Filter
 namespace Cathedral.MoebiusSmithBridge
 
 -- Re-export for convenience
-open Cathedral.Physics.Mertens.RamanujanBridge
+open Cathedral.Physics.RamanujanBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. DEFINITIONS

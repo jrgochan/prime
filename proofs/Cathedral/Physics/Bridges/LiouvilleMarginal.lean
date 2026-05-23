@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/LiouvilleMarginal.lean
+  Cathedral/Physics/Bridges/LiouvilleMarginal.lean
 
   ## THE LIOUVILLE MARGINAL: Equidistribution Against the Gram Matrix
 
@@ -50,7 +50,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Bridges.LiouvilleMarginal
+namespace Cathedral.Physics.LiouvilleMarginal
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE LIOUVILLE-WEIGHTED WITNESS VECTOR
@@ -257,6 +257,6 @@ other proof paths.
 | 1 | `marginal_decay_bound` | ‖r‖∞ ≤ C/N (strictly weaker than Crown) |
 -/
 
-end Cathedral.Physics.Bridges.LiouvilleMarginal
+end Cathedral.Physics.LiouvilleMarginal
 
 end

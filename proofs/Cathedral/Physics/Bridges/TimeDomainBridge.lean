@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/TimeDomainBridge.lean
+  Cathedral/Physics/Bridges/TimeDomainBridge.lean
 
   ## THE TIME-DOMAIN BRIDGE: G_BD = 2M - 1/(3jk) + 2∫E/t³
 
@@ -48,7 +48,7 @@ import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 noncomputable section
 open Real MeasureTheory Finset Filter Topology
 
-namespace Cathedral.Physics.Bridges.TimeDomainBridge
+namespace Cathedral.Physics.TimeDomainBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. DEFINITIONS
@@ -1438,6 +1438,6 @@ near t=1, where the arithmetic is well-understood (only the initial
 Farey fractions contribute). This is the Theorist's key insight.
 -/
 
-end Cathedral.Physics.Bridges.TimeDomainBridge
+end Cathedral.Physics.TimeDomainBridge
 
 end

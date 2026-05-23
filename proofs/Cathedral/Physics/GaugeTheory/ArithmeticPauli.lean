@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticPauli.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticPauli.lean
 
   ## The Arithmetic Pauli Exclusion Principle
 

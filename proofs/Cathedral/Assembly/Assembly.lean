@@ -73,7 +73,7 @@ theorem rh_discrete_subseq : RiemannHypothesis :=
 -- UNIFIED EXPORTS: UNCONDITIONAL (Dark Sector)
 -- ════════════════════════════════════════════════
 
-open Cathedral.Gram.DarkGramMatrix in
+open DarkGramMatrix in
 /-- **DARK SECTOR SPECTRAL STABILITY** (Unconditional).
 
     The Dark Gram matrix G⁽²⁾ is positive-semidefinite:
@@ -90,7 +90,7 @@ theorem dark_gram_spectral_stability (N : ℕ) (x : Fin N → ℝ) :
       darkGramEntry_n2 (i.val + 2) (j.val + 2) * x i * x j :=
   dark_gram_quadratic_form_nonneg N x
 
-open Cathedral.Gram.DarkGramMatrix in
+open DarkGramMatrix in
 /-- **SMITH'S 1876 THEOREM** (Unconditional).
 
     The GCD⁴ matrix is positive-semidefinite:

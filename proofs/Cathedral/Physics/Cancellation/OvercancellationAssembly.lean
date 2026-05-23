@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/OvercancellationAssembly.lean
+  Cathedral/Physics/Cancellation/OvercancellationAssembly.lean
 
   ## THE OVERCANCELLATION ASSEMBLY — Connecting the Pipes
 

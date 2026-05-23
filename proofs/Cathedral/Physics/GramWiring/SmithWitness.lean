@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SmithWitness.lean
+  Cathedral/Physics/GramWiring/SmithWitness.lean
 
   ## THE SMITH WITNESS: Closing the Gap (CORRECTED)
 
@@ -45,7 +45,7 @@ import Mathlib.Tactic.FieldSimp
 noncomputable section
 open Finset
 
-namespace Cathedral.Physics.GramWiring.SmithWitness
+namespace Cathedral.Physics.SmithWitness
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE MÖBIUS FUNCTION AND EULER TOTIENT
@@ -978,4 +978,4 @@ MainChain.lean via the Mellin Crown architecture), this implies RH.
 - SumOfSquares.lean (σ_SOS structure — note: σ_SOS ≠ σ_witness)
 -/
 
-end Cathedral.Physics.GramWiring.SmithWitness
+end Cathedral.Physics.SmithWitness

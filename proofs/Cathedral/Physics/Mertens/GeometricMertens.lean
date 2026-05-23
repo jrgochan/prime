@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GeometricMertens.lean
+  Cathedral/Physics/Mertens/GeometricMertens.lean
 
   ## THE GEOMETRIC MERTENS BRIDGE: Sign Oscillation on the Critical Line
 
@@ -45,7 +45,7 @@ noncomputable section
 open Real Finset ArithmeticFunction Filter
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Mertens.GeometricMertens
+namespace Cathedral.Physics.GeometricMertens
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE CRITICAL-LINE MERTENS FUNCTION
@@ -335,6 +335,6 @@ Note: Matter fractions are sensitive to truncation depth.
 Shape and collapse metric are more stable observables.
 -/
 
-end Cathedral.Physics.Mertens.GeometricMertens
+end Cathedral.Physics.GeometricMertens
 
 end

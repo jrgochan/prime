@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GlassComparison.lean
+  Cathedral/Physics/Glass/GlassComparison.lean
 
   ## THE GLASS COMPARISON: R ↔ G⁽²⁾ Decomposition
 
@@ -38,7 +38,7 @@ import Cathedral.Physics.GramWiring.SmithSpectralGap
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Glass.GlassComparison
+namespace Cathedral.Physics.GlassComparison
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE EXACT QUADRATIC FORM IDENTITY
@@ -219,6 +219,6 @@ theorem dark_spectral_gap_explicit (N : ℕ) (x : Fin N → ℝ) (hx : x ≠ 0) 
   proving G⁽²⁾ is PD without needing the comparison operator at all.
 -/
 
-end Cathedral.Physics.Glass.GlassComparison
+end Cathedral.Physics.GlassComparison
 
 end

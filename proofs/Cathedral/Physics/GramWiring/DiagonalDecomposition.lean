@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/DiagonalDecomposition.lean
+  Cathedral/Physics/GramWiring/DiagonalDecomposition.lean
 
   ## The Diagonal Decomposition: Why ln(2π) Governs the Convergence
 

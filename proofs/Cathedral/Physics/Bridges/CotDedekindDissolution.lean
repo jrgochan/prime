@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/CotDedekindDissolution.lean
+  Cathedral/Physics/Bridges/CotDedekindDissolution.lean
 
   ## The Dissolution of Entanglement
 
@@ -28,7 +28,7 @@ import Mathlib.Tactic.Positivity
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 
 -- We import the existing certified theorems
--- import Cathedral.Physics.Bridges.DedekindBridge       -- dedekind_reciprocity
+-- import Cathedral.Physics.DedekindBridge       -- dedekind_reciprocity
 -- import Cathedral.Vasyunin.Defs                -- vasyuninSum
 
 noncomputable section

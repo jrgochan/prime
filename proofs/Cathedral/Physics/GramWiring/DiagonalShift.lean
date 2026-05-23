@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/DiagonalShift.lean
+  Cathedral/Physics/GramWiring/DiagonalShift.lean
 
   ## THE −1/3 DIAGONAL SHIFT: G_V(k,k) − G^(1)(k,k) → −1/3
 
@@ -45,7 +45,7 @@ import Cathedral.Physics.GramWiring.DiagonalBound
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.GramWiring.DiagonalShift
+namespace Cathedral.Physics.DiagonalShift
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE BERNOULLI-1 DIAGONAL IS CONSTANT 1/3
@@ -305,6 +305,6 @@ Key numerical bounds used:
 - log(2) < 347/500 (from Mathlib log_two_lt_d9)
 -/
 
-end Cathedral.Physics.GramWiring.DiagonalShift
+end Cathedral.Physics.DiagonalShift
 
 end

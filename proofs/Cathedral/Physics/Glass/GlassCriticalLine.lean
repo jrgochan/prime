@@ -55,7 +55,7 @@ This is a **roadmap**, not a proof. The sorry marks the wall.
 
 noncomputable section
 
-namespace Cathedral.Physics.Glass.GlassCriticalLine
+namespace Cathedral.Physics.GlassCriticalLine
 
 open Complex
 
@@ -244,6 +244,6 @@ The gap is:
 The Cathedral sees the wall clearly. The wall is real.
 -/
 
-end Cathedral.Physics.Glass.GlassCriticalLine
+end Cathedral.Physics.GlassCriticalLine
 
 end

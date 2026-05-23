@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/MertensRamanujan.lean
+  Cathedral/Physics/Mertens/MertensRamanujan.lean
 
   ## PHASE 3: MERTENS-DIVISOR BRIDGE
 
@@ -41,7 +41,7 @@ import Cathedral.AbelTail.MertensBridge
 noncomputable section
 open Real Finset ArithmeticFunction Filter
 
-namespace Cathedral.Physics.Mertens.MertensRamanujan
+namespace Cathedral.Physics.MertensRamanujan
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. DIVISOR COEFFICIENT AS RESTRICTED MERTENS SUM
@@ -271,6 +271,6 @@ mertens_bound_eps (PROVED)     AbelEngine (PROVED)
 ```
 -/
 
-end Cathedral.Physics.Mertens.MertensRamanujan
+end Cathedral.Physics.MertensRamanujan
 
 end

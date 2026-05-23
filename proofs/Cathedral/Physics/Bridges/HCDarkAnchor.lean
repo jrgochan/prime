@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/HCDarkAnchor.lean
+  Cathedral/Physics/Bridges/HCDarkAnchor.lean
 
   ## The HC-Dark Spectral Anchor
 
@@ -57,7 +57,7 @@ import Mathlib.NumberTheory.Divisors
 
 noncomputable section
 open Finset Real
-open Cathedral.Gram.DarkGramMatrix
+open DarkGramMatrix
 open Cathedral.Covariance
 
 -- ════════════════════════════════════════════════════════════════

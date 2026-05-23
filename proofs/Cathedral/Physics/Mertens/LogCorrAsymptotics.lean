@@ -1,5 +1,5 @@
 /-
-  Cathedral.Physics.Mertens.LogCorrAsymptotics
+  Cathedral.Physics.LogCorrAsymptotics
   =====================================
 
   STEP 3 OF PATH 4.5: LogCorr Asymptotic Bounds

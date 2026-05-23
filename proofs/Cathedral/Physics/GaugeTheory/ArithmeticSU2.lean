@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticSU2.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticSU2.lean
 
   ## SU(2) Gauge Symmetry: Electroweak Parity Breaking at p = 2
 
@@ -32,7 +32,7 @@
   arithmetic vacuum.
 
   Status: PROVED. Zero axioms. NOT on crown path (Physics beacon).
-  Dependencies: Cathedral.Vasyunin.Defs, Cathedral.Physics.GaugeTheory.ArithmeticPauli
+  Dependencies: Cathedral.Vasyunin.Defs, Cathedral.Physics.ArithmeticPauli
   Created: May 13, 2026 — Exploration 36
 -/
 

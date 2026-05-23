@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/WardIdentity.lean
+  Cathedral/Physics/Cancellation/WardIdentity.lean
 
   ## THE ARITHMETIC WARD IDENTITY
 
@@ -50,7 +50,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Cancellation.WardIdentity
+namespace Cathedral.Physics.WardIdentity
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE NOETHER CURRENT (PARITY CHARGE)
@@ -441,6 +441,6 @@ D(N) = D_even + D_odd                  Parity-split diagonal [diagonal_parity_sp
 | 4 | `paritySignedOffDiagonal` | Ward current W(N) |
 -/
 
-end Cathedral.Physics.Cancellation.WardIdentity
+end Cathedral.Physics.WardIdentity
 
 end

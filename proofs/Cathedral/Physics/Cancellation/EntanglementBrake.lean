@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/EntanglementBrake.lean
+  Cathedral/Physics/Cancellation/EntanglementBrake.lean
 
   ## The Perfect Square Brake: vᵀE_const·v = −S²
 

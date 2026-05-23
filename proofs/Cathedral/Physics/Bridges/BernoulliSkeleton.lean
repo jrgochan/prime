@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/BernoulliSkeleton.lean
+  Cathedral/Physics/Bridges/BernoulliSkeleton.lean
 
   ## The B₁ Arithmetic Skeleton
 
@@ -38,7 +38,7 @@ import Cathedral.Defs
 noncomputable section
 open Real Finset BigOperators
 
-namespace Cathedral.Physics.Bridges.BernoulliSkeleton
+namespace Cathedral.Physics.BernoulliSkeleton
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE B₁ SKELETON DEFINITION
@@ -497,4 +497,4 @@ Smith's 1876 Theorem for gcd² formally certified in Lean 4.
 | 1 | `moebius_annihilation` | THE target — Möbius annihilation of L₁ |
 -/
 
-end Cathedral.Physics.Bridges.BernoulliSkeleton
+end Cathedral.Physics.BernoulliSkeleton

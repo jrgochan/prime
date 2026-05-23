@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/WoodburyCondensate.lean
+  Cathedral/Physics/Cancellation/WoodburyCondensate.lean
 
   ## THE WOODBURY CONDENSATE — Spectral Decoupling of the Vacuum
 

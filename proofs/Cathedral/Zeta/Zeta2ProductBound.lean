@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/Zeta2ProductBound.lean
+  Cathedral/Zeta/Zeta2ProductBound.lean
 
   ## Graduation of zeta2Product_lower_bound
 
@@ -27,7 +27,8 @@ set_option autoImplicit false
 noncomputable section
 open Real Finset Filter Topology
 
-namespace Cathedral.GlassEulerConvergence
+namespace Cathedral.Zeta.Zeta2ProductBound
+open Cathedral.GlassEulerConvergence
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. LOGARITHMIC BOUND: ln(1-x) ≥ -2x for 0 ≤ x ≤ 1/2
@@ -125,4 +126,4 @@ theorem zeta2Product_lower_bound_proved :
         intro p hp
         simp only [mem_filter] at hp
         exact (log_factor_lower_bound p hp.2).le
-end Cathedral.GlassEulerConvergence
+end Cathedral.Zeta.Zeta2ProductBound

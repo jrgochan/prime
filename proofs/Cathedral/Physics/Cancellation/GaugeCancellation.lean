@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GaugeCancellation.lean
+  Cathedral/Physics/Cancellation/GaugeCancellation.lean
 
   ## Gauge Cancellation in the Gram Quadratic Form
 
@@ -67,7 +67,7 @@ noncomputable section
 open Real Matrix Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Cancellation.GaugeCancellation
+namespace Cathedral.Physics.GaugeCancellation
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE LOG-CUTOFF WITNESS STRUCTURE
@@ -421,6 +421,6 @@ improves, directly tied to equidistribution of Liouville's function.
   - In Lean basis (k=1..N-1), the k=1 anchor pulls vᵀGv below 1
 -/
 
-end Cathedral.Physics.Cancellation.GaugeCancellation
+end Cathedral.Physics.GaugeCancellation
 
 end

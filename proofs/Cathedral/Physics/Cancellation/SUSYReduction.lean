@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SUSYReduction.lean
+  Cathedral/Physics/Cancellation/SUSYReduction.lean
 
   ## THE SUSY REDUCTION: Crown Axiom ↔ Off-Diagonal Cancellation
 
@@ -57,7 +57,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Physics.Cancellation.SUSYReduction
+namespace Cathedral.Physics.SUSYReduction
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE WITNESS-ENTRY CORRESPONDENCE
@@ -373,6 +373,6 @@ The Crown Axiom is EQUIVALENT to the SUSY cancellation bound.
 The physical content is transparent: RH ⟺ arithmetic SUSY.
 -/
 
-end Cathedral.Physics.Cancellation.SUSYReduction
+end Cathedral.Physics.SUSYReduction
 
 end

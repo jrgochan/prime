@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GlassEulerConvergence.lean
+  Cathedral/Physics/Glass/GlassEulerConvergence.lean
 
   ## The Glass₁ Euler Product Vanishes — Mertens Connection
 

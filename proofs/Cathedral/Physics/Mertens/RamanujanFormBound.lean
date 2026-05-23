@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/RamanujanFormBound.lean
+  Cathedral/Physics/Mertens/RamanujanFormBound.lean
 
   ## THE RAMANUJAN FORM BOUND: vᵀRv ≤ 1 + K/logN under RH
 
@@ -39,7 +39,7 @@ import Cathedral.MellinBridge.BDWeights
 noncomputable section
 open Real Finset ArithmeticFunction
 
-namespace Cathedral.Physics.Mertens.RamanujanFormBound
+namespace Cathedral.Physics.RamanujanFormBound
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE SMITH DECOMPOSITION OF THE RAMANUJAN FORM
@@ -389,6 +389,6 @@ mertens_bound_eps                gcd2_sos_decomposition
 ```
 -/
 
-end Cathedral.Physics.Mertens.RamanujanFormBound
+end Cathedral.Physics.RamanujanFormBound
 
 end

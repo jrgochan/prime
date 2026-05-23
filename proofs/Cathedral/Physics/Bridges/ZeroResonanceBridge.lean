@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ZeroResonanceBridge.lean
+  Cathedral/Physics/Bridges/ZeroResonanceBridge.lean
 
   ## THE ZERO RESONANCE BRIDGE: cos²θ Oscillatory Decomposition
 
@@ -43,7 +43,7 @@ import Mathlib.Topology.Algebra.InfiniteSum.Basic
 noncomputable section
 open Real Finset Filter Topology
 
-namespace Cathedral.Physics.Bridges.ZeroResonanceBridge
+namespace Cathedral.Physics.ZeroResonanceBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE ZERO RESONANCE AXIOM
@@ -227,4 +227,4 @@ positions — the zeros control the fine structure but not the convergence.
 | 5 | `drop_tsum_finite` | 🎓 PROVED (chains summable_drops_from_trend) |
 -/
 
-end Cathedral.Physics.Bridges.ZeroResonanceBridge
+end Cathedral.Physics.ZeroResonanceBridge

@@ -117,6 +117,7 @@ lean_lib «Cathedral» where
     `Cathedral.Structural.Eigenvalue,
     `Cathedral.Structural.DivisorDropBound,
     `Cathedral.Structural.TailSumBound,
+    `Cathedral.Structural.PrimeFractal,
     `Cathedral.Structural.Structural,
     -- Mellin bridge
     `Cathedral.MellinBridge.Basic,

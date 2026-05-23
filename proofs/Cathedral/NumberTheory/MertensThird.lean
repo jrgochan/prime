@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/MertensThird.lean
+  Cathedral/NumberTheory/MertensThird.lean
 
   ## Mertens' Third Theorem: The Rate of the Light
 

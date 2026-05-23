@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/BilinearMertens.lean
+  Cathedral/Physics/Mertens/BilinearMertens.lean
 
   ## THE BILINEAR MERTENS BRIDGE — D-W Compensation via PNT Rate
 
@@ -57,7 +57,7 @@ noncomputable section
 open Real Finset ArithmeticFunction Filter
 open scoped ArithmeticFunction.Moebius
 
-namespace Cathedral.Physics.Mertens.BilinearMertens
+namespace Cathedral.Physics.BilinearMertens
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. MERTENS RATE — From PNT to quantitative Mertens
@@ -413,6 +413,6 @@ The SUSY approach succeeds because:
 | 7 | `ward_from_pnt` | **🎓 THEOREM** (delegates to #6) |
 -/
 
-end Cathedral.Physics.Mertens.BilinearMertens
+end Cathedral.Physics.BilinearMertens
 
 end

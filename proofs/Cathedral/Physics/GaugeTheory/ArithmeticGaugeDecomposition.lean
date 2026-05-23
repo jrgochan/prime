@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/ArithmeticGaugeDecomposition.lean
+  Cathedral/Physics/GaugeTheory/ArithmeticGaugeDecomposition.lean
 
   ## Gauge Decomposition of the Quadratic Form
 
@@ -37,7 +37,7 @@ noncomputable section
 open ArithmeticFunction Finset
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.GaugeTheory.GaugeDecomposition
+namespace Cathedral.Physics.GaugeDecomposition
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE PAULI FILTER: SQUAREFREE SUPPORT
@@ -239,6 +239,6 @@ vᵀCv would NOT decay.
 | 10 | `gauge_split` | **🎓 THEOREM** (the decomposition) |
 -/
 
-end Cathedral.Physics.GaugeTheory.GaugeDecomposition
+end Cathedral.Physics.GaugeDecomposition
 
 end

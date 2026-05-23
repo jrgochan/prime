@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/RowCancellation.lean
+  Cathedral/Physics/Cancellation/RowCancellation.lean
 
   ## ROW CANCELLATION — Global Ward Bound from Per-Row Equidistribution
 
@@ -47,7 +47,7 @@ import Cathedral.Physics.Bridges.LiouvilleMarginal
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Cancellation.RowCancellation
+namespace Cathedral.Physics.RowCancellation
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. ROW TOTAL — The absolute weight seen by each row
@@ -247,6 +247,6 @@ The per-row version is the equidistribution statement.
 | 3 | `totalAbsWeight` | Σ |lw(i)| |
 -/
 
-end Cathedral.Physics.Cancellation.RowCancellation
+end Cathedral.Physics.RowCancellation
 
 end

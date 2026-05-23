@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SmithFranelBridge.lean
+  Cathedral/Physics/GramWiring/SmithFranelBridge.lean
 
   ## THE UNCONDITIONAL FRANEL CONVERGENCE THEOREM
 
@@ -30,7 +30,7 @@ import Cathedral.Physics.Glass.GlassDistance
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.GramWiring.SmithFranelBridge
+namespace Cathedral.Physics.SmithFranelBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE UNCONDITIONAL CONVERGENCE THEOREM
@@ -193,6 +193,6 @@ Báez-Duarte (2003) chose {1/(kx)} precisely because it is the MINIMAL
 function system whose completeness is EQUIVALENT to RH.
 -/
 
-end Cathedral.Physics.GramWiring.SmithFranelBridge
+end Cathedral.Physics.SmithFranelBridge
 
 end

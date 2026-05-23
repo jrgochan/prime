@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SpectralGap.lean
+  Cathedral/Physics/Strategy/SpectralGap.lean
 
   ## THE SPECTRAL GAP BRIDGE: Ward Identity ⟹ Spectral Decay
 
@@ -64,7 +64,7 @@ noncomputable section
 open Real Finset ArithmeticFunction
 open scoped ArithmeticFunction.Moebius ArithmeticFunction.Omega
 
-namespace Cathedral.Physics.Strategy.SpectralGap
+namespace Cathedral.Physics.SpectralGap
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE SPECTRAL RAYLEIGH BOUND (Spectral → Gram Form)
@@ -422,6 +422,6 @@ SUSY cancellation (axiom)          spectral gap decay rate
 ```
 -/
 
-end Cathedral.Physics.Strategy.SpectralGap
+end Cathedral.Physics.SpectralGap
 
 end

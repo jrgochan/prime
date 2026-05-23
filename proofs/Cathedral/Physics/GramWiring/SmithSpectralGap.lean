@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SmithSpectralGap.lean
+  Cathedral/Physics/GramWiring/SmithSpectralGap.lean
 
   THE SMITH SPECTRAL GAP: G⁽²⁾ is Positive Definite
 
@@ -14,9 +14,9 @@
 import Cathedral.Gram.DarkGramMatrix
 
 noncomputable section
-open Real Finset Cathedral.Gram.DarkGramMatrix
+open Real Finset DarkGramMatrix
 
-namespace Cathedral.Physics.GramWiring.SmithSpectralGap
+namespace Cathedral.Physics.SmithSpectralGap
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. GENERALIZED DIVISOR TRANSFORM (base offset b)
@@ -276,6 +276,6 @@ theorem dark_spectral_gap (N : ℕ) (x : Fin N → ℝ) (hx : x ≠ 0) :
 ### Custom Axioms: 0
 -/
 
-end Cathedral.Physics.GramWiring.SmithSpectralGap
+end Cathedral.Physics.SmithSpectralGap
 
 end

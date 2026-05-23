@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/RamanujanBridge.lean
+  Cathedral/Physics/Mertens/RamanujanBridge.lean
 
   ## THE RAMANUJAN GRAM MATRIX: gcd(j,k)²/(12·j·k)
 
@@ -56,7 +56,7 @@ import Cathedral.Spectral.RamanujanInnerProduct
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Mertens.RamanujanBridge
+namespace Cathedral.Physics.RamanujanBridge
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE RAMANUJAN GRAM ENTRY
@@ -648,6 +648,6 @@ The rank-1 term (1/4)·(Σvₖ)² vanishes by PNT (Σμ(k)/k → 0).
 What remains is vᵀRv — the Ramanujan residual, pure GCD arithmetic.
 -/
 
-end Cathedral.Physics.Mertens.RamanujanBridge
+end Cathedral.Physics.RamanujanBridge
 
 end

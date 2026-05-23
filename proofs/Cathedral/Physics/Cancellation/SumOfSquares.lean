@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/SumOfSquares.lean
+  Cathedral/Physics/Cancellation/SumOfSquares.lean
 
   ## THE SUM-OF-SQUARES STRUCTURE OF THE GLASS DISTANCE
 
@@ -38,7 +38,7 @@ import Cathedral.Physics.Mertens.RamanujanBridge
 noncomputable section
 open Finset
 
-namespace Cathedral.Physics.Cancellation.SumOfSquares
+namespace Cathedral.Physics.SumOfSquares
 
 -- ════════════════════════════════════════════════════════════════
 -- §1. THE WEIGHTED MERTENS FUNCTION
@@ -283,4 +283,4 @@ theorem sigmaSOS_ge_linear (N_val : ℕ) (hN : 2 ≤ N_val) (μ : ℕ → ℤ)
 - RamanujanBridge.lean (J₂ definitions and positivity)
 -/
 
-end Cathedral.Physics.Cancellation.SumOfSquares
+end Cathedral.Physics.SumOfSquares

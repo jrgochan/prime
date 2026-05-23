@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/GlassFiberCotRes.lean
+  Cathedral/Physics/Glass/GlassFiberCotRes.lean
 
   ## Glass-Fiber Decomposition of the Cotangent Residual
 

@@ -1,5 +1,5 @@
 /-
-  Cathedral/Physics/BridgeGap.lean
+  Cathedral/Physics/Bridges/BridgeGap.lean
 
   ## THE BRIDGE GAP: G_Vasyunin = R_Ramanujan + Δ
 
@@ -36,7 +36,7 @@ import Cathedral.Physics.Mertens.RamanujanBridge
 noncomputable section
 open Real Finset
 
-namespace Cathedral.Physics.Bridges.BridgeGap
+namespace Cathedral.Physics.BridgeGap
 
 -- Re-export notation
 local notation "γ" => Real.eulerMascheroniConstant
@@ -229,6 +229,6 @@ theorem gap_diag_explicit (N : ℕ) (v : Fin N → ℝ) :
 ```
 -/
 
-end Cathedral.Physics.Bridges.BridgeGap
+end Cathedral.Physics.BridgeGap
 
 end
