@@ -406,6 +406,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.SDualityGlass,
     -- Hopf Glass Cycle (Cayley-Dickson tower ζ(2)↔ζ(16), Exploration 36)
     `Cathedral.Physics.HopfGlassCycle,
+    -- Trigintaduonion Glass (32D/64D Prime Democracy, tower convergence, Exploration 36)
+    `Cathedral.Physics.TrigintaduonionGlass,
     -- Möbius Shadow Crown (glass-layered factorization → crown bound)
     `Cathedral.Physics.MoebiusShadowCrown,
     -- Mertens Third (∏(1-1/p) ~ e^{-γ}/ln(N), shadow rate)

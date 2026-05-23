@@ -1,6 +1,7 @@
 {
-  "name": "core-engine",
+  "name": "core-engine-explorer",
   "type": "module",
+  "description": "HYPERZETA Explorer — Cayley-Dickson Tower sedenion engine with 4 view modes",
   "version": "0.1.0",
   "files": [
     "core_engine_bg.wasm",

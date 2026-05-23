@@ -73,7 +73,7 @@ const VIEW_MODES: ViewMode[] = [
     id: 2,
     name: "GLASS STAIRCASE",
     subtitle: "Cayley-Dickson Layer Decomposition",
-    formula: "ℝ → ℂ → ℍ → 𝕆 → 𝕊",
+    formula: "ℝ → ℂ → ℍ → 𝕆 → 𝕊 → 𝕋",
     coreColor: "#ff8800",
     edgeColor: "#442200",
     hotkey: "3",
@@ -96,18 +96,29 @@ const VIEW_MODES: ViewMode[] = [
     edgeColor: "#664400",
     hotkey: "5",
   },
+  {
+    id: 5,
+    name: "PRIME DEMOCRACY",
+    subtitle: "S³¹ Zero Distribution · Trigintaduonion",
+    formula: "Z(t) = Σ sin(t·ln pₖ)·eₖ  |  31 primes, 31 dimensions",
+    coreColor: "#00ffdd",
+    edgeColor: "#004444",
+    hotkey: "6",
+  },
 ];
 
-// Layer colors for the Glass Staircase
 const LAYER_COLORS = [
   "#ffffff", // ℝ — white (real, pure)
   "#00aaff", // ℂ — blue (complex)
   "#ffaa00", // ℍ — gold (quaternion)
   "#00ff88", // 𝕆 — green (octonion)
   "#ff00aa", // 𝕊 — magenta (sedenion)
+  "#00ffdd", // 𝕋 — cyan (trigintaduonion)
+  "#ff6600", // 𝕍 — orange (64-nion)
+  "#ffffcc", // ∞ — white-gold (glass clears)
 ];
 
-const LAYER_NAMES = ["ℝ", "ℂ", "ℍ", "𝕆", "𝕊"];
+const LAYER_NAMES = ["ℝ", "ℂ", "ℍ", "𝕆", "𝕊", "𝕋", "𝕍", "∞"];
 
 // ═══════════════════════════════════════════════════════
 // SPECTROMETER GRID COMPONENT
@@ -852,8 +863,8 @@ function ExplorerCloud({
         const idx = i * 3;
 
         if (mode.id === 2) {
-          // Glass Staircase: color by dominant CD layer
-          const layerIdx = Math.min(Math.max(Math.round(layerArray[idx]), 0), 4);
+          // Glass Staircase: color by dominant CD layer (6 layers now)
+          const layerIdx = Math.min(Math.max(Math.round(layerArray[idx]), 0), 5);
           color.copy(LAYER_COLOR_OBJS[layerIdx]);
         } else if (mode.id === 3) {
           // Division by Zero: color by Möbius sign
@@ -865,8 +876,18 @@ function ExplorerCloud({
           } else {
             color.setRGB(brightness, brightness * 0.15, brightness * 0.25); // red = μ=-1
           }
+        } else if (mode.id === 5) {
+          // Prime Democracy: color by dominant prime direction
+          // Map prime index (0-30) to a hue cycle
+          const primeIdx = Math.round(layerArray[idx]) % 31;
+          const hue = primeIdx / 31.0;
+          const energy = Math.min(layerArray[idx + 1], 1.0);
+          const realPart = layerArray[idx + 2]; // cos(t·ln2)
+          const sat = 0.7 + energy * 0.3;
+          const light = 0.4 + Math.abs(realPart) * 0.4;
+          color.setHSL(hue, sat, light);
         } else {
-          // Origin / Teardrop: gradient from core to edge based on distance
+          // Origin / Teardrop / Spectrometer: gradient from core to edge
           const x = memoryArray[idx], y = memoryArray[idx + 1], z = memoryArray[idx + 2];
           const dist = Math.sqrt(x * x + y * y + z * z);
           const t = Math.min(dist / 30, 1);
@@ -917,7 +938,8 @@ export default function Home() {
   const [particleCount, setParticleCount] = useState(DEFAULT_PARTICLE_COUNT);
   const [speed, setSpeed] = useState(1);
   const [detectedZeros, setDetectedZeros] = useState<DetectedZero[]>([]);
-  const [layerEnergies, setLayerEnergies] = useState([0, 0, 0, 0, 0]);
+  const [layerEnergies, setLayerEnergies] = useState([0, 0, 0, 0, 0, 0, 0, 0]);
+  const [towerLevel, setTowerLevel] = useState(5); // 0=ℝ .. 7=∞
   const [paused, setPaused] = useState(false);
   const stepRef = useRef(false);
   const [jetInfo, setJetInfo] = useState<JetInfo | null>(null);
@@ -1004,6 +1026,13 @@ export default function Home() {
     }
   }, [modeIdx, hyperSystem]);
 
+  // Sync tower level to engine
+  useEffect(() => {
+    if (hyperSystem) {
+      hyperSystem.engine.set_tower_level(towerLevel);
+    }
+  }, [towerLevel, hyperSystem]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1011,7 +1040,7 @@ export default function Home() {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
 
       const num = parseInt(e.key);
-      if (num >= 1 && num <= 5) {
+      if (num >= 1 && num <= 6) {
         setModeIdx(num - 1);
         return;
       }
@@ -1050,14 +1079,15 @@ export default function Home() {
   useEffect(() => {
     if (!hyperSystem) return;
     const interval = setInterval(() => {
+      try {
       const c = hyperSystem.engine.get_collapse_metric();
       const lambda = hyperSystem.engine.get_lambda();
       const t = 10.0 + lambda * 2.0;
 
-      // Update layer energies for Glass Staircase
-      if (modeIdx === 2) {
-        const energies = [0, 1, 2, 3, 4].map((i) =>
-          hyperSystem.engine.get_layer_energy(i)
+      // Update layer energies for Glass Staircase and Prime Democracy
+      if (modeIdx === 2 || modeIdx === 5) {
+        const energies = [0, 1, 2, 3, 4, 5, 6, 7].map((i) =>
+          i < 6 ? hyperSystem.engine.get_layer_energy(i) : 0
         );
         setLayerEnergies(energies);
       }
@@ -1094,6 +1124,7 @@ export default function Home() {
           shapes: emptyShapeCounts(), jetEvents: 0, maxJets: 0, peakFlatness: 0,
         };
       }
+      } catch (_) { /* engine freed during hot reload */ }
     }, 50);
     return () => clearInterval(interval);
   }, [hyperSystem, modeIdx]);
@@ -1363,6 +1394,168 @@ export default function Home() {
           <div className="mt-4 flex flex-col gap-1">
             <p className="text-xs opacity-50 border-b border-white/10 pb-1 mb-1">
               CAYLEY-DICKSON ENERGY DISTRIBUTION
+            </p>
+            {LAYER_NAMES.map((name, idx) => {
+              const maxE = Math.max(...layerEnergies, 0.001);
+              const pct = (layerEnergies[idx] / maxE) * 100;
+              return (
+                <div key={idx} className="flex items-center gap-2 text-xs">
+                  <span className="w-4 font-bold" style={{ color: LAYER_COLORS[idx] }}>
+                    {name}
+                  </span>
+                  <div className="flex-1 h-2 bg-white/5 rounded overflow-hidden">
+                    <div
+                      className="h-full rounded transition-all duration-300"
+                      style={{
+                        width: `${pct}%`,
+                        backgroundColor: LAYER_COLORS[idx],
+                        opacity: 0.8,
+                      }}
+                    />
+                  </div>
+                  <span className="opacity-40 w-12 text-right tabular-nums">
+                    {layerEnergies[idx].toFixed(2)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+         {/* Prime Democracy: Prime harmonic radar + stats */}
+        {modeIdx === 5 && hyperSystem && (
+          <div className="mt-4 flex flex-col gap-1">
+            <p className="text-xs opacity-50 border-b border-white/10 pb-1 mb-1">
+              PRIME DEMOCRACY — {LAYER_NAMES[towerLevel]} LEVEL
+            </p>
+            {/* Tower Level Slider */}
+            <div className="flex flex-col gap-1 mb-2 pointer-events-auto">
+              <div className="flex items-center gap-1">
+                {LAYER_NAMES.map((name, idx) => {
+                  const dims = [1, 2, 4, 8, 16, 32, 64, 128][idx];
+                  const primes = [0, 1, 3, 7, 15, 31, 63, 127][idx];
+                  const isActive = idx <= towerLevel;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setTowerLevel(idx)}
+                      className="flex-1 py-1 text-center transition-all duration-300 rounded"
+                      style={{
+                        backgroundColor: idx === towerLevel
+                          ? LAYER_COLORS[idx] + '33'
+                          : isActive ? 'rgba(255,255,255,0.05)' : 'transparent',
+                        border: idx === towerLevel
+                          ? `1px solid ${LAYER_COLORS[idx]}`
+                          : '1px solid rgba(255,255,255,0.1)',
+                        color: isActive ? LAYER_COLORS[idx] : '#333',
+                        fontSize: '10px',
+                        fontWeight: idx === towerLevel ? 'bold' : 'normal',
+                      }}
+                      title={`${name} — dim ${dims}, ${primes} primes`}
+                    >
+                      <div>{name}</div>
+                      <div style={{ fontSize: '7px', opacity: 0.5 }}>{dims}D</div>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-[10px] opacity-30 text-center">
+                {[0, 1, 3, 7, 15, 31, 63, 127][towerLevel]} prime{[0, 1, 3, 7, 15, 31, 63, 127][towerLevel] !== 1 ? 's' : ''} active · dim {[1, 2, 4, 8, 16, 32, 64, 128][towerLevel]} · {['real axis only', 'S¹ circle', 'S³ sphere', 'S⁷ exotic', 'S¹⁵ sedenion', 'S³¹ democracy', 'S⁶³ full democracy', 'S¹²⁷ glass clears'][towerLevel]}
+              </p>
+            </div>
+            {/* SVG Radar chart of prime energies */}
+            <div className="flex justify-center">
+              <svg width={220} height={220} viewBox="-110 -110 220 220">
+                {/* Background circles */}
+                {[30, 60, 90].map(r => (
+                  <circle key={r} cx={0} cy={0} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={0.5} />
+                ))}
+                {/* Prime spokes + energy polygon */}
+                {(() => {
+                  const PRIMES = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,709];
+                  const activePrimes = [0, 1, 3, 7, 15, 31, 63, 127][towerLevel];
+                  const n = 127;
+                  const points: string[] = [];
+                  const spokes: React.JSX.Element[] = [];
+                  for (let k = 0; k < n; k++) {
+                    const angle = (k / n) * Math.PI * 2 - Math.PI / 2;
+                    const isActive = k < activePrimes;
+                    const energy = isActive ? hyperSystem.engine.get_prime_energy(k) : 0;
+                    const r = Math.min(energy * activePrimes * 90 / Math.max(activePrimes, 1), 95);
+                    const x = Math.cos(angle) * (isActive ? r : 0);
+                    const y = Math.sin(angle) * (isActive ? r : 0);
+                    points.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+                    // Spoke line
+                    const sx = Math.cos(angle) * 95;
+                    const sy = Math.sin(angle) * 95;
+                    const hue = (k / n) * 360;
+                    const spokeOpacity = isActive ? 0.2 : 0.04;
+                    const labelOpacity = isActive ? (n > 64 ? 0.4 : 0.8) : 0.15;
+                    const showLabel = n <= 63 || k % 8 === 0 || k === n - 1;
+                    spokes.push(
+                      <g key={k}>
+                        <line x1={0} y1={0} x2={sx} y2={sy} stroke={`hsla(${hue},60%,50%,${spokeOpacity})`} strokeWidth={isActive ? (n > 64 ? 0.4 : 0.8) : 0.3} />
+                        {showLabel && (
+                          <text x={sx * 1.12} y={sy * 1.12} fill={`hsla(${hue},70%,65%,${labelOpacity})`}
+                            fontSize={k < 10 ? 5 : k < 31 ? 4 : k < 63 ? 3.5 : 3} textAnchor="middle" dominantBaseline="central"
+                            fontWeight={isActive ? 'bold' : 'normal'}>
+                            {PRIMES[k]}
+                          </text>
+                        )}
+                        {/* Glow dot on active spokes */}
+                        {isActive && r > 5 && (
+                          <circle cx={x} cy={y} r={n > 64 ? 1.2 : 2} fill={`hsla(${hue},80%,60%,0.7)`} />
+                        )}
+                      </g>
+                    );
+                  }
+                  const towerColor = LAYER_COLORS[towerLevel];
+                  return (
+                    <>
+                      {spokes}
+                      <polygon
+                        points={points.join(' ')}
+                        fill={towerColor + '1a'}
+                        stroke={towerColor}
+                        strokeWidth={1.5}
+                        strokeLinejoin="round"
+                        className="transition-all duration-500"
+                      />
+                      {/* Uniform reference circle */}
+                      <circle cx={0} cy={0} r={90} fill="none" stroke={towerColor + '33'} strokeWidth={0.5} strokeDasharray="3,3" />
+                      {/* Center label */}
+                      <text x={0} y={0} fill={towerColor} fontSize={14} textAnchor="middle" dominantBaseline="central" fontWeight="bold" opacity={0.4}>
+                        {LAYER_NAMES[towerLevel]}
+                      </text>
+                    </>
+                  );
+                })()}
+              </svg>
+            </div>
+            {/* Uniformity score */}
+            <div className="flex items-center gap-2 text-xs mt-1">
+              <span className="opacity-50">UNIFORMITY:</span>
+              <div className="flex-1 h-2 bg-white/5 rounded overflow-hidden">
+                <div
+                  className="h-full rounded transition-all duration-500"
+                  style={{
+                    width: `${hyperSystem.engine.get_prime_uniformity() * 100}%`,
+                    backgroundColor: '#00ffdd',
+                    opacity: 0.8,
+                  }}
+                />
+              </div>
+              <span style={{ color: '#00ffdd' }} className="tabular-nums w-12 text-right">
+                {(hyperSystem.engine.get_prime_uniformity() * 100).toFixed(1)}%
+              </span>
+            </div>
+            <p className="text-[10px] opacity-30 mt-1">
+              Each spoke = one of 31 primes ≤ 127. Dashed circle = perfect uniformity (1/31 each).
+              The polygon shows actual energy distribution across S³¹.
+            </p>
+            {/* Layer energy bars (shared with Glass Staircase) */}
+            <p className="text-xs opacity-50 border-b border-white/10 pb-1 mb-1 mt-2">
+              CAYLEY-DICKSON TOWER ENERGY
             </p>
             {LAYER_NAMES.map((name, idx) => {
               const maxE = Math.max(...layerEnergies, 0.001);
@@ -1667,7 +1860,9 @@ export default function Home() {
         <p>
           {mode.id === 3
             ? "1/ζ(s) = Σ μ(n)/nˢ  ·  Division by zero = the Möbius function"
-            : "ζ_𝕊(s) = Σ n⁻ˢ  ·  s ∈ 𝕊₁₆  ·  Re(s) = ½  ·  PCA → Gram bound"}
+            : mode.id === 5
+            ? "Z(t) = Σ sin(t·ln pₖ)·eₖ  ·  31 primes on S³¹  ·  No prime is special"
+            : "ζ_𝕋(s) = Σ n⁻ˢ  ·  s ∈ 𝕋₃₂  ·  Re(s) = ½  ·  PCA → Gram bound"}
         </p>
       </div>
 

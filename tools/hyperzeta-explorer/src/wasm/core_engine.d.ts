@@ -41,7 +41,7 @@ export class HyperEngine {
     get_lambda(): number;
     get_layer_buffer_pointer(): number;
     /**
-     * Get layer energy for the given Cayley-Dickson level (0-4)
+     * Get layer energy for the given Cayley-Dickson level (0-5)
      */
     get_layer_energy(level: number): number;
     /**
@@ -60,8 +60,22 @@ export class HyperEngine {
      * Peak |E_S| seen so far
      */
     get_peak_fluctuation(): number;
+    /**
+     * Get prime harmonic energy for prime index k (0-126)
+     */
+    get_prime_energy(k: number): number;
+    /**
+     * Get prime uniformity score (0-1, 1 = perfectly uniform)
+     */
+    get_prime_uniformity(): number;
+    get_tower_level(): number;
     get_view_mode(): number;
     constructor(particle_count: number);
+    /**
+     * Set Cayley-Dickson tower level (0-7):
+     * 0=ℝ(0), 1=ℂ(1), 2=ℍ(3), 3=𝕆(7), 4=𝕊(15), 5=𝕋(31), 6=𝕍(63), 7=∞(127)
+     */
+    set_tower_level(level: number): void;
     set_view_mode(mode: number): void;
     tick_physics(): void;
 }
@@ -88,8 +102,12 @@ export interface InitOutput {
     readonly hyperengine_get_pca_lambda2: (a: number) => number;
     readonly hyperengine_get_pca_lambda3: (a: number) => number;
     readonly hyperengine_get_peak_fluctuation: (a: number) => number;
+    readonly hyperengine_get_prime_energy: (a: number, b: number) => number;
+    readonly hyperengine_get_prime_uniformity: (a: number) => number;
+    readonly hyperengine_get_tower_level: (a: number) => number;
     readonly hyperengine_get_view_mode: (a: number) => number;
     readonly hyperengine_new: (a: number) => number;
+    readonly hyperengine_set_tower_level: (a: number, b: number) => void;
     readonly hyperengine_set_view_mode: (a: number, b: number) => void;
     readonly hyperengine_tick_physics: (a: number) => void;
     readonly __wbindgen_exn_store: (a: number) => void;

@@ -104,7 +104,7 @@ export class HyperEngine {
         return ret >>> 0;
     }
     /**
-     * Get layer energy for the given Cayley-Dickson level (0-4)
+     * Get layer energy for the given Cayley-Dickson level (0-5)
      * @param {number} level
      * @returns {number}
      */
@@ -145,6 +145,30 @@ export class HyperEngine {
         return ret;
     }
     /**
+     * Get prime harmonic energy for prime index k (0-126)
+     * @param {number} k
+     * @returns {number}
+     */
+    get_prime_energy(k) {
+        const ret = wasm.hyperengine_get_prime_energy(this.__wbg_ptr, k);
+        return ret;
+    }
+    /**
+     * Get prime uniformity score (0-1, 1 = perfectly uniform)
+     * @returns {number}
+     */
+    get_prime_uniformity() {
+        const ret = wasm.hyperengine_get_prime_uniformity(this.__wbg_ptr);
+        return ret;
+    }
+    /**
+     * @returns {number}
+     */
+    get_tower_level() {
+        const ret = wasm.hyperengine_get_tower_level(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
      * @returns {number}
      */
     get_view_mode() {
@@ -159,6 +183,14 @@ export class HyperEngine {
         this.__wbg_ptr = ret;
         HyperEngineFinalization.register(this, this.__wbg_ptr, this);
         return this;
+    }
+    /**
+     * Set Cayley-Dickson tower level (0-7):
+     * 0=ℝ(0), 1=ℂ(1), 2=ℍ(3), 3=𝕆(7), 4=𝕊(15), 5=𝕋(31), 6=𝕍(63), 7=∞(127)
+     * @param {number} level
+     */
+    set_tower_level(level) {
+        wasm.hyperengine_set_tower_level(this.__wbg_ptr, level);
     }
     /**
      * @param {number} mode
