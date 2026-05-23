@@ -7,6 +7,7 @@ import * as THREE from "three";
 
 import init, { HyperEngine } from "../wasm/core_engine.js";
 import { ZETA_ARGS, PI_POWERS, gridValue, MATCHES, CATEGORY_COLORS, getGridMatches } from "./spectrometer-data";
+import Heptadecagon from "./heptadecagon";
 
 const DEFAULT_PARTICLE_COUNT = 25_000;
 
@@ -104,6 +105,15 @@ const VIEW_MODES: ViewMode[] = [
     coreColor: "#00ffdd",
     edgeColor: "#004444",
     hotkey: "6",
+  },
+  {
+    id: 6,
+    name: "HEPTADECAGON",
+    subtitle: "Gauss's 17-gon · Cayley-Dickson Folding",
+    formula: "16 = 2⁴ → ℝ ← ℂ ← ℍ ← 𝕆 ← 𝕊",
+    coreColor: "#aa44ff",
+    edgeColor: "#330066",
+    hotkey: "7",
   },
 ];
 
@@ -1862,35 +1872,43 @@ export default function Home() {
             ? "1/ζ(s) = Σ μ(n)/nˢ  ·  Division by zero = the Möbius function"
             : mode.id === 5
             ? "Z(t) = Σ sin(t·ln pₖ)·eₖ  ·  31 primes on S³¹  ·  No prime is special"
+            : mode.id === 6
+            ? "17-1 = 16 = 2⁴  ·  Constructible by compass & straightedge  ·  Gauss, 1796"
             : "ζ_𝕋(s) = Σ n⁻ˢ  ·  s ∈ 𝕋₃₂  ·  Re(s) = ½  ·  PCA → Gram bound"}
         </p>
       </div>
 
-      <Canvas
-        camera={{ position: [0, 0, 30], fov: 60 }}
-        className="w-full h-full bg-[#000000]"
-      >
-        <ambientLight intensity={0.5} />
-        <OrbitControls autoRotate autoRotateSpeed={2.0} />
-        {modeIdx === 4 ? (
-          <SpectrometerGrid />
-        ) : hyperSystem ? (
-          <ExplorerCloud
-            wasmEngine={hyperSystem.engine}
-            memoryArray={hyperSystem.memory}
-            layerArray={hyperSystem.layers}
-            particleCount={particleCount}
-            mode={mode}
-            speed={speed}
-            paused={paused}
-            stepRef={stepRef}
-            onMetrics={handleMetrics}
-            onJets={handleJetsWithMorphology}
-            onShape={handleShape}
-            onBridge={handleBridge}
-          />
-        ) : null}
-      </Canvas>
+      {modeIdx === 6 ? (
+        <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "#000000" }}>
+          <Heptadecagon width={700} height={700} interactive={true} />
+        </div>
+      ) : (
+        <Canvas
+          camera={{ position: [0, 0, 30], fov: 60 }}
+          className="w-full h-full bg-[#000000]"
+        >
+          <ambientLight intensity={0.5} />
+          <OrbitControls autoRotate autoRotateSpeed={2.0} />
+          {modeIdx === 4 ? (
+            <SpectrometerGrid />
+          ) : hyperSystem ? (
+            <ExplorerCloud
+              wasmEngine={hyperSystem.engine}
+              memoryArray={hyperSystem.memory}
+              layerArray={hyperSystem.layers}
+              particleCount={particleCount}
+              mode={mode}
+              speed={speed}
+              paused={paused}
+              stepRef={stepRef}
+              onMetrics={handleMetrics}
+              onJets={handleJetsWithMorphology}
+              onShape={handleShape}
+              onBridge={handleBridge}
+            />
+          ) : null}
+        </Canvas>
+      )}
     </main>
   );
 }
