@@ -419,6 +419,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Glass.GlassEulerConvergence,
     -- Zeta2 Product Bound (graduation of zeta2Product_lower_bound axiom)
     `Cathedral.Zeta.Zeta2ProductBound,
+    -- Mirror Geometry: the three realities of the zeta function
+    `Cathedral.Zeta.MirrorGeometry,
     -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
     `Cathedral.Physics.Glass.CotResQuadBridge,
     -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
