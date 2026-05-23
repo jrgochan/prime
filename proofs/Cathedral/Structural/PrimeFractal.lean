@@ -1,4 +1,5 @@
 import Cathedral.Defs
+import Cathedral.Spectral.RayleighBridge
 import Mathlib.Data.Nat.Prime.Basic
 import Mathlib.MeasureTheory.Function.Floor
 
@@ -450,6 +451,32 @@ theorem two_mul_sub_div_sq_le (p : ℕ) (hp : 2 ≤ p) :
   rw [div_le_div_iff₀ (sq_pos_of_pos hp_pos) hp_pos]
   -- Goal: 2 * (↑p - 1) * ↑p ≤ (↑p - 1) * ↑p ^ 2
   nlinarith [sq_nonneg ((p : ℝ) - 2)]
+
+/-- **Quadratic form bound**: For any vector v,
+    vᵀ G_p v ≤ (1/p) · vᵀ G v + (p-1)/p · ‖v‖².
+
+    This is the core of the spectral self-similarity bound,
+    separating the matrix analysis (Rayleigh) from the entry-wise analysis.
+
+    The proof combines:
+    - primeGramEntry_split: G_p(j,k) = (1/p)·G(j,k) + E(j,k)
+    - primeGramEntry_error_decay_tight: |E(j,k)| ≤ (p-1)/(jkp²)
+    - sq_sum_abs_div_lt_two: Cauchy-Schwarz + telescoping
+    - two_mul_sub_div_sq_le: 2(p-1)/p² ≤ (p-1)/p -/
+theorem quadForm_primeGram_bound (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N)
+    (v : Fin (N - 1) → ℝ) :
+    dotProduct v ((primeGramMatrix p N).mulVec v) ≤
+    (1 / (p : ℝ)) * dotProduct v ((gramMatrix N).mulVec v) +
+    ((p : ℝ) - 1) / p * dotProduct v v := by
+  -- The proof unfolds to entry-wise double sums:
+  --   Σ_{i,j} v_i · primeGramEntry(i+1,j+1) · v_j
+  -- ≤ (1/p) · Σ_{i,j} v_i · gramEntry(i+1,j+1) · v_j + (p-1)/p · Σ_i v_i²
+  --
+  -- Uses: primeGramEntry_split to decompose each entry
+  --       primeGramEntry_error_decay_tight for the error bound
+  --       sq_sum_abs_div_lt_two (Cauchy-Schwarz + telescoping)
+  --       two_mul_sub_div_sq_le (arithmetic closure)
+  sorry
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
@@ -499,7 +526,52 @@ theorem spectral_selfsimilarity_upper (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤
         (by rw [Fintype.card_fin]; exact ⟨⟨0, hn⟩, Finset.mem_univ _⟩)
         hG.eigenvalues₀
       + ((p : ℝ) - 1) / p := by
-  sorry
+  -- Introduce the let bindings and the ∀-bound hn
+  intro _ _ _ _ hn
+  -- Take the minimum eigenvector e of G (which has unit norm)
+  -- Find the index i₀ that achieves inf' for G
+  have h_nonempty : (univ : Finset (Fin (Fintype.card (Fin (N - 1))))).Nonempty :=
+    ⟨⟨0, by rw [Fintype.card_fin]; exact hn⟩, Finset.mem_univ _⟩
+  -- Get an index achieving the inf' for G
+  obtain ⟨i₀, _, hi₀⟩ := Finset.exists_mem_eq_inf' h_nonempty (gramMatrix_hermitian N).eigenvalues₀
+  -- There exists j₀ : Fin (N-1) with eigenvalues j₀ = eigenvalues₀ i₀
+  have h_in_range : (gramMatrix_hermitian N).eigenvalues₀ i₀ ∈
+      Set.range (gramMatrix_hermitian N).eigenvalues := by
+    unfold Matrix.IsHermitian.eigenvalues
+    exact ⟨(Fintype.equivOfCardEq (Fintype.card_fin _)) i₀, by simp [Equiv.symm_apply_apply]⟩
+  obtain ⟨j₀, hj₀⟩ := h_in_range
+  -- e = eigenvectorBasis j₀ is a unit eigenvector of G
+  set e := (gramMatrix_hermitian N).eigenvectorBasis j₀
+  -- eᵀGe = eigenvalues j₀
+  have h_eigval : realQuadForm (gramMatrix N) (⇑e) =
+      (gramMatrix_hermitian N).eigenvalues j₀ :=
+    quadForm_eigenvector (gramMatrix_hermitian N) j₀
+  have h_unit : ‖(WithLp.toLp 2 (⇑e) : EuclideanSpace ℝ (Fin (N - 1)))‖ = 1 :=
+    (gramMatrix_hermitian N).eigenvectorBasis.orthonormal.1 j₀
+  -- Step 1: λ_min(G_p) ≤ eᵀG_pe (Rayleigh quotient)
+  have h_rayleigh := min_eigenvalue_le_quadForm (primeGramMatrix_hermitian p N) (⇑e) h_unit hn
+  -- Step 2: eᵀG_pe ≤ (1/p)·eᵀGe + (p-1)/p (our quadratic form bound)
+  have h_qf := quadForm_primeGram_bound p N hp (by omega) (⇑e)
+  -- dotProduct e e = 1 for unit eigenvector
+  have h_dot_one : dotProduct (⇑e) (⇑e) = 1 := by
+    rw [← inner_eq_dotProduct]; simp [inner_self_eq_norm_sq_to_K, h_unit]
+  -- Wire: eigenvalues₀ i₀ = eigenvalues j₀
+  -- The goal uses let bindings, but our hi₀/hj₀ use direct gramMatrix_hermitian
+  -- These are definitionally equal, so we use calc directly
+  show univ.inf' _ (primeGramMatrix_hermitian p N).eigenvalues₀ ≤ _
+  calc (univ.inf' h_nonempty (primeGramMatrix_hermitian p N).eigenvalues₀ : ℝ)
+      ≤ realQuadForm (primeGramMatrix p N) (⇑e) := h_rayleigh
+    _ = dotProduct (⇑e) ((primeGramMatrix p N).mulVec (⇑e)) := rfl
+    _ ≤ 1 / ↑p * dotProduct (⇑e) ((gramMatrix N).mulVec (⇑e)) +
+        (↑p - 1) / ↑p * dotProduct (⇑e) (⇑e) := h_qf
+    _ = 1 / ↑p * realQuadForm (gramMatrix N) (⇑e) +
+        (↑p - 1) / ↑p * 1 := by rw [h_dot_one]; rfl
+    _ = 1 / ↑p * (gramMatrix_hermitian N).eigenvalues j₀ +
+        (↑p - 1) / ↑p := by rw [h_eigval, mul_one]
+    _ = 1 / ↑p * (gramMatrix_hermitian N).eigenvalues₀ i₀ +
+        (↑p - 1) / ↑p := by rw [hj₀]
+    _ = 1 / ↑p * univ.inf' h_nonempty (gramMatrix_hermitian N).eigenvalues₀ +
+        (↑p - 1) / ↑p := by rw [hi₀]
 
 /-- **The Prime Fractal Dimension Equation.**
 
