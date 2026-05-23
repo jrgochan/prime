@@ -440,6 +440,16 @@ theorem sq_sum_abs_div_lt_two (N : ℕ) (hN : 1 ≤ N) (v : Fin N → ℝ)
   simp_rw [h_sq_div] at hcs
   exact lt_of_le_of_lt hcs (sum_inv_sq_lt_two N hN)
 
+/-- For p ≥ 2: 2 * (p-1) / p² ≤ (p-1) / p.
+
+    Equivalent to 2/p ≤ 1, which holds since p ≥ 2. -/
+theorem two_mul_sub_div_sq_le (p : ℕ) (hp : 2 ≤ p) :
+    2 * ((p : ℝ) - 1) / (p : ℝ) ^ 2 ≤ ((p : ℝ) - 1) / (p : ℝ) := by
+  have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
+  have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
+  rw [div_le_div_iff₀ (sq_pos_of_pos hp_pos) hp_pos]
+  -- Goal: 2 * (↑p - 1) * ↑p ≤ (↑p - 1) * ↑p ^ 2
+  nlinarith [sq_nonneg ((p : ℝ) - 2)]
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
