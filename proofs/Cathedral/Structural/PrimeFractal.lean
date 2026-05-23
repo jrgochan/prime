@@ -382,6 +382,42 @@ theorem primeGramEntry_error_decay_tight (p : ℕ) (hp : 1 < p) (j k : ℕ)
         have : (↑p : ℝ) ≠ 0 := ne_of_gt hp_pos
         field_simp
 
+/-- **Telescoping bound**: Σ_{j=0}^{N-1} 1/(j+1)² < 2 for all N ≥ 1.
+
+    Uses: 1/(j+1)² ≤ 1/(j(j+1)) = 1/j - 1/(j+1) for j ≥ 1.
+    Sum = 1 + Σ_{j=1}^{N-1} 1/(j+1)² ≤ 1 + Σ_{j=1}^{N-1} (1/j - 1/(j+1))
+        = 1 + (1 - 1/N) = 2 - 1/N < 2.
+
+    Stated with `Fin N` indexing for direct compatibility with
+    the Gram matrix quadratic form. -/
+theorem sum_inv_sq_lt_two (N : ℕ) (hN : 1 ≤ N) :
+    ∑ j : Fin N, (1 / ((↑j : ℝ) + 1) ^ 2) < 2 := by
+  -- We prove by strong induction: Σ 1/(j+1)² ≤ 2 - 1/N
+  -- which gives < 2 since 1/N > 0
+  suffices h : ∑ j : Fin N, (1 / ((↑j : ℝ) + 1) ^ 2) ≤ 2 - 1 / (N : ℝ) by
+    linarith [show (0 : ℝ) < 1 / (N : ℝ) from by positivity]
+  induction N with
+  | zero => omega
+  | succ n ih =>
+    by_cases hn : n = 0
+    · subst hn; simp; norm_num
+    · have hn1 : 1 ≤ n := Nat.one_le_iff_ne_zero.mpr hn
+      rw [Fin.sum_univ_castSucc]
+      have ih' := ih hn1
+      -- Last term: 1/(n+1)²
+      -- Bound: 1/(n+1)² ≤ 1/n - 1/(n+1) for n ≥ 1
+      have hn_pos : (0 : ℝ) < (n : ℝ) := Nat.cast_pos.mpr (Nat.pos_of_ne_zero hn)
+      have hn1_pos : (0 : ℝ) < (n : ℝ) + 1 := by linarith
+      have h_last : 1 / ((n : ℝ) + 1) ^ 2 ≤ 1 / (n : ℝ) - 1 / ((n : ℝ) + 1) := by
+        rw [div_sub_div _ _ (ne_of_gt hn_pos) (ne_of_gt hn1_pos)]
+        rw [div_le_div_iff₀ (pow_pos hn1_pos 2) (mul_pos hn_pos hn1_pos)]
+        -- 1 * (n * (n+1)) ≤ ((n+1) - n) * (n+1)²
+        -- i.e. n*(n+1) ≤ (n+1)²
+        nlinarith [sq_nonneg ((n : ℝ) + 1)]
+      -- Combine: simplify castSucc and Fin.last, then linarith
+      simp only [Fin.val_castSucc, Fin.val_last]
+      push_cast
+      linarith
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted
