@@ -90,7 +90,7 @@ hyperzeta-origin: ## Launch HyperZeta Origin — proof-graph explorer (port 3001
 hyperzeta-explorer: ## Launch HyperZeta Explorer — Cayley-Dickson tower visualizer (port 3002)
 	@echo ""
 	@echo "  ✦  Launching HYPERZETA Explorer — Cayley-Dickson Tower..."
-	@echo "     4 modes: Origin · Teardrop · Glass Staircase · Division by Zero"
+	@echo "     6 modes: Origin · Teardrop · Glass Staircase · Division by Zero · Spectrometer · Prime Democracy"
 	@echo ""
 	@if [ -d tools/hyperzeta-explorer/node_modules ]; then \
 		echo "  Starting Next.js dev server on http://localhost:3002 ..." && \

@@ -449,7 +449,6 @@ theorem two_mul_sub_div_sq_le (p : ℕ) (hp : 2 ≤ p) :
   have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
   have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast hp
   rw [div_le_div_iff₀ (sq_pos_of_pos hp_pos) hp_pos]
-  -- Goal: 2 * (↑p - 1) * ↑p ≤ (↑p - 1) * ↑p ^ 2
   nlinarith [sq_nonneg ((p : ℝ) - 2)]
 
 /-- **Quadratic form bound**: For any vector v,
@@ -459,24 +458,130 @@ theorem two_mul_sub_div_sq_le (p : ℕ) (hp : 2 ≤ p) :
     separating the matrix analysis (Rayleigh) from the entry-wise analysis.
 
     The proof combines:
-    - primeGramEntry_split: G_p(j,k) = (1/p)·G(j,k) + E(j,k)
     - primeGramEntry_error_decay_tight: |E(j,k)| ≤ (p-1)/(jkp²)
-    - sq_sum_abs_div_lt_two: Cauchy-Schwarz + telescoping
+    - double_sum_abs_bound: triangle inequality for double sums
+    - entry_bound_to_sq: entry-wise → quadratic factoring
+    - cs_telescoping_bound: Cauchy-Schwarz + telescoping
     - two_mul_sub_div_sq_le: 2(p-1)/p² ≤ (p-1)/p -/
+
+-- Helper 1: Triangle inequality for double sums
+private theorem double_sum_abs_bound {n : ℕ} (v : Fin n → ℝ) (M : Fin n → Fin n → ℝ) :
+    ∑ i : Fin n, v i * ∑ j, M i j * v j ≤
+    ∑ i : Fin n, |v i| * ∑ j, |M i j| * |v j| := by
+  apply le_trans (le_abs_self _)
+  apply le_trans (Finset.abs_sum_le_sum_abs _ _)
+  apply Finset.sum_le_sum; intro i _
+  calc |v i * ∑ j, M i j * v j| = |v i| * |∑ j, M i j * v j| := abs_mul _ _
+    _ ≤ |v i| * ∑ j, |M i j * v j| := by
+        exact mul_le_mul_of_nonneg_left (Finset.abs_sum_le_sum_abs _ _) (abs_nonneg _)
+    _ = |v i| * ∑ j, |M i j| * |v j| := by
+        congr 1; congr 1; ext j; exact abs_mul _ _
+
+-- Helper 2: Entry-wise bound → factored quadratic bound
+private theorem entry_bound_to_sq {n : ℕ} (v : Fin n → ℝ) (M : Fin n → Fin n → ℝ)
+    (a : Fin n → ℝ) (C : ℝ)
+    (h_bound : ∀ i j : Fin n, |M i j| ≤ C * a i * a j) :
+    ∑ i : Fin n, |v i| * ∑ j, |M i j| * |v j| ≤
+    C * (∑ i : Fin n, |v i| * a i) ^ 2 := by
+  have h1 : ∑ i : Fin n, |v i| * ∑ j, |M i j| * |v j| ≤
+      ∑ i : Fin n, |v i| * ∑ j, (C * a i * a j) * |v j| := by
+    apply Finset.sum_le_sum; intro i _
+    apply mul_le_mul_of_nonneg_left _ (abs_nonneg _)
+    apply Finset.sum_le_sum; intro j _
+    exact mul_le_mul_of_nonneg_right (h_bound i j) (abs_nonneg _)
+  have h2 : ∑ i : Fin n, |v i| *
+      ∑ j, (C * a i * a j) * |v j| = C * (∑ i : Fin n, |v i| * a i) ^ 2 := by
+    have h_inner : ∀ i : Fin n,
+        ∑ j : Fin n, C * a i * a j * |v j| =
+        C * a i * ∑ j : Fin n, |v j| * a j := by
+      intro i; rw [Finset.mul_sum]; congr 1; ext j; ring
+    simp_rw [h_inner]
+    have h_outer : ∀ i : Fin n,
+        |v i| * (C * a i * ∑ j, |v j| * a j) =
+        C * (∑ j, |v j| * a j) * (|v i| * a i) := fun i => by ring
+    simp_rw [h_outer, ← Finset.mul_sum, sq]; ring
+  linarith
+
+-- Helper 3: Cauchy-Schwarz + telescoping for weighted sum
+private theorem cs_telescoping_bound (N : ℕ) (hN : 1 ≤ N) (v : Fin N → ℝ) :
+    (∑ i : Fin N, |v i| * (1/((i.val:ℝ)+1))) ^ 2 ≤
+    2 * ∑ i : Fin N, v i ^ 2 := by
+  have hcs := Finset.sum_mul_sq_le_sq_mul_sq Finset.univ
+    (fun j : Fin N => |v j|) (fun j : Fin N => 1/((j.val:ℝ)+1))
+  have h_abs_sq : ∑ j : Fin N, |v j| ^ 2 = ∑ j : Fin N, v j ^ 2 := by
+    congr 1; ext j; rw [sq_abs]
+  have h_sum_eq : ∑ j : Fin N, (1/((j.val:ℝ)+1)) ^ 2 =
+      ∑ j : Fin N, 1/((j.val:ℝ)+1)^2 := by
+    congr 1; ext j; rw [div_pow, one_pow]
+  have h_tele : ∑ j : Fin N, 1/((j.val:ℝ)+1)^2 < 2 := sum_inv_sq_lt_two N hN
+  have h_sq_nn : 0 ≤ ∑ j : Fin N, v j ^ 2 :=
+    Finset.sum_nonneg (fun i _ => sq_nonneg _)
+  nlinarith
+
+-- Main theorem: compose the helpers
+set_option maxHeartbeats 400000 in
 theorem quadForm_primeGram_bound (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N)
     (v : Fin (N - 1) → ℝ) :
     dotProduct v ((primeGramMatrix p N).mulVec v) ≤
     (1 / (p : ℝ)) * dotProduct v ((gramMatrix N).mulVec v) +
     ((p : ℝ) - 1) / p * dotProduct v v := by
-  -- The proof unfolds to entry-wise double sums:
-  --   Σ_{i,j} v_i · primeGramEntry(i+1,j+1) · v_j
-  -- ≤ (1/p) · Σ_{i,j} v_i · gramEntry(i+1,j+1) · v_j + (p-1)/p · Σ_i v_i²
-  --
-  -- Uses: primeGramEntry_split to decompose each entry
-  --       primeGramEntry_error_decay_tight for the error bound
-  --       sq_sum_abs_div_lt_two (Cauchy-Schwarz + telescoping)
-  --       two_mul_sub_div_sq_le (arithmetic closure)
-  sorry
+  have hp1 : 1 < p := hp.one_lt
+  -- ═══ STEP 1: Matrix decomposition G_p = (1/p)•G + E ═══
+  have h_split : dotProduct v ((primeGramMatrix p N).mulVec v) =
+      dotProduct v (((1/(p:ℝ)) • gramMatrix N).mulVec v) +
+      dotProduct v ((primeGramMatrix p N - (1/(p:ℝ)) • gramMatrix N).mulVec v) := by
+    rw [← dotProduct_add, ← Matrix.add_mulVec]; congr 1; ext i; simp
+  have h_smul : dotProduct v (((1/(p:ℝ)) • gramMatrix N).mulVec v) =
+      (1/(p:ℝ)) * dotProduct v ((gramMatrix N).mulVec v) := by
+    simp [dotProduct, Matrix.mulVec, Matrix.smul_apply, smul_eq_mul, Finset.mul_sum]
+    congr 1; ext i; congr 1; ext j; ring
+  rw [h_split, h_smul]
+  suffices h_err : dotProduct v ((primeGramMatrix p N - (1/(p:ℝ)) • gramMatrix N).mulVec v) ≤
+      ((p:ℝ)-1)/↑p * dotProduct v v by linarith
+  -- ═══ STEP 2: Error matrix and entry bound ═══
+  set E := primeGramMatrix p N - (1/(p:ℝ)) • gramMatrix N with hE_def
+  set C := ((p:ℝ)-1)/(p:ℝ)^2 with hC_def
+  have h_entry : ∀ i j : Fin (N-1), |E i j| ≤
+      C * (1/((i.val:ℝ)+1)) * (1/((j.val:ℝ)+1)) := by
+    intro i j
+    simp only [E, Matrix.sub_apply, Matrix.smul_apply, primeGramMatrix, gramMatrix,
+      Matrix.of_apply, smul_eq_mul]
+    have h := primeGramEntry_error_decay_tight p hp1 (i.val+1) (j.val+1) (by omega) (by omega)
+    have hci : (↑(i.val + 1) : ℝ) = (↑i.val : ℝ) + 1 := by push_cast; ring
+    have hcj : (↑(j.val + 1) : ℝ) = (↑j.val : ℝ) + 1 := by push_cast; ring
+    rw [hci, hcj] at h
+    calc |primeGramEntry p (↑i + 1) (↑j + 1) - 1 / ↑p * gramEntry (↑i + 1) (↑j + 1)|
+        ≤ (↑p - 1) / ((↑↑i + 1) * (↑↑j + 1) * ↑p ^ 2) := h
+      _ = C * (1 / ((i.val:ℝ)+1)) * (1 / ((j.val:ℝ)+1)) := by
+          simp only [C]; field_simp
+  -- ═══ STEP 3: Unfold and chain the helpers ═══
+  change ∑ i : Fin (N-1), v i * ∑ j, E i j * v j ≤
+    ((p:ℝ)-1)/↑p * ∑ i : Fin (N-1), v i * v i
+  set S := ∑ i : Fin (N-1), |v i| * (1/((i.val:ℝ)+1))
+  have hC_nn : 0 ≤ C := by
+    show 0 ≤ ((p:ℝ)-1)/(p:ℝ)^2
+    apply div_nonneg
+    · have : (1:ℝ) ≤ (p:ℝ) := by exact_mod_cast (show 1 ≤ p from le_of_lt hp1)
+      linarith
+    · positivity
+  have h_2C : 2 * C ≤ ((p:ℝ)-1)/↑p := by
+    show 2 * (((p:ℝ)-1)/(p:ℝ)^2) ≤ ((p:ℝ)-1)/↑p
+    have hp_pos : (0 : ℝ) < (p : ℝ) := by positivity
+    have hp2 : (2 : ℝ) ≤ (p : ℝ) := by exact_mod_cast (show 2 ≤ p by omega)
+    have hp1r : (0:ℝ) ≤ ((p:ℝ) - 1) := by linarith
+    -- Clear fractions: suffices 2*(p-1)*p ≤ (p-1)*p²
+    have h1 : 2 * (((p:ℝ)-1)/(p:ℝ)^2) = (2 * ((p:ℝ)-1)) / (p:ℝ)^2 := by ring
+    rw [h1, div_le_div_iff₀ (sq_pos_of_pos hp_pos) hp_pos]
+    nlinarith [sq_nonneg ((p : ℝ) - 2)]
+  calc ∑ i : Fin (N-1), v i * ∑ j, E i j * v j
+      ≤ ∑ i, |v i| * ∑ j, |E i j| * |v j| := double_sum_abs_bound v (E · ·)
+    _ ≤ C * S ^ 2 := entry_bound_to_sq v (E · ·) (fun i => 1/((i.val:ℝ)+1)) C h_entry
+    _ ≤ C * (2 * ∑ i, v i ^ 2) := by
+        exact mul_le_mul_of_nonneg_left (cs_telescoping_bound (N-1) (by omega) v) hC_nn
+    _ = 2 * C * ∑ i, v i ^ 2 := by ring
+    _ ≤ ((p:ℝ)-1)/↑p * ∑ i, v i ^ 2 := by
+        apply mul_le_mul_of_nonneg_right h_2C (Finset.sum_nonneg (fun i _ => sq_nonneg _))
+    _ = ((p:ℝ)-1)/↑p * ∑ i, v i * v i := by congr 1; congr 1; ext i; rw [sq]
 /-- **Spectral Self-Similarity Bound** (the key eigenvalue inequality).
 
     For a prime p and N ≥ 2, the minimum eigenvalue of the prime-restricted

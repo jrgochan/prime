@@ -70,9 +70,17 @@ import Cathedral.Physics.SpectralDivergence
   ARCHITECTURE 3 — Ramanujan-Smith Physics (ALTERNATIVE, May 16, 2026):
   Forward: σ → ∞ via Euclid + SOS decomposition (zero axioms, fully proven).
   SmithWitness.lean: smith_solve → sigma_sos_eq → sigma_witness_growth
-  → glass_distance_formula → d² → 0.
-  The converse reuses `nyman_beurling_converse` (zero custom axioms).
-  ★ ZERO sorry. ZERO axioms. Fully compiler-verified.
+  → glass_distance_formula → d²_saw → 0.
+  ★ ZERO sorry. ZERO axioms for d²_saw → 0 in the SAWTOOTH basis.
+
+  ⚠️ BASIS GAP (May 22, 2026):
+  The Smith witness proves d²_saw → 0 in the sawtooth basis {kt}.
+  The NB converse requires d²_BD → 0 in the BD basis {1/(kx)}.
+  These are DIFFERENT Gram matrices (R(j,k) = gcd²/(12jk) vs
+  gramEntry(j,k) = ∫₀¹{1/(jx)}{1/(kx)}dx).
+  Connecting d²_saw → 0 to d²_BD → 0 is EQUIVALENT to RH.
+  Path D therefore proves: RH ⟺ Smith sawtooth approximants
+  can be re-expressed in the BD basis.
 
   Four alternative proof paths are preserved as supplementary theorems:
   * PATH A (Mellin): `nyman_beurling_equivalence_mellin`
@@ -208,22 +216,20 @@ theorem nyman_beurling_equivalence_renormalization :
     The Ramanujan-Smith witness sum σ(N) diverges to infinity:
     σ(N) ≥ 4·π(N) → ∞ (via SOS decomposition + Euclid).
 
-    This gives d²(N) = 4/(4+σ(N)) → 0, which by `nyman_beurling_converse`
-    implies RH.
+    This gives d²_saw(N) = 4/(4+σ(N)) → 0 in the SAWTOOTH basis {kt}.
 
     Architecture: smith_solve → sigma_sos_eq → sigma_witness_growth
-                  → glass_distance_formula → d² → 0.
+                  → glass_distance_formula → d²_saw → 0.
 
-    ★ ZERO sorry. ZERO axioms. The alternative forward path is fully
-    certified from Mathlib primitives alone.
+    ★ ZERO sorry. ZERO axioms for σ → ∞ and d²_saw → 0.
 
-    Note: This theorem establishes that the Smith witness provides
-    approximants whose L² error vanishes, but the connection to the
-    standard NB L²(0,1) norm requires additional bridging (the
-    discrete-to-continuous Mellin lift in the Crown architecture).
-    The von Mangoldt bridge (`VonMangoldtBridge.smith_basis_rotation`,
-    ZERO SORRY) shows that this lift passes through Λ(d) = -ζ'/ζ.
-    The statement below packages the growth and distance results. -/
+    ⚠️ BASIS GAP: The NB converse (`nyman_beurling_converse`) requires
+    d² → 0 in the BD basis {1/(kx)}, NOT the sawtooth basis {kt}.
+    These have DIFFERENT Gram matrices:
+      - Sawtooth: R(j,k) = gcd(j,k)²/(12jk)  (the Ramanujan matrix)
+      - BD: gramEntry(j,k) = ∫₀¹{1/(jx)}{1/(kx)}dx  (Vasyunin formula)
+    Bridging d²_saw → 0 to d²_BD → 0 is equivalent to RH itself.
+    The statement below packages the σ-growth and sawtooth distance. -/
 theorem smith_witness_forward_direction :
     ∀ B : ℝ, ∃ N₀ : ℕ, ∀ N : ℕ, N₀ ≤ N →
       B < Cathedral.Physics.SmithWitness.sigmaWitness N ∧

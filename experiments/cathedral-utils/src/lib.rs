@@ -26,6 +26,7 @@
 //! - [`gpu`] — GPU acceleration via CUDA/cuSOLVER/cuBLAS (feature-gated)
 //! - [`hpdf`] — HDF5-based high-precision data format (feature-gated)
 //! - [`octonion`] — Octonion algebra and prime-to-octonion encoding
+//! - [`trigintaduonion`] — Trigintaduonion (32D) algebra, Cayley-Dickson construction, prime/zero encoding
 //! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
 //! - [`riemann_siegel`] — Riemann-Siegel theta, Hardy Z-function, zero finder
 //! - [`spectral_stats`] — Random matrix theory diagnostics (GUE/GOE/GSE)
@@ -55,4 +56,6 @@ pub mod riemann_siegel;
 pub mod rsvd;
 pub mod spectral;
 pub mod spectral_stats;
+pub mod trigintaduonion;
 pub mod vasyunin;
+
