@@ -158,7 +158,7 @@ export default function Heptadecagon({
       // Glow
       const glowR = isCenter ? 20 : 12;
       const glow = ctx.createRadialGradient(vx, vy, 0, vx, vy, glowR);
-      glow.addColorStop(0, vColor + "88");
+      glow.addColorStop(0, withAlpha(vColor, 0.53));
       glow.addColorStop(1, "transparent");
       ctx.fillStyle = glow;
       ctx.fillRect(vx - glowR, vy - glowR, glowR * 2, glowR * 2);
@@ -234,25 +234,54 @@ export default function Heptadecagon({
     showFormula,
   ]);
 
-  function getVertexColor(k: number, fold: number, t: number): string {
+  // Convert HSL to hex for canvas compatibility
+  function hslToHex(h: number, s: number, l: number): string {
+    s /= 100;
+    l /= 100;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n: number) => {
+      const k = (n + h / 30) % 12;
+      const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+      return Math.round(255 * color).toString(16).padStart(2, "0");
+    };
+    return `#${f(0)}${f(8)}${f(4)}`;
+  }
+
+  // Add alpha to a hex color
+  function withAlpha(hex: string, alpha: number): string {
+    // Ensure hex is 7 chars (#rrggbb)
+    const clean = hex.length === 9 ? hex.slice(0, 7) : hex;
+    const r = parseInt(clean.slice(1, 3), 16);
+    const g = parseInt(clean.slice(3, 5), 16);
+    const b = parseInt(clean.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  function getVertexColor(k: number, fold: number, _t: number): string {
     if (k === 0) return "#ffffff"; // center vertex is always white (the 1)
     const idx = k - 1; // 0-15 for the 16 nontrivial roots
 
     if (fold === 0) {
       // Full 17-gon: rainbow
       const hue = (idx / 16) * 360;
-      return `hsl(${hue}, 80%, 65%)`;
+      return hslToHex(hue, 80, 65);
     }
 
     // Fold groups: pair indices
     const groupSize = Math.pow(2, 5 - fold); // fold 1→16, fold 2→8, fold 3→4, fold 4→2
     const groupIdx = Math.floor(idx / groupSize);
-    const layerColor = CD_LAYERS[fold - 1].color;
 
-    // Alternate brightness within group
-    const brightness = 50 + (groupIdx % 2) * 20 + Math.sin(t * 2 + groupIdx) * 10;
-    const hue = parseInt(layerColor.slice(1, 3), 16);
-    return CD_LAYERS[fold - 1].color + (groupIdx % 2 === 0 ? "ff" : "aa");
+    // Alternate brightness
+    if (groupIdx % 2 === 0) {
+      return CD_LAYERS[fold - 1].color;
+    } else {
+      // Slightly dimmer variant
+      const base = CD_LAYERS[fold - 1].color;
+      const r = Math.round(parseInt(base.slice(1, 3), 16) * 0.7);
+      const g = Math.round(parseInt(base.slice(3, 5), 16) * 0.7);
+      const b = Math.round(parseInt(base.slice(5, 7), 16) * 0.7);
+      return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+    }
   }
 
   function drawFoldArcs(
@@ -280,7 +309,7 @@ export default function Heptadecagon({
       const midX = (x1 + x2) / 2;
       const midY = (y1 + y2) / 2;
 
-      ctx.strokeStyle = color + "66";
+      ctx.strokeStyle = withAlpha(color, 0.4);
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 4]);
 
@@ -301,7 +330,7 @@ export default function Heptadecagon({
       // Group label
       if (animProgress > 0.5) {
         ctx.font = "bold 10px 'Inter', monospace";
-        ctx.fillStyle = color + "cc";
+        ctx.fillStyle = withAlpha(color, 0.8);
         ctx.textAlign = "center";
         const labelX = midX + (midX - cx) * 0.15;
         const labelY = midY + (midY - cy) * 0.15;
@@ -326,12 +355,12 @@ export default function Heptadecagon({
       // Dot
       ctx.beginPath();
       ctx.arc(x0 + 8, y, isActive ? 5 : 3, 0, TAU);
-      ctx.fillStyle = isActive ? layer.color : layer.color + "44";
+      ctx.fillStyle = isActive ? layer.color : withAlpha(layer.color, 0.27);
       ctx.fill();
 
       if (isActive) {
         const glow = ctx.createRadialGradient(x0 + 8, y, 0, x0 + 8, y, 12);
-        glow.addColorStop(0, layer.color + "44");
+        glow.addColorStop(0, withAlpha(layer.color, 0.27));
         glow.addColorStop(1, "transparent");
         ctx.fillStyle = glow;
         ctx.fillRect(x0 - 4, y - 12, 24, 24);
