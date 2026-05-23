@@ -421,7 +421,11 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.Zeta2ProductBound,
     -- Mirror Geometry: the three realities of the zeta function
     `Cathedral.Zeta.MirrorGeometry,
-    -- Glass Critical Line: the 4-step chain Glass → RH (3 axioms, down from 6)
+    -- Zeta Tower Limit: ζ(2ⁿs) → 1 as n → ∞ (GRADUATED, zero sorry)
+    `Cathedral.Zeta.ZetaTowerLimit,
+    -- Glass Telescope: ζ(s) = ζ(2ⁿs) · ∏ ζ(2^k·s)/ζ(2^{k+1}·s) (GRADUATED, zero sorry)
+    `Cathedral.Zeta.GlassTelescope,
+    -- Glass Critical Line: the 4-step chain Glass → RH (1 axiom: THE WALL)
     `Cathedral.Physics.Glass.GlassCriticalLine,
     -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
     `Cathedral.Physics.Glass.CotResQuadBridge,
