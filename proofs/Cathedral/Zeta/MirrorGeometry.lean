@@ -81,6 +81,7 @@ import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 import Mathlib.NumberTheory.LSeries.Dirichlet
 
 noncomputable section
+set_option linter.unnecessarySeqFocus false
 open Complex Real HurwitzZeta
 open scoped ComplexConjugate
 
