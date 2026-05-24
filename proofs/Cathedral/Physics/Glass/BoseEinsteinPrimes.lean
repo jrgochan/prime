@@ -61,7 +61,7 @@
   | Pauli exclusion          | μ²(n) = 1 (squarefree)     | ArithmeticPauli         |
   | Bose condensation        | HC number accumulation      | SmithWitness            |
 
-  Status: 1 sorry (rpow/pow bridge). 0 custom axioms.
+  Status: PROVED. 0 sorry. 0 custom axioms.
   Dependencies: Glass/SDualityGlass, Glass/HopfGlassCycle
   Created: May 24, 2026 — File #444: The Prime Number Gas
 -/
@@ -160,11 +160,37 @@ theorem partition_function_decomposition (p s : ℝ)
     (hp : 1 < p) (hs : 0 < s) :
     boseEinsteinFactor p s =
     fermiDiracFactor p s * boseEinsteinFactor p (2 * s) := by
-  -- The algebraic identity 1/(1-x) = (1+x)·1/(1-x²) is proved
-  -- in bose_fermi_decomposition above. This corollary requires
-  -- bridging rpow(2*s) ↔ pow(s)^2, which hits Lean 4 rpow/pow
-  -- type unification. Mathematically trivial; formally tedious.
-  sorry
+  -- Use the abstract bose_fermi_decomposition with x = 1/p^s.
+  -- The key bridge: p^(2s) = (p^s)^2, using the rpow_natCast + rpow_mul
+  -- pattern from TrigintaduonionGlass.lean (glass_critical_strip_vanishes).
+  unfold boseEinsteinFactor fermiDiracFactor
+  have hp_pos : (0 : ℝ) < p := by linarith
+  have hps : (0 : ℝ) < p ^ s := rpow_pos_of_pos hp_pos s
+  have hps_gt : 1 < p ^ s := by
+    rw [show (1 : ℝ) = p ^ (0 : ℝ) from (rpow_zero p).symm]
+    exact rpow_lt_rpow_of_exponent_lt (by linarith) hs
+  -- Bridge: 1/(1 - 1/p^(2s)) = 1/(1 - 1/(p^s)^2)
+  have h2s : p ^ (2 * s) = (p ^ s) ^ (2 : ℕ) := by
+    rw [← rpow_natCast (p ^ s) 2, ← rpow_mul hp_pos.le]
+    congr 1; push_cast; ring
+  rw [h2s]
+  -- Now set x = 1/p^s and apply the abstract identity
+  set q := p ^ s
+  have hq_ne : q ≠ 0 := ne_of_gt hps
+  have hq_lt : 1 / q < 1 := by rw [div_lt_one hps]; linarith
+  have hx1 : (1 : ℝ) / q ≠ 1 := ne_of_lt hq_lt
+  have hx2 : ((1 : ℝ) / q) ^ 2 ≠ 1 := by
+    have hx_pos : 0 < 1 / q := by positivity
+    have hx_sq : (1 / q) ^ 2 < 1 := by
+      rw [sq]
+      calc 1 / q * (1 / q) < 1 * (1 / q) := by nlinarith
+        _ < 1 * 1 := by nlinarith
+        _ = 1 := by ring
+    exact ne_of_lt hx_sq
+  -- Bridge: 1/q^2 = (1/q)^2
+  rw [show (1 : ℝ) / q ^ (2 : ℕ) = ((1 : ℝ) / q) ^ 2 from by
+    rw [div_pow, one_pow]]
+  exact bose_fermi_decomposition (1 / q) hx1 hx2
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. THERMODYNAMIC IDENTITIES
@@ -424,7 +450,7 @@ theorem fermi_factor_at_critical (p : ℝ) (hp : 1 < p) :
 /-!
 ## Audit
 
-### Sorry: 1 (rpow/pow type bridge in partition_function_decomposition)
+### Sorry: 0 ✅
 ### Custom Axioms: 0 ✅
 ### Axiom footprint: [propext, Classical.choice, Quot.sound]
 
@@ -436,7 +462,7 @@ theorem fermi_factor_at_critical (p : ℝ) (hp : 1 < p) :
 | 3 | `boseEinsteinFactor` | 📐 **DEFINITION** (Z_BE = 1/(1-p⁻ˢ)) |
 | 4 | `fermiDiracFactor` | 📐 **DEFINITION** (Z_FD = 1+p⁻ˢ) |
 | 5 | `bose_fermi_decomposition` | 🎓 **THEOREM** (1/(1-x) = (1+x)·1/(1-x²)) |
-| 6 | `partition_function_decomposition` | ⚠️ **THEOREM** (Z_BE = Z_FD · Z_BE(2s), 1 sorry: rpow/pow bridge) |
+| 6 | `partition_function_decomposition` | 🎓 **THEOREM** (Z_BE = Z_FD · Z_BE(2s)) |
 | 7 | `free_energy_additive` | 🎓 **THEOREM** (log Π = Σ log) |
 | 8 | `fermi_dirac_pos` | 🎓 **THEOREM** (Z_FD > 0) |
 | 9 | `fermi_dirac_ge_one` | 🎓 **THEOREM** (Z_FD ≥ 1) |
