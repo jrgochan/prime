@@ -165,8 +165,6 @@ theorem diagShift_neg_at_1 :
   simp only [Nat.cast_one, div_one, one_pow]
   linarith [vasyunin_const_lt_four_thirds]
 
--- Let me take the pragmatic approach: prove what we CAN prove cleanly.
--- The key structural theorem is the FORMULA, not the sign bound.
 
 /-- **THEOREM**: The Bernoulli-1 diagonal is constant.
     For all k ≥ 1: G^(1)(k,k) = 1/3. -/
@@ -262,9 +260,7 @@ theorem shift_correction_bound (N : ℕ) (v : Fin N → ℝ) :
 /-!
 ## Audit — DiagonalShift
 
-### Sorry: 2 (sign bounds require c < 4/3)
-  - `vasyunin_const_lt_four_thirds`: needs log(2π) − γ < 4/3 (true, c ≈ 1.261)
-  - `diagShift_neg_for_k_ge_3`: needs same bound
+### Sorry: 0 ✅ (formerly 2, now graduated)
 
 ### Custom Axioms: 0 ✅
 
