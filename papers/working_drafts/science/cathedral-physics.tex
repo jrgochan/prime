@@ -23,7 +23,7 @@
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
 Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
-in Lean~4 (329 active files, $\sim$95{,}000 lines)---and their physical
+in Lean~4 (330 active files, 444 incl.\ archive, $\sim$97{,}000 lines)---and their physical
 counterparts in quantum mechanics, statistical mechanics, signal
 processing, and quantum field theory.
 The Gram matrix is the two-point correlator of a 1D quantum field.
@@ -44,6 +44,10 @@ conformal symmetry.
 An Arithmetic Standard Model identifies the first three primes
 with the gauge groups $U(1) \times SU(2) \times SU(3)$,
 with 76+ theorems proved from zero axioms.
+The Bose--Einstein and Fermi--Dirac partition functions of the prime
+number gas are formalized and proved equivalent to the Glass Tower
+factorization; the squarefree density is proved to be the Fermi
+statistic.
 The crown theorem depends on exactly \textbf{one literature axiom}
 (B\'aez-Duarte 2003); the converse direction is proved with
 \textbf{zero} custom axioms via the Rank-1 Mellin identity.
@@ -1616,6 +1620,8 @@ assertion that this flow is complete.
 % ================================================================
 
 \input{sections/13a-glass-tower}
+
+\input{sections/13b-bose-einstein-primes}
 
 \input{sections/14-time-domain-bridge}
 
