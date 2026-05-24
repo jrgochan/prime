@@ -1,0 +1,150 @@
+% ================================================================
+\section{The Smith--Ramanujan Decomposition}
+\label{sec:smith}
+% ================================================================
+
+The Smith--Ramanujan subsystem (\lean{Physics/GramWiring/*.lean},
+\lean{Physics/Mertens/*.lean}, 18 files, zero sorry) decomposes
+the Gram matrix through the Smith Normal Form, revealing the
+Jordan totient eigenvalues and establishing an unconditional
+spectral gap for the Ramanujan quadratic form.
+
+\subsection{The Ramanujan Matrix}
+
+The Ramanujan matrix $R$ with entries
+\begin{equation}
+  R(j,k) = \frac{\gcd(j,k)^2}{jk} - \frac{1}{jk}
+  \label{eq:ramanujan-entry}
+\end{equation}
+is the ``arithmetic part'' of the Gram matrix. The Cathedral proves
+(in \lean{RamanujanBridge.lean}) that the full Gram entry decomposes as:
+\begin{equation}
+  G(j,k) = R(j,k) + \text{(analytic correction)}
+  \label{eq:gram-ramanujan}
+\end{equation}
+The Ramanujan matrix captures the \emph{algebraic} interaction between
+modes $j$ and $k$ through their greatest common divisor, while the
+analytic correction involves transcendental quantities
+($\ln 2\pi$, $\gamma$, cotangent sums).
+
+\subsection{The Smith Normal Form and Sum of Squares}
+
+The Smith witness (\lean{SmithWitness.lean}, 50K bytes) proves that
+the Ramanujan quadratic form has a sum-of-squares decomposition:
+\begin{equation}
+  v^T R\, v = \frac{1}{12} \sum_{d=1}^{N} J_2(d)\, y_d^2
+  \label{eq:sos}
+\end{equation}
+where $J_2(d) = d^2 \prod_{p | d}(1 - 1/p^2)$ is the
+\emph{Jordan totient function} and $y_d$ are linear combinations of the
+$v_k$'s defined by the Smith decomposition.
+
+\begin{correspondence}[Smith Normal Form = Spectral Diagonalization]
+The Smith Normal Form of the $\gcd^2$ matrix factorizes as
+$R = D^{-1} \Phi\, J\, \Phi^T D^{-1}/12$, where $\Phi$ is the
+Euler totient matrix, $J$ is the diagonal matrix of Jordan
+totients, and $D$ is the diagonal normalization. This is
+the \emph{spectral diagonalization} of the Ramanujan scattering
+matrix: the Jordan totients $J_2(d)$ are the eigenvalues,
+and the Euler totient matrix~$\Phi$ provides the change of basis.
+
+The physical content:
+\begin{itemize}
+  \item $J_2(d) > 0$ for all $d$ (since $1 - 1/p^2 > 0$), so
+    $v^T R\, v \geq 0$---the Ramanujan matrix is
+    \textbf{positive semidefinite}. The scattering matrix is
+    ``reflection positive.''
+  \item Each term $J_2(d) y_d^2$ represents the energy in the
+    $d$-th ``stratum''---modes whose arithmetic structure is
+    controlled by the divisor~$d$.
+  \item The SOS structure implies that cancellation in $v^T R\, v$
+    requires $y_d = 0$ for all~$d$---a strong constraint on the
+    weight vector.
+\end{itemize}
+\end{correspondence}
+
+\subsection{The East--West Principle}
+
+The Smith--Franel Bridge (\lean{SmithFranelBridge.lean}) establishes
+a profound asymmetry between two completeness problems:
+
+\begin{principle}[The East--West Principle]
+\begin{itemize}
+  \item \textbf{The East Wing (unconditional):} The functions
+    $\{kt\}$ for $k = 1, 2, \ldots$ are complete in $L^2(0,1)$.
+    This is the Franel--Landau completeness theorem, related to
+    Farey fractions. The Ramanujan quadratic form
+    $\sigma(N) = \inf_v v^T R\, v \to 0$ unconditionally
+    (proved from Euclid's theorem in \lean{SmithSpectralGap.lean}).
+
+  \item \textbf{The West Wing (conditional):} The functions
+    $\{1/(kx)\}$ for $k = 2, 3, \ldots$ are complete in $L^2(0,1)$
+    \emph{if and only if} the Riemann Hypothesis holds. This is the
+    Nyman--Beurling theorem.
+\end{itemize}
+
+The East Wing uses the ``Ramanujan'' inner product
+$\langle \{jt\}, \{kt\} \rangle = R(j,k)$, which has no transcendental
+content. The West Wing uses the ``Gram'' inner product
+$\langle \{1/(jx)\}, \{1/(kx)\} \rangle = G(j,k)$, which
+involves the Mellin-sensitive cotangent sums.
+
+Both wings share the same underlying arithmetic (the GCD structure),
+but they differ in their \emph{analytic weight}: the East Wing
+sees only algebraic correlations (GCD power), while the West Wing
+sees the full transcendental correlator (cotangent phase shifts).
+The Riemann Hypothesis is the assertion that the transcendental
+corrections do not obstruct completeness---that the algebra
+determines the analysis.
+\end{principle}
+
+\subsection{The Spectral Gap: $\sigma(N) \to \infty$}
+
+The Smith spectral gap (\lean{SmithSpectralGap.lean}) proves the key
+unconditional result:
+\begin{equation}
+  \sigma(N) = \sum_{k=1}^{N} J_2(k) \to \infty
+  \quad\text{as } N \to \infty
+  \label{eq:sigma-diverges}
+\end{equation}
+This follows from Euclid's theorem (infinitely many primes): each
+new prime $p$ contributes $J_2(p) = p^2 - 1 > 0$ to the sum.
+
+\begin{correspondence}[Unconditional Infrared Divergence]
+The divergence $\sigma(N) \to \infty$ is an \emph{infrared divergence}
+of the Ramanujan scattering matrix: the total spectral weight
+grows without bound. In the East Wing, this divergence is
+\emph{desirable}---it ensures completeness. In the West Wing,
+the same divergence is \emph{balanced} by the analytic corrections
+in the Gram matrix, and whether this balance is perfect
+(leading to $d_N^2 \to 0$) is exactly the content of RH.
+\end{correspondence}
+
+\subsection{The Mertens--Ramanujan Connection}
+
+The Mertens--Ramanujan files (\lean{MertensRamanujan.lean},
+\lean{MertensHarmony.lean}, \lean{BilinearMertens.lean})
+establish the connection between the Mertens function (the
+``magnetization'') and the Ramanujan matrix:
+\begin{itemize}
+  \item The \emph{geometric Mertens} identity
+    (\lean{GeometricMertens.lean}) connects the Mertens product
+    $\prod_{p \leq N}(1 - 1/p) \sim e^{-\gamma}/\ln N$ to the
+    diagonal of the Ramanujan matrix.
+  \item The \emph{bilinear Mertens} variance
+    (\lean{BilinearMertens.lean}) bounds the off-diagonal
+    Mertens interaction via the second moment $\sum \mu(j)\mu(k)/jk$.
+  \item The \emph{log-correction} forms
+    (\lean{LogCorrectionForm.lean}, \lean{LogCorrAsymptotics.lean})
+    capture the subleading $O(1/\ln N)$ corrections to the
+    Mertens-weighted quadratic form.
+\end{itemize}
+
+\begin{correspondence}[The Mertens Thermometer]
+The Mertens product $e^{-\gamma}/\ln N$ is the \emph{temperature}
+of the prime number gas at scale~$N$. The Ramanujan matrix entries
+scale as $\gcd^2/(jk)$, which at temperature $T = 1/\ln N$ gives
+an effective coupling constant $g_{\text{eff}} \sim \gcd^2/(jk\ln N)$.
+As $N \to \infty$ ($T \to 0$), the coupling weakens---this is the
+\emph{asymptotic freedom} of the Ramanujan interaction.
+\end{correspondence}

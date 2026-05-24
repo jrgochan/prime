@@ -1,0 +1,211 @@
+% ================================================================
+\section{The Glass Tower: Cayley--Dickson Fiber Decomposition}
+\label{sec:glass-tower}
+% ================================================================
+
+The Glass Tower (\lean{Physics/Glass/*.lean}, 10 files, $\sim$145{,}000
+bytes, zero sorry) discovers that the M\"obius Euler product---the
+generating function of the prime number gas---factorizes through the
+Cayley--Dickson doubling sequence of normed division algebras. This is
+the deepest structural connection between the prime numbers and
+abstract algebra found in the Cathedral.
+
+\subsection{The Hopf Glass Cycle}
+
+The Euler product for a single prime $p$ is:
+\[
+  1 - \frac{1}{p^{2s}} = \underbrace{\left(1 - \frac{1}{p^s}\right)}_{\text{dark (M\"obius)}}
+  \cdot \underbrace{\left(1 + \frac{1}{p^s}\right)}_{\text{Glass}_0}
+\]
+The Glass Tower extends this factorization through three successive
+``Hopf lifts'' (proved in \lean{HopfGlassCycle.lean}):
+\begin{align}
+  1 - \frac{1}{p^{2s}} &= \left(1 - \frac{1}{p^s}\right)
+  \cdot \left(1 + \frac{1}{p^s}\right) \\
+  1 - \frac{1}{p^{4s}} &= \left(1 - \frac{1}{p^{2s}}\right)
+  \cdot \underbrace{\left(1 + \frac{1}{p^{2s}}\right)}_{\text{Glass}_1} \\
+  1 - \frac{1}{p^{8s}} &= \left(1 - \frac{1}{p^{4s}}\right)
+  \cdot \underbrace{\left(1 + \frac{1}{p^{4s}}\right)}_{\text{Glass}_2}
+\end{align}
+Composing all three lifts:
+\begin{equation}
+  \left(1 - \frac{1}{p^s}\right) = \frac{1 - 1/p^{8s}}
+  {\left(1 + 1/p^s\right)\left(1 + 1/p^{2s}\right)\left(1 + 1/p^{4s}\right)}
+  \label{eq:glass-full-cycle}
+\end{equation}
+This is the \lean{glass\_full\_cycle} theorem.
+
+\begin{correspondence}[The Hopf Fibration Sequence]
+\label{corr:hopf}
+Each ``Hopf lift'' corresponds to one of the three topological Hopf
+fibrations---the only fiber bundles of spheres over spheres:
+\begin{center}
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{Lift} & \textbf{Hopf Fibration} & \textbf{Algebra} & \textbf{Glass Product} \\
+\midrule
+0 & $S^1 \hookrightarrow S^3 \to S^2$ & $\CC$ (complex) & $\prod_p(1 + 1/p^s)$ \\
+1 & $S^3 \hookrightarrow S^7 \to S^4$ & $\HH$ (quaternion) & $\prod_p(1 + 1/p^{2s})$ \\
+2 & $S^7 \hookrightarrow S^{15} \to S^8$ & $\OO$ (octonion) & $\prod_p(1 + 1/p^{4s})$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The factorization terminates at the octonions because the Hopf
+fibrations exhaust the normed division algebras: $\RR$, $\CC$, $\HH$,
+$\OO$ are the only four (by the Hurwitz theorem). The dark factor
+$(1 - 1/p^s)$ is the ``real'' baseline; each Glass factor
+peels off one layer of algebraic structure.
+\end{correspondence}
+
+\subsection{The Extended Tower: Sedenions and Trigintaduonions}
+
+The algebraic factorization extends beyond the classical Hopf
+fibrations into the Cayley--Dickson ``post-division'' algebras
+(proved in \lean{TrigintaduonionGlass.lean}):
+\begin{align}
+  1 - \frac{1}{p^{16s}} &= \left(1 - \frac{1}{p^{8s}}\right)
+  \cdot \underbrace{\left(1 + \frac{1}{p^{8s}}\right)}_{\text{Glass}_3\;\text{(sedenion)}} \\
+  1 - \frac{1}{p^{32s}} &= \left(1 - \frac{1}{p^{16s}}\right)
+  \cdot \underbrace{\left(1 + \frac{1}{p^{16s}}\right)}_{\text{Glass}_4\;\text{(trigintaduonion)}}
+\end{align}
+The five Glass products are:
+\begin{center}
+\begin{tabular}{@{}cllll@{}}
+\toprule
+$k$ & \textbf{Product} & \textbf{Exponent} & \textbf{Algebra (dim)} & \textbf{Lost Property} \\
+\midrule
+0 & $\prod_p(1 + 1/p^s)$ & $s$ & $\CC$ (2) & Ordering \\
+1 & $\prod_p(1 + 1/p^{2s})$ & $2s$ & $\HH$ (4) & Commutativity \\
+2 & $\prod_p(1 + 1/p^{4s})$ & $4s$ & $\OO$ (8) & Associativity \\
+3 & $\prod_p(1 + 1/p^{8s})$ & $8s$ & $\mathbb{S}$ (16) & Alternativity \\
+4 & $\prod_p(1 + 1/p^{16s})$ & $16s$ & $\mathbb{T}$ (32) & Flexibility \\
+\bottomrule
+\end{tabular}
+\end{center}
+The tower terminates at dimension~32 because beyond the trigintaduonions,
+no further algebraic property is lost---the doubling becomes purely formal.
+
+\begin{principle}[Prime Democracy on $S^{31}$]
+The trigintaduonion algebra $\mathbb{T}$ has 31 imaginary units. Since
+$\pi(127) = 31$ (there are exactly 31 primes up to 127), each prime
+$p \leq 127$ can be assigned a unique imaginary direction in~$\mathbb{T}$.
+This ``prime democracy'' (\lean{prime\_democracy\_31}) embeds the
+first 31 primes into the unit sphere $S^{31}$ of the trigintaduonion
+algebra, where they form an orthogonal system.
+\end{principle}
+
+\subsection{The Glass Distance Identity}
+
+At the critical point $s = 1/2$, the Glass products evaluate to
+specific zeta ratios. The Glass comparison theorem
+(\lean{GlassComparison.lean}) proves:
+\begin{equation}
+  G^{(1)}(j,k) = 15 \cdot j'k' \cdot G^{(2)}(j,k) + \frac{1}{4}
+  \label{eq:glass-comparison}
+\end{equation}
+where $G^{(1)}$ is the Vasyunin (``positive'') Gram matrix,
+$G^{(2)} = \gcd(j,k)^4/(180\,j^2 k^2)$ is the ``dark'' Gram matrix,
+and $j' = j/\gcd(j,k)$, $k' = k/\gcd(j,k)$ are the coprime parts.
+
+\begin{correspondence}[Glass as Gauge Coupling Constant]
+The Glass products $\prod_p(1 + 1/p^{2^k s})$ are the
+\emph{running coupling constants} of the prime number gauge theory.
+At each scale $2^k s$, a new Glass factor modifies the effective
+interaction strength. The full cycle~\eqref{eq:glass-full-cycle}
+decomposes the bare coupling $(1 - 1/p^s)$ into a product of
+``dressed'' couplings at successively higher energy scales.
+
+In the language of the renormalization group:
+\begin{itemize}
+  \item \textbf{IR (low energy):} The dark factor $(1 - 1/p^s)$
+    dominates---this is the ``confined'' phase where primes are
+    individually resolved.
+  \item \textbf{UV (high energy):} The Glass factors approach~1
+    (since $1/p^{2^k s} \to 0$ for large $k$)---asymptotic
+    freedom.
+  \item \textbf{Critical line:} At $\re s = 1/2$, all Glass factors
+    are $O(1)$---this is the crossover region where the full
+    algebraic structure of the tower is visible.
+\end{itemize}
+\end{correspondence}
+
+\subsection{The Shadow Crown and Monotone Bracketing}
+
+The M\"obius Shadow Crown (\lean{MoebiusShadowCrown.lean}) establishes
+a monotone chain of Euler products:
+\begin{equation}
+  0 \leq \prod_p \left(1 - \frac{1}{p^s}\right)
+  \leq \prod_p \left(1 - \frac{1}{p^{8s}}\right)
+  \leq 1
+  \label{eq:shadow-crown}
+\end{equation}
+for $\re s > 0$. Each successive truncation of the Glass tower
+gives a tighter lower bound on the dark product.
+
+\begin{principle}[The Shadow Crown Principle]
+The Shadow Crown is the number-theoretic analogue of the
+\emph{Wilsonian effective action}: at each energy scale $2^k s$,
+the partition function $\zeta(2^k s)$ captures the ``integrated out''
+degrees of freedom. The chain~\eqref{eq:shadow-crown} says that
+removing more UV modes (higher Glass factors) always moves the
+effective action \emph{toward} the trivial (vacuum) theory---a
+monotonicity that reflects the \emph{c-theorem} of conformal
+field theory.
+\end{principle}
+
+\subsection{S-Duality and Strong--Weak Coupling}
+
+The S-duality (\lean{SDualityGlass.lean}) establishes a reflection
+symmetry between the Glass products and their reciprocals:
+\begin{equation}
+  \prod_p \frac{1}{1 + 1/p^s} = \frac{\zeta(2s)}{\zeta(s)},
+  \qquad
+  \prod_p \left(1 + \frac{1}{p^s}\right) = \frac{\zeta(s)}{\zeta(2s)}
+  \label{eq:s-duality}
+\end{equation}
+
+\begin{correspondence}[S-Duality]
+The pair $(\zeta(s)/\zeta(2s),\; \zeta(2s)/\zeta(s))$ satisfies
+a ``strong--weak'' duality: when one is large (strong coupling),
+the other is small (weak coupling). At $s = 1$:
+\[
+  \frac{\zeta(1)}{\zeta(2)} = \frac{\infty}{\pi^2/6} = \infty,
+  \qquad
+  \frac{\zeta(2)}{\zeta(1)} = 0.
+\]
+At $s = \infty$: both ratios approach~1 (free theory). At the
+critical point $s = 1/2$: $\zeta(1/2) \approx -1.460$ is finite
+while $\zeta(1)$ has a pole---the Glass product encodes the
+\emph{finite renormalization} that tames the pole.
+\end{correspondence}
+
+\subsection{Convergence to the Dark Sector}
+
+The Zeta Tower (\lean{Zeta/ZetaTowerLimit.lean},
+\lean{Zeta/GlassTelescope.lean}) proves the convergence of
+the Glass telescope:
+\begin{equation}
+  \zeta(2^n s) \to 1 \quad\text{as } n \to \infty
+  \label{eq:tower-limit}
+\end{equation}
+for $\re s > 0$. This means the Glass factors at sufficiently high
+levels contribute negligible corrections, and the dark
+product $(1 - 1/p^s)$ is the ``infrared limit'' of the full tower.
+
+The proof uses the Dirichlet tail bound: for $\sigma = \re s > 0$,
+\[
+  |\zeta(2^n s) - 1| \leq \sum_{m=2}^{\infty} \frac{1}{m^{2^n \sigma}}
+  \leq \frac{1}{2^{2^n \sigma} - 1} \to 0.
+\]
+The convergence is doubly exponential---faster than any power law.
+
+\begin{principle}[UV Completion]
+The tower limit~\eqref{eq:tower-limit} is the
+\emph{UV completion} of the prime number field theory. The infinite
+Glass tower provides a well-defined continuum limit: the product
+$\prod_{k=0}^{\infty}(1 + 1/p^{2^k s})$ converges absolutely to
+$(1 - 1/p^s)^{-1}$, recovering the zeta function. The five
+finite Glass products capture the algebraically meaningful part
+of this tower; the tail is a pure convergence correction with
+no algebraic content.
+\end{principle}

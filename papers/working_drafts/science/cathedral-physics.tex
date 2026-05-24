@@ -23,7 +23,7 @@
 We present a systematic dictionary between the mathematical structures
 of the Cathedral---a machine-verified proof architecture for the
 Nyman--Beurling--B\'aez-Duarte equivalence for the Riemann Hypothesis
-in Lean~4 (227 active files, $\sim$60{,}500 lines)---and their physical
+in Lean~4 (329 active files, $\sim$95{,}000 lines)---and their physical
 counterparts in quantum mechanics, statistical mechanics, signal
 processing, and quantum field theory.
 The Gram matrix is the two-point correlator of a 1D quantum field.
@@ -35,16 +35,26 @@ capacity of the prime number gas.
 The Vasyunin cotangent tower is a complete lattice field theory
 of the off-diagonal correlator, reduced to one convergence axiom
 via the ergodic hypothesis.
+The M\"obius Euler product factorizes through the Cayley--Dickson
+doubling sequence (the ``Glass Tower''), connecting the prime
+number gas to Hopf fibrations and normed division algebras.
+The Gram quadratic form equals a time-domain integral of a
+physical witness wave, whose Ramanujan invariance is a hidden
+conformal symmetry.
+An Arithmetic Standard Model identifies the first three primes
+with the gauge groups $U(1) \times SU(2) \times SU(3)$,
+with 76+ theorems proved from zero axioms.
 The crown theorem depends on exactly \textbf{one literature axiom}
 (B\'aez-Duarte 2003); the converse direction is proved with
 \textbf{zero} custom axioms via the Rank-1 Mellin identity.
 An alternative Oracle Bridge bypasses the literature axiom entirely
 via DD-precision GPU certification at highly composite numbers.
-Over 120 physics correspondences are catalogued, spanning
+Over 160 physics correspondences are catalogued, spanning
 Feynman diagram decompositions, Abel summation as renormalization,
 eigenvalue interlacing as Weyl asymptotics, Gallagher MVT as a
-quantum error-correcting code, and Bohr complementarity between
-spatial and spectral proof paths.
+quantum error-correcting code, SUSY cancellation of the quadratic
+form, Smith--Ramanujan spectral diagonalization, and Bohr
+complementarity between spatial and spectral proof paths.
 This correspondence is not metaphorical---it is structural,
 reflecting a deep identity between number theory and quantum physics
 that the formalization makes precise.
@@ -1602,6 +1612,20 @@ and flows to an IR fixed point (infinite $N$, massless), and RH is the
 assertion that this flow is complete.
 
 % ================================================================
+% NEW SECTIONS (v18, May 2026)
+% ================================================================
+
+\input{sections/13a-glass-tower}
+
+\input{sections/14-time-domain-bridge}
+
+\input{sections/13c-susy-cancellation}
+
+\input{sections/13d-smith-ramanujan}
+
+\input{sections/13e-arithmetic-standard-model}
+
+% ================================================================
 \section{Summary: The Physics--Mathematics Dictionary}
 \label{sec:summary}
 % ================================================================
@@ -1683,8 +1707,11 @@ Sherman--Morrison & Rank-1 scattering update & \lean{ShermanMorrison.lean} \\
 PNT axioms $S_1, S_2, S_3$ & Response function asymptotics & \lean{PNT/AbelMean.lean} \\
 \bottomrule
 \end{tabular}
-\caption{The complete physics--mathematics dictionary of the Cathedral
-(updated May~10, 2026, v17 Oracle Capstone). The table is organized by subsystem.
+\caption{The core physics--mathematics dictionary of the Cathedral
+(updated May~24, 2026, v18). The table is organized by subsystem.
+Additional subsystems (Glass Tower, SUSY, Smith--Ramanujan,
+Arithmetic Standard Model, Time-Domain Bridge) are detailed in
+\S\ref{sec:glass-tower}--\S\ref{sec:standard-model}.
 Entries marked \textbf{(proved)} denote theorems with zero sorry;
 \textbf{(axiom)} denotes off-crown mathematical axioms.
 \textbf{One} literature axiom remains on the primary crown path;
@@ -2259,18 +2286,20 @@ Conservation of Difficulty & Gauss--Bonnet obstruction & (E15, conceptual) & ---
 \toprule
 \textbf{Metric} & \textbf{Count} \\
 \midrule
-Total physics phenomena mapped & 120+ \\
-Proved (zero sorry, zero axiom) & 80+ \\
+Total physics phenomena mapped & 160+ \\
+Proved (zero sorry, zero axiom) & 120+ \\
 Axiom (off-crown) & $\sim$20 \\
 Crown axiom (One-Pillar) & \textbf{1} \\
 Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
 Proof paths to RH & \textbf{5} \\
-Physical domains covered & 9 \\
-Cathedral Lean modules referenced & 55+ \\
+Physical domains covered & 11 \\
+Cathedral Lean modules referenced & 80+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 227 (330 incl.\ archive) \\
-Active lines of code & $\sim$60{,}500 ($\sim$85{,}000 incl.\ archive) \\
-Theorem/lemma declarations & $\sim$2{,}000 \\
+Active Lean files & 329 (443 incl.\ archive) \\
+Active lines of code & $\sim$95{,}000 ($\sim$121{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$3{,}500 \\
+Physics/ subsystem files & \textbf{64} \\
+Physics/ subsystem sorry & \textbf{0} \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\

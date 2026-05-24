@@ -1,0 +1,141 @@
+% ================================================================
+\section{The Time-Domain Bridge: Witness Waves and Ramanujan Invariance}
+\label{sec:time-domain}
+% ================================================================
+
+The Time-Domain Bridge (\lean{Physics/Bridges/TimeDomainBridge.lean},
+1,444 lines, zero sorry, one analysis axiom) establishes that the Gram
+quadratic form---the central object measuring the vacuum energy---\emph{is}
+a time-domain integral of a physical wave. This transforms the abstract
+linear algebra of $v^T G v$ into a concrete question about wave interference.
+
+\subsection{The Witness Wave}
+
+Define the \emph{witness wave}:
+\begin{equation}
+  V(t) = \sum_{k=1}^{N} v_k \left\{\frac{t}{k}\right\},
+  \qquad t > 0,
+  \label{eq:witness-wave}
+\end{equation}
+where $\{x\} = x - \lfloor x \rfloor$ is the fractional part. Each
+term $v_k \{t/k\}$ is a sawtooth oscillation with period~$k$ and
+amplitude~$v_k$. The witness wave $V(t)$ is their superposition---a
+signal whose frequency content encodes the prime-weighted coefficients.
+
+\begin{principle}[The Quadratic Form Identity]
+The Gram quadratic form equals the time-domain integral of the squared
+witness wave (proved in \lean{quad\_form\_time\_domain}):
+\begin{equation}
+  v^T G v = \int_1^{\infty} \frac{V(t)^2}{t^2}\,dt
+  \label{eq:quad-form-td}
+\end{equation}
+This identity transforms the algebraic statement $v^T G v < 1$
+(which implies RH via the Nyman--Beurling converse) into a
+\emph{physical} statement: the total energy of the witness wave,
+measured with the $1/t^2$ weighting (the inverse-square law), must be
+less than~1.
+\end{principle}
+
+The proof proceeds by substitution: each Gram entry $G(j,k) =
+\int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$ is rewritten via $t = 1/x$ as
+$\int_1^\infty \{t/j\}\{t/k\}/t^2\,dt$ (proved as
+\lean{substitution\_identity}), then the double sum $\sum_{j,k} v_j v_k
+G(j,k)$ is recognized as $\int V(t)^2/t^2\,dt$ by bilinearity.
+
+\subsection{The Mean--Fluctuation Decomposition}
+
+The witness wave's squared amplitude decomposes into a mean and a
+fluctuation:
+\begin{equation}
+  V(t)^2 = \mu_S + \bigl(V(t)^2 - \mu_S\bigr)
+  \label{eq:mean-fluct}
+\end{equation}
+where $\mu_S = v^T R\, v + \tfrac{1}{4}(\sum_k v_k)^2$ is the
+\emph{periodicMean} (proved in \lean{mu\_S\_eq}), and $R$ is the
+Ramanujan matrix.
+
+\begin{correspondence}[Vacuum Fluctuations]
+The decomposition~\eqref{eq:mean-fluct} is the number-theoretic
+analogue of the Casimir effect:
+\begin{itemize}
+  \item $\mu_S$ is the \textbf{vacuum expectation value}---the
+    mean-square amplitude of the witness wave, determined by the
+    Ramanujan matrix (the ``classical'' part).
+  \item $V(t)^2 - \mu_S$ is the \textbf{vacuum fluctuation}---the
+    deviation from the mean, which oscillates with zero time-average
+    (proved in \lean{fluct\_mean\_zero}).
+\end{itemize}
+The Gram quadratic form splits accordingly
+(proved in \lean{quad\_form\_mean\_fluct}):
+\[
+  v^T G v = \mu_S + \int_1^{\infty}
+  \frac{V(t)^2 - \mu_S}{t^2}\,dt
+\]
+The first term is the classical Ramanujan energy; the second is the
+quantum correction from vacuum fluctuations.
+\end{correspondence}
+
+\subsection{The Ramanujan Invariance: An Algebraic Miracle}
+
+The deepest result in the Time-Domain Bridge is the
+\emph{Ramanujan invariance} (proved in \lean{ramanujan\_invariance},
+marked \textbf{THE ALGEBRAIC MIRACLE} in the code):
+\begin{equation}
+  R(L/j,\, L/k) = R(j, k)
+  \label{eq:ramanujan-invariance}
+\end{equation}
+for any $L$ divisible by both $j$ and $k$, where $R(j,k)$ is the
+Ramanujan matrix entry.
+
+\begin{principle}[Hidden Scaling Symmetry]
+The Ramanujan invariance is a \emph{hidden scaling symmetry} of
+the Gram matrix. The periodicMean of the witness wave does not
+change when we rescale the lattice by any common multiple $L$---the
+``interaction strength'' between modes $j$ and $k$ depends only on
+their arithmetic relationship, not on the absolute scale.
+
+In physics, this is a \emph{conformal symmetry}: the correlation
+function is invariant under dilations. The Ramanujan matrix is
+conformally invariant on the integer lattice.
+
+The proof chain composes three certified steps:
+\begin{enumerate}
+  \item \textbf{CoV (Change of Variables):} The integral identity
+    $\int_0^L \{t/j\}\{t/k\}\,dt = \int_0^1 \{Lt/j\}\{Lt/k\}\,dt
+    \cdot L$ (scaling).
+  \item \textbf{Glass (Periodicity):} The integrand $\{t/j\}\{t/k\}$
+    is periodic with period $\mathrm{lcm}(j,k)$ (proved in
+    \lean{witnessWave\_periodic}).
+  \item \textbf{Ramanujan:} The integral per period is exactly the
+    Ramanujan entry $R(j,k)$ (from the Glass quadratic form identity).
+\end{enumerate}
+\end{principle}
+
+\subsection{Periodicity and the IBP Identity}
+
+The witness wave $V(t)$ is periodic with period $N!$ (proved in
+\lean{witnessWave\_periodic}), as is $V(t)^2$ (proved in
+\lean{witnessWave\_sq\_periodic}) and the fluctuation $V(t)^2 - \mu_S$
+(proved in \lean{fluct\_periodic}).
+
+The periodicity of the fluctuation, combined with its zero mean
+(proved in \lean{fluct\_mean\_zero}), enables integration by parts
+on the improper integral $\int_1^\infty (V^2 - \mu_S)/t^2\,dt$.
+The IBP identity (proved in \lean{exact\_ibp\_identity}) yields:
+\begin{equation}
+  v^T G v = 2\mu_S - \frac{S^2}{3} + 2\int_1^\infty
+  \frac{E_S(t)}{t^3}\,dt
+  \label{eq:ibp-identity}
+\end{equation}
+where $S = \sum_k v_k$ and $E_S$ is the fluctuation primitive
+(bounded by periodicity + continuity, proved in
+\lean{globalFluctPrimitive\_bounded}).
+
+\begin{correspondence}[The IBP as Virial Theorem]
+The IBP identity~\eqref{eq:ibp-identity} is the number-theoretic
+\emph{virial theorem}: it relates the time-averaged kinetic energy
+($v^T G v$) to the potential energy ($2\mu_S - S^2/3$) plus a
+correction from the boundary fluctuations. The $1/t^3$ weight in the
+remainder integral ensures convergence---the fluctuations are damped
+by the cube of the distance, not just the square.
+\end{correspondence}
