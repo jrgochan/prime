@@ -10,7 +10,7 @@
 \author{
   Jason Robert Gochanour\,\orcidlink{0000-0002-2862-526X}
 }
-\date{May 18, 2026}
+\date{May 24, 2026}
 
 \begin{document}
 
@@ -29,8 +29,8 @@ Nyman--Beurling distance:
   \RH \;\iff\; d_N^2 \to 0
 \]
 where $d_N^2 = \inf_{v} \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$.
-The formalization comprises 283 active Lean files ($\sim$81{,}000 lines;
-395 files and $\sim$107{,}000 lines including archived explorations) with
+The formalization comprises 330 active Lean files ($\sim$121{,}000 lines;
+444 files and $\sim$130{,}000 lines including archived explorations) with
 zero compilation errors. On the crown path, the theorem depends on
 exactly \textbf{one} substantive axiom---the Gram quadratic form decay
 (B\'aez-Duarte 2003, reformulated as a direct Gram matrix bound)---plus
@@ -61,6 +61,9 @@ trust reduces to the correctness of open-source numerical code.
 Companion Rust experiments (50+ programs, f64--512-bit MPFR--DD
 precision) validate the spectral correspondence to $10^{-17}$
 precision, with the largest certified computation at $N = 55{,}440$.
+The Glass Tower formalizes the Bose--Einstein and Fermi--Dirac
+partition functions of the prime number gas, proving the squarefree
+density is the Fermi statistic (File~\#444, zero sorry).
 \end{abstract}
 
 \tableofcontents
@@ -415,9 +418,9 @@ plus PNT bureaucracy. These are \textbf{not} on the primary crown path.
 
 \subsection{The Full Axiom Registry}
 
-The 283 active files contain 91 custom axioms; an additional
-60 axioms reside in archived explorations, totaling $\sim$151 across
-the full repository ($\sim$2{,}000 theorem/lemma/def declarations):
+The 330 active files contain $\sim$108 custom axioms; an additional
+$\sim$60 axioms reside in archived explorations, totaling $\sim$168 across
+the full repository ($\sim$2{,}400 theorem/lemma/def declarations):
 
 \begin{center}
 \begin{tabular}{@{}clcc@{}}
@@ -430,10 +433,10 @@ the full repository ($\sim$2{,}000 theorem/lemma/def declarations):
 3 & Sieve engine (off-path) & 7 & 0 \\
 4 & MellinBridge / alt paths / Vasyunin & 47 & 0 \\
 \cmidrule{1-4}
-& \textbf{Active subtotal} & \textbf{91} & \textbf{1} \\
-5 & Archive (inactive, superseded) & 60 & 0 \\
+& \textbf{Active subtotal} & \textbf{$\sim$108} & \textbf{1} \\
+5 & Archive (inactive, superseded) & $\sim$60 & 0 \\
 \midrule
-& \textbf{Grand total} & \textbf{$\sim$151} & \textbf{1} \\
+& \textbf{Grand total} & \textbf{$\sim$168} & \textbf{1} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -460,6 +463,7 @@ the full repository ($\sim$2{,}000 theorem/lemma/def declarations):
 2026-05-13 & Gram Crown + Unified Assembly (v18) & 1 \\
 2026-05-14 & \textbf{Direct Mellin Bound + Graduation (v19)} & \textbf{1 + 3 PNT} \\
 2026-05-17 & Glass Bridge + Physics Enrichment (v20) & 1 + 3 PNT \\
+2026-05-24 & \textbf{File \#444: Bose--Einstein Prime Gas (v21)} & 1 + 3 PNT \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -492,6 +496,7 @@ Glass Bridge identity & \lean{Physics/GlassDistance.lean} & 0 \\
 Dark Gram matrix & \lean{Physics/DarkGramMatrix.lean} & 0 \\
 Hopf--Glass cycle & \lean{Physics/HopfGlassCycle.lean} & 0 \\
 S-duality glass ratio & \lean{Physics/SDualityGlass.lean} & 0 \\
+Bose--Einstein / Fermi--Dirac prime gas & \lean{Physics/Glass/BoseEinsteinPrimes.lean} & 0 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -653,7 +658,7 @@ to informal proof:
 
 \subsection{Module Organization}
 
-The Cathedral is organized into 25 modules (283 active files):
+The Cathedral is organized into 25+ modules (330 active files):
 
 \begin{center}
 \small
@@ -668,7 +673,7 @@ The Cathedral is organized into 25 modules (283 active files):
 \lean{Analysis} & Real/complex analysis, Stirling & 16 & 0 \\
 \lean{Assembly} & Crown theorem, Gram Crown, Oracle & 20 & 1 + Oracle \\
 \lean{AbelTail} & Abel summation tail bounds & 14 & 0 \\
-\lean{Physics} & Gauge theory, SUSY, Ward, Glass Bridge, Dark Gram & 39 & 0 \\
+\lean{Physics} & Gauge theory, SUSY, Ward, Glass Bridge, Dark Gram, BE/FD & 65 & 0 \\
 \lean{Spectral} & Rayleigh, class restriction & 14 & 0 \\
 \lean{NymanBeurling} & Converse (Rank-1 Mellin) & 11 & 0 \\
 \lean{Zeta} & Zeta bounds, Dirichlet inverse & 10 & 0 \\
@@ -681,16 +686,16 @@ The Cathedral is organized into 25 modules (283 active files):
 \lean{PNT} & PNT bridge (PNTA dependency) & 4 & 0 \\
 \lean{+ 6 others} & Renorm., Compute, IntegralBasis, etc. & 13 & 0 \\
 \midrule
-& \textbf{Active total} & \textbf{283} & \textbf{1 + Oracle} \\
+& \textbf{Active total} & \textbf{330} & \textbf{1 + Oracle} \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-An additional 112 files are preserved in \lean{Archive/}.
-The build emits \textbf{15} \lean{sorry} warnings across 8 files;
-all are in exploratory paths (PNT Bridge, Covariance,
-Assembly/QualitativeForward, Assembly/ParsevalFactored, ZeroAxiom)
-and do not affect the crown theorem.
+An additional 114 files are preserved in \lean{Archive/}.
+The build emits exploratory \lean{sorry} warnings in off-crown paths
+(PNT Bridge, Covariance, Assembly/QualitativeForward,
+Assembly/ParsevalFactored, ZeroAxiom)
+that do not affect the crown theorem.
 
 \subsection{The Axiom Audit Protocol}
 
@@ -715,8 +720,8 @@ these are safely quarantined off the crown path.
 
 \begin{verbatim}
 cd proofs
-lake build    # 261 active files, 112 archived
-              # Build completed successfully (8503 jobs)
+lake build    # 330 active files, 114 archived
+              # Build completed successfully (8570 jobs)
 
 #print axioms nyman_beurling_equivalence  -- PRIMARY EXPORT
 -- R_isLittleO, frac_error_isLittleO,
@@ -1047,7 +1052,7 @@ The machine taught us to listen.}
 % ================================================================
 
 This project was built through AI-assisted formal verification using
-Lean~4 and Mathlib over $\sim$48 days (March--May 2026). The author
+Lean~4 and Mathlib over $\sim$58 days (March--May 2026). The author
 gratefully acknowledges Google DeepMind's Gemini for mathematical
 strategy, the Mellin Crown architecture, phase cancellation
 analysis, the Transit of the Primes correspondence, and the
@@ -1063,7 +1068,7 @@ The complete Lean~4 formalization, Rust experiments, and GPU
 pipeline code are available at
 \url{https://github.com/jrgochan/prime}.
 The repository compiles with \texttt{lake build} (Lean~4 /
-Mathlib, zero errors, 8{,}397 build jobs).
+Mathlib, zero errors, 8{,}570 build jobs).
 
 % ================================================================
 % BIBLIOGRAPHY
