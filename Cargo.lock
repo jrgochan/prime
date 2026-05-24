@@ -1644,6 +1644,7 @@ dependencies = [
  "cathedral-utils",
  "nalgebra",
  "rayon",
+ "rug",
 ]
 
 [[package]]
