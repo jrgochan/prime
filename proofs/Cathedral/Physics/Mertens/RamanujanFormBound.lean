@@ -331,7 +331,7 @@ theorem sum_jordan_yd_sq_bound (N : ℕ) (hN : 3 ≤ N) (v : Fin N → ℝ)
 
     This is a conditional structural result — it shows WHAT needs to be
     proved, not HOW to prove it. The HOW is the Möbius cancellation. -/
-theorem crown_reduction_smith (N : ℕ) (hN : 3 ≤ N) (v : Fin N → ℝ)
+theorem crown_reduction_smith (N : ℕ) (_hN : 3 ≤ N) (v : Fin N → ℝ)
     (h_smith : (1/12 : ℝ) * ∑ d ∈ Finset.Icc 1 N,
         RamanujanBridge.jordanTotient2 d * (divisorCoeff N v d) ^ 2 +
       (1/4 : ℝ) * (∑ k : Fin N, v k) ^ 2 ≤

@@ -870,7 +870,7 @@ theorem fract_product_period_integral (L j k : ℕ) (hL : 0 < L) (hj : 0 < j) (h
   have h_eq : (fun u : ℝ => Int.fract ((L : ℝ) * u / (j : ℝ)) * Int.fract ((L : ℝ) * u / (k : ℝ))) =
       (fun u : ℝ => Int.fract (((L / j : ℕ) : ℝ) * u) * Int.fract (((L / k : ℕ) : ℝ) * u)) := by
     ext u
-    congr 1 <;> [rw [← hj_div]; rw [← hk_div]] <;> ring
+    congr 1 <;> [rw [← hj_div]; rw [← hk_div]] <;> ring_nf
   rw [h_eq]
   -- Step 3: Apply positive_gram_via_ramanujan (L/j) (L/k)
   -- ∫₀¹ {(L/j)t}·{(L/k)t} = ramanujanEntry(L/j, L/k) + 1/4 = periodicMean(L/j, L/k)

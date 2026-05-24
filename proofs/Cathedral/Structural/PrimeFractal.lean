@@ -618,8 +618,8 @@ theorem quadForm_primeGram_bound (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N)
     - Cauchy-Schwarz for Finset sums
     - The telescoping bound Σ 1/j² < 2 -/
 theorem spectral_selfsimilarity_upper (p N : ℕ) (hp : Nat.Prime p) (hN : 2 ≤ N) :
-    let G_p := primeGramMatrix p N
-    let G   := gramMatrix N
+    let _G_p := primeGramMatrix p N
+    let _G   := gramMatrix N
     let hG_p := primeGramMatrix_hermitian p N
     let hG   := gramMatrix_hermitian N
     ∀ (hn : 0 < N - 1),

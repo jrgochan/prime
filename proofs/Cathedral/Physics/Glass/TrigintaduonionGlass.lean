@@ -365,7 +365,7 @@ theorem glass_critical_strip_vanishes (p : ℝ) (hp : 2 ≤ p) (σ : ℝ) (hσ :
   calc 1 / p ^ (2 ^ N * σ)
       = 1 / (p ^ σ) ^ (2 ^ N) := by
         rw [← rpow_natCast (p ^ σ) (2 ^ N), ← rpow_mul hp_pos.le]
-        congr 1; push_cast; ring
+        congr 1; push_cast; ring_nf
     _ = (1 / p ^ σ) ^ (2 ^ N) := by
         rw [one_div, one_div, ← inv_pow]
     _ ≤ (1 / p ^ σ) ^ N := by

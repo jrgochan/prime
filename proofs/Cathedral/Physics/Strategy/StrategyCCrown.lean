@@ -109,8 +109,8 @@ theorem strategy_c_complete (hRH : RiemannHypothesis) :
     This connects Strategy C to the overcancellation path by showing
     that vᵀGv is controlled by the d=1 Smith coefficient y₁. -/
 theorem strategy_c_overcancellation_framework
-    (hRH : RiemannHypothesis) (N : ℕ) (hN : 3 ≤ N) (v : Fin N → ℝ)
-    (hv : ∀ i : Fin N, v i = -(↑(ArithmeticFunction.moebius (i.val + 1)) : ℝ) *
+    (_hRH : RiemannHypothesis) (N : ℕ) (_hN : 3 ≤ N) (v : Fin N → ℝ)
+    (_hv : ∀ i : Fin N, v i = -(↑(ArithmeticFunction.moebius (i.val + 1)) : ℝ) *
       logWeight N (i.val + 1)) :
     -- vᵀGv = (1/12)·(y₁² + Σ_{d≥2} J₂(d)·y_d²) + ¼(Σv)²
     ∑ i : Fin N, ∑ j : Fin N,

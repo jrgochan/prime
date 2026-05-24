@@ -79,7 +79,7 @@ theorem b1_diagonal (j : ℕ) (hj : 0 < j) :
   have hj_ne : (j : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr (by omega)
   -- gcd(j,j)²/(12·j·j) = j²/(12j²) = 1/12
   -- This is straightforward field arithmetic
-  push_cast; field_simp
+  field_simp
 
 /-- A₁ entries are non-negative for positive indices. -/
 theorem b1_nonneg (j k : ℕ) (_ : 0 < j) (_ : 0 < k) :
@@ -451,7 +451,7 @@ theorem perturbation_comm (j k : ℕ) : perturbationEntry j k = perturbationEntr
     2. The structure of L₁ as a "smooth" correction to gcd²
     3. Abel/partial summation to extract the decay rate -/
 axiom moebius_annihilation :
-    ∃ C : ℝ, ∀ N : ℕ, 2 ≤ N →
+    ∃ _C : ℝ, ∀ N : ℕ, 2 ≤ N →
       -- The perturbation on the Möbius subspace is bounded
       -- relative to the skeleton by C/logN
       True  -- Placeholder: exact statement TBD after more experiments
