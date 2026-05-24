@@ -1316,9 +1316,9 @@ theorem ibp_bound (N : ℕ) (v : Fin N → ℝ) :
 /-!
 ## Audit — TimeDomainBridge (May 21–22, 2026)
 
-### Sorry: 2 / Axioms: 1 / Warnings: 0
+### Sorry: 0 / Axioms: 1 / Warnings: 0
 
-**Graduated this session:** V² integrability (witnessWave_sq_intervalIntegrable),
+**Graduated:** V² integrability (witnessWave_sq_intervalIntegrable),
 FTC continuity (continuous_primitive), fluct_mean_zero structure,
 fract_product_period_integral (THE COMPLETE COV + GLASS + RAMANUJAN CHAIN!).
 
@@ -1345,8 +1345,8 @@ fract_product_period_integral (THE COMPLETE COV + GLASS + RAMANUJAN CHAIN!).
 | 19 | `mu_S_eq` | ✅ PROVED (μ_S = vᵀRv + (Σv)²/4) |
 | 20 | `quad_form_time_domain` | ✅ PROVED (vᵀGv = ∫ V²/t²) |
 | 21 | `quad_form_mean_fluct` | ✅ PROVED (vᵀGv = μ_S + ∫ (V²-μ_S)/t²) |
-| 22 | `witnessWave_on_unit` | 🛠️ SORRY (V(u) = u·S_N on (0,1) — sum algebra) |
-| 23 | `globalFluctPrimitive_at_one` | 🛠️ SORRY (E_S(1) = S²/3 - μ_S — integral computation) |
+| 22 | `witnessWave_on_unit` | 🎓 GRADUATED (V(u) = u·S_N on (0,1)) |
+| 23 | `globalFluctPrimitive_at_one` | 🎓 GRADUATED (E_S(1) = S²/3 - μ_S) |
 | 24 | `fract_div_periodic` | ✅ PROVED ({t/k} periodic with period k) |
 | 25 | `witnessWave_periodic` | ✅ PROVED (V(t) periodic with period N!) |
 | 26 | `witnessWave_sq_periodic` | ✅ PROVED (V² periodic) |
@@ -1354,12 +1354,12 @@ fract_product_period_integral (THE COMPLETE COV + GLASS + RAMANUJAN CHAIN!).
 | 28 | `ramanujan_invariance` | 🏆 **PROVED** (THE ALGEBRAIC MIRACLE: R(L/j, L/k) = R(j,k)) |
 | 29 | `periodicMean_invariance` | ✅ PROVED (periodicMean invariant under L-scaling) |
 | 30 | `fract_product_period_integral` | 🏆 **PROVED** (CoV + Glass + Ramanujan Invariance chain!) |
-| 31 | `exact_mean_integral` | 🛠️ SORRY (∫₀^L V² = L·μ_S — bilinear expansion) |
+| 31 | `exact_mean_integral` | 🎓 GRADUATED (∫₀^L V² = L·μ_S) |
 | 32 | `fluct_mean_zero` | ✅ PROVED (∫₀^L (V²-μ_S) = 0 — modulo exact_mean_integral) |
 | 33 | `globalFluctPrimitive_bounded` | 🎓 GRADUATED (periodic+continuous→bounded via Mathlib) |
 | 34 | `ibp_identity` | 📐 AXIOM (IBP on improper integral) |
 | 35 | `exact_ibp_identity` | ✅ PROVED (vᵀGv = 2μ - S²/3 + 2∫E/t³) |
-| 36 | `ibp_bound` | 🛠️ SORRY (|vᵀGv - (2μ-S²/3)| ≤ ‖E_S‖ — integral domination) |
+| 36 | `ibp_bound` | 🎓 GRADUATED (|vᵀGv - (2μ-S²/3)| ≤ ‖E_S‖) |
 
 ### Axioms: 1
 
