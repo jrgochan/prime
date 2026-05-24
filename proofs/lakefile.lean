@@ -429,6 +429,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Glass.GlassCriticalLine,
     -- CotRes ↔ vᵀGv Bridge (diagonal/off-diagonal decomposition)
     `Cathedral.Physics.Glass.CotResQuadBridge,
+    -- Bose-Einstein Primes (File #444: ζ(s) as partition function, Fermi-Dirac = squarefree)
+    `Cathedral.Physics.Glass.BoseEinsteinPrimes,
     -- Möbius-Smith Bridge (connects SOS decomposition to Möbius weights)
     `Cathedral.Physics.GramWiring.MoebiusSmithBridge,
     `Cathedral.Physics.Cancellation.WoodburyCondensate,

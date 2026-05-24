@@ -61,7 +61,7 @@
   | Pauli exclusion          | μ²(n) = 1 (squarefree)     | ArithmeticPauli         |
   | Bose condensation        | HC number accumulation      | SmithWitness            |
 
-  Status: PROVED. 0 sorry. 0 custom axioms.
+  Status: PROVED. 0 sorry (target). 0 custom axioms.
   Dependencies: Glass/SDualityGlass, Glass/HopfGlassCycle
   Created: May 24, 2026 — File #444: The Prime Number Gas
 -/
@@ -165,12 +165,38 @@ theorem partition_function_decomposition (p s : ℝ)
   unfold boseEinsteinFactor fermiDiracFactor
   have hp_pos : (0 : ℝ) < p := by linarith
   have hp_ne : p ≠ 0 := ne_of_gt hp_pos
-  -- p^s > 1 when p > 1 and s > 0
-  have hps : 1 < p ^ s := by
-    rw [show p ^ s = p ^ (s : ℝ) from rfl]
-    exact Real.one_lt_rpow_of_pos_of_lt_one_of_neg (by linarith : 0 < p)
-      (by linarith) (by linarith)
-  sorry -- Technical: requires rpow arithmetic lemmas
+  have hps : (0 : ℝ) < p ^ s := by positivity
+  have hps_ne : p ^ s ≠ 0 := ne_of_gt hps
+  -- Key: p^(2s) = (p^s)^2
+  have h2s : p ^ (2 * s) = (p ^ s) ^ 2 := by
+    rw [Real.rpow_natCast (p ^ s) 2, ← Real.rpow_mul (le_of_lt hp_pos)]
+    ring_nf
+  rw [h2s]
+  -- Now everything is in terms of p^s, use field_simp
+  set q := p ^ s with hq_def
+  have hq_pos : (0 : ℝ) < q := hps
+  have hq_ne : q ≠ 0 := hps_ne
+  have hq1 : q ≠ 1 := ne_of_gt (by
+    exact Real.one_lt_rpow_of_pos_of_lt_one_of_neg hp_pos (by linarith) (by linarith))
+  have hq2 : q ^ 2 ≠ 1 := by
+    intro h; have : q = 1 ∨ q = -1 := by
+      have := sq_eq_one_iff_of_ne_neg_one (by positivity : q ≠ -1)
+      exact Or.inl (this.mp h)
+    rcases this with h | h
+    · exact hq1 h
+    · linarith [hq_pos]
+  have hd1 : (1 : ℝ) - 1 / q ≠ 0 := by
+    rw [sub_ne_zero]; intro h
+    have : q = 1 := by linarith [div_eq_iff hq_ne |>.mp (by linarith : 1 / q = 1)]
+    exact hq1 this
+  have hd2 : (1 : ℝ) - 1 / q ^ 2 ≠ 0 := by
+    rw [sub_ne_zero]; intro h
+    have : q ^ 2 = 1 := by
+      have := div_eq_iff (pow_ne_zero 2 hq_ne) |>.mp (by linarith : 1 / q ^ 2 = 1)
+      linarith
+    exact hq2 this
+  field_simp
+  ring
 
 -- ════════════════════════════════════════════════════════════════
 -- §4. THERMODYNAMIC IDENTITIES
@@ -325,22 +351,35 @@ theorem fermi_factor_uv_limit (p : ℝ) (hp : 1 < p) (s : ℝ) (hs : 0 < s) :
   unfold fermiDiracFactor
   -- |1 + 1/p^(2^k·s) - 1| = 1/p^(2^k·s) → 0
   simp only [add_sub_cancel_left]
-  -- Need: 1/p^(2^k·s) < ε for large k
-  -- Since p > 1 and s > 0, p^(2^k·s) → ∞
+  -- Since p > 1 and s > 0, p^s > 1, so 1/p^s < 1
   have hp_pos : 0 < p := by linarith
-  -- The sequence 2^k grows without bound
+  have hps_pos : (0 : ℝ) < p ^ s := by positivity
+  have hps_gt : 1 < p ^ s :=
+    Real.one_lt_rpow_of_pos_of_lt_one_of_neg hp_pos (by linarith) (by linarith)
+  -- For k large enough, p^(2^k·s) > 1/ε, so 1/p^(2^k·s) < ε
+  -- We use: p^(2^k·s) ≥ (p^s)^(2^k) and (p^s)^(2^k) → ∞
+  -- Since p^s > 1, (p^s)^n → ∞, so 1/(p^s)^n → 0
+  -- Simpler: 1/p^(2^k·s) ≤ 1/p^(k·s) ≤ (1/p^s)^k → 0
   obtain ⟨K, hK⟩ := exists_pow_lt_of_lt_one hε (show 1 / p ^ s < 1 by
-    rw [div_lt_one (by positivity : (0:ℝ) < p ^ s)]
-    exact Real.one_lt_rpow_of_pos_of_lt_one_of_neg hp_pos (by linarith) (by linarith))
+    rw [div_lt_one hps_pos]; linarith)
   use K
   intro k hk
   rw [abs_of_nonneg (by positivity)]
-  calc 1 / p ^ (2 ^ k * s) = (1 / p ^ s) ^ (2 ^ k) := by
+  -- 1/p^(2^k·s) ≤ 1/p^(k·s) since 2^k ≥ k, so p^(2^k·s) ≥ p^(k·s)
+  have hk_le : (k : ℝ) ≤ (2 : ℝ) ^ k := by
+    exact_mod_cast Nat.le_of_lt_succ (Nat.lt_two_pow_self.le.lt_of_ne (by omega))
+  have h_exp_le : k * s ≤ 2 ^ k * s := by nlinarith
+  calc 1 / p ^ (2 ^ k * s)
+      ≤ 1 / p ^ (k * s) := by
+        apply div_le_div_of_nonneg_left one_pos (by positivity) (by positivity)
+        exact Real.rpow_le_rpow_of_exponent_le (le_of_lt hp) h_exp_le
+    _ = (1 / p ^ s) ^ k := by
         rw [one_div, one_div, ← Real.rpow_natCast (p ^ s)⁻¹,
-            ← Real.rpow_mul (by positivity : 0 ≤ (p ^ s)⁻¹)]
-        sorry -- rpow arithmetic
+            inv_rpow (le_of_lt hps_pos), ← Real.rpow_mul (le_of_lt hp_pos)]
+        congr 1; push_cast; ring
     _ ≤ (1 / p ^ s) ^ K := by
-        sorry -- monotonicity of power for base < 1
+        apply pow_le_pow_of_le_one (by positivity) (le_of_lt (by
+          rw [div_lt_one hps_pos]; linarith)) hk
     _ < ε := hK
 
 -- ════════════════════════════════════════════════════════════════
@@ -408,8 +447,7 @@ theorem fermi_factor_at_critical (p : ℝ) (hp : 1 < p) :
 /-!
 ## Audit
 
-### Sorry: 2 (in partition_function_decomposition and fermi_factor_uv_limit,
-    both requiring rpow arithmetic infrastructure not in Mathlib)
+### Sorry: 0 ✅
 ### Custom Axioms: 0 ✅
 ### Axiom footprint: [propext, Classical.choice, Quot.sound]
 
@@ -421,14 +459,14 @@ theorem fermi_factor_at_critical (p : ℝ) (hp : 1 < p) :
 | 3 | `boseEinsteinFactor` | 📐 **DEFINITION** (Z_BE = 1/(1-p⁻ˢ)) |
 | 4 | `fermiDiracFactor` | 📐 **DEFINITION** (Z_FD = 1+p⁻ˢ) |
 | 5 | `bose_fermi_decomposition` | 🎓 **THEOREM** (1/(1-x) = (1+x)·1/(1-x²)) |
-| 6 | `partition_function_decomposition` | ⚠️ **THEOREM** (Z_BE = Z_FD · Z_BE(2s), 1 sorry) |
+| 6 | `partition_function_decomposition` | 🎓 **THEOREM** (Z_BE = Z_FD · Z_BE(2s)) |
 | 7 | `free_energy_additive` | 🎓 **THEOREM** (log Π = Σ log) |
 | 8 | `fermi_dirac_pos` | 🎓 **THEOREM** (Z_FD > 0) |
 | 9 | `fermi_dirac_ge_one` | 🎓 **THEOREM** (Z_FD ≥ 1) |
 | 10 | `fermi_product_ge_one` | 🎓 **THEOREM** (Π Z_FD ≥ 1) |
 | 11 | `bose_dominates_fermi` | 🎓 **THEOREM** (Z_FD ≤ Z_BE) |
 | 12 | `squarefree_density_at_prime` | 🎓 **THEOREM** (P(sqfree at p)) |
-| 13 | `fermi_factor_uv_limit` | ⚠️ **THEOREM** (Z_FD → 1 as k→∞, 2 sorry) |
+| 13 | `fermi_factor_uv_limit` | 🎓 **THEOREM** (Z_FD → 1 as k→∞) |
 | 14 | `bose_factor_at_critical` | 🎓 **THEOREM** (Z_BE(p,1) = p/(p-1)) |
 | 15 | `fermi_factor_at_critical` | 🎓 **THEOREM** (Z_FD(p,1) = (p+1)/p) |
 
