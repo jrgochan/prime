@@ -183,6 +183,7 @@ lean_lib «Cathedral» where
     `Cathedral.Assembly.GramCrown,
     -- Overcancellation: Crown-free path to RH (Exploration 39)
     `Cathedral.Assembly.OvercancellationChain,
+    `Cathedral.Assembly.FejerMellinBound,
     `Cathedral.Assembly.Assembly,
     -- PNT bridge (re-enabled via local PNTAnd clone with v4.29 fix)
     `Cathedral.PNT.Bridge,
