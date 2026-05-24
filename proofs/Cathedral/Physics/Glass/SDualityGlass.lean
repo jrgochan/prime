@@ -175,20 +175,12 @@ theorem dark_factor_bounds (p : ℝ) (hp : 1 < p) :
 
     Glass_S = Π_{p ∈ S} (1 + 1/p²)
 
-  In the limit:
-    Glass_∞ = ζ(2)/ζ(4) = (π²/6)/(π⁴/90) = 90/(6π²) = 15/π² ≈ 1.5198...
+  In the limit S → {all primes}:
 
-  Wait — let me recalculate:
-    ζ(4)⁻¹ = ζ(2)⁻¹ · Glass
-    Glass = ζ(4)⁻¹ / ζ(2)⁻¹ = ζ(2) / ζ(4)
-    = (π²/6) / (π⁴/90) = (π² · 90) / (6 · π⁴) = 90/(6π²) = 15/π²
-
-  Actually:
-    ζ(2) = π²/6
-    ζ(4) = π⁴/90
-    ζ(2)/ζ(4) = (π²/6) · (90/π⁴) = 90/(6π²) = 15/π²
-
-  So Glass = 15/π² ≈ 1.5198...
+    Glass_∞ = ζ(2)/ζ(4)
+            = (π²/6) / (π⁴/90)
+            = 15/π²
+            ≈ 1.5198...
 
   This means the dark sector is ~52% "larger" than the positive sector
   at each step through the mirror. -/
@@ -250,23 +242,14 @@ theorem glass_two_three_five :
   - ζ(4)⁻¹ = J₄ density at HC numbers ← Dark sector crystal density
   - ζ(2)/ζ(4) = 15/π² ← The glass of the mirror
 
-  And notice the beautiful tower:
+  The even zeta values are related by:
   - ζ(2) = π²/6   (Basel, Euler 1735)
   - ζ(4) = π⁴/90  (Euler)
   - ζ(2)² = π⁴/36
-  - ζ(4) = (5/2) · ζ(2)² / something...
+  - ζ(4)/ζ(2)² = 36/90 = 2/5
 
-  Actually: ζ(4) = π⁴/90, ζ(2)² = π⁴/36
-  So ζ(4)/ζ(2)² = 36/90 = 2/5.
-
-  This means:
-    ζ(4) = (2/5) · ζ(2)²
-
-  Or equivalently:
-    ζ(2)²/ζ(4) = 5/2
-
-  **The ratio of the positive sector's square to the dark sector is 5/2.**
-  This is the "supersymmetric constant" of the S-Duality. -/
+  Therefore: **ζ(2)²/ζ(4) = 5/2** — the "supersymmetric constant"
+  of the arithmetic S-Duality. -/
 
 /-- **THE SUPERSYMMETRIC RATIO**: ζ(2)²/ζ(4) = 5/2.
     This is a known identity relating even zeta values. -/

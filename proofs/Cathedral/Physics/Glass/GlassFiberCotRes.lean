@@ -365,19 +365,6 @@ theorem glass2_euler_term_bounded (p : ℝ) (hp : 2 ≤ p) :
     This product relates to ∏(1-1/p) via:
     ∏(1-1/p) = ∏(1-1/p²) · ∏ p/(p+1)
 
-    So bounding the Glass₁ product reduces to the Mertens third theorem:
-    ∏_{p ≤ x}(1-1/p) ~ e^{-γ}/ln(x)  [Mertens 1874]
-
-    Combined with ∏(1-1/p²) = 6/π² (known, convergent), this gives:
-    ∏_{p ≤ x} p/(p+1) ~ (6/π²) · e^γ · ln(x) · ∏_{p ≤ x}(1-1/p)
-                       ~ 6/(π² · e^γ) ... wait, that's wrong.
-
-    Actually: ∏(1-1/p) = ∏(1-1/p²) · ∏ 1/(1+1/p) (glass identity)
-    So: ∏ 1/(1+1/p) = ∏(1-1/p) / ∏(1-1/p²)
-                     ~ (e^{-γ}/ln x) / (6/π²)
-                     = π²·e^{-γ} / (6·ln x)
-                     → 0
-
     The Glass₁ inversion VANISHES as x → ∞. This is the Mertens rate.
     The total Glass₁ contribution to CotRes is controlled by 1/ln(N). -/
 theorem glass1_product_factors (p : ℝ) (hp : 1 < p) :
@@ -420,7 +407,7 @@ theorem dissolved_sym_bounded (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
 /-!
 ## Audit — GlassFiberCotRes (May 21, 2026)
 
-### PROVED: 12 🎓
+### PROVED: 16 🎓
 | # | Result | Status |
 |---|--------|--------|
 | 1 | `kernel_decomp` | 🎓 K = K_sym + K_anti |
@@ -428,13 +415,17 @@ theorem dissolved_sym_bounded (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
 | 3 | `kernelAnti_comm` | 🎓 K_anti is antisymmetric |
 | 4 | `kernelAnti_diag` | 🎓 K_anti diagonal vanishes |
 | 5 | `bilinear_decomp` | 🎓 B = B_sym + B_anti |
-| 6 | `glassFactor_product` | 🎓 Glass factors → Möbius factor |
-| 7 | `glass3_inversion_near_one` | 🎓 Glass₃ ≤ 1/17 deviation |
-| 8 | `glass2_inversion_near_one` | 🎓 Glass₂ ≤ 1/5 deviation |
-| 9 | `dark_factor_near_one` | 🎓 Dark ≤ 1/256 deviation |
-| 10 | `fiber_weight_sum` | 🎓 Fiber weights sum to total |
-| 11 | `dissolved_sym_bounded` | 🎓 Symmetric Vasyunin bounded |
-| 12 | `bilinearAnti_vanishes_symmetric` | 🎓 Anti vanishes for sym v |
+| 6 | `bilinearAnti_zero` | 🎓 Anti part vanishes for separable forms |
+| 7 | `bilinear_eq_sym` | 🎓 B = B_sym (corollary of #6) |
+| 8 | `glassFactor_product` | 🎓 Glass factors → Möbius factor |
+| 9 | `glass3_inversion_near_one` | 🎓 Glass₃ ≤ 1/17 deviation |
+| 10 | `glass2_inversion_near_one` | 🎓 Glass₂ ≤ 1/5 deviation |
+| 11 | `dark_factor_near_one` | 🎓 Dark ≤ 1/256 deviation |
+| 12 | `fiber_weight_sum` | 🎓 Fiber weights sum to total |
+| 13 | `glass3_euler_sum_bounded` | 🎓 Σ 1/p⁴ bounded |
+| 14 | `glass2_euler_term_bounded` | 🎓 1/p² ≤ 1/4 |
+| 15 | `glass1_product_factors` | 🎓 1/(1+1/p) = (1-1/p)/(1-1/p²) |
+| 16 | `dissolved_sym_bounded` | 🎓 Symmetric Vasyunin bounded |
 
 ### Architecture
 ```

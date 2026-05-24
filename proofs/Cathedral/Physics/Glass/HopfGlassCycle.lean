@@ -494,16 +494,20 @@ theorem glass_inverse_le_one (S : Finset ℝ) (hS : ∀ p ∈ S, 0 < p) (k : ℕ
 | 2 | `glass_lift_1` | 🎓 **THEOREM** (k=1, S¹→S³→S², ℂ) |
 | 3 | `glass_lift_2` | 🎓 **THEOREM** (k=2, S³→S⁷→S⁴, ℍ) |
 | 4 | `glass_lift_3` | 🎓 **THEOREM** (k=4, S⁷→S¹⁵→S⁸, 𝕆) |
-| 5 | `glass_full_cycle` | 🎓 **THEOREM** (telescoped product = 1-1/p⁸) |
-| 6 | `hopf_1_ratio` | 🎓 **THEOREM** (= susy_ratio = 5/2) |
-| 7 | `glass_products_telescope` | 🎓 **THEOREM** (products compose) |
-| 8 | `hurwitz_dimension_product` | 🎓 **THEOREM** (1×2×4×8 = 64) |
-| 9 | `sm_generation_dof` | 🎓 **THEOREM** (32 complex DoF per gen) |
-| 10 | `moebius_shadow_lift` | 🎓 **THEOREM** (1/ζ(2k) = (1/ζ(k))·Glass_k) |
-| 11 | `moebius_shadow_full_cycle` | 🎓 **THEOREM** (full 3-fiber Möbius decomp) |
-| 12 | `glass_correction_bound` | 🎓 **THEOREM** (glass correction ≤ 1/4) |
-| 13 | `glass_product_ge_one` | 🎓 **THEOREM** (∏(1+1/p^k) ≥ 1) |
-| 14 | `glass_inverse_le_one` | 🎓 **THEOREM** (Glass⁻¹ ≤ 1, shadow is darker) |
+| 5 | `glass_lift_4` | 🎓 **THEOREM** (k=8, 𝕊, sedenions) |
+| 6 | `glass_lift_5` | 🎓 **THEOREM** (k=16, 𝕋, trigintaduonions) |
+| 7 | `glass_full_cycle` | 🎓 **THEOREM** (3 Hopf lifts: 1-1/p⁸) |
+| 8 | `glass_extended_cycle` | 🎓 **THEOREM** (5 lifts: 1-1/p³²) |
+| 9 | `hopf_1_ratio` | 🎓 **THEOREM** (= susy_ratio = 5/2) |
+| 10 | `glass_products_telescope` | 🎓 **THEOREM** (3 products compose) |
+| 11 | `glass_products_extended_telescope` | 🎓 **THEOREM** (5 products compose) |
+| 12 | `hurwitz_dimension_product` | 🎓 **THEOREM** (1×2×4×8 = 64) |
+| 13 | `sm_generation_dof` | 🎓 **THEOREM** (32 complex DoF per gen) |
+| 14 | `moebius_shadow_lift` | 🎓 **THEOREM** (1/ζ(2k) = (1/ζ(k))·Glass_k) |
+| 15 | `moebius_shadow_full_cycle` | 🎓 **THEOREM** (full 3-fiber Möbius decomp) |
+| 16 | `glass_correction_bound` | 🎓 **THEOREM** (glass correction ≤ 1/4) |
+| 17 | `glass_product_ge_one` | 🎓 **THEOREM** (∏(1+1/p^k) ≥ 1) |
+| 18 | `glass_inverse_le_one` | 🎓 **THEOREM** (Glass⁻¹ ≤ 1, shadow is darker) |
 
 ### DEFINITIONS:
 | # | Name | Description |
@@ -511,6 +515,8 @@ theorem glass_inverse_le_one (S : Finset ℝ) (hS : ∀ p ∈ S, 0 < p) (k : ℕ
 | 1 | `glassProduct1` | ∏(1+1/p²), 1st Hopf conversion factor |
 | 2 | `glassProduct2` | ∏(1+1/p⁴), 2nd Hopf conversion factor |
 | 3 | `glassProduct3` | ∏(1+1/p⁸), 3rd Hopf conversion factor |
+| 4 | `glassProduct4` | ∏(1+1/p¹⁶), sedenion conversion factor |
+| 5 | `glassProduct5` | ∏(1+1/p³²), trigintaduonion conversion factor |
 
 ### CONJECTURES (documented, not formalized):
 | # | Conjecture | Status |
