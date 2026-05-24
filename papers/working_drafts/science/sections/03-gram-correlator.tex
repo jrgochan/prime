@@ -65,6 +65,16 @@ the Beatty sequence bound (at most 2 tiles per row for $j \leq k$),
 and the Dedekind reciprocity of harmonic tile sums are all
 fully proved, establishing that the interaction is
 \emph{bounded-range} in the dual lattice.
+
+A further structural result (May~24, 2026) proves that the
+\emph{Born approximation} term $E_{\mathrm{ratio}}(j,k) =
+\frac{j-k}{2jk}\ln\frac{k}{j}$ is \textbf{always non-positive}
+for all $j \neq k$ (\lean{eratio\_entry\_nonpos} in
+\lean{GramAssembly.lean}). This follows from the identity
+$(a - b) \cdot \ln(b/a) \leq 0$ for all $a, b > 0$
+(\lean{sub\_mul\_log\_div\_nonpos}). The Born approximation
+never adds energy to the off-diagonal---it always dissipates,
+providing structural overcancellation (see~\S\ref{sec:susy}).
 \end{observation}
 
 \subsection{Positive Definiteness = Reflection Positivity}
