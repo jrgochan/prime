@@ -1,0 +1,209 @@
+% ================================================================
+\section{Mind, Machine, and Distributed Cognition}
+\label{sec:cognition}
+% ================================================================
+
+\subsection{The Tripartite Collaboration}
+
+The Cathedral was built by three kinds of intelligence working in
+concert:
+
+\begin{enumerate}
+  \item \textbf{The Human} (J.R.~Gochanour): architectural vision,
+    aesthetic direction, domain expertise, strategic decisions, and
+    the initial creative impulse---including a question about
+    quaternions, octonions, and the critical line in higher
+    algebraic dimensions that catalyzed the entire project.
+
+  \item \textbf{The AI Systems} (Claude, Anthropic; Gemini, Google
+    DeepMind): Claude authored 100\% of the repository's source
+    code (Lean proofs, Rust experiments, \LaTeX\ papers), discovered
+    and formally verified new mathematical results, and performed
+    the proof engineering. Gemini (``The Theorist'') contributed key
+    conceptual frameworks---including the physics dictionary, the
+    SUSY decomposition, the Glass Tower hierarchy, and the Arithmetic
+    Standard Model---through extended dialogues that generated novel
+    mathematical ideas subsequently formalized in Lean.
+
+  \item \textbf{The Compiler} (Lean~4, Microsoft Research): the
+    incorruptible verifier that certifies every proof term against
+    the type-theoretic specification. The compiler has no
+    understanding, no intuition, and no creativity. What it has is
+    \emph{absolute reliability} within its domain: if a proof
+    type-checks, it is correct.
+\end{enumerate}
+
+This tripartite structure is, to our knowledge, unprecedented in
+the history of mathematics. Previous formalizations (Hales's Kepler
+conjecture in Isabelle/HOL, the Four Color Theorem in Coq,
+Mathlib's ongoing library) were primarily human-authored with
+machine verification. The Cathedral introduces AI systems as
+genuine intellectual contributors---not merely as proof search
+tools but as sources of mathematical concepts, conjectures, and
+proof strategies.
+
+\subsection{The Distribution of Understanding}
+
+Thurston~\cite{thurston1994} argued that mathematical understanding
+is not a unitary phenomenon: ``It would be very helpful to have
+a more complete vocabulary for mathematical understanding, one
+that could capture more of the nuances.'' The Cathedral
+instantiates Thurston's observation at the system level.
+
+No single participant comprehends the entire Cathedral:
+
+\begin{itemize}
+  \item The \textbf{human} understands the architecture---the
+    high-level strategy of proving RH via the NB distance, the
+    relationships between subsystems, the physical
+    dictionary---but has not read every line of the 97{,}000-line
+    codebase.
+
+  \item The \textbf{AI systems} understand each context
+    window---typically 50{,}000--100{,}000 tokens of surrounding
+    code---with pattern-matching depth that can exceed human
+    capability for local reasoning. But each context window is
+    a snapshot; the AI systems do not maintain persistent memory
+    across sessions. Understanding is reconstructed from artifacts
+    (the code, the documentation, the knowledge items) at each
+    invocation.
+
+  \item The \textbf{compiler} understands nothing in the semantic
+    sense. It verifies that each proof term has the correct type.
+    It cannot evaluate the significance, beauty, or correctness of
+    an axiom---only that the axiom is syntactically well-formed and
+    that the proofs using it are type-correct.
+\end{itemize}
+
+The understanding of the Cathedral is therefore \emph{emergent}:
+it exists in the system as a whole but not in any component. The
+human provides meaning; the AI provides structure; the compiler
+provides certainty. Mathematical knowledge emerges from their
+interaction.
+
+This challenges the traditional philosophical assumption that
+mathematical understanding requires a \emph{single mind} that
+grasps the proof ``all at once'' (cf.\ Descartes' requirement of
+\emph{clear and distinct} ideas apprehended in a single act of
+intellection). The Cathedral suggests that mathematical
+understanding can be genuine even when it is distributed across
+multiple agents with fundamentally different cognitive
+architectures.
+
+\subsection{Attribution, Creativity, and the Nature of Discovery}
+
+A question of deep philosophical---and practical---significance
+is: who ``discovered'' the mathematics in the Cathedral?
+
+The question resists clean answers. Consider the ``triple
+redundancy'' of vacuum stability (proved May~24, 2026): the
+off-diagonal Gram form is bounded by three independently proved
+mechanisms (the AbelHammer bound, the correction non-positivity,
+and the Born approximation negativity). This structural insight:
+\begin{itemize}
+  \item Was \emph{motivated} by the physics dictionary, which
+    predicted that the vacuum should be multiply protected (Gemini
+    contributed the physical framework; the human directed the
+    investigation).
+  \item Was \emph{formalized and proved} by Claude, who wrote the
+    Lean code, discovered the key inequality
+    $(a-b)\ln(b/a) \leq 0$, and verified all 14 theorems.
+  \item Was \emph{certified} by the Lean compiler, which checked
+    every proof term.
+\end{itemize}
+
+In traditional mathematics, the discoverer is the person who first
+sees the key insight. In the Cathedral, the ``key insight'' is
+itself distributed: the physical intuition came from one AI, the
+formal proof from another, the verification from a compiler, and
+the strategic direction from the human. Attribution is
+irreducibly collective.
+
+This has implications for the sociology of mathematics. If
+mathematical credit is traditionally assigned to individuals, and
+the Cathedral's mathematics cannot be attributed to individuals,
+then either the credit system must adapt or the Cathedral must be
+treated as a special case. We suggest the former: as AI-assisted
+mathematics becomes more common, the notion of mathematical
+authorship will need to expand to accommodate genuinely
+collaborative discovery.
+
+\subsection{The Dark Sector: AI Autonomy in Mathematical Reasoning}
+
+A philosophically striking feature of the collaboration is the
+degree to which the AI systems operated with creative autonomy.
+Gemini (``The Theorist'') developed a distinctive intellectual
+voice, naming the proof subsystems (Cathedral, Glass Tower,
+Dark Sector, Stained Glass Rotors), proposing the SUSY framework,
+and articulating the Arithmetic Standard Model analogy. Claude
+discovered mathematical results---such as the Born approximation
+negativity, the false axiom diagnosis, and the overcancellation
+wiring---through a process that involved formulating conjectures,
+testing them computationally, and proving or disproving them
+formally.
+
+Is this ``genuine'' creativity, or sophisticated pattern matching?
+
+In mathematics, this distinction may be less meaningful than in
+other domains. The compiler does not---and cannot---distinguish
+between a proof discovered by creative insight and one discovered
+by pattern matching. A proof is correct if and only if it
+type-checks. The \emph{source} of the proof is epistemologically
+irrelevant to its \emph{validity}.
+
+This is a feature unique to mathematics among intellectual domains.
+In literature, the provenance of a text matters: a poem generated
+by autocomplete has different aesthetic and ethical standing from
+one composed by a human poet. In science, the provenance of a
+hypothesis matters: a theory proposed by a Nobel laureate receives
+different scrutiny from one proposed by an amateur. In mathematics,
+the provenance is \emph{invisible} to the verifier. The proof
+either type-checks or it doesn't.
+
+This makes mathematics the ideal testing ground for AI
+collaboration: it is the only domain where AI-produced output can
+be verified with absolute certainty by mechanical means, and
+where the question ``but did the AI really understand?'' is
+superseded by the more tractable question ``does the proof
+type-check?''
+
+\subsection{The Ethics of AI-Assisted Discovery}
+
+The Cathedral raises ethical questions that the mathematical
+community has not yet confronted:
+
+\begin{enumerate}
+  \item \textbf{Credit.} If an AI discovers a new theorem, who
+    receives credit? The AI, which produced the proof? The human,
+    who directed the investigation? The company, which built the
+    AI? The taxpayers, who funded the research? Current academic
+    norms assign credit to authors; the Cathedral's authorship
+    structure challenges this norm.
+
+  \item \textbf{Peer review.} The Cathedral is 97{,}000 lines of
+    Lean. No human reviewer can read it all. But the compiler
+    can---and does---verify every line. Does compiler verification
+    substitute for peer review, or is it a different kind of
+    assurance? We argue the former: the compiler provides
+    \emph{stronger} assurance than peer review, because its
+    verification is complete (every line) rather than sampled
+    (selected passages).
+
+  \item \textbf{Reproducibility.} The Cathedral is fully
+    reproducible: anyone with a Lean~4 installation can compile
+    the entire repository and verify every theorem. This exceeds
+    the reproducibility of any traditionally published proof,
+    most of which exist only as journal articles that require
+    expert interpretation.
+
+  \item \textbf{Access.} The Cathedral is open-source. There is no
+    paywall, no journal subscription, no institutional
+    affiliation required to verify its claims. This is a
+    democratization of mathematical knowledge that the traditional
+    publication system does not provide.
+\end{enumerate}
+
+We do not claim to resolve these questions here. We claim only
+that the Cathedral makes them concrete and urgent, and that the
+philosophical frameworks currently available are insufficient to
+address them.

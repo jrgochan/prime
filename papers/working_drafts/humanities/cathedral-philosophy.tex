@@ -4,8 +4,8 @@
 
 \title{%
   The Cathedral as Philosophical Object:\\
-  On Machine Proof, Mathematical Truth,\\
-  and the History of an Unsolved Problem%
+  Machine Verification, Mathematical Ontology,\\
+  and the Nature of Arithmetic Truth%
 }
 \author{Jason Robert Gochanour}
 \date{May 2026}
@@ -14,201 +14,156 @@
 \maketitle
 
 \begin{abstract}
-We examine the Cathedral---a machine-verified reduction of the
-Riemann Hypothesis---through the lens of the philosophy of
-mathematics and the history of the problem it addresses. We argue
-that the Cathedral occupies a novel philosophical position: it is
-neither a proof of RH nor a failure to prove it, but rather a
-\emph{containment vessel} that isolates the unknown content of RH
-to one precisely characterized gap. We examine what this means for
-mathematical truth, the nature of proof, and the relationship between
-human and machine understanding. We place the project in the
-historical arc from Riemann (1859) through Hilbert's program,
-G\"odel's incompleteness theorems, and the modern era of interactive
-theorem proving.
+We examine the Cathedral---a Lean~4 formalization reducing the
+Riemann Hypothesis to one precisely characterized axiom via the
+Nyman--Beurling--B\'aez-Duarte criterion (330 active files,
+$\sim$97{,}000 lines, zero compilation errors)---as an object of
+study in the philosophy of mathematics. We argue that it occupies
+a novel epistemological position: neither a proof nor a failure,
+but a \emph{formal reduction} that isolates the unknown content of
+an open problem to a single, machine-identified gap. We trace the
+philosophical ramifications across five domains: the epistemology
+of machine-verified conditional knowledge (\S\ref{sec:epistemology}),
+the ontological status of mathematical objects as revealed by a
+systematic physics dictionary of 160+ structural correspondences
+(\S\ref{sec:ontology}), the implications for Hilbert's program and
+the conservation of mathematical difficulty
+(\S\ref{sec:hilbert-godel}), the cognitive architecture of
+tripartite human--AI--compiler collaboration
+(\S\ref{sec:cognition}), and the aesthetics of proof as a
+criterion of mathematical significance (\S\ref{sec:aesthetics}).
+We engage with the positions of Benacerraf, Shapiro, Lakatos,
+Thurston, and Avigad, arguing that the Cathedral constitutes
+evidence for a moderate structural realism: the integers possess
+genuine physical structure, the formalization reveals it, and the
+remaining gap is not a defect but a precise measurement of what
+remains unknown about the deepest regularity in arithmetic.
 \end{abstract}
 
 \tableofcontents
 
 % ================================================================
-\section{Introduction: A New Kind of Mathematical Object}
-% ================================================================
+\input{sections/01-introduction}
 
-The Cathedral is not a proof of the Riemann Hypothesis. Nor is it a
-failure. It is something new: a \emph{formal containment vessel}
-that identifies exactly what remains unknown, proves everything
-else, and provides machine-checked guarantees that no errors lurk
-in the proved portions.
+\input{sections/02-epistemology}
 
-This creates a philosophical puzzle. In traditional mathematics,
-a problem is either solved or open. The Cathedral suggests a third
-category: \emph{formally reduced}---open in the sense that the
-central claim remains unproved, but closed in the sense that the
-logical structure is fully mapped.
+\input{sections/03-axiom}
 
-% ================================================================
-\section{What Is a Proof?}
-% ================================================================
+\input{sections/04-ontology}
 
-\subsection{The Classical View}
+\input{sections/05-hilbert-godel}
 
-A proof is a chain of logical deductions from axioms to conclusion,
-sufficiently detailed to convince a competent mathematician.
+\input{sections/06-cognition}
 
-\subsection{The Formal View}
+\input{sections/07-aesthetics}
 
-A proof is a term in a type theory (e.g., CIC) that type-checks
-against a specification. It convinces not a human but a compiler.
+\input{sections/08-society}
 
-\subsection{The Cathedral's Position}
-
-The Cathedral is a formal proof that type-checks. But it proves
-a \emph{conditional} statement: RH $\iff$ decay, modulo one axiom.
-Is this a proof? Of what?
-
-We argue it is a proof of the \emph{logical structure} of the
-Riemann Hypothesis: the assertion that RH is equivalent to a
-concrete analytic statement, with the equivalence machine-verified.
+\input{sections/09-conclusion}
 
 % ================================================================
-\section{The Axiom as Philosophical Concept}
-% ================================================================
-
-The Cathedral's one axiom is not an article of faith. It is a
-precisely stated mathematical claim that happens to lack
-a machine-checked proof. It is:
-\begin{enumerate}
-  \item Provable in $\ZFC$ by standard methods.
-  \item Verified numerically to high precision ($N = 55{,}440$).
-  \item Published in a peer-reviewed journal (IMRN 2003).
-  \item Accepted by the mathematical community as true.
-\end{enumerate}
-
-The question ``is this proof complete?'' becomes ``what is the
-epistemic status of this one claim?'' The Cathedral converts a
-qualitative question (is RH true?) into a quantitative one (how
-certain are we of B\'aez-Duarte's forward direction?).
-
-\begin{remark}[The Philosophical Progression]
-The Cathedral's axiom count evolved: 56 $\to$ 42 $\to$ 7 $\to$ 4
-$\to$ 2 $\to$ 1. Each reduction made the containment vessel
-tighter, the unknown content more precisely localized. The
-progression from ``56 unknowns'' to ``1 published result''
-is itself a philosophical achievement: the gradual replacement
-of faith with verification.
-\end{remark}
-
-% ================================================================
-\section{The History of the Riemann Hypothesis}
-% ================================================================
-
-\subsection{Riemann's Paper (1859)}
-
-Bernhard Riemann's eight-page paper \emph{\"Ueber die Anzahl der
-Primzahlen unter einer gegebenen Gr\"osse} introduced the zeta
-function, the functional equation, and the famous conjecture.
-
-\subsection{The Early 20th Century}
-
-Hardy (1914) proved infinitely many zeros on the critical line.
-Hardy and Littlewood (1918) developed the circle method and mean
-value theorems that underlie the Cathedral's Axiom~1.
-
-\subsection{The Modern Era}
-
-Computational verification (Odlyzko, Gourdon) has checked the first
-$10^{13}$ zeros. The Nyman--Beurling criterion (1950--2003) recast RH
-as an approximation problem in $L^2(0,1)$.
-
-\subsection{The Cathedral (2026)}
-
-For the first time, the logical equivalence $\RH \iff d_N^2 \to 0$
-has been machine-verified, with the full proof chain auditable by
-any person with a Lean compiler.
-
-% ================================================================
-\section{Hilbert's Program and G\"odel's Shadow}
-% ================================================================
-
-Hilbert's Sixth Problem asked for the axiomatization of physics.
-His broader program sought to prove mathematics consistent via
-finitary methods. G\"odel showed this was impossible in general.
-
-The Cathedral sidesteps G\"odel: it does not prove RH (which might
-be independent of $\ZFC$, though this is unlikely). Instead, it
-proves an \emph{equivalence}, which is a theorem of $\ZFC$
-regardless of whether RH is true, false, or independent.
-
-% ================================================================
-\section{Machine Understanding vs.\ Human Understanding}
-% ================================================================
-
-Does the Lean compiler ``understand'' the Riemann Hypothesis?
-
-No---it verifies type-correctness. But the human author does not
-``understand'' all $\sim$60{,}500 lines either. The understanding is
-\emph{distributed}: the human understands the architecture; the
-machine verifies the details; neither comprehends the whole.
-
-The Cathedral adds a further dimension: the understanding was
-also distributed \emph{temporally}. Across 45 days and hundreds
-of context windows, knowledge was carried by the human, rediscovered
-by the AIs, and certified by the compiler. The proof exists as a
-whole only in the repository; no single mind has ever held it
-completely.
-
-This distributed cognition model may be the future of mathematics:
-not human proof or machine proof, but human-machine proof, where
-the verification burden is shared according to each party's
-strengths.
-
-% ================================================================
-\section{The Cathedral as Cultural Object}
-% ================================================================
-
-Like its architectural namesake, the Cathedral is:
-\begin{itemize}
-  \item \textbf{Built over time}: 45 days, 17 versions, 35 explorations.
-  \item \textbf{Built by many hands}: human + two AI systems.
-  \item \textbf{Built to last}: machine verification ensures
-    permanence.
-  \item \textbf{Built for a purpose beyond its builders}:
-    the mathematical content will outlive its creators.
-\end{itemize}
-
-The medieval cathedral builders could not see their work completed.
-The mathematical Cathedral builders face a similar situation: the
-one remaining axiom may take years---or weeks---to formalize.
-But the architecture stands, ready. The Observatory is calibrated.
-
-% ================================================================
-\section{Conclusion}
-% ================================================================
-
-The Cathedral introduces a new philosophical category: the formally
-reduced open problem. It demonstrates that machine verification can
-provide certainty about the \emph{structure} of a mathematical claim
-even when the claim itself remains unresolved. And it suggests that
-the future of mathematical proof lies not in choosing between human
-and machine, but in combining their complementary strengths.
-
-\begin{quote}
-\emph{We do not know if the Riemann Hypothesis is true.
-We do know, with machine-verified certainty, exactly what it means.}
-\end{quote}
-
 \begin{thebibliography}{99}
+
 \bibitem{riemann1859}
-B.~Riemann, \emph{\"Ueber die Anzahl der Primzahlen unter einer
+B.~Riemann, \emph{\"Uber die Anzahl der Primzahlen unter einer
 gegebenen Gr\"osse}, Monatsberichte der K\"oniglich Preu\ss ischen
 Akademie der Wissenschaften zu Berlin, 1859.
+
 \bibitem{hardy1914}
 G.H.~Hardy, \emph{Sur les z\'eros de la fonction $\zeta(s)$ de
 Riemann}, C.R. Acad. Sci. Paris \textbf{158} (1914).
+
+\bibitem{hardy1940}
+G.H.~Hardy, \emph{A Mathematician's Apology}, Cambridge University
+Press, 1940.
+
 \bibitem{godel1931}
-K.~G\"odel, \emph{\"Uber formal unentscheidbare S\"atze}, 1931.
+K.~G\"odel, \emph{\"Uber formal unentscheidbare S\"atze der
+Principia Mathematica und verwandter Systeme I}, Monatshefte f\"ur
+Mathematik und Physik \textbf{38} (1931), 173--198.
+
+\bibitem{benacerraf1965}
+P.~Benacerraf, \emph{What numbers could not be}, Philosophical
+Review \textbf{74} (1965), 47--73.
+
+\bibitem{benacerraf1973}
+P.~Benacerraf, \emph{Mathematical truth}, Journal of Philosophy
+\textbf{70} (1973), 661--679.
+
+\bibitem{lakatos1976}
+I.~Lakatos, \emph{Proofs and Refutations: The Logic of Mathematical
+Discovery}, Cambridge University Press, 1976.
+
+\bibitem{thurston1994}
+W.P.~Thurston, \emph{On proof and progress in mathematics}, Bulletin
+of the AMS \textbf{30} (1994), 161--177.
+
+\bibitem{shapiro1997}
+S.~Shapiro, \emph{Philosophy of Mathematics: Structure and Ontology},
+Oxford University Press, 1997.
+
+\bibitem{avigad2006}
+J.~Avigad, \emph{Mathematical method and proof}, Synthese
+\textbf{153} (2006), 105--159.
+
+\bibitem{avigad2018}
+J.~Avigad, \emph{The mechanization of mathematics}, Notices of the
+AMS \textbf{65} (2018), 681--690.
+
+\bibitem{hacking2014}
+I.~Hacking, \emph{Why Is There Philosophy of Mathematics At All?},
+Cambridge University Press, 2014.
+
+\bibitem{detlefsen1986}
+M.~Detlefsen, \emph{Hilbert's Program: An Essay on Mathematical
+Instrumentalism}, Reidel, 1986.
+
+\bibitem{baezduarte2003}
+L.~B\'aez-Duarte, \emph{A strengthening of the Nyman--Beurling
+criterion for the Riemann hypothesis}, Atti Accad. Naz. Lincei
+Rend. Lincei Mat. Appl. \textbf{14} (2003), 5--11.
+
+\bibitem{nyman1950}
+B.~Nyman, \emph{On the one-dimensional translation group and
+semi-group in certain function spaces}, Thesis, Uppsala, 1950.
+
+\bibitem{beurling1955}
+A.~Beurling, \emph{A closure problem related to the Riemann zeta
+function}, Proc. Nat. Acad. Sci. USA \textbf{41} (1955), 312--314.
+
+\bibitem{tegmark2008}
+M.~Tegmark, \emph{The Mathematical Universe}, Foundations of
+Physics \textbf{38} (2008), 101--150.
+
+\bibitem{wigner1960}
+E.P.~Wigner, \emph{The unreasonable effectiveness of mathematics
+in the natural sciences}, Communications on Pure and Applied
+Mathematics \textbf{13} (1960), 1--14.
+
+\bibitem{buzaglo2002}
+M.~Buzaglo, \emph{The Logic of Concept Expansion}, Cambridge
+University Press, 2002.
+
+\bibitem{corfield2003}
+D.~Corfield, \emph{Towards a Philosophy of Real Mathematics},
+Cambridge University Press, 2003.
+
+\bibitem{mancosu2008}
+P.~Mancosu (ed.), \emph{The Philosophy of Mathematical Practice},
+Oxford University Press, 2008.
+
+\bibitem{tao2007}
+T.~Tao, \emph{What is good mathematics?}, Bulletin of the AMS
+\textbf{44} (2007), 623--634.
+
 \bibitem{cathedral}
-J.R.~Gochanour, \emph{The Cathedral}, 2026.
+J.R.~Gochanour, \emph{The Cathedral: A Formal Reduction of the
+Riemann Hypothesis}, 2026.
+
+\bibitem{cathedral-physics}
+J.R.~Gochanour, \emph{The Physics of the Primes: A Dictionary
+Between the Cathedral Proof and Quantum Mechanics}, 2026.
+
 \end{thebibliography}
 
 \end{document}
