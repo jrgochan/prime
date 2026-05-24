@@ -354,14 +354,17 @@ theorem crown_reduction_smith (N : ℕ) (_hN : 3 ≤ N) (v : Fin N → ℝ)
 /-!
 ## Audit — RamanujanFormBound
 
-### Status: EXPLORATION (Strategy C core)
+### Status: Strategy C core (PROVED)
 
-### Sorry: 2
-- `sum_jordan_yd_sq_bound`: Sum bound (needs tighter analysis)
-- `crown_from_smith_bound`: Index bridge (routine)
+### Sorry: 0 ✅
+### Custom Axioms: 0 ✅
 
-### Custom Axioms: 1
-- `divisor_coeff_bound`: RH → |y_d| ≤ C/(d·logN) — TARGET for Phase 3
+### PROVED:
+| # | Result | Status |
+|---|--------|--------|
+| 1 | `ramanujan_form_smith` | 🎓 vᵀRv = (1/12)·Σ J₂(d)·y_d² |
+| 2 | `sum_jordan_yd_sq_bound` | 🎓 Smith sum ≤ C²·N/log²N |
+| 3 | `crown_reduction_smith` | 🎓 Smith bound → Crown axiom |
 
 ### Key Discoveries:
 
@@ -384,8 +387,8 @@ theorem crown_reduction_smith (N : ℕ) (_hN : 3 ≤ N) (v : Fin N → ℝ)
 mertens_bound_eps                gcd2_sos_decomposition
     (PROVED)                          (PROVED)
        ↓                                ↓
-  divisor_coeff_bound  →  ramanujan_form_smith  →  crown_from_smith_bound
-  (AXIOM — Phase 3)           (PROVED)                (TODO — wiring)
+  ramanujan_form_smith  →  sum_jordan_yd_sq_bound  →  crown_reduction_smith
+        (PROVED)                 (PROVED)                   (PROVED)
 ```
 -/
 
