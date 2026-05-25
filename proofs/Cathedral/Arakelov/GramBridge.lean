@@ -85,15 +85,23 @@ theorem gcdIntersection_self_effective (D : WeilDivisor)
   congr 1; ext q
   simp [min_self]
 
-/-- The GCD intersection of zero with an effective divisor is zero.
-    (For effective D, min(0, D(p)) = 0 at each prime.) -/
+/-- Helper: the summand in gcdIntersection 0 D is zero for effective D.
+    The key is matching the exact pattern `(0 : WeilDivisor) q` that
+    appears after unfolding, rather than `(0 : ℤ)`. -/
+private lemma gcdIntersection_summand_zero (D : WeilDivisor)
+    (hD : WeilDivisor.IsEffective D) (q : PrimeSpec) :
+    (min ((0 : WeilDivisor) q) (D q) : ℝ) * Real.log q.val = 0 := by
+  -- The cast distributes through min, so min is at ℝ level
+  have h1 : ((0 : WeilDivisor) q : ℝ) = (0 : ℝ) := by
+    simp [Finsupp.zero_apply]
+  simp only [h1, min_eq_left (by exact_mod_cast hD q : (0 : ℝ) ≤ ↑(D q)), zero_mul]
+
 theorem gcdIntersection_zero_left_effective (D : WeilDivisor)
     (hD : WeilDivisor.IsEffective D) :
     gcdIntersection 0 D = 0 := by
-  -- Mathematically trivial: each summand is (↑(min 0 (D q)) : ℝ) * log q = 0
-  -- since D effective ⟹ D q ≥ 0 ⟹ min(0, D q) = 0.
-  -- The Lean proof is blocked by Finsupp.sum/min/Int.cast interaction.
-  sorry
+  unfold gcdIntersection
+  simp only [Finsupp.support_zero, Finset.empty_union]
+  simp_rw [gcdIntersection_summand_zero D hD, Finset.sum_const_zero]
 
 /-- The GCD intersection is nonneg for effective divisors. -/
 theorem gcdIntersection_nonneg (D₁ D₂ : WeilDivisor)
