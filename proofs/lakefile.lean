@@ -520,4 +520,6 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.SilenceAndEcho,
     -- Kummer Tower (p-adic extension beyond Cayley-Dickson: ζ(-13)=ζ(-1), echo theorem)
     `Cathedral.Zeta.KummerTower,
+    -- Tower Fusion (Rigidity Axiom: arithmetic structure forces zeros to Re(s)=1/2)
+    `Cathedral.Zeta.TowerFusion,
   ]
