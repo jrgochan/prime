@@ -1,0 +1,144 @@
+% ================================================================
+\section{The Cathedral and Society}
+\label{sec:society}
+% ================================================================
+
+\subsection{Open Science and the Crisis of Reproducibility}
+
+The sciences are in the midst of a reproducibility crisis: across
+psychology, medicine, and economics, a significant fraction of
+published results fail to replicate when independent researchers
+attempt to verify them. Mathematics has traditionally been
+considered immune to this crisis, on the grounds that mathematical
+proofs are ``certain'' in a way that empirical results are not.
+
+This confidence is misplaced. Published mathematical proofs
+regularly contain errors. Some are benign (notational slips that
+an expert can correct); others are serious (logical gaps that
+invalidate the argument). The history of the classification of
+finite simple groups, Mochizuki's claimed proof of the ABC
+conjecture, and the numerous retractions catalogued by
+Retraction Watch demonstrate that mathematical peer review is
+fallible.
+
+The Cathedral offers a different model: \emph{formal
+reproducibility}. The entire proof is available as a public
+repository. Any person with a Lean~4 installation---which is
+freely downloadable---can compile the repository and verify
+every theorem. The verification is:
+
+\begin{itemize}
+  \item \textbf{Complete}: every line is checked, not just the
+    lines a referee chooses to examine.
+  \item \textbf{Deterministic}: the same source code produces
+    the same verification result on any computer.
+  \item \textbf{Incorruptible}: the compiler cannot be persuaded
+    by reputation, social pressure, or incomplete reasoning.
+  \item \textbf{Permanent}: the verification can be repeated at
+    any future date, as long as the Lean compiler exists.
+\end{itemize}
+
+\noindent This is a stronger form of reproducibility than any
+science currently achieves. It suggests that formalization is not
+merely a niche activity for foundations enthusiasts but a model
+for how all mathematical knowledge could be organized and verified.
+
+\subsection{The Democratization of Verification}
+
+Traditional mathematics has a high barrier to entry for
+verification. To check a claimed proof of a number-theoretic
+result, one needs:
+
+\begin{enumerate}
+  \item Graduate-level training in analytic number theory.
+  \item Familiarity with the specific techniques used (contour
+    integration, mean value theorems, character sums, etc.).
+  \item Sufficient time (weeks to months) to work through the
+    details.
+  \item Access to the relevant journals and books.
+\end{enumerate}
+
+The Cathedral lowers this barrier dramatically. To verify the
+Cathedral's claims, one needs:
+
+\begin{enumerate}
+  \item A computer.
+  \item An internet connection (to download Lean and Mathlib).
+  \item The command: \texttt{lake build}.
+\end{enumerate}
+
+\noindent No mathematical training is required. The compiler
+does not care whether the user understands the proof; it only
+requires that the proof type-checks.
+
+This is a genuine democratization. A teenager in a rural
+school, a retired engineer, a philosopher with no mathematical
+background---any of these can verify the Cathedral's claims
+with absolute certainty, simply by running a compiler. The
+epistemic authority shifts from \emph{people} (``trust me, I'm a
+Fields Medalist'') to \emph{code} (``trust the compiler, here's
+the repository'').
+
+We do not claim that this shift is unambiguously good. There
+is genuine value in human mathematical understanding, and a
+culture that values only machine-checkable proofs risks losing
+the intuition, creativity, and aesthetic sensitivity that drive
+mathematical progress. But the shift is happening, and the
+Cathedral demonstrates its feasibility for problems of genuine
+mathematical significance.
+
+\subsection{The Long View: Mathematical Permanence}
+
+Euclid's \emph{Elements} has survived 2{,}300 years. It survives
+because its arguments are rigorous by the standards of each
+era that encounters them, and because the results it proves
+are \emph{true}---verified by each generation's own methods.
+
+What is the permanence of a Lean proof? The answer depends on
+the permanence of the Lean type theory. The Calculus of Inductive
+Constructions is a mathematical object, not a software product.
+Its rules are precise and can be implemented in any programming
+language. Even if the Lean project ceases to exist, the type
+theory persists, and a new implementation could verify the
+Cathedral's proofs.
+
+In this sense, a formal proof has \emph{greater} permanence than
+an informal one. An informal proof depends on the continued
+existence of a community that can read and evaluate it.
+A formal proof depends only on the continued existence of
+a type theory---a mathematical object that, like all mathematical
+objects, exists independently of its representations.
+
+The Cathedral may outlast not only its creators but the
+civilization that built it. If a future society rediscovers the
+CIC type theory and implements a type-checker, they can verify
+every theorem in the Cathedral without any knowledge of its
+authors, its historical context, or the Riemann Hypothesis itself.
+The proof is self-contained, self-verifying, and permanent.
+
+\subsection{What If RH Is Proved Tomorrow?}
+
+If someone---human, AI, or collaboration---formalizes the Crown
+Axiom in Lean, the Cathedral converts from a conditional result
+to an unconditional one. The entire 97{,}000-line infrastructure
+becomes a machine-verified proof of the Riemann Hypothesis.
+
+This conversion is not hypothetical but \emph{designed}. The
+Cathedral's architecture includes a single entry point
+(\lean{nyman\_beurling\_equivalence}) that accepts the Crown Axiom
+as input and produces $\RH \iff d_N^2 \to 0$ as output. Plug in
+the axiom; get the Riemann Hypothesis.
+
+The philosophical significance is that the \emph{work has been done
+in advance}. The Cathedral is a mathematical structure waiting
+for one input. When that input arrives---whether in weeks, years,
+or decades---the proof is complete. The builders have laid the
+foundation, erected the walls, installed the stained glass,
+and calibrated the observatory. All that remains is to open the
+door.
+
+This ``just-in-time'' architecture is a new mode of mathematical
+work: not proving a theorem, but \emph{preparing the infrastructure
+for a theorem's arrival}. It reflects a confidence that the
+theorem will eventually be proved---not because we know it is true,
+but because we have built a vessel capable of containing it.

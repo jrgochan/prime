@@ -1,0 +1,230 @@
+% ================================================================
+\section{The Epistemology of Machine-Verified Proof}
+\label{sec:epistemology}
+% ================================================================
+
+\subsection{Three Conceptions of Proof}
+
+The history of the philosophy of mathematics offers three
+progressively refined conceptions of what it means to prove
+a mathematical claim.
+
+\subsubsection{Proof as Persuasion}
+
+In the classical tradition from Euclid through the 19th century,
+a proof is a rhetorical act: a chain of reasoning designed to
+compel assent from a competent reader. Hardy~\cite{hardy1940}
+described the mathematician's task as presenting a ``proof of the
+theorem'' that makes the theorem ``seem almost obvious'' to the
+trained eye. Thurston~\cite{thurston1994} refined this into an
+explicitly social account: mathematical proof is ``a social process
+by which mathematicians come to agree.''
+
+The strengths of this conception are well known. The weaknesses
+became apparent in the 20th century, as proofs grew too long
+(the classification of finite simple groups exceeds 10{,}000 pages)
+or too computationally intensive (the four-color theorem,
+Hales's proof of the Kepler conjecture) for any single human mind
+to verify. Lakatos~\cite{lakatos1976} showed that even
+``elementary'' proofs can contain unnoticed gaps that survive
+decades of expert scrutiny.
+
+\subsubsection{Proof as Formal Derivation}
+
+Hilbert's program proposed that mathematical proof should be
+reduced to mechanical symbol manipulation: a proof is a finite
+sequence of formulas, each either an axiom or derived from earlier
+formulas by specified rules, whose last formula is the theorem.
+This conception eliminates the need for human judgment---in
+principle, a clerk with no mathematical training could verify
+the proof by checking each rule application.
+
+The Curry--Howard correspondence deepened this to an identification:
+proofs ARE programs, and the propositions they prove are the types
+of those programs. In this view, a proof of $\forall x,\, P(x)$
+is a function that, given any $x$, produces evidence for $P(x)$.
+Verification becomes type-checking: does this program (proof) have
+the claimed type (theorem)?
+
+Modern proof assistants---Lean, Coq, Isabelle, Agda---implement
+this identification literally. A ``proof'' in Lean~4 is a term in
+the Calculus of Inductive Constructions (CIC) that type-checks
+against a specification. The verification is performed by a small,
+trusted kernel (approximately 10{,}000 lines of C++ for Lean~4)
+whose correctness is independently auditable.
+
+\subsubsection{The Cathedral's Synthesis}
+
+The Cathedral occupies an unusual position in this landscape.
+It is a formal proof in the Hilbert--Curry--Howard sense: it
+type-checks, and the Lean kernel certifies its correctness. But
+what it proves is not the Riemann Hypothesis. It proves:
+
+\begin{enumerate}
+  \item \textbf{The converse} ($d_N^2 \to 0 \implies \RH$):
+    with zero custom axioms.
+  \item \textbf{The forward direction} ($\RH \implies d_N^2 \to 0$):
+    conditional on one literature axiom.
+  \item \textbf{The equivalence} ($\RH \iff d_N^2 \to 0$):
+    the conjunction of (1) and (2), conditional on the same axiom.
+\end{enumerate}
+
+This creates a \emph{gradient of certainty}:
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Claim} & \textbf{Axioms} & \textbf{Epistemic Status} \\
+\midrule
+$d_N^2 \to 0 \implies \RH$ & 0 & Machine-certified \\
+$\RH \implies d_N^2 \to 0$ & 1 (literature) & Conditional \\
+$\RH \iff d_N^2 \to 0$ & 1 (literature) & Conditional \\
+RH itself & = Crown Axiom & Open \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent What kind of knowledge is this?
+
+\subsection{Conditional Knowledge and Its Value}
+
+Avigad~\cite{avigad2006} has argued that the value of a
+mathematical proof lies not merely in establishing truth, but in
+providing \emph{understanding}---a grasp of the logical
+relationships between concepts. By this criterion, the Cathedral
+provides genuine mathematical knowledge: it establishes, with
+machine-checked certainty, the precise logical relationship between
+the Riemann Hypothesis and a concrete analytic inequality.
+
+Consider an analogy from physics. Newton's law of gravitation
+does not \emph{prove} that the planets orbit the sun. It
+establishes a conditional: \emph{if} gravity obeys an inverse-square
+law, \emph{then} the planetary orbits are conic sections. The
+conditional itself is a theorem; the hypothesis (inverse-square
+gravity) is an empirical claim, verified to high precision but
+never ``proved'' in the mathematical sense. No physicist considers
+Newton's work incomplete because the inverse-square law remains,
+strictly speaking, an axiom.
+
+The Cathedral stands in the same relationship to the Riemann
+Hypothesis. The conditional equivalence $\RH \iff d_N^2 \to 0$ is
+a theorem---fully proved, machine-verified, not dependent on RH
+being true. The Crown Axiom (the Gram form bound) is the empirical
+hypothesis, verified computationally to $N = 55{,}440$ with
+31-digit precision. Just as Newton's conditional is valuable
+regardless of whether gravity is ``truly'' inverse-square, the
+Cathedral's conditional is valuable regardless of whether RH
+is ``truly'' true.
+
+\subsection{The Gradient of Certainty}
+
+The Cathedral exhibits a remarkable epistemological structure: a
+\emph{gradient} from absolute certainty to complete uncertainty,
+traversed in precisely identified steps.
+
+\begin{enumerate}
+  \item \textbf{Lean kernel axioms} (propext, Classical.choice,
+    Quot.sound): accepted by the entire Lean community. Certainty
+    level: foundational.
+
+  \item \textbf{Mathlib infrastructure} (Stirling, harmonic numbers,
+    Cauchy integral formula): proved from kernel axioms, machine-checked.
+    Certainty level: absolute (modulo kernel trust).
+
+  \item \textbf{Graduated theorems} (PNT Möbius sums, Abel engine,
+    NB distance formula, bridges): formerly axioms, now proved.
+    Certainty level: absolute.
+
+  \item \textbf{PNT axioms} (mu\_pnt\_alt, pnt\_mu\_log\_sq\_div\_k):
+    provable from the PrimeNumberTheoremAnd project, which has
+    formalized these results independently. Certainty level:
+    very high (will become absolute when imported).
+
+  \item \textbf{The Crown Axiom} ($v^TGv \leq 1 + K/\ln N$): this
+    IS the Riemann Hypothesis, reformulated. Certainty level:
+    the central open question of mathematics.
+\end{enumerate}
+
+The graduated gates---the axioms that were successively converted
+to theorems (56 $\to$ 42 $\to$ 7 $\to$ 4 $\to$ 2 $\to$ 1)---are
+the most philosophically significant feature of this gradient. Each
+graduation was an act of converting faith into knowledge: a claim
+that was previously accepted on the authority of classical
+mathematics was replaced by a machine-verified derivation. The
+progression is not merely a bookkeeping achievement; it is an
+\emph{epistemological compression}, concentrating the entire
+unknown content of the Riemann Hypothesis into a single, precisely
+stated inequality.
+
+\subsection{The False Axiom and the Limits of Intuition}
+
+A particularly instructive episode occurred during the axiom
+graduation process. The axiom \lean{remainder\_bound\_abstract},
+which asserted an operator norm bound on the off-diagonal correction
+matrix $E_{\mathrm{ratio}}$, was believed to be true on the basis
+of mathematical intuition and partial analysis. Numerical
+experiments (conducted by one of the AI collaborators) then
+demonstrated that the axiom was \textbf{false} for general
+vectors---the operator norm grows logarithmically, not decaying
+as claimed.
+
+This discovery carries philosophical weight. It demonstrates that:
+\begin{enumerate}
+  \item Mathematical intuition, even when grounded in structural
+    analysis, can be wrong.
+  \item Machine computation can detect errors that human reasoning
+    misses.
+  \item The Lean compiler, which treats axioms as opaque declarations,
+    offers no protection against false axioms---it will cheerfully
+    derive nonsense from false assumptions.
+\end{enumerate}
+
+The resolution was equally instructive. The false global bound was
+replaced by three \emph{entry-level} theorems about the individual
+matrix entries: each $E_{\mathrm{ratio}}(j,k)$ is non-positive
+(proved from the structural identity $(a-b)\ln(b/a) \leq 0$), and
+each has magnitude bounded by $(b-a)^2/(2a^2b)$. These entry-level
+bounds are both \emph{stronger} and \emph{true}---they provide
+pointwise control that the false global bound could not.
+
+The philosophical lesson is that formalization disciplines
+mathematical intuition in a way that informal reasoning cannot.
+The false axiom survived months of informal analysis; it fell in
+minutes to numerical experiment. The replacement theorems, once
+discovered, were proved in Lean with zero sorry. The episode
+vindicates the formalization project's methodology: state your
+assumptions explicitly, test them computationally, prove them
+formally, and be prepared to discover that some of them are wrong.
+
+\subsection{The Tri-Crown and Epistemological Pluralism}
+
+The Cathedral offers not one but three independent paths to the
+Riemann Hypothesis:
+\begin{itemize}
+  \item The \textbf{Analytic Crown}: RH via one literature axiom
+    (Baez-Duarte's forward direction).
+  \item The \textbf{Cybernetic Crown} (Oracle Bridge): RH via one
+    computation axiom (GPU-certified Gram matrices at highly
+    composite numbers).
+  \item The \textbf{Gram Crown}: RH via one arithmetic inequality
+    (the Gram form bound along a subsequence).
+\end{itemize}
+
+All three paths share the same zero-axiom converse. They differ
+only in how they establish the forward direction. This architectural
+feature has epistemological significance: it demonstrates that the
+truth of RH, if it is true, can be \emph{witnessed} from multiple
+independent perspectives, each with its own epistemic character.
+
+The Analytic Crown relies on the authority of a published journal
+article. The Cybernetic Crown relies on the correctness of a
+computational pipeline. The Gram Crown relies on the truth of a
+pure arithmetic inequality. These are three fundamentally different
+\emph{kinds} of evidence. The Cathedral's architecture makes their
+equivalence precise: all three are logically sufficient, and the
+machine-verified infrastructure converts each into a proof of RH.
+
+This is a form of mathematical \emph{perspectivism}: there is no
+single ``correct'' proof of RH, only multiple valid perspectives
+on the same underlying truth. The Cathedral makes this pluralism
+explicit and machine-verifiable.

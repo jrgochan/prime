@@ -1,0 +1,118 @@
+% ================================================================
+\section{Introduction: A New Kind of Mathematical Object}
+\label{sec:introduction}
+% ================================================================
+
+In the taxonomy of mathematical claims, a proposition is traditionally
+assigned one of three epistemic statuses: \emph{proved} (its truth is
+established by a chain of reasoning from accepted axioms),
+\emph{refuted} (its negation is proved), or \emph{open} (neither its
+truth nor its falsity has been established). G\"odel's incompleteness
+theorems~\cite{godel1931} introduced a fourth category---\emph{independent}---for
+statements that are neither provable nor refutable within a given
+formal system. The Cathedral suggests a fifth:
+
+\begin{quote}
+\emph{Formally reduced}: a claim whose logical structure has been
+completely mapped by machine verification, so that its truth or
+falsity depends on exactly one precisely characterized gap,
+with everything else certified by a proof assistant.
+\end{quote}
+
+The Riemann Hypothesis (RH), arguably the deepest open problem in
+mathematics, has been formally reduced in this sense. The Cathedral
+is a Lean~4 formalization comprising 330 active files and
+approximately 97{,}000 lines of code, with zero compilation errors,
+that establishes the biconditional
+\[
+  \RH \;\iff\; d_N^2 \to 0
+\]
+where $d_N^2 = \inf_v \int_0^1 (1 - \sum_{k=2}^{N} v_k \{1/(kx)\})^2\,dx$
+is the Nyman--Beurling distance. The converse direction
+($d_N^2 \to 0 \implies \RH$) is proved with \textbf{zero} custom
+axioms and \textbf{zero sorry}. The forward direction
+($\RH \implies d_N^2 \to 0$) depends on exactly \textbf{one}
+literature axiom~\cite{baezduarte2003}.
+
+This paper examines what this formal reduction \emph{means}---not
+mathematically (the companion paper~\cite{cathedral} provides the
+technical details) nor physically (the physics dictionary~\cite{cathedral-physics}
+catalogues 160+ structural correspondences between the proof and
+quantum field theory), but \emph{philosophically}. We engage with
+the questions that the Cathedral raises for the philosophy of
+mathematics:
+
+\begin{enumerate}
+  \item \textbf{Epistemology.} What kind of knowledge is a
+    machine-verified conditional equivalence? If the compiler has
+    certified that RH is equivalent to a concrete analytic inequality,
+    do we ``know'' more about RH than we did before---even though
+    the hypothesis itself remains unproved? (\S\ref{sec:epistemology})
+
+  \item \textbf{Ontology.} The physics dictionary reveals that every
+    mathematical structure in the proof has a precise physical dual:
+    the Gram matrix is a quantum correlator, the Mertens function is
+    a magnetization, the Parseval Bridge is unitarity. Are these
+    correspondences structural or metaphorical? What do they tell us
+    about the nature of mathematical objects?
+    (\S\ref{sec:ontology})
+
+  \item \textbf{Foundations.} The Cathedral reduces an open problem
+    to one axiom, but the difficulty of proving that axiom appears
+    to be a \emph{topological invariant}: it cannot be eliminated
+    by changing proof frameworks, only redistributed. What does this
+    ``conservation of difficulty'' say about the limits of formal
+    methods? (\S\ref{sec:hilbert-godel})
+
+  \item \textbf{Cognition.} The Cathedral was built by a tripartite
+    collaboration: a human mathematician, two AI systems (Claude
+    and Gemini), and a proof compiler (Lean~4). No single
+    participant comprehends the entire proof. What model of
+    mathematical understanding does this require?
+    (\S\ref{sec:cognition})
+
+  \item \textbf{Aesthetics.} The Cathedral's naming conventions,
+    architectural metaphors, and the closing poem of its physics
+    paper (``the integers are the particles; the primes are the
+    interactions'') treat beauty as a structural feature of proof.
+    Is this legitimate, or merely decoration?
+    (\S\ref{sec:aesthetics})
+\end{enumerate}
+
+We argue for a position we call \emph{moderate structural realism}:
+the integers possess genuine structure that is revealed, not
+constructed, by formalization; the physics correspondences are
+evidence that this structure is the same structure that governs
+the physical world; and the machine-verified reduction is a new and
+philosophically significant form of mathematical knowledge, distinct
+from both proof and conjecture.
+
+\subsection{Scope and Method}
+
+This paper is addressed to philosophers of mathematics in the
+tradition of Benacerraf~\cite{benacerraf1973},
+Shapiro~\cite{shapiro1997}, Lakatos~\cite{lakatos1976}, and
+Corfield~\cite{corfield2003}---those who take the practice of
+mathematics seriously as a source of philosophical insight, rather
+than treating it as a mere application of formal logic. We follow
+Mancosu's~\cite{mancosu2008} program of drawing philosophical
+conclusions from mathematical \emph{practice}, and we take seriously
+Thurston's~\cite{thurston1994} observation that mathematical
+understanding is not reducible to formal proof.
+
+At the same time, we are writing about a \emph{formal proof}---a
+mathematical object that exists precisely as a term in a type theory.
+This creates a productive tension: the Cathedral is simultaneously
+the kind of mathematics that philosophy of mathematics should attend
+to (a complex, multi-authored, computationally intensive research
+program with deep connections to physics) and the kind that
+traditional philosophy of mathematics can most easily analyze
+(a formal derivation from axioms to conclusions, checkable by
+algorithm).
+
+We quote specific Lean declarations (e.g., \lean{gram\_bound\_implies\_rh})
+and specific numerical results (e.g., $v^TGv = 0.7367$ at $N = 55{,}440$)
+throughout, not as ornament but as evidence. The philosophical claims
+we make are grounded in the concrete mathematical structures of the
+Cathedral, and the reader is invited to verify them against the
+public repository.

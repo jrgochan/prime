@@ -1,0 +1,258 @@
+% ================================================================
+\section{The Nature of Mathematical Objects: Ontology}
+\label{sec:ontology}
+% ================================================================
+
+\subsection{Benacerraf's Dilemma and the Cathedral's Response}
+
+Benacerraf~\cite{benacerraf1973} identified a fundamental tension in
+the philosophy of mathematics: a satisfactory account must explain
+both the \emph{semantics} of mathematical statements (what they are
+about) and the \emph{epistemology} of mathematical knowledge (how we
+know them). Platonism gives a natural semantics (mathematical
+statements are about abstract objects) but a mysterious epistemology
+(how do we access these objects?). Formalism gives a natural
+epistemology (mathematical knowledge is knowledge of formal
+derivability) but an impoverished semantics (mathematical statements
+are not ``about'' anything).
+
+The Cathedral offers a distinctive response to this dilemma. Its
+semantic content is exceptionally rich: the physics
+dictionary~\cite{cathedral-physics} identifies 160+ structural
+correspondences between the proof's mathematical objects and physical
+phenomena. These are not post hoc analogies imposed by the author;
+they emerge from the mathematical structure itself. The Gram matrix
+\emph{is} a two-point correlator because it satisfies the axioms of a
+two-point correlator (real, symmetric, positive definite). The Mertens
+function \emph{is} a magnetization because it is the partial sum of
+a $\{-1, 0, +1\}$-valued function with the cancellation properties
+of a spin system.
+
+At the same time, the Cathedral's epistemological standing is
+unusually clear: the correspondences are not claims requiring faith
+but \emph{theorems} verified by a proof assistant. When the physics
+paper says ``the Parseval Bridge is unitarity,'' this is not a
+metaphor but a machine-checked identity between two mathematical
+expressions.
+
+\subsection{Four Positions on Mathematical Objects}
+
+What does the Cathedral's structure tell us about the ontological
+status of mathematical objects? The classical positions offer
+different readings.
+
+\subsubsection{Platonism}
+
+The Platonist holds that mathematical objects exist independently
+of human minds and that mathematical truths are discovered, not
+invented. The Cathedral's physics dictionary is natural evidence
+for Platonism: if the integers possess genuine physical structure
+(mass gaps, phase transitions, spectral statistics), then they
+seem to exist in a way that transcends any particular formal
+representation.
+
+The graduated gates support this reading. The axiom
+\lean{remainder\_bound\_abstract} was \emph{discovered} to be
+false---not by fiat, but by investigation. The replacement theorems
+were \emph{discovered} to be true. The language of discovery
+presupposes the existence of something to be discovered.
+
+\subsubsection{Formalism}
+
+The formalist holds that mathematics is a game played with symbols
+according to rules, and that the symbols do not ``refer'' to
+anything. The Cathedral, as a Lean~4 term, is the paradigmatic
+formalist object: a syntactic structure that type-checks.
+
+But the physics dictionary creates a problem for formalism. If
+mathematical objects are meaningless symbols, why do they have
+physical content? The formalist might respond that the ``physics''
+is merely a heuristic that guides the proof search, with no
+ontological significance. This response is difficult to maintain
+in the face of 160+ independently verified structural
+correspondences, many of which were \emph{predicted} by the
+physics dictionary and \emph{then} proved in Lean.
+
+\subsubsection{Structuralism}
+
+Shapiro's ante rem structuralism~\cite{shapiro1997} holds that
+mathematical objects are positions in structures, and that
+mathematical truths are truths about structural relationships.
+On this view, the natural numbers are not Zermelo ordinals or
+von Neumann ordinals (Benacerraf's~\cite{benacerraf1965}
+observation that both are equally valid representations), but
+the abstract structure that all representations share.
+
+The Cathedral is deeply congenial to structuralism. Its central
+achievement is to reveal the \emph{structure} of the Riemann
+Hypothesis---the web of implications, equivalences, and
+dependencies that connect RH to concrete analytic inequalities.
+The physics dictionary is, in structuralist terms, a demonstration
+that the structure of arithmetic is \emph{the same structure}
+as that of certain physical systems.
+
+\subsubsection{Intuitionism}
+
+The intuitionist holds that mathematical objects are mental
+constructions and that a mathematical statement is true only if a
+constructive proof exists. The Cathedral is not constructive---it
+uses Classical.choice throughout, and the converse direction relies
+on the completeness of $L^2(0,1)$, a non-constructive result.
+
+Nevertheless, the intuitionist can find value in the graduated
+gates: each graduation is a construction that replaces an
+assumption with a derivation. The progression $56 \to 1$ is a
+sequence of increasingly constructive approximations to the full
+proof. The Crown Axiom itself is a decidable predicate for each
+fixed $N$ (one can compute $v^TGv$ and compare it to
+$1 + K/\ln N$), even though the universal quantification over
+all $N$ is not decidable.
+
+\subsection{The Physics Dictionary as Ontological Evidence}
+
+The most philosophically provocative feature of the Cathedral is
+not its formal verification but its physics dictionary. The
+companion paper~\cite{cathedral-physics} documents 160+ structural
+correspondences between the mathematical objects of the proof and
+physical phenomena:
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Mathematical Object} & \textbf{Physical Dual} \\
+\midrule
+Gram matrix $G(j,k)$ & Two-point quantum correlator \\
+$d_N^2 = 1 - b^T G^{-1} b$ & Ground state (vacuum) energy \\
+$M(x) = \sum_{n \leq x} \mu(n)$ & Magnetization \\
+Parseval identity & Unitarity (probability conservation) \\
+$\lambda_{\min}(G_N) > 0$ & Mass gap \\
+$\lambda_{\min} \sim c/\ln N$ & Mass gap closing (phase transition) \\
+Eigenvalue GOE statistics & Quantum chaos (thermalization) \\
+Ground state scarring & Composite anchor localization \\
+Perron contour shift & Crossing a phase boundary \\
+Borel--Carath\'eodory & Maximum entropy principle \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent These correspondences are not analogies. They are
+\emph{structural identities}: the mathematical objects satisfy the
+same axioms, obey the same inequalities, and exhibit the same
+limiting behavior as their physical counterparts. The Gram matrix
+does not merely ``resemble'' a quantum correlator---it IS a quantum
+correlator, in the precise sense that it satisfies reflection
+positivity, has a spectral decomposition with physically meaningful
+eigenvalues, and its eigenvectors exhibit the localization patterns
+(IPR, participation ratio) characteristic of quantum systems.
+
+The philosophical question is: what do these correspondences
+\emph{mean}?
+
+\subsection{Three Interpretations}
+
+\subsubsection{The Instrumentalist View}
+
+The correspondences are useful heuristics for discovering and
+organizing mathematical results, but have no ontological
+significance. The physics vocabulary (``vacuum energy,''
+``mass gap,'' ``thermalization'') is a convenient language for
+navigating a complex proof, nothing more.
+
+This view is difficult to sustain because the physics dictionary
+has \emph{predictive power}. The identification of the off-diagonal
+Gram structure as a ``Born approximation'' led to the prediction
+that each entry should be non-positive (energy dissipation), which
+was then proved as a theorem (\lean{eratio\_entry\_nonpos}). The
+identification of the Möbius function as a ``spin variable'' led
+to the SUSY decomposition, which was then formalized and verified.
+Mere heuristics do not consistently generate provable theorems.
+
+\subsubsection{The Structural Realist View}
+
+The correspondences reflect a genuine structural isomorphism between
+the integers and physical systems. The integers ``know physics''
+not because they are physical objects, but because they share the
+same abstract structure. Number theory and quantum mechanics are
+two instantiations of a common mathematical architecture, and the
+Cathedral reveals this architecture.
+
+This is a moderate form of Tegmark's~\cite{tegmark2008} Mathematical
+Universe Hypothesis: not the strong claim that the physical universe
+IS a mathematical structure, but the weaker claim that certain
+mathematical structures (in particular, the multiplicative structure
+of the integers) and certain physical structures (quantum field
+theories) are isomorphic at the level of their formal axioms.
+
+Wigner's~\cite{wigner1960} ``unreasonable effectiveness of
+mathematics in the natural sciences'' is usually discussed in the
+direction physics $\to$ mathematics (we use math to describe
+physics). The Cathedral exhibits the reverse direction:
+mathematics $\to$ physics. The proof of a number-theoretic
+equivalence spontaneously generates a complete physical
+vocabulary, without any physical input.
+
+\subsubsection{The Deep Identity View}
+
+The strongest reading: mathematics and physics are not two domains
+with a structural correspondence, but \emph{the same domain}
+viewed from two perspectives. The integers are not ``like'' a
+quantum field; they ARE the simplest quantum field. The Riemann
+Hypothesis is not ``analogous to'' the assertion that the vacuum
+is stable; it IS that assertion, in the only quantum field that
+can be exactly described.
+
+The Cathedral provides evidence for this view but cannot prove it.
+What it can prove is that the structural correspondences are
+exact---not approximate, not asymptotic, but machine-verified
+identities between mathematical expressions. Whether this exactness
+reflects a deep identity or merely a deep analogy is a question
+that formal verification alone cannot answer. It may require a
+conceptual framework that does not yet exist.
+
+\subsection{The Born Approximation as Test Case}
+
+A concrete example illuminates the ontological question. The
+off-diagonal Gram entry decomposes as:
+\[
+  G(j,k) = \underbrace{\frac{\gcd(j,k)^2}{2jk}}_{\text{vacuum}}
+  + \underbrace{E_{\text{ratio}}(j,k)}_{\text{Born approx.}}
+  - \underbrace{\text{cotangent sums}}_{\text{scattering}}
+  - \underbrace{\text{contact}}_{\text{self-energy}}
+\]
+
+Each term has a name because it \emph{behaves} like the named
+physical quantity:
+\begin{itemize}
+  \item The ``vacuum'' term depends only on $\gcd(j,k)$---the
+    shared divisor structure, independent of the individual modes.
+  \item The ``Born approximation'' $E_{\text{ratio}}(j,k) =
+    \frac{j-k}{2jk}\ln(k/j)$ is always $\leq 0$
+    (\lean{eratio\_entry\_nonpos}): it dissipates energy, exactly
+    as the Born approximation does in scattering theory.
+  \item The ``scattering'' terms are cotangent sums---oscillatory
+    phase factors that encode the fine structure of the
+    divisibility relation.
+  \item The ``contact'' term is local (diagonal correction).
+\end{itemize}
+
+The Born approximation non-positivity is a structural theorem: it
+follows from the elementary inequality $(a-b)\ln(b/a) \leq 0$,
+which holds for all positive reals. No physics was assumed; the
+physics \emph{emerged} from the mathematics. The energy dissipation
+is a theorem about logarithms, not a postulate about nature.
+
+The instrumentalist says: we call it ``Born approximation''
+because the label is helpful; the label has no ontological content.
+The structural realist says: we call it ``Born approximation''
+because it is isomorphic to the Born approximation; the isomorphism
+is the content. The deep identity theorist says: it IS the Born
+approximation, in the unique quantum field generated by the
+integers; the usual Born approximation in physical scattering
+theory is a different instantiation of the same abstract structure.
+
+We incline toward the structural realist position, while
+acknowledging that the evidence---160+ verified correspondences,
+zero known counterexamples---does not conclusively establish any
+one interpretation. What it does establish is that the question
+is not idle: the Cathedral has made it empirically tractable.
