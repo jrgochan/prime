@@ -90,10 +90,10 @@ theorem gcdIntersection_self_effective (D : WeilDivisor)
 theorem gcdIntersection_zero_left_effective (D : WeilDivisor)
     (hD : WeilDivisor.IsEffective D) :
     gcdIntersection 0 D = 0 := by
-  -- Each summand is (min 0 (D q) : ℝ) * log q.val = 0
-  -- because D is effective (D q ≥ 0) so min(0, D q) = 0.
-  -- Technical: the Finsupp.sum/min/cast interaction is nontrivial.
-  sorry -- TODO: close via Finsupp.sum_congr + Int.cast_zero
+  -- Mathematically trivial: each summand is (↑(min 0 (D q)) : ℝ) * log q = 0
+  -- since D effective ⟹ D q ≥ 0 ⟹ min(0, D q) = 0.
+  -- The Lean proof is blocked by Finsupp.sum/min/Int.cast interaction.
+  sorry
 
 /-- The GCD intersection is nonneg for effective divisors. -/
 theorem gcdIntersection_nonneg (D₁ D₂ : WeilDivisor)
