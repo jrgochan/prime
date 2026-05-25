@@ -526,4 +526,6 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.SpectralTower,
     -- Four-Fold Symmetry (quadruplet structure, degeneration on Re=½, May 24, 2026)
     `Cathedral.Zeta.FourFoldSymmetry,
+    -- Arakelov Bridge (intersection theory road to RH, May 25, 2026)
+    `Cathedral.Zeta.ArakelovBridge,
   ]
