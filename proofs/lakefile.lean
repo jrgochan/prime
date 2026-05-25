@@ -530,4 +530,6 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.ArakelovBridge,
     -- Arakelov Layer 1: Weil Divisors on Spec(ℤ) (May 25, 2026)
     `Cathedral.Arakelov.WeilDivisor,
+    -- Arakelov Layer 2: Arithmetic Divisors (May 25, 2026)
+    `Cathedral.Arakelov.ArithmeticDivisor,
   ]
