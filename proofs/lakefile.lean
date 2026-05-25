@@ -522,4 +522,6 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.KummerTower,
     -- Tower Fusion (Rigidity Axiom: arithmetic structure forces zeros to Re(s)=1/2)
     `Cathedral.Zeta.TowerFusion,
+    -- Spectral Tower (Fourier harmonics in the imaginary direction, Three Towers vision)
+    `Cathedral.Zeta.SpectralTower,
   ]
