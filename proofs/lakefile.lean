@@ -516,4 +516,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Bridges.BridgeGap,
     -- Time-Domain Bridge (G = 2M - 1/(3jk) + 2∫E/t³, IBP maneuver, Bridge Session)
     `Cathedral.Physics.Bridges.TimeDomainBridge,
+    -- Silence and Echo (trivial zero duality: ζ(-1)=-1/12, Σ_reg(-2n)=1/6, Basel)
+    `Cathedral.Zeta.SilenceAndEcho,
+    -- Kummer Tower (p-adic extension beyond Cayley-Dickson: ζ(-13)=ζ(-1), echo theorem)
+    `Cathedral.Zeta.KummerTower,
   ]
