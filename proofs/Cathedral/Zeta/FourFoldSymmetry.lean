@@ -286,6 +286,75 @@ theorem quadruplet_in_strip (ρ : ℂ) (h_lo : 0 < ρ.re) (h_hi : ρ.re < 1) :
     exact ⟨h_lo, h_hi⟩
 
 -- ════════════════════════════════════════════════════════════════
+-- §7. THE KLEIN FOUR-GROUP (The Cycle)
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### Saṃsāra: The Wheel of Zeros
+
+The Mirror (M: s ↦ 1-s) and Conjugate (C: s ↦ s̄) generate
+the Klein four-group V₄ ≅ ℤ/2 × ℤ/2:
+
+    ρ ──M──→ 1-ρ ──C──→ 1-ρ̄ ──M──→ ρ̄ ──C──→ ρ
+
+The cycle has period 4. Applying MCMC returns to the start.
+
+On the Middle Way (Re = 1/2), M = C, so MCMC = M⁴ = id trivially,
+and the effective period drops to 2: ρ ──M──→ ρ̄ ──M──→ ρ. -/
+
+/-- **M is an involution**: mirror(mirror(s)) = s. -/
+theorem mirror_involution (s : ℂ) : 1 - (1 - s) = s := by ring
+
+/-- **C is an involution**: conj(conj(s)) = s. -/
+theorem conj_involution (s : ℂ) : conj (conj s) = s := by
+  simp
+
+/-- **MC = CM**: The mirror and conjugate commute.
+    conj(1-s) = 1-conj(s) -/
+theorem mirror_conj_commute (s : ℂ) :
+    conj (1 - s) = 1 - conj s := by
+  apply Complex.ext
+  · simp [Complex.conj_re, Complex.sub_re, Complex.one_re]
+  · simp [Complex.conj_im, Complex.sub_im, Complex.one_im]
+
+/-- **THE CYCLE (MCMC = id)**: Starting from any s ∈ ℂ, applying
+    Mirror, Conjugate, Mirror, Conjugate returns to s.
+
+    s →^M (1-s) →^C conj(1-s) = 1-s̄ →^M 1-(1-s̄) = s̄ →^C conj(s̄) = s
+
+    This is the Saṃsāra of the zeros: the wheel turns
+    through four stations and returns to the beginning. -/
+theorem klein_four_cycle (s : ℂ) :
+    conj (1 - conj (1 - s)) = s := by
+  rw [mirror_conj_commute]
+  simp [sub_sub_cancel]
+
+/-- **The four stations of the cycle**, stated explicitly.
+    Starting from s, the MCMC orbit is {s, 1-s, 1-s̄, s̄}. -/
+theorem cycle_stations (s : ℂ) :
+    let station₁ := s           -- the zero itself
+    let _station₂ := 1 - s      -- Mirror
+    let station₃ := 1 - conj s  -- Mirror then Conjugate (= Conjugate then Mirror)
+    let station₄ := conj s      -- Conjugate
+    -- The cycle closes: C(station₄) = station₁
+    conj station₄ = station₁ ∧
+    -- And M(station₃) = station₄
+    (1 - station₃) = station₄ := by
+  simp [sub_sub_cancel]
+
+/-- **On the Middle Way, the cycle has period 2**.
+    When Re(s) = 1/2, station₂ = station₄ and station₃ = station₁,
+    so the four stations collapse to two. -/
+theorem cycle_period_two_on_critical_line (s : ℂ) (h : s.re = 1/2) :
+    (1 - s = conj s) ∧ (1 - conj s = s) := by
+  have h1 := (degeneration_iff_critical_line s).mpr h
+  constructor
+  · exact h1
+  · -- From 1-s = conj(s), we get conj(s) = 1-s
+    -- So 1 - conj(s) = 1 - (1-s) = s
+    calc 1 - conj s = 1 - (1 - s) := by rw [h1]
+      _ = s := by ring
+
+-- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
 
