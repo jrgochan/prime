@@ -512,6 +512,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.Bridges.IridiumCrown,
     -- B₁ Arithmetic Skeleton (Path 6: Spectral Gap Attack — gcd²/12jk decomposition)
     `Cathedral.Physics.Bridges.BernoulliSkeleton,
+    -- Annihilation Bridge (σ→∞ ⟹ d²→0, conditional on moebius_annihilation)
+    `Cathedral.Physics.Bridges.AnnihilationBridge,
     -- Bridge Gap (G_Vasyunin = R_Ramanujan + Δ decomposition, Bridge Gap Session)
     `Cathedral.Physics.Bridges.BridgeGap,
     -- Time-Domain Bridge (G = 2M - 1/(3jk) + 2∫E/t³, IBP maneuver, Bridge Session)

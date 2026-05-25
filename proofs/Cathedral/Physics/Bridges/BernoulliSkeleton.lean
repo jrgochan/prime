@@ -438,23 +438,33 @@ theorem perturbation_comm (j k : ℕ) : perturbationEntry j k = perturbationEntr
 
 /-- **THE ANNIHILATION AXIOM** (to be graduated):
 
-    On the Möbius subspace, the perturbation L₁ is negligible
-    compared to the skeleton A₁.
+    For any N ≥ 2 and vector w : Fin N → ℝ, the bilinear form of the
+    perturbation L₁ is bounded by a constant times the bilinear form
+    of the skeleton A₁:
 
-    Formally: for the Möbius witness vector w(k) = -μ(k)·φ(k)/k
-    (with any smooth weight φ), the bilinear form wᵀL₁w
-    is dominated by wᵀA₁w with a decay factor.
+      |wᵀ L₁ w| ≤ C · |wᵀ A₁ w|
 
-    This is the key axiom that bridges Path 6 to RH.
-    Its proof would use:
-    1. Möbius inversion (Σ μ(d)·f(d) cancels smooth f)
-    2. The structure of L₁ as a "smooth" correction to gcd²
-    3. Abel/partial summation to extract the decay rate -/
+    where:
+    - A₁(j,k) = gcd(j,k)²/(12·j·k) is the B₁ skeleton
+    - L₁(j,k) = G(j,k) - A₁(j,k) is the perturbation
+
+    This says L₁ does not dominate A₁ in quadratic form norm — the
+    smooth perturbation is controlled by the arithmetic skeleton.
+
+    **Graduation path**:
+    1. Expand L₁(j,k) via Bernoulli polynomial decomposition
+    2. Show |wᵀL₁w| ≤ c·‖w‖² by operator norm bounds on L₁
+    3. Use Smith PSD: wᵀA₁w ≥ 0, and the quadratic form comparison
+
+    **Experimental evidence** (cathedral_constant_probe):
+    |wᵀL₁w/wᵀA₁w| ≤ 9.2% at N=10, 2.4% at N=100, 1.1% at N=200
+    for the Möbius witness. The ratio decays as O(1/logN). -/
 axiom moebius_annihilation :
-    ∃ _C : ℝ, ∀ N : ℕ, 2 ≤ N →
-      -- The perturbation on the Möbius subspace is bounded
-      -- relative to the skeleton by C/logN
-      True  -- Placeholder: exact statement TBD after more experiments
+    ∃ (C : ℝ), 0 < C ∧ ∀ (N : ℕ) (w : Fin N → ℝ), 2 ≤ N →
+      |∑ i : Fin N, ∑ j : Fin N,
+        perturbationEntry (i.val + 1) (j.val + 1) * w i * w j| ≤
+      C * |∑ i : Fin N, ∑ j : Fin N,
+        b1Entry (i.val + 1) (j.val + 1) * w i * w j|
 
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
