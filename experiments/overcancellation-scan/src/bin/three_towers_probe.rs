@@ -127,13 +127,32 @@ fn theta_f64(t: f64) -> f64 {
     t2 * (t2 / PI).ln() - t2 - PI / 8.0 + 1.0 / (48.0 * t) + 7.0 / (5760.0 * t * t * t)
 }
 
-/// Hardy Z-function: Z(t) = e^{iθ(t)} · ζ(1/2 + it)
-/// Z(t) is real for real t, and its sign changes correspond to zeros of ζ on Re=1/2
-fn hardy_z_f64(t: f64, n_terms: usize) -> f64 {
+/// Hardy Z-function via the RIEMANN-SIEGEL FORMULA:
+/// Z(t) = 2 Σ_{n≤N} n^{-1/2} cos(θ(t) - t·ln(n)) + R(t)
+/// where N = floor(√(t/(2π))) and R(t) is a remainder term.
+///
+/// This converges in the critical strip (unlike the partial Dirichlet sum)
+/// and is the standard algorithm for computing zeros of ζ on Re=1/2.
+fn hardy_z_f64(t: f64) -> f64 {
+    if t < 2.0 { return 0.0; }
     let theta = theta_f64(t);
-    let (zeta_re, zeta_im) = zeta_f64(0.5, t, n_terms);
-    // Z(t) = Re(e^{iθ} · ζ) = cos(θ)·Re(ζ) - sin(θ)·Im(ζ)
-    theta.cos() * zeta_re - theta.sin() * zeta_im
+    let n_max = ((t / (2.0 * PI)).sqrt()).floor() as usize;
+    if n_max < 1 { return 0.0; }
+    
+    let mut sum = 0.0f64;
+    for n in 1..=n_max {
+        let nf = n as f64;
+        sum += nf.powf(-0.5) * (theta - t * nf.ln()).cos();
+    }
+    sum *= 2.0;
+    
+    // Riemann-Siegel remainder (first correction term)
+    let p = ((t / (2.0 * PI)).sqrt()).fract();
+    // C₀(p) ≈ cos(2π(p² - p - 1/16)) / cos(2πp)
+    let c0 = (2.0 * PI * (p * p - p - 1.0/16.0)).cos() / (2.0 * PI * p).cos();
+    let remainder = (-1.0f64).powi((n_max as i32) - 1) * (t / (2.0 * PI)).powf(-0.25) * c0;
+    
+    sum + remainder
 }
 
 /// Riemann-von Mangoldt formula: N(T) ≈ T/(2π)·ln(T/(2π)) - T/(2π) + 7/8
@@ -310,7 +329,7 @@ fn probe_spectral_energy(primes: &[usize]) {
 // §4. WAVE COUNTING (Hardy Z-function)
 // ═══════════════════════════════════════════════════════
 
-fn probe_wave_counting(max_t: f64, n_terms: usize) {
+fn probe_wave_counting(max_t: f64) {
     println!("╔══════════════════════════════════════════════════════════╗");
     println!("║  §4. WAVE COUNTING — Hardy Z Sign Changes              ║");
     println!("║  Counting zeros on the critical line up to T = {:<8.1} ║", max_t);
@@ -323,11 +342,11 @@ fn probe_wave_counting(max_t: f64, n_terms: usize) {
     
     let mut sign_changes = 0u64;
     let mut detected_zeros: Vec<f64> = Vec::new();
-    let mut prev_z = hardy_z_f64(10.0, n_terms);
+    let mut prev_z = hardy_z_f64(10.0);
     
     for i in 1..=n_steps {
         let t = 10.0 + (i as f64) * dt;
-        let z = hardy_z_f64(t, n_terms);
+        let z = hardy_z_f64(t);
         
         if prev_z * z < 0.0 {
             // Sign change — zero detected!
@@ -336,8 +355,8 @@ fn probe_wave_counting(max_t: f64, n_terms: usize) {
             let mut hi = t;
             for _ in 0..50 {
                 let mid = (lo + hi) / 2.0;
-                let z_mid = hardy_z_f64(mid, n_terms);
-                if z_mid * hardy_z_f64(lo, n_terms) < 0.0 {
+                let z_mid = hardy_z_f64(mid);
+                if z_mid * hardy_z_f64(lo) < 0.0 {
                     hi = mid;
                 } else {
                     lo = mid;
@@ -352,7 +371,7 @@ fn probe_wave_counting(max_t: f64, n_terms: usize) {
     
     let predicted = riemann_von_mangoldt(max_t) - riemann_von_mangoldt(10.0);
     
-    println!("  Results (T = {:.1}, dt = {}, N_terms = {}):", max_t, dt, n_terms);
+    println!("  Results (T = {:.1}, dt = {}, method = Riemann-Siegel):", max_t, dt);
     println!("    Sign changes detected:    {}", sign_changes);
     println!("    Riemann-von Mangoldt:     {:.2}", predicted);
     println!("    Difference:               {}", (sign_changes as f64 - predicted) as i64);
@@ -467,7 +486,7 @@ fn main() {
     probe_tower_angles(max_t, n_terms);
     probe_fourfold_symmetry(n_terms, prec);
     probe_spectral_energy(&primes);
-    probe_wave_counting(max_t, n_terms);
+    probe_wave_counting(max_t);
     probe_tower_profiles(n_terms);
     
     println!("═══════════════════════════════════════════════════════════");
