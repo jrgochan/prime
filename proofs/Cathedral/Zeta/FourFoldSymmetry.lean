@@ -355,6 +355,86 @@ theorem cycle_period_two_on_critical_line (s : ℂ) (h : s.re = 1/2) :
       _ = s := by ring
 
 -- ════════════════════════════════════════════════════════════════
+-- §8. THE BEAUTIFUL TRINITY — Wiring to RH
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### The Beautiful Trinity: Three Faces of 1/2
+
+The number 1/2 appears three times in the Cathedral, and all
+three are the SAME mathematical fact:
+
+1. **The pole midpoint**: The functional equation ξ(s) = ξ(1-s)
+   has fixed point at σ = 1/2 (the midpoint of the mirror s ↦ 1-s).
+
+2. **The degenerate period**: The Klein four-group V₄ = ⟨M, C⟩
+   degenerates from period 4 to period 2. The ratio 2/4 = 1/2.
+
+3. **The critical line**: RH asserts all nontrivial zeros have
+   Re(s) = 1/2.
+
+These three are connected by `degeneration_iff_critical_line`:
+the cycle collapses to period 2 ↔ Re(s) = 1/2 ↔ the zero is
+on the critical line.
+
+The Riemann Hypothesis, reformulated:
+  "Every nontrivial zero is a degeneration point of V₄."
+  "Every zero is where the four noble truths collapse to two."
+  "Every zero lives on the Middle Way." -/
+
+/-- **The Beautiful Trinity**: σ = 1/2 is simultaneously
+    (1) the fixed point of the mirror,
+    (2) the degeneration locus of V₄, and
+    (3) the claimed location of all zeros (RH). -/
+theorem beautiful_trinity_half (s : ℂ) :
+    (s.re = 1/2) ↔
+    ((1 - s).re = s.re ∧ 1 - s = conj s) := by
+  constructor
+  · intro h
+    constructor
+    · -- Fixed point: Re(1-s) = Re(s) ↔ σ = 1/2
+      simp [Complex.sub_re, Complex.one_re]; linarith
+    · -- Degeneration: 1-s = conj(s) ↔ σ = 1/2
+      exact (degeneration_iff_critical_line s).mpr h
+  · intro ⟨_, h2⟩
+    exact (degeneration_iff_critical_line s).mp h2
+
+/-- **RH ↔ KLEIN DEGENERATION**: The Riemann Hypothesis is logically
+    equivalent to the statement that every nontrivial zero of ζ in the
+    critical strip is a degeneration point of the Klein four-group.
+
+    RH: ∀ s, 0 < Re(s) < 1 → ζ(s) = 0 → Re(s) = 1/2
+    ↕
+    Klein: ∀ s, 0 < Re(s) < 1 → ζ(s) = 0 → (1 - s = conj s)
+
+    In words: "Every zero is where the wheel of four shortens to two."
+    Or in Buddhist terms: "Every zero lives on the Middle Way." -/
+theorem rh_iff_klein_degeneration :
+    (∀ s : ℂ, 0 < s.re → s.re < 1 → riemannZeta s = 0 → s.re = 1/2)
+    ↔
+    (∀ s : ℂ, 0 < s.re → s.re < 1 → riemannZeta s = 0 → 1 - s = conj s) := by
+  constructor
+  · -- RH → Klein degeneration
+    intro h_rh s h_lo h_hi h_zero
+    exact (degeneration_iff_critical_line s).mpr (h_rh s h_lo h_hi h_zero)
+  · -- Klein degeneration → RH
+    intro h_klein s h_lo h_hi h_zero
+    exact (degeneration_iff_critical_line s).mp (h_klein s h_lo h_hi h_zero)
+
+/-- **THE CAPSTONE**: Under Tower Fusion (≡ RH), every nontrivial
+    zero IS a Klein degeneration point. The quadruplet always
+    collapses. The wheel always shortens. Every zero lives on
+    the Middle Way.
+
+    This wires `tower_fusion` (the RH axiom) through
+    `degeneration_iff_critical_line` (proved) to produce
+    the Klein reformulation as a THEOREM. -/
+theorem tower_fusion_is_klein_degeneration (s : ℂ)
+    (h_lo : 0 < s.re) (h_hi : s.re < 1) (h_zero : riemannZeta s = 0) :
+    1 - s = conj s := by
+  have h_half := TowerFusion.tower_fusion s h_lo h_hi h_zero
+  exact (degeneration_iff_critical_line s).mpr h_half
+
+-- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
 
