@@ -528,4 +528,6 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.FourFoldSymmetry,
     -- Arakelov Bridge (intersection theory road to RH, May 25, 2026)
     `Cathedral.Zeta.ArakelovBridge,
+    -- Arakelov Layer 1: Weil Divisors on Spec(ℤ) (May 25, 2026)
+    `Cathedral.Arakelov.WeilDivisor,
   ]
