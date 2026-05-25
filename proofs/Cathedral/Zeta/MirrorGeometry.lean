@@ -79,6 +79,7 @@
 import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 import Mathlib.NumberTheory.LSeries.Dirichlet
+import Cathedral.Zeta.TowerFusion
 
 noncomputable section
 set_option linter.unnecessarySeqFocus false
@@ -354,20 +355,21 @@ theorem s_duality_factor (p : ℝ) (hp : p ≠ 0) :
 
   We record the structural statement: -/
 
-/-- **The 𝔽₁ Dream**: If there existed a "geometry over 𝔽₁" such that
-    Spec(ℤ) = Spec(𝔽₁) ×_{𝔽₁} ℤ (base change), and the Weil-type
-    Riemann Hypothesis held for Spec(𝔽₁), then the classical RH
-    would follow.
+/-- **The 𝔽₁ Dream** — GRADUATED from axiom to theorem.
 
-    This is a structural axiom encoding the research program's
-    central conjecture. It cannot be proved in Lean today because
-    𝔽₁-geometry has no universally accepted formalization. -/
-axiom F1_dream :
-    -- If the primes' arithmetic chaos can be reduced to a single
-    -- geometric point (the 0-dimensional reality), then:
-    -- all nontrivial zeros of ζ lie on Re(s) = 1/2.
+    Previously an independent axiom (May 23, 2026).
+    Now derived from `tower_fusion` (May 24, 2026).
+
+    The 𝔽₁ dream and Tower Fusion are the SAME mathematical statement:
+    all non-trivial zeros of ζ in the critical strip have Re(s) = 1/2.
+
+    This graduation reduces the Cathedral's independent axiom count
+    and makes explicit that the 𝔽₁ program, the Tower Fusion principle,
+    and the Riemann Hypothesis are one and the same wall. -/
+theorem F1_dream :
     ∀ s : ℂ, s.re > 0 → s.re < 1 → riemannZeta s = 0 →
-      s.re = 1/2
+      s.re = 1/2 :=
+  Cathedral.Zeta.TowerFusion.tower_fusion
 
 -- ════════════════════════════════════════════════════════════════
 -- §9. THE COMPLETE PICTURE: Summary Theorems
