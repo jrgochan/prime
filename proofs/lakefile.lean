@@ -532,4 +532,6 @@ lean_lib «Cathedral» where
     `Cathedral.Arakelov.WeilDivisor,
     -- Arakelov Layer 2: Arithmetic Divisors (May 25, 2026)
     `Cathedral.Arakelov.ArithmeticDivisor,
+    -- Arakelov Layer 3: Gram-Arakelov Bridge (May 25, 2026)
+    `Cathedral.Arakelov.GramBridge,
   ]
