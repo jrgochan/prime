@@ -139,6 +139,22 @@ path = "src/bin/glass_convergence_probe.rs"
 name = "glass-tower-mpfr-probe"
 path = "src/bin/glass_tower_mpfr_probe.rs"
 
+[[bin]]
+name = "basis-gap-probe"
+path = "src/bin/basis_gap_probe.rs"
+
+[[bin]]
+name = "prime-fractal-probe"
+path = "src/bin/prime_fractal_probe.rs"
+
+[[bin]]
+name = "trig-spectral-probe"
+path = "src/bin/trig_spectral_probe.rs"
+
+[[bin]]
+name = "three-towers-probe"
+path = "src/bin/three_towers_probe.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
