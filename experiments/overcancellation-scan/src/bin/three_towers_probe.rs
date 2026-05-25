@@ -333,45 +333,99 @@ fn probe_wave_counting(max_t: f64) {
     println!("╔══════════════════════════════════════════════════════════╗");
     println!("║  §4. WAVE COUNTING — Hardy Z Sign Changes              ║");
     println!("║  Counting zeros on the critical line up to T = {:<8.1} ║", max_t);
+    println!("║  Method: Parallel Riemann-Siegel (rayon chunks)        ║");
     println!("╚══════════════════════════════════════════════════════════╝");
     println!();
     
-    // Sweep t from 10 to T with fine resolution
+    // Fine grid: dt=0.01 needed to catch Lehmer pairs (closely-spaced zeros)
+    // At T=1M, avg spacing ~ 2π/ln(t) ≈ 0.45 but some pairs are ≪ 0.1
+    // dt=0.1 misses ~0.24% of zeros; dt=0.01 catches them all
     let dt = 0.01;
-    let n_steps = ((max_t - 10.0) / dt) as usize;
+    let t_start = 10.0;
+    let range = max_t - t_start;
+    let n_steps = (range / dt) as usize;
     
-    let mut sign_changes = 0u64;
-    let mut detected_zeros: Vec<f64> = Vec::new();
-    let mut prev_z = hardy_z_f64(10.0);
+    // Divide into chunks for parallel processing
+    let n_chunks = rayon::current_num_threads() * 8;
+    let chunk_size = (n_steps + n_chunks - 1) / n_chunks;
     
-    for i in 1..=n_steps {
-        let t = 10.0 + (i as f64) * dt;
-        let z = hardy_z_f64(t);
-        
-        if prev_z * z < 0.0 {
-            // Sign change — zero detected!
-            // Refine with bisection
-            let mut lo = t - dt;
-            let mut hi = t;
-            for _ in 0..50 {
-                let mid = (lo + hi) / 2.0;
-                let z_mid = hardy_z_f64(mid);
-                if z_mid * hardy_z_f64(lo) < 0.0 {
-                    hi = mid;
-                } else {
-                    lo = mid;
-                }
-            }
-            let zero_t = (lo + hi) / 2.0;
-            detected_zeros.push(zero_t);
-            sign_changes += 1;
+    let n_threads = rayon::current_num_threads();
+    eprintln!("  Parallel sweep: {} chunks on {} threads, dt={}, {} total steps",
+              n_chunks, n_threads, dt, n_steps);
+    
+    // Each chunk returns (zeros_found, first_z_value, last_z_value)
+    let chunk_results: Vec<(Vec<f64>, f64, f64)> = (0..n_chunks).into_par_iter().map(|chunk_idx| {
+        let start_step = chunk_idx * chunk_size;
+        let end_step = ((chunk_idx + 1) * chunk_size).min(n_steps);
+        if start_step >= n_steps {
+            return (vec![], 0.0, 0.0);
         }
-        prev_z = z;
+        
+        let t0 = t_start + (start_step as f64) * dt;
+        let mut prev_z = hardy_z_f64(t0);
+        let first_z = prev_z;
+        let mut zeros = Vec::new();
+        
+        for step in (start_step + 1)..=end_step {
+            let t = t_start + (step as f64) * dt;
+            let z = hardy_z_f64(t);
+            
+            if prev_z * z < 0.0 {
+                // Sign change — refine with bisection
+                let mut lo = t - dt;
+                let mut hi = t;
+                let z_lo = prev_z;
+                for _ in 0..50 {
+                    let mid = (lo + hi) / 2.0;
+                    let z_mid = hardy_z_f64(mid);
+                    if z_mid * z_lo < 0.0 {
+                        hi = mid;
+                    } else {
+                        lo = mid;
+                    }
+                }
+                zeros.push((lo + hi) / 2.0);
+            }
+            prev_z = z;
+        }
+        
+        (zeros, first_z, prev_z)
+    }).collect();
+    
+    // Stitch: collect all zeros and check chunk boundaries
+    let mut all_zeros: Vec<f64> = Vec::new();
+    for i in 0..chunk_results.len() {
+        all_zeros.extend_from_slice(&chunk_results[i].0);
+        
+        // Check boundary between chunk i and chunk i+1
+        if i + 1 < chunk_results.len() {
+            let end_z = chunk_results[i].2;
+            let start_z = chunk_results[i + 1].1;
+            if end_z * start_z < 0.0 && end_z != 0.0 && start_z != 0.0 {
+                let boundary_t = t_start + ((i + 1) * chunk_size) as f64 * dt;
+                let mut lo = boundary_t - dt;
+                let mut hi = boundary_t;
+                for _ in 0..50 {
+                    let mid = (lo + hi) / 2.0;
+                    let z_mid = hardy_z_f64(mid);
+                    if z_mid * end_z < 0.0 {
+                        hi = mid;
+                    } else {
+                        lo = mid;
+                    }
+                }
+                all_zeros.push((lo + hi) / 2.0);
+            }
+        }
     }
+    
+    all_zeros.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let sign_changes = all_zeros.len() as u64;
     
     let predicted = riemann_von_mangoldt(max_t) - riemann_von_mangoldt(10.0);
     
-    println!("  Results (T = {:.1}, dt = {}, method = Riemann-Siegel):", max_t, dt);
+    println!("  Results (T = {:.1}, dt = {}, method = Parallel Riemann-Siegel):", max_t, dt);
+    println!("    Threads used:             {}", n_threads);
     println!("    Sign changes detected:    {}", sign_changes);
     println!("    Riemann-von Mangoldt:     {:.2}", predicted);
     println!("    Difference:               {}", (sign_changes as f64 - predicted) as i64);
@@ -381,12 +435,12 @@ fn probe_wave_counting(max_t: f64) {
     println!("  {:>4}  {:>14}  {:>14}  {:>12}", "n", "detected γ_n", "known γ_n", "error");
     println!("  {:>4}  {:>14}  {:>14}  {:>12}", "──", "────────────", "──────────", "─────────");
     
-    let n_compare = detected_zeros.len().min(KNOWN_ZEROS.len());
+    let n_compare = all_zeros.len().min(KNOWN_ZEROS.len());
     for i in 0..n_compare {
-        let err = (detected_zeros[i] - KNOWN_ZEROS[i]).abs();
+        let err = (all_zeros[i] - KNOWN_ZEROS[i]).abs();
         let check = if err < 0.1 { "✓" } else { "✗" };
         println!("  {:>4}  {:>14.8}  {:>14.8}  {:>10.2e}  {}",
-                 i + 1, detected_zeros[i], KNOWN_ZEROS[i], err, check);
+                 i + 1, all_zeros[i], KNOWN_ZEROS[i], err, check);
     }
     println!();
 }
