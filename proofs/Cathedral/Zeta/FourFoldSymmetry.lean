@@ -434,6 +434,89 @@ theorem tower_fusion_is_klein_degeneration (s : ℂ)
   have h_half := TowerFusion.tower_fusion s h_lo h_hi h_zero
   exact (degeneration_iff_critical_line s).mpr h_half
 
+/-- **THE REVERSE BRIDGE**: Klein degeneration → nonvanishing for Re(s) > 1/2.
+
+    If every nontrivial zero is a degeneration point of V₄
+    (i.e., satisfies 1-s = conj(s)), then ζ(s) ≠ 0 for Re(s) > 1/2.
+
+    This wires the Middle Way back into the Cathedral's practical
+    currency: the positive half-plane nonvanishing that drives the
+    Nyman-Beurling convergence chain. -/
+theorem klein_degeneration_implies_nonvanishing
+    (h_klein : ∀ s : ℂ, 0 < s.re → s.re < 1 → riemannZeta s = 0 →
+      1 - s = conj s)
+    {s : ℂ} (hs : (1 : ℝ) / 2 < s.re) (_hs1 : s ≠ 1) :
+    riemannZeta s ≠ 0 := by
+  -- Klein degeneration is equivalent to RH via rh_iff_klein_degeneration
+  -- Extract the RH formulation
+  have h_rh := rh_iff_klein_degeneration.mpr h_klein
+  -- Now use the same proof as tower_fusion_implies_nonvanishing
+  intro hzero
+  by_cases h1 : 1 ≤ s.re
+  · -- Re(s) ≥ 1: Mathlib's de la Vallée-Poussin (PROVED)
+    exact absurd hzero (riemannZeta_ne_zero_of_one_le_re h1)
+  · -- 1/2 < Re(s) < 1: Klein → Re = 1/2, contradiction
+    push_neg at h1
+    linarith [h_rh s (by linarith : 0 < s.re) h1 hzero]
+
+/-- **THE FULL CIRCLE**: Klein degeneration ↔ positive half-plane nonvanishing.
+
+    This is the complete bridge between the Middle Way (Buddhist reformulation)
+    and the Glass Tower (Cathedral's algebraic machinery):
+
+    "Every zero lives on the Middle Way"
+    ↕
+    "The Glass Tower extends to Re(s) > 1/2"
+
+    Both are equivalent to RH. This theorem makes the equivalence explicit
+    at the level where the Cathedral's crown chain operates. -/
+theorem middle_way_iff_glass_extension :
+    (∀ s : ℂ, 0 < s.re → s.re < 1 → riemannZeta s = 0 → 1 - s = conj s)
+    ↔
+    (∀ s : ℂ, (1 : ℝ) / 2 < s.re → s ≠ 1 → riemannZeta s ≠ 0) := by
+  constructor
+  · -- Middle Way → Glass Extension
+    intro h_klein s hs hs1
+    exact klein_degeneration_implies_nonvanishing h_klein hs hs1
+  · -- Glass Extension → Middle Way
+    intro h_glass s h_lo h_hi h_zero
+    -- If ζ(s) = 0 and Re(s) ≠ 1/2, then either Re(s) > 1/2 or Re(s) < 1/2
+    by_contra h_not_degen
+    -- h_not_degen : ¬(1 - s = conj s), i.e., Re(s) ≠ 1/2
+    have h_ne_half : s.re ≠ 1/2 :=
+      fun h => h_not_degen ((degeneration_iff_critical_line s).mpr h)
+    rcases lt_or_gt_of_ne h_ne_half with h_lt | h_gt
+    · -- Re(s) < 1/2: use functional equation to get ζ(1-s) = 0
+      -- Since Re(s) > 0, s is not a non-positive integer
+      have h_not_int : ∀ n : ℕ, s ≠ -(↑n : ℂ) := by
+        intro n hn
+        have : s.re = -(↑n : ℝ) := by
+          have := congr_arg Complex.re hn; simpa using this
+        linarith
+      have h_ne1 : s ≠ 1 := by
+        intro heq; rw [heq] at h_hi; simp at h_hi
+      -- Functional equation: ζ(1-s) = prefactor * ζ(s)
+      have h_func := riemannZeta_one_sub h_not_int h_ne1
+      -- ζ(s) = 0 → ζ(1-s) = prefactor * 0 = 0
+      have h_1s_zero : riemannZeta (1 - s) = 0 := by
+        rw [h_func, h_zero, mul_zero]
+      -- But Re(1-s) = 1 - Re(s) > 1 - 1/2 = 1/2
+      have h_re_1s : (1 : ℝ) / 2 < (1 - s).re := by
+        simp [Complex.sub_re, Complex.one_re]; linarith
+      -- Also 1-s ≠ 1 (since s ≠ 0, and Re(s) > 0)
+      have h_1s_ne1 : (1 - s) ≠ 1 := by
+        intro heq
+        -- From heq: (1-s).re = 1, so s.re = 0, contradicting h_lo > 0
+        have : s.re = 0 := by
+          have := congr_arg Complex.re heq
+          simp [Complex.sub_re, Complex.one_re] at this
+          linarith
+        linarith
+      exact absurd h_1s_zero (h_glass (1 - s) h_re_1s h_1s_ne1)
+    · -- Re(s) > 1/2: directly contradicts h_glass
+      exact absurd h_zero (h_glass s h_gt (by
+        intro heq; rw [heq] at h_hi; simp at h_hi))
+
 -- ════════════════════════════════════════════════════════════════
 -- AUDIT
 -- ════════════════════════════════════════════════════════════════
