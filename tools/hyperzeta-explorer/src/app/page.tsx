@@ -115,6 +115,15 @@ const VIEW_MODES: ViewMode[] = [
     edgeColor: "#330066",
     hotkey: "7",
   },
+  {
+    id: 7,
+    name: "THREE TOWERS",
+    subtitle: "Glass · Kummer · Spectral — Four-fold Symmetry",
+    formula: "ρ ↦ {ρ, 1-ρ, ρ̄, 1-ρ̄} → Re(ρ) = ½",
+    coreColor: "#ffffff",
+    edgeColor: "#1a1a3a",
+    hotkey: "8",
+  },
 ];
 
 const LAYER_COLORS = [
@@ -896,6 +905,27 @@ function ExplorerCloud({
           const sat = 0.7 + energy * 0.3;
           const light = 0.4 + Math.abs(realPart) * 0.4;
           color.setHSL(hue, sat, light);
+        } else if (mode.id === 7) {
+          // THREE TOWERS: color by tower membership + degeneration
+          const towerId = layerArray[idx];       // 0=Glass, 1=Kummer, 2=Spectral
+          const degen = layerArray[idx + 1];      // |2σ-1|, 0 = on critical line
+          const brightness = Math.max(0.3, 1.0 - degen * 0.8);
+          
+          if (towerId < 0.5) {
+            // Glass Tower: cyan → deep blue
+            color.setRGB(0.1 * brightness, 0.8 * brightness, brightness);
+          } else if (towerId < 1.5) {
+            // Kummer Tower: warm orange → deep red
+            color.setRGB(brightness, 0.5 * brightness, 0.1 * brightness);
+          } else {
+            // Spectral Tower: white → gold (on critical line = brightest)
+            const goldness = 1.0 - Math.min(degen * 3, 1.0);
+            color.setRGB(
+              brightness,
+              brightness * (0.7 + goldness * 0.3),
+              brightness * (0.3 + goldness * 0.2)
+            );
+          }
         } else {
           // Origin / Teardrop / Spectrometer: gradient from core to edge
           const x = memoryArray[idx], y = memoryArray[idx + 1], z = memoryArray[idx + 2];

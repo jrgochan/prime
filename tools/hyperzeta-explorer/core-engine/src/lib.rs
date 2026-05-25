@@ -533,6 +533,108 @@ impl HyperEngine {
                     }
                 }
 
+                // ─────────────────────────────────────────────
+                // MODE 7: THREE TOWERS (Four-fold Symmetry)
+                // Shows the three towers of the Cathedral:
+                //   Glass Tower (Re > 1): Euler product, rightward
+                //   Kummer Tower (Re < 0): Bernoulli, leftward  
+                //   Spectral Tower (Im axis): Fourier harmonics, vertical
+                //
+                // Each particle maps to a quadruplet:
+                //   ρ, 1-ρ, ρ̄, 1-ρ̄
+                // Under RH these collapse to pairs (ρ = 1-ρ̄)
+                //
+                // Visualization: X = Re(s)-1/2 (distance from critical line)
+                //                Y = Im(s) (height)
+                //                Z = |ζ(s)| (zeta magnitude)
+                // Color: tower membership (Glass=cyan, Kummer=orange, Spectral=white)
+                // ─────────────────────────────────────────────
+                7 => {
+                    let t = 10.0 + lambda * 2.0;
+                    // Each particle samples a different σ (real part) near the critical strip
+                    let particle_phase = (i as f64) / (self.particle_count as f64);
+                    
+                    // Map particles across the three regions:
+                    //   25% in Glass Tower (Re > 1)
+                    //   25% in Kummer Tower (Re < 0)  
+                    //   50% on/near Spectral Tower (0 < Re < 1, centered at 1/2)
+                    let (sigma, tower_id) = if particle_phase < 0.25 {
+                        // Glass Tower: σ ∈ [1.0, 3.0]
+                        let frac = particle_phase / 0.25;
+                        (1.0 + frac * 2.0, 0u32)
+                    } else if particle_phase < 0.5 {
+                        // Kummer Tower: σ ∈ [-2.0, 0.0]
+                        let frac = (particle_phase - 0.25) / 0.25;
+                        (-2.0 + frac * 2.0, 1u32)
+                    } else {
+                        // Spectral Tower: σ ∈ [0.01, 0.99], concentrated near 1/2
+                        let frac = (particle_phase - 0.5) / 0.5;
+                        // Use Gaussian-like concentration around 1/2
+                        let u = frac * 2.0 - 1.0; // map to [-1, 1]
+                        let sigma = 0.5 + u * 0.4 * (1.0 - u * u).max(0.0).sqrt();
+                        (sigma, 2u32)
+                    };
+
+                    // Height varies with particle index + time
+                    let im_t = t + (i as f64 % 1000.0) * 0.1;
+                    
+                    // Compute partial ζ sum at s = σ + i·im_t
+                    let mut zeta_re = 0.0f64;
+                    let mut zeta_im = 0.0f64;
+                    for n in 1..=terms {
+                        let ln_n = (n as f64).ln();
+                        // n^{-s} = n^{-σ} · e^{-i·t·ln(n)}
+                        let n_neg_sigma = (n as f64).powf(-sigma);
+                        let angle = -im_t * ln_n;
+                        zeta_re += n_neg_sigma * angle.cos();
+                        zeta_im += n_neg_sigma * angle.sin();
+                    }
+                    
+                    let zeta_mag = (zeta_re * zeta_re + zeta_im * zeta_im).sqrt();
+
+                    // Four-fold symmetry: compute the "mirror" point 1-s
+                    let mirror_sigma = 1.0 - sigma;
+                    let mut mirror_re = 0.0f64;
+                    let mut mirror_im = 0.0f64;
+                    for n in 1..=terms {
+                        let ln_n = (n as f64).ln();
+                        let n_neg_ms = (n as f64).powf(-mirror_sigma);
+                        let angle = im_t * ln_n; // conjugate: +t instead of -t
+                        mirror_re += n_neg_ms * angle.cos();
+                        mirror_im += n_neg_ms * angle.sin();
+                    }
+                    let mirror_mag = (mirror_re * mirror_re + mirror_im * mirror_im).sqrt();
+
+                    // Degeneration measure: how close ρ is to 1-ρ̄
+                    // Under RH: σ = 1/2, so σ = 1-σ and the quadruplet degenerates
+                    let degen = (sigma - mirror_sigma).abs(); // = |2σ - 1|
+
+                    let idx = i * 3;
+                    let scale = 8.0;
+                    
+                    // X = distance from critical line (signed)
+                    // Y = imaginary height (mod to keep visual bounded)
+                    // Z = zeta magnitude (log-scaled)
+                    self.geometry_buffer[idx]     = ((sigma - 0.5) * scale * 5.0) as f32;
+                    self.geometry_buffer[idx + 1] = ((im_t % 80.0 - 40.0) * 0.5) as f32;
+                    self.geometry_buffer[idx + 2] = (zeta_mag.ln().max(-5.0).min(5.0) * scale) as f32;
+                    
+                    total_magnitude += zeta_mag * zeta_mag;
+
+                    // Layer buffer: tower_id, degeneration, mirror_mag
+                    self.layer_buffer[idx]     = tower_id as f32;
+                    self.layer_buffer[idx + 1] = degen as f32;
+                    self.layer_buffer[idx + 2] = mirror_mag as f32;
+
+                    // Accumulate spectral energies (prime harmonics at this height)
+                    for k in 0..31usize.min(127) {
+                        let p = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,
+                                 53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127][k];
+                        let e = (im_t * (p as f64).ln()).sin().powi(2);
+                        prime_e[k] += e;
+                    }
+                }
+
                 _ => {}
             }
         }
