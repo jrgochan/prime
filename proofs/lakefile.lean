@@ -550,4 +550,6 @@ lean_lib «Cathedral» where
     `Cathedral.F1.LambdaRing,
     -- 𝔽₁ Layer 2: 𝔽₁-Zeta = Riemann ζ(s) (Euler product bridge, May 26, 2026)
     `Cathedral.F1.F1Zeta,
+    -- 𝔽₁ Layer 3: Castelnuovo (Hodge Index → RH, The Wall, May 26, 2026)
+    `Cathedral.F1.Castelnuovo,
   ]
