@@ -80,6 +80,7 @@ import Mathlib.NumberTheory.LSeries.RiemannZeta
 import Mathlib.NumberTheory.LSeries.HurwitzZetaValues
 import Mathlib.NumberTheory.LSeries.Dirichlet
 import Cathedral.Zeta.TowerFusion
+import Cathedral.Physics.Bridges.CriticalLinePhase
 
 noncomputable section
 set_option linter.unnecessarySeqFocus false
@@ -276,11 +277,13 @@ to a 1D problem (find sign changes of a ℝ-valued function).
 This is proved in CriticalLinePhase.lean — the Cathedral's
 "1D Collapse" theorem. We reference it here structurally. -/
 
-/-- The Schwarz reflection principle for Λ₀:
+/-- The Schwarz reflection principle for Λ₀ (GRADUATED 🎓):
     Since the Mellin kernel is real-valued, Λ₀(conj s) = conj(Λ₀(s)).
-    This is proved from the integral representation. -/
-axiom schwarz_reflection_completedZeta :
-    ∀ s : ℂ, completedRiemannZeta₀ (conj s) = conj (completedRiemannZeta₀ s)
+    Proved in CriticalLinePhase.lean from the integral representation.
+    Graduated May 26, 2026 — axiom → theorem via CriticalLinePhase bridge. -/
+theorem schwarz_reflection_completedZeta (s : ℂ) :
+    completedRiemannZeta₀ (conj s) = conj (completedRiemannZeta₀ s) := by
+  exact Cathedral.Physics.CriticalLinePhase.schwarz_reflection_completedRiemannZeta₀ s
 
 /-- **THE 1D COLLAPSE**: Λ₀(½+it) is real for all t ∈ ℝ.
     On the critical line, the mirror and Schwarz reflection conspire:
