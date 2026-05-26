@@ -546,4 +546,6 @@ lean_lib «Cathedral» where
     `Cathedral.Arakelov.GramBridge,
     -- Arakelov Layer 4: Fusion — connecting Arakelov to Cathedral (May 25, 2026)
     `Cathedral.Arakelov.ArakelovFusion,
+    -- 𝔽₁ Layer 1: Λ-Rings (Borger's algebraic skeleton, May 26, 2026)
+    `Cathedral.F1.LambdaRing,
   ]
