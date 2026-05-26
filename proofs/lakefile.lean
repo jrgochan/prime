@@ -554,4 +554,6 @@ lean_lib «Cathedral» where
     `Cathedral.F1.Castelnuovo,
     -- 𝔽₁ Layer 3.1: Hodge Quadratic Form (degree-0 subspace, May 26, 2026)
     `Cathedral.F1.HodgeQuadForm,
+    -- 𝔽₁ Layer 3.2: Hodge Spectrum (eigenvalue growth, spectral gap, May 26, 2026)
+    `Cathedral.F1.HodgeSpectrum,
   ]

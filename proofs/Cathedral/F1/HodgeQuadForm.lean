@@ -17,16 +17,16 @@ The Gram matrix G = B₁ + L₁ decomposes into:
 - L₁ (the archimedean perturbation): **mostly negative**
 
 On the Möbius witness v:
-- vᵀB₁v ≈ 0.052  (positive, slowly decreasing)
+- vᵀB₁v ≈ 0.051  (positive, slowly decreasing)
 - vᵀL₁v ≈ -0.008 (negative! the perturbation HELPS)
-- vᵀGv ≈ 0.044   (well below 1)
+- vᵀGv ≈ 0.043   (well below 1, with 95.7% margin)
 
 The "degree" Σ v_k → 0 as N → ∞ (this IS the PNT).
 
 The Hodge Index in its literal Arakelov form (NSD on degree-0)
 does NOT hold — G is a Gram matrix, so it's PSD. But the key
-insight is: L₁ is overwhelmingly negative-definite (only ~5
-positive eigenvalues out of N, independent of N!).
+insight is: L₁ is overwhelmingly negative-definite (only ~ln(N)
+positive eigenvalues out of N, growing logarithmically!).
 
 ### What This File Formalizes
 
@@ -37,6 +37,7 @@ positive eigenvalues out of N, independent of N!).
 
 Status: Framework + 1 axiom (perturbation bound). 0 sorry.
 Created: May 26, 2026 — The Hodge Probe Session
+Updated: May 26, 2026 — Full HPDF Scale (N=55440, v2)
 -/
 
 noncomputable section
@@ -90,19 +91,27 @@ For ANY vector v:
 The B₁ part is PSD (Smith 1876). The key question is whether
 vᵀL₁v is bounded.
 
-### Numerical Evidence (The Hodge Probe)
+### Numerical Evidence (The Hodge Probe v2 — Full HPDF Scale)
 
-| N   | vᵀB₁v | vᵀL₁v  | vᵀGv  | deg(v) |
-|-----|--------|---------|-------|--------|
-| 30  | 0.054  | -0.003  | 0.051 | 0.295  |
-| 60  | 0.053  | -0.006  | 0.047 | 0.244  |
-| 120 | 0.052  | -0.007  | 0.045 | 0.209  |
-| 240 | 0.052  | -0.008  | 0.044 | 0.183  |
+| N      | vᵀB₁v | vᵀL₁v  | vᵀGv  | deg(v)  | #pos L₁ |
+|--------|--------|---------|-------|---------|----------|
+| 60     | 0.053  | -0.006  | 0.047 | 0.244   | 4        |
+| 120    | 0.052  | -0.007  | 0.045 | 0.209   | 5        |
+| 720    | 0.052  | -0.008  | 0.043 | 0.152   | 7        |
+| 2520   | 0.051  | -0.008  | 0.043 | 0.128   | 8        |
+| 5040   | 0.051  | -0.008  | 0.043 | 0.117   | 9        |
+| 10080  | 0.051  | -0.008  | 0.043 | 0.108   | 9        |
+| 55440  | 0.051  | -0.008  | 0.043 | 0.092   | —        |
 
 The perturbation is **negative** on the Möbius witness! It reduces
 the Gram form below the B₁ contribution. This is because the
 log terms in G create systematic cancellation against the gcd terms
-when weighted by the Möbius function. -/
+when weighted by the Möbius function.
+
+The margin is locked at **95.7%** from N=2520 onward.
+
+Critically, #pos L₁ eigenvalues grows as **ln(N)**, not constant!
+See HodgeSpectrum.lean for the detailed spectral analysis. -/
 
 -- ════════════════════════════════════════════════════════════════
 -- §3. THE PERTURBATION NEGATIVITY
@@ -110,18 +119,22 @@ when weighted by the Möbius function. -/
 
 /-! ### The L₁ Perturbation is Negative on the Möbius Witness
 
-The numerical probe reveals that vᵀL₁v < 0 for all tested N.
-This means the perturbation HELPS — it makes vᵀGv smaller, not larger.
+The full-scale probe (28 HPDF files, N=6 to 55440) confirms:
+vᵀL₁v < 0 for ALL tested N, converging to ≈ -0.008.
 
-Since vᵀB₁v ≈ 0.052 and vᵀL₁v < 0, we get vᵀGv < 0.052 < 1.
+The perturbation HELPS — it makes vᵀGv smaller, not larger.
 
-More precisely, the eigenvalue analysis shows:
-- L₁ restricted to degree-0 has ~5 positive eigenvalues (constant in N!)
-- L₁ restricted to degree-0 has ~(N-6) negative eigenvalues
-- The positive eigenvalues of L₁ are small compared to the bulk negative ones
+Since vᵀB₁v ≈ 0.051 and vᵀL₁v < 0, we get vᵀGv < 0.051 < 1.
 
-This means L₁ is "mostly negative" — a perturbation that predominantly
-cancels rather than amplifies. -/
+More precisely, the spectral analysis (HodgeSpectrum.lean) shows:
+- L₁ restricted to degree-0 has ~ln(N) positive eigenvalues
+- L₁ restricted to degree-0 has ~(N - 1 - ln(N)) negative eigenvalues
+- The Möbius witness projects predominantly onto the NEGATIVE eigenspace
+- λ_max(L₁⁺) ≈ 0.423·ln(N) (grows, but the witness avoids it)
+
+This means L₁ has an "overwhelmingly negative" Hodge signature:
+only O(ln N) directions out of O(N) are positive, and the Möbius
+function's cancellation properties keep it orthogonal to those. -/
 
 /-- **THE B₁ BOUND**: The B₁ skeleton contribution to the Gram form
     is bounded above by 1/12.
@@ -178,7 +191,11 @@ If we could prove:
   (b) vᵀL₁v ≤ ε                      (perturbation absorbed by margin)
 
 then vᵀGv ≤ 1 follows. The numerical evidence suggests ε ≈ 0.95,
-giving enormous headroom. -/
+giving enormous headroom.
+
+The spectral analysis (HodgeSpectrum.lean) provides the mechanism:
+the ln(N) positive eigenvalues form a thin "ample cone" that the
+Möbius witness avoids due to its cancellation structure. -/
 
 -- ════════════════════════════════════════════════════════════════
 -- §5. THE MERTENS CONNECTION
@@ -238,10 +255,12 @@ axiom mertens_degree_vanishing :
 
 The Hodge probe revealed:
 - G is PSD (Gram matrix!) — the naive Hodge Index fails ❌
-- L₁ has only ~5 positive eigenvalues out of N (constant in N!) ✅
-- L₁ is negative on the Möbius witness at all tested N ✅
-- vᵀGv ≈ 0.044 ≪ 1 ✅
-- deg(v) → 0 as N → ∞ ✅
+- L₁ has ~ln(N) positive eigenvalues (logarithmic growth!) ✅
+- L₁ is negative on the Möbius witness at ALL tested N (6–55440) ✅
+- vᵀGv ≈ 0.043 ≪ 1, margin locked at 95.7% ✅
+- deg(v) → 0 as N → ∞ (0.092 at N=55440) ✅
+
+See also: HodgeSpectrum.lean for the full spectral analysis.
 
 ### The Refined Architecture
 

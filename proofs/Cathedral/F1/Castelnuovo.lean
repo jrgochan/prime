@@ -130,10 +130,13 @@ Arakelov-geometric clothing. -/
     ### Numerical Evidence
 
     All computed values of vᵀGv are well below 1:
-      N=2520:  vᵀGv ≈ 0.6446
-      N=5040:  vᵀGv ≈ 0.6705
-      N=10080: vᵀGv ≈ 0.6928
-      N=55440: vᵀGv ≈ 0.7367 -/
+      N=2520:  vᵀGv ≈ 0.0429, margin = 95.7%
+      N=5040:  vᵀGv ≈ 0.0428, margin = 95.7%
+      N=10080: vᵀGv ≈ 0.0428, margin = 95.7%
+      N=55440: vᵀGv ≈ 0.0429, margin = 95.7%
+
+    The margin has been locked at 95.7% since N=2520 across all
+    28 HPDF files tested (N=6 to N=55440). -/
 axiom hodge_index_spec_Z :
     ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
       dotProduct (logCutoffWitness N)
@@ -209,11 +212,15 @@ where:
 The B₁ skeleton satisfies Castelnuovo-like bounds.
 If we could show |vᵀL₁v| ≤ 1 - vᵀB₁v, we'd be done.
 
-Numerically, vᵀB₁v ≈ 0.97 and vᵀL₁v ≈ -0.27 at N=55440,
+Numerically, vᵀB₁v ≈ 0.051 and vᵀL₁v ≈ -0.008 at N=55440,
 so the perturbation actually HELPS (it's negative!).
 
 The perturbation is negative because the Möbius function
 causes systematic cancellation in the log terms.
+
+The spectral analysis (HodgeSpectrum.lean) reveals WHY:
+L₁ has only ~ln(N) positive eigenvalues, and the Möbius witness
+is nearly orthogonal to all of them.
 
 Three graduation paths for the Hodge Index:
 
