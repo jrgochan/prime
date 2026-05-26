@@ -456,7 +456,7 @@ theorem klein_degeneration_implies_nonvanishing
   · -- Re(s) ≥ 1: Mathlib's de la Vallée-Poussin (PROVED)
     exact absurd hzero (riemannZeta_ne_zero_of_one_le_re h1)
   · -- 1/2 < Re(s) < 1: Klein → Re = 1/2, contradiction
-    push_neg at h1
+    push Not at h1
     linarith [h_rh s (by linarith : 0 < s.re) h1 hzero]
 
 /-- **THE FULL CIRCLE**: Klein degeneration ↔ positive half-plane nonvanishing.
