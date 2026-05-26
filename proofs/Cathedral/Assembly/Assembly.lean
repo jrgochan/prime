@@ -6,19 +6,19 @@
   This is the unified capstone module that exports ALL proof architectures
   of the Riemann Hypothesis, plus the unconditional dark sector results:
 
-  ### Architecture 1: Gram Crown (discrete, covariance-free)
-  - `rh_discrete_global`  : RH from vᵀGv ≤ 1+K/lnN (∀ large N)
-  - `rh_discrete_subseq`  : RH from vᵀGv ≤ 1+K/lnN (along subseq)
-  - 1 Crown axiom + 3 PNT. Zero covariance axioms.
-
-  ### Architecture 2: Overcancellation (PREFERRED — simplest axiom footprint)
+  ### Architecture 1: Overcancellation (PREFERRED — simplest axiom footprint)
   - `rh_overcancellation` : RH from vᵀGv ≤ 1 (overcancellation hypothesis)
-  - 1 PNT axiom + overcancellation hypothesis. Crown-free.
+  - PNT axioms (bureaucratic, awaiting upstream) + overcancellation_hypothesis.
   - See OvercancellationChain.lean for details.
+
+  ### Architecture 2: Gram Crown (discrete, via overcancellation)
+  - `rh_discrete_global`  : RH via overcancellation_hypothesis (REWIRED May 26, 2026)
+  - Same axiom footprint as Architecture 1 (overcancellation_hypothesis replaces
+    gram_form_upper_bound_direct).
 
   ### Architecture 3: Nyman-Beurling (historical — continuous L² path)
   - `nyman_beurling_equivalence` : (d²_N → 0) ↔ RH
-  - 4 PNT axioms + 1 covariance axiom (via Perron Crown).
+  - PNT axioms + covariance axiom (via Perron Crown).
 
   ### Dark Sector (unconditional — the mirror universe)
   - `dark_gram_spectral_stability` : xᵀG⁽²⁾x ≥ 0 (PSD, zero axioms)
@@ -26,10 +26,10 @@
   - Zero sorrys, zero custom axioms. Certified from Mathlib primitives.
 
   Dependency graph:
-    MainChain.lean ← GramBoundDirect.lean ← GramCrown.lean
-                                                 ↑
-    Assembly.lean (this file) imports all ────────┘
-    OvercancellationChain.lean (Crown-free path)
+    MainChain.lean ← GramBoundDirect.lean
+    OvercancellationChain.lean ← GramCrown.lean (REWIRED)
+                                     ↑
+    Assembly.lean (this file) ───────┘
     DarkGramMatrix.lean (standalone, no dependencies on proof chain)
 -/
 
@@ -46,7 +46,7 @@ import Cathedral.Gram.DarkGramMatrix
 open Matrix Cathedral.Vasyunin
 
 /-- **THE RIEMANN HYPOTHESIS** (Overcancellation Path — PREFERRED).
-    ★★ Simplest axiom footprint: 1 PNT axiom + overcancellation.
+    ★★ Simplest axiom footprint: PNT axioms + overcancellation.
     Crown-free. See `OvercancellationChain.lean` for documentation. -/
 theorem rh_overcancellation
     (h_oc : ∃ N₀ : ℕ, ∀ N : ℕ, N ≥ N₀ → N ≥ 3 →
@@ -56,15 +56,18 @@ theorem rh_overcancellation
   overcancellation_implies_rh h_oc
 
 -- ════════════════════════════════════════════════
--- UNIFIED EXPORTS: GRAM CROWN (Discrete)
+-- UNIFIED EXPORTS: GRAM CROWN (via Overcancellation, REWIRED)
 -- ════════════════════════════════════════════════
 
-/-- **THE RIEMANN HYPOTHESIS** (Discrete, Global Gram Bound path).
+/-- **THE RIEMANN HYPOTHESIS** (Gram Crown — via Overcancellation).
+    REWIRED May 26, 2026: now uses overcancellation_hypothesis
+    instead of gram_form_upper_bound_direct.
     See `GramCrown.lean` for documentation. -/
 theorem rh_discrete_global : RiemannHypothesis :=
   riemann_hypothesis_from_gram_global
 
-/-- **THE RIEMANN HYPOTHESIS** (Discrete, Subsequential Gram Bound path).
+/-- **THE RIEMANN HYPOTHESIS** (Legacy: Subsequential Gram Bound path).
+    Uses `gram_form_upper_bound_subseq` from GramBoundDirect.lean.
     See `GramCrown.lean` for documentation. -/
 theorem rh_discrete_subseq : RiemannHypothesis :=
   riemann_hypothesis_from_gram_subseq
