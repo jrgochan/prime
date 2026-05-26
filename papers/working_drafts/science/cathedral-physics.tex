@@ -1632,6 +1632,15 @@ assertion that this flow is complete.
 \input{sections/13e-arithmetic-standard-model}
 
 % ================================================================
+% NEW SECTIONS (v20--v21, May 2026)
+% ================================================================
+
+\input{sections/14-riemann-sphere}
+
+\input{sections/15-arakelov-bridge}
+
+
+% ================================================================
 \section{Summary: The Physics--Mathematics Dictionary}
 \label{sec:summary}
 % ================================================================
@@ -1731,189 +1740,11 @@ concept, and this correspondence is not metaphorical but structural.}
 \end{table}
 
 % ================================================================
-\section{Axiom Audit: The One-Pillar Cathedral (v17, May 10, 2026)}
-\label{sec:axiom-audit}
+% Axiom Audit (externalized to sections/15-axiom-audit.tex, v21)
 % ================================================================
 
-The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
-\textbf{one} literature axiom, plus the three
-Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
-\texttt{Quot.sound}).
+\input{sections/15-axiom-audit}
 
-\begin{remark}[The Dual Crown Architecture (v17)]
-\label{rem:dual-crown}
-The Cathedral possesses a \textbf{Dual Crown} architecture:
-\begin{itemize}
-  \item \textbf{The Analytic Crown:} The primary crown path
-    (\lean{nyman\_beurling\_equivalence}) relies on 1 literature axiom
-    (\lean{baez\_duarte\_forward}) for the continuous mathematical ideal.
-    This establishes the \emph{biconditional} RH $\Leftrightarrow d_N^2 \to 0$.
-  \item \textbf{The Cybernetic Crown (Oracle Bridge):}
-    The Oracle path (\lean{rh\_from\_oracle}) relies on 0 literature axioms,
-    using 1 trusted computation axiom (\lean{oracle\_certificates}) for the
-    discrete physical realization.
-    This proves RH \emph{directly} from certified GPU measurement.
-\end{itemize}
-The Analytic Crown says ``RH is exactly as hard as one classical result.''
-The Cybernetic Crown says ``RH is as hard as verifying a finite computation.''
-Both paths share the same zero-axiom converse via the Rank-1 Mellin identity.
-\end{remark}
-
-The axiom is a standard result of analytic number theory with a precise
-physical interpretation:
-
-\begin{center}
-\small
-\begin{tabular}{@{}cllll@{}}
-\toprule
-\textbf{\#} & \textbf{Axiom} & \textbf{Physics} & \textbf{Module} & \textbf{Status} \\
-\midrule
-1 & \texttt{baez\_duarte\_forward} & Unitarity constraint & \lean{MainChain.lean} & literature \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-\begin{remark}[Physical meaning of the single gate]
-The sole axiom \texttt{baez\_duarte\_forward} states that under RH,
-the BD basis can approximate~$1$ in $L^2(0,1)$:
-\[
-  \RH \implies \forall\,\varepsilon > 0,\; \exists\, N_0,\;
-  \forall\, N \geq N_0,\; \exists\, v :\;
-  \int_0^1 (1 - f_{N,v})^2\,dx < \varepsilon.
-\]
-This is the \emph{unitarity constraint} of the prime number quantum
-field theory: the statement that vacuum screening is complete. In quantum
-field theory, unitarity (probability conservation) is the one axiom that
-cannot be derived from within the theory---it must be imposed from
-outside. The Cathedral mirrors this precisely: everything \emph{except}
-the forward direction is proved internally with zero axioms.
-
-The forward direction requires complex-analytic machinery
-(the Parseval/Mellin identity on the critical line $\re s = 1/2$)
-that involves the full strength of the zeta function's analytic
-continuation. Real-variable Abel summation alone cannot capture the
-phase interference of the fractional-part sawtooth waves---this is
-the \emph{Mertens Wall}, documented in \lean{Archive/TheMertensWall/}.
-\end{remark}
-
-\begin{remark}[Alternative proof paths]
-Five alternative axiom footprints are preserved:
-\begin{center}
-\small
-\begin{tabular}{@{}cllll@{}}
-\toprule
-\textbf{\#} & \textbf{Axiom} & \textbf{Physics} & \textbf{Module} & \textbf{Difficulty} \\
-\midrule
-1 & \texttt{covariance\_bound} & Virial theorem & \lean{GramFormProof.lean} & $\star\star\star$ \\
-2 & \texttt{pnt\_mu\_log\_div\_k} & Magnetic susceptibility & \lean{PNT/AbelMean.lean} & $\star\star$ \\
-3 & \texttt{partial\_integral} & Ergodic hypothesis & \lean{ConvergenceAxioms.lean} & $\star\star\star\star$ \\
-4 & \texttt{rh\_zeta\_lower\_bound} & Weyl law (spectral density) & \lean{Zeta/Hadamard.lean} & $\star\star\star\star\star$ \\
-5 & \texttt{oracle\_certificates} & Lattice QCD certification & \lean{OracleCertificates.lean} & $\star$ (trusted) \\
-\bottomrule
-\end{tabular}
-\end{center}
-Axioms 1--4 appear on the Perron Crown (spatial gauge) and Mellin Crown
-(frequency gauge) paths. They are \textbf{not} on the primary crown path,
-which uses only \texttt{baez\_duarte\_forward}. Each is a standard result of
-20th-century analytic number theory; they are axioms only because Mathlib
-lacks the prerequisite infrastructure. The gap is a \emph{software engineering}
-problem, not a mathematical one.
-
-Axiom~5 (\texttt{oracle\_certificates}) is the Oracle Bridge (v17):
-DD-precision GPU measurements of $v^T G v < 1$ at 8 highly composite
-numbers ($N \in [6, 55440]$), imported as a trusted Lean axiom.
-The Oracle path bypasses \texttt{baez\_duarte\_forward} entirely,
-proving \lean{rh\_from\_oracle} via the chain:
-oracle certificates $\to$ Gram subsequence $\to$ monotonicity $\to$
-NB converse $\to$ RH (\S\ref{sec:oracle}).
-\end{remark}
-
-\subsection{The Dual-Path Architecture as Gauge Fixing}
-
-The Cathedral supports two independent proof paths for the forward
-direction (RH $\Rightarrow d_N^2 \to 0$), each corresponding to a
-different \emph{gauge choice}:
-
-\begin{itemize}
-  \item \textbf{The Spatial Path} (\lean{nyman\_beurling\_equivalence\_spatial},
-    the primary export): Works in position coordinates. Uses 4 elementary
-    axioms, each mapping to a single classical theorem. Zero \texttt{sorryAx}.
-    This is the \emph{Lorenz gauge}: more variables, maximal transparency.
-
-  \item \textbf{The Mellin Path} (\lean{nyman\_beurling\_equivalence\_mellin}):
-    Works in frequency coordinates on the critical line $\re s = 1/2$.
-    Uses 2 composite axioms (the Mellin variance and the Hadamard bound).
-    Zero \texttt{sorry}. This is the \emph{unitary gauge}: fewer
-    variables, but each axiom encodes multiple classical results.
-\end{itemize}
-
-The \lean{MellinPerronBridge.lean} theorem proves their equivalence
-via the Parseval isometry---the formal \emph{gauge transformation}---with
-zero axioms.
-
-Physically, this is the insight that the Riemann Hypothesis admits both
-a position-space description (the Perron contour integral, Mertens bound,
-discrete covariance) and a momentum-space description (the Mellin
-transform, critical-line spectral variance). The Bridge proves that
-the vacuum energy $d_N^2$ is a gauge-invariant observable.
-
-\subsection{The Conservation of Difficulty (v12)}
-
-Exploration~15 (April~27, 2026) demonstrated a fundamental principle:
-the ``difficulty'' of proving $d_N^2 \to 0$ is a
-\emph{topological invariant} of the proof. Every attempt to bypass
-the axioms by changing domains runs into the same obstruction---the
-number-theoretic analogue of the Gauss--Bonnet theorem:
-
-\begin{itemize}
-  \item \textbf{Spatial domain}: Axioms 1 + 3 (Gram matrix + Vasyunin convergence)
-  \item \textbf{Frequency domain}: Axiom 4 (Parseval tails + mollifier cancellation)
-  \item \textbf{Coefficient domain}: Ramanujan cross-terms (off-diagonal divergence)
-\end{itemize}
-
-The obstruction is the Balazard--Saias--Yor integral: the Parseval Bridge
-maps the BD distance to a critical-line integral involving $\zeta(s) \cdot D_N(s)$,
-and the B\'aez-Duarte polynomial $D_N$ is constructed as a mollifier of
-$1/\zeta$. Cauchy--Schwarz decouples their destructive interference,
-preventing any single-domain proof from reducing below the axiom floor.
-
-\subsection{Graduated Gates (v7--v12)}
-
-The following axioms were on the crown path but have been \textbf{graduated}
-to theorems or \textbf{bypassed} through architecture changes:
-
-\begin{center}
-\small
-\begin{tabular}{@{}llll@{}}
-\toprule
-\textbf{Axiom} & \textbf{Version} & \textbf{Method} & \textbf{Physics} \\
-\midrule
-\texttt{rh\_implies\_mertens\_bound} & v7 & Perron chain (16 files) & RH $\to$ critical magnetization \\
-\texttt{pnt\_mu\_div\_k} & v8 & Mathlib PNT & Zero magnetization ($S_1 \to 0$) \\
-\texttt{pnt\_mu\_log\_sq\_div\_k} & v9 & Abel Bypass & Heat capacity ($c_v \to -2\gamma$) \\
-\texttt{gram\_form\_upper\_bound\_34} & v10 & Variance decomposition & Virial bound \\
-\texttt{critical\_line\_mellin\_variance} & v12 & Perron Bridge & Spectral weight (now theorem) \\
-\texttt{crown\_graduation\_target} & v12 & Direct application & Crown assembly (now theorem) \\
-\texttt{simp warning (HilbertInequality)} & v12 & Tactic cleanup & MV bound (now clean) \\
-\texttt{gram\_form\_upper\_bound\_34} & v16 & Double-sum expansion (E26) & Virial bound (graduated) \\
-\texttt{2-axiom $\to$ 1-axiom consolidation} & v16 & One-Pillar architecture (E27) & Unitarity axiom \\
-\texttt{baez\_duarte\_forward} bypass & v17 & Oracle Bridge (E32) & Lattice QCD (\S\ref{sec:oracle}) \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-The v7--v10 graduations \emph{proved} axioms as theorems. The v12 entries
-represent the Crown Graduation (Exploration~17, April~28, 2026):
-\texttt{critical\_line\_mellin\_variance} was a crown axiom
-in the Mellin path (v11) but is now a \emph{theorem} proved via the
-Mellin--Perron Bridge from the Perron Crown's Mertens bound.
-The \texttt{crown\_graduation\_target} sorry in \lean{MellinResidualExpansion.lean}
-was closed by recognizing that \lean{critical\_line\_mellin\_variance\_proved}
-already provided the exact type signature. The HilbertInequality simp warning
-was resolved by removing an unused \texttt{Complex.ofReal\_re} argument.
-The entire forward chain is now a continuous, machine-checked path with
-zero sorry on the crown path. Exploratory paths contain $\sim$105
-quarantined \texttt{sorry} placeholders that do not affect the crown theorem.
 
 % ================================================================
 % Oracle Bridge Section (content in sections/oracle-bridge.tex)

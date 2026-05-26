@@ -1,0 +1,149 @@
+% ================================================================
+\section{The Arakelov Bridge: Algebraic Geometry Meets Spectral Theory}
+\label{sec:arakelov}
+% ================================================================
+
+The Arakelov subsystem (\lean{Arakelov/*.lean} + \lean{Zeta/ArakelovBridge.lean},
+5~files, $\sim$1{,}660~lines, 0~sorry, 1~axiom) establishes an algebraic-geometric
+interpretation of the Gram matrix, connecting the Nyman-Beurling spectral
+approach to Arakelov intersection theory on~$\Spec(\ZZ)$.
+
+The central insight: the Gram matrix $G_N$ with entries
+$G(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$ decomposes as
+\begin{equation}
+  G(j,k) = \underbrace{\frac{\gcd(j,k)^2}{12jk}}_{\text{finite part } G_{\mathrm{fin}}}
+  + \underbrace{\text{perturbation}}_{\text{archimedean part } G_{\mathrm{arch}}}
+  \label{eq:arakelov-decomp}
+\end{equation}
+where the finite part is determined by the prime factorizations
+of~$j$ and~$k$ (through the GCD), and the archimedean part captures
+the analytic correction from higher Bernoulli terms.
+
+\subsection{The Four Layers}
+
+The Arakelov bridge is built in four layers, each with zero sorry:
+
+\begin{center}
+\small
+\begin{tabular}{@{}cllrl@{}}
+\toprule
+\textbf{Layer} & \textbf{File} & \textbf{Content} & \textbf{Lines} & \textbf{Key Result} \\
+\midrule
+1 & \lean{WeilDivisor.lean}       & Divisors on $\Spec(\ZZ)$       & 219 & $\log\deg(D_k) = \log k$ \\
+2 & \lean{ArithmeticDivisor.lean} & Arakelov metric                & 336 & $\deg(\hat{D}_1) = 0$ \\
+3 & \lean{GramBridge.lean}        & Tropical $\to$ Gram connection & 366 & $\text{b1Entry} = \gcd^2/(12jk)$ \\
+4 & \lean{ArakelovFusion.lean}    & Fusion theorem                 & 370 & $G = G_{\mathrm{fin}} + G_{\mathrm{arch}}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection*{Layer 1: Weil Divisors (\lean{WeilDivisor.lean})}
+
+A Weil divisor on $\Spec(\ZZ)$ is a formal sum
+$D = \sum_p v_p(D) \cdot [p]$ of prime ideals with integer multiplicities.
+The \emph{log-degree} is $\log\deg(D) = \sum_p v_p(D) \cdot \log p$.
+For the factorization divisor of an integer~$k$:
+$\log\deg(D_k) = \log k$
+(\lean{logDegree\_factorizationDivisor}).
+
+\subsubsection*{Layer 2: Arithmetic Divisors (\lean{ArithmeticDivisor.lean})}
+
+An arithmetic divisor $\hat{D} = (D, g)$ pairs a Weil divisor with a
+Green's function $g \in \RR$ (the archimedean contribution). The
+\emph{arithmetic degree} is $\deg(\hat{D}) = \log\deg(D) + g$.
+For the Nyman-Beurling divisor encoding with $g_k = -\log k$:
+\[
+  \deg(\hat{D}_k) = \log k + (-\log k) = 0
+\]
+(\lean{bdDivisor\_one\_degree\_zero}). This is the
+\emph{product formula} $|k|_{\mathrm{fin}} \cdot |k|_\infty = 1$
+expressed as arithmetic degree zero.
+
+\begin{correspondence}[Hodge Index Theorem]
+In Arakelov geometry, the Hodge Index Theorem states that the
+arithmetic intersection pairing is negative definite on divisors
+of degree zero modulo numerical equivalence. Our product formula
+shows the BD divisors have degree zero, placing them in the regime
+where Hodge Index applies. The Gram matrix's positive-definiteness
+failure (i.e., $\lambda_{\min}(G_N) \to 0$) is precisely the
+Hodge Index Theorem manifesting in the spectral domain.
+\end{correspondence}
+
+\subsubsection*{Layer 3: The Gram Bridge (\lean{GramBridge.lean})}
+
+The tropical intersection (\lean{gcdIntersection}) computes
+\[
+  \langle D_j, D_k \rangle_{\mathrm{trop}} = \sum_p \min\bigl(v_p(j), v_p(k)\bigr) \cdot \log p
+  = \log\gcd(j,k)
+\]
+The B$_1$ Arakelov entry is then
+$\text{b1ArakelovEntry}(j,k) = \gcd(j,k)^2 / (12jk)$
+(\lean{b1ArakelovEntry}), which equals the exponential of
+twice the tropical intersection:
+\[
+  G_{\mathrm{fin}}(j,k) = \frac{e^{2\langle D_j, D_k \rangle_{\mathrm{trop}}}}{12 \cdot j \cdot k}
+\]
+(\lean{b1\_from\_tropical}).
+
+\subsubsection*{Layer 4: The Fusion (\lean{ArakelovFusion.lean})}
+
+The Fusion theorem (\lean{arakelov\_eq\_skeleton}) proves that the
+Arakelov road (\lean{GramBridge}) and the Cathedral road
+(\lean{BernoulliSkeleton}) independently computed the \emph{same}
+function: $\text{b1ArakelovEntry} = \text{b1Entry}$ (definitional equality).
+This enables:
+\begin{enumerate}
+  \item \textbf{PSD Transfer} (\lean{arakelov\_pairing\_psd}):
+    Smith's 1876 theorem (GCD matrices are PSD) transfers to the
+    Arakelov pairing via the definitional bridge. Effective arithmetic
+    divisors have non-negative self-intersection.
+
+  \item \textbf{Gram Decomposition} (\lean{gram\_arakelov\_decomposition}):
+    $G(j,k) = G_{\mathrm{fin}}(j,k) + G_{\mathrm{arch}}(j,k)$,
+    with concrete witnesses for both parts.
+
+  \item \textbf{GCD Structure} (\lean{G\_fin\_gcd\_structure}):
+    the finite part depends only on $\gcd(j,k)$ and the product~$jk$.
+    On the diagonal, $G_{\mathrm{fin}}(j,j) = 1/12$ for all~$j$
+    (\lean{G\_fin\_diagonal}).
+\end{enumerate}
+
+\subsection{The Tropical-Spectral Pipeline}
+
+The Arakelov bridge establishes a complete pipeline:
+\[
+  \text{Tropical geometry}
+  \xrightarrow{\text{GCD}}
+  \text{Arakelov intersection}
+  \xrightarrow{\exp}
+  \text{Gram matrix}
+  \xrightarrow{\lambda_{\min}}
+  \text{RH}
+\]
+
+\begin{principle}[Algebraic Geometry Dictates Spectral Decay]
+The rate at which $\lambda_{\min}(G_N) \to 0$ is controlled by
+the Arakelov intersection pairing of the BD divisors. The finite
+part $G_{\mathrm{fin}}$ (GCD structure) provides the skeleton---a
+PSD matrix that Smith's 1876 theorem protects from below. The
+archimedean part $G_{\mathrm{arch}}$ (analytic correction) provides
+the refinement that drives the eigenvalue toward zero at the rate
+demanded by the Riemann Hypothesis.
+\end{principle}
+
+\subsection{Remaining Gap}
+
+The sole remaining axiom on the Arakelov road is
+\lean{hodge\_index\_eigenvalue\_bound} (in \lean{ArakelovBridge.lean}),
+asserting $\lambda_{\min}(G_N) \leq C/N^{1+\varepsilon}$. Graduating
+this axiom requires:
+\begin{enumerate}
+  \item The M\"obius annihilation conjecture (\lean{BernoulliSkeleton.lean}):
+    that $\sum_{k \leq N} \mu(k) \cdot G_{\mathrm{arch}}(j,k) \to 0$
+    sufficiently fast.
+  \item PNT-level estimates on partial sums of
+    $\sum \mu(k) f(k) / k$.
+\end{enumerate}
+These are deep number-theoretic inputs, not formalization gaps.
+The Arakelov bridge identifies precisely \emph{where} the
+mathematics must advance and \emph{why}.

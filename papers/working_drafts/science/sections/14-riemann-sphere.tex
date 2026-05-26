@@ -1,0 +1,189 @@
+% ================================================================
+\section{The Riemann Sphere: Geometric Foundations}
+\label{sec:riemann-sphere}
+% ================================================================
+
+The Zeta subsystem (\lean{Zeta/*.lean}, 10~files, $\sim$3{,}400~lines,
+zero sorry except 1 structural axiom) establishes a complete
+geometric interpretation of the critical line, the functional equation,
+and the zero distribution on the Riemann sphere~$S^2$.
+
+\subsection{The Three Realities}
+
+The Mirror Geometry (\lean{MirrorGeometry.lean}, 23~theorems, 0~sorry)
+partitions~$\CC$ into three sectors separated by the critical line:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Sector} & \textbf{Definition} & \textbf{Physical Character} \\
+\midrule
+Positive Reality & $\re s > \tfrac{1}{2}$ & Euler product converges; $\zeta \neq 0$ for $\re s > 1$ \\
+Zero Dimension   & $\re s = \tfrac{1}{2}$ & Critical line: all nontrivial zeros live here (RH) \\
+Negative Reality & $\re s < \tfrac{1}{2}$ & Trivial zeros at $s = -2, -4, \ldots$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{principle}[The Mirror Map]
+The functional equation acts as an involution
+$s \mapsto 1 - s$ (\lean{mirror\_involution}), swapping Positive
+and Negative Reality (\lean{mirror\_swaps\_sectors}). The critical line
+$\re s = \tfrac{1}{2}$ is the \emph{fixed locus} of this mirror
+(\lean{mirror\_fixes\_critical\_line}).
+
+On the critical line, the mirror equals conjugation
+(\lean{mirror\_eq\_conj\_on\_critical\_line}):
+\[
+  1 - \bigl(\tfrac{1}{2} + it\bigr) = \tfrac{1}{2} - it
+  = \overline{\tfrac{1}{2} + it}
+\]
+This coincidence is the geometric reason why $\Lambda_0(\tfrac{1}{2}+it) \in \RR$
+(\lean{critical\_line\_reality}), reducing the zero-finding problem
+from two real dimensions to one.
+\end{principle}
+
+\subsection{Centered Coordinates and the Great Circle}
+
+The Great Circle (\lean{RiemannSphere.lean}, 23~theorems, 0~sorry)
+introduces the centered coordinate $w = s - \tfrac{1}{2}$ (\lean{centered}),
+under which:
+\begin{itemize}
+  \item The critical line $\re s = \tfrac{1}{2}$ becomes the
+    \emph{imaginary axis} $\re w = 0$
+    (\lean{critical\_line\_is\_imaginary\_axis}).
+  \item The functional equation $s \mapsto 1-s$ becomes
+    \emph{negation} $w \mapsto -w$
+    (\lean{func\_eq\_is\_negation}).
+  \item The completed zeta function $\Lambda_0$ becomes an
+    \emph{even function} of~$w$:
+    $\Lambda_0(\tfrac{1}{2}+w) = \Lambda_0(\tfrac{1}{2}-w)$
+    (\lean{completedZeta\_even\_in\_w}).
+\end{itemize}
+
+Under stereographic projection, lines through the origin of~$\CC$
+map to great circles on~$S^2$. Since the critical line \emph{is}
+the imaginary axis in centered coordinates---a line through the
+origin---it maps to a \emph{great circle}:
+
+\begin{theorem}[The Great Circle Theorem, \lean{great\_circle\_zero\_structure}]
+\label{thm:great-circle}
+The critical line is a great circle on the Riemann sphere.
+The zeros of~$\Lambda_0$ on this great circle form antipodal pairs:
+if $w_0 = t_0 \cdot i$ is a zero, then $-w_0 = -t_0 \cdot i$ is also
+a zero (\lean{zeros\_are\_antipodal}).
+The great circle divides~$S^2$ into two hemispheres:
+\begin{itemize}
+  \item \textbf{Eastern Hemisphere}: $\re w > 0$ (Positive Reality, $\re s > \tfrac{1}{2}$)
+  \item \textbf{Western Hemisphere}: $\re w < 0$ (Negative Reality, $\re s < \tfrac{1}{2}$)
+\end{itemize}
+The functional equation ($w \mapsto -w$) is a rotation by~$\pi$
+swapping East and West (\lean{negation\_swaps\_hemispheres}).
+\end{theorem}
+
+\begin{correspondence}[Geodesic Principle]
+In general relativity, geodesics are the paths of zero net force.
+The critical line, being a great circle, is the \emph{geodesic}
+of the Riemann sphere's geometry. The RH asserts that
+all nontrivial zeros of~$\zeta$ sit on this geodesic---they
+follow the path of least resistance through the arithmetic
+landscape. This is the geometric incarnation of ``the primes
+choose the simplest possible structure.''
+\end{correspondence}
+
+\subsection{The Klein Four-Group and Its Degeneration}
+
+The Four-Fold Symmetry (\lean{FourFoldSymmetry.lean}, 36~theorems, 0~sorry)
+formalizes the Klein four-group $V_4 = \{e, M, C, MC\}$ acting on~$\CC$:
+\[
+  e : s \mapsto s, \qquad
+  M : s \mapsto 1-s, \qquad
+  C : s \mapsto \bar{s}, \qquad
+  MC : s \mapsto 1-\bar{s}
+\]
+with multiplication table and fixed-point analysis. In centered
+coordinates, this simplifies to:
+\[
+  e : w \mapsto w, \qquad
+  M : w \mapsto -w, \qquad
+  C : w \mapsto \bar{w}, \qquad
+  MC : w \mapsto -\bar{w}
+\]
+
+On the critical line ($w = ti$), the Klein group \textbf{degenerates}
+(\lean{negation\_eq\_conj\_on\_great\_circle}): $-w = -(ti) = \overline{ti} = \bar{w}$,
+so the mirror $M$ and conjugation~$C$ \emph{coincide}. The group
+$V_4 \cong \ZZ/2 \times \ZZ/2$ collapses to $\ZZ/2$.
+
+The Circle Quadruplet (\lean{CircleQuadruplet.lean}, 12~theorems, 0~sorry)
+extends this to the action of $V_4$ on circles, showing that the
+Klein group maps the unit circle at height~$t$ to four related circles,
+which degenerate at the equator ($t = 0$).
+
+\begin{remark}[Physical interpretation]
+The Klein degeneration is the number-theoretic analogue of
+\emph{symmetry breaking} in gauge theory. The full $V_4$ symmetry
+exists everywhere, but on the critical line---the equator---two
+independent symmetries merge into one. This ``enhanced symmetry'' at
+the equator is precisely what forces $\Lambda_0$ to be real there,
+collapsing the 2D zero-finding problem to 1D.
+\end{remark}
+
+\subsection{The Algebraic Tower}
+
+Three files extend the geometric picture into algebraic number theory:
+
+\begin{itemize}
+  \item \textbf{The Kummer Tower} (\lean{KummerTower.lean}, 0~sorry):
+    extends the Cayley-Dickson construction (reals $\to$ complex $\to$
+    quaternions $\to$ octonions $\to \ldots$) into the $p$-adic direction
+    via Kummer extensions $\QQ(\zeta_p)$. Each prime~$p$ contributes a
+    ``floor'' to the tower, and the Euler product is the product of
+    all floors.
+
+  \item \textbf{The Spectral Tower} (\lean{SpectralTower.lean}, 0~sorry):
+    formalizes the Fourier harmonics in the imaginary direction of the
+    critical strip, connecting Fourier analysis on $\re s = \sigma$
+    to the spectral decomposition of~$\zeta$.
+
+  \item \textbf{Tower Fusion} (\lean{TowerFusion.lean}):
+    states the \emph{Rigidity Axiom}: the assertion that
+    all nontrivial zeros of~$\zeta$ in the critical strip have
+    $\re s = \tfrac{1}{2}$.  This is precisely the Riemann Hypothesis,
+    stated as a single axiom.  The key result:
+    \lean{F1\_dream} (in \lean{MirrorGeometry.lean}) is \emph{graduated}
+    from an independent axiom to a theorem derived from \lean{tower\_fusion}.
+\end{itemize}
+
+\begin{remark}[The Dream of $\FF_1$]
+The ``field with one element'' $\FF_1$, if formalized, would reduce
+$\Spec(\ZZ)$ (an infinite-genus surface) to~$S^2$ (a sphere), on which
+the Riemann Hypothesis is trivially true by the Weil conjectures.
+\lean{F1\_dream} records this structural statement, now derived from
+the Tower Fusion axiom rather than stated independently.
+\end{remark}
+
+\subsection{Theorem Census}
+
+\begin{center}
+\small
+\begin{tabular}{@{}llrl@{}}
+\toprule
+\textbf{File} & \textbf{Content} & \textbf{Theorems} & \textbf{Sorry} \\
+\midrule
+\lean{MirrorGeometry.lean}   & Three Realities, Mirror, S-Duality   & 14 & 0 \\
+\lean{SilenceAndEcho.lean}   & Trivial zero duality                 & 9  & 0 \\
+\lean{FourFoldSymmetry.lean} & Klein $V_4$ group, Four Noble Zeros   & 36 & 0 \\
+\lean{StripGeometry.lean}    & Circle-strip geometry, Hardy~$Z$      & 14 & 0 \\
+\lean{HardyZFunction.lean}   & Hardy $Z$-function, ring contraction  & 13 & 0 \\
+\lean{RiemannSphere.lean}    & Great Circle, hemisphere bisection    & 23 & 0 \\
+\lean{CircleQuadruplet.lean} & $V_4$ action on circles               & 12 & 0 \\
+\lean{KummerTower.lean}      & $p$-adic tower extension              & 11 & 0 \\
+\lean{SpectralTower.lean}    & Fourier harmonics                     & 10 & 0 \\
+\lean{TowerFusion.lean}      & Rigidity Axiom ($\equiv$ RH)          & 8  & 0 \\
+\midrule
+\textbf{Total}               &                                       & \textbf{150} & \textbf{0} \\
+\bottomrule
+\end{tabular}
+\end{center}

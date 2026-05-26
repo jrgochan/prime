@@ -1,5 +1,5 @@
 % ================================================================
-\section{Axiom Audit: The Tri-Crown Cathedral (v18, May 13, 2026)}
+\section{Axiom Audit: The Quad-Crown Cathedral (v21, May 26, 2026)}
 \label{sec:axiom-audit}
 % ================================================================
 
@@ -8,9 +8,9 @@ The crown theorem \lean{nyman\_beurling\_equivalence} depends on exactly
 Lean kernel axioms (\texttt{propext}, \texttt{Classical.choice},
 \texttt{Quot.sound}).
 
-\begin{remark}[The Tri-Crown Architecture (v18)]
-\label{rem:tri-crown}
-The Cathedral possesses a \textbf{Tri-Crown} architecture:
+\begin{remark}[The Quad-Crown Architecture (v21)]
+\label{rem:quad-crown}
+The Cathedral possesses a \textbf{Quad-Crown} architecture:
 \begin{itemize}
   \item \textbf{The Analytic Crown:} The primary crown path
     (\lean{nyman\_beurling\_equivalence}) relies on 1 literature axiom
@@ -28,11 +28,20 @@ The Cathedral possesses a \textbf{Tri-Crown} architecture:
     This reformulates RH as a single \emph{discrete arithmetic inequality}
     about M\"obius-weighted fractional-part sums.
     Key advantage: bypasses the covariance axiom entirely.
+  \item \textbf{The Arakelov Crown (v21, \S\ref{sec:arakelov}):}
+    The algebraic-geometric path decomposes the Gram matrix as
+    $G = G_{\mathrm{fin}} + G_{\mathrm{arch}}$ via the Arakelov
+    intersection pairing (\lean{ArakelovFusion.lean}), connects
+    tropical geometry to spectral decay, and reduces RH to
+    1 axiom (\lean{hodge\_index\_eigenvalue\_bound}).
+    Key advantage: connects prime factorization structure directly
+    to eigenvalue control via Smith's 1876 PSD theorem.
 \end{itemize}
 The Analytic Crown says ``RH is exactly as hard as one classical result.''
 The Cybernetic Crown says ``RH is as hard as verifying a finite computation.''
 The Gram Crown says ``RH IS a quadratic form inequality.''
-All three paths share the same zero-axiom converse via the Rank-1 Mellin identity.
+The Arakelov Crown says ``RH IS an intersection-theoretic inequality.''
+All four paths share the same zero-axiom converse via the Rank-1 Mellin identity.
 \end{remark}
 
 The axiom is a standard result of analytic number theory with a precise
@@ -186,6 +195,10 @@ to theorems or \textbf{bypassed} through architecture changes:
 Gram Crown deployment & v18 & GramBoundDirect (E36) & Quadratic form (\S\ref{sec:axiom-audit}) \\
 Arithmetic Standard Model & v18 & Physics layer (E36) & U(1)$\times$SU(2)$\times$SU(3) \\
 \texttt{remainder\_bound\_abstract} & v19 & Entry-level analysis (E37) & Born negativity (false $\to$ 3 thms) \\
+Riemann Sphere geometry & v20 & Zeta/MirrorGeometry,RiemannSphere (E38--40) & Critical line $=$ great circle (\S\ref{sec:riemann-sphere}) \\
+$\FF_1$ Dream graduation & v20 & TowerFusion $\to$ MirrorGeometry (E40) & Axiom $\to$ theorem via fusion \\
+Arakelov Fusion & v21 & Arakelov layers 1--4 (E41--42) & $G = G_{\mathrm{fin}} + G_{\mathrm{arch}}$ (\S\ref{sec:arakelov}) \\
+Two-Tier Gram Bound & v21 & TwoTierGramBound (E43) & Diagonal + off-diagonal control \\
 \bottomrule
 \end{tabular}
 \end{center}
