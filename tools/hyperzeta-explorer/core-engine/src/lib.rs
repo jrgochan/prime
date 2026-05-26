@@ -49,7 +49,7 @@ pub struct HyperEngine {
     particle_count: usize,
     frame: f32,
     collapse_metric: f64,
-    /// 0=Origin, 1=Teardrop, 2=GlassStaircase, 3=DivisionByZero, 4=Spectrometer, 5=PrimeDemocracy
+    /// 0=Origin, 1=Teardrop, 2=GlassStaircase, 3=DivisionByZero, 4=Spectrometer, 5=PrimeDemocracy, 7=ThreeTowers, 8=TeardropAscent
     view_mode: u32,
     /// Layer energies: [ℝ, ℂ, ℍ, 𝕆, 𝕊, 𝕋] accumulated per frame
     layer_energies: [f64; 6],
@@ -235,6 +235,51 @@ impl HyperEngine {
         let mut prime_e = [0.0f64; 127];
 
         let terms = 16;
+
+        // Pre-compute |ζ(1/2 + it)| on the critical line for Mode 8 (Teardrop Ascent).
+        // Uses the Hardy Z-function via the Riemann-Siegel formula:
+        //   Z(t) = 2·Σ_{n≤N} n^{-1/2}·cos(θ(t) - t·ln(n)) + C₀ correction
+        //   |ζ(1/2 + it)| = |Z(t)|
+        // This is the analytic continuation — it actually goes to zero at zeros,
+        // unlike the raw Dirichlet partial sum which diverges in the critical strip.
+        let teardrop_center_zeta = if self.view_mode == 8 {
+            let t = 10.0 + lambda * 2.0;
+            let pi = std::f64::consts::PI;
+
+            // Riemann-Siegel theta function (Stirling approximation)
+            // θ(t) ≈ t/2·ln(t/(2πe)) - π/8 + 1/(48t) + 7/(5760t³)
+            let theta = t / 2.0 * (t / (2.0 * pi * std::f64::consts::E)).ln()
+                - pi / 8.0
+                + 1.0 / (48.0 * t)
+                + 7.0 / (5760.0 * t * t * t);
+
+            // Main sum: N = floor(√(t/(2π)))
+            let p = (t / (2.0 * pi)).sqrt();
+            let n_max = p.floor() as usize;
+            let n_max = n_max.max(1);
+
+            let mut z_val = 0.0f64;
+            for n in 1..=n_max {
+                let nf = n as f64;
+                z_val += nf.powf(-0.5) * (theta - t * nf.ln()).cos();
+            }
+            z_val *= 2.0;
+
+            // Riemann-Siegel C₀ correction term
+            // Improves accuracy near zeros
+            let frac = p - p.floor();
+            let c0_num = (2.0 * pi * (frac * frac - frac - 1.0 / 16.0)).cos();
+            let c0_den = (2.0 * pi * frac).cos();
+            if c0_den.abs() > 1e-10 {
+                let sign = if (n_max as i32) % 2 == 0 { 1.0 } else { -1.0 };
+                z_val += sign * c0_num / c0_den * p.powf(-0.5);
+            }
+
+            // |ζ(1/2 + it)| = |Z(t)|
+            z_val.abs()
+        } else {
+            0.0
+        };
 
         for i in 0..self.particle_count {
             // STEP 1: Morph the Input Coordinate
@@ -635,6 +680,107 @@ impl HyperEngine {
                     }
                 }
 
+                // ─────────────────────────────────────────────
+                // MODE 8: Riemann Teardrop Ascent
+                // A circle of particles in the s-plane centered at
+                //   s_center = 1/2 + i·t (on the critical line)
+                // Each particle at angle φ:
+                //   s(φ) = 1/2 + i·t + R·e^{iφ}
+                // Lifted to 3D by (Re(s)-1/2, Im(s)-t, |ζ(s)|)
+                //
+                // At zeros: |ζ| → 0, teardrop pinches.
+                // Between zeros: teardrop bulges RIGHT (toward pole s=1).
+                // Color: arg(ζ) winds once through full hue per zero.
+                // ─────────────────────────────────────────────
+                8 => {
+                    let t = 10.0 + lambda * 2.0;
+                    // Radius = 0.5: exact critical strip width.
+                    // Circle goes from σ = 0 to σ = 1.
+                    let circle_radius = 0.5;
+
+                    // Each particle at angle φ on the circle in s-plane
+                    let phi = 2.0 * std::f64::consts::PI * (i as f64)
+                        / (self.particle_count as f64);
+                    let sigma = 0.5 + circle_radius * phi.cos();
+                    let im_s = t + circle_radius * phi.sin();
+
+                    // Compute ζ(s) at this particle's position on the circle
+                    let n_max = ((im_s.abs() / (2.0 * std::f64::consts::PI)).sqrt())
+                        .floor()
+                        .max(1.0) as usize;
+                    let n_use = n_max.max(terms).min(64);
+
+                    let mut zeta_re = 0.0f64;
+                    let mut zeta_im = 0.0f64;
+                    for n in 1..=n_use {
+                        let nf = n as f64;
+                        let mag = nf.powf(-sigma);
+                        let angle = -im_s * nf.ln();
+                        zeta_re += mag * angle.cos();
+                        zeta_im += mag * angle.sin();
+                    }
+
+                    let zeta_abs = (zeta_re * zeta_re + zeta_im * zeta_im).sqrt();
+                    let zeta_arg = zeta_im.atan2(zeta_re);
+
+                    total_magnitude += zeta_abs * zeta_abs;
+
+                    let idx = i * 3;
+
+                    // ═══════════════════════════════════════════════
+                    // TEARDROP GEOMETRY
+                    //
+                    // The RING RADIUS is modulated by |ζ(center)|:
+                    //   - Between zeros: |ζ(½+it)| ≈ 1-5 → full ring
+                    //   - At zeros: |ζ(½+it)| → 0 → ring CONTRACTS to a point!
+                    //
+                    // The HEIGHT (Z) uses the per-particle |ζ(s)|:
+                    //   - Right side (σ > ½): |ζ| larger → taller → teardrop bulge
+                    //   - Left side (σ < ½): |ζ| smaller → shorter
+                    //
+                    // The RADIAL OFFSET encodes the teardrop asymmetry:
+                    //   - Particles where |ζ(s)| > |ζ(center)| push outward
+                    //   - Particles where |ζ(s)| < |ζ(center)| pull inward
+                    // ═══════════════════════════════════════════════
+
+                    let base_ring_scale = 20.0;
+
+                    // Ring contraction: normalize center zeta to [0, 1] range
+                    // Use smooth mapping: tanh(|ζ|/2) gives nice S-curve
+                    let center_norm = (teardrop_center_zeta * 0.5).tanh();
+                    let ring_r = base_ring_scale * (0.03 + 0.97 * center_norm);
+
+                    // Per-particle height from local |ζ|
+                    let local_height = zeta_abs.sqrt().min(5.0) * 5.0;
+
+                    // Asymmetry: ratio of local |ζ| to center |ζ|
+                    // This creates the teardrop lean — right side bulges out
+                    let ratio = if teardrop_center_zeta > 0.01 {
+                        (zeta_abs / teardrop_center_zeta).min(3.0)
+                    } else {
+                        1.0 // at exact zero, no asymmetry modulation
+                    };
+
+                    // Radial position: base ring + asymmetry push
+                    let asym_push = (ratio - 1.0) * ring_r * 0.3;
+                    let particle_r = ring_r + asym_push;
+
+                    self.geometry_buffer[idx] =
+                        (phi.cos() * particle_r) as f32;
+                    self.geometry_buffer[idx + 1] =
+                        (phi.sin() * particle_r) as f32;
+                    self.geometry_buffer[idx + 2] =
+                        local_height as f32;
+
+                    // Layer buffer for coloring:
+                    //   [0] = arg(ζ) for hue (phase winding)
+                    //   [1] = |ζ| for brightness
+                    //   [2] = center_zeta for zero proximity flash
+                    self.layer_buffer[idx]     = zeta_arg as f32;
+                    self.layer_buffer[idx + 1] = zeta_abs.min(10.0) as f32;
+                    self.layer_buffer[idx + 2] = teardrop_center_zeta.min(10.0) as f32;
+                }
+
                 _ => {}
             }
         }
@@ -850,5 +996,11 @@ impl HyperEngine {
     #[wasm_bindgen]
     pub fn get_centroid_z(&self) -> f64 {
         self.centroid[2]
+    }
+
+    /// Current height t on the critical line (for Teardrop Ascent HUD)
+    #[wasm_bindgen]
+    pub fn get_height(&self) -> f64 {
+        10.0 + (self.frame as f64) * 2.0
     }
 }

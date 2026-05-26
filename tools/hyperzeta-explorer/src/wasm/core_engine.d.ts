@@ -38,6 +38,10 @@ export class HyperEngine {
      * Gram form bound: |vᵀGv - asymptotic| ≤ this value
      */
     get_gram_bound(): number;
+    /**
+     * Current height t on the critical line (for Teardrop Ascent HUD)
+     */
+    get_height(): number;
     get_lambda(): number;
     get_layer_buffer_pointer(): number;
     /**
@@ -95,6 +99,7 @@ export interface InitOutput {
     readonly hyperengine_get_flatness: (a: number) => number;
     readonly hyperengine_get_fluctuation_energy: (a: number) => number;
     readonly hyperengine_get_gram_bound: (a: number) => number;
+    readonly hyperengine_get_height: (a: number) => number;
     readonly hyperengine_get_lambda: (a: number) => number;
     readonly hyperengine_get_layer_buffer_pointer: (a: number) => number;
     readonly hyperengine_get_layer_energy: (a: number, b: number) => number;

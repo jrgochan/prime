@@ -90,6 +90,14 @@ export class HyperEngine {
         return ret;
     }
     /**
+     * Current height t on the critical line (for Teardrop Ascent HUD)
+     * @returns {number}
+     */
+    get_height() {
+        const ret = wasm.hyperengine_get_height(this.__wbg_ptr);
+        return ret;
+    }
+    /**
      * @returns {number}
      */
     get_lambda() {

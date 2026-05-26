@@ -124,6 +124,15 @@ const VIEW_MODES: ViewMode[] = [
     edgeColor: "#1a1a3a",
     hotkey: "8",
   },
+  {
+    id: 8,
+    name: "TEARDROP ASCENT",
+    subtitle: "ζ-Lifted Circle · Critical Line Sweep",
+    formula: "s(φ) = ½+it + R·e^{iφ} → (Re, Im, |ζ|)",
+    coreColor: "#ff44aa",
+    edgeColor: "#440022",
+    hotkey: "9",
+  },
 ];
 
 const LAYER_COLORS = [
@@ -926,6 +935,26 @@ function ExplorerCloud({
               brightness * (0.3 + goldness * 0.2)
             );
           }
+        } else if (mode.id === 8) {
+          // TEARDROP ASCENT: color by arg(ζ) + zero proximity flash
+          const zetaArg = layerArray[idx];           // arg(ζ), [-π, π]
+          const zetaAbs = layerArray[idx + 1];       // |ζ| at this particle
+          const centerZeta = layerArray[idx + 2];    // |ζ(center)| — zero proximity
+
+          // Zero proximity: when center zeta is small, we're near a zero
+          const zeroProximity = Math.max(0, 1.0 - centerZeta * 0.5);
+
+          if (zeroProximity > 0.7) {
+            // NEAR ZERO: pulse red/white — dramatic flash
+            const pulse = 0.3 + zeroProximity * 0.7;
+            color.setRGB(pulse, pulse * 0.15, pulse * 0.25);
+          } else {
+            // Normal: hue from arg(ζ), brightness from |ζ|
+            const hue = ((zetaArg / (2 * Math.PI)) + 0.5 + 1.0) % 1.0;
+            const bright = Math.min(zetaAbs / 3.0, 1.0);
+            const sat = 0.5 + bright * 0.5;
+            color.setHSL(hue, sat, 0.15 + bright * 0.6);
+          }
         } else {
           // Origin / Teardrop / Spectrometer: gradient from core to edge
           const x = memoryArray[idx], y = memoryArray[idx + 1], z = memoryArray[idx + 2];
@@ -1080,7 +1109,7 @@ export default function Home() {
       if ((e.target as HTMLElement).tagName === "INPUT") return;
 
       const num = parseInt(e.key);
-      if (num >= 1 && num <= 6) {
+      if (num >= 1 && num <= VIEW_MODES.length) {
         setModeIdx(num - 1);
         return;
       }
@@ -1734,6 +1763,72 @@ export default function Home() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Teardrop Ascent: zero proximity HUD */}
+        {modeIdx === 8 && (
+          <div className="mt-4 border border-pink-500/30 bg-black/50 backdrop-blur-sm rounded px-3 py-2">
+            <p className="text-[10px] opacity-60 tracking-wider border-b border-pink-500/20 pb-1 mb-2" style={{ color: '#ff44aa' }}>
+              RIEMANN TEARDROP — CRITICAL LINE ASCENT
+            </p>
+            {(() => {
+              const nearestZero = KNOWN_ZEROS.reduce((best, z) =>
+                Math.abs(z - height) < Math.abs(best - height) ? z : best
+              , KNOWN_ZEROS[0]);
+              const distToZero = Math.abs(height - nearestZero);
+              const isNearZero = distToZero < 1.0;
+              const isVeryNear = distToZero < 0.3;
+              const nextZ = KNOWN_ZEROS.find(z => z > height);
+              const prevZ = [...KNOWN_ZEROS].reverse().find(z => z < height);
+              return (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] opacity-50">Height:</span>
+                    <span className="text-sm font-bold tabular-nums" style={{ color: '#ff44aa' }}>
+                      t = {height.toFixed(3)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] opacity-50">Nearest γ:</span>
+                    <span className="text-sm font-bold tabular-nums" style={{
+                      color: isVeryNear ? '#ff0044' : isNearZero ? '#ff8844' : '#888',
+                    }}>
+                      {nearestZero.toFixed(4)}
+                    </span>
+                    <span className="text-[10px] opacity-40">Δ = {distToZero.toFixed(3)}</span>
+                  </div>
+                  {/* Zero proximity bar */}
+                  <div className="w-full h-2 bg-black/50 rounded overflow-hidden border border-white/10">
+                    <div
+                      className={`h-full transition-all duration-200 ${isVeryNear ? 'animate-pulse' : ''}`}
+                      style={{
+                        width: `${Math.max(5, (1 - Math.min(distToZero / 3, 1)) * 100)}%`,
+                        background: isVeryNear
+                          ? 'linear-gradient(90deg, #ff0044, #ff44aa)'
+                          : isNearZero
+                          ? 'linear-gradient(90deg, #ff8844, #ff44aa66)'
+                          : 'linear-gradient(90deg, #333, #ff44aa33)',
+                      }}
+                    />
+                  </div>
+                  {isVeryNear && (
+                    <p className="text-xs font-black tracking-widest animate-pulse" style={{ color: '#ff0044' }}>
+                      ◆ ZERO CROSSING — TEARDROP PINCH ◆
+                    </p>
+                  )}
+                  <div className="flex gap-4 text-[10px] opacity-40 mt-1">
+                    {prevZ && <span>← γ = {prevZ.toFixed(2)}</span>}
+                    {nextZ && <span>γ = {nextZ.toFixed(2)} →</span>}
+                  </div>
+                  <div className="border-t border-white/10 pt-1.5 mt-1">
+                    <p className="text-[10px] opacity-50">Ring contracts at zeros · bulges between zeros</p>
+                    <p className="text-[10px] opacity-50">Phase color = arg(ζ) winding · Red flash = zero crossing</p>
+                    <p className="text-[10px] opacity-30 mt-0.5">Circle radius R = 0.5 (exact critical strip σ∈[0,1])</p>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

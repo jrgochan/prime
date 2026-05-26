@@ -12,6 +12,7 @@ export const hyperengine_get_elongation: (a: number) => number;
 export const hyperengine_get_flatness: (a: number) => number;
 export const hyperengine_get_fluctuation_energy: (a: number) => number;
 export const hyperengine_get_gram_bound: (a: number) => number;
+export const hyperengine_get_height: (a: number) => number;
 export const hyperengine_get_lambda: (a: number) => number;
 export const hyperengine_get_layer_buffer_pointer: (a: number) => number;
 export const hyperengine_get_layer_energy: (a: number, b: number) => number;
