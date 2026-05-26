@@ -528,6 +528,14 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.SpectralTower,
     -- Four-Fold Symmetry (quadruplet structure, degeneration on Re=½, May 24, 2026)
     `Cathedral.Zeta.FourFoldSymmetry,
+    -- Strip Geometry (circle-strip intersection, teardrop direction, May 25, 2026)
+    `Cathedral.Zeta.StripGeometry,
+    -- Hardy Z-Function (Z-function theory, ring contraction, May 25, 2026)
+    `Cathedral.Zeta.HardyZFunction,
+    -- Circle-Quadruplet Wiring (Klein V₄ on circles, degeneration at equator, May 25, 2026)
+    `Cathedral.Zeta.CircleQuadruplet,
+    -- Riemann Sphere (critical line = great circle, Λ₀ even, hemisphere bisection, May 25, 2026)
+    `Cathedral.Zeta.RiemannSphere,
     -- Arakelov Bridge (intersection theory road to RH, May 25, 2026)
     `Cathedral.Zeta.ArakelovBridge,
     -- Arakelov Layer 1: Weil Divisors on Spec(ℤ) (May 25, 2026)
