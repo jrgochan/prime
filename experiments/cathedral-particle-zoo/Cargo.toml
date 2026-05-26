@@ -43,5 +43,13 @@ path = "src/bin/susy_sweep_v5.rs"
 name = "susy-sweep-v6"
 path = "src/bin/susy_sweep_v6.rs"
 
+[[bin]]
+name = "zoo-census"
+path = "src/bin/zoo_census.rs"
+
+[[bin]]
+name = "zoo-census-h5"
+path = "src/bin/zoo_census_h5.rs"
+
 [lints]
 workspace = true
