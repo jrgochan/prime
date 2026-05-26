@@ -106,11 +106,11 @@ particle-zoo: ## Launch Particle Zoo — every integer has a soul (port 3003)
 	@echo "     55,440 integers classified · Quark-Meson battle · SUSY cancellation"
 	@echo ""
 	@if [ -d tools/hyperzeta-particle-zoo/node_modules ]; then \
-		echo "  Starting Vite dev server on http://localhost:3003 ..." && \
-		cd tools/hyperzeta-particle-zoo && npx vite --port 3003; \
+		echo "  Starting Next.js dev server on http://localhost:3003 ..." && \
+		cd tools/hyperzeta-particle-zoo && npm run dev; \
 	else \
 		echo "  Installing dependencies..." && \
-		cd tools/hyperzeta-particle-zoo && npm install && npx vite --port 3003; \
+		cd tools/hyperzeta-particle-zoo && npm install && npm run dev; \
 	fi
 
 cascade: ## Audit the Oracle Cascade axiom footprint (requires: make build)

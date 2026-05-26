@@ -1,0 +1,11 @@
+/* Particle Zoo — minimal global reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #030712;
+  overflow: hidden;
+}
