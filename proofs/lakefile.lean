@@ -548,4 +548,6 @@ lean_lib «Cathedral» where
     `Cathedral.Arakelov.ArakelovFusion,
     -- 𝔽₁ Layer 1: Λ-Rings (Borger's algebraic skeleton, May 26, 2026)
     `Cathedral.F1.LambdaRing,
+    -- 𝔽₁ Layer 2: 𝔽₁-Zeta = Riemann ζ(s) (Euler product bridge, May 26, 2026)
+    `Cathedral.F1.F1Zeta,
   ]
