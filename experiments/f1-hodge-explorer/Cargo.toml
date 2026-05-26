@@ -1,0 +1,37 @@
+[package]
+name = "f1-hodge-explorer"
+version = "0.1.0"
+edition = "2021"
+description = """
+𝔽₁ Hodge Explorer — Numerical exploration of the Hodge Index Theorem
+for Spec(ℤ)/𝔽₁ using Cathedral HPDF Gram matrices.
+
+Investigates:
+  1. B₁/L₁ decomposition (G = gcd²/(12jk) + perturbation)
+  2. Eigenvalue structure of L₁ in the degree-0 subspace
+  3. The mysterious ~5 constant-count positive L₁ eigenvalues
+  4. Möbius witness form decomposition: vᵀGv = vᵀB₁v + vᵀL₁v
+  5. Degree functional: deg(v) = Σ v_k → 0 (PNT connection)
+"""
+
+[features]
+default = ["hpdf"]
+hpdf = ["cathedral-utils/hpdf", "hdf5", "hdf5-sys", "ndarray"]
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+nalgebra = "0.33"
+rayon = "1.10"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hdf5 = { version = "0.8", optional = true }
+hdf5-sys = { version = "0.8", features = ["static"], optional = true }
+ndarray = { version = "0.15", optional = true }
+
+[[bin]]
+name = "f1-hodge-explorer"
+path = "src/bin/f1_hodge_explorer.rs"
+
+[lints]
+workspace = true
