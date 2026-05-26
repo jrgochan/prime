@@ -6,7 +6,7 @@
 The Arakelov subsystem (\lean{Arakelov/*.lean} + \lean{Zeta/ArakelovBridge.lean},
 5~files, $\sim$1{,}660~lines, 0~sorry, 1~axiom) establishes an algebraic-geometric
 interpretation of the Gram matrix, connecting the Nyman-Beurling spectral
-approach to Arakelov intersection theory on~$\Spec(\ZZ)$.
+approach to Arakelov intersection theory on~$\operatorname{Spec}(\ZZ)$.
 
 The central insight: the Gram matrix $G_N$ with entries
 $G(j,k) = \int_0^1 \{1/(jx)\}\{1/(kx)\}\,dx$ decomposes as
@@ -29,7 +29,7 @@ The Arakelov bridge is built in four layers, each with zero sorry:
 \toprule
 \textbf{Layer} & \textbf{File} & \textbf{Content} & \textbf{Lines} & \textbf{Key Result} \\
 \midrule
-1 & \lean{WeilDivisor.lean}       & Divisors on $\Spec(\ZZ)$       & 219 & $\log\deg(D_k) = \log k$ \\
+1 & \lean{WeilDivisor.lean}       & Divisors on $\operatorname{Spec}(\ZZ)$       & 219 & $\log\deg(D_k) = \log k$ \\
 2 & \lean{ArithmeticDivisor.lean} & Arakelov metric                & 336 & $\deg(\hat{D}_1) = 0$ \\
 3 & \lean{GramBridge.lean}        & Tropical $\to$ Gram connection & 366 & $\text{b1Entry} = \gcd^2/(12jk)$ \\
 4 & \lean{ArakelovFusion.lean}    & Fusion theorem                 & 370 & $G = G_{\mathrm{fin}} + G_{\mathrm{arch}}$ \\
@@ -39,7 +39,7 @@ The Arakelov bridge is built in four layers, each with zero sorry:
 
 \subsubsection*{Layer 1: Weil Divisors (\lean{WeilDivisor.lean})}
 
-A Weil divisor on $\Spec(\ZZ)$ is a formal sum
+A Weil divisor on $\operatorname{Spec}(\ZZ)$ is a formal sum
 $D = \sum_p v_p(D) \cdot [p]$ of prime ideals with integer multiplicities.
 The \emph{log-degree} is $\log\deg(D) = \sum_p v_p(D) \cdot \log p$.
 For the factorization divisor of an integer~$k$:

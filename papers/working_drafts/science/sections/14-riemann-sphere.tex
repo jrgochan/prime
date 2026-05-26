@@ -138,7 +138,7 @@ Three files extend the geometric picture into algebraic number theory:
   \item \textbf{The Kummer Tower} (\lean{KummerTower.lean}, 0~sorry):
     extends the Cayley-Dickson construction (reals $\to$ complex $\to$
     quaternions $\to$ octonions $\to \ldots$) into the $p$-adic direction
-    via Kummer extensions $\QQ(\zeta_p)$. Each prime~$p$ contributes a
+    via Kummer extensions $\mathbb{Q}(\zeta_p)$. Each prime~$p$ contributes a
     ``floor'' to the tower, and the Euler product is the product of
     all floors.
 
@@ -156,9 +156,9 @@ Three files extend the geometric picture into algebraic number theory:
     from an independent axiom to a theorem derived from \lean{tower\_fusion}.
 \end{itemize}
 
-\begin{remark}[The Dream of $\FF_1$]
-The ``field with one element'' $\FF_1$, if formalized, would reduce
-$\Spec(\ZZ)$ (an infinite-genus surface) to~$S^2$ (a sphere), on which
+\begin{remark}[The Dream of $\mathbb{F}_1$]
+The ``field with one element'' $\mathbb{F}_1$, if formalized, would reduce
+$\operatorname{Spec}(\ZZ)$ (an infinite-genus surface) to~$S^2$ (a sphere), on which
 the Riemann Hypothesis is trivially true by the Weil conjectures.
 \lean{F1\_dream} records this structural statement, now derived from
 the Tower Fusion axiom rather than stated independently.
