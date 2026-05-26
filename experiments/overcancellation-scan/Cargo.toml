@@ -155,6 +155,23 @@ path = "src/bin/trig_spectral_probe.rs"
 name = "three-towers-probe"
 path = "src/bin/three_towers_probe.rs"
 
+[[bin]]
+name = "cotangent-residual-probe"
+path = "src/bin/cotangent_residual_probe.rs"
+
+[[bin]]
+name = "cotangent-residual-hpdf"
+path = "src/bin/cotangent_residual_hpdf.rs"
+required-features = ["hpdf"]
+
+[[bin]]
+name = "zero-circle-probe"
+path = "src/bin/zero_circle_probe.rs"
+
+[[bin]]
+name = "riemann-teardrop-probe"
+path = "src/bin/riemann_teardrop_probe.rs"
+
 [profile.release]
 opt-level = 3
 lto = true
