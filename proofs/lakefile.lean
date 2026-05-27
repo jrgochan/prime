@@ -556,4 +556,12 @@ lean_lib «Cathedral» where
     `Cathedral.F1.HodgeQuadForm,
     -- 𝔽₁ Layer 3.2: Hodge Spectrum (eigenvalue growth, spectral gap, May 26, 2026)
     `Cathedral.F1.HodgeSpectrum,
+    -- Euler Product Limit (lim vᵀB₁v = 1/(2π²), Option A, May 26, 2026)
+    `Cathedral.NumberTheory.EulerProductLimit,
+    -- Coprime-Restricted Möbius Sum (CR(d) = (6/π²)/Π(1-1/p²), May 27, 2026)
+    `Cathedral.NumberTheory.CoprimeRestricted,
+    -- Euler Product Graduation (Option A, FULLY GRADUATED, May 26, 2026)
+    `Cathedral.NumberTheory.EulerProductGraduation,
+    -- Squarefree J₂ Sum (graduation: Σ_{sqfree} 1/J₂ = π²/6, May 26, 2026)
+    `Cathedral.NumberTheory.SquarefreeJ2Sum,
   ]
