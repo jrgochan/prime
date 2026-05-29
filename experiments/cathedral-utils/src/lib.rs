@@ -30,6 +30,8 @@
 //! - [`ooc`] — Out-of-core Gram matrix operations (disk-streamed)
 //! - [`riemann_siegel`] — Riemann-Siegel theta, Hardy Z-function, zero finder
 //! - [`spectral_stats`] — Random matrix theory diagnostics (GUE/GOE/GSE)
+//! - [`harmonics`] — Prime oscillator bank (computational twin of PrimeHarmonics.lean)
+//! - [`zeta_zeros`] — Known non-trivial zeros of ζ(s) (Odlyzko tables + on-demand computation)
 
 pub mod abel;
 pub mod arith;
@@ -58,4 +60,6 @@ pub mod spectral;
 pub mod spectral_stats;
 pub mod trigintaduonion;
 pub mod vasyunin;
+pub mod harmonics;
+pub mod zeta_zeros;
 

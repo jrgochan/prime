@@ -1,0 +1,11 @@
+//! Run modes for the Prime Harmonics Explorer.
+
+pub mod bench;
+pub mod democracy;
+pub mod fine_scan;
+pub mod full;
+pub mod hardy_z;
+pub mod hunt;
+pub mod mirror;
+pub mod portrait;
+pub mod sweep;

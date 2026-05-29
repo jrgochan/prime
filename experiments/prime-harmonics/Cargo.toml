@@ -1,0 +1,20 @@
+[package]
+name = "prime-harmonics"
+version = "0.1.0"
+edition = "2021"
+description = """
+🌀 Prime Harmonics Explorer — Each prime is a spinning oscillator.
+
+Computational implementation of Cathedral/Spectral/PrimeHarmonics.lean.
+Scans primes at known zeta zeros, computes interference sums,
+and visualizes the energy landscape of the prime choir.
+"""
+
+[dependencies]
+cathedral-utils = { path = "../cathedral-utils" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rayon = "1.10"
+
+[lints]
+workspace = true
