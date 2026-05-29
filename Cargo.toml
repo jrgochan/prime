@@ -50,6 +50,7 @@ members = [
     "experiments/bilinear-probe",
     "experiments/dark-gram-spectroscopy",
     "experiments/dark-gram-spectroscopy-gpu",
+    "experiments/prime-harmonics",
 
     # ═══════════════════════════════════════════════
     # Archive (preserved for reproducibility)
@@ -137,6 +138,7 @@ default-members = [
     "experiments/bilinear-probe",
     "experiments/dark-gram-spectroscopy",
     # "experiments/dark-gram-spectroscopy-gpu", # requires CUDA
+    "experiments/prime-harmonics",
     "experiments/archive/abel-bridge",
     "experiments/archive/abel-tail-validator",
     "experiments/archive/algebraic/cross-class-verifier",

@@ -86,11 +86,37 @@ theorem AdamsSystem.psi_determined_by_primes {R : Type*} [CommRing R]
       Ψ₁.psi ⟨p, hp.pos⟩ = Ψ₂.psi ⟨p, hp.pos⟩) :
     ∀ (n : ℕ+), Ψ₁.psi n = Ψ₂.psi n := by
   intro n
-  -- Every positive integer is a product of primes.
-  -- The Adams multiplicativity reduces ψ_n to products of ψ_p.
-  -- This is a structural theorem; we prove it for n = 1 and primes,
-  -- the general case follows from unique factorization.
-  sorry -- TODO: induction on prime factorization
+  -- Strong induction on n.val
+  have : ∀ k : ℕ, 0 < k → ∀ n : ℕ+, n.val = k → Ψ₁.psi n = Ψ₂.psi n := by
+    intro k
+    induction k using Nat.strongRecOn with
+    | ind k ih =>
+    intro hk n hn
+    -- Case k = 1: both are id
+    by_cases h1 : k = 1
+    · have hn1 : n = 1 := by
+        apply PNat.eq; simp [hn, h1]
+      subst hn1; rw [Ψ₁.psi_one, Ψ₂.psi_one]
+    -- Case k > 1: factor k = p * m
+    · have hk_gt : 1 < k := by omega
+      set p := k.minFac with hp_def
+      have hp_prime : Nat.Prime p := Nat.minFac_prime (by omega)
+      have hp_dvd : p ∣ k := Nat.minFac_dvd k
+      obtain ⟨m, hm⟩ := hp_dvd
+      have hm_pos : 0 < m := by
+        rcases Nat.eq_zero_or_pos m with h | h
+        · subst h; simp at hm; omega
+        · exact h
+      have hm_lt : m < k := by
+        rw [hm]; exact lt_mul_of_one_lt_left hm_pos hp_prime.one_lt
+      -- n = p * m as PNat
+      have h_eq : n = ⟨p, hp_prime.pos⟩ * ⟨m, hm_pos⟩ := by
+        apply PNat.eq; simp [PNat.mul_coe, hm, hn]
+      -- Apply psi_mul: ψ_n = ψ_p ∘ ψ_m
+      rw [h_eq, ← Ψ₁.psi_mul, ← Ψ₂.psi_mul]
+      rw [h_primes p hp_prime]
+      rw [ih m hm_lt hm_pos ⟨m, hm_pos⟩ rfl]
+  exact this n.val n.pos n rfl
 
 -- ════════════════════════════════════════════════════════════════
 -- §2. THE Λ-RING TYPECLASS
@@ -335,10 +361,10 @@ theorem ghostMap_ringHom (R : Type*) [LambdaRing R] (n : ℕ+) :
 | 8 | `f1StructureMap_preserves_adams` | **PROVED** ✅ |
 | 9 | `ghostMap` | **DEF** ✅ |
 | 10 | `int_ghostMap_const` | **PROVED** ✅ |
-| 11 | `psi_determined_by_primes` | **sorry** (needs prime factorization induction) |
+| 11 | `psi_determined_by_primes` | **PROVED** ✅ (strong induction on prime factorization) |
 
 ### Custom Axioms: 0 ✅
-### Sorry: 1 (structural, not mathematical — prime factorization induction)
+### Sorry: 0 ✅
 
 ### Architecture
 

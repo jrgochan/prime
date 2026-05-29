@@ -99,6 +99,10 @@ lean_lib «Cathedral» where
     `Cathedral.Spectral.FiniteDimReduction,
     -- Fourier–Gram Bridge (Exploration 31, ZERO SORRY)
     `Cathedral.Spectral.FourierGram,
+    -- Prime Harmonics: oscillators on the unit circle
+    `Cathedral.Spectral.PrimeHarmonics,
+    -- Mirror Duality: zeros reconstruct primes (explicit formula)
+    `Cathedral.Spectral.MirrorDuality,
     -- Ramanujan B₁ Inner Product (∫B₁({jt})·B₁({kt}) = gcd²/(12jk), ZERO SORRY)
     `Cathedral.Spectral.RamanujanInnerProduct,
     `Cathedral.Spectral.BilinearSieve,
@@ -284,6 +288,9 @@ lean_lib «Cathedral» where
     `Cathedral.Vasyunin.Proof.BartlettWindow,
     `Cathedral.IntegralBasis.BaezDuarte,
     `Cathedral.IntegralBasis.Quantitative,
+    `Cathedral.IntegralBasis.IntegralQuadForm,
+    -- Winding Energy: Fourier B₁ decomposition of interference energy
+    `Cathedral.IntegralBasis.WindingEnergy,
     `Cathedral.Analysis.IntervalCalc,
     -- PNT LogBridge (Dirichlet convolution identity, 1 sorry)
     `Cathedral.PNT.LogBridge,
@@ -536,6 +543,10 @@ lean_lib «Cathedral» where
     `Cathedral.Zeta.CircleQuadruplet,
     -- Riemann Sphere (critical line = great circle, Λ₀ even, hemisphere bisection, May 25, 2026)
     `Cathedral.Zeta.RiemannSphere,
+    -- Stereographic Projection (great circle = S² ∩ {X=0}, round-trip identities, May 27, 2026)
+    `Cathedral.Zeta.StereographicProjection,
+    -- Sphere Resonance (zeros = equatorial cancellation, prime winding → RH, May 27, 2026)
+    `Cathedral.Zeta.SphereResonance,
     -- Arakelov Bridge (intersection theory road to RH, May 25, 2026)
     `Cathedral.Zeta.ArakelovBridge,
     -- Arakelov Layer 1: Weil Divisors on Spec(ℤ) (May 25, 2026)

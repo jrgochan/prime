@@ -1791,6 +1791,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "prime-harmonics"
+version = "0.1.0"
+dependencies = [
+ "cathedral-utils",
+ "rayon",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "private-gemm-x86"
 version = "0.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
