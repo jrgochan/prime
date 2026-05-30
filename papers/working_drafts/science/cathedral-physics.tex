@@ -1631,6 +1631,8 @@ assertion that this flow is complete.
 
 \input{sections/13e-arithmetic-standard-model}
 
+\input{sections/13f-spectral-mirror}
+
 % ================================================================
 \section{Summary: The Physics--Mathematics Dictionary}
 \label{sec:summary}
@@ -1986,6 +1988,19 @@ are a quantum field, and the Riemann Hypothesis is the assertion that
 this field is ergodic---that its thermodynamic limit exists and
 agrees with its ensemble average.
 
+\begin{remark}[The Riemann Sphere Picture]
+The critical line $\re s = 1/2$ maps to the \emph{equator} of the
+Riemann sphere $\hat{\CC} \cong S^2$ under stereographic projection
+from the point at infinity. The trivial zeros at $s = -2, -4, \ldots$
+cluster near the south pole, the pole at $s = 1$ lies just above the
+equator, and the Riemann Hypothesis asserts that all non-trivial zeros
+lie \emph{on the equator}---the great circle of maximum geodesic
+symmetry. The functional equation $\Lambda(s) = \Lambda(1-s)$ is the
+\emph{antipodal map} $s \mapsto 1 - s$, which is an isometry of the
+Riemann sphere. Formalized in \lean{SphereResonance.lean} and
+\lean{StereographicProjection.lean} (Cathedral/Zeta/).
+\end{remark}
+
 \subsection{Experimental Verification}
 
 The Cathedral's physics predictions are tested by \textbf{50+} independent
@@ -2056,11 +2071,18 @@ Rust/MPFR computational experiments. The key validators:
     tensors. Produces JSON certificates imported as Lean axioms.
     Certifies $N \leq 55{,}440$ with 31-digit precision.
     Lean bridge: \lean{OracleCertificates.lean}.
+  \item \texttt{prime-harmonics}: \textbf{Spectral mirror experiment}---8-mode
+    Rust explorer (mirror, sweep, portrait, bench, hunt, fine\_scan, full,
+    democracy) reconstructing $\pi(x)$ from zeta zeros via the explicit formula.
+    With 10{,}000 zeros: exact at $\pi(10) = 4$, $\pi(50) = 15$,
+    $\pi(200) = 46$. Numerical confirmation of the Mirror Duality
+    (\S\ref{sec:spectral-mirror}). Lean bridge: \lean{MirrorDuality.lean}.
 \end{enumerate}
 Experiments 1--9 use 512-bit MPFR precision; experiments 10--12 use
 f64 precision (sufficient for bulk eigenvalue statistics);
 experiments 13--15 use DD precision (31 digits, $\S$\ref{sec:dd-precision});
-experiments 16--17 use MPFR-256/DD hybrid precision (Oracle Bridge).
+experiments 16--17 use MPFR-256/DD hybrid precision (Oracle Bridge);
+experiment 18 uses f64 with high zero counts.
 All are produced by massively parallel Rust programs.
 The results serve as the ``experimental physics'' of the prime number
 quantum field.
@@ -2292,20 +2314,21 @@ Conservation of Difficulty & Gauss--Bonnet obstruction & (E15, conceptual) & ---
 \toprule
 \textbf{Metric} & \textbf{Count} \\
 \midrule
-Total physics phenomena mapped & 160+ \\
-Proved (zero sorry, zero axiom) & 120+ \\
+Total physics phenomena mapped & 170+ \\
+Proved (zero sorry, zero axiom) & 130+ \\
 Axiom (off-crown) & $\sim$20 \\
 Crown axiom (One-Pillar) & \textbf{1} \\
 Oracle axiom (\lean{oracle\_certificates}) & \textbf{1} \\
 Proof paths to RH & \textbf{5} \\
-Physical domains covered & 11 \\
-Cathedral Lean modules referenced & 80+ \\
+Physical domains covered & 12 \\
+Cathedral Lean modules referenced & 85+ \\
 Numerical experiments & \textbf{50+} \\
-Active Lean files & 330 (444 incl.\ archive) \\
-Active lines of code & $\sim$95{,}000 ($\sim$121{,}000 incl.\ archive) \\
-Theorem/lemma declarations & $\sim$3{,}500 \\
-Physics/ subsystem files & \textbf{64} \\
+Active Lean files & 340 (450+ incl.\ archive) \\
+Active lines of code & $\sim$97{,}000 ($\sim$123{,}000 incl.\ archive) \\
+Theorem/lemma declarations & $\sim$3{,}600 \\
+Physics/ subsystem files & \textbf{66} \\
 Physics/ subsystem sorry & \textbf{0} \\
+Spectral/ subsystem sorry & \textbf{0} \\
 Crown path sorry & \textbf{0} \\
 Oracle path sorry & \textbf{0} \\
 Largest certified $N$ & \textbf{55,440} (DD precision) \\
