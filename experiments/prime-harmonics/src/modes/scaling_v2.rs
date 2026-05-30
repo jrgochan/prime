@@ -21,6 +21,11 @@
 //! Total cost per step: O(N²) for the forward solve L⁻¹g.
 //! Total cost for sweep N=2..M: O(M³/3) — same as ONE Cholesky at N=M!
 //!
+//! THE MONOTONICITY THEOREM (Gemini, May 30 2026):
+//!   d²(N) = d²(N-1) - y²_new   where y_new = (b_new - wᵀy_old) / s
+//!   Since y²_new ≥ 0, d²_opt is STRICTLY MONOTONICALLY DECREASING.
+//!   Every new basis function extracts exactly y²_new of vacuum energy.
+//!
 //! This is the OPTIMAL algorithm: we get d²_opt for EVERY integer
 //! in the time it takes to do a single factorization at the max N.
 //!
@@ -157,7 +162,8 @@ pub fn run(h5_dir: &str, max_n: usize) {
 
     println!("# Dense d²_opt — Incremental Cholesky v2");
     println!("# Source: gram_N{file_n}.h5 (dim={file_dim})");
-    println!("N\td2_opt\tln_N\td2_lnN\td2_ln2N\tis_prime\tis_hcn\ttau\tclass");
+    println!("# Monotonicity: d²(N) = d²(N-1) - y²_new");
+    println!("N\td2_opt\tln_N\td2_lnN\td2_ln2N\ty2_new\tis_prime\tis_hcn\ttau\tclass");
 
     let t_sweep = Instant::now();
 
@@ -223,6 +229,8 @@ pub fn run(h5_dir: &str, max_n: usize) {
         let ln_n = (n as f64).ln();
         let d2_ln = d2 * ln_n;
         let d2_ln2 = d2 * ln_n * ln_n;
+        // y²_new: the vacuum energy extracted at this step
+        let y2_new = if z.is_empty() { 0.0 } else { z.last().unwrap().powi(2) };
         let p = if n <= effective_max && is_prime[n] { 1 } else { 0 };
         let h = if n <= effective_max && is_hcn[n] { 1 } else { 0 };
         let t = if n <= effective_max { tau[n] } else { 0 };
@@ -230,7 +238,7 @@ pub fn run(h5_dir: &str, max_n: usize) {
             else if n <= effective_max && is_prime[n] { "prime" }
             else { "comp" };
 
-        println!("{n}\t{d2:.12e}\t{ln_n:.6}\t{d2_ln:.10}\t{d2_ln2:.10}\t{p}\t{h}\t{t}\t{class}");
+        println!("{n}\t{d2:.12e}\t{ln_n:.6}\t{d2_ln:.10}\t{d2_ln2:.10}\t{y2_new:.12e}\t{p}\t{h}\t{t}\t{class}");
 
         if dim % 5000 == 0 {
             let elapsed = t_sweep.elapsed().as_secs_f64();
