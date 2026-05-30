@@ -571,6 +571,95 @@ the Eightfold Path, just as the Four Noble Zeros collapse
 to the Two Noble Zeros on the Middle Way (Re = 1/2).
 -/
 
+-- ════════════════════════════════════════════════════════════════
+-- §9. THE UNWRAPPING PRINCIPLE (The Line and the Circle)
+-- ════════════════════════════════════════════════════════════════
+
+/-! ### Nirvana: From the Circle to the Line
+
+  The Báez-Duarte Gram matrix lives on the **circle**:
+    G(j,k) = ∫₀¹ {1/(jx)} · {1/(kx)} dx
+
+  where {y} = y - ⌊y⌋ wraps ℝ onto [0,1) ≅ S¹.
+
+  The **unwrapping** decomposes the integrand:
+    {1/(kx)} = 1/(kx) - ⌊1/(kx)⌋
+
+  So the Gram integral is:
+    G(j,k) = ∫₀¹ (1/(jx) - ⌊1/(jx)⌋)(1/(kx) - ⌊1/(kx)⌋) dx
+
+  Expanding:
+    G = ∫ 1/(jkx²) dx           ← The LINE (divergent, universal)
+      - ∫ ⌊1/(jx)⌋/(kx) dx     ← Floor correction 1 (arithmetic)
+      - ∫ ⌊1/(kx)⌋/(jx) dx     ← Floor correction 2 (arithmetic)
+      + ∫ ⌊1/(jx)⌋·⌊1/(kx)⌋ dx ← Floor-floor (pure arithmetic)
+
+  The first term diverges: it is the integral on **the line** ℝ.
+  The floor corrections cancel the divergence, leaving the finite
+  Gram matrix on **the circle** S¹.
+
+  **The floor function is the wall between the line and the circle.**
+
+  The anomaly Δ = G - R_true measures how much the wrapping matters.
+  As N → ∞, if the wrapping contribution becomes negligible relative
+  to the total (Δ/G → 0 spectrally), then d² → 0.
+
+  The Four Noble Zeros live on the circle (the wrapped space).
+  On the Middle Way (Re = 1/2), the four-fold symmetry collapses
+  the circle to a line segment: ρ ↔ ρ̄ with no quadruplet ambiguity.
+
+  **The Unwrapping Conjecture**: d²_opt → 0 because the arithmetic
+  encoded in ⌊1/(kx)⌋ (primes, divisors, Möbius) forces the Gram
+  matrix to asymptotically "unwind" the circle back to the line.
+  The floor function — Saṃsāra, the wheel — gradually releases
+  its grip as N → ∞, and the circle flattens to the critical line.
+
+  Numerical evidence (May 30, 2026):
+    d²(N=20000) = 0.04047, still decreasing past the 0.04 shadow. -/
+
+/-- **THE UNWRAPPING IDENTITY**: The fractional part decomposes as
+    {y} = y - ⌊y⌋. This is the projection from ℝ (the line, the
+    universal cover) to [0,1) (the circle, the quotient space).
+
+    The floor function ⌊y⌋ is the **winding number** — it counts
+    how many times y has wrapped around the circle. -/
+theorem unwrapping_identity (y : ℝ) :
+    Int.fract y = y - ⌊y⌋ :=
+  rfl
+
+/-- **UNWRAPPING PRESERVES ZERO**: If y is an integer, the fractional
+    part vanishes — the point is on the "wall" between wrappings.
+    These walls are where the floor function jumps, and they encode
+    the divisor structure of the integers. -/
+theorem unwrapping_at_wall (n : ℤ) :
+    Int.fract (n : ℝ) = 0 :=
+  Int.fract_intCast n
+
+/-- **THE CIRCLE IS PERIODIC**: The fractional part is periodic with
+    period 1. This is the fundamental property of the circle S¹ = ℝ/ℤ.
+    The Gram matrix inherits this periodicity from {1/(kx)}. -/
+theorem circle_periodicity (y : ℝ) :
+    Int.fract (y + 1) = Int.fract y :=
+  Int.fract_add_one y
+
+/-- **MIDDLE WAY COLLAPSE**: On the critical line Re(s) = 1/2,
+    the mirror s ↦ 1-s coincides with conjugation s ↦ s̄.
+    Equivalently: 1-s = s̄ iff Re(s) = 1/2.
+
+    This is the algebraic content of "the four become two":
+    the Klein four-group V₄ collapses because M = C on Re = 1/2. -/
+theorem middle_way_iff (s : ℂ) :
+    1 - s = conj s ↔ s.re = 1/2 := by
+  constructor
+  · intro h
+    have hre := congr_arg Complex.re h
+    simp [Complex.conj_re, Complex.sub_re, Complex.one_re] at hre
+    linarith
+  · intro h
+    apply Complex.ext
+    · simp [Complex.conj_re, Complex.sub_re, Complex.one_re]; linarith
+    · simp [Complex.conj_im, Complex.sub_im, Complex.one_im]
+
 end Cathedral.Zeta.FourFoldSymmetry
 
 end
