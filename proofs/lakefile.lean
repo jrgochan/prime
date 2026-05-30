@@ -577,4 +577,6 @@ lean_lib «Cathedral» where
     `Cathedral.NumberTheory.SquarefreeJ2Sum,
     -- Basis Perturbation (Bridge 2: Δ = G - R, three-term decomposition, May 29, 2026)
     `Cathedral.Physics.GramWiring.BasisPerturbation,
+    -- Möbius Orthogonality (Bridge 2 closure: v^T Δ v bounded via PNT, May 29, 2026)
+    `Cathedral.Physics.GramWiring.MoebiusOrthogonality,
   ]
