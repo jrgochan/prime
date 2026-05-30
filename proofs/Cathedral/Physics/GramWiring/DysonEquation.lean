@@ -423,10 +423,22 @@ theorem sherman_morrison_mono (S₁ S₂ : ℝ) (h1 : 0 < S₁) (h12 : S₁ < S�
     As S → ∞, S/(1+S) → 1. -/
 theorem sherman_morrison_limit :
     Filter.Tendsto (fun S : ℝ => S / (1 + S)) Filter.atTop (nhds 1) := by
-  -- Proof: S/(1+S) = 1 - 1/(1+S), and 1/(1+S) → 0 since 1+S → ∞.
-  -- The algebra is: S/(1+S) = ((1+S) - 1)/(1+S) = 1 - 1/(1+S).
-  -- Lean API: Tendsto.sub + Tendsto.div_atTop + tendsto_atTop_add_const_left
-  sorry -- TODO: wire the div algebra lemmas (sub_div, div_self)
+  -- Strategy: S/(1+S) = 1 - 1/(1+S), and 1/(1+S) → 0 as S → ∞.
+  -- Step 1: Rewrite the function as 1 - 1/(1+S)
+  suffices h : Filter.Tendsto (fun S : ℝ => 1 - 1 / (1 + S)) Filter.atTop (nhds 1) by
+    apply h.congr'
+    filter_upwards [Filter.eventually_ge_atTop 0] with S hS
+    have h1S : (1 + S : ℝ) ≠ 0 := by linarith
+    field_simp
+    ring
+  -- Step 2: Show 1 - 1/(1+S) → 1
+  -- Rewrite 1 as 1-0 only in the nhds target
+  have h_zero : Filter.Tendsto (fun S : ℝ => 1 / (1 + S)) Filter.atTop (nhds 0) := by
+    apply Filter.Tendsto.div_atTop tendsto_const_nhds
+    exact Filter.tendsto_atTop_add_const_left _ 1 Filter.tendsto_id
+  have := Filter.Tendsto.sub (tendsto_const_nhds (x := (1 : ℝ))) h_zero
+  simp only [sub_zero] at this
+  exact this
 
 /-- **c^T w* → 1**: The mean convergence of Smith weights.
 
