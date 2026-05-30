@@ -575,4 +575,6 @@ lean_lib «Cathedral» where
     `Cathedral.NumberTheory.EulerProductGraduation,
     -- Squarefree J₂ Sum (graduation: Σ_{sqfree} 1/J₂ = π²/6, May 26, 2026)
     `Cathedral.NumberTheory.SquarefreeJ2Sum,
+    -- Basis Perturbation (Bridge 2: Δ = G - R, three-term decomposition, May 29, 2026)
+    `Cathedral.Physics.GramWiring.BasisPerturbation,
   ]
