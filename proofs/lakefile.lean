@@ -347,6 +347,8 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GaugeTheory.ArithmeticStandardModel,
     -- Physics: Gauge Decomposition (bosonic/fermionic sector split, Exploration 36)
     `Cathedral.Physics.GaugeTheory.ArithmeticGaugeDecomposition,
+    -- Physics: Confinement (strong coupling ρ>1, non-perturbative v*, Mirror RH Closure)
+    `Cathedral.Physics.GaugeTheory.Confinement,
     -- Physics: Gauge Cancellation (vᵀGv SUSY decomposition, Exploration 36)
     `Cathedral.Physics.Cancellation.GaugeCancellation,
     -- Physics: Diagonal Bound (D(N) = O(ln N) unconditional, Exploration 36)
