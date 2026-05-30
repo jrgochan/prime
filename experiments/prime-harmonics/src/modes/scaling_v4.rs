@@ -27,7 +27,7 @@ const EULER_GAMMA: f64 = 0.5772156649015329;
 // OOC file format constants (must match ooc_probe.rs)
 const OOC_MAGIC: u64 = 0x434F4F4854_414300;
 const OOC_VERSION: u32 = 1;
-const OOC_HEADER_SIZE: usize = 48; // 8+4+4+4+4+8+8+8 = 48 bytes with padding
+const OOC_HEADER_SIZE: usize = 40; // 8+4+4+4+4+8+8 = 40 bytes
 
 /// BD b-vector entry: b_k = (ln(k) + 1 - γ) / k
 fn b_entry(k: usize) -> f64 {
