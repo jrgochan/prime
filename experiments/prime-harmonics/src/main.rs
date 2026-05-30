@@ -73,6 +73,12 @@ fn main() {
         return;
     }
 
+    // Dyson mode — The Nuclear Option
+    if let cli::Mode::Dyson { n_max } = config.mode {
+        modes::dyson::run(n_max);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -112,5 +118,6 @@ fn main() {
         cli::Mode::Mirror { .. } => unreachable!(),
         cli::Mode::Eta { .. } => unreachable!(),
         cli::Mode::Anomaly { .. } => unreachable!(),
+        cli::Mode::Dyson { .. } => unreachable!(),
     }
 }

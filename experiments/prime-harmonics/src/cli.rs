@@ -53,6 +53,8 @@ pub enum Mode {
     Eta { n_max: usize, num_zeros: usize, verbose: bool },
     /// Anomaly mode — Bridge 2: Δ = G - R perturbation analysis
     Anomaly { n_max: usize },
+    /// Dyson mode — The Nuclear Option: d²_opt = d²_free + scattering
+    Dyson { n_max: usize },
 }
 
 /// Output format for sweep mode.
@@ -234,6 +236,15 @@ pub fn parse_args() -> Config {
                     30
                 };
                 mode = Mode::Anomaly { n_max };
+            }
+            "--dyson" => {
+                i += 1;
+                let n_max: usize = if i < args.len() {
+                    args[i].parse().unwrap_or(100)
+                } else {
+                    100
+                };
+                mode = Mode::Dyson { n_max };
             }
             "--help" => {
                 print_help();

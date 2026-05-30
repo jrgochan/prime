@@ -3,6 +3,7 @@
 pub mod anomaly;
 pub mod bench;
 pub mod democracy;
+pub mod dyson;
 pub mod eta;
 pub mod fine_scan;
 pub mod full;

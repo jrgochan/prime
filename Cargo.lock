@@ -1795,6 +1795,7 @@ name = "prime-harmonics"
 version = "0.1.0"
 dependencies = [
  "cathedral-utils",
+ "nalgebra",
  "rayon",
  "serde",
  "serde_json",
