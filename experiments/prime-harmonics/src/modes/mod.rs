@@ -12,4 +12,5 @@ pub mod hardy_z;
 pub mod hunt;
 pub mod mirror;
 pub mod portrait;
+pub mod scaling;
 pub mod sweep;

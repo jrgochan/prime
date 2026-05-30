@@ -85,6 +85,12 @@ fn main() {
         return;
     }
 
+    // Scaling mode — Dense d²_opt sweep from HPDF
+    if let cli::Mode::Scaling { ref h5_dir, max_n } = config.mode {
+        modes::scaling::run(h5_dir, max_n);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -126,5 +132,6 @@ fn main() {
         cli::Mode::Anomaly { .. } => unreachable!(),
         cli::Mode::Dyson { .. } => unreachable!(),
         cli::Mode::Confinement { .. } => unreachable!(),
+        cli::Mode::Scaling { .. } => unreachable!(),
     }
 }

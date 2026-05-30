@@ -57,6 +57,8 @@ pub enum Mode {
     Dyson { n_max: usize },
     /// Confinement mode — Strong coupling table from HPDF .h5 files
     Confinement { h5_dir: String },
+    /// Scaling mode — Dense d²_opt sweep from HPDF for every integer N
+    Scaling { h5_dir: String, max_n: usize },
 }
 
 /// Output format for sweep mode.
@@ -257,6 +259,23 @@ pub fn parse_args() -> Config {
                     "experiments/cache/hpdf".to_string()
                 };
                 mode = Mode::Confinement { h5_dir };
+            }
+            "--scaling" => {
+                i += 1;
+                let max_n: usize = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].parse().expect("Expected number for --scaling")
+                } else {
+                    i -= 1;
+                    1000 // default: sweep N=2..1000
+                };
+                i += 1;
+                let h5_dir = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].clone()
+                } else {
+                    i -= 1;
+                    "experiments/cache/hpdf".to_string()
+                };
+                mode = Mode::Scaling { h5_dir, max_n };
             }
             "--help" => {
                 print_help();
