@@ -373,7 +373,7 @@ theorem sherman_morrison_mono (S₁ S₂ : ℝ) (h1 : 0 < S₁) (h12 : S₁ < S�
 /-- **SHERMAN-MORRISON LIMIT**:
     As S → ∞, S/(1+S) → 1. -/
 theorem sherman_morrison_limit :
-    Filter.Tendsto (fun S => S / (1 + S)) Filter.atTop (nhds 1) := by
+    Filter.Tendsto (fun S : ℝ => S / (1 + S)) Filter.atTop (nhds 1) := by
   -- Proof: S/(1+S) = 1 - 1/(1+S), and 1/(1+S) → 0 since 1+S → ∞.
   -- The algebra is: S/(1+S) = ((1+S) - 1)/(1+S) = 1 - 1/(1+S).
   -- Lean API: Tendsto.sub + Tendsto.div_atTop + tendsto_atTop_add_const_left
@@ -391,9 +391,10 @@ theorem smith_weights_sawtooth_mean_converges
     (hS_pos : ∀ N, 0 < S N)
     (hS_inf : Filter.Tendsto S Filter.atTop Filter.atTop) :
     Filter.Tendsto (fun N => S N / (1 + S N)) Filter.atTop (nhds 1) := by
-  -- The composition f ∘ S where f(x) = x/(1+x) and S → ∞
-  -- gives f(S(N)) → 1 by sherman_morrison_limit.
-  sorry -- Filter composition: sherman_morrison_limit.comp hS_inf with coercion ℕ→ℝ
+  -- f ∘ S → 1 where f(x) = x/(1+x) → 1 as x → ∞ and S → ∞
+  have h : Filter.Tendsto ((fun x : ℝ => x / (1 + x)) ∘ S) Filter.atTop (nhds 1) :=
+    Filter.Tendsto.comp sherman_morrison_limit hS_inf
+  exact h
 
 -- ════════════════════════════════════════════════
 -- §8. DC ORTHOGONALITY: w* ⊥ DC mode
@@ -429,7 +430,12 @@ theorem dc_projection_vanishes
     Filter.Tendsto (fun N : ℕ => (2 / Real.sqrt (N : ℝ)) * w_dot_c N)
       Filter.atTop (nhds 0) := by
   -- 2/√N → 0 and w_dot_c → L, so product → 0·L = 0
-  sorry -- Filter.Tendsto.mul (2/√N → 0) (w_dot_c → L) with 0·L = 0
+  rw [show (0 : ℝ) = 0 * L from (zero_mul L).symm]
+  apply Filter.Tendsto.mul _ h_conv
+  -- Need: 2/√N → 0 as N → ∞
+  apply Filter.Tendsto.div_atTop tendsto_const_nhds
+  -- Need: √N → ∞ as N → ∞
+  exact Filter.Tendsto.comp Real.tendsto_sqrt_atTop tendsto_natCast_atTop_atTop
 
 -- ════════════════════════════════════════════════
 -- §9. THE SNIPER PROTOCOL STATUS

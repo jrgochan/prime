@@ -25,6 +25,25 @@ use crate::modes::anomaly::{exact_gram};
 
 const EULER_GAMMA: f64 = 0.5772156649015329;
 
+/// Möbius function μ(n)
+fn moebius_fn(n: usize) -> i32 {
+    if n == 1 { return 1; }
+    let mut temp = n;
+    let mut d = 2usize;
+    let mut count = 0;
+    while d * d <= temp {
+        if temp % d == 0 {
+            let mut exp = 0;
+            while temp % d == 0 { temp /= d; exp += 1; }
+            if exp > 1 { return 0; }
+            count += 1;
+        }
+        d += 1;
+    }
+    if temp > 1 { count += 1; }
+    if count % 2 == 0 { 1 } else { -1 }
+}
+
 /// BD mean: b_k = (ln(k) + 1 - γ) / k
 fn bd_mean(k: usize) -> f64 {
     ((k as f64).ln() + 1.0 - EULER_GAMMA) / k as f64
@@ -227,29 +246,123 @@ pub fn run(n_max: usize) {
     }
 
     // ═══════════════════════════════════════════════
-    // §3. CONVERGENCE ANALYSIS
+    // §4. HCN RESONATOR: Fejér-Möbius at Highly Composite Numbers
     // ═══════════════════════════════════════════════
     println!();
     println!("════════════════════════════════════════════════════════════════════════════════════════════");
-    println!("§3. CONVERGENCE ANALYSIS");
+    println!("§4. HCN RESONATOR: Fejér-Möbius weights at Highly Composite Numbers");
     println!("════════════════════════════════════════════════════════════════════════════════════════════");
     println!();
-    println!("{:>6} {:>14} {:>12} {:>12} {:>12}",
-             "N", "d²_opt(G)", "d²·lnN", "d²·ln²N", "d²·√N");
-    println!("{}", "-".repeat(60));
-    for (n, _d2_free, _scatt, d2_opt) in &dyson_results {
-        let log_n = (*n as f64).ln();
-        println!("{:>6} {:>14.10} {:>12.6} {:>12.4} {:>12.6}",
-                 n, d2_opt, d2_opt * log_n, d2_opt * log_n * log_n,
-                 d2_opt * (*n as f64).sqrt());
-    }
+    println!("Wilsonian UV cutoff: w_k = -μ(k)(1 - lnk/lnN)/k");
+    println!("HCNs: 120, 180, 240, 360, 720, 840, 1260, 1680, 2520");
     println!();
-    println!("If d²·lnN → constant  ⟹  d²_opt ~ C/logN");
-    println!("If d²·ln²N → constant ⟹  d²_opt ~ C/log²N");
-    println!("If d²·√N → constant   ⟹  d²_opt ~ C/√N");
+    println!("{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
+             "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time");
+    println!("{}", "-".repeat(95));
+
+    // HCNs up to reasonable N for CPU
+    let hcn_ns: Vec<usize> = vec![120, 180, 240, 360, 720, 840, 1260, 1680, 2520];
+    let hcn_ns: Vec<usize> = hcn_ns.into_iter().filter(|&n| n <= n_max).collect();
+
+    for &n in &hcn_ns {
+        let t0 = Instant::now();
+
+        let g_mat = build_gram_matrix(n);
+        let rt_mat = build_r_true(n);
+        let b = build_b_vector(n);
+        let c = build_c_vector(n);
+        let delta_true = &g_mat - &rt_mat;
+        let dim = n - 1;
+
+        // Fejér-Möbius weights: v_k = -μ(k+1)(1 - ln(k+1)/ln(N))
+        let mut v_fm = DVector::zeros(dim);
+        let ln_n = (n as f64).ln();
+        for i in 0..dim {
+            let k = i + 2;
+            let mu = moebius_fn(k);
+            if mu != 0 {
+                v_fm[i] = -(mu as f64) * (1.0 - (k as f64).ln() / ln_n);
+            }
+        }
+
+        // d²_saw(FM) = 1 - 2cᵀv + vᵀR_true v
+        let d2_saw = 1.0 - 2.0 * c.dot(&v_fm) + v_fm.dot(&(&rt_mat * &v_fm));
+
+        // 2(c-b)ᵀv
+        let c_minus_b = &c - &b;
+        let mean_corr = 2.0 * c_minus_b.dot(&v_fm);
+
+        // vᵀΔ_true v
+        let anomaly = v_fm.dot(&(&delta_true * &v_fm));
+
+        // d²_BD(FM)
+        let d2_bd = d2_saw + mean_corr + anomaly;
+
+        // Optimal for comparison
+        let lu_g = g_mat.lu();
+        let v_star = match lu_g.solve(&b) {
+            Some(v) => v,
+            None => { continue; }
+        };
+        let d2_opt = 1.0 - b.dot(&v_star);
+
+        let elapsed = t0.elapsed();
+
+        println!("{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
+                 n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed);
+    }
+
+    // Also run at non-HCN neighbors for comparison
+    println!();
+    println!("COMPARISON: Non-HCN neighbors");
+    println!("{:>6} {:>14} {:>14} {:>14} {:>14} {:>14} {:>8}",
+             "N", "d²_saw(FM)", "2(c-b)ᵀv", "vᵀΔ_true v", "d²_BD(FM)", "d²_opt", "time");
+    println!("{}", "-".repeat(95));
+
+    let non_hcn_ns: Vec<usize> = vec![100, 150, 200, 300, 500, 700];
+    let non_hcn_ns: Vec<usize> = non_hcn_ns.into_iter().filter(|&n| n <= n_max).collect();
+
+    for &n in &non_hcn_ns {
+        let t0 = Instant::now();
+
+        let g_mat = build_gram_matrix(n);
+        let rt_mat = build_r_true(n);
+        let b = build_b_vector(n);
+        let c = build_c_vector(n);
+        let delta_true = &g_mat - &rt_mat;
+        let dim = n - 1;
+
+        let mut v_fm = DVector::zeros(dim);
+        let ln_n = (n as f64).ln();
+        for i in 0..dim {
+            let k = i + 2;
+            let mu = moebius_fn(k);
+            if mu != 0 {
+                v_fm[i] = -(mu as f64) * (1.0 - (k as f64).ln() / ln_n);
+            }
+        }
+
+        let d2_saw = 1.0 - 2.0 * c.dot(&v_fm) + v_fm.dot(&(&rt_mat * &v_fm));
+        let c_minus_b = &c - &b;
+        let mean_corr = 2.0 * c_minus_b.dot(&v_fm);
+        let anomaly = v_fm.dot(&(&delta_true * &v_fm));
+        let d2_bd = d2_saw + mean_corr + anomaly;
+
+        let lu_g = g_mat.lu();
+        let v_star = match lu_g.solve(&b) {
+            Some(v) => v,
+            None => { continue; }
+        };
+        let d2_opt = 1.0 - b.dot(&v_star);
+
+        let elapsed = t0.elapsed();
+
+        println!("{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>7.1?}",
+                 n, d2_saw, mean_corr, anomaly, d2_bd, d2_opt, elapsed);
+    }
 
     // ═══════════════════════════════════════════════
-    // §4. SUMMARY
+    // §5. SUMMARY
     // ═══════════════════════════════════════════════
     println!();
     let elapsed = total_start.elapsed();
@@ -261,6 +374,7 @@ pub fn run(n_max: usize) {
     println!("  Total time: {:.2?}", elapsed);
     println!();
     println!("  Master Equation: d²_opt(G) = d²_free + (w*)ᵀ Δ_true v*");
+    println!("  HCN Resonator: Fejér-Möbius weights at Highly Composite Numbers");
     println!("  The prime number gas has fired its Nuclear Option. 🔥");
     println!();
 }
