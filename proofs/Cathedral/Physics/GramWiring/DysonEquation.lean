@@ -230,11 +230,19 @@ theorem matrix_dyson {n : Type*} [DecidableEq n] [Fintype n]
   have hBB : B * B⁻¹ = 1 := mul_nonsing_inv B hB
   have hAA' : A⁻¹ * A = 1 := nonsing_inv_mul A hA
   have hBB' : B⁻¹ * B = 1 := nonsing_inv_mul B hB
-  -- Strategy: show (B⁻¹ - B⁻¹CA⁻¹) * A = I.
-  -- (B⁻¹ - B⁻¹CA⁻¹)A = B⁻¹A - B⁻¹C(A⁻¹A) = B⁻¹A - B⁻¹C
-  --                     = B⁻¹(A - C) = B⁻¹B = I   [since C = A - B]
-  -- Then nonsing_inv_eq_of_mul_eq_one gives the result.
-  sorry -- TODO: need sub_mul + mul_assoc wiring in Matrix
+  -- Step 1: Show (B⁻¹ - B⁻¹ * C * A⁻¹) * A = 1
+  have key : (B⁻¹ - B⁻¹ * C * A⁻¹) * A = 1 := by
+    -- Distribute: sub_mul
+    rw [sub_mul]
+    -- Reassociate B⁻¹ * C * A⁻¹ * A = B⁻¹ * C * (A⁻¹ * A)
+    rw [mul_assoc (B⁻¹ * C) A⁻¹ A, hAA', mul_one]
+    -- Now: B⁻¹ * A - B⁻¹ * C = B⁻¹ * (A - C)
+    rw [← mul_sub]
+    -- A - C = B (from A = B + C)
+    rw [h_decomp, add_sub_cancel_right]
+    exact hBB'
+  -- Step 2: inv_eq_left_inv: if X * A = 1 then A⁻¹ = X
+  exact Matrix.inv_eq_left_inv key
 
 -- ════════════════════════════════════════════════
 -- §5. CONNECTING TO THE NB DISTANCE
