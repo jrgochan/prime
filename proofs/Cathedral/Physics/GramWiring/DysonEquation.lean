@@ -230,9 +230,11 @@ theorem matrix_dyson {n : Type*} [DecidableEq n] [Fintype n]
   have hBB : B * B⁻¹ = 1 := mul_nonsing_inv B hB
   have hAA' : A⁻¹ * A = 1 := nonsing_inv_mul A hA
   have hBB' : B⁻¹ * B = 1 := nonsing_inv_mul B hB
-  -- The full proof requires careful matrix algebra
-  -- (B⁻¹ - B⁻¹CA⁻¹)A = B⁻¹(B+C) - B⁻¹C = B⁻¹B + B⁻¹C - B⁻¹C = I
-  sorry
+  -- Strategy: show (B⁻¹ - B⁻¹CA⁻¹) * A = I.
+  -- (B⁻¹ - B⁻¹CA⁻¹)A = B⁻¹A - B⁻¹C(A⁻¹A) = B⁻¹A - B⁻¹C
+  --                     = B⁻¹(A - C) = B⁻¹B = I   [since C = A - B]
+  -- Then nonsing_inv_eq_of_mul_eq_one gives the result.
+  sorry -- TODO: need sub_mul + mul_assoc wiring in Matrix
 
 -- ════════════════════════════════════════════════
 -- §5. CONNECTING TO THE NB DISTANCE
@@ -359,18 +361,23 @@ theorem sherman_morrison_bounded (S : ℝ) (hS : 0 < S) :
     S/(1+S) is strictly increasing for S > 0. -/
 theorem sherman_morrison_mono (S₁ S₂ : ℝ) (h1 : 0 < S₁) (h12 : S₁ < S₂) :
     S₁ / (1 + S₁) < S₂ / (1 + S₂) := by
-  -- S/(1+S) = 1 - 1/(1+S) is increasing since 1/(1+S) is decreasing.
-  -- Cross-multiply: S₁(1+S₂) < S₂(1+S₁) ⟺ S₁ + S₁S₂ < S₂ + S₁S₂ ⟺ S₁ < S₂ ✓
-  sorry
+  have h2 : 0 < S₂ := lt_trans h1 h12
+  have h1' : (0 : ℝ) < 1 + S₁ := by linarith
+  have h2' : (0 : ℝ) < 1 + S₂ := by linarith
+  have h1n : (1 + S₁ : ℝ) ≠ 0 := ne_of_gt h1'
+  have h2n : (1 + S₂ : ℝ) ≠ 0 := ne_of_gt h2'
+  -- Reduce to S₁(1+S₂) < S₂(1+S₁), which simplifies to S₁ < S₂
+  rw [div_lt_div_iff₀ h1' h2']
+  nlinarith [mul_comm S₁ S₂]
 
 /-- **SHERMAN-MORRISON LIMIT**:
     As S → ∞, S/(1+S) → 1. -/
 theorem sherman_morrison_limit :
     Filter.Tendsto (fun S => S / (1 + S)) Filter.atTop (nhds 1) := by
-  -- S/(1+S) = 1 - 1/(1+S). As S → ∞, 1/(1+S) → 0, so S/(1+S) → 1.
-  -- The proof is: rewrite as 1 - 1/(1+S), apply Tendsto.sub,
-  -- use Tendsto.div_atTop for 1/(1+S) → 0.
-  sorry
+  -- Proof: S/(1+S) = 1 - 1/(1+S), and 1/(1+S) → 0 since 1+S → ∞.
+  -- The algebra is: S/(1+S) = ((1+S) - 1)/(1+S) = 1 - 1/(1+S).
+  -- Lean API: Tendsto.sub + Tendsto.div_atTop + tendsto_atTop_add_const_left
+  sorry -- TODO: wire the div algebra lemmas (sub_div, div_self)
 
 /-- **c^T w* → 1**: The mean convergence of Smith weights.
 
