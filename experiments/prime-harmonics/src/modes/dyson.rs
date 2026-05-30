@@ -170,55 +170,60 @@ pub fn run(n_max: usize) {
     }
 
     // ═══════════════════════════════════════════════
-    // §2. OPTION C: SMITH WEIGHTS IN BD BASIS
+    // §2. BORN PROTOCOL (OPTION D): w_bare = R_true⁻¹ b
     // ═══════════════════════════════════════════════
     println!();
     println!("════════════════════════════════════════════════════════════════════════════════════════════");
-    println!("§2. OPTION C: Smith weights w* = R_true⁻¹ c (c_k = 1/2) in BD basis");
+    println!("§2. BORN PROTOCOL: w_bare = R_true⁻¹ b (First-Order Born Approximation)");
     println!("════════════════════════════════════════════════════════════════════════════════════════════");
     println!();
-    println!("d²_BD(w*) = d²_saw(w*) + 2(c-b)ᵀw* + w*ᵀΔ_true w*");
+    println!("d²_BD(w_bare) = d²_free + w_bare^T Δ_true w_bare   [UPPER BOUND on d²_opt]");
     println!();
-    println!("{:>6} {:>14} {:>14} {:>14} {:>14} {:>12}",
-             "N", "d²_saw(w*)", "2(c-b)ᵀw*", "w*ᵀΔ_true w*", "d²_BD(w*)", "check");
-    println!("{}", "-".repeat(85));
+    println!("{:>6} {:>12} {:>14} {:>14} {:>14} {:>14} {:>10}",
+             "N", "cᵀw_bare", "d²_free", "w^TΔw", "d²_Born", "d²_opt", "ratio");
+    println!("{}", "-".repeat(90));
 
     for &n in &test_ns {
-        let t0 = Instant::now();
-        let dim = n - 1;
-
         let g_mat = build_gram_matrix(n);
         let rt_mat = build_r_true(n);
         let b = build_b_vector(n);
         let c = build_c_vector(n);
         let delta_true = &g_mat - &rt_mat;
 
-        // Smith weights: w* = R_true⁻¹ c
         let lu_rt = rt_mat.clone().lu();
-        let w_star = match lu_rt.solve(&c) {
+        let lu_g = g_mat.clone().lu();
+
+        // Bare BD weights: w_bare = R_true⁻¹ b
+        let w_bare = match lu_rt.solve(&b) {
             Some(w) => w,
             None => { eprintln!("  N={}: R_true singular!", n); continue; }
         };
 
-        // Term 1: d²_saw(w*) = 1 - 2cᵀw* + w*ᵀ R_true w*
-        let d2_saw = 1.0 - 2.0 * c.dot(&w_star) + w_star.dot(&(&rt_mat * &w_star));
+        // Optimal: v* = G⁻¹ b
+        let v_star = match lu_g.solve(&b) {
+            Some(v) => v,
+            None => { eprintln!("  N={}: G singular!", n); continue; }
+        };
 
-        // Term 2: 2(c-b)ᵀ w*
-        let c_minus_b = &c - &b;
-        let mean_corr = 2.0 * c_minus_b.dot(&w_star);
+        // DC orthogonality: c^T w_bare (should → 0 by symmetry)
+        let ct_w_bare = c.dot(&w_bare);
 
-        // Term 3: w*ᵀ Δ_true w*
-        let anomaly = w_star.dot(&(&delta_true * &w_star));
+        // Free energy: d²_free = 1 - b^T w_bare
+        let d2_free = 1.0 - b.dot(&w_bare);
 
-        // Sum
-        let d2_bd = d2_saw + mean_corr + anomaly;
+        // Thermal scattering: w_bare^T Δ_true w_bare
+        let scatt = w_bare.dot(&(&delta_true * &w_bare));
 
-        // Direct check: d²_BD(w*) = 1 - 2bᵀw* + w*ᵀ G w*
-        let d2_bd_direct = 1.0 - 2.0 * b.dot(&w_star) + w_star.dot(&(&g_mat * &w_star));
-        let check = (d2_bd - d2_bd_direct).abs();
+        // Born energy (upper bound): d²_BD(w_bare) = d²_free + scatt
+        let d2_born = d2_free + scatt;
 
-        println!("{:>6} {:>+14.8} {:>+14.8} {:>+14.8} {:>14.8} {:>12.2e}",
-                 n, d2_saw, mean_corr, anomaly, d2_bd, check);
+        // Optimal: d²_opt = 1 - b^T v*
+        let d2_opt = 1.0 - b.dot(&v_star);
+
+        let ratio = if d2_opt > 0.0 { d2_born / d2_opt } else { f64::INFINITY };
+
+        println!("{:>6} {:>+12.8} {:>+14.8} {:>+14.8} {:>14.10} {:>14.10} {:>10.4}",
+                 n, ct_w_bare, d2_free, scatt, d2_born, d2_opt, ratio);
     }
 
     // ═══════════════════════════════════════════════
