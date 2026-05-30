@@ -578,7 +578,7 @@ private lemma sum_range_id_R (n : ℕ) :
 
 /-- **EUCLIDEAN FLOOR DIVISION**: For b = qa+1, the floor ⌊(jq+t)a/b⌋ = j
     when j < a and 1 ≤ t ≤ q. Key: ja ≤ (jq+t)a/b < (j+1)a. -/
-private lemma base_div_r1 (a q j t : ℕ) (ha : 2 ≤ a) (hj : j < a)
+private lemma base_div_r1 (a q j t : ℕ) (_ha : 2 ≤ a) (hj : j < a)
     (ht : 1 ≤ t) (htq : t ≤ q) :
     (j * q + t) * a / (q * a + 1) = j := by
   rw [Nat.div_eq_of_lt_le] <;> nlinarith
@@ -784,8 +784,7 @@ private lemma dedekind_three_term (a b : ℕ) (ha : 1 < a) (hb : 1 < b)
       simp_rw [hconst]
       -- Normalize hSq: rewrite b → q*a+1 and push ℕ cast
       rw [hb_eq] at hSq
-      push_cast at hSq
-      -- Now push_cast and rw for goal
+      -- hSq already normalized by simp [Nat.cast_mul] and rw [hb_eq]
       rw [show b = q * a + 1 from hb_eq]
       push_cast
       -- Set abbreviations for the sums:
