@@ -49,6 +49,8 @@ pub enum Mode {
     Bench,
     /// Mirror mode — reconstruct primes from zeros
     Mirror { x_max: f64 },
+    /// Eta mode — complete winding cancellation analysis
+    Eta { n_max: usize, num_zeros: usize, verbose: bool },
 }
 
 /// Output format for sweep mode.
@@ -198,6 +200,30 @@ pub fn parse_args() -> Config {
                 };
                 mode = Mode::Mirror { x_max };
             }
+            "--eta" => {
+                i += 1;
+                let n_max: usize = if i < args.len() {
+                    args[i].parse().unwrap_or(100_000)
+                } else {
+                    100_000
+                };
+                let mut num_zeros = 5;
+                let mut verbose = false;
+                while i + 1 < args.len() {
+                    match args[i + 1].as_str() {
+                        "--zeros" | "-z" => {
+                            i += 2;
+                            num_zeros = args[i].parse().unwrap();
+                        }
+                        "--verbose" | "-v" => {
+                            i += 1;
+                            verbose = true;
+                        }
+                        _ => break,
+                    }
+                }
+                mode = Mode::Eta { n_max, num_zeros, verbose };
+            }
             "--help" => {
                 print_help();
                 std::process::exit(0);
@@ -249,6 +275,8 @@ EXAMPLES:
     prime-harmonics -s 0 500 --json > energy.json
     prime-harmonics --hardy-z 10000 10100            # Find zeros at t=10000 (no primes needed)
     prime-harmonics --hardy-z 100000 100100 --stats  # Zeros + gap statistics
+    prime-harmonics --eta 1000000                    # Eta cancellation to N=10^6
+    prime-harmonics --eta 10000000 --zeros 10         # 10M with 10 zeros
 "#
     );
 }

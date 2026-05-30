@@ -61,6 +61,12 @@ fn main() {
         return;
     }
 
+    // Eta mode — complete winding analysis, no primes needed
+    if let cli::Mode::Eta { n_max, num_zeros, verbose } = config.mode {
+        modes::eta::run(n_max, num_zeros, verbose);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -98,5 +104,6 @@ fn main() {
         cli::Mode::Bench => modes::bench::run(&bank),
         cli::Mode::HardyZ { .. } => unreachable!(),
         cli::Mode::Mirror { .. } => unreachable!(),
+        cli::Mode::Eta { .. } => unreachable!(),
     }
 }

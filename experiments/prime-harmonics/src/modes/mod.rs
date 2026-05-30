@@ -2,6 +2,7 @@
 
 pub mod bench;
 pub mod democracy;
+pub mod eta;
 pub mod fine_scan;
 pub mod full;
 pub mod hardy_z;
