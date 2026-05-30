@@ -1796,6 +1796,7 @@ version = "0.1.0"
 dependencies = [
  "cathedral-utils",
  "hdf5",
+ "libc",
  "nalgebra",
  "ndarray",
  "rayon",

@@ -63,6 +63,8 @@ pub enum Mode {
     ScalingV2 { h5_dir: String, max_n: usize },
     /// Scaling v3 — Incremental Cholesky, on-the-fly Gram (no H5)
     ScalingV3 { max_n: usize },
+    /// Scaling v4 — Incremental Cholesky from OOC mmap'd Gram binary
+    ScalingV4 { ooc_path: String, max_n: usize },
 }
 
 /// Output format for sweep mode.
@@ -307,6 +309,23 @@ pub fn parse_args() -> Config {
                     5000
                 };
                 mode = Mode::ScalingV3 { max_n };
+            }
+            "--scaling-v4" => {
+                i += 1;
+                let max_n: usize = if i < args.len() && !args[i].starts_with('-') {
+                    let n = args[i].parse().expect("Expected number for --scaling-v4");
+                    i += 1;
+                    n
+                } else {
+                    5000
+                };
+                let ooc_path = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].to_string()
+                } else {
+                    i -= 1;
+                    format!("/mnt/d/cathedral-cache/ooc_gram_N{max_n}_p256.bin")
+                };
+                mode = Mode::ScalingV4 { ooc_path, max_n };
             }
             "--help" => {
                 print_help();

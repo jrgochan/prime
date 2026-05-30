@@ -103,6 +103,12 @@ fn main() {
         return;
     }
 
+    // Scaling v4 — Incremental Cholesky from OOC mmap'd Gram
+    if let cli::Mode::ScalingV4 { ref ooc_path, max_n } = config.mode {
+        modes::scaling_v4::run(ooc_path, max_n);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -147,5 +153,6 @@ fn main() {
         cli::Mode::Scaling { .. } => unreachable!(),
         cli::Mode::ScalingV2 { .. } => unreachable!(),
         cli::Mode::ScalingV3 { .. } => unreachable!(),
+        cli::Mode::ScalingV4 { .. } => unreachable!(),
     }
 }
