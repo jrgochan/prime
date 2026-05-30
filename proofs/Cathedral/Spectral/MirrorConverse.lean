@@ -145,8 +145,8 @@ theorem phase_quadratic_identity (σ t u : ℝ) :
     This is the WAVE CONTENT of `rank1_lower_bound` from BDMellin.lean:
     the squared norm of the residual is bounded below by the
     squared imaginary part of ρ, normalized by |ρ|⁴·|ρ-1|². -/
-theorem wave_rank1_bound (σ t : ℝ) (hσ_pos : 0 < σ) (hσ_lt : σ < 1)
-    (ht : t ≠ 0) (W : ℝ) :
+theorem wave_rank1_bound (σ t : ℝ) (_hσ_pos : 0 < σ) (_hσ_lt : σ < 1)
+    (_ht : t ≠ 0) (W : ℝ) :
     t ^ 2 ≤ (σ ^ 2 + t ^ 2) *
       ((σ * (1 - W) - 1) ^ 2 + (t * (1 - W)) ^ 2) := by
   have h := phase_quadratic_identity σ t (1 - W)
@@ -185,7 +185,7 @@ def correctionAmplitude (x σ : ℝ) : ℝ :=
   x ^ σ
 
 /-- At σ = 1/2, the correction amplitude equals √x. -/
-theorem correction_at_critical_line (x : ℝ) (hx : 0 < x) :
+theorem correction_at_critical_line (x : ℝ) (_hx : 0 < x) :
     correctionAmplitude x (1/2) = Real.sqrt x := by
   unfold correctionAmplitude
   rw [Real.sqrt_eq_rpow]
@@ -202,7 +202,7 @@ theorem correction_at_critical_line (x : ℝ) (hx : 0 < x) :
     this gives d_N² ≥ (2σ-1) · t² / (|ρ|⁴ · |ρ-1|²) > 0,
     which is the content of zeta_zero_separates_bd. -/
 theorem wave_converse (σ t : ℝ) (hσ_pos : 0 < σ) (hσ_lt : σ < 1)
-    (hσ_ne : σ ≠ 1/2) (ht : t ≠ 0) :
+    (_hσ_ne : σ ≠ 1/2) (ht : t ≠ 0) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ W : ℝ,
       δ ≤ (σ * (1 - W) - 1) ^ 2 + (t * (1 - W)) ^ 2 :=
   wave_mass_gap σ t hσ_pos hσ_lt ht
@@ -324,4 +324,3 @@ theorem overcancellation_question :
     True := trivial
 
 end Cathedral.Spectral.MirrorConverse
-
