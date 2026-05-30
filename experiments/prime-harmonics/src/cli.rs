@@ -61,6 +61,8 @@ pub enum Mode {
     Scaling { h5_dir: String, max_n: usize },
     /// Scaling v2 — Incremental Cholesky O(N²) per step
     ScalingV2 { h5_dir: String, max_n: usize },
+    /// Scaling v3 — Incremental Cholesky, on-the-fly Gram (no H5)
+    ScalingV3 { max_n: usize },
 }
 
 /// Output format for sweep mode.
@@ -295,6 +297,16 @@ pub fn parse_args() -> Config {
                     "experiments/cache/hpdf".to_string()
                 };
                 mode = Mode::ScalingV2 { h5_dir, max_n };
+            }
+            "--scaling-v3" => {
+                i += 1;
+                let max_n: usize = if i < args.len() && !args[i].starts_with('-') {
+                    args[i].parse().expect("Expected number for --scaling-v3")
+                } else {
+                    i -= 1;
+                    5000
+                };
+                mode = Mode::ScalingV3 { max_n };
             }
             "--help" => {
                 print_help();

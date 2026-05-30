@@ -97,6 +97,12 @@ fn main() {
         return;
     }
 
+    // Scaling v3 — Incremental Cholesky, on-the-fly Gram (no H5)
+    if let cli::Mode::ScalingV3 { max_n } = config.mode {
+        modes::scaling_v3::run(max_n);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -140,5 +146,6 @@ fn main() {
         cli::Mode::Confinement { .. } => unreachable!(),
         cli::Mode::Scaling { .. } => unreachable!(),
         cli::Mode::ScalingV2 { .. } => unreachable!(),
+        cli::Mode::ScalingV3 { .. } => unreachable!(),
     }
 }
