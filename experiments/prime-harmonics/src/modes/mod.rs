@@ -1,5 +1,6 @@
 //! Run modes for the Prime Harmonics Explorer.
 
+pub mod anomaly;
 pub mod bench;
 pub mod democracy;
 pub mod eta;

@@ -51,6 +51,8 @@ pub enum Mode {
     Mirror { x_max: f64 },
     /// Eta mode — complete winding cancellation analysis
     Eta { n_max: usize, num_zeros: usize, verbose: bool },
+    /// Anomaly mode — Bridge 2: Δ = G - R perturbation analysis
+    Anomaly { n_max: usize },
 }
 
 /// Output format for sweep mode.
@@ -223,6 +225,15 @@ pub fn parse_args() -> Config {
                     }
                 }
                 mode = Mode::Eta { n_max, num_zeros, verbose };
+            }
+            "--anomaly" => {
+                i += 1;
+                let n_max: usize = if i < args.len() {
+                    args[i].parse().unwrap_or(30)
+                } else {
+                    30
+                };
+                mode = Mode::Anomaly { n_max };
             }
             "--help" => {
                 print_help();

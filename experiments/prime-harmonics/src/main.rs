@@ -67,6 +67,12 @@ fn main() {
         return;
     }
 
+    // Anomaly mode — Bridge 2: Δ = G - R perturbation analysis
+    if let cli::Mode::Anomaly { n_max } = config.mode {
+        modes::anomaly::run(n_max);
+        return;
+    }
+
     eprintln!("🌀 Prime Harmonics Explorer");
     eprintln!("  Prime limit: {}", config.prime_limit);
 
@@ -105,5 +111,6 @@ fn main() {
         cli::Mode::HardyZ { .. } => unreachable!(),
         cli::Mode::Mirror { .. } => unreachable!(),
         cli::Mode::Eta { .. } => unreachable!(),
+        cli::Mode::Anomaly { .. } => unreachable!(),
     }
 }
