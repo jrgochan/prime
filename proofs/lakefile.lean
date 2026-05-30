@@ -579,4 +579,6 @@ lean_lib «Cathedral» where
     `Cathedral.Physics.GramWiring.BasisPerturbation,
     -- Möbius Orthogonality (Bridge 2 closure: v^T Δ v bounded via PNT, May 29, 2026)
     `Cathedral.Physics.GramWiring.MoebiusOrthogonality,
+    -- Dyson Equation (The Nuclear Option: d²_opt = d²_free + scattering, May 29, 2026)
+    `Cathedral.Physics.GramWiring.DysonEquation,
   ]
